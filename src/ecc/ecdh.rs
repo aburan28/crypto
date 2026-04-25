@@ -1,0 +1,72 @@
+//! Elliptic Curve Diffie-Hellman (ECDH) key exchange.
+//!
+//! # Protocol
+//! Alice and Bob each hold a private scalar and the corresponding public point:
+//!   Alice: d_A, Q_A = d_A·G
+//!   Bob:   d_B, Q_B = d_B·G
+//!
+//! Shared secret:
+//!   Alice computes: S = d_A · Q_B = d_A · d_B · G
+//!   Bob computes:   S = d_B · Q_A = d_B · d_A · G
+//!
+//! Both arrive at the same point S; only the x-coordinate is used as the
+//! raw shared secret (per RFC 8422 / ANSI X9.63).  Callers should derive a
+//! symmetric key from this value using HKDF rather than using it directly.
+
+use super::curve::CurveParams;
+use super::keys::{EccPrivateKey, EccPublicKey};
+use super::point::Point;
+use num_bigint::BigUint;
+
+/// Perform ECDH: multiply `our_private` by `their_public`.
+/// Returns the x-coordinate of the resulting point as a 32-byte big-endian value,
+/// or `None` if the result is the point at infinity (degenerate input).
+pub fn ecdh(
+    our_private: &EccPrivateKey,
+    their_public: &EccPublicKey,
+    curve: &CurveParams,
+) -> Option<[u8; 32]> {
+    let shared = their_public
+        .point
+        .scalar_mul(&our_private.scalar, &curve.a_fe());
+
+    match shared {
+        Point::Affine { x, .. } => {
+            let bytes = crate::utils::encoding::bigint_to_bytes_be(&x.value, 32);
+            let mut out = [0u8; 32];
+            out.copy_from_slice(&bytes);
+            Some(out)
+        }
+        Point::Infinity => None,
+    }
+}
+
+/// Raw shared secret as a `BigUint` (x-coordinate of d_A · Q_B).
+pub fn ecdh_raw(
+    our_private: &EccPrivateKey,
+    their_public: &EccPublicKey,
+    curve: &CurveParams,
+) -> Option<BigUint> {
+    match their_public.point.scalar_mul(&our_private.scalar, &curve.a_fe()) {
+        Point::Affine { x, .. } => Some(x.value),
+        Point::Infinity => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ecc::{curve::CurveParams, keys::EccKeyPair};
+
+    #[test]
+    fn shared_secret_matches() {
+        let curve = CurveParams::secp256k1();
+        let alice = EccKeyPair::generate(&curve);
+        let bob = EccKeyPair::generate(&curve);
+
+        let secret_a = ecdh(&alice.private, &bob.public, &curve).unwrap();
+        let secret_b = ecdh(&bob.private, &alice.public, &curve).unwrap();
+
+        assert_eq!(secret_a, secret_b, "shared secrets must match");
+    }
+}
