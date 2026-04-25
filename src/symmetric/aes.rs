@@ -247,10 +247,16 @@ pub fn decrypt_block(block: &[u8; 16], key: &AesKey) -> [u8; 16] {
 /// AES-CTR encryption/decryption (symmetric operation).
 ///
 /// Counter block layout: `nonce` (12 bytes) || counter (4 bytes, big-endian).
-/// The counter starts at 1 (matching RFC 3686 / GCM conventions).
+/// The counter starts at 1 (matching RFC 3686).
 pub fn aes_ctr(data: &[u8], key: &AesKey, nonce: &[u8; 12]) -> Vec<u8> {
+    aes_ctr_from(data, key, nonce, 1)
+}
+
+/// AES-CTR with explicit starting counter. Used by GCM (which needs counter=2
+/// because counter=1 is consumed by J₀ for tag derivation).
+fn aes_ctr_from(data: &[u8], key: &AesKey, nonce: &[u8; 12], start: u32) -> Vec<u8> {
     let mut out = data.to_vec();
-    let mut counter = 1u32;
+    let mut counter = start;
 
     for chunk in out.chunks_mut(16) {
         let mut ctr_block = [0u8; 16];
@@ -339,8 +345,9 @@ pub fn aes_gcm_encrypt(plaintext: &[u8], key: &AesKey, nonce: &[u8; 12], aad: &[
     // Derive GHASH key H = E(K, 0¹²⁸)
     let h: [u8; 16] = encrypt_block(&[0u8; 16], key);
 
-    // Encrypt
-    let ciphertext = aes_ctr(plaintext, key, nonce);
+    // Encrypt plaintext with CTR starting at J₀ + 1 = 2 (96-bit IV case).
+    // Counter 1 (= J₀) is reserved for tag derivation in `encrypt_j0`.
+    let ciphertext = aes_ctr_from(plaintext, key, nonce, 2);
 
     // Compute tag: GHASH(H, AAD, CT) XOR E(K, J₀)
     let mut tag = ghash(&h, aad, &ciphertext);
@@ -371,7 +378,8 @@ pub fn aes_gcm_decrypt(
     let tag_ok = expected_tag.iter().zip(tag_bytes.iter()).fold(0u8, |acc, (a, b)| acc | (a ^ b)) == 0;
     if !tag_ok { return Err(()); }
 
-    Ok(aes_ctr(ciphertext, key, nonce))
+    // Decrypt plaintext with CTR starting at counter=2 (J₀ + 1).
+    Ok(aes_ctr_from(ciphertext, key, nonce, 2))
 }
 
 /// Encrypt the J₀ counter block (nonce || 0x00000001) for the authentication tag.
@@ -386,72 +394,175 @@ fn encrypt_j0(key: &AesKey, nonce: &[u8; 12]) -> [u8; 16] {
 mod tests {
     use super::*;
 
-    #[test]
-    fn aes128_roundtrip() {
-        let key = AesKey::Aes128([0u8; 16]);
-        let plaintext = [0u8; 16];
-        let ct = encrypt_block(&plaintext, &key);
-        let pt = decrypt_block(&ct, &key);
-        assert_eq!(pt, plaintext);
-    }
+    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+
+    // ── AES-128 single-block KAT (FIPS 197 §B / Appendix C.1) ────────────────
 
     #[test]
-    fn aes128_known_answer() {
-        // FIPS 197 Appendix B: key=2b7e..., pt=3243...
-        let key = AesKey::Aes128([
-            0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,
-            0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c,
-        ]);
-        let pt = [
-            0x32,0x43,0xf6,0xa8,0x88,0x5a,0x30,0x8d,
-            0x31,0x31,0x98,0xa2,0xe0,0x37,0x07,0x34,
-        ];
+    fn aes128_fips197_appendix_b() {
+        let key = AesKey::Aes128(h("2b7e151628aed2a6abf7158809cf4f3c").try_into().unwrap());
+        let pt: [u8; 16] = h("3243f6a8885a308d313198a2e0370734").try_into().unwrap();
         let ct = encrypt_block(&pt, &key);
-        let expected = [
-            0x39,0x25,0x84,0x1d,0x02,0xdc,0x09,0xfb,
-            0xdc,0x11,0x85,0x97,0x19,0x6a,0x0b,0x32,
-        ];
-        assert_eq!(ct, expected);
+        assert_eq!(&ct, h("3925841d02dc09fbdc118597196a0b32").as_slice());
+        assert_eq!(decrypt_block(&ct, &key), pt);
     }
 
     #[test]
-    fn aes256_roundtrip() {
-        let key = AesKey::Aes256([0u8; 32]);
-        let plaintext = [0x42u8; 16];
-        let ct = encrypt_block(&plaintext, &key);
-        let pt = decrypt_block(&ct, &key);
-        assert_eq!(pt, plaintext);
+    fn aes128_fips197_appendix_c1() {
+        // FIPS 197 §C.1
+        let key = AesKey::Aes128(h("000102030405060708090a0b0c0d0e0f").try_into().unwrap());
+        let pt: [u8; 16] = h("00112233445566778899aabbccddeeff").try_into().unwrap();
+        let ct = encrypt_block(&pt, &key);
+        assert_eq!(&ct, h("69c4e0d86a7b0430d8cdb78070b4c55a").as_slice());
+        assert_eq!(decrypt_block(&ct, &key), pt);
+    }
+
+    // ── AES-256 single-block KAT (FIPS 197 §C.3) ─────────────────────────────
+
+    #[test]
+    fn aes256_fips197_appendix_c3() {
+        let key = AesKey::Aes256(
+            h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+                .try_into().unwrap(),
+        );
+        let pt: [u8; 16] = h("00112233445566778899aabbccddeeff").try_into().unwrap();
+        let ct = encrypt_block(&pt, &key);
+        assert_eq!(&ct, h("8ea2b7ca516745bfeafc49904b496089").as_slice());
+        assert_eq!(decrypt_block(&ct, &key), pt);
     }
 
     #[test]
-    fn ctr_roundtrip() {
-        let key = AesKey::Aes128([0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,
-                                   0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c]);
-        let nonce = [0u8; 12];
-        let msg = b"Hello, AES-CTR world!";
-        let ct = aes_ctr(msg, &key, &nonce);
-        let pt = aes_ctr(&ct, &key, &nonce);
-        assert_eq!(&pt, msg);
+    fn aes_decrypt_inverse() {
+        // Roundtrip AES-128 and AES-256 over many random-ish blocks.
+        for seed in 0..16u8 {
+            let mut k128 = [0u8; 16];
+            for (i, b) in k128.iter_mut().enumerate() { *b = seed.wrapping_mul(i as u8 + 1); }
+            let key128 = AesKey::Aes128(k128);
+            let mut pt = [0u8; 16];
+            for (i, b) in pt.iter_mut().enumerate() { *b = seed.wrapping_add((i*7) as u8); }
+            assert_eq!(decrypt_block(&encrypt_block(&pt, &key128), &key128), pt);
+
+            let mut k256 = [0u8; 32];
+            for (i, b) in k256.iter_mut().enumerate() { *b = seed.wrapping_mul(i as u8 + 3); }
+            let key256 = AesKey::Aes256(k256);
+            assert_eq!(decrypt_block(&encrypt_block(&pt, &key256), &key256), pt);
+        }
+    }
+
+    // ── AES-CTR KAT (matches Python cryptography backend with counter starting at 1) ─
+
+    #[test]
+    fn ctr_known_answer() {
+        let key = AesKey::Aes128(h("2b7e151628aed2a6abf7158809cf4f3c").try_into().unwrap());
+        let nonce: [u8; 12] = h("f0f1f2f3f4f5f6f7f8f9fafb").try_into().unwrap();
+        let pt = h("6bc1bee22e409f96e93d7e117393172a\
+                    ae2d8a571e03ac9c9eb76fac45af8e51\
+                    30c81c46a35ce411e5fbc1191a0a52ef");
+        let ct = aes_ctr(&pt, &key, &nonce);
+        assert_eq!(
+            ct,
+            h("288028c71599c5a8dd53c2671b86b813ab25397ad21f8b4b94892b65cf891edd\
+               d47cfd8d0ecd23a4eb8c0558454a6344"),
+        );
+        // Roundtrip
+        assert_eq!(aes_ctr(&ct, &key, &nonce), pt);
     }
 
     #[test]
-    fn gcm_roundtrip() {
+    fn ctr_handles_partial_last_block() {
         let key = AesKey::Aes128([0u8; 16]);
         let nonce = [0u8; 12];
-        let pt = b"secret message!";
-        let aad = b"header";
-        let ct = aes_gcm_encrypt(pt, &key, &nonce, aad);
-        let recovered = aes_gcm_decrypt(&ct, &key, &nonce, aad).unwrap();
-        assert_eq!(recovered, pt);
+        // Length not a multiple of 16
+        for len in [1usize, 15, 17, 31, 33, 100] {
+            let pt: Vec<u8> = (0..len).map(|i| i as u8).collect();
+            let ct = aes_ctr(&pt, &key, &nonce);
+            assert_eq!(aes_ctr(&ct, &key, &nonce), pt, "len={}", len);
+        }
+    }
+
+    // ── AES-GCM KATs (NIST GCM Spec test cases #1, #2) ───────────────────────
+
+    #[test]
+    fn aes128_gcm_nist_test1_empty() {
+        // Test #1: zero key/IV/AAD/PT; tag-only output
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        let out = aes_gcm_encrypt(b"", &key, &nonce, b"");
+        // Output is just the 16-byte tag
+        assert_eq!(out, h("58e2fccefa7e3061367f1d57a4e7455a"));
     }
 
     #[test]
-    fn gcm_tag_failure() {
+    fn aes128_gcm_nist_test2_one_block() {
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        let pt = [0u8; 16];
+        let out = aes_gcm_encrypt(&pt, &key, &nonce, b"");
+        assert_eq!(
+            out,
+            h("0388dace60b6a392f328c2b971b2fe78ab6e47d42cec13bdf53a67b21257bddf"),
+        );
+        // Decrypt back
+        let dec = aes_gcm_decrypt(&out, &key, &nonce, b"").unwrap();
+        assert_eq!(dec, pt);
+    }
+
+    #[test]
+    fn aes256_gcm_zeros_one_block() {
+        let key = AesKey::Aes256([0u8; 32]);
+        let nonce = [0u8; 12];
+        let pt = [0u8; 16];
+        let out = aes_gcm_encrypt(&pt, &key, &nonce, b"");
+        assert_eq!(
+            out,
+            h("cea7403d4d606b6e074ec5d3baf39d18d0d1c8a799996bf0265b98b5d48ab919"),
+        );
+        let dec = aes_gcm_decrypt(&out, &key, &nonce, b"").unwrap();
+        assert_eq!(dec, pt);
+    }
+
+    #[test]
+    fn aes_gcm_with_aad_roundtrip() {
+        let key = AesKey::Aes128([0x42u8; 16]);
+        let nonce = [0x07u8; 12];
+        let pt = b"authenticated payload";
+        let aad = b"unencrypted-but-authenticated-header";
+        let ct = aes_gcm_encrypt(pt, &key, &nonce, aad);
+        assert_eq!(aes_gcm_decrypt(&ct, &key, &nonce, aad).unwrap(), pt);
+    }
+
+    #[test]
+    fn aes_gcm_tamper_ciphertext_fails() {
         let key = AesKey::Aes128([0u8; 16]);
         let nonce = [0u8; 12];
         let mut ct = aes_gcm_encrypt(b"msg", &key, &nonce, b"aad");
-        // Tamper with the ciphertext
         ct[0] ^= 0xff;
         assert!(aes_gcm_decrypt(&ct, &key, &nonce, b"aad").is_err());
+    }
+
+    #[test]
+    fn aes_gcm_tamper_aad_fails() {
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        let ct = aes_gcm_encrypt(b"data", &key, &nonce, b"original");
+        assert!(aes_gcm_decrypt(&ct, &key, &nonce, b"different").is_err());
+    }
+
+    #[test]
+    fn aes_gcm_tamper_tag_fails() {
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        let mut ct = aes_gcm_encrypt(b"msg", &key, &nonce, b"");
+        let last = ct.len() - 1;
+        ct[last] ^= 0x01;
+        assert!(aes_gcm_decrypt(&ct, &key, &nonce, b"").is_err());
+    }
+
+    #[test]
+    fn aes_gcm_short_input_fails() {
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        // Anything shorter than 16 bytes can't be a valid (CT||tag).
+        assert!(aes_gcm_decrypt(&[0u8; 8], &key, &nonce, b"").is_err());
     }
 }

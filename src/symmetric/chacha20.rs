@@ -196,43 +196,118 @@ pub fn chacha20_poly1305_decrypt(
 mod tests {
     use super::*;
 
+    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+
+    // ── ChaCha20 block KATs (RFC 8439) ────────────────────────────────────────
+
     #[test]
-    fn chacha20_block_rfc8439() {
-        // RFC 8439 §2.1.2 test vector
+    fn chacha20_block_zero_key() {
+        // RFC 8439 §2.3.2: zero key, zero nonce, counter 0.
         let key = [0u8; 32];
         let nonce = [0u8; 12];
         let block = chacha20_block(&key, &nonce, 0);
-        // First 4 bytes of the output keystream
-        assert_eq!(&block[..4], &[0x76, 0xb8, 0xe0, 0xad]);
+        let expected = h("76b8e0ada0f13d90405d6ae55386bd28bdd219b8a08ded1aa836efcc8b770dc7da41597c5157488d7724e03fb8d84a376a43b8f41518a11cc387b669b2ee6586");
+        assert_eq!(&block[..], expected.as_slice());
     }
 
     #[test]
-    fn chacha20_roundtrip() {
+    fn chacha20_block_rfc8439_2_3_2() {
+        // RFC 8439 §2.3.2 named example.
+        let key: [u8; 32] = h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+            .try_into().unwrap();
+        let nonce: [u8; 12] = h("000000090000004a00000000").try_into().unwrap();
+        let block = chacha20_block(&key, &nonce, 1);
+        let expected = h("10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e");
+        assert_eq!(&block[..], expected.as_slice());
+    }
+
+    // ── ChaCha20 stream cipher KAT (RFC 8439 §2.4.2) ─────────────────────────
+
+    #[test]
+    fn chacha20_xor_rfc8439_2_4_2() {
+        let key: [u8; 32] = h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+            .try_into().unwrap();
+        let nonce: [u8; 12] = h("000000000000004a00000000").try_into().unwrap();
+        let pt = b"Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+        let ct = chacha20_xor(pt, &key, &nonce);
+        let expected = h("6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d");
+        assert_eq!(ct, expected);
+        // Roundtrip
+        let dec = chacha20_xor(&ct, &key, &nonce);
+        assert_eq!(&dec, pt);
+    }
+
+    #[test]
+    fn chacha20_roundtrip_random_lengths() {
         let key = [0x42u8; 32];
-        let nonce = [0u8; 12];
-        let msg = b"Hello, ChaCha20!";
-        let ct = chacha20_xor(msg, &key, &nonce);
-        let pt = chacha20_xor(&ct, &key, &nonce);
-        assert_eq!(&pt, msg);
+        let nonce = [0x07u8; 12];
+        for len in [0usize, 1, 15, 16, 17, 63, 64, 65, 127, 128, 129, 255, 256, 257] {
+            let pt: Vec<u8> = (0..len).map(|i| (i as u8).wrapping_mul(31)).collect();
+            let ct = chacha20_xor(&pt, &key, &nonce);
+            let dec = chacha20_xor(&ct, &key, &nonce);
+            assert_eq!(dec, pt, "roundtrip failed at len={}", len);
+        }
+    }
+
+    // ── Poly1305 KATs (RFC 8439 §2.5.2) ──────────────────────────────────────
+
+    #[test]
+    fn poly1305_rfc8439_2_5_2() {
+        let key: [u8; 32] = h("85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b")
+            .try_into().unwrap();
+        let msg = b"Cryptographic Forum Research Group";
+        let tag = poly1305(&key, msg);
+        assert_eq!(&tag, h("a8061dc1305136c6c22b8baf0c0127a9").as_slice());
+    }
+
+    // ── ChaCha20-Poly1305 AEAD KAT (RFC 8439 §2.8.2) ─────────────────────────
+
+    #[test]
+    fn chacha20_poly1305_rfc8439_2_8_2() {
+        let key: [u8; 32] = h("808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f")
+            .try_into().unwrap();
+        let nonce: [u8; 12] = h("070000004041424344454647").try_into().unwrap();
+        let aad = h("50515253c0c1c2c3c4c5c6c7");
+        let pt = b"Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+        let expected = h("d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b61161ae10b594f09e26a7e902ecbd0600691");
+        let ct = chacha20_poly1305_encrypt(pt, &key, &nonce, &aad);
+        assert_eq!(ct, expected);
+        let dec = chacha20_poly1305_decrypt(&ct, &key, &nonce, &aad).unwrap();
+        assert_eq!(&dec, pt);
     }
 
     #[test]
-    fn chacha20_poly1305_roundtrip() {
-        let key = [0x42u8; 32];
-        let nonce = [0u8; 12];
-        let msg = b"authenticated message";
-        let aad = b"header data";
-        let ct = chacha20_poly1305_encrypt(msg, &key, &nonce, aad);
-        let pt = chacha20_poly1305_decrypt(&ct, &key, &nonce, aad).unwrap();
-        assert_eq!(&pt, msg);
-    }
-
-    #[test]
-    fn chacha20_poly1305_tamper_fails() {
+    fn chacha20_poly1305_tamper_ciphertext_fails() {
         let key = [0x42u8; 32];
         let nonce = [0u8; 12];
         let mut ct = chacha20_poly1305_encrypt(b"secret", &key, &nonce, b"");
         ct[0] ^= 0xff;
         assert!(chacha20_poly1305_decrypt(&ct, &key, &nonce, b"").is_err());
+    }
+
+    #[test]
+    fn chacha20_poly1305_tamper_tag_fails() {
+        let key = [0x42u8; 32];
+        let nonce = [0u8; 12];
+        let mut ct = chacha20_poly1305_encrypt(b"secret message", &key, &nonce, b"aad");
+        let last = ct.len() - 1;
+        ct[last] ^= 0x01;
+        assert!(chacha20_poly1305_decrypt(&ct, &key, &nonce, b"aad").is_err());
+    }
+
+    #[test]
+    fn chacha20_poly1305_tamper_aad_fails() {
+        let key = [0x42u8; 32];
+        let nonce = [0u8; 12];
+        let ct = chacha20_poly1305_encrypt(b"data", &key, &nonce, b"original-aad");
+        assert!(chacha20_poly1305_decrypt(&ct, &key, &nonce, b"different-aad").is_err());
+    }
+
+    #[test]
+    fn chacha20_poly1305_short_input_fails() {
+        let key = [0u8; 32];
+        let nonce = [0u8; 12];
+        // Less than 16 bytes is not even a valid tag, must reject.
+        assert!(chacha20_poly1305_decrypt(&[0u8; 8], &key, &nonce, b"").is_err());
     }
 }

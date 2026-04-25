@@ -338,4 +338,132 @@ mod tests {
         let ss_dec = kyber_decapsulate(&sk, &ct);
         assert_eq!(ss_enc, ss_dec, "shared secrets must match");
     }
+
+    #[test]
+    fn poly_mul_identity() {
+        // 1 · p = p for any p
+        let mut one = Poly::zero();
+        one.0[0] = 1;
+        let mut p = Poly::zero();
+        p.0[0] = 7; p.0[1] = 13; p.0[5] = 100; p.0[N - 1] = 42;
+        assert_eq!(one.mul(&p), p);
+        assert_eq!(p.mul(&one), p);
+    }
+
+    #[test]
+    fn poly_mul_anticyclic() {
+        // x · x^(N-1) = x^N ≡ -1 (mod xⁿ + 1)
+        let mut x = Poly::zero();
+        x.0[1] = 1;
+        let mut x_n_minus_1 = Poly::zero();
+        x_n_minus_1.0[N - 1] = 1;
+        let prod = x.mul(&x_n_minus_1);
+        // Constant term should be -1 mod Q = Q - 1; all other coefficients zero.
+        assert_eq!(prod.0[0], Q - 1);
+        for i in 1..N {
+            assert_eq!(prod.0[i], 0, "coeff {i} should be 0");
+        }
+    }
+
+    #[test]
+    fn poly_mul_commutative() {
+        // Random-ish polynomials; mul must be commutative.
+        let mut a = Poly::zero();
+        let mut b = Poly::zero();
+        for i in 0..16 {
+            a.0[i] = (i as i64 * 17 + 3).rem_euclid(Q);
+            b.0[i] = (i as i64 * 31 + 5).rem_euclid(Q);
+        }
+        assert_eq!(a.mul(&b), b.mul(&a));
+    }
+
+    #[test]
+    fn poly_mul_distributes_over_add() {
+        // a·(b+c) == a·b + a·c
+        let mut a = Poly::zero();
+        let mut b = Poly::zero();
+        let mut c = Poly::zero();
+        for i in 0..8 {
+            a.0[i] = (i as i64 + 1) * 11;
+            b.0[i] = (i as i64 + 2) * 13;
+            c.0[i] = (i as i64 + 3) * 17;
+        }
+        let lhs = a.mul(&b.add(&c));
+        let rhs = a.mul(&b).add(&a.mul(&c));
+        assert_eq!(lhs, rhs);
+    }
+
+    #[test]
+    fn poly_compress_decompress_approx_inverse() {
+        // For d=10 the round-trip error per coefficient is bounded by q/2^(d+1).
+        let mut p = Poly::zero();
+        for i in 0..N {
+            p.0[i] = (i as i64 * 13 + 7).rem_euclid(Q);
+        }
+        let compressed = p.compress(10);
+        let recovered = Poly::decompress(&compressed, 10);
+        let bound = (Q + (1 << 11) - 1) / (1 << 11) + 1; // ⌈q/2^11⌉ + 1
+        for i in 0..N {
+            let diff = (p.0[i] - recovered.0[i]).abs();
+            let wrap = (Q - diff).abs();
+            let err = diff.min(wrap);
+            assert!(err <= bound, "coeff {i}: err {err} > bound {bound}");
+        }
+    }
+
+    #[test]
+    fn encode_decode_message_patterns() {
+        let patterns: [[u8; 32]; 4] = [
+            [0x00; 32],
+            [0xff; 32],
+            [0xaa; 32],
+            *b"PaymentChannelSettlementRoot=ABC",
+        ];
+        for msg in &patterns {
+            let p = encode_message(msg);
+            // Encoded coefficients must be exactly 0 or Q/2.
+            for &c in &p.0 {
+                assert!(c == 0 || c == Q / 2, "encoded coeff out of set: {c}");
+            }
+            assert_eq!(decode_message(&p), *msg);
+        }
+    }
+
+    #[test]
+    fn cbd_samples_are_reduced() {
+        // Centred-binomial samples should sit in [0, Q) after reduction,
+        // i.e., representing values in {-η..η} (here {-3..3}) mod q.
+        for _ in 0..4 {
+            let p = sample_cbd();
+            for &c in &p.0 {
+                assert!(c >= 0 && c < Q, "out-of-range coeff {c}");
+                // Modulo Q, valid representatives are {0, 1, 2, 3} ∪ {Q-3, Q-2, Q-1}.
+                let small = c <= ETA || c >= Q - ETA;
+                assert!(small, "coeff {c} not in CBD range");
+            }
+        }
+    }
+
+    #[test]
+    fn kyber_multiple_roundtrips_distinct_secrets() {
+        // Each fresh encapsulation samples a new message, so two encaps under
+        // the same public key must (with overwhelming probability) yield
+        // different shared secrets — and both must decap correctly.
+        let sk = kyber_keygen();
+        let (ct1, ss1) = kyber_encapsulate(&sk.public);
+        let (ct2, ss2) = kyber_encapsulate(&sk.public);
+        assert_ne!(ss1, ss2, "two encaps must produce different secrets");
+        assert_eq!(ss1, kyber_decapsulate(&sk, &ct1));
+        assert_eq!(ss2, kyber_decapsulate(&sk, &ct2));
+    }
+
+    #[test]
+    fn kyber_decap_with_wrong_key_differs() {
+        // Encapsulate under Alice's pk; Bob's sk must not recover Alice's secret.
+        let alice = kyber_keygen();
+        let bob   = kyber_keygen();
+        let (ct, alice_ss) = kyber_encapsulate(&alice.public);
+        let bob_ss = kyber_decapsulate(&bob, &ct);
+        assert_ne!(alice_ss, bob_ss);
+    }
 }

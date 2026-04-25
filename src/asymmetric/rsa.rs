@@ -289,4 +289,162 @@ mod tests {
         let pt = rsa_decrypt(&ct, &kp.private).unwrap();
         assert_eq!(pt, msg);
     }
+
+    #[test]
+    fn primality_known_large_primes() {
+        // 2^127 - 1 (Mersenne prime M_127)
+        let m127 = (BigUint::one() << 127u32) - BigUint::one();
+        assert!(is_prime(&m127));
+        // 2^61 - 1 (Mersenne prime M_61)
+        let m61 = (BigUint::one() << 61u32) - BigUint::one();
+        assert!(is_prime(&m61));
+        // Carmichael number 561 = 3·11·17 — fools Fermat's little theorem
+        // but Miller-Rabin must reject it.
+        assert!(!is_prime(&BigUint::from(561u32)));
+        // Carmichael 41041 = 7·11·13·41
+        assert!(!is_prime(&BigUint::from(41041u32)));
+        // Carmichael 825265 = 5·7·17·19·73
+        assert!(!is_prime(&BigUint::from(825265u32)));
+    }
+
+    #[test]
+    fn random_prime_has_correct_bit_length() {
+        for _ in 0..3 {
+            let p = random_prime(256);
+            assert_eq!(p.bits(), 256, "prime must have exactly 256 bits");
+            assert!(is_prime(&p));
+        }
+    }
+
+    #[test]
+    fn rsa_keygen_modulus_bit_length() {
+        let kp = RsaKeyPair::generate(1024);
+        // n = p·q with p, q each 512 bits and high bits forced to 1, so
+        // n must be exactly 1023 or 1024 bits. We force the bit-1 of each
+        // prime, so n is at least 2^1022 and at most 2^1024 - 1.
+        let bits = kp.public.n.bits();
+        assert!(bits >= 1023 && bits <= 1024, "got {bits} bits");
+        // d·e ≡ 1 (mod λ(n))
+        let lambda = (&kp.private.p - BigUint::one())
+            .lcm(&(&kp.private.q - BigUint::one()));
+        assert_eq!((&kp.private.d * &kp.private.e) % &lambda, BigUint::one());
+        // p·q == n
+        assert_eq!(&kp.private.p * &kp.private.q, kp.public.n);
+    }
+
+    #[test]
+    fn pkcs1_pad_unpad_roundtrip() {
+        let msg = b"sensitive payment payload";
+        let padded = pkcs1_pad_encrypt(msg, 128).unwrap();
+        assert_eq!(padded.len(), 128);
+        assert_eq!(padded[0], 0x00);
+        assert_eq!(padded[1], 0x02);
+        // Padding bytes must all be non-zero.
+        let zero_sep = padded[2..].iter().position(|&b| b == 0).unwrap() + 2;
+        assert!(zero_sep - 2 >= 8, "PS must be ≥ 8 bytes");
+        for &b in &padded[2..zero_sep] {
+            assert_ne!(b, 0);
+        }
+        let recovered = pkcs1_unpad_encrypt(&padded).unwrap();
+        assert_eq!(recovered, msg);
+    }
+
+    #[test]
+    fn pkcs1_pad_rejects_oversized_message() {
+        // 128-byte modulus has 128 - 11 = 117 bytes max payload.
+        assert!(pkcs1_pad_encrypt(&vec![0u8; 117], 128).is_ok());
+        assert!(pkcs1_pad_encrypt(&vec![0u8; 118], 128).is_err());
+    }
+
+    #[test]
+    fn pkcs1_unpad_rejects_malformed() {
+        // Wrong leading byte
+        let mut bad = vec![0u8; 128];
+        bad[0] = 0x01;
+        bad[1] = 0x02;
+        assert!(pkcs1_unpad_encrypt(&bad).is_err());
+        // Wrong block type
+        let mut bad2 = vec![0u8; 128];
+        bad2[1] = 0x01;
+        assert!(pkcs1_unpad_encrypt(&bad2).is_err());
+        // PS shorter than 8 bytes
+        let mut bad3 = vec![0u8; 128];
+        bad3[1] = 0x02;
+        bad3[2] = 0xff;
+        bad3[3] = 0x00; // separator after only 1 PS byte
+        bad3[4..].copy_from_slice(&[0xaa; 124]);
+        assert!(pkcs1_unpad_encrypt(&bad3).is_err());
+        // No zero separator at all
+        let bad4 = vec![0xffu8; 128];
+        assert!(pkcs1_unpad_encrypt(&bad4).is_err());
+    }
+
+    #[test]
+    fn rsa_encrypt_is_randomized() {
+        // PKCS#1 v1.5 padding uses random PS, so two encryptions of the same
+        // plaintext must produce different ciphertexts.
+        let kp = RsaKeyPair::generate(1024);
+        let msg = b"same message";
+        let c1 = rsa_encrypt(msg, &kp.public).unwrap();
+        let c2 = rsa_encrypt(msg, &kp.public).unwrap();
+        assert_ne!(c1, c2, "PKCS#1 v1.5 must produce randomized ciphertexts");
+        assert_eq!(rsa_decrypt(&c1, &kp.private).unwrap(), msg);
+        assert_eq!(rsa_decrypt(&c2, &kp.private).unwrap(), msg);
+    }
+
+    #[test]
+    fn rsa_encrypt_empty_and_max_message() {
+        let kp = RsaKeyPair::generate(1024);
+        // Empty message
+        let ct_empty = rsa_encrypt(b"", &kp.public).unwrap();
+        assert_eq!(rsa_decrypt(&ct_empty, &kp.private).unwrap(), b"");
+        // Maximum-length message: 128 - 11 = 117 bytes
+        let max_msg = vec![0xab; 117];
+        let ct_max = rsa_encrypt(&max_msg, &kp.public).unwrap();
+        assert_eq!(rsa_decrypt(&ct_max, &kp.private).unwrap(), max_msg);
+        // One byte too long must fail at padding stage
+        let too_long = vec![0xab; 118];
+        assert!(rsa_encrypt(&too_long, &kp.public).is_err());
+    }
+
+    #[test]
+    fn rsa_signature_unique_per_message() {
+        // Plain (deterministic) RSA signatures for distinct messages must differ.
+        let kp = RsaKeyPair::generate(1024);
+        let s1 = rsa_sign(b"msg-a", &kp.private);
+        let s2 = rsa_sign(b"msg-b", &kp.private);
+        assert_ne!(s1, s2);
+    }
+
+    #[test]
+    fn rsa_verify_with_wrong_key_fails() {
+        let kp1 = RsaKeyPair::generate(1024);
+        let kp2 = RsaKeyPair::generate(1024);
+        let sig = rsa_sign(b"transfer 100", &kp1.private);
+        assert!(rsa_verify(b"transfer 100", &sig, &kp1.public));
+        assert!(!rsa_verify(b"transfer 100", &sig, &kp2.public));
+    }
+
+    #[test]
+    fn rsa_decrypt_rejects_tampered_ciphertext() {
+        let kp = RsaKeyPair::generate(1024);
+        let ct = rsa_encrypt(b"hello", &kp.public).unwrap();
+        // Flip a bit in the ciphertext (cheap) — decryption nearly always fails
+        // PKCS#1 v1.5 unpadding because the random PS bytes change.
+        let tampered = &ct ^ BigUint::one();
+        // Make sure tampered < n; if it overflowed (extremely unlikely), retry
+        // with a different mask.
+        let tampered = if tampered >= kp.public.n {
+            &ct + BigUint::from(2u32)
+        } else {
+            tampered
+        };
+        let res = rsa_decrypt(&tampered, &kp.private);
+        // Either unpadding fails outright, or the message decoded to garbage —
+        // but it must NOT decrypt back to the original plaintext.
+        match res {
+            Err(_) => {}
+            Ok(plain) => assert_ne!(plain, b"hello"),
+        }
+    }
 }

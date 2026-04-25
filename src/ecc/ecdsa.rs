@@ -131,8 +131,17 @@ mod tests {
     use crate::ecc::{curve::CurveParams, keys::EccKeyPair};
 
     #[test]
-    fn sign_and_verify() {
+    fn sign_and_verify_secp256k1() {
         let curve = CurveParams::secp256k1();
+        let kp = EccKeyPair::generate(&curve);
+        let msg = b"hello, elliptic curves!";
+        let sig = sign(msg, &kp.private, &curve);
+        assert!(verify(msg, &kp.public, &sig, &curve));
+    }
+
+    #[test]
+    fn sign_and_verify_p256() {
+        let curve = CurveParams::p256();
         let kp = EccKeyPair::generate(&curve);
         let msg = b"hello, elliptic curves!";
         let sig = sign(msg, &kp.private, &curve);
@@ -154,5 +163,48 @@ mod tests {
         let kp2 = EccKeyPair::generate(&curve);
         let sig = sign(b"message", &kp1.private, &curve);
         assert!(!verify(b"message", &kp2.public, &sig, &curve));
+    }
+
+    #[test]
+    fn p256_verify_external_signature() {
+        // Cross-implementation KAT: signature produced by Python `cryptography`
+        // (OpenSSL backend) on P-256 with the given private key and message.
+        // Verifies our verification path against an independent implementation.
+        let curve = CurveParams::p256();
+        let priv_hex = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+        let d = BigUint::parse_bytes(priv_hex.as_bytes(), 16).unwrap();
+        let kp = EccKeyPair::from_private(d, &curve);
+
+        let r = BigUint::parse_bytes(
+            b"3f00b2a032fa0274eb2a3ac7a4fda16cbaf44de009166536df839187a0dcdb3d", 16,
+        ).unwrap();
+        let s = BigUint::parse_bytes(
+            b"880fbab6bd8fe10f572454e17ee0bb6cb7a6955aa9b8ee6b0b14b0029b582c1c", 16,
+        ).unwrap();
+        let sig = EcdsaSignature { r, s };
+        assert!(verify(b"attack at dawn", &kp.public, &sig, &curve));
+        // Tampered message must fail
+        assert!(!verify(b"attack at noon", &kp.public, &sig, &curve));
+    }
+
+    #[test]
+    fn reject_zero_r_or_s() {
+        let curve = CurveParams::p256();
+        let kp = EccKeyPair::generate(&curve);
+        let zero = EcdsaSignature { r: BigUint::from(0u32), s: BigUint::from(1u32) };
+        assert!(!verify(b"msg", &kp.public, &zero, &curve));
+        let zero2 = EcdsaSignature { r: BigUint::from(1u32), s: BigUint::from(0u32) };
+        assert!(!verify(b"msg", &kp.public, &zero2, &curve));
+    }
+
+    #[test]
+    fn reject_out_of_range_signature() {
+        let curve = CurveParams::p256();
+        let kp = EccKeyPair::generate(&curve);
+        // r = n is out of range
+        let bad = EcdsaSignature { r: curve.n.clone(), s: BigUint::from(1u32) };
+        assert!(!verify(b"msg", &kp.public, &bad, &curve));
+        let bad2 = EcdsaSignature { r: BigUint::from(1u32), s: curve.n.clone() };
+        assert!(!verify(b"msg", &kp.public, &bad2, &curve));
     }
 }

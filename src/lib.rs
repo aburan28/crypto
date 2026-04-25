@@ -9,7 +9,7 @@
 //! | `asymmetric`   | RSA (keygen, encrypt, sign/verify)                      |
 //! | `hash`         | SHA-256, SHA-3 (Keccak), BLAKE3                         |
 //! | `kdf`          | HKDF-SHA256, PBKDF2-HMAC-SHA256                         |
-//! | `pqc`          | Simplified Kyber/ML-KEM (educational)                   |
+//! | `pqc`          | Simplified Kyber/ML-KEM and binary-Goppa McEliece       |
 //! | `keys`         | Unified key management                                  |
 //! | `utils`        | Modular arithmetic, randomness, encoding                |
 

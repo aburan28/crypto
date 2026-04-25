@@ -72,7 +72,14 @@ fn compress(state: &mut [u32; 8], block: &[u8]) {
             .wrapping_add(w[i - 16]);
     }
 
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
+    let mut a = state[0];
+    let mut b = state[1];
+    let mut c = state[2];
+    let mut d = state[3];
+    let mut e = state[4];
+    let mut f = state[5];
+    let mut g = state[6];
+    let mut h = state[7];
 
     for i in 0..64 {
         let t1 = h
@@ -81,9 +88,13 @@ fn compress(state: &mut [u32; 8], block: &[u8]) {
             .wrapping_add(K[i])
             .wrapping_add(w[i]);
         let t2 = sigma0(a).wrapping_add(maj(a, b, c));
-        h = g; g = f; f = e;
+        h = g;
+        g = f;
+        f = e;
         e = d.wrapping_add(t1);
-        d = c; c = b; b = a;
+        d = c;
+        c = b;
+        b = a;
         a = t1.wrapping_add(t2);
     }
 
@@ -137,33 +148,102 @@ pub fn sha224(data: &[u8]) -> [u8; 28] {
 mod tests {
     use super::*;
 
+    fn h(hex_str: &str) -> Vec<u8> {
+        hex::decode(hex_str).unwrap()
+    }
+
+    // ── SHA-256 known-answer tests (FIPS 180-4 + RFC 6234) ────────────────────
+
     #[test]
-    fn empty_message() {
-        let digest = sha256(b"");
-        let expected = hex::decode(
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ).unwrap();
-        assert_eq!(&digest, expected.as_slice());
+    fn sha256_empty() {
+        assert_eq!(
+            sha256(b"").as_slice(),
+            h("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855").as_slice(),
+        );
     }
 
     #[test]
-    fn hello_world() {
-        let digest = sha256(b"hello world");
-        let expected = hex::decode(
-            "b94d27b9934d3e08a52e52d7da7dabfac484efe04294e576e8d2eaaddf24e5e8",
-        ).unwrap();
-        // Well-known hash of "hello world"
-        assert_eq!(digest.len(), 32);
-        let _ = expected; // just verifying length here; known-answer test above
+    fn sha256_abc() {
+        // FIPS 180-4 §B.1
+        assert_eq!(
+            sha256(b"abc").as_slice(),
+            h("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad").as_slice(),
+        );
     }
 
     #[test]
-    fn abc() {
-        let digest = sha256(b"abc");
-        let expected = hex::decode(
-            "ba7816bf8f01cfea414140de5dae2ec73b00361bbef0469121373e91b35d63d",
-        ).unwrap();
-        let _ = expected;
-        assert_eq!(digest.len(), 32);
+    fn sha256_hello_world() {
+        assert_eq!(
+            sha256(b"hello world").as_slice(),
+            h("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha256_fips180_56byte() {
+        // FIPS 180-4 §B.2
+        let msg = b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+        assert_eq!(
+            sha256(msg).as_slice(),
+            h("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha256_fips180_112byte() {
+        // FIPS 180-4 §B.3 — spans 3 blocks
+        let msg = b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
+        assert_eq!(
+            sha256(msg).as_slice(),
+            h("cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha256_million_a() {
+        // FIPS 180-4 §B.3 — 1,000,000 'a' characters
+        let msg = vec![b'a'; 1_000_000];
+        assert_eq!(
+            sha256(&msg).as_slice(),
+            h("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha256_block_boundary_55() {
+        // 55 bytes — fits exactly in one padded block (1 byte before length).
+        // Verified with `printf 'A...A' | shasum -a 256`.
+        assert_eq!(
+            sha256(&vec![b'A'; 55]).as_slice(),
+            h("8963cc0afd622cc7574ac2011f93a3059b3d65548a77542a1559e3d202e6ab00").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha256_two_blocks_64() {
+        // 64 bytes — forces a second padding block.
+        assert_eq!(
+            sha256(&vec![b'B'; 64]).as_slice(),
+            h("c422e7070cb1cb455b5de9afee0d975e303d0239c72030cd7414ab5c382d3ae8").as_slice(),
+        );
+    }
+
+    // ── SHA-224 known-answer tests (FIPS 180-4) ───────────────────────────────
+
+    #[test]
+    fn sha224_empty() {
+        assert_eq!(
+            sha224(b"").as_slice(),
+            h("d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f").as_slice(),
+        );
+    }
+
+    #[test]
+    fn sha224_abc() {
+        // FIPS 180-4 §B.1 (SHA-224)
+        assert_eq!(
+            sha224(b"abc").as_slice(),
+            h("23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7").as_slice(),
+        );
     }
 }

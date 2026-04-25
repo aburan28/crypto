@@ -57,25 +57,68 @@ pub fn pbkdf2_hmac_sha256(
 mod tests {
     use super::*;
 
+    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+
+    // ── PBKDF2-HMAC-SHA256 KATs (RFC 7914 §11) ───────────────────────────────
+
     #[test]
-    fn rfc6070_tc1() {
-        // RFC 6070 Test Vector 1: password="password", salt="salt", c=1, dkLen=20
-        // Note: this uses HMAC-SHA1, but we use HMAC-SHA256; just verify length/no-panic.
-        let dk = pbkdf2_hmac_sha256(b"password", b"salt", 1, 32);
-        assert_eq!(dk.len(), 32);
+    fn pbkdf2_rfc7914_tc1() {
+        // RFC 7914 §11 — PBKDF2-HMAC-SHA-256(passwd, salt, 1, 64)
+        let dk = pbkdf2_hmac_sha256(b"passwd", b"salt", 1, 64);
+        assert_eq!(
+            dk,
+            h("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc\
+               49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783"),
+        );
     }
 
     #[test]
-    fn deterministic() {
+    fn pbkdf2_simple_c1_32() {
+        // Cross-checked with Python cryptography
+        let dk = pbkdf2_hmac_sha256(b"password", b"salt", 1, 32);
+        assert_eq!(
+            dk,
+            h("120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b"),
+        );
+    }
+
+    #[test]
+    fn pbkdf2_c4096_32() {
+        let dk = pbkdf2_hmac_sha256(b"password", b"salt", 4096, 32);
+        assert_eq!(
+            dk,
+            h("c5e478d59288c841aa530db6845c4c8d962893a001ce4e11a4963873aa98134a"),
+        );
+    }
+
+    #[test]
+    fn pbkdf2_deterministic() {
         let dk1 = pbkdf2_hmac_sha256(b"secret", b"pepper", 100, 32);
         let dk2 = pbkdf2_hmac_sha256(b"secret", b"pepper", 100, 32);
         assert_eq!(dk1, dk2);
     }
 
     #[test]
-    fn different_passwords() {
+    fn pbkdf2_different_passwords() {
         let dk1 = pbkdf2_hmac_sha256(b"password1", b"salt", 100, 32);
         let dk2 = pbkdf2_hmac_sha256(b"password2", b"salt", 100, 32);
         assert_ne!(dk1, dk2);
+    }
+
+    #[test]
+    fn pbkdf2_different_salts() {
+        let dk1 = pbkdf2_hmac_sha256(b"password", b"salt-a", 100, 32);
+        let dk2 = pbkdf2_hmac_sha256(b"password", b"salt-b", 100, 32);
+        assert_ne!(dk1, dk2);
+    }
+
+    #[test]
+    fn pbkdf2_multi_block() {
+        // dkLen > hLen exercises the block concatenation logic.
+        let dk = pbkdf2_hmac_sha256(b"passwd", b"salt", 1, 64);
+        assert_eq!(dk.len(), 64);
+        // Truncating the multi-block output must equal a single-block call of the same length.
+        let dk32 = pbkdf2_hmac_sha256(b"passwd", b"salt", 1, 32);
+        assert_eq!(&dk[..32], &dk32[..]);
     }
 }

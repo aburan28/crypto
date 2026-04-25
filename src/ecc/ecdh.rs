@@ -59,14 +59,40 @@ mod tests {
     use crate::ecc::{curve::CurveParams, keys::EccKeyPair};
 
     #[test]
-    fn shared_secret_matches() {
+    fn shared_secret_matches_secp256k1() {
         let curve = CurveParams::secp256k1();
         let alice = EccKeyPair::generate(&curve);
         let bob = EccKeyPair::generate(&curve);
-
         let secret_a = ecdh(&alice.private, &bob.public, &curve).unwrap();
         let secret_b = ecdh(&bob.private, &alice.public, &curve).unwrap();
-
         assert_eq!(secret_a, secret_b, "shared secrets must match");
+    }
+
+    #[test]
+    fn shared_secret_matches_p256() {
+        let curve = CurveParams::p256();
+        let alice = EccKeyPair::generate(&curve);
+        let bob = EccKeyPair::generate(&curve);
+        let secret_a = ecdh(&alice.private, &bob.public, &curve).unwrap();
+        let secret_b = ecdh(&bob.private, &alice.public, &curve).unwrap();
+        assert_eq!(secret_a, secret_b, "P-256 shared secrets must match");
+    }
+
+    #[test]
+    fn ecdh_p256_known_answer() {
+        // Cross-checked against Python `cryptography`:
+        //   priv_a = 1, priv_b = 2; the shared secret is x-coordinate of 2G
+        //   = 7cf27b188d034f7e8a52380304b51ac3c08969e277f21b35a60b48fc47669978
+        let curve = CurveParams::p256();
+        let alice = EccKeyPair::from_private(BigUint::from(1u32), &curve);
+        let bob = EccKeyPair::from_private(BigUint::from(2u32), &curve);
+
+        let secret_ab = ecdh(&alice.private, &bob.public, &curve).unwrap();
+        let secret_ba = ecdh(&bob.private, &alice.public, &curve).unwrap();
+        assert_eq!(secret_ab, secret_ba);
+        assert_eq!(
+            hex::encode(secret_ab),
+            "7cf27b188d034f7e8a52380304b51ac3c08969e277f21b35a60b48fc47669978",
+        );
     }
 }
