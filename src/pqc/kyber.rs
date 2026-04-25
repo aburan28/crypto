@@ -244,6 +244,16 @@ pub struct KyberPrivateKey {
     pub public: KyberPublicKey,
 }
 
+impl Drop for KyberPrivateKey {
+    fn drop(&mut self) {
+        for poly in self.s.iter_mut() {
+            for c in poly.0.iter_mut() {
+                *c = 0;
+            }
+        }
+    }
+}
+
 /// An encapsulated shared secret (ciphertext).
 pub struct KyberCiphertext {
     pub u: Vec<Vec<u16>>,   // Compressed A^T·r + e1

@@ -20,6 +20,7 @@ use crate::utils::{mod_inverse, mod_pow};
 use num_bigint::{BigUint, RandBigInt};
 use num_integer::Integer;
 use num_traits::{One, Zero};
+use rand::rngs::OsRng;
 
 // ── Miller-Rabin primality test ───────────────────────────────────────────────
 
@@ -86,9 +87,12 @@ pub fn is_prime(n: &BigUint) -> bool {
 }
 
 /// Generate a random probable prime of exactly `bits` bits.
-/// Uses 20 rounds of Miller-Rabin for probabilistic primality (error < 4⁻²⁰).
+/// Uses deterministic Miller-Rabin with the witness set above.
+///
+/// Entropy comes from `OsRng` (the OS CSPRNG); we deliberately avoid
+/// `thread_rng` so the entropy source is unambiguous.
 pub fn random_prime(bits: u64) -> BigUint {
-    let mut rng = rand::thread_rng();
+    let mut rng = OsRng;
     loop {
         let mut candidate = rng.gen_biguint(bits);
         // Ensure the candidate has the right bit length and is odd
@@ -114,6 +118,9 @@ pub struct RsaPublicKey {
 }
 
 /// RSA private key (PKCS#1 representation).
+///
+/// Private fields (`d`, `p`, `q`) are best-effort zeroized on drop.  See
+/// the note on `EccPrivateKey` for the limits of `num-bigint` zeroization.
 #[derive(Clone, Debug)]
 pub struct RsaPrivateKey {
     pub n: BigUint,
@@ -123,6 +130,15 @@ pub struct RsaPrivateKey {
     pub p: BigUint,
     pub q: BigUint,
     pub bits: u64,
+}
+
+impl Drop for RsaPrivateKey {
+    fn drop(&mut self) {
+        self.d.set_zero();
+        self.p.set_zero();
+        self.q.set_zero();
+        // n and e are public.
+    }
 }
 
 /// An RSA key pair.
@@ -167,13 +183,18 @@ impl RsaKeyPair {
 // ── Textbook RSA operations ───────────────────────────────────────────────────
 
 /// Textbook RSA encrypt: c = mᵉ mod n.
-/// WARNING: not semantically secure on its own — use OAEP padding in production.
-pub fn rsa_encrypt_raw(msg: &BigUint, key: &RsaPublicKey) -> BigUint {
+///
+/// **Internal only.** Textbook RSA is not semantically secure (deterministic,
+/// malleable, leaks small messages).  External callers must go through
+/// `rsa_encrypt`, which applies PKCS#1 v1.5 padding.  Restricted to
+/// `pub(crate)` to keep this off the public API surface.
+pub(crate) fn rsa_encrypt_raw(msg: &BigUint, key: &RsaPublicKey) -> BigUint {
     mod_pow(msg, &key.e, &key.n)
 }
 
-/// Textbook RSA decrypt: m = cᵈ mod n.
-pub fn rsa_decrypt_raw(ciphertext: &BigUint, key: &RsaPrivateKey) -> BigUint {
+/// Textbook RSA decrypt: m = cᵈ mod n.  See `rsa_encrypt_raw` for why this
+/// is `pub(crate)`.
+pub(crate) fn rsa_decrypt_raw(ciphertext: &BigUint, key: &RsaPrivateKey) -> BigUint {
     mod_pow(ciphertext, &key.d, &key.n)
 }
 
@@ -200,9 +221,13 @@ pub fn rsa_verify(message: &[u8], signature: &BigUint, key: &RsaPublicKey) -> bo
 
 /// Encode a short message with PKCS#1 v1.5 type 2 padding for RSA encryption.
 ///
+/// Internal helper for `rsa_encrypt`.  Exposed to other modules in the
+/// crate but not part of the public API: callers should use `rsa_encrypt`,
+/// which packages padding + modular exponentiation correctly.
+///
 /// Layout: 0x00 || 0x02 || PS (random non-zero padding) || 0x00 || msg
 /// The padded value must be strictly less than n.
-pub fn pkcs1_pad_encrypt(msg: &[u8], key_bytes: usize) -> Result<Vec<u8>, &'static str> {
+pub(crate) fn pkcs1_pad_encrypt(msg: &[u8], key_bytes: usize) -> Result<Vec<u8>, &'static str> {
     if msg.len() + 11 > key_bytes {
         return Err("message too long for key size");
     }
@@ -224,7 +249,9 @@ pub fn pkcs1_pad_encrypt(msg: &[u8], key_bytes: usize) -> Result<Vec<u8>, &'stat
 }
 
 /// Strip PKCS#1 v1.5 type 2 padding, returning the original message or an error.
-pub fn pkcs1_unpad_encrypt(padded: &[u8]) -> Result<Vec<u8>, &'static str> {
+///
+/// Internal helper for `rsa_decrypt`.  See `pkcs1_pad_encrypt`.
+pub(crate) fn pkcs1_unpad_encrypt(padded: &[u8]) -> Result<Vec<u8>, &'static str> {
     if padded.len() < 11 || padded[0] != 0x00 || padded[1] != 0x02 {
         return Err("invalid padding");
     }

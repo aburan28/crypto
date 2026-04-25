@@ -7,11 +7,28 @@ use super::curve::CurveParams;
 use super::point::Point;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
+use num_traits::Zero;
+
 /// An ECC private key: a random scalar d ∈ [1, n-1].
+///
+/// On drop, the scalar is best-effort overwritten with zero.  Note: the
+/// underlying `BigUint` heap allocation is owned by `num-bigint` and the
+/// crate does not expose its internal `Vec<u64>`; we can only re-assign
+/// the high-level value to zero, which the allocator may or may not
+/// scrub before reuse.  For genuinely defence-in-depth zeroization, swap
+/// `num-bigint` for `crypto-bigint` (a constant-time, zeroize-aware
+/// arbitrary-precision integer crate).
 #[derive(Clone, Debug)]
 pub struct EccPrivateKey {
     pub scalar: BigUint,
     pub curve_name: String,
+}
+
+impl Drop for EccPrivateKey {
+    fn drop(&mut self) {
+        self.scalar.set_zero();
+        // String contents are public (curve name) — no need to scrub.
+    }
 }
 
 /// An ECC public key: the point Q = d·G on the curve.

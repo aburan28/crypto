@@ -477,7 +477,7 @@ fn generator_from_systematic(h_sys: &BinMat) -> BinMat {
 /// GF(2^m).  For t ≤ 3 this is equivalent to irreducibility.
 fn random_irreducible_poly(t: usize, gf: &GfTables) -> Poly {
     assert!(t >= 1 && t <= 3, "this implementation supports t ≤ 3");
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rngs::OsRng;
     loop {
         let mut g: Poly = vec![0u32; t + 1];
         g[t] = 1;
@@ -511,7 +511,7 @@ fn random_invertible_matrix(k: usize) -> (BinMat, BinMat) {
 
 /// Sample a uniformly-random permutation of {0,1,…,n-1} (Fisher–Yates).
 fn random_permutation(n: usize) -> Vec<usize> {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rngs::OsRng;
     let mut p: Vec<usize> = (0..n).collect();
     for i in (1..n).rev() {
         let j = rng.gen_range(0..=i);
@@ -554,7 +554,7 @@ fn vec_mat_mul(v: &[u8], m: &BinMat) -> Vec<u8> {
 
 /// Sample a random binary error vector of length `n` and Hamming weight `t`.
 fn random_error(n: usize, t: usize) -> Vec<u8> {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rngs::OsRng;
     let mut e = vec![0u8; n];
     let mut placed = 0usize;
     while placed < t {
@@ -579,6 +579,10 @@ pub struct McElieceePublicKey {
 }
 
 /// McEliece private key: everything needed to invert encryption.
+///
+/// All four secret components — `s_inv`, `support`, `g_poly`, `perm` —
+/// are zeroized on drop.  Knowing any of them defeats the cryptosystem,
+/// so they are all treated as secret material.
 #[derive(Clone, Debug)]
 pub struct McEliecePrivateKey {
     /// k×k inverse of the scrambler S.
@@ -591,6 +595,17 @@ pub struct McEliecePrivateKey {
     pub perm: Vec<usize>,
     /// Cached field tables.
     pub gf: GfTables,
+}
+
+impl Drop for McEliecePrivateKey {
+    fn drop(&mut self) {
+        for row in self.s_inv.iter_mut() {
+            for b in row.iter_mut() { *b = 0; }
+        }
+        for s in self.support.iter_mut() { *s = 0; }
+        for c in self.g_poly.iter_mut() { *c = 0; }
+        for p in self.perm.iter_mut() { *p = 0; }
+    }
 }
 
 /// A McEliece keypair.

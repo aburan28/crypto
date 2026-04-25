@@ -4,8 +4,32 @@ A from-scratch implementation of the major cryptographic algorithm families in R
 Every algorithm is documented with the underlying mathematics, making this a study
 companion as much as a working library.
 
-> **Warning**: This library is for learning purposes. It is not constant-time in most
-> places, has not been audited, and should **not** be used to protect real secrets.
+> ## ⚠️ DO NOT USE IN PRODUCTION
+>
+> This library is **not safe** for any real use case where confidentiality,
+> integrity, or authenticity matters.  It is an educational reimplementation
+> intended for studying the algorithms.
+>
+> **What is wrong with it:**
+> - **Not constant-time.** All big-integer arithmetic uses `num-bigint`,
+>   which branches on secret values.  Every RSA, ECDSA, ECDH, and ECC
+>   operation leaks via timing.  AES uses a lookup-table S-box vulnerable
+>   to cache-timing attacks.
+> - **No third-party audit.**  We've already found one real keystream-reuse
+>   bug in AES-GCM during testing — there could easily be more.
+> - **Non-standard Kyber.**  The implementation here is *not* compatible
+>   with NIST ML-KEM (FIPS 203).
+> - **Toy McEliece parameters** (m=6, n=32, t=3) — far below any security
+>   level.
+>
+> See [`SECURITY.md`](./SECURITY.md) for the full list of structural
+> limitations and recommended audited alternatives (`aws-lc-rs`, `ring`,
+> RustCrypto, dalek, etc.).
+>
+> A hardening pass has been applied (OS-backed RNG, RFC 6979 deterministic
+> ECDSA, constant-time MAC verification, best-effort key zeroization,
+> textbook-RSA hidden from the public API).  This makes the codebase a
+> better educational artifact.  **It does not make it production-safe.**
 
 ---
 

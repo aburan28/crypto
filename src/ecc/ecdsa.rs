@@ -19,7 +19,7 @@ use super::curve::CurveParams;
 use super::keys::{EccPrivateKey, EccPublicKey};
 use super::point::Point;
 use crate::hash::sha256::sha256;
-use crate::utils::random::random_scalar;
+use crate::kdf::hkdf::hmac_sha256;
 use crate::utils::mod_inverse;
 use num_bigint::BigUint;
 use num_traits::Zero;
@@ -38,6 +38,12 @@ pub fn sign(message: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) ->
 }
 
 /// Sign a pre-computed 32-byte hash with `private_key`.
+///
+/// Nonces are derived deterministically per **RFC 6979** (HMAC-SHA-256
+/// DRBG seeded from the private key and the message hash).  This eliminates
+/// the catastrophic key-recovery failure mode that occurs when a randomly
+/// sampled `k` is repeated, biased, or predictable.  Two signatures over
+/// the same `(message, key)` are bit-for-bit identical.
 pub fn sign_hash(
     hash: &[u8],
     private_key: &EccPrivateKey,
@@ -46,8 +52,10 @@ pub fn sign_hash(
     let z = hash_to_scalar(hash, &curve.n);
     let a = curve.a_fe();
 
+    let mut drbg = Rfc6979Drbg::new(&private_key.scalar, hash, &curve.n);
+
     loop {
-        let k = random_scalar(&curve.n);
+        let k = drbg.next_k(&curve.n);
         let kg = curve.generator().scalar_mul(&k, &a);
 
         let x1 = match &kg {
@@ -74,6 +82,101 @@ pub fn sign_hash(
 
         return EcdsaSignature { r, s };
     }
+}
+
+// ── RFC 6979 — Deterministic Usage of the DSA and ECDSA ──────────────────────
+//
+// Implements the HMAC-SHA-256 DRBG as specified in §3.2.  Operating on
+// 256-bit curves (secp256k1, P-256) with q-len = 256 and ro-len = 32:
+//
+//   bits2int(h):     interpret `h` as big-endian, take leftmost 256 bits
+//   bits2octets(h):  bits2int(h) mod q, encoded as 32 big-endian bytes
+//   int2octets(x):   x encoded as 32 big-endian bytes
+//
+// Then:
+//   V = 0x01 0x01 ... 0x01            (32 bytes)
+//   K = 0x00 0x00 ... 0x00            (32 bytes)
+//   K = HMAC_K(V || 0x00 || int2octets(d) || bits2octets(h))
+//   V = HMAC_K(V)
+//   K = HMAC_K(V || 0x01 || int2octets(d) || bits2octets(h))
+//   V = HMAC_K(V)
+//   loop:
+//     T = empty
+//     while len(T) < q-len: V = HMAC_K(V); T ||= V
+//     k = bits2int(T)
+//     if 1 ≤ k < q: yield k
+//     else:        K = HMAC_K(V || 0x00); V = HMAC_K(V); continue
+
+struct Rfc6979Drbg {
+    k: [u8; 32],
+    v: [u8; 32],
+}
+
+impl Rfc6979Drbg {
+    fn new(private_scalar: &BigUint, hash: &[u8], q: &BigUint) -> Self {
+        let qlen_bytes = 32usize;
+        let d_bytes = int2octets(private_scalar, qlen_bytes);
+        let h_bytes = bits2octets(hash, q, qlen_bytes);
+
+        let mut v = [0x01u8; 32];
+        let mut k = [0x00u8; 32];
+
+        // K = HMAC_K(V || 0x00 || d || h)
+        let mut buf = Vec::with_capacity(32 + 1 + qlen_bytes * 2);
+        buf.extend_from_slice(&v);
+        buf.push(0x00);
+        buf.extend_from_slice(&d_bytes);
+        buf.extend_from_slice(&h_bytes);
+        k = hmac_sha256(&k, &buf);
+
+        // V = HMAC_K(V)
+        v = hmac_sha256(&k, &v);
+
+        // K = HMAC_K(V || 0x01 || d || h)
+        buf.clear();
+        buf.extend_from_slice(&v);
+        buf.push(0x01);
+        buf.extend_from_slice(&d_bytes);
+        buf.extend_from_slice(&h_bytes);
+        k = hmac_sha256(&k, &buf);
+
+        // V = HMAC_K(V)
+        v = hmac_sha256(&k, &v);
+
+        Rfc6979Drbg { k, v }
+    }
+
+    fn next_k(&mut self, q: &BigUint) -> BigUint {
+        loop {
+            // T = V (one HMAC block = 32 bytes covers q-len = 256).
+            self.v = hmac_sha256(&self.k, &self.v);
+            let t_int = bits2int(&self.v);
+            if !t_int.is_zero() && &t_int < q {
+                return t_int;
+            }
+            // Reseed: K = HMAC_K(V || 0x00); V = HMAC_K(V).
+            let mut buf = Vec::with_capacity(33);
+            buf.extend_from_slice(&self.v);
+            buf.push(0x00);
+            self.k = hmac_sha256(&self.k, &buf);
+            self.v = hmac_sha256(&self.k, &self.v);
+        }
+    }
+}
+
+fn int2octets(x: &BigUint, rolen: usize) -> Vec<u8> {
+    crate::utils::encoding::bigint_to_bytes_be(x, rolen)
+}
+
+fn bits2int(h: &[u8]) -> BigUint {
+    // q-len = 256; for any 32-byte hash this is just from_bytes_be.
+    BigUint::from_bytes_be(h)
+}
+
+fn bits2octets(h: &[u8], q: &BigUint, rolen: usize) -> Vec<u8> {
+    let z1 = bits2int(h);
+    let z2 = if &z1 >= q { z1 - q } else { z1 };
+    int2octets(&z2, rolen)
 }
 
 /// Verify that `sig` is a valid ECDSA signature over `message` for `public_key`.
@@ -195,6 +298,46 @@ mod tests {
         assert!(!verify(b"msg", &kp.public, &zero, &curve));
         let zero2 = EcdsaSignature { r: BigUint::from(1u32), s: BigUint::from(0u32) };
         assert!(!verify(b"msg", &kp.public, &zero2, &curve));
+    }
+
+    #[test]
+    fn rfc6979_p256_sample_kat() {
+        // RFC 6979 Appendix A.2.5 — P-256 with private key
+        //   x = C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721
+        // signing the SHA-256 hash of the ASCII string "sample".  Expected
+        // values:
+        //   k = A6E3C57DD01ABE90086538398355DD4C3B17AA873382B0F24D6129493D8AAD60
+        //   r = EFD48B2AACB6A8FD1140DD9CD45E81D69D2C877B56AAF991C34D0EA84EAF3716
+        //   s = F7CB1C942D657C41D436C7A1B6E29F65F3E900DBB9AFF4064DC4AB2F843ACDA8
+        let curve = CurveParams::p256();
+        let d = BigUint::parse_bytes(
+            b"C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721", 16,
+        ).unwrap();
+        let kp = EccKeyPair::from_private(d, &curve);
+        let sig = sign(b"sample", &kp.private, &curve);
+        assert_eq!(
+            format!("{:064x}", sig.r),
+            "efd48b2aacb6a8fd1140dd9cd45e81d69d2c877b56aaf991c34d0ea84eaf3716",
+        );
+        assert_eq!(
+            format!("{:064x}", sig.s),
+            "f7cb1c942d657c41d436c7a1b6e29f65f3e900dbb9aff4064dc4ab2f843acda8",
+        );
+        assert!(verify(b"sample", &kp.public, &sig, &curve));
+    }
+
+    #[test]
+    fn rfc6979_signatures_are_deterministic() {
+        // Two signatures over the same (key, message) must be byte-identical.
+        let curve = CurveParams::secp256k1();
+        let kp = EccKeyPair::generate(&curve);
+        let sig1 = sign(b"deterministic", &kp.private, &curve);
+        let sig2 = sign(b"deterministic", &kp.private, &curve);
+        assert_eq!(sig1.r, sig2.r);
+        assert_eq!(sig1.s, sig2.s);
+        // But different messages must produce different sigs (overwhelmingly).
+        let sig3 = sign(b"different", &kp.private, &curve);
+        assert_ne!(sig1.r, sig3.r);
     }
 
     #[test]

@@ -20,6 +20,22 @@ use crate::hash::sha256::sha256;
 const BLOCK_SIZE: usize = 64; // SHA-256 block size in bytes
 const HASH_LEN: usize = 32;   // SHA-256 output length in bytes
 
+/// Constant-time verification of an HMAC-SHA256 tag.
+///
+/// Returns `true` iff `HMAC(key, data) == expected_tag`.  Uses
+/// `subtle::ConstantTimeEq` so the comparison runs in time independent of
+/// where the first byte of difference (if any) lies — defeating the basic
+/// timing oracle that lets attackers forge MACs byte by byte.
+///
+/// Always prefer this over `hmac_sha256(...) == expected` in any context
+/// where the tag is supplied by an untrusted party.
+pub fn hmac_sha256_verify(key: &[u8], data: &[u8], expected_tag: &[u8]) -> bool {
+    use subtle::ConstantTimeEq;
+    let computed = hmac_sha256(key, data);
+    if expected_tag.len() != 32 { return false; }
+    computed.ct_eq(expected_tag).unwrap_u8() == 1
+}
+
 /// HMAC-SHA256 as defined in RFC 2104.
 pub fn hmac_sha256(key: &[u8], data: &[u8]) -> [u8; 32] {
     // Normalize the key to exactly BLOCK_SIZE bytes

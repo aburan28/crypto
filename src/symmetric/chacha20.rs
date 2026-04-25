@@ -186,8 +186,11 @@ pub fn chacha20_poly1305_decrypt(
     let mac_data = poly1305_pad(aad, ciphertext);
     let expected_tag = poly1305(&otk, &mac_data);
 
-    let ok = expected_tag.iter().zip(tag_bytes.iter()).fold(0u8, |a, (x, y)| a | (x ^ y)) == 0;
-    if !ok { return Err(()); }
+    // Constant-time MAC comparison; see `aes::aes_gcm_decrypt` for rationale.
+    use subtle::ConstantTimeEq;
+    if expected_tag.ct_eq(tag_bytes).unwrap_u8() != 1 {
+        return Err(());
+    }
 
     Ok(chacha20_xor(ciphertext, key, nonce))
 }

@@ -374,9 +374,16 @@ pub fn aes_gcm_decrypt(
     let j0 = encrypt_j0(key, nonce);
     for (t, j) in expected_tag.iter_mut().zip(j0.iter()) { *t ^= j; }
 
-    // Constant-time tag comparison to prevent timing attacks
-    let tag_ok = expected_tag.iter().zip(tag_bytes.iter()).fold(0u8, |acc, (a, b)| acc | (a ^ b)) == 0;
-    if !tag_ok { return Err(()); }
+    // Constant-time tag comparison via `subtle::ConstantTimeEq` to defeat
+    // timing side-channels.  A hand-rolled XOR-fold compiles to constant
+    // time today but the compiler is permitted to introduce branches; the
+    // `subtle` crate uses optimisation-resistant primitives (volatile reads,
+    // `core::hint::black_box`-style barriers) to keep the comparison safe
+    // across compiler versions and optimisation levels.
+    use subtle::ConstantTimeEq;
+    if expected_tag.ct_eq(tag_bytes).unwrap_u8() != 1 {
+        return Err(());
+    }
 
     // Decrypt plaintext with CTR starting at counter=2 (J₀ + 1).
     Ok(aes_ctr_from(ciphertext, key, nonce, 2))

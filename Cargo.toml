@@ -17,6 +17,14 @@ num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
 num-integer = "0.1"
 rand = "0.8"
+# OS-backed CSPRNG (getrandom(2) on Linux, BCryptGenRandom on Windows, etc.).
+getrandom = "0.2"
+# Constant-time equality for MAC/tag verification. Public-domain.
+subtle = "2.5"
+# Zeroize secret material on drop. Best-effort: cannot zeroize internal
+# heap allocations of num-bigint, but covers byte buffers and re-assigns
+# BigUint fields to zero on drop.
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
 hex = "0.4"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
