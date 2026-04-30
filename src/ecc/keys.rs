@@ -3,6 +3,7 @@
 //! A private key is a random scalar d in [1, n-1].
 //! The corresponding public key is the point Q = d·G.
 
+use super::ct::scalar_mul_secret;
 use super::curve::CurveParams;
 use super::point::Point;
 use crate::utils::random::random_scalar;
@@ -46,9 +47,14 @@ pub struct EccKeyPair {
 
 impl EccKeyPair {
     /// Generate a fresh key pair on the given curve.
+    ///
+    /// `d → d·G` routes through [`scalar_mul_secret`], which dispatches
+    /// to the projective Renes-Costello-Batina ladder for both
+    /// secp256k1 (Algorithms 7/9, a = 0) and P-256 (Algorithms 1/3,
+    /// general a).
     pub fn generate(curve: &CurveParams) -> Self {
         let d = random_scalar(&curve.n);
-        let q = curve.generator().scalar_mul(&d, &curve.a_fe());
+        let q = scalar_mul_secret(&curve.generator(), &d, curve);
         EccKeyPair {
             private: EccPrivateKey { scalar: d, curve_name: curve.name.to_string() },
             public: EccPublicKey { point: q, curve_name: curve.name.to_string() },
@@ -57,7 +63,7 @@ impl EccKeyPair {
 
     /// Derive the public key from a known private scalar (useful for testing).
     pub fn from_private(d: BigUint, curve: &CurveParams) -> Self {
-        let q = curve.generator().scalar_mul(&d, &curve.a_fe());
+        let q = scalar_mul_secret(&curve.generator(), &d, curve);
         EccKeyPair {
             private: EccPrivateKey { scalar: d, curve_name: curve.name.to_string() },
             public: EccPublicKey { point: q, curve_name: curve.name.to_string() },

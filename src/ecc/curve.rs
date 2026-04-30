@@ -98,6 +98,14 @@ impl CurveParams {
         self.fe(self.a.clone())
     }
 
+    /// Bit length of the group order `n`.  Used to pick a fixed
+    /// iteration count for the constant-time scalar-multiplication
+    /// ladder so the runtime does not depend on the position of the
+    /// scalar's most-significant set bit.
+    pub fn order_bits(&self) -> usize {
+        self.n.bits() as usize
+    }
+
     /// Return the generator point G.
     pub fn generator(&self) -> Point {
         Point::Affine {

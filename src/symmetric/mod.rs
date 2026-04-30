@@ -2,6 +2,8 @@
 
 pub mod aes;
 pub mod chacha20;
+pub mod serpent;
+pub mod threefish;
 
 pub use aes::{
     AesKey, aes_ctr, aes_gcm_decrypt, aes_gcm_encrypt,

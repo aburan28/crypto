@@ -1,12 +1,17 @@
 //! Elliptic curve cryptography: field arithmetic, point operations,
 //! key generation, ECDSA, and ECDH over secp256k1 / P-256.
 
+pub mod ct;
 pub mod curve;
 pub mod ecdh;
 pub mod ecdsa;
 pub mod field;
 pub mod keys;
 pub mod point;
+pub mod p256_field;
+pub mod p256_point;
+pub mod secp256k1_field;
+pub mod secp256k1_point;
 
 pub use curve::CurveParams;
 pub use ecdh::{ecdh, ecdh_raw};

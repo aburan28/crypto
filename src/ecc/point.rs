@@ -79,8 +79,10 @@ impl Point {
     /// Scalar multiplication kP using the double-and-add algorithm.
     ///
     /// Security note: this implementation is NOT constant-time and is
-    /// vulnerable to timing side-channels. Production code must use
-    /// Montgomery ladder or similar constant-time methods.
+    /// vulnerable to timing side-channels.  Use [`Point::scalar_mul_ct`]
+    /// for secret scalars.  This variable-time variant is appropriate
+    /// only for public-input scalar multiplications, e.g. the verifier's
+    /// `u1·G + u2·Q` in ECDSA verification.
     pub fn scalar_mul(&self, k: &BigUint, a: &FieldElement) -> Point {
         let mut result = Point::Infinity;
         let mut addend = self.clone();
@@ -95,6 +97,58 @@ impl Point {
             k >>= 1;
         }
         result
+    }
+
+    /// Scalar multiplication kP using the Montgomery ladder, processing
+    /// `scalar_bits` bits MSB-first.  Every iteration performs exactly
+    /// one point addition and one point doubling, regardless of the bit
+    /// value, so the *operation count* no longer depends on the
+    /// scalar's bit pattern.  Iteration count is fixed at `scalar_bits`,
+    /// so the runtime no longer scales with the position of the
+    /// most-significant set bit.
+    ///
+    /// Security caveats (read carefully):
+    ///
+    /// - The branch that re-binds `(r0, r1)` after each step is a
+    ///   plain Rust `if`.  The two branches assign the same set of
+    ///   precomputed values in different orders, but the compiler is
+    ///   free to emit a conditional jump.  This still closes the
+    ///   coarse-grained "count operations to count set bits" leak that
+    ///   double-and-add has.
+    /// - The underlying field arithmetic uses `num-bigint`, which is
+    ///   *not* constant-time at the limb level.  An attacker with
+    ///   fine-grained timing access can still extract information from
+    ///   individual `FieldElement::mul` / `inv` operations.  Fixing
+    ///   that requires replacing `num-bigint` with a fixed-width,
+    ///   constant-time bignum (out of scope for this change).
+    ///
+    /// In other words: this is a real improvement over double-and-add,
+    /// but it does not make ECC operations side-channel safe.  See
+    /// `SECURITY.md` for the full picture.
+    pub fn scalar_mul_ct(&self, k: &BigUint, a: &FieldElement, scalar_bits: usize) -> Point {
+        let mut r0 = Point::Infinity;
+        let mut r1 = self.clone();
+
+        for i in (0..scalar_bits).rev() {
+            let bit = k.bit(i as u64);
+
+            // Always compute all three potential next states so the
+            // operation count is independent of `bit`.
+            let sum = r0.add(&r1, a);
+            let r0_dbl = r0.double(a);
+            let r1_dbl = r1.double(a);
+
+            // Re-bind (r0, r1) according to the current bit.  Both
+            // arms assign exactly two values; the work is the same.
+            if bit {
+                r0 = sum;
+                r1 = r1_dbl;
+            } else {
+                r0 = r0_dbl;
+                r1 = sum;
+            }
+        }
+        r0
     }
 
     /// Negate a point: -P = (x, -y mod p).
@@ -153,6 +207,39 @@ mod tests {
         let g = g();
         let result = g.scalar_mul(&BigUint::one(), &a());
         assert_eq!(result, g);
+    }
+
+    #[test]
+    fn ladder_matches_double_and_add() {
+        let g = g();
+        let a = a();
+        // Try every scalar in [0, 5] (curve order) and verify ladder == double-and-add.
+        for k in 0u64..=5 {
+            let k_bu = BigUint::from(k);
+            let v = g.scalar_mul(&k_bu, &a);
+            let ct = g.scalar_mul_ct(&k_bu, &a, 4);
+            assert_eq!(v, ct, "mismatch at k={}", k);
+        }
+    }
+
+    #[test]
+    fn ladder_matches_double_and_add_p256() {
+        use super::super::curve::CurveParams;
+        let curve = CurveParams::p256();
+        let g = curve.generator();
+        let a = curve.a_fe();
+        // A handful of arbitrary scalars: the ladder must agree with double-and-add.
+        for k_hex in [
+            "1",
+            "2",
+            "deadbeef",
+            "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f",
+        ] {
+            let k = BigUint::parse_bytes(k_hex.as_bytes(), 16).unwrap();
+            let v = g.scalar_mul(&k, &a);
+            let ct = g.scalar_mul_ct(&k, &a, 256);
+            assert_eq!(v, ct, "mismatch at k={}", k_hex);
+        }
     }
 
     #[test]

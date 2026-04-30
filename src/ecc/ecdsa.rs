@@ -15,12 +15,13 @@
 //!   3. (x₁, _) = u₁·G + u₂·Q.
 //!   4. Valid iff x₁ mod n = r.
 
+use super::ct::scalar_mul_secret_blinded;
 use super::curve::CurveParams;
 use super::keys::{EccPrivateKey, EccPublicKey};
 use super::point::Point;
 use crate::hash::sha256::sha256;
 use crate::kdf::hkdf::hmac_sha256;
-use crate::utils::mod_inverse;
+use crate::utils::{mod_inverse, mod_inverse_prime_ct};
 use num_bigint::BigUint;
 use num_traits::Zero;
 /// An ECDSA signature pair (r, s).
@@ -50,13 +51,23 @@ pub fn sign_hash(
     curve: &CurveParams,
 ) -> EcdsaSignature {
     let z = hash_to_scalar(hash, &curve.n);
-    let a = curve.a_fe();
 
     let mut drbg = Rfc6979Drbg::new(&private_key.scalar, hash, &curve.n);
 
     loop {
         let k = drbg.next_k(&curve.n);
-        let kg = curve.generator().scalar_mul(&k, &a);
+        // `scalar_mul_secret_blinded` routes through the curve's
+        // projective Renes-Costello-Batina ladder (secp256k1: Alg
+        // 7+9 for a=0; P-256: Alg 1+3 for general a) AND adds
+        // Coron's scalar blinding: `k' = k + r · n` for a fresh
+        // 64-bit random `r` per call.  Since `n · G = O`, `[k']G =
+        // [k]G` and the (r, s) output is unchanged — but the bit
+        // pattern driving the ladder is re-randomised every call,
+        // defeating DPA / template attacks that combine ladder
+        // traces across many signatures.  This is the standard
+        // post-2020 ECDSA-implementation discipline; see SECURITY.md
+        // § "scalar blinding."
+        let kg = scalar_mul_secret_blinded(&curve.generator(), &k, curve);
 
         let x1 = match &kg {
             Point::Affine { x, .. } => x.value.clone(),
@@ -71,7 +82,12 @@ pub fn sign_hash(
         // s = k⁻¹ · (z + r·d) mod n
         let rd = (&r * &private_key.scalar) % &curve.n;
         let z_plus_rd = (&z + &rd) % &curve.n;
-        let k_inv = match mod_inverse(&k, &curve.n) {
+        // `k` is the per-message secret nonce.  The curve order `n` is
+        // prime for both supported curves, so compute k⁻¹ via Fermat's
+        // little theorem (a Montgomery-ladder mod_pow on a public bit
+        // length) rather than via the variable-time extended Euclidean
+        // algorithm in `mod_inverse`.
+        let k_inv = match mod_inverse_prime_ct(&k, &curve.n) {
             Some(v) => v,
             None => continue,
         };

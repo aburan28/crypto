@@ -13,6 +13,7 @@
 //! raw shared secret (per RFC 8422 / ANSI X9.63).  Callers should derive a
 //! symmetric key from this value using HKDF rather than using it directly.
 
+use super::ct::scalar_mul_secret;
 use super::curve::CurveParams;
 use super::keys::{EccPrivateKey, EccPublicKey};
 use super::point::Point;
@@ -26,9 +27,11 @@ pub fn ecdh(
     their_public: &EccPublicKey,
     curve: &CurveParams,
 ) -> Option<[u8; 32]> {
-    let shared = their_public
-        .point
-        .scalar_mul(&our_private.scalar, &curve.a_fe());
+    // For secp256k1, this routes through `ProjectivePoint::scalar_mul_ct`
+    // — Montgomery ladder over Renes-Costello-Batina formulas with
+    // limb-level constant-time field arithmetic.  For P-256 it falls
+    // back to the affine ladder over the textbook `FieldElement`.
+    let shared = scalar_mul_secret(&their_public.point, &our_private.scalar, curve);
 
     match shared {
         Point::Affine { x, .. } => {
@@ -47,7 +50,7 @@ pub fn ecdh_raw(
     their_public: &EccPublicKey,
     curve: &CurveParams,
 ) -> Option<BigUint> {
-    match their_public.point.scalar_mul(&our_private.scalar, &curve.a_fe()) {
+    match scalar_mul_secret(&their_public.point, &our_private.scalar, curve) {
         Point::Affine { x, .. } => Some(x.value),
         Point::Infinity => None,
     }

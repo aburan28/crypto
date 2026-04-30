@@ -1,7 +1,29 @@
-//! Asymmetric cryptography: RSA key generation, encryption, and signatures.
+//! Asymmetric cryptography: RSA, plus three partially-homomorphic
+//! encryption schemes — Paillier (additive over `Z_n²`),
+//! ElGamal (multiplicative over `Z_p*`), and EC-ElGamal
+//! (additive over an elliptic curve).
 
+pub mod ec_elgamal;
+pub mod elgamal;
+pub mod paillier;
 pub mod rsa;
 
+pub use ec_elgamal::{
+    ec_elgamal_add, ec_elgamal_add_plain, ec_elgamal_decrypt,
+    ec_elgamal_decrypt_bounded, ec_elgamal_decrypt_point, ec_elgamal_encrypt,
+    ec_elgamal_keygen, ec_elgamal_mul_scalar,
+    EcElGamalCiphertext, EcElGamalPrivateKey, EcElGamalPublicKey,
+};
+pub use elgamal::{
+    elgamal_decrypt, elgamal_encrypt, elgamal_keygen, elgamal_mul,
+    elgamal_mul_plain, elgamal_pow, elgamal_rerandomise,
+    ElGamalCiphertext, ElGamalGroup, ElGamalPrivateKey, ElGamalPublicKey,
+};
+pub use paillier::{
+    paillier_add, paillier_add_plain, paillier_decrypt, paillier_encrypt,
+    paillier_keygen, paillier_mul_scalar, paillier_rerandomise,
+    PaillierPrivateKey, PaillierPublicKey,
+};
 pub use rsa::{
     RsaKeyPair, RsaPrivateKey, RsaPublicKey,
     is_prime, random_prime,

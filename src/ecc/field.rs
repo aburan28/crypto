@@ -4,6 +4,7 @@
 //! The modulus p must be prime for `inv()` to work correctly (Fermat's
 //! little theorem: a^(p-2) ≡ a^(-1) mod p).
 
+use crate::utils::mod_pow_ct;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use std::fmt;
@@ -42,12 +43,12 @@ impl FieldElement {
     }
 
     pub fn sub(&self, rhs: &Self) -> Self {
-        // Avoid underflow: (a - b + p) mod p
-        let v = if self.value >= rhs.value {
-            &self.value - &rhs.value
-        } else {
-            &self.modulus - &rhs.value + &self.value
-        };
+        // Always compute (a + p - b) mod p instead of branching on
+        // (a >= b).  Algebraically the same as (a - b) mod p, but
+        // without the data-dependent comparison that the branch-and-
+        // negate variant uses.  The underlying `BigUint` add/sub still
+        // leak via limb count — see SECURITY.md.
+        let v = (&self.value + &self.modulus - &rhs.value) % &self.modulus;
         FieldElement { value: v, modulus: self.modulus.clone() }
     }
 
@@ -55,37 +56,29 @@ impl FieldElement {
         Self::new(&self.value * &rhs.value, self.modulus.clone())
     }
 
-    /// Additive inverse: -a mod p
+    /// Additive inverse: -a mod p.  Always computes (p - a) mod p
+    /// instead of branching on `a == 0`.  For `a = 0` the result is
+    /// `p mod p = 0`; for `a != 0` it is `p - a` (unreduced, since
+    /// `0 < p - a < p`).
     pub fn neg(&self) -> Self {
-        if self.value.is_zero() {
-            self.clone()
-        } else {
-            FieldElement {
-                value: &self.modulus - &self.value,
-                modulus: self.modulus.clone(),
-            }
-        }
+        let v = (&self.modulus - &self.value) % &self.modulus;
+        FieldElement { value: v, modulus: self.modulus.clone() }
     }
 
-    /// Modular exponentiation using square-and-multiply.
+    /// Modular exponentiation via the Montgomery-ladder
+    /// [`mod_pow_ct`].  Iteration count is fixed at `modulus.bits()`,
+    /// and every step performs one multiplication and one squaring
+    /// regardless of the bit value.  Caveat: the underlying
+    /// `BigUint` arithmetic is still not constant-time at the limb
+    /// level — see SECURITY.md.
     pub fn pow(&self, exp: &BigUint) -> Self {
-        let mut result = FieldElement::one(self.modulus.clone());
-        let mut base = self.clone();
-        let mut e = exp.clone();
-        let one = BigUint::one();
-
-        while !e.is_zero() {
-            if &e & &one == one {
-                result = result.mul(&base);
-            }
-            base = base.mul(&base);
-            e >>= 1;
-        }
-        result
+        let bits = self.modulus.bits() as usize;
+        let value = mod_pow_ct(&self.value, exp, &self.modulus, bits);
+        FieldElement { value, modulus: self.modulus.clone() }
     }
 
     /// Multiplicative inverse via Fermat's little theorem: a^(p-2) mod p.
-    /// Returns `None` if `self` is zero.
+    /// Returns `None` if `self` is zero.  Uses the laddered [`pow`].
     pub fn inv(&self) -> Option<Self> {
         if self.is_zero() {
             return None;

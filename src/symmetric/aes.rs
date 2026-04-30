@@ -58,17 +58,61 @@ const RCON: [u8; 11] = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x
 
 // ── GF(2⁸) arithmetic ────────────────────────────────────────────────────────
 
-/// Multiply two bytes in GF(2⁸) using the peasant's algorithm.
+/// Branchless multiplication in GF(2⁸).  The peasant-multiply loop always
+/// runs eight iterations and uses bit-mask arithmetic instead of `if`
+/// branches on secret bits, so the runtime and memory access pattern do
+/// not depend on the operand values.
 fn gmul(mut a: u8, mut b: u8) -> u8 {
     let mut p = 0u8;
     for _ in 0..8 {
-        if b & 1 != 0 { p ^= a; }
-        let hi = a & 0x80;
-        a <<= 1;
-        if hi != 0 { a ^= 0x1b; }
+        // p ^= a iff lsb(b) == 1   →  build a 0xFF/0x00 mask from that bit
+        let bit_mask = 0u8.wrapping_sub(b & 1);
+        p ^= a & bit_mask;
+        // a = (a << 1) XOR 0x1b iff msb(a) was 1
+        let hi_mask = 0u8.wrapping_sub(a >> 7);
+        a = (a << 1) ^ (0x1b & hi_mask);
         b >>= 1;
     }
     p
+}
+
+// ── Constant-time S-box / inverse S-box ──────────────────────────────────────
+//
+// Cache-timing attacks against table-driven AES (Bernstein 2005,
+// Osvik–Shamir–Tromer 2006) exploit the fact that a 256-byte lookup
+// table spans multiple cache lines: which line is touched leaks the
+// upper bits of the secret index.
+//
+// We close that channel by scanning the full table on every byte
+// substitution: the same 256 reads happen regardless of the input, and
+// the matching entry is selected via `subtle::ConditionallySelectable`,
+// which uses optimisation-resistant primitives the compiler must not
+// rewrite into a data-dependent branch.  This costs ~256× per S-box
+// call vs. the direct lookup, which is acceptable for everything
+// except bulk-throughput symmetric encryption.  Bulk users on hardware
+// with AES-NI should call into the hardware path; we don't have one
+// here.
+
+fn sbox_ct(x: u8) -> u8 {
+    use subtle::{ConditionallySelectable, ConstantTimeEq};
+    let mut result: u8 = 0;
+    for i in 0u16..256 {
+        let candidate = SBOX[i as usize];
+        let choice = (i as u8).ct_eq(&x);
+        result = u8::conditional_select(&result, &candidate, choice);
+    }
+    result
+}
+
+fn inv_sbox_ct(x: u8) -> u8 {
+    use subtle::{ConditionallySelectable, ConstantTimeEq};
+    let mut result: u8 = 0;
+    for i in 0u16..256 {
+        let candidate = INV_SBOX[i as usize];
+        let choice = (i as u8).ct_eq(&x);
+        result = u8::conditional_select(&result, &candidate, choice);
+    }
+    result
 }
 
 // ── AES key types ─────────────────────────────────────────────────────────────
@@ -120,7 +164,7 @@ pub fn key_expansion(key: &AesKey) -> Vec<[u8; 4]> {
 
 fn rot_word(w: [u8; 4]) -> [u8; 4] { [w[1], w[2], w[3], w[0]] }
 fn sub_word(w: [u8; 4]) -> [u8; 4] {
-    [SBOX[w[0] as usize], SBOX[w[1] as usize], SBOX[w[2] as usize], SBOX[w[3] as usize]]
+    [sbox_ct(w[0]), sbox_ct(w[1]), sbox_ct(w[2]), sbox_ct(w[3])]
 }
 
 // ── State helpers ─────────────────────────────────────────────────────────────
@@ -151,7 +195,7 @@ fn add_round_key(s: &mut State, round_key: &[[u8; 4]]) {
 // ── Forward transformations ───────────────────────────────────────────────────
 
 fn sub_bytes(s: &mut State) {
-    for col in s.iter_mut() { for b in col.iter_mut() { *b = SBOX[*b as usize]; } }
+    for col in s.iter_mut() { for b in col.iter_mut() { *b = sbox_ct(*b); } }
 }
 
 fn shift_rows(s: &mut State) {
@@ -175,7 +219,7 @@ fn mix_columns(s: &mut State) {
 // ── Inverse transformations ───────────────────────────────────────────────────
 
 fn inv_sub_bytes(s: &mut State) {
-    for col in s.iter_mut() { for b in col.iter_mut() { *b = INV_SBOX[*b as usize]; } }
+    for col in s.iter_mut() { for b in col.iter_mut() { *b = inv_sbox_ct(*b); } }
 }
 
 fn inv_shift_rows(s: &mut State) {
