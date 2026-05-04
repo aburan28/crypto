@@ -1036,7 +1036,58 @@ does not change this conclusion.
   between "broken" (≤10 rounds) and "secure" (≥20 rounds)
   rounds is visible empirically.
 
-- **NIST/RFC known-answer tests + cross-check unit tests** — 401
+- **`hash::ripemd160`** — RIPEMD-160 hash function + Bitcoin's
+  `HASH160 = RIPEMD-160(SHA-256(input))`.  Verified against the
+  original RIPE-1996 paper KATs (`""`, `"a"`, `"abc"`,
+  `"message digest"`, `"a-z"`) plus the canonical "million-a"
+  long-message test (`52783243c1697bdb...`).  `HASH160` verified
+  against a known Bitcoin pubkey → address-hash mapping.  Closes
+  the Bitcoin pipeline: pubkey → address derivation now works
+  end-to-end without external dependencies.
+
+- **`encoding::der`** — strict-DER encoder/decoder for ECDSA
+  signatures (`SEQUENCE { r INTEGER, s INTEGER }`).  BIP-66
+  compliant: rejects non-canonical encodings (leading zeros,
+  high-bit-set INTEGERs without sign-prefix, length mismatches,
+  trailing bytes, zero components).  Tested with a real Bitcoin
+  mainnet signature (decoded successfully).  Connects directly
+  to `cryptanalysis::signature_corpus` — users can now ingest
+  raw Bitcoin transaction signatures without writing their own
+  parser.
+
+- **`symmetric::aes_cbc` + Vaudenay 2002 padding-oracle attack**
+  — AES-CBC with PKCS#7 padding, plus the canonical
+  protocol-level attack against it.  AES-CBC was the workhorse
+  mode of TLS 1.0-1.2; Lucky-13 (Al Fardan-Paterson 2013) and
+  POODLE (Möller-Duong-Kotowicz 2014) are production-class
+  refinements of Vaudenay's original.  This module ships the
+  attack: given an oracle that answers "is this ciphertext's
+  plaintext correctly padded?", recover arbitrary plaintext
+  in `O(plaintext_bytes · 256)` oracle queries.  Tests
+  recover real plaintext (`"the password is hunter2"`) and
+  multi-block plaintext (`"this plaintext spans multiple AES
+  blocks for the test."`) using only the boolean oracle.
+  6 tests passing.
+
+- **`ecc::schnorr` — BIP-340 Schnorr signatures** for Bitcoin
+  Taproot.  Replaces ECDSA for new-style outputs (activated
+  November 2021).  Ships:
+    - Tagged-hash construction
+      (`SHA256(SHA256(tag) ‖ SHA256(tag) ‖ msg)`)
+    - X-only public-key encoding (32 bytes; Y-coordinate forced
+      even by negating `d` if needed)
+    - Sign with auxiliary randomness (deterministic when
+      `aux_rand = 0³²`)
+    - Verify (parse signature, lift x-coordinate, check
+      `s·G − e·P = R` with even Y)
+    - "Lift x" implementation using `p ≡ 3 (mod 4)` square-root
+      shortcut on secp256k1's prime
+  **Verified against both official BIP-340 test vectors**
+  (vectors 0 and 1 from the BIP itself + Bitcoin Core's test
+  suite).  Round-trip + tampering rejection + wrong-message
+  rejection tests round out coverage.  6 tests passing.
+
+- **NIST/RFC known-answer tests + cross-check unit tests** — 423
   passing, 24 ignored (1 RSA-CRT-2048 slow, 3 Serpent KAT
   regressions, 7 EC-ElGamal slow-affine tests, 1 HNP 16-bit-bias
   slow LLL, 1 Pollard rho 20-bit DLP slow, 3 CGA-HNC Phase-1

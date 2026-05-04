@@ -10,6 +10,7 @@ pub mod keys;
 pub mod point;
 pub mod p256_field;
 pub mod p256_point;
+pub mod schnorr;
 pub mod secp256k1_field;
 pub mod secp256k1_point;
 
@@ -19,3 +20,6 @@ pub use ecdsa::{sign, sign_hash, verify, verify_hash, EcdsaSignature};
 pub use field::FieldElement;
 pub use keys::{EccKeyPair, EccPrivateKey, EccPublicKey};
 pub use point::Point;
+pub use schnorr::{
+    schnorr_keypair, schnorr_sign, schnorr_verify, tagged_hash, xonly_pubkey,
+};

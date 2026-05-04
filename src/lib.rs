@@ -20,6 +20,7 @@ pub mod cryptanalysis;
 pub mod ct_bignum;
 pub mod ecc;
 pub mod ecc_safety;
+pub mod encoding;
 pub mod hash;
 pub mod kdf;
 pub mod keys;
