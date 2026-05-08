@@ -108,6 +108,7 @@ pub mod lattice;
 pub mod multi_key_hnp;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
+pub mod mazur_tate_sigma;
 pub mod md5_differential;
 pub mod modular_polynomial;
 pub mod nonanom_formal_log;
