@@ -94,6 +94,7 @@
 
 pub mod aut_folded_rho;
 pub mod avalanche;
+pub mod b_seed_profile;
 pub mod bleichenbacher;
 pub mod boolean;
 pub mod canonical_lift;
@@ -110,8 +111,10 @@ pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod mazur_tate_sigma;
 pub mod md5_differential;
+pub mod ml_rho_walks;
 pub mod modular_polynomial;
 pub mod nonanom_formal_log;
+pub mod orbit_homology;
 pub mod p256_attacks;
 pub mod p256_structural;
 pub mod sbox;

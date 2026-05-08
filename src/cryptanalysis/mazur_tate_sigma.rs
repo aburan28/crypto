@@ -118,14 +118,33 @@ use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
 /// `σ_p(z)` as a `z`-power-series for short-Weierstrass `E: y² = x³
-/// + ax + b`.  Leading terms (Mazur-Tate normalisation):
+/// + ax + b`.
+///
+/// **Derivation** (Cohen "Number Theory I" §7.4.2 / Silverman III.5):
+/// for short Weierstrass with invariants `g_2 = -4a`, `g_3 = -4b`,
+/// the Weierstrass `℘`-function expands as:
 ///
 /// ```text
-/// σ_p(z) = z + (a/5) z⁵ + (b/7) z⁷ + (a²/15) z⁹ + …
+/// ℘(z) = z⁻² - (a/5) z² - (b/7) z⁴ - …
 /// ```
 ///
-/// Coefficients verified against Mazur-Tate Conjecture 1 (the
-/// signs and denominators come from the formal-group structure).
+/// The Weierstrass `ζ`-function `ζ' = -℘ + z⁻²` integrates to:
+///
+/// ```text
+/// ζ(z) - 1/z = ∫₀ᶻ -℘(t) dt - (-1/z + 1/0)  (regularised)
+///            = (a/15) z³ + (b/35) z⁵ + …
+/// ```
+///
+/// Then `σ(z) = z · exp[∫(ζ - 1/z) dz]`:
+///
+/// ```text
+/// σ(z) = z · exp[(a/60) z⁴ + (b/210) z⁶ + …]
+///      = z + (a/60) z⁵ + (b/210) z⁷ + (a²/7200) z⁹ + …
+/// ```
+///
+/// **This is the corrected formula** (the previous version used
+/// `a/5`, `b/7`, which were the `℘`-coefficients, not the `σ`-
+/// coefficients).
 ///
 /// Returns the power series in `z` with `n` terms.
 pub fn sigma_p_series(curve: &ZpCurve, n: usize) -> PSeries {
@@ -133,28 +152,29 @@ pub fn sigma_p_series(curve: &ZpCurve, n: usize) -> PSeries {
     let prec = curve.precision;
     let mut coefs = vec![ZpInt::zero(p, prec); n];
     if n >= 2 {
-        // σ_p(z) = z + ... (leading term z, no constant).
+        // σ_p(z) = z + ...
         coefs[1] = ZpInt::one(p, prec);
     }
     if n >= 6 {
-        // Coefficient of z⁵: a / 5.
-        let five = ZpInt::new(BigInt::from(5), p, prec);
-        if let Some(inv5) = five.inverse() {
-            coefs[5] = curve.a.mul(&inv5);
+        // Coefficient of z⁵: a / 60.
+        let sixty = ZpInt::new(BigInt::from(60), p, prec);
+        if let Some(inv60) = sixty.inverse() {
+            coefs[5] = curve.a.mul(&inv60);
         }
     }
     if n >= 8 {
-        // Coefficient of z⁷: b / 7.
-        let seven = ZpInt::new(BigInt::from(7), p, prec);
-        if let Some(inv7) = seven.inverse() {
-            coefs[7] = curve.b.mul(&inv7);
+        // Coefficient of z⁷: b / 210.
+        let two_ten = ZpInt::new(BigInt::from(210), p, prec);
+        if let Some(inv) = two_ten.inverse() {
+            coefs[7] = curve.b.mul(&inv);
         }
     }
     if n >= 10 {
-        // Coefficient of z⁹: a² / 15.
-        let fifteen = ZpInt::new(BigInt::from(15), p, prec);
-        if let Some(inv15) = fifteen.inverse() {
-            coefs[9] = curve.a.mul(&curve.a).mul(&inv15);
+        // Coefficient of z⁹: a² / 7200.
+        // (From exp expansion: (a/60)²/2 z⁸·z = a²/7200 z⁹.)
+        let seventy_two_hundred = ZpInt::new(BigInt::from(7200), p, prec);
+        if let Some(inv) = seventy_two_hundred.inverse() {
+            coefs[9] = curve.a.mul(&curve.a).mul(&inv);
         }
     }
     PSeries::from_coef_vec(p, prec, coefs)
