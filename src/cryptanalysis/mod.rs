@@ -117,6 +117,7 @@ pub mod p256_structural;
 pub mod sbox;
 pub mod sha1_differential;
 pub mod shor;
+pub mod solinas_correlations;
 pub mod signature_corpus;
 pub mod statistical;
 
