@@ -99,6 +99,7 @@ pub mod boolean;
 pub mod canonical_lift;
 pub mod cga_hnc;
 pub mod cm_canonical_lift;
+pub mod coleman_integration;
 pub mod ecdsa_audit;
 pub mod ecm;
 pub mod hilbert_class_poly;

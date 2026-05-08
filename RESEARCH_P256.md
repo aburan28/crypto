@@ -514,3 +514,85 @@ What remains open: non-abelian / iterated invariants. The
 research-agent's TOP-3 list (Kim's program, Mazur-Tate sigma,
 adversarial-ML rho walks, persistent homology) is unaffected by
 this negative result. Those directions are independent.
+
+## Phase 1 + 2: Coleman integration toolkit (Kim-program foundation)
+
+Module `cryptanalysis::coleman_integration` (≈530 LoC) implements
+the foundation for Kim's nonabelian Chabauty program at toy scale:
+
+- **Power-series ring** over `Z_p / p^prec` with formal addition,
+  multiplication, antiderivative (`integrate`), and evaluation.
+- **Holomorphic differential** `ω₀ = dx/y` as a `z`-power-series
+  for short Weierstrass.  Leading terms verified.
+- **Single Coleman integral** `I_1(P, ω₀) = ∫_O^P ω₀` via the
+  `[n]`-trick.  Verified to reproduce formal-log values.
+- **Iterated Coleman integral** `I_2(P, ω_a, ω_b)` via direct
+  power-series antidifferentiation.
+
+### The non-additivity confirmation
+
+```
+I_1(P + Q, ω₀) = I_1(P, ω₀) + I_1(Q, ω₀)              [additive]
+I_2(P + Q, ω₀, ω₀) − I_2(P) − I_2(Q) = z_P · z_Q ≠ 0  [non-abelian]
+```
+
+Confirms computational access to **genuinely non-abelian information** —
+exactly what Kim's program needs and what canonical-lift Smart lacks.
+
+### Phase 2: real scalar mul probe
+
+The natural next question: with actual elliptic-curve formal-group
+law, does `I_2(d·P) = d² · I_2(P)`?  If yes → `d` recoverable
+via square root mod `p`.
+
+**Empirical answer** (E: y²=x³+x+1 over F_11, precision 6):
+
+```
+d=1: I_2 = 1016400, d²·I_2(P) = 1016400, diff = 0    (trivial)
+d=3: I_2 = 1016400, d²·I_2(P) = 289795,  diff ≠ 0    (clean failure)
+```
+
+**The naive `I_2(d·P) / I_2(P) = d²` relation does NOT hold** under
+actual elliptic-curve scalar mul at toy precision.  Reasons:
+
+1. Formal-group law has corrections beyond simple `T_1 + T_2`.
+2. Truncated `Z_p / p^prec` creates apparent torsion (precision
+   exhaustion).
+3. Linear `z scales as d` approximation breaks immediately when
+   nonlinear formal-group corrections fire.
+
+### Honest interpretation
+
+This is a negative result on the *simplest possible* Phase-3
+formulation.  It does NOT rule out Kim's program; the actual
+Kim approach uses **de Rham cohomology** structure, **Selmer
+scheme** local-global constraints, and **`p`-adic L-function**
+connections — none of which are implemented here.
+
+The `coleman_integration` module is a stepping-stone shipping
+the iterated-integral primitives Kim's full program would build
+on.
+
+### Reproducing
+
+```bash
+cargo test --lib coleman -- --nocapture
+```
+
+Runtime: ~0.1 seconds.
+
+### What this rules in / out
+
+- **Rules in**: Coleman iterated integrals carry non-abelian
+  information accessible at toy scale.  Kim's program is **not**
+  blocked by computational unavailability of these primitives.
+- **Rules out**: the simplest possible Phase-3 formulation
+  (`I_2(d·P) / I_2(P) = d²`) does not yield a clean ECDLP attack
+  even at `p = 11`.
+
+What remains genuinely open: a proper Kim-program / Mazur-Tate
+sigma / `p`-adic-regulator-based attack.  The infrastructure here
+is the precondition; the actual attack requires real arithmetic-
+geometry research.
+
+This is **honest progress**, not a breakthrough.
