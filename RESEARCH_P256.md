@@ -596,3 +596,46 @@ is the precondition; the actual attack requires real arithmetic-
 geometry research.
 
 This is **honest progress**, not a breakthrough.
+
+### Phase 2b: clean d² verification via formal-group law
+
+Bypassing the projective scalar mul (which had precision-loss
+artifacts) and using the short-Weierstrass formal-group law
+directly (`F(T_1, T_2) = T_1 + T_2 + O(T^5)`), we re-test the d²
+relation:
+
+```
+d= 1: z = 33,  I_2(d·P) = 886325, d²·I_2(P) = 886325, match ✓
+d= 2: z = 66,  I_2(d·P) =   2178, d²·I_2(P) =   2178, match ✓
+d= 3: z = 99,  I_2(d·P) = 890681, d²·I_2(P) = 890681, match ✓
+... (all d = 1..10 match exactly mod p^6)
+```
+
+**Decisive result**: with the correct formal-group law, the
+relation `I_2(d·P) = d² · I_2(P)` holds *exactly* — the Phase 2
+"failure" was precision exhaustion in the projective scalar mul.
+
+### But: this is still the abelian case
+
+The match is a consequence of `F(T_1, T_2) ≈ T_1 + T_2` at low
+degrees, which makes `I_2(d·P) = (d · z_P)²/2 = d² · I_2(P)`
+trivially.  This is **NOT genuinely non-abelian** — it reduces
+to the formal-log structure, which we already empirically
+showed fails to recover `d` from `F_p`-points (because lifting
+introduces noise that destroys the relation).
+
+**To get genuinely non-abelian information**, iterated integrals
+must use *different* differentials (`ω₀ = dx/y` vs `ω₁ = x dx/y`).
+The integrals of `ω₁` have poles at `O` and require regularization
+— this is exactly the **Mazur-Tate `p`-adic sigma function** approach.
+
+Mazur-Tate σ satisfies `σ(d·P) = σ(P)^d · exp[h(P, P) · d(d-1)/2]`,
+where `h` is the `p`-adic height pairing.  Taking logs:
+
+```
+log σ(d·P) − d · log σ(P) = h(P, P) · d(d-1)/2
+```
+
+A **quadratic equation in d**.  Given `σ(P), σ(Q), h(P, P)` from
+`P, Q ∈ E(F_p)` lifts, solve for `d`.  This has never been published
+as an ECDLP attack.  Phase 3 implements it.
