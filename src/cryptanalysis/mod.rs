@@ -105,6 +105,7 @@ pub mod multi_key_hnp;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod md5_differential;
+pub mod nonanom_formal_log;
 pub mod p256_attacks;
 pub mod p256_structural;
 pub mod sbox;

@@ -220,3 +220,115 @@ The "novelty" claim here is narrow and specific: as far as I can
 determine, the complete factorisation of P-256's twist order
 `nᵗ = 3·5·13·179·(241-bit prime)` is being published in a
 machine-checkable form for the first time by this codebase.
+
+## Empirical experiment: non-anomalous Smart attack via Hensel lifts
+
+The module `cryptanalysis::nonanom_formal_log` is a genuine
+research attempt at extending Smart's anomalous-curve attack to
+non-anomalous ordinary curves like P-256, via canonical-lift
+formal-group logarithms.
+
+### The attack idea
+
+Smart 1999 breaks anomalous curves (`#E(F_p) = p`) in `O(log p)`.
+The mechanism: compute `[p]·P̂` and `[p]·Q̂` in the lifted curve
+`E(Z_p)`; both sit in the formal group `Ê(p Z_p) ≅ p Z_p`; the
+formal-log ratio recovers the discrete log.
+
+Generalisation to non-anomalous: replace `p` with `n = #E(F_p)`.
+Then `[n]·P̂` still sits in the formal group, and the ratio
+`log_F([n]·Q̂) / log_F([n]·P̂)` *would* equal `d (mod p)` if the
+lifts of `P` and `Q` were "compatible" — i.e. canonical lifts in
+the Lubin-Tate-Serre sense.
+
+For arbitrary Hensel lifts there's an error term:
+
+```
+log_F([n]·Q̂) = d · log_F([n]·P̂) + n · log_F(T)
+```
+
+where `T = Q̂ − d·P̂ ∈ Ê(p Z_p)` is the lift discrepancy.
+
+### Empirical question
+
+Does the Hensel-lift ratio still recover `d` *empirically* — at
+better-than-random rates — even though the theoretical noise
+term `n · log_F(T) / log_F([n]·P̂)` is "generically a unit mod p"
+and predicts a `1/p` random-baseline?
+
+### Methodology
+
+- Implemented projective `Z_p` arithmetic (affine breaks at
+  `[n]·P̂` because the result lives at the F_p point at infinity).
+- Enumerated all non-singular non-anomalous curves over each
+  prime in `{5, 7, 11, 13}`.
+- For each curve, found a generator of order ≥ 5, swept `d` over
+  `[1, ord-1]`, and ran the Smart-style recovery.
+- Reported success rate excluding the trivial `d = 1` case
+  (which trivially succeeds since `Q = P` ⇒ `Q̂ = P̂` ⇒ ratio = 1).
+- Total: **277 curves, 2,389 non-trivial trials.**
+
+### Results
+
+```
+F_5:   6 / 49   = 0.122  (theoretical 1/p = 0.200, z = -1.36)
+F_7:  17 / 171  = 0.099  (theoretical 0.143, z = -1.62)
+F_11: 71 / 838  = 0.085  (theoretical 0.091, z = -0.62)
+F_13: 74 / 1331 = 0.056  (theoretical 0.077, z = -2.92)
+
+Aggregate: 168 / 2389 = 0.0703
+Aggregate z-score vs uniform-random null: ≈ -3.2σ
+```
+
+Distribution of `v_p(z_P̂)` (the formal-group `z`-coordinate of
+`[n]·P̂`): `{1: 2400, 2: 248, 3: 10, 6: 8}` — almost all points
+have minimal valuation 1, as the theory predicts.
+
+### Interpretation
+
+- **No better-than-random recovery.**  Hensel-lift Smart-style
+  attack on non-anomalous curves does *not* recover the discrete
+  log at exploitable rates.  The rate is at-or-below the `1/p`
+  random baseline.
+- The slight (3.2σ) under-baseline aggregate rate is consistent
+  with the noise term having weak negative correlation with the
+  signal — possibly because `n · log_F(T)` and `log_F([n]·P̂)`
+  share structure dependent on the lift choice.  Not exploitable.
+- **Empirical confirmation of the theoretical obstruction.**  The
+  predicted `1/p` noise floor holds across all 277 curves tested.
+
+### What would need to change to break P-256 via this route
+
+To force `T = 0` (no lift discrepancy), one would need to lift
+`P` and `Q` as **canonical lifts** in the Lubin-Tate-Serre sense.
+For ordinary curves over `F_p`, the canonical lift is the unique
+lift fixed by canonical Frobenius — equivalently, the lift
+satisfying a `p`-adic version of the modular polynomial relation.
+
+Constructing canonical lifts at cryptographic scale (`p ≈ 2²⁵⁶`
+for P-256) requires inverting a `p`-adic modular polynomial.
+That is itself an open hard problem in arithmetic geometry.  No
+known polynomial-time algorithm exists.
+
+### Honest novelty claim
+
+As far as the agent's literature survey could determine, this is
+the first published machine-checkable empirical tabulation of
+the Hensel-lift Smart-attack success rate on non-anomalous toy
+curves.  Most prior work focused on theoretical obstructions
+(Voloch, Cheon, et al.) without numerical experiments at this
+scale.
+
+The result confirms what theory predicts.  It is *not* an attack
+on P-256.  It is a precise empirical pinning-down of one specific
+research direction's failure mode — useful for ruling out a path
+that some less-careful researcher might think viable based on
+"Smart's attack obviously generalises."  It does not.
+
+### Reproducing
+
+```
+cargo test --lib nonanom_formal_log -- --nocapture
+```
+
+Runtime: ~1.5 seconds for the full 277-curve, 2389-trial sweep.
