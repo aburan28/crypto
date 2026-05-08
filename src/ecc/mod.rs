@@ -3,8 +3,10 @@
 
 pub mod ct;
 pub mod curve;
+pub mod curve25519;
 pub mod ecdh;
 pub mod ecdsa;
+pub mod ed25519;
 pub mod field;
 pub mod keys;
 pub mod point;
@@ -13,6 +15,7 @@ pub mod p256_point;
 pub mod schnorr;
 pub mod secp256k1_field;
 pub mod secp256k1_point;
+pub mod x25519;
 
 pub use curve::CurveParams;
 pub use ecdh::{ecdh, ecdh_raw};
@@ -23,3 +26,5 @@ pub use point::Point;
 pub use schnorr::{
     schnorr_keypair, schnorr_sign, schnorr_verify, tagged_hash, xonly_pubkey,
 };
+pub use x25519::{clamp, x25519, x25519_base};
+pub use ed25519::{ed25519_pubkey, ed25519_sign, ed25519_verify};

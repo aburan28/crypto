@@ -3,6 +3,7 @@
 pub mod aes;
 pub mod aes_cbc;
 pub mod chacha20;
+pub mod cmac;
 pub mod serpent;
 pub mod threefish;
 
@@ -14,6 +15,7 @@ pub use aes_cbc::{
     aes_cbc_decrypt, aes_cbc_encrypt, padding_oracle_attack,
     pkcs7_pad, pkcs7_unpad,
 };
+pub use cmac::{aes_cmac, CmacTag};
 pub use chacha20::{
     chacha20_block, chacha20_poly1305_decrypt, chacha20_poly1305_encrypt, chacha20_xor,
     poly1305,
