@@ -105,6 +105,7 @@ pub mod multi_key_hnp;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod md5_differential;
+pub mod p256_attacks;
 pub mod sbox;
 pub mod sha1_differential;
 pub mod shor;
