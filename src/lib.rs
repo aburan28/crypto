@@ -14,6 +14,7 @@
 //! | `cryptanalysis`| LLL/BKZ + HNP + multi-key-HNP + ρ-variants + Bleichenbacher + Smart + corpus-sweep |
 //! | `ecc_safety`   | ECDH/ECDSA curve-parameter safety auditor               |
 //! | `utils`        | Modular arithmetic, randomness, encoding                |
+//! | `zk`           | Schnorr ZKP, Pedersen commitments, Chaum-Pedersen, Merkle tree |
 
 pub mod asymmetric;
 pub mod cryptanalysis;
@@ -27,3 +28,4 @@ pub mod keys;
 pub mod pqc;
 pub mod symmetric;
 pub mod utils;
+pub mod zk;
