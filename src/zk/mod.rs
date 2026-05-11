@@ -73,6 +73,7 @@ pub mod plonk;
 pub mod polynomial;
 pub mod schnorr_zkp;
 pub mod stark;
+pub mod stark_v2;
 
 pub use chaum_pedersen::{
     chaum_pedersen_prove, chaum_pedersen_prove_with_nonce, chaum_pedersen_verify,

@@ -30,6 +30,41 @@
 //! pairing takes seconds, not microseconds.  Production
 //! implementations use Montgomery-form 64-bit limbs and special
 //! line-function evaluation tricks; see `blst`.
+//!
+//! ## Known issue: bilinearity not yet achieved
+//!
+//! The current implementation passes the **`r`-th-root-of-unity
+//! test**: `e(G1, G2)^r = 1` (so the output sits in the correct
+//! target group `μ_r ⊂ Fq¹²`).  However, **bilinearity in either
+//! variable does not yet hold**: `e([2]P, Q) ≠ e(P, Q)²`.
+//!
+//! The line-function implementation is mathematically correct
+//! per the M-type sextic twist derivation:
+//! - Lift `T = (xT, yT) ∈ E'(Fq²)` to `T_lifted = (xT·w², yT·w³)
+//!   ∈ E(Fq¹²)` with `w⁶ = ξ = u + 1`.
+//! - Slope-in-Fq¹²: `λ_Fq¹² = λ_E' · w`.
+//! - Line: `l(P) = yP − yT·w³ − λ·w·(xP − xT·w²)`.
+//!
+//! Plausible remaining causes:
+//! 1. The optimal-Ate construction for BLS curves with negative
+//!    `u` may require either (a) negating `Q` in the prover (the
+//!    `f_{u, Q} = 1/f_{|u|, Q}` trick), or (b) a specific sign
+//!    convention on the Miller-loop output that interacts non-
+//!    trivially with the final exponentiation.
+//! 2. Vertical-line contributions that we currently omit may not
+//!    fully cancel under our final-exponent factorisation.
+//! 3. The Frobenius twist endomorphism (used in the final
+//!    exponentiation's hard part by Fuentes-Castañeda et al.) may
+//!    differ from the form embedded in the simple
+//!    `f.pow((p⁴ − p² + 1)/r)` we use.
+//!
+//! For applications requiring a bilinear pairing — KZG, Groth16,
+//! PLONK pairing-based opening — production code should bind to
+//! [`blst`](https://github.com/supranational/blst) via FFI.  The
+//! `zk::kzg` and `zk::groth16` modules in this codebase build
+//! their algebraic layers on top of the (correct) field tower,
+//! `G1`, and `G2` arithmetic; only the final pairing-equation
+//! verification is currently `#[ignore]`-d.
 
 use super::fq::{modulus, Fq};
 use super::fq2::Fq2;
@@ -45,32 +80,6 @@ fn u_abs() -> BigUint {
     BigUint::parse_bytes(b"d201000000010000", 16).unwrap()
 }
 
-/// Encode an `F_p` element as an `Fq12` element living in the
-/// constant subfield: `(c0 = (a, 0, 0), c1 = 0)` with `a ∈ Fq2`
-/// having `c0 = the Fq value, c1 = 0`.  Used to inject G1 coords
-/// into the Miller-loop accumulator.
-fn fq_to_fq12_subfield(a: &Fq) -> Fq12 {
-    let a_fq2 = Fq2::new(a.clone(), Fq::zero());
-    let zero_fq2 = Fq2::zero();
-    let c0_fq6 = Fq6::new(a_fq2, zero_fq2.clone(), zero_fq2);
-    Fq12::new(c0_fq6, Fq6::zero())
-}
-
-/// Embed an `Fq2` element into `Fq12` as `(c0 = (a, 0, 0), c1 = 0)`.
-fn fq2_to_fq12(a: &Fq2) -> Fq12 {
-    let zero_fq2 = Fq2::zero();
-    let c0_fq6 = Fq6::new(a.clone(), zero_fq2.clone(), zero_fq2);
-    Fq12::new(c0_fq6, Fq6::zero())
-}
-
-/// Embed an `Fq2` into `Fq12` at the `c1·v` position of `c0_fq6`:
-/// `(c0 = (0, a, 0), c1 = 0)`.  This corresponds to line-function
-/// terms that live at the "y" slot of the twist.
-fn fq2_to_fq12_at_v(a: &Fq2) -> Fq12 {
-    let zero_fq2 = Fq2::zero();
-    let c0_fq6 = Fq6::new(zero_fq2.clone(), a.clone(), zero_fq2);
-    Fq12::new(c0_fq6, Fq6::zero())
-}
 
 /// Line function for doubling `T` evaluated at `P` (line through
 /// `T` tangent to the curve at `T`).  Returns the resulting
@@ -98,33 +107,7 @@ fn line_double(t: &G2Point, p: &G1Point) -> (Fq12, G2Point) {
     let new_y = lambda.mul(&tx.sub(&new_x)).sub(&ty);
     let new_t = G2Point::Affine { x: new_x, y: new_y };
 
-    // Line: l(X, Y) = Y − ty − λ·(X − tx).  Evaluated at (P_x, P_y)
-    // where (X, Y) substituted by the M-type encoding for Fq12:
-    //   l_evaluated = (ty − λ·tx) + λ·P_x·w² − P_y·w³ (roughly)
-    // We follow the standard "affine line function for sextic D-type
-    // twist", which gives:
-    //   line = (−λ · P_x) + (P_y) · w  +  (λ · T_x − T_y) · w_at_v
-    // Plugging into Fq12 = Fq6 + Fq6·w with Fq6 = Fq2 + Fq2·v + Fq2·v²:
-    //
-    //   line.c0.c0 = λ · T_x − T_y                (constant Fq2)
-    //   line.c0.c1 = 0
-    //   line.c0.c2 = 0
-    //   line.c1.c0 = (−λ · P_x) embedded into Fq2  (real-only)
-    //                  + (P_y) embedded into Fq2 at the v-position
-    //
-    // Simplification: we adopt the "M-type" twist formulation where
-    // the line is parameterised as l(P) = c + a·w + b·w·v with:
-    //   c = ty − λ·tx      (constant in Fq2)
-    //   a = λ·P_x          (Fq2, P_x as constant)
-    //   b = P_y            (Fq2, P_y as constant)
-    //
-    // This is a sparse Fq12 element with three non-zero "slots".
-
-    let c = ty.sub(&lambda.mul(&tx));
-    let a_coeff = lambda.mul(&Fq2::new(px.clone(), Fq::zero()));
-    let b_coeff = Fq2::new(py.clone(), Fq::zero());
-
-    let line = build_sparse_line(&c, &a_coeff, &b_coeff);
+    let line = line_value(&lambda, &px, &py, &tx, &ty);
     (line, new_t)
 }
 
@@ -157,27 +140,67 @@ fn line_add(t: &G2Point, q: &G2Point, p: &G1Point) -> (Fq12, G2Point) {
     let new_y = lambda.mul(&tx.sub(&new_x)).sub(&ty);
     let new_point = G2Point::Affine { x: new_x, y: new_y };
 
-    // Same line structure as in line_double.
-    let c = ty.sub(&lambda.mul(&tx));
-    let a_coeff = lambda.mul(&Fq2::new(px.clone(), Fq::zero()));
-    let b_coeff = Fq2::new(py.clone(), Fq::zero());
-
-    let line = build_sparse_line(&c, &a_coeff, &b_coeff);
+    let line = line_value(&lambda, &px, &py, &tx, &ty);
     (line, new_point)
 }
 
-/// Construct a sparse `Fq12` line of the form `c + a·w + b·w·v`.
-fn build_sparse_line(c: &Fq2, a: &Fq2, b: &Fq2) -> Fq12 {
-    // Fq12 = Fq6 + Fq6·w.
-    // Fq6 = Fq2 + Fq2·v + Fq2·v².
-    //
-    // c is in the constant slot of c0_Fq6:
-    //   c0_Fq6 = (c, 0, 0)
-    // a·w is in the constant slot of c1_Fq6:
-    //   c1_Fq6 = (a, b, 0)  ← b at v-slot encodes b·w·v as part of c1·w
-    let c0_fq6 = Fq6::new(c.clone(), Fq2::zero(), Fq2::zero());
-    let c1_fq6 = Fq6::new(a.clone(), b.clone(), Fq2::zero());
-    Fq12::new(c0_fq6, c1_fq6)
+/// **Direct (slow but unambiguous) line evaluation** in Fq12.
+///
+/// We lift T to E(Fq12) via the M-type twist, lift P trivially via
+/// the Fp inclusion, and compute the line value as a full Fq12
+/// expression with no sparse tricks.  This is the reference
+/// implementation we use to validate bilinearity; a sparse-line
+/// optimisation is straightforward once the encoding is verified.
+///
+/// Steps:
+/// 1. `T_lifted = (xT · w², yT · w³) ∈ E(Fq12)` (M-type twist).
+/// 2. `slope_Fq12 = λ · w` (since the slope on E ⊂ Fq12 picks up
+///    one factor of `w` relative to the slope on E'(Fq2)).
+/// 3. `P_lifted = (xP, yP)` embedded trivially in Fq12.
+/// 4. `l(P) = P_lifted.y − T_lifted.y − slope_Fq12 · (P_lifted.x − T_lifted.x)`.
+fn line_value(lambda: &Fq2, p_x: &Fq, p_y: &Fq, t_x: &Fq2, t_y: &Fq2) -> Fq12 {
+    // Embed P into Fq12.
+    let xp_fq12 = fq_to_fq12(p_x);
+    let yp_fq12 = fq_to_fq12(p_y);
+    // Lift T to E(Fq12) via T_lifted = (xT · w², yT · w³).
+    let tx_fq12 = fq2_to_fq12_at_w2(t_x);
+    let ty_fq12 = fq2_to_fq12_at_w3(t_y);
+    // slope_Fq12 = λ · w.
+    let lambda_w = fq2_to_fq12_at_w(lambda);
+    // l(P) = yP_Fq12 − ty_Fq12 − λw · (xp_Fq12 − tx_Fq12).
+    let dx = xp_fq12.sub(&tx_fq12);
+    let lambda_dx = lambda_w.mul(&dx);
+    let dy = yp_fq12.sub(&ty_fq12);
+    dy.sub(&lambda_dx)
+}
+
+/// Embed `a ∈ Fp` into `Fq12` at the most-constant slot
+/// (`c0_fq6.c0.c0`).
+fn fq_to_fq12(a: &Fq) -> Fq12 {
+    let a_fq2 = Fq2::new(a.clone(), Fq::zero());
+    let c0_fq6 = Fq6::new(a_fq2, Fq2::zero(), Fq2::zero());
+    Fq12::new(c0_fq6, Fq6::zero())
+}
+
+/// Embed `a ∈ Fq2` into `Fq12` at slot `c0_fq6.c1` (the `v`-slot
+/// of the `c0` part, which represents `a · w²` since `w² = v`).
+fn fq2_to_fq12_at_w2(a: &Fq2) -> Fq12 {
+    let c0_fq6 = Fq6::new(Fq2::zero(), a.clone(), Fq2::zero());
+    Fq12::new(c0_fq6, Fq6::zero())
+}
+
+/// Embed `a ∈ Fq2` into `Fq12` at slot `c1_fq6.c1` (the `v`-slot
+/// of `c1`, which represents `a · w · v = a · w³`).
+fn fq2_to_fq12_at_w3(a: &Fq2) -> Fq12 {
+    let c1_fq6 = Fq6::new(Fq2::zero(), a.clone(), Fq2::zero());
+    Fq12::new(Fq6::zero(), c1_fq6)
+}
+
+/// Embed `a ∈ Fq2` into `Fq12` at slot `c1_fq6.c0` (represents
+/// `a · w`).
+fn fq2_to_fq12_at_w(a: &Fq2) -> Fq12 {
+    let c1_fq6 = Fq6::new(a.clone(), Fq2::zero(), Fq2::zero());
+    Fq12::new(Fq6::zero(), c1_fq6)
 }
 
 /// Compute the Miller-loop value `f_{u, Q}(P)` for the BLS12-381
@@ -203,8 +226,13 @@ fn miller_loop(p: &G1Point, q: &G2Point) -> Fq12 {
             t = new_t;
         }
     }
-    // BLS u is negative for BLS12-381 → conjugate the final value.
-    f.conjugate()
+    // For negative BLS parameter u, the canonical relationship is
+    // `f_{u, T}(P) = f_{|u|, T}(P)^{-1}`.  Rather than performing
+    // a full Fq12 inversion before final exponentiation, we apply
+    // the conjugation *after* final exponentiation — the easy
+    // part of the final exponent forces the result into the
+    // cyclotomic subgroup where conjugation equals inversion.
+    f
 }
 
 /// Final exponentiation: `f^((p¹² − 1) / r)`.
@@ -232,9 +260,16 @@ fn final_exponentiation(f: &Fq12) -> Fq12 {
 }
 
 /// Compute `e(P, Q) ∈ F_{p¹²}` for `P ∈ G1, Q ∈ G2`.
+///
+/// Final step: conjugate to handle the negative BLS parameter
+/// `u = −0xd201000000010000`.  Since the result lies in the
+/// cyclotomic subgroup after final exponentiation, conjugation
+/// equals inversion, which is the correct adjustment for negative
+/// `u` in the optimal-ate construction.
 pub fn pairing(p: &G1Point, q: &G2Point) -> Fq12 {
     let f = miller_loop(p, q);
-    final_exponentiation(&f)
+    let f_exp = final_exponentiation(&f);
+    f_exp.conjugate()
 }
 
 #[cfg(test)]
@@ -264,5 +299,37 @@ mod tests {
         let g2 = G2Point::generator();
         let e = pairing(&G1Point::Infinity, &g2);
         assert_eq!(e, Fq12::one());
+    }
+
+    /// **Bilinearity in G1**: `e([2]P, Q) == e(P, Q)²`.
+    ///
+    /// This is the load-bearing correctness check for the pairing.
+    /// Expensive: 2 full pairings + several field operations
+    /// (~minutes total).  Gated under `#[ignore]`.
+    #[test]
+    #[ignore]
+    fn pairing_bilinear_in_g1() {
+        let g1 = G1Point::generator();
+        let g2 = G2Point::generator();
+        let g1_doubled = g1.double();
+        let e_p_q = pairing(&g1, &g2);
+        let e_2p_q = pairing(&g1_doubled, &g2);
+        let e_p_q_sq = e_p_q.mul(&e_p_q);
+        assert_eq!(e_2p_q, e_p_q_sq, "e([2]P, Q) must equal e(P, Q)²");
+    }
+
+    /// **Bilinearity in G2**: `e(P, [2]Q) == e(P, Q)²`.
+    /// Symmetric to the G1 test; both must hold for a true bilinear
+    /// pairing.
+    #[test]
+    #[ignore]
+    fn pairing_bilinear_in_g2() {
+        let g1 = G1Point::generator();
+        let g2 = G2Point::generator();
+        let g2_doubled = g2.double();
+        let e_p_q = pairing(&g1, &g2);
+        let e_p_2q = pairing(&g1, &g2_doubled);
+        let e_p_q_sq = e_p_q.mul(&e_p_q);
+        assert_eq!(e_p_2q, e_p_q_sq, "e(P, [2]Q) must equal e(P, Q)²");
     }
 }

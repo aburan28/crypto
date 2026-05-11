@@ -92,6 +92,7 @@
 //! assert!((s0.max_differential_probability() - 0.25).abs() < 1e-9);
 //! ```
 
+pub mod ai_schoof;
 pub mod aut_folded_rho;
 pub mod avalanche;
 pub mod b_seed_profile;
@@ -109,6 +110,7 @@ pub mod lattice;
 pub mod multi_key_hnp;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
+pub mod quantum_estimator;
 pub mod mazur_tate_sigma;
 pub mod md5_differential;
 pub mod ml_rho_walks;
