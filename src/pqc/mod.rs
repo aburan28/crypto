@@ -4,11 +4,15 @@
 //!
 //! See individual modules for algorithm documentation and limitations.
 
+pub mod bike;
+pub mod classic_mceliece;
+pub mod csidh;
 pub mod frodo;
 pub mod hqc;
 pub mod kyber;
 pub mod mceliece;
 pub mod ntru;
+pub mod ntru_prime;
 pub mod x_wing;
 
 pub use kyber::{
