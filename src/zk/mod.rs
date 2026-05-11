@@ -63,6 +63,7 @@
 //!   those are required for Groth16/PLONK SNARKs, and are a
 //!   substantial separate undertaking.
 
+pub mod bulletproofs;
 pub mod chaum_pedersen;
 pub mod merkle;
 pub mod pedersen;
