@@ -233,12 +233,14 @@ fn decompress_polyvec(data: &[Vec<u16>], d: u32) -> PolyVec {
 // ── Public types ──────────────────────────────────────────────────────────────
 
 /// Kyber public key: the matrix A and the vector t = A·s + e.
+#[derive(Clone, Debug)]
 pub struct KyberPublicKey {
     pub a: [PolyVec; K],
     pub t: PolyVec,
 }
 
 /// Kyber private key: the secret vector s.
+#[derive(Clone, Debug)]
 pub struct KyberPrivateKey {
     pub s: PolyVec,
     pub public: KyberPublicKey,
@@ -255,6 +257,7 @@ impl Drop for KyberPrivateKey {
 }
 
 /// An encapsulated shared secret (ciphertext).
+#[derive(Clone, Debug)]
 pub struct KyberCiphertext {
     pub u: Vec<Vec<u16>>,   // Compressed A^T·r + e1
     pub v: Vec<u16>,         // Compressed t·r + e2 + msg
