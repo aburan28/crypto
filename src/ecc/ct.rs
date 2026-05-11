@@ -40,10 +40,13 @@ pub fn scalar_mul_secret(point: &Point, k: &BigUint, curve: &CurveParams) -> Poi
     match curve.name {
         "secp256k1" => secp256k1_point::ct_scalar_mul(point, k, curve),
         "P-256" => ct_scalar_mul_p256(point, k, curve),
-        other => panic!(
-            "ecc::ct::scalar_mul_secret: no constant-time stack wired up for curve {:?}",
-            other
-        ),
+        _ => {
+            // Generic fallback for curves without a dedicated projective
+            // stack: route through the BigUint-backed affine Montgomery
+            // ladder.  This is significantly slower than the projective
+            // RCB stacks, but it works for any short-Weierstrass curve.
+            point.scalar_mul_ct(k, &curve.a_fe(), curve.order_bits())
+        }
     }
 }
 
@@ -91,10 +94,13 @@ pub fn scalar_mul_secret_blinded(point: &Point, k: &BigUint, curve: &CurveParams
             let out = pp.scalar_mul_ct(&k_blinded, scalar_bits);
             out.to_textbook(&curve.p)
         }
-        other => panic!(
-            "ecc::ct::scalar_mul_secret_blinded: no constant-time stack wired up for curve {:?}",
-            other
-        ),
+        _ => {
+            // Generic fallback: still randomise the ladder via the
+            // Coron k' = k + r·n trick, but route through the affine
+            // BigUint Montgomery ladder.  Slower than the dedicated
+            // projective stacks but works for any curve.
+            point.scalar_mul_ct(&k_blinded, &curve.a_fe(), scalar_bits)
+        }
     }
 }
 
@@ -121,11 +127,8 @@ mod tests {
     fn blinded_matches_unblinded_secp256k1() {
         let curve = CurveParams::secp256k1();
         let g = curve.generator();
-        let k = BigUint::parse_bytes(
-            b"DEADBEEFCAFEBABE0123456789ABCDEF0011223344556677",
-            16,
-        )
-        .unwrap();
+        let k =
+            BigUint::parse_bytes(b"DEADBEEFCAFEBABE0123456789ABCDEF0011223344556677", 16).unwrap();
         let unblinded = scalar_mul_secret(&g, &k, &curve);
         // Blinded ladder is randomised; run several times and check
         // every result equals the unblinded baseline.
