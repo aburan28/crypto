@@ -17,6 +17,7 @@
 //! | `zk`           | Schnorr ZKP, Pedersen commitments, Chaum-Pedersen, Merkle tree |
 
 pub mod asymmetric;
+pub mod bls12_381;
 pub mod cryptanalysis;
 pub mod ct_bignum;
 pub mod ecc;
