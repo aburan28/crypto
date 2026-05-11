@@ -1,6 +1,7 @@
 //! Elliptic curve cryptography: field arithmetic, point operations,
 //! key generation, ECDSA, and ECDH over secp256k1 / P-256.
 
+pub mod barrett_ecdsa;
 pub mod ct;
 pub mod curve;
 pub mod curve25519;
