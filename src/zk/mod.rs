@@ -65,8 +65,11 @@
 
 pub mod bulletproofs;
 pub mod chaum_pedersen;
+pub mod groth16;
+pub mod kzg;
 pub mod merkle;
 pub mod pedersen;
+pub mod polynomial;
 pub mod schnorr_zkp;
 
 pub use chaum_pedersen::{
