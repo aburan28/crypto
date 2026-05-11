@@ -6,6 +6,8 @@ pub mod sha256;
 pub mod sha3;
 pub mod sha512;
 pub mod siphash;
+pub mod sm3;
+pub mod streebog;
 
 pub use blake3::{blake3_derive_key, blake3_hash, blake3_keyed};
 pub use ripemd160::{hash160, ripemd160};
@@ -13,3 +15,5 @@ pub use sha256::{sha224, sha256};
 pub use sha3::{sha3_256, sha3_512, shake128, shake256};
 pub use sha512::{sha384, sha512};
 pub use siphash::{siphash, SipKey};
+pub use sm3::{sm3, Sm3};
+pub use streebog::{streebog_256, streebog_512, Streebog};

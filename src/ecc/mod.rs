@@ -13,19 +13,30 @@ pub mod keys;
 pub mod point;
 pub mod p256_field;
 pub mod p256_point;
+pub mod gost_3410_2012;
 pub mod schnorr;
 pub mod secp256k1_field;
 pub mod secp256k1_point;
+pub mod sm2;
 pub mod x25519;
 
 pub use curve::CurveParams;
 pub use ecdh::{ecdh, ecdh_raw};
 pub use ecdsa::{sign, sign_hash, verify, verify_hash, EcdsaSignature};
 pub use field::FieldElement;
+pub use gost_3410_2012::{
+    sign as gost_sign, sign_hash as gost_sign_hash, sign_hash_with_k as gost_sign_hash_with_k,
+    verify as gost_verify, verify_hash as gost_verify_hash, DigestBits as GostDigestBits,
+    GostSignature,
+};
 pub use keys::{EccKeyPair, EccPrivateKey, EccPublicKey};
 pub use point::Point;
 pub use schnorr::{
     schnorr_keypair, schnorr_sign, schnorr_verify, tagged_hash, xonly_pubkey,
+};
+pub use sm2::{
+    decrypt as sm2_decrypt, encrypt as sm2_encrypt, sign as sm2_sign, verify as sm2_verify,
+    za as sm2_za, Sm2Signature, DEFAULT_ID as SM2_DEFAULT_ID,
 };
 pub use x25519::{clamp, x25519, x25519_base};
 pub use ed25519::{ed25519_pubkey, ed25519_sign, ed25519_verify};

@@ -4,7 +4,10 @@ pub mod aes;
 pub mod aes_cbc;
 pub mod chacha20;
 pub mod cmac;
+pub mod gost_magma;
+pub mod kuznyechik;
 pub mod serpent;
+pub mod sm4;
 pub mod threefish;
 
 pub use aes::{
@@ -20,3 +23,6 @@ pub use chacha20::{
     chacha20_block, chacha20_poly1305_decrypt, chacha20_poly1305_encrypt, chacha20_xor,
     poly1305,
 };
+pub use gost_magma::Magma;
+pub use kuznyechik::Kuznyechik;
+pub use sm4::Sm4;

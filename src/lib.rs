@@ -4,10 +4,10 @@
 //!
 //! | Module         | Algorithms                                              |
 //! |----------------|---------------------------------------------------------|
-//! | `ecc`          | secp256k1/P-256 field ops, ECDSA, ECDH                  |
-//! | `symmetric`    | AES, ChaCha20-Poly1305, Serpent, Threefish-256/512/1024 |
+//! | `ecc`          | secp256k1/P-256/SM2/GOST-3410-2012 field ops, ECDSA, ECDH, SM2 sig/enc, GOST sig |
+//! | `symmetric`    | AES, ChaCha20-Poly1305, Serpent, Threefish, SM4, Kuznyechik, GOST Magma |
 //! | `asymmetric`   | RSA (keygen/enc/sig, CRT-CT), Paillier + ElGamal + EC-ElGamal HE |
-//! | `hash`         | SHA-256, SHA-3 (Keccak), BLAKE3                         |
+//! | `hash`         | SHA-256, SHA-3 (Keccak), BLAKE3, SM3, Streebog          |
 //! | `kdf`          | HKDF-SHA256, PBKDF2-HMAC-SHA256                         |
 //! | `pqc`          | Simplified Kyber/ML-KEM and binary-Goppa McEliece       |
 //! | `keys`         | Unified key management                                  |

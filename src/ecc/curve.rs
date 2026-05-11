@@ -58,6 +58,96 @@ impl CurveParams {
         }
     }
 
+    /// **GOST R 34.10-2012 §A.2.1 example curve** (256-bit).  This is
+    /// the demonstration curve used in the standard's worked example
+    /// (Appendix A.2.1); it is *not* one of the operationally
+    /// standardised parameter sets (CryptoPro-A/B/C, paramSetA/B), but
+    /// it is what every published GOST 34.10-2012 test vector at the
+    /// 256-bit level is computed against.
+    pub fn gost_3410_2012_256_test() -> Self {
+        CurveParams {
+            name: "GOST-3410-2012-256-test",
+            p: BigUint::parse_bytes(
+                b"8000000000000000000000000000000000000000000000000000000000000431", 16,
+            ).unwrap(),
+            a: BigUint::from(7u32),
+            b: BigUint::parse_bytes(
+                b"5FBFF498AA938CE739B8E022FBAFEF40563F6E6A3472FC2A514C0CE9DAE23B7E", 16,
+            ).unwrap(),
+            gx: BigUint::from(2u32),
+            gy: BigUint::parse_bytes(
+                b"08E2A8A0E65147D4BD6316030E16D19C85C97F0A9CA267122B96ABBCEA7E8FC8", 16,
+            ).unwrap(),
+            n: BigUint::parse_bytes(
+                b"8000000000000000000000000000000150FE8A1892976154C59CFC193ACCF5B3", 16,
+            ).unwrap(),
+            h: 1,
+        }
+    }
+
+    /// **GOST R 34.10-2012 §A.2.2 example curve** (512-bit).  The
+    /// demonstration curve used in the standard's 512-bit worked
+    /// example (Appendix A.2.2).
+    pub fn gost_3410_2012_512_test() -> Self {
+        CurveParams {
+            name: "GOST-3410-2012-512-test",
+            p: BigUint::parse_bytes(
+                b"4531ACD1FE0023C7550D267B6B2FEE80922B14B2FFB90F04D4EB7C09B5D2D15DF1D852741AF4704A0458047E80E4546D35B8336FAC224DD81664BBF528BE6373",
+                16,
+            ).unwrap(),
+            a: BigUint::from(7u32),
+            b: BigUint::parse_bytes(
+                b"1CFF0806A31116DA29D8CFA54E57EB748BC5F377E49400FDD788B649ECA1AC4361834013B2AD7322480A89CA58E0CF74BC9E540C2ADD6897FAD0A3084F302ADC",
+                16,
+            ).unwrap(),
+            gx: BigUint::parse_bytes(
+                b"24D19CC64572EE30F396BF6EBBFD7A6C5213B3B3D7057CC825F91093A68CD762FD60611262CD838DC6B60AA7EEE804E28BC849977FAC33B4B530F1B120248A9A",
+                16,
+            ).unwrap(),
+            gy: BigUint::parse_bytes(
+                b"2BB312A43BD2CE6E0D020613C857ACDDCFBF061E91E5F2C3F32447C259F39B2C83AB156D77F1496BF7EB3351E1EE4E43DC1A18B91B24640B6DBB92CB1ADD371E",
+                16,
+            ).unwrap(),
+            n: BigUint::parse_bytes(
+                b"4531ACD1FE0023C7550D267B6B2FEE80922B14B2FFB90F04D4EB7C09B5D2D15DA82F2D7ECB1DBAC719905C5EECC423F1D86E25EDBE23C595D644AAF187E6E6DF",
+                16,
+            ).unwrap(),
+            h: 1,
+        }
+    }
+
+    /// **SM2 curve** — the standardised 256-bit prime-field curve in
+    /// GB/T 32918 (Chinese national standard).  Sometimes called
+    /// `sm2p256v1`.  Used for SM2 digital signature, public-key
+    /// encryption, and key agreement.
+    ///
+    /// y² = x³ + ax + b (mod p) with a = p - 3 (so the curve has the
+    /// Weierstrass form `y² = x³ - 3x + b` over F_p).
+    pub fn sm2() -> Self {
+        CurveParams {
+            name: "SM2",
+            p: BigUint::parse_bytes(
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16,
+            ).unwrap(),
+            a: BigUint::parse_bytes(
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16,
+            ).unwrap(),
+            b: BigUint::parse_bytes(
+                b"28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16,
+            ).unwrap(),
+            gx: BigUint::parse_bytes(
+                b"32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16,
+            ).unwrap(),
+            gy: BigUint::parse_bytes(
+                b"BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16,
+            ).unwrap(),
+            n: BigUint::parse_bytes(
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16,
+            ).unwrap(),
+            h: 1,
+        }
+    }
+
     /// NIST P-256 (secp256r1) — widely used in TLS and FIDO2.
     ///
     /// y² = x³ - 3x + b (mod p), a = p - 3.
