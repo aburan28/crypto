@@ -69,8 +69,10 @@ pub mod groth16;
 pub mod kzg;
 pub mod merkle;
 pub mod pedersen;
+pub mod plonk;
 pub mod polynomial;
 pub mod schnorr_zkp;
+pub mod stark;
 
 pub use chaum_pedersen::{
     chaum_pedersen_prove, chaum_pedersen_prove_with_nonce, chaum_pedersen_verify,
