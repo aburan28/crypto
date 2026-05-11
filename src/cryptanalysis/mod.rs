@@ -102,78 +102,73 @@ pub mod canonical_lift;
 pub mod cga_hnc;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
+pub mod ec_index_calculus;
 pub mod ecdsa_audit;
 pub mod ecm;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
 pub mod lattice;
-pub mod multi_key_hnp;
-pub mod pollard_rho;
-pub mod preprocessing_rho;
-pub mod quantum_estimator;
 pub mod mazur_tate_sigma;
 pub mod md5_differential;
 pub mod ml_rho_walks;
 pub mod modular_polynomial;
+pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod p256_attacks;
+pub mod p256_speculation;
 pub mod p256_structural;
+pub mod pollard_rho;
+pub mod preprocessing_rho;
+pub mod quantum_estimator;
 pub mod sbox;
 pub mod sha1_differential;
 pub mod shor;
-pub mod solinas_correlations;
 pub mod signature_corpus;
+pub mod solinas_correlations;
 pub mod statistical;
 
-pub use avalanche::{
-    AvalancheReport, bit_independence_score, full_avalanche, sac_score,
-};
-pub use boolean::{
-    algebraic_degree, anf_coefficients, walsh_hadamard,
-};
 pub use aut_folded_rho::{
-    apply_aut, aut_folded_rho_dlp, canonical_form,
-    AutElt, FoldedRhoOptions, FoldedRhoSolution, J0CurveAut,
+    apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
+    J0CurveAut,
 };
+pub use avalanche::{bit_independence_score, full_avalanche, sac_score, AvalancheReport};
 pub use bleichenbacher::{
-    bias_magnitude, bleichenbacher_direct, signature_to_sample,
-    BleichenbacherPeak, BleichenbacherSample,
+    bias_magnitude, bleichenbacher_direct, signature_to_sample, BleichenbacherPeak,
+    BleichenbacherSample,
 };
+pub use boolean::{algebraic_degree, anf_coefficients, walsh_hadamard};
 pub use canonical_lift::{
-    find_anomalous_curve, hensel_lift_point, smart_attack_anomalous,
-    ZpCurve, ZpInt, ZpPoint,
+    find_anomalous_curve, hensel_lift_point, smart_attack_anomalous, ZpCurve, ZpInt, ZpPoint,
+};
+pub use ec_index_calculus::{
+    build_factor_base, ec_index_calculus_dlp, find_one_relation, gaussian_eliminate_mod_n,
+    pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p,
+    FactorBaseEntry, Relation,
 };
 pub use ecdsa_audit::{
-    audit_ecdsa_transcript, quick_bias_score,
-    AuditOptions, AuditResult, EcdsaSample,
+    audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,
 };
 pub use hnp_ecdsa::{
-    hnp_recover_key, hnp_recover_key_with_reduction,
-    BiasedSignature, HnpReduction,
+    hnp_recover_key, hnp_recover_key_with_reduction, BiasedSignature, HnpReduction,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
-pub use multi_key_hnp::{
-    build_transcript, multi_key_hnp_recover_master, ChildKeySignature,
+pub use multi_key_hnp::{build_transcript, multi_key_hnp_recover_master, ChildKeySignature};
+pub use pollard_rho::{
+    pollard_rho_dlp, pollard_rho_dlp_zp, pollard_rho_dlp_zp_multi, pollard_rho_dp_dlp_zp,
+    pollard_rho_dp_dlp_zp_multi, DpRhoOptions, RhoOptions, RhoSolution,
 };
 pub use preprocessing_rho::{
-    build_preprocessing_table, expected_online_cost, online_solve,
-    preprocessing_rho_dlp, PreprocessingOptions, PreprocessingTable,
-};
-pub use pollard_rho::{
-    pollard_rho_dlp, pollard_rho_dlp_zp, pollard_rho_dlp_zp_multi,
-    pollard_rho_dp_dlp_zp, pollard_rho_dp_dlp_zp_multi,
-    DpRhoOptions, RhoOptions, RhoSolution,
+    build_preprocessing_table, expected_online_cost, online_solve, preprocessing_rho_dlp,
+    PreprocessingOptions, PreprocessingTable,
 };
 pub use sbox::{Sbox, SboxReport};
 pub use sha1_differential::{
-    estimate_differential, find_near_collision, round_function_truth_table,
-    sha1, sha1_avalanche, sha1_compress, DifferentialEstimate, NearCollision,
+    estimate_differential, find_near_collision, round_function_truth_table, sha1, sha1_avalanche,
+    sha1_compress, DifferentialEstimate, NearCollision,
 };
 pub use shor::{shor_factor, shor_order_find};
 pub use signature_corpus::{
     CorpusAnalyzer, CorpusReport, Finding, ReportRow, Severity, SignatureRecord,
 };
-pub use statistical::{
-    chi_squared_byte_test, ChiSquaredReport, monobit_test, runs_test,
-};
+pub use statistical::{chi_squared_byte_test, monobit_test, runs_test, ChiSquaredReport};
