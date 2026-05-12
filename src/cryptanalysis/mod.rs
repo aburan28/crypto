@@ -105,6 +105,7 @@ pub mod coleman_integration;
 pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ecdsa_audit;
+pub mod research_bench;
 pub mod ecm;
 pub mod fght_snfs;
 pub mod hilbert_class_poly;
