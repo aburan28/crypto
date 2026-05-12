@@ -59,6 +59,7 @@
 use crate::cryptanalysis::ec_index_calculus::{
     ec_index_calculus_dlp, pollard_rho_ecdlp,
 };
+use crate::cryptanalysis::ec_index_calculus_j0::j0_index_calculus_dlp;
 use crate::ecc::curve::CurveParams;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
@@ -475,6 +476,262 @@ impl Hypothesis for Ic2DecompEcdlp {
     }
 }
 
+/// A small set of **j-invariant 0** curves (a = 0) spanning a range
+/// of bit sizes — for the orbit-reduced IC hypothesis.  All curves
+/// satisfy `p ≡ 1 (mod 6)` so the full order-6 automorphism group is
+/// rational over `F_p`.
+pub fn bench_curves_j0() -> Vec<(u32, CurveParams)> {
+    vec![
+        (
+            6, // n = 61
+            CurveParams {
+                name: "j0-bench-8bit",
+                p: BigUint::from(61u32),
+                a: BigUint::zero(),
+                b: BigUint::from(2u32),
+                gx: BigUint::from(1u32),
+                gy: BigUint::from(8u32),
+                n: BigUint::from(61u32),
+                h: 1,
+            },
+        ),
+        (
+            10, // n = 823
+            CurveParams {
+                name: "j0-bench-10bit",
+                p: BigUint::from(829u32),
+                a: BigUint::zero(),
+                b: BigUint::from(2u32),
+                gx: BigUint::from(1u32),
+                gy: BigUint::from(400u32),
+                n: BigUint::from(823u32),
+                h: 1,
+            },
+        ),
+        (
+            12, // n = 3847
+            CurveParams {
+                name: "j0-bench-12bit",
+                p: BigUint::from(3907u32),
+                a: BigUint::zero(),
+                b: BigUint::from(2u32),
+                gx: BigUint::from(2u32),
+                gy: BigUint::from(2903u32),
+                n: BigUint::from(3847u32),
+                h: 1,
+            },
+        ),
+        (
+            14, // n = 16231
+            CurveParams {
+                name: "j0-bench-14bit",
+                p: BigUint::from(16189u32),
+                a: BigUint::zero(),
+                b: BigUint::from(10u32),
+                gx: BigUint::from(4u32),
+                gy: BigUint::from(6168u32),
+                n: BigUint::from(16231u32),
+                h: 1,
+            },
+        ),
+        (
+            16, // n = 65521
+            CurveParams {
+                name: "j0-bench-16bit",
+                p: BigUint::from(65353u32),
+                a: BigUint::zero(),
+                b: BigUint::from(5u32),
+                gx: BigUint::from(1u32),
+                gy: BigUint::from(2632u32),
+                n: BigUint::from(65521u32),
+                h: 1,
+            },
+        ),
+    ]
+}
+
+/// **j=0 orbit-reduced index calculus** — the speculative direction
+/// from earlier: exploit the order-3 ψ endomorphism on j-invariant 0
+/// curves to shrink the factor base ~3× and amplify relations.
+///
+/// **Theoretical claim** (per the analysis in
+/// `ec_index_calculus_j0.rs`): the orbit reduction gives a √6-style
+/// **constant-factor** improvement but **no asymptotic change**.
+/// So we expect the measured α to track generic IC's α = 1.5 with a
+/// smaller prefactor.  Confirming "same exponent, smaller prefactor"
+/// is the empirical falsification of any hope that j=0 changes the
+/// asymptotic class on prime-field curves.
+pub struct J0OrbitIcEcdlp;
+
+impl Hypothesis for J0OrbitIcEcdlp {
+    fn name(&self) -> &str {
+        "Index calculus on j=0 curves (ζ-orbit reduced)"
+    }
+    fn description(&self) -> &str {
+        "ζ-symmetric Semaev index calculus exploiting the order-3 ψ endomorphism on j=0 curves to reduce the factor base."
+    }
+    fn theoretical_complexity(&self) -> &str {
+        "O(p^{3/2} / √6) — same exponent as generic IC, ~√6× smaller prefactor"
+    }
+    fn theoretical_exponent(&self) -> Option<f64> {
+        Some(1.5)
+    }
+    fn scale_range(&self) -> Range<u32> {
+        6..13
+    }
+    fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
+        let curves = bench_curves_j0();
+        let curve = match curves
+            .into_iter()
+            .find(|(bits, _)| *bits == problem_size_log2)
+        {
+            Some((_, c)) => c,
+            None => {
+                return ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: 0,
+                    succeeded: false,
+                    notes: "no j=0 bench curve at this size".into(),
+                }
+            }
+        };
+        let g = curve.generator();
+        let a_fe = curve.a_fe();
+        let x_truth = random_scalar(&curve.n);
+        if x_truth.is_zero() {
+            return ExperimentResult {
+                problem_size_log2,
+                elapsed_ms: 0,
+                succeeded: false,
+                notes: "x_truth = 0".into(),
+            };
+        }
+        let q_point = g.scalar_mul(&x_truth, &a_fe);
+        let target_orbits = (1usize << (problem_size_log2 / 2 + 2)).min(30);
+        let extra = 6;
+        let max_trials = (1usize << (problem_size_log2 + 4)).min(60_000);
+        let t0 = Instant::now();
+        let recovered = j0_index_calculus_dlp(
+            &curve,
+            &g,
+            &q_point,
+            target_orbits,
+            extra,
+            max_trials,
+        );
+        let elapsed = t0.elapsed().as_millis();
+        match recovered {
+            Some(r) => {
+                let recheck = g.scalar_mul(&r, &a_fe);
+                let ok = recheck == q_point;
+                ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: elapsed,
+                    succeeded: ok,
+                    notes: format!("orbits={}, x_truth={}", target_orbits, x_truth),
+                }
+            }
+            None => ExperimentResult {
+                problem_size_log2,
+                elapsed_ms: elapsed,
+                succeeded: false,
+                notes: format!("j=0 IC failed at orbits={}", target_orbits),
+            },
+        }
+    }
+}
+
+/// **PLACEHOLDER — Eisenstein-smoothness factor base on j=0 curves.**
+///
+/// The third speculative direction from the earlier conversation.  The
+/// idea: define a factor base of points whose x-coordinate is the
+/// image of a small Eisenstein integer `α + β·ω ∈ ℤ[ζ₆]` under the
+/// map `ω ↦ ω_p` (the primitive cube root of unity in `F_p`).  The
+/// hope: maybe ℤ[ζ₆]-smoothness gives a multiplicatively-meaningful
+/// notion of "small" curve points that beats the generic "small
+/// x-coordinate" factor base.
+///
+/// **Status**: not implemented.  The concrete formulation is unclear
+/// because point addition on the curve doesn't respect any
+/// multiplicative structure on x-coordinates; the Eisenstein-integer
+/// structure lives in the endomorphism ring acting on the GROUP, not
+/// on the coordinate space.  Implementing this would require either
+/// (a) finding a non-obvious "Eisenstein-multiplicative" structure
+/// on the curve, or (b) accepting that the factor base is just
+/// another way to pick ≈ B² points and measuring whether it
+/// nonetheless helps in practice.
+///
+/// Registered here as a stub so the bench correctly reports the
+/// research direction as "not falsified, but also not tested."
+pub struct EisensteinSmoothJ0Ic;
+
+impl Hypothesis for EisensteinSmoothJ0Ic {
+    fn name(&self) -> &str {
+        "Eisenstein-smoothness factor base (j=0) — not implemented"
+    }
+    fn description(&self) -> &str {
+        "Speculative: factor base of points whose x-coords are images of small Eisenstein integers. Concrete formulation unclear; documented here for future work."
+    }
+    fn theoretical_complexity(&self) -> &str {
+        "unknown — would need to be derived"
+    }
+    fn theoretical_exponent(&self) -> Option<f64> {
+        None
+    }
+    fn scale_range(&self) -> Range<u32> {
+        0..0 // empty range; bench skips
+    }
+    fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
+        ExperimentResult {
+            problem_size_log2,
+            elapsed_ms: 0,
+            succeeded: false,
+            notes: "not implemented — placeholder for future research".into(),
+        }
+    }
+}
+
+/// **PLACEHOLDER — Twists + Weil descent on j=0.**
+///
+/// The first speculative direction from the earlier conversation.
+/// The idea: lift a j=0 curve to its 6 twists over `F_p`, then to
+/// `F_{p⁶}` where all 6 twists become isomorphic, then run Weil
+/// descent on the unified curve to drop ECDLP into a higher-genus
+/// Jacobian over `F_p` where index calculus works.
+///
+/// **Status**: not implemented.  Would need ~1500+ LoC: explicit
+/// twist enumeration, F_{p⁶} arithmetic, trace-zero variety
+/// construction, Weil-descent reduction, and a higher-genus index
+/// calculus.  Almost certainly hits Diem's hardness bounds on the
+/// resulting Jacobian, but the analysis is nontrivial.
+pub struct WeilDescentJ0;
+
+impl Hypothesis for WeilDescentJ0 {
+    fn name(&self) -> &str {
+        "Twists + Weil descent on j=0 — not implemented"
+    }
+    fn description(&self) -> &str {
+        "Speculative: lift the 6 twists of a j=0 curve to F_{p^6}, run Weil descent into a higher-genus Jacobian where index calculus works."
+    }
+    fn theoretical_complexity(&self) -> &str {
+        "unknown — likely Diem-bounded at the Jacobian level"
+    }
+    fn theoretical_exponent(&self) -> Option<f64> {
+        None
+    }
+    fn scale_range(&self) -> Range<u32> {
+        0..0
+    }
+    fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
+        ExperimentResult {
+            problem_size_log2,
+            elapsed_ms: 0,
+            succeeded: false,
+            notes: "not implemented — placeholder for future research".into(),
+        }
+    }
+}
+
 /// Aggregate-bench driver: run every registered hypothesis at every
 /// available scale, `samples_per_scale` times, and emit one Markdown
 /// document with the per-hypothesis sections.
@@ -491,6 +748,59 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
     let ic = Ic2DecompEcdlp;
     let ic_results = run_hypothesis(&ic, samples_per_scale);
     out.push_str(&format_report(&ic, &ic_results));
+    out.push('\n');
+    let j0 = J0OrbitIcEcdlp;
+    let j0_results = run_hypothesis(&j0, samples_per_scale);
+    out.push_str(&format_report(&j0, &j0_results));
+    out.push('\n');
+    // Placeholders: render their description so the report explicitly
+    // says "we considered this direction and did not test it yet."
+    let eisenstein = EisensteinSmoothJ0Ic;
+    out.push_str(&format_report(&eisenstein, &[]));
+    out.push('\n');
+    let weil = WeilDescentJ0;
+    out.push_str(&format_report(&weil, &[]));
+    out.push('\n');
+    out.push_str("---\n\n");
+    out.push_str("## Cross-hypothesis comparison\n\n");
+    // Quick at-a-glance table.
+    out.push_str("| Hypothesis | Theoretical α | Measured α | Verdict |\n");
+    out.push_str("|------------|--------------:|-----------:|---------|\n");
+    for (h_name, theo, results) in [
+        ("Pollard ρ ECDLP", 0.5, &rho_results),
+        ("IC 2-decomp (generic)", 1.5, &ic_results),
+        ("IC 2-decomp (j=0 orbit-reduced)", 1.5, &j0_results),
+    ] {
+        let measured = log_log_fit(results)
+            .map(|f| format!("{:.3}", f.measured_exponent))
+            .unwrap_or_else(|| "—".into());
+        let verdict = match log_log_fit(results) {
+            Some(f) => {
+                let d = (f.measured_exponent - theo).abs();
+                if d < 0.2 {
+                    "✓ matches"
+                } else if d < 0.5 {
+                    "≈ approx"
+                } else {
+                    "✗ deviates"
+                }
+            }
+            None => "—",
+        };
+        out.push_str(&format!(
+            "| {} | {:.3} | {} | {} |\n",
+            h_name, theo, measured, verdict,
+        ));
+    }
+    out.push_str("\n");
+    out.push_str(
+        "**Direction #1** (Weil descent on twists of j=0): placeholder, \
+         not implemented.\n",
+    );
+    out.push_str(
+        "**Direction #3** (Eisenstein-smoothness factor base): placeholder, \
+         not implemented — concrete formulation unclear.\n",
+    );
     out
 }
 
