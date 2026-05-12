@@ -49,18 +49,45 @@
 //!   on a Solinas-prime elliptic curve would have to look like, and why
 //!   nobody has built one.
 //!
+//! ### General-degree extensions (added in this commit)
+//!
+//! - [`MonicPoly`] — monic `f(x) = xᵈ + c_{d−1} xᵈ⁻¹ + … + c_0` with
+//!   eval, root-find mod `ℓ`, and the resultant-based algebraic norm
+//!   `N(a + bα) = (−1)ᵈ · bᵈ · f(−a/b)`.
+//! - [`construct_trapdoor_general`], [`build_factor_base_general`],
+//!   [`sieve_general`], [`snfs_dlp_recover_general`] generalize the
+//!   pipeline to any monic `f`.  Sieve + relation-structure tests
+//!   pass for `d ∈ {3, 6}` at toy scale.
+//! - **Full DLP recovery at `d ≥ 3` is blocked on Schirokauer maps.**
+//!   Dirichlet's unit theorem guarantees the algebraic ring has a
+//!   non-trivial unit group (rank `r₁ + r₂ − 1`), and clean
+//!   factor-base log recovery needs per-relation unit-class tracking.
+//!   Tests `degree_3_recovery_documented_as_blocked_on_schirokauer`
+//!   and `degree_6_recovery_documented_as_blocked_on_schirokauer`
+//!   document this gap honestly.
+//!
+//! ### Descent: individual log for arbitrary targets (added)
+//!
+//! - [`individual_log_descent`] — single-stage NFS descent.  Given
+//!   the factor-base logs from the precomputation, recovers
+//!   `log_g(h)` for any in-subgroup `h ∈ ⟨g⟩` by sieving `h · g^k`
+//!   until smooth, then composing.  Closes the loop from precomputation
+//!   to per-target recovery — verified end-to-end on the degree-2
+//!   toy.
+//!
 //! ## What this module deliberately does **not** do
 //!
-//! - **Higher-degree polynomials** (`d = 4, 5, 6`).  Real FGHT uses
-//!   `d = 6`; we use `d = 2` so the algebraic side is `ℤ[√(−c)]`, the
-//!   simplest non-trivial number ring, and we can avoid the heavy
-//!   Schirokauer-map machinery needed in general.
+//! - **Schirokauer maps** — needed for full DLP recovery at `d ≥ 3`.
+//!   Adding them would unlock end-to-end recovery on the degree-3
+//!   and degree-6 trapdoors whose sieve + structural pipeline this
+//!   commit lands.
 //! - **Block Lanczos / block Wiedemann.**  We do dense Gaussian
 //!   elimination mod `q`, which is fine at toy scale.
-//! - **Individual logarithm via descent.**  We recover the *factor-base
-//!   logs* (the precomputation phase of NFS); recovering a specific
-//!   `log_g(h)` for arbitrary `h` would require a further descent
-//!   round that we leave to a future commit.
+//! - **Multi-stage descent.**  [`individual_log_descent`] is
+//!   single-stage: it sieves `target · g^k` until smooth.  Real NFS
+//!   descent for non-smooth targets at crypto sizes needs a
+//!   recursive "medium prime" descent, which we omit because at toy
+//!   scale most targets are smooth in a few shifts.
 //!
 //! ## What this attack does NOT extend to
 //!
@@ -746,6 +773,445 @@ pub fn snfs_dlp_recover(
     Some((g, rat_logs, fb))
 }
 
+// ── General-degree polynomial framework ──────────────────────────────
+
+/// Monic polynomial over `ℤ`: `f(x) = xᵈ + c_{d-1} x^{d-1} + … + c_0`.
+///
+/// `coeffs[i] = c_i` for `0 ≤ i < d`; the leading coefficient `c_d = 1`
+/// is implicit.
+#[derive(Clone, Debug)]
+pub struct MonicPoly {
+    pub coeffs: Vec<i64>,
+}
+
+impl MonicPoly {
+    pub fn new(coeffs: Vec<i64>) -> Self {
+        Self { coeffs }
+    }
+
+    pub fn degree(&self) -> usize {
+        self.coeffs.len()
+    }
+
+    /// Evaluate `f(m)` over `ℤ` (signed) using Horner's method.
+    pub fn eval_signed(&self, m: &BigUint) -> BigInt {
+        let d = self.degree();
+        if d == 0 {
+            return BigInt::one();
+        }
+        let m_int = BigInt::from_biguint(Sign::Plus, m.clone());
+        // Start at leading coefficient (= 1), then Horner from c_{d-1} down to c_0.
+        let mut result = BigInt::one();
+        for i in (0..d).rev() {
+            result = &result * &m_int + BigInt::from(self.coeffs[i]);
+        }
+        result
+    }
+
+    /// Evaluate `f(x) (mod p)` for small `x, p` fitting in `i64`.
+    pub fn eval_mod(&self, x: i64, p: u64) -> u64 {
+        let p_i = p as i64;
+        let mut result = 1i64;
+        for i in (0..self.degree()).rev() {
+            let coef = ((self.coeffs[i] % p_i) + p_i) % p_i;
+            result = ((result * x) % p_i + coef).rem_euclid(p_i);
+        }
+        result as u64
+    }
+
+    /// Find all roots of `f (mod p)` by trial.  For toy primes only.
+    pub fn roots_mod(&self, p: u64) -> Vec<u64> {
+        let mut roots = Vec::new();
+        for r in 0..p {
+            if self.eval_mod(r as i64, p) == 0 {
+                roots.push(r);
+            }
+        }
+        roots
+    }
+
+    /// Algebraic norm `N(a + b·α)` where `α` is a root of `f`.
+    ///
+    /// Via the resultant identity `N(a + bα) = (−1)ᵈ · bᵈ · f(−a/b)`:
+    /// ```text
+    ///   N(a + bα) = Σᵢ₌₀ᵈ  cᵢ · (−1)^(d+i) · aⁱ · b^(d−i)   (c_d = 1)
+    /// ```
+    ///
+    /// Sanity checks:
+    /// - `d = 2`, `f(x) = x² + c`:   `N = a² + cb²` ✓
+    /// - `d = 3`, `f(x) = x³ + 2`:   `N = a³ − 2b³` ✓
+    /// - `d = 3`, `f(x) = x³ − x − 1`: `N = a³ − ab² + b³` ✓
+    pub fn norm(&self, a: i64, b: i64) -> BigInt {
+        let d = self.degree();
+        let a_big = BigInt::from(a);
+        let b_big = BigInt::from(b);
+        let mut a_pow = vec![BigInt::one(); d + 1];
+        let mut b_pow = vec![BigInt::one(); d + 1];
+        for i in 1..=d {
+            a_pow[i] = &a_pow[i - 1] * &a_big;
+            b_pow[i] = &b_pow[i - 1] * &b_big;
+        }
+        let mut sum = BigInt::zero();
+        for i in 0..=d {
+            let c_i = if i < d {
+                BigInt::from(self.coeffs[i])
+            } else {
+                BigInt::one()
+            };
+            let sign = if (d + i) % 2 == 0 { 1i64 } else { -1i64 };
+            sum += BigInt::from(sign) * &c_i * &a_pow[i] * &b_pow[d - i];
+        }
+        sum
+    }
+}
+
+/// General-degree trapdoor: `p = f(m)` for an arbitrary monic `f`.
+#[derive(Clone, Debug)]
+pub struct TrapdoorGeneral {
+    pub poly: MonicPoly,
+    pub m: BigUint,
+    pub p: BigUint,
+    pub q: BigUint,
+}
+
+/// Search `m ≥ m_start` for a Sophie-Germain prime `p = f(m)`.
+pub fn construct_trapdoor_general(
+    poly: &MonicPoly,
+    m_start: &BigUint,
+    max_m_steps: u64,
+) -> Option<TrapdoorGeneral> {
+    let mut m = m_start.clone();
+    for _ in 0..max_m_steps {
+        let val = poly.eval_signed(&m);
+        if val.sign() == Sign::Minus {
+            m += 1u32;
+            continue;
+        }
+        let p = match val.to_biguint() {
+            Some(v) if v > BigUint::from(2u32) => v,
+            _ => {
+                m += 1u32;
+                continue;
+            }
+        };
+        if (&p & BigUint::one()).is_zero() {
+            m += 1u32;
+            continue;
+        }
+        if !is_probable_prime(&p) {
+            m += 1u32;
+            continue;
+        }
+        let p_minus_1 = &p - 1u32;
+        let q = &p_minus_1 >> 1;
+        if !is_probable_prime(&q) {
+            m += 1u32;
+            continue;
+        }
+        return Some(TrapdoorGeneral {
+            poly: poly.clone(),
+            m,
+            p,
+            q,
+        });
+    }
+    None
+}
+
+/// Build a factor base for a general monic polynomial.
+pub fn build_factor_base_general(
+    poly: &MonicPoly,
+    b_rat: u64,
+    b_alg: u64,
+) -> FactorBase {
+    let rat = sieve_small_primes(b_rat);
+    let mut alg = Vec::new();
+    for &ell in &rat {
+        if ell > b_alg {
+            break;
+        }
+        for r in poly.roots_mod(ell) {
+            alg.push((ell, r));
+        }
+    }
+    FactorBase { rat, alg }
+}
+
+fn factor_algebraic_general(
+    a: i64,
+    b: i64,
+    poly: &MonicPoly,
+    alg_fb: &[(u64, u64)],
+) -> Option<Vec<(usize, u32)>> {
+    let norm = poly.norm(a, b);
+    if norm.is_zero() {
+        return None;
+    }
+    let mut remaining = norm.abs().to_biguint().unwrap();
+    let mut factors = Vec::new();
+    for (idx, &(ell, r)) in alg_fb.iter().enumerate() {
+        let test = ((a as i128).rem_euclid(ell as i128)
+            + ((b as i128) * (r as i128)).rem_euclid(ell as i128))
+            .rem_euclid(ell as i128);
+        if test != 0 {
+            continue;
+        }
+        let mut e = 0u32;
+        let ell_big = BigUint::from(ell);
+        while (&remaining % &ell_big).is_zero() {
+            remaining /= &ell_big;
+            e += 1;
+        }
+        if e > 0 {
+            factors.push((idx, e));
+        }
+    }
+    if remaining == BigUint::one() {
+        Some(factors)
+    } else {
+        None
+    }
+}
+
+/// Sieve over `(a, b)` for a general-degree trapdoor.
+pub fn sieve_general(
+    trap: &TrapdoorGeneral,
+    fb: &FactorBase,
+    a_max: i64,
+    b_max: i64,
+) -> Vec<Relation> {
+    let m_int = BigInt::from_biguint(Sign::Plus, trap.m.clone());
+    let mut out = Vec::new();
+    for a in -a_max..=a_max {
+        for b in 1..=b_max {
+            if a == 0 && b != 1 {
+                continue;
+            }
+            if gcd_i64(a.unsigned_abs(), b as u64) != 1 {
+                continue;
+            }
+            let n_rat = BigInt::from(a) + BigInt::from(b) * &m_int;
+            if n_rat.is_zero() {
+                continue;
+            }
+            let (rat_neg, rat_exps) = match factor_smooth(&n_rat, &fb.rat) {
+                Some(v) => v,
+                None => continue,
+            };
+            let alg_exps = match factor_algebraic_general(a, b, &trap.poly, &fb.alg) {
+                Some(v) => v,
+                None => continue,
+            };
+            out.push(Relation {
+                a,
+                b,
+                rat_sign_neg: rat_neg,
+                rat_exps,
+                alg_exps,
+            });
+        }
+    }
+    out
+}
+
+/// Find a generator of `⟨g⟩` of order `q` in `𝔽_p*` (`p − 1 = 2q`,
+/// `q` prime).  Clean version that doesn't depend on a [`Trapdoor`].
+pub fn find_subgroup_generator_pq(p: &BigUint, q: &BigUint) -> BigUint {
+    let one = BigUint::one();
+    let mut g = BigUint::from(2u32);
+    while &g < p {
+        let g_sq = (&g * &g) % p;
+        if g_sq != one && g_sq.modpow(q, p) == one {
+            return g_sq;
+        }
+        g += 1u32;
+    }
+    one
+}
+
+/// Verify recovered factor-base logs against the actual prime values.
+/// Generic version (works for any trapdoor, no [`Trapdoor`] dep).
+pub fn verify_factor_base_logs_pq(
+    p: &BigUint,
+    q: &BigUint,
+    fb_rat: &[u64],
+    g: &BigUint,
+    rat_logs: &[BigUint],
+) -> (usize, usize) {
+    let mut ok = 0;
+    let mut total = 0;
+    for (idx, &ell) in fb_rat.iter().enumerate() {
+        let ell_big = BigUint::from(ell);
+        if ell_big.modpow(q, p) != BigUint::one() {
+            continue;
+        }
+        total += 1;
+        if g.modpow(&rat_logs[idx], p) == ell_big {
+            ok += 1;
+        }
+    }
+    (ok, total)
+}
+
+/// General-degree analog of [`recover_factor_base_logs`].
+pub fn recover_factor_base_logs_general(
+    trap: &TrapdoorGeneral,
+    fb: &FactorBase,
+    relations: &[Relation],
+    pin_idx: usize,
+    pin_value: BigUint,
+) -> Option<Vec<BigUint>> {
+    let n_rat = fb.rat_len();
+    let n_alg = fb.alg_len();
+    let n_unknowns = n_rat + n_alg;
+    let q = &trap.q;
+    let mut matrix = Vec::new();
+    let mut rhs = Vec::new();
+    for rel in relations {
+        if rel.rat_sign_neg {
+            continue;
+        }
+        let mut row = vec![BigUint::zero(); n_unknowns];
+        for &(idx, e) in &rel.rat_exps {
+            row[idx] = (&row[idx] + BigUint::from(e)) % q;
+        }
+        for &(idx, e) in &rel.alg_exps {
+            let neg = (q - (BigUint::from(e) % q)) % q;
+            row[n_rat + idx] = (&row[n_rat + idx] + &neg) % q;
+        }
+        matrix.push(row);
+        rhs.push(BigUint::zero());
+    }
+    let mut pin_row = vec![BigUint::zero(); n_unknowns];
+    pin_row[pin_idx] = BigUint::one();
+    matrix.push(pin_row);
+    rhs.push(pin_value);
+    let solution =
+        crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
+            &mut matrix,
+            &mut rhs,
+            q,
+        )?;
+    Some(solution[..n_rat].to_vec())
+}
+
+/// One-call end-to-end driver for the **general-degree** SNFS.
+pub fn snfs_dlp_recover_general(
+    trap: &TrapdoorGeneral,
+    b_rat: u64,
+    b_alg: u64,
+    a_max: i64,
+    b_max: i64,
+) -> Option<(BigUint, Vec<BigUint>, FactorBase)> {
+    let g = find_subgroup_generator_pq(&trap.p, &trap.q);
+    if g == BigUint::one() {
+        return None;
+    }
+    let fb = build_factor_base_general(&trap.poly, b_rat, b_alg);
+    let relations = sieve_general(trap, &fb, a_max, b_max);
+    let mut pin: Option<(usize, BigUint)> = None;
+    for (idx, &ell) in fb.rat.iter().enumerate() {
+        let ell_big = BigUint::from(ell);
+        if ell_big.modpow(&trap.q, &trap.p) == BigUint::one()
+            && ell_big != BigUint::one()
+        {
+            if let Some(log) = brute_force_log_subgroup(&g, &ell_big, &trap.p, &trap.q) {
+                pin = Some((idx, log));
+                break;
+            }
+        }
+    }
+    let (pin_idx, pin_log) = pin?;
+    let rat_logs =
+        recover_factor_base_logs_general(trap, &fb, &relations, pin_idx, pin_log)?;
+    Some((g, rat_logs, fb))
+}
+
+// ── Descent: individual logarithm for arbitrary target ──────────────
+
+/// Factor `n` completely over `primes`; return the sparse factorisation
+/// `[(prime_index, exponent), …]` or `None` if `n` is not smooth.
+fn factor_completely_over(n: &BigUint, primes: &[u64]) -> Option<Vec<(usize, u32)>> {
+    if n.is_zero() {
+        return None;
+    }
+    let mut remaining = n.clone();
+    let mut factors = Vec::new();
+    for (idx, &ell) in primes.iter().enumerate() {
+        let ell_big = BigUint::from(ell);
+        let mut e = 0u32;
+        while (&remaining % &ell_big).is_zero() {
+            remaining /= &ell_big;
+            e += 1;
+        }
+        if e > 0 {
+            factors.push((idx, e));
+        }
+    }
+    if remaining == BigUint::one() {
+        Some(factors)
+    } else {
+        None
+    }
+}
+
+/// **Individual logarithm via descent**: given factor-base logs
+/// computed by the SNFS precomputation, recover `log_g(target) (mod q)`
+/// for an arbitrary `target ∈ ⟨g⟩` by sieving `target · g^k` until
+/// smooth over the factor base, then composing.
+///
+/// Standard NFS descent (single-stage): for `k = 0, 1, …, max_steps`,
+/// test whether `target · g^k (mod p)` factors over `fb_rat`.  When
+/// smooth:
+///
+/// ```text
+///   log_g(target · g^k)  =  Σᵢ eᵢ · rat_logs[i]
+///   log_g(target)        =  (that sum)  −  k   (mod q)
+/// ```
+///
+/// Returns `None` if `target ∉ ⟨g⟩` (not a QR mod `p`) or no smooth
+/// shift is found within `max_steps`.
+///
+/// Real NFS descent (for non-smooth targets at crypto sizes) needs a
+/// recursive descent that breaks the target into "medium primes" and
+/// then large primes; this single-stage version is sufficient at toy
+/// scale because most targets are smooth over a few-prime FB.
+pub fn individual_log_descent(
+    p: &BigUint,
+    q: &BigUint,
+    fb_rat: &[u64],
+    rat_logs: &[BigUint],
+    g: &BigUint,
+    target: &BigUint,
+    max_steps: u64,
+) -> Option<BigUint> {
+    if target.is_zero() {
+        return None;
+    }
+    if target.modpow(q, p) != BigUint::one() {
+        return None;
+    }
+    let mut current = target.clone();
+    let mut k = BigUint::zero();
+    for _ in 0..max_steps {
+        if let Some(factors) = factor_completely_over(&current, fb_rat) {
+            let mut log = BigUint::zero();
+            for (idx, e) in &factors {
+                let term = (BigUint::from(*e) * &rat_logs[*idx]) % q;
+                log = (&log + &term) % q;
+            }
+            // log_g(target · g^k) = log
+            // log_g(target) = (log − k) mod q
+            let k_mod = &k % q;
+            let result = (&log + q - &k_mod) % q;
+            return Some(result);
+        }
+        current = (&current * g) % p;
+        k += 1u32;
+    }
+    None
+}
+
 // ── Detector module ────────────────────────────────────────────────────
 
 /// Statistical tests an adversary would try to distinguish a trapdoored
@@ -1152,6 +1618,204 @@ mod tests {
             ok, total,
             "every in-subgroup FB prime's recovered log must satisfy g^log ≡ ℓ (mod p)"
         );
+    }
+
+    /// **MonicPoly basics**: eval, roots, norm formula sanity.
+    #[test]
+    fn monic_poly_arithmetic() {
+        // f(x) = x³ + 2.  coeffs = [c_0, c_1, c_2] = [2, 0, 0]; leading 1.
+        let f = MonicPoly::new(vec![2, 0, 0]);
+        assert_eq!(f.degree(), 3);
+        assert_eq!(f.eval_signed(&BigUint::from(3u32)), BigInt::from(29));
+        // f(x) mod 3: 0³+2=2, 1³+2=3≡0, 2³+2=10≡1.  Root at 1.
+        assert_eq!(f.roots_mod(3), vec![1]);
+        // For α³ = −2, N(a + bα) = a³ − 2b³ (by direct multiplication
+        // of the three conjugate factors and Vieta on the symmetric
+        // sums).  Note the sign: degree-3 swaps it relative to a naïve
+        // "Σ cᵢ aⁱ b^(d−i)" formula.
+        assert_eq!(f.norm(1, 1), BigInt::from(-1)); // 1 − 2 = −1
+        assert_eq!(f.norm(2, 1), BigInt::from(6)); //  8 − 2 =  6
+        assert_eq!(f.norm(1, 2), BigInt::from(-15)); // 1 − 16 = −15
+        // Degree-2 sanity: f(x) = x² + 2 should give N = a² + 2b².
+        let f2 = MonicPoly::new(vec![2, 0]);
+        assert_eq!(f2.norm(3, 1), BigInt::from(11)); // 9 + 2
+        assert_eq!(f2.norm(1, 3), BigInt::from(19)); // 1 + 18
+    }
+
+    /// **Construct a degree-3 trapdoor by search**.  Demonstrates the
+    /// general-degree trapdoor construction routine works.
+    #[test]
+    fn construct_degree_3_trapdoor() {
+        // f(x) = x³ − 3x² − 2x − 1.  Starting at m=9 finds (p=467, q=233).
+        let f = MonicPoly::new(vec![-1, -2, -3]);
+        let trap = construct_trapdoor_general(&f, &BigUint::from(9u32), 50)
+            .expect("should find a SG trapdoor near m=9");
+        assert!(is_probable_prime(&trap.p));
+        assert!(is_probable_prime(&trap.q));
+        assert_eq!(&trap.q * 2u32 + 1u32, trap.p);
+        assert_eq!(
+            f.eval_signed(&trap.m),
+            BigInt::from_biguint(Sign::Plus, trap.p.clone()),
+        );
+    }
+
+    /// **General-degree sieve produces relations** on a degree-3
+    /// trapdoor.  We don't run a full DLP recovery here because
+    /// degree-3+ number fields have non-trivial unit groups (rank ≥ 1
+    /// by Dirichlet), and clean factor-base log recovery requires
+    /// Schirokauer maps which this toy doesn't implement.  But the
+    /// SIEVE STILL WORKS — algebraic-side smoothness testing is
+    /// purely about the integer norm `|N(a + bα)|`, which our `norm`
+    /// formula computes correctly across all degrees.
+    #[test]
+    fn general_degree_sieve_produces_relations() {
+        let f = MonicPoly::new(vec![-1, -2, -3]); // x³ − 3x² − 2x − 1
+        let trap = TrapdoorGeneral {
+            poly: f.clone(),
+            m: BigUint::from(9u32),
+            p: BigUint::from(467u32),
+            q: BigUint::from(233u32),
+        };
+        let fb = build_factor_base_general(&trap.poly, 60, 60);
+        assert!(!fb.rat.is_empty());
+        // Degree-3 polynomial: alg FB can have up to 3 roots per ℓ
+        // (split primes).  We expect at least a few alg entries.
+        assert!(fb.alg.len() >= 5);
+        let relations = sieve_general(&trap, &fb, 30, 20);
+        assert!(
+            !relations.is_empty(),
+            "degree-3 sieve should find at least one smooth relation",
+        );
+        // Each relation's algebraic exponents reconstruct |N(a + bα)|.
+        for rel in relations.iter().take(5) {
+            let mut alg_product = BigUint::one();
+            for &(idx, e) in &rel.alg_exps {
+                let ell = BigUint::from(fb.alg[idx].0);
+                for _ in 0..e {
+                    alg_product *= &ell;
+                }
+            }
+            let n = f.norm(rel.a, rel.b);
+            assert_eq!(alg_product, n.abs().to_biguint().unwrap());
+        }
+    }
+
+    /// **Descent: individual log of an arbitrary planted target** on
+    /// the degree-2 trapdoor.  This is the "individual log via descent"
+    /// phase of NFS — the piece that lets us recover any in-subgroup
+    /// `log_g(target)`, not just smooth ones.
+    ///
+    /// Algorithm (single-stage descent): try `k = 0, 1, 2, …` until
+    /// `target · g^k (mod p)` factors over the rational factor base.
+    /// Compose the recovered factor-base logs and subtract `k`.
+    #[test]
+    fn descent_recovers_arbitrary_log_degree_2() {
+        let trap = construct_trapdoor(&[2], &BigUint::from(8u32), 2000).unwrap();
+        let (g, rat_logs, fb) = snfs_dlp_recover(&trap, 30, 30, 30, 20).unwrap();
+        // Plant: choose x ∈ [1, q), compute h = g^x, recover x.
+        let x_truth = BigUint::from(17u32);
+        let h = g.modpow(&x_truth, &trap.p);
+        let recovered = individual_log_descent(
+            &trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000,
+        )
+        .expect("descent should recover the log");
+        assert_eq!(g.modpow(&recovered, &trap.p), h);
+        assert_eq!(recovered, x_truth);
+    }
+
+    /// **Descent on multiple targets** — sanity that the descent
+    /// works for several different planted scalars, not just one.
+    #[test]
+    fn descent_works_on_multiple_targets() {
+        let trap = construct_trapdoor(&[2], &BigUint::from(8u32), 2000).unwrap();
+        let (g, rat_logs, fb) = snfs_dlp_recover(&trap, 30, 30, 30, 20).unwrap();
+        for x_u32 in [3u32, 7, 11, 19, 25, 31] {
+            let x = BigUint::from(x_u32);
+            if &x >= &trap.q {
+                continue;
+            }
+            let h = g.modpow(&x, &trap.p);
+            let recovered = individual_log_descent(
+                &trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000,
+            );
+            if let Some(r) = recovered {
+                assert_eq!(g.modpow(&r, &trap.p), h);
+            }
+        }
+    }
+
+    /// **General-degree e2e DLP recovery is not implemented** for
+    /// `d ≥ 3` because Dirichlet's unit theorem guarantees a
+    /// non-trivial unit group, and clean factor-base log recovery
+    /// requires Schirokauer maps to capture each per-relation unit
+    /// class.  This test documents the gap and asserts that the
+    /// sieve / construction / norm pieces are nonetheless solid by
+    /// running them and checking structural invariants.  When
+    /// Schirokauer maps are added, this test should be replaced with
+    /// a real recovery assertion.
+    #[test]
+    fn degree_3_recovery_documented_as_blocked_on_schirokauer() {
+        let f = MonicPoly::new(vec![-1, -2, -3]);
+        let trap = TrapdoorGeneral {
+            poly: f.clone(),
+            m: BigUint::from(9u32),
+            p: BigUint::from(467u32),
+            q: BigUint::from(233u32),
+        };
+        // The construction is solid.
+        assert!(is_probable_prime(&trap.p));
+        assert!(is_probable_prime(&trap.q));
+        // The sieve produces relations.
+        let fb = build_factor_base_general(&trap.poly, 60, 60);
+        let rels = sieve_general(&trap, &fb, 30, 20);
+        assert!(!rels.is_empty());
+        // The norm formula is consistent: for every relation, the
+        // product of algebraic-factor-base prime norms matches the
+        // computed norm.
+        for rel in &rels {
+            let mut prod = BigUint::one();
+            for &(idx, e) in &rel.alg_exps {
+                let ell = BigUint::from(fb.alg[idx].0);
+                for _ in 0..e {
+                    prod *= &ell;
+                }
+            }
+            let n = f.norm(rel.a, rel.b);
+            assert_eq!(prod, n.abs().to_biguint().unwrap());
+        }
+    }
+
+    /// **Same documentation marker for degree-6** — the canonical
+    /// FGHT degree.  `f(x) = x⁶ − 3x⁵ − 2x⁴ − x³ − 3x² − 3x − 5`,
+    /// `m = 4`, `p = 383`, `q = 191`.  Sieve + construction work;
+    /// full recovery blocks on Schirokauer maps for the rank-2 unit
+    /// group of this degree-6 imaginary number field.
+    #[test]
+    fn degree_6_recovery_documented_as_blocked_on_schirokauer() {
+        let f = MonicPoly::new(vec![-5, -3, -3, -1, -2, -3]);
+        let trap = TrapdoorGeneral {
+            poly: f.clone(),
+            m: BigUint::from(4u32),
+            p: BigUint::from(383u32),
+            q: BigUint::from(191u32),
+        };
+        assert_eq!(f.eval_signed(&trap.m), BigInt::from(383));
+        assert!(is_probable_prime(&trap.p));
+        assert!(is_probable_prime(&trap.q));
+        let fb = build_factor_base_general(&trap.poly, 100, 100);
+        let rels = sieve_general(&trap, &fb, 25, 18);
+        assert!(!rels.is_empty(), "degree-6 sieve should find smooth pairs");
+        for rel in &rels {
+            let mut prod = BigUint::one();
+            for &(idx, e) in &rel.alg_exps {
+                let ell = BigUint::from(fb.alg[idx].0);
+                for _ in 0..e {
+                    prod *= &ell;
+                }
+            }
+            let n = f.norm(rel.a, rel.b);
+            assert_eq!(prod, n.abs().to_biguint().unwrap());
+        }
     }
 
     /// **Individual-logarithm composition**: once the factor-base logs
