@@ -617,6 +617,135 @@ pub fn verify_factor_base_logs(
     (ok, total)
 }
 
+// ── End-to-end DLP recovery ───────────────────────────────────────────
+
+/// Brute-force discrete log of `h` in `⟨g⟩` (assumed to have prime
+/// order `q`).  Returns `Some(k)` with `0 ≤ k < q` and `g^k ≡ h (mod p)`
+/// if `h ∈ ⟨g⟩`, else `None`.
+///
+/// O(q) time — toy-scale only.  Used to pin one factor-base log so the
+/// homogeneous NFS system gets a unique solution.
+pub fn brute_force_log_subgroup(
+    g: &BigUint,
+    h: &BigUint,
+    p: &BigUint,
+    q: &BigUint,
+) -> Option<BigUint> {
+    let mut current = BigUint::one();
+    let mut k = BigUint::zero();
+    while &k < q {
+        if &current == h {
+            return Some(k);
+        }
+        current = (&current * g) % p;
+        k += 1u32;
+    }
+    None
+}
+
+/// **Recover factor-base logarithms** by building the relation matrix
+/// and solving mod `q`, with one pinning row to fix the gauge.
+///
+/// Returns the rational-factor-base logs `[log_g(fb.rat[0]), …,
+/// log_g(fb.rat[n_rat-1])]` mod `q`.  The algebraic-side unknowns are
+/// abstract (no direct interpretation as logs of F_p elements), so we
+/// don't return them.
+///
+/// **Contract**: caller must ensure `pin_idx ∈ [0, fb.rat_len())` and
+/// `pin_value ≡ log_g(fb.rat[pin_idx]) (mod q)`.
+///
+/// Returns `None` if the linear system is under-determined (too few
+/// independent relations).
+pub fn recover_factor_base_logs(
+    trap: &Trapdoor,
+    fb: &FactorBase,
+    relations: &[Relation],
+    pin_idx: usize,
+    pin_value: BigUint,
+) -> Option<Vec<BigUint>> {
+    let n_rat = fb.rat_len();
+    let n_alg = fb.alg_len();
+    let n_unknowns = n_rat + n_alg;
+    let q = &trap.q;
+    let mut matrix: Vec<Vec<BigUint>> = Vec::new();
+    let mut rhs: Vec<BigUint> = Vec::new();
+    for rel in relations {
+        if rel.rat_sign_neg {
+            // Sign-negative relations involve `−1`, which lies outside
+            // the order-q subgroup when q is odd prime — skip them to
+            // keep the solve clean.  At toy scale we get plenty of
+            // positive-sign relations.
+            continue;
+        }
+        let mut row = vec![BigUint::zero(); n_unknowns];
+        for &(idx, e) in &rel.rat_exps {
+            row[idx] = (&row[idx] + BigUint::from(e)) % q;
+        }
+        for &(idx, e) in &rel.alg_exps {
+            let neg = (q - (BigUint::from(e) % q)) % q;
+            row[n_rat + idx] = (&row[n_rat + idx] + &neg) % q;
+        }
+        matrix.push(row);
+        rhs.push(BigUint::zero());
+    }
+    // Gauge-fixing pin row: y_{pin_idx} = pin_value.
+    let mut pin_row = vec![BigUint::zero(); n_unknowns];
+    pin_row[pin_idx] = BigUint::one();
+    matrix.push(pin_row);
+    rhs.push(pin_value);
+    let solution =
+        crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
+            &mut matrix,
+            &mut rhs,
+            q,
+        )?;
+    // Return rational logs only.
+    Some(solution[..n_rat].to_vec())
+}
+
+/// **One-call end-to-end SNFS DLP solver for F_p\***: given a trapdoor,
+/// recover the discrete-log table for every rational factor-base prime
+/// that lies in the order-`q` subgroup of `F_p*`.
+///
+/// Returns `(g, rat_logs)` where:
+///   - `g` is a generator of `⟨g⟩` of order `q`;
+///   - `rat_logs[i] = log_g(fb.rat[i]) (mod q)` when `fb.rat[i] ∈ ⟨g⟩`;
+///   - otherwise `rat_logs[i]` is an abstract gauge value (the
+///     verification step in [`verify_factor_base_logs`] skips it).
+///
+/// Returns `None` if no rational FB prime is in `⟨g⟩` (so we can't
+/// build a pin row) or if the linear system is under-determined.
+pub fn snfs_dlp_recover(
+    trap: &Trapdoor,
+    b_rat: u64,
+    b_alg: u64,
+    a_max: i64,
+    b_max: i64,
+) -> Option<(BigUint, Vec<BigUint>, FactorBase)> {
+    let g = find_subgroup_generator(trap);
+    if g == BigUint::one() {
+        return None;
+    }
+    let fb = build_factor_base(trap.c, b_rat, b_alg);
+    let relations = sieve(trap, &fb, a_max, b_max);
+    // Find a small FB prime ℓ ∈ ⟨g⟩ to pin.
+    let mut pin_idx_log: Option<(usize, BigUint)> = None;
+    for (idx, &ell) in fb.rat.iter().enumerate() {
+        let ell_big = BigUint::from(ell);
+        if ell_big.modpow(&trap.q, &trap.p) == BigUint::one() && ell_big != BigUint::one() {
+            if let Some(log) =
+                brute_force_log_subgroup(&g, &ell_big, &trap.p, &trap.q)
+            {
+                pin_idx_log = Some((idx, log));
+                break;
+            }
+        }
+    }
+    let (pin_idx, pin_log) = pin_idx_log?;
+    let rat_logs = recover_factor_base_logs(trap, &fb, &relations, pin_idx, pin_log)?;
+    Some((g, rat_logs, fb))
+}
+
 // ── Detector module ────────────────────────────────────────────────────
 
 /// Statistical tests an adversary would try to distinguish a trapdoored
@@ -959,5 +1088,102 @@ mod tests {
         let expected = BigInt::from(rel.a) + BigInt::from(rel.b) * &m_int;
         let abs_expected = expected.abs().to_biguint().unwrap();
         assert_eq!(rat_product, abs_expected);
+    }
+
+    /// **Brute-force discrete log** in `⟨g⟩` of prime order `q`.
+    /// On a small subgroup this terminates quickly.
+    #[test]
+    fn brute_force_log_subgroup_works() {
+        // Use a tiny known instance: p = 23, g = 5 (order 22), so q = 11
+        // generates the order-11 subgroup via g² = 25 mod 23 = 2.
+        // 2^11 mod 23 = 2048 mod 23 = 2048 - 89·23 = 1.  ✓
+        let p = BigUint::from(23u32);
+        let q = BigUint::from(11u32);
+        let g = BigUint::from(2u32);
+        // Verify g has order 11.
+        assert_eq!(g.modpow(&q, &p), BigUint::one());
+        // 2^k mod 23 for k = 0..11:
+        //   1, 2, 4, 8, 16, 9, 18, 13, 3, 6, 12.
+        let cases = [
+            (BigUint::from(1u32), Some(BigUint::from(0u32))),
+            (BigUint::from(4u32), Some(BigUint::from(2u32))),
+            (BigUint::from(3u32), Some(BigUint::from(8u32))),
+            // 5 is not in ⟨2⟩ mod 23 (5 = 2^k for no k since list above).
+            (BigUint::from(5u32), None),
+        ];
+        for (h, expected) in &cases {
+            assert_eq!(
+                brute_force_log_subgroup(&g, h, &p, &q),
+                *expected,
+                "log_g({}) in ⟨g⟩ mod {}",
+                h,
+                p,
+            );
+        }
+    }
+
+    /// **End-to-end SNFS DLP recovery**: construct a trapdoor, sieve,
+    /// solve the linear system, recover `log_g(ℓ)` for every rational
+    /// factor-base prime `ℓ ∈ ⟨g⟩`, and verify `g^{log_g(ℓ)} ≡ ℓ (mod p)`.
+    ///
+    /// This is the headline claim of the FGHT module: an actual
+    /// discrete-log recovery on a toy trapdoored prime, computed by
+    /// the SNFS pipeline end-to-end.
+    #[test]
+    fn end_to_end_dlp_recovery() {
+        // c = 2 keeps the algebraic ring ℤ[√−2] with units {±1} —
+        // dodges Schirokauer-map complications.
+        let trap = construct_trapdoor(&[2], &BigUint::from(8u32), 2000)
+            .expect("trapdoor for c = 2");
+        let (g, rat_logs, fb) =
+            snfs_dlp_recover(&trap, 30, 30, 30, 20)
+                .expect("SNFS should recover factor-base logs on toy p");
+        // Sanity: g has order q.
+        assert_eq!(g.modpow(&trap.q, &trap.p), BigUint::one());
+        assert_ne!(g, BigUint::one());
+        // Verify recovered logs.
+        let (ok, total) = verify_factor_base_logs(&trap, &fb, &g, &rat_logs);
+        assert!(
+            total >= 2,
+            "at least 2 rational FB primes should lie in ⟨g⟩ on p = {}",
+            trap.p,
+        );
+        assert_eq!(
+            ok, total,
+            "every in-subgroup FB prime's recovered log must satisfy g^log ≡ ℓ (mod p)"
+        );
+    }
+
+    /// **Individual-logarithm composition**: once the factor-base logs
+    /// are known, log of a smooth target follows by linear combination.
+    /// This is the "individual log" step of NFS, made trivial when the
+    /// target is already smooth over the FB.
+    #[test]
+    fn individual_log_for_smooth_target() {
+        let trap = construct_trapdoor(&[2], &BigUint::from(8u32), 2000).expect("trap");
+        let (g, rat_logs, fb) = snfs_dlp_recover(&trap, 30, 30, 30, 20).expect("recover");
+        // Pick a target h built from two QR FB primes: h = ℓ₁ · ℓ₂ mod p.
+        let mut qr_indices: Vec<usize> = Vec::new();
+        for (idx, &ell) in fb.rat.iter().enumerate() {
+            let ell_big = BigUint::from(ell);
+            if ell_big.modpow(&trap.q, &trap.p) == BigUint::one()
+                && ell_big != BigUint::one()
+            {
+                qr_indices.push(idx);
+            }
+            if qr_indices.len() == 2 {
+                break;
+            }
+        }
+        assert!(qr_indices.len() >= 2, "need 2 QR primes for the test");
+        let i1 = qr_indices[0];
+        let i2 = qr_indices[1];
+        let l1 = BigUint::from(fb.rat[i1]);
+        let l2 = BigUint::from(fb.rat[i2]);
+        let h = (&l1 * &l2) % &trap.p;
+        // Predicted log via the factor-base recovery:
+        let predicted = (&rat_logs[i1] + &rat_logs[i2]) % &trap.q;
+        // Verify g^predicted ≡ h (mod p).
+        assert_eq!(g.modpow(&predicted, &trap.p), h);
     }
 }
