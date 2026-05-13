@@ -95,6 +95,7 @@
 pub mod aes;
 pub mod ai_schoof;
 pub mod aut_folded_rho;
+pub mod auto_attack;
 pub mod avalanche;
 pub mod b_seed_profile;
 pub mod bleichenbacher;
@@ -102,6 +103,7 @@ pub mod boolean;
 pub mod boomerang;
 pub mod canonical_lift;
 pub mod cga_hnc;
+pub mod cipher_registry;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
 pub mod ec_index_calculus;

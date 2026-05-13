@@ -76,6 +76,74 @@ enum Cmd {
     Pqc,
     /// Run all demos
     Demo,
+    /// Cryptanalysis: run cipher-attack techniques (S-box analysis,
+    /// boomerang distinguisher, rectangle attack, trail search, …)
+    Cryptanalysis {
+        #[command(subcommand)]
+        op: CryptanalysisOp,
+    },
+}
+
+#[derive(Subcommand)]
+enum CryptanalysisOp {
+    /// List all registered ciphers known to the auto-attack runner.
+    ListCiphers,
+    /// Run every applicable attack against a registered cipher and
+    /// emit a Markdown report.
+    ///
+    /// Example: `cargo run -- cryptanalysis auto --cipher toyspn-2r`
+    Auto {
+        /// Cipher identifier (use `list-ciphers` to see options).
+        #[arg(long)]
+        cipher: String,
+        /// Number of plaintext pairs for the boomerang.
+        #[arg(long, default_value_t = 65_536)]
+        boomerang_pairs: usize,
+        /// Pool size for the rectangle attack.
+        #[arg(long, default_value_t = 2048)]
+        rectangle_pool: usize,
+        /// Negative log₂ of the differential-trail probability
+        /// threshold.  `12` here means threshold = `2⁻¹²`.
+        #[arg(long, default_value_t = 12)]
+        trail_threshold_neg_log2: u32,
+        /// Max number of trails to render.
+        #[arg(long, default_value_t = 5)]
+        trail_top_k: usize,
+    },
+    /// Run just the boomerang distinguisher against a registered cipher.
+    Boomerang {
+        #[arg(long)]
+        cipher: String,
+        /// α and δ in hex (low byte first), e.g. `0100`.  Defaults to
+        /// the cipher's canonical pair.
+        #[arg(long)]
+        alpha: Option<String>,
+        #[arg(long)]
+        delta: Option<String>,
+        #[arg(long, default_value_t = 65_536)]
+        pairs: usize,
+    },
+    /// Run just the rectangle attack against a registered cipher.
+    Rectangle {
+        #[arg(long)]
+        cipher: String,
+        #[arg(long)]
+        alpha: Option<String>,
+        #[arg(long)]
+        delta: Option<String>,
+        #[arg(long, default_value_t = 2048)]
+        pool: usize,
+    },
+    /// Print the S-box differential / linear / boomerang report for a
+    /// registered cipher.
+    Sbox {
+        #[arg(long)]
+        cipher: String,
+    },
+    /// Run the full research bench and emit the Markdown report.
+    /// (Equivalent to `cargo test --lib --release bench_demo --
+    /// --ignored --nocapture` but accessible from the CLI.)
+    Bench,
 }
 
 #[derive(Subcommand)]
@@ -111,6 +179,180 @@ fn main() {
         Cmd::Hkdf                       => cmd_hkdf(),
         Cmd::Pqc                        => cmd_pqc(),
         Cmd::Demo                       => cmd_demo(),
+        Cmd::Cryptanalysis { op }       => cmd_cryptanalysis(op),
+    }
+}
+
+// ── Cryptanalysis subcommands ─────────────────────────────────────────────────
+
+fn cmd_cryptanalysis(op: CryptanalysisOp) {
+    use crypto_lib::cryptanalysis::auto_attack::{auto_attack_with, AutoAttackOptions};
+    use crypto_lib::cryptanalysis::boomerang::{
+        boomerang_distinguisher, rectangle_attack,
+    };
+    use crypto_lib::cryptanalysis::cipher_registry::{list_ciphers, RegisteredCipher};
+    use crypto_lib::cryptanalysis::research_bench::run_full_bench;
+    match op {
+        CryptanalysisOp::ListCiphers => {
+            println!("Registered ciphers:");
+            for name in list_ciphers() {
+                if let Some(c) = RegisteredCipher::from_name(name) {
+                    let e = c.entry();
+                    println!(
+                        "  {:<22} {} block={}B rounds={}",
+                        name, e.description, e.block_bytes, e.rounds,
+                    );
+                }
+            }
+        }
+        CryptanalysisOp::Auto {
+            cipher,
+            boomerang_pairs,
+            rectangle_pool,
+            trail_threshold_neg_log2,
+            trail_top_k,
+        } => {
+            let opts = AutoAttackOptions {
+                boomerang_pairs,
+                rectangle_pool,
+                trail_threshold: 2f64.powi(-(trail_threshold_neg_log2 as i32)),
+                trail_top_k,
+            };
+            match auto_attack_with(&cipher, opts) {
+                Ok(r) => {
+                    println!("{}", r.markdown);
+                    eprintln!(
+                        "[auto-attack] {} sections in {} ms",
+                        r.sections_run, r.elapsed_ms,
+                    );
+                }
+                Err(e) => {
+                    eprintln!("error: {}", e);
+                    eprintln!("Try one of: {}", list_ciphers().join(", "));
+                    std::process::exit(1);
+                }
+            }
+        }
+        CryptanalysisOp::Boomerang {
+            cipher,
+            alpha,
+            delta,
+            pairs,
+        } => {
+            let c = match RegisteredCipher::from_name(&cipher) {
+                Some(c) => c,
+                None => {
+                    eprintln!("error: unknown cipher: {}", cipher);
+                    std::process::exit(1);
+                }
+            };
+            let entry = c.entry();
+            let alpha_bytes = match alpha {
+                Some(h) => from_hex(&h).expect("bad alpha hex"),
+                None => entry.canonical_alpha.clone(),
+            };
+            let delta_bytes = match delta {
+                Some(h) => from_hex(&h).expect("bad delta hex"),
+                None => entry.canonical_delta.clone(),
+            };
+            if alpha_bytes.len() != entry.block_bytes
+                || delta_bytes.len() != entry.block_bytes
+            {
+                eprintln!(
+                    "error: alpha/delta must be {} bytes for this cipher",
+                    entry.block_bytes
+                );
+                std::process::exit(1);
+            }
+            let t0 = std::time::Instant::now();
+            let r = boomerang_distinguisher(&c, &alpha_bytes, &delta_bytes, pairs, None);
+            let elapsed = t0.elapsed().as_millis();
+            println!("# Boomerang distinguisher on `{}`", cipher);
+            println!();
+            println!("- elapsed:       {} ms", elapsed);
+            println!("- right quartets: {} / {}", r.right_quartets, r.n_pairs);
+            println!("- empirical p:   {:.4e}", r.empirical_probability);
+            println!("- random baseline: {:.4e}", r.random_baseline);
+            println!(
+                "- distinguishes from random (10×): {}",
+                if r.distinguishes_from_random(10.0) {
+                    "yes"
+                } else {
+                    "no"
+                },
+            );
+        }
+        CryptanalysisOp::Rectangle {
+            cipher,
+            alpha,
+            delta,
+            pool,
+        } => {
+            let c = match RegisteredCipher::from_name(&cipher) {
+                Some(c) => c,
+                None => {
+                    eprintln!("error: unknown cipher: {}", cipher);
+                    std::process::exit(1);
+                }
+            };
+            let entry = c.entry();
+            let alpha_bytes = match alpha {
+                Some(h) => from_hex(&h).expect("bad alpha hex"),
+                None => entry.canonical_alpha.clone(),
+            };
+            let delta_bytes = match delta {
+                Some(h) => from_hex(&h).expect("bad delta hex"),
+                None => entry.canonical_delta.clone(),
+            };
+            let t0 = std::time::Instant::now();
+            let r = rectangle_attack(&c, &alpha_bytes, &delta_bytes, pool, None);
+            let elapsed = t0.elapsed().as_millis();
+            println!("# Rectangle attack on `{}`", cipher);
+            println!();
+            println!("- elapsed:           {} ms", elapsed);
+            println!("- pool size:         {}", r.pool_size);
+            println!("- right rectangles:  {}", r.right_quartets);
+        }
+        CryptanalysisOp::Sbox { cipher } => {
+            let c = match RegisteredCipher::from_name(&cipher) {
+                Some(c) => c,
+                None => {
+                    eprintln!("error: unknown cipher: {}", cipher);
+                    std::process::exit(1);
+                }
+            };
+            match c.sbox() {
+                Some(sbox) => {
+                    let r = sbox.report();
+                    println!("# S-box report for `{}`", cipher);
+                    println!();
+                    println!("- bits in / out:                 {} / {}", r.n_in, r.n_out);
+                    println!("- bijective:                     {}", r.bijective);
+                    println!("- balanced:                      {}", r.balanced);
+                    println!("- differential uniformity:       {}", r.differential_uniformity);
+                    println!("- max differential probability:  {:.4}", r.max_differential_probability);
+                    println!("- max linear bias:               {:.4}", r.max_linear_bias);
+                    println!("- nonlinearity:                  {}", r.nonlinearity);
+                    println!("- algebraic degree:              {}", r.algebraic_degree);
+                    println!(
+                        "- boomerang uniformity:          {}",
+                        r.boomerang_uniformity
+                            .map(|v| v.to_string())
+                            .unwrap_or_else(|| "—".into()),
+                    );
+                    println!("- max DLCT bias:                 {:.4}", r.max_dlct_bias);
+                }
+                None => {
+                    eprintln!("error: cipher {} has no exposed S-box", cipher);
+                    std::process::exit(1);
+                }
+            }
+        }
+        CryptanalysisOp::Bench => {
+            eprintln!("Running full research bench (this takes ~15-30 s in release mode)...");
+            let report = run_full_bench(1);
+            println!("{}", report);
+        }
     }
 }
 
