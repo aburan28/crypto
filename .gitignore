@@ -1,2 +1,7 @@
 /target
 Cargo.lock
+
+# macOS resource-fork sidecar files (created on filesystems mounted via
+# Finder / SMB / etc.). Empty payload, just filesystem cruft.
+._*
+.DS_Store
