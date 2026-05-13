@@ -71,6 +71,10 @@ cargo test --release
 | `symmetric::gost_magma`   | GOST R 34.12-2015 Magma (64-bit)     | GOST R 34.12-2015           |
 | `symmetric::kuznyechik`   | GOST R 34.12-2015 Kuznyechik (128-bit) | GOST R 34.12-2015           |
 | `symmetric::cmac`         | CMAC-AES MAC                          | NIST SP 800-38B             |
+| `symmetric::des`          | DES (Data Encryption Standard, broken — teaching) | FIPS PUB 46-3 |
+| `symmetric::des3`         | Triple-DES (EDE3, deprecated by NIST 2017)   | NIST SP 800-67  |
+| `symmetric::rc4`          | RC4 stream cipher (broken — teaching) | Rivest 1987 / RFC 6229 vectors |
+| `symmetric::rc5`          | RC5-32/12/16 block cipher             | Rivest, FSE 1994            |
 
 ### Block-cipher modes (generic over `BlockCipher<N>` trait)
 

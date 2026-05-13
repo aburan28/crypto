@@ -36,8 +36,11 @@ impl<T: BlockCipher<16>> BlockCipher128 for T {}
 // ── BlockCipher impls for our shipping primitives ────────────────────
 
 use crate::symmetric::aes::{decrypt_block, encrypt_block, AesKey};
+use crate::symmetric::des::Des;
+use crate::symmetric::des3::TripleDes;
 use crate::symmetric::gost_magma::Magma;
 use crate::symmetric::kuznyechik::Kuznyechik;
+use crate::symmetric::rc5::Rc5;
 use crate::symmetric::serpent::{serpent_decrypt, serpent_encrypt, SerpentKey};
 use crate::symmetric::sm4::Sm4;
 
@@ -83,6 +86,33 @@ impl BlockCipher<8> for Magma {
     }
     fn decrypt_block(&self, block: &mut [u8; 8]) {
         Magma::decrypt_block(self, block);
+    }
+}
+
+impl BlockCipher<8> for Des {
+    fn encrypt_block(&self, block: &mut [u8; 8]) {
+        Des::encrypt_block(self, block);
+    }
+    fn decrypt_block(&self, block: &mut [u8; 8]) {
+        Des::decrypt_block(self, block);
+    }
+}
+
+impl BlockCipher<8> for TripleDes {
+    fn encrypt_block(&self, block: &mut [u8; 8]) {
+        TripleDes::encrypt_block(self, block);
+    }
+    fn decrypt_block(&self, block: &mut [u8; 8]) {
+        TripleDes::decrypt_block(self, block);
+    }
+}
+
+impl BlockCipher<8> for Rc5 {
+    fn encrypt_block(&self, block: &mut [u8; 8]) {
+        Rc5::encrypt_block(self, block);
+    }
+    fn decrypt_block(&self, block: &mut [u8; 8]) {
+        Rc5::decrypt_block(self, block);
     }
 }
 
