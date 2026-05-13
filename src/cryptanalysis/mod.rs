@@ -92,6 +92,7 @@
 //! assert!((s0.max_differential_probability() - 0.25).abs() < 1e-9);
 //! ```
 
+pub mod aes;
 pub mod ai_schoof;
 pub mod aut_folded_rho;
 pub mod avalanche;
