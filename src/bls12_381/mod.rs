@@ -46,17 +46,17 @@
 //! - Sean Bowe / Zcash protocol specification §5.4.9.
 
 pub mod fq;
+pub mod fq12;
 pub mod fq2;
 pub mod fq6;
-pub mod fq12;
 pub mod g1;
 pub mod g2;
 pub mod pairing;
 
 pub use fq::Fq;
+pub use fq12::Fq12;
 pub use fq2::Fq2;
 pub use fq6::Fq6;
-pub use fq12::Fq12;
 pub use g1::G1Point;
 pub use g2::G2Point;
 pub use pairing::pairing;

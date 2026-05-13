@@ -93,11 +93,15 @@ fn l_prime(b: u32) -> u32 {
 
 /// T(.) = L(τ(.)).
 #[inline]
-fn t(x: u32) -> u32 { l(tau(x)) }
+fn t(x: u32) -> u32 {
+    l(tau(x))
+}
 
 /// T'(.) = L'(τ(.)).
 #[inline]
-fn t_prime(x: u32) -> u32 { l_prime(tau(x)) }
+fn t_prime(x: u32) -> u32 {
+    l_prime(tau(x))
+}
 
 // ── Key schedule ──────────────────────────────────────────────────
 
@@ -110,17 +114,12 @@ impl Sm4 {
     /// Construct an SM4 cipher from a 128-bit master key.
     pub fn new(key: &[u8; 16]) -> Self {
         let mk = [
-            u32::from_be_bytes([key[0],  key[1],  key[2],  key[3]]),
-            u32::from_be_bytes([key[4],  key[5],  key[6],  key[7]]),
-            u32::from_be_bytes([key[8],  key[9],  key[10], key[11]]),
+            u32::from_be_bytes([key[0], key[1], key[2], key[3]]),
+            u32::from_be_bytes([key[4], key[5], key[6], key[7]]),
+            u32::from_be_bytes([key[8], key[9], key[10], key[11]]),
             u32::from_be_bytes([key[12], key[13], key[14], key[15]]),
         ];
-        let mut k = [
-            mk[0] ^ FK[0],
-            mk[1] ^ FK[1],
-            mk[2] ^ FK[2],
-            mk[3] ^ FK[3],
-        ];
+        let mut k = [mk[0] ^ FK[0], mk[1] ^ FK[1], mk[2] ^ FK[2], mk[3] ^ FK[3]];
         let mut rk = [0u32; 32];
         for i in 0..32 {
             let new_k = k[0] ^ t_prime(k[1] ^ k[2] ^ k[3] ^ CK[i]);
@@ -136,9 +135,9 @@ impl Sm4 {
     /// Encrypt a single 128-bit block in place.
     pub fn encrypt_block(&self, block: &mut [u8; 16]) {
         let mut x = [
-            u32::from_be_bytes([block[0],  block[1],  block[2],  block[3]]),
-            u32::from_be_bytes([block[4],  block[5],  block[6],  block[7]]),
-            u32::from_be_bytes([block[8],  block[9],  block[10], block[11]]),
+            u32::from_be_bytes([block[0], block[1], block[2], block[3]]),
+            u32::from_be_bytes([block[4], block[5], block[6], block[7]]),
+            u32::from_be_bytes([block[8], block[9], block[10], block[11]]),
             u32::from_be_bytes([block[12], block[13], block[14], block[15]]),
         ];
         for i in 0..32 {
@@ -160,9 +159,9 @@ impl Sm4 {
     /// with round keys reversed.
     pub fn decrypt_block(&self, block: &mut [u8; 16]) {
         let mut x = [
-            u32::from_be_bytes([block[0],  block[1],  block[2],  block[3]]),
-            u32::from_be_bytes([block[4],  block[5],  block[6],  block[7]]),
-            u32::from_be_bytes([block[8],  block[9],  block[10], block[11]]),
+            u32::from_be_bytes([block[0], block[1], block[2], block[3]]),
+            u32::from_be_bytes([block[4], block[5], block[6], block[7]]),
+            u32::from_be_bytes([block[8], block[9], block[10], block[11]]),
             u32::from_be_bytes([block[12], block[13], block[14], block[15]]),
         ];
         for i in 0..32 {
@@ -207,13 +206,13 @@ mod tests {
     #[test]
     fn sm4_official_test_vector() {
         let key: [u8; 16] = [
-            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-            0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10,
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54,
+            0x32, 0x10,
         ];
         let plain: [u8; 16] = key;
         let expected: [u8; 16] = [
-            0x68, 0x1e, 0xdf, 0x34, 0xd2, 0x06, 0x96, 0x5e,
-            0x86, 0xb3, 0xe9, 0x4f, 0x53, 0x6e, 0x42, 0x46,
+            0x68, 0x1e, 0xdf, 0x34, 0xd2, 0x06, 0x96, 0x5e, 0x86, 0xb3, 0xe9, 0x4f, 0x53, 0x6e,
+            0x42, 0x46,
         ];
         let ct = encrypt_block(&key, &plain);
         assert_eq!(ct, expected);
@@ -237,8 +236,8 @@ mod tests {
     #[test]
     fn sm4_million_iterations() {
         let key: [u8; 16] = [
-            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-            0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10,
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54,
+            0x32, 0x10,
         ];
         let cipher = Sm4::new(&key);
         let mut block: [u8; 16] = key;
@@ -246,8 +245,8 @@ mod tests {
             cipher.encrypt_block(&mut block);
         }
         let expected: [u8; 16] = [
-            0x59, 0x52, 0x98, 0xc7, 0xc6, 0xfd, 0x27, 0x1f,
-            0x04, 0x02, 0xf8, 0x04, 0xc3, 0x3d, 0x3f, 0x66,
+            0x59, 0x52, 0x98, 0xc7, 0xc6, 0xfd, 0x27, 0x1f, 0x04, 0x02, 0xf8, 0x04, 0xc3, 0x3d,
+            0x3f, 0x66,
         ];
         assert_eq!(block, expected);
     }

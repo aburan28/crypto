@@ -65,14 +65,10 @@ use rand::{RngCore, SeedableRng};
 // ── SHA-1 implementation (cryptanalysis target, not a primitive) ────────
 
 /// SHA-1 initial hash values (FIPS 180-4 §5.3.1).
-pub const SHA1_IV: [u32; 5] = [
-    0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0,
-];
+pub const SHA1_IV: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
 /// SHA-1 round constants (FIPS 180-4 §4.2.1).
-pub const K: [u32; 4] = [
-    0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6,
-];
+pub const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
 /// SHA-1 round function.  Cycles through:
 /// - rounds 0..20:  `Choose(B, C, D) = (B ∧ C) ⊕ (¬B ∧ D)`
@@ -102,7 +98,10 @@ pub fn expand_block(block: &[u8; 64], rounds: usize) -> Vec<u32> {
     let mut w = vec![0u32; rounds.max(16)];
     for i in 0..16 {
         w[i] = u32::from_be_bytes([
-            block[4 * i], block[4 * i + 1], block[4 * i + 2], block[4 * i + 3],
+            block[4 * i],
+            block[4 * i + 1],
+            block[4 * i + 2],
+            block[4 * i + 3],
         ]);
     }
     for i in 16..rounds {
@@ -329,9 +328,8 @@ mod tests {
     fn sha1_full_matches_nist_kat() {
         let h = sha1(b"abc", 80);
         let expected: [u8; 20] = [
-            0xa9, 0x99, 0x3e, 0x36, 0x47, 0x06, 0x81, 0x6a,
-            0xba, 0x3e, 0x25, 0x71, 0x78, 0x50, 0xc2, 0x6c,
-            0x9c, 0xd0, 0xd8, 0x9d,
+            0xa9, 0x99, 0x3e, 0x36, 0x47, 0x06, 0x81, 0x6a, 0xba, 0x3e, 0x25, 0x71, 0x78, 0x50,
+            0xc2, 0x6c, 0x9c, 0xd0, 0xd8, 0x9d,
         ];
         assert_eq!(h, expected, "SHA-1(\"abc\") doesn't match NIST KAT");
     }
@@ -341,9 +339,8 @@ mod tests {
     fn sha1_empty_matches_nist_kat() {
         let h = sha1(b"", 80);
         let expected: [u8; 20] = [
-            0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d,
-            0x32, 0x55, 0xbf, 0xef, 0x95, 0x60, 0x18, 0x90,
-            0xaf, 0xd8, 0x07, 0x09,
+            0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55, 0xbf, 0xef, 0x95, 0x60,
+            0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09,
         ];
         assert_eq!(h, expected);
     }
@@ -375,7 +372,10 @@ mod tests {
         };
         println!();
         println!("=== full SHA-1 avalanche (80 rounds, 256 samples/bit) ===");
-        println!("  worst-cell deviation: {:.4} (expected ~0.10–0.18 from sampling noise)", worst);
+        println!(
+            "  worst-cell deviation: {:.4} (expected ~0.10–0.18 from sampling noise)",
+            worst
+        );
         println!("  mean-cell deviation:  {:.4} (expected near 0.025)", mean);
         // Worst-cell looser; mean-cell tighter.
         assert!(
@@ -415,7 +415,8 @@ mod tests {
         assert!(
             reduced_dev > full_dev,
             "reduced-round deviation {} should exceed full {}",
-            reduced_dev, full_dev
+            reduced_dev,
+            full_dev
         );
     }
 
@@ -495,7 +496,8 @@ mod tests {
         assert!(
             nc_10.hamming_distance < nc_80.hamming_distance,
             "10-round near-collision distance {} should be < 80-round {}",
-            nc_10.hamming_distance, nc_80.hamming_distance
+            nc_10.hamming_distance,
+            nc_80.hamming_distance
         );
     }
 
@@ -514,7 +516,9 @@ mod tests {
             let (_, weakest) = r.weakest_input_bit();
             println!(
                 "  {:>6} | {:>13.4} | {:>21.4}",
-                rounds, r.sac_deviation(), weakest
+                rounds,
+                r.sac_deviation(),
+                weakest
             );
         }
     }

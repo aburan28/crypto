@@ -126,10 +126,9 @@ impl R1cs {
 }
 
 fn inner(coeffs: &[BigUint], z: &[BigUint]) -> BigUint {
-    coeffs
-        .iter()
-        .zip(z)
-        .fold(BigUint::zero(), |acc, (ci, zi)| fr_add(&acc, &fr_mul(ci, zi)))
+    coeffs.iter().zip(z).fold(BigUint::zero(), |acc, (ci, zi)| {
+        fr_add(&acc, &fr_mul(ci, zi))
+    })
 }
 
 /// A QAP: polynomials `A_i(X), B_i(X), C_i(X)` for each variable
@@ -331,7 +330,10 @@ pub fn prove(qap: &Qap, srs: &Groth16Srs, z: &[BigUint]) -> Groth16Proof {
     // QAP identity: A(X) · B(X) − C(X) = H(X) · Z(X).
     let lhs = a_poly.mul(&b_poly).sub(&c_poly);
     let (h_poly, rem) = lhs.divmod(&qap.z_poly);
-    debug_assert!(rem.coeffs.iter().all(|c| c.is_zero()), "QAP not satisfied — witness invalid?");
+    debug_assert!(
+        rem.coeffs.iter().all(|c| c.is_zero()),
+        "QAP not satisfied — witness invalid?"
+    );
     let _ = rem;
 
     let g1 = G1Point::generator();
@@ -364,19 +366,27 @@ pub fn prove(qap: &Qap, srs: &Groth16Srs, z: &[BigUint]) -> Groth16Proof {
     }
     // Add H polynomial commitment (each h_poly coefficient).
     for (i, hc) in h_poly.coeffs.iter().enumerate() {
-        if hc.is_zero() { continue; }
+        if hc.is_zero() {
+            continue;
+        }
         if i < srs.g1_h_coeffs.len() {
             c_proof = c_proof.add(&srs.g1_h_coeffs[i].scalar_mul(hc));
         }
     }
 
-    Groth16Proof { a: a_g1, b: b_g2, c: c_proof }
+    Groth16Proof {
+        a: a_g1,
+        b: b_g2,
+        c: c_proof,
+    }
 }
 
 fn commit_poly_g1(p: &Poly, g1_tau_pow: &[G1Point]) -> G1Point {
     let mut acc = G1Point::Infinity;
     for (i, c) in p.coeffs.iter().enumerate() {
-        if c.is_zero() { continue; }
+        if c.is_zero() {
+            continue;
+        }
         acc = acc.add(&g1_tau_pow[i].scalar_mul(c));
     }
     acc
@@ -384,7 +394,9 @@ fn commit_poly_g1(p: &Poly, g1_tau_pow: &[G1Point]) -> G1Point {
 fn commit_poly_g2(p: &Poly, g2_tau_pow: &[G2Point]) -> G2Point {
     let mut acc = G2Point::Infinity;
     for (i, c) in p.coeffs.iter().enumerate() {
-        if c.is_zero() { continue; }
+        if c.is_zero() {
+            continue;
+        }
         acc = acc.add(&g2_tau_pow[i].scalar_mul(c));
     }
     acc
@@ -448,18 +460,10 @@ mod tests {
             constraints: vec![constraint],
         };
         // z = [1, 25, 5]; constraint: 5·5 = 25 ✓.
-        let z = vec![
-            BigUint::one(),
-            BigUint::from(25u32),
-            BigUint::from(5u32),
-        ];
+        let z = vec![BigUint::one(), BigUint::from(25u32), BigUint::from(5u32)];
         assert!(r1cs.is_satisfied(&z));
         // Bad witness: x = 4 → 16 ≠ 25.
-        let z_bad = vec![
-            BigUint::one(),
-            BigUint::from(25u32),
-            BigUint::from(4u32),
-        ];
+        let z_bad = vec![BigUint::one(), BigUint::from(25u32), BigUint::from(4u32)];
         assert!(!r1cs.is_satisfied(&z_bad));
     }
 
@@ -487,18 +491,27 @@ mod tests {
 
         // Check at each evaluation point.
         for pt in &qap.points {
-            let a_eval = qap.a_polys.iter().enumerate().fold(
-                BigUint::zero(),
-                |acc, (i, p)| fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt))),
-            );
-            let b_eval = qap.b_polys.iter().enumerate().fold(
-                BigUint::zero(),
-                |acc, (i, p)| fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt))),
-            );
-            let c_eval = qap.c_polys.iter().enumerate().fold(
-                BigUint::zero(),
-                |acc, (i, p)| fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt))),
-            );
+            let a_eval = qap
+                .a_polys
+                .iter()
+                .enumerate()
+                .fold(BigUint::zero(), |acc, (i, p)| {
+                    fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt)))
+                });
+            let b_eval = qap
+                .b_polys
+                .iter()
+                .enumerate()
+                .fold(BigUint::zero(), |acc, (i, p)| {
+                    fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt)))
+                });
+            let c_eval = qap
+                .c_polys
+                .iter()
+                .enumerate()
+                .fold(BigUint::zero(), |acc, (i, p)| {
+                    fr_add(&acc, &fr_mul(&z[i], &p.evaluate(pt)))
+                });
             assert_eq!(fr_mul(&a_eval, &b_eval), c_eval);
         }
     }

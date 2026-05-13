@@ -208,9 +208,11 @@ pub fn log_sigma_minus_log_z(curve: &ZpCurve, n: usize) -> Option<PSeries> {
     for k in 1..n.min(20) {
         let k_zp = ZpInt::new(BigInt::from(k as i64), p, prec);
         let k_inv = k_zp.inverse()?;
-        let term = u_pow.mul(&PSeries::from_coef_vec(p, prec, vec![
-            ZpInt::new(BigInt::from(sign), p, prec).mul(&k_inv),
-        ]));
+        let term = u_pow.mul(&PSeries::from_coef_vec(
+            p,
+            prec,
+            vec![ZpInt::new(BigInt::from(sign), p, prec).mul(&k_inv)],
+        ));
         result = result.add(&term);
         u_pow = u_pow.mul(&u);
         // Truncate to keep length manageable.
@@ -277,7 +279,11 @@ pub fn run_mazur_tate_recovery_test(
     // For Mazur-Tate quadratic: diff should equal h(P, P) · d(d-1)/2
     // (some constant times d(d-1)/2).
     // The relationship: diff / [d(d-1)/2] should be independent of d.
-    let d_d_minus_1 = ZpInt::new(BigInt::from((d * (d - 1)) as i64), &curve.p, curve.precision);
+    let d_d_minus_1 = ZpInt::new(
+        BigInt::from((d * (d - 1)) as i64),
+        &curve.p,
+        curve.precision,
+    );
     let two = ZpInt::new(BigInt::from(2), &curve.p, curve.precision);
     let half_d_d_minus_1 = d_d_minus_1.mul(&two.inverse()?);
     let estimated_h = if half_d_d_minus_1.value.is_zero() {
@@ -350,12 +356,17 @@ mod tests {
         println!("If estimated_h is constant across d, the relation is exact");
         println!("and d is recoverable as (positive root of quadratic).");
         println!();
-        println!("{:>3} {:>12} {:>15} {:>15} {:>15}", "d", "diff", "estimated h", "z_q", "(d-1)·val_p");
+        println!(
+            "{:>3} {:>12} {:>15} {:>15} {:>15}",
+            "d", "diff", "estimated h", "z_q", "(d-1)·val_p"
+        );
 
         let mut estimated_hs: Vec<BigInt> = Vec::new();
         for d in 2u64..=8 {
             if let Some(r) = run_mazur_tate_recovery_test(&curve, &z_p, d) {
-                let h_str = r.estimated_h.as_ref()
+                let h_str = r
+                    .estimated_h
+                    .as_ref()
                     .map(|h| h.to_string())
                     .unwrap_or_else(|| "N/A".into());
                 println!(

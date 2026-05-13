@@ -50,7 +50,8 @@ impl G2Point {
             Self::Infinity => true,
             Self::Affine { x, y } => {
                 let lhs = y.square();
-                let four_u_plus_1 = Fq2::new(Fq::new(BigUint::from(4u32)), Fq::new(BigUint::from(4u32)));
+                let four_u_plus_1 =
+                    Fq2::new(Fq::new(BigUint::from(4u32)), Fq::new(BigUint::from(4u32)));
                 let rhs = x.square().mul(x).add(&four_u_plus_1);
                 lhs == rhs
             }
@@ -60,7 +61,10 @@ impl G2Point {
     pub fn neg(&self) -> Self {
         match self {
             Self::Infinity => Self::Infinity,
-            Self::Affine { x, y } => Self::Affine { x: x.clone(), y: y.neg() },
+            Self::Affine { x, y } => Self::Affine {
+                x: x.clone(),
+                y: y.neg(),
+            },
         }
     }
 

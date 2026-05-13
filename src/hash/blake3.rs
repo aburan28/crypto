@@ -39,9 +39,9 @@ mod tests {
         let h = blake3_hash(b"");
         assert_eq!(h.len(), 32);
         // Known answer: BLAKE3("") from the spec
-        let expected = hex::decode(
-            "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
-        ).unwrap();
+        let expected =
+            hex::decode("af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262")
+                .unwrap();
         assert_eq!(&h, expected.as_slice());
     }
 }

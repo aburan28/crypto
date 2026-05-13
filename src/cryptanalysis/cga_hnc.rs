@@ -170,7 +170,12 @@ pub fn curve_from_j_invariant(j: &BigInt, p: &BigInt) -> Option<(BigInt, BigInt)
 /// the four coefficients `[c_0, c_1, c_2, c_3]` of
 /// `c_0 + c_1·X + c_2·X² + c_3·X³`.
 pub fn phi_2_evaluate(j_0: &BigInt, p: &BigInt) -> [BigInt; 4] {
-    let mut coeffs = [BigInt::zero(), BigInt::zero(), BigInt::zero(), BigInt::zero()];
+    let mut coeffs = [
+        BigInt::zero(),
+        BigInt::zero(),
+        BigInt::zero(),
+        BigInt::zero(),
+    ];
     for &(c, ex, ey) in PHI_2_COEFFS {
         let c_mod = ((BigInt::from(c) % p) + p) % p;
         let j_pow = j_0.modpow(&BigInt::from(ey), p);
@@ -191,11 +196,8 @@ pub fn cubic_roots_brute(coeffs: &[BigInt; 4], p: &BigInt) -> Vec<BigInt> {
     let p_u64 = p.to_u64_digits().1[0];
     for x_u in 0..p_u64 {
         let x = BigInt::from(x_u);
-        let val = (&coeffs[0]
-            + &coeffs[1] * &x
-            + &coeffs[2] * x.pow(2)
-            + &coeffs[3] * x.pow(3))
-            % p;
+        let val =
+            (&coeffs[0] + &coeffs[1] * &x + &coeffs[2] * x.pow(2) + &coeffs[3] * x.pow(3)) % p;
         let val_pos = ((val % p) + p) % p;
         if val_pos.is_zero() {
             roots.push(x);
@@ -421,10 +423,7 @@ pub fn pt_double(p: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
                 Some(v) => v,
                 None => return Pt2::Inf,
             };
-            let lam = mod_pos(
-                (BigInt::from(3) * x.pow(2) + a) * inv,
-                p_mod,
-            );
+            let lam = mod_pos((BigInt::from(3) * x.pow(2) + a) * inv, p_mod);
             let x3 = mod_pos(lam.pow(2) - BigInt::from(2) * x, p_mod);
             let y3 = mod_pos(&lam * (x - &x3) - y, p_mod);
             Pt2::Aff(x3, y3)
@@ -491,12 +490,7 @@ pub fn pt_scalar_mul(p: &Pt2, k: &BigInt, a: &BigInt, p_mod: &BigInt) -> Pt2 {
 /// derived from Vélu's formula composed with the Weierstrass-form
 /// translations.  Verified by Φ_2(j(E), j(E')) ≡ 0 on round-trip
 /// tests.
-pub fn two_isogeny_transport_point(
-    pt: &Pt2,
-    alpha: &BigInt,
-    a: &BigInt,
-    p_mod: &BigInt,
-) -> Pt2 {
+pub fn two_isogeny_transport_point(pt: &Pt2, alpha: &BigInt, a: &BigInt, p_mod: &BigInt) -> Pt2 {
     match pt {
         Pt2::Inf => Pt2::Inf,
         Pt2::Aff(x, y) => {
@@ -506,9 +500,7 @@ pub fn two_isogeny_transport_point(
             }
             // x'_short = (x² − 4αx + 6α² + a) / (x − α)
             let num_x = mod_pos(
-                x.pow(2) - BigInt::from(4) * alpha * x
-                    + BigInt::from(6) * alpha.pow(2)
-                    + a,
+                x.pow(2) - BigInt::from(4) * alpha * x + BigInt::from(6) * alpha.pow(2) + a,
                 p_mod,
             );
             let dx = mod_pos(x - alpha, p_mod);
@@ -519,9 +511,7 @@ pub fn two_isogeny_transport_point(
             let x_new = mod_pos(num_x * &dx_inv, p_mod);
             // y'_short = y · (x² − 2αx − 2α² − a) / (x − α)²
             let num_y = mod_pos(
-                x.pow(2) - BigInt::from(2) * alpha * x
-                    - BigInt::from(2) * alpha.pow(2)
-                    - a,
+                x.pow(2) - BigInt::from(2) * alpha * x - BigInt::from(2) * alpha.pow(2) - a,
                 p_mod,
             );
             let dx_sq_inv = mod_pos(dx_inv.pow(2), p_mod);
@@ -563,12 +553,7 @@ pub fn two_torsion_x_coords(a: &BigInt, b: &BigInt, p_mod: &BigInt) -> Vec<BigIn
 /// Compute the order of `p` on `E` given that `n_curve = #E(F_p)` is
 /// known (so the order divides `n_curve`).  Returns the smallest `d`
 /// with `d·P = O`.  Tries divisors of `n_curve` in increasing order.
-pub fn point_order(
-    p: &Pt2,
-    n_curve: u64,
-    a: &BigInt,
-    p_mod: &BigInt,
-) -> u64 {
+pub fn point_order(p: &Pt2, n_curve: u64, a: &BigInt, p_mod: &BigInt) -> u64 {
     if matches!(p, Pt2::Inf) {
         return 1;
     }
@@ -730,7 +715,17 @@ pub fn cga_hnc_attack(
     max_depth: u32,
     residual_bsgs_max: u64,
 ) -> CgaHncResult {
-    cga_hnc_attack_verbose(a_0, b_0, p_mod, p_pt, q_pt, smoothness_bound, max_depth, residual_bsgs_max, false)
+    cga_hnc_attack_verbose(
+        a_0,
+        b_0,
+        p_mod,
+        p_pt,
+        q_pt,
+        smoothness_bound,
+        max_depth,
+        residual_bsgs_max,
+        false,
+    )
 }
 
 #[doc(hidden)]
@@ -754,9 +749,8 @@ pub fn cga_hnc_attack_verbose(
 
     // BFS over the 2-isogeny graph, tracking (curve coefficients,
     // current point pair on that curve, depth).
-    let mut queue: std::collections::VecDeque<(
-        BigInt, BigInt, Pt2, Pt2, u32,
-    )> = std::collections::VecDeque::new();
+    let mut queue: std::collections::VecDeque<(BigInt, BigInt, Pt2, Pt2, u32)> =
+        std::collections::VecDeque::new();
     let mut seen: std::collections::HashSet<Vec<u8>> = std::collections::HashSet::new();
     queue.push_back((a_0.clone(), b_0.clone(), p_pt.clone(), q_pt.clone(), 0));
 
@@ -848,8 +842,7 @@ pub fn cga_hnc_attack_verbose(
         // Fast path: if the CRT modulus already exceeds `ord(P)`, then
         // `d_known mod ord(P)` IS the secret (when consistent).
         let d_candidate = mod_pos(d_known.clone(), &p_order_bi);
-        let recomputed_q =
-            pt_scalar_mul(p_pt, &d_candidate, a_0, p_mod);
+        let recomputed_q = pt_scalar_mul(p_pt, &d_candidate, a_0, p_mod);
         if &recomputed_q == q_pt {
             residual_recovered_d = Some(d_candidate);
             residual_bsgs_cost = Some(0);
@@ -858,29 +851,21 @@ pub fn cga_hnc_attack_verbose(
             if m > 0 && p_order_full % m == 0 {
                 let u_range = p_order_full / m;
                 if u_range > 1 && u_range <= residual_bsgs_max {
-                    let dknown_p =
-                        pt_scalar_mul(p_pt, &d_known, a_0, p_mod);
+                    let dknown_p = pt_scalar_mul(p_pt, &d_known, a_0, p_mod);
                     let neg_dknown_p = match dknown_p {
                         Pt2::Aff(x, y) => Pt2::Aff(x, mod_pos(-y, p_mod)),
                         Pt2::Inf => Pt2::Inf,
                     };
                     let r_pt = pt_add(q_pt, &neg_dknown_p, a_0, p_mod);
-                    let mp = pt_scalar_mul(
-                        p_pt,
-                        &BigInt::from(m),
-                        a_0,
-                        p_mod,
-                    );
+                    let mp = pt_scalar_mul(p_pt, &BigInt::from(m), a_0, p_mod);
                     if let Some(u) = bsgs_dlp(&mp, &r_pt, u_range, a_0, p_mod) {
                         let d = &d_known + &modulus * BigInt::from(u);
                         let d_mod = mod_pos(d, &p_order_bi);
                         // Verify.
-                        let test_q =
-                            pt_scalar_mul(p_pt, &d_mod, a_0, p_mod);
+                        let test_q = pt_scalar_mul(p_pt, &d_mod, a_0, p_mod);
                         if &test_q == q_pt {
                             residual_recovered_d = Some(d_mod);
-                            residual_bsgs_cost =
-                                Some(((u_range as f64).sqrt().ceil()) as u64);
+                            residual_bsgs_cost = Some(((u_range as f64).sqrt().ceil()) as u64);
                         }
                     }
                 }
@@ -907,9 +892,7 @@ fn combined_modulus(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> BigIn
     m
 }
 
-fn crt_combine_map(
-    pairs: &std::collections::HashMap<u64, (u64, u64)>,
-) -> (BigInt, BigInt) {
+fn crt_combine_map(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> (BigInt, BigInt) {
     let mut d = BigInt::zero();
     let mut m = BigInt::one();
     // Distinct primes ⇒ pairwise coprime moduli.
@@ -931,13 +914,7 @@ fn modulus_to_u64(m: &BigInt) -> Option<u64> {
 
 /// Baby-step giant-step DLP on an affine curve.  Searches for `d ∈
 /// [0, n)` such that `d · base = target`.  `O(√n)` time and memory.
-fn bsgs_dlp(
-    base: &Pt2,
-    target: &Pt2,
-    n: u64,
-    a: &BigInt,
-    p_mod: &BigInt,
-) -> Option<u64> {
+fn bsgs_dlp(base: &Pt2, target: &Pt2, n: u64, a: &BigInt, p_mod: &BigInt) -> Option<u64> {
     use std::collections::HashMap;
     let m = (n as f64).sqrt().ceil() as u64;
     if m == 0 {
@@ -1189,7 +1166,11 @@ mod tests {
                 assert!(
                     dev <= bound,
                     "Hasse violated for a={}, b={}: n={}, expected~{}, dev={}",
-                    a, b, n, expected, dev
+                    a,
+                    b,
+                    n,
+                    expected,
+                    dev
                 );
             }
         }
@@ -1202,8 +1183,16 @@ mod tests {
     fn smoothness_decomposition() {
         assert_eq!(largest_smooth_divisor(720, 5), 720);
         assert_eq!(largest_smooth_divisor(720, 4), 144);
-        assert_eq!(largest_smooth_divisor(101, 100), 1, "101 prime, no small factor");
-        assert_eq!(largest_smooth_divisor(101, 101), 101, "with bound = 101 itself");
+        assert_eq!(
+            largest_smooth_divisor(101, 100),
+            1,
+            "101 prime, no small factor"
+        );
+        assert_eq!(
+            largest_smooth_divisor(101, 101),
+            101,
+            "with bound = 101 itself"
+        );
     }
 
     /// Orbit traversal terminates and returns at least the start curve.
@@ -1222,13 +1211,7 @@ mod tests {
     #[test]
     fn orbit_smoothness_report_runs() {
         let p = BigInt::from(101);
-        let report = orbit_smoothness_report(
-            &BigInt::from(1),
-            &BigInt::from(1),
-            &p,
-            50,
-            20,
-        );
+        let report = orbit_smoothness_report(&BigInt::from(1), &BigInt::from(1), &p, 50, 20);
         assert!(!report.rows.is_empty(), "should visit ≥ 1 curve");
         // Sanity: total_bits_crt ≤ log₂(p) · |orbit| (not tight, just a bound)
         let p_bits = (p.bits() as f64) * (report.rows.len() as f64);
@@ -1249,18 +1232,23 @@ mod tests {
         let p_bits = p.bits() as f64;
         println!();
         println!("== CGA-HNC Experiment P1.1: p = 1009 (10-bit) ==");
-        println!(
-            "| start curve   | #orbit | naive bits | CRT bits  | CRT/log₂(p) |"
-        );
-        println!(
-            "|---------------|--------|------------|-----------|-------------|"
-        );
+        println!("| start curve   | #orbit | naive bits | CRT bits  | CRT/log₂(p) |");
+        println!("|---------------|--------|------------|-----------|-------------|");
 
         let mut totals: Vec<f64> = Vec::new();
         for &(a, b) in &[
-            (1i64, 1i64), (1, 2), (2, 3), (3, 1), (5, 7),
-            (7, 11), (11, 13), (13, 1), (17, 1), (23, 5),
-            (29, 31), (37, 1),
+            (1i64, 1i64),
+            (1, 2),
+            (2, 3),
+            (3, 1),
+            (5, 7),
+            (7, 11),
+            (11, 13),
+            (13, 1),
+            (17, 1),
+            (23, 5),
+            (29, 31),
+            (37, 1),
         ] {
             let a_bi = BigInt::from(a);
             let b_bi = BigInt::from(b);
@@ -1271,8 +1259,12 @@ mod tests {
             let frac = report.total_bits_crt / p_bits;
             println!(
                 "| ({:>3}, {:>3})    | {:>6} | {:>10.2} | {:>9.2} | {:>11.3} |",
-                a, b, report.rows.len(), report.total_bits_naive,
-                report.total_bits_crt, frac
+                a,
+                b,
+                report.rows.len(),
+                report.total_bits_naive,
+                report.total_bits_crt,
+                frac
             );
             totals.push(frac);
         }
@@ -1284,24 +1276,17 @@ mod tests {
             println!();
             println!(
                 "Across {} curves: mean CRT/log₂(p) = {:.3}, min = {:.3}, max = {:.3}",
-                totals.len(), mean, min, max
+                totals.len(),
+                mean,
+                min,
+                max
             );
             println!();
-            println!(
-                "Interpretation: a value near 1.0 means the orbit fully covers the"
-            );
-            println!(
-                "256-bit-equivalent secret via CRT alone (no rho needed); a value"
-            );
-            println!(
-                "near 0.0 means the orbit gives no useful CRT amortisation.  Mid-"
-            );
-            println!(
-                "values indicate the proposal's HNP-residual-cleanup angle is"
-            );
-            println!(
-                "where the action is."
-            );
+            println!("Interpretation: a value near 1.0 means the orbit fully covers the");
+            println!("256-bit-equivalent secret via CRT alone (no rho needed); a value");
+            println!("near 0.0 means the orbit gives no useful CRT amortisation.  Mid-");
+            println!("values indicate the proposal's HNP-residual-cleanup angle is");
+            println!("where the action is.");
         }
     }
 
@@ -1317,9 +1302,18 @@ mod tests {
         println!("== CGA-HNC Experiment P1.2: p = 1009, B = 10 ==");
         let mut totals: Vec<f64> = Vec::new();
         for &(a, b) in &[
-            (1i64, 1i64), (1, 2), (2, 3), (3, 1), (5, 7),
-            (7, 11), (11, 13), (13, 1), (17, 1), (23, 5),
-            (29, 31), (37, 1),
+            (1i64, 1i64),
+            (1, 2),
+            (2, 3),
+            (3, 1),
+            (5, 7),
+            (7, 11),
+            (11, 13),
+            (13, 1),
+            (17, 1),
+            (23, 5),
+            (29, 31),
+            (37, 1),
         ] {
             let a_bi = BigInt::from(a);
             let b_bi = BigInt::from(b);
@@ -1335,7 +1329,10 @@ mod tests {
             let min = totals.iter().cloned().fold(f64::INFINITY, f64::min);
             println!(
                 "Across {} curves at B=10: mean CRT/log₂(p) = {:.3}, min = {:.3}, max = {:.3}",
-                totals.len(), mean, min, max
+                totals.len(),
+                mean,
+                min,
+                max
             );
         }
     }
@@ -1514,12 +1511,13 @@ mod tests {
         };
         println!(
             "  CRT: d_known = {} (mod {}); residual u-range = {}",
-            result.d_known, result.modulus,
+            result.d_known,
+            result.modulus,
             BigInt::from(p_order) / &modulus_for_div,
         );
-        if let (Some(d_full), Some(cost)) = (
-            &result.residual_recovered_d, result.residual_bsgs_cost,
-        ) {
+        if let (Some(d_full), Some(cost)) =
+            (&result.residual_recovered_d, result.residual_bsgs_cost)
+        {
             println!(
                 "  BSGS residual cleanup recovered d = {} at cost {} ops",
                 d_full, cost
@@ -1601,26 +1599,31 @@ mod tests {
         let mut bsgs_max: u64 = 0;
 
         // Sample 24 planted d values across [1, p_order).
-        let sample: Vec<u64> = (1..p_order).step_by(((p_order / 24).max(1)) as usize).collect();
+        let sample: Vec<u64> = (1..p_order)
+            .step_by(((p_order / 24).max(1)) as usize)
+            .collect();
         for &d_u in &sample {
             let d_planted = BigInt::from(d_u);
             let q_pt = pt_scalar_mul(&p_pt, &d_planted, &a, &p_mod);
             let result = cga_hnc_attack(
-                &a, &b, &p_mod, &p_pt, &q_pt,
-                100,  // smoothness bound
-                8,    // depth
+                &a, &b, &p_mod, &p_pt, &q_pt, 100,     // smoothness bound
+                8,       // depth
                 p_order, // residual_bsgs_max — allow full BSGS
             );
             let m_u = modulus_to_u64(&result.modulus).unwrap_or(1);
             let residual_range = if m_u > 0 { p_order / m_u } else { p_order };
-            let bsgs_ops = result.residual_bsgs_cost.unwrap_or(
-                ((residual_range as f64).sqrt().ceil()) as u64,
-            );
+            let bsgs_ops = result
+                .residual_bsgs_cost
+                .unwrap_or(((residual_range as f64).sqrt().ceil()) as u64);
             let recovered = result.residual_recovered_d.is_some();
             println!(
                 "| {:>9} | {:>6} | {:>11} | {:>7} | {:>14} | {:>8} | {:>10} |  d_known={}",
-                d_u, result.useful_curves, result.cooperative_curves,
-                m_u, residual_range, bsgs_ops,
+                d_u,
+                result.useful_curves,
+                result.cooperative_curves,
+                m_u,
+                residual_range,
+                bsgs_ops,
                 if recovered { "yes" } else { "no" },
                 result.d_known,
             );
@@ -1638,12 +1641,16 @@ mod tests {
         println!();
         println!(
             "Across {} planted d values: full recoveries = {}/{} ({:.0}%)",
-            total, full_recoveries, total,
+            total,
+            full_recoveries,
+            total,
             100.0 * full_recoveries as f64 / total as f64
         );
         println!(
             "  Mean cooperative_curves = {:.2}, mean BSGS cost = {:.1} ops, max = {}",
-            cooperative_total as f64 / total as f64, mean_bsgs, bsgs_max
+            cooperative_total as f64 / total as f64,
+            mean_bsgs,
+            bsgs_max
         );
         println!(
             "  Plain rho on this curve: ~{} ops.  CGA-HNC mean: {} ops.",
@@ -1708,31 +1715,35 @@ mod tests {
         let mut full_recoveries_no_orbit = 0;
         let mut total = 0;
 
-        let sample: Vec<u64> = (1..p_order).step_by(((p_order / 14).max(1)) as usize).collect();
+        let sample: Vec<u64> = (1..p_order)
+            .step_by(((p_order / 14).max(1)) as usize)
+            .collect();
         for &d_u in &sample {
             let d_planted = BigInt::from(d_u);
             let q_pt = pt_scalar_mul(&p_pt, &d_planted, &a, &p_mod);
 
             // (a) With orbit (depth=8): orbit can supply d mod 7.
             let with_orbit = cga_hnc_attack(
-                &a, &b, &p_mod, &p_pt, &q_pt,
-                5,    // tight smoothness bound
-                8,    // full orbit
+                &a, &b, &p_mod, &p_pt, &q_pt, 5, // tight smoothness bound
+                8, // full orbit
                 p_order,
             );
             // (b) Without orbit (depth=0): just PH on original curve.
             let no_orbit = cga_hnc_attack(
-                &a, &b, &p_mod, &p_pt, &q_pt,
-                5,    // tight smoothness bound
-                0,    // no orbit walk
+                &a, &b, &p_mod, &p_pt, &q_pt, 5, // tight smoothness bound
+                0, // no orbit walk
                 p_order,
             );
 
             let r_orbit = with_orbit.residual_recovered_d.is_some();
             let r_no = no_orbit.residual_recovered_d.is_some();
             total += 1;
-            if r_orbit { full_recoveries_orbit += 1; }
-            if r_no { full_recoveries_no_orbit += 1; }
+            if r_orbit {
+                full_recoveries_orbit += 1;
+            }
+            if r_no {
+                full_recoveries_no_orbit += 1;
+            }
             println!(
                 "  d={:>3}: with-orbit recovery = {} (mod {}), no-orbit recovery = {} (mod {})",
                 d_u,
@@ -1746,12 +1757,14 @@ mod tests {
         println!();
         println!(
             "  WITH orbit: {}/{} ({:.0}%) recovered",
-            full_recoveries_orbit, total,
+            full_recoveries_orbit,
+            total,
             100.0 * full_recoveries_orbit as f64 / total as f64
         );
         println!(
             "  WITHOUT orbit (single-curve PH only): {}/{} ({:.0}%) recovered",
-            full_recoveries_no_orbit, total,
+            full_recoveries_no_orbit,
+            total,
             100.0 * full_recoveries_no_orbit as f64 / total as f64
         );
         if full_recoveries_orbit > full_recoveries_no_orbit {
@@ -1802,13 +1815,13 @@ mod tests {
         let mut total = 0;
         let mut cooperative_total = 0;
         let mut full_recoveries = 0;
-        let sample: Vec<u64> = (1..p_order).step_by(((p_order / 16).max(1)) as usize).collect();
+        let sample: Vec<u64> = (1..p_order)
+            .step_by(((p_order / 16).max(1)) as usize)
+            .collect();
         for &d_u in &sample {
             let d_planted = BigInt::from(d_u);
             let q_pt = pt_scalar_mul(&p_pt, &d_planted, &a, &p_mod);
-            let result = cga_hnc_attack(
-                &a, &b, &p_mod, &p_pt, &q_pt, 100, 8, p_order,
-            );
+            let result = cga_hnc_attack(&a, &b, &p_mod, &p_pt, &q_pt, 100, 8, p_order);
             total += 1;
             cooperative_total += result.cooperative_curves;
             if result.residual_recovered_d.is_some() {
@@ -1817,7 +1830,9 @@ mod tests {
         }
         println!(
             "  {} d values: full recoveries = {}/{}, mean cooperative = {:.2}",
-            total, full_recoveries, total,
+            total,
+            full_recoveries,
+            total,
             cooperative_total as f64 / total as f64
         );
     }
@@ -1834,8 +1849,14 @@ mod tests {
         println!("== CGA-HNC Experiment P1.3: p = 10007 (14-bit), B = 100 ==");
         let mut totals: Vec<f64> = Vec::new();
         for &(a, b) in &[
-            (1i64, 1i64), (1, 2), (2, 3), (3, 1), (5, 7),
-            (7, 11), (11, 13), (17, 1),
+            (1i64, 1i64),
+            (1, 2),
+            (2, 3),
+            (3, 1),
+            (5, 7),
+            (7, 11),
+            (11, 13),
+            (17, 1),
         ] {
             let a_bi = BigInt::from(a);
             let b_bi = BigInt::from(b);
@@ -1846,7 +1867,11 @@ mod tests {
             let frac = report.total_bits_crt / p_bits;
             println!(
                 "(a={:>3}, b={:>3}): orbit={}, CRT bits = {:.2}, fraction = {:.3}",
-                a, b, report.rows.len(), report.total_bits_crt, frac
+                a,
+                b,
+                report.rows.len(),
+                report.total_bits_crt,
+                frac
             );
             totals.push(frac);
         }
@@ -1855,7 +1880,9 @@ mod tests {
             let max = totals.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
             println!(
                 "Mean CRT/log₂(p) = {:.3}, max = {:.3} across {} curves",
-                mean, max, totals.len()
+                mean,
+                max,
+                totals.len()
             );
         }
     }

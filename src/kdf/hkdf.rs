@@ -18,7 +18,7 @@ use crate::hash::sha256::sha256;
 // ── HMAC-SHA256 ───────────────────────────────────────────────────────────────
 
 const BLOCK_SIZE: usize = 64; // SHA-256 block size in bytes
-const HASH_LEN: usize = 32;   // SHA-256 output length in bytes
+const HASH_LEN: usize = 32; // SHA-256 output length in bytes
 
 /// Constant-time verification of an HMAC-SHA256 tag.
 ///
@@ -32,7 +32,9 @@ const HASH_LEN: usize = 32;   // SHA-256 output length in bytes
 pub fn hmac_sha256_verify(key: &[u8], data: &[u8], expected_tag: &[u8]) -> bool {
     use subtle::ConstantTimeEq;
     let computed = hmac_sha256(key, data);
-    if expected_tag.len() != 32 { return false; }
+    if expected_tag.len() != 32 {
+        return false;
+    }
     computed.ct_eq(expected_tag).unwrap_u8() == 1
 }
 
@@ -49,13 +51,17 @@ pub fn hmac_sha256(key: &[u8], data: &[u8]) -> [u8; 32] {
 
     // Inner hash: SHA256((k ⊕ ipad) || data)
     let mut ipad_data = [0x36u8; BLOCK_SIZE].to_vec();
-    for (a, b) in ipad_data.iter_mut().zip(k.iter()) { *a ^= b; }
+    for (a, b) in ipad_data.iter_mut().zip(k.iter()) {
+        *a ^= b;
+    }
     ipad_data.extend_from_slice(data);
     let inner = sha256(&ipad_data);
 
     // Outer hash: SHA256((k ⊕ opad) || inner)
     let mut opad_data = [0x5cu8; BLOCK_SIZE].to_vec();
-    for (a, b) in opad_data.iter_mut().zip(k.iter()) { *a ^= b; }
+    for (a, b) in opad_data.iter_mut().zip(k.iter()) {
+        *a ^= b;
+    }
     opad_data.extend_from_slice(&inner);
     sha256(&opad_data)
 }
@@ -92,12 +98,7 @@ pub fn hkdf_expand(prk: &[u8; 32], info: &[u8], length: usize) -> Vec<u8> {
 }
 
 /// One-shot HKDF: extract then expand.
-pub fn hkdf(
-    salt: Option<&[u8]>,
-    ikm: &[u8],
-    info: &[u8],
-    length: usize,
-) -> Vec<u8> {
+pub fn hkdf(salt: Option<&[u8]>, ikm: &[u8], info: &[u8], length: usize) -> Vec<u8> {
     let prk = hkdf_extract(salt, ikm);
     hkdf_expand(&prk, info, length)
 }
@@ -106,7 +107,9 @@ pub fn hkdf(
 mod tests {
     use super::*;
 
-    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+    fn h(s: &str) -> Vec<u8> {
+        hex::decode(s).unwrap()
+    }
 
     // ── HMAC-SHA256 KATs (RFC 4231) ──────────────────────────────────────────
 
@@ -169,7 +172,7 @@ mod tests {
     #[test]
     fn hkdf_rfc5869_tc1_basic() {
         // RFC 5869 §A.1
-        let ikm  = h("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+        let ikm = h("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
         let salt = h("000102030405060708090a0b0c");
         let info = h("f0f1f2f3f4f5f6f7f8f9");
         assert_eq!(
@@ -191,9 +194,11 @@ mod tests {
         let okm = hkdf(Some(&salt), &ikm, &info, 82);
         assert_eq!(
             okm,
-            h("b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c\
+            h(
+                "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c\
                59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71\
-               cc30c58179ec3e87c14c01d5c1f3434f1d87"),
+               cc30c58179ec3e87c14c01d5c1f3434f1d87"
+            ),
         );
     }
 
@@ -204,8 +209,10 @@ mod tests {
         let okm = hkdf(None, &ikm, &[], 42);
         assert_eq!(
             okm,
-            h("8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d\
-               9d201395faa4b61a96c8"),
+            h(
+                "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d\
+               9d201395faa4b61a96c8"
+            ),
         );
     }
 }

@@ -23,15 +23,15 @@
 //!
 //! For production use, see the `pqcrypto-kyber` or `kyber-kem` crates.
 
-use crate::utils::random::random_bytes_vec;
 use crate::hash::sha256::sha256;
+use crate::utils::random::random_bytes_vec;
 
 // ── Parameters (Kyber-512) ────────────────────────────────────────────────────
 
-const N: usize = 256;   // Polynomial degree
-const Q: i64   = 3329;  // Modulus
-const K: usize = 2;     // Module rank (Kyber-512 uses k=2)
-const ETA: i64 = 3;     // Noise distribution parameter (centred binomial)
+const N: usize = 256; // Polynomial degree
+const Q: i64 = 3329; // Modulus
+const K: usize = 2; // Module rank (Kyber-512 uses k=2)
+const ETA: i64 = 3; // Noise distribution parameter (centred binomial)
 
 // Compression bit widths for ciphertext components
 const DU: u32 = 10;
@@ -44,7 +44,9 @@ const DV: u32 = 4;
 pub struct Poly([i64; N]);
 
 impl Poly {
-    pub fn zero() -> Self { Poly([0; N]) }
+    pub fn zero() -> Self {
+        Poly([0; N])
+    }
 
     /// Reduce all coefficients mod Q into [0, Q)
     #[allow(dead_code)]
@@ -91,10 +93,13 @@ impl Poly {
     /// Compress coefficient to `d` bits: round(x * 2^d / q) mod 2^d
     pub fn compress(&self, d: u32) -> Vec<u16> {
         let two_d = 1i64 << d;
-        self.0.iter().map(|&c| {
-            let compressed = ((c * two_d + Q / 2) / Q).rem_euclid(two_d) as u16;
-            compressed
-        }).collect()
+        self.0
+            .iter()
+            .map(|&c| {
+                let compressed = ((c * two_d + Q / 2) / Q).rem_euclid(two_d) as u16;
+                compressed
+            })
+            .collect()
     }
 
     /// Decompress from `d`-bit representation: round(x * q / 2^d)
@@ -123,10 +128,7 @@ fn polyvec_dot(a: &PolyVec, b: &PolyVec) -> Poly {
 
 /// Matrix-vector product: A ∈ R^(k×k), v ∈ R^k → R^k
 fn matrix_vec_mul(a: &[PolyVec; K], v: &PolyVec) -> PolyVec {
-    [
-        polyvec_dot(&a[0], v),
-        polyvec_dot(&a[1], v),
-    ]
+    [polyvec_dot(&a[0], v), polyvec_dot(&a[1], v)]
 }
 
 /// Transpose matrix-vector product: Aᵀ·v
@@ -152,12 +154,12 @@ fn sample_cbd() -> Poly {
         let mut b = 0i64;
         for _ in 0..ETA {
             let byte_a = bytes[bit_idx / 8];
-            let bit_a  = (byte_a >> (bit_idx % 8)) & 1;
+            let bit_a = (byte_a >> (bit_idx % 8)) & 1;
             a += bit_a as i64;
             bit_idx += 1;
 
             let byte_b = bytes[bit_idx / 8];
-            let bit_b  = (byte_b >> (bit_idx % 8)) & 1;
+            let bit_b = (byte_b >> (bit_idx % 8)) & 1;
             b += bit_b as i64;
             bit_idx += 1;
         }
@@ -224,10 +226,7 @@ fn compress_polyvec(v: &PolyVec, d: u32) -> Vec<Vec<u16>> {
 }
 
 fn decompress_polyvec(data: &[Vec<u16>], d: u32) -> PolyVec {
-    [
-        Poly::decompress(&data[0], d),
-        Poly::decompress(&data[1], d),
-    ]
+    [Poly::decompress(&data[0], d), Poly::decompress(&data[1], d)]
 }
 
 // ── Public types ──────────────────────────────────────────────────────────────
@@ -259,8 +258,8 @@ impl Drop for KyberPrivateKey {
 /// An encapsulated shared secret (ciphertext).
 #[derive(Clone, Debug)]
 pub struct KyberCiphertext {
-    pub u: Vec<Vec<u16>>,   // Compressed A^T·r + e1
-    pub v: Vec<u16>,         // Compressed t·r + e2 + msg
+    pub u: Vec<Vec<u16>>, // Compressed A^T·r + e1
+    pub v: Vec<u16>,      // Compressed t·r + e2 + msg
 }
 
 /// Key generation: sample s, e; compute t = A·s + e.
@@ -284,7 +283,7 @@ pub fn kyber_keygen() -> KyberPrivateKey {
 pub fn kyber_encapsulate(pk: &KyberPublicKey) -> (KyberCiphertext, [u8; 32]) {
     let m: [u8; 32] = random_bytes_vec(32).try_into().unwrap();
 
-    let r  = sample_cbd_vec();
+    let r = sample_cbd_vec();
     let e1 = sample_cbd_vec();
     let e2 = sample_cbd();
     let mu = encode_message(&m);
@@ -303,7 +302,13 @@ pub fn kyber_encapsulate(pk: &KyberPublicKey) -> (KyberCiphertext, [u8; 32]) {
     // Shared secret = SHA256(m)
     let shared_secret: [u8; 32] = sha256(&m);
 
-    (KyberCiphertext { u: u_compressed, v: v_compressed }, shared_secret)
+    (
+        KyberCiphertext {
+            u: u_compressed,
+            v: v_compressed,
+        },
+        shared_secret,
+    )
 }
 
 /// Decapsulation: recover the message from the ciphertext, return shared secret.
@@ -329,7 +334,8 @@ mod tests {
     fn poly_add_sub() {
         let mut a = Poly::zero();
         let mut b = Poly::zero();
-        a.0[0] = 100; b.0[0] = 200;
+        a.0[0] = 100;
+        b.0[0] = 200;
         let sum = a.add(&b);
         assert_eq!(sum.0[0], 300);
         let diff = sum.sub(&b);
@@ -358,7 +364,10 @@ mod tests {
         let mut one = Poly::zero();
         one.0[0] = 1;
         let mut p = Poly::zero();
-        p.0[0] = 7; p.0[1] = 13; p.0[5] = 100; p.0[N - 1] = 42;
+        p.0[0] = 7;
+        p.0[1] = 13;
+        p.0[5] = 100;
+        p.0[N - 1] = 42;
         assert_eq!(one.mul(&p), p);
         assert_eq!(p.mul(&one), p);
     }
@@ -474,7 +483,7 @@ mod tests {
     fn kyber_decap_with_wrong_key_differs() {
         // Encapsulate under Alice's pk; Bob's sk must not recover Alice's secret.
         let alice = kyber_keygen();
-        let bob   = kyber_keygen();
+        let bob = kyber_keygen();
         let (ct, alice_ss) = kyber_encapsulate(&alice.public);
         let bob_ss = kyber_decapsulate(&bob, &ct);
         assert_ne!(alice_ss, bob_ss);

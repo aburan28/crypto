@@ -154,7 +154,9 @@ fn decode_integer(input: &[u8]) -> Result<(BigUint, &[u8]), DerError> {
     }
     // Reject high-bit set (would be negative in DER).
     if bytes[0] & 0x80 != 0 {
-        return Err(DerError::NonCanonical("INTEGER has high bit set (negative)"));
+        return Err(DerError::NonCanonical(
+            "INTEGER has high bit set (negative)",
+        ));
     }
     // Reject leading zero unless required by next-byte high bit.
     if bytes.len() > 1 && bytes[0] == 0x00 && bytes[1] & 0x80 == 0 {
@@ -191,7 +193,7 @@ mod tests {
         // r has high bit set ⇒ should have 0x00 prefix in encoding ⇒
         // r-length byte = 33.
         assert_eq!(der[2], 0x02); // INTEGER tag
-        assert_eq!(der[3], 33);   // length with prefix byte
+        assert_eq!(der[3], 33); // length with prefix byte
         assert_eq!(der[4], 0x00); // sign-prefix
         let (r2, s2) = decode_ecdsa_signature(&der).unwrap();
         assert_eq!(r, r2);

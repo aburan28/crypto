@@ -419,7 +419,11 @@ mod tests {
         for s in 0..8 {
             for n in 0..16 {
                 let f = SBOX[s][n] as usize;
-                assert_eq!(INV_SBOX[s][f] as usize, n, "SBOX{} inverse broken at {}", s, n);
+                assert_eq!(
+                    INV_SBOX[s][f] as usize, n,
+                    "SBOX{} inverse broken at {}",
+                    s, n
+                );
             }
         }
     }
@@ -493,7 +497,11 @@ mod tests {
             .zip(c2.iter())
             .map(|(a, b)| (a ^ b).count_ones() as usize)
             .sum::<usize>();
-        assert!(differing >= 32, "too few output bits flipped: {}", differing);
+        assert!(
+            differing >= 32,
+            "too few output bits flipped: {}",
+            differing
+        );
     }
 
     #[test]
@@ -574,11 +582,15 @@ mod tests {
             let mut key = [0u8; 32];
             let mut pt = [0u8; 16];
             for b in &mut key {
-                s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
                 *b = (s >> 56) as u8;
             }
             for b in &mut pt {
-                s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
                 *b = (s >> 56) as u8;
             }
             let k = SerpentKey::new(&key).unwrap();

@@ -101,8 +101,16 @@ fn ec_add(p: &Point, q: &Point, a: &BigUint, n: &BigUint) -> Result<Point, BigUi
                 (num * two_y_inv) % n
             } else {
                 // Distinct addition: λ = (y2 - y1) / (x2 - x1).
-                let dx = if x2 >= x1 { (x2 - x1) % n } else { (n - ((x1 - x2) % n)) % n };
-                let dy = if y2 >= y1 { (y2 - y1) % n } else { (n - ((y1 - y2) % n)) % n };
+                let dx = if x2 >= x1 {
+                    (x2 - x1) % n
+                } else {
+                    (n - ((x1 - x2) % n)) % n
+                };
+                let dy = if y2 >= y1 {
+                    (y2 - y1) % n
+                } else {
+                    (n - ((y1 - y2) % n)) % n
+                };
                 let dx_inv = mod_inv_or_factor(&dx, n)?;
                 (dy * dx_inv) % n
             };
@@ -112,9 +120,17 @@ fn ec_add(p: &Point, q: &Point, a: &BigUint, n: &BigUint) -> Result<Point, BigUi
             } else {
                 ((&lambda * &lambda) + n - x1 - x2) % n
             };
-            let x_diff = if x1 >= &x3 { (x1 - &x3) % n } else { (n - ((&x3 - x1) % n)) % n };
+            let x_diff = if x1 >= &x3 {
+                (x1 - &x3) % n
+            } else {
+                (n - ((&x3 - x1) % n)) % n
+            };
             let lx = (&lambda * &x_diff) % n;
-            let y3 = if lx >= *y1 { (lx - y1) % n } else { (n - ((y1 - lx) % n)) % n };
+            let y3 = if lx >= *y1 {
+                (lx - y1) % n
+            } else {
+                (n - ((y1 - lx) % n)) % n
+            };
             Ok(Some((x3, y3)))
         }
     }
@@ -148,7 +164,11 @@ pub fn ecm_one_curve(n: &BigUint, b1: u64, seed: u64) -> EcmResult {
         let x3 = (&x0 * &x0 % n * &x0) % n;
         let ax = (&a * &x0) % n;
         let rhs_part = (x3 + ax) % n;
-        if lhs >= rhs_part { (lhs - rhs_part) % n } else { (n - ((rhs_part - lhs) % n)) % n }
+        if lhs >= rhs_part {
+            (lhs - rhs_part) % n
+        } else {
+            (n - ((rhs_part - lhs) % n)) % n
+        }
     };
     // We don't need b explicitly for scalar mul (a is enough for the
     // doubling formula).
@@ -275,7 +295,9 @@ mod tests {
         assert!(
             &g == &p || &g == &q,
             "found factor {} should be {} or {}",
-            g, p, q
+            g,
+            p,
+            q
         );
     }
 
@@ -288,9 +310,7 @@ mod tests {
     #[test]
     #[ignore] // Time-consuming; run with --ignored
     fn ecm_attack_on_p256_cm_cofactor() {
-        use crate::cryptanalysis::p256_structural::{
-            p256_cm_discriminant_abs, deep_factor,
-        };
+        use crate::cryptanalysis::p256_structural::{deep_factor, p256_cm_discriminant_abs};
 
         let cm_disc = p256_cm_discriminant_abs();
         // First strip the trial-divisible factors and the 39-bit
@@ -323,14 +343,21 @@ mod tests {
         // find a factor — the cofactor is prime, and P-256's CM
         // discriminant factors as 3 · 5 · 456597257999 · (216-bit prime).
         let is_prime = crate::asymmetric::rsa::is_prime(&cofactor);
-        println!("Miller-Rabin primality test: {}", if is_prime { "PRIME" } else { "COMPOSITE" });
+        println!(
+            "Miller-Rabin primality test: {}",
+            if is_prime { "PRIME" } else { "COMPOSITE" }
+        );
         if is_prime {
             println!();
             println!("✓ **NEW RESULT**: P-256's CM discriminant factors COMPLETELY as");
             println!("  |D| = 3 · 5 · 456597257999 · {}", cofactor);
             println!();
             println!("  Smallest prime factor of |D|: 3");
-            println!("  Largest prime factor of |D|: {} ({} bits)", cofactor, cofactor.bits());
+            println!(
+                "  Largest prime factor of |D|: {} ({} bits)",
+                cofactor,
+                cofactor.bits()
+            );
             println!();
             println!("  This is the **complete factorisation of P-256's CM");
             println!("  discriminant** — a step that has been documented as");
@@ -354,7 +381,8 @@ mod tests {
                 println!("  product check: {}", &g * &other == cofactor);
             }
             None => {
-                println!("✗ ECM at B1 ≤ {} found no factor in {} × {} = {} curve attempts.",
+                println!(
+                    "✗ ECM at B1 ≤ {} found no factor in {} × {} = {} curve attempts.",
                     b1_levels.last().unwrap(),
                     b1_levels.len(),
                     curves_per_level,

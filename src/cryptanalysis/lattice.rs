@@ -291,8 +291,9 @@ pub fn bkz_reduce(
             let end = (k + beta - 1).min(n - 1);
             // Compute GS data restricted to rows [k..=end].
             let (bstar, mu) = gram_schmidt(&basis[..]);
-            let block_norms_sq: Vec<f64> =
-                (k..=end).map(|i| bstar[i].iter().map(|x| x * x).sum()).collect();
+            let block_norms_sq: Vec<f64> = (k..=end)
+                .map(|i| bstar[i].iter().map(|x| x * x).sum())
+                .collect();
             // Build mu_block[i][j] for i, j in 0..(end-k+1), j < i,
             // mapping mu_block[i][j] = mu[k+i][k+j].
             let block_dim = end - k + 1;
@@ -355,11 +356,7 @@ pub fn bkz_reduce(
 /// is `−Σ_{j>i} μ_{j,i} · x_j`; we try integer values in a window
 /// around it whose width is bounded by the remaining squared-norm
 /// budget.
-fn enumerate_block(
-    bstar_norms_sq: &[f64],
-    mu: &[Vec<f64>],
-    radius_sq: f64,
-) -> Option<Vec<i64>> {
+fn enumerate_block(bstar_norms_sq: &[f64], mu: &[Vec<f64>], radius_sq: f64) -> Option<Vec<i64>> {
     let d = bstar_norms_sq.len();
     if d == 0 {
         return None;
@@ -520,9 +517,8 @@ mod bkz_tests {
         lll_reduce(&mut a, 0.99).unwrap();
         bkz_reduce(&mut b, 8, 0.99).unwrap();
 
-        let norm_sq = |row: &Vec<BigInt>| -> f64 {
-            row.iter().map(|x| big_to_f64(x).powi(2)).sum()
-        };
+        let norm_sq =
+            |row: &Vec<BigInt>| -> f64 { row.iter().map(|x| big_to_f64(x).powi(2)).sum() };
         let na = norm_sq(&a[0]);
         let nb = norm_sq(&b[0]);
         assert!(

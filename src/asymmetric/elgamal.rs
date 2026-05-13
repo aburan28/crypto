@@ -95,7 +95,11 @@ impl ElGamalGroup {
     pub fn rfc3526_group_14() -> Self {
         let p = BigUint::parse_bytes(RFC3526_GROUP_14_HEX.as_bytes(), 16).expect("valid hex");
         let q = (&p - BigUint::one()) >> 1;
-        Self { p, q, g: BigUint::from(2u32) }
+        Self {
+            p,
+            q,
+            g: BigUint::from(2u32),
+        }
     }
 }
 
@@ -133,7 +137,11 @@ pub fn elgamal_keygen() -> ElGamalPrivateKey {
     let group = ElGamalGroup::rfc3526_group_14();
     let mut rng = OsRng;
     let x = rng.gen_biguint_below(&group.q);
-    let x = if x.is_zero_choice() { BigUint::one() } else { x };
+    let x = if x.is_zero_choice() {
+        BigUint::one()
+    } else {
+        x
+    };
     let h = mod_pow(&group.g, &x, &group.p);
     ElGamalPrivateKey {
         public: ElGamalPublicKey { group, h },
@@ -228,11 +236,7 @@ pub fn elgamal_mul_plain(
 /// `dec(elgamal_pow(c, k)) == m^k mod p`.
 ///
 /// Implementation: `(c₁^k, c₂^k)`.
-pub fn elgamal_pow(
-    pk: &ElGamalPublicKey,
-    c: &ElGamalCiphertext,
-    k: &BigUint,
-) -> ElGamalCiphertext {
+pub fn elgamal_pow(pk: &ElGamalPublicKey, c: &ElGamalCiphertext, k: &BigUint) -> ElGamalCiphertext {
     let p = &pk.group.p;
     ElGamalCiphertext {
         c1: mod_pow(&c.c1, k, p),

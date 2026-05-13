@@ -127,48 +127,52 @@ impl P256ProjectivePoint {
         let (x1, y1, z1) = (&self.x, &self.y, &self.z);
         let (x2, y2, z2) = (&other.x, &other.y, &other.z);
 
-        let mut t0 = x1.mul(x2);              // 1.  t0 = X1*X2
-        let mut t1 = y1.mul(y2);              // 2.  t1 = Y1*Y2
-        let mut t2 = z1.mul(z2);              // 3.  t2 = Z1*Z2
-        let mut t3 = x1.add(y1);              // 4.  t3 = X1+Y1
-        let mut t4 = x2.add(y2);              // 5.  t4 = X2+Y2
-        t3 = t3.mul(&t4);                     // 6.  t3 = t3*t4
-        t4 = t0.add(&t1);                     // 7.  t4 = t0+t1
-        t3 = t3.sub(&t4);                     // 8.  t3 = t3-t4
-        t4 = x1.add(z1);                      // 9.  t4 = X1+Z1
-        let mut t5 = x2.add(z2);              // 10. t5 = X2+Z2
-        t4 = t4.mul(&t5);                     // 11. t4 = t4*t5
-        t5 = t0.add(&t2);                     // 12. t5 = t0+t2
-        t4 = t4.sub(&t5);                     // 13. t4 = t4-t5
-        t5 = y1.add(z1);                      // 14. t5 = Y1+Z1
-        let mut x3 = y2.add(z2);              // 15. X3 = Y2+Z2
-        t5 = t5.mul(&x3);                     // 16. t5 = t5*X3
-        x3 = t1.add(&t2);                     // 17. X3 = t1+t2
-        t5 = t5.sub(&x3);                     // 18. t5 = t5-X3
-        let mut z3 = A_FE.mul(&t4);           // 19. Z3 = a*t4
-        x3 = B3_FE.mul(&t2);                  // 20. X3 = b3*t2
-        z3 = x3.add(&z3);                     // 21. Z3 = X3+Z3
-        x3 = t1.sub(&z3);                     // 22. X3 = t1-Z3
-        z3 = t1.add(&z3);                     // 23. Z3 = t1+Z3
-        let mut y3 = x3.mul(&z3);             // 24. Y3 = X3*Z3
-        t1 = t0.add(&t0);                     // 25. t1 = t0+t0
-        t1 = t1.add(&t0);                     // 26. t1 = t1+t0
-        t2 = A_FE.mul(&t2);                   // 27. t2 = a*t2
-        t4 = B3_FE.mul(&t4);                  // 28. t4 = b3*t4
-        t1 = t1.add(&t2);                     // 29. t1 = t1+t2
-        t2 = t0.sub(&t2);                     // 30. t2 = t0-t2
-        t2 = A_FE.mul(&t2);                   // 31. t2 = a*t2
-        t4 = t4.add(&t2);                     // 32. t4 = t4+t2
-        t0 = t1.mul(&t4);                     // 33. t0 = t1*t4
-        y3 = y3.add(&t0);                     // 34. Y3 = Y3+t0
-        t0 = t5.mul(&t4);                     // 35. t0 = t5*t4
-        x3 = t3.mul(&x3);                     // 36. X3 = t3*X3
-        x3 = x3.sub(&t0);                     // 37. X3 = X3-t0
-        t0 = t3.mul(&t1);                     // 38. t0 = t3*t1
-        z3 = t5.mul(&z3);                     // 39. Z3 = t5*Z3
-        z3 = z3.add(&t0);                     // 40. Z3 = Z3+t0
+        let mut t0 = x1.mul(x2); // 1.  t0 = X1*X2
+        let mut t1 = y1.mul(y2); // 2.  t1 = Y1*Y2
+        let mut t2 = z1.mul(z2); // 3.  t2 = Z1*Z2
+        let mut t3 = x1.add(y1); // 4.  t3 = X1+Y1
+        let mut t4 = x2.add(y2); // 5.  t4 = X2+Y2
+        t3 = t3.mul(&t4); // 6.  t3 = t3*t4
+        t4 = t0.add(&t1); // 7.  t4 = t0+t1
+        t3 = t3.sub(&t4); // 8.  t3 = t3-t4
+        t4 = x1.add(z1); // 9.  t4 = X1+Z1
+        let mut t5 = x2.add(z2); // 10. t5 = X2+Z2
+        t4 = t4.mul(&t5); // 11. t4 = t4*t5
+        t5 = t0.add(&t2); // 12. t5 = t0+t2
+        t4 = t4.sub(&t5); // 13. t4 = t4-t5
+        t5 = y1.add(z1); // 14. t5 = Y1+Z1
+        let mut x3 = y2.add(z2); // 15. X3 = Y2+Z2
+        t5 = t5.mul(&x3); // 16. t5 = t5*X3
+        x3 = t1.add(&t2); // 17. X3 = t1+t2
+        t5 = t5.sub(&x3); // 18. t5 = t5-X3
+        let mut z3 = A_FE.mul(&t4); // 19. Z3 = a*t4
+        x3 = B3_FE.mul(&t2); // 20. X3 = b3*t2
+        z3 = x3.add(&z3); // 21. Z3 = X3+Z3
+        x3 = t1.sub(&z3); // 22. X3 = t1-Z3
+        z3 = t1.add(&z3); // 23. Z3 = t1+Z3
+        let mut y3 = x3.mul(&z3); // 24. Y3 = X3*Z3
+        t1 = t0.add(&t0); // 25. t1 = t0+t0
+        t1 = t1.add(&t0); // 26. t1 = t1+t0
+        t2 = A_FE.mul(&t2); // 27. t2 = a*t2
+        t4 = B3_FE.mul(&t4); // 28. t4 = b3*t4
+        t1 = t1.add(&t2); // 29. t1 = t1+t2
+        t2 = t0.sub(&t2); // 30. t2 = t0-t2
+        t2 = A_FE.mul(&t2); // 31. t2 = a*t2
+        t4 = t4.add(&t2); // 32. t4 = t4+t2
+        t0 = t1.mul(&t4); // 33. t0 = t1*t4
+        y3 = y3.add(&t0); // 34. Y3 = Y3+t0
+        t0 = t5.mul(&t4); // 35. t0 = t5*t4
+        x3 = t3.mul(&x3); // 36. X3 = t3*X3
+        x3 = x3.sub(&t0); // 37. X3 = X3-t0
+        t0 = t3.mul(&t1); // 38. t0 = t3*t1
+        z3 = t5.mul(&z3); // 39. Z3 = t5*Z3
+        z3 = z3.add(&t0); // 40. Z3 = Z3+t0
 
-        P256ProjectivePoint { x: x3, y: y3, z: z3 }
+        P256ProjectivePoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
 
     /// Renes–Costello–Batina **Algorithm 3**: complete doubling for
@@ -177,43 +181,51 @@ impl P256ProjectivePoint {
     pub fn double(&self) -> Self {
         let (x, y, z) = (&self.x, &self.y, &self.z);
 
-        let mut t0 = x.mul(x);                // 1.  t0 = X*X
-        let t1 = y.mul(y);                    // 2.  t1 = Y*Y
-        let mut t2 = z.mul(z);                // 3.  t2 = Z*Z
-        let mut t3 = x.mul(y);                // 4.  t3 = X*Y
-        t3 = t3.add(&t3);                     // 5.  t3 = t3+t3
-        let mut z3 = x.mul(z);                // 6.  Z3 = X*Z
-        z3 = z3.add(&z3);                     // 7.  Z3 = Z3+Z3
-        let mut x3 = A_FE.mul(&z3);           // 8.  X3 = a*Z3
-        let mut y3 = B3_FE.mul(&t2);          // 9.  Y3 = b3*t2
-        y3 = x3.add(&y3);                     // 10. Y3 = X3+Y3
-        x3 = t1.sub(&y3);                     // 11. X3 = t1-Y3
-        y3 = t1.add(&y3);                     // 12. Y3 = t1+Y3
-        y3 = x3.mul(&y3);                     // 13. Y3 = X3*Y3
-        x3 = t3.mul(&x3);                     // 14. X3 = t3*X3
-        z3 = B3_FE.mul(&z3);                  // 15. Z3 = b3*Z3
-        t2 = A_FE.mul(&t2);                   // 16. t2 = a*t2
-        t3 = t0.sub(&t2);                     // 17. t3 = t0-t2
-        t3 = A_FE.mul(&t3);                   // 18. t3 = a*t3
-        t3 = t3.add(&z3);                     // 19. t3 = t3+Z3
-        z3 = t0.add(&t0);                     // 20. Z3 = t0+t0
-        t0 = z3.add(&t0);                     // 21. t0 = Z3+t0
-        t0 = t0.add(&t2);                     // 22. t0 = t0+t2
-        t0 = t0.mul(&t3);                     // 23. t0 = t0*t3
-        y3 = y3.add(&t0);                     // 24. Y3 = Y3+t0
-        t2 = y.mul(z);                        // 25. t2 = Y*Z
-        t2 = t2.add(&t2);                     // 26. t2 = t2+t2
-        t0 = t2.mul(&t3);                     // 27. t0 = t2*t3
-        x3 = x3.sub(&t0);                     // 28. X3 = X3-t0
-        z3 = t2.mul(&t1);                     // 29. Z3 = t2*t1
-        z3 = z3.add(&z3);                     // 30. Z3 = Z3+Z3
-        z3 = z3.add(&z3);                     // 31. Z3 = Z3+Z3
+        let mut t0 = x.mul(x); // 1.  t0 = X*X
+        let t1 = y.mul(y); // 2.  t1 = Y*Y
+        let mut t2 = z.mul(z); // 3.  t2 = Z*Z
+        let mut t3 = x.mul(y); // 4.  t3 = X*Y
+        t3 = t3.add(&t3); // 5.  t3 = t3+t3
+        let mut z3 = x.mul(z); // 6.  Z3 = X*Z
+        z3 = z3.add(&z3); // 7.  Z3 = Z3+Z3
+        let mut x3 = A_FE.mul(&z3); // 8.  X3 = a*Z3
+        let mut y3 = B3_FE.mul(&t2); // 9.  Y3 = b3*t2
+        y3 = x3.add(&y3); // 10. Y3 = X3+Y3
+        x3 = t1.sub(&y3); // 11. X3 = t1-Y3
+        y3 = t1.add(&y3); // 12. Y3 = t1+Y3
+        y3 = x3.mul(&y3); // 13. Y3 = X3*Y3
+        x3 = t3.mul(&x3); // 14. X3 = t3*X3
+        z3 = B3_FE.mul(&z3); // 15. Z3 = b3*Z3
+        t2 = A_FE.mul(&t2); // 16. t2 = a*t2
+        t3 = t0.sub(&t2); // 17. t3 = t0-t2
+        t3 = A_FE.mul(&t3); // 18. t3 = a*t3
+        t3 = t3.add(&z3); // 19. t3 = t3+Z3
+        z3 = t0.add(&t0); // 20. Z3 = t0+t0
+        t0 = z3.add(&t0); // 21. t0 = Z3+t0
+        t0 = t0.add(&t2); // 22. t0 = t0+t2
+        t0 = t0.mul(&t3); // 23. t0 = t0*t3
+        y3 = y3.add(&t0); // 24. Y3 = Y3+t0
+        t2 = y.mul(z); // 25. t2 = Y*Z
+        t2 = t2.add(&t2); // 26. t2 = t2+t2
+        t0 = t2.mul(&t3); // 27. t0 = t2*t3
+        x3 = x3.sub(&t0); // 28. X3 = X3-t0
+        z3 = t2.mul(&t1); // 29. Z3 = t2*t1
+        z3 = z3.add(&z3); // 30. Z3 = Z3+Z3
+        z3 = z3.add(&z3); // 31. Z3 = Z3+Z3
 
-        P256ProjectivePoint { x: x3, y: y3, z: z3 }
+        P256ProjectivePoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
 
     pub fn neg(&self) -> Self {
-        P256ProjectivePoint { x: self.x, y: self.y.neg(), z: self.z }
+        P256ProjectivePoint {
+            x: self.x,
+            y: self.y.neg(),
+            z: self.z,
+        }
     }
 
     /// Constant-time scalar multiplication via the Montgomery ladder.
@@ -295,10 +307,8 @@ mod tests {
             Point::Affine { x, y } => (x.value.clone(), y.value.clone()),
             Point::Infinity => panic!(),
         };
-        let pp = P256ProjectivePoint::from_affine(
-            &U256::from_biguint(&gx),
-            &U256::from_biguint(&gy),
-        );
+        let pp =
+            P256ProjectivePoint::from_affine(&U256::from_biguint(&gx), &U256::from_biguint(&gy));
         let (xb, yb) = pp.to_affine().unwrap();
         assert_eq!(xb.to_biguint(), gx);
         assert_eq!(yb.to_biguint(), gy);
@@ -343,8 +353,14 @@ mod tests {
     fn add_with_identity_law() {
         let g = p256().generator();
         let pg = P256ProjectivePoint::from_textbook(&g);
-        assert!(proj_eq_textbook(&pg.add(&P256ProjectivePoint::IDENTITY), &g));
-        assert!(proj_eq_textbook(&P256ProjectivePoint::IDENTITY.add(&pg), &g));
+        assert!(proj_eq_textbook(
+            &pg.add(&P256ProjectivePoint::IDENTITY),
+            &g
+        ));
+        assert!(proj_eq_textbook(
+            &P256ProjectivePoint::IDENTITY.add(&pg),
+            &g
+        ));
     }
 
     #[test]

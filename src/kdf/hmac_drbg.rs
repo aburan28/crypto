@@ -39,7 +39,10 @@ impl HmacDrbg {
     /// Optionally pass `personalization` for domain separation
     /// (NIST SP 800-90A §10.1.2.3).
     pub fn new(entropy: &[u8], personalization: &[u8]) -> Self {
-        let mut drbg = HmacDrbg { k: [0u8; 32], v: [1u8; 32] };
+        let mut drbg = HmacDrbg {
+            k: [0u8; 32],
+            v: [1u8; 32],
+        };
         let mut seed = Vec::with_capacity(entropy.len() + personalization.len());
         seed.extend_from_slice(entropy);
         seed.extend_from_slice(personalization);

@@ -197,7 +197,9 @@ impl CorrelationTable {
         for (b, byte) in r_bytes.iter().enumerate() {
             for k in 0..8 {
                 let idx = b * 8 + k;
-                if idx >= 256 { break; }
+                if idx >= 256 {
+                    break;
+                }
                 r_bits[idx] = (byte >> k) & 1 == 1;
             }
         }
@@ -278,17 +280,20 @@ mod tests {
         let test_inputs: &[[u32; 16]] = &[
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0xFFFFFFFF; 16],
-            [0xDEADBEEF, 0xCAFEBABE, 0x12345678, 0x87654321,
-             0x00000001, 0x00000002, 0x00000003, 0x00000004,
-             0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD,
-             0xEEEEEEEE, 0xFFFFFFFF, 0x10101010, 0x20202020],
+            [
+                0xDEADBEEF, 0xCAFEBABE, 0x12345678, 0x87654321, 0x00000001, 0x00000002, 0x00000003,
+                0x00000004, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF,
+                0x10101010, 0x20202020,
+            ],
         ];
         for input in test_inputs {
             let solinas = solinas_reduce_p256(input);
             let direct = direct_reduce(input);
-            assert_eq!(solinas, direct,
+            assert_eq!(
+                solinas, direct,
                 "Solinas reduction disagrees with direct for input {:?}",
-                input);
+                input
+            );
         }
     }
 
@@ -323,12 +328,17 @@ mod tests {
         // positives at z ≈ 4.5 by Bonferroni-style reasoning.
         // Looking for z > 6 (clearly significant) or consistent
         // structural patterns.
-        let max_z = outliers.iter().map(|&(z, _, _)| z.abs()).fold(0.0f64, f64::max);
+        let max_z = outliers
+            .iter()
+            .map(|&(z, _, _)| z.abs())
+            .fold(0.0f64, f64::max);
         println!();
         println!("Maximum |z| observed: {:.2}", max_z);
         println!();
-        println!("Expected under independence: max |z| ≈ {:.2} for N tests at α=0.001 / N",
-                 ((131072.0 / 0.001f64).ln() * 2.0).sqrt());
+        println!(
+            "Expected under independence: max |z| ≈ {:.2} for N tests at α=0.001 / N",
+            ((131072.0 / 0.001f64).ln() * 2.0).sqrt()
+        );
         println!();
         if max_z > 6.0 {
             println!("⚠ Maximum |z| > 6 — POTENTIALLY ANOMALOUS.");

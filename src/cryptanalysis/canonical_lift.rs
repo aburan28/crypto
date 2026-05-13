@@ -96,15 +96,27 @@ impl ZpInt {
     pub fn new(value: BigInt, p: &BigInt, precision: u32) -> Self {
         let m = p.pow(precision);
         let v = ((value % &m) + &m) % &m;
-        ZpInt { p: p.clone(), precision, value: v }
+        ZpInt {
+            p: p.clone(),
+            precision,
+            value: v,
+        }
     }
 
     pub fn zero(p: &BigInt, precision: u32) -> Self {
-        ZpInt { p: p.clone(), precision, value: BigInt::zero() }
+        ZpInt {
+            p: p.clone(),
+            precision,
+            value: BigInt::zero(),
+        }
     }
 
     pub fn one(p: &BigInt, precision: u32) -> Self {
-        ZpInt { p: p.clone(), precision, value: BigInt::one() }
+        ZpInt {
+            p: p.clone(),
+            precision,
+            value: BigInt::one(),
+        }
     }
 
     pub fn add(&self, other: &Self) -> Self {
@@ -276,11 +288,7 @@ impl ZpCurve {
 /// choice works), solve for `Y`.  Returns `None` if the curve has
 /// `2 y_0 ≡ 0 (mod p)` (singular y-derivative — would need different
 /// strategy).
-pub fn hensel_lift_point(
-    curve: &ZpCurve,
-    x_0: &BigInt,
-    y_0: &BigInt,
-) -> Option<ZpPoint> {
+pub fn hensel_lift_point(curve: &ZpCurve, x_0: &BigInt, y_0: &BigInt) -> Option<ZpPoint> {
     let p = &curve.p;
     let prec = curve.precision;
     // Use X = x_0 (lifted as p-adic integer = x_0 + 0·p + 0·p² + …).
@@ -399,8 +407,7 @@ pub fn smart_attack_anomalous(
     // Hensel-lift P̂, Q̂ to E(Z_p / p²).
     let p_hat = hensel_lift_point(&curve, p_pt_x, p_pt_y)
         .ok_or("Hensel lift of P failed (likely 2·y_P ≡ 0 mod p)")?;
-    let q_hat = hensel_lift_point(&curve, q_pt_x, q_pt_y)
-        .ok_or("Hensel lift of Q failed")?;
+    let q_hat = hensel_lift_point(&curve, q_pt_x, q_pt_y).ok_or("Hensel lift of Q failed")?;
 
     // Compute [p]·P̂ and [p]·Q̂.  Both reduce to O ∈ E(F_p) (since
     // #E(F_p) = p), so they lie in the formal group.
@@ -444,10 +451,8 @@ pub fn find_anomalous_curve(p: u64) -> Option<(u64, u64)> {
     for a in 0..p {
         for b in 0..p {
             // Check non-singularity: 4a³ + 27b² ≢ 0 (mod p).
-            let disc = (4u64.wrapping_mul(a)
-                .wrapping_mul(a)
-                .wrapping_mul(a))
-            .wrapping_add(27u64.wrapping_mul(b).wrapping_mul(b))
+            let disc = (4u64.wrapping_mul(a).wrapping_mul(a).wrapping_mul(a))
+                .wrapping_add(27u64.wrapping_mul(b).wrapping_mul(b))
                 % p;
             if disc == 0 {
                 continue;
@@ -538,8 +543,7 @@ mod tests {
         // Pick a point on E: y² = x³ + x + 6 over F_11.
         // x = 2: rhs = 8 + 2 + 6 = 16 = 5; need y² ≡ 5 mod 11.
         // 4² = 16 ≡ 5 ✓.  So (2, 4) is on E.  Lift it.
-        let pt = hensel_lift_point(&curve, &BigInt::from(2), &BigInt::from(4))
-            .expect("2,4 lifts");
+        let pt = hensel_lift_point(&curve, &BigInt::from(2), &BigInt::from(4)).expect("2,4 lifts");
         let dbl = curve.double(&pt);
         let added = curve.add(&pt, &pt);
         assert_eq!(dbl, added, "2·P should equal P + P");
@@ -566,10 +570,7 @@ mod tests {
     fn find_anomalous_curve_works() {
         let p = 11u64;
         let result = find_anomalous_curve(p);
-        assert!(
-            result.is_some(),
-            "should find an anomalous curve over F_11"
-        );
+        assert!(result.is_some(), "should find an anomalous curve over F_11");
         let (a, b) = result.unwrap();
         // Verify by re-counting.
         let mut count: u64 = 1;

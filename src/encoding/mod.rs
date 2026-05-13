@@ -8,6 +8,4 @@
 
 pub mod der;
 
-pub use der::{
-    decode_ecdsa_signature, encode_ecdsa_signature, DerError,
-};
+pub use der::{decode_ecdsa_signature, encode_ecdsa_signature, DerError};

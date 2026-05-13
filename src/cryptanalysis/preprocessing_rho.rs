@@ -142,13 +142,7 @@ fn partition(x: &BigUint) -> u8 {
     bytes.last().copied().unwrap_or(0) & 1
 }
 
-fn step_g(
-    x: &BigUint,
-    a: &BigUint,
-    g: &BigUint,
-    p: &BigUint,
-    n: &BigUint,
-) -> (BigUint, BigUint) {
+fn step_g(x: &BigUint, a: &BigUint, g: &BigUint, p: &BigUint, n: &BigUint) -> (BigUint, BigUint) {
     match partition(x) {
         0 => ((x * g) % p, (a + BigUint::one()) % n),
         _ => ((x * x) % p, (a * BigUint::from(2u32)) % n),
@@ -413,7 +407,8 @@ mod tests {
         assert!(
             online < 5.0 * n_one_third && online > 0.2 * n_one_third,
             "online = {}, expected near {}",
-            online, n_one_third
+            online,
+            n_one_third
         );
     }
 

@@ -141,12 +141,7 @@ pub fn sign(msg: &[u8], d: &BigUint, curve: &CurveParams, width: DigestBits) -> 
 
 /// **Verify** that `sig` is a valid GOST 34.10-2012 signature for the
 /// pre-computed hash `hash` under public key `pa`.
-pub fn verify_hash(
-    hash: &[u8],
-    sig: &GostSignature,
-    pa: &Point,
-    curve: &CurveParams,
-) -> bool {
+pub fn verify_hash(hash: &[u8], sig: &GostSignature, pa: &Point, curve: &CurveParams) -> bool {
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
         return false;
     }
@@ -208,8 +203,10 @@ mod tests {
     fn gost_256_public_key_vector() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let (xa, ya) = match pa {
             Point::Affine { x, y } => (x.value, y.value),
@@ -218,14 +215,18 @@ mod tests {
         assert_eq!(
             xa,
             BigUint::parse_bytes(
-                b"7F2B49E270DB6D90D8595BEC458B50C58585BA1D4E9B788F6689DBD8E56FD80B", 16,
-            ).unwrap(),
+                b"7F2B49E270DB6D90D8595BEC458B50C58585BA1D4E9B788F6689DBD8E56FD80B",
+                16,
+            )
+            .unwrap(),
         );
         assert_eq!(
             ya,
             BigUint::parse_bytes(
-                b"26F1B489D6701DD185C8413A977B3CBBAF64D1C593D26627DFFB101A87FF77DA", 16,
-            ).unwrap(),
+                b"26F1B489D6701DD185C8413A977B3CBBAF64D1C593D26627DFFB101A87FF77DA",
+                16,
+            )
+            .unwrap(),
         );
     }
 
@@ -235,27 +236,33 @@ mod tests {
     fn gost_256_signature_vector() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let k = BigUint::parse_bytes(
-            b"77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3", 16,
-        ).unwrap();
-        let alpha = hex_bytes(
-            "2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5",
-        );
+            b"77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3",
+            16,
+        )
+        .unwrap();
+        let alpha = hex_bytes("2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5");
         let sig = sign_hash_with_k(&alpha, &d, &k, &curve).expect("nonce is fine");
         assert_eq!(
             sig.r,
             BigUint::parse_bytes(
-                b"41AA28D2F1AB148280CD9ED56FEDA41974053554A42767B83AD043FD39DC0493", 16,
-            ).unwrap(),
+                b"41AA28D2F1AB148280CD9ED56FEDA41974053554A42767B83AD043FD39DC0493",
+                16,
+            )
+            .unwrap(),
             "r mismatch",
         );
         assert_eq!(
             sig.s,
             BigUint::parse_bytes(
-                b"1456C64BA4642A1653C235A98A60249BCD6D3F746B631DF928014F6C5BF9C40", 16,
-            ).unwrap(),
+                b"1456C64BA4642A1653C235A98A60249BCD6D3F746B631DF928014F6C5BF9C40",
+                16,
+            )
+            .unwrap(),
             "s mismatch",
         );
     }
@@ -265,8 +272,10 @@ mod tests {
     fn gost_256_sign_verify_roundtrip() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let msg = b"GOST 34.10-2012 message";
         let sig = sign(msg, &d, &curve, DigestBits::B256);
@@ -280,15 +289,17 @@ mod tests {
     fn gost_256_signature_verifies() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let k = BigUint::parse_bytes(
-            b"77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3", 16,
-        ).unwrap();
-        let alpha = hex_bytes(
-            "2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5",
-        );
+            b"77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3",
+            16,
+        )
+        .unwrap();
+        let alpha = hex_bytes("2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5");
         let sig = sign_hash_with_k(&alpha, &d, &k, &curve).unwrap();
         assert!(verify_hash(&alpha, &sig, &pa, &curve));
     }
@@ -298,8 +309,10 @@ mod tests {
     fn gost_256_wrong_message_fails() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let sig = sign(b"original", &d, &curve, DigestBits::B256);
         assert!(!verify(b"tampered", &sig, &pa, &curve, DigestBits::B256));
@@ -344,8 +357,10 @@ mod tests {
     fn gost_reject_out_of_range() {
         let curve = curve_256_test();
         let d = BigUint::parse_bytes(
-            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16,
-        ).unwrap();
+            b"7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let bad_r = GostSignature {
             r: BigUint::zero(),

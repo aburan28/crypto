@@ -46,8 +46,8 @@
 use crate::ecc::x25519::{x25519, x25519_base};
 use crate::hash::sha256::sha256;
 use crate::pqc::kyber::{
-    kyber_decapsulate, kyber_encapsulate, kyber_keygen,
-    KyberCiphertext, KyberPrivateKey, KyberPublicKey,
+    kyber_decapsulate, kyber_encapsulate, kyber_keygen, KyberCiphertext, KyberPrivateKey,
+    KyberPublicKey,
 };
 use rand::{rngs::OsRng, Rng};
 
@@ -93,7 +93,10 @@ pub fn x_wing_keygen() -> XWingKeyPair {
     let kyber_sk = kyber_keygen();
     let kyber_pk = kyber_sk.public.clone();
 
-    let pk = XWingPublicKey { x25519: x_pk, kyber: kyber_pk };
+    let pk = XWingPublicKey {
+        x25519: x_pk,
+        kyber: kyber_pk,
+    };
     let sk = XWingPrivateKey {
         x25519: x_sk,
         kyber: kyber_sk,

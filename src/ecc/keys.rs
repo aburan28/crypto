@@ -56,8 +56,14 @@ impl EccKeyPair {
         let d = random_scalar(&curve.n);
         let q = scalar_mul_secret(&curve.generator(), &d, curve);
         EccKeyPair {
-            private: EccPrivateKey { scalar: d, curve_name: curve.name.to_string() },
-            public: EccPublicKey { point: q, curve_name: curve.name.to_string() },
+            private: EccPrivateKey {
+                scalar: d,
+                curve_name: curve.name.to_string(),
+            },
+            public: EccPublicKey {
+                point: q,
+                curve_name: curve.name.to_string(),
+            },
         }
     }
 
@@ -65,8 +71,14 @@ impl EccKeyPair {
     pub fn from_private(d: BigUint, curve: &CurveParams) -> Self {
         let q = scalar_mul_secret(&curve.generator(), &d, curve);
         EccKeyPair {
-            private: EccPrivateKey { scalar: d, curve_name: curve.name.to_string() },
-            public: EccPublicKey { point: q, curve_name: curve.name.to_string() },
+            private: EccPrivateKey {
+                scalar: d,
+                curve_name: curve.name.to_string(),
+            },
+            public: EccPublicKey {
+                point: q,
+                curve_name: curve.name.to_string(),
+            },
         }
     }
 }

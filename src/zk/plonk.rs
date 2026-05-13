@@ -141,19 +141,17 @@ impl Circuit {
                         &fr_mul(&self.q_o[i], &w.c[i]),
                     ),
                 ),
-                &fr_add(&fr_mul(&self.q_m[i], &fr_mul(&w.a[i], &w.b[i])), &self.q_c[i]),
+                &fr_add(
+                    &fr_mul(&self.q_m[i], &fr_mul(&w.a[i], &w.b[i])),
+                    &self.q_c[i],
+                ),
             );
             if !term.is_zero() {
                 return false;
             }
         }
         // Permutation (copy constraints).
-        let all_wires: Vec<&BigUint> = w
-            .a
-            .iter()
-            .chain(w.b.iter())
-            .chain(w.c.iter())
-            .collect();
+        let all_wires: Vec<&BigUint> = w.a.iter().chain(w.b.iter()).chain(w.c.iter()).collect();
         for (i, &target) in self.permutation.iter().enumerate() {
             if all_wires[i] != all_wires[target] {
                 return false;
@@ -172,7 +170,9 @@ struct Transcript {
 
 impl Transcript {
     fn new() -> Self {
-        Self { state: FS_TAG.as_bytes().to_vec() }
+        Self {
+            state: FS_TAG.as_bytes().to_vec(),
+        }
     }
     fn append(&mut self, label: &str, bytes: &[u8]) {
         self.state.extend_from_slice(label.as_bytes());
@@ -257,8 +257,7 @@ pub fn prove(circuit: &Circuit, witness: &Witness) -> PlonkProof {
     let alpha = transcript.challenge("alpha");
 
     let t_poly = compute_quotient(
-        circuit, &h_domain, &a_poly, &b_poly, &c_poly, &z_poly,
-        &beta, &gamma, &alpha,
+        circuit, &h_domain, &a_poly, &b_poly, &c_poly, &z_poly, &beta, &gamma, &alpha,
     );
 
     transcript.append_poly("t", &t_poly);
@@ -321,10 +320,7 @@ pub fn verify(circuit: &Circuit, proof: &PlonkProof) -> bool {
     //   gate(ζ) = q_M·a·b + q_L·a + q_R·b + q_O·c + q_C.
     let gate_zeta = fr_add(
         &fr_add(
-            &fr_add(
-                &fr_mul(&q_m_z, &fr_mul(a_z, b_z)),
-                &fr_mul(&q_l_z, a_z),
-            ),
+            &fr_add(&fr_mul(&q_m_z, &fr_mul(a_z, b_z)), &fr_mul(&q_l_z, a_z)),
             &fr_add(&fr_mul(&q_r_z, b_z), &fr_mul(&q_o_z, c_z)),
         ),
         &q_c_z,
@@ -400,14 +396,30 @@ fn compute_z(
     let mut acc = BigUint::one();
     for i in 0..(n - 1) {
         // Numerator at row i.
-        let num_a = fr_add(&witness.a[i], &fr_add(&fr_mul(beta, &fr_mul(&k_a, &h_domain[i])), gamma));
-        let num_b = fr_add(&witness.b[i], &fr_add(&fr_mul(beta, &fr_mul(&k_b, &h_domain[i])), gamma));
-        let num_c = fr_add(&witness.c[i], &fr_add(&fr_mul(beta, &fr_mul(&k_c, &h_domain[i])), gamma));
+        let num_a = fr_add(
+            &witness.a[i],
+            &fr_add(&fr_mul(beta, &fr_mul(&k_a, &h_domain[i])), gamma),
+        );
+        let num_b = fr_add(
+            &witness.b[i],
+            &fr_add(&fr_mul(beta, &fr_mul(&k_b, &h_domain[i])), gamma),
+        );
+        let num_c = fr_add(
+            &witness.c[i],
+            &fr_add(&fr_mul(beta, &fr_mul(&k_c, &h_domain[i])), gamma),
+        );
         let num = fr_mul(&fr_mul(&num_a, &num_b), &num_c);
         // Denominator at row i: uses the permutation σ.
         let sigma_a = wire_id_to_omega(circuit.permutation[i], n, h_domain, &k_a, &k_b, &k_c);
         let sigma_b = wire_id_to_omega(circuit.permutation[n + i], n, h_domain, &k_a, &k_b, &k_c);
-        let sigma_c = wire_id_to_omega(circuit.permutation[2 * n + i], n, h_domain, &k_a, &k_b, &k_c);
+        let sigma_c = wire_id_to_omega(
+            circuit.permutation[2 * n + i],
+            n,
+            h_domain,
+            &k_a,
+            &k_b,
+            &k_c,
+        );
         let den_a = fr_add(&witness.a[i], &fr_add(&fr_mul(beta, &sigma_a), gamma));
         let den_b = fr_add(&witness.b[i], &fr_add(&fr_mul(beta, &sigma_b), gamma));
         let den_c = fr_add(&witness.c[i], &fr_add(&fr_mul(beta, &sigma_c), gamma));
@@ -464,7 +476,8 @@ fn compute_quotient(
 
     // Gate(X) = q_M·a·b + q_L·a + q_R·b + q_O·c + q_C.
     let ab = a_poly.mul(b_poly);
-    let gate = q_m_poly.mul(&ab)
+    let gate = q_m_poly
+        .mul(&ab)
         .add(&q_l_poly.mul(a_poly))
         .add(&q_r_poly.mul(b_poly))
         .add(&q_o_poly.mul(c_poly))
@@ -514,7 +527,16 @@ fn permutation_identity_at_zeta(
         .map(|i| wire_id_to_omega(circuit.permutation[n + i], n, h_domain, &k_a, &k_b, &k_c))
         .collect();
     let sigma_c_evals: Vec<BigUint> = (0..n)
-        .map(|i| wire_id_to_omega(circuit.permutation[2 * n + i], n, h_domain, &k_a, &k_b, &k_c))
+        .map(|i| {
+            wire_id_to_omega(
+                circuit.permutation[2 * n + i],
+                n,
+                h_domain,
+                &k_a,
+                &k_b,
+                &k_c,
+            )
+        })
         .collect();
     let sigma_a_poly = lagrange_from_evaluations(h_domain, &sigma_a_evals);
     let sigma_b_poly = lagrange_from_evaluations(h_domain, &sigma_b_evals);
@@ -552,14 +574,42 @@ mod tests {
         // Gate 1: a + b - c = 0 ⇒ q_L=1, q_R=1, q_O=-1, others 0.
         // Gates 2, 3: 0 = 0 (no-op).
         let neg_one = fr_neg(&BigUint::one());
-        let q_l = vec![BigUint::zero(), BigUint::one(), BigUint::zero(), BigUint::zero()];
-        let q_r = vec![BigUint::zero(), BigUint::one(), BigUint::zero(), BigUint::zero()];
-        let q_o = vec![neg_one.clone(), neg_one.clone(), BigUint::zero(), BigUint::zero()];
-        let q_m = vec![BigUint::one(), BigUint::zero(), BigUint::zero(), BigUint::zero()];
+        let q_l = vec![
+            BigUint::zero(),
+            BigUint::one(),
+            BigUint::zero(),
+            BigUint::zero(),
+        ];
+        let q_r = vec![
+            BigUint::zero(),
+            BigUint::one(),
+            BigUint::zero(),
+            BigUint::zero(),
+        ];
+        let q_o = vec![
+            neg_one.clone(),
+            neg_one.clone(),
+            BigUint::zero(),
+            BigUint::zero(),
+        ];
+        let q_m = vec![
+            BigUint::one(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+        ];
         let q_c = vec![BigUint::zero(); n];
         // Identity permutation (each wire maps to itself; no copy constraints).
         let permutation: Vec<usize> = (0..(3 * n)).collect();
-        let circuit = Circuit { n, q_l, q_r, q_o, q_m, q_c, permutation };
+        let circuit = Circuit {
+            n,
+            q_l,
+            q_r,
+            q_o,
+            q_m,
+            q_c,
+            permutation,
+        };
 
         // Witness: a = (3, 5, 0, 0), b = (4, 7, 0, 0),
         //          c = (12, 12, 0, 0).

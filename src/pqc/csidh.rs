@@ -68,18 +68,30 @@ pub const M: i32 = 3;
 
 // ── Field arithmetic over F_p ─────────────────────────────────────
 
-fn fp_add(a: u64, b: u64) -> u64 { (a + b) % P }
-fn fp_sub(a: u64, b: u64) -> u64 { ((a + P) - (b % P)) % P }
-fn fp_mul(a: u64, b: u64) -> u64 { (a * b) % P }
-fn fp_neg(a: u64) -> u64 { (P - (a % P)) % P }
+fn fp_add(a: u64, b: u64) -> u64 {
+    (a + b) % P
+}
+fn fp_sub(a: u64, b: u64) -> u64 {
+    ((a + P) - (b % P)) % P
+}
+fn fp_mul(a: u64, b: u64) -> u64 {
+    (a * b) % P
+}
+fn fp_neg(a: u64) -> u64 {
+    (P - (a % P)) % P
+}
 fn fp_inv(a: u64) -> Option<u64> {
     // Fermat: a^{p-2} mod p.
-    if a == 0 { return None; }
+    if a == 0 {
+        return None;
+    }
     let mut result = 1u64;
     let mut base = a % P;
     let mut exp = P - 2;
     while exp > 0 {
-        if exp & 1 == 1 { result = fp_mul(result, base); }
+        if exp & 1 == 1 {
+            result = fp_mul(result, base);
+        }
         base = fp_mul(base, base);
         exp >>= 1;
     }
@@ -87,13 +99,17 @@ fn fp_inv(a: u64) -> Option<u64> {
 }
 fn fp_sqrt(a: u64) -> Option<u64> {
     // p ≡ 3 mod 4: sqrt(a) = a^{(p+1)/4} mod p when a is a QR.
-    if a == 0 { return Some(0); }
+    if a == 0 {
+        return Some(0);
+    }
     let exp = (P + 1) / 4;
     let mut result = 1u64;
     let mut base = a % P;
     let mut e = exp;
     while e > 0 {
-        if e & 1 == 1 { result = fp_mul(result, base); }
+        if e & 1 == 1 {
+            result = fp_mul(result, base);
+        }
         base = fp_mul(base, base);
         e >>= 1;
     }
@@ -118,7 +134,9 @@ pub enum MontPoint {
 }
 
 impl MontCurve {
-    pub fn base() -> Self { Self { a: 0 } }
+    pub fn base() -> Self {
+        Self { a: 0 }
+    }
 
     /// Check whether `(x, y)` is on the curve `y² = x³ + Ax² + x`.
     pub fn is_on_curve(&self, p: &MontPoint) -> bool {
@@ -176,7 +194,9 @@ impl MontCurve {
         match p {
             MontPoint::Infinity => MontPoint::Infinity,
             MontPoint::Affine { x, y } => {
-                if *y == 0 { return MontPoint::Infinity; }
+                if *y == 0 {
+                    return MontPoint::Infinity;
+                }
                 let two_y_inv = fp_inv(fp_mul(2, *y)).unwrap();
                 let three_x2 = fp_mul(3, fp_mul(*x, *x));
                 let two_ax = fp_mul(2, fp_mul(self.a, *x));
@@ -194,7 +214,9 @@ impl MontCurve {
         let mut addend = *p;
         let mut e = k;
         while e > 0 {
-            if e & 1 == 1 { result = self.add(&result, &addend); }
+            if e & 1 == 1 {
+                result = self.add(&result, &addend);
+            }
             addend = self.double(&addend);
             e >>= 1;
         }
@@ -205,7 +227,9 @@ impl MontCurve {
     pub fn find_point_of_order(&self, ell: u64) -> Option<MontPoint> {
         let cofactor = (P + 1) / ell;
         for pt in self.all_points() {
-            if matches!(pt, MontPoint::Infinity) { continue; }
+            if matches!(pt, MontPoint::Infinity) {
+                continue;
+            }
             let pt_cofactor = self.scalar_mul(&pt, cofactor);
             if !matches!(pt_cofactor, MontPoint::Infinity) {
                 // Verify [ell]·pt_cofactor = O.

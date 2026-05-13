@@ -401,7 +401,11 @@ mod tests {
         };
         let result = audit_ecdsa_transcript(&curve, &kp.public, &samples, &opts);
         match result {
-            AuditResult::KeyRecovered { d: recovered, k_bits, .. } => {
+            AuditResult::KeyRecovered {
+                d: recovered,
+                k_bits,
+                ..
+            } => {
                 assert_eq!(recovered, d, "audit recovered wrong d");
                 assert!(
                     (180..=220).contains(&k_bits),
@@ -498,7 +502,8 @@ mod tests {
         assert!(
             biased_score > uniform_score,
             "biased should score higher than uniform: biased={}, uniform={}",
-            biased_score, uniform_score
+            biased_score,
+            uniform_score
         );
         assert!(
             biased_score > 0.9,
@@ -518,12 +523,7 @@ mod tests {
     fn handles_degenerate_inputs() {
         let curve = CurveParams::p256();
         let kp = EccKeyPair::from_private(BigUint::from(7u32), &curve);
-        let result = audit_ecdsa_transcript(
-            &curve,
-            &kp.public,
-            &[],
-            &AuditOptions::default(),
-        );
+        let result = audit_ecdsa_transcript(&curve, &kp.public, &[], &AuditOptions::default());
         assert!(matches!(result, AuditResult::NoBiasDetected));
     }
 }

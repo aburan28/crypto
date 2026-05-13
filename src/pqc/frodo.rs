@@ -69,9 +69,15 @@ pub struct Matrix {
 
 impl Matrix {
     pub fn zero(rows: usize, cols: usize) -> Self {
-        Self { rows, cols, data: vec![0u32; rows * cols] }
+        Self {
+            rows,
+            cols,
+            data: vec![0u32; rows * cols],
+        }
     }
-    pub fn get(&self, r: usize, c: usize) -> u32 { self.data[r * self.cols + c] }
+    pub fn get(&self, r: usize, c: usize) -> u32 {
+        self.data[r * self.cols + c]
+    }
     pub fn set(&mut self, r: usize, c: usize, v: u32) {
         self.data[r * self.cols + c] = v & (Q - 1);
     }
@@ -147,7 +153,11 @@ fn sample_error(rows: usize, cols: usize) -> Matrix {
     for r in 0..rows {
         for c in 0..cols {
             let bit: i32 = rng.gen_range(-1..=1);
-            let v = if bit >= 0 { bit as u32 } else { (Q as i32 + bit) as u32 };
+            let v = if bit >= 0 {
+                bit as u32
+            } else {
+                (Q as i32 + bit) as u32
+            };
             m.set(r, c, v);
         }
     }
@@ -161,7 +171,10 @@ fn sample_error(rows: usize, cols: usize) -> Matrix {
 fn encode(msg: &[u8]) -> Matrix {
     // For our toy: M·L coefficients × B bits/coef = M·L·B bits.
     // M = 1, L = 4, B = 2 → 8 bits per ciphertext = 1 byte.
-    assert!(msg.len() * 8 >= M * L * B as usize, "msg too short for encoding");
+    assert!(
+        msg.len() * 8 >= M * L * B as usize,
+        "msg too short for encoding"
+    );
     let mut m = Matrix::zero(M, L);
     let shift = D - B;
     for i in 0..M {
@@ -283,20 +296,26 @@ mod tests {
     fn matrix_mul_associative() {
         let a = {
             let mut m = Matrix::zero(2, 2);
-            m.set(0, 0, 1); m.set(0, 1, 2);
-            m.set(1, 0, 3); m.set(1, 1, 4);
+            m.set(0, 0, 1);
+            m.set(0, 1, 2);
+            m.set(1, 0, 3);
+            m.set(1, 1, 4);
             m
         };
         let b = {
             let mut m = Matrix::zero(2, 2);
-            m.set(0, 0, 5); m.set(0, 1, 6);
-            m.set(1, 0, 7); m.set(1, 1, 8);
+            m.set(0, 0, 5);
+            m.set(0, 1, 6);
+            m.set(1, 0, 7);
+            m.set(1, 1, 8);
             m
         };
         let c = {
             let mut m = Matrix::zero(2, 2);
-            m.set(0, 0, 9); m.set(0, 1, 10);
-            m.set(1, 0, 11); m.set(1, 1, 12);
+            m.set(0, 0, 9);
+            m.set(0, 1, 10);
+            m.set(1, 0, 11);
+            m.set(1, 1, 12);
             m
         };
         let lhs = a.mul(&b).mul(&c);
@@ -334,10 +353,14 @@ mod tests {
             let kp = frodo_keygen();
             let (ct, k_enc) = frodo_encapsulate(&kp.pk);
             let k_dec = frodo_decapsulate(&ct, &kp.sk);
-            if k_enc == k_dec { successes += 1; }
+            if k_enc == k_dec {
+                successes += 1;
+            }
         }
-        assert!(successes >= 4,
+        assert!(
+            successes >= 4,
             "FrodoKEM should succeed in ≥4 of 5 trials at toy scale; got {}/5",
-            successes);
+            successes
+        );
     }
 }

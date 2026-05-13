@@ -25,7 +25,10 @@
 /// Time `O(n · 2^n)`, in-place; allocates a single `Vec<i64>`.
 pub fn walsh_hadamard(truth_table: &[u8]) -> Vec<i64> {
     let n = truth_table.len();
-    assert!(n.is_power_of_two(), "truth table length must be a power of 2");
+    assert!(
+        n.is_power_of_two(),
+        "truth table length must be a power of 2"
+    );
     assert!(n <= 1 << 20, "truth table too large; max 2^20 entries");
 
     let mut out: Vec<i64> = truth_table
@@ -63,7 +66,10 @@ pub fn walsh_hadamard(truth_table: &[u8]) -> Vec<i64> {
 /// but with XOR instead of `±`.  In-place, allocates one `Vec<u8>`.
 pub fn anf_coefficients(truth_table: &[u8]) -> Vec<u8> {
     let n = truth_table.len();
-    assert!(n.is_power_of_two(), "truth table length must be a power of 2");
+    assert!(
+        n.is_power_of_two(),
+        "truth table length must be a power of 2"
+    );
     let mut out: Vec<u8> = truth_table.iter().map(|&v| v & 1).collect();
 
     let mut h = 1;
@@ -149,7 +155,9 @@ mod tests {
         // f(x) = x_0 XOR x_1 XOR x_2 XOR x_3 (parity).  Walsh coefficient
         // is non-zero only at the all-ones mask.
         let n: usize = 16;
-        let tt: Vec<u8> = (0..n).map(|x| ((x as u32).count_ones() & 1) as u8).collect();
+        let tt: Vec<u8> = (0..n)
+            .map(|x| ((x as u32).count_ones() & 1) as u8)
+            .collect();
         let w = walsh_hadamard(&tt);
         // For parity function, only the "all-ones" Walsh coefficient is non-zero.
         for (a, &v) in w.iter().enumerate() {

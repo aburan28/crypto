@@ -341,8 +341,10 @@ pub fn aut_folded_rho_dlp(
         let (a0, b0) = if restart == 0 {
             (BigInt::one(), BigInt::zero())
         } else {
-            (rng.gen_bigint_range(&BigInt::zero(), n),
-             rng.gen_bigint_range(&BigInt::zero(), n))
+            (
+                rng.gen_bigint_range(&BigInt::zero(), n),
+                rng.gen_bigint_range(&BigInt::zero(), n),
+            )
         };
         let pow_a = pt_scalar_mul(g, &a0, curve_a, p_mod);
         let pow_b = pt_scalar_mul(h, &b0, curve_a, p_mod);
@@ -549,8 +551,7 @@ mod tests {
         let (b_u, n_u) = find_j0_prime_order_curve(p_u).expect("j=0 prime-order curve at p=43");
         // p ≡ 1 mod 3, n is prime ≡ 1 mod 3.
         let beta_u = primitive_cube_root_mod(p_u).expect("β exists since p ≡ 1 mod 3");
-        let lambda_u =
-            primitive_cube_root_mod(n_u).expect("λ exists since n is prime ≡ 1 mod 3");
+        let lambda_u = primitive_cube_root_mod(n_u).expect("λ exists since n is prime ≡ 1 mod 3");
         J0CurveAut {
             p: BigInt::from(p_u),
             a: BigInt::from(0),
@@ -633,7 +634,9 @@ mod tests {
                 compare_pt(&via_aut, &via_scalar),
                 std::cmp::Ordering::Equal,
                 "α={:?} mismatch on Z[ω]-stable group: aut={:?}, scalar={:?}",
-                alpha, via_aut, via_scalar
+                alpha,
+                via_aut,
+                via_scalar
             );
         }
     }
@@ -660,7 +663,8 @@ mod tests {
                     compare_pt(&check, &h),
                     std::cmp::Ordering::Equal,
                     "recovered d = {} does not satisfy d·G = h on n={}",
-                    sol.d, aut.n
+                    sol.d,
+                    aut.n
                 );
                 // The recovered d is correct (verified via point match);
                 // it may differ from the planted d by an Aut(E) factor
@@ -685,8 +689,7 @@ mod tests {
         // Use a larger toy curve for the variance to average out.
         // p = 67 (≡ 1 mod 3), search for prime-order j=0 curve.
         let p_u = 67u64;
-        let (b_u, n_u) = find_j0_prime_order_curve(p_u)
-            .expect("j=0 prime-order curve at p=67");
+        let (b_u, n_u) = find_j0_prime_order_curve(p_u).expect("j=0 prime-order curve at p=67");
         let beta_u = primitive_cube_root_mod(p_u).unwrap();
         let lambda_u = primitive_cube_root_mod(n_u).unwrap();
         let aut = J0CurveAut {
@@ -722,12 +725,21 @@ mod tests {
 
         println!();
         println!("=== Aut-folded rho empirical speedup ===");
-        println!("  Curve: p = {}, b = {}, n = {} (prime ≡ 1 mod 3)", p_u, b_u, n_u);
+        println!(
+            "  Curve: p = {}, b = {}, n = {} (prime ≡ 1 mod 3)",
+            p_u, b_u, n_u
+        );
         println!("  β = {}, λ = {}", beta_u, lambda_u);
         println!("  Aut(E) = Z/6Z order 6");
-        println!("  Aut-folded mean iterations: {:.1} (over {} runs)", folded_mean, folded_runs);
+        println!(
+            "  Aut-folded mean iterations: {:.1} (over {} runs)",
+            folded_mean, folded_runs
+        );
         println!("  Theoretical full rho:       {:.1}", theoretical_full_rho);
-        println!("  Theoretical aut-folded:     {:.1}", theoretical_aut_folded);
+        println!(
+            "  Theoretical aut-folded:     {:.1}",
+            theoretical_aut_folded
+        );
         println!(
             "  Empirical / theoretical-full-rho ratio: {:.2}",
             folded_mean / theoretical_full_rho
@@ -739,7 +751,10 @@ mod tests {
         println!();
         println!("  Honest interpretation:");
         println!("  - Recovery is mathematically correct (folded_rho_recovers_planted_dlp).");
-        println!("  - At n = {}, statistical variance dominates over the √6 speedup.", n_u);
+        println!(
+            "  - At n = {}, statistical variance dominates over the √6 speedup.",
+            n_u
+        );
         println!("  - The √6 advantage is asymptotic; appearing cleanly requires n ≫ 10⁴.");
         println!("  - This module ships the algorithm and CORRECTNESS validation;");
         println!("    cryptographic-scale benchmarking would require a curve where");
@@ -750,7 +765,8 @@ mod tests {
         assert!(
             folded_mean < 4.0 * theoretical_full_rho,
             "aut-folded mean {} should be ≤ 4× full-rho theoretical {}",
-            folded_mean, theoretical_full_rho
+            folded_mean,
+            theoretical_full_rho
         );
     }
 

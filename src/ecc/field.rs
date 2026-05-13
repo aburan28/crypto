@@ -25,11 +25,17 @@ impl FieldElement {
     }
 
     pub fn zero(modulus: BigUint) -> Self {
-        FieldElement { value: BigUint::zero(), modulus }
+        FieldElement {
+            value: BigUint::zero(),
+            modulus,
+        }
     }
 
     pub fn one(modulus: BigUint) -> Self {
-        FieldElement { value: BigUint::one(), modulus }
+        FieldElement {
+            value: BigUint::one(),
+            modulus,
+        }
     }
 
     pub fn is_zero(&self) -> bool {
@@ -49,7 +55,10 @@ impl FieldElement {
         // negate variant uses.  The underlying `BigUint` add/sub still
         // leak via limb count — see SECURITY.md.
         let v = (&self.value + &self.modulus - &rhs.value) % &self.modulus;
-        FieldElement { value: v, modulus: self.modulus.clone() }
+        FieldElement {
+            value: v,
+            modulus: self.modulus.clone(),
+        }
     }
 
     pub fn mul(&self, rhs: &Self) -> Self {
@@ -62,7 +71,10 @@ impl FieldElement {
     /// `0 < p - a < p`).
     pub fn neg(&self) -> Self {
         let v = (&self.modulus - &self.value) % &self.modulus;
-        FieldElement { value: v, modulus: self.modulus.clone() }
+        FieldElement {
+            value: v,
+            modulus: self.modulus.clone(),
+        }
     }
 
     /// Modular exponentiation via the Montgomery-ladder
@@ -74,7 +86,10 @@ impl FieldElement {
     pub fn pow(&self, exp: &BigUint) -> Self {
         let bits = self.modulus.bits() as usize;
         let value = mod_pow_ct(&self.value, exp, &self.modulus, bits);
-        FieldElement { value, modulus: self.modulus.clone() }
+        FieldElement {
+            value,
+            modulus: self.modulus.clone(),
+        }
     }
 
     /// Multiplicative inverse via Fermat's little theorem: a^(p-2) mod p.

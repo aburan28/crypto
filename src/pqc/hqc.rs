@@ -75,7 +75,11 @@ pub struct F2Poly {
 const BYTES: usize = (N + 7) / 8;
 
 impl F2Poly {
-    pub fn zero() -> Self { Self { bits: vec![0u8; BYTES] } }
+    pub fn zero() -> Self {
+        Self {
+            bits: vec![0u8; BYTES],
+        }
+    }
 
     pub fn get(&self, i: usize) -> u8 {
         (self.bits[i / 8] >> (i % 8)) & 1
@@ -208,7 +212,11 @@ pub fn hqc_keygen() -> HqcKeyPair {
     let y = F2Poly::sample_sparse(W);
     let s = x.add(&h.mul(&y));
     let pk = HqcPublicKey { h, s };
-    let sk = HqcPrivateKey { x, y, pk: pk.clone() };
+    let sk = HqcPrivateKey {
+        x,
+        y,
+        pk: pk.clone(),
+    };
     HqcKeyPair { pk, sk }
 }
 
@@ -256,9 +264,12 @@ mod tests {
     #[test]
     fn f2poly_add_is_xor() {
         let mut a = F2Poly::zero();
-        a.set(0, 1); a.set(3, 1); a.set(7, 1);
+        a.set(0, 1);
+        a.set(3, 1);
+        a.set(7, 1);
         let mut b = F2Poly::zero();
-        b.set(3, 1); b.set(5, 1);
+        b.set(3, 1);
+        b.set(5, 1);
         let c = a.add(&b);
         assert_eq!(c.get(0), 1);
         assert_eq!(c.get(3), 0);
@@ -269,8 +280,10 @@ mod tests {
     /// Cyclic mul: x · x^k = x^{k+1} (or wraps).
     #[test]
     fn f2poly_mul_basic() {
-        let mut x = F2Poly::zero(); x.set(1, 1);
-        let mut x_n_minus_1 = F2Poly::zero(); x_n_minus_1.set(N - 1, 1);
+        let mut x = F2Poly::zero();
+        x.set(1, 1);
+        let mut x_n_minus_1 = F2Poly::zero();
+        x_n_minus_1.set(N - 1, 1);
         let prod = x.mul(&x_n_minus_1);
         // x · x^{N-1} = x^N ≡ 1 (mod x^N - 1).
         assert_eq!(prod.get(0), 1);
@@ -310,10 +323,14 @@ mod tests {
             let kp = hqc_keygen();
             let (ct, k_enc) = hqc_encapsulate(&kp.pk);
             let k_dec = hqc_decapsulate(&ct, &kp.sk);
-            if k_enc == k_dec { successes += 1; }
+            if k_enc == k_dec {
+                successes += 1;
+            }
         }
-        assert!(successes >= 3,
+        assert!(
+            successes >= 3,
             "HQC educational toy should succeed ≥ 3/5 trials; got {}/5",
-            successes);
+            successes
+        );
     }
 }

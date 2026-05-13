@@ -155,7 +155,10 @@ impl Point {
     pub fn neg(&self) -> Point {
         match self {
             Point::Infinity => Point::Infinity,
-            Point::Affine { x, y } => Point::Affine { x: x.clone(), y: y.neg() },
+            Point::Affine { x, y } => Point::Affine {
+                x: x.clone(),
+                y: y.neg(),
+            },
         }
     }
 
@@ -179,7 +182,10 @@ mod tests {
     }
 
     fn g() -> Point {
-        Point::Affine { x: field(3), y: field(6) }
+        Point::Affine {
+            x: field(3),
+            y: field(6),
+        }
     }
 
     fn a() -> FieldElement {

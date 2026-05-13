@@ -41,19 +41,27 @@ impl CurveParams {
         CurveParams {
             name: "secp256k1",
             p: BigUint::parse_bytes(
-                b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16,
-            ).unwrap(),
+                b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F",
+                16,
+            )
+            .unwrap(),
             a: BigUint::from(0u32),
             b: BigUint::from(7u32),
             gx: BigUint::parse_bytes(
-                b"79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16,
-            ).unwrap(),
+                b"79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798",
+                16,
+            )
+            .unwrap(),
             gy: BigUint::parse_bytes(
-                b"483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16,
-            ).unwrap(),
+                b"483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8",
+                16,
+            )
+            .unwrap(),
             n: BigUint::parse_bytes(
-                b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16,
-            ).unwrap(),
+                b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",
+                16,
+            )
+            .unwrap(),
             h: 1,
         }
     }
@@ -68,19 +76,27 @@ impl CurveParams {
         CurveParams {
             name: "GOST-3410-2012-256-test",
             p: BigUint::parse_bytes(
-                b"8000000000000000000000000000000000000000000000000000000000000431", 16,
-            ).unwrap(),
+                b"8000000000000000000000000000000000000000000000000000000000000431",
+                16,
+            )
+            .unwrap(),
             a: BigUint::from(7u32),
             b: BigUint::parse_bytes(
-                b"5FBFF498AA938CE739B8E022FBAFEF40563F6E6A3472FC2A514C0CE9DAE23B7E", 16,
-            ).unwrap(),
+                b"5FBFF498AA938CE739B8E022FBAFEF40563F6E6A3472FC2A514C0CE9DAE23B7E",
+                16,
+            )
+            .unwrap(),
             gx: BigUint::from(2u32),
             gy: BigUint::parse_bytes(
-                b"08E2A8A0E65147D4BD6316030E16D19C85C97F0A9CA267122B96ABBCEA7E8FC8", 16,
-            ).unwrap(),
+                b"08E2A8A0E65147D4BD6316030E16D19C85C97F0A9CA267122B96ABBCEA7E8FC8",
+                16,
+            )
+            .unwrap(),
             n: BigUint::parse_bytes(
-                b"8000000000000000000000000000000150FE8A1892976154C59CFC193ACCF5B3", 16,
-            ).unwrap(),
+                b"8000000000000000000000000000000150FE8A1892976154C59CFC193ACCF5B3",
+                16,
+            )
+            .unwrap(),
             h: 1,
         }
     }
@@ -127,23 +143,35 @@ impl CurveParams {
         CurveParams {
             name: "SM2",
             p: BigUint::parse_bytes(
-                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16,
-            ).unwrap(),
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF",
+                16,
+            )
+            .unwrap(),
             a: BigUint::parse_bytes(
-                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16,
-            ).unwrap(),
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC",
+                16,
+            )
+            .unwrap(),
             b: BigUint::parse_bytes(
-                b"28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16,
-            ).unwrap(),
+                b"28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93",
+                16,
+            )
+            .unwrap(),
             gx: BigUint::parse_bytes(
-                b"32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16,
-            ).unwrap(),
+                b"32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7",
+                16,
+            )
+            .unwrap(),
             gy: BigUint::parse_bytes(
-                b"BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16,
-            ).unwrap(),
+                b"BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0",
+                16,
+            )
+            .unwrap(),
             n: BigUint::parse_bytes(
-                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16,
-            ).unwrap(),
+                b"FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123",
+                16,
+            )
+            .unwrap(),
             h: 1,
         }
     }
@@ -155,23 +183,35 @@ impl CurveParams {
         CurveParams {
             name: "P-256",
             p: BigUint::parse_bytes(
-                b"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16,
-            ).unwrap(),
+                b"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+                16,
+            )
+            .unwrap(),
             a: BigUint::parse_bytes(
-                b"ffffffff00000001000000000000000000000000fffffffffffffffffffffffc", 16,
-            ).unwrap(),
+                b"ffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+                16,
+            )
+            .unwrap(),
             b: BigUint::parse_bytes(
-                b"5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16,
-            ).unwrap(),
+                b"5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+                16,
+            )
+            .unwrap(),
             gx: BigUint::parse_bytes(
-                b"6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16,
-            ).unwrap(),
+                b"6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296",
+                16,
+            )
+            .unwrap(),
             gy: BigUint::parse_bytes(
-                b"4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16,
-            ).unwrap(),
+                b"4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5",
+                16,
+            )
+            .unwrap(),
             n: BigUint::parse_bytes(
-                b"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16,
-            ).unwrap(),
+                b"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551",
+                16,
+            )
+            .unwrap(),
             h: 1,
         }
     }
@@ -211,8 +251,9 @@ impl CurveParams {
             Point::Affine { x, y } => {
                 let lhs = y.mul(y); // y²
                 let a = self.a_fe();
-                let rhs = x.mul(&x.mul(x))   // x³
-                    .add(&a.mul(x))           // + ax
+                let rhs = x
+                    .mul(&x.mul(x)) // x³
+                    .add(&a.mul(x)) // + ax
                     .add(&self.fe(self.b.clone())); // + b
                 lhs == rhs
             }

@@ -78,7 +78,10 @@ impl ModularPolynomial {
     /// internally).  This is a verification helper.
     pub fn coeff(&self, i: u32, j: u32) -> BigInt {
         let (i, j) = if i <= j { (i, j) } else { (j, i) };
-        self.coeffs.get(&(i, j)).cloned().unwrap_or_else(BigInt::zero)
+        self.coeffs
+            .get(&(i, j))
+            .cloned()
+            .unwrap_or_else(BigInt::zero)
     }
 
     /// Bidegree (max `i + j` for non-zero coefficient).
@@ -173,10 +176,7 @@ pub fn phi_3() -> ModularPolynomial {
 /// to a chosen number of `q`-series terms.  Returns the maximum
 /// `q`-power coefficient that's non-zero in the residual (should be
 /// far past the precision used).
-pub fn verify_via_q_series(
-    phi: &ModularPolynomial,
-    q_terms: usize,
-) -> Result<(), String> {
+pub fn verify_via_q_series(phi: &ModularPolynomial, q_terms: usize) -> Result<(), String> {
     // Compute j(q) to q_terms.
     let j_q = j_invariant_q_series(q_terms);
     // Compute j(qˡ) by raising q's exponent.
@@ -228,8 +228,8 @@ impl QSeries {
     /// Add two series (truncating to the shorter length).
     fn add(&self, other: &Self) -> Self {
         let lo = self.min_pow.min(other.min_pow);
-        let hi = (self.min_pow + self.coefs.len() as i32)
-            .max(other.min_pow + other.coefs.len() as i32);
+        let hi =
+            (self.min_pow + self.coefs.len() as i32).max(other.min_pow + other.coefs.len() as i32);
         let len = (hi - lo) as usize;
         let mut result = vec![BigInt::zero(); len];
         for (i, c) in self.coefs.iter().enumerate() {
@@ -348,10 +348,16 @@ fn evaluate_phi(
             continue;
         }
         // Term: c · X^i · Y^j  +  c · X^j · Y^i (if i ≠ j, symmetry).
-        let term1 = j_q.pow(i, q_terms).mul(&j_ql.pow(j, q_terms), q_terms).scale(c);
+        let term1 = j_q
+            .pow(i, q_terms)
+            .mul(&j_ql.pow(j, q_terms), q_terms)
+            .scale(c);
         sum = sum.add(&term1);
         if i != j {
-            let term2 = j_q.pow(j, q_terms).mul(&j_ql.pow(i, q_terms), q_terms).scale(c);
+            let term2 = j_q
+                .pow(j, q_terms)
+                .mul(&j_ql.pow(i, q_terms), q_terms)
+                .scale(c);
             sum = sum.add(&term2);
         }
     }
@@ -414,7 +420,10 @@ mod tests {
         println!();
         println!("=== Modular polynomial Φ_l storage requirements (log_2 scale) ===");
         println!();
-        println!("{:>15} {:>20} {:>20}", "log_2(l)", "log_2(num_coefs)", "log_2(total_bits)");
+        println!(
+            "{:>15} {:>20} {:>20}",
+            "log_2(l)", "log_2(num_coefs)", "log_2(total_bits)"
+        );
         for &l_log2 in &[1u64, 2, 3, 4, 8, 16, 32, 64, 128, 256] {
             let (n_log2, b_log2) = estimated_storage_for_phi_l(l_log2);
             println!("{:>15} {:>20} {:>20}", l_log2, n_log2, b_log2);

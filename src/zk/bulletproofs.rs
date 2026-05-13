@@ -74,7 +74,10 @@ impl Transcript {
     fn new(curve: &CurveParams) -> Self {
         let mut state = Vec::with_capacity(64);
         state.extend_from_slice(FS_TAG.as_bytes());
-        Self { state, n: curve.n.clone() }
+        Self {
+            state,
+            n: curve.n.clone(),
+        }
     }
     fn append_label(&mut self, label: &str) {
         self.state.extend_from_slice(label.as_bytes());
@@ -143,9 +146,9 @@ fn sc_pow(base: &BigUint, exp: u64, n: &BigUint) -> BigUint {
 // ── Vector helpers (vectors of scalars mod n) ─────────────────────
 
 fn vec_inner(a: &[BigUint], b: &[BigUint], n: &BigUint) -> BigUint {
-    a.iter().zip(b).fold(BigUint::zero(), |acc, (x, y)| {
-        (acc + x * y) % n
-    })
+    a.iter()
+        .zip(b)
+        .fold(BigUint::zero(), |acc, (x, y)| (acc + x * y) % n)
 }
 fn vec_add(a: &[BigUint], b: &[BigUint], n: &BigUint) -> Vec<BigUint> {
     a.iter().zip(b).map(|(x, y)| (x + y) % n).collect()
@@ -193,10 +196,7 @@ fn nums_generators(curve: &CurveParams, label: &str, m: usize) -> Vec<Point> {
         seed.extend_from_slice(&(i as u64).to_be_bytes());
         let mut x_cand = BigUint::from_bytes_be(&sha256(&seed)) % &curve.p;
         loop {
-            let rhs = (x_cand.modpow(&three, &curve.p)
-                + &curve.a * &x_cand
-                + &curve.b)
-                % &curve.p;
+            let rhs = (x_cand.modpow(&three, &curve.p) + &curve.a * &x_cand + &curve.b) % &curve.p;
             let p_minus_1_over_2 = (&curve.p - BigUint::one()) / &two;
             let euler = rhs.modpow(&p_minus_1_over_2, &curve.p);
             if euler == BigUint::one() {
@@ -344,7 +344,11 @@ fn ipa_verify(
         let mut acc = BigUint::one();
         for j in 0..challenges.len() {
             let bit = (i >> (challenges.len() - 1 - j)) & 1;
-            let factor = if bit == 1 { &challenges[j] } else { &challenges_inv[j] };
+            let factor = if bit == 1 {
+                &challenges[j]
+            } else {
+                &challenges_inv[j]
+            };
             acc = sc_mul(&acc, factor, n);
         }
         s[i] = acc;
@@ -363,7 +367,10 @@ fn ipa_verify(
 
     // RHS: Σ (a·s_i)·G_i + Σ (b·s'_i)·H_i + (a·b)·u
     let a_s: Vec<BigUint> = s.iter().map(|si| sc_mul(&proof.a_final, si, n)).collect();
-    let b_sp: Vec<BigUint> = s_prime.iter().map(|si| sc_mul(&proof.b_final, si, n)).collect();
+    let b_sp: Vec<BigUint> = s_prime
+        .iter()
+        .map(|si| sc_mul(&proof.b_final, si, n))
+        .collect();
     let mut rhs = msm(g_vec, &a_s, &a_fe);
     rhs = rhs.add(&msm(h_vec, &b_sp, &a_fe), &a_fe);
     let ab = sc_mul(&proof.a_final, &proof.b_final, n);
@@ -416,11 +423,7 @@ fn two_pow_vec(n: &BigUint) -> Vec<BigUint> {
 
 /// **Prove** that `v ∈ [0, 2³²)` given the Pedersen commitment
 /// `V = v·G + γ·H` (the caller knows `v, γ`).
-pub fn range_prove(
-    v: u64,
-    gamma: &BigUint,
-    params: &PedersenParams,
-) -> RangeProof {
+pub fn range_prove(v: u64, gamma: &BigUint, params: &PedersenParams) -> RangeProof {
     let curve = &params.curve;
     let n = &curve.n;
     let a_fe = curve.a_fe();
@@ -468,15 +471,9 @@ pub fn range_prove(
     // r(X) = y^n ∘ (a_R + z·1ⁿ + s_R·X) + z²·2ⁿ
     let z_neg = sc_neg(&z, n);
     let z_sq = sc_mul(&z, &z, n);
-    let l_const: Vec<BigUint> = a_l
-        .iter()
-        .map(|al| sc_add(al, &z_neg, n))
-        .collect();
+    let l_const: Vec<BigUint> = a_l.iter().map(|al| sc_add(al, &z_neg, n)).collect();
     let l_x: Vec<BigUint> = s_l.clone();
-    let r_const_inner: Vec<BigUint> = a_r
-        .iter()
-        .map(|ar| sc_add(ar, &z, n))
-        .collect();
+    let r_const_inner: Vec<BigUint> = a_r.iter().map(|ar| sc_add(ar, &z, n)).collect();
     let r_const: Vec<BigUint> = vec_add(
         &vec_hadamard(&y_pow, &r_const_inner, n),
         &vec_scale(&two_pow, &z_sq, n),
@@ -494,8 +491,12 @@ pub fn range_prove(
     let t2 = vec_inner(&l_x, &r_x, n);
 
     // T1 = t1·G + τ1·H, T2 = t2·G + τ2·H
-    let t1_pt = g.scalar_mul(&t1, &a_fe).add(&h.scalar_mul(&tau1, &a_fe), &a_fe);
-    let t2_pt = g.scalar_mul(&t2, &a_fe).add(&h.scalar_mul(&tau2, &a_fe), &a_fe);
+    let t1_pt = g
+        .scalar_mul(&t1, &a_fe)
+        .add(&h.scalar_mul(&tau1, &a_fe), &a_fe);
+    let t2_pt = g
+        .scalar_mul(&t2, &a_fe)
+        .add(&h.scalar_mul(&tau2, &a_fe), &a_fe);
 
     transcript.append_point("T1", &t1_pt);
     transcript.append_point("T2", &t2_pt);
@@ -509,7 +510,11 @@ pub fn range_prove(
     let t_hat = vec_inner(&l_final, &r_final, n);
     // τ_x = τ1·x + τ2·x² + z²·γ
     let tau_x = sc_add(
-        &sc_add(&sc_mul(&tau1, &x, n), &sc_mul(&tau2, &sc_mul(&x, &x, n), n), n),
+        &sc_add(
+            &sc_mul(&tau1, &x, n),
+            &sc_mul(&tau2, &sc_mul(&x, &x, n), n),
+            n,
+        ),
         &sc_mul(&z_sq, gamma, n),
         n,
     );
@@ -595,9 +600,15 @@ pub fn range_verify(v_commit: &Point, proof: &RangeProof, params: &PedersenParam
     let z_cube = sc_mul(&z_sq, &z, n);
     let sum_y = vec_inner(&ones, &y_pow, n);
     let sum_two = vec_inner(&ones, &two_pow, n);
-    let delta = sc_sub(&sc_mul(&sc_sub(&z, &z_sq, n), &sum_y, n), &sc_mul(&z_cube, &sum_two, n), n);
+    let delta = sc_sub(
+        &sc_mul(&sc_sub(&z, &z_sq, n), &sum_y, n),
+        &sc_mul(&z_cube, &sum_two, n),
+        n,
+    );
 
-    let lhs1 = g.scalar_mul(&proof.t_hat, &a_fe).add(&h.scalar_mul(&proof.tau_x, &a_fe), &a_fe);
+    let lhs1 = g
+        .scalar_mul(&proof.t_hat, &a_fe)
+        .add(&h.scalar_mul(&proof.tau_x, &a_fe), &a_fe);
     let rhs1 = {
         let p1 = v_commit.scalar_mul(&z_sq, &a_fe);
         let p2 = g.scalar_mul(&delta, &a_fe);
@@ -636,7 +647,15 @@ pub fn range_verify(v_commit: &Point, proof: &RangeProof, params: &PedersenParam
     let u = g.scalar_mul(&w, &a_fe);
     // The relation embedded by IPA is P + t̂·u = <l, G> + <r, H'> + <l, r>·u.
     let p_with_thatu = p.add(&u.scalar_mul(&proof.t_hat, &a_fe), &a_fe);
-    ipa_verify(curve, &p_with_thatu, &g_vec, &h_prime, &u, &proof.ipa, &mut transcript)
+    ipa_verify(
+        curve,
+        &p_with_thatu,
+        &g_vec,
+        &h_prime,
+        &u,
+        &proof.ipa,
+        &mut transcript,
+    )
 }
 
 /// Helper: produce the Pedersen commitment to `v` with blinding `γ`.
@@ -674,7 +693,15 @@ mod tests {
         let proof = ipa_prove(&curve, g_vec.clone(), h_vec.clone(), &u, a, b, &mut t_prove);
 
         let mut t_verify = Transcript::new(&curve);
-        assert!(ipa_verify(&curve, &p, &g_vec, &h_vec, &u, &proof, &mut t_verify));
+        assert!(ipa_verify(
+            &curve,
+            &p,
+            &g_vec,
+            &h_vec,
+            &u,
+            &proof,
+            &mut t_verify
+        ));
     }
 
     /// Inner-product argument: n=8 (3 halving rounds).
@@ -697,7 +724,15 @@ mod tests {
         let proof = ipa_prove(&curve, g_vec.clone(), h_vec.clone(), &u, a, b, &mut t_prove);
 
         let mut t_verify = Transcript::new(&curve);
-        assert!(ipa_verify(&curve, &p, &g_vec, &h_vec, &u, &proof, &mut t_verify));
+        assert!(ipa_verify(
+            &curve,
+            &p,
+            &g_vec,
+            &h_vec,
+            &u,
+            &proof,
+            &mut t_verify
+        ));
     }
 
     /// IPA proof size is logarithmic in n.

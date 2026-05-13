@@ -32,9 +32,7 @@ pub fn siphash(key: &SipKey, data: &[u8]) -> u64 {
 
     // Compress full 8-byte blocks (2 SipRounds per block).
     for chunk_start in (0..n_full).step_by(8) {
-        let m = u64::from_le_bytes(
-            data[chunk_start..chunk_start + 8].try_into().unwrap(),
-        );
+        let m = u64::from_le_bytes(data[chunk_start..chunk_start + 8].try_into().unwrap());
         v3 ^= m;
         sip_round(&mut v0, &mut v1, &mut v2, &mut v3);
         sip_round(&mut v0, &mut v1, &mut v2, &mut v3);
@@ -90,8 +88,8 @@ mod tests {
     #[test]
     fn siphash_test_vectors() {
         let key = SipKey([
-            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-            0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
+            0x0e, 0x0f,
         ]);
         // Empty input.
         assert_eq!(siphash(&key, &[]), 0x726fdb47dd0e0e31);
@@ -115,8 +113,8 @@ mod tests {
     #[test]
     fn empty_input_with_test_key() {
         let key = SipKey([
-            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-            0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
+            0x0e, 0x0f,
         ]);
         assert_eq!(siphash(&key, b""), 0x726fdb47dd0e0e31);
     }

@@ -46,7 +46,10 @@ impl G1Point {
     pub fn neg(&self) -> Self {
         match self {
             Self::Infinity => Self::Infinity,
-            Self::Affine { x, y } => Self::Affine { x: x.clone(), y: y.neg() },
+            Self::Affine { x, y } => Self::Affine {
+                x: x.clone(),
+                y: y.neg(),
+            },
         }
     }
 
@@ -155,6 +158,9 @@ mod tests {
     #[test]
     fn subgroup_check_on_generator() {
         let g = G1Point::generator();
-        assert!(g.is_in_correct_subgroup(), "[r]·G == O for the BLS12-381 generator");
+        assert!(
+            g.is_in_correct_subgroup(),
+            "[r]·G == O for the BLS12-381 generator"
+        );
     }
 }

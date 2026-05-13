@@ -236,12 +236,18 @@ fn compute_smooth_product(factors: &[(u64, u32)]) -> BigUint {
 /// Integer square root via Newton's method.  Returns `(s, exact)`
 /// where `s = ⌊√n⌋` and `exact` indicates `s² == n`.
 pub fn isqrt_with_exactness(n: &BigUint) -> (BigUint, bool) {
-    if n.is_zero() { return (BigUint::zero(), true); }
+    if n.is_zero() {
+        return (BigUint::zero(), true);
+    }
     let one = BigUint::one();
-    if n == &one { return (one, true); }
+    if n == &one {
+        return (one, true);
+    }
     let bits = n.bits();
     let mut x = (n.clone()) >> ((bits / 2).max(1));
-    if x.is_zero() { x = BigUint::one(); }
+    if x.is_zero() {
+        x = BigUint::one();
+    }
     // Newton iteration: x ← (x + n/x) / 2 until convergence.
     loop {
         let next = (&x + n / &x) >> 1;
@@ -258,8 +264,12 @@ pub fn isqrt_with_exactness(n: &BigUint) -> (BigUint, bool) {
 /// factor of `n` within `max_iters` iterations.  Returns `Some(p)`
 /// where `1 < p < n`, or `None` if no factor found in budget.
 pub fn pollard_rho_factor(n: &BigUint, max_iters: u64, seed: u64) -> Option<BigUint> {
-    if n <= &BigUint::from(3u32) { return None; }
-    if (n % BigUint::from(2u32)).is_zero() { return Some(BigUint::from(2u32)); }
+    if n <= &BigUint::from(3u32) {
+        return None;
+    }
+    if (n % BigUint::from(2u32)).is_zero() {
+        return Some(BigUint::from(2u32));
+    }
     let mut x = BigUint::from(seed.max(2));
     let mut y = x.clone();
     let mut c = BigUint::from(seed.max(1));
@@ -299,12 +309,18 @@ pub fn deep_factor(n: &BigUint, trial_bound: u64, pollard_iters: u64) -> Vec<(Bi
     residue = BigUint::one();
     let mut seed = 1u64;
     while let Some(c) = work.pop() {
-        if c <= BigUint::one() { continue; }
+        if c <= BigUint::one() {
+            continue;
+        }
         if crate::asymmetric::rsa::is_prime(&c) {
             // Increment exponent if already present, else append.
             let mut found = false;
             for (p, e) in all_factors.iter_mut() {
-                if p == &c { *e += 1; found = true; break; }
+                if p == &c {
+                    *e += 1;
+                    found = true;
+                    break;
+                }
             }
             if !found {
                 all_factors.push((c, 1));
@@ -354,7 +370,10 @@ mod tests {
         let rhs = BigUint::from(4u32) * &p;
         assert!(lhs <= rhs, "Hasse violated: t² > 4p");
         // For ordinary curves: t ≢ 0 mod p.
-        assert!(!(&t % &p).is_zero(), "P-256 should be ordinary, but t ≡ 0 mod p");
+        assert!(
+            !(&t % &p).is_zero(),
+            "P-256 should be ordinary, but t ≡ 0 mod p"
+        );
     }
 
     /// **The headline experiment**: compute `|D| = 4p − t²` for
@@ -377,12 +396,18 @@ mod tests {
         println!("    value = {}", report.cm_disc_abs);
         println!();
         println!("Trial-division factorisation of |D| up to 2²² ≈ 4M:");
-        println!("    smooth-part bits = {}", report.cm_disc_smooth_part.bits());
+        println!(
+            "    smooth-part bits = {}",
+            report.cm_disc_smooth_part.bits()
+        );
         for (q, e) in &report.cm_disc_factors {
             println!("    {}^{}", q, e);
         }
         println!("    cofactor bits = {}", report.cm_disc_residue.bits());
-        println!("    cofactor is prime? = {}", report.cm_disc_residue_is_prime);
+        println!(
+            "    cofactor is prime? = {}",
+            report.cm_disc_residue_is_prime
+        );
         println!("    cofactor = {}", report.cm_disc_residue);
         println!();
         println!("Twist order nᵗ = 2(p+1) − n:");
@@ -425,13 +450,22 @@ mod tests {
         // part is 1 — would mean End(E) has discriminant 1, impossible
         // (would require D = 0).  Sanity check.
         let (sqrt_d, exact_d) = isqrt_with_exactness(&cm_disc_abs);
-        println!("⌊√|D|⌋ = {}-bit value, perfect square? = {}", sqrt_d.bits(), exact_d);
-        assert!(!exact_d, "|D| should not be a perfect square (would imply End(E) is Z)");
+        println!(
+            "⌊√|D|⌋ = {}-bit value, perfect square? = {}",
+            sqrt_d.bits(),
+            exact_d
+        );
+        assert!(
+            !exact_d,
+            "|D| should not be a perfect square (would imply End(E) is Z)"
+        );
 
         // Run trial division + Pollard rho.
         let factors = deep_factor(&cm_disc_abs, 1u64 << 20, 1_000_000);
         println!();
-        println!("Deep factorisation of |D| (trial-div ≤ 2²⁰, Pollard rho ≤ 10⁶ iters per cofactor):");
+        println!(
+            "Deep factorisation of |D| (trial-div ≤ 2²⁰, Pollard rho ≤ 10⁶ iters per cofactor):"
+        );
         let mut squarefree = BigUint::one();
         let mut accounted = BigUint::one();
         let mut has_unfactored = false;
@@ -439,16 +473,14 @@ mod tests {
             if *e == 0 {
                 println!(
                     "  unfactored composite ({} bits): {}",
-                    p_factor.bits(), p_factor
+                    p_factor.bits(),
+                    p_factor
                 );
                 has_unfactored = true;
                 accounted *= p_factor.clone();
                 squarefree *= p_factor.clone();
             } else {
-                println!(
-                    "  prime ({} bits)^{} = {}",
-                    p_factor.bits(), e, p_factor
-                );
+                println!("  prime ({} bits)^{} = {}", p_factor.bits(), e, p_factor);
                 accounted *= p_factor.pow(*e);
                 if e % 2 == 1 {
                     squarefree *= p_factor.clone();
@@ -456,7 +488,10 @@ mod tests {
             }
         }
         println!();
-        println!("Accounted-for product = {} bits (should equal |D|)", accounted.bits());
+        println!(
+            "Accounted-for product = {} bits (should equal |D|)",
+            accounted.bits()
+        );
         println!("Squarefree-part lower-bound = {} bits", squarefree.bits());
         println!("    (anything above ~50 bits → no exploitable small CM)");
         println!();
@@ -464,7 +499,10 @@ mod tests {
             println!("Note: some composite cofactors weren't fully split by Pollard rho");
             println!("at this iteration count; squarefree-part is a lower bound.");
         }
-        assert_eq!(accounted, cm_disc_abs, "deep_factor product should equal |D|");
+        assert_eq!(
+            accounted, cm_disc_abs,
+            "deep_factor product should equal |D|"
+        );
         // The squarefree part should be enormous — generic curves have
         // squarefree(|D|) ~ |D| with overwhelming probability.
         assert!(

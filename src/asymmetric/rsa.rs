@@ -58,11 +58,7 @@ fn rsa_mod_pow_ct(base: &BigUint, exp: &BigUint, n: &BigUint, bits: usize) -> Bi
     }
 }
 
-fn rsa_mod_pow_ct_sized<const LIMBS: usize>(
-    base: &BigUint,
-    exp: &BigUint,
-    n: &BigUint,
-) -> BigUint {
+fn rsa_mod_pow_ct_sized<const LIMBS: usize>(base: &BigUint, exp: &BigUint, n: &BigUint) -> BigUint {
     // `Uint::from_biguint` truncates anything past LIMBS limbs, so we
     // must pre-reduce the base mod n.  In ordinary RSA flows the
     // ciphertext / message hash is already less than n, but guarding
@@ -71,8 +67,7 @@ fn rsa_mod_pow_ct_sized<const LIMBS: usize>(
     let n_u = Uint::<LIMBS>::from_biguint(n);
     let base_u = Uint::<LIMBS>::from_biguint(&base_reduced);
     let exp_u = Uint::<LIMBS>::from_biguint(exp);
-    let ctx = MontgomeryContext::<LIMBS>::new(n_u)
-        .expect("RSA modulus must be odd and nonzero");
+    let ctx = MontgomeryContext::<LIMBS>::new(n_u).expect("RSA modulus must be odd and nonzero");
     let result = mont_pow_ct(&base_u, &exp_u, &ctx);
     result.to_biguint()
 }
@@ -140,10 +135,8 @@ fn rsa_mod_pow_ct_crt_sized<const HALF: usize, const FULL: usize>(
     let dq_u = Uint::<HALF>::from_biguint(&key.dq);
     let qinv_u = Uint::<HALF>::from_biguint(&key.qinv);
 
-    let p_ctx = MontgomeryContext::<HALF>::new(p_u)
-        .expect("p must be odd and nonzero");
-    let q_ctx = MontgomeryContext::<HALF>::new(q_u)
-        .expect("q must be odd and nonzero");
+    let p_ctx = MontgomeryContext::<HALF>::new(p_u).expect("p must be odd and nonzero");
+    let q_ctx = MontgomeryContext::<HALF>::new(q_u).expect("q must be odd and nonzero");
 
     // Reduce c mod p and c mod q via the CT split-and-reduce primitive.
     // Pre-reducing through BigUint here would leak p/q at the limb level;
@@ -240,10 +233,7 @@ fn ct_reduce_full_to_half<const HALF: usize, const FULL: usize>(
 /// Constant-time `if v >= n { v - n } else { v }` for HALF-limb
 /// operands.  Used by [`ct_reduce_full_to_half`] for the per-half
 /// reduction; only correct when `v < 2n`.
-fn cond_sub_modulus<const LIMBS: usize>(
-    v: &Uint<LIMBS>,
-    n: &Uint<LIMBS>,
-) -> Uint<LIMBS> {
+fn cond_sub_modulus<const LIMBS: usize>(v: &Uint<LIMBS>, n: &Uint<LIMBS>) -> Uint<LIMBS> {
     use subtle::Choice;
     let (v_minus_n, borrow) = Uint::<LIMBS>::sbb(v, n);
     // borrow == 0 means v >= n, so we keep v_minus_n; else keep v.
@@ -287,16 +277,26 @@ fn miller_rabin_witness(n: &BigUint, d: &BigUint, s: u64, a: &BigUint) -> bool {
 /// Deterministic Miller-Rabin using a fixed witness set that is correct
 /// for all n < 3,317,044,064,679,887,385,961,981 (sufficient for 256-bit+ primes).
 pub fn is_prime(n: &BigUint) -> bool {
-    if n < &BigUint::from(2u32) { return false; }
-    if n == &BigUint::from(2u32) || n == &BigUint::from(3u32) { return true; }
-    if n.is_even() { return false; }
+    if n < &BigUint::from(2u32) {
+        return false;
+    }
+    if n == &BigUint::from(2u32) || n == &BigUint::from(3u32) {
+        return true;
+    }
+    if n.is_even() {
+        return false;
+    }
 
     // Small prime divisibility check for speed
     let small_primes = [2u32, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
     for &p in &small_primes {
         let bp = BigUint::from(p);
-        if n == &bp { return true; }
-        if (n % &bp).is_zero() { return false; }
+        if n == &bp {
+            return true;
+        }
+        if (n % &bp).is_zero() {
+            return false;
+        }
     }
 
     let n_minus_1 = n - BigUint::one();
@@ -310,7 +310,9 @@ pub fn is_prime(n: &BigUint) -> bool {
         .collect();
 
     witnesses.iter().all(|a| {
-        if a >= n { return true; } // Skip witnesses ≥ n
+        if a >= n {
+            return true;
+        } // Skip witnesses ≥ n
         miller_rabin_witness(n, &d, s, a)
     })
 }
@@ -403,7 +405,9 @@ impl RsaKeyPair {
         loop {
             let p_raw = random_prime(half);
             let q_raw = random_prime(half);
-            if p_raw == q_raw { continue; }
+            if p_raw == q_raw {
+                continue;
+            }
 
             // PKCS#1 convention: p > q, so qinv = q^(-1) mod p ∈ [1, p).
             // Swapping is just a labelling choice — n = p·q either way.
@@ -421,7 +425,9 @@ impl RsaKeyPair {
             let lambda = p1.lcm(&q1);
 
             let e = BigUint::from(65537u32);
-            if lambda.gcd(&e) != BigUint::one() { continue; }
+            if lambda.gcd(&e) != BigUint::one() {
+                continue;
+            }
 
             let d = match mod_inverse(&e, &lambda) {
                 Some(v) => v,
@@ -437,11 +443,20 @@ impl RsaKeyPair {
             };
 
             return RsaKeyPair {
-                public: RsaPublicKey { n: n.clone(), e: e.clone(), bits },
+                public: RsaPublicKey {
+                    n: n.clone(),
+                    e: e.clone(),
+                    bits,
+                },
                 private: RsaPrivateKey {
-                    n, e, d,
-                    p, q,
-                    dp, dq, qinv,
+                    n,
+                    e,
+                    d,
+                    p,
+                    q,
+                    dp,
+                    dq,
+                    qinv,
                     bits,
                 },
             };
@@ -682,8 +697,7 @@ mod tests {
         let bits = kp.public.n.bits();
         assert!(bits >= 1023 && bits <= 1024, "got {bits} bits");
         // d·e ≡ 1 (mod λ(n))
-        let lambda = (&kp.private.p - BigUint::one())
-            .lcm(&(&kp.private.q - BigUint::one()));
+        let lambda = (&kp.private.p - BigUint::one()).lcm(&(&kp.private.q - BigUint::one()));
         assert_eq!((&kp.private.d * &kp.private.e) % &lambda, BigUint::one());
         // p·q == n
         assert_eq!(&kp.private.p * &kp.private.q, kp.public.n);

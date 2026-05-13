@@ -183,21 +183,31 @@ mod tests {
         let samples: Vec<f64> = (0..10_000).map(|i| (i as f64 + 0.5) / 10_000.0).collect();
         let d = ks_statistic_uniform(&samples);
         let p = ks_pvalue(d, samples.len());
-        assert!(d < 0.001, "evenly-spaced samples should have tiny D, got {}", d);
-        assert!(p > 0.99, "p-value should be high for uniform-looking samples, got {}", p);
+        assert!(
+            d < 0.001,
+            "evenly-spaced samples should have tiny D, got {}",
+            d
+        );
+        assert!(
+            p > 0.99,
+            "p-value should be high for uniform-looking samples, got {}",
+            p
+        );
     }
 
     /// Sanity: clearly non-uniform sample should give low p-value.
     #[test]
     fn ks_test_rejects_under_alternative() {
         // Sample biased toward 0: cubic distribution F(x) = x³.
-        let samples: Vec<f64> = (1..=1000)
-            .map(|i| (i as f64 / 1000.0).powi(3))
-            .collect();
+        let samples: Vec<f64> = (1..=1000).map(|i| (i as f64 / 1000.0).powi(3)).collect();
         let d = ks_statistic_uniform(&samples);
         let p = ks_pvalue(d, samples.len());
         assert!(d > 0.1, "skewed samples should have large D, got {}", d);
-        assert!(p < 0.001, "p-value should be tiny for non-uniform samples, got {}", p);
+        assert!(
+            p < 0.001,
+            "p-value should be tiny for non-uniform samples, got {}",
+            p
+        );
     }
 
     /// **The headline experiment**: deep profile of P-256's `b` against
@@ -218,11 +228,20 @@ mod tests {
         println!("Number of primes tested: {}", result.n_primes);
         println!("Largest prime used: {}", result.max_prime);
         println!();
-        println!("KS statistic vs Uniform[0, 1):  D = {:.6}", result.ks_statistic);
-        println!("KS p-value:                     p = {:.4}", result.ks_pvalue);
+        println!(
+            "KS statistic vs Uniform[0, 1):  D = {:.6}",
+            result.ks_statistic
+        );
+        println!(
+            "KS p-value:                     p = {:.4}",
+            result.ks_pvalue
+        );
         println!();
-        println!("Decile counts (expected ≈ {}/10 = {} each):",
-                 result.n_primes, result.n_primes / 10);
+        println!(
+            "Decile counts (expected ≈ {}/10 = {} each):",
+            result.n_primes,
+            result.n_primes / 10
+        );
         for k in 0..10 {
             let lo = k as f64 / 10.0;
             let hi = (k + 1) as f64 / 10.0;

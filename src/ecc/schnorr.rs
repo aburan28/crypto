@@ -85,7 +85,11 @@ fn xy(point: &Point) -> Option<(&BigUint, &BigUint)> {
 
 /// Negate a scalar mod `n`.
 fn neg_mod(x: &BigUint, n: &BigUint) -> BigUint {
-    if x.is_zero() { BigUint::zero() } else { n - (x % n) }
+    if x.is_zero() {
+        BigUint::zero()
+    } else {
+        n - (x % n)
+    }
 }
 
 // ── Keygen ──────────────────────────────────────────────────────────
@@ -321,15 +325,9 @@ mod tests {
         let d = BigUint::from_bytes_be(&hex_decode(
             "0000000000000000000000000000000000000000000000000000000000000003",
         ));
-        let aux = hex32(
-            "0000000000000000000000000000000000000000000000000000000000000000",
-        );
-        let msg = hex_decode(
-            "0000000000000000000000000000000000000000000000000000000000000000",
-        );
-        let expected_pk = hex32(
-            "F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9",
-        );
+        let aux = hex32("0000000000000000000000000000000000000000000000000000000000000000");
+        let msg = hex_decode("0000000000000000000000000000000000000000000000000000000000000000");
+        let expected_pk = hex32("F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9");
         let expected_sig = hex64(
             "E907831F80848D1069A5371B402410364BDF1C5F8307B0084C55F1CE2DCA8215\
              25F66A4A85EA8B71E482A74F382D2CE5EBEEE8FDB2172F477DF4900D310536C0",
@@ -352,15 +350,9 @@ mod tests {
         let d = BigUint::from_bytes_be(&hex_decode(
             "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF",
         ));
-        let aux = hex32(
-            "0000000000000000000000000000000000000000000000000000000000000001",
-        );
-        let msg = hex_decode(
-            "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-        );
-        let expected_pk = hex32(
-            "DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-        );
+        let aux = hex32("0000000000000000000000000000000000000000000000000000000000000001");
+        let msg = hex_decode("243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89");
+        let expected_pk = hex32("DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659");
         let expected_sig = hex64(
             "6896BD60EEAE296DB48A229FF71DFE071BDE413E6D43F917DC8DCF8C78DE3341\
              8906D11AC976ABCCB20B091292BFF4EA897EFCB639EA871CFA95F6DE339E4B0A",

@@ -281,8 +281,16 @@ mod tests {
         // Extraction: x = (s1 - s2) / (c1 - c2)  (mod n)
         let n = &curve.n;
         // s1 - s2 mod n
-        let s_diff = if s1 >= s2 { (&s1 - &s2) % n } else { (n - ((&s2 - &s1) % n)) % n };
-        let c_diff = if c1 >= c2 { (&c1 - &c2) % n } else { (n - ((&c2 - &c1) % n)) % n };
+        let s_diff = if s1 >= s2 {
+            (&s1 - &s2) % n
+        } else {
+            (n - ((&s2 - &s1) % n)) % n
+        };
+        let c_diff = if c1 >= c2 {
+            (&c1 - &c2) % n
+        } else {
+            (n - ((&c2 - &c1) % n)) % n
+        };
         let c_diff_inv = crate::utils::mod_inverse(&c_diff, n).unwrap();
         let x_extracted = (&s_diff * &c_diff_inv) % n;
 

@@ -99,13 +99,17 @@ impl NtruPoly {
 
     pub fn add(&self, other: &Self) -> Self {
         let mut out = [0; N];
-        for i in 0..N { out[i] = self.0[i] + other.0[i]; }
+        for i in 0..N {
+            out[i] = self.0[i] + other.0[i];
+        }
         Self(out)
     }
 
     pub fn sub(&self, other: &Self) -> Self {
         let mut out = [0; N];
-        for i in 0..N { out[i] = self.0[i] - other.0[i]; }
+        for i in 0..N {
+            out[i] = self.0[i] - other.0[i];
+        }
         Self(out)
     }
 
@@ -128,7 +132,9 @@ impl NtruPoly {
 
     pub fn scale(&self, s: i32) -> Self {
         let mut out = [0; N];
-        for i in 0..N { out[i] = self.0[i] * s; }
+        for i in 0..N {
+            out[i] = self.0[i] * s;
+        }
         Self(out)
     }
 
@@ -142,12 +148,18 @@ impl NtruPoly {
         let mut placed_plus = 0;
         while placed_plus < d_plus {
             let i: usize = rng.gen_range(0..N);
-            if out[i] == 0 { out[i] = 1; placed_plus += 1; }
+            if out[i] == 0 {
+                out[i] = 1;
+                placed_plus += 1;
+            }
         }
         let mut placed_minus = 0;
         while placed_minus < d_minus {
             let i: usize = rng.gen_range(0..N);
-            if out[i] == 0 { out[i] = -1; placed_minus += 1; }
+            if out[i] == 0 {
+                out[i] = -1;
+                placed_minus += 1;
+            }
         }
         Self(out)
     }
@@ -204,7 +216,9 @@ fn poly_inverse_brute(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
 fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
     // Convert to degree-N-1 polynomial representation as Vec<i32>.
     let mut a = vec![0i32; N + 1];
-    for i in 0..N { a[i] = ((f.0[i] % m) + m) % m; }
+    for i in 0..N {
+        a[i] = ((f.0[i] % m) + m) % m;
+    }
     // a(x) and x^N − 1: a starts as f, b starts as x^N − 1.
     let mut b = vec![0i32; N + 1];
     b[0] = m - 1; // -1 mod m
@@ -221,10 +235,14 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
 
     let mod_inv = |x: i32, m: i32| -> Option<i32> {
         let x = ((x % m) + m) % m;
-        if x == 0 { return None; }
+        if x == 0 {
+            return None;
+        }
         // Brute force inverse for small m.
         for i in 1..m {
-            if (x * i) % m == 1 { return Some(i); }
+            if (x * i) % m == 1 {
+                return Some(i);
+            }
         }
         None
     };
@@ -234,9 +252,11 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
         if a[0] == 0 {
             // Multiply a, u by x^{-1}: shift down.
             a.rotate_left(1);
-            if a.last() == Some(&0) { *a.last_mut().unwrap() = 0; } // no-op
-            // u should multiply by x^{-1} = x^{N-1} mod (x^N − 1).
-            // Equivalent to rotating u right.
+            if a.last() == Some(&0) {
+                *a.last_mut().unwrap() = 0;
+            } // no-op
+              // u should multiply by x^{-1} = x^{N-1} mod (x^N − 1).
+              // Equivalent to rotating u right.
             u.rotate_right(1);
             if u[0] != 0 {
                 // rotate_right placed last element at position 0, ok.
@@ -261,11 +281,16 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
                 result.rotate_right(1);
             }
             let mut out = NtruPoly::zero();
-            for i in 0..N { out.0[i] = result[i]; }
+            for i in 0..N {
+                out.0[i] = result[i];
+            }
             // Sanity check: verify f · out = 1.
             let one_check = f.mul(&out).reduce_mod(m);
-            let mut one = NtruPoly::zero(); one.0[0] = 1;
-            if one_check == one { return Some(out); }
+            let mut one = NtruPoly::zero();
+            one.0[0] = 1;
+            if one_check == one {
+                return Some(out);
+            }
             return None;
         }
         if deg_a < deg_b {
@@ -286,8 +311,12 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
             u[i] = ((u[i] - coef * v[i]) % m + m * m) % m;
         }
         // Recompute deg_a.
-        while deg_a > 0 && a[deg_a] == 0 { deg_a -= 1; }
-        if a.iter().all(|&x| x == 0) { return None; }
+        while deg_a > 0 && a[deg_a] == 0 {
+            deg_a -= 1;
+        }
+        if a.iter().all(|&x| x == 0) {
+            return None;
+        }
     }
 }
 
@@ -331,7 +360,11 @@ pub fn ntru_keygen() -> NtruKeyPair {
         // h = p · f_q_inv · g  (mod q)
         let h = f_q_inv.mul(&g).scale(P).reduce_mod(Q);
         let pk = NtruPublicKey { h };
-        let sk = NtruPrivateKey { f, f_p_inv, pk: pk.clone() };
+        let sk = NtruPrivateKey {
+            f,
+            f_p_inv,
+            pk: pk.clone(),
+        };
         return NtruKeyPair { pk, sk };
     }
     panic!("NTRU keygen failed after 200 retries (extremely unlikely with valid parameters)");
@@ -402,8 +435,11 @@ mod tests {
     /// Polynomial arithmetic: x · (x + 1) = x² + x  (in R = Z[x]/(x^N − 1))
     #[test]
     fn poly_mul_basic() {
-        let mut x = NtruPoly::zero(); x.0[1] = 1;
-        let mut x_plus_1 = NtruPoly::zero(); x_plus_1.0[0] = 1; x_plus_1.0[1] = 1;
+        let mut x = NtruPoly::zero();
+        x.0[1] = 1;
+        let mut x_plus_1 = NtruPoly::zero();
+        x_plus_1.0[0] = 1;
+        x_plus_1.0[1] = 1;
         let prod = x.mul(&x_plus_1);
         let mut expected = NtruPoly::zero();
         expected.0[1] = 1;
@@ -419,7 +455,8 @@ mod tests {
             let f = NtruPoly::sample_ternary(2, 1);
             if let Some(f_inv) = poly_inverse(&f, P) {
                 let prod = f.mul(&f_inv).reduce_mod(P);
-                let mut one = NtruPoly::zero(); one.0[0] = 1;
+                let mut one = NtruPoly::zero();
+                one.0[0] = 1;
                 assert_eq!(prod, one, "trial {}", trial);
                 return;
             }

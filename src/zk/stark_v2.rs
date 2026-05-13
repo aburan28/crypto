@@ -63,12 +63,18 @@ impl StarkConfig {
     /// Default: `blow_up = 8`, `query_count = 80`.  Conjectured
     /// soundness: `(1/8)^80 = 2^{-240}`.
     pub fn default() -> Self {
-        Self { blow_up: 8, query_count: 80 }
+        Self {
+            blow_up: 8,
+            query_count: 80,
+        }
     }
     /// Lower-soundness, faster: `blow_up = 4`, `query_count = 20`.
     /// Conjectured soundness `2^{-40}`.  Good for tests.
     pub fn fast() -> Self {
-        Self { blow_up: 4, query_count: 20 }
+        Self {
+            blow_up: 4,
+            query_count: 20,
+        }
     }
 }
 
@@ -108,7 +114,12 @@ impl AirV2 {
         });
         let generate_trace = Arc::new(gen);
         let boundary = vec![(0, BigUint::from(s))];
-        Self { n, boundary, transition, generate_trace }
+        Self {
+            n,
+            boundary,
+            transition,
+            generate_trace,
+        }
     }
 }
 
@@ -149,7 +160,11 @@ fn eval_on_domain(p: &Poly, dom: &[BigUint]) -> Vec<BigUint> {
 /// `< n` on a multiplicative subgroup of size `n`, recover the
 /// polynomial.  Uses Lagrange via [`Poly::interpolate`].
 fn interpolate_from_subgroup(dom: &[BigUint], evals: &[BigUint]) -> Poly {
-    let pts: Vec<(BigUint, BigUint)> = dom.iter().zip(evals).map(|(d, e)| (d.clone(), e.clone())).collect();
+    let pts: Vec<(BigUint, BigUint)> = dom
+        .iter()
+        .zip(evals)
+        .map(|(d, e)| (d.clone(), e.clone()))
+        .collect();
     Poly::interpolate(&pts)
 }
 
@@ -162,13 +177,7 @@ fn interpolate_from_subgroup(dom: &[BigUint], evals: &[BigUint]) -> Poly {
 /// The composition is `α₁ · T(X) + α₂ · B(X)` where:
 /// - `T(X) = transition_constraint(f(X), f(ω·X)) / Z_{H_minus_last}(X)`
 /// - `B(X) = (f(X) − boundary) / (X − boundary_point)`
-fn compose(
-    air: &AirV2,
-    f: &Poly,
-    h_trace: &[BigUint],
-    alpha1: &BigUint,
-    alpha2: &BigUint,
-) -> Poly {
+fn compose(air: &AirV2, f: &Poly, h_trace: &[BigUint], alpha1: &BigUint, alpha2: &BigUint) -> Poly {
     let n = air.n;
     let omega = &h_trace[1]; // ω = g_n^1
 
@@ -250,9 +259,13 @@ fn scalar_to_bytes(s: &BigUint) -> Vec<u8> {
 /// **Prove** the AIR is satisfied by an executed trace.
 pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     let n = air.n;
-    if !n.is_power_of_two() { return None; }
+    if !n.is_power_of_two() {
+        return None;
+    }
     let trace = (air.generate_trace)();
-    if trace.len() != n { return None; }
+    if trace.len() != n {
+        return None;
+    }
     let h_trace = subgroup(n);
 
     // Trace polynomial via Lagrange.
@@ -316,10 +329,8 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
         .collect();
 
     // Open FRI at the same positions.
-    let fri_openings: Vec<(usize, FriQueryOpening)> = positions
-        .iter()
-        .map(|&p| (p, fri_query(&fri, p)))
-        .collect();
+    let fri_openings: Vec<(usize, FriQueryOpening)> =
+        positions.iter().map(|&p| (p, fri_query(&fri, p))).collect();
 
     Some(StarkProofV2 {
         trace_commit,
@@ -334,7 +345,9 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
 /// **Verify** a STARK v2 proof.
 pub fn verify(air: &AirV2, config: &StarkConfig, proof: &StarkProofV2) -> bool {
     let n = air.n;
-    if !n.is_power_of_two() { return false; }
+    if !n.is_power_of_two() {
+        return false;
+    }
     let lde_size = n * config.blow_up;
     let shift = coset_shift();
     let h_lde = coset(lde_size, &shift);
@@ -356,7 +369,12 @@ pub fn verify(air: &AirV2, config: &StarkConfig, proof: &StarkProofV2) -> bool {
     let fri_transcript_initial = transcript.clone();
 
     // FRI verify (composition polynomial is low-degree).
-    if !fri_verify(&proof.fri, &h_lde, &proof.fri_openings, &fri_transcript_initial) {
+    if !fri_verify(
+        &proof.fri,
+        &h_lde,
+        &proof.fri_openings,
+        &fri_transcript_initial,
+    ) {
         return false;
     }
 
@@ -438,6 +456,9 @@ mod tests {
         let air = AirV2::doubling(8, 1);
         let cfg = StarkConfig::fast();
         let proof = prove(&air, &cfg).expect("proving");
-        assert!(verify(&air, &cfg, &proof), "v2 verify must accept honest proof");
+        assert!(
+            verify(&air, &cfg, &proof),
+            "v2 verify must accept honest proof"
+        );
     }
 }

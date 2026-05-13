@@ -23,12 +23,7 @@ const H_LEN: usize = 32; // HMAC-SHA256 output length
 /// * `salt`       — a random per-credential salt (≥ 16 bytes recommended)
 /// * `iterations` — work factor; ≥ 600_000 recommended for password storage
 /// * `dk_len`     — desired output length in bytes
-pub fn pbkdf2_hmac_sha256(
-    password: &[u8],
-    salt: &[u8],
-    iterations: u32,
-    dk_len: usize,
-) -> Vec<u8> {
+pub fn pbkdf2_hmac_sha256(password: &[u8], salt: &[u8], iterations: u32, dk_len: usize) -> Vec<u8> {
     let block_count = (dk_len + H_LEN - 1) / H_LEN;
     let mut dk = Vec::with_capacity(block_count * H_LEN);
 
@@ -57,7 +52,9 @@ pub fn pbkdf2_hmac_sha256(
 mod tests {
     use super::*;
 
-    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+    fn h(s: &str) -> Vec<u8> {
+        hex::decode(s).unwrap()
+    }
 
     // ── PBKDF2-HMAC-SHA256 KATs (RFC 7914 §11) ───────────────────────────────
 
@@ -67,8 +64,10 @@ mod tests {
         let dk = pbkdf2_hmac_sha256(b"passwd", b"salt", 1, 64);
         assert_eq!(
             dk,
-            h("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc\
-               49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783"),
+            h(
+                "55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc\
+               49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783"
+            ),
         );
     }
 

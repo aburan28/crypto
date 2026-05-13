@@ -32,7 +32,11 @@ pub fn p() -> BigUint {
 /// Reduce `x mod p`.
 pub fn fe_reduce(x: &BigUint) -> BigUint {
     let pp = p();
-    if x < &pp { x.clone() } else { x % &pp }
+    if x < &pp {
+        x.clone()
+    } else {
+        x % &pp
+    }
 }
 
 /// `(a + b) mod p`.
@@ -43,7 +47,11 @@ pub fn fe_add(a: &BigUint, b: &BigUint) -> BigUint {
 /// `(a − b) mod p`.
 pub fn fe_sub(a: &BigUint, b: &BigUint) -> BigUint {
     let pp = p();
-    if a >= b { (a - b) % &pp } else { &pp - ((b - a) % &pp) }
+    if a >= b {
+        (a - b) % &pp
+    } else {
+        &pp - ((b - a) % &pp)
+    }
 }
 
 /// `(a · b) mod p`.

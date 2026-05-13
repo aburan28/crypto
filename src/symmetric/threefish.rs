@@ -447,10 +447,22 @@ impl Threefish1024 {
             k[i] = u64::from_le_bytes(key[i * 8..i * 8 + 8].try_into().unwrap());
         }
         k[16] = C240
-            ^ k[0] ^ k[1] ^ k[2] ^ k[3]
-            ^ k[4] ^ k[5] ^ k[6] ^ k[7]
-            ^ k[8] ^ k[9] ^ k[10] ^ k[11]
-            ^ k[12] ^ k[13] ^ k[14] ^ k[15];
+            ^ k[0]
+            ^ k[1]
+            ^ k[2]
+            ^ k[3]
+            ^ k[4]
+            ^ k[5]
+            ^ k[6]
+            ^ k[7]
+            ^ k[8]
+            ^ k[9]
+            ^ k[10]
+            ^ k[11]
+            ^ k[12]
+            ^ k[13]
+            ^ k[14]
+            ^ k[15];
         let mut t = [0u64; 3];
         t[0] = u64::from_le_bytes(tweak[0..8].try_into().unwrap());
         t[1] = u64::from_le_bytes(tweak[8..16].try_into().unwrap());
@@ -586,7 +598,10 @@ mod tests {
         let cipher = Threefish512::new(&key, &tweak);
         let mut block = pt;
         cipher.encrypt(&mut block);
-        assert_ne!(block, pt, "zero key/tweak/plaintext must not be a fixed point");
+        assert_ne!(
+            block, pt,
+            "zero key/tweak/plaintext must not be a fixed point"
+        );
         cipher.decrypt(&mut block);
         assert_eq!(block, pt);
     }
@@ -600,7 +615,9 @@ mod tests {
             let mut pt = [0u8; 64];
             for buf in [&mut key[..], &mut tweak[..], &mut pt[..]] {
                 for b in buf.iter_mut() {
-                    s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                    s = s
+                        .wrapping_mul(6364136223846793005)
+                        .wrapping_add(1442695040888963407);
                     *b = (s >> 56) as u8;
                 }
             }
@@ -636,10 +653,16 @@ mod tests {
         assert_ne!(c1, c2, "single-bit tweak change must change ciphertext");
 
         // Tweak avalanche: ≥ 200 of 512 bits should differ.
-        let differing: usize = c1.iter().zip(c2.iter())
+        let differing: usize = c1
+            .iter()
+            .zip(c2.iter())
             .map(|(a, b)| (a ^ b).count_ones() as usize)
             .sum();
-        assert!(differing >= 200, "weak avalanche on tweak: {} bits", differing);
+        assert!(
+            differing >= 200,
+            "weak avalanche on tweak: {} bits",
+            differing
+        );
     }
 
     #[test]
@@ -649,8 +672,16 @@ mod tests {
         let k1 = [0u8; 64];
         let mut k2 = [0u8; 64];
         k2[0] = 1;
-        let c1 = { let mut b = pt; Threefish512::new(&k1, &tweak).encrypt(&mut b); b };
-        let c2 = { let mut b = pt; Threefish512::new(&k2, &tweak).encrypt(&mut b); b };
+        let c1 = {
+            let mut b = pt;
+            Threefish512::new(&k1, &tweak).encrypt(&mut b);
+            b
+        };
+        let c2 = {
+            let mut b = pt;
+            Threefish512::new(&k2, &tweak).encrypt(&mut b);
+            b
+        };
         assert_ne!(c1, c2);
     }
 
@@ -676,7 +707,9 @@ mod tests {
             let mut pt = [0u8; 32];
             for buf in [&mut key[..], &mut tweak[..], &mut pt[..]] {
                 for b in buf.iter_mut() {
-                    s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                    s = s
+                        .wrapping_mul(6364136223846793005)
+                        .wrapping_add(1442695040888963407);
                     *b = (s >> 56) as u8;
                 }
             }
@@ -710,7 +743,9 @@ mod tests {
             let mut pt = [0u8; 128];
             for buf in [&mut key[..], &mut tweak[..], &mut pt[..]] {
                 for b in buf.iter_mut() {
-                    s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                    s = s
+                        .wrapping_mul(6364136223846793005)
+                        .wrapping_add(1442695040888963407);
                     *b = (s >> 56) as u8;
                 }
             }
@@ -750,9 +785,7 @@ mod tests {
         let mut block = [0u8; 32];
         let cipher = Threefish256::new(&key, &tweak);
         cipher.encrypt(&mut block);
-        let expect = hex_to_vec(
-            "84da2a1f8beaee947066ae3e3103f1ad536db1f4a1192495116b9f3ce6133fd8",
-        );
+        let expect = hex_to_vec("84da2a1f8beaee947066ae3e3103f1ad536db1f4a1192495116b9f3ce6133fd8");
         assert_eq!(&block[..], &expect[..], "Threefish-256 KAT mismatch");
         cipher.decrypt(&mut block);
         assert_eq!(block, [0u8; 32]);

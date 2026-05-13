@@ -112,10 +112,7 @@ impl WalkFn for StandardWalk {
 
 /// Emit a JSON Lines training trace for an ML pipeline.  Writes each
 /// `WalkTrace` as one JSON object per line to the given writer.
-pub fn emit_traces(
-    traces: &[WalkTrace],
-    writer: &mut impl Write,
-) -> std::io::Result<()> {
+pub fn emit_traces(traces: &[WalkTrace], writer: &mut impl Write) -> std::io::Result<()> {
     for trace in traces {
         let line = serde_json::to_string(trace)?;
         writeln!(writer, "{}", line)?;

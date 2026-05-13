@@ -148,7 +148,11 @@ impl MerkleTree {
             let sibling_idx = if idx % 2 == 0 {
                 // We're the LEFT child; sibling is right (idx+1 or
                 // duplicate of self if at boundary).
-                if idx + 1 < level_nodes.len() { idx + 1 } else { idx }
+                if idx + 1 < level_nodes.len() {
+                    idx + 1
+                } else {
+                    idx
+                }
             } else {
                 // We're the RIGHT child; sibling is left.
                 idx - 1
@@ -221,7 +225,10 @@ mod tests {
         let proof_a = tree.proof(0).unwrap();
         assert_eq!(proof_a.path.len(), 1);
         assert_eq!(proof_a.path[0], hash_leaf(b"b"));
-        assert!(!proof_a.directions[0], "sibling is on the right for index 0");
+        assert!(
+            !proof_a.directions[0],
+            "sibling is on the right for index 0"
+        );
         assert!(merkle_verify(b"a", &proof_a, &tree.root()));
 
         let proof_b = tree.proof(1).unwrap();
@@ -238,8 +245,11 @@ mod tests {
         // Should still be verifiable for every leaf.
         for i in 0..3 {
             let proof = tree.proof(i).unwrap();
-            assert!(merkle_verify(&leaves[i], &proof, &tree.root()),
-                "proof for index {} should verify", i);
+            assert!(
+                merkle_verify(&leaves[i], &proof, &tree.root()),
+                "proof for index {} should verify",
+                i
+            );
         }
         // Out-of-bounds index → None.
         assert!(tree.proof(3).is_none());
@@ -311,8 +321,11 @@ mod tests {
         let tree = MerkleTree::from_leaves(&leaves);
         for i in 0..100 {
             let proof = tree.proof(i).unwrap();
-            assert!(merkle_verify(&leaves[i], &proof, &tree.root()),
-                "leaf {} should verify in a 100-leaf tree", i);
+            assert!(
+                merkle_verify(&leaves[i], &proof, &tree.root()),
+                "leaf {} should verify in a 100-leaf tree",
+                i
+            );
         }
     }
 

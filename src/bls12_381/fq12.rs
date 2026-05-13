@@ -18,22 +18,37 @@ impl Fq12 {
         Self { c0, c1 }
     }
     pub fn zero() -> Self {
-        Self { c0: Fq6::zero(), c1: Fq6::zero() }
+        Self {
+            c0: Fq6::zero(),
+            c1: Fq6::zero(),
+        }
     }
     pub fn one() -> Self {
-        Self { c0: Fq6::one(), c1: Fq6::zero() }
+        Self {
+            c0: Fq6::one(),
+            c1: Fq6::zero(),
+        }
     }
     pub fn is_zero(&self) -> bool {
         self.c0.is_zero() && self.c1.is_zero()
     }
     pub fn add(&self, other: &Self) -> Self {
-        Self { c0: self.c0.add(&other.c0), c1: self.c1.add(&other.c1) }
+        Self {
+            c0: self.c0.add(&other.c0),
+            c1: self.c1.add(&other.c1),
+        }
     }
     pub fn sub(&self, other: &Self) -> Self {
-        Self { c0: self.c0.sub(&other.c0), c1: self.c1.sub(&other.c1) }
+        Self {
+            c0: self.c0.sub(&other.c0),
+            c1: self.c1.sub(&other.c1),
+        }
     }
     pub fn neg(&self) -> Self {
-        Self { c0: self.c0.neg(), c1: self.c1.neg() }
+        Self {
+            c0: self.c0.neg(),
+            c1: self.c1.neg(),
+        }
     }
     /// Multiplication using `w² = v`:
     /// `(a + bw)(c + dw) = (ac + bd·v) + (ad + bc)·w`.
@@ -52,7 +67,10 @@ impl Fq12 {
     }
     /// Conjugate: `a + bw ↦ a − bw`.
     pub fn conjugate(&self) -> Self {
-        Self { c0: self.c0.clone(), c1: self.c1.neg() }
+        Self {
+            c0: self.c0.clone(),
+            c1: self.c1.neg(),
+        }
     }
     pub fn inverse(&self) -> Option<Self> {
         // For (a + bw)(a − bw) = a² − b²·v in F_{p⁶}.
@@ -80,9 +98,9 @@ impl Fq12 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::fq::Fq;
     use super::super::fq2::Fq2;
+    use super::*;
     use num_bigint::BigUint;
 
     fn sample() -> Fq12 {

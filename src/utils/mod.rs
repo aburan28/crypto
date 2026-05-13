@@ -58,12 +58,7 @@ pub fn mod_pow(base: &BigUint, exp: &BigUint, modulus: &BigUint) -> BigUint {
 /// the exponent `d` is bounded by the modulus, and using `n.bits()`
 /// keeps the iteration count uniform across keys with the same
 /// modulus size.
-pub fn mod_pow_ct(
-    base: &BigUint,
-    exp: &BigUint,
-    modulus: &BigUint,
-    exp_bits: usize,
-) -> BigUint {
+pub fn mod_pow_ct(base: &BigUint, exp: &BigUint, modulus: &BigUint, exp_bits: usize) -> BigUint {
     let mut r0 = BigUint::one();
     let mut r1 = base % modulus;
 

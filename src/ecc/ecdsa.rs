@@ -45,11 +45,7 @@ pub fn sign(message: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) ->
 /// the catastrophic key-recovery failure mode that occurs when a randomly
 /// sampled `k` is repeated, biased, or predictable.  Two signatures over
 /// the same `(message, key)` are bit-for-bit identical.
-pub fn sign_hash(
-    hash: &[u8],
-    private_key: &EccPrivateKey,
-    curve: &CurveParams,
-) -> EcdsaSignature {
+pub fn sign_hash(hash: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) -> EcdsaSignature {
     let z = hash_to_scalar(hash, &curve.n);
 
     let mut drbg = Rfc6979Drbg::new(&private_key.scalar, hash, &curve.n);
@@ -295,11 +291,15 @@ mod tests {
         let kp = EccKeyPair::from_private(d, &curve);
 
         let r = BigUint::parse_bytes(
-            b"3f00b2a032fa0274eb2a3ac7a4fda16cbaf44de009166536df839187a0dcdb3d", 16,
-        ).unwrap();
+            b"3f00b2a032fa0274eb2a3ac7a4fda16cbaf44de009166536df839187a0dcdb3d",
+            16,
+        )
+        .unwrap();
         let s = BigUint::parse_bytes(
-            b"880fbab6bd8fe10f572454e17ee0bb6cb7a6955aa9b8ee6b0b14b0029b582c1c", 16,
-        ).unwrap();
+            b"880fbab6bd8fe10f572454e17ee0bb6cb7a6955aa9b8ee6b0b14b0029b582c1c",
+            16,
+        )
+        .unwrap();
         let sig = EcdsaSignature { r, s };
         assert!(verify(b"attack at dawn", &kp.public, &sig, &curve));
         // Tampered message must fail
@@ -310,9 +310,15 @@ mod tests {
     fn reject_zero_r_or_s() {
         let curve = CurveParams::p256();
         let kp = EccKeyPair::generate(&curve);
-        let zero = EcdsaSignature { r: BigUint::from(0u32), s: BigUint::from(1u32) };
+        let zero = EcdsaSignature {
+            r: BigUint::from(0u32),
+            s: BigUint::from(1u32),
+        };
         assert!(!verify(b"msg", &kp.public, &zero, &curve));
-        let zero2 = EcdsaSignature { r: BigUint::from(1u32), s: BigUint::from(0u32) };
+        let zero2 = EcdsaSignature {
+            r: BigUint::from(1u32),
+            s: BigUint::from(0u32),
+        };
         assert!(!verify(b"msg", &kp.public, &zero2, &curve));
     }
 
@@ -327,8 +333,10 @@ mod tests {
         //   s = F7CB1C942D657C41D436C7A1B6E29F65F3E900DBB9AFF4064DC4AB2F843ACDA8
         let curve = CurveParams::p256();
         let d = BigUint::parse_bytes(
-            b"C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721", 16,
-        ).unwrap();
+            b"C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721",
+            16,
+        )
+        .unwrap();
         let kp = EccKeyPair::from_private(d, &curve);
         let sig = sign(b"sample", &kp.private, &curve);
         assert_eq!(
@@ -361,9 +369,15 @@ mod tests {
         let curve = CurveParams::p256();
         let kp = EccKeyPair::generate(&curve);
         // r = n is out of range
-        let bad = EcdsaSignature { r: curve.n.clone(), s: BigUint::from(1u32) };
+        let bad = EcdsaSignature {
+            r: curve.n.clone(),
+            s: BigUint::from(1u32),
+        };
         assert!(!verify(b"msg", &kp.public, &bad, &curve));
-        let bad2 = EcdsaSignature { r: BigUint::from(1u32), s: curve.n.clone() };
+        let bad2 = EcdsaSignature {
+            r: BigUint::from(1u32),
+            s: curve.n.clone(),
+        };
         assert!(!verify(b"msg", &kp.public, &bad2, &curve));
     }
 }

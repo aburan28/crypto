@@ -51,8 +51,8 @@ pub const T: usize = 3;
 /// Message dimension (k = n − m·t).
 pub const K: usize = N - M * T;
 
-const FIELD_SIZE: u32 = 1u32 << M;          // 64
-const GF_PRIM:    u32 = 0b100_0011;         // x^6 + x + 1, primitive over GF(2)
+const FIELD_SIZE: u32 = 1u32 << M; // 64
+const GF_PRIM: u32 = 0b100_0011; // x^6 + x + 1, primitive over GF(2)
 
 // ── GF(2^m) field arithmetic via log/antilog tables ──────────────────────────
 
@@ -62,8 +62,8 @@ const GF_PRIM:    u32 = 0b100_0011;         // x^6 + x + 1, primitive over GF(2)
 /// reduction.
 #[derive(Clone, Debug)]
 pub struct GfTables {
-    exp: Vec<u32>,   // length 2*(field_size-1) = 126
-    log: Vec<u32>,   // length field_size = 64; log[0] is unused (sentinel)
+    exp: Vec<u32>, // length 2*(field_size-1) = 126
+    log: Vec<u32>, // length field_size = 64; log[0] is unused (sentinel)
 }
 
 impl GfTables {
@@ -87,10 +87,14 @@ impl GfTables {
 }
 
 #[inline]
-fn gf_add(a: u32, b: u32) -> u32 { a ^ b }
+fn gf_add(a: u32, b: u32) -> u32 {
+    a ^ b
+}
 
 fn gf_mul(a: u32, b: u32, gf: &GfTables) -> u32 {
-    if a == 0 || b == 0 { return 0; }
+    if a == 0 || b == 0 {
+        return 0;
+    }
     gf.exp[(gf.log[a as usize] + gf.log[b as usize]) as usize]
 }
 
@@ -101,10 +105,12 @@ fn gf_inv(a: u32, gf: &GfTables) -> u32 {
 
 #[allow(dead_code)]
 fn gf_div(a: u32, b: u32, gf: &GfTables) -> u32 {
-    if a == 0 { return 0; }
+    if a == 0 {
+        return 0;
+    }
     assert!(b != 0, "GF division by zero");
-    gf.exp[(gf.log[a as usize] as usize + (FIELD_SIZE as usize - 1)
-            - gf.log[b as usize] as usize) % (FIELD_SIZE as usize - 1)]
+    gf.exp[(gf.log[a as usize] as usize + (FIELD_SIZE as usize - 1) - gf.log[b as usize] as usize)
+        % (FIELD_SIZE as usize - 1)]
 }
 
 // ── Polynomial arithmetic in GF(2^m)[x] ──────────────────────────────────────
@@ -113,33 +119,51 @@ fn gf_div(a: u32, b: u32, gf: &GfTables) -> u32 {
 type Poly = Vec<u32>;
 
 fn poly_trim(a: &mut Poly) {
-    while a.last() == Some(&0) { a.pop(); }
+    while a.last() == Some(&0) {
+        a.pop();
+    }
 }
 
 fn poly_deg(a: &Poly) -> isize {
-    if a.is_empty() { -1 } else { a.len() as isize - 1 }
+    if a.is_empty() {
+        -1
+    } else {
+        a.len() as isize - 1
+    }
 }
 
 fn poly_add(a: &Poly, b: &Poly) -> Poly {
     let mut out = vec![0u32; a.len().max(b.len())];
-    for (i, &x) in a.iter().enumerate() { out[i] ^= x; }
-    for (i, &x) in b.iter().enumerate() { out[i] ^= x; }
+    for (i, &x) in a.iter().enumerate() {
+        out[i] ^= x;
+    }
+    for (i, &x) in b.iter().enumerate() {
+        out[i] ^= x;
+    }
     poly_trim(&mut out);
     out
 }
 
 fn poly_scale(a: &Poly, c: u32, gf: &GfTables) -> Poly {
-    if c == 0 { return vec![]; }
+    if c == 0 {
+        return vec![];
+    }
     a.iter().map(|&x| gf_mul(x, c, gf)).collect()
 }
 
 fn poly_mul(a: &Poly, b: &Poly, gf: &GfTables) -> Poly {
-    if a.is_empty() || b.is_empty() { return vec![]; }
+    if a.is_empty() || b.is_empty() {
+        return vec![];
+    }
     let mut out = vec![0u32; a.len() + b.len() - 1];
     for (i, &ai) in a.iter().enumerate() {
-        if ai == 0 { continue; }
+        if ai == 0 {
+            continue;
+        }
         for (j, &bj) in b.iter().enumerate() {
-            if bj == 0 { continue; }
+            if bj == 0 {
+                continue;
+            }
             out[i + j] ^= gf_mul(ai, bj, gf);
         }
     }
@@ -149,7 +173,9 @@ fn poly_mul(a: &Poly, b: &Poly, gf: &GfTables) -> Poly {
 
 /// Polynomial squaring in characteristic 2: (Σ aᵢ xⁱ)² = Σ aᵢ² x^{2i}.
 fn poly_square(a: &Poly, gf: &GfTables) -> Poly {
-    if a.is_empty() { return vec![]; }
+    if a.is_empty() {
+        return vec![];
+    }
     let mut out = vec![0u32; 2 * a.len() - 1];
     for (i, &x) in a.iter().enumerate() {
         out[2 * i] = gf_mul(x, x, gf);
@@ -173,7 +199,9 @@ fn poly_divmod(a: &Poly, b: &Poly, gf: &GfTables) -> (Poly, Poly) {
         let coef = gf_mul(r[r.len() - 1], b_lead_inv, gf);
         q[shift] = coef;
         for (i, &bi) in b.iter().enumerate() {
-            if bi == 0 { continue; }
+            if bi == 0 {
+                continue;
+            }
             r[i + shift] ^= gf_mul(coef, bi, gf);
         }
         poly_trim(&mut r);
@@ -202,8 +230,10 @@ fn poly_gcd_ext(a: &Poly, b: &Poly, gf: &GfTables) -> (Poly, Poly) {
     while !r1.is_empty() {
         let (q, r) = poly_divmod(&r0, &r1, gf);
         let s = poly_add(&s0, &poly_mul(&q, &s1, gf));
-        r0 = r1; r1 = r;
-        s0 = s1; s1 = s;
+        r0 = r1;
+        r1 = r;
+        s0 = s1;
+        s1 = s;
     }
     (r0, s0)
 }
@@ -240,7 +270,7 @@ fn parity_check_gf(support: &[u32], g: &Poly, gf: &GfTables) -> Vec<Vec<u32>> {
         let g_aj = poly_eval(g, aj, gf);
         assert!(g_aj != 0, "support point is a root of g");
         let inv_g_aj = gf_inv(g_aj, gf);
-        let mut p: u32 = inv_g_aj;       // α_j^0 / g(α_j) = 1/g(α_j)
+        let mut p: u32 = inv_g_aj; // α_j^0 / g(α_j) = 1/g(α_j)
         for i in 0..t {
             h[i][j] = p;
             p = gf_mul(p, aj, gf);
@@ -271,12 +301,7 @@ fn expand_to_binary(h: &[Vec<u32>]) -> Vec<Vec<u8>> {
 /// Given received word `r` (length n binary) with up to t bit-errors against
 /// a Goppa code with support `L` and Goppa polynomial `g`, return the
 /// codeword (corrected `r`) and the error pattern `e`.
-pub fn patterson_decode(
-    r: &[u8],
-    support: &[u32],
-    g: &Poly,
-    gf: &GfTables,
-) -> (Vec<u8>, Vec<u8>) {
+pub fn patterson_decode(r: &[u8], support: &[u32], g: &Poly, gf: &GfTables) -> (Vec<u8>, Vec<u8>) {
     let n = support.len();
     let t = g.len() - 1;
     assert_eq!(r.len(), n);
@@ -302,7 +327,9 @@ pub fn patterson_decode(
 
     // Step 3: V(x) = T(x) + x   (mod g, but deg ≤ t-1 already)
     let mut v_poly = t_poly.clone();
-    if v_poly.len() < 2 { v_poly.resize(2, 0); }
+    if v_poly.len() < 2 {
+        v_poly.resize(2, 0);
+    }
     v_poly[1] ^= 1;
     poly_trim(&mut v_poly);
 
@@ -316,8 +343,10 @@ pub fn patterson_decode(
     while poly_deg(&r1) > stop {
         let (q, rem) = poly_divmod(&r0, &r1, gf);
         let b_new = poly_add(&b0, &poly_mul(&q, &b1, gf));
-        r0 = r1; r1 = rem;
-        b0 = b1; b1 = b_new;
+        r0 = r1;
+        r1 = rem;
+        b0 = b1;
+        b1 = b_new;
     }
     // After the loop, r1 = A(x), b1 = B(x): B·U ≡ A (mod g), with
     // deg A ≤ ⌊t/2⌋ and deg B ≤ ⌊(t-1)/2⌋.
@@ -359,7 +388,9 @@ fn mat_zeros(rows: usize, cols: usize) -> BinMat {
 
 fn mat_identity(n: usize) -> BinMat {
     let mut m = mat_zeros(n, n);
-    for i in 0..n { m[i][i] = 1; }
+    for i in 0..n {
+        m[i][i] = 1;
+    }
     m
 }
 
@@ -400,7 +431,9 @@ fn invert_binary(m: &BinMat) -> Option<BinMat> {
                     break;
                 }
             }
-            if !found { return None; }
+            if !found {
+                return None;
+            }
         }
         for r in 0..n {
             if r != i && a[r][i] == 1 {
@@ -436,7 +469,9 @@ fn systematic_form(h: &BinMat) -> Option<(BinMat, Vec<usize>)> {
             }
         }
         let (pr, pc) = pivot?;
-        if pr != i { a.swap(pr, i); }
+        if pr != i {
+            a.swap(pr, i);
+        }
         if pc != i {
             for row in a.iter_mut() {
                 row.swap(i, pc);
@@ -463,9 +498,9 @@ fn generator_from_systematic(h_sys: &BinMat) -> BinMat {
     let mut g = mat_zeros(k, n);
     for r in 0..k {
         for c in 0..mt {
-            g[r][c] = h_sys[c][mt + r];   // B^T
+            g[r][c] = h_sys[c][mt + r]; // B^T
         }
-        g[r][mt + r] = 1;                  // I_k
+        g[r][mt + r] = 1; // I_k
     }
     g
 }
@@ -484,12 +519,19 @@ fn random_irreducible_poly(t: usize, gf: &GfTables) -> Poly {
         for i in 0..t {
             g[i] = rng.gen_range(0..FIELD_SIZE);
         }
-        if g[0] == 0 { continue; }
+        if g[0] == 0 {
+            continue;
+        }
         let mut has_root = false;
         for alpha in 0..FIELD_SIZE {
-            if poly_eval(&g, alpha, gf) == 0 { has_root = true; break; }
+            if poly_eval(&g, alpha, gf) == 0 {
+                has_root = true;
+                break;
+            }
         }
-        if !has_root { return g; }
+        if !has_root {
+            return g;
+        }
     }
 }
 
@@ -544,7 +586,9 @@ fn vec_mat_mul(v: &[u8], m: &BinMat) -> Vec<u8> {
     let cols = m[0].len();
     let mut out = vec![0u8; cols];
     for (i, &vi) in v.iter().enumerate() {
-        if vi == 0 { continue; }
+        if vi == 0 {
+            continue;
+        }
         for j in 0..cols {
             out[j] ^= m[i][j];
         }
@@ -600,11 +644,19 @@ pub struct McEliecePrivateKey {
 impl Drop for McEliecePrivateKey {
     fn drop(&mut self) {
         for row in self.s_inv.iter_mut() {
-            for b in row.iter_mut() { *b = 0; }
+            for b in row.iter_mut() {
+                *b = 0;
+            }
         }
-        for s in self.support.iter_mut() { *s = 0; }
-        for c in self.g_poly.iter_mut() { *c = 0; }
-        for p in self.perm.iter_mut() { *p = 0; }
+        for s in self.support.iter_mut() {
+            *s = 0;
+        }
+        for c in self.g_poly.iter_mut() {
+            *c = 0;
+        }
+        for p in self.perm.iter_mut() {
+            *p = 0;
+        }
     }
 }
 
@@ -635,7 +687,7 @@ impl McElieceKeyPair {
 
             let (h_sys, sys_perm) = match systematic_form(&h_bin) {
                 Some(p) => p,
-                None => continue,    // singular: retry with a new g
+                None => continue, // singular: retry with a new g
             };
 
             // Re-order the support so that column i corresponds to support
@@ -661,10 +713,17 @@ impl McElieceKeyPair {
 
             return McElieceKeyPair {
                 public: McElieceePublicKey {
-                    g_prime, n: N, k: K, t: T,
+                    g_prime,
+                    n: N,
+                    k: K,
+                    t: T,
                 },
                 private: McEliecePrivateKey {
-                    s_inv, support: support_sys, g_poly, perm: p_perm, gf,
+                    s_inv,
+                    support: support_sys,
+                    g_poly,
+                    perm: p_perm,
+                    gf,
                 },
             };
         }
@@ -675,7 +734,9 @@ impl McElieceKeyPair {
 /// Returns an `N`-byte ciphertext (one bit per byte).
 pub fn mceliece_encrypt(msg: &[u8], pk: &McElieceePublicKey) -> Vec<u8> {
     assert_eq!(msg.len(), pk.k, "message must be exactly k bits");
-    for &b in msg { assert!(b <= 1, "message bits must be 0 or 1"); }
+    for &b in msg {
+        assert!(b <= 1, "message bits must be 0 or 1");
+    }
     let mg = vec_mat_mul(msg, &pk.g_prime);
     let e = random_error(pk.n, pk.t);
     let mut c = vec![0u8; pk.n];
@@ -698,7 +759,9 @@ pub fn mceliece_decrypt(ct: &[u8], sk: &McEliecePrivateKey) -> Option<Vec<u8>> {
 
     // Verify weight ≤ t (Patterson always returns weight ≤ t when valid).
     let weight: usize = e.iter().map(|&x| x as usize).sum();
-    if weight > T { return None; }
+    if weight > T {
+        return None;
+    }
 
     // Generator was in systematic form [B^T | I_k]: message is the last K
     // bits of the codeword.
@@ -752,8 +815,8 @@ mod tests {
     #[test]
     fn poly_divmod_consistency() {
         let gf = GfTables::new();
-        let a: Poly = vec![3, 5, 1, 7, 2, 1];   // degree 5
-        let b: Poly = vec![1, 0, 1];             // x^2 + 1
+        let a: Poly = vec![3, 5, 1, 7, 2, 1]; // degree 5
+        let b: Poly = vec![1, 0, 1]; // x^2 + 1
         let (q, r) = poly_divmod(&a, &b, &gf);
         // a == q·b + r
         let recombined = poly_add(&poly_mul(&q, &b, &gf), &r);
@@ -777,7 +840,7 @@ mod tests {
     fn poly_sqrt_roundtrip() {
         let gf = GfTables::new();
         let g = random_irreducible_poly(3, &gf);
-        let v: Poly = vec![1, 2, 3];     // any polynomial mod g
+        let v: Poly = vec![1, 2, 3]; // any polynomial mod g
         let r = poly_sqrt_mod_g(&v, &g, &gf);
         // r^2 ≡ v (mod g)
         let r2 = poly_mod(&poly_square(&r, &gf), &g, &gf);
@@ -846,7 +909,9 @@ mod tests {
         // Inject T errors.
         let e = random_error(N, T);
         let mut received = codeword.clone();
-        for i in 0..N { received[i] ^= e[i]; }
+        for i in 0..N {
+            received[i] ^= e[i];
+        }
 
         let (decoded, e_rec) = patterson_decode(&received, &support_after, &sk.g_poly, gf);
         assert_eq!(decoded, codeword, "decoder must recover the codeword");
@@ -899,7 +964,7 @@ mod tests {
         let msg: Vec<u8> = (0..K).map(|_| rand::random::<u8>() & 1).collect();
         let ct = mceliece_encrypt(&msg, &kp1.public);
         match mceliece_decrypt(&ct, &kp2.private) {
-            None => {}                    // decoding failure is fine
+            None => {} // decoding failure is fine
             Some(plain) => assert_ne!(plain, msg),
         }
     }

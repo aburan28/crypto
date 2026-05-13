@@ -46,8 +46,8 @@
 use num_bigint::{BigUint, RandBigInt};
 use num_integer::Integer;
 use num_traits::{One, Zero};
-use rand::SeedableRng;
 use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 use crate::utils::mod_inverse;
 
@@ -194,8 +194,8 @@ where
                     sterile = true;
                     break;
                 }
-                let rhs_inv = mod_inverse(&rhs, n)
-                    .ok_or("inverse of (b_h − b_t) does not exist")?;
+                let rhs_inv =
+                    mod_inverse(&rhs, n).ok_or("inverse of (b_h − b_t) does not exist")?;
                 let x = (&lhs * &rhs_inv) % n;
                 return Ok(RhoSolution {
                     x,
@@ -297,10 +297,8 @@ pub fn pollard_rho_dp_dlp_zp(
     n: &BigUint,
     opts: &DpRhoOptions,
 ) -> Result<RhoSolution, &'static str> {
-    pollard_rho_dp_dlp_zp_multi(g, &[h.clone()], p, n, opts).map(|mut v| {
-        v.pop()
-            .expect("non-empty result on Ok")
-    })
+    pollard_rho_dp_dlp_zp_multi(g, &[h.clone()], p, n, opts)
+        .map(|mut v| v.pop().expect("non-empty result on Ok"))
 }
 
 /// **Multi-target distinguished-points rho.**  Solves `m` DLPs
@@ -392,7 +390,8 @@ pub fn pollard_rho_dp_dlp_zp_multi(
         if unsolved.is_empty() {
             break;
         }
-        let target_idx = unsolved[rng.gen_biguint_below(&BigUint::from(unsolved.len() as u64))
+        let target_idx = unsolved[rng
+            .gen_biguint_below(&BigUint::from(unsolved.len() as u64))
             .iter_u64_digits()
             .next()
             .unwrap_or(0) as usize
@@ -426,8 +425,8 @@ pub fn pollard_rho_dp_dlp_zp_multi(
                     let lhs = sub_mod(&a, a_prev, n);
                     let rhs = sub_mod(b_prev, &b, n);
                     if !rhs.is_zero() && rhs.gcd(n).is_one() {
-                        let rhs_inv = mod_inverse(&rhs, n)
-                            .ok_or("modular inverse unexpectedly absent")?;
+                        let rhs_inv =
+                            mod_inverse(&rhs, n).ok_or("modular inverse unexpectedly absent")?;
                         let candidate = (&lhs * &rhs_inv) % n;
                         // Verify candidate is correct.
                         if &pow(g, &candidate) == h {
@@ -583,9 +582,15 @@ mod tests {
         let p = BigUint::from(131267u32);
         let q = BigUint::from(65633u32);
         let g = BigUint::from(4u32);
-        let secrets = [BigUint::from(101u32), BigUint::from(20202u32), BigUint::from(54321u32)];
-        let targets: Vec<BigUint> =
-            secrets.iter().map(|x| crate::utils::mod_pow(&g, x, &p)).collect();
+        let secrets = [
+            BigUint::from(101u32),
+            BigUint::from(20202u32),
+            BigUint::from(54321u32),
+        ];
+        let targets: Vec<BigUint> = secrets
+            .iter()
+            .map(|x| crate::utils::mod_pow(&g, x, &p))
+            .collect();
         let opts = RhoOptions {
             max_iterations: 1_000_000,
             ..RhoOptions::default()
@@ -602,12 +607,18 @@ mod tests {
     #[test]
     fn sub_mod_correctness() {
         let n = BigUint::from(100u32);
-        assert_eq!(sub_mod(&BigUint::from(30u32), &BigUint::from(20u32), &n), BigUint::from(10u32));
+        assert_eq!(
+            sub_mod(&BigUint::from(30u32), &BigUint::from(20u32), &n),
+            BigUint::from(10u32)
+        );
         assert_eq!(
             sub_mod(&BigUint::from(20u32), &BigUint::from(30u32), &n),
             BigUint::from(90u32)
         );
-        assert_eq!(sub_mod(&BigUint::from(50u32), &BigUint::from(50u32), &n), BigUint::zero());
+        assert_eq!(
+            sub_mod(&BigUint::from(50u32), &BigUint::from(50u32), &n),
+            BigUint::zero()
+        );
         assert_eq!(
             sub_mod(&BigUint::from(0u32), &BigUint::from(99u32), &n),
             BigUint::from(1u32)
@@ -619,7 +630,8 @@ mod tests {
     fn rejects_trivial_group() {
         let one = BigUint::from(1u32);
         let p = BigUint::from(7u32);
-        let result = pollard_rho_dlp_zp(&one, &one, &p, &BigUint::from(1u32), &RhoOptions::default());
+        let result =
+            pollard_rho_dlp_zp(&one, &one, &p, &BigUint::from(1u32), &RhoOptions::default());
         assert!(result.is_err());
     }
 
@@ -668,8 +680,10 @@ mod tests {
         let q = BigUint::from(65633u32);
         let g = BigUint::from(4u32);
         let secrets = [BigUint::from(1234u32), BigUint::from(5678u32)];
-        let targets: Vec<BigUint> =
-            secrets.iter().map(|x| crate::utils::mod_pow(&g, x, &p)).collect();
+        let targets: Vec<BigUint> = secrets
+            .iter()
+            .map(|x| crate::utils::mod_pow(&g, x, &p))
+            .collect();
         let opts = DpRhoOptions {
             dp_bits: 4,
             seed: Some(0xFACEu64),

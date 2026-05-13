@@ -80,7 +80,11 @@ impl PSeries {
     }
 
     pub fn from_coef_vec(p: &BigInt, precision: u32, coefs: Vec<ZpInt>) -> Self {
-        Self { p: p.clone(), precision, coefs }
+        Self {
+            p: p.clone(),
+            precision,
+            coefs,
+        }
     }
 
     pub fn n(&self) -> usize {
@@ -104,9 +108,13 @@ impl PSeries {
         let n = n.min(self.n() + other.n() - 1);
         let mut out = vec![ZpInt::zero(&self.p, self.precision); n];
         for i in 0..self.n() {
-            if self.coefs[i].value.is_zero() { continue; }
+            if self.coefs[i].value.is_zero() {
+                continue;
+            }
             for j in 0..other.n() {
-                if i + j >= n { break; }
+                if i + j >= n {
+                    break;
+                }
                 let prod = self.coefs[i].mul(&other.coefs[j]);
                 out[i + j] = out[i + j].add(&prod);
             }
@@ -239,10 +247,7 @@ pub fn omega_second_kind_series(curve: &ZpCurve, n: usize) -> PSeries {
 ///
 /// where `n = #E(F_p)` (or any multiple of `ord(P)`).  Requires
 /// `gcd(n, p) = 1` (non-anomalous).
-pub fn coleman_integral_abelian_via_n_trick(
-    z_n_p: &ZpInt,
-    n: u64,
-) -> Option<ZpInt> {
+pub fn coleman_integral_abelian_via_n_trick(z_n_p: &ZpInt, n: u64) -> Option<ZpInt> {
     let n_zp = ZpInt::new(BigInt::from(n as i64), &z_n_p.p, z_n_p.precision);
     let n_inv = n_zp.inverse()?;
     Some(z_n_p.mul(&n_inv))
@@ -277,12 +282,7 @@ pub fn iterated_coleman_integral(
 
 /// Verify additivity of single Coleman integrals (sanity check).
 /// For `ω` holomorphic, `I_1(P + Q) ≡ I_1(P) + I_1(Q) (mod p^k)`.
-pub fn verify_abelian_additivity(
-    omega: &PSeries,
-    z_p: &ZpInt,
-    z_q: &ZpInt,
-    z_pq: &ZpInt,
-) -> bool {
+pub fn verify_abelian_additivity(omega: &PSeries, z_p: &ZpInt, z_q: &ZpInt, z_pq: &ZpInt) -> bool {
     let i_p = omega.integrate().and_then(|f| Some(f.evaluate(z_p)));
     let i_q = omega.integrate().and_then(|f| Some(f.evaluate(z_q)));
     let i_pq = omega.integrate().and_then(|f| Some(f.evaluate(z_pq)));
@@ -295,11 +295,7 @@ pub fn verify_abelian_additivity(
 /// **Phase 2 utilities**: extract formal-group `z = -X/Y` from a
 /// projective point in the formal group, after computing `[d]·P̂`
 /// via the genuine elliptic-curve scalar mul.
-pub fn formal_z_from_projective(
-    x: &ZpInt,
-    y: &ZpInt,
-    z: &ZpInt,
-) -> Option<ZpInt> {
+pub fn formal_z_from_projective(x: &ZpInt, y: &ZpInt, z: &ZpInt) -> Option<ZpInt> {
     // For points in the formal group, Z has positive p-valuation
     // and Y is a unit.  Then z = -X/Y (independent of Z scaling).
     if y.value.is_zero() {
@@ -326,12 +322,7 @@ pub fn formal_z_from_projective(
 /// We compute up to a chosen power-series order via the recursive
 /// formal-group law derivation.  Below we hard-code the leading
 /// terms; higher-order corrections involve `a_6 = b`.
-pub fn formal_group_add(
-    a: &ZpInt,
-    _b: &ZpInt,
-    t1: &ZpInt,
-    t2: &ZpInt,
-) -> ZpInt {
+pub fn formal_group_add(a: &ZpInt, _b: &ZpInt, t1: &ZpInt, t2: &ZpInt) -> ZpInt {
     // F(T_1, T_2) = T_1 + T_2 + (-2 a) · (T_1·T_2) · (T_1³ + T_1²·T_2 + T_1·T_2² + T_2³) / 5 + O(T^7)
     //
     // Reference: Silverman IV.1.5, applied to short Weierstrass.
@@ -353,12 +344,7 @@ pub fn formal_group_add(
 }
 
 /// `[d]·T` in the formal group via repeated addition.
-pub fn formal_group_scalar_mul(
-    a: &ZpInt,
-    b: &ZpInt,
-    t: &ZpInt,
-    d: u64,
-) -> ZpInt {
+pub fn formal_group_scalar_mul(a: &ZpInt, b: &ZpInt, t: &ZpInt, d: u64) -> ZpInt {
     if d == 0 {
         return ZpInt::zero(&t.p, t.precision);
     }
@@ -469,8 +455,8 @@ mod tests {
         // Three formal-group parameters (z = -x/y for some points).
         let z_p = ZpInt::new(BigInt::from(11 * 2), &p, prec); // z_P = 22 (val 1)
         let z_q = ZpInt::new(BigInt::from(11 * 3), &p, prec); // z_Q = 33
-        // For z_P · z_Q small enough, the formal sum is approximately
-        // z_P + z_Q (to leading order).  Use this as an approximation.
+                                                              // For z_P · z_Q small enough, the formal sum is approximately
+                                                              // z_P + z_Q (to leading order).  Use this as an approximation.
         let z_pq = z_p.add(&z_q);
 
         // I_1 abelian additivity (already verified by formula
@@ -595,9 +581,8 @@ mod tests {
             println!("WARN: [9]·P̂ did not reduce to identity (precision-exhaustion).");
             return;
         }
-        let z_p_formal = formal_z_from_projective(
-            &p_formal.x, &p_formal.y, &p_formal.z,
-        ).expect("formal z extraction");
+        let z_p_formal = formal_z_from_projective(&p_formal.x, &p_formal.y, &p_formal.z)
+            .expect("formal z extraction");
         println!();
         println!("=== Phase 2: Iterated Coleman with REAL scalar mul ===");
         println!("z_{{P_formal}} = {}", z_p_formal.value);
@@ -614,9 +599,7 @@ mod tests {
                 println!("d={}: [d]·P_formal lost formal-group reduction (skip)", d);
                 continue;
             }
-            let z_d = match formal_z_from_projective(
-                &p_d_formal.x, &p_d_formal.y, &p_d_formal.z,
-            ) {
+            let z_d = match formal_z_from_projective(&p_d_formal.x, &p_d_formal.y, &p_d_formal.z) {
                 Some(z) => z,
                 None => {
                     println!("d={}: z extraction failed (skip)", d);
@@ -694,7 +677,9 @@ mod tests {
                 "d={:2}: z_{{d·P}} = {:>10}, I_2 = {:>10}, d²·I_2(P) = {:>10}, match = {}",
                 d, z_d_p.value, i2_d_p.value, predicted.value, match_
             );
-            if !match_ { all_match = false; }
+            if !match_ {
+                all_match = false;
+            }
         }
         println!();
         if all_match {

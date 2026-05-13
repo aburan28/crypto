@@ -52,12 +52,16 @@ impl Poly {
         if c.is_zero() {
             Self::zero()
         } else {
-            Self { coeffs: vec![fr_reduce(&c)] }
+            Self {
+                coeffs: vec![fr_reduce(&c)],
+            }
         }
     }
 
     pub fn from_coeffs(coeffs: Vec<BigUint>) -> Self {
-        let mut p = Self { coeffs: coeffs.into_iter().map(|c| fr_reduce(&c)).collect() };
+        let mut p = Self {
+            coeffs: coeffs.into_iter().map(|c| fr_reduce(&c)).collect(),
+        };
         p.trim();
         p
     }
@@ -122,7 +126,9 @@ impl Poly {
         }
         let mut out = vec![BigUint::zero(); self.coeffs.len() + other.coeffs.len() - 1];
         for (i, a) in self.coeffs.iter().enumerate() {
-            if a.is_zero() { continue; }
+            if a.is_zero() {
+                continue;
+            }
             for (j, b) in other.coeffs.iter().enumerate() {
                 out[i + j] = fr_add(&out[i + j], &fr_mul(a, b));
             }
@@ -176,7 +182,9 @@ impl Poly {
             let mut num = Self::constant(BigUint::one());
             let mut denom = BigUint::one();
             for (j, (xj, _)) in points.iter().enumerate() {
-                if i == j { continue; }
+                if i == j {
+                    continue;
+                }
                 // (X − x_j)
                 let factor = Self::from_coeffs(vec![fr_neg(xj), BigUint::one()]);
                 num = num.mul(&factor);
@@ -198,7 +206,9 @@ mod tests {
     fn evaluation_simple() {
         // p(x) = 1 + 2x + 3x²; p(1) = 6; p(2) = 17.
         let p = Poly::from_coeffs(vec![
-            BigUint::from(1u32), BigUint::from(2u32), BigUint::from(3u32),
+            BigUint::from(1u32),
+            BigUint::from(2u32),
+            BigUint::from(3u32),
         ]);
         assert_eq!(p.evaluate(&BigUint::from(1u32)), BigUint::from(6u32));
         assert_eq!(p.evaluate(&BigUint::from(2u32)), BigUint::from(17u32));
@@ -217,7 +227,12 @@ mod tests {
     #[test]
     fn divmod_roundtrip() {
         // p = x³ + 1; divisor = x − 1; expect q · (x − 1) + r = p.
-        let p = Poly::from_coeffs(vec![BigUint::from(1u32), BigUint::zero(), BigUint::zero(), BigUint::from(1u32)]);
+        let p = Poly::from_coeffs(vec![
+            BigUint::from(1u32),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::from(1u32),
+        ]);
         let d = Poly::from_coeffs(vec![fr_neg(&BigUint::one()), BigUint::one()]); // -1 + x
         let (q, rem) = p.divmod(&d);
         assert_eq!(q.mul(&d).add(&rem), p);

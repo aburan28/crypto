@@ -29,13 +29,19 @@ impl KeyBundle {
     /// Print a human-readable key summary.
     pub fn summary(&self) {
         println!("=== ECC (secp256k1) ===");
-        println!("Private: {}", to_hex(&bigint_to_bytes_be(&self.ecc.private.scalar, 32)));
+        println!(
+            "Private: {}",
+            to_hex(&bigint_to_bytes_be(&self.ecc.private.scalar, 32))
+        );
         if let Some(pub_bytes) = self.ecc.public.to_sec1_uncompressed() {
             println!("Public:  {}", to_hex(&pub_bytes));
         }
         println!();
         println!("=== RSA-{} ===", self.rsa.public.bits);
-        let n_hex = to_hex(&bigint_to_bytes_be(&self.rsa.public.n, (self.rsa.public.bits as usize + 7) / 8));
+        let n_hex = to_hex(&bigint_to_bytes_be(
+            &self.rsa.public.n,
+            (self.rsa.public.bits as usize + 7) / 8,
+        ));
         println!("n (first 32 bytes): {}", &n_hex[..64]);
         println!("e: {}", self.rsa.public.e);
     }

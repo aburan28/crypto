@@ -390,7 +390,10 @@ impl CurveParams {
                  to index calculus on a degree-{} Jacobian over \
                  F_{{p^{}}} — subexponential.  Use a prime-field \
                  curve (n = 1) or an extension of prime degree.",
-                n_ext, small_factor, small_factor, (n_ext as u64) / small_factor,
+                n_ext,
+                small_factor,
+                small_factor,
+                (n_ext as u64) / small_factor,
             ));
         }
         // Prime n ≥ 2: warn but pass.  Trace-zero subvarieties
@@ -507,7 +510,10 @@ impl CurveParams {
                     residue.bits(),
                     largest_small,
                 );
-                return (SafetyCheck::Inconclusive(msg.clone()), SafetyCheck::Inconclusive(msg));
+                return (
+                    SafetyCheck::Inconclusive(msg.clone()),
+                    SafetyCheck::Inconclusive(msg),
+                );
             }
         } else {
             // Fully factored.
@@ -838,7 +844,11 @@ mod tests {
         // ≈ n/2, astronomically large).
         let curve = secp256k1();
         let k = curve.embedding_degree(100);
-        assert!(k.is_none(), "secp256k1 embedding degree should be > 100, got {:?}", k);
+        assert!(
+            k.is_none(),
+            "secp256k1 embedding degree should be > 100, got {:?}",
+            k
+        );
     }
 
     // ── Failure-case fixtures: deliberately weak curves ────────────────────
@@ -946,11 +956,8 @@ mod tests {
             .map(|p| BigUint::from(*p))
             .product();
         // A 200-bit prime to be the "large" factor.
-        let big = BigUint::parse_bytes(
-            b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD",
-            16,
-        )
-        .unwrap();
+        let big = BigUint::parse_bytes(b"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD", 16)
+            .unwrap();
         curve.n = &smooth * &big;
         // If private keys are 32 bits, the smooth product (~32 bits)
         // is enough for Pohlig-Hellman, and effective security ≈ 9 bits
@@ -997,7 +1004,12 @@ mod tests {
         assert!(!report.all_pass());
         let failed = report.failed_checks();
         // Must catch at least: small order, generator-off-curve, singular, anomalous.
-        for must in &["order_size", "generator_on_curve", "non_singular", "non_anomalous"] {
+        for must in &[
+            "order_size",
+            "generator_on_curve",
+            "non_singular",
+            "non_anomalous",
+        ] {
             assert!(
                 failed.contains(must),
                 "expected `{}` in failed list, got {:?}",
@@ -1070,7 +1082,11 @@ mod tests {
     fn weil_descent_passes_for_prime_field() {
         let curve = secp256k1();
         let r = curve.check_no_weil_descent(&AnalysisOptions::default());
-        assert!(r.is_pass(), "F_p curve must pass Weil descent check; got {:?}", r);
+        assert!(
+            r.is_pass(),
+            "F_p curve must pass Weil descent check; got {:?}",
+            r
+        );
     }
 
     /// Composite extension degree ⇒ hard fail (Diem).
@@ -1094,7 +1110,10 @@ mod tests {
             ..AnalysisOptions::default()
         };
         let r = curve.check_no_weil_descent(&opts);
-        assert!(matches!(r, SafetyCheck::Inconclusive(_)), "n=5 must be Inconclusive");
+        assert!(
+            matches!(r, SafetyCheck::Inconclusive(_)),
+            "n=5 must be Inconclusive"
+        );
     }
 
     /// Composite-degree failure surfaces in `failed_checks()`.
@@ -1186,7 +1205,11 @@ mod tests {
         let r = curve.check_cl_o_orbit_brittleness(&opts);
         // Verify the check actually ran (Fail or Pass with detail).
         // It will be Fail for this curve (it's brittle empirically).
-        assert!(r.is_fail(), "(a=1, b=2)/F_1009 should be flagged brittle; got {:?}", r);
+        assert!(
+            r.is_fail(),
+            "(a=1, b=2)/F_1009 should be flagged brittle; got {:?}",
+            r
+        );
     }
 
     /// At toy size: a curve from the experimental sample where the
@@ -1265,7 +1288,9 @@ mod tests {
     /// `is_prime_small` smoke test.
     #[test]
     fn is_prime_small_works() {
-        for &p in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 97, 101, 8191, 65537] {
+        for &p in &[
+            2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 97, 101, 8191, 65537,
+        ] {
             assert!(is_prime_small(p), "expected {} prime", p);
         }
         for &c in &[0u64, 1, 4, 6, 8, 9, 15, 21, 25, 100, 1000] {

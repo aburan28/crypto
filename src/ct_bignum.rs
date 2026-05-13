@@ -226,10 +226,12 @@ impl<const LIMBS: usize> Uint<LIMBS> {
             for j in 0..LIMBS {
                 let idx = i + j;
                 // t[i+j] += a[j] * b[i] + carry
-                let cur = if idx < LIMBS { lo[idx] } else { hi[idx - LIMBS] };
-                let acc = (a.0[j] as u128) * (b.0[i] as u128)
-                    + (cur as u128)
-                    + (carry as u128);
+                let cur = if idx < LIMBS {
+                    lo[idx]
+                } else {
+                    hi[idx - LIMBS]
+                };
+                let acc = (a.0[j] as u128) * (b.0[i] as u128) + (cur as u128) + (carry as u128);
                 let new = acc as u64;
                 if idx < LIMBS {
                     lo[idx] = new;
@@ -288,10 +290,12 @@ impl<const LIMBS: usize> Uint<LIMBS> {
             let mut carry: u64 = 0;
             for j in 0..LIMBS {
                 let idx = i + j;
-                let cur = if idx < LIMBS { lo[idx] } else { hi[idx - LIMBS] };
-                let acc = (cur as u128)
-                    + (a.0[j] as u128) * (b.0[i] as u128)
-                    + (carry as u128);
+                let cur = if idx < LIMBS {
+                    lo[idx]
+                } else {
+                    hi[idx - LIMBS]
+                };
+                let acc = (cur as u128) + (a.0[j] as u128) * (b.0[i] as u128) + (carry as u128);
                 let new = acc as u64;
                 if idx < LIMBS {
                     lo[idx] = new;
@@ -321,10 +325,12 @@ impl<const LIMBS: usize> Uint<LIMBS> {
             let mut carry: u64 = 0;
             for j in 0..LIMBS {
                 let idx = i + j;
-                let cur = if idx < LIMBS { lo[idx] } else { hi[idx - LIMBS] };
-                let acc = (cur as u128)
-                    + (m as u128) * (p.0[j] as u128)
-                    + (carry as u128);
+                let cur = if idx < LIMBS {
+                    lo[idx]
+                } else {
+                    hi[idx - LIMBS]
+                };
+                let acc = (cur as u128) + (m as u128) * (p.0[j] as u128) + (carry as u128);
                 let new = acc as u64;
                 if idx < LIMBS {
                     lo[idx] = new;
@@ -463,7 +469,12 @@ impl<const LIMBS: usize> MontgomeryContext<LIMBS> {
         let r = BigUint::from(1u8) << (64 * LIMBS);
         let r_mod_n = Uint::<LIMBS>::from_biguint(&(&r % &n_bu));
         let r2_mod_n = Uint::<LIMBS>::from_biguint(&((&r * &r) % &n_bu));
-        Some(Self { n, n_inv_low, r_mod_n, r2_mod_n })
+        Some(Self {
+            n,
+            n_inv_low,
+            r_mod_n,
+            r2_mod_n,
+        })
     }
 
     /// Multiply two Montgomery-form values: `(a · R) · (b · R) · R^(-1) = (a·b) · R`.
@@ -679,9 +690,8 @@ mod tests {
     }
 
     fn p_secp256k1() -> U256 {
-        let bytes =
-            hex::decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F")
-                .unwrap();
+        let bytes = hex::decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F")
+            .unwrap();
         U256::from_bytes_be(&bytes.try_into().unwrap())
     }
 
@@ -700,8 +710,7 @@ mod tests {
                 let expected = (a.to_biguint() + b.to_biguint()) % modulus_256();
                 assert!(bool::from(sum.ct_eq_full(&U256::from_biguint(&expected))));
 
-                let expected_carry =
-                    (a.to_biguint() + b.to_biguint() >= modulus_256()) as u64;
+                let expected_carry = (a.to_biguint() + b.to_biguint() >= modulus_256()) as u64;
                 assert_eq!(carry, expected_carry, "carry mismatch");
             }
         }
@@ -774,9 +783,7 @@ mod tests {
         for a in &canonical {
             for b in &canonical {
                 let got = a.sub_mod(b, &p);
-                let want = U256::from_biguint(
-                    &((&p_bu + a.to_biguint() - b.to_biguint()) % &p_bu),
-                );
+                let want = U256::from_biguint(&((&p_bu + a.to_biguint() - b.to_biguint()) % &p_bu));
                 assert!(
                     bool::from(got.ct_eq_full(&want)),
                     "sub_mod({:x?} - {:x?}) mod p mismatch",
@@ -830,12 +837,8 @@ mod tests {
         for a in &canonical {
             for b in &canonical {
                 let got = U256::mont_mul(a, b, &p, p_inv_low);
-                let want = U256::from_biguint(&ref_mont_mul(
-                    &a.to_biguint(),
-                    &b.to_biguint(),
-                    &p_bu,
-                    &r,
-                ));
+                let want =
+                    U256::from_biguint(&ref_mont_mul(&a.to_biguint(), &b.to_biguint(), &p_bu, &r));
                 assert!(
                     bool::from(got.ct_eq_full(&want)),
                     "mont_mul mismatch:\n  a={:x?}\n  b={:x?}\n  got={:x?}\n  want={:x?}",
@@ -865,10 +868,7 @@ mod tests {
             // Convert to Montgomery: a * R mod p = mont_mul(a, R^2, ...).
             let v_m = U256::mont_mul(&v_canonical, &r2_mod_p, &p, p_inv_low);
             let want_v_m = U256::from_biguint(&((v_canonical.to_biguint() * &r) % &p_bu));
-            assert!(
-                bool::from(v_m.ct_eq_full(&want_v_m)),
-                "to-Montgomery wrong"
-            );
+            assert!(bool::from(v_m.ct_eq_full(&want_v_m)), "to-Montgomery wrong");
             // Convert back: mont_mul(v_m, 1) = v.
             let one = U256::ONE;
             let v_back = U256::mont_mul(&v_m, &one, &p, p_inv_low);
@@ -906,7 +906,9 @@ mod tests {
         let mut s = seed;
         let mut limbs = [0u64; 16];
         for limb in &mut limbs {
-            s = s.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            s = s
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             *limb = s;
         }
         Uint(limbs)
@@ -921,8 +923,7 @@ mod tests {
             let (sum, carry) = U1024::adc(&a, &b);
             let expected_sum = (a.to_biguint() + b.to_biguint()) % &modulus;
             assert_eq!(sum.to_biguint(), expected_sum, "u1024 adc value");
-            let expected_carry =
-                (a.to_biguint() + b.to_biguint() >= modulus) as u64;
+            let expected_carry = (a.to_biguint() + b.to_biguint() >= modulus) as u64;
             assert_eq!(carry, expected_carry, "u1024 adc carry");
 
             let (diff, borrow) = U1024::sbb(&a, &b);
@@ -1002,7 +1003,7 @@ mod tests {
         )
         .unwrap();
         let n = (a * b) | BigUint::from(1u8); // force odd
-        // Force top bit on so the modulus is ~2048 bits exactly.
+                                              // Force top bit on so the modulus is ~2048 bits exactly.
         let top_bit = BigUint::from(1u8) << 2047;
         n | top_bit
     }
@@ -1102,11 +1103,8 @@ mod tests {
         let n = Uint::<64>::from_biguint(&n_bu);
         let ctx = MontgomeryContext::<64>::new(n).unwrap();
 
-        let base = BigUint::parse_bytes(
-            b"feedfacecafebeefbeefcafefacefeed1234567890abcdef",
-            16,
-        )
-        .unwrap();
+        let base =
+            BigUint::parse_bytes(b"feedfacecafebeefbeefcafefacefeed1234567890abcdef", 16).unwrap();
         let exp = &n_bu - BigUint::from(11u8);
 
         let base_u = Uint::<64>::from_biguint(&base);

@@ -62,7 +62,9 @@ pub struct R2Poly {
 
 impl R2Poly {
     pub fn zero() -> Self {
-        Self { bits: vec![0u8; BYTES] }
+        Self {
+            bits: vec![0u8; BYTES],
+        }
     }
 
     pub fn get(&self, i: usize) -> u8 {
@@ -77,7 +79,9 @@ impl R2Poly {
 
     pub fn add(&self, other: &Self) -> Self {
         let mut out = self.clone();
-        for i in 0..BYTES { out.bits[i] ^= other.bits[i]; }
+        for i in 0..BYTES {
+            out.bits[i] ^= other.bits[i];
+        }
         out
     }
 
@@ -148,7 +152,9 @@ impl R2Poly {
         };
         let degree = |v: &[u8], max: usize| -> Option<usize> {
             for i in (0..max).rev() {
-                if get_bit(v, i) == 1 { return Some(i); }
+                if get_bit(v, i) == 1 {
+                    return Some(i);
+                }
             }
             None
         };
@@ -157,7 +163,9 @@ impl R2Poly {
         for _iter in 0..(R * R) {
             let deg_a = degree(&a, max_bits);
             let deg_b = degree(&b, max_bits);
-            if deg_a.is_none() { return None; }
+            if deg_a.is_none() {
+                return None;
+            }
             if deg_a == Some(0) {
                 // gcd is x^0 = 1 (constant); u is the inverse.
                 let mut out = Self::zero();
@@ -168,7 +176,9 @@ impl R2Poly {
                 let prod = self.mul(&out);
                 let mut one = Self::zero();
                 one.set(0, 1);
-                if prod == one { return Some(out); }
+                if prod == one {
+                    return Some(out);
+                }
                 return None;
             }
             let deg_a_u = deg_a.unwrap();
@@ -237,7 +247,11 @@ pub fn bike_keygen() -> BikeKeyPair {
         };
         let h = h1.mul(&h0_inv);
         let pk = BikePublicKey { h };
-        let sk = BikePrivateKey { h0, h1, pk: pk.clone() };
+        let sk = BikePrivateKey {
+            h0,
+            h1,
+            pk: pk.clone(),
+        };
         return BikeKeyPair { pk, sk };
     }
     panic!("BIKE keygen failed: h0 not invertible after 200 trials");
@@ -281,12 +295,7 @@ pub fn bike_decapsulate(ct: &BikeCiphertext, sk: &BikePrivateKey) -> [u8; 32] {
 /// Brute-force decoder: enumerate all `(e0, e1)` with total weight
 /// `≤ t` until one matches `e0·h0 + e1·h1 = s_prime`.  Feasible for
 /// our toy `R = 31, T = 3` (search space ≈ `(2R choose T) ≈ 36k`).
-fn brute_force_decode(
-    s_prime: &R2Poly,
-    h0: &R2Poly,
-    h1: &R2Poly,
-    t: usize,
-) -> (R2Poly, R2Poly) {
+fn brute_force_decode(s_prime: &R2Poly, h0: &R2Poly, h1: &R2Poly, t: usize) -> (R2Poly, R2Poly) {
     // Enumerate all positions choosing `t` bits across the 2R-bit
     // concatenated error vector.
     let total_positions = 2 * R;
@@ -305,7 +314,11 @@ fn brute_force_decode(
             let mut e0 = R2Poly::zero();
             let mut e1 = R2Poly::zero();
             for &p in chosen.iter() {
-                if p < R { e0.set(p, 1); } else { e1.set(p - R, 1); }
+                if p < R {
+                    e0.set(p, 1);
+                } else {
+                    e1.set(p - R, 1);
+                }
             }
             let candidate = e0.mul(h0).add(&e1.mul(h1));
             if candidate == *target {
@@ -348,9 +361,11 @@ mod tests {
     #[test]
     fn r2poly_add_is_xor() {
         let mut a = R2Poly::zero();
-        a.set(0, 1); a.set(3, 1);
+        a.set(0, 1);
+        a.set(3, 1);
         let mut b = R2Poly::zero();
-        b.set(3, 1); b.set(5, 1);
+        b.set(3, 1);
+        b.set(5, 1);
         let c = a.add(&b);
         assert_eq!(c.get(0), 1);
         assert_eq!(c.get(3), 0);

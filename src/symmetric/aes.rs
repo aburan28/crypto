@@ -54,7 +54,9 @@ const INV_SBOX: [u8; 256] = [
 ];
 
 // Round constant (Rcon) for key schedule — powers of 2 in GF(2⁸).
-const RCON: [u8; 11] = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
+const RCON: [u8; 11] = [
+    0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
+];
 
 // ── GF(2⁸) arithmetic ────────────────────────────────────────────────────────
 
@@ -125,12 +127,22 @@ pub enum AesKey {
 
 impl AesKey {
     pub fn key_len(&self) -> usize {
-        match self { AesKey::Aes128(_) => 16, AesKey::Aes256(_) => 32 }
+        match self {
+            AesKey::Aes128(_) => 16,
+            AesKey::Aes256(_) => 32,
+        }
     }
-    pub fn nk(&self) -> usize { self.key_len() / 4 }
-    pub fn nr(&self) -> usize { self.nk() + 6 }
+    pub fn nk(&self) -> usize {
+        self.key_len() / 4
+    }
+    pub fn nr(&self) -> usize {
+        self.nk() + 6
+    }
     pub fn as_bytes(&self) -> &[u8] {
-        match self { AesKey::Aes128(k) => k, AesKey::Aes256(k) => k }
+        match self {
+            AesKey::Aes128(k) => k,
+            AesKey::Aes256(k) => k,
+        }
     }
 }
 
@@ -145,7 +157,7 @@ pub fn key_expansion(key: &AesKey) -> Vec<[u8; 4]> {
     let k = key.as_bytes();
 
     for i in 0..nk {
-        w.push([k[4*i], k[4*i+1], k[4*i+2], k[4*i+3]]);
+        w.push([k[4 * i], k[4 * i + 1], k[4 * i + 2], k[4 * i + 3]]);
     }
 
     for i in nk..total {
@@ -157,12 +169,19 @@ pub fn key_expansion(key: &AesKey) -> Vec<[u8; 4]> {
             temp = sub_word(temp);
         }
         let prev = w[i - nk];
-        w.push([prev[0]^temp[0], prev[1]^temp[1], prev[2]^temp[2], prev[3]^temp[3]]);
+        w.push([
+            prev[0] ^ temp[0],
+            prev[1] ^ temp[1],
+            prev[2] ^ temp[2],
+            prev[3] ^ temp[3],
+        ]);
     }
     w
 }
 
-fn rot_word(w: [u8; 4]) -> [u8; 4] { [w[1], w[2], w[3], w[0]] }
+fn rot_word(w: [u8; 4]) -> [u8; 4] {
+    [w[1], w[2], w[3], w[0]]
+}
 fn sub_word(w: [u8; 4]) -> [u8; 4] {
     [sbox_ct(w[0]), sbox_ct(w[1]), sbox_ct(w[2]), sbox_ct(w[3])]
 }
@@ -174,13 +193,21 @@ type State = [[u8; 4]; 4];
 
 fn bytes_to_state(block: &[u8]) -> State {
     let mut s = [[0u8; 4]; 4];
-    for c in 0..4 { for r in 0..4 { s[c][r] = block[c * 4 + r]; } }
+    for c in 0..4 {
+        for r in 0..4 {
+            s[c][r] = block[c * 4 + r];
+        }
+    }
     s
 }
 
 fn state_to_bytes(s: &State) -> [u8; 16] {
     let mut out = [0u8; 16];
-    for c in 0..4 { for r in 0..4 { out[c * 4 + r] = s[c][r]; } }
+    for c in 0..4 {
+        for r in 0..4 {
+            out[c * 4 + r] = s[c][r];
+        }
+    }
     out
 }
 
@@ -195,7 +222,11 @@ fn add_round_key(s: &mut State, round_key: &[[u8; 4]]) {
 // ── Forward transformations ───────────────────────────────────────────────────
 
 fn sub_bytes(s: &mut State) {
-    for col in s.iter_mut() { for b in col.iter_mut() { *b = sbox_ct(*b); } }
+    for col in s.iter_mut() {
+        for b in col.iter_mut() {
+            *b = sbox_ct(*b);
+        }
+    }
 }
 
 fn shift_rows(s: &mut State) {
@@ -203,39 +234,51 @@ fn shift_rows(s: &mut State) {
     let r1 = [s[1][1], s[2][1], s[3][1], s[0][1]];
     let r2 = [s[2][2], s[3][2], s[0][2], s[1][2]];
     let r3 = [s[3][3], s[0][3], s[1][3], s[2][3]];
-    for c in 0..4 { s[c][1] = r1[c]; s[c][2] = r2[c]; s[c][3] = r3[c]; }
+    for c in 0..4 {
+        s[c][1] = r1[c];
+        s[c][2] = r2[c];
+        s[c][3] = r3[c];
+    }
 }
 
 fn mix_columns(s: &mut State) {
     for c in 0..4 {
         let a = s[c];
-        s[c][0] = gmul(0x02, a[0]) ^ gmul(0x03, a[1]) ^ a[2]             ^ a[3];
-        s[c][1] = a[0]             ^ gmul(0x02, a[1]) ^ gmul(0x03, a[2]) ^ a[3];
-        s[c][2] = a[0]             ^ a[1]             ^ gmul(0x02, a[2]) ^ gmul(0x03, a[3]);
-        s[c][3] = gmul(0x03, a[0]) ^ a[1]             ^ a[2]             ^ gmul(0x02, a[3]);
+        s[c][0] = gmul(0x02, a[0]) ^ gmul(0x03, a[1]) ^ a[2] ^ a[3];
+        s[c][1] = a[0] ^ gmul(0x02, a[1]) ^ gmul(0x03, a[2]) ^ a[3];
+        s[c][2] = a[0] ^ a[1] ^ gmul(0x02, a[2]) ^ gmul(0x03, a[3]);
+        s[c][3] = gmul(0x03, a[0]) ^ a[1] ^ a[2] ^ gmul(0x02, a[3]);
     }
 }
 
 // ── Inverse transformations ───────────────────────────────────────────────────
 
 fn inv_sub_bytes(s: &mut State) {
-    for col in s.iter_mut() { for b in col.iter_mut() { *b = inv_sbox_ct(*b); } }
+    for col in s.iter_mut() {
+        for b in col.iter_mut() {
+            *b = inv_sbox_ct(*b);
+        }
+    }
 }
 
 fn inv_shift_rows(s: &mut State) {
     let r1 = [s[3][1], s[0][1], s[1][1], s[2][1]];
     let r2 = [s[2][2], s[3][2], s[0][2], s[1][2]];
     let r3 = [s[1][3], s[2][3], s[3][3], s[0][3]];
-    for c in 0..4 { s[c][1] = r1[c]; s[c][2] = r2[c]; s[c][3] = r3[c]; }
+    for c in 0..4 {
+        s[c][1] = r1[c];
+        s[c][2] = r2[c];
+        s[c][3] = r3[c];
+    }
 }
 
 fn inv_mix_columns(s: &mut State) {
     for c in 0..4 {
         let a = s[c];
-        s[c][0] = gmul(0x0e,a[0])^gmul(0x0b,a[1])^gmul(0x0d,a[2])^gmul(0x09,a[3]);
-        s[c][1] = gmul(0x09,a[0])^gmul(0x0e,a[1])^gmul(0x0b,a[2])^gmul(0x0d,a[3]);
-        s[c][2] = gmul(0x0d,a[0])^gmul(0x09,a[1])^gmul(0x0e,a[2])^gmul(0x0b,a[3]);
-        s[c][3] = gmul(0x0b,a[0])^gmul(0x0d,a[1])^gmul(0x09,a[2])^gmul(0x0e,a[3]);
+        s[c][0] = gmul(0x0e, a[0]) ^ gmul(0x0b, a[1]) ^ gmul(0x0d, a[2]) ^ gmul(0x09, a[3]);
+        s[c][1] = gmul(0x09, a[0]) ^ gmul(0x0e, a[1]) ^ gmul(0x0b, a[2]) ^ gmul(0x0d, a[3]);
+        s[c][2] = gmul(0x0d, a[0]) ^ gmul(0x09, a[1]) ^ gmul(0x0e, a[2]) ^ gmul(0x0b, a[3]);
+        s[c][3] = gmul(0x0b, a[0]) ^ gmul(0x0d, a[1]) ^ gmul(0x09, a[2]) ^ gmul(0x0e, a[3]);
     }
 }
 
@@ -327,14 +370,20 @@ fn gcm_mult(x: &[u8; 16], y: &[u8; 16]) -> [u8; 16] {
     for i in 0..16 {
         for bit in (0..8).rev() {
             if (x[i] >> bit) & 1 == 1 {
-                for j in 0..16 { z[j] ^= v[j]; }
+                for j in 0..16 {
+                    z[j] ^= v[j];
+                }
             }
             let lsb = v[15] & 1;
             // Right-shift v by 1 bit
-            for j in (1..16).rev() { v[j] = (v[j] >> 1) | (v[j-1] << 7); }
+            for j in (1..16).rev() {
+                v[j] = (v[j] >> 1) | (v[j - 1] << 7);
+            }
             v[0] >>= 1;
             // Reduce mod the GCM polynomial if the shifted-out bit was 1
-            if lsb == 1 { v[0] ^= 0xe1; }
+            if lsb == 1 {
+                v[0] ^= 0xe1;
+            }
         }
     }
     z
@@ -371,13 +420,19 @@ fn ghash(h: &[u8; 16], aad: &[u8], ciphertext: &[u8]) -> [u8; 16] {
 fn pad_to_block(data: &[u8]) -> Vec<u8> {
     let mut v = data.to_vec();
     let rem = v.len() % 16;
-    if rem != 0 { v.resize(v.len() + (16 - rem), 0); }
-    if v.is_empty() { v.resize(16, 0); }
+    if rem != 0 {
+        v.resize(v.len() + (16 - rem), 0);
+    }
+    if v.is_empty() {
+        v.resize(16, 0);
+    }
     v
 }
 
 fn xor_into(dst: &mut [u8; 16], src: &[u8]) {
-    for (a, b) in dst.iter_mut().zip(src.iter()) { *a ^= b; }
+    for (a, b) in dst.iter_mut().zip(src.iter()) {
+        *a ^= b;
+    }
 }
 
 /// AES-GCM encrypt. Returns `ciphertext || 16-byte tag`.
@@ -396,7 +451,9 @@ pub fn aes_gcm_encrypt(plaintext: &[u8], key: &AesKey, nonce: &[u8; 12], aad: &[
     // Compute tag: GHASH(H, AAD, CT) XOR E(K, J₀)
     let mut tag = ghash(&h, aad, &ciphertext);
     let j0 = encrypt_j0(key, nonce);
-    for (t, j) in tag.iter_mut().zip(j0.iter()) { *t ^= j; }
+    for (t, j) in tag.iter_mut().zip(j0.iter()) {
+        *t ^= j;
+    }
 
     let mut out = ciphertext;
     out.extend_from_slice(&tag);
@@ -410,13 +467,17 @@ pub fn aes_gcm_decrypt(
     nonce: &[u8; 12],
     aad: &[u8],
 ) -> Result<Vec<u8>, ()> {
-    if ciphertext_and_tag.len() < 16 { return Err(()); }
+    if ciphertext_and_tag.len() < 16 {
+        return Err(());
+    }
     let (ciphertext, tag_bytes) = ciphertext_and_tag.split_at(ciphertext_and_tag.len() - 16);
 
     let h: [u8; 16] = encrypt_block(&[0u8; 16], key);
     let mut expected_tag = ghash(&h, aad, ciphertext);
     let j0 = encrypt_j0(key, nonce);
-    for (t, j) in expected_tag.iter_mut().zip(j0.iter()) { *t ^= j; }
+    for (t, j) in expected_tag.iter_mut().zip(j0.iter()) {
+        *t ^= j;
+    }
 
     // Constant-time tag comparison via `subtle::ConstantTimeEq` to defeat
     // timing side-channels.  A hand-rolled XOR-fold compiles to constant
@@ -445,7 +506,9 @@ fn encrypt_j0(key: &AesKey, nonce: &[u8; 12]) -> [u8; 16] {
 mod tests {
     use super::*;
 
-    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+    fn h(s: &str) -> Vec<u8> {
+        hex::decode(s).unwrap()
+    }
 
     // ── AES-128 single-block KAT (FIPS 197 §B / Appendix C.1) ────────────────
 
@@ -474,7 +537,8 @@ mod tests {
     fn aes256_fips197_appendix_c3() {
         let key = AesKey::Aes256(
             h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
-                .try_into().unwrap(),
+                .try_into()
+                .unwrap(),
         );
         let pt: [u8; 16] = h("00112233445566778899aabbccddeeff").try_into().unwrap();
         let ct = encrypt_block(&pt, &key);
@@ -487,14 +551,20 @@ mod tests {
         // Roundtrip AES-128 and AES-256 over many random-ish blocks.
         for seed in 0..16u8 {
             let mut k128 = [0u8; 16];
-            for (i, b) in k128.iter_mut().enumerate() { *b = seed.wrapping_mul(i as u8 + 1); }
+            for (i, b) in k128.iter_mut().enumerate() {
+                *b = seed.wrapping_mul(i as u8 + 1);
+            }
             let key128 = AesKey::Aes128(k128);
             let mut pt = [0u8; 16];
-            for (i, b) in pt.iter_mut().enumerate() { *b = seed.wrapping_add((i*7) as u8); }
+            for (i, b) in pt.iter_mut().enumerate() {
+                *b = seed.wrapping_add((i * 7) as u8);
+            }
             assert_eq!(decrypt_block(&encrypt_block(&pt, &key128), &key128), pt);
 
             let mut k256 = [0u8; 32];
-            for (i, b) in k256.iter_mut().enumerate() { *b = seed.wrapping_mul(i as u8 + 3); }
+            for (i, b) in k256.iter_mut().enumerate() {
+                *b = seed.wrapping_mul(i as u8 + 3);
+            }
             let key256 = AesKey::Aes256(k256);
             assert_eq!(decrypt_block(&encrypt_block(&pt, &key256), &key256), pt);
         }
@@ -512,8 +582,10 @@ mod tests {
         let ct = aes_ctr(&pt, &key, &nonce);
         assert_eq!(
             ct,
-            h("288028c71599c5a8dd53c2671b86b813ab25397ad21f8b4b94892b65cf891edd\
-               d47cfd8d0ecd23a4eb8c0558454a6344"),
+            h(
+                "288028c71599c5a8dd53c2671b86b813ab25397ad21f8b4b94892b65cf891edd\
+               d47cfd8d0ecd23a4eb8c0558454a6344"
+            ),
         );
         // Roundtrip
         assert_eq!(aes_ctr(&ct, &key, &nonce), pt);

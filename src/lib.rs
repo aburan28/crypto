@@ -28,6 +28,7 @@ pub mod hash;
 pub mod kdf;
 pub mod keys;
 pub mod pqc;
+pub mod prime_hyperelliptic;
 pub mod symmetric;
 pub mod utils;
 pub mod zk;

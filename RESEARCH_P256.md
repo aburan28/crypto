@@ -802,3 +802,21 @@ log σ(d·P) − d · log σ(P) = h(P, P) · d(d-1)/2
 A **quadratic equation in d**.  Given `σ(P), σ(Q), h(P, P)` from
 `P, Q ∈ E(F_p)` lifts, solve for `d`.  This has never been published
 as an ECDLP attack.  Phase 3 implements it.
+
+## Public speculation map
+
+Module `cryptanalysis::p256_speculation` records the four public
+P-256 concern categories in a machine-readable form and attaches the
+finite probes this codebase can honestly run:
+
+| Concern | Implemented probe | Verdict |
+|---------|-------------------|---------|
+| Hidden/generalized transfer attacks | `p256_embedding_degree_probe(max_k)` | Standard MOV/Frey-Ruck check passes; unpublished transfer families are not publicly falsifiable |
+| Solinas prime structure | `p256_solinas_prime_profile()` plus `solinas_correlations` | The 5-term Solinas structure is present; no public P-256 ECDLP attack follows |
+| Scalar-multiplication statistical bias | `p256_scalar_bit_correlation_report(opts)` | Lightweight bit-correlation sanity probe; no public attack model known |
+| Elliptic-curve index calculus | status row in `p256_public_speculation_findings()` | Active public research, but no practical prime-field P-256 break |
+
+This module is deliberately conservative: public finite checks can rule
+out known-small embedding degree, verify the Solinas representation, and
+look for simple scalar-output correlations. They cannot rule out an
+unknown unpublished transfer attack or a future index-calculus method.

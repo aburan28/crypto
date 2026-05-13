@@ -51,24 +51,16 @@ use subtle::Choice;
 ///
 /// `7·R mod p = 7·(2^32 + 977) = 0x7_0000_1AB7`.  Verified by
 /// [`tests::b_constant_is_correct`].
-pub const B_FE: SecpFieldElement = SecpFieldElement::from_montgomery_unchecked(Uint([
-    0x0000_0007_0000_1AB7,
-    0,
-    0,
-    0,
-]));
+pub const B_FE: SecpFieldElement =
+    SecpFieldElement::from_montgomery_unchecked(Uint([0x0000_0007_0000_1AB7, 0, 0, 0]));
 
 /// Precomputed `3·b = 21` in Montgomery form, as it appears in the RCB
 /// formulas.
 ///
 /// `21·R mod p = 21·(2^32 + 977) = 0x15_0000_5025`.  Verified by
 /// [`tests::b3_constant_is_correct`].
-pub const B3_FE: SecpFieldElement = SecpFieldElement::from_montgomery_unchecked(Uint([
-    0x0000_0015_0000_5025,
-    0,
-    0,
-    0,
-]));
+pub const B3_FE: SecpFieldElement =
+    SecpFieldElement::from_montgomery_unchecked(Uint([0x0000_0015_0000_5025, 0, 0, 0]));
 
 /// A projective-coordinate point on secp256k1.  The triple
 /// `(X, Y, Z)` encodes the affine point `(X/Z, Y/Z)`; the identity
@@ -141,41 +133,45 @@ impl ProjectivePoint {
         let (x1, y1, z1) = (&self.x, &self.y, &self.z);
         let (x2, y2, z2) = (&other.x, &other.y, &other.z);
 
-        let mut t0 = x1.mul(x2);              // 1.  t0 = X1*X2
-        let mut t1 = y1.mul(y2);              // 2.  t1 = Y1*Y2
-        let mut t2 = z1.mul(z2);              // 3.  t2 = Z1*Z2
-        let mut t3 = x1.add(y1);              // 4.  t3 = X1+Y1
-        let mut t4 = x2.add(y2);              // 5.  t4 = X2+Y2
-        t3 = t3.mul(&t4);                     // 6.  t3 = t3*t4
-        t4 = t0.add(&t1);                     // 7.  t4 = t0+t1
-        t3 = t3.sub(&t4);                     // 8.  t3 = t3-t4
-        t4 = y1.add(z1);                      // 9.  t4 = Y1+Z1
-        let mut x3 = y2.add(z2);              // 10. X3 = Y2+Z2
-        t4 = t4.mul(&x3);                     // 11. t4 = t4*X3
-        x3 = t1.add(&t2);                     // 12. X3 = t1+t2
-        t4 = t4.sub(&x3);                     // 13. t4 = t4-X3
-        x3 = x1.add(z1);                      // 14. X3 = X1+Z1
-        let mut y3 = x2.add(z2);              // 15. Y3 = X2+Z2
-        x3 = x3.mul(&y3);                     // 16. X3 = X3*Y3
-        y3 = t0.add(&t2);                     // 17. Y3 = t0+t2
-        y3 = x3.sub(&y3);                     // 18. Y3 = X3-Y3
-        x3 = t0.add(&t0);                     // 19. X3 = t0+t0
-        t0 = x3.add(&t0);                     // 20. t0 = X3+t0
-        t2 = B3_FE.mul(&t2);                  // 21. t2 = b3*t2
-        let mut z3 = t1.add(&t2);             // 22. Z3 = t1+t2
-        t1 = t1.sub(&t2);                     // 23. t1 = t1-t2
-        y3 = B3_FE.mul(&y3);                  // 24. Y3 = b3*Y3
-        x3 = t4.mul(&y3);                     // 25. X3 = t4*Y3
-        t2 = t3.mul(&t1);                     // 26. t2 = t3*t1
-        x3 = t2.sub(&x3);                     // 27. X3 = t2-X3
-        y3 = y3.mul(&t0);                     // 28. Y3 = Y3*t0
-        t1 = t1.mul(&z3);                     // 29. t1 = t1*Z3
-        y3 = t1.add(&y3);                     // 30. Y3 = t1+Y3
-        t0 = t0.mul(&t3);                     // 31. t0 = t0*t3
-        z3 = z3.mul(&t4);                     // 32. Z3 = Z3*t4
-        z3 = z3.add(&t0);                     // 33. Z3 = Z3+t0
+        let mut t0 = x1.mul(x2); // 1.  t0 = X1*X2
+        let mut t1 = y1.mul(y2); // 2.  t1 = Y1*Y2
+        let mut t2 = z1.mul(z2); // 3.  t2 = Z1*Z2
+        let mut t3 = x1.add(y1); // 4.  t3 = X1+Y1
+        let mut t4 = x2.add(y2); // 5.  t4 = X2+Y2
+        t3 = t3.mul(&t4); // 6.  t3 = t3*t4
+        t4 = t0.add(&t1); // 7.  t4 = t0+t1
+        t3 = t3.sub(&t4); // 8.  t3 = t3-t4
+        t4 = y1.add(z1); // 9.  t4 = Y1+Z1
+        let mut x3 = y2.add(z2); // 10. X3 = Y2+Z2
+        t4 = t4.mul(&x3); // 11. t4 = t4*X3
+        x3 = t1.add(&t2); // 12. X3 = t1+t2
+        t4 = t4.sub(&x3); // 13. t4 = t4-X3
+        x3 = x1.add(z1); // 14. X3 = X1+Z1
+        let mut y3 = x2.add(z2); // 15. Y3 = X2+Z2
+        x3 = x3.mul(&y3); // 16. X3 = X3*Y3
+        y3 = t0.add(&t2); // 17. Y3 = t0+t2
+        y3 = x3.sub(&y3); // 18. Y3 = X3-Y3
+        x3 = t0.add(&t0); // 19. X3 = t0+t0
+        t0 = x3.add(&t0); // 20. t0 = X3+t0
+        t2 = B3_FE.mul(&t2); // 21. t2 = b3*t2
+        let mut z3 = t1.add(&t2); // 22. Z3 = t1+t2
+        t1 = t1.sub(&t2); // 23. t1 = t1-t2
+        y3 = B3_FE.mul(&y3); // 24. Y3 = b3*Y3
+        x3 = t4.mul(&y3); // 25. X3 = t4*Y3
+        t2 = t3.mul(&t1); // 26. t2 = t3*t1
+        x3 = t2.sub(&x3); // 27. X3 = t2-X3
+        y3 = y3.mul(&t0); // 28. Y3 = Y3*t0
+        t1 = t1.mul(&z3); // 29. t1 = t1*Z3
+        y3 = t1.add(&y3); // 30. Y3 = t1+Y3
+        t0 = t0.mul(&t3); // 31. t0 = t0*t3
+        z3 = z3.mul(&t4); // 32. Z3 = Z3*t4
+        z3 = z3.add(&t0); // 33. Z3 = Z3+t0
 
-        ProjectivePoint { x: x3, y: y3, z: z3 }
+        ProjectivePoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
 
     /// Renes–Costello–Batina **Algorithm 9**: complete doubling for
@@ -185,31 +181,39 @@ impl ProjectivePoint {
     pub fn double(&self) -> Self {
         let (x, y, z) = (&self.x, &self.y, &self.z);
 
-        let mut t0 = y.mul(y);              // 1.  t0 = Y*Y
-        let mut z3 = t0.add(&t0);           // 2.  Z3 = t0+t0
-        z3 = z3.add(&z3);                   // 3.  Z3 = Z3+Z3
-        z3 = z3.add(&z3);                   // 4.  Z3 = Z3+Z3
-        let mut t1 = y.mul(z);              // 5.  t1 = Y*Z
-        let mut t2 = z.mul(z);              // 6.  t2 = Z*Z
-        t2 = B3_FE.mul(&t2);                // 7.  t2 = b3*t2
-        let mut x3 = t2.mul(&z3);           // 8.  X3 = t2*Z3
-        let mut y3 = t0.add(&t2);           // 9.  Y3 = t0+t2
-        z3 = t1.mul(&z3);                   // 10. Z3 = t1*Z3
-        t1 = t2.add(&t2);                   // 11. t1 = t2+t2
-        t2 = t1.add(&t2);                   // 12. t2 = t1+t2
-        t0 = t0.sub(&t2);                   // 13. t0 = t0-t2
-        y3 = t0.mul(&y3);                   // 14. Y3 = t0*Y3
-        y3 = x3.add(&y3);                   // 15. Y3 = X3+Y3
-        t1 = x.mul(y);                      // 16. t1 = X*Y
-        x3 = t0.mul(&t1);                   // 17. X3 = t0*t1
-        x3 = x3.add(&x3);                   // 18. X3 = X3+X3
+        let mut t0 = y.mul(y); // 1.  t0 = Y*Y
+        let mut z3 = t0.add(&t0); // 2.  Z3 = t0+t0
+        z3 = z3.add(&z3); // 3.  Z3 = Z3+Z3
+        z3 = z3.add(&z3); // 4.  Z3 = Z3+Z3
+        let mut t1 = y.mul(z); // 5.  t1 = Y*Z
+        let mut t2 = z.mul(z); // 6.  t2 = Z*Z
+        t2 = B3_FE.mul(&t2); // 7.  t2 = b3*t2
+        let mut x3 = t2.mul(&z3); // 8.  X3 = t2*Z3
+        let mut y3 = t0.add(&t2); // 9.  Y3 = t0+t2
+        z3 = t1.mul(&z3); // 10. Z3 = t1*Z3
+        t1 = t2.add(&t2); // 11. t1 = t2+t2
+        t2 = t1.add(&t2); // 12. t2 = t1+t2
+        t0 = t0.sub(&t2); // 13. t0 = t0-t2
+        y3 = t0.mul(&y3); // 14. Y3 = t0*Y3
+        y3 = x3.add(&y3); // 15. Y3 = X3+Y3
+        t1 = x.mul(y); // 16. t1 = X*Y
+        x3 = t0.mul(&t1); // 17. X3 = t0*t1
+        x3 = x3.add(&x3); // 18. X3 = X3+X3
 
-        ProjectivePoint { x: x3, y: y3, z: z3 }
+        ProjectivePoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
 
     /// Negate a point: `-(X, Y, Z) = (X, -Y, Z)`.
     pub fn neg(&self) -> Self {
-        ProjectivePoint { x: self.x, y: self.y.neg(), z: self.z }
+        ProjectivePoint {
+            x: self.x,
+            y: self.y.neg(),
+            z: self.z,
+        }
     }
 
     /// Construct a `ProjectivePoint` from a textbook affine `Point`,
@@ -362,10 +366,8 @@ mod tests {
             Point::Affine { x, y } => (x.value.clone(), y.value.clone()),
             Point::Infinity => panic!("generator is not infinity"),
         };
-        let pp = ProjectivePoint::from_affine(
-            &U256::from_biguint(&gx_bu),
-            &U256::from_biguint(&gy_bu),
-        );
+        let pp =
+            ProjectivePoint::from_affine(&U256::from_biguint(&gx_bu), &U256::from_biguint(&gy_bu));
         let (x_back, y_back) = pp.to_affine().unwrap();
         assert_eq!(x_back.to_biguint(), gx_bu);
         assert_eq!(y_back.to_biguint(), gy_bu);

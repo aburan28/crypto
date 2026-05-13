@@ -58,7 +58,9 @@ struct UnionFind {
 
 impl UnionFind {
     fn new(n: usize) -> Self {
-        Self { parent: (0..n).collect() }
+        Self {
+            parent: (0..n).collect(),
+        }
     }
     fn find(&mut self, x: usize) -> usize {
         let mut r = x;
@@ -130,18 +132,14 @@ pub fn compute_betti_curve(
 /// Generate a random uniform point cloud in `[0, p)²`.
 pub fn random_uniform_cloud(n: usize, p: u64, seed: u64) -> Vec<(u64, u64)> {
     let mut rng = SmallRng::seed_from_u64(seed);
-    (0..n).map(|_| (rng.gen_range(0..p), rng.gen_range(0..p))).collect()
+    (0..n)
+        .map(|_| (rng.gen_range(0..p), rng.gen_range(0..p)))
+        .collect()
 }
 
 /// Compute orbit `{[k]·G}` for `k = 1, …, N` on `E: y² = x³ + a x + b`
 /// over `F_p`.  Returns the list of `(x, y)` coordinates.
-pub fn ec_orbit(
-    a: i64,
-    b: i64,
-    p: u64,
-    g: (u64, u64),
-    n: usize,
-) -> Vec<(u64, u64)> {
+pub fn ec_orbit(a: i64, b: i64, p: u64, g: (u64, u64), n: usize) -> Vec<(u64, u64)> {
     let mut orbit = Vec::with_capacity(n);
     let p_i = p as i128;
     let a_n = ((a as i128 % p_i) + p_i) % p_i;
@@ -159,14 +157,7 @@ pub fn ec_orbit(
     orbit
 }
 
-fn ec_add_signed(
-    x1: i128,
-    y1: i128,
-    x2: i128,
-    y2: i128,
-    a: i128,
-    p: i128,
-) -> Option<(i128, i128)> {
+fn ec_add_signed(x1: i128, y1: i128, x2: i128, y2: i128, a: i128, p: i128) -> Option<(i128, i128)> {
     let x1m = ((x1 % p) + p) % p;
     let x2m = ((x2 % p) + p) % p;
     let y1m = ((y1 % p) + p) % p;
@@ -278,33 +269,56 @@ mod tests {
         println!("=== Orbit Persistent-Homology Proxy vs Random Uniform Null ===");
         println!();
         println!("Curve: y² = x³ - 3x + {} over F_{}, #E = {}", b, p, n);
-        println!("Orbit length: {}, Null samples: {}", orbit_points.len(), n_null);
+        println!(
+            "Orbit length: {}, Null samples: {}",
+            orbit_points.len(),
+            n_null
+        );
         println!();
-        println!("{:>8} | {:>8} {:>10} ± {:<6} | {:>8} {:>10} ± {:<6} | {:>6} {:>6}",
-                 "r²", "B₀ orb", "B₀ null μ", "σ", "B₁ orb", "B₁ null μ", "σ", "z(B₀)", "z(B₁)");
+        println!(
+            "{:>8} | {:>8} {:>10} ± {:<6} | {:>8} {:>10} ± {:<6} | {:>6} {:>6}",
+            "r²", "B₀ orb", "B₀ null μ", "σ", "B₁ orb", "B₁ null μ", "σ", "z(B₀)", "z(B₁)"
+        );
 
         let mut max_z = 0.0f64;
         for i in 0..radii_sq.len() {
             let mean_b0: f64 = null_b0[i].iter().sum::<f64>() / n_null as f64;
             let mean_b1: f64 = null_b1[i].iter().sum::<f64>() / n_null as f64;
-            let var_b0: f64 = null_b0[i].iter().map(|x| (x - mean_b0).powi(2)).sum::<f64>()
+            let var_b0: f64 = null_b0[i]
+                .iter()
+                .map(|x| (x - mean_b0).powi(2))
+                .sum::<f64>()
                 / (n_null as f64 - 1.0);
-            let var_b1: f64 = null_b1[i].iter().map(|x| (x - mean_b1).powi(2)).sum::<f64>()
+            let var_b1: f64 = null_b1[i]
+                .iter()
+                .map(|x| (x - mean_b1).powi(2))
+                .sum::<f64>()
                 / (n_null as f64 - 1.0);
             let std_b0 = var_b0.sqrt();
             let std_b1 = var_b1.sqrt();
             let z_b0 = if std_b0 > 0.0 {
                 (orbit_betti[i].1 as f64 - mean_b0) / std_b0
-            } else { 0.0 };
+            } else {
+                0.0
+            };
             let z_b1 = if std_b1 > 0.0 {
                 (orbit_betti[i].2 as f64 - mean_b1) / std_b1
-            } else { 0.0 };
+            } else {
+                0.0
+            };
             max_z = max_z.max(z_b0.abs()).max(z_b1.abs());
-            println!("{:>8} | {:>8} {:>10.1} ± {:<6.2} | {:>8} {:>10.1} ± {:<6.2} | {:>+6.2} {:>+6.2}",
-                     orbit_betti[i].0,
-                     orbit_betti[i].1, mean_b0, std_b0,
-                     orbit_betti[i].2, mean_b1, std_b1,
-                     z_b0, z_b1);
+            println!(
+                "{:>8} | {:>8} {:>10.1} ± {:<6.2} | {:>8} {:>10.1} ± {:<6.2} | {:>+6.2} {:>+6.2}",
+                orbit_betti[i].0,
+                orbit_betti[i].1,
+                mean_b0,
+                std_b0,
+                orbit_betti[i].2,
+                mean_b1,
+                std_b1,
+                z_b0,
+                z_b1
+            );
         }
 
         println!();

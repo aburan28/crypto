@@ -26,10 +26,18 @@ const SIGMA: [u32; 4] = [0x61707865, 0x3320646e, 0x79622d32, 0x6b206574];
 /// Apply one ChaCha20 quarter round to four words.
 macro_rules! qr {
     ($a:expr, $b:expr, $c:expr, $d:expr) => {
-        $a = $a.wrapping_add($b); $d ^= $a; $d = $d.rotate_left(16);
-        $c = $c.wrapping_add($d); $b ^= $c; $b = $b.rotate_left(12);
-        $a = $a.wrapping_add($b); $d ^= $a; $d = $d.rotate_left(8);
-        $c = $c.wrapping_add($d); $b ^= $c; $b = $b.rotate_left(7);
+        $a = $a.wrapping_add($b);
+        $d ^= $a;
+        $d = $d.rotate_left(16);
+        $c = $c.wrapping_add($d);
+        $b ^= $c;
+        $b = $b.rotate_left(12);
+        $a = $a.wrapping_add($b);
+        $d ^= $a;
+        $d = $d.rotate_left(8);
+        $c = $c.wrapping_add($d);
+        $b ^= $c;
+        $b = $b.rotate_left(7);
     };
 }
 
@@ -39,11 +47,11 @@ pub fn chacha20_block(key: &[u8; 32], nonce: &[u8; 12], counter: u32) -> [u8; 64
     state[..4].copy_from_slice(&SIGMA);
 
     for i in 0..8 {
-        state[4 + i] = u32::from_le_bytes(key[i*4..i*4+4].try_into().unwrap());
+        state[4 + i] = u32::from_le_bytes(key[i * 4..i * 4 + 4].try_into().unwrap());
     }
     state[12] = counter;
     for i in 0..3 {
-        state[13 + i] = u32::from_le_bytes(nonce[i*4..i*4+4].try_into().unwrap());
+        state[13 + i] = u32::from_le_bytes(nonce[i * 4..i * 4 + 4].try_into().unwrap());
     }
 
     let mut working = state;
@@ -51,21 +59,21 @@ pub fn chacha20_block(key: &[u8; 32], nonce: &[u8; 12], counter: u32) -> [u8; 64
     // 20 rounds = 10 column rounds + 10 diagonal rounds
     for _ in 0..10 {
         // Column rounds
-        qr!(working[0], working[4], working[8],  working[12]);
-        qr!(working[1], working[5], working[9],  working[13]);
+        qr!(working[0], working[4], working[8], working[12]);
+        qr!(working[1], working[5], working[9], working[13]);
         qr!(working[2], working[6], working[10], working[14]);
         qr!(working[3], working[7], working[11], working[15]);
         // Diagonal rounds
         qr!(working[0], working[5], working[10], working[15]);
         qr!(working[1], working[6], working[11], working[12]);
-        qr!(working[2], working[7], working[8],  working[13]);
-        qr!(working[3], working[4], working[9],  working[14]);
+        qr!(working[2], working[7], working[8], working[13]);
+        qr!(working[3], working[4], working[9], working[14]);
     }
 
     let mut out = [0u8; 64];
     for (i, w) in working.iter().enumerate() {
         let w_final = w.wrapping_add(state[i]);
-        out[i*4..i*4+4].copy_from_slice(&w_final.to_le_bytes());
+        out[i * 4..i * 4 + 4].copy_from_slice(&w_final.to_le_bytes());
     }
     out
 }
@@ -94,12 +102,12 @@ fn p1305() -> BigUint {
 
 /// Clamp `r` per RFC 8439: zero out specific bits to reduce the key space.
 fn clamp_r(r: &mut [u8; 16]) {
-    r[3]  &= 0x0f;
-    r[7]  &= 0x0f;
+    r[3] &= 0x0f;
+    r[7] &= 0x0f;
     r[11] &= 0x0f;
     r[15] &= 0x0f;
-    r[4]  &= 0xfc;
-    r[8]  &= 0xfc;
+    r[4] &= 0xfc;
+    r[8] &= 0xfc;
     r[12] &= 0xfc;
 }
 
@@ -152,7 +160,9 @@ fn poly1305_pad(aad: &[u8], ciphertext: &[u8]) -> Vec<u8> {
 
 fn pad16(v: &mut Vec<u8>) {
     let rem = v.len() % 16;
-    if rem != 0 { v.resize(v.len() + (16 - rem), 0); }
+    if rem != 0 {
+        v.resize(v.len() + (16 - rem), 0);
+    }
 }
 
 /// ChaCha20-Poly1305 encrypt. Returns `ciphertext || 16-byte tag`.
@@ -179,7 +189,9 @@ pub fn chacha20_poly1305_decrypt(
     nonce: &[u8; 12],
     aad: &[u8],
 ) -> Result<Vec<u8>, ()> {
-    if ciphertext_and_tag.len() < 16 { return Err(()); }
+    if ciphertext_and_tag.len() < 16 {
+        return Err(());
+    }
     let (ciphertext, tag_bytes) = ciphertext_and_tag.split_at(ciphertext_and_tag.len() - 16);
 
     let otk = poly1305_key_gen(key, nonce);
@@ -199,7 +211,9 @@ pub fn chacha20_poly1305_decrypt(
 mod tests {
     use super::*;
 
-    fn h(s: &str) -> Vec<u8> { hex::decode(s).unwrap() }
+    fn h(s: &str) -> Vec<u8> {
+        hex::decode(s).unwrap()
+    }
 
     // ── ChaCha20 block KATs (RFC 8439) ────────────────────────────────────────
 
@@ -217,7 +231,8 @@ mod tests {
     fn chacha20_block_rfc8439_2_3_2() {
         // RFC 8439 §2.3.2 named example.
         let key: [u8; 32] = h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
-            .try_into().unwrap();
+            .try_into()
+            .unwrap();
         let nonce: [u8; 12] = h("000000090000004a00000000").try_into().unwrap();
         let block = chacha20_block(&key, &nonce, 1);
         let expected = h("10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e");
@@ -229,7 +244,8 @@ mod tests {
     #[test]
     fn chacha20_xor_rfc8439_2_4_2() {
         let key: [u8; 32] = h("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
-            .try_into().unwrap();
+            .try_into()
+            .unwrap();
         let nonce: [u8; 12] = h("000000000000004a00000000").try_into().unwrap();
         let pt = b"Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
         let ct = chacha20_xor(pt, &key, &nonce);
@@ -244,7 +260,9 @@ mod tests {
     fn chacha20_roundtrip_random_lengths() {
         let key = [0x42u8; 32];
         let nonce = [0x07u8; 12];
-        for len in [0usize, 1, 15, 16, 17, 63, 64, 65, 127, 128, 129, 255, 256, 257] {
+        for len in [
+            0usize, 1, 15, 16, 17, 63, 64, 65, 127, 128, 129, 255, 256, 257,
+        ] {
             let pt: Vec<u8> = (0..len).map(|i| (i as u8).wrapping_mul(31)).collect();
             let ct = chacha20_xor(&pt, &key, &nonce);
             let dec = chacha20_xor(&ct, &key, &nonce);
@@ -257,7 +275,8 @@ mod tests {
     #[test]
     fn poly1305_rfc8439_2_5_2() {
         let key: [u8; 32] = h("85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b")
-            .try_into().unwrap();
+            .try_into()
+            .unwrap();
         let msg = b"Cryptographic Forum Research Group";
         let tag = poly1305(&key, msg);
         assert_eq!(&tag, h("a8061dc1305136c6c22b8baf0c0127a9").as_slice());
@@ -268,7 +287,8 @@ mod tests {
     #[test]
     fn chacha20_poly1305_rfc8439_2_8_2() {
         let key: [u8; 32] = h("808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f")
-            .try_into().unwrap();
+            .try_into()
+            .unwrap();
         let nonce: [u8; 12] = h("070000004041424344454647").try_into().unwrap();
         let aad = h("50515253c0c1c2c3c4c5c6c7");
         let pt = b"Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";

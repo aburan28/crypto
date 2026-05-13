@@ -134,10 +134,7 @@ pub fn ec_elgamal_encrypt(pk: &EcElGamalPublicKey, m: &BigUint) -> EcElGamalCiph
 /// Returns the point but does NOT solve DLP.  Useful for protocols
 /// that operate on the encoded plaintext without ever needing the
 /// integer (e.g. equality tests via point comparison).
-pub fn ec_elgamal_decrypt_point(
-    sk: &EcElGamalPrivateKey,
-    c: &EcElGamalCiphertext,
-) -> Point {
+pub fn ec_elgamal_decrypt_point(sk: &EcElGamalPrivateKey, c: &EcElGamalCiphertext) -> Point {
     let a = sk.public.curve.a_fe();
     let bits = sk.public.curve.order_bits();
     let d_c1 = c.c1.scalar_mul_ct(&sk.d, &a, bits);

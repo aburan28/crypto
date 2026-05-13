@@ -64,9 +64,19 @@ use num_traits::{One, Zero};
 pub const CM_CURVES: &[(i64, i64, i64, &str)] = &[
     // (D, a, b, "E label")
     (-4, -1, 0, "E: y² = x³ − x  (j=1728, CM by Z[i])"),
-    (-7, -35, 98, "E: y² = x³ − 35x + 98  (j=-3375, CM by Z[(1+√-7)/2])"),
+    (
+        -7,
+        -35,
+        98,
+        "E: y² = x³ − 35x + 98  (j=-3375, CM by Z[(1+√-7)/2])",
+    ),
     (-8, -30, 56, "E: y² = x³ − 30x + 56  (j=8000, CM by Z[√-2])"),
-    (-11, -1056, 13552, "E: y² = x³ − 1056x + 13552  (j=-32768, CM by Z[(1+√-11)/2])"),
+    (
+        -11,
+        -1056,
+        13552,
+        "E: y² = x³ − 1056x + 13552  (j=-32768, CM by Z[(1+√-11)/2])",
+    ),
     // We focus on these four for empirical testing; the other 9 give
     // similar empirical behaviour but require larger Weierstrass
     // coefficients for some j-values.
@@ -178,14 +188,7 @@ fn mod_inverse_bigint(a: &BigInt, m: &BigInt) -> Option<BigInt> {
 /// Brute-force scalar mul on `E: y² = x³ + ax + b` over `F_p` with
 /// possibly-negative `a, b`.  Returns `Some((x, y))` of `[d]·(x_0,
 /// y_0)`, or `None` if intermediate identity hit.
-fn scalar_mul_fp_signed(
-    x_0: u64,
-    y_0: u64,
-    d: u64,
-    a: i64,
-    b: i64,
-    p: u64,
-) -> Option<(u64, u64)> {
+fn scalar_mul_fp_signed(x_0: u64, y_0: u64, d: u64, a: i64, b: i64, p: u64) -> Option<(u64, u64)> {
     if d == 0 {
         return None;
     }
@@ -365,7 +368,13 @@ mod tests {
             (-4, -1, 0, &[5, 13, 17, 29, 37, 41], "y²=x³-x"),
             (-7, -35, 98, &[11, 23, 29, 37, 53], "y²=x³-35x+98"),
             (-8, -30, 56, &[11, 17, 19, 41, 43], "y²=x³-30x+56"),
-            (-11, -1056, 13552, &[23, 31, 47, 59, 67, 89], "y²=x³-1056x+13552"),
+            (
+                -11,
+                -1056,
+                13552,
+                &[23, 31, 47, 59, 67, 89],
+                "y²=x³-1056x+13552",
+            ),
         ];
 
         let mut grand_trials = 0u64;
@@ -397,9 +406,9 @@ mod tests {
                 let precision = if p < 20 { 8 } else { 6 };
 
                 for d_planted in 1..ord {
-                    if let Some(exp) = run_cm_smart_attack(
-                        a, b, p, ord, px, py, d_planted, d, precision,
-                    ) {
+                    if let Some(exp) =
+                        run_cm_smart_attack(a, b, p, ord, px, py, d_planted, d, precision)
+                    {
                         trials += 1;
                         if exp.recovery_succeeded {
                             successes += 1;
@@ -420,8 +429,13 @@ mod tests {
                 let theoretical = 1.0 / (p as f64);
                 println!(
                     "  p={}, n={}, ord={}: nontrivial {}/{} = {:.3}, 1/p = {:.3}",
-                    p, n, ord, nontrivial_successes, nontrivial_trials,
-                    nontrivial_rate, theoretical,
+                    p,
+                    n,
+                    ord,
+                    nontrivial_successes,
+                    nontrivial_trials,
+                    nontrivial_rate,
+                    theoretical,
                 );
                 grand_trials += trials;
                 grand_successes += successes;
@@ -434,10 +448,15 @@ mod tests {
         println!();
         println!("=== AGGREGATE OVER ALL CM CURVES ===");
         println!("Total trials: {}", grand_trials);
-        println!("Total successes: {} ({} trivial d=1)", grand_successes,
-                 grand_successes - grand_nontrivial_successes);
-        println!("Non-trivial (d ≠ 1): {} / {} = {:.4}",
-                 grand_nontrivial_successes, grand_nontrivial_trials, agg_rate);
+        println!(
+            "Total successes: {} ({} trivial d=1)",
+            grand_successes,
+            grand_successes - grand_nontrivial_successes
+        );
+        println!(
+            "Non-trivial (d ≠ 1): {} / {} = {:.4}",
+            grand_nontrivial_successes, grand_nontrivial_trials, agg_rate
+        );
         println!();
         println!("Compare to non-CM Hensel-lift baseline (from nonanom_formal_log):");
         println!("  168 / 2389 = 0.0703");

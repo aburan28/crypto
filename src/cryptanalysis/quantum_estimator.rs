@@ -109,7 +109,10 @@ impl Circuit {
 
     /// Apply a Toffoli (control1, control2, target).
     pub fn toffoli(&mut self, c1: usize, c2: usize, target: usize) {
-        let new_depth = self.qubits[c1].max(self.qubits[c2]).max(self.qubits[target]) + 1;
+        let new_depth = self.qubits[c1]
+            .max(self.qubits[c2])
+            .max(self.qubits[target])
+            + 1;
         self.qubits[c1] = new_depth;
         self.qubits[c2] = new_depth;
         self.qubits[target] = new_depth;
@@ -130,7 +133,10 @@ impl Circuit {
         self.counts.toffoli += block.toffoli;
         self.counts.cnot += block.cnot;
         self.counts.single_qubit += block.single_qubit;
-        self.counts.depth = self.counts.depth.max(self.qubits.iter().copied().max().unwrap_or(0));
+        self.counts.depth = self
+            .counts
+            .depth
+            .max(self.qubits.iter().copied().max().unwrap_or(0));
     }
 }
 
@@ -274,22 +280,38 @@ mod tests {
         println!();
         println!(
             "{:>4} | {:>9} {:>11} {:>11} {:>11} | {:>9} {:>11} {:>11} {:>11}",
-            "n", "PA qbits", "PA Toffoli", "PA CNOT", "PA depth",
-            "PD qbits", "PD Toffoli", "PD CNOT", "PD depth",
+            "n",
+            "PA qbits",
+            "PA Toffoli",
+            "PA CNOT",
+            "PA depth",
+            "PD qbits",
+            "PD Toffoli",
+            "PD CNOT",
+            "PD depth",
         );
         for &n in &[8, 16, 127, 163, 233, 283, 409, 571] {
             let (pa, pd) = ecpm_single_step_stats(n);
             println!(
                 "{:>4} | {:>9} {:>11} {:>11} {:>11} | {:>9} {:>11} {:>11} {:>11}",
                 n,
-                pa.qubits, pa.toffoli, pa.cnot, pa.depth,
-                pd.qubits, pd.toffoli, pd.cnot, pd.depth,
+                pa.qubits,
+                pa.toffoli,
+                pa.cnot,
+                pa.depth,
+                pd.qubits,
+                pd.toffoli,
+                pd.cnot,
+                pd.depth,
             );
         }
         println!();
         println!("=== Total-step ECPM (2n PD + 2 PA) ===");
         println!();
-        println!("{:>4} | {:>9} {:>13} {:>13}", "n", "qubits", "Toffoli", "depth");
+        println!(
+            "{:>4} | {:>9} {:>13} {:>13}",
+            "n", "qubits", "Toffoli", "depth"
+        );
         for &n in &[8, 16, 127, 163, 233, 283, 409, 571] {
             let total = ecpm_total_stats(n);
             println!(
@@ -342,10 +364,7 @@ mod tests {
             pd_contribution > 10 * pa_contribution,
             "2n PD should dominate 2 PA by ≥10× at n=163"
         );
-        assert_eq!(
-            total.toffoli,
-            pa_contribution + pd_contribution
-        );
+        assert_eq!(total.toffoli, pa_contribution + pd_contribution);
     }
 
     /// Circuit-builder depth increments correctly with sequential

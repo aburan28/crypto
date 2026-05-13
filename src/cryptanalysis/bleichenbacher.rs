@@ -211,17 +211,32 @@ impl C {
     const ZERO: C = C { re: 0.0, im: 0.0 };
     const ONE: C = C { re: 1.0, im: 0.0 };
     fn from_phase(theta: f64) -> Self {
-        C { re: theta.cos(), im: theta.sin() }
+        C {
+            re: theta.cos(),
+            im: theta.sin(),
+        }
     }
-    fn add(self, o: C) -> C { C { re: self.re + o.re, im: self.im + o.im } }
-    fn sub(self, o: C) -> C { C { re: self.re - o.re, im: self.im - o.im } }
+    fn add(self, o: C) -> C {
+        C {
+            re: self.re + o.re,
+            im: self.im + o.im,
+        }
+    }
+    fn sub(self, o: C) -> C {
+        C {
+            re: self.re - o.re,
+            im: self.im - o.im,
+        }
+    }
     fn mul(self, o: C) -> C {
         C {
             re: self.re * o.re - self.im * o.im,
             im: self.re * o.im + self.im * o.re,
         }
     }
-    fn norm_sq(self) -> f64 { self.re * self.re + self.im * self.im }
+    fn norm_sq(self) -> f64 {
+        self.re * self.re + self.im * self.im
+    }
 }
 
 /// In-place radix-2 Cooley-Tukey FFT with **positive-phase**
@@ -230,7 +245,9 @@ impl C {
 fn fft_pos(input: &mut [C]) {
     let n = input.len();
     debug_assert!(n.is_power_of_two());
-    if n <= 1 { return; }
+    if n <= 1 {
+        return;
+    }
 
     // Bit-reversal permutation.
     let mut j = 0usize;
@@ -355,10 +372,14 @@ pub fn bleichenbacher_fft(
     let mut best_d = BigUint::from(d_candidate);
     let mut best_d_mag = bias_magnitude(samples, &best_d, n);
     for delta in (-window)..=window {
-        if delta == 0 { continue; }
+        if delta == 0 {
+            continue;
+        }
         let cand_i = (d_candidate as i64 + delta).rem_euclid(n_int.max(1) as i64);
         let cand = BigUint::from(cand_i as u64);
-        if &cand >= n { continue; }
+        if &cand >= n {
+            continue;
+        }
         let mag = bias_magnitude(samples, &cand, n);
         if mag > best_d_mag {
             best_d_mag = mag;
@@ -459,7 +480,8 @@ mod tests {
         assert!(
             mag_true > 2.0 * wrong_max,
             "expected mag_true > 2× max-wrong, got mag_true={} wrong_max={}",
-            mag_true, wrong_max
+            mag_true,
+            wrong_max
         );
     }
 
@@ -561,7 +583,11 @@ mod tests {
         fft_pos(&mut v);
         assert!((v[0].re - n_size as f64).abs() < 1e-9, "DC component wrong");
         for i in 1..n_size {
-            assert!(v[i].norm_sq() < 1e-9, "non-DC freq should be 0, got {:?}", v[i]);
+            assert!(
+                v[i].norm_sq() < 1e-9,
+                "non-DC freq should be 0, got {:?}",
+                v[i]
+            );
         }
     }
 
@@ -608,15 +634,15 @@ mod tests {
         // refine via a brute-force scan in that region).
         let recovered_i64 = peak.d.iter_u64_digits().next().unwrap_or(0) as i64;
         let true_i64 = 617i64;
-        let dist = ((recovered_i64 - true_i64).abs()).min(
-            (recovered_i64 + 1019 - true_i64).abs(),
-        ).min(
-            (true_i64 + 1019 - recovered_i64).abs(),
-        );
+        let dist = ((recovered_i64 - true_i64).abs())
+            .min((recovered_i64 + 1019 - true_i64).abs())
+            .min((true_i64 + 1019 - recovered_i64).abs());
         assert!(
             dist < 100,
             "FFT recovered d = {} too far from true {} (Hamming dist {})",
-            peak.d, d_true, dist
+            peak.d,
+            d_true,
+            dist
         );
         // The peak SNR should be measurably above the noise floor.
         assert!(peak.snr >= 2.0, "SNR below threshold: {}", peak.snr);
@@ -634,7 +660,11 @@ mod tests {
                 let h = rng.gen_biguint_below(&n);
                 let k = rng.gen_biguint_below(&n);
                 let hd = (&h * &d_true) % &n;
-                let t = if k >= hd { (&k - &hd) % &n } else { &n - ((&hd - &k) % &n) };
+                let t = if k >= hd {
+                    (&k - &hd) % &n
+                } else {
+                    &n - ((&hd - &k) % &n)
+                };
                 BleichenbacherSample { t, h }
             })
             .collect();

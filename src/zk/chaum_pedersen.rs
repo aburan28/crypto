@@ -112,11 +112,7 @@ fn push_be32(out: &mut Vec<u8>, v: &BigUint) {
 }
 
 /// **Prove** that `log_G(Y) = log_H(Z) = x`, with fresh OS randomness.
-pub fn chaum_pedersen_prove(
-    x: &BigUint,
-    h_pt: &Point,
-    curve: &CurveParams,
-) -> ChaumPedersenProof {
+pub fn chaum_pedersen_prove(x: &BigUint, h_pt: &Point, curve: &CurveParams) -> ChaumPedersenProof {
     let mut rng = OsRng;
     let r = rng.gen_biguint_below(&curve.n);
     chaum_pedersen_prove_with_nonce(x, &r, h_pt, curve)
@@ -157,8 +153,7 @@ pub fn chaum_pedersen_verify(
     if proof.s >= curve.n {
         return false;
     }
-    if !curve.is_on_curve(y) || !curve.is_on_curve(z)
-        || !curve.is_on_curve(h_pt) {
+    if !curve.is_on_curve(y) || !curve.is_on_curve(z) || !curve.is_on_curve(h_pt) {
         return false;
     }
     if !curve.is_on_curve(&proof.r1) || !curve.is_on_curve(&proof.r2) {

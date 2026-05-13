@@ -15,8 +15,8 @@
 //!    bit flip.  Approximated as `max |corr(j, k)|` over output-bit
 //!    pairs.
 
-use rand::{RngCore, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{RngCore, SeedableRng};
 
 /// Per-bit-pair avalanche probabilities.
 #[derive(Clone, Debug)]
@@ -96,7 +96,11 @@ where
 
             let y0 = cipher(&input);
             let y1 = cipher(&flipped);
-            assert_eq!(y0.len(), y1.len(), "cipher returned mismatched output lengths");
+            assert_eq!(
+                y0.len(),
+                y1.len(),
+                "cipher returned mismatched output lengths"
+            );
 
             for j in 0..n_out {
                 let b0 = (y0[j / 8] >> (j % 8)) & 1;
@@ -114,18 +118,17 @@ where
         .map(|row| row.into_iter().map(|c| c as f64 / denom).collect())
         .collect();
 
-    AvalancheReport { n_in, n_out, samples_per_bit, matrix }
+    AvalancheReport {
+        n_in,
+        n_out,
+        samples_per_bit,
+        matrix,
+    }
 }
 
 /// SAC score = `max |A[i][j] − 0.5|`.  Convenience wrapper around
 /// [`full_avalanche`].
-pub fn sac_score<F>(
-    cipher: F,
-    n_in: usize,
-    n_out: usize,
-    samples_per_bit: usize,
-    seed: u64,
-) -> f64
+pub fn sac_score<F>(cipher: F, n_in: usize, n_out: usize, samples_per_bit: usize, seed: u64) -> f64
 where
     F: Fn(&[u8]) -> Vec<u8>,
 {

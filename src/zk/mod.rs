@@ -79,14 +79,11 @@ pub use chaum_pedersen::{
     chaum_pedersen_prove, chaum_pedersen_prove_with_nonce, chaum_pedersen_verify,
     ChaumPedersenProof,
 };
-pub use merkle::{
-    merkle_root, merkle_proof, merkle_verify, MerkleProof, MerkleTree,
-};
+pub use merkle::{merkle_proof, merkle_root, merkle_verify, MerkleProof, MerkleTree};
 pub use pedersen::{
-    pedersen_commit, pedersen_commit_with_blinding, pedersen_open,
-    pedersen_second_generator, PedersenCommitment, PedersenParams,
+    pedersen_commit, pedersen_commit_with_blinding, pedersen_open, pedersen_second_generator,
+    PedersenCommitment, PedersenParams,
 };
 pub use schnorr_zkp::{
-    schnorr_zkp_prove, schnorr_zkp_prove_with_nonce, schnorr_zkp_verify,
-    SchnorrZkProof,
+    schnorr_zkp_prove, schnorr_zkp_prove_with_nonce, schnorr_zkp_verify, SchnorrZkProof,
 };

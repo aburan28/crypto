@@ -36,10 +36,14 @@ impl Fq {
         Self { value: v % &p }
     }
     pub fn zero() -> Self {
-        Self { value: BigUint::zero() }
+        Self {
+            value: BigUint::zero(),
+        }
     }
     pub fn one() -> Self {
-        Self { value: BigUint::one() }
+        Self {
+            value: BigUint::one(),
+        }
     }
     pub fn is_zero(&self) -> bool {
         self.value.is_zero()
@@ -56,7 +60,9 @@ impl Fq {
         if self.value.is_zero() {
             Self::zero()
         } else {
-            Self { value: &p - &self.value }
+            Self {
+                value: &p - &self.value,
+            }
         }
     }
     pub fn mul(&self, other: &Self) -> Self {
@@ -97,7 +103,9 @@ impl Fq {
         let p = modulus();
         // BLS12-381 prime satisfies p ≡ 3 (mod 4): verified by p mod 4 = 3.
         let exp = (&p + BigUint::one()) / BigUint::from(4u32);
-        Some(Self { value: self.value.modpow(&exp, &p) })
+        Some(Self {
+            value: self.value.modpow(&exp, &p),
+        })
     }
 }
 

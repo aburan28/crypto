@@ -315,8 +315,8 @@ mod tests {
     use num_bigint::{BigUint, RandBigInt};
     use num_traits::Zero;
     use rand::rngs::OsRng;
-    use rand::{RngCore, SeedableRng};
     use rand::rngs::StdRng;
+    use rand::{RngCore, SeedableRng};
 
     /// Sign with a caller-supplied nonce.  Test-only — bypasses
     /// RFC 6979 deliberately so we can inject biased `k`.
@@ -516,17 +516,17 @@ mod tests {
                 }
             }
             // LLL run.
-            if let Ok(d_rec) = hnp_recover_key_with_reduction(
-                &curve, &kp.public, &sigs, HnpReduction::Lll,
-            ) {
+            if let Ok(d_rec) =
+                hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::Lll)
+            {
                 if d_rec == d {
                     lll_successes += 1;
                 }
             }
             // BKZ run.
-            if let Ok(d_rec) = hnp_recover_key_with_reduction(
-                &curve, &kp.public, &sigs, HnpReduction::Bkz(12),
-            ) {
+            if let Ok(d_rec) =
+                hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::Bkz(12))
+            {
                 if d_rec == d {
                     bkz_successes += 1;
                 }
@@ -548,7 +548,8 @@ mod tests {
         assert!(
             bkz_successes >= lll_successes,
             "BKZ ({}) should match or exceed LLL ({}) at thin-margin HNP",
-            bkz_successes, lll_successes
+            bkz_successes,
+            lll_successes
         );
     }
 
@@ -585,11 +586,15 @@ mod tests {
             }
 
             if hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::Lll)
-                .map(|x| x == d).unwrap_or(false) {
+                .map(|x| x == d)
+                .unwrap_or(false)
+            {
                 lll_succ += 1;
             }
             if hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::Bkz(12))
-                .map(|x| x == d).unwrap_or(false) {
+                .map(|x| x == d)
+                .unwrap_or(false)
+            {
                 bkz_succ += 1;
             }
         }
@@ -600,7 +605,9 @@ mod tests {
         // BKZ should match-or-exceed LLL.
         assert!(
             bkz_succ >= lll_succ,
-            "at thin margin, BKZ ({}) must ≥ LLL ({})", bkz_succ, lll_succ
+            "at thin margin, BKZ ({}) must ≥ LLL ({})",
+            bkz_succ,
+            lll_succ
         );
     }
 

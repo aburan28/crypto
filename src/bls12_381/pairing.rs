@@ -67,9 +67,9 @@
 //! verification is currently `#[ignore]`-d.
 
 use super::fq::{modulus, Fq};
+use super::fq12::Fq12;
 use super::fq2::Fq2;
 use super::fq6::Fq6;
-use super::fq12::Fq12;
 use super::g1::G1Point;
 use super::g2::G2Point;
 use num_bigint::BigUint;
@@ -79,7 +79,6 @@ use num_traits::One;
 fn u_abs() -> BigUint {
     BigUint::parse_bytes(b"d201000000010000", 16).unwrap()
 }
-
 
 /// Line function for doubling `T` evaluated at `P` (line through
 /// `T` tangent to the curve at `T`).  Returns the resulting
@@ -100,7 +99,9 @@ fn line_double(t: &G2Point, p: &G1Point) -> (Fq12, G2Point) {
     // Slope λ = (3·x²) / (2·y).
     let three = Fq2::new(Fq::new(BigUint::from(3u32)), Fq::zero());
     let two = Fq2::new(Fq::new(BigUint::from(2u32)), Fq::zero());
-    let lambda = three.mul(&tx.square()).mul(&two.mul(&ty).inverse().unwrap());
+    let lambda = three
+        .mul(&tx.square())
+        .mul(&two.mul(&ty).inverse().unwrap());
 
     // New T' = 2T.
     let new_x = lambda.square().sub(&tx).sub(&tx);
@@ -286,11 +287,19 @@ mod tests {
         let g1 = G1Point::generator();
         let g2 = G2Point::generator();
         let e = pairing(&g1, &g2);
-        assert_ne!(e, Fq12::one(), "e(G1, G2) should be a non-trivial root of unity");
+        assert_ne!(
+            e,
+            Fq12::one(),
+            "e(G1, G2) should be a non-trivial root of unity"
+        );
         // It should be an r-th root of unity, i.e. f^r = 1 in Fq12.
         let r = super::super::fq::scalar_modulus();
         let test = e.pow(&r);
-        assert_eq!(test, Fq12::one(), "pairing output must be an r-th root of unity");
+        assert_eq!(
+            test,
+            Fq12::one(),
+            "pairing output must be an r-th root of unity"
+        );
     }
 
     /// Pairing of infinity is one.

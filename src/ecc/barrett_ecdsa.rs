@@ -101,7 +101,12 @@ impl BarrettContext {
         assert!(l_bits >= m_bits, "L must be at least M = bits(m)");
         let two_to_l = BigUint::one() << l_bits as usize;
         let k = &two_to_l / &m;
-        Self { m, m_bits, l_bits, k }
+        Self {
+            m,
+            m_bits,
+            l_bits,
+            k,
+        }
     }
 }
 
@@ -112,7 +117,10 @@ impl BarrettContext {
 /// 2 (`⌊d/m⌋ − 2 ≤ c3 ≤ ⌊d/m⌋`), so the final `while` loop runs
 /// at most 2 iterations.
 pub fn barrett_reduce(d: &BigUint, ctx: &BarrettContext) -> BigUint {
-    debug_assert!(d.bits() <= ctx.l_bits, "input d exceeds maximum bit-length L");
+    debug_assert!(
+        d.bits() <= ctx.l_bits,
+        "input d exceeds maximum bit-length L"
+    );
     // c1 = d >> (M − 1)
     let c1 = d >> ((ctx.m_bits - 1) as usize);
     // c2 = c1 · k
@@ -152,13 +160,23 @@ impl BarrettEcdsaParams {
     /// Construct a [`BarrettContext`] for reducing 2P-bit values
     /// mod `p` (used in field-level Barrett reductions).
     pub fn p_context(&self) -> BarrettContext {
-        BarrettContext { m: self.p.clone(), m_bits: self.bit_length, l_bits: 2 * self.bit_length, k: self.k_p.clone() }
+        BarrettContext {
+            m: self.p.clone(),
+            m_bits: self.bit_length,
+            l_bits: 2 * self.bit_length,
+            k: self.k_p.clone(),
+        }
     }
 
     /// Construct a [`BarrettContext`] for reducing 2P-bit values
     /// mod `n` (used in scalar-level Barrett reductions).
     pub fn n_context(&self) -> BarrettContext {
-        BarrettContext { m: self.n.clone(), m_bits: self.bit_length, l_bits: 2 * self.bit_length, k: self.k_n.clone() }
+        BarrettContext {
+            m: self.n.clone(),
+            m_bits: self.bit_length,
+            l_bits: 2 * self.bit_length,
+            k: self.k_n.clone(),
+        }
     }
 }
 
@@ -197,7 +215,15 @@ pub fn generate_barrett_ecdsa_params(bit_length: u64) -> BarrettEcdsaParams {
     } else {
         &two_l / &n
     };
-    BarrettEcdsaParams { p, a, b, n, k_p, k_n, bit_length }
+    BarrettEcdsaParams {
+        p,
+        a,
+        b,
+        n,
+        k_p,
+        k_n,
+        bit_length,
+    }
 }
 
 /// **Algorithm 2, lines 1–6**: generate a prime `p` with the paper's
@@ -386,11 +412,7 @@ mod tests {
     #[test]
     fn paper_example_1_p256_reproduces() {
         // r from Example 1: 128-bit value.
-        let r = BigUint::parse_bytes(
-            b"bba46de2b4b53e20b97d41941c01a6b0",
-            16,
-        )
-        .unwrap();
+        let r = BigUint::parse_bytes(b"bba46de2b4b53e20b97d41941c01a6b0", 16).unwrap();
         let (p, alpha) = barrett_prime_from_r(256, &r);
 
         // α = 2^255 + 2^129 + r.  In hex (64 chars), the high half
@@ -450,7 +472,11 @@ mod tests {
         // Bits 130..255 must all be zero (the gap between 2^(P-1)
         // and 2^(U+1) terms).  These are the bits we "predetermine".
         for k in 130..255 {
-            assert!(!p.bit(k), "bit {} should be 0 in the predetermined region", k);
+            assert!(
+                !p.bit(k),
+                "bit {} should be 0 in the predetermined region",
+                k
+            );
         }
         // p must be prime.
         assert!(crate::asymmetric::rsa::is_prime(&p));
@@ -475,7 +501,9 @@ mod tests {
         assert!(kp.bit(256), "k_p must have bit 256 set");
         let mut ones_in_top_half = 0u32;
         for k in 128..257u64 {
-            if kp.bit(k) { ones_in_top_half += 1; }
+            if kp.bit(k) {
+                ones_in_top_half += 1;
+            }
         }
         // Out of 129 bits in [128, 257), at least 120 should be 1
         // (Lemma 1 plus the gap criterion give us roughly P/2 − 1 ones).

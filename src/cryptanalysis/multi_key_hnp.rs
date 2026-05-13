@@ -261,7 +261,9 @@ mod tests {
                     let k = biased_nonce(&mut rng, target_k_bits);
                     if let Some((r, s)) = sign_with_nonce(&z, &k, &d_child, &curve) {
                         all_sigs.push(ChildKeySignature {
-                            r, s, z,
+                            r,
+                            s,
+                            z,
                             k_bits: target_k_bits,
                             offset: offset.clone(),
                         });
@@ -272,10 +274,8 @@ mod tests {
         }
 
         assert_eq!(all_sigs.len(), 8);
-        let recovered = multi_key_hnp_recover_master(
-            &curve, &master_kp.public, &all_sigs,
-        )
-        .expect("joint multi-key HNP should recover master");
+        let recovered = multi_key_hnp_recover_master(&curve, &master_kp.public, &all_sigs)
+            .expect("joint multi-key HNP should recover master");
         assert_eq!(recovered, master_d, "recovered master mismatched plant");
     }
 
@@ -305,7 +305,10 @@ mod tests {
             let k = biased_nonce(&mut rng, target_k_bits);
             if let Some((r, s)) = sign_with_nonce(&z, &k, &d, &curve) {
                 sigs.push(BiasedSignature {
-                    r, s, z, k_bits: target_k_bits,
+                    r,
+                    s,
+                    z,
+                    k_bits: target_k_bits,
                 });
             }
         }
@@ -337,7 +340,9 @@ mod tests {
                 let k = rng.gen_biguint_below(&n); // FULL ENTROPY
                 if let Some((r, s)) = sign_with_nonce(&z, &k, &d_child, &curve) {
                     all_sigs.push(ChildKeySignature {
-                        r, s, z,
+                        r,
+                        s,
+                        z,
                         k_bits: 200, // claim moderate bias (lie)
                         offset: offset.clone(),
                     });
@@ -345,9 +350,7 @@ mod tests {
             }
         }
 
-        let result = multi_key_hnp_recover_master(
-            &curve, &master_kp.public, &all_sigs,
-        );
+        let result = multi_key_hnp_recover_master(&curve, &master_kp.public, &all_sigs);
         match result {
             Err(_) => { /* expected: lattice didn't find a short vector */ }
             Ok(d_rec) if d_rec != master_d => { /* acceptable */ }

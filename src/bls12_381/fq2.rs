@@ -20,22 +20,37 @@ impl Fq2 {
         Self { c0, c1 }
     }
     pub fn zero() -> Self {
-        Self { c0: Fq::zero(), c1: Fq::zero() }
+        Self {
+            c0: Fq::zero(),
+            c1: Fq::zero(),
+        }
     }
     pub fn one() -> Self {
-        Self { c0: Fq::one(), c1: Fq::zero() }
+        Self {
+            c0: Fq::one(),
+            c1: Fq::zero(),
+        }
     }
     pub fn is_zero(&self) -> bool {
         self.c0.is_zero() && self.c1.is_zero()
     }
     pub fn add(&self, other: &Self) -> Self {
-        Self { c0: self.c0.add(&other.c0), c1: self.c1.add(&other.c1) }
+        Self {
+            c0: self.c0.add(&other.c0),
+            c1: self.c1.add(&other.c1),
+        }
     }
     pub fn sub(&self, other: &Self) -> Self {
-        Self { c0: self.c0.sub(&other.c0), c1: self.c1.sub(&other.c1) }
+        Self {
+            c0: self.c0.sub(&other.c0),
+            c1: self.c1.sub(&other.c1),
+        }
     }
     pub fn neg(&self) -> Self {
-        Self { c0: self.c0.neg(), c1: self.c1.neg() }
+        Self {
+            c0: self.c0.neg(),
+            c1: self.c1.neg(),
+        }
     }
     pub fn mul(&self, other: &Self) -> Self {
         // (a + bu)(c + du) = (ac − bd) + (ad + bc)u
@@ -43,19 +58,28 @@ impl Fq2 {
         let bd = self.c1.mul(&other.c1);
         let ad = self.c0.mul(&other.c1);
         let bc = self.c1.mul(&other.c0);
-        Self { c0: ac.sub(&bd), c1: ad.add(&bc) }
+        Self {
+            c0: ac.sub(&bd),
+            c1: ad.add(&bc),
+        }
     }
     pub fn square(&self) -> Self {
         // (a + bu)² = (a² − b²) + 2ab·u
         let a_sq = self.c0.square();
         let b_sq = self.c1.square();
         let two_ab = self.c0.mul(&self.c1).add(&self.c0.mul(&self.c1));
-        Self { c0: a_sq.sub(&b_sq), c1: two_ab }
+        Self {
+            c0: a_sq.sub(&b_sq),
+            c1: two_ab,
+        }
     }
     /// Frobenius: `(a + bu)^p = a − b·u`  (since `u^p = -u` when
     /// `p ≡ 3 (mod 4)`, true for BLS12-381).
     pub fn frobenius_map(&self) -> Self {
-        Self { c0: self.c0.clone(), c1: self.c1.neg() }
+        Self {
+            c0: self.c0.clone(),
+            c1: self.c1.neg(),
+        }
     }
     pub fn inverse(&self) -> Option<Self> {
         if self.is_zero() {
@@ -116,13 +140,19 @@ impl Fq2 {
         let beta = alpha.mul(self);
         let alpha_squared_self = alpha.square().mul(self);
         // Check if alpha² · self equals -1 in F_p² (i.e. value (-1, 0)).
-        let neg_one = Fq2 { c0: Fq::one().neg(), c1: Fq::zero() };
+        let neg_one = Fq2 {
+            c0: Fq::one().neg(),
+            c1: Fq::zero(),
+        };
         let sqrt_candidate = if alpha_squared_self == neg_one {
             // x = β · u  (u² = -1 makes (β u)² = -β² · 1 = self · -1 · -1 = self).
             // Wait: β² = self · α² · self · α² = …
             // Use the more general approach: β · ζ where ζ² = -1.
             // In F_p² with u² = -1, ζ = u works.
-            beta.mul(&Fq2 { c0: Fq::zero(), c1: Fq::one() })
+            beta.mul(&Fq2 {
+                c0: Fq::zero(),
+                c1: Fq::one(),
+            })
         } else {
             beta
         };
@@ -168,7 +198,10 @@ mod tests {
 
     #[test]
     fn inverse_roundtrip() {
-        let a = Fq2::new(Fq::new(BigUint::from(123u32)), Fq::new(BigUint::from(456u32)));
+        let a = Fq2::new(
+            Fq::new(BigUint::from(123u32)),
+            Fq::new(BigUint::from(456u32)),
+        );
         let ai = a.inverse().unwrap();
         assert_eq!(a.mul(&ai), Fq2::one());
     }

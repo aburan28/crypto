@@ -77,19 +77,19 @@ use num_traits::{One, Zero};
 pub const CLASS_NUMBER_ONE: &[(i64, &str)] = &[
     // Fundamental discriminants and corresponding j-invariants.
     // Note j(τ) for τ = (1 + √-D)/2 (or i for D=-4, etc.).
-    (-3, "0"),                        // j(ω) = 0 where ω = exp(2πi/3)
-    (-4, "1728"),                     // j(i) = 1728
-    (-7, "-3375"),                    // j((1+√-7)/2) = -3375
-    (-8, "8000"),                     // j(√-2) = 8000
-    (-11, "-32768"),                  // j((1+√-11)/2) = -32768
-    (-12, "54000"),                   // 54000 = 2^4 · 3^3 · 5^3
-    (-16, "287496"),                  // 287496 = 2^3 · 3^3 · 11^3
-    (-19, "-884736"),                 // -884736 = -2^15 · 3^3
-    (-27, "-12288000"),               // -12288000
-    (-28, "16581375"),                // 16581375 = 3^3 · 5^3 · 17^3
-    (-43, "-884736000"),              // -884736000 = -2^18 · 3^3 · 5^3
-    (-67, "-147197952000"),           // -147197952000 = -2^15 · 3^3 · 5^3 · 11^3
-    (-163, "-262537412640768000"),    // -262537412640768000
+    (-3, "0"),                     // j(ω) = 0 where ω = exp(2πi/3)
+    (-4, "1728"),                  // j(i) = 1728
+    (-7, "-3375"),                 // j((1+√-7)/2) = -3375
+    (-8, "8000"),                  // j(√-2) = 8000
+    (-11, "-32768"),               // j((1+√-11)/2) = -32768
+    (-12, "54000"),                // 54000 = 2^4 · 3^3 · 5^3
+    (-16, "287496"),               // 287496 = 2^3 · 3^3 · 11^3
+    (-19, "-884736"),              // -884736 = -2^15 · 3^3
+    (-27, "-12288000"),            // -12288000
+    (-28, "16581375"),             // 16581375 = 3^3 · 5^3 · 17^3
+    (-43, "-884736000"),           // -884736000 = -2^18 · 3^3 · 5^3
+    (-67, "-147197952000"),        // -147197952000 = -2^15 · 3^3 · 5^3 · 11^3
+    (-163, "-262537412640768000"), // -262537412640768000
 ];
 
 /// Hilbert class polynomial as a list of coefficients in increasing
@@ -247,12 +247,7 @@ mod tests {
     fn class_number_brute_force_agrees() {
         // Class number 1 cases.
         for &(d, _) in CLASS_NUMBER_ONE {
-            assert_eq!(
-                class_number_brute_force(d),
-                Some(1),
-                "h({}) should be 1",
-                d
-            );
+            assert_eq!(class_number_brute_force(d), Some(1), "h({}) should be 1", d);
         }
         // Class number 2 cases: D = -15 has h = 2.  D = -20 has h = 2.
         // D = -23 has h = 3.  D = -47 has h = 5.
@@ -270,8 +265,10 @@ mod tests {
         println!();
         println!("=== Hilbert class polynomial H_D(X) scaling barrier ===");
         println!();
-        println!("{:>15} {:>15} {:>20}",
-            "log_2|D|", "est log_2 h(D)", "est log_2 storage_bits");
+        println!(
+            "{:>15} {:>15} {:>20}",
+            "log_2|D|", "est log_2 h(D)", "est log_2 storage_bits"
+        );
         for &abs_d_log2 in &[4u64, 8, 16, 32, 50, 64, 100, 128, 200, 258] {
             let h_log2 = class_number_estimate(abs_d_log2);
             // Coefficients of H_D have bit-size ~h(D)·log h(D) by

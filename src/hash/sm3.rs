@@ -23,41 +23,60 @@
 //! - **Output**: concatenate the final 8 32-bit words (256 bits).
 
 const IV: [u32; 8] = [
-    0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600,
-    0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e,
+    0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e,
 ];
 
 #[inline]
 fn rotl(x: u32, n: u32) -> u32 {
     let n = n & 31;
-    if n == 0 { x } else { (x << n) | (x >> (32 - n)) }
+    if n == 0 {
+        x
+    } else {
+        (x << n) | (x >> (32 - n))
+    }
 }
 
 /// Round constant T_j.
 #[inline]
 fn t(j: usize) -> u32 {
-    if j < 16 { 0x79cc4519 } else { 0x7a879d8a }
+    if j < 16 {
+        0x79cc4519
+    } else {
+        0x7a879d8a
+    }
 }
 
 /// Boolean function FF_j.
 #[inline]
 fn ff(j: usize, x: u32, y: u32, z: u32) -> u32 {
-    if j < 16 { x ^ y ^ z } else { (x & y) | (x & z) | (y & z) }
+    if j < 16 {
+        x ^ y ^ z
+    } else {
+        (x & y) | (x & z) | (y & z)
+    }
 }
 
 /// Boolean function GG_j.
 #[inline]
 fn gg(j: usize, x: u32, y: u32, z: u32) -> u32 {
-    if j < 16 { x ^ y ^ z } else { (x & y) | (!x & z) }
+    if j < 16 {
+        x ^ y ^ z
+    } else {
+        (x & y) | (!x & z)
+    }
 }
 
 /// Permutation P_0 for the round function.
 #[inline]
-fn p0(x: u32) -> u32 { x ^ rotl(x, 9) ^ rotl(x, 17) }
+fn p0(x: u32) -> u32 {
+    x ^ rotl(x, 9) ^ rotl(x, 17)
+}
 
 /// Permutation P_1 for message expansion.
 #[inline]
-fn p1(x: u32) -> u32 { x ^ rotl(x, 15) ^ rotl(x, 23) }
+fn p1(x: u32) -> u32 {
+    x ^ rotl(x, 15) ^ rotl(x, 23)
+}
 
 /// Compress one 512-bit block into the 8-word state.
 fn compress(state: &mut [u32; 8], block: &[u8; 64]) {
@@ -71,9 +90,7 @@ fn compress(state: &mut [u32; 8], block: &[u8; 64]) {
         ]);
     }
     for i in 16..68 {
-        w[i] = p1(w[i - 16] ^ w[i - 9] ^ rotl(w[i - 3], 15))
-            ^ rotl(w[i - 13], 7)
-            ^ w[i - 6];
+        w[i] = p1(w[i - 16] ^ w[i - 9] ^ rotl(w[i - 3], 15)) ^ rotl(w[i - 13], 7) ^ w[i - 6];
     }
     let mut w_prime = [0u32; 64];
     for i in 0..64 {
@@ -90,7 +107,12 @@ fn compress(state: &mut [u32; 8], block: &[u8; 64]) {
     let mut h = state[7];
 
     for j in 0..64 {
-        let ss1 = rotl(rotl(a, 12).wrapping_add(e).wrapping_add(rotl(t(j), j as u32)), 7);
+        let ss1 = rotl(
+            rotl(a, 12)
+                .wrapping_add(e)
+                .wrapping_add(rotl(t(j), j as u32)),
+            7,
+        );
         let ss2 = ss1 ^ rotl(a, 12);
         let tt1 = ff(j, a, b, c)
             .wrapping_add(d)
@@ -174,7 +196,9 @@ impl Sm3 {
 }
 
 impl Default for Sm3 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// One-shot: hash `data` and return the 256-bit digest.
@@ -194,10 +218,9 @@ mod tests {
     fn sm3_abc() {
         let digest = sm3(b"abc");
         let expected: [u8; 32] = [
-            0x66, 0xc7, 0xf0, 0xf4, 0x62, 0xee, 0xed, 0xd9,
-            0xd1, 0xf2, 0xd4, 0x6b, 0xdc, 0x10, 0xe4, 0xe2,
-            0x41, 0x67, 0xc4, 0x87, 0x5c, 0xf2, 0xf7, 0xa2,
-            0x29, 0x7d, 0xa0, 0x2b, 0x8f, 0x4b, 0xa8, 0xe0,
+            0x66, 0xc7, 0xf0, 0xf4, 0x62, 0xee, 0xed, 0xd9, 0xd1, 0xf2, 0xd4, 0x6b, 0xdc, 0x10,
+            0xe4, 0xe2, 0x41, 0x67, 0xc4, 0x87, 0x5c, 0xf2, 0xf7, 0xa2, 0x29, 0x7d, 0xa0, 0x2b,
+            0x8f, 0x4b, 0xa8, 0xe0,
         ];
         assert_eq!(digest, expected);
     }
@@ -211,10 +234,9 @@ mod tests {
         let input: Vec<u8> = b"abcd".iter().copied().cycle().take(64).collect();
         let digest = sm3(&input);
         let expected: [u8; 32] = [
-            0xde, 0xbe, 0x9f, 0xf9, 0x22, 0x75, 0xb8, 0xa1,
-            0x38, 0x60, 0x48, 0x89, 0xc1, 0x8e, 0x5a, 0x4d,
-            0x6f, 0xdb, 0x70, 0xe5, 0x38, 0x7e, 0x57, 0x65,
-            0x29, 0x3d, 0xcb, 0xa3, 0x9c, 0x0c, 0x57, 0x32,
+            0xde, 0xbe, 0x9f, 0xf9, 0x22, 0x75, 0xb8, 0xa1, 0x38, 0x60, 0x48, 0x89, 0xc1, 0x8e,
+            0x5a, 0x4d, 0x6f, 0xdb, 0x70, 0xe5, 0x38, 0x7e, 0x57, 0x65, 0x29, 0x3d, 0xcb, 0xa3,
+            0x9c, 0x0c, 0x57, 0x32,
         ];
         assert_eq!(digest, expected);
     }

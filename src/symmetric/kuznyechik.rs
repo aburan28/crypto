@@ -48,8 +48,7 @@ const PI_INV: [u8; 256] = {
 
 /// L-transform coefficients (`l_15..l_0` in standard's notation).
 const L_COEFFS: [u8; 16] = [
-    0x94, 0x20, 0x85, 0x10, 0xC2, 0xC0, 0x01, 0xFB,
-    0x01, 0xC0, 0xC2, 0x10, 0x85, 0x20, 0x94, 0x01,
+    0x94, 0x20, 0x85, 0x10, 0xC2, 0xC0, 0x01, 0xFB, 0x01, 0xC0, 0xC2, 0x10, 0x85, 0x20, 0x94, 0x01,
 ];
 
 // ── F_{2^8} arithmetic (irreducible polynomial x^8 + x^7 + x^6 + x + 1 = 0x1C3) ──
@@ -58,10 +57,14 @@ const L_COEFFS: [u8; 16] = [
 fn gmul(mut a: u8, mut b: u8) -> u8 {
     let mut p: u8 = 0;
     for _ in 0..8 {
-        if b & 1 == 1 { p ^= a; }
+        if b & 1 == 1 {
+            p ^= a;
+        }
         let hi = a & 0x80;
         a <<= 1;
-        if hi != 0 { a ^= 0xC3; }
+        if hi != 0 {
+            a ^= 0xC3;
+        }
         b >>= 1;
     }
     p
@@ -72,12 +75,16 @@ fn gmul(mut a: u8, mut b: u8) -> u8 {
 /// `S`: byte-wise S-box layer.
 #[inline]
 fn s(block: &mut [u8; 16]) {
-    for b in block.iter_mut() { *b = PI[*b as usize]; }
+    for b in block.iter_mut() {
+        *b = PI[*b as usize];
+    }
 }
 
 #[inline]
 fn s_inv(block: &mut [u8; 16]) {
-    for b in block.iter_mut() { *b = PI_INV[*b as usize]; }
+    for b in block.iter_mut() {
+        *b = PI_INV[*b as usize];
+    }
 }
 
 /// `R`: single LFSR step.  Compute `s = ⊕ l_i · a_{15-i}`, then
@@ -146,7 +153,9 @@ fn r_inv(block: &mut [u8; 16]) {
 /// Compute `a^{-1}` in `F_{2^8}` (with irreducible poly 0x1C3) by
 /// Fermat: `a^{254}` (since `|F^*| = 255`).
 fn inv_gf256(a: u8) -> u8 {
-    if a == 0 { return 0; }
+    if a == 0 {
+        return 0;
+    }
     let mut result = a;
     let mut base = a;
     // 254 = 11111110_2 = sum of 2^i for i ∈ {1, 2, 3, 4, 5, 6, 7}
@@ -169,17 +178,23 @@ fn inv_gf256(a: u8) -> u8 {
 /// `L`: apply `R` sixteen times.
 #[inline]
 fn l_transform(block: &mut [u8; 16]) {
-    for _ in 0..16 { r(block); }
+    for _ in 0..16 {
+        r(block);
+    }
 }
 
 #[inline]
 fn l_inv(block: &mut [u8; 16]) {
-    for _ in 0..16 { r_inv(block); }
+    for _ in 0..16 {
+        r_inv(block);
+    }
 }
 
 #[inline]
 fn x_xor(block: &mut [u8; 16], key: &[u8; 16]) {
-    for i in 0..16 { block[i] ^= key[i]; }
+    for i in 0..16 {
+        block[i] ^= key[i];
+    }
 }
 
 // ── Key schedule ──────────────────────────────────────────────────
@@ -219,7 +234,9 @@ impl Kuznyechik {
                 s(&mut tmp);
                 l_transform(&mut tmp);
                 // Result XORed with K2 gives new K1; old K1 becomes new K2.
-                for b in 0..16 { tmp[b] ^= k2[b]; }
+                for b in 0..16 {
+                    tmp[b] ^= k2[b];
+                }
                 k2 = k1;
                 k1 = tmp;
             }
@@ -273,18 +290,17 @@ mod tests {
     #[test]
     fn kuznyechik_official_test_vector() {
         let key: [u8; 32] = [
-            0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
-            0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-            0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10,
-            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+            0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55,
+            0x66, 0x77, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
         ];
         let plain: [u8; 16] = [
-            0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x00,
-            0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
+            0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x00, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa,
+            0x99, 0x88,
         ];
         let expected: [u8; 16] = [
-            0x7f, 0x67, 0x9d, 0x90, 0xbe, 0xbc, 0x24, 0x30,
-            0x5a, 0x46, 0x8d, 0x42, 0xb9, 0xd4, 0xed, 0xcd,
+            0x7f, 0x67, 0x9d, 0x90, 0xbe, 0xbc, 0x24, 0x30, 0x5a, 0x46, 0x8d, 0x42, 0xb9, 0xd4,
+            0xed, 0xcd,
         ];
         let ct = encrypt_block(&key, &plain);
         assert_eq!(ct, expected);

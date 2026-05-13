@@ -195,11 +195,10 @@ pub fn fri_commit(
             //   new(x²) = ((f(x) + f(-x)) + α · (f(x) − f(-x)) · x⁻¹) / 2.
             let sum = fr_add(f_x, f_neg_x);
             let diff = fr_sub(f_x, f_neg_x);
-            let x_inv = super::polynomial::fr_inv(&cur_domain[i])
-                .expect("non-zero domain element");
+            let x_inv = super::polynomial::fr_inv(&cur_domain[i]).expect("non-zero domain element");
             let alpha_term = fr_mul(&alpha, &fr_mul(&diff, &x_inv));
-            let two_inv = super::polynomial::fr_inv(&BigUint::from(2u32))
-                .expect("2 is invertible in F_r");
+            let two_inv =
+                super::polynomial::fr_inv(&BigUint::from(2u32)).expect("2 is invertible in F_r");
             let folded = fr_mul(&fr_add(&sum, &alpha_term), &two_inv);
             next_evals.push(folded);
             next_domain.push(fr_mul(&cur_domain[i], &cur_domain[i]));
@@ -228,7 +227,11 @@ pub fn fri_query(commitment: &FriCommitment, mut position: usize) -> FriQueryOpe
         let evals = &commitment.layers[layer];
         let half = evals.len() / 2;
         let pos_main = position % evals.len();
-        let pos_sibling = if pos_main < half { pos_main + half } else { pos_main - half };
+        let pos_sibling = if pos_main < half {
+            pos_main + half
+        } else {
+            pos_main - half
+        };
         let proof_main = commitment.layer_trees[layer]
             .proof(pos_main)
             .expect("position in range");
@@ -314,7 +317,11 @@ pub fn fri_verify(
             }
             // Advance: domain squares, layer size halves.
             cur_x = fr_mul(&cur_x, &cur_x);
-            cur_pos = cur_pos.min(if cur_pos >= half { cur_pos - half } else { cur_pos });
+            cur_pos = cur_pos.min(if cur_pos >= half {
+                cur_pos - half
+            } else {
+                cur_pos
+            });
             layer_size = half;
         }
     }
@@ -424,7 +431,11 @@ pub fn verify(air: &Air, proof: &StarkProof) -> bool {
     // Verify trace queries: each opens against the trace commitment
     // and is consistent with the AIR's transition constraint.
     for (pos, val, proof_path) in &proof.trace_queries {
-        if !merkle_verify(&scalar_to_bytes(val), proof_path, &proof.trace_commitment_root) {
+        if !merkle_verify(
+            &scalar_to_bytes(val),
+            proof_path,
+            &proof.trace_commitment_root,
+        ) {
             return false;
         }
         // Boundary checks at first/last position.
@@ -446,7 +457,12 @@ pub fn verify(air: &Air, proof: &StarkProof) -> bool {
     // Verify FRI: feed transcript state up to (but not including)
     // FRI's α challenges.
     let fri_transcript_initial = transcript_state.clone();
-    if !fri_verify(&proof.fri, &domain, &proof.fri_queries, &fri_transcript_initial) {
+    if !fri_verify(
+        &proof.fri,
+        &domain,
+        &proof.fri_queries,
+        &fri_transcript_initial,
+    ) {
         return false;
     }
     true
@@ -475,8 +491,7 @@ mod tests {
     fn air_execution_doubling() {
         let air = doubling_air(8, 1);
         let trace = air.execute();
-        let expected: Vec<BigUint> =
-            (0..8).map(|i| BigUint::from(1u64 << i)).collect();
+        let expected: Vec<BigUint> = (0..8).map(|i| BigUint::from(1u64 << i)).collect();
         assert_eq!(trace, expected);
         assert!(air.check_trace(&trace));
     }
@@ -520,7 +535,12 @@ mod tests {
             .map(|&p| (p, fri_query(&commitment, p)))
             .collect();
 
-        assert!(fri_verify(&commitment, &domain, &queries, &initial_transcript));
+        assert!(fri_verify(
+            &commitment,
+            &domain,
+            &queries,
+            &initial_transcript
+        ));
     }
 
     /// **End-to-end STARK** on the doubling AIR.

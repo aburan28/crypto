@@ -17,10 +17,18 @@ impl Fq6 {
         Self { c0, c1, c2 }
     }
     pub fn zero() -> Self {
-        Self { c0: Fq2::zero(), c1: Fq2::zero(), c2: Fq2::zero() }
+        Self {
+            c0: Fq2::zero(),
+            c1: Fq2::zero(),
+            c2: Fq2::zero(),
+        }
     }
     pub fn one() -> Self {
-        Self { c0: Fq2::one(), c1: Fq2::zero(), c2: Fq2::zero() }
+        Self {
+            c0: Fq2::one(),
+            c1: Fq2::zero(),
+            c2: Fq2::zero(),
+        }
     }
     pub fn is_zero(&self) -> bool {
         self.c0.is_zero() && self.c1.is_zero() && self.c2.is_zero()
@@ -40,7 +48,11 @@ impl Fq6 {
         }
     }
     pub fn neg(&self) -> Self {
-        Self { c0: self.c0.neg(), c1: self.c1.neg(), c2: self.c2.neg() }
+        Self {
+            c0: self.c0.neg(),
+            c1: self.c1.neg(),
+            c2: self.c2.neg(),
+        }
     }
     /// Schoolbook multiplication using `v³ = ξ = u + 1`.
     /// (a + b·v + c·v²)(d + e·v + f·v²) =
@@ -80,10 +92,19 @@ impl Fq6 {
         // t2 = c1² − c0·c2
         // norm = c0·t0 + ξ·c2·t1 + ξ·c1·t2
         // inv = (t0, t1, t2) / norm
-        let t0 = self.c0.square().sub(&self.c1.mul(&self.c2).mul_by_nonresidue());
-        let t1 = self.c2.square().mul_by_nonresidue().sub(&self.c0.mul(&self.c1));
+        let t0 = self
+            .c0
+            .square()
+            .sub(&self.c1.mul(&self.c2).mul_by_nonresidue());
+        let t1 = self
+            .c2
+            .square()
+            .mul_by_nonresidue()
+            .sub(&self.c0.mul(&self.c1));
         let t2 = self.c1.square().sub(&self.c0.mul(&self.c2));
-        let norm = self.c0.mul(&t0)
+        let norm = self
+            .c0
+            .mul(&t0)
             .add(&self.c2.mul(&t1).mul_by_nonresidue())
             .add(&self.c1.mul(&t2).mul_by_nonresidue());
         let norm_inv = norm.inverse()?;
@@ -97,8 +118,8 @@ impl Fq6 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::fq::Fq;
+    use super::*;
     use num_bigint::BigUint;
 
     fn sample() -> Fq6 {

@@ -103,7 +103,9 @@ fn sigmoid_prime(s: f64) -> f64 {
 /// Tiny portable PRNG (LCG) — sufficient for weight initialisation;
 /// no need for proper crypto-grade randomness here.
 fn lcg_next(state: &mut u64) -> f64 {
-    *state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+    *state = state
+        .wrapping_mul(6364136223846793005)
+        .wrapping_add(1442695040888963407);
     let v = ((*state >> 11) as u32) as f64 / (u32::MAX as f64 + 1.0);
     v * 2.0 - 1.0 // [-1, 1]
 }
@@ -128,7 +130,11 @@ impl Net {
             weights.push(w_layer);
             biases.push(vec![0.0; layers[l + 1]]);
         }
-        Self { layers, weights, biases }
+        Self {
+            layers,
+            weights,
+            biases,
+        }
     }
 
     /// Forward pass: returns the per-layer activations (input
@@ -241,12 +247,20 @@ pub fn generate_training_data(n: usize, seed: u64) -> (Vec<[f64; 3]>, Vec<f64>) 
 }
 
 fn is_small_prime(n: u64) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 {
+        return false;
+    }
     let mut i = 3u64;
     while i * i <= n {
-        if n % i == 0 { return false; }
+        if n % i == 0 {
+            return false;
+        }
         i += 2;
     }
     true
@@ -290,7 +304,10 @@ pub fn predict_order_interval(
     let sqrt_p = (p as f64).sqrt();
     let n_hat = (y_hat * 4.0 * sqrt_p - 2.0 * sqrt_p + (p as f64 + 1.0)).round() as u64;
     let half_width = (2.0 * sqrt_p * interval_half_width_fraction).round() as u64;
-    (n_hat.saturating_sub(half_width), n_hat.saturating_add(half_width))
+    (
+        n_hat.saturating_sub(half_width),
+        n_hat.saturating_add(half_width),
+    )
 }
 
 #[cfg(test)]
@@ -304,7 +321,9 @@ mod tests {
             for a in [0u64, 1, 3, p - 3].iter().copied() {
                 for b in [1u64, 5, 7].iter().copied() {
                     let disc = (4 * a * a % p * a + 27 * b * b) % p;
-                    if disc == 0 { continue; }
+                    if disc == 0 {
+                        continue;
+                    }
                     let n = count_points_small(p, a % p, b % p);
                     let sqrt_p = (p as f64).sqrt();
                     let lower = (p as f64 + 1.0 - 2.0 * sqrt_p) as i128;
@@ -312,7 +331,10 @@ mod tests {
                     assert!(
                         (n as i128) >= lower && (n as i128) <= upper,
                         "Hasse violated: p={}, a={}, b={}, n={}",
-                        p, a, b, n,
+                        p,
+                        a,
+                        b,
+                        n,
                     );
                 }
             }
@@ -350,7 +372,8 @@ mod tests {
         assert!(
             final_loss < initial_loss * 0.5,
             "SGD should at least halve the loss on a small dataset; got {} → {}",
-            initial_loss, final_loss
+            initial_loss,
+            final_loss
         );
     }
 

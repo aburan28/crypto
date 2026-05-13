@@ -32,7 +32,7 @@
 
 use crate::hash::sha256::sha256;
 use crate::pqc::mceliece::{
-    mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McElieceePublicKey, McEliecePrivateKey,
+    mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McEliecePrivateKey, McElieceePublicKey,
 };
 use rand::{rngs::OsRng, Rng};
 

@@ -73,11 +73,9 @@ use std::collections::HashMap;
 use num_bigint::{BigUint, ToBigInt};
 use num_traits::Zero;
 
+use crate::cryptanalysis::bleichenbacher::{bleichenbacher_direct, BleichenbacherSample};
 use crate::cryptanalysis::ecdsa_audit::{
     audit_ecdsa_transcript, AuditOptions, AuditResult, EcdsaSample,
-};
-use crate::cryptanalysis::bleichenbacher::{
-    bleichenbacher_direct, BleichenbacherSample,
 };
 use crate::ecc::curve::CurveParams;
 use crate::ecc::keys::EccPublicKey;
@@ -164,7 +162,10 @@ pub struct CorpusReport {
 impl CorpusReport {
     /// Number of `Critical` findings (i.e., recovered private keys).
     pub fn critical_count(&self) -> usize {
-        self.rows.iter().filter(|r| r.severity == Severity::Critical).count()
+        self.rows
+            .iter()
+            .filter(|r| r.severity == Severity::Critical)
+            .count()
     }
     /// All findings of a given severity.
     pub fn at_severity(&self, sev: Severity) -> Vec<&ReportRow> {
@@ -241,14 +242,17 @@ impl<'c> CorpusAnalyzer<'c> {
         self.total_signatures += 1;
         let n = &self.curve.n;
         if record.r.is_zero() || record.s.is_zero() || &record.r >= n || &record.s >= n {
-            self.malformed.push((record.source.clone(), "r/s out of (0, n)".to_string()));
+            self.malformed
+                .push((record.source.clone(), "r/s out of (0, n)".to_string()));
             return;
         }
         let key_bytes = match record.public_key.to_sec1_uncompressed() {
             Some(v) => v,
             None => {
-                self.malformed
-                    .push((record.source.clone(), "public key cannot be SEC1-encoded".to_string()));
+                self.malformed.push((
+                    record.source.clone(),
+                    "public key cannot be SEC1-encoded".to_string(),
+                ));
                 return;
             }
         };
@@ -337,16 +341,26 @@ fn analyze_cluster(
         })
         .collect();
     match audit_ecdsa_transcript(curve, public_key, &samples, audit_opts) {
-        AuditResult::KeyRecovered { d, k_bits, signatures_used } => {
+        AuditResult::KeyRecovered {
+            d,
+            k_bits,
+            signatures_used,
+        } => {
             rows.push(ReportRow {
                 severity: Severity::Critical,
-                finding: Finding::KeyRecoveredViaHnp { d, k_bits, signatures_used },
+                finding: Finding::KeyRecoveredViaHnp {
+                    d,
+                    k_bits,
+                    signatures_used,
+                },
                 public_key_sec1: key_sec1.clone(),
             });
             // Skip subsequent detectors on this cluster — already broken.
             return;
         }
-        AuditResult::BiasSuspectedNoRecovery { suspected_k_bits, .. } => {
+        AuditResult::BiasSuspectedNoRecovery {
+            suspected_k_bits, ..
+        } => {
             rows.push(ReportRow {
                 severity: Severity::High,
                 finding: Finding::BiasSuspectedNoRecovery { suspected_k_bits },
@@ -428,13 +442,21 @@ fn detect_repeated_k(
                 (&s1.z - &s2.z) % n
             } else {
                 let d = (&s2.z - &s1.z) % n;
-                if d.is_zero() { BigUint::zero() } else { n - d }
+                if d.is_zero() {
+                    BigUint::zero()
+                } else {
+                    n - d
+                }
             };
             let s_diff = if s1.s >= s2.s {
                 (&s1.s - &s2.s) % n
             } else {
                 let d = (&s2.s - &s1.s) % n;
-                if d.is_zero() { BigUint::zero() } else { n - d }
+                if d.is_zero() {
+                    BigUint::zero()
+                } else {
+                    n - d
+                }
             };
             if s_diff.is_zero() {
                 continue; // can't divide
@@ -454,7 +476,11 @@ fn detect_repeated_k(
                 (&s1_k - &s1.z) % n
             } else {
                 let d = (&s1.z - &s1_k) % n;
-                if d.is_zero() { BigUint::zero() } else { n - d }
+                if d.is_zero() {
+                    BigUint::zero()
+                } else {
+                    n - d
+                }
             };
             let d = (lhs * &r_inv) % n;
             if d.is_zero() {
@@ -606,16 +632,24 @@ mod tests {
         let mut analyzer = CorpusAnalyzer::new(&curve);
         analyzer.add(SignatureRecord {
             public_key: kp.public.clone(),
-            r: r1, s: s1, z: z1,
+            r: r1,
+            s: s1,
+            z: z1,
             source: "tx_a".to_string(),
         });
         analyzer.add(SignatureRecord {
             public_key: kp.public.clone(),
-            r: r2, s: s2, z: z2,
+            r: r2,
+            s: s2,
+            z: z2,
             source: "tx_b".to_string(),
         });
         let report = analyzer.finalize();
-        assert_eq!(report.critical_count(), 1, "expected exactly 1 critical finding");
+        assert_eq!(
+            report.critical_count(),
+            1,
+            "expected exactly 1 critical finding"
+        );
         let recovered = report.recovered_keys();
         assert_eq!(recovered.len(), 1);
         assert_eq!(*recovered[0], d, "recovered d does not match planted");
@@ -641,7 +675,9 @@ mod tests {
             if let Some((r, s)) = sign_with_nonce(&z, &k, &d, &curve) {
                 analyzer.add(SignatureRecord {
                     public_key: kp.public.clone(),
-                    r, s, z,
+                    r,
+                    s,
+                    z,
                     source: format!("sig_{}", z_seed),
                 });
             }
@@ -667,7 +703,8 @@ mod tests {
             assert!(
                 recovered.iter().any(|x| **x == d),
                 "recovered_keys = {:?}, expected to contain {}",
-                recovered, d
+                recovered,
+                d
             );
         }
     }
@@ -690,7 +727,9 @@ mod tests {
             if let Some((r, s)) = sign_with_nonce(&z, &k, &d, &curve) {
                 analyzer.add(SignatureRecord {
                     public_key: kp.public.clone(),
-                    r, s, z,
+                    r,
+                    s,
+                    z,
                     source: format!("sig_{}", i),
                 });
             }
@@ -729,7 +768,9 @@ mod tests {
             let (r, s) = sign_with_nonce(&z, &k_shared, &d_bad, &curve).unwrap();
             analyzer.add(SignatureRecord {
                 public_key: kp_bad.public.clone(),
-                r, s, z,
+                r,
+                s,
+                z,
                 source: format!("bad_{}", i),
             });
         }
@@ -744,7 +785,9 @@ mod tests {
                 if let Some((r, s)) = sign_with_nonce(&z, &k, &d_good, &curve) {
                     analyzer.add(SignatureRecord {
                         public_key: kp_good.public.clone(),
-                        r, s, z,
+                        r,
+                        s,
+                        z,
                         source: format!("good_{}_{}", k_idx, i),
                     });
                 }
@@ -778,7 +821,12 @@ mod tests {
         let info: Vec<_> = report.at_severity(Severity::Info).into_iter().collect();
         assert!(!info.is_empty(), "expected at least one Info row");
         // No Critical / High / Medium / Low.
-        for sev in [Severity::Critical, Severity::High, Severity::Medium, Severity::Low] {
+        for sev in [
+            Severity::Critical,
+            Severity::High,
+            Severity::Medium,
+            Severity::Low,
+        ] {
             assert_eq!(
                 report.at_severity(sev).len(),
                 0,
@@ -804,6 +852,8 @@ mod tests {
         });
         let report = analyzer.finalize();
         let low: Vec<_> = report.at_severity(Severity::Low).into_iter().collect();
-        assert!(low.iter().any(|r| matches!(r.finding, Finding::MalformedRecord { .. })));
+        assert!(low
+            .iter()
+            .any(|r| matches!(r.finding, Finding::MalformedRecord { .. })));
     }
 }

@@ -117,13 +117,7 @@ fn message_digest(za: &[u8; 32], msg: &[u8], n: &BigUint) -> BigUint {
 ///
 /// Caller must ensure `pa = d·G` matches `d` (the same point is used
 /// in ZA computation and is exposed in the public key).
-pub fn sign(
-    msg: &[u8],
-    d: &BigUint,
-    pa: &Point,
-    id: &[u8],
-    curve: &CurveParams,
-) -> Sm2Signature {
+pub fn sign(msg: &[u8], d: &BigUint, pa: &Point, id: &[u8], curve: &CurveParams) -> Sm2Signature {
     let z = za(id, pa, curve);
     let e = message_digest(&z, msg, &curve.n);
     let a = curve.a_fe();
@@ -163,13 +157,7 @@ pub fn sign(
 
 /// **Verify** that `sig` is a valid SM2 signature over `msg` with
 /// signer public key `pa` and identifier `id`.
-pub fn verify(
-    msg: &[u8],
-    sig: &Sm2Signature,
-    pa: &Point,
-    id: &[u8],
-    curve: &CurveParams,
-) -> bool {
+pub fn verify(msg: &[u8], sig: &Sm2Signature, pa: &Point, id: &[u8], curve: &CurveParams) -> bool {
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
         return false;
     }
@@ -338,19 +326,25 @@ mod tests {
     fn sm2_public_key_test_vector() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let (xa, ya) = match pa {
             Point::Affine { x, y } => (x.value, y.value),
             _ => panic!("PA should not be infinity"),
         };
         let want_x = BigUint::parse_bytes(
-            b"09F9DF311E5421A150DD7D161E4BC5C672179FAD1833FC076BB08FF356F35020", 16,
-        ).unwrap();
+            b"09F9DF311E5421A150DD7D161E4BC5C672179FAD1833FC076BB08FF356F35020",
+            16,
+        )
+        .unwrap();
         let want_y = BigUint::parse_bytes(
-            b"CCEA490CE26775A52DC6EA718CC1AA600AED05FBF35E084A6632F6072DA9AD13", 16,
-        ).unwrap();
+            b"CCEA490CE26775A52DC6EA718CC1AA600AED05FBF35E084A6632F6072DA9AD13",
+            16,
+        )
+        .unwrap();
         assert_eq!(xa, want_x);
         assert_eq!(ya, want_y);
     }
@@ -367,8 +361,10 @@ mod tests {
     fn sm2_sign_verify_roundtrip() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let msg = b"hello SM2!";
         let sig = sign(msg, &d, &pa, DEFAULT_ID, &curve);
@@ -380,8 +376,10 @@ mod tests {
     fn sm2_wrong_message_fails() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let sig = sign(b"original", &d, &pa, DEFAULT_ID, &curve);
         assert!(!verify(b"tampered", &sig, &pa, DEFAULT_ID, &curve));
@@ -392,11 +390,15 @@ mod tests {
     fn sm2_wrong_key_fails() {
         let curve = sm2_curve();
         let d1 = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let d2 = BigUint::parse_bytes(
-            b"1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF", 16,
-        ).unwrap();
+            b"1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF",
+            16,
+        )
+        .unwrap();
         let pa1 = public_key_from_private(&d1, &curve);
         let pa2 = public_key_from_private(&d2, &curve);
         let sig = sign(b"msg", &d1, &pa1, DEFAULT_ID, &curve);
@@ -408,8 +410,10 @@ mod tests {
     fn sm2_encrypt_decrypt_roundtrip() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pb = public_key_from_private(&d, &curve);
         let msg = b"encrypted hello, SM2 world!";
         let ct = encrypt(msg, &pb, &curve);
@@ -422,8 +426,10 @@ mod tests {
     fn sm2_tampered_ciphertext_rejected() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pb = public_key_from_private(&d, &curve);
         let mut ct = encrypt(b"msg", &pb, &curve);
         // Flip a bit in the last (C2) block.
@@ -443,13 +449,13 @@ mod tests {
     fn sm2_za_known_vector() {
         let curve = sm2_curve();
         let d = BigUint::parse_bytes(
-            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8", 16,
-        ).unwrap();
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
         let pa = public_key_from_private(&d, &curve);
         let z = za(DEFAULT_ID, &pa, &curve);
-        let want = hex_to_bytes(
-            "b2e14c5c79c6df5b85f4fe7ed8db7a262b9da7e07ccb0ea9f4747b8ccda8a4f3",
-        );
+        let want = hex_to_bytes("b2e14c5c79c6df5b85f4fe7ed8db7a262b9da7e07ccb0ea9f4747b8ccda8a4f3");
         assert_eq!(&z[..], &want[..]);
     }
 

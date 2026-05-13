@@ -113,7 +113,11 @@ fn ladder(scalar: &BigUint, u: &BigUint) -> BigUint {
     let z2_inv = fe_inv(&z2);
     let result = fe_mul(&x2, &z2_inv);
     let pp = p();
-    if result < pp { result } else { result % pp }
+    if result < pp {
+        result
+    } else {
+        result % pp
+    }
 }
 
 #[cfg(test)]
@@ -142,12 +146,8 @@ mod tests {
     /// **RFC 7748 §5.2 test vector 1**.  Scalar and u given, expected output.
     #[test]
     fn rfc7748_vector_1() {
-        let scalar = hex32(
-            "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4",
-        );
-        let u = hex32(
-            "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c",
-        );
+        let scalar = hex32("a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4");
+        let u = hex32("e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c");
         let expected = "c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552";
         let result = x25519(&scalar, &u);
         assert_eq!(hex(&result), expected, "RFC 7748 vector 1 mismatch");
@@ -156,12 +156,8 @@ mod tests {
     /// **RFC 7748 §5.2 test vector 2**.
     #[test]
     fn rfc7748_vector_2() {
-        let scalar = hex32(
-            "4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d",
-        );
-        let u = hex32(
-            "e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493",
-        );
+        let scalar = hex32("4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d");
+        let u = hex32("e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493");
         let expected = "95cbde9476e8907d7aade45cb4b873f88b595a68799fa152e6f8f7647aac7957";
         let result = x25519(&scalar, &u);
         assert_eq!(hex(&result), expected, "RFC 7748 vector 2 mismatch");

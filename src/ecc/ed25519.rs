@@ -98,7 +98,12 @@ impl EdPoint {
 
     fn from_affine(x: BigUint, y: BigUint) -> Self {
         let t = fe_mul(&x, &y);
-        EdPoint { x, y, z: BigUint::one(), t }
+        EdPoint {
+            x,
+            y,
+            z: BigUint::one(),
+            t,
+        }
     }
 
     fn to_affine(&self) -> (BigUint, BigUint) {
@@ -117,14 +122,19 @@ impl EdPoint {
         let c = fe_mul(&BigUint::from(2u32), &fe_sq(&self.z));
         let xy = fe_add(&self.x, &self.y);
         let e = fe_sub(&fe_sq(&xy), &fe_add(&a, &b));
-        let g = fe_sub(&b, &a);                                  // G = B - A
-        let h = fe_sub(&BigUint::zero(), &fe_add(&a, &b));       // H = -A - B
-        let f = fe_sub(&g, &c);                                  // F = G - C
+        let g = fe_sub(&b, &a); // G = B - A
+        let h = fe_sub(&BigUint::zero(), &fe_add(&a, &b)); // H = -A - B
+        let f = fe_sub(&g, &c); // F = G - C
         let new_x = fe_mul(&e, &f);
         let new_y = fe_mul(&g, &h);
         let new_t = fe_mul(&e, &h);
         let new_z = fe_mul(&f, &g);
-        EdPoint { x: new_x, y: new_y, z: new_z, t: new_t }
+        EdPoint {
+            x: new_x,
+            y: new_y,
+            z: new_z,
+            t: new_t,
+        }
     }
 
     /// Mixed/projective add (HCD 2008, §3.1, a = -1).
@@ -147,7 +157,12 @@ impl EdPoint {
         let new_y = fe_mul(&g, &h);
         let new_t = fe_mul(&e, &h);
         let new_z = fe_mul(&f, &g);
-        EdPoint { x: new_x, y: new_y, z: new_z, t: new_t }
+        EdPoint {
+            x: new_x,
+            y: new_y,
+            z: new_z,
+            t: new_t,
+        }
     }
 
     fn neg(&self) -> Self {
@@ -361,12 +376,8 @@ mod tests {
     /// **RFC 8032 §7.1 TEST 1**.  Empty message.
     #[test]
     fn rfc8032_test_1() {
-        let seed = hex32(
-            "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
-        );
-        let expected_pk = hex32(
-            "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
-        );
+        let seed = hex32("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60");
+        let expected_pk = hex32("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a");
         let pk = ed25519_pubkey(&seed);
         assert_eq!(pk, expected_pk, "pubkey mismatch");
 
@@ -382,12 +393,8 @@ mod tests {
     /// **RFC 8032 §7.1 TEST 2**.  Single-byte message.
     #[test]
     fn rfc8032_test_2() {
-        let seed = hex32(
-            "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
-        );
-        let expected_pk = hex32(
-            "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
-        );
+        let seed = hex32("4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb");
+        let expected_pk = hex32("3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c");
         let pk = ed25519_pubkey(&seed);
         assert_eq!(pk, expected_pk);
 

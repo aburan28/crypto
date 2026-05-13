@@ -122,7 +122,11 @@ impl ZpProjPoint {
     pub fn from_affine(x: ZpInt, y: ZpInt) -> Self {
         let p = x.p.clone();
         let prec = x.precision;
-        ZpProjPoint { x, y, z: ZpInt::one(&p, prec) }
+        ZpProjPoint {
+            x,
+            y,
+            z: ZpInt::one(&p, prec),
+        }
     }
 }
 
@@ -176,7 +180,11 @@ pub fn proj_double(curve: &ZpCurve, point: &ZpProjPoint) -> ZpProjPoint {
     // Z' = Z · d³
     let z_new = point.z.mul(&ddd);
 
-    ZpProjPoint { x: x_new, y: y_new, z: z_new }
+    ZpProjPoint {
+        x: x_new,
+        y: y_new,
+        z: z_new,
+    }
 }
 
 /// Projective addition on `E: y² = x³ + ax + b`.
@@ -194,11 +202,7 @@ pub fn proj_double(curve: &ZpCurve, point: &ZpProjPoint) -> ZpProjPoint {
 ///
 /// Falls back to doubling when `V = 0 ∧ U = 0` (same point) and to
 /// identity when `V = 0 ∧ U ≠ 0` (P + (-P)).
-pub fn proj_add(
-    curve: &ZpCurve,
-    p1: &ZpProjPoint,
-    p2: &ZpProjPoint,
-) -> ZpProjPoint {
+pub fn proj_add(curve: &ZpCurve, p1: &ZpProjPoint, p2: &ZpProjPoint) -> ZpProjPoint {
     let p = &curve.p;
     let prec = curve.precision;
 
@@ -230,11 +234,7 @@ pub fn proj_add(
     let x1z2 = p1.x.mul(&p2.z);
 
     // W = U²·Z1·Z2 - V³ - 2·V²·X1·Z2
-    let w = u
-        .mul(&u)
-        .mul(&z1z2)
-        .sub(&vvv)
-        .sub(&two.mul(&vv).mul(&x1z2));
+    let w = u.mul(&u).mul(&z1z2).sub(&vvv).sub(&two.mul(&vv).mul(&x1z2));
 
     // X3 = V·W
     let x3 = v.mul(&w);
@@ -244,15 +244,15 @@ pub fn proj_add(
     // Z3 = V³·Z1·Z2
     let z3 = vvv.mul(&z1z2);
 
-    ZpProjPoint { x: x3, y: y3, z: z3 }
+    ZpProjPoint {
+        x: x3,
+        y: y3,
+        z: z3,
+    }
 }
 
 /// Projective scalar multiplication via double-and-add.
-pub fn proj_scalar_mul(
-    curve: &ZpCurve,
-    point: &ZpProjPoint,
-    k: &BigUint,
-) -> ZpProjPoint {
+pub fn proj_scalar_mul(curve: &ZpCurve, point: &ZpProjPoint, k: &BigUint) -> ZpProjPoint {
     let p = &curve.p;
     let prec = curve.precision;
     let mut acc = ZpProjPoint::identity(p, prec);
@@ -268,15 +268,13 @@ pub fn proj_scalar_mul(
 
 /// Hensel-lift an `F_p`-point `(x_0, y_0)` to projective `Z_p`-point
 /// with `Z = 1`.  Reuses the affine Hensel lift.
-pub fn proj_hensel_lift(
-    curve: &ZpCurve,
-    x_0: &BigInt,
-    y_0: &BigInt,
-) -> Option<ZpProjPoint> {
+pub fn proj_hensel_lift(curve: &ZpCurve, x_0: &BigInt, y_0: &BigInt) -> Option<ZpProjPoint> {
     let lifted = super::canonical_lift::hensel_lift_point(curve, x_0, y_0)?;
     match lifted {
         super::canonical_lift::ZpPoint::Aff(x, y) => Some(ZpProjPoint::from_affine(x, y)),
-        super::canonical_lift::ZpPoint::Inf => Some(ZpProjPoint::identity(&curve.p, curve.precision)),
+        super::canonical_lift::ZpPoint::Inf => {
+            Some(ZpProjPoint::identity(&curve.p, curve.precision))
+        }
     }
 }
 
@@ -334,7 +332,12 @@ pub fn run_nonanom_experiment(
     precision: u32,
 ) -> Option<NonAnomExperiment> {
     let p_bi = BigInt::from(p);
-    let curve = ZpCurve::new(BigInt::from(a as i64), BigInt::from(b as i64), &p_bi, precision);
+    let curve = ZpCurve::new(
+        BigInt::from(a as i64),
+        BigInt::from(b as i64),
+        &p_bi,
+        precision,
+    );
 
     // Lift P; compute Q = d·P in F_p, lift Q.
     let p_hat = proj_hensel_lift(&curve, &BigInt::from(p_x), &BigInt::from(p_y))?;
@@ -422,14 +425,7 @@ fn mod_inverse_bigint(a: &BigInt, m: &BigInt) -> Option<BigInt> {
 
 // ── Brute-force scalar mul in E(F_p) for the toy experiment ────────────────
 
-fn scalar_mul_fp(
-    x_0: u64,
-    y_0: u64,
-    d: u64,
-    a: u64,
-    b: u64,
-    p: u64,
-) -> Option<(u64, u64)> {
+fn scalar_mul_fp(x_0: u64, y_0: u64, d: u64, a: u64, b: u64, p: u64) -> Option<(u64, u64)> {
     if d == 0 {
         return None;
     }
@@ -607,10 +603,16 @@ mod tests {
         let lhs = dbl.y.mul(&dbl.y).mul(&dbl.z);
         let z2 = dbl.z.mul(&dbl.z);
         let z3 = z2.mul(&dbl.z);
-        let rhs = dbl.x.mul(&dbl.x).mul(&dbl.x)
+        let rhs = dbl
+            .x
+            .mul(&dbl.x)
+            .mul(&dbl.x)
             .add(&curve.a.mul(&dbl.x).mul(&z2))
             .add(&curve.b.mul(&z3));
-        assert_eq!(lhs, rhs, "projective doubling should preserve curve equation");
+        assert_eq!(
+            lhs, rhs,
+            "projective doubling should preserve curve equation"
+        );
     }
 
     /// Sanity: projective addition matches doubling when adding a point
@@ -631,7 +633,10 @@ mod tests {
             "doubling and self-add should agree (X cross diff = {:?})",
             cross_x.value
         );
-        assert!(cross_y.value.is_zero(), "doubling and self-add should agree (Y)");
+        assert!(
+            cross_y.value.is_zero(),
+            "doubling and self-add should agree (Y)"
+        );
     }
 
     /// Verify `[#E(F_p)]·P̂` reduces to identity for non-anomalous curves.
@@ -681,8 +686,14 @@ mod tests {
                 np.reduces_to_identity(),
                 "Non-anomalous E(F_{}) of order {}, P=({},{}): [n]·P̂ should reduce to identity \
                  (got X={:?}, Y={:?}, Z={:?}, val(Z)={})",
-                p_u, n_count, px, py,
-                np.x.value, np.y.value, np.z.value, np.z.valuation(),
+                p_u,
+                n_count,
+                px,
+                py,
+                np.x.value,
+                np.y.value,
+                np.z.value,
+                np.z.valuation(),
             );
         }
     }
@@ -715,7 +726,7 @@ mod tests {
         let mut grand_trials = 0u64;
         let mut grand_successes = 0u64;
         let mut grand_curves = 0u64;
-        let mut grand_trivial = 0u64;       // d = 1 case (Q = P, ratio = 1 = d)
+        let mut grand_trivial = 0u64; // d = 1 case (Q = P, ratio = 1 = d)
         let mut grand_nontrivial_trials = 0u64;
         let mut grand_nontrivial_successes = 0u64;
         let mut grand_val_dist: std::collections::BTreeMap<u32, u64> =
@@ -768,9 +779,9 @@ mod tests {
                     let mut nontrivial_trials = 0u64;
                     let mut nontrivial_successes = 0u64;
                     for d in 1..ord {
-                        if let Some(e) = run_nonanom_experiment(
-                            a, b, p_u, ord, px, py, d, precision,
-                        ) {
+                        if let Some(e) =
+                            run_nonanom_experiment(a, b, p_u, ord, px, py, d, precision)
+                        {
                             trials += 1;
                             *grand_val_dist.entry(e.valuation_z_p).or_insert(0) += 1;
                             if e.recovery_succeeded {

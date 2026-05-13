@@ -70,7 +70,9 @@ pub const T: usize = 1;
 pub struct NpPoly(pub [i32; P]);
 
 impl NpPoly {
-    pub fn zero() -> Self { Self([0; P]) }
+    pub fn zero() -> Self {
+        Self([0; P])
+    }
 
     pub fn one() -> Self {
         let mut p = Self::zero();
@@ -97,19 +99,25 @@ impl NpPoly {
 
     pub fn add(&self, other: &Self) -> Self {
         let mut out = [0; P];
-        for i in 0..P { out[i] = self.0[i] + other.0[i]; }
+        for i in 0..P {
+            out[i] = self.0[i] + other.0[i];
+        }
         Self(out)
     }
 
     pub fn sub(&self, other: &Self) -> Self {
         let mut out = [0; P];
-        for i in 0..P { out[i] = self.0[i] - other.0[i]; }
+        for i in 0..P {
+            out[i] = self.0[i] - other.0[i];
+        }
         Self(out)
     }
 
     pub fn scale(&self, s: i32) -> Self {
         let mut out = [0; P];
-        for i in 0..P { out[i] = self.0[i] * s; }
+        for i in 0..P {
+            out[i] = self.0[i] * s;
+        }
         Self(out)
     }
 
@@ -149,12 +157,18 @@ impl NpPoly {
         let mut placed = 0;
         while placed < w_plus {
             let i: usize = rng.gen_range(0..P);
-            if out[i] == 0 { out[i] = 1; placed += 1; }
+            if out[i] == 0 {
+                out[i] = 1;
+                placed += 1;
+            }
         }
         let mut placed_m = 0;
         while placed_m < w_minus {
             let i: usize = rng.gen_range(0..P);
-            if out[i] == 0 { out[i] = -1; placed_m += 1; }
+            if out[i] == 0 {
+                out[i] = -1;
+                placed_m += 1;
+            }
         }
         Self(out)
     }
@@ -165,7 +179,9 @@ impl NpPoly {
     pub fn try_invert_mod(&self, m: i32) -> Option<Self> {
         let m_u = m as u64;
         let total = m_u.checked_pow(P as u32)?;
-        if total > 100_000_000 { return None; }
+        if total > 100_000_000 {
+            return None;
+        }
         let one = Self::one();
         for code in 0..total {
             let mut g = NpPoly::zero();
@@ -225,7 +241,11 @@ pub fn ntru_prime_keygen() -> NtruPrimeKeyPair {
         // h = g · (3f)^{-1} mod q
         let h = g.mul(&three_f_inv).reduce_mod(Q);
         let pk = NtruPrimePublicKey { h };
-        let sk = NtruPrimePrivateKey { f, g_inv, pk: pk.clone() };
+        let sk = NtruPrimePrivateKey {
+            f,
+            g_inv,
+            pk: pk.clone(),
+        };
         return NtruPrimeKeyPair { pk, sk };
     }
     panic!("NTRU Prime keygen failed: f or g not invertible after 200 trials");
@@ -244,8 +264,12 @@ pub fn ntru_prime_encapsulate(pk: &NtruPrimePublicKey) -> (NtruPrimeCiphertext, 
     }
 
     let mut hash_input = Vec::with_capacity(2 * P * 4);
-    for v in r.0.iter() { hash_input.extend_from_slice(&v.to_le_bytes()); }
-    for v in c.0.iter() { hash_input.extend_from_slice(&v.to_le_bytes()); }
+    for v in r.0.iter() {
+        hash_input.extend_from_slice(&v.to_le_bytes());
+    }
+    for v in c.0.iter() {
+        hash_input.extend_from_slice(&v.to_le_bytes());
+    }
     let k = sha256(&hash_input);
     (NtruPrimeCiphertext { c }, k)
 }
@@ -261,8 +285,12 @@ pub fn ntru_prime_decapsulate(ct: &NtruPrimeCiphertext, sk: &NtruPrimePrivateKey
     let r_centered = r.center_lift(SMALL);
 
     let mut hash_input = Vec::with_capacity(2 * P * 4);
-    for v in r_centered.0.iter() { hash_input.extend_from_slice(&v.to_le_bytes()); }
-    for v in ct.c.0.iter() { hash_input.extend_from_slice(&v.to_le_bytes()); }
+    for v in r_centered.0.iter() {
+        hash_input.extend_from_slice(&v.to_le_bytes());
+    }
+    for v in ct.c.0.iter() {
+        hash_input.extend_from_slice(&v.to_le_bytes());
+    }
     sha256(&hash_input)
 }
 
@@ -274,8 +302,10 @@ mod tests {
     /// x^P = x + 1` after reduction.
     #[test]
     fn mul_uses_irreducible_relation() {
-        let mut x = NpPoly::zero(); x.0[1] = 1;
-        let mut x_pminus1 = NpPoly::zero(); x_pminus1.0[P - 1] = 1;
+        let mut x = NpPoly::zero();
+        x.0[1] = 1;
+        let mut x_pminus1 = NpPoly::zero();
+        x_pminus1.0[P - 1] = 1;
         let prod = x.mul(&x_pminus1);
         // x · x^{P-1} = x^P = x + 1
         let mut expected = NpPoly::zero();
@@ -315,7 +345,9 @@ mod tests {
             for v in ct.c.0.iter() {
                 assert!(*v >= 0 && *v < Q);
             }
-            if k_enc == k_dec { at_least_one_success = true; }
+            if k_enc == k_dec {
+                at_least_one_success = true;
+            }
         }
         assert!(
             at_least_one_success,

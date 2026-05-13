@@ -125,7 +125,12 @@ pub fn chi_squared_byte_test(stream: &[u8]) -> ChiSquaredReport {
     // 99% critical value of χ²(255) ≈ 310.46.
     let rejected = stat > 310.46;
 
-    ChiSquaredReport { n, statistic: stat, p_value, rejected }
+    ChiSquaredReport {
+        n,
+        statistic: stat,
+        p_value,
+        rejected,
+    }
 }
 
 /// Standard-normal CDF via the Abramowitz–Stegun 26.2.17 formula.
@@ -181,7 +186,11 @@ mod tests {
     fn sha256_passes_chi_squared() {
         let s = sha_stream(2_000);
         let r = chi_squared_byte_test(&s);
-        assert!(!r.rejected, "SHA-256 chi² rejected at α=0.01: stat = {}", r.statistic);
+        assert!(
+            !r.rejected,
+            "SHA-256 chi² rejected at α=0.01: stat = {}",
+            r.statistic
+        );
     }
 
     #[test]
@@ -191,7 +200,11 @@ mod tests {
         let mut s = vec![0u8; 9_000];
         s.extend((0..1_000u32).map(|i| (i & 0xff) as u8));
         let r = chi_squared_byte_test(&s);
-        assert!(r.rejected, "biased stream NOT rejected; stat = {}", r.statistic);
+        assert!(
+            r.rejected,
+            "biased stream NOT rejected; stat = {}",
+            r.statistic
+        );
     }
 
     #[test]

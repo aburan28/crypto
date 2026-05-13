@@ -53,8 +53,8 @@
 
 use super::polynomial::{fr_mul, fr_neg, fr_sub, Poly};
 use crate::bls12_381::fq::scalar_modulus;
-use crate::bls12_381::fq2::Fq2;
 use crate::bls12_381::fq12::Fq12;
+use crate::bls12_381::fq2::Fq2;
 use crate::bls12_381::g1::G1Point;
 use crate::bls12_381::g2::G2Point;
 use crate::bls12_381::pairing::pairing;
@@ -97,7 +97,10 @@ pub fn kzg_insecure_setup(max_degree: usize) -> KzgSrs {
         tau_pow = (&tau_pow * &tau) % &r;
     }
     let g2_powers = vec![g2.clone(), g2.scalar_mul(&tau)];
-    KzgSrs { g1_powers, g2_powers }
+    KzgSrs {
+        g1_powers,
+        g2_powers,
+    }
 }
 
 /// A KZG commitment to a polynomial.
@@ -120,7 +123,9 @@ pub fn kzg_commit(p: &Poly, srs: &KzgSrs) -> KzgCommitment {
     );
     let mut acc = G1Point::Infinity;
     for (i, c) in p.coeffs.iter().enumerate() {
-        if c == &BigUint::from(0u32) { continue; }
+        if c == &BigUint::from(0u32) {
+            continue;
+        }
         acc = acc.add(&srs.g1_powers[i].scalar_mul(c));
     }
     KzgCommitment { point: acc }
@@ -150,7 +155,9 @@ pub fn kzg_open(p: &Poly, z: &BigUint, srs: &KzgSrs) -> (BigUint, KzgProof) {
 fn commit_poly_g1(p: &Poly, srs: &KzgSrs) -> G1Point {
     let mut acc = G1Point::Infinity;
     for (i, c) in p.coeffs.iter().enumerate() {
-        if c.is_zero_fr() { continue; }
+        if c.is_zero_fr() {
+            continue;
+        }
         acc = acc.add(&srs.g1_powers[i].scalar_mul(c));
     }
     acc
@@ -202,11 +209,11 @@ mod tests {
     fn kzg_homomorphic() {
         let srs = kzg_insecure_setup(4);
         let p = Poly::from_coeffs(vec![
-            BigUint::from(1u32), BigUint::from(2u32), BigUint::from(3u32),
+            BigUint::from(1u32),
+            BigUint::from(2u32),
+            BigUint::from(3u32),
         ]);
-        let q = Poly::from_coeffs(vec![
-            BigUint::from(4u32), BigUint::from(5u32),
-        ]);
+        let q = Poly::from_coeffs(vec![BigUint::from(4u32), BigUint::from(5u32)]);
         let c_p = kzg_commit(&p, &srs);
         let c_q = kzg_commit(&q, &srs);
         let c_sum_lhs = c_p.point.add(&c_q.point);
@@ -221,9 +228,7 @@ mod tests {
     #[ignore]
     fn kzg_open_verify_roundtrip() {
         let srs = kzg_insecure_setup(8);
-        let p = Poly::from_coeffs(
-            (1u32..=5).map(BigUint::from).collect(),
-        );
+        let p = Poly::from_coeffs((1u32..=5).map(BigUint::from).collect());
         let z = BigUint::from(3u32);
         let (y, proof) = kzg_open(&p, &z, &srs);
         let commit = kzg_commit(&p, &srs);

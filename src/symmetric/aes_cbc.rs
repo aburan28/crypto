@@ -136,10 +136,7 @@ pub fn aes_cbc_decrypt(input: &[u8], key: &AesKey) -> Option<Vec<u8>> {
 //   varying `C'[14]`, and so on.
 
 /// One block's worth of recovered intermediate state `D = AES_dec(C)`.
-fn recover_intermediate<F: Fn(&[u8]) -> bool>(
-    c_block: &[u8; 16],
-    oracle: &F,
-) -> [u8; 16] {
+fn recover_intermediate<F: Fn(&[u8]) -> bool>(c_block: &[u8; 16], oracle: &F) -> [u8; 16] {
     let mut intermediate = [0u8; 16];
     // Recover bytes 15, 14, ..., 0 (right to left).
     for byte_idx in (0..16usize).rev() {
@@ -191,7 +188,11 @@ pub fn padding_oracle_attack<F>(iv: &[u8; 16], ct: &[u8], oracle: F) -> Vec<u8>
 where
     F: Fn(&[u8]) -> bool,
 {
-    assert_eq!(ct.len() % 16, 0, "ciphertext must be a whole number of blocks");
+    assert_eq!(
+        ct.len() % 16,
+        0,
+        "ciphertext must be a whole number of blocks"
+    );
     let mut plaintext = Vec::with_capacity(ct.len());
     let mut prev_ct: [u8; 16] = *iv;
     for chunk in ct.chunks_exact(16) {
@@ -219,8 +220,8 @@ mod tests {
             b"",
             b"a",
             b"hello",
-            b"0123456789ABCDE",  // 15 bytes — pad with 1 byte 0x01
-            b"0123456789ABCDEF", // 16 bytes — pad with full block of 0x10
+            b"0123456789ABCDE",                 // 15 bytes — pad with 1 byte 0x01
+            b"0123456789ABCDEF",                // 16 bytes — pad with full block of 0x10
             b"0123456789ABCDEF0123456789ABCDE", // 31 bytes
         ];
         for &m in cases {
@@ -314,9 +315,7 @@ mod tests {
         let iv = [0xADu8; 16];
         let secret: &[u8] = b"this plaintext spans multiple AES blocks for the test.";
         let full_ct = aes_cbc_encrypt(secret, &key, &iv);
-        let oracle = |probe: &[u8]| -> bool {
-            aes_cbc_decrypt(probe, &key).is_some()
-        };
+        let oracle = |probe: &[u8]| -> bool { aes_cbc_decrypt(probe, &key).is_some() };
         let iv_ref: &[u8; 16] = full_ct[..16].try_into().unwrap();
         let ct_ref = &full_ct[16..];
         let recovered_padded = padding_oracle_attack(iv_ref, ct_ref, oracle);

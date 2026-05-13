@@ -188,8 +188,10 @@ pub fn p256_negation_rho(
         let (a0, b0) = if restart == 0 {
             (BigInt::one(), BigInt::zero())
         } else {
-            (rng.gen_bigint_range(&BigInt::zero(), n),
-             rng.gen_bigint_range(&BigInt::zero(), n))
+            (
+                rng.gen_bigint_range(&BigInt::zero(), n),
+                rng.gen_bigint_range(&BigInt::zero(), n),
+            )
         };
         let pow_a = pt_scalar_mul(g, &a0, a, p_mod);
         let pow_b = pt_scalar_mul(h, &b0, a, p_mod);
@@ -431,8 +433,10 @@ pub fn hybrid_rho_filter(
         let (a0, b0) = if restart == 0 {
             (BigInt::one(), BigInt::zero())
         } else {
-            (rng.gen_bigint_range(&BigInt::zero(), n),
-             rng.gen_bigint_range(&BigInt::zero(), n))
+            (
+                rng.gen_bigint_range(&BigInt::zero(), n),
+                rng.gen_bigint_range(&BigInt::zero(), n),
+            )
         };
         let p_a = pt_scalar_mul(g, &a0, a, p_mod);
         let p_b = pt_scalar_mul(h, &b0, a, p_mod);
@@ -551,7 +555,11 @@ mod tests {
             let xb = BigInt::from(x);
             let rhs_int = (xb.pow(3) + a * &xb + b) % BigInt::from(p);
             let rhs_int = ((rhs_int + BigInt::from(p)) % BigInt::from(p))
-                .to_u64_digits().1.first().copied().unwrap_or(0);
+                .to_u64_digits()
+                .1
+                .first()
+                .copied()
+                .unwrap_or(0);
             if rhs_int == 0 {
                 count += 1;
                 continue;
@@ -574,12 +582,20 @@ mod tests {
     }
 
     fn is_prime_u64(n: u64) -> bool {
-        if n < 2 { return false; }
-        if n < 4 { return true; }
-        if n % 2 == 0 { return false; }
+        if n < 2 {
+            return false;
+        }
+        if n < 4 {
+            return true;
+        }
+        if n % 2 == 0 {
+            return false;
+        }
         let mut d = 3u64;
         while d.saturating_mul(d) <= n {
-            if n % d == 0 { return false; }
+            if n % d == 0 {
+                return false;
+            }
             d += 2;
         }
         true
@@ -590,7 +606,9 @@ mod tests {
         for x in 0..p_u {
             let xb = BigInt::from(x);
             let rhs = mod_pos(xb.pow(3) + a * &xb + b, p);
-            if rhs.is_zero() { continue; }
+            if rhs.is_zero() {
+                continue;
+            }
             for y in 1..p_u {
                 let yb = BigInt::from(y);
                 if mod_pos(yb.pow(2), p) == rhs {
@@ -614,8 +632,8 @@ mod tests {
             max_restarts: 32,
             seed: Some(0xC0FFEE),
         };
-        let sol = p256_negation_rho(&g, &h, &a, &p_mod, &n, &opts)
-            .expect("negation rho should recover");
+        let sol =
+            p256_negation_rho(&g, &h, &a, &p_mod, &n, &opts).expect("negation rho should recover");
         // Recovered d must satisfy d·G = h on this curve.
         let d_rec_bi = sol.d.to_bigint().unwrap();
         let check = pt_scalar_mul(&g, &d_rec_bi, &a, &p_mod);
@@ -665,13 +683,25 @@ mod tests {
                 Pt2::Aff(rx, _) => rx.to_biguint().unwrap() % &n_u,
                 Pt2::Inf => continue,
             };
-            if r.is_zero() { continue; }
+            if r.is_zero() {
+                continue;
+            }
             // Pick a random z and derive s = k⁻¹ (z + r·d) mod n.
-            let z = rng.gen_bigint_range(&BigInt::zero(), &n).to_biguint().unwrap();
+            let z = rng
+                .gen_bigint_range(&BigInt::zero(), &n)
+                .to_biguint()
+                .unwrap();
             let k_inv = mod_inverse(&k_u, &n_u).unwrap();
             let s = (&k_inv * (&z + &r * &d_planted)) % &n_u;
-            if s.is_zero() { continue; }
-            transcript.push(P256TranscriptEntry { r, s, z, k_bits: bias_bits });
+            if s.is_zero() {
+                continue;
+            }
+            transcript.push(P256TranscriptEntry {
+                r,
+                s,
+                z,
+                k_bits: bias_bits,
+            });
         }
 
         // Filter check: correct d should pass.
@@ -700,8 +730,13 @@ mod tests {
         let mut wrong_rejected = 0u32;
         let mut wrong_total = 0u32;
         for _ in 0..1000 {
-            let wrong_d = rng.gen_bigint_range(&BigInt::one(), &n).to_biguint().unwrap();
-            if wrong_d == d_planted { continue; }
+            let wrong_d = rng
+                .gen_bigint_range(&BigInt::one(), &n)
+                .to_biguint()
+                .unwrap();
+            if wrong_d == d_planted {
+                continue;
+            }
             wrong_total += 1;
             let mut all_pass_w = true;
             for (a_i, t_i, k_bits_i) in &precomp {
@@ -720,12 +755,15 @@ mod tests {
         println!("=== Hybrid filter selectivity test ===");
         println!(
             "  Bias: {} bits per sig, {} sigs ⇒ filter info: {} bits",
-            n_bits - bias_bits, transcript.len(),
+            n_bits - bias_bits,
+            transcript.len(),
             (n_bits - bias_bits) as u64 * transcript.len() as u64
         );
         println!(
             "  Wrong-candidate rejection rate: {:.1}% ({}/{})",
-            rejection_rate * 100.0, wrong_rejected, wrong_total
+            rejection_rate * 100.0,
+            wrong_rejected,
+            wrong_total
         );
         // The filter should reject ≥ 50% of wrong candidates at this
         // bias level (8 sigs · 2 bits = 16 bits of filter info, on
@@ -756,13 +794,25 @@ mod tests {
                 Pt2::Aff(rx, _) => rx.to_biguint().unwrap() % &n_u,
                 Pt2::Inf => continue,
             };
-            if r.is_zero() { continue; }
-            let z = rng.gen_bigint_range(&BigInt::zero(), &n).to_biguint().unwrap();
+            if r.is_zero() {
+                continue;
+            }
+            let z = rng
+                .gen_bigint_range(&BigInt::zero(), &n)
+                .to_biguint()
+                .unwrap();
             let k_inv = mod_inverse(&k_u, &n_u).unwrap();
             let s = (&k_inv * (&z + &r * &d_planted)) % &n_u;
-            if s.is_zero() { continue; }
+            if s.is_zero() {
+                continue;
+            }
             // Lie about k_bits: claim full entropy (no bias).
-            transcript.push(P256TranscriptEntry { r, s, z, k_bits: n_bits });
+            transcript.push(P256TranscriptEntry {
+                r,
+                s,
+                z,
+                k_bits: n_bits,
+            });
         }
         let opts = P256RhoOptions {
             max_iterations: 5_000,

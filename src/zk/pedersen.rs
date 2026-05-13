@@ -107,10 +107,8 @@ pub fn pedersen_second_generator(curve: &CurveParams) -> Point {
 
     // Try x_candidate, x_candidate+1, ... until we find an on-curve point.
     for _ in 0..1024 {
-        let rhs_value = (x_candidate.modpow(&three, &curve.p)
-            + &curve.a * &x_candidate
-            + &curve.b)
-            % &curve.p;
+        let rhs_value =
+            (x_candidate.modpow(&three, &curve.p) + &curve.a * &x_candidate + &curve.b) % &curve.p;
         // Test if rhs is a QR mod p via Euler: rhs^((p-1)/2) mod p.
         let p_minus_1_over_2 = (&curve.p - BigUint::one()) / &two;
         let euler = rhs_value.modpow(&p_minus_1_over_2, &curve.p);
@@ -170,10 +168,7 @@ fn push_be32(out: &mut Vec<u8>, v: &BigUint) {
 
 /// **Commit** to a message `m` with fresh random blinding `r`.
 /// Returns `(commitment, r)` so the caller can later open.
-pub fn pedersen_commit(
-    m: &BigUint,
-    params: &PedersenParams,
-) -> (PedersenCommitment, BigUint) {
+pub fn pedersen_commit(m: &BigUint, params: &PedersenParams) -> (PedersenCommitment, BigUint) {
     let mut rng = OsRng;
     let r = rng.gen_biguint_below(&params.curve.n);
     let c = pedersen_commit_with_blinding(m, &r, params);
@@ -219,7 +214,12 @@ mod tests {
         for curve in [CurveParams::secp256k1(), CurveParams::p256()] {
             let h = pedersen_second_generator(&curve);
             assert!(curve.is_on_curve(&h), "H must be on curve {}", curve.name);
-            assert_ne!(h, curve.generator(), "H must differ from G on {}", curve.name);
+            assert_ne!(
+                h,
+                curve.generator(),
+                "H must differ from G on {}",
+                curve.name
+            );
         }
     }
 

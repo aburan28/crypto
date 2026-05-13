@@ -540,7 +540,11 @@ mod tests {
         )
         .unwrap();
         assert!(s.is_bijective());
-        assert_eq!(s.differential_uniformity(), 4, "Serpent S0 should have DU=4");
+        assert_eq!(
+            s.differential_uniformity(),
+            4,
+            "Serpent S0 should have DU=4"
+        );
         // 4/16 = 0.25.
         assert!((s.max_differential_probability() - 0.25).abs() < 1e-9);
         // For 4-bit S-boxes: NL ∈ {0, 2, 4}; Serpent's S-boxes hit the optimum 4.
@@ -585,8 +589,12 @@ mod tests {
 
     #[test]
     fn lat_consistent_with_walsh() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         assert!(s.lat_matches_walsh());
     }
 
@@ -602,8 +610,12 @@ mod tests {
 
     #[test]
     fn report_shape() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let r = s.report();
         assert_eq!(r.n_in, 4);
         assert_eq!(r.n_out, 4);
@@ -620,8 +632,12 @@ mod tests {
     /// Trivial corners: `BCT[a][0] = BCT[0][b] = 2^n` regardless of S.
     #[test]
     fn bct_trivial_corners() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let bct = s.bct().expect("bijective");
         let n = 16u32;
         for a in 0..16 {
@@ -633,8 +649,12 @@ mod tests {
     /// `BCT[a][b] ≥ DDT[a][b]` for all `(a, b)` — Cid et al., Theorem 1.
     #[test]
     fn bct_dominates_ddt() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let ddt = s.ddt();
         let bct = s.bct().expect("bijective");
         for a in 0..16 {
@@ -697,8 +717,12 @@ mod tests {
     /// Trivial corners: `DLCT[0][λ] = DLCT[Δ][0] = 2^(n-1)`.
     #[test]
     fn dlct_trivial_corners() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let dlct = s.dlct();
         let half: i32 = 8;
         for i in 0..16 {
@@ -711,8 +735,12 @@ mod tests {
     /// trivial corners.
     #[test]
     fn dlct_bounded_by_half() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let dlct = s.dlct();
         for row in &dlct {
             for &v in row {
@@ -727,16 +755,20 @@ mod tests {
     /// (active vs inactive on the whole input/output).
     #[test]
     fn truncated_ddt_full_lane_2x2() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let t = s.truncated_ddt(4).unwrap();
         assert_eq!(t.len(), 2);
         assert_eq!(t[0].len(), 2);
         // Δ = 0 → b = 0 always; corresponds to t[0][0] = 16.
         assert_eq!(t[0][0], 16);
         assert_eq!(t[0][1], 0); // Δ = 0 cannot yield non-zero b.
-        // Δ ≠ 0: 15 input differences × 16 inputs = 240 total.  All
-        // produce non-zero output difference iff S is bijective.
+                                // Δ ≠ 0: 15 input differences × 16 inputs = 240 total.  All
+                                // produce non-zero output difference iff S is bijective.
         assert_eq!(t[1][0], 0, "non-zero Δ on a bijective S can't give b=0");
         assert_eq!(t[1][1], 15 * 16);
     }
@@ -746,8 +778,12 @@ mod tests {
     /// Therefore total = `2^(2 n_in)`.
     #[test]
     fn truncated_ddt_total_count() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         let t = s.truncated_ddt(2).unwrap();
         let total: u64 = t.iter().flat_map(|r| r.iter()).map(|&c| c as u64).sum();
         assert_eq!(total, 16 * 16, "must equal 2^(2 n_in) = 256");
@@ -755,8 +791,12 @@ mod tests {
 
     #[test]
     fn truncated_ddt_rejects_indivisible_lane() {
-        let s = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12])
-            .unwrap();
+        let s = Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap();
         assert!(s.truncated_ddt(3).is_err()); // 4 % 3 ≠ 0
         assert!(s.truncated_ddt(0).is_err());
     }

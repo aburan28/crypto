@@ -246,7 +246,11 @@ impl QState {
                 norm_sq += self.amps[state].norm_sq();
             }
         }
-        let inv = if norm_sq > 0.0 { 1.0 / norm_sq.sqrt() } else { 0.0 };
+        let inv = if norm_sq > 0.0 {
+            1.0 / norm_sq.sqrt()
+        } else {
+            0.0
+        };
         for amp in &mut self.amps {
             *amp = amp.scale(inv);
         }
@@ -306,12 +310,7 @@ fn cf_convergents(mut num: u64, mut den: u64, max_q: u64) -> Vec<(u64, u64)> {
 /// `precision_qubits` is the size of the QPE register; should be
 /// `≥ 2·⌈log₂(n)⌉` for high success probability.  Total simulation
 /// qubits = `precision_qubits + ⌈log₂(n)⌉`.
-pub fn shor_order_find(
-    a: u64,
-    n: u64,
-    precision_qubits: usize,
-    rng_seed: u64,
-) -> Option<u64> {
+pub fn shor_order_find(a: u64, n: u64, precision_qubits: usize, rng_seed: u64) -> Option<u64> {
     if n.gcd(&a) != 1 {
         return None;
     }
@@ -324,11 +323,16 @@ pub fn shor_order_find(
         q.apply_h(i);
     }
     // U_f: |x⟩|0⟩ → |x⟩|a^x mod n⟩.
-    q.apply_function(nx, ny, |x| crate::utils::mod_pow(
-        &num_bigint::BigUint::from(a),
-        &num_bigint::BigUint::from(x),
-        &num_bigint::BigUint::from(n),
-    ).iter_u64_digits().next().unwrap_or(0));
+    q.apply_function(nx, ny, |x| {
+        crate::utils::mod_pow(
+            &num_bigint::BigUint::from(a),
+            &num_bigint::BigUint::from(x),
+            &num_bigint::BigUint::from(n),
+        )
+        .iter_u64_digits()
+        .next()
+        .unwrap_or(0)
+    });
     // QFT on precision register.
     q.apply_qft(nx);
     // Measure precision register.
@@ -387,7 +391,9 @@ pub fn shor_factor(n: u64, max_retries: u32, mut rng_seed: u64) -> Option<u64> {
         // Try up to `max_retries` quantum order-finding runs.
         let nx = 8.max(2 * ((64 - n.leading_zeros()) as usize));
         for _attempt in 0..max_retries {
-            rng_seed = rng_seed.wrapping_mul(0x9E37_79B9_7F4A_7C15).wrapping_add(0xCAFE);
+            rng_seed = rng_seed
+                .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+                .wrapping_add(0xCAFE);
             let r = match shor_order_find(a, n, nx, rng_seed) {
                 Some(r) => r,
                 None => continue,
@@ -431,7 +437,11 @@ mod tests {
         let convs = cf_convergents(7, 15, 100);
         // Should include the convergent 1/2 (a fairly accurate approximation).
         let has_half = convs.iter().any(|&(p, q)| p == 1 && q == 2);
-        assert!(has_half, "expected 1/2 convergent for 7/15; got {:?}", convs);
+        assert!(
+            has_half,
+            "expected 1/2 convergent for 7/15; got {:?}",
+            convs
+        );
     }
 
     /// QFT followed by inverse QFT (= QFT applied 3 more times for an
