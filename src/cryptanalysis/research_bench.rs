@@ -59,11 +59,14 @@
 use crate::cryptanalysis::ec_index_calculus::{
     ec_index_calculus_dlp, pollard_rho_ecdlp,
 };
-use crate::cryptanalysis::ec_index_calculus_j0::j0_index_calculus_dlp;
+use crate::cryptanalysis::ec_index_calculus_j0::{
+    eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
+};
+use crate::cryptanalysis::j0_twists::enumerate_twists;
 use crate::ecc::curve::CurveParams;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
-use num_traits::Zero;
+use num_traits::{One, Zero};
 use std::ops::Range;
 use std::time::Instant;
 
@@ -240,10 +243,11 @@ pub fn format_report(h: &dyn Hypothesis, results: &[ExperimentResult]) -> String
 /// pre-computed offline (via Python search) so the bench is
 /// deterministic and reproducible.
 pub fn bench_curves() -> Vec<(u32, CurveParams)> {
-    // (log₂ n, curve params).
+    // (log₂ n, curve params).  Pre-computed offline so the bench is
+    // reproducible.
     vec![
         (
-            7, // log₂(67) ≈ 6.07; closest power of 2 ≤ 7
+            7, // log₂(67) ≈ 6.07
             CurveParams {
                 name: "bench-8bit",
                 p: BigUint::from(59u32),
@@ -256,7 +260,7 @@ pub fn bench_curves() -> Vec<(u32, CurveParams)> {
             },
         ),
         (
-            10, // log₂(823) ≈ 9.68
+            10,
             CurveParams {
                 name: "bench-10bit",
                 p: BigUint::from(827u32),
@@ -269,7 +273,7 @@ pub fn bench_curves() -> Vec<(u32, CurveParams)> {
             },
         ),
         (
-            12, // log₂(3889) ≈ 11.93
+            12,
             CurveParams {
                 name: "bench-12bit",
                 p: BigUint::from(3907u32),
@@ -282,7 +286,7 @@ pub fn bench_curves() -> Vec<(u32, CurveParams)> {
             },
         ),
         (
-            14, // log₂(16231) ≈ 13.98
+            14,
             CurveParams {
                 name: "bench-14bit",
                 p: BigUint::from(16187u32),
@@ -295,7 +299,7 @@ pub fn bench_curves() -> Vec<(u32, CurveParams)> {
             },
         ),
         (
-            16, // log₂(65003) ≈ 15.99
+            16,
             CurveParams {
                 name: "bench-16bit",
                 p: BigUint::from(65353u32),
@@ -304,6 +308,33 @@ pub fn bench_curves() -> Vec<(u32, CurveParams)> {
                 gx: BigUint::from(1u32),
                 gy: BigUint::from(15165u32),
                 n: BigUint::from(65003u32),
+                h: 1,
+            },
+        ),
+        // ── Pushed: bigger curves so the asymptotic regime manifests. ──
+        (
+            18,
+            CurveParams {
+                name: "bench-18bit",
+                p: BigUint::from(261847u32),
+                a: BigUint::from(3u32),
+                b: BigUint::from(2u32),
+                gx: BigUint::from(2u32),
+                gy: BigUint::from(4u32),
+                n: BigUint::from(261673u32),
+                h: 1,
+            },
+        ),
+        (
+            20,
+            CurveParams {
+                name: "bench-20bit",
+                p: BigUint::from(1048291u32),
+                a: BigUint::from(1u32),
+                b: BigUint::from(11u32),
+                gx: BigUint::from(1u32),
+                gy: BigUint::from(123004u32),
+                n: BigUint::from(1046999u32),
                 h: 1,
             },
         ),
@@ -332,7 +363,7 @@ impl Hypothesis for PollardRhoEcdlp {
         Some(0.5)
     }
     fn scale_range(&self) -> Range<u32> {
-        7..17
+        7..21 // up to 20-bit curves — asymptotic regime starts to show
     }
     fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
         let curves = bench_curves();
@@ -547,6 +578,33 @@ pub fn bench_curves_j0() -> Vec<(u32, CurveParams)> {
                 h: 1,
             },
         ),
+        // ── Pushed: bigger j=0 curves so the asymptotic regime manifests ──
+        (
+            18, // n = 262657
+            CurveParams {
+                name: "j0-bench-18bit",
+                p: BigUint::from(262147u32),
+                a: BigUint::zero(),
+                b: BigUint::from(2u32),
+                gx: BigUint::from(2u32),
+                gy: BigUint::from(103214u32),
+                n: BigUint::from(262657u32),
+                h: 1,
+            },
+        ),
+        (
+            20, // n = 1047379
+            CurveParams {
+                name: "j0-bench-20bit",
+                p: BigUint::from(1048609u32),
+                a: BigUint::zero(),
+                b: BigUint::from(29u32),
+                gx: BigUint::from(1u32),
+                gy: BigUint::from(245324u32),
+                n: BigUint::from(1047379u32),
+                h: 1,
+            },
+        ),
     ]
 }
 
@@ -577,7 +635,7 @@ impl Hypothesis for J0OrbitIcEcdlp {
         Some(1.5)
     }
     fn scale_range(&self) -> Range<u32> {
-        6..13
+        6..15 // include 14-bit j=0 curve for stronger regression
     }
     fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
         let curves = bench_curves_j0();
@@ -641,93 +699,210 @@ impl Hypothesis for J0OrbitIcEcdlp {
     }
 }
 
-/// **PLACEHOLDER — Eisenstein-smoothness factor base on j=0 curves.**
+/// **Eisenstein-smoothness factor base on j=0 curves** — IMPLEMENTED.
 ///
-/// The third speculative direction from the earlier conversation.  The
-/// idea: define a factor base of points whose x-coordinate is the
-/// image of a small Eisenstein integer `α + β·ω ∈ ℤ[ζ₆]` under the
-/// map `ω ↦ ω_p` (the primitive cube root of unity in `F_p`).  The
-/// hope: maybe ℤ[ζ₆]-smoothness gives a multiplicatively-meaningful
-/// notion of "small" curve points that beats the generic "small
-/// x-coordinate" factor base.
+/// The third speculative direction from the j=0 cryptanalysis
+/// discussion: build the factor base by enumerating Eisenstein
+/// integers `α = u + v·ω ∈ ℤ[ω]` with bounded norm
+/// `N(α) = u² − uv + v² ≤ B²`, mapping them to `F_p` via
+/// `α ↦ (u + v·ω_p) mod p`, and using those as the candidate
+/// x-coordinates.
 ///
-/// **Status**: not implemented.  The concrete formulation is unclear
-/// because point addition on the curve doesn't respect any
-/// multiplicative structure on x-coordinates; the Eisenstein-integer
-/// structure lives in the endomorphism ring acting on the GROUP, not
-/// on the coordinate space.  Implementing this would require either
-/// (a) finding a non-obvious "Eisenstein-multiplicative" structure
-/// on the curve, or (b) accepting that the factor base is just
-/// another way to pick ≈ B² points and measuring whether it
-/// nonetheless helps in practice.
+/// **Why this is a different sample** than the generic
+/// "smallest-x factor base" `{1, …, B}`:
+/// 1. The Eisenstein lattice covers `F_p` anisotropically — sampling
+///    is dense near small `(u, v)` but spread across the field.
+/// 2. The map `ω ↦ ω_p` ties the FB to the *endomorphism-ring action*
+///    of `ψ` on the curve.  If the FB has any orbit structure under
+///    `ψ`, the relations should reflect it.
 ///
-/// Registered here as a stub so the bench correctly reports the
-/// research direction as "not falsified, but also not tested."
+/// **Theoretical exponent**: same asymptotic class as generic IC
+/// (`α = 1.5` for 2-decomposition).  The Eisenstein FB has size
+/// `~ π/√3 · B²`, basically the same density as `{1, …, B}` so the
+/// optimal `B = √p` is unchanged.
+///
+/// **Falsifiability target**: does the measured exponent at toy scale
+/// come out **below** the generic IC's measured `α ≈ 0.76`?  If yes,
+/// the lattice sampling has a real practical effect.  If no, the
+/// speculation is falsified — no measurable advantage over generic.
 pub struct EisensteinSmoothJ0Ic;
 
 impl Hypothesis for EisensteinSmoothJ0Ic {
     fn name(&self) -> &str {
-        "Eisenstein-smoothness factor base (j=0) — not implemented"
+        "Eisenstein-smoothness factor base (j=0)"
     }
     fn description(&self) -> &str {
-        "Speculative: factor base of points whose x-coords are images of small Eisenstein integers. Concrete formulation unclear; documented here for future work."
+        "Factor base of points whose x-coords are images of small Eisenstein integers u + v·ω with norm bounded by B²."
     }
     fn theoretical_complexity(&self) -> &str {
-        "unknown — would need to be derived"
+        "O(p^{3/2}) — same class as generic IC; conjecture: smaller prefactor via Eisenstein-lattice sampling"
     }
     fn theoretical_exponent(&self) -> Option<f64> {
-        None
+        Some(1.5)
     }
     fn scale_range(&self) -> Range<u32> {
-        0..0 // empty range; bench skips
+        6..15 // include 14-bit j=0 curve for stronger regression
     }
     fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
-        ExperimentResult {
-            problem_size_log2,
-            elapsed_ms: 0,
-            succeeded: false,
-            notes: "not implemented — placeholder for future research".into(),
+        let curves = bench_curves_j0();
+        let curve = match curves
+            .into_iter()
+            .find(|(bits, _)| *bits == problem_size_log2)
+        {
+            Some((_, c)) => c,
+            None => {
+                return ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: 0,
+                    succeeded: false,
+                    notes: "no j=0 bench curve at this size".into(),
+                }
+            }
+        };
+        let g = curve.generator();
+        let a_fe = curve.a_fe();
+        let x_truth = random_scalar(&curve.n);
+        if x_truth.is_zero() {
+            return ExperimentResult {
+                problem_size_log2,
+                elapsed_ms: 0,
+                succeeded: false,
+                notes: "x_truth = 0".into(),
+            };
+        }
+        let q_point = g.scalar_mul(&x_truth, &a_fe);
+        // Norm-bound `B`: pick so the FB has roughly p^{1/2} entries,
+        // matching the IC optimum.  For p ~ 2^bits, B ~ 2^(bits/4) is
+        // a starting heuristic; cap at 24 so the enumeration stays cheap.
+        let norm_bound = (1u32 << (problem_size_log2 / 4 + 2)).min(24);
+        let extra = 6;
+        let max_trials = (1usize << (problem_size_log2 + 4)).min(60_000);
+        let t0 = Instant::now();
+        let recovered = eisenstein_smooth_ic_dlp(
+            &curve,
+            &g,
+            &q_point,
+            norm_bound,
+            extra,
+            max_trials,
+        );
+        let elapsed = t0.elapsed().as_millis();
+        match recovered {
+            Some(r) => {
+                let recheck = g.scalar_mul(&r, &a_fe);
+                let ok = recheck == q_point;
+                ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: elapsed,
+                    succeeded: ok,
+                    notes: format!("B={}, x_truth={}", norm_bound, x_truth),
+                }
+            }
+            None => ExperimentResult {
+                problem_size_log2,
+                elapsed_ms: elapsed,
+                succeeded: false,
+                notes: format!("Eisenstein IC failed at B={}", norm_bound),
+            },
         }
     }
 }
 
-/// **PLACEHOLDER — Twists + Weil descent on j=0.**
+/// **Twists + Weil descent on j=0: stage 1 — 6-twist enumeration**.
 ///
-/// The first speculative direction from the earlier conversation.
-/// The idea: lift a j=0 curve to its 6 twists over `F_p`, then to
-/// `F_{p⁶}` where all 6 twists become isomorphic, then run Weil
-/// descent on the unified curve to drop ECDLP into a higher-genus
-/// Jacobian over `F_p` where index calculus works.
+/// The first speculative direction from the j=0 cryptanalysis
+/// discussion.  The full attack chain would be:
 ///
-/// **Status**: not implemented.  Would need ~1500+ LoC: explicit
-/// twist enumeration, F_{p⁶} arithmetic, trace-zero variety
-/// construction, Weil-descent reduction, and a higher-genus index
-/// calculus.  Almost certainly hits Diem's hardness bounds on the
-/// resulting Jacobian, but the analysis is nontrivial.
+/// 1. Enumerate the 6 sextic twists of `E: y² = x³ + b` over `F_p`.
+/// 2. Each twist has a different point count `n_i = p + 1 − a_i`,
+///    with `Σ a_i = 0` (the six Frobenius traces sum to zero).
+/// 3. **If any twist has a smooth order**, an invalid-curve attack
+///    leaks the scalar via Pohlig–Hellman on that twist (≈ √max_q
+///    work per remaining prime power, vastly less than `O(√p)`).
+/// 4. **Otherwise**, lift to `F_{p⁶}` where all 6 twists become
+///    isomorphic, run Weil descent into a higher-genus Jacobian
+///    over `F_p`, and apply index calculus there.  This last step
+///    is the hard part — ~1500 LoC of `F_{p⁶}` arithmetic, trace-
+///    zero variety construction, descent, higher-genus IC.
+///
+/// **This bench measures stage 1**: enumerate twists and look for
+/// smoothness.  The measured "elapsed time" is the cost of running
+/// the enumeration + factoring all 6 orders.  Success means we found
+/// a twist with all prime factors below `√n` — actionable as an
+/// invalid-curve attack.
+///
+/// **Theoretical exponent for stage 1**: `α = 1.0`.  The dominant
+/// cost is 6 naive O(p) point counts.  In `n = p + O(√p)` units,
+/// `time ∝ p ∝ n`.
 pub struct WeilDescentJ0;
 
 impl Hypothesis for WeilDescentJ0 {
     fn name(&self) -> &str {
-        "Twists + Weil descent on j=0 — not implemented"
+        "Twists + Weil descent on j=0 — stage 1 (twist enumeration)"
     }
     fn description(&self) -> &str {
-        "Speculative: lift the 6 twists of a j=0 curve to F_{p^6}, run Weil descent into a higher-genus Jacobian where index calculus works."
+        "Enumerate the 6 sextic twists of a j=0 curve, naive-count each, factorise orders, flag smooth twists as invalid-curve vulnerabilities."
     }
     fn theoretical_complexity(&self) -> &str {
-        "unknown — likely Diem-bounded at the Jacobian level"
+        "O(p) for 6 naive point counts; success = at least one twist has smooth order"
     }
     fn theoretical_exponent(&self) -> Option<f64> {
-        None
+        Some(1.0)
     }
     fn scale_range(&self) -> Range<u32> {
-        0..0
+        6..19 // 18 bits is feasible (~3s naive count × 6); 20+ slow
     }
     fn run_at_scale(&self, problem_size_log2: u32) -> ExperimentResult {
-        ExperimentResult {
-            problem_size_log2,
-            elapsed_ms: 0,
-            succeeded: false,
-            notes: "not implemented — placeholder for future research".into(),
+        let curves = bench_curves_j0();
+        let curve = match curves
+            .into_iter()
+            .find(|(bits, _)| *bits == problem_size_log2)
+        {
+            Some((_, c)) => c,
+            None => {
+                return ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: 0,
+                    succeeded: false,
+                    notes: "no j=0 bench curve at this size".into(),
+                }
+            }
+        };
+        let t0 = Instant::now();
+        let twists = enumerate_twists(&curve.p, &curve.b);
+        let elapsed = t0.elapsed().as_millis();
+        match twists {
+            Some(ts) => {
+                // "Success" = at least one twist has max prime factor below
+                // ~ p^{1/3}, which would make Pohlig-Hellman trivially
+                // faster than rho on the base curve.
+                let bound = {
+                    let p_f = curve.p.bits() as f64;
+                    let cutoff_bits = (p_f / 3.0).max(8.0) as u32;
+                    1u64 << cutoff_bits.min(20)
+                };
+                let any_smooth = ts.iter().any(|t| t.is_smooth(bound));
+                let smoothest = ts
+                    .iter()
+                    .min_by_key(|t| t.max_prime_factor.clone())
+                    .map(|t| t.max_prime_factor.to_str_radix(10))
+                    .unwrap_or_else(|| "?".into());
+                ExperimentResult {
+                    problem_size_log2,
+                    elapsed_ms: elapsed,
+                    succeeded: any_smooth,
+                    notes: format!(
+                        "min(max_prime over 6 twists) = {} (smoothness bound = {})",
+                        smoothest, bound
+                    ),
+                }
+            }
+            None => ExperimentResult {
+                problem_size_log2,
+                elapsed_ms: elapsed,
+                succeeded: false,
+                notes: "p ≢ 1 mod 6, no sextic twist family".into(),
+            },
         }
     }
 }
@@ -753,13 +928,14 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
     let j0_results = run_hypothesis(&j0, samples_per_scale);
     out.push_str(&format_report(&j0, &j0_results));
     out.push('\n');
-    // Placeholders: render their description so the report explicitly
-    // says "we considered this direction and did not test it yet."
+    // Speculative directions, now implemented at stage 1.
     let eisenstein = EisensteinSmoothJ0Ic;
-    out.push_str(&format_report(&eisenstein, &[]));
+    let eisenstein_results = run_hypothesis(&eisenstein, samples_per_scale);
+    out.push_str(&format_report(&eisenstein, &eisenstein_results));
     out.push('\n');
     let weil = WeilDescentJ0;
-    out.push_str(&format_report(&weil, &[]));
+    let weil_results = run_hypothesis(&weil, samples_per_scale);
+    out.push_str(&format_report(&weil, &weil_results));
     out.push('\n');
     out.push_str("---\n\n");
     out.push_str("## Cross-hypothesis comparison\n\n");
@@ -770,6 +946,8 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
         ("Pollard ρ ECDLP", 0.5, &rho_results),
         ("IC 2-decomp (generic)", 1.5, &ic_results),
         ("IC 2-decomp (j=0 orbit-reduced)", 1.5, &j0_results),
+        ("Eisenstein-smooth IC (j=0)", 1.5, &eisenstein_results),
+        ("Weil-descent stage 1 (twist enum)", 1.0, &weil_results),
     ] {
         let measured = log_log_fit(results)
             .map(|f| format!("{:.3}", f.measured_exponent))
@@ -794,12 +972,14 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
     }
     out.push_str("\n");
     out.push_str(
-        "**Direction #1** (Weil descent on twists of j=0): placeholder, \
-         not implemented.\n",
+        "**Direction #1** (Weil descent on twists of j=0): stage 1 \
+         implemented — twist enumeration + smoothness detection.  Full \
+         Weil-descent chain to `F_{p⁶}` deferred (~1500 LoC).\n",
     );
     out.push_str(
-        "**Direction #3** (Eisenstein-smoothness factor base): placeholder, \
-         not implemented — concrete formulation unclear.\n",
+        "**Direction #3** (Eisenstein-smoothness factor base): implemented \
+         as `EisensteinSmoothJ0Ic`.  Concrete formulation: FB built from \
+         lattice points `u + v·ω` with `N(u + v·ω) ≤ B²`.\n",
     );
     out
 }
@@ -900,6 +1080,36 @@ mod tests {
             assert!(
                 curve.is_on_curve(&curve.generator()),
                 "{}-bit curve {} generator off curve",
+                bits,
+                curve.name,
+            );
+        }
+    }
+
+    /// **j=0 bench curves are valid**: same for the j-invariant 0
+    /// curve set used by the orbit-IC, Eisenstein-IC, and twist-enum
+    /// hypotheses.
+    #[test]
+    fn bench_curves_j0_are_valid() {
+        for (bits, curve) in bench_curves_j0() {
+            assert!(
+                curve.a.is_zero(),
+                "{}-bit j=0 curve {} has a ≠ 0",
+                bits,
+                curve.name,
+            );
+            assert!(
+                curve.is_on_curve(&curve.generator()),
+                "{}-bit j=0 curve {} generator off curve",
+                bits,
+                curve.name,
+            );
+            // p ≡ 1 (mod 6) so the full order-6 automorphism group is
+            // rational over F_p (this is what gives us the 6 twists).
+            assert_eq!(
+                &curve.p % BigUint::from(6u32),
+                BigUint::one(),
+                "{}-bit j=0 curve {} has p ≢ 1 mod 6",
                 bits,
                 curve.name,
             );

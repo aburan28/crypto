@@ -90,7 +90,8 @@
 //!   Semaev-polynomial Gröbner basis cost across curve families.
 
 use crate::cryptanalysis::ec_index_calculus::{
-    gaussian_eliminate_mod_n, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
+    find_one_relation, gaussian_eliminate_mod_n, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
+    FactorBaseEntry,
 };
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
@@ -493,6 +494,168 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
     }
 }
 
+// ── Eisenstein-smooth factor base for j=0 IC ─────────────────────────
+//
+// The third speculative direction from the j=0 cryptanalysis
+// discussion: rather than picking factor-base x-coordinates from the
+// integers `{1, 2, …, B}` of `F_p`, sample x's as **images of small
+// Eisenstein integers** under the ring homomorphism
+//
+//     ℤ[ω] → 𝔽_p,    ω ↦ ω_p
+//
+// where `ω_p ∈ 𝔽_p` is the unique primitive cube root of unity (well-
+// defined when `p ≡ 1 (mod 3)`, which holds for every j=0 curve with
+// a rational order-3 automorphism).  Concretely, an Eisenstein
+// integer `α = u + v·ω` of norm `N(α) = u² − uv + v²` lifts to
+// `x_α = (u + v·ω_p) mod p`.
+//
+// **Asymptotic claim**: the FB size grows as the count of lattice
+// points with `N(α) ≤ B²`, which is `~ π/√3 · B²`.  This is
+// effectively the same `O(B²)` density-in-p as the generic FB
+// `{1, …, B}`, so the IC complexity class is identical: `O(p^{3/2})`
+// in measured `α`.
+//
+// **Falsifiability target**: at toy scale, does the measured `α`
+// (or the prefactor) come out **lower** than generic IC's measured
+// `α ≈ 0.76`?  If yes, we have empirical evidence that the lattice
+// sampling pattern interacts non-trivially with the Semaev-S₃
+// decomposition probability.  If no, the speculation is falsified —
+// the Eisenstein lattice gives no measurable advantage.
+
+/// **Build the Eisenstein-smooth factor base** for a j-invariant 0
+/// curve.  Enumerate Eisenstein integers `α = u + v·ω` with
+/// `N(α) = u² − uv + v² ≤ norm_bound²`, map them to
+/// `x_α = (u + v·ω_p) mod p`, and keep those whose image is on the
+/// curve (`x_α³ + b` is a QR mod p).
+///
+/// Deduplicates by x-coordinate to avoid double-counting orbit
+/// members (since `u + v·ω` and `(u + v·ω) · ω` have related but
+/// distinct x-images that may both land in the enumeration grid).
+///
+/// Returns an empty list if `curve` is not j=0 or `p ≢ 1 (mod 3)`.
+pub fn build_eisenstein_factor_base(
+    curve: &CurveParams,
+    norm_bound: u32,
+) -> Vec<FactorBaseEntry> {
+    if !is_j_invariant_zero(curve) {
+        return Vec::new();
+    }
+    let zeta_val = match cube_root_of_unity(&curve.p) {
+        Some(z) => z,
+        None => return Vec::new(),
+    };
+    let p = &curve.p;
+    let b_norm_sq = (norm_bound as i64) * (norm_bound as i64);
+    let b = norm_bound as i64;
+    let mut seen_x: HashMap<BigUint, ()> = HashMap::new();
+    let mut out: Vec<FactorBaseEntry> = Vec::new();
+    // Enumerate the fundamental cone `u ≥ 0` (the orbit `α, ω·α, ω²·α`
+    // covers all of ℤ[ω]).  For each (u, v), check norm bound, then
+    // map and test curve membership.
+    for u in 0..=b {
+        for v in -b..=b {
+            // Norm of Eisenstein integer (positive-definite):
+            //   N(u + v·ω) = u² − uv + v².
+            let nm = u * u - u * v + v * v;
+            if nm <= 0 || nm > b_norm_sq {
+                continue;
+            }
+            // Build x = (u + v · ζ) mod p, with v possibly negative.
+            let u_big = BigUint::from(u as u64);
+            let v_abs = BigUint::from(v.unsigned_abs());
+            let zeta_v = (&v_abs * &zeta_val) % p;
+            let x = if v >= 0 {
+                (&u_big + &zeta_v) % p
+            } else {
+                // u_big − zeta_v mod p
+                if u_big >= zeta_v {
+                    (&u_big - &zeta_v) % p
+                } else {
+                    (p + &u_big - &zeta_v) % p
+                }
+            };
+            if x.is_zero() {
+                continue;
+            }
+            if seen_x.contains_key(&x) {
+                continue;
+            }
+            seen_x.insert(x.clone(), ());
+            // Curve-membership check: y² = x³ + b for j=0.
+            let xf = curve.fe(x);
+            let rhs = xf
+                .mul(&xf)
+                .mul(&xf)
+                .add(&curve.fe(curve.b.clone()))
+                .value;
+            if let Some(y) = sqrt_mod_p(&rhs, p) {
+                let y_canon = if &y * &BigUint::from(2u32) < curve.p {
+                    y
+                } else {
+                    &curve.p - &y
+                };
+                out.push(FactorBaseEntry {
+                    idx: out.len(),
+                    point: Point::Affine {
+                        x: xf,
+                        y: curve.fe(y_canon),
+                    },
+                });
+            }
+        }
+    }
+    out
+}
+
+/// **Solve `Q = x·G`** on a j=0 curve via index calculus with an
+/// Eisenstein-smooth factor base.  Mirrors [`crate::cryptanalysis::ec_index_calculus::ec_index_calculus_dlp`]
+/// but plugs in [`build_eisenstein_factor_base`] for the FB.
+///
+/// Returns `None` if the curve is not j=0, the FB is empty, or
+/// relation gathering / linear solve fails.
+pub fn eisenstein_smooth_ic_dlp(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    norm_bound: u32,
+    extra_relations: usize,
+    max_trials_per_relation: usize,
+) -> Option<BigUint> {
+    let fb = build_eisenstein_factor_base(curve, norm_bound);
+    if fb.is_empty() {
+        return None;
+    }
+    let m = fb.len();
+    let target = m + extra_relations;
+    let mut relations = Vec::with_capacity(target);
+    while relations.len() < target {
+        let rel = find_one_relation(curve, g, q, &fb, max_trials_per_relation)?;
+        relations.push(rel);
+    }
+    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut row = vec![BigUint::zero(); m + 1];
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod(mult, &curve.n);
+            row[j] = (&row[j] + &val) % &curve.n;
+        }
+        let neg_b = (&curve.n - &(&rel.coef_b % &curve.n)) % &curve.n;
+        row[m] = neg_b;
+        matrix.push(row);
+        rhs.push(rel.coef_a.clone() % &curve.n);
+    }
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let x = solution[m].clone();
+    let a_fe = curve.a_fe();
+    let candidate = g.scalar_mul(&x, &a_fe);
+    if &candidate == q {
+        Some(x)
+    } else {
+        None
+    }
+}
+
 // ── Tests ────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -662,5 +825,82 @@ mod tests {
         {
             assert_eq!(batch.len(), 3);
         }
+    }
+
+    /// **Eisenstein FB sanity**: produces a non-empty factor base on
+    /// the toy j=0 curve, every entry is on the curve, every
+    /// x-coordinate is distinct.
+    #[test]
+    fn eisenstein_factor_base_is_on_curve_and_unique() {
+        let curve = j0_curve();
+        let fb = build_eisenstein_factor_base(&curve, 6);
+        assert!(!fb.is_empty(), "Eisenstein FB should be non-empty at toy");
+        let mut xs = std::collections::HashSet::new();
+        for entry in &fb {
+            assert!(
+                curve.is_on_curve(&entry.point),
+                "Eisenstein FB entry {:?} not on curve",
+                entry.point
+            );
+            if let Point::Affine { x, .. } = &entry.point {
+                assert!(
+                    xs.insert(x.value.clone()),
+                    "duplicate x in Eisenstein FB"
+                );
+            }
+        }
+    }
+
+    /// **The Eisenstein FB is NOT just the smallest-x FB**: at the
+    /// same target size the two FBs should differ in at least one
+    /// element (otherwise the "lattice sampling" speculation is
+    /// trivially equivalent to the generic FB).
+    #[test]
+    fn eisenstein_factor_base_differs_from_smallest_x_fb() {
+        use crate::cryptanalysis::ec_index_calculus::build_factor_base;
+        let curve = j0_curve();
+        let eisenstein = build_eisenstein_factor_base(&curve, 6);
+        let generic = build_factor_base(&curve, eisenstein.len());
+        let eis_xs: std::collections::HashSet<BigUint> = eisenstein
+            .iter()
+            .filter_map(|fb| {
+                if let Point::Affine { x, .. } = &fb.point {
+                    Some(x.value.clone())
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let gen_xs: std::collections::HashSet<BigUint> = generic
+            .iter()
+            .filter_map(|fb| {
+                if let Point::Affine { x, .. } = &fb.point {
+                    Some(x.value.clone())
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_ne!(
+            eis_xs, gen_xs,
+            "Eisenstein FB should be a different sample of F_p than the smallest-x FB"
+        );
+    }
+
+    /// **End-to-end Eisenstein-smooth IC**: recover an ECDLP on the
+    /// toy j=0 curve using the Eisenstein-smooth factor base.
+    #[test]
+    fn eisenstein_smooth_ic_recovers_dlp() {
+        let curve = j0_curve();
+        let g = curve.generator();
+        let a_fe = curve.a_fe();
+        let x_truth = BigUint::from(91u32);
+        let q = g.scalar_mul(&x_truth, &a_fe);
+        // norm_bound=6 gives FB size ~ π/√3 · 36 ≈ 65 candidate (u,v)
+        // pairs, of which roughly half map to curve points → FB ~ 30.
+        let recovered = eisenstein_smooth_ic_dlp(&curve, &g, &q, 6, 4, 5_000)
+            .expect("Eisenstein-smooth IC should recover x on the toy curve");
+        let recheck = g.scalar_mul(&recovered, &a_fe);
+        assert_eq!(recheck, q);
     }
 }

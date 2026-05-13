@@ -111,6 +111,7 @@ pub mod ecm;
 pub mod fght_snfs;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
+pub mod j0_twists;
 pub mod lattice;
 pub mod mazur_tate_sigma;
 pub mod md5_differential;
@@ -148,6 +149,13 @@ pub use ec_index_calculus::{
     build_factor_base, ec_index_calculus_dlp, find_one_relation, gaussian_eliminate_mod_n,
     pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p,
     FactorBaseEntry, Relation,
+};
+pub use ec_index_calculus_j0::{
+    build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
+};
+pub use j0_twists::{
+    enumerate_twists, factorise_small, format_twist_table, max_prime_factor, naive_point_count,
+    primitive_root, twist_coefficients, TwistInfo,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,
