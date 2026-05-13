@@ -48,23 +48,38 @@ pub struct IrreduciblePoly {
 impl IrreduciblePoly {
     /// `x⁸ + x⁴ + x³ + x + 1` (NIST/FIPS 186-4 toy).
     pub fn deg_8() -> Self {
-        Self { degree: 8, low_terms: vec![0, 1, 3, 4] }
+        Self {
+            degree: 8,
+            low_terms: vec![0, 1, 3, 4],
+        }
     }
     /// `x¹⁶ + x⁵ + x³ + x + 1`.
     pub fn deg_16() -> Self {
-        Self { degree: 16, low_terms: vec![0, 1, 3, 5] }
+        Self {
+            degree: 16,
+            low_terms: vec![0, 1, 3, 5],
+        }
     }
     /// `z¹²⁷ + z + 1` (Mersenne-like, used by Banegas et al.).
     pub fn deg_127() -> Self {
-        Self { degree: 127, low_terms: vec![0, 1] }
+        Self {
+            degree: 127,
+            low_terms: vec![0, 1],
+        }
     }
     /// `z¹⁶³ + z⁷ + z⁶ + z³ + 1` — NIST B-163.
     pub fn deg_163() -> Self {
-        Self { degree: 163, low_terms: vec![0, 3, 6, 7] }
+        Self {
+            degree: 163,
+            low_terms: vec![0, 3, 6, 7],
+        }
     }
     /// `z²³³ + z⁷⁴ + 1` — NIST B-233.
     pub fn deg_233() -> Self {
-        Self { degree: 233, low_terms: vec![0, 74] }
+        Self {
+            degree: 233,
+            low_terms: vec![0, 74],
+        }
     }
 }
 
@@ -84,7 +99,10 @@ impl F2mElement {
     /// Zero element.
     pub fn zero(m: u32) -> Self {
         let n_words = ((m + 63) / 64) as usize;
-        Self { bits: vec![0u64; n_words.max(1)], m }
+        Self {
+            bits: vec![0u64; n_words.max(1)],
+            m,
+        }
     }
 
     /// One element (the constant polynomial `1`).
@@ -150,6 +168,19 @@ impl F2mElement {
         self.bits.iter().all(|w| *w == 0)
     }
 
+    /// Field width parameter `m` (i.e. `self ∈ F_{2^m}`).
+    pub fn m_value(&self) -> u32 {
+        self.m
+    }
+
+    /// Raw bit-vector view (LSB-first, packed into `u64`s).  Mostly
+    /// used by cryptanalysis code that wants to do `F_2`-vector
+    /// arithmetic across many elements (e.g. computing the rank of
+    /// a set of elements as an `F_2`-subspace of `F_{2^m}`).
+    pub fn raw_bits(&self) -> &[u64] {
+        &self.bits
+    }
+
     pub fn degree(&self) -> Option<u32> {
         for (i, w) in self.bits.iter().enumerate().rev() {
             if *w != 0 {
@@ -164,7 +195,9 @@ impl F2mElement {
     /// operations that could leave stray high bits.
     fn mask_in_place(&mut self) {
         let m = self.m;
-        if m == 0 { return; }
+        if m == 0 {
+            return;
+        }
         let last_word = ((m - 1) / 64) as usize;
         let last_bit_in_word = (m - 1) % 64;
         if last_word < self.bits.len() {
@@ -429,7 +462,9 @@ fn add_shifted(out: &mut Vec<u64>, b: &[u64], shift: u32) {
                 out[target] ^= *w;
             } else {
                 // Auto-grow if needed.
-                while out.len() <= target { out.push(0); }
+                while out.len() <= target {
+                    out.push(0);
+                }
                 out[target] ^= *w;
             }
         }
@@ -439,13 +474,17 @@ fn add_shifted(out: &mut Vec<u64>, b: &[u64], shift: u32) {
             if target < out.len() {
                 out[target] ^= *w << bit_shift;
             } else {
-                while out.len() <= target { out.push(0); }
+                while out.len() <= target {
+                    out.push(0);
+                }
                 out[target] ^= *w << bit_shift;
             }
             if target + 1 < out.len() {
                 out[target + 1] ^= *w >> (64 - bit_shift);
             } else {
-                while out.len() <= target + 1 { out.push(0); }
+                while out.len() <= target + 1 {
+                    out.push(0);
+                }
                 out[target + 1] ^= *w >> (64 - bit_shift);
             }
         }
@@ -483,8 +522,12 @@ fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
             }
         }
     }
-    if low.is_empty() { low.push(0); }
-    if high.is_empty() { high.push(0); }
+    if low.is_empty() {
+        low.push(0);
+    }
+    if high.is_empty() {
+        high.push(0);
+    }
     (low, high)
 }
 
@@ -501,7 +544,9 @@ fn reduce(value: &mut Vec<u64>, irreducible: &IrreduciblePoly) {
     for pos in (m..total_bits).rev() {
         let w = (pos / 64) as usize;
         let b = pos % 64;
-        if w >= value.len() { continue; }
+        if w >= value.len() {
+            continue;
+        }
         if (value[w] >> b) & 1 == 1 {
             // Clear bit (pos).
             value[w] ^= 1u64 << b;
@@ -528,7 +573,7 @@ mod tests {
     fn add_is_xor() {
         let m = 8;
         let a = F2mElement::from_bit_positions(&[0, 3, 7], m); // 1 + z³ + z⁷
-        let b = F2mElement::from_bit_positions(&[3, 5], m);    // z³ + z⁵
+        let b = F2mElement::from_bit_positions(&[3, 5], m); // z³ + z⁵
         let c = a.add(&b);
         // Result: 1 + z⁵ + z⁷
         let expected = F2mElement::from_bit_positions(&[0, 5, 7], m);
@@ -539,12 +584,8 @@ mod tests {
     #[test]
     fn schoolbook_and_karatsuba_agree() {
         let irr = IrreduciblePoly::deg_127();
-        let a = F2mElement::from_hex(
-            "5A3F1E7CABCDEF0123456789ABCDEF01", 127,
-        );
-        let b = F2mElement::from_hex(
-            "12345678DEADBEEFC0FFEE0011223344", 127,
-        );
+        let a = F2mElement::from_hex("5A3F1E7CABCDEF0123456789ABCDEF01", 127);
+        let b = F2mElement::from_hex("12345678DEADBEEFC0FFEE0011223344", 127);
         let p1 = a.schoolbook_mul(&b, &irr);
         let p2 = a.karatsuba_mul(&b, &irr);
         assert_eq!(p1, p2);
@@ -554,10 +595,7 @@ mod tests {
     #[test]
     fn mul_by_one_is_identity() {
         let irr = IrreduciblePoly::deg_163();
-        let a = F2mElement::from_hex(
-            "abcdef0123456789abcdef0123456789abcdef01ff",
-            163,
-        );
+        let a = F2mElement::from_hex("abcdef0123456789abcdef0123456789abcdef01ff", 163);
         let one = F2mElement::one(163);
         assert_eq!(a.mul(&one, &irr), a);
     }
@@ -607,7 +645,9 @@ mod tests {
         let irr = IrreduciblePoly::deg_16();
         for v in [1u64, 2, 3, 0xDEAD, 0xCAFE, 0xBEEF, 0xFFFF] {
             let a = F2mElement::from_biguint(&BigUint::from(v), 16);
-            if a.is_zero() { continue; }
+            if a.is_zero() {
+                continue;
+            }
             let inv = a.flt_inverse(&irr).unwrap();
             let prod = a.mul(&inv, &irr);
             assert_eq!(prod, F2mElement::one(16), "a·a⁻¹ ≠ 1 for a = {}", v);
@@ -619,8 +659,8 @@ mod tests {
     #[test]
     fn reduction_works_at_boundary() {
         let irr = IrreduciblePoly::deg_8(); // x⁸ + x⁴ + x³ + x + 1
-        // a = z⁵, b = z⁵.  a·b = z¹⁰ = z² · z⁸ = z² · (z⁴ + z³ + z + 1)
-        //                       = z⁶ + z⁵ + z³ + z².
+                                            // a = z⁵, b = z⁵.  a·b = z¹⁰ = z² · z⁸ = z² · (z⁴ + z³ + z + 1)
+                                            //                       = z⁶ + z⁵ + z³ + z².
         let a = F2mElement::from_bit_positions(&[5], 8);
         let b = a.clone();
         let p = a.schoolbook_mul(&b, &irr);

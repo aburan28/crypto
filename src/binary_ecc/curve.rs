@@ -72,17 +72,11 @@ impl BinaryCurve {
         let irr = IrreduciblePoly::deg_163();
         let a = F2mElement::one(m); // a = 1
         let b = F2mElement::one(m); // b = 1
-        // Generator coordinates from SEC 2.
-        let gx = F2mElement::from_hex(
-            "02fe13c0537bbc11acaa07d793de4e6d5e5c94eee8", m,
-        );
-        let gy = F2mElement::from_hex(
-            "0289070fb05d38ff58321f2e800536d538ccdaa3d9", m,
-        );
+                                    // Generator coordinates from SEC 2.
+        let gx = F2mElement::from_hex("02fe13c0537bbc11acaa07d793de4e6d5e5c94eee8", m);
+        let gy = F2mElement::from_hex("0289070fb05d38ff58321f2e800536d538ccdaa3d9", m);
         // Order n (SEC 2): 4000000000000000000020108A2E0CC0D99F8A5EF
-        let order = BigUint::parse_bytes(
-            b"4000000000000000000020108A2E0CC0D99F8A5EF", 16,
-        ).unwrap();
+        let order = BigUint::parse_bytes(b"4000000000000000000020108A2E0CC0D99F8A5EF", 16).unwrap();
         Self {
             m,
             irreducible: irr,
@@ -104,8 +98,8 @@ impl BinaryCurve {
         let b = F2mElement::one(m);
         // Pick a generator by trial (we'll find one valid point).
         let gx = F2mElement::from_bit_positions(&[1], m); // x = z
-        // Find y satisfying y² + zy = z³ + z² + 1 ...
-        // Just brute-force search for a valid point.
+                                                          // Find y satisfying y² + zy = z³ + z² + 1 ...
+                                                          // Just brute-force search for a valid point.
         let (gen, ord) = find_any_generator(m, &irr, &a, &b);
         Self {
             m,
