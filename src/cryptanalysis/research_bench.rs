@@ -119,6 +119,44 @@ pub struct ScalingFit {
     pub r_squared: f64,
 }
 
+/// **Generic linear-regression primitive**: fit `y = slope · x + intercept`
+/// to the `(xs, ys)` samples and return `(slope, intercept, R²)`.
+/// Returns `None` if fewer than two points or zero variance in `x`.
+///
+/// Used by both the polynomial log-log fit (where `xs = log₂ n` and
+/// `ys = ln time`) and the exponential-decay fit (where `xs = rounds`
+/// and `ys = ln right_quartets`).
+pub fn linear_fit(xs: &[f64], ys: &[f64]) -> Option<(f64, f64, f64)> {
+    if xs.len() != ys.len() || xs.len() < 2 {
+        return None;
+    }
+    let n = xs.len() as f64;
+    let mean_x = xs.iter().sum::<f64>() / n;
+    let mean_y = ys.iter().sum::<f64>() / n;
+    let mut num = 0.0;
+    let mut den = 0.0;
+    for (x, y) in xs.iter().zip(ys) {
+        num += (x - mean_x) * (y - mean_y);
+        den += (x - mean_x).powi(2);
+    }
+    if den == 0.0 {
+        return None;
+    }
+    let slope = num / den;
+    let intercept = mean_y - slope * mean_x;
+    let ss_tot: f64 = ys.iter().map(|y| (y - mean_y).powi(2)).sum();
+    let ss_res: f64 = xs
+        .iter()
+        .zip(ys)
+        .map(|(x, y)| {
+            let y_pred = intercept + slope * x;
+            (y - y_pred).powi(2)
+        })
+        .sum();
+    let r_squared = if ss_tot > 0.0 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    Some((slope, intercept, r_squared))
+}
+
 /// Linear regression of `ln(elapsed_ms)` vs. `problem_size_log2`,
 /// converted to an exponent in base `n` (rather than base `2^bits`).
 ///
@@ -134,35 +172,12 @@ pub fn log_log_fit(results: &[ExperimentResult]) -> Option<ScalingFit> {
     }
     let xs: Vec<f64> = usable.iter().map(|r| r.problem_size_log2 as f64).collect();
     let ys: Vec<f64> = usable.iter().map(|r| (r.elapsed_ms as f64).ln()).collect();
-    let n = xs.len() as f64;
-    let mean_x = xs.iter().sum::<f64>() / n;
-    let mean_y = ys.iter().sum::<f64>() / n;
-    let mut num = 0.0;
-    let mut den = 0.0;
-    for (x, y) in xs.iter().zip(&ys) {
-        num += (x - mean_x) * (y - mean_y);
-        den += (x - mean_x).powi(2);
-    }
-    if den == 0.0 {
-        return None;
-    }
-    let slope = num / den; // d(ln time) / d(log₂ n)
-    let intercept = mean_y - slope * mean_x;
-    // n = 2^(log₂ n), so time ≈ e^intercept · 2^(slope · log₂ n)
-    //                       = e^intercept · n^(slope / ln 2).
+    let (slope, intercept, r_squared) = linear_fit(&xs, &ys)?;
+    // slope = d(ln time) / d(log₂ n).  n = 2^(log₂ n), so
+    //   time ≈ e^intercept · 2^(slope · log₂ n)
+    //        = e^intercept · n^(slope / ln 2).
     let measured_exponent = slope / std::f64::consts::LN_2;
     let prefactor = intercept.exp();
-    // R²
-    let ss_tot: f64 = ys.iter().map(|y| (y - mean_y).powi(2)).sum();
-    let ss_res: f64 = xs
-        .iter()
-        .zip(&ys)
-        .map(|(x, y)| {
-            let y_pred = intercept + slope * x;
-            (y - y_pred).powi(2)
-        })
-        .sum();
-    let r_squared = if ss_tot > 0.0 { 1.0 - ss_res / ss_tot } else { 0.0 };
     Some(ScalingFit {
         samples: usable.len(),
         measured_exponent,
@@ -907,6 +922,153 @@ impl Hypothesis for WeilDescentJ0 {
     }
 }
 
+// ── Boomerang attack decay across cipher rounds (non-polynomial) ────
+//
+// Boomerang attacks scale **exponentially in cipher rounds**: the
+// right-quartet probability `(pq)²` halves (or worse) with every
+// additional round of the cipher.  The polynomial log-log fit
+// machinery above doesn't apply; instead, we fit
+//
+//     ln(right_quartets) = a − b · rounds
+//
+// where `b · log₂(e)` is the "bits lost per round" — the empirical
+// per-round trail-probability decay.  For a 4-bit S-box of maximum
+// differential probability `2^{−2}` (Serpent S0, PRESENT, …), a
+// single-active-S-box trail contributes `2^{−2}` per round, and the
+// boomerang squares the quartet, so theoretical decay is `≈ 8 bits
+// per round` (a stretch — depends on how the linear layer expands
+// the active S-box count).
+
+/// One observation in the boomerang decay study.
+#[derive(Clone, Debug)]
+pub struct BoomerangDecaySample {
+    pub rounds: u32,
+    pub elapsed_ms: u128,
+    pub n_pairs: usize,
+    pub right_quartets: u64,
+    /// `right_quartets / n_pairs`.
+    pub empirical_probability: f64,
+}
+
+/// **Boomerang decay study** on r-round ToySpn for r ∈ `rounds_range`,
+/// using `n_pairs` random pairs per round count.
+///
+/// Returns one sample per round; samples with zero right quartets are
+/// retained (and excluded from the exponential fit).
+pub fn run_boomerang_decay(
+    rounds_range: std::ops::RangeInclusive<u32>,
+    n_pairs: usize,
+    alpha: u16,
+    delta: u16,
+) -> Vec<BoomerangDecaySample> {
+    use crate::cryptanalysis::boomerang::{boomerang_distinguisher, ToySpn};
+    use crate::cryptanalysis::sbox::Sbox;
+    let sbox = Sbox::new(
+        4,
+        4,
+        vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+    )
+    .expect("Serpent S0");
+    let alpha_bytes = alpha.to_le_bytes();
+    let delta_bytes = delta.to_le_bytes();
+    let mut samples = Vec::new();
+    for r in rounds_range {
+        let cipher = ToySpn::new(sbox.clone(), r as usize, 0xC0FFEE);
+        let t0 = Instant::now();
+        let result =
+            boomerang_distinguisher(&cipher, &alpha_bytes, &delta_bytes, n_pairs, None);
+        let elapsed = t0.elapsed().as_millis();
+        samples.push(BoomerangDecaySample {
+            rounds: r,
+            elapsed_ms: elapsed,
+            n_pairs,
+            right_quartets: result.right_quartets,
+            empirical_probability: result.empirical_probability,
+        });
+    }
+    samples
+}
+
+/// Fit `ln(right_quartets) = a − b · rounds` to the boomerang decay
+/// samples.  Returns `(bits_per_round, R²)` where `bits_per_round =
+/// b · log₂(e)` is the empirical decay rate.  Excludes samples with
+/// `right_quartets = 0` (undefined log).  Returns `None` if fewer
+/// than 2 non-zero samples remain.
+pub fn fit_boomerang_decay(samples: &[BoomerangDecaySample]) -> Option<(f64, f64)> {
+    let usable: Vec<&BoomerangDecaySample> = samples
+        .iter()
+        .filter(|s| s.right_quartets > 0)
+        .collect();
+    if usable.len() < 2 {
+        return None;
+    }
+    let xs: Vec<f64> = usable.iter().map(|s| s.rounds as f64).collect();
+    let ys: Vec<f64> = usable
+        .iter()
+        .map(|s| (s.right_quartets as f64).ln())
+        .collect();
+    let (slope, _intercept, r_squared) = linear_fit(&xs, &ys)?;
+    // slope = d ln(count) / d r.  bits-per-round = -slope / ln 2.
+    let bits_per_round = -slope / std::f64::consts::LN_2;
+    Some((bits_per_round, r_squared))
+}
+
+/// Render the boomerang decay study as a Markdown section.
+pub fn format_boomerang_decay(samples: &[BoomerangDecaySample]) -> String {
+    let mut out = String::new();
+    out.push_str("## Boomerang attack decay on r-round ToySpn\n\n");
+    out.push_str(
+        "**Description**: For each round count `r`, run the boomerang \
+         distinguisher with `N` random pairs and a 1-active-nibble difference \
+         (α = δ = 0x0001).  Record right-quartet count, time, and empirical \
+         probability `count / N`.\n\n",
+    );
+    out.push_str(
+        "**Theoretical claim**: `(pq)²` decays per round at the rate set by \
+         the S-box DDT.  For Serpent S0 with maxDP = 4/16 = 2^{−2} and a \
+         single-active-Sbox upper/lower trail, each round contributes \
+         `≈ 8 bits` of trail-amplification cost (`p_round^4` for the quartet \
+         under naive independence).  In practice the linear-layer expansion \
+         pushes this higher because additional S-boxes become active.\n\n",
+    );
+    out.push_str("| rounds | N pairs | elapsed (ms) | right quartets | empirical (pq)² |\n");
+    out.push_str("|-------:|--------:|-------------:|---------------:|----------------:|\n");
+    for s in samples {
+        let p_str = if s.right_quartets > 0 {
+            format!("{:.3e}", s.empirical_probability)
+        } else {
+            "0".into()
+        };
+        out.push_str(&format!(
+            "| {} | {} | {} | {} | {} |\n",
+            s.rounds, s.n_pairs, s.elapsed_ms, s.right_quartets, p_str,
+        ));
+    }
+    out.push('\n');
+    if let Some((bits_per_round, r2)) = fit_boomerang_decay(samples) {
+        out.push_str(&format!(
+            "**Measured decay**: {:.2} bits / round  (R² = {:.3}, samples = {})\n\n",
+            bits_per_round,
+            r2,
+            samples.iter().filter(|s| s.right_quartets > 0).count(),
+        ));
+        out.push_str(
+            "**Interpretation**: this is the empirical exponential rate at \
+             which the boomerang's data complexity grows per added round.  \
+             Compare to the theoretical 8 bits/round lower bound — a larger \
+             measured value means the linear layer is diffusing additional \
+             active S-boxes into the trail (good for security).\n",
+        );
+    } else {
+        out.push_str(
+            "**Measured decay**: fewer than 2 non-zero observations — \
+             trail decay too steep at this `N`; bump `n_pairs` to extend \
+             the round range.\n",
+        );
+    }
+    out
+}
+
 /// Aggregate-bench driver: run every registered hypothesis at every
 /// available scale, `samples_per_scale` times, and emit one Markdown
 /// document with the per-hypothesis sections.
@@ -936,6 +1098,12 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
     let weil = WeilDescentJ0;
     let weil_results = run_hypothesis(&weil, samples_per_scale);
     out.push_str(&format_report(&weil, &weil_results));
+    out.push('\n');
+    // Boomerang decay study (separate from the polynomial-scaling
+    // hypotheses above).  Uses ~ N_pairs = 65536 across r ∈ 1..=4 to
+    // observe the trail-probability decay rate per round.
+    let boomerang_samples = run_boomerang_decay(1..=4, 65_536, 0x0001, 0x0001);
+    out.push_str(&format_boomerang_decay(&boomerang_samples));
     out.push('\n');
     out.push_str("---\n\n");
     out.push_str("## Cross-hypothesis comparison\n\n");
@@ -981,6 +1149,14 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
          as `EisensteinSmoothJ0Ic`.  Concrete formulation: FB built from \
          lattice points `u + v·ω` with `N(u + v·ω) ≤ B²`.\n",
     );
+    if let Some((bits_per_round, r2)) = fit_boomerang_decay(&boomerang_samples) {
+        out.push_str(&format!(
+            "\n**Boomerang decay** (separate scaling regime — exponential in \
+             cipher rounds, not polynomial in block size): {:.2} bits / round \
+             measured on r-round ToySpn (R² = {:.3}).\n",
+            bits_per_round, r2,
+        ));
+    }
     out
 }
 
@@ -1192,6 +1368,123 @@ mod tests {
         // Fit summary present (the doubling-with-bits pattern fits α = 2,
         // so we should at least see *some* α value).
         assert!(report.contains("Measured exponent"));
+    }
+
+    /// **linear_fit recovers a known slope/intercept** from synthetic
+    /// `y = 3x + 7` data.
+    #[test]
+    fn linear_fit_recovers_known_line() {
+        let xs: Vec<f64> = (0..10).map(|i| i as f64).collect();
+        let ys: Vec<f64> = xs.iter().map(|x| 3.0 * x + 7.0).collect();
+        let (slope, intercept, r2) = linear_fit(&xs, &ys).expect("fit");
+        assert!((slope - 3.0).abs() < 1e-9);
+        assert!((intercept - 7.0).abs() < 1e-9);
+        assert!((r2 - 1.0).abs() < 1e-9);
+    }
+
+    /// **Boomerang decay fit on synthetic exponential data** —
+    /// `right_quartets = N · 2^{−2·r}` gives 2 bits/round exactly,
+    /// chosen shallow enough that the counts stay > 1 across the
+    /// sample range and integer-truncation noise is minimal.
+    #[test]
+    fn boomerang_decay_fit_recovers_synthetic_slope() {
+        let n_pairs = 1usize << 20;
+        let samples: Vec<BoomerangDecaySample> = (1..=6)
+            .map(|r| {
+                let count = ((n_pairs as f64) * 2f64.powi(-(2 * r as i32))) as u64;
+                BoomerangDecaySample {
+                    rounds: r as u32,
+                    elapsed_ms: 1,
+                    n_pairs,
+                    right_quartets: count,
+                    empirical_probability: count as f64 / n_pairs as f64,
+                }
+            })
+            .collect();
+        let (bits_per_round, r2) = fit_boomerang_decay(&samples).expect("fit");
+        assert!(
+            (bits_per_round - 2.0).abs() < 0.05,
+            "expected ≈ 2 bits/round, got {} (R² = {})",
+            bits_per_round,
+            r2,
+        );
+        assert!(r2 > 0.999);
+    }
+
+    /// **Boomerang decay fit ignores zero-quartet samples** (their
+    /// log is undefined).
+    #[test]
+    fn boomerang_decay_fit_skips_zero_observations() {
+        let samples = vec![
+            BoomerangDecaySample {
+                rounds: 1,
+                elapsed_ms: 1,
+                n_pairs: 1024,
+                right_quartets: 64,
+                empirical_probability: 64.0 / 1024.0,
+            },
+            BoomerangDecaySample {
+                rounds: 2,
+                elapsed_ms: 1,
+                n_pairs: 1024,
+                right_quartets: 4,
+                empirical_probability: 4.0 / 1024.0,
+            },
+            BoomerangDecaySample {
+                rounds: 3,
+                elapsed_ms: 1,
+                n_pairs: 1024,
+                right_quartets: 0, // skip
+                empirical_probability: 0.0,
+            },
+        ];
+        let fit = fit_boomerang_decay(&samples);
+        assert!(fit.is_some(), "fit on 2 non-zero samples should succeed");
+    }
+
+    /// **format_boomerang_decay renders without panic** even when the
+    /// sample list has zero-quartet observations.
+    #[test]
+    fn format_boomerang_decay_renders_with_zero_quartet_rows() {
+        let samples = vec![
+            BoomerangDecaySample {
+                rounds: 1,
+                elapsed_ms: 1,
+                n_pairs: 16,
+                right_quartets: 0,
+                empirical_probability: 0.0,
+            },
+            BoomerangDecaySample {
+                rounds: 2,
+                elapsed_ms: 1,
+                n_pairs: 16,
+                right_quartets: 0,
+                empirical_probability: 0.0,
+            },
+        ];
+        let report = format_boomerang_decay(&samples);
+        assert!(report.contains("Boomerang attack decay"));
+        assert!(report.contains("fewer than 2 non-zero observations"));
+    }
+
+    /// **Boomerang on real ToySpn**: rounds 1..=3, N=4096 pairs.
+    /// Verify the bench function (a) terminates, (b) returns one
+    /// sample per round.  Marked `#[ignore]` because it does
+    /// 4096 × 3 ≈ 12K encryptions — adds ~150 ms.
+    ///
+    /// NOTE: monotonic decay is *not* a valid assertion at small `r`
+    /// — the chosen `(α, δ)` may have `BCT[α][δ] = 0` at one S-box
+    /// (giving zero quartets at r=1) while r=2 hits non-zero through
+    /// other trail paths after the bit permutation diffuses.
+    #[test]
+    #[ignore]
+    fn boomerang_decay_on_toyspn_produces_one_sample_per_round() {
+        let samples = run_boomerang_decay(1..=3, 4096, 0x0001, 0x0001);
+        assert_eq!(samples.len(), 3);
+        for (i, s) in samples.iter().enumerate() {
+            assert_eq!(s.rounds as usize, i + 1);
+            assert_eq!(s.n_pairs, 4096);
+        }
     }
 }
 

@@ -136,15 +136,58 @@ classical "twist security failure" but **amplified 6× by the j=0
 sextic twist structure**: six twists to roll the dice on, vs just two
 for generic curves.
 
+### Boomerang attack decay on r-round ToySpn
+
+**Status**: now wired into the bench as a *separate scaling regime*.
+Boomerang data complexity grows **exponentially in cipher rounds**,
+not polynomially in block size, so the log-log machinery doesn't
+apply.  Instead the bench fits `ln(right_quartets) = a − b · r` and
+reports `b · log₂(e)` as **bits per round**.
+
+- **Cipher**: ToySpn (16-bit, 4 × 4-bit S-boxes, PRESENT-style bit
+  permutation, Serpent S0 as the S-box).
+- **Differences**: `α = δ = 0x0001` (low-nibble active).
+- **N pairs**: 65 536 per round count.
+
+| rounds | elapsed (ms) | right quartets | empirical (pq)² |
+|-------:|-------------:|---------------:|----------------:|
+| 1      | 88           | **0**          | 0               |
+| 2      | 103          | 16 420         | 2.505e−1        |
+| 3      | 118          | 271            | 4.135e−3        |
+| 4      | 127          | 15             | 2.289e−4        |
+
+**Measured decay**: **5.05 bits / round**  (R² = 0.990, samples = 3 — r=1 excluded).
+
+**Empirical findings**:
+
+1. **r = 1 produces zero right quartets** at this `(α, δ)` choice.
+   The S-box BCT entry `BCT_serpentS0[1][1] = 0` (the boomerang
+   switch fails on this single-active-nibble difference for 1-round
+   Serpent S0).  This is exactly the kind of "anti-result" the BCT
+   was designed to surface — a `(α, δ)` pair the naive DDT analysis
+   would have predicted to work.
+
+2. **r = 2 is the empirical sweet spot**: 25% right quartets.  The
+   bit permutation diffuses the active nibble into multiple
+   positions, creating several trail paths that contribute additively
+   to the boomerang probability.
+
+3. **r ≥ 3 decay at 5 bits/round**, below the theoretical
+   single-active-Sbox lower bound of 8 bits/round.  The shortfall is
+   because the bit permutation rapidly saturates active S-box count
+   (4 nibbles is small), so additional rounds gain less from new
+   active S-boxes.
+
 ## Cross-hypothesis comparison
 
-| Hypothesis | Theoretical α | Measured α | R² | Bench verdict |
-|------------|--------------:|-----------:|:--:|---------|
-| Pollard ρ ECDLP | 0.500 | 0.807 | 0.996 | ≈ approx |
-| IC 2-decomp (generic) | 1.500 | 0.691 | 0.970 | ✗ deviates |
-| IC 2-decomp (j=0 orbit-reduced) | 1.500 | 0.752 | 0.895 | ✗ deviates |
-| Eisenstein-smooth IC (j=0) | 1.500 | 0.825 | 0.992 | ✗ deviates |
-| Weil-descent stage 1 (twist enum) | 1.000 | 1.035 | 0.999 | ✓ matches |
+| Hypothesis | Scaling regime | Theoretical | Measured | R² | Verdict |
+|------------|---------------:|------------:|---------:|:--:|---------|
+| Pollard ρ ECDLP | polynomial α | 0.500 | 0.807 | 0.996 | ≈ approx |
+| IC 2-decomp (generic) | polynomial α | 1.500 | 0.691 | 0.970 | ✗ deviates |
+| IC 2-decomp (j=0 orbit-reduced) | polynomial α | 1.500 | 0.752 | 0.895 | ✗ deviates |
+| Eisenstein-smooth IC (j=0) | polynomial α | 1.500 | 0.825 | 0.992 | ✗ deviates |
+| Weil-descent stage 1 (twist enum) | polynomial α | 1.000 | 1.035 | 0.999 | ✓ matches |
+| Boomerang decay (ToySpn) | exponential bits/round | ~8 | 5.05 | 0.990 | ✗ deviates (linear-layer saturation) |
 
 ## Honest interpretation of the measured exponents
 
