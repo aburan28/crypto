@@ -84,6 +84,9 @@ The `symmetric::modes` submodule hosts modes that work against any
 | `modes::ofb`                    | Pre-computable keystream       | NIST SP 800-38A §6.4   |
 | `modes::ccm`                    | **AEAD** (Counter + CBC-MAC)   | NIST SP 800-38C / RFC 3610 |
 | `modes::siv`                    | **AEAD, misuse-resistant** (deterministic) | RFC 5297            |
+| `modes::eax`                    | **AEAD** (three-CMAC construction)         | Bellare-Rogaway-Wagner FSE 2004 |
+| `modes::ocb3`                   | **AEAD** (single-pass, offset-codebook)    | RFC 7253 |
+| `modes::gcm_siv` (+ POLYVAL)    | **AEAD, nonce-misuse-resistant** (GCM variant) | RFC 8452 |
 | `modes::kw`                     | Deterministic key wrap         | NIST SP 800-38F / RFC 3394 |
 | `modes::xts`                    | Disk encryption (ciphertext stealing) | IEEE P1619 / NIST SP 800-38E |
 
