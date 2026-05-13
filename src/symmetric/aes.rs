@@ -144,6 +144,26 @@ impl AesKey {
             AesKey::Aes256(k) => k,
         }
     }
+
+    /// Construct an `AesKey` from a raw byte slice.  Accepts 16 (AES-128)
+    /// or 32 (AES-256) bytes; returns `Err` for any other length.
+    /// AES-192 is intentionally not supported (24-byte variant has no
+    /// strong reason to ship at the educational scale).
+    pub fn new(bytes: &[u8]) -> Result<Self, &'static str> {
+        match bytes.len() {
+            16 => {
+                let mut k = [0u8; 16];
+                k.copy_from_slice(bytes);
+                Ok(AesKey::Aes128(k))
+            }
+            32 => {
+                let mut k = [0u8; 32];
+                k.copy_from_slice(bytes);
+                Ok(AesKey::Aes256(k))
+            }
+            _ => Err("AES key must be 16 or 32 bytes"),
+        }
+    }
 }
 
 // ── Key expansion ─────────────────────────────────────────────────────────────

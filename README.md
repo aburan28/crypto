@@ -72,6 +72,21 @@ cargo test --release
 | `symmetric::kuznyechik`   | GOST R 34.12-2015 Kuznyechik (128-bit) | GOST R 34.12-2015           |
 | `symmetric::cmac`         | CMAC-AES MAC                          | NIST SP 800-38B             |
 
+### Block-cipher modes (generic over `BlockCipher<N>` trait)
+
+The `symmetric::modes` submodule hosts modes that work against any
+[`BlockCipher<N>`] implementor — AES, SM4, Serpent, Kuznyechik, Magma.
+
+| Mode                            | Type                           | Standard               |
+|---------------------------------|--------------------------------|------------------------|
+| `modes::ecb` (PKCS#7 padded)    | Confidentiality (broken — teaching only) | NIST SP 800-38A §6.1 |
+| `modes::cfb`                    | Self-synchronising stream      | NIST SP 800-38A §6.3   |
+| `modes::ofb`                    | Pre-computable keystream       | NIST SP 800-38A §6.4   |
+| `modes::ccm`                    | **AEAD** (Counter + CBC-MAC)   | NIST SP 800-38C / RFC 3610 |
+| `modes::siv`                    | **AEAD, misuse-resistant** (deterministic) | RFC 5297            |
+| `modes::kw`                     | Deterministic key wrap         | NIST SP 800-38F / RFC 3394 |
+| `modes::xts`                    | Disk encryption (ciphertext stealing) | IEEE P1619 / NIST SP 800-38E |
+
 ### Hashes / XOFs
 
 | Module           | Algorithm                  | Standard                |
