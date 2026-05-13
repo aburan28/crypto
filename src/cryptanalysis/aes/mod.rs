@@ -49,13 +49,34 @@
 //! tooling and large-state structures that would dwarf the rest of the
 //! cryptanalysis module. They are tracked in `DEFERRED.md`.
 
+pub mod boomerang;
 pub mod differential;
+pub mod impossible;
+pub mod linear;
+pub mod mixture;
 pub mod reduced;
 pub mod square;
+pub mod yoyo;
 
 pub use differential::{
     aes_sbox_ddt, key_recovery_two_round, max_differential_probability, propagate_one_round,
     AesDdt, DifferentialAttackReport, RoundDifference,
+};
+pub use impossible::{
+    active_byte_count, elimination_demonstration, state_contradicts_impossibility,
+    verify_4_round_impossibility, ImpossibilityReport,
+};
+pub use mixture::{
+    algebraic_identity_holds, column_confined_subspace_check, pairwise_equality_holds, xor4,
+    ColumnMixtureReport, Mixture,
+};
+pub use yoyo::{
+    diff_in_column_0, exchange_bytes, yoyo_distinguisher, yoyo_iteration, YoyoReport,
+    COL0_FLAT, YOYO_SUPPORT_3R,
+};
+pub use linear::{
+    aes_sbox_lat, linear_correlation, max_linear_bias, recover_key_bit_one_round,
+    recover_key_byte_one_round,
 };
 pub use reduced::{ReducedAes128, RoundOps};
 pub use square::{
