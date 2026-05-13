@@ -99,6 +99,7 @@ pub mod avalanche;
 pub mod b_seed_profile;
 pub mod bleichenbacher;
 pub mod boolean;
+pub mod boomerang;
 pub mod canonical_lift;
 pub mod cga_hnc;
 pub mod cm_canonical_lift;
@@ -142,6 +143,12 @@ pub use bleichenbacher::{
     BleichenbacherSample,
 };
 pub use boolean::{algebraic_degree, anf_coefficients, walsh_hadamard};
+pub use boomerang::{
+    boomerang_distinguisher, boomerang_trail_search, differential_trail_search,
+    rectangle_attack, sandwich_distinguisher, BlockCipher, BoomerangResult,
+    BoomerangTrailPair, DifferentialTrail, RectangleResult, SandwichResult,
+    SpnTrailModel, ToySpn,
+};
 pub use canonical_lift::{
     find_anomalous_curve, hensel_lift_point, smart_attack_anomalous, ZpCurve, ZpInt, ZpPoint,
 };
