@@ -49,12 +49,18 @@
 //! tooling and large-state structures that would dwarf the rest of the
 //! cryptanalysis module. They are tracked in `DEFERRED.md`.
 
+pub mod algebraic;
+pub mod biclique;
 pub mod boomerang;
 pub mod differential;
 pub mod impossible;
 pub mod linear;
+pub mod milp;
+pub mod mitm;
 pub mod mixture;
+pub mod quantum_grover;
 pub mod reduced;
+pub mod small_scale;
 pub mod square;
 pub mod yoyo;
 
@@ -70,6 +76,7 @@ pub use mixture::{
     algebraic_identity_holds, column_confined_subspace_check, pairwise_equality_holds, xor4,
     ColumnMixtureReport, Mixture,
 };
+pub use mitm::{delta_set, is_uniform_multiset, mitm_recover_two_round, multiset, ordered_sequence};
 pub use yoyo::{
     diff_in_column_0, exchange_bytes, yoyo_distinguisher, yoyo_iteration, YoyoReport,
     COL0_FLAT, YOYO_SUPPORT_3R,
