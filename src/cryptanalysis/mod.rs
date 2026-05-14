@@ -116,6 +116,7 @@ pub mod ecdsa_audit;
 pub mod research_bench;
 pub mod ecm;
 pub mod fght_snfs;
+pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
 pub mod j0_twists;

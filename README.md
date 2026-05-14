@@ -98,6 +98,8 @@ The `symmetric::modes` submodule hosts modes that work against any
 
 | Module           | Algorithm                  | Standard                |
 |------------------|----------------------------|-------------------------|
+| `hash::md4`      | MD4 (broken — teaching/target)  | RFC 1320            |
+| `hash::md5`      | MD5 (broken — teaching/target)  | RFC 1321            |
 | `hash::sha256`   | SHA-224 / SHA-256          | FIPS 180-4              |
 | `hash::sha512`   | SHA-384 / SHA-512          | FIPS 180-4              |
 | `hash::sha3`     | SHA3-256/512, SHAKE128/256 | FIPS 202 (Keccak)       |
@@ -106,6 +108,33 @@ The `symmetric::modes` submodule hosts modes that work against any
 | `hash::siphash`  | SipHash-2-4                | Aumasson–Bernstein 2012 |
 | `hash::sm3`      | SM3 Chinese national hash  | GB/T 32905              |
 | `hash::streebog` | GOST R 34.11-2012 (256/512)| GOST R 34.11-2012       |
+
+### Hash-function cryptanalysis
+
+Generic attacks over the `HashFunction` / `MerkleDamgardHash` trait:
+
+| Attack                                  | Module                     | Notes                                |
+|----------------------------------------|----------------------------|--------------------------------------|
+| **Length-extension attack**            | `cryptanalysis::hash_attacks::length_extension_attack` | Works against any MD-Damgård hash used as `H(secret \|\| msg)` MAC.  Tested on MD4, MD5, SHA-1. |
+| **Birthday-collision search**          | `cryptanalysis::hash_attacks::birthday_collision_search` | Generic `√(2^b)` collision finder over a truncated hash. |
+| **Joux multicollision** (CRYPTO 2004)  | `cryptanalysis::hash_attacks::joux_multicollision` | Chain `t` collisions → `2^t` equivalent messages at cost `t · 2^(b/2)`. |
+| **Differential bias**                  | `cryptanalysis::hash_attacks::differential_bias` | Per-output-byte bias measurement on a chosen input differential. |
+| **MD5 Wang differential**              | `cryptanalysis::md5_differential` | Reduced-round near-collision finder. |
+| **SHA-1 differential**                 | `cryptanalysis::sha1_differential` | Round-function table + near-collision search. |
+
+CLI:
+
+```bash
+# Auto-run every applicable hash attack
+crypto cryptanalysis hash-auto --hash md5
+crypto cryptanalysis hash-auto --hash md4
+crypto cryptanalysis hash-auto --hash sha1
+
+# Length-extension demo (interactive)
+crypto cryptanalysis length-extension --hash sha1 \
+    --secret-len 16 --message-hex "&role=guest" \
+    --suffix-hex "&role=admin" --digest-hex <hex>
+```
 
 ### Elliptic-curve cryptography
 

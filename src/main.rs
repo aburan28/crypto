@@ -144,6 +144,32 @@ enum CryptanalysisOp {
     /// (Equivalent to `cargo test --lib --release bench_demo --
     /// --ignored --nocapture` but accessible from the CLI.)
     Bench,
+    /// Auto-run every applicable hash-function attack (length
+    /// extension, birthday collision, Joux multicollision,
+    /// differential bias) against the named hash.  Targets: md4, md5, sha1.
+    HashAuto {
+        /// Hash identifier: `md4`, `md5`, or `sha1`.
+        #[arg(long)]
+        hash: String,
+    },
+    /// Length-extension attack demo against a Merkle-Damgård hash.
+    LengthExtension {
+        /// Hash identifier: `md4`, `md5`, or `sha1`.
+        #[arg(long)]
+        hash: String,
+        /// Length (in bytes) of the unknown secret prefix.
+        #[arg(long)]
+        secret_len: usize,
+        /// Original message body (hex-encoded).
+        #[arg(long)]
+        message_hex: String,
+        /// Suffix to append (hex-encoded).
+        #[arg(long)]
+        suffix_hex: String,
+        /// Digest of `secret || message_hex` (hex-encoded).
+        #[arg(long)]
+        digest_hex: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -352,6 +378,67 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
             eprintln!("Running full research bench (this takes ~15-30 s in release mode)...");
             let report = run_full_bench(1);
             println!("{}", report);
+        }
+        CryptanalysisOp::HashAuto { hash } => {
+            use crypto_lib::cryptanalysis::hash_attacks::auto_hash_attack;
+            match auto_hash_attack(&hash) {
+                Ok(md) => println!("{}", md),
+                Err(e) => {
+                    eprintln!("error: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        CryptanalysisOp::LengthExtension {
+            hash,
+            secret_len,
+            message_hex,
+            suffix_hex,
+            digest_hex,
+        } => {
+            use crypto_lib::cryptanalysis::hash_attacks::{
+                length_extension_attack, Md4, Md5, MerkleDamgardHash, Sha1,
+            };
+            let message = from_hex(&message_hex).expect("bad message hex");
+            let suffix = from_hex(&suffix_hex).expect("bad suffix hex");
+            let digest = from_hex(&digest_hex).expect("bad digest hex");
+            let prefix_len = secret_len + message.len();
+            fn report_lex<H: MerkleDamgardHash>(
+                hash: &H,
+                digest: &[u8],
+                prefix_len: usize,
+                message: &[u8],
+                suffix: &[u8],
+            ) {
+                let (forged, glue) =
+                    length_extension_attack(hash, digest, prefix_len, suffix);
+                println!("# Length-extension attack on `{}`", hash.name());
+                println!();
+                println!("Forged digest: {}", to_hex(&forged));
+                println!("Glue padding bytes ({} B): {}", glue.len(), to_hex(&glue));
+                println!();
+                println!("Effective extended message (without secret):");
+                println!(
+                    "  message ({}B) || glue ({}B) || suffix ({}B)",
+                    message.len(),
+                    glue.len(),
+                    suffix.len()
+                );
+                let mut combined = Vec::new();
+                combined.extend_from_slice(message);
+                combined.extend_from_slice(&glue);
+                combined.extend_from_slice(suffix);
+                println!("Hex: {}", to_hex(&combined));
+            }
+            match hash.as_str() {
+                "md4" => report_lex(&Md4, &digest, prefix_len, &message, &suffix),
+                "md5" => report_lex(&Md5, &digest, prefix_len, &message, &suffix),
+                "sha1" => report_lex(&Sha1, &digest, prefix_len, &message, &suffix),
+                other => {
+                    eprintln!("error: unknown hash '{}' (try md4, md5, sha1)", other);
+                    std::process::exit(1);
+                }
+            }
         }
     }
 }
