@@ -110,12 +110,11 @@ pub mod coleman_integration;
 pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
-pub mod ghs_descent;
-pub mod ghs_full_attack;
 pub mod ecdsa_audit;
-pub mod research_bench;
 pub mod ecm;
 pub mod fght_snfs;
+pub mod ghs_descent;
+pub mod ghs_full_attack;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
@@ -134,12 +133,15 @@ pub mod p256_structural;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod quantum_estimator;
+pub mod research_bench;
 pub mod sbox;
 pub mod sha1_differential;
 pub mod shor;
 pub mod signature_corpus;
 pub mod solinas_correlations;
 pub mod statistical;
+pub mod visual_demos;
+pub mod visualize;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
@@ -152,31 +154,30 @@ pub use bleichenbacher::{
 };
 pub use boolean::{algebraic_degree, anf_coefficients, walsh_hadamard};
 pub use boomerang::{
-    boomerang_distinguisher, boomerang_trail_search, differential_trail_search,
-    rectangle_attack, sandwich_distinguisher, BlockCipher, BoomerangResult,
-    BoomerangTrailPair, DifferentialTrail, RectangleResult, SandwichResult,
-    SpnTrailModel, ToySpn,
+    boomerang_distinguisher, boomerang_trail_search, differential_trail_search, rectangle_attack,
+    sandwich_distinguisher, BlockCipher, BoomerangResult, BoomerangTrailPair, DifferentialTrail,
+    RectangleResult, SandwichResult, SpnTrailModel, ToySpn,
 };
 pub use canonical_lift::{
     find_anomalous_curve, hensel_lift_point, smart_attack_anomalous, ZpCurve, ZpInt, ZpPoint,
 };
 pub use ec_index_calculus::{
     build_factor_base, ec_index_calculus_dlp, find_one_relation, gaussian_eliminate_mod_n,
-    pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p,
-    FactorBaseEntry, Relation,
+    pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p, FactorBaseEntry,
+    Relation,
 };
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
-};
-pub use j0_twists::{
-    enumerate_twists, factorise_small, format_twist_table, max_prime_factor, naive_point_count,
-    primitive_root, twist_coefficients, TwistInfo,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,
 };
 pub use hnp_ecdsa::{
     hnp_recover_key, hnp_recover_key_with_reduction, BiasedSignature, HnpReduction,
+};
+pub use j0_twists::{
+    enumerate_twists, factorise_small, format_twist_table, max_prime_factor, naive_point_count,
+    primitive_root, twist_coefficients, TwistInfo,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use multi_key_hnp::{build_transcript, multi_key_hnp_recover_master, ChildKeySignature};

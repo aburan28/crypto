@@ -145,6 +145,19 @@ crypto cryptanalysis aes-visual-demo --demo truncated-diff   # 4-round trail gri
 crypto cryptanalysis aes-visual-demo --demo integral         # 3-round Square balance
 crypto cryptanalysis aes-visual-demo --demo dfa              # Piret-Quisquater fault diff
 crypto cryptanalysis aes-visual-demo --demo key-schedule     # AES-128 vs AES-256 diffusion
+
+# Visual demos for every NON-AES attack module
+crypto cryptanalysis visual-all --target all                 # full bundle (Markdown)
+crypto cryptanalysis visual-all --target sbox-ddt            # DDT heat-maps (AES + Serpent + PRESENT)
+crypto cryptanalysis visual-all --target sbox-lat            # LAT heat-maps
+crypto cryptanalysis visual-all --target walsh               # Walsh-Hadamard signed spectrum bars
+crypto cryptanalysis visual-all --target pollard-rho         # ρ-iteration trajectory plot
+crypto cryptanalysis visual-all --target hnp                 # HNP recovery probability curve
+crypto cryptanalysis visual-all --target bleichenbacher      # nonce-bias histogram
+crypto cryptanalysis visual-all --target length-extension    # MD-Damgård chain diagram
+crypto cryptanalysis visual-all --target joux                # multicollision tree
+crypto cryptanalysis visual-all --target j0-twists           # twist factor-size bars
+crypto cryptanalysis visual-all --target birthday            # cumulative collision-probability curve
 ```
 
 ### Visual output samples

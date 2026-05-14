@@ -196,6 +196,19 @@ enum CryptanalysisOp {
         #[arg(long, default_value = "all")]
         demo: String,
     },
+    /// **Visual demos for every non-AES attack** — DDT/LAT heat-maps
+    /// on S-boxes, Walsh-Hadamard spectra, Pollard ρ trajectories,
+    /// HNP recovery curves, Bleichenbacher bias histograms,
+    /// length-extension diagrams, Joux multicollision trees, j=0
+    /// twist factorisations, birthday-paradox curves.
+    VisualAll {
+        /// Optional single-demo target: `sbox-ddt`, `sbox-lat`,
+        /// `walsh`, `pollard-rho`, `hnp`, `bleichenbacher`,
+        /// `length-extension`, `joux`, `j0-twists`, `birthday`,
+        /// or `all` (default).
+        #[arg(long, default_value = "all")]
+        target: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -529,7 +542,10 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
             // 2. Related-key avalanche (AES-128 only — the avalanche
             // function uses ReducedAes128 which is 16-byte-key only).
             if key_bits == 128 {
-                println!("## Related-key avalanche ({} rounds, {} trials)\n", rounds, avalanche_trials);
+                println!(
+                    "## Related-key avalanche ({} rounds, {} trials)\n",
+                    rounds, avalanche_trials
+                );
                 let zero_key_16 = [0u8; 16];
                 let mut dk16 = [0u8; 16];
                 dk16.copy_from_slice(&delta_k);
@@ -541,8 +557,14 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
                 println!("## Biryukov-Khovratovich-style local collision\n");
                 println!("{} trials at {} rounds:", avalanche_trials, rounds);
                 let r = biryukov_khovratovich_4round_demo(avalanche_trials, rounds);
-                println!("- low-Hamming-distance hits: {} / {}", r.collisions, r.n_trials);
-                println!("- empirical hit rate:        {:.4}", r.empirical_probability);
+                println!(
+                    "- low-Hamming-distance hits: {} / {}",
+                    r.collisions, r.n_trials
+                );
+                println!(
+                    "- empirical hit rate:        {:.4}",
+                    r.empirical_probability
+                );
                 println!("- random baseline (Hd≤16 in 128 bits): ≈ 2⁻⁷⁹");
             } else {
                 println!("(Related-key avalanche + local-collision demo only available for AES-128; key-schedule diffusion table above already shows the AES-256 weakness.)");
@@ -550,11 +572,13 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
         }
         CryptanalysisOp::AesVisualDemo { demo } => {
             use crypto_lib::cryptanalysis::aes::{
-                dfa::{format_dfa_visualization, dfa_per_column_candidates, inject_fault_round_9},
+                dfa::{dfa_per_column_candidates, format_dfa_visualization, inject_fault_round_9},
                 higher_order::{integral_distinguisher_3_round, render_integral_visualization},
-                related_key::{format_key_schedule_diff, key_schedule_difference},
                 reduced::ReducedAes128,
-                truncated_diff::{propagate_truncated_round, render_trail_diagram, TruncatedPattern},
+                related_key::{format_key_schedule_diff, key_schedule_difference},
+                truncated_diff::{
+                    propagate_truncated_round, render_trail_diagram, TruncatedPattern,
+                },
             };
             use crypto_lib::symmetric::aes::AesKey;
             let run_truncated = |x: &str| -> bool { x == "all" || x == "truncated-diff" };
@@ -596,10 +620,7 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
                 let pt = [0x6bu8; 16];
                 let (correct, faulted) = inject_fault_round_9(&cipher, &pt, 0, 0xCC);
                 let cands = dfa_per_column_candidates(&correct, &faulted);
-                println!(
-                    "{}",
-                    format_dfa_visualization(&correct, &faulted, &cands)
-                );
+                println!("{}", format_dfa_visualization(&correct, &faulted, &cands));
             }
             if run_ks(&demo) {
                 println!("\n## (4) Related-key schedule diffusion (AES-256 vs AES-128)\n");
@@ -613,6 +634,32 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
                     println!("{}", format_key_schedule_diff(&diff));
                 }
             }
+        }
+        CryptanalysisOp::VisualAll { target } => {
+            use crypto_lib::cryptanalysis::visual_demos::{
+                demo_bleichenbacher_bias, demo_birthday_paradox, demo_hnp_recovery_curve,
+                demo_j0_twist_factors, demo_joux_multicollision,
+                demo_length_extension_diagram, demo_pollard_rho_path, demo_sbox_ddt_heatmap,
+                demo_sbox_lat_heatmap, demo_walsh_spectrum, run_all_visual_demos,
+            };
+            let out: String = match target.as_str() {
+                "sbox-ddt" => demo_sbox_ddt_heatmap(),
+                "sbox-lat" => demo_sbox_lat_heatmap(),
+                "walsh" => demo_walsh_spectrum(),
+                "pollard-rho" => demo_pollard_rho_path(),
+                "hnp" => demo_hnp_recovery_curve(),
+                "bleichenbacher" => demo_bleichenbacher_bias(),
+                "length-extension" => demo_length_extension_diagram(),
+                "joux" => demo_joux_multicollision(),
+                "j0-twists" => demo_j0_twist_factors(),
+                "birthday" => demo_birthday_paradox(),
+                "all" => run_all_visual_demos(),
+                other => {
+                    eprintln!("error: unknown target '{}'; try `all` or one of: sbox-ddt, sbox-lat, walsh, pollard-rho, hnp, bleichenbacher, length-extension, joux, j0-twists, birthday", other);
+                    std::process::exit(1);
+                }
+            };
+            println!("{}", out);
         }
     }
 }
@@ -773,7 +820,7 @@ fn cmd_hkdf() {
     let ikm = b"input keying material";
     let salt = b"random salt";
     let info = b"application context";
-    let okm = hkdf(Some(salt), ikm, info, 32);
+    let okm = hkdf(Some(salt), ikm, info, 32).expect("demo HKDF parameters must be valid");
     println!("IKM:  {:?}", std::str::from_utf8(ikm).unwrap());
     println!("OKM:  {}", to_hex(&okm));
 }
@@ -830,7 +877,8 @@ fn cmd_demo() {
 
     // HKDF
     println!("\n[HKDF-SHA256]");
-    let okm = hkdf(Some(b"salt"), b"secret", b"ctx", 32);
+    let okm =
+        hkdf(Some(b"salt"), b"secret", b"ctx", 32).expect("demo HKDF parameters must be valid");
     println!("  Derived key: {}", to_hex(&okm));
 
     // Kyber
