@@ -138,7 +138,39 @@ crypto cryptanalysis length-extension --hash sha1 \
 # AES related-key attack: key-schedule diffusion + avalanche + local collision
 crypto cryptanalysis aes-related-key --key-bits 256 --rounds 4
 crypto cryptanalysis aes-related-key --key-bits 128 --rounds 4 --avalanche-trials 1024
+
+# AES visual demos — ASCII art for every major attack
+crypto cryptanalysis aes-visual-demo --demo all              # all four below
+crypto cryptanalysis aes-visual-demo --demo truncated-diff   # 4-round trail grid
+crypto cryptanalysis aes-visual-demo --demo integral         # 3-round Square balance
+crypto cryptanalysis aes-visual-demo --demo dfa              # Piret-Quisquater fault diff
+crypto cryptanalysis aes-visual-demo --demo key-schedule     # AES-128 vs AES-256 diffusion
 ```
+
+### Visual output samples
+
+The `aes-visual-demo` subcommand renders ASCII diagrams.  For example,
+`--demo truncated-diff` shows the classical wide-trail AES diffusion:
+
+```
+        input      R1 SR      R2 SR      R3 SR      R4 SR
+  row 0    ▓ · · ·    ▓ · · ·    ▓ · · ·    ▓ ▓ ▓ ▓    ▓ ▓ ▓ ▓
+  row 1    · · · ·    · · · ·    · · · ▓    ▓ ▓ ▓ ▓    · · · ·
+  row 2    · · · ·    · · · ·    · · ▓ ·    ▓ ▓ ▓ ▓    · · · ·
+  row 3    · · · ·    · · · ·    · ▓ · ·    ▓ ▓ ▓ ▓    · · · ·
+
+**Active S-boxes per round**
+
+round  0 │█                              1
+round  1 │███████                        4
+round  2 │██████████████████████████████ 16
+round  3 │███████                        4
+
+**Total active S-boxes** N = 25, Pr ≤ 2⁻¹⁵⁰
+```
+
+The same machinery powers every other attack's test output — run any
+`#[ignore]`-flagged `demo_*` test with `--nocapture` to see it.
 
 ### Elliptic-curve cryptography
 
@@ -253,6 +285,10 @@ that makes adding new attacks cheap.
 | `cryptanalysis::aes::quantum_grover`        | Grover-style quantum key-recovery cost model |
 | `cryptanalysis::aes::biclique`              | Biclique attack skeleton |
 | `cryptanalysis::aes::related_key`           | **Related-key attack framework** — key-schedule difference propagation, related-key avalanche, related-key boomerang, Biryukov-Khovratovich local-collision demo |
+| `cryptanalysis::aes::truncated_diff`        | **Truncated differential cryptanalysis** (Knudsen FSE 1994) — active-byte trail propagation, MixColumns branch-number filter, minimum-active-S-box bounds |
+| `cryptanalysis::aes::higher_order`          | **Higher-order differential** (Lai 1994, Knudsen 1995) — d-th derivatives, 3-round Square integral distinguisher, algebraic-degree probe |
+| `cryptanalysis::aes::dfa`                   | **DFA / Piret-Quisquater fault attack** (FDTC 2003) — single-byte fault before round 9 reduces last-round-key entropy by ~29 bits per fault |
+| `cryptanalysis::aes::visualize`             | **ASCII visualization helpers** — state grids, active-byte patterns, trail diagrams, heat maps, bar charts, boomerang quartet diagrams, recovery progress bars |
 | `cryptanalysis::md5_differential`           | MD5 differential collision (Wang et al. 2004) |
 | `cryptanalysis::sha1_differential`          | SHA-1 differential analysis (Wang-Yin-Yu 2005) |
 

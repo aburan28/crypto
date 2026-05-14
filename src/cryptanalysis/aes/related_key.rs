@@ -353,8 +353,11 @@ pub fn biryukov_khovratovich_4round_demo(
 
 // ── Markdown report ──────────────────────────────────────────────────
 
-/// Render a Markdown report for a `KeyScheduleDiff`.
+/// Render a Markdown report for a `KeyScheduleDiff`.  Includes both
+/// the per-round table AND a horizontal bar-chart visualization of
+/// the diffusion rate.
 pub fn format_key_schedule_diff(diff: &KeyScheduleDiff) -> String {
+    use super::visualize::{format_active_pattern, format_round_bars};
     let mut s = String::new();
     s.push_str("| round | active bytes | round-key XOR (hex) |\n");
     s.push_str("|------:|-------------:|---------------------|\n");
@@ -368,9 +371,25 @@ pub fn format_key_schedule_diff(diff: &KeyScheduleDiff) -> String {
         s.push_str(&format!("| {} | {} | {} |\n", r, active, hex));
     }
     s.push_str(&format!(
-        "\n**Total active key bytes**: {} across {} round-key segments.\n",
+        "\n**Total active key bytes**: {} across {} round-key segments.\n\n",
         diff.total_active_bytes, diff.n_rounds
     ));
+    // Visual bar chart of the diffusion rate.
+    s.push_str(&format_round_bars(
+        &diff.active_bytes_per_round,
+        "Active-byte diffusion per round",
+        30,
+    ));
+    s.push('\n');
+    // Show the FIRST round-key-difference 4×4 grid as an active-byte
+    // pattern (the rest get tedious, but the first illustrates the
+    // ShiftRows/MC propagation pattern).
+    if let Some(rk1) = diff.round_key_diff.get(1) {
+        s.push_str(&format_active_pattern(
+            rk1,
+            "Round-1 key-difference active-byte pattern",
+        ));
+    }
     s
 }
 

@@ -186,6 +186,16 @@ enum CryptanalysisOp {
         #[arg(long, default_value_t = 0)]
         rounds: usize,
     },
+    /// **AES visual demos** — emit ASCII diagrams for the major
+    /// AES attack visualizations: truncated-diff trail, 3-round
+    /// integral distinguisher, DFA single-byte-fault propagation,
+    /// related-key schedule diffusion.
+    AesVisualDemo {
+        /// Which demo to run: `truncated-diff`, `integral`, `dfa`,
+        /// `key-schedule`, or `all` (default).
+        #[arg(long, default_value = "all")]
+        demo: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -536,6 +546,72 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
                 println!("- random baseline (Hd≤16 in 128 bits): ≈ 2⁻⁷⁹");
             } else {
                 println!("(Related-key avalanche + local-collision demo only available for AES-128; key-schedule diffusion table above already shows the AES-256 weakness.)");
+            }
+        }
+        CryptanalysisOp::AesVisualDemo { demo } => {
+            use crypto_lib::cryptanalysis::aes::{
+                dfa::{format_dfa_visualization, dfa_per_column_candidates, inject_fault_round_9},
+                higher_order::{integral_distinguisher_3_round, render_integral_visualization},
+                related_key::{format_key_schedule_diff, key_schedule_difference},
+                reduced::ReducedAes128,
+                truncated_diff::{propagate_truncated_round, render_trail_diagram, TruncatedPattern},
+            };
+            use crypto_lib::symmetric::aes::AesKey;
+            let run_truncated = |x: &str| -> bool { x == "all" || x == "truncated-diff" };
+            let run_integral = |x: &str| -> bool { x == "all" || x == "integral" };
+            let run_dfa = |x: &str| -> bool { x == "all" || x == "dfa" };
+            let run_ks = |x: &str| -> bool { x == "all" || x == "key-schedule" };
+            if run_truncated(&demo) {
+                println!("\n## (1) Truncated-differential trail on AES (single active byte)\n");
+                let mut current = TruncatedPattern(1);
+                let mut steps = Vec::new();
+                for _ in 0..4 {
+                    let step = propagate_truncated_round(current);
+                    let mut next = 0u16;
+                    for c in 0..4 {
+                        let n = *step.mc_output_counts[c].iter().min().unwrap();
+                        for r in 0..n as usize {
+                            next |= 1u16 << (4 * c + r);
+                        }
+                    }
+                    current = TruncatedPattern(next);
+                    steps.push(step);
+                }
+                println!("{}", render_trail_diagram(&steps));
+            }
+            if run_integral(&demo) {
+                println!("\n## (2) Square / integral distinguisher on 3-round AES\n");
+                let key = [0u8; 16];
+                let other = [0u8; 15];
+                let xor_sum = integral_distinguisher_3_round(&key, &other);
+                println!("{}", render_integral_visualization(&xor_sum));
+            }
+            if run_dfa(&demo) {
+                println!("\n## (3) DFA / Piret-Quisquater single-byte fault on AES-128\n");
+                let key_bytes = [
+                    0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09,
+                    0xcf, 0x4f, 0x3c,
+                ];
+                let cipher = ReducedAes128::new(&key_bytes, 10, false);
+                let pt = [0x6bu8; 16];
+                let (correct, faulted) = inject_fault_round_9(&cipher, &pt, 0, 0xCC);
+                let cands = dfa_per_column_candidates(&correct, &faulted);
+                println!(
+                    "{}",
+                    format_dfa_visualization(&correct, &faulted, &cands)
+                );
+            }
+            if run_ks(&demo) {
+                println!("\n## (4) Related-key schedule diffusion (AES-256 vs AES-128)\n");
+                for &(bits, label) in &[(128u32, "AES-128"), (256u32, "AES-256")] {
+                    let key_bytes = vec![0u8; (bits / 8) as usize];
+                    let key = AesKey::new(&key_bytes).unwrap();
+                    let mut delta = vec![0u8; (bits / 8) as usize];
+                    delta[0] = 0x01;
+                    let diff = key_schedule_difference(&key, &delta);
+                    println!("\n### {} (ΔK = single byte at position 0)\n", label);
+                    println!("{}", format_key_schedule_diff(&diff));
+                }
             }
         }
     }

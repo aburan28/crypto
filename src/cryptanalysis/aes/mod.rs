@@ -52,7 +52,9 @@
 pub mod algebraic;
 pub mod biclique;
 pub mod boomerang;
+pub mod dfa;
 pub mod differential;
+pub mod higher_order;
 pub mod impossible;
 pub mod linear;
 pub mod milp;
@@ -63,7 +65,27 @@ pub mod reduced;
 pub mod related_key;
 pub mod small_scale;
 pub mod square;
+pub mod truncated_diff;
+pub mod visualize;
 pub mod yoyo;
+
+pub use dfa::{
+    dfa_per_column_candidates, dfa_recover_last_round_key_byte_candidates,
+    format_dfa_visualization, inject_fault_round_9,
+};
+pub use higher_order::{
+    derivative, derivative_state, dth_derivative_is_zero, integral_distinguisher_3_round,
+    render_integral_visualization,
+};
+pub use truncated_diff::{
+    minimum_active_sbox_count, mix_columns_branch_options, propagate_truncated_round,
+    render_trail_diagram, shift_rows_truncated, TruncatedPattern, TruncatedRoundStep,
+};
+pub use visualize::{
+    format_active_pattern, format_boomerang_quartet_diagram, format_histogram,
+    format_recovery_progress, format_round_bars, format_state_grid,
+    format_table_4bit_heatmap, format_table_8bit_summary, format_trail,
+};
 
 pub use related_key::{
     biryukov_khovratovich_4round_demo, format_key_schedule_diff, key_schedule_difference,
