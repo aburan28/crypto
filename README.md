@@ -134,6 +134,10 @@ crypto cryptanalysis hash-auto --hash sha1
 crypto cryptanalysis length-extension --hash sha1 \
     --secret-len 16 --message-hex "&role=guest" \
     --suffix-hex "&role=admin" --digest-hex <hex>
+
+# AES related-key attack: key-schedule diffusion + avalanche + local collision
+crypto cryptanalysis aes-related-key --key-bits 256 --rounds 4
+crypto cryptanalysis aes-related-key --key-bits 128 --rounds 4 --avalanche-trials 1024
 ```
 
 ### Elliptic-curve cryptography
@@ -248,6 +252,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::aes::milp`                  | MILP encoding of differential trail search |
 | `cryptanalysis::aes::quantum_grover`        | Grover-style quantum key-recovery cost model |
 | `cryptanalysis::aes::biclique`              | Biclique attack skeleton |
+| `cryptanalysis::aes::related_key`           | **Related-key attack framework** — key-schedule difference propagation, related-key avalanche, related-key boomerang, Biryukov-Khovratovich local-collision demo |
 | `cryptanalysis::md5_differential`           | MD5 differential collision (Wang et al. 2004) |
 | `cryptanalysis::sha1_differential`          | SHA-1 differential analysis (Wang-Yin-Yu 2005) |
 

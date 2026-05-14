@@ -60,9 +60,16 @@ pub mod mitm;
 pub mod mixture;
 pub mod quantum_grover;
 pub mod reduced;
+pub mod related_key;
 pub mod small_scale;
 pub mod square;
 pub mod yoyo;
+
+pub use related_key::{
+    biryukov_khovratovich_4round_demo, format_key_schedule_diff, key_schedule_difference,
+    related_key_avalanche, related_key_boomerang_distinguisher, KeyScheduleDiff,
+    LocalCollisionResult, RelatedKeyAvalanche, RelatedKeyBoomerangResult,
+};
 
 pub use differential::{
     aes_sbox_ddt, key_recovery_two_round, max_differential_probability, propagate_one_round,
@@ -72,21 +79,23 @@ pub use impossible::{
     active_byte_count, elimination_demonstration, state_contradicts_impossibility,
     verify_4_round_impossibility, ImpossibilityReport,
 };
-pub use mixture::{
-    algebraic_identity_holds, column_confined_subspace_check, pairwise_equality_holds, xor4,
-    ColumnMixtureReport, Mixture,
-};
-pub use mitm::{delta_set, is_uniform_multiset, mitm_recover_two_round, multiset, ordered_sequence};
-pub use yoyo::{
-    diff_in_column_0, exchange_bytes, yoyo_distinguisher, yoyo_iteration, YoyoReport,
-    COL0_FLAT, YOYO_SUPPORT_3R,
-};
 pub use linear::{
     aes_sbox_lat, linear_correlation, max_linear_bias, recover_key_bit_one_round,
     recover_key_byte_one_round,
+};
+pub use mitm::{
+    delta_set, is_uniform_multiset, mitm_recover_two_round, multiset, ordered_sequence,
+};
+pub use mixture::{
+    algebraic_identity_holds, column_confined_subspace_check, pairwise_equality_holds, xor4,
+    ColumnMixtureReport, Mixture,
 };
 pub use reduced::{ReducedAes128, RoundOps};
 pub use square::{
     is_balanced, key_recovery_four_round, lambda_set, square_distinguisher_three_round,
     SquareAttackReport,
+};
+pub use yoyo::{
+    diff_in_column_0, exchange_bytes, yoyo_distinguisher, yoyo_iteration, YoyoReport, COL0_FLAT,
+    YOYO_SUPPORT_3R,
 };
