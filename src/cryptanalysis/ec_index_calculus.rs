@@ -290,6 +290,64 @@ fn one(p: &BigUint) -> FieldElement {
     FieldElement::one(p.clone())
 }
 
+// ── Univariate root finder over F_p ─────────────────────────────────────
+
+/// Find every `F_p`-rational root of the polynomial
+/// `coeffs[0] + coeffs[1]·X + coeffs[2]·X² + … + coeffs[d]·X^d`.
+///
+/// This is what wires Semaev's `S_4` into an actual 3-decomposition
+/// sieve: fix `(x_R, x_i, x_j)` from a factor-base sweep, compute the
+/// quartic in `X_k` via [`semaev_s4_in_x4`], and pass it here to read
+/// off the candidate `x_k` values.
+///
+/// Algorithm: for fields with `p` up to roughly `2²⁰` we evaluate at
+/// every element (Horner's rule, ~`p · d` field ops).  This is the
+/// only context where this index-calculus module is exercised in the
+/// crate — the toy curve uses `p = 271` — so brute force is more than
+/// fast enough.
+///
+/// For cryptographically-sized `p` the right approach is
+/// `gcd(poly(X), X^p − X)` (Cantor-Zassenhaus rational-factor
+/// extraction) followed by equal-degree splitting; we do not
+/// implement that here, but the function still returns the empty
+/// vector rather than panicking so the caller can detect the gap.
+pub fn find_roots_fp(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    let mut roots = Vec::new();
+    if coeffs.is_empty() || coeffs.iter().all(|c| c.is_zero()) {
+        return roots;
+    }
+    // Strip trailing zero coefficients to get the true degree.
+    let mut deg = coeffs.len() - 1;
+    while deg > 0 && coeffs[deg].is_zero() {
+        deg -= 1;
+    }
+    if deg == 0 {
+        // Non-zero constant: no roots.
+        return roots;
+    }
+
+    let p_bits = p.bits();
+    if p_bits > 20 {
+        // Out of brute-force range and no CZ wired here — caller
+        // gets empty.  See doc comment.
+        return roots;
+    }
+    let p_u64 = p.to_u64_digits().get(0).copied().unwrap_or(0);
+    let coeffs_slice = &coeffs[..=deg];
+    for v in 0..p_u64 {
+        let elt = FieldElement::new(BigUint::from(v), p.clone());
+        // Horner: value = c_d; value = value·X + c_{i} for i = d-1 .. 0.
+        let mut value = coeffs_slice[deg].clone();
+        for i in (0..deg).rev() {
+            value = value.mul(&elt).add(&coeffs_slice[i]);
+        }
+        if value.is_zero() {
+            roots.push(elt);
+        }
+    }
+    roots
+}
+
 // ── Tonelli–Shanks square root mod p ────────────────────────────────────
 
 /// Solve `x² ≡ n (mod p)` for a prime `p`.  Returns `Some(x)` if `n`
@@ -1002,6 +1060,81 @@ mod tests {
             x4_pow = x4_pow.mul(&x4);
         }
         assert!(value.is_zero(), "S₄ should vanish on collinear-sum x-coords");
+    }
+
+    /// **Root finder sanity**: build a polynomial with known roots
+    /// and recover them.
+    #[test]
+    fn find_roots_fp_round_trip() {
+        let p = BigUint::from(271u32);
+        let r1 = FieldElement::new(BigUint::from(3u32), p.clone());
+        let r2 = FieldElement::new(BigUint::from(11u32), p.clone());
+        let r3 = FieldElement::new(BigUint::from(200u32), p.clone());
+        // (X − r1)(X − r2)(X − r3) over F_271 (signs absorbed via .neg()).
+        let mr1 = r1.neg();
+        let mr2 = r2.neg();
+        let mr3 = r3.neg();
+        // Expand step by step.
+        //   (X + mr1)(X + mr2) = X² + (mr1 + mr2)X + mr1·mr2
+        let c0_a = mr1.mul(&mr2);
+        let c1_a = mr1.add(&mr2);
+        // Multiply that by (X + mr3):
+        //   X³ + (mr3 + c1_a) X² + (mr3·c1_a + c0_a) X + mr3·c0_a
+        let c0 = mr3.mul(&c0_a);
+        let c1 = mr3.mul(&c1_a).add(&c0_a);
+        let c2 = mr3.add(&c1_a);
+        let c3 = FieldElement::one(p.clone());
+        let coeffs = vec![c0, c1, c2, c3];
+        let mut roots = find_roots_fp(&coeffs, &p);
+        roots.sort_by_key(|r| r.value.clone());
+        let mut expected = vec![r1, r2, r3];
+        expected.sort_by_key(|r| r.value.clone());
+        assert_eq!(roots, expected);
+    }
+
+    /// **S_4 + root finder, end-to-end 3-decomposition oracle**.
+    ///
+    /// Given three factor-base x-coords `(x₁, x₂, x₃)` and the curve's
+    /// `(a, b)`, compute `S_4(x₁, x₂, x₃, X₄)` as a quartic and read off
+    /// every candidate `x₄ ∈ F_p` whose curve point closes the relation
+    /// `±P₁ ± P₂ ± P₃ ± P₄ = O`. This is the binary-search step that
+    /// turns the (currently unused) `semaev_s4_in_x4` infrastructure
+    /// into something a relation collector can actually call.
+    #[test]
+    fn s4_root_finder_recovers_x4() {
+        let curve = tiny_curve();
+        let g = curve.generator();
+        let a_fe = curve.a_fe();
+        let b_fe = curve.fe(curve.b.clone());
+
+        let p1 = g.scalar_mul(&BigUint::from(2u32), &a_fe);
+        let p2 = g.scalar_mul(&BigUint::from(7u32), &a_fe);
+        let p3 = g.scalar_mul(&BigUint::from(13u32), &a_fe);
+        let p4 = p1.add(&p2, &a_fe).add(&p3, &a_fe).neg();
+        let (x1, x2, x3, x4) = (
+            match &p1 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p2 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p3 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p4 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+        );
+        let coeffs = semaev_s4_in_x4(&x1, &x2, &x3, &a_fe, &b_fe);
+        let coeffs_vec: Vec<FieldElement> = coeffs.to_vec();
+        let roots = find_roots_fp(&coeffs_vec, &curve.p);
+        assert!(
+            roots.contains(&x4),
+            "the true x₄ = {:?} should be among S₄-roots {:?}",
+            x4.value,
+            roots.iter().map(|r| r.value.clone()).collect::<Vec<_>>()
+        );
+        // Cross-check: every root r satisfies S_4(x_1, x_2, x_3, r) = 0,
+        // i.e. evaluating the quartic at r gives zero.
+        for r in &roots {
+            let mut val = coeffs[4].clone();
+            for i in (0..4).rev() {
+                val = val.mul(r).add(&coeffs[i]);
+            }
+            assert!(val.is_zero());
+        }
     }
 
     /// **Pollard rho** as a sanity baseline: recover the same `x` and
