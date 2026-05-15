@@ -38,6 +38,12 @@ use num_bigint::BigUint;
 #[derive(Parser)]
 #[command(name = "crypto", about = "Educational cryptography library demo")]
 struct Cli {
+    /// Color output mode: `auto` (default), `always`, or `never`.
+    /// `auto` enables colors only on TTY.  Respected by every visual
+    /// renderer.
+    #[arg(long, global = true, default_value = "auto")]
+    color: String,
+
     #[command(subcommand)]
     command: Cmd,
 }
@@ -271,6 +277,12 @@ enum RsaOp {
 
 fn main() {
     let cli = Cli::parse();
+    // Honour the --color flag before any visual code runs.
+    match cli.color.as_str() {
+        "always" | "1" | "yes" | "on" => crypto_lib::visualize::color::set_enabled(true),
+        "never" | "0" | "no" | "off" => crypto_lib::visualize::color::set_enabled(false),
+        _ => {} // "auto": leave to env-var + TTY detection
+    }
 
     match cli.command {
         Cmd::Hash { algorithm, message } => cmd_hash(&algorithm, &message),

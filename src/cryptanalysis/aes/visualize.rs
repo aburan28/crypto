@@ -37,6 +37,7 @@
 ///     └────┴────┴────┴────┘
 /// ```
 pub fn format_state_grid(bytes: &[u8; 16], title: &str) -> String {
+    use crate::visualize::color::{paint, DIM, FG_BRIGHT_YELLOW};
     let mut s = String::new();
     if !title.is_empty() {
         s.push_str(&format!("**{}**\n\n", title));
@@ -46,7 +47,15 @@ pub fn format_state_grid(bytes: &[u8; 16], title: &str) -> String {
     for r in 0..4 {
         s.push_str(&format!("r{}  │", r));
         for c in 0..4 {
-            s.push_str(&format!(" {:02x} │", bytes[4 * c + r]));
+            let b = bytes[4 * c + r];
+            let hex_str = format!("{:02x}", b);
+            // Non-zero bytes get yellow; zeros stay dim.
+            let painted = if b == 0 {
+                paint(&hex_str, DIM)
+            } else {
+                paint(&hex_str, FG_BRIGHT_YELLOW)
+            };
+            s.push_str(&format!(" {} │", painted));
         }
         s.push('\n');
         if r < 3 {
@@ -64,6 +73,7 @@ pub fn format_state_grid(bytes: &[u8; 16], title: &str) -> String {
 /// differential trails where the actual byte values are noise and
 /// only the active-position pattern matters.
 pub fn format_active_pattern(bytes: &[u8; 16], title: &str) -> String {
+    use crate::visualize::color::{paint_char, DIM, FG_BRIGHT_RED};
     let mut s = String::new();
     if !title.is_empty() {
         s.push_str(&format!("**{}**\n\n", title));
@@ -73,7 +83,10 @@ pub fn format_active_pattern(bytes: &[u8; 16], title: &str) -> String {
         s.push_str("  ");
         for c in 0..4 {
             let b = bytes[4 * c + r];
-            s.push_str(if b == 0 { " ·" } else { " ▓" });
+            let ch = if b == 0 { '·' } else { '▓' };
+            let color = if b == 0 { DIM } else { FG_BRIGHT_RED };
+            s.push(' ');
+            s.push_str(&paint_char(ch, color));
         }
         s.push('\n');
     }
@@ -101,8 +114,12 @@ pub fn format_trail(states: &[[u8; 16]], round_labels: &[&str]) -> String {
         for state in states {
             s.push_str("  ");
             for c in 0..4 {
+                use crate::visualize::color::{paint_char, DIM, FG_BRIGHT_RED};
                 let b = state[4 * c + r];
-                s.push_str(if b == 0 { " ·" } else { " ▓" });
+                let ch = if b == 0 { '·' } else { '▓' };
+                let col = if b == 0 { DIM } else { FG_BRIGHT_RED };
+                s.push(' ');
+                s.push_str(&paint_char(ch, col));
             }
             s.push(' ');
         }
@@ -123,13 +140,7 @@ pub fn format_table_4bit_heatmap(table: &[Vec<u32>], title: &str) -> String {
     if !title.is_empty() {
         s.push_str(&format!("**{}**\n\n", title));
     }
-    let max = table
-        .iter()
-        .flatten()
-        .copied()
-        .max()
-        .unwrap_or(1)
-        .max(1) as f64;
+    let max = table.iter().flatten().copied().max().unwrap_or(1).max(1) as f64;
     s.push_str("```\n");
     s.push_str("       ");
     for c in 0..16 {
@@ -140,9 +151,13 @@ pub fn format_table_4bit_heatmap(table: &[Vec<u32>], title: &str) -> String {
         s.push_str(&format!("  {:x}    ", r));
         for &v in row {
             let lv = ((v as f64) / max * 4.0).round() as usize;
-            let ch = ['·', '░', '▒', '▓', '█'][lv.min(4)];
+            let lv = lv.min(4);
+            let ch = ['·', '░', '▒', '▓', '█'][lv];
             s.push(' ');
-            s.push(ch);
+            s.push_str(&crate::visualize::color::paint_char(
+                ch,
+                crate::visualize::color::heatmap_color(lv),
+            ));
         }
         s.push('\n');
     }
@@ -154,11 +169,7 @@ pub fn format_table_4bit_heatmap(table: &[Vec<u32>], title: &str) -> String {
 /// number of zero entries, top-5 differentials by frequency.  Full
 /// 256×256 heat-map would be unreadable; this is what fits on a
 /// page.
-pub fn format_table_8bit_summary(
-    table: &[Vec<u32>],
-    title: &str,
-    top_k: usize,
-) -> String {
+pub fn format_table_8bit_summary(table: &[Vec<u32>], title: &str, top_k: usize) -> String {
     assert_eq!(table.len(), 256);
     let mut s = String::new();
     if !title.is_empty() {
@@ -220,6 +231,7 @@ pub fn format_table_8bit_summary(
 /// round  4 │█████████                  9
 /// ```
 pub fn format_round_bars(values: &[usize], title: &str, max_width: usize) -> String {
+    use crate::visualize::color::{paint, FG_BRIGHT_CYAN};
     let mut s = String::new();
     if !title.is_empty() {
         s.push_str(&format!("**{}**\n\n", title));
@@ -228,7 +240,7 @@ pub fn format_round_bars(values: &[usize], title: &str, max_width: usize) -> Str
     s.push_str("```\n");
     for (i, &v) in values.iter().enumerate() {
         let bar_width = (v * max_width) / max;
-        let bar: String = "█".repeat(bar_width);
+        let bar = paint(&"█".repeat(bar_width), FG_BRIGHT_CYAN);
         let pad: String = " ".repeat(max_width.saturating_sub(bar_width));
         s.push_str(&format!("round {:>2} │{}{} {}\n", i, bar, pad, v));
     }
@@ -315,10 +327,11 @@ pub fn format_boomerang_quartet_diagram(
 /// Render a small key-recovery progress bar.  `recovered` is the
 /// number of key bits / bytes recovered, `total` is the target.
 pub fn format_recovery_progress(recovered: usize, total: usize, label: &str) -> String {
+    use crate::visualize::color::{paint, DIM, FG_BRIGHT_GREEN};
     let width = 40;
     let filled = (recovered * width) / total.max(1);
-    let bar: String = "█".repeat(filled);
-    let empty: String = "░".repeat(width - filled);
+    let bar = paint(&"█".repeat(filled), FG_BRIGHT_GREEN);
+    let empty = paint(&"░".repeat(width - filled), DIM);
     format!(
         "  {} │{}{}│ {}/{} ({:.1}%)\n",
         label,

@@ -43,10 +43,15 @@ pub fn demo_toy_curve_scatter(p: u64, a: u64, b: u64) -> String {
     // y-axis label
     s.push_str("  y\n");
     s.push_str("  ▲\n");
+    use crate::visualize::color::{paint_char, FG_BRIGHT_MAGENTA};
     for row in &grid {
         s.push_str("  │");
         for &c in row {
-            s.push(c);
+            if c == '●' {
+                s.push_str(&paint_char(c, FG_BRIGHT_MAGENTA));
+            } else {
+                s.push(c);
+            }
             s.push(' ');
         }
         s.push('\n');

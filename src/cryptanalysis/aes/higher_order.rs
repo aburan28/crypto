@@ -97,10 +97,7 @@ pub fn derivative_state<F: Fn(&[u8; 16]) -> [u8; 16]>(
 ///
 /// Returns the per-byte XOR sum (which should be all zeros for
 /// genuine 3-round AES).
-pub fn integral_distinguisher_3_round(
-    key: &[u8; 16],
-    fixed_other_bytes: &[u8; 15],
-) -> [u8; 16] {
+pub fn integral_distinguisher_3_round(key: &[u8; 16], fixed_other_bytes: &[u8; 15]) -> [u8; 16] {
     let cipher = ReducedAes128::new(key, 3, true);
     let mut xor_sum = [0u8; 16];
     for v in 0u32..256 {
@@ -171,15 +168,23 @@ pub fn render_integral_visualization(xor_sum: &[u8; 16]) -> String {
         zero_count
     ));
     s.push_str(&format_state_grid(xor_sum, "XOR-sum state"));
+    use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
     if zero_count == 16 {
-        s.push_str("\n✅ **Distinguishes from random**: random ciphers give 16 random bytes here.\n");
+        s.push_str(&format!(
+            "\n{} **Distinguishes from random**: random ciphers give 16 random bytes here.\n",
+            paint("✅", FG_BRIGHT_GREEN)
+        ));
     } else if zero_count > 8 {
         s.push_str(&format!(
-            "\n⚠️  **Partial balance** ({} bytes zero): cipher has *some* integral structure.\n",
+            "\n{} **Partial balance** ({} bytes zero): cipher has *some* integral structure.\n",
+            paint("⚠️ ", FG_BRIGHT_YELLOW),
             zero_count
         ));
     } else {
-        s.push_str("\n❌ **No balance**: cipher looks random over the λ-set (≥ 4 rounds typically).\n");
+        s.push_str(&format!(
+            "\n{} **No balance**: cipher looks random over the λ-set (≥ 4 rounds typically).\n",
+            paint("❌", FG_BRIGHT_RED)
+        ));
     }
     s
 }

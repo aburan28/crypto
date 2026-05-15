@@ -9,6 +9,15 @@
 //! Submodule-specific renderers live in their own `visualize.rs`
 //! files (e.g. `symmetric::visualize`, `hash::visualize`,
 //! `ecc::visualize`) and call into the primitives here.
+//!
+//! ## ANSI colors
+//!
+//! All renderers consult [`color::enabled()`] before emitting ANSI
+//! escape codes.  Auto-detected from stdout TTY status; respects
+//! `NO_COLOR` (off) and `CRYPTO_COLOR={always|never}` overrides.
+//! Pipe a colored visual to a file → the file gets plain text.
+
+pub mod color;
 
 pub use crate::cryptanalysis::visualize::{
     format_active_pattern, format_birthday_curve, format_boomerang_quartet_diagram,

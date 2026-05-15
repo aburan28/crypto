@@ -56,13 +56,16 @@ pub fn format_matrix_heatmap(matrix: &[Vec<f64>], title: &str, label_cols: bool)
         }
         s.push('\n');
     }
+    use crate::visualize::color::{heatmap_color, paint_char};
     for r in 0..m {
         s.push_str(&format!(" {:>4}  ", r));
         for c in 0..n {
             let v = matrix[r][c].abs();
             let lv = (v / max_abs * 4.0).round() as usize;
-            let ch = ['·', '░', '▒', '▓', '█'][lv.min(4)];
-            s.push_str(&format!("   {}", ch));
+            let lv = lv.min(4);
+            let ch = ['·', '░', '▒', '▓', '█'][lv];
+            s.push_str("   ");
+            s.push_str(&paint_char(ch, heatmap_color(lv)));
         }
         s.push('\n');
     }
@@ -111,10 +114,17 @@ pub fn format_path_trajectory(
         }
     }
     s.push_str("```\n");
+    use crate::visualize::color::{paint_char, FG_BRIGHT_CYAN, FG_BRIGHT_MAGENTA};
     for row in &grid {
         s.push_str("  ");
         for &c in row {
-            s.push(c);
+            if c == '●' {
+                s.push_str(&paint_char(c, FG_BRIGHT_MAGENTA));
+            } else if c == '·' {
+                s.push_str(&paint_char(c, FG_BRIGHT_CYAN));
+            } else {
+                s.push(c);
+            }
         }
         s.push('\n');
     }
@@ -157,23 +167,28 @@ pub fn format_signed_bars(values: &[i32], title: &str, max_width: usize) -> Stri
     let max_abs = values.iter().map(|v| v.abs()).max().unwrap_or(1).max(1);
     let half = max_width / 2;
     s.push_str("```\n");
+    use crate::visualize::color::{paint, signed_color};
     for (i, &v) in values.iter().enumerate() {
         let bar_width = ((v.abs() as usize) * half) / (max_abs as usize);
+        let bar_str = "═".repeat(bar_width);
+        let colored_bar = paint(&bar_str, signed_color(v));
         let mut line = String::new();
         if v >= 0 {
             line.push_str(&" ".repeat(half));
             line.push('│');
-            line.push_str(&"═".repeat(bar_width));
+            line.push_str(&colored_bar);
         } else {
             let pad = half.saturating_sub(bar_width);
             line.push_str(&" ".repeat(pad));
-            line.push_str(&"═".repeat(bar_width));
+            line.push_str(&colored_bar);
             line.push('│');
             line.push_str(&" ".repeat(half));
         }
         s.push_str(&format!(
-            "  idx {:>3}  {}  {:>+5}\n",
-            i, line, v
+            "  idx {:>3}  {}  {}\n",
+            i,
+            line,
+            paint(&format!("{:>+5}", v), signed_color(v))
         ));
     }
     s.push_str("```\n");

@@ -188,7 +188,21 @@ crypto visual ecc --target ecdsa               # ECDSA sign/verify dataflow
 
 # Everything at once
 crypto visual all
+
+# Color control
+crypto --color always visual symmetric --target ecb-penguin    # force colors
+crypto --color never  visual ecc       --target curve          # plain text
+CRYPTO_COLOR=always crypto visual hash --target sponge         # via env var
+NO_COLOR=1 crypto visual all                                   # standard NO_COLOR
 ```
+
+**ANSI colors**: every visual renderer emits ANSI colors when stdout
+is a TTY.  Heat-maps grade `dim → blue → green → yellow → red` (low
+to high); state grids highlight non-zero bytes in **yellow**; active
+patterns paint `▓` in **bright red**; signed bars are **green** for
+positive, **red** for negative; recovery progress bars are **green
+filled, dim unfilled**; verdict markers (`✓ ✗ ⚠`) get their canonical
+colors.  Set `NO_COLOR=1` or `--color never` to suppress.
 
 ### Visual output samples
 
