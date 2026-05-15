@@ -121,6 +121,7 @@ pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
 pub mod j0_twists;
 pub mod lattice;
+pub mod legacy_curve_attacks;
 pub mod mazur_tate_sigma;
 pub mod md5_differential;
 pub mod ml_rho_walks;
@@ -181,6 +182,10 @@ pub use j0_twists::{
     primitive_root, twist_coefficients, TwistInfo,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
+pub use legacy_curve_attacks::{
+    bounded_bsgs_binary, bounded_bsgs_prime, legacy_curve_attack_report,
+    run_legacy_curve_attack_demos, BoundedDlpSolution, LegacyCurveAttackDemo,
+};
 pub use multi_key_hnp::{build_transcript, multi_key_hnp_recover_master, ChildKeySignature};
 pub use pollard_rho::{
     pollard_rho_dlp, pollard_rho_dlp_zp, pollard_rho_dlp_zp_multi, pollard_rho_dp_dlp_zp,
