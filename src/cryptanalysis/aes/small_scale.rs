@@ -314,9 +314,7 @@ mod tests {
                 ((k >> 12) & 0xf) as u8,
             ];
             let candidate_cipher = SmallAes::new(candidate_key, 4);
-            if candidate_cipher.encrypt(pt1) == ct1
-                && candidate_cipher.encrypt(pt2) == ct2
-            {
+            if candidate_cipher.encrypt(pt1) == ct1 && candidate_cipher.encrypt(pt2) == ct2 {
                 recovered = Some(candidate_key);
                 break;
             }

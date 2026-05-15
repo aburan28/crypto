@@ -105,11 +105,24 @@ pub fn ec_elgamal_keygen(curve: CurveParams) -> EcElGamalPrivateKey {
 
 /// Encrypt the integer `m` under public key `pk`.
 ///
-/// `m` is **not** range-checked here — but bear in mind that
-/// decryption can only recover `m ∈ [0, m_max)` for the BSGS bound
-/// supplied at decrypt time.  A protocol designer must enforce the
-/// range in the surrounding code.
+/// Panics if `pk` or `m` is invalid. Prefer [`ec_elgamal_encrypt_checked`]
+/// when those inputs are untrusted.
 pub fn ec_elgamal_encrypt(pk: &EcElGamalPublicKey, m: &BigUint) -> EcElGamalCiphertext {
+    ec_elgamal_encrypt_checked(pk, m).expect("invalid EC-ElGamal public key or plaintext")
+}
+
+/// Checked EC-ElGamal encryption.
+///
+/// Plaintexts are accepted only in `[0, n)` to avoid the `m·G` encoding
+/// collision where `m` and `m + n` encrypt to the same curve point.
+pub fn ec_elgamal_encrypt_checked(
+    pk: &EcElGamalPublicKey,
+    m: &BigUint,
+) -> Result<EcElGamalCiphertext, &'static str> {
+    validate_public_key(pk)?;
+    if m >= &pk.curve.n {
+        return Err("plaintext must be in [0, n)");
+    }
     let mut rng = OsRng;
     let n = &pk.curve.n;
     let k = loop {
@@ -126,7 +139,7 @@ pub fn ec_elgamal_encrypt(pk: &EcElGamalPublicKey, m: &BigUint) -> EcElGamalCiph
     let m_g = g.scalar_mul(m, &a);
     let k_q = pk.q.scalar_mul_ct(&k, &a, bits);
     let c2 = m_g.add(&k_q, &a);
-    EcElGamalCiphertext { c1, c2 }
+    Ok(EcElGamalCiphertext { c1, c2 })
 }
 
 /// Recover `M = m·G` — the encoded plaintext as a curve point.
@@ -135,11 +148,21 @@ pub fn ec_elgamal_encrypt(pk: &EcElGamalPublicKey, m: &BigUint) -> EcElGamalCiph
 /// that operate on the encoded plaintext without ever needing the
 /// integer (e.g. equality tests via point comparison).
 pub fn ec_elgamal_decrypt_point(sk: &EcElGamalPrivateKey, c: &EcElGamalCiphertext) -> Point {
+    ec_elgamal_decrypt_point_checked(sk, c).expect("invalid EC-ElGamal ciphertext")
+}
+
+/// Checked variant of [`ec_elgamal_decrypt_point`].
+pub fn ec_elgamal_decrypt_point_checked(
+    sk: &EcElGamalPrivateKey,
+    c: &EcElGamalCiphertext,
+) -> Result<Point, &'static str> {
+    validate_public_key(&sk.public)?;
+    validate_ciphertext(&sk.public.curve, c)?;
     let a = sk.public.curve.a_fe();
     let bits = sk.public.curve.order_bits();
     let d_c1 = c.c1.scalar_mul_ct(&sk.d, &a, bits);
     // M = C2 − d·C1 = C2 + (−(d·C1))
-    c.c2.add(&d_c1.neg(), &a)
+    Ok(c.c2.add(&d_c1.neg(), &a))
 }
 
 /// Recover the integer plaintext via baby-step giant-step DLP.
@@ -157,7 +180,7 @@ pub fn ec_elgamal_decrypt_bounded(
     c: &EcElGamalCiphertext,
     m_max: u64,
 ) -> Result<u64, &'static str> {
-    let target = ec_elgamal_decrypt_point(sk, c);
+    let target = ec_elgamal_decrypt_point_checked(sk, c)?;
     bsgs_solve(&sk.public.curve, &target, m_max)
 }
 
@@ -176,7 +199,7 @@ fn bsgs_solve(curve: &CurveParams, target: &Point, m_max: u64) -> Result<u64, &'
     }
     // Take m_step = ⌈√m_max⌉ as the BSGS step.  Baby steps store
     // {j·G : j = 0..m_step}; giant steps walk target − i·(m_step)·G.
-    let m_step = (m_max as f64).sqrt().ceil() as u64;
+    let m_step = integer_sqrt_ceil(m_max);
     if m_step == 0 {
         return Err("m_max too small");
     }
@@ -213,6 +236,39 @@ fn bsgs_solve(curve: &CurveParams, target: &Point, m_max: u64) -> Result<u64, &'
     Err("plaintext not in [0, m_max); enlarge m_max or check ciphertext")
 }
 
+fn integer_sqrt_ceil(n: u64) -> u64 {
+    if n <= 1 {
+        return n;
+    }
+    let mut lo = 1u64;
+    let mut hi = 1u64 << 32;
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if mid >= n / mid && (n % mid == 0 || mid > n / mid) {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    lo
+}
+
+fn validate_public_key(pk: &EcElGamalPublicKey) -> Result<(), &'static str> {
+    if pk.curve.is_valid_public_point(&pk.q) {
+        Ok(())
+    } else {
+        Err("invalid EC-ElGamal public key")
+    }
+}
+
+fn validate_ciphertext(curve: &CurveParams, c: &EcElGamalCiphertext) -> Result<(), &'static str> {
+    if curve.is_valid_public_point(&c.c1) && curve.is_on_curve(&c.c2) {
+        Ok(())
+    } else {
+        Err("ciphertext points are not valid for this curve")
+    }
+}
+
 /// Canonical byte serialisation of a point — used as a `HashMap` key
 /// in BSGS.  Identity gets a distinguished prefix.
 fn point_key(p: &Point) -> Vec<u8> {
@@ -242,11 +298,23 @@ pub fn ec_elgamal_add(
     ca: &EcElGamalCiphertext,
     cb: &EcElGamalCiphertext,
 ) -> EcElGamalCiphertext {
+    ec_elgamal_add_checked(pk, ca, cb).expect("invalid EC-ElGamal ciphertext")
+}
+
+/// Checked homomorphic ciphertext addition.
+pub fn ec_elgamal_add_checked(
+    pk: &EcElGamalPublicKey,
+    ca: &EcElGamalCiphertext,
+    cb: &EcElGamalCiphertext,
+) -> Result<EcElGamalCiphertext, &'static str> {
+    validate_public_key(pk)?;
+    validate_ciphertext(&pk.curve, ca)?;
+    validate_ciphertext(&pk.curve, cb)?;
     let a = pk.curve.a_fe();
-    EcElGamalCiphertext {
+    Ok(EcElGamalCiphertext {
         c1: ca.c1.add(&cb.c1, &a),
         c2: ca.c2.add(&cb.c2, &a),
-    }
+    })
 }
 
 /// Add a public scalar `m` to an encrypted value.
@@ -256,13 +324,27 @@ pub fn ec_elgamal_add_plain(
     c: &EcElGamalCiphertext,
     m: &BigUint,
 ) -> EcElGamalCiphertext {
+    ec_elgamal_add_plain_checked(pk, c, m).expect("invalid EC-ElGamal ciphertext or plaintext")
+}
+
+/// Checked public plaintext addition.
+pub fn ec_elgamal_add_plain_checked(
+    pk: &EcElGamalPublicKey,
+    c: &EcElGamalCiphertext,
+    m: &BigUint,
+) -> Result<EcElGamalCiphertext, &'static str> {
+    validate_public_key(pk)?;
+    validate_ciphertext(&pk.curve, c)?;
+    if m >= &pk.curve.n {
+        return Err("plaintext must be in [0, n)");
+    }
     let g = pk.curve.generator();
     let a = pk.curve.a_fe();
     let m_g = g.scalar_mul(m, &a);
-    EcElGamalCiphertext {
+    Ok(EcElGamalCiphertext {
         c1: c.c1.clone(),
         c2: c.c2.add(&m_g, &a),
-    }
+    })
 }
 
 /// Scalar multiplication of an encrypted plaintext by a public scalar.
@@ -272,12 +354,23 @@ pub fn ec_elgamal_mul_scalar(
     c: &EcElGamalCiphertext,
     k: &BigUint,
 ) -> EcElGamalCiphertext {
+    ec_elgamal_mul_scalar_checked(pk, c, k).expect("invalid EC-ElGamal ciphertext")
+}
+
+/// Checked ciphertext scalar multiplication.
+pub fn ec_elgamal_mul_scalar_checked(
+    pk: &EcElGamalPublicKey,
+    c: &EcElGamalCiphertext,
+    k: &BigUint,
+) -> Result<EcElGamalCiphertext, &'static str> {
+    validate_public_key(pk)?;
+    validate_ciphertext(&pk.curve, c)?;
     let a = pk.curve.a_fe();
     let bits = pk.curve.order_bits();
-    EcElGamalCiphertext {
+    Ok(EcElGamalCiphertext {
         c1: c.c1.scalar_mul_ct(k, &a, bits),
         c2: c.c2.scalar_mul_ct(k, &a, bits),
-    }
+    })
 }
 
 #[cfg(test)]
@@ -421,5 +514,34 @@ mod tests {
         // search will overwhelmingly fail to find a small M' < 2³².
         let result = ec_elgamal_decrypt_bounded(&sk_b, &c, 1 << 16);
         assert!(result.is_err(), "wrong key must not decrypt");
+    }
+
+    #[test]
+    fn checked_encrypt_rejects_invalid_public_key_and_plaintext_collision() {
+        let sk = keypair();
+        let mut bad_pk = sk.public.clone();
+        bad_pk.q = Point::Infinity;
+        assert!(ec_elgamal_encrypt_checked(&bad_pk, &BigUint::from(1u32)).is_err());
+        assert!(ec_elgamal_encrypt_checked(&sk.public, &sk.public.curve.n).is_err());
+    }
+
+    #[test]
+    fn decrypt_rejects_invalid_ciphertext_points() {
+        let sk = keypair();
+        let bad = EcElGamalCiphertext {
+            c1: Point::Infinity,
+            c2: sk.public.q.clone(),
+        };
+        assert!(ec_elgamal_decrypt_bounded(&sk, &bad, 10).is_err());
+    }
+
+    #[test]
+    fn integer_sqrt_ceil_matches_small_cases() {
+        assert_eq!(integer_sqrt_ceil(1), 1);
+        assert_eq!(integer_sqrt_ceil(2), 2);
+        assert_eq!(integer_sqrt_ceil(4), 2);
+        assert_eq!(integer_sqrt_ceil(5), 3);
+        assert_eq!(integer_sqrt_ceil(15), 4);
+        assert_eq!(integer_sqrt_ceil(16), 4);
     }
 }

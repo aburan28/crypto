@@ -68,15 +68,8 @@ use crate::symmetric::aes::{encrypt_block, AesKey};
 fn multx_polyval(x: u128) -> u128 {
     let msb = (x >> 127) & 1;
     let shifted = x << 1;
-    if msb != 0 {
-        let c = 1u128
-            | (1u128 << 121)
-            | (1u128 << 126)
-            | (1u128 << 127);
-        shifted ^ c
-    } else {
-        shifted
-    }
+    let c = 1u128 | (1u128 << 121) | (1u128 << 126) | (1u128 << 127);
+    shifted ^ (c & 0u128.wrapping_sub(msb))
 }
 
 /// Multiply by `x^(-1)` (inverse of `multx_polyval`).
@@ -85,15 +78,10 @@ fn multx_polyval(x: u128) -> u128 {
 /// had bit 127 set (the multX path that XOR'd in the constant), so
 /// we XOR with the constant *before* shifting and then OR back bit 127.
 fn divx_polyval(x: u128) -> u128 {
-    if x & 1 == 0 {
-        x >> 1
-    } else {
-        let c = 1u128
-            | (1u128 << 121)
-            | (1u128 << 126)
-            | (1u128 << 127);
-        ((x ^ c) >> 1) | (1u128 << 127)
-    }
+    let bit = x & 1;
+    let mask = 0u128.wrapping_sub(bit);
+    let c = 1u128 | (1u128 << 121) | (1u128 << 126) | (1u128 << 127);
+    ((x ^ (c & mask)) >> 1) | ((1u128 << 127) & mask)
 }
 
 /// **POLYVAL's dot product** in GF(2^128):  `dot(a, b) = a · b · x^(-128)`
@@ -116,9 +104,8 @@ pub fn polyval_mul(a: &[u8; 16], b: &[u8; 16]) -> [u8; 16] {
     // Pass 1: compute `a · b` (mod R) using multX after each bit.
     let mut result: u128 = 0;
     for i in 0..128 {
-        if (b_u >> i) & 1 != 0 {
-            result ^= a_u;
-        }
+        let mask = 0u128.wrapping_sub((b_u >> i) & 1);
+        result ^= a_u & mask;
         a_u = multx_polyval(a_u);
     }
     // Pass 2: apply x^(-128) — divide by x 128 times.
@@ -137,7 +124,11 @@ pub fn polyval_mul(a: &[u8; 16], b: &[u8; 16]) -> [u8; 16] {
 /// digest under key `H`.  `data` must be a multiple of 16 bytes (the
 /// caller pads as required by RFC 8452).
 pub fn polyval(h: &[u8; 16], data: &[u8]) -> [u8; 16] {
-    assert_eq!(data.len() % 16, 0, "POLYVAL input must be padded to 16-byte blocks");
+    assert_eq!(
+        data.len() % 16,
+        0,
+        "POLYVAL input must be padded to 16-byte blocks"
+    );
     let mut s = [0u8; 16];
     for chunk in data.chunks(16) {
         let mut blk = [0u8; 16];
@@ -169,7 +160,7 @@ fn derive_keys(master: &AesKey, nonce: &[u8; 12]) -> ([u8; 16], AesKey) {
     // Enc-key blocks: indices 2, 3 (and 4, 5 if 32-byte master).
     for i in 0..n_blocks_enc {
         let mut blk = [0u8; 16];
-        blk[0..4].copy_from_slice(&((i as u32 + 2)).to_le_bytes());
+        blk[0..4].copy_from_slice(&(i as u32 + 2).to_le_bytes());
         blk[4..16].copy_from_slice(nonce);
         let enc = encrypt_block(&blk, master);
         enc_buf[i * 8..(i + 1) * 8].copy_from_slice(&enc[0..8]);
@@ -221,12 +212,7 @@ fn ctr_encrypt(key: &AesKey, init_ctr: &[u8; 16], data: &[u8]) -> Vec<u8> {
 }
 
 /// **GCM-SIV encrypt** (RFC 8452).  Returns `ciphertext || tag` (16-byte tag).
-pub fn gcm_siv_encrypt(
-    master: &AesKey,
-    nonce: &[u8; 12],
-    aad: &[u8],
-    plaintext: &[u8],
-) -> Vec<u8> {
+pub fn gcm_siv_encrypt(master: &AesKey, nonce: &[u8; 12], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
     let (auth_key, enc_key) = derive_keys(master, nonce);
     let mut polyval_input = Vec::new();
     polyval_input.extend_from_slice(&pad16(aad));
@@ -324,10 +310,8 @@ mod tests {
         let h_bytes = h("25629347589242761d31f826ba4b757b");
         let mut h_arr = [0u8; 16];
         h_arr.copy_from_slice(&h_bytes);
-        let x = h(
-            "4f4f95668c83dfb6401762bb2d01a262 \
-             d1a24ddd2721d006bbe45f20d3c9f362",
-        );
+        let x = h("4f4f95668c83dfb6401762bb2d01a262 \
+             d1a24ddd2721d006bbe45f20d3c9f362");
         let expected = h("f7a3b47b846119fae5b7866cf5e5b77e");
         let result = polyval(&h_arr, &x);
         // Debug aid: print both representations so any divergence is

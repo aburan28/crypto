@@ -170,10 +170,7 @@ pub fn dfa_recover_last_round_key_byte_candidates(
 /// each, reducing the per-column key entropy from 8 to 2 bits, total
 /// over a column ≈ 8 → 8 bits (single-fault is enough to give a
 /// strong filter; two faults usually uniquely recover the column key).
-pub fn dfa_per_column_candidates(
-    correct_ct: &[u8; 16],
-    faulted_ct: &[u8; 16],
-) -> [Vec<u8>; 4] {
+pub fn dfa_per_column_candidates(correct_ct: &[u8; 16], faulted_ct: &[u8; 16]) -> [Vec<u8>; 4] {
     let mut out: [Vec<u8>; 4] = Default::default();
     // The 4 active positions form a "diagonal" in the post-MixColumns
     // state of round 9; after ShiftRows in round 10 they get permuted
@@ -350,7 +347,12 @@ mod tests {
                 columns_hit.insert(i / 4);
             }
         }
-        assert_eq!(columns_hit.len(), 4, "expected 4 distinct columns, got {:?}", columns_hit);
+        assert_eq!(
+            columns_hit.len(),
+            4,
+            "expected 4 distinct columns, got {:?}",
+            columns_hit
+        );
     }
 
     /// **Per-byte candidate enumeration** returns plausible counts.

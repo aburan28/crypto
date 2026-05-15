@@ -151,7 +151,10 @@ pub fn demo_sha256_round_trace(input: &[u8]) -> String {
     for i in 16..64 {
         let s0 = w[i - 15].rotate_right(7) ^ w[i - 15].rotate_right(18) ^ (w[i - 15] >> 3);
         let s1 = w[i - 2].rotate_right(17) ^ w[i - 2].rotate_right(19) ^ (w[i - 2] >> 10);
-        w[i] = w[i - 16].wrapping_add(s0).wrapping_add(w[i - 7]).wrapping_add(s1);
+        w[i] = w[i - 16]
+            .wrapping_add(s0)
+            .wrapping_add(w[i - 7])
+            .wrapping_add(s1);
     }
     let mut a = h[0];
     let mut b = h[1];
@@ -190,7 +193,14 @@ pub fn demo_sha256_round_trace(input: &[u8]) -> String {
             s.push_str(&format!(
                 "  {:>3}   {:08x} {:08x} {:08x} {:08x} {:08x} {:08x} {:08x} {:08x}\n",
                 round + 1,
-                a, b, c, d, e, f, g, hh
+                a,
+                b,
+                c,
+                d,
+                e,
+                f,
+                g,
+                hh
             ));
         }
     }
@@ -234,8 +244,16 @@ pub fn demo_hash_avalanche() -> String {
         perturbed[byte] ^= mask;
         let m = md5(&perturbed);
         let s_ = sha256(&perturbed);
-        let h1: u32 = m.iter().zip(&h0_md5).map(|(a, b)| (a ^ b).count_ones()).sum();
-        let h2: u32 = s_.iter().zip(&h0_sha).map(|(a, b)| (a ^ b).count_ones()).sum();
+        let h1: u32 = m
+            .iter()
+            .zip(&h0_md5)
+            .map(|(a, b)| (a ^ b).count_ones())
+            .sum();
+        let h2: u32 = s_
+            .iter()
+            .zip(&h0_sha)
+            .map(|(a, b)| (a ^ b).count_ones())
+            .sum();
         hd_md5.push(h1 as usize);
         hd_sha.push(h2 as usize);
     }
@@ -253,9 +271,17 @@ pub fn demo_hash_avalanche() -> String {
         *v /= 16;
     }
     s.push_str("## MD5 (128-bit digest, ideal avalanche ≈ 64 bits)\n\n");
-    s.push_str(&format_round_bars(&buckets_md5, "Mean Hamming distance per input-bit bucket", 30));
+    s.push_str(&format_round_bars(
+        &buckets_md5,
+        "Mean Hamming distance per input-bit bucket",
+        30,
+    ));
     s.push_str("\n## SHA-256 (256-bit digest, ideal avalanche ≈ 128 bits)\n\n");
-    s.push_str(&format_round_bars(&buckets_sha, "Mean Hamming distance per input-bit bucket", 30));
+    s.push_str(&format_round_bars(
+        &buckets_sha,
+        "Mean Hamming distance per input-bit bucket",
+        30,
+    ));
     s
 }
 

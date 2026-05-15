@@ -373,12 +373,7 @@ fn factor_smooth(n: &BigInt, primes: &[u64]) -> Option<(bool, Vec<(usize, u32)>)
 /// We then check that the product of `ℓ^{v}` equals the absolute value
 /// of the algebraic norm `|a² + c·b²|`.  If the product matches, the
 /// algebraic side is smooth over `alg_fb`.
-fn factor_algebraic(
-    a: i64,
-    b: i64,
-    c: i64,
-    alg_fb: &[(u64, u64)],
-) -> Option<Vec<(usize, u32)>> {
+fn factor_algebraic(a: i64, b: i64, c: i64, alg_fb: &[(u64, u64)]) -> Option<Vec<(usize, u32)>> {
     // Norm of (a + bα) in ℤ[α] where α² = −c:  N = a² + c·b².
     // (Use i128 to dodge i64 overflow at the toy scale we run at.)
     let norm = (a as i128) * (a as i128) + (c as i128) * (b as i128) * (b as i128);
@@ -392,7 +387,7 @@ fn factor_algebraic(
         // this ideal's side; otherwise this ideal contributes nothing.
         let test = ((a as i128).rem_euclid(ell as i128)
             + ((b as i128) * (r as i128)).rem_euclid(ell as i128))
-            .rem_euclid(ell as i128);
+        .rem_euclid(ell as i128);
         if test != 0 {
             continue;
         }
@@ -720,12 +715,11 @@ pub fn recover_factor_base_logs(
     pin_row[pin_idx] = BigUint::one();
     matrix.push(pin_row);
     rhs.push(pin_value);
-    let solution =
-        crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
-            &mut matrix,
-            &mut rhs,
-            q,
-        )?;
+    let solution = crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
+        &mut matrix,
+        &mut rhs,
+        q,
+    )?;
     // Return rational logs only.
     Some(solution[..n_rat].to_vec())
 }
@@ -760,9 +754,7 @@ pub fn snfs_dlp_recover(
     for (idx, &ell) in fb.rat.iter().enumerate() {
         let ell_big = BigUint::from(ell);
         if ell_big.modpow(&trap.q, &trap.p) == BigUint::one() && ell_big != BigUint::one() {
-            if let Some(log) =
-                brute_force_log_subgroup(&g, &ell_big, &trap.p, &trap.q)
-            {
+            if let Some(log) = brute_force_log_subgroup(&g, &ell_big, &trap.p, &trap.q) {
                 pin_idx_log = Some((idx, log));
                 break;
             }
@@ -919,11 +911,7 @@ pub fn construct_trapdoor_general(
 }
 
 /// Build a factor base for a general monic polynomial.
-pub fn build_factor_base_general(
-    poly: &MonicPoly,
-    b_rat: u64,
-    b_alg: u64,
-) -> FactorBase {
+pub fn build_factor_base_general(poly: &MonicPoly, b_rat: u64, b_alg: u64) -> FactorBase {
     let rat = sieve_small_primes(b_rat);
     let mut alg = Vec::new();
     for &ell in &rat {
@@ -952,7 +940,7 @@ fn factor_algebraic_general(
     for (idx, &(ell, r)) in alg_fb.iter().enumerate() {
         let test = ((a as i128).rem_euclid(ell as i128)
             + ((b as i128) * (r as i128)).rem_euclid(ell as i128))
-            .rem_euclid(ell as i128);
+        .rem_euclid(ell as i128);
         if test != 0 {
             continue;
         }
@@ -1086,12 +1074,11 @@ pub fn recover_factor_base_logs_general(
     pin_row[pin_idx] = BigUint::one();
     matrix.push(pin_row);
     rhs.push(pin_value);
-    let solution =
-        crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
-            &mut matrix,
-            &mut rhs,
-            q,
-        )?;
+    let solution = crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n(
+        &mut matrix,
+        &mut rhs,
+        q,
+    )?;
     Some(solution[..n_rat].to_vec())
 }
 
@@ -1112,9 +1099,7 @@ pub fn snfs_dlp_recover_general(
     let mut pin: Option<(usize, BigUint)> = None;
     for (idx, &ell) in fb.rat.iter().enumerate() {
         let ell_big = BigUint::from(ell);
-        if ell_big.modpow(&trap.q, &trap.p) == BigUint::one()
-            && ell_big != BigUint::one()
-        {
+        if ell_big.modpow(&trap.q, &trap.p) == BigUint::one() && ell_big != BigUint::one() {
             if let Some(log) = brute_force_log_subgroup(&g, &ell_big, &trap.p, &trap.q) {
                 pin = Some((idx, log));
                 break;
@@ -1122,8 +1107,7 @@ pub fn snfs_dlp_recover_general(
         }
     }
     let (pin_idx, pin_log) = pin?;
-    let rat_logs =
-        recover_factor_base_logs_general(trap, &fb, &relations, pin_idx, pin_log)?;
+    let rat_logs = recover_factor_base_logs_general(trap, &fb, &relations, pin_idx, pin_log)?;
     Some((g, rat_logs, fb))
 }
 
@@ -1599,11 +1583,10 @@ mod tests {
     fn end_to_end_dlp_recovery() {
         // c = 2 keeps the algebraic ring ℤ[√−2] with units {±1} —
         // dodges Schirokauer-map complications.
-        let trap = construct_trapdoor(&[2], &BigUint::from(8u32), 2000)
-            .expect("trapdoor for c = 2");
-        let (g, rat_logs, fb) =
-            snfs_dlp_recover(&trap, 30, 30, 30, 20)
-                .expect("SNFS should recover factor-base logs on toy p");
+        let trap =
+            construct_trapdoor(&[2], &BigUint::from(8u32), 2000).expect("trapdoor for c = 2");
+        let (g, rat_logs, fb) = snfs_dlp_recover(&trap, 30, 30, 30, 20)
+            .expect("SNFS should recover factor-base logs on toy p");
         // Sanity: g has order q.
         assert_eq!(g.modpow(&trap.q, &trap.p), BigUint::one());
         assert_ne!(g, BigUint::one());
@@ -1636,7 +1619,7 @@ mod tests {
         assert_eq!(f.norm(1, 1), BigInt::from(-1)); // 1 − 2 = −1
         assert_eq!(f.norm(2, 1), BigInt::from(6)); //  8 − 2 =  6
         assert_eq!(f.norm(1, 2), BigInt::from(-15)); // 1 − 16 = −15
-        // Degree-2 sanity: f(x) = x² + 2 should give N = a² + 2b².
+                                                     // Degree-2 sanity: f(x) = x² + 2 should give N = a² + 2b².
         let f2 = MonicPoly::new(vec![2, 0]);
         assert_eq!(f2.norm(3, 1), BigInt::from(11)); // 9 + 2
         assert_eq!(f2.norm(1, 3), BigInt::from(19)); // 1 + 18
@@ -1715,10 +1698,8 @@ mod tests {
         // Plant: choose x ∈ [1, q), compute h = g^x, recover x.
         let x_truth = BigUint::from(17u32);
         let h = g.modpow(&x_truth, &trap.p);
-        let recovered = individual_log_descent(
-            &trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000,
-        )
-        .expect("descent should recover the log");
+        let recovered = individual_log_descent(&trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000)
+            .expect("descent should recover the log");
         assert_eq!(g.modpow(&recovered, &trap.p), h);
         assert_eq!(recovered, x_truth);
     }
@@ -1735,9 +1716,8 @@ mod tests {
                 continue;
             }
             let h = g.modpow(&x, &trap.p);
-            let recovered = individual_log_descent(
-                &trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000,
-            );
+            let recovered =
+                individual_log_descent(&trap.p, &trap.q, &fb.rat, &rat_logs, &g, &h, 1000);
             if let Some(r) = recovered {
                 assert_eq!(g.modpow(&r, &trap.p), h);
             }
@@ -1830,9 +1810,7 @@ mod tests {
         let mut qr_indices: Vec<usize> = Vec::new();
         for (idx, &ell) in fb.rat.iter().enumerate() {
             let ell_big = BigUint::from(ell);
-            if ell_big.modpow(&trap.q, &trap.p) == BigUint::one()
-                && ell_big != BigUint::one()
-            {
+            if ell_big.modpow(&trap.q, &trap.p) == BigUint::one() && ell_big != BigUint::one() {
                 qr_indices.push(idx);
             }
             if qr_indices.len() == 2 {

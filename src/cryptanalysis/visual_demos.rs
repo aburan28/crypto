@@ -74,7 +74,10 @@ pub fn demo_sbox_lat_heatmap() -> String {
     let mut s = String::from("# S-box LAT visualizations\n\n");
     let aes = Sbox::new(8, 8, aes_sbox_table()).unwrap();
     let lat = aes.lat();
-    let lat_abs: Vec<Vec<u32>> = lat.iter().map(|row| row.iter().map(|&v| v.unsigned_abs()).collect()).collect();
+    let lat_abs: Vec<Vec<u32>> = lat
+        .iter()
+        .map(|row| row.iter().map(|&v| v.unsigned_abs()).collect())
+        .collect();
     s.push_str("## AES S-box (8×8) — LAT (absolute values)\n\n");
     s.push_str(&format_table_8bit_summary(&lat_abs, "Top |biases|", 6));
     s.push('\n');
@@ -85,7 +88,10 @@ pub fn demo_sbox_lat_heatmap() -> String {
     )
     .unwrap();
     let lat = serpent_s0.lat();
-    let lat_abs: Vec<Vec<u32>> = lat.iter().map(|row| row.iter().map(|&v| v.unsigned_abs()).collect()).collect();
+    let lat_abs: Vec<Vec<u32>> = lat
+        .iter()
+        .map(|row| row.iter().map(|&v| v.unsigned_abs()).collect())
+        .collect();
     s.push_str("## Serpent S0 (4×4) — |LAT| heat-map\n\n");
     s.push_str(&format_table_4bit_heatmap(&lat_abs, ""));
     s
@@ -191,11 +197,7 @@ pub fn demo_pollard_rho_path() -> String {
             1 => (&x * &x) % &p,
             _ => (&x * &target) % &p,
         };
-        let xd = x
-            .to_u32_digits()
-            .first()
-            .copied()
-            .unwrap_or(0) as f64;
+        let xd = x.to_u32_digits().first().copied().unwrap_or(0) as f64;
         points.push((i as f64, xd % 256.0));
     }
     s.push_str(&format_path_trajectory(
@@ -226,7 +228,11 @@ pub fn demo_hnp_recovery_curve() -> String {
     let bound = 256.0 / 4.0; // 256-bit curve, 4-bit bias.
     let mut points = Vec::new();
     for n in 1..=128 {
-        let p = if (n as f64) >= bound { 1.0 } else { (n as f64 / bound).powi(8) };
+        let p = if (n as f64) >= bound {
+            1.0
+        } else {
+            (n as f64 / bound).powi(8)
+        };
         points.push((n as f64, p));
     }
     s.push_str(&format_path_trajectory(
@@ -287,7 +293,9 @@ pub fn demo_length_extension_diagram() -> String {
     s.push_str("                                              └───────┬────────┘\n");
     s.push_str("                                                      │\n");
     s.push_str("                                              ┌───────▼────────┐\n");
-    s.push_str("                                              │   suffix block │──►  forged digest\n");
+    s.push_str(
+        "                                              │   suffix block │──►  forged digest\n",
+    );
     s.push_str("                                              └────────────────┘\n");
     s.push_str("```\n");
     s.push_str("\nThis attack works against MD4, MD5, SHA-1, SHA-256, SHA-512, RIPEMD-160 — every Merkle-Damgård hash used as `H(secret||msg)` MAC.\n");
@@ -325,7 +333,11 @@ pub fn demo_j0_twist_factors() -> String {
         .iter()
         .map(|t| {
             let bits = t.max_prime_factor.bits();
-            if bits == 0 { 1 } else { bits as usize }
+            if bits == 0 {
+                1
+            } else {
+                bits as usize
+            }
         })
         .collect();
     s.push_str(&format_round_bars(

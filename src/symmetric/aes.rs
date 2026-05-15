@@ -356,12 +356,33 @@ pub fn decrypt_block(block: &[u8; 16], key: &AesKey) -> [u8; 16] {
 /// Counter block layout: `nonce` (12 bytes) || counter (4 bytes, big-endian).
 /// The counter starts at 1 (matching RFC 3686).
 pub fn aes_ctr(data: &[u8], key: &AesKey, nonce: &[u8; 12]) -> Vec<u8> {
-    aes_ctr_from(data, key, nonce, 1)
+    aes_ctr_checked(data, key, nonce).expect("AES-CTR counter would wrap")
+}
+
+/// Checked AES-CTR encryption/decryption.
+///
+/// Returns an error if processing `data` would wrap the 32-bit counter field.
+pub fn aes_ctr_checked(
+    data: &[u8],
+    key: &AesKey,
+    nonce: &[u8; 12],
+) -> Result<Vec<u8>, &'static str> {
+    aes_ctr_from_checked(data, key, nonce, 1)
 }
 
 /// AES-CTR with explicit starting counter. Used by GCM (which needs counter=2
 /// because counter=1 is consumed by J₀ for tag derivation).
 fn aes_ctr_from(data: &[u8], key: &AesKey, nonce: &[u8; 12], start: u32) -> Vec<u8> {
+    aes_ctr_from_checked(data, key, nonce, start).expect("AES-CTR counter would wrap")
+}
+
+fn aes_ctr_from_checked(
+    data: &[u8],
+    key: &AesKey,
+    nonce: &[u8; 12],
+    start: u32,
+) -> Result<Vec<u8>, &'static str> {
+    ensure_ctr_capacity(data.len(), start)?;
     let mut out = data.to_vec();
     let mut counter = start;
 
@@ -376,7 +397,21 @@ fn aes_ctr_from(data: &[u8], key: &AesKey, nonce: &[u8; 12], start: u32) -> Vec<
         }
         counter = counter.wrapping_add(1);
     }
-    out
+    Ok(out)
+}
+
+pub fn aes_ctr_len_fits(len: usize, start: u32) -> bool {
+    ensure_ctr_capacity(len, start).is_ok()
+}
+
+fn ensure_ctr_capacity(len: usize, start: u32) -> Result<(), &'static str> {
+    let blocks = len.checked_add(15).ok_or("AES-CTR input length overflow")? / 16;
+    let available = (u32::MAX as u64) - (start as u64) + 1;
+    if (blocks as u64) > available {
+        Err("AES-CTR counter would wrap")
+    } else {
+        Ok(())
+    }
 }
 
 // ── GCM (GHASH + CTR) ─────────────────────────────────────────────────────────
@@ -413,17 +448,15 @@ fn gcm_mult(x: &[u8; 16], y: &[u8; 16]) -> [u8; 16] {
 fn ghash(h: &[u8; 16], aad: &[u8], ciphertext: &[u8]) -> [u8; 16] {
     let mut y = [0u8; 16];
 
-    // Process AAD padded to 16-byte boundary
-    let padded_aad = pad_to_block(aad);
-    for block in padded_aad.chunks(16) {
-        xor_into(&mut y, block);
+    // Process AAD padded to 16-byte boundary. Empty AAD contributes no block.
+    for block in padded_blocks(aad) {
+        xor_into(&mut y, &block);
         y = gcm_mult(&y, h);
     }
 
-    // Process ciphertext
-    let padded_ct = pad_to_block(ciphertext);
-    for block in padded_ct.chunks(16) {
-        xor_into(&mut y, block);
+    // Process ciphertext. Empty ciphertext contributes no block.
+    for block in padded_blocks(ciphertext) {
+        xor_into(&mut y, &block);
         y = gcm_mult(&y, h);
     }
 
@@ -437,16 +470,17 @@ fn ghash(h: &[u8; 16], aad: &[u8], ciphertext: &[u8]) -> [u8; 16] {
     y
 }
 
-fn pad_to_block(data: &[u8]) -> Vec<u8> {
-    let mut v = data.to_vec();
-    let rem = v.len() % 16;
-    if rem != 0 {
-        v.resize(v.len() + (16 - rem), 0);
+fn padded_blocks(data: &[u8]) -> Vec<[u8; 16]> {
+    if data.is_empty() {
+        return Vec::new();
     }
-    if v.is_empty() {
-        v.resize(16, 0);
+    let mut out = Vec::with_capacity((data.len() + 15) / 16);
+    for chunk in data.chunks(16) {
+        let mut block = [0u8; 16];
+        block[..chunk.len()].copy_from_slice(chunk);
+        out.push(block);
     }
-    v
+    out
 }
 
 fn xor_into(dst: &mut [u8; 16], src: &[u8]) {
@@ -623,6 +657,15 @@ mod tests {
         }
     }
 
+    #[test]
+    fn ctr_rejects_counter_wrap_without_allocating() {
+        let max_len = (u32::MAX as usize) * 16;
+        assert!(aes_ctr_len_fits(max_len, 1));
+        assert!(!aes_ctr_len_fits(max_len + 1, 1));
+        assert!(aes_ctr_len_fits(16, u32::MAX));
+        assert!(!aes_ctr_len_fits(17, u32::MAX));
+    }
+
     // ── AES-GCM KATs (NIST GCM Spec test cases #1, #2) ───────────────────────
 
     #[test]
@@ -633,6 +676,17 @@ mod tests {
         let out = aes_gcm_encrypt(b"", &key, &nonce, b"");
         // Output is just the 16-byte tag
         assert_eq!(out, h("58e2fccefa7e3061367f1d57a4e7455a"));
+    }
+
+    #[test]
+    fn aes128_gcm_aad_only_known_answer() {
+        let key = AesKey::Aes128([0u8; 16]);
+        let nonce = [0u8; 12];
+        let out = aes_gcm_encrypt(b"", &key, &nonce, b"aad");
+        assert_eq!(out, h("5fe5978c14764479f5aba1acb37df1d8"));
+        assert!(aes_gcm_decrypt(&out, &key, &nonce, b"aad")
+            .unwrap()
+            .is_empty());
     }
 
     #[test]

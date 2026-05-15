@@ -23,7 +23,7 @@ use crate::hash::sha256::sha256;
 use crate::kdf::hkdf::hmac_sha256;
 use crate::utils::{mod_inverse, mod_inverse_prime_ct};
 use num_bigint::BigUint;
-use num_traits::Zero;
+use num_traits::{One, Zero};
 /// An ECDSA signature pair (r, s).
 #[derive(Clone, Debug)]
 pub struct EcdsaSignature {
@@ -46,6 +46,12 @@ pub fn sign(message: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) ->
 /// sampled `k` is repeated, biased, or predictable.  Two signatures over
 /// the same `(message, key)` are bit-for-bit identical.
 pub fn sign_hash(hash: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) -> EcdsaSignature {
+    assert!(
+        private_key.curve_name == curve.name
+            && private_key.scalar >= BigUint::one()
+            && private_key.scalar < curve.n,
+        "ECDSA private scalar must be in [1, n) for the selected curve"
+    );
     let z = hash_to_scalar(hash, &curve.n);
 
     let mut drbg = Rfc6979Drbg::new(&private_key.scalar, hash, &curve.n);
@@ -98,8 +104,7 @@ pub fn sign_hash(hash: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) 
 
 // ── RFC 6979 — Deterministic Usage of the DSA and ECDSA ──────────────────────
 //
-// Implements the HMAC-SHA-256 DRBG as specified in §3.2.  Operating on
-// 256-bit curves (secp256k1, P-256) with q-len = 256 and ro-len = 32:
+// Implements the HMAC-SHA-256 DRBG as specified in §3.2.
 //
 //   bits2int(h):     interpret `h` as big-endian, take leftmost 256 bits
 //   bits2octets(h):  bits2int(h) mod q, encoded as 32 big-endian bytes
@@ -122,19 +127,22 @@ pub fn sign_hash(hash: &[u8], private_key: &EccPrivateKey, curve: &CurveParams) 
 struct Rfc6979Drbg {
     k: [u8; 32],
     v: [u8; 32],
+    qlen_bits: usize,
+    rolen: usize,
 }
 
 impl Rfc6979Drbg {
     fn new(private_scalar: &BigUint, hash: &[u8], q: &BigUint) -> Self {
-        let qlen_bytes = 32usize;
-        let d_bytes = int2octets(private_scalar, qlen_bytes);
-        let h_bytes = bits2octets(hash, q, qlen_bytes);
+        let qlen_bits = q.bits() as usize;
+        let rolen = (qlen_bits + 7) / 8;
+        let d_bytes = int2octets(private_scalar, rolen);
+        let h_bytes = bits2octets(hash, q, qlen_bits, rolen);
 
         let mut v = [0x01u8; 32];
         let mut k = [0x00u8; 32];
 
         // K = HMAC_K(V || 0x00 || d || h)
-        let mut buf = Vec::with_capacity(32 + 1 + qlen_bytes * 2);
+        let mut buf = Vec::with_capacity(32 + 1 + rolen * 2);
         buf.extend_from_slice(&v);
         buf.push(0x00);
         buf.extend_from_slice(&d_bytes);
@@ -155,14 +163,23 @@ impl Rfc6979Drbg {
         // V = HMAC_K(V)
         v = hmac_sha256(&k, &v);
 
-        Rfc6979Drbg { k, v }
+        Rfc6979Drbg {
+            k,
+            v,
+            qlen_bits,
+            rolen,
+        }
     }
 
     fn next_k(&mut self, q: &BigUint) -> BigUint {
         loop {
-            // T = V (one HMAC block = 32 bytes covers q-len = 256).
-            self.v = hmac_sha256(&self.k, &self.v);
-            let t_int = bits2int(&self.v);
+            // T = HMAC blocks until we cover q-len.
+            let mut t = Vec::with_capacity(self.rolen);
+            while t.len() < self.rolen {
+                self.v = hmac_sha256(&self.k, &self.v);
+                t.extend_from_slice(&self.v);
+            }
+            let t_int = bits2int(&t, self.qlen_bits);
             if !t_int.is_zero() && &t_int < q {
                 return t_int;
             }
@@ -177,16 +194,21 @@ impl Rfc6979Drbg {
 }
 
 fn int2octets(x: &BigUint, rolen: usize) -> Vec<u8> {
-    crate::utils::encoding::bigint_to_bytes_be(x, rolen)
+    crate::utils::encoding::bigint_to_bytes_be_checked(x, rolen)
+        .expect("scalar must fit in curve order length")
 }
 
-fn bits2int(h: &[u8]) -> BigUint {
-    // q-len = 256; for any 32-byte hash this is just from_bytes_be.
-    BigUint::from_bytes_be(h)
+fn bits2int(h: &[u8], qlen_bits: usize) -> BigUint {
+    let mut z = BigUint::from_bytes_be(h);
+    let h_bits = h.len() * 8;
+    if h_bits > qlen_bits {
+        z >>= h_bits - qlen_bits;
+    }
+    z
 }
 
-fn bits2octets(h: &[u8], q: &BigUint, rolen: usize) -> Vec<u8> {
-    let z1 = bits2int(h);
+fn bits2octets(h: &[u8], q: &BigUint, qlen_bits: usize, rolen: usize) -> Vec<u8> {
+    let z1 = bits2int(h, qlen_bits);
     let z2 = if &z1 >= q { z1 - q } else { z1 };
     int2octets(&z2, rolen)
 }
@@ -210,6 +232,9 @@ pub fn verify_hash(
 ) -> bool {
     // Reject out-of-range values immediately.
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
+        return false;
+    }
+    if public_key.curve_name != curve.name || !curve.is_valid_public_point(&public_key.point) {
         return false;
     }
 
@@ -379,5 +404,17 @@ mod tests {
             s: curve.n.clone(),
         };
         assert!(!verify(b"msg", &kp.public, &bad2, &curve));
+    }
+
+    #[test]
+    fn verify_rejects_invalid_public_key() {
+        let curve = CurveParams::p256();
+        let kp = EccKeyPair::generate(&curve);
+        let sig = sign(b"msg", &kp.private, &curve);
+        let bad_key = EccPublicKey {
+            point: Point::Infinity,
+            curve_name: curve.name.to_string(),
+        };
+        assert!(!verify(b"msg", &bad_key, &sig, &curve));
     }
 }

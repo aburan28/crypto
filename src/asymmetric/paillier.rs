@@ -288,8 +288,9 @@ mod tests {
         // n should be ~2048 bits.
         let bits = sk.public.n.bits();
         assert!(bits >= 2047 && bits <= 2048, "modulus has {} bits", bits);
-        // n² should be ~4096 bits.
-        assert!(sk.public.n_squared.bits() >= 4094);
+        // If n is 2047 bits, n² can be 4093 bits; if n is 2048 bits, n² can
+        // be 4095-4096 bits. All are valid for two 1024-bit primes.
+        assert!(sk.public.n_squared.bits() >= 4093);
         // g = n + 1
         assert_eq!(sk.public.g, &sk.public.n + BigUint::one());
     }

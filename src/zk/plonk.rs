@@ -43,6 +43,8 @@
 //!   verifier here accepts iff the combined identity holds at `ζ` —
 //!   this is the actual soundness-relevant check; KZG just binds
 //!   the polynomial choices.
+//!   The standalone [`verify`] API is therefore an educational identity checker,
+//!   not a complete binding SNARK verifier.
 //!
 //! - **Single multiplicative-subgroup domain.**  We use a small
 //!   power-of-2 domain `H` with a primitive root of unity `ω` over
@@ -124,10 +126,24 @@ pub struct Witness {
 }
 
 impl Circuit {
+    pub fn is_well_formed(&self) -> bool {
+        self.n.is_power_of_two()
+            && self.q_l.len() == self.n
+            && self.q_r.len() == self.n
+            && self.q_o.len() == self.n
+            && self.q_m.len() == self.n
+            && self.q_c.len() == self.n
+            && self.permutation.len() == 3 * self.n
+            && self.permutation.iter().all(|&i| i < 3 * self.n)
+    }
+
     /// **Direct check** of the circuit constraints against a witness.
     /// Used for sanity testing the prover; the real verifier would
     /// instead check via the polynomial identity at challenge ζ.
     pub fn is_satisfied(&self, w: &Witness) -> bool {
+        if !self.is_well_formed() {
+            return false;
+        }
         if w.a.len() != self.n || w.b.len() != self.n || w.c.len() != self.n {
             return false;
         }
@@ -283,6 +299,9 @@ pub fn prove(circuit: &Circuit, witness: &Witness) -> PlonkProof {
 /// transcript to recover `(β, γ, α, ζ)`, then checks the combined
 /// polynomial identity at `ζ`.
 pub fn verify(circuit: &Circuit, proof: &PlonkProof) -> bool {
+    if !circuit.is_well_formed() {
+        return false;
+    }
     let n = circuit.n;
     let h_domain = domain(n);
 

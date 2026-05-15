@@ -70,9 +70,7 @@
 //! and the structure is the same; what gets harder is bookkeeping, not
 //! technique. Cross-referenced in `DEFERRED.md`.
 
-use super::reduced::{
-    bytes_to_state, state_to_bytes, INV_SBOX, ReducedAes128, RoundOps,
-};
+use super::reduced::{bytes_to_state, state_to_bytes, ReducedAes128, RoundOps, INV_SBOX};
 
 /// Build a Λ-set of 256 plaintexts.
 ///
@@ -114,7 +112,10 @@ pub fn is_balanced(states: &[[u8; 16]]) -> bool {
 /// XORs to zero. Returns `true` on success.
 pub fn square_distinguisher_three_round(cipher: &ReducedAes128, base: &[u8; 16]) -> bool {
     assert_eq!(cipher.nr, 3, "distinguisher targets 3-round AES");
-    assert!(cipher.final_mix_columns, "needs full final round for the balanced property");
+    assert!(
+        cipher.final_mix_columns,
+        "needs full final round for the balanced property"
+    );
     let pts = lambda_set(base, 0);
     let cts: Vec<_> = pts.iter().map(|p| cipher.encrypt(p)).collect();
     is_balanced(&cts)

@@ -34,8 +34,9 @@
 //! ## Standardised parameters (NIST / SEC 2)
 //!
 //! The paper analyses curves over `F_{2^n}` for `n ∈ {163, 233,
-//! 283, 409, 571}`.  We ship at least one verified set; toy curves
-//! at smaller `n` for testing.
+//! 283, 409, 571}`.  We ship the legacy sect113/sect131/sect163
+//! families plus IKE/Oakley Group 3 for historical audit coverage,
+//! and toy curves at smaller `n` for testing.
 //!
 //! ## Honest scope
 //!
@@ -60,7 +61,5 @@ pub mod poly_f2m;
 
 pub use curve::{BinaryCurve, BinaryPoint};
 pub use f2m::{F2mElement, IrreduciblePoly};
-pub use hyperelliptic::{
-    hcdlp_bsgs, hcdlp_pollard_rho, HyperellipticCurve, MumfordDivisor,
-};
+pub use hyperelliptic::{hcdlp_bsgs, hcdlp_pollard_rho, HyperellipticCurve, MumfordDivisor};
 pub use poly_f2m::F2mPoly;

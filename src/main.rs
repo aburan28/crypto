@@ -682,10 +682,10 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
         }
         CryptanalysisOp::VisualAll { target } => {
             use crypto_lib::cryptanalysis::visual_demos::{
-                demo_bleichenbacher_bias, demo_birthday_paradox, demo_hnp_recovery_curve,
-                demo_j0_twist_factors, demo_joux_multicollision,
-                demo_length_extension_diagram, demo_pollard_rho_path, demo_sbox_ddt_heatmap,
-                demo_sbox_lat_heatmap, demo_walsh_spectrum, run_all_visual_demos,
+                demo_birthday_paradox, demo_bleichenbacher_bias, demo_hnp_recovery_curve,
+                demo_j0_twist_factors, demo_joux_multicollision, demo_length_extension_diagram,
+                demo_pollard_rho_path, demo_sbox_ddt_heatmap, demo_sbox_lat_heatmap,
+                demo_walsh_spectrum, run_all_visual_demos,
             };
             let out: String = match target.as_str() {
                 "sbox-ddt" => demo_sbox_ddt_heatmap(),

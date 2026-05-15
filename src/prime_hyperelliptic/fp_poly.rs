@@ -179,11 +179,7 @@ impl FpPoly {
         if s.is_zero() {
             return Self::zero(self.p.clone());
         }
-        let coeffs = self
-            .coeffs
-            .iter()
-            .map(|c| (c * &s) % &self.p)
-            .collect();
+        let coeffs = self.coeffs.iter().map(|c| (c * &s) % &self.p).collect();
         Self {
             p: self.p.clone(),
             coeffs,
@@ -204,8 +200,7 @@ impl FpPoly {
         assert!(!divisor.is_zero(), "division by zero polynomial");
         let p = self.p.clone();
         let d_deg = divisor.degree().unwrap();
-        let d_lead_inv =
-            fp_inv(&divisor.lead(), &p).expect("non-zero divisor lead");
+        let d_lead_inv = fp_inv(&divisor.lead(), &p).expect("non-zero divisor lead");
         let mut r = self.clone();
         let mut q = Self::zero(p.clone());
         while let Some(r_deg) = r.degree() {
@@ -377,7 +372,11 @@ mod tests {
         let p = BigUint::from(11u32);
         // p(x) = 2 + 3x + x²; at x = 5: 2 + 15 + 25 = 42, mod 11 = 9.
         let f = FpPoly::from_coeffs(
-            vec![BigUint::from(2u32), BigUint::from(3u32), BigUint::from(1u32)],
+            vec![
+                BigUint::from(2u32),
+                BigUint::from(3u32),
+                BigUint::from(1u32),
+            ],
             p,
         );
         assert_eq!(f.eval(&BigUint::from(5u32)), BigUint::from(9u32));
@@ -386,8 +385,7 @@ mod tests {
     #[test]
     fn monic_makes_leading_one() {
         let p = BigUint::from(13u32);
-        let f =
-            FpPoly::from_coeffs(vec![BigUint::from(4u32), BigUint::from(7u32)], p.clone());
+        let f = FpPoly::from_coeffs(vec![BigUint::from(4u32), BigUint::from(7u32)], p.clone());
         let m = f.monic();
         assert_eq!(m.lead(), BigUint::one());
     }

@@ -9,14 +9,10 @@ use crypto_lib::binary_ecc::{F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, phi_l_mod2_in_x,
 };
-use crypto_lib::cryptanalysis::ec_trapdoor::{
-    audit_curve, magic_number_full, FieldTower,
-};
+use crypto_lib::cryptanalysis::ec_trapdoor::{audit_curve, magic_number_full, FieldTower};
+use crypto_lib::cryptanalysis::ec_trapdoor::{construct_trapdoor_curve, DescentRow, TrapdoorCurve};
 use crypto_lib::cryptanalysis::ghs_descent::{descend_m2_abstract, ECurve, Pt};
-use crypto_lib::cryptanalysis::ghs_full_attack::{
-    format_report, run_full_attack, AttackOptions,
-};
-use crypto_lib::cryptanalysis::ec_trapdoor::{construct_trapdoor_curve, TrapdoorCurve, DescentRow};
+use crypto_lib::cryptanalysis::ghs_full_attack::{format_report, run_full_attack, AttackOptions};
 use num_bigint::BigUint;
 
 fn banner(s: &str) {
@@ -85,7 +81,10 @@ E(F_{{2^3}}) — a much smaller group, where ECDLP is trivially solvable.
         row: DescentRow::default(),
         full_audit: None,
     };
-    println!("  Curve E: y² + xy = x³ + 1·x² + ({:?})  over F_{{2^6}}", b.to_biguint());
+    println!(
+        "  Curve E: y² + xy = x³ + 1·x² + ({:?})  over F_{{2^6}}",
+        b.to_biguint()
+    );
     println!("  b ∈ F_{{2^3}}: {}", tower.is_in_subfield(&b, l));
     let aud = audit_curve(big_n, &irr, &a, &b);
     println!("  Auditor table:");
@@ -104,7 +103,10 @@ E(F_{{2^3}}) — a much smaller group, where ECDLP is trivially solvable.
         let x = F2mElement::from_biguint(&BigUint::from(xi), big_n);
         for yi in 1u64..(1u64 << 6) {
             let y = F2mElement::from_biguint(&BigUint::from(yi), big_n);
-            let cand = Pt::Aff { x: x.clone(), y: y.clone() };
+            let cand = Pt::Aff {
+                x: x.clone(),
+                y: y.clone(),
+            };
             if curve.is_on_curve(&cand) {
                 p_opt = Some(cand);
                 break;
@@ -130,8 +132,11 @@ E(F_{{2^3}}) — a much smaller group, where ECDLP is trivially solvable.
     }
     println!();
     println!("  ECDLP instance: find d such that Q = d·P on E.");
-    println!("  (hidden true d = {}, Q is {} the identity)", d_true,
-             if matches!(q, Pt::Inf) { "AT" } else { "NOT at" });
+    println!(
+        "  (hidden true d = {}, Q is {} the identity)",
+        d_true,
+        if matches!(q, Pt::Inf) { "AT" } else { "NOT at" }
+    );
 
     let opts = AttackOptions {
         target_magic: 1,
@@ -239,13 +244,8 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
                 d2.beta_1.to_biguint(),
                 d2.beta_2.to_biguint()
             );
-            println!(
-                "    type II (β_2 = β_0 + β_1): {}",
-                d2.is_type_ii
-            );
-            println!(
-                "    σ-fixed AS generator w_0 satisfies w_0² + w_0 = x + a"
-            );
+            println!("    type II (β_2 = β_0 + β_1): {}", d2.is_type_ii);
+            println!("    σ-fixed AS generator w_0 satisfies w_0² + w_0 = x + a");
             println!("    status: {}", d2.smooth_model_status());
         }
         None => println!("  no magic-2 trapdoor found in the search budget"),

@@ -83,8 +83,8 @@ pub use truncated_diff::{
 };
 pub use visualize::{
     format_active_pattern, format_boomerang_quartet_diagram, format_histogram,
-    format_recovery_progress, format_round_bars, format_state_grid,
-    format_table_4bit_heatmap, format_table_8bit_summary, format_trail,
+    format_recovery_progress, format_round_bars, format_state_grid, format_table_4bit_heatmap,
+    format_table_8bit_summary, format_trail,
 };
 
 pub use related_key::{

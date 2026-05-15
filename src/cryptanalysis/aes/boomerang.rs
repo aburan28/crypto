@@ -255,8 +255,7 @@ mod tests {
         let mut alpha = [0u8; 16];
         alpha[0] = 0x42;
         let delta = [0xa5u8; 16];
-        let report =
-            boomerang_with_chosen_delta(&cipher, &alpha, Some(delta), 200, 0xbeef);
+        let report = boomerang_with_chosen_delta(&cipher, &alpha, Some(delta), 200, 0xbeef);
         assert_eq!(report.returns, 0);
     }
 }

@@ -99,6 +99,9 @@ pub fn sign_hash_with_k(
     k: &BigUint,
     curve: &CurveParams,
 ) -> Option<GostSignature> {
+    if d.is_zero() || d >= &curve.n || k.is_zero() || k >= &curve.n {
+        return None;
+    }
     let e = reduce_digest(hash, &curve.n);
     let a = curve.a_fe();
     let kg = curve.generator().scalar_mul_ct(k, &a, curve.order_bits());
@@ -143,6 +146,9 @@ pub fn sign(msg: &[u8], d: &BigUint, curve: &CurveParams, width: DigestBits) -> 
 /// pre-computed hash `hash` under public key `pa`.
 pub fn verify_hash(hash: &[u8], sig: &GostSignature, pa: &Point, curve: &CurveParams) -> bool {
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
+        return false;
+    }
+    if !curve.is_valid_public_point(pa) {
         return false;
     }
     let e = reduce_digest(hash, &curve.n);
@@ -372,6 +378,16 @@ mod tests {
             s: curve.n.clone(),
         };
         assert!(!verify_hash(b"msg", &bad_s, &pa, &curve));
+    }
+
+    #[test]
+    fn gost_rejects_invalid_public_key() {
+        let curve = curve_256_test();
+        let sig = GostSignature {
+            r: BigUint::one(),
+            s: BigUint::one(),
+        };
+        assert!(!verify_hash(b"msg", &sig, &Point::Infinity, &curve));
     }
 
     fn hex_bytes(s: &str) -> Vec<u8> {

@@ -51,7 +51,7 @@
 //! demonstration on 2-round AES recovering one byte of the round-2
 //! key, and notes documenting how the full attack scales.
 
-use super::reduced::{INV_SBOX, ReducedAes128, SBOX};
+use super::reduced::{ReducedAes128, INV_SBOX, SBOX};
 
 /// Generate a δ-set: 256 plaintexts equal to `base` everywhere except
 /// position `active_byte`, which cycles `0..=255`.
@@ -97,7 +97,11 @@ pub fn is_uniform_multiset(m: &[u32; 256]) -> bool {
 fn xtimes(a: u8) -> u8 {
     let hi = a & 0x80 != 0;
     let r = a.wrapping_shl(1);
-    if hi { r ^ 0x1b } else { r }
+    if hi {
+        r ^ 0x1b
+    } else {
+        r
+    }
 }
 
 /// Tiny-scale Demirci-Selçuk style MITM on **2-round AES**.
@@ -217,6 +221,11 @@ mod tests {
         );
         // The 256-entry sequence match is strong; only the correct
         // triple should survive.
-        assert_eq!(cands.len(), 1, "expected unique recovery, got {} candidates", cands.len());
+        assert_eq!(
+            cands.len(),
+            1,
+            "expected unique recovery, got {} candidates",
+            cands.len()
+        );
     }
 }

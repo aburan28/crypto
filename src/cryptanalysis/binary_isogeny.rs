@@ -49,8 +49,14 @@ use std::collections::{HashMap, HashSet, VecDeque};
 /// `j(E) = c₄³ / Δ = 1 / b`.  `b = 0` would be a supersingular curve,
 /// which we never deal with here (the GHS trapdoor assumes ordinary `b`).
 pub fn j_invariant(curve: &ECurve) -> F2mElement {
-    assert!(!curve.b.is_zero(), "supersingular curve (b = 0) — j undefined");
-    curve.b.flt_inverse(&curve.irr).expect("b ≠ 0 implies invertible")
+    assert!(
+        !curve.b.is_zero(),
+        "supersingular curve (b = 0) — j undefined"
+    );
+    curve
+        .b
+        .flt_inverse(&curve.irr)
+        .expect("b ≠ 0 implies invertible")
 }
 
 // ── Φ_l(X, j) over F_{2^m} ─────────────────────────────────────────

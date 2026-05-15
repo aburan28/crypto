@@ -95,8 +95,12 @@ impl Rc5 {
         a = a.wrapping_add(self.s[0]);
         b = b.wrapping_add(self.s[1]);
         for i in 1..=R {
-            a = (a ^ b).rotate_left(b & ((W as u32) - 1)).wrapping_add(self.s[2 * i]);
-            b = (b ^ a).rotate_left(a & ((W as u32) - 1)).wrapping_add(self.s[2 * i + 1]);
+            a = (a ^ b)
+                .rotate_left(b & ((W as u32) - 1))
+                .wrapping_add(self.s[2 * i]);
+            b = (b ^ a)
+                .rotate_left(a & ((W as u32) - 1))
+                .wrapping_add(self.s[2 * i + 1]);
         }
         block[0..4].copy_from_slice(&a.to_le_bytes());
         block[4..8].copy_from_slice(&b.to_le_bytes());

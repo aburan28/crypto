@@ -9,6 +9,7 @@
 //! | France (ANSSI government)                    | FRP256v1 + Brainpool                       |
 //! | Russia / EAEU (GOST R 34.10)                 | CryptoPro A/B/C (256-bit) + tc26 paramSetA/B (512-bit) |
 //! | China (GB/T 32918)                           | SM2 (see [`CurveParams::sm2`])             |
+//! | Historical Internet standards                | secp112/128/160*, P-192 (legacy, low security) |
 //! | South Korea (EC-KCDSA / TTA)                 | NIST / SECG                                |
 //! | Japan (CRYPTREC)                             | NIST / SECG                                |
 //! | Brazil (ICP-Brasil)                          | NIST + Brainpool                           |
@@ -25,6 +26,132 @@ use super::curve::CurveParams;
 use num_bigint::BigUint;
 
 impl CurveParams {
+    // ── Historical low-security SECG/NIST curves ───────────────────────────
+
+    /// **secp112r1** (SEC 2 v1 §2.2.1).
+    ///
+    /// WTLS/WAP-era 112-bit prime-field curve with roughly 56-bit
+    /// generic ECDLP security.  Included for legacy audits only.
+    pub fn secp112r1() -> Self {
+        CurveParams {
+            name: "secp112r1",
+            p: hexp("DB7C2ABF62E35E668076BEAD208B"),
+            a: hexp("DB7C2ABF62E35E668076BEAD2088"),
+            b: hexp("659EF8BA043916EEDE8911702B22"),
+            gx: hexp("09487239995A5EE76B55F9C2F098"),
+            gy: hexp("A89CE5AF8724C0A23E0E0FF77500"),
+            n: hexp("DB7C2ABF62E35E7628DFAC6561C5"),
+            h: 1,
+        }
+    }
+
+    /// **secp112r2** (SEC 2 v1 §2.2.2).
+    ///
+    /// WTLS/WAP-era 112-bit prime-field curve with cofactor 4 and
+    /// roughly 56-bit generic ECDLP security.  Included for legacy
+    /// audits only.
+    pub fn secp112r2() -> Self {
+        CurveParams {
+            name: "secp112r2",
+            p: hexp("DB7C2ABF62E35E668076BEAD208B"),
+            a: hexp("6127C24C05F38A0AAAF65C0EF02C"),
+            b: hexp("51DEF1815DB5ED74FCC34C85D709"),
+            gx: hexp("4BA30AB5E892B4E1649DD0928643"),
+            gy: hexp("ADCD46F5882E3747DEF36E956E97"),
+            n: hexp("36DF0AAFD8B8D7597CA10520D04B"),
+            h: 4,
+        }
+    }
+
+    /// **secp128r1** (SEC 2 v1 §2.3.1).
+    ///
+    /// WTLS/WAP-era 128-bit prime-field curve with roughly 64-bit
+    /// generic ECDLP security.  Included for legacy audits only.
+    pub fn secp128r1() -> Self {
+        CurveParams {
+            name: "secp128r1",
+            p: hexp("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFF"),
+            a: hexp("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFC"),
+            b: hexp("E87579C11079F43DD824993C2CEE5ED3"),
+            gx: hexp("161FF7528B899B2D0C28607CA52C5B86"),
+            gy: hexp("CF5AC8395BAFEB13C02DA292DDED7A83"),
+            n: hexp("FFFFFFFE0000000075A30D1B9038A115"),
+            h: 1,
+        }
+    }
+
+    /// **secp128r2** (SEC 2 v1 §2.3.2).
+    ///
+    /// WTLS/WAP-era 128-bit prime-field curve with cofactor 4 and
+    /// roughly 64-bit generic ECDLP security.  Included for legacy
+    /// audits only.
+    pub fn secp128r2() -> Self {
+        CurveParams {
+            name: "secp128r2",
+            p: hexp("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFF"),
+            a: hexp("D6031998D1B3BBFEBF59CC9BBFF9AEE1"),
+            b: hexp("5EEEFCA380D02919DC2C6558BB6D8A5D"),
+            gx: hexp("7B6AA5D85E572983E6FB32A7CDEBC140"),
+            gy: hexp("27B6916A894D3AEE7106FE805FC34B44"),
+            n: hexp("3FFFFFFF7FFFFFFFBE0024720613B5A3"),
+            h: 4,
+        }
+    }
+
+    /// **secp160k1** (SEC 2 v2 §2.1.1).
+    ///
+    /// Legacy 160-bit prime-field Koblitz curve, roughly 80-bit generic
+    /// ECDLP security.  Kept for historical audits and attack demos only;
+    /// do not use for new systems.
+    pub fn secp160k1() -> Self {
+        CurveParams {
+            name: "secp160k1",
+            p: hexp("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC73"),
+            a: BigUint::from(0u32),
+            b: BigUint::from(7u32),
+            gx: hexp("3B4C382CE37AA192A4019E763036F4F5DD4D7EBB"),
+            gy: hexp("938CF935318FDCED6BC28286531733C3F03C4FEE"),
+            n: hexp("0100000000000000000001B8FA16DFAB9ACA16B6B3"),
+            h: 1,
+        }
+    }
+
+    /// **secp160r1** (SEC 2 v2 §2.1.2).
+    ///
+    /// Legacy random 160-bit prime-field curve, roughly 80-bit generic
+    /// ECDLP security.  Present for historical interoperability analysis
+    /// and cryptanalytic regression tests, not production use.
+    pub fn secp160r1() -> Self {
+        CurveParams {
+            name: "secp160r1",
+            p: hexp("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFF"),
+            a: hexp("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFC"),
+            b: hexp("1C97BEFC54BD7A8B65ACF89F81D4D4ADC565FA45"),
+            gx: hexp("4A96B5688EF573284664698968C38BB913CBFC82"),
+            gy: hexp("23A628553168947D59DCC912042351377AC5FB32"),
+            n: hexp("0100000000000000000001F4C8F927AED3CA752257"),
+            h: 1,
+        }
+    }
+
+    /// **secp160r2** (SEC 2 v2 §2.1.3).
+    ///
+    /// Legacy random 160-bit prime-field curve, roughly 80-bit generic
+    /// ECDLP security.  Kept to model historically deployed standards;
+    /// modern deployments should use >=128-bit-security curves instead.
+    pub fn secp160r2() -> Self {
+        CurveParams {
+            name: "secp160r2",
+            p: hexp("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC73"),
+            a: hexp("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC70"),
+            b: hexp("B4E134D3FB59EB8BAB57274904664D5AF50388BA"),
+            gx: hexp("52DCB034293A117E1F4FF11B30F7199D3144CE6D"),
+            gy: hexp("FEAFFEF2E331F296E071FA0DF9982CFEA7D43F2E"),
+            n: hexp("0100000000000000000000351EE786A818F3A1A16B"),
+            h: 1,
+        }
+    }
+
     // ── Brainpool (RFC 5639) ────────────────────────────────────────────────
 
     /// **brainpoolP192r1** (RFC 5639 §3.1).
@@ -144,6 +271,9 @@ impl CurveParams {
     // ── NIST P-curves (FIPS 186-4, SEC2 v2) ─────────────────────────────────
 
     /// **NIST P-192 / secp192r1 / ANSI prime192v1** (FIPS 186-4 §D.2.1).
+    ///
+    /// Legacy 192-bit curve with roughly 96-bit generic ECDLP security.
+    /// Included for historical Internet-standard audits, not new systems.
     pub fn p192() -> Self {
         CurveParams {
             name: "P-192",
@@ -155,6 +285,16 @@ impl CurveParams {
             n: hexp("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831"),
             h: 1,
         }
+    }
+
+    /// Alias for [`CurveParams::p192`] using the SECG name.
+    pub fn secp192r1() -> Self {
+        Self::p192()
+    }
+
+    /// Alias for [`CurveParams::p192`] using the ANSI X9.62 name.
+    pub fn prime192v1() -> Self {
+        Self::p192()
     }
 
     /// **NIST P-224 / secp224r1 / ANSI prime224v1** (FIPS 186-4 §D.2.2).
@@ -357,6 +497,13 @@ mod tests {
             CurveParams::brainpool_p384r1(),
             CurveParams::brainpool_p512r1(),
             CurveParams::frp256v1(),
+            CurveParams::secp112r1(),
+            CurveParams::secp112r2(),
+            CurveParams::secp128r1(),
+            CurveParams::secp128r2(),
+            CurveParams::secp160k1(),
+            CurveParams::secp160r1(),
+            CurveParams::secp160r2(),
             CurveParams::p192(),
             CurveParams::p224(),
             CurveParams::p384(),
@@ -388,6 +535,7 @@ mod tests {
         let curves = [
             CurveParams::brainpool_p256r1(),
             CurveParams::frp256v1(),
+            CurveParams::secp160r1(),
             CurveParams::p384(),
             CurveParams::secp192k1(),
             CurveParams::gost_cryptopro_a(),
@@ -407,11 +555,96 @@ mod tests {
     /// iterations of BigUint field ops, each iteration ~milliseconds),
     /// so we limit to brainpoolP192r1 which is fast.
     #[test]
-    fn n_times_generator_is_infinity_p192() {
-        let curve = CurveParams::brainpool_p192r1();
-        let a = curve.a_fe();
-        let ng = curve.generator().scalar_mul(&curve.n, &a);
-        assert_eq!(ng, Point::Infinity);
+    fn n_times_generator_is_infinity_for_legacy_low_security_curves() {
+        for curve in [
+            CurveParams::secp112r1(),
+            CurveParams::secp112r2(),
+            CurveParams::secp128r1(),
+            CurveParams::secp128r2(),
+            CurveParams::secp160k1(),
+            CurveParams::secp160r1(),
+            CurveParams::secp160r2(),
+            CurveParams::p192(),
+            CurveParams::brainpool_p192r1(),
+        ] {
+            let a = curve.a_fe();
+            let ng = curve.generator().scalar_mul(&curve.n, &a);
+            assert_eq!(ng, Point::Infinity, "n*G mismatch on {}", curve.name);
+        }
+    }
+
+    #[test]
+    fn legacy_curve_base_points_match_sec2_constants() {
+        let cases = [
+            (
+                CurveParams::secp112r1(),
+                "09487239995A5EE76B55F9C2F098",
+                "A89CE5AF8724C0A23E0E0FF77500",
+            ),
+            (
+                CurveParams::secp112r2(),
+                "4BA30AB5E892B4E1649DD0928643",
+                "ADCD46F5882E3747DEF36E956E97",
+            ),
+            (
+                CurveParams::secp128r1(),
+                "161FF7528B899B2D0C28607CA52C5B86",
+                "CF5AC8395BAFEB13C02DA292DDED7A83",
+            ),
+            (
+                CurveParams::secp128r2(),
+                "7B6AA5D85E572983E6FB32A7CDEBC140",
+                "27B6916A894D3AEE7106FE805FC34B44",
+            ),
+            (
+                CurveParams::secp160k1(),
+                "3B4C382CE37AA192A4019E763036F4F5DD4D7EBB",
+                "938CF935318FDCED6BC28286531733C3F03C4FEE",
+            ),
+            (
+                CurveParams::secp160r1(),
+                "4A96B5688EF573284664698968C38BB913CBFC82",
+                "23A628553168947D59DCC912042351377AC5FB32",
+            ),
+            (
+                CurveParams::secp160r2(),
+                "52DCB034293A117E1F4FF11B30F7199D3144CE6D",
+                "FEAFFEF2E331F296E071FA0DF9982CFEA7D43F2E",
+            ),
+            (
+                CurveParams::p192(),
+                "188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012",
+                "07192B95FFC8DA78631011ED6B24CDD573F977A11E794811",
+            ),
+        ];
+        for (curve, gx, gy) in cases {
+            assert_eq!(curve.gx, hexp(gx), "Gx mismatch on {}", curve.name);
+            assert_eq!(curve.gy, hexp(gy), "Gy mismatch on {}", curve.name);
+        }
+    }
+
+    #[test]
+    fn legacy_curve_nominal_security_categories() {
+        for curve in [CurveParams::secp112r1(), CurveParams::secp112r2()] {
+            assert_eq!(curve.p.bits() / 2, 56, "{} should be ~56-bit", curve.name);
+        }
+        for curve in [CurveParams::secp128r1(), CurveParams::secp128r2()] {
+            assert_eq!(curve.p.bits() / 2, 64, "{} should be ~64-bit", curve.name);
+        }
+        for curve in [
+            CurveParams::secp160k1(),
+            CurveParams::secp160r1(),
+            CurveParams::secp160r2(),
+        ] {
+            assert_eq!(curve.n.bits() / 2, 80, "{} should be ~80-bit", curve.name);
+        }
+        assert_eq!(CurveParams::secp112r1().h, 1);
+        assert_eq!(CurveParams::secp112r2().h, 4);
+        assert_eq!(CurveParams::secp128r1().h, 1);
+        assert_eq!(CurveParams::secp128r2().h, 4);
+        assert_eq!(CurveParams::p192().n.bits() / 2, 96);
+        assert_eq!(CurveParams::secp192r1().n, CurveParams::p192().n);
+        assert_eq!(CurveParams::prime192v1().n, CurveParams::p192().n);
     }
 
     /// **Brainpool p256r1 — RFC 7027 §A.1 test vector** for 2·G.

@@ -137,7 +137,14 @@ fn sc_neg(a: &BigUint, n: &BigUint) -> BigUint {
     (n - (a % n)) % n
 }
 fn sc_inv(a: &BigUint, n: &BigUint) -> BigUint {
-    crate::utils::mod_inverse(a, n).expect("scalar must be invertible")
+    sc_inv_checked(a, n).expect("scalar must be invertible")
+}
+fn sc_inv_checked(a: &BigUint, n: &BigUint) -> Option<BigUint> {
+    if a.is_zero() {
+        None
+    } else {
+        crate::utils::mod_inverse(a, n)
+    }
 }
 fn sc_pow(base: &BigUint, exp: u64, n: &BigUint) -> BigUint {
     base.modpow(&BigUint::from(exp), n)
@@ -334,7 +341,14 @@ fn ipa_verify(
         transcript.append_point("R", r);
         challenges.push(transcript.challenge("x_ipa"));
     }
-    let challenges_inv: Vec<BigUint> = challenges.iter().map(|x| sc_inv(x, n)).collect();
+    let challenges_inv: Vec<BigUint> = match challenges
+        .iter()
+        .map(|x| sc_inv_checked(x, n))
+        .collect::<Option<Vec<_>>>()
+    {
+        Some(v) => v,
+        None => return false,
+    };
 
     // Compute scalars s_i for G basis: s_i = ∏ x_j^{b_ij} where
     // b_ij ∈ {+1, -1} per the bit decomposition of i.
@@ -360,7 +374,10 @@ fn ipa_verify(
     let mut p_prime = p_initial.clone();
     for j in 0..challenges.len() {
         let x_sq = sc_mul(&challenges[j], &challenges[j], n);
-        let x_sq_inv = sc_inv(&x_sq, n);
+        let x_sq_inv = match sc_inv_checked(&x_sq, n) {
+            Some(v) => v,
+            None => return false,
+        };
         p_prime = p_prime.add(&proof.l_vec[j].scalar_mul(&x_sq, &a_fe), &a_fe);
         p_prime = p_prime.add(&proof.r_vec[j].scalar_mul(&x_sq_inv, &a_fe), &a_fe);
     }
@@ -424,6 +441,18 @@ fn two_pow_vec(n: &BigUint) -> Vec<BigUint> {
 /// **Prove** that `v ∈ [0, 2³²)` given the Pedersen commitment
 /// `V = v·G + γ·H` (the caller knows `v, γ`).
 pub fn range_prove(v: u64, gamma: &BigUint, params: &PedersenParams) -> RangeProof {
+    range_prove_checked(v, gamma, params).expect("value is outside Bulletproof range")
+}
+
+/// Checked range prover for `v < 2^N`.
+pub fn range_prove_checked(
+    v: u64,
+    gamma: &BigUint,
+    params: &PedersenParams,
+) -> Result<RangeProof, &'static str> {
+    if v >= (1u64 << N) {
+        return Err("value outside supported Bulletproof range");
+    }
     let curve = &params.curve;
     let n = &curve.n;
     let a_fe = curve.a_fe();
@@ -553,7 +582,7 @@ pub fn range_prove(v: u64, gamma: &BigUint, params: &PedersenParams) -> RangePro
     let _ = ones;
     let _ = h_vec;
 
-    RangeProof {
+    Ok(RangeProof {
         a: a_pt,
         s: s_pt,
         t1: t1_pt,
@@ -562,7 +591,7 @@ pub fn range_prove(v: u64, gamma: &BigUint, params: &PedersenParams) -> RangePro
         tau_x,
         mu,
         ipa,
-    }
+    })
 }
 
 /// **Verify** a range proof against the public commitment `V`.
@@ -572,6 +601,14 @@ pub fn range_verify(v_commit: &Point, proof: &RangeProof, params: &PedersenParam
     let a_fe = curve.a_fe();
     let g = curve.generator();
     let h = &params.h;
+    if !curve.is_valid_public_point(v_commit)
+        || !range_proof_points_valid(curve, proof)
+        || &proof.t_hat >= n
+        || &proof.tau_x >= n
+        || &proof.mu >= n
+    {
+        return false;
+    }
 
     let g_vec = nums_generators(curve, "BP/G", N);
     let h_vec = nums_generators(curve, "BP/H", N);
@@ -622,7 +659,10 @@ pub fn range_verify(v_commit: &Point, proof: &RangeProof, params: &PedersenParam
 
     // Equation 2: build P = A + x·S − μ·H + Σ_i ([-z]·G_i) + Σ_i ((z·y^i + z²·2^i)·H'_i)
     // and check via IPA that t̂ = <l, r> at this point.
-    let y_inv = sc_inv(&y, n);
+    let y_inv = match sc_inv_checked(&y, n) {
+        Some(v) => v,
+        None => return false,
+    };
     let mut h_prime = Vec::with_capacity(N);
     let mut y_inv_pow = BigUint::one();
     for h_i in &h_vec {
@@ -656,6 +696,17 @@ pub fn range_verify(v_commit: &Point, proof: &RangeProof, params: &PedersenParam
         &proof.ipa,
         &mut transcript,
     )
+}
+
+fn range_proof_points_valid(curve: &CurveParams, proof: &RangeProof) -> bool {
+    let public_points = [&proof.a, &proof.s, &proof.t1, &proof.t2];
+    public_points.iter().all(|p| curve.is_valid_public_point(p))
+        && proof
+            .ipa
+            .l_vec
+            .iter()
+            .chain(proof.ipa.r_vec.iter())
+            .all(|p| curve.is_valid_public_point(p))
 }
 
 /// Helper: produce the Pedersen commitment to `v` with blinding `γ`.
@@ -787,5 +838,20 @@ mod tests {
         let mut proof = range_prove(v, &gamma, &params);
         proof.t_hat = (&proof.t_hat + 1u32) % &params.curve.n;
         assert!(!range_verify(&v_commit, &proof, &params));
+    }
+
+    #[test]
+    fn range_prove_checked_rejects_out_of_range_value() {
+        let params = PedersenParams::standard(CurveParams::secp256k1());
+        let gamma = BigUint::one();
+        assert!(range_prove_checked(1u64 << 32, &gamma, &params).is_err());
+    }
+
+    #[test]
+    fn range_verify_rejects_invalid_commitment_point() {
+        let params = PedersenParams::standard(CurveParams::secp256k1());
+        let gamma = BigUint::one();
+        let proof = range_prove(7, &gamma, &params);
+        assert!(!range_verify(&Point::Infinity, &proof, &params));
     }
 }

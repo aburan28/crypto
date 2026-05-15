@@ -129,6 +129,12 @@ fn ntz(n: u64) -> u32 {
     n.trailing_zeros()
 }
 
+fn l_table_max_log(data_len: usize, aad_len: usize) -> usize {
+    let blocks = data_len / BLOCK + aad_len / BLOCK + 2;
+    let ceil_logish = usize::BITS as usize - blocks.max(1).leading_zeros() as usize;
+    ceil_logish + 4
+}
+
 fn nonce_to_offset0(key: &AesKey, nonce: &[u8; 12]) -> [u8; 16] {
     // Nonce: 00 || 00 || 00 || 01 || N12.
     let mut full_nonce = [0u8; 16];
@@ -175,16 +181,8 @@ fn hash_aad(key: &AesKey, aad: &[u8], l_table: &[[u8; 16]], l_star: &[u8; 16]) -
 
 /// **OCB3 encrypt** with 12-byte nonce, 16-byte tag.  Returns
 /// `ciphertext || tag`.
-pub fn ocb3_encrypt(
-    key: &AesKey,
-    nonce: &[u8; 12],
-    aad: &[u8],
-    plaintext: &[u8],
-) -> Vec<u8> {
-    let max_log = ((plaintext.len() / BLOCK + aad.len() / BLOCK + 2) as f64)
-        .log2()
-        .ceil() as usize
-        + 4;
+pub fn ocb3_encrypt(key: &AesKey, nonce: &[u8; 12], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
+    let max_log = l_table_max_log(plaintext.len(), aad.len());
     let (l_table, l_star, l_dollar) = compute_l_table(key, max_log.max(1));
     let mut offset = nonce_to_offset0(key, nonce);
     let mut checksum = [0u8; 16];
@@ -237,10 +235,7 @@ pub fn ocb3_decrypt(
     let ct = &ciphertext_with_tag[..ct_len];
     let mut recv_tag = [0u8; 16];
     recv_tag.copy_from_slice(&ciphertext_with_tag[ct_len..]);
-    let max_log = ((ct_len / BLOCK + aad.len() / BLOCK + 2) as f64)
-        .log2()
-        .ceil() as usize
-        + 4;
+    let max_log = l_table_max_log(ct_len, aad.len());
     let (l_table, l_star, l_dollar) = compute_l_table(key, max_log.max(1));
     let mut offset = nonce_to_offset0(key, nonce);
     let mut checksum = [0u8; 16];
@@ -358,6 +353,12 @@ mod tests {
         let ct = ocb3_encrypt(&key, &nonce, b"", &pt);
         let recovered = ocb3_decrypt(&key, &nonce, b"", &ct).unwrap();
         assert_eq!(recovered, pt);
+    }
+
+    #[test]
+    fn ocb3_l_table_sizing_uses_integer_math() {
+        assert!(l_table_max_log(0, 0) >= 1);
+        assert!(l_table_max_log(16 * 17, 0) >= ntz(17) as usize);
     }
 
     /// Partial last block (forces L_* / 0x80-pad branch).

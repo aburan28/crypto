@@ -53,6 +53,7 @@ use crate::ecc::curve::CurveParams;
 use crate::ecc::point::Point;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
+use num_traits::Zero;
 use rand::rngs::OsRng;
 
 /// A Chaum-Pedersen proof of equality of two discrete logs.
@@ -78,16 +79,26 @@ fn fs_challenge(
     r2: &Point,
 ) -> BigUint {
     let g = curve.generator();
-    let mut buf = Vec::with_capacity(FS_TAG.len() + 65 * 6);
-    buf.extend_from_slice(FS_TAG.as_bytes());
-    buf.extend_from_slice(&encode_point(&g));
-    buf.extend_from_slice(&encode_point(y));
-    buf.extend_from_slice(&encode_point(h_pt));
-    buf.extend_from_slice(&encode_point(z));
-    buf.extend_from_slice(&encode_point(r1));
-    buf.extend_from_slice(&encode_point(r2));
-    let h = sha256(&buf);
-    BigUint::from_bytes_be(&h) % &curve.n
+    for counter in 0u32.. {
+        let mut buf = Vec::with_capacity(FS_TAG.len() + 65 * 6 + 4);
+        buf.extend_from_slice(FS_TAG.as_bytes());
+        buf.extend_from_slice(&counter.to_be_bytes());
+        buf.extend_from_slice(&encode_point(&g));
+        buf.extend_from_slice(&encode_point(y));
+        buf.extend_from_slice(&encode_point(h_pt));
+        buf.extend_from_slice(&encode_point(z));
+        buf.extend_from_slice(&encode_point(r1));
+        buf.extend_from_slice(&encode_point(r2));
+        let mut c = BigUint::from_bytes_be(&sha256(&buf));
+        let q_bits = curve.n.bits() as usize;
+        if q_bits < 256 {
+            c >>= 256 - q_bits;
+        }
+        if !c.is_zero() && c < curve.n {
+            return c;
+        }
+    }
+    unreachable!("u32 counter space is enough for Fiat-Shamir rejection sampling")
 }
 
 fn encode_point(p: &Point) -> Vec<u8> {
@@ -153,10 +164,13 @@ pub fn chaum_pedersen_verify(
     if proof.s >= curve.n {
         return false;
     }
-    if !curve.is_on_curve(y) || !curve.is_on_curve(z) || !curve.is_on_curve(h_pt) {
+    if !curve.is_valid_public_point(y)
+        || !curve.is_valid_public_point(z)
+        || !curve.is_valid_public_point(h_pt)
+    {
         return false;
     }
-    if !curve.is_on_curve(&proof.r1) || !curve.is_on_curve(&proof.r2) {
+    if !curve.is_valid_public_point(&proof.r1) || !curve.is_valid_public_point(&proof.r2) {
         return false;
     }
 

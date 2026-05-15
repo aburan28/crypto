@@ -8,7 +8,7 @@ use super::curve::CurveParams;
 use super::point::Point;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
-use num_traits::Zero;
+use num_traits::{One, Zero};
 
 /// An ECC private key: a random scalar d ∈ [1, n-1].
 ///
@@ -69,8 +69,16 @@ impl EccKeyPair {
 
     /// Derive the public key from a known private scalar (useful for testing).
     pub fn from_private(d: BigUint, curve: &CurveParams) -> Self {
+        Self::from_private_checked(d, curve).expect("ECC private scalar must be in [1, n)")
+    }
+
+    /// Derive the public key from a known private scalar, validating bounds.
+    pub fn from_private_checked(d: BigUint, curve: &CurveParams) -> Result<Self, &'static str> {
+        if d < BigUint::one() || d >= curve.n {
+            return Err("ECC private scalar must be in [1, n)");
+        }
         let q = scalar_mul_secret(&curve.generator(), &d, curve);
-        EccKeyPair {
+        Ok(EccKeyPair {
             private: EccPrivateKey {
                 scalar: d,
                 curve_name: curve.name.to_string(),
@@ -79,7 +87,7 @@ impl EccKeyPair {
                 point: q,
                 curve_name: curve.name.to_string(),
             },
-        }
+        })
     }
 }
 
@@ -90,13 +98,26 @@ impl EccPublicKey {
         match &self.point {
             Point::Affine { x, y } => {
                 let mut out = vec![0x04];
-                let x_bytes = crate::utils::encoding::bigint_to_bytes_be(&x.value, 32);
-                let y_bytes = crate::utils::encoding::bigint_to_bytes_be(&y.value, 32);
+                let x_bytes = crate::utils::encoding::bigint_to_bytes_be_checked(&x.value, 32)?;
+                let y_bytes = crate::utils::encoding::bigint_to_bytes_be_checked(&y.value, 32)?;
                 out.extend_from_slice(&x_bytes);
                 out.extend_from_slice(&y_bytes);
                 Some(out)
             }
             Point::Infinity => None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_private_rejects_zero_and_order() {
+        let curve = CurveParams::p256();
+        assert!(EccKeyPair::from_private_checked(BigUint::zero(), &curve).is_err());
+        assert!(EccKeyPair::from_private_checked(curve.n.clone(), &curve).is_err());
+        assert!(EccKeyPair::from_private_checked(BigUint::one(), &curve).is_ok());
     }
 }

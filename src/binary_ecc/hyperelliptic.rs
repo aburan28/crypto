@@ -108,13 +108,7 @@ impl HyperellipticCurve {
     /// bounds (`deg f ≤ 2g + 1`, `deg h ≤ g`).  Does **not** check
     /// non-singularity globally — only obvious degeneracies like
     /// `f = 0` and `h = 0`.
-    pub fn new(
-        m: u32,
-        irr: IrreduciblePoly,
-        h: F2mPoly,
-        f: F2mPoly,
-        genus: u32,
-    ) -> Self {
+    pub fn new(m: u32, irr: IrreduciblePoly, h: F2mPoly, f: F2mPoly, genus: u32) -> Self {
         let g = genus as usize;
         assert!(!f.is_zero(), "f must be non-zero");
         // In char 2, h(x) = 0 makes C singular.  We allow toy curves
@@ -134,7 +128,9 @@ impl HyperellipticCurve {
 
     /// `true` iff `(x, y)` satisfies `y² + h(x)·y = f(x)`.
     pub fn is_on_curve(&self, x: &F2mElement, y: &F2mElement) -> bool {
-        let lhs = y.square(&self.irr).add(&self.h.eval(x, &self.irr).mul(y, &self.irr));
+        let lhs = y
+            .square(&self.irr)
+            .add(&self.h.eval(x, &self.irr).mul(y, &self.irr));
         let rhs = self.f.eval(x, &self.irr);
         lhs == rhs
     }
@@ -426,14 +422,14 @@ pub fn hcdlp_pollard_rho(
         let b = c0.to_bytes_be().last().copied().unwrap_or(0);
         (b as usize) % 3
     };
-    let step = |d: &MumfordDivisor, a: &BigUint, b: &BigUint|
-     -> (MumfordDivisor, BigUint, BigUint) {
-        match partition(d) {
-            0 => (d.add(p, curve), (a + 1u32) % order, b.clone()),
-            1 => (d.double(curve), (a * 2u32) % order, (b * 2u32) % order),
-            _ => (d.add(q, curve), a.clone(), (b + 1u32) % order),
-        }
-    };
+    let step =
+        |d: &MumfordDivisor, a: &BigUint, b: &BigUint| -> (MumfordDivisor, BigUint, BigUint) {
+            match partition(d) {
+                0 => (d.add(p, curve), (a + 1u32) % order, b.clone()),
+                1 => (d.double(curve), (a * 2u32) % order, (b * 2u32) % order),
+                _ => (d.add(q, curve), a.clone(), (b + 1u32) % order),
+            }
+        };
     let mut x = MumfordDivisor::identity(curve.m);
     let mut a = BigUint::zero();
     let mut b = BigUint::zero();

@@ -60,7 +60,9 @@ pub(crate) const INV_SBOX: [u8; 256] = [
     0x17,0x2b,0x04,0x7e,0xba,0x77,0xd6,0x26,0xe1,0x69,0x14,0x63,0x55,0x21,0x0c,0x7d,
 ];
 
-const RCON: [u8; 11] = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
+const RCON: [u8; 11] = [
+    0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
+];
 
 /// Multiply two bytes as polynomials in GF(2⁸) modulo x⁸+x⁴+x³+x+1.
 fn gmul(mut a: u8, mut b: u8) -> u8 {
@@ -349,7 +351,11 @@ mod tests {
             for fmc in [false, true] {
                 let aes = ReducedAes128::new(&key, nr, fmc);
                 let ct = aes.encrypt(&pt);
-                assert_eq!(aes.decrypt(&ct), pt, "round-trip failed at nr={nr}, fmc={fmc}");
+                assert_eq!(
+                    aes.decrypt(&ct),
+                    pt,
+                    "round-trip failed at nr={nr}, fmc={fmc}"
+                );
             }
         }
     }

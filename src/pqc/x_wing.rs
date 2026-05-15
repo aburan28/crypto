@@ -1,6 +1,5 @@
-//! **X-Wing** — hybrid X25519 + ML-KEM-768 KEM (Barbosa, Connolly,
-//! Diaz Duarte, Kaiser, Schwabe, Varner, Westerbaan 2024).  IETF
-//! draft-connolly-cfrg-xwing-kem.
+//! **Toy X-Wing-style hybrid** — X25519 plus this crate's educational
+//! Kyber-inspired KEM.
 //!
 //! ## Why X-Wing
 //!
@@ -14,8 +13,9 @@
 //! - A future cryptanalytic breakthrough on lattice problems
 //!   would leave ML-KEM-only deployments suddenly insecure.
 //!
-//! TLS 1.3 and Signal Protocol are adopting X-Wing or similar
-//! hybrids during the 2024–2027 transition window.
+//! Real deployments should use the CFRG X-Wing construction with ML-KEM-768.
+//! This module is non-interoperable because `pqc::kyber` is a toy Kyber-512-like
+//! implementation.
 //!
 //! ## Construction
 //!
@@ -46,8 +46,8 @@
 use crate::ecc::x25519::{x25519, x25519_base};
 use crate::hash::sha256::sha256;
 use crate::pqc::kyber::{
-    kyber_decapsulate, kyber_encapsulate, kyber_keygen, KyberCiphertext, KyberPrivateKey,
-    KyberPublicKey,
+    kyber_ciphertext_to_bytes, kyber_decapsulate, kyber_encapsulate, kyber_keygen, KyberCiphertext,
+    KyberPrivateKey, KyberPublicKey,
 };
 use rand::{rngs::OsRng, Rng};
 
@@ -78,8 +78,7 @@ pub struct XWingCiphertext {
     pub kyber_ct: KyberCiphertext,
 }
 
-/// Generate an X-Wing keypair: an X25519 keypair plus an ML-KEM
-/// keypair.
+/// Generate a toy hybrid keypair: an X25519 keypair plus a toy Kyber keypair.
 pub fn x_wing_keygen() -> XWingKeyPair {
     let mut rng = OsRng;
     let mut x_sk = [0u8; 32];
@@ -105,7 +104,7 @@ pub fn x_wing_keygen() -> XWingKeyPair {
     XWingKeyPair { pk, sk }
 }
 
-/// Encapsulate against an X-Wing public key.
+/// Encapsulate against a toy hybrid public key.
 pub fn x_wing_encapsulate(pk: &XWingPublicKey) -> (XWingCiphertext, [u8; 32]) {
     let mut rng = OsRng;
     let mut esk = [0u8; 32];
@@ -142,20 +141,11 @@ fn combine_secrets(
     input.extend_from_slice(DOMAIN_SEPARATOR);
     input.extend_from_slice(ss_x);
     input.extend_from_slice(ss_k);
-    // Serialize KyberCiphertext: include all its u/v polys.
-    input.extend_from_slice(&kyber_ct_to_bytes(kyber_ct));
+    input.extend_from_slice(
+        &kyber_ciphertext_to_bytes(kyber_ct).expect("X-Wing ciphertext must be well formed"),
+    );
     input.extend_from_slice(epk);
     sha256(&input)
-}
-
-/// Serialise a KyberCiphertext canonically for hashing.  We rely
-/// on the internal field layout (cleaner approaches would use a
-/// dedicated `to_bytes` on the type).
-fn kyber_ct_to_bytes(ct: &KyberCiphertext) -> Vec<u8> {
-    // Use the Debug-formatted representation as a stable hash input.
-    // While not as compact as a custom encoder, this preserves
-    // ciphertext-binding for the hybrid combiner.
-    format!("{:?}", ct).into_bytes()
 }
 
 #[cfg(test)]
@@ -193,5 +183,15 @@ mod tests {
         let k_dec = x_wing_decapsulate(&ct, &kp.sk);
         let (_, k_orig) = x_wing_encapsulate(&kp.pk);
         assert_ne!(k_dec, k_orig);
+    }
+
+    #[test]
+    fn x_wing_uses_canonical_kyber_serialization() {
+        let kp = x_wing_keygen();
+        let (ct, _) = x_wing_encapsulate(&kp.pk);
+        let a = kyber_ciphertext_to_bytes(&ct.kyber_ct).unwrap();
+        let b = kyber_ciphertext_to_bytes(&ct.kyber_ct).unwrap();
+        assert_eq!(a, b);
+        assert!(!a.is_empty());
     }
 }

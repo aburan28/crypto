@@ -74,7 +74,7 @@
 //! version of the elimination over a small parameter range, sufficient
 //! to demonstrate the elimination mechanism on a runnable scale.
 
-use super::reduced::{INV_SBOX, ReducedAes128};
+use super::reduced::{ReducedAes128, INV_SBOX};
 
 /// Count the active bytes (nonzero positions) in a 16-byte difference.
 pub fn active_byte_count(diff: &[u8; 16]) -> u32 {
@@ -237,8 +237,8 @@ pub fn elimination_demonstration(
         for (idx, &flat) in quartet.iter().enumerate() {
             // After INV_SR, ciphertext position `flat` lands at column 0,
             // row `idx`. Flat in the state_R4-diff array is `idx`.
-            true_state[idx] = check(flat, &c1, true_key_at(flat))
-                ^ check(flat, &c2, true_key_at(flat));
+            true_state[idx] =
+                check(flat, &c1, true_key_at(flat)) ^ check(flat, &c2, true_key_at(flat));
         }
         // Wrong-key inversion.
         let mut wrong_state = [0u8; 16];
@@ -269,8 +269,8 @@ mod tests {
         let report = verify_4_round_impossibility(&cipher, 0x9c, 4_000, 0xcafe_babe);
         assert_eq!(
             report.one_active_output_pairs, 0,
-            "4-round AES cannot map 1→1 — saw {} pairs"
-            , report.one_active_output_pairs
+            "4-round AES cannot map 1→1 — saw {} pairs",
+            report.one_active_output_pairs
         );
         // Most pairs should be fully active.
         assert!(report.fully_active_pairs > report.pairs_tested * 9 / 10);
@@ -329,8 +329,7 @@ mod tests {
     fn wrong_key_eventually_contradicts() {
         let key = [0u8; 16];
         let cipher = ReducedAes128::new(&key, 5, false);
-        let (true_hits, wrong_hits) =
-            elimination_demonstration(&cipher, 0x42, 1 << 20, 0x5eed);
+        let (true_hits, wrong_hits) = elimination_demonstration(&cipher, 0x42, 1 << 20, 0x5eed);
         assert_eq!(true_hits, 0);
         // 2²⁰ pairs at rate ~2⁻²⁴ → ≈ 1/16 expected; allow up to 0–4.
         assert!(wrong_hits < 16, "unexpectedly high: {wrong_hits}");

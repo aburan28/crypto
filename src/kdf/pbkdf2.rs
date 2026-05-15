@@ -24,7 +24,27 @@ const H_LEN: usize = 32; // HMAC-SHA256 output length
 /// * `iterations` — work factor; ≥ 600_000 recommended for password storage
 /// * `dk_len`     — desired output length in bytes
 pub fn pbkdf2_hmac_sha256(password: &[u8], salt: &[u8], iterations: u32, dk_len: usize) -> Vec<u8> {
-    let block_count = (dk_len + H_LEN - 1) / H_LEN;
+    pbkdf2_hmac_sha256_checked(password, salt, iterations, dk_len)
+        .expect("invalid PBKDF2 parameters")
+}
+
+/// Checked PBKDF2-HMAC-SHA256.
+pub fn pbkdf2_hmac_sha256_checked(
+    password: &[u8],
+    salt: &[u8],
+    iterations: u32,
+    dk_len: usize,
+) -> Result<Vec<u8>, &'static str> {
+    if iterations == 0 {
+        return Err("PBKDF2 iterations must be nonzero");
+    }
+    let block_count = dk_len
+        .checked_add(H_LEN - 1)
+        .ok_or("PBKDF2 output too long")?
+        / H_LEN;
+    if block_count > u32::MAX as usize {
+        return Err("PBKDF2 output too long");
+    }
     let mut dk = Vec::with_capacity(block_count * H_LEN);
 
     for i in 1u32..=block_count as u32 {
@@ -45,7 +65,7 @@ pub fn pbkdf2_hmac_sha256(password: &[u8], salt: &[u8], iterations: u32, dk_len:
     }
 
     dk.truncate(dk_len);
-    dk
+    Ok(dk)
 }
 
 #[cfg(test)]
@@ -119,5 +139,12 @@ mod tests {
         // Truncating the multi-block output must equal a single-block call of the same length.
         let dk32 = pbkdf2_hmac_sha256(b"passwd", b"salt", 1, 32);
         assert_eq!(&dk[..32], &dk32[..]);
+    }
+
+    #[test]
+    fn pbkdf2_rejects_zero_iterations_and_block_overflow() {
+        assert!(pbkdf2_hmac_sha256_checked(b"p", b"s", 0, 32).is_err());
+        let too_long = (u32::MAX as usize + 1) * H_LEN;
+        assert!(pbkdf2_hmac_sha256_checked(b"p", b"s", 1, too_long).is_err());
     }
 }

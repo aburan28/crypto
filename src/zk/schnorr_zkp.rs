@@ -79,17 +79,26 @@ pub struct SchnorrZkProof {
 /// Domain-separation tag for the Fiat-Shamir hash.
 const FS_TAG: &str = "ZK-SCHNORR/v1";
 
-/// Compute the Fiat-Shamir challenge `c = H(tag ‖ G ‖ Y ‖ R) mod n`.
+/// Compute the Fiat-Shamir challenge using rejection sampling into `Z_n`.
 fn fs_challenge(curve: &CurveParams, y: &Point, r: &Point) -> BigUint {
     let g = curve.generator();
-    let mut buf = Vec::with_capacity(32 + 33 * 3);
-    buf.extend_from_slice(FS_TAG.as_bytes());
-    buf.extend_from_slice(&encode_point(&g));
-    buf.extend_from_slice(&encode_point(y));
-    buf.extend_from_slice(&encode_point(r));
-    let h = sha256(&buf);
-    // Reduce mod n so the challenge sits in Z_n.
-    BigUint::from_bytes_be(&h) % &curve.n
+    for counter in 0u32.. {
+        let mut buf = Vec::with_capacity(32 + 65 * 3 + 4);
+        buf.extend_from_slice(FS_TAG.as_bytes());
+        buf.extend_from_slice(&counter.to_be_bytes());
+        buf.extend_from_slice(&encode_point(&g));
+        buf.extend_from_slice(&encode_point(y));
+        buf.extend_from_slice(&encode_point(r));
+        let mut c = BigUint::from_bytes_be(&sha256(&buf));
+        let q_bits = curve.n.bits() as usize;
+        if q_bits < 256 {
+            c >>= 256 - q_bits;
+        }
+        if !c.is_zero() && c < curve.n {
+            return c;
+        }
+    }
+    unreachable!("u32 counter space is enough for Fiat-Shamir rejection sampling")
 }
 
 /// Serialise a point as the 1-byte tag (`0x04` for affine, `0x00` for
@@ -160,10 +169,10 @@ pub fn schnorr_zkp_verify(y: &Point, proof: &SchnorrZkProof, curve: &CurveParams
     if proof.s >= curve.n {
         return false;
     }
-    if !curve.is_on_curve(&proof.r_point) {
+    if !curve.is_valid_public_point(&proof.r_point) {
         return false;
     }
-    if !curve.is_on_curve(y) {
+    if !curve.is_valid_public_point(y) {
         return false;
     }
 

@@ -25,6 +25,11 @@
 //! # Test vectors
 //!
 //! Verified against RFC 8032 §7.1 test vectors.
+//!
+//! Security note: this educational implementation still uses `BigUint` and
+//! variable-time scalar multiplication. Verification rejects identity,
+//! small-order, and non-prime-subgroup public/R points, but this module should
+//! not be treated as a constant-time production Ed25519 implementation.
 
 use super::curve25519::{
     fe_add, fe_from_bytes, fe_inv, fe_mul, fe_pow_p58, fe_sq, fe_sub, fe_to_bytes, p,
@@ -109,6 +114,11 @@ impl EdPoint {
     fn to_affine(&self) -> (BigUint, BigUint) {
         let zi = fe_inv(&self.z);
         (fe_mul(&self.x, &zi), fe_mul(&self.y, &zi))
+    }
+
+    fn is_identity(&self) -> bool {
+        let (x, y) = self.to_affine();
+        x.is_zero() && y.is_one()
     }
 
     /// Point doubling on extended Edwards (HCD 2008 §3.3) with `a = -1`.
@@ -237,6 +247,18 @@ fn decode_point(input: &[u8; 32]) -> Option<EdPoint> {
     Some(EdPoint::from_affine(cand, y))
 }
 
+fn is_small_order(point: &EdPoint) -> bool {
+    point.scalar_mul(&BigUint::from(8u32)).is_identity()
+}
+
+fn is_in_prime_order_subgroup(point: &EdPoint) -> bool {
+    point.scalar_mul(&ed25519_l()).is_identity()
+}
+
+fn is_acceptable_public_point(point: &EdPoint) -> bool {
+    !is_small_order(point) && is_in_prime_order_subgroup(point)
+}
+
 /// Compute `(s, prefix) = SHA-512(seed); s clamped`.
 fn expand_seed(seed: &[u8; 32]) -> ([u8; 32], [u8; 32]) {
     let h = sha512(seed);
@@ -313,6 +335,9 @@ pub fn ed25519_verify(message: &[u8], pubkey: &[u8; 32], sig: &[u8; 64]) -> bool
         Some(p) => p,
         None => return false,
     };
+    if !is_acceptable_public_point(&a_pt) || !is_acceptable_public_point(&r_pt) {
+        return false;
+    }
 
     // k = SHA-512(R ‖ A ‖ message) mod L
     let mut k_input = Vec::with_capacity(64 + message.len());
@@ -434,5 +459,34 @@ mod tests {
         let pk = ed25519_pubkey(&seed);
         let sig = ed25519_sign(b"original", &seed);
         assert!(!ed25519_verify(b"different", &pk, &sig));
+    }
+
+    #[test]
+    fn ed25519_rejects_identity_public_key_and_r() {
+        let seed = [0x42u8; 32];
+        let pk = ed25519_pubkey(&seed);
+        let sig = ed25519_sign(b"msg", &seed);
+
+        let identity = {
+            let mut b = [0u8; 32];
+            b[0] = 1;
+            b
+        };
+        assert!(!ed25519_verify(b"msg", &identity, &sig));
+
+        let mut bad_sig = sig;
+        bad_sig[..32].copy_from_slice(&identity);
+        assert!(!ed25519_verify(b"msg", &pk, &bad_sig));
+    }
+
+    #[test]
+    fn ed25519_rejects_trivial_forgery_with_identity_points() {
+        let identity = {
+            let mut b = [0u8; 32];
+            b[0] = 1;
+            b
+        };
+        let sig = [0u8; 64];
+        assert!(!ed25519_verify(b"forged", &identity, &sig));
     }
 }

@@ -101,7 +101,7 @@ mod tests {
     fn ecb_leaks_block_repetition() {
         let key = AesKey::new(&[7u8; 16]).unwrap();
         let pt: Vec<u8> = (0..64).map(|i| (i % 16) as u8).collect(); // 4 identical blocks
-        // Manually replicate one block so we have 4 identical 16-byte chunks.
+                                                                     // Manually replicate one block so we have 4 identical 16-byte chunks.
         let mut pt2 = vec![0u8; 64];
         for i in 0..64 {
             pt2[i] = (i % 16) as u8;

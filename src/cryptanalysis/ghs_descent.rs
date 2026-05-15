@@ -104,7 +104,10 @@ impl ECurve {
             Pt::Aff { x, y } => {
                 let lhs = y.square(&self.irr).add(&x.mul(y, &self.irr));
                 let xs = x.square(&self.irr);
-                let rhs = xs.mul(x, &self.irr).add(&self.a.mul(&xs, &self.irr)).add(&self.b);
+                let rhs = xs
+                    .mul(x, &self.irr)
+                    .add(&self.a.mul(&xs, &self.irr))
+                    .add(&self.b);
                 lhs == rhs
             }
         }
@@ -155,9 +158,7 @@ impl ECurve {
                 let lam_sq = lam.square(&self.irr);
                 let x3 = lam_sq.add(&lam).add(&self.a);
                 let lam_plus_1 = lam.add(&F2mElement::one(self.m));
-                let y3 = x1
-                    .square(&self.irr)
-                    .add(&lam_plus_1.mul(&x3, &self.irr));
+                let y3 = x1.square(&self.irr).add(&lam_plus_1.mul(&x3, &self.irr));
                 Pt::Aff { x: x3, y: y3 }
             }
         }
@@ -272,12 +273,7 @@ pub fn solve_via_descent_m1(
 /// Brute-force `Q = k·P` by walking `k = 0, 1, …, bound − 1`.
 /// Trivial; used as the inner solver after the descent has shrunk
 /// the group.
-pub fn brute_force_ecdlp(
-    curve: &ECurve,
-    p: &Pt,
-    q: &Pt,
-    bound: &BigUint,
-) -> Option<BigUint> {
+pub fn brute_force_ecdlp(curve: &ECurve, p: &Pt, q: &Pt, bound: &BigUint) -> Option<BigUint> {
     let mut acc = Pt::Inf;
     let mut k = BigUint::zero();
     while &k < bound {
@@ -672,9 +668,7 @@ mod tests {
                 let dc = descend_m1(&tc).unwrap();
                 let tp = dc.descent_map(&p);
                 if !matches!(tp, Pt::Inf) {
-                    panic!(
-                        "descent should have found d but returned None despite Tr(P) ≠ O"
-                    );
+                    panic!("descent should have found d but returned None despite Tr(P) ≠ O");
                 }
             }
         }
@@ -690,8 +684,7 @@ mod tests {
         let n = 4;
         let l = 2;
         let irr = IrreduciblePoly::deg_8();
-        let tc =
-            construct_trapdoor_curve(big_n, n, l, 2, &irr, 256).expect("m=2 curve found");
+        let tc = construct_trapdoor_curve(big_n, n, l, 2, &irr, 256).expect("m=2 curve found");
         let aff = descend_m2_affine(&tc).expect("affine model");
         let tower = FieldTower::new(big_n, n, l, irr.clone());
         // s, t should be in k = F_{2^l}.

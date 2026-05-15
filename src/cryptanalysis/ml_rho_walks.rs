@@ -138,10 +138,198 @@ pub fn average_steps_to_collision<W: WalkFn>(
     None
 }
 
+// ── Pre-ML deterministic walk-function comparison ────────────────────
+
+use crate::cryptanalysis::pollard_rho::{pollard_rho_dlp, RhoOptions};
+use num_bigint::RandBigInt;
+use num_traits::{One, Zero};
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+
+/// Run a controlled benchmark: solve a planted DLP in `Z_p*` under
+/// several deterministic walk-partition functions, measure
+/// **median** and **mean** steps to solve, and report the result.
+///
+/// The partition function is the part of Pollard rho most adjacent
+/// to what an ML walk would replace — and the most data-driven
+/// improvement target.  By comparing 4 deterministic walks we
+/// establish the **variance** of the metric and a baseline against
+/// which any ML improvement must be measured.
+pub struct WalkBenchResult {
+    pub name: String,
+    pub n_runs: usize,
+    pub success_count: usize,
+    pub mean_iters: f64,
+    pub median_iters: u64,
+    pub min_iters: u64,
+    pub max_iters: u64,
+}
+
+/// Solve DLP `h = g^x mod q` (with `g` of prime order `n`) using
+/// `pollard_rho_dlp` with a custom partition function.
+fn solve_dlp_zp_with_partition<F>(
+    g: &BigUint,
+    h: &BigUint,
+    n: &BigUint,
+    q: &BigUint,
+    partition: F,
+    seed: u64,
+) -> Option<u64>
+where
+    F: Fn(&BigUint) -> u8,
+{
+    let op = |a: &BigUint, b: &BigUint| -> BigUint { (a * b) % q };
+    let eq = |a: &BigUint, b: &BigUint| -> bool { a == b };
+    let pow = |g: &BigUint, k: &BigUint| -> BigUint { g.modpow(k, q) };
+    let opts = RhoOptions {
+        max_iterations: 50_000,
+        max_restarts: 30,
+        seed: Some(seed),
+    };
+    match pollard_rho_dlp(g, h, n, op, eq, partition, pow, &opts) {
+        Ok(sol) => Some(sol.iterations),
+        Err(_) => None,
+    }
+}
+
+/// Compare 4 deterministic walk-function partitions on `n_runs` random
+/// DLP instances at the given toy prime.  Returns one
+/// [`WalkBenchResult`] per partition.
+pub fn benchmark_walk_partitions(
+    p: u64,
+    g_val: u64,
+    subgroup_order: u64,
+    n_runs: usize,
+    base_seed: u64,
+) -> Vec<WalkBenchResult> {
+    let p_big = BigUint::from(p);
+    let n = BigUint::from(subgroup_order);
+    let g = BigUint::from(g_val);
+
+    let partitions: Vec<(&str, Box<dyn Fn(&BigUint) -> u8>)> = vec![
+        // Standard: low byte mod 3 (default `pollard_rho`).
+        (
+            "standard low-byte",
+            Box::new(|x: &BigUint| x.to_bytes_be().last().copied().unwrap_or(0)),
+        ),
+        // High byte mod 3.
+        (
+            "high-byte",
+            Box::new(|x: &BigUint| x.to_bytes_be().first().copied().unwrap_or(0)),
+        ),
+        // XOR of two halves.
+        (
+            "xor-halves",
+            Box::new(|x: &BigUint| {
+                let bs = x.to_bytes_be();
+                let n_half = bs.len() / 2;
+                let lo: u8 = bs.iter().skip(n_half).fold(0u8, |a, b| a ^ b);
+                let hi: u8 = bs.iter().take(n_half).fold(0u8, |a, b| a ^ b);
+                lo ^ hi
+            }),
+        ),
+        // Popcount mod 3 (information-bearing about Hamming weight).
+        (
+            "popcount",
+            Box::new(|x: &BigUint| {
+                x.to_bytes_be()
+                    .iter()
+                    .map(|b| b.count_ones() as u8)
+                    .sum::<u8>()
+            }),
+        ),
+    ];
+
+    let mut results = Vec::new();
+    for (name, partition) in partitions {
+        let mut rng = StdRng::seed_from_u64(base_seed);
+        let mut iters_log: Vec<u64> = Vec::new();
+        let mut successes = 0usize;
+        for run in 0..n_runs {
+            let secret = rng.gen_biguint_below(&n);
+            if secret.is_zero() {
+                continue;
+            }
+            let h = g.modpow(&secret, &p_big);
+            match solve_dlp_zp_with_partition(
+                &g,
+                &h,
+                &n,
+                &p_big,
+                &partition,
+                base_seed + run as u64,
+            ) {
+                Some(iters) => {
+                    successes += 1;
+                    iters_log.push(iters);
+                }
+                None => {}
+            }
+        }
+        iters_log.sort();
+        let mean = if iters_log.is_empty() {
+            0.0
+        } else {
+            iters_log.iter().sum::<u64>() as f64 / iters_log.len() as f64
+        };
+        let median = iters_log.get(iters_log.len() / 2).copied().unwrap_or(0);
+        let min = iters_log.first().copied().unwrap_or(0);
+        let max = iters_log.last().copied().unwrap_or(0);
+        results.push(WalkBenchResult {
+            name: name.into(),
+            n_runs,
+            success_count: successes,
+            mean_iters: mean,
+            median_iters: median,
+            min_iters: min,
+            max_iters: max,
+        });
+    }
+    results
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::io::Cursor;
+
+    /// **Walk-partition benchmark**: 4 deterministic partition
+    /// functions, 50 random DLP instances at p = 32213 (15-bit Solinas
+    /// shape), subgroup order 8053 (a divisor of p - 1).  Reports
+    /// mean / median / min / max iterations per partition.
+    #[test]
+    #[ignore]
+    fn walk_partition_benchmark_p32213() {
+        // p = 32213 is prime; (p-1) = 32212 = 2² · 7 · 1151
+        // Subgroup of order 1151.  Pick g of order 1151.
+        // For brevity, use g = 2 and the full multiplicative-group
+        // structure (order p − 1 = 32212).
+        let results = benchmark_walk_partitions(32213, 2, 32212, 50, 0xDEAD_BEEF);
+        println!("\n=== Walk-partition benchmark (p = 32213, n_runs = 50) ===");
+        println!(
+            "{:>22} {:>10} {:>12} {:>10} {:>10} {:>10}",
+            "partition", "successes", "mean iters", "median", "min", "max"
+        );
+        for r in &results {
+            println!(
+                "{:>22} {:>10} {:>12.0} {:>10} {:>10} {:>10}",
+                r.name, r.success_count, r.mean_iters, r.median_iters, r.min_iters, r.max_iters
+            );
+        }
+        // Sanity assertion: report success rate; some walks may
+        // legitimately fail on bad seeds even with multiple restarts.
+        let total_successes: usize = results.iter().map(|r| r.success_count).sum();
+        println!(
+            "\n  Total successes: {} / {} ({:.0}%)",
+            total_successes,
+            results.len() * 50,
+            100.0 * total_successes as f64 / (results.len() * 50) as f64,
+        );
+        assert!(
+            total_successes > 50,
+            "Aggregate success rate too low across all walks — likely a bug."
+        );
+    }
 
     /// JSON serialization of WalkTrace for ML pipeline ingest.
     #[test]

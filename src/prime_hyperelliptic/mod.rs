@@ -36,10 +36,13 @@
 //!   `O(p^c)` for small `c`; appropriate for `p ≤ ~10^3`.
 
 pub mod curve;
+pub mod fp2;
 pub mod fp_poly;
 
 pub use curve::{
-    brute_force_jac_order, brute_force_jac_order_via_lpoly, count_points,
+    brute_force_jac_order, brute_force_jac_order_via_lpoly, count_points, count_points_fp2,
+    fast_frob_ab, fast_point_counts, frob_ab_and_jac, jac_order_via_lpoly, FrobABForJac,
     HyperellipticCurveP, MumfordDivisorP,
 };
+pub use fp2::{enumerate_fp2, Fp2, Fp2Ctx};
 pub use fp_poly::FpPoly;

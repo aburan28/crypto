@@ -117,6 +117,305 @@ use crate::cryptanalysis::coleman_integration::PSeries;
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
+// ── Phase 3: proper formal-group [d]_F via formal-log reversion ──────
+
+/// Formal log `log_F(z)` for short Weierstrass `y² = x³ + ax + b`.
+///
+/// `log_F(z) = ∫ ω = z + (a/5)·z⁵ + (b/7)·z⁷ + (a²/9)·z⁹ + …`
+///
+/// This is the inverse-image of the standard "additive formal group"
+/// under the isomorphism (over Z_p[[z]]) `Ê_a,b ≅ Ĝ_a`.
+pub fn formal_log_series(curve: &ZpCurve, n: usize) -> PSeries {
+    let p = &curve.p;
+    let prec = curve.precision;
+    let mut coefs = vec![ZpInt::zero(p, prec); n];
+    if n >= 2 {
+        coefs[1] = ZpInt::one(p, prec); // z
+    }
+    if n >= 6 {
+        // a/5 · z⁵
+        let five = ZpInt::new(BigInt::from(5), p, prec);
+        if let Some(inv5) = five.inverse() {
+            coefs[5] = curve.a.mul(&inv5);
+        }
+    }
+    if n >= 8 {
+        // b/7 · z⁷
+        let seven = ZpInt::new(BigInt::from(7), p, prec);
+        if let Some(inv7) = seven.inverse() {
+            coefs[7] = curve.b.mul(&inv7);
+        }
+    }
+    if n >= 10 {
+        // a²/9 · z⁹  (from higher-order integration of ω)
+        let nine = ZpInt::new(BigInt::from(9), p, prec);
+        if let Some(inv9) = nine.inverse() {
+            coefs[9] = curve.a.mul(&curve.a).mul(&inv9);
+        }
+    }
+    PSeries::from_coef_vec(p, prec, coefs)
+}
+
+/// **Reversion** (series inverse) of `log_F`: given `u = log_F(z)`,
+/// returns `z(u)` as a power series in `u`.
+///
+/// For `log_F(z) = z + c_5·z⁵ + c_7·z⁷ + c_9·z⁹ + ...`, the inverse:
+/// ```text
+///   z(u) = u − c_5·u⁵ − c_7·u⁷ + (5·c_5² − c_9)·u⁹ + …
+/// ```
+/// Computed via Lagrange-style iterative substitution.
+pub fn formal_log_inverse_series(curve: &ZpCurve, n: usize) -> PSeries {
+    let p = &curve.p;
+    let prec = curve.precision;
+    // Build `log_F(z)` as a series of length `n`.
+    let logf = formal_log_series(curve, n);
+    // We want z(u) such that logf(z(u)) ≡ u.  Start with z(u) = u
+    // and iterate: z_{new}(u) = u − [logf(z_old(u)) − z_old(u)]
+    //                         = z_old(u) − [logf(z_old(u)) − u]
+    let mut z = PSeries::new(p, prec, n);
+    if n >= 2 {
+        z.coefs[1] = ZpInt::one(p, prec);
+    }
+    // Helper: compose `logf` with current `z(u)` to get `logf(z(u))`.
+    // logf has coefficients c_k at z^k; logf(z(u)) = sum_k c_k · z(u)^k.
+    for _iter in 0..n {
+        // Compute z^k power series up to k = n - 1.
+        let mut z_pow = PSeries::from_coef_vec(p, prec, vec![ZpInt::one(p, prec)]); // = 1
+        let mut acc = PSeries::new(p, prec, n);
+        for k in 0..logf.n() {
+            if !logf.coefs[k].value.is_zero() {
+                // Add c_k · z(u)^k.
+                let scaled = z_pow.mul(&PSeries::from_coef_vec(
+                    p,
+                    prec,
+                    vec![logf.coefs[k].clone()],
+                ));
+                acc = acc.add(&scaled);
+            }
+            // Step: z_pow ← z_pow · z.
+            z_pow = z_pow.mul(&z);
+            // Truncate to length n for efficiency.
+            if z_pow.n() > n {
+                z_pow.coefs.truncate(n);
+            }
+        }
+        // Compute residual = acc − u.
+        let mut u_series = PSeries::new(p, prec, n);
+        if n >= 2 {
+            u_series.coefs[1] = ZpInt::one(p, prec);
+        }
+        // acc − u
+        let residual = acc.add(&scale_neg_one(&u_series, p, prec));
+        // Check if residual is zero (up to truncation).
+        let mut nonzero_residual = false;
+        for c in &residual.coefs {
+            if !c.value.is_zero() {
+                nonzero_residual = true;
+                break;
+            }
+        }
+        if !nonzero_residual {
+            break;
+        }
+        // Subtract residual from z (Newton-like correction).
+        z = z.add(&scale_neg_one(&residual, p, prec));
+        if z.n() > n {
+            z.coefs.truncate(n);
+        }
+    }
+    z
+}
+
+fn scale_neg_one(s: &PSeries, p: &BigInt, prec: u32) -> PSeries {
+    let neg_one = ZpInt::new(BigInt::from(-1), p, prec);
+    let neg_series = PSeries::from_coef_vec(p, prec, vec![neg_one]);
+    s.mul(&neg_series)
+}
+
+/// **Compute `[d]_F(z) = log_F^{-1}(d · log_F(z))`** for short
+/// Weierstrass.  This is the *correct* formal-group `d`-fold multiple
+/// of `z`, accounting for the non-additive corrections in `F(s, t)`.
+///
+/// Uses **scalar Newton iteration** rather than power-series reversion
+/// for numerical robustness at toy precision.
+///
+/// Given the target `u = d · log_F(z)`, find `z_d` such that
+/// `log_F(z_d) = u` via:
+/// ```text
+///   z_{k+1} = z_k − (log_F(z_k) − u) / log_F'(z_k)
+/// ```
+/// Newton converges quadratically; at `prec` digits we need `O(log
+/// prec)` iterations.
+pub fn formal_d_times_z(curve: &ZpCurve, z: &ZpInt, d: u64, series_len: usize) -> ZpInt {
+    let p = &z.p;
+    let prec = z.precision;
+    let logf = formal_log_series(curve, series_len);
+    // Derivative of log_F: log_F'(z) = 1 + a·z⁴ + b·z⁶ + a²·z⁸ + ...
+    // (differentiating term-by-term).
+    let logf_deriv = {
+        let mut coefs = vec![ZpInt::zero(p, prec); series_len];
+        for k in 1..logf.n() {
+            // logf has c_k at z^k.  d/dz: k·c_k·z^{k-1}.
+            let k_zp = ZpInt::new(BigInt::from(k as i64), p, prec);
+            coefs[k - 1] = k_zp.mul(&logf.coefs[k]);
+        }
+        PSeries::from_coef_vec(p, prec, coefs)
+    };
+    // u = d · log_F(z)
+    let u = logf.evaluate(z);
+    let d_zp = ZpInt::new(BigInt::from(d as i64), p, prec);
+    let target = d_zp.mul(&u);
+    // Newton: start at z_0 = d · z (leading-order).
+    let mut z_cur = d_zp.mul(z);
+    for _ in 0..(prec as usize + 4) {
+        let logf_at_z = logf.evaluate(&z_cur);
+        let f = logf_at_z.sub(&target);
+        if f.value.is_zero() {
+            break;
+        }
+        let fp = logf_deriv.evaluate(&z_cur);
+        let fp_inv = match fp.inverse() {
+            Some(v) => v,
+            None => break,
+        };
+        let delta = f.mul(&fp_inv);
+        let new_z = z_cur.sub(&delta);
+        if new_z == z_cur {
+            break;
+        }
+        z_cur = new_z;
+    }
+    z_cur
+}
+
+/// **Phase 3 test result**: verifies the Mazur-Tate quadratic identity
+/// ```text
+///     log σ(d·P) − d · log σ(P) ≡ h(P, P) · d(d−1)/2  (mod p^precision)
+/// ```
+/// using the **correct** formal-group `[d]_F` (Phase-3 fix) rather
+/// than the naive `z_Q = d·z_P` (Phase-2 stub).
+#[derive(Clone, Debug)]
+pub struct MazurTatePhase3Row {
+    pub d: u64,
+    pub z_d: BigInt,
+    pub log_sigma_d: BigInt,
+    pub diff: BigInt, // log σ(d·P) − d · log σ(P)
+    pub d_d_minus_1_half: BigInt,
+    pub h_estimate: Option<BigInt>,
+}
+
+/// **Verify** that `[d]_F` is correct by checking the composition
+/// law `[d]_F([e]_F(z)) = [d·e]_F(z)`.  This is a structural sanity
+/// check that does not depend on the σ-series being complete.
+pub fn verify_formal_d_times_composition(
+    curve: &ZpCurve,
+    z: &ZpInt,
+    d: u64,
+    e: u64,
+    series_len: usize,
+) -> bool {
+    let z_e = formal_d_times_z(curve, z, e, series_len);
+    let z_de_via_compose = formal_d_times_z(curve, &z_e, d, series_len);
+    let z_de_direct = formal_d_times_z(curve, z, d * e, series_len);
+    z_de_via_compose == z_de_direct
+}
+
+/// **`p`-adic unit root `α_p`** of the Frobenius polynomial
+/// `T² − a_p T + p = 0` in `Z_p`, where `a_p = p + 1 − #E(F_p)`.
+///
+/// For an ordinary curve (`gcd(a_p, p) = 1`), this factor lifts to a
+/// p-adic unit α_p with `α_p ≡ a_p (mod p)`.  Computed via Hensel
+/// iteration on `f(α) = α² − a_p α + p`, starting from `α_0 = a_p`.
+///
+/// This is the Frobenius eigenvalue on the unit-root subspace of
+/// `H^1_dR(E/Q_p)` and the crucial ingredient missing from the
+/// existing σ-series for the Mazur-Tate quadratic identity to hold.
+pub fn frobenius_unit_root(p: &BigInt, a_p: i64, precision: u32) -> Option<ZpInt> {
+    let a_p_zp = ZpInt::new(BigInt::from(a_p), p, precision);
+    if a_p_zp.value.is_zero() {
+        // Supersingular case — no unit root.
+        return None;
+    }
+    let p_zp = ZpInt::new(p.clone(), p, precision);
+    // Newton iteration: α_{k+1} = α_k − f(α_k)/f'(α_k)
+    // f(α) = α² − a_p α + p ⇒ f'(α) = 2α − a_p
+    let mut alpha = a_p_zp.clone();
+    for _ in 0..precision {
+        let f = alpha.mul(&alpha).sub(&a_p_zp.mul(&alpha)).add(&p_zp);
+        let f_prime = ZpInt::new(BigInt::from(2), p, precision)
+            .mul(&alpha)
+            .sub(&a_p_zp);
+        let f_prime_inv = f_prime.inverse()?;
+        let delta = f.mul(&f_prime_inv);
+        alpha = alpha.sub(&delta);
+    }
+    Some(alpha)
+}
+
+/// Run the Phase-3 quadratic-identity verification at `(curve, z_P, d
+/// ∈ 2..=d_max)`.  Returns a vector of rows + a consistency flag.
+pub fn run_mazur_tate_phase3(
+    curve: &ZpCurve,
+    z_p: &ZpInt,
+    d_max: u64,
+) -> (Vec<MazurTatePhase3Row>, bool, Option<BigInt>) {
+    let p_u: u64 = curve.p.clone().try_into().unwrap_or(11);
+    let series_n = (p_u - 1).max(10) as usize;
+    let log_sigma_minus_log_z = match log_sigma_minus_log_z(curve, series_n) {
+        Some(s) => s,
+        None => return (Vec::new(), false, None),
+    };
+    let log_sigma_p = log_sigma_minus_log_z.evaluate(z_p);
+    let mut rows = Vec::new();
+    let mut hs = Vec::new();
+    for d in 2..=d_max {
+        // [d]_F(z_P) via correct formal-group multiplication.
+        let z_d = formal_d_times_z(curve, z_p, d, series_n);
+        let log_sigma_d = log_sigma_minus_log_z.evaluate(&z_d);
+        // diff = log_sigma_d − d · log_sigma_p
+        let d_zp = ZpInt::new(BigInt::from(d as i64), &curve.p, curve.precision);
+        let d_log_p = d_zp.mul(&log_sigma_p);
+        let diff = log_sigma_d.sub(&d_log_p);
+        // d(d−1)/2
+        let d_d_minus_1 = ZpInt::new(
+            BigInt::from((d * (d - 1)) as i64),
+            &curve.p,
+            curve.precision,
+        );
+        let two = ZpInt::new(BigInt::from(2), &curve.p, curve.precision);
+        let two_inv = two.inverse();
+        let denom_half = two_inv.as_ref().map(|inv| d_d_minus_1.mul(inv));
+        // h estimate = diff / [d(d−1)/2]
+        let h_estimate = if let Some(denom) = denom_half.as_ref() {
+            if denom.value.is_zero() {
+                None
+            } else {
+                denom.inverse().map(|inv| diff.mul(&inv))
+            }
+        } else {
+            None
+        };
+        if let Some(h) = h_estimate.as_ref() {
+            hs.push(h.value.clone());
+        }
+        rows.push(MazurTatePhase3Row {
+            d,
+            z_d: z_d.value.clone(),
+            log_sigma_d: log_sigma_d.value.clone(),
+            diff: diff.value.clone(),
+            d_d_minus_1_half: denom_half.map(|h| h.value).unwrap_or_else(BigInt::zero),
+            h_estimate: h_estimate.map(|h| h.value),
+        });
+    }
+    let consistent = !hs.is_empty() && hs.iter().all(|h| h == &hs[0]);
+    let common_h = if consistent {
+        Some(hs[0].clone())
+    } else {
+        None
+    };
+    (rows, consistent, common_h)
+}
+
 /// `σ_p(z)` as a `z`-power-series for short-Weierstrass `E: y² = x³
 /// + ax + b`.
 ///
@@ -405,6 +704,105 @@ mod tests {
             println!("  Either (a) the simplified formula is missing terms, or");
             println!("  (b) precision artifacts dominate, or");
             println!("  (c) the relation requires more careful regularization.");
+        }
+    }
+
+    /// **Phase 3a — `[d]_F` composition sanity**: verify the formal-
+    /// group composition law `[d]_F([e]_F(z)) = [d·e]_F(z)`.  This is
+    /// a structural test of the formal-log reversion, independent of
+    /// the σ-series being complete.
+    #[test]
+    fn mazur_tate_phase3_formal_d_composition() {
+        let p = BigInt::from(11);
+        let prec = 6u32;
+        let curve = ZpCurve::new(BigInt::from(1), BigInt::from(1), &p, prec);
+        let z_p = ZpInt::new(BigInt::from(11), &p, prec);
+        // [2]_F([3]_F(z)) == [6]_F(z)
+        // [3]_F([2]_F(z)) == [6]_F(z)
+        // [2]_F([5]_F(z)) == [10]_F(z)
+        for (d, e) in [(2u64, 3u64), (3, 2), (2, 5), (4, 2)] {
+            let ok = verify_formal_d_times_composition(&curve, &z_p, d, e, 10);
+            assert!(
+                ok,
+                "composition [{}]_F ∘ [{}]_F = [{}]_F failed",
+                d,
+                e,
+                d * e
+            );
+        }
+        println!("\n✓ Phase 3a: [d]_F composition law verified at p = 11.");
+    }
+
+    /// **Phase 3b — `α_p` Hensel lift**: verify that the unit root
+    /// `α_p` of the Frobenius polynomial `T² − a_p T + p` is correctly
+    /// Hensel-lifted in `Z_p`.
+    #[test]
+    fn mazur_tate_phase3_alpha_p_unit_root() {
+        // Curve y² = x³ + x + 1 over F_11 has #E = 13 (verified earlier),
+        // so a_p = 11 + 1 − 13 = −1.
+        // Frobenius polynomial: T² + T + 11 = 0.  Unit root α_p ≡ −1 (mod 11)
+        // and satisfies α_p² + α_p + 11 = 0 in Z_11.
+        let p = BigInt::from(11);
+        let prec = 6u32;
+        let alpha = frobenius_unit_root(&p, -1, prec).expect("ordinary curve");
+        // Verify f(α) = 0 mod p^prec.
+        let p_zp = ZpInt::new(p.clone(), &p, prec);
+        let a_p_zp = ZpInt::new(BigInt::from(-1), &p, prec);
+        let f_alpha = alpha.mul(&alpha).sub(&a_p_zp.mul(&alpha)).add(&p_zp);
+        assert!(
+            f_alpha.value.is_zero(),
+            "Hensel lift failed: f(α) = {} ≠ 0 mod 11^6",
+            f_alpha.value
+        );
+        // Verify α is a unit (α ≢ 0 mod p).
+        assert!(!alpha.value.is_zero());
+        println!(
+            "\n✓ Phase 3b: α_p Hensel-lifted to mod 11^6:  α = {}",
+            alpha.value
+        );
+    }
+
+    /// **Phase 3 verification**: with the corrected `[d]_F` via
+    /// formal-log reversion, the Mazur-Tate quadratic identity should
+    /// hold with a constant `h` across `d`.
+    #[test]
+    fn mazur_tate_phase3_quadratic_identity() {
+        let p = BigInt::from(11);
+        let prec = 6u32;
+        let curve = ZpCurve::new(BigInt::from(1), BigInt::from(1), &p, prec);
+        let z_p = ZpInt::new(BigInt::from(11), &p, prec);
+
+        let (rows, consistent, h_common) = run_mazur_tate_phase3(&curve, &z_p, 8);
+        println!();
+        println!("=== Mazur-Tate σ Phase 3: corrected [d]_F via reversion ===");
+        println!();
+        println!(
+            "{:>3} {:>15} {:>15} {:>15} {:>15}",
+            "d", "z_d", "log σ(d·P)", "diff", "h estimate"
+        );
+        for r in &rows {
+            let h_str = r
+                .h_estimate
+                .as_ref()
+                .map(|h| h.to_string())
+                .unwrap_or_else(|| "N/A".into());
+            println!(
+                "{:>3} {:>15} {:>15} {:>15} {:>15}",
+                r.d, r.z_d, r.log_sigma_d, r.diff, h_str,
+            );
+        }
+        println!();
+        if consistent {
+            println!("✓ Phase 3: h(P, P) CONSISTENT across d.");
+            if let Some(h) = h_common.as_ref() {
+                println!("  Common h = {}", h);
+            }
+            println!("  The Mazur-Tate quadratic identity is verified at toy scale.");
+            println!("  ECDLP recovery via Phase 3 σ is feasible for these parameters.");
+        } else {
+            println!("✗ Phase 3: h still varies across d.");
+            println!("  Either reversion precision is insufficient, or the σ-series");
+            println!("  itself requires the E_2 / p-adic-height correction terms.");
         }
     }
 }

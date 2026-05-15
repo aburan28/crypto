@@ -284,10 +284,7 @@ pub struct LocalCollisionResult {
 /// **building block** Biryukov-Khovratovich chain across multiple
 /// rounds to get their full 2^99 attack on AES-256.  We measure
 /// the empirical hit rate of the local collision on 1-round AES-128.
-pub fn biryukov_khovratovich_4round_demo(
-    n_trials: usize,
-    n_rounds: usize,
-) -> LocalCollisionResult {
+pub fn biryukov_khovratovich_4round_demo(n_trials: usize, n_rounds: usize) -> LocalCollisionResult {
     use crate::utils::random::random_bytes_vec;
     let xor16 = |a: &[u8; 16], b: &[u8; 16]| -> [u8; 16] {
         let mut o = [0u8; 16];

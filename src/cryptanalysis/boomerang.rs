@@ -447,8 +447,7 @@ pub fn differential_trail_search(
     threshold: f64,
 ) -> Vec<DifferentialTrail> {
     let mut results = Vec::new();
-    let mut stack: Vec<(u64, f64, Vec<(u64, u64)>)> =
-        vec![(alpha_seed, 1.0, Vec::new())];
+    let mut stack: Vec<(u64, f64, Vec<(u64, u64)>)> = vec![(alpha_seed, 1.0, Vec::new())];
     let mask = (1u64 << model.block_bits()) - 1;
     while let Some((diff_in, prob, trail)) = stack.pop() {
         let depth = trail.len();
@@ -748,7 +747,12 @@ mod tests {
 
     /// Serpent S0 — a 4-bit S-box with known DDT properties.
     fn serpent_s0() -> Sbox {
-        Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12]).unwrap()
+        Sbox::new(
+            4,
+            4,
+            vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
+        )
+        .unwrap()
     }
 
     /// PRESENT S-box — the canonical lightweight 4×4 S-box.
@@ -799,13 +803,7 @@ mod tests {
     #[test]
     fn boomerang_zero_difference_always_right_quartet() {
         let cipher = ToySpn::new(serpent_s0(), 2, 0xDEAD_BEEF);
-        let result = boomerang_distinguisher(
-            &cipher,
-            &[0u8, 0u8],
-            &[0u8, 0u8],
-            64,
-            Some(1.0),
-        );
+        let result = boomerang_distinguisher(&cipher, &[0u8, 0u8], &[0u8, 0u8], 64, Some(1.0));
         assert_eq!(
             result.right_quartets, 64,
             "zero-diff quartet must always be right: {:?}",
@@ -942,8 +940,7 @@ mod tests {
             n_sboxes: 4,
             linear_layer: |x| ToySpn::bit_permutation(x as u16) as u64,
         };
-        let trails =
-            differential_trail_search(&model, 0x0001u64, 2, 2f64.powi(-12));
+        let trails = differential_trail_search(&model, 0x0001u64, 2, 2f64.powi(-12));
         assert!(
             !trails.is_empty(),
             "trail search returned no 2-round trails with α = 0x0001"
@@ -963,8 +960,7 @@ mod tests {
             n_sboxes: 4,
             linear_layer: |x| ToySpn::bit_permutation(x as u16) as u64,
         };
-        let trails =
-            differential_trail_search(&model, 0x0001u64, 3, 2f64.powi(-8));
+        let trails = differential_trail_search(&model, 0x0001u64, 3, 2f64.powi(-8));
         for t in &trails {
             assert!(
                 t.probability >= 2f64.powi(-8),
@@ -987,15 +983,7 @@ mod tests {
             linear_layer: |x| ToySpn::bit_permutation(x as u16) as u64,
         };
         // Search for boomerang pairs with α = δ = 0x0001, 2+2 rounds.
-        let pairs = boomerang_trail_search(
-            &model,
-            0x0001u64,
-            0x0001u64,
-            2,
-            2,
-            2f64.powi(-12),
-            5,
-        );
+        let pairs = boomerang_trail_search(&model, 0x0001u64, 0x0001u64, 2, 2, 2f64.powi(-12), 5);
         // We don't require a non-empty result for arbitrary (α, δ);
         // verify the search at least terminates and returns a sorted list.
         for window in pairs.windows(2) {
@@ -1048,9 +1036,9 @@ mod tests {
         let alpha = [(beta & 0xFF) as u8, ((beta >> 8) & 0xFF) as u8];
         let delta = [(gamma & 0xFF) as u8, ((gamma >> 8) & 0xFF) as u8];
         let result = sandwich_distinguisher(
-            |b| b.to_vec(),                            // E0 = identity
-            |b| cipher1.encrypt(b),                    // Em = the S-box layer
-            |b| b.to_vec(),                            // E1 = identity
+            |b| b.to_vec(),         // E0 = identity
+            |b| cipher1.encrypt(b), // Em = the S-box layer
+            |b| b.to_vec(),         // E1 = identity
             |b| b.to_vec(),
             |b| cipher1.decrypt(b),
             |b| b.to_vec(),

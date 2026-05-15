@@ -130,12 +130,7 @@ impl FieldTower {
     pub fn new(big_n: u32, n: u32, l: u32, irr: IrreduciblePoly) -> Self {
         assert_eq!(big_n, n * l, "N must equal n·l");
         assert_eq!(irr.degree, big_n);
-        Self {
-            big_n,
-            n,
-            l,
-            irr,
-        }
+        Self { big_n, n, l, irr }
     }
 
     /// `σ(x) = x^{2^l}` — the Frobenius generator of `Gal(K/k)`.
@@ -403,10 +398,7 @@ pub fn construct_trapdoor_curve(
     let mut tried = 0u32;
     let mut candidate_bits = 1u64;
     while tried < max_attempts {
-        let sqrt_b = F2mElement::from_biguint(
-            &num_bigint::BigUint::from(candidate_bits),
-            big_n,
-        );
+        let sqrt_b = F2mElement::from_biguint(&num_bigint::BigUint::from(candidate_bits), big_n);
         candidate_bits = candidate_bits.wrapping_add(1);
         if candidate_bits == 0 {
             candidate_bits = 1;
@@ -601,7 +593,7 @@ mod tests {
         let b = F2mElement::from_biguint(&BigUint::from(0b0010u32), m);
         let c = F2mElement::from_biguint(&BigUint::from(0b0100u32), m);
         let d = F2mElement::from_biguint(&BigUint::from(0b0111u32), m); // a+b+c
-        // {a, b, c} → rank 3.  {a, b, c, d} → still rank 3.
+                                                                        // {a, b, c} → rank 3.  {a, b, c, d} → still rank 3.
         assert_eq!(f2_dim(&[a.clone(), b.clone(), c.clone()], m), 3);
         assert_eq!(f2_dim(&[a, b, c, d], m), 3);
     }
@@ -643,8 +635,7 @@ mod tests {
         let b = F2mElement::one(8);
         let rows = audit_curve(8, &irr, &a, &b);
         // 8 = 2·4 = 4·2.  Both should appear.
-        let factorisations: Vec<(u32, u32)> =
-            rows.iter().map(|r| (r.n, r.l)).collect();
+        let factorisations: Vec<(u32, u32)> = rows.iter().map(|r| (r.n, r.l)).collect();
         assert!(factorisations.contains(&(4, 2)));
         assert!(factorisations.contains(&(2, 4)));
         // All magic numbers should be 1 (b is in F_2).

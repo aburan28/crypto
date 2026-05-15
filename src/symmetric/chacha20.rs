@@ -15,6 +15,10 @@
 //! Key: (r, s) derived from the first 32 bytes of ChaCha20 output (counter=0).
 //! r is clamped by zeroing specific bits; s is used as-is.
 //! The tag is: ((clamp(r)·m₁ + clamp(r)·m₂ + … + s) mod 2¹³⁰-5) mod 2¹²⁸
+//!
+//! Security note: Poly1305 here is implemented with `BigUint`, so it is
+//! variable-time. Tag verification uses constant-time comparison, but this
+//! module remains educational rather than production-grade.
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -80,6 +84,16 @@ pub fn chacha20_block(key: &[u8; 32], nonce: &[u8; 12], counter: u32) -> [u8; 64
 
 /// Encrypt or decrypt `data` using ChaCha20 (XOR with keystream, counter starts at 1).
 pub fn chacha20_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 12]) -> Vec<u8> {
+    chacha20_xor_checked(data, key, nonce).expect("ChaCha20 counter would wrap")
+}
+
+/// Checked ChaCha20 XOR that rejects inputs requiring counter wraparound.
+pub fn chacha20_xor_checked(
+    data: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+) -> Result<Vec<u8>, &'static str> {
+    ensure_chacha20_capacity(data.len(), 1)?;
     let mut out = data.to_vec();
     let mut counter = 1u32;
 
@@ -90,7 +104,24 @@ pub fn chacha20_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 12]) -> Vec<u8> {
         }
         counter = counter.wrapping_add(1);
     }
-    out
+    Ok(out)
+}
+
+pub fn chacha20_len_fits(len: usize, start_counter: u32) -> bool {
+    ensure_chacha20_capacity(len, start_counter).is_ok()
+}
+
+fn ensure_chacha20_capacity(len: usize, start_counter: u32) -> Result<(), &'static str> {
+    let blocks = len
+        .checked_add(63)
+        .ok_or("ChaCha20 input length overflow")?
+        / 64;
+    let available = (u32::MAX as u64) - (start_counter as u64) + 1;
+    if (blocks as u64) > available {
+        Err("ChaCha20 counter would wrap")
+    } else {
+        Ok(())
+    }
 }
 
 // ── Poly1305 ─────────────────────────────────────────────────────────────────
@@ -172,14 +203,25 @@ pub fn chacha20_poly1305_encrypt(
     nonce: &[u8; 12],
     aad: &[u8],
 ) -> Vec<u8> {
-    let ciphertext = chacha20_xor(plaintext, key, nonce);
+    chacha20_poly1305_encrypt_checked(plaintext, key, nonce, aad)
+        .expect("ChaCha20-Poly1305 counter would wrap")
+}
+
+/// Checked ChaCha20-Poly1305 encryption.
+pub fn chacha20_poly1305_encrypt_checked(
+    plaintext: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+    aad: &[u8],
+) -> Result<Vec<u8>, &'static str> {
+    let ciphertext = chacha20_xor_checked(plaintext, key, nonce)?;
     let otk = poly1305_key_gen(key, nonce);
     let mac_data = poly1305_pad(aad, &ciphertext);
     let tag = poly1305(&otk, &mac_data);
 
     let mut out = ciphertext;
     out.extend_from_slice(&tag);
-    out
+    Ok(out)
 }
 
 /// ChaCha20-Poly1305 decrypt. Returns `Ok(plaintext)` or `Err(())` on tag failure.
@@ -204,7 +246,7 @@ pub fn chacha20_poly1305_decrypt(
         return Err(());
     }
 
-    Ok(chacha20_xor(ciphertext, key, nonce))
+    chacha20_xor_checked(ciphertext, key, nonce).map_err(|_| ())
 }
 
 #[cfg(test)]
@@ -268,6 +310,15 @@ mod tests {
             let dec = chacha20_xor(&ct, &key, &nonce);
             assert_eq!(dec, pt, "roundtrip failed at len={}", len);
         }
+    }
+
+    #[test]
+    fn chacha20_rejects_counter_wrap_without_allocating() {
+        let max_len = (u32::MAX as usize) * 64;
+        assert!(chacha20_len_fits(max_len, 1));
+        assert!(!chacha20_len_fits(max_len + 1, 1));
+        assert!(chacha20_len_fits(64, u32::MAX));
+        assert!(!chacha20_len_fits(65, u32::MAX));
     }
 
     // ── Poly1305 KATs (RFC 8439 §2.5.2) ──────────────────────────────────────

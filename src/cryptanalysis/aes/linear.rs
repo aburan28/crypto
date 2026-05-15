@@ -131,8 +131,8 @@ pub fn recover_key_bit_one_round(
     let ciphertext_byte_pos = 4 * c + r;
     let mut zeros = 0i32;
     for (p, ct) in pairs {
-        let lhs = dot(input_mask, p[plaintext_byte_pos])
-            ^ dot(output_mask, ct[ciphertext_byte_pos]);
+        let lhs =
+            dot(input_mask, p[plaintext_byte_pos]) ^ dot(output_mask, ct[ciphertext_byte_pos]);
         if lhs == 0 {
             zeros += 1;
         }
@@ -142,8 +142,16 @@ pub fn recover_key_bit_one_round(
     // If LAT entry is negative: the relationship inverts.
     let lat_sign = lat[input_mask as usize][output_mask as usize].signum();
     let bit = if lat_sign >= 0 {
-        if margin > 0 { 0 } else { 1 }
-    } else if margin > 0 { 1 } else { 0 };
+        if margin > 0 {
+            0
+        } else {
+            1
+        }
+    } else if margin > 0 {
+        1
+    } else {
+        0
+    };
     (bit, margin)
 }
 
@@ -224,7 +232,8 @@ pub fn recover_key_byte_one_round(
         let mut consistent = true;
         let mut k_out: Option<u8> = None;
         for (p, ct) in pairs {
-            let candidate_out = SBOX[(p[plaintext_byte_pos] ^ k) as usize] ^ ct[ciphertext_byte_pos];
+            let candidate_out =
+                SBOX[(p[plaintext_byte_pos] ^ k) as usize] ^ ct[ciphertext_byte_pos];
             match k_out {
                 None => k_out = Some(candidate_out),
                 Some(prev) if prev != candidate_out => {

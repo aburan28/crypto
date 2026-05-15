@@ -69,7 +69,8 @@ pub const DEFAULT_ID: &[u8] = b"1234567812345678";
 /// string.  Used to serialise field elements / scalars into the
 /// `ZA` and signature byte streams.
 fn bytes_be(x: &BigUint, width: usize) -> Vec<u8> {
-    crate::utils::encoding::bigint_to_bytes_be(x, width)
+    crate::utils::encoding::bigint_to_bytes_be_checked(x, width)
+        .expect("SM2 field element must fit fixed width")
 }
 
 /// Compute `ZA = SM3(ENTL || ID || a || b || Gx || Gy || PAx || PAy)`.
@@ -78,6 +79,13 @@ fn bytes_be(x: &BigUint, width: usize) -> Vec<u8> {
 /// alongside the message.  It is parameterised on the public key `PA`
 /// and the user identifier `id` (default [`DEFAULT_ID`]).
 pub fn za(id: &[u8], pa: &Point, curve: &CurveParams) -> [u8; 32] {
+    try_za(id, pa, curve).expect("ZA: public key must be finite and on the selected curve")
+}
+
+fn try_za(id: &[u8], pa: &Point, curve: &CurveParams) -> Option<[u8; 32]> {
+    if !curve.is_valid_public_point(pa) {
+        return None;
+    }
     let mut buf = Vec::with_capacity(2 + id.len() + 32 * 6);
     let entl = (id.len() as u16) * 8; // bit-length of ID, 16-bit BE
     buf.push((entl >> 8) as u8);
@@ -92,9 +100,9 @@ pub fn za(id: &[u8], pa: &Point, curve: &CurveParams) -> [u8; 32] {
             buf.extend_from_slice(&bytes_be(&x.value, 32));
             buf.extend_from_slice(&bytes_be(&y.value, 32));
         }
-        Point::Infinity => panic!("ZA: public key cannot be infinity"),
+        Point::Infinity => return None,
     }
-    sm3(&buf)
+    Some(sm3(&buf))
 }
 
 /// An SM2 signature `(r, s)`.
@@ -161,7 +169,10 @@ pub fn verify(msg: &[u8], sig: &Sm2Signature, pa: &Point, id: &[u8], curve: &Cur
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
         return false;
     }
-    let z = za(id, pa, curve);
+    let z = match try_za(id, pa, curve) {
+        Some(z) => z,
+        None => return false,
+    };
     let e = message_digest(&z, msg, &curve.n);
     let a = curve.a_fe();
 
@@ -203,6 +214,18 @@ fn sm2_kdf(z: &[u8], out_len: usize) -> Vec<u8> {
 /// `C3` is a 32-byte SM3 integrity tag, and `C2` is the same length as
 /// the plaintext `msg`.
 pub fn encrypt(msg: &[u8], pb: &Point, curve: &CurveParams) -> Vec<u8> {
+    encrypt_checked(msg, pb, curve).expect("SM2 recipient public key must be valid")
+}
+
+/// Checked SM2 encryption that rejects invalid recipient public keys.
+pub fn encrypt_checked(
+    msg: &[u8],
+    pb: &Point,
+    curve: &CurveParams,
+) -> Result<Vec<u8>, &'static str> {
+    if !curve.is_valid_public_point(pb) {
+        return Err("recipient public key is not a valid point on this curve");
+    }
     let a = curve.a_fe();
     loop {
         let k = random_scalar(&curve.n);
@@ -242,7 +265,7 @@ pub fn encrypt(msg: &[u8], pb: &Point, curve: &CurveParams) -> Vec<u8> {
         out.extend_from_slice(&bytes_be(&c1y, 32));
         out.extend_from_slice(&c3);
         out.extend_from_slice(&c2);
-        return out;
+        return Ok(out);
     }
 }
 
@@ -437,6 +460,21 @@ mod tests {
         ct[last] ^= 0x01;
         // SM2 detects tampering via the C3 integrity tag.
         assert!(decrypt(&ct, &d, &curve).is_none());
+    }
+
+    #[test]
+    fn sm2_rejects_invalid_public_inputs() {
+        let curve = sm2_curve();
+        let d = BigUint::parse_bytes(
+            b"3945208F7B2144B13F36E38AC6D39F95889393692860B51A42FB81EF4DF7C5B8",
+            16,
+        )
+        .unwrap();
+        let pa = public_key_from_private(&d, &curve);
+        let sig = sign(b"msg", &d, &pa, DEFAULT_ID, &curve);
+
+        assert!(!verify(b"msg", &sig, &Point::Infinity, DEFAULT_ID, &curve));
+        assert!(encrypt_checked(b"msg", &Point::Infinity, &curve).is_err());
     }
 
     /// **Test 8 — ZA is deterministic and matches a Python reference**.

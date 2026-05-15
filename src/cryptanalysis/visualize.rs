@@ -208,7 +208,12 @@ pub fn format_joux_tree(depth: usize) -> String {
     let mut s = String::new();
     s.push_str("```\n");
     s.push_str("Joux multicollision chain ");
-    s.push_str(&format!("({} steps → 2^{} = {} equivalent messages)\n\n", depth, depth, 1usize << depth));
+    s.push_str(&format!(
+        "({} steps → 2^{} = {} equivalent messages)\n\n",
+        depth,
+        depth,
+        1usize << depth
+    ));
     // Render as a horizontal chain with "choice points".
     s.push_str("  IV ");
     for i in 0..depth {
@@ -217,8 +222,7 @@ pub fn format_joux_tree(depth: usize) -> String {
     s.push_str("──┐\n");
     s.push_str("     ");
     for i in 0..depth {
-        s.push_str("  │  (choose B_a^{")
-            ;
+        s.push_str("  │  (choose B_a^{");
         s.push_str(&format!("{}", i + 1));
         s.push_str("}");
         let _ = i;
@@ -262,12 +266,7 @@ pub fn format_birthday_curve(b: u32, max_trials: usize, width: usize) -> String 
         let p = 1.0 - (-n * n / (2.0 * n_b)).exp();
         points.push((n, p));
     }
-    s.push_str(&format_path_trajectory(
-        &points,
-        "",
-        width.max(20),
-        12,
-    ));
+    s.push_str(&format_path_trajectory(&points, "", width.max(20), 12));
     s.push_str(&format!(
         "  √(2^{}) ≈ {:.0} trials gives Pr[collision] ≈ 0.39 (the rule of thumb)\n",
         b,

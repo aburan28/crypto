@@ -74,7 +74,7 @@
 //! `N = 16` already drives that below 1; the attack uses 24 pairs by
 //! default for a comfortable margin.
 
-use super::reduced::{INV_SBOX, ReducedAes128, SBOX};
+use super::reduced::{ReducedAes128, INV_SBOX, SBOX};
 
 /// 256×256 differential distribution table.
 pub type AesDdt = Vec<Vec<u16>>;
@@ -260,10 +260,10 @@ pub fn key_recovery_two_round(
     //
     // After SR R2 the bytes land at the flat indices below.
     let active: [(usize, u8); 4] = [
-        (0, 2),   // (col=0, row=0) ← came from col-0, row-0, coef 2
-        (13, 1),  // (col=3, row=1) ← came from col-0, row=1, coef 1
-        (10, 1),  // (col=2, row=2) ← came from col-0, row=2, coef 1
-        (7, 3),   // (col=1, row=3) ← came from col-0, row=3, coef 3
+        (0, 2),  // (col=0, row=0) ← came from col-0, row-0, coef 2
+        (13, 1), // (col=3, row=1) ← came from col-0, row=1, coef 1
+        (10, 1), // (col=2, row=2) ← came from col-0, row=2, coef 1
+        (7, 3),  // (col=1, row=3) ← came from col-0, row=3, coef 3
     ];
 
     let mut trial_count = 0usize;

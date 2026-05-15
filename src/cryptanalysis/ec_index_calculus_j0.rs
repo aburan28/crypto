@@ -320,9 +320,7 @@ pub fn find_relation_with_psi(
                     Some(j) => j,
                     None => continue,
                 };
-                if let Some((s_i, s_j)) =
-                    resolve_signs(&r, &fb_i.point, &fb[j_idx].point, &a_fe)
-                {
+                if let Some((s_i, s_j)) = resolve_signs(&r, &fb_i.point, &fb[j_idx].point, &a_fe) {
                     let mut entries: Vec<(usize, i64)> = Vec::new();
                     if fb_i.idx == j_idx {
                         let combined = s_i + s_j;
@@ -445,15 +443,8 @@ pub fn j0_index_calculus_dlp(
     let target_raw_relations = m + extra_relations;
     let mut raw_relations: Vec<OrbitRelation> = Vec::with_capacity(target_raw_relations);
     while raw_relations.len() < target_raw_relations {
-        let batch = find_relation_with_psi(
-            curve,
-            g,
-            q,
-            &fb,
-            &zeta,
-            &lambda,
-            max_trials_per_relation,
-        )?;
+        let batch =
+            find_relation_with_psi(curve, g, q, &fb, &zeta, &lambda, max_trials_per_relation)?;
         // Only the first row of each batch is a *new* raw relation;
         // the other two are ψ-shifts.  Keep raw relations only for
         // the linear system.
@@ -533,10 +524,7 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
 /// distinct x-images that may both land in the enumeration grid).
 ///
 /// Returns an empty list if `curve` is not j=0 or `p ≢ 1 (mod 3)`.
-pub fn build_eisenstein_factor_base(
-    curve: &CurveParams,
-    norm_bound: u32,
-) -> Vec<FactorBaseEntry> {
+pub fn build_eisenstein_factor_base(curve: &CurveParams, norm_bound: u32) -> Vec<FactorBaseEntry> {
     if !is_j_invariant_zero(curve) {
         return Vec::new();
     }
@@ -583,11 +571,7 @@ pub fn build_eisenstein_factor_base(
             seen_x.insert(x.clone(), ());
             // Curve-membership check: y² = x³ + b for j=0.
             let xf = curve.fe(x);
-            let rhs = xf
-                .mul(&xf)
-                .mul(&xf)
-                .add(&curve.fe(curve.b.clone()))
-                .value;
+            let rhs = xf.mul(&xf).mul(&xf).add(&curve.fe(curve.b.clone())).value;
             if let Some(y) = sqrt_mod_p(&rhs, p) {
                 let y_canon = if &y * &BigUint::from(2u32) < curve.p {
                     y
@@ -758,8 +742,7 @@ mod tests {
             let x1 = generic.fe(BigUint::from((trial * 17 + 1) as u64));
             let x2 = generic.fe(BigUint::from((trial * 31 + 5) as u64));
             let x3 = generic.fe(BigUint::from((trial * 47 + 9) as u64));
-            let lhs =
-                semaev_s3(&x1.mul(&zeta), &x2.mul(&zeta), &x3.mul(&zeta), &a_fe, &b_fe);
+            let lhs = semaev_s3(&x1.mul(&zeta), &x2.mul(&zeta), &x3.mul(&zeta), &a_fe, &b_fe);
             let rhs = zeta.mul(&semaev_s3(&x1, &x2, &x3, &a_fe, &b_fe));
             if lhs != rhs {
                 all_equiv = false;
@@ -820,9 +803,7 @@ mod tests {
         let a_fe = curve.a_fe();
         let q = g.scalar_mul(&BigUint::from(50u32), &a_fe);
         let fb = build_orbit_factor_base(&curve, &zeta_val, 12);
-        if let Some(batch) =
-            find_relation_with_psi(&curve, &g, &q, &fb, &zeta, &lambda, 10_000)
-        {
+        if let Some(batch) = find_relation_with_psi(&curve, &g, &q, &fb, &zeta, &lambda, 10_000) {
             assert_eq!(batch.len(), 3);
         }
     }
@@ -843,10 +824,7 @@ mod tests {
                 entry.point
             );
             if let Point::Affine { x, .. } = &entry.point {
-                assert!(
-                    xs.insert(x.value.clone()),
-                    "duplicate x in Eisenstein FB"
-                );
+                assert!(xs.insert(x.value.clone()), "duplicate x in Eisenstein FB");
             }
         }
     }

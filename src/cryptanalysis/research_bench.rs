@@ -56,12 +56,8 @@
 //! - [`PollardRhoEcdlp`] — generic ECDLP via Pollard ρ, theory α = 0.5.
 //! - [`Ic2DecompEcdlp`] — 2-decomposition index calculus, theory α = 1.5.
 
-use crate::cryptanalysis::ec_index_calculus::{
-    ec_index_calculus_dlp, pollard_rho_ecdlp,
-};
-use crate::cryptanalysis::ec_index_calculus_j0::{
-    eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
-};
+use crate::cryptanalysis::ec_index_calculus::{ec_index_calculus_dlp, pollard_rho_ecdlp};
+use crate::cryptanalysis::ec_index_calculus_j0::{eisenstein_smooth_ic_dlp, j0_index_calculus_dlp};
 use crate::cryptanalysis::j0_twists::enumerate_twists;
 use crate::ecc::curve::CurveParams;
 use crate::utils::random::random_scalar;
@@ -153,7 +149,11 @@ pub fn linear_fit(xs: &[f64], ys: &[f64]) -> Option<(f64, f64, f64)> {
             (y - y_pred).powi(2)
         })
         .sum();
-    let r_squared = if ss_tot > 0.0 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let r_squared = if ss_tot > 0.0 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
     Some((slope, intercept, r_squared))
 }
 
@@ -188,10 +188,7 @@ pub fn log_log_fit(results: &[ExperimentResult]) -> Option<ScalingFit> {
 
 /// Run a hypothesis at every size in [`Hypothesis::scale_range`],
 /// `samples_per_scale` times per size, and collect every result.
-pub fn run_hypothesis<H: Hypothesis>(
-    h: &H,
-    samples_per_scale: usize,
-) -> Vec<ExperimentResult> {
+pub fn run_hypothesis<H: Hypothesis>(h: &H, samples_per_scale: usize) -> Vec<ExperimentResult> {
     let mut out = Vec::new();
     for size in h.scale_range() {
         for _ in 0..samples_per_scale {
@@ -241,10 +238,7 @@ pub fn format_report(h: &dyn Hypothesis, results: &[ExperimentResult]) -> String
             } else {
                 "✗ deviates from theory"
             };
-            out.push_str(&format!(
-                "**vs theory**: Δα = {:.3} → {}\n",
-                delta, verdict
-            ));
+            out.push_str(&format!("**vs theory**: Δα = {:.3} → {}\n", delta, verdict));
         }
     } else {
         out.push_str("**Measured exponent**: insufficient successful samples for fit.\n");
@@ -409,8 +403,7 @@ impl Hypothesis for PollardRhoEcdlp {
         }
         let q_point = g.scalar_mul(&x_truth, &a_fe);
         // ρ needs ≈ √(πn/2) steps; bound at ~32× that for safety.
-        let max_steps = (1usize << (problem_size_log2 / 2 + 5))
-            .min(2_000_000);
+        let max_steps = (1usize << (problem_size_log2 / 2 + 5)).min(2_000_000);
         let t0 = Instant::now();
         let recovered = pollard_rho_ecdlp(&curve, &g, &q_point, max_steps);
         let elapsed = t0.elapsed().as_millis();
@@ -492,14 +485,8 @@ impl Hypothesis for Ic2DecompEcdlp {
         let extra = 6;
         let max_trials = 1usize << (problem_size_log2 + 4);
         let t0 = Instant::now();
-        let recovered = ec_index_calculus_dlp(
-            &curve,
-            &g,
-            &q_point,
-            fb_size,
-            extra,
-            max_trials.min(60_000),
-        );
+        let recovered =
+            ec_index_calculus_dlp(&curve, &g, &q_point, fb_size, extra, max_trials.min(60_000));
         let elapsed = t0.elapsed().as_millis();
         match recovered {
             Some(r) => {
@@ -684,14 +671,8 @@ impl Hypothesis for J0OrbitIcEcdlp {
         let extra = 6;
         let max_trials = (1usize << (problem_size_log2 + 4)).min(60_000);
         let t0 = Instant::now();
-        let recovered = j0_index_calculus_dlp(
-            &curve,
-            &g,
-            &q_point,
-            target_orbits,
-            extra,
-            max_trials,
-        );
+        let recovered =
+            j0_index_calculus_dlp(&curve, &g, &q_point, target_orbits, extra, max_trials);
         let elapsed = t0.elapsed().as_millis();
         match recovered {
             Some(r) => {
@@ -793,14 +774,8 @@ impl Hypothesis for EisensteinSmoothJ0Ic {
         let extra = 6;
         let max_trials = (1usize << (problem_size_log2 + 4)).min(60_000);
         let t0 = Instant::now();
-        let recovered = eisenstein_smooth_ic_dlp(
-            &curve,
-            &g,
-            &q_point,
-            norm_bound,
-            extra,
-            max_trials,
-        );
+        let recovered =
+            eisenstein_smooth_ic_dlp(&curve, &g, &q_point, norm_bound, extra, max_trials);
         let elapsed = t0.elapsed().as_millis();
         match recovered {
             Some(r) => {
@@ -975,8 +950,7 @@ pub fn run_boomerang_decay(
     for r in rounds_range {
         let cipher = ToySpn::new(sbox.clone(), r as usize, 0xC0FFEE);
         let t0 = Instant::now();
-        let result =
-            boomerang_distinguisher(&cipher, &alpha_bytes, &delta_bytes, n_pairs, None);
+        let result = boomerang_distinguisher(&cipher, &alpha_bytes, &delta_bytes, n_pairs, None);
         let elapsed = t0.elapsed().as_millis();
         samples.push(BoomerangDecaySample {
             rounds: r,
@@ -995,10 +969,8 @@ pub fn run_boomerang_decay(
 /// `right_quartets = 0` (undefined log).  Returns `None` if fewer
 /// than 2 non-zero samples remain.
 pub fn fit_boomerang_decay(samples: &[BoomerangDecaySample]) -> Option<(f64, f64)> {
-    let usable: Vec<&BoomerangDecaySample> = samples
-        .iter()
-        .filter(|s| s.right_quartets > 0)
-        .collect();
+    let usable: Vec<&BoomerangDecaySample> =
+        samples.iter().filter(|s| s.right_quartets > 0).collect();
     if usable.len() < 2 {
         return None;
     }
@@ -1300,11 +1272,7 @@ mod tests {
         let h = PollardRhoEcdlp;
         let r = h.run_at_scale(7);
         // At 7 bits, ρ should always succeed in well under 1 second.
-        assert!(
-            r.succeeded,
-            "ρ should succeed at 7 bits: {:?}",
-            r
-        );
+        assert!(r.succeeded, "ρ should succeed at 7 bits: {:?}", r);
     }
 
     /// **Tiny scaling run for ρ** — collect a few samples and fit.

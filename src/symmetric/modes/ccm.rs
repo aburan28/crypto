@@ -53,6 +53,10 @@ fn format_b0(tag_len: usize, nonce: &[u8; NONCE_LEN], pt_len: usize, has_aad: bo
     b0
 }
 
+pub fn ccm_plaintext_len_supported(len: usize) -> bool {
+    len <= u32::MAX as usize
+}
+
 fn format_aad(aad: &[u8]) -> Vec<u8> {
     // Length-prefix encoding per SP 800-38C §A.2.2.
     let mut out = Vec::new();
@@ -111,6 +115,21 @@ pub fn ccm_encrypt<C: BlockCipher<16>>(
     plaintext: &[u8],
     tag_len: CcmTagLen,
 ) -> Vec<u8> {
+    ccm_encrypt_checked(cipher, nonce, aad, plaintext, tag_len)
+        .expect("CCM plaintext too long for L=4 length field")
+}
+
+/// Checked CCM encrypt that rejects plaintext lengths not encodable with L=4.
+pub fn ccm_encrypt_checked<C: BlockCipher<16>>(
+    cipher: &C,
+    nonce: &[u8; NONCE_LEN],
+    aad: &[u8],
+    plaintext: &[u8],
+    tag_len: CcmTagLen,
+) -> Result<Vec<u8>, &'static str> {
+    if !ccm_plaintext_len_supported(plaintext.len()) {
+        return Err("CCM plaintext too long for L=4");
+    }
     let m = tag_len as usize;
     // ── 1) CBC-MAC chain ──────────────────────────────────────────────
     let mut chain = Vec::new();
@@ -141,7 +160,7 @@ pub fn ccm_encrypt<C: BlockCipher<16>>(
     for i in 0..m {
         ct.push(t[i] ^ s0[i]);
     }
-    ct
+    Ok(ct)
 }
 
 /// **CCM decrypt + verify**.  Returns `None` on tag mismatch (the
@@ -158,6 +177,9 @@ pub fn ccm_decrypt<C: BlockCipher<16>>(
         return None;
     }
     let ct_len = ciphertext_with_tag.len() - m;
+    if !ccm_plaintext_len_supported(ct_len) {
+        return None;
+    }
     let ct = &ciphertext_with_tag[..ct_len];
     let recv_u = &ciphertext_with_tag[ct_len..];
 
@@ -215,8 +237,8 @@ mod tests {
         let pt = b"plaintext goes here";
         let ct = ccm_encrypt(&key, &nonce, aad, pt, CcmTagLen::Bytes16);
         assert_eq!(ct.len(), pt.len() + 16);
-        let recovered = ccm_decrypt(&key, &nonce, aad, &ct, CcmTagLen::Bytes16)
-            .expect("CCM should verify");
+        let recovered =
+            ccm_decrypt(&key, &nonce, aad, &ct, CcmTagLen::Bytes16).expect("CCM should verify");
         assert_eq!(recovered, pt);
     }
 
@@ -283,5 +305,11 @@ mod tests {
                 pt.to_vec()
             );
         }
+    }
+
+    #[test]
+    fn ccm_rejects_unencodable_lengths_without_allocating() {
+        assert!(ccm_plaintext_len_supported(u32::MAX as usize));
+        assert!(!ccm_plaintext_len_supported(u32::MAX as usize + 1));
     }
 }

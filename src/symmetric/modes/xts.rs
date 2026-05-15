@@ -56,7 +56,12 @@ fn aes_decrypt_block(block: &[u8; 16], key: &AesKey) -> [u8; 16] {
 /// (same key size).  `tweak` is the 16-byte sector identifier
 /// (typically little-endian sector index).  Plaintext length must
 /// be ≥ 16 bytes.
-pub fn xts_encrypt(k1: &AesKey, k2: &AesKey, tweak: &[u8; 16], plaintext: &[u8]) -> Option<Vec<u8>> {
+pub fn xts_encrypt(
+    k1: &AesKey,
+    k2: &AesKey,
+    tweak: &[u8; 16],
+    plaintext: &[u8],
+) -> Option<Vec<u8>> {
     if plaintext.len() < 16 {
         return None;
     }
@@ -68,7 +73,11 @@ pub fn xts_encrypt(k1: &AesKey, k2: &AesKey, tweak: &[u8; 16], plaintext: &[u8])
     // (rem == 0) the whole input is processed in the loop; if not,
     // we skip the last full block so ciphertext-stealing can handle
     // both it and the partial trailing chunk.
-    let loop_blocks = if rem == 0 { total_blocks } else { total_blocks - 1 };
+    let loop_blocks = if rem == 0 {
+        total_blocks
+    } else {
+        total_blocks - 1
+    };
     let mut out = Vec::with_capacity(plaintext.len());
     for i in 0..loop_blocks {
         let mut blk = [0u8; 16];
@@ -126,14 +135,23 @@ pub fn xts_encrypt(k1: &AesKey, k2: &AesKey, tweak: &[u8; 16], plaintext: &[u8])
 }
 
 /// **XTS-AES decrypt one sector**.  Inverse of `xts_encrypt`.
-pub fn xts_decrypt(k1: &AesKey, k2: &AesKey, tweak: &[u8; 16], ciphertext: &[u8]) -> Option<Vec<u8>> {
+pub fn xts_decrypt(
+    k1: &AesKey,
+    k2: &AesKey,
+    tweak: &[u8; 16],
+    ciphertext: &[u8],
+) -> Option<Vec<u8>> {
     if ciphertext.len() < 16 {
         return None;
     }
     let mut t = encrypt_block(tweak, k2);
     let total_blocks = ciphertext.len() / 16;
     let rem = ciphertext.len() % 16;
-    let loop_blocks = if rem == 0 { total_blocks } else { total_blocks - 1 };
+    let loop_blocks = if rem == 0 {
+        total_blocks
+    } else {
+        total_blocks - 1
+    };
     let mut out = Vec::with_capacity(ciphertext.len());
     for i in 0..loop_blocks {
         let mut blk = [0u8; 16];

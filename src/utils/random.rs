@@ -13,7 +13,7 @@
 //! and removes any doubt about reseeding semantics.
 
 use num_bigint::{BigUint, RandBigInt};
-use num_traits::Zero;
+use num_traits::{One, Zero};
 use rand::rngs::OsRng;
 use rand::RngCore;
 
@@ -30,14 +30,25 @@ pub fn random_bytes(buf: &mut [u8]) {
 ///
 /// Uses rejection sampling on top of `OsRng` so the distribution is uniform
 /// — no modular bias.  The output is guaranteed non-zero.
-pub fn random_scalar(max: &BigUint) -> BigUint {
+pub fn random_scalar_checked(max: &BigUint) -> Option<BigUint> {
+    if max <= &BigUint::one() {
+        return None;
+    }
     let mut rng = OsRng;
     loop {
         let candidate = rng.gen_biguint_below(max);
         if !candidate.is_zero() {
-            return candidate;
+            return Some(candidate);
         }
     }
+}
+
+/// Generate a random `BigUint` in the range `[1, max)`.
+///
+/// Panics for `max <= 1`; use [`random_scalar_checked`] when invalid bounds are
+/// possible at runtime.
+pub fn random_scalar(max: &BigUint) -> BigUint {
+    random_scalar_checked(max).expect("random_scalar requires max > 1")
 }
 
 /// Generate `len` cryptographically-random bytes as a `Vec<u8>`.
@@ -45,4 +56,15 @@ pub fn random_bytes_vec(len: usize) -> Vec<u8> {
     let mut buf = vec![0u8; len];
     OsRng.fill_bytes(&mut buf);
     buf
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn random_scalar_checked_rejects_empty_ranges() {
+        assert!(random_scalar_checked(&BigUint::zero()).is_none());
+        assert!(random_scalar_checked(&BigUint::one()).is_none());
+    }
 }

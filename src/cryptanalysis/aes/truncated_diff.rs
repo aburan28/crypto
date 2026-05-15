@@ -193,11 +193,7 @@ pub fn render_trail_diagram(steps: &[TruncatedRoundStep]) -> String {
     s.push_str(&format_trail(&states, &label_refs));
     s.push('\n');
     let counts: Vec<usize> = steps.iter().map(|s| s.active_sboxes as usize).collect();
-    s.push_str(&format_round_bars(
-        &counts,
-        "Active S-boxes per round",
-        30,
-    ));
+    s.push_str(&format_round_bars(&counts, "Active S-boxes per round", 30));
     s.push_str(&format!(
         "\n**Total active S-boxes** (lower-bounds trail prob via Pr ≤ 2⁻⁶·N):\n  N = {}, Pr ≤ 2⁻{}\n",
         counts.iter().sum::<usize>(),

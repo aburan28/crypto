@@ -18,6 +18,7 @@ use super::curve::CurveParams;
 use super::keys::{EccPrivateKey, EccPublicKey};
 use super::point::Point;
 use num_bigint::BigUint;
+use num_traits::One;
 
 /// Perform ECDH: multiply `our_private` by `their_public`.
 /// Returns the x-coordinate of the resulting point as a 32-byte big-endian value,
@@ -27,6 +28,9 @@ pub fn ecdh(
     their_public: &EccPublicKey,
     curve: &CurveParams,
 ) -> Option<[u8; 32]> {
+    if !valid_ecdh_inputs(our_private, their_public, curve) {
+        return None;
+    }
     // For secp256k1, this routes through `ProjectivePoint::scalar_mul_ct`
     // — Montgomery ladder over Renes-Costello-Batina formulas with
     // limb-level constant-time field arithmetic.  For P-256 it falls
@@ -35,7 +39,7 @@ pub fn ecdh(
 
     match shared {
         Point::Affine { x, .. } => {
-            let bytes = crate::utils::encoding::bigint_to_bytes_be(&x.value, 32);
+            let bytes = crate::utils::encoding::bigint_to_bytes_be_checked(&x.value, 32)?;
             let mut out = [0u8; 32];
             out.copy_from_slice(&bytes);
             Some(out)
@@ -50,10 +54,25 @@ pub fn ecdh_raw(
     their_public: &EccPublicKey,
     curve: &CurveParams,
 ) -> Option<BigUint> {
+    if !valid_ecdh_inputs(our_private, their_public, curve) {
+        return None;
+    }
     match scalar_mul_secret(&their_public.point, &our_private.scalar, curve) {
         Point::Affine { x, .. } => Some(x.value),
         Point::Infinity => None,
     }
+}
+
+fn valid_ecdh_inputs(
+    our_private: &EccPrivateKey,
+    their_public: &EccPublicKey,
+    curve: &CurveParams,
+) -> bool {
+    our_private.curve_name == curve.name
+        && their_public.curve_name == curve.name
+        && our_private.scalar >= BigUint::one()
+        && our_private.scalar < curve.n
+        && curve.is_valid_public_point(&their_public.point)
 }
 
 #[cfg(test)]
@@ -97,5 +116,17 @@ mod tests {
             hex::encode(secret_ab),
             "7cf27b188d034f7e8a52380304b51ac3c08969e277f21b35a60b48fc47669978",
         );
+    }
+
+    #[test]
+    fn rejects_invalid_peer_public_key() {
+        let curve = CurveParams::p256();
+        let alice = EccKeyPair::from_private(BigUint::from(1u32), &curve);
+        let bad = EccPublicKey {
+            point: Point::Infinity,
+            curve_name: curve.name.to_string(),
+        };
+        assert!(ecdh(&alice.private, &bad, &curve).is_none());
+        assert!(ecdh_raw(&alice.private, &bad, &curve).is_none());
     }
 }

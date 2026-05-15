@@ -31,7 +31,12 @@ pub fn demo_ecb_penguin(width: usize, height: usize) -> String {
             pixels[r * width + c] = 0xFF;
         }
     }
-    s.push_str(&format_bitmap_shaded(&pixels, width, height, "Original plaintext"));
+    s.push_str(&format_bitmap_shaded(
+        &pixels,
+        width,
+        height,
+        "Original plaintext",
+    ));
 
     // ECB-encrypt as bytes (we treat groups of 16 pixels as one block).
     let key = AesKey::new(&[0x42u8; 16]).unwrap();
@@ -103,7 +108,9 @@ pub fn demo_mode_dataflows() -> String {
     s.push_str(
         "```\n  IV  ──► E_K ──┐                C_0 ──► E_K ──┐\n                ⊕──► P_0 = C_0                 ⊕──► P_1 ⊕ E_K(C_0) = C_1\n  P_0 ──────────┘                P_1 ──────────┘\n```\n",
     );
-    s.push_str("_Self-synchronising: corrupted ciphertext affects next block only, then recovers._\n\n");
+    s.push_str(
+        "_Self-synchronising: corrupted ciphertext affects next block only, then recovers._\n\n",
+    );
 
     s.push_str("## OFB — Output Feedback\n\n");
     s.push_str(
@@ -224,12 +231,8 @@ pub fn demo_chacha20_state() -> String {
     state[2] = 0x79622d32;
     state[3] = 0x6b206574;
     for i in 0..8 {
-        state[4 + i] = u32::from_le_bytes([
-            key[4 * i],
-            key[4 * i + 1],
-            key[4 * i + 2],
-            key[4 * i + 3],
-        ]);
+        state[4 + i] =
+            u32::from_le_bytes([key[4 * i], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]]);
     }
     state[12] = counter;
     for i in 0..3 {
@@ -373,7 +376,9 @@ mod tests {
     #[test]
     fn mode_dataflows_render_all() {
         let s = demo_mode_dataflows();
-        for mode in &["ECB", "CBC", "CTR", "CFB", "OFB", "GCM", "CCM", "SIV", "XTS", "KW"] {
+        for mode in &[
+            "ECB", "CBC", "CTR", "CFB", "OFB", "GCM", "CCM", "SIV", "XTS", "KW",
+        ] {
             assert!(s.contains(mode), "missing {}", mode);
         }
     }

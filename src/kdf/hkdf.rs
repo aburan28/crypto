@@ -30,12 +30,14 @@ const HASH_LEN: usize = 32; // SHA-256 output length in bytes
 /// Always prefer this over `hmac_sha256(...) == expected` in any context
 /// where the tag is supplied by an untrusted party.
 pub fn hmac_sha256_verify(key: &[u8], data: &[u8], expected_tag: &[u8]) -> bool {
-    use subtle::ConstantTimeEq;
+    use subtle::{Choice, ConstantTimeEq};
     let computed = hmac_sha256(key, data);
-    if expected_tag.len() != 32 {
-        return false;
-    }
-    computed.ct_eq(expected_tag).unwrap_u8() == 1
+    let mut provided = [0u8; 32];
+    let copy_len = expected_tag.len().min(32);
+    provided[..copy_len].copy_from_slice(&expected_tag[..copy_len]);
+    let tag_matches = computed.ct_eq(&provided);
+    let len_matches = Choice::from((expected_tag.len() == 32) as u8);
+    (tag_matches & len_matches).unwrap_u8() == 1
 }
 
 /// HMAC-SHA256 as defined in RFC 2104.
@@ -81,7 +83,18 @@ pub fn hkdf_extract(salt: Option<&[u8]>, ikm: &[u8]) -> [u8; 32] {
 ///
 /// `length` must be ≤ 255 × HashLen = 8160 bytes.
 pub fn hkdf_expand(prk: &[u8; 32], info: &[u8], length: usize) -> Vec<u8> {
-    assert!(length <= 255 * HASH_LEN, "HKDF output too long");
+    hkdf_expand_checked(prk, info, length).expect("HKDF output too long")
+}
+
+/// Checked HKDF-Expand.
+pub fn hkdf_expand_checked(
+    prk: &[u8; 32],
+    info: &[u8],
+    length: usize,
+) -> Result<Vec<u8>, &'static str> {
+    if length > 255 * HASH_LEN {
+        return Err("HKDF output too long");
+    }
     let n = (length + HASH_LEN - 1) / HASH_LEN;
     let mut okm = Vec::with_capacity(n * HASH_LEN);
     let mut t = Vec::new(); // T(0) = empty
@@ -94,7 +107,7 @@ pub fn hkdf_expand(prk: &[u8; 32], info: &[u8], length: usize) -> Vec<u8> {
         okm.extend_from_slice(&t);
     }
     okm.truncate(length);
-    okm
+    Ok(okm)
 }
 
 /// One-shot HKDF: extract then expand.
@@ -214,5 +227,19 @@ mod tests {
                9d201395faa4b61a96c8"
             ),
         );
+    }
+
+    #[test]
+    fn hkdf_expand_checked_rejects_too_long_output() {
+        let prk = [0u8; 32];
+        assert!(hkdf_expand_checked(&prk, b"", 255 * HASH_LEN).is_ok());
+        assert!(hkdf_expand_checked(&prk, b"", 255 * HASH_LEN + 1).is_err());
+    }
+
+    #[test]
+    fn hmac_verify_rejects_wrong_length() {
+        let tag = hmac_sha256(b"k", b"d");
+        assert!(hmac_sha256_verify(b"k", b"d", &tag));
+        assert!(!hmac_sha256_verify(b"k", b"d", &tag[..31]));
     }
 }

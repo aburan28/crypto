@@ -11,9 +11,9 @@
 //! Encrypt: c = mᵉ mod n
 //! Decrypt: m = cᵈ mod n
 //!
-//! # Signatures (PKCS#1 v1.5 style)
-//! Sign: s = hash(m)ᵈ mod n
-//! Verify: hash(m) == sᵉ mod n
+//! # Signatures (PKCS#1 v1.5)
+//! Sign: s = EMSA-PKCS1-v1_5(SHA-256(m))ᵈ mod n
+//! Verify: EMSA-PKCS1-v1_5(SHA-256(m)) == sᵉ mod n
 
 use crate::ct_bignum::{mont_pow_ct, MontgomeryContext, Uint};
 use crate::hash::sha256::sha256;
@@ -274,8 +274,11 @@ fn miller_rabin_witness(n: &BigUint, d: &BigUint, s: u64, a: &BigUint) -> bool {
     false
 }
 
-/// Deterministic Miller-Rabin using a fixed witness set that is correct
-/// for all n < 3,317,044,064,679,887,385,961,981 (sufficient for 256-bit+ primes).
+/// Miller-Rabin primality test.
+///
+/// Uses deterministic bases for small candidates and OS-random witnesses for
+/// larger candidates. The large-candidate path is probabilistic: 32 independent
+/// witnesses give a false-prime probability below 2^-64 for odd composites.
 pub fn is_prime(n: &BigUint) -> bool {
     if n < &BigUint::from(2u32) {
         return false;
@@ -302,23 +305,38 @@ pub fn is_prime(n: &BigUint) -> bool {
     let n_minus_1 = n - BigUint::one();
     let (s, d) = factor_out_twos(&n_minus_1);
 
-    // Witnesses sufficient for 64-bit numbers; for larger numbers a probabilistic
-    // set of random witnesses is used.
-    let witnesses: Vec<BigUint> = [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+    let fixed_witnesses: Vec<BigUint> = [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
         .iter()
         .map(|&w| BigUint::from(w))
         .collect();
 
-    witnesses.iter().all(|a| {
+    if !fixed_witnesses.iter().all(|a| {
         if a >= n {
             return true;
         } // Skip witnesses ≥ n
         miller_rabin_witness(n, &d, s, a)
-    })
+    }) {
+        return false;
+    }
+
+    if n.bits() <= 128 {
+        return true;
+    }
+
+    let two = BigUint::from(2u32);
+    let high = n - BigUint::one();
+    let mut rng = OsRng;
+    for _ in 0..32 {
+        let a = rng.gen_biguint_range(&two, &high);
+        if !miller_rabin_witness(n, &d, s, &a) {
+            return false;
+        }
+    }
+    true
 }
 
 /// Generate a random probable prime of exactly `bits` bits.
-/// Uses deterministic Miller-Rabin with the witness set above.
+/// Uses Miller-Rabin with fixed small bases plus random OS-backed witnesses.
 ///
 /// Entropy comes from `OsRng` (the OS CSPRNG); we deliberately avoid
 /// `thread_rng` so the entropy source is unambiguous.
@@ -493,21 +511,56 @@ pub(crate) fn rsa_decrypt_raw(ciphertext: &BigUint, key: &RsaPrivateKey) -> BigU
 
 // ── Signing / Verification ────────────────────────────────────────────────────
 
-/// Sign a message by SHA-256 hashing it, then computing h^d mod n.
-/// Routed through [`rsa_mod_pow_ct_crt`] because the exponent `d` is private.
-pub fn rsa_sign(message: &[u8], key: &RsaPrivateKey) -> BigUint {
+const SHA256_DIGEST_INFO_PREFIX: [u8; 19] = [
+    0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
+    0x00, 0x04, 0x20,
+];
+
+fn emsa_pkcs1_v1_5_encode_sha256(
+    message: &[u8],
+    key_bytes: usize,
+) -> Result<Vec<u8>, &'static str> {
     let hash = sha256(message);
-    let hash_int = BigUint::from_bytes_be(&hash);
-    rsa_mod_pow_ct_crt(&hash_int, key)
+    let t_len = SHA256_DIGEST_INFO_PREFIX.len() + hash.len();
+    if key_bytes < t_len + 11 {
+        return Err("RSA key too small for SHA-256 PKCS#1 v1.5 signature");
+    }
+    let ps_len = key_bytes - t_len - 3;
+    let mut em = Vec::with_capacity(key_bytes);
+    em.push(0x00);
+    em.push(0x01);
+    em.extend(std::iter::repeat(0xff).take(ps_len));
+    em.push(0x00);
+    em.extend_from_slice(&SHA256_DIGEST_INFO_PREFIX);
+    em.extend_from_slice(&hash);
+    Ok(em)
 }
 
-/// Verify: recompute s^e mod n and compare with SHA-256(message).
+/// Sign a message with RSASSA-PKCS1-v1_5/SHA-256.
+/// Routed through [`rsa_mod_pow_ct_crt`] because the exponent `d` is private.
+pub fn rsa_sign(message: &[u8], key: &RsaPrivateKey) -> BigUint {
+    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let encoded = emsa_pkcs1_v1_5_encode_sha256(message, key_bytes)
+        .expect("RSA key too small for SHA-256 PKCS#1 v1.5 signature");
+    let m = BigUint::from_bytes_be(&encoded);
+    rsa_mod_pow_ct_crt(&m, key)
+}
+
+/// Verify an RSASSA-PKCS1-v1_5/SHA-256 signature.
 pub fn rsa_verify(message: &[u8], signature: &BigUint, key: &RsaPublicKey) -> bool {
-    let hash = sha256(message);
-    let expected = BigUint::from_bytes_be(&hash);
+    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let expected = match emsa_pkcs1_v1_5_encode_sha256(message, key_bytes) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
     let recovered = mod_pow(signature, &key.e, &key.n);
-    // Pad expected to same length as n for comparison
-    expected == recovered
+    let recovered_bytes =
+        match crate::utils::encoding::bigint_to_bytes_be_checked(&recovered, key_bytes) {
+            Some(v) => v,
+            None => return false,
+        };
+    use subtle::ConstantTimeEq;
+    recovered_bytes.ct_eq(&expected).unwrap_u8() == 1
 }
 
 // ── PKCS#1 v1.5 style helpers ─────────────────────────────────────────────────
@@ -785,6 +838,24 @@ mod tests {
         let s1 = rsa_sign(b"msg-a", &kp.private);
         let s2 = rsa_sign(b"msg-b", &kp.private);
         assert_ne!(s1, s2);
+    }
+
+    #[test]
+    fn rsa_signature_uses_pkcs1_v1_5_encoding() {
+        let kp = RsaKeyPair::generate(1024);
+        let sig = rsa_sign(b"encoded", &kp.private);
+        let recovered = mod_pow(&sig, &kp.public.e, &kp.public.n);
+        let recovered_bytes =
+            crate::utils::encoding::bigint_to_bytes_be_checked(&recovered, 128).unwrap();
+        assert_eq!(&recovered_bytes[..2], &[0x00, 0x01]);
+        assert!(
+            recovered_bytes[2..]
+                .iter()
+                .take_while(|&&b| b == 0xff)
+                .count()
+                >= 8
+        );
+        assert!(rsa_verify(b"encoded", &sig, &kp.public));
     }
 
     #[test]

@@ -204,10 +204,7 @@ impl F2mPoly {
             return Self::zero(self.m);
         }
         let coeffs = self.coeffs.iter().map(|c| c.mul(s, irr)).collect();
-        let mut p = Self {
-            m: self.m,
-            coeffs,
-        };
+        let mut p = Self { m: self.m, coeffs };
         p.trim();
         p
     }
@@ -219,10 +216,7 @@ impl F2mPoly {
         }
         let mut coeffs = vec![F2mElement::zero(self.m); k];
         coeffs.extend_from_slice(&self.coeffs);
-        Self {
-            m: self.m,
-            coeffs,
-        }
+        Self { m: self.m, coeffs }
     }
 
     /// Divide by `x^k` — shift down.  Truncates (drops) the lower
@@ -234,10 +228,7 @@ impl F2mPoly {
             return Self::zero(self.m);
         }
         let coeffs = self.coeffs[k..].to_vec();
-        let mut p = Self {
-            m: self.m,
-            coeffs,
-        };
+        let mut p = Self { m: self.m, coeffs };
         p.trim();
         p
     }
@@ -481,8 +472,7 @@ mod tests {
         let x_sq_plus_1 = x.mul(&x, &irr).add(&one);
         let a = x_plus_1.mul(&x_sq_plus_1, &irr);
         let alpha = F2mElement::from_biguint(&num_bigint::BigUint::from(0x05u32), m);
-        let x_plus_alpha =
-            F2mPoly::from_coeffs(vec![alpha.clone(), F2mElement::one(m)], m);
+        let x_plus_alpha = F2mPoly::from_coeffs(vec![alpha.clone(), F2mElement::one(m)], m);
         let b = x_plus_1.mul(&x_plus_alpha, &irr);
         let g = a.gcd(&b, &irr);
         // Should contain (x+1).  Check that g(1) = 0 — i.e., 1 is a root.
@@ -518,9 +508,7 @@ mod tests {
         let alpha = F2mElement::from_biguint(&num_bigint::BigUint::from(0x05u32), m);
         let v = p.eval(&alpha, &irr);
         // Expected: 1 + α + α².
-        let manual = F2mElement::one(m)
-            .add(&alpha)
-            .add(&alpha.square(&irr));
+        let manual = F2mElement::one(m).add(&alpha).add(&alpha.square(&irr));
         assert_eq!(v, manual);
     }
 }

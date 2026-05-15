@@ -102,12 +102,7 @@ pub fn format_xor_junction(a: &str, b: &str, c: &str) -> String {
 
 /// Render a 2-D `width × height` bitmap as ASCII shading, treating
 /// each byte as an intensity 0..255.  Used for the ECB penguin demo.
-pub fn format_bitmap_shaded(
-    pixels: &[u8],
-    width: usize,
-    height: usize,
-    title: &str,
-) -> String {
+pub fn format_bitmap_shaded(pixels: &[u8], width: usize, height: usize, title: &str) -> String {
     let mut s = String::new();
     if !title.is_empty() {
         s.push_str(&format!("**{}**\n\n", title));
@@ -142,13 +137,14 @@ pub fn format_tree(root_label: &str, levels: usize, branching: usize) -> String 
         s.push_str(&format!("{}│\n", line_indent));
         let leaf = count;
         for i in 0..leaf.min(branching * 2) {
-            s.push_str(&format!(
-                "{}├── L{}-{}\n",
-                line_indent, level, i
-            ));
+            s.push_str(&format!("{}├── L{}-{}\n", line_indent, level, i));
         }
         if leaf > branching * 2 {
-            s.push_str(&format!("{}└── ... ({} more)\n", line_indent, leaf - branching * 2));
+            s.push_str(&format!(
+                "{}└── ... ({} more)\n",
+                line_indent,
+                leaf - branching * 2
+            ));
         }
     }
     s.push_str("```\n");

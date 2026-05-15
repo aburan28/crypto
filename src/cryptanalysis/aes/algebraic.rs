@@ -152,10 +152,7 @@ pub fn sbox4_quadratic_equations() -> Vec<Polynomial> {
     // The null space has dimension `n_mono - rank`. For AES-like S-boxes
     // this is 21–23.
     let mut free_cols: Vec<usize> = Vec::new();
-    let used: std::collections::HashSet<usize> = pivot_col
-        .iter()
-        .filter_map(|&c| c)
-        .collect();
+    let used: std::collections::HashSet<usize> = pivot_col.iter().filter_map(|&c| c).collect();
     for c in 0..n_mono {
         if !used.contains(&c) {
             free_cols.push(c);

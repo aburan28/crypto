@@ -193,10 +193,8 @@ mod tests {
         let nonce = h("22E7ADD93CFC6393C57EC0B3C17D6B44");
         let header = h("126735FCC320D25A");
         let pt = h("CA40D7446E545FFAED3BD12A740A659FFBBB3CEAB7");
-        let expected = h(
-            "CB8920F87A6C75CFF39627B56E3ED197C552D295A7 \
-             CFC46AFC253B4652B1AF3795B124AB6E",
-        );
+        let expected = h("CB8920F87A6C75CFF39627B56E3ED197C552D295A7 \
+             CFC46AFC253B4652B1AF3795B124AB6E");
         let out = eax_encrypt(&key, &nonce, &header, &pt, 16);
         assert_eq!(out, expected);
         let recovered = eax_decrypt(&key, &nonce, &header, &out, 16).unwrap();

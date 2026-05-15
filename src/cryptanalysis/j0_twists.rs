@@ -357,7 +357,9 @@ mod tests {
         // Render the table; smoke test.
         let table = format_twist_table(&twists);
         assert!(table.contains("twist"));
-        assert!(table.contains("65856") || twists.iter().any(|t| t.order.to_str_radix(10).len() > 1));
+        assert!(
+            table.contains("65856") || twists.iter().any(|t| t.order.to_str_radix(10).len() > 1)
+        );
     }
 
     /// **Rejects non-1-mod-6 primes**.
@@ -384,5 +386,4 @@ mod tests {
         let h_pow6 = g.modpow(&BigUint::from(6u32), &p);
         assert_eq!((&b * &h_pow6) % &p, b_g6);
     }
-
 }

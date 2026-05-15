@@ -187,6 +187,15 @@ pub fn merkle_verify(leaf_data: &[u8], proof: &MerkleProof, expected_root: &Hash
     if proof.path.len() != proof.directions.len() {
         return false;
     }
+    if proof.path.is_empty() && proof.leaf_index != 0 {
+        return false;
+    }
+    for (level, sibling_is_left) in proof.directions.iter().enumerate() {
+        let index_bit = ((proof.leaf_index >> level) & 1) == 1;
+        if index_bit != *sibling_is_left {
+            return false;
+        }
+    }
     let mut current = hash_leaf(leaf_data);
     for (sibling, sibling_is_left) in proof.path.iter().zip(&proof.directions) {
         current = if *sibling_is_left {
@@ -327,6 +336,16 @@ mod tests {
                 i
             );
         }
+    }
+
+    #[test]
+    fn proof_leaf_index_is_bound_to_directions() {
+        let leaves: Vec<Vec<u8>> = (0..4u8).map(|i| vec![i]).collect();
+        let tree = MerkleTree::from_leaves(&leaves);
+        let mut proof = tree.proof(2).unwrap();
+        assert!(merkle_verify(&leaves[2], &proof, &tree.root()));
+        proof.leaf_index = 0;
+        assert!(!merkle_verify(&leaves[2], &proof, &tree.root()));
     }
 
     /// Empty list: degenerate root, no leaves.

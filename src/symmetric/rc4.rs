@@ -69,9 +69,7 @@ impl Rc4 {
         }
         let mut j: u8 = 0;
         for i in 0..256 {
-            j = j
-                .wrapping_add(s[i])
-                .wrapping_add(key[i % key.len()]);
+            j = j.wrapping_add(s[i]).wrapping_add(key[i % key.len()]);
             s.swap(i, j as usize);
         }
         Ok(Rc4 { s, i: 0, j: 0 })

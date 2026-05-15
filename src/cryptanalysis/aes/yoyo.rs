@@ -136,11 +136,7 @@ pub struct YoyoReport {
 /// Empirical yoyo distinguisher: start each trial from a column-0-only
 /// plaintext difference, run one yoyo iteration, and check whether
 /// the resulting pair still has a column-0-only difference.
-pub fn yoyo_distinguisher(
-    cipher: &ReducedAes128,
-    trials: usize,
-    seed: u64,
-) -> YoyoReport {
+pub fn yoyo_distinguisher(cipher: &ReducedAes128, trials: usize, seed: u64) -> YoyoReport {
     let mut state = seed;
     let mut byte = || {
         state = state

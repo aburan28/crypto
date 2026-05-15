@@ -94,7 +94,12 @@ impl MerkleDamgardHash for Md4 {
     fn compress(&self, state: &mut [u8], block: &[u8]) {
         let mut s = [0u32; 4];
         for i in 0..4 {
-            s[i] = u32::from_le_bytes([state[4 * i], state[4 * i + 1], state[4 * i + 2], state[4 * i + 3]]);
+            s[i] = u32::from_le_bytes([
+                state[4 * i],
+                state[4 * i + 1],
+                state[4 * i + 2],
+                state[4 * i + 3],
+            ]);
         }
         let mut b = [0u8; 64];
         b.copy_from_slice(block);
@@ -128,7 +133,12 @@ impl MerkleDamgardHash for Md5 {
     fn compress(&self, state: &mut [u8], block: &[u8]) {
         let mut s = [0u32; 4];
         for i in 0..4 {
-            s[i] = u32::from_le_bytes([state[4 * i], state[4 * i + 1], state[4 * i + 2], state[4 * i + 3]]);
+            s[i] = u32::from_le_bytes([
+                state[4 * i],
+                state[4 * i + 1],
+                state[4 * i + 2],
+                state[4 * i + 3],
+            ]);
         }
         let mut b = [0u8; 64];
         b.copy_from_slice(block);
@@ -164,7 +174,12 @@ impl MerkleDamgardHash for Sha1 {
     fn compress(&self, state: &mut [u8], block: &[u8]) {
         let mut s = [0u32; 5];
         for i in 0..5 {
-            s[i] = u32::from_be_bytes([state[4 * i], state[4 * i + 1], state[4 * i + 2], state[4 * i + 3]]);
+            s[i] = u32::from_be_bytes([
+                state[4 * i],
+                state[4 * i + 1],
+                state[4 * i + 2],
+                state[4 * i + 3],
+            ]);
         }
         let mut b = [0u8; 64];
         b.copy_from_slice(block);
@@ -438,12 +453,8 @@ fn run_length_extension<H: MerkleDamgardHash>(hash: &H) -> String {
     let suffix = b"&role=admin";
     let combined = [&secret[..], &original_message[..]].concat();
     let target_digest = hash.hash(&combined);
-    let (forged_digest, glue) = length_extension_attack(
-        hash,
-        &target_digest,
-        combined.len(),
-        suffix,
-    );
+    let (forged_digest, glue) =
+        length_extension_attack(hash, &target_digest, combined.len(), suffix);
     // Verify: the forged extended message is original_message || glue || suffix,
     // and its hash under (secret || ·) should equal forged_digest.
     let mut full = Vec::new();
@@ -468,7 +479,10 @@ fn run_length_extension<H: MerkleDamgardHash>(hash: &H) -> String {
 }
 
 fn run_birthday<H: HashFunction>(hash: &H, truncate_bits: u32, max_trials: usize) -> String {
-    let mut md = format!("## Birthday-collision search (truncate to {} bits)\n\n", truncate_bits);
+    let mut md = format!(
+        "## Birthday-collision search (truncate to {} bits)\n\n",
+        truncate_bits
+    );
     let t0 = std::time::Instant::now();
     let result = birthday_collision_search(hash, truncate_bits, max_trials, 0xC0FFEE);
     let elapsed = t0.elapsed().as_millis();

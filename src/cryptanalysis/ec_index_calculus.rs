@@ -537,9 +537,16 @@ pub fn find_one_relation(
                     None => continue,
                 };
                 let candidate = qc.neg().mul(&inv);
-                if let Some(rel) = try_finalise(&r, &fb_i.point, &candidate, &x_to_idx, factor_base,
-                                                 curve, &a, &b)
-                {
+                if let Some(rel) = try_finalise(
+                    &r,
+                    &fb_i.point,
+                    &candidate,
+                    &x_to_idx,
+                    factor_base,
+                    curve,
+                    &a,
+                    &b,
+                ) {
                     return Some(rel);
                 }
                 continue;
@@ -561,9 +568,16 @@ pub fn find_one_relation(
                     curve.fe(sqrt_disc.clone())
                 };
                 let candidate = qb.neg().add(&s).mul(&two_qa_inv);
-                if let Some(rel) = try_finalise(&r, &fb_i.point, &candidate, &x_to_idx, factor_base,
-                                                 curve, &a, &b)
-                {
+                if let Some(rel) = try_finalise(
+                    &r,
+                    &fb_i.point,
+                    &candidate,
+                    &x_to_idx,
+                    factor_base,
+                    curve,
+                    &a,
+                    &b,
+                ) {
                     return Some(rel);
                 }
             }
@@ -810,8 +824,11 @@ pub fn pollard_rho_ecdlp(
 
     let step = |r: &Point, alpha: &BigUint, beta: &BigUint| -> (Point, BigUint, BigUint) {
         let branch = match r {
-            Point::Affine { x, .. } => (&x.value % BigUint::from(3u32)).to_u32_digits()
-                .get(0).copied().unwrap_or(0),
+            Point::Affine { x, .. } => (&x.value % BigUint::from(3u32))
+                .to_u32_digits()
+                .get(0)
+                .copied()
+                .unwrap_or(0),
             Point::Infinity => 0,
         };
         match branch {
@@ -935,9 +952,18 @@ mod tests {
         let p3 = p1.add(&p2, &a_fe).neg();
 
         let (x1, x2, x3) = (
-            match &p1 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p2 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p3 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p1 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p2 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p3 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
         );
         let s = semaev_s3(&x1, &x2, &x3, &a_fe, &b_fe);
         assert!(s.is_zero(), "S₃ should vanish on collinear x-coords");
@@ -1046,10 +1072,22 @@ mod tests {
         let p3 = g.scalar_mul(&BigUint::from(13u32), &a_fe);
         let p4 = p1.add(&p2, &a_fe).add(&p3, &a_fe).neg();
         let (x1, x2, x3, x4) = (
-            match &p1 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p2 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p3 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p4 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p1 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p2 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p3 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p4 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
         );
         // Evaluate S_4(x₁, x₂, x₃, X₄) at X₄ = x₄.
         let coeffs = semaev_s4_in_x4(&x1, &x2, &x3, &a_fe, &b_fe);
@@ -1059,7 +1097,10 @@ mod tests {
             value = value.add(&c.mul(&x4_pow));
             x4_pow = x4_pow.mul(&x4);
         }
-        assert!(value.is_zero(), "S₄ should vanish on collinear-sum x-coords");
+        assert!(
+            value.is_zero(),
+            "S₄ should vanish on collinear-sum x-coords"
+        );
     }
 
     /// **Root finder sanity**: build a polynomial with known roots
@@ -1112,10 +1153,22 @@ mod tests {
         let p3 = g.scalar_mul(&BigUint::from(13u32), &a_fe);
         let p4 = p1.add(&p2, &a_fe).add(&p3, &a_fe).neg();
         let (x1, x2, x3, x4) = (
-            match &p1 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p2 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p3 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
-            match &p4 { Point::Affine { x, .. } => x.clone(), _ => panic!() },
+            match &p1 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p2 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p3 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
+            match &p4 {
+                Point::Affine { x, .. } => x.clone(),
+                _ => panic!(),
+            },
         );
         let coeffs = semaev_s4_in_x4(&x1, &x2, &x3, &a_fe, &b_fe);
         let coeffs_vec: Vec<FieldElement> = coeffs.to_vec();
@@ -1146,8 +1199,8 @@ mod tests {
         let a_fe = curve.a_fe();
         let x_truth = BigUint::from(47u32);
         let q = g.scalar_mul(&x_truth, &a_fe);
-        let recovered = pollard_rho_ecdlp(&curve, &g, &q, 200_000)
-            .expect("rho should recover small DLP");
+        let recovered =
+            pollard_rho_ecdlp(&curve, &g, &q, 200_000).expect("rho should recover small DLP");
         let recheck = g.scalar_mul(&recovered, &a_fe);
         assert_eq!(recheck, q);
     }

@@ -13,11 +13,12 @@
 //!   - Decapsulation: recover the message by subtracting off the LWE term.
 //!
 //! # This implementation
-//! This is a *didactic* implementation of Kyber-512 (k=2):
+//! This is a *didactic*, non-interoperable toy implementation inspired by
+//! Kyber-512 (k=2):
 //!   - Polynomial arithmetic is in Zq[x] / (xⁿ + 1).
 //!   - The Number Theoretic Transform (NTT) is omitted; multiplication uses
 //!     naive O(n²) schoolbook convolution for clarity.
-//!   - Random sampling uses rand::thread_rng instead of SHAKE-256 XOF.
+//!   - Random sampling uses the OS CSPRNG instead of SHAKE-256 XOF expansion.
 //!   - Compression / decompression uses the standard rounding formulas.
 //!   - The resulting ciphertexts are *NOT* compatible with the NIST standard.
 //!
@@ -171,10 +172,22 @@ fn sample_cbd() -> Poly {
 /// Sample a random public polynomial (uniform in Zq)
 fn sample_uniform() -> Poly {
     let mut p = Poly::zero();
-    let bytes = random_bytes_vec(N * 3);
-    for (i, chunk) in bytes.chunks(3).take(N).enumerate() {
-        let v = (chunk[0] as i64 | ((chunk[1] as i64) << 8)) & 0x1fff;
-        p.0[i] = if v < Q { v } else { (v - Q).rem_euclid(Q) };
+    let mut filled = 0usize;
+    while filled < N {
+        let bytes = random_bytes_vec(3);
+        let candidates = [
+            (bytes[0] as i64 | ((bytes[1] as i64) << 8)) & 0x0fff,
+            (((bytes[1] as i64) >> 4) | ((bytes[2] as i64) << 4)) & 0x0fff,
+        ];
+        for v in candidates {
+            if v < Q {
+                p.0[filled] = v;
+                filled += 1;
+                if filled == N {
+                    break;
+                }
+            }
+        }
     }
     p
 }
@@ -262,6 +275,35 @@ pub struct KyberCiphertext {
     pub v: Vec<u16>,      // Compressed t·r + e2 + msg
 }
 
+pub fn kyber_ciphertext_is_well_formed(ct: &KyberCiphertext) -> bool {
+    let u_bound = 1u16 << DU;
+    let v_bound = 1u16 << DV;
+    ct.u.len() == K
+        && ct
+            .u
+            .iter()
+            .all(|poly| poly.len() == N && poly.iter().all(|&x| x < u_bound))
+        && ct.v.len() == N
+        && ct.v.iter().all(|&x| x < v_bound)
+}
+
+/// Canonical toy-Kyber ciphertext serialization used for transcript binding.
+pub fn kyber_ciphertext_to_bytes(ct: &KyberCiphertext) -> Result<Vec<u8>, &'static str> {
+    if !kyber_ciphertext_is_well_formed(ct) {
+        return Err("malformed Kyber ciphertext");
+    }
+    let mut out = Vec::with_capacity((K + 1) * N * 2);
+    for poly in &ct.u {
+        for &coeff in poly {
+            out.extend_from_slice(&coeff.to_le_bytes());
+        }
+    }
+    for &coeff in &ct.v {
+        out.extend_from_slice(&coeff.to_le_bytes());
+    }
+    Ok(out)
+}
+
 /// Key generation: sample s, e; compute t = A·s + e.
 pub fn kyber_keygen() -> KyberPrivateKey {
     let a = sample_uniform_matrix();
@@ -313,6 +355,17 @@ pub fn kyber_encapsulate(pk: &KyberPublicKey) -> (KyberCiphertext, [u8; 32]) {
 
 /// Decapsulation: recover the message from the ciphertext, return shared secret.
 pub fn kyber_decapsulate(sk: &KyberPrivateKey, ct: &KyberCiphertext) -> [u8; 32] {
+    kyber_decapsulate_checked(sk, ct).expect("malformed Kyber ciphertext")
+}
+
+/// Checked decapsulation that rejects malformed ciphertext shapes.
+pub fn kyber_decapsulate_checked(
+    sk: &KyberPrivateKey,
+    ct: &KyberCiphertext,
+) -> Result<[u8; 32], &'static str> {
+    if !kyber_ciphertext_is_well_formed(ct) {
+        return Err("malformed Kyber ciphertext");
+    }
     let u_poly = decompress_polyvec(&ct.u, DU);
     let v_poly = Poly::decompress(&ct.v, DV);
 
@@ -323,7 +376,7 @@ pub fn kyber_decapsulate(sk: &KyberPrivateKey, ct: &KyberCiphertext) -> [u8; 32]
     let recovered_mu = v_poly.sub(&su);
     let m = decode_message(&recovered_mu);
 
-    sha256(&m)
+    Ok(sha256(&m))
 }
 
 #[cfg(test)]
@@ -487,5 +540,27 @@ mod tests {
         let (ct, alice_ss) = kyber_encapsulate(&alice.public);
         let bob_ss = kyber_decapsulate(&bob, &ct);
         assert_ne!(alice_ss, bob_ss);
+    }
+
+    #[test]
+    fn kyber_rejects_malformed_ciphertext() {
+        let sk = kyber_keygen();
+        let bad = KyberCiphertext {
+            u: vec![vec![0u16; N]],
+            v: vec![0u16; N],
+        };
+        assert!(kyber_decapsulate_checked(&sk, &bad).is_err());
+    }
+
+    #[test]
+    fn kyber_ciphertext_serialization_is_stable() {
+        let ct = KyberCiphertext {
+            u: vec![vec![1u16; N], vec![2u16; N]],
+            v: vec![3u16; N],
+        };
+        let bytes1 = kyber_ciphertext_to_bytes(&ct).unwrap();
+        let bytes2 = kyber_ciphertext_to_bytes(&ct).unwrap();
+        assert_eq!(bytes1, bytes2);
+        assert_eq!(bytes1.len(), (K + 1) * N * 2);
     }
 }

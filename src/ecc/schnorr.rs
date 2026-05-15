@@ -100,6 +100,9 @@ fn neg_mod(x: &BigUint, n: &BigUint) -> BigUint {
 /// point.  The 32-byte x-only encoding is what BIP-340 wire format
 /// specifies for public keys.
 pub fn xonly_pubkey(d: &BigUint, curve: &CurveParams) -> Option<([u8; 32], BigUint)> {
+    if curve.name != "secp256k1" {
+        return None;
+    }
     if d.is_zero() || d >= &curve.n {
         return None;
     }
@@ -124,6 +127,9 @@ pub fn schnorr_sign(
     aux_rand: &[u8; 32],
     curve: &CurveParams,
 ) -> Option<[u8; 64]> {
+    if curve.name != "secp256k1" {
+        return None;
+    }
     let n = &curve.n;
     if d.is_zero() || d >= n {
         return None;
@@ -194,6 +200,9 @@ pub fn schnorr_verify(
     sig: &[u8; 64],
     curve: &CurveParams,
 ) -> bool {
+    if curve.name != "secp256k1" {
+        return false;
+    }
     let n = &curve.n;
     let p_field = &curve.p;
 
@@ -403,5 +412,18 @@ mod tests {
         let (pk, _) = xonly_pubkey(&d, &curve).unwrap();
         let sig = schnorr_sign(b"original", &d, &aux, &curve).unwrap();
         assert!(!schnorr_verify(b"different", &pk, &sig, &curve));
+    }
+
+    #[test]
+    fn bip340_rejects_non_secp256k1_curve() {
+        let curve = CurveParams::p256();
+        let d = BigUint::from(3u32);
+        let aux = [0u8; 32];
+        let pk = [0u8; 32];
+        let sig = [0u8; 64];
+
+        assert!(xonly_pubkey(&d, &curve).is_none());
+        assert!(schnorr_sign(b"msg", &d, &aux, &curve).is_none());
+        assert!(!schnorr_verify(b"msg", &pk, &sig, &curve));
     }
 }

@@ -122,11 +122,7 @@ pub fn binary_semaev_s3_in_x3(
 /// solution whenever `Tr(c) = 0`.  For even `m` the half-trace recipe
 /// requires a fixed non-AS element; we fall back to brute force,
 /// which is fine for the toy fields this module targets (`m ≤ 16`).
-pub fn solve_artin_schreier(
-    c: &F2mElement,
-    m: u32,
-    irr: &IrreduciblePoly,
-) -> Option<F2mElement> {
+pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Option<F2mElement> {
     // Compute Tr(c) = c + c² + c⁴ + … + c^{2^{m-1}}.
     let mut acc = c.clone();
     let mut tr = c.clone();
@@ -228,7 +224,10 @@ mod tests {
     use num_bigint::BigUint;
 
     fn f64_irr() -> IrreduciblePoly {
-        IrreduciblePoly { degree: 6, low_terms: vec![0, 1] }
+        IrreduciblePoly {
+            degree: 6,
+            low_terms: vec![0, 1],
+        }
     }
 
     /// Symmetry: `S₃(x₁, x₂, x₃)` equals every permutation.
@@ -360,8 +359,9 @@ mod tests {
                 }
                 let p3 = curve.neg(&sum);
                 let (x1, x2, x3) = match (&p1, &p2, &p3) {
-                    (Pt::Aff { x: a, .. }, Pt::Aff { x: b, .. }, Pt::Aff { x: c, .. }) =>
-                        (a.clone(), b.clone(), c.clone()),
+                    (Pt::Aff { x: a, .. }, Pt::Aff { x: b, .. }, Pt::Aff { x: c, .. }) => {
+                        (a.clone(), b.clone(), c.clone())
+                    }
                     _ => continue,
                 };
                 // Also skip degenerate doubling (x₁ = x₂).

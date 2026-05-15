@@ -127,12 +127,7 @@ pub struct NeighbourReport {
 /// produces an [`AttackReport`] capturing every step.  The m=1
 /// descent + brute-force ECDLP path is the only one that actually
 /// recovers `d`; the m≥2 reports are structural only.
-pub fn run_full_attack(
-    tc: &TrapdoorCurve,
-    p: &Pt,
-    q: &Pt,
-    opts: &AttackOptions,
-) -> AttackReport {
+pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions) -> AttackReport {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
     let start_curve = ECurve::new(tc.big_n, tc.big_irr.clone(), tc.a.clone(), tc.b.clone());
     let start_magic = magic_number_full(&tower, &tc.a, &tc.b);
@@ -189,7 +184,9 @@ pub fn run_full_attack(
         .map(|j| {
             // Reconstruct a curve with this j and recompute its magic.
             // a = 0 representative is fine for magic purposes.
-            let b = j.flt_inverse(&tc.big_irr).unwrap_or(F2mElement::zero(tc.big_n));
+            let b = j
+                .flt_inverse(&tc.big_irr)
+                .unwrap_or(F2mElement::zero(tc.big_n));
             let a0 = F2mElement::zero(tc.big_n);
             magic_number_full(&tower, &a0, &b)
         })
@@ -288,7 +285,10 @@ pub fn format_report(r: &AttackReport, irr: &IrreduciblePoly) -> String {
     let _ = irr;
     let mut out = String::new();
     out.push_str("┌─ GHS / Hess Weil-descent attack report ─────────────────────────┐\n");
-    out.push_str(&format!("│ Starting magic number       : {}\n", r.start_magic));
+    out.push_str(&format!(
+        "│ Starting magic number       : {}\n",
+        r.start_magic
+    ));
     out.push_str(&format!(
         "│ Isogeny walk path length    : {}  ({} curves visited)\n",
         r.walk_path.len() - 1,
@@ -296,9 +296,15 @@ pub fn format_report(r: &AttackReport, irr: &IrreduciblePoly) -> String {
     ));
     if !r.walk_magics.is_empty() {
         let mag_str: Vec<String> = r.walk_magics.iter().map(|m| m.to_string()).collect();
-        out.push_str(&format!("│ Magic sequence along walk   : [{}]\n", mag_str.join(" → ")));
+        out.push_str(&format!(
+            "│ Magic sequence along walk   : [{}]\n",
+            mag_str.join(" → ")
+        ));
     }
-    out.push_str(&format!("│ Descent ran on magic-{} curve\n", r.descent_magic));
+    out.push_str(&format!(
+        "│ Descent ran on magic-{} curve\n",
+        r.descent_magic
+    ));
     if r.descent_magic == 1 {
         if r.ecdlp_solved {
             out.push_str(&format!(
@@ -309,7 +315,8 @@ pub fn format_report(r: &AttackReport, irr: &IrreduciblePoly) -> String {
             out.push_str("│ m=1 descent ran; ECDLP recovery partial or failed.\n");
             if let Some(d) = &r.recovered_scalar {
                 out.push_str(&format!(
-                    "│   (partial scalar mod descent-subgroup: {})\n", d
+                    "│   (partial scalar mod descent-subgroup: {})\n",
+                    d
                 ));
             }
         }
@@ -323,8 +330,7 @@ pub fn format_report(r: &AttackReport, irr: &IrreduciblePoly) -> String {
         "│ Immediate isogeny neighbours: {} curves\n",
         r.neighbour_magics.len()
     ));
-    let mut spectrum: std::collections::BTreeMap<u32, usize> =
-        std::collections::BTreeMap::new();
+    let mut spectrum: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
     for nb in &r.neighbour_magics {
         *spectrum.entry(nb.magic).or_insert(0) += 1;
     }
@@ -368,8 +374,7 @@ mod tests {
         // Find b ∈ F_{2^3} \ F_2.
         let mut b = None;
         for candidate in 2u64..(1u64 << 6) {
-            let cand =
-                F2mElement::from_biguint(&BigUint::from(candidate), big_n);
+            let cand = F2mElement::from_biguint(&BigUint::from(candidate), big_n);
             if tower.is_in_subfield(&cand, l) && !tower.is_in_subfield(&cand, 1) {
                 b = Some(cand);
                 break;
@@ -396,7 +401,10 @@ mod tests {
             let x = F2mElement::from_biguint(&BigUint::from(xi), big_n);
             for yi in 1u64..(1u64 << 6) {
                 let y = F2mElement::from_biguint(&BigUint::from(yi), big_n);
-                let cand = Pt::Aff { x: x.clone(), y: y.clone() };
+                let cand = Pt::Aff {
+                    x: x.clone(),
+                    y: y.clone(),
+                };
                 if curve.is_on_curve(&cand) {
                     p_opt = Some(cand);
                     break;
@@ -436,8 +444,7 @@ mod tests {
         let tower = FieldTower::new(big_n, n, l, irr.clone());
         let mut b = None;
         for candidate in 2u64..(1u64 << 6) {
-            let cand =
-                F2mElement::from_biguint(&BigUint::from(candidate), big_n);
+            let cand = F2mElement::from_biguint(&BigUint::from(candidate), big_n);
             if tower.is_in_subfield(&cand, l) && !tower.is_in_subfield(&cand, 1) {
                 b = Some(cand);
                 break;

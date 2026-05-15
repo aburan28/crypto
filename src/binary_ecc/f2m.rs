@@ -28,7 +28,6 @@
 //! this is `O(m)` time and very fast in practice.
 
 use num_bigint::BigUint;
-use num_traits::Zero;
 
 /// An irreducible polynomial of `F_2[z]` defining a binary field
 /// `F_{2^m}`.  Stored as the bit-positions of the polynomial's
@@ -65,6 +64,27 @@ impl IrreduciblePoly {
         Self {
             degree: 127,
             low_terms: vec![0, 1],
+        }
+    }
+    /// `z¹¹³ + z⁹ + 1` — SECG sect113r1/r2.
+    pub fn deg_113() -> Self {
+        Self {
+            degree: 113,
+            low_terms: vec![0, 9],
+        }
+    }
+    /// `z¹³¹ + z⁸ + z³ + z² + 1` — SECG sect131r1/r2.
+    pub fn deg_131() -> Self {
+        Self {
+            degree: 131,
+            low_terms: vec![0, 2, 3, 8],
+        }
+    }
+    /// `z¹⁵⁵ + z⁶² + 1` — RFC 2409 Oakley Group 3 EC2N.
+    pub fn deg_155_oakley_group3() -> Self {
+        Self {
+            degree: 155,
+            low_terms: vec![0, 62],
         }
     }
     /// `z¹⁶³ + z⁷ + z⁶ + z³ + 1` — NIST B-163.
