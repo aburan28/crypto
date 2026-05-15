@@ -79,6 +79,38 @@ enum Cmd {
         #[command(subcommand)]
         op: CryptanalysisOp,
     },
+    /// **Visual demos** for every part of the library — symmetric
+    /// ciphers, hash constructions, ECC.
+    Visual {
+        #[command(subcommand)]
+        op: VisualOp,
+    },
+}
+
+#[derive(Subcommand)]
+enum VisualOp {
+    /// Symmetric ciphers: ECB-penguin, mode dataflows, AES round
+    /// trace, ChaCha state, avalanche heat-map.
+    Symmetric {
+        /// Sub-target: `ecb-penguin`, `modes`, `aes-trace`, `chacha`,
+        /// `avalanche`, `all`.
+        #[arg(long, default_value = "all")]
+        target: String,
+    },
+    /// Hash functions: Merkle-Damgård / sponge / BLAKE3 tree diagrams,
+    /// SHA-256 round trace, hash avalanche.
+    Hash {
+        #[arg(long, default_value = "all")]
+        target: String,
+    },
+    /// Elliptic curves: toy-curve scatter, point operations,
+    /// scalar-multiplication ladder, ECDSA dataflow.
+    Ecc {
+        #[arg(long, default_value = "all")]
+        target: String,
+    },
+    /// Everything at once — emits the full visual bundle.
+    All,
 }
 
 #[derive(Subcommand)]
@@ -252,6 +284,7 @@ fn main() {
         Cmd::Pqc => cmd_pqc(),
         Cmd::Demo => cmd_demo(),
         Cmd::Cryptanalysis { op } => cmd_cryptanalysis(op),
+        Cmd::Visual { op } => cmd_visual(op),
     }
 }
 
@@ -889,4 +922,74 @@ fn cmd_demo() {
     println!("  KEM secrets match: {}", ss3_enc == ss3_dec);
 
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+}
+
+// ── Visual subcommands ────────────────────────────────────────────────────────
+
+fn cmd_visual(op: VisualOp) {
+    use crypto_lib::ecc::visualize as ecc_v;
+    use crypto_lib::hash::visualize as hash_v;
+    use crypto_lib::symmetric::visualize as sym_v;
+    match op {
+        VisualOp::Symmetric { target } => match target.as_str() {
+            "ecb-penguin" => println!("{}", sym_v::demo_ecb_penguin(32, 16)),
+            "modes" => println!("{}", sym_v::demo_mode_dataflows()),
+            "aes-trace" => {
+                println!(
+                    "{}",
+                    sym_v::demo_aes_state_trace(b"YELLOW SUBMARINE", &[0x42u8; 16])
+                )
+            }
+            "chacha" => println!("{}", sym_v::demo_chacha20_state()),
+            "avalanche" => {
+                for nr in [1usize, 2, 3, 5, 10] {
+                    println!("{}", sym_v::demo_avalanche_matrix(nr));
+                }
+            }
+            "all" => println!("{}", sym_v::run_all_symmetric_demos()),
+            other => {
+                eprintln!(
+                    "error: unknown symmetric target '{}'; try one of: ecb-penguin, modes, aes-trace, chacha, avalanche, all",
+                    other
+                );
+                std::process::exit(1);
+            }
+        },
+        VisualOp::Hash { target } => match target.as_str() {
+            "md" => println!("{}", hash_v::demo_merkle_damgard_diagram()),
+            "sponge" => println!("{}", hash_v::demo_sponge_diagram()),
+            "blake3" => println!("{}", hash_v::demo_blake3_tree_diagram()),
+            "sha256-trace" => println!("{}", hash_v::demo_sha256_round_trace(b"abc")),
+            "avalanche" => println!("{}", hash_v::demo_hash_avalanche()),
+            "all" => println!("{}", hash_v::run_all_hash_demos()),
+            other => {
+                eprintln!(
+                    "error: unknown hash target '{}'; try: md, sponge, blake3, sha256-trace, avalanche, all",
+                    other
+                );
+                std::process::exit(1);
+            }
+        },
+        VisualOp::Ecc { target } => match target.as_str() {
+            "curve" => println!("{}", ecc_v::demo_toy_curve_scatter(31, 1, 1)),
+            "ops" => println!("{}", ecc_v::demo_point_operations()),
+            "ladder" => println!("{}", ecc_v::demo_scalar_mul_ladder(13)),
+            "ecdsa" => println!("{}", ecc_v::demo_ecdsa_flow()),
+            "all" => println!("{}", ecc_v::run_all_ecc_demos()),
+            other => {
+                eprintln!(
+                    "error: unknown ecc target '{}'; try: curve, ops, ladder, ecdsa, all",
+                    other
+                );
+                std::process::exit(1);
+            }
+        },
+        VisualOp::All => {
+            println!("{}", sym_v::run_all_symmetric_demos());
+            println!("\n\n========================================\n\n");
+            println!("{}", hash_v::run_all_hash_demos());
+            println!("\n\n========================================\n\n");
+            println!("{}", ecc_v::run_all_ecc_demos());
+        }
+    }
 }

@@ -31,4 +31,5 @@ pub mod pqc;
 pub mod prime_hyperelliptic;
 pub mod symmetric;
 pub mod utils;
+pub mod visualize;
 pub mod zk;

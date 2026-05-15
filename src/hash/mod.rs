@@ -18,6 +18,7 @@ pub mod sha512;
 pub mod siphash;
 pub mod sm3;
 pub mod streebog;
+pub mod visualize;
 
 pub use blake3::{blake3_derive_key, blake3_hash, blake3_keyed};
 pub use md4::{md4, md4_compress, md4_pad};

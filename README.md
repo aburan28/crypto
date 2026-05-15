@@ -160,6 +160,36 @@ crypto cryptanalysis visual-all --target j0-twists           # twist factor-size
 crypto cryptanalysis visual-all --target birthday            # cumulative collision-probability curve
 ```
 
+### Library-wide visual demos
+
+Beyond the cryptanalysis-side visualizations, every major module
+ships ASCII-art demos:
+
+```bash
+# Symmetric ciphers
+crypto visual symmetric --target ecb-penguin   # leak structure through ECB
+crypto visual symmetric --target modes         # CBC/CFB/OFB/CTR/GCM/CCM/SIV/XTS/KW dataflow
+crypto visual symmetric --target aes-trace     # 11 AES-128 state grids round-by-round
+crypto visual symmetric --target chacha        # ChaCha20 4×4 word state evolution
+crypto visual symmetric --target avalanche     # AES avalanche heat-map at 1/2/3/5/10 rounds
+
+# Hash functions
+crypto visual hash --target md                 # Merkle-Damgård chain (MD5/SHA-2/RIPEMD)
+crypto visual hash --target sponge             # SHA-3 / SHAKE sponge construction
+crypto visual hash --target blake3             # BLAKE3 binary-tree mode
+crypto visual hash --target sha256-trace       # SHA-256 working-variable trace
+crypto visual hash --target avalanche          # MD5 vs SHA-256 single-bit avalanche
+
+# Elliptic curves
+crypto visual ecc --target curve               # scatter plot of points on toy F_p curve
+crypto visual ecc --target ops                 # point-add and point-double geometric diagrams
+crypto visual ecc --target ladder              # double-and-add scalar-mul trace
+crypto visual ecc --target ecdsa               # ECDSA sign/verify dataflow
+
+# Everything at once
+crypto visual all
+```
+
 ### Visual output samples
 
 The `aes-visual-demo` subcommand renders ASCII diagrams.  For example,
