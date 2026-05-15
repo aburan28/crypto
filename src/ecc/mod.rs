@@ -44,4 +44,4 @@ pub use sm2::{
     decrypt as sm2_decrypt, encrypt as sm2_encrypt, sign as sm2_sign, verify as sm2_verify,
     za as sm2_za, Sm2Signature, DEFAULT_ID as SM2_DEFAULT_ID,
 };
-pub use x25519::{clamp, x25519, x25519_base, x25519_checked};
+pub use x25519::{clamp, x25519, x25519_base};
