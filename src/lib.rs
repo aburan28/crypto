@@ -30,6 +30,7 @@ pub mod keys;
 pub mod pqc;
 pub mod prime_hyperelliptic;
 pub mod symmetric;
+pub mod tls13;
 pub mod utils;
 pub mod visualize;
 pub mod zk;
