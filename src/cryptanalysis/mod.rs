@@ -145,6 +145,7 @@ pub mod shor;
 pub mod signature_corpus;
 pub mod solinas_correlations;
 pub mod statistical;
+pub mod signal_ratchet;
 pub mod tls12_kdf;
 pub mod tls13_kdf;
 pub mod visual_demos;
