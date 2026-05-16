@@ -118,9 +118,29 @@ pub fn fe_to_bytes(a: &BigUint) -> [u8; 32] {
     out
 }
 
-/// Decode 32 little-endian bytes to a field element.
+/// Decode 32 little-endian bytes to a field element modulo `p`.
+///
+/// RFC 7748 requires X25519 implementations to accept non-canonical
+/// u-coordinate encodings and process them as if reduced modulo `p`,
+/// so this helper intentionally performs that reduction. Protocols
+/// with stricter encoding rules (for example Ed25519 point decoding)
+/// must use [`fe_from_bytes_canonical`] instead.
 pub fn fe_from_bytes(bytes: &[u8; 32]) -> BigUint {
     fe_reduce(&BigUint::from_bytes_le(bytes))
+}
+
+/// Decode a canonical 32-byte little-endian field-element encoding.
+///
+/// Returns `None` when the integer is not already in `[0, p)`. This is
+/// the right boundary for Ed25519 point encodings, which must reject
+/// non-canonical field elements rather than silently reducing them.
+pub fn fe_from_bytes_canonical(bytes: &[u8; 32]) -> Option<BigUint> {
+    let value = BigUint::from_bytes_le(bytes);
+    if value < p() {
+        Some(value)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -144,6 +164,26 @@ mod tests {
             let recovered = fe_from_bytes(&bytes);
             assert_eq!(f, recovered);
         }
+    }
+
+    #[test]
+    fn canonical_decoder_rejects_p_and_above() {
+        let pp = p();
+        let canonical = fe_to_bytes(&(pp.clone() - BigUint::one()));
+        assert_eq!(
+            fe_from_bytes_canonical(&canonical),
+            Some(pp.clone() - BigUint::one())
+        );
+
+        let p_bytes = fe_to_bytes(&pp);
+        assert_eq!(fe_from_bytes_canonical(&p_bytes), None);
+
+        let reduced = fe_from_bytes(&p_bytes);
+        assert_eq!(
+            reduced,
+            BigUint::zero(),
+            "X25519-style decoder still reduces non-canonical inputs mod p"
+        );
     }
 
     /// `a · a⁻¹ ≡ 1 (mod p)`.

@@ -86,7 +86,7 @@ pub fn hkdf_expand_label(secret: &[u8], label: &str, context: &[u8], length: usi
     let info = hkdf_label(length as u16, label, context);
     let mut prk = [0u8; 32];
     prk.copy_from_slice(secret);
-    hkdf_expand(&prk, &info, length).expect("hkdf_expand failed")
+    hkdf_expand(&prk, &info, length)
 }
 
 /// **Derive-Secret** from RFC 8446 §7.1 — convenience wrapper that

@@ -32,14 +32,26 @@
 
 use crate::hash::sha256::sha256;
 use crate::pqc::mceliece::{
-    mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McEliecePrivateKey, McElieceePublicKey,
+    mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McEliecePrivateKey, McElieceePublicKey, N,
 };
+use crate::utils::random::random_bytes_vec;
 use rand::{rngs::OsRng, Rng};
+use subtle::ConstantTimeEq;
 
 /// Classic McEliece public key — same as the underlying scheme.
 pub type ClassicMceliecePublicKey = McElieceePublicKey;
-/// Classic McEliece private key.
-pub type ClassicMceliecePrivateKey = McEliecePrivateKey;
+/// Classic McEliece private key plus secret implicit-rejection seed.
+#[derive(Clone, Debug)]
+pub struct ClassicMceliecePrivateKey {
+    pub inner: McEliecePrivateKey,
+    reject_secret: [u8; 32],
+}
+
+impl Drop for ClassicMceliecePrivateKey {
+    fn drop(&mut self) {
+        self.reject_secret.fill(0);
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct ClassicMcelieceKeyPair {
@@ -60,9 +72,14 @@ pub struct ClassicMcelieceCiphertext {
 /// simplified McEliece keygen).
 pub fn classic_mceliece_keygen() -> ClassicMcelieceKeyPair {
     let inner = McElieceKeyPair::generate();
+    let mut reject_secret = [0u8; 32];
+    reject_secret.copy_from_slice(&random_bytes_vec(32));
     ClassicMcelieceKeyPair {
         pk: inner.public,
-        sk: inner.private,
+        sk: ClassicMceliecePrivateKey {
+            inner: inner.private,
+            reject_secret,
+        },
     }
 }
 
@@ -113,22 +130,21 @@ pub fn classic_mceliece_encapsulate(
 /// **Decapsulate**: recover `m`, verify the hash commitment, then
 /// derive the shared secret.  On verification failure (implicit
 /// rejection), return a deterministic pseudo-random key derived
-/// from the ciphertext alone — preserves IND-CCA-2 by ensuring the
-/// adversary can't distinguish decryption-failure from decryption-
-/// success via the resulting key.
+/// from a secret fallback seed and the ciphertext.  That keeps
+/// malformed-ciphertext outputs unpredictable to an attacker while
+/// remaining deterministic for the holder of the private key.
 pub fn classic_mceliece_decapsulate(
     ct: &ClassicMcelieceCiphertext,
     sk: &ClassicMceliecePrivateKey,
 ) -> [u8; 32] {
-    let recovered = mceliece_decrypt(&ct.bytes, sk);
+    if ct.bytes.len() != N {
+        return rejection_key(sk, &ct.bytes);
+    }
+
+    let recovered = mceliece_decrypt(&ct.bytes, &sk.inner);
     let m_candidate: Vec<u8> = match recovered {
         Some(m) => m,
-        None => {
-            let mut buf = Vec::with_capacity(64 + ct.bytes.len());
-            buf.extend_from_slice(b"CM-REJECT");
-            buf.extend_from_slice(&ct.bytes);
-            return sha256(&buf);
-        }
+        None => return rejection_key(sk, &ct.bytes),
     };
 
     let mut commit_input = Vec::with_capacity(64 + ct.bytes.len());
@@ -137,11 +153,8 @@ pub fn classic_mceliece_decapsulate(
     commit_input.extend_from_slice(&ct.bytes);
     let commit_check = sha256(&commit_input);
 
-    if commit_check != ct.hash_commit {
-        let mut buf = Vec::with_capacity(64 + ct.bytes.len());
-        buf.extend_from_slice(b"CM-REJECT");
-        buf.extend_from_slice(&ct.bytes);
-        return sha256(&buf);
+    if !bool::from(commit_check.ct_eq(&ct.hash_commit)) {
+        return rejection_key(sk, &ct.bytes);
     }
 
     let mut ss_input = Vec::with_capacity(64 + ct.bytes.len());
@@ -149,6 +162,14 @@ pub fn classic_mceliece_decapsulate(
     ss_input.extend_from_slice(&m_candidate);
     ss_input.extend_from_slice(&ct.bytes);
     sha256(&ss_input)
+}
+
+fn rejection_key(sk: &ClassicMceliecePrivateKey, ciphertext: &[u8]) -> [u8; 32] {
+    let mut buf = Vec::with_capacity(64 + ciphertext.len());
+    buf.extend_from_slice(b"CM-REJECT");
+    buf.extend_from_slice(&sk.reject_secret);
+    buf.extend_from_slice(ciphertext);
+    sha256(&buf)
 }
 
 #[cfg(test)]
@@ -176,11 +197,21 @@ mod tests {
         let k = classic_mceliece_decapsulate(&ct, &kp.sk);
         // The result should be deterministic (the rejection key)
         // and should equal the rejection-key formula.
-        let mut expected_buf = Vec::with_capacity(64 + ct.bytes.len());
-        expected_buf.extend_from_slice(b"CM-REJECT");
-        expected_buf.extend_from_slice(&ct.bytes);
-        let expected = sha256(&expected_buf);
+        let expected = rejection_key(&kp.sk, &ct.bytes);
         assert_eq!(k, expected);
+    }
+
+    #[test]
+    fn malformed_ciphertext_length_yields_rejection_key() {
+        let kp = classic_mceliece_keygen();
+        let ct = ClassicMcelieceCiphertext {
+            bytes: vec![0u8; N - 1],
+            hash_commit: [0u8; 32],
+        };
+        assert_eq!(
+            classic_mceliece_decapsulate(&ct, &kp.sk),
+            rejection_key(&kp.sk, &ct.bytes)
+        );
     }
 
     /// Different keys → different shared secrets.

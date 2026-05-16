@@ -406,6 +406,49 @@ pub fn ntru_encapsulate(pk: &NtruPublicKey) -> (NtruPoly, [u8; 32]) {
     (c, k)
 }
 
+fn ciphertext_is_well_formed(c: &NtruPoly) -> bool {
+    c.0.iter().all(|&coeff| coeff >= 0 && coeff < Q)
+}
+
+fn is_valid_encapsulated_message(m: &NtruPoly) -> bool {
+    let plus = m.0.iter().filter(|&&coeff| coeff == 1).count();
+    let minus = m.0.iter().filter(|&&coeff| coeff == -1).count();
+    plus == 1 && minus == 0 && m.0.iter().all(|&coeff| matches!(coeff, -1..=1))
+}
+
+fn matches_valid_encapsulation(c: &NtruPoly, m: &NtruPoly, pk: &NtruPublicKey) -> bool {
+    if !is_valid_encapsulated_message(m) {
+        return false;
+    }
+
+    // Encapsulation currently samples `r` with exactly one `+1` term and no
+    // `-1` terms, so we can cheaply re-encrypt across the tiny candidate set.
+    for i in 0..N {
+        let mut r = NtruPoly::zero();
+        r.0[i] = 1;
+        if ntru_encrypt_raw(m, &r, pk) == *c {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn rejection_key(sk: &NtruPrivateKey, c: &NtruPoly) -> [u8; 32] {
+    let mut hash_input = Vec::with_capacity(32 + 3 * N * 4);
+    hash_input.extend_from_slice(b"NTRU-REJECT");
+    for coeff in sk.f.0.iter() {
+        hash_input.extend_from_slice(&coeff.to_le_bytes());
+    }
+    for coeff in sk.f_p_inv.0.iter() {
+        hash_input.extend_from_slice(&coeff.to_le_bytes());
+    }
+    for coeff in c.0.iter() {
+        hash_input.extend_from_slice(&coeff.to_le_bytes());
+    }
+    sha256(&hash_input)
+}
+
 /// **KEM Decapsulation**: recover `m`, then `r`-recovery (here
 /// simplified: we hash just `m` for the educational version since
 /// recovering `r` requires the FO re-encryption check).  For full
@@ -415,9 +458,19 @@ pub fn ntru_encapsulate(pk: &NtruPublicKey) -> (NtruPoly, [u8; 32]) {
 ///    invertible mod q — not always the case).
 /// 3. Re-encrypt and verify match.
 ///
-/// For the educational version we just hash `m` and the ciphertext.
+/// This educational version still rejects malformed ciphertexts and
+/// impossible decryptions instead of directly hashing attacker-chosen
+/// decapsulation outputs.
 pub fn ntru_decapsulate(c: &NtruPoly, sk: &NtruPrivateKey) -> [u8; 32] {
+    if !ciphertext_is_well_formed(c) {
+        return rejection_key(sk, c);
+    }
+
     let m = ntru_decrypt_raw(c, sk);
+    if !matches_valid_encapsulation(c, &m, &sk.pk) {
+        return rejection_key(sk, c);
+    }
+
     let mut hash_input = Vec::with_capacity(N * 4 + N * 4);
     for v in m.0.iter() {
         hash_input.extend_from_slice(&v.to_le_bytes());
@@ -494,5 +547,25 @@ mod tests {
         let (c, k_enc) = ntru_encapsulate(&kp.pk);
         let k_dec = ntru_decapsulate(&c, &kp.sk);
         assert_eq!(k_enc, k_dec);
+    }
+
+    #[test]
+    fn ntru_decapsulate_rejects_zero_ciphertext() {
+        let kp = ntru_keygen();
+        let zero = NtruPoly::zero();
+
+        assert_eq!(ntru_decapsulate(&zero, &kp.sk), rejection_key(&kp.sk, &zero));
+    }
+
+    #[test]
+    fn ntru_decapsulate_rejects_out_of_range_coefficients() {
+        let kp = ntru_keygen();
+        let mut malformed = NtruPoly::zero();
+        malformed.0[0] = Q;
+
+        assert_eq!(
+            ntru_decapsulate(&malformed, &kp.sk),
+            rejection_key(&kp.sk, &malformed)
+        );
     }
 }

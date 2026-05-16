@@ -224,6 +224,13 @@ pub struct BikePrivateKey {
     pub h0: R2Poly,
     pub h1: R2Poly,
     pub pk: BikePublicKey,
+    reject_secret: [u8; 32],
+}
+
+impl Drop for BikePrivateKey {
+    fn drop(&mut self) {
+        self.reject_secret.fill(0);
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -246,11 +253,14 @@ pub fn bike_keygen() -> BikeKeyPair {
             None => continue,
         };
         let h = h1.mul(&h0_inv);
+        let mut reject_secret = [0u8; 32];
+        reject_secret.copy_from_slice(&crate::utils::random::random_bytes_vec(32));
         let pk = BikePublicKey { h };
         let sk = BikePrivateKey {
             h0,
             h1,
             pk: pk.clone(),
+            reject_secret,
         };
         return BikeKeyPair { pk, sk };
     }
@@ -275,6 +285,10 @@ pub fn bike_encapsulate(pk: &BikePublicKey) -> (BikeCiphertext, [u8; 32]) {
 }
 
 pub fn bike_decapsulate(ct: &BikeCiphertext, sk: &BikePrivateKey) -> [u8; 32] {
+    if !r2poly_is_well_formed(&ct.s) {
+        return rejection_key(sk, &ct.s);
+    }
+
     // Compute s' = s · h0 = e0·h0 + e1·h1 (the syndrome under the
     // QC-MDPC parity-check matrix [h0 | h1]).
     let s_prime = ct.s.mul(&sk.h0);
@@ -289,6 +303,31 @@ pub fn bike_decapsulate(ct: &BikeCiphertext, sk: &BikePrivateKey) -> [u8; 32] {
     hash_input.extend_from_slice(&e0_decoded.bits);
     hash_input.extend_from_slice(&e1_decoded.bits);
     hash_input.extend_from_slice(&ct.s.bits);
+    sha256(&hash_input)
+}
+
+fn r2poly_is_well_formed(poly: &R2Poly) -> bool {
+    let padding_bits = (BYTES * 8) - R;
+    let padding_mask = if padding_bits == 0 {
+        0
+    } else {
+        u8::MAX << (8 - padding_bits)
+    };
+
+    poly.bits.len() == BYTES
+        && poly
+            .bits
+            .last()
+            .map(|last| (last & padding_mask) == 0)
+            .unwrap_or(false)
+}
+
+fn rejection_key(sk: &BikePrivateKey, poly: &R2Poly) -> [u8; 32] {
+    let mut hash_input = Vec::with_capacity(32 + poly.bits.len() + 16);
+    hash_input.extend_from_slice(b"BIKE-REJECT");
+    hash_input.extend_from_slice(&sk.reject_secret);
+    hash_input.extend_from_slice(&poly.bits);
+    hash_input.extend_from_slice(&(poly.bits.len() as u64).to_le_bytes());
     sha256(&hash_input)
 }
 
@@ -381,5 +420,33 @@ mod tests {
         let (ct, k_enc) = bike_encapsulate(&kp.pk);
         let k_dec = bike_decapsulate(&ct, &kp.sk);
         assert_eq!(k_enc, k_dec);
+    }
+
+    #[test]
+    fn bike_decapsulate_rejects_truncated_storage_without_panicking() {
+        let kp = bike_keygen();
+        let malformed = BikeCiphertext {
+            s: R2Poly {
+                bits: vec![0u8; BYTES - 1],
+            },
+        };
+
+        assert_eq!(
+            bike_decapsulate(&malformed, &kp.sk),
+            rejection_key(&kp.sk, &malformed.s)
+        );
+    }
+
+    #[test]
+    fn bike_decapsulate_rejects_noncanonical_padding_bits_without_panicking() {
+        let kp = bike_keygen();
+        let mut bits = vec![0u8; BYTES];
+        bits[BYTES - 1] = 0x80;
+        let malformed = BikeCiphertext { s: R2Poly { bits } };
+
+        assert_eq!(
+            bike_decapsulate(&malformed, &kp.sk),
+            rejection_key(&kp.sk, &malformed.s)
+        );
     }
 }

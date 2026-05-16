@@ -53,6 +53,20 @@ pub fn x25519(scalar: &[u8; 32], u_coord: &[u8; 32]) -> [u8; 32] {
     fe_to_bytes(&result)
 }
 
+/// X25519 key agreement with RFC 7748's all-zero shared-secret check.
+///
+/// Low-order public inputs can force the Montgomery ladder to return the
+/// all-zero string. Callers doing ECDH should reject that result rather than
+/// treating it as a successful shared secret.
+pub fn x25519_checked(scalar: &[u8; 32], u_coord: &[u8; 32]) -> Option<[u8; 32]> {
+    let shared = x25519(scalar, u_coord);
+    if shared.iter().all(|&b| b == 0) {
+        None
+    } else {
+        Some(shared)
+    }
+}
+
 /// X25519 base-point scalar multiplication: derive a public key
 /// from a clamped 32-byte scalar.  Base point `u = 9`.
 pub fn x25519_base(scalar: &[u8; 32]) -> [u8; 32] {
@@ -173,6 +187,21 @@ mod tests {
         let s_ab = x25519(&a_priv, &b_pub);
         let s_ba = x25519(&b_priv, &a_pub);
         assert_eq!(s_ab, s_ba, "ECDH shared-secret asymmetry — bug");
+    }
+
+    #[test]
+    fn checked_x25519_rejects_low_order_input() {
+        let scalar = [0x11u8; 32];
+        let low_order = [0u8; 32];
+        assert!(
+            x25519_checked(&scalar, &low_order).is_none(),
+            "low-order public inputs must not be accepted as ECDH secrets"
+        );
+        assert_eq!(
+            x25519(&scalar, &low_order),
+            [0u8; 32],
+            "regression guard: raw primitive still exposes the RFC all-zero output"
+        );
     }
 
     /// Clamping zeros the right bits.

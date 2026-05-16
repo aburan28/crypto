@@ -82,6 +82,10 @@ impl Matrix {
         self.data[r * self.cols + c] = v & (Q - 1);
     }
 
+    pub fn is_well_formed(&self) -> bool {
+        self.data.len() == self.rows.saturating_mul(self.cols)
+    }
+
     /// Element-wise addition mod `q`.
     pub fn add(&self, other: &Self) -> Self {
         assert_eq!((self.rows, self.cols), (other.rows, other.cols));
@@ -240,6 +244,39 @@ pub struct FrodoCiphertext {
     pub c: Matrix,
 }
 
+fn serialize_ciphertext(ct: &FrodoCiphertext) -> Vec<u8> {
+    let mut out = Vec::with_capacity(
+        4 * std::mem::size_of::<usize>() + 4 * (ct.b_prime.data.len() + ct.c.data.len()),
+    );
+    out.extend_from_slice(&ct.b_prime.rows.to_le_bytes());
+    out.extend_from_slice(&ct.b_prime.cols.to_le_bytes());
+    out.extend_from_slice(&ct.c.rows.to_le_bytes());
+    out.extend_from_slice(&ct.c.cols.to_le_bytes());
+    for &val in ct.b_prime.data.iter().chain(ct.c.data.iter()) {
+        out.extend_from_slice(&val.to_le_bytes());
+    }
+    out
+}
+
+fn rejection_key(sk: &FrodoPrivateKey, ct: &FrodoCiphertext) -> [u8; 32] {
+    let mut hash_input = Vec::with_capacity(16 + 4 * sk.s.data.len());
+    hash_input.extend_from_slice(b"FRODO-REJECT");
+    for &val in &sk.s.data {
+        hash_input.extend_from_slice(&val.to_le_bytes());
+    }
+    hash_input.extend_from_slice(&serialize_ciphertext(ct));
+    sha256(&hash_input)
+}
+
+fn ciphertext_is_well_formed(ct: &FrodoCiphertext) -> bool {
+    ct.b_prime.rows == M
+        && ct.b_prime.cols == N
+        && ct.c.rows == M
+        && ct.c.cols == L
+        && ct.b_prime.is_well_formed()
+        && ct.c.is_well_formed()
+}
+
 pub fn frodo_keygen() -> FrodoKeyPair {
     let mut rng = OsRng;
     let mut seed_a = [0u8; 32];
@@ -277,6 +314,10 @@ pub fn frodo_encapsulate(pk: &FrodoPublicKey) -> (FrodoCiphertext, [u8; 32]) {
 }
 
 pub fn frodo_decapsulate(ct: &FrodoCiphertext, sk: &FrodoPrivateKey) -> [u8; 32] {
+    if !ciphertext_is_well_formed(ct) || !sk.s.is_well_formed() {
+        return rejection_key(sk, ct);
+    }
+
     let m_mat = ct.c.sub(&ct.b_prime.mul(&sk.s));
     let msg_bytes = decode(&m_mat);
 
@@ -362,5 +403,31 @@ mod tests {
             "FrodoKEM should succeed in ≥4 of 5 trials at toy scale; got {}/5",
             successes
         );
+    }
+
+    #[test]
+    fn frodo_decapsulate_rejects_malformed_b_prime_shape_without_panicking() {
+        let kp = frodo_keygen();
+        let ct = FrodoCiphertext {
+            b_prime: Matrix::zero(M + 1, N),
+            c: Matrix::zero(M, L),
+        };
+
+        assert_eq!(frodo_decapsulate(&ct, &kp.sk), rejection_key(&kp.sk, &ct));
+    }
+
+    #[test]
+    fn frodo_decapsulate_rejects_truncated_matrix_storage_without_panicking() {
+        let kp = frodo_keygen();
+        let ct = FrodoCiphertext {
+            b_prime: Matrix {
+                rows: M,
+                cols: N,
+                data: vec![0u32; (M * N).saturating_sub(1)],
+            },
+            c: Matrix::zero(M, L),
+        };
+
+        assert_eq!(frodo_decapsulate(&ct, &kp.sk), rejection_key(&kp.sk, &ct));
     }
 }

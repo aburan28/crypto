@@ -145,6 +145,10 @@ pub fn sign(msg: &[u8], d: &BigUint, curve: &CurveParams, width: DigestBits) -> 
 /// **Verify** that `sig` is a valid GOST 34.10-2012 signature for the
 /// pre-computed hash `hash` under public key `pa`.
 pub fn verify_hash(hash: &[u8], sig: &GostSignature, pa: &Point, curve: &CurveParams) -> bool {
+    if !curve.is_valid_public_point(pa) {
+        return false;
+    }
+
     if sig.r.is_zero() || sig.r >= curve.n || sig.s.is_zero() || sig.s >= curve.n {
         return false;
     }

@@ -156,11 +156,6 @@ pub fn chaum_pedersen_verify(
     proof: &ChaumPedersenProof,
     curve: &CurveParams,
 ) -> bool {
-    // Reject identity commitments.
-    match (&proof.r1, &proof.r2) {
-        (Point::Infinity, _) | (_, Point::Infinity) => return false,
-        _ => {}
-    }
     if proof.s >= curve.n {
         return false;
     }
@@ -258,5 +253,23 @@ mod tests {
         let p1 = chaum_pedersen_prove_with_nonce(&x, &r, &h_pt, &curve);
         let p2 = chaum_pedersen_prove_with_nonce(&x, &r, &h_pt, &curve);
         assert_eq!(p1, p2);
+    }
+
+    #[test]
+    fn chaum_pedersen_rejects_identity_statement_forgery() {
+        let curve = CurveParams::secp256k1();
+        let h_pt = pedersen_second_generator(&curve);
+        let a = curve.a_fe();
+        let s = BigUint::from(9u32);
+        let forged = ChaumPedersenProof {
+            r1: curve.generator().scalar_mul(&s, &a),
+            r2: h_pt.scalar_mul(&s, &a),
+            s,
+        };
+
+        assert!(
+            !chaum_pedersen_verify(&Point::Infinity, &Point::Infinity, &h_pt, &forged, &curve),
+            "identity statements must not admit witness-free forgeries"
+        );
     }
 }

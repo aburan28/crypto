@@ -105,7 +105,16 @@ fn n_byte_len(curve: &CurveParams) -> usize {
 /// **Sign** `msg` with private key `x` under signer identity
 /// `cert_data` (any byte string — the standard prescribes
 /// `H(Q ‖ identifying-info)`, but the choice is an application policy).
-pub fn sign(msg: &[u8], x: &BigUint, cert_data: &[u8], curve: &CurveParams) -> EcKcdsaSignature {
+pub fn sign(
+    msg: &[u8],
+    x: &BigUint,
+    cert_data: &[u8],
+    curve: &CurveParams,
+) -> Result<EcKcdsaSignature, &'static str> {
+    if (x % &curve.n).is_zero() {
+        return Err("invalid EC-KCDSA private key");
+    }
+
     let z = h(&z_input(cert_data, msg));
     let nl = n_byte_len(curve);
     let a = curve.a_fe();
@@ -131,7 +140,7 @@ pub fn sign(msg: &[u8], x: &BigUint, cert_data: &[u8], curve: &CurveParams) -> E
         if s.is_zero() {
             continue;
         }
-        return EcKcdsaSignature { r, s };
+        return Ok(EcKcdsaSignature { r, s });
     }
 }
 
@@ -145,6 +154,10 @@ pub fn verify(
     cert_data: &[u8],
     curve: &CurveParams,
 ) -> bool {
+    if !curve.is_valid_public_point(q) {
+        return false;
+    }
+
     if sig.s.is_zero() || sig.s >= curve.n {
         return false;
     }
@@ -200,7 +213,7 @@ mod tests {
         let q = public_key_from_private(&x, &curve).expect("key derivation");
         let cert_data = b"signer-info";
         let msg = b"hello, EC-KCDSA";
-        let sig = sign(msg, &x, cert_data, &curve);
+        let sig = sign(msg, &x, cert_data, &curve).expect("valid signing key");
         assert!(verify(msg, &sig, &q, cert_data, &curve));
     }
 
@@ -210,7 +223,7 @@ mod tests {
         let curve = CurveParams::p256();
         let x = BigUint::from(0xC0FFEEu32);
         let q = public_key_from_private(&x, &curve).unwrap();
-        let sig = sign(b"original", &x, b"cert", &curve);
+        let sig = sign(b"original", &x, b"cert", &curve).expect("valid signing key");
         assert!(!verify(b"tampered", &sig, &q, b"cert", &curve));
     }
 
@@ -221,7 +234,7 @@ mod tests {
         let curve = CurveParams::p256();
         let x = BigUint::from(0xDEADBEEFu64);
         let q = public_key_from_private(&x, &curve).unwrap();
-        let sig = sign(b"msg", &x, b"alice", &curve);
+        let sig = sign(b"msg", &x, b"alice", &curve).expect("valid signing key");
         assert!(!verify(b"msg", &sig, &q, b"bob", &curve));
     }
 
@@ -234,7 +247,7 @@ mod tests {
         let x2 = BigUint::from(0x22222222u64);
         let q1 = public_key_from_private(&x1, &curve).unwrap();
         let q2 = public_key_from_private(&x2, &curve).unwrap();
-        let sig = sign(b"msg", &x1, b"cert", &curve);
+        let sig = sign(b"msg", &x1, b"cert", &curve).expect("valid signing key");
         assert!(verify(b"msg", &sig, &q1, b"cert", &curve));
         assert!(!verify(b"msg", &sig, &q2, b"cert", &curve));
     }
@@ -247,8 +260,26 @@ mod tests {
         let curve = CurveParams::secp256k1();
         let x = BigUint::from(0xA5u64);
         let q = public_key_from_private(&x, &curve).unwrap();
-        let sig = sign(b"msg", &x, b"cert", &curve);
+        let sig = sign(b"msg", &x, b"cert", &curve).expect("valid signing key");
         assert!(verify(b"msg", &sig, &q, b"cert", &curve));
+    }
+
+    #[test]
+    fn ec_kcdsa_sign_rejects_zero_private_key() {
+        let curve = CurveParams::p256();
+        assert_eq!(
+            sign(b"msg", &BigUint::zero(), b"cert", &curve),
+            Err("invalid EC-KCDSA private key")
+        );
+    }
+
+    #[test]
+    fn ec_kcdsa_sign_rejects_order_multiple_private_key() {
+        let curve = CurveParams::p256();
+        assert_eq!(
+            sign(b"msg", &curve.n, b"cert", &curve),
+            Err("invalid EC-KCDSA private key")
+        );
     }
 
     /// **Reject out-of-range s**.

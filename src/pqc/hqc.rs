@@ -91,6 +91,20 @@ impl F2Poly {
         self.bits[byte] = (self.bits[byte] & !(1 << bit)) | ((v & 1) << bit);
     }
 
+    pub fn is_well_formed(&self) -> bool {
+        if self.bits.len() != BYTES {
+            return false;
+        }
+
+        let used_bits_in_last_byte = N % 8;
+        if used_bits_in_last_byte == 0 {
+            return true;
+        }
+
+        let padding_mask = !((1u8 << used_bits_in_last_byte) - 1);
+        (self.bits[BYTES - 1] & padding_mask) == 0
+    }
+
     /// XOR (addition in F_2).
     pub fn add(&self, other: &Self) -> Self {
         let mut out = self.clone();
@@ -206,6 +220,22 @@ pub struct HqcCiphertext {
     pub v: F2Poly,
 }
 
+fn ciphertext_is_well_formed(ct: &HqcCiphertext) -> bool {
+    ct.u.is_well_formed() && ct.v.is_well_formed()
+}
+
+fn rejection_key(sk: &HqcPrivateKey, ct: &HqcCiphertext) -> [u8; 32] {
+    let mut input = Vec::new();
+    input.extend_from_slice(b"HQC-REJECT");
+    input.extend_from_slice(&sk.x.bits);
+    input.extend_from_slice(&sk.y.bits);
+    input.extend_from_slice(&ct.u.bits);
+    input.extend_from_slice(&(ct.u.bits.len() as u64).to_le_bytes());
+    input.extend_from_slice(&ct.v.bits);
+    input.extend_from_slice(&(ct.v.bits.len() as u64).to_le_bytes());
+    sha256(&input)
+}
+
 pub fn hqc_keygen() -> HqcKeyPair {
     let h = F2Poly::sample_sparse(W);
     let x = F2Poly::sample_sparse(W);
@@ -246,6 +276,10 @@ pub fn hqc_encapsulate(pk: &HqcPublicKey) -> (HqcCiphertext, [u8; 32]) {
 }
 
 pub fn hqc_decapsulate(ct: &HqcCiphertext, sk: &HqcPrivateKey) -> [u8; 32] {
+    if !ciphertext_is_well_formed(ct) || !sk.x.is_well_formed() || !sk.y.is_well_formed() {
+        return rejection_key(sk, ct);
+    }
+
     // Decode m · C from (v + u · y).
     let raw = ct.v.add(&ct.u.mul(&sk.y));
     let msg = decode_rep(&raw);
@@ -332,5 +366,29 @@ mod tests {
             "HQC educational toy should succeed ≥ 3/5 trials; got {}/5",
             successes
         );
+    }
+
+    #[test]
+    fn hqc_decapsulate_rejects_truncated_u_storage_without_panicking() {
+        let kp = hqc_keygen();
+        let ct = HqcCiphertext {
+            u: F2Poly { bits: vec![0u8; BYTES - 1] },
+            v: F2Poly::zero(),
+        };
+
+        assert_eq!(hqc_decapsulate(&ct, &kp.sk), rejection_key(&kp.sk, &ct));
+    }
+
+    #[test]
+    fn hqc_decapsulate_rejects_noncanonical_padding_bits_without_panicking() {
+        let kp = hqc_keygen();
+        let mut malformed = F2Poly::zero();
+        malformed.bits[BYTES - 1] |= 0x80;
+        let ct = HqcCiphertext {
+            u: malformed,
+            v: F2Poly::zero(),
+        };
+
+        assert_eq!(hqc_decapsulate(&ct, &kp.sk), rejection_key(&kp.sk, &ct));
     }
 }

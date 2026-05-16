@@ -161,11 +161,6 @@ pub fn schnorr_zkp_prove_with_nonce(
 ///
 /// Returns `true` iff `s·G = R + c·Y` where `c = H(tag ‖ G ‖ Y ‖ R)`.
 pub fn schnorr_zkp_verify(y: &Point, proof: &SchnorrZkProof, curve: &CurveParams) -> bool {
-    // Defence: reject proofs with R = O or s out of range.
-    match &proof.r_point {
-        Point::Infinity => return false,
-        Point::Affine { .. } => {}
-    }
     if proof.s >= curve.n {
         return false;
     }
@@ -259,6 +254,22 @@ mod tests {
         let g = curve.generator();
         let y_wrong = g.scalar_mul(&(&x + 1u32), &a);
         assert!(!schnorr_zkp_verify(&y_wrong, &proof, &curve));
+    }
+
+    #[test]
+    fn schnorr_zkp_rejects_identity_statement_forgery() {
+        let curve = CurveParams::secp256k1();
+        let a = curve.a_fe();
+        let s = BigUint::from(7u32);
+        let forged = SchnorrZkProof {
+            r_point: curve.generator().scalar_mul(&s, &a),
+            s,
+        };
+
+        assert!(
+            !schnorr_zkp_verify(&Point::Infinity, &forged, &curve),
+            "identity statements must not admit witness-free forgeries"
+        );
     }
 
     /// **Special soundness**: from two transcripts with different

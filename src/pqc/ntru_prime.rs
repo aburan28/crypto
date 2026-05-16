@@ -210,6 +210,7 @@ pub struct NtruPrimePrivateKey {
     pub f: NpPoly,
     pub g_inv: NpPoly,
     pub pk: NtruPrimePublicKey,
+    reject_secret: [u8; 32],
 }
 
 #[derive(Clone, Debug)]
@@ -241,20 +242,27 @@ pub fn ntru_prime_keygen() -> NtruPrimeKeyPair {
         // h = g · (3f)^{-1} mod q
         let h = g.mul(&three_f_inv).reduce_mod(Q);
         let pk = NtruPrimePublicKey { h };
+        let mut reject_secret = [0u8; 32];
+        OsRng.fill(&mut reject_secret);
         let sk = NtruPrimePrivateKey {
             f,
             g_inv,
             pk: pk.clone(),
+            reject_secret,
         };
         return NtruPrimeKeyPair { pk, sk };
     }
     panic!("NTRU Prime keygen failed: f or g not invertible after 200 trials");
 }
 
-pub fn ntru_prime_encapsulate(pk: &NtruPrimePublicKey) -> (NtruPrimeCiphertext, [u8; 32]) {
-    let r = NpPoly::sample_ternary(T, T - 1);
-    // Compute h·r, then round to nearest multiple of 3.
-    let hr = pk.h.mul(&r).center_lift(Q);
+impl Drop for NtruPrimePrivateKey {
+    fn drop(&mut self) {
+        self.reject_secret.fill(0);
+    }
+}
+
+fn rounded_ciphertext_for_r(r: &NpPoly, pk: &NtruPrimePublicKey) -> NpPoly {
+    let hr = pk.h.mul(r).center_lift(Q);
     let mut c = NpPoly::zero();
     for i in 0..P {
         let v = hr.0[i];
@@ -262,6 +270,40 @@ pub fn ntru_prime_encapsulate(pk: &NtruPrimePublicKey) -> (NtruPrimeCiphertext, 
         let rounded = ((v as f64) / 3.0).round() as i32 * 3;
         c.0[i] = ((rounded % Q) + Q) % Q;
     }
+    c
+}
+
+fn is_valid_short_r(r: &NpPoly) -> bool {
+    let mut pos = 0usize;
+    let mut neg = 0usize;
+    for &coeff in &r.0 {
+        match coeff {
+            1 => pos += 1,
+            -1 => neg += 1,
+            0 => {}
+            _ => return false,
+        }
+    }
+    pos == T && neg == (T - 1)
+}
+
+fn ciphertext_is_well_formed(ct: &NtruPrimeCiphertext) -> bool {
+    ct.c.0.iter().all(|&coeff| (0..Q).contains(&coeff))
+}
+
+fn rejection_key(sk: &NtruPrimePrivateKey, ct: &NtruPrimeCiphertext) -> [u8; 32] {
+    let mut hash_input = Vec::with_capacity(32 + 2 * P * 4);
+    hash_input.extend_from_slice(b"NTRUPRIME-REJECT");
+    hash_input.extend_from_slice(&sk.reject_secret);
+    for &v in &ct.c.0 {
+        hash_input.extend_from_slice(&v.to_le_bytes());
+    }
+    sha256(&hash_input)
+}
+
+pub fn ntru_prime_encapsulate(pk: &NtruPrimePublicKey) -> (NtruPrimeCiphertext, [u8; 32]) {
+    let r = NpPoly::sample_ternary(T, T - 1);
+    let c = rounded_ciphertext_for_r(&r, pk);
 
     let mut hash_input = Vec::with_capacity(2 * P * 4);
     for v in r.0.iter() {
@@ -275,6 +317,10 @@ pub fn ntru_prime_encapsulate(pk: &NtruPrimePublicKey) -> (NtruPrimeCiphertext, 
 }
 
 pub fn ntru_prime_decapsulate(ct: &NtruPrimeCiphertext, sk: &NtruPrimePrivateKey) -> [u8; 32] {
+    if !ciphertext_is_well_formed(ct) {
+        return rejection_key(sk, ct);
+    }
+
     // e = 3·f·c mod q, lifted.
     let three_fc = sk.f.scale(3).mul(&ct.c).center_lift(Q);
     // Reduce mod 3.
@@ -283,6 +329,9 @@ pub fn ntru_prime_decapsulate(ct: &NtruPrimeCiphertext, sk: &NtruPrimePrivateKey
     let r = sk.g_inv.mul(&e_mod_3).reduce_mod(SMALL);
     // Lift to centered for hashing consistency.
     let r_centered = r.center_lift(SMALL);
+    if !is_valid_short_r(&r_centered) || rounded_ciphertext_for_r(&r_centered, &sk.pk) != ct.c {
+        return rejection_key(sk, ct);
+    }
 
     let mut hash_input = Vec::with_capacity(2 * P * 4);
     for v in r_centered.0.iter() {
@@ -352,6 +401,27 @@ mod tests {
         assert!(
             at_least_one_success,
             "Out of 20 trials, at least one shared-secret match should occur"
+        );
+    }
+
+    #[test]
+    fn ntru_prime_decapsulate_rejects_zero_ciphertext() {
+        let kp = ntru_prime_keygen();
+        let zero = NtruPrimeCiphertext { c: NpPoly::zero() };
+
+        assert_eq!(ntru_prime_decapsulate(&zero, &kp.sk), rejection_key(&kp.sk, &zero));
+    }
+
+    #[test]
+    fn ntru_prime_decapsulate_rejects_out_of_range_coefficients() {
+        let kp = ntru_prime_keygen();
+        let mut bad = NpPoly::zero();
+        bad.0[0] = Q;
+        let malformed = NtruPrimeCiphertext { c: bad };
+
+        assert_eq!(
+            ntru_prime_decapsulate(&malformed, &kp.sk),
+            rejection_key(&kp.sk, &malformed)
         );
     }
 }

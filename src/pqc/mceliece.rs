@@ -749,7 +749,9 @@ pub fn mceliece_encrypt(msg: &[u8], pk: &McElieceePublicKey) -> Vec<u8> {
 /// Decrypt an `N`-bit ciphertext back into the original `K`-bit message.
 /// Returns `None` on decoding failure.
 pub fn mceliece_decrypt(ct: &[u8], sk: &McEliecePrivateKey) -> Option<Vec<u8>> {
-    assert_eq!(ct.len(), N);
+    if ct.len() != N {
+        return None;
+    }
 
     // Strip the public permutation: c·P^{-1}.
     let c_unperm = apply_inv_perm(ct, &sk.perm);

@@ -124,6 +124,124 @@ fn ensure_chacha20_capacity(len: usize, start_counter: u32) -> Result<(), &'stat
     }
 }
 
+// ── ChaCha8 / ChaCha12 / HChaCha20 / XChaCha20 ───────────────────────────────
+
+/// Run the ChaCha core for `double_rounds × 2` rounds.  ChaCha20 uses
+/// 10 (i.e. 20 rounds); ChaCha12 uses 6; ChaCha8 uses 4.
+fn chacha_block_with(
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+    counter: u32,
+    double_rounds: usize,
+) -> [u8; 64] {
+    let mut state = [0u32; 16];
+    state[..4].copy_from_slice(&SIGMA);
+    for i in 0..8 {
+        state[4 + i] = u32::from_le_bytes(key[i * 4..i * 4 + 4].try_into().unwrap());
+    }
+    state[12] = counter;
+    for i in 0..3 {
+        state[13 + i] = u32::from_le_bytes(nonce[i * 4..i * 4 + 4].try_into().unwrap());
+    }
+    let mut working = state;
+    for _ in 0..double_rounds {
+        qr!(working[0], working[4], working[8], working[12]);
+        qr!(working[1], working[5], working[9], working[13]);
+        qr!(working[2], working[6], working[10], working[14]);
+        qr!(working[3], working[7], working[11], working[15]);
+        qr!(working[0], working[5], working[10], working[15]);
+        qr!(working[1], working[6], working[11], working[12]);
+        qr!(working[2], working[7], working[8], working[13]);
+        qr!(working[3], working[4], working[9], working[14]);
+    }
+    let mut out = [0u8; 64];
+    for (i, w) in working.iter().enumerate() {
+        let w_final = w.wrapping_add(state[i]);
+        out[i * 4..i * 4 + 4].copy_from_slice(&w_final.to_le_bytes());
+    }
+    out
+}
+
+fn chacha_xor_with(
+    data: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+    double_rounds: usize,
+) -> Vec<u8> {
+    let mut out = data.to_vec();
+    let mut counter = 1u32;
+    for chunk in out.chunks_mut(64) {
+        let block = chacha_block_with(key, nonce, counter, double_rounds);
+        for (b, k) in chunk.iter_mut().zip(block.iter()) {
+            *b ^= k;
+        }
+        counter = counter.wrapping_add(1);
+    }
+    out
+}
+
+/// ChaCha8 keystream block (4 double rounds = 8 single rounds).
+pub fn chacha8_block(key: &[u8; 32], nonce: &[u8; 12], counter: u32) -> [u8; 64] {
+    chacha_block_with(key, nonce, counter, 4)
+}
+/// ChaCha8 stream cipher — XOR `data` with keystream (counter starts at 1).
+pub fn chacha8_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 12]) -> Vec<u8> {
+    chacha_xor_with(data, key, nonce, 4)
+}
+
+/// ChaCha12 keystream block (6 double rounds = 12 single rounds).
+pub fn chacha12_block(key: &[u8; 32], nonce: &[u8; 12], counter: u32) -> [u8; 64] {
+    chacha_block_with(key, nonce, counter, 6)
+}
+/// ChaCha12 stream cipher — XOR `data` with keystream (counter starts at 1).
+pub fn chacha12_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 12]) -> Vec<u8> {
+    chacha_xor_with(data, key, nonce, 6)
+}
+
+/// **HChaCha20** — key-derivation kernel for XChaCha20.  Runs the
+/// ChaCha20 core (20 rounds) with the given 32-byte key and 16-byte
+/// input slotted into the counter+nonce positions, then returns 8
+/// state words (positions 0-3, 12-15) *without* the feed-forward.
+pub fn hchacha20(key: &[u8; 32], input: &[u8; 16]) -> [u8; 32] {
+    let mut state = [0u32; 16];
+    state[..4].copy_from_slice(&SIGMA);
+    for i in 0..8 {
+        state[4 + i] = u32::from_le_bytes(key[i * 4..i * 4 + 4].try_into().unwrap());
+    }
+    for i in 0..4 {
+        state[12 + i] = u32::from_le_bytes(input[i * 4..i * 4 + 4].try_into().unwrap());
+    }
+    for _ in 0..10 {
+        qr!(state[0], state[4], state[8], state[12]);
+        qr!(state[1], state[5], state[9], state[13]);
+        qr!(state[2], state[6], state[10], state[14]);
+        qr!(state[3], state[7], state[11], state[15]);
+        qr!(state[0], state[5], state[10], state[15]);
+        qr!(state[1], state[6], state[11], state[12]);
+        qr!(state[2], state[7], state[8], state[13]);
+        qr!(state[3], state[4], state[9], state[14]);
+    }
+    let pick = [0usize, 1, 2, 3, 12, 13, 14, 15];
+    let mut out = [0u8; 32];
+    for (i, &p) in pick.iter().enumerate() {
+        out[i * 4..i * 4 + 4].copy_from_slice(&state[p].to_le_bytes());
+    }
+    out
+}
+
+/// **XChaCha20** — 24-byte-nonce variant (draft-irtf-cfrg-xchacha).
+/// Derives a subkey via HChaCha20(key, nonce[0..16]); the inner
+/// ChaCha20 uses that subkey with a 12-byte nonce composed of 4 zero
+/// bytes followed by `nonce[16..24]`.
+pub fn xchacha20_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 24]) -> Vec<u8> {
+    let mut hin = [0u8; 16];
+    hin.copy_from_slice(&nonce[0..16]);
+    let subkey = hchacha20(key, &hin);
+    let mut inner_nonce = [0u8; 12];
+    inner_nonce[4..12].copy_from_slice(&nonce[16..24]);
+    chacha20_xor(data, &subkey, &inner_nonce)
+}
+
 // ── Poly1305 ─────────────────────────────────────────────────────────────────
 
 fn p1305() -> BigUint {
@@ -383,5 +501,64 @@ mod tests {
         let nonce = [0u8; 12];
         // Less than 16 bytes is not even a valid tag, must reject.
         assert!(chacha20_poly1305_decrypt(&[0u8; 8], &key, &nonce, b"").is_err());
+    }
+
+    // ── ChaCha8 / ChaCha12 / HChaCha20 / XChaCha20 ───────────────────
+
+    /// Self-consistency: `chacha_block_with(..., 10)` must equal the
+    /// dedicated `chacha20_block`.
+    #[test]
+    fn chacha_param_matches_chacha20() {
+        let key = [0x42u8; 32];
+        let nonce = [0x11u8; 12];
+        assert_eq!(chacha_block_with(&key, &nonce, 7, 10), chacha20_block(&key, &nonce, 7));
+    }
+
+    /// ChaCha8 and ChaCha12 XOR round-trips.
+    #[test]
+    fn chacha8_chacha12_round_trip() {
+        let key = [0x55u8; 32];
+        let nonce = [0x22u8; 12];
+        let msg = b"reduced-round ChaCha siblings".to_vec();
+        let ct8 = chacha8_xor(&msg, &key, &nonce);
+        let ct12 = chacha12_xor(&msg, &key, &nonce);
+        assert_ne!(ct8, msg);
+        assert_ne!(ct12, msg);
+        assert_ne!(ct8, ct12);
+        assert_eq!(chacha8_xor(&ct8, &key, &nonce), msg);
+        assert_eq!(chacha12_xor(&ct12, &key, &nonce), msg);
+    }
+
+    /// **HChaCha20 test vector** from draft-irtf-cfrg-xchacha §2.2.1.
+    #[test]
+    fn hchacha20_irtf_vector() {
+        let key: [u8; 32] = [
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
+            0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b,
+            0x1c, 0x1d, 0x1e, 0x1f,
+        ];
+        let input: [u8; 16] = [
+            0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x00, 0x00, 0x31, 0x41,
+            0x59, 0x27,
+        ];
+        let subkey = hchacha20(&key, &input);
+        let expected: [u8; 32] = [
+            0x82, 0x41, 0x3b, 0x42, 0x27, 0xb2, 0x7b, 0xfe, 0xd3, 0x0e, 0x42, 0x50, 0x8a, 0x87,
+            0x7d, 0x73, 0xa0, 0xf9, 0xe4, 0xd5, 0x8a, 0x74, 0xa8, 0x53, 0xc1, 0x2e, 0xc4, 0x13,
+            0x26, 0xd3, 0xec, 0xdc,
+        ];
+        assert_eq!(subkey, expected);
+    }
+
+    /// XChaCha20 XOR round-trip + length sanity check.
+    #[test]
+    fn xchacha20_round_trip() {
+        let key = [0x77u8; 32];
+        let nonce = [0x33u8; 24];
+        let msg = b"XChaCha20 with a 24-byte nonce is randomizable in practice".to_vec();
+        let ct = xchacha20_xor(&msg, &key, &nonce);
+        assert_ne!(ct, msg);
+        assert_eq!(ct.len(), msg.len());
+        assert_eq!(xchacha20_xor(&ct, &key, &nonce), msg);
     }
 }
