@@ -25,7 +25,69 @@
 use super::velu::{velu_isogeny_2, velu_isogeny_odd, VeluIsogeny};
 use super::volcano::j_invariant;
 use super::SmallCurve;
+use num_bigint::BigUint;
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
+
+/// Find every 2-isogeny `φ: E → E'` defined over `F_p` by sampling
+/// random points and reducing via the cofactor `m = #E / 2`.  At
+/// most three 2-isogenies exist (one per F_p-rational root of
+/// `x³ + a·x + b = 0`).  If `2 ∤ #E` we know there is no
+/// F_p-rational 2-torsion and we short-circuit.  Cost:
+/// `O(log² p)` per sample, `O(1)` samples per isogeny.
+fn two_isogenies_via_cubic_roots(curve: &SmallCurve) -> Vec<VeluIsogeny> {
+    use crate::ecc::point::Point;
+    use std::collections::HashSet;
+    let cm = crate::isogeny::cm::cm_discriminant(curve);
+    if cm.order <= 0 || (cm.order as u64) % 2 != 0 {
+        return Vec::new();
+    }
+    let cofactor = (cm.order as u64) / 2;
+    let cp = curve.to_curve_params();
+    let a_fe = cp.a_fe();
+    let mut seen: HashSet<u64> = HashSet::new();
+    let mut result = Vec::new();
+    let mut rng: u64 = (curve.p as u64)
+        .wrapping_mul(0xB492B66FBE98F273)
+        .wrapping_add(curve.a)
+        .wrapping_mul(0x9FB21C651E98DF25)
+        .wrapping_add(curve.b);
+    // Three is the upper bound — degenerate cases are fewer.
+    let max_attempts = 32u64;
+    for _ in 0..max_attempts {
+        rng = rng
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        let p_point = match crate::isogeny::cm::sample_random_point(curve, &mut rng) {
+            Some(p) => p,
+            None => continue,
+        };
+        let q = p_point.scalar_mul(&BigUint::from(cofactor), &a_fe);
+        let x_t = match &q {
+            Point::Affine { x, y } => {
+                // 2-torsion: y must be zero.  If non-zero, the point
+                // has order > 2 (the random scalar landed in a larger
+                // subgroup of the doubled cofactor) — skip and try
+                // again.
+                let yv = y.value.iter_u64_digits().next().unwrap_or(0);
+                if yv != 0 {
+                    continue;
+                }
+                x.value.iter_u64_digits().next().unwrap_or(0)
+            }
+            Point::Infinity => continue,
+        };
+        if !seen.insert(x_t) {
+            continue;
+        }
+        if let Some(iso) = velu_isogeny_2(curve, x_t) {
+            result.push(iso);
+            if result.len() >= 3 {
+                break;
+            }
+        }
+    }
+    result
+}
 
 /// One node in the isogeny graph: a curve, its j-invariant, and
 /// its index in the [`IsogenyGraph`] node list.
@@ -264,15 +326,7 @@ pub fn build_graph(start: &SmallCurve, primes: &[u64], max_nodes: usize) -> Isog
         }
         for &ell in primes {
             let neighbours: Vec<VeluIsogeny> = if ell == 2 {
-                let mut v = Vec::new();
-                for x in 0..c.p {
-                    if c.rhs(x) == 0 {
-                        if let Some(iso) = velu_isogeny_2(&c, x) {
-                            v.push(iso);
-                        }
-                    }
-                }
-                v
+                two_isogenies_via_cubic_roots(&c)
             } else {
                 velu_isogeny_odd(&c, ell)
             };

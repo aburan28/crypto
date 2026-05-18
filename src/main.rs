@@ -508,7 +508,11 @@ fn cmd_isogeny(op: IsogenyOp) {
             cfg.num_curves = trials.max(1);
             cfg.primes = parse_ell_list(&ell_list);
             cfg.max_graph_nodes = 16;
-            cfg.rho_max_iters = 1 << 18;
+            // Cap scales with √n.  Hasse interval is centred at p, so
+            // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
+            // geometric-distribution tail.
+            let half_bits = (cfg.bits.min(60) / 2) as u32;
+            cfg.rho_max_iters = 8u64.checked_shl(half_bits).unwrap_or(u64::MAX);
             eprintln!(
                 "# Running isogeny experiment: bits={}, trials={}, ell={:?}",
                 cfg.bits, cfg.num_curves, cfg.primes,

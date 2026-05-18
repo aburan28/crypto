@@ -163,7 +163,7 @@ fn point_key(p: &crate::ecc::point::Point) -> [u8; 17] {
 /// random offset using a small linear-congruential walk; finds the
 /// first `x` with `rhs(x)` a quadratic residue, then computes a
 /// square root via Tonelli-Shanks (or `rhs = 0` directly).
-fn sample_random_point(
+pub fn sample_random_point(
     curve: &SmallCurve,
     rng: &mut u64,
 ) -> Option<crate::ecc::point::Point> {
