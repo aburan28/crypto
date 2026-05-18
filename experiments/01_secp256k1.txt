@@ -1,0 +1,27 @@
+# secp256k1 case study
+
+β (cube root of 1 in F_p):
+  hex = 7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee
+  β³ ≡ 1 (mod p):       true
+
+λ (eigenvalue of φ on the n-torsion):
+  hex = 5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72
+  λ² + λ + 1 ≡ 0 (mod n): true
+
+MOV / Frey–Rück feasibility:
+  certificate: k > 200, embedding degree ≥ 200
+  → MOV infeasible: true
+
+Quadratic-twist pairing-friendly survey (k ≤ 32):
+  → twist pairing-friendly: false
+
+Small-degree-isogeny structural survey (Z[ω], disc = -3):
+  ℓ =  2:  inert
+  ℓ =  3:  ramified
+  ℓ =  5:  inert
+  ℓ =  7:  split
+  ℓ = 11:  inert
+  ℓ = 13:  split
+  ℓ = 17:  inert
+  ℓ = 19:  split
+  ℓ = 23:  inert

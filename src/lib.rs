@@ -12,6 +12,7 @@
 //! | `pqc`          | Simplified Kyber/ML-KEM and binary-Goppa McEliece       |
 //! | `keys`         | Unified key management                                  |
 //! | `cryptanalysis`| LLL/BKZ + HNP + multi-key-HNP + ρ-variants + Bleichenbacher + Smart + corpus-sweep |
+//! | `isogeny`      | CM theory, class groups, Vélu's formulas, isogeny graphs/volcanoes, secp256k1 case study |
 //! | `ecc_safety`   | ECDH/ECDSA curve-parameter safety auditor               |
 //! | `utils`        | Modular arithmetic, randomness, encoding                |
 //! | `zk`           | Schnorr ZKP, Pedersen commitments, Chaum-Pedersen, Merkle tree |
@@ -25,6 +26,7 @@ pub mod ecc;
 pub mod ecc_safety;
 pub mod encoding;
 pub mod hash;
+pub mod isogeny;
 pub mod kdf;
 pub mod keys;
 pub mod pqc;
