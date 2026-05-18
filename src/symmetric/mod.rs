@@ -123,7 +123,11 @@ pub use modes::{
 };
 pub use rc4::{rc4, Rc4};
 pub use rc5::Rc5;
-pub use salsa20::{hsalsa20, salsa20_block, salsa20_xor, xsalsa20_xor};
-pub use simon::{Simon128_128, Simon128_256, Simon64_128};
+// Re-exports for stubbed modules (aria, blowfish, camellia, ...,
+// salsa20, simon, speck, twofish, xtea) are temporarily disabled
+// while those .rs files are placeholders.  Restore them once the
+// real implementations land.
+// pub use salsa20::{hsalsa20, salsa20_block, salsa20_xor, xsalsa20_xor};
+// pub use simon::{Simon128_128, Simon128_256, Simon64_128};
 pub use sm4::Sm4;
-pub use speck::{Speck128_128, Speck128_256, Speck64_128};
+// pub use speck::{Speck128_128, Speck128_256, Speck64_128};

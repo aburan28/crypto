@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='content-type'>
+    <meta content='Thomas Ptacek, Sean Devlin, and Alex Balducci' name='author'>
+    <title>The Cryptopals Crypto Challenges</title>
+    <link href='/static/bootstrap.css' media='all' rel='stylesheet' type='text/css'>
+    <link href='/static/app.css' media='all' rel='stylesheet' type='text/css'>
+    <style>
+      body { 
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='row'>
+        <div class='col-md-12'>
+          <h3>
+            <a href='/'>the cryptopals crypto challenges</a>
+          </h3>
+        </div>
+      </div>
+<div class='row'>
+  <div class='col-md-2'>
+    <ul class='nav nav-pills nav-stacked'>
+      <li>
+        <a href='/sets/1'>Set 1: Basics</a>
+      </li>
+      <li>
+        <a href='/sets/2'>Set 2: Block crypto</a>
+      </li>
+      <li>
+        <a href='/sets/3'>Set 3: Block & stream crypto</a>
+      </li>
+      <li>
+        <a href='/sets/4'>Set 4: Stream crypto and randomness</a>
+      </li>
+      <li>
+        <a href='/sets/5'>Set 5: Diffie-Hellman and friends</a>
+      </li>
+      <li>
+        <a href='/sets/6'>Set 6: RSA and DSA</a>
+      </li>
+      <li>
+        <a href='/sets/7'>Set 7: Hashes</a>
+      </li>
+      <li>
+        <a href='/sets/8'>Set 8: Abstract Algebra</a>
+      </li>
+    </ul>
+  </div>
+  <div class='col-md-10'>
+    <h2>404 - NOT FOUND</h2>
+    <p>
+      Not sure what you were looking for, but it's not here.
+    </p>
+  </div>
+</div>
+   </div>
+   <div style="text-align:center"><a href="https://cryptoservices.github.io/">Cryptography Services</a> | <a href="https://www.nccgroup.trust/us/">NCC Group</a></div>
+  </body>
+</html>
