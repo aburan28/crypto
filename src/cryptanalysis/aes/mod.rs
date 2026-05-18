@@ -52,8 +52,10 @@
 pub mod algebraic;
 pub mod biclique;
 pub mod boomerang;
+pub mod cache_timing;
 pub mod dfa;
 pub mod differential;
+pub mod dpa;
 pub mod higher_order;
 pub mod impossible;
 pub mod linear;
@@ -63,11 +65,13 @@ pub mod mixture;
 pub mod quantum_grover;
 pub mod reduced;
 pub mod related_key;
+pub mod slide;
 pub mod small_scale;
 pub mod square;
 pub mod truncated_diff;
 pub mod visualize;
 pub mod yoyo;
+pub mod zero_correlation;
 
 pub use dfa::{
     dfa_per_column_candidates, dfa_recover_last_round_key_byte_candidates,

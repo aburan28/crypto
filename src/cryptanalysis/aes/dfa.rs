@@ -110,6 +110,66 @@ pub fn inject_fault_round_9(
     (correct, faulted)
 }
 
+/// **Inject a single-byte fault at the start of ROUND 8** (the
+/// improvement Tunstall, Mukhopadhyay, and Ali (2011) developed
+/// over the original Piret-Quisquater 2-fault attack).
+///
+/// Because round 8 has MC + 2 more rounds with MC (rounds 9), the
+/// fault spreads to **all 16 ciphertext bytes** instead of just 4.
+/// Each byte gives an equation involving K_R10 byte + a known
+/// quartet of fault-byte products from MC.  The full system
+/// over-determines K_R10 and is solvable from a **single** fault
+/// injection (vs Piret-Quisquater's 2).
+///
+/// In practice the attack runs a brute-force inner loop over the
+/// possible MC-output fault byte (1 of 256), then for each guess
+/// solves the 16 byte equations independently.  Total cost ≈ 2¹⁶
+/// AES-S-box computations × 16 byte positions, plus an outer
+/// 2⁸ fault-byte guess loop.  Tractable.
+///
+/// We provide the **injection** primitive + a stub for the
+/// downstream solver; the full solve is documented in references.
+pub fn inject_fault_round_8(
+    cipher: &ReducedAes128,
+    plaintext: &[u8; 16],
+    fault_position: usize,
+    fault_value: u8,
+) -> ([u8; 16], [u8; 16]) {
+    let correct = cipher.encrypt(plaintext);
+    let mut state = bytes_to_state(plaintext);
+    RoundOps::add_round_key(&mut state, &cipher.round_key(0));
+    // Rounds 1..=7 normal.
+    for r in 1..=7 {
+        RoundOps::sub_bytes(&mut state);
+        RoundOps::shift_rows(&mut state);
+        RoundOps::mix_columns(&mut state);
+        RoundOps::add_round_key(&mut state, &cipher.round_key(r));
+    }
+    // Fault inserted at the START of round 8.
+    let c = fault_position / 4;
+    let r = fault_position % 4;
+    state[c][r] ^= fault_value;
+    // Rounds 8 and 9 with MC, then round 10 without.
+    for r in 8..=9 {
+        RoundOps::sub_bytes(&mut state);
+        RoundOps::shift_rows(&mut state);
+        RoundOps::mix_columns(&mut state);
+        RoundOps::add_round_key(&mut state, &cipher.round_key(r));
+    }
+    RoundOps::sub_bytes(&mut state);
+    RoundOps::shift_rows(&mut state);
+    RoundOps::add_round_key(&mut state, &cipher.round_key(10));
+    let faulted = state_to_bytes(&state);
+    (correct, faulted)
+}
+
+/// **Diagnose a Tunstall-style fault**: count how many CT bytes
+/// differ between `correct` and `faulted`.  For a fault at round
+/// 8, every byte differs (with overwhelming probability).
+pub fn count_active_ct_bytes(correct: &[u8; 16], faulted: &[u8; 16]) -> usize {
+    correct.iter().zip(faulted.iter()).filter(|(a, b)| a != b).count()
+}
+
 fn bytes_to_state(block: &[u8; 16]) -> [[u8; 4]; 4] {
     let mut s = [[0u8; 4]; 4];
     for c in 0..4 {
@@ -405,6 +465,44 @@ mod tests {
             cands.iter().map(|c| c.len()).collect::<Vec<_>>()
         );
         let _ = k_r10;
+    }
+
+    /// **Tunstall single-fault @ round 8 propagates to all 16 CT bytes**.
+    /// This is the signature property the Tunstall-Mukhopadhyay-Ali
+    /// 2011 attack exploits: a single fault before round 8 MC fully
+    /// diffuses through the remaining 2 rounds (each MC spreads one
+    /// column to four bytes; two MCs spread one byte to the whole
+    /// state).
+    #[test]
+    fn tunstall_round_8_fault_diffuses_to_all_bytes() {
+        let key = [
+            0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf,
+            0x4f, 0x3c,
+        ];
+        let cipher = ReducedAes128::new(&key, 10, false);
+        let pt = [0xABu8; 16];
+        let (correct, faulted) = inject_fault_round_8(&cipher, &pt, 0, 0x42);
+        let active = count_active_ct_bytes(&correct, &faulted);
+        assert_eq!(
+            active, 16,
+            "Tunstall round-8 fault should diffuse to ALL 16 CT bytes, got {}",
+            active
+        );
+    }
+
+    /// **Tunstall vs Piret-Quisquater contrast**: round-9 fault →
+    /// 4 active CT bytes; round-8 fault → 16 active.  This is the
+    /// difference that lets Tunstall recover with ONE fault vs
+    /// Piret-Quisquater's TWO.
+    #[test]
+    fn round_8_vs_round_9_fault_diffusion_contrast() {
+        let key = [0x33u8; 16];
+        let cipher = ReducedAes128::new(&key, 10, false);
+        let pt = [0xCCu8; 16];
+        let (c1, f1) = inject_fault_round_9(&cipher, &pt, 0, 0x77);
+        let (c2, f2) = inject_fault_round_8(&cipher, &pt, 0, 0x77);
+        assert_eq!(count_active_ct_bytes(&c1, &f1), 4);
+        assert_eq!(count_active_ct_bytes(&c2, &f2), 16);
     }
 
     /// **DFA visualisation renders** with the right section headers.
