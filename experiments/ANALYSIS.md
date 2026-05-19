@@ -227,7 +227,7 @@ point counting + cofactor-sampling ℓ-isogeny construction):
 | 22   | 30       | 30   | 1 384        | 2 567     | 0.54  |  **1 s**     |
 | 30   | 5        | 5    | 38 266       | 41 069    | 0.93  |  **2 s**     |
 | 40   | 15       | 14   | 870 880      | 1 314 195 | 0.66  |  13 m 07 s |
-| 50   | 14       | (rho cycle exceeds 2³ · 2²⁵ ≈ 268 M cap; would need ≈ 1 hr per trial) |
+| 50   | 14       | 14   | 30 200 000   | 42 054 244 | 0.72  |  ~1 hr |
 
 The post-fix median ratio is consistently 0.5–0.9 of the textbook
 √(πn/2) expectation.  At small `bits` the gcd-recovery branch reports
@@ -239,6 +239,16 @@ subgroup, the ratio approaches the theoretical 1.0 (0.93 at 30-bit).
 The 22→30 bit transition is dramatic: 30-bit (one of the user's
 originally-requested sizes!) now runs in **2 seconds** where the
 v1 brute-force implementation would have taken months.
+
+**50-bit**: 14/14 vertices succeed, with two starting curves whose
+classes split into a 3-vertex class (one starting curve plus its
+two 2-isogenous neighbours) and an 11-vertex class.  The order at
+50-bit is `n ≈ 1.13 · 10¹⁵`; the median rho cycle of 30.2 M iters
+matches √(πn/2) ≈ 42 M to a ratio of 0.72 — well within the
+geometric-distribution noise floor, and very close to the 0.76
+mean.  The 14 successes all completed below the 2³ · 2²⁵ ≈ 268 M
+cap, confirming the cap-scaling formula in `cmd_isogeny` is
+calibrated correctly for this regime.
 
 ### 3.2.1 Pooled stats CONDITIONAL ON n=odd (sterile-collision bug avoided)
 
