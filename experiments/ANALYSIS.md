@@ -21,6 +21,33 @@
   `compose_isogenies` with `O(p · log² p)` Tonelli-Shanks point
   sampling.  Bit ceiling lifted from 18 to 22-bit at full 4-trial
   experiment cost, 26-bit (4 trials) feasible at ~1 hr.
+- **Round 5 (2026-05-19, r-adding walk)**: replaced the 3-partition
+  Pollard ρ (default in
+  [`src/cryptanalysis/pollard_rho.rs`](src/cryptanalysis/pollard_rho.rs))
+  with a 20-bucket r-adding walk written inline in
+  [`src/isogeny/attack.rs::r_adding_rho_on_curve`](src/isogeny/attack.rs).
+  Bucket choice uses a splitmix64-style mixer on `(x, y)` to avoid
+  collisions with small-order torsion structure.  Round-2's gcd-
+  recovery branch is preserved.
+
+  **Result: net improvement is real but uneven.**
+
+  | bits | r=3 wall (round 4) | r=20 wall (round 5) | improvement |
+  |------|-------------------:|--------------------:|------------:|
+  | 18   | 2 m 25 s           | 0.4 s               | 360×        |
+  | 22   | 1 s                | 1.1 s               | (noise)     |
+  | 30   | 2 s                | 3.2 s               | (noise; tail) |
+  | 40   | 13 m 07 s          | **6 m 40 s**        | **2.0×**    |
+  | 50   | ~1 hr              | killed at 1 h 30    | (regressed) |
+
+  The 18-bit gain is mostly attributable to the dropped restart
+  cost; 30/50-bit show a long-tail problem where a single starting
+  curve's class has a bad walk and the harness has no parallel
+  walker to share work.  The conclusion: **r-adding alone is not
+  enough** to push past 50-bit cleanly — the next required upgrade
+  is distinguished-points with K parallel walkers, which would
+  amortise the long tail across cores.
+
 - **Round 4 (2026-05-18, division-polynomial replacement)**: replaced
   the `O(p · log² p)` point enumeration in `velu_isogeny_odd` with
   random-point cofactor sampling (`m = #E / ℓ`, `Q = m·P`, repeat
