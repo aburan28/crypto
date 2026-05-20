@@ -1,0 +1,313 @@
+{
+  "config": {
+    "bits": 60,
+    "num_curves": 2,
+    "primes": [
+      2,
+      3
+    ],
+    "max_graph_nodes": 16,
+    "rho_max_iters": 8589934592,
+    "seed": 12648430
+  },
+  "per_curve": [
+    {
+      "start": [
+        1152921504606847009,
+        137590797895443232,
+        120162052370764389
+      ],
+      "class_size": 8,
+      "class": [
+        {
+          "curve": [
+            1152921504606847009,
+            137590797895443232,
+            120162052370764389
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -474035359,
+            "order": 1152921505080882369,
+            "frobenius_disc": -4386976496845129155,
+            "fundamental_disc": -4386976496845129155,
+            "conductor": 1,
+            "endomorphism_disc": -4386976496845129155,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1016258149,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            115815447661766432,
+            911227544304458096
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -329358436,
+            "order": 1152921504936205446,
+            "frobenius_disc": -4503209039063021940,
+            "fundamental_disc": -4503209039063021940,
+            "conductor": 1,
+            "endomorphism_disc": -4503209039063021940,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 367474002,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            467675367165114024,
+            1094646018717397577
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -1834875463,
+            "order": 1152921506441722473,
+            "frobenius_disc": -1244918053707923667,
+            "fundamental_disc": -1244918053707923667,
+            "conductor": 1,
+            "endomorphism_disc": -1244918053707923667,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1084156517,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            451607573954820268,
+            560571738199572032
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": 1280480786,
+            "order": 1152921503326366224,
+            "frobenius_disc": -2972054975112210240,
+            "fundamental_disc": -20639270660501460,
+            "conductor": 12,
+            "endomorphism_disc": -2972054975112210240,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1214506411,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            49705257510639404,
+            524187414569956129
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -477304494,
+            "order": 1152921505084151504,
+            "frobenius_disc": -4383866438434792000,
+            "fundamental_disc": -10959666096086980,
+            "conductor": 20,
+            "endomorphism_disc": -4383866438434792000,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1113385810,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            53237937690571377,
+            334373384231656400
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -1146700454,
+            "order": 1152921505753547464,
+            "frobenius_disc": -3296764087223581920,
+            "fundamental_disc": -824191021805895480,
+            "conductor": 2,
+            "endomorphism_disc": -3296764087223581920,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1137886288,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            1007541294531004881,
+            74063582888416433
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -232793868,
+            "order": 1152921504839640878,
+            "frobenius_disc": -4557493033448986612,
+            "fundamental_disc": -4557493033448986612,
+            "conductor": 1,
+            "endomorphism_disc": -4557493033448986612,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1837378481,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            1003183334894914826,
+            222237228026498591
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": 1137866046,
+            "order": 1152921503468980964,
+            "frobenius_disc": -3316946879787713920,
+            "fundamental_disc": -207309179986732120,
+            "conductor": 4,
+            "endomorphism_disc": -3316946879787713920,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1058223689,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 1103658668.375,
+      "median_rho_iters": 1113385810.0,
+      "stddev_rho_iters": 397123499.64007413
+    },
+    {
+      "start": [
+        1152921504606847009,
+        49160503063287103,
+        18492406172991609
+      ],
+      "class_size": 3,
+      "class": [
+        {
+          "curve": [
+            1152921504606847009,
+            49160503063287103,
+            18492406172991609
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": 280281662,
+            "order": 1152921504326565348,
+            "frobenius_disc": -4533128208373905792,
+            "fundamental_disc": -31480057002596568,
+            "conductor": 12,
+            "endomorphism_disc": -4533128208373905792,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 509795287,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            239406442527248729,
+            733375251794035518
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -577412293,
+            "order": 1152921505184259303,
+            "frobenius_disc": -4278281062319870187,
+            "fundamental_disc": -4278281062319870187,
+            "conductor": 1,
+            "endomorphism_disc": -4278281062319870187,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 479836819,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1152921504606847009,
+            350321471878801205,
+            130974452736435296
+          ],
+          "cm": {
+            "p": 1152921504606847009,
+            "trace": -822462521,
+            "order": 1152921505429309531,
+            "frobenius_disc": -3935241419977712595,
+            "fundamental_disc": -3935241419977712595,
+            "conductor": 1,
+            "endomorphism_disc": -3935241419977712595,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 1695462355,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 895031487.0,
+      "median_rho_iters": 509795287.0,
+      "stddev_rho_iters": 693355290.0834116
+    }
+  ],
+  "aggregate": {
+    "total_curves": 2,
+    "total_isogenous_vertices": 11,
+    "curves_with_smart_applicable": 0,
+    "curves_with_mov_feasible": 0,
+    "curves_with_glv": 0,
+    "overall_mean_rho_iters": 1046760346.1818181
+  }
+}

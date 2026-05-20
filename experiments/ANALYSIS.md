@@ -35,7 +35,7 @@
   | 30   | 3.2 s                  | 3.1 s               | (noise)     |
   | 40   | 6 m 40 s               | **53 s**            | **7.5×**    |
   | 50   | killed at 1 h 30+      | **33 m 58 s**       | **\>2.6×**  |
-  | 60   | infeasible             | **see round-6 results below** | new scale |
+  | 60   | infeasible             | **~14 hr**          | new scale (was unreachable) |
 
   Notes:
   * Median-ratio dropped a little (0.51–0.68 vs 0.66–0.93 in round 5).
@@ -47,6 +47,15 @@
     `√(πn/2) ≈ 1.3 M` iters per rho — confirming the parallel
     walkers add up to roughly 4× CPU utilisation in addition to
     the algorithm-level √K saving.
+  * **60-bit headline numbers** (2 starting curves, 11 vertices):
+    * `n ≈ 1.15 × 10¹⁸`
+    * `√(πn/2) ≈ 1.35 × 10⁹`
+    * Observed median: `1.08 × 10⁹` (**ratio 0.81**)
+    * Observed mean: `1.05 × 10⁹` (mean ratio 0.78)
+    * CoV: 0.44 — *lower* than at any of the smaller scales,
+      consistent with the K-walker variance reduction
+    * Success rate: **11/11**
+    * Wall: ~14 hr at 4 cores
 
 - **Round 5 (2026-05-19, r-adding walk)**: replaced the 3-partition
   Pollard ρ (default in
