@@ -52,6 +52,7 @@ pub mod fq6;
 pub mod g1;
 pub mod g2;
 pub mod pairing;
+pub mod signature;
 
 pub use fq::Fq;
 pub use fq12::Fq12;

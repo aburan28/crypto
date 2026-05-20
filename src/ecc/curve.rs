@@ -216,6 +216,8 @@ impl CurveParams {
         }
     }
 
+    // (secp192k1 and secp224k1 are in curve_zoo.rs; we delegate to those.)
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// Wrap a raw value as a `FieldElement` over this curve's prime field.

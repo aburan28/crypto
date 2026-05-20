@@ -1,0 +1,130 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Supersingular reductions of secp256k1's equation y² = x³ + 7
+================================================================
+
+---- Supersingularity criterion for j = 0 curves ----
+
+Theorem (Deuring): for ℓ ≠ 2, 3, the curve y² = x³ + b over
+F_ℓ is supersingular iff ℓ ≡ 2 (mod 3), regardless of b.
+
+Equivalently: -3 is a non-residue mod ℓ  ⇔  ℓ is inert in Z[ω]
+            ⇔  the j=0 curve over F_ℓ is supersingular.
+
+---- Reductions of secp256k1 (y² = x³ + 7) over small F_ℓ ----
+
+ℓ      ℓ mod 3   ord/SS    #E(F_ℓ)   trace   j(E_ℓ)
+---  --------- ---------  --------  ------  -------
+  5      2       SS     6    0   0
+  11      2       SS     12    0   0
+  13      1       ord    7    7   0
+  17      2       SS     18    0   0
+  19      1       ord    12    8   0
+  23      2       SS     24    0   0
+  29      2       SS     30    0   0
+  31      1       ord    21    11   0
+  37      1       ord    39    -1   0
+  41      2       SS     42    0   0
+  43      1       ord    31    13   0
+  47      2       SS     48    0   0
+  53      2       SS     54    0   0
+  59      2       SS     60    0   0
+  61      1       ord    61    1   0
+  67      1       ord    79    -11   0
+  71      2       SS     72    0   0
+  73      1       ord    64    10   0
+  79      1       ord    67    13   0
+  83      2       SS     84    0   0
+  89      2       SS     90    0   0
+  97      1       ord    79    19   0
+
+Total supersingular primes ℓ < 100: 12
+Supersingular ℓ list: [5, 11, 17, 23, 29, 41, 47, 53, 59, 71, 83, 89]
+
+---- Connection (or lack thereof) to F_p ECDLP ----
+
+For each supersingular reduction E_ℓ of y² = x³ + 7:
+
+• End(E_ℓ) is a maximal order in the quaternion algebra
+  B_{ℓ,∞} = the unique quaternion algebra over Q ramified
+  exactly at ℓ and ∞.
+
+• j(E_ℓ) = 0 always (since the equation y² = x³ + 7 has j = 0).
+
+• The supersingular j-invariant set over F̄_ℓ contains roughly
+  ℓ/12 elements; j = 0 is one of them when ℓ ≡ 2 mod 3.
+
+• Castryck-Decru-Maino-Martindale-Panny-Pope-Robert (2022)
+  broke SIDH by exploiting the supersingular ℓ-isogeny
+  problem with auxiliary torsion data.  This is a SUPERSINGULAR-
+  WORLD attack, not connected to F_p ECDLP.
+
+---- Why supersingular reductions DON'T attack F_p ECDLP ----
+
+Deuring's lifting theorem: an ordinary curve over F_p lifts
+uniquely (up to F_p²-isomorphism) from any of its reductions.
+BUT the lifting is FROM F_ℓ TO characteristic 0, then specialise
+BACK to F_p.  This DOES NOT give a useful 'attack pipeline'
+because:
+
+  (a) The lift takes you to characteristic 0 (Q-bar / Q_p), not
+      to a 'smaller' DLP problem.
+
+  (b) The supersingular isogeny graph at ℓ has rich structure,
+      but its DLP-relevant features (e.g., GMP-isogeny-problem
+      hardness, SIDH-CSIDH) are about the ISOGENY problem on
+      the graph, not about ECDLP on individual curves in the
+      graph.
+
+  (c) Castryck-Decru's SIDH break needs specific torsion data
+      that's published by the protocol.  For our setting (we
+      just have an ECDLP instance on E/F_p), no such data is
+      published.
+
+  (d) The j-invariant 0 supersingular curve over F̄_ℓ is the
+      same algebraic-geometric object as secp256k1's reduction,
+      but reading ECDLP information from this object back to
+      F_p requires lifting through Deuring, which loses the
+      DLP secret in the process.
+
+---- Smart's attack revisited via canonical lift ----
+
+Smart 1999 attack on anomalous curves (n = p) uses the
+CANONICAL LIFT of E/F_p to a curve E/Z_p over the p-adic
+integers, then applies the formal logarithm to extract the
+discrete log.
+
+For secp256k1: n ≠ p (n = p + 1 - t with t ≈ 2^{129} ≠ 1).
+Therefore canonical-lift extraction of the discrete log via
+the formal logarithm DOES NOT WORK — the formal log produces
+a multiple of n in Z_p, but extracting d from this requires
+knowing n / gcd(n, p) which equals n.  Then d · log(P) =
+log(Q) mod p², which gives d mod (something) but not d mod n
+when n ∤ p.
+
+So canonical lifts give nothing for non-anomalous curves like
+secp256k1.  Confirmed null.
+
+================================================================
+V4 verdict: supersingular-reduction direction is null for
+           secp256k1's F_p ECDLP.
+================================================================
+
+• Supersingular reductions of secp256k1 exist for every prime
+  ℓ ≡ 2 (mod 3) (≈ half of all primes); each is in the
+  j=0 supersingular point of F̄_ℓ.
+
+• These reductions live in the SIDH/CSIDH supersingular world,
+  but the supersingular ℓ-isogeny problem (and its Castryck-
+  Decru-style breaks) are mathematically disjoint from F_p
+  ECDLP.  No known reduction in either direction.
+
+• Canonical-lift attacks (Smart 1999) require anomalous curves
+  (#E = p) — secp256k1 is not anomalous.
+
+⇒ V4 direction is closed for prime-field ECDLP on secp256k1.
+  The supersingular isogeny graph is a rich mathematical
+  object with its own cryptanalytic story (SIDH break) but
+  does not attack F_p ECDLP on ordinary curves.
+
+================================================================

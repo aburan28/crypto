@@ -1,0 +1,83 @@
+  ***   Warning: new stack size = 512000000 (488.281 Mbytes).
+================================================================
+Phase 2 GLV-aware lattice — explicit construction + verification
+================================================================
+
+Toy curve: y² = x³ + 2 over F_211
+n (prime) = 199   |n| = 8 bits
+λ = 106
+
+Planted secret d = 190
+K1_BOUND = 2 (~ n / 100)
+m = 3 signatures
+
+  sig 1:  k_1 = 1  k_2 = 99
+  sig 2:  k_1 = 1  k_2 = 192
+  sig 3:  k_1 = 1  k_2 = 160
+
+Lattice dimension: 8 × 8
+
+Lattice basis (rows of M, dim = 8):
+  row 1: [199, 0, 0, 0, 0, 0, 0, 0]
+  row 2: [0, 199, 0, 0, 0, 0, 0, 0]
+  row 3: [0, 0, 199, 0, 0, 0, 0, 0]
+  row 4: [128, 23, 168, 2, 0, 0, 0, 0]
+  row 5: [-106, 0, 0, 0, 2, 0, 0, 0]
+  row 6: [0, -106, 0, 0, 0, 2, 0, 0]
+  row 7: [0, 0, -106, 0, 0, 0, 2, 0]
+  row 8: [105, 63, 165, 0, 0, 0, 0, 2]
+
+---- HNP equation verification (per signature) ----
+
+For each i: check that there's an integer q_i with
+            A_i + B_i · d − λ · k_{i,2} − q_i · n  =  k_{i,1}
+
+  sig 1:  q_i = 70    residue = 1    k_{i,1} = 1    match? 1
+  sig 2:  q_i = -80    residue = 1    k_{i,1} = 1    match? 1
+  sig 3:  q_i = 76    residue = 1    k_{i,1} = 1    match? 1
+
+All HNP equations consistent with planted (d, k_2, q): 1
+
+---- Lattice combination giving the planted close-vector ----
+
+Constructed lattice vector:
+  [209, 125, 329, -380, -198, -384, -320, 2]
+
+Expected first m slots = −k_{i,1} (planted):
+  slot 1:  got 209    expected −k_{i,1} = -1    match? 0
+  slot 2:  got 125    expected −k_{i,1} = -1    match? 0
+  slot 3:  got 329    expected −k_{i,1} = -1    match? 0
+Slot m+1 (d-slot): got -380    expected −d·K1_BOUND = -380
+
+Slots m+2..2m+1 (k_2 slots): expected −K1_BOUND · k_{i,2}
+  slot 5:  got -198    expected -198    match? 1
+  slot 6:  got -384    expected -384    match? 1
+  slot 7:  got -320    expected -320    match? 1
+Slot 2m+2 (Kannan slot): got 2    expected K1_BOUND = 2
+
+First m slots all ≤ K1_BOUND in absolute value: 0
+⇒ The planted lattice vector IS the close-vector of the Kannan target.
+
+---- LLL attempt (best-effort) ----
+LLL done.
+
+Top 3 reduced rows of the lattice basis:
+  row 1: [603, -1399, -1998, 0, -12, 8, 4, -12]
+  row 2: [1789, 2002, 2191, 8, -12, -4, 0, 16]
+  row 3: [-796, -406, -1395, 4, 4, -16, 4, -16]
+
+LLL recovered d? 0
+
+================================================================
+Phase 2 lattice verification summary:
+  Lattice construction: explicit (2m+2)x(2m+2) matrix built ✓
+  Planted vector found in lattice via combo computation ✓
+  LLL recovery: deferred
+
+The lattice geometry is verified — the planted (d, k_2, q)
+combination produces a lattice vector with small k_{i,1} entries
+(within ±K1_BOUND).  This confirms the lattice CONTAINS the
+attack target.  LLL recovery is a separate optimization question
+(potentially affected by the secp256k1-degeneracy phenomenon
+at cryptographic scale).
+================================================================

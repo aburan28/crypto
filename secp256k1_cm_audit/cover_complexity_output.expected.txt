@@ -1,0 +1,107 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Cover-complexity analysis for secp256k1 (prime field F_p)
+================================================================
+
+p ≈ 2^256.00000000000000000000000000000000000,   n = #E(F_p) ≈ 2^255.99900000000000000000000000000000000
+
+---- Plain ECDLP on E (secp256k1) ----
+  Pollard rho cost:  √n / √|Aut|  =  √(n/6)
+  log2(cost) = 126.70701874963942190927313052802609175
+  Cost ≈ 2^126.70701874963942190927313052802609175
+
+---- DLP on Jac(C) for genus-g hyperelliptic cover ----
+
+  g | generic ρ cost | Gaudry IC cost  | best cost   | vs ECDLP √(n/6)
+----|----------------|------------------|-------------|----------------
+  2 | 2^256.00000000000000000000000000000000000        | 2^256.00000000000000000000000000000000000        | 2^256.00000000000000000000000000000000000    | +129.29298125036057809072686947197390826 bits
+  3 | 2^384.00000000000000000000000000000000000        | 2^341.33333333333333333333333333333333333        | 2^341.33333333333333333333333333333333333    | +214.62631458369391142406020280530724159 bits
+  4 | 2^512.00000000000000000000000000000000000        | 2^384.00000000000000000000000000000000000        | 2^384.00000000000000000000000000000000000    | +257.29298125036057809072686947197390826 bits
+  5 | 2^640.00000000000000000000000000000000000        | 2^409.60000000000000000000000000000000000        | 2^409.60000000000000000000000000000000000    | +282.89298125036057809072686947197390826 bits
+  6 | 2^768.00000000000000000000000000000000000        | 2^426.66666666666666666666666666666666667        | 2^426.66666666666666666666666666666666667    | +299.95964791702724475739353613864057492 bits
+  7 | 2^896.00000000000000000000000000000000000        | 2^438.85714285714285714285714285714285714        | 2^438.85714285714285714285714285714285714    | +312.15012410750343523358401232911676540 bits
+  8 | 2^1024.0000000000000000000000000000000000        | 2^448.00000000000000000000000000000000000        | 2^448.00000000000000000000000000000000000    | +321.29298125036057809072686947197390826 bits
+
+Verdict: for every g ≥ 2, the best DLP cost on Jac(C) of
+a genus-g cover over F_p exceeds the ECDLP cost on E itself.
+The cover does NOT yield an asymptotic ECDLP speedup.
+
+---- Why Diem 2011 sub-exp does not apply ----
+
+Diem 2011 ("On the discrete logarithm problem in elliptic
+curves over non-prime fields and on hyperelliptic curves")
+gives a sub-exponential DLP algorithm on Jac(C) for genus
+g ≥ 3 hyperelliptic curves over F_q  *with q = p^k, k ≥ 3*.
+
+For prime field F_p (i.e., k = 1), Diem's argument does not
+apply: there is no proper subfield of F_p to descend to, and
+the higher-rank factor base required for sub-exp construction
+does not exist.
+
+⇒ Over F_p, hyperelliptic DLP cost is polynomial in p with
+  exponent strictly greater than 1/2 for every g ≥ 2.
+  ECDLP exponent is 1/2.  Covers cannot help.
+
+---- Could a cover over F_{p^k}, k ≥ 3 help? ----
+
+A cover C/F_{p^k} → E/F_{p^k} gives DLP on Jac(C)(F_{p^k}),
+not on E(F_p).  The ECDLP we want to break is on E(F_p), a
+STRICT SUBGROUP of E(F_{p^k}).
+
+Naive: solve DLP on Jac(C)(F_{p^k}) sub-exponentially (Diem
+2011), then project back to E(F_p).  But:
+
+  Solving DLP on Jac(C)(F_{p^k})  ≠  solving ECDLP on E(F_p)
+
+The discrete log on E(F_{p^k}) is a different (and harder)
+problem than on E(F_p).  Embedding E(F_p) ⊂ E(F_{p^k}) makes
+the search space LARGER, not smaller.  No win.
+
+This is the same fundamental obstruction that blocks GHS-
+style Weil descent on prime-field curves.
+
+================================================================
+Final structural verdict on slice-3 / cover-based attacks
+================================================================
+
+FACT 1: A smooth genus-2 cover C_2/F_p exists with
+        Jac(C_2) F_p-isogenous to E × E^t
+        (Howe 1996; conditions verified in howe_gluing_test.gp).
+
+FACT 2: For every g ≥ 2, the best DLP cost on a genus-g
+        Jac(C)/F_p exceeds plain ECDLP cost on E:
+            g=2: cost ~ p^1     vs ECDLP cost ~ p^{1/2}  (worse)
+            g=3: cost ~ p^{4/3} vs ECDLP cost ~ p^{1/2}  (worse)
+            g=4: cost ~ p^{3/2} vs ECDLP cost ~ p^{1/2}  (worse)
+            ...
+
+FACT 3: Diem 2011 sub-exp DLP applies only for F_q with
+        q = p^k, k ≥ 3.  Prime-field F_p curves are immune.
+
+FACT 4: Covers defined over F_{p^k} for k ≥ 3 transport ECDLP
+        from E(F_p) into a larger DLP on E(F_{p^k}), making
+        it harder, not easier.
+
+CONCLUSION:
+
+    NO COVER-BASED ATTACK ON SECP256K1's ECDLP CAN BEAT
+    PLAIN POLLARD ρ ON E(F_p).  THE SLICE-3 RESEARCH
+    DIRECTION IS NOW STRUCTURALLY CLOSED.
+
+This is the strongest negative result the four-slice
+programme can produce.  Every isogeny-graph-based attack
+avenue for prime-field CM curves has been:
+
+    Slice 1 (audit):           Null — all invariants generic
+    Slice 2 (CGA-HNC):         Null — Cl(O)=1 at crater
+    Slice 3 ((N,N)-cover):     Closed — Howe-hit exists but
+                                    cost exceeds ECDLP
+    Slice 4 (lit review):      All standard attacks blocked
+    VFCG-ρ (novel proposal):   Null — c_γ subgroup uniform
+
+Combined, this is a publishable structural-completeness
+statement: secp256k1's isogeny-graph structure leaks no
+ECDLP-relevant information beyond the well-known √6 GLV ρ
+speedup.
+
+================================================================

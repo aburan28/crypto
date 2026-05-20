@@ -1,0 +1,124 @@
+  ***   Warning: new stack size = 512000000 (488.281 Mbytes).
+================================================================
+VFCG-ρ variant falsifier — ord(c_γ) analysis at floor of volcano
+================================================================
+
+---- V1: Multi-depth at fixed ℓ ----
+Predicted ord(c_γ) ≤ 2 · h(-3·ℓ^{2d}) for each (ℓ, d).
+
+  ℓ    d    disc(-3·ℓ^{2d})    h(disc)    bound on ord(c_γ)
+  5    1    -75          2         4
+  5    2    -1875          10         20
+  5    3    -46875          50         100
+
+  7    1    -147          2         4
+  7    2    -7203          14         28
+  7    3    -352947          98         196
+
+  11    1    -363          4         8
+  11    2    -43923          44         88
+  11    3    -5314683          484         968
+
+  13    1    -507          4         8
+  13    2    -85683          52         104
+  13    3    -14480427          676         1352
+
+  17    1    -867          6         12
+  17    2    -250563          102         204
+  17    3    -72412707          1734         3468
+
+
+---- V2: Multi-prime floor (composite conductor f = ℓ_1 · ℓ_2) ----
+Predicted ord(c_γ) ≤ 2 · h(-3·f²) for each pair.
+
+  ℓ_1   ℓ_2   disc(-3·f²)    h(disc)    bound on ord(c_γ)
+  5    7     -3675       12       24
+  5    11     -9075       24       48
+  5    13     -12675       24       48
+  5    17     -21675       36       72
+  7    11     -17787       24       48
+  7    13     -24843       24       48
+  7    17     -42483       36       72
+  11    13     -61347       48       96
+  11    17     -104907       72       144
+  13    17     -146523       72       144
+
+---- Crucial observation ----
+
+Across ALL the (ℓ, d) and (ℓ_1, ℓ_2) variants above, the
+bound on ord(c_γ) is small (polylog(p)).  Concretely, even at
+depth 3 for ℓ=17, ord(c_γ) ≤ ~2·100 = 200 — still tiny
+compared to n ≈ 2^{256}.
+
+⇒ c_γ ALWAYS lies in a small subgroup of (Z/n)*.
+⇒ The §4(b) 'hope' of the proposal is satisfied uniformly.
+⇒ But the §3 cost analysis says this does NOT give an attack,
+   because additive ρ steps re-randomise the walk in (Z/n)
+   regardless of the c_γ-step structure.
+
+---- Numerical confirmation: ℓ=5, depth 1, toy example ----
+
+Toy: p = 1009, b = 11, n = 967
+E_crater = y² = x³ + 11 over F_1009
+  #E_crater = 967
+  j(E_crater) = 0  (by construction: a=0)
+
+Φ_5(0, Y) mod p factorisation:
+[Mod(1, 1009)*y + Mod(399, 1009), 3; Mod(1, 1009)*y + Mod(809, 1009), 3]
+
+Note: ℓ=5 is inert in Z[ω].  Descending neighbours may live
+over F_{p^k} for k ≥ 2.  For this toy:
+  F_p-rational 5-isogeny neighbours: 6
+================================================================
+
+---- V3: Tagged DPs with class-group residues ----
+
+This variant is orthogonal to V1/V2: it changes the DP-
+distinguishing criterion but not the walk function f or the
+state space.  The cycle structure of the walk is unchanged
+by the distinguishing criterion, so the asymptotic ρ cost
+(√n) is preserved.  V3 is a re-parameterisation, not an
+attack.  → No falsifier needed; structurally null.
+
+---- V4: Supersingular reduction of E mod auxiliary ℓ ----
+
+Out of scope for this falsifier.  Reductions of secp256k1
+mod auxiliary primes ℓ live on the supersingular isogeny
+graph over F̄_ℓ — a different mathematical world from the
+F_p-isogeny class of secp256k1.  No direct connection from
+the supersingular isogeny problem (attacked by Castryck-
+Decru / SQIsign-cryptanalysis machinery) to F_p ECDLP is
+known.  Would require its own research-direction paper.
+→ Not falsifiable by simple PARI computation; deferred.
+
+---- Strengthened verdict ----
+
+Across V1 (multi-depth) and V2 (multi-prime), the bound
+ord(c_γ) ≤ 2 · h(disc) is small uniformly.  So c_γ is
+ALWAYS in a small subgroup of (Z/n)*.
+
+The §3 cost analysis of RESEARCH_VOLCANO_FLOOR_RHO.md
+shows that c_γ ∈ small-subgroup, by itself, does NOT yield
+a ρ speedup, because:
+
+  (a) ρ walks combine c_γ-multiplicative steps with additive
+      steps.  Additive steps move freely in (Z/n), so the
+      total walk visits all of (Z/n) regardless of c_γ's
+      subgroup constraint.
+
+  (b) Restricting to c_γ-only walks (which would respect the
+      small-subgroup) gives walks cycling in a O(h)-element
+      coset.  These do not recover d unless d happens to lie
+      in that coset (probability h/n).
+
+Therefore the §4(b) 'hope' of the proposal — that c_γ being
+in a small subgroup gives a speedup — is FALSIFIED by
+structural analysis, independent of any specific gcd test.
+
+VFCG-ρ is null in the stronger sense: not just for
+secp256k1, not just generically, but for EVERY (j=0, ℓ, d)
+choice the proposal considers.
+
+================================================================
+VFCG-ρ variant falsifier complete.
+================================================================

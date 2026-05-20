@@ -47,7 +47,15 @@
 //! - **Gueron-Lindell**, *GCM-SIV: Full Nonce Misuse-Resistant
 //!   Authenticated Encryption at Under One Cycle per Byte*, CCS 2015.
 
-use crate::symmetric::aes::{encrypt_block, AesKey};
+use super::cipher::BlockCipher128;
+use crate::symmetric::aes::AesKey;
+
+#[inline]
+fn enc<C: BlockCipher128>(cipher: &C, block: &[u8; 16]) -> [u8; 16] {
+    let mut b = *block;
+    cipher.encrypt_block(&mut b);
+    b
+}
 
 // ── POLYVAL ──────────────────────────────────────────────────────────
 //
@@ -144,33 +152,34 @@ pub fn polyval(h: &[u8; 16], data: &[u8]) -> [u8; 16] {
 
 // ── Key derivation per RFC 8452 §4 ───────────────────────────────────
 
-fn derive_keys(master: &AesKey, nonce: &[u8; 12]) -> ([u8; 16], AesKey) {
-    let key_len = master.key_len();
+/// Generic key derivation.  Returns `(auth_key, enc_key_bytes)`.
+/// `enc_key_len` is 16 or 32 per RFC 8452.
+fn derive_key_bytes<C: BlockCipher128>(
+    master: &C,
+    nonce: &[u8; 12],
+    enc_key_len: usize,
+) -> ([u8; 16], Vec<u8>) {
+    assert!(enc_key_len == 16 || enc_key_len == 32);
     let mut auth = [0u8; 16];
-    let mut enc_buf = [0u8; 32];
-    let n_blocks_enc = if key_len == 16 { 2 } else { 4 };
+    let mut enc_buf = vec![0u8; enc_key_len];
+    let n_blocks_enc = enc_key_len / 8;
     // Auth blocks: indices 0, 1.
-    for i in 0..2 {
+    for i in 0..2u32 {
         let mut blk = [0u8; 16];
-        blk[0..4].copy_from_slice(&(i as u32).to_le_bytes());
+        blk[0..4].copy_from_slice(&i.to_le_bytes());
         blk[4..16].copy_from_slice(nonce);
-        let enc = encrypt_block(&blk, master);
-        auth[i * 8..(i + 1) * 8].copy_from_slice(&enc[0..8]);
+        let e = enc(master, &blk);
+        auth[(i as usize) * 8..(i as usize + 1) * 8].copy_from_slice(&e[0..8]);
     }
     // Enc-key blocks: indices 2, 3 (and 4, 5 if 32-byte master).
     for i in 0..n_blocks_enc {
         let mut blk = [0u8; 16];
-        blk[0..4].copy_from_slice(&(i as u32 + 2).to_le_bytes());
+        blk[0..4].copy_from_slice(&((i as u32) + 2).to_le_bytes());
         blk[4..16].copy_from_slice(nonce);
-        let enc = encrypt_block(&blk, master);
-        enc_buf[i * 8..(i + 1) * 8].copy_from_slice(&enc[0..8]);
+        let e = enc(master, &blk);
+        enc_buf[i * 8..(i + 1) * 8].copy_from_slice(&e[0..8]);
     }
-    let enc_key = if key_len == 16 {
-        AesKey::new(&enc_buf[..16]).unwrap()
-    } else {
-        AesKey::new(&enc_buf[..32]).unwrap()
-    };
-    (auth, enc_key)
+    (auth, enc_buf)
 }
 
 // ── GCM-SIV encrypt / decrypt ────────────────────────────────────────
@@ -192,12 +201,12 @@ fn length_block(aad_len: usize, pt_len: usize) -> [u8; 16] {
     lb
 }
 
-fn ctr_encrypt(key: &AesKey, init_ctr: &[u8; 16], data: &[u8]) -> Vec<u8> {
+fn ctr_encrypt<C: BlockCipher128>(cipher: &C, init_ctr: &[u8; 16], data: &[u8]) -> Vec<u8> {
     let mut ctr = *init_ctr;
     let mut out = Vec::with_capacity(data.len());
     let mut idx = 0;
     while idx < data.len() {
-        let ks = encrypt_block(&ctr, key);
+        let ks = enc(cipher, &ctr);
         let n = 16.min(data.len() - idx);
         for i in 0..n {
             out.push(data[idx + i] ^ ks[i]);
@@ -211,9 +220,30 @@ fn ctr_encrypt(key: &AesKey, init_ctr: &[u8; 16], data: &[u8]) -> Vec<u8> {
     out
 }
 
-/// **GCM-SIV encrypt** (RFC 8452).  Returns `ciphertext || tag` (16-byte tag).
-pub fn gcm_siv_encrypt(master: &AesKey, nonce: &[u8; 12], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
-    let (auth_key, enc_key) = derive_keys(master, nonce);
+/// **GCM-SIV encrypt** (RFC 8452), generic over any 16-byte block cipher.
+///
+/// `master` is the master cipher (16- or 32-byte key per RFC 8452).
+/// `enc_key_len` is the master's key length in bytes (16 or 32).
+/// `new_cipher` is a factory that builds a fresh `C` instance from the
+/// derived enc-key bytes.
+///
+/// The standard AES-typed entry points [`gcm_siv_encrypt`] /
+/// [`gcm_siv_decrypt`] are thin wrappers over this.
+pub fn gcm_siv_encrypt_with<M, C, F>(
+    master: &M,
+    enc_key_len: usize,
+    nonce: &[u8; 12],
+    aad: &[u8],
+    plaintext: &[u8],
+    new_cipher: F,
+) -> Vec<u8>
+where
+    M: BlockCipher128,
+    C: BlockCipher128,
+    F: Fn(&[u8]) -> C,
+{
+    let (auth_key, enc_key_bytes) = derive_key_bytes(master, nonce, enc_key_len);
+    let enc_cipher = new_cipher(&enc_key_bytes);
     let mut polyval_input = Vec::new();
     polyval_input.extend_from_slice(&pad16(aad));
     polyval_input.extend_from_slice(&pad16(plaintext));
@@ -223,23 +253,30 @@ pub fn gcm_siv_encrypt(master: &AesKey, nonce: &[u8; 12], aad: &[u8], plaintext:
         s_s[i] ^= nonce[i];
     }
     s_s[15] &= 0x7F;
-    let tag = encrypt_block(&s_s, &enc_key);
+    let tag = enc(&enc_cipher, &s_s);
     let mut ctr0 = tag;
     ctr0[15] |= 0x80;
-    let ct = ctr_encrypt(&enc_key, &ctr0, plaintext);
+    let ct = ctr_encrypt(&enc_cipher, &ctr0, plaintext);
     let mut out = Vec::with_capacity(ct.len() + 16);
     out.extend_from_slice(&ct);
     out.extend_from_slice(&tag);
     out
 }
 
-/// **GCM-SIV decrypt + verify**.  Returns `None` on tag mismatch.
-pub fn gcm_siv_decrypt(
-    master: &AesKey,
+/// **GCM-SIV decrypt + verify**, generic over any 16-byte block cipher.
+pub fn gcm_siv_decrypt_with<M, C, F>(
+    master: &M,
+    enc_key_len: usize,
     nonce: &[u8; 12],
     aad: &[u8],
     ciphertext_with_tag: &[u8],
-) -> Option<Vec<u8>> {
+    new_cipher: F,
+) -> Option<Vec<u8>>
+where
+    M: BlockCipher128,
+    C: BlockCipher128,
+    F: Fn(&[u8]) -> C,
+{
     if ciphertext_with_tag.len() < 16 {
         return None;
     }
@@ -247,11 +284,11 @@ pub fn gcm_siv_decrypt(
     let ct = &ciphertext_with_tag[..ct_len];
     let mut recv_tag = [0u8; 16];
     recv_tag.copy_from_slice(&ciphertext_with_tag[ct_len..]);
-    let (auth_key, enc_key) = derive_keys(master, nonce);
+    let (auth_key, enc_key_bytes) = derive_key_bytes(master, nonce, enc_key_len);
+    let enc_cipher = new_cipher(&enc_key_bytes);
     let mut ctr0 = recv_tag;
     ctr0[15] |= 0x80;
-    let pt = ctr_encrypt(&enc_key, &ctr0, ct);
-    // Re-derive the expected tag from the recovered plaintext.
+    let pt = ctr_encrypt(&enc_cipher, &ctr0, ct);
     let mut polyval_input = Vec::new();
     polyval_input.extend_from_slice(&pad16(aad));
     polyval_input.extend_from_slice(&pad16(&pt));
@@ -261,7 +298,7 @@ pub fn gcm_siv_decrypt(
         s_s[i] ^= nonce[i];
     }
     s_s[15] &= 0x7F;
-    let expected_tag = encrypt_block(&s_s, &enc_key);
+    let expected_tag = enc(&enc_cipher, &s_s);
     let mut diff = 0u8;
     for i in 0..16 {
         diff |= expected_tag[i] ^ recv_tag[i];
@@ -270,6 +307,29 @@ pub fn gcm_siv_decrypt(
         return None;
     }
     Some(pt)
+}
+
+/// **AES-GCM-SIV encrypt** (RFC 8452).  Returns `ciphertext || 16-byte tag`.
+/// Thin wrapper over the generic [`gcm_siv_encrypt_with`].
+pub fn gcm_siv_encrypt(master: &AesKey, nonce: &[u8; 12], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
+    let kl = master.key_len();
+    gcm_siv_encrypt_with(master, kl, nonce, aad, plaintext, |bytes| {
+        AesKey::new(bytes).expect("derived AES key bytes")
+    })
+}
+
+/// **AES-GCM-SIV decrypt + verify**.  Thin wrapper over
+/// [`gcm_siv_decrypt_with`].
+pub fn gcm_siv_decrypt(
+    master: &AesKey,
+    nonce: &[u8; 12],
+    aad: &[u8],
+    ciphertext_with_tag: &[u8],
+) -> Option<Vec<u8>> {
+    let kl = master.key_len();
+    gcm_siv_decrypt_with(master, kl, nonce, aad, ciphertext_with_tag, |bytes| {
+        AesKey::new(bytes).expect("derived AES key bytes")
+    })
 }
 
 // ── Tests ────────────────────────────────────────────────────────────
@@ -434,5 +494,41 @@ mod tests {
         assert_eq!(out, expected);
         let recovered = gcm_siv_decrypt(&key, &nonce, b"", &out).unwrap();
         assert_eq!(recovered, pt);
+    }
+
+    /// **Camellia-GCM-SIV** round-trip + tamper.  No standardised
+    /// test vectors exist (RFC 8452 is AES-only), so we verify
+    /// encrypt → decrypt → match plus tag-tamper rejection.
+    #[test]
+    fn gcm_siv_camellia_round_trip() {
+        use crate::symmetric::camellia::Camellia128;
+        let master = Camellia128::new(&[0x42u8; 16]);
+        let nonce = [0x99u8; 12];
+        let aad = b"non-AES GCM-SIV";
+        let pt = b"GCM-SIV is algebraic in the block cipher.".to_vec();
+
+        let ct = gcm_siv_encrypt_with(&master, 16, &nonce, aad, &pt, |bytes| {
+            let mut k = [0u8; 16];
+            k.copy_from_slice(bytes);
+            Camellia128::new(&k)
+        });
+        let recovered = gcm_siv_decrypt_with(&master, 16, &nonce, aad, &ct, |bytes| {
+            let mut k = [0u8; 16];
+            k.copy_from_slice(bytes);
+            Camellia128::new(&k)
+        })
+        .expect("decrypt");
+        assert_eq!(recovered, pt);
+
+        // Tag tamper → reject.
+        let mut tampered = ct.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+        let rejected = gcm_siv_decrypt_with(&master, 16, &nonce, aad, &tampered, |bytes| {
+            let mut k = [0u8; 16];
+            k.copy_from_slice(bytes);
+            Camellia128::new(&k)
+        });
+        assert!(rejected.is_none());
     }
 }

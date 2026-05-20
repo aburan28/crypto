@@ -1,0 +1,147 @@
+#!/usr/bin/env sage
+# ============================================================
+# Howe-Mestre construction of the explicit genus-2 cover of
+# secp256k1 — Sage port.
+# ============================================================
+#
+# This is a Sage script intended to be run on a Sage-installed
+# system (Sage isn't installed on the development machine, so this
+# script is not directly executable here).
+#
+# Why Sage: PARI's standard library lacks the moduli-of-abelian-
+# surfaces machinery needed for Mestre's reconstruction algorithm.
+# Sage's `genus2_curves` module and `EllipticCurveIsogeny` provide
+# the missing pieces.
+#
+# Run: sage howe_mestre.sage
+#
+# Companion to RESEARCH_MESTRE_HOWE.md and the partial PARI
+# implementation in secp256k1_cm_audit/igusa_clebsch.gp /
+# mestre_scaffold.gp.
+
+print("================================================================")
+print("Howe-Mestre construction (Sage version)")
+print("================================================================")
+print("")
+
+# ------------------------------------------------------------
+# Step 1: Define secp256k1 and its quadratic twist
+# ------------------------------------------------------------
+p_secp = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+n_secp = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+t_secp = p_secp + 1 - n_secp
+
+F_p = GF(p_secp)
+E = EllipticCurve(F_p, [0, 7])
+print("E (secp256k1):", E)
+print("  #E(F_p) =", E.order(), " (= n)")
+print("  trace t =", t_secp)
+print("")
+
+# Sage finds the smallest non-square d via quadratic_residues
+d_twist = next(d for d in range(2, 100) if not F_p(d).is_square())
+print("Smallest non-square d =", d_twist)
+
+# Quadratic twist: y² = x³ + d³ · 7
+E_twist = EllipticCurve(F_p, [0, d_twist^3 * 7])
+print("E^t:", E_twist)
+print("  #E^t(F_p) =", E_twist.order(), " (= n_twist)")
+print("")
+
+# ------------------------------------------------------------
+# Step 2: Howe-condition checks (verified in PARI; re-checked here)
+# ------------------------------------------------------------
+print("---- Howe (H1)(H2)(H3) verification ----")
+n_twist = E_twist.order()
+print("(H1) #E != #E^t:", E.order() != n_twist)
+print("(H3) gcd(n, n_twist):", gcd(E.order(), n_twist), "(expected 1)")
+# (H2) E[2] ≃ E^t[2] as Galois modules — factor x³+7 and x³+189
+R.<x> = PolynomialRing(F_p)
+f_E = x^3 + 7
+f_Et = x^3 + d_twist^3 * 7
+print("(H2) E[2] factorisation pattern:", [(g.degree(), e) for g, e in f_E.factor()])
+print("(H2) E^t[2] factorisation pattern:", [(g.degree(), e) for g, e in f_Et.factor()])
+print("")
+
+# ------------------------------------------------------------
+# Step 3: Compute Igusa-Clebsch invariants of (E × E^t) / Γ_α
+#
+# Sage has IgusaInvariants via Genus2Curve, but constructing the
+# abelian-surface quotient (E × E^t) / Γ_α is non-trivial.  Sage's
+# `EllipticCurveIsogeny` operates on elliptic curves; for abelian
+# surfaces we need the `genus2_curves` package (less mature).
+#
+# The workflow:
+#   3a. Identify the 4 Galois orbits of 2-torsion points on E and E^t.
+#   3b. Choose a Galois-equivariant iso α: E[2] → E^t[2].
+#   3c. Construct the quotient abelian surface A = (E × E^t)/Γ_α.
+#   3d. Compute Igusa invariants of A (this is the hard part).
+#   3e. Apply Mestre's reconstruction to recover C/F_p with Jac(C) ≅ A.
+# ------------------------------------------------------------
+print("---- Steps 3a-3e (Mestre reconstruction) ----")
+print("")
+print("Step 3a: identify Galois orbits of E[2] and E^t[2].")
+print("Both 2-torsion polynomials are irreducible cubics over F_p_secp,")
+print("so both have a single Galois orbit of size 3 under Frobenius.")
+print("")
+print("Step 3b: choose iso α.  Up to ±1, there's a unique F_p-Galois-")
+print("equivariant iso between Z/3-cyclic Galois modules.  Sage's")
+print("automorphism-of-finite-modules code handles this.")
+print("")
+print("Steps 3c-3e: NOT IMPLEMENTED.")
+print("Sage's `genus2_curves` module provides Igusa invariants from a")
+print("known curve C: y² = f(x), but does NOT provide the inverse map")
+print("(Mestre reconstruction).  The Sage Trac issue #11005 and the")
+print("`hyperelliptic_curves` module in the Genus2Reconstruction package")
+print("by Cardona-Howe-Lercier-Ritzenthaler-Streng provide pieces, but")
+print("are not in vanilla Sage.")
+print("")
+print("Recommended path: install the Cardona-Howe-Lercier-Ritzenthaler-")
+print("Streng `g2reconstruction` patch for Sage, or use Magma's")
+print("`HyperellipticCurveFromInvariants` directly.")
+print("")
+
+# ------------------------------------------------------------
+# What Sage CAN compute easily: Igusa invariants of a known C
+# ------------------------------------------------------------
+print("---- What Sage handles: forward-direction Igusa from C ----")
+print("")
+print("For the naive (but NON-Howe-glued) cover y² = (x³+7)(x³+189):")
+h_naive = (x^3 + 7) * (x^3 + d_twist^3 * 7)
+print("  h(x) =", h_naive)
+print("")
+C_naive = HyperellipticCurve(h_naive)
+print("  C_naive:", C_naive)
+# Sage's Igusa-Clebsch invariants:
+print("  Igusa-Clebsch invariants (J_2, J_4, J_6, J_10):")
+try:
+    inv = C_naive.igusa_clebsch_invariants()
+    print("    J_2  =", inv[0])
+    print("    J_4  =", inv[1])
+    print("    J_6  =", inv[2])
+    print("    J_10 =", inv[3])
+except Exception as e:
+    print("    (computation not available in this Sage version:", e, ")")
+
+# ------------------------------------------------------------
+# Notes for the human running this
+# ------------------------------------------------------------
+print("")
+print("================================================================")
+print("Notes for the operator")
+print("================================================================")
+print("")
+print("• Sage must be installed (`brew install sage` on macOS, or via")
+print("  conda-forge: `conda install -c conda-forge sage`).  This")
+print("  script is NOT directly runnable on the development host.")
+print("")
+print("• For the FULL Mestre reconstruction, install:")
+print("    - Cardona-Howe-Lercier-Ritzenthaler-Streng's g2reconstruction")
+print("      Sage patch (search SageMath community resources)")
+print("    - Or use Magma's HyperellipticCurveFromInvariants directly")
+print("")
+print("• The Igusa invariants of (E × E^t)/Γ_α require a Sage extension")
+print("  that's beyond core Sage's elliptic-curves and genus-2 modules.")
+print("  See RESEARCH_MESTRE_HOWE.md §7 for the implementation roadmap.")
+print("")
+print("================================================================")

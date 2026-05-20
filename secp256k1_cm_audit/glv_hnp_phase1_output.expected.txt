@@ -1,0 +1,57 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Phase 1: HNP framework demonstration (toy ECDSA, brute-force d)
+================================================================
+
+Toy: y² = x³ + 11 over F_1009
+  n = 967  prime? 1
+  n bits = 10
+
+GLV applicable (kronecker(-3, n) = 1)?  1
+  λ = 142
+  λ² + λ + 1 mod n = 0
+
+---- HNP setup ----
+Planted secret d = 964
+Bias model: k ∈ [1, 32) ⇒ 6 bits free per nonce
+
+Generating 6 signatures...
+Done.  HNP equation per signature: k_i ≡ A_i + B_i · d  (mod n)
+
+---- HNP equations (planted) ----
+
+  i | k_i (planted) | A_i              | B_i
+----+---------------+------------------+-----------
+  1 | 19           | 569           | 828
+  2 | 22           | 808           | 262
+  3 | 1           | 454           | 151
+  4 | 5           | 458           | 151
+  5 | 17           | 325           | 425
+  6 | 13           | 129           | 361
+
+Sanity check (A_i + B_i d mod n == k_i for all i): 1
+
+---- Brute-force recovery: iterate d ∈ [1, n) ----
+
+For each candidate d_cand, check that A_i + B_i · d_cand mod n
+lies in [1, K_BOUND) for every signature i.  At most one d_cand
+survives (with high probability).
+
+Total candidate d values consistent with all bias constraints: 1
+First (and likely only) candidate: d = 964
+
+================================================================
+Phase 1 verdict: PASS — HNP framework recovers d correctly
+
+✓ Planted d = 964
+✓ Recovered  = 964
+✓ Unique candidate from bias constraints alone
+
+The HNP equation k_i ≡ A_i + B_i d (mod n) with bias on k_i
+gives enough information to determine d.  Brute force works
+at toy scale; LATTICE attack (Phase 1.5) scales this to
+cryptographic sizes via Boneh-Venkatesan.  GLV-aware lattice
+(Phase 2) extends to the k_1-only-leak threat model — see
+RESEARCH_GLV_HNP.md §3 for the proposed construction.
+
+================================================================

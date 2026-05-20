@@ -865,7 +865,7 @@ fn cmd_hkdf() {
     let ikm = b"input keying material";
     let salt = b"random salt";
     let info = b"application context";
-    let okm = hkdf(Some(salt), ikm, info, 32).expect("demo HKDF parameters must be valid");
+    let okm = hkdf(Some(salt), ikm, info, 32);
     println!("IKM:  {:?}", std::str::from_utf8(ikm).unwrap());
     println!("OKM:  {}", to_hex(&okm));
 }
@@ -922,8 +922,7 @@ fn cmd_demo() {
 
     // HKDF
     println!("\n[HKDF-SHA256]");
-    let okm =
-        hkdf(Some(b"salt"), b"secret", b"ctx", 32).expect("demo HKDF parameters must be valid");
+    let okm = hkdf(Some(b"salt"), b"secret", b"ctx", 32);
     println!("  Derived key: {}", to_hex(&okm));
 
     // Kyber

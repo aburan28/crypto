@@ -17,16 +17,24 @@
 //! 4. CBC-MAC the padded message using AES-K with zero IV; the
 //!    final ciphertext block is the tag.
 
-use super::aes::{encrypt_block, AesKey};
+use super::aes::AesKey;
+use super::modes::cipher::BlockCipher128;
 
 /// 16-byte authentication tag.
 pub type CmacTag = [u8; 16];
 
-/// AES-CMAC of `message` under `key`.  Tag length is fixed at 16
-/// bytes (the full AES block); truncating to fewer bytes is the
-/// caller's responsibility.
-pub fn aes_cmac(key: &AesKey, message: &[u8]) -> CmacTag {
-    let l = encrypt_block(&[0u8; 16], key);
+#[inline]
+fn enc<C: BlockCipher128>(cipher: &C, block: &[u8; 16]) -> [u8; 16] {
+    let mut b = *block;
+    cipher.encrypt_block(&mut b);
+    b
+}
+
+/// CMAC generic over any 16-byte block cipher (NIST SP 800-38B).
+/// AES-CMAC is the canonical instance; this is the same algorithm
+/// keyed on Camellia, Twofish, Serpent, etc.
+pub fn cmac<C: BlockCipher128>(cipher: &C, message: &[u8]) -> CmacTag {
+    let l = enc(cipher, &[0u8; 16]);
     let k1 = double(&l);
     let k2 = double(&k1);
 
@@ -43,7 +51,7 @@ pub fn aes_cmac(key: &AesKey, message: &[u8]) -> CmacTag {
         for j in 0..16 {
             state[j] ^= block[j];
         }
-        state = encrypt_block(&state, key);
+        state = enc(cipher, &state);
     }
 
     // Final block.
@@ -65,7 +73,12 @@ pub fn aes_cmac(key: &AesKey, message: &[u8]) -> CmacTag {
     for j in 0..16 {
         state[j] ^= last[j];
     }
-    encrypt_block(&state, key)
+    enc(cipher, &state)
+}
+
+/// AES-CMAC — thin wrapper over the generic [`cmac`] for an AES key.
+pub fn aes_cmac(key: &AesKey, message: &[u8]) -> CmacTag {
+    cmac(key, message)
 }
 
 /// Double in `GF(2¹²⁸)` with reduction polynomial
@@ -158,5 +171,19 @@ mod tests {
 
     fn hex(bytes: &[u8]) -> String {
         bytes.iter().map(|b| format!("{:02x}", b)).collect()
+    }
+
+    /// **Camellia-CMAC round-trip** — proves the generic construction
+    /// works over a non-AES 16-byte cipher.  Deterministic identity:
+    /// two CMACs of the same message under the same cipher must match.
+    #[test]
+    fn cmac_camellia_is_deterministic_and_distinct() {
+        use crate::symmetric::camellia::Camellia128;
+        let cipher = Camellia128::new(&[0x42u8; 16]);
+        let t1 = cmac(&cipher, b"hello");
+        let t2 = cmac(&cipher, b"hello");
+        let t3 = cmac(&cipher, b"hellp");
+        assert_eq!(t1, t2);
+        assert_ne!(t1, t3);
     }
 }

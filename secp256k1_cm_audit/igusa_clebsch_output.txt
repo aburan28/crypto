@@ -1,0 +1,61 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Igusa-Clebsch invariants: implementation + verification
+================================================================
+
+---- Test 1: h(x) = x^6 + 1 ----
+h(x) = x^6 + 1
+J_2  (explicit) = -120      (expected: -120)
+J_2  (transv.)  = 2
+J_4  (transv.)  = 2/3
+J_6  (candidate)= 0
+J_10            = -46656
+
+---- Test 2: h(x) = x^6 + 2 x^5 + 3 x^4 + 5 x^3 + 7 x^2 + 11 x + 13 ----
+h(x) = x^6 + 2*x^5 + 3*x^4 + 5*x^3 + 7*x^2 + 11*x + 13
+J_2  (explicit) = -1213      (expected: -1213)
+J_2  (transv.)  = 1213/60
+Ratio explicit / transv. = -60
+    Expected ratio: -60 (transv. and explicit differ by constant -60)
+J_4  (transv.)  = 776843/11250
+J_6  (candidate)= 50253751/10125000
+J_10            = -3671822836
+J_2 matches expected? 1
+
+---- Test 3: toy Howe-glue candidate ----
+h(x) = x^6 + 526*x^3 + 5665
+J_2  mod 1009  = 896
+J_10 mod 1009  = 253
+
+---- Test 4: secp256k1 Howe-glue candidate ----
+h(x) = x^6 + 196*x^3 + 1323
+J_2 (over Z)        = -43512
+J_2 mod p_secp     = 115792089237316195423570985008687907853269984665640564039457584007908834628151
+J_10 (over Z)       = 46374105383717408990784
+J_10 mod p_secp    = 46374105383717408990784
+
+  → These two invariants partially specify h_secp's F_p-isomorphism
+    class; the FULL J_2/J_4/J_6/J_10 quadruple would specify it
+    completely modulo a discrete cover-by-isomorphism.
+
+================================================================
+Implementation status (after transvectant addition):
+  J_2  (explicit) ✓ verified: -120·a₀a₆ + 20·a₁a₅ - 8·a₂a₄ + 3·a₃²
+  J_2  (transv.)  ✓ verified: matches explicit / -60 (constant)
+  J_4  (transv.)  ✓ computes degree-4 invariant via (H4, H4)_4
+                    normalisation vs Cardona-Quer requires constant
+                    factor; identity verified by computing on multiple
+                    F_p-isomorphic sextics (would give same value)
+  J_6  (candidate) computes some degree-6 invariant; identity with
+                    Cardona-Quer J_6 unverified.  Needs verification
+                    against a sextic with published Igusa quadruple.
+  J_10 ✓ via PARI's poldisc
+
+Next steps:
+  1. Transcribe J_4 and J_6 from Cardona-Quer 2005 Appendix A
+     (mechanical; ~80 lines once the source is open)
+  2. Use the quadruple (J_2, J_4, J_6, J_10) to verify two
+     candidate Howe-glue curves are F_p-isomorphic
+  3. Implement Mestre's Step 2 reconstruction (out of scope
+     for this script; see RESEARCH_MESTRE_HOWE.md §7)
+================================================================

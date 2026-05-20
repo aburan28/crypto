@@ -367,6 +367,44 @@ pub fn chacha20_poly1305_decrypt(
     chacha20_xor_checked(ciphertext, key, nonce).map_err(|_| ())
 }
 
+// ── XChaCha20-Poly1305 (draft-irtf-cfrg-xchacha) ─────────────────────────────
+
+/// **XChaCha20-Poly1305 encrypt** — extended-nonce AEAD (24-byte nonce).
+///
+/// Internally: derive a subkey via `HChaCha20(key, nonce[0..16])`, then
+/// run ChaCha20-Poly1305 with the subkey and a 12-byte inner nonce of
+/// `0x00000000 || nonce[16..24]` (RFC-draft convention).  This lets
+/// you sample nonces uniformly at random without birthday-bound
+/// worries — the bottleneck moves to 2^96 instead of 2^48.
+pub fn xchacha20_poly1305_encrypt(
+    plaintext: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 24],
+    aad: &[u8],
+) -> Vec<u8> {
+    let mut hin = [0u8; 16];
+    hin.copy_from_slice(&nonce[0..16]);
+    let subkey = hchacha20(key, &hin);
+    let mut inner_nonce = [0u8; 12];
+    inner_nonce[4..12].copy_from_slice(&nonce[16..24]);
+    chacha20_poly1305_encrypt(plaintext, &subkey, &inner_nonce, aad)
+}
+
+/// **XChaCha20-Poly1305 decrypt + verify**.
+pub fn xchacha20_poly1305_decrypt(
+    ciphertext_and_tag: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 24],
+    aad: &[u8],
+) -> Result<Vec<u8>, ()> {
+    let mut hin = [0u8; 16];
+    hin.copy_from_slice(&nonce[0..16]);
+    let subkey = hchacha20(key, &hin);
+    let mut inner_nonce = [0u8; 12];
+    inner_nonce[4..12].copy_from_slice(&nonce[16..24]);
+    chacha20_poly1305_decrypt(ciphertext_and_tag, &subkey, &inner_nonce, aad)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -560,5 +598,56 @@ mod tests {
         assert_ne!(ct, msg);
         assert_eq!(ct.len(), msg.len());
         assert_eq!(xchacha20_xor(&ct, &key, &nonce), msg);
+    }
+
+    /// **XChaCha20-Poly1305** AEAD round-trip + tamper.  No IETF
+    /// has-finalised test vectors at the time of writing, so we
+    /// verify the composition: encrypt → decrypt → match, plus all
+    /// three failure modes (tampered CT, tampered tag, wrong AAD).
+    #[test]
+    fn xchacha20_poly1305_aead_round_trip_and_tamper() {
+        let key = [0x42u8; 32];
+        let nonce = [0x99u8; 24];
+        let aad = b"associated data";
+        let pt = b"the 24-byte nonce makes random sampling safe".to_vec();
+
+        let ct = xchacha20_poly1305_encrypt(&pt, &key, &nonce, aad);
+        assert_eq!(ct.len(), pt.len() + 16);
+        let recovered = xchacha20_poly1305_decrypt(&ct, &key, &nonce, aad).expect("decrypt");
+        assert_eq!(recovered, pt);
+
+        // Tampered CT.
+        let mut tampered = ct.clone();
+        tampered[0] ^= 1;
+        assert!(xchacha20_poly1305_decrypt(&tampered, &key, &nonce, aad).is_err());
+        // Tampered tag.
+        let mut tampered = ct.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+        assert!(xchacha20_poly1305_decrypt(&tampered, &key, &nonce, aad).is_err());
+        // Wrong AAD.
+        assert!(xchacha20_poly1305_decrypt(&ct, &key, &nonce, b"other-aad").is_err());
+    }
+
+    /// XChaCha20-Poly1305 is equivalent to ChaCha20-Poly1305 with a
+    /// derived subkey — verify the composition by hand to ensure
+    /// the wrapper isn't doing anything subtle.
+    #[test]
+    fn xchacha20_poly1305_equals_subkey_chacha_poly() {
+        let key = [0x33u8; 32];
+        let nonce = [0x55u8; 24];
+        let aad = b"";
+        let pt = b"composition check".to_vec();
+
+        let ct_via_xchacha = xchacha20_poly1305_encrypt(&pt, &key, &nonce, aad);
+
+        let mut hin = [0u8; 16];
+        hin.copy_from_slice(&nonce[0..16]);
+        let subkey = hchacha20(&key, &hin);
+        let mut inner_nonce = [0u8; 12];
+        inner_nonce[4..12].copy_from_slice(&nonce[16..24]);
+        let ct_via_chacha = chacha20_poly1305_encrypt(&pt, &subkey, &inner_nonce, aad);
+
+        assert_eq!(ct_via_xchacha, ct_via_chacha);
     }
 }

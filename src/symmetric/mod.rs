@@ -44,7 +44,8 @@
 //!
 //! - **AES-GCM**, **AES-CCM** (RFC 3610), **AES-SIV** (RFC 5297)
 //! - **ChaCha20-Poly1305** (RFC 8439)
-//! - **Ascon-128** (`ascon`) — NIST Lightweight Cryptography winner 2023
+//! - **Ascon-128** / **Ascon-128a** (`ascon`) — NIST Lightweight Crypto winner
+//! - **AEGIS-128L / AEGIS-256** (`aegis`) — CAESAR finalists (Wu-Preneel 2014)
 //!
 //! ## Generic modes of operation
 //!
@@ -58,6 +59,7 @@
 //! - Specialised: [`modes::kw`] (RFC 3394 key wrap),
 //!   [`modes::xts`] (IEEE P1619 disk encryption).
 
+pub mod aegis;
 pub mod aes;
 pub mod aes_cbc;
 pub mod aria;
@@ -81,6 +83,7 @@ pub mod lucifer;
 pub mod mars;
 pub mod misty1;
 pub mod modes;
+pub mod pmac;
 pub mod present;
 pub mod rc4;
 pub mod rc5;
@@ -123,7 +126,9 @@ pub use modes::{
 };
 pub use rc4::{rc4, Rc4};
 pub use rc5::Rc5;
-pub use salsa20::{hsalsa20, salsa20_block, salsa20_xor, xsalsa20_xor};
+pub use salsa20::{
+    hsalsa20, salsa20_block, salsa20_xor, secretbox, secretbox_open, xsalsa20_xor,
+};
 pub use simon::{Simon128_128, Simon128_256, Simon64_128};
 pub use sm4::Sm4;
 pub use speck::{Speck128_128, Speck128_256, Speck64_128};

@@ -22,6 +22,8 @@ pub mod secp256k1_point;
 pub mod sm2;
 pub mod visualize;
 pub mod x25519;
+pub mod x448;
+pub mod ed448;
 
 pub use curve::CurveParams;
 pub use ec_kcdsa::{

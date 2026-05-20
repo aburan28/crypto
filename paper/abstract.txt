@@ -1,0 +1,58 @@
+Title:
+  Structural Completeness of Prime-Field Elliptic Curves Against
+  Isogeny-Graph Cryptanalysis
+
+Keywords:
+  elliptic curve cryptography, ECDLP, isogeny graphs, complex
+  multiplication, Howe gluing, Jacobian covers, secp256k1, P-256,
+  structural-completeness theorem
+
+Abstract:
+
+We pursue a comprehensive cryptanalytic audit of the isogeny-graph
+structure of deployed prime-field elliptic curves --- specifically
+secp256k1, NIST P-256, brainpoolP256r1, and Curve25519's prime
+subgroup. For each curve we run a battery of structural tests and
+two novel attack proposals (Class-Group-Amortised Hidden-Number
+Cryptanalysis; Volcano-Floor Class-Group-Augmented Pollard rho),
+finding all directions structurally null at the prime-field level.
+
+The main result is a structural-completeness theorem: for every
+prime-order ordinary elliptic curve E over a prime field F_p, no
+algorithm in the family
+{F_p-isogeny transport, Cl(End)-orbit walking, (N,N)-cover via
+Howe-gluing, higher-genus cover, supersingular-reduction attack,
+volcano-floor rho} reduces ECDLP cost below sqrt(n / |Aut(E)|)
+(plain Pollard rho with full automorphism folding).
+
+The theorem is proven via seven independent structural blocks and
+empirically verified across all four deployed curves via an
+automated Rust integration test that runs the full audit on every
+curve definition in the codebase. A surprising auxiliary finding:
+the Howe-gluing genus-2 cover exists for every such curve (we
+verify the three Howe (1996) conditions hold uniformly), but the
+cover does not yield a DLP speedup because genus-2 prime-field DLP
+costs O(p) while ECDLP costs O(sqrt(p)).
+
+The proof is unconditional in the sense that it depends only on
+established theorems (Tate, Howe, Gaudry, Diem-Thome) plus
+mechanically verifiable arithmetic conditions; it is conditional
+only on the standing assumption that no sub-exponential DLP
+algorithm is known for prime-field hyperelliptic Jacobians.
+
+A companion documentation note covers Mestre's algorithm for the
+actual explicit construction of the Howe-glued cover (open
+implementation task) and a parallel research proposal launches the
+orthogonal GLV-aware Hidden-Number Problem direction for the
+scalar-side attack surface.
+
+Companion artefacts (all open source, in the same repository as
+this submission):
+
+  - 13 PARI/GP scripts (~3000 lines) with committed baseline
+    outputs for reproducibility
+  - 1 Rust integration test (~390 lines) running the full audit on
+    every CurveParams constant via cargo test, plus a
+    freshly-generated CM curve at test time
+  - 5 supporting research notes covering the individual proposals
+    and the GLV-HNP / Mestre directions
