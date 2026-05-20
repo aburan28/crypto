@@ -142,14 +142,18 @@ pub fn rho_on_curve(curve: &SmallCurve, max_iters: u64, seed: u64) -> (Option<Rh
     // Pick a private scalar d in [1, n−1].
     let d = ((seed.wrapping_mul(0x9E3779B97F4A7C15) % (n - 1)) + 1) as u64;
     let h = g.scalar_mul(&BigUint::from(d), &a_fe);
-
-    // Pick a private scalar d in [1, n−1].
-    let d = ((seed.wrapping_mul(0x9E3779B97F4A7C15) % (n - 1)) + 1) as u64;
-    let h = g.scalar_mul(&BigUint::from(d), &a_fe);
     let _ = d;
 
     let n_big = BigUint::from(n);
-    r_adding_rho_on_curve(&g, &h, &n_big, &a_fe, max_iters, seed)
+    // Dispatch by scale: below 30-bit, the single-walker r-adding rho
+    // is faster than spinning up threads.  At ≥ 30 bit, the parallel
+    // distinguished-points variant amortises long-tail walks across
+    // K = 4 walkers sharing a DP table.
+    if n.leading_zeros() >= 34 {
+        r_adding_rho_on_curve(&g, &h, &n_big, &a_fe, max_iters, seed)
+    } else {
+        dp_parallel_rho_on_curve(&g, &h, &n_big, &a_fe, max_iters, seed)
+    }
 }
 
 /// **r-adding walk Pollard ρ for ECDLP**, with `r = 20` Teske buckets
@@ -327,6 +331,219 @@ fn r_adding_rho_on_curve(
         // sterile collision: re-randomise (a₀, b₀) and try again.
     }
     (None, max_iters)
+}
+
+/// **Distinguished-points rho with K parallel walkers** (round-6
+/// upgrade).  K = 4 walkers run the same r-adding walk with
+/// independent random starts.  Each walker emits a *distinguished
+/// point* (low `dp_bits` bits of `x` are zero) to a shared hash
+/// table; a hit from any other walker triggers the linear-equation
+/// recovery and signals all walkers to stop.
+///
+/// Compared to the sequential r-adding rho:
+/// * Wall time falls by ~`√K` for the typical case (each walker
+///   walks `√(πn/2)/√K` until they collide) — though the cap also
+///   shrinks per walker.
+/// * The **long-tail problem** that bit the 50-bit r=20 sweep is
+///   bounded: even if one walker draws a pathological start, the
+///   other K-1 walkers continue from independent positions and one
+///   of them is overwhelmingly likely to hit a DP already in the
+///   table.
+fn dp_parallel_rho_on_curve(
+    g: &Point,
+    h: &Point,
+    n: &BigUint,
+    a_fe: &crate::ecc::field::FieldElement,
+    max_iters: u64,
+    seed: u64,
+) -> (Option<RhoSolution>, u64) {
+    use crate::utils::mod_inverse;
+    use num_bigint::RandBigInt;
+    use num_integer::Integer;
+    use num_traits::One;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+    use std::collections::HashMap;
+    use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+    use std::sync::{Arc, Mutex};
+    let _ = One::one as fn() -> BigUint;
+
+    const K: usize = 4;
+    const R: usize = 20;
+
+    // Precompute r=20 adders.  Shared (immutable) across walkers.
+    let mut prng = StdRng::seed_from_u64(seed ^ 0xA5A5A5A5_5A5A5A5A);
+    let mut adders: Vec<(Point, BigUint, BigUint)> = Vec::with_capacity(R);
+    for _ in 0..R {
+        let ai = (&mut prng).gen_biguint_below(n);
+        let bi = (&mut prng).gen_biguint_below(n);
+        let pt = g.scalar_mul(&ai, a_fe).add(&h.scalar_mul(&bi, a_fe), a_fe);
+        adders.push((pt, ai, bi));
+    }
+    let adders = Arc::new(adders);
+
+    // DP threshold.  Heuristic: dp_bits ≈ bits(n)/4 — DP density
+    // ≈ 2^{-bits/4}, so each walker emits ~2^{bits/4} DPs in its
+    // √n budget.  At 50-bit that's ~32k DPs; table fits in memory.
+    let dp_bits = (((n.bits() as u32) / 4).max(8)).min(28) as u64;
+    let dp_mask = (1u64 << dp_bits) - 1;
+
+    let dp_table: Arc<Mutex<HashMap<u64, (BigUint, BigUint)>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+    let result: Arc<Mutex<Option<BigUint>>> = Arc::new(Mutex::new(None));
+    let total_iters = Arc::new(AtomicU64::new(0));
+    let done = Arc::new(AtomicBool::new(false));
+
+    let per_walker_cap = max_iters / K as u64;
+    let n_arc = Arc::new(n.clone());
+    let g_arc = Arc::new(g.clone());
+    let h_arc = Arc::new(h.clone());
+    let a_fe_arc = Arc::new(a_fe.clone());
+
+    let zero = BigUint::zero();
+    let _ = &zero;
+
+    let mut handles = Vec::with_capacity(K);
+    for wid in 0..K {
+        let adders = Arc::clone(&adders);
+        let dp_table = Arc::clone(&dp_table);
+        let result = Arc::clone(&result);
+        let total_iters = Arc::clone(&total_iters);
+        let done = Arc::clone(&done);
+        let n_arc = Arc::clone(&n_arc);
+        let g_arc = Arc::clone(&g_arc);
+        let h_arc = Arc::clone(&h_arc);
+        let a_fe_arc = Arc::clone(&a_fe_arc);
+
+        handles.push(std::thread::spawn(move || {
+            let n = &*n_arc;
+            let g_pt = &*g_arc;
+            let h_pt = &*h_arc;
+            let a_fe = &*a_fe_arc;
+            let mut wrng = StdRng::seed_from_u64(
+                seed.wrapping_add((wid as u64).wrapping_mul(0xC6BC279692B5C323)),
+            );
+
+            // Hash a point into [0, R) — splitmix64 mixer on (x, y).
+            let bucket = |pt: &Point| -> usize {
+                match pt {
+                    Point::Infinity => 0,
+                    Point::Affine { x, y } => {
+                        let xv = x.value.iter_u64_digits().next().unwrap_or(0);
+                        let yv = y.value.iter_u64_digits().next().unwrap_or(0);
+                        let mut z = xv.wrapping_add(yv.wrapping_mul(0x9E3779B97F4A7C15));
+                        z ^= z >> 30;
+                        z = z.wrapping_mul(0xBF58476D1CE4E5B9);
+                        z ^= z >> 27;
+                        z = z.wrapping_mul(0x94D049BB133111EB);
+                        z ^= z >> 31;
+                        (z as usize) % R
+                    }
+                }
+            };
+            let sub_mod = |a: &BigUint, b: &BigUint, m: &BigUint| -> BigUint {
+                if a >= b {
+                    (a - b) % m
+                } else {
+                    let diff = (b - a) % m;
+                    if diff.is_zero() { BigUint::zero() } else { m - diff }
+                }
+            };
+
+            // Random initial (a, b).
+            let a0 = (&mut wrng).gen_biguint_below(n);
+            let b0 = (&mut wrng).gen_biguint_below(n);
+            let mut pt = g_pt
+                .scalar_mul(&a0, a_fe)
+                .add(&h_pt.scalar_mul(&b0, a_fe), a_fe);
+            let mut a_acc = a0;
+            let mut b_acc = b0;
+            let mut local: u64 = 0;
+
+            while local < per_walker_cap {
+                if local & 0x3FF == 0 && done.load(Ordering::Relaxed) {
+                    break;
+                }
+                let bk = bucket(&pt);
+                let (add_pt, add_a, add_b) = &adders[bk];
+                pt = pt.add(add_pt, a_fe);
+                a_acc = (&a_acc + add_a) % n;
+                b_acc = (&b_acc + add_b) % n;
+                local += 1;
+
+                let x_low = match &pt {
+                    Point::Affine { x, .. } => x.value.iter_u64_digits().next().unwrap_or(0),
+                    Point::Infinity => continue,
+                };
+                if (x_low & dp_mask) == 0 {
+                    let mut tbl = dp_table.lock().unwrap();
+                    if let Some((prev_a, prev_b)) = tbl.get(&x_low).cloned() {
+                        drop(tbl);
+                        let lhs = sub_mod(&a_acc, &prev_a, n);
+                        let rhs = sub_mod(&prev_b, &b_acc, n);
+                        if rhs.is_zero() {
+                            continue;
+                        }
+                        let g_gcd = rhs.gcd(n);
+                        if g_gcd.is_one() {
+                            if let Some(inv) = mod_inverse(&rhs, n) {
+                                let x_val = (&lhs * &inv) % n;
+                                let test = g_pt.scalar_mul(&x_val, a_fe);
+                                if test == *h_pt {
+                                    let mut rg = result.lock().unwrap();
+                                    if rg.is_none() {
+                                        *rg = Some(x_val);
+                                        done.store(true, Ordering::Relaxed);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else if &lhs % &g_gcd == BigUint::zero() && g_gcd.bits() <= 16 {
+                            let m_red = n / &g_gcd;
+                            let lhs_red = &lhs / &g_gcd;
+                            let rhs_red = &rhs / &g_gcd;
+                            if let Some(inv) = mod_inverse(&rhs_red, &m_red) {
+                                let x_base = (&lhs_red * &inv) % &m_red;
+                                let g_u: u64 = g_gcd.iter_u64_digits().next().unwrap_or(0);
+                                let mut x_cand = x_base;
+                                let mut found = false;
+                                for _ in 0..g_u {
+                                    let test = g_pt.scalar_mul(&x_cand, a_fe);
+                                    if test == *h_pt {
+                                        let mut rg = result.lock().unwrap();
+                                        if rg.is_none() {
+                                            *rg = Some(x_cand);
+                                            done.store(true, Ordering::Relaxed);
+                                        }
+                                        found = true;
+                                        break;
+                                    }
+                                    x_cand = (&x_cand + &m_red) % n;
+                                }
+                                if found {
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        tbl.insert(x_low, (a_acc.clone(), b_acc.clone()));
+                    }
+                }
+            }
+            total_iters.fetch_add(local, Ordering::Relaxed);
+        }));
+    }
+
+    for h in handles {
+        let _ = h.join();
+    }
+
+    let total = total_iters.load(Ordering::Relaxed);
+    let final_x = result.lock().unwrap().take();
+    match final_x {
+        Some(x) => (Some(RhoSolution { x, iterations: total }), total),
+        None => (None, max_iters),
+    }
 }
 
 /// Top-level attack-suite runner.  Computes every feasibility

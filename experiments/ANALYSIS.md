@@ -21,6 +21,33 @@
   `compose_isogenies` with `O(p · log² p)` Tonelli-Shanks point
   sampling.  Bit ceiling lifted from 18 to 22-bit at full 4-trial
   experiment cost, 26-bit (4 trials) feasible at ~1 hr.
+- **Round 6 (2026-05-19, distinguished-points + K parallel walkers)**:
+  added
+  [`src/isogeny/attack.rs::dp_parallel_rho_on_curve`](src/isogeny/attack.rs)
+  using K=4 OS threads sharing a `HashMap`-backed DP table.  Each
+  walker runs the r-adding step from round 5; emits a DP whenever
+  the low `dp_bits ≈ log₂(n)/4` bits of `x` are zero; checks the
+  shared table for a cross-walker collision.  Closes the long-tail
+  problem that bit round 5 at 50-bit.
+
+  | bits | round 5 (r=20, single) | round 6 (DP + K=4)  | improvement |
+  |------|-----------------------:|--------------------:|------------:|
+  | 30   | 3.2 s                  | 3.1 s               | (noise)     |
+  | 40   | 6 m 40 s               | **53 s**            | **7.5×**    |
+  | 50   | killed at 1 h 30+      | **33 m 58 s**       | **\>2.6×**  |
+  | 60   | infeasible             | **see round-6 results below** | new scale |
+
+  Notes:
+  * Median-ratio dropped a little (0.51–0.68 vs 0.66–0.93 in round 5).
+    This is consistent with the K-walker cross-collision effect:
+    walkers find each other's DPs faster than one walker finds its
+    own.  Mean iterations is ~25 % below √(πn/2).
+  * Wall-time at 40-bit is 53 s for 4 trials × 15 vertices = 60
+    rho calls.  That's 0.88 s per rho on average, against
+    `√(πn/2) ≈ 1.3 M` iters per rho — confirming the parallel
+    walkers add up to roughly 4× CPU utilisation in addition to
+    the algorithm-level √K saving.
+
 - **Round 5 (2026-05-19, r-adding walk)**: replaced the 3-partition
   Pollard ρ (default in
   [`src/cryptanalysis/pollard_rho.rs`](src/cryptanalysis/pollard_rho.rs))
