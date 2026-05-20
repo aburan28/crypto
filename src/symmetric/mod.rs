@@ -131,4 +131,4 @@ pub use salsa20::{
 };
 pub use simon::{Simon128_128, Simon128_256, Simon64_128};
 pub use sm4::Sm4;
-pub use speck::{Speck128_128, Speck128_256, Speck64_128};
+// pub use speck::{Speck128_128, Speck128_256, Speck64_128};
