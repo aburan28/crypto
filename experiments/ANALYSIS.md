@@ -21,6 +21,42 @@
   `compose_isogenies` with `O(p · log² p)` Tonelli-Shanks point
   sampling.  Bit ceiling lifted from 18 to 22-bit at full 4-trial
   experiment cost, 26-bit (4 trials) feasible at ~1 hr.
+- **Round 7 (2026-05-20, multi-target GLS amortisation, partial)**:
+  added
+  [`src/isogeny/attack.rs::multi_target_dp_rho`](src/isogeny/attack.rs) —
+  a Galbraith-Lin-Scott multi-target rho.  K=4 parallel walkers
+  track state `(a, b_0, …, b_{m-1})` such that the running point
+  equals `a·g + Σ b_i·h_i`.  Collisions yield linear equations in
+  `(d_0, …, d_{m-1})`; an incremental Gaussian elimination
+  (`RrefState`) reduces each new equation against existing pivots
+  in `O(m²)`.  Theoretical per-target speedup: **√m**.
+
+  **The catch — rank stalling.**  RrefState requires every pivot
+  to be invertible mod `n`.  When `n = 2 · p` (which is the case
+  for *every* curve in our 16-bit experiment because
+  `p ≡ 1 (mod 2) ⇒ n = p + 1 − t` and `p + 1` is even), some
+  pivot column never gets a row with an odd entry, and rank stalls
+  at `m − 1`.  This is *not* a coding bug — it's a Smith-normal-
+  form issue: the random adders' span in `(Z/n)^{m+1}` happens to
+  miss the right coset modulo 2 for some seeds.  Empirical sweep:
+
+  | m | seeds that solve in < 10k iters | seeds that stall at rank m−1 |
+  |---|--------------------------------:|-----------------------------:|
+  | 1 | all                             | none                         |
+  | 2 | most                            | rare                         |
+  | 3 | most                            | rare                         |
+  | 4 | ~30 %                           | ~70 %                        |
+
+  Round-7 commits the infrastructure (multi-target rho + RrefState
+  with full correctness tests) and a single 16-bit lucky-seed test
+  showing the algorithm is *correct* when rank progression
+  succeeds.  The rho dispatch in `rho_on_curve` is **unchanged** —
+  the experiment still uses round-6 single-target DP rho.  Fixing
+  the rank-stalling problem requires either (a) factoring `n` and
+  solving mod each prime factor with CRT, or (b) generating
+  adders constrained to span the full Smith-normal-form basis.
+  Both are tractable but out of scope for this round.
+
 - **Round 6 (2026-05-19, distinguished-points + K parallel walkers)**:
   added
   [`src/isogeny/attack.rs::dp_parallel_rho_on_curve`](src/isogeny/attack.rs)

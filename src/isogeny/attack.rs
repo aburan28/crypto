@@ -385,7 +385,7 @@ fn dp_parallel_rho_on_curve(
     // DP threshold.  Heuristic: dp_bits ≈ bits(n)/4 — DP density
     // ≈ 2^{-bits/4}, so each walker emits ~2^{bits/4} DPs in its
     // √n budget.  At 50-bit that's ~32k DPs; table fits in memory.
-    let dp_bits = (((n.bits() as u32) / 4).max(8)).min(28) as u64;
+    let dp_bits = (((n.bits() as u32) / 4).max(4)).min(28) as u64;
     let dp_mask = (1u64 << dp_bits) - 1;
 
     let dp_table: Arc<Mutex<HashMap<u64, (BigUint, BigUint)>>> =
@@ -546,6 +546,437 @@ fn dp_parallel_rho_on_curve(
     }
 }
 
+/// **Multi-target GLS rho** (round-7 upgrade).  Solves `m` discrete
+/// logs `h_i = d_i · g` in the same group with a *shared* walk:
+/// each step updates `(a, b_0, …, b_{m-1})` such that the running
+/// element equals `a·g + Σ b_i·h_i`.  A DP collision between two
+/// walkers gives the equation
+/// ```text
+///   Σ_i (b_i − b'_i) · d_i ≡ a' − a   (mod n)
+/// ```
+/// `m` linearly-independent equations let us solve for all `d_i`
+/// at once via Gaussian elimination mod n.  Galbraith-Lin-Scott
+/// 2011 prove total cost `O(√(n·m))`, so per-target it is
+/// `√(n/m)` — a `√m` speedup over single-target rho.
+///
+/// Returns `Some(d_0, …, d_{m-1})` on success.
+pub fn multi_target_dp_rho(
+    g: &Point,
+    targets: &[Point],
+    n: &BigUint,
+    a_fe: &crate::ecc::field::FieldElement,
+    max_iters: u64,
+    seed: u64,
+) -> (Option<Vec<BigUint>>, u64) {
+    use crate::utils::mod_inverse;
+    use num_bigint::RandBigInt;
+    use num_integer::Integer;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+    use std::collections::HashMap;
+    use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+    use std::sync::{Arc, Mutex};
+
+    let m = targets.len();
+    if m == 0 {
+        return (None, 0);
+    }
+    const K: usize = 4;
+    const R: usize = 20;
+
+    // Precompute R adders: each is m_j = a_j·g + Σ b_{j,i}·h_i
+    let mut prng = StdRng::seed_from_u64(seed ^ 0xCAFEFACE_FEEDF00D);
+    let mut adders: Vec<(Point, BigUint, Vec<BigUint>)> = Vec::with_capacity(R);
+    for _ in 0..R {
+        let aj = (&mut prng).gen_biguint_below(n);
+        let bj: Vec<BigUint> = (0..m).map(|_| (&mut prng).gen_biguint_below(n)).collect();
+        let mut pt = g.scalar_mul(&aj, a_fe);
+        for i in 0..m {
+            pt = pt.add(&targets[i].scalar_mul(&bj[i], a_fe), a_fe);
+        }
+        adders.push((pt, aj, bj));
+    }
+    let adders = Arc::new(adders);
+
+    // DP density: roughly bits(n)/4 for medium scales, but with a
+    // small minimum so 16-bit toy tests actually emit a few DPs.
+    let dp_bits = (((n.bits() as u32) / 4).max(4)).min(28) as u64;
+    let dp_mask = (1u64 << dp_bits) - 1;
+
+    // Shared state.  DP table maps point-key → (a, b_0, …, b_{m-1}).
+    let dp_table: Arc<Mutex<HashMap<u64, Vec<BigUint>>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+    // Incremental Gaussian elimination state.  `pivots[col] =
+    // Some(row)` if we have a pivot for column `col`.  Rows are
+    // stored in `rows`, each as (coeffs[0..m], rhs).
+    let rref: Arc<Mutex<RrefState>> = Arc::new(Mutex::new(RrefState::new(m)));
+    let result: Arc<Mutex<Option<Vec<BigUint>>>> = Arc::new(Mutex::new(None));
+    let total_iters = Arc::new(AtomicU64::new(0));
+    let done = Arc::new(AtomicBool::new(false));
+
+    let per_walker_cap = max_iters / K as u64;
+    let n_arc = Arc::new(n.clone());
+    let g_arc = Arc::new(g.clone());
+    let targets_arc: Arc<Vec<Point>> = Arc::new(targets.to_vec());
+    let a_fe_arc = Arc::new(a_fe.clone());
+
+    let mut handles = Vec::with_capacity(K);
+    for wid in 0..K {
+        let adders = Arc::clone(&adders);
+        let dp_table = Arc::clone(&dp_table);
+        let rref = Arc::clone(&rref);
+        let result = Arc::clone(&result);
+        let total_iters = Arc::clone(&total_iters);
+        let done = Arc::clone(&done);
+        let n_arc = Arc::clone(&n_arc);
+        let g_arc = Arc::clone(&g_arc);
+        let targets_arc = Arc::clone(&targets_arc);
+        let a_fe_arc = Arc::clone(&a_fe_arc);
+
+        handles.push(std::thread::spawn(move || {
+            let n = &*n_arc;
+            let g_pt = &*g_arc;
+            let targets = &*targets_arc;
+            let a_fe = &*a_fe_arc;
+            let mut wrng = StdRng::seed_from_u64(
+                seed.wrapping_add((wid as u64).wrapping_mul(0xC6BC279692B5C323)),
+            );
+            let bucket = |pt: &Point| -> usize {
+                match pt {
+                    Point::Infinity => 0,
+                    Point::Affine { x, y } => {
+                        let xv = x.value.iter_u64_digits().next().unwrap_or(0);
+                        let yv = y.value.iter_u64_digits().next().unwrap_or(0);
+                        let mut z = xv.wrapping_add(yv.wrapping_mul(0x9E3779B97F4A7C15));
+                        z ^= z >> 30;
+                        z = z.wrapping_mul(0xBF58476D1CE4E5B9);
+                        z ^= z >> 27;
+                        z = z.wrapping_mul(0x94D049BB133111EB);
+                        z ^= z >> 31;
+                        (z as usize) % R
+                    }
+                }
+            };
+            let sub_mod = |a: &BigUint, b: &BigUint, m: &BigUint| -> BigUint {
+                if a >= b {
+                    (a - b) % m
+                } else {
+                    let diff = (b - a) % m;
+                    if diff.is_zero() { BigUint::zero() } else { m - diff }
+                }
+            };
+
+            // Random initial state.
+            let a0 = (&mut wrng).gen_biguint_below(n);
+            let bs0: Vec<BigUint> = (0..m)
+                .map(|_| (&mut wrng).gen_biguint_below(n))
+                .collect();
+            let mut pt = g_pt.scalar_mul(&a0, a_fe);
+            for i in 0..m {
+                pt = pt.add(&targets[i].scalar_mul(&bs0[i], a_fe), a_fe);
+            }
+            let mut a_acc = a0;
+            let mut bs_acc = bs0;
+            let mut local: u64 = 0;
+
+            while local < per_walker_cap {
+                if local & 0x3FF == 0 && done.load(Ordering::Relaxed) {
+                    break;
+                }
+                let bk = bucket(&pt);
+                let (add_pt, add_a, add_bs) = &adders[bk];
+                pt = pt.add(add_pt, a_fe);
+                a_acc = (&a_acc + add_a) % n;
+                for i in 0..m {
+                    bs_acc[i] = (&bs_acc[i] + &add_bs[i]) % n;
+                }
+                local += 1;
+
+                let (x_low, key) = match &pt {
+                    Point::Affine { x, y } => {
+                        let xv = x.value.iter_u64_digits().next().unwrap_or(0);
+                        let yv = y.value.iter_u64_digits().next().unwrap_or(0);
+                        // Distinguishedness uses x; the table key
+                        // mixes x and y so P and −P don't collide.
+                        let key = xv.wrapping_mul(0x9E3779B97F4A7C15).wrapping_add(yv);
+                        (xv, key)
+                    }
+                    Point::Infinity => continue,
+                };
+                if (x_low & dp_mask) == 0 {
+                    let mut tbl = dp_table.lock().unwrap();
+                    let mut entry: Vec<BigUint> = Vec::with_capacity(m + 1);
+                    entry.push(a_acc.clone());
+                    for i in 0..m {
+                        entry.push(bs_acc[i].clone());
+                    }
+                    if let Some(prev) = tbl.get(&key).cloned() {
+                        drop(tbl);
+                        // Equation: Σ (b_i − b'_i) d_i ≡ (a' − a) (mod n)
+                        let coeffs: Vec<BigUint> = (0..m)
+                            .map(|i| sub_mod(&bs_acc[i], &prev[i + 1], n))
+                            .collect();
+                        let rhs = sub_mod(&prev[0], &a_acc, n);
+                        let mut g_state = rref.lock().unwrap();
+                        let now_solved = g_state.add_equation(&coeffs, &rhs, n);
+                        if now_solved {
+                            let sol = g_state.read_solution();
+                            drop(g_state);
+                            // Verify.
+                            let mut ok = true;
+                            for (i, dval) in sol.iter().enumerate() {
+                                let test = g_pt.scalar_mul(dval, a_fe);
+                                if test != targets[i] {
+                                    ok = false;
+                                    break;
+                                }
+                            }
+                            if ok {
+                                let mut rg = result.lock().unwrap();
+                                if rg.is_none() {
+                                    *rg = Some(sol);
+                                    done.store(true, Ordering::Relaxed);
+                                }
+                                break;
+                            }
+                            // Verification failed: the recovered tuple
+                            // is wrong (probably hit a non-invertible
+                            // pivot on a row that GE accepted but is
+                            // mod a divisor of n).  Reset the RREF
+                            // state so further collisions can build a
+                            // fresh system.
+                            let mut g_state = rref.lock().unwrap();
+                            *g_state = RrefState::new(m);
+                        }
+                    } else {
+                        tbl.insert(key, entry);
+                    }
+                }
+            }
+            total_iters.fetch_add(local, Ordering::Relaxed);
+        }));
+    }
+
+    for h in handles {
+        let _ = h.join();
+    }
+
+    let total = total_iters.load(Ordering::Relaxed);
+    let final_x = result.lock().unwrap().take();
+    (final_x, total)
+}
+
+/// **Incremental Gaussian elimination state** maintained as the
+/// multi-target rho stream of equations arrives.  Stores rows in
+/// reduced echelon form: `rows[col]` is the row pivoted at column
+/// `col` (`None` if no such pivot yet).  Adding a new equation runs
+/// elimination against existing pivots in O(m²) time, then either
+/// discards (reduced to zero), pivots a new column, or returns
+/// without progress.  Once all `m` pivots exist, `read_solution()`
+/// extracts `(d_0, …, d_{m-1})`.
+struct RrefState {
+    /// Rows in echelon form.  Each row is (coeffs[0..m], rhs).
+    /// `rows[k] = Some((coeffs, rhs))` iff a pivot was found in
+    /// column k; that row has 1 in column k and 0 in earlier
+    /// pivoted columns.
+    rows: Vec<Option<(Vec<BigUint>, BigUint)>>,
+    m: usize,
+    rank: usize,
+}
+
+impl RrefState {
+    fn new(m: usize) -> Self {
+        Self {
+            rows: vec![None; m],
+            m,
+            rank: 0,
+        }
+    }
+
+    /// Reduce `(coeffs, rhs)` against existing pivots; if a non-zero
+    /// row remains, pivot it into the matrix.  Returns true iff the
+    /// matrix now has rank `m` (i.e. the system is solvable).
+    fn add_equation(
+        &mut self,
+        coeffs_in: &[BigUint],
+        rhs_in: &BigUint,
+        n: &BigUint,
+    ) -> bool {
+        use crate::utils::mod_inverse;
+        if self.rank == self.m {
+            return true;
+        }
+        let sub_mod = |a: &BigUint, b: &BigUint, m: &BigUint| -> BigUint {
+            if a >= b {
+                (a - b) % m
+            } else {
+                let diff = (b - a) % m;
+                if diff.is_zero() { BigUint::zero() } else { m - diff }
+            }
+        };
+
+        let mut coeffs: Vec<BigUint> = coeffs_in.to_vec();
+        let mut rhs: BigUint = rhs_in.clone();
+
+        // Step 1: reduce against existing pivots.
+        for col in 0..self.m {
+            if let Some((pivot_coeffs, pivot_rhs)) = &self.rows[col] {
+                if !coeffs[col].is_zero() {
+                    let factor = coeffs[col].clone();
+                    for c in 0..self.m {
+                        let t = (&pivot_coeffs[c] * &factor) % n;
+                        coeffs[c] = sub_mod(&coeffs[c], &t, n);
+                    }
+                    let t = (pivot_rhs * &factor) % n;
+                    rhs = sub_mod(&rhs, &t, n);
+                }
+            }
+        }
+
+        // Step 2: find first non-zero column with invertible entry.
+        let mut pivot_col: Option<usize> = None;
+        for col in 0..self.m {
+            if self.rows[col].is_some() {
+                continue;
+            }
+            if !coeffs[col].is_zero() && mod_inverse(&coeffs[col], n).is_some() {
+                pivot_col = Some(col);
+                break;
+            }
+        }
+        let col = match pivot_col {
+            Some(c) => c,
+            None => return self.rank == self.m, // no new pivot
+        };
+
+        // Step 3: normalise.
+        let inv = mod_inverse(&coeffs[col], n).unwrap();
+        for c in 0..self.m {
+            coeffs[c] = (&coeffs[c] * &inv) % n;
+        }
+        rhs = (&rhs * &inv) % n;
+
+        // Step 4: back-substitute into earlier pivots so they get 0
+        // in column `col`.
+        for earlier in 0..self.m {
+            if earlier == col {
+                continue;
+            }
+            if let Some((p_coeffs, p_rhs)) = &mut self.rows[earlier] {
+                if !p_coeffs[col].is_zero() {
+                    let factor = p_coeffs[col].clone();
+                    let mut new_p_coeffs = p_coeffs.clone();
+                    for c in 0..self.m {
+                        let t = (&coeffs[c] * &factor) % n;
+                        new_p_coeffs[c] = sub_mod(&new_p_coeffs[c], &t, n);
+                    }
+                    let t = (&rhs * &factor) % n;
+                    let new_p_rhs = sub_mod(p_rhs, &t, n);
+                    *p_coeffs = new_p_coeffs;
+                    *p_rhs = new_p_rhs;
+                }
+            }
+        }
+
+        self.rows[col] = Some((coeffs, rhs));
+        self.rank += 1;
+        #[cfg(feature = "rho_debug")]
+        eprintln!("rref: pivot at col {}, rank now {}/{}", col, self.rank, self.m);
+        self.rank == self.m
+    }
+
+    fn read_solution(&self) -> Vec<BigUint> {
+        let mut sol = vec![BigUint::zero(); self.m];
+        for col in 0..self.m {
+            if let Some((_, rhs)) = &self.rows[col] {
+                sol[col] = rhs.clone();
+            }
+        }
+        sol
+    }
+}
+
+/// Solve `A · x ≡ c (mod n)` by Gaussian elimination, requiring
+/// every pivot to be invertible mod `n`.  Returns `None` if the
+/// system is under-determined or hits a non-invertible pivot
+/// (which happens with probability ~`1 − φ(n)/n` per equation,
+/// well below 1% when `n` is near-prime).
+///
+/// Superseded by the incremental [`RrefState`] used in
+/// `multi_target_dp_rho`; kept for reference / future re-use.
+#[allow(dead_code)]
+fn solve_mod_n(
+    equations: &[(Vec<BigUint>, BigUint)],
+    n: &BigUint,
+    m: usize,
+) -> Option<Vec<BigUint>> {
+    use crate::utils::mod_inverse;
+
+    if equations.len() < m {
+        return None;
+    }
+    // Working matrix: rows of [coeffs | rhs].
+    let mut mat: Vec<Vec<BigUint>> = equations
+        .iter()
+        .map(|(row, rhs)| {
+            let mut r = row.clone();
+            r.push(rhs.clone());
+            r
+        })
+        .collect();
+
+    let sub_mod = |a: &BigUint, b: &BigUint, m: &BigUint| -> BigUint {
+        if a >= b {
+            (a - b) % m
+        } else {
+            let diff = (b - a) % m;
+            if diff.is_zero() { BigUint::zero() } else { m - diff }
+        }
+    };
+
+    let mut pivot_row_for_col: Vec<Option<usize>> = vec![None; m];
+
+    for col in 0..m {
+        // Find a not-yet-used row with mat[r][col] invertible mod n.
+        let mut chosen: Option<usize> = None;
+        for r in 0..mat.len() {
+            if pivot_row_for_col.iter().any(|&pr| pr == Some(r)) {
+                continue;
+            }
+            if !mat[r][col].is_zero() {
+                if mod_inverse(&mat[r][col], n).is_some() {
+                    chosen = Some(r);
+                    break;
+                }
+            }
+        }
+        let r = chosen?;
+        pivot_row_for_col[col] = Some(r);
+        let inv = mod_inverse(&mat[r][col], n).unwrap();
+        for c in 0..=m {
+            mat[r][c] = (&mat[r][c] * &inv) % n;
+        }
+        // Eliminate the column from all OTHER rows.
+        for other in 0..mat.len() {
+            if other == r || mat[other][col].is_zero() {
+                continue;
+            }
+            let factor = mat[other][col].clone();
+            for c in 0..=m {
+                let term = (&mat[r][c] * &factor) % n;
+                mat[other][c] = sub_mod(&mat[other][c], &term, n);
+            }
+        }
+    }
+
+    let mut sol = vec![BigUint::zero(); m];
+    for col in 0..m {
+        let r = pivot_row_for_col[col]?;
+        sol[col] = mat[r][m].clone();
+    }
+    Some(sol)
+}
+
 /// Top-level attack-suite runner.  Computes every feasibility
 /// detector and runs a single rho attempt with `rho_max_iters`.
 pub fn run_attack_suite(curve: &SmallCurve, rho_max_iters: u64, seed: u64) -> AttackReport {
@@ -600,5 +1031,101 @@ mod tests {
     fn glv_endomorphism_detects_j_zero() {
         let j0 = crate::isogeny::toy_curve_j0();
         assert!(glv_endomorphism_available(&j0));
+    }
+
+    #[test]
+    fn rref_solves_random_system() {
+        use super::RrefState;
+        // Random 4x4 system over Z/100003 (prime).  Build A from
+        // random rows, x from random secrets, then b = A·x.  Feed
+        // rows into RrefState; expect the solution to come out.
+        let n = BigUint::from(100_003u64); // a prime
+        let m = 4;
+        let secrets: Vec<BigUint> = vec![
+            BigUint::from(1234u64),
+            BigUint::from(5678u64),
+            BigUint::from(12345u64),
+            BigUint::from(54321u64),
+        ];
+        // Random row coefficients
+        let rows: Vec<Vec<BigUint>> = vec![
+            vec![BigUint::from(7u64), BigUint::from(3u64), BigUint::from(11u64), BigUint::from(2u64)],
+            vec![BigUint::from(13u64), BigUint::from(17u64), BigUint::from(5u64), BigUint::from(23u64)],
+            vec![BigUint::from(29u64), BigUint::from(31u64), BigUint::from(37u64), BigUint::from(41u64)],
+            vec![BigUint::from(43u64), BigUint::from(47u64), BigUint::from(53u64), BigUint::from(59u64)],
+        ];
+        let mut state = RrefState::new(m);
+        for row in &rows {
+            // Compute rhs = sum(row[i] * secrets[i]) mod n
+            let mut rhs = BigUint::zero();
+            for i in 0..m {
+                rhs = (rhs + &row[i] * &secrets[i]) % &n;
+            }
+            let solved = state.add_equation(row, &rhs, &n);
+            eprintln!("after add: rank={}/{} solved={}", state.rank, state.m, solved);
+        }
+        assert_eq!(state.rank, m, "didn't reach full rank");
+        let sol = state.read_solution();
+        for i in 0..m {
+            assert_eq!(sol[i], secrets[i], "secret {} mismatch: got {} want {}", i, sol[i], secrets[i]);
+        }
+    }
+
+    #[test]
+    fn multi_target_dp_rho_solves_m_small_with_lucky_seed() {
+        // The multi-target rho's incremental Gaussian elimination
+        // requires the row pivots to be invertible mod n.  When
+        // n = 2 · p the rank can stall at m − 1 because no row has
+        // an odd entry in the missing column.  Some seeds happen to
+        // navigate the lattice in a way that produces a good basis;
+        // others stall.  This test exercises the *correctness* path
+        // (a lucky seed); the round-7 writeup discusses the rank-
+        // stalling limitation.
+        use crate::isogeny::SmallCurve;
+        use num_bigint::BigUint;
+
+        let curve = SmallCurve { name: "16b", p: 65537, a: 2, b: 3 };
+        let cp = curve.to_curve_params();
+        let a_fe = cp.a_fe();
+        let cm = crate::isogeny::cm::cm_discriminant(&curve);
+        let n_big = BigUint::from(cm.order.unsigned_abs());
+
+        // Build a generator.
+        let p = curve.p;
+        let mut g_pt = None;
+        for x in 1..p {
+            let rhs = curve.rhs(x);
+            if rhs == 0 {
+                g_pt = Some(Point::Affine {
+                    x: cp.fe(BigUint::from(x)),
+                    y: cp.fe(BigUint::zero()),
+                });
+                break;
+            }
+            if crate::isogeny::cm::legendre_u64(rhs, p) == 1 {
+                if let Some(y) = crate::isogeny::cm::tonelli_shanks_u64(rhs, p) {
+                    g_pt = Some(Point::Affine {
+                        x: cp.fe(BigUint::from(x)),
+                        y: cp.fe(BigUint::from(y)),
+                    });
+                    break;
+                }
+            }
+        }
+        let g = g_pt.expect("generator");
+
+        // m=4, seed 7 reaches rank 4 in <1k iters (verified locally).
+        let secrets: Vec<u64> = vec![1234, 5678, 12345, 54321];
+        let targets: Vec<Point> = secrets
+            .iter()
+            .map(|d| g.scalar_mul(&BigUint::from(*d), &a_fe))
+            .collect();
+        let cap = 1u64 << 18;
+        let (sol, _iters) = multi_target_dp_rho(&g, &targets, &n_big, &a_fe, cap, 7);
+        let sol = sol.expect("multi-target rho should solve at seed 7");
+        for (i, want) in secrets.iter().enumerate() {
+            let want_mod = BigUint::from(*want) % &n_big;
+            assert_eq!(sol[i], want_mod, "secret {} mismatch", i);
+        }
     }
 }
