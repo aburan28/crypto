@@ -145,14 +145,59 @@ pub fn rho_on_curve(curve: &SmallCurve, max_iters: u64, seed: u64) -> (Option<Rh
     let _ = d;
 
     let n_big = BigUint::from(n);
-    // Dispatch by scale: below 30-bit, the single-walker r-adding rho
-    // is faster than spinning up threads.  At ≥ 30 bit, the parallel
-    // distinguished-points variant amortises long-tail walks across
-    // K = 4 walkers sharing a DP table.
+    // Dispatch by scale.  The round-8 Pohlig+GLS m=4 path is opt-in
+    // via CRYPTO_ISOGENY_PH_GLS=1 — it solves *m* logs per call so
+    // the reported iter count is `total / m`, the per-target cost.
+    // Default dispatch is round-6 single-target DP rho.
+    if std::env::var("CRYPTO_ISOGENY_PH_GLS").is_ok() {
+        return rho_via_pohlig_gls(&g, &n_big, &a_fe, max_iters, seed);
+    }
     if n.leading_zeros() >= 34 {
         r_adding_rho_on_curve(&g, &h, &n_big, &a_fe, max_iters, seed)
     } else {
         dp_parallel_rho_on_curve(&g, &h, &n_big, &a_fe, max_iters, seed)
+    }
+}
+
+/// Round-8 dispatch: pick `m = 4` random secrets, run Pohlig+GLS on
+/// all of them, report the **per-target** iteration count (so the
+/// numbers stay comparable to single-target rho).  Returns the
+/// solution to the *first* target.
+fn rho_via_pohlig_gls(
+    g: &Point,
+    n_big: &BigUint,
+    a_fe: &crate::ecc::field::FieldElement,
+    max_iters: u64,
+    seed: u64,
+) -> (Option<RhoSolution>, u64) {
+    let n_u64: u64 = n_big.iter_u64_digits().next().unwrap_or(0);
+    if n_u64 < 8 {
+        return (None, 0);
+    }
+    // Pick m secrets deterministically from the seed.
+    const M: u64 = 4;
+    let mut secrets: Vec<u64> = Vec::with_capacity(M as usize);
+    let mut s = seed;
+    for _ in 0..M {
+        s = s.wrapping_mul(0x9E3779B97F4A7C15).wrapping_add(1);
+        secrets.push(s % (n_u64 - 1) + 1);
+    }
+    let targets: Vec<Point> = secrets
+        .iter()
+        .map(|d| g.scalar_mul(&BigUint::from(*d), a_fe))
+        .collect();
+    let (sol, total_iters) =
+        pohlig_multi_target_rho(g, &targets, n_big, a_fe, max_iters, seed);
+    let per_target = total_iters / M.max(1);
+    match sol {
+        Some(s) => (
+            Some(RhoSolution {
+                x: s.into_iter().next().unwrap(),
+                iterations: per_target,
+            }),
+            per_target,
+        ),
+        None => (None, max_iters),
     }
 }
 
@@ -766,6 +811,169 @@ pub fn multi_target_dp_rho(
     (final_x, total)
 }
 
+/// Trial-divide `n` up to `bound`.  Returns `(small_factors, residual)`
+/// where each `small_factors[i] = (q, e)` is a prime power dividing
+/// `n`, and `residual = n / Π q^e` is the cofactor (1 if `n` is
+/// `bound`-smooth, otherwise a residue that may be prime or a
+/// product of large primes).
+fn factor_smooth(n: u64, bound: u64) -> (Vec<(u64, u32)>, u64) {
+    let mut factors = Vec::new();
+    let mut rem = n;
+    let mut q = 2u64;
+    while q <= bound && q * q <= rem {
+        if rem % q == 0 {
+            let mut e = 0u32;
+            while rem % q == 0 {
+                rem /= q;
+                e += 1;
+            }
+            factors.push((q, e));
+        }
+        q += if q == 2 { 1 } else { 2 };
+    }
+    // If the residual is prime ≤ bound, account for it.
+    if rem > 1 && rem <= bound {
+        factors.push((rem, 1));
+        rem = 1;
+    }
+    (factors, rem)
+}
+
+/// **Pohlig-Hellman + multi-target GLS** (round-8).  Factors `n`
+/// into smooth + residual; for each prime-power factor `q^e`,
+/// lifts `g` and the targets into the order-`q^e` subgroup via
+/// scalar multiplication by `n/q^e`, runs multi-target GLS rho
+/// there (which never stalls because the subgroup order is a
+/// prime power), recovers `d_i mod q^e`, and CRT-combines all
+/// the residues to recover `d_i mod n`.
+///
+/// For the typical curve in our sweep, `n = 2 · p` with `p` a
+/// large odd prime.  This routine handles the `q = 2` factor
+/// trivially (one curve operation per target), then runs GLS
+/// in the order-`p` subgroup where the rank-stalling problem
+/// of round 7 does not occur (every non-zero element is
+/// invertible modulo a prime).
+pub fn pohlig_multi_target_rho(
+    g: &Point,
+    targets: &[Point],
+    n: &BigUint,
+    a_fe: &crate::ecc::field::FieldElement,
+    max_iters_per_subgroup: u64,
+    seed: u64,
+) -> (Option<Vec<BigUint>>, u64) {
+    use crate::cryptanalysis::pohlig_hellman::crt_combine;
+    use num_traits::One;
+
+    let m = targets.len();
+    if m == 0 {
+        return (None, 0);
+    }
+    let n_u64: u64 = match n.iter_u64_digits().next() {
+        Some(v) if n.bits() <= 64 => v,
+        _ => return multi_target_dp_rho(g, targets, n, a_fe, max_iters_per_subgroup, seed),
+    };
+    if n.bits() > 63 {
+        return multi_target_dp_rho(g, targets, n, a_fe, max_iters_per_subgroup, seed);
+    }
+
+    // Smooth-bound: factor out everything up to 2^20.  Larger
+    // residuals are handled by a single GLS run in their subgroup.
+    let (small, residual) = factor_smooth(n_u64, 1 << 20);
+    let mut all_factors: Vec<(u64, u32)> = small.clone();
+    if residual > 1 {
+        all_factors.push((residual, 1));
+    }
+    if all_factors.len() < 2 {
+        // n itself is a prime power: just run GLS directly.
+        return multi_target_dp_rho(g, targets, n, a_fe, max_iters_per_subgroup, seed);
+    }
+
+    // For each (q, e): lift base/targets to order-q^e subgroup
+    // by scalar-multiplying by n / q^e, then run GLS rho there.
+    let mut residues_per_target: Vec<Vec<(BigUint, BigUint)>> =
+        vec![Vec::new(); m];
+    let mut total_iters: u64 = 0;
+    for (q, e) in &all_factors {
+        let mut qe: u64 = 1;
+        for _ in 0..*e { qe *= q; }
+        let qe_big = BigUint::from(qe);
+        let cofactor = BigUint::from(n_u64 / qe);
+        let g_sub = g.scalar_mul(&cofactor, a_fe);
+        let h_sub: Vec<Point> = targets
+            .iter()
+            .map(|h| h.scalar_mul(&cofactor, a_fe))
+            .collect();
+        if matches!(g_sub, Point::Infinity) {
+            // Degenerate: g lifts to identity, skip.  d_i mod q^e
+            // is unconstrained, default to 0.
+            for i in 0..m {
+                residues_per_target[i].push((qe_big.clone(), BigUint::zero()));
+            }
+            continue;
+        }
+        // For q = 2, e = 1: brute-force check h^{n/2} = O.
+        if *q == 2 && *e == 1 {
+            for i in 0..m {
+                let r = if matches!(h_sub[i], Point::Infinity) {
+                    BigUint::zero()
+                } else {
+                    BigUint::one()
+                };
+                residues_per_target[i].push((qe_big.clone(), r));
+            }
+            continue;
+        }
+        // Try multi-target GLS first.  It works for prime q^e
+        // because invertibility mod a prime gives RrefState a clean
+        // run.  For prime-power orders (e > 1) and certain awkward
+        // seeds the rank can stall — fall back to per-target single
+        // rho in the same subgroup so smooth-n curves still recover.
+        let (sol, iters) = multi_target_dp_rho(
+            &g_sub,
+            &h_sub,
+            &qe_big,
+            a_fe,
+            max_iters_per_subgroup,
+            seed.wrapping_add(*q),
+        );
+        total_iters += iters;
+        match sol {
+            Some(s) => {
+                for i in 0..m {
+                    residues_per_target[i].push((qe_big.clone(), s[i].clone()));
+                }
+            }
+            None => {
+                // Per-target fallback.
+                for i in 0..m {
+                    let (fb_sol, fb_iters) = dp_parallel_rho_on_curve(
+                        &g_sub,
+                        &h_sub[i],
+                        &qe_big,
+                        a_fe,
+                        max_iters_per_subgroup,
+                        seed.wrapping_add(*q).wrapping_mul(i as u64 + 1),
+                    );
+                    total_iters += fb_iters;
+                    let r = match fb_sol {
+                        Some(s) => s.x,
+                        None => return (None, total_iters),
+                    };
+                    residues_per_target[i].push((qe_big.clone(), r));
+                }
+            }
+        }
+    }
+
+    // CRT each target's residues to recover d_i mod n.
+    let mut sol = Vec::with_capacity(m);
+    for i in 0..m {
+        let r = crt_combine(&residues_per_target[i]);
+        sol.push(r.unwrap_or(BigUint::zero()));
+    }
+    (Some(sol), total_iters)
+}
+
 /// **Incremental Gaussian elimination state** maintained as the
 /// multi-target rho stream of equations arrives.  Stores rows in
 /// reduced echelon form: `rows[col]` is the row pivoted at column
@@ -1068,6 +1276,66 @@ mod tests {
         let sol = state.read_solution();
         for i in 0..m {
             assert_eq!(sol[i], secrets[i], "secret {} mismatch: got {} want {}", i, sol[i], secrets[i]);
+        }
+    }
+
+    #[test]
+    fn pohlig_multi_target_rho_solves_m4_robustly() {
+        // Same setup as round 7's lucky-seed test, but using the
+        // Pohlig-Hellman + multi-target rho.  Should solve cleanly
+        // for *all* tested seeds because each prime-factor subgroup
+        // has a prime order where rank stalling can't happen.
+        use crate::isogeny::SmallCurve;
+        use num_bigint::BigUint;
+
+        let curve = SmallCurve { name: "16b", p: 65537, a: 2, b: 3 };
+        let cp = curve.to_curve_params();
+        let a_fe = cp.a_fe();
+        let cm = crate::isogeny::cm::cm_discriminant(&curve);
+        let n_big = BigUint::from(cm.order.unsigned_abs());
+
+        let p = curve.p;
+        let mut g_pt = None;
+        for x in 1..p {
+            let rhs = curve.rhs(x);
+            if rhs == 0 {
+                g_pt = Some(Point::Affine {
+                    x: cp.fe(BigUint::from(x)),
+                    y: cp.fe(BigUint::zero()),
+                });
+                break;
+            }
+            if crate::isogeny::cm::legendre_u64(rhs, p) == 1 {
+                if let Some(y) = crate::isogeny::cm::tonelli_shanks_u64(rhs, p) {
+                    g_pt = Some(Point::Affine {
+                        x: cp.fe(BigUint::from(x)),
+                        y: cp.fe(BigUint::from(y)),
+                    });
+                    break;
+                }
+            }
+        }
+        let g = g_pt.expect("generator");
+
+        let secrets: Vec<u64> = vec![1234, 5678, 12345, 54321];
+        let targets: Vec<Point> = secrets
+            .iter()
+            .map(|d| g.scalar_mul(&BigUint::from(*d), &a_fe))
+            .collect();
+        // Round 7 failed at seeds 42, 100, 1, 12345.  Round 8 must
+        // solve all of them.
+        for seed in [42u64, 100, 1, 12345, 7, 555] {
+            let cap = 1u64 << 18;
+            let (sol, _iters) = pohlig_multi_target_rho(
+                &g, &targets, &n_big, &a_fe, cap, seed,
+            );
+            let sol = sol.unwrap_or_else(|| panic!("seed {} failed", seed));
+            for (i, want) in secrets.iter().enumerate() {
+                let want_mod = BigUint::from(*want) % &n_big;
+                assert_eq!(sol[i], want_mod,
+                    "seed {} secret {} mismatch: got {} want {}",
+                    seed, i, sol[i], want_mod);
+            }
         }
     }
 

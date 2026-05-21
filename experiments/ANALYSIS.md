@@ -21,6 +21,45 @@
   `compose_isogenies` with `O(p · log² p)` Tonelli-Shanks point
   sampling.  Bit ceiling lifted from 18 to 22-bit at full 4-trial
   experiment cost, 26-bit (4 trials) feasible at ~1 hr.
+- **Round 8 (2026-05-20, Pohlig-Hellman + multi-target GLS)**: added
+  [`pohlig_multi_target_rho`](src/isogeny/attack.rs) — wraps the
+  round-7 `multi_target_dp_rho` in a Pohlig-Hellman outer loop.
+  Factors `n` into prime powers, lifts the base & targets into each
+  order-`q^e` subgroup via scalar-multiplying by `n/q^e`, runs GLS
+  there, CRT-combines the per-prime residues to recover the secrets
+  mod `n`.  When GLS stalls inside a subgroup (e.g. for the
+  `q = 2^e` factor of a smooth `n`), the loop falls back to per-
+  target round-6 dp-parallel rho in that subgroup.
+
+  Tests:
+  * `pohlig_multi_target_rho_solves_m4_robustly` — exercises the
+    16-bit `n = 2 · prime` setup at **all** seeds that failed in
+    round 7.  Round 8 solves them cleanly.
+
+  Optional dispatch: setting `CRYPTO_ISOGENY_PH_GLS=1` routes
+  `rho_on_curve` through `rho_via_pohlig_gls`, which picks `m=4`
+  random secrets and reports the per-target iteration count.
+
+  **Empirical result is mixed.**  At 22-bit (4 trials):
+
+  | dispatch | mean iters / target | wall |
+  |----------|---------------------:|------:|
+  | round-6 single-target | 3 219 | 1.0 s |
+  | round-8 PH + GLS m=4  | 14 818 | 0.5 s |
+
+  Wall time halves, but the *per-target* iter count goes up 4.6×.
+  Reason: each multi-target step updates m+1 coefficients
+  `(a, b_0, …, b_{m-1})` instead of just `(a, b)`, so the per-step
+  cost rises faster than the cycle-length saving at this scale.
+  The √m speedup from GLS is real asymptotically but doesn't
+  materialise yet at 22-bit.  Likely needs (a) a tighter inner
+  loop with fewer BigUint allocations, or (b) larger `n` where the
+  cycle-length saving dominates the coefficient overhead.
+
+  Round 8 is therefore **opt-in only** — the default sweep still
+  uses round-6 DP single-target rho, which delivered the 14 → 60
+  bit progression already in the record.
+
 - **Round 7 (2026-05-20, multi-target GLS amortisation, partial)**:
   added
   [`src/isogeny/attack.rs::multi_target_dp_rho`](src/isogeny/attack.rs) —
