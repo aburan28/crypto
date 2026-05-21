@@ -117,19 +117,49 @@ pub fn lll_reduce(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'stat
     Ok(())
 }
 
-/// Gram–Schmidt orthogonalisation in `f64` precision.
+/// Gram–Schmidt orthogonalisation in `f64` precision with auto-scaling.
 ///
 /// Returns `(bstar, mu)` where `bstar[i]` is the i-th orthogonal
 /// vector and `mu[i][j]` is the GS coefficient
 /// `<b_i, bstar_j> / <bstar_j, bstar_j>` for `j < i`.
+///
+/// Auto-scaling: if any basis entry exceeds ~2^500, all entries are
+/// logically divided by a power of 2 before the f64 conversion so
+/// that inner products (dim ≤ 30, entry ≤ 2^500) stay below f64::MAX
+/// (≈ 2^1023).  The μ_{ij} coefficients are invariant to global
+/// scaling, so the result is identical to unscaled GS.
+///
+/// This handles the P-521 HNP basis whose n² diagonal entries are
+/// ~2^1042, which overflow unscaled f64 to Inf and produce NaN.
 fn gram_schmidt(basis: &[Vec<BigInt>]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
     let n = basis.len();
     let dim = if n > 0 { basis[0].len() } else { 0 };
+
+    // Find the max bit-length of all non-zero basis entries.
+    let max_bits = basis
+        .iter()
+        .flatten()
+        .filter(|x| !x.is_zero())
+        .map(|x| x.bits())
+        .max()
+        .unwrap_or(0);
+
+    // We need dim * (max_scaled_entry)^2 < 2^1023 to prevent dot-product
+    // overflow.  With dim ≤ 30: 2*target + 5 < 1023 → target < 509.
+    // Use 500 for a comfortable margin.
+    let scale_shift: u32 = if max_bits > 500 {
+        (max_bits - 500) as u32
+    } else {
+        0
+    };
+
+    let to_f = |x: &BigInt| big_to_f64_scaled(x, scale_shift);
+
     let mut bstar: Vec<Vec<f64>> = vec![vec![0.0; dim]; n];
     let mut mu: Vec<Vec<f64>> = vec![vec![0.0; n]; n];
 
     for i in 0..n {
-        let bi: Vec<f64> = basis[i].iter().map(big_to_f64).collect();
+        let bi: Vec<f64> = basis[i].iter().map(to_f).collect();
         bstar[i].copy_from_slice(&bi);
         for j in 0..i {
             let dot: f64 = bi.iter().zip(&bstar[j]).map(|(a, b)| a * b).sum();
@@ -143,12 +173,41 @@ fn gram_schmidt(basis: &[Vec<BigInt>]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
     (bstar, mu)
 }
 
-/// `BigInt → f64`, lossy for large values.  Sufficient for our
-/// attack-scale lattices (256-bit coefficients fit in f64 with
-/// ~204-bit precision; the GS coefficients are ratios that bring
-/// us comfortably back into double range).
-fn big_to_f64(x: &BigInt) -> f64 {
-    x.to_f64().unwrap_or(0.0)
+/// Convert `BigInt` to `f64`, dividing by `2^scale_shift` without
+/// passing through Inf for large values.
+///
+/// For entries that fit in f64 normally (`bits + scale_shift ≤ 1020`),
+/// this is equivalent to `x.to_f64() / 2^scale_shift`.  For larger
+/// entries (e.g. n² for P-521 at ~2^1042), we first right-shift the
+/// integer to bring it into f64 exponent range, then re-apply the
+/// remaining exponent difference as a float multiply.  This preserves
+/// small entries (e.g. 2^384 scaled by 2^542 → 2^{-158} ≈ 2.7×10^{-48},
+/// well above f64's minimum positive normal ≈ 2^{-1022}).
+fn big_to_f64_scaled(x: &BigInt, scale_shift: u32) -> f64 {
+    if x.is_zero() || scale_shift == 0 {
+        return x.to_f64().unwrap_or(0.0);
+    }
+    let sign: f64 = if x.is_negative() { -1.0 } else { 1.0 };
+    // Work with the absolute value as a BigInt for bit operations.
+    let abs: BigInt = if x.is_negative() { -x.clone() } else { x.clone() };
+    let nbits = abs.bits() as u32;
+
+    if nbits + scale_shift <= 1020 {
+        // Safe direct path: convert to f64 then apply the scale.
+        let v = abs.to_f64().unwrap_or(0.0);
+        // 2^scale_shift is exactly representable in f64 for scale_shift < 1024.
+        sign * v / f64::powi(2.0, scale_shift as i32)
+    } else {
+        // abs >= 2^(1020 - scale_shift), so direct to_f64() would overflow.
+        // Shift abs right to bring it to ~2^1020 bits, then adjust exponent.
+        let extra_shift = nbits.saturating_sub(1020);
+        let shifted = &abs >> extra_shift as usize;
+        let v = shifted.to_f64().unwrap_or(0.0);
+        // v ≈ abs / 2^extra_shift, and we want abs / 2^scale_shift.
+        // Result = v * 2^(extra_shift - scale_shift).
+        let exp: i32 = (extra_shift as i32) - (scale_shift as i32);
+        sign * v * f64::powi(2.0, exp)
+    }
 }
 
 #[cfg(test)]
@@ -518,7 +577,7 @@ mod bkz_tests {
         bkz_reduce(&mut b, 8, 0.99).unwrap();
 
         let norm_sq =
-            |row: &Vec<BigInt>| -> f64 { row.iter().map(|x| big_to_f64(x).powi(2)).sum() };
+            |row: &Vec<BigInt>| -> f64 { row.iter().map(|x| big_to_f64_scaled(x, 0).powi(2)).sum() };
         let na = norm_sq(&a[0]);
         let nb = norm_sq(&b[0]);
         assert!(
