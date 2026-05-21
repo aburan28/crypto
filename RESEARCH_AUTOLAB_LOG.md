@@ -59,17 +59,35 @@ P-521 basis entry 2^384 → 2^384/2^542 = 2^{-158}  (finite, ~2.7×10^{-48})
 dot product of 10 scaled-P-521 entries: ~10^302 < f64::MAX ✓
 ```
 
-sweep test (P-384, P-521, brainpoolP384r1) running in background at time of writing —
-results pending. The 256-bit results (secp256k1 3/3) confirm the fix works there.
+**Full sweep results** (`probe_lll_sweep_by_bit_length`, 1 seed, 8 sigs, LLL):
+
+| Curve | n_bits | k_bits | Old outcome | New outcome | New time |
+|-------|--------|--------|-------------|-------------|----------|
+| secp192k1 | 192 | 144 | ✓ 389ms | ✓ RECOVERED | 325ms |
+| secp224k1 | 224 | 168 | ✓ 617ms | ✓ RECOVERED | 615ms |
+| **secp256k1** | 256 | 192 | ✗ cap 10019ms | ✓ RECOVERED | 657ms |
+| P-256 | 256 | 192 | ✓ 710ms | ✓ RECOVERED | 686ms |
+| brainpoolP256r1 | 256 | 192 | ✓ 714ms | ✓ RECOVERED | 671ms |
+| **P-384** | 384 | 288 | ✗ cap 20392ms | ✓ RECOVERED | 2047ms |
+| **brainpoolP384r1** | 384 | 288 | ✗ cap 20131ms | ✓ RECOVERED | 2042ms |
+| **P-521** | 521 | 384 | ✗ cap (NaN) | ✗ no short vec | 126010ms |
+
+P-521 now runs WITHOUT NaN and WITHOUT iteration cap (LLL terminates cleanly in 126s),
+but does not recover the key. The error is "LLL did not produce a recoverable short
+vector — try more signatures or increase bias". This is a **genuine** failure mode
+distinct from the numerical bug: with m=8, k_bits=384, the LLL reduction at 521-bit
+precision does not find the short vector.
 
 ### Revised interpretation of `RESEARCH_LLL_GS_ANALYSIS.md`
 
-- **§5 hypothesis** (secp256k1 r_i distribution causing μ-oscillation): likely wrong.
-  The secp256k1 vs P-256 discrepancy was purely numerical.
-- **Failure B** (P-384/P-521 iteration cap): also likely numerical, not LLL convergence.
-  Should be confirmed by sweep test results.
-- The Gram-Schmidt analysis in §3 remains valid as a theoretical framework, but the
-  empirical claim that secp256k1 "fails LLL" is now invalidated.
+- **§5 hypothesis** (secp256k1 r_i distribution causing μ-oscillation): **refuted**.
+  The secp256k1 vs P-256 discrepancy was entirely due to floating-point overflow.
+- **Failure A** (secp256k1 at 256 bits): **resolved** — numerical bug, not lattice.
+- **Failure B** (P-384/P-521 iteration cap): **P-384 resolved** (numerical), **P-521 partial**.
+  P-521 NaN is fixed; P-521 now has a genuine LLL precision/convergence issue at 521 bits.
+- The Gram-Schmidt analysis in §3 remains valid as a theoretical framework.
+- Open Q for P-521: is the "no short vector" failure due to (a) insufficient bias m=8/k_bits=384,
+  (b) f64 precision loss in 521-bit LLL steps, or (c) need for BKZ vs LLL?
 
 ### Commits made
 
@@ -77,11 +95,13 @@ See next git hash after this entry.
 
 ### Next step proposal
 
-1. **Confirm sweep results** (P-384, P-521, brainpoolP384r1): wait for background
-   sweep test, record results here. If P-521 now recovers → all curve failures were
-   numerical.
+1. **P-521 genuine failure diagnosis** (priority 1, continued):
+   Try `m=16, k_bits=384` (doubling signatures) to see if more samples help.
+   Try BKZ-β instead of LLL for the P-521 probe.
+   Both are one-line parameter changes in `probe_once()`.
 2. **Update `RESEARCH_LLL_GS_ANALYSIS.md`**: revise the "two failure modes" narrative;
-   replace with the numerical-overflow explanation.
-3. **Move to priority thread 2** (CHLRS Igusa formula): the P-521 NaN is effectively
-   resolved; the remaining work is documentation.
-4. **Howe sextic twists** (priority 3): quick PARI check on 15 pairs, one session.
+   replace with the numerical-overflow explanation (the §5/7 analysis is now obsolete).
+3. **CHLRS Igusa formula** (priority 2): implement the `(E × E^t)/Γ_α` Igusa-Clebsch
+   invariants in PARI.  Start from `secp256k1_cm_audit/igusa_clebsch.gp` which may
+   already scaffold this.
+4. **Howe sextic twists** (priority 3): quick PARI check on 15 pairs.
