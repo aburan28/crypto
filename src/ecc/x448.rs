@@ -32,9 +32,9 @@ fn p() -> BigUint {
     (BigUint::one() << 448) - (BigUint::one() << 224) - BigUint::one()
 }
 
-/// `A24 = (A + 2) / 4 = (156326 + 2) / 4 = 39082`.
+/// `A24 = (A - 2) / 4 = (156326 - 2) / 4 = 39081` (RFC 7748 §5).
 fn a24() -> BigUint {
-    BigUint::from(39082u32)
+    BigUint::from(39081u32)
 }
 
 fn fe_reduce(x: &BigUint) -> BigUint {
@@ -188,7 +188,6 @@ mod tests {
 
     /// **RFC 7748 §5.2 X448 vector**.
     #[test]
-    #[ignore = "X448 KAT fails — agent that built this module hit org usage limit mid-implementation; clamp + ECDH round-trip work but the RFC scalar-mult vector doesn't match. Likely a Montgomery-ladder or field-reduction bug worth fixing later."]
     fn rfc7748_x448_vector() {
         let scalar = hex56(
             "3d262fddf9ec8e88495266fea19a34d28882acef045104d0d1aae121\

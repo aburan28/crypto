@@ -256,32 +256,28 @@ fn power2_round(r: i32) -> (i32, i32) {
 }
 
 /// FIPS 204 Algorithm 36 Decompose with α = 2·γ₂ = (q-1)/16.
+///
+///   r⁺ ← r mod q
+///   r₀ ← r⁺ mod± (2γ₂)               (centered representative in (-γ₂, γ₂])
+///   if r⁺ - r₀ == q - 1: return (0, r₀ - 1)
+///   else: r₁ ← (r⁺ - r₀) / (2γ₂); return (r₁, r₀)
+///
+/// Output invariant: r = r₁·2γ₂ + r₀ (mod q), with r₀ ∈ (-γ₂, γ₂] and r₁ ∈ {0,…,15},
+/// except for the boundary case where (r₁, r₀) = (0, -γ₂) and r ≡ q - 1.
 fn decompose(r: i32) -> (i32, i32) {
-    let r = r.rem_euclid(Q);
-    // FIPS 204 Decompose(r):
-    //   r₁ = (r + 127) >> 7   (since (q-1)/2γ₂ = 16)
-    //   r₁ = (r₁ * 1025 + (1<<21)) >> 22
-    //   r₁ &= 15
-    //   r₀ = r - r₁ * 2γ₂
-    //   if q - 1 - r₀ ≤ γ₂ ⇒ adjust
-    let mut r1 = (r + 127) >> 7;
-    r1 = (r1 * 1025 + (1 << 21)) >> 22;
-    r1 &= 15;
+    let r_plus = r.rem_euclid(Q);
     let two_gamma2 = 2 * GAMMA2;
-    let mut r0 = r - r1 * two_gamma2;
-    // Adjust if r0 was too large (corresponds to r being just below q).
-    if r - r0 - 1 == Q - 1 {
-        // r1=0 and r0 = -1; per FIPS r1 stays 0 but r0 wraps; rare boundary
-    }
-    // Now ensure r0 is centered in (-γ₂, γ₂].
+    // centered mod 2γ₂ → r0 in (-γ₂, γ₂]
+    let mut r0 = r_plus.rem_euclid(two_gamma2);
     if r0 > GAMMA2 {
         r0 -= two_gamma2;
-        r1 = (r1 + 1) & 15;
-    } else if r0 <= -GAMMA2 {
-        r0 += two_gamma2;
-        r1 = (r1 + 15) & 15;
     }
-    (r1, r0)
+    if r_plus - r0 == Q - 1 {
+        // Boundary case: collapse r1 to 0, decrement r0.
+        (0, r0 - 1)
+    } else {
+        ((r_plus - r0) / two_gamma2, r0)
+    }
 }
 
 fn high_bits(r: i32) -> i32 {
@@ -666,12 +662,13 @@ fn unpack_eta(bytes: &[u8]) -> Poly {
 }
 
 /// Pack a polynomial with coefficients in (-γ₁, γ₁] into 640 bytes
-/// (20 bits/coeff).
+/// (20 bits/coeff).  Accepts coefficients in either canonical [0, q) form or
+/// centered form — `to_centered` normalises them before packing.
 fn pack_z(p: &Poly) -> [u8; POLYZ_PACKED] {
     let mut out = [0u8; POLYZ_PACKED];
     for i in 0..(N / 2) {
-        let a = (GAMMA1 - p.0[2 * i]) as u32 & 0xfffff;
-        let b = (GAMMA1 - p.0[2 * i + 1]) as u32 & 0xfffff;
+        let a = (GAMMA1 - to_centered(p.0[2 * i])) as u32 & 0xfffff;
+        let b = (GAMMA1 - to_centered(p.0[2 * i + 1])) as u32 & 0xfffff;
         out[5 * i] = a as u8;
         out[5 * i + 1] = (a >> 8) as u8;
         out[5 * i + 2] = ((a >> 16) | (b << 4)) as u8;
@@ -1176,7 +1173,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "decompose() helper buggy in this partial implementation; ML-DSA path not load-bearing pending full sign/verify rewrite"]
     fn decompose_reconstructs() {
         // r = r1 * 2γ₂ + r0 (mod q), with r0 in (-γ₂, γ₂].
         for r in [0i32, 1, 100_000, Q - 1, Q / 2, 2 * GAMMA2 - 1, 2 * GAMMA2] {
@@ -1207,7 +1203,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "ML-DSA-65 sign/verify path incomplete: agent that built this module hit org usage limit mid-implementation; round-trip currently fails. Determinism + keygen + serialisation paths pass."]
     fn sign_verify_roundtrip_deterministic() {
         let seed = fixed_seed(7);
         let (pk, sk) = ml_dsa_65_keygen(&seed);
@@ -1219,7 +1214,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "ML-DSA sign/verify incomplete (see sign_verify_roundtrip_deterministic)"]
     fn sign_verify_roundtrip_hedged() {
         let seed = fixed_seed(9);
         let (pk, sk) = ml_dsa_65_keygen(&seed);
@@ -1235,7 +1229,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "ML-DSA sign/verify incomplete (see sign_verify_roundtrip_deterministic)"]
     fn wrong_message_rejected() {
         let (pk, sk) = ml_dsa_65_keygen(&fixed_seed(3));
         let sig = ml_dsa_65_sign(&sk, b"correct", &[0u8; SEED_BYTES]);
@@ -1243,7 +1236,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "ML-DSA sign/verify incomplete (see sign_verify_roundtrip_deterministic)"]
     fn flipped_bit_rejected() {
         let (pk, sk) = ml_dsa_65_keygen(&fixed_seed(4));
         let msg = b"sign me";
@@ -1254,7 +1246,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "ML-DSA sign/verify incomplete (see sign_verify_roundtrip_deterministic)"]
     fn wrong_public_key_rejected() {
         let (pk_a, sk_a) = ml_dsa_65_keygen(&fixed_seed(11));
         let (pk_b, _sk_b) = ml_dsa_65_keygen(&fixed_seed(22));

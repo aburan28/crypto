@@ -257,9 +257,103 @@ fn sswu_z() -> Fq2 {
     )
 }
 
-/// Simplified SWU mapping `u ↦ (x, y) ∈ E'2(F_{p²})` (RFC 9380
-/// §6.6.3 with the optimisation of §F.2 elided in favour of clarity).
-fn map_to_curve_g2(u: &Fq2) -> G2Point {
+/// Sqrt in `F_p` for the BLS12-381 prime (p ≡ 3 mod 4).
+/// Returns `Some(r)` with `r² = a (mod p)` if `a` is a quadratic residue,
+/// else `None`.
+fn fp_sqrt(a: &Fq) -> Option<Fq> {
+    if a.is_zero() {
+        return Some(Fq::zero());
+    }
+    let p = modulus();
+    let exp = (&p + BigUint::one()) / BigUint::from(4u32);
+    let r = Fq {
+        value: a.value.modpow(&exp, &p),
+    };
+    if r.square() == *a {
+        Some(r)
+    } else {
+        None
+    }
+}
+
+/// Sqrt in `F_{p²}` via the complex method (p ≡ 3 mod 4 here, so
+/// `F_{p²} = F_p[i]/(i² + 1)`).  Returns `Some(r)` with `r² = a` if
+/// `a` is a square, else `None`.
+///
+/// Algorithm: write `a = a0 + a1·i`.  If a square, then `N(a) = a0² + a1²`
+/// is a square in F_p; let `s = sqrt(N(a))`.  Then we look for
+/// `x = x0 + x1·i` with `x² = a`, giving `x0² = (a0 + s)/2` and
+/// `x1 = a1 / (2·x0)`.  If `(a0 + s)/2` is not a QR, try `(a0 - s)/2`.
+fn fq2_sqrt_local(a: &Fq2) -> Option<Fq2> {
+    if a.is_zero() {
+        return Some(Fq2::zero());
+    }
+    let p = modulus();
+    // Special case a1 == 0: just compute sqrt of a0 (or sqrt(-a0)·i).
+    if a.c1.is_zero() {
+        if let Some(r) = fp_sqrt(&a.c0) {
+            return Some(Fq2::new(r, Fq::zero()));
+        }
+        // -a0 is necessarily a QR since a0 is not (and -1 is a non-QR in F_p
+        // when p ≡ 3 mod 4).
+        let neg_a0 = a.c0.neg();
+        let r = fp_sqrt(&neg_a0)?;
+        return Some(Fq2::new(Fq::zero(), r));
+    }
+    let n = a.c0.square().add(&a.c1.square()); // norm
+    let s = fp_sqrt(&n)?;
+    let two_inv = Fq {
+        value: BigUint::from(2u32),
+    }
+    .inverse()
+    .unwrap();
+    // Try (a0 + s)/2
+    let cand = a.c0.add(&s).mul(&two_inv);
+    let x0 = match fp_sqrt(&cand) {
+        Some(r) => r,
+        None => {
+            // Try (a0 - s)/2
+            let cand2 = a.c0.sub(&s).mul(&two_inv);
+            fp_sqrt(&cand2)?
+        }
+    };
+    if x0.is_zero() {
+        return None;
+    }
+    // x1 = a1 / (2·x0)
+    let two_x0 = x0.add(&x0);
+    let x1 = a.c1.mul(&two_x0.inverse().unwrap());
+    let candidate = Fq2::new(x0, x1);
+    // Sanity-check: in pathological inputs (e.g. when the "wrong" sign of s is
+    // picked) the candidate may not square to a.  We just verify.
+    if candidate.square() == *a {
+        Some(candidate)
+    } else {
+        // Try the other sign of s
+        let cand = a.c0.sub(&s).mul(&two_inv);
+        let x0b = fp_sqrt(&cand)?;
+        if x0b.is_zero() {
+            return None;
+        }
+        let two_x0b = x0b.add(&x0b);
+        let x1b = a.c1.mul(&two_x0b.inverse().unwrap());
+        let cand2 = Fq2::new(x0b, x1b);
+        if cand2.square() == *a {
+            Some(cand2)
+        } else {
+            None
+        }
+    }
+    .map(|r| {
+        // Normalise: not strictly necessary, but caller may rely on sgn0
+        // consistency.
+        r
+    })
+}
+
+/// Simplified SWU mapping `u ↦ (x, y) ∈ E'2(F_{p²})` returning the
+/// **pre-isogeny** point on E'2 (RFC 9380 §6.6.3).
+fn sswu_map_to_iso_curve(u: &Fq2) -> (Fq2, Fq2) {
     let a = iso_a();
     let b = iso_b();
     let z = sswu_z();
@@ -280,7 +374,6 @@ fn map_to_curve_g2(u: &Fq2) -> G2Point {
         x1_den_candidate
     };
 
-    // gx1 = x1³ + A·x1 + B = (x1_num³ + A·x1_num·x1_den² + B·x1_den³) / x1_den³
     let x1_den_inv = x1_den.inverse().unwrap();
     let x1 = x1_num.mul(&x1_den_inv);
     let gx1 = x1.square().mul(&x1).add(&a.mul(&x1)).add(&b);
@@ -289,21 +382,27 @@ fn map_to_curve_g2(u: &Fq2) -> G2Point {
     let x2 = zu2.mul(&x1);
     let gx2 = x2.square().mul(&x2).add(&a.mul(&x2)).add(&b);
 
-    // Choose (x, y) = (x1, sqrt(gx1)) if gx1 is a square in Fp², else
-    // (x2, sqrt(gx2)).  Adjust sign of y to match sign of u.
-    let (x, y) = match gx1.sqrt() {
+    let (x, y) = match fq2_sqrt_local(&gx1) {
         Some(y1) => (x1, y1),
         None => {
-            let y2 = gx2.sqrt().expect("gx2 must be a square by SSWU lemma");
+            let y2 = fq2_sqrt_local(&gx2).expect("gx2 must be a square by SSWU lemma");
             (x2, y2)
         }
     };
 
     // Sign correction: if sgn0(u) != sgn0(y), negate y.
-    let y_signed = if sgn0_fq2(u) != sgn0_fq2(&y) { y.neg() } else { y };
+    let y_signed = if sgn0_fq2(u) != sgn0_fq2(&y) {
+        y.neg()
+    } else {
+        y
+    };
+    (x, y_signed)
+}
 
-    // The point (x, y) lies on E'2 — apply 3-isogeny to map to G2.
-    iso3_g2(&x, &y_signed)
+/// Full map-to-curve: SSWU onto E'2, then 3-isogeny to G2.
+fn map_to_curve_g2(u: &Fq2) -> G2Point {
+    let (x, y) = sswu_map_to_iso_curve(u);
+    iso3_g2(&x, &y)
 }
 
 /// `sgn0` for F_{p²} per RFC 9380 §4.1: sign of c0; if c0 == 0, use c1.
@@ -392,16 +491,16 @@ fn iso3_y_num_coeffs() -> [Fq2; 4] {
 fn iso3_y_den_coeffs() -> [Fq2; 4] {
     [
         parse_fq2(
-            "12",
-            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa99",
+            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb",
+            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb",
         ),
         parse_fq2(
             "0",
-            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa9d",
+            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa9d3",
         ),
         parse_fq2(
             "12",
-            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa9f",
+            "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa99",
         ),
         Fq2::one(),
     ]
@@ -480,34 +579,18 @@ mod tests {
     /// SSWU output lies on the isogenous curve E'2:
     /// `y² == x³ + A'·x + B'`.
     #[test]
-    #[ignore = "hash_to_g2 SSWU+isogeny incomplete: agent that built this module hit org usage limit mid-implementation. keygen + algebraic-aggregate paths work but the hash-to-curve subroutine doesn't land on the curve yet."]
     fn sswu_output_on_iso_curve() {
-        // Re-do SSWU but return the pre-isogeny point so we can check
-        // the curve equation.  We replicate the relevant fragment:
         let u = hash_to_field_fq2(b"test-vec", DST_BASIC, 1)[0].clone();
         let a = iso_a();
         let b = iso_b();
-        let z = sswu_z();
-        let one = Fq2::one();
-        let u2 = u.square();
-        let zu2 = z.mul(&u2);
-        let zu2_sq = zu2.square();
-        let sum = zu2.add(&zu2_sq);
-        let x1_num = b.mul(&sum.add(&one));
-        let neg_a = a.neg();
-        let cand = neg_a.mul(&sum);
-        let x1_den = if cand.is_zero() { z.mul(&a) } else { cand };
-        let x1 = x1_num.mul(&x1_den.inverse().unwrap());
-        let gx1 = x1.square().mul(&x1).add(&a.mul(&x1)).add(&b);
-        let x2 = zu2.mul(&x1);
-        let gx2 = x2.square().mul(&x2).add(&a.mul(&x2)).add(&b);
-        // SSWU lemma: at least one of gx1, gx2 is a QR.
-        assert!(gx1.sqrt().is_some() || gx2.sqrt().is_some());
+        let (x, y) = sswu_map_to_iso_curve(&u);
+        let lhs = y.square();
+        let rhs = x.square().mul(&x).add(&a.mul(&x)).add(&b);
+        assert_eq!(lhs, rhs, "SSWU output must satisfy y² = x³ + A'·x + B'");
     }
 
     /// `hash_to_g2` lands on the G2 curve `y² = x³ + 4(u + 1)`.
     #[test]
-    #[ignore = "hash_to_g2 incomplete (see sswu_output_on_iso_curve)"]
     fn hash_to_g2_on_curve() {
         let p = hash_to_g2(b"hash-to-curve test", DST_BASIC);
         assert!(p.is_on_curve(), "hash_to_g2 output must satisfy curve eq");
@@ -516,7 +599,6 @@ mod tests {
 
     /// hash_to_g2 is deterministic; different inputs give different outputs.
     #[test]
-    #[ignore = "hash_to_g2 incomplete (see sswu_output_on_iso_curve)"]
     fn hash_to_g2_deterministic_and_distinct() {
         let a = hash_to_g2(b"msg-a", DST_BASIC);
         let b = hash_to_g2(b"msg-a", DST_BASIC);
@@ -553,7 +635,6 @@ mod tests {
     /// This is the load-bearing property of BLS signing and is
     /// independent of pairing bilinearity.
     #[test]
-    #[ignore = "depends on hash_to_g2 (see sswu_output_on_iso_curve)"]
     fn sign_is_sk_times_hashed_msg() {
         let (sk, _) = bls_keygen(b"deterministic-seed-for-sign-test");
         let msg = b"sign me";
@@ -566,7 +647,6 @@ mod tests {
 
     /// Aggregate is the G2 sum of the inputs.
     #[test]
-    #[ignore = "depends on hash_to_g2 (see sswu_output_on_iso_curve)"]
     fn aggregate_is_sum() {
         let (sk1, _) = bls_keygen(b"agg-key-1-seed-padding-padding!!");
         let (sk2, _) = bls_keygen(b"agg-key-2-seed-padding-padding!!");
@@ -583,7 +663,6 @@ mod tests {
     /// Algebraic-level check on aggregation over a single message:
     /// `Σ sig_i = (Σ sk_i) · H(m)` since H is fixed.
     #[test]
-    #[ignore = "depends on hash_to_g2 (see sswu_output_on_iso_curve)"]
     fn aggregate_same_message_collapses_to_sum_of_sks() {
         let (sk1, _) = bls_keygen(b"single-msg-agg-key-1-padded!!!!!");
         let (sk2, _) = bls_keygen(b"single-msg-agg-key-2-padded!!!!!");
@@ -601,7 +680,6 @@ mod tests {
     /// `sk · H(m')` as the original.  This is the algebraic version
     /// of the "tamper detection" property of `bls_verify`.
     #[test]
-    #[ignore = "depends on hash_to_g2 (see sswu_output_on_iso_curve)"]
     fn sign_tampered_msg_differs() {
         let (sk, _) = bls_keygen(b"tamper-test-seed-padded-padded!!");
         let s1 = bls_sign(&sk, b"original", DST_BASIC);
@@ -612,7 +690,6 @@ mod tests {
     /// Verify rejects an obviously-invalid signature (point at
     /// infinity).  This path doesn't depend on pairing bilinearity.
     #[test]
-    #[ignore = "depends on hash_to_g2 (see sswu_output_on_iso_curve)"]
     fn verify_rejects_infinity_sig_and_pk() {
         let (sk, pk) = bls_keygen(b"verify-edge-case-seed-padded!!!!");
         let sig = bls_sign(&sk, b"x", DST_BASIC);

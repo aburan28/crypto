@@ -18,7 +18,10 @@ pub mod scrypt;
 
 pub use argon2::{argon2, argon2id, Argon2Variant};
 pub use bcrypt::{bcrypt, bcrypt_hash, bcrypt_verify};
-pub use hkdf::{hkdf, hkdf_expand, hkdf_extract, hmac_sha256};
+pub use hkdf::{
+    hkdf, hkdf_blake2b, hkdf_expand, hkdf_expand_with, hkdf_extract, hkdf_extract_with, hkdf_sha1,
+    hkdf_sha384, hkdf_sha512, hkdf_with, hmac_sha256,
+};
 pub use hmac_drbg::{drbg_expand, HmacDrbg};
 pub use hotp::{
     hotp_sha1, hotp_sha256, hotp_sha512, totp_now_sha1, totp_now_sha256, totp_now_sha512,

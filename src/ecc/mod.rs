@@ -33,6 +33,8 @@ pub use ec_kcdsa::{
 pub use ecdh::{ecdh, ecdh_raw};
 pub use ecdsa::{sign, sign_hash, verify, verify_hash, EcdsaSignature};
 pub use ed25519::{ed25519_pubkey, ed25519_sign, ed25519_verify};
+pub use ed448::{ed448_keygen, ed448_sign, ed448_verify};
+pub use x448::{x448, x448_keygen};
 pub use field::FieldElement;
 pub use gost_3410_2012::{
     sign as gost_sign, sign_hash as gost_sign_hash, sign_hash_with_k as gost_sign_hash_with_k,

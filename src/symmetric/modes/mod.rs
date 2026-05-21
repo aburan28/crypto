@@ -46,6 +46,7 @@ pub mod gcm_siv;
 pub mod kw;
 pub mod ocb3;
 pub mod ofb;
+pub mod pmac;
 pub mod siv;
 pub mod xts;
 
@@ -61,6 +62,7 @@ pub use gcm_siv::{
 };
 pub use kw::{kw_unwrap, kw_wrap};
 pub use ocb3::{ocb3_decrypt, ocb3_encrypt};
+pub use pmac::pmac;
 pub use ofb::ofb_apply;
 pub use siv::{siv_decrypt, siv_encrypt};
 pub use xts::{xts_decrypt, xts_encrypt};
