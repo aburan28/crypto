@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elliptic Curves &mdash; Attack Chart</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #2a313c;
+    --text: #d7dde6;
+    --muted: #8b95a3;
+    --accent: #7aa2f7;
+    --green: #7ce38b;
+    --red: #f47174;
+    --amber: #e3b341;
+    --gold: #f0c674;
+    --link: #79c0ff;
+    --code: #1f2630;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafbfc;
+      --panel: #ffffff;
+      --panel-2: #f4f6f8;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #57606a;
+      --accent: #0969da;
+      --green: #1a7f37;
+      --red: #cf222e;
+      --amber: #9a6700;
+      --gold: #bf8700;
+      --link: #0969da;
+      --code: #eef1f4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  h2 { margin: 32px 0 10px; font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { margin: 22px 0 8px; font-size: 16px; color: var(--accent); }
+  p.lede { color: var(--muted); margin: 0; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 16px; margin: 16px 0 24px;
+  }
+  .legend span { white-space: nowrap; }
+  .yes { color: var(--green); font-weight: 600; }
+  .no  { color: var(--red); font-weight: 600; }
+  .warn{ color: var(--amber); font-weight: 600; }
+  .intent { color: var(--gold); font-weight: 600; }
+  .pill {
+    display: inline-block; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  }
+  .pill.danger { color: var(--red); border-color: var(--red); }
+  .pill.warn   { color: var(--amber); border-color: var(--amber); }
+  .pill.ok     { color: var(--green); border-color: var(--green); }
+  .pill.intent { color: var(--gold); border-color: var(--gold); }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; margin: 8px 0 20px; }
+  table { border-collapse: collapse; width: 100%; background: var(--panel); }
+  thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--panel-2); color: var(--text);
+    text-align: left; font-weight: 600; font-size: 12.5px;
+    padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody td, tbody th {
+    padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top;
+    font-size: 13px;
+  }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+  tbody tr:hover { background: var(--panel-2); }
+  th.row { text-align: left; font-weight: 600; white-space: nowrap; background: var(--panel-2); }
+  td.center, th.center { text-align: center; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.small, th.small { font-size: 12px; color: var(--muted); }
+  caption { caption-side: top; text-align: left; padding: 10px 12px 6px; color: var(--muted); font-size: 12.5px; }
+
+  nav.toc {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 24px;
+  }
+  nav.toc h4 { margin: 0 0 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  nav.toc ol { margin: 0; padding-left: 18px; columns: 2; column-gap: 24px; }
+  nav.toc li { margin: 3px 0; break-inside: avoid; }
+
+  .footnote { color: var(--muted); font-size: 12px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+  @media print {
+    body { background: white; color: black; }
+    .wrap { max-width: none; padding: 0; }
+    thead th { position: static; }
+    .legend, nav.toc { break-inside: avoid; }
+    table { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Elliptic Curves &mdash; Attack &amp; Vulnerability Chart</h1>
+  <p class="lede">Curve-by-curve breakdown of applicable attacks, bit security, CVE history, and research-frontier threats.</p>
+</header>
+
+<div class="legend">
+  <span><span class="yes">&#9989;</span> applies / works against curve</span>
+  <span><span class="no">&#10060;</span> does not apply / mitigated by design</span>
+  <span><span class="warn">&#9888;&#65039;</span> partial / conditional / implementation-dependent</span>
+  <span><span class="intent">&#127919;</span> intentionally exploitable (pairing curves want MOV)</span>
+</div>
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#nist-prime">NIST prime curves</a></li>
+    <li><a href="#secp256k1">secp256k1</a></li>
+    <li><a href="#bernstein">Bernstein / Hamburg curves</a></li>
+    <li><a href="#binary">NIST binary curves</a></li>
+    <li><a href="#brainpool">Brainpool / ANSSI / SM2</a></li>
+    <li><a href="#pairing">Pairing-friendly curves</a></li>
+    <li><a href="#broken">Broken / forbidden / historical</a></li>
+    <li><a href="#niche">Niche / research curves</a></li>
+    <li><a href="#timeline">Cross-cutting attack timeline</a></li>
+    <li><a href="#cves-nist">CVE table &mdash; NIST P-curves</a></li>
+    <li><a href="#cves-k1">CVE / incident table &mdash; secp256k1</a></li>
+    <li><a href="#cves-25519">CVE table &mdash; Curve25519 / Ed25519 / Curve448</a></li>
+    <li><a href="#cves-pairing">CVE table &mdash; pairing curves</a></li>
+    <li><a href="#cves-brainpool">CVE table &mdash; Brainpool / SM2</a></li>
+    <li><a href="#frontier-nist">Research frontier &mdash; NIST primes</a></li>
+    <li><a href="#frontier-k1">Research frontier &mdash; secp256k1</a></li>
+    <li><a href="#frontier-25519">Research frontier &mdash; Curve25519/Ed25519</a></li>
+    <li><a href="#frontier-binary">Research frontier &mdash; binary curves</a></li>
+    <li><a href="#frontier-pairing">Research frontier &mdash; pairing curves</a></li>
+    <li><a href="#frontier-broken">Already-broken families</a></li>
+    <li><a href="#pq">Post-quantum migration</a></li>
+  </ol>
+</nav>
+
+<h2 id="nist-prime">1. NIST prime curves</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>Attack</th>
+      <th class="center">P-192</th>
+      <th class="center">P-224</th>
+      <th class="center">P-256</th>
+      <th class="center">P-384</th>
+      <th class="center">P-521</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">Pollard rho (generic)</th><td class="center"><span class="yes">&#9989;</span> ~2<sup>96</sup></td><td class="center"><span class="yes">&#9989;</span> ~2<sup>112</sup></td><td class="center"><span class="yes">&#9989;</span> ~2<sup>128</sup></td><td class="center"><span class="yes">&#9989;</span> ~2<sup>192</sup></td><td class="center"><span class="yes">&#9989;</span> ~2<sup>260</sup></td></tr>
+    <tr><th class="row">Pohlig&ndash;Hellman</th><td class="center"><span class="no">&#10060;</span> (prime order, h=1)</td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">Smart (anomalous)</th><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">MOV / Frey&ndash;R&uuml;ck</th><td class="center"><span class="no">&#10060;</span> (k huge)</td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">Weil descent (GHS)</th><td class="center"><span class="no">&#10060;</span> (prime field)</td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">GLV endomorphism speedup</th><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">Twist attack</th><td class="center"><span class="warn">&#9888;&#65039;</span> if x-only &amp; no validate</td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td></tr>
+    <tr><th class="row">Invalid-curve attack</th><td class="center"><span class="yes">&#9989;</span> if no point check</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td></tr>
+    <tr><th class="row">Small-subgroup</th><td class="center"><span class="no">&#10060;</span> (h=1)</td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td></tr>
+    <tr><th class="row">Nonce-bias / HNP (ECDSA)</th><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td></tr>
+    <tr><th class="row">Side channels (timing/cache/EM)</th><td class="center"><span class="yes">&#9989;</span> historically</td><td class="center"><span class="yes">&#9989;</span> <b>Brumley&ndash;Tuveri 2011</b></td><td class="center"><span class="yes">&#9989;</span> many OpenSSL/wolfSSL CVEs</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td></tr>
+    <tr><th class="row">Fault injection</th><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td></tr>
+    <tr><th class="row">Status today</th><td class="center"><span class="pill danger">deprecated &lt;2<sup>100</sup></span></td><td class="center"><span class="pill warn">legacy</span></td><td class="center"><span class="pill ok">mainstream</span></td><td class="center"><span class="pill ok">mainstream</span></td><td class="center"><span class="pill ok">mainstream</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="secp256k1">2. secp256k1 (Bitcoin / Ethereum)</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Property</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><th class="row">Equation</th><td><span class="mono">y&sup2; = x&sup3; + 7</span></td></tr>
+    <tr><th class="row">Field p</th><td><span class="mono">2<sup>256</sup> &minus; 2<sup>32</sup> &minus; 977</span></td></tr>
+    <tr><th class="row">j-invariant</th><td>0 (CM by &#8484;[&omega;])</td></tr>
+    <tr><th class="row">Order bits</th><td>256, cofactor 1</td></tr>
+    <tr><th class="row">Rho baseline</th><td>2<sup>128</sup></td></tr>
+    <tr><th class="row">Rho with GLV endo + negation</th><td>2<sup>128</sup> / &radic;6 &approx; 2<sup>126.3</sup></td></tr>
+    <tr><th class="row">Last attack improvement</th><td>2014 Bos&ndash;Kaihara&ndash;Kleinjung&ndash;Lenstra&ndash;Montgomery (rho with endo)</td></tr>
+    <tr><th class="row">GLV &beta;</th><td><span class="mono">0x7AE96A2B&hellip;ABAC9EE</span></td></tr>
+    <tr><th class="row">GLV &lambda;</th><td>cube root of 1 mod n</td></tr>
+    <tr><th class="row">Twist order</th><td>not prime; small factor 13&middot;3319&middot;&hellip; (irrelevant under full-coord validation)</td></tr>
+    <tr><th class="row">Real incidents</th><td>
+      Android SecureRandom (2013) &mdash; Bitcoin Wallet, blockchain.info ~55 BTC stolen;
+      PS3 fixed-k (2010) Sony master key (same algo class);
+      Blockchain.info R-value reuse (Dec 2014);
+      Trezor side-channel CVE-2020-11399;
+      ongoing LadderLeak-class drains; CVE-2022-24884 ethermint nonce malleability.
+    </td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="bernstein">3. Bernstein / Hamburg curves</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Curve</th><th>Field</th><th class="center">Cofactor</th><th class="center">Rho cost</th><th>Last attack improvement</th><th>Real incidents</th></tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">Curve25519 / X25519</th><td class="mono">2<sup>255</sup>&minus;19</td><td class="center">8</td><td class="center">2<sup>126</sup></td><td>2017 Cremers&ndash;Jackson cofactor decoupling (DH); no curve break</td><td>CVE-2017-15396 (Tor), CVE-2019-13627 (libgcrypt), CVE-2022-3296 (S2N)</td></tr>
+    <tr><th class="row">Ed25519</th><td class="mono">same</td><td class="center">8</td><td class="center">2<sup>126</sup></td><td>2020 Chalkias et al. "Taming the Many EdDSAs"</td><td>CVE-2020-36242 (PyCryptodome); CVE-2022-21449 Java psychic sigs (impl); CVE-2024-21987 StorageGRID</td></tr>
+    <tr><th class="row">Curve448 / X448</th><td class="mono">2<sup>448</sup>&minus;2<sup>224</sup>&minus;1</td><td class="center">4</td><td class="center">2<sup>223</sup></td><td>&mdash;</td><td>none major</td></tr>
+    <tr><th class="row">Ed448</th><td class="mono">same</td><td class="center">4</td><td class="center">2<sup>223</sup></td><td>2020 same EdDSA-family paper</td><td>none major</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="binary">4. NIST binary curves</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>Attack</th>
+      <th class="center">K-163</th><th class="center">K-233</th><th class="center">K-283</th><th class="center">K-409</th><th class="center">K-571</th>
+      <th class="center">B-163</th><th class="center">B-233</th><th class="center">B-283</th><th class="center">B-409</th><th class="center">B-571</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">Pollard rho</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Rho &divide;&radic;(2m) Frobenius speedup</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Frobenius &tau;-GLV scalar mult</th>
+      <td class="center"><span class="yes">&#9989;</span> ~4&times;</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Pohlig&ndash;Hellman</th>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Smart / MOV</th>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Weil descent (GHS)</th>
+      <td class="center"><span class="no">&#10060;</span> (m prime)</td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td><td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Small-char index calc (FJV, PQ)</th>
+      <td class="center"><span class="warn">&#9888;&#65039;</span> tight</td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td>
+      <td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td>
+    </tr>
+    <tr><th class="row">Invalid-curve</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Side channels</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p class="footnote">NIST SP 800-186 (2023) <b>disallows all binary curves</b> for new use.</p>
+
+<h2 id="brainpool">5. Brainpool / ANSSI / SM2</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Curve</th><th>Field</th><th class="center">Cofactor</th><th class="center">Twist-secure</th><th class="center">Rho cost</th><th>Real incidents</th></tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">brainpoolP256r1</th><td>256-bit pseudo-random p</td><td class="center">1</td><td class="center"><span class="yes">&#9989;</span></td><td class="center">2<sup>128</sup></td><td>CVE-2014-3570 OpenSSL BN_sqr; CVE-2015-0205 brainpool invalid-curve in IKE/IPsec</td></tr>
+    <tr><th class="row">brainpoolP256t1</th><td>same</td><td class="center">1</td><td class="center"><span class="yes">&#9989;</span></td><td class="center">2<sup>128</sup></td><td>same family</td></tr>
+    <tr><th class="row">brainpoolP384r1</th><td>384-bit</td><td class="center">1</td><td class="center"><span class="yes">&#9989;</span></td><td class="center">2<sup>192</sup></td><td>&mdash;</td></tr>
+    <tr><th class="row">brainpoolP512r1</th><td>512-bit</td><td class="center">1</td><td class="center"><span class="yes">&#9989;</span></td><td class="center">2<sup>256</sup></td><td>&mdash;</td></tr>
+    <tr><th class="row">FRP256v1 (ANSSI)</th><td>256-bit</td><td class="center">1</td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center">2<sup>128</sup></td><td>rarely deployed; no public CVEs</td></tr>
+    <tr><th class="row">SM2 (Chinese P-256)</th><td class="mono">2<sup>256</sup>&minus;2<sup>224</sup>&minus;2<sup>96</sup>+2<sup>64</sup>&minus;1</td><td class="center">1</td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center">2<sup>128</sup></td><td>CVE-2021-3711 OpenSSL SM2 buffer overflow; Liu et al. 2019 SM2-specific HNP</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pairing">6. Pairing-friendly curves</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>Attack</th>
+      <th class="center">BN254 / bn128</th>
+      <th class="center">BN256 (CN)</th>
+      <th class="center">BLS12-381</th>
+      <th class="center">BLS12-377</th>
+      <th class="center">BLS24-315</th>
+      <th class="center">MNT4-298</th>
+      <th class="center">MNT6-298</th>
+      <th class="center">KSS18</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">Rho on G&#8321;/G&#8322;</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">MOV (intentional)</th>
+      <td class="center"><span class="intent">&#127919;</span> k=12</td><td class="center"><span class="intent">&#127919;</span> k=12</td><td class="center"><span class="intent">&#127919;</span> k=12</td><td class="center"><span class="intent">&#127919;</span> k=12</td><td class="center"><span class="intent">&#127919;</span> k=24</td><td class="center"><span class="intent">&#127919;</span> k=4</td><td class="center"><span class="intent">&#127919;</span> k=6</td><td class="center"><span class="intent">&#127919;</span> k=18</td>
+    </tr>
+    <tr><th class="row">exTNFS in F<sub>p<sup>k</sup></sub> (Kim&ndash;Barbulescu 2016)</th>
+      <td class="center"><span class="yes">&#9989;</span> ~100-bit (was 128)</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span> ~117&ndash;120-bit</td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="yes">&#9989;</span> harder hit</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td>
+    </tr>
+    <tr><th class="row">GLV (G&#8321;)</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">GLS (G&#8322; via twist)</th>
+      <td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="warn">&#9888;&#65039;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Subgroup-check / G&#8322; membership</th>
+      <td class="center"><span class="yes">&#9989;</span> historic zcash/ETH bugs</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span> Bowe-style required</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Small-subgroup / cofactor clearing</th>
+      <td class="center"><span class="yes">&#9989;</span> required</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Twist attack on G&#8322; compression</th>
+      <td class="center"><span class="yes">&#9989;</span> if not validated</td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td><td class="center"><span class="yes">&#9989;</span></td>
+    </tr>
+    <tr><th class="row">Status</th>
+      <td class="center"><span class="pill warn">being phased out</span></td>
+      <td class="center"><span class="pill warn">legacy</span></td>
+      <td class="center"><span class="pill ok">mainstream</span></td>
+      <td class="center"><span class="pill ok">recursive SNARKs</span></td>
+      <td class="center"><span class="pill ok">high security</span></td>
+      <td class="center"><span class="pill warn">recursive pair</span></td>
+      <td class="center"><span class="pill warn">recursive pair</span></td>
+      <td class="center"><span class="pill warn">research</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="broken">7. Broken / forbidden / historical</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>Attack</th>
+      <th class="center">Anomalous (#E=p)</th>
+      <th class="center">Supersingular over F<sub>p</sub></th>
+      <th class="center">SIDH / SIKE</th>
+      <th class="center">F<sub>2<sup>155</sup></sub> &amp; composite-degree binary</th>
+      <th class="center">Singular curves</th>
+      <th class="center">secp192k1 / 160 / 112</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">Smart (linear-time)</th>
+      <td class="center"><span class="yes">&#9989;</span> <b>TOTAL BREAK</b></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center">n/a</td>
+      <td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">MOV / Frey&ndash;R&uuml;ck</th>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="yes">&#9989;</span> <b>k&le;6 break</b></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center">n/a</td>
+      <td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Castryck&ndash;Decru / Maino&ndash;Martindale / Robert (2022)</th>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="yes">&#9989;</span> <b>TOTAL BREAK with aux torsion</b></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">GHS Weil descent</th>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="yes">&#9989;</span> <b>Gaudry&ndash;Hess&ndash;Smart practical</b></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Reduction to F<sub>p</sub><sup>+</sup> / F<sub>p</sub><sup>*</sup> DLP</th>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="no">&#10060;</span></td>
+      <td class="center"><span class="yes">&#9989;</span> trivial</td>
+      <td class="center"><span class="no">&#10060;</span></td>
+    </tr>
+    <tr><th class="row">Pollard rho</th>
+      <td class="center"><span class="yes">&#9989;</span> but irrelevant</td>
+      <td class="center"><span class="yes">&#9989;</span> MOV faster</td>
+      <td class="center"><span class="yes">&#9989;</span> CD faster</td>
+      <td class="center"><span class="yes">&#9989;</span> GHS faster</td>
+      <td class="center">trivial DLP</td>
+      <td class="center"><span class="yes">&#9989;</span> ~2<sup>96</sup> feasible-ish</td>
+    </tr>
+    <tr><th class="row">Status</th>
+      <td class="center"><span class="pill danger">NEVER USE</span></td>
+      <td class="center"><span class="pill warn">not for ECDLP; OK as pairing G&#8321;</span></td>
+      <td class="center"><span class="pill danger">dead (NIST PQC dropped 2022)</span></td>
+      <td class="center"><span class="pill danger">forbidden</span></td>
+      <td class="center"><span class="pill danger">NEVER USE</span></td>
+      <td class="center"><span class="pill danger">deprecated</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="niche">8. Niche / research curves</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Curve / class</th><th>Headline property</th><th>Bit security</th><th>Last update</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><th class="row">GLS curves over F<sub>p<sup>2</sup></sub></th><td>Frobenius endomorphism &rArr; fast scalar mult</td><td>~&frac12;-bit margin loss vs prime-field</td><td>Galbraith&ndash;Lin&ndash;Scott 2009; refined 2011</td><td>libecc, some IoT</td></tr>
+    <tr><th class="row">Q-curves / Scholten</th><td>similar endo trick</td><td>similar</td><td>2014 Smith</td><td>research</td></tr>
+    <tr><th class="row">Hessian / Jacobi-quartic / Huff</th><td>complete unified formulas</td><td>inherited from Weierstrass equivalent</td><td>2008&ndash;2010</td><td>impl-level only</td></tr>
+    <tr><th class="row">Low-D CM (D=&minus;3, &minus;4)</th><td>enables GLV; secp256k1, BN, BLS</td><td>full</td><td>2024 Howe&ndash;Lepr&eacute; lattice probes (no break)</td><td>see local RESEARCH_MESTRE_HOWE.md</td></tr>
+    <tr><th class="row">NUMS (MSR 2014)</th><td>"Nothing Up My Sleeve", twist-secure</td><td>128/192/256</td><td>&mdash;</td><td>low adoption</td></tr>
+    <tr><th class="row">Curve41417</th><td>Edwards, p=2<sup>414</sup>&minus;17</td><td>~206-bit</td><td>2014</td><td>research</td></tr>
+    <tr><th class="row">E-222, E-382, E-521 (SafeCurves)</th><td>Edwards twist-secure</td><td>various</td><td>2014 Bernstein&ndash;Lange SafeCurves</td><td>educational</td></tr>
+    <tr><th class="row">Jubjub / Pallas / Vesta (Pasta)</th><td>embedded for in-circuit ops (Halo2)</td><td>~125-bit</td><td>2020 Zcash Halo2</td><td>mainstream in zk-rollups</td></tr>
+    <tr><th class="row">Baby Jubjub</th><td>embedded in BN254 scalar field</td><td>~120-bit &minus; exTNFS</td><td>2018</td><td>circom, semaphore</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h2 id="timeline">Cross-cutting attack timeline (last 15 years)</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th class="num">Year</th><th>Attack</th><th>Affected curves</th><th>Significance</th></tr></thead>
+  <tbody>
+    <tr><td class="num">2011</td><td>Brumley&ndash;Tuveri remote timing</td><td>P-224, many ECDSA impls</td><td>first remote ECDSA over network</td></tr>
+    <tr><td class="num">2013</td><td>Android SecureRandom</td><td>secp256k1 (Bitcoin)</td><td>real $$ loss</td></tr>
+    <tr><td class="num">2014</td><td>Bos et al. GLV+negation rho</td><td>secp256k1</td><td>&radic;6 speedup</td></tr>
+    <tr><td class="num">2014</td><td>Petit&ndash;Quisquater small-char index calc</td><td>binary curves</td><td>margins narrowed</td></tr>
+    <tr><td class="num">2016</td><td><b>Kim&ndash;Barbulescu exTNFS</b></td><td>BN254, all pairing curves</td><td>BN254 &rarr; ~100-bit; industry migration to BLS12-381</td></tr>
+    <tr><td class="num">2017</td><td>LadderLeak</td><td>P-256 ECDSA in OpenSSL</td><td>&lt;1 bit nonce bias suffices</td></tr>
+    <tr><td class="num">2018</td><td>ROHNP / Minerva</td><td>P-256 cards</td><td>smartcard key extraction</td></tr>
+    <tr><td class="num">2019</td><td>TPM-Fail</td><td>P-256 in Intel fTPM, STMicro</td><td>full key in minutes</td></tr>
+    <tr><td class="num">2020</td><td>Chalkias et al. "Taming the Many EdDSAs"</td><td>Ed25519</td><td>malleability bestiary</td></tr>
+    <tr><td class="num">2020</td><td>CurveBall (CVE-2020-0601)</td><td>P-256/384 cert validation</td><td>Windows CryptoAPI accepted arbitrary base point</td></tr>
+    <tr><td class="num">2022</td><td><b>Castryck&ndash;Decru / Maino&ndash;Martindale / Robert</b></td><td>SIDH / SIKE</td><td>NIST PQC candidate killed in weeks</td></tr>
+    <tr><td class="num">2022</td><td>Psychic signatures (CVE-2022-21449)</td><td>Java ECDSA</td><td>(0,0) accepted as valid sig</td></tr>
+    <tr><td class="num">2023</td><td>NIST SP 800-186 finalized</td><td>binary curves disallowed</td><td>regulatory</td></tr>
+    <tr><td class="num">2024</td><td>Howe&ndash;Lepr&eacute; CM lattice analysis</td><td>low-D CM curves</td><td>no break; structural insight</td></tr>
+    <tr><td class="num">2024</td><td>PuTTY ECDSA bias (CVE-2024-31497)</td><td>NIST P-521 keys via PuTTY</td><td>&lt;60 sigs recover key</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h2 id="cves-nist">CVE table &mdash; NIST P-curves</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>CVE</th><th class="num">Year</th><th>Component</th><th>Curve(s)</th><th>Class</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">CVE-2011-1945</td><td class="num">2011</td><td>OpenSSL</td><td>P-192/224/256</td><td>Side-channel</td><td>Brumley&ndash;Tuveri area; ECDSA timing</td></tr>
+    <tr><td class="mono">CVE-2014-0076</td><td class="num">2014</td><td>OpenSSL</td><td>P-256</td><td>Cache timing</td><td>Yarom&ndash;Benger FLUSH+RELOAD on ECDSA</td></tr>
+    <tr><td class="mono">CVE-2014-3570</td><td class="num">2014</td><td>OpenSSL</td><td>all over GF(p)</td><td>Math bug</td><td>BN_sqr wrong result; affects ECDSA</td></tr>
+    <tr><td class="mono">CVE-2015-0205</td><td class="num">2015</td><td>OpenSSL</td><td>Brainpool / NIST</td><td>Protocol</td><td>DH cert authentication</td></tr>
+    <tr><td class="mono">CVE-2017-8932</td><td class="num">2017</td><td>Go crypto/elliptic</td><td>P-521</td><td>Carry bug</td><td>P-521 arithmetic; could leak key over many sigs</td></tr>
+    <tr><td class="mono">CVE-2018-0495</td><td class="num">2018</td><td>libgcrypt</td><td>P-256 / P-384</td><td>Side-channel</td><td><b>ROHNP</b> &mdash; modular-inverse timing</td></tr>
+    <tr><td class="mono">CVE-2019-11090</td><td class="num">2019</td><td>Intel CSME fTPM</td><td>P-256</td><td>Side-channel</td><td><b>TPM-Fail</b> &mdash; full ECDSA key in 4&ndash;20 min</td></tr>
+    <tr><td class="mono">CVE-2019-16863</td><td class="num">2019</td><td>STMicro ST33 TPM</td><td>P-256</td><td>Side-channel</td><td><b>TPM-Fail</b> companion; ~80 min for full key</td></tr>
+    <tr><td class="mono">CVE-2019-13627</td><td class="num">2019</td><td>libgcrypt</td><td>P-256</td><td>Side-channel</td><td>ladder-timing class</td></tr>
+    <tr><td class="mono">CVE-2019-15809</td><td class="num">2019</td><td>Athena IDProtect</td><td>P-256</td><td>Side-channel</td><td><b>Minerva</b> &mdash; biased nonce length leak</td></tr>
+    <tr><td class="mono">CVE-2020-0601</td><td class="num">2020</td><td>Windows CryptoAPI</td><td>P-256 / P-384</td><td>Curve validation</td><td><b>CurveBall</b> &mdash; arbitrary base point accepted</td></tr>
+    <tr><td class="mono">CVE-2020-12607</td><td class="num">2020</td><td>FortiOS</td><td>P-256</td><td>Side-channel</td><td>ECDSA cache timing</td></tr>
+    <tr><td class="mono">CVE-2020-13895</td><td class="num">2020</td><td>Crypto++</td><td>P-256</td><td>Cache</td><td>ECDSA scalar leak</td></tr>
+    <tr><td class="mono">CVE-2022-21449</td><td class="num">2022</td><td>Java JCA</td><td>P-256/384/521</td><td>Verify logic</td><td><b>"Psychic signatures"</b> &mdash; (r,s)=(0,0) accepted</td></tr>
+    <tr><td class="mono">CVE-2022-0778</td><td class="num">2022</td><td>OpenSSL</td><td>P-curves</td><td>DoS</td><td>BN_mod_sqrt infinite loop on invalid certs</td></tr>
+    <tr><td class="mono">CVE-2023-0286</td><td class="num">2023</td><td>OpenSSL</td><td>EC certs</td><td>Type confusion</td><td>X.509 GeneralName confusion</td></tr>
+    <tr><td class="mono">CVE-2024-31497</td><td class="num">2024</td><td>PuTTY &le;0.80</td><td>NIST P-521</td><td>Biased nonce</td><td>&lt;60 signatures recover private key</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="cves-k1">CVE / incident table &mdash; secp256k1</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>ID / name</th><th class="num">Year</th><th>Component</th><th>Class</th><th>Outcome</th></tr></thead>
+  <tbody>
+    <tr><td><b>Android SecureRandom bug</b></td><td class="num">2013</td><td>Bitcoin Wallet / Mycelium / blockchain.info Android</td><td>Weak RNG &rarr; r-reuse</td><td>~55 BTC drained from real wallets</td></tr>
+    <tr><td>PS3 fixed-k (NIST P-224, same algo class)</td><td class="num">2010</td><td>Sony PS3 firmware signing</td><td>Fixed nonce</td><td>Sony root key recovered</td></tr>
+    <tr><td>Blockchain.info R-value collisions</td><td class="num">2014</td><td>blockchain.info wallet</td><td>RNG reuse across users</td><td>dozens of BTC stolen</td></tr>
+    <tr><td class="mono">CVE-2018-17144</td><td class="num">2018</td><td>Bitcoin Core</td><td>Consensus (inflation)</td><td>not crypto math; listed for context</td></tr>
+    <tr><td class="mono">CVE-2020-11399</td><td class="num">2020</td><td>Trezor One firmware</td><td>Side-channel</td><td>physical-access key extraction</td></tr>
+    <tr><td class="mono">CVE-2022-24884</td><td class="num">2022</td><td>ethermint / cosmos-sdk</td><td>Signature malleability</td><td>tendermint duplicate-sig handling</td></tr>
+    <tr><td class="mono">CVE-2023-39910 (libbitcoin "Milk Sad")</td><td class="num">2023</td><td>libbitcoin-explorer <span class="mono">bx seed</span></td><td>Weak entropy (32-bit MT seed)</td><td>&gt;$900K drained from generated wallets</td></tr>
+    <tr><td>Slope Wallet / Solana incident</td><td class="num">2022</td><td>Slope mobile wallet</td><td>Mnemonic logged to Sentry</td><td>thousands of wallets drained</td></tr>
+    <tr><td>LadderLeak class (research)</td><td class="num">2020</td><td>OpenSSL P-256 family</td><td>&lt;1 bit nonce bias</td><td>broad ECDSA exposure</td></tr>
+    <tr><td>On-chain bad-RNG drains</td><td class="num">ongoing</td><td>many Bitcoin addresses</td><td>duplicate k between txs</td><td>continuous low-grade losses</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="cves-25519">CVE table &mdash; Curve25519 / Ed25519 / Curve448</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>CVE / ID</th><th class="num">Year</th><th>Component</th><th>Curve</th><th>Class</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">CVE-2017-15396</td><td class="num">2017</td><td>Tor</td><td>Curve25519</td><td>Validation</td><td>low-order point handling</td></tr>
+    <tr><td class="mono">CVE-2019-13627</td><td class="num">2019</td><td>libgcrypt</td><td>Ed25519</td><td>Cache timing</td><td>nonce leak</td></tr>
+    <tr><td class="mono">CVE-2020-36242</td><td class="num">2021</td><td>PyCryptodome</td><td>Ed25519</td><td>Verify bug</td><td>malleability accepted</td></tr>
+    <tr><td>"Taming Many EdDSAs" (Chalkias et al.)</td><td class="num">2020</td><td>spec/impl survey</td><td>Ed25519</td><td>Cofactor / malleability</td><td>drove RFC 8032 errata + ZIP-215</td></tr>
+    <tr><td class="mono">CVE-2024-21987</td><td class="num">2024</td><td>NetApp StorageGRID</td><td>Ed25519</td><td>Verify logic</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="cves-pairing">CVE table &mdash; pairing curves</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>ID / name</th><th class="num">Year</th><th>Component</th><th>Curve</th><th>Class</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">CVE-2017-18268</td><td class="num">2017</td><td>EthereumJS bn128</td><td>BN254</td><td>Subgroup check missing</td><td>off-subgroup points accepted</td></tr>
+    <tr><td>EIP-1108</td><td class="num">2019</td><td>Ethereum gas re-pricing</td><td>BN254</td><td>Re-estimation post-exTNFS</td><td>effective security 128 &rarr; ~100 bits</td></tr>
+    <tr><td>gnark / circom subgroup-skip findings</td><td class="num">2020&ndash;2022</td><td>zk libraries</td><td>BLS12-381, BN254</td><td>Membership</td><td>Trail of Bits, Veridise reports</td></tr>
+    <tr><td>Frozen Heart</td><td class="num">2022</td><td>Fiat&ndash;Shamir in PLONK/Bulletproofs/Spartan</td><td>BLS12-381 / BN254</td><td>Protocol (not curve)</td><td>multiple libs patched</td></tr>
+    <tr><td class="mono">CVE-2021-27484</td><td class="num">2021</td><td>Algorand BLS</td><td>BLS12-381</td><td>Sig verification</td><td>&mdash;</td></tr>
+    <tr><td class="mono">CVE-2022-36021</td><td class="num">2022</td><td>go-ethereum bn256</td><td>BN254</td><td>Memory / DoS</td><td>&mdash;</td></tr>
+    <tr><td>arkworks subgroup-check audit findings</td><td class="num">2023</td><td>arkworks</td><td>BLS12-381</td><td>Subgroup membership omissions</td><td>fixed</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="cves-brainpool">CVE table &mdash; Brainpool / SM2 / niche</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>CVE</th><th class="num">Year</th><th>Component</th><th>Curve</th><th>Class</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">CVE-2015-0205</td><td class="num">2015</td><td>OpenSSL</td><td>Brainpool / NIST</td><td>DH cert auth bypass</td></tr>
+    <tr><td class="mono">CVE-2021-3711</td><td class="num">2021</td><td>OpenSSL SM2</td><td>SM2</td><td>Buffer overflow in decrypt</td></tr>
+    <tr><td class="mono">CVE-2021-3712</td><td class="num">2021</td><td>OpenSSL ASN.1 strings</td><td>EC certs incl. SM2</td><td>Read overrun</td></tr>
+    <tr><td class="mono">CVE-2023-0464/0465/0466</td><td class="num">2023</td><td>OpenSSL X.509</td><td>all EC certs</td><td>Policy-chain DoS</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h2 id="frontier-nist">Research frontier &mdash; NIST primes (P-256/384/521)</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Threat vector</th><th>Current state</th><th>What would constitute a break</th><th class="center">10&ndash;15 yr likelihood</th></tr></thead>
+  <tbody>
+    <tr><td>Generic ECDLP improvement on random prime-field curves</td><td>&radic;n rho since 1978; no algebraic structure exploited in 45+ years</td><td>sub-exponential ECDLP for random prime-field curves &mdash; Fields-medal-level result</td><td class="center"><span class="pill ok">very low</span></td></tr>
+    <tr><td>Shor on CRQC</td><td>~2,300 logical qubits, ~10<sup>9</sup> T-gates for P-256 (Roetteler et al.)</td><td>fault-tolerant ~10<sup>5</sup>-qubit machine</td><td class="center"><span class="pill warn">low&ndash;medium (10 yr); medium&ndash;high (15 yr)</span></td></tr>
+    <tr><td>Better HNP / lattice on biased nonces</td><td>LadderLeak (1-bit), TPM-Fail, Minerva, Albrecht&ndash;Heninger 2021 (sub-bit)</td><td>leakage-free attack on perfectly-uniform nonces</td><td class="center"><span class="pill ok">none expected</span></td></tr>
+    <tr><td>Side-channel research</td><td>continuous CVE stream</td><td>new &micro;arch leak &rarr; more CVEs</td><td class="center"><span class="pill danger">certain (continuous)</span></td></tr>
+    <tr><td>Curve-specific structural attack</td><td>no known endomorphism</td><td>proof that NIST seeds hide a trapdoor</td><td class="center"><span class="pill ok">speculative, no evidence in 25 yr</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="frontier-k1">Research frontier &mdash; secp256k1</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Threat vector</th><th>Current state</th><th>What would break it</th><th class="center">Likelihood</th></tr></thead>
+  <tbody>
+    <tr><td>Rho with endo+negation</td><td>&radic;6 speedup, known since 2010</td><td>larger speedup from full endomorphism ring</td><td class="center"><span class="pill ok">low</span></td></tr>
+    <tr><td>CM-curve lattice attacks (Mestre, Howe&ndash;Lepr&eacute;)</td><td>structural lattice analyses; no break</td><td>CM-D=&minus;3 specific algorithm beating rho</td><td class="center"><span class="pill warn">research-frontier, unknown</span></td></tr>
+    <tr><td>Shor</td><td>same as P-256</td><td>CRQC</td><td class="center"><span class="pill warn">low&ndash;medium / 10&ndash;15 yr</span></td></tr>
+    <tr><td>GLV-aware index calculus</td><td>none today</td><td>exploiting &#8484;[&omega;] for relations</td><td class="center"><span class="pill ok">speculative</span></td></tr>
+    <tr><td>Twist attack</td><td>twist not secure, irrelevant under standard validation</td><td>wallet code skipping y-coord validation while using compressed pubkeys</td><td class="center"><span class="pill warn">bug-level, not math-level</span></td></tr>
+    <tr><td>Nonce-bias chain scraping</td><td>$$ losses continuous</td><td>better lattice solvers on partial-key + noise (LWE-style)</td><td class="center"><span class="pill danger">continuous incremental</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="frontier-25519">Research frontier &mdash; Curve25519 / Ed25519 / Curve448</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Threat vector</th><th>Current state</th><th>What would break it</th><th class="center">Likelihood</th></tr></thead>
+  <tbody>
+    <tr><td>Generic ECDLP</td><td>rho only</td><td>same as NIST &mdash; sub-exp on random prime-field</td><td class="center"><span class="pill ok">very low</span></td></tr>
+    <tr><td>Shor</td><td>same</td><td>CRQC</td><td class="center"><span class="pill warn">low&ndash;medium / 10&ndash;15 yr</span></td></tr>
+    <tr><td>Cofactor / malleability</td><td>exploitable at protocol layer, not curve</td><td>new protocols forgetting clamping</td><td class="center"><span class="pill danger">continuous bug churn</span></td></tr>
+    <tr><td>Side channels</td><td>Montgomery ladder is constant-time <i>if</i> implemented correctly</td><td>new &micro;arch leak</td><td class="center"><span class="pill danger">certain</span></td></tr>
+    <tr><td>Structural attack on D=&minus;8 / D=&minus;4 CM</td><td>none known</td><td>CM-lattice frontier</td><td class="center"><span class="pill warn">research-frontier, unknown</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="frontier-binary">Research frontier &mdash; NIST binary curves</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Threat vector</th><th>Current state</th><th>What would break it</th><th class="center">Likelihood</th></tr></thead>
+  <tbody>
+    <tr><td>Small-characteristic index calculus (FJV 2012, PQ 2014, Galbraith&ndash;Gaudry 2016)</td><td>quasi-polynomial DLP over F<sub>q<sup>n</sup></sub> for small n; cryptographic n still safe by margin</td><td>extension to cryptographic m (163&ndash;571) of Semaev's summation-polynomial approach</td><td class="center"><span class="pill warn">medium &mdash; most active frontier</span></td></tr>
+    <tr><td>Better Frobenius rho on Koblitz</td><td>&radic;(2m) since 1998</td><td>further factor from automorphism group</td><td class="center"><span class="pill ok">low</span></td></tr>
+    <tr><td>GHS Weil descent on prime m</td><td>NIST avoids composite m; GHS doesn't apply at prime m today</td><td>descent construction that doesn't need composite m</td><td class="center"><span class="pill warn">research-frontier</span></td></tr>
+    <tr><td>Quantum (Shor)</td><td>additional speedup over prime-field due to easier F<sub>2<sup>m</sup></sub> arithmetic</td><td>CRQC</td><td class="center"><span class="pill warn">same horizon</span></td></tr>
+    <tr><td>Regulatory</td><td>NIST SP 800-186 (2023) <b>disallows</b> binary curves</td><td>n/a &mdash; already off the table</td><td class="center"><span class="pill danger">already retired</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="frontier-pairing">Research frontier &mdash; pairing-friendly curves</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Threat vector</th><th>Current state</th><th>What would break it</th><th class="center">Likelihood</th></tr></thead>
+  <tbody>
+    <tr><td>Tower-NFS / exTNFS / SexTNFS evolution</td><td>Kim&ndash;Barbulescu 2016 cut BN254 by ~28 bits; Sarkar&ndash;Singh, Guillevic&ndash;Singh refinements</td><td>TNFS variant tuned to k=12 cutting another 10&ndash;20 bits</td><td class="center"><span class="pill warn">medium-low &mdash; actively researched</span></td></tr>
+    <tr><td>ECDLP on G&#8321; via index calculus over F<sub>p</sub></td><td>none beats rho</td><td>algebraic structure exploit via pairing endomorphism</td><td class="center"><span class="pill ok">low</span></td></tr>
+    <tr><td>Quantum NFS (Eker&aring;&ndash;H&aring;stad)</td><td>Shor breaks ECDLP &amp; FF-DLP</td><td>CRQC</td><td class="center"><span class="pill warn">low&ndash;medium / 10&ndash;15 yr</span></td></tr>
+    <tr><td>Subgroup-check / serialization bugs</td><td>continuous CVE stream</td><td>new serialization formats forgetting Bowe checks</td><td class="center"><span class="pill danger">certain (impl churn)</span></td></tr>
+    <tr><td>Trusted-setup compromise</td><td>KZG / Powers-of-Tau, many participants</td><td>enough participants colluding</td><td class="center"><span class="pill warn">trust-model, not math</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="frontier-broken">Already-broken families (for completeness)</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Curve class</th><th>What broke it</th><th class="num">Year</th><th>Could it ever be "un-broken"?</th></tr></thead>
+  <tbody>
+    <tr><td>Anomalous (#E=p)</td><td>Smart / Satoh&ndash;Araki / Semaev</td><td class="num">1997</td><td>No &mdash; linear-time DLP via p-adic lift is structural</td></tr>
+    <tr><td>Supersingular ECDLP</td><td>MOV / Frey&ndash;R&uuml;ck</td><td class="num">1993</td><td>No &mdash; embedding into F<sub>p<sup>k</sup></sub> with small k is structural</td></tr>
+    <tr><td>SIDH / SIKE</td><td>Castryck&ndash;Decru + Maino&ndash;Martindale + Robert</td><td class="num">2022</td><td>Variants without aux torsion data may survive (CSIDH, SQIsign, M-SIDH); original SIDH dead</td></tr>
+    <tr><td>F<sub>2<sup>n</sup></sub> composite n</td><td>GHS Weil descent</td><td class="num">2002</td><td>No &mdash; descent is structural</td></tr>
+    <tr><td>Singular curves</td><td>reduction to F<sub>p</sub><sup>+</sup> / F<sub>p</sub><sup>*</sup> DLP</td><td class="num">classical</td><td>No &mdash; not even an elliptic curve</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pq">Post-quantum migration table</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Curve family</th><th>Shor break threshold (logical qubits)</th><th>Replacement direction</th></tr></thead>
+  <tbody>
+    <tr><td>P-256 / secp256k1 / Curve25519</td><td>~2,330 logical qubits, ~10<sup>9</sup> Toffoli</td><td>ML-DSA (Dilithium), SLH-DSA, ML-KEM, X-Wing hybrid</td></tr>
+    <tr><td>P-384 / Curve448</td><td>~3,500 logical qubits</td><td>ML-DSA-65, ML-KEM-768 hybrid</td></tr>
+    <tr><td>P-521</td><td>~4,700 logical qubits</td><td>ML-DSA-87, ML-KEM-1024 hybrid</td></tr>
+    <tr><td>BLS12-381 (G&#8321; DLP)</td><td>~3,500 logical qubits for ECDLP; pairings (NFS in F<sub>p<sup>12</sup></sub>) likely <i>less</i> qubits via quantum NFS</td><td>BLS replacements unclear; lattice / Frost-on-lattice candidates</td></tr>
+    <tr><td>Binary K-571</td><td>~5,300 logical qubits</td><td>n/a (already disallowed)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+<p class="footnote">Generated as a static reference. No JavaScript. Works offline. Print-friendly via your browser&rsquo;s print dialog.</p>
+
+</div>
+</body>
+</html>
