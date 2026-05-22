@@ -1,0 +1,2289 @@
+{
+  "config": {
+    "bits": 14,
+    "num_curves": 10,
+    "primes": [
+      2,
+      3
+    ],
+    "max_graph_nodes": 16,
+    "rho_max_iters": 262144,
+    "seed": 12648430
+  },
+  "per_curve": [
+    {
+      "start": [
+        16411,
+        8928,
+        762
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            16411,
+            8928,
+            762
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -59,
+            "order": 16471,
+            "frobenius_disc": -62163,
+            "fundamental_disc": -6907,
+            "conductor": 3,
+            "endomorphism_disc": -62163,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 92,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 92.0,
+      "median_rho_iters": 92.0,
+      "stddev_rho_iters": 0.0
+    },
+    {
+      "start": [
+        16411,
+        12113,
+        15485
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            16411,
+            12113,
+            15485
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -185,
+            "order": 16597,
+            "frobenius_disc": -31419,
+            "fundamental_disc": -3491,
+            "conductor": 3,
+            "endomorphism_disc": -31419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 164,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 164.0,
+      "median_rho_iters": 164.0,
+      "stddev_rho_iters": 0.0
+    },
+    {
+      "start": [
+        16411,
+        2318,
+        4344
+      ],
+      "class_size": 16,
+      "class": [
+        {
+          "curve": [
+            16411,
+            2318,
+            4344
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 126,
+            "order": 16286,
+            "frobenius_disc": -49768,
+            "fundamental_disc": -49768,
+            "conductor": 1,
+            "endomorphism_disc": -49768,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 144,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8579,
+            7449
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -7,
+            "order": 16419,
+            "frobenius_disc": -65595,
+            "fundamental_disc": -65595,
+            "conductor": 1,
+            "endomorphism_disc": -65595,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 46,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8011,
+            7333
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 41,
+            "order": 16371,
+            "frobenius_disc": -63963,
+            "fundamental_disc": -7107,
+            "conductor": 3,
+            "endomorphism_disc": -63963,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 173,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8908,
+            10712
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 157,
+            "order": 16255,
+            "frobenius_disc": -40995,
+            "fundamental_disc": -4555,
+            "conductor": 3,
+            "endomorphism_disc": -40995,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 140,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14881,
+            4313
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 115,
+            "order": 16297,
+            "frobenius_disc": -52419,
+            "fundamental_disc": -52419,
+            "conductor": 1,
+            "endomorphism_disc": -52419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 138,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8843,
+            11469
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 76,
+            "order": 16336,
+            "frobenius_disc": -59868,
+            "fundamental_disc": -1663,
+            "conductor": 6,
+            "endomorphism_disc": -59868,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 174,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            12735,
+            12320
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -200,
+            "order": 16612,
+            "frobenius_disc": -25644,
+            "fundamental_disc": -6411,
+            "conductor": 2,
+            "endomorphism_disc": -25644,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 233,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            451,
+            10925
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 124,
+            "order": 16288,
+            "frobenius_disc": -50268,
+            "fundamental_disc": -12567,
+            "conductor": 2,
+            "endomorphism_disc": -50268,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 85,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            5400,
+            9345
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 12,
+            "order": 16400,
+            "frobenius_disc": -65500,
+            "fundamental_disc": -655,
+            "conductor": 10,
+            "endomorphism_disc": -65500,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 275,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            9684,
+            6364
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -176,
+            "order": 16588,
+            "frobenius_disc": -34668,
+            "fundamental_disc": -107,
+            "conductor": 18,
+            "endomorphism_disc": -34668,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 122,
+          "rho_success": true,
+          "embedding_degree": 28,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14353,
+            9058
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -70,
+            "order": 16482,
+            "frobenius_disc": -60744,
+            "fundamental_disc": -60744,
+            "conductor": 1,
+            "endomorphism_disc": -60744,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 178,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            7257,
+            15379
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -67,
+            "order": 16479,
+            "frobenius_disc": -61155,
+            "fundamental_disc": -755,
+            "conductor": 9,
+            "endomorphism_disc": -61155,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 32,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            3450,
+            15388
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 136,
+            "order": 16276,
+            "frobenius_disc": -47148,
+            "fundamental_disc": -11787,
+            "conductor": 2,
+            "endomorphism_disc": -47148,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 237,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            1846,
+            5466
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 92,
+            "order": 16320,
+            "frobenius_disc": -57180,
+            "fundamental_disc": -14295,
+            "conductor": 2,
+            "endomorphism_disc": -57180,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 98,
+          "rho_success": true,
+          "embedding_degree": 16,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8794,
+            3059
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -44,
+            "order": 16456,
+            "frobenius_disc": -63708,
+            "fundamental_disc": -15927,
+            "conductor": 2,
+            "endomorphism_disc": -63708,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 82,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11196,
+            12820
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 133,
+            "order": 16279,
+            "frobenius_disc": -47955,
+            "fundamental_disc": -47955,
+            "conductor": 1,
+            "endomorphism_disc": -47955,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 196,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 147.0625,
+      "median_rho_iters": 144.0,
+      "stddev_rho_iters": 68.94777613044045
+    },
+    {
+      "start": [
+        16411,
+        2434,
+        4190
+      ],
+      "class_size": 16,
+      "class": [
+        {
+          "curve": [
+            16411,
+            2434,
+            4190
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 107,
+            "order": 16305,
+            "frobenius_disc": -54195,
+            "fundamental_disc": -54195,
+            "conductor": 1,
+            "endomorphism_disc": -54195,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 248,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            4201,
+            1901
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 17,
+            "order": 16395,
+            "frobenius_disc": -65355,
+            "fundamental_disc": -65355,
+            "conductor": 1,
+            "endomorphism_disc": -65355,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 57,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11249,
+            14824
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 154,
+            "order": 16258,
+            "frobenius_disc": -41928,
+            "fundamental_disc": -41928,
+            "conductor": 1,
+            "endomorphism_disc": -41928,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 132,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11700,
+            2990
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 122,
+            "order": 16290,
+            "frobenius_disc": -50760,
+            "fundamental_disc": -5640,
+            "conductor": 3,
+            "endomorphism_disc": -50760,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 162,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6964,
+            10424
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -167,
+            "order": 16579,
+            "frobenius_disc": -37755,
+            "fundamental_disc": -4195,
+            "conductor": 3,
+            "endomorphism_disc": -37755,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 142,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8996,
+            273
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 76,
+            "order": 16336,
+            "frobenius_disc": -59868,
+            "fundamental_disc": -1663,
+            "conductor": 6,
+            "endomorphism_disc": -59868,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 162,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            3694,
+            606
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 24,
+            "order": 16388,
+            "frobenius_disc": -65068,
+            "fundamental_disc": -16267,
+            "conductor": 2,
+            "endomorphism_disc": -65068,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 142,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            12400,
+            7400
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 18,
+            "order": 16394,
+            "frobenius_disc": -65320,
+            "fundamental_disc": -65320,
+            "conductor": 1,
+            "endomorphism_disc": -65320,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 240,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            1787,
+            10800
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -12,
+            "order": 16424,
+            "frobenius_disc": -65500,
+            "fundamental_disc": -655,
+            "conductor": 10,
+            "endomorphism_disc": -65500,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 45,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            2052,
+            15865
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -154,
+            "order": 16566,
+            "frobenius_disc": -41928,
+            "fundamental_disc": -41928,
+            "conductor": 1,
+            "endomorphism_disc": -41928,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 264,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            7908,
+            13565
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 215,
+            "order": 16197,
+            "frobenius_disc": -19419,
+            "fundamental_disc": -19419,
+            "conductor": 1,
+            "endomorphism_disc": -19419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 96,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            16194,
+            12629
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -85,
+            "order": 16497,
+            "frobenius_disc": -58419,
+            "fundamental_disc": -6491,
+            "conductor": 3,
+            "endomorphism_disc": -58419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 62,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            12861,
+            412
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -131,
+            "order": 16543,
+            "frobenius_disc": -48483,
+            "fundamental_disc": -5387,
+            "conductor": 3,
+            "endomorphism_disc": -48483,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 35,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13505,
+            1635
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 12,
+            "order": 16400,
+            "frobenius_disc": -65500,
+            "fundamental_disc": -655,
+            "conductor": 10,
+            "endomorphism_disc": -65500,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 168,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            3250,
+            12120
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 176,
+            "order": 16236,
+            "frobenius_disc": -34668,
+            "fundamental_disc": -107,
+            "conductor": 18,
+            "endomorphism_disc": -34668,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 161,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            10819,
+            2145
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -154,
+            "order": 16566,
+            "frobenius_disc": -41928,
+            "fundamental_disc": -41928,
+            "conductor": 1,
+            "endomorphism_disc": -41928,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 268,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 149.0,
+      "median_rho_iters": 161.0,
+      "stddev_rho_iters": 77.18030836942802
+    },
+    {
+      "start": [
+        16411,
+        768,
+        644
+      ],
+      "class_size": 3,
+      "class": [
+        {
+          "curve": [
+            16411,
+            768,
+            644
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -42,
+            "order": 16454,
+            "frobenius_disc": -63880,
+            "fundamental_disc": -63880,
+            "conductor": 1,
+            "endomorphism_disc": -63880,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 116,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13539,
+            1058
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 42,
+            "order": 16370,
+            "frobenius_disc": -63880,
+            "fundamental_disc": -63880,
+            "conductor": 1,
+            "endomorphism_disc": -63880,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 72,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13485,
+            4095
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 67,
+            "order": 16345,
+            "frobenius_disc": -61155,
+            "fundamental_disc": -755,
+            "conductor": 9,
+            "endomorphism_disc": -61155,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 95,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 94.33333333333333,
+      "median_rho_iters": 95.0,
+      "stddev_rho_iters": 22.00757445365875
+    },
+    {
+      "start": [
+        16411,
+        3955,
+        9348
+      ],
+      "class_size": 16,
+      "class": [
+        {
+          "curve": [
+            16411,
+            3955,
+            9348
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 184,
+            "order": 16228,
+            "frobenius_disc": -31788,
+            "fundamental_disc": -883,
+            "conductor": 6,
+            "endomorphism_disc": -31788,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 300,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            7989,
+            14822
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -52,
+            "order": 16464,
+            "frobenius_disc": -62940,
+            "fundamental_disc": -15735,
+            "conductor": 2,
+            "endomorphism_disc": -62940,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 83,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13118,
+            4523
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -122,
+            "order": 16534,
+            "frobenius_disc": -50760,
+            "fundamental_disc": -5640,
+            "conductor": 3,
+            "endomorphism_disc": -50760,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 81,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            10942,
+            4955
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -38,
+            "order": 16450,
+            "frobenius_disc": -64200,
+            "fundamental_disc": -2568,
+            "conductor": 5,
+            "endomorphism_disc": -64200,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 230,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            4679,
+            674
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -158,
+            "order": 16570,
+            "frobenius_disc": -40680,
+            "fundamental_disc": -4520,
+            "conductor": 3,
+            "endomorphism_disc": -40680,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 105,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            16312,
+            10153
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 27,
+            "order": 16385,
+            "frobenius_disc": -64915,
+            "fundamental_disc": -64915,
+            "conductor": 1,
+            "endomorphism_disc": -64915,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 138,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            12892,
+            13946
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 71,
+            "order": 16341,
+            "frobenius_disc": -60603,
+            "fundamental_disc": -60603,
+            "conductor": 1,
+            "endomorphism_disc": -60603,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 57,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11335,
+            11403
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -66,
+            "order": 16478,
+            "frobenius_disc": -61288,
+            "fundamental_disc": -61288,
+            "conductor": 1,
+            "endomorphism_disc": -61288,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 191,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11767,
+            12223
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -85,
+            "order": 16497,
+            "frobenius_disc": -58419,
+            "fundamental_disc": -6491,
+            "conductor": 3,
+            "endomorphism_disc": -58419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 101,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14565,
+            12401
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -98,
+            "order": 16510,
+            "frobenius_disc": -56040,
+            "fundamental_disc": -56040,
+            "conductor": 1,
+            "endomorphism_disc": -56040,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 62,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            10299,
+            13127
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 238,
+            "order": 16174,
+            "frobenius_disc": -9000,
+            "fundamental_disc": -40,
+            "conductor": 15,
+            "endomorphism_disc": -9000,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 114,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6579,
+            3789
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -2,
+            "order": 16414,
+            "frobenius_disc": -65640,
+            "fundamental_disc": -65640,
+            "conductor": 1,
+            "endomorphism_disc": -65640,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 26,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            1724,
+            10004
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -182,
+            "order": 16594,
+            "frobenius_disc": -32520,
+            "fundamental_disc": -32520,
+            "conductor": 1,
+            "endomorphism_disc": -32520,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 328,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            3660,
+            15634
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -49,
+            "order": 16461,
+            "frobenius_disc": -63243,
+            "fundamental_disc": -7027,
+            "conductor": 3,
+            "endomorphism_disc": -63243,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 84,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            15047,
+            12348
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -52,
+            "order": 16464,
+            "frobenius_disc": -62940,
+            "fundamental_disc": -15735,
+            "conductor": 2,
+            "endomorphism_disc": -62940,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 105,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14161,
+            3171
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 112,
+            "order": 16300,
+            "frobenius_disc": -53100,
+            "fundamental_disc": -59,
+            "conductor": 30,
+            "endomorphism_disc": -53100,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 169,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 135.875,
+      "median_rho_iters": 105.0,
+      "stddev_rho_iters": 86.67939009168596
+    },
+    {
+      "start": [
+        16411,
+        10429,
+        3945
+      ],
+      "class_size": 16,
+      "class": [
+        {
+          "curve": [
+            16411,
+            10429,
+            3945
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 64,
+            "order": 16348,
+            "frobenius_disc": -61548,
+            "fundamental_disc": -15387,
+            "conductor": 2,
+            "endomorphism_disc": -61548,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 186,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            1267,
+            3576
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 164,
+            "order": 16248,
+            "frobenius_disc": -38748,
+            "fundamental_disc": -9687,
+            "conductor": 2,
+            "endomorphism_disc": -38748,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 170,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6720,
+            7762
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -185,
+            "order": 16597,
+            "frobenius_disc": -31419,
+            "fundamental_disc": -3491,
+            "conductor": 3,
+            "endomorphism_disc": -31419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 147,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            5587,
+            8560
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 10,
+            "order": 16402,
+            "frobenius_disc": -65544,
+            "fundamental_disc": -65544,
+            "conductor": 1,
+            "endomorphism_disc": -65544,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 118,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13093,
+            1885
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 83,
+            "order": 16329,
+            "frobenius_disc": -58755,
+            "fundamental_disc": -58755,
+            "conductor": 1,
+            "endomorphism_disc": -58755,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 114,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            3645,
+            10627
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -155,
+            "order": 16567,
+            "frobenius_disc": -41619,
+            "fundamental_disc": -41619,
+            "conductor": 1,
+            "endomorphism_disc": -41619,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 128,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            15674,
+            4165
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -112,
+            "order": 16524,
+            "frobenius_disc": -53100,
+            "fundamental_disc": -59,
+            "conductor": 30,
+            "endomorphism_disc": -53100,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 35,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            10837,
+            8413
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 44,
+            "order": 16368,
+            "frobenius_disc": -63708,
+            "fundamental_disc": -15927,
+            "conductor": 2,
+            "endomorphism_disc": -63708,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 262144,
+          "rho_success": false,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14146,
+            13745
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -140,
+            "order": 16552,
+            "frobenius_disc": -46044,
+            "fundamental_disc": -1279,
+            "conductor": 6,
+            "endomorphism_disc": -46044,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 22,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            2692,
+            14374
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -175,
+            "order": 16587,
+            "frobenius_disc": -35019,
+            "fundamental_disc": -3891,
+            "conductor": 3,
+            "endomorphism_disc": -35019,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 90,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6317,
+            15391
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -40,
+            "order": 16452,
+            "frobenius_disc": -64044,
+            "fundamental_disc": -1779,
+            "conductor": 6,
+            "endomorphism_disc": -64044,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 86,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            2949,
+            11418
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 188,
+            "order": 16224,
+            "frobenius_disc": -30300,
+            "fundamental_disc": -303,
+            "conductor": 10,
+            "endomorphism_disc": -30300,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 270,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14782,
+            9108
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 26,
+            "order": 16386,
+            "frobenius_disc": -64968,
+            "fundamental_disc": -64968,
+            "conductor": 1,
+            "endomorphism_disc": -64968,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 240,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            7719,
+            870
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 76,
+            "order": 16336,
+            "frobenius_disc": -59868,
+            "fundamental_disc": -1663,
+            "conductor": 6,
+            "endomorphism_disc": -59868,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 23,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            9674,
+            1246
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -88,
+            "order": 16500,
+            "frobenius_disc": -57900,
+            "fundamental_disc": -579,
+            "conductor": 10,
+            "endomorphism_disc": -57900,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 32,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            10782,
+            9980
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 66,
+            "order": 16346,
+            "frobenius_disc": -61288,
+            "fundamental_disc": -61288,
+            "conductor": 1,
+            "endomorphism_disc": -61288,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 167,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 16498.25,
+      "median_rho_iters": 128.0,
+      "stddev_rho_iters": 65505.57545888746
+    },
+    {
+      "start": [
+        16411,
+        1916,
+        6834
+      ],
+      "class_size": 3,
+      "class": [
+        {
+          "curve": [
+            16411,
+            1916,
+            6834
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -138,
+            "order": 16550,
+            "frobenius_disc": -46600,
+            "fundamental_disc": -1864,
+            "conductor": 5,
+            "endomorphism_disc": -46600,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 30,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            4428,
+            10237
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -194,
+            "order": 16606,
+            "frobenius_disc": -28008,
+            "fundamental_disc": -3112,
+            "conductor": 3,
+            "endomorphism_disc": -28008,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 180,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            12488,
+            2322
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -101,
+            "order": 16513,
+            "frobenius_disc": -55443,
+            "fundamental_disc": -55443,
+            "conductor": 1,
+            "endomorphism_disc": -55443,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 171,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 127.0,
+      "median_rho_iters": 171.0,
+      "stddev_rho_iters": 84.12490713219242
+    },
+    {
+      "start": [
+        16411,
+        10831,
+        1544
+      ],
+      "class_size": 16,
+      "class": [
+        {
+          "curve": [
+            16411,
+            10831,
+            1544
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -188,
+            "order": 16600,
+            "frobenius_disc": -30300,
+            "fundamental_disc": -303,
+            "conductor": 10,
+            "endomorphism_disc": -30300,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 84,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13783,
+            10188
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -85,
+            "order": 16497,
+            "frobenius_disc": -58419,
+            "fundamental_disc": -6491,
+            "conductor": 3,
+            "endomorphism_disc": -58419,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 88,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            16197,
+            4427
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -68,
+            "order": 16480,
+            "frobenius_disc": -61020,
+            "fundamental_disc": -1695,
+            "conductor": 6,
+            "endomorphism_disc": -61020,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 174,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6844,
+            2968
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -68,
+            "order": 16480,
+            "frobenius_disc": -61020,
+            "fundamental_disc": -1695,
+            "conductor": 6,
+            "endomorphism_disc": -61020,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 262144,
+          "rho_success": false,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            4464,
+            13292
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 104,
+            "order": 16308,
+            "frobenius_disc": -54828,
+            "fundamental_disc": -1523,
+            "conductor": 6,
+            "endomorphism_disc": -54828,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 150,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14452,
+            13260
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 164,
+            "order": 16248,
+            "frobenius_disc": -38748,
+            "fundamental_disc": -9687,
+            "conductor": 2,
+            "endomorphism_disc": -38748,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 186,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            11926,
+            3603
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 118,
+            "order": 16294,
+            "frobenius_disc": -51720,
+            "fundamental_disc": -51720,
+            "conductor": 1,
+            "endomorphism_disc": -51720,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 91,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            8126,
+            9323
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 148,
+            "order": 16264,
+            "frobenius_disc": -43740,
+            "fundamental_disc": -15,
+            "conductor": 54,
+            "endomorphism_disc": -43740,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 40,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14321,
+            13729
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -67,
+            "order": 16479,
+            "frobenius_disc": -61155,
+            "fundamental_disc": -755,
+            "conductor": 9,
+            "endomorphism_disc": -61155,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 22,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14985,
+            6696
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 89,
+            "order": 16323,
+            "frobenius_disc": -57723,
+            "fundamental_disc": -57723,
+            "conductor": 1,
+            "endomorphism_disc": -57723,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 173,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            847,
+            9219
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 100,
+            "order": 16312,
+            "frobenius_disc": -55644,
+            "fundamental_disc": -13911,
+            "conductor": 2,
+            "endomorphism_disc": -55644,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 78,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            439,
+            14759
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -108,
+            "order": 16520,
+            "frobenius_disc": -53980,
+            "fundamental_disc": -13495,
+            "conductor": 2,
+            "endomorphism_disc": -53980,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 245,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            6309,
+            15943
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -197,
+            "order": 16609,
+            "frobenius_disc": -26835,
+            "fundamental_disc": -26835,
+            "conductor": 1,
+            "endomorphism_disc": -26835,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 200,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            13711,
+            15580
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 140,
+            "order": 16272,
+            "frobenius_disc": -46044,
+            "fundamental_disc": -1279,
+            "conductor": 6,
+            "endomorphism_disc": -46044,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 105,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            5536,
+            13961
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -116,
+            "order": 16528,
+            "frobenius_disc": -52188,
+            "fundamental_disc": -13047,
+            "conductor": 2,
+            "endomorphism_disc": -52188,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 399,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            16411,
+            14393,
+            8553
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": -46,
+            "order": 16458,
+            "frobenius_disc": -63528,
+            "fundamental_disc": -63528,
+            "conductor": 1,
+            "endomorphism_disc": -63528,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 96,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 16517.1875,
+      "median_rho_iters": 150.0,
+      "stddev_rho_iters": 65500.5470849608
+    },
+    {
+      "start": [
+        16411,
+        13691,
+        11949
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            16411,
+            13691,
+            11949
+          ],
+          "cm": {
+            "p": 16411,
+            "trace": 21,
+            "order": 16391,
+            "frobenius_disc": -65203,
+            "fundamental_disc": -65203,
+            "conductor": 1,
+            "endomorphism_disc": -65203,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 8,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 8.0,
+      "median_rho_iters": 8.0,
+      "stddev_rho_iters": 0.0
+    }
+  ],
+  "aggregate": {
+    "total_curves": 10,
+    "total_isogenous_vertices": 89,
+    "curves_with_smart_applicable": 0,
+    "curves_with_mov_feasible": 0,
+    "curves_with_glv": 0,
+    "overall_mean_rho_iters": 6023.438202247191
+  }
+}

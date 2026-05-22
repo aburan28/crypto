@@ -1,0 +1,195 @@
+{
+  "config": {
+    "bits": 30,
+    "num_curves": 4,
+    "primes": [
+      2,
+      3
+    ],
+    "max_graph_nodes": 16,
+    "rho_max_iters": 262144,
+    "seed": 12648430
+  },
+  "per_curve": [
+    {
+      "start": [
+        1073741827,
+        838978027,
+        721928552
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            1073741827,
+            838978027,
+            721928552
+          ],
+          "cm": {
+            "p": 1073741827,
+            "trace": 46627,
+            "order": 1073695201,
+            "frobenius_disc": -2120890179,
+            "fundamental_disc": -2120890179,
+            "conductor": 1,
+            "endomorphism_disc": -2120890179,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 38465,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 38465.0,
+      "median_rho_iters": 38465.0,
+      "stddev_rho_iters": 0.0
+    },
+    {
+      "start": [
+        1073741827,
+        165756581,
+        300375944
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            1073741827,
+            165756581,
+            300375944
+          ],
+          "cm": {
+            "p": 1073741827,
+            "trace": 1503,
+            "order": 1073740325,
+            "frobenius_disc": -4292708299,
+            "fundamental_disc": -4292708299,
+            "conductor": 1,
+            "endomorphism_disc": -4292708299,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 56406,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 56406.0,
+      "median_rho_iters": 56406.0,
+      "stddev_rho_iters": 0.0
+    },
+    {
+      "start": [
+        1073741827,
+        767012407,
+        296809721
+      ],
+      "class_size": 1,
+      "class": [
+        {
+          "curve": [
+            1073741827,
+            767012407,
+            296809721
+          ],
+          "cm": {
+            "p": 1073741827,
+            "trace": -32097,
+            "order": 1073773925,
+            "frobenius_disc": -3264749899,
+            "fundamental_disc": -3264749899,
+            "conductor": 1,
+            "endomorphism_disc": -3264749899,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 26244,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 26244.0,
+      "median_rho_iters": 26244.0,
+      "stddev_rho_iters": 0.0
+    },
+    {
+      "start": [
+        1073741827,
+        652259896,
+        293600676
+      ],
+      "class_size": 2,
+      "class": [
+        {
+          "curve": [
+            1073741827,
+            652259896,
+            293600676
+          ],
+          "cm": {
+            "p": 1073741827,
+            "trace": 7316,
+            "order": 1073734512,
+            "frobenius_disc": -4241443452,
+            "fundamental_disc": -1060360863,
+            "conductor": 2,
+            "endomorphism_disc": -4241443452,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 14095,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        },
+        {
+          "curve": [
+            1073741827,
+            859045339,
+            949645003
+          ],
+          "cm": {
+            "p": 1073741827,
+            "trace": -1788,
+            "order": 1073743616,
+            "frobenius_disc": -4291770364,
+            "fundamental_disc": -1072942591,
+            "conductor": 2,
+            "endomorphism_disc": -4291770364,
+            "anomalous": false,
+            "supersingular": false
+          },
+          "rho_iters": 38266,
+          "rho_success": true,
+          "embedding_degree": null,
+          "mov_feasible": false,
+          "smart_applies": false,
+          "glv_speedup_available": false
+        }
+      ],
+      "mean_rho_iters": 26180.5,
+      "median_rho_iters": 38266.0,
+      "stddev_rho_iters": 17091.47800806004
+    }
+  ],
+  "aggregate": {
+    "total_curves": 4,
+    "total_isogenous_vertices": 5,
+    "curves_with_smart_applicable": 0,
+    "curves_with_mov_feasible": 0,
+    "curves_with_glv": 0,
+    "overall_mean_rho_iters": 34695.2
+  }
+}

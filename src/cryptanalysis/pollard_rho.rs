@@ -188,9 +188,44 @@ where
                 }
                 let gcd = rhs.gcd(n);
                 if !gcd.is_one() {
-                    // rhs and n share a factor: only a partial
-                    // recovery is possible (mod n/gcd).  Treat as
-                    // sterile and retry from a different start.
+                    // rhs and n share a factor g.  The congruence
+                    //   lhs ≡ rhs · x  (mod n)
+                    // has a solution iff g | lhs, and the solution
+                    // is determined only mod n/g.  Reduce and brute-
+                    // force the remaining g candidates against the
+                    // target h.  This converts the previous sterile-
+                    // restart into a successful recovery whenever g
+                    // is small enough to enumerate.
+                    let zero = BigUint::zero();
+                    if &lhs % &gcd == zero {
+                        // Bound the search: only attempt if g is
+                        // small enough that g exponentiations cost
+                        // less than another full rho cycle.
+                        let g_bits = gcd.bits();
+                        if g_bits <= 16 {
+                            let m = n / &gcd;
+                            let lhs_red = &lhs / &gcd;
+                            let rhs_red = &rhs / &gcd;
+                            if let Some(rhs_inv) = mod_inverse(&rhs_red, &m) {
+                                let x_base = (&lhs_red * &rhs_inv) % &m;
+                                let g_u: u64 = gcd
+                                    .iter_u64_digits()
+                                    .next()
+                                    .unwrap_or(0);
+                                let mut x_cand = x_base;
+                                for _ in 0..g_u {
+                                    let test = pow(g, &x_cand);
+                                    if eq(&test, h) {
+                                        return Ok(RhoSolution {
+                                            x: x_cand,
+                                            iterations: total_iters,
+                                        });
+                                    }
+                                    x_cand = (&x_cand + &m) % n;
+                                }
+                            }
+                        }
+                    }
                     sterile = true;
                     break;
                 }
