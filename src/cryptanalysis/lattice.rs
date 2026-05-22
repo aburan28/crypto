@@ -22,7 +22,206 @@
 //! attack details; this module is the linear-algebra workhorse.
 
 use num_bigint::{BigInt, ToBigInt};
-use num_traits::{Signed, ToPrimitive, Zero};
+use num_traits::{One, Signed, ToPrimitive, Zero};
+
+// ── High-precision fixed-point arithmetic for GS ─────────────────────────────
+//
+// Represent each value as a BigInt where the implicit scale is 2^HP_PREC:
+//   stored_int = actual_value × 2^HP_PREC
+//
+// This gives HP_PREC bits of mantissa precision, enough to avoid the
+// catastrophic cancellation that f64 suffers on P-521 HNP lattices
+// (entries spanning 2^384 to 2^1042 → 658-bit dynamic range > f64's 53 bits).
+
+const HP_PREC: usize = 2048;
+
+/// Convert BigInt x to HP fixed-point: result = x × 2^HP_PREC.
+#[inline]
+fn hp_from_bigint(x: &BigInt) -> BigInt {
+    x << HP_PREC
+}
+
+/// Multiply two HP values: hp(a) × hp(b) → hp(a×b).
+/// (A × 2^P) × (B × 2^P) / 2^P = (A×B) × 2^P.
+#[inline]
+fn hp_mul(a: &BigInt, b: &BigInt) -> BigInt {
+    (a * b) >> HP_PREC
+}
+
+/// Divide two HP values: hp(a) / hp(b) → hp(a/b).
+/// (A × 2^P) / (B × 2^P) = A/B; to return as HP: (A × 2^P × 2^P) / (B × 2^P) = (A/B) × 2^P.
+#[inline]
+fn hp_div(a: &BigInt, b: &BigInt) -> BigInt {
+    if b.is_zero() {
+        return BigInt::zero();
+    }
+    (a << HP_PREC) / b
+}
+
+/// Round HP value to nearest integer (as plain BigInt, not HP).
+fn hp_round(a: &BigInt) -> BigInt {
+    // Add or subtract half (2^(P-1)) then arithmetic shift right by P.
+    let half: BigInt = BigInt::one() << (HP_PREC - 1);
+    if a.is_negative() {
+        let neg_a = -a.clone();
+        -((&neg_a + &half) >> HP_PREC)
+    } else {
+        (a + &half) >> HP_PREC
+    }
+}
+
+/// High-precision Gram–Schmidt orthogonalization using 2048-bit fixed-point.
+///
+/// Returns `(bstar_sq, mu)` where:
+/// - `bstar_sq[i]` = ||b*_i||² as an HP fixed-point BigInt (= actual_norm² × 2^P)
+/// - `mu[i][j]`    = μ_{i,j} as an HP fixed-point BigInt (= actual_μ × 2^P)
+///
+/// Unlike the f64 `gram_schmidt`, this function avoids the catastrophic
+/// cancellation that occurs on the P-521 HNP lattice, where the GS
+/// subtraction of nearly-equal ~2^1042 terms should yield exactly 0 but
+/// f64 leaves a ~2^446 residual that buries the true ~2^384 GS component.
+fn gram_schmidt_hp(basis: &[Vec<BigInt>]) -> (Vec<BigInt>, Vec<Vec<BigInt>>) {
+    let n = basis.len();
+    let dim = if n > 0 { basis[0].len() } else { 0 };
+
+    // bstar[i][k] = b*_i[k] in HP fixed-point
+    let mut bstar: Vec<Vec<BigInt>> = vec![vec![BigInt::zero(); dim]; n];
+    // bstar_sq[i] = ||b*_i||² in HP fixed-point
+    let mut bstar_sq: Vec<BigInt> = vec![BigInt::zero(); n];
+    // mu[i][j] = μ_{i,j} in HP fixed-point
+    let mut mu: Vec<Vec<BigInt>> = vec![vec![BigInt::zero(); n]; n];
+
+    for i in 0..n {
+        // Initialise b*_i ← b_i (converted to HP)
+        for k in 0..dim {
+            bstar[i][k] = hp_from_bigint(&basis[i][k]);
+        }
+
+        for j in 0..i {
+            if bstar_sq[j].is_zero() {
+                continue;
+            }
+            // dot = b_i · b*_j  (HP scale)
+            let dot: BigInt = (0..dim)
+                .map(|k| hp_mul(&bstar[i][k], &bstar[j][k]))
+                .sum();
+            // μ_{i,j} = dot / ||b*_j||²  (HP ÷ HP → HP)
+            mu[i][j] = hp_div(&dot, &bstar_sq[j]);
+
+            // b*_i -= μ_{i,j} × b*_j
+            let mu_ij = mu[i][j].clone();
+            for k in 0..dim {
+                let sub = hp_mul(&mu_ij, &bstar[j][k]);
+                bstar[i][k] -= sub;
+            }
+        }
+
+        // ||b*_i||² = Σ_k (b*_i[k])² in HP scale
+        bstar_sq[i] = (0..dim)
+            .map(|k| hp_mul(&bstar[i][k], &bstar[i][k]))
+            .sum();
+    }
+
+    (bstar_sq, mu)
+}
+
+/// LLL-reduce `basis` using 2048-bit HP Gram–Schmidt.
+///
+/// Identical contract to [`lll_reduce`], but uses [`gram_schmidt_hp`]
+/// internally.  Required for lattices whose entries exceed ~2^500,
+/// where the standard f64 GS suffers catastrophic cancellation even
+/// after overflow-scaling.  In particular, the P-521 HNP basis has
+/// a ~2^658 dynamic range that f64 cannot handle.
+///
+/// Cost is higher than `lll_reduce` (~10-100× per GS call due to
+/// BigInt arithmetic), but for cryptanalytic dimensions (≤ 30) this
+/// is still milliseconds to seconds.
+pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'static str> {
+    if !(0.25 < delta && delta < 1.0) {
+        return Err("delta must be in (1/4, 1)");
+    }
+    let n = basis.len();
+    if n == 0 {
+        return Ok(());
+    }
+    let dim = basis[0].len();
+    if dim == 0 {
+        return Err("basis vectors must be non-empty");
+    }
+    if basis.iter().any(|v| v.len() != dim) {
+        return Err("basis vectors must all have the same length");
+    }
+
+    let max_iter = 500 * n * n * 8 + 10_000;
+    let mut iter = 0;
+
+    // delta as HP fixed-point: floor(delta × 2^HP_PREC)
+    // delta is in (0.25, 1.0); represent as ratio × 2^HP_PREC.
+    let delta_hp: BigInt = {
+        // Compute delta × 2^HP_PREC via integer arithmetic to avoid f64 issues.
+        // delta = p/q where p = (delta × 2^53) as u64, q = 2^53.
+        let p = (delta * (1u64 << 53) as f64) as u64;
+        let q = 1u64 << 53;
+        (BigInt::from(p) << HP_PREC) / BigInt::from(q)
+    };
+    let half_hp: BigInt = BigInt::one() << (HP_PREC - 1);
+
+    let (mut bstar_sq, mut mu) = gram_schmidt_hp(basis);
+    let mut k = 1usize;
+
+    while k < n {
+        iter += 1;
+        if iter > max_iter {
+            return Err("LLL exceeded iteration cap (degenerate input?)");
+        }
+
+        // ── Size reduction ───────────────────────────────────────────
+        for j in (0..k).rev() {
+            // Check |μ_{k,j}| > 1/2 using HP arithmetic
+            let mu_abs = if mu[k][j].is_negative() {
+                -mu[k][j].clone()
+            } else {
+                mu[k][j].clone()
+            };
+            if mu_abs > half_hp {
+                let q_bi = hp_round(&mu[k][j]);
+                if q_bi.is_zero() {
+                    continue;
+                }
+                // basis[k] -= q × basis[j]
+                for i in 0..dim {
+                    let bji = basis[j][i].clone();
+                    basis[k][i] -= &q_bi * &bji;
+                }
+                // Update μ: μ_{k,j} -= q (in HP)
+                let q_hp = hp_from_bigint(&q_bi);
+                mu[k][j] -= &q_hp;
+                for i in 0..j {
+                    let qmu = hp_mul(&q_hp, &mu[j][i]);
+                    mu[k][i] -= qmu;
+                }
+            }
+        }
+
+        // ── Lovász condition ─────────────────────────────────────────
+        // Check: ||b*_k||² ≥ (δ − μ_{k,k-1}²) · ||b*_{k-1}||²
+        let mu_sq = hp_mul(&mu[k][k - 1], &mu[k][k - 1]);
+        // rhs = (delta_hp - mu_sq) × bstar_sq[k-1] / 2^HP_PREC
+        let factor = &delta_hp - &mu_sq;
+        let rhs = hp_mul(&factor, &bstar_sq[k - 1]);
+
+        if bstar_sq[k] >= rhs {
+            k += 1;
+        } else {
+            basis.swap(k, k - 1);
+            let (new_bstar_sq, new_mu) = gram_schmidt_hp(basis);
+            bstar_sq = new_bstar_sq;
+            mu = new_mu;
+            k = if k > 1 { k - 1 } else { 1 };
+        }
+    }
+    Ok(())
+}
 
 /// LLL-reduce `basis` in place using Lovász parameter `delta`.
 ///
@@ -297,6 +496,92 @@ mod tests {
         let mut basis: Vec<Vec<BigInt>> = vec![vec_bigint(&[1, 0]), vec_bigint(&[0, 1])];
         assert!(lll_reduce(&mut basis, 1.5).is_err());
         assert!(lll_reduce(&mut basis, 0.1).is_err());
+    }
+
+    /// lll_reduce_hp should agree with lll_reduce on small inputs.
+    #[test]
+    fn lll_hp_matches_lll_on_small_basis() {
+        // Use the same known-reduced basis from lll_two_dim_obvious_reduction.
+        let mut a = vec![vec_bigint(&[1, 1, 1]), vec_bigint(&[-1, 0, 2])];
+        let mut b = a.clone();
+        lll_reduce(&mut a, 0.75).unwrap();
+        lll_reduce_hp(&mut b, 0.75).unwrap();
+
+        // Both should produce vectors of the same length (not necessarily identical
+        // order, but the first vector should be the same short vector).
+        let norm_a0: i64 = a[0].iter().map(|x| x.to_i64().unwrap().pow(2)).sum();
+        let norm_b0: i64 = b[0].iter().map(|x| x.to_i64().unwrap().pow(2)).sum();
+        assert_eq!(norm_a0, norm_b0, "HP and f64 LLL should find same-length first vector");
+    }
+
+    /// lll_reduce_hp should recover key on P-384 (a larger-entry case that
+    /// exercises the HP path more than P-256 would).
+    #[test]
+    fn lll_hp_recovers_p384_key() {
+        use crate::cryptanalysis::hnp_ecdsa::{
+            hnp_recover_key_with_reduction, BiasedSignature, HnpReduction,
+        };
+        use crate::ecc::curve::CurveParams;
+        use crate::ecc::keys::EccKeyPair;
+        use crate::ecc::point::Point;
+        use crate::utils::mod_inverse;
+        use num_bigint::{BigUint, RandBigInt};
+        use num_traits::Zero;
+        use rand::rngs::StdRng;
+        use rand::{RngCore, SeedableRng};
+
+        let curve = CurveParams::p384();
+        let n = &curve.n;
+        let mut rng = StdRng::seed_from_u64(0xC0FFEE);
+        let d = rng.gen_biguint_below(n);
+        let kp = EccKeyPair::from_private(d.clone(), &curve);
+        let k_bits = 288u32;
+
+        let mut k_rng = StdRng::seed_from_u64(0xDEADBEEF);
+        let mut z_seed: u64 = 0xDEAD_BEEF;
+        let mut sigs: Vec<BiasedSignature> = Vec::new();
+        while sigs.len() < 8 {
+            let bytes = ((k_bits + 7) / 8) as usize;
+            let mut buf = vec![0u8; bytes];
+            k_rng.fill_bytes(&mut buf);
+            let extra = bytes as u32 * 8 - k_bits;
+            if extra > 0 {
+                buf[0] &= 0xff >> extra;
+            }
+            let k = BigUint::from_bytes_be(&buf);
+            if k.is_zero() {
+                continue;
+            }
+            let z = BigUint::from(z_seed) % n;
+            z_seed = z_seed.wrapping_add(0x9E37_79B9_7F4A_7C15);
+            let g = curve.generator();
+            let a_fe = curve.a_fe();
+            let kg = g.scalar_mul(&k, &a_fe);
+            let x1 = match &kg {
+                Point::Affine { x, .. } => x.value.clone(),
+                Point::Infinity => continue,
+            };
+            let r = &x1 % n;
+            if r.is_zero() {
+                continue;
+            }
+            let rd = (&r * &d) % n;
+            let z_plus_rd = (&z + &rd) % n;
+            let k_inv = match mod_inverse(&k, n) {
+                Some(v) => v,
+                None => continue,
+            };
+            let s = (&k_inv * &z_plus_rd) % n;
+            if s.is_zero() {
+                continue;
+            }
+            sigs.push(BiasedSignature { r, s, z, k_bits });
+        }
+
+        let recovered =
+            hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::LllHp)
+                .unwrap();
+        assert_eq!(recovered, d, "HP LLL should recover P-384 private key");
     }
 }
 

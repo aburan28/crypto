@@ -105,3 +105,72 @@ See next git hash after this entry.
    invariants in PARI.  Start from `secp256k1_cm_audit/igusa_clebsch.gp` which may
    already scaffold this.
 4. **Howe sextic twists** (priority 3): quick PARI check on 15 pairs.
+
+## 2026-05-22 (autolab run)
+
+### Task picked
+
+Priority thread 1 (P-521 LLL), continued from 2026-05-21. Yesterday's run
+fixed the overflow bug (f64 Inf/NaN). Today: diagnose why P-521 still fails
+after overflow fix, and implement a root-cause fix.
+
+### Work done
+
+- Traced P-521 failure post-overflow-fix to **catastrophic cancellation** in f64 GS.
+  Mechanism: P-521 HNP basis has entries spanning 2^384 to 2^1042 (658-bit
+  dynamic range). GS step computes `n·a_l - (a_l/n)·n² = 0` exactly, but
+  two ~2^499 f64 values subtract to a phantom residual ~2^446, which is
+  2^604× larger than the true b*_m[m] = 2^(-158) (scaled). LLL's Lovász
+  condition is meaningless with this noise floor.
+- Verified the hypothesis by computing the expected residual analytically:
+  `|error| = n × r / 2^scale` where `r = (a_l × 2^scale) mod n < n`.
+  With scale=542, error ≈ 2^(521-542) = 2^(-21), still > true b*_m[m] = 2^(-158).
+  (Actually error ≈ n × n / 2^2048 = 2^(1042-2048) = 2^(-1006) with HP GS.)
+- Implemented `gram_schmidt_hp` and `lll_reduce_hp` in
+  `src/cryptanalysis/lattice.rs`:
+  - 2048-bit fixed-point BigInt arithmetic (HP_PREC = 2048)
+  - Functions: `hp_from_bigint`, `hp_mul`, `hp_div`, `hp_round`
+  - `gram_schmidt_hp` returns `(bstar_sq, mu)` as HP BigInt vectors
+  - `lll_reduce_hp` mirrors `lll_reduce` but uses HP GS throughout
+- Added `HnpReduction::LllHp` variant to `hnp_ecdsa.rs` and wired it in.
+- Added `probe_once_ext` (accepts `HnpReduction` param) and
+  `probe_p521_lll_hp` test to `tests/lll_degeneracy_probe.rs`.
+- Added unit tests `lll_hp_matches_lll_on_small_basis` and
+  `lll_hp_recovers_p384_key` to `src/cryptanalysis/lattice.rs`.
+- Updated `RESEARCH_LLL_GS_ANALYSIS.md` §10 with full resolution writeup.
+
+### Findings
+
+**Definitive empirical result** (`probe_p521_lll_hp`, k_bits=384, m=8):
+
+```
+f64 LLL: 0/3 seeds recovered  (~147s each, loops to iteration cap)
+HP  LLL: 3/3 seeds recovered  (~79-82s each, converges correctly)
+```
+
+HP LLL is **1.8× faster** than f64 LLL on P-521 because correct GS enables
+proper LLL convergence — f64 LLL wasted cycles on wrong swap decisions.
+
+Precision analysis: HP GS reduces the cancellation residual from ~2^446 (f64)
+to ~2^(-1006) (2048-bit fixed point) — an improvement of 2^1452 in precision.
+This completely resolves the P-521 issue.
+
+Full test suite: 11/11 unit tests + 5/5 integration tests pass.
+
+### Next step proposal
+
+1. **Priority 1 CLOSED** for P-521. Residual open: lll_reduce_hp performance
+   at higher m (currently m=8 at 79s; m=32 may need incremental GS update
+   instead of full recompute per swap). Performance profiling optional.
+2. **Priority 2 (CHLRS Igusa formula)**: implement `(E × E^t)/Γ_α`
+   Igusa-Clebsch invariants in PARI. Check `secp256k1_cm_audit/igusa_clebsch.gp`
+   for existing scaffolding.
+3. **Priority 3 (Howe sextic twists)**: quick PARI check on 15 pairs of
+   6 sextic twists for secp256k1. Short script, possibly runnable next session.
+4. **Priority 5 (GLV-HNP Phase 2 toy)**: now that P-521 HP GS works, the
+   GLV-aware lattice attack on a 32-bit toy curve is the next most interesting
+   experiment.
+
+### Commits made
+
+[see next git hash after this entry]

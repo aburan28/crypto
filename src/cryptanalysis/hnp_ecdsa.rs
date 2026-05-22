@@ -67,7 +67,7 @@
 //! - **Side-channel-leak amplification.**  Out of scope for a
 //!   pure-cryptanalysis module; would need a leakage simulator.
 
-use super::lattice::{bkz_reduce, lll_reduce};
+use super::lattice::{bkz_reduce, lll_reduce, lll_reduce_hp};
 use crate::ecc::curve::CurveParams;
 use crate::ecc::keys::EccPublicKey;
 use crate::ecc::point::Point;
@@ -145,6 +145,11 @@ pub enum HnpReduction {
     /// `β = 8`–`20` for HNP at sub-LLL-threshold parameters.  Cost
     /// scales as roughly `2^(0.292β)` per block.
     Bkz(usize),
+    /// LLL with 2048-bit fixed-point Gram–Schmidt (HP = high-precision).
+    /// Required for P-521 and other large-entry lattices where f64 GS
+    /// produces catastrophic cancellation (entries spanning > 2^500 dynamic
+    /// range).  Slower than `Lll` (~10–100× per GS call) but correct.
+    LllHp,
 }
 
 impl Default for HnpReduction {
@@ -232,6 +237,7 @@ pub fn hnp_recover_key_with_reduction(
             // cleanup between block insertions, standard practice).
             bkz_reduce(&mut basis, beta, 0.99)?;
         }
+        HnpReduction::LllHp => lll_reduce_hp(&mut basis, 0.75)?,
     }
 
     // ── Recover d ──

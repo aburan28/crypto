@@ -252,3 +252,84 @@ spectra empirically and confirm or refute the clustering claim.
 
 This note documents the theoretical groundwork; the empirical
 follow-up is left as future work (see §7).
+
+---
+
+## 10. RESOLUTION (2026-05-22): Both failures were numerical artifacts
+
+### 10.1 Failure A → Overflow (resolved 2026-05-21)
+
+The secp256k1 vs P-256 LLL discrepancy (§5, §7) was **not** a
+genuine lattice-theoretic phenomenon.  It was a floating-point
+overflow bug: `secp256k1.n ≈ 2^256`, so `n^4 ≈ 2^1024 > f64::MAX
+≈ 2^1023`.  The GS norm computation produced `Inf → NaN`,
+causing LLL to hit the iteration cap.  P-256 escaped only because
+its `n` is smaller by `~2^192`, putting `P-256.n^4` just under
+`f64::MAX`.  Fix: global scaling by `2^(max_bits − 500)`.  All
+256-bit and 384-bit curves now recover 3/3 seeds.  The §5
+μ-oscillation hypothesis, §4 Gram-matrix eigenvalue analysis, and
+§7 r-distribution analysis are **refuted as root causes**.
+
+### 10.2 Failure B → Catastrophic cancellation (resolved 2026-05-22)
+
+P-521 LLL still failed after the overflow fix.  Root cause:
+**catastrophic cancellation** in the f64 GS orthogonalization step.
+
+The P-521 HNP basis has entries spanning `2^384` to `2^1042`
+(658-bit dynamic range).  For the initial basis:
+
+```
+Row i:   n² × e_i   (i = 0..m-1)        [entries ~ 2^1042]
+Row m:   (n·a₀, ..., n·a_{m-1}, 2^384, 0)
+```
+
+The GS orthogonalization must compute:
+```
+b*_m[l] = n·a_l - (a_l/n) × n²  =  n·a_l - n·a_l  =  0
+```
+Both terms are `~2^499` in scaled f64.  IEEE 754 subtraction of
+two nearly-equal 53-bit values leaves a residual `~2^446`.  The
+true `b*_m[m] = 2^384 ≈ 2^{-158}` (scaled) is `2^604` times
+smaller than the phantom residual.  LLL's Lovász condition sees
+`||b*_m||² ≈ m × 2^892` instead of `2^{-316}`, causing
+pathological swap behavior.
+
+### 10.3 Fix: 2048-bit fixed-point GS (`lll_reduce_hp`)
+
+Implemented in `src/cryptanalysis/lattice.rs` as `lll_reduce_hp`.
+Uses `BigInt`-based fixed-point arithmetic with `HP_PREC = 2048`
+bits.  Each GS value stored as `BigInt × 2^2048`.
+
+Key operations (`hp_mul`, `hp_div`, `hp_round`) and
+`gram_schmidt_hp` function give `~2^{-1006}` residual for the
+P-521 cancellation step vs `2^{446}` in f64 — a `2^{1452}`
+improvement in precision.
+
+**Empirical results** (`probe_p521_lll_hp`, m=8, k_bits=384):
+
+| Reduction | Seed 0xC0FFEE | Seed 0xDEADBEEF | Seed 0x12345678 | Time/probe |
+|-----------|---------------|-----------------|-----------------|------------|
+| f64 LLL   | ✗ fail        | ✗ fail          | ✗ fail          | ~147s      |
+| HP LLL    | ✓ RECOVERED   | ✓ RECOVERED     | ✓ RECOVERED     | ~79–82s    |
+
+Note: HP LLL is **~1.8× faster** than f64 LLL because correct GS
+enables proper LLL convergence (f64 LLL was looping uselessly to
+the iteration cap).
+
+### 10.4 Revised status of open questions (§8)
+
+- **§8.1** Failure A: CLOSED.  Was overflow, not μ-oscillation.
+- **§8.2** Failure B (P-384, P-521): CLOSED.  Was catastrophic cancellation.
+  - P-384: overflow fix sufficient (resolved 2026-05-21).
+  - P-521: required HP GS (resolved 2026-05-22).
+- **§8.3** Koblitz cross-curve: CLOSED.  secp256k1 now recovers 3/3; no
+  special Koblitz behavior remains.
+
+### 10.5 Remaining open question
+
+Is `lll_reduce_hp` efficient enough for P-521 with higher signature counts?
+Current: m=8 at ~79s.  Hypothesis: HP LLL time grows as O(m² × HP_PREC² × n)
+where n = m+2.  For m=16: estimate ~4× ≈ 316s.  Acceptable.
+For m=32: estimate ~1200s.  May need optimisation (incremental GS update
+instead of recompute-from-scratch on each swap).
+

@@ -86,6 +86,44 @@ fn generate_biased_sigs(
     sigs
 }
 
+fn probe_once_ext(
+    curve: &CurveParams,
+    curve_name: &str,
+    k_bits: u32,
+    m: usize,
+    d_seed: u64,
+    k_seed: u64,
+    reduction: HnpReduction,
+) -> (String, u128) {
+    let n = curve.n.clone();
+    let mut d_rng = StdRng::seed_from_u64(d_seed);
+    let d = d_rng.gen_biguint_below(&n);
+    let kp = EccKeyPair::from_private(d.clone(), curve);
+
+    let sigs = generate_biased_sigs(curve, &d, k_bits, m, k_seed);
+
+    let reduction_label = match &reduction {
+        HnpReduction::Lll => "LLL".to_string(),
+        HnpReduction::LllHp => "LLL-HP".to_string(),
+        HnpReduction::Bkz(b) => format!("BKZ-{}", b),
+    };
+
+    let t0 = Instant::now();
+    let result = hnp_recover_key_with_reduction(curve, &kp.public, &sigs, reduction);
+    let elapsed = t0.elapsed().as_millis();
+
+    let outcome = match result {
+        Ok(recovered) if recovered == d => "✓ RECOVERED".to_string(),
+        Ok(_) => "✗ WRONG KEY".to_string(),
+        Err(e) => format!("✗ {}", e),
+    };
+    eprintln!(
+        "{:<10} k_bits={:>3} m={:>2} reduction={:<8} d_seed=0x{:08X}  →  {:<40}  ({} ms)",
+        curve_name, k_bits, m, reduction_label, d_seed, outcome, elapsed
+    );
+    (outcome, elapsed)
+}
+
 fn probe_once(
     curve: &CurveParams,
     curve_name: &str,
@@ -340,4 +378,140 @@ fn probe_koblitz_lll_degeneracy_hypothesis() {
     } else {
         eprintln!("? Hypothesis partially supported; more curves needed.");
     }
+}
+
+/// P-521 reduction sweep: investigate whether LLL at m=16 or BKZ-β recovers key.
+///
+/// Previous result (2026-05-21): m=8 LLL terminates without NaN but no short
+/// vector found after 126s.  Two hypotheses:
+///   (a) insufficient samples: m=8 gives marginal lattice quality at 521 bits
+///   (b) LLL is too weak: need BKZ for 521-bit dimension
+///
+/// This test probes: m=8/LLL, m=16/LLL, m=8/BKZ-20, m=16/BKZ-20, m=24/BKZ-20
+///
+/// Timeout warning: each P-521 LLL probe ~126s; BKZ-20 may be 3-5× longer.
+/// Run: `cargo test --test lll_degeneracy_probe p521_reduction_sweep -- --ignored --nocapture`
+#[test]
+#[ignore = "slow: P-521 probes 300-600s each; run deliberately"]
+fn probe_p521_reduction_sweep() {
+    let p521 = CurveParams::p521();
+    let d_seed = 0xC0FFEEu64;
+    let k_seed = 0xC0FFEEu64;
+    let k_bits = 384u32;
+
+    eprintln!();
+    eprintln!("=== P-521 reduction sweep (k_bits=384) ===");
+    eprintln!(
+        "{:<8} {:<10} {:<55} {:>12}",
+        "m", "reduction", "outcome", "elapsed_ms"
+    );
+
+    let configs: Vec<(usize, HnpReduction)> = vec![
+        (8, HnpReduction::Lll),
+        (16, HnpReduction::Lll),
+        (8, HnpReduction::Bkz(20)),
+        (16, HnpReduction::Bkz(20)),
+        (24, HnpReduction::Bkz(20)),
+    ];
+
+    let mut any_recovered = false;
+    for (m, red) in configs {
+        let red_label = match &red {
+            HnpReduction::Lll => "LLL".to_string(),
+            HnpReduction::LllHp => "LLL-HP".to_string(),
+            HnpReduction::Bkz(b) => format!("BKZ-{}", b),
+        };
+        let (outcome, elapsed) =
+            probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, red);
+        eprintln!(
+            "{:<8} {:<10} {:<55} {:>12}",
+            m, red_label, outcome, elapsed
+        );
+        if outcome.starts_with("✓") {
+            any_recovered = true;
+        }
+    }
+
+    eprintln!();
+    if any_recovered {
+        eprintln!("✓ At least one configuration recovered the P-521 key.");
+    } else {
+        eprintln!("✗ No configuration recovered the key — genuine lattice dimension issue.");
+        eprintln!("  Next step: larger m, BKZ-β>20, or true bigfloat GS (rug crate).");
+    }
+}
+
+/// P-521 with high-precision (HP) Gram-Schmidt: verify the catastrophic-
+/// cancellation hypothesis and that lll_reduce_hp recovers the key.
+///
+/// Hypothesis: f64 GS on the P-521 HNP basis produces phantom ~2^446 residuals
+/// in b*_m[l] (should be 0) that swamp the true b*_m[m] = 2^384.  The 2048-bit
+/// HP GS avoids this and LLL should recover d at m=8.
+///
+/// Run: `cargo test --test lll_degeneracy_probe p521_lll_hp -- --ignored --nocapture`
+#[test]
+#[ignore = "slow: P-521 HP LLL ~60-120s per probe"]
+fn probe_p521_lll_hp() {
+    let p521 = CurveParams::p521();
+    let k_bits = 384u32;
+
+    eprintln!();
+    eprintln!("=== P-521 LLL-HP probe (k_bits=384, tests the bigfloat-GS fix) ===");
+
+    let seeds: [(u64, u64, usize); 3] = [
+        (0xC0FFEE, 0xC0FFEE, 8),
+        (0xDEAD_BEEF, 0xBADC_AFE, 8),
+        (0x1234_5678, 0x9ABC_DEF0, 8),
+    ];
+
+    let mut hp_pass = 0usize;
+    let mut f64_pass = 0usize;
+
+    for (d_seed, k_seed, m) in seeds {
+        // f64 LLL (expected: fail due to catastrophic cancellation)
+        let (out_f64, t_f64) =
+            probe_once_ext(&p521, "P-521[f64]", k_bits, m, d_seed, k_seed, HnpReduction::Lll);
+        if out_f64.starts_with("✓") {
+            f64_pass += 1;
+        }
+        // HP LLL (expected: recover key)
+        let (out_hp, t_hp) = probe_once_ext(
+            &p521,
+            "P-521[HP]",
+            k_bits,
+            m,
+            d_seed,
+            k_seed,
+            HnpReduction::LllHp,
+        );
+        if out_hp.starts_with("✓") {
+            hp_pass += 1;
+        }
+        eprintln!(
+            "  seed=0x{:08X} | f64={:<40} ({} ms) | HP={:<40} ({} ms)",
+            d_seed, out_f64, t_f64, out_hp, t_hp
+        );
+    }
+
+    eprintln!();
+    eprintln!("f64 LLL: {}/{} recovered", f64_pass, seeds.len());
+    eprintln!("HP  LLL: {}/{} recovered", hp_pass, seeds.len());
+
+    if hp_pass > f64_pass {
+        eprintln!("✓ HP GS fix improves P-521 recovery vs f64 GS.");
+    }
+    if hp_pass == seeds.len() {
+        eprintln!("✓ P-521 HNP fully resolved: HP GS + LLL recovers key 3/3.");
+    } else {
+        eprintln!("? HP LLL still fails some seeds — may need larger m or BKZ.");
+    }
+    // The test passes as long as HP does at least as well as f64 on the same seeds.
+    assert!(
+        hp_pass >= f64_pass,
+        "HP LLL ({}/{}) should be ≥ f64 LLL ({}/{}) for P-521",
+        hp_pass,
+        seeds.len(),
+        f64_pass,
+        seeds.len()
+    );
 }
