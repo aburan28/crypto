@@ -11,8 +11,10 @@ pub mod frodo;
 pub mod hqc;
 pub mod kyber;
 pub mod mceliece;
+pub mod ml_dsa;
 pub mod ntru;
 pub mod ntru_prime;
+pub mod slh_dsa;
 pub mod x_wing;
 
 pub use kyber::{

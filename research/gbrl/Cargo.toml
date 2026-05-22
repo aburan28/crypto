@@ -1,0 +1,33 @@
+[package]
+name = "gbrl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rand = "0.8"
+
+[[bin]]
+name = "rl_server"
+path = "src/bin/rl_server.rs"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"
+
+[[bin]]
+name = "semaev_test"
+path = "src/bin/semaev_test.rs"
+
+[[bin]]
+name = "decomp_demo"
+path = "src/bin/decomp_demo.rs"
+
+[[bin]]
+name = "ecdlp_demo"
+path = "src/bin/ecdlp_demo.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

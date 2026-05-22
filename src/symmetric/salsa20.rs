@@ -12,6 +12,8 @@
 //! - [`xsalsa20_xor`] — 24-byte nonce variant.  Splits the nonce into
 //!   16 bytes for HSalsa20 → subkey, plus 8 bytes for the inner Salsa20.
 //!   This is the construction NaCl uses for `crypto_secretbox`.
+//! - [`secretbox`] / [`secretbox_open`] — NaCl-style XSalsa20-Poly1305
+//!   AEAD with no associated data (matches `crypto_secretbox` in libsodium).
 //!
 //! ## State layout
 //!
@@ -154,6 +156,86 @@ pub fn xsalsa20_xor(data: &[u8], key: &[u8; 32], nonce: &[u8; 24]) -> Vec<u8> {
     salsa20_xor(data, &subkey, &inner_nonce)
 }
 
+// ── NaCl secretbox: XSalsa20-Poly1305 AEAD ───────────────────────────
+
+/// Derive the Poly1305 one-time key by encrypting 32 zero bytes under
+/// the (subkey, inner-nonce) — same trick as ChaCha20-Poly1305, but in
+/// the Salsa20 family.  The first 32 bytes of the Salsa20 stream
+/// (counter = 0) become the Poly1305 key.
+fn poly1305_key_for_secretbox(subkey: &[u8; 32], inner_nonce: &[u8; 8]) -> [u8; 32] {
+    let block = salsa20_block(subkey, inner_nonce, 0);
+    let mut out = [0u8; 32];
+    out.copy_from_slice(&block[0..32]);
+    out
+}
+
+/// **NaCl `crypto_secretbox`** — XSalsa20-Poly1305 AEAD, no associated
+/// data.  Returns `tag || ciphertext` (16-byte tag prepended, matching
+/// libsodium / NaCl wire format).
+///
+/// The 24-byte nonce should be unique per (key, message); since it's
+/// 192 bits, it can be sampled uniformly at random with negligible
+/// collision probability.
+pub fn secretbox(plaintext: &[u8], key: &[u8; 32], nonce: &[u8; 24]) -> Vec<u8> {
+    let mut hin = [0u8; 16];
+    hin.copy_from_slice(&nonce[0..16]);
+    let subkey = hsalsa20(key, &hin);
+    let mut inner_nonce = [0u8; 8];
+    inner_nonce.copy_from_slice(&nonce[16..24]);
+
+    let poly_key = poly1305_key_for_secretbox(&subkey, &inner_nonce);
+    // Salsa20 stream starting at counter 1 — counter 0 is the poly key.
+    let mut ciphertext = plaintext.to_vec();
+    let mut counter = 1u64;
+    for chunk in ciphertext.chunks_mut(64) {
+        let block = salsa20_block(&subkey, &inner_nonce, counter);
+        for (b, k) in chunk.iter_mut().zip(block.iter()) {
+            *b ^= k;
+        }
+        counter = counter.wrapping_add(1);
+    }
+    let tag = crate::symmetric::chacha20::poly1305(&poly_key, &ciphertext);
+
+    let mut out = Vec::with_capacity(16 + ciphertext.len());
+    out.extend_from_slice(&tag);
+    out.extend_from_slice(&ciphertext);
+    out
+}
+
+/// **NaCl `crypto_secretbox_open`** — verify + decrypt.  Returns
+/// `Some(plaintext)` on tag match, `None` otherwise.
+pub fn secretbox_open(boxed: &[u8], key: &[u8; 32], nonce: &[u8; 24]) -> Option<Vec<u8>> {
+    if boxed.len() < 16 {
+        return None;
+    }
+    let (tag_bytes, ciphertext) = boxed.split_at(16);
+
+    let mut hin = [0u8; 16];
+    hin.copy_from_slice(&nonce[0..16]);
+    let subkey = hsalsa20(key, &hin);
+    let mut inner_nonce = [0u8; 8];
+    inner_nonce.copy_from_slice(&nonce[16..24]);
+
+    let poly_key = poly1305_key_for_secretbox(&subkey, &inner_nonce);
+    let expected = crate::symmetric::chacha20::poly1305(&poly_key, ciphertext);
+
+    use subtle::ConstantTimeEq;
+    if expected.ct_eq(tag_bytes).unwrap_u8() != 1 {
+        return None;
+    }
+
+    let mut plaintext = ciphertext.to_vec();
+    let mut counter = 1u64;
+    for chunk in plaintext.chunks_mut(64) {
+        let block = salsa20_block(&subkey, &inner_nonce, counter);
+        for (b, k) in chunk.iter_mut().zip(block.iter()) {
+            *b ^= k;
+        }
+        counter = counter.wrapping_add(1);
+    }
+    Some(plaintext)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -210,6 +292,30 @@ mod tests {
             0xc8, 0xcf, 0xf8, 0x80,
         ];
         assert_eq!(ct.as_slice(), &expected);
+    }
+
+    /// **NaCl `crypto_secretbox` round-trip + tamper**.
+    #[test]
+    fn secretbox_round_trip_and_tamper() {
+        let key = [0x42u8; 32];
+        let nonce = [0x11u8; 24];
+        let pt = b"NaCl secretbox compatibility test".to_vec();
+
+        let boxed = secretbox(&pt, &key, &nonce);
+        assert_eq!(boxed.len(), 16 + pt.len());
+        let opened = secretbox_open(&boxed, &key, &nonce).expect("open");
+        assert_eq!(opened, pt);
+
+        // Tampered ciphertext.
+        let mut tampered = boxed.clone();
+        tampered[20] ^= 1;
+        assert!(secretbox_open(&tampered, &key, &nonce).is_none());
+        // Tampered tag.
+        let mut tampered = boxed.clone();
+        tampered[0] ^= 1;
+        assert!(secretbox_open(&tampered, &key, &nonce).is_none());
+        // Wrong key.
+        assert!(secretbox_open(&boxed, &[0x33u8; 32], &nonce).is_none());
     }
 
     /// HSalsa20 NaCl test vector — verifies the subkey derivation in

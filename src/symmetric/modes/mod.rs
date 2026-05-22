@@ -38,6 +38,7 @@
 pub mod ccm;
 pub mod cfb;
 pub mod cipher;
+pub mod ctr;
 pub mod eax;
 pub mod ecb;
 pub mod gcm;
@@ -45,18 +46,23 @@ pub mod gcm_siv;
 pub mod kw;
 pub mod ocb3;
 pub mod ofb;
+pub mod pmac;
 pub mod siv;
 pub mod xts;
 
 pub use ccm::{ccm_decrypt, ccm_encrypt, CcmTagLen};
 pub use cfb::{cfb_decrypt, cfb_encrypt};
 pub use cipher::{BlockCipher, BlockCipher128};
+pub use ctr::{ctr_apply, ctr_rfc3686};
 pub use eax::{eax_decrypt, eax_encrypt};
 pub use ecb::{ecb_decrypt, ecb_encrypt, pkcs7_pad, pkcs7_unpad};
 pub use gcm::{gcm_decrypt, gcm_encrypt};
-pub use gcm_siv::{gcm_siv_decrypt, gcm_siv_encrypt, polyval};
+pub use gcm_siv::{
+    gcm_siv_decrypt, gcm_siv_decrypt_with, gcm_siv_encrypt, gcm_siv_encrypt_with, polyval,
+};
 pub use kw::{kw_unwrap, kw_wrap};
 pub use ocb3::{ocb3_decrypt, ocb3_encrypt};
+pub use pmac::pmac;
 pub use ofb::ofb_apply;
 pub use siv::{siv_decrypt, siv_encrypt};
 pub use xts::{xts_decrypt, xts_encrypt};

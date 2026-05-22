@@ -34,3 +34,10 @@ rayon = "1.10"
 # BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
 # reimplement educationally without obscuring the learning goal.
 blake3 = "1.5"
+# DEFLATE compression. Used only by the cryptopals Set-7 CRIME demo
+# (challenge 51): the attack treats compressed-output length as a
+# side channel, so we need a real LZ77-style compressor for the
+# attack to be faithful. Pure-Rust, no_std-compatible.
+flate2 = "1.0"
+# Base64 codec for cryptopals fixtures (challenge 56 cookie).
+base64 = "0.21"

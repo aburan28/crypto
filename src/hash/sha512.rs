@@ -222,6 +222,64 @@ pub fn sha384(message: &[u8]) -> [u8; 48] {
     out
 }
 
+// ── SHA-512/t truncated variants (FIPS 180-4 §6.6) ───────────────────────────
+//
+// SHA-512/224 and SHA-512/256 are SHA-512 with output truncated to 224/256
+// bits and distinct IVs.  Per FIPS 180-4 §5.3.6, each generation IV is
+// computed by running SHA-512 over the literal ASCII `"SHA-512/t"` with
+// the standard IV XORed against `0xa5a5_a5a5_a5a5_a5a5`.  The hard-coded
+// constants below are the published outputs of that derivation.
+
+/// SHA-512/224 IV (FIPS 180-4 §5.3.6.1).
+const IV_512_224: [u64; 8] = [
+    0x8c3d37c819544da2,
+    0x73e1996689dcd4d6,
+    0x1dfab7ae32ff9c82,
+    0x679dd514582f9fcf,
+    0x0f6d2b697bd44da8,
+    0x77e36f7304c48942,
+    0x3f9d85a86a1d36c8,
+    0x1112e6ad91d692a1,
+];
+
+/// SHA-512/256 IV (FIPS 180-4 §5.3.6.2).
+const IV_512_256: [u64; 8] = [
+    0x22312194fc2bf72c,
+    0x9f555fa3c84c64c2,
+    0x2393b86b6f53b151,
+    0x963877195940eabd,
+    0x96283ee2a88effe3,
+    0xbe5e1e2553863992,
+    0x2b0199fc2c85b8aa,
+    0x0eb72ddc81c52ca2,
+];
+
+/// SHA-512/224 of `message`.  Returns 28 bytes (truncated SHA-512 with
+/// the §5.3.6.1 IV).
+pub fn sha512_224(message: &[u8]) -> [u8; 28] {
+    let state = pad_and_compress(message, IV_512_224);
+    let mut out = [0u8; 28];
+    // First 3.5 64-bit words = 28 bytes: full words 0..3, then high 4
+    // bytes of word 3 — but easier to lay down 4 full words and truncate.
+    let mut full = [0u8; 32];
+    for (i, &word) in state.iter().take(4).enumerate() {
+        full[8 * i..8 * i + 8].copy_from_slice(&word.to_be_bytes());
+    }
+    out.copy_from_slice(&full[..28]);
+    out
+}
+
+/// SHA-512/256 of `message`.  Returns 32 bytes (truncated SHA-512 with
+/// the §5.3.6.2 IV).
+pub fn sha512_256(message: &[u8]) -> [u8; 32] {
+    let state = pad_and_compress(message, IV_512_256);
+    let mut out = [0u8; 32];
+    for (i, &word) in state.iter().take(4).enumerate() {
+        out[8 * i..8 * i + 8].copy_from_slice(&word.to_be_bytes());
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -284,6 +342,44 @@ mod tests {
             hex(&h),
             "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da\
              274edebfe76f65fbd51ad2f14898b95b",
+        );
+    }
+
+    // ── SHA-512/224 and SHA-512/256 KATs (FIPS 180-4 §6.6) ───────────────────
+
+    #[test]
+    fn sha512_224_empty() {
+        let h = sha512_224(b"");
+        assert_eq!(
+            hex(&h),
+            "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4",
+        );
+    }
+
+    #[test]
+    fn sha512_224_abc() {
+        let h = sha512_224(b"abc");
+        assert_eq!(
+            hex(&h),
+            "4634270f707b6a54daae7530460842e20e37ed265ceee9a43e8924aa",
+        );
+    }
+
+    #[test]
+    fn sha512_256_empty() {
+        let h = sha512_256(b"");
+        assert_eq!(
+            hex(&h),
+            "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a",
+        );
+    }
+
+    #[test]
+    fn sha512_256_abc() {
+        let h = sha512_256(b"abc");
+        assert_eq!(
+            hex(&h),
+            "53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23",
         );
     }
 }

@@ -1,0 +1,307 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+secp256k1 CM / isogeny-graph structural audit
+================================================================
+p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+n = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+t (Frobenius trace) = 432420386565659656852420866390673177327
+|t| bit-length      = 129
+t mod 2  = Mod(1, 2)
+t mod 3  = Mod(1, 3)
+
+---- Frobenius discriminant ----
+t^2 - 4p = -276180966231670251052810340486134462307742726569900724701098994184861751821723
+sign = -1
+(t^2 - 4p) / -3 = 92060322077223417017603446828711487435914242189966908233699664728287250607241
+is square?  1
+sqrt        = 303414439467246543595250775667605759171
+
+---- Cornacchia: 4p = L^2 + 27 M^2 ----
+L (raw) = 432420386565659656852420866390673177327
+M       = 101138146489082181198416925222535253057
+check 4p = L^2 + 27 M^2: 1
+L mod 3 = Mod(1, 3)
+L (normalised, L ≡ 1 mod 3) = 432420386565659656852420866390673177327
+L odd? 1    M odd? 1
+
+---- Six possible Frobenius traces ----
+  t_1 = 432420386565659656852420866390673177327
+  t_2 = -432420386565659656852420866390673177327
+  t_3 = 367917413016453100223835821029139468249
+  t_4 = -367917413016453100223835821029139468249
+  t_5 = 64502973549206556628585045361533709078
+  t_6 = -64502973549206556628585045361533709078
+Sum of six traces (must be 0): 0
+
+---- Which twist is secp256k1 ----
+secp256k1 = twist #1  (trace = 432420386565659656852420866390673177327)
+
+---- Six twist orders ----
+  #E_1 = 115792089237316195423570985008687907852837564279074904382605163141518161494337 <-- secp256k1
+  #E_2 = 115792089237316195423570985008687907853702405052206223696310004874299507848991
+  #E_3 = 115792089237316195423570985008687907852902067252624110939233748186879695203415
+  #E_4 = 115792089237316195423570985008687907853637902078657017139681419828937974139913
+  #E_5 = 115792089237316195423570985008687907853205481692091357482828998962547300962586
+  #E_6 = 115792089237316195423570985008687907853334487639189770596086169053270368380742
+Sum of six orders = 6(p+1)? 1
+
+---- Twist-order partial factorisation ----
+(trial division to 10^7, then short ECM; primality probabilistic)
+
+Twist #1 (secp256k1):  N = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  smooth-part (primes < 10^7): 1
+  cofactor: 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  cofactor bit-len: 256
+  cofactor pseudoprime? 1
+
+Twist #2:  N = 115792089237316195423570985008687907853702405052206223696310004874299507848991
+    factor 3^2
+    factor 13^2
+    factor 3319^1
+    factor 22639^1
+  smooth-part (primes < 10^7): 114286177161
+  cofactor: 1013176677300131846900870239606035638738100997248092069256697437031
+  cofactor bit-len: 220
+  cofactor pseudoprime? 1
+  largest small prime factor: 22639    (Pohlig-Hellman on it: ~150 ops)
+
+Twist #3:  N = 115792089237316195423570985008687907852902067252624110939233748186879695203415
+    factor 3^2
+    factor 5^1
+  smooth-part (primes < 10^7): 45
+  cofactor: 2573157538607026564968244111304175730064490383391646909760749959708437671187
+  cofactor bit-len: 251
+  cofactor pseudoprime? 0
+  largest small prime factor: 5    (Pohlig-Hellman on it: ~2 ops)
+
+Twist #4:  N = 115792089237316195423570985008687907853637902078657017139681419828937974139913
+    factor 11^1
+    factor 41^1
+    factor 241^1
+    factor 307^1
+    factor 2939^1
+    factor 4931^1
+    factor 158771^1
+  smooth-part (primes < 10^7): 76778165074282726043
+  cofactor: 1508138272453992268451685241626330367080835334438895490091
+  cofactor bit-len: 190
+  cofactor pseudoprime? 0
+  largest small prime factor: 158771    (Pohlig-Hellman on it: ~398 ops)
+
+Twist #5:  N = 115792089237316195423570985008687907853205481692091357482828998962547300962586
+    factor 2^1
+    factor 3^1
+    factor 13^1
+    factor 19^1
+    factor 821^1
+  smooth-part (primes < 10^7): 1216722
+  cofactor: 95167252040578041182431964745182472128559754563566169990210581350996613
+  cofactor bit-len: 236
+  cofactor pseudoprime? 0
+  largest small prime factor: 821    (Pohlig-Hellman on it: ~28 ops)
+
+Twist #6:  N = 115792089237316195423570985008687907853334487639189770596086169053270368380742
+    factor 2^1
+    factor 277^1
+  smooth-part (primes < 10^7): 554
+  cofactor: 209010991403097825674315857416404165800242757471461679776328825005903192023
+  cofactor bit-len: 247
+  cofactor pseudoprime? 1
+  largest small prime factor: 277    (Pohlig-Hellman on it: ~16 ops)
+
+---- Frobenius pi in O_K = Z[w] ----
+K = Q(w), disc(K) = -3
+primes above p in K: 2
+  prime 1  norm=115792089237316195423570985008687907853269984665640564039457584007908834671663 e=1 f=1
+  prime 2  norm=115792089237316195423570985008687907853269984665640564039457584007908834671663 e=1 f=1
+
+(4p - t^2)/3 = 92060322077223417017603446828711487435914242189966908233699664728287250607241   is square? 1
+sqrt        = 303414439467246543595250775667605759171
+Two Frobenius candidates pi = a + b*w:
+  pi_+ = 367917413016453100223835821029139468249 + (303414439467246543595250775667605759171) w
+    norm = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+    trace = 432420386565659656852420866390673177327
+  pi_- = 64502973549206556628585045361533709078 + (-303414439467246543595250775667605759171) w   [complex conjugate]
+    norm = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+    trace = 432420386565659656852420866390673177327
+Norm(pi - 1)     = 115792089237316195423570985008687907852837564279074904382605163141518161494337    == n?  1
+Norm(pi-bar - 1) = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+    matches twist #1
+
+---- Small-ℓ isogeny neighbours of j = 0 (mod p) ----
+
+---- ℓ = 2 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 3  (expected 3)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 3    ↳ j' = 54000
+  F_p-rational neighbour j-invariants (w/mult): 3
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          0
+
+---- ℓ = 3 ----
+  (-3/ℓ) = 0  ⇒  ℓ is ramified in Z[ω]
+  deg Φ_ℓ(0, Y) = 4  (expected 4)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 1    ↳ j' = 0 (self-loop)
+    deg 1 × 3    ↳ j' = 115792089237316195423570985008687907853269984665640564039457584007908822383663
+  F_p-rational neighbour j-invariants (w/mult): 4
+  distinct F_p-rational j-neighbours:           2
+  self-loops to j = 0:                          1
+
+---- ℓ = 5 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 6  (expected 6)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 2 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- ℓ = 7 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 8  (expected 8)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 1 × 3    ↳ j' = 84609089597443236855825118237987836607444801397553420299668946452538171694871
+    deg 1 × 3    ↳ j' = 31182999639872958567745866770700071245825183268087143739788602706865110080792
+  F_p-rational neighbour j-invariants (w/mult): 8
+  distinct F_p-rational j-neighbours:           3
+  self-loops to j = 0:                          2
+
+---- ℓ = 11 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 12  (expected 12)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 4 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- ℓ = 13 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 14  (expected 14)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 4 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 2
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          2
+
+---- ℓ = 17 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 18  (expected 18)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 3    ↳ j' = 104923316301590621861704191026558132311632013249617352071037649179949095034058
+    deg 1 × 3    ↳ j' = 47146689366969442298622399822794250493193826886988861081865234257675440151871
+    deg 1 × 3    ↳ j' = 39621712735683453249671237842720949338228517138181056697147881143696022945709
+    deg 1 × 3    ↳ j' = 24091328083785136182644606153124650325281912897432746040401195006108076436078
+    deg 1 × 3    ↳ j' = 12018056193811227023448253686399876369531737520767386976133152100257242137042
+    deg 1 × 3    ↳ j' = 3783075792792510231051281485777956853748285577831907611949060336473394942568
+  F_p-rational neighbour j-invariants (w/mult): 18
+  distinct F_p-rational j-neighbours:           6
+  self-loops to j = 0:                          0
+
+---- ℓ = 19 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 20  (expected 20)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 2 × 3    [not F_p-rational]
+    deg 2 × 3    [not F_p-rational]
+    deg 2 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 2
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          2
+
+---- ℓ = 23 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 24  (expected 24)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 2 × 3    [not F_p-rational]
+    deg 2 × 3    [not F_p-rational]
+    deg 2 × 3    [not F_p-rational]
+    deg 2 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- ℓ = 29 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 30  (expected 30)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 5 × 3    [not F_p-rational]
+    deg 5 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- ℓ = 31 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 32  (expected 32)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 10 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 2
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          2
+
+---- ℓ = 37 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 38  (expected 38)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 12 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 2
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          2
+
+---- ℓ = 41 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 42  (expected 42)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 14 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- ℓ = 43 ----
+  (-3/ℓ) = 1  ⇒  ℓ is split in Z[ω]
+  deg Φ_ℓ(0, Y) = 44  (expected 44)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 1 × 2    ↳ j' = 0 (self-loop)
+    deg 14 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 2
+  distinct F_p-rational j-neighbours:           1
+  self-loops to j = 0:                          2
+
+---- ℓ = 47 ----
+  (-3/ℓ) = -1  ⇒  ℓ is inert in Z[ω]
+  deg Φ_ℓ(0, Y) = 48  (expected 48)
+  factorisation of Φ_ℓ(0, Y) over F_p:
+    deg 16 × 3    [not F_p-rational]
+  F_p-rational neighbour j-invariants (w/mult): 0
+  distinct F_p-rational j-neighbours:           0
+  self-loops to j = 0:                          0
+
+---- Class numbers h(-3·ℓ²) of descending orders ----
+(non-maximal order Z + ℓZ[ω] has discriminant -3·ℓ²)
+  ℓ = 2    disc = -12    h(disc) = 1
+  ℓ = 3    disc = -27    h(disc) = 1
+  ℓ = 5    disc = -75    h(disc) = 2
+  ℓ = 7    disc = -147    h(disc) = 2
+  ℓ = 11    disc = -363    h(disc) = 4
+  ℓ = 13    disc = -507    h(disc) = 4
+  ℓ = 17    disc = -867    h(disc) = 6
+  ℓ = 19    disc = -1083    h(disc) = 6
+  ℓ = 23    disc = -1587    h(disc) = 8
+  ℓ = 29    disc = -2523    h(disc) = 10
+  ℓ = 31    disc = -2883    h(disc) = 10
+  ℓ = 37    disc = -4107    h(disc) = 12
+  ℓ = 41    disc = -5043    h(disc) = 14
+  ℓ = 43    disc = -5547    h(disc) = 14
+  ℓ = 47    disc = -6627    h(disc) = 16
+
+================================================================
+Audit done.
+================================================================

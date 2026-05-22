@@ -1,0 +1,74 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Horizontal Cl(O)-orbit walk on CM disc D = -71 curves
+================================================================
+h(D) = 7
+
+---- Finding a small p with CM disc D = -71 curves ----
+Chosen p = 107
+Cornacchia: 4p = a^2 + |D| b^2 with a = 12, b = 2
+check 4p = a^2 + |D| b^2: 1
+
+---- The two possible traces ----
+Trace +a: 12    #E = 96    factor: [2, 5; 3, 1]
+Trace -a: -12    #E = 120    factor: [2, 3; 3, 1; 5, 1]
+
+---- Hilbert class polynomial H_D(X) and its roots mod p ----
+H_D(X) ∈ Z[X], deg = 7  (== h(D) = 7)
+Factorisation of H_D mod p:
+  deg 1 × 1
+    ↳ j = 77
+  deg 1 × 1
+    ↳ j = 64
+  deg 1 × 1
+    ↳ j = 63
+  deg 1 × 1
+    ↳ j = 57
+  deg 1 × 1
+    ↳ j = 46
+  deg 1 × 1
+    ↳ j = 30
+  deg 1 × 1
+    ↳ j = 19
+Total F_p-rational j-invariants: 7
+(If = h(D), the entire Cl(O)-orbit is F_p-rational.)
+
+---- Building curves and counting points for each orbit member ----
+(All orders should equal n_plus or n_minus, by Tate.)
+
+  j = 77    #E = 120    trace = -12
+  j = 64    #E = 120    trace = -12
+  j = 63    #E = 120    trace = -12
+  j = 57    #E = 120    trace = -12
+  j = 46    #E = 120    trace = -12
+  j = 30    #E = 96    trace = 12
+  j = 19    #E = 120    trace = -12
+
+Distinct #E values across orbit: 2
+(should be 1 if all F_p-rational members are in one Frobenius-orbit)
+(or 2 if the orbit splits into +/− trace pairs)
+
+---- Smoothness of #E (= n_plus or n_minus) ----
+By Tate, #E is constant across each Frobenius-orbit, so:
+  smooth part of #E for n_plus  = 96 : [2, 5; 3, 1]
+  smooth part of #E for n_minus = 120 : [2, 3; 3, 1; 5, 1]
+
+CGA-HNC's claimed 'per-curve variation in #E' is therefore
+VACUOUS in the strictly horizontal Cl(O)-orbit.  Variation
+in the existing 2-isogeny-BFS measurement comes from:
+  (a) the orbit including DESCENDING isogenies to non-maximal
+      orders (which still have #E = n by Tate, but lose GLV-style
+      automorphisms), OR
+  (b) the transported POINT ORDER ord(P_i) being a different
+      divisor of #E on different curves, even when #E is fixed.
+
+Mechanism (b) is real and is what cga_hnc Phase 2 exploits.
+Mechanism (a) is moot for ECDLP (Tate again).
+
+Cost analysis: the orbit walk visits h(D) curves; the saving
+over single-curve PH is at most a factor of h(D); the walk
+itself costs Θ(h(D)) ℓ-isogeny steps; ⇒ no asymptotic gain.
+
+================================================================
+Horizontal Cl(O)-orbit measurement complete.
+================================================================

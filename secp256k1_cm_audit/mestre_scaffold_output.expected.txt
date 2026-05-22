@@ -1,0 +1,56 @@
+  ***   Warning: new stack size = 256000000 (244.141 Mbytes).
+================================================================
+Mestre algorithm scaffolding: Igusa invariants of genus-2 curves
+================================================================
+
+---- Toy: h_toy = (x³ + 11)(x³ + 515) over F_1009 ----
+
+h_toy(x) = x^6 + 526*x^3 + 5665
+
+J_10 (= discriminant) = 253
+Non-zero ⇒ h_toy defines a smooth genus-2 curve.
+
+Frobenius char poly of Jac(C_toy):
+  x^4 - 84*x^3 + 3361*x^2 - 84756*x + 1018081
+
+---- secp256k1 candidate: h_secp = (x³ + 7)(x³ + 189) ----
+
+h_secp(x) = x^6 + 196*x^3 + 1323
+
+J_10 of h_secp = 46374105383717408990784
+Non-zero ⇒ h_secp defines a smooth genus-2 curve over F_p_secp.
+
+(Frobenius char poly of Jac(C_secp) NOT computed — PARI's
+hyperellcharpoly at 256-bit p would take hours-to-days.)
+
+---- Invariant ratios across curves ----
+
+J_10(toy)  bit-length = 8
+J_10(secp) bit-length = 76
+
+J_10(secp) is a 256-bit-class number (modulo p_secp), i.e., a
+specific F_p_secp element identifying h_secp's F_p-isomorphism
+class within the moduli space of genus-2 curves over F_p_secp.
+
+================================================================
+Out-of-scope for this scaffold (RESEARCH_MESTRE_HOWE.md §7)
+================================================================
+
+  1. Full I_2, I_4, I_6 polynomial formulas in (a_i).
+     ~50 lines of PARI; mechanically transcribed from
+     Cardona-Quer 2005 Appendix A.
+
+  2. Igusa invariants of (E × E^t)/Γ_α — the actual moduli
+     computation.  ~1000+ lines; requires modular-form
+     pullback machinery not in PARI's standard library.
+
+  3. Mestre's reconstruction: (I_2, I_4, I_6, I_10) → C.
+     ~500 lines; classical algorithm with conic + sextic
+     resolution.  Implemented in Magma but not in PARI.
+
+Status: scaffold demonstrates the framework.  Full Howe-cover
+construction for secp256k1 remains the open implementation
+task documented in RESEARCH_MESTRE_HOWE.md and acknowledged in
+RESEARCH_SECP256K1_CM.md §8.10 errata.
+
+================================================================

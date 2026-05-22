@@ -26,10 +26,11 @@ pub trait BlockCipher<const N: usize> {
 }
 
 /// Convenience marker for 16-byte (128-bit) block ciphers — the
-/// AES-family ciphers (AES, SM4, Serpent, Kuznyechik).
+/// AES-family ciphers (AES, SM4, Serpent, Kuznyechik, Camellia,
+/// Twofish, ARIA, SEED, MARS, RC6, Lucifer, SQUARE, …).
 ///
-/// CCM, SIV, GCM, GCM-SIV, OCB3, XTS, KW, and EAX all require a
-/// 16-byte block, so we collect them under this alias.
+/// CCM, SIV, GCM, GCM-SIV, OCB3, XTS, KW, EAX, and PMAC all require
+/// a 16-byte block, so we collect them under this alias.
 pub trait BlockCipher128: BlockCipher<16> {}
 impl<T: BlockCipher<16>> BlockCipher128 for T {}
 
@@ -194,7 +195,7 @@ impl BlockCipher<8> for Simon64_128 {
     }
 }
 
-// ── 128-bit-block ciphers (BlockCipher<16>) ─────────────────────────
+// ── 128-bit-block ciphers ────────────────────────────────────────────
 
 macro_rules! bc16 {
     ($t:ty) => {
@@ -224,7 +225,7 @@ bc16!(Skinny128_128);
 bc16!(Square);
 bc16!(Twofish);
 
-// ── 64-bit-block ciphers (BlockCipher<8>) ───────────────────────────
+// ── 64-bit-block ciphers ─────────────────────────────────────────────
 
 macro_rules! bc8 {
     ($t:ty) => {
@@ -255,14 +256,10 @@ bc8!(Skipjack);
 bc8!(Tea);
 bc8!(Xtea);
 
-// ── Tests ────────────────────────────────────────────────────────────
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::symmetric::aes::AesKey;
 
-    /// AES round-trip via the BlockCipher trait.
     #[test]
     fn aes_blockcipher_round_trip() {
         let key = AesKey::new(&[0u8; 16]).unwrap();
@@ -274,100 +271,24 @@ mod tests {
         assert_eq!(block, original);
     }
 
-    /// SM4 round-trip via the BlockCipher trait.
-    #[test]
-    fn sm4_blockcipher_round_trip() {
-        let cipher = Sm4::new(&[0u8; 16]);
-        let mut block = [0x01u8; 16];
-        let original = block;
-        BlockCipher::<16>::encrypt_block(&cipher, &mut block);
-        assert_ne!(block, original);
-        BlockCipher::<16>::decrypt_block(&cipher, &mut block);
-        assert_eq!(block, original);
-    }
-
-    /// Generic helper accepting `impl BlockCipher<16>` works across
-    /// cipher types — proves the trait actually unifies them.
-    fn round_trip<C: BlockCipher<16>>(cipher: &C, mut block: [u8; 16]) -> bool {
-        let original = block;
-        cipher.encrypt_block(&mut block);
-        let mid_differs = block != original;
-        cipher.decrypt_block(&mut block);
-        mid_differs && block == original
-    }
-
-    #[test]
-    fn generic_round_trip_works_for_aes_sm4_kuznyechik() {
-        let aes = AesKey::new(&[1u8; 32]).unwrap();
-        let sm4 = Sm4::new(&[1u8; 16]);
-        let kuz = Kuznyechik::new(&[1u8; 32]);
-        assert!(round_trip(&aes, [2u8; 16]));
-        assert!(round_trip(&sm4, [2u8; 16]));
-        assert!(round_trip(&kuz, [2u8; 16]));
-    }
-
-    /// Magma is the only 8-byte-block cipher we ship; verify it
-    /// implements `BlockCipher<8>`.
-    #[test]
-    fn magma_blockcipher_round_trip() {
-        let magma = Magma::new(&[0x42u8; 32]);
-        let mut block = [0xAAu8; 8];
-        let original = block;
-        BlockCipher::<8>::encrypt_block(&magma, &mut block);
-        assert_ne!(block, original);
-        BlockCipher::<8>::decrypt_block(&magma, &mut block);
-        assert_eq!(block, original);
-    }
-
-    /// Simon and Speck round-trip through the generic `BlockCipher`
-    /// trait, covering both 8- and 16-byte block sizes.
-    #[test]
-    fn simon_speck_blockcipher_round_trip() {
-        let s128_128 = Speck128_128::new(&[0x11u8; 16]);
-        let s128_256 = Speck128_256::new(&[0x22u8; 32]);
-        let s64_128 = Speck64_128::new(&[0x33u8; 16]);
-        assert!(round_trip(&s128_128, [3u8; 16]));
-        assert!(round_trip(&s128_256, [4u8; 16]));
-
-        let m128_128 = Simon128_128::new(&[0x55u8; 16]);
-        let m128_256 = Simon128_256::new(&[0x66u8; 32]);
-        let m64_128 = Simon64_128::new(&[0x77u8; 16]);
-        assert!(round_trip(&m128_128, [7u8; 16]));
-        assert!(round_trip(&m128_256, [8u8; 16]));
-
-        // 8-byte-block variants
-        for cipher in [
-            (&s64_128 as &dyn BlockCipher<8>),
-            (&m64_128 as &dyn BlockCipher<8>),
-        ] {
-            let mut block = [0x5Au8; 8];
-            let orig = block;
-            cipher.encrypt_block(&mut block);
-            assert_ne!(block, orig);
-            cipher.decrypt_block(&mut block);
-            assert_eq!(block, orig);
-        }
+    fn rt16<C: BlockCipher<16>>(c: &C) {
+        let mut block = [0x5Au8; 16];
+        let orig = block;
+        c.encrypt_block(&mut block);
+        assert_ne!(block, orig);
+        c.decrypt_block(&mut block);
+        assert_eq!(block, orig);
     }
 
     fn rt8<C: BlockCipher<8>>(c: &C) {
         let mut block = [0x5Au8; 8];
         let orig = block;
         c.encrypt_block(&mut block);
-        assert_ne!(block, orig, "encrypt was identity");
+        assert_ne!(block, orig);
         c.decrypt_block(&mut block);
-        assert_eq!(block, orig, "decrypt failed to invert");
+        assert_eq!(block, orig);
     }
 
-    fn rt16<C: BlockCipher<16>>(c: &C) {
-        let mut block = [0x5Au8; 16];
-        let orig = block;
-        c.encrypt_block(&mut block);
-        assert_ne!(block, orig, "encrypt was identity");
-        c.decrypt_block(&mut block);
-        assert_eq!(block, orig, "decrypt failed to invert");
-    }
-
-    /// Every 128-bit-block cipher we ship round-trips through the trait.
     #[test]
     fn all_128bit_block_ciphers_via_trait() {
         rt16(&Aria128::new(&[0u8; 16]));
@@ -386,7 +307,6 @@ mod tests {
         rt16(&Twofish::new(&[0u8; 16]).unwrap());
     }
 
-    /// Every 64-bit-block cipher we ship round-trips through the trait.
     #[test]
     fn all_64bit_block_ciphers_via_trait() {
         rt8(&Blowfish::new(&[0u8; 16]).unwrap());

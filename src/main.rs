@@ -98,6 +98,12 @@ enum Cmd {
         #[command(subcommand)]
         op: IsogenyOp,
     },
+    /// Cryptopals Set 7 (Hashes) challenges 49–56.  Pass an integer
+    /// to run one (`cryptopals 49`) or `all` for every challenge.
+    Cryptopals {
+        /// Challenge number 49..=56, or the literal `all`.
+        challenge: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -348,6 +354,50 @@ fn main() {
         Cmd::Cryptanalysis { op } => cmd_cryptanalysis(op),
         Cmd::Visual { op } => cmd_visual(op),
         Cmd::Isogeny { op } => cmd_isogeny(op),
+        Cmd::Cryptopals { challenge } => cmd_cryptopals(&challenge),
+    }
+}
+
+fn cmd_cryptopals(arg: &str) {
+    use crypto_lib::cryptopals;
+    let reports = if arg == "all" {
+        cryptopals::run_all()
+    } else if arg == "set7" {
+        (49..=56).map(|n| cryptopals::run(n).unwrap()).collect()
+    } else if arg == "set8" {
+        (57..=66).map(|n| cryptopals::run(n).unwrap()).collect()
+    } else if arg == "set9" {
+        (67..=74).map(|n| cryptopals::run(n).unwrap()).collect()
+    } else {
+        match arg.parse::<u32>() {
+            Ok(n) => match cryptopals::run(n) {
+                Some(r) => vec![r],
+                None => {
+                    eprintln!("Unknown challenge {n} — valid range is 1..=74.");
+                    std::process::exit(2);
+                }
+            },
+            Err(_) => {
+                eprintln!("Pass a challenge number (1..=74), or `set7`/`set8`/`set9`/`all`.");
+                std::process::exit(2);
+            }
+        }
+    };
+    let mut any_fail = false;
+    for r in &reports {
+        println!(
+            "── Cryptopals #{} — {} {}──",
+            r.challenge,
+            r.title,
+            if r.success { "[OK] " } else { "[FAIL] " }
+        );
+        println!("{}", r.transcript);
+        if !r.success {
+            any_fail = true;
+        }
+    }
+    if any_fail {
+        std::process::exit(1);
     }
 }
 

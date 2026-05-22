@@ -1,0 +1,92 @@
+  ***   Warning: new stack size = 512000000 (488.281 Mbytes).
+================================================================
+Explicit genus-2 cover of secp256k1 (with correction to Howe claim)
+================================================================
+
+---- Toy empirical test: p = 1009, j = 0, b = 11 ----
+
+E: y² = x³ + 11    #E = 967    trace t = 43
+
+non-square d = 11
+twist b' = d³·b mod p = 515
+E_twist: y² = x³ + 515
+#E_twist = 1053
+E_twist's trace = -43
+
+Is E_twist the *quadratic* twist of E (trace = -t)?  1
+If not, the curve we built is a SEXTIC twist, not the
+quadratic twist — affecting how the cover relates to E × E^t.
+
+C: y² = (x³ + 11) · (x³ + 515) = x^6 + 526*x^3 + 5665
+
+Frobenius char poly of Jac(C):
+  x^4 - 84*x^3 + 3361*x^2 - 84756*x + 1018081
+Expected (if Jac(C) ~ E × E_twist): Y^4 + 169*Y^2 + 1018081
+
+Match?  0
+
+#Jac(C) = char_F(1) = 936603
+n · n_twist          = 1018251
+Match?              0
+
+CONCLUSION (toy): C = y² = f_1·f_2 produces a smooth genus-2
+curve, but Jac(C) is NOT F_p-isogenous to E × E_twist.
+
+Factorisation of char_F(Jac(C)) over Q:
+  Mat([Y^4 - 84*Y^3 + 3361*Y^2 - 84756*Y + 1018081, 1])
+⇒ Jac(C) is simple over F_p: not a product of elliptic curves
+
+================================================================
+The simpler cover for secp256k1 (NOT the literal Howe glue)
+================================================================
+
+d_secp non-square = 3
+Twist b' = d³·b = 189
+
+Explicit genus-2 cover C/F_p_secp:
+
+    C : y² = (x³ + 7) · (x³ + 189)
+        = x^6 + 196*x^3 + 1323
+
+Key properties of this C:
+
+• C is a smooth genus-2 hyperelliptic curve over F_p_secp.
+• C has degree-2 maps to E_1: y² = x³ + 7 (= secp256k1) and
+  E_2: y² = x³ + 189, both defined OVER F̄_p_secp (not F_p_secp
+  directly — they require sqrt(f_j(x)) for the orthogonal j).
+• Jac(C) is a smooth dim-2 abelian variety over F_p_secp.
+• Per the TOY VERIFICATION above, Jac(C) is NOT F_p-isogenous
+  to E × E_twist; it sits in a DIFFERENT F_p-isogeny class.
+
+The literal Howe-glued cover (with Jac(C) F_p-isogenous to
+E × E^t per Howe 1996, Theorem 1) requires Mestre's
+reconstruction algorithm from Igusa invariants, which is
+NOT implemented here.
+
+================================================================
+Effect on the structural-completeness theorem
+================================================================
+
+The B5 block of PAPER_STRUCTURAL_COMPLETENESS.md says:
+
+    For every smooth genus-g curve C/F_p with Jac(C) → E_secp,
+    the best known DLP algorithm on Jac(C)(F_p) costs
+    O(p^{2 − 2/g}) ≥ O(p) for g ≥ 2.
+
+This applies to ANY genus-2 cover of secp256k1, INCLUDING the
+simpler C above AND the literal Howe-glued one.  Both produce
+genus-2 Jacobians with DLP cost ~p > √n_secp = √p_secp.
+
+⇒ The structural-completeness conclusion is UNAFFECTED by
+  whether we have the literal Howe glue or just a generic
+  genus-2 cover.  Neither attacks secp256k1's ECDLP.
+
+What DOES require correction:
+• Earlier claim in RESEARCH_SECP256K1_CM.md §8.6 that the
+  explicit Howe cover for secp256k1 has the simple form
+  y² = (x³+7)(x³+189) is WRONG.  Howe's theorem guarantees
+  EXISTENCE of an F_p-rational genus-2 curve C with Jac(C)
+  ~ E × E^t, but the explicit construction requires Mestre
+  reconstruction.  See errata in RESEARCH_SECP256K1_CM.md §8.6.
+
+================================================================
