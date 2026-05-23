@@ -174,3 +174,104 @@ Full test suite: 11/11 unit tests + 5/5 integration tests pass.
 ### Commits made
 
 [see next git hash after this entry]
+
+## 2026-05-23 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa formula). Priority 1 (P-521 LLL) resolved 2026-05-22. Today:
+implement the Cardona-Howe-Lercier-Ritzenthaler-Streng Igusa-Clebsch invariants for the
+Howe-glued abelian surface (E × E^t)/Γ_α.
+
+### Work done
+
+**Part A — Existing script audit (igusa_clebsch.gp)**
+- Ran `igusa_clebsch.gp` and `igusa_clebsch_verification.gp` from `secp256k1_cm_audit/`.
+- Confirmed: J_2 (explicit) ✓, J_4 (transvectant B) ✓ (isomorphism-invariant),
+  J_10 (poldisc) ✓. J_6 was a "candidate" of unknown correctness.
+- Verification (x→2x+1): J_k scales by 2^{6k}, J_4/J_2² and J_6_cand/J_2³
+  isomorphism-invariant ✓.
+
+**Part B — Rosenhain cross-ratio formula attempt**
+- Derived an explicit Rosenhain formula for the Howe-glued curve C using Möbius
+  transforms on the 6 2-torsion points {α,ωα,ω²α, dα,dωα,dω²α} (where α=(-b)^{1/3},
+  ω=cube root of unity, d=non-square, for j=0 curves).
+- Implemented in `chlrs_igusa_formula.gp`, tested for p=1009, b=11, t=43.
+- **DISPROVED**: all 3 Möbius variants give Frobenius poly x⁴+334x²+1009²
+  (#Jac=1018416), which is IRREDUCIBLE over Z → Jac is SIMPLE.
+- Target is x⁴+169x²+1009² = (x²−43x+1009)(x²+43x+1009), #Jac=1018251 (DECOMPOSABLE).
+- **Key finding**: the Howe-glued curve's Weierstrass points are NOT the combined
+  2-torsion of E and E^t. The product y²=(x³+b₁)(x³+b₂) is a different isogeny class.
+  Mestre reconstruction is required.
+
+**Part C — Complete Igusa-Clebsch implementation**
+- Retrieved Clebsch-to-Igusa conversion formulas from SageMath source
+  (sage/schemes/hyperelliptic_curves/invariants.py, attributed [LY2001]):
+  ```
+  I2  = -120*A
+  I4  = -720*A² + 6750*B
+  I6  = 8640*A³ - 108000*A*B + 202500*C
+  I10 = -62208*A⁵ + 972000*A³*B + 1620000*A²*C
+         - 3037500*A*B² - 6075000*B*C - 4556250*D
+  ```
+  where A,B,C,D are Clebsch invariants via transvectants:
+  ```
+  A = (f,f)_6          B = (i,i)_4    [i=(f,f)_4]
+  C = (i,(i,i)_2)_4    D = (y3,y1)_2  [y1=(f,i)_4, y2=(i,y1)_2, y3=(i,y2)_2]
+  ```
+- Implemented all four in `igusa_clebsch_complete.gp` using existing transvectant engine.
+- **Verification**: I10=poldisc ✓; I4/I2² and I6/I2³ isomorphism-invariant ✓;
+  scaling I_k → 2^{6k}·I_k under x→2x+1 ✓.
+- Note: our transvectant normalization gives A_ours = 2×A_Sage, so I2_ours = 2×I2_canonical.
+  The ratios I4/I2² and I6/I2³ are correct regardless.
+- Ran `cargo test --test curve_audit`: 5/5 ✓.
+
+### Findings
+
+**Empirical (p=1009 Rosenhain test)**
+```
+Cross-ratio Rosenhain curve Frobenius poly: x^4 + 334*x^2 + 1018081  (simple Jac)
+Target (Howe-glued) Frobenius poly:         x^4 + 169*x^2 + 1018081  (decomposable)
+  where 169 = 13^2 = (2*1009 - 43^2), 334 = 2*167 (not of this form)
+```
+The cross-ratio construction gives a DIFFERENT isogeny class than E×E^t.
+
+**Full Igusa-Clebsch quadruple for naive secp256k1 cover** (in our 2×canonical I2 scaling):
+```
+h_secp = (x^3+7)(x^3+189) over Z
+  I2  = -87024          (canonical: -43512)
+  I4  = 19302628212
+  I6  = -636669361341720
+  I10 = 46374105383717408990784
+
+Normalised ratios (isomorphism class in A_2):
+  I4/I2^2  = 223317/87616
+  I6/I2^3  = 25053705/25934336
+  I10/I2^5 = -10556231283/1136131391488
+```
+These invariants describe the naive cover, NOT the Howe-glued curve.
+
+**CHLRS formula status**:
+- The CHLRS formula (Igusa invariants of (E×E^t)/Γ_α from Weierstrass data) requires
+  modular form pullback machinery not available in PARI. SageMath has `mestre.py` which
+  implements Mestre reconstruction (invariants → sextic), but not the inverse direction
+  (Weierstrass data → quotient invariants).
+- ePrint 2010/294 (Cardona et al.) and arxiv:1305.4330 (Abelard-Gaudry-Spaenlehauer)
+  are the relevant references. Access was blocked (403).
+
+### Next step proposal
+
+1. **Priority 2 (CHLRS continued, BLOCKED)**: Two paths to unblock:
+   (a) Install SageMath and call `mestre.reconstruct_curve(igusa_invariants)` on the
+       QUOTIENT invariants. First need: compute quotient invariants via modular forms.
+   (b) Port Mestre reconstruction (invariants → curve) to PARI from the SageMath
+       algorithm. This is the FORWARD direction (Igusa → sextic); we already have
+       Igusa computation from a given sextic.
+2. **Priority 3 (Howe sextic twists)**: check all 15 pairs of 6 sextic twists of
+   secp256k1 for Howe (H1)-(H2)-(H3) conditions. Quick PARI check in `howe_gluing_test.gp`.
+3. **Priority 4 (Cross-curve LLL)**: re-run sweep with multiple seeds for 384-bit case.
+4. **Priority 5 (GLV-HNP Phase 2 toy)**: 32-bit toy curve GLV lattice attack.
+
+### Commits made
+
+autolab 2026-05-23: implement complete Igusa-Clebsch (ABCD→I2I4I6I10); negative Rosenhain result
