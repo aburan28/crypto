@@ -113,6 +113,7 @@ pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
 pub mod ecdsa_audit;
 pub mod ecm;
+pub mod ffd_harness;
 pub mod fght_snfs;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
