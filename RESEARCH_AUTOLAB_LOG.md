@@ -274,4 +274,79 @@ These invariants describe the naive cover, NOT the Howe-glued curve.
 
 ### Commits made
 
-autolab 2026-05-23: implement complete Igusa-Clebsch (ABCD→I2I4I6I10); negative Rosenhain result
+autolab 2026-05-23: complete Igusa-Clebsch ABCD; negative Rosenhain result  (10ac375)
+
+---
+
+## 2026-05-24 (autolab run)
+
+### Task picked
+
+Priority 3 (Howe sextic twists). Priority 1 (P-521 LLL) resolved 2026-05-22.
+Priority 2 (CHLRS Igusa) worked 2026-05-23 but BLOCKED (requires modular-form
+pullback unavailable in PARI/SageMath; multi-week effort). Moving to Priority 3:
+check all 15 pairs of the 6 j=0 sextic twists of secp256k1 for Howe (H1)+(H2)+(H3).
+
+### Work done
+
+- PARI/GP not installed in this environment. Implemented analysis in Python
+  (`secp256k1_cm_audit/howe_sextic_twists_check.py`, ~250 lines).
+- Also wrote companion PARI script `howe_sextic_twists_all15.gp` for future gp
+  environments.
+- CM formula: 4p = t²+3s² with s = 303414439467246543595250775667605759171.
+  All 6 traces computed algebraically — no ellcard calls needed.
+- Primitive 6th root: u = 3^{(p-1)/6} mod p (u^3≡−1, u^2≢1, u^6≡1 ✓).
+- Trace matching: for each b_k, found an affine point P and tested which
+  candidate order n=p+1-T_i gives n*P=O via double-and-add. Fixed scalar-
+  truncation bug (k-mod clipped large scalars for negative-trace curves).
+- Ran `cargo test --test curve_audit`: 5/5 ✓.
+
+### Findings
+
+**Six sextic twists of secp256k1 (b_k = 7·u^k mod p):**
+
+| k | trace | 2-tor pattern | Howe-glueable with? |
+|---|-------|---------------|---------------------|
+| 0 (secp256k1) | +432420…177327 | [3] irred. | k=2,3,5 |
+| 1 | +671331…227420 | [1,1,1] splits | none |
+| 2 | +238911…050093 | [3] irred. | k=0,3,5 |
+| 3 (quad.twist) | −432420…177327 | [3] irred. | k=0,2 |
+| 4 | −671331…227420 | [1,1,1] splits | none |
+| 5 | −238911…050093 | [3] irred. | k=0,2 |
+
+**Result: 5 / 15 pairs are Howe-glueable.**
+Pairs: (0,2), (0,3), (0,5), (2,3), (2,5) — all [3]×[3] pairs with gcd=1.
+
+Failures:
+- All 8 cross-pattern ([3]×[1,1,1]) pairs fail H2 (different Galois module).
+- Pair (3,5): H2 ✓ but H3 ✗ — gcd(n_3, n_5) divisible by 3 (CM artifact: trace
+  difference = 3·(s+t)/2 forces common factor).
+- Pair (1,4): H2 ✓ but H3 ✗ — gcd(n_1, n_4) divisible by 2 (both curves have
+  full rational 2-torsion → orders divisible by 4).
+
+**Structural explanation of the [1,1,1] pattern:**
+x³+b_k splits completely over F_p iff −b_k is a cube mod p. The 6 b-values fall
+into 3 cubic residue classes (since u^3≡−1 is a cube mod p≡1 mod 6): two classes
+contain 4 curves each with [3], and two specific classes k=1,4 have [1,1,1].
+Precisely: b_1 = 7u and b_4 = 7u·u^3 = −7u; these are cubes iff 7u is a cube.
+Since 7 is not a cube (x³+7 irred → −7 not a cube → 7 not a cube unless 7≡−(−7)
+and both have same cubic class; −1 is a cube mod p≡1 mod 6 so −7 is in the same
+class as 7, but u has order 3 in F_p*/(F_p*)^3 and 7u is in a different class).
+
+**ECDLP implications:** None. All 5 glueable pairs yield genus-2 Jacobians with
+|Jac| ≈ p² and DLP cost ≥ √|Jac| ≈ p ≫ √n_secp ≈ √p. Consistent with
+PAPER_STRUCTURAL_COMPLETENESS.md Block B5.
+
+### Next step proposal
+
+1. **Priority 4 (Cross-curve LLL, 384-bit multi-seed)**: re-run
+   `lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` with seeds 1,2,3
+   for 384-bit case to confirm 3-of-3 pass. One seed passed on 2026-05-22.
+2. **Priority 5 (GLV-HNP Phase 2 toy)**: 32-bit toy curve lattice attack for
+   scalar recovery. Scaffold is in `glv_hnp_phase2_toy.gp`; port to Python.
+3. **Priority 3 follow-up (low)**: extend `howe_explicit_cover.gp` to attempt
+   Mestre reconstruction for pair (2,3) — a non-obvious glueable pair.
+4. **Priority 2 CHLRS (blocked)**: SageMath `HyperellipticCurveFromInvariants`
+   would complete this; record as BLOCKED pending environment upgrade.
+
+### Commits made
