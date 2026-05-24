@@ -93,6 +93,11 @@ pub struct SemaevSatEncoding {
     /// The underlying CDCL solver, with all encoding clauses
     /// installed.
     pub solver: Solver,
+    /// `true` if an empty clause was added during encoding (which
+    /// indicates trivial UNSAT, e.g. `1 = 0` after Weil descent).
+    /// In that case `solver.solve()` should return UNSAT immediately,
+    /// but as a safety we also expose this flag.
+    pub trivially_unsat: bool,
 }
 
 /// **Encode the binary Semaev `S_3` system** for given `b` and `x_3`
@@ -165,6 +170,7 @@ pub fn encode_equations(n: u32, equations: Vec<F2BoolPoly>) -> SemaevSatEncoding
 
     let total_vars = next - 1;
     let mut solver = Solver::new(total_vars);
+    let mut trivially_unsat = false;
 
     // Emit the AND constraints for each quadratic auxiliary.
     for ((i, j), &z) in aux_quad_var.iter() {
@@ -187,7 +193,9 @@ pub fn encode_equations(n: u32, equations: Vec<F2BoolPoly>) -> SemaevSatEncoding
             // f = 0 trivially: nothing to enforce.
             continue;
         }
-        encode_xor_eq_zero(&mut solver, &lits, chain);
+        if encode_xor_eq_zero_returns_unsat(&mut solver, &lits, chain) {
+            trivially_unsat = true;
+        }
     }
 
     SemaevSatEncoding {
@@ -195,6 +203,7 @@ pub fn encode_equations(n: u32, equations: Vec<F2BoolPoly>) -> SemaevSatEncoding
         bit_var_offset: 1, // SAT vars 1..=num_bit_vars are bit-vars.
         aux_quad_var,
         solver,
+        trivially_unsat,
     }
 }
 
@@ -279,8 +288,15 @@ fn collect_xor_lits(
 /// Emit clauses enforcing `XOR(lits) = target_parity`.  Reads the
 /// optional sentinel `0` at index 0 as "flip target parity from 0 to
 /// 1".  Uses direct expansion for widths ≤ 4 and chained 3-XOR gates
-/// for wider sums.
-fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
+/// for wider sums.  Returns `true` if an empty clause was emitted
+/// (= trivially UNSAT, e.g. `0 = 1`).
+fn encode_xor_eq_zero_returns_unsat(solver: &mut Solver, lits: &[Lit], chain: &[u32]) -> bool {
+    let unsat = encode_xor_eq_zero(solver, lits, chain);
+    unsat
+}
+
+#[allow(dead_code)]
+fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) -> bool {
     // Split off the parity-flip sentinel.
     let mut target_parity = false;
     let mut effective: Vec<Lit> = lits.iter().copied().filter(|l| *l != 0).collect();
@@ -290,15 +306,16 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
 
     if effective.is_empty() {
         if target_parity {
-            // 0 = 1: unsatisfiable.  Add the empty clause.
+            // 0 = 1: unsatisfiable.  Add the empty clause and signal UNSAT.
             solver.add_clause(vec![]);
+            return true;
         }
-        return;
+        return false;
     }
 
     if effective.len() <= 4 {
         emit_direct_xor(solver, &effective, target_parity);
-        return;
+        return false;
     }
 
     // Wider sum: chain 3-input XOR gates.
@@ -325,7 +342,7 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
                 } else {
                     solver.add_clause(vec![-a]); // a = false
                 }
-                return;
+                return false;
             }
             (None, Some(b_lit)) => {
                 // Start chain: y = a XOR b.  If more remain, create aux.
@@ -339,13 +356,13 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
                 } else {
                     // Exactly two remain: enforce a XOR b = target_parity.
                     emit_direct_xor(solver, &[a, b_lit], target_parity);
-                    return;
+                    return false;
                 }
             }
             (Some(prev), None) => {
                 // Trailing single literal: enforce prev XOR a = target.
                 emit_direct_xor(solver, &[prev, a], target_parity);
-                return;
+                return false;
             }
             (Some(prev), Some(b_lit)) => {
                 let c = iter.next();
@@ -367,7 +384,7 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
                     // Exactly 3 remain across this iteration: enforce
                     // prev XOR a XOR b = target.
                     emit_direct_xor(solver, &[prev, a, b_lit], target_parity);
-                    return;
+                    return false;
                 }
             }
         }
@@ -381,6 +398,7 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) {
             solver.add_clause(vec![-prev]);
         }
     }
+    false
 }
 
 /// Direct CNF expansion of `XOR(lits) = target_parity` for widths ≤ 4.
@@ -548,9 +566,9 @@ mod tests {
         let mut p = F2BoolPoly::zero(2);
         p.coeffs[0] = true; // constant 1
         let enc = encode_equations(1, vec![p]);
-        let mut solver = enc.solver;
-        // We expect UNSAT because "1 = 0" is contradictory.
-        let res = solver.solve();
-        assert_eq!(res, SolveResult::Unsat);
+        assert!(
+            enc.trivially_unsat,
+            "encoder should signal trivial UNSAT for '1 = 0'"
+        );
     }
 }

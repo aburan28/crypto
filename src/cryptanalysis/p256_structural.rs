@@ -1168,9 +1168,13 @@ mod multi_curve_report {
             md.push_str(&format!("- **Verdict**: {}\n\n", a.regime));
         }
 
-        // Write to file.
-        let path = "/Volumes/Volume/crypto/MAINSTREAM_CURVE_AUDIT.md";
-        let mut f = File::create(path).expect("create");
+        // Write to file.  Use `$CRYPTO_AUDIT_DIR` (defaults to the
+        // OS temp dir) so the test passes on machines that don't
+        // happen to have `/Volumes/Volume/crypto`.
+        let dir = std::env::var("CRYPTO_AUDIT_DIR")
+            .unwrap_or_else(|_| std::env::temp_dir().display().to_string());
+        let path = format!("{}/MAINSTREAM_CURVE_AUDIT.md", dir);
+        let mut f = File::create(&path).expect("create");
         f.write_all(md.as_bytes()).unwrap();
         println!("\nWrote {} bytes to {}", md.len(), path);
 
