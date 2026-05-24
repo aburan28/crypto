@@ -165,3 +165,138 @@ calibration row just by swapping `(p, b)`.
 
 Cross-reference: [ECDLP_ATTACK_MATRIX.md](ECDLP_ATTACK_MATRIX.md) for the
 attack taxonomy these calibration curves are meant to exercise.
+
+---
+
+# Cryptanalytic structural fingerprint of the calibration set
+
+A structural probe of all 29 (prime, curve) pairs revealed five findings worth
+recording. The headline: the Solinas reduction shape that makes the NIST primes
+fast also *algebraically forces* their p±1 to be super-smooth — this is benign
+for pure ECDLP but is the load-bearing reason these primes should not be reused
+as the modulus of any companion multiplicative-group DLP.
+
+## 1. P-224-family primes have algebraically forced super-smooth p−1
+
+For any prime of the form `p = 2ⁿ − 2ᵏ + 1` (the P-224 topology),
+
+```
+    p − 1  =  2ⁿ − 2ᵏ  =  2ᵏ · (2^(n−k) − 1)
+```
+
+so `p − 1` inherits *every* factor of the cyclotomic value 2^(n−k) − 1 =
+∏_{d | (n−k)} Φ_d(2). These factors are systematically small. Direct
+factorisations across the P-224 row of the calibration set:
+
+| n    | k   | n−k | factor(2^(n−k) − 1)                                        | largest prime |
+|------|-----|-----|-------------------------------------------------------------|---------------|
+| 56   | 24  | 32  | `3·5·17·257·65537`                                          | 65 537        |
+| 64   | 24  | 40  | `3·5²·11·17·31·41·61681`                                    | 61 681        |
+| 70   | 40  | 30  | `3²·7·11·31·151·331`                                        | 331           |
+| 80   | 48  | 32  | `3·5·17·257·65537`                                          | 65 537        |
+| 84   | 68  | 16  | `3·5·17·257`                                                | 257           |
+| 96   | 32  | 64  | `3·5·17·257·641·65537·6700417`                              | 6 700 417     |
+| 126  | 18  | 108 | `3⁴·5·7·13·19·37·73·109·87211·246241·262657·279073`         | 279 073       |
+| **224**  | **96**  | **128** | **`3·5·17·257·641·65537·274177·6700417·67280421310721`** | **≈ 2⁴⁶** |
+
+**NIST P-224 itself has a p − 1 that is 46-bit smooth.** This is intrinsic to
+the form, not a property of any particular bit-size choice.
+
+## 2. Mirror pattern across the other NIST topologies
+
+The same identity, applied to the other Solinas shapes:
+
+| Family form               | Smooth side          | Mechanism                            |
+|---------------------------|----------------------|--------------------------------------|
+| `2ⁿ − 2ᵏ − 1`             | **p + 1**            | p+1 = 2ⁿ − 2ᵏ = 2ᵏ·(2^(n−k) − 1)      |
+| `2ⁿ − 2ᵏ + 1`             | **p − 1**            | (above)                              |
+| `2ⁿ − 1` (Mersenne)       | **p + 1 = 2ⁿ**       | fully 2-smooth                       |
+| `2ⁿ − 2ᵃ + 2ᵇ + 2ᶜ − 1` (P-256) | neither       | no clean cyclotomic factorisation    |
+| `2ⁿ − 2ᵃ − 2ᵇ + 2ᶜ − 1` (P-384) | neither       | no clean cyclotomic factorisation    |
+
+Observed in the probe (`p±1 rough bit-length / n`):
+
+- P-192/72: `p+1 rough = 1b / 72` (p+1 = 2⁷² − 2²⁴, cyclotomic)
+- P-224/56–84: `p−1 rough = 1b / 56–84` (all super-smooth)
+- P-521/61, 89, 107, 127: `p+1 rough = 1b / n` (fully 2-smooth)
+- P-521/61: **both** `p−1` and `p+1` are 1-bit rough (M₆₁ doubly smooth)
+- P-256/* and P-384/*: rough parts are 49–116 bits — *no* special structure
+
+## 3. Universally good ECDLP-relevant fingerprints
+
+The probe also confirmed every calibration curve is structurally sound on the
+fingerprints that matter directly for ECDLP:
+
+- **Embedding degree k_MOV > 200** for all 29 — MOV / Frey-Rück reduction to
+  DLP in F_{p^k}* is computationally infeasible. Pairings on these curves
+  are likewise unreachable, which is a security feature here.
+- **No anomalous curve** (#E ≠ p in every case) — Smart / Semaev /
+  Satoh–Araki additive-group break does not apply.
+- **j-invariant ∉ {0, 1728}** for any row — the `a = −3` constraint forbids
+  j = 1728, and no row landed at j = 0 either, so no built-in GLV
+  endomorphism comes for free.
+- **CM discriminants are generically large** (∼ −4p) — these are not
+  special-CM curves.
+
+## 4. Two accidentally-near-twist-secure curves
+
+The `b` values were optimised purely for main-curve cofactor; the twist was
+ignored. Most twist orders are wildly composite as a result, but two outliers
+fell out of the search anyway:
+
+| curve         | b   | h_E | **twist cofactor h_T**       |
+|---------------|-----|-----|-------------------------------|
+| **P-224/56**  | 87  | 1   | **33** (= 3·11)               |
+| **P-256/96**  | 7   | 4   | **20** (= 2²·5)               |
+
+These are practically twist-secure (≤ 5 bits of small-subgroup leakage) and
+make natural positive controls when validating invalid-curve attacks against
+the twist-vulnerable rows.
+
+Mid-range twist cofactors worth noting:
+
+| curve       | h_T     |
+|-------------|---------|
+| P-521/107   | 2 983   |
+| P-384/112   | 60 337  |
+| P-384/96    | 63 259  |
+| P-256/112   | 246     |
+| P-256/128   | 199 144 |
+
+All other rows have h_T ≥ 10⁷ — strongly twist-vulnerable, well-suited as
+targets for invalid-curve research.
+
+## 5. Properly framing the cryptanalytic implications
+
+The smoothness pattern matters for *adjacent* attack surfaces — not for ECDLP
+itself:
+
+| Attack                                | Affected by p±1 smoothness? | Relevance to these curves              |
+|---------------------------------------|------------------------------|----------------------------------------|
+| Pollard ρ on E(F_p)                   | No                           | Depends only on \|n′\|                  |
+| Pollard p−1 / Williams p+1            | Only for factoring composites| These primes *are* prime; N/A          |
+| MOV / Frey-Rück → DLP in F_{p^k}*     | Indirectly via SNFS          | k > 200, so unreachable                |
+| **SNFS in F_p\* if reused for Schnorr/DSA** | **Yes**                | **P-192 / P-224 / P-521 family unsafe**|
+| Twist (invalid-curve)                 | Only via twist cofactor      | See section 4                          |
+| GHS / Weil descent                    | No (needs subfield structure)| Prime fields — does not apply          |
+| Summation-polynomial / Diem index calc | No                          | Curve-structure dependent, not p±1     |
+
+The bottom line: **the calibration primes are weak field choices for any
+companion multiplicative-group DLP — and that is the same weakness P-224
+itself inherits — but for pure ECDLP they are as hard as their bit-size
+suggests.**
+
+## Suggested follow-up experiments
+
+- Run Pohlig–Hellman on **F_p\*** for the P-224-family primes — should be fast
+  at scale-down sizes precisely because p−1 is so smooth. Direct evidence
+  of the "dual-DLP weakness".
+- Targeted twist attack against P-256/96 and P-224/56 — verify the
+  small-subgroup-confinement leakage is exactly ⌈log₂ h_T⌉ bits.
+- GLV-friendly variant: drop `a = −3` and refit with `a = 0` to get
+  j = 0 curves with built-in ζ₃-endomorphism. Lets you separately
+  calibrate GLV-accelerated ρ.
+- Index-calculus stress test using the highest-smoothness P-224 rows
+  against the [summation-poly](../src/cryptanalysis/summation_poly/)
+  implementation. The expected result is *no* speedup from the inherited
+  field structure; confirming this is itself valuable.
