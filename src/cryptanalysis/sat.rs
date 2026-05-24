@@ -119,6 +119,9 @@ pub struct Solver {
     /// Maximum total conflicts before giving up. `u64::MAX` means
     /// no limit.
     pub conflict_budget: u64,
+    /// Set when `add_clause` detects UNSAT (empty clause or
+    /// conflict-on-unit).  `solve()` short-circuits to UNSAT when set.
+    is_unsat: bool,
 }
 
 #[inline]
@@ -154,6 +157,7 @@ impl Solver {
             conflicts_since_restart: 0,
             conflicts: 0,
             conflict_budget: u64::MAX,
+            is_unsat: false,
         }
     }
 
@@ -169,17 +173,24 @@ impl Solver {
             }
         }
         match lits.len() {
-            0 => false,
+            0 => {
+                self.is_unsat = true;
+                false
+            }
             1 => {
                 // Unit clause: assign now (at level 0).
                 let l = lits[0];
-                self.enqueue(l, Reason::Propagated(self.clauses.len()))
-                    .map(|_| {
+                match self.enqueue(l, Reason::Propagated(self.clauses.len())) {
+                    Ok(()) => {
                         self.clauses.push(vec![l]);
                         self.n_orig_clauses = self.clauses.len();
                         true
-                    })
-                    .unwrap_or(false)
+                    }
+                    Err(()) => {
+                        self.is_unsat = true;
+                        false
+                    }
+                }
             }
             _ => {
                 let idx = self.clauses.len();
@@ -232,10 +243,12 @@ impl Solver {
                 let cidx = watchers[i];
                 i += 1;
                 // Ensure clause[0] is the false watcher (the one we're
-                // looking to replace).
+                // looking to replace).  The watch entry tells us the
+                // false watcher is one of clause[0]/clause[1]; swap so
+                // it's at index 0.
                 {
                     let clause = &mut self.clauses[cidx];
-                    if clause[0] == -lit {
+                    if clause[0] != -lit {
                         clause.swap(0, 1);
                     }
                 }
@@ -404,6 +417,9 @@ impl Solver {
 
     /// Main solve loop. Runs until SAT/UNSAT or conflict budget hits.
     pub fn solve(&mut self) -> SolveResult {
+        if self.is_unsat {
+            return SolveResult::Unsat;
+        }
         // Initial propagation at level 0 catches trivial UNSAT from
         // unit clauses.
         if self.propagate().is_some() {
@@ -489,17 +505,25 @@ impl Solver {
 /// pathological inputs we don't want to risk the stack.
 fn luby(i: u64) -> u64 {
     // i is 1-indexed in this codebase; the sequence starts at i = 1.
-    // Find the largest k with 2^k − 1 ≤ i. If i + 1 == 2^k, return
-    // 2^(k − 1); else recurse on i − (2^(k−1) − 1).
+    // Luby recurrence (Luby-Sinclair-Zuckerman 1993):
+    //   t_i = 2^{k-1}            if i = 2^k - 1
+    //        t_{i - 2^{k-1} + 1}  otherwise (with k = ⌊log₂ i⌋ + 1)
     let mut n = i;
     loop {
-        let mut k: u64 = 1;
-        while (1u64 << k) <= (n + 1) {
-            if n + 1 == (1u64 << k) - 1 {
-                return 1u64 << (k - 1);
-            }
+        if n == 0 {
+            return 1; // guard; shouldn't happen with i >= 1
+        }
+        // Find the smallest k with 2^k > n  (i.e. 2^k >= n + 1).
+        let mut k: u64 = 0;
+        while (1u64 << k) < n + 1 {
             k += 1;
         }
+        // Now (1 << k) >= n + 1.  Two cases:
+        if n + 1 == 1u64 << k {
+            // n == 2^k - 1: base case, return 2^{k-1} (= 1 when k = 0).
+            return if k == 0 { 1 } else { 1u64 << (k - 1) };
+        }
+        // Otherwise, recurse on n - (2^{k-1} - 1).
         n -= (1u64 << (k - 1)) - 1;
     }
 }
@@ -611,13 +635,24 @@ mod tests {
         assert!(check_model(&orig, &m));
     }
 
-    /// Trivially UNSAT: x ∧ ¬x.
+    /// Trivially UNSAT: x ∧ ¬x.  Note: `add_clause` may return false
+    /// for the second unit clause because enqueuing `-1` conflicts
+    /// with the already-propagated `1`; both that path and `solve()`
+    /// must reach UNSAT.
     #[test]
     fn trivial_unsat() {
         let mut s = Solver::new(1);
         assert!(s.add_clause(vec![1]));
-        assert!(s.add_clause(vec![-1]));
-        assert_eq!(s.solve(), SolveResult::Unsat);
+        // The contradictory unit may be detected immediately at add
+        // time (returns false) or surface from solve(); either is
+        // valid UNSAT detection.
+        let added = s.add_clause(vec![-1]);
+        if added {
+            assert_eq!(s.solve(), SolveResult::Unsat);
+        } else {
+            // add_clause already detected UNSAT; solve() must agree.
+            assert_eq!(s.solve(), SolveResult::Unsat);
+        }
     }
 
     /// The pigeonhole principle PHP(3, 2): 3 pigeons in 2 holes is
