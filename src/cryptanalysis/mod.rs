@@ -136,6 +136,7 @@ pub mod p256_attacks;
 pub mod p256_isogeny_cover;
 pub mod p256_structural;
 pub mod petit_quisquater;
+pub mod pkm_criterion;
 pub mod pohlig_hellman;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
