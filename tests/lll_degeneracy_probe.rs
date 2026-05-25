@@ -195,6 +195,64 @@ fn probe_lll_degeneracy_head_to_head() {
     );
 }
 
+/// Confirm that the scaled-f64 GS overflow fix resolves LLL degeneracy for
+/// 384-bit curves across 3 independent seeds.
+///
+/// Prior result (2026-05-22): P-384 and brainpoolP384r1 recovered with seed
+/// 0xC0FFEE only (1-of-3). This test runs the remaining 2 seeds to confirm
+/// 3-of-3 for each curve.
+///
+/// Run: `cargo test --test lll_degeneracy_probe probe_384bit -- --nocapture`
+#[test]
+fn probe_384bit_lll_multiseed() {
+    let p384 = CurveParams::p384();
+    let bp384 = CurveParams::brainpool_p384r1();
+
+    eprintln!();
+    eprintln!("=== 384-bit LLL convergence: P-384 and brainpoolP384r1 (k_bits=288, m=8) ===");
+
+    // Three independent (d_seed, k_seed) pairs
+    let seeds: [(u64, u64); 3] = [
+        (0xC0FFEE, 0xC0FFEE),
+        (0xDEAD_BEEF, 0xBADC_AFE),
+        (0x1234_5678, 0x9ABC_DEF0),
+    ];
+
+    let mut p384_pass = 0usize;
+    let mut bp384_pass = 0usize;
+
+    for (d_seed, k_seed) in seeds {
+        let (out_p, _) = probe_once(&p384, "P-384", 288, 8, d_seed, k_seed);
+        if out_p.starts_with("✓") {
+            p384_pass += 1;
+        }
+        let (out_b, _) = probe_once(&bp384, "brainpoolP384r1", 288, 8, d_seed, k_seed);
+        if out_b.starts_with("✓") {
+            bp384_pass += 1;
+        }
+    }
+
+    eprintln!();
+    eprintln!("=== Summary ===");
+    eprintln!("P-384:           {}/{} seeds recovered key", p384_pass, seeds.len());
+    eprintln!("brainpoolP384r1: {}/{} seeds recovered key", bp384_pass, seeds.len());
+
+    assert_eq!(
+        p384_pass,
+        seeds.len(),
+        "P-384 expected 3/3 LLL recoveries (scaled-GS fix); got {}/{}",
+        p384_pass,
+        seeds.len()
+    );
+    assert_eq!(
+        bp384_pass,
+        seeds.len(),
+        "brainpoolP384r1 expected 3/3 LLL recoveries (scaled-GS fix); got {}/{}",
+        bp384_pass,
+        seeds.len()
+    );
+}
+
 /// Extended bit-length sweep of LLL convergence across curves.
 ///
 /// Test the refined hypothesis (after the cross-Koblitz refutation):

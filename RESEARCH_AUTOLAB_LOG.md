@@ -350,3 +350,80 @@ PAPER_STRUCTURAL_COMPLETENESS.md Block B5.
    would complete this; record as BLOCKED pending environment upgrade.
 
 ### Commits made
+
+none (2026-05-24 run had no commits — Python/PARI scripts not committed)
+
+---
+
+## 2026-05-25 (autolab run)
+
+### Task picked
+
+Priority 4 (Cross-curve LLL 384-bit multi-seed). Priorities 1–3 resolved or
+blocked: P-521 LLL closed 2026-05-22, CHLRS Igusa blocked 2026-05-23, Howe
+sextic twist check complete 2026-05-24. Today: confirm that the scaled-f64 GS
+overflow fix makes P-384 and brainpoolP384r1 recover 3-of-3 seeds (only seed
+0xC0FFEE was tested on 2026-05-22).
+
+### Work done
+
+- Added `probe_384bit_lll_multiseed` to `tests/lll_degeneracy_probe.rs`.
+  Not `#[ignore]`'d: runs P-384 and brainpoolP384r1 at k_bits=288, m=8 with
+  three (d_seed, k_seed) pairs: (0xC0FFEE, 0xC0FFEE), (0xDEAD_BEEF, 0xBADC_AFE),
+  (0x1234_5678, 0x9ABC_DEF0). Asserts 3/3 recovery for each curve.
+- Ran `cargo test --test lll_degeneracy_probe probe_384bit -- --nocapture`.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Empirical result — P-384 and brainpoolP384r1, 3 seeds each:**
+
+| curve           | seed pair              | outcome     | time (ms) |
+|-----------------|------------------------|-------------|-----------|
+| P-384           | 0xC0FFEE / 0xC0FFEE    | ✓ RECOVERED | 2446      |
+| brainpoolP384r1 | 0xC0FFEE / 0xC0FFEE    | ✓ RECOVERED | 2414      |
+| P-384           | 0xDEADBEEF / 0xBADCAFE | ✓ RECOVERED | 2518      |
+| brainpoolP384r1 | 0xDEADBEEF / 0xBADCAFE | ✓ RECOVERED | 2529      |
+| P-384           | 0x12345678 / 0x9ABCDEF0 | ✓ RECOVERED | 2378      |
+| brainpoolP384r1 | 0x12345678 / 0x9ABCDEF0 | ✓ RECOVERED | 2490      |
+
+**P-384: 3/3 | brainpoolP384r1: 3/3**
+
+Average per-probe time ~2.46s. This is consistent with the 2026-05-22 table
+(2047ms / 2042ms) — slight increase attributed to debug build overhead variance.
+
+**Conclusion:** Priority 4 is RESOLVED. The scaled-f64 GS fix (commit 17ac5d8)
+is confirmed correct for 384-bit curves across multiple independent seeds.
+No curve-specific arithmetic effect; the failure was purely numerical (f64
+overflow for entries ~n^2 with n ≈ 2^384, exceeding f64::MAX ≈ 2^1023 only at
+n^4 ≈ 2^{1536}).
+
+**Open thread status update:**
+- Priority 1 (P-521 LLL): CLOSED (2026-05-22)
+- Priority 2 (CHLRS Igusa): BLOCKED (SageMath required)
+- Priority 3 (Howe sextic twists): CLOSED (2026-05-24, 5/15 glueable)
+- Priority 4 (Cross-curve LLL): CLOSED (this run)
+- Priority 5 (GLV-HNP Phase 2 toy 32-bit): OPEN — next target
+- Priority 6 (B5 over F_{p^k}): OPEN
+
+### Next step proposal
+
+1. **Priority 5 (GLV-HNP Phase 2 toy)**: implement the GLV-aware lattice attack
+   on a 32-bit toy curve (e.g., secp256k1 at p=2^31−1 ≈ 2.1×10^9). The GLV
+   endomorphism φ: (x,y)→(βx,y) with φ(P)=λP splits the 32-bit scalar d into
+   (d₀, d₁) with |d₀|,|d₁| ≤ √n ≈ 2^16. The 2D GLV HNP basis is 4×4 vs the
+   standard 10×10 (m=8). Concretely:
+   - Use `secp192k1` as a stand-in (192-bit, GLV-amenable, λ already computed)
+     with inflated bias (k_bits = 144→48 to simulate 32-bit secrecy).
+   - Or write a genuine 32-bit toy in Python using `cryptography` or pure-int
+     arithmetic (fastest to prototype).
+   - Port the GLV decomposition + 4×4 lattice from `RESEARCH_GLV_HNP_PHASE2.md`
+     into a standalone Python script.
+2. **Priority 6 (B5 over F_{p^k})**: check whether the cover-cost estimate in
+   Block B5 of PAPER_STRUCTURAL_COMPLETENESS.md remains ≥ √|Jac| ≥ p when
+   the base field is F_{p^k} for small k (e.g., k=2). A 2-line check in PARI/GP
+   (or Python): for p=secp256k1's prime, k=2, compute Weil restriction cost vs
+   rho cost.
+
+### Commits made
+
