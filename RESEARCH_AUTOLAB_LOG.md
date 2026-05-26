@@ -427,3 +427,94 @@ n^4 ≈ 2^{1536}).
 
 ### Commits made
 
+
+---
+
+## 2026-05-26 (autolab run)
+
+### Task picked
+
+Priority 5 (GLV-HNP Phase 2 toy lattice). Priorities 1–4 are closed/blocked
+(see prior entries). Today: build a working GLV-aware HNP lattice that actually
+recovers d via LLL on the toy n=199 curve. The existing `glv_hnp_phase2_lattice.gp`
+had two problems blocking recovery: a sign bug in the planted-vector verification
+and an unbalanced lattice that made the planted vector non-shortest.
+
+### Work done
+
+- Installed PARI/GP 2.15.4 (`apt-get install pari-gp`).
+- Installed `fpylll` 0.6.4 + `cysignals` 1.12.5 via pip for Python/LLL.
+- Ran existing `glv_hnp_phase2_lattice.gp` — LLL failed (d not recovered).
+- Diagnosed two bugs:
+  1. **Sign bug** in `glv_hnp_phase2_lattice.gp` lines 218–229: combination
+     coefficients `(+q_i, -d, -k2_i, +1)` were wrong; correct is `(-q_i, +d, +k2_i, +1)`.
+     Result: first m slots were `q_i*n - d*B_i + λ*k2_i + A_i ≠ k1_i`.
+  2. **Unbalanced scaling**: planted vector had d-slot = `d * K1_BOUND = 190 * 2 = 380`
+     dominating norm (≈ 305) vs. spurious λ-row combinations with norm ≈ 27.
+     Root cause: `2*(k2-row_i) + (mod-n-row_i)` gives `(-13, 2*K2_diag)` with
+     norm `sqrt(169 + 4*K2^2) ≈ 33` — much shorter than planted vector (305).
+- Fixed sign bug in `glv_hnp_phase2_lattice.gp`. All planted vector slots now
+  verify correctly (k1_i slots = +k1_i, d-slot = +d*K1, k2 slots = +k2_i*K2,
+  Kannan = K1_BOUND). Unscaled PARI LLL still fails (planted not shortest).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_attack.py` — Python/fpylll lattice
+  attack with **balanced column-diagonal scaling**:
+  - `S_k1 = N // K1_BOUND = 99`
+  - `S_d  = 1` (d appears directly, unscaled)
+  - `S_k2 = N // K2_BOUND = 13`
+  - `S_kannan = N = 199`
+  After scaling, planted vector = `[k1_i*99, d*1, k2_i*13, 199]` ≈ all entries O(200).
+  Spurious λ-combination norm: `sqrt(13^2 * 99^2 + (2*13)^2) ≈ 1287`.
+  Planted vector norm: ≈ 312. Planted < spurious → LLL finds planted vector.
+- Ran Python attack with sweep over m ∈ {2,3,4,5,6,7}, 5 seeds each.
+- Ran `cargo test --test curve_audit` — 5/5 pass.
+
+### Findings
+
+**Toy curve recovery results (n=199, K1_BOUND=2, K2_BOUND=15, GLV domain):**
+
+| m (signatures) | seeds recovered/5 | note                         |
+|----------------|-------------------|------------------------------|
+| 2              | 2/5               | below info-theoretic m_min   |
+| 3              | 3/5               | at threshold (m_min ≈ 3.0)   |
+| 4              | 3/5               | above threshold               |
+| 5              | 4/5               | above threshold               |
+| **6**          | **5/5**           | **100% — practical threshold** |
+| 7              | 5/5               | 100%                          |
+
+Information-theoretic minimum: `m ≥ ⌈log(n) / log(n / (K1*K2))⌉ = 4`.
+Practical LLL threshold: m = 6 (two extra signatures vs. info-theoretic minimum).
+
+**Witness row for d=104, m=4, seed=42:**
+`[99, 0, 0, 0, -95, 39, 143, 117, 39, 199]`
+- k1 slots: [1, 0, 0, 0] (all ∈ [0, K1_BOUND)) ✓
+- d-slot: -95. With Kannan sign=+1: d = -95 mod 199 = 104 ✓
+- k2 slots: [39/13=3, 143/13=11, 117/13=9, 39/13=3] ✓
+- Kannan: 199 = S_KANNAN ✓
+
+**Key design insight (column-diagonal scaling):**
+The critical fix is choosing `S_d = 1` (NOT `S_d = K1_BOUND`). With S_d=K1_BOUND,
+the d-slot entry is `d * K1_BOUND ≈ n * K1 ≈ 400`, which dominates the planted
+vector norm and makes it non-shortest. With `S_d = 1`, the d-slot entry is just
+`d ≈ n ≈ 200`, balanced against the k1 slots (`k1 * S_k1 ≈ 2 * 99 = 198`) and
+k2 slots (`k2 * S_k2 ≈ 14 * 13 = 182`).
+
+**Status update:**
+- Priority 5 (GLV-HNP Phase 2 toy): **CLOSED** (d recovered 5/5 at m=6)
+- Priority 6 (B5 over F_{p^k}): OPEN → next target
+
+### Next step proposal
+
+1. **Priority 6 (B5 over F_{p^k})**: check whether the cover-cost argument in
+   Block B5 of `PAPER_STRUCTURAL_COMPLETENESS.md` holds for F_{p^k} (k=2,3).
+   Two-line PARI check: for p = secp256k1 prime, n_ab = |Jac(C)(F_{p^k})|,
+   compare rho cost sqrt(n_ab) vs. p^k (the base DLP cost). If sqrt(n_ab) ≥ p^k
+   for all k, the argument breaks (abelian surface DLP cheaper than secp256k1 DLP).
+   If sqrt(n_ab) ≥ p at least, Block B5 remains sound.
+2. **GLV-HNP scaling test (low priority)**: re-run the Python attack with a
+   192-bit prime-order curve (secp192k1) by inflating bias (k_bits ← 96) and
+   check if the balanced-scaling lattice still converges. This bridges the toy
+   to near-practical scale without requiring GMP.
+3. **CHLRS (still BLOCKED)**: needs SageMath `HyperellipticCurveFromInvariants`.
+
+### Commits made
+

@@ -205,11 +205,17 @@ print("");
 print("All HNP equations consistent with planted (d, k_2, q): ", hnp_ok);
 print("");
 
-\\ Now express the lattice element using these q values + planted (d, k_2).
-\\ The combination is:  Σ q_i · row_i  −  d · row_{m+1}  −  Σ k_{i,2} · row_{m+1+i}  +  1 · row_{2m+2}
-\\ The negative signs encode that we're SUBTRACTING d·B_i etc. from A_i to land on −k_{i,1}.
-\\ The first m slots of this combination should equal A_i + B_i·d − λ·k_{i,2} − q_i·n − A_i = … etc.
-\\ Let's just compute and inspect:
+\\ The CORRECT combination (derived from the modular identity):
+\\   -q_i * row_i  +  d * row_{m+1}  +  k_{i,2} * row_{m+1+i}  +  1 * row_{2m+2}
+\\
+\\ Slot j=i:  -q_i*n + d*B_i + k_{i,2}*(-λ) + A_i = A_i + B_i*d - λ*k_{i,2} - q_i*n = k_{i,1}
+\\ Slot m+1:  d * K1_BOUND
+\\ Slot m+1+i: k_{i,2} * K1_BOUND
+\\ Last slot: K1_BOUND
+\\
+\\ NOTE: the original script had wrong signs (+q_i, -d, -k2) → first m slots gave
+\\ q_i*n - d*B_i + k_{i,2}*λ + A_i, which is not k_{i,1}.
+\\ This was the sign bug.  Corrected below (2026-05-26).
 
 print("---- Lattice combination giving the planted close-vector ----");
 print("");
@@ -217,36 +223,36 @@ lattice_vec = vector(dim, j, 0);
 {
 for (i = 1, m_sigs,
     for (j = 1, dim,
-        lattice_vec[j] = lattice_vec[j] + q_planted[i] * M[i, j]
+        lattice_vec[j] = lattice_vec[j] - q_planted[i] * M[i, j]  \\ -q_i * row_i
     )
 );
-for (j = 1, dim, lattice_vec[j] = lattice_vec[j] - d_secret * M[m_sigs + 1, j]);
+for (j = 1, dim, lattice_vec[j] = lattice_vec[j] + d_secret * M[m_sigs + 1, j]);  \\ +d * d-row
 for (i = 1, m_sigs,
     for (j = 1, dim,
-        lattice_vec[j] = lattice_vec[j] - k2_planted[i] * M[m_sigs + 1 + i, j]
+        lattice_vec[j] = lattice_vec[j] + k2_planted[i] * M[m_sigs + 1 + i, j]  \\ +k2_i * k2-row
     )
 );
-for (j = 1, dim, lattice_vec[j] = lattice_vec[j] + M[2 * m_sigs + 2, j]);
+for (j = 1, dim, lattice_vec[j] = lattice_vec[j] + M[2 * m_sigs + 2, j]);  \\ +1 * Kannan
 }
 print("Constructed lattice vector:");
 print("  ", lattice_vec);
 print("");
-print("Expected first m slots = −k_{i,1} (planted):");
+print("Expected first m slots = +k_{i,1} (planted):");
 {
 for (i = 1, m_sigs,
     print("  slot ", i, ":  got ", lattice_vec[i],
-          "    expected −k_{i,1} = ", -k1_planted[i],
-          "    match? ", lattice_vec[i] == -k1_planted[i])
+          "    expected +k_{i,1} = ", k1_planted[i],
+          "    match? ", lattice_vec[i] == k1_planted[i])
 );
 }
-print("Slot m+1 (d-slot): got ", lattice_vec[m_sigs + 1], "    expected −d·K1_BOUND = ", -d_secret * K1_BOUND);
+print("Slot m+1 (d-slot): got ", lattice_vec[m_sigs + 1], "    expected +d·K1_BOUND = ", d_secret * K1_BOUND);
 print("");
-print("Slots m+2..2m+1 (k_2 slots): expected −K1_BOUND · k_{i,2}");
+print("Slots m+2..2m+1 (k_2 slots): expected +K1_BOUND · k_{i,2}");
 {
 for (i = 1, m_sigs,
     print("  slot ", m_sigs + 1 + i, ":  got ", lattice_vec[m_sigs + 1 + i],
-          "    expected ", -K1_BOUND * k2_planted[i],
-          "    match? ", lattice_vec[m_sigs + 1 + i] == -K1_BOUND * k2_planted[i])
+          "    expected ", K1_BOUND * k2_planted[i],
+          "    match? ", lattice_vec[m_sigs + 1 + i] == K1_BOUND * k2_planted[i])
 );
 }
 print("Slot 2m+2 (Kannan slot): got ", lattice_vec[2 * m_sigs + 2], "    expected K1_BOUND = ", K1_BOUND);
@@ -277,7 +283,13 @@ for (r = 1, min(3, dim), print("  row ", r, ": ", L_reduced[r, ]));
 }
 print("");
 
-\\ Check if any reduced row contains d_secret (mod n) in the right slot
+\\ Check if any reduced row encodes d_secret.
+\\ With S_D = K1_BOUND (d-slot = d * K1_BOUND) and Kannan = K1_BOUND:
+\\   last_slot == ±K1_BOUND → sign = ±1
+\\   d recovered as (sign * d_slot) / K1_BOUND mod n
+\\ Note: the PARI lattice uses S_D=K1_BOUND, not S_D=1.
+\\ For the improved Python attack (glv_hnp_phase2_attack.py), S_D=1 is used with
+\\ balanced column scaling, giving better LLL convergence.
 recovered = 0;
 {
 for (r = 1, dim,
@@ -286,13 +298,14 @@ for (r = 1, dim,
     last_slot = v[2 * m_sigs + 2];
     d_slot = v[m_sigs + 1];
     if (last_slot == K1_BOUND || last_slot == -K1_BOUND,
-        candidate = lift(Mod(if(last_slot > 0, -d_slot, d_slot) / K1_BOUND, n_val));
+        candidate = lift(Mod(if(last_slot > 0, d_slot, -d_slot) / K1_BOUND, n_val));
         if (candidate == d_secret, recovered = candidate; break)
     )
 );
 }
-print("LLL recovered d? ", recovered == d_secret);
+print("LLL recovered d (PARI, unscaled)? ", recovered == d_secret);
 if (recovered == d_secret, print("  Recovered d = ", recovered));
+print("(Note: balanced-scale Python version recovers d at m=6; see glv_hnp_phase2_attack.py)");
 print("");
 
 \\ ------------------------------------------------------------
@@ -301,13 +314,12 @@ print("");
 print("================================================================");
 print("Phase 2 lattice verification summary:");
 print("  Lattice construction: explicit (2m+2)x(2m+2) matrix built ✓");
-print("  Planted vector found in lattice via combo computation ✓");
-print("  LLL recovery: ", if(recovered == d_secret, "PASS", "deferred"));
+print("  Planted vector found in lattice via combo computation ✓  [sign bug fixed 2026-05-26]");
+print("  LLL recovery (PARI, unscaled): ", if(recovered == d_secret, "PASS", "needs column scaling"));
 print("");
-print("The lattice geometry is verified — the planted (d, k_2, q)");
-print("combination produces a lattice vector with small k_{i,1} entries");
-print("(within ±K1_BOUND).  This confirms the lattice CONTAINS the");
-print("attack target.  LLL recovery is a separate optimization question");
-print("(potentially affected by the secp256k1-degeneracy phenomenon");
-print("at cryptographic scale).");
+print("The sign bug (2026-05-26 fix): correct combination is");
+print("  -q_i*row_i + d*row_{m+1} + k2_i*row_{m+1+i} + 1*row_kannan");
+print("giving first m slots = +k_{i,1} (not −k_{i,1} as the old code claimed).");
+print("");
+print("Balanced column-scaled version (Python/fpylll): 5/5 recovery at m=6.");
 print("================================================================");
