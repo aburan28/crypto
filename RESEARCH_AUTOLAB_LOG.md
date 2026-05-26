@@ -518,3 +518,4 @@ k2 slots (`k2 * S_k2 ≈ 14 * 13 = 182`).
 
 ### Commits made
 
+- `2f90eec` autolab 2026-05-26: GLV-HNP Phase 2 toy lattice recovery (Priority 5 closed)
