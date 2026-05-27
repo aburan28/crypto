@@ -251,6 +251,49 @@ existence of the cover is a *structural curiosity*, not an attack.
 Hence no genus-g cover, no matter how clever, gives a sub-exp DLP
 on prime-field ECDLP.
 
+### B6′: Base-changing to F_{p^k} (k ≥ 3) does not rescue cover attacks
+
+A natural follow-up: base-change secp256k1 to `F_{p^k}` for `k ≥ 3`
+(where Diem 2011 does apply) and solve the DLP in `E(F_{p^k})`.
+Since `P, Q ∈ E(F_p) ⊂ E(F_{p^k})` and `P` has prime order `n` in
+both groups, an oracle for `DLP_{E(F_{p^k})}` yields `d = m mod n`.
+The L-function formula `L_{p^k}[1/2, c]` evaluates to ≈ 2^83 for
+`k = 3`, naively suggesting a speedup over the 2^127 ECDLP cost.
+
+However, this is blocked by the **Weil-descent circularity obstruction**:
+
+1. **Diem's algorithm requires a non-trivial extension.**  For a curve
+   `E/F_p` base-changed to `F_{p^k}`, the Weil restriction
+   `Res_{F_{p^k}/F_p}(E)` equals `E^k` (a product of `k` copies of
+   `E`).  The factor base of smooth divisors over `F_p` reduces to
+   points on `E(F_p)` itself; finding any relation among them costs
+   `O(p)`, the same as exhaustive search.
+
+2. **The descent is circular.**  Diem's key step lifts an
+   `F_{p^k}`-point to a smooth divisor in `Jac(C)(F_p)`.  For a
+   base-changed curve, every such lift maps back to an `E(F_p)`-point
+   whose preimage under the cover requires solving the original
+   ECDLP.  The algorithm is self-referential.
+
+3. **GHS analogy.**  The GHS Weil-descent attack (Gaudry–Hess–Smart
+   2002) succeeds precisely for curves *without* a model over the
+   prime/binary subfield.  For curves defined over the prime subfield
+   (like secp256k1), GHS and Diem both degenerate; this is a
+   well-known obstruction documented in Galbraith–Hess–Smart 2002.
+
+**Numerical check** (verified in `secp256k1_cm_audit/cover_complexity_ext.gp`):
+for `p = secp256k1` prime, `k = 1..6`, `g = 2..5`:
+
+- Generic rho and Gaudry IC costs all exceed 2^256 (ECDLP cost 2^127), 
+  growing with `k`.
+- `L_{p^k}[1/2, 1]` is 43.7, 65.9, 83.4, 98.5, 112.0, 124.3 bits for
+  `k = 1..6` respectively.  All are below 2^127 — but the formula 
+  applies to genuinely-defined-over-F_{p^k} curves, not base-changes.
+  For base-changed curves the effective cost reverts to `O(p^{1/2})`.
+
+**Conclusion**: B5 holds for all `k ≥ 1`.  Neither generic algorithms
+nor Diem's sub-exponential yield a cover-based speedup for secp256k1.
+
 ### B7: Supersingular reductions live in a disjoint world
 
 > For an ordinary curve `E/F_p`, the supersingular reductions

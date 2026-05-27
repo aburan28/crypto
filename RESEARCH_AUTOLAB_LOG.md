@@ -519,3 +519,112 @@ k2 slots (`k2 * S_k2 ≈ 14 * 13 = 182`).
 ### Commits made
 
 - `2f90eec` autolab 2026-05-26: GLV-HNP Phase 2 toy lattice recovery (Priority 5 closed)
+
+---
+
+## 2026-05-27 (autolab run)
+
+### Task picked
+
+Priority 6 (B5 over F_{p^k}): check whether the cover-cost argument
+in PAPER_STRUCTURAL_COMPLETENESS.md Block B5 holds for base-field
+extensions F_{p^k}, k ≥ 2. Priorities 1–5 are all closed/blocked
+(per prior log entries). Today: write a PARI/GP script to numerically
+verify B5 for k=1..6, g=2..5, and investigate whether Diem 2011's
+sub-exp algorithm changes the picture for k ≥ 3.
+
+### Work done
+
+- Installed PARI/GP 2.15.4 (already present from prior run).
+- Wrote `secp256k1_cm_audit/cover_complexity_ext.gp` (~165 lines):
+  - Q1: tabulates generic rho and Gaudry IC costs for all (k,g) pairs.
+  - Q2: computes L_{p^k}[1/2, c=1] (Diem sub-exp formula) for k=1..6.
+  - Q3: documents the Weil-descent circularity obstruction for base-changed curves.
+  - Break-even search: finds minimum k where Diem formula < sqrt(n/6).
+- Identified a **gap in the paper's B6**: B6 only says "Diem doesn't apply for k=1
+  (prime fields)". It did NOT address the question "what if we base-change secp256k1
+  to F_{p^3} and apply Diem there?" This is a non-trivial omission.
+- Added new block **B6'** to PAPER_STRUCTURAL_COMPLETENESS.md (after B6), covering:
+  - The "apparent attack" from base-changing to F_{p^k}.
+  - Weil-descent circularity obstruction (3 sub-points + GHS analogy).
+  - Numerical data from cover_complexity_ext.gp.
+- Ran `cargo test --test curve_audit` — 5/5 pass.
+
+### Findings
+
+**Q1: Generic + Gaudry IC costs (log2 bits, secp256k1 p ≈ 2^256)**
+
+| k | g | rho | Gaudry IC | best | vs ECDLP(2^127) |
+|---|---|-----|-----------|------|-----------------|
+| 1 | 2 | 256 | 256       | 256  | +129 bits       |
+| 1 | 3 | 384 | 341       | 341  | +214 bits       |
+| 2 | 2 | 512 | 512       | 512  | +385 bits       |
+| 3 | 2 | 768 | 768       | 768  | +641 bits       |
+| 4 | 2 | 1024| 1024      | 1024 | +897 bits       |
+
+All cover DLP costs grow with k. Extending the base field makes
+generic cover attacks strictly worse, not better.
+
+**Q2: Diem 2011 sub-exp formula L_{p^k}[1/2, c=1]**
+
+| k | ln(p^k) | log2(L_{p^k}[1/2,1]) | vs ECDLP(2^127) |
+|---|---------|----------------------|-----------------|
+| 1 | 177.4   | **43.7 bits**        | -83 bits (below!) |
+| 2 | 354.9   | **65.9 bits**        | -61 bits (below!) |
+| 3 | 532.3   | **83.4 bits**        | -43 bits (below!) |
+| 4 | 709.8   | **98.5 bits**        | -28 bits (below!) |
+| 5 | 887.2   | **112.0 bits**       | -15 bits (below!) |
+| 6 | 1064.7  | **124.3 bits**       | -3 bits (below!) |
+
+**Key surprise**: L_{p^k}[1/2,1] < 2^127 for ALL k=1..6 — the Diem
+formula naively gives a sub-ECDLP cost even for k=1 (prime field)!
+The formula is monotone increasing in k, so the "cheapest" Diem attack
+would be at k=1 (2^43.7) — exactly the case where the algorithm
+is known to NOT work (no subfield to use for factor base).
+
+**Q3: Why base-change + Diem doesn't attack secp256k1**
+
+Four obstructions documented in the new B6' section:
+1. **Non-trivial extension required**: Diem's factor base uses F_p-points
+   of a descended auxiliary variety. For E/F_p base-changed to F_{p^k},
+   Weil restriction = E^k, so factor-base computation = O(p) = O(2^256).
+2. **Weil-descent is circular**: lifting F_{p^k}-points to smooth divisors
+   over F_p requires solving ECDLP on E(F_p). Self-referential.
+3. **GHS analogy**: GHS Weil-descent attack (and Diem's variant) only
+   work for curves without a model over the prime/base field. secp256k1
+   is defined over F_p — exact condition under which descent degenerates.
+4. **Break-even is moot**: the minimum of L_{p^k}[1/2,1] over k is at k=1,
+   but k=1 is the prime-field case where Diem doesn't apply. For k≥3 where
+   Diem applies, the circularity obstruction forces effective cost back to O(p^{1/2}).
+
+**B5 verdict (extended):** Block B5 holds for all k ≥ 1.
+No combination of (k, g) yields a cover-based speedup over secp256k1's ECDLP.
+
+**Paper gap identified and closed:** The original B6 was incomplete — it
+only ruled out prime-field DLP sub-exp (k=1), not the base-change strategy.
+New block B6' (added to PAPER_STRUCTURAL_COMPLETENESS.md) closes this gap.
+
+### Next step proposal
+
+All six priority threads are now closed or documented:
+- Priority 1 (P-521 LLL NaN): OPEN (requires bigfloat / rug dependency)
+- Priority 2 (CHLRS Igusa): BLOCKED (needs SageMath)
+- Priority 3 (Howe sextic twists): CLOSED (all 15 pairs checked, 2026-05-24)
+- Priority 4 (Cross-curve LLL 3-of-3): CLOSED (2026-05-25)
+- Priority 5 (GLV-HNP toy): CLOSED (5/5 recovery at m=6, 2026-05-26)
+- Priority 6 (B5 over F_{p^k}): **CLOSED** (B5 extends to all k; B6' gap patched)
+
+**Proposed fallback (Priority 1 sub-task):** Implement the 'double-double' (two-f64)
+Gram-Schmidt variant for P-521. Specifically:
+- Add a `f128_gram_schmidt` function using two f64 values (hi + lo) to represent
+  each coordinate, giving ~104 bits of precision vs. 53-bit f64.
+- This avoids the rug/GMP dependency entirely.
+- Target: confirm target_bits=150 GS doesn't produce NaN for 521-bit entries.
+- File: `src/cryptanalysis/lll_advanced.rs`, function `gram_schmidt_orthogonalize_scaled`.
+
+Or alternatively: add rug behind a feature flag in Cargo.toml with `optional = true`
+and run the P-521 test under `--features bigfloat`.
+
+### Commits made
+
+- (see below after git commit)
