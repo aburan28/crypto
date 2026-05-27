@@ -627,4 +627,4 @@ and run the P-521 test under `--features bigfloat`.
 
 ### Commits made
 
-- (see below after git commit)
+- `35172f7` autolab 2026-05-27: B5 over F_{p^k} verified; B6' gap patched (Priority 6 closed)
