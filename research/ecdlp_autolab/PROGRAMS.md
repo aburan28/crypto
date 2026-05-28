@@ -14,7 +14,7 @@ own `research_program_v*.md` file.
 | v4 | Groebner / Semaev deep dive | COMPLETED | All negative; Yokoyama bound confirmed |
 | v5 | Non-naive attempts #1 | COMPLETED | All 4 directions ruled out for LMFDB |
 | v6 | Non-naive attempts #2 + C engineering | COMPLETED | 5 directions closed; C extension 23-86× |
-| **v7** | **Close C-extension gap to 80-bit feasibility** | **PARTIAL** | Phase 22.1 Barrett: **9.47× mul speedup** (4.7× over projected); end-to-end validation pending |
+| **v7** | **Close C-extension gap to 80-bit feasibility** | **PARTIAL** | Phase 22.1 Barrett mul: 9.47×. Phase 22.6 end-to-end: 1.5-2.3× (inverse dominates). Phase 22.7-22.8 next. |
 | **v8** | **Algorithmic frontiers** | **PLANNED** | F5 Semaev, Drinfeld, tropical, hyperelliptic |
 | **v9** | **Long-horizon roadmap** | **PLANNED** | 1-5 year speculative agenda |
 | **v10** | **Moonshots / catalog of bad ideas** | **PLANNED** | Reference of M1-M15 known-bad approaches |

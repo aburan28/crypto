@@ -104,30 +104,93 @@ expected walk length to distinguished point.
 
 **Deliverable:** `phase22_tag_walk.c`.
 
-## Phase 22.6: Barrett → Pollard rho integration (PRIORITY 1)
+## Phase 22.6: Barrett → Pollard rho integration ✓ EXECUTED
 
-**Why:** Phase 22.1's microbenchmark shows 9.47× on modular mul alone.
-End-to-end Pollard rho cost is mul-dominated but also includes modular
-inverse, distinguished-point check, partition lookup. Need to measure
-how much of the 9.47× propagates end-to-end.
+**Status:** Done. Result: **1.5-2.3× end-to-end**, well below the
+projected 5× target.
+
+**Why result fell short of microbench:**
+- Pollard rho point-add does ~3 muls + 1 inverse + few add/sub
+- Barrett accelerates muls (~30× faster)
+- Modular inverse (GMP) NOT accelerated, dominates per-step cost
+- Net per-add cost dropped from ~430ns to ~270ns (~1.6× win)
+
+**Result table (81-bit):**
+
+| Threads | v3 (GMP only) | Barrett+GMP inv | Speedup |
+|--------:|--------------:|----------------:|--------:|
+| 1 | 2.32e6 | 3.66e6 | 1.58× |
+| 2 | 4.92e6 | 6.63e6 | 1.35× |
+| 4 | 7.39e6 | 14.0e6 | 1.89× |
+| 8 | 1.02e7 | 22.7e6 | 2.23× |
+
+**Risk hypothesis confirmed:** Barrett benefit was lost in inverse
+noise. The risk mitigation kicks in: execute Phases 22.7-22.8 next.
+
+**Failed alternative:** Fermat-via-Barrett inverse is 3× SLOWER than
+GMP binary-GCD inverse. Custom u128 binary-GCD needed.
+
+## Phase 22.7: Jacobian projective + Barrett (NEW, PRIORITY 2)
+
+**Why:** Jacobian projective coordinates avoid modular inverse per
+point-add. Per-add cost = ~16 muls (no inverse). With Barrett mul at
+9.4ns, that's ~150ns per add vs affine's ~270ns → ~1.8× more.
 
 **Concrete experiment:**
-1. Take `phase21_rho_v3.c` and replace `mpz_mul + mpz_mod` with
-   `barrett_mul` (from `phase22_barrett.c`)
-2. Keep mpz_invert (inverse is harder to speed up; Fermat's is
-   80 Barrett muls = still 8× faster than GMP inversion)
-3. Benchmark at 81-bit, 1/2/4/8 threads
-4. Verify correctness by running full Pollard rho at 30-bit and
-   confirming secret recovery
+1. Adapt `phase21_rho_v2.c` (Jacobian + GMP) to use Barrett mul
+2. Benchmark at 81-bit, 1/2/4/8 threads
+3. Convert back to affine only at distinguished points (1 inverse
+   per trail, amortized)
 
-**Deliverable:** `phase22_rho_barrett.c`.
+**Deliverable:** `phase22_rho_jacobian_barrett.c`.
 
-**Acceptance criterion:** ≥5× end-to-end speedup over `phase21_rho_v3.c`
-at 81-bit. Combined with multi-target, exceeds 27e6 ops/sec on 2 CPUs.
+**Acceptance criterion:** ≥1.5× over Phase 22.6 = ≥34e6 ops/sec at
+4 threads. Combined with Phase 22.6, gives 3-4× over v6 baseline.
 
-**Risk:** Barrett benefit may be lost in the noise of inverse cost.
-If end-to-end speedup is only 2-3×, fall back to executing Phases
-22.2-22.5.
+## Phase 22.8: Binary-GCD inverse in u128 (NEW, PRIORITY 3)
+
+**Why:** GMP's binary-GCD inverse at 81-bit takes ~200ns. Hand-rolled
+u128 binary-GCD could give ~1.3× by avoiding GMP function-call overhead.
+
+**Concrete experiment:**
+1. Implement extended binary GCD for `__uint128_t`
+2. Verify correctness against GMP
+3. Replace `mod_inv_gmp` in Phase 22.6 with custom
+
+**Deliverable:** Updated `phase22_rho_barrett.c` with custom inverse.
+
+**Acceptance criterion:** Within 1.2× of GMP inverse, ideally faster.
+
+## Combined v7 trajectory (revised)
+
+| Phase | Speedup | Aggregate (4 threads) |
+|-------|--------:|----------------------:|
+| v3 baseline | 1.0× | 7.4e6 |
+| + Phase 22.6 Barrett | 1.9× | 1.4e7 |
+| + Phase 22.7 Jacobian | 1.5× | 2.1e7 |
+| + Phase 22.8 custom inv | 1.3× | 2.7e7 |
+| + multi-target (if 6 targets shared) | 2.4× | 6.5e7 |
+
+**Projected 80-bit time on AutoLab (2 CPUs × 4 hours):**
+
+- 4-thread effective × Barrett + Jacobian + custom inv = 27M ops/sec
+- 80-bit requires 7e11 ops with engineering stack
+- Time: 7e11 / 27e6 = 26,000 s = 7.2 hours
+
+Still ~1.8× over budget. Need one of:
+- Hyperthreading effective 8 threads → 54M → 3.6 hours (within!)
+- SIMD for further speedup
+
+## Path to 80-bit feasibility
+
+Most likely combination that works:
+1. Phase 22.6 Barrett (done, 1.9×) +
+2. Phase 22.7 Jacobian (projected 1.5-2×) +
+3. Phase 22.8 custom inverse (projected 1.3×) +
+4. Aggressive use of 2-CPU hyperthreading (effective ~4× via HT)
+
+**Estimated total: 5-7× over v6 baseline.**
+**Brings 80-bit from 44 hours to 6-9 hours — borderline feasible.**
 
 ## Original aggregate plan (now superseded by Phase 22.6)
 

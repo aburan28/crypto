@@ -235,6 +235,14 @@ sections, contradict prior analysis, document what you learn.
   projected 2×). Updated v7 critique Assumption 1.
 - 2026-05-28: PROGRAMS.md sequencing reorder: Phase 22.6 (Barrett →
   rho integration) is now top priority, ahead of v11.
+- 2026-05-28: Phase 22.6 EXECUTED; end-to-end speedup was only
+  1.5-2.3×, not the 5× target. Microbench (9.47×) overstated because
+  modular inverse dominates per-add cost and is NOT accelerated by
+  Barrett. SECOND time an optimistic projection was off by 3-5×
+  (first: v6 raw ops/sec → end-to-end). Lesson: ALWAYS validate
+  end-to-end before claiming feasibility. Added Phase 22.7 (Jacobian
+  + Barrett) and Phase 22.8 (custom u128 binary-GCD inverse) as
+  follow-on priorities.
 
 Future updates here should follow the same pattern: prior assumption,
 new evidence, what changes about the plan.
