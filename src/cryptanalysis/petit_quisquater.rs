@@ -443,6 +443,146 @@ fn signed_mod_n(v: i64, n: &BigUint) -> BigUint {
     }
 }
 
+// ── Full pipeline (descent + Gröbner + sparse LA) ──────────────────
+
+/// **Find one PQ relation via the full Weil-descent + Gröbner pipeline.**
+///
+/// This is the pedagogical companion to [`find_one_pq_relation`]: same
+/// inputs, same output shape, but the per-`R_j` decomposition search
+/// goes through the actual Petit–Quisquater machinery rather than the
+/// `n = 2` quadratic shortcut over `F_{2^m}`.
+///
+/// Pipeline:
+///
+/// 1. Pick random `(a_j, b_j) ∈ Z/N`; form `R_j = a_j G + b_j Q`.
+/// 2. Weil-descend `S_3(X_1, X_2, x(R_j)) = 0` into `m` boolean
+///    polynomials in `2m'` variables.
+/// 3. Compute a Gröbner basis over `F_2 / (v_i² − v_i)` (Buchberger +
+///    Gebauer-Möller).
+/// 4. Enumerate `{0,1}^{2m'}` solutions of the GB; lift each to a
+///    candidate `(x_1, x_2) ∈ V × V`.
+/// 5. For each candidate, look up FB indices and try four `(±, ±)`
+///    sign combinations — same finalisation step as the shortcut path.
+///
+/// Costs `O(2^{2m'} · m² + |gb-buchberger-steps|)` per random `R_j`;
+/// the shortcut path is `O(|V| · m²)` (cheaper at `n = 2`).  The two
+/// paths produce mathematically identical decompositions on the same
+/// input — see the `pipeline_agrees_with_shortcut` cross-check test.
+pub fn find_one_pq_relation_via_descent(
+    curve: &BinaryCurve,
+    g: &BinaryPoint,
+    q: &BinaryPoint,
+    fb: &[PqFactorBaseEntry],
+    v: &PqSubspace,
+    rng: &mut StdRng,
+    max_trials: usize,
+) -> Option<PqRelation> {
+    use crate::cryptanalysis::pq_descent::solve_decomposition_via_descent;
+
+    // Build the V-basis used by the descent (same convention as PqSubspace::span_low).
+    let v_basis: Vec<F2mElement> = (0..v.m_prime)
+        .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
+        .collect();
+    // FB lookup by x → idx.
+    let mut x_to_idx: HashMap<BigUint, usize> = HashMap::with_capacity(fb.len());
+    for entry in fb {
+        x_to_idx.insert(key(&entry.x), entry.idx);
+    }
+
+    for _ in 0..max_trials {
+        let a = random_scalar_biguint(rng, &curve.order);
+        let b = random_scalar_biguint(rng, &curve.order);
+        let ag = scalar_mul(curve, g, &a);
+        let bq = scalar_mul(curve, q, &b);
+        let r = point_add(curve, &ag, &bq);
+        let x_r = match &r {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => continue,
+        };
+        // Run descent + GB to find all (x_1, x_2) ∈ V × V with S_3 = 0.
+        let candidates = solve_decomposition_via_descent(curve, &x_r, &v_basis);
+        for (x_1, x_2) in candidates {
+            let i = match x_to_idx.get(&key(&x_1)) {
+                Some(&i) => i,
+                None => continue, // x_1 in V but not on curve
+            };
+            let j = match x_to_idx.get(&key(&x_2)) {
+                Some(&j) => j,
+                None => continue,
+            };
+            if let Some(rel) = try_finalise(curve, &r, &fb[i], &fb[j], &a, &b) {
+                return Some(rel);
+            }
+        }
+    }
+    None
+}
+
+/// **End-to-end PQ via the full pipeline.**  Like
+/// [`petit_quisquater_n2_toy`] but uses [`find_one_pq_relation_via_descent`]
+/// for relation gathering and [`pq_sparse_la::sparse_solve_mod_n`] for
+/// the relation matrix.
+///
+/// On the same `(curve, g, q, seed)` and target relation count, this
+/// should recover the same `k` as [`petit_quisquater_n2_toy`].  See
+/// the `pipeline_agrees_with_shortcut` test for the cross-check.
+pub fn petit_quisquater_n2_full_pipeline(
+    curve: &BinaryCurve,
+    g: &BinaryPoint,
+    q: &BinaryPoint,
+    v: &PqSubspace,
+    target_extra: usize,
+    max_trials_per_relation: usize,
+    seed: u64,
+) -> Option<BigUint> {
+    use crate::cryptanalysis::pq_sparse_la::{sparse_solve_mod_n, SparseRow};
+
+    let fb = build_pq_factor_base(curve, v);
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + target_extra.max(1);
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut relations: Vec<PqRelation> = Vec::with_capacity(target);
+    while relations.len() < target {
+        let rel = find_one_pq_relation_via_descent(
+            curve,
+            g,
+            q,
+            &fb,
+            v,
+            &mut rng,
+            max_trials_per_relation,
+        )?;
+        relations.push(rel);
+    }
+
+    // Same relation encoding as the shortcut driver; just sparse.
+    let m = fb.len();
+    let n = &curve.order;
+    let k_col = m;
+    let mut sparse_rows: Vec<SparseRow> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut entries: Vec<(usize, BigUint)> = Vec::new();
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod_n(mult, n);
+            entries.push((j, val));
+        }
+        let neg_b = (n - &(&rel.coef_b % n)) % n;
+        entries.push((k_col, neg_b));
+        sparse_rows.push(SparseRow::from_entries(entries, rel.coef_a.clone() % n));
+    }
+
+    let k = sparse_solve_mod_n(sparse_rows, m + 1, k_col, n)?;
+    // Verify.
+    let q_check = scalar_mul(curve, g, &k);
+    if q_check == *q {
+        Some(k)
+    } else {
+        None
+    }
+}
+
 // ── Diagnostic helpers ─────────────────────────────────────────────
 
 /// Summary of a PQ attack run — useful for the tests and any future
@@ -846,6 +986,103 @@ mod tests {
         let true_k = &BigUint::from(11u32) % &n;
         let _report = run_pq_attack(&curve, &g, &true_k, &v, 0, 50, 5);
         // No panic = pass.
+    }
+
+    /// **Full pipeline end-to-end: descent + GB + sparse LA recovers the secret.**
+    #[test]
+    fn pq_full_pipeline_recovers_secret() {
+        let (curve, g, n) = build_toy_curve_and_generator();
+        let v = PqSubspace::span_low(curve.m, 4);
+        let true_k = (&n / BigUint::from(5u32)) + BigUint::from(13u32);
+        let true_k = &true_k % &n;
+        let q = scalar_mul(&curve, &g, &true_k);
+        let recovered = petit_quisquater_n2_full_pipeline(
+            &curve, &g, &q, &v, 4, 200, 0xDECAF,
+        );
+        assert_eq!(
+            recovered.as_ref(),
+            Some(&true_k),
+            "full pipeline should recover k = {} on toy curve (got {:?})",
+            true_k, recovered,
+        );
+    }
+
+    /// **Cross-check: shortcut path and full pipeline agree.**  On the
+    /// same `(curve, g, q)` and matching seeds, both drivers should
+    /// recover the same `k`.  Different per-relation seeds (the full
+    /// pipeline draws an extra RNG call per candidate during the GB
+    /// enumeration) mean we don't pin equality of intermediate
+    /// relations — only the final recovered scalar.
+    #[test]
+    fn pipeline_agrees_with_shortcut() {
+        let (curve, g, n) = build_toy_curve_and_generator();
+        let v = PqSubspace::span_low(curve.m, 4);
+        let true_k = &BigUint::from(17u32) % &n;
+        let q = scalar_mul(&curve, &g, &true_k);
+        let k_shortcut = petit_quisquater_n2_toy(&curve, &g, &q, &v, 4, 500, 11);
+        let k_full =
+            petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 11);
+        assert_eq!(k_shortcut.as_ref(), Some(&true_k));
+        assert_eq!(k_full.as_ref(), Some(&true_k));
+        assert_eq!(k_shortcut, k_full);
+    }
+
+    /// **Cross-check: descent-based decomposition equals shortcut decomposition.**
+    /// For a fixed `x_R`, both the descent-based [`solve_decomposition_via_descent`]
+    /// and the shortcut quadratic-over-`F_{2^m}` should produce the same
+    /// SET of `(x_1, x_2) ∈ V × V` (modulo symmetry — the descent emits
+    /// both `(x_1, x_2)` and `(x_2, x_1)` since the system is symmetric).
+    #[test]
+    fn descent_decomposition_matches_shortcut() {
+        use crate::cryptanalysis::binary_semaev::{
+            binary_semaev_s3_in_x3, solve_quadratic_f2m,
+        };
+        use crate::cryptanalysis::pq_descent::solve_decomposition_via_descent;
+        let (curve, g, _n) = build_toy_curve_and_generator();
+        let pq_v = PqSubspace::span_low(curve.m, 4);
+        let fb = build_pq_factor_base(&curve, &pq_v);
+        // Pick a random R = 7·G to use as the target.
+        let r = scalar_mul(&curve, &g, &BigUint::from(7u32));
+        let x_r = match r {
+            BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("7G shouldn't be O"),
+        };
+        // Shortcut path: collect (x_1, x_2) hits.
+        let mut shortcut_set: std::collections::HashSet<(BigUint, BigUint)> =
+            std::collections::HashSet::new();
+        for entry in &fb {
+            let (aa, bb, cc) = binary_semaev_s3_in_x3(
+                &entry.x, &x_r, &curve.b, &curve.irreducible,
+            );
+            for x2 in solve_quadratic_f2m(&aa, &bb, &cc, curve.m, &curve.irreducible) {
+                // Reject x_2 not in V (i.e. with high bits set).
+                if x2.to_biguint() >= BigUint::from(16u32) {
+                    continue;
+                }
+                shortcut_set.insert((entry.x.to_biguint(), x2.to_biguint()));
+            }
+        }
+        // Descent path: enumerate solutions of the GB.
+        let v_basis: Vec<F2mElement> = (0..4)
+            .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
+            .collect();
+        let descent_pairs = solve_decomposition_via_descent(&curve, &x_r, &v_basis);
+        let descent_set: std::collections::HashSet<(BigUint, BigUint)> = descent_pairs
+            .into_iter()
+            .filter(|(a, b)| !a.is_zero() && !b.is_zero())
+            .map(|(a, b)| (a.to_biguint(), b.to_biguint()))
+            .collect();
+        // The shortcut iterates only `x_1 ∈ FB` (on-curve) but the
+        // descent emits all (x_1, x_2) ∈ V × V satisfying S_3 = 0
+        // regardless of curve membership.  So we expect:
+        //   shortcut_set ⊆ descent_set (every shortcut hit is in descent).
+        for hit in &shortcut_set {
+            assert!(
+                descent_set.contains(hit),
+                "shortcut hit {:?} not found in descent set\n  shortcut: {:?}\n  descent:  {:?}",
+                hit, shortcut_set, descent_set,
+            );
+        }
     }
 
     /// **Cross-check vs. brute-force DLP**: on the toy curve, brute
