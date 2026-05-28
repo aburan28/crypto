@@ -628,3 +628,84 @@ and run the P-521 test under `--features bigfloat`.
 ### Commits made
 
 - `35172f7` autolab 2026-05-27: B5 over F_{p^k} verified; B6' gap patched (Priority 6 closed)
+
+---
+
+## 2026-05-28 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 LLL). The 2026-05-27 log incorrectly listed this as OPEN.
+`RESEARCH_LLL_GS_ANALYSIS.md` §10.3 confirms `lll_reduce_hp` (2048-bit BigInt GS)
+was implemented and recovers P-521 3/3 at m=8. The remaining open sub-task (§10.5)
+is efficiency at larger m (m=16, m=32). Diagnosis: `lll_reduce_hp` called
+`gram_schmidt_hp(basis)` (full O(n³) recompute) on every LLL swap — the standard
+incremental GS swap update was not implemented.
+
+### Work done
+
+- Identified bottleneck in `src/cryptanalysis/lattice.rs:217`: every LLL swap triggered
+  a full `gram_schmidt_hp` recompute (O(n³) HP BigInt ops) when only the two swapped
+  rows need updating (O(n) ops).
+- Derived the incremental GS swap update formulas (Cohen §2.6.3):
+  Let μ̂ = μ_{k,k-1}, B̃ = ||b*_k||² + μ̂²||b*_{k-1}||². After swapping rows k-1 and k:
+  - new ||b*_{k-1}||² = B̃
+  - new ||b*_k||² = ||b*_k||²·||b*_{k-1}||² / B̃
+  - new μ_{k,k-1} = μ̂·||b*_{k-1}||² / B̃
+  - swap μ_{k-1,j} ↔ μ_{k,j} for j < k-1
+  - for i > k: new μ_{i,k-1} = (μ_{i,k}·B_k + μ_{i,k-1}·μ̂·B_{k-1}) / B̃
+  - for i > k: new μ_{i,k} = μ_{i,k-1} − μ̂·μ_{i,k}   (old values)
+- Implemented the incremental update in `lll_reduce_hp` (replaces lines 215-221).
+  Used `split_at_mut` to swap two rows of mu simultaneously without unsafe code.
+- Added `lll_hp_incremental_swap_matches_lll_on_4dim` unit test in `lattice.rs`
+  (verifies first-vector norm matches f64 LLL on 4-dim basis that triggers multiple swaps).
+- Added `probe_p521_hp_timing` `#[ignore]` test in `tests/lll_degeneracy_probe.rs`
+  for reproducible before/after timing.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Ran `cargo test --lib lll_hp`: 3/3 pass (including new 4-dim test and P-384 recovery).
+
+### Findings
+
+**Timing comparison (P-521, m=8, k_bits=384, seed=0xC0FFEE):**
+
+| Implementation | Time | Outcome |
+|---|---|---|
+| Full GS recompute (2026-05-22 baseline) | ~79 000 ms | ✓ RECOVERED |
+| Incremental GS swap (this session) | **13 758 ms** | ✓ RECOVERED |
+| Speedup | **5.7×** | — |
+
+**Asymptotic analysis:**
+- Full recompute: O(n³) HP BigInt multiplications per LLL swap (n=10 for m=8)
+- Incremental: O(n) HP BigInt multiplications per swap
+- Theoretical speedup: O(n²) = 100×; observed 5.7× because HP BigInt values grow to
+  ~3000-4000 bits (GS values × 2^2048 fixed-point scale), making each BigInt mul
+  more expensive than the O(n²) count alone predicts. Actual bottleneck at larger m
+  becomes the basis update operations during size reduction.
+
+**Implications for higher m:**
+- m=8: 13.8s (confirmed)
+- m=16: estimated ~55s (extrapolating 5.7× from old ~316s estimate)
+- m=32: estimated ~210s (extrapolating from old ~1200s estimate)
+  All now feasible in a single run.
+
+**Non-ignored test results:**
+- `probe_lll_degeneracy_head_to_head`: secp256k1 and P-256 both 3/3 (unchanged)
+- `probe_384bit_lll_multiseed`: P-384 and brainpoolP384r1 both 3/3 (unchanged)
+- All still using f64 LLL (these don't invoke `lll_reduce_hp`)
+
+### Next step proposal
+
+Run `probe_p521_lll_hp` (the 3-seed HP vs f64 comparison) after updating the test to
+skip the slow f64 probes (which always fail at ~147s each). With the incremental update,
+3×HP should complete in ~45s total, well within a reasonable test budget. Then:
+1. Extend to m=16: add a `probe_p521_hp_m16` test to measure wall-clock time
+2. Check if m=16 at k_bits=384 actually recovers the P-521 key (LLL quality question)
+3. If m=16 fails, try BKZ-20 with HP GS (requires implementing BKZ with HP GS, currently
+   BKZ uses f64 GS which will NaN on P-521)
+
+Alternatively, if m=16 LLL succeeds at ~55s, this closes Priority 1 completely and
+we have a fully working attack pipeline for P-521 HNP.
+
+### Commits made
+
+- [to be filled after commit]

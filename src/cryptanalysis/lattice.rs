@@ -213,10 +213,60 @@ pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'s
         if bstar_sq[k] >= rhs {
             k += 1;
         } else {
+            // Swap rows k-1 and k, then update GS values incrementally.
+            //
+            // After swapping b_{k-1} ↔ b_k, the new GS values are (Cohen §2.6.3):
+            //   B̃ = ||b*_k||² + μ_{k,k-1}² × ||b*_{k-1}||²
+            //   new ||b*_{k-1}||² = B̃
+            //   new ||b*_k||²     = ||b*_k||² × ||b*_{k-1}||² / B̃
+            //   new μ_{k,k-1}     = μ_{k,k-1} × ||b*_{k-1}||² / B̃
+            //   new μ_{k-1,j}     = old μ_{k,j}      for j < k-1
+            //   new μ_{k,j}       = old μ_{k-1,j}    for j < k-1
+            //   new μ_{i,k-1}     = (μ_{i,k}×B_k + μ_{i,k-1}×μ̂×B_{k-1}) / B̃   for i > k
+            //   new μ_{i,k}       = μ_{i,k-1} − μ̂×μ_{i,k}                        for i > k
+            //
+            // All division/multiplication in HP fixed-point.
+            let mu_hat = mu[k][k - 1].clone();
+            let old_bkm1 = bstar_sq[k - 1].clone();
+            let old_bk = bstar_sq[k].clone();
+
             basis.swap(k, k - 1);
-            let (new_bstar_sq, new_mu) = gram_schmidt_hp(basis);
-            bstar_sq = new_bstar_sq;
-            mu = new_mu;
+
+            let mu_hat_sq = hp_mul(&mu_hat, &mu_hat);
+            let b_tilde = &old_bk + &hp_mul(&mu_hat_sq, &old_bkm1);
+
+            if b_tilde.is_zero() {
+                // Degenerate basis — fall back to full recompute.
+                let (new_bstar_sq, new_mu) = gram_schmidt_hp(basis);
+                bstar_sq = new_bstar_sq;
+                mu = new_mu;
+            } else {
+                bstar_sq[k - 1] = b_tilde.clone();
+                bstar_sq[k] = (&old_bk * &old_bkm1) / &b_tilde;
+                mu[k][k - 1] = (&mu_hat * &old_bkm1) / &b_tilde;
+
+                // Swap μ rows k-1 and k for column indices j < k-1.
+                {
+                    let (rows_lo, rows_hi) = mu.split_at_mut(k);
+                    let row_km1 = &mut rows_lo[k - 1];
+                    let row_k = &mut rows_hi[0];
+                    for j in 0..k - 1 {
+                        std::mem::swap(&mut row_km1[j], &mut row_k[j]);
+                    }
+                }
+
+                // Update μ_{i,k-1} and μ_{i,k} for i > k.
+                for i in k + 1..n {
+                    let old_mu_i_k = mu[i][k].clone();
+                    let old_mu_i_km1 = mu[i][k - 1].clone();
+                    let term1 = hp_mul(&old_mu_i_k, &old_bk);
+                    let term2 = hp_mul(&hp_mul(&old_mu_i_km1, &mu_hat), &old_bkm1);
+                    let num = &term1 + &term2;
+                    mu[i][k - 1] = hp_div(&num, &b_tilde);
+                    mu[i][k] = old_mu_i_km1 - hp_mul(&mu_hat, &old_mu_i_k);
+                }
+            }
+
             k = if k > 1 { k - 1 } else { 1 };
         }
     }
@@ -496,6 +546,31 @@ mod tests {
         let mut basis: Vec<Vec<BigInt>> = vec![vec_bigint(&[1, 0]), vec_bigint(&[0, 1])];
         assert!(lll_reduce(&mut basis, 1.5).is_err());
         assert!(lll_reduce(&mut basis, 0.1).is_err());
+    }
+
+    /// lll_reduce_hp with incremental GS swap should agree with lll_reduce on
+    /// a medium basis that exercises multiple swap steps.
+    #[test]
+    fn lll_hp_incremental_swap_matches_lll_on_4dim() {
+        // A 4-dim basis that requires several swaps.
+        let mut a = vec![
+            vec_bigint(&[10, 23, 1, 5]),
+            vec_bigint(&[7, -3, 12, 19]),
+            vec_bigint(&[-4, 8, 15, -2]),
+            vec_bigint(&[3, 11, -6, 9]),
+        ];
+        let mut b = a.clone();
+        lll_reduce(&mut a, 0.75).unwrap();
+        lll_reduce_hp(&mut b, 0.75).unwrap();
+        // Both should produce a first vector of the same squared norm.
+        let norm_sq = |v: &Vec<BigInt>| -> i64 {
+            v.iter().map(|x| x.to_i64().unwrap().pow(2)).sum()
+        };
+        assert_eq!(
+            norm_sq(&a[0]),
+            norm_sq(&b[0]),
+            "HP (incremental) and f64 LLL diverge on 4-dim basis"
+        );
     }
 
     /// lll_reduce_hp should agree with lll_reduce on small inputs.

@@ -573,3 +573,43 @@ fn probe_p521_lll_hp() {
         seeds.len()
     );
 }
+
+/// Quick single-seed HP LLL timing probe for P-521.
+///
+/// Measures wall-clock time for one HP LLL recovery to benchmark the
+/// incremental GS swap update (incremental O(n) per swap vs old full-recompute O(n³)).
+///
+/// Prior measurement (full-recompute, 2026-05-22): ~79s per probe.
+/// Expected after incremental update: <10s per probe.
+///
+/// Run: `cargo test --test lll_degeneracy_probe p521_hp_timing -- --ignored --nocapture`
+#[test]
+#[ignore = "slow: ~14s per probe (down from ~79s with full-recompute; run to verify speedup"]
+fn probe_p521_hp_timing() {
+    let p521 = CurveParams::p521();
+    let k_bits = 384u32;
+    let m = 8usize;
+    let d_seed = 0xC0FFEEu64;
+    let k_seed = 0xC0FFEEu64;
+
+    eprintln!();
+    eprintln!("=== P-521 HP LLL single-seed timing (incremental GS swap) ===");
+    eprintln!("  baseline (full-recompute, 2026-05-22): ~79s");
+
+    let (outcome, elapsed_ms) = probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
+
+    eprintln!("  result: {} in {} ms", outcome, elapsed_ms);
+    eprintln!();
+
+    if elapsed_ms < 79_000 {
+        eprintln!("✓ Incremental GS swap is faster than full-recompute baseline.");
+    } else {
+        eprintln!("? No speedup vs baseline — investigate.");
+    }
+
+    assert!(
+        outcome.starts_with("✓"),
+        "P-521 HP LLL should recover key; got: {}",
+        outcome
+    );
+}
