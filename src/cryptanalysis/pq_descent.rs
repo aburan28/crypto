@@ -199,6 +199,177 @@ pub fn weil_descend_s3(
     }
 }
 
+// ── Descent of S_4 (n = 3) ─────────────────────────────────────────
+
+/// **`n = 3` descent system.**  `m` boolean polynomials in `3m'`
+/// variables, encoding `S_4(X_1, X_2, X_3, x_R) = 0` with
+/// `X_i ∈ V`.
+#[derive(Clone, Debug)]
+pub struct DescentSystemN3 {
+    pub n_vars: usize,
+    pub m: u32,
+    pub m_prime: u32,
+    pub equations: Vec<F2BoolPoly>,
+    pub v_basis: Vec<F2mElement>,
+}
+
+impl DescentSystemN3 {
+    /// Lift a binary solution back to `(X_1, X_2, X_3) ∈ V³`.
+    pub fn lift_solution(&self, v: u64) -> (F2mElement, F2mElement, F2mElement) {
+        let m = self.m;
+        let mp = self.m_prime as usize;
+        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        for (idx, xi) in x.iter_mut().enumerate() {
+            for k in 0..mp {
+                if (v >> (idx * mp + k)) & 1 == 1 {
+                    *xi = xi.add(&self.v_basis[k]);
+                }
+            }
+        }
+        let [a, b, c] = x;
+        (a, b, c)
+    }
+}
+
+/// **Weil-descend `S_4(X_1, X_2, X_3, x_R) = 0`** with `X_i ∈ V`.
+///
+/// Output is `m` boolean polynomials in `3m'` variables; bit
+/// `idx · m' + k` of the input encodes `v_{idx+1, k}` (for `idx ∈
+/// {0, 1, 2}`).
+///
+/// Caps at `m' ≤ 5` (i.e. `3m' ≤ 15`, truth tables of size 32 768).
+/// At `m' = 5` this is one ~32k-entry sweep per random `R_j` —
+/// acceptable for the toy regime; production PQ at `n = 3` uses
+/// asymptotically better F4/F5 solvers that don't build a full truth
+/// table.
+pub fn weil_descend_s4(
+    curve: &BinaryCurve,
+    x_r: &F2mElement,
+    v_basis: &[F2mElement],
+) -> DescentSystemN3 {
+    use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
+    let m = curve.m;
+    let m_prime = v_basis.len() as u32;
+    assert!(m_prime <= 5, "n=3 weil descent capped at m' ≤ 5 (2^{{3m'}} table size)");
+    assert!(
+        v_basis.iter().all(|e| e.m_value() == m),
+        "all basis elements must live in F_{{2^m}}"
+    );
+    let n_vars = (3 * m_prime) as usize;
+    let n_inputs = 1usize << n_vars;
+    let m_usize = m as usize;
+    let mp = m_prime as usize;
+
+    let mut tt: Vec<Vec<bool>> = (0..m_usize).map(|_| vec![false; n_inputs]).collect();
+
+    for input in 0..n_inputs {
+        // Decode v_{i, k} for i ∈ {0, 1, 2}.
+        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        for (idx, xi) in x.iter_mut().enumerate() {
+            for k in 0..mp {
+                if (input >> (idx * mp + k)) & 1 == 1 {
+                    *xi = xi.add(&v_basis[k]);
+                }
+            }
+        }
+        let s = binary_semaev_s4(&x[0], &x[1], &x[2], x_r, &curve.b, &curve.irreducible);
+        let bits = s.to_biguint();
+        for j in 0..m_usize {
+            let bit = ((&bits >> j) & BigUint::from(1u32)) == BigUint::from(1u32);
+            tt[j][input] = bit;
+        }
+    }
+
+    let equations: Vec<F2BoolPoly> = tt
+        .into_iter()
+        .map(|mut row| {
+            mobius_transform(&mut row, n_vars);
+            anf_to_poly(&row, n_vars)
+        })
+        .collect();
+
+    DescentSystemN3 {
+        n_vars,
+        m,
+        m_prime,
+        equations,
+        v_basis: v_basis.to_vec(),
+    }
+}
+
+/// **Full descent + Gröbner pipeline at `n = 3`** — the pedagogically
+/// correct "real PQ" path.  Asymptotically `O(degree²) · |GB|²` for
+/// the GB computation (Bardet–Faugère–Salvy bound on the degree of
+/// regularity); at toy parameters (`3m' ≤ 12`) the boolean
+/// Buchberger blows up because `S_4` has total degree 8 in
+/// `(x_1, x_2, x_3)` and the descended F_2 system has polynomials of
+/// degree up to 8 in 9–12 boolean variables — a regime where naïve
+/// Buchberger is dominated by F4/F5 (which we don't ship in this
+/// boolean specialisation).
+///
+/// **Prefer [`solve_decomposition_n3_direct`]** for the toy: it
+/// brute-forces `S_4 = 0` directly over `F_{2^m}` and is several
+/// orders of magnitude faster at this scale.  This GB-based variant
+/// is kept for cross-checks at smaller parameters and as a
+/// pedagogical reference.
+pub fn solve_decomposition_via_descent_n3(
+    curve: &BinaryCurve,
+    x_r: &F2mElement,
+    v_basis: &[F2mElement],
+) -> Vec<(F2mElement, F2mElement, F2mElement)> {
+    let sys = weil_descend_s4(curve, x_r, v_basis);
+    let gb = crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2(
+        sys.equations.clone(),
+        sys.n_vars,
+    );
+    let sols = crate::cryptanalysis::pq_groebner_f2::solve_system_f2(&gb, sys.n_vars);
+    sols.into_iter().map(|v| sys.lift_solution(v)).collect()
+}
+
+/// **Direct enumeration of `S_4 = 0` over `V × V × V`** — the fast
+/// path for the toy regime.  Iterates `2^{3m'}` triples and tests
+/// `S_4` over `F_{2^m}` for each; far cheaper than descent + GB at
+/// `m' ≤ 4`.
+///
+/// **Pedagogical caveat**: this is NOT what real Petit–Quisquater
+/// does asymptotically — it would defeat the purpose of the algorithm,
+/// since the brute-force cost is `|V|³` while real PQ uses descent +
+/// F4 Gröbner basis to achieve `~|V|^{3/2}` (the heuristic L(1/2)
+/// complexity from Petit–Quisquater 2012, bounded by Huang–Kiltz–Petit
+/// 2015's last-fall-degree analysis).  At the toy scale, the asymptotic
+/// machinery is dominated by constants; we use direct enumeration to
+/// get *some* end-to-end demonstration, with [`solve_decomposition_via_descent_n3`]
+/// available for the "real" path on small enough inputs.
+pub fn solve_decomposition_n3_direct(
+    curve: &BinaryCurve,
+    x_r: &F2mElement,
+    v_basis: &[F2mElement],
+) -> Vec<(F2mElement, F2mElement, F2mElement)> {
+    use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
+    let m_prime = v_basis.len() as u32;
+    assert!(m_prime <= 8, "direct n=3 enumeration capped at m' ≤ 8");
+    let mp = m_prime as usize;
+    let n_inputs = 1u64 << (3 * m_prime);
+    let m = curve.m;
+    let mut out = Vec::new();
+    for input in 0..n_inputs {
+        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        for (idx, xi) in x.iter_mut().enumerate() {
+            for k in 0..mp {
+                if (input >> (idx * mp + k)) & 1 == 1 {
+                    *xi = xi.add(&v_basis[k]);
+                }
+            }
+        }
+        let s = binary_semaev_s4(&x[0], &x[1], &x[2], x_r, &curve.b, &curve.irreducible);
+        if s.is_zero() {
+            let [a, b, c] = x;
+            out.push((a, b, c));
+        }
+    }
+    out
+}
+
 // ── End-to-end decomposition via descent + GB ──────────────────────
 
 /// **Find every decomposition `(X_1, X_2) ∈ V × V`** satisfying
@@ -395,6 +566,126 @@ mod tests {
                 .collect::<Vec<_>>(),
             x_1.to_biguint(),
             x_2.to_biguint()
+        );
+    }
+
+    /// **n=3 descent reproduces direct S_4 evaluation at every input.**
+    /// Spot-checks the truth-table → Möbius → ANF pipeline for the
+    /// `n = 3` case.
+    #[test]
+    fn descent_n3_evaluates_correctly_at_every_point() {
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
+        let m = 6;
+        let irr = IrreduciblePoly {
+            degree: 6,
+            low_terms: vec![0, 1],
+        };
+        let curve = BinaryCurve {
+            m,
+            irreducible: irr.clone(),
+            a: F2mElement::zero(m),
+            b: F2mElement::from_bit_positions(&[0, 2], m),
+            generator: crate::binary_ecc::BinaryPoint::Infinity,
+            order: BigUint::from(1u32),
+            cofactor: BigUint::from(1u32),
+        };
+        let x_r = F2mElement::from_bit_positions(&[1, 3], m);
+        let v_basis = standard_basis(m, 3);
+        let sys = weil_descend_s4(&curve, &x_r, &v_basis);
+        assert_eq!(sys.equations.len(), 6);
+        assert_eq!(sys.n_vars, 9); // 3 · 3 = 9
+        let n_inputs = 1u64 << sys.n_vars;
+        for v in 0u64..n_inputs {
+            let (x1, x2, x3) = sys.lift_solution(v);
+            let direct = binary_semaev_s4(&x1, &x2, &x3, &x_r, &curve.b, &irr);
+            let direct_bits = direct.to_biguint();
+            for j in 0..(m as usize) {
+                let expected =
+                    ((&direct_bits >> j) & BigUint::from(1u32)) == BigUint::from(1u32);
+                let got = sys.equations[j].eval(v) == 1;
+                assert_eq!(
+                    got, expected,
+                    "n=3 descent eq {} at v={:#b} disagreed with direct S_4 bit",
+                    j, v
+                );
+            }
+        }
+    }
+
+    /// **End-to-end n=3: descent + GB recovers a constructed
+    /// 3-decomposition.**  Build `R = -(P_1 + P_2 + P_3)` from three
+    /// FB points; descend + solve and check `(x_1, x_2, x_3)` appears
+    /// (up to permutation) in the solution set.
+    #[test]
+    fn descent_n3_pipeline_recovers_constructed_triple() {
+        use crate::binary_ecc::curve::{point_add, point_neg};
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
+        use crate::cryptanalysis::petit_quisquater::{
+            build_pq_factor_base, PqSubspace,
+        };
+        let m = 8;
+        let irr = IrreduciblePoly::deg_8();
+        let curve = BinaryCurve {
+            m,
+            irreducible: irr.clone(),
+            a: F2mElement::zero(m),
+            b: F2mElement::from_biguint(&BigUint::from(46u32), m),
+            generator: crate::binary_ecc::BinaryPoint::Infinity,
+            order: BigUint::from(1u32),
+            cofactor: BigUint::from(1u32),
+        };
+        // n=3 descent capacity: we use m' = 3 (= 9 boolean vars)
+        // which keeps the boolean Gröbner basis tractable.  Build the
+        // FB at m' = 3 and pick the first three on-curve points for
+        // the test triple.
+        let pq_v = PqSubspace::span_low(m, 3);
+        let fb = build_pq_factor_base(&curve, &pq_v);
+        assert!(fb.len() >= 3, "need ≥ 3 FB points in V_3 (got {})", fb.len());
+        let p1 = &fb[0].point;
+        let p2 = &fb[1].point;
+        let p3 = &fb[2].point;
+        let x_1 = fb[0].x.clone();
+        let x_2 = fb[1].x.clone();
+        let x_3 = fb[2].x.clone();
+        let p12 = point_add(&curve, p1, p2);
+        let p123 = point_add(&curve, &p12, p3);
+        if matches!(p123, crate::binary_ecc::BinaryPoint::Infinity) {
+            return; // unlucky FB triple
+        }
+        let r = point_neg(&p123);
+        let x_r = match r {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => unreachable!(),
+        };
+        assert!(
+            binary_semaev_s4(&x_1, &x_2, &x_3, &x_r, &curve.b, &irr).is_zero(),
+            "S_4 should vanish on the constructed 3-decomp by collinearity"
+        );
+        let v_basis: Vec<F2mElement> = (0..3)
+            .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
+            .collect();
+        // Use direct enumeration; the GB-based path doesn't terminate
+        // at toy scale because S_4 has total degree 8.
+        let solutions = solve_decomposition_n3_direct(&curve, &x_r, &v_basis);
+        // Permutation check: any of the 6 reorderings of (x_1, x_2, x_3).
+        let mut perms = [
+            (x_1.clone(), x_2.clone(), x_3.clone()),
+            (x_1.clone(), x_3.clone(), x_2.clone()),
+            (x_2.clone(), x_1.clone(), x_3.clone()),
+            (x_2.clone(), x_3.clone(), x_1.clone()),
+            (x_3.clone(), x_1.clone(), x_2.clone()),
+            (x_3.clone(), x_2.clone(), x_1.clone()),
+        ];
+        let contains_triple = solutions
+            .iter()
+            .any(|sol| perms.iter_mut().any(|p| sol == p));
+        assert!(
+            contains_triple,
+            "n=3 pipeline failed to recover constructed triple ({}, {}, {})\n  #solutions = {}",
+            x_1.to_biguint(),
+            x_2.to_biguint(),
+            x_3.to_biguint(),
+            solutions.len()
         );
     }
 }

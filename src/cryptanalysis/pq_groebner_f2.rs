@@ -341,13 +341,29 @@ pub fn reduce(r: &F2BoolPoly, basis: &[F2BoolPoly]) -> F2BoolPoly {
 /// non-leading term irreducible modulo the others).
 pub fn groebner_basis_f2(initial: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolPoly> {
     let mut basis: Vec<F2BoolPoly> = initial.into_iter().filter(|p| !p.is_zero()).collect();
-    let mut pairs: Vec<(usize, usize)> = Vec::new();
+    // Pair queue with **normal selection strategy**: process the pair
+    // whose LCM has the smallest total degree first.  This is the
+    // Bayer–Stillman recommendation and prevents intermediate-polynomial
+    // degree blowup that LIFO ordering causes — the classic source of
+    // 10–100× speedups on dense boolean systems like Weil-descended PQ.
+    let mut pairs: Vec<(usize, usize, u32)> = Vec::new(); // (i, j, lcm_degree)
     for i in 0..basis.len() {
         for j in (i + 1)..basis.len() {
-            pairs.push((i, j));
+            let lcm_deg = basis[i].lt().unwrap().lcm(basis[j].lt().unwrap()).degree();
+            pairs.push((i, j, lcm_deg));
         }
     }
-    while let Some((i, j)) = pairs.pop() {
+
+    while !pairs.is_empty() {
+        // Pop the pair with the SMALLEST lcm degree.
+        let min_idx = pairs
+            .iter()
+            .enumerate()
+            .min_by_key(|(_, p)| p.2)
+            .map(|(idx, _)| idx)
+            .unwrap();
+        let (i, j, _) = pairs.swap_remove(min_idx);
+
         // Criterion 1: coprime leading monomials → S-poly reduces to 0.
         let li = basis[i].lt().unwrap();
         let lj = basis[j].lt().unwrap();
@@ -358,9 +374,11 @@ pub fn groebner_basis_f2(initial: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolP
         let r = reduce(&s, &basis);
         if !r.is_zero() {
             let new_idx = basis.len();
-            // Add new pairs (k, new_idx).
+            // Add new pairs (k, new_idx) with their LCM degrees.
+            let r_lt = r.lt().unwrap();
             for k in 0..new_idx {
-                pairs.push((k, new_idx));
+                let lcm_deg = basis[k].lt().unwrap().lcm(r_lt).degree();
+                pairs.push((k, new_idx, lcm_deg));
             }
             basis.push(r);
         }
