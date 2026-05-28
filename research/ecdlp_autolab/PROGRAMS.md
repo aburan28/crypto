@@ -17,29 +17,37 @@ own `research_program_v*.md` file.
 | **v7** | **Close C-extension gap to 80-bit feasibility** | **PLANNED** | Target: ≥27e6 ops/sec on 2 CPUs |
 | **v8** | **Algorithmic frontiers** | **PLANNED** | F5 Semaev, Drinfeld, tropical, hyperelliptic |
 | **v9** | **Long-horizon roadmap** | **PLANNED** | 1-5 year speculative agenda |
+| **v10** | **Moonshots / catalog of bad ideas** | **PLANNED** | Reference of M1-M15 known-bad approaches |
+| **v11** | **Publication and dissemination** | **PLANNED** | 6 phases (paper, release, talks, edu, CI, engagement) |
 
 ## Recommended sequencing
 
 For a single engineer / researcher with limited time:
 
-1. **v7** first (3 weeks of engineering)
+1. **v11 Phase 41 (paper)** first (8 weeks of writing)
+   - Highest leverage: converts existing v1-v6 results into a paper
+   - Establishes priority before someone else duplicates
+   - Independent of any future technical work
+
+2. **v7** in parallel with v11 (3 weeks of engineering)
    - High concrete impact, low research risk
    - Brings 80-bit benchmark within reach
    - Validates infrastructure for future programs
+   - Could be a follow-up paper §
 
-2. **v9 Phase 40** in parallel with v7 (publication writing)
-   - Converts v1-v6 results into a paper
-   - Establishes priority before someone else duplicates
+3. **v11 Phase 42 (open-science release)** after paper drafted
+   - 2 weeks; reproducible binaries + Zenodo dataset
+   - Maximizes visibility
 
-3. **v8 Phase 23 (F5 Semaev)** after v7 ships
+4. **v8 Phase 23 (F5 Semaev)** after v7 ships
    - Highest theoretical upside
    - But large implementation effort (4-8 weeks)
 
-4. **v9 Phase 35 (curve-generation pipeline)** later
+5. **v9 Phase 35 (curve-generation pipeline)** later
    - Useful contribution to cryptographic practice
    - Less time-sensitive
 
-5. Defer **v8 Phases 24-29** unless something promising emerges
+6. Defer **v8 Phases 24-29** unless something promising emerges
 
 ## Cross-cutting dependencies
 
@@ -71,14 +79,17 @@ For a single engineer / researcher with limited time:
 
 ## Reading order for newcomers
 
-1. `final_synthesis.md` — start here; ties together v1-v6
-2. `research_program_v6_result.md` — most recent honest result
-3. `yokoyama_lower_bound.md` — theoretical floor
-4. `research_program_v7.md` and `research_program_v7_execution.md` —
+1. `QUICK_START.md` — read this first, 5-minute orientation
+2. `final_synthesis.md` — master synthesis; ties together v1-v6
+3. `research_program_v6_result.md` — most recent honest result
+4. `yokoyama_lower_bound.md` — theoretical floor
+5. `research_program_v7.md` and `research_program_v7_execution.md` —
    what's next, concretely
-5. `research_program_v8.md` — what's next, ambitiously
-6. `research_program_v9.md` — what's next, over the horizon
-7. `research_program_v[1-3].md` — historical context if needed
+6. `research_program_v8.md` — what's next, ambitiously
+7. `research_program_v9.md` — what's next, over the horizon
+8. `research_program_v10.md` — moonshots; catalog of bad ideas
+9. `research_program_v11.md` — publication strategy
+10. `research_program_v[1-3].md` — historical context if needed
 
 ## How to add a new program
 
