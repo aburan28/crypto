@@ -708,4 +708,4 @@ we have a fully working attack pipeline for P-521 HNP.
 
 ### Commits made
 
-- [to be filled after commit]
+- `b905818` autolab 2026-05-28: incremental GS swap in lll_reduce_hp; P-521 5.7x faster
