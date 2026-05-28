@@ -223,3 +223,58 @@ When making new decisions, add an entry:
 
 Decisions don't need to be "important"; routine choices benefit from
 documentation too. The aggregate becomes institutional memory.
+
+## Decision 16: Implement Barrett before SIMD/r=64/etc
+
+**Decision:** Start v7 with Phase 22.1 (Barrett reduction) before
+the other sub-phases.
+
+**Alternatives considered:**
+- Start with SIMD (most exotic engineering)
+- Start with r=64 partition (simplest sub-phase)
+- Try them all in parallel
+
+**Reason:** Barrett has the largest projected speedup (2×) and is a
+self-contained operation that's measurable independently. If it fails
+or barely delivers, falls back to the other sub-phases. If it
+overdelivers (which it did: 9.47×), the other sub-phases become
+optional.
+
+**Outcome:** Barrett overdelivered by 4.7× (9.47× vs projected 2×).
+Phases 22.2-22.5 deprioritized. Validated the "do the highest-EV
+sub-phase first" heuristic.
+
+## Decision 17: Use __uint128_t for Barrett, not GMP
+
+**Decision:** Implement Barrett in pure C with `__uint128_t` intermediates
+rather than calling into GMP for the mul.
+
+**Alternatives considered:**
+- Use GMP `mpz_mul` for the wide mul, then hand-rolled reduction
+- Use libgcrypt or NaCl big-int primitives
+
+**Reason:** `__uint128_t` is a compiler intrinsic with hardware
+support on modern x86-64 (via MUL/MULX) and ARM64. Avoids per-call
+function-call overhead and memory allocation entirely.
+
+**Outcome:** 9.47× over GMP. The intuition that "function call
+overhead is much more than the actual multiplication at 81-bit"
+proved correct.
+
+## Decision 18: Iterate plans after each empirical result
+
+**Decision:** Update v7 plan and PROGRAMS.md immediately after
+Phase 22.1 result, rather than waiting until all phases complete.
+
+**Alternatives considered:**
+- Execute all of v7 first, then update plans
+- Update plans only at version boundaries
+
+**Reason:** Empirical reality contradicts plan assumptions (Phase 22.1
+overdelivered by 4.7×). If we don't update, future work follows the
+outdated plan that says "Phase 22.2-22.5 are necessary". Updating
+immediately preserves decision authority for the next iteration.
+
+**Outcome:** PROGRAMS.md reordering puts Phase 22.6 (end-to-end
+validation of Barrett) as the next immediate priority. v7 plan
+explicitly marks 22.2-22.5 as conditional.

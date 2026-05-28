@@ -14,7 +14,7 @@ own `research_program_v*.md` file.
 | v4 | Groebner / Semaev deep dive | COMPLETED | All negative; Yokoyama bound confirmed |
 | v5 | Non-naive attempts #1 | COMPLETED | All 4 directions ruled out for LMFDB |
 | v6 | Non-naive attempts #2 + C engineering | COMPLETED | 5 directions closed; C extension 23-86× |
-| **v7** | **Close C-extension gap to 80-bit feasibility** | **PLANNED** | Target: ≥27e6 ops/sec on 2 CPUs |
+| **v7** | **Close C-extension gap to 80-bit feasibility** | **PARTIAL** | Phase 22.1 Barrett: **9.47× mul speedup** (4.7× over projected); end-to-end validation pending |
 | **v8** | **Algorithmic frontiers** | **PLANNED** | F5 Semaev, Drinfeld, tropical, hyperelliptic |
 | **v9** | **Long-horizon roadmap** | **PLANNED** | 1-5 year speculative agenda |
 | **v10** | **Moonshots / catalog of bad ideas** | **PLANNED** | Reference of M1-M15 known-bad approaches |
@@ -24,16 +24,21 @@ own `research_program_v*.md` file.
 
 For a single engineer / researcher with limited time:
 
-1. **v11 Phase 41 (paper)** first (8 weeks of writing)
-   - Highest leverage: converts existing v1-v6 results into a paper
-   - Establishes priority before someone else duplicates
-   - Independent of any future technical work
+1. **v7 Phase 22.6 (Barrett → rho integration)** — IMMEDIATE next action
+   - Barrett microbench gives 9.47× over GMP
+   - End-to-end validation is the critical missing piece
+   - If validated, v7 ships with just Phase 22.1 + 22.6 (~2 days work)
+   - Closes 5.5× gap, makes 80-bit feasible in budget
 
-2. **v7** in parallel with v11 (3 weeks of engineering)
-   - High concrete impact, low research risk
-   - Brings 80-bit benchmark within reach
-   - Validates infrastructure for future programs
-   - Could be a follow-up paper §
+2. **v11 Phase 41 (paper)** in parallel (8 weeks of writing)
+   - Highest leverage: converts existing v1-v6 + new v7 results
+   - Establishes priority before someone else duplicates
+   - Includes Phase 22.1 Barrett result as engineering contribution
+
+3. **v7 Phases 22.2-22.5** (only if 22.6 insufficient, 1-3 weeks)
+   - SIMD, r=64, hyperthreading, tag walk
+   - High concrete impact if needed
+   - Not needed if Phase 22.6 alone exceeds 27e6 ops/sec target
 
 3. **v11 Phase 42 (open-science release)** after paper drafted
    - 2 weeks; reproducible binaries + Zenodo dataset

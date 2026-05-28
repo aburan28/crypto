@@ -1,11 +1,32 @@
 # Research Program v7: Engineering to close the 80-bit gap
 
 **Date:** 2026-05-28
-**Status:** planned, not yet executed
+**Status:** Phase 22.1 EXECUTED (overdelivered), Phase 22.2-22.5 deprioritized
 **Motivation:** v6 demonstrated a 23-86× C-extension speedup but a **5.5×
 gap remains** to make 80-bit AutoLab ECDLP solvable in the budget. v7
 targets that gap with concrete engineering work, each item independently
 testable.
+
+## Major update (2026-05-28): Phase 22.1 overdelivered
+
+Barrett reduction prototype: **9.47× speedup over GMP persistent mpz_t**
+(106M vs 11.1M muls/sec). See `phase22_barrett.c` and
+`phase22_barrett_result.md`.
+
+This single result, if it carries through to end-to-end Pollard rho,
+**closes the 5.5× gap by itself** (projected 80-bit ECDLP in ~2-6
+hours on 2 CPUs). The other v7 phases (22.2-22.5) may be unnecessary.
+
+**Revised v7 plan:**
+
+1. **Priority 1 (next):** Phase 22.6 = Barrett integration into
+   Pollard rho walk + end-to-end ECDLP validation at 40-60 bits
+2. **Priority 2 (if 22.6 insufficient):** Phase 22.2 SIMD, 22.3 r=64
+3. **Optional/Deferred:** Phase 22.5 tag walk (small gain)
+
+If Phase 22.6 validates end-to-end at the projected speedup, v7
+**ships** with just Phase 22.1 + 22.6. The other sub-phases become
+v7.5 / v8 territory.
 
 ## Goal
 
@@ -83,20 +104,45 @@ expected walk length to distinguished point.
 
 **Deliverable:** `phase22_tag_walk.c`.
 
-## Aggregate plan
+## Phase 22.6: Barrett → Pollard rho integration (PRIORITY 1)
+
+**Why:** Phase 22.1's microbenchmark shows 9.47× on modular mul alone.
+End-to-end Pollard rho cost is mul-dominated but also includes modular
+inverse, distinguished-point check, partition lookup. Need to measure
+how much of the 9.47× propagates end-to-end.
+
+**Concrete experiment:**
+1. Take `phase21_rho_v3.c` and replace `mpz_mul + mpz_mod` with
+   `barrett_mul` (from `phase22_barrett.c`)
+2. Keep mpz_invert (inverse is harder to speed up; Fermat's is
+   80 Barrett muls = still 8× faster than GMP inversion)
+3. Benchmark at 81-bit, 1/2/4/8 threads
+4. Verify correctness by running full Pollard rho at 30-bit and
+   confirming secret recovery
+
+**Deliverable:** `phase22_rho_barrett.c`.
+
+**Acceptance criterion:** ≥5× end-to-end speedup over `phase21_rho_v3.c`
+at 81-bit. Combined with multi-target, exceeds 27e6 ops/sec on 2 CPUs.
+
+**Risk:** Barrett benefit may be lost in the noise of inverse cost.
+If end-to-end speedup is only 2-3×, fall back to executing Phases
+22.2-22.5.
+
+## Original aggregate plan (now superseded by Phase 22.6)
 
 If each sub-phase delivers its projected speedup, the multiplicative
 combination is:
-- 22.1 Montgomery: 2×
+- 22.1 Barrett: 2× *(actual: 9.47× microbench)*
 - 22.2 SIMD multi-target: 1.5×
 - 22.3 r=64 partition: 1.2×
 - 22.4 Hyperthreading: 1.3× (on 2-CPU effective)
 - 22.5 Better walk: 1.1×
 
-Combined: **2 × 1.5 × 1.2 × 1.3 × 1.1 = 5.15×**
+Combined projection: 2 × 1.5 × 1.2 × 1.3 × 1.1 = 5.15×
 
-That closes the 5.5× gap to within ~10% — borderline feasible. If
-any sub-phase overdelivers, we have margin.
+**Empirical Phase 22.1 alone delivers 9.47×, exceeding the combined
+projection.** Phases 22.2-22.5 become optional.
 
 ## Risk assessment
 

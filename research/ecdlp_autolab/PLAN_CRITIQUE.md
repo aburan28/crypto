@@ -10,13 +10,20 @@ The critique is structured as: **assumption** → **why it might be wrong**
 
 ## Critique of v7 (engineering to close C-extension gap)
 
-### Assumption 1: Montgomery gives 2× speedup at 81-bit
+### Assumption 1: Montgomery/Barrett gives 2× speedup at 81-bit
 **Why might be wrong:** At 81-bit, GMP's `mpz_mod` is already
 optimized via Barrett internally. Our hand-rolled Barrett might
 match GMP, not beat it. Real speedup might be 1.0-1.3×.
 
+**UPDATE (2026-05-28):** Empirically measured 9.47× (Barrett vs GMP
+persistent mpz_t). GMP has substantial per-call overhead even with
+persistent vars; hand-rolled `__uint128_t` Barrett wins handily. The
+"GMP is already Barrett internally" assumption was wrong about
+per-call overhead.
+
 **Mitigation:** Day 1-2 should explicitly compare hand-rolled to GMP
-on identical workloads, not project a 2× improvement.
+on identical workloads, not project a 2× improvement. *DONE; Barrett
+overdelivered by 4.7×.*
 
 ### Assumption 2: SIMD multi-target gives 1.5× speedup
 **Why might be wrong:** Modular arithmetic has data-dependent branches
@@ -221,3 +228,13 @@ attack-resistance on hundreds of random curves.
 If you're reading this and wondering "should I update this critique?"
 — yes! Self-critique should evolve as new evidence arrives. Add
 sections, contradict prior analysis, document what you learn.
+
+## Update log
+
+- 2026-05-28: Phase 22.1 Barrett executed; overdelivered (9.47× vs
+  projected 2×). Updated v7 critique Assumption 1.
+- 2026-05-28: PROGRAMS.md sequencing reorder: Phase 22.6 (Barrett →
+  rho integration) is now top priority, ahead of v11.
+
+Future updates here should follow the same pattern: prior assumption,
+new evidence, what changes about the plan.
