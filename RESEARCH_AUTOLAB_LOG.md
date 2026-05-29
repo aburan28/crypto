@@ -709,3 +709,78 @@ we have a fully working attack pipeline for P-521 HNP.
 ### Commits made
 
 - `b905818` autolab 2026-05-28: incremental GS swap in lll_reduce_hp; P-521 5.7x faster
+
+---
+
+## 2026-05-29 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 LLL §10.5), then Priority 2 (CHLRS Igusa formula).
+
+Priority 1: Yesterday (2026-05-28) made measurable progress (5.7× speedup via incremental GS). Open sub-task: test m=16 to close §10.5 ("is lll_reduce_hp efficient at higher m?"). Ran and confirmed.
+
+Priority 2: CHLRS Igusa formula has never been executed (PARI was not installed). Installed PARI/GP 2.15.4 and ran existing scripts to discover root-cause issues with the formula.
+
+### Work done
+
+**Priority 1 (P-521 m=16):**
+- Added `probe_p521_hp_m16` test (18×18 lattice, 3 seeds) and `probe_p521_hp_m32_timing` single-seed probe to `tests/lll_degeneracy_probe.rs` (lines 617-710).
+- Ran `cargo test --test lll_degeneracy_probe probe_p521_hp_m16 -- --ignored --nocapture`.
+
+**Priority 2 (CHLRS Igusa formula):**
+- Installed PARI/GP 2.15.4 (`apt-get install pari-gp`).
+- Ran `chlrs_igusa_formula.gp`: toy case (p=1009, b=11) gives match=0 for all 3 Möbius variants.
+- Diagnosed cubic-residue condition: `(-b)^{(p-1)/3} mod p` must equal 1 for 2-torsion to be F_p-rational (`chlrs_rosenhain_diagnostic.gp`, `chlrs_flat_check.gp`).
+- Confirmed via `polrootsmod(x^3+7, p_secp)`: **0 roots** — secp256k1 2-torsion NOT F_p-rational.
+- Even for valid toy (p=13, b=1) where cubic residue HOLDS (all 3 roots {12,4,10} in F_13, E2 roots {7,8,11}):
+  - Natural sextic: h6 = (x^3+1)(x^3+8) mod 13 (confirmed PARI output: `x^6 + 9x^3 + 8`)
+  - `hyperellcharpoly(Mod(1,13)*h6)` = **x^4 - 26x^2 + 169** = (x^2-13)^2
+  - All 3 Möbius rearrangements give the same char poly (same curve, different coordinates)
+  - #Jac(C) = **144**, target #(E1×E2)(F_13) = **192**. **Match: FAIL.**
+- Conclusion: the formula in `chlrs_igusa_formula.gp` constructs a (2,2)-cover of E1 ramified at the 2-torsion, NOT the Howe-glued curve Jac = (E1×E2)/Γ_α.
+- New scripts created: `chlrs_rosenhain_diagnostic.gp`, `chlrs_flat_check.gp`, `chlrs_minimal.gp`, `chlrs_sextic.gp`, `chlrs_valid_toy.gp`, `chlrs_cubic_residue_check.gp`.
+
+### Findings
+
+**Priority 1 (P-521 §10.5 CLOSED):**
+
+| Seed | Time | Outcome |
+|---|---|---|
+| 0xC0FFEE | 18,737 ms | ✓ RECOVERED |
+| 0xDEADBEEF | 19,718 ms | ✓ RECOVERED |
+| 0x12345678 | 18,782 ms | ✓ RECOVERED |
+| **Total** | **57,237 ms** | **3/3** |
+
+Scaling from m=8 (~14s) to m=16 (~19s) is **1.35×**, far below the O((m+2)²) = 3.24× theoretical. Reason: LLL converges in fewer swaps with more equations (better-conditioned basis). **§10.5 is now CLOSED. Priority 1 fully closed.**
+
+**Priority 2 (CHLRS Igusa — BLOCKED):**
+
+Two distinct failure modes for the Rosenhain formula:
+
+1. **Cubic residue failure (secp256k1, p=1009 b=11)**: `(-b)^{(p-1)/3} ≢ 1 mod p`. The 2-torsion x-coords (roots of x³=-b) are NOT F_p-rational. `polrootsmod(x^3+7, p_secp)` = 0 roots.
+
+2. **Wrong isogeny class (p=13, b=1, cubic residue OK)**: Even when all 6 branch points are in F_p — E1 roots {12,4,10} from x³=12, E2 roots {7,8,11} from x³=5 — the curve y² = (x³+1)(x³+8) has:
+   - Char poly: (x²-13)² (NOT (x²-2x+13)(x²+2x+13))
+   - #Jac = 144 ≠ 192 = #(E1×E2)(F_13)
+   - Same result for all 3 Möbius rearrangements
+
+**Root cause of failure 2**: The curve y² = (x³+b)(x³+d³b) is a (2,2)-cover of E1 in which the RAMIFICATION at the 2-torsion is used, but this is NOT the same as the Howe-glued abelian surface (E1×E2)/Γ_α. Howe's construction requires a specific principal polarisation compatible with the Weil pairing on E1[2] ≅ E2[2], which is NOT simply the product cover.
+
+**Implication for secp256k1**: The naive sextic h_secp = (x³+7)(x³+189) computed in `chlrs_igusa_formula.gp` Part 2 is a (2,2)-cover of secp256k1 ramified at the (non-F_p-rational) 2-torsion, but its Jacobian is probably NOT isogenous to secp256k1 × secp256k1^t. Its Igusa invariants (J2, J4, J6, J10) computed in Part 2 are for the WRONG CURVE.
+
+### Next step proposal
+
+Priority 2 requires genuine Mestre/CHLRS reconstruction:
+
+**Option A (recommended, 2-3 sessions):** Implement Mestre's Step 1 for j=0 curves. The Igusa invariants of (E1×E2)/Γ_α can be computed from the Igusa invariants of E1 and E2 and the isomorphism data using the Cardona-Quer 2005 explicit formulas (Appendix A). These are ~80 lines of PARI. Then Mestre's Step 2 (conic + cubic solver) reconstructs C from (I2,I4,I6,I10).
+
+**Option B (1 session, partial):** Over F_{p³}, the cubic residue condition holds for any j=0 curve (since p³ ≡ 1 mod 3 always). Compute the Rosenhain model over F_{p³} and check whether the resulting genus-2 curve descends to F_p (i.e., whether it has a model over F_p). This is a field of definition question.
+
+**Option C (fallback):** Use Sage (not available in this environment) — Sage's `HyperellipticCurve` and `EllipticCurve.weil_restriction` might compute this directly.
+
+**Immediate blocker**: Cardona-Quer 2005 formulas for I4 and I6 are not yet transcribed in the PARI scripts (see `igusa_clebsch.gp` lines 85-83: "implementing this transvectant machinery is more than 50 lines"). Next step: implement the transvectant-based I4 and I6 computation in `igusa_clebsch.gp`, then use the Cardona-Quer Igusa formulas for the quotient surface.
+
+### Commits made
+
+- (listed after commit)
