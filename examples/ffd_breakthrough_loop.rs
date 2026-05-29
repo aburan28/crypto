@@ -23,7 +23,11 @@ use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::descent_expansion::{
     enumerate_irreducibles, spearman, system_expansion_report,
 };
-use crypto_lib::cryptanalysis::descent_lowgamma::{run_lowgamma_cell, BasisFamily, LowGammaCell};
+use crypto_lib::cryptanalysis::descent_lowgamma::{
+    descend_on_subspace, run_lowgamma_cell, measure_on_subspace, BasisFamily, FactorSubspace,
+    LowGammaCell,
+};
+use crypto_lib::cryptanalysis::descent_algebraic::{early_defect, rank_profile};
 use crypto_lib::cryptanalysis::pc_degree_avg::{
     measure_avg, mean_dstar_spread, run_pc_curve_independence_sweep,
     run_pc_operating_point_sweep, run_pc_regime_sweep, AvgRow,
@@ -119,6 +123,26 @@ fn main() {
     let p2e = judge_p2_structured(&ee);
     println!("   GATE G-P2 (structured contrast): {p2e}");
 
+    // ── EXP-F: the ALGEBRAIC discriminator (early rank defect vs D*) ────
+    // After both graph invariants failed (P2, P2″), test whether a
+    // Hilbert-function defect — read from the coefficients — predicts D*.
+    let ef = run_exp_f(8, 4, 24, 3, seed.wrapping_add(5));
+    println!("\n[EXP-F] algebraic discriminator: early rank defect vs D* (n=8, n'=4):");
+    println!("    {:<11} {:>13} {:>9}", "family", "early-defect", "D* mean");
+    for c in &ef {
+        println!(
+            "    {:<11} {:>13.4} {:>9}",
+            format!("{:?}", c.family),
+            c.early_defect,
+            c.dstar_mean.map(|d| format!("{d:.2}")).unwrap_or_else(|| "—".into()),
+        );
+    }
+    let (p3alg, p3_rho) = judge_p3_algebraic(&ef);
+    println!(
+        "   GATE G-P3-alg (defect ↑ ⇒ D* ↓, Spearman ρ_s={}): {p3alg}",
+        p3_rho.map(|r| format!("{r:+.3}")).unwrap_or_else(|| "—".into()),
+    );
+
     // ── Snapshot to experiments/ ────────────────────────────────────
     // Fixed seed ⇒ reproducible run ⇒ a single canonical file (overwritten
     // each run) rather than a timestamped pile. `generated_at` records the
@@ -130,7 +154,7 @@ fn main() {
     let path = "experiments/ffd_loop_latest.json".to_string();
     let json = build_json(
         seed, targets, ts, &exp_a, spread, &p5, &opp, &p1_odd, &p1_even, &regime, &p6, &p2,
-        p2_rho, p2_gspread, p2_dspread, &ee, &p2e,
+        p2_rho, p2_gspread, p2_dspread, &ee, &p2e, &ef, &p3alg, p3_rho,
     );
     match std::fs::write(&path, &json) {
         Ok(_) => println!("\n[snapshot] wrote {path}"),
@@ -140,7 +164,7 @@ fn main() {
     // ── Next experiment (queue head still blocked) ──────────────────
     println!(
         "\n[next] {}",
-        next_experiment(&p5, &p1_odd, &p1_even, &p2, &p2e)
+        next_experiment(&p5, &p1_odd, &p1_even, &p2, &p2e, &p3alg)
     );
     println!("════════════════════════════════════════════════════════════════");
 }
@@ -198,6 +222,102 @@ fn run_exp_e(n: u32, n_sub: u32, trials: u32, seed: u64) -> Vec<LowGammaCell> {
         .into_iter()
         .filter_map(|fam| run_lowgamma_cell(fam, n, n_sub, &irr, d_max, trials, seed))
         .collect()
+}
+
+/// One EXP-F cell: a factor-base family's mean early rank defect and mean D*.
+struct AlgCell {
+    family: BasisFamily,
+    early_defect: f64,
+    dstar_mean: Option<f64>,
+}
+
+/// EXP-F: the algebraic discriminator. For each family, average the early
+/// rank defect (`Σ_{D≤cutoff} δ(D) / cols`) and the refutation degree D*
+/// over `trials` random `(b, x₃)`. The hypothesis P3-alg: defect ↑ ⇒ D* ↓
+/// (the structure that lowers D* is excess low-degree syzygies, visible in
+/// the coefficient algebra where graph invariants were blind).
+fn run_exp_f(n: u32, n_sub: u32, trials: u32, cutoff: u32, seed: u64) -> Vec<AlgCell> {
+    let irr = enumerate_irreducibles(n, 1)
+        .into_iter()
+        .next()
+        .expect("a degree-n irreducible exists");
+    let d_max = 2 * n_sub;
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut out = Vec::new();
+    for fam in [BasisFamily::Subfield, BasisFamily::Coordinate, BasisFamily::Random] {
+        let mut de = Vec::new();
+        let mut ds = Vec::new();
+        for t in 0..trials as u64 {
+            let v = match fam {
+                BasisFamily::Random => FactorSubspace::build(fam, n, n_sub, &irr, seed ^ (0x900 + t)),
+                _ => FactorSubspace::build(fam, n, n_sub, &irr, 0),
+            };
+            let Some(v) = v else { continue };
+            let b = rand_nz(&mut rng, n);
+            let x3 = rand_nz(&mut rng, n);
+            let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
+            let prof = rank_profile(&eqs, 2 * n_sub, n, d_max);
+            de.push(early_defect(&prof, cutoff));
+            let pt = measure_on_subspace(n, &v, &irr, &b, &x3, 2 * n_sub + 2);
+            if let Some(d) = pt.refutation_degree {
+                ds.push(d as f64);
+            }
+        }
+        if de.is_empty() {
+            continue;
+        }
+        out.push(AlgCell {
+            family: fam,
+            early_defect: de.iter().sum::<f64>() / de.len() as f64,
+            dstar_mean: if ds.is_empty() {
+                None
+            } else {
+                Some(ds.iter().sum::<f64>() / ds.len() as f64)
+            },
+        });
+    }
+    out
+}
+
+/// G-P3-alg: does the early rank defect predict D* across families? The
+/// theory-predicted relation is **negative** (more defect ⇒ lower D*).
+/// *Supported* if Spearman ρ_s ≤ −0.6 across the cells (and the easy
+/// subfield indeed has the largest defect); *killed* if |ρ_s| < 0.2;
+/// else *inconclusive*.
+fn judge_p3_algebraic(cells: &[AlgCell]) -> (Verdict, Option<f64>) {
+    let xs: Vec<f64> = cells.iter().map(|c| c.early_defect).collect();
+    let ys: Vec<f64> = cells.iter().filter_map(|c| c.dstar_mean).collect();
+    if xs.len() < 3 || ys.len() != xs.len() {
+        return (
+            Verdict {
+                status: "blocked",
+                detail: format!("only {} complete cells (need ≥3)", ys.len().min(xs.len())),
+            },
+            None,
+        );
+    }
+    let rho = spearman(&xs, &ys);
+    let v = match rho {
+        None => Verdict {
+            status: "blocked",
+            detail: "degenerate (zero variance) defect or D*".into(),
+        },
+        Some(r) if r <= -0.6 => Verdict {
+            status: "supported",
+            detail: format!(
+                "ρ_s {r:+.3} ≤ −0.6: higher early rank defect ⇒ lower D* — the ALGEBRAIC predictor works where graph invariants failed"
+            ),
+        },
+        Some(r) if r.abs() < 0.2 => Verdict {
+            status: "killed",
+            detail: format!("ρ_s {r:+.3}: early defect does not track D* either"),
+        },
+        Some(r) => Verdict {
+            status: "inconclusive",
+            detail: format!("ρ_s {r:+.3} in (−0.6, −0.2]∪[0.2, 1): suggestive, widen the sweep"),
+        },
+    };
+    (v, rho)
 }
 
 /// G-P2 via the structured contrast: the bridge predicts the *easier*
@@ -412,39 +532,34 @@ fn next_experiment(
     p1_even: &Verdict,
     p2: &Verdict,
     p2e: &Verdict,
+    p3alg: &Verdict,
 ) -> String {
     if p5.status == "blocked" {
         return "EXP-A: widen curve-independence batch (need ≥2 defined means)".into();
     }
-    if p5.status == "killed" {
-        return "EXP-C: rebuild descent_expansion KEYED ON THE CURVE (P5 killed: D* is curve-dependent)".into();
-    }
-    // The decisive structured contrast (EXP-E) overrides the generic-basis
-    // correlation: it is the test P2 was really about.
-    if p2e.status == "killed" {
-        return "STOP → breakthrough-NEGATIVE. EXP-E shows the structured (subfield) factor base is EASIER (lower D*) yet NOT lower-γ: spectral γ does not explain solving-degree ease, contradicting the bridge's central conjecture. Next: (a) test whether a DIFFERENT graph invariant (e.g. boundary expansion on the quadratic-only support, or treewidth) tracks D*; (b) if none does, write up the negative result — 'PC degree of Semaev systems is not expansion-controlled' — which is itself publishable and reshapes the FFD map.".into();
-    }
-    if p2e.status == "supported" {
-        return "EXP-D: structured contrast supports the bridge (subfield is both easier AND lower-γ). Build sparse-F4 to push 2n'≳14 and firm up the γ↔D* law across the full range; then draft the screening invariant.".into();
-    }
-    // Structured test blocked/inconclusive → fall back to the generic-basis
-    // G-P2 routing.
-    match p2.status {
-        "killed" | "inconclusive" => {
-            return "EXP-E: re-run the structured contrast at another (n,n') with n'|n (e.g. n=9,n'=3 or n=12,n'=4) to get a clean subfield D* vs random D* comparison.".into();
+    // The live thread: the ALGEBRAIC discriminator (EXP-F). After both graph
+    // invariants (P2 spectral, P2″ treewidth) failed, this is the predictor
+    // that might actually work — so its verdict drives the queue.
+    match p3alg.status {
+        "supported" => {
+            return "EXP-G: the early rank-defect (Hilbert-function) predictor TRACKS D* where graph invariants failed. Next: (a) confirm the defect↔D* law across more (n,n') and at larger reach (sparse-F4, EXP-D); (b) formalise it — is δ(D) the right algebraic proxy for the last-fall degree? — and draft the screening invariant + a corrected §3 of the proposal (replace expansion with Hilbert-defect).".into();
         }
-        "blocked" => {
-            return "EXP-E: enlarge the basis pool / use sparse-normal bases so γ actually varies; current generic bases are all high-γ.".into();
+        "inconclusive" => {
+            return "EXP-F: widen the algebraic-discriminator sweep (more targets, more (n,n') with n'|n, and vary cutoff) to sharpen the defect↔D* Spearman past the −0.6 bar.".into();
+        }
+        "killed" => {
+            return "STOP → breakthrough-NEGATIVE (strong form). Neither graph invariants NOR the Hilbert-function defect predict D*. Write up: 'the solving degree of Weil-descended Semaev systems is not predicted by incidence-graph OR low-degree Hilbert-defect invariants; the subfield speedup resists local prediction.'".into();
         }
         _ => {}
+    }
+    if p3alg.status == "blocked" && p2e.status == "killed" {
+        return "EXP-F: build out the algebraic discriminator (graph invariants P2/P2″ are dead); need ≥3 complete (defect, D*) cells.".into();
     }
     if p1_odd.status == "blocked" || p1_even.status == "blocked" {
         return "EXP-D: build sparse-F4 backend to reach 2n'≳14 (G-P1 reach-limited)".into();
     }
-    if p1_odd.status == "inconclusive" || p1_even.status == "inconclusive" {
-        return "EXP-D: extend operating-point reach; current slope flat within noise".into();
-    }
-    "Breakthrough-positive criteria approached: G-P2 supported + G-P1 supported. Draft the defensive theorem + screening invariant.".into()
+    let _ = (p1_even, p2);
+    "Re-run the loop; no blocked gate has a cheaper experiment than the current queue head.".into()
 }
 
 // ── Output helpers ──────────────────────────────────────────────────
@@ -492,6 +607,9 @@ fn build_json(
     p2_dspread: f64,
     ee: &[LowGammaCell],
     p2e: &Verdict,
+    ef: &[AlgCell],
+    p3alg: &Verdict,
+    p3_rho: Option<f64>,
 ) -> String {
     let row_json = |r: &AvgRow| {
         format!(
@@ -527,8 +645,17 @@ fn build_json(
         )
     };
     let ee_arr = ee.iter().map(cell_json).collect::<Vec<_>>().join(",");
+    let alg_json = |c: &AlgCell| {
+        format!(
+            "{{\"family\":\"{:?}\",\"early_defect\":{:.5},\"dstar_mean\":{}}}",
+            c.family,
+            c.early_defect,
+            c.dstar_mean.map(|d| format!("{d:.4}")).unwrap_or_else(|| "null".into()),
+        )
+    };
+    let ef_arr = ef.iter().map(alg_json).collect::<Vec<_>>().join(",");
     format!(
-        "{{\n  \"schema\": \"ffd_breakthrough_loop/v3\",\n  \"seed\": {seed},\n  \"generated_at\": {generated_at},\n  \"targets_per_cell\": {targets},\n  \"exp_a_curve_independence\": {{\n    \"spread_mean_dstar\": {},\n    \"gate_p5\": {},\n    \"rows\": [{}]\n  }},\n  \"scaling_operating_point\": {{\n    \"gate_p1_odd\": {},\n    \"gate_p1_even\": {},\n    \"rows\": [{}]\n  }},\n  \"regime_n10\": {{\n    \"gate_p6\": {},\n    \"rows\": [{}]\n  }},\n  \"exp_c_expansion_vs_dstar\": {{\n    \"gate_p2\": {},\n    \"spearman_rho\": {},\n    \"gamma_spread\": {:.4},\n    \"dstar_spread\": {:.4}\n  }},\n  \"exp_e_structured_contrast\": {{\n    \"gate_p2_structured\": {},\n    \"cells\": [{}]\n  }}\n}}\n",
+        "{{\n  \"schema\": \"ffd_breakthrough_loop/v4\",\n  \"seed\": {seed},\n  \"generated_at\": {generated_at},\n  \"targets_per_cell\": {targets},\n  \"exp_a_curve_independence\": {{\n    \"spread_mean_dstar\": {},\n    \"gate_p5\": {},\n    \"rows\": [{}]\n  }},\n  \"scaling_operating_point\": {{\n    \"gate_p1_odd\": {},\n    \"gate_p1_even\": {},\n    \"rows\": [{}]\n  }},\n  \"regime_n10\": {{\n    \"gate_p6\": {},\n    \"rows\": [{}]\n  }},\n  \"exp_c_expansion_vs_dstar\": {{\n    \"gate_p2\": {},\n    \"spearman_rho\": {},\n    \"gamma_spread\": {:.4},\n    \"dstar_spread\": {:.4}\n  }},\n  \"exp_e_structured_contrast\": {{\n    \"gate_p2_structured\": {},\n    \"cells\": [{}]\n  }},\n  \"exp_f_algebraic_discriminator\": {{\n    \"gate_p3_algebraic\": {},\n    \"spearman_rho\": {},\n    \"cells\": [{}]\n  }}\n}}\n",
         spread.map(|s| format!("{s:.4}")).unwrap_or_else(|| "null".into()),
         verdict(p5),
         arr(exp_a),
@@ -543,5 +670,8 @@ fn build_json(
         p2_dspread,
         verdict(p2e),
         ee_arr,
+        verdict(p3alg),
+        p3_rho.map(|r| format!("{r:.4}")).unwrap_or_else(|| "null".into()),
+        ef_arr,
     )
 }

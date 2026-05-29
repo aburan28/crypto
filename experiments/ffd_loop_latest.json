@@ -1,7 +1,7 @@
 {
-  "schema": "ffd_breakthrough_loop/v3",
+  "schema": "ffd_breakthrough_loop/v4",
   "seed": 268242953,
-  "generated_at": 1780035193,
+  "generated_at": 1780069527,
   "targets_per_cell": 64,
   "exp_a_curve_independence": {
     "spread_mean_dstar": 0.2188,
@@ -26,5 +26,10 @@
   "exp_e_structured_contrast": {
     "gate_p2_structured": {"status":"killed","detail":"subfield D* 2.04<3.53 (easier) yet γ 0.882≥0.861 (not lower): γ does NOT explain ease → bridge contradicted"},
     "cells": [{"family":"Subfield","n":8,"n_sub":4,"trials":32,"decomp_rate":0.2812,"gamma_mean":0.8817,"dstar_mean":2.0435,"nondecomp":23},{"family":"Coordinate","n":8,"n_sub":4,"trials":32,"decomp_rate":0.2812,"gamma_mean":0.8782,"dstar_mean":2.1739,"nondecomp":23},{"family":"Random","n":8,"n_sub":4,"trials":32,"decomp_rate":0.5312,"gamma_mean":0.8607,"dstar_mean":3.5333,"nondecomp":15}]
+  },
+  "exp_f_algebraic_discriminator": {
+    "gate_p3_algebraic": {"status":"supported","detail":"ρ_s -1.000 ≤ −0.6: higher early rank defect ⇒ lower D* — the ALGEBRAIC predictor works where graph invariants failed"},
+    "spearman_rho": -1.0000,
+    "cells": [{"family":"Subfield","early_defect":0.17204,"dstar_mean":2.0588},{"family":"Coordinate","early_defect":0.07930,"dstar_mean":2.7222},{"family":"Random","early_defect":0.02688,"dstar_mean":3.1667}]
   }
 }

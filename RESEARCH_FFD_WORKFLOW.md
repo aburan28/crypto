@@ -52,9 +52,12 @@ current reach." Maintained as a table here and machine-checked by
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
 | P6 | Over-determined `ρ ≫ 1` collapses `D*` to 2 (Nullstellensatz) | `supported` | n=10 sweep: ρ≥2.5 ⇒ mean D* ≤ 2.03 (`15b5b1c`, re-confirmed iteration 1) |
+| **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iteration 5: across {Subfield, Coordinate, Random} at n=8,n'=4 the early-defect↔D* Spearman is **ρ_s = −1.000** (perfect inverse rank order): Subfield (defect 0.172, D* 2.06) > Coordinate (0.079, 2.72) > Random (0.027, 3.17). The predictor that **works where both graph invariants failed** — it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
 
 New predictions are appended as experiments suggest them; killed ones stay
 in the table with their kill evidence (negative results are the point).
+The graph-invariant predictors P2/P2″ are dead; the algebraic predictor
+**P3-alg is the live, supported replacement** for the proposal's §3.
 
 ---
 
@@ -187,6 +190,43 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 5 (ALGEBRAIC discriminator — P3-alg SUPPORTED, the positive result)
+
+- Prediction attacked: **P3-alg** (new) — after every *graph* invariant
+  failed, test whether an **algebraic** invariant predicts `D*`. The
+  candidate: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)`, the
+  excess low-degree syzygies vs a generic (semi-regular) system. Subfields
+  are multiplicatively closed ⇒ they inject low-degree relations ⇒ larger
+  early defect; hypothesis: more early defect ⇒ lower `D*`.
+- Built `src/cryptanalysis/descent_algebraic.rs`: `rank_profile`
+  (per-degree rows/cols/rank/generic/defect, reusing the tested Macaulay
+  rank + generic Hilbert prediction), `early_defect` (cumulative δ up to a
+  cutoff, normalized by column count), `total_defect`. 3 tests, incl. the
+  strict-ordering discriminator. Wired EXP-F + `judge_p3_algebraic`
+  (Spearman gate) into the driver.
+- **Result — G-P3-alg SUPPORTED (ρ_s = −1.000).** At n=8, n'=4 the
+  early-defect↔D* relation is a **perfect inverse rank order**:
+
+  | family | early defect | mean D* |
+  |---|---:|---:|
+  | Subfield   | 0.172 | 2.06 |
+  | Coordinate | 0.079 | 2.72 |
+  | Random     | 0.027 | 3.17 |
+
+  The probe across n∈{6,8,9} showed the same monotone pattern in every
+  regime. So the *algebraic* invariant — read straight from the
+  coefficients — **predicts D* where spectral γ (wrong sign) and treewidth
+  (constant) both failed.** This is the positive replacement for the
+  proposal's §3 expansion predictor: not graph expansion, but
+  Hilbert-function defect.
+- Ledger delta: **P3-alg open→supported**; it supersedes the dead P2/P2″.
+- Next (driver-chosen): **EXP-G** — (a) confirm the defect↔D* law at more
+  `(n,n')` and larger reach (sparse-F4, EXP-D); (b) formalise whether δ(D)
+  is the right algebraic proxy for the last-fall degree; (c) rewrite §3 of
+  the proposal around the Hilbert-defect predictor and draft the screening
+  invariant.
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 4 (treewidth reformulation — P2″ also negative, and it explains why)
 

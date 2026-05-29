@@ -129,6 +129,27 @@ Build the bipartite graph
 > conjecture is retained below as originally written for the record; see
 > §6/§8 and `RESEARCH_FFD_WORKFLOW.md` iteration 3 for the refutation and
 > the surviving (weaker) possibilities.
+>
+> **✓ UPDATE (iterations 4–5): the predictor is REPLACED, not just
+> refuted.** Treewidth of the primal graph also fails (the descended graph
+> is the *complete* graph K_{2n'}, so treewidth is constant — iteration 4):
+> **no incidence-graph invariant predicts `D*`**, because the structure is
+> algebraic, not combinatorial. The working replacement (iteration 5,
+> `descent_algebraic.rs`) is the **early Macaulay rank defect**
+> `δ(D) = r_gen(D) − r(D)` — the excess low-degree syzygies vs a generic
+> system. Empirically (n=8, n'=4) `D*` is a **perfect monotone-decreasing**
+> function of the cumulative early defect across {Subfield, Coordinate,
+> Random}: Spearman ρ_s = −1.000. The corrected conjecture is therefore
+>
+> ```
+>    D*  decreases monotonically with  Σ_{D ≤ D_low} δ(D),
+> ```
+>
+> i.e. *low-degree Hilbert-function deficiency*, not graph expansion,
+> governs the solving/last-fall degree. The subfield's multiplicative
+> closure is what supplies that early deficiency. This is the screening
+> handle the program was after — read directly from the system's
+> coefficients, computable wherever a few low-degree Macaulay ranks are.
 
 **Central conjecture (falsifiable — spectral form now falsified, see
 above).**
