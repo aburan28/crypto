@@ -530,6 +530,315 @@ pub fn format_report(r: &EdsReport) -> String {
     )
 }
 
+// ── bias census (fast u64 path) ─────────────────────────────────────────────
+//
+// The BigUint analysis path above is the validated reference; for sweeping
+// thousands of curves we need a faster integer path.  Everything here works
+// over primes `p < 2^32` so that products fit in `u128`, and only over
+// `p ≡ 3 (mod 4)` so the square root is the closed form `r^((p+1)/4)`.
+
+#[inline]
+fn mulm(x: u64, y: u64, p: u64) -> u64 {
+    ((x as u128 * y as u128) % p as u128) as u64
+}
+
+#[inline]
+fn subm(x: u64, y: u64, p: u64) -> u64 {
+    (x % p + p - y % p) % p
+}
+
+fn powm(mut x: u64, mut e: u64, p: u64) -> u64 {
+    let mut r = 1u64;
+    x %= p;
+    while e > 0 {
+        if e & 1 == 1 {
+            r = mulm(r, x, p);
+        }
+        x = mulm(x, x, p);
+        e >>= 1;
+    }
+    r
+}
+
+#[inline]
+fn legendre_u64(w: u64, p: u64) -> i8 {
+    let w = w % p;
+    if w == 0 {
+        return 0;
+    }
+    if powm(w, (p - 1) / 2, p) == 1 {
+        1
+    } else {
+        -1
+    }
+}
+
+#[inline]
+fn invm(x: u64, p: u64) -> u64 {
+    powm(x, p - 2, p)
+}
+
+/// Per-curve census record.
+#[derive(Clone, Debug)]
+pub struct CurveBias {
+    pub a: u64,
+    pub b: u64,
+    pub order: u64,
+    pub qr: u64,
+    pub nqr: u64,
+    pub bias: f64,
+    pub chi_a: i8,
+    pub chi_b: i8,
+}
+
+/// Compute the apparition-block residue bias for `P=(x,y)` on
+/// `y²=x³+ax+b / F_p` (requires `p ≡ 3 mod 4`, `y≠0`).  Walks the EDS until
+/// the first zero (= ord(P)) or `cap`, then reads the multiplier characters
+/// from the two terms past the zero.  Returns `None` if order > cap.
+fn block_bias_u64(p: u64, a: u64, b: u64, x: u64, y: u64, cap: usize) -> Option<CurveBias> {
+    // Seed terms W(0..4) (same formulas as eds_sequence, in u64).
+    let x2 = mulm(x, x, p);
+    let x3 = mulm(x2, x, p);
+    let x4 = mulm(x2, x2, p);
+    let x6 = mulm(x3, x3, p);
+    let a2 = mulm(a, a, p);
+
+    let w1 = 1u64;
+    let w2 = mulm(2, y, p);
+    let w3 = {
+        let t = (mulm(3, x4, p) + mulm(mulm(6, a, p), x2, p) + mulm(mulm(12, b, p), x, p)) % p;
+        subm(t, a2, p)
+    };
+    let w4 = {
+        let pos = (x6 + mulm(mulm(5, a, p), x4, p) + mulm(mulm(20, b, p), x3, p)) % p;
+        let mut inner = subm(pos, mulm(mulm(5, a2, p), x2, p), p);
+        inner = subm(inner, mulm(mulm(mulm(4, a, p), b, p), x, p), p);
+        inner = subm(inner, mulm(8, mulm(b, b, p), p), p);
+        inner = subm(inner, mulm(a2, a, p), p);
+        mulm(mulm(4, y, p), inner, p)
+    };
+
+    let mut w = vec![0u64, w1, w2, w3, w4];
+    let w2_inv = invm(w2, p);
+
+    let mut order = 0usize;
+    let mut k = 5usize;
+    loop {
+        let val = if k % 2 == 1 {
+            let n = (k - 1) / 2;
+            let lhs = mulm(w[n + 2], mulm(mulm(w[n], w[n], p), w[n], p), p);
+            let r1 = mulm(w[n + 1], w[n + 1], p);
+            let rhs = mulm(w[n - 1], mulm(r1, w[n + 1], p), p);
+            subm(lhs, rhs, p)
+        } else {
+            let n = k / 2;
+            let t1 = mulm(w[n + 2], mulm(w[n - 1], w[n - 1], p), p);
+            let t2 = mulm(w[n - 2], mulm(w[n + 1], w[n + 1], p), p);
+            let bracket = subm(t1, t2, p);
+            mulm(mulm(w[n], bracket, p), w2_inv, p)
+        };
+        w.push(val);
+        if val == 0 && order == 0 {
+            order = k; // first zero = ord(P)
+        }
+        // Need terms up to r+2 to read the multiplier; stop two past the zero.
+        if order != 0 && k >= order + 2 {
+            break;
+        }
+        if k > cap {
+            return None; // order too large for the cap
+        }
+        k += 1;
+    }
+    let r = order;
+
+    // Multiplier (A,B): B = W(r+2)/(W(2)·W(r+1)), A = W(r+1)/B.
+    let wr1 = w[r + 1];
+    let wr2 = w[r + 2];
+    if wr1 == 0 {
+        return None;
+    }
+    let mb = mulm(wr2, mulm(w2_inv, invm(wr1, p), p), p);
+    if mb == 0 {
+        return None;
+    }
+    let ma = mulm(wr1, invm(mb, p), p);
+
+    // QR balance over the apparition block [1, r-1] (W(r)=0 excluded).
+    let mut qr = 0u64;
+    let mut nqr = 0u64;
+    for &wn in &w[1..r] {
+        match legendre_u64(wn, p) {
+            1 => qr += 1,
+            -1 => nqr += 1,
+            _ => {}
+        }
+    }
+    let bias = if qr + nqr > 0 {
+        (qr as f64 - nqr as f64) / (qr + nqr) as f64
+    } else {
+        0.0
+    };
+
+    Some(CurveBias {
+        a,
+        b,
+        order: r as u64,
+        qr,
+        nqr,
+        bias,
+        chi_a: legendre_u64(ma, p),
+        chi_b: legendre_u64(mb, p),
+    })
+}
+
+/// First curve point with small `x`, `y≠0` (needs `p ≡ 3 mod 4`).
+fn first_point_u64(p: u64, a: u64, b: u64) -> Option<(u64, u64)> {
+    for x in 1..p {
+        let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p;
+        if rhs == 0 {
+            continue;
+        }
+        if legendre_u64(rhs, p) == 1 {
+            let y = powm(rhs, (p + 1) / 4, p);
+            if y != 0 {
+                return Some((x, y));
+            }
+        }
+    }
+    None
+}
+
+/// Aggregate census result.
+#[derive(Clone, Debug)]
+pub struct CensusSummary {
+    pub p: u64,
+    pub curves: usize,
+    pub mean_bias: f64,
+    pub std_bias: f64,
+    pub abs_mean: f64,
+    pub max_abs: f64,
+    /// Count of curves with |bias| above the noise band `2/sqrt(samples)`.
+    pub heavy_tail: usize,
+    /// Mean |bias| split by multiplier-character class (χA,χB):
+    /// (++, +-, -+, --) with per-class counts.
+    pub by_class: [(usize, f64); 4],
+    pub min_order: u64,
+}
+
+fn class_index(chi_a: i8, chi_b: i8) -> usize {
+    match (chi_a >= 0, chi_b >= 0) {
+        (true, true) => 0,   // (+,+)
+        (true, false) => 1,  // (+,-)
+        (false, true) => 2,  // (-,+)
+        (false, false) => 3, // (-,-)
+    }
+}
+
+/// Sweep curves `y²=x³+ax+b` over `F_p` (`p ≡ 3 mod 4`) for
+/// `a ∈ [0, a_max), b ∈ [0, b_max)`, skipping singular curves, and
+/// aggregate the apparition-block residue bias.  Only curves whose chosen
+/// point has order ≥ `min_order` (and ≤ `cap`) are counted.
+pub fn census(
+    p: u64,
+    a_max: u64,
+    b_max: u64,
+    min_order: u64,
+    cap: usize,
+) -> (CensusSummary, Vec<CurveBias>) {
+    let mut recs: Vec<CurveBias> = Vec::new();
+    for a in 0..a_max {
+        for b in 0..b_max {
+            // discriminant 4a³+27b² ≠ 0
+            let disc = (mulm(4, mulm(mulm(a, a, p), a, p), p) + mulm(27, mulm(b, b, p), p)) % p;
+            if disc == 0 {
+                continue;
+            }
+            if let Some((x, y)) = first_point_u64(p, a, b) {
+                if let Some(rec) = block_bias_u64(p, a, b, x, y, cap) {
+                    if rec.order >= min_order {
+                        recs.push(rec);
+                    }
+                }
+            }
+        }
+    }
+
+    let n = recs.len();
+    let (mut sum, mut sum_abs, mut sum_sq, mut max_abs) = (0.0, 0.0, 0.0, 0.0f64);
+    let mut by_class = [(0usize, 0.0f64); 4];
+    let mut min_order = u64::MAX;
+    for r in &recs {
+        sum += r.bias;
+        sum_abs += r.bias.abs();
+        sum_sq += r.bias * r.bias;
+        max_abs = max_abs.max(r.bias.abs());
+        let ci = class_index(r.chi_a, r.chi_b);
+        by_class[ci].0 += 1;
+        by_class[ci].1 += r.bias.abs();
+        min_order = min_order.min(r.order);
+    }
+    let mean = if n > 0 { sum / n as f64 } else { 0.0 };
+    let var = if n > 0 { sum_sq / n as f64 - mean * mean } else { 0.0 };
+    for c in by_class.iter_mut() {
+        if c.0 > 0 {
+            c.1 /= c.0 as f64;
+        }
+    }
+    // Noise band: a fair ±1 block of length m has bias std ≈ 1/sqrt(m).
+    let heavy_tail = recs
+        .iter()
+        .filter(|r| r.bias.abs() > 2.0 / ((r.qr + r.nqr).max(1) as f64).sqrt())
+        .count();
+
+    (
+        CensusSummary {
+            p,
+            curves: n,
+            mean_bias: mean,
+            std_bias: var.max(0.0).sqrt(),
+            abs_mean: if n > 0 { sum_abs / n as f64 } else { 0.0 },
+            max_abs,
+            heavy_tail,
+            by_class,
+            min_order: if n > 0 { min_order } else { 0 },
+        },
+        recs,
+    )
+}
+
+/// Render a [`CensusSummary`] as Markdown.
+pub fn format_census(s: &CensusSummary) -> String {
+    let cls = |i: usize, name: &str| {
+        format!(
+            "  - `{}`: {} curves, mean|bias|={:.4}\n",
+            name, s.by_class[i].0, s.by_class[i].1
+        )
+    };
+    format!(
+        "### Census p={p} ({n} curves, min order {mo})\n\n\
+         - mean bias = `{mean:+.5}`  (expect ≈ 0 if unbiased)\n\
+         - std(bias) = `{std:.5}`\n\
+         - mean |bias| = `{am:.5}`\n\
+         - max |bias| = `{mx:.4}`\n\
+         - heavy tail (|bias| > 2/√m): **{ht}/{n}** = {htp:.1}%\n\
+         - by multiplier class (χA,χB):\n{c0}{c1}{c2}{c3}",
+        p = s.p,
+        n = s.curves,
+        mo = s.min_order,
+        mean = s.mean_bias,
+        std = s.std_bias,
+        am = s.abs_mean,
+        mx = s.max_abs,
+        ht = s.heavy_tail,
+        htp = 100.0 * s.heavy_tail as f64 / s.curves.max(1) as f64,
+        c0 = cls(0, "(+,+)"),
+        c1 = cls(1, "(+,-)"),
+        c2 = cls(2, "(-,+)"),
+        c3 = cls(3, "(-,-)"),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -611,6 +920,78 @@ mod tests {
         assert_eq!(qr + nqr + zero, r.order);
         // χ(A), χ(B) are genuine signs.
         assert!(r.chi_a != 0 && r.chi_b != 0);
+    }
+
+    #[test]
+    fn census_runs_and_is_sane() {
+        // Small fast sweep on p=4099 (≡3 mod 4).
+        let (s, recs) = census(4099, 12, 12, 50, 5000);
+        assert!(s.curves >= 20, "expected a decent number of curves, got {}", s.curves);
+        // Per-curve sanity: QR+NQR ≈ order-1 (block excludes the single zero).
+        for r in &recs {
+            assert_eq!(r.qr + r.nqr, r.order - 1);
+            assert!(r.bias.abs() <= 1.0);
+            assert!(r.chi_a != 0 && r.chi_b != 0);
+        }
+        // The u64 census must agree with the BigUint reference on a shared curve.
+        // Find a census curve and re-derive its bias via analyze().
+        let probe = &recs[0];
+        let p = BigUint::from(4099u32);
+        let a = BigUint::from(probe.a);
+        let b = BigUint::from(probe.b);
+        let (px, py, _) = find_toy_point(&p, &a, &b, 1, 50).unwrap();
+        let rep = analyze(&p, &a, &b, &px, &py);
+        // analyze counts the zero inside [1,r]; census excludes it — compare QR/NQR only.
+        assert_eq!((rep.qr_balance.0, rep.qr_balance.1), (probe.qr, probe.nqr));
+    }
+
+    #[test]
+    fn reflection_symmetry_law() {
+        // For p ≡ 3 (mod 4), χ(−1) = −1, and the EDS reflection
+        //   W(r−n) = −A·B^{−n}·W(n)
+        // forces  χ(W(n))·χ(W(r−n)) = χ(−1)·χ(A)·χ(B)^n  for all n,
+        // except the fixed point n = r/2 when r is even.
+        let p = BigUint::from(4099u32);
+        let chi_neg1 = legendre(&(&p - BigUint::from(1u32)), &p);
+        assert_eq!(chi_neg1, -1, "p must be ≡ 3 (mod 4)");
+
+        // a=2,b=7 is the heaviest-bias curve in the p=4099 census, class (−,+).
+        let a = BigUint::from(2u32);
+        let b = BigUint::from(7u32);
+        let (px, py, ord) = find_toy_point(&p, &a, &b, 1, 80).unwrap();
+        let rep = analyze(&p, &a, &b, &px, &py);
+        let r = ord as usize;
+        let w = eds_sequence(&p, &a, &b, &px, &py, 2 * r + 4);
+
+        let mut bpow = rep.chi_b; // χ(B)^n, starting n=1
+        for n in 1..r {
+            if 2 * n != r {
+                let lhs = legendre(&w[n], &p) * legendre(&w[r - n], &p);
+                let rhs = chi_neg1 * rep.chi_a * bpow;
+                assert_eq!(lhs, rhs, "reflection law failed at n={}", n);
+            }
+            bpow *= rep.chi_b;
+        }
+    }
+
+    #[test]
+    fn plus_plus_class_is_balanced() {
+        // The (+,+) class must be (essentially) perfectly balanced, while
+        // some other class carries real bias — the structural signature.
+        let (s, recs) = census(4099, 30, 30, 80, 5000);
+        let pp = s.by_class[0]; // (+,+)
+        let mp = s.by_class[2]; // (−,+) — the reinforcing class
+        assert!(pp.0 > 10 && mp.0 > 10, "need populated classes");
+        assert!(pp.1 < 0.01, "(+,+) mean|bias| should be ~0, got {}", pp.1);
+        assert!(mp.1 > pp.1, "(−,+) must carry more bias than (+,+)");
+        // Every heavy-bias curve should be outside the (+,+) class.
+        for r in recs.iter().filter(|r| r.bias.abs() > 0.1) {
+            assert!(
+                !(r.chi_a == 1 && r.chi_b == 1),
+                "a (+,+) curve cannot have large bias: {:?}",
+                r
+            );
+        }
     }
 
     #[test]

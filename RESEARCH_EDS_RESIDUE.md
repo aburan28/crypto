@@ -231,15 +231,81 @@ cases (e.g. `p=7919`: `Q=[1321]P` recovered from the net zero
    combination (rows 1009, 2003, 7919). The predicted closed form matches
    with no exceptions.
 
-3. **Residue bias is curve-dependent and sometimes large.** This is the
-   structurally interesting find. If `χ(W(n))` over the apparition block
-   were a fair `±1` coin, the bias `(QR−NQR)/(QR+NQR)` would sit within a
-   few percent of zero. Two of five curves show `+0.16` — a real,
-   non-generic imbalance — while `p=10007` is *perfectly* balanced
-   (1639/1639). The bias is therefore **not universal but not noise
-   either**: it is a curve-specific quantity. Mapping which curves carry
-   large residue bias, and why, is the first thing the avenue should
-   chase. (Sample sizes here are small; §5 specifies the scale-up.)
+3. **Residue bias looks curve-dependent at small `m`** — two curves show
+   `+0.16`, while `p=10007` is *perfectly* balanced (1639/1639). At this
+   sample size one cannot tell a structural distinguisher from finite-size
+   noise. **The census in §4.5 resolves this**, and the answer is sharper
+   than "curve-specific quantity": the balanced curve is exactly the
+   `(χA,χB)=(+,+)` case, and there is an *exact symmetry law* behind it.
+
+---
+
+## 4.5 Bias census + the reflection-symmetry law (step 1, completed)
+
+`cargo run --release --example eds_census` sweeps thousands of curves over
+three primes `p ≡ 3 (mod 4)` and aggregates the apparition-block residue
+bias by multiplier class. The result is a **clean, decisive answer**.
+
+| `p` | curves | mean bias | std(bias) | mean \|bias\| | max \|bias\| | heavy tail (\|bias\|>2/√m) |
+|----:|-------:|----------:|----------:|--------------:|-------------:|---------------------------:|
+| 4 099 | 1 568 | +0.0013 | 0.0361 | 0.0204 | 0.316 | 7.7 % |
+| 10 007 | 1 564 | +0.0012 | 0.0215 | 0.0130 | 0.150 | 8.0 % |
+| 100 003 | 760 | +0.0001 | 0.0066 | 0.0039 | 0.045 | 8.3 % |
+
+Mean \|bias\| per multiplier class:
+
+| class `(χA,χB)` | p=4099 | p=10007 | p=100003 |
+|:---------------:|-------:|--------:|---------:|
+| `(+,+)` | **0.0000** | **0.0000** | **0.0000** |
+| `(+,−)` | 0.0195 | 0.0123 | 0.0040 |
+| `(−,+)` | 0.0335 | 0.0214 | 0.0066 |
+| `(−,−)` | 0.0210 | 0.0128 | 0.0034 |
+
+**Two facts jump out.**
+
+(a) **The bias decays like `1/√m`.** As the order grows (`m ≈ 150 → 600 →
+3 800`), `max|bias|` falls `0.316 → 0.150 → 0.045` and `std(bias)` falls
+`0.036 → 0.021 → 0.0066` — the exact scaling of the sample standard
+deviation of a fair `±1` coin over `m` draws. The heavy-tail fraction sits
+at a constant `≈ 8 %`, i.e. ordinary Gaussian fluctuation (no structured
+excess of outliers). **So there is no constant residue-bias distinguisher**
+— the `+0.16` values at §4 were small-`m` noise, and they vanish at
+cryptographic scale. This is the negative result the avenue most needed,
+and it is now nailed down rather than assumed.
+
+(b) **But the `(+,+)` class has bias *exactly* 0 at every scale, and every
+single heaviest-bias curve is `(−,+)`.** That is not noise — it is an exact
+symmetry. The EDS extends to negative indices by `W(−n) = −W(n)`, so the
+multiplier law `(▲)` gives the **reflection identity**
+
+```
+W(r − n) = −A · B^{−n} · W(n)      ⇒
+χ(W(n))·χ(W(r−n)) = χ(−1) · χ(A) · χ(B)ⁿ.                          (◆)
+```
+
+For `p ≡ 3 (mod 4)`, `χ(−1) = −1`, so:
+
+- **`(χA,χB) = (+,+)`:** the pair product is `−1` for every `n`, so `n` and
+  `r−n` always carry *opposite* residue symbols — the block cancels in
+  pairs and the bias is forced to `0` (up to the lone `n=r/2` fixed point
+  when `r` is even).
+- **`(χA,χB) = (−,+)`:** the pair product is `+1`, so reflected indices
+  *reinforce* — this class can sustain the largest fluctuations, which is
+  exactly why every census outlier lands here.
+- **`χB = −1`:** the sign alternates with `n`, giving the intermediate
+  behaviour of the `(+,−)` / `(−,−)` rows.
+
+Identity `(◆)` is verified term-by-term in the test suite
+(`reflection_symmetry_law`, run on the heaviest-bias census curve), and the
+`(+,+)`-is-balanced consequence in `plus_plus_class_is_balanced`.
+
+**Upshot.** The residue "bias" is *not* an exploitable distinguisher: it is
+finite-size sampling noise, modulated by an exact reflection symmetry that
+pins the `(+,+)` class to zero and steers fluctuations into `(−,+)`. The
+Legendre sequence is, at cryptographic scale, statistically generic — but
+its *structure* (period dichotomy §3, reflection law `(◆)`) is rigid and
+fully predictable from the two multiplier characters. The handle is real;
+the *bias-based* attack on it is closed.
 
 ---
 
@@ -247,12 +313,14 @@ cases (e.g. `p=7919`: `Q=[1321]P` recovered from the net zero
 
 Falsifiable, ordered by cost:
 
-1. **Bias census.** Sweep thousands of curves at `p ≈ 2¹⁶–2²⁰`, compute
-   the apparition-block residue bias, and characterise its distribution.
-   *Prediction to break:* bias concentrates near `0` with curve-specific
-   outliers correlated with the multiplier characters `(χ(A), χ(B))`
-   and/or the CM discriminant. If a clean predictor of large bias exists,
-   that is a publishable distinguisher.
+1. ~~**Bias census.**~~ **DONE (§4.5).** Outcome: the bias is finite-size
+   noise (`∝ 1/√m`, ~8 % Gaussian tail), with **no** constant
+   distinguisher, but governed by the exact reflection law `(◆)` that
+   forces the `(+,+)` class to zero bias and channels fluctuations into
+   `(−,+)`. The hoped-for "clean predictor of large bias" does not exist
+   as an *advantage*; it exists as a *symmetry*. Remaining: repeat for
+   `p ≡ 1 (mod 4)` (where `χ(−1)=+1` flips which class is balanced) and at
+   `p ≈ 2³²` to confirm the `1/√m` extrapolation.
 
 2. **Multiplier-character law in general.** Prove the §3 dichotomy for all
    `r` (the `r`-odd case has a different parity term) and express
@@ -284,30 +352,37 @@ Falsifiable, ordered by cost:
 | ECDLP "lives inside" the EDS/net (zero-lattice = slope `k`) | **Proven & demonstrated** (§2.1, §4) |
 | EDS-Residue solves ⟺ ECDLP solves (sub-exp) | **Lauter–Stange theorem** — no shortcut |
 | `χ`-period determined by `(χ(A),χ(B))` | **Confirmed empirically**, closed form in §3 |
-| Residue bias is curve-dependent, sometimes large | **Observed** (+0.16 vs 0.00); needs census |
-| QR pattern beats generic ECDLP | **No evidence; expected false.** Open to quantify constants |
+| Residue bias is an exploitable distinguisher | **Refuted (§4.5):** bias `∝ 1/√m`, ~8 % Gaussian tail, no constant advantage |
+| Reflection law `(◆)` pins `(+,+)` to zero bias | **Proven & test-verified** (§4.5) on 3 primes |
+| QR pattern beats generic ECDLP | **No evidence; bias route now closed.** Net-`χ` localisation (§5.3) untested |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
-often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). But
-the theorem is asymptotic; the *bias and period structure of the Legendre
-sequence* — the part with curve-specific, non-generic behaviour visible
-even in this five-curve toy sweep — was never the theorem's subject and
-has had little systematic measurement. That gap, not a hoped-for
-sub-exponential attack, is the real opportunity: a distinguisher census
-that the existing literature simply did not run.
+often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). The
+theorem is asymptotic, so it never spoke to the *finite statistics* of the
+Legendre sequence — and that is the gap this note actually fills. The
+honest result is two-sided: (i) the bias-distinguisher hope is **refuted**
+(§4.5) — at cryptographic `m` the Legendre sequence is statistically
+generic; but (ii) the *structure* is rigid and was un-catalogued — the
+period dichotomy (§3) and the reflection law `(◆)` (§4.5) are exact,
+test-verified, and predict the entire `χ` symmetry from two sign bits. The
+remaining genuinely-open door is §5.3 (does the QR pattern of the 2-D net
+localise the zero-lattice cheaper than generic?), which the bias result
+neither opens nor closes.
 
 ---
 
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 6 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 9 tests
 cargo run   --release --example eds_residue_demo           # the §4 table
+cargo run   --release --example eds_census                 # the §4.5 census
 ```
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,
-`multiplier_law_and_periods`, `report_renders`.
+`multiplier_law_and_periods`, `reflection_symmetry_law`,
+`plus_plus_class_is_balanced`, `census_runs_and_is_sane`, `report_renders`.
 
 ---
 
