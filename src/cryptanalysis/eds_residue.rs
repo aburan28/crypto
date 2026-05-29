@@ -534,8 +534,8 @@ pub fn format_report(r: &EdsReport) -> String {
 //
 // The BigUint analysis path above is the validated reference; for sweeping
 // thousands of curves we need a faster integer path.  Everything here works
-// over primes `p < 2^32` so that products fit in `u128`, and only over
-// `p ≡ 3 (mod 4)` so the square root is the closed form `r^((p+1)/4)`.
+// over odd primes `p < 2^32` so that products fit in `u128` (square roots via
+// Tonelli–Shanks, so both `p ≡ 1` and `p ≡ 3 (mod 4)` are handled).
 
 #[inline]
 fn mulm(x: u64, y: u64, p: u64) -> u64 {
@@ -576,6 +576,56 @@ fn legendre_u64(w: u64, p: u64) -> i8 {
 #[inline]
 fn invm(x: u64, p: u64) -> u64 {
     powm(x, p - 2, p)
+}
+
+/// Square root mod an odd prime `p` (Tonelli–Shanks), or `None` if `n` is a
+/// non-residue.  Handles both `p ≡ 1` and `p ≡ 3 (mod 4)`.
+fn sqrt_u64(n: u64, p: u64) -> Option<u64> {
+    let n = n % p;
+    if n == 0 {
+        return Some(0);
+    }
+    if powm(n, (p - 1) / 2, p) != 1 {
+        return None; // non-residue
+    }
+    if p % 4 == 3 {
+        return Some(powm(n, (p + 1) / 4, p));
+    }
+    // p ≡ 1 (mod 4): full Tonelli–Shanks.
+    let mut q = p - 1;
+    let mut s = 0u32;
+    while q % 2 == 0 {
+        q /= 2;
+        s += 1;
+    }
+    // Smallest non-residue z.
+    let mut z = 2u64;
+    while powm(z, (p - 1) / 2, p) != p - 1 {
+        z += 1;
+    }
+    let mut m = s;
+    let mut c = powm(z, q, p);
+    let mut t = powm(n, q, p);
+    let mut r = powm(n, (q + 1) / 2, p);
+    loop {
+        if t == 1 {
+            return Some(r);
+        }
+        let mut i = 0u32;
+        let mut t2 = t;
+        while t2 != 1 {
+            t2 = mulm(t2, t2, p);
+            i += 1;
+            if i == m {
+                return None;
+            }
+        }
+        let b = powm(c, 1u64 << (m - i - 1), p);
+        m = i;
+        c = mulm(b, b, p);
+        t = mulm(t, c, p);
+        r = mulm(r, b, p);
+    }
 }
 
 /// Per-curve census record.
@@ -692,15 +742,14 @@ fn block_bias_u64(p: u64, a: u64, b: u64, x: u64, y: u64, cap: usize) -> Option<
     })
 }
 
-/// First curve point with small `x`, `y≠0` (needs `p ≡ 3 mod 4`).
+/// First curve point with small `x`, `y≠0` (any odd prime `p`).
 fn first_point_u64(p: u64, a: u64, b: u64) -> Option<(u64, u64)> {
     for x in 1..p {
         let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p;
         if rhs == 0 {
             continue;
         }
-        if legendre_u64(rhs, p) == 1 {
-            let y = powm(rhs, (p + 1) / 4, p);
+        if let Some(y) = sqrt_u64(rhs, p) {
             if y != 0 {
                 return Some((x, y));
             }
@@ -735,7 +784,7 @@ fn class_index(chi_a: i8, chi_b: i8) -> usize {
     }
 }
 
-/// Sweep curves `y²=x³+ax+b` over `F_p` (`p ≡ 3 mod 4`) for
+/// Sweep curves `y²=x³+ax+b` over `F_p` (any odd prime) for
 /// `a ∈ [0, a_max), b ∈ [0, b_max)`, skipping singular curves, and
 /// aggregate the apparition-block residue bias.  Only curves whose chosen
 /// point has order ≥ `min_order` (and ≤ `cap`) are counted.
@@ -991,6 +1040,66 @@ mod tests {
                 "a (+,+) curve cannot have large bias: {:?}",
                 r
             );
+        }
+    }
+
+    #[test]
+    fn reflection_law_holds_for_p_eq_1_mod_4() {
+        // Same identity (◆), but now χ(−1) = +1, so the balanced class is
+        // (−,+) instead of (+,+).  Verify (◆) term-by-term on a p≡1 curve.
+        let p = BigUint::from(4093u32);
+        let chi_neg1 = legendre(&(&p - BigUint::from(1u32)), &p);
+        assert_eq!(chi_neg1, 1, "p must be ≡ 1 (mod 4)");
+        let a = BigUint::from(3u32);
+        let b = BigUint::from(9u32);
+        let (px, py, ord) = find_toy_point(&p, &a, &b, 1, 80).unwrap();
+        let rep = analyze(&p, &a, &b, &px, &py);
+        let r = ord as usize;
+        let w = eds_sequence(&p, &a, &b, &px, &py, 2 * r + 4);
+        let mut bpow = rep.chi_b;
+        for n in 1..r {
+            if 2 * n != r {
+                let lhs = legendre(&w[n], &p) * legendre(&w[r - n], &p);
+                let rhs = chi_neg1 * rep.chi_a * bpow;
+                assert_eq!(lhs, rhs, "reflection law (p≡1) failed at n={}", n);
+            }
+            bpow *= rep.chi_b;
+        }
+    }
+
+    #[test]
+    fn balanced_class_flips_for_p_eq_1_mod_4() {
+        // The reflection law (◆) predicts the block is forced balanced iff
+        //   χ(B)=+1  AND  χ(A) = −χ(−1).
+        // For p ≡ 1 (mod 4), χ(−1)=+1, so the balanced class flips from
+        // (+,+) (the p≡3 case) to (−,+).
+        let p = 4093u64; // 4093 ≡ 1 (mod 4), prime
+        assert_eq!(p % 4, 1);
+        let (s, _recs) = census(p, 40, 40, 80, 5000);
+        let pp = s.by_class[0]; // (+,+)
+        let mp = s.by_class[2]; // (−,+)
+        assert!(pp.0 > 10 && mp.0 > 10, "need populated classes");
+        // (−,+) is now the balanced class.
+        assert!(mp.1 < 0.01, "(−,+) should be ~0 for p≡1, got {}", mp.1);
+        // and (+,+) now carries bias (it is no longer the balanced class).
+        assert!(pp.1 > mp.1, "(+,+) must lose its balance at p≡1");
+    }
+
+    #[test]
+    fn sqrt_u64_roundtrips_both_residues() {
+        for &p in &[4099u64 /*≡3*/, 4093 /*≡1*/, 10009 /*≡1*/, 10007 /*≡3*/] {
+            let mut squares = 0;
+            for v in 1..200u64 {
+                let sq = (v * v) % p;
+                let r = sqrt_u64(sq, p).expect("square has a root");
+                assert_eq!((r * r) % p, sq, "sqrt wrong for {} mod {}", sq, p);
+                squares += 1;
+            }
+            assert!(squares > 0);
+            // A guaranteed non-residue returns None.
+            // (find one: smallest n with legendre = -1)
+            let nqr = (2..p).find(|&n| legendre_u64(n, p) == -1).unwrap();
+            assert!(sqrt_u64(nqr, p).is_none());
         }
     }
 

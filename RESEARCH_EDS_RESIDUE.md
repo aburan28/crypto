@@ -243,23 +243,28 @@ cases (e.g. `p=7919`: `Q=[1321]P` recovered from the net zero
 ## 4.5 Bias census + the reflection-symmetry law (step 1, completed)
 
 `cargo run --release --example eds_census` sweeps thousands of curves over
-three primes `p ≡ 3 (mod 4)` and aggregates the apparition-block residue
-bias by multiplier class. The result is a **clean, decisive answer**.
+five primes — three with `p ≡ 3 (mod 4)` and two with `p ≡ 1 (mod 4)` — and
+aggregates the apparition-block residue bias by multiplier class. The result
+is a **clean, decisive answer** with a sharp falsifiable prediction that
+checks out.
 
-| `p` | curves | mean bias | std(bias) | mean \|bias\| | max \|bias\| | heavy tail (\|bias\|>2/√m) |
-|----:|-------:|----------:|----------:|--------------:|-------------:|---------------------------:|
-| 4 099 | 1 568 | +0.0013 | 0.0361 | 0.0204 | 0.316 | 7.7 % |
-| 10 007 | 1 564 | +0.0012 | 0.0215 | 0.0130 | 0.150 | 8.0 % |
-| 100 003 | 760 | +0.0001 | 0.0066 | 0.0039 | 0.045 | 8.3 % |
+| `p` | class | curves | mean bias | std(bias) | mean \|bias\| | max \|bias\| | heavy tail |
+|----:|:-----:|-------:|----------:|----------:|--------------:|-------------:|-----------:|
+| 4 099 | ≡3 | 1 568 | +0.0013 | 0.0361 | 0.0204 | 0.316 | 7.7 % |
+| 10 007 | ≡3 | 1 564 | +0.0012 | 0.0215 | 0.0130 | 0.150 | 8.0 % |
+| 100 003 | ≡3 | 760 | +0.0001 | 0.0066 | 0.0039 | 0.045 | 8.3 % |
+| 4 093 | ≡1 | 1 557 | +0.0011 | 0.0320 | 0.0189 | 0.302 | 2.7 % |
+| 10 009 | ≡1 | 1 553 | +0.0005 | 0.0203 | 0.0124 | 0.174 | 6.1 % |
 
-Mean \|bias\| per multiplier class:
+Mean \|bias\| per multiplier class — note the **balanced class flips with
+`p mod 4`**:
 
-| class `(χA,χB)` | p=4099 | p=10007 | p=100003 |
-|:---------------:|-------:|--------:|---------:|
-| `(+,+)` | **0.0000** | **0.0000** | **0.0000** |
-| `(+,−)` | 0.0195 | 0.0123 | 0.0040 |
-| `(−,+)` | 0.0335 | 0.0214 | 0.0066 |
-| `(−,−)` | 0.0210 | 0.0128 | 0.0034 |
+| class `(χA,χB)` | 4099 (≡3) | 10007 (≡3) | 100003 (≡3) | 4093 (≡1) | 10009 (≡1) |
+|:---------------:|----------:|-----------:|------------:|----------:|-----------:|
+| `(+,+)` | **0.0000** | **0.0000** | **0.0000** | 0.0300 | 0.0191 |
+| `(+,−)` | 0.0195 | 0.0123 | 0.0040 | 0.0188 | 0.0123 |
+| `(−,+)` | 0.0335 | 0.0214 | 0.0066 | **0.0000** | **0.0000** |
+| `(−,−)` | 0.0210 | 0.0128 | 0.0034 | 0.0212 | 0.0138 |
 
 **Two facts jump out.**
 
@@ -283,29 +288,35 @@ W(r − n) = −A · B^{−n} · W(n)      ⇒
 χ(W(n))·χ(W(r−n)) = χ(−1) · χ(A) · χ(B)ⁿ.                          (◆)
 ```
 
-For `p ≡ 3 (mod 4)`, `χ(−1) = −1`, so:
+For the block to be *forced* balanced, the pair product `(◆)` must equal
+`−1` for every `n`, which (since `χ(B)ⁿ` must be constant in `n`) happens
+**iff `χ(B) = +1` and `χ(A) = −χ(−1)`**. Concretely:
 
-- **`(χA,χB) = (+,+)`:** the pair product is `−1` for every `n`, so `n` and
-  `r−n` always carry *opposite* residue symbols — the block cancels in
-  pairs and the bias is forced to `0` (up to the lone `n=r/2` fixed point
-  when `r` is even).
-- **`(χA,χB) = (−,+)`:** the pair product is `+1`, so reflected indices
-  *reinforce* — this class can sustain the largest fluctuations, which is
-  exactly why every census outlier lands here.
-- **`χB = −1`:** the sign alternates with `n`, giving the intermediate
-  behaviour of the `(+,−)` / `(−,−)` rows.
+- **`p ≡ 3 (mod 4)`** (`χ(−1) = −1`): balanced class is `(χA,χB) = (+,+)`;
+  the *reinforcing* class (pair product `+1`, largest fluctuations) is
+  `(−,+)`. Every census outlier at `p≡3` is `(−,+)`. ✓
+- **`p ≡ 1 (mod 4)`** (`χ(−1) = +1`): the balanced class **flips to
+  `(−,+)`**, and `(+,+)` becomes the reinforcing class. The census confirms
+  this exactly — at `p = 4093, 10009` the `(−,+)` column is `0.0000` and
+  every top-bias curve is `(+,+)`. ✓
+- **`χ(B) = −1`:** the sign alternates with `n`; no global cancellation,
+  intermediate behaviour (`(+,−)` / `(−,−)` rows).
 
-Identity `(◆)` is verified term-by-term in the test suite
-(`reflection_symmetry_law`, run on the heaviest-bias census curve), and the
-`(+,+)`-is-balanced consequence in `plus_plus_class_is_balanced`.
+(The `0` is exact up to the lone `n = r/2` fixed point when `r` is even.)
+This `χ(−1)`-dependent flip is the kind of *predicted-then-confirmed* result
+that distinguishes a real law from a fitted curiosity. Identity `(◆)` is
+verified term-by-term in the test suite for **both** regimes
+(`reflection_symmetry_law` at `p≡3`, `reflection_law_holds_for_p_eq_1_mod_4`
+at `p≡1`), and the balanced-class consequence in `plus_plus_class_is_balanced`
+and `balanced_class_flips_for_p_eq_1_mod_4`.
 
 **Upshot.** The residue "bias" is *not* an exploitable distinguisher: it is
-finite-size sampling noise, modulated by an exact reflection symmetry that
-pins the `(+,+)` class to zero and steers fluctuations into `(−,+)`. The
-Legendre sequence is, at cryptographic scale, statistically generic — but
-its *structure* (period dichotomy §3, reflection law `(◆)`) is rigid and
-fully predictable from the two multiplier characters. The handle is real;
-the *bias-based* attack on it is closed.
+finite-size sampling noise (`∝ 1/√m`), modulated by an exact reflection
+symmetry whose balanced class is `{χ(B)=+1, χ(A)=−χ(−1)}`. The Legendre
+sequence is, at cryptographic scale, statistically generic — but its
+*structure* (period dichotomy §3, reflection law `(◆)`) is rigid and fully
+predictable from `(χ(A), χ(B))` and `p mod 4`. The handle is real; the
+*bias-based* attack on it is closed.
 
 ---
 
@@ -313,14 +324,15 @@ the *bias-based* attack on it is closed.
 
 Falsifiable, ordered by cost:
 
-1. ~~**Bias census.**~~ **DONE (§4.5).** Outcome: the bias is finite-size
-   noise (`∝ 1/√m`, ~8 % Gaussian tail), with **no** constant
-   distinguisher, but governed by the exact reflection law `(◆)` that
-   forces the `(+,+)` class to zero bias and channels fluctuations into
-   `(−,+)`. The hoped-for "clean predictor of large bias" does not exist
-   as an *advantage*; it exists as a *symmetry*. Remaining: repeat for
-   `p ≡ 1 (mod 4)` (where `χ(−1)=+1` flips which class is balanced) and at
-   `p ≈ 2³²` to confirm the `1/√m` extrapolation.
+1. ~~**Bias census.**~~ **DONE (§4.5), both residue classes.** Outcome: the
+   bias is finite-size noise (`∝ 1/√m`, ~3–8 % Gaussian tail), with **no**
+   constant distinguisher, but governed by the exact reflection law `(◆)`
+   whose balanced class `{χ(B)=+1, χ(A)=−χ(−1)}` flips with `p mod 4` —
+   predicted and confirmed (`(+,+)` balanced at `p≡3`, `(−,+)` at `p≡1`).
+   The hoped-for "clean predictor of large bias" does not exist as an
+   *advantage*; it exists as a *symmetry*. Remaining only: push to
+   `p ≈ 2³²` to confirm the `1/√m` extrapolation (the u64 path supports it;
+   cost-bounded by `min_order`/`cap`).
 
 2. **Multiplier-character law in general.** Prove the §3 dichotomy for all
    `r` (the `r`-odd case has a different parity term) and express
@@ -329,13 +341,35 @@ Falsifiable, ordered by cost:
    2-torsion / the Tate pairing `⟨P,P⟩`. This connects EDS-Residue back to
    EDS-Association and the pairing.
 
-3. **Net-`χ` localisation experiment.** Build the genuine 2-D net (not the
-   point-arithmetic stand-in used here for the zero-lattice illustration)
-   and measure whether the Legendre pattern `χ(W(a,b))` constrains `Λ_k`
-   enough to beat `O(√m)`. *Prediction to break:* it does not beat
-   generic — but quantify the constant, and test small-embedding-degree
-   curves where EDS-Association is already easy, to see if the residue
-   signal piggybacks.
+3. **Net-`χ` localisation experiment** *(the remaining open door).* Build
+   the genuine 2-D net (not the point-arithmetic stand-in used here for the
+   zero-lattice illustration) and measure whether the Legendre pattern
+   `χ(W(a,b))` constrains `Λ_k` enough to beat `O(√m)`. *Prediction to
+   break:* it does not beat generic — but quantify the constant, and test
+   small-embedding-degree curves where EDS-Association is already easy, to
+   see if the residue signal piggybacks.
+
+   **Status / blocker.** The fundamental net recurrence is in hand and
+   confirmed,
+   `W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²`
+   (Stange, arXiv:0710.1316), and the `b=0` / `a=0` axes of the rank-2 net
+   are exactly the 1-D EDS of `P` / `Q` that this module already computes
+   and validates. The missing ingredient is the **mixed initial block** —
+   the closed forms for `W(2,1)`, `W(1,2)`, `W(2,−1)` (Props 6.3/6.4 of
+   arXiv:0710.1316), which the recurrence alone underdetermines and which
+   could not be retrieved in this environment (arXiv/ePrint PDFs returned
+   HTTP 403). It is *not* implemented here rather than implemented on a
+   guess: the whole experiment turns on the *canonical* (curve-fixed) gauge
+   of the net — a wrong-but-zero-preserving normalisation would pass a
+   zero-lattice check yet report a meaningless `χ`-pattern. **Certification
+   plan once the seeds are in hand:** (i) match the recurrence output on
+   both axes against the validated 1-D EDS (pins the gauge), (ii) reproduce
+   every net zero against `[a]P+[b]Q=O` (structure), (iii) match the mixed
+   seeds against their closed forms (gauge cross-term). Only then measure
+   `χ(W(a,b))`. Note the EDS-Association ↔ Tate-pairing ↔ MOV/Frey–Rück
+   link (§2.2) is *already* realised in this crate by
+   `cryptanalysis::mov_attack`, which is the regime where this net signal
+   provably collapses to an easy DLP.
 
 4. **`F_p` ↔ `Z` bridge.** Make the Silverman–Stephens sign-period formula
    explicit mod `p` and check whether the `χ`-period `r·j_χ` we measure is
@@ -353,8 +387,8 @@ Falsifiable, ordered by cost:
 | EDS-Residue solves ⟺ ECDLP solves (sub-exp) | **Lauter–Stange theorem** — no shortcut |
 | `χ`-period determined by `(χ(A),χ(B))` | **Confirmed empirically**, closed form in §3 |
 | Residue bias is an exploitable distinguisher | **Refuted (§4.5):** bias `∝ 1/√m`, ~8 % Gaussian tail, no constant advantage |
-| Reflection law `(◆)` pins `(+,+)` to zero bias | **Proven & test-verified** (§4.5) on 3 primes |
-| QR pattern beats generic ECDLP | **No evidence; bias route now closed.** Net-`χ` localisation (§5.3) untested |
+| Reflection law `(◆)`; balanced class `{χB=+1, χA=−χ(−1)}` flips with `p mod 4` | **Predicted & confirmed**, test-verified both regimes (§4.5), 5 primes |
+| QR pattern beats generic ECDLP | **No evidence; bias route closed.** Net-`χ` localisation (§5.3) blocked on Stange's mixed seeds (arXiv 403 here) |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
 often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). The
@@ -374,7 +408,7 @@ neither opens nor closes.
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 9 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 12 tests
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 ```
@@ -382,7 +416,9 @@ cargo run   --release --example eds_census                 # the §4.5 census
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,
 `multiplier_law_and_periods`, `reflection_symmetry_law`,
-`plus_plus_class_is_balanced`, `census_runs_and_is_sane`, `report_renders`.
+`reflection_law_holds_for_p_eq_1_mod_4`, `plus_plus_class_is_balanced`,
+`balanced_class_flips_for_p_eq_1_mod_4`, `sqrt_u64_roundtrips_both_residues`,
+`census_runs_and_is_sane`, `report_renders`.
 
 ---
 
@@ -394,6 +430,10 @@ Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
   <https://arxiv.org/abs/0803.0728> · <https://eprint.iacr.org/2008/099>
 - K. E. Stange. *The Tate Pairing via Elliptic Nets.* Pairing 2007.
   ePrint 2006/392. <https://eprint.iacr.org/2006/392>
+- K. E. Stange. *Elliptic Nets and Elliptic Curves.* Algebra & Number
+  Theory 5 (2011). arXiv:0710.1316. <https://arxiv.org/abs/0710.1316>
+  (rank-2 net polynomials and initial values: Props 3.8, 6.3, 6.4 — needed
+  for §5.3.)
 - R. Shipsey. *Elliptic Divisibility Sequences.* PhD thesis, Goldsmiths,
   University of London, 2000.
 - J. H. Silverman, N. Stephens. *The sign of an elliptic divisibility

@@ -16,13 +16,16 @@ use std::time::Instant;
 
 fn main() {
     println!("\n=== EDS-Residue bias census ===\n");
-    // (p, a_max, b_max, min_order, cap).  All primes ≡ 3 (mod 4).
+    // (p, a_max, b_max, min_order, cap, label).
     let runs = [
-        (4099u64, 40u64, 40u64, 80u64, 5_000usize),
-        (10_007, 40, 40, 200, 11_000),
-        (100_003, 28, 28, 2_000, 101_000),
+        (4099u64, 40u64, 40u64, 80u64, 5_000usize, "≡3 mod 4"),
+        (10_007, 40, 40, 200, 11_000, "≡3 mod 4"),
+        (100_003, 28, 28, 2_000, 101_000, "≡3 mod 4"),
+        (4093, 40, 40, 80, 5_000, "≡1 mod 4"),
+        (10_009, 40, 40, 200, 11_000, "≡1 mod 4"),
     ];
-    for (p, am, bm, mo, cap) in runs {
+    for (p, am, bm, mo, cap, label) in runs {
+        println!("# p = {} ({}):", p, label);
         let t = Instant::now();
         let (s, recs) = census(p, am, bm, mo, cap);
         println!("{}", format_census(&s));
