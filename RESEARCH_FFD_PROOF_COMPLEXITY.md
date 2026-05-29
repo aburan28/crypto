@@ -1,0 +1,298 @@
+# A proof-complexity bridge for the first-fall-degree assumption
+
+**Status:** research proposal (novel approach), 2026-05-29
+**Builds on:** `src/cryptanalysis/ffd_harness.rs`,
+`src/cryptanalysis/groebner_f4.rs`, `src/cryptanalysis/semaev_sat.rs`,
+`src/cryptanalysis/binary_semaev.rs`, `src/cryptanalysis/diem_descent.rs`,
+`RESEARCH_FFD_MEASUREMENT.md`.
+**One-line thesis:** the disputed first-fall-degree heuristic is, up to
+constants, a statement about the **Polynomial Calculus refutation
+degree** of the Weil-descended summation-polynomial system — and that
+degree is governed by the **expansion of the descent incidence graph**,
+a combinatorial quantity we can compute at full cryptographic size
+*without ever running a Gröbner basis*.
+
+---
+
+## 1. The dispute, restated as one number
+
+Index calculus on `E/F_q` decomposes a target `R` over a factor base
+`{P : x(P) ∈ V}` (`V` an `F_2`-subspace of dimension `n'` for binary
+fields, a subfield for `F_{p^k}`) by solving
+
+```
+   S_{m+1}(x_1, …, x_m, x(R)) = 0 ,     x_i ∈ V,
+```
+
+where `S_{m+1}` is Semaev's summation polynomial. Weil descent turns
+this into a polynomial system over `F_2` (resp. `F_p`); one computes a
+Gröbner basis and reads off the decomposition. **Everything** —
+Petit–Quisquater's `2^{O(n^{2/3}\log n)}` claim, Semaev 2015, the
+Huang–Kosters–Yeo last-fall-degree rebuttal, the Galbraith–Petit
+pushback — turns on a single number:
+
+> **the degree `D*` at which the Gröbner / Macaulay computation
+> terminates** (the "solving degree" / "degree of regularity").
+
+- The **first-fall-degree assumption** says `D* ≈ d_ff`, the smallest
+  degree at which *any* non-generic syzygy appears, and that
+  `d_ff = O(log n)` (or `O(1)`), giving subexponential ECDLP.
+- **Huang–Kosters–Yeo (CRYPTO 2015)** introduced the **last fall
+  degree** `d_last`, proved `D* ≤ d_last + (\text{small})`, and
+  exhibited explicit Weil-descent systems where `d_ff ≪ d_last`. So the
+  assumption `D* ≈ d_ff` is *unjustified*: the true solving degree can
+  sit far above the first fall.
+- **Galbraith–Petit** observed empirically that `d_ff` *looks* constant
+  at tiny `n` but extrapolation is unsafe.
+
+`ffd_harness.rs` already measures `d_ff` (the **first** fall). Its own
+table shows `d_ff = 3` flat for `n = 3..7`. **But `d_ff` is the wrong
+number.** The number that decides security is `D* ≈ d_last`, and nobody
+in this repo (or, computationally, in the literature) measures it
+directly or predicts it cheaply. That is the gap this proposal closes.
+
+---
+
+## 2. The novel move: `D*` *is* a Polynomial Calculus refutation degree
+
+Fix a **non-decomposable** target `R` (no `m`-term decomposition over
+`V`). Then the system `Σ = { S_{m+1}(x,x(R)) = 0, field equations
+x_i^2 = x_i }` is **unsatisfiable**, and a Gröbner computation
+necessarily derives `1` — it produces a *refutation*.
+
+The classical Clegg–Edmonds–Impagliazzo correspondence says: the
+matrix-F4 computation reaching degree `D` is *exactly* a degree-`D`
+**Polynomial Calculus (PC)** derivation over the same field. Hence
+
+```
+        D*  =  Gröbner solving degree
+            ≍  Polynomial-Calculus refutation degree of Σ
+            ≍  Huang–Kosters–Yeo last fall degree  d_last.
+```
+
+This is the bridge. It lets us **import 25 years of proof-complexity
+degree lower bounds** — a body of technique the ECDLP literature has
+essentially never used — to settle whether `D*` is small (attack works)
+or large (attack is exponential). Three immediate consequences:
+
+| Crypto object                       | Proof-complexity object                    |
+|-------------------------------------|--------------------------------------------|
+| first-fall-degree assumption        | "PC refutation degree is `O(\log n)`"      |
+| HKY last fall degree `d_last`       | PC refutation **degree** of `Σ`            |
+| Galbraith–Petit "it grows fast"     | a PC degree **lower bound**                |
+
+The point of the reframing: PC degree is the canonical object for
+which **expansion-based lower bounds** exist (Ben-Sasson–Wigderson for
+width; Alekhnovich–Razborov, Mikša–Nordström for PC/PCR degree). We can
+try to *prove*, not just measure, that `D*` is linear in `n` for generic
+curves — i.e. that the first-fall-degree assumption is **false** for
+cryptographic parameters. That is a defensive theorem, and it slots
+straight into this repo's cryptanalysis-resistance map theme.
+
+---
+
+## 3. The predictor: expansion of the descent incidence graph
+
+The reason PC degree is *low* for some Semaev systems and *high* for
+others should not be mysterious — proof complexity tells us exactly what
+controls it. For a bounded-degree polynomial system over `F_2`, the PC
+refutation degree is lower-bounded by the **boundary expansion** of the
+constraint–variable bipartite (Tanner) graph, *provided* the
+constraints are "immune" (no small subset is satisfiable by a
+low-degree assignment that a clever derivation could exploit).
+
+Concretely, after the Weil descent in `ffd_harness::weil_descend_s3`,
+each of the `n` output equations is a degree-2 `F_2`-polynomial in the
+`2n` bit-variables, and *which* bit-variables appear in equation `j` is
+dictated by the **structure-constant tensor** `c_{ikj}` of the chosen
+`F_2`-basis of `F_{2^n}`:
+
+```
+   z^i · z^k  =  Σ_j c_{ikj} z^j        (the field-multiplication tensor).
+```
+
+Build the bipartite graph
+
+```
+   G(E, basis)  :  equations  ⟷  bit-variables,   edge iff variable
+                   occurs in equation (with multiplicity from c_{ikj}).
+```
+
+**Central conjecture (falsifiable).**
+
+```
+   D*  =  Θ( min( m·n' ,  γ(G)·n ) ),
+```
+
+where `γ(G)` is the (small-set) boundary/spectral expansion of
+`G(E, basis)`. Equivalently:
+
+> the first-fall-degree assumption holds **iff** the descent incidence
+> graph has expansion `o(1)` — i.e. iff the basis/field structure-
+> constant tensor is sparse and clustered.
+
+This **reconciles the dispute** instead of picking a side:
+
+- The HKY counterexamples and the Galbraith–Gebregiyorgis "nice" cases
+  (Koblitz / subfield bases, sparse normal bases) are precisely the
+  **low-expansion** structures → `D*` small → the heuristic holds *for
+  them*. That is *why* the first-fall assumption ever looked true.
+- A **generic** curve over a generic basis (and every prime-field
+  descent that lacks a subfield) gives a **high-expansion** tensor →
+  `D* = Θ(n)` → the heuristic is **false**, and the attack is
+  exponential.
+
+Crucially, `γ(G)` is the spectral gap of an `n × 2n`-ish graph: it is
+computable in milliseconds at `n = 256` even though the Gröbner basis it
+predicts is astronomically out of reach. **That is the deliverable a
+parameter-selection committee actually needs.**
+
+---
+
+## 4. What gets built (concrete, plugs into existing modules)
+
+Four pieces, each a thin extension of code already in `cryptanalysis/`:
+
+1. **`pc_degree_harness`** — fork `ffd_harness.rs` but *do not stop at
+   the first fall*. Pick a **non-decomposable** `x(R)`, run the
+   bit-packed Macaulay reduction to completion, and report the
+   **refutation degree** `D*` = smallest `D` at which a row reduces to
+   the constant `1`. The harness currently prints one column (`d_ff`);
+   this adds the column that matters (`D* ≈ d_last`). The gap between
+   the two columns *is* the Huang–Kosters–Yeo invariant, made
+   operational for the first time in this repo.
+
+2. **`descent_expansion`** — given a curve and an `F_2`-basis, build
+   `G(E, basis)` from the structure-constant tensor and return
+   `γ(G)` via the second eigenvalue of the normalized incidence
+   Laplacian plus an explicit small-set boundary scan. Pure linear
+   algebra; runs at cryptographic `n`.
+
+3. **Correlation study** — sweep the existing toy zoo: binary `n=3..10`
+   under {polynomial, normal, sparse Galbraith–Gebregiyorgis} bases,
+   plus the `F_{p^k}` Diem examples (`diem_descent.rs`). Plot measured
+   `D*` against predicted `γ(G)`. The conjecture predicts a clean linear
+   law `D* ≈ γ·n`; deviations localize exactly where the algebraic
+   immunity step (below) fails — which is itself informative.
+
+4. **Lower-bound attempt** — adapt Ben-Sasson–Wigderson /
+   Mikša–Nordström expansion ⇒ PC-degree to `Σ`. The one genuinely hard
+   step (and the honest risk) is **immunity**: Semaev equations are not
+   random XORs, they carry the group law, so we must show that no small
+   subset of descent equations is "prematurely refutable" at low degree.
+   The proposed route: prove that the summation-polynomial coefficients
+   are **algebraically independent** functions of the curve (a
+   Schwartz–Zippel / generic-coordinates argument), so that under a
+   random `F_2`-linear change of factor-base basis the system is, with
+   high probability, an expander-supported quadratic system to which the
+   expansion bound applies. **If this step holds for generic curves, the
+   first-fall-degree assumption is provably false at cryptographic
+   scale** — a defensive theorem, not just a heuristic.
+
+---
+
+## 5. The attacker's corollary (so this is two-sided, not just defense)
+
+The same theory hands the *attacker* a search target: **minimize
+`γ(G)`**. It unifies every known speedup as "an expansion reduction":
+
+- subfield / Koblitz curves → block-structured, low-expansion tensor;
+- symmetrization (Faugère–Gaudry–Huot–Renault, our
+  `symmetrized_semaev.rs`) → collapses the `S_m`-orbit, shrinking the
+  *effective* variable set and hence `γ·n`;
+- GHS-amenable field/basis choices → sparse normal bases.
+
+It also makes a sharp prediction: **any genuinely new subexponential
+family must exhibit an explicit low-expansion descent.** That converts
+"hunt for a subexponential ECDLP attack" into the concrete, checkable
+subproblem "find a curve/basis whose multiplication-tensor Tanner graph
+has `o(1)` small-set expansion" — a structural certificate we can screen
+candidate primes and fields for, feeding directly into
+`pkm_criterion.rs` and `solinas_correlations.rs` in the resistance map.
+
+---
+
+## 6. Falsifiable predictions (how to kill this proposal fast)
+
+1. `pc_degree_harness` on a generic binary curve with a **dense normal
+   basis** must show `D*` growing roughly linearly in `n` over
+   `n = 5..10`, *while* `d_ff` stays ≈ 3. If `D*` also stays constant,
+   the bridge's premise (that `d_ff ≪ D*` generically) is wrong and the
+   proposal dies.
+2. Across the basis sweep, `D*` must be **monotone in `1/γ(G)`**. A
+   scatter with no correlation refutes the central conjecture.
+3. The HKY explicit counterexample systems must register as **low-`γ`**
+   under `descent_expansion`. If they don't, the predictor doesn't
+   capture the known gap and must be reformulated.
+
+Each is cheap: (1) and (2) run in minutes on a laptop at `n ≤ 10`; (3)
+is pure linear algebra at any `n`.
+
+---
+
+## 7. Honest limitations / where it can break
+
+- **PC ⇄ solving-degree is not exactly equality** over `F_2` with field
+  equations — it is PC (sometimes PCR) and there are `±O(1)` and
+  characteristic subtleties (Galesi–Lauria). The experiments calibrate
+  the constant; the asymptotic claim is what matters.
+- **Immunity is the crux and may fail precisely for special fields** —
+  which is the *point* (those are the breakable cases), but it makes the
+  *generic* lower bound genuinely hard. The proposal's defensive theorem
+  is conditional on the algebraic-independence step.
+- **Locality.** Expansion bounds want bounded-degree constraints; the
+  descent equations are degree 2 but globally coupled through the
+  tensor. The argument has to lean on tensor *sparsity* in the chosen
+  basis, so the bound is really about (curve, basis) pairs, not curves
+  alone — consistent with the known basis-sensitivity of GHS/Weil
+  descent.
+- It predicts asymptotics and a *screening* invariant, **not** a break
+  of any 256-bit curve. As with everything in §6 of the research map, it
+  does not threaten deployed parameters.
+
+---
+
+## 8. Why this is new
+
+- HKY *define* `d_last` and bound it with HFE-style algebra; **nobody
+  bounds it via combinatorial expansion of the descent graph.** That
+  bridge is the contribution.
+- Proof-complexity PC-degree lower bounds have been applied to random
+  k-XOR/k-CNF, Tseitin, and pigeonhole — **never to
+  summation-polynomial / ECDLP systems.** The translation, and the
+  "immunity from algebraic independence of Semaev coefficients" step,
+  is the new technical content.
+- It yields a predictor **evaluable without running Gröbner**, at full
+  cryptographic `n` — exactly the regime where the attack itself is
+  unobservable and where the dispute has therefore been stuck on
+  extrapolation from `n ≤ 8`.
+- It **reconciles** Petit–Quisquater/Semaev with Huang–Kosters–Yeo and
+  Galbraith–Petit: all three are right, on different expansion regimes.
+
+---
+
+## References
+
+- I. Semaev, *Summation polynomials and the discrete logarithm problem
+  on elliptic curves*, ePrint 2004/031; *New algorithm for the discrete
+  logarithm problem on elliptic curves*, ePrint 2015/310.
+- C. Petit, J.-J. Quisquater, *On polynomial systems arising from a
+  Weil descent*, ASIACRYPT 2012.
+- M.-D. Huang, M. Kosters, S. L. Yeo, *Last fall degree, HFE, and Weil
+  descent attacks on ECDLP*, CRYPTO 2015.
+- S. Galbraith, S. Gebregiyorgis, *Summation polynomial algorithms for
+  elliptic curves in characteristic two*, INDOCRYPT 2014.
+- J.-C. Faugère, P. Gaudry, L. Huot, G. Renault, *Using symmetries in
+  the index calculus for elliptic curve DLP*, J. Cryptology 2014.
+- M. Clegg, J. Edmonds, R. Impagliazzo, *Using the Groebner basis
+  algorithm to find proofs of unsatisfiability*, STOC 1996.
+- E. Ben-Sasson, A. Wigderson, *Short proofs are narrow — resolution
+  made simple*, J. ACM 2001.
+- M. Alekhnovich, A. Razborov, *Lower bounds for polynomial calculus:
+  non-binomial case*, FOCS 2001.
+- M. Mikša, J. Nordström, *A generalized method for proving polynomial
+  calculus degree lower bounds*, CCC 2015.
+- N. Galesi, M. Lauria, *Optimality of size-degree tradeoffs for
+  polynomial calculus*, ACM TOCL 2010.
+</content>
+</invoke>
