@@ -52,7 +52,7 @@ current reach." Maintained as a table here and machine-checked by
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
 | P6 | Over-determined `ρ ≫ 1` collapses `D*` to 2 (Nullstellensatz) | `supported` | n=10 sweep: ρ≥2.5 ⇒ mean D* ≤ 2.03 (`15b5b1c`, re-confirmed iteration 1) |
-| **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iteration 5: across {Subfield, Coordinate, Random} at n=8,n'=4 the early-defect↔D* Spearman is **ρ_s = −1.000** (perfect inverse rank order): Subfield (defect 0.172, D* 2.06) > Coordinate (0.079, 2.72) > Random (0.027, 3.17). The predictor that **works where both graph invariants failed** — it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
+| **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iteration 5: at n=8,n'=4 the early-defect↔D* Spearman is **ρ_s = −1.000** (perfect inverse rank order). **EXP-G iteration 6 turned the 3-point ordering into a 40-cell curve** over 8 operating points × 3 families: pooled **ρ_s = −0.754** (Pearson −0.728); in the *critical* regime `2n'=n` (the ECDLP case) ρ_s = −0.750 with OLS slope **−7.2 D* per unit defect**. Seed-robust (pooled ρ_s ∈ [−0.64,−0.76], critical slope ∈ [−6.9,−7.7] over 4 seeds). The 3 within-point "misses" are exactly the over-determined points `2n'≪n` where D* is floored at 2 by P6 — saturation, not refutation. The predictor that **works where both graph invariants failed** — it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
 
 New predictions are appended as experiments suggest them; killed ones stay
 in the table with their kill evidence (negative results are the point).
@@ -190,6 +190,35 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 6 (EXP-G — defect↔D* law widened to a 40-cell curve)
+
+- Task: turn iteration 5's perfect-but-3-point ρ_s into a real correlation.
+  New runner `examples/ffd_expg_curve.rs` pools `(early_defect, D*)`
+  cell-means across **8 operating points** with `n'|n`
+  ({(4,2),(6,2),(6,3),(8,2),(8,4),(9,3),(10,2),(10,5)}) × 3 families
+  (Subfield, Coordinate, ×3 reseeded Random), 20 targets/cell → **40 cells**.
+- Result: pooled **Spearman ρ_s = −0.754**, Pearson −0.728, OLS slope −5.5.
+  Seed-robust over 4 seeds (pooled ρ_s ∈ [−0.64, −0.76]).
+- **Regime split (the refinement).** Within-point ordering held at 5/8
+  points; the 3 misses were the over-determined points `(n,2)` where `2n'≪n`
+  and D* is floored at 2 by the Nullstellensatz collapse (P6) — D* has no
+  room to move, so the law can't show there. Splitting:
+  - **critical `2n'=n`** (the ECDLP regime, 20 cells): ρ_s = −0.750, slope
+    **−7.2** — steep, because D* is free to vary.
+  - over-determined `2n'<n` (20 cells): ρ_s = −0.738 but slope −1.9 (D*
+    compressed near the P6 floor).
+  The critical-regime slope is the seed-stable estimator (∈ [−6.9, −7.7]).
+- Gate G-P3-alg (pooled): **SUPPORTED** — the algebraic predictor is a law
+  across operating points, not a one-point artifact. Honest caveat: at the
+  weakest seed critical ρ_s dips to −0.52 (small samples, tied Random
+  reseeds); the OLS slope is the more stable witness.
+- Ledger delta: P3-alg evidence upgraded (3-point ordering → 40-cell curve).
+- Snapshot: `experiments/ffd_expg_curve.json` (schema v2, regime split).
+- Next: EXP-D reach (sparse-F4) to test the slope past `2n'=10`, and
+  formalise whether `δ(D)` is the Hilbert-defect proxy for the last-fall
+  degree; then rewrite proposal §3 around it.
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 5 (ALGEBRAIC discriminator — P3-alg SUPPORTED, the positive result)
 
