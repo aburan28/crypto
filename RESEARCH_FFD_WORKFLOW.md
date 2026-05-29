@@ -28,7 +28,8 @@ specialised to the FFD program.
 | Distribution | `pc_degree_avg` | `D*` min/mean/max over many targets, ratio `ρ` | `2n' ≤ 10` |
 | Regime | `pc_degree_avg::run_pc_regime_sweep` / `…_operating_point_sweep` | `D*` vs `ρ`, `D*` vs `n` at fixed `ρ` | `2n' ≤ 10` |
 | Expansion (predictor) | `descent_expansion` *(not built)* | `γ(G)` from the multiplication tensor | any `n` |
-| Sparse solver (reach) | `groebner_f4` + sparse F4 *(partial)* | `D*` | target `2n' ≤ 16` |
+| Refutation (reach) | dense single-pass `pc_degree_harness::rank_and_refute` + `d_cap` censoring | `D*` | reaches `2n'=14`–`16` (sparse backend built but lost to fill-in, iter. 8) |
+| Algebraic predictor | `descent_algebraic` (`Δ_low`) + `ffd_expg_curve` / `ffd_defect_scaling` | `Δ_low ↔ D*`; `Δ_low(2n')` scaling | `Δ_low` to `2n'=20` |
 
 The loop's first job each iteration is to pick a prediction; its second is
 to pick the **cheapest instrument** on this stack that can attack it.
@@ -153,9 +154,12 @@ closest to decidable given current reach. Hand-maintained seed order:
 3. **EXP-C — build `descent_expansion` (unblocks P2, P4).** Tanner graph
    from the `IrreduciblePoly` multiplication tensor; spectral gap +
    small-set boundary scan. Then run G-P2.
-4. **EXP-D — sparse-F4 reach (unblocks P1′).** Swap the dense Macaulay
-   rank for a sparse/blocked solver to push `2n' = 12 → 16`, then re-run
-   G-P1 and G-P1′ with ≥ 5 points per parity class.
+4. **EXP-D — reach for P1′.** *(Partly addressed, iter. 7–8.)* The dense
+   single-pass `rank_and_refute` + `d_cap` censoring now reaches
+   `2n'=14`–`16`; a sparse backend was built but lost to Macaulay fill-in
+   (iter. 8). Remaining: ≥ 5 points per parity class for the *linear*-law
+   test of P1′ (a blocked/4-Russians dense solver, not sparse, is the next
+   lever if more reach is needed).
 5. **EXP-E — basis sweep (P2, P4).** Polynomial vs normal vs sparse
    Galbraith–Gebregiyorgis bases; the central test of the whole bridge.
 

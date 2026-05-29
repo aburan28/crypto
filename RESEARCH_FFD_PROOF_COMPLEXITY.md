@@ -255,6 +255,58 @@ predicts is astronomically out of reach. **That is the deliverable a
 parameter-selection committee actually needs** — and unlike the refuted
 `γ(G)`, it tracks `D*` with the correct sign.
 
+### 3.4 Toward a lower bound: the defect-vanishing route
+
+The corrected predictor immediately suggests the **defensive theorem** the
+whole program is after — a *generic* lower bound `D* = Θ(n)`. The bridge is:
+
+> **Conditional theorem (defect ⇒ hardness).** Let `Σ_N` be the
+> `V`-restricted descended Semaev system at `2n'=N`. If, for a generic
+> factor base `V`, the early Hilbert defect vanishes — `Δ_low(Σ_N) = o(1)`
+> as `N → ∞` for every fixed cutoff `D_low` — then `Σ_N` is asymptotically
+> **semi-regular** through low degree, so its solving / refutation degree is
+> the generic one, `D* = Θ(N) = Θ(n)`. Hence the first-fall-degree
+> assumption is **false** for generic curves/bases, and the index-calculus
+> attack is exponential there.
+
+The implication step is standard: a sequence that matches the semi-regular
+Hilbert function through low degree has its degree of regularity at the
+generic value, which for `m = Θ(N)` quadratics in `N` Boolean variables is
+`Θ(N)` (Bardet–Faugère–Salvy). The *only* unproven input is the antecedent:
+
+> **Genericity lemma (open, the crux).** For a uniformly random
+> `F_2`-linear factor base `V` of dimension `n'`, `Δ_low(Σ_N) = o(1)` with
+> high probability.
+
+This is the same "immunity" obstacle as before, but now stated for the
+*Hilbert defect* rather than graph expansion — and it is the natural place
+to use the **algebraic independence of the Semaev coefficients**: a random
+`F_2`-linear restriction should put the degree-`≤ D_low` part of `Σ_N` in
+generic position, so its low-degree Hilbert function is the semi-regular one
+whp. Proving this is future work; what the experiments establish is that the
+antecedent **holds empirically, with room to spare.**
+
+> **Evidence (EXP-H, `examples/ffd_defect_scaling.rs`, snapshot
+> `experiments/ffd_defect_scaling.json`).** In the critical regime `2n'=n`,
+> the normalized early defect of the **Random** (generic) family decays
+> polynomially to zero,
+>
+> ```
+>    Δ_low(Random)  ≈  a · (2n')^{−c},     c ≈ 4.3   (4.2–4.5 over seeds),
+> ```
+>
+> measured cleanly across `2n' ∈ {6,…,20}` (`Δ_low`: 0.155 → 0.0007). The
+> **Subfield** family stays bounded away from 0 over the same range
+> (0.23 → 0.048), so the ratio `Δ_low(Subfield)/Δ_low(Random)` *diverges*,
+> 6.7 → 67. The generic defect vanishing — and the structured defect
+> persisting — is exactly the two-sided shape the conditional theorem needs:
+> generic ⇒ hard, subfield ⇒ easy.
+
+So the lower-bound route reduces to a single, sharply-stated, empirically
+well-supported lemma about the low-degree genericity of random restrictions
+— a much more tractable target than a PC-degree expansion bound on a
+globally-coupled quadratic system.
+
 ---
 
 ## 4. What gets built (concrete, plugs into existing modules)
@@ -333,8 +385,10 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    the sign of the trend.*
    (ii) The climb is real but shallow over `n ≤ 12` — three points on the
    odd subsequence is suggestive, not conclusive; confirming a *linear*
-   law needs (a) a sparse-F4 backend to reach `2n' ≳ 14`, and (b)
-   separating the two parity classes explicitly. (iii) `D*` here is still
+   law needs (a) more reach (the dense single-pass `rank_and_refute` plus
+   `d_cap` censoring now reaches `2n'=14`–`16`; a tried sparse backend lost
+   to Macaulay fill-in — see workflow iter. 8), and (b) separating the two
+   parity classes explicitly. (iii) `D*` here is still
    bounded by the small `n'`; the absolute degrees are toy-scale. The
    trend, not the magnitude, is the result.
 
@@ -373,17 +427,26 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    ρ_s = −0.79, critical-regime slope ≈ −7.6 (§3.3), seed-robust. This is
    the working replacement for the expansion study (item 3).
 
-5. **Lower-bound attempt** — two routes, now reordered by the evidence.
-   (a) *Algebraic (favoured):* turn the empirical `D* ↓ Δ_low` law into a
-   bound — show that for a generic factor base the early defect is `o(1)`
-   (the quotient tracks semi-regular through low degree, e.g. via algebraic
-   independence of the Semaev coefficients), forcing `D* = Θ(n)`.
+5. **Defect-scaling study** — *(implemented:
+   `examples/ffd_defect_scaling.rs` (EXP-H), snapshot
+   `experiments/ffd_defect_scaling.json`.)* Measures `Δ_low(2n')` for the
+   Subfield vs Random families in the critical regime to `2n'=20` (cheap:
+   degree-≤3 ranks only). **Outcome:** Random `Δ_low ≈ (2n')^{−4.3} → 0`
+   while Subfield stays bounded — the empirical antecedent of the §3.4
+   conditional theorem (the generic defect vanishes; the structured one
+   persists).
+
+6. **Lower-bound attempt** — the route is now §3.4 (defect vanishing).
+   (a) *Algebraic (favoured):* the conditional theorem `Δ_low = o(1) ⇒ D* =
+   Θ(n)` is in hand; the one open input is the **genericity lemma**
+   (`Δ_low = o(1)` whp for a random `F_2`-linear factor base, via algebraic
+   independence of the Semaev coefficients), for which EXP-H (item 5) is
+   strong evidence (`(2n')^{−4.3}` decay).
    (b) *Expansion (legacy):* the Ben-Sasson–Wigderson / Mikša–Nordström
-   route via **immunity**; retained because a PC-degree lower bound still
-   needs a degree-vs-structure argument, but it is no longer the primary
-   path since spectral `γ` does not track `D*`. **If either step holds for
-   generic curves, the first-fall-degree assumption is provably false at
-   cryptographic scale** — a defensive theorem, not just a heuristic.
+   route via immunity; retained only as a fallback, since spectral `γ` does
+   not track `D*`. **If the genericity lemma holds, the first-fall-degree
+   assumption is provably false at cryptographic scale** — a defensive
+   theorem, not just a heuristic.
 
 ---
 
@@ -452,12 +515,22 @@ map.
    `2n' ∈ {4,…,14}` give pooled Spearman ρ_s = −0.79; in the critical
    regime `2n'=n` ρ_s = −0.78 with OLS slope ≈ −7.6 (seed-robust, slope
    ∈ [−7.6,−8.5]). The kill condition is now the *reverse*: if at larger
-   reach (sparse-F4, `2n' ≳ 16`) the slope flattens to 0 or flips sign,
-   the algebraic predictor fails too and the bridge has no working
-   predictor. So far it strengthens with reach.
+   reach the slope flattens to 0 or flips sign, the algebraic predictor
+   fails too and the bridge has no working predictor. So far it strengthens
+   with reach.
+
+5. **(The lower-bound antecedent — §3.4.)** For the generic (Random)
+   factor base in the critical regime, the early defect must **vanish** as
+   `2n' → ∞`. **Status: SUPPORTED (workflow iteration 8, EXP-H).** Random
+   `Δ_low ≈ (2n')^{−4.3} → 0` across `2n' ∈ {6,…,20}`, while Subfield stays
+   bounded (ratio diverges 6.7 → 67). Kill condition: if Random `Δ_low`
+   instead plateaued at a constant `> 0`, generic systems would *not* be
+   asymptotically semi-regular and the defensive-theorem route would
+   collapse. It does not plateau.
 
 Each is cheap: (1), (2), (4) run in minutes on a laptop at `2n' ≤ 14`;
-(3) is pure linear algebra at any `n`.
+(3) is pure linear algebra at any `n`; (5) runs to `2n'=20` in seconds
+(degree-≤3 ranks only).
 
 ---
 
