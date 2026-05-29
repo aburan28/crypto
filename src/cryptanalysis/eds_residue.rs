@@ -530,8 +530,153 @@ pub fn format_report(r: &EdsReport) -> String {
     )
 }
 
-// ── bias census (fast u64 path) ─────────────────────────────────────────────
+// ── EDS-Residue χ-localisation (rank-1, decimation identity) ────────────────
 //
+// The genuine 2-D net is blocked on Stange's mixed initial seeds (see
+// RESEARCH_EDS_RESIDUE.md §5.3).  But the EDS-Residue question — how much the
+// quadratic-residuosity of EDS terms leaks about the discrete log — is
+// answerable in rank 1, fully canonically, via the decimation identity
+//
+//     ψ_{κn}(P) = ψ_n([κ]P) · ψ_κ(P)^{n²}                              (DEC)
+//
+// (Ward / Shipsey).  Taking Legendre symbols and using χ(·)^{n²}=χ(·)^{n}:
+//
+//     χ(ψ_n(Q)) = χ(ψ_{kn}(P)) · χ(ψ_k(P))^{n}     for Q = [k]P.       (DEC-χ)
+//
+// The left side is computable from Q's coordinates alone (no knowledge of k);
+// each n therefore pins a constraint on k against the precomputed table
+// T[j] = χ(ψ_j(P)).  The experiment measures the *minimal window* of n's
+// whose residues uniquely identify k — i.e. the information content of the
+// EDS-Residue signal.
+
+/// `T[j] = χ(ψ_j(P)) = (W_{E,P}(j) | p)` for `j ∈ [0, upto)`.
+pub fn chi_eds_table(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    px: &BigUint,
+    py: &BigUint,
+    upto: usize,
+) -> Vec<i8> {
+    let w = eds_sequence(p, a, b, px, py, upto.max(5));
+    w.iter().map(|wn| legendre(wn, p)).collect()
+}
+
+/// `±1` raised to a parity (`n² ≡ n (mod 2)`): returns `s` if `n` is odd
+/// (and `s≠0`), else `1`.
+#[inline]
+fn chi_pow_nsq(s: i8, n: usize) -> i8 {
+    if n % 2 == 1 {
+        s
+    } else {
+        1
+    }
+}
+
+/// Result of one χ-localisation trial.
+#[derive(Clone, Debug)]
+pub struct LocalisationResult {
+    pub order: u64,
+    pub k: u64,
+    /// Minimal window `W` (consecutive `n≥2`) after which every surviving
+    /// candidate lies in `{k, m−k}` — i.e. `k` is pinned *up to sign*, the
+    /// best any sign-symmetric residue signal can do.  `None` if not reached
+    /// within budget.
+    pub unique_window: Option<usize>,
+    /// Number of candidates still matching at the largest tested window.
+    pub residual_candidates: usize,
+    /// Whether `m−k` is itself distinguishable from `k` by the residues
+    /// (true ⇒ the window pins `k` exactly, not just up to sign).
+    pub sign_resolved: bool,
+    /// Did the observed `χ(ψ_n(Q))` match the decimation prediction (DEC-χ)?
+    pub decimation_ok: bool,
+}
+
+/// Measure how many EDS-Residue bits identify the discrete log `k` for
+/// `Q = [k]P`.  Fully self-contained and self-validating (checks DEC-χ).
+/// Returns `None` if `Q` is the identity or 2-torsion.
+pub fn localisation(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    px: &BigUint,
+    py: &BigUint,
+    order: u64,
+    k: u64,
+    max_window: usize,
+) -> Option<LocalisationResult> {
+    let m = order;
+    // Q = [k]P.
+    let a_fe = fe(a, p);
+    let base = Point::Affine {
+        x: fe(px, p),
+        y: fe(py, p),
+    };
+    let q = base.scalar_mul(&BigUint::from(k), &a_fe);
+    let (qx, qy) = match &q {
+        Point::Affine { x, y } if !y.is_zero() => (x.value.clone(), y.value.clone()),
+        _ => return None, // identity or 2-torsion ⇒ ψ_2(Q)=0, degenerate
+    };
+
+    // Observed residues from Q's own EDS: o[n] = χ(ψ_n(Q)).
+    let o: Vec<i8> = chi_eds_table(p, a, b, &qx, &qy, max_window + 3);
+
+    // Table over P, large enough for indices κ·n with κ<m, n≤max_window+1.
+    let upto = (m as usize) * (max_window + 1) + 3;
+    let t = chi_eds_table(p, a, b, px, py, upto);
+
+    // Validate DEC-χ on the true k: o[n] == T[k·n]·χ(ψ_k(P))^{n}.
+    let tk = t[k as usize];
+    let mut decimation_ok = true;
+    for n in 1..=(max_window + 1) {
+        let pred = t[(k as usize) * n] * chi_pow_nsq(tk, n);
+        if pred != o[n] {
+            decimation_ok = false;
+            break;
+        }
+    }
+
+    // Candidate matching: minimal window after which survivors ⊆ {k, m−k}.
+    let neg_k = (m - k % m) % m;
+    let mut unique_window = None;
+    let mut residual = m as usize - 1;
+    let mut sign_resolved = false;
+    for w in 1..=max_window {
+        // window uses n ∈ [2, w+1]  (n=1 is χ(ψ_1)=+1, uninformative)
+        let mut survivors: Vec<u64> = Vec::new();
+        for kappa in 1..m {
+            let tkap = t[kappa as usize];
+            let mut ok = true;
+            for n in 2..=(w + 1) {
+                let pred = t[(kappa as usize) * n] * chi_pow_nsq(tkap, n);
+                if pred != o[n] {
+                    ok = false;
+                    break;
+                }
+            }
+            if ok {
+                survivors.push(kappa);
+            }
+        }
+        residual = survivors.len();
+        if survivors.iter().all(|&c| c == k || c == neg_k) {
+            unique_window = Some(w);
+            sign_resolved = !survivors.contains(&neg_k) || neg_k == k;
+            break;
+        }
+    }
+
+    Some(LocalisationResult {
+        order: m,
+        k,
+        unique_window,
+        residual_candidates: residual,
+        sign_resolved,
+        decimation_ok,
+    })
+}
+
+
 // The BigUint analysis path above is the validated reference; for sweeping
 // thousands of curves we need a faster integer path.  Everything here works
 // over odd primes `p < 2^32` so that products fit in `u128` (square roots via
@@ -625,6 +770,111 @@ fn sqrt_u64(n: u64, p: u64) -> Option<u64> {
         c = mulm(b, b, p);
         t = mulm(t, c, p);
         r = mulm(r, b, p);
+    }
+}
+
+/// Aggregate of a χ-localisation sweep over many `k` on one `(E,P)`.
+#[derive(Clone, Debug)]
+pub struct LocalisationSweep {
+    pub p: BigUint,
+    pub order: u64,
+    pub p_mod4: u64,
+    pub tested: usize,
+    /// `k` pinned to `{k, m−k}` within the window budget.
+    pub pinned: usize,
+    /// of the pinned, how many had the sign resolved (k exact).
+    pub sign_resolved: usize,
+    pub mean_window: f64,
+    pub median_window: usize,
+    pub max_window_seen: usize,
+    pub decimation_ok: bool,
+}
+
+/// Efficient sweep: precompute `T` once, filter candidates incrementally
+/// (`O(ord)` per `k`), sampling up to `max_k_samples` values of `k`.
+pub fn localisation_sweep(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    px: &BigUint,
+    py: &BigUint,
+    order: u64,
+    max_window: usize,
+    max_k_samples: usize,
+) -> LocalisationSweep {
+    let m = order;
+    let upto = (m as usize) * (max_window + 1) + 3;
+    let t = chi_eds_table(p, a, b, px, py, upto);
+    let a_fe = fe(a, p);
+    let base = Point::Affine {
+        x: fe(px, p),
+        y: fe(py, p),
+    };
+
+    let ks: Vec<u64> = if (m.saturating_sub(2)) as usize <= max_k_samples {
+        (2..m).collect()
+    } else {
+        (0..max_k_samples as u64)
+            .map(|i| 2 + i * (m - 2) / max_k_samples as u64)
+            .collect()
+    };
+
+    let mut windows: Vec<usize> = Vec::new();
+    let mut tested = 0usize;
+    let mut sign_resolved = 0usize;
+    let mut decimation_ok = true;
+    for k in ks {
+        let q = base.scalar_mul(&BigUint::from(k), &a_fe);
+        let (qx, qy) = match &q {
+            Point::Affine { x, y } if !y.is_zero() => (x.value.clone(), y.value.clone()),
+            _ => continue,
+        };
+        tested += 1;
+        let o = chi_eds_table(p, a, b, &qx, &qy, max_window + 3);
+        let tk = t[k as usize];
+        for n in 1..=(max_window + 1) {
+            if t[(k as usize) * n] * chi_pow_nsq(tk, n) != o[n] {
+                decimation_ok = false;
+                break;
+            }
+        }
+        let neg_k = (m - k % m) % m;
+        let mut survivors: Vec<u64> = (1..m).collect();
+        for w in 1..=max_window {
+            let n = w + 1; // new constraint
+            survivors
+                .retain(|&kap| t[(kap as usize) * n] * chi_pow_nsq(t[kap as usize], n) == o[n]);
+            if survivors.iter().all(|&c| c == k || c == neg_k) {
+                windows.push(w);
+                if !survivors.contains(&neg_k) || neg_k == k {
+                    sign_resolved += 1;
+                }
+                break;
+            }
+        }
+    }
+
+    windows.sort_unstable();
+    let pinned = windows.len();
+    let median = windows.get(pinned / 2).copied().unwrap_or(0);
+    let max_seen = windows.last().copied().unwrap_or(0);
+    let mean = if pinned > 0 {
+        windows.iter().sum::<usize>() as f64 / pinned as f64
+    } else {
+        0.0
+    };
+
+    LocalisationSweep {
+        p: p.clone(),
+        order: m,
+        p_mod4: (p % BigUint::from(4u32)).try_into().unwrap_or(0),
+        tested,
+        pinned,
+        sign_resolved,
+        mean_window: mean,
+        median_window: median,
+        max_window_seen: max_seen,
+        decimation_ok,
     }
 }
 
@@ -1101,6 +1351,75 @@ mod tests {
             let nqr = (2..p).find(|&n| legendre_u64(n, p) == -1).unwrap();
             assert!(sqrt_u64(nqr, p).is_none());
         }
+    }
+
+    #[test]
+    fn decimation_identity_holds() {
+        // ψ_{κn}(P) = ψ_n([κ]P)·ψ_κ(P)^{n²}, checked on residues for several κ.
+        let (p, a, b) = toy();
+        let (px, py, m) = find_toy_point(&p, &a, &b, 1, 30).unwrap();
+        for k in [2u64, 3, 5, 7] {
+            let r = localisation(&p, &a, &b, &px, &py, m, k, 24);
+            if let Some(res) = r {
+                assert!(res.decimation_ok, "DEC-χ must hold for k={}", k);
+            }
+        }
+    }
+
+    #[test]
+    fn localisation_pins_the_true_k() {
+        // The residue window must, for most k, narrow to a unique candidate,
+        // and that candidate is the true k (DEC-χ verified along the way).
+        let (p, a, b) = toy();
+        let (px, py, m) = find_toy_point(&p, &a, &b, 1, 30).unwrap();
+        let mut unique = 0;
+        let mut total = 0;
+        for k in 2..m.min(40) {
+            if let Some(res) = localisation(&p, &a, &b, &px, &py, m, k, 40) {
+                total += 1;
+                assert!(res.decimation_ok);
+                if res.unique_window.is_some() {
+                    unique += 1;
+                }
+            }
+        }
+        assert!(total > 5, "need several valid k");
+        // The residue pattern pins k up to sign for essentially every k.
+        assert!(
+            unique * 2 >= total,
+            "expected most k to pin (up to ±), got {}/{}",
+            unique,
+            total
+        );
+    }
+
+    #[test]
+    fn localisation_sweep_sign_dichotomy_and_log_window() {
+        // p ≡ 3 (mod 4): the sign is resolved (k exact), and the residue
+        // window scales ~ log2(m).
+        let p3 = BigUint::from(2003u32);
+        let (px, py, m3) = find_toy_point(&p3, &BigUint::from(11u32), &BigUint::from(19u32), 1, 30)
+            .unwrap();
+        let s3 = localisation_sweep(&p3, &BigUint::from(11u32), &BigUint::from(19u32), &px, &py, m3, 48, 120);
+        assert!(s3.decimation_ok);
+        assert_eq!(s3.pinned, s3.tested, "every k pins up to ±");
+        assert_eq!(s3.sign_resolved, s3.pinned, "p≡3 resolves the sign");
+        // generous O(log m) bound on the window.
+        assert!(
+            (s3.max_window_seen as f64) <= 4.0 * (m3 as f64).log2(),
+            "window {} should be ~log2(m={})",
+            s3.max_window_seen,
+            m3
+        );
+
+        // p ≡ 1 (mod 4): k pins, but only up to sign (sign never resolved).
+        let p1 = BigUint::from(1009u32);
+        let (qx, qy, m1) = find_toy_point(&p1, &BigUint::from(37u32), &BigUint::from(2u32), 1, 30)
+            .unwrap();
+        let s1 = localisation_sweep(&p1, &BigUint::from(37u32), &BigUint::from(2u32), &qx, &qy, m1, 48, 120);
+        assert!(s1.decimation_ok);
+        assert_eq!(s1.pinned, s1.tested, "every k pins up to ±");
+        assert_eq!(s1.sign_resolved, 0, "p≡1 cannot resolve the sign");
     }
 
     #[test]

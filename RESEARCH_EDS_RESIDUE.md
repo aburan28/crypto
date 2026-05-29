@@ -341,35 +341,80 @@ Falsifiable, ordered by cost:
    2-torsion / the Tate pairing `⟨P,P⟩`. This connects EDS-Residue back to
    EDS-Association and the pairing.
 
-3. **Net-`χ` localisation experiment** *(the remaining open door).* Build
-   the genuine 2-D net (not the point-arithmetic stand-in used here for the
-   zero-lattice illustration) and measure whether the Legendre pattern
-   `χ(W(a,b))` constrains `Λ_k` enough to beat `O(√m)`. *Prediction to
-   break:* it does not beat generic — but quantify the constant, and test
-   small-embedding-degree curves where EDS-Association is already easy, to
-   see if the residue signal piggybacks.
+3. **χ-localisation: how many residue bits identify the discrete log?**
+   **DONE in rank-1 (§5.3a); rank-2 net deferred (§5.3b).**
 
-   **Status / blocker.** The fundamental net recurrence is in hand and
-   confirmed,
-   `W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²`
-   (Stange, arXiv:0710.1316), and the `b=0` / `a=0` axes of the rank-2 net
-   are exactly the 1-D EDS of `P` / `Q` that this module already computes
-   and validates. The missing ingredient is the **mixed initial block** —
-   the closed forms for `W(2,1)`, `W(1,2)`, `W(2,−1)` (Props 6.3/6.4 of
-   arXiv:0710.1316), which the recurrence alone underdetermines and which
-   could not be retrieved in this environment (arXiv/ePrint PDFs returned
-   HTTP 403). It is *not* implemented here rather than implemented on a
-   guess: the whole experiment turns on the *canonical* (curve-fixed) gauge
-   of the net — a wrong-but-zero-preserving normalisation would pass a
-   zero-lattice check yet report a meaningless `χ`-pattern. **Certification
-   plan once the seeds are in hand:** (i) match the recurrence output on
-   both axes against the validated 1-D EDS (pins the gauge), (ii) reproduce
-   every net zero against `[a]P+[b]Q=O` (structure), (iii) match the mixed
-   seeds against their closed forms (gauge cross-term). Only then measure
-   `χ(W(a,b))`. Note the EDS-Association ↔ Tate-pairing ↔ MOV/Frey–Rück
-   link (§2.2) is *already* realised in this crate by
-   `cryptanalysis::mov_attack`, which is the regime where this net signal
-   provably collapses to an easy DLP.
+### 5.3a Rank-1 χ-localisation via the decimation identity
+
+The genuine 2-D net is not required to ask the sharp EDS-Residue question.
+The **decimation identity** (Ward / Shipsey)
+
+```
+ψ_{κn}(P) = ψ_n([κ]P) · ψ_κ(P)^{n²}                                  (DEC)
+```
+
+gives, on Legendre symbols (using `χ(·)^{n²} = χ(·)ⁿ`),
+
+```
+χ(ψ_n(Q)) = χ(ψ_{kn}(P)) · χ(ψ_k(P))ⁿ      for Q = [k]P.            (DEC-χ)
+```
+
+The left side is computable from `Q`'s coordinates **alone** (no knowledge
+of `k`); every `n` is therefore one EDS-Residue bit constraining `k`
+against the public table `T[j] = χ(ψ_j(P))`. `localisation_sweep` measures
+the minimal window of `n`'s that pins `k`. `cargo run --release --example
+eds_localisation`:
+
+| `p` | `p mod 4` | `ord(P)` | tested `k` | pinned to `±k` | median window | max window | sign resolved |
+|----:|:---------:|---------:|-----------:|:--------------:|:-------------:|:----------:|:-------------:|
+| 4099 | 3 | 64 | 61 | 61/61 | 6 | 10 | **61/61** |
+| 2003 | 3 | 116 | 113 | 113/113 | 8 | 11 | **113/113** |
+| 1019 | 3 | 524 | 200 | 200/200 | 10 | 23 | **200/200** |
+| 1009 | 1 | 92 | 89 | 89/89 | 7 | 11 | **0/89** |
+| 2017 | 1 | 694 | 200 | 200/200 | 10 | 17 | **0/200** |
+| 4093 | 1 | 2029 | 200 | 200/200 | 11 | 23 | **0/200** |
+
+Three clean read-outs:
+
+- **The residues always pin `k`** (up to the unavoidable `±k`): `100 %`
+  on every curve. `DEC-χ` verified for every `k` along the way.
+- **`log₂ m` scaling.** Median window `6 → 7 → 8 → 10 → 10 → 11` as
+  `m: 64 → 92 → 116 → 524 → 694 → 2029` tracks `log₂ m` (≈ 6 … 11). Each
+  residue contributes ≈ one bit, and `k` carries `log₂ m` bits — the signal
+  is **information-theoretically tight**, no redundancy, no obstruction.
+- **A third `p mod 4` dichotomy.** The sign of `k` is resolved iff
+  `χ(−1) = −1`, i.e. `p ≡ 3 (mod 4)` (`100 %` resolved), and is *never*
+  resolved at `p ≡ 1` (`0 %`). Reason: `ψ_n(−Q) = ±ψ_n(Q)` with the sign
+  `= χ(−1)` on even `n`, so the `k ↔ m−k` pair is distinguishable exactly
+  when `χ(−1) = −1`.
+
+**But this is not a computational shortcut.** Using the bits still requires
+the candidate scan — `O(m)` survivors per window, `O(m·log m)` total —
+which is *worse* than the generic `O(√m)`. So the EDS-Residue signal is
+**information-rich yet algorithmically inert**: a textbook illustration of
+*why* Lauter–Stange's equivalence holds — the bits are there and tight, but
+extracting `k` from them costs a full search. (Tests:
+`decimation_identity_holds`, `localisation_pins_the_true_k`,
+`localisation_sweep_sign_dichotomy_and_log_window`.)
+
+### 5.3b Genuine 2-D net (deferred)
+
+The remaining piece — does the Legendre pattern of the *canonical 2-D net*
+`χ(W(a,b))` localise `Λ_k` cheaper than `O(√m)`? — needs the net's mixed
+initial block (`W(2,1)`, `W(1,2)`, `W(2,−1)`; Props 6.3/6.4 of Stange,
+arXiv:0710.1316). The fundamental recurrence
+`W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²` is in hand and
+the axes are the 1-D EDS this module validates, but the recurrence alone
+underdetermines the mixed seeds, and they could not be retrieved here
+(arXiv/ePrint returned HTTP 403). It is left unimplemented rather than
+guessed — a wrong-but-zero-preserving gauge would pass a zero check yet
+report a meaningless `χ`-pattern. **Certification plan once the seeds are
+in hand:** (i) match the recurrence on both axes against the 1-D EDS (pins
+the gauge), (ii) reproduce every net zero against `[a]P+[b]Q=O`, (iii)
+match the mixed seeds to their closed forms. Note the EDS-Association ↔
+Tate-pairing ↔ MOV/Frey–Rück link (§2.2) is *already* realised in this
+crate by `cryptanalysis::mov_attack` — the regime where the net signal
+provably collapses to an easy DLP.
 
 4. **`F_p` ↔ `Z` bridge.** Make the Silverman–Stephens sign-period formula
    explicit mod `p` and check whether the `χ`-period `r·j_χ` we measure is
@@ -388,29 +433,36 @@ Falsifiable, ordered by cost:
 | `χ`-period determined by `(χ(A),χ(B))` | **Confirmed empirically**, closed form in §3 |
 | Residue bias is an exploitable distinguisher | **Refuted (§4.5):** bias `∝ 1/√m`, ~8 % Gaussian tail, no constant advantage |
 | Reflection law `(◆)`; balanced class `{χB=+1, χA=−χ(−1)}` flips with `p mod 4` | **Predicted & confirmed**, test-verified both regimes (§4.5), 5 primes |
-| QR pattern beats generic ECDLP | **No evidence; bias route closed.** Net-`χ` localisation (§5.3) blocked on Stange's mixed seeds (arXiv 403 here) |
+| EDS residues pin `k` (up to `±`) in `~log₂ m` bits | **Measured (§5.3a):** 100 % of `k`, 6 primes; info-theoretically tight |
+| Sign of `k` resolved iff `p ≡ 3 (mod 4)` | **Predicted & confirmed** (§5.3a): 100 % at `p≡3`, 0 % at `p≡1` |
+| QR pattern beats generic ECDLP | **No.** Residues are info-tight but algorithmically inert (`O(m log m)` scan ≫ `√m`, §5.3a). Canonical 2-D net (§5.3b) blocked on Stange's mixed seeds (arXiv 403 here) |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
 often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). The
 theorem is asymptotic, so it never spoke to the *finite statistics* of the
 Legendre sequence — and that is the gap this note actually fills. The
-honest result is two-sided: (i) the bias-distinguisher hope is **refuted**
-(§4.5) — at cryptographic `m` the Legendre sequence is statistically
-generic; but (ii) the *structure* is rigid and was un-catalogued — the
-period dichotomy (§3) and the reflection law `(◆)` (§4.5) are exact,
-test-verified, and predict the entire `χ` symmetry from two sign bits. The
-remaining genuinely-open door is §5.3 (does the QR pattern of the 2-D net
-localise the zero-lattice cheaper than generic?), which the bias result
-neither opens nor closes.
+honest result is three-sided: (i) the bias-distinguisher hope is
+**refuted** (§4.5) — at cryptographic `m` the Legendre sequence is
+statistically generic; (ii) the *structure* is rigid and was un-catalogued
+— the period dichotomy (§3), the reflection law `(◆)` (§4.5), and the
+`log₂ m`-tight localisation with its sign dichotomy (§5.3a) are exact,
+test-verified, and predicted from `(χ(A),χ(B))` and `p mod 4`; and (iii)
+the residues are **information-tight but algorithmically inert** — they
+determine `k` in `~log₂ m` bits yet give no sub-`√m` algorithm, which is
+the cleanest concrete illustration of *why* the Lauter–Stange equivalence
+holds. The one genuinely-open door left is §5.3b (does the *canonical 2-D
+net's* `χ`-pattern localise `Λ_k` cheaper than generic?), blocked only on
+Stange's mixed seeds.
 
 ---
 
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 12 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 15 tests
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
+cargo run   --release --example eds_localisation           # the §5.3a sweep
 ```
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
@@ -418,7 +470,9 @@ Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `multiplier_law_and_periods`, `reflection_symmetry_law`,
 `reflection_law_holds_for_p_eq_1_mod_4`, `plus_plus_class_is_balanced`,
 `balanced_class_flips_for_p_eq_1_mod_4`, `sqrt_u64_roundtrips_both_residues`,
-`census_runs_and_is_sane`, `report_renders`.
+`decimation_identity_holds`, `localisation_pins_the_true_k`,
+`localisation_sweep_sign_dichotomy_and_log_window`, `census_runs_and_is_sane`,
+`report_renders`.
 
 ---
 
