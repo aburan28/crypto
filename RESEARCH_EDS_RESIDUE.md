@@ -334,12 +334,8 @@ Falsifiable, ordered by cost:
    `p ≈ 2³²` to confirm the `1/√m` extrapolation (the u64 path supports it;
    cost-bounded by `min_order`/`cap`).
 
-2. **Multiplier-character law in general.** Prove the §3 dichotomy for all
-   `r` (the `r`-odd case has a different parity term) and express
-   `(χ(A), χ(B))` intrinsically — conjecture: in terms of the quadratic
-   character of `B = (the Weierstrass-`℘`′-type ratio)` and ultimately the
-   2-torsion / the Tate pairing `⟨P,P⟩`. This connects EDS-Residue back to
-   EDS-Association and the pairing.
+2. **Multiplier-character law. DONE for the closed form (§5.5); the
+   sequence-free / Tate-pairing step remains a stated lead.**
 
 3. **χ-localisation: how many residue bits identify the discrete log?**
    **DONE in rank-1 (§5.3a); rank-2 net deferred (§5.3b).**
@@ -465,6 +461,50 @@ off the curve's real period; it must be computed mod `p`. (Tests:
 `integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
 `bridge_reduction_matches_group_order_and_chi_law`.)
 
+### 5.5 Intrinsic multiplier characters (program item 2)
+
+The §3 χ-period and the §4.5 reflection law are both driven by the two sign
+bits `(χ(A), χ(B))` of the shift multiplier `W(n+r) = A·Bⁿ·W(n)`. These bits
+are not opaque. From the extraction `B = W(r+2)/(W(2)·W(r+1))` and
+`A = W(r+1)/B = W(2)·W(r+1)²/W(r+2)`, and because `W(r+1)²` is a square:
+
+```
+χ(A) = χ( W(2)·W(r+2) ),     χ(B) = χ( W(2)·W(r+1)·W(r+2) ).          (CF)
+```
+
+`(CF)` is verified against the inversion-extracted `A, B` on 5 curves
+(`multiplier_chars_closed_form_matches_extraction`). There is also a
+**structural identity**, derived from Ward's relation at the rank of
+apparition (`ψ_r(P)=0`) plus the periodicity `(▲)`:
+
+```
+Bʳ = − W(r+1)·W(r−1),     together with   A·B = W(r+1).               (BR)
+```
+
+`(BR)` is test-verified exactly mod `p` on 3 curves
+(`structural_identity_b_pow_r`), sign and all. For **odd `r`**, `Bʳ` carries
+the same character as `B` (since `B²` is a square), so `(BR)` collapses to
+the near-intrinsic form
+
+```
+χ(B) = χ(−1)·χ(W(r+1))·χ(W(r−1)),     χ(A) = χ(−1)·χ(W(r−1))    (r odd),
+```
+
+also test-verified. These turn the entire χ-structure (period §3, balanced
+class §4.5) into closed forms in three sequence values.
+
+**What remains (the genuine lead).** `(CF)`/`(BR)` still read three terms
+*near index `r`*, so they need the `O(r)` sequence. The sequence-free goal
+runs through `B² = −W(r+1)/W(r−1)`: this ratio is conjecturally a
+**self-pairing** value (Tate / Frey–Rück `⟨P,P⟩_r`), which for embedding
+degree 1 (`r ∣ p−1`) lives in `μ_r ⊂ F_p^*` and is computable by Miller in
+`O(log r)` — *without* the EDS. If `χ(B) = χ(⟨P,P⟩_r)` holds, the χ-period
+becomes predictable from the pairing alone, **tying EDS-Residue directly to
+EDS-Association** (the Lauter–Stange problem that *is* the Tate pairing,
+§2.2). Testing this needs a correct `F_p` self-Tate-pairing; the crate's
+only pairing is a k=2 pseudo-Weil routine (`mov_attack`), so it is left as
+the next implementation step, with `(BR)` as the bridge to it.
+
 ---
 
 ## 6. Honest scorecard
@@ -479,6 +519,7 @@ off the curve's real period; it must be computed mod `p`. (Tests:
 | EDS residues pin `k` (up to `±`) in `~log₂ m` bits | **Measured (§5.3a):** 100 % of `k`, 6 primes; info-theoretically tight |
 | Sign of `k` resolved iff `p ≡ 3 (mod 4)` | **Predicted & confirmed** (§5.3a): 100 % at `p≡3`, 0 % at `p≡1` |
 | `F_p` χ-period = reduction of the archimedean sign-period | **Refuted (§5.4):** orthogonal invariants; integer EDS = A006769 (validated), signs aperiodic, χ-period hops `r`/`2r` with `p` |
+| Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves; sequence-free Tate-pairing step open |
 | QR pattern beats generic ECDLP | **No.** Residues are info-tight but algorithmically inert (`O(m log m)` scan ≫ `√m`, §5.3a). Canonical 2-D net (§5.3b) blocked on Stange's mixed seeds (arXiv 403 here) |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
@@ -494,16 +535,20 @@ test-verified, and predicted from `(χ(A),χ(B))` and `p mod 4`; and (iii)
 the residues are **information-tight but algorithmically inert** — they
 determine `k` in `~log₂ m` bits yet give no sub-`√m` algorithm, which is
 the cleanest concrete illustration of *why* the Lauter–Stange equivalence
-holds. The one genuinely-open door left is §5.3b (does the *canonical 2-D
-net's* `χ`-pattern localise `Λ_k` cheaper than generic?), blocked only on
-Stange's mixed seeds.
+holds; and the χ-structure is now reduced to closed forms in the multiplier
+(§5.5). Two related leads remain, both routing through a pairing this
+sandbox can't yet supply: §5.3b (does the *canonical 2-D net's* `χ`-pattern
+localise `Λ_k` cheaper than generic? — needs Stange's mixed seeds) and §5.5
+(is `χ(B)` the character of the self-Tate-pairing `⟨P,P⟩_r`? — needs an
+`F_p` Tate pairing). Both would tie EDS-Residue to EDS-Association/the Tate
+pairing, which is the natural next thread.
 
 ---
 
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 18 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep
@@ -518,8 +563,9 @@ Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `decimation_identity_holds`, `localisation_pins_the_true_k`,
 `localisation_sweep_sign_dichotomy_and_log_window`,
 `integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
-`bridge_reduction_matches_group_order_and_chi_law`, `census_runs_and_is_sane`,
-`report_renders`.
+`bridge_reduction_matches_group_order_and_chi_law`,
+`multiplier_chars_closed_form_matches_extraction`, `structural_identity_b_pow_r`,
+`census_runs_and_is_sane`, `report_renders`.
 
 ---
 
