@@ -326,6 +326,37 @@ pub fn solve_decomposition_via_descent_n3(
     sols.into_iter().map(|v| sys.lift_solution(v)).collect()
 }
 
+/// **Full descent + XL pipeline at `n = 3`**.  Companion to
+/// [`solve_decomposition_via_descent_n3`] that swaps the Buchberger
+/// Gröbner basis for the **XL solver** (Courtois-Klimov-Patarin-
+/// Shamir 2000), which scales much better at the boolean
+/// `n_vars ≥ 9` regime where Buchberger blows up.
+///
+/// Pipeline:
+///   1. Weil-descend `S_4(X_1, X_2, X_3, x_R) = 0` over `F_{2^m}` to
+///      `m` boolean polynomials in `3m'` variables.
+///   2. Run [`crate::cryptanalysis::pq_xl::boolean_xl_solve`] on the
+///      descended system.
+///   3. Lift each solution `v ∈ F_2^{3m'}` to `(X_1, X_2, X_3) ∈ V³`.
+///
+/// At the toy parameters `m = 8`, `m' = 3` (so 9 boolean variables),
+/// this terminates fast (matrix is ~72 × 512 over F_2; reduction is
+/// XOR-based).  For `m' = 4` (12 boolean variables) the matrix grows
+/// to ~256 × 4096 — still tractable but slower than the brute-force
+/// [`solve_decomposition_n3_direct`] path at this scale.
+pub fn solve_decomposition_via_descent_n3_xl(
+    curve: &BinaryCurve,
+    x_r: &F2mElement,
+    v_basis: &[F2mElement],
+) -> Vec<(F2mElement, F2mElement, F2mElement)> {
+    let sys = weil_descend_s4(curve, x_r, v_basis);
+    let sols = crate::cryptanalysis::pq_xl::boolean_xl_solve(
+        sys.equations.clone(),
+        sys.n_vars,
+    );
+    sols.into_iter().map(|v| sys.lift_solution(v)).collect()
+}
+
 /// **Direct enumeration of `S_4 = 0` over `V × V × V`** — the fast
 /// path for the toy regime.  Iterates `2^{3m'}` triples and tests
 /// `S_4` over `F_{2^m}` for each; far cheaper than descent + GB at
@@ -665,7 +696,9 @@ mod tests {
             .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
             .collect();
         // Use direct enumeration; the GB-based path doesn't terminate
-        // at toy scale because S_4 has total degree 8.
+        // at toy scale because S_4 has total degree 8.  See the
+        // `descent_n3_xl_matches_direct` test for the XL-based path
+        // that DOES terminate.
         let solutions = solve_decomposition_n3_direct(&curve, &x_r, &v_basis);
         // Permutation check: any of the 6 reorderings of (x_1, x_2, x_3).
         let mut perms = [
@@ -686,6 +719,63 @@ mod tests {
             x_2.to_biguint(),
             x_3.to_biguint(),
             solutions.len()
+        );
+    }
+
+    /// **n=3 XL path produces the same solution set as direct enumeration.**
+    /// At the toy `(m = 8, m' = 3)` regime, the descent + XL pipeline
+    /// terminates fast and yields the same `(x_1, x_2, x_3)` triples
+    /// as direct `S_4 = 0` enumeration over `V × V × V`.
+    #[test]
+    fn descent_n3_xl_matches_direct() {
+        use crate::cryptanalysis::petit_quisquater::{
+            build_pq_factor_base, PqSubspace,
+        };
+        let m = 8;
+        let irr = IrreduciblePoly::deg_8();
+        let curve = BinaryCurve {
+            m,
+            irreducible: irr.clone(),
+            a: F2mElement::zero(m),
+            b: F2mElement::from_biguint(&BigUint::from(46u32), m),
+            generator: crate::binary_ecc::BinaryPoint::Infinity,
+            order: BigUint::from(1u32),
+            cofactor: BigUint::from(1u32),
+        };
+        // Build a target x_R from a constructed FB triple so we know
+        // there's at least one V³ solution.
+        let pq_v = PqSubspace::span_low(m, 3);
+        let fb = build_pq_factor_base(&curve, &pq_v);
+        assert!(fb.len() >= 2, "need ≥ 2 FB points in V_3");
+        use crate::binary_ecc::curve::{point_add, point_neg};
+        let p12 = point_add(&curve, &fb[0].point, &fb[1].point);
+        if matches!(p12, crate::binary_ecc::BinaryPoint::Infinity) {
+            return;
+        }
+        // R chosen as a point in the curve; for the test we just want a
+        // random-looking x_R.
+        let x_r = match point_neg(&p12) {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("neg of affine should be affine"),
+        };
+        let v_basis: Vec<F2mElement> = (0..3)
+            .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
+            .collect();
+        let direct: std::collections::HashSet<(BigUint, BigUint, BigUint)> =
+            solve_decomposition_n3_direct(&curve, &x_r, &v_basis)
+                .into_iter()
+                .map(|(a, b, c)| (a.to_biguint(), b.to_biguint(), c.to_biguint()))
+                .collect();
+        let xl: std::collections::HashSet<(BigUint, BigUint, BigUint)> =
+            solve_decomposition_via_descent_n3_xl(&curve, &x_r, &v_basis)
+                .into_iter()
+                .map(|(a, b, c)| (a.to_biguint(), b.to_biguint(), c.to_biguint()))
+                .collect();
+        assert_eq!(
+            direct, xl,
+            "XL and direct enumeration should yield the same V³ solutions\n\
+             direct: {:?}\n  xl: {:?}",
+            direct, xl,
         );
     }
 }

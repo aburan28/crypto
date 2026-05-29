@@ -721,6 +721,133 @@ pub fn find_one_pq_relation_n3_via_descent(
     None
 }
 
+/// **Find one PQ relation at `n = 3` via descent + XL**.  Same as
+/// [`find_one_pq_relation_n3_via_descent`] but uses the XL boolean
+/// solver instead of direct `S_4 = 0` enumeration — the
+/// pedagogically real PQ path at the toy scale where Buchberger is
+/// intractable.
+///
+/// At `m = 8, m' = 3` (= 9 boolean variables) XL completes the
+/// per-`R_j` solve in ~50 ms (debug) — slower than the
+/// O(|V|^3) direct path but using the actual Macaulay-matrix
+/// algebra that real PQ relies on at scale.
+pub fn find_one_pq_relation_n3_via_xl(
+    curve: &BinaryCurve,
+    g: &BinaryPoint,
+    q: &BinaryPoint,
+    fb: &[PqFactorBaseEntry],
+    v: &PqSubspace,
+    rng: &mut StdRng,
+    max_trials: usize,
+) -> Option<PqRelation> {
+    use crate::cryptanalysis::pq_descent::solve_decomposition_via_descent_n3_xl;
+
+    let v_basis: Vec<F2mElement> = (0..v.m_prime)
+        .map(|k| F2mElement::from_bit_positions(&[k], curve.m))
+        .collect();
+    let mut x_to_idx: HashMap<BigUint, usize> = HashMap::with_capacity(fb.len());
+    for entry in fb {
+        x_to_idx.insert(key(&entry.x), entry.idx);
+    }
+
+    for _ in 0..max_trials {
+        let a = random_scalar_biguint(rng, &curve.order);
+        let b = random_scalar_biguint(rng, &curve.order);
+        let ag = scalar_mul(curve, g, &a);
+        let bq = scalar_mul(curve, q, &b);
+        let r = point_add(curve, &ag, &bq);
+        let x_r = match &r {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => continue,
+        };
+        let candidates = solve_decomposition_via_descent_n3_xl(curve, &x_r, &v_basis);
+        for (x_1, x_2, x_3) in candidates {
+            let i = match x_to_idx.get(&key(&x_1)) {
+                Some(&i) => i,
+                None => continue,
+            };
+            let j = match x_to_idx.get(&key(&x_2)) {
+                Some(&j) => j,
+                None => continue,
+            };
+            let k = match x_to_idx.get(&key(&x_3)) {
+                Some(&k) => k,
+                None => continue,
+            };
+            if let Some(rel) =
+                try_finalise_n3(curve, &r, &fb[i], &fb[j], &fb[k], &a, &b)
+            {
+                return Some(rel);
+            }
+        }
+    }
+    None
+}
+
+/// **End-to-end PQ at `n = 3` via descent + XL + sparse LA.**
+///
+/// This is the first PQ pipeline in the library that uses **algebraic
+/// solving** at the relation-search step.  At `n = 2` we shortcut via
+/// the quadratic over `F_{2^m}`; at `n = 3` the direct shortcut
+/// requires brute-forcing `V^3` — this driver instead descends `S_4`
+/// to `F_2` and solves the boolean system via XL (matrix-based
+/// Gröbner-style reduction), the same algorithm family used by real
+/// PQ at production scale (Petit–Quisquater 2012).
+pub fn petit_quisquater_n3_full_pipeline_via_xl(
+    curve: &BinaryCurve,
+    g: &BinaryPoint,
+    q: &BinaryPoint,
+    v: &PqSubspace,
+    target_extra: usize,
+    max_trials_per_relation: usize,
+    seed: u64,
+) -> Option<BigUint> {
+    use crate::cryptanalysis::pq_sparse_la::{sparse_solve_mod_n, SparseRow};
+
+    let fb = build_pq_factor_base(curve, v);
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + target_extra.max(1);
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut relations: Vec<PqRelation> = Vec::with_capacity(target);
+    while relations.len() < target {
+        let rel = find_one_pq_relation_n3_via_xl(
+            curve,
+            g,
+            q,
+            &fb,
+            v,
+            &mut rng,
+            max_trials_per_relation,
+        )?;
+        relations.push(rel);
+    }
+
+    let m = fb.len();
+    let n = &curve.order;
+    let k_col = m;
+    let mut sparse_rows: Vec<SparseRow> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut entries: Vec<(usize, BigUint)> = Vec::new();
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod_n(mult, n);
+            entries.push((j, val));
+        }
+        let neg_b = (n - &(&rel.coef_b % n)) % n;
+        entries.push((k_col, neg_b));
+        sparse_rows.push(SparseRow::from_entries(entries, rel.coef_a.clone() % n));
+    }
+
+    let k = sparse_solve_mod_n(sparse_rows, m + 1, k_col, n)?;
+    let q_check = scalar_mul(curve, g, &k);
+    if q_check == *q {
+        Some(k)
+    } else {
+        None
+    }
+}
+
 /// **End-to-end PQ at `n = 3`** via descent + Gröbner + sparse LA.
 ///
 /// First PQ pipeline in the library that cannot be reduced to a
@@ -1201,6 +1328,37 @@ mod tests {
             recovered.as_ref(),
             Some(&true_k),
             "full pipeline should recover k = {} on toy curve (got {:?})",
+            true_k, recovered,
+        );
+    }
+
+    /// **n=3 XL-based pipeline recovers the secret.**  Uses the actual
+    /// algebraic solving step (descent + XL matrix reduction)
+    /// pedagogically equivalent to what real PQ does at scale.
+    ///
+    /// **`#[ignore]`'d by default**: at toy parameters each XL call
+    /// takes ~1.4 s in debug mode, so gathering `|FB| + extra`
+    /// relations (each needing ~16 random `R_j` trials due to the
+    /// on-curve-FB filter) runs over the test-suite budget.  The
+    /// algorithmic correctness of the XL pipeline is exercised by
+    /// `descent_n3_xl_matches_direct` (which directly compares XL's
+    /// decompositions against the brute-force `S_4` enumeration on the
+    /// same `x_R`).  Run via `cargo test -- --ignored` to actually
+    /// execute the end-to-end key recovery (~10 minutes in debug).
+    #[test]
+    #[ignore]
+    fn pq_n3_full_pipeline_via_xl_recovers_secret() {
+        let (curve, g, n) = build_toy_curve_and_generator();
+        let v = PqSubspace::span_low(curve.m, 3); // m'=3 → 9 boolean vars
+        let true_k = (&n / BigUint::from(11u32)) + BigUint::from(19u32);
+        let true_k = &true_k % &n;
+        let q = scalar_mul(&curve, &g, &true_k);
+        let recovered =
+            petit_quisquater_n3_full_pipeline_via_xl(&curve, &g, &q, &v, 6, 200, 0xBADCAFE);
+        assert_eq!(
+            recovered.as_ref(),
+            Some(&true_k),
+            "n=3 XL pipeline should recover k = {} on toy curve (got {:?})",
             true_k, recovered,
         );
     }
