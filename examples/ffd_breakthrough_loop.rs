@@ -23,6 +23,7 @@ use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::descent_expansion::{
     enumerate_irreducibles, spearman, system_expansion_report,
 };
+use crypto_lib::cryptanalysis::descent_lowgamma::{run_lowgamma_cell, BasisFamily, LowGammaCell};
 use crypto_lib::cryptanalysis::pc_degree_avg::{
     measure_avg, mean_dstar_spread, run_pc_curve_independence_sweep,
     run_pc_operating_point_sweep, run_pc_regime_sweep, AvgRow,
@@ -98,6 +99,26 @@ fn main() {
     );
     println!("   GATE G-P2 (γ ↔ D* positive monotone): {p2}");
 
+    // ── EXP-E: structured (subfield) vs random across the full γ range ──
+    // The decisive test P2 was missing: a genuine LOW-D* structured case.
+    let ee = run_exp_e(8, 4, 32, seed.wrapping_add(4));
+    println!("\n[EXP-E] structured vs random factor base (n=8, n'=4, 2n'=n):");
+    println!(
+        "    {:<11} {:>8} {:>9} {:>10}",
+        "family", "γ mean", "D* mean", "decomp"
+    );
+    for c in &ee {
+        println!(
+            "    {:<11} {:>8.3} {:>9} {:>9.0}%",
+            format!("{:?}", c.family),
+            c.gamma_mean,
+            c.dstar_mean.map(|d| format!("{d:.2}")).unwrap_or_else(|| "—".into()),
+            c.decomp_rate * 100.0,
+        );
+    }
+    let p2e = judge_p2_structured(&ee);
+    println!("   GATE G-P2 (structured contrast): {p2e}");
+
     // ── Snapshot to experiments/ ────────────────────────────────────
     // Fixed seed ⇒ reproducible run ⇒ a single canonical file (overwritten
     // each run) rather than a timestamped pile. `generated_at` records the
@@ -109,7 +130,7 @@ fn main() {
     let path = "experiments/ffd_loop_latest.json".to_string();
     let json = build_json(
         seed, targets, ts, &exp_a, spread, &p5, &opp, &p1_odd, &p1_even, &regime, &p6, &p2,
-        p2_rho, p2_gspread, p2_dspread,
+        p2_rho, p2_gspread, p2_dspread, &ee, &p2e,
     );
     match std::fs::write(&path, &json) {
         Ok(_) => println!("\n[snapshot] wrote {path}"),
@@ -117,7 +138,10 @@ fn main() {
     }
 
     // ── Next experiment (queue head still blocked) ──────────────────
-    println!("\n[next] {}", next_experiment(&p5, &p1_odd, &p1_even, &p2));
+    println!(
+        "\n[next] {}",
+        next_experiment(&p5, &p1_odd, &p1_even, &p2, &p2e)
+    );
     println!("════════════════════════════════════════════════════════════════");
 }
 
@@ -160,6 +184,70 @@ fn run_p2(
     let dspread = spread(&dy);
     let verdict = judge_p2(rho, gspread);
     (verdict, rho, bases.len(), gspread, dspread)
+}
+
+/// EXP-E: measure (γ, D*, decomp-rate) for the structured factor-base
+/// families {Subfield, Coordinate, Random} at the operating point `2n' = n`.
+fn run_exp_e(n: u32, n_sub: u32, trials: u32, seed: u64) -> Vec<LowGammaCell> {
+    let irr = enumerate_irreducibles(n, 1)
+        .into_iter()
+        .next()
+        .expect("a degree-n irreducible exists");
+    let d_max = 2 * n_sub + 2;
+    [BasisFamily::Subfield, BasisFamily::Coordinate, BasisFamily::Random]
+        .into_iter()
+        .filter_map(|fam| run_lowgamma_cell(fam, n, n_sub, &irr, d_max, trials, seed))
+        .collect()
+}
+
+/// G-P2 via the structured contrast: the bridge predicts the *easier*
+/// (lower-D*) factor base should be the *lower*-γ one. If the structured
+/// subfield has the lowest D* but **not** the lowest γ, that contradicts
+/// "D* increases with γ" — a breakthrough-NEGATIVE signal.
+fn judge_p2_structured(cells: &[LowGammaCell]) -> Verdict {
+    let find = |f: BasisFamily| cells.iter().find(|c| c.family == f);
+    let (sub, rnd) = match (find(BasisFamily::Subfield), find(BasisFamily::Random)) {
+        (Some(s), Some(r)) => (s, r),
+        _ => {
+            return Verdict {
+                status: "blocked",
+                detail: "subfield infeasible at this (n,n') — need n' | n".into(),
+            };
+        }
+    };
+    let (sd, rd) = match (sub.dstar_mean, rnd.dstar_mean) {
+        (Some(a), Some(b)) => (a, b),
+        _ => {
+            return Verdict {
+                status: "blocked",
+                detail: "a family produced no non-decomposable D* sample".into(),
+            };
+        }
+    };
+    let structured_easier = sd + 0.05 < rd;
+    let structured_lower_gamma = sub.gamma_mean + 1e-3 < rnd.gamma_mean;
+    if structured_easier && !structured_lower_gamma {
+        Verdict {
+            status: "killed",
+            detail: format!(
+                "subfield D* {sd:.2}<{rd:.2} (easier) yet γ {:.3}≥{:.3} (not lower): γ does NOT explain ease → bridge contradicted",
+                sub.gamma_mean, rnd.gamma_mean
+            ),
+        }
+    } else if structured_easier && structured_lower_gamma {
+        Verdict {
+            status: "supported",
+            detail: format!(
+                "subfield both easier (D* {sd:.2}<{rd:.2}) and lower-γ ({:.3}<{:.3}) — γ tracks ease",
+                sub.gamma_mean, rnd.gamma_mean
+            ),
+        }
+    } else {
+        Verdict {
+            status: "inconclusive",
+            detail: format!("subfield not clearly easier (D* {sd:.2} vs {rd:.2})"),
+        }
+    }
 }
 
 fn spread(v: &[f64]) -> f64 {
@@ -318,30 +406,38 @@ fn ols_slope(pts: &[(f64, f64)]) -> f64 {
 
 /// Pick the next experiment to run: the highest-priority gate that is not
 /// yet supported (mirrors the §5 queue, re-prioritised from verdicts).
-fn next_experiment(p5: &Verdict, p1_odd: &Verdict, p1_even: &Verdict, p2: &Verdict) -> String {
+fn next_experiment(
+    p5: &Verdict,
+    p1_odd: &Verdict,
+    p1_even: &Verdict,
+    p2: &Verdict,
+    p2e: &Verdict,
+) -> String {
     if p5.status == "blocked" {
         return "EXP-A: widen curve-independence batch (need ≥2 defined means)".into();
     }
     if p5.status == "killed" {
         return "EXP-C: rebuild descent_expansion KEYED ON THE CURVE (P5 killed: D* is curve-dependent)".into();
     }
-    // The central test (G-P2) takes priority once we can run it.
+    // The decisive structured contrast (EXP-E) overrides the generic-basis
+    // correlation: it is the test P2 was really about.
+    if p2e.status == "killed" {
+        return "STOP → breakthrough-NEGATIVE. EXP-E shows the structured (subfield) factor base is EASIER (lower D*) yet NOT lower-γ: spectral γ does not explain solving-degree ease, contradicting the bridge's central conjecture. Next: (a) test whether a DIFFERENT graph invariant (e.g. boundary expansion on the quadratic-only support, or treewidth) tracks D*; (b) if none does, write up the negative result — 'PC degree of Semaev systems is not expansion-controlled' — which is itself publishable and reshapes the FFD map.".into();
+    }
+    if p2e.status == "supported" {
+        return "EXP-D: structured contrast supports the bridge (subfield is both easier AND lower-γ). Build sparse-F4 to push 2n'≳14 and firm up the γ↔D* law across the full range; then draft the screening invariant.".into();
+    }
+    // Structured test blocked/inconclusive → fall back to the generic-basis
+    // G-P2 routing.
     match p2.status {
-        "killed" => {
-            return "EXP-E: add LOW-γ bases (subfield/Koblitz/sparse-normal). P2 killed among GENERIC bases (all high-γ); the low-vs-high contrast is the real test. If still no relation, the bridge's predictor is wrong → write the negative result."
-                .into();
-        }
-        "inconclusive" => {
-            return "EXP-E: reformulate γ (try boundary expansion on a sparser graph, or restrict the incidence to the quadratic-only support) and add low-γ bases."
-                .into();
+        "killed" | "inconclusive" => {
+            return "EXP-E: re-run the structured contrast at another (n,n') with n'|n (e.g. n=9,n'=3 or n=12,n'=4) to get a clean subfield D* vs random D* comparison.".into();
         }
         "blocked" => {
-            return "EXP-E: enlarge the basis pool / use sparse-normal bases so γ actually varies; current generic bases are all high-γ."
-                .into();
+            return "EXP-E: enlarge the basis pool / use sparse-normal bases so γ actually varies; current generic bases are all high-γ.".into();
         }
         _ => {}
     }
-    // P2 supported → firm up P1 reach.
     if p1_odd.status == "blocked" || p1_even.status == "blocked" {
         return "EXP-D: build sparse-F4 backend to reach 2n'≳14 (G-P1 reach-limited)".into();
     }
@@ -394,6 +490,8 @@ fn build_json(
     p2_rho: Option<f64>,
     p2_gspread: f64,
     p2_dspread: f64,
+    ee: &[LowGammaCell],
+    p2e: &Verdict,
 ) -> String {
     let row_json = |r: &AvgRow| {
         format!(
@@ -415,8 +513,22 @@ fn build_json(
         rows.iter().map(row_json).collect::<Vec<_>>().join(",")
     };
     let verdict = |v: &Verdict| format!("{{\"status\":\"{}\",\"detail\":\"{}\"}}", v.status, v.detail.replace('"', "'"));
+    let cell_json = |c: &LowGammaCell| {
+        format!(
+            "{{\"family\":\"{:?}\",\"n\":{},\"n_sub\":{},\"trials\":{},\"decomp_rate\":{:.4},\"gamma_mean\":{:.4},\"dstar_mean\":{},\"nondecomp\":{}}}",
+            c.family,
+            c.n,
+            c.n_sub,
+            c.trials,
+            c.decomp_rate,
+            c.gamma_mean,
+            c.dstar_mean.map(|d| format!("{d:.4}")).unwrap_or_else(|| "null".into()),
+            c.nondecomp,
+        )
+    };
+    let ee_arr = ee.iter().map(cell_json).collect::<Vec<_>>().join(",");
     format!(
-        "{{\n  \"schema\": \"ffd_breakthrough_loop/v2\",\n  \"seed\": {seed},\n  \"generated_at\": {generated_at},\n  \"targets_per_cell\": {targets},\n  \"exp_a_curve_independence\": {{\n    \"spread_mean_dstar\": {},\n    \"gate_p5\": {},\n    \"rows\": [{}]\n  }},\n  \"scaling_operating_point\": {{\n    \"gate_p1_odd\": {},\n    \"gate_p1_even\": {},\n    \"rows\": [{}]\n  }},\n  \"regime_n10\": {{\n    \"gate_p6\": {},\n    \"rows\": [{}]\n  }},\n  \"exp_c_expansion_vs_dstar\": {{\n    \"gate_p2\": {},\n    \"spearman_rho\": {},\n    \"gamma_spread\": {:.4},\n    \"dstar_spread\": {:.4}\n  }}\n}}\n",
+        "{{\n  \"schema\": \"ffd_breakthrough_loop/v3\",\n  \"seed\": {seed},\n  \"generated_at\": {generated_at},\n  \"targets_per_cell\": {targets},\n  \"exp_a_curve_independence\": {{\n    \"spread_mean_dstar\": {},\n    \"gate_p5\": {},\n    \"rows\": [{}]\n  }},\n  \"scaling_operating_point\": {{\n    \"gate_p1_odd\": {},\n    \"gate_p1_even\": {},\n    \"rows\": [{}]\n  }},\n  \"regime_n10\": {{\n    \"gate_p6\": {},\n    \"rows\": [{}]\n  }},\n  \"exp_c_expansion_vs_dstar\": {{\n    \"gate_p2\": {},\n    \"spearman_rho\": {},\n    \"gamma_spread\": {:.4},\n    \"dstar_spread\": {:.4}\n  }},\n  \"exp_e_structured_contrast\": {{\n    \"gate_p2_structured\": {},\n    \"cells\": [{}]\n  }}\n}}\n",
         spread.map(|s| format!("{s:.4}")).unwrap_or_else(|| "null".into()),
         verdict(p5),
         arr(exp_a),
@@ -429,5 +541,7 @@ fn build_json(
         p2_rho.map(|r| format!("{r:.4}")).unwrap_or_else(|| "null".into()),
         p2_gspread,
         p2_dspread,
+        verdict(p2e),
+        ee_arr,
     )
 }

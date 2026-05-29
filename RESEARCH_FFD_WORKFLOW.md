@@ -46,7 +46,7 @@ current reach." Maintained as a table here and machine-checked by
 |---|---|---|---|
 | P1 | At fixed `ρ ≈ 1`, **mean `D*` grows with `n`** (within a parity class) | `supported` | both parities positive slope: odd +0.121/n (3 pts), even +0.060/n (4 pts) — auto-verdict, iteration 1 |
 | P1′ | The growth in P1 is **linear**, not log/constant | `blocked` (reach) | needs `2n' ≳ 14` → sparse F4 |
-| P2 | `D*` is **positively monotone in `γ(G)`** across a basis sweep (corrected: high expansion → high PC degree, per Ben-Sasson–Wigderson — not `1/γ`) | `inconclusive` | EXP-C iteration 2: system-γ vs mean D* over 24 generic bases (n=8,n'=3), Spearman ρ_s = −0.322. But all generic bases are **high-γ** (γ∈[0.74,0.95]); the low-vs-high contrast P2 is really about is absent. Need low-γ (subfield/Koblitz/sparse-normal) bases. |
+| P2 | `D*` is **positively monotone in `γ(G)`** across a basis/subspace sweep (high expansion → high PC degree, Ben-Sasson–Wigderson) | **`killed`** | EXP-E iteration 3 (decisive): at the operating point `2n'=n` (n=8), the **subfield** factor base `F_16` is *easier* (mean D* 2.04 vs random 3.53) yet has *higher* spectral γ (0.882 vs 0.861). The structured low-D* case is **not** the low-γ case → spectral γ does not explain solving-degree ease → the bridge's central conjecture is contradicted. (Generic-basis EXP-C iteration 2 was also weak/negative: ρ_s=−0.322.) |
 | P3 | The **even/odd parity split** in `D*` is explained by a structural feature of the tensor / field (subfield, half-trace) | `open` | parity effect persists (odd cells ~0.5 deg higher) but BOTH parities now show growth; still unexplained |
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
@@ -186,6 +186,47 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 3 (EXP-E: structured low-γ contrast — DECISIVE)
+
+- Prediction attacked: **P2** (the central bridge claim), with the
+  low-γ contrast that iteration 2 said was missing.
+- Built `src/cryptanalysis/descent_lowgamma.rs`: an arbitrary factor-base
+  subspace `V` via linear change of variables on the descended `S₃`
+  (`descend_on_subspace`, verified to reproduce `restrict_to_subspace` on
+  the coordinate case), the three families {Subfield, Coordinate, Random},
+  exact subfield construction as `ker(Frob^d − I)` (robust to non-primitive
+  defining polynomials), and a joint `(γ, D*, decomp-rate)` cell runner.
+  8 tests. Wired EXP-E + `judge_p2_structured` into the driver.
+- **Result — G-P2 KILLED (breakthrough-negative).** At `2n'=n` (n=8):
+
+  | family | mean γ | mean D* | decomp rate |
+  |---|---:|---:|---:|
+  | Subfield (F_16) | 0.882 | **2.04** | 28% |
+  | Coordinate | 0.878 | 2.17 | 28% |
+  | Random | 0.861 | **3.53** | 53% |
+
+  The structured subfield factor base is **markedly easier** (lowest D*,
+  2.04 vs random 3.53) — the genuine "subfield is easier" effect index
+  calculus exploits — **yet its spectral expansion is not lower** (0.882 ≥
+  0.861). So `γ` does **not** explain why the structured case is easier:
+  the bridge's central conjecture "`D*` increases with `γ`" (P2) is
+  **contradicted by the most important structured case**. This is locked
+  in by the test `subfield_lower_dstar_but_not_lower_gamma`.
+- A correction along the way: the first subfield construction used
+  `w = z^{(2ⁿ−1)/(2ᵈ−1)}`, which silently failed for the non-primitive
+  defining polynomial (then `z` doesn't generate `F_{2ⁿ}^×`). Rebuilt as
+  the kernel of the Frobenius map `x ↦ x^{2ᵈ}+x`, which is exact regardless
+  of primitivity. (The transient "subfield decomposes everything" reading
+  was an artifact of the broken construction — withdrawn.)
+- Ledger delta: P2 inconclusive→**killed**.
+- Next (driver-chosen): **STOP → breakthrough-negative.** Either (a) find a
+  *different* graph invariant that does track D* (boundary expansion on the
+  quadratic-only support; treewidth), or (b) write up the negative result —
+  "PC degree of Semaev systems is not (spectral-)expansion-controlled" —
+  which is itself publishable and reshapes the FFD map. The empirical
+  pillars P1/P5/P6 stand; the *explanatory* conjecture P2 does not.
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 2 (EXP-C: build descent_expansion, run G-P2)
 

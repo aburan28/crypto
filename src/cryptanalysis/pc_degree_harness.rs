@@ -139,12 +139,44 @@ pub fn measure_refutation_degree(
     let num_eqs = eqs.len() as u32;
     let decomposable = is_decomposable(n, n_sub, irr, b, x3);
 
+    let (first_fall, refutation_degree, per_degree) = refutation_scan(&eqs, num_vars, d_max);
+
+    PcRow {
+        n,
+        n_sub,
+        num_vars,
+        num_eqs,
+        decomposable,
+        per_degree,
+        first_fall,
+        refutation_degree,
+    }
+}
+
+/// Scan Macaulay degrees `2..=d_max` of an arbitrary `F_2`-quadratic system
+/// `eqs` in `num_vars` Boolean variables, returning
+/// `(first_fall, refutation_degree, per_degree)`:
+///
+/// - `first_fall` = smallest `D` with `rank < rows` and `rank < cols`
+///   (operational first-fall onset), and
+/// - `refutation_degree` = smallest `D` at which the constant `1` enters
+///   the row-space (the PC / last-fall refutation degree `D*`).
+///
+/// Factored out of [`measure_refutation_degree`] so callers that build the
+/// descended system differently — e.g. EXP-E's arbitrary factor-base
+/// subspace via [`crate::cryptanalysis::descent_lowgamma`] — can reuse the
+/// exact same measurement.
+pub fn refutation_scan(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    d_max: u32,
+) -> (Option<u32>, Option<u32>, Vec<PcMeasurement>) {
     let mut per_degree = Vec::new();
     let mut first_fall: Option<u32> = None;
     let mut refutation_degree: Option<u32> = None;
 
     for d in 2..=d_max {
-        let (rows, cols, rows_constructed) = build_macaulay_rows(&eqs, num_vars, d);
+        let (rows, cols, rows_constructed) = build_macaulay_rows(eqs, num_vars, d);
         // Rank of the Macaulay matrix (clone — f2_rank reduces in place).
         let mut for_rank = rows.clone();
         let rank = f2_rank(&mut for_rank, cols) as u64;
@@ -167,23 +199,12 @@ pub fn measure_refutation_degree(
             refuted,
         });
 
-        // Once refuted, deeper degrees only re-confirm it — stop early to
-        // keep the sweep cheap.
+        // Once refuted, deeper degrees only re-confirm it — stop early.
         if refutation_degree.is_some() {
             break;
         }
     }
-
-    PcRow {
-        n,
-        n_sub,
-        num_vars,
-        num_eqs,
-        decomposable,
-        per_degree,
-        first_fall,
-        refutation_degree,
-    }
+    (first_fall, refutation_degree, per_degree)
 }
 
 /// Run the refutation-degree sweep over `n_range`.  For each `n` the

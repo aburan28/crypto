@@ -118,7 +118,20 @@ Build the bipartite graph
                    occurs in equation (with multiplicity from c_{ikj}).
 ```
 
-**Central conjecture (falsifiable).**
+> **⚠ STATUS (workflow iteration 3): the spectral form of this conjecture
+> is REFUTED.** EXP-E (`descent_lowgamma.rs`) measured `(γ, D*)` for a
+> genuine *subfield* factor base `F_{2^{n'}}` at the operating point
+> `2n'=n` (n=8): the subfield is the **easiest** case (mean `D*` 2.04 vs
+> random 3.53) — exactly the "structured ⇒ easy" effect index calculus
+> exploits — **yet its spectral expansion is not lower** (0.882 ≥ 0.861).
+> So the *most important* low-`D*` structure is **not** a low-`γ`
+> structure, contradicting `D* = Θ(γ·n)` for the spectral `γ`. The
+> conjecture is retained below as originally written for the record; see
+> §6/§8 and `RESEARCH_FFD_WORKFLOW.md` iteration 3 for the refutation and
+> the surviving (weaker) possibilities.
+
+**Central conjecture (falsifiable — spectral form now falsified, see
+above).**
 
 ```
    D*  =  Θ( min( m·n' ,  γ(G)·n ) ),
@@ -244,12 +257,16 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    the full descended `S₃` including the basis-sensitive Frobenius-squared
    terms. See the §6 status note for the first G-P2 numbers.
 
-3. **Correlation study** — sweep the existing toy zoo: binary `n=3..10`
-   under {polynomial, normal, sparse Galbraith–Gebregiyorgis} bases,
-   plus the `F_{p^k}` Diem examples (`diem_descent.rs`). Plot measured
-   `D*` against predicted `γ(G)`. The conjecture predicts a clean linear
-   law `D* ≈ γ·n`; deviations localize exactly where the algebraic
-   immunity step (below) fails — which is itself informative.
+3. **Correlation study** — *(implemented: `descent_lowgamma.rs` (EXP-E) +
+   the `run_p2`/`run_exp_e` stages of `ffd_breakthrough_loop`.)* Sweeps
+   `D*` against `γ(G)` over both generic irreducible bases and the three
+   structured factor-base families {Subfield, Coordinate, Random} at fixed
+   `(n, n')`. **Outcome: the conjecture's spectral form is falsified** —
+   the subfield case is the easiest (lowest `D*`) yet not the lowest-`γ`,
+   so there is no `D* ≈ γ·n` law for spectral `γ`. See §6 prediction 2 and
+   the workflow iteration-3 log. The infrastructure now supports retrying
+   with a reformulated `γ` (boundary expansion on the quadratic-only
+   support, or treewidth).
 
 4. **Lower-bound attempt** — adapt Ben-Sasson–Wigderson /
    Mikša–Nordström expansion ⇒ PC-degree to `Σ`. The one genuinely hard
@@ -295,25 +312,32 @@ candidate primes and fields for, feeding directly into
    `n = 5..10`, *while* `d_ff` stays ≈ 3. If `D*` also stays constant,
    the bridge's premise (that `d_ff ≪ D*` generically) is wrong and the
    proposal dies.
-2. Across the basis sweep, `D*` must be **positively monotone in `γ(G)`**
-   (high expansion ⇒ high PC/refutation degree, Ben-Sasson–Wigderson;
-   *not* `1/γ` — an earlier draft had the direction backwards). A scatter
-   with no correlation refutes the central conjecture. **Status (workflow
-   iteration 2):** built `descent_expansion` and ran this; over 24
-   *generic* irreducible bases at (n=8, n'=3) the Spearman correlation is
-   ρ_s = −0.322 — inconclusive and mildly *negative*. The catch is that
-   every generic basis is high-expansion (γ_spec ∈ [0.74, 0.95]); the
-   low-γ side of the contrast (subfield/Koblitz/sparse-normal bases) is
-   absent from the sample, so the test has not yet been run across the
-   full γ range. Two further structural facts emerged: the *tensor*
-   incidence graph is basis-independent in the refutable regime (so the
-   predictor must use the *system* graph with its Frobenius-squared
-   terms), and the unique-neighbor boundary expansion is uniformly 0 on
-   these dense graphs (so the BW boundary quantity needs a sparser graph
-   model). See `RESEARCH_FFD_WORKFLOW.md` iteration 2.
+2. Across the basis/subspace sweep, `D*` must be **positively monotone in
+   `γ(G)`** (high expansion ⇒ high PC/refutation degree,
+   Ben-Sasson–Wigderson; *not* `1/γ` — an earlier draft had the direction
+   backwards). **Status: REFUTED for spectral `γ` (workflow iterations
+   2–3).**
+   - *Iteration 2* (generic bases): over 24 generic irreducibles at
+     (n=8, n'=3), Spearman ρ_s = −0.322 — weak and wrong-signed. But all
+     generic bases are high-γ (γ_spec ∈ [0.74, 0.95]), so this was the
+     wrong part of the axis.
+   - *Iteration 3* (the decisive structured contrast, `descent_lowgamma`):
+     the subfield factor base `F_{2^{n'}}` at `2n'=n` is the **easiest**
+     case (mean `D*` 2.04 vs random 3.53) yet has **higher** spectral γ
+     (0.882 ≥ 0.861). The low-`D*` structure is *not* the low-`γ`
+     structure → the spectral-`γ` conjecture is contradicted by the most
+     important structured case.
+   - Two structural facts also emerged: the *tensor* incidence graph is
+     basis-independent in the refutable regime (so the predictor uses the
+     *system* graph), and unique-neighbor boundary expansion is uniformly
+     0 on these dense graphs (so the BW boundary quantity needs a sparser
+     graph model — a surviving, untested reformulation).
 3. The HKY explicit counterexample systems must register as **low-`γ`**
    under `descent_expansion`. If they don't, the predictor doesn't
-   capture the known gap and must be reformulated.
+   capture the known gap and must be reformulated. *(Not yet run; given
+   (2)'s refutation of the spectral form, this should target a
+   reformulated `γ` — boundary expansion on the quadratic-only support, or
+   treewidth — not spectral `γ`.)*
 
 Each is cheap: (1) and (2) run in minutes on a laptop at `n ≤ 10`; (3)
 is pure linear algebra at any `n`.
