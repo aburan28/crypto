@@ -8,9 +8,14 @@
 **One-line thesis:** the disputed first-fall-degree heuristic is, up to
 constants, a statement about the **Polynomial Calculus refutation
 degree** of the Weil-descended summation-polynomial system — and that
-degree is governed by the **expansion of the descent incidence graph**,
-a combinatorial quantity we can compute at full cryptographic size
-*without ever running a Gröbner basis*.
+degree is governed by the system's **low-degree Hilbert-function defect**
+`Δ_low` (the excess of its quotient Hilbert function over a generic
+system), an *algebraic* quantity we can compute from a few low-degree
+Macaulay ranks at full cryptographic size *without ever running a Gröbner
+basis*. (An earlier form of this thesis pinned `D*` on the **expansion of
+the descent incidence graph**; that and a treewidth variant were built and
+**refuted** — no graph-incidence invariant predicts `D*`, because the
+structure is algebraic. See §3.)
 
 ---
 
@@ -91,95 +96,164 @@ straight into this repo's cryptanalysis-resistance map theme.
 
 ---
 
-## 3. The predictor: expansion of the descent incidence graph
+## 3. The predictor: the low-degree Hilbert-function defect `δ(D)`
 
 The reason PC degree is *low* for some Semaev systems and *high* for
-others should not be mysterious — proof complexity tells us exactly what
-controls it. For a bounded-degree polynomial system over `F_2`, the PC
-refutation degree is lower-bounded by the **boundary expansion** of the
-constraint–variable bipartite (Tanner) graph, *provided* the
-constraints are "immune" (no small subset is satisfiable by a
-low-degree assignment that a clever derivation could exploit).
+others should not be mysterious — but the explanatory program had to find
+the right invariant by elimination. **Two natural graph-incidence
+predictors were built and refuted** before the working one was found; the
+honest record matters, so it is summarised first (§3.0), then the working
+predictor is defined and formalised (§3.1–§3.3).
 
-Concretely, after the Weil descent in `ffd_harness::weil_descend_s3`,
-each of the `n` output equations is a degree-2 `F_2`-polynomial in the
-`2n` bit-variables, and *which* bit-variables appear in equation `j` is
-dictated by the **structure-constant tensor** `c_{ikj}` of the chosen
-`F_2`-basis of `F_{2^n}`:
+### 3.0 What was refuted first (graph-incidence invariants)
 
-```
-   z^i · z^k  =  Σ_j c_{ikj} z^j        (the field-multiplication tensor).
-```
+The original conjecture was **spectral**: PC degree is lower-bounded by
+the boundary expansion `γ(G)` of the constraint–variable bipartite graph
+`G(E, basis)` whose edges follow the field structure-constant tensor
+`c_{ikj}` (`z^i z^k = Σ_j c_{ikj} z^j`). Two refutations killed the whole
+*graph-incidence* family of predictors:
 
-Build the bipartite graph
+- **Spectral expansion `γ` (workflow iter. 3, `descent_lowgamma.rs`).** At
+  the operating point `2n'=n` (n=8) the genuine *subfield* factor base
+  `F_{2^{n'}}` is the **easiest** case (mean `D*` ≈ 2.0 vs random ≈ 3.5) —
+  exactly the structured-is-easy effect index calculus exploits — **yet its
+  spectral expansion is not lower** (0.882 ≥ 0.861). The most important
+  low-`D*` structure is *not* a low-`γ` structure: `D* = Θ(γ·n)` is false.
+- **Treewidth (workflow iter. 4, `descent_treewidth.rs`).** The descended
+  *primal* graph is the **complete** graph `K_{2n'}` (the Frobenius-squared
+  cross terms saturate every variable pair), so its treewidth is the
+  constant `2n'−1` for *every* family and cannot discriminate easy from
+  hard at all.
 
-```
-   G(E, basis)  :  equations  ⟷  bit-variables,   edge iff variable
-                   occurs in equation (with multiplicity from c_{ikj}).
-```
+The lesson is structural: **the subfield speedup is algebraic
+(multiplicative closure), and is therefore invisible to any invariant of
+the variable-incidence graph.** The predictor has to read the
+*coefficients*, not the support.
 
-> **⚠ STATUS (workflow iteration 3): the spectral form of this conjecture
-> is REFUTED.** EXP-E (`descent_lowgamma.rs`) measured `(γ, D*)` for a
-> genuine *subfield* factor base `F_{2^{n'}}` at the operating point
-> `2n'=n` (n=8): the subfield is the **easiest** case (mean `D*` 2.04 vs
-> random 3.53) — exactly the "structured ⇒ easy" effect index calculus
-> exploits — **yet its spectral expansion is not lower** (0.882 ≥ 0.861).
-> So the *most important* low-`D*` structure is **not** a low-`γ`
-> structure, contradicting `D* = Θ(γ·n)` for the spectral `γ`. The
-> conjecture is retained below as originally written for the record; see
-> §6/§8 and `RESEARCH_FFD_WORKFLOW.md` iteration 3 for the refutation and
-> the surviving (weaker) possibilities.
->
-> **✓ UPDATE (iterations 4–5): the predictor is REPLACED, not just
-> refuted.** Treewidth of the primal graph also fails (the descended graph
-> is the *complete* graph K_{2n'}, so treewidth is constant — iteration 4):
-> **no incidence-graph invariant predicts `D*`**, because the structure is
-> algebraic, not combinatorial. The working replacement (iteration 5,
-> `descent_algebraic.rs`) is the **early Macaulay rank defect**
-> `δ(D) = r_gen(D) − r(D)` — the excess low-degree syzygies vs a generic
-> system. Empirically (n=8, n'=4) `D*` is a **perfect monotone-decreasing**
-> function of the cumulative early defect across {Subfield, Coordinate,
-> Random}: Spearman ρ_s = −1.000. The corrected conjecture is therefore
->
-> ```
->    D*  decreases monotonically with  Σ_{D ≤ D_low} δ(D),
-> ```
->
-> i.e. *low-degree Hilbert-function deficiency*, not graph expansion,
-> governs the solving/last-fall degree. The subfield's multiplicative
-> closure is what supplies that early deficiency. This is the screening
-> handle the program was after — read directly from the system's
-> coefficients, computable wherever a few low-degree Macaulay ranks are.
+### 3.1 Definition
 
-**Central conjecture (falsifiable — spectral form now falsified, see
-above).**
+Work in the Boolean polynomial ring `R = F_2[x_1,…,x_N]/⟨x_i²−x_i⟩`,
+`N = 2n'`, where `Σ` is the `V`-substituted descended Semaev system (a set
+of `F_2`-quadratics). For each degree `D`, the **Macaulay matrix**
+`Mac_D(Σ)` has one column per multilinear monomial of degree `≤ D`
+(`cols(D) = Σ_{k≤D} C(N,k)`) and one row per product `m·f` with `f ∈ Σ`,
+`deg(m·f) ≤ D`. Let `r(D) = rank_{F_2} Mac_D(Σ)`.
+
+Let `r_gen(D)` be the rank a **semi-regular** (generic) system of the same
+shape — `m` quadratics in `N` Boolean variables — would have at degree `D`,
+given by the truncated Bardet–Faugère–Salvy Hilbert series (implemented in
+`ffd_harness::generic_rank_prediction`). Define the **Hilbert-function
+defect**
 
 ```
-   D*  =  Θ( min( m·n' ,  γ(G)·n ) ),
+   δ(D)  :=  r_gen(D) − r(D)  =  H_Σ(D) − H_gen(D)   ≥ 0,
 ```
 
-where `γ(G)` is the (small-set) boundary/spectral expansion of
-`G(E, basis)`. Equivalently:
+where `H_•(D) = cols(D) − r_•(D)` is the (truncated) quotient Hilbert
+function. The **early defect** is the cumulative sum up to a small cutoff
+`D_low`:
 
-> the first-fall-degree assumption holds **iff** the descent incidence
-> graph has expansion `o(1)` — i.e. iff the basis/field structure-
-> constant tensor is sparse and clustered.
+```
+   Δ_low(Σ)  :=  Σ_{D ≤ D_low}  δ(D).
+```
+
+(`descent_algebraic.rs`: `rank_profile`, `early_defect`; default
+`D_low = 3`.)
+
+### 3.2 Why `δ(D) ≥ 0`, and what it counts (the formalisation)
+
+`δ(D) ≥ 0` is **not** an empirical accident — it is the right baseline by
+construction. The Hilbert function is *upper semicontinuous* in the
+coefficients, so among all ideals generated by forms of the given degrees
+the **generic** one has the termwise-minimal Hilbert function:
+`H_Σ(D) ≥ H_gen(D)` for every `Σ` (rigorous). The Fröberg / semi-regular
+*formula* in `generic_rank_prediction` is the standard estimate of that
+minimal value — exact in the small-degree, under-determined cases at hand
+(and the result is clamped at 0 regardless). Equivalently `r(D) ≤
+r_gen(D)`, so
+
+```
+   δ(D)  =  r_gen(D) − r(D)  =  H_Σ(D) − H_gen(D)  ≥  0,
+```
+
+with equality iff `Σ` behaves semi-regularly up to degree `D`. Thus `δ(D)`
+is the **excess of the quotient over generic** at degree `D`: it counts the
+low-degree relations (syzygies) `Σ` carries *beyond* a generic system —
+exactly the algebraic structure a solver gets "for free." (`δ(D) ≥ 0` is
+asserted in `descent_algebraic`'s tests and held in every one of the 50
+EXP-G cells.)
+
+**The proxy claim (Hilbert defect ↔ last-fall degree).** The refutation /
+solving degree `D*` is the degree at which the Macaulay tower first
+contains the contradiction `1 ∈ rowspace` (≈ the last-fall degree of the
+Gröbner computation). A system whose quotient Hilbert function runs *above*
+generic at low degree — large `Δ_low` — is one whose ideal is already
+"saturating" early: each unit of early defect is a low-degree relation that
+pulls the termination degree down. The corrected predictor is therefore
+
+```
+   D*  is monotone DECREASING in  Δ_low(Σ).
+```
+
+We state this as a heuristic correspondence backed by strong empirics, not
+a closed theorem; the rigorous half is `δ ≥ 0` and its
+excess-syzygy meaning, and the empirical half is the slope below.
+
+**Mechanism for the subfield.** When `V = F_{2^{n'}}` is a subfield it is
+*closed under multiplication*: the products `z^i z^k` of factor-base
+elements fall back into `V`, so the descended system inherits the subfield's
+own multiplication tensor and produces relations that collapse already at
+degree 2–3 → large `Δ_low`. A random `V` has no such closure, so its
+quotient tracks generic until high degree → `Δ_low ≈ 0`. This is precisely
+the algebraic content the incidence graph cannot see.
+
+### 3.3 Central conjecture (corrected) and its evidence
+
+```
+   D*  =  D*_min  +  Θ( − Δ_low(Σ) ),     i.e.
+   D*  decreases monotonically with the early Hilbert-function defect Δ_low.
+```
+
+Equivalently:
+
+> the first-fall-degree assumption holds **iff** the restricted system
+> carries a large early Hilbert defect — i.e. iff the factor base is
+> multiplicatively structured (a subfield / Koblitz / sparse-normal base),
+> which is exactly when `Δ_low` is large and `D*` small.
+
+**Evidence (EXP-G, `examples/ffd_expg_curve.rs`, snapshot
+`experiments/ffd_expg_curve.json`).** Across **50 cells** spanning ten
+operating points `2n' ∈ {4,…,14}` × three factor-base families
+(Subfield, Coordinate, Random), the early defect `Δ_low` predicts `D*`:
+
+| regime | cells | Spearman ρ_s | OLS slope `dD*/dΔ_low` |
+|---|---|---|---|
+| pooled | 50 | **−0.79** | −6.3 |
+| **critical `2n'=n`** (the ECDLP case) | 30 | **−0.78** | **−7.6** |
+| over-determined `2n'<n` | 20 | −0.74 | −1.9 (D* floored at 2 by §6 / P6) |
+
+Seed-robust at this reach (critical ρ_s ∈ [−0.70,−0.81], slope ∈
+[−7.6,−8.5] over 3 seeds); the exchange rate of ≈ **−7 to −8 degrees of
+`D*` per unit early defect** is stable across `2n'` from 4 to 14. The
+over-determined slope is shallow only because `D*` is saturated at the
+Nullstellensatz floor of 2 there (§6), not because the law weakens.
 
 This **reconciles the dispute** instead of picking a side:
 
 - The HKY counterexamples and the Galbraith–Gebregiyorgis "nice" cases
   (Koblitz / subfield bases, sparse normal bases) are precisely the
-  **low-expansion** structures → `D*` small → the heuristic holds *for
+  **high-`Δ_low`** structures → `D*` small → the heuristic holds *for
   them*. That is *why* the first-fall assumption ever looked true.
-- A **generic** curve over a generic basis (and every prime-field
-  descent that lacks a subfield) gives a **high-expansion** tensor →
-  `D* = Θ(n)` → the heuristic is **false**, and the attack is
-  exponential.
+- A **generic** curve over a generic basis (and every prime-field descent
+  that lacks a multiplicatively-closed factor base) gives `Δ_low ≈ 0` →
+  `D* = Θ(n)` → the heuristic is **false** and the attack is exponential.
 
-Crucially, `γ(G)` is the spectral gap of an `n × 2n`-ish graph: it is
-computable in milliseconds at `n = 256` even though the Gröbner basis it
+Crucially, `Δ_low(Σ)` is the rank profile of a few **low-degree** Macaulay
+matrices (degree `≤ D_low`, so `O(N^{D_low})` columns at fixed `D_low`): a
+*polynomial-time* screen, computable even when the full Gröbner basis it
 predicts is astronomically out of reach. **That is the deliverable a
-parameter-selection committee actually needs.**
+parameter-selection committee actually needs** — and unlike the refuted
+`γ(G)`, it tracks `D*` with the correct sign.
 
 ---
 
@@ -289,40 +363,52 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    with a reformulated `γ` (boundary expansion on the quadratic-only
    support, or treewidth).
 
-4. **Lower-bound attempt** — adapt Ben-Sasson–Wigderson /
-   Mikša–Nordström expansion ⇒ PC-degree to `Σ`. The one genuinely hard
-   step (and the honest risk) is **immunity**: Semaev equations are not
-   random XORs, they carry the group law, so we must show that no small
-   subset of descent equations is "prematurely refutable" at low degree.
-   The proposed route: prove that the summation-polynomial coefficients
-   are **algebraically independent** functions of the curve (a
-   Schwartz–Zippel / generic-coordinates argument), so that under a
-   random `F_2`-linear change of factor-base basis the system is, with
-   high probability, an expander-supported quadratic system to which the
-   expansion bound applies. **If this step holds for generic curves, the
-   first-fall-degree assumption is provably false at cryptographic
-   scale** — a defensive theorem, not just a heuristic.
+4. **The algebraic predictor** — *(implemented:
+   `src/cryptanalysis/descent_algebraic.rs`, 3 tests; sweep
+   `examples/ffd_expg_curve.rs`, snapshot `experiments/ffd_expg_curve.json`;
+   single-pass `pc_degree_harness::rank_and_refute` for reach.)* After the
+   graph-incidence predictors were refuted, this computes the low-degree
+   Hilbert defect `Δ_low` (§3.1) and correlates it with `D*`. **Outcome:
+   supported** — 50 cells over `2n' ∈ {4,…,14}` give pooled Spearman
+   ρ_s = −0.79, critical-regime slope ≈ −7.6 (§3.3), seed-robust. This is
+   the working replacement for the expansion study (item 3).
+
+5. **Lower-bound attempt** — two routes, now reordered by the evidence.
+   (a) *Algebraic (favoured):* turn the empirical `D* ↓ Δ_low` law into a
+   bound — show that for a generic factor base the early defect is `o(1)`
+   (the quotient tracks semi-regular through low degree, e.g. via algebraic
+   independence of the Semaev coefficients), forcing `D* = Θ(n)`.
+   (b) *Expansion (legacy):* the Ben-Sasson–Wigderson / Mikša–Nordström
+   route via **immunity**; retained because a PC-degree lower bound still
+   needs a degree-vs-structure argument, but it is no longer the primary
+   path since spectral `γ` does not track `D*`. **If either step holds for
+   generic curves, the first-fall-degree assumption is provably false at
+   cryptographic scale** — a defensive theorem, not just a heuristic.
 
 ---
 
 ## 5. The attacker's corollary (so this is two-sided, not just defense)
 
-The same theory hands the *attacker* a search target: **minimize
-`γ(G)`**. It unifies every known speedup as "an expansion reduction":
+The same theory hands the *attacker* a search target: **maximize the early
+Hilbert defect `Δ_low`**. It unifies every known speedup as "inject
+low-degree algebraic relations":
 
-- subfield / Koblitz curves → block-structured, low-expansion tensor;
+- subfield / Koblitz curves → the factor base is multiplicatively closed,
+  so products fall back into it → large `Δ_low`;
 - symmetrization (Faugère–Gaudry–Huot–Renault, our
-  `symmetrized_semaev.rs`) → collapses the `S_m`-orbit, shrinking the
-  *effective* variable set and hence `γ·n`;
-- GHS-amenable field/basis choices → sparse normal bases.
+  `symmetrized_semaev.rs`) → the `S_m`-orbit relations are exactly extra
+  low-degree syzygies → raises `Δ_low`;
+- GHS-amenable field/basis choices → sparse normal bases that share
+  multiplicative structure.
 
 It also makes a sharp prediction: **any genuinely new subexponential
-family must exhibit an explicit low-expansion descent.** That converts
-"hunt for a subexponential ECDLP attack" into the concrete, checkable
-subproblem "find a curve/basis whose multiplication-tensor Tanner graph
-has `o(1)` small-set expansion" — a structural certificate we can screen
-candidate primes and fields for, feeding directly into
-`pkm_criterion.rs` and `solinas_correlations.rs` in the resistance map.
+family must exhibit a descent system with non-vanishing early defect.**
+That converts "hunt for a subexponential ECDLP attack" into the concrete,
+checkable subproblem "find a curve/basis whose restricted descent system
+has `Δ_low = ω(1)`" — a structural certificate we can screen candidate
+primes and fields for (a few low-degree Macaulay ranks), feeding directly
+into `pkm_criterion.rs` and `solinas_correlations.rs` in the resistance
+map.
 
 ---
 
@@ -355,13 +441,23 @@ candidate primes and fields for, feeding directly into
      graph model — a surviving, untested reformulation).
 3. The HKY explicit counterexample systems must register as **low-`γ`**
    under `descent_expansion`. If they don't, the predictor doesn't
-   capture the known gap and must be reformulated. *(Not yet run; given
-   (2)'s refutation of the spectral form, this should target a
-   reformulated `γ` — boundary expansion on the quadratic-only support, or
-   treewidth — not spectral `γ`.)*
+   capture the known gap and must be reformulated. *(Subsumed by (2)'s
+   refutation of the spectral form and replaced by the algebraic predictor
+   in (4); retained as record.)*
 
-Each is cheap: (1) and (2) run in minutes on a laptop at `n ≤ 10`; (3)
-is pure linear algebra at any `n`.
+4. **(The surviving, supported prediction — P3-alg.)** Across the
+   factor-base families and operating points, `D*` must be **monotone
+   *decreasing* in the early Hilbert defect `Δ_low`** (§3). **Status:
+   SUPPORTED (workflow iterations 5–7).** EXP-G: 50 cells over
+   `2n' ∈ {4,…,14}` give pooled Spearman ρ_s = −0.79; in the critical
+   regime `2n'=n` ρ_s = −0.78 with OLS slope ≈ −7.6 (seed-robust, slope
+   ∈ [−7.6,−8.5]). The kill condition is now the *reverse*: if at larger
+   reach (sparse-F4, `2n' ≳ 16`) the slope flattens to 0 or flips sign,
+   the algebraic predictor fails too and the bridge has no working
+   predictor. So far it strengthens with reach.
+
+Each is cheap: (1), (2), (4) run in minutes on a laptop at `2n' ≤ 14`;
+(3) is pure linear algebra at any `n`.
 
 ---
 
@@ -390,19 +486,28 @@ is pure linear algebra at any `n`.
 ## 8. Why this is new
 
 - HKY *define* `d_last` and bound it with HFE-style algebra; **nobody
-  bounds it via combinatorial expansion of the descent graph.** That
-  bridge is the contribution.
+  identifies the low-degree Hilbert-function defect `Δ_low` as its
+  controlling parameter, nor exhibits the empirical `D* ↓ Δ_low` law.**
+  That bridge — and the falsification of the natural graph-incidence
+  alternatives along the way — is the contribution.
 - Proof-complexity PC-degree lower bounds have been applied to random
   k-XOR/k-CNF, Tseitin, and pigeonhole — **never to
   summation-polynomial / ECDLP systems.** The translation, and the
   "immunity from algebraic independence of Semaev coefficients" step,
   is the new technical content.
 - It yields a predictor **evaluable without running Gröbner**, at full
-  cryptographic `n` — exactly the regime where the attack itself is
-  unobservable and where the dispute has therefore been stuck on
-  extrapolation from `n ≤ 8`.
+  cryptographic `n` — `Δ_low` is the rank profile of a few low-degree
+  Macaulay matrices (`O(N^{D_low})` columns) — exactly the regime where the
+  attack itself is unobservable and where the dispute has therefore been
+  stuck on extrapolation from `n ≤ 8`.
 - It **reconciles** Petit–Quisquater/Semaev with Huang–Kosters–Yeo and
-  Galbraith–Petit: all three are right, on different expansion regimes.
+  Galbraith–Petit: all three are right, on different *defect* regimes —
+  multiplicatively-structured factor bases carry large `Δ_low` (heuristic
+  holds), generic ones carry `Δ_low ≈ 0` (heuristic fails).
+- The route is itself instructive: the natural combinatorial predictors
+  (spectral expansion, treewidth) are **refuted**, and the surviving
+  predictor is algebraic. A negative result on graph-incidence invariants
+  for Semaev systems, with a positive algebraic replacement, is new.
 
 ---
 
