@@ -783,4 +783,4 @@ Priority 2 requires genuine Mestre/CHLRS reconstruction:
 
 ### Commits made
 
-- (listed after commit)
+- `1a5dfd7` autolab 2026-05-29: P-521 m=16 3/3 confirmed (§10.5 closed); CHLRS Rosenhain root-cause diagnosed
