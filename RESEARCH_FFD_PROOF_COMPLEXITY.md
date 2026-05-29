@@ -153,14 +153,38 @@ parameter-selection committee actually needs.**
 
 Four pieces, each a thin extension of code already in `cryptanalysis/`:
 
-1. **`pc_degree_harness`** — fork `ffd_harness.rs` but *do not stop at
-   the first fall*. Pick a **non-decomposable** `x(R)`, run the
-   bit-packed Macaulay reduction to completion, and report the
-   **refutation degree** `D*` = smallest `D` at which a row reduces to
-   the constant `1`. The harness currently prints one column (`d_ff`);
-   this adds the column that matters (`D* ≈ d_last`). The gap between
-   the two columns *is* the Huang–Kosters–Yeo invariant, made
-   operational for the first time in this repo.
+1. **`pc_degree_harness`** — *(implemented:
+   `src/cryptanalysis/pc_degree_harness.rs`, demo
+   `cargo run --release --example pc_degree_demo)`.* Forks `ffd_harness`
+   but *does not stop at the first fall*. It restricts the factor base to
+   a subspace `V` of dimension `n' = ⌊n/2⌋`, picks a **non-decomposable**
+   target `x(R)` (the genuinely *unsatisfiable* PDP instance — the
+   unrestricted system is satisfiable and has no refutation), and reports
+   the **refutation degree** `D*` = smallest `D` at which the constant
+   `1` enters the Macaulay row-space (tested by `e0_in_rowspace`). It
+   prints both columns: `d_ff` (operational first fall, as in
+   `ffd_harness`) and `D* ≈ d_last`. The gap between them *is* the
+   Huang–Kosters–Yeo invariant, made operational for the first time in
+   this repo.
+
+   **Validation (the load-bearing test).** `refutation_iff_nondecomposable`
+   exhaustively checks, over `F_{2^4}` with `n'=2`, that a target refutes
+   **iff** it is non-decomposable over `V` — confirming `D*` measures the
+   right object (`1 ∈ ⟨S₃, field eqs⟩ ⟺ no `F_2`-solution`). All six
+   module tests pass.
+
+   **First numbers, and an honest caveat.** A single-sample sweep
+   `n = 4..8` (`n' = ⌊n/2⌋`) already produces finite refutation degrees on
+   non-decomposable instances, but at these toy sizes the system is
+   heavily *over*determined (`n` equations in `2n' ≈ n` variables), so
+   `D*` is small and noisy (degree-2 Nullstellensatz certificates appear
+   for several `n`). The apparatus is correct; **prediction #1's
+   asymptotic `D*`-climb is not yet observable from one sample per `n`.**
+   Demonstrating it needs (a) averaging over many non-decomposable targets
+   per `(n, n')`, (b) the `n'`-vs-`n` regime tuned toward "roughly
+   determined" rather than over-determined, and (c) a sparse-F4 backend
+   to reach `2n' ≳ 12`. That is the §4-item-3 correlation study; the
+   instrument it needs is now in place.
 
 2. **`descent_expansion`** — given a curve and an `F_2`-basis, build
    `G(E, basis)` from the structure-constant tensor and return

@@ -140,6 +140,7 @@ pub mod orbit_homology;
 pub mod p256_attacks;
 pub mod p256_isogeny_cover;
 pub mod p256_structural;
+pub mod pc_degree_harness;
 pub mod petit_quisquater;
 pub mod pkm_criterion;
 pub mod pohlig_hellman;

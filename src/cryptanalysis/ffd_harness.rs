@@ -553,59 +553,68 @@ fn reduce_mod_irr(conv: &mut Vec<F2BoolPoly>, n: u32, irr: &IrreduciblePoly) {
 // ── Macaulay matrix + rank ──────────────────────────────────────────
 
 fn build_and_rank_macaulay(eqs: &[F2BoolPoly], num_vars: u32, d: u32) -> MacaulayMeasurement {
-    let cols = num_monomials_upto_degree(num_vars, d);
-    if cols == 0 || eqs.is_empty() {
+    let (mut rows, cols, rows_constructed) = build_macaulay_rows(eqs, num_vars, d);
+    let cols_u64 = cols as u64;
+    if rows.is_empty() {
         return MacaulayMeasurement {
             degree: d,
             rows_constructed: 0,
-            cols,
+            cols: cols_u64,
             rank: 0,
             rank_generic: 0,
             fall_signal: 0,
         };
     }
-    // Generate every monomial m of degree ≤ d - 2 (since each f has
-    // degree 2), multiply by each equation, and place the resulting
-    // polynomial (degree ≤ d) as one row of the Macaulay matrix.
-    let multipliers = enumerate_monomials_upto(num_vars, d.saturating_sub(2));
-
-    let mut rows: Vec<Vec<u64>> = Vec::new();
-    let row_words = (cols as usize + 63) / 64;
-    // Also include the field equations xᵢ² + xᵢ = 0 (= xᵢ since xᵢ² = xᵢ
-    // in F_2).  These would normally restrict to multilinear monomials;
-    // in our `F2BoolPoly` encoding multilinearity is already enforced
-    // (we collapsed xᵢ · xᵢ to xᵢ in `mul_linear`).  So no extra rows
-    // are needed.
-
-    for mult in &multipliers {
-        for eq in eqs {
-            let row_poly = mul_by_monomial(eq, mult, num_vars);
-            // Flatten F2BoolPoly into a packed bit-row, indexed by
-            // monomial-index.  We can reuse coeffs since coeffs[0] is
-            // the constant, [1..=v] is linear, [v+1..] is quadratic —
-            // matching our flat indexing for `d = 2`.  For `d ≥ 3`,
-            // multiplying by a degree-(d-2) monomial pushes us above
-            // degree 2, which requires expansion into a longer flat
-            // vector.
-            let flat = expand_to_flat(&row_poly, mult, num_vars, d);
-            let packed = pack_bits(&flat, row_words);
-            rows.push(packed);
-        }
-    }
-
-    let rows_constructed = rows.len() as u64;
-    let rank = f2_rank(&mut rows, cols as usize) as u64;
-    let rank_generic = generic_rank_prediction(eqs.len() as u64, num_vars, d, cols);
+    let rank = f2_rank(&mut rows, cols) as u64;
+    let rank_generic = generic_rank_prediction(eqs.len() as u64, num_vars, d, cols_u64);
     let fall_signal = rank as i64 - rank_generic as i64;
 
     MacaulayMeasurement {
         degree: d,
         rows_constructed,
-        cols,
+        cols: cols_u64,
         rank,
         rank_generic,
         fall_signal,
     }
+}
+
+/// Build the bit-packed Macaulay-matrix rows of `eqs` at degree `d`.
+/// Returns `(rows, cols, rows_constructed)`, where each row is a packed
+/// bit-vector over the degree-≤`d` multilinear monomial basis (column 0
+/// is the constant monomial `1`).
+///
+/// Generate every multiplier monomial `m` of degree ≤ `d − 2` (each `f`
+/// has degree 2), multiply by each equation, and emit the resulting
+/// polynomial (degree ≤ `d`) as one row.  The field equations
+/// `xᵢ² + xᵢ = 0` are enforced implicitly: multilinearity is baked into
+/// the [`F2BoolPoly`] encoding (squares collapse in `mul_linear` /
+/// `insert_sorted`), so no extra rows are needed.
+///
+/// Shared by [`build_and_rank_macaulay`] (first-fall measurement) and by
+/// the PC-degree / refutation harness (`pc_degree_harness`).
+pub(crate) fn build_macaulay_rows(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    d: u32,
+) -> (Vec<Vec<u64>>, usize, u64) {
+    let cols = num_monomials_upto_degree(num_vars, d) as usize;
+    if cols == 0 || eqs.is_empty() {
+        return (Vec::new(), cols, 0);
+    }
+    let multipliers = enumerate_monomials_upto(num_vars, d.saturating_sub(2));
+    let row_words = (cols + 63) / 64;
+    let mut rows: Vec<Vec<u64>> = Vec::new();
+    for mult in &multipliers {
+        for eq in eqs {
+            let row_poly = mul_by_monomial(eq, mult, num_vars);
+            let flat = expand_to_flat(&row_poly, mult, num_vars, d);
+            let packed = pack_bits(&flat, row_words);
+            rows.push(packed);
+        }
+    }
+    let rows_constructed = rows.len() as u64;
+    (rows, cols, rows_constructed)
 }
 
 /// Enumerate every multilinear monomial of degree ≤ `d` in `v`
@@ -738,7 +747,7 @@ fn pack_bits(flat: &[bool], words: usize) -> Vec<u64> {
 }
 
 /// Gauss-Jordan reduction over `F_2` (XOR rows).  Returns the rank.
-fn f2_rank(rows: &mut Vec<Vec<u64>>, cols: usize) -> usize {
+pub(crate) fn f2_rank(rows: &mut Vec<Vec<u64>>, cols: usize) -> usize {
     let mut rank = 0;
     let mut row = 0;
     for col in 0..cols {
@@ -784,7 +793,7 @@ fn f2_rank(rows: &mut Vec<Vec<u64>>, cols: usize) -> usize {
 /// ```
 ///
 /// Clamp `H` at 0 from below; the predicted rank is `cols(D) − H(D)`.
-fn generic_rank_prediction(n_eqs: u64, num_vars: u32, d: u32, cols: u64) -> u64 {
+pub(crate) fn generic_rank_prediction(n_eqs: u64, num_vars: u32, d: u32, cols: u64) -> u64 {
     let lower = if d >= 2 {
         num_monomials_upto_degree(num_vars, d - 2)
     } else {
@@ -803,7 +812,7 @@ fn generic_rank_prediction(n_eqs: u64, num_vars: u32, d: u32, cols: u64) -> u64 
 
 // ── Misc helpers ────────────────────────────────────────────────────
 
-fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
+pub(crate) fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
     loop {
         let bits: Vec<u32> = (0..n).filter(|_| rng.gen::<bool>()).collect();
         let e = F2mElement::from_bit_positions(&bits, n);
@@ -813,7 +822,7 @@ fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
     }
 }
 
-fn choose_irreducible(n: u32) -> IrreduciblePoly {
+pub(crate) fn choose_irreducible(n: u32) -> IrreduciblePoly {
     // Trinomials/pentanomials with low low_terms for n ∈ {3..16}.
     let low_terms: Vec<u32> = match n {
         2 => vec![0, 1],
