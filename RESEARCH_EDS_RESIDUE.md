@@ -416,11 +416,54 @@ Tate-pairing ↔ MOV/Frey–Rück link (§2.2) is *already* realised in this
 crate by `cryptanalysis::mov_attack` — the regime where the net signal
 provably collapses to an easy DLP.
 
-4. **`F_p` ↔ `Z` bridge.** Make the Silverman–Stephens sign-period formula
-   explicit mod `p` and check whether the `χ`-period `r·j_χ` we measure is
-   the reduction of their real-analytic period. A clean bridge would let
-   one *predict* `χ`-structure from the curve's real period without
-   building the sequence.
+4. **`F_p` ↔ `Z` bridge. DONE (§5.4).** Answer: the two periods are
+   *orthogonal*. The archimedean sign is one fixed aperiodic object; the
+   `F_p` χ-period hops between `r` and `2r` with `p` per the §3 law. No
+   reduction relates them.
+
+### 5.4 The archimedean sign (Silverman–Stephens) vs the F_p χ-period
+
+A natural hope is that the `F_p` χ-period `r·j_χ` (§3) is the mod-`p`
+shadow of the *archimedean* sign-period that Silverman–Stephens (2006)
+attach to an integer EDS. It is not — and the bridge experiment shows why,
+fully validated.
+
+`eds_integer` builds the genuine **integer** EDS of curve `37a`
+(`y²+y = x³−x`), point `(0,0)`, from the seeds `W(2),W(3),W(4) = 1,−1,1`
+via the duplication formulas over `Z`. It reproduces **OEIS A006769**
+exactly (`0,1,1,−1,1,2,−1,−3,−5,7,−4,−23,29,…`), test-checked to `n=25`.
+
+- **Archimedean side.** `37a` has discriminant `> 0` (two real components)
+  and an irrational rotation number, so by Silverman–Stephens its sign
+  sequence is **aperiodic**. Measured: `++-++---+--+++--+---++-+++--+--+++-++---…`,
+  no period `≤ 80` over 220 terms (`integer_eds_signs_aperiodic_for_37a`).
+  This is a single fixed real-analytic object — the placement of `nP` on
+  the real components, governed by the elliptic logarithm of `P`.
+
+- **Arithmetic side.** Reducing the *same* integer sequence mod `p` and
+  reading its F_p structure (`reduce_and_analyze`): the rank of apparition
+  equals `ord(P mod p)` — verified against independent point arithmetic on
+  the short form `Y²=x³−x+1/4`, `P=(0,1/2)`, for `p ∈ {7,11,13,23,29}` — and
+  the χ-period is `r·j_χ` with `j_χ ∈ {1,2}` set by the multiplier
+  characters (§3), **jumping with `p`**:
+
+  | `p` | `ord(P mod p)` | `(χA,χB)` | χ-period |
+  |----:|---------------:|:---------:|:--------:|
+  | 7 | 9 | (−,+) | `2r=18` |
+  | 13 | 16 | (+,−) | `2r=32` |
+  | 23 | 11 | (+,+) | `1r=11` |
+  | 29 | 12 | (+,+) | `1r=12` |
+  | 41 | 51 | (+,+) | `1r=51` |
+  | 43 | 14 | (+,−) | `2r=28` |
+
+**Conclusion.** The archimedean sign-period (real, fixed, aperiodic) and the
+`F_p` χ-period (arithmetic, `p`-dependent, `r` or `2r`) are different
+invariants of the same point — one set by the *real* elliptic logarithm,
+the other by the *quadratic character mod `p`* of the multiplier. There is
+no naive reduction from one to the other, so the χ-structure cannot be read
+off the curve's real period; it must be computed mod `p`. (Tests:
+`integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
+`bridge_reduction_matches_group_order_and_chi_law`.)
 
 ---
 
@@ -435,6 +478,7 @@ provably collapses to an easy DLP.
 | Reflection law `(◆)`; balanced class `{χB=+1, χA=−χ(−1)}` flips with `p mod 4` | **Predicted & confirmed**, test-verified both regimes (§4.5), 5 primes |
 | EDS residues pin `k` (up to `±`) in `~log₂ m` bits | **Measured (§5.3a):** 100 % of `k`, 6 primes; info-theoretically tight |
 | Sign of `k` resolved iff `p ≡ 3 (mod 4)` | **Predicted & confirmed** (§5.3a): 100 % at `p≡3`, 0 % at `p≡1` |
+| `F_p` χ-period = reduction of the archimedean sign-period | **Refuted (§5.4):** orthogonal invariants; integer EDS = A006769 (validated), signs aperiodic, χ-period hops `r`/`2r` with `p` |
 | QR pattern beats generic ECDLP | **No.** Residues are info-tight but algorithmically inert (`O(m log m)` scan ≫ `√m`, §5.3a). Canonical 2-D net (§5.3b) blocked on Stange's mixed seeds (arXiv 403 here) |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
@@ -459,10 +503,11 @@ Stange's mixed seeds.
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 15 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 18 tests
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep
+cargo run   --release --example eds_bridge                 # the §5.4 bridge
 ```
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
@@ -471,7 +516,9 @@ Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `reflection_law_holds_for_p_eq_1_mod_4`, `plus_plus_class_is_balanced`,
 `balanced_class_flips_for_p_eq_1_mod_4`, `sqrt_u64_roundtrips_both_residues`,
 `decimation_identity_holds`, `localisation_pins_the_true_k`,
-`localisation_sweep_sign_dichotomy_and_log_window`, `census_runs_and_is_sane`,
+`localisation_sweep_sign_dichotomy_and_log_window`,
+`integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
+`bridge_reduction_matches_group_order_and_chi_law`, `census_runs_and_is_sane`,
 `report_renders`.
 
 ---

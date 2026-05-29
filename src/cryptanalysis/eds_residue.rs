@@ -56,7 +56,7 @@
 use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint, Sign};
 use num_traits::{One, Zero};
 
 // ── small modular helpers (BigUint, fixed modulus p) ───────────────────────
@@ -1138,6 +1138,149 @@ pub fn format_census(s: &CensusSummary) -> String {
     )
 }
 
+// ── F_p ↔ Z bridge: integer EDS and Silverman–Stephens signs ────────────────
+//
+// The χ-period over F_p (§3) is an *arithmetic* invariant — the quadratic
+// character of the mod-p multiplier.  Over Z, Silverman–Stephens (2006) show
+// the *sign* of an integer EDS is governed by an *archimedean* invariant: the
+// real elliptic logarithm of P / the real period.  This section computes the
+// genuine integer EDS, validates it against OEIS A006769 (curve 37a, point
+// (0,0)), measures its archimedean sign behaviour, and reduces it mod p to
+// show the two "periods" are orthogonal objects, not a reduction of one
+// another.
+
+fn cube(x: &BigInt) -> BigInt {
+    x * x * x
+}
+fn sq_i(x: &BigInt) -> BigInt {
+    x * x
+}
+
+/// Integer EDS with `W(0)=0, W(1)=1` and the given `W(2),W(3),W(4)` seeds,
+/// extended by the duplication formulas (exact over `Z`).  Panics if a
+/// half-index division is not exact (i.e. the seeds are not a valid EDS).
+pub fn eds_integer(w2: i64, w3: i64, w4: i64, count: usize) -> Vec<BigInt> {
+    assert!(count >= 5);
+    let d2 = BigInt::from(w2);
+    let mut w = vec![
+        BigInt::from(0),
+        BigInt::from(1),
+        d2.clone(),
+        BigInt::from(w3),
+        BigInt::from(w4),
+    ];
+    for k in 5..count {
+        let val = if k % 2 == 1 {
+            let n = (k - 1) / 2;
+            &w[n + 2] * cube(&w[n]) - &w[n - 1] * cube(&w[n + 1])
+        } else {
+            let n = k / 2;
+            let bracket = &w[n + 2] * sq_i(&w[n - 1]) - &w[n - 2] * sq_i(&w[n + 1]);
+            let num = &w[n] * &bracket;
+            let q = &num / &d2;
+            debug_assert_eq!(&q * &d2, num, "non-exact EDS division at k={}", k);
+            q
+        };
+        w.push(val);
+    }
+    w
+}
+
+/// Sign sequence of an integer EDS: `+1`, `-1`, or `0`.
+pub fn signs(seq: &[BigInt]) -> Vec<i8> {
+    seq.iter()
+        .map(|w| match w.sign() {
+            Sign::Plus => 1,
+            Sign::Minus => -1,
+            Sign::NoSign => 0,
+        })
+        .collect()
+}
+
+/// Smallest period `π ≤ max_period` of the sign sequence over the index
+/// range `[start, len)`, or `None` if the signs are aperiodic up to that
+/// bound (the Silverman–Stephens "irrational rotation number" case).
+pub fn sign_period(s: &[i8], start: usize, max_period: usize) -> Option<usize> {
+    let n = s.len();
+    'p: for period in 1..=max_period.min(n - start - 1) {
+        for i in start..(n - period) {
+            if s[i] != s[i + period] {
+                continue 'p;
+            }
+        }
+        return Some(period);
+    }
+    None
+}
+
+/// Result of reducing an integer EDS mod `p` and reading its F_p structure.
+#[derive(Clone, Debug)]
+pub struct BridgeReduction {
+    pub p: u64,
+    /// Rank of apparition mod p (first zero) = ord(P mod p) for good p.
+    pub order: u64,
+    pub chi_a: i8,
+    pub chi_b: i8,
+    /// χ-period = r·j_χ from the §3 multiplier-character closed form.
+    pub chi_period: u64,
+}
+
+/// χ-period multiplier `j_χ` from the multiplier characters (the §3 law,
+/// valid for all `r`): smallest `j≥1` with `χ(B)^j=1` and
+/// `χ(A)^j·χ(B)^{r·j(j-1)/2}=1`.
+fn chi_period_mult(chi_a: i8, chi_b: i8, r: u64) -> u64 {
+    for j in 1u64..=8 {
+        if pm_pow(chi_b, j % 2 == 1) != 1 {
+            continue;
+        }
+        let exp_odd = ((r as u128) * (j as u128) * ((j as u128) - 1) / 2) % 2 == 1;
+        if pm_pow(chi_a, j % 2 == 1) * pm_pow(chi_b, exp_odd) == 1 {
+            return j;
+        }
+    }
+    0
+}
+
+/// Reduce an integer EDS mod `p`, find its rank of apparition and the
+/// multiplier characters, and apply the §3 χ-period law.  `None` if the
+/// sequence is too short (need ≥ r+3 terms) or degenerate mod p.
+pub fn reduce_and_analyze(seq: &[BigInt], p: u64) -> Option<BridgeReduction> {
+    let m = BigInt::from(p);
+    let red: Vec<u64> = seq
+        .iter()
+        .map(|w| {
+            let r = ((w % &m) + &m) % &m;
+            let (_, digits) = r.to_u64_digits();
+            digits.first().copied().unwrap_or(0)
+        })
+        .collect();
+    // rank of apparition: first zero at index ≥ 1.
+    let r = (1..red.len()).find(|&i| red[i] == 0)?;
+    if r + 2 >= red.len() {
+        return None;
+    }
+    let w2 = red[2];
+    if w2 == 0 || red[r + 1] == 0 {
+        return None;
+    }
+    // B = W(r+2)/(W(2)·W(r+1)), A = W(r+1)/B.
+    let mb = mulm(red[r + 2], mulm(invm(w2, p), invm(red[r + 1], p), p), p);
+    if mb == 0 {
+        return None;
+    }
+    let ma = mulm(red[r + 1], invm(mb, p), p);
+    let chi_a = legendre_u64(ma, p);
+    let chi_b = legendre_u64(mb, p);
+    let j = chi_period_mult(chi_a, chi_b, r as u64);
+    Some(BridgeReduction {
+        p,
+        order: r as u64,
+        chi_a,
+        chi_b,
+        chi_period: (r as u64) * j,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1420,6 +1563,61 @@ mod tests {
         assert!(s1.decimation_ok);
         assert_eq!(s1.pinned, s1.tested, "every k pins up to ±");
         assert_eq!(s1.sign_resolved, 0, "p≡1 cannot resolve the sign");
+    }
+
+    /// OEIS A006769: integer EDS for curve 37a, point (0,0), n = 0..25.
+    fn a006769() -> [i64; 26] {
+        [
+            0, 1, 1, -1, 1, 2, -1, -3, -5, 7, -4, -23, 29, 59, 129, -314, -65, 1529, -3689,
+            -8209, -16264, 83313, 113689, -620297, 2382785, 7869898,
+        ]
+    }
+
+    #[test]
+    fn integer_eds_matches_oeis_a006769() {
+        let w = eds_integer(1, -1, 1, 26);
+        let known = a006769();
+        for n in 0..26 {
+            assert_eq!(w[n], BigInt::from(known[n]), "A006769 mismatch at n={}", n);
+        }
+    }
+
+    #[test]
+    fn integer_eds_signs_aperiodic_for_37a() {
+        // 37a has Δ>0 (two real components) and an irrational rotation
+        // number, so Silverman–Stephens ⇒ the sign sequence is aperiodic.
+        let w = eds_integer(1, -1, 1, 220);
+        let s = signs(&w);
+        assert!(
+            sign_period(&s, 1, 80).is_none(),
+            "37a EDS signs should be aperiodic up to period 80"
+        );
+    }
+
+    #[test]
+    fn bridge_reduction_matches_group_order_and_chi_law() {
+        // Reduce the integer EDS mod p and confirm: (a) its rank of
+        // apparition equals ord(P mod p) computed independently by point
+        // arithmetic on Y²=x³−x+1/4, P=(0,1/2); (b) the χ-period obeys the
+        // §3 law (r or 2r).  This shows the F_p χ-structure is arithmetic,
+        // unrelated to the archimedean sign behaviour above.
+        let w = eds_integer(1, -1, 1, 140);
+        for p in [7u64, 11, 13, 23, 29] {
+            let br = reduce_and_analyze(&w, p).expect("reduction ok");
+            let pp = BigUint::from(p);
+            let a = BigUint::from(p - 1); // −1 mod p
+            let b = BigUint::from(invm(4, p)); // 1/4 mod p
+            let px = BigUint::from(0u32);
+            let py = BigUint::from(invm(2, p)); // 1/2 mod p
+            let ord = point_order(&px, &py, &a, &pp, 2 * p + 4).expect("finite order");
+            assert_eq!(
+                br.order, ord,
+                "apparition under reduction must equal ord(P mod {})",
+                p
+            );
+            let j = br.chi_period / br.order;
+            assert!(j == 1 || j == 2, "χ-period must be r or 2r, got j={} (p={})", j, p);
+        }
     }
 
     #[test]
