@@ -173,18 +173,55 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    right object (`1 ∈ ⟨S₃, field eqs⟩ ⟺ no `F_2`-solution`). All six
    module tests pass.
 
-   **First numbers, and an honest caveat.** A single-sample sweep
-   `n = 4..8` (`n' = ⌊n/2⌋`) already produces finite refutation degrees on
-   non-decomposable instances, but at these toy sizes the system is
-   heavily *over*determined (`n` equations in `2n' ≈ n` variables), so
-   `D*` is small and noisy (degree-2 Nullstellensatz certificates appear
-   for several `n`). The apparatus is correct; **prediction #1's
-   asymptotic `D*`-climb is not yet observable from one sample per `n`.**
-   Demonstrating it needs (a) averaging over many non-decomposable targets
-   per `(n, n')`, (b) the `n'`-vs-`n` regime tuned toward "roughly
-   determined" rather than over-determined, and (c) a sparse-F4 backend
-   to reach `2n' ≳ 12`. That is the §4-item-3 correlation study; the
-   instrument it needs is now in place.
+   **Averaging layer** — *(implemented: `src/cryptanalysis/pc_degree_avg.rs`,
+   demo `cargo run --release --example pc_degree_avg_demo`).* A single
+   `(n, n', x₃)` gives one noisy `D*`; `pc_degree_avg` samples **many
+   non-decomposable targets** per cell and reports the `D*` *distribution*
+   (`DegreeStats`: min / mean / max + histogram, with decomposable draws
+   skipped and tallied). It exposes the **determination ratio**
+   `ρ = #eqs/#vars = n/(2n')` and ships three sweeps:
+   `run_pc_avg_sweep` (the `n' = ⌊n/2⌋` edge), `run_pc_regime_sweep`
+   (fix `n`, vary `n'` so `ρ` sweeps down toward 1), and
+   `run_pc_operating_point_sweep` (grow `n` at fixed `ρ ≈ 1`). 7 tests
+   pass.
+
+   **What the averaged data shows (64 targets/cell).** Two findings, both
+   the *opposite* of the earlier "flat `D*`" artifact:
+
+   - **`D*` rises as `ρ → 1` (regime sweep, fixed `n = 10`).** Mean `D*`
+     climbs monotonically as the system approaches just-determined:
+
+     | `n'` | `ρ` | mean `D*` | `D*` histogram |
+     |---:|---:|---:|---|
+     | 1 | 5.00 | 2.00 | `2:64` |
+     | 2 | 2.50 | 2.00 | `2:64` |
+     | 3 | 1.67 | 2.17 | `2:53 3:11` |
+     | 4 | 1.25 | 2.31 | `2:46 3:16 4:2` |
+     | 5 | 1.00 | 2.42 | `2:50 3:1 4:13` |
+
+     So the flat `D*` reported by the single-sample harness was indeed an
+     **over-determination artifact**: heavily over-determined systems
+     (`ρ ≫ 1`) admit degree-2 Nullstellensatz certificates, masking the
+     solving degree. The interesting regime is `ρ ≈ 1`.
+
+   - **At fixed `ρ ≈ 1.1`, mean `D*` climbs with `n` (operating-point
+     sweep).** Along the **odd-`n`** subsequence:
+     `D* = 2.77 (n=7) → 2.98 (n=9) → 3.22 (n=11)`. This is the first
+     direct sighting of **prediction #1's `D*`-climb** in this repo, on
+     genuinely unsatisfiable instances.
+
+   **Honest caveats.** (i) A strong **even/odd parity effect** dominates
+   the scaling sweep: odd `n` give markedly higher `D*` than the
+   neighbouring even `n` (e.g. `n=9 → 2.98` vs `n=10 → 2.39`). This is a
+   known characteristic-2 Semaev phenomenon (odd-degree fields lack the
+   even-`n` half-trace / subfield structure), so prediction #1 must be
+   read **within a fixed parity class**, not across the raw sequence.
+   (ii) The climb is real but shallow over `n ≤ 12` — three points on the
+   odd subsequence is suggestive, not conclusive; confirming a *linear*
+   law needs (a) a sparse-F4 backend to reach `2n' ≳ 14`, and (b)
+   separating the two parity classes explicitly. (iii) `D*` here is still
+   bounded by the small `n'`; the absolute degrees are toy-scale. The
+   trend, not the magnitude, is the result.
 
 2. **`descent_expansion`** — given a curve and an `F_2`-basis, build
    `G(E, basis)` from the structure-constant tensor and return

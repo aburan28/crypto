@@ -120,6 +120,20 @@ pub struct AvgRow {
     pub first_fall: DegreeStats,
 }
 
+impl AvgRow {
+    /// Determination ratio `ρ = #eqs / #vars = n / (2n')`.  `ρ > 1` means
+    /// over-determined (more equations than unknowns); `ρ ≈ 1` is the
+    /// "just determined" index-calculus operating point where the generic
+    /// solving degree is largest.
+    pub fn ratio(&self) -> f64 {
+        if self.num_vars == 0 {
+            0.0
+        } else {
+            self.num_eqs as f64 / self.num_vars as f64
+        }
+    }
+}
+
 /// Measure the `D*` distribution over up to `targets` non-decomposable
 /// targets for a fixed `(n, n', b)`. Draws random `x₃` with `rng`,
 /// skipping decomposable ones, until `targets` non-decomposable instances
@@ -202,15 +216,89 @@ pub fn run_pc_avg_sweep(
     out
 }
 
-// ── Pretty printing ─────────────────────────────────────────────────
+/// **Determination-ratio regime sweep.** For a *fixed* field degree `n`,
+/// vary the factor-base dimension `n'` over `1..=⌊n/2⌋` and report the
+/// `D*` distribution at each. This isolates the effect of the
+/// **determination ratio** `ρ = #eqs / #vars = n / (2n')` on the
+/// refutation degree, with the field held constant so the only thing
+/// changing is how over-determined the restricted system is.
+///
+/// Why this axis. The unsatisfiable (refutable) regime is intrinsically
+/// `2n' ≲ n` — non-decomposable targets exist only when `|V|² = 2^{2n'}`
+/// is smaller than the field, i.e. `ρ ≳ 1`. So `ρ` cannot be pushed below
+/// ~1 while keeping a refutation to measure; the meaningful question is
+/// whether `D*` *rises as `ρ → 1⁺`* (the system approaching "just
+/// determined", where the solving degree of a generic quadratic system is
+/// largest). `n' = ⌊n/2⌋` is the boundary case the plain `run_pc_avg_sweep`
+/// already samples; this sweep fills in the more over-determined
+/// `n' < ⌊n/2⌋` cells for contrast.
+pub fn run_pc_regime_sweep(n: u32, d_max: u32, targets: u32, seed: u64) -> Vec<AvgRow> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let irr = choose_irreducible(n);
+    let b = random_nonzero_f2m(&mut rng, n);
+    let max_attempts = targets.saturating_mul(20).max(64);
+    let mut out = Vec::new();
+    for n_sub in 1..=(n / 2).max(1) {
+        out.push(measure_avg(
+            n,
+            n_sub,
+            &irr,
+            &b,
+            d_max,
+            targets,
+            max_attempts,
+            &mut rng,
+        ));
+    }
+    out
+}
+
+/// **Operating-point scaling sweep.** Scale the field degree `n` across
+/// `n_range` while holding the factor base at the *largest* dimension that
+/// still leaves most targets non-decomposable, `n' = ⌊(n − margin)/2⌋`
+/// (clamped to ≥ 1). This tracks `D*` along the index-calculus operating
+/// boundary `2n' ≈ n` as `n` grows — the asymptotic axis that prediction
+/// #1 is really about (does mean `D*` climb with `n` at fixed `ρ ≈ 1`?).
+///
+/// `margin` (typically 1–2) keeps `2n' < n` so non-decomposable targets
+/// remain plentiful; `margin = 0` puts `n'` exactly at `⌊n/2⌋` (the
+/// `run_pc_avg_sweep` default), where for even `n` the system is exactly
+/// determined and non-decomposable targets get scarce.
+pub fn run_pc_operating_point_sweep(
+    n_range: std::ops::RangeInclusive<u32>,
+    margin: u32,
+    d_max: u32,
+    targets: u32,
+    seed: u64,
+) -> Vec<AvgRow> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut out = Vec::new();
+    for n in n_range {
+        let n_sub = (n.saturating_sub(margin) / 2).max(1);
+        let irr = choose_irreducible(n);
+        let b = random_nonzero_f2m(&mut rng, n);
+        let max_attempts = targets.saturating_mul(20).max(64);
+        out.push(measure_avg(
+            n,
+            n_sub,
+            &irr,
+            &b,
+            d_max,
+            targets,
+            max_attempts,
+            &mut rng,
+        ));
+    }
+    out
+}
 
 pub fn print_pc_avg_sweep(rows: &[AvgRow]) {
     println!();
     println!(
-        "{:>3} {:>3} {:>5} {:>4} {:>5} | {:>13} | {:>17} | {:>4}",
-        "n", "n'", "vars", "eqs", "N", "first-fall μ", "D* min/μ/max", "none"
+        "{:>3} {:>3} {:>5} {:>4} {:>5} {:>5} | {:>13} | {:>17} | {:>4}",
+        "n", "n'", "vars", "eqs", "ρ", "N", "first-fall μ", "D* min/μ/max", "none"
     );
-    println!("{}", "─".repeat(72));
+    println!("{}", "─".repeat(80));
     for r in rows {
         let ff_mean = r
             .first_fall
@@ -223,11 +311,12 @@ pub fn print_pc_avg_sweep(rows: &[AvgRow]) {
             _ => "—".into(),
         };
         println!(
-            "{:>3} {:>3} {:>5} {:>4} {:>5} | {:>13} | {:>17} | {:>4}",
+            "{:>3} {:>3} {:>5} {:>4} {:>5.2} {:>5} | {:>13} | {:>17} | {:>4}",
             r.n,
             r.n_sub,
             r.num_vars,
             r.num_eqs,
+            r.ratio(),
             r.n_targets,
             ff_mean,
             dstar,
@@ -332,6 +421,53 @@ mod tests {
                 assert!(r.refutation.mean.is_some());
                 assert!(r.refutation.min.unwrap() <= r.refutation.max.unwrap());
             }
+        }
+    }
+
+    /// `ratio()` reports `n / (2n')` and is ≥ 1 in the refutable regime.
+    #[test]
+    fn determination_ratio() {
+        let rows = run_pc_avg_sweep(6..=6, 9, 4, 0x_DE_7E);
+        let r = &rows[0];
+        // n=6, n'=3 ⇒ vars=6, eqs=6, ρ = 1.0.
+        assert_eq!(r.num_vars, 6);
+        assert!((r.ratio() - 1.0).abs() < 1e-9);
+    }
+
+    /// The regime sweep at fixed `n` returns one row per `n' ∈ 1..=⌊n/2⌋`,
+    /// with the determination ratio decreasing monotonically toward 1 as
+    /// `n'` grows.
+    #[test]
+    fn regime_sweep_covers_nsub_range() {
+        let n = 8;
+        let rows = run_pc_regime_sweep(n, 10, 6, 0x_BE_61_E);
+        assert_eq!(rows.len() as u32, (n / 2).max(1)); // n'=1,2,3,4
+        for (i, r) in rows.iter().enumerate() {
+            assert_eq!(r.n, n);
+            assert_eq!(r.n_sub, (i as u32) + 1);
+        }
+        // ρ is strictly decreasing in n'.
+        for w in rows.windows(2) {
+            assert!(w[0].ratio() > w[1].ratio(), "ρ should fall as n' rises");
+        }
+        // Every measured target is non-decomposable ⇒ no `none`s within a
+        // generous budget for the over-determined cells.
+        for r in &rows {
+            let hist_total: u32 = r.refutation.histogram.values().sum();
+            assert_eq!(hist_total, r.refutation.n_defined);
+        }
+    }
+
+    /// The operating-point sweep keeps `2n'` just below `n` (ρ ≳ 1) as `n`
+    /// scales, and produces one row per `n`.
+    #[test]
+    fn operating_point_sweep_tracks_boundary() {
+        let rows = run_pc_operating_point_sweep(6..=10, 1, 11, 6, 0x_0B_DE);
+        assert_eq!(rows.len(), 5);
+        for r in &rows {
+            // margin=1 ⇒ n' = ⌊(n-1)/2⌋, so 2n' ≤ n-1 < n ⇒ ρ > 1.
+            assert!(r.num_vars < r.n, "operating point must stay below n");
+            assert!(r.ratio() >= 1.0);
         }
     }
 }
