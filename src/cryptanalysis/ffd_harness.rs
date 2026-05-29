@@ -617,6 +617,77 @@ pub(crate) fn build_macaulay_rows(
     (rows, cols, rows_constructed)
 }
 
+/// Sparse counterpart of [`build_macaulay_rows`]: each Macaulay row is
+/// returned as the **sorted, deduplicated** list of its set column indices
+/// (the monomial indices that survive the `x_i² = x_i` collapse and the
+/// degree-`d` truncation) instead of a packed `cols/64`-word bit-vector.
+///
+/// This is the construction half of a sparse `F_2` backend. At very low
+/// degree each row touches only a handful of monomials, so the memory is
+/// proportional to the actual nonzeros rather than to `rows × cols/64`.
+///
+/// **Benchmark result (negative, recorded honestly).** The sparse path
+/// (`pc_degree_harness::sparse_rank_and_refute`) was built to extend reach
+/// to `2n' ≥ 16`, but benchmarking showed it is **slower** than the dense
+/// bit-packed path there (≈ 391 s vs 23 s at `2n'=16`): Macaulay matrices
+/// **densify under fill-in at degree ≥ 5**, and once rows are dense,
+/// 64-bit-wide XOR beats element-wise symmetric difference by an order of
+/// magnitude. The reach win at `2n'=14`–`16` came instead from the *dense*
+/// single-pass `rank_and_refute` plus the `d_cap` censoring in EXP-G. The
+/// sparse functions are retained as a validated reference (their `(rank,
+/// refuted)` is asserted identical to the dense path) and for the
+/// genuinely-sparse very-low-degree regime.
+///
+/// The set of column indices produced for a given system is identical to
+/// the support of the dense rows (asserted in tests).
+// Retained as a validated reference / for the very-low-degree sparse
+// regime; the production scan uses the dense path (see benchmark above), so
+// this is exercised only by tests.
+#[allow(dead_code)]
+pub(crate) fn build_macaulay_rows_sparse(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    d: u32,
+) -> (Vec<Vec<u32>>, usize, u64) {
+    let cols = num_monomials_upto_degree(num_vars, d) as usize;
+    if cols == 0 || eqs.is_empty() {
+        return (Vec::new(), cols, 0);
+    }
+    let multipliers = enumerate_monomials_upto(num_vars, d.saturating_sub(2));
+    let mut rows: Vec<Vec<u32>> = Vec::new();
+    for mult in &multipliers {
+        for eq in eqs {
+            let row_poly = mul_by_monomial(eq, mult, num_vars);
+            // XOR-accumulate column indices: a monomial that appears an even
+            // number of times cancels over F_2.
+            let mut idxs: Vec<u32> = Vec::with_capacity(row_poly.len());
+            for mono in &row_poly {
+                if mono.len() as u32 > d {
+                    continue; // degree-d truncation (matches expand_to_flat)
+                }
+                idxs.push(monomial_index(mono, num_vars, d) as u32);
+            }
+            idxs.sort_unstable();
+            // Keep indices occurring an odd number of times.
+            let mut row: Vec<u32> = Vec::with_capacity(idxs.len());
+            let mut i = 0;
+            while i < idxs.len() {
+                let mut j = i + 1;
+                while j < idxs.len() && idxs[j] == idxs[i] {
+                    j += 1;
+                }
+                if (j - i) & 1 == 1 {
+                    row.push(idxs[i]);
+                }
+                i = j;
+            }
+            rows.push(row);
+        }
+    }
+    let rows_constructed = rows.len() as u64;
+    (rows, cols, rows_constructed)
+}
+
 /// Enumerate every multilinear monomial of degree ≤ `d` in `v`
 /// variables.  Each monomial is the **sorted** vector of variable
 /// indices.

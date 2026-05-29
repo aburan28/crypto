@@ -191,6 +191,45 @@ attack a different prediction.
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
 
+### 2026-05-29 — iteration 8 (sparse backend [negative], + EXP-H defect scaling → lower-bound evidence)
+
+- Two tasks ("both, reach first"): a sparse-F2 backend to push `2n' ≳ 16`,
+  and the algebraic lower-bound argument (`Δ_low = o(1)` for generic bases).
+- **Sparse backend — built, validated, benchmarked NEGATIVE.**
+  `ffd_harness::build_macaulay_rows_sparse` (sorted column-index rows) +
+  `pc_degree_harness::sparse_rank_and_refute` (sparse echelon via `symdiff`,
+  keyed by leading column) + e₀ reduction. A test asserts `(rank, refuted)`
+  and the row supports are **identical** to the dense path. But
+  benchmarking at `2n'=16` showed the sparse path is **17× slower** (391 s
+  vs 23 s): Macaulay matrices densify under fill-in at degree ≥ 5, where
+  64-bit-wide dense XOR beats element-wise symmetric difference. **Reverted
+  the production scan to the dense single-pass `rank_and_refute`**; sparse
+  code retained as a validated reference with the benchmark documented in
+  its doc comment. Honest engineering result: dense wins for these matrices.
+  (Reach to `2n'=14`–`16` therefore comes from the dense single-pass +
+  `d_cap` censoring, not from sparse storage; `(16,8)` runs in ~23 s,
+  `(18,9)` subfield ~216 s.)
+- **EXP-H — defect scaling (`examples/ffd_defect_scaling.rs`,
+  `experiments/ffd_defect_scaling.json`).** `Δ_low` only needs degree-≤3
+  ranks, so it is cheap to `2n'=20`. In the critical regime, the **Random
+  (generic) family's normalized `Δ_low` decays polynomially to 0** — fit
+  `Δ_low ≈ (2n')^{−c}`, `c ≈ 4.3` (4.2–4.5 over 3 seeds) — while the
+  **Subfield stays bounded away** (0.23 → 0.048) so the ratio sub/rand
+  diverges (6.7 → 67 over `2n' = 8…20`).
+- **Significance (the lower-bound backbone).** `Δ_low → 0` for generic bases
+  *is* the statement "a generic factor base is asymptotically semi-regular
+  at low degree" — no early collapse → `D* = Θ(n)`. This is the empirical
+  support for the defensive theorem's conditional (proposal §3.4 / §4·5a):
+  *if generic descended Semaev systems have `Δ_low = o(1)`, the first-fall
+  assumption is false at scale.* The subfield's persistent defect is the
+  converse (the breakable cases).
+- Ledger: P3-alg unchanged (supported); added the lower-bound route's
+  evidence. 600 lib tests pass.
+- Next: formalise the genericity lemma (`Δ_low = o(1)` whp over a random
+  `F_2`-linear factor base, via algebraic independence of Semaev
+  coefficients) — the one unproven step in the conditional theorem.
+- Commit: (this + the proposal §3.4 commit)
+
 ### 2026-05-29 — iteration 7 (EXP-G reach — law confirmed to 2n'=14, slope stable)
 
 - Task: "reach first" — push the defect↔D* curve past `2n'=10` to test

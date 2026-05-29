@@ -176,9 +176,14 @@ pub fn refutation_scan(
     let mut refutation_degree: Option<u32> = None;
 
     for d in 2..=d_max {
+        // Dense single-pass: one echelon reduction yields both the rank and
+        // the refutation test (1 ∈ row-space). Benchmarked against the
+        // sparse backend (`sparse_rank_and_refute`) at 2n' ∈ {12,…,18}: the
+        // dense bit-packed path WINS decisively (e.g. 23 s vs 391 s at
+        // 2n'=16) because Macaulay matrices densify under fill-in at degree
+        // ≥ 5, where 64-bit-wide XOR beats element-wise symmetric difference.
+        // See `build_macaulay_rows_sparse` for that (negative) result.
         let (mut rows, cols, rows_constructed) = build_macaulay_rows(eqs, num_vars, d);
-        // Single reduction pass yields both the rank and the refutation test
-        // (1 ∈ row-space), avoiding the former double f2_rank + clones.
         let (rank_us, refuted) = rank_and_refute(&mut rows, cols);
         let rank = rank_us as u64;
 
@@ -415,6 +420,79 @@ pub fn rank_and_refute(rows: &mut [Vec<u64>], cols: usize) -> (usize, bool) {
     (rank, refuted)
 }
 
+/// XOR (symmetric difference) of two sorted, deduplicated index lists.
+/// Keeps elements appearing in exactly one input — the `F_2` row sum.
+fn symdiff(a: &[u32], b: &[u32]) -> Vec<u32> {
+    let mut out = Vec::with_capacity(a.len() + b.len());
+    let (mut i, mut j) = (0, 0);
+    while i < a.len() && j < b.len() {
+        match a[i].cmp(&b[j]) {
+            std::cmp::Ordering::Less => {
+                out.push(a[i]);
+                i += 1;
+            }
+            std::cmp::Ordering::Greater => {
+                out.push(b[j]);
+                j += 1;
+            }
+            std::cmp::Ordering::Equal => {
+                i += 1;
+                j += 1;
+            }
+        }
+    }
+    out.extend_from_slice(&a[i..]);
+    out.extend_from_slice(&b[j..]);
+    out
+}
+
+/// Sparse `F_2` rank + refutation, the elimination half of the sparse
+/// backend. `rows` are sorted column-index lists (from
+/// [`build_macaulay_rows_sparse`]). Performs sparse row-echelon reduction:
+/// each row is XOR-reduced against the stored pivots (keyed by leading
+/// column) until it either gains a fresh leading column (→ new pivot) or
+/// vanishes. The leading column strictly increases at every reduction step,
+/// so the process terminates.
+///
+/// Returns `(rank, refuted)` where `refuted` is whether the unit `e₀`
+/// (column 0, the constant `1`) lies in the row-space — tested by reducing
+/// the singleton `[0]` against the pivots. The result is identical to the
+/// dense `(f2_rank, e0_in_rowspace)` / [`rank_and_refute`] path (the rank
+/// of a matrix is representation-independent); this is asserted in tests.
+pub fn sparse_rank_and_refute(rows: Vec<Vec<u32>>) -> (usize, bool) {
+    use std::collections::HashMap;
+    // pivots[leading_col] = the (reduced) pivot row whose minimum index is
+    // `leading_col`.
+    let mut pivots: HashMap<u32, Vec<u32>> = HashMap::new();
+    for mut row in rows {
+        while let Some(&lead) = row.first() {
+            match pivots.get(&lead) {
+                Some(p) => {
+                    row = symdiff(&row, p);
+                    // `lead` is now cancelled; the new leading index is > lead.
+                }
+                None => {
+                    pivots.insert(lead, row);
+                    break;
+                }
+            }
+        }
+        // If `row` emptied, it was linearly dependent — no new pivot.
+    }
+    let rank = pivots.len();
+
+    // Reduce e₀ = [0] against the pivot basis.
+    let mut w: Vec<u32> = vec![0];
+    while let Some(&lead) = w.first() {
+        match pivots.get(&lead) {
+            Some(p) => w = symdiff(&w, p),
+            None => break,
+        }
+    }
+    let refuted = w.is_empty();
+    (rank, refuted)
+}
+
 // ── Pretty printing ─────────────────────────────────────────────────
 
 pub fn print_pc_sweep(rows: &[PcRow]) {
@@ -511,6 +589,65 @@ mod tests {
         }
         assert!(checked_refute, "test never hit a refuting case");
         assert!(checked_nonrefute, "test never hit a non-refuting case");
+    }
+
+    /// The sparse backend (`build_macaulay_rows_sparse` +
+    /// `sparse_rank_and_refute`) must produce exactly the same `(rank,
+    /// refuted)` as the dense path on real Macaulay matrices, across degrees
+    /// and both refuting / non-refuting targets. Also checks the sparse row
+    /// supports equal the dense row supports.
+    #[test]
+    fn sparse_backend_matches_dense() {
+        use crate::cryptanalysis::ffd_harness::{build_macaulay_rows, build_macaulay_rows_sparse};
+        let n = 6;
+        let n_sub = 3;
+        let irr = irr(n);
+        let mut hit_refute = false;
+        let mut hit_nonrefute = false;
+        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
+            let b = F2mElement::from_bit_positions(
+                &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
+                n,
+            );
+            let x3 = F2mElement::from_bit_positions(
+                &(0..n).filter(|k| (xm >> k) & 1 == 1).collect::<Vec<_>>(),
+                n,
+            );
+            if b.is_zero() || x3.is_zero() {
+                continue;
+            }
+            let eqs = restrict_to_subspace(&weil_descend_s3(n, &irr, &b, &x3), n, n_sub);
+            for d in 2..=2 * n_sub {
+                let (dense, cols, dn) = build_macaulay_rows(&eqs, 2 * n_sub, d);
+                let (sparse, scols, sn) = build_macaulay_rows_sparse(&eqs, 2 * n_sub, d);
+                assert_eq!(cols, scols);
+                assert_eq!(dn, sn, "row count differs at d={d}");
+                // Row supports match (dense packed bits ↔ sparse indices).
+                for (drow, srow) in dense.iter().zip(sparse.iter()) {
+                    let mut want: Vec<u32> = Vec::new();
+                    for (w, word) in drow.iter().enumerate() {
+                        for bit in 0..64 {
+                            if word & (1u64 << bit) != 0 {
+                                want.push((w * 64 + bit) as u32);
+                            }
+                        }
+                    }
+                    assert_eq!(srow, &want, "sparse support differs at d={d}");
+                }
+                let mut for_rank = dense.clone();
+                let want_rank = f2_rank(&mut for_rank, cols);
+                let want_refuted = e0_in_rowspace(&dense, cols, want_rank);
+                let (got_rank, got_refuted) = sparse_rank_and_refute(sparse);
+                assert_eq!(got_rank, want_rank, "sparse rank differs at d={d}");
+                assert_eq!(got_refuted, want_refuted, "sparse refute differs at d={d}");
+                if got_refuted {
+                    hit_refute = true;
+                } else {
+                    hit_nonrefute = true;
+                }
+            }
+        }
+        assert!(hit_refute && hit_nonrefute);
     }
 
     /// Restriction drops every monomial that touches a high bit and
