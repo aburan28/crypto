@@ -216,6 +216,13 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    known characteristic-2 Semaev phenomenon (odd-degree fields lack the
    even-`n` half-trace / subfield structure), so prediction #1 must be
    read **within a fixed parity class**, not across the raw sequence.
+   *Update (workflow iteration 1, `RESEARCH_FFD_WORKFLOW.md`): with the
+   parity split made explicit and 64 targets/cell, BOTH parity classes
+   show a positive `D*`-vs-`n` slope — odd +0.121/n (n=7,9,11), even
+   +0.060/n (n=6,8,10,12). The earlier "even looks flat" remark was
+   undersampling; the auto-verdict gate G-P1 now reports `supported` on
+   both classes. The parity effect is a level shift, not a difference in
+   the sign of the trend.*
    (ii) The climb is real but shallow over `n ≤ 12` — three points on the
    odd subsequence is suggestive, not conclusive; confirming a *linear*
    law needs (a) a sparse-F4 backend to reach `2n' ≳ 14`, and (b)

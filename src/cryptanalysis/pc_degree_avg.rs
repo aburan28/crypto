@@ -292,6 +292,60 @@ pub fn run_pc_operating_point_sweep(
     out
 }
 
+/// **EXP-A — curve-independence sweep.** For a *fixed* `(n, n')`, measure
+/// the `D*` distribution over `n_curves` independent random curve
+/// parameters `b`, each with its own batch of `targets` non-decomposable
+/// targets. Tests prediction P5: is `D*` a field/basis invariant (the
+/// `D*` distribution is the same for every `b`) or does it depend on the
+/// specific curve?
+///
+/// The answer decides how `descent_expansion` (the P2 predictor) must be
+/// keyed: if `D*` is curve-independent, the Tanner graph need only encode
+/// the (field, basis) multiplication tensor; if not, the curve `b` must
+/// enter the graph too. Returns one `AvgRow` per `b` (all share the same
+/// `n, n'`), so a downstream spread/KS test can run on `.refutation`.
+pub fn run_pc_curve_independence_sweep(
+    n: u32,
+    n_sub: u32,
+    n_curves: u32,
+    d_max: u32,
+    targets: u32,
+    seed: u64,
+) -> Vec<AvgRow> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let irr = choose_irreducible(n);
+    let max_attempts = targets.saturating_mul(20).max(64);
+    let mut out = Vec::new();
+    for _ in 0..n_curves {
+        let b = random_nonzero_f2m(&mut rng, n);
+        out.push(measure_avg(
+            n,
+            n_sub,
+            &irr,
+            &b,
+            d_max,
+            targets,
+            max_attempts,
+            &mut rng,
+        ));
+    }
+    out
+}
+
+/// Spread of mean `D*` across a set of rows: `max(mean) − min(mean)` over
+/// rows that have a defined mean. `None` if fewer than two rows have a
+/// defined mean. Used by the EXP-A gate G-P5: a small spread (≲ 0.5
+/// degree) supports curve-independence; a large spread kills it.
+pub fn mean_dstar_spread(rows: &[AvgRow]) -> Option<f64> {
+    let means: Vec<f64> = rows.iter().filter_map(|r| r.refutation.mean).collect();
+    if means.len() < 2 {
+        return None;
+    }
+    let lo = means.iter().cloned().fold(f64::INFINITY, f64::min);
+    let hi = means.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    Some(hi - lo)
+}
+
 pub fn print_pc_avg_sweep(rows: &[AvgRow]) {
     println!();
     println!(
@@ -469,5 +523,51 @@ mod tests {
             assert!(r.num_vars < r.n, "operating point must stay below n");
             assert!(r.ratio() >= 1.0);
         }
+    }
+
+    /// EXP-A: the curve-independence sweep returns one row per curve `b`,
+    /// all sharing `(n, n')`, and the mean-`D*` spread is well-defined.
+    #[test]
+    fn curve_independence_sweep_shape_and_spread() {
+        let n = 8;
+        let n_sub = 3;
+        let rows = run_pc_curve_independence_sweep(n, n_sub, 5, 10, 16, 0x_C0_4E);
+        assert_eq!(rows.len(), 5);
+        for r in &rows {
+            assert_eq!(r.n, n);
+            assert_eq!(r.n_sub, n_sub);
+            assert_eq!(r.num_vars, 2 * n_sub);
+        }
+        // Spread is the max−min of defined means and is non-negative.
+        if let Some(spread) = mean_dstar_spread(&rows) {
+            assert!(spread >= 0.0);
+        }
+    }
+
+    /// `mean_dstar_spread` returns `None` with fewer than two defined means
+    /// and the correct max−min otherwise.
+    #[test]
+    fn spread_arithmetic() {
+        assert!(mean_dstar_spread(&[]).is_none());
+        // Hand-build rows with known means via DegreeStats.
+        let mk = |vals: &[u32]| {
+            let mut s = DegreeStats::default();
+            for &v in vals {
+                s.accumulate(Some(v));
+            }
+            s.finalize();
+            AvgRow {
+                n: 6,
+                n_sub: 3,
+                num_vars: 6,
+                num_eqs: 6,
+                n_targets: vals.len() as u32,
+                skipped_decomposable: 0,
+                refutation: s,
+                first_fall: DegreeStats::default(),
+            }
+        };
+        let rows = vec![mk(&[2, 2]), mk(&[4, 4])]; // means 2.0 and 4.0
+        assert_eq!(mean_dstar_spread(&rows), Some(2.0));
     }
 }

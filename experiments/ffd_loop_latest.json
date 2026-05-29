@@ -1,0 +1,20 @@
+{
+  "schema": "ffd_breakthrough_loop/v1",
+  "seed": 268242953,
+  "generated_at": 1780028048,
+  "targets_per_cell": 64,
+  "exp_a_curve_independence": {
+    "spread_mean_dstar": 0.2188,
+    "gate_p5": {"status":"supported","detail":"spread 0.219 < 0.5"},
+    "rows": [{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3281,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:43 3:21"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3438,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:42 3:22"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3125,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:44 3:20"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.2812,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:46 3:18"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.2656,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:47 3:17"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.4844,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:33 3:31"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3750,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:40 3:24"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3125,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:44 3:20"}]
+  },
+  "scaling_operating_point": {
+    "gate_p1_odd": {"status":"supported","detail":"odd: slope +0.121/n over 3 pts"},
+    "gate_p1_even": {"status":"supported","detail":"even: slope +0.060/n over 4 pts"},
+    "rows": [{"n":6,"n_sub":2,"vars":4,"eqs":6,"ratio":1.5000,"n_targets":64,"mean_dstar":2.1250,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:56 3:8"},{"n":7,"n_sub":3,"vars":6,"eqs":7,"ratio":1.1667,"n_targets":64,"mean_dstar":2.7656,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:16 3:47 4:1"},{"n":8,"n_sub":3,"vars":6,"eqs":8,"ratio":1.3333,"n_targets":64,"mean_dstar":2.3125,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:44 3:20"},{"n":9,"n_sub":4,"vars":8,"eqs":9,"ratio":1.1250,"n_targets":64,"mean_dstar":2.9688,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:5 3:56 4:3"},{"n":10,"n_sub":4,"vars":8,"eqs":10,"ratio":1.2500,"n_targets":64,"mean_dstar":2.4844,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:33 3:31"},{"n":11,"n_sub":5,"vars":10,"eqs":11,"ratio":1.1000,"n_targets":64,"mean_dstar":3.2500,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:3 3:42 4:19"},{"n":12,"n_sub":5,"vars":10,"eqs":12,"ratio":1.2000,"n_targets":64,"mean_dstar":2.4688,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:38 3:22 4:4"}]
+  },
+  "regime_n10": {
+    "gate_p6": {"status":"supported","detail":"all 2 over-determined cells have mean D* ≤ 2.05"},
+    "rows": [{"n":10,"n_sub":1,"vars":2,"eqs":10,"ratio":5.0000,"n_targets":64,"mean_dstar":2.0156,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:63 3:1"},{"n":10,"n_sub":2,"vars":4,"eqs":10,"ratio":2.5000,"n_targets":64,"mean_dstar":2.0312,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:62 3:2"},{"n":10,"n_sub":3,"vars":6,"eqs":10,"ratio":1.6667,"n_targets":64,"mean_dstar":2.1719,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:53 3:11"},{"n":10,"n_sub":4,"vars":8,"eqs":10,"ratio":1.2500,"n_targets":64,"mean_dstar":2.3281,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:44 3:19 4:1"},{"n":10,"n_sub":5,"vars":10,"eqs":10,"ratio":1.0000,"n_targets":64,"mean_dstar":2.4375,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:50 4:14"}]
+  }
+}
