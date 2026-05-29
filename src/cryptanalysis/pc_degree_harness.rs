@@ -176,11 +176,11 @@ pub fn refutation_scan(
     let mut refutation_degree: Option<u32> = None;
 
     for d in 2..=d_max {
-        let (rows, cols, rows_constructed) = build_macaulay_rows(eqs, num_vars, d);
-        // Rank of the Macaulay matrix (clone — f2_rank reduces in place).
-        let mut for_rank = rows.clone();
-        let rank = f2_rank(&mut for_rank, cols) as u64;
-        let refuted = e0_in_rowspace(&rows, cols, rank as usize);
+        let (mut rows, cols, rows_constructed) = build_macaulay_rows(eqs, num_vars, d);
+        // Single reduction pass yields both the rank and the refutation test
+        // (1 ∈ row-space), avoiding the former double f2_rank + clones.
+        let (rank_us, refuted) = rank_and_refute(&mut rows, cols);
+        let rank = rank_us as u64;
 
         let nontrivial_syzygy = rank < rows_constructed;
         let not_saturated = rank < cols as u64;
@@ -346,6 +346,75 @@ pub fn e0_in_rowspace(rows: &[Vec<u64>], cols: usize, base_rank: usize) -> bool 
     aug_rank == base_rank
 }
 
+/// Combined rank + refutation in a **single** reduction pass.
+///
+/// `refutation_scan` previously computed the Macaulay rank with `f2_rank`
+/// and then re-reduced an augmented copy in `e0_in_rowspace` — two full
+/// Gaussian eliminations plus two clones of the (large) row set per degree.
+/// This routine row-reduces `rows` to echelon form **once**, recording the
+/// pivot columns, then reduces the unit vector `e₀` against that basis. The
+/// system is refuted (`1` ∈ row-space) iff `e₀` reduces to zero.
+///
+/// Returns `(rank, refuted)`. Consumes `rows` (reduced in place) — callers
+/// that still need the original matrix should clone first, but the scan does
+/// not, which is the point. Result is identical to
+/// `(f2_rank(rows), e0_in_rowspace(rows, …))`; this is asserted in tests.
+pub fn rank_and_refute(rows: &mut [Vec<u64>], cols: usize) -> (usize, bool) {
+    if rows.is_empty() || cols == 0 {
+        return (0, false);
+    }
+    // Echelon reduction (eliminate the pivot column from rows *below* the
+    // pivot only), recording (pivot_row_index, pivot_col) in pivot order.
+    let mut pivots: Vec<(usize, usize)> = Vec::new();
+    let mut row = 0usize;
+    for col in 0..cols {
+        let word = col / 64;
+        let mask = 1u64 << (col % 64);
+        let mut pivot = None;
+        for r in row..rows.len() {
+            if rows[r][word] & mask != 0 {
+                pivot = Some(r);
+                break;
+            }
+        }
+        let Some(pivot) = pivot else { continue };
+        rows.swap(row, pivot);
+        for r in (row + 1)..rows.len() {
+            if rows[r][word] & mask != 0 {
+                let (lo, hi) = rows.split_at_mut(r);
+                let pr = &lo[row];
+                for (rr, p) in hi[0].iter_mut().zip(pr.iter()) {
+                    *rr ^= *p;
+                }
+            }
+        }
+        pivots.push((row, col));
+        row += 1;
+        if row >= rows.len() {
+            break;
+        }
+    }
+    let rank = pivots.len();
+
+    // Reduce e₀ (only column 0 set) against the echelon basis: for each
+    // pivot whose column is currently set in the working vector, XOR in the
+    // pivot row. `1` ∈ row-space ⇔ the result is zero.
+    let words = (cols + 63) / 64;
+    let mut w = vec![0u64; words];
+    w[0] = 1;
+    for &(prow, pcol) in &pivots {
+        let word = pcol / 64;
+        let mask = 1u64 << (pcol % 64);
+        if w[word] & mask != 0 {
+            for (wi, p) in w.iter_mut().zip(rows[prow].iter()) {
+                *wi ^= *p;
+            }
+        }
+    }
+    let refuted = w.iter().all(|&x| x == 0);
+    (rank, refuted)
+}
+
 // ── Pretty printing ─────────────────────────────────────────────────
 
 pub fn print_pc_sweep(rows: &[PcRow]) {
@@ -393,6 +462,55 @@ mod tests {
 
     fn irr(n: u32) -> IrreduciblePoly {
         choose_irreducible(n)
+    }
+
+    /// The single-pass `rank_and_refute` must agree exactly with the old
+    /// two-call path `(f2_rank, e0_in_rowspace)` on real Macaulay matrices,
+    /// across degrees and across both refuting and non-refuting targets.
+    #[test]
+    fn rank_and_refute_matches_two_call_path() {
+        use crate::cryptanalysis::ffd_harness::build_macaulay_rows;
+        let n = 6;
+        let n_sub = 3;
+        let irr = irr(n);
+        let mut checked_refute = false;
+        let mut checked_nonrefute = false;
+        // A handful of targets to hit both refuting and non-refuting cases.
+        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
+            let b = F2mElement::from_bit_positions(
+                &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
+                n,
+            );
+            let x3 = F2mElement::from_bit_positions(
+                &(0..n).filter(|k| (xm >> k) & 1 == 1).collect::<Vec<_>>(),
+                n,
+            );
+            if b.is_zero() || x3.is_zero() {
+                continue;
+            }
+            let full = weil_descend_s3(n, &irr, &b, &x3);
+            let eqs = restrict_to_subspace(&full, n, n_sub);
+            for d in 2..=2 * n_sub {
+                let (rows, cols, _) = build_macaulay_rows(&eqs, 2 * n_sub, d);
+                if rows.is_empty() {
+                    continue;
+                }
+                let mut for_rank = rows.clone();
+                let want_rank = f2_rank(&mut for_rank, cols);
+                let want_refuted = e0_in_rowspace(&rows, cols, want_rank);
+                let mut mine = rows;
+                let (got_rank, got_refuted) = rank_and_refute(&mut mine, cols);
+                assert_eq!(got_rank, want_rank, "rank mismatch at d={d}");
+                assert_eq!(got_refuted, want_refuted, "refute mismatch at d={d}");
+                if got_refuted {
+                    checked_refute = true;
+                } else {
+                    checked_nonrefute = true;
+                }
+            }
+        }
+        assert!(checked_refute, "test never hit a refuting case");
+        assert!(checked_nonrefute, "test never hit a non-refuting case");
     }
 
     /// Restriction drops every monomial that touches a high bit and

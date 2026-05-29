@@ -52,7 +52,7 @@ current reach." Maintained as a table here and machine-checked by
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
 | P6 | Over-determined `ρ ≫ 1` collapses `D*` to 2 (Nullstellensatz) | `supported` | n=10 sweep: ρ≥2.5 ⇒ mean D* ≤ 2.03 (`15b5b1c`, re-confirmed iteration 1) |
-| **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iteration 5: at n=8,n'=4 the early-defect↔D* Spearman is **ρ_s = −1.000** (perfect inverse rank order). **EXP-G iteration 6 turned the 3-point ordering into a 40-cell curve** over 8 operating points × 3 families: pooled **ρ_s = −0.754** (Pearson −0.728); in the *critical* regime `2n'=n` (the ECDLP case) ρ_s = −0.750 with OLS slope **−7.2 D* per unit defect**. Seed-robust (pooled ρ_s ∈ [−0.64,−0.76], critical slope ∈ [−6.9,−7.7] over 4 seeds). The 3 within-point "misses" are exactly the over-determined points `2n'≪n` where D* is floored at 2 by P6 — saturation, not refutation. The predictor that **works where both graph invariants failed** — it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
+| **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iter 5: at n=8,n'=4 early-defect↔D* Spearman **ρ_s = −1.000**. EXP-G iter 6: 40-cell curve, pooled ρ_s −0.754, critical slope −7.2. **EXP-G iter 7 extended reach to `2n'=14`** (single-pass rank+refute + d_cap censoring): **50 cells**, pooled **ρ_s = −0.793**; *critical* regime (30 cells incl. 2n'=12,14) **ρ_s = −0.778, slope −7.6**. Seed-robust at extended reach: critical ρ_s ∈ [−0.70,−0.81], slope ∈ [−7.6,−8.5] over 3 seeds — adding the big points *strengthened* the law. The new critical points (12,6),(14,7) show perfect inverse ordering. Censoring (228 high-D* targets dropped) is conservative — it biases random D* down toward subfield, yet ρ_s rose. The predictor that **works where both graph invariants failed**: it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
 
 New predictions are appended as experiments suggest them; killed ones stay
 in the table with their kill evidence (negative results are the point).
@@ -190,6 +190,39 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 7 (EXP-G reach — law confirmed to 2n'=14, slope stable)
+
+- Task: "reach first" — push the defect↔D* curve past `2n'=10` to test
+  whether the critical-regime slope (~−7) survives at scale.
+- Diagnosis (the reframing): the reach wall is **not raw `2n'`**. A timing
+  probe showed refuting targets resolve at low degree and are near-instant
+  even at `2n'=14`; the cost was entirely the **non-refuting targets**
+  running the degree scan to the exponential tail `d_max=2n'+2`, plus
+  `refutation_scan` doing **two** full `f2_rank` passes per degree.
+- Two safe, high-leverage fixes (no new F4 needed):
+  1. `pc_degree_harness::rank_and_refute` — single echelon pass yields both
+     the rank and the `1∈row-space` refutation test, replacing the double
+     `f2_rank` + clones. Validated **identical** to the old two-call path on
+     real Macaulay matrices across degrees and both refuting/non-refuting
+     cases (new test; 599 lib tests pass).
+  2. EXP-G `d_cap`: cap the scan; targets not refuted by the cap are
+     **censored** (counted, not averaged). Censoring drops the highest-D*
+     targets — a *conservative* bias that can only weaken the negative
+     correlation.
+- Added critical points **(12,6)→2n'=12** and **(14,7)→2n'=14**. Result:
+  50 cells, pooled **ρ_s = −0.793**; critical regime (30 cells) **ρ_s =
+  −0.778, slope −7.6**. Seed-robust: critical ρ_s ∈ [−0.70, −0.81], slope
+  ∈ [−7.6, −8.5] over 3 seeds. The big points show perfect inverse ordering
+  and *strengthened* the law (worst-seed critical ρ_s rose −0.52→−0.70).
+  Censoring concentrated in high-D* random cells (conservative); ρ_s rose
+  anyway.
+- Gate G-P3-alg: **SUPPORTED** at extended reach. The slope ≈ −7…−8 D* per
+  unit early-defect is now stable across `2n' ∈ {4,…,14}`.
+- Snapshot: `experiments/ffd_expg_curve.json` (schema v3, censoring).
+- Next: the formalization half — argue `δ(D)` is the Hilbert-defect proxy
+  for the last-fall degree and rewrite proposal §3 around it.
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 6 (EXP-G — defect↔D* law widened to a 40-cell curve)
 

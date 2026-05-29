@@ -33,6 +33,7 @@ struct Cell {
     early_defect: f64,
     dstar: f64,
     n_trials: u32,
+    censored: u32,
 }
 
 fn rand_nz(rng: &mut StdRng, n: u32) -> F2mElement {
@@ -55,20 +56,29 @@ fn run_cell(
     v: &FactorSubspace,
     irr: &crypto_lib::binary_ecc::IrreduciblePoly,
     trials: u32,
+    d_cap: u32,
     rng: &mut StdRng,
 ) -> Option<Cell> {
-    let d_max = 2 * n_sub;
+    // The early defect only needs degrees ≤ cutoff(3); cap the profile so it
+    // is cheap even at large 2n'. The refutation scan is capped at `d_cap`:
+    // targets that have not refuted by then are *censored* (counted, not
+    // averaged). Censoring drops the highest-D* targets, so it can only make
+    // the negative defect↔D* correlation harder to see — never inflate it.
+    let prof_dmax = (3).min(2 * n_sub);
+    let scan_dmax = d_cap.min(2 * n_sub + 2);
     let mut de = Vec::new();
     let mut ds = Vec::new();
+    let mut censored = 0u32;
     for _ in 0..trials {
         let b = rand_nz(rng, n);
         let x3 = rand_nz(rng, n);
         let eqs = descend_on_subspace(n, v, irr, &b, &x3);
-        let prof = rank_profile(&eqs, 2 * n_sub, n, d_max);
+        let prof = rank_profile(&eqs, 2 * n_sub, n, prof_dmax);
         de.push(early_defect(&prof, 3));
-        let pt = measure_on_subspace(n, v, irr, &b, &x3, 2 * n_sub + 2);
-        if let Some(d) = pt.refutation_degree {
-            ds.push(d as f64);
+        let pt = measure_on_subspace(n, v, irr, &b, &x3, scan_dmax);
+        match pt.refutation_degree {
+            Some(d) => ds.push(d as f64),
+            None => censored += 1,
         }
     }
     if ds.is_empty() || de.is_empty() {
@@ -82,6 +92,7 @@ fn run_cell(
         early_defect: de.iter().sum::<f64>() / de.len() as f64,
         dstar: ds.iter().sum::<f64>() / ds.len() as f64,
         n_trials: trials,
+        censored,
     })
 }
 
@@ -162,28 +173,43 @@ fn main() {
         .and_then(|s| s.parse::<u64>().ok())
         .unwrap_or(0xE6C0);
     // Operating points with n' | n (so the subfield factor base exists).
-    // Kept where 2n' ≤ n is comfortable AND the Macaulay rank at 2n' is
-    // affordable (2n' ≤ 8 ⇒ ≤ 16 vars at degree ≤ 8).
-    let points: &[(u32, u32)] = &[(4, 2), (6, 2), (6, 3), (8, 2), (8, 4), (9, 3), (10, 2), (10, 5)];
-    let trials = 20u32;
+    // The reach extension (iteration 7): the wall is NOT raw 2n' — refuting
+    // targets resolve at low degree even at 2n'=14; it is the non-refuting
+    // targets that ran the scan to the exponential tail. With the single-pass
+    // rank+refute and a `d_cap` (censoring), the big critical points
+    // (12,6)→2n'=12 and (14,7)→2n'=14 become affordable. `(trials, d_cap)`
+    // per point: fewer trials + tighter cap as the cost grows.
+    let points: &[(u32, u32, u32, u32)] = &[
+        // (n, n', trials, d_cap)
+        (4, 2, 20, 8),
+        (6, 2, 20, 8),
+        (6, 3, 20, 8),
+        (8, 2, 20, 8),
+        (8, 4, 20, 8),
+        (9, 3, 20, 8),
+        (10, 2, 20, 8),
+        (10, 5, 20, 7),
+        (12, 6, 12, 6), // 2n'=12, extended reach
+        (14, 7, 8, 6),  // 2n'=14, extended reach
+    ];
     let random_reseeds = 3u32; // distinct Random bases per point → more cloud points
 
     let mut cells: Vec<Cell> = Vec::new();
     let mut rng = StdRng::seed_from_u64(seed);
 
-    for &(n, n_sub) in points {
+    for &(n, n_sub, trials, d_cap) in points {
         let Some(irr) = enumerate_irreducibles(n, 1).into_iter().next() else {
             continue;
         };
         // Subfield (unique) — exists because n_sub | n by construction.
         if let Some(v) = FactorSubspace::build(BasisFamily::Subfield, n, n_sub, &irr, 0) {
-            if let Some(c) = run_cell(n, n_sub, BasisFamily::Subfield, "subfield".into(), &v, &irr, trials, &mut rng) {
+            if let Some(c) = run_cell(n, n_sub, BasisFamily::Subfield, "subfield".into(), &v, &irr, trials, d_cap, &mut rng) {
                 cells.push(c);
             }
         }
         // Coordinate (unique baseline).
         if let Some(v) = FactorSubspace::build(BasisFamily::Coordinate, n, n_sub, &irr, 0) {
-            if let Some(c) = run_cell(n, n_sub, BasisFamily::Coordinate, "coord".into(), &v, &irr, trials, &mut rng) {
+            if let Some(c) = run_cell(n, n_sub, BasisFamily::Coordinate, "coord".into(), &v, &irr, trials, d_cap, &mut rng) {
                 cells.push(c);
             }
         }
@@ -191,7 +217,7 @@ fn main() {
         for r in 0..random_reseeds {
             let bseed = seed ^ ((n as u64) << 16) ^ ((n_sub as u64) << 8) ^ r as u64 ^ 0x7000;
             if let Some(v) = FactorSubspace::build(BasisFamily::Random, n, n_sub, &irr, bseed) {
-                if let Some(c) = run_cell(n, n_sub, BasisFamily::Random, format!("rand{r}"), &v, &irr, trials, &mut rng) {
+                if let Some(c) = run_cell(n, n_sub, BasisFamily::Random, format!("rand{r}"), &v, &irr, trials, d_cap, &mut rng) {
                     cells.push(c);
                 }
             }
@@ -201,15 +227,20 @@ fn main() {
     // ── Report ──
     println!("════════════════════════════════════════════════════════════════");
     println!("EXP-G — algebraic discriminator curve (defect ↔ D*), seed={seed}");
-    println!("  {} cells over {} operating points, {trials} targets/cell", cells.len(), points.len());
+    let total_censored: u32 = cells.iter().map(|c| c.censored).sum();
     println!(
-        "  {:>4} {:>4} {:<10} {:>13} {:>9}",
-        "n", "n'", "family", "early-defect", "D* mean"
+        "  {} cells over {} operating points; {total_censored} censored targets (D*>d_cap, dropped)",
+        cells.len(),
+        points.len()
+    );
+    println!(
+        "  {:>4} {:>4} {:<10} {:>13} {:>9} {:>6}",
+        "n", "n'", "family", "early-defect", "D* mean", "cens"
     );
     for c in &cells {
         println!(
-            "  {:>4} {:>4} {:<10} {:>13.4} {:>9.3}",
-            c.n, c.n_sub, c.tag, c.early_defect, c.dstar
+            "  {:>4} {:>4} {:<10} {:>13.4} {:>9.3} {:>4}/{}",
+            c.n, c.n_sub, c.tag, c.early_defect, c.dstar, c.censored, c.n_trials
         );
     }
 
@@ -227,7 +258,7 @@ fn main() {
     // controlling for n? (defect should still beat random within a point).
     let mut within_ok = 0usize;
     let mut within_total = 0usize;
-    for &(n, n_sub) in points {
+    for &(n, n_sub, _, _) in points {
         let grp: Vec<&Cell> = cells.iter().filter(|c| c.n == n && c.n_sub == n_sub).collect();
         if grp.len() < 2 {
             continue;
@@ -282,13 +313,13 @@ fn main() {
     let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let cell_json = |c: &Cell| {
         format!(
-            "{{\"n\":{},\"n_sub\":{},\"family\":\"{:?}\",\"tag\":\"{}\",\"early_defect\":{:.5},\"dstar\":{:.4},\"trials\":{}}}",
-            c.n, c.n_sub, c.family, c.tag, c.early_defect, c.dstar, c.n_trials
+            "{{\"n\":{},\"n_sub\":{},\"family\":\"{:?}\",\"tag\":\"{}\",\"early_defect\":{:.5},\"dstar\":{:.4},\"trials\":{},\"censored\":{}}}",
+            c.n, c.n_sub, c.family, c.tag, c.early_defect, c.dstar, c.n_trials, c.censored
         )
     };
     let arr = cells.iter().map(cell_json).collect::<Vec<_>>().join(",");
     let json = format!(
-        "{{\n  \"schema\": \"ffd_expg_curve/v2\",\n  \"seed\": {seed},\n  \"generated_at\": {ts},\n  \"trials_per_cell\": {trials},\n  \"n_cells\": {},\n  \"spearman_rho\": {},\n  \"pearson_r\": {},\n  \"ols_slope_dstar_per_defect\": {:.5},\n  \"within_point_ordering\": \"{within_ok}/{within_total}\",\n  \"critical_regime\": {{\"cells\": {}, \"spearman_rho\": {}, \"ols_slope\": {:.5}}},\n  \"overdetermined_regime\": {{\"cells\": {}, \"spearman_rho\": {}, \"ols_slope\": {:.5}}},\n  \"cells\": [{arr}]\n}}\n",
+        "{{\n  \"schema\": \"ffd_expg_curve/v3\",\n  \"seed\": {seed},\n  \"generated_at\": {ts},\n  \"total_censored\": {total_censored},\n  \"n_cells\": {},\n  \"spearman_rho\": {},\n  \"pearson_r\": {},\n  \"ols_slope_dstar_per_defect\": {:.5},\n  \"within_point_ordering\": \"{within_ok}/{within_total}\",\n  \"critical_regime\": {{\"cells\": {}, \"spearman_rho\": {}, \"ols_slope\": {:.5}}},\n  \"overdetermined_regime\": {{\"cells\": {}, \"spearman_rho\": {}, \"ols_slope\": {:.5}}},\n  \"cells\": [{arr}]\n}}\n",
         cells.len(),
         rho.map(|v| format!("{v:.5}")).unwrap_or_else(|| "null".into()),
         r.map(|v| format!("{v:.5}")).unwrap_or_else(|| "null".into()),
