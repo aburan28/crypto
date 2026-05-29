@@ -230,11 +230,19 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    bounded by the small `n'`; the absolute degrees are toy-scale. The
    trend, not the magnitude, is the result.
 
-2. **`descent_expansion`** — given a curve and an `F_2`-basis, build
-   `G(E, basis)` from the structure-constant tensor and return
-   `γ(G)` via the second eigenvalue of the normalized incidence
-   Laplacian plus an explicit small-set boundary scan. Pure linear
-   algebra; runs at cryptographic `n`.
+2. **`descent_expansion`** — *(implemented:
+   `src/cryptanalysis/descent_expansion.rs`, 14 tests.)* Builds the
+   incidence graph from the field multiplication structure-constant tensor
+   and returns `γ(G)` two ways: spectral (`1 − σ₂` of the normalized
+   biadjacency, via a small Jacobi eigensolver) and unique-neighbor
+   boundary expansion (subset scan). Pure linear algebra; runs at
+   cryptographic `n` (smoke-tested at `n = 32`). Also ships a Rabin
+   irreducibility test + basis enumerator so the P2 study can vary the
+   basis at fixed `(n, n')`. **Key finding:** the naïve *tensor* graph
+   (bilinear term only) is basis-independent in the refutable regime, so
+   the predictor uses the *system* graph (`system_incidence`), built from
+   the full descended `S₃` including the basis-sensitive Frobenius-squared
+   terms. See the §6 status note for the first G-P2 numbers.
 
 3. **Correlation study** — sweep the existing toy zoo: binary `n=3..10`
    under {polynomial, normal, sparse Galbraith–Gebregiyorgis} bases,
@@ -287,8 +295,22 @@ candidate primes and fields for, feeding directly into
    `n = 5..10`, *while* `d_ff` stays ≈ 3. If `D*` also stays constant,
    the bridge's premise (that `d_ff ≪ D*` generically) is wrong and the
    proposal dies.
-2. Across the basis sweep, `D*` must be **monotone in `1/γ(G)`**. A
-   scatter with no correlation refutes the central conjecture.
+2. Across the basis sweep, `D*` must be **positively monotone in `γ(G)`**
+   (high expansion ⇒ high PC/refutation degree, Ben-Sasson–Wigderson;
+   *not* `1/γ` — an earlier draft had the direction backwards). A scatter
+   with no correlation refutes the central conjecture. **Status (workflow
+   iteration 2):** built `descent_expansion` and ran this; over 24
+   *generic* irreducible bases at (n=8, n'=3) the Spearman correlation is
+   ρ_s = −0.322 — inconclusive and mildly *negative*. The catch is that
+   every generic basis is high-expansion (γ_spec ∈ [0.74, 0.95]); the
+   low-γ side of the contrast (subfield/Koblitz/sparse-normal bases) is
+   absent from the sample, so the test has not yet been run across the
+   full γ range. Two further structural facts emerged: the *tensor*
+   incidence graph is basis-independent in the refutable regime (so the
+   predictor must use the *system* graph with its Frobenius-squared
+   terms), and the unique-neighbor boundary expansion is uniformly 0 on
+   these dense graphs (so the BW boundary quantity needs a sparser graph
+   model). See `RESEARCH_FFD_WORKFLOW.md` iteration 2.
 3. The HKY explicit counterexample systems must register as **low-`γ`**
    under `descent_expansion`. If they don't, the predictor doesn't
    capture the known gap and must be reformulated.

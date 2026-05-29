@@ -1,7 +1,7 @@
 {
-  "schema": "ffd_breakthrough_loop/v1",
+  "schema": "ffd_breakthrough_loop/v2",
   "seed": 268242953,
-  "generated_at": 1780028048,
+  "generated_at": 1780033317,
   "targets_per_cell": 64,
   "exp_a_curve_independence": {
     "spread_mean_dstar": 0.2188,
@@ -16,5 +16,11 @@
   "regime_n10": {
     "gate_p6": {"status":"supported","detail":"all 2 over-determined cells have mean D* ≤ 2.05"},
     "rows": [{"n":10,"n_sub":1,"vars":2,"eqs":10,"ratio":5.0000,"n_targets":64,"mean_dstar":2.0156,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:63 3:1"},{"n":10,"n_sub":2,"vars":4,"eqs":10,"ratio":2.5000,"n_targets":64,"mean_dstar":2.0312,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:62 3:2"},{"n":10,"n_sub":3,"vars":6,"eqs":10,"ratio":1.6667,"n_targets":64,"mean_dstar":2.1719,"min_dstar":2,"max_dstar":3,"none":0,"hist":"2:53 3:11"},{"n":10,"n_sub":4,"vars":8,"eqs":10,"ratio":1.2500,"n_targets":64,"mean_dstar":2.3281,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:44 3:19 4:1"},{"n":10,"n_sub":5,"vars":10,"eqs":10,"ratio":1.0000,"n_targets":64,"mean_dstar":2.4375,"min_dstar":2,"max_dstar":4,"none":0,"hist":"2:50 4:14"}]
+  },
+  "exp_c_expansion_vs_dstar": {
+    "gate_p2": {"status":"inconclusive","detail":"ρ_s -0.322 in (0.2,0.6): reformulate γ"},
+    "spearman_rho": -0.3216,
+    "gamma_spread": 0.1748,
+    "dstar_spread": 0.5833
   }
 }

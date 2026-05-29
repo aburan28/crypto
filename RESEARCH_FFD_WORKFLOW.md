@@ -46,7 +46,7 @@ current reach." Maintained as a table here and machine-checked by
 |---|---|---|---|
 | P1 | At fixed `ρ ≈ 1`, **mean `D*` grows with `n`** (within a parity class) | `supported` | both parities positive slope: odd +0.121/n (3 pts), even +0.060/n (4 pts) — auto-verdict, iteration 1 |
 | P1′ | The growth in P1 is **linear**, not log/constant | `blocked` (reach) | needs `2n' ≳ 14` → sparse F4 |
-| P2 | `D*` is **monotone in `1/γ(G)`** across a basis sweep | `blocked` | `descent_expansion` not built |
+| P2 | `D*` is **positively monotone in `γ(G)`** across a basis sweep (corrected: high expansion → high PC degree, per Ben-Sasson–Wigderson — not `1/γ`) | `inconclusive` | EXP-C iteration 2: system-γ vs mean D* over 24 generic bases (n=8,n'=3), Spearman ρ_s = −0.322. But all generic bases are **high-γ** (γ∈[0.74,0.95]); the low-vs-high contrast P2 is really about is absent. Need low-γ (subfield/Koblitz/sparse-normal) bases. |
 | P3 | The **even/odd parity split** in `D*` is explained by a structural feature of the tensor / field (subfield, half-trace) | `open` | parity effect persists (odd cells ~0.5 deg higher) but BOTH parities now show growth; still unexplained |
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
@@ -186,6 +186,47 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 2 (EXP-C: build descent_expansion, run G-P2)
+
+- Prediction attacked: **P2** (the central bridge claim) — and P5
+  re-examined as a by-product.
+- Built `src/cryptanalysis/descent_expansion.rs`: multiplication
+  structure-constant tensor, two incidence graphs (tensor + system),
+  spectral expansion (Jacobi eigensolver on the normalized Gram matrix),
+  unique-neighbor boundary expansion, Rabin irreducibility test +
+  basis enumeration, Spearman. 14 tests. Wired EXP-C / G-P2 into the
+  driver.
+- **Direction correction.** The proposal originally wrote P2 as "monotone
+  in `1/γ`"; Ben-Sasson–Wigderson says **high** expansion forces **high**
+  PC/refutation degree, and the conjecture `D* = Θ(min(m·n', γ·n))` is
+  *increasing* in γ. P2 is a **positive** γ↔D* relation. Fixed in the
+  ledger and the proposal doc.
+- **Structural finding (locked in by test).** The *tensor* incidence graph
+  (bilinear `X₁·X₂` only) is **basis-INDEPENDENT** in the refutable regime
+  `2n' ≤ n`: those products have degree `< n`, so no reduction mod `m(z)`
+  happens. Basis dependence lives only in the **Frobenius-squared** terms
+  `(X₁X₂)²`, `(X₁+X₂)²x₃²` — so the P2 predictor must use the *system*
+  incidence graph (full descended S₃), which is what `system_incidence`
+  does.
+- **G-P2 result: INCONCLUSIVE, leaning negative.** Over 24 generic
+  irreducible bases at (n=8, n'=3): Spearman ρ_s = **−0.322** between
+  averaged system-γ and mean D*. The sign is *opposite* to the theory and
+  the magnitude is below the 0.6 support bar. **Crucial caveat:** every
+  generic irreducible basis is **high-expansion** (γ_spec ∈ [0.74, 0.95]);
+  the boundary expansion is uniformly 0 (graphs too dense). P2 is
+  fundamentally a *low-γ vs high-γ* contrast claim (subfield/Koblitz are
+  the low-γ side), and that contrast is **absent from the generic-basis
+  sample**. So this neither confirms nor kills P2 — it says the test was
+  run on the wrong part of the γ axis.
+- Ledger delta: P2 blocked→inconclusive (with the low-γ-contrast caveat).
+- Next (driver-chosen): **EXP-E** — add genuinely low-γ bases
+  (subfield-defined / Koblitz / sparse-normal) so γ spans its full range;
+  only then is G-P2 a real test. If a strong relation still fails to
+  appear across the *full* γ range, that is the breakthrough-negative
+  outcome (write up "PC degree of Semaev systems is not
+  expansion-controlled").
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 1 (bootstrap + EXP-A)
 

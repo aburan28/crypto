@@ -108,6 +108,7 @@ pub mod cga_hnc;
 pub mod cipher_registry;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
+pub mod descent_expansion;
 pub mod diem_descent;
 pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
