@@ -1,7 +1,7 @@
 # Elliptic divisibility sequences, elliptic nets, and the EDS-Residue handle on the ECDLP
 
-**Modules:** `src/cryptanalysis/eds_residue.rs`, `src/cryptanalysis/eds_tate.rs` (§5.6)
-**Demos:** `examples/eds_residue_demo.rs`, `eds_census.rs`, `eds_localisation.rs`, `eds_bridge.rs`, `eds_tate_demo.rs`
+**Modules:** `src/cryptanalysis/eds_residue.rs`, `eds_tate.rs` (§5.6), `eds_net.rs` (§5.3b)
+**Demos:** `examples/eds_residue_demo.rs`, `eds_census.rs`, `eds_localisation.rs`, `eds_bridge.rs`, `eds_tate_demo.rs`, `eds_net_demo.rs`
 **Provenance:** Direct response to the research thread *"the genuinely
 underexplored above-generic handle over the ECDLP is the elliptic
 divisibility sequence / elliptic net structure (Shipsey, Stange,
@@ -339,7 +339,7 @@ Falsifiable, ordered by cost:
    `χ(B) = χ(⟨P,P⟩_r)` confirmed in the nondegenerate regime (§5.6).
 
 3. **χ-localisation: how many residue bits identify the discrete log?**
-   **DONE in rank-1 (§5.3a); rank-2 net deferred (§5.3b).**
+   **DONE: rank-1 (§5.3a) and rank-2 net (§5.3b, built without Stange's seeds).**
 
 ### 5.3a Rank-1 χ-localisation via the decimation identity
 
@@ -394,24 +394,46 @@ extracting `k` from them costs a full search. (Tests:
 `decimation_identity_holds`, `localisation_pins_the_true_k`,
 `localisation_sweep_sign_dichotomy_and_log_window`.)
 
-### 5.3b Genuine 2-D net (deferred)
+### 5.3b Genuine 2-D net — built without Stange's seeds, and the verdict
 
-The remaining piece — does the Legendre pattern of the *canonical 2-D net*
-`χ(W(a,b))` localise `Λ_k` cheaper than `O(√m)`? — needs the net's mixed
-initial block (`W(2,1)`, `W(1,2)`, `W(2,−1)`; Props 6.3/6.4 of Stange,
-arXiv:0710.1316). The fundamental recurrence
-`W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²` is in hand and
-the axes are the 1-D EDS this module validates, but the recurrence alone
-underdetermines the mixed seeds, and they could not be retrieved here
-(arXiv/ePrint returned HTTP 403). It is left unimplemented rather than
-guessed — a wrong-but-zero-preserving gauge would pass a zero check yet
-report a meaningless `χ`-pattern. **Certification plan once the seeds are
-in hand:** (i) match the recurrence on both axes against the 1-D EDS (pins
-the gauge), (ii) reproduce every net zero against `[a]P+[b]Q=O`, (iii)
-match the mixed seeds to their closed forms. Note the EDS-Association ↔
-Tate-pairing ↔ MOV/Frey–Rück link (§2.2) is *already* realised in this
-crate by `cryptanalysis::mov_attack` — the regime where the net signal
-provably collapses to an easy DLP.
+**Module:** `src/cryptanalysis/eds_net.rs` · **demo:** `eds_net_demo`.
+
+Stange's mixed initial block (`W(2,1)`, `W(1,2)`, …; Props 6.3/6.4 of
+arXiv:0710.1316) could not be fetched here, and the net recurrence alone
+underdetermines them. So instead of guessing, the net is **derived** from a
+rank-2 generalisation of the rank-1 coordinate relation
+`ψ_{a+1}ψ_{a−1}/ψ_a² = x(P)−x(aP)`:
+
+```
+W(a+1,b)·W(a−1,b) / W(a,b)²  =  x(P) − x(aP+bQ)            (REL-P)
+W(a,b+1)·W(a,b−1) / W(a,b)²  =  x(Q) − x(aP+bQ)            (REL-Q)
+```
+
+With gauge `W(1,0)=W(0,1)=W(1,1)=1`, axes `W(a,0)=ψ_a(P)`, `W(0,b)=ψ_b(Q)`,
+and `x(aP+bQ)` from point arithmetic, these second-order recurrences fill the
+grid — *no external seeds needed*. The result is then **validated**, not
+assumed:
+
+- the net recurrence `W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²`
+  holds on every checked triple (`net_satisfies_recurrence`);
+- the zero set is exactly `{(a,b) : aP+bQ = O}` (`net_zero_lattice_matches_point_arithmetic`);
+- the axes reproduce the rank-1 EDS.
+
+So **§5.3b is unblocked**: a genuine canonical net is in hand.
+
+**The verdict on χ-localisation.** For the ECDLP, `Q = [k]P`, so every point
+`aP+bQ = [(a+bk) mod m]P` lives in `⟨P⟩`, and `(REL-P)` only ever consumes
+`x(jP)` values — **the rank-2 net is a reparametrisation of the rank-1 EDS of
+`P`**. Its `χ(W(a,b))` pattern therefore carries no localisation power beyond
+§5.3a: information-tight (`~log₂ m` bits) but algorithmically inert
+(`O(m)` extraction, no sub-`√m` advantage). The demo shows row `b=0` is
+literally the rank-1 EDS χ-row, and confirms `aP+bQ=[(a+bk) mod m]P` for the
+whole grid. A *non-degenerate* rank-2 net (independent `P,Q` in different
+subgroups) does **not** arise in the ECDLP — so the 2-D net offers no opening
+the 1-D handle didn't, consistent with Lauter–Stange. The EDS-Association ↔
+Tate-pairing ↔ MOV/Frey–Rück route (§2.2, realised by
+`cryptanalysis::mov_attack`) remains the only regime where this structure
+collapses the DLP, exactly when the embedding degree is small.
 
 4. **`F_p` ↔ `Z` bridge. DONE (§5.4).** Answer: the two periods are
    *orthogonal*. The archimedean sign is one fixed aperiodic object; the
@@ -528,10 +550,9 @@ EDS-Association, §2.2), and in that regime `χ(B)` is computable in
 (Tests: `tate_pairing_is_valid`,
 `chi_b_equals_chi_self_tate_in_nondegenerate_regime`.)
 
-**What is left.** The forced regime (`v₂(r)<v₂(p−1)`) needs a different,
-non-`F_p` handle (the pairing into `μ_r` simply cannot see `χ(B)` there); and
-§5.3b — the *canonical 2-D net's* χ-localisation — still awaits Stange's
-mixed seeds. Both are genuinely open; everything else in §5 is settled.
+**What is left.** Only the forced regime (`v₂(r)<v₂(p−1)`) would need a
+different, non-`F_p` handle — the pairing into `μ_r` simply cannot see `χ(B)`
+there. (§5.3b, once the open item, is now resolved below.)
 
 ---
 
@@ -549,7 +570,8 @@ mixed seeds. Both are genuinely open; everything else in §5 is settled.
 | `F_p` χ-period = reduction of the archimedean sign-period | **Refuted (§5.4):** orthogonal invariants; integer EDS = A006769 (validated), signs aperiodic, χ-period hops `r`/`2r` with `p` |
 | Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves |
 | Tate bridge `χ(B) = χ(⟨P,P⟩_r)` when `v₂(r)=v₂(p−1)` | **Confirmed (§5.6):** 27/27 nondeg; F_p Tate pairing built & validated (bilinear, μ_r), 84 instances |
-| QR pattern beats generic ECDLP | **No.** Residues are info-tight but algorithmically inert (`O(m log m)` scan ≫ `√m`, §5.3a). Canonical 2-D net (§5.3b) blocked on Stange's mixed seeds (arXiv 403 here) |
+| Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
+| QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
 often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). The
@@ -567,9 +589,13 @@ the cleanest concrete illustration of *why* the Lauter–Stange equivalence
 holds; the χ-structure is reduced to closed forms in the multiplier (§5.5);
 and that multiplier character is **identified with a self-Tate pairing**
 `χ(B)=χ(⟨P,P⟩_r)` in the nondegenerate regime (§5.6) — the concrete bridge
-from EDS-Residue to EDS-Association the program set out to find. One door
-stays open: §5.3b, the *canonical 2-D net's* χ-localisation, which still
-needs Stange's mixed seeds (arXiv 403 in this sandbox).
+from EDS-Residue to EDS-Association the program set out to find; and the
+canonical 2-D net, the last "blocked" item, was **derived from scratch**
+without Stange's seeds (§5.3b) and shown to be a rank-1 reparametrisation in
+the ECDLP case — no new opening. Every item of the program is now settled:
+the EDS/elliptic-net handle on the ECDLP is real, rigidly structured, and
+**information-tight but algorithmically inert** — no sub-`√m` attack, exactly
+as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 
 ---
 
@@ -578,11 +604,13 @@ needs Stange's mixed seeds (arXiv 403 in this sandbox).
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
 cargo test  --release --lib cryptanalysis::eds_tate        #  2 tests (§5.6)
+cargo test  --release --lib cryptanalysis::eds_net         #  2 tests (§5.3b)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep
 cargo run   --release --example eds_bridge                 # the §5.4 bridge
 cargo run   --release --example eds_tate_demo              # the §5.6 bridge
+cargo run   --release --example eds_net_demo               # the §5.3b net
 ```
 
 `eds_tate` tests: `tate_pairing_is_valid`,

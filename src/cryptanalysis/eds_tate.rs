@@ -277,7 +277,7 @@ pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Opti
 // ── EDS multiplier B over F_p (u64) ─────────────────────────────────────────
 
 /// Integer-reduced EDS `W(0..count)` over `F_p` for `y²=x³+ax+b`, `P=(x,y)`.
-fn eds_u64(a: u64, b: u64, x: u64, y: u64, p: u64, count: usize) -> Vec<u64> {
+pub fn eds_u64(a: u64, b: u64, x: u64, y: u64, p: u64, count: usize) -> Vec<u64> {
     let x2 = mulm(x, x, p);
     let x3 = mulm(x2, x, p);
     let x4 = mulm(x2, x2, p);
