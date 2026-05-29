@@ -47,6 +47,7 @@ current reach." Maintained as a table here and machine-checked by
 | P1 | At fixed `ρ ≈ 1`, **mean `D*` grows with `n`** (within a parity class) | `supported` | both parities positive slope: odd +0.121/n (3 pts), even +0.060/n (4 pts) — auto-verdict, iteration 1 |
 | P1′ | The growth in P1 is **linear**, not log/constant | `blocked` (reach) | needs `2n' ≳ 14` → sparse F4 |
 | P2 | `D*` is **positively monotone in `γ(G)`** across a basis/subspace sweep (high expansion → high PC degree, Ben-Sasson–Wigderson) | **`killed`** | EXP-E iteration 3 (decisive): at the operating point `2n'=n` (n=8), the **subfield** factor base `F_16` is *easier* (mean D* 2.04 vs random 3.53) yet has *higher* spectral γ (0.882 vs 0.861). The structured low-D* case is **not** the low-γ case → spectral γ does not explain solving-degree ease → the bridge's central conjecture is contradicted. (Generic-basis EXP-C iteration 2 was also weak/negative: ρ_s=−0.322.) |
+| P2″ | `D*` is monotone in the **treewidth** of the constraint primal graph (reformulation after P2 killed; treewidth bounds elimination fill-in) | **`killed`** | Iteration 4: the descended primal graph is the **complete** graph K_{2n'} (density 1.0) for every family — the Frobenius-squared terms saturate it — so treewidth is constant `2n'−1` and cannot discriminate easy (subfield, D*≈2.07) from hard (random, ≈3.53). **No incidence-graph invariant works:** the subfield speedup is *algebraic* (multiplicative closure), invisible to graph structure. |
 | P3 | The **even/odd parity split** in `D*` is explained by a structural feature of the tensor / field (subfield, half-trace) | `open` | parity effect persists (odd cells ~0.5 deg higher) but BOTH parities now show growth; still unexplained |
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
@@ -186,6 +187,45 @@ attack a different prediction.
 > *Task picked · Experiment · Result · Gate verdict · Ledger delta ·
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
+
+### 2026-05-29 — iteration 4 (treewidth reformulation — P2″ also negative, and it explains why)
+
+- Prediction attacked: **P2″** — the driver's iteration-3 recommendation
+  that the *treewidth* of the constraint primal graph (which directly
+  bounds elimination fill-in and the solving degree) might track `D*`
+  where spectral γ failed. Hypothesis: subfields induce block structure ⇒
+  low treewidth even at high spectral expansion.
+- Built `src/cryptanalysis/descent_treewidth.rs`: primal (moral) graph of
+  the `V`-substituted system + **exact** treewidth via the
+  Bodlaender–Fomin subset DP (exact for `2n' ≤ 18`, covering the whole
+  regime). 8 tests (K_n, paths, cycles, disjoint cliques all verified).
+- **Result — P2″ KILLED, with a sharper diagnosis.** Across all families
+  and `(n, n')`, treewidth is **constant** = `2n'−1`, because the descended
+  primal graph is the **complete** graph K_{2n'} (edge density 1.0): the
+  Frobenius-squared terms `(X₁X₂)²`, `(X₁+X₂)²x₃²` couple essentially every
+  pair of variables, saturating the graph. So treewidth cannot
+  discriminate the easy subfield case (mean D* ≈ 2.07) from the hard
+  random case (≈ 3.53) — locked in by `descended_primal_graph_is_complete`.
+- **The real lesson (sharpens the iteration-3 negative).** *No* invariant
+  of the variable-incidence graph can predict `D*` here: spectral γ varies
+  but the wrong way, treewidth is constant because the graph is saturated.
+  The structure that makes the subfield easy is **not in the graph at
+  all** — it lives in the **algebraic content of the coefficients** (the
+  multiplicative closure of `F_{2^{n'}}`), which graph invariants are
+  blind to. The proof-complexity bridge `D* ≍ PC-degree` is intact; what is
+  refuted is the *combinatorial-expansion predictor* of that degree (the
+  proposal's §3). A predictor, if one exists, must be **algebraic**, not
+  graph-theoretic.
+- Ledger delta: P2 (spectral) killed → reformulation P2″ (treewidth) also
+  killed; the *class* of graph-incidence predictors is now disfavoured.
+- Next: pivot to an **algebraic** discriminator (e.g. the rank profile /
+  Hilbert function of the subfield-restricted ideal, or the dimension of
+  the degree-`D` part the subfield's multiplicative relations kill early),
+  OR write up the two-part negative result, which is the cleaner
+  contribution: "the solving degree of Weil-descended Semaev systems is not
+  controlled by any incidence-graph invariant (spectral expansion or
+  treewidth); the subfield speedup is algebraic, not combinatorial."
+- Commit: (this commit)
 
 ### 2026-05-29 — iteration 3 (EXP-E: structured low-γ contrast — DECISIVE)
 
