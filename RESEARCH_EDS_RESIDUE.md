@@ -417,9 +417,15 @@ assumed:
 - the net recurrence `W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²`
   holds on every checked triple (`net_satisfies_recurrence`);
 - the zero set is exactly `{(a,b) : aP+bQ = O}` (`net_zero_lattice_matches_point_arithmetic`);
-- the axes reproduce the rank-1 EDS.
+- the axes reproduce the rank-1 EDS;
+- **and it is genuinely rank-2**: on a full-7-torsion curve over `F_1009`
+  with *independent* `P, Q` (`Q ∉ ⟨P⟩`), `(NET)` still holds and the
+  zero-lattice is the 2-D sublattice `7ℤ×7ℤ`, not a line
+  (`net_recurrence_holds_for_independent_p_q`). So the construction is *the*
+  rank-2 net, not a degenerate artifact of `Q ∈ ⟨P⟩`.
 
-So **§5.3b is unblocked**: a genuine canonical net is in hand.
+So **§5.3b is unblocked**: a genuine canonical net is in hand, validated in
+both the degenerate (ECDLP) and the truly 2-dimensional case.
 
 **The verdict on χ-localisation.** For the ECDLP, `Q = [k]P`, so every point
 `aP+bQ = [(a+bk) mod m]P` lives in `⟨P⟩`, and `(REL-P)` only ever consumes
@@ -604,7 +610,7 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
 cargo test  --release --lib cryptanalysis::eds_tate        #  2 tests (§5.6)
-cargo test  --release --lib cryptanalysis::eds_net         #  2 tests (§5.3b)
+cargo test  --release --lib cryptanalysis::eds_net         #  3 tests (§5.3b)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep

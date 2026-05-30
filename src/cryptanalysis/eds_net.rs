@@ -107,15 +107,29 @@ pub fn build_net(
     amax: usize,
     bmax: usize,
 ) -> Net {
-    let pt = Some(pp);
-    let qq = ec_mul(k, pt, ca, p);
-    let (xp, xq) = (pp.0, qq.expect("Q≠O").0);
+    let q = ec_mul(k, Some(pp), ca, p).expect("Q = [k]P ≠ O");
+    build_net_pq(ca, cb, p, pp, q, amax, bmax)
+}
 
-    // zero mask: (a,b) with aP+bQ = O.
+/// Build the canonical net for an **arbitrary** pair `(P, Q)` over the
+/// quadrant `[0,amax]×[0,bmax]` via (REL-P)/(REL-Q).  When `Q ∉ ⟨P⟩`
+/// (non-cyclic group) this is a genuinely rank-2 net with a 2-D zero-lattice.
+pub fn build_net_pq(
+    ca: u64,
+    cb: u64,
+    p: u64,
+    pp: (u64, u64),
+    q: (u64, u64),
+    amax: usize,
+    bmax: usize,
+) -> Net {
+    let pt = Some(pp);
+    let qq = Some(q);
+    let (xp, xq) = (pp.0, q.0);
+
     let zero = |a: usize, b: usize| -> bool { x_of(a as i64, b as i64, pt, qq, ca, p).is_none() };
 
     let psi_p = eds_u64(ca, cb, pp.0, pp.1, p, amax + 3);
-    let q = qq.unwrap();
     let psi_q = eds_u64(ca, cb, q.0, q.1, p, bmax + 3);
 
     let mut w = vec![vec![None::<u64>; amax + 1]; bmax + 1];
@@ -239,6 +253,99 @@ mod tests {
             }
         }
         None
+    }
+
+    #[test]
+    fn net_recurrence_holds_for_independent_p_q() {
+        // Genuinely rank-2: find full ℓ-torsion (two independent order-ℓ
+        // points) so Q ∉ ⟨P⟩ and the zero-lattice is 2-dimensional, then
+        // verify the (REL-P)/(REL-Q) net still satisfies (NET).
+        let p = 1009u64; // 7 | p−1 ⇒ full 7-torsion can be rational
+        let ell = 7u64;
+        // sqrt table for fast point finding.
+        let mut sqrt = vec![None::<u64>; p as usize];
+        for y in 0..p {
+            sqrt[((y * y) % p) as usize].get_or_insert(y);
+        }
+        let mut found = None;
+        'search: for a in 0..120u64 {
+            for b in 0..120u64 {
+                let disc = (4 * mulm(mulm(a, a, p), a, p) + 27 * mulm(b, b, p)) % p;
+                if disc == 0 {
+                    continue;
+                }
+                let mut pbase: Option<(u64, u64)> = None;
+                let mut orbit: Vec<u64> = Vec::new();
+                for x in 0..p {
+                    let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p;
+                    if rhs == 0 {
+                        continue;
+                    }
+                    let y = match sqrt[rhs as usize] {
+                        Some(y) if y != 0 => y,
+                        _ => continue,
+                    };
+                    if ec_order(Some((x, y)), a, p, ell + 1) != Some(ell) {
+                        continue;
+                    }
+                    match pbase {
+                        None => {
+                            pbase = Some((x, y));
+                            for i in 1..ell {
+                                if let Some((xx, _)) = ec_mul(i, Some((x, y)), a, p) {
+                                    orbit.push(xx);
+                                }
+                            }
+                        }
+                        Some(pp) => {
+                            if !orbit.contains(&x) {
+                                found = Some((a, b, pp, (x, y)));
+                                break 'search;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let (ca, cb, pp, q) = found.expect("full 7-torsion instance over F_1009");
+        // sanity: P, Q independent order-7.
+        assert_eq!(ec_order(Some(pp), ca, p, 8), Some(7));
+        assert_eq!(ec_order(Some(q), ca, p, 8), Some(7));
+
+        let (amax, bmax) = (6usize, 6usize);
+        let net = build_net_pq(ca, cb, p, pp, q, amax, bmax);
+
+        // axis = rank-1 EDS of P
+        let psi_p = eds_u64(ca, cb, pp.0, pp.1, p, amax + 1);
+        for a in 1..=amax {
+            assert_eq!(net.get(a, 0), Some(psi_p[a]));
+        }
+        // (NET) on triples with nonneg differences inside [0,6]².
+        let triples = [
+            ((3, 2), (2, 1), (1, 1)),
+            ((4, 2), (2, 1), (1, 1)),
+            ((4, 3), (2, 2), (1, 1)),
+            ((3, 3), (2, 2), (1, 1)),
+        ];
+        let mut checked = 0;
+        for (pv, qv, rv) in triples {
+            if let Some(ok) = check_net_relation(&net, pv, qv, rv) {
+                assert!(ok, "NET failed (independent P,Q) at {:?},{:?},{:?}", pv, qv, rv);
+                checked += 1;
+            }
+        }
+        assert!(checked >= 3, "expected several checkable triples, got {}", checked);
+
+        // genuinely rank-2 zero-lattice: aP+bQ=O ⟺ a≡b≡0 (mod 7).
+        let pt = Some(pp);
+        for a in 0..14usize {
+            for b in 0..14usize {
+                let is_o =
+                    ec_add(ec_mul(a as u64, pt, ca, p), ec_mul(b as u64, Some(q), ca, p), ca, p)
+                        .is_none();
+                assert_eq!(is_o, a % 7 == 0 && b % 7 == 0, "zero-lattice at ({},{})", a, b);
+            }
+        }
     }
 
     fn gcd(mut a: u64, mut b: u64) -> u64 {
