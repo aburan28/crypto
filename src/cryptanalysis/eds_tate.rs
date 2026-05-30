@@ -297,6 +297,52 @@ pub fn self_tate_raw(
     Some((t, raw))
 }
 
+/// Reduced Tate pairing `⟨P,Q⟩_r ∈ μ_r ⊂ F_p^*` for an **arbitrary** second
+/// argument `Q` (not necessarily in `⟨P⟩`), embedding degree 1 (`r | p−1`).
+pub fn tate_pairing(
+    pp: (u64, u64),
+    qq: (u64, u64),
+    r: u64,
+    a: u64,
+    b: u64,
+    p: u64,
+) -> Option<u64> {
+    assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
+    let exp = (p - 1) / r;
+    for xs in 1..p {
+        let rhs = (addm(addm(mulm(mulm(xs, xs, p), xs, p), mulm(a, xs, p), p), b, p)) % p;
+        if rhs == 0 {
+            continue;
+        }
+        let ys = match sqrt_mod(rhs, p) {
+            Some(y) if y != 0 => y,
+            _ => continue,
+        };
+        let s = (xs, ys);
+        let qs = match ec_add(Some(qq), Some(s), a, p) {
+            Some(v) => v,
+            None => continue,
+        };
+        if qs.0 == pp.0 || s.0 == pp.0 {
+            continue;
+        }
+        let num = match miller_eval(pp, qs, r, a, p) {
+            Some(v) if v != 0 => v,
+            _ => continue,
+        };
+        let den = match miller_eval(pp, s, r, a, p) {
+            Some(v) if v != 0 => v,
+            _ => continue,
+        };
+        let t = powm(mulm(num, invm(den, p), p), exp, p);
+        if t == 0 {
+            continue;
+        }
+        return Some(t);
+    }
+    None
+}
+
 /// Reduced self-Tate pairing `⟨P,[c]P⟩_r ∈ μ_r ⊂ F_p^*`, for `r | p−1`.
 pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Option<u64> {
     self_tate_raw(pp, c, r, a, b, p, 1).map(|(t, _)| t)

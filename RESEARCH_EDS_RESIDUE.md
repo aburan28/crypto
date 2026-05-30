@@ -609,6 +609,35 @@ The only place the embedding degree matters is whether the *reduced* pairing
 the standard `k`-small criterion, orthogonal to the χ-bridge.
 (Test: `unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.)
 
+### 5.9 Stange's Tate-pairing-via-net formula, cross-validated
+
+The non-degenerate net (§5.3b) finally lets us close the loop with Stange's
+original motivation — computing the Tate pairing as a *ratio of net values*.
+For `P` of order `r` and an arbitrary `Q`, Stange's formula (embedding degree
+1) is
+
+```
+τ_r(P,Q) = ( W(r+1,1)·W(1,0) / (W(r+1,0)·W(1,1)) )^{(p−1)/r}.
+```
+
+Crucially, when `P,Q` are **independent** (`Q ∉ ⟨P⟩`) the row `b=1` has *no*
+zeros — `aP+Q = O` is impossible — so `W(r+1,1)` is reachable by the
+`(REL-P)` fill even though the axis row `b=0` vanishes at `a=r`. On a full
+7-torsion curve over `F_1009` (so `r=7 ∣ p−1`, independent order-7 `P,Q`):
+
+> the net ratio `τ_net` **equals** the independent Miller-based Tate pairing
+> `τ_miller` exactly, and both are a **nondegenerate** primitive `r`-th root
+> of unity (`≠1`, in `μ_r`).
+
+This is a **triple cross-validation** in one identity: it confirms (i) the
+`(REL-P)/(REL-Q)` net is the canonical Stange net (a *wrong* gauge would not
+satisfy the gauge-invariant Tate ratio), (ii) the from-scratch Miller pairing
+of §5.6, and (iii) Stange's net-Tate formula itself. The EDS / elliptic-net
+machinery built here is therefore mutually consistent end to end — the net
+computes the pairing, the pairing's character is the EDS multiplier character
+(§5.7–§5.8), and the multiplier governs the χ-structure (§3–§5.5).
+(Test: `tate_via_net_matches_miller`.)
+
 ---
 
 ## 6. Honest scorecard
@@ -628,6 +657,7 @@ the standard `k`-small criterion, orthogonal to the χ-bridge.
 | Forced regime `v₂(r)<v₂(p−1)`: `χ(B)` from the *unreduced* pairing | **Resolved (§5.7):** `χ(B)=χ(f_{r,P})` for all even `r`, both regimes, S-independent — test-verified |
 | Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` holds for `r∤p−1` too, S-independent, *entirely in `F_p`* — test-verified on ≥20 instances |
 | Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
+| Stange's Tate-via-net formula reproduces the Miller pairing | **Yes (§5.9):** `τ_net = τ_miller` (nondegenerate, in `μ_r`) — triple cross-validation of net, pairing, formula |
 | QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
@@ -664,7 +694,7 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
 cargo test  --release --lib cryptanalysis::eds_tate        #  4 tests (§5.6–§5.8)
-cargo test  --release --lib cryptanalysis::eds_net         #  3 tests (§5.3b)
+cargo test  --release --lib cryptanalysis::eds_net         #  4 tests (§5.3b, §5.9)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep

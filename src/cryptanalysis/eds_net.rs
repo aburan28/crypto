@@ -27,7 +27,7 @@
 //! (everything lives in `⟨P⟩`), which is the point: its χ-pattern collapses
 //! to the rank-1 decimation of §5.3a, so it gives no advantage over rank-1.
 
-use crate::cryptanalysis::eds_tate::{ec_add, ec_mul, eds_u64, Pt};
+use crate::cryptanalysis::eds_tate::{ec_add, ec_mul, ec_order, eds_u64, Pt};
 
 #[inline]
 fn mulm(x: u64, y: u64, p: u64) -> u64 {
@@ -218,10 +218,59 @@ pub fn check_net_relation(
     Some(lhs == rhs)
 }
 
+/// Find a full-`ell`-torsion instance over `F_p` (`ell | p−1`): a curve and
+/// two **independent** points `P, Q` of order `ell` (`Q ∉ ⟨P⟩`).  Returns
+/// `(a, b, P, Q)`.
+pub fn find_full_torsion(p: u64, ell: u64) -> Option<(u64, u64, (u64, u64), (u64, u64))> {
+    let mut sqrt = vec![None::<u64>; p as usize];
+    for y in 0..p {
+        sqrt[((y * y) % p) as usize].get_or_insert(y);
+    }
+    for a in 0..120u64 {
+        for b in 0..120u64 {
+            let disc = (4 * mulm(mulm(a, a, p), a, p) + 27 * mulm(b, b, p)) % p;
+            if disc == 0 {
+                continue;
+            }
+            let mut pbase: Option<(u64, u64)> = None;
+            let mut orbit: Vec<u64> = Vec::new();
+            for x in 0..p {
+                let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p;
+                if rhs == 0 {
+                    continue;
+                }
+                let y = match sqrt[rhs as usize] {
+                    Some(y) if y != 0 => y,
+                    _ => continue,
+                };
+                if ec_order(Some((x, y)), a, p, ell + 1) != Some(ell) {
+                    continue;
+                }
+                match pbase {
+                    None => {
+                        pbase = Some((x, y));
+                        for i in 1..ell {
+                            if let Some((xx, _)) = ec_mul(i, Some((x, y)), a, p) {
+                                orbit.push(xx);
+                            }
+                        }
+                    }
+                    Some(pp) => {
+                        if !orbit.contains(&x) {
+                            return Some((a, b, pp, (x, y)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::eds_tate::{ec_add, ec_mul, ec_order};
+    use crate::cryptanalysis::eds_tate::tate_pairing;
 
     /// Find a toy curve + point of order ≥ min_r over F_p (any odd prime).
     fn toy_instance(p: u64, min_r: u64) -> Option<(u64, u64, (u64, u64), u64)> {
@@ -346,6 +395,39 @@ mod tests {
                 assert_eq!(is_o, a % 7 == 0 && b % 7 == 0, "zero-lattice at ({},{})", a, b);
             }
         }
+    }
+
+    #[test]
+    fn tate_via_net_matches_miller() {
+        // Stange's Tate-pairing-via-net formula, validated against the
+        // independent Miller-based pairing on a non-degenerate net.
+        //   τ_r(P,Q) = ( W(r+1,1)·W(1,0) / (W(r+1,0)·W(1,1)) )^{(p−1)/r}
+        // For independent P,Q the row b=1 has no zeros, so W(r+1,1) is
+        // reachable. p=1009, full 7-torsion (7 | p−1 ⇒ embedding degree 1).
+        let p = 1009u64;
+        let ell = 7u64;
+        let (ca, cb, pp, q) = find_full_torsion(p, ell).expect("full 7-torsion");
+        let r = ell;
+        let net = build_net_pq(ca, cb, p, pp, q, (r + 1) as usize, 2);
+
+        let w_r1_1 = net.get((r + 1) as usize, 1).expect("W(r+1,1) present");
+        let w_r1_0 = net.get((r + 1) as usize, 0).expect("W(r+1,0) present");
+        let w_1_0 = net.get(1, 0).unwrap();
+        let w_1_1 = net.get(1, 1).unwrap();
+
+        // raw ratio, then reduce.
+        let num = mulm(w_r1_1, w_1_0, p);
+        let den = mulm(w_r1_0, w_1_1, p);
+        let raw = mulm(num, invm(den, p), p);
+        let tau_net = powm(raw, (p - 1) / r, p);
+
+        let tau_miller = tate_pairing(pp, q, r, ca, cb, p).expect("miller tate");
+
+        // nondegenerate instance: the pairing is a primitive r-th root.
+        assert_ne!(tau_miller, 1, "expected a nondegenerate pairing value");
+        assert_eq!(powm(tau_miller, r, p), 1, "pairing must lie in μ_r");
+        // the headline: Stange's net formula reproduces the Miller pairing.
+        assert_eq!(tau_net, tau_miller, "Tate-via-net must equal Miller pairing");
     }
 
     fn gcd(mut a: u64, mut b: u64) -> u64 {
