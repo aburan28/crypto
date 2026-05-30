@@ -1,7 +1,7 @@
 # Elliptic divisibility sequences, elliptic nets, and the EDS-Residue handle on the ECDLP
 
-**Modules:** `src/cryptanalysis/eds_residue.rs`, `eds_tate.rs` (§5.6), `eds_net.rs` (§5.3b)
-**Demos:** `examples/eds_residue_demo.rs`, `eds_census.rs`, `eds_localisation.rs`, `eds_bridge.rs`, `eds_tate_demo.rs`, `eds_net_demo.rs`
+**Modules:** `src/cryptanalysis/eds_residue.rs`, `eds_tate.rs` (§5.6), `eds_net.rs` (§5.3b), `eds_mov.rs` (§5.10)
+**Demos:** `examples/eds_residue_demo.rs`, `eds_census.rs`, `eds_localisation.rs`, `eds_bridge.rs`, `eds_tate_demo.rs`, `eds_net_demo.rs`, `eds_mov_demo.rs`
 **Provenance:** Direct response to the research thread *"the genuinely
 underexplored above-generic handle over the ECDLP is the elliptic
 divisibility sequence / elliptic net structure (Shipsey, Stange,
@@ -646,6 +646,36 @@ computes the pairing, the pairing's character is the EDS multiplier character
 (§5.7–§5.8), and the multiplier governs the χ-structure (§3–§5.5).
 (Test: `tate_via_net_matches_miller`.)
 
+### 5.10 The payoff: a working MOV attack via the pairing
+
+Everything above says the EDS/net handle is *inert* on generic curves — but
+it **computes the pairing**, and on the right curves the pairing is not
+inert. `eds_mov.rs` closes the arc with an end-to-end MOV/Frey–Rück break.
+
+On the supersingular curve `y²=x³+x` over `p≡3 (mod 4)` (`#E=p+1`, embedding
+degree 2), the distortion map `φ(x,y)=(−x, iy)` (`i²=−1 ∈ F_{p²}`) sends `P ∈
+E(F_p)` to an independent point of `E(F_{p²})`, so the modified reduced Tate
+pairing `t_r(P, φ(P)) = f_{r,P}(φ(P))^{(p²−1)/r} ∈ μ_r ⊂ F_{p²}^*` is
+**non-degenerate**. Built from scratch here (minimal `F_{p²} = F_p[i]`
+arithmetic + Miller evaluated at the `F_{p²}` point `φ(P)`) and validated:
+the pairing lands in `μ_r` (`t^r=1`), is bilinear (`t([c]P,φ(P)) = t^c`), and
+`≠1`. Bilinearity then transfers the ECDLP `Q=[k]P` into a DLP `α^k = β` in
+the *small* cyclic group `μ_r`, solved generically:
+
+```
+E: y²=x³+x / F_1283  (supersingular, #E=1284), r=107 | p+1
+P=(921,458) ord 107,  t_r(P,φ(P))=(171,824) ∈ μ_107  (nondegenerate)
+Q=[7]P→k=7   Q=[42]P→k=42   Q=[99]P→k=99   Q=[106]P→k=106   ✓
+```
+
+This is the concrete edge of the whole investigation. The EDS-Residue /
+elliptic-net handle gives **no** sub-`√m` attack on generic curves (§3–§5.9),
+but the same machinery *is* the Tate pairing (§5.6, §5.9), and the pairing
+collapses the ECDLP **exactly** on the small-embedding-degree curves — which
+is precisely the Lauter–Stange "EDS Association ⇒ weak curve" boundary (§2.2)
+made executable. (Tests: `distortion_point_is_on_curve_over_fp2`,
+`pairing_is_nondegenerate_and_bilinear`, `mov_attack_recovers_discrete_log`.)
+
 ---
 
 ## 6. Honest scorecard
@@ -666,6 +696,7 @@ computes the pairing, the pairing's character is the EDS multiplier character
 | Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` for `r∤p−1`, S-independent, *entirely in `F_p`* — incl. **supersingular** `y²=x³+x` (embedding degree 2), test-verified |
 | Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
 | Stange's Tate-via-net formula reproduces the Miller pairing | **Yes (§5.9):** `τ_net = τ_miller` (nondegenerate, in `μ_r`) — triple cross-validation of net, pairing, formula |
+| The pairing *does* break the ECDLP on weak curves | **Yes (§5.10):** end-to-end MOV attack on supersingular `y²=x³+x` via `F_{p²}` distortion pairing — recovers `k` |
 | QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
@@ -703,13 +734,18 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
 cargo test  --release --lib cryptanalysis::eds_tate        #  5 tests (§5.6–§5.8)
 cargo test  --release --lib cryptanalysis::eds_net         #  4 tests (§5.3b, §5.9)
+cargo test  --release --lib cryptanalysis::eds_mov         #  3 tests (§5.10)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep
 cargo run   --release --example eds_bridge                 # the §5.4 bridge
 cargo run   --release --example eds_tate_demo              # the §5.6 bridge
 cargo run   --release --example eds_net_demo               # the §5.3b net
+cargo run   --release --example eds_mov_demo               # the §5.10 MOV attack
 ```
+
+`eds_mov` tests: `distortion_point_is_on_curve_over_fp2`,
+`pairing_is_nondegenerate_and_bilinear`, `mov_attack_recovers_discrete_log`.
 
 `eds_tate` tests: `tate_pairing_is_valid`,
 `chi_b_equals_chi_self_tate_in_nondegenerate_regime`,

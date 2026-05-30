@@ -119,6 +119,7 @@ pub mod ec_trapdoor;
 pub mod ecdsa_audit;
 pub mod ecm;
 pub mod eds_residue;
+pub mod eds_mov;
 pub mod eds_net;
 pub mod eds_tate;
 pub mod ffd_harness;
