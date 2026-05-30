@@ -613,3 +613,100 @@ fn probe_p521_hp_timing() {
         outcome
     );
 }
+
+/// P-521 HP LLL at m=16 — tests efficiency after incremental GS swap (2026-05-28).
+///
+/// With 5.7× speedup: m=8 ~14s → m=16 estimated ~45-55s (O((m+2)²) scaling).
+/// 3-seed run targets <180s total.  A pass closes §10.5 of RESEARCH_LLL_GS_ANALYSIS.md.
+///
+/// Run: `cargo test --test lll_degeneracy_probe p521_hp_m16 -- --ignored --nocapture`
+#[test]
+#[ignore = "slow: P-521 HP LLL m=16 ~45-180s total"]
+fn probe_p521_hp_m16() {
+    let p521 = CurveParams::p521();
+    let k_bits = 384u32;
+    let m = 16usize;
+
+    eprintln!();
+    eprintln!("=== P-521 HP LLL m=16 (§10.5 efficiency check, incremental GS) ===");
+    eprintln!("  lattice dim: {}×{}", m + 2, m + 2);
+    eprintln!("  expected: 3/3 recovery, <180s total");
+
+    let seeds: [(u64, u64); 3] = [
+        (0xC0FFEE, 0xC0FFEE),
+        (0xDEAD_BEEF, 0xBADC_AFE),
+        (0x1234_5678, 0x9ABC_DEF0),
+    ];
+
+    let mut pass = 0usize;
+    let mut total_ms = 0u128;
+
+    for (d_seed, k_seed) in seeds {
+        let (outcome, elapsed_ms) =
+            probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
+        if outcome.starts_with("✓") {
+            pass += 1;
+        }
+        total_ms += elapsed_ms;
+    }
+
+    eprintln!();
+    eprintln!(
+        "P-521 HP LLL m=16: {}/{} recovered in {} ms total",
+        pass,
+        seeds.len(),
+        total_ms
+    );
+    if pass == seeds.len() {
+        eprintln!("✓ §10.5 CLOSED: HP LLL scales to m=16 on P-521.");
+    } else {
+        eprintln!(
+            "? Partial ({}/3) — try m=20 or BKZ; §10.5 remains open.",
+            pass
+        );
+    }
+
+    assert!(
+        pass >= 1,
+        "HP LLL m=16 should recover at least 1/3 P-521 keys; got 0"
+    );
+}
+
+/// P-521 HP LLL single-seed timing probe for m=32.
+///
+/// Estimates feasibility of §10.5 at large m before committing to a 3-seed run.
+/// Expected: ~162s (11.6× m=8 baseline of ~14s) based on O((m+2)²) scaling.
+///
+/// Run: `cargo test --test lll_degeneracy_probe p521_hp_m32_timing -- --ignored --nocapture`
+#[test]
+#[ignore = "slow: P-521 HP LLL m=32 single-seed ~100-200s"]
+fn probe_p521_hp_m32_timing() {
+    let p521 = CurveParams::p521();
+    let k_bits = 384u32;
+    let m = 32usize;
+    let d_seed = 0xC0FFEEu64;
+    let k_seed = 0xC0FFEEu64;
+
+    eprintln!();
+    eprintln!("=== P-521 HP LLL m=32 single-seed timing (§10.5) ===");
+    eprintln!("  lattice dim: {}×{}", m + 2, m + 2);
+    eprintln!("  baseline (m=8 incremental, 2026-05-28): ~14s");
+    eprintln!("  O((m+2)²) estimate for m=32: ~162s");
+
+    let (outcome, elapsed_ms) =
+        probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
+
+    eprintln!();
+    eprintln!("  m=32 result: {} in {} ms", outcome, elapsed_ms);
+
+    let m8_baseline_ms = 14_000u128;
+    let ratio = elapsed_ms as f64 / m8_baseline_ms as f64;
+    let theoretical_ratio = ((m as f64 + 2.0) / 10.0f64).powi(2);
+    eprintln!(
+        "  scaling ratio: {:.1}× measured vs {:.1}× theoretical O((m+2)²)",
+        ratio, theoretical_ratio
+    );
+
+    // Don't require recovery — m=32 may need BKZ; just measure timing.
+    eprintln!("  (not asserting recovery at m=32 — timing probe only)");
+}

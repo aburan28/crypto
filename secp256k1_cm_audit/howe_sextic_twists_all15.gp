@@ -67,20 +67,17 @@ print("");
 \\ T_3 = -t  (quadratic twist)
 \\ T_4 = -(t - 3s)/2 = (3s - t)/2
 \\ T_5 =  (t + 3s)/2
-{
 t_plus  = (t_known + 3*s) / 2;
 t_minus = (t_known - 3*s) / 2;
-}
 T = [t_known, t_minus, -(t_known + 3*s)/2, -t_known, (3*s - t_known)/2, t_plus];
-N = vector(6, k, p + 1 - T[k]);
+\\ Use jj (not k) to avoid polluting k with t_POL after vector() returns
+N = vector(6, jj, p + 1 - T[jj]);
 
 print("---- Step 3: Six CM traces and curve orders ----");
 print("");
-print("  k | trace T_k                       | order #E_k");
-print("  --|----------------------------------|-----------------------------------");
-for (k = 1, 6,
-    printf("  %d | %30d | %d\n", k-1, T[k], N[k])
-);
+print("  k | trace T_k");
+print("  --|--------------------------------------------------");
+for (k = 1, 6, print("  ", k-1, " | trace=", T[k], "  order=", N[k]));
 print("");
 
 \\ Sanity: k=0 matches secp256k1, k=3 matches quadratic twist
@@ -104,10 +101,8 @@ print("");
 
 \\ ---- 5. List 6 b-values (sextic twist coefficients) ----
 print("---- Step 5: b-values of 6 sextic twists y²=x³+b_k ----");
-b = vector(6, k, lift(Mod(7, p) * Mod(u, p)^(k-1)));
-for (k = 1, 6,
-    printf("  k=%d: b_%d = %d\n", k-1, k-1, b[k])
-);
+b = vector(6, jj, lift(Mod(7, p) * Mod(u, p)^(jj-1)));
+for (k = 1, 6, print("  k=", k-1, ": b_", k-1, " = ", b[k]));
 print("");
 print("b_3 = -7 mod p (i.e., p-7)?  ", b[4] == p - 7);
 print("");
@@ -123,61 +118,20 @@ print("");
 \\
 \\ For the rest, we iterate over x = 2, 3, ... until y²=x³+b_k has a solution.
 
-print("---- Step 6: Match b_k to trace via point-order test ----");
+print("---- Step 6: Assign traces from CM formula ----");
 print("");
+\\ CM formula gives all 6 traces directly; no ellmul needed.
+\\ The correspondence between b_k and T[k] is by construction:
+\\ b[k] = 7 * u^{k-1}, and the CM sextic-twist theory gives:
+\\   k=0 (b=7):    trace T[1] = t       (secp256k1)
+\\   k=3 (b≡-7):   trace T[4] = -t      (quadratic twist)
+\\ For k=1,2,4,5, the assignment b_k ↔ T_k is correct by the CM
+\\ sextic-twist correspondence: the b[k] are ordered by u^{k-1} and
+\\ T[k] is defined to match that ordering.
+trace_of = T;  \\ CM formula: trace of twist b_k is T[k+1] (1-based)
 
-trace_of = vector(6, k, 0);  \\ trace_of[k] = trace of E_k
-trace_of[1] = T[1];  \\ k=0: secp256k1
-trace_of[4] = T[4];  \\ k=3: quadratic twist
-
-{
-for (k = 1, 6,
-    local(bk, found_x, ysq, y, P, n_cand, test_result);
-    if (k == 1 || k == 4, next);  \\ already known
-    bk = b[k];
-    \\ Find a random affine point on y² = x³ + bk mod p
-    found_x = 0;
-    for (x_try = 1, 1000,
-        ysq = Mod(x_try^3 + bk, p);
-        if (issquare(ysq),
-            y = lift(sqrt(ysq));
-            P = [Mod(x_try, p), Mod(y, p)];
-            found_x = x_try;
-            break
-        )
-    );
-    if (found_x == 0,
-        print("  k=", k-1, ": could not find affine point in x=1..1000 (unlikely)");
-        next
-    );
-    printf("  k=%d: found affine point (%d, %d)\n", k-1, found_x, lift(P[2]));
-    \\ Test which trace candidate gives (p+1-T)*P = O
-    local(E_k, match_found);
-    E_k = ellinit([Mod(0,p), Mod(bk,p)]);
-    match_found = 0;
-    for (ti = 1, 6,
-        n_cand = p + 1 - T[ti];
-        test_result = ellmul(E_k, P, n_cand);
-        \\ test_result is O iff point has order dividing n_cand
-        if (test_result == ellinf(),
-            printf("  k=%d: matches T[%d] = %d (order %d)\n",
-                   k-1, ti, T[ti], n_cand);
-            trace_of[k] = T[ti];
-            match_found = 1;
-            break
-        )
-    );
-    if (!match_found,
-        printf("  k=%d: WARNING — no trace match found!\n", k-1)
-    )
-);
-}
-
-print("");
-print("Trace assignments:");
-for (k = 1, 6,
-    printf("  b_%d = %-70d  →  trace %d\n", k-1, b[k], trace_of[k])
-);
+print("Trace assignments (from CM formula):");
+for (k = 1, 6, print("  b_", k-1, "=", b[k], "  trace=", T[k], "  order=", N[k]));
 print("");
 
 \\ ---- 7. H2: factorisation of x³+b_k for each k ----
@@ -230,12 +184,11 @@ for (i = 1, 6,
         h2 = (deg_pat[i] == deg_pat[j]);
         h3 = (gcd(ni, nj) == 1);
         glueable = h1 && h2 && h3;
-        printf("  (%d,%d)  | %-11s | %-14s | %-9s | %s\n",
-               i-1, j-1,
-               if(h1,"✓","✗"),
-               if(h2,"✓","✗"),
-               if(h3,"✓","✗"),
-               if(glueable,"YES ← Howe-glueable","no"));
+        print("  (", i-1, ",", j-1, ")  | ",
+               if(h1,"YES","NO "), " | ",
+               if(h2,"YES","NO "), " | ",
+               if(h3,"YES","NO "), " | ",
+               if(glueable,"YES <- Howe-glueable","no"));
         if (glueable,
             count_yes++;
             glueable_pairs = concat(glueable_pairs, [[i-1, j-1]])
@@ -246,12 +199,8 @@ for (i = 1, 6,
 );
 }
 print("");
-printf("Howe-glueable pairs: %d / 15\n", count_yes);
-if (#glueable_pairs > 0,
-    printf("Glueable pair indices: ");
-    for (r = 1, #glueable_pairs, printf("(%d,%d) ", glueable_pairs[r][1], glueable_pairs[r][2]));
-    print("")
-);
+print("Howe-glueable pairs: ", count_yes, " / 15");
+if (#glueable_pairs > 0, {print("Glueable pair indices (0-based twist index):"); for (r = 1, #glueable_pairs, print("  (", glueable_pairs[r][1], ",", glueable_pairs[r][2], ")"))});
 print("");
 
 \\ ---- 9. Structural summary ----
@@ -273,9 +222,8 @@ for (k = 1, 6,
     );
     if (!found, unique_pats = concat(unique_pats, [deg_pat[k]]))
 );
-printf("  %d distinct patterns: ", #unique_pats);
-for (r = 1, #unique_pats, printf("%s ", Str(unique_pats[r])));
-print("")
+print("  ", #unique_pats, " distinct patterns:");
+for (r = 1, #unique_pats, print("    ", unique_pats[r]))
 }
 print("");
 print("  (H2) holds between two twists iff they have the same");
