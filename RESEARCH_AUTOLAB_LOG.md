@@ -876,4 +876,4 @@ The Rosenhain formula requires F_{p³} extension (since x³+7 has no roots mod p
 
 ### Commits made
 
-- `<hash>` autolab 2026-05-30: Howe 15-pair check complete — 5/15 glueable pairs confirmed
+- `7d38bc9` autolab 2026-05-30: Howe 15-pair check — 5/15 glueable pairs confirmed
