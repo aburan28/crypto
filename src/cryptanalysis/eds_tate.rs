@@ -228,11 +228,12 @@ fn miller_eval(pp: (u64, u64), rr: (u64, u64), r: u64, a: u64, p: u64) -> Option
     Some(f)
 }
 
-/// `(reduced, raw)` self-pairing values: `raw = f_{r,P}((Q+S)−(S))` (the
-/// *unreduced* Miller value) and `reduced = raw^{(p−1)/r} ∈ μ_r`.  Scans the
-/// auxiliary point `S` from `xs_start`.  The raw value depends on `S` only up
-/// to `(F_p*)^r`; in particular `χ(raw)` is `S`-independent when `r` is even.
-pub fn self_tate_raw(
+/// Unreduced self-Miller value `f_{r,P}((Q+S)−(S)) ∈ F_p^*`, `Q=[c]P`, with
+/// **no embedding-degree requirement** (the Miller function is `F_p`-rational
+/// and evaluated at `F_p` points, so the value lies in `F_p` regardless of
+/// where the *reduced* pairing would land).  Scans the auxiliary point `S`
+/// from `xs_start`.  `None` if no usable `S` is found.
+pub fn miller_self_raw(
     pp: (u64, u64),
     c: u64,
     r: u64,
@@ -240,10 +241,8 @@ pub fn self_tate_raw(
     b: u64,
     p: u64,
     xs_start: u64,
-) -> Option<(u64, u64)> {
-    assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
+) -> Option<u64> {
     let q = ec_mul(c, Some(pp), a, p)?;
-    let exp = (p - 1) / r;
     for xs in xs_start..p {
         let rhs = (addm(addm(mulm(mulm(xs, xs, p), xs, p), mulm(a, xs, p), p), b, p)) % p;
         if rhs == 0 {
@@ -271,13 +270,31 @@ pub fn self_tate_raw(
             _ => continue,
         };
         let raw = mulm(num, invm(den, p), p);
-        let t = powm(raw, exp, p);
-        if t == 0 {
+        if raw == 0 {
             continue;
         }
-        return Some((t, raw));
+        return Some(raw);
     }
     None
+}
+
+/// `(reduced, raw)` self-pairing values: `raw = f_{r,P}((Q+S)−(S))` (the
+/// *unreduced* Miller value) and `reduced = raw^{(p−1)/r} ∈ μ_r`.  Scans the
+/// auxiliary point `S` from `xs_start`.  The raw value depends on `S` only up
+/// to `(F_p*)^r`; in particular `χ(raw)` is `S`-independent when `r` is even.
+pub fn self_tate_raw(
+    pp: (u64, u64),
+    c: u64,
+    r: u64,
+    a: u64,
+    b: u64,
+    p: u64,
+    xs_start: u64,
+) -> Option<(u64, u64)> {
+    assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
+    let raw = miller_self_raw(pp, c, r, a, b, p, xs_start)?;
+    let t = powm(raw, (p - 1) / r, p);
+    Some((t, raw))
 }
 
 /// Reduced self-Tate pairing `⟨P,[c]P⟩_r ∈ μ_r ⊂ F_p^*`, for `r | p−1`.
@@ -559,6 +576,75 @@ mod tests {
         assert!(nd_total >= 10, "need a populated nondegenerate regime");
         assert_eq!(nd_agree, nd_total, "χ(B)=χ(⟨P,P⟩) must hold in nondeg regime");
         assert_eq!(forced_pos, forced_total, "forced regime ⇒ χ(⟨P,P⟩)=+1");
+    }
+
+    #[test]
+    fn unreduced_self_miller_char_equals_chi_b_any_embedding_degree() {
+        // Lift §5.7 to embedding degree > 1 (MOV regime). The unreduced
+        // self-Miller value f_{r,P}(D_P) stays in F_p even when r ∤ p−1, so
+        // χ(f) is still an F_p bit. Test whether χ(B) = χ(f) for even r with
+        // embedding degree > 1 (r ∤ p−1), and whether χ(f) is S-independent.
+        let (mut total, mut agree, mut sindep, mut hi_emb) = (0, 0, 0, 0);
+        for p in [1009u64, 1013, 2003, 4099, 10007, 1019] {
+            for a in 0..25u64 {
+                for b in 0..25u64 {
+                    let disc =
+                        (4 * mulm(mulm(a, a, p), a, p) + 27 * mulm(b, b, p)) % p;
+                    if disc == 0 {
+                        continue;
+                    }
+                    // first point P
+                    let mut pp = None;
+                    for x in 1..p.min(120) {
+                        let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p;
+                        if rhs == 0 {
+                            continue;
+                        }
+                        if let Some(y) = sqrt_mod(rhs, p) {
+                            if y != 0 {
+                                pp = Some((x, y));
+                                break;
+                            }
+                        }
+                    }
+                    let pp = match pp {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let r = match ec_order(Some(pp), a, p, 2 * p + 4) {
+                        Some(r) if r % 2 == 0 && r >= 6 => r,
+                        _ => continue,
+                    };
+                    if (p - 1) % r == 0 {
+                        continue; // embedding degree 1 — already handled by §5.7
+                    }
+                    let bmul = match eds_multiplier_b(a, b, pp.0, pp.1, r, p) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let raw1 = match miller_self_raw(pp, 1, r, a, b, p, 1) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    total += 1;
+                    hi_emb += 1;
+                    if legendre(raw1, p) == legendre(bmul, p) {
+                        agree += 1;
+                    }
+                    if let Some(raw2) = miller_self_raw(pp, 1, r, a, b, p, p / 2) {
+                        if legendre(raw2, p) == legendre(raw1, p) {
+                            sindep += 1;
+                        }
+                    }
+                    if total >= 40 {
+                        break;
+                    }
+                }
+            }
+        }
+        assert!(hi_emb >= 20, "need embedding-degree>1 instances, got {}", hi_emb);
+        assert_eq!(sindep, total, "χ(f) must be S-independent for even r");
+        assert_eq!(agree, total, "χ(B)=χ(f_{{r,P}}) should lift to any embedding degree");
     }
 
     #[test]

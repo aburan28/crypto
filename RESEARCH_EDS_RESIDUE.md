@@ -585,6 +585,30 @@ the quadratic character of the (unreduced) self-Tate pairing for *all* even
 the clean closed form `χ(B)=χ(−1)χ(W(r+1))χ(W(r−1))` from §5.5. Between §5.5
 (odd `r`) and §5.7 (even `r`), `χ(B)` is now pinned in every case.
 
+### 5.8 Lift to embedding degree > 1 (the MOV regime), still in `F_p`
+
+§5.6/§5.7 assumed embedding degree 1 (`r ∣ p−1`), so the pairing lived in
+`F_p`. The genuine MOV/Frey–Rück regime has embedding degree `k > 1`: `r ∣
+p^k−1` but `r ∤ p−1`, and the *reduced* Tate pairing lands in
+`μ_r ⊂ F_{p^k}^*`. One might expect the bridge to need extension-field
+arithmetic there. It does not. The **unreduced** self-Miller value
+`f_{r,P}(D_P)` is computed from the `F_p`-rational Miller function evaluated
+at `F_p` points, so **it stays in `F_p` no matter the embedding degree** —
+only the final exponentiation would leave `F_p`. The result (test-verified on
+≥20 embedding-degree-`>1` instances, even `r`, over 6 primes):
+
+> **For every even `r`, any embedding degree, `χ(B) = χ(f_{r,P}(D_P))`**,
+> with `χ(f)` `S`-independent — entirely within `F_p`.
+
+(For even `r`, `gcd(r,p−1)` is even, so `(F_p^*)^r ⊆` squares and `χ(f)` is
+well-defined on the divisor-ambiguity cosets regardless of `k`.) So the
+EDS-Residue ↔ self-pairing identification is **not** a low-embedding-degree
+accident: it is an `F_p` statement that holds across the whole MOV spectrum.
+The only place the embedding degree matters is whether the *reduced* pairing
+(hence an actual sub-exponential DLP transfer, MOV) is available — which is
+the standard `k`-small criterion, orthogonal to the χ-bridge.
+(Test: `unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.)
+
 ---
 
 ## 6. Honest scorecard
@@ -602,6 +626,7 @@ the clean closed form `χ(B)=χ(−1)χ(W(r+1))χ(W(r−1))` from §5.5. Between
 | Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves |
 | Tate bridge `χ(B) = χ(⟨P,P⟩_r)` when `v₂(r)=v₂(p−1)` | **Confirmed (§5.6):** 27/27 nondeg; F_p Tate pairing built & validated (bilinear, μ_r), 84 instances |
 | Forced regime `v₂(r)<v₂(p−1)`: `χ(B)` from the *unreduced* pairing | **Resolved (§5.7):** `χ(B)=χ(f_{r,P})` for all even `r`, both regimes, S-independent — test-verified |
+| Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` holds for `r∤p−1` too, S-independent, *entirely in `F_p`* — test-verified on ≥20 instances |
 | Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
 | QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
@@ -622,7 +647,8 @@ holds; the χ-structure is reduced to closed forms in the multiplier (§5.5);
 and that multiplier character is **identified with a self-Tate pairing** —
 `χ(B)=χ(⟨P,P⟩_r)` in the nondegenerate regime (§5.6), and more generally
 `χ(B)=χ(f_{r,P})` (the unreduced pairing character) for every even `r`
-including the forced regime (§5.7) — the concrete bridge from EDS-Residue to
+including the forced regime (§5.7) and *every embedding degree* (§5.8, the
+MOV regime, still entirely in `F_p`) — the concrete bridge from EDS-Residue to
 EDS-Association the program set out to find; and the
 canonical 2-D net, the last "blocked" item, was **derived from scratch**
 without Stange's seeds (§5.3b) and shown to be a rank-1 reparametrisation in
@@ -637,7 +663,7 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
-cargo test  --release --lib cryptanalysis::eds_tate        #  3 tests (§5.6, §5.7)
+cargo test  --release --lib cryptanalysis::eds_tate        #  4 tests (§5.6–§5.8)
 cargo test  --release --lib cryptanalysis::eds_net         #  3 tests (§5.3b)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
@@ -649,7 +675,8 @@ cargo run   --release --example eds_net_demo               # the §5.3b net
 
 `eds_tate` tests: `tate_pairing_is_valid`,
 `chi_b_equals_chi_self_tate_in_nondegenerate_regime`,
-`unreduced_self_tate_char_equals_chi_b_all_even_r`.
+`unreduced_self_tate_char_equals_chi_b_all_even_r`,
+`unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,
