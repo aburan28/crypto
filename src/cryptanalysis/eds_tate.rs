@@ -594,6 +594,63 @@ mod tests {
     }
 
     #[test]
+    fn bridge_holds_on_supersingular_curves() {
+        // y²=x³+x over p≡3 (mod 4) is supersingular: #E = p+1, embedding
+        // degree exactly 2 — the canonical MOV-weak / pairing family.  This is
+        // the realest test of §5.8: χ(B)=χ(f_{r,P}) for embedding degree > 1,
+        // computed entirely in F_p via the unreduced self-Miller value.
+        let (a, b) = (1u64, 0u64);
+        let (mut total, mut agree, mut sindep) = (0usize, 0usize, 0usize);
+        for p in [1019u64, 1031, 2003, 2011, 4099, 1283] {
+            assert_eq!(p % 4, 3, "y²=x³+x is supersingular only for p≡3 (mod 4)");
+            let mut used_orders = std::collections::HashSet::new();
+            for x in 1..p {
+                let rhs = (mulm(mulm(x, x, p), x, p) + mulm(a, x, p) + b) % p; // x³+x
+                if rhs == 0 {
+                    continue;
+                }
+                let y = match sqrt_mod(rhs, p) {
+                    Some(y) if y != 0 => y,
+                    _ => continue,
+                };
+                let r = match ec_order(Some((x, y)), a, p, 2 * p + 4) {
+                    Some(r) if r % 2 == 0 && r >= 6 => r,
+                    _ => continue,
+                };
+                // embedding degree exactly 2: r ∤ p−1 but r | p²−1.
+                assert_ne!((p - 1) % r, 0, "expected embedding degree > 1");
+                assert_eq!((p * p - 1) % r, 0, "expected embedding degree | 2");
+                if !used_orders.insert(r) {
+                    continue; // one representative per order
+                }
+                let bmul = match eds_multiplier_b(a, b, x, y, r, p) {
+                    Some(v) => v,
+                    None => continue,
+                };
+                let raw1 = match miller_self_raw((x, y), 1, r, a, b, p, 1) {
+                    Some(v) => v,
+                    None => continue,
+                };
+                total += 1;
+                if legendre(raw1, p) == legendre(bmul, p) {
+                    agree += 1;
+                }
+                if let Some(raw2) = miller_self_raw((x, y), 1, r, a, b, p, p / 2) {
+                    if legendre(raw2, p) == legendre(raw1, p) {
+                        sindep += 1;
+                    }
+                }
+                if used_orders.len() >= 5 {
+                    break;
+                }
+            }
+        }
+        assert!(total >= 12, "need supersingular instances, got {}", total);
+        assert_eq!(agree, total, "χ(B)=χ(f_{{r,P}}) on supersingular (embedding degree 2)");
+        assert_eq!(sindep, total, "χ(f) must be S-independent on supersingular");
+    }
+
+    #[test]
     fn chi_b_equals_chi_self_tate_in_nondegenerate_regime() {
         // The refined bridge: χ(B) = χ(⟨P,P⟩_r) exactly when v2(r)=v2(p−1)
         // (so −1 ∈ μ_r and the self-Tate character is non-trivial); in the

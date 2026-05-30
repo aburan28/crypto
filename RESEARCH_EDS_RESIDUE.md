@@ -609,6 +609,14 @@ The only place the embedding degree matters is whether the *reduced* pairing
 the standard `k`-small criterion, orthogonal to the χ-bridge.
 (Test: `unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.)
 
+The sharpest case is the **supersingular** family `y²=x³+x` over `p≡3
+(mod 4)`: `#E=p+1`, embedding degree *exactly* 2 — the canonical MOV-weak /
+pairing curves. The bridge `χ(B)=χ(f_{r,P})` holds there too, computed wholly
+in `F_p`, S-independent, across 6 primes and several orders per curve. So the
+identification survives precisely on the curves where the *reduced* pairing
+would transfer the DLP into `F_{p²}` (Test:
+`bridge_holds_on_supersingular_curves`).
+
 ### 5.9 Stange's Tate-pairing-via-net formula, cross-validated
 
 The non-degenerate net (§5.3b) finally lets us close the loop with Stange's
@@ -655,7 +663,7 @@ computes the pairing, the pairing's character is the EDS multiplier character
 | Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves |
 | Tate bridge `χ(B) = χ(⟨P,P⟩_r)` when `v₂(r)=v₂(p−1)` | **Confirmed (§5.6):** 27/27 nondeg; F_p Tate pairing built & validated (bilinear, μ_r), 84 instances |
 | Forced regime `v₂(r)<v₂(p−1)`: `χ(B)` from the *unreduced* pairing | **Resolved (§5.7):** `χ(B)=χ(f_{r,P})` for all even `r`, both regimes, S-independent — test-verified |
-| Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` holds for `r∤p−1` too, S-independent, *entirely in `F_p`* — test-verified on ≥20 instances |
+| Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` for `r∤p−1`, S-independent, *entirely in `F_p`* — incl. **supersingular** `y²=x³+x` (embedding degree 2), test-verified |
 | Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
 | Stange's Tate-via-net formula reproduces the Miller pairing | **Yes (§5.9):** `τ_net = τ_miller` (nondegenerate, in `μ_r`) — triple cross-validation of net, pairing, formula |
 | QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
@@ -693,7 +701,7 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
-cargo test  --release --lib cryptanalysis::eds_tate        #  4 tests (§5.6–§5.8)
+cargo test  --release --lib cryptanalysis::eds_tate        #  5 tests (§5.6–§5.8)
 cargo test  --release --lib cryptanalysis::eds_net         #  4 tests (§5.3b, §5.9)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
@@ -706,7 +714,8 @@ cargo run   --release --example eds_net_demo               # the §5.3b net
 `eds_tate` tests: `tate_pairing_is_valid`,
 `chi_b_equals_chi_self_tate_in_nondegenerate_regime`,
 `unreduced_self_tate_char_equals_chi_b_all_even_r`,
-`unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.
+`unreduced_self_miller_char_equals_chi_b_any_embedding_degree`,
+`bridge_holds_on_supersingular_curves`.
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,
