@@ -556,9 +556,34 @@ EDS-Association, §2.2), and in that regime `χ(B)` is computable in
 (Tests: `tate_pairing_is_valid`,
 `chi_b_equals_chi_self_tate_in_nondegenerate_regime`.)
 
-**What is left.** Only the forced regime (`v₂(r)<v₂(p−1)`) would need a
-different, non-`F_p` handle — the pairing into `μ_r` simply cannot see `χ(B)`
-there. (§5.3b, once the open item, is now resolved below.)
+### 5.7 The forced regime, resolved: the *unreduced* pairing character
+
+The §5.6 bridge used the *reduced* pairing `t = f^{(p−1)/r} ∈ μ_r`. In the
+forced regime `(p−1)/r` is even, so `χ(t) = χ(f)^{(p−1)/r} = +1` — the final
+exponentiation destroys the quadratic character. The fix is to **not reduce**:
+keep the unreduced Miller value `f = f_{r,P}(D_P)`. The Tate pairing fixes `f`
+only up to `(F_p^*)^r`, but for **even `r`** every `r`-th power `z^r =
+(z^{r/2})²` is a square, so `χ` is constant on those cosets — hence `χ(f)` is
+a **well-defined, `S`-independent** bit. The result (test-verified, 84
+even-`r` instances over 7 primes, all valid):
+
+> **For every even `r`,  `χ(B) = χ(f_{r,P}(D_P))`** — the unreduced
+> self-Tate-pairing character — *in both regimes*.
+
+This subsumes §5.6: when `(p−1)/r` is odd (nondegenerate) `χ(f) = χ(t)`, so it
+reduces to the earlier statement; when `(p−1)/r` is even (forced) `χ(t)` is
+trivial but `χ(f)` still equals `χ(B)`. Two checks pin it down: `χ(f)` is
+identical for two independent auxiliary points `S` (S-independence, as the
+`r`-even coset argument predicts), and in the forced regime `χ(t) = +1`
+always while `χ(f) = χ(B)` varies. So the EDS-Residue multiplier character is
+the quadratic character of the (unreduced) self-Tate pairing for *all* even
+`r` — and it stays `F_p`-computable; no exotic handle is needed.
+(Test: `unreduced_self_tate_char_equals_chi_b_all_even_r`.)
+
+**What is left.** Only odd `r` sits outside this pairing statement (there
+`(F_p^*)^r ⊄` squares, so `χ(f)` is ill-defined) — but odd `r` already has
+the clean closed form `χ(B)=χ(−1)χ(W(r+1))χ(W(r−1))` from §5.5. Between §5.5
+(odd `r`) and §5.7 (even `r`), `χ(B)` is now pinned in every case.
 
 ---
 
@@ -576,6 +601,7 @@ there. (§5.3b, once the open item, is now resolved below.)
 | `F_p` χ-period = reduction of the archimedean sign-period | **Refuted (§5.4):** orthogonal invariants; integer EDS = A006769 (validated), signs aperiodic, χ-period hops `r`/`2r` with `p` |
 | Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves |
 | Tate bridge `χ(B) = χ(⟨P,P⟩_r)` when `v₂(r)=v₂(p−1)` | **Confirmed (§5.6):** 27/27 nondeg; F_p Tate pairing built & validated (bilinear, μ_r), 84 instances |
+| Forced regime `v₂(r)<v₂(p−1)`: `χ(B)` from the *unreduced* pairing | **Resolved (§5.7):** `χ(B)=χ(f_{r,P})` for all even `r`, both regimes, S-independent — test-verified |
 | Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
 | QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
@@ -593,9 +619,11 @@ the residues are **information-tight but algorithmically inert** — they
 determine `k` in `~log₂ m` bits yet give no sub-`√m` algorithm, which is
 the cleanest concrete illustration of *why* the Lauter–Stange equivalence
 holds; the χ-structure is reduced to closed forms in the multiplier (§5.5);
-and that multiplier character is **identified with a self-Tate pairing**
-`χ(B)=χ(⟨P,P⟩_r)` in the nondegenerate regime (§5.6) — the concrete bridge
-from EDS-Residue to EDS-Association the program set out to find; and the
+and that multiplier character is **identified with a self-Tate pairing** —
+`χ(B)=χ(⟨P,P⟩_r)` in the nondegenerate regime (§5.6), and more generally
+`χ(B)=χ(f_{r,P})` (the unreduced pairing character) for every even `r`
+including the forced regime (§5.7) — the concrete bridge from EDS-Residue to
+EDS-Association the program set out to find; and the
 canonical 2-D net, the last "blocked" item, was **derived from scratch**
 without Stange's seeds (§5.3b) and shown to be a rank-1 reparametrisation in
 the ECDLP case — no new opening. Every item of the program is now settled:
@@ -609,7 +637,7 @@ as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 
 ```bash
 cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
-cargo test  --release --lib cryptanalysis::eds_tate        #  2 tests (§5.6)
+cargo test  --release --lib cryptanalysis::eds_tate        #  3 tests (§5.6, §5.7)
 cargo test  --release --lib cryptanalysis::eds_net         #  3 tests (§5.3b)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
@@ -620,7 +648,8 @@ cargo run   --release --example eds_net_demo               # the §5.3b net
 ```
 
 `eds_tate` tests: `tate_pairing_is_valid`,
-`chi_b_equals_chi_self_tate_in_nondegenerate_regime`.
+`chi_b_equals_chi_self_tate_in_nondegenerate_regime`,
+`unreduced_self_tate_char_equals_chi_b_all_even_r`.
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,

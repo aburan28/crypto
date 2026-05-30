@@ -228,16 +228,23 @@ fn miller_eval(pp: (u64, u64), rr: (u64, u64), r: u64, a: u64, p: u64) -> Option
     Some(f)
 }
 
-/// Reduced self-Tate pairing `⟨P,[c]P⟩_r ∈ μ_r ⊂ F_p^*`, for `r | p−1`.
-/// Uses an auxiliary point `S` (scanned deterministically) so the evaluation
-/// divisor `(Q+S)−(S)` avoids the support of `f_{r,P}`.  `None` if no usable
-/// `S` is found.
-pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Option<u64> {
+/// `(reduced, raw)` self-pairing values: `raw = f_{r,P}((Q+S)−(S))` (the
+/// *unreduced* Miller value) and `reduced = raw^{(p−1)/r} ∈ μ_r`.  Scans the
+/// auxiliary point `S` from `xs_start`.  The raw value depends on `S` only up
+/// to `(F_p*)^r`; in particular `χ(raw)` is `S`-independent when `r` is even.
+pub fn self_tate_raw(
+    pp: (u64, u64),
+    c: u64,
+    r: u64,
+    a: u64,
+    b: u64,
+    p: u64,
+    xs_start: u64,
+) -> Option<(u64, u64)> {
     assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
     let q = ec_mul(c, Some(pp), a, p)?;
     let exp = (p - 1) / r;
-    for xs in 1..p {
-        // S = (xs, ys) on the curve, y ≠ 0
+    for xs in xs_start..p {
         let rhs = (addm(addm(mulm(mulm(xs, xs, p), xs, p), mulm(a, xs, p), p), b, p)) % p;
         if rhs == 0 {
             continue;
@@ -252,7 +259,6 @@ pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Opti
             None => continue,
         };
         let sv = (xs, ys);
-        // avoid evaluating on the support of f_{r,P} (x = x_P)
         if qs.0 == pp.0 || sv.0 == pp.0 {
             continue;
         }
@@ -269,9 +275,14 @@ pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Opti
         if t == 0 {
             continue;
         }
-        return Some(t);
+        return Some((t, raw));
     }
     None
+}
+
+/// Reduced self-Tate pairing `⟨P,[c]P⟩_r ∈ μ_r ⊂ F_p^*`, for `r | p−1`.
+pub fn self_tate(pp: (u64, u64), c: u64, r: u64, a: u64, b: u64, p: u64) -> Option<u64> {
+    self_tate_raw(pp, c, r, a, b, p, 1).map(|(t, _)| t)
 }
 
 // ── EDS multiplier B over F_p (u64) ─────────────────────────────────────────
@@ -548,6 +559,48 @@ mod tests {
         assert!(nd_total >= 10, "need a populated nondegenerate regime");
         assert_eq!(nd_agree, nd_total, "χ(B)=χ(⟨P,P⟩) must hold in nondeg regime");
         assert_eq!(forced_pos, forced_total, "forced regime ⇒ χ(⟨P,P⟩)=+1");
+    }
+
+    #[test]
+    fn unreduced_self_tate_char_equals_chi_b_all_even_r() {
+        // Forced-regime resolution: for even r, χ of the *unreduced* Miller
+        // value f_{r,P}(D_P) is S-independent and equals χ(B) in BOTH regimes
+        // — unifying §5.6.  In the forced regime χ of the *reduced* pairing
+        // is structurally +1 (loses the bit); the unreduced character keeps it.
+        let (mut total, mut agree, mut sindep, mut forced) = (0, 0, 0, 0);
+        for p in [1021u64, 1033, 2017, 4093, 1013, 2069, 3001] {
+            for (a, b, pp, r) in enumerate_embedding1(p, 6, 12) {
+                let bmul = match eds_multiplier_b(a, b, pp.0, pp.1, r, p) {
+                    Some(v) => v,
+                    None => continue,
+                };
+                let (t1, raw1) = match self_tate_raw(pp, 1, r, a, b, p, 1) {
+                    Some(v) => v,
+                    None => continue,
+                };
+                total += 1;
+                let chi_b = legendre(bmul, p);
+                // χ(unreduced) = χ(B)?
+                if legendre(raw1, p) == chi_b {
+                    agree += 1;
+                }
+                // χ(raw) S-independent (different auxiliary S)?
+                if let Some((_, raw2)) = self_tate_raw(pp, 1, r, a, b, p, p / 2) {
+                    if legendre(raw2, p) == legendre(raw1, p) {
+                        sindep += 1;
+                    }
+                }
+                // forced regime: reduced character is structurally trivial.
+                if v2(r) < v2(p - 1) {
+                    forced += 1;
+                    assert_eq!(legendre(t1, p), 1, "forced ⇒ χ(reduced)=+1 (p={},r={})", p, r);
+                }
+            }
+        }
+        assert!(total >= 20, "need many even-r instances, got {}", total);
+        assert!(forced >= 5, "need forced-regime instances, got {}", forced);
+        assert_eq!(agree, total, "χ(B)=χ(unreduced self-pairing) for all even r");
+        assert_eq!(sindep, total, "χ(unreduced) must be S-independent (r even)");
     }
 
     #[test]
