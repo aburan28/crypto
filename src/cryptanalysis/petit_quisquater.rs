@@ -583,6 +583,96 @@ pub fn petit_quisquater_n2_full_pipeline(
     }
 }
 
+/// **End-to-end PQ via descent + GB + Wiedemann LA**.  Identical to
+/// [`petit_quisquater_n2_full_pipeline`] except the final relation
+/// matrix is solved with sequential Wiedemann
+/// ([`crate::cryptanalysis::pq_wiedemann::wiedemann_solve`]) instead
+/// of structured Gaussian.
+///
+/// Wiedemann is the algorithm production index-calculus pipelines
+/// actually use for the LA step — it scales to systems with
+/// `2^{20}+` rows where any direct (Gaussian) method is infeasible.
+/// At the toy scale it costs more per call (sequence length
+/// `2(|FB|+1) + 2` mat-vecs vs. `|FB|+1` pivot operations for sparse
+/// Gaussian) but uses the exact same algorithmic primitive — sparse
+/// matrix-vector product — that the rest of the index-calculus
+/// pipeline already pays for.
+///
+/// **Square padding**: the relation matrix `M` has `|FB| + extra`
+/// rows × `|FB| + 1` columns; Wiedemann internally falls back to the
+/// normal equations `M^T M x = M^T b` when rows ≠ cols.  When `extra
+/// = 0` exactly the system is square and Wiedemann runs in its
+/// fast / direct mode.
+pub fn petit_quisquater_n2_full_pipeline_via_wiedemann(
+    curve: &BinaryCurve,
+    g: &BinaryPoint,
+    q: &BinaryPoint,
+    v: &PqSubspace,
+    target_extra: usize,
+    max_trials_per_relation: usize,
+    seed: u64,
+) -> Option<BigUint> {
+    use crate::cryptanalysis::pq_sparse_la::SparseRow;
+    use crate::cryptanalysis::pq_wiedemann::wiedemann_solve;
+
+    let fb = build_pq_factor_base(curve, v);
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + target_extra.max(1);
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut relations: Vec<PqRelation> = Vec::with_capacity(target);
+    while relations.len() < target {
+        let rel = find_one_pq_relation_via_descent(
+            curve,
+            g,
+            q,
+            &fb,
+            v,
+            &mut rng,
+            max_trials_per_relation,
+        )?;
+        relations.push(rel);
+    }
+
+    let m = fb.len();
+    let n = &curve.order;
+    let k_col = m;
+    let mut sparse_rows: Vec<SparseRow> = Vec::with_capacity(relations.len());
+    let mut b_vec: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut entries: Vec<(usize, BigUint)> = Vec::new();
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod_n(mult, n);
+            entries.push((j, val));
+        }
+        let neg_b = (n - &(&rel.coef_b % n)) % n;
+        entries.push((k_col, neg_b));
+        sparse_rows.push(SparseRow::from_entries(entries, rel.coef_a.clone() % n));
+        b_vec.push(rel.coef_a.clone() % n);
+    }
+
+    // Try a few seeds for Wiedemann — the random projection vector
+    // can land on degenerate Krylov subspaces.
+    let mut x = None;
+    for wied_seed in 0u64..30 {
+        if let Some(sol) =
+            wiedemann_solve(&sparse_rows, &b_vec, m + 1, n, seed.wrapping_add(wied_seed))
+        {
+            x = Some(sol);
+            break;
+        }
+    }
+    let x = x?;
+    let k = x[k_col].clone();
+    let q_check = scalar_mul(curve, g, &k);
+    if q_check == *q {
+        Some(k)
+    } else {
+        None
+    }
+}
+
 // ── n = 3 full pipeline ────────────────────────────────────────────
 
 /// Try all 2³ = 8 sign combinations on a candidate 3-decomposition
@@ -1330,6 +1420,46 @@ mod tests {
             "full pipeline should recover k = {} on toy curve (got {:?})",
             true_k, recovered,
         );
+    }
+
+    /// **n=2 full pipeline with Wiedemann LA recovers the secret.**
+    /// Demonstrates the descent + Buchberger + Wiedemann path — the
+    /// algorithm family production index calculus uses end-to-end.
+    #[test]
+    fn pq_full_pipeline_via_wiedemann_recovers_secret() {
+        let (curve, g, n) = build_toy_curve_and_generator();
+        let v = PqSubspace::span_low(curve.m, 4);
+        let true_k = (&n / BigUint::from(13u32)) + BigUint::from(29u32);
+        let true_k = &true_k % &n;
+        let q = scalar_mul(&curve, &g, &true_k);
+        let recovered = petit_quisquater_n2_full_pipeline_via_wiedemann(
+            &curve, &g, &q, &v, 4, 200, 0xFEEDCAFE,
+        );
+        assert_eq!(
+            recovered.as_ref(),
+            Some(&true_k),
+            "Wiedemann-based pipeline should recover k = {} (got {:?})",
+            true_k, recovered,
+        );
+    }
+
+    /// **Wiedemann and structured-Gaussian pipelines agree.**  Same
+    /// `(curve, g, q, seed)` should give the same recovered `k`
+    /// regardless of which LA solver finishes the linear system.
+    #[test]
+    fn wiedemann_pipeline_agrees_with_gaussian() {
+        let (curve, g, n) = build_toy_curve_and_generator();
+        let v = PqSubspace::span_low(curve.m, 4);
+        let true_k = &BigUint::from(31u32) % &n;
+        let q = scalar_mul(&curve, &g, &true_k);
+        let k_gaussian =
+            petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 999);
+        let k_wiedemann = petit_quisquater_n2_full_pipeline_via_wiedemann(
+            &curve, &g, &q, &v, 4, 200, 999,
+        );
+        assert_eq!(k_gaussian.as_ref(), Some(&true_k));
+        assert_eq!(k_wiedemann.as_ref(), Some(&true_k));
+        assert_eq!(k_gaussian, k_wiedemann);
     }
 
     /// **n=3 XL-based pipeline recovers the secret.**  Uses the actual
