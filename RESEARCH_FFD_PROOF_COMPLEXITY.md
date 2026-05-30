@@ -296,13 +296,46 @@ survives it. The antecedent holds for a different, sharper reason:
 > which is the antecedent, with an *exact* rate (matching the measured
 > `Δ_low`: 0.00334 at `N=12` → 0.00074 at `N=20`, i.e. `1/cols(3)` to the
 > digit). The remaining analytical task is no longer probabilistic
-> genericity but a concrete algebraic one: **identify that single degree-3
-> syzygy and prove there is exactly one.** It almost certainly comes from
-> the `S₂`-symmetry / single-generator structure of `S₃` (all `n` equations
-> are coordinates of *one* symmetric summation polynomial), not from the
-> random factor base — which is why it is `N`-independent.
+> genericity but a concrete algebraic one — and EXP-J now **identifies the
+> syzygy**.
+
+**The syzygy, identified (EXP-J).** Extracting the (1-dimensional)
+linear-syzygy space of the descended system reveals a single, sharply
+structured relation. The unique syzygy is
+
+```
+   ℓ · ( Σ_{i∈S} f_i )  ≡  0        (mod x_k² = x_k),
+```
+
+i.e. **one** linear form `ℓ` annihilating **one** `F_2`-combination
+`F_S = Σ_{i∈S} f_i` of the equations (all participating `ℓ_i` are *equal* to
+the same `ℓ`). Two structural facts pin its origin, verified on every one of
+48 random instances over `2n' ∈ {12,…,18}` and 4 seeds:
+
+1. **`ℓ` is `X₁↔X₂`-symmetric** — its `X₁`-coordinate support equals its
+   `X₂`-coordinate support. So `ℓ` is a linear form in the *symmetric*
+   variables, which is exactly the fingerprint of the `S₂` symmetry of `S₃`.
+2. **The quadratic parts of all equations are bipartite** (zero
+   `X₁ᵢX₁ⱼ` and `X₂ᵢX₂ⱼ` terms): they depend only on `e₂ = X₁X₂`, because
+   `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` (with `e₁=X₁+X₂`, `e₂=X₁X₂`) has quadratic
+   part `x₃·e₂ + e₂²`, a function of `e₂` alone.
+
+This converts the lemma to a concrete, basis-free claim: *a symmetric linear
+form times a bipartite combination of the equations vanishes at degree 3*,
+and there is exactly one such relation. **Existence** follows from the `S₂`
+structure (1)+(2) — the symmetric/bipartite shape forces the cubic relation;
+**uniqueness** (that the count is exactly 1, not 2+) is the one piece still
+to be made fully rigorous, though EXP-I/EXP-J pin it at 1 across all
+measured `N` and seeds. With the syzygy in hand the bounded-defect lemma —
+and hence the defensive theorem `D* = Θ(n)` for generic bases — rests on a
+single, well-understood algebraic relation rather than a genericity
+heuristic.
 
 > **Evidence.**
+> - *EXP-J* (`examples/ffd_syzygy.rs`, `experiments/ffd_syzygy.json`):
+>   linear-syzygy dim `= 1`; `ℓ` identical across equations; `ℓ` is
+>   `X₁↔X₂`-symmetric; `ℓ·F_S ≡ 0` verified independently; quadratic parts
+>   bipartite — all `true` on 48 instances × 4 seeds.
 > - *EXP-I* (`examples/ffd_genericity.rs`, `experiments/ffd_genericity.json`):
 >   raw Semaev defect `Σδ_low = 1.00` for every `2n' ∈ {12,…,20}` over 5
 >   seeds, vs control `= 0`; `Δ_low = 1/cols(3)` to the digit.
@@ -442,24 +475,28 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    ρ_s = −0.79, critical-regime slope ≈ −7.6 (§3.3), seed-robust. This is
    the working replacement for the expansion study (item 3).
 
-5. **Defect-scaling & genericity studies** — *(implemented:
-   `examples/ffd_defect_scaling.rs` (EXP-H) and `examples/ffd_genericity.rs`
-   (EXP-I), snapshots in `experiments/`.)* EXP-H: `Δ_low(2n') → 0` for the
-   Random family to `2n'=20`, Subfield bounded. EXP-I: against a
-   random-quadratic control (defect 0), the random-restricted Semaev keeps
-   **exactly one** degree-3 syzygy for all `2n' ≥ 12` — the **bounded-defect
-   lemma** (§3.4), pinning `Δ_low = 1/cols(3) = Θ(N^{−3})`. Both are
-   degree-≤3 ranks (seconds at `2n'=20`).
+5. **Defect-scaling, genericity & syzygy studies** — *(implemented:
+   `examples/ffd_defect_scaling.rs` (EXP-H), `examples/ffd_genericity.rs`
+   (EXP-I), `examples/ffd_syzygy.rs` (EXP-J), snapshots in `experiments/`.)*
+   EXP-H: `Δ_low(2n') → 0` for the Random family to `2n'=20`, Subfield
+   bounded. EXP-I: against a random-quadratic control (defect 0), the
+   random-restricted Semaev keeps **exactly one** degree-3 syzygy for all
+   `2n' ≥ 12` — the **bounded-defect lemma** (§3.4), pinning `Δ_low =
+   1/cols(3) = Θ(N^{−3})`. EXP-J **identifies** that syzygy: a single
+   `X₁↔X₂`-symmetric linear form `ℓ` with `ℓ·(Σ_{i∈S} f_i) ≡ 0`, on bipartite
+   quadratic parts (`e₂=X₁X₂`) — verified on 48 instances × 4 seeds. All are
+   degree-≤3 linear algebra (seconds at `2n'=20`).
 
 6. **Lower-bound attempt** — the route is §3.4 (bounded low-degree defect).
    (a) *Algebraic (favoured):* the conditional theorem `Δ_low = o(1) ⇒ D* =
    Θ(n)` is in hand, and the antecedent is now the concrete **bounded-defect
-   lemma** rather than a probabilistic genericity claim. The remaining step
-   is to **exhibit the single degree-3 syzygy and prove it is the only one**
-   — most likely arising from the `S₂`-symmetry / single-generator structure
-   of `S₃` (EXP-I shows it is `N`-independent, hence structural, not
-   random). The earlier "random ⇒ generic position" framing was *refuted* by
-   EXP-I's control and is dropped.
+   lemma** rather than a probabilistic genericity claim. EXP-J has
+   **exhibited** the syzygy — a single `X₁↔X₂`-symmetric linear form `ℓ` with
+   `ℓ·(Σ_{i∈S} f_i) ≡ 0`, on bipartite quadratic parts (`e₂=X₁X₂`),
+   confirming the `S₂`-symmetry origin and `N`-independence — so existence is
+   structural; only the **uniqueness count** (exactly 1, not 2+) remains to
+   be made fully rigorous. The earlier "random ⇒ generic position" framing
+   was *refuted* by EXP-I's control and is dropped.
    (b) *Expansion (legacy):* the Ben-Sasson–Wigderson / Mikša–Nordström
    route via immunity; retained only as a fallback, since spectral `γ` does
    not track `D*`. **If the bounded-defect lemma is proved, the
@@ -549,7 +586,10 @@ map.
    a provable bounded-syzygy statement. Kill conditions: if Random `Δ_low`
    plateaued `> 0`, OR if the raw syzygy count *grew* with `N` (so the defect
    were not `O(1)`), the route would weaken. Neither happens — the count is
-   pinned at 1.
+   pinned at 1. *EXP-J (iter. 10):* the syzygy is identified as
+   `l*(sum_{i in S} f_i) = 0` for a single X1<->X2-symmetric linear form `l`
+   on bipartite quadratic parts (`e2=X1X2`) — verified on 48 instances over 4
+   seeds; an added kill condition (`l` not symmetric) also does not trigger.
 
 Each is cheap: (1), (2), (4) run in minutes on a laptop at `2n' ≤ 14`;
 (3) is pure linear algebra at any `n`; (5) runs to `2n'=20` in seconds

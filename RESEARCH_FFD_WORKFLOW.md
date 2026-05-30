@@ -195,6 +195,40 @@ attack a different prediction.
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
 
+### 2026-05-30 — iteration 10 (EXP-J — the single syzygy IDENTIFIED: a symmetric annihilator)
+
+- Task: extract and identify the one degree-3 syzygy whose existence EXP-I
+  established — the remaining analytical step of the bounded-defect lemma.
+- Method (`examples/ffd_syzygy.rs`): since the generic linear-syzygy space is
+  0-dimensional here (`n(N+1) ≈ N²` multiplied rows ≪ `cols(3) ≈ N³/6`, and
+  the random control has full row rank), the Semaev system's single excess
+  syzygy means its linear-syzygy space is **exactly 1-dimensional**. Compute
+  it as the kernel of the labelled degree-3 Macaulay matrix (columns =
+  (equation `i`, multiplier `∈ {1, x_k}`)), decode into per-equation linear
+  forms `ℓ_i`, and analyse.
+- **Result — the syzygy is identified.** On all 48 instances (4 sizes ×
+  3 instances × 4 seeds):
+  - dim `= 1` (unique), and **all participating `ℓ_i` are the *same* linear
+    form `ℓ`** → the syzygy is `ℓ·(Σ_{i∈S} f_i) ≡ 0`: one linear form
+    annihilating one combination of equations.
+  - **`ℓ` is `X₁↔X₂`-symmetric** (its `X₁`- and `X₂`-coordinate supports are
+    equal) → the fingerprint of `S₃`'s `S₂` symmetry.
+  - **quadratic parts are bipartite** (zero within-half products): they
+    depend only on `e₂=X₁X₂`, since `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` has
+    quadratic part `x₃e₂ + e₂²`.
+  - `ℓ·F_S ≡ 0` re-verified independently — all `true`.
+- Significance: the bounded-defect lemma's syzygy is no longer mysterious. It
+  is a symmetric linear form times a bipartite equation-combination,
+  structurally forced by the `S₂` symmetry and `N`-independent. **Existence**
+  is now structural; only the **uniqueness count** (exactly 1) remains to be
+  proved fully rigorously. The defensive theorem `D* = Θ(n)` for generic
+  bases rests on this one well-understood relation.
+- Proposal §3.4 extended with the identification; §4·5–6 and §6·5 updated.
+  Snapshot `experiments/ffd_syzygy.json`.
+- Next: a rigorous existence+uniqueness proof of the symmetric syzygy from
+  `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` and the bipartite/symmetric structure.
+- Commit: (this commit, branch `claude/ffd-genericity-lemma`)
+
 ### 2026-05-30 — iteration 9 (EXP-I — the bounded-defect lemma; genericity mechanism refuted)
 
 - Task: attack the genericity lemma (`Δ_low = o(1)` for a random factor
