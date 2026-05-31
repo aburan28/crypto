@@ -877,3 +877,107 @@ The Rosenhain formula requires F_{p³} extension (since x³+7 has no roots mod p
 ### Commits made
 
 - `7d38bc9` autolab 2026-05-30: Howe 15-pair check — 5/15 glueable pairs confirmed
+
+---
+
+## 2026-05-31 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa formula). Priority 1 (P-521) is closed. Priority 3 (Howe 15-pair) is completed. CHLRS was last touched 2026-05-29 with root-cause diagnosed (Rosenhain blocked because x^3+7 irreducible over F_p_secp). Next step: attempt F_{p^3} Rosenhain construction and verify whether the naive cover y^2=(x^3+7)(x^3+189) is the Howe-glued curve.
+
+### Work done
+
+- Installed PARI/GP 2.15.4 (not present at session start).
+- Ran `igusa_clebsch_complete.gp` to confirm baseline Igusa quadruple of naive cover:
+  I2=-87024, I4=19302628212, I6=-636669361341720, I10=46374105383717408990784.
+- Diagnosed PARI 2.15.4 new syntax constraint: `{ }` INSIDE function bodies causes "embedded braces not implemented" error. Previously-known constraint was forprime/for multiline bodies needing `{ }`; new constraint is `{ }` cannot be nested inside function `{ }` bodies.
+- Wrote and debugged `chlrs_fp3_rosenhain.gp` (three attempts, working on attempt 3):
+  - Part 1: toy prime p=19 where x^3+7 splits over F_p.
+  - Part 2: proxy prime p=43 where x^3+7 is irreducible, H1+H2+H3 all satisfied.
+  - Part 3: F_{p^3} Rosenhain analysis.
+- Ran `cargo test --test curve_audit` — 5/5 pass, no regressions.
+
+### Findings
+
+**Part 1 (toy_p=19, x^3+7 splits completely over F_p):**
+
+| Field | Value |
+|---|---|
+| p | 19 (p mod 3 = 1) |
+| Roots of x^3+7 mod p | [10, 13, 15] |
+| ω = rts[2]/rts[1] mod p | 7 (ω^3 = 1 ✓) |
+| E1 (b=7) | #E=12, trace=8 |
+| E2 (quadtwist b=18) | #E=28, trace=-8 |
+| H1/H2/H3 | ✓ / ✓ / gcd=4 (H3 fails) |
+| Rosenhain lambdas | l1=15, l2=17, l3=8 |
+| Char poly Jac(naive cover) | x^4 − 26x^2 + 361 |
+| Expected (Frob_E1)(Frob_E2) | (T^2−8T+19)(T^2+8T+19) = T^4−26T^2+361 |
+| **Match** | **YES** ✓ |
+
+Even with H3 failing (gcd=4), the naive cover's Jacobian equals E1×E2 when all 2-torsion is F_p-rational.
+
+**Part 2 (proxy_p=43, x^3+7 irreducible, H3 satisfied):**
+
+| Field | Value |
+|---|---|
+| p | 43 (p mod 3 = 1) |
+| x^3+7 roots mod p | 0 (irreducible) |
+| E1 (b=7) | #E=31 (prime), trace=13 |
+| E2 (b_twist=13) | #E=57, trace=-13 |
+| H1/H2/H3 | ✓ / ✓ / gcd=1 ✓ |
+| Char poly Jac(naive cover) | x^4 − 6x^3 + 55x^2 − 258x + 1849 |
+| Expected (Frob_E1)(Frob_E2) | x^4 − 83x^2 + 1849 |
+| **Match** | **NO** ✗ |
+
+The naive cover y^2=(x^3+7)(x^3+13) over F_43 does NOT have Jacobian ~ E1×E2, even though all Howe conditions are satisfied.
+
+**Part 3 (F_{p^3} Rosenhain — proxy_p=43):**
+
+- F_{p^3} = F_p[w]/(w^3+7). Effective branch point coordinates (after factoring out w):
+  c = [1, ζ₃, ζ₃², d, d·ζ₃, d·ζ₃²] = [1, 6, 36, 2, 12, 29] ∈ F_43.
+- All Mobius cross-ratios (lambdas) are F_p-rational (degree 0 in w) for EVERY choice of Mobius base point ordering.
+- Exhaustive search over all 120 orderings (a→0, b→∞, e→1): **NONE** give char poly = x^4−83x^2+1849.
+
+**Negative result verified by exhaustive search: no cross-ratio of the F_{p^3} 2-torsion branch points gives the correct Howe-glued curve.**
+
+**CHLRS Implication (corrects prior claim):**
+
+The Igusa quadruple (I2=-87024, I4=19302628212, I6=-636669361341720, I10=46374105383717408990784) computed in previous sessions is for the **NAIVE COVER** y^2=(x^3+7)(x^3+189), which is NOT the Howe-glued curve when x^3+7 is irreducible over F_p. The actual Howe-glued curve (existence guaranteed by Howe's theorem since H1+H2+H3 hold for secp256k1 with n_secp prime) has DIFFERENT Igusa invariants.
+
+**Structural explanation:**
+
+When x^3+7 is irreducible over F_p (like secp256k1), the Galois orbit of the 2-torsion {α, ζ₃α, ζ₃²α} is a single cycle of length 3. The (2,2)-isogeny kernel in E1[2] × E2[2] is a Galois-STABLE Lagrangian, but it is NOT determined by simply pairing branch points from E1 with branch points from E2 via cross-ratios. The correct kernel corresponds to a specific element of the isogeny class, computable via:
+- (A) The CHLRS explicit formula (requires modular-form machinery beyond PARI stdlib), or
+- (B) The Mestre algorithm (implemented in SageMath), or
+- (C) The IGUSA-CLEBSCH reconstruction from the correct Siegel modular form.
+
+**PARI 2.15.4 bug — new constraint documented:**
+
+Constraint: `{ }` inside function definitions causes "embedded braces not implemented" error. Previous workaround (using `{ }` for top-level forprime/for bodies) does NOT extend to nested braces inside functions.
+
+Workaround for functions:
+- Use `while(cond, expr)` instead of `for(v=a,b, { body })` for early-exit loops
+- Keep all expressions inside function bodies to single-expression form (no `{ }`)
+- For complex conditionals: define as standalone functions, call them
+
+Workaround for top-level:
+- Use flat nested `for(a=1,N, for(b=1,N, for(c=1,N, expr1; expr2; ...)))` with single-expression chaining via `;`
+
+### Next step proposal
+
+**Priority 2 continuation — CHLRS Howe-glued curve construction:**
+
+The correct next step is to find the EXPLICIT equation of the Howe-glued curve over F_43 (and by analogy for secp256k1). Three approaches:
+
+1. **Brute-force over small proxy (p=43)**: Enumerate genus-2 curves y^2=x^6+... over F_43 and search for one with char poly x^4-83x^2+1849. The search space is p^5 ≈ 10^8, too large for naive search but tractable with filtering (e.g., require J_2=specific value).
+
+2. **Mestre algorithm**: Port the Mestre curve-from-Igusa-invariants algorithm to PARI. Reference: SageMath `mestre.py`. This is ~100 lines of algebra.
+
+3. **Verify p=43 via a different method**: Use PARI's `genus2red` or look for (2,2)-isogeny neighbors of E1×E2 in the isogeny graph. PARI's `ellisogenyapply` or similar.
+
+**Alternative (GLV-HNP Phase 2):** Implement the actual LLL lattice for the GLV-aware attack on the toy 32-bit curve. The `glv_hnp_phase2_toy.gp` script establishes the equation structure; the LLL implementation is the next concrete step.
+
+### Commits made
+
+none yet (appending to log before committing)
