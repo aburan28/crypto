@@ -272,39 +272,87 @@ whole program is after — a *generic* lower bound `D* = Θ(n)`. The bridge is:
 The implication step is standard: a sequence that matches the semi-regular
 Hilbert function through low degree has its degree of regularity at the
 generic value, which for `m = Θ(N)` quadratics in `N` Boolean variables is
-`Θ(N)` (Bardet–Faugère–Salvy). The *only* unproven input is the antecedent:
+`Θ(N)` (Bardet–Faugère–Salvy). The *only* unproven input is the antecedent
+`Δ_low(Σ_N) = o(1)`.
 
-> **Genericity lemma (open, the crux).** For a uniformly random
-> `F_2`-linear factor base `V` of dimension `n'`, `Δ_low(Σ_N) = o(1)` with
-> high probability.
+**What the antecedent is — and is *not*.** The natural first guess was a
+**genericity lemma**: that a random `F_2`-linear restriction puts the
+low-degree part of `Σ_N` in *generic position*, so its Hilbert function is
+the semi-regular one. **EXP-I refutes that mechanism.** Against a control of
+`m` uniformly random `F_2`-quadratics in the same `N` variables — which has
+`Δ_low = 0` *exactly* (random systems are semi-regular at low degree, as
+theory predicts) — the random-restricted Semaev system keeps a **nonzero**
+defect. So the restriction is *not* generic; residual Semaev structure
+survives it. The antecedent holds for a different, sharper reason:
 
-This is the same "immunity" obstacle as before, but now stated for the
-*Hilbert defect* rather than graph expansion — and it is the natural place
-to use the **algebraic independence of the Semaev coefficients**: a random
-`F_2`-linear restriction should put the degree-`≤ D_low` part of `Σ_N` in
-generic position, so its low-degree Hilbert function is the semi-regular one
-whp. Proving this is future work; what the experiments establish is that the
-antecedent **holds empirically, with room to spare.**
-
-> **Evidence (EXP-H, `examples/ffd_defect_scaling.rs`, snapshot
-> `experiments/ffd_defect_scaling.json`).** In the critical regime `2n'=n`,
-> the normalized early defect of the **Random** (generic) family decays
-> polynomially to zero,
->
+> **Bounded-defect lemma (the corrected antecedent).** The random-restricted
+> descended Semaev system carries a **bounded** number of excess low-degree
+> syzygies, independent of `N`. Empirically (EXP-I) it is **exactly one**
+> degree-3 syzygy for all `2n' ≥ 12` (and `δ(2)=0`), robust across seeds and
+> targets. Hence
 > ```
->    Δ_low(Random)  ≈  a · (2n')^{−c},     c ≈ 4.3   (4.2–4.5 over seeds),
+>    Δ_low(Σ_N)  =  Σδ / cols(3)  =  1 / cols(3)  =  Θ(N^{−3})  →  0,
 > ```
->
-> measured cleanly across `2n' ∈ {6,…,20}` (`Δ_low`: 0.155 → 0.0007). The
-> **Subfield** family stays bounded away from 0 over the same range
-> (0.23 → 0.048), so the ratio `Δ_low(Subfield)/Δ_low(Random)` *diverges*,
-> 6.7 → 67. The generic defect vanishing — and the structured defect
-> persisting — is exactly the two-sided shape the conditional theorem needs:
-> generic ⇒ hard, subfield ⇒ easy.
+> which is the antecedent, with an *exact* rate (matching the measured
+> `Δ_low`: 0.00334 at `N=12` → 0.00074 at `N=20`, i.e. `1/cols(3)` to the
+> digit). The remaining analytical task is no longer probabilistic
+> genericity but a concrete algebraic one — and EXP-J now **identifies the
+> syzygy**.
 
-So the lower-bound route reduces to a single, sharply-stated, empirically
-well-supported lemma about the low-degree genericity of random restrictions
-— a much more tractable target than a PC-degree expansion bound on a
+**The syzygy, identified (EXP-J).** Extracting the (1-dimensional)
+linear-syzygy space of the descended system reveals a single, sharply
+structured relation. The unique syzygy is
+
+```
+   ℓ · ( Σ_{i∈S} f_i )  ≡  0        (mod x_k² = x_k),
+```
+
+i.e. **one** linear form `ℓ` annihilating **one** `F_2`-combination
+`F_S = Σ_{i∈S} f_i` of the equations (all participating `ℓ_i` are *equal* to
+the same `ℓ`). Two structural facts pin its origin, verified on every one of
+48 random instances over `2n' ∈ {12,…,18}` and 4 seeds:
+
+1. **`ℓ` is `X₁↔X₂`-symmetric** — its `X₁`-coordinate support equals its
+   `X₂`-coordinate support. So `ℓ` is a linear form in the *symmetric*
+   variables, which is exactly the fingerprint of the `S₂` symmetry of `S₃`.
+2. **The quadratic parts of all equations are bipartite** (zero
+   `X₁ᵢX₁ⱼ` and `X₂ᵢX₂ⱼ` terms): they depend only on `e₂ = X₁X₂`, because
+   `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` (with `e₁=X₁+X₂`, `e₂=X₁X₂`) has quadratic
+   part `x₃·e₂ + e₂²`, a function of `e₂` alone.
+
+This converts the lemma to a concrete, basis-free claim: *a symmetric linear
+form times a bipartite combination of the equations vanishes at degree 3*,
+and there is exactly one such relation. **Existence** follows from the `S₂`
+structure (1)+(2) — the symmetric/bipartite shape forces the cubic relation;
+**uniqueness** (that the count is exactly 1, not 2+) is the one piece still
+to be made fully rigorous, though EXP-I/EXP-J pin it at 1 across all
+measured `N` and seeds. With the syzygy in hand the bounded-defect lemma —
+and hence the defensive theorem `D* = Θ(n)` for generic bases — rests on a
+single, well-understood algebraic relation rather than a genericity
+heuristic.
+
+> **Evidence.**
+> - *EXP-J* (`examples/ffd_syzygy.rs`, `experiments/ffd_syzygy.json`):
+>   linear-syzygy dim `= 1`; `ℓ` identical across equations; `ℓ` is
+>   `X₁↔X₂`-symmetric; `ℓ·F_S ≡ 0` verified independently; quadratic parts
+>   bipartite — all `true` on 48 instances × 4 seeds.
+> - *EXP-I* (`examples/ffd_genericity.rs`, `experiments/ffd_genericity.json`):
+>   raw Semaev defect `Σδ_low = 1.00` for every `2n' ∈ {12,…,20}` over 5
+>   seeds, vs control `= 0`; `Δ_low = 1/cols(3)` to the digit.
+> - *EXP-H* (`examples/ffd_defect_scaling.rs`): the normalized defect decays
+>   to 0 across `2n' ∈ {6,…,20}` (0.155 → 0.0007); the small-`N` points
+>   (`2n' ≤ 10`, where `Σδ` is still 2–7) make a power-law fit read
+>   `≈ (2n')^{−4.3}`, but the *asymptotic* rate is the cleaner `N^{−3}` of
+>   the bounded-defect lemma. The **Subfield** family instead keeps a defect
+>   that decays far slower (0.23 → 0.048), so `Δ_low(Subfield)/Δ_low(Random)`
+>   *diverges* 6.7 → 67 — the two-sided shape the theorem needs: generic ⇒
+>   hard, subfield ⇒ easy.
+
+So the lower-bound route reduces to a single, sharply-stated lemma —
+*"the descended Semaev system has `O(1)` low-degree syzygies"* — that is
+**provable in principle** (exhibit the one cubic relation) rather than a
+probabilistic genericity claim, and is supported to the digit by EXP-I. This
+is a much more tractable target than a PC-degree expansion bound on a
 globally-coupled quadratic system.
 
 ---
@@ -427,26 +475,33 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
    ρ_s = −0.79, critical-regime slope ≈ −7.6 (§3.3), seed-robust. This is
    the working replacement for the expansion study (item 3).
 
-5. **Defect-scaling study** — *(implemented:
-   `examples/ffd_defect_scaling.rs` (EXP-H), snapshot
-   `experiments/ffd_defect_scaling.json`.)* Measures `Δ_low(2n')` for the
-   Subfield vs Random families in the critical regime to `2n'=20` (cheap:
-   degree-≤3 ranks only). **Outcome:** Random `Δ_low ≈ (2n')^{−4.3} → 0`
-   while Subfield stays bounded — the empirical antecedent of the §3.4
-   conditional theorem (the generic defect vanishes; the structured one
-   persists).
+5. **Defect-scaling, genericity & syzygy studies** — *(implemented:
+   `examples/ffd_defect_scaling.rs` (EXP-H), `examples/ffd_genericity.rs`
+   (EXP-I), `examples/ffd_syzygy.rs` (EXP-J), snapshots in `experiments/`.)*
+   EXP-H: `Δ_low(2n') → 0` for the Random family to `2n'=20`, Subfield
+   bounded. EXP-I: against a random-quadratic control (defect 0), the
+   random-restricted Semaev keeps **exactly one** degree-3 syzygy for all
+   `2n' ≥ 12` — the **bounded-defect lemma** (§3.4), pinning `Δ_low =
+   1/cols(3) = Θ(N^{−3})`. EXP-J **identifies** that syzygy: a single
+   `X₁↔X₂`-symmetric linear form `ℓ` with `ℓ·(Σ_{i∈S} f_i) ≡ 0`, on bipartite
+   quadratic parts (`e₂=X₁X₂`) — verified on 48 instances × 4 seeds. All are
+   degree-≤3 linear algebra (seconds at `2n'=20`).
 
-6. **Lower-bound attempt** — the route is now §3.4 (defect vanishing).
+6. **Lower-bound attempt** — the route is §3.4 (bounded low-degree defect).
    (a) *Algebraic (favoured):* the conditional theorem `Δ_low = o(1) ⇒ D* =
-   Θ(n)` is in hand; the one open input is the **genericity lemma**
-   (`Δ_low = o(1)` whp for a random `F_2`-linear factor base, via algebraic
-   independence of the Semaev coefficients), for which EXP-H (item 5) is
-   strong evidence (`(2n')^{−4.3}` decay).
+   Θ(n)` is in hand, and the antecedent is now the concrete **bounded-defect
+   lemma** rather than a probabilistic genericity claim. EXP-J has
+   **exhibited** the syzygy — a single `X₁↔X₂`-symmetric linear form `ℓ` with
+   `ℓ·(Σ_{i∈S} f_i) ≡ 0`, on bipartite quadratic parts (`e₂=X₁X₂`),
+   confirming the `S₂`-symmetry origin and `N`-independence — so existence is
+   structural; only the **uniqueness count** (exactly 1, not 2+) remains to
+   be made fully rigorous. The earlier "random ⇒ generic position" framing
+   was *refuted* by EXP-I's control and is dropped.
    (b) *Expansion (legacy):* the Ben-Sasson–Wigderson / Mikša–Nordström
    route via immunity; retained only as a fallback, since spectral `γ` does
-   not track `D*`. **If the genericity lemma holds, the first-fall-degree
-   assumption is provably false at cryptographic scale** — a defensive
-   theorem, not just a heuristic.
+   not track `D*`. **If the bounded-defect lemma is proved, the
+   first-fall-degree assumption is provably false at cryptographic scale** —
+   a defensive theorem, not just a heuristic.
 
 ---
 
@@ -521,12 +576,20 @@ map.
 
 5. **(The lower-bound antecedent — §3.4.)** For the generic (Random)
    factor base in the critical regime, the early defect must **vanish** as
-   `2n' → ∞`. **Status: SUPPORTED (workflow iteration 8, EXP-H).** Random
-   `Δ_low ≈ (2n')^{−4.3} → 0` across `2n' ∈ {6,…,20}`, while Subfield stays
-   bounded (ratio diverges 6.7 → 67). Kill condition: if Random `Δ_low`
-   instead plateaued at a constant `> 0`, generic systems would *not* be
-   asymptotically semi-regular and the defensive-theorem route would
-   collapse. It does not plateau.
+   `2n' → ∞`. **Status: SUPPORTED, and sharpened (workflow iters. 8–9).**
+   *EXP-H:* `Δ_low → 0` across `2n' ∈ {6,…,20}`. *EXP-I (the sharpening):*
+   against a random-`F_2`-quadratic control (which has `Δ_low = 0` exactly),
+   the random-restricted Semaev keeps a **bounded** raw defect — **exactly
+   one** degree-3 syzygy for every `2n' ≥ 12`, over 5 seeds — so
+   `Δ_low = 1/cols(3) = Θ(N^{−3})`. This *refuted* the "random ⇒ generic
+   position" mechanism (generic = 0 defect, Semaev = 1) and replaced it with
+   a provable bounded-syzygy statement. Kill conditions: if Random `Δ_low`
+   plateaued `> 0`, OR if the raw syzygy count *grew* with `N` (so the defect
+   were not `O(1)`), the route would weaken. Neither happens — the count is
+   pinned at 1. *EXP-J (iter. 10):* the syzygy is identified as
+   `l*(sum_{i in S} f_i) = 0` for a single X1<->X2-symmetric linear form `l`
+   on bipartite quadratic parts (`e2=X1X2`) — verified on 48 instances over 4
+   seeds; an added kill condition (`l` not symmetric) also does not trigger.
 
 Each is cheap: (1), (2), (4) run in minutes on a laptop at `2n' ≤ 14`;
 (3) is pure linear algebra at any `n`; (5) runs to `2n'=20` in seconds

@@ -195,6 +195,76 @@ attack a different prediction.
 > Commit.* Keep entries short; the JSON snapshots in `experiments/` hold
 > the numbers.
 
+### 2026-05-30 — iteration 10 (EXP-J — the single syzygy IDENTIFIED: a symmetric annihilator)
+
+- Task: extract and identify the one degree-3 syzygy whose existence EXP-I
+  established — the remaining analytical step of the bounded-defect lemma.
+- Method (`examples/ffd_syzygy.rs`): since the generic linear-syzygy space is
+  0-dimensional here (`n(N+1) ≈ N²` multiplied rows ≪ `cols(3) ≈ N³/6`, and
+  the random control has full row rank), the Semaev system's single excess
+  syzygy means its linear-syzygy space is **exactly 1-dimensional**. Compute
+  it as the kernel of the labelled degree-3 Macaulay matrix (columns =
+  (equation `i`, multiplier `∈ {1, x_k}`)), decode into per-equation linear
+  forms `ℓ_i`, and analyse.
+- **Result — the syzygy is identified.** On all 48 instances (4 sizes ×
+  3 instances × 4 seeds):
+  - dim `= 1` (unique), and **all participating `ℓ_i` are the *same* linear
+    form `ℓ`** → the syzygy is `ℓ·(Σ_{i∈S} f_i) ≡ 0`: one linear form
+    annihilating one combination of equations.
+  - **`ℓ` is `X₁↔X₂`-symmetric** (its `X₁`- and `X₂`-coordinate supports are
+    equal) → the fingerprint of `S₃`'s `S₂` symmetry.
+  - **quadratic parts are bipartite** (zero within-half products): they
+    depend only on `e₂=X₁X₂`, since `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` has
+    quadratic part `x₃e₂ + e₂²`.
+  - `ℓ·F_S ≡ 0` re-verified independently — all `true`.
+- Significance: the bounded-defect lemma's syzygy is no longer mysterious. It
+  is a symmetric linear form times a bipartite equation-combination,
+  structurally forced by the `S₂` symmetry and `N`-independent. **Existence**
+  is now structural; only the **uniqueness count** (exactly 1) remains to be
+  proved fully rigorously. The defensive theorem `D* = Θ(n)` for generic
+  bases rests on this one well-understood relation.
+- Proposal §3.4 extended with the identification; §4·5–6 and §6·5 updated.
+  Snapshot `experiments/ffd_syzygy.json`.
+- Next: a rigorous existence+uniqueness proof of the symmetric syzygy from
+  `S₃ = e₁²x₃² + e₂x₃ + e₂² + b` and the bipartite/symmetric structure.
+- Commit: (this commit, branch `claude/ffd-genericity-lemma`)
+
+### 2026-05-30 — iteration 9 (EXP-I — the bounded-defect lemma; genericity mechanism refuted)
+
+- Task: attack the genericity lemma (`Δ_low = o(1)` for a random factor
+  base), the one open input of the §3.4 conditional theorem. Strategy: test
+  the *mechanism* I had proposed — "a random `F_2`-linear restriction puts
+  the low-degree part in generic position" — by comparing the
+  random-restricted Semaev `Δ_low` against a **control** of `m` uniformly
+  random `F_2`-quadratics of the same shape (`examples/ffd_genericity.rs`).
+- **Result (mechanism REFUTED, lemma SHARPENED).** The control has
+  `Δ_low = 0` *exactly* (random systems are semi-regular at low degree, as
+  theory predicts) — but the random-restricted Semaev keeps a **nonzero**
+  defect. So the restriction is **not** generic; "random ⇒ generic" is
+  false. Looking at the *raw* (un-normalized) defect explained why and gave
+  something better: the Semaev excess is a **bounded** count —
+  **exactly one** degree-3 syzygy (`δ(2)=0, δ(3)=1`) for *every* `2n' ∈
+  {12,…,20}`, pinned at 1.00 across 5 seeds. The control is 0.
+- Consequence: `Δ_low = Σδ/cols(3) = 1/cols(3) = Θ(N^{−3}) → 0`, matching
+  the measured normalized defect *to the digit* (0.00334 at N=12 → 0.00074
+  at N=20). This corrects EXP-H's `(2n')^{−4.3}` fit (a small-`N` artifact;
+  the asymptotic rate is `N^{−3}`).
+- **Significance.** The lower-bound antecedent is no longer a probabilistic
+  genericity claim but a concrete, provable-in-principle **bounded-defect
+  lemma**: *the descended Semaev system has `O(1)` low-degree syzygies,
+  `N`-independent.* The remaining analytical step is to exhibit the single
+  degree-3 syzygy and prove uniqueness — almost certainly from the
+  `S₂`-symmetry / single-generator structure of `S₃` (it is `N`-independent,
+  so structural, not random).
+- Proposal §3.4 rewritten around the bounded-defect lemma; §4·5–6 and §6
+  prediction 5 updated; the refuted genericity mechanism dropped.
+- Snapshot: `experiments/ffd_genericity.json` (schema v2). Ledger: P3-alg
+  unchanged; lower-bound antecedent sharpened to a provable target.
+- Next: extract the actual degree-3 syzygy (left-kernel of the degree-3
+  Macaulay matrix, labelled by (multiplier, equation)) and identify its
+  algebraic origin in `S₃`.
+- Commit: (this commit, branch `claude/ffd-genericity-lemma`)
+
 ### 2026-05-29 — iteration 8 (sparse backend [negative], + EXP-H defect scaling → lower-bound evidence)
 
 - Two tasks ("both, reach first"): a sparse-F2 backend to push `2n' ≳ 16`,
