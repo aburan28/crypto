@@ -980,4 +980,4 @@ The correct next step is to find the EXPLICIT equation of the Howe-glued curve o
 
 ### Commits made
 
-none yet (appending to log before committing)
+- `623ddca` autolab 2026-05-31: CHLRS naive-cover ≠ Howe-glued when 2-torsion irreducible
