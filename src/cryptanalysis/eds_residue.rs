@@ -1281,6 +1281,48 @@ pub fn reduce_and_analyze(seq: &[BigInt], p: u64) -> Option<BridgeReduction> {
     })
 }
 
+// ── intrinsic multiplier characters (program item 2) ───────────────────────
+//
+// The §3 χ-period and §4.5 reflection law are governed by the two sign bits
+// (χ(A), χ(B)) of the EDS shift multiplier W(n+r) = A·Bⁿ·W(n).  These bits
+// are not opaque: from the extraction B = W(r+2)/(W(2)·W(r+1)) and
+// A = W(r+1)/B = W(2)·W(r+1)²/W(r+2), and because W(r+1)² is a square,
+//
+//     χ(A) = χ( W(2)·W(r+2) ),
+//     χ(B) = χ( W(2)·W(r+1)·W(r+2) ).                                  (CF)
+//
+// There is also the structural identity (derived from Ward's relation at the
+// rank of apparition, using ψ_r(P)=0)
+//
+//     Bʳ = − W(r+1)·W(r−1),                                            (BR)
+//
+// which for *odd* r collapses (CF) to the curve-near-intrinsic form
+// χ(B) = χ(−1)·χ(W(r+1))·χ(W(r−1)),  χ(A) = χ(−1)·χ(W(r−1)).
+// The remaining genuinely-open step — expressing these without computing the
+// O(r) sequence at all — runs through B² = −W(r+1)/W(r−1), conjecturally a
+// self-pairing (Tate/Frey–Rück) value; see RESEARCH_EDS_RESIDUE.md §5.5.
+
+/// Closed-form multiplier characters `(χ(A), χ(B))` computed directly from the
+/// sequence values `W(2), W(r+1), W(r+2)` via `(CF)` — no inversion to recover
+/// `A, B`.  `None` if `P` has no usable order.
+pub fn multiplier_chars_closed_form(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    px: &BigUint,
+    py: &BigUint,
+) -> Option<(i8, i8)> {
+    let pu: u64 = p.clone().try_into().ok()?;
+    let r = point_order(px, py, a, p, pu + 2)? as usize;
+    let w = eds_sequence(p, a, b, px, py, r + 3);
+    let w2 = &w[2];
+    let wr1 = &w[r + 1];
+    let wr2 = &w[r + 2];
+    let chi_a = legendre(&((w2 * wr2) % p), p);
+    let chi_b = legendre(&((&((w2 * wr1) % p) * wr2) % p), p);
+    Some((chi_a, chi_b))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1617,6 +1659,50 @@ mod tests {
             );
             let j = br.chi_period / br.order;
             assert!(j == 1 || j == 2, "χ-period must be r or 2r, got j={} (p={})", j, p);
+        }
+    }
+
+    #[test]
+    fn multiplier_chars_closed_form_matches_extraction() {
+        // (CF): χ(A)=χ(W2·W(r+2)), χ(B)=χ(W2·W(r+1)·W(r+2)) must agree with
+        // the characters of the A,B extracted by inversion in analyze().
+        for (pp, aa, bb) in [
+            (1009u32, 37u32, 2u32),
+            (1013, 5, 7),
+            (2003, 11, 19),
+            (4099, 5, 3),
+            (2017, 7, 5),
+        ] {
+            let (p, a, b) = (BigUint::from(pp), BigUint::from(aa), BigUint::from(bb));
+            let (px, py, _) = find_toy_point(&p, &a, &b, 1, 7).unwrap();
+            let rep = analyze(&p, &a, &b, &px, &py);
+            let (ca, cb) = multiplier_chars_closed_form(&p, &a, &b, &px, &py).unwrap();
+            assert_eq!((ca, cb), (rep.chi_a, rep.chi_b), "CF mismatch at p={}", pp);
+        }
+    }
+
+    #[test]
+    fn structural_identity_b_pow_r() {
+        // (BR): Bʳ = −W(r+1)·W(r−1) (mod p), and the extraction relations
+        // A·B = W(r+1),  B = W(r+2)/(W(2)·W(r+1)).
+        for (pp, aa, bb) in [(1009u32, 37u32, 2u32), (2003, 11, 19), (4099, 5, 3)] {
+            let (p, a, b) = (BigUint::from(pp), BigUint::from(aa), BigUint::from(bb));
+            let (px, py, _) = find_toy_point(&p, &a, &b, 1, 7).unwrap();
+            let rep = analyze(&p, &a, &b, &px, &py);
+            let r = rep.order as usize;
+            let w = eds_sequence(&p, &a, &b, &px, &py, r + 3);
+            // A·B = W(r+1)
+            assert_eq!((&rep.mult_a * &rep.mult_b) % &p, w[r + 1], "AB=W(r+1) p={}", pp);
+            // Bʳ = −W(r+1)·W(r−1)
+            let bpow = rep.mult_b.modpow(&BigUint::from(rep.order), &p);
+            let rhs = m_sub(&BigUint::zero(), &((&w[r + 1] * &w[r - 1]) % &p), &p);
+            assert_eq!(bpow, rhs, "Bʳ=−W(r+1)W(r−1) p={}", pp);
+            // For odd r: χ(B) = χ(−1)·χ(W(r+1))·χ(W(r−1)).
+            if r % 2 == 1 {
+                let chi_neg1 = legendre(&(&p - BigUint::from(1u32)), &p);
+                let pred = chi_neg1 * legendre(&w[r + 1], &p) * legendre(&w[r - 1], &p);
+                assert_eq!(pred, rep.chi_b, "odd-r χ(B) form p={}", pp);
+            }
         }
     }
 

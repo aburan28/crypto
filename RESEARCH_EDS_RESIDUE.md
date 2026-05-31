@@ -1,7 +1,7 @@
 # Elliptic divisibility sequences, elliptic nets, and the EDS-Residue handle on the ECDLP
 
-**Module:** `src/cryptanalysis/eds_residue.rs`
-**Demo:** `examples/eds_residue_demo.rs` (`cargo run --release --example eds_residue_demo`)
+**Modules:** `src/cryptanalysis/eds_residue.rs`, `eds_tate.rs` (§5.6), `eds_net.rs` (§5.3b), `eds_mov.rs` (§5.10)
+**Demos:** `examples/eds_residue_demo.rs`, `eds_census.rs`, `eds_localisation.rs`, `eds_bridge.rs`, `eds_tate_demo.rs`, `eds_net_demo.rs`, `eds_mov_demo.rs`
 **Provenance:** Direct response to the research thread *"the genuinely
 underexplored above-generic handle over the ECDLP is the elliptic
 divisibility sequence / elliptic net structure (Shipsey, Stange,
@@ -334,15 +334,12 @@ Falsifiable, ordered by cost:
    `p ≈ 2³²` to confirm the `1/√m` extrapolation (the u64 path supports it;
    cost-bounded by `min_order`/`cap`).
 
-2. **Multiplier-character law in general.** Prove the §3 dichotomy for all
-   `r` (the `r`-odd case has a different parity term) and express
-   `(χ(A), χ(B))` intrinsically — conjecture: in terms of the quadratic
-   character of `B = (the Weierstrass-`℘`′-type ratio)` and ultimately the
-   2-torsion / the Tate pairing `⟨P,P⟩`. This connects EDS-Residue back to
-   EDS-Association and the pairing.
+2. **Multiplier-character law. DONE.** Closed forms `(CF)` + structural
+   identity `(BR)` (§5.5), and the sequence-free **Tate-pairing bridge**
+   `χ(B) = χ(⟨P,P⟩_r)` confirmed in the nondegenerate regime (§5.6).
 
 3. **χ-localisation: how many residue bits identify the discrete log?**
-   **DONE in rank-1 (§5.3a); rank-2 net deferred (§5.3b).**
+   **DONE: rank-1 (§5.3a) and rank-2 net (§5.3b, built without Stange's seeds).**
 
 ### 5.3a Rank-1 χ-localisation via the decimation identity
 
@@ -397,24 +394,52 @@ extracting `k` from them costs a full search. (Tests:
 `decimation_identity_holds`, `localisation_pins_the_true_k`,
 `localisation_sweep_sign_dichotomy_and_log_window`.)
 
-### 5.3b Genuine 2-D net (deferred)
+### 5.3b Genuine 2-D net — built without Stange's seeds, and the verdict
 
-The remaining piece — does the Legendre pattern of the *canonical 2-D net*
-`χ(W(a,b))` localise `Λ_k` cheaper than `O(√m)`? — needs the net's mixed
-initial block (`W(2,1)`, `W(1,2)`, `W(2,−1)`; Props 6.3/6.4 of Stange,
-arXiv:0710.1316). The fundamental recurrence
-`W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²` is in hand and
-the axes are the 1-D EDS this module validates, but the recurrence alone
-underdetermines the mixed seeds, and they could not be retrieved here
-(arXiv/ePrint returned HTTP 403). It is left unimplemented rather than
-guessed — a wrong-but-zero-preserving gauge would pass a zero check yet
-report a meaningless `χ`-pattern. **Certification plan once the seeds are
-in hand:** (i) match the recurrence on both axes against the 1-D EDS (pins
-the gauge), (ii) reproduce every net zero against `[a]P+[b]Q=O`, (iii)
-match the mixed seeds to their closed forms. Note the EDS-Association ↔
-Tate-pairing ↔ MOV/Frey–Rück link (§2.2) is *already* realised in this
-crate by `cryptanalysis::mov_attack` — the regime where the net signal
-provably collapses to an easy DLP.
+**Module:** `src/cryptanalysis/eds_net.rs` · **demo:** `eds_net_demo`.
+
+Stange's mixed initial block (`W(2,1)`, `W(1,2)`, …; Props 6.3/6.4 of
+arXiv:0710.1316) could not be fetched here, and the net recurrence alone
+underdetermines them. So instead of guessing, the net is **derived** from a
+rank-2 generalisation of the rank-1 coordinate relation
+`ψ_{a+1}ψ_{a−1}/ψ_a² = x(P)−x(aP)`:
+
+```
+W(a+1,b)·W(a−1,b) / W(a,b)²  =  x(P) − x(aP+bQ)            (REL-P)
+W(a,b+1)·W(a,b−1) / W(a,b)²  =  x(Q) − x(aP+bQ)            (REL-Q)
+```
+
+With gauge `W(1,0)=W(0,1)=W(1,1)=1`, axes `W(a,0)=ψ_a(P)`, `W(0,b)=ψ_b(Q)`,
+and `x(aP+bQ)` from point arithmetic, these second-order recurrences fill the
+grid — *no external seeds needed*. The result is then **validated**, not
+assumed:
+
+- the net recurrence `W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²`
+  holds on every checked triple (`net_satisfies_recurrence`);
+- the zero set is exactly `{(a,b) : aP+bQ = O}` (`net_zero_lattice_matches_point_arithmetic`);
+- the axes reproduce the rank-1 EDS;
+- **and it is genuinely rank-2**: on a full-7-torsion curve over `F_1009`
+  with *independent* `P, Q` (`Q ∉ ⟨P⟩`), `(NET)` still holds and the
+  zero-lattice is the 2-D sublattice `7ℤ×7ℤ`, not a line
+  (`net_recurrence_holds_for_independent_p_q`). So the construction is *the*
+  rank-2 net, not a degenerate artifact of `Q ∈ ⟨P⟩`.
+
+So **§5.3b is unblocked**: a genuine canonical net is in hand, validated in
+both the degenerate (ECDLP) and the truly 2-dimensional case.
+
+**The verdict on χ-localisation.** For the ECDLP, `Q = [k]P`, so every point
+`aP+bQ = [(a+bk) mod m]P` lives in `⟨P⟩`, and `(REL-P)` only ever consumes
+`x(jP)` values — **the rank-2 net is a reparametrisation of the rank-1 EDS of
+`P`**. Its `χ(W(a,b))` pattern therefore carries no localisation power beyond
+§5.3a: information-tight (`~log₂ m` bits) but algorithmically inert
+(`O(m)` extraction, no sub-`√m` advantage). The demo shows row `b=0` is
+literally the rank-1 EDS χ-row, and confirms `aP+bQ=[(a+bk) mod m]P` for the
+whole grid. A *non-degenerate* rank-2 net (independent `P,Q` in different
+subgroups) does **not** arise in the ECDLP — so the 2-D net offers no opening
+the 1-D handle didn't, consistent with Lauter–Stange. The EDS-Association ↔
+Tate-pairing ↔ MOV/Frey–Rück route (§2.2, realised by
+`cryptanalysis::mov_attack`) remains the only regime where this structure
+collapses the DLP, exactly when the embedding degree is small.
 
 4. **`F_p` ↔ `Z` bridge. DONE (§5.4).** Answer: the two periods are
    *orthogonal*. The archimedean sign is one fixed aperiodic object; the
@@ -465,6 +490,192 @@ off the curve's real period; it must be computed mod `p`. (Tests:
 `integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
 `bridge_reduction_matches_group_order_and_chi_law`.)
 
+### 5.5 Intrinsic multiplier characters (program item 2)
+
+The §3 χ-period and the §4.5 reflection law are both driven by the two sign
+bits `(χ(A), χ(B))` of the shift multiplier `W(n+r) = A·Bⁿ·W(n)`. These bits
+are not opaque. From the extraction `B = W(r+2)/(W(2)·W(r+1))` and
+`A = W(r+1)/B = W(2)·W(r+1)²/W(r+2)`, and because `W(r+1)²` is a square:
+
+```
+χ(A) = χ( W(2)·W(r+2) ),     χ(B) = χ( W(2)·W(r+1)·W(r+2) ).          (CF)
+```
+
+`(CF)` is verified against the inversion-extracted `A, B` on 5 curves
+(`multiplier_chars_closed_form_matches_extraction`). There is also a
+**structural identity**, derived from Ward's relation at the rank of
+apparition (`ψ_r(P)=0`) plus the periodicity `(▲)`:
+
+```
+Bʳ = − W(r+1)·W(r−1),     together with   A·B = W(r+1).               (BR)
+```
+
+`(BR)` is test-verified exactly mod `p` on 3 curves
+(`structural_identity_b_pow_r`), sign and all. For **odd `r`**, `Bʳ` carries
+the same character as `B` (since `B²` is a square), so `(BR)` collapses to
+the near-intrinsic form
+
+```
+χ(B) = χ(−1)·χ(W(r+1))·χ(W(r−1)),     χ(A) = χ(−1)·χ(W(r−1))    (r odd),
+```
+
+also test-verified. These turn the entire χ-structure (period §3, balanced
+class §4.5) into closed forms in three sequence values.
+
+### 5.6 The Tate-pairing bridge: `χ(B) = χ(⟨P,P⟩_r)` (confirmed)
+
+**Module:** `src/cryptanalysis/eds_tate.rs` · **demo:** `eds_tate_demo`.
+
+`(CF)`/`(BR)` still read terms *near index `r`*, so they need the `O(r)`
+sequence. The sequence-free route goes through `B² = −W(r+1)/W(r−1)` and the
+**self-Tate–Lichtenbaum pairing** `⟨P,P⟩_r`. For embedding degree 1
+(`r ∣ p−1`) this pairing lives in `μ_r ⊂ F_p^*` and is computable by Miller's
+algorithm in `O(log r)` — *without* the EDS. I implemented a full `F_p` Tate
+pairing from scratch (Miller + final exponentiation, with the loop-ending
+2-torsion / inverse-point cases that arise for even `r`) and **validated it
+independently**: on every instance it lands in `μ_r` (`t^r=1`) and is
+bilinear (`⟨P,[c]P⟩ = ⟨P,P⟩^c`). 84 instances over 6 primes, all valid.
+
+The naive conjecture `χ(B) = χ(⟨P,P⟩_r)` holds only 62/84 — but the failures
+are **structural, not random**. For `t ∈ μ_r`, `χ(t) = t^{(p−1)/2}` is forced
+to `+1` whenever `v₂(r) < v₂(p−1)` (then `−1 ∉ μ_r`). Splitting by that
+2-adic valuation gives a clean dichotomy:
+
+| regime | meaning | result |
+|--------|---------|--------|
+| `v₂(r) = v₂(p−1)` (**nondegenerate**) | `−1 ∈ μ_r`, `χ(t)` can be `−1` | **`χ(B) = χ(⟨P,P⟩_r)`: 27/27** |
+| `v₂(r) < v₂(p−1)` (forced) | `χ(t) = +1` carries no information | `χ(t)=+1`: 57/57 |
+
+So the conjecture, *correctly stated*, is **confirmed**: whenever the
+self-Tate pairing's quadratic character is non-degenerate
+(`v₂(r) = v₂(p−1)`), it **equals** the EDS-Residue multiplier character
+`χ(B)`. This is the bridge the program sought — it ties the EDS-Residue
+χ-structure (§3, §5.5) directly to a **Tate pairing** (the object of
+EDS-Association, §2.2), and in that regime `χ(B)` is computable in
+`O(log r)` from the pairing without ever building the `O(r)` sequence.
+(Tests: `tate_pairing_is_valid`,
+`chi_b_equals_chi_self_tate_in_nondegenerate_regime`.)
+
+### 5.7 The forced regime, resolved: the *unreduced* pairing character
+
+The §5.6 bridge used the *reduced* pairing `t = f^{(p−1)/r} ∈ μ_r`. In the
+forced regime `(p−1)/r` is even, so `χ(t) = χ(f)^{(p−1)/r} = +1` — the final
+exponentiation destroys the quadratic character. The fix is to **not reduce**:
+keep the unreduced Miller value `f = f_{r,P}(D_P)`. The Tate pairing fixes `f`
+only up to `(F_p^*)^r`, but for **even `r`** every `r`-th power `z^r =
+(z^{r/2})²` is a square, so `χ` is constant on those cosets — hence `χ(f)` is
+a **well-defined, `S`-independent** bit. The result (test-verified, 84
+even-`r` instances over 7 primes, all valid):
+
+> **For every even `r`,  `χ(B) = χ(f_{r,P}(D_P))`** — the unreduced
+> self-Tate-pairing character — *in both regimes*.
+
+This subsumes §5.6: when `(p−1)/r` is odd (nondegenerate) `χ(f) = χ(t)`, so it
+reduces to the earlier statement; when `(p−1)/r` is even (forced) `χ(t)` is
+trivial but `χ(f)` still equals `χ(B)`. Two checks pin it down: `χ(f)` is
+identical for two independent auxiliary points `S` (S-independence, as the
+`r`-even coset argument predicts), and in the forced regime `χ(t) = +1`
+always while `χ(f) = χ(B)` varies. So the EDS-Residue multiplier character is
+the quadratic character of the (unreduced) self-Tate pairing for *all* even
+`r` — and it stays `F_p`-computable; no exotic handle is needed.
+(Test: `unreduced_self_tate_char_equals_chi_b_all_even_r`.)
+
+**What is left.** Only odd `r` sits outside this pairing statement (there
+`(F_p^*)^r ⊄` squares, so `χ(f)` is ill-defined) — but odd `r` already has
+the clean closed form `χ(B)=χ(−1)χ(W(r+1))χ(W(r−1))` from §5.5. Between §5.5
+(odd `r`) and §5.7 (even `r`), `χ(B)` is now pinned in every case.
+
+### 5.8 Lift to embedding degree > 1 (the MOV regime), still in `F_p`
+
+§5.6/§5.7 assumed embedding degree 1 (`r ∣ p−1`), so the pairing lived in
+`F_p`. The genuine MOV/Frey–Rück regime has embedding degree `k > 1`: `r ∣
+p^k−1` but `r ∤ p−1`, and the *reduced* Tate pairing lands in
+`μ_r ⊂ F_{p^k}^*`. One might expect the bridge to need extension-field
+arithmetic there. It does not. The **unreduced** self-Miller value
+`f_{r,P}(D_P)` is computed from the `F_p`-rational Miller function evaluated
+at `F_p` points, so **it stays in `F_p` no matter the embedding degree** —
+only the final exponentiation would leave `F_p`. The result (test-verified on
+≥20 embedding-degree-`>1` instances, even `r`, over 6 primes):
+
+> **For every even `r`, any embedding degree, `χ(B) = χ(f_{r,P}(D_P))`**,
+> with `χ(f)` `S`-independent — entirely within `F_p`.
+
+(For even `r`, `gcd(r,p−1)` is even, so `(F_p^*)^r ⊆` squares and `χ(f)` is
+well-defined on the divisor-ambiguity cosets regardless of `k`.) So the
+EDS-Residue ↔ self-pairing identification is **not** a low-embedding-degree
+accident: it is an `F_p` statement that holds across the whole MOV spectrum.
+The only place the embedding degree matters is whether the *reduced* pairing
+(hence an actual sub-exponential DLP transfer, MOV) is available — which is
+the standard `k`-small criterion, orthogonal to the χ-bridge.
+(Test: `unreduced_self_miller_char_equals_chi_b_any_embedding_degree`.)
+
+The sharpest case is the **supersingular** family `y²=x³+x` over `p≡3
+(mod 4)`: `#E=p+1`, embedding degree *exactly* 2 — the canonical MOV-weak /
+pairing curves. The bridge `χ(B)=χ(f_{r,P})` holds there too, computed wholly
+in `F_p`, S-independent, across 6 primes and several orders per curve. So the
+identification survives precisely on the curves where the *reduced* pairing
+would transfer the DLP into `F_{p²}` (Test:
+`bridge_holds_on_supersingular_curves`).
+
+### 5.9 Stange's Tate-pairing-via-net formula, cross-validated
+
+The non-degenerate net (§5.3b) finally lets us close the loop with Stange's
+original motivation — computing the Tate pairing as a *ratio of net values*.
+For `P` of order `r` and an arbitrary `Q`, Stange's formula (embedding degree
+1) is
+
+```
+τ_r(P,Q) = ( W(r+1,1)·W(1,0) / (W(r+1,0)·W(1,1)) )^{(p−1)/r}.
+```
+
+Crucially, when `P,Q` are **independent** (`Q ∉ ⟨P⟩`) the row `b=1` has *no*
+zeros — `aP+Q = O` is impossible — so `W(r+1,1)` is reachable by the
+`(REL-P)` fill even though the axis row `b=0` vanishes at `a=r`. On a full
+7-torsion curve over `F_1009` (so `r=7 ∣ p−1`, independent order-7 `P,Q`):
+
+> the net ratio `τ_net` **equals** the independent Miller-based Tate pairing
+> `τ_miller` exactly, and both are a **nondegenerate** primitive `r`-th root
+> of unity (`≠1`, in `μ_r`).
+
+This is a **triple cross-validation** in one identity: it confirms (i) the
+`(REL-P)/(REL-Q)` net is the canonical Stange net (a *wrong* gauge would not
+satisfy the gauge-invariant Tate ratio), (ii) the from-scratch Miller pairing
+of §5.6, and (iii) Stange's net-Tate formula itself. The EDS / elliptic-net
+machinery built here is therefore mutually consistent end to end — the net
+computes the pairing, the pairing's character is the EDS multiplier character
+(§5.7–§5.8), and the multiplier governs the χ-structure (§3–§5.5).
+(Test: `tate_via_net_matches_miller`.)
+
+### 5.10 The payoff: a working MOV attack via the pairing
+
+Everything above says the EDS/net handle is *inert* on generic curves — but
+it **computes the pairing**, and on the right curves the pairing is not
+inert. `eds_mov.rs` closes the arc with an end-to-end MOV/Frey–Rück break.
+
+On the supersingular curve `y²=x³+x` over `p≡3 (mod 4)` (`#E=p+1`, embedding
+degree 2), the distortion map `φ(x,y)=(−x, iy)` (`i²=−1 ∈ F_{p²}`) sends `P ∈
+E(F_p)` to an independent point of `E(F_{p²})`, so the modified reduced Tate
+pairing `t_r(P, φ(P)) = f_{r,P}(φ(P))^{(p²−1)/r} ∈ μ_r ⊂ F_{p²}^*` is
+**non-degenerate**. Built from scratch here (minimal `F_{p²} = F_p[i]`
+arithmetic + Miller evaluated at the `F_{p²}` point `φ(P)`) and validated:
+the pairing lands in `μ_r` (`t^r=1`), is bilinear (`t([c]P,φ(P)) = t^c`), and
+`≠1`. Bilinearity then transfers the ECDLP `Q=[k]P` into a DLP `α^k = β` in
+the *small* cyclic group `μ_r`, solved generically:
+
+```
+E: y²=x³+x / F_1283  (supersingular, #E=1284), r=107 | p+1
+P=(921,458) ord 107,  t_r(P,φ(P))=(171,824) ∈ μ_107  (nondegenerate)
+Q=[7]P→k=7   Q=[42]P→k=42   Q=[99]P→k=99   Q=[106]P→k=106   ✓
+```
+
+This is the concrete edge of the whole investigation. The EDS-Residue /
+elliptic-net handle gives **no** sub-`√m` attack on generic curves (§3–§5.9),
+but the same machinery *is* the Tate pairing (§5.6, §5.9), and the pairing
+collapses the ECDLP **exactly** on the small-embedding-degree curves — which
+is precisely the Lauter–Stange "EDS Association ⇒ weak curve" boundary (§2.2)
+made executable. (Tests: `distortion_point_is_on_curve_over_fp2`,
+`pairing_is_nondegenerate_and_bilinear`, `mov_attack_recovers_discrete_log`.)
+
 ---
 
 ## 6. Honest scorecard
@@ -479,7 +690,14 @@ off the curve's real period; it must be computed mod `p`. (Tests:
 | EDS residues pin `k` (up to `±`) in `~log₂ m` bits | **Measured (§5.3a):** 100 % of `k`, 6 primes; info-theoretically tight |
 | Sign of `k` resolved iff `p ≡ 3 (mod 4)` | **Predicted & confirmed** (§5.3a): 100 % at `p≡3`, 0 % at `p≡1` |
 | `F_p` χ-period = reduction of the archimedean sign-period | **Refuted (§5.4):** orthogonal invariants; integer EDS = A006769 (validated), signs aperiodic, χ-period hops `r`/`2r` with `p` |
-| QR pattern beats generic ECDLP | **No.** Residues are info-tight but algorithmically inert (`O(m log m)` scan ≫ `√m`, §5.3a). Canonical 2-D net (§5.3b) blocked on Stange's mixed seeds (arXiv 403 here) |
+| Multiplier characters have closed forms `(CF)` + identity `Bʳ=−W(r+1)W(r−1)` | **Derived & test-verified (§5.5)** on 5/3 curves |
+| Tate bridge `χ(B) = χ(⟨P,P⟩_r)` when `v₂(r)=v₂(p−1)` | **Confirmed (§5.6):** 27/27 nondeg; F_p Tate pairing built & validated (bilinear, μ_r), 84 instances |
+| Forced regime `v₂(r)<v₂(p−1)`: `χ(B)` from the *unreduced* pairing | **Resolved (§5.7):** `χ(B)=χ(f_{r,P})` for all even `r`, both regimes, S-independent — test-verified |
+| Bridge lifts to embedding degree > 1 (MOV regime) | **Yes (§5.8):** `χ(B)=χ(f_{r,P})` for `r∤p−1`, S-independent, *entirely in `F_p`* — incl. **supersingular** `y²=x³+x` (embedding degree 2), test-verified |
+| Canonical 2-D net derivable without Stange's seeds | **Yes (§5.3b):** built via (REL-P)/(REL-Q), validated by (NET) + zero-lattice + axes |
+| Stange's Tate-via-net formula reproduces the Miller pairing | **Yes (§5.9):** `τ_net = τ_miller` (nondegenerate, in `μ_r`) — triple cross-validation of net, pairing, formula |
+| The pairing *does* break the ECDLP on weak curves | **Yes (§5.10):** end-to-end MOV attack on supersingular `y²=x³+x` via `F_{p²}` distortion pairing — recovers `k` |
+| QR pattern (1-D or 2-D net) beats generic ECDLP | **No.** Info-tight but algorithmically inert (§5.3a); for `Q∈⟨P⟩` the 2-D net is a rank-1 reparametrisation (§5.3b) — no sub-`√m` advantage |
 
 **Why it is underexplored, fairly stated.** The equivalence theorem is
 often read as closing the subject ("EDS-Residue ≡ ECDLP, move on"). The
@@ -494,21 +712,46 @@ test-verified, and predicted from `(χ(A),χ(B))` and `p mod 4`; and (iii)
 the residues are **information-tight but algorithmically inert** — they
 determine `k` in `~log₂ m` bits yet give no sub-`√m` algorithm, which is
 the cleanest concrete illustration of *why* the Lauter–Stange equivalence
-holds. The one genuinely-open door left is §5.3b (does the *canonical 2-D
-net's* `χ`-pattern localise `Λ_k` cheaper than generic?), blocked only on
-Stange's mixed seeds.
+holds; the χ-structure is reduced to closed forms in the multiplier (§5.5);
+and that multiplier character is **identified with a self-Tate pairing** —
+`χ(B)=χ(⟨P,P⟩_r)` in the nondegenerate regime (§5.6), and more generally
+`χ(B)=χ(f_{r,P})` (the unreduced pairing character) for every even `r`
+including the forced regime (§5.7) and *every embedding degree* (§5.8, the
+MOV regime, still entirely in `F_p`) — the concrete bridge from EDS-Residue to
+EDS-Association the program set out to find; and the
+canonical 2-D net, the last "blocked" item, was **derived from scratch**
+without Stange's seeds (§5.3b) and shown to be a rank-1 reparametrisation in
+the ECDLP case — no new opening. Every item of the program is now settled:
+the EDS/elliptic-net handle on the ECDLP is real, rigidly structured, and
+**information-tight but algorithmically inert** — no sub-`√m` attack, exactly
+as Lauter–Stange's equivalence predicts, now demonstrated end to end.
 
 ---
 
 ## 7. Tests & reproduction
 
 ```bash
-cargo test  --release --lib cryptanalysis::eds_residue     # 18 tests
+cargo test  --release --lib cryptanalysis::eds_residue     # 20 tests
+cargo test  --release --lib cryptanalysis::eds_tate        #  5 tests (§5.6–§5.8)
+cargo test  --release --lib cryptanalysis::eds_net         #  4 tests (§5.3b, §5.9)
+cargo test  --release --lib cryptanalysis::eds_mov         #  3 tests (§5.10)
 cargo run   --release --example eds_residue_demo           # the §4 table
 cargo run   --release --example eds_census                 # the §4.5 census
 cargo run   --release --example eds_localisation           # the §5.3a sweep
 cargo run   --release --example eds_bridge                 # the §5.4 bridge
+cargo run   --release --example eds_tate_demo              # the §5.6 bridge
+cargo run   --release --example eds_net_demo               # the §5.3b net
+cargo run   --release --example eds_mov_demo               # the §5.10 MOV attack
 ```
+
+`eds_mov` tests: `distortion_point_is_on_curve_over_fp2`,
+`pairing_is_nondegenerate_and_bilinear`, `mov_attack_recovers_discrete_log`.
+
+`eds_tate` tests: `tate_pairing_is_valid`,
+`chi_b_equals_chi_self_tate_in_nondegenerate_regime`,
+`unreduced_self_tate_char_equals_chi_b_all_even_r`,
+`unreduced_self_miller_char_equals_chi_b_any_embedding_degree`,
+`bridge_holds_on_supersingular_curves`.
 
 Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `legendre_matches_euler`, `net_zero_lattice_recovers_discrete_log`,
@@ -518,8 +761,9 @@ Tests: `rank_of_apparition_equals_order`, `apparition_law_holds`,
 `decimation_identity_holds`, `localisation_pins_the_true_k`,
 `localisation_sweep_sign_dichotomy_and_log_window`,
 `integer_eds_matches_oeis_a006769`, `integer_eds_signs_aperiodic_for_37a`,
-`bridge_reduction_matches_group_order_and_chi_law`, `census_runs_and_is_sane`,
-`report_renders`.
+`bridge_reduction_matches_group_order_and_chi_law`,
+`multiplier_chars_closed_form_matches_extraction`, `structural_identity_b_pow_r`,
+`census_runs_and_is_sane`, `report_renders`.
 
 ---
 
