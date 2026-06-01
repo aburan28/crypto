@@ -1077,4 +1077,4 @@ Estimated complexity: O(p^3) field operations over F_{p^3}, fully tractable in a
 
 ### Commits made
 
-- `[to be filled]` autolab 2026-06-01: Howe-glued Z/3Z search — 28 curves, 7 classes, 7th-root structure
+- `02c7f7d` autolab 2026-06-01: Howe-glued Z/3Z search — 28 curves, 7 classes, 7th-root structure
