@@ -151,3 +151,29 @@ To actually clear sub-2.45B, THREE pieces must all land + validate 0/0/0:
 Net: the denser-log lever is empirically real (-24q on the GCD tier), but
 clearing the goal requires landing all three hard pieces, each in a different
 subsystem. The validated result this session stays 2,490,847,962.
+
+## Round84 floor (piece 3) — hard gating wall, no in-session lever
+
+Investigated whether the round84 squaring tier (1413) can be cut >=3q (the gate
+to clearing the goal once GROUP_SIZE=5 drops the GCD to 1410). Findings:
+
+- The binder is `r84k_z_inv_squares` (schoolbook_square_symmetric_inverse over
+  tmp_ext/z1_reg), independent of the sidecar log (it stayed 1413 in the
+  GROUP_SIZE=5 measurement build).
+- NO flag moves it: measured ROUND84_XTAIL_{KARATSUBA,WALK_SQUARE,SCHOOLBOOK},
+  KARA_Z02_LOWQ, KARA_FREE_Z1_TOPBIT, ROUND84_XTAIL_BORROW_CARRIES -- all give
+  round84_peak=1413. The square is already heavily optimized (code comments
+  document prior 1698->~1567->1413 reductions via row/carry-lane hosting on idle
+  acc/tx). Cutting 3 more needs deep new field-arithmetic restructuring with no
+  identified approach.
+
+Net conclusion for the sub-2.45B goal via Path 2:
+- The denser-log lever is CONFIRMED real: GROUP_SIZE=5 drops the dialog-GCD tier
+  1434 -> 1410 (-24q, measured).
+- But the goal is BLOCKED by the round84 squaring floor (1413). Clearing it would
+  require ALL of: (1) the div-by-3 GROUP_SIZE=5 compressor, (2) the layout
+  re-derivation, AND (3) a round84 -3q cut that currently has no tractable lever.
+  Without piece 3, peak stays 1413 -> 2,453,371,109, still ~2.4M above goal.
+
+Best validated, submittable result remains the active-395 island:
+1434 x 1,736,993 = 2,490,847,962.
