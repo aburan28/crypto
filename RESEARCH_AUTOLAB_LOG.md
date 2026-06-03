@@ -1078,3 +1078,94 @@ Estimated complexity: O(p^3) field operations over F_{p^3}, fully tractable in a
 ### Commits made
 
 - `02c7f7d` autolab 2026-06-01: Howe-glued Z/3Z search — 28 curves, 7 classes, 7th-root structure
+
+---
+
+## 2026-06-03 (autolab run)
+
+### Task picked
+
+**Priority 2 continuation**: Enumerate the (2,2)-isogeny kernel structure of E1×E2 over F_43, and identify which of the 7 canonical Z/3Z classes is the Howe-glued curve.
+
+**Approach tried**: Z/3Z Richelot graph — for each of the 7 canonical Z/3Z classes, compute the Richelot images under all three Galois-equivariant sigma matchings and track which class maps to which.
+
+### Work done
+
+**Scripts written:**
+- `howe_richelot_v3.gp`: First working Richelot for naive cover — three sigma matchings
+- `howe_richelot_v4.gp`: Extended to all 7 classes (had bugs, not used for results)
+- `howe_richelot_v5.gp`: Fixed Richelot implementation — correct H_in1 formula
+- `igusa_7classes.gp`: I10 and tier analysis for all 7 classes
+- `igusa_7classes_full.gp`: Full Igusa-Clebsch invariants (I2,I4,I6,I10) via transvectant
+
+### Key findings
+
+**Finding 1: Root tier obstruction — Z/3Z Richelot is degenerate for all 7 target classes.**
+
+Over F_{43^3} = F_43[t]/(t^3-36), the cube roots of r1, r2 (the roots of T^2+a*T+b=0) lie in one of three "tiers":
+- Tier 0: cube root ∈ F_43 (r is a cube mod 43)
+- Tier 1: cube root = c*t for some c ∈ F_43 (r/36 is a cube)
+- Tier 2: cube root = c*t^2 for some c ∈ F_43 (r/6 is a cube)
+
+For the naive cover y^2=(x^3+7)(x^3+13): r1=36 (tier 1), r2=30 (tier 1) — SAME tier. ✓ Richelot works.
+
+For ALL 7 canonical classes with char poly T^4-83T^2+1849: r1 and r2 are always in DIFFERENT tiers (one in tier 1, one in tier 2). For example, Class 2 (a=2,b=8): r1=36 tier 1, r2=5 tier 2.
+
+**Why this blocks the Richelot:** For the Z/3Z Richelot (factoring y^2=G1*G2*G3 into Galois-equivariant quadratics), the determinant Delta of the pairing matrix vanishes when r1,r2 are in different tiers. Verified: for all 7 classes and all 3 sigma matchings, richelot_gen returns [-1,-1] due to degenerate (non-invertible) Delta.
+
+**Galois action explains the obstruction:**
+- Frobenius φ: t → 6t = ζ_3*t, so φ acts as ×ζ_3 on tier-1 elements and ×ζ_3^2 on tier-2 elements.
+- If α is tier 1 and β is tier 2: φ(α)=ζ_3*α and φ(β)=ζ_3^2*β.
+- The only Galois-equivariant pairing of α- and β-orbits gives G1,G2,G3 all with the SAME constant term α*β, forcing Delta=0.
+- Therefore: no non-degenerate Galois-equivariant Z/3Z Richelot exists for tier-1/tier-2 root pairs.
+
+**Finding 2: Confirmed the naive cover is in a different isogeny class (not an obstruction — already known, now explained by tier structure).**
+
+**Finding 3: Fixed PARI implementation bugs.**
+- v4 had H_in1 formula error: used `fmul(G_jx, Gx2=1)` instead of `fmul(G_jx, G_kx)`.
+- Correct formula: H_in1 = 2*(G_kc - G_jc), giving correct sigma_0 result (a=41,b=5) for naive cover.
+- PARI `default(parisize, N)` within `read("file.gp")` aborts the read (causes stack reset). Fix: pre-set parisize before calling read.
+
+**Finding 4: Full Igusa-Clebsch invariants for all 7 classes (mod 43).**
+
+Using Clebsch A,B,C,D transvectants → (I2,I4,I6,I10) via the standard conversion:
+
+| Class | a  | b  | I2 | I4 | I6 | I10 |
+|-------|----|----|----|----|----|----|
+| 1     | 1  | 2  | 21 | 33 | 41 | 35 |
+| 2     | 2  | 8  | 41 | 12 | 1  | 21 |
+| 3     | 3  | 42 | 18 | 37 | 22 | 35 |
+| 4     | 4  | 32 | 35 | 20 | 21 | 4  |
+| 5     | 6  | 39 | 29 | 33 | 32 | 21 |
+| 6     | 8  | 42 | 11 | 19 | 11 | 11 |
+| 7     | 16 | 39 | 1  | 3  | 16 | 41 |
+
+*(I2 computed via direct formula 3a²-120b mod 43; I4,I6 via Clebsch transvectants; I10 from poldisc.)*
+
+All 7 classes are distinct (no two share the same quadruple). The naive cover has (I2,I4,I6,I10) = (41,27,7,36) — distinct from all 7 target classes. ✓
+
+**Finding 5: The (2,2)-isogeny to E1×E2 is NOT a Richelot between smooth Jacobians.**
+
+The Howe (2,2)-gluing produces a map Jac(C) → E1×E2 where E1×E2 is a split (boundary) ppav. The "Richelot" in the standard sense maps between smooth Jacobians and cannot reach the boundary of A_2. The Z/3Z Richelot graph (connecting the 7 classes to each other) exists in principle but requires a different factorization structure (not the tier-1/tier-2 pairing).
+
+### What remains open
+
+The specific identification of the Howe-glued class among the 7 requires one of:
+1. **Direct (2,2)-kernel enumeration** (as proposed last session): enumerate 15 isotropic subgroups of E1[2]×E2[2], check Galois stability, compute quotient ppav, match Igusa invariants.
+2. **CM theory**: Compute the Igusa class polynomial for the CM type (O_K, Φ) where K=Q(√-43) (or Q(√-3)?), and find the root over F_43.
+3. **Theta function approach**: Use the explicit Rosenhain coordinates of the Howe-glued ppav.
+
+The (2,2)-kernel enumeration approach (option 1) was proposed in the previous session and remains the most tractable for p=43. This should be the next session's concrete task.
+
+### Next step
+
+**Concrete task for next session:**
+Implement the (2,2)-isogeny kernel enumeration in PARI over F_{43^3}:
+1. Compute E1[2] = {O, P1, P2, P3} and E2[2] = {O, Q1, Q2, Q3} where Pi = (ζ_3^{i-1}*t, 0) on E1 and Qi = (ζ_3^{i-1}*β, 0) on E2 (β = cube root of 30 = -13).
+2. For each of the 3 non-trivial symplectic isomorphisms α: E1[2] → E2[2], form the kernel Γ_α ⊂ E1[2]×E2[2].
+3. Check Galois stability of Γ_α (which choice of α is fixed by Frobenius?).
+4. Compute the quotient ppav and match its Igusa invariants against the table above.
+
+### Commits made
+
+- `howe_richelot_v5.gp`, `igusa_7classes.gp`, `igusa_7classes_full.gp` added
