@@ -117,3 +117,37 @@ active-395 island: 1434 x 1,736,993 = 2,490,847,962. The denser-log path is the
 most promising future lever: derive the 5-trit compressor (verifiable by
 enumerating 243 inputs), then re-derive the DialogGcdHighTailLayout constants for
 GROUP_SIZE=5.
+
+## GROUP_SIZE=5 EMPIRICAL MEASUREMENT (lever confirmed; reveals 2nd floor)
+
+Built a throwaway measurement circuit (GROUP_SIZE=5, BLOCK_BITS=8, BLOCKS=79,
+COMPRESSED_BITS=632, EXTENSION_BITS=200, placeholder compressor, relaxed
+check_passed) purely to read the peak (peak depends on allocations, not
+correctness). Result, vs the GROUP_SIZE=3 baseline:
+
+- The entire dialog-GCD tier dropped **1434 -> 1410** (-24q): all six former
+  1434 binders (apply sum/difference, ipmul/quotient reacquire_terminal_u,
+  pair1_quotient, pair2_product) now sit at 1410. CONFIRMS the denser-log lever
+  works and the carry-borrow survives.
+- BUT a second floor surfaces: the round84 field-squaring tier
+  `r84k_z_inv_squares` and `round84_fused_square_xtail_dx_sub_lam_square_lowq`
+  at **1413** (independent of the log; unchanged by the GCD change), then
+  `r84k_inv_combine` at 1409. So the new binding peak is 1413, score
+  1,736,993 x 1413 = 2,453,371,109 -- still ~2.4M above the 2.45B goal.
+
+To actually clear sub-2.45B, THREE pieces must all land + validate 0/0/0:
+1. Correct ancilla-free GROUP_SIZE=5 compressor (deterministic div-by-3 build:
+   decompressor extracts V mod 3 then V<-(V-d)*171 mod 2^8; compressor = inverse.
+   Blind greedy/SA synthesis of a CX/CCX-only 10->8 map both failed -- needs the
+   structured arithmetic construction).
+2. Re-derive DialogGcdHighTailLayout for GROUP_SIZE=5 (EXTENSION_BITS,
+   MIN_V_INDEX, PROJECTED_Q/T/QT, RAW_REPAIRED_HASH, block cell positions) so
+   check_passed holds. Cell pool (680) >> 632 needed, so feasible.
+3. Shave >=3 qubits off the round84 squaring tier (1413 -> <=1410): deep
+   Karatsuba field-square (z0/z1/z2 limbs + tmp_ext scratch) -- a separate
+   subsystem with its own hosting problem. Only THEN does inv_combine (1409)
+   become the floor -> peak 1410 -> 2,449,160,130 < goal (margin ~1.8M).
+
+Net: the denser-log lever is empirically real (-24q on the GCD tier), but
+clearing the goal requires landing all three hard pieces, each in a different
+subsystem. The validated result this session stays 2,490,847,962.
