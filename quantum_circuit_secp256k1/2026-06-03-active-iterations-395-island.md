@@ -81,3 +81,39 @@ compressor already frees exactly 1 of 6 raw bits -> 17..32 reachable 3-step
 states -> 5 bits provably necessary; no 4-bit code exists). Neither is a
 reliable in-session validated change. Best validated result this session remains
 the active-395 island: 1434 x 1,736,993 = 2,490,847,962.
+
+## Denser-log (GROUP_SIZE=5) investigation — real lever, research-scale to land
+
+Pursued the peak cut via a denser sidecar code (authorized open-ended effort).
+The peak is purely persistent state: u(256)+tx(256)+ty(256)+log + ~1. tx/ty/u are
+fixed-width, so the ONLY shrinkable register is the log. The log is a base-3
+stream: each GCD step stores (b0, b0&b1) with b0&b1 = b0 AND (u>v), giving exactly
+3 reachable states/step. The round763 compressor packs 3 trits -> 5 bits
+(27 <= 32, frees 1 of 6), = 1.667 bits/step -> 665q.
+
+GROUP_SIZE=5 packs 5 trits -> 8 bits (3^5=243 <= 256, frees 2 of 10) = 1.6
+bits/step -> ~640q, a -25q peak cut (with active=395=79*5 exactly, -33q -> peak
+1401 -> 1,736,993 x 1401 = 2,432,527,193, well under the 2.45B goal). The
+future-log carry borrow capacity (~632 early) still exceeds the ~511 transient
+need, so borrowing survives.
+
+Two blockers make this research-scale, not a localized edit:
+1. **Compressor synthesis.** Need an ancilla-free CX/CCX-only reversible map that
+   zeroes 2 output bits across all 243 valid 10-bit inputs (ancilla would re-raise
+   the peak; high-control Toffoli synthesis (TBS) needs ancilla). Greedy and
+   simulated-annealing searches (thousands of seeds) both failed to find one;
+   it needs a structured hand-derivation (base-3 Horner with constraint-driven
+   bit cancellation).
+2. **Layout invariant.** GROUP_SIZE/BLOCK_BITS are tied to ~10 precomputed
+   constants via `DialogGcdHighTailLayout::check_passed`, enforced by a hard
+   `assert!` in the build path (EXTENSION_BITS=212, MIN_V_INDEX=15,
+   PROJECTED_Q=1451, COMPRESSED_BITS, per-block cell positions, RAW_REPAIRED
+   hash/T). Changing GROUP_SIZE requires re-deriving the entire high-tail-alias
+   layout model.
+
+Conclusion: both structural paths to sub-2.45B (jump-GCD; denser-log) are
+genuine but research-scale. Best validated result this session stays the
+active-395 island: 1434 x 1,736,993 = 2,490,847,962. The denser-log path is the
+most promising future lever: derive the 5-trit compressor (verifiable by
+enumerating 243 inputs), then re-derive the DialogGcdHighTailLayout constants for
+GROUP_SIZE=5.
