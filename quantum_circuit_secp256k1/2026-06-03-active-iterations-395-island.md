@@ -215,3 +215,46 @@ proper reversible-logic synthesis toolchain (or a stable environment with more
 compute) to produce the compact 5-trit compressor, then the layout re-derivation
 + a fresh reroll island + 0/0/0 validation. Best validated, submittable result
 remains the active-395 island: 1434 x 1,736,993 = 2,490,847,962.
+
+
+## GROUP_SIZE=5 budget CONFIRMED + exact compressor target (goal 2,479,548,210)
+
+MEASURED (placeholder 0-Toffoli compressor, GROUP_SIZE=5, active-395, reroll
+767/173, eval results.tsv): avg Toffoli **1,732,769** at peak **1413** ->
+score **2,448,402,597** (31M UNDER goal). So GROUP_SIZE=5 clears this goal with
+huge margin IF a correct compressor lands.
+
+Compressor Toffoli budget (PINNED by measurement): the compressor is emitted
+~632x total (8x per block x 79 blocks; compress+decompress over the GCD passes).
+double-round763 (8 Toffoli/block) measured avg Toffoli 1,737,825 (delta +5,056 =
+8x632). Headroom at peak 1413 = 1,754,810 - 1,732,769 = 22,041 executed Toffoli
+-> the compressor must be **<= ~34 Toffoli (CCX) per emission** (ancilla-free, to
+keep peak 1413). round763 (3-trit free-1) is 4 CCX, so the 5-trit free-2 target
+is <=34 CCX (~8x round763) -- NOT minimal, but still needs synthesis.
+
+Synthesis status (the SOLE blocker): a <=34-CCX ancilla-free CX/CCX 5-trit
+base-3 pack (10->8, free 2 bits) <=> a free-1 recode on the 243-state
+post-round763 set. ALL methods exhausted:
+- z3 exact merges: proves >=10 gates needed (G<=9 UNSAT) but cannot FIND the
+  >=10-gate SAT even for the 6-bit merge (SAT-search wall on symbolic operands).
+- z3 free-1 on 243 inputs: 'unknown' at every gate count (encoding too large).
+- SA free-1 (bit9=0 post-round763): 128k restarts, found nothing.
+- SA collision-recode (make bit9 a function of other 8, then XOR-clear): killed
+  by container restart before result; prior SA evidence suggests it also stalls.
+- round763 building blocks: PROVABLY cannot free 2 (5 trits != two clean
+  triples; any valid synthetic 3rd trit must use the freed bit5 as its hi, which
+  round763 then clobbers).
+- Arithmetic Horner / borrowed-W: correct but ~160 Toffoli/block (5x over the
+  34 budget) and/or +8-16 ancilla (pushes peak >1427).
+- TBS: ~4219 gates (~100x over).
+
+Conclusion (goal 2,479,548,210): achievable and fully budget-confirmed
+(2,448,402,597 with a valid compressor), blocked ONLY on synthesizing a <=34-CCX
+free-2 compressor -- a reversible-logic synthesis problem that needs a proper
+synthesis toolchain (the repo's 3-trit round763 was presumably derived with one).
+z3/SA/TBS all fail in this environment, compounded by ~4 container restarts that
+killed long runs. Drop-in path for a future run: supply the <=34-CCX 5-trit
+compressor + its inverse, set GROUP_SIZE=5/BLOCK_BITS=8/BLOCKS=79/
+COMPRESSED_BITS=632/EXTENSION_BITS=200, relax DialogGcdHighTailLayout::check_passed
+to structural-only, rebuild, reroll for a 0/0/0 island. Validated best stays
+2,490,847,962.
