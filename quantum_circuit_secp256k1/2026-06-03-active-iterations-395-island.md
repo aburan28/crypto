@@ -177,3 +177,41 @@ Net conclusion for the sub-2.45B goal via Path 2:
 
 Best validated, submittable result remains the active-395 island:
 1434 x 1,736,993 = 2,490,847,962.
+
+
+## Goal "beat 2,479,548,210": achievable via GROUP_SIZE=5, blocked only by compressor synthesis
+
+This goal needs peak<=1427 (at current T) OR T<=1,729,113 (at peak 1434).
+- GROUP_SIZE=5 MEASURED to drop the dialog-GCD tier to 1410; the round84 floor
+  (1413) then binds -> peak 1413 -> 1,736,993 x 1413 = 2,453,371,109, which is
+  26M UNDER this goal (so round84 piece-3 is NOT needed here). Toffoli budget is
+  adequate: at peak 1413, T may rise to 1,755,165 (~18k headroom), i.e. the new
+  compressor may cost up to ~64 executed Toffoli/invocation.
+- EXTENSION_BITS reduction alone does NOT drop the peak (measured: EXT 212->207
+  kept peak 1434). The peak is bound by the 665 live log cells, so the cut
+  genuinely requires the denser (GROUP_SIZE=5) code.
+
+The SINGLE blocker is synthesizing a compact (<=~64 Toffoli), ancilla-free,
+CX/CCX-only reversible "5-trit base-3 pack" (10 bits -> 8, free 2). Methods tried
+and why each fails:
+- Simulated annealing / greedy: cannot descend the free-bit objective landscape.
+- Transformation-based synthesis (TBS): ~4219 gates (bad don't-care completion)
+  -> ~250x over the Toffoli budget.
+- z3/SMT exact synthesis: the 243-input propagation (and exact-arithmetic merge
+  targets) are too slow; z3 returns 'unknown' at every gate count even for
+  6-bit sub-problems. (merge1, a 4-bit sub-merge, DID solve in 1s -> approach is
+  sound only for tiny cases.)
+- Double-round763 (round763 on bits0-5 then bits4-9): VERIFIED to free bit9
+  cleanly but clobbers bit5 -> nets only 1 freed bit (5 trits cannot split into
+  two clean triples).
+- Function-clear: post-round763, no single bit is a function of the others, so
+  no bit is directly freeable; a genuine recoding circuit is required.
+- Arithmetic Horner (mod-3 + x171 decompressor): correct but ~100-210 Toffoli/
+  block -> over the ~64 budget -> would push score back over the goal.
+
+Compounded by an ephemeral container that restarted ~3x mid-run, killing long
+syntheses. Net: the goal is achievable and de-risked, but landing it needs a
+proper reversible-logic synthesis toolchain (or a stable environment with more
+compute) to produce the compact 5-trit compressor, then the layout re-derivation
++ a fresh reroll island + 0/0/0 validation. Best validated, submittable result
+remains the active-395 island: 1434 x 1,736,993 = 2,490,847,962.
