@@ -258,3 +258,44 @@ compressor + its inverse, set GROUP_SIZE=5/BLOCK_BITS=8/BLOCKS=79/
 COMPRESSED_BITS=632/EXTENSION_BITS=200, relax DialogGcdHighTailLayout::check_passed
 to structural-only, rebuild, reroll for a 0/0/0 island. Validated best stays
 2,490,847,962.
+
+
+## 2026-06-04 FRONTIER MOVED — real target is 2,402,429,905 (1355q route)
+
+The leaderboard high score is now **2,402,429,905 = 1,773,011 T x 1,355 Q**
+(PhantasticUniverse/GPT-5), built on the promoted **1355-qubit route** (challenge
+commit d3e35ae = submission 18f807e). My entire prior session optimized the
+STALE 1,434q dialog-GCD route; my clone was 24 commits behind. github.com/
+ecdsafail IS reachable (only api.ecdsa.fail is blocked), so I fetched origin/main
+(c3c3f8d) and **reproduced the exact top score 2,402,429,905, all 9024 shots OK**.
+The 1434q -> 1355q gain came from a long community-stacked lever chain (anupsv et
+al.): HOST_GATED (-126q), KARA_SOL_DBL_FAST, KARA_FREE_Z1_TOPBIT, MEASURED_APPLY_SUB,
+ROUND84 Karatsuba, COMPARE_BITS=56, WIDTH_MARGIN=26, APPLY_CLEAN_COMPARE_BITS=20,
+active-395, etc. My active-396->395 lever is among them (the competitor used it).
+
+### Path to beat it (still the SAME unexploited lever)
+The 1355 peak is bound by the dialog-GCD compress_block / tobitvector / apply
+phases -- still GROUP_SIZE=3 (665q log). The community has NOT applied GROUP_SIZE=5.
+Traced floors: bind 1355, shift 1350, round84 1309. GROUP_SIZE=5 denser log ->
+~1331q -> 1,773,011 x 1331 = **2,360,477,641, beating the top by ~42M**. Toffoli
+budget generous (~32k headroom at 1331). This is the unexploited structural lever
+on the live frontier.
+
+### Blocker (unchanged, now with a 4th solver tried)
+The <=~34-CCX ancilla-free 5-trit base-3 free-2 compressor still resists synthesis:
+- z3: times out (unknown) finding SAT; exact merges proved >=10 gates.
+- SA / greedy / collision-recode: nothing.
+- **cadical (pysat)** [NEW, fast solver]: validated on merge1 (G=8, 0.1s); proves
+  the exact merges UNSAT through G=11 (slow above), and the full 243-input free-2
+  is slow to build+solve (UNSAT proofs scale ~15x/gate; G4=10s, G5=149s). No SAT
+  landed in practical in-session time. The 243-input synthesis is the hard core.
+- Constructive R-=R>>2: that value-map is non-injective over the full register
+  (R=3 and R=4 both ->3), so it's a constrained bijection = the same synthesis.
+- active-394: BREAKS the route (log aliasing needs specific iters -> degenerate
+  2715q). 395 is the convergence floor.
+
+Net: beating 2,402,429,905 needs the GROUP_SIZE=5 compressor (a hard reversible-
+synthesis problem the whole competitive community also hasn't cracked) or
+out-lottery-ing a heavily-tuned truncation frontier (low odds). The exact drop-in
+recipe is documented; a working reversible-synthesis toolchain on a stable box
+lands it. I reproduced the top score but cannot yet beat it in this environment.
