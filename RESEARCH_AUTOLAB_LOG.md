@@ -1221,4 +1221,4 @@ match Igusa invariants). Estimated 1-2 PARI sessions.
 
 ### Commits made
 
-- `[hash]` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
+- `d9e7414` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
