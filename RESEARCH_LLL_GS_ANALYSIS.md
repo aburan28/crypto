@@ -325,11 +325,22 @@ the iteration cap).
 - **§8.3** Koblitz cross-curve: CLOSED.  secp256k1 now recovers 3/3; no
   special Koblitz behavior remains.
 
-### 10.5 Remaining open question
+### 10.5 Efficiency at higher m — CLOSED (2026-06-06)
 
-Is `lll_reduce_hp` efficient enough for P-521 with higher signature counts?
-Current: m=8 at ~79s.  Hypothesis: HP LLL time grows as O(m² × HP_PREC² × n)
-where n = m+2.  For m=16: estimate ~4× ≈ 316s.  Acceptable.
-For m=32: estimate ~1200s.  May need optimisation (incremental GS update
-instead of recompute-from-scratch on each swap).
+Empirical results with incremental GS swap (implemented 2026-05-28):
+
+| m  | dim   | per-probe time | 3-seed total | outcome          |
+|----|-------|----------------|--------------|------------------|
+| 8  | 10×10 | ~14s           | ~42s         | 3/3 recovered    |
+| 16 | 18×18 | ~23s           | ~69.7s       | 3/3 recovered ✓  |
+| 32 | 34×34 | ~57s           | —            | 1/1 recovered ✓  |
+
+Actual scaling 8→32: 4.1× measured vs 11.6× theoretical O((m+2)²).
+The incremental GS swap changes the dominant cost; the real complexity is
+sub-quadratic in practice.  m=32 at ~57s/probe is fully practical.
+
+**§10.5 CLOSED**: HP LLL scales to at least m=32 on P-521 with
+sub-quadratic empirical growth.  No further optimisation needed for
+signature counts ≤ 32.  For m > 32 the BKZ-style block reduction
+is the natural next step (out of scope for this analysis).
 

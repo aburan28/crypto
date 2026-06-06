@@ -1169,3 +1169,56 @@ Implement the (2,2)-isogeny kernel enumeration in PARI over F_{43^3}:
 ### Commits made
 
 - `howe_richelot_v5.gp`, `igusa_7classes.gp`, `igusa_7classes_full.gp` added
+
+---
+
+## 2026-06-06 (autolab run)
+
+### Task picked
+
+**Priority 1 — §10.5 P-521 HP LLL efficiency at higher m.** The P-521 NaN
+bug is closed since 2026-05-22 (BigInt HP GS fix). The one remaining open
+question, §10.5 of RESEARCH_LLL_GS_ANALYSIS.md, asks whether `lll_reduce_hp`
+scales to m≥16. No log entry has touched this since the incremental GS swap
+was landed on 2026-05-28. Task: run `probe_p521_hp_m16` (3 seeds) and
+`probe_p521_hp_m32_timing` (1 seed timing) and record concrete numbers.
+
+### Work done
+
+- Confirmed clean build (53s, warnings only — no errors).
+- Ran `cargo test --test lll_degeneracy_probe probe_p521_hp_m16 -- --ignored --nocapture` (3 seeds).
+- Ran `cargo test --test lll_degeneracy_probe probe_p521_hp_m32_timing -- --ignored --nocapture` (1 seed).
+- Updated §10.5 in `RESEARCH_LLL_GS_ANALYSIS.md` with empirical table and CLOSED status.
+
+### Findings
+
+**P-521 HP LLL scaling — all results use incremental GS swap (2026-05-28 baseline m=8: ~14s/probe):**
+
+| m  | dim   | per-probe   | 3-seed total | recovery |
+|----|-------|-------------|--------------|----------|
+| 8  | 10×10 | ~14s        | ~42s         | 3/3 ✓    |
+| 16 | 18×18 | ~23s        | 69.7s        | 3/3 ✓    |
+| 32 | 34×34 | 57.2s       | (1-seed)     | 1/1 ✓    |
+
+Scaling ratio 8→32: **4.1× measured** vs 11.6× theoretical O((m+2)²).
+The incremental GS swap breaks the quadratic per-swap cost; empirical growth
+is closer to O((m+2)^1.3) in practice.
+
+Test assertion: `probe_p521_hp_m16` passes with `"✓ §10.5 CLOSED: HP LLL scales to m=16 on P-521."`.
+
+**§10.5 is closed.** All P-521 LLL questions are resolved. The full
+resolution chain is now documented in §10.1–10.5 of
+`RESEARCH_LLL_GS_ANALYSIS.md`.
+
+### Next step proposal
+
+Priority 2 thread (CHLRS/Howe): implement the (2,2)-isogeny kernel
+enumeration in PARI over F_{43^3} to identify which of the 7 Igusa classes
+is the Howe-glued ppav. This was proposed in the 2026-06-03 log as the
+immediate next concrete task — the specific algorithm is fully specified
+(enumerate 15 isotropic subgroups of E1[2]×E2[2], check Galois stability,
+match Igusa invariants). Estimated 1-2 PARI sessions.
+
+### Commits made
+
+- `[hash]` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
