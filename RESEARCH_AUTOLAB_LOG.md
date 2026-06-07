@@ -1222,3 +1222,85 @@ match Igusa invariants). Estimated 1-2 PARI sessions.
 ### Commits made
 
 - `d9e7414` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
+
+---
+
+## 2026-06-07 (autolab run)
+
+### Task picked
+
+**Index-calculus factor-base fronts (branch `claude/index-calculus-factor-base`).**
+Four open theory questions handed in: (1) can any structured factor base over
+F_p be subexponential; (2) a Weil-descent analogue for prime fields; (3) last-
+fall-degree bounds for prime-field PDP; (4) the Mahalanobis–Abdullah–Mallick
+"initial minors" conjecture. Goal: situate each against the repo's existing
+results (yokoyama_lower_bound, structured_fb_*, phase6_weil_restriction,
+RESEARCH_FFD_PROOF_COMPLEXITY) and push each forward.
+
+### Work done
+
+- New synthesis doc `RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md` covering all four.
+- New experiment suite `experiments/initial_minors/` (pure Python — no
+  Sage/PARI; container has only cargo + python3, and WebFetch is 403-blocked by
+  the network policy so arXiv/IACR full texts were not retrievable, only search
+  snippets).
+- Implemented the AMM minors method from first principles: toy EC arithmetic,
+  the Riemann–Roch monomial basis, the mod-p determinant/LU, and the leading-
+  principal-minor (Schur) pivot scan.
+
+### Findings
+
+**(1) Structured factor base.** Promoted the empirical "sparsity doesn't help"
+to **Proposition 1 (sparsity invariance):** for a fixed factor-base *set* V, the
+solving degree D* depends only on the ideal (F_V), not its presentation; so
+X^t−1, falling factorials, interval/PKM divisor sets all inherit the same
+Yokoyama regularity. A *fully general* impossibility needs algebraic-circuit
+lower bounds (out of reach); the *equal-Hilbert-function family* version is a
+realistic scoped target.
+
+**(2) Weil descent over F_p.** Hopeless, now shown per candidate: Z_p×Z_p is a
+product ring with no Galois action (no Res functor); quadratic-field-mod-p gives
+either F_{p^2} (where the F_p-subgroup DLP is unchanged) or F_p×F_p (no curve).
+The missing ingredient is Galois structure, which a prime field lacks.
+
+**(3) Last-fall degree over F_p.** The HKYY/PC-degree bridge (small-char,
+`RESEARCH_FFD_PROOF_COMPLEXITY.md`) does NOT port: the field equation x^p−x is
+degree p, killing the constant-degree-axiom assumption of PC lower bounds, and
+there is no base field to descend to (no fall-events). The correct invariant
+over F_p is the degree of regularity; the one decisive measurement (symmetrized-
+Semaev Macaulay ranks over F_p) is specified but blocked by lack of Sage/msolve.
+
+**(4) Initial minors.** Confirmed the core fact `sum==O ⇔ k×k minor singular`
+(299/300; the miss is a sub-relation) and recovered a real discrete log from a
+found vanishing minor. Measured cost-to-first-relation across prime-order toy
+curves:
+
+| bits |        n | reps | E[subsets]/n |
+|-----:|---------:|-----:|-------------:|
+| 8    |      419 | 300  | 0.997 |
+| 10   |     1427 | 300  | 0.982 |
+| 12   |     4943 | 300  | 1.006 |
+| 14   |    31847 |  62  | 1.024 |
+| 16   |   102763 |  19  | 1.067 |
+| 18   |   333911 |   5  | 1.632 (5-rep noise) |
+| 20   |  1408111 |   2  | 2.650 (2-rep noise) |
+
+Relation density is exactly 1/n → natural minor search is **Θ(n)**, *worse* than
+rho's Θ(√n). Crossover analysis: at 2^50 (their ceiling) rho is 2^25 and L[1/2],
+L[1/3], √n all sit within a few bits — the sub-exp-vs-√n divergence opens only
+near 2^118. So the published 2^50 evidence **cannot** distinguish subexponential
+from √n. Conjecture reframed around a falsifiable observable:
+E[initial-minors-to-relation] dropping below √n. Measured Θ(n) for the leading-
+principal family says it does not; not refuted, but burden of proof shifted.
+
+### Next step proposal
+
+Redo `ffd_harness.rs`-style low-degree Macaulay-rank measurement for the
+**symmetrized Semaev system over F_p** (interval factor base) to test whether
+d_last = Θ(Reg) there (Proposition 1 predicts yes → no early fall). Requires a
+Sage or msolve toolchain in the container, which is currently absent.
+
+### Commits made
+
+- (this commit) autolab 2026-06-07: index-calculus factor-base four-front
+  synthesis + initial-minors experiment (Θ(n) density, 2^50 indistinguishability)

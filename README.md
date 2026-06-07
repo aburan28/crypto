@@ -677,6 +677,7 @@ src/
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
+- [`RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md`](./RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md) — structured factor bases over GF(p): four open fronts (factor-base no-go, Weil descent, last-fall degree, initial-minors conjecture).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
