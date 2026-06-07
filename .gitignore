@@ -5,3 +5,6 @@ Cargo.lock
 # Finder / SMB / etc.). Empty payload, just filesystem cruft.
 ._*
 .DS_Store
+
+# SageMath preparser output (generated when running `sage foo.sage`).
+*.sage.py
