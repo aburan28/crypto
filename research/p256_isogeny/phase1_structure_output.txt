@@ -1,0 +1,135 @@
+{
+  "frobenius_disc": -455213823400003756884736869668539463648899917731097708475249543966132856781915,
+  "structural_prediction": [
+    {
+      "ell": 2,
+      "kind": "inert",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": -1,
+      "predicted_rational_isogenies": 0,
+      "volcano_height": 0
+    },
+    {
+      "ell": 3,
+      "kind": "ramified",
+      "v_ell_disc": 1,
+      "legendre_disc_mod_ell": 0,
+      "predicted_rational_isogenies": 1,
+      "volcano_height": 0
+    },
+    {
+      "ell": 5,
+      "kind": "ramified",
+      "v_ell_disc": 1,
+      "legendre_disc_mod_ell": 0,
+      "predicted_rational_isogenies": 1,
+      "volcano_height": 0
+    },
+    {
+      "ell": 7,
+      "kind": "inert",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": -1,
+      "predicted_rational_isogenies": 0,
+      "volcano_height": 0
+    },
+    {
+      "ell": 11,
+      "kind": "split",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": 1,
+      "predicted_rational_isogenies": 2,
+      "volcano_height": 0
+    },
+    {
+      "ell": 13,
+      "kind": "split",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": 1,
+      "predicted_rational_isogenies": 2,
+      "volcano_height": 0
+    },
+    {
+      "ell": 17,
+      "kind": "split",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": 1,
+      "predicted_rational_isogenies": 2,
+      "volcano_height": 0
+    },
+    {
+      "ell": 19,
+      "kind": "inert",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": -1,
+      "predicted_rational_isogenies": 0,
+      "volcano_height": 0
+    },
+    {
+      "ell": 23,
+      "kind": "split",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": 1,
+      "predicted_rational_isogenies": 2,
+      "volcano_height": 0
+    },
+    {
+      "ell": 29,
+      "kind": "split",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": 1,
+      "predicted_rational_isogenies": 2,
+      "volcano_height": 0
+    },
+    {
+      "ell": 31,
+      "kind": "inert",
+      "v_ell_disc": 0,
+      "legendre_disc_mod_ell": -1,
+      "predicted_rational_isogenies": 0,
+      "volcano_height": 0
+    }
+  ],
+  "split_primes": [
+    11,
+    13,
+    17,
+    23,
+    29
+  ],
+  "inert_primes": [
+    2,
+    7,
+    19,
+    31
+  ],
+  "ramified_primes": [
+    3,
+    5
+  ],
+  "empirical_confirmation": {
+    "ell2_rational_2torsion_roots": 0,
+    "ell2_matches_prediction": true,
+    "ell3_psi3_rational_roots": 1,
+    "ell3_matches_prediction": true
+  },
+  "constructed_3_isogenous_neighbors": [
+    {
+      "kernel_x": 108494815539227526261591756460669585469668810667962802221946703900438636945563,
+      "neighbor_a": 69813713139673779928897632679399297923312904910852909497923264316660085700227,
+      "neighbor_b": 46459849483693785433638644630303853891775023127090599264446658487217616473547,
+      "neighbor_j": 60359795834994757875819835712620686501669024665003573244969414519504858434740,
+      "same_order_as_p256": true,
+      "distinct_from_root": true,
+      "cheap_invariants": {
+        "j_is_0": false,
+        "j_is_1728": false,
+        "a_is_minus3": false,
+        "a_hamming_weight": 121,
+        "b_hamming_weight": 136,
+        "automorphism_group_size": 2,
+        "special": false
+      }
+    }
+  ]
+}

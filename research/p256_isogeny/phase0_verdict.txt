@@ -1,0 +1,8 @@
+
+--- Phase 0 verdict (classical weak-curve buckets) ---
+  anomalous (n == p)                        : OK (ruled out)
+  supersingular (t == 0 mod p)              : OK (ruled out)
+  smooth order (n composite)                : OK (ruled out)
+  small embedding degree (MOV/FR, k<100)    : OK (ruled out)
+  -> all classical buckets are same-order invariants; ruled out for
+     every same-order neighbour of P-256 over F_p.
