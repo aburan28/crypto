@@ -12,8 +12,9 @@ import sys
 
 from ecfp import (Curve, INF, two_torsion_x, velu_2_isogeny,
                   velu_from_kernel_xs, three_isogenous_neighbors,
-                  poly_roots_mod_p, order_is)
+                  isogenous_neighbors, poly_roots_mod_p, order_is)
 import params as PP
+import semaev
 
 
 def brute_order(E: Curve) -> int:
@@ -71,6 +72,49 @@ def test_velu_brute():
     print(f"  [ok] velu_*_isogeny preserve order (brute-force, {checked} codomains)")
 
 
+def test_velu_oddl_brute():
+    """Schoof-kernel ell-isogenies (ell=5,7,11,13) preserve order, brute-checked."""
+    checked = 0
+    for p in (101, 1009, 2003):
+        for a in range(0, 4):
+            for b in range(1, 4):
+                if (4 * a ** 3 + 27 * b ** 2) % p == 0:
+                    continue
+                E = Curve(a, b, p)
+                nE = brute_order(E)
+                t = p + 1 - nE
+                for ell in (5, 7, 11, 13):
+                    if ell * ell > 4 * p:
+                        continue
+                    for lam, h, E2 in isogenous_neighbors(E, ell, t):
+                        assert len(h) - 1 == (ell - 1) // 2, "kernel poly degree"
+                        assert brute_order(E2) == nE, (p, a, b, ell, "order")
+                        checked += 1
+    print(f"  [ok] odd-ell Schoof isogenies preserve order ({checked} codomains)")
+
+
+def test_semaev3_vanishes():
+    """S_3(x1,x2,x3) = 0 whenever P1+P2+P3 = O on a toy curve."""
+    import random
+    p, a, b = 1009, 2, 3
+    E = Curve(a, b, p)
+    S3 = semaev.semaev3(a, b, p)
+    rng = random.Random(5)
+    checked = 0
+    for _ in range(300):
+        P1 = E.random_point(rng)
+        P2 = E.random_point(rng)
+        S = E.add(P1, P2)
+        if S is INF:
+            continue
+        x1, x2, x3 = P1[0], P2[0], S[0]
+        val = sum(c * pow(x1, e1, p) * pow(x2, e2, p) * pow(x3, e3, p)
+                  for (e1, e2, e3), c in S3.items()) % p
+        assert val == 0, "S_3 did not vanish on a real collinear triple"
+        checked += 1
+    print(f"  [ok] Semaev S_3 vanishes on {checked} real triples")
+
+
 def test_p256_phase0():
     p, a, b, n = PP.P, PP.A, PP.B, PP.N
     E = Curve(a, b, p)
@@ -99,6 +143,8 @@ def main():
     print("running P-256 isogeny toolkit self-tests...")
     test_poly_roots()
     test_velu_brute()
+    test_velu_oddl_brute()
+    test_semaev3_vanishes()
     test_p256_phase0()
     test_p256_phase1()
     print("ALL TESTS PASSED")

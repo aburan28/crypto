@@ -170,6 +170,18 @@ def _poly_trim(c):
     return c
 
 
+def poly_mul(a, b, p):
+    """Full product of two polynomials mod p (no reduction)."""
+    if not a or not b:
+        return [0]
+    r = [0] * (len(a) + len(b) - 1)
+    for i, ai in enumerate(a):
+        if ai:
+            for j, bj in enumerate(b):
+                r[i + j] = (r[i + j] + ai * bj) % p
+    return _poly_trim(r)
+
+
 def poly_mulmod(a, b, mod, p):
     r = [0] * (len(a) + len(b) - 1)
     for i, ai in enumerate(a):
@@ -345,6 +357,182 @@ def three_isogenous_neighbors(E: Curve):
     p = E.p
     roots = poly_roots_mod_p(division_poly_3(E), p)
     return [velu_from_kernel_xs(E, [r]) for r in roots], roots
+
+
+# --------------------------------------------------------------------------
+# division polynomials and general odd-l isogenies (Schoof-style kernels)
+# --------------------------------------------------------------------------
+#
+# Elements of R = F_p[x][y]/(y^2 - W),  W = x^3 + a x + b, are stored as a pair
+# (P0, P1) meaning P0(x) + P1(x)*y.  psi_m is pure-x for odd m (P1 = 0) and of
+# the form y*poly for even m (P0 = 0).
+
+def _r_add(A, B, p):
+    return (poly_add(A[0], B[0], p), poly_add(A[1], B[1], p))
+
+
+def _r_sub(A, B, p):
+    return (poly_sub(A[0], B[0], p), poly_sub(A[1], B[1], p))
+
+
+def _r_mul(A, B, W, p):
+    # (a0+a1 y)(b0+b1 y) = (a0 b0 + a1 b1 W) + (a0 b1 + a1 b0) y
+    a0, a1 = A
+    b0, b1 = B
+    p0 = poly_add(poly_mul(a0, b0, p), poly_mul(poly_mul(a1, b1, p), W, p), p)
+    p1 = poly_add(poly_mul(a0, b1, p), poly_mul(a1, b0, p), p)
+    return (_poly_trim(p0), _poly_trim(p1))
+
+
+def poly_add(a, b, p):
+    n = max(len(a), len(b))
+    r = [0] * n
+    for i in range(len(a)):
+        r[i] = a[i] % p
+    for i in range(len(b)):
+        r[i] = (r[i] + b[i]) % p
+    return _poly_trim(r)
+
+
+def poly_sub(a, b, p):
+    n = max(len(a), len(b))
+    r = [0] * n
+    for i in range(len(a)):
+        r[i] = a[i] % p
+    for i in range(len(b)):
+        r[i] = (r[i] - b[i]) % p
+    return _poly_trim(r)
+
+
+def division_polys(a, b, p, upto):
+    """Return psi_0..psi_upto as R-elements (P0, P1) with y^2 = x^3+ax+b."""
+    W = [b % p, a % p, 0, 1]
+    psi = [None] * (upto + 1)
+    psi[0] = ([0], [0])
+    if upto >= 1:
+        psi[1] = ([1], [0])
+    if upto >= 2:
+        psi[2] = ([0], [2])                                   # 2y
+    if upto >= 3:
+        psi[3] = ([(-a * a) % p, (12 * b) % p, (6 * a) % p, 0, 3], [0])
+    if upto >= 4:
+        g4 = [(-8 * b * b - a ** 3) % p, (-4 * a * b) % p, (-5 * a * a) % p,
+              (20 * b) % p, (5 * a) % p, 0, 1]
+        psi[4] = ([0], [(4 * c) % p for c in g4])             # 4y(...)
+    for m in range(2, (upto // 2) + 1):
+        # psi_{2m+1} = psi_{m+2} psi_m^3 - psi_{m-1} psi_{m+1}^3
+        idx = 2 * m + 1
+        if idx <= upto and psi[idx] is None:
+            pm3 = _r_mul(_r_mul(psi[m], psi[m], W, p), psi[m], W, p)
+            pp3 = _r_mul(_r_mul(psi[m + 1], psi[m + 1], W, p), psi[m + 1], W, p)
+            t1 = _r_mul(psi[m + 2], pm3, W, p)
+            t2 = _r_mul(psi[m - 1], pp3, W, p)
+            psi[idx] = _r_sub(t1, t2, p)
+        # psi_{2m} * 2y = psi_m (psi_{m+2} psi_{m-1}^2 - psi_{m-2} psi_{m+1}^2)
+        idx = 2 * m
+        if idx <= upto and psi[idx] is None:
+            term = _r_sub(
+                _r_mul(psi[m + 2], _r_mul(psi[m - 1], psi[m - 1], W, p), W, p),
+                _r_mul(psi[m - 2], _r_mul(psi[m + 1], psi[m + 1], W, p), W, p), p)
+            rhs = _r_mul(psi[m], term, W, p)        # = psi_{2m} * 2y, pure-x P0
+            # psi_{2m} = (0, rhs.P0 / (2W))
+            g = poly_divmod(rhs[0], poly_mul([2], W, p), p)
+            assert g[1] == [0], "non-exact 2y division in psi_{2m}"
+            psi[idx] = ([0], g[0])
+    return psi, W
+
+
+def _frob_eigenvalues(t, p, ell):
+    """Roots lambda of X^2 - t X + p (mod ell)."""
+    roots = []
+    for lam in range(ell):
+        if (lam * lam - t * lam + p) % ell == 0:
+            roots.append(lam)
+    return roots
+
+
+def _r_to_x(elt):
+    """Extract the pure-x part of an R-element that should have P1 == 0."""
+    assert elt[1] == [0] or all(c == 0 for c in elt[1]), "expected pure-x element"
+    return _poly_trim(elt[0][:])
+
+
+def kernel_polynomials(E: Curve, ell: int, t: int):
+    """
+    Kernel polynomials of all rational ell-isogenies of E (ell odd prime).
+
+    For each Frobenius eigenvalue lambda (root of X^2 - tX + p mod ell), the
+    lambda-eigenspace kernel polynomial is
+
+        h_lambda = gcd( x^p * D_lambda - N_lambda ,  psi_ell )
+
+    where x([lambda]) = N_lambda / D_lambda, D_lambda = psi_lambda^2 (pure-x),
+    N_lambda = x*D_lambda - psi_{lambda-1} psi_{lambda+1} (pure-x).  Returns a
+    list of (lambda, h) with monic h of degree (ell-1)/2.
+    """
+    p = E.p
+    lams = _frob_eigenvalues(t % ell, p % ell, ell)
+    if not lams:
+        return []
+    psi, W = division_polys(E.a, E.b, p, ell + 1)
+    psi_ell = _r_to_x(psi[ell])              # pure-x, degree (ell^2-1)/2
+    # make psi_ell monic for clean gcd
+    lead = inv_mod(psi_ell[-1], p)
+    psi_ell_m = [(c * lead) % p for c in psi_ell]
+    xp = poly_powmod([0, 1], p, psi_ell_m, p)    # x^p mod psi_ell
+
+    out = []
+    for lam in lams:
+        if lam == 0:
+            continue
+        Dl = _r_to_x(_r_mul(psi[lam], psi[lam], W, p))             # psi_lambda^2
+        prod = _r_to_x(_r_mul(psi[lam - 1], psi[lam + 1], W, p))   # psi_{l-1} psi_{l+1}
+        Nl = poly_sub(poly_mul([0, 1], Dl, p), prod, p)            # x*D - prod
+        G = poly_sub(poly_mulmod(xp, Dl, psi_ell_m, p),
+                     poly_divmod(Nl, psi_ell_m, p)[1], p)
+        h = poly_gcd(G, psi_ell_m, p)
+        if len(h) - 1 == (ell - 1) // 2:
+            out.append((lam, h))
+    return out
+
+
+def velu_from_kernel_poly(E: Curve, h) -> Curve:
+    """
+    Codomain of the odd-degree isogeny with monic kernel polynomial h(x)
+    (degree d = (ell-1)/2, roots = x-coords of one rep per +-pair of the
+    cyclic kernel).  Velu needs only the power sums p1,p2,p3 of the roots,
+    obtained from the top coefficients of h via Newton's identities:
+
+        h = x^d - e1 x^{d-1} + e2 x^{d-2} - e3 x^{d-3} + ...
+        p1 = e1 ;  p2 = e1 p1 - 2 e2 ;  p3 = e1 p2 - e2 p1 + 3 e3
+
+        t = 6 p2 + 2 d a
+        w = 10 p3 + 6 a p1 + 4 b d
+        a' = a - 5 t ,  b' = b - 7 w
+    """
+    p, a, b = E.p, E.a, E.b
+    d = len(h) - 1
+    assert h[-1] == 1, "kernel polynomial must be monic"
+
+    def coeff(k):           # coefficient of x^{d-k}, k=1,2,3
+        return h[d - k] if 0 <= d - k < len(h) else 0
+    e1 = (-coeff(1)) % p
+    e2 = (coeff(2)) % p
+    e3 = (-coeff(3)) % p
+    p1 = e1 % p
+    p2 = (e1 * p1 - 2 * e2) % p
+    p3 = (e1 * p2 - e2 * p1 + 3 * e3) % p
+    t = (6 * p2 + 2 * d * a) % p
+    w = (10 * p3 + 6 * a * p1 + 4 * b * d) % p
+    return Curve((a - 5 * t) % p, (b - 7 * w) % p, p)
+
+
+def isogenous_neighbors(E: Curve, ell: int, t: int):
+    """All rational ell-isogenous codomains of E (odd prime ell)."""
+    res = []
+    for lam, h in kernel_polynomials(E, ell, t):
+        res.append((lam, h, velu_from_kernel_poly(E, h)))
+    return res
 
 
 # --------------------------------------------------------------------------

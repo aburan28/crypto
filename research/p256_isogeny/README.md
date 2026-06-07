@@ -20,8 +20,22 @@ isogeny-graph structure + shallow crawl), and the start of Phase 2 / Phase 4
 | `phase0_invariants.py` | Phase 0 — invariants + classical weak-curve rejection checks |
 | `phase1_structure.py` | Phase 1 — exact small-prime isogeny-graph structure from Δπ, confirmed by direct construction for ℓ=2,3 |
 | `phase1_crawl_ell2.py` | Phase 1 (Mode A/D) — BFS 2-isogeny crawl via Vélu, writes `curves.jsonl`/`edges.jsonl` |
-| `test_p256_isogeny.py` | self-tests, incl. brute-force validation of Vélu codomains |
+| `phase1_crater_walk.py` | Phase 1 (Mode C/D) — odd-ℓ (Schoof-kernel) neighbour catalog + split-prime crater walks |
+| `semaev.py` | Semaev summation polynomials over F_p (toy scale) |
+| `phase7_relation_yield.py` | Phase 7 — Semaev relation-yield harness with controls (root vs same-order neighbour vs random) |
+| `analysis.py` | shared Phase 4 cheap-invariant scoring |
+| `test_p256_isogeny.py` | self-tests, incl. brute-force validation of Vélu / Schoof codomains and the Semaev oracle |
 | `*_output.txt` | captured reference outputs |
+
+### Odd-ℓ isogeny construction (Schoof-style)
+
+For odd ℓ the kernel of a rational ℓ-isogeny need not contain a rational point;
+it is a Frobenius eigenspace in `E[ℓ]`. `ecfp.kernel_polynomials` finds, for each
+eigenvalue λ (root of `X²−tX+p mod ℓ`), the kernel polynomial
+`h_λ = gcd(xᵖ·D_λ − N_λ, ψ_ℓ)` of degree `(ℓ−1)/2`, and `velu_from_kernel_poly`
+builds the codomain from the kernel's power sums `p₁,p₂,p₃` (all Vélu needs).
+Validated against brute-force point counting for every ℓ∈{2,3,5,7,11,13} codomain
+at toy scale.
 
 ## Run
 
@@ -86,23 +100,66 @@ generic ordinary model. This is the H0 ("generic hardness") baseline: the first
 non-trivial neighbour is indistinguishable from a random ordinary curve, exactly
 as the plan anticipates for the overwhelming majority of nodes.
 
+### Split-prime crater walk (Phase 1 Mode C/D)
+
+`phase1_crater_walk.py` constructs real same-order neighbours via odd-ℓ isogenies
+and walks the horizontal crater. Results:
+
+* **12-neighbour catalog** (one step per ramified/split ℓ ≤ 29): every codomain
+  is order-verified `= n`, distinct from the root, and **cheap-score zero**
+  (no special `j`, no `a=−3`, dense coefficients, automorphism group 2). The
+  per-ℓ neighbour count exactly matches the Δπ predictor — an independent
+  Schoof-eigenvalue confirmation (5→1, 7→0, 11/13/17/23/29→2).
+* **Horizontal walks** of 7 (ℓ=11) and 5 (ℓ=13) distinct same-order nodes, all
+  generic.
+* **Finding:** P-256's defining sparse model `a=−3` is a property of the *root
+  only* — none of its isogenous neighbours inherit it. The "special" sparse model
+  is not isogeny-invariant.
+
+### Phase 7 — Semaev relation yield: no signal (H0 confirmed)
+
+`phase7_relation_yield.py` reduces P-256 mod a toy prime `q`, builds its rational
+same-order ℓ-isogenous neighbour, and compares **index-calculus relation yield**
+(fraction of random targets decomposable into `m` factor-base points) against
+strict controls, with an *identical* factor-base size across all curves
+(same-work comparison) and a Semaev-S₃ oracle cross-check:
+
+| q | root | neighbour | same-order ctrl (mean) | random ctrl (mean) | neighbour/root |
+|---|------|-----------|------------------------|--------------------|----------------|
+| 12007 | 0.245 | 0.263 | 0.266 | 0.276 | 1.07 |
+| 40009 | 0.105 | 0.083 | 0.089 | 0.088 | 0.79 |
+
+The neighbour's relation yield is **statistically indistinguishable** from the
+root and from same-order / random controls (ratios bracket 1.0, within control
+spread), and the signal does not grow with field size. This is the **H0
+"generic hardness"** outcome: isogenous movement does **not** change the
+relation-generation geometry — no Level-1 signal (would require ≥5×).
+
 ## Correctness
 
-`test_p256_isogeny.py` validates the Vélu codomain formulas independently by
-brute-force point counting over 236 toy codomains (every 2- and 3-isogeny found
-for small `a,b` over `p ∈ {101,1009,2003}`), confirming order preservation, and
-re-checks the P-256 Phase 0/Phase 1 facts. All pass in <1 s.
+`test_p256_isogeny.py` (6 tests, <1 s) independently validates:
+* Vélu 2-/3-isogeny codomains vs brute-force point counting (236 toy codomains);
+* odd-ℓ Schoof-kernel isogenies ℓ∈{5,7,11,13} vs brute force (106 codomains),
+  incl. kernel-polynomial degree `(ℓ−1)/2`;
+* the Semaev S₃ oracle (vanishes on real collinear triples);
+* the P-256 Phase 0 / Phase 1 facts (`[n]G=O`, 0 rational 2-isogenies, 1 verified
+  same-order 3-isogeny).
 
-## Not yet implemented (next steps from the plan)
+## Status vs the plan
 
-* odd-ℓ isogeny construction for ℓ ≥ 5 (kernel-polynomial factoring of ψ_ℓ, or
-  modular-polynomial roots) to walk the split-prime crater cycles (11,13,17,23,29);
-* Phase 3 random/same-order controls;
-* Phase 5 endomorphism/GLV audit; Phase 6 conductor audit;
-* Phase 7 Semaev/Gröbner harness at toy + reduced-modulus scale (highest value);
-* Phase 8 low-genus correspondence search.
+Done: Phase 0; Phase 1 (structure + ℓ=2 crawl + odd-ℓ catalog + crater walks);
+Phase 2 (same-order model construction + order verification); Phase 4 (cheap
+scoring); Phase 7.2 (relation yield) with Phase 3 controls and Phase 13 red-team
+checks (same-work, controls, scaling).
 
-The structural conclusion driving prioritisation: the **vertical** volcano
-structure around P-256 is trivial at small primes (height 0 everywhere), so any
-non-generic behaviour would have to come from the **horizontal** crater nodes or
-from the algebraic (Semaev/Gröbner) geometry — not from conductor depth.
+Not yet implemented:
+* Phase 7.3/7.4 true Gröbner / Betti analysis (needs a Gröbner engine — degree of
+  regularity, F4 timing, syzygies; the relation-yield proxy is the runnable stand-in here);
+* Phase 5 endomorphism/GLV audit; Phase 6 deep conductor audit;
+* Phase 8 low-genus correspondence search; Phase 9 explicit isogeny-map transport.
+
+**Bottom line so far:** every measurable probe — classical invariants, volcano
+structure, cheap invariants, and toy-scale relation yield — places P-256's
+same-order isogenous neighbours squarely in the generic-ordinary bucket. The
+vertical volcano is trivial (height 0 at all small ℓ), the horizontal crater
+nodes are generic, and isogenous movement leaves relation-generation unchanged.

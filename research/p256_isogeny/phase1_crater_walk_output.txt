@@ -1,0 +1,45 @@
+{
+  "root_j": 7958909377132088453074743217357398615041065282494610304372115906626967530147,
+  "catalog_size": 12,
+  "catalog_all_same_order": true,
+  "catalog_all_distinct_from_root": true,
+  "catalog_any_special_cheap_score": false,
+  "neighbor_count_by_ell": {
+    "3": 1,
+    "5": 1,
+    "11": 2,
+    "13": 2,
+    "17": 2,
+    "23": 2,
+    "29": 2
+  },
+  "walks": {
+    "11": {
+      "length": 7,
+      "distinct_j": 7,
+      "all_same_order": true,
+      "any_special_cheap_score": true,
+      "j_sequence_tail6": [
+        626967530147,
+        610783034304,
+        531865648995,
+        147256105787,
+        142017555398,
+        592810601159
+      ]
+    },
+    "13": {
+      "length": 5,
+      "distinct_j": 5,
+      "all_same_order": true,
+      "any_special_cheap_score": true,
+      "j_sequence_tail6": [
+        626967530147,
+        460849897561,
+        667948464963,
+        360330149383,
+        960940007378
+      ]
+    }
+  }
+}

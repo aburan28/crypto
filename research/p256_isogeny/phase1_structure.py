@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 
 from ecfp import Curve, two_torsion_x, three_isogenous_neighbors, order_is
+from analysis import cheap_score
 import params as PP
 
 
@@ -42,28 +43,6 @@ def v_ell(m: int, ell: int) -> int:
         m //= ell
         v += 1
     return v
-
-
-def cheap_score(E: Curve):
-    """Phase 4 cheap-invariant features for a candidate curve model."""
-    p = E.p
-    j = E.j_invariant()
-    # automorphism group size: generic 2, j=1728 -> 4, j=0 -> 6
-    if j == 0:
-        aut = 6
-    elif j == 1728 % p:
-        aut = 4
-    else:
-        aut = 2
-    return {
-        "j_is_0": j == 0,
-        "j_is_1728": j == 1728 % p,
-        "a_is_minus3": E.a == (-3) % p,
-        "a_hamming_weight": bin(E.a).count("1"),
-        "b_hamming_weight": bin(E.b).count("1"),
-        "automorphism_group_size": aut,
-        "special": (j in (0, 1728 % p)) or E.a == (-3) % p,
-    }
 
 
 def classify(ell: int, disc: int):

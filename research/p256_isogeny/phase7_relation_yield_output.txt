@@ -1,0 +1,79 @@
+{
+  "experiment": "Semaev relation-yield, root vs same-order neighbour vs controls",
+  "results": [
+    {
+      "q": 12007,
+      "n_q": 12069,
+      "trace_q": -61,
+      "ell": 11,
+      "fb_size_K": 14,
+      "m": 3,
+      "targets": 400,
+      "semaev3_oracle_consistent": true,
+      "root_yield": 0.245,
+      "neighbor_yield": 0.2625,
+      "neighbor_order_eq_root": true,
+      "same_order_control_yields": [
+        0.27,
+        0.25,
+        0.275,
+        0.2675
+      ],
+      "random_control_yields": [
+        0.2675,
+        0.2575,
+        0.2925,
+        0.285
+      ],
+      "same_order_control_mean": 0.2656,
+      "random_control_mean": 0.2756
+    },
+    {
+      "q": 40009,
+      "n_q": 40274,
+      "trace_q": -264,
+      "ell": 5,
+      "fb_size_K": 14,
+      "m": 3,
+      "targets": 400,
+      "semaev3_oracle_consistent": true,
+      "root_yield": 0.105,
+      "neighbor_yield": 0.0825,
+      "neighbor_order_eq_root": true,
+      "same_order_control_yields": [
+        0.085,
+        0.0925,
+        0.0875,
+        0.09
+      ],
+      "random_control_yields": [
+        0.0975,
+        0.0875,
+        0.0825,
+        0.085
+      ],
+      "same_order_control_mean": 0.0887,
+      "random_control_mean": 0.0881
+    }
+  ],
+  "verdict": [
+    {
+      "q": 12007,
+      "root": 0.245,
+      "neighbor": 0.2625,
+      "same_order_ctrl_mean": 0.2656,
+      "random_ctrl_mean": 0.2756,
+      "neighbor_vs_root_ratio": 1.071,
+      "neighbor_vs_same_order_ratio": 0.988
+    },
+    {
+      "q": 40009,
+      "root": 0.105,
+      "neighbor": 0.0825,
+      "same_order_ctrl_mean": 0.0887,
+      "random_ctrl_mean": 0.0881,
+      "neighbor_vs_root_ratio": 0.786,
+      "neighbor_vs_same_order_ratio": 0.93
+    }
+  ]
+}
