@@ -1,0 +1,146 @@
+{
+  "experiment": "Groebner degree-of-regularity on Semaev 2-decomposition systems",
+  "q": 12007,
+  "n_q": 12069,
+  "fb_size_K": 5,
+  "targets_per_curve": 10,
+  "rows": [
+    {
+      "label": "root",
+      "a": 12004,
+      "b": 9596,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2094.8,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "neighbor",
+      "a": 11673,
+      "b": 6335,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2122.1,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "same_order_ctrl_0",
+      "a": 7433,
+      "b": 10374,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2094.9,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "same_order_ctrl_1",
+      "a": 8944,
+      "b": 6277,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2094.9,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "same_order_ctrl_2",
+      "a": 9546,
+      "b": 719,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2122.3,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "random_ctrl_0",
+      "a": 7203,
+      "b": 894,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2122.4,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "random_ctrl_1",
+      "a": 10160,
+      "b": 3904,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2122.3,
+      "generic_solving_degree_mean": 9.0
+    },
+    {
+      "label": "random_ctrl_2",
+      "a": 4085,
+      "b": 3651,
+      "fb_size": 5,
+      "targets": 10,
+      "semaev_solving_degree_mean": 9.0,
+      "semaev_solving_degree_max": 9,
+      "reductions_mean": 2149.8,
+      "generic_solving_degree_mean": 9.0
+    }
+  ],
+  "verdict": {
+    "root_semaev_solving_degree": 9.0,
+    "neighbor_semaev_solving_degree": 9.0,
+    "all_semaev_solving_degrees": {
+      "root": 9.0,
+      "neighbor": 9.0,
+      "same_order_ctrl_0": 9.0,
+      "same_order_ctrl_1": 9.0,
+      "same_order_ctrl_2": 9.0,
+      "random_ctrl_0": 9.0,
+      "random_ctrl_1": 9.0,
+      "random_ctrl_2": 9.0
+    },
+    "semaev_vs_generic_same_shape": {
+      "root": [
+        9.0,
+        9.0
+      ],
+      "neighbor": [
+        9.0,
+        9.0
+      ],
+      "same_order_ctrl_0": [
+        9.0,
+        9.0
+      ],
+      "same_order_ctrl_1": [
+        9.0,
+        9.0
+      ],
+      "same_order_ctrl_2": [
+        9.0,
+        9.0
+      ],
+      "random_ctrl_0": [
+        9.0,
+        9.0
+      ],
+      "random_ctrl_1": [
+        9.0,
+        9.0
+      ],
+      "random_ctrl_2": [
+        9.0,
+        9.0
+      ]
+    },
+    "any_neighbor_or_ctrl_below_root": false
+  }
+}

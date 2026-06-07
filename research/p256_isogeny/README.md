@@ -22,7 +22,10 @@ isogeny-graph structure + shallow crawl), and the start of Phase 2 / Phase 4
 | `phase1_crawl_ell2.py` | Phase 1 (Mode A/D) — BFS 2-isogeny crawl via Vélu, writes `curves.jsonl`/`edges.jsonl` |
 | `phase1_crater_walk.py` | Phase 1 (Mode C/D) — odd-ℓ (Schoof-kernel) neighbour catalog + split-prime crater walks |
 | `semaev.py` | Semaev summation polynomials over F_p (toy scale) |
-| `phase7_relation_yield.py` | Phase 7 — Semaev relation-yield harness with controls (root vs same-order neighbour vs random) |
+| `phase7_relation_yield.py` | Phase 7.2 — Semaev relation-yield harness with controls (root vs same-order neighbour vs random) |
+| `groebner.py` | minimal Buchberger/grevlex Gröbner engine over F_p (F4 degree-of-regularity proxy) |
+| `phase7_groebner_dreg.py` | Phase 7.3 — solving-degree probe on Semaev decomposition systems, vs same-shape generic control |
+| `phase5_endomorphism.py` | Phase 5 — endomorphism / GLV audit (CM norm-form reduction, automorphism + self-loop scan) |
 | `analysis.py` | shared Phase 4 cheap-invariant scoring |
 | `test_p256_isogeny.py` | self-tests, incl. brute-force validation of Vélu / Schoof codomains and the Semaev oracle |
 | `*_output.txt` | captured reference outputs |
@@ -135,13 +138,47 @@ spread), and the signal does not grow with field size. This is the **H0
 "generic hardness"** outcome: isogenous movement does **not** change the
 relation-generation geometry — no Level-1 signal (would require ≥5×).
 
+### Phase 7.3 — Gröbner degree of regularity: no anomaly (H3 absent)
+
+`phase7_groebner_dreg.py` runs a pure-Python Buchberger (grevlex) on the
+2-point factor-base decomposition system
+`{ S₃(x₁,x₂,x_R)=0, g(x₁)=0, g(x₂)=0 }` (g = factor-base vanishing polynomial)
+and records the **solving degree** (max remainder/S-poly degree), reduction count
+and basis size. Over q=12007, |FB|=5, 10 consistent targets per curve:
+
+| curve | Semaev solving degree | reductions | generic same-shape control |
+|-------|-----------------------|------------|----------------------------|
+| root (P-256 mod q) | 9.0 | ~2095 | 9.0 |
+| same-order neighbour | 9.0 | ~2122 | 9.0 |
+| 3× same-order control | 9.0 | ~2104 | 9.0 |
+| 3× random control | 9.0 | ~2131 | 9.0 |
+
+Every curve — including a **generic polynomial of identical monomial support** —
+solves at the *same* degree with the *same* work. The solving degree is fixed by
+the system shape, not the curve: no curve-dependent degree-of-regularity drop, no
+extra low-degree syzygy. H3 (Semaev/Gröbner anomaly) is absent.
+
+### Phase 5 — endomorphism / GLV audit: no usable endomorphism (H1 absent)
+
+`phase5_endomorphism.py` reduces the CM norm form `[1, t, p]` (norm of
+`a+b·π`). The reduced form is `[1, 1, ≈2²⁵⁶]`: the smallest **non-scalar**
+endomorphism has degree ≈ 2²⁵⁶. The only efficiently computable endomorphism is
+Frobenius (degree p), which acts as the **identity** on the rational order-n
+subgroup (eigenvalue λ=1) — useless for GLV. All 12 catalogued neighbours have
+automorphism group size 2, none has special j∈{0,1728}, and none is a self-loop.
+
+→ **rho bits saved ≈ 0** (below the "interesting" threshold of 1 bit). Unlike
+secp256k1 (j=0, CM disc −3, genuine GLV), P-256 and its same-order neighbours
+have no GLV-style endomorphism.
+
 ## Correctness
 
-`test_p256_isogeny.py` (6 tests, <1 s) independently validates:
+`test_p256_isogeny.py` (8 tests, <1 s) independently validates:
 * Vélu 2-/3-isogeny codomains vs brute-force point counting (236 toy codomains);
 * odd-ℓ Schoof-kernel isogenies ℓ∈{5,7,11,13} vs brute force (106 codomains),
   incl. kernel-polynomial degree `(ℓ−1)/2`;
 * the Semaev S₃ oracle (vanishes on real collinear triples);
+* the Buchberger engine (ideal membership) and binary-quadratic-form reduction;
 * the P-256 Phase 0 / Phase 1 facts (`[n]G=O`, 0 rational 2-isogenies, 1 verified
   same-order 3-isogeny).
 
@@ -149,17 +186,20 @@ relation-generation geometry — no Level-1 signal (would require ≥5×).
 
 Done: Phase 0; Phase 1 (structure + ℓ=2 crawl + odd-ℓ catalog + crater walks);
 Phase 2 (same-order model construction + order verification); Phase 4 (cheap
-scoring); Phase 7.2 (relation yield) with Phase 3 controls and Phase 13 red-team
-checks (same-work, controls, scaling).
+scoring); **Phase 5 (endomorphism/GLV audit)**; Phase 7.2 (relation yield) and
+**Phase 7.3 (Gröbner solving degree)** with Phase 3 controls and Phase 13 red-team
+checks (same-work, same-shape generic control, controls, scaling).
 
 Not yet implemented:
-* Phase 7.3/7.4 true Gröbner / Betti analysis (needs a Gröbner engine — degree of
-  regularity, F4 timing, syzygies; the relation-yield proxy is the runnable stand-in here);
-* Phase 5 endomorphism/GLV audit; Phase 6 deep conductor audit;
-* Phase 8 low-genus correspondence search; Phase 9 explicit isogeny-map transport.
+* Phase 6 deep conductor audit (full factorisation of Δπ beyond small primes);
+* Phase 7.4 Betti/syzygy tables; Phase 8 low-genus correspondence search;
+* Phase 9 explicit isogeny-map transport; Phase 10 scoring sigmoid roll-up.
 
 **Bottom line so far:** every measurable probe — classical invariants, volcano
-structure, cheap invariants, and toy-scale relation yield — places P-256's
-same-order isogenous neighbours squarely in the generic-ordinary bucket. The
-vertical volcano is trivial (height 0 at all small ℓ), the horizontal crater
-nodes are generic, and isogenous movement leaves relation-generation unchanged.
+structure, cheap invariants, toy-scale relation yield, Gröbner solving degree, and
+the CM endomorphism lattice — places P-256's same-order isogenous neighbours
+squarely in the generic-ordinary bucket. The vertical volcano is trivial (height 0
+at all small ℓ), the horizontal crater nodes are generic, no GLV endomorphism
+exists, and isogenous movement leaves both relation yield and degree of regularity
+unchanged. No hypothesis H1–H4 shows any signal; H0 (generic hardness) holds
+across the board.

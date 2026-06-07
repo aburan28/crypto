@@ -115,6 +115,30 @@ def test_semaev3_vanishes():
     print(f"  [ok] Semaev S_3 vanishes on {checked} real triples")
 
 
+def test_groebner_ideal_membership():
+    """Buchberger: x2^2-1 must lie in <x1^2-1, x1 x2-1>."""
+    import groebner as gb
+    p = 101
+    f1 = {(2, 0): 1, (0, 0): (-1) % p}
+    f2 = {(1, 1): 1, (0, 0): (-1) % p}
+    G, stats = gb.buchberger([f1, f2], p)
+    Gw = [gb._wrap(g) for g in G]
+    r = gb.reduce_poly({(0, 2): 1, (0, 0): (-1) % p}, Gw, p,
+                       {"max_deg": 0, "reductions": 0})
+    assert r == {}, "x2^2-1 should reduce to 0 in the ideal"
+    print(f"  [ok] Groebner ideal membership (solving_degree={stats['solving_degree']})")
+
+
+def test_form_reduction():
+    """Gauss reduction of binary quadratic forms against known reductions."""
+    from phase5_endomorphism import reduce_form_exact as r
+    assert r(1, 1, -23) == (1, 1, 6)
+    assert r(1, 0, -4) == (1, 0, 1)
+    A, B, C = r(5, 1, -23)              # non-reduced input, same disc
+    assert B * B - 4 * A * C == -23 and -A < B <= A <= C
+    print("  [ok] binary-quadratic-form reduction")
+
+
 def test_p256_phase0():
     p, a, b, n = PP.P, PP.A, PP.B, PP.N
     E = Curve(a, b, p)
@@ -145,6 +169,8 @@ def main():
     test_velu_brute()
     test_velu_oddl_brute()
     test_semaev3_vanishes()
+    test_groebner_ideal_membership()
+    test_form_reduction()
     test_p256_phase0()
     test_p256_phase1()
     print("ALL TESTS PASSED")

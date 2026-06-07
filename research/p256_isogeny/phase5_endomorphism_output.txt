@@ -1,0 +1,102 @@
+{
+  "curve": "NIST P-256",
+  "frobenius_disc_bits": 258,
+  "reduced_norm_form": [
+    1,
+    1,
+    113803455850000939221184217417134865912224979432774427118812385991533214195479
+  ],
+  "frobenius_norm_log2": 256.0,
+  "min_nonscalar_endomorphism_norm_log2": 255.98,
+  "interpretation": "smallest non-scalar endomorphism has degree ~2^256; only Frobenius (deg p) is efficiently computable and it acts as identity on <G>",
+  "root_automorphism_group_size": 2,
+  "any_neighbor_special_automorphism": false,
+  "self_isogeny_loop_found": false,
+  "neighbor_automorphism_audit": [
+    {
+      "ell": 3,
+      "j_mod_1e9": 858434740,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 5,
+      "j_mod_1e9": 561518746,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 11,
+      "j_mod_1e9": 783034304,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 11,
+      "j_mod_1e9": 204587912,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 13,
+      "j_mod_1e9": 849897561,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 13,
+      "j_mod_1e9": 305888173,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 17,
+      "j_mod_1e9": 48874118,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 17,
+      "j_mod_1e9": 685348397,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 23,
+      "j_mod_1e9": 434235185,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 23,
+      "j_mod_1e9": 813669715,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 29,
+      "j_mod_1e9": 510142553,
+      "aut": 2,
+      "is_self_loop": false
+    },
+    {
+      "ell": 29,
+      "j_mod_1e9": 802608396,
+      "aut": 2,
+      "is_self_loop": false
+    }
+  ],
+  "glv": {
+    "efficient_nontrivial_endomorphism": false,
+    "frobenius_eigenvalue_on_subgroup": 1,
+    "automorphism_bits_saved": 0.0,
+    "total_rho_bits_saved_estimate": 0.0
+  },
+  "thresholds": {
+    "interesting_bits": 1,
+    "serious_bits": 8,
+    "breakthrough_bits": 32,
+    "meets_interesting": false
+  },
+  "verdict": "H1 NOT supported: no efficiently computable non-trivial endomorphism; no special-j neighbour; rho bits saved ~ 0 (< interesting threshold 1)."
+}
