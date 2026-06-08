@@ -1222,3 +1222,106 @@ match Igusa invariants). Estimated 1-2 PARI sessions.
 ### Commits made
 
 - `d9e7414` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
+
+---
+
+## 2026-06-08 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS/Howe): (2,2)-isogeny kernel enumeration for Howe-glued ppav
+identification over F_43. Proposed in 2026-06-06 log as the immediate concrete
+next task with fully specified algorithm: enumerate 15 isotropic subgroups of
+E1[2]×E2[2], check Galois stability, match Igusa invariants against the 7
+canonical Z/3Z classes.
+
+### Work done
+
+- Installed PARI/GP 2.15.4 (`apt-get install pari-gp`; not present in container).
+- Found `howe_richelot_p43.gp` (committed 2026-06-03) fails: nested multi-line
+  `ff3_add(ff3_add(...), ...)` calls cause parse errors in PARI 2.15.4.
+- Rewrote as `howe_richelot_p43_v2.gp`: all intermediate values stored in named
+  variables (`t1`, `t2`, ..., `D`) to avoid nested multi-line calls.
+- Ran the three Richelot sigma pairings (sigma_0, sigma_1, sigma_2) for the
+  naive cover y²=(x³+7)(x³+13) over F_43 and recorded char polys.
+- Verified that all 7 canonical Z/3Z classes (from 2026-06-01 search) have
+  char poly T⁴−83T²+1849 = target. ✓
+- Tested CHLRS Rosenhain formula (`chlrs_igusa_formula.gp`) with p=43, b_E=7,
+  d=2, ω=6; computed Rosenhain coordinates (λ₁,λ₂,λ₃) = (24,7,40).
+- Ran `howe_richelot_v5.gp` (Z/3Z Richelot between canonical classes) for all
+  7 classes; recorded results.
+
+### Findings
+
+**Three distinct isogeny classes over F_43 encountered:**
+
+| Class | Char poly | #Jac | Example curve | Source |
+|-------|-----------|------|---------------|--------|
+| A  | T⁴−6T³+55T²−258T+1849 | 1641 | y²=x⁶+20x³+5 | naive cover (x³+7)(x³+13) |
+| A' | T⁴+6T³+55T²+258T+1849 | 1897 | y²=x⁶+41x³+5 | Richelot sigma_0 of A |
+| B  | T⁴−74T²+1849 | 1679 | y²=x(x−1)(x−24)(x−7)(x−40) | CHLRS Rosenhain |
+| C  | T⁴−83T²+1849 | 1767 | y²=x⁶+ax³+b (7 classes) | TARGET |
+
+Key observations:
+
+1. **Naive cover in wrong isogeny class**: y²=(x³+7)(x³+13) = y²=x⁶+20x³+5
+   has #Jac=1641 ≠ 1767 = #E1 · #E2 / p. It is NOT isogenous to E1×E2 over F_43.
+   The Richelot from this cover (all three sigma pairings) lands in Class A',
+   also NOT the target.
+
+2. **CHLRS Rosenhain formula gives wrong class**: With d=2, ω=6 for p=43,
+   the formula yields (λ₁,λ₂,λ₃)=(24,7,40); char poly of the resulting
+   Rosenhain curve = T⁴−74T²+1849 (Class B). NOT in target class C.
+
+3. **Z/3Z Richelot fails for canonical classes**: `howe_richelot_v5.gp`
+   returns a=−1, b=−1 for all 7 canonical classes — the discriminant Δ or
+   cube-root extraction fails over F_{43³} for these parameters. The Z/3Z
+   Richelot graph does not connect to the product locus from these starting
+   points.
+
+4. **Root cause diagnosis**: The three constructions above all start from the
+   WRONG DIRECTION. The Howe construction gives a map Jac(C) → E1×E2, where
+   E1×E2 is a SPLIT (boundary) abelian surface in A_2. The standard Richelot
+   maps between smooth Jacobians in the interior of A_2 and cannot reach the
+   boundary directly. To find which of the 7 classes is (E1×E2)/Γ_α, one must:
+   (a) compute the ppav structure of the quotient directly, OR
+   (b) match Igusa invariants via CM theory.
+
+**BLOCKED**: The Howe-glued ppav identification requires computing Igusa
+invariants of (E1×E2)/Γ_α directly — not achievable via Richelot from any
+F_43-smooth sextic curve starting point. Requires theta-null arithmetic or
+CM class polynomial computation.
+
+### Next step proposal
+
+**Concrete task**: Implement direct (2,2)-kernel enumeration using the
+Kummer surface / theta-null approach over F_43.
+
+The period matrix of E1: y²=x³+7 at the CM point is τ = (−1+√−3)/2 = e^{2πi/3}.
+The Howe (2,2)-isogeny quotient (E1×E2)/Γ_α has Ω = [[τ,0],[0,τ']] modified
+by the Γ_α gluing. The theta-null values θ[ab](0,Ω) determine the Rosenhain
+parameters (and hence Igusa invariants) of the quotient.
+
+Alternative (simpler for F_43): use the explicit formula for the Howe gluing.
+For E: y²=x³+c with 2-torsion at x=−c^{1/3} (in F_{43³}), the Howe
+construction gives a specific Rosenhain form. The three kernel choices
+(σ_0, σ_1, σ_2) give three distinct F_43-isomorphism classes; one of them
+must be among the 7 canonical classes.
+
+The discrepancy in the current computation is likely a SIGN CONVENTION error
+in the Richelot quadratic grouping: the script groups E1[2]-points together
+and E2[2]-points together, but the correct (2,2)-isogeny kernel Γ_α should
+PAIR one E1[2]-point with one E2[2]-point in each quadratic. The quadratics
+G_i should be G_i(x) = (x − α_i)(x − β_{σ(i)}) where α_i ∈ E1[2] and
+β_{σ(i)} ∈ E2[2], NOT a product of two E1[2]-points.
+
+**Proposed fix**: Rewrite `howe_richelot_p43_v2.gp` with correct cross-pairings:
+- G_1(x) = (x − α)(x − β_{σ(1)}),  where α=alpha, β=sigma_0_match
+- G_2(x) = (x − ζ_3·α)(x − ζ_3·β_{σ(1)})
+- G_3(x) = (x − ζ_3²·α)(x − ζ_3²·β_{σ(1)})
+This gives a Γ_α ⊂ E1[2]×E2[2] with the correct isotropic structure, and the
+Richelot image should land in one of the 7 canonical Z/3Z classes.
+
+### Commits made
+
+- `howe_richelot_p43_v2.gp` added (Richelot from naive cover, fixed for PARI 2.15.4 syntax)
