@@ -1437,3 +1437,4 @@ enough orders that the isogeny can be verified by direct point-counting.
 
 ### Commits made
 
+- `3eaf753` autolab 2026-06-09: 5/15 sextic-twist pairs Howe-glueable for secp256k1; Priority-2 Richelot structural obstruction diagnosed
