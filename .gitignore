@@ -8,3 +8,8 @@ Cargo.lock
 
 # SageMath preparser output (generated when running `sage foo.sage`).
 *.sage.py
+
+# Compiled C benchmark binaries in research/ecdlp_autolab (built locally
+# from the checked-in .c sources; not artifacts to track).
+research/ecdlp_autolab/phase21_rho_v3
+research/ecdlp_autolab/phase22_rho_barrett

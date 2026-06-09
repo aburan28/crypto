@@ -14,7 +14,7 @@ own `research_program_v*.md` file.
 | v4 | Groebner / Semaev deep dive | COMPLETED | All negative; Yokoyama bound confirmed |
 | v5 | Non-naive attempts #1 | COMPLETED | All 4 directions ruled out for LMFDB |
 | v6 | Non-naive attempts #2 + C engineering | COMPLETED | 5 directions closed; C extension 23-86× |
-| **v7** | **Close C-extension gap to 80-bit feasibility** | **PARTIAL** | Phase 22.1 Barrett: **9.47× mul speedup** (4.7× over projected); end-to-end validation pending |
+| **v7** | **Close C-extension gap to 80-bit feasibility** | **PARTIAL** | Phase 22.1 Barrett: **9.47× mul speedup**; Phase 22.6 Barrett+batched-inverse rho: **3.0× end-to-end** (verified vs GMP), gap to 80-bit now ~1.8× |
 | **v8** | **Algorithmic frontiers** | **PLANNED** | F5 Semaev, Drinfeld, tropical, hyperelliptic |
 | **v9** | **Long-horizon roadmap** | **PLANNED** | 1-5 year speculative agenda |
 | **v10** | **Moonshots / catalog of bad ideas** | **PLANNED** | Reference of M1-M15 known-bad approaches |
@@ -24,11 +24,12 @@ own `research_program_v*.md` file.
 
 For a single engineer / researcher with limited time:
 
-1. **v7 Phase 22.6 (Barrett → rho integration)** — IMMEDIATE next action
-   - Barrett microbench gives 9.47× over GMP
-   - End-to-end validation is the critical missing piece
-   - If validated, v7 ships with just Phase 22.1 + 22.6 (~2 days work)
-   - Closes 5.5× gap, makes 80-bit feasible in budget
+1. **v7 Phase 22.6 (Barrett → rho integration)** — DONE (2026-06-09)
+   - Barrett microbench gave 9.47× over GMP; end-to-end now measured
+   - `phase22_rho_barrett.c`: Barrett + batched Montgomery inversion
+   - **3.0× end-to-end** over v3 baseline, arithmetic verified vs GMP
+   - Closes most of the 5.5× gap; ~1.8× remains (SIMD/Montgomery/multi-target)
+   - See `phase22_rho_barrett_result.md`
 
 2. **v11 Phase 41 (paper)** in parallel (8 weeks of writing)
    - Highest leverage: converts existing v1-v6 + new v7 results
