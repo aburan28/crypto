@@ -1325,3 +1325,115 @@ Richelot image should land in one of the 7 canonical Z/3Z classes.
 ### Commits made
 
 - `howe_richelot_p43_v2.gp` added (Richelot from naive cover, fixed for PARI 2.15.4 syntax)
+
+## 2026-06-09 (autolab run)
+
+### Task picked
+
+Priority 3 (Howe sextic twists): check all 15 pairwise Howe (H1)+(H2)+(H3)
+conditions for the 6 sextic twists of secp256k1 over F_p. Priority 2
+(CHLRS/Howe Richelot) was last worked 2026-06-08 and is BLOCKED (Richelot
+from any Z/3Z-symmetric genus-2 curve cannot reach the split locus E1×E2 over
+the base field — shown by Δ = SP·39 ≠ 0 for all 3 symmetric factorizations).
+Priority 3 has a complete script (`howe_sextic_twists_all15.gp`) with no
+prior execution on actual secp256k1 parameters.
+
+### Work done
+
+- Installed PARI/GP 2.15.4 (container-fresh, not present).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` on the real secp256k1 prime.
+  Run time: ~40 s (dominated by `znprimroot` for 256-bit prime).
+- Computed GCDs for all 15 pairs with a follow-up script (`/tmp/gcd2.gp`).
+- Re-examined Priority 2 script `howe_richelot_p43_v2.gp`: confirmed the
+  "proposed fix" from 2026-06-08 was ALREADY implemented — the σ₀/σ₁/σ₂
+  pairings are already cross-pairings (α ∈ E1[2] with β ∈ E2[2] per G_i).
+  The Richelot CANNOT reach E1×E2 as a split abelian surface because Δ=SP·39≠0
+  for any Z/3Z-symmetric factorization of any Z/3Z-symmetric sextic. This is
+  a structural obstruction, not a coding bug.
+
+### Findings
+
+**Howe-glueable pairs: 5 / 15**
+
+| Pair (i,j) | H1 | H2 | H3 | Glueable? |
+|------------|----|----|-----|-----------|
+| (0,1) | YES | NO  | YES | no  |
+| (0,2) | YES | YES | YES | **YES** |
+| (0,3) | YES | YES | YES | **YES** |
+| (0,4) | YES | NO  | YES | no  |
+| (0,5) | YES | YES | YES | **YES** |
+| (1,2) | YES | NO  | YES | no  |
+| (1,3) | YES | NO  | NO  | no  |
+| (1,4) | YES | YES | YES | **YES** |
+| (1,5) | YES | NO  | NO  | no  |
+| (2,3) | YES | YES | YES | **YES** |
+| (2,4) | YES | NO  | YES | no  |
+| (2,5) | YES | YES | NO  | no  |
+| (3,4) | YES | NO  | YES | no  |
+| (3,5) | YES | YES | NO  | no  |
+| (4,5) | YES | NO  | YES | no  |
+
+**2-torsion structure (H2)**:
+- Pattern [3] (irreducible, 2-torsion in F_{p³}): k = 0, 2, 3, 5  (four twists)
+- Pattern [1,1,1] (splits completely, all 2-torsion in F_p): k = 1, 4  (two twists)
+- H2 holds iff both twists share the same pattern.
+- The two [1,1,1] twists have b₁ = 7·u and b₄ = 7·u⁴ where u is a primitive
+  6th root of unity mod p. These b-values are cubes in F_p (hence x³+b_k
+  splits). cl(u) = 2 mod 3 (since cl(7)=1 and cl(7·u)=0 means cl(u)=2).
+
+**H3 failures — GCDs** (small CM factors only):
+- gcd(N₁, N₃) = 3
+- gcd(N₁, N₅) = 3
+- gcd(N₂, N₅) = 4
+- gcd(N₃, N₅) = 3
+
+  These tiny gcds (3 or 4) arise from CM arithmetic: N₃ = 3²·13²·3319·22639·[~192-bit prime]
+  (partial factorization; full factoring timed out at 30 s). The factor 4 in
+  gcd(N₂,N₅) comes from p+1 ≡ 0 mod 4 (since p ≡ 3 mod 4) and N₂+N₅ = 2(p+1).
+
+**Glueable pair GCDs** (all trivially coprime):
+- gcd(N₀, N₂) = gcd(N₀, N₃) = gcd(N₀, N₅) = gcd(N₁, N₄) = gcd(N₂, N₃) = 1
+
+**N₀ (secp256k1 order) is prime** (confirmed). **N₃ is composite**.
+
+**Priority 2 structural diagnosis** (Richelot obstruction):
+For any Z/3Z-symmetric sextic y² = x⁶+ax³+b with roots {ρ^{1/3}·ζ₃ⁱ, (ρ')^{1/3}·ζ₃ⁱ},
+the Richelot discriminant for σ₀/σ₁/σ₂ factorizations is:
+  Δ = S · P · c   where S = ρ^{1/3}+(ρ')^{1/3}, P = (ρρ')^{1/3} = b^{1/3}
+and c = ζ₃⁴ - 3ζ₃² + 2ζ₃ = 39 mod 43 (non-zero).
+Therefore Δ ≠ 0 for any smooth sextic with non-zero S and P. The Richelot from
+any Z/3Z-symmetric curve NEVER degenerates to a split abelian surface E1×E2.
+The Howe-glued curve must be found via Mestre's algorithm (outside PARI's
+standard library), not Richelot from the naive or canonical sextics.
+
+**Cryptographic implication**:
+secp256k1 (k=0) participates in 3 Howe-glueable pairs: (0,2), (0,3), (0,5).
+Genus-2 curves C/F_p with Jac(C) —(2,2)→ secp256k1 × E_j exist for j∈{2,3,5}.
+However, as stated in PAPER_STRUCTURAL_COMPLETENESS.md, these covers do not
+reduce ECDLP to anything easier: the DLP in Jac(C) has complexity ~L(p⁴)[1/2],
+strictly harder than √p (BSGS on secp256k1). The result is consistent with the
+main theorem.
+
+Special case (1,4): The only glueable pair where BOTH curves have [1,1,1]
+2-torsion (all E[2] rational over F_p). For this pair, the Howe gluing map
+α: E₁[2] → E₂[2] is defined over F_p (not just an extension), so the
+Howe-glued genus-2 curve might have a more explicit F_p-rational structure.
+This could be worth investigating for completeness of the Mestre construction.
+
+### Next step proposal
+
+**Concrete**: Implement the GLV-aware HNP lattice in `glv_hnp_phase2_toy.gp`.
+The existing script builds signatures and verifies the HNP equation but defers
+the lattice. PARI has `lllint` built in. The lattice has dimension 2m+1 for m
+signatures; for the toy curve (n ~ 500–2000), LLL will run instantly. The key
+deliverable: show the short vector actually encodes (d, k₁₁, ..., k₁ₘ) and
+LLL recovers d. This directly addresses Priority 5 and uses the P-521 LLL fix
+(Priority 1, closed 2026-06-06) as confirmation that the LLL code is correct.
+
+Alternative: implement the pair (1,4) Mestre construction over a small prime
+where both E₁ and E₂ have fully rational 2-torsion (simplest Howe case). Find
+a prime p ≡ 1 mod 6 where both b₁ and b₄ (the [1,1,1] twists) have small
+enough orders that the isogeny can be verified by direct point-counting.
+
+### Commits made
+
