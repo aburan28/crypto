@@ -111,6 +111,7 @@ pub mod coleman_integration;
 pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
+pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;
 pub mod fght_snfs;
@@ -202,6 +203,12 @@ pub use legacy_curve_attacks::{
     run_legacy_curve_attack_demos, BoundedDlpSolution, LegacyCurveAttackDemo,
 };
 pub use multi_key_hnp::{build_transcript, multi_key_hnp_recover_master, ChildKeySignature};
+pub use ecdlp_variants::{
+    bsgs_average_case, bsgs_interleaving, bsgs_interleaving_block, bsgs_interleaving_negation,
+    bsgs_negation, bsgs_textbook, demo_group_mid, demo_group_small, gaudry_schost,
+    gaudry_schost_montgomery, gaudry_schost_negation, grumpy_giants, grumpy_giants_block,
+    grumpy_giants_negation, DlpSolution, EcGroup, GaudrySchostOptions,
+};
 pub use pollard_rho::{
     pollard_rho_dlp, pollard_rho_dlp_zp, pollard_rho_dlp_zp_multi, pollard_rho_dp_dlp_zp,
     pollard_rho_dp_dlp_zp_multi, DpRhoOptions, RhoOptions, RhoSolution,
