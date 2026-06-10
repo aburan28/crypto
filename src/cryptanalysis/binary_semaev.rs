@@ -109,6 +109,71 @@ pub fn binary_semaev_s3_in_x3(
     (sum12_sq, prod12, c)
 }
 
+// ── Semaev S₄ for binary curves ────────────────────────────────────
+
+/// **Semaev's 4th summation polynomial** over `F_{2^m}` for the binary
+/// curve `E: y² + xy = x³ + ax² + b`.
+///
+/// `S₄(x₁, x₂, x₃, x₄) = 0` iff there exist `y_i ∈ F_{2^m}` (possibly
+/// in a quadratic extension) such that the four affine points
+/// `P_i = (x_i, y_i)` admit a sign choice `±P_1 ± P_2 ± P_3 ± P_4 = O`.
+///
+/// ## Construction
+///
+/// We use the recursive Semaev identity (Semaev 2004, eqn. 4):
+///
+/// ```text
+///     S_{n+m-1}(x_1, …, x_n, y_1, …, y_m)
+///         = Res_X( S_{n+1}(x_1, …, x_n, X), S_{m+1}(y_1, …, y_m, X) ).
+/// ```
+///
+/// Specialising to `n = m = 2` gives
+///
+/// ```text
+///     S_4(x_1, x_2, x_3, x_4)
+///         = Res_X( S_3(x_1, x_2, X), S_3(x_3, x_4, X) ).
+/// ```
+///
+/// Each of the inner `S_3`'s is a quadratic in `X` with coefficients
+/// `(A_i, B_i, C_i)` from [`binary_semaev_s3_in_x3`].  The resultant of
+/// two quadratics `A_1 X² + B_1 X + C_1` and `A_2 X² + B_2 X + C_2` is
+///
+/// ```text
+///     Res = (A_1 C_2 + A_2 C_1)² + (A_1 B_2 + A_2 B_1)(B_1 C_2 + B_2 C_1)
+/// ```
+///
+/// (the characteristic-2 simplification of the standard Sylvester
+/// determinant; signs collapse since `−x = x` in `F_2`).
+///
+/// The result is symmetric in all four arguments — see the test
+/// `s4_symmetric_in_all_args`.
+///
+/// ## Note on the trace condition
+///
+/// As with `S_3`, the vanishing of `S_4` is the algebraic condition
+/// only; whether the `y_i` actually live in `F_{2^m}` (rather than the
+/// quadratic extension) is a separate trace-of-the-slope question.
+/// For the Petit–Quisquater pipeline that uses this polynomial, the
+/// sign-and-y-lift step at relation finalisation handles this exactly
+/// the same way the `n = 2` driver does.
+pub fn binary_semaev_s4(
+    x1: &F2mElement,
+    x2: &F2mElement,
+    x3: &F2mElement,
+    x4: &F2mElement,
+    b: &F2mElement,
+    irr: &IrreduciblePoly,
+) -> F2mElement {
+    let (a1, b1, c1) = binary_semaev_s3_in_x3(x1, x2, b, irr);
+    let (a2, b2, c2) = binary_semaev_s3_in_x3(x3, x4, b, irr);
+    // Res = (A_1 C_2 + A_2 C_1)² + (A_1 B_2 + A_2 B_1)(B_1 C_2 + B_2 C_1).
+    let t1 = a1.mul(&c2, irr).add(&a2.mul(&c1, irr)).square(irr);
+    let t2_left = a1.mul(&b2, irr).add(&a2.mul(&b1, irr));
+    let t2_right = b1.mul(&c2, irr).add(&b2.mul(&c1, irr));
+    let t2 = t2_left.mul(&t2_right, irr);
+    t1.add(&t2)
+}
+
 // ── Artin-Schreier and quadratic solvers in F_{2^m} ────────────────
 
 /// Solve `t² + t = c` over `F_{2^m}`.
@@ -383,5 +448,97 @@ mod tests {
             }
         }
         assert!(tested, "no non-degenerate (P₁, P₂) pair found");
+    }
+
+    /// `S₄` is symmetric in all four arguments.  We spot-check four
+    /// permutations against the canonical evaluation.
+    #[test]
+    fn s4_symmetric_in_all_args() {
+        let irr = f64_irr();
+        let m = 6;
+        let b = F2mElement::from_bit_positions(&[0, 2], m);
+        let x1 = F2mElement::from_bit_positions(&[1], m);
+        let x2 = F2mElement::from_bit_positions(&[0, 3], m);
+        let x3 = F2mElement::from_bit_positions(&[2, 4], m);
+        let x4 = F2mElement::from_bit_positions(&[1, 5], m);
+        let v1234 = binary_semaev_s4(&x1, &x2, &x3, &x4, &b, &irr);
+        let v2134 = binary_semaev_s4(&x2, &x1, &x3, &x4, &b, &irr);
+        let v1243 = binary_semaev_s4(&x1, &x2, &x4, &x3, &b, &irr);
+        let v3412 = binary_semaev_s4(&x3, &x4, &x1, &x2, &b, &irr);
+        let v4321 = binary_semaev_s4(&x4, &x3, &x2, &x1, &b, &irr);
+        let v1324 = binary_semaev_s4(&x1, &x3, &x2, &x4, &b, &irr);
+        let v1423 = binary_semaev_s4(&x1, &x4, &x2, &x3, &b, &irr);
+        assert_eq!(v1234, v2134, "swap (1,2)");
+        assert_eq!(v1234, v1243, "swap (3,4)");
+        assert_eq!(v1234, v3412, "swap pairs");
+        assert_eq!(v1234, v4321, "full reversal");
+        assert_eq!(v1234, v1324, "swap (2,3)");
+        assert_eq!(v1234, v1423, "swap (2,4)");
+    }
+
+    /// `S₄` vanishes on four collinear E-points: `P₁ + P₂ + P₃ + P₄ = O`.
+    /// Construct `P_4 = -(P_1 + P_2 + P_3)`; check `S₄(x_1, x_2, x_3, x_4) = 0`.
+    #[test]
+    fn s4_vanishes_on_4_points_summing_to_o() {
+        let irr = f64_irr();
+        let m = 6;
+        let a = F2mElement::one(m);
+        let b = F2mElement::from_bit_positions(&[0, 1, 4], m);
+        let curve = ECurve::new(m, irr.clone(), a, b.clone());
+        let mut points = Vec::new();
+        for xi in 1u64..(1u64 << m) {
+            let x = F2mElement::from_biguint(&BigUint::from(xi), m);
+            for yi in 0u64..(1u64 << m) {
+                let y = F2mElement::from_biguint(&BigUint::from(yi), m);
+                let pt = Pt::Aff { x: x.clone(), y };
+                if curve.is_on_curve(&pt) {
+                    points.push(pt);
+                    if points.len() >= 6 {
+                        break;
+                    }
+                }
+            }
+            if points.len() >= 6 {
+                break;
+            }
+        }
+        assert!(points.len() >= 3, "need ≥ 3 distinct points on E");
+        // Find a non-degenerate triple.
+        let mut tested = false;
+        'outer: for i in 0..points.len() {
+            for j in (i + 1)..points.len() {
+                for k in (j + 1)..points.len() {
+                    let p1 = points[i].clone();
+                    let p2 = points[j].clone();
+                    let p3 = points[k].clone();
+                    let p12 = curve.add(&p1, &p2);
+                    if matches!(p12, Pt::Inf) {
+                        continue;
+                    }
+                    let p123 = curve.add(&p12, &p3);
+                    if matches!(p123, Pt::Inf) {
+                        continue;
+                    }
+                    let p4 = curve.neg(&p123);
+                    let (x1, x2, x3, x4) = match (&p1, &p2, &p3, &p4) {
+                        (
+                            Pt::Aff { x: a, .. },
+                            Pt::Aff { x: b, .. },
+                            Pt::Aff { x: c, .. },
+                            Pt::Aff { x: d, .. },
+                        ) => (a.clone(), b.clone(), c.clone(), d.clone()),
+                        _ => continue,
+                    };
+                    let s4 = binary_semaev_s4(&x1, &x2, &x3, &x4, &b, &irr);
+                    assert!(
+                        s4.is_zero(),
+                        "S₄ should vanish on a collinear-in-the-group 4-tuple"
+                    );
+                    tested = true;
+                    break 'outer;
+                }
+            }
+        }
+        assert!(tested, "no non-degenerate 4-tuple found");
     }
 }
