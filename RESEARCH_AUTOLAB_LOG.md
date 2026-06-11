@@ -1579,4 +1579,4 @@ Since |E1(F_43)| = 31 and |E2(F_43)| = 57 are both ODD, neither E1 nor E2 has an
 
 ### Commits made
 
-- [see below] autolab 2026-06-11: Howe-glued curve y²=(x³+7)(x³+13) identified; F_{p³} obstruction confirmed
+- `eddc591` autolab 2026-06-11: Howe-glued curve y²=(x³+7)(x³+13) identified; F_{p³} obstruction confirmed
