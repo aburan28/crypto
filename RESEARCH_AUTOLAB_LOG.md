@@ -1676,4 +1676,4 @@ t_secp = 432420386565659656852420866390673177327 (~2^129)
 
 ### Commits made
 
-- `[pending]` autolab 2026-06-12: secp256k1 F_{p³} obstruction verified numerically; Igusa J4/J6 for F_43 Howe curve
+- `8352a7f` autolab 2026-06-12: secp256k1 F_{p³} obstruction verified numerically; Igusa J4/J6 for F_43 Howe curve
