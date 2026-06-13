@@ -1677,3 +1677,70 @@ t_secp = 432420386565659656852420866390673177327 (~2^129)
 ### Commits made
 
 - `8352a7f` autolab 2026-06-12: secp256k1 F_{p³} obstruction verified numerically; Igusa J4/J6 for F_43 Howe curve
+
+---
+
+## 2026-06-13 (autolab run)
+
+### Task picked
+
+**Priority 2 continuation** (F_{p³} obstruction paper integration). The 2026-06-12 session proved
+the F_{p³} obstruction theorem numerically and left "paper integration (high priority)" as the
+explicit next step. Thread 1 (P-521 LLL) is CLOSED. Thread 2 has recent measurable progress
+and a clear continuation point.
+
+### Work done
+
+- **Read** `paper/structural_completeness.tex` to understand section structure and insertion points.
+- **Added Proposition 5.1** (`prop:fp3obs`) in §5 (The Howe-gluing structural fact), after the
+  existing Remark, with four enumerated items: (i) x³+7 irreducible over F_p; (ii) partner twist
+  polynomials also irreducible; (iii) Galois-equivariant α not defined over F_p or F_{p²};
+  (iv) Howe isogeny defined over F_{p³} only.
+- **Added proof** citing Newton-power-sum computation, factormod result, explicit t value, and
+  pointing to `secp256k1_cm_audit/fp3_obstruction_secp256k1.gp`.
+- **Added Corollary 5.2** (`cor:fp3cost`): Cover-based attack on secp256k1 costs O(p^{3/2}) ≈ 2^384
+  (by Gaudry), versus 2^128 for direct ECDLP → 2^256 times slower.
+- **Added toy-verification paragraph** for p=43, presenting Igusa invariants
+  (J2:J4:J6:J8:J10) = (39:27:7:15:36) in P(2,4,6,8,10)/F_43, with a note on the 2× PARI
+  normalisation convention for J2, and citing `igusa_f43_howe.gp`.
+- **Updated main theorem proof** (§7 case list): $(N,N)$-cover bullet now references
+  Corollary ref{cor:fp3cost} and notes F_{p³} forces O(p^{3/2}) for secp256k1.
+- **Updated abstract**: added two sentences describing the secp256k1-specific sharpening
+  (x³+7 irreducible → cover over F_{p³} → attack cost 2^384 ≈ 2^256 times slower).
+- **Updated Reproducibility table**: added `fp3_obstruction_secp256k1.gp` (200 LOC) and
+  `igusa_f43_howe.gp` (58 LOC); total updated to ≈3533.
+- **Added Open question**: exact CQ normalisation of Igusa J4/J6 for C_43 pending Sage cross-check.
+- `cargo test --test curve_audit` → 5/5 pass.
+
+### Findings
+
+**Paper now contains:**
+- Proposition (F_{p³} obstruction) + computational proof with explicit numerical data.
+- Corollary (cover-attack cost ≈ 2^384 for secp256k1, 2^256× slower than direct rho).
+- Toy-verification paragraph (p=43, full Igusa tuple).
+- Abstract updated with the sharper secp256k1 result.
+
+**Remaining paper gaps (not addressed today):**
+- Igusa J4/J6 in exact CQ normalization (need Sage; marked as open question).
+- Pair (2,5) / [1,1,1]×[1,1,1] case: cover exists over F_p but does not involve secp256k1;
+  no paper section added (low priority).
+
+**PARI note**: `gp` binary not in PATH in this execution environment; numerical results used
+from 2026-06-11/12 sessions (which did have PARI). The computation is reproducible by running
+`gp -q secp256k1_cm_audit/fp3_obstruction_secp256k1.gp`.
+
+### Next step proposal
+
+1. **Igusa CQ normalization** (highest remaining sub-task): Run
+   `sage -c "R.<x>=QQ[]; C=HyperellipticCurve(x^6+20*x^3+5); print(C.igusa_clebsch_invariants())"`.
+   Compare J4, J6 to `igusa_f43_howe.gp` output (39:27:7:15:36). Determine exact scaling.
+   Update toy-verification paragraph with CQ-normalized tuple if they differ.
+
+2. **Thread 4 (Cross-curve LLL)**: `tests/lll_degeneracy_probe.rs` needs 3-of-3 seeds at 384 bits.
+   Last run: 1/1 seed confirmed. Run with `--test lll_degeneracy_probe` with 2 more seeds.
+
+3. **Thread 5 (GLV-HNP toy)**: `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` — try 32-bit toy curve.
+
+### Commits made
+
+- [to be filled after commit]
