@@ -1,0 +1,312 @@
+# The Elliptic Curve Discrete Logarithm Problem: State of the Art (2025–2026)
+
+*Compiled June 2026. A survey of the best known classical algorithms, special-case
+attacks, quantum resource estimates, record computations, and the implications for
+standardized curves and the post-quantum migration.*
+
+---
+
+## TL;DR
+
+- For a well-chosen curve of group order `n`, the **best known classical attack is still
+  generic square-root** — Pollard rho / parallel collision search / kangaroo at
+  `~sqrt(n)` ≈ `2^(n_bits/2)` group operations. This has not changed.
+- **No subexponential classical algorithm exists for prime-field ECDLP.** Index calculus
+  (summation polynomials, point decomposition, Gröbner bases) yields subexponential or
+  improved attacks **only over extension fields** `F_{q^n}`, and the most optimistic
+  binary-field claims rest on the **first-fall-degree assumption, now widely doubted**.
+- **Special-case breaks** (anomalous curves, low-embedding-degree / MOV, Weil descent /
+  GHS) and **implementation breaks** (invalid-curve, small-subgroup, twist, biased-nonce
+  lattice/Bleichenbacher attacks) do **not** apply to correctly-implemented P-256,
+  Curve25519, or secp256k1.
+- The **practical record frontier** is ~**112-bit** (prime field) / ~**117-bit** (binary
+  field) for genuine ECDLP, and ~**130-bit interval** DLP for the Bitcoin-puzzle kangaroo
+  solves — roughly `2^58`–`2^65` operations, about `10^19` times short of breaking a
+  256-bit curve.
+- **Shor's algorithm breaks ECDLP in polynomial time** on a fault-tolerant quantum
+  computer, and **ECC-256 is an easier quantum target than RSA-2048**. Latest logical-qubit
+  estimates for ECDLP-256 are ~**1,200 logical qubits** with tens of millions of Toffoli
+  gates — but **no cryptographically relevant quantum computer (CRQC) exists**, and the
+  hardware gap remains 1–2 orders of magnitude in logical qubits.
+- **NIST IR 8547** (deprecate ECC by 2030, disallow by 2035) and **NSA CNSA 2.0** drive the
+  migration; **hybrid X25519MLKEM768** is already the dominant PQC key exchange on the web
+  (~38% of human HTTPS traffic on Cloudflare by early 2025).
+
+---
+
+## 1. Classical generic algorithms (the standing security bound)
+
+The security of every standardized curve rests on the fact that, with no exploitable
+structure, the only attack is generic.
+
+- **`O(sqrt(n))` is the best known and essentially optimal.** Pollard rho, baby-step
+  giant-step, and van Oorschot–Wiener parallel collision search all cost
+  `~sqrt(pi*n/2)` group operations. Shoup's 1997 generic-group lower bound — any
+  `m`-query generic algorithm succeeds with probability `< (m+2)^2/(2p) + 1/p` — matches
+  the BSGS upper bound, so generic algorithms are optimal *in the generic model*. Applying
+  that bound to a concrete curve is a modeling assumption, but it is the universally-used
+  effective security bound.
+  *(Galbraith–Gaudry survey, DCC 2015, doi 10.1007/s10623-015-0146-7; Shoup, EUROCRYPT 1997.)*
+
+- **Parallelization is linear.** Van Oorschot–Wiener replaces one long rho walk with many
+  short walks to *distinguished points*, collisions detected via a shared list; expected
+  work divides cleanly across processors. This is what all record computations use.
+  *(van Oorschot & Wiener, J. Cryptology 1999.)*
+
+- **The negation map gives a `sqrt(2)` (~1.41×) speedup** by walking on classes `{P, -P}`,
+  but induces *fruitless cycles* that trap the walk; realized speedups are
+  implementation-dependent (reported ~1.29× up to near-2× with careful SIMD cycle
+  handling), generally short of the theoretical `sqrt(2)`.
+  *(Bernstein–Lange–Schwabe 2011; Bos–Kleinjung–Lenstra, Information Sciences 2012.)*
+
+- **Interval ECDLP** (logarithm known to lie in an interval of width `w`) is solved by
+  **Pollard's kangaroo (lambda)** in `~O(sqrt(w))`, parallelizable linearly. Interleaved
+  BSGS and Gaudry–Schost variants can edge out plain kangaroo. This is the regime of the
+  Bitcoin-puzzle solves (§4).
+
+**Bottom line:** as of 2025–2026 there is **no accepted classical algorithm beating
+`O(sqrt(n))` for standard prime-field curves**; recurring "sub-sqrt" preprints have not
+survived scrutiny.
+
+---
+
+## 2. Index calculus on elliptic curves (works only over extension fields)
+
+The major research thread that *could* have broken ECDLP — and the reason the prime-field
+case is reassuring precisely because the thread failed there.
+
+- **Semaev summation polynomials (2004).** `S_{m+1}` vanishes exactly when `m+1` curve
+  points with the given x-coordinates sum to zero. This is the algebraic engine of every
+  elliptic index-calculus attempt. *(Semaev, ePrint 2004/031.)*
+
+- **Gaudry / Diem point decomposition.** Over `F_{q^n}`, Weil descent + Gröbner-basis
+  solving of the summation system yields, for fixed `n`, heuristic time roughly
+  `O(q^{2 - 2/n})`, beating generic `q^{n/2}` once `n` is large enough.
+  *(Gaudry, ePrint 2010/157; Diem.)*
+
+- **Diem's subexponential result.** For suitable families over `F_{q^n}` as `n` grows
+  (including some binary fields heuristically), genuinely **subexponential** complexity is
+  achievable — the strongest theoretical index-calculus success against elliptic curves.
+
+- **Petit–Quisquater (ASIACRYPT 2012)** conjectured subexponential **binary-field** ECDLP
+  *under the first-fall-degree assumption*.
+
+- **The refutation.** The **first-fall-degree assumption is now widely doubted**:
+  computational evidence and constructed counterexamples (the CRYPTO 2015 "last fall
+  degree" work, ePrint 2015/573; ePrint 2015/358 on generalized FFD assumptions) show it
+  fails in general and is unlikely to hold for the relevant Weil-descent systems. This is
+  the main reason the 2012-era subexponential optimism for binary ECDLP has receded.
+
+- **Prime fields are untouched.** No subexponential algorithm is known for ECDLP over
+  `F_p` (or binary fields of *prime* extension degree). Lifting / "xedni calculus"
+  approaches fail to produce small enough relations (Miller's argument, strengthened by
+  Silverman–Suzuki). Even where index calculus formally applies, generic `O(sqrt(n))` still
+  wins at practically-used parameter sizes — the advantage is purely asymptotic and
+  assumption-dependent. *(Galbraith–Gaudry survey; ePrint 2017/609.)*
+
+---
+
+## 3. Special-case and implementation attacks (avoidable by construction)
+
+None of these are generic ECDLP breaks; they target curves or implementations with
+exploitable structure.
+
+### Structural (curve-class) attacks
+| Attack | Target class | Effect | Hits standard curves? |
+|---|---|---|---|
+| **MOV / Frey–Rück** | low embedding degree `k` | transfers ECDLP to DLP in `F_{p^k}^*`, then subexponential index calculus | **No** — P-256/secp256k1/25519 have huge `k` |
+| **Anomalous (SSSA: Smart / Semaev / Satoh–Araki, 1997–99)** | trace 1, `#E = p` | **polynomial-time** via p-adic elliptic log into `(F_p, +)` | **No** — none are anomalous |
+| **Weil descent / GHS (2001–02)** | binary `F_{2^n}`, composite `n` | maps to higher-genus curve where index calculus is easier | **No** — prime-field / well-chosen binary curves |
+
+- **exTNFS fallout (Kim–Barbulescu, CRYPTO 2016)** improved finite-field DLP in
+  `F_{p^n}` with composite `n`, which **re-scored pairing-friendly curves**: BN256, once
+  believed 128-bit, was re-estimated at **~100-bit** security. The community moved to
+  larger curves (**BLS12-381**, **BN462**) for ~128-bit pairings. *(This affects
+  pairing-based crypto, not the base ECDLP of standard signing/KEX curves.)*
+
+### Implementation attacks (recover keys *without* solving ECDLP)
+- **Invalid-curve attacks**: unvalidated input points on a weaker curve leak the private
+  key mod small subgroup orders (CRT); demonstrated against TLS-ECDH.
+- **Small-subgroup attacks**: exploit cofactor > 1 via low-order points; harmless for
+  prime-order (cofactor 1) curves.
+- **Twist attacks**: x-only/Montgomery-ladder ECDH with an x-coordinate on the quadratic
+  twist leaks bits if the twist has small factors. **secp256k1 and P-256 are not strongly
+  twist-secure** and require point validation for x-only ECDH; **Curve25519 was designed
+  twist-secure.** A 2026 advisory (GHSA-r6ph-v2qm-q3c2) shows missing SECT-curve subgroup
+  validation in pyca/cryptography — these flaws remain live.
+- **Biased-nonce ECDSA** (the most practically important): partial nonce leakage reduces
+  to the Hidden Number Problem, solved by lattice reduction (LLL/BKZ) or Bleichenbacher
+  FFT — **no ECDLP solve required**. **Minerva (2020)** recovered 256-bit keys from
+  ~500–2,100 signatures across libgcrypt/wolfSSL/MatrixSSL/SunEC/Crypto++; **LadderLeak
+  (CCS 2020)** needed <1 bit of leakage; **2024 work (Osaki–Kunihiro, SAC 2024)** tolerates
+  high nonce-error rates via 4-list sum algorithms.
+
+**Takeaway:** secp256k1, P-256, and Curve25519 have prime/near-prime order, huge embedding
+degree, and no anomalous/descent structure → best generic attack is `2^128` rho. Their real
+residual risk is **implementation** (point validation, nonce bias), not the math.
+
+---
+
+## 4. Record computations (and what they prove)
+
+> **Crucial distinction:** *full random-instance ECDLP records* (~112–117 bit) are not
+> comparable to *interval/kangaroo "puzzle" solves* (up to ~130-bit interval), which only
+> work because the key is range-confined **and** the public key was exposed.
+
+### Full ECDLP records
+- **Certicom challenges:** ECCp-109 solved Nov 2002 (~10,000 machines, Monico); ECC2-109
+  solved Apr 2004 (~2,600 machines). **ECC2K-130 (131-bit class) is the smallest unsolved
+  Certicom challenge** — a 12+ institution CPU/GPU/Cell/FPGA effort built the attack but
+  never completed it; all 131-bit-and-larger challenges remain open.
+- **112-bit prime field (secp112r1):** solved July 2009 by Bos–Kaihara–Kleinjung–
+  Lenstra–Montgomery on 200+ PlayStation 3 consoles over ~6 months — **largest classic
+  prime-field secp record.**
+- **114-bit prime field (Barreto–Naehrig curve w/ automorphisms):** ~2017/18, ~2,000 CPU
+  cores over ~6 months — largest *prime-field* ECDLP, on a special curve.
+- **117.35-bit binary field (`F_{2^127}`):** Bernstein–Engels–Lange–Niederhagen–Paar–
+  Schwabe–Zimmermann, FPGA, 2016 (ePrint 2016/382) — **largest completed binary-field
+  ECDL.**
+- **No full random-curve ECDLP above ~118 bits has ever been completed.**
+
+### Interval ECDLP — Bitcoin "puzzle" kangaroo solves (secp256k1)
+These are `~2^(N/2)`-op interval DLPs, enabled by exposed public keys:
+- **#115** (114-bit interval): 16 Jun 2020, Zieniewicz & Pons, JeanLucPons Kangaroo,
+  256× Tesla V100, ~13 days (~`2^58` ops).
+- **#120, #125**: solved 2023–2024 (kangaroo).
+- **#130** (~`2^130` interval, ~`2^65` ops): solved **Sep 2024** (RetiredCoder /
+  RCKangaroo — "SOTA" symmetry method, `K≈1.15` vs `2.1` classic, ~8 GKeys/s on RTX 4090).
+- **#135** (~`2^67.5` ops): **unsolved as of late 2025**, targeted by distributed pools.
+- Lower puzzles *without* exposed pubkeys are brute-forced (BitCrack): #66 (Sep 2024),
+  #67 (Feb 2025), #68 (Apr 2025), #69 (Apr 2025) — several "stolen" by RBF/mempool bots
+  re-deriving the key from the briefly exposed pubkey at spend time.
+
+### Security-margin implication
+Largest completed work ≈ `2^58`–`2^65` operations. A 256-bit curve needs `~2^128`
+operations by rho/kangaroo — roughly `2^63` (≈ `10^19`) times harder. **Classically
+infeasible.** The puzzle solves do **not** threaten secp256k1 in normal use: a standard
+unused address (a *hash* of the pubkey, full 256-bit range) offers no shortcut.
+
+---
+
+## 5. Quantum attacks (the actual threat) and resource estimates
+
+- **Shor solves ECDLP in polynomial time** via period-finding on the group; for generic
+  prime-order groups no quantum algorithm asymptotically beats it. **Grover is irrelevant**
+  to ECDLP (only `O(sqrt(N))` unstructured search; it matters for symmetric/hash sizes).
+
+- **ECC-256 is an easier quantum target than RSA-2048.** Because the best *classical* ECC
+  attack (rho, `sqrt`) is far costlier per bit than GNFS on RSA, ECC keys are much smaller,
+  and Shor's cost scales with operand size — so P-256 needs **~2.6× fewer logical qubits
+  and ~100–150× fewer gates** than RSA-2048/3072.
+
+**Trajectory of 256-bit ECC Toffoli-count estimates (illustrative, one curve):**
+
+| Year | Work | Logical qubits | Toffoli gates | Architecture/notes |
+|---|---|---|---|---|
+| 2017 | Roetteler–Naehrig–Svore–Lauter | ~2,330 | ~1.26 × 10¹¹ | seminal concrete estimate; `9n + O(log n)` qubits |
+| 2020 | Häner–Jaques–Naehrig–Roetteler–Soeken | improved trade-offs | lower depth/T-count | windowed arithmetic, Q# implementation |
+| 2023 | Litinski (PsiQuantum) | — | **~44–50 × 10⁶** | "active-volume" photonic; ~1 key / 10 min on ~6,000 modules |
+| 2023 | Gouzien et al. (Alice & Bob) | — | — | **126,133 cat qubits, ~9 hours** |
+| 2026* | Chevignard–Fouque–Schrottenloher (EUROCRYPT 2026) | **~1,193** (≈ 3.12n) | ~2³⁸ (quartic) | Legendre-symbol compression, avoids modular inversion; space↓ gate↑ |
+| 2026* | Google QAI / Ethereum Fdn / Stanford (secp256k1) | **~1,200–1,450** | **~70–90 × 10⁶** | <500k physical qubits, runtime in minutes (superconducting) |
+
+\* 2026-dated items rest partly on secondary reporting + arXiv preprints (some details of
+the Google ECDLP paper reportedly disclosed only via a ZK proof) — **treat exact figures as
+provisional** until proceedings are confirmed.
+
+- **Hardware gap is still large.** Google Willow (Dec 2024) showed below-threshold error
+  correction with 105 physical qubits; public logical-qubit counts are in the *tens*
+  (Quantinuum/Microsoft ~12, Atom/Microsoft ~24). IBM's roadmap targets ~200 logical qubits
+  (~10,000 physical) around 2028–29. Breaking ECC-256 needs **~1,200+ logical qubits /
+  hundreds of thousands of physical qubits** — a 1–2 order-of-magnitude gap.
+- **Expert timeline (GRI / Mosca Quantum Threat Timeline 2025):** a CRQC is "quite possible"
+  (28–49%) within 10 years and "likely" (51–70%) within 15; ~92% of surveyed experts put
+  ≥50% probability at 20 years. Timeline viewed as accelerating.
+
+---
+
+## 6. Standardized curves & the post-quantum migration
+
+- **Classical status:** P-256/P-384, Curve25519/Ed25519, secp256k1 have **no practical
+  classical break**; ~128-bit (P-384: ~192-bit) security stands. secp256k1's GLV
+  endomorphism is only a ~1-bit constant-factor speedup. The **NIST P-curve seeds remain
+  unexplained** (fails SafeCurves "rigidity," a lingering post-Dual_EC trust debate), but
+  **no hidden weakness has ever been shown**; Curve25519 satisfies SafeCurves fully.
+- **Consensus:** ECDLP is **not** expected to fall to classical math advances — the
+  migration is driven **exclusively by Shor**. Koblitz–Menezes counsel humility given the
+  history of special-instance surprises, but no cryptographer is predicting a classical
+  break.
+- **The SIDH/SIKE break (Castryck–Decru 2022)** exploited torsion-point info via Kani's
+  criterion — it killed an *isogeny* KEM and has **no bearing on ECDLP** or
+  P-256/25519/secp256k1.
+- **NIST IR 8547** (initial public draft Nov 2024): RSA/ECDSA/EdDSA/ECDH at 112-bit
+  **deprecated after 2030, disallowed after 2035**; ≥128-bit ECC also disallowed after 2035
+  for federal use. *(As of mid-2026 it still appears to be at IPD status — secondary reports
+  conflict; verify the final at csrc.nist.gov/pubs/ir/8547.)*
+- **NSA CNSA 2.0** (2022, updated 2025): direct migration to PQC (no hybrid required for
+  NSS); networking-gear exclusivity ~2030, OS/apps/cloud ~2033, all NSS quantum-resistant by
+  2035.
+- **Harvest-now-decrypt-later** is the stated reason to migrate **ECDH key exchange now**:
+  recorded traffic is retroactively decryptable once a CRQC exists.
+- **PQC replacements:** FIPS 203 (ML-KEM), 204 (ML-DSA), 205 (SLH-DSA) finalized Aug 2024;
+  **HQC** selected as fifth algorithm (code-based KEM backup) Mar 2025. **Hybrid
+  X25519MLKEM768** is the dominant deployed TLS 1.3 KEX (Chrome default since v124, Apr
+  2024; OpenSSL/Go/Apple OSes). By early 2025 Cloudflare measured **~38% of human HTTPS
+  traffic** using hybrid PQC key agreement, though origin-side support lagged (~4–10%).
+
+---
+
+## 7. Active research directions (2025–2026)
+
+1. **Quantum resource minimization for ECDLP-256** — the live frontier: driving logical
+   qubits toward ~1,200 and Toffoli counts toward tens of millions (Litinski active-volume;
+   Chevignard et al. Legendre-symbol compression; the Google/Ethereum secp256k1
+   spacetime-volume optimization). Benchmarking proposals like *"Brace for impact: ECDLP
+   challenges for quantum cryptanalysis"* (arXiv 2508.14011, 2025) define challenge ladders
+   to track the quantum threat to Bitcoin.
+2. **Extension-field index calculus & the last/first-fall-degree question** — refining
+   complexity bounds, probing whether any salvageable subexponential binary-field attack
+   survives the collapse of the first-fall-degree assumption.
+3. **Better generic-attack engineering** — kangaroo symmetry methods (RCKangaroo SOTA),
+   negation-map cycle handling, GPU/FPGA throughput; relevant to records and interval DLP.
+4. **Nonce-leakage / HNP attacks** — increasingly powerful Bleichenbacher-FFT and
+   lattice methods tolerating tiny or noisy bias (the practically dangerous class).
+5. **PQC migration engineering** — hybrid KEX deployment, agility, key-transparency, and
+   the 2030/2035/2033 compliance timelines.
+
+---
+
+## Sources (selected, by section)
+
+**Classical/generic:** Galbraith–Gaudry survey (DCC 2015, doi 10.1007/s10623-015-0146-7);
+Shoup EUROCRYPT 1997; van Oorschot–Wiener (J. Cryptology 1999); Bernstein–Lange–Schwabe
+negation map (cr.yp.to/elliptic/negation-20110102.pdf); Bos–Kleinjung–Lenstra (Inf. Sci.
+2012).
+**Index calculus:** Semaev ePrint 2004/031; Gaudry ePrint 2010/157; Petit–Quisquater
+EUROCRYPT/ASIACRYPT 2012; last-fall-degree ePrint 2015/573; ePrint 2015/358; prime-field
+ePrint 2017/609.
+**Special-case/impl:** SafeCurves (safecurves.cr.yp.to transfer/twist); Smart/SSSA;
+Gaudry–Hess–Smart ePrint 2001/084; Kim–Barbulescu exTNFS (CRYPTO 2016); Minerva
+(minerva.crocs.fi.muni.cz); LadderLeak ePrint 2020/615; Osaki–Kunihiro SAC 2024;
+GHSA-r6ph-v2qm-q3c2.
+**Records:** Bos et al. 112-bit (joppebos.com/presentations/112bitECDLP.pdf); 114-bit BN
+(Springer 10.1007/978-3-319-78556-1_13); binary-field ePrint 2016/382; ECC2K-130 ePrint
+2009/466 & ecc-challenge.info; JeanLucPons/Kangaroo; RetiredC/RCKangaroo;
+privatekeys.pw/puzzles.
+**Quantum:** Roetteler et al. arXiv 1706.06752; Häner et al. ePrint 2020/077; Litinski
+arXiv 2306.08585; Gouzien et al. arXiv 2302.06639; Gidney 2025 (RSA) arXiv 2505.15917;
+Chevignard–Fouque–Schrottenloher (EUROCRYPT 2026); arXiv 2508.14011; GRI Quantum Threat
+Timeline 2025.
+**Standards/PQC:** NIST IR 8547 (csrc.nist.gov/pubs/ir/8547/ipd); NSA CNSA 2.0; FIPS
+203/204/205; NIST HQC selection (Mar 2025); Cloudflare "State of the post-quantum Internet
+in 2025"; Castryck–Decru ePrint 2022/975; Koblitz–Menezes ePrint 2015/1018.
+
+> **Methodology / caveats.** Synthesized from five parallel literature searches. Many
+> primary PDFs (eprint, arXiv, NIST, Cloudflare, Wikipedia) returned HTTP 403 to automated
+> fetch, so some figures rest on authoritative search snippets + corroborating secondary
+> sources; these are flagged inline. The least-settled points are: (a) exact post-exTNFS
+> bit levels for BLS12-381/BN462; (b) the **final** status of NIST IR 8547 (still IPD as far
+> as could be confirmed); (c) all **2026-dated quantum estimates**, pending published
+> proceedings. The core qualitative claims — generic `sqrt(n)` classical hardness, no
+> prime-field subexponential attack, Shor as the operative threat, ~112–117-bit record
+> frontier — are high-confidence and corroborated across independent sources.
