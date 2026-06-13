@@ -1743,4 +1743,4 @@ from 2026-06-11/12 sessions (which did have PARI). The computation is reproducib
 
 ### Commits made
 
-- [to be filled after commit]
+- `181f925` autolab 2026-06-13: paper integration — F_{p^3} obstruction Prop + Cor added to §5
