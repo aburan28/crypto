@@ -1744,3 +1744,68 @@ from 2026-06-11/12 sessions (which did have PARI). The computation is reproducib
 ### Commits made
 
 - `181f925` autolab 2026-06-13: paper integration — F_{p^3} obstruction Prop + Cor added to §5
+
+---
+
+## 2026-06-14 (autolab run)
+
+### Task picked
+
+**Priority 4: Cross-curve LLL 3-of-3 seeds at 384 bits.** The 2026-06-13 session proposed this
+as the next concrete sub-task but did not execute it. Thread 1 (P-521) is CLOSED. Thread 2
+(Igusa CQ) had recent work (2026-06-13) and its remaining sub-task requires Sage (not available
+in this environment). Thread 3 (Howe gluing) is substantially resolved. Thread 4 had a clear,
+runnable test: `probe_384bit_lll_multiseed` in `tests/lll_degeneracy_probe.rs`.
+
+### Work done
+
+- Ran `cargo test --test curve_audit` → 5/5 pass (baseline check).
+- Ran `cargo test --test lll_degeneracy_probe probe_384bit_lll_multiseed -- --nocapture`:
+  - P-384 at k_bits=288, m=8: 3/3 seeds recovered.
+  - brainpoolP384r1 at k_bits=288, m=8: 3/3 seeds recovered.
+  - Total wall time: ~104s (including Rust test harness overhead; each probe ~2s).
+- Ran `cargo test --test lll_degeneracy_probe probe_lll_degeneracy_head_to_head -- --nocapture`:
+  - P-256 at k_bits=192, m=8: 3/3 seeds recovered (~650ms/probe).
+  - secp256k1 at k_bits=192, m=8: 3/3 seeds recovered (~645ms/probe).
+  - This is the original failure scenario (secp256k1 LLL-degeneracy from Thread 1 prehistory)
+    — **secp256k1 now passes 3/3**, confirming the degeneracy is fully resolved.
+
+### Findings
+
+**Numerical results:**
+
+| Curve          | n_bits | k_bits | m | Seeds | Result  | Time/probe |
+|----------------|--------|--------|---|-------|---------|------------|
+| P-256          | 256    | 192    | 8 | 3/3   | ✓ 3/3   | ~650 ms    |
+| secp256k1      | 256    | 192    | 8 | 3/3   | ✓ 3/3   | ~645 ms    |
+| P-384          | 384    | 288    | 8 | 3/3   | ✓ 3/3   | ~2000 ms   |
+| brainpoolP384r1| 384    | 288    | 8 | 3/3   | ✓ 3/3   | ~2010 ms   |
+
+Seeds tested: `(0xC0FFEE, 0xC0FFEE)`, `(0xDEADBEEF, 0xBADCAFE)`, `(0x12345678, 0x9ABCDEF0)`.
+
+**Thread 4 status: CLOSED.** Scaled-GS fix resolves LLL degeneracy for all tested 256-bit and
+384-bit curves, including secp256k1, consistently across 3 independent seeds. No residual
+384-bit failure mode.
+
+**Corollary:** With Threads 1 and 4 both CLOSED, the LLL/GS degeneracy investigation is
+complete through 384 bits. P-521 is CLOSED via HP-LLL (§10.5). The entire LLL analysis thread
+(RESEARCH_LLL_GS_ANALYSIS.md) can be considered settled.
+
+### Next step proposal
+
+1. **Thread 5 (GLV-HNP Phase 2 toy)** is now unblocked: `secp256k1_cm_audit/glv_hnp_phase2_toy.gp`
+   has equation structure verified (sanity=1) but marks the Phase 2 lattice implementation as
+   "deferred pending secp256k1 LLL-degeneracy resolution". That blocker is now lifted.
+   **Next action**: implement the (2m+1)-dimensional lattice basis in PARI and call `lllgram()`
+   or `qflll()` on it. The basis construction is sketched at lines 160–176 of the script.
+   Test on the toy curve found in the script (some prime p ∈ [200, 2000] with j=0 and
+   GLV eigenvalue λ satisfying λ²+λ+1≡0 mod n).
+
+2. **Thread 2 (Igusa CQ normalization)** remains open; needs `sage -c "..."` which is not
+   available in this container. BLOCKED until Sage is accessible.
+
+3. **Thread 6 (B5 over F_{p^k})** has never been touched and is not blocked.
+
+### Commits made
+
+- (this run)
