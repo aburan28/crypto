@@ -1808,4 +1808,4 @@ complete through 384 bits. P-521 is CLOSED via HP-LLL (§10.5). The entire LLL a
 
 ### Commits made
 
-- (this run)
+- `12a75a3` autolab 2026-06-14: Thread 4 CLOSED — P-384 and secp256k1 LLL 3/3 across all seeds
