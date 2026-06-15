@@ -1883,4 +1883,4 @@ by actual execution (first run with fpylll). The claim was pre-emptive; it is co
 
 ### Commits made
 
-- TBD (this entry)
+- `18e5a92` autolab 2026-06-15: Thread 5 confirmed — GLV HNP Phase 2 5/5 at m=6, small-λ failure mode diagnosed
