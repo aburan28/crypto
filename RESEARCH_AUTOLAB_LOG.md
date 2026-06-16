@@ -1983,4 +1983,4 @@ scaling of m with bit size is the open empirical question.
 
 ### Commits made
 
-- `TBD` autolab 2026-06-16: GLV Phase 2 20-bit confirmed, BKZ rescue negative
+- `172f7ff` autolab 2026-06-16: GLV Phase 2 20-bit confirmed, BKZ rescue negative
