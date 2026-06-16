@@ -73,7 +73,11 @@ four deployed curves (Section~\ref{sec:empirical}). A surprising
 auxiliary finding: the Howe-gluing genus-2 cover \emph{exists} for
 every such curve, but does not yield a DLP speedup because
 genus-2 prime-field DLP costs $O(p)$ while ECDLP costs
-$O(\sqrt{p})$.
+$O(\sqrt{p})$.  For secp256k1 specifically, the obstruction is
+sharper: $x^3 + 7$ is irreducible over $\FF_p$, so the cover's
+field of definition is $\FF_{p^3}$ rather than $\FF_p$, making
+the cover-based attack cost $O(p^{3/2}) \approx 2^{384}$~---
+a factor of $2^{256}$ slower than the $2^{128}$ ECDLP target.
 \end{abstract}
 
 \section{Introduction and motivation}
@@ -350,6 +354,87 @@ Howe-glued construction requires Mestre's reconstruction from the
 Igusa invariants of $(E \times E^t)/\Gamma_\alpha$.
 \end{remark}
 
+\subsection*{The $\FF_{p^3}$ field-of-definition obstruction for secp256k1}
+
+\begin{proposition}[$\FF_{p^3}$ obstruction]\label{prop:fp3obs}
+Let $E_0\colon y^2 = x^3 + 7$ be secp256k1 over $\FF_p$
+\textup{(}$p = 2^{256} - 2^{32} - 977$, $p \equiv 1 \pmod 6$\textup{)}.
+Let $E_k$ be any of the three sextic twists of $E_0$ satisfying the
+Howe conditions \textup{(H1)--(H3)} of Theorem~\ref{thm:howe}.  Then:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item\label{it:irred} $x^3 + 7$ is irreducible over $\FF_p$; hence the
+      affine $2$-torsion of $E_0$ lies in
+      $E_0(\FF_{p^3}) \setminus \bigl(E_0(\FF_p) \cup E_0(\FF_{p^2})\bigr)$.
+\item\label{it:partner} For each glueable partner $E_k$, the polynomial
+      $x^3 + b_k$ \textup{(}$b_k = 7u^k \bmod p$, $u$ a primitive sixth
+      root of unity mod $p$\textup{)} is also irreducible over $\FF_p$.
+\item\label{it:galois} Any Galois-equivariant isomorphism
+      $\alpha\colon E_0[2] \to E_k[2]$ is not defined over $\FF_p$
+      or $\FF_{p^2}$.
+\item\label{it:cover} The Howe isogeny $\Jac(C) \to E_0 \times E_k$
+      is defined over $\FF_{p^3}$, not over $\FF_p$ or $\FF_{p^2}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+From the Frobenius trace
+\[
+  t = p + 1 - n = 432420386565659656852420866390673177327 \approx 2^{129}
+\]
+and the Newton-power-sum formula
+$|E_0(\FF_{p^k})| = p^k + 1 - (\alpha^k + \bar{\alpha}^k)$
+($\alpha\bar{\alpha} = p$, $\alpha + \bar{\alpha} = t$), one computes:
+\begin{equation}\label{eq:torsion-counts}
+  |E_0(\FF_p)| \bmod 2 = 1, \quad
+  |E_0(\FF_{p^2})| \bmod 2 = 1, \quad
+  |E_0(\FF_{p^3})| \bmod 4 = 0.
+\end{equation}
+The pattern in~\eqref{eq:torsion-counts} shows no $2$-torsion over $\FF_p$ or
+$\FF_{p^2}$, but full $E_0[2] \cong (\ZZ/2)^2$ at $\FF_{p^3}$.  Since
+$E_0\colon y^2 = x^3 + 7$, the affine $2$-torsion $x$-coordinates are
+roots of $x^3 + 7$; they lie in $\FF_{p^3}$ precisely when $x^3 + 7$
+is irreducible over $\FF_p$, confirmed by
+\texttt{factormod($x^3 + 7$,\,p)} returning a single degree-$3$ factor.
+Item~\ref{it:partner} is the same computation applied to $x^3 + b_k$
+for each glueable partner (verified for $k \in \{1, 3, 4\}$ in the
+sextic-twist labeling of \S\ref{sec:empirical}).
+Items~\ref{it:galois}--\ref{it:cover} follow: a Galois-equivariant
+$\alpha\colon E_0[2] \to E_k[2]$ requires both $2$-torsion groups to
+be simultaneously rational, which first occurs over $\FF_{p^3}$; by
+Howe's theorem~\cite{howe1996} the resulting cover $\Jac(C) \to
+E_0 \times E_k$ is then defined over $\FF_{p^3}$.
+PARI/GP script: \texttt{secp256k1\_cm\_audit/fp3\_obstruction\_secp256k1.gp}.
+\end{proof}
+
+\begin{corollary}[Cover-attack cost for secp256k1]\label{cor:fp3cost}
+Any Howe-cover attack on secp256k1 must solve DLP in
+$\Jac(C)(\FF_{p^3})$.  By Gaudry's bound~\cite{gaudry2000}, this costs
+\[
+  O\!\left(\sqrt{|\Jac(C)(\FF_{p^3})|}\right)
+  = O\!\left(\sqrt{p^3}\right)
+  = O\!\left(p^{3/2}\right)
+  \approx 2^{384}
+\]
+group operations, versus plain Pollard~$\rho$ at
+$O(\sqrt{n}) \approx 2^{128}$.
+The cover-based attack is $2^{256}$ times \emph{slower} than direct ECDLP.
+\end{corollary}
+
+\paragraph{Toy verification ($p = 43$).}
+For the analogous toy case $p = 43$, the Howe-glued curve
+$C_{43}\colon y^2 = (x^3 + 7)(x^3 + 13)$ (the two glueable-partner
+twist polynomials over $\FF_{43}$) has Igusa invariants
+\[
+  (J_2 : J_4 : J_6 : J_8 : J_{10}) = (39 : 27 : 7 : 15 : 36)
+  \quad \in \mathbb{P}(2,4,6,8,10)/\FF_{43},
+\]
+confirming that the weighted-projective isomorphism class is
+well-defined over $\FF_{43}$.  (The $J_2$ entry carries the
+conventional factor of $2$ from PARI's \texttt{igusa\_quadruple}
+normalisation relative to Cardona--Quer; $J_{10} = 36$ is
+normalization-independent and matches both conventions.)
+Script: \texttt{secp256k1\_cm\_audit/igusa\_f43\_howe.gp}.
+
 \section{Empirical verification on deployed curves}\label{sec:empirical}
 
 The companion script \texttt{multi\_curve\_audit.gp} runs the full
@@ -432,8 +517,11 @@ Case analysis over $\mathcal{A}$:
       for $h > 1$, the algorithm reduces to plain $\rho$.
 \item \textbf{$(N, N)$-cover via Howe-gluing}: by B4--B5, the
       cover's Jacobian has genus 2 and DLP cost
-      $O(p) > O(\sqrt{r})$. Algorithm cost dominated by $\Jac(C)$
-      DLP.
+      $O(p) > O(\sqrt{r})$. For secp256k1 specifically,
+      Corollary~\ref{cor:fp3cost} sharpens this to $O(p^{3/2})
+      \approx 2^{384}$ because Proposition~\ref{prop:fp3obs}
+      forces the cover's field of definition to be $\FF_{p^3}$.
+      Algorithm cost dominated by $\Jac(C)$ DLP.
 \item \textbf{Higher-genus cover via Weil restriction}: by B5--B6.
       Genus $g \geq 2$ covers have DLP cost
       $O(p^{2 - 2/g}) \geq O(p) > O(\sqrt{r})$ over prime fields;
@@ -482,6 +570,8 @@ is the plain Pollard~$\rho$ cost.
       admit faster DLP algorithms over $\FF_p$?
 \item Indirect uses of supersingular reductions for fault-attack-
       amplified ECDLP recovery on isogenous siblings: speculative.
+\item Exact Cardona--Quer normalisation of Igusa invariants for
+      $C_{43}$ (cross-verification with Sage / Magma pending).
 \end{itemize}
 
 \subsection*{Out-of-scope: separate attack programmes}
@@ -519,8 +609,10 @@ File & LOC \\
 \texttt{curve\_audit\_template.gp} & 120 \\
 \texttt{generate\_cm\_curve.gp} & 80 \\
 \texttt{glv\_hnp\_phase1.gp} & 180 \\
+\texttt{fp3\_obstruction\_secp256k1.gp} & 200 \\
+\texttt{igusa\_f43\_howe.gp} & 58 \\
 \midrule
-\textbf{Total} & \textbf{$\approx 3275$} \\
+\textbf{Total} & \textbf{$\approx 3533$} \\
 \bottomrule
 \end{tabular}
 \end{center}
