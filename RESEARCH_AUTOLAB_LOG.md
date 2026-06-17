@@ -1984,3 +1984,82 @@ scaling of m with bit size is the open empirical question.
 ### Commits made
 
 - `172f7ff` autolab 2026-06-16: GLV Phase 2 20-bit confirmed, BKZ rescue negative
+
+---
+
+## 2026-06-17 (autolab run)
+
+### Task picked
+
+**Priority 5 continued: GLV-HNP Phase 2 — controlled scaling (fix eff≈0.15, isolate bit-size effect).**
+2026-06-16 proposed disentangling the eff confound (20-bit used eff=0.05, 8/12-bit used eff=0.15).
+Executed the controlled experiment today; discovered a sharp K1 phase transition.
+
+### Work done
+
+- Installed fpylll 0.6.4 + cysignals 1.12.5 + sympy 1.14.0 (fresh container).
+- Implemented `secp256k1_cm_audit/glv_hnp_controlled_scaling.py`:
+  - Runs 8-bit (K1=2, eff=0.1508), 12-bit (K1=8, eff=0.1564), 20-bit (K1=109, eff=0.1506) — all at eff≈0.15.
+  - 20-bit curve: p=524347, b=2, n=523969, lam=177902 (same as 2026-06-16).
+  - 8-bit: first 3/3 at m=5 (m_thresh=3, ratio=1.67).
+  - 12-bit: first 3/3 at m=8 (m_thresh=5, ratio=1.60).
+  - **20-bit (eff=0.15, K1=109): FAILED — 0/3 at every m from 5 to 16.**
+- Implemented `secp256k1_cm_audit/glv_hnp_k1_diagnostic.py`:
+  - Fixed 20-bit curve, varied K1 ∈ {36, 55, 72, 90, 109}, swept m=5..18.
+  - Extended sweep for K1=109 up to m=24.
+- Confirmed 5/5 Rust tests pass (no regressions).
+
+### Findings
+
+**Controlled scaling experiment (all eff ≈ 0.15):**
+
+| Curve        | n_bits | lam/n | eff    | K1  | m_thresh | first_3/3 | ratio  |
+|--------------|--------|-------|--------|-----|----------|-----------|--------|
+| 8-bit/199    | 8      | 0.53  | 0.1508 | 2   | 3        | 5         | 1.67   |
+| 12-bit/2659  | 12     | 0.66  | 0.1564 | 8   | 5        | 8         | 1.60   |
+| 20-bit/523969| 19     | 0.34  | 0.1506 | 109 | 7        | —         | N/A    |
+
+**K1 diagnostic (fixed 20-bit curve, vary K1):**
+
+| K1  | eff    | m_thresh | first_3/3 | ratio |
+|-----|--------|----------|-----------|-------|
+| 36  | 0.0497 | 5        | 7         | 1.40  |
+| 55  | 0.0760 | 6        | —         | N/A   |
+| 72  | 0.0995 | 6        | —         | N/A   |
+| 90  | 0.1244 | 7        | —         | N/A   |
+| 109 | 0.1506 | 7        | —         | N/A   |
+| 109 | 0.1506 | 7        | — (m≤24)  | N/A   |
+
+**Key finding: sharp K1 phase transition at 20-bit between K1=36 (eff=0.05, works) and K1=55 (eff=0.076, fails).**
+
+The eff ceiling for LLL success at 20-bit is ~0.05-0.076, far below the ~0.15 that works for 8/12-bit.
+
+**Candidate explanations for lam/n-dependent eff ceiling:**
+
+1. **lam/n value**: 8/12-bit have lam/n≈0.5-0.7 (balanced GLV); 20-bit has lam/n=0.34 (unbalanced). When lam/n deviates from 0.5, the GLV lattice structure becomes less uniform and LLL finds more spurious short vectors.
+
+2. **Lattice dimension scaling**: At m_thresh, dim=2*m_thresh+2. For 8-bit (m_thresh=3, dim=8), 12-bit (m_thresh=5, dim=12), 20-bit/K1=36 (m_thresh=5, dim=12). For K1=55 (m_thresh=6, dim=14). LLL's approximation degrades with dim. However, since K1=36 and K1=55 at 20-bit have similar m_thresh (5 vs 6), this alone doesn't explain the sharp cutoff.
+
+3. **Most likely: joint effect.** For the 20-bit curve at K1=55, m_thresh=6 → dim=14. At dim=14, LLL's GH-factor gap between the planted vector and next-shortest is not sufficient for lam/n=0.34. For 12-bit at dim=12 with lam/n=0.66, the balanced GLV structure widens this gap.
+
+**Secp256k1 implication**: secp256k1 has lam/n≈0.33, virtually identical to the 20-bit failure curve. This diagnostic predicts the effective eff ceiling for secp256k1 is ~0.05, meaning the GLV-HNP attack requires nonce bias below 5% of n (not 15% as the m_thresh formula alone would suggest). This is a significant practical constraint on the attack.
+
+**Updated GLV-HNP attack status:**
+- Attack is confirmed valid for lam/n≈0.5 curves (balanced GLV) with eff up to ~0.15.
+- For lam/n≈0.33 (secp256k1-like) curves, eff must be < ~0.05 for LLL to work.
+- Root cause of lam/n dependence is a OPEN QUESTION requiring further investigation.
+
+### Next step proposal
+
+1. **Isolate lam/n effect**: Find a 20-bit j=0 curve with lam/n ≈ 0.50 (look at other twists of
+   p=524347 — the 6 traces give 6 different n values, each with potentially different lam/n). Run
+   K1 diagnostic on it. If eff ceiling rises to ~0.15, it confirms lam/n is the determining factor.
+
+2. **Theoretical analysis**: Write up the lattice geometry analysis (planted vector norm vs GH
+   shortest vector) as a function of K1 and lam/n. Determine the theoretical K1 cutoff.
+
+3. **Igusa CQ (Thread 2)**: Still BLOCKED (no Sage/Oscar in container). Consider Oscar.jl install.
+
+### Commits made
+
+- `5a2658e` autolab 2026-06-17: GLV Phase 2 — sharp K1 phase transition, lam/n-dependent eff ceiling
