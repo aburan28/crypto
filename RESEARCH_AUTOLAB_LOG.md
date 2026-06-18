@@ -2163,4 +2163,4 @@ an unusually high overhead.
 
 ### Commits made
 
-- [to be filled after commit]
+- `8af4810` autolab 2026-06-18: lam/n hypothesis falsified — Curve C (lam/n=0.29) succeeds at all K1; failure is curve-specific
