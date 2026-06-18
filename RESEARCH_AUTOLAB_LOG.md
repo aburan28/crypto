@@ -2063,3 +2063,104 @@ The eff ceiling for LLL success at 20-bit is ~0.05-0.076, far below the ~0.15 th
 ### Commits made
 
 - `5a2658e` autolab 2026-06-17: GLV Phase 2 — sharp K1 phase transition, lam/n-dependent eff ceiling
+
+---
+
+## 2026-06-18 (autolab run)
+
+### Task picked
+
+**Priority 5 continued: GLV-HNP Phase 2 — lam/n isolation experiment.**
+2026-06-17 found a sharp K1 phase transition at 20-bit for Curve A (lam/n=0.34):
+K1=36 (eff=0.05) succeeds but K1≥55 (eff≥0.076) fails. Proposed hypothesis:
+lam/n ≈ 0.33 (unbalanced) causes the eff ceiling degradation. Today: controlled
+3-curve test at fixed 20-bit to isolate the lam/n effect.
+
+### Work done
+
+- Installed fpylll + cysignals + sympy (fresh container, same as prior runs).
+- Wrote `secp256k1_cm_audit/glv_hnp_lamn_isolation.py`:
+  - Curve A: p=524347, n=523969, lam=177902 (lam/n=0.3395) — yesterday's curve.
+  - Curve B: p=525013, n=526297, lam=240822 (lam/n=0.4576) — new, balanced GLV.
+  - Curve C: p=624517, n=622957, lam=178530 (lam/n=0.2867) — new, more unbalanced.
+  - K1 scan: K1 ∈ {36, 55, 72, 90, 109}, m=5..19, seeds=[42, 1234, 9999].
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**Full K1 sweep results (first_3/3 in m≤19, "FAIL" = never achieved 3/3):**
+
+| Curve | lam/n | K1=36 (e=0.05) | K1=55 (e=0.07) | K1=72 (e=0.10) | K1=90 (e=0.12) | K1=109 (e=0.14) |
+|-------|-------|----------------|----------------|----------------|----------------|-----------------|
+| A p=524347 n=523969 | 0.3395 | m=7 ✓ | FAIL | FAIL | FAIL | FAIL |
+| B p=525013 n=526297 | 0.4576 | m=12 ✓ | m=16 ✓ | FAIL | FAIL | FAIL |
+| C p=624517 n=622957 | 0.2867 | m=8 ✓  | m=12 ✓ | m=13 ✓ | m=13 ✓ | m=13 ✓ |
+
+**Key finding: lam/n hypothesis is FALSIFIED.**
+
+- Curve C (lam/n=0.287) is MORE unbalanced than Curve A (lam/n=0.340), yet Curve C
+  succeeds at all K1 up to 109 (eff=0.138) while Curve A fails at K1≥55 (eff≥0.076).
+- lam/n alone does NOT predict the eff ceiling. Something else determines success.
+
+**Candidate explanations (ranked by plausibility):**
+
+1. **Insufficient m range (most likely):** Curve A at K1=55 shows sporadic 1/3 at m=11
+   and m=12 (in the raw sweep). This suggests the planted vector is occasionally short
+   enough for LLL to find, but the actual ratio m/m_thresh needed is >2.5 (m>19).
+   Our sweep stopped at m=19. If extended to m=25-30, Curve A might eventually succeed.
+   Curve C needed only m=12 (ratio=2.00); Curve B needed m=16 (ratio=2.67).
+   Curve A might need m=20+ (ratio>3.3).
+
+2. **Arithmetic structure of (lam, n):** For Curve A, lam ≈ n/3 exactly (lam=177902,
+   3*lam=533706, n=523969, δ=9737). The off-diagonal lam*S_K1 = (n/3)*S_K1 creates a
+   specific divisibility structure in the lattice that may make LLL's short-vector
+   search harder. Not fully understood.
+
+3. **Specific n bit length:** Curve A has n≈524K (barely 19 bits), Curve B has n≈526K
+   (barely 20 bits), Curve C has n≈623K (solidly 20 bits). The slight difference in log(n)
+   affects the S_K scaling factors — but shouldn't explain a categorical failure.
+
+**Implication for secp256k1:**
+The assumption that lam/n≈0.33 causes a degraded eff ceiling is likely WRONG. The eff ceiling
+degradation at 20-bit appears to be curve-specific and possibly just a consequence of needing
+larger m (not a categorical failure). At secp256k1's 256-bit scale, m needs to grow accordingly.
+
+**Ratios m/m_thresh observed (all three 20-bit curves):**
+
+| K1 | eff | Curve A ratio | Curve B ratio | Curve C ratio |
+|----|-----|--------------|--------------|--------------|
+| 36 | 0.05 | 1.40 | 2.40 | 1.60 |
+| 55 | 0.07 | N/A  | 2.67 | 2.00 |
+| 72 | 0.10 | N/A  | N/A  | 2.17 |
+| 90 | 0.12 | N/A  | N/A  | 1.86 |
+| 109| 0.14 | N/A  | N/A  | 1.86 |
+
+Curve C has stable ratio ≈ 1.86-2.17 regardless of K1. Curve B ratio ≈ 2.40-2.67.
+Curve A's only data point (K1=36, ratio=1.40) is anomalously LOW — perhaps Curve A
+needs smaller m overhead for low K1. The "failure" at K1=55 may simply be that ratio
+needed is ~2.5 but our sweep only went to 19/6 = 3.17 — which IS enough. So if it
+fails in m=5..19 at K1=55 (m_thresh=6), that means ratio > 3.17 is needed. That IS
+an unusually high overhead.
+
+**Bottom line:**
+- Curve A at eff=0.05: ratio=1.40 (reasonable)
+- Curve A at eff=0.076: ratio>3.17 (if it works at all — genuinely anomalous)
+- This is NOT explained by lam/n alone. Curve-specific lattice geometry issue.
+
+### Next step proposal
+
+1. **Extend Curve A sweep at K1=55, m=20..35** to determine whether Curve A eventually
+   succeeds (needs very high m) or completely fails (the lattice structure is degenerate).
+   This is the single most important follow-up — it determines whether the Curve A failure
+   is a "just needs more m" issue or a structural obstruction.
+
+2. **More seeds (10 seeds):** The 1/3 sporadic success at m=11,12 for Curve A at K1=55
+   might be a false positive (only 3 seeds). With 10 seeds, check if it's really ~10-30%
+   or a genuine 1/3 floor.
+
+3. **GNR/BKZ:** For Curve B at K1=72 (fails at m≤19), try BKZ(beta=40) to see if stronger
+   reduction rescues the failure — as a data point on the impact of reduction quality.
+
+### Commits made
+
+- [to be filled after commit]
