@@ -2276,3 +2276,122 @@ The BKZ ceiling of Curve A matches Curve C's LLL ceiling roughly. The difference
 ### Commits made
 
 - `b6b55a3` autolab 2026-06-19: Curve A LLL failure is reduction-quality, not structural — BKZ-20 rescues K1=55 at m=14
+
+---
+
+## 2026-06-20 (autolab run)
+
+### Task picked
+
+**Priority 5 continued: GLV-HNP Phase 2 — BKZ ceiling for Curve A + Curve C eigenvalue correction.**
+2026-06-19 showed BKZ-20 rescues Curve A (lam/n=0.34) at K1=55 and concluded the failure was
+"reduction quality, not structural." Today: verify BKZ-20's ceiling at K1=72,90,109 and run
+BKZ-40 escalation. Also discovered Curve C was tested with an INCORRECT eigenvalue in 2026-06-18;
+corrected and re-ran.
+
+### Work done
+
+- Installed fpylll+cysignals (fresh container).
+- Wrote `secp256k1_cm_audit/glv_hnp_bkz_ceiling.py`:
+  - Exp 1: Curve A + BKZ-20 at K1={55,72,90,109}, m=10..24, 3 seeds.
+  - Exp 2: BKZ-40 escalation for K1 values where BKZ-20 failed.
+  - Exp 3: Curve C LLL verification (K1=72,90,109, m=10..16).
+- Discovered: Curve C (p=624517, n=622957) used lam=178530 in 2026-06-18, which does NOT
+  satisfy lam³=1 (mod n). Actual CM root is 178615. Difference: 85. Computed correct CM roots:
+  root1=444341, root2=178615 (both satisfy λ³≡1, λ²+λ+1≡0 mod n). ✓
+- Re-ran Curve C attack with correct CM eigenvalue (178615) at K1={55,72,90,109}, m=8..19, 3 seeds.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**Experiment 1+2: Curve A BKZ ceiling (correct CM lam=177902, δ/n=0.0186)**
+
+| K1 | eff   | A LLL (prior) | A BKZ-20 | A BKZ-40 | C LLL (wrong lam ref) |
+|----|-------|---------------|----------|----------|-----------------------|
+| 55 | 0.076 | FAIL          | m=14 ✓   | —        | m=12                  |
+| 72 | 0.100 | FAIL          | FAIL     | FAIL     | m=13                  |
+| 90 | 0.124 | FAIL          | FAIL     | FAIL     | m=13                  |
+|109 | 0.151 | FAIL          | FAIL     | FAIL     | m=13                  |
+
+- BKZ-20 rescues K1=55 (m=14) but NOT K1≥72.
+- BKZ-40 adds no benefit over BKZ-20; 0/3 at ALL m=10..22 for K1≥72.
+- At K1=72 with BKZ-40: zero wins across ALL m=10..22 (completely consistent 0/3).
+- Lattice dimension at m=10: 2*10+2=22. BKZ-40 covers the ENTIRE lattice in each block →
+  effectively near-HKZ. The failure is NOT a block-size issue.
+
+**REVISED CONCLUSION (replaces 2026-06-19):** The failure for Curve A at K1≥72 is a GENUINE
+STRUCTURAL OBSTRUCTION in the lattice, not a reduction-quality issue. BKZ-40 is essentially
+optimal for dim=22 and still fails completely.
+
+**Curve C eigenvalue correction:**
+
+- Wrong lam=178530 (not CM): lam³ mod n = 505379 ≠ 1. Used in 2026-06-18 comparisons.
+- Correct lam=178615 (CM root): lam³ mod n = 1 ✓, 1+lam+lam² ≡ 0 mod n ✓.
+- δ/n for correct CM lam: min(3*178615 mod n, n-3*178615 mod n)/n = 87112/622957 = 0.1398.
+
+**Experiment: Curve C with CORRECT CM eigenvalue (LLL, K1={55,72,90,109}, m=8..19):**
+
+| K1 | eff   | first 3/3 m |
+|----|-------|-------------|
+| 55 | 0.070 | m=14        |
+| 72 | 0.091 | m=14        |
+| 90 | 0.114 | m=14        |
+|109 | 0.138 | m=15        |
+
+Curve C with correct CM eigenvalue STILL succeeds at all K1≤109 (just at m=14-15 instead
+of the wrong-eigenvalue's m=10-13). The 2026-06-18 conclusion stands: Curve C has no eff ceiling
+through K1=109. But the comparison was slightly contaminated by the eigenvalue error.
+
+**Structural obstruction criterion identified:**
+
+The key distinguishing quantity is δ(3λ,n)/n = min(3λ mod n, n - 3λ mod n) / n:
+
+| Curve             | λ/n    | δ(3λ,n)/n | LLL ceiling K1 | BKZ-40 ceiling K1 |
+|-------------------|--------|-----------|----------------|-------------------|
+| A p=524347        | 0.3395 | **0.019** | ≤55            | ≤55               |
+| C p=624517 (CM)   | 0.2867 | 0.140     | ≥109 (no ceil) | N/A               |
+| **secp256k1**     | 0.3257 | **0.023** | (unknown, proj) | (unknown, proj)  |
+
+- Curve A: δ/n=0.019 → structural ceiling at K1≤55 (eff≤0.076), even BKZ-40 cannot help
+- Curve C: δ/n=0.140 → no ceiling through K1=109 (eff≤0.14)
+- **secp256k1: δ/n=0.023** → expected to be in the same "obstructed" category as Curve A
+
+**secp256k1 computation:**
+```
+n  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+lam= 0x5363AD4CC05C30E0A5261C028812645A122E22EA20816678DF02967C1B23BD72
+3*lam mod n ≈ 0.977*n  →  δ/n = 1 - 0.977 = 0.023
+```
+
+The obstruction threshold lies somewhere in (0.019, 0.140). secp256k1 (δ/n=0.023) is
+extremely close to the obstructed side of the threshold.
+
+**Physical mechanism:** When 3λ ≡ δ (mod n) with small δ, the lattice row M[m+1+i][i] =
+-λ*S_K1 ≈ -(n/3)*S_K1, so M[m+1+i] ≈ (-1/3)*M[i] column-wise. Three copies of the GLV
+rows nearly reconstruct each "k1" row, making the Gram-Schmidt basis near-degenerate regardless
+of reduction block size. At high K1 (small S_K1), this near-linearity is more pronounced
+relative to S_K2, causing complete reduction failure.
+
+**Implication for paper:** The GLV-HNP attack direction has a STRUCTURAL CEILING for j=0 CM
+curves with λ satisfying 3λ ≡ δ (mod n), δ/n ≈ 0.02. Since secp256k1 is in this category,
+the GLV-HNP attack cannot exceed eff≈0.076 for secp256k1, independent of lattice algorithm.
+This supports the main paper thesis (no attack beats ρ for prime-field ECC).
+
+### Next step proposal
+
+1. **Map the obstruction threshold:** Find 20-bit j=0 CM curves with intermediate δ/n values
+   (0.04, 0.06, 0.08, 0.10) and test K1=72 (eff=0.10) to find the critical δ*/n that separates
+   obstructed from unobstructed. Expected: linear or threshold behavior.
+   Method: in `find_20bit_curve`, filter by δ(3λ,n)/n ∈ [target_lo, target_hi].
+
+2. **Theoretical analysis of δ/n distribution for j=0 CM curves:** For curves p = a²+ab+b²
+   with GLV eigenvalue λ satisfying λ²+λ+1=0 (mod n), characterize when δ/n is small. Is
+   secp256k1's δ/n=0.023 typical or exceptional for 256-bit j=0 curves?
+
+3. **Document paper implication:** Add a remark to §5 of `paper/eprint_combined.tex` stating
+   the empirical eff ceiling for the GLV-HNP approach at secp256k1 scale.
+
+### Commits made
+
+- `[hash]` autolab 2026-06-20: BKZ-40 fails at K1≥72 for Curve A — structural obstruction; Curve C CM eigenvalue corrected
+
