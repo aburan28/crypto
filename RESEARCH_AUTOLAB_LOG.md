@@ -2393,5 +2393,5 @@ This supports the main paper thesis (no attack beats ρ for prime-field ECC).
 
 ### Commits made
 
-- `[hash]` autolab 2026-06-20: BKZ-40 fails at K1≥72 for Curve A — structural obstruction; Curve C CM eigenvalue corrected
+- `2059779` autolab 2026-06-20: BKZ-40 fails at K1≥72 for Curve A — structural obstruction confirmed; Curve C CM eigenvalue corrected
 
