@@ -2481,4 +2481,4 @@ not a δ/n threshold effect. The condition "λ/n ≈ 1/3" captures the true obst
 
 ### Commits made
 
-- [to be added after commit]
+- `1ed426b` autolab 2026-06-21: delta/n threshold mapped — obstruction at lam/n≈1/3 confirmed; secp256k1 firmly in obstructed regime
