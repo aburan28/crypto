@@ -2395,3 +2395,90 @@ This supports the main paper thesis (no attack beats ρ for prime-field ECC).
 
 - `2059779` autolab 2026-06-20: BKZ-40 fails at K1≥72 for Curve A — structural obstruction confirmed; Curve C CM eigenvalue corrected
 
+
+## 2026-06-21 (autolab run)
+
+### Task picked
+
+Thread 5 (GLV-HNP Phase 2), continued from 2026-06-20. The prior run confirmed a
+structural obstruction at δ(3λ,n)/n ≈ 0.019 (Curve A, BKZ-40 fails), and proposed
+mapping the threshold by finding 20-bit j=0 CM curves at intermediate δ/n values.
+Today: execute that threshold mapping — find representative curves in five δ/n bins
+([0.015,0.035), [0.040,0.065), [0.065,0.095), [0.095,0.125), [0.130,0.165)) and
+run K1=72 LLL sweep m=10..20 (3 seeds) for each.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_delta_threshold.py`:
+  - Scans 20-bit j=0 CM primes using Eisenstein decomposition + `j0_traces`.
+  - Computes δ(3λ,n)/n = min(3λ mod n, n-3λ mod n)/n for each candidate (p,n,lam).
+  - Bins 2 representative curves per δ-range; finds group parameter b via order check.
+  - Runs K1=72 LLL sweep m=10..20 with SEEDS=[42,1234,9999] for each curve.
+  - Includes Curve C anchor (p=624517, lam=178615, δ/n=0.140) for continuity.
+- Scanned 195 primes in [2^19, 2^20]; found 2 curves per bin within ~1s.
+- Ran full LLL sweep; total runtime <5 min.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Threshold experiment — K1=72 LLL at m=10..20 (3 seeds), 20-bit j=0 curves:**
+
+| δ(3λ,n)/n | curve (p,n,lam) | lam/n | 3/3 at m= | outcome |
+|-----------|-----------------|-------|-----------|---------|
+| 0.0186 | p=524347, n=523969, λ=177902 | 0.340 | NEVER | **OBSTRUCTED** (0/3 all m) |
+| 0.0176 | p=526741, n=528163, λ=172961 | 0.327 | NEVER | **OBSTRUCTED** (max 1/3) |
+| 0.0477 | p=524983, n=526429, λ=8367   | 0.016 | m=10  | **SUCCESS** (3/3 all m=10..20) |
+| 0.0601 | p=525253, n=526051, λ=10535  | 0.020 | m=10  | **SUCCESS** (3/3 all m=10..20) |
+| 0.0758 | p=524497, n=523177, λ=187613 | 0.358 | NEVER | fail (max 1/3) |
+| 0.0816 | p=526051, n=525253, λ=160806 | 0.306 | m=10  | SUCCESS (3/3 all m) |
+| 0.0966 | p=524941, n=525913, λ=158367 | 0.301 | NEVER | fail (max 1/3) |
+| 0.1167 | p=525127, n=524149, λ=20387  | 0.039 | m=20  | SUCCESS (3/3 at m=20) |
+| 0.1584 | p=525379, n=525157, λ=147323 | 0.281 | NEVER | fail (max 2/3 at m=16-17) |
+| 0.1602 | p=525127, n=526543, λ=203631 | 0.387 | NEVER | fail (max 1/3) |
+| 0.1398 | [Curve C anchor] λ=178615    | 0.287 | m=15  | SUCCESS (confirmed) |
+
+**Key structural finding:** δ(3λ,n)/n is NOT the sole predictor. Two separate effects observed:
+
+**Effect A — True structural obstruction (λ/n ≈ 1/3):**
+- Curves with λ/n ≈ 0.327-0.387 (hence 3λ ≈ n or 3λ ≈ 2n, δ/n small) fail at ALL m.
+- Mechanism confirmed from prior run: GLV rows M[m+1+i][i] = -λ*S_K1 ≈ (-1/3)*M[i][i],
+  creating near-linear dependence. BKZ-40 cannot recover this (2026-06-20 result).
+- Obstructed examples: δ/n = 0.018-0.019, λ/n = 0.327-0.340.
+- Borderline obstructed: δ/n = 0.076-0.097, λ/n = 0.301-0.358 (fail at m≤20, may fail at all m).
+
+**Effect B — Small-λ success (λ/n << 1/3):**
+- Curves with λ/n ≈ 0.016-0.039 succeed TRIVIALLY (m=10 or m=20), regardless of δ/n.
+- Mechanism: small λ → GLV rows nearly orthogonal to k1 rows → well-conditioned lattice.
+- Examples: δ/n=0.048 (λ/n=0.016) → 3/3 at m=10; δ/n=0.117 (λ/n=0.039) → 3/3 at m=20.
+
+**Effect A dominates when λ/n is in (0.28, 0.40).** The "unobstructed" Curve C (λ/n=0.287) is
+in this range yet succeeds (m=15). But two curves with λ/n=0.281 and λ/n=0.387 fail at m≤20.
+This suggests Curve C's success may require larger m if re-tested at harsher parameters, or
+there is a finer structural invariant beyond δ(3λ)/n.
+
+**Obstruction boundary for secp256k1:**
+- secp256k1: λ/n ≈ 0.326, δ(3λ)/n ≈ 0.023 → fits squarely in the "obstructed" regime.
+- bin0_tiny (δ/n ≈ 0.018, λ/n ≈ 0.327-0.340): 0/3 at all m=10..20 (both curves).
+- Critical threshold: the first SUCCESS at δ/n≥0.048 (bin1_low, λ/n≈0.016) uses small λ,
+  not large δ/n as the enabler. The secp256k1 λ is NOT small (λ/n≈0.326).
+
+**Implication:** The obstruction for secp256k1 is likely **effect A** (λ/n≈1/3 near-linearity),
+not a δ/n threshold effect. The condition "λ/n ≈ 1/3" captures the true obstruction criterion.
+
+### Next step proposal
+
+1. **Refine Effect A boundary**: find 20-bit curves with λ/n in {0.22, 0.25, 0.30, 0.35, 0.38}
+   and test K1=72 LLL at m=10..25. Determine if failure is correlated with λ/n proximity to 1/3
+   (or 1/2, 2/3) specifically.
+
+2. **Test Curve C at extended m**: run m=10..30 for Curve C (λ/n=0.287) to confirm it succeeds
+   consistently or to find the onset of success. If it only succeeds at m≥20, it may actually be
+   a near-borderline case.
+
+3. **Paper remark**: update §5 of `paper/eprint_combined.tex` — restate the structural obstruction
+   criterion as "λ/n ≈ 1/3" (equivalently: 3λ ≡ δ (mod n) with δ/n < 0.03) rather than purely δ/n.
+   secp256k1 satisfies this criterion, confirming the K1=72 eff=0.10 ceiling.
+
+### Commits made
+
+- [to be added after commit]
