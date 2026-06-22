@@ -2594,4 +2594,5 @@ which is the operationally precise characterisation.
 
 ### Commits made
 
-- (to be filled after commit)
+- `f6928d5` autolab 2026-06-22: Effect A boundary mapped — δ/n<0.02 structurally obstructed; per-curve lattice variance documented
+- Note: resolved long-standing detached-HEAD issue — 48 accumulated commits (Jun 4–22) fast-forward merged to main and pushed.
