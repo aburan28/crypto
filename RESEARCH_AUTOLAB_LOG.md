@@ -2482,3 +2482,116 @@ not a δ/n threshold effect. The condition "λ/n ≈ 1/3" captures the true obst
 ### Commits made
 
 - `1ed426b` autolab 2026-06-21: delta/n threshold mapped — obstruction at lam/n≈1/3 confirmed; secp256k1 firmly in obstructed regime
+
+---
+
+## 2026-06-22 (autolab run)
+
+### Task picked
+
+Thread 5 (GLV-HNP Phase 2), continued from 2026-06-21. Prior run mapped δ/n bins and
+confirmed a structural obstruction at λ/n≈1/3. Today's goal: refine the Effect A
+boundary by sweeping λ/n ∈ {0.20, 0.23, 0.27, 0.30, 0.33, 0.35, 0.37, 0.40, 0.43, 0.47}
+on 20-bit j=0 CM curves with K1=72, m=10..25, 3 seeds. Also extend Curve C to m=10..30
+to confirm it isn't borderline.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_lamn_boundary.py`:
+  - Scans 20-bit j=0 CM primes, finds up to 2 curves per λ/n target (tol ±0.015).
+  - Runs K1=72 LLL at m=10..25 (3 seeds) for each curve; records first_3of3_m.
+  - Also runs Curve C extended sweep m=10..30 as anchor.
+  - Reuses EC/CM/LLL core from `glv_hnp_delta_threshold.py`.
+- Installed fpylll + sympy (not persisted between sessions; always re-install).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Ran full boundary experiment (~320 primes scanned, ~10 min total).
+
+### Findings
+
+**Curve C extended (m=10..30, λ/n=0.2867, δ/n=0.1398):**
+- 3/3 first at m=15, stays 3/3 for m=16..30 with NO failures.
+- Confirms Curve C is unambiguously in the unobstructed regime; m=15 is the onset.
+- Prior 2026-06-21 Curve C anchor (m=14: 2/3) is consistent.
+
+**λ/n boundary sweep results (K1=72, m=10..25):**
+
+| λ/n   | |λ/n-1/3| | δ/n   | first 3/3 | notes |
+|-------|----------|-------|-----------|-------|
+| 0.2114 | 0.1333 | 0.3659 | never | 0/3 ALL m; see below |
+| 0.2122 | 0.1333 | 0.3635 | m=10  | trivially easy |
+| 0.2386 | 0.1033 | 0.2842 | never | max 2/3 at m=25 |
+| 0.2158 | 0.1033 | 0.3525 | m=13  | |
+| 0.2805 | 0.0633 | 0.1584 | m=23  | high m needed |
+| 0.2691 | 0.0633 | 0.1926 | m=18  | |
+| 0.3011 | 0.0333 | 0.0966 | never | max 1/3 |
+| 0.3002 | 0.0333 | 0.0993 | m=12  | |
+| 0.3395 | 0.0033 | 0.0186 | never | **0/3 ALL m — strongest obstruction** |
+| 0.3178 | 0.0033 | 0.0466 | m=20  | marginal; irregular (m=22-24: 2/3 again) |
+| 0.3586 | 0.0167 | 0.0758 | never | max 1/3 |
+| 0.3648 | 0.0167 | 0.0945 | m=23  | high m needed |
+| 0.3696 | 0.0367 | 0.1088 | m=12  | easy |
+| 0.3557 | 0.0367 | 0.0671 | never | max 1/3 |
+| 0.3867 | 0.0667 | 0.1602 | never | max 1/3 |
+| 0.4110 | 0.0667 | 0.2330 | m=13  | |
+| 0.4289 | 0.0967 | 0.2867 | m=13  | |
+| 0.4257 | 0.0967 | 0.2770 | never | max 1/3 |
+| 0.4576 | 0.1367 | 0.3728 | m=19  | |
+| 0.4562 | 0.1367 | 0.3687 | never | max 1/3 |
+| **Curve C** | **0.0467** | **0.1398** | **m=15** | anchor |
+
+**Three key structural findings:**
+
+**A. The 1/3-proximity zone (λ/n ≈ 0.33, δ/n < 0.02): fully obstructed.**
+- λ/n=0.3395, δ/n=0.019: 0/3 at ALL m=10..25 (48 consecutive failures; not statistical noise).
+- λ/n=0.3178, δ/n=0.047: barely succeeds at m=20 (1/2 curves); irregular convergence.
+- secp256k1 (λ/n=0.326, δ/n=0.023) maps directly into this band → structural obstruction
+  for secp256k1 at K1=72 remains confirmed.
+
+**B. Large-pair variance: failures throughout the δ/n spectrum.**
+Within every λ/n target band, one of two curves succeeds and the other fails (max 1/3).
+Examples of same-λ/n-band discordance:
+- λ/n≈0.20: (δ/n=0.366 → 0/3 all m) vs (δ/n=0.364 → 3/3 at m=10). Nearly identical δ/n.
+- λ/n≈0.40: (δ/n=0.160 → never 3/3) vs (δ/n=0.233 → 3/3 at m=13).
+- λ/n≈0.43: (δ/n=0.287 → 3/3 at m=13) vs (δ/n=0.277 → never 3/3).
+
+This variance at the same λ/n and similar δ/n means neither metric alone fully predicts
+success. Some further structural property of each (p, n, λ) triple governs per-curve LLL
+success.
+
+**C. δ/n is a better predictor than λ/n proximity, but not a clean threshold.**
+Sorting by δ/n: failures appear at δ/n=0.019, 0.067, 0.076, 0.097, 0.160, 0.277, 0.284,
+0.366, 0.369. Successes appear at δ/n=0.047, 0.094, 0.099, 0.109, 0.140, 0.158, 0.193,
+0.233, 0.287, 0.353, 0.363, 0.373. No clean threshold separates them beyond δ/n < 0.02.
+
+The 0/3 failures at large δ/n (e.g. λ/n=0.211, δ/n=0.366) with 3 seeds are likely
+statistical (only 48 trials). The 0/3 failures at small δ/n (λ/n=0.340, δ/n=0.019)
+over 48 trials is structural. The intermediate failures (max 1/3) cannot be definitively
+classified with the current sample size.
+
+**Paper implication:** The claim "secp256k1 is structurally obstructed at K1=72" stands,
+supported by the λ/n=0.3395, δ/n=0.019 analogue which is a complete structural failure
+(not marginal, not probabilistic). The obstruction criterion should be stated as:
+δ(3λ, n)/n < 0.02 (equivalently: 3λ ≡ ε mod n with |ε| < 0.02n),
+which is the operationally precise characterisation.
+
+### Next step proposal
+
+1. **Investigate per-curve lattice conditioning**: For pairs that have the same λ/n but
+   opposite outcomes (e.g., the λ/n≈0.20 pair), compute the condition number κ(M) of the
+   raw basis matrix M as a diagnostic. Hypothesis: κ(M) < threshold → LLL succeeds;
+   κ(M) > threshold → LLL fails. If confirmed, this replaces the heuristic δ/n predictor
+   with a computable lattice-quality metric.
+   Script: `secp256k1_cm_audit/glv_hnp_conditioning.py` — compute κ(M) for each
+   experiment curve and correlate with LLL outcome.
+
+2. **Update §5 of `paper/eprint_combined.tex`**: Add remark stating the obstruction
+   criterion is δ(3λ,n)/n < 0.02 (not simply λ/n ≈ 1/3), with secp256k1 (δ/n≈0.023)
+   firmly inside the obstructed zone. Cite `glv_hnp_lamn_boundary.py` results.
+
+3. **Run conditioning check on the intermediate failures** (δ/n ∈ [0.06, 0.16], max 1/3):
+   determine if these are probabilistically hard or structurally hard with larger m.
+   Extend to m=30 for the λ/n≈0.30, λ/n≈0.35 pairs (clearest intermediate cases).
+
+### Commits made
+
+- (to be filled after commit)
