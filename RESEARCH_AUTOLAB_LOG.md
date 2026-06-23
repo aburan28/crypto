@@ -2693,3 +2693,128 @@ C. **CM arithmetic:** The two curves in PAIR 1 have p=524743,n=523597 (FAIL) vs
 ### Commits made
 
 - `102576d` autolab 2026-06-23: κ(M) hypothesis falsified — per-curve LLL variance is not numerical; discriminating property unknown
+
+---
+
+## 2026-06-23 (continued) — Thread 5: GLV-HNP Phase 2, Session 2
+
+### Experiments A/B/C: Target-vector norms, spurious-vector check, Kannan-row norm comparison
+
+**Script:** `secp256k1_cm_audit/glv_hnp_target_vector.py`
+
+**Curves:**
+- C1 (FAIL): p=524743, n=523597, λ/n=0.2114, δ/n=0.366
+- C2 (SUCCESS): p=525043, n=524269, λ/n=0.2122, δ/n=0.364
+- Parameters: K1=72 bits, m=12, seeds [0xDEAD, 0xBEEF, 0xCAFE]
+- S_K1 = S_K2 = 2^(n_bits - K1) = 2^(256-72), S_KANNAN = n
+
+---
+
+### Exp A — Target-vector norm (size obstruction test)
+
+Computed ‖v_target‖² = Σ k1_i²·S_K1² + d² + Σ k2_i²·S_K2² + S_KANNAN²
+
+| Seed   | C1 (FAIL) norm | C2 (SUCCESS) norm | Ratio C2/C1 |
+|--------|---------------|-------------------|-------------|
+| 0xDEAD | 1,330,322     | 1,331,139         | 1.0006      |
+| 0xBEEF | 1,655,653     | 1,656,850         | 1.0007      |
+| 0xCAFE | 1,603,821     | 1,604,656         | 1.0005      |
+
+Gaussian heuristic GH ≈ sqrt(dim/(2πe)) · vol(L)^(1/dim) gives v/GH ≈ **1.178** for BOTH curves.
+
+**Conclusion (Exp A): Size obstruction hypothesis RULED OUT.** Both curves have nearly identical
+target-vector norms. The failing curve's solution is not larger; it should be equally findable
+by LLL on volume grounds.
+
+---
+
+### Exp B — Spurious-vector check
+
+Ran LLL at m=12. After reduction, inspected ALL rows of the reduced basis for |last_col| == S_KANNAN.
+
+| Curve | Seed   | Total Kannan rows | Correct rows | Spurious rows | Correct d found? |
+|-------|--------|-------------------|--------------|---------------|-----------------|
+| C1    | 0xDEAD | 4                 | 0            | 4             | NO              |
+| C1    | 0xBEEF | 3                 | 0            | 3             | NO              |
+| C1    | 0xCAFE | 4                 | 0            | 4             | NO              |
+| C2    | 0xDEAD | 6                 | 1 (row 13)   | 5             | YES             |
+| C2    | 0xBEEF | 5                 | 1 (row 13)   | 4             | YES             |
+| C2    | 0xCAFE | 5                 | 1 (row 13)   | 4             | YES             |
+
+C1 spurious d_candidates (seed=0xDEAD): {369846, 215022, 336529, 222305}
+
+**Conclusion (Exp B):** LLL DOES find Kannan-embedded rows for C1, but they are ALL wrong.
+The correct solution for C1 is not efficiently reduced by LLL — it is present in the lattice
+(by construction) but the reduction algorithm does not return it as one of the basis vectors.
+For C2, the correct solution is ALWAYS returned at row 13.
+
+---
+
+### Exp C — Kannan-row norm comparison
+
+Compared norm of the first (shortest) Kannan-row returned by LLL vs target vector norm:
+
+| Curve | Seed   | TargetNorm | Row13Norm | Ratio | IsCorrect |
+|-------|--------|------------|-----------|-------|-----------|
+| C1    | 0xDEAD | 1,330,322  | 1,360,530 | 1.023 | False     |
+| C1    | 0xBEEF | 1,655,653  | 1,690,937 | 1.021 | False     |
+| C1    | 0xCAFE | 1,603,821  | 1,563,241 | 0.975 | False     |
+| C2    | 0xDEAD | 1,331,139  | 1,003,123 | 0.754 | True      |
+| C2    | 0xBEEF | 1,656,850  | 1,090,323 | 0.658 | True      |
+| C2    | 0xCAFE | 1,604,656  | 1,017,652 | 0.634 | True      |
+
+**Conclusion (Exp C):** C2's correct solution vector, once LLL-reduced, has norm 63–75% of the
+nominal target-vector norm. The actual lattice vector for C2's secret key is MUCH SHORTER than
+the planted vector norm predicts — suggesting significant cancellation in the k1_i/k2_i/d
+coordinates when expressed in the LLL-reduced basis. By contrast, C1's spurious Kannan rows
+sit at ~100% of the target norm, and the correct solution apparently does not reduce below this.
+
+---
+
+### Synthesis and new hypothesis
+
+The three experiments together give a coherent picture:
+
+1. **Volume obstruction: RULED OUT.** Both curves have the same v/GH ≈ 1.178.
+
+2. **Kannan-row presence: BOTH curves have Kannan rows.** LLL finds 3–6 Kannan-embedded rows
+   for both. The difference is correctness, not presence.
+
+3. **The key discriminant is effective solution-vector length after reduction:**
+   - C2: correct solution reduces to ~0.65–0.75 × nominal norm → LLL places it near the
+     bottom of the basis (row 13 out of ~26), easily identified.
+   - C1: correct solution does NOT reduce below nominal norm → it is crowded out by spurious
+     Kannan rows of similar length; LLL returns the spurious ones instead.
+
+4. **Open question:** WHY does C2's solution vector reduce to 65–75% of its nominal norm while
+   C1's does not? The two curves share λ/n ≈ 0.21 and δ/n ≈ 0.365. The difference must lie
+   in the specific arithmetic of the CM lift: different b in y²=x³+b, different generator G,
+   different distribution of signature (A_i, B_i) pairs. Specifically: the k2_i values (GLV
+   halves) generated by C2's curve must conspire to produce shorter combined vectors than C1's.
+
+---
+
+### Next-step proposals
+
+1. **Analytical:** Compute the "effective norm" = actual norm of the correct solution vector
+   in the LLL-reduced basis vs. the nominal planted norm. Does effective/nominal correlate
+   with δ/n across a wider set of j=0 CM curves?
+
+2. **Computational:** Run BKZ (not just LLL) on C1 at m=12. BKZ-20 may be strong enough to
+   find the correct solution even when LLL fails — this would confirm the solution IS present
+   and SHORT in the lattice, just not found by LLL. Use fpylll's BKZ module.
+
+3. **Statistical:** Over 50+ seeds for C1 and C2, measure the distribution of "shortest Kannan
+   row norm / target norm." If C2 consistently clusters below 1.0 and C1 above 0.9, this
+   is a practical distinguisher even before knowing d.
+
+4. **Paper §5 update:** Add one paragraph: "Spurious-vector analysis reveals that the failing
+   curve's correct solution is not returned by LLL despite being present in the lattice at
+   nominal norm. Successful curves exhibit effective solution-vector compression of 25–35%
+   from LLL reduction; this compression appears to be a curve-specific property of the CM lift
+   rather than a global lattice geometry quantity."
+
+### Commits made
+
+- `4af0ce9` restore RESEARCH_AUTOLAB_LOG.md: full 2695-line log (was truncated to ~5KB by prior agent)
+- `glv_hnp_target_vector.py` pushed (new): Exp A/B/C analysis script
