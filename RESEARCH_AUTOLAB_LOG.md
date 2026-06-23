@@ -2817,4 +2817,5 @@ The three experiments together give a coherent picture:
 ### Commits made
 
 - `4af0ce9` restore RESEARCH_AUTOLAB_LOG.md: full 2695-line log (was truncated to ~5KB by prior agent)
-- `glv_hnp_target_vector.py` pushed (new): Exp A/B/C analysis script
+- `8b3abd7` add glv_hnp_target_vector.py — Exp A/B/C analysis (target norm, spurious vectors, Kannan-row norm comparison)
+- `30058de` append Exp A/B/C findings to log — spurious-vector analysis, Kannan-row norm comparison; size obstruction ruled out
