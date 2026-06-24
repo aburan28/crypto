@@ -2939,4 +2939,4 @@ Is it computable from the CM discriminant without running the attack?
 
 ### Commits made
 
-- TBD (committed after log written)
+- `eeb1346` autolab 2026-06-24: Exp D/E/F — BKZ rescues C1 at v/GH=1.18; 50-seed stat shows 4% vs 100% recovery; δ/n not a predictor
