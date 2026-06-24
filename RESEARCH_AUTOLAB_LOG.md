@@ -2819,3 +2819,124 @@ The three experiments together give a coherent picture:
 - `4af0ce9` restore RESEARCH_AUTOLAB_LOG.md: full 2695-line log (was truncated to ~5KB by prior agent)
 - `8b3abd7` add glv_hnp_target_vector.py — Exp A/B/C analysis (target norm, spurious vectors, Kannan-row norm comparison)
 - `30058de` append Exp A/B/C findings to log — spurious-vector analysis, Kannan-row norm comparison; size obstruction ruled out
+
+## 2026-06-24 (autolab run)
+
+### Task picked
+
+Priority 5 (GLV-HNP Phase 2), continued from 2026-06-23. All other threads are closed
+(1, 4, 6) or blocked (2: needs Sage, 3: resolved). Yesterday's Exp A/B/C showed C1's
+correct solution does not compress in LLL while C2's compresses to ~65-75% of nominal.
+Today: (D) BKZ escalation to confirm solution IS present for C1; (E) 50-seed statistical
+separation; (F) δ/n correlation scan.
+
+### Work done
+
+- Installed fpylll (0.6.4) + cysignals + sympy + numpy (not present in container by default).
+- Wrote `secp256k1_cm_audit/glv_hnp_bkz_c1.py` with three experiments:
+  - Exp D: BKZ escalation (β=15,20,25,30) on C1 (fail) + C2 (succeed) at m=12, K1=72
+  - Exp E: 50-seed LLL statistical analysis for C1 and C2
+  - Exp F: δ/n correlation scan across 8 j=0 CM curves (18–20 bit)
+- Ran all three experiments successfully (< 3 min total).
+- Confirmed cargo test --test curve_audit passes (5/5 tests).
+
+### Findings
+
+**Exp D — BKZ escalation on C1:**
+
+| Curve    | Seed   | v/GH  | LLL | BKZ15 | BKZ20 | BKZ25 | BKZ30 |
+|----------|--------|-------|-----|-------|-------|-------|-------|
+| C1-FAIL  | 0xDEAD | 1.178 | N   | Y     | Y     | Y     | Y     |
+| C1-FAIL  | 0xBEEF | 1.467 | N   | N     | N     | N     | N     |
+| C1-FAIL  | 0xCAFE | 1.421 | N   | N     | N     | N     | N     |
+| C2-SUCC  | 0xDEAD | 1.178 | Y   | Y     | Y     | Y     | Y     |
+| C2-SUCC  | 0xBEEF | 1.466 | Y   | Y     | Y     | Y     | Y     |
+| C2-SUCC  | 0xCAFE | 1.420 | Y   | Y     | Y     | Y     | Y     |
+
+Key result: BKZ-15 RESCUES C1 at v/GH=1.178 (seed 0xDEAD). This CONFIRMS the correct
+solution IS present in the lattice at low v/GH. At v/GH=1.42-1.47, even BKZ-30 fails for C1.
+C2 succeeds with plain LLL at ALL v/GH ratios (including 1.42-1.47).
+
+Interpretation: C1's correct solution vector norm, after LLL reduction, sits near 95-100%
+of the nominal target norm — just barely compressed. At v/GH≈1.18 this is short enough for
+BKZ-15 to find; at v/GH≈1.42-1.47 it is not. C2's correct solution compresses to ~65-75%
+of nominal, so it is findable by LLL even at v/GH=1.47.
+
+**Exp E — 50-seed statistical analysis (m=12, K1=72):**
+
+C1-FAIL (p=524743, n=523597):
+- Recovery rate: 2/50 (4%)
+- Shortest Kannan norm / nominal: min=0.709, median=0.924, max=1.123, mean=0.914
+- Correct row norm / nominal (2 recovered seeds): min=0.946, mean=0.973
+
+C2-SUCCEED (p=525043, n=524269):
+- Recovery rate: 50/50 (100%)
+- Shortest Kannan norm / nominal: min=0.522, median=0.699, max=0.855, mean=0.683
+- Correct row norm / nominal (all 50): min=0.522, median=0.699, max=0.855, mean=0.683
+
+Crisp statistical separation:
+- C2's correct solution vector ALWAYS compresses to 52-86% of nominal (100% recovery).
+- C1's correct solution compresses to only ~94-100% of nominal (4% recovery); the
+  SHORTEST Kannan row for C1 is spurious (wrong d), at 0.71-1.12 × nominal.
+- For C1, spurious Kannan rows are shorter than the correct solution in 96% of seeds.
+
+**Exp F — δ/n correlation across 8 curves (K1=72, m=12, 3 seeds):**
+
+| p      | n      | λ/n   | δ/n   | recovery | median_ratio |
+|--------|--------|-------|-------|----------|--------------|
+| 262153 | 262567 | 0.270 | 0.190 | 3/3      | 0.695        |
+| 262399 | 261439 | 0.424 | 0.273 | 0/3      | 0.893        |
+| 262237 | 261223 | 0.430 | 0.291 | 3/3      | 0.793        |
+| 262459 | 261643 | 0.148 | 0.445 | 0/3      | 0.867        |
+| 262261 | 263191 | 0.185 | 0.446 | 0/3      | 0.828        |
+| 262303 | 263209 | 0.184 | 0.448 | 0/3      | 0.770        |
+| 262567 | 262153 | 0.172 | 0.484 | 3/3      | 0.698        |
+| 262231 | 263083 | 0.164 | 0.492 | 0/3      | 0.760        |
+
+Result: δ/n DOES NOT cleanly predict recovery. Curves with δ/n≈0.49 can win or lose;
+curves with δ/n≈0.27 can lose while δ/n≈0.29 wins. The discriminating property is NOT
+a simple function of (λ/n, δ/n). It is likely curve-specific (depends on b, G, or the
+specific k2_i arithmetic distribution for a given set of signatures).
+
+Note: two failures at δ/n≈0.45-0.49 have median_ratio=0.76-0.77, yet still fail
+recovery. This confirms that a short SPURIOUS Kannan row can exist without the correct
+solution being recoverable — the correct row is at a HIGHER effective norm than the
+spurious ones.
+
+**Synthesis:**
+
+The complete picture:
+1. C1's correct solution is PRESENT in the lattice (BKZ-15 finds it at low v/GH).
+2. C1's correct solution is barely compressed by LLL (~95% of nominal).
+3. C2's correct solution is strongly compressed by LLL (~68% of nominal).
+4. The compression asymmetry is NOT explained by (λ/n, δ/n) alone.
+5. The compression is likely determined by the specific arithmetic of the GLV nonce
+   decomposition k = k1 + λ·k2: if k2_i values are "small" relative to what the
+   basis expects, the solution vector is effectively shorter. This is curve-specific.
+
+**Open question (sharpened):** For a given CM curve (p, n, λ, b, G), what is the
+expected effective norm of the correct Kannan-embedded solution after LLL reduction?
+Is it computable from the CM discriminant without running the attack?
+
+### Next-step proposals
+
+1. **k2_i distribution analysis**: For C1 and C2, generate 100 signatures at K1=72 and
+   compare the distribution of k2_i values. Do C2's k2_i values have tighter variance?
+   The hypothesis is that C2's GLV decomposition produces k2_i with smaller effective
+   norm, enabling LLL to compress the combined row.
+
+2. **BKZ at β=40-50 for C1 resistant seeds**: At v/GH=1.42-1.47, BKZ-30 fails. Try
+   β=40, 50 to find the crossover. May be expensive (minutes per run).
+
+3. **Vary m at fixed K1=72 for C1**: At m=20 or 24, do more equations help C1's recovery?
+   More rows constrain the lattice — the question is whether C1's correct solution becomes
+   relatively shorter as m grows.
+
+4. **Paper §5 update**: Add subsection with:
+   - BKZ-15 rescue at v/GH=1.18 (confirms solution presence)
+   - Statistical table (Exp E): 4% vs 100% recovery across 50 seeds
+   - Conclusion: lattice recovery is curve-specific, not uniformly exploitable
+
+### Commits made
+
+- TBD (committed after log written)
