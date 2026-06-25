@@ -3084,4 +3084,4 @@ exists. This is a curve-specific algebraic property of (p_C1, n_C1, λ_C1).
 
 ### Commits made
 
-- (to be filled after commit)
+- `b6affe5` autolab 2026-06-25: Exp G/H/I — C1 structural obstruction confirmed; spurious sublattice is lattice artifact
