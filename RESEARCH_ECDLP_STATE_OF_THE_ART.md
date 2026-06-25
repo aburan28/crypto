@@ -333,13 +333,144 @@ provisional** until proceedings are confirmed.
    to track the quantum threat to Bitcoin.
 2. **Extension-field index calculus & the last/first-fall-degree question** — refining
    complexity bounds, probing whether any salvageable subexponential binary-field attack
-   survives the collapse of the first-fall-degree assumption.
+   survives the collapse of the first-fall-degree assumption. **See §8 for the detailed
+   frontier** (symmetrized Semaev, Gröbner bottleneck, cover/gluing attacks, EDS equivalence,
+   and the prime-field "Holy Grail").
 3. **Better generic-attack engineering** — kangaroo symmetry methods (RCKangaroo SOTA),
    negation-map cycle handling, GPU/FPGA throughput; relevant to records and interval DLP.
 4. **Nonce-leakage / HNP attacks** — increasingly powerful Bleichenbacher-FFT and
    lattice methods tolerating tiny or noisy bias (the practically dangerous class).
 5. **PQC migration engineering** — hybrid KEX deployment, agility, key-transparency, and
    the 2030/2035/2033 compliance timelines.
+
+---
+
+## 8. The algebraic-attack frontier in detail (mapped to this repo's modules)
+
+This section goes deeper on the index-calculus / descent program — the directions this
+repository actually pursues — and states, per direction, the current literature consensus and
+the concrete obstruction. **Net: every one of these attacks is confined to extension fields
+or stalls on a Gröbner/degree bottleneck; none beats Pollard rho at any cryptographic size,
+and the prime-field case (`secp256k1`, P-256) has no working index calculus at all.**
+
+### 8.1 Symmetrized summation-polynomial index calculus over `F_{q^n}`
+*(repo: `symmetrized_semaev.rs`, `semaev_higher.rs`, `groebner_f4.rs`)*
+
+- **The symmetrization gain is real but bounded.** Faugère–Gaudry–Huot–Renault (J. Cryptology
+  2014) get an **exponential `2^{ω(n−1)}` factor** on the point-decomposition step for twisted
+  Edwards / Jacobi-intersection models, via the `S_n` action and elementary-symmetric /
+  power-sum variable changes (plus small-torsion tricks for more compact polynomials). This is
+  exactly the density reduction the repo's `decompose_symmetric` targets.
+- **But the Gröbner step is the wall, and it's a brutal constant.** The dominant cost is F4/F5
+  solving the Semaev system, *not* the linear algebra. Galbraith–Gebregiyorgis (INDOCRYPT
+  2014) measured `<1000` decomposition systems/sec versus `25,000–150,000` rho point-additions/sec,
+  and concluded **"Pollard rho is still much faster than index calculus for ECDLP over
+  `F_{2^n}` of reasonable size."** This is the empirical reality the repo's `groebner_f4`
+  performance envelope (≈6 vars before the Buchberger brake) runs into; a research-grade
+  F4/F5 + FGLM + sparse linear algebra is what would even make the comparison interesting.
+- **Asymptotics.** Gaudry/Diem give point-decomposition `Õ(q^{2−2/n})` for fixed `n` (with the
+  Gaudry–Thomé–Thériault–Diem double-large-prime variation), beating generic `q^{n/2}` only
+  once `n` is large — and even then the "n treated as constant" framing hides the Gröbner cost
+  that prevents a concrete win at small fixed `n = 2,3,4,5`.
+- **Incremental 2012–2018 progress, no class change:** Joux–Vitse cover-and-decomposition
+  (composite `n`, see §8.3); Vitse–Wallet *Improved Sieving on Algebraic Curves* (LATINCRYPT
+  2015, ~3× constant speedup); Amadori–Pintore–Sala one-relation variant (§8.5). **Consensus:
+  symmetrized index calculus threatens no standardized curve.**
+
+### 8.2 The first-fall-degree question — is binary ECDLP subexponential?
+*(repo: `RESEARCH_FFD_*`, `semaev_sat.rs`)*
+
+- Petit–Quisquater (ASIACRYPT 2012) claimed `O(2^{c·n^{2/3} log n})` for `F_{2^n}` **conditional
+  on the first-fall-degree assumption** (degree of regularity ≈ first fall degree). Even granting
+  it, the **crossover with rho is non-cryptographic** — their own estimate beats rho only for
+  `n ≳ 2000`, vs deployed `n ≈ 160–600`.
+- **The assumption is now widely distrusted.** Kosters–Yeo (*Notes on summation polynomials*,
+  arXiv 1503.08001, 2015) give experimental evidence the degree of regularity **grows with `n`**
+  (a rise observed around `n ≈ 45` for `m=2`), contradicting `D_reg ≈ D_FirstFall`.
+  Huang–Kosters–Yeo (*Last fall degree, HFE, and Weil descent attacks on ECDLP*, CRYPTO 2015,
+  eprint 2015/573) introduce the monomial-order-independent **last fall degree**, prove an
+  *unconditional* poly-time solve for HFE, and **construct Weil-descent systems where the
+  first-fall-degree assumption is unlikely to hold.** Huang–Petit–Shinohara–Takagi (eprint
+  2015/358) try to *salvage* a generalized assumption — the live tension is "likely false"
+  (Kosters–Yeo) vs "refine it" (Petit et al.).
+- **Concrete bounds that *do* hold:** Kousidis–Wiemers (J. Math. Cryptol. 2019) prove the first
+  fall degree of the Semaev Weil-descent system is `≤ m² − m + 1` (improving `m² + 1`); Huang
+  (arXiv 2103.07282, 2021) bounds the last fall degree of *linearized* descent systems — but
+  the **Semaev/ECDLP case remains open.** The repo's FFD harness is measuring exactly the
+  invariant whose growth is the crux.
+- **A provable negative:** the *naive* Semaev index calculus **cannot beat Pollard rho** over
+  an arbitrary finite field (J. Math. Cryptol. jmc-2019-0029, 2020) — and experimentally not
+  even brute force.
+- **A closed-off side route:** quasi-subfield polynomials (Huang–Kosters–Yeo 2020) were killed
+  by Euler–Petit's non-existence theorem (FFA 2021, arXiv 1909.11326): the needed parameter
+  regime can't be met, so **no speedup.**
+
+### 8.3 Cover / descent / genus-2 gluing — and why prime fields are immune
+*(repo: `RESEARCH_MESTRE_HOWE.md`, Richelot / Howe-gluing autolab work, `secp256k1_cm`)*
+
+- **All cover attacks need a subfield.** GHS and its generalizations (Hess; Galbraith–Hess–Smart
+  isogeny extension; Diem's odd-characteristic GHS) transfer ECDLP over `F_{q^n}` to a
+  higher-genus Jacobian DLP over a subfield. Diem showed the odd-char GHS **fails for prime
+  extension degree ≥ 11** (genus blows up); only `d = 2,3,5,7` need analysis. Joux–Vitse
+  cover-and-decomposition (EUROCRYPT 2012) broke a real **156-bit curve over `F_{p^6}`** — but
+  it is a *composite-degree* attack.
+- **Newer genus-2/3 covers for prime-*order* curves still need an extension field.** Song Tian,
+  *Cover Attacks for Elliptic Curves over Cubic Extension Fields* (J. Cryptology 2023, arXiv
+  2012.07173): an `F_q`-rational `(ℓ,ℓ,ℓ)`-isogeny from the Weil restriction to a **genus-3**
+  Jacobian solves DLP in `Õ(q)` for *some* prime-order curves over `F_{q^3}`. Fan (2022)
+  constructs genus-2 covers over *quadratic* extensions. **Neither touches prime fields.**
+- **The gluing machinery the repo is exploring is constructive, not an attack vector for
+  `F_p`.** Howe–Leprévost–Poonen `(2,2)`-gluing of two elliptic curves into a genus-2 Jacobian,
+  and Richelot `(2,2)`-isogenies between genus-2 Jacobians, are used to *build* curves and in
+  *isogeny-based* PQC; the Castryck–Decru SIDH break uses them **with exchanged torsion-point
+  images** — side information plain ECDLP doesn't expose. Scholten's construction
+  (`E/F_{p²} → ` genus-2 curve over `F_p` via Weil restriction) and "weak Weil restriction"
+  curves give an obstruction **for `E/F_{p²}`, not for prime-field curves.** Concretely, for
+  the repo's secp256k1 sextic-twist gluing: `secp256k1` lives over a *prime* `F_p`, so there is
+  **no Weil restriction to descend through**, and any cover correspondence preserves the group
+  order (Tate) while the index-calculus cost in a genus-`g` Jacobian is `Õ(q^{2−2/g})` — needing
+  small `g`, whereas prime-order covers force large (non-hyperelliptic) genus. That is the
+  **dual obstruction**: (i) no subfield, (ii) genus growth makes any cover costlier than rho.
+
+### 8.4 Elliptic divisibility sequences / elliptic nets
+*(repo: `RESEARCH_EDS_RESIDUE.md`)*
+
+- Shipsey's and Swart's EDS attacks solve ECDLP **only when the point order equals `q−1`** —
+  i.e. the same multiplicative structure MOV/Frey–Rück already exploit.
+- Lauter–Stange (SAC 2008, eprint 2008/099) define **EDS Association, EDS Residue, and EDS
+  Discrete Log** and prove each is subexponential **iff ECDLP is** — a rigorous *equivalence*,
+  not an advantage. The repo's `EDS_RESIDUE` work is therefore probing a problem provably no
+  easier than the target; index calculus via elliptic nets is in turn **equivalent to Semaev's
+  summation polynomials**. **Consensus: no advantage over generic `sqrt(n)` for prime fields.**
+
+### 8.5 Direct prime-field index calculus — the "Holy Grail"
+*(repo: `diem_descent.rs` and its `Amadori–Pintore–Sala` reference, `pkm_criterion.rs`)*
+
+- The structural problem is stark: over `F_p` there is **no subfield** to define a small factor
+  base, so Semaev's polynomials have nowhere to land. Petit–Kosters–Messeng (PKC 2016) were the
+  **first to make summation-polynomial IC run at all over prime fields**, via factor bases from
+  compositions of small-degree rational maps — but **only for tiny parameters**, with asymptotics
+  bounded by the heuristic Gröbner behavior. Amadori–Pintore–Sala (FFA 2018, eprint 2017/609)
+  cut the relations needed to **one** (a Las Vegas algorithm, success ≈ 0.6) and outperform
+  *other IC variants* in the prime-field case — **but not Pollard rho.** Kudo–Yokota (CANS 2018,
+  title literally *"…and Its Limitation"*) accelerate it and document that it still doesn't beat
+  generic methods.
+- **Refuted/closed historically:** Silverman's **xedni calculus** was decisively refuted
+  (Jacobson–Koblitz–Silverman–Stein–Teske, DCC 2000) — an absolute bound on lifted-relation
+  coefficient size makes it asymptotically almost-certain to fail. Semaev's 2015 subexponential
+  claim (eprint 2015/310) was **binary-only and rests on the now-distrusted first-fall-degree
+  assumption** (§8.2), not a prime-field result.
+- **Status of the Holy Grail:** *open but unmoved.* No subexponential prime-field algorithm
+  exists and none is refuted as impossible; decades of attempts have produced only
+  small-parameter demonstrators. This is the honest framing for the repo's prime-field
+  ambitions — the existence question is genuinely open, but there is no published toehold.
+
+**What would actually constitute progress** (and what the repo's bets ride on): a Gröbner/
+solving-degree breakthrough that makes Semaev decomposition sub-rho at small fixed `n`; a proof
+(or refutation) of a first-/last-fall-degree bound for the *Semaev* system; a prime-field
+factor base that doesn't need a subfield; or a genuinely new curve invariant (cf. §3a) tying
+ECDLP to an easier problem. Absent one of these, `secp256k1`/P-256 retain full `2^128` classical
+security and the operative threat remains Shor.
 
 ---
 
@@ -360,6 +491,17 @@ Galbraith–Hess–Smart / Maurer–Menezes–Teske isogeny-extension of GHS; Ca
 **Index calculus:** Semaev ePrint 2004/031; Gaudry ePrint 2010/157; Petit–Quisquater
 EUROCRYPT/ASIACRYPT 2012; last-fall-degree ePrint 2015/573; ePrint 2015/358; prime-field
 ePrint 2017/609.
+**Algebraic-attack frontier (§8):** Faugère–Gaudry–Huot–Renault (J. Cryptology 2014, HAL
+hal-00700555); symmetrized/small-torsion (doi 10.1007/978-3-642-55220-5_3);
+Galbraith–Gebregiyorgis INDOCRYPT 2014 (eprint 2014/806); Gaudry–Thomé–Thériault–Diem double
+large prime; Kosters–Yeo arXiv 1503.08001; Huang–Kosters–Yeo CRYPTO 2015 (eprint 2015/573);
+Kousidis–Wiemers (J. Math. Cryptol. 2019, arXiv 1906.05594); Huang arXiv 2103.07282; naive-IC
+lower bound (jmc-2019-0029); Euler–Petit quasi-subfield (FFA 2021, arXiv 1909.11326);
+Joux–Vitse EUROCRYPT 2012 (eprint 2011/020); Vitse–Wallet LATINCRYPT 2015; Tian (J. Cryptology
+2023, arXiv 2012.07173); Fan (Math. Probl. Eng. 2022); Howe–Leprévost–Poonen gluing; Scholten
+construction; Lauter–Stange SAC 2008 (eprint 2008/099); Petit–Kosters–Messeng PKC 2016;
+Amadori–Pintore–Sala FFA 2018; Kudo–Yokota CANS 2018; xedni refutation (Jacobson–Koblitz–
+Silverman–Stein–Teske, DCC 2000).
 **Special-case/impl:** SafeCurves (safecurves.cr.yp.to transfer/twist); Smart/SSSA;
 Gaudry–Hess–Smart ePrint 2001/084; Kim–Barbulescu exTNFS (CRYPTO 2016); Minerva
 (minerva.crocs.fi.muni.cz); LadderLeak ePrint 2020/615; Osaki–Kunihiro SAC 2024;
@@ -376,12 +518,17 @@ Timeline 2025.
 203/204/205; NIST HQC selection (Mar 2025); Cloudflare "State of the post-quantum Internet
 in 2025"; Castryck–Decru ePrint 2022/975; Koblitz–Menezes ePrint 2015/1018.
 
-> **Methodology / caveats.** Synthesized from five parallel literature searches. Many
-> primary PDFs (eprint, arXiv, NIST, Cloudflare, Wikipedia) returned HTTP 403 to automated
-> fetch, so some figures rest on authoritative search snippets + corroborating secondary
-> sources; these are flagged inline. The least-settled points are: (a) exact post-exTNFS
-> bit levels for BLS12-381/BN462; (b) the **final** status of NIST IR 8547 (still IPD as far
-> as could be confirmed); (c) all **2026-dated quantum estimates**, pending published
-> proceedings. The core qualitative claims — generic `sqrt(n)` classical hardness, no
-> prime-field subexponential attack, Shor as the operative threat, ~112–117-bit record
-> frontier — are high-confidence and corroborated across independent sources.
+> **Methodology / caveats.** Synthesized from nine parallel literature searches (five
+> broad-survey passes for §§1–7, four targeted deep-dives for §8: symmetrized index calculus,
+> cover/gluing attacks, first-/last-fall-degree, and EDS + prime-field IC). Many primary PDFs
+> (eprint, arXiv, NIST, Springer, Cloudflare, Wikipedia) returned HTTP 403 to automated fetch,
+> so some figures rest on authoritative search snippets + corroborating secondary sources;
+> these are flagged inline. The least-settled points are: (a) exact post-exTNFS bit levels for
+> BLS12-381/BN462; (b) the **final** status of NIST IR 8547 (still IPD as far as could be
+> confirmed); (c) all **2026-dated quantum estimates**, pending published proceedings; (d) a
+> few §8 snippet-only figures (Joux–Vitse exact bit-record, Amadori–Pintore–Sala largest
+> instance, the "8th symmetrized polynomial" detail). The core qualitative claims — generic
+> `sqrt(n)` classical hardness, no prime-field subexponential attack, the first-fall-degree
+> assumption being distrusted, cover/gluing attacks confined to extension fields, Shor as the
+> operative threat, ~112–117-bit record frontier — are high-confidence and corroborated across
+> independent sources.
