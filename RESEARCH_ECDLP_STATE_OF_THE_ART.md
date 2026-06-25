@@ -68,6 +68,38 @@ structure, the only attack is generic.
 `O(sqrt(n))` for standard prime-field curves**; recurring "sub-sqrt" preprints have not
 survived scrutiny.
 
+### 1a. Precomputation and amortization — beating `sqrt(n)` *online*
+
+Rho's `sqrt(n)` is the bound for a *single* discrete log in an *unknown* group. Two
+distinct techniques do better when the group is **fixed** (e.g. a standardized curve) and
+either precomputation is amortized or only online cost is counted.
+
+- **Hellman-table / cube-root preprocessing (the `S·T² = N` tradeoff).** Spend a one-time
+  precomputation on the fixed group, store an `S`-bit advice string, then answer each query
+  in online time `T`, with `S·T² = Θ̃(N)`. At the balanced point `S = T = N^(1/3)`:
+  **online time `N^(1/3)`, advice `N^(1/3)`, precomputation `≈ N^(2/3)`.** Algorithm:
+  Mihalcik (2010), Bernstein–Lange, *Computing small discrete logarithms faster*
+  (LATINCRYPT 2012). **Optimality:** Corrigan-Gibbs & Kogan, *The Discrete-Logarithm Problem
+  with Preprocessing* (EUROCRYPT 2018, eprint 2017/1113) proved `S·T² = Ω̃(N)` in the generic
+  group model — so `N^(1/3)` online is the best possible with `N^(1/3)` advice. A 2022 ITC
+  paper made the table construction fully explicit/optimal. This is the substance of
+  Bernstein–Lange, *Non-uniform cracks in the concrete* (ASIACRYPT 2013, eprint 2012/318):
+  in the **non-uniform** model P-256's advertised `2^128` is only `~2^85` online. *Caveat:*
+  the precomputation for P-256 is `~N^(2/3) ≈ 2^170` — far more than `2^128` — so this is a
+  statement about the security *model* and about small-`N`/many-target regimes, **not a
+  practical break**. For a one-off log in a random group, rho's `sqrt(n)` still wins.
+- **Batch / amortized rho (`sqrt(LN)` for `L` targets).** Kuhn–Struik, *Random Walks
+  Revisited* (SAC 2001), share a distinguished-point database across `L` targets in the same
+  group: total cost `~sqrt(2LN)`, i.e. `~sqrt(N/L)` amortized per log — a **`sqrt(L)`
+  speedup** over independent rho. No expensive separate precomputation; the win is real and
+  practical when many keys live on one curve, bounded by the number of targets.
+
+Both interact with **interval ECDLP**: the cube-root preprocessing takes interval-DLP of
+width `w` from `sqrt(w)` to `w^(1/3)` online (Bernstein–Lange's "small logarithms" target),
+so a precomputed table for a fixed curve speeds the Bitcoin-puzzle-style kangaroo solves
+too — again only if the `w^(2/3)` precompute is affordable. None of this dents 256-bit
+curves in practice.
+
 ---
 
 ## 2. Index calculus on elliptic curves (works only over extension fields)
@@ -144,6 +176,41 @@ exploitable structure.
 **Takeaway:** secp256k1, P-256, and Curve25519 have prime/near-prime order, huge embedding
 degree, and no anomalous/descent structure → best generic attack is `2^128` rho. Their real
 residual risk is **implementation** (point validation, nonce bias), not the math.
+
+### 3a. Can isogenies map a prime-field curve to a weaker one? — No (a structural argument)
+
+A natural attack idea: an isogeny `φ: E → E'` is a group homomorphism, so a small-degree
+isogeny transports a DLP instance from `E` to `E'` and back — if `E'` were weaker, you'd
+win. It fails for well-chosen prime-field curves, and the reason is a **provable invariance**:
+
+- **Tate's isogeny theorem:** two curves over `F_p` are isogenous **iff** `#E(F_p) =
+  #E'(F_p)`. So the group order `n`, and hence the trace `t = p+1−n`, is **constant across
+  the entire isogeny class.**
+- Therefore every structural-attack precondition is a **class invariant**:
+  - the large prime subgroup order `r | n` (governs rho `sqrt(r)`) — fixed;
+  - **anomalous** status (`t = 1`) — fixed: not anomalous ⇒ nothing isogenous is;
+  - **embedding degree** `k` (= order of `p` mod `r`) — fixed, since `p` and `r` are.
+- The **only** thing that varies within a class is the **endomorphism ring** (Kohel's
+  isogeny volcano). But **no known ECDLP attack exploits the endomorphism ring**; the closest
+  thing — efficiently computable endomorphisms (GLV/GLS, e.g. secp256k1's `λ`) — gives only
+  a **constant-factor** rho speedup, never an asymptotic one.
+
+So the set of curves reachable from a good prime-field curve by isogeny is exactly the set
+sharing its (good) group order — none weak to any known attack.
+
+The isogeny-walk-to-a-weak-curve idea *does* work in **one** place: **GHS Weil-descent over
+composite-degree binary fields** `F_{2^n}`, where Hess / Maurer–Menezes–Teske showed you can
+hop via a small isogeny to a GHS-vulnerable curve (e.g. the `GF(2^155)` results). That needs
+a subfield to descend to and is **absent over prime fields**. Related confusions: the
+**SIDH/SIKE break (Castryck–Decru 2022)** recovers an isogeny from torsion-point images (the
+opposite direction) and says nothing about ECDLP; **quantum isogeny-path** algorithms
+(Childs–Jao–Soukharev) solve isogeny-finding, not ECDLP, where Shor is already polynomial.
+
+**Assessment:** a prime-field isogeny break would require a *new* curve invariant not
+determined by the group order, varying within a class (the endomorphism ring is the only
+candidate) and admitting a faster discrete log — something the entire GLV/GLS/CM literature
+has not produced. This route looks markedly less promising for prime fields than the
+(already stalled) index-calculus and (extension-field-only) Weil-descent routes.
 
 ---
 
@@ -282,6 +349,14 @@ provisional** until proceedings are confirmed.
 Shoup EUROCRYPT 1997; van Oorschot–Wiener (J. Cryptology 1999); Bernstein–Lange–Schwabe
 negation map (cr.yp.to/elliptic/negation-20110102.pdf); Bos–Kleinjung–Lenstra (Inf. Sci.
 2012).
+**Precomputation/amortization:** Corrigan-Gibbs–Kogan EUROCRYPT 2018 (eprint 2017/1113);
+Bernstein–Lange *Non-uniform cracks in the concrete* ASIACRYPT 2013 (eprint 2012/318);
+Bernstein–Lange *Computing small discrete logarithms faster* LATINCRYPT 2012; Mihalcik 2010;
+fully-constructive optimal preprocessing (ITC 2022); Kuhn–Struik *Random Walks Revisited*
+SAC 2001.
+**Isogenies & ECDLP:** Tate isogeny theorem; Kohel isogeny volcanoes (thesis 1996);
+Galbraith–Hess–Smart / Maurer–Menezes–Teske isogeny-extension of GHS; Castryck–Decru
+(eprint 2022/975, distinct problem); Childs–Jao–Soukharev quantum isogeny path (2014).
 **Index calculus:** Semaev ePrint 2004/031; Gaudry ePrint 2010/157; Petit–Quisquater
 EUROCRYPT/ASIACRYPT 2012; last-fall-degree ePrint 2015/573; ePrint 2015/358; prime-field
 ePrint 2017/609.
