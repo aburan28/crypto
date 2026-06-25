@@ -2940,3 +2940,148 @@ Is it computable from the CM discriminant without running the attack?
 ### Commits made
 
 - `eeb1346` autolab 2026-06-24: Exp D/E/F — BKZ rescues C1 at v/GH=1.18; 50-seed stat shows 4% vs 100% recovery; δ/n not a predictor
+
+## 2026-06-25 (autolab run)
+
+### Task picked
+
+Priority 5 (GLV-HNP Phase 2), continuing from 2026-06-24. Yesterday confirmed C1's
+correct solution is present in the lattice (BKZ-15 finds it) but barely compressed by
+LLL (~97% nominal), while C2 compresses to ~68% nominal (100% recovery). The discriminating
+property was unknown. Today: Exp G (spurious vector anatomy), Exp H (vary m), Exp I
+(component fraction breakdown).
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_k2_distribution.py` with three new experiments.
+- Ran all experiments (< 3 min total). All pass.
+- Confirmed `cargo test --test curve_audit` passes (5/5).
+
+### Findings
+
+**Exp G — Spurious vector anatomy (C1, K1=72, m=12, 50 seeds):**
+
+- Recovery: 2/50 (4%), consistent with Exp E from 2026-06-24.
+- Shortest Kannan row = spurious: 48/50 seeds.
+
+Spurious row structure (48 seeds where LLL returns wrong d):
+
+| Metric                                    | Value  |
+|-------------------------------------------|--------|
+| k1_valid fraction (all k1_i ∈ [0,71])    | 0.000  |
+| k2_valid fraction (all k2_i ∈ [0,723])   | 0.000  |
+| both_valid fraction                       | 0.000  |
+| avg k1_i (spurious row)                   | 1.31   |
+| avg k2_i (spurious row)                   | 7.13   |
+| norm ratio median (spuri)                 | 0.908  |
+| norm ratio min                            | 0.709  |
+| norm ratio max                            | 1.123  |
+
+Correct row (2 seeds where found by LLL):
+
+| Metric                     | Value  |
+|----------------------------|--------|
+| avg k1_i                   | 25.92  |
+| avg k2_i                   | 288.38 |
+| norm ratio median          | 1.000  |
+
+For reference: K1=72, K2=724; expected avg k1_i~35.5, avg k2_i~361.5.
+
+Key result: **NONE of C1's spurious rows are valid ECDSA solutions** (0/48 have all
+k1_i ∈ [0,71] or all k2_i ∈ [0,723]). Spurious rows have avg k1_i=1.31 (vs 35.5
+expected), avg k2_i=7.13 (vs 361.5 expected) — very small, mixed-sign. They are
+pure lattice artifacts, not signature-derived. The correct row has ZERO compression
+(norm ratio = 1.000 exactly) — LLL does not shorten it at all.
+
+**Exp H — Vary m at K1=72 (C1 vs C2, 10 seeds each):**
+
+C1-FAIL recovery:
+
+| m  | dim | recovery | med_ratio |
+|----|-----|----------|-----------|
+|  8 |  18 |    0/10  |    —      |
+| 10 |  22 |    0/10  |    —      |
+| 12 |  26 |    0/10  |    —      |
+| 16 |  34 |    0/10  |    —      |
+| 20 |  42 |    0/10  |    —      |
+| 24 |  50 |    0/10  |    —      |
+
+C2-SUCCEED recovery:
+
+| m  | dim | recovery | med_ratio |
+|----|-----|----------|-----------|
+|  8 |  18 |    9/10  |   0.730   |
+| 10 |  22 |   10/10  |   0.699   |
+| 12 |  26 |   10/10  |   0.728   |
+| 16 |  34 |   10/10  |   0.706   |
+| 20 |  42 |   10/10  |   0.686   |
+| 24 |  50 |   10/10  |   0.659   |
+
+Key result: **C1 has 0% recovery at ALL m ∈ {8,...,24}**. Adding more equations is
+completely ineffective. C2 recovers at 90-100% regardless of m, with compression
+improving slightly (0.730→0.659) as m grows. This is a STRUCTURAL obstruction for
+C1, not a statistical/sample-size issue.
+
+**Exp I — Component fraction breakdown (C1 vs C2, m=12, K1=72, 100 seeds):**
+
+| Component              | C1 avg frac | C2 avg frac |
+|------------------------|-------------|-------------|
+| k1-block (k1_i*S_K1)² |    0.4176   |    0.4185   |
+| d²                     |    0.0318   |    0.0317   |
+| k2-block (k2_i*S_K2)² |    0.4387   |    0.4379   |
+| S_KANNAN²              |    0.1119   |    0.1119   |
+| nom_norm (avg)         |  1,579,517  |  1,581,323  |
+
+Key result: **C1 and C2 have IDENTICAL nominal norm structure** (fractions agree to 4
+decimal places; total norms differ by <0.1%). The difference between C1 and C2 is
+NOT in the norm of the correct solution vector. It is entirely in the lattice algebra.
+
+### Synthesis
+
+The complete picture of the C1 structural obstruction:
+
+1. **Spurious vectors are lattice artifacts**: They have avg k1_i=1.31, k2_i=7.13
+   (far below K1/2=35.5, K2/2=361.5) with mixed signs — they are NOT valid ECDSA
+   solutions. They arise from the algebraic structure of C1's GLV lattice, independent
+   of the signature data.
+
+2. **C1's correct solution has zero LLL compression**: norm ratio = 1.000 exactly.
+   LLL cannot compress the correct row below its nominal norm for C1.
+
+3. **More equations are futile**: 0% recovery at m=8 through m=24. The spurious
+   sublattice is structural and not overcome by adding more constraints.
+
+4. **Nominal norm is not the issue**: C1 and C2 have identical component fractions.
+   The problem is a short spurious sublattice in C1's lattice that exists independent
+   of actual signature contributions.
+
+**Hypothesis for root cause**: C1's CM endomorphism ring has an additional short-vector
+structure (perhaps related to a small conductor or accidental unit in End(E_C1)) that
+creates short lattice vectors in the Kannan embedding. For C2, no such short sublattice
+exists. This is a curve-specific algebraic property of (p_C1, n_C1, λ_C1).
+
+### Next-step proposals
+
+1. **Algebraic spurious-vector source**: For C1 at one seed, extract the full spurious
+   Kannan row vector [c_0,...,c_{2m+1}] and reduce modulo n, p, S_K1, S_K2. Does it
+   satisfy a lattice relation independent of the B_i, A_i coefficients? If yes, this
+   is a CM ring artifact.
+
+2. **K1 variation for C1**: Try K1 ∈ {32, 48, 64, 96, 128} for C1 at m=12, 10 seeds.
+   If recovery rate stays 0% across all K1, the spurious sublattice is truly fundamental
+   (not dependent on the K1 scaling). If some K1 works, there may be a threshold.
+
+3. **Paper §5 update — add key theorem**: "For certain j=0 CM curves, the GLV-HNP
+   Kannan lattice contains structural short vectors (lattice artifacts not derived from
+   signature data, with k1_i ∉ [0,K1-1]) that prevent LLL from recovering the correct
+   solution regardless of the number of signatures collected. This is an intrinsic
+   property of the CM endomorphism ring and cannot be overcome by increasing m."
+
+4. **Cross-curve screening**: Screen 50 j=0 CM curves in the 18-20 bit range and
+   classify each as "C1-type" (structural obstruction, recovery=0%) or "C2-type"
+   (compression present, recovery>80%). Characterize the C1-type curves by (disc, h,
+   lam/n, etc.) to find the distinguishing algebraic invariant.
+
+### Commits made
+
+- (to be filled after commit)
