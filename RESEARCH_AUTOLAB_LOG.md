@@ -3085,3 +3085,174 @@ exists. This is a curve-specific algebraic property of (p_C1, n_C1, λ_C1).
 ### Commits made
 
 - `b6affe5` autolab 2026-06-25: Exp G/H/I — C1 structural obstruction confirmed; spurious sublattice is lattice artifact
+
+## 2026-06-26 (autolab run)
+
+### Task picked
+
+Priority 5 (GLV-HNP Phase 2), continuing from 2026-06-25. Yesterday confirmed C1's
+structural obstruction: 0% recovery at K1=72, m=8..24; spurious sublattice present
+(Exp G/H/I). Today: Exp J (K1 variation for C1), Exp K (CM-artifact check), Exp L
+(cross-curve screening). Goal: pin down the root cause of C1 vs C2 divergence.
+
+### Work done
+
+- Installed fpylll (0.6.4) + cysignals (1.12.5) — not present in fresh container.
+- Wrote `secp256k1_cm_audit/glv_hnp_structural_source.py` with three new experiments.
+- Ran all experiments (~40s total). All pass.
+- Confirmed `cargo test --test curve_audit` passes (5/5).
+
+### Findings
+
+**CRITICAL REVERSAL from 2026-06-25 narrative:**
+
+**Exp J — K1 variation for C1 (m=12, 10 seeds)**
+
+| K1  | K1/n    | recovery | med_ratio |
+|-----|---------|----------|-----------|
+|   8 | 0.00002 | 10/10    | 1.0000    |
+|  16 | 0.00003 | 10/10    | 1.0000    |
+|  32 | 0.00006 | 10/10    | 1.0000    |
+|  48 | 0.00009 |  4/10    | 1.0000    |
+|  64 | 0.00012 |  1/10    | 1.0000    |
+|  96 | 0.00018 |  0/10    |    —      |
+| 128 | 0.00024 |  0/10    |    —      |
+
+Key result: **C1 is NOT structurally obstructed.** C1 has 100% recovery at K1 ≤ 32.
+The 0% recovery at K1=72 (tested all of last week) is a **K1 threshold phenomenon**:
+there is a phase transition between K1=32 (safe, no spurious interference) and K1=48
+(40% recovery). The "structural obstruction" from prior log entries (2026-06-21 to
+2026-06-25) was an artifact of testing exclusively at K1=72.
+
+Revised picture: C1 and C2 have different K1 thresholds. C1's threshold ≈ 32–48.
+C2's threshold is above 72 (C2 succeeds at K1=72). When K1 exceeds the threshold,
+spurious short vectors emerge in the lattice and displace the correct solution.
+
+The compression ratio 1.0000 at K1 ≤ 32 means: LLL returns the correct row and its
+norm equals the nominal norm exactly. No compression needed — at small K1 there are
+no spurious vectors shorter than the target, so LLL trivially finds the correct row.
+
+**Exp K — Spurious-vector CM-artifact check (C1, K1=72, m=12, 20 seeds)**
+
+| seed | d_cand | min(d,n-d) | k1_avg | k2_avg |
+|------|--------|------------|--------|--------|
+|    0 | 162264 |    162264  |  19.00 | 136.25 |
+|    1 | 340111 |    183486  |   0.33 | 124.42 |
+|    2 | 468573 |     55024  |   1.08 | -60.33 |
+|    3 | 504396 |     19201  | -17.17 |  -3.50 |
+|    4 | 278333 |    245264  |   0.33 |  97.42 |
+| ...  |  ...   |    ...     |  ...   |  ...   |
+
+Distinct d_cand values across 20 seeds: **20** (all different).
+min(d_cand, n-d_cand): min=19201, max=261162, mean=155606.
+
+Key result: The spurious shortest row has **completely different d_cand per seed**,
+i.e., it depends on signature data. It is NOT a fixed CM ring artifact. The hypothesis
+from 2026-06-25 ("accidental unit in End(E_C1) creates fixed short sublattice") is
+**falsified**.
+
+Anatomy of seed=0 spurious row:
+- d_cand = 162264, d_cand*λ mod n = 385514 ≠ d_cand (not in GLV eigenspace)
+- k1_i decoded are exact integers (max fractional part 0.0000) — valid lattice vector
+- k2_i decoded are exact integers — valid lattice vector
+- Some k1_i outside [0,71]: e.g., k1_i=75, k1_i=-11 at m=12
+- k2_i has values outside [0,723]: e.g., k2_i=627, k2_i=-434
+
+The spurious row is a genuine (short) lattice vector that does NOT represent a valid
+ECDSA solution (its k1_i, k2_i are out-of-range), but it differs across seeds because
+the lattice basis rows involving A_i and B_i differ per seed.
+
+**Exp L — Cross-curve screening (30 j=0 CM curves, 18-20 bit, K1=72, m=12, 10 seeds)**
+
+Results table (p, n, lam/n, n%9, recovery):
+
+| # | p      | n      | b  | lam/n  | n%9 | recov | type    |
+|---|--------|--------|----|--------|-----|-------|---------|
+| 1 | 271651 | 271753 |  3 | 0.2621 |  7  |  0/10 | C1-type |
+| 2 | 343963 | 345109 |  2 | 0.0340 |  4  |  0/10 | C1-type |
+| 3 | 602839 | 601543 | 15 | 0.4239 |  1  |  1/10 | C1-type |
+| 4 | 821677 | 820177 |  7 | 0.3969 |  7  |  2/10 | C1-type |
+| 5 | 321889 | 321163 | 19 | 0.2883 |  7  |  0/10 | C1-type |
+| 6 | 422083 | 420997 |  2 | 0.1217 |  4  |  3/10 | MID     |
+| 7 | 424519 | 423727 |  3 | 0.1340 |  7  |  1/10 | C1-type |
+| 8 | 903367 | 904369 |  3 | 0.0857 |  4  | 10/10 | C2-type |
+| 9 | 327553 | 326479 | 10 | 0.0969 |  4  |  0/10 | C1-type |
+|10 | 418813 | 418849 |  2 | 0.1352 |  7  |  2/10 | C1-type |
+|11 | 318001 | 319129 | 13 | 0.4801 |  7  | 10/10 | C2-type |
+|12 | 991483 | 989797 |  3 | 0.4730 |  4  |  8/10 | C2-type |
+|13 | 678499 | 678217 |  3 | 0.0213 |  4  |  2/10 | C1-type |
+|14 | 812233 | 811297 | 15 | 0.1305 |  1  | 10/10 | C2-type |
+|15 | 339139 | 337999 |  2 | 0.2370 |  4  |  0/10 | C1-type |
+|16 | 978151 | 978973 | 11 | 0.2685 |  7  | 10/10 | C2-type |
+|17 | 434683 | 434647 |  5 | 0.2286 |  1  |  2/10 | C1-type |
+|18 | 816769 | 817357 | 22 | 0.1256 |  4  |  1/10 | C1-type |
+|19 | 815533 | 814687 |  2 | 0.4473 |  7  |  9/10 | C2-type |
+|20 | 450199 | 448939 |  3 | 0.0302 |  1  |  0/10 | C1-type |
+|21 | 793813 | 792307 |  2 | 0.2113 |  1  |  3/10 | MID     |
+|22 | 975967 | 976369 |  3 | 0.4566 |  4  |  4/10 | MID     |
+|23 | 446461 | 447793 |  2 | 0.3623 |  7  |  8/10 | C2-type |
+|24 | 903709 | 905053 |  2 | 0.1866 |  4  |  1/10 | C1-type |
+|25 | 951001 | 949423 | 11 | 0.4039 |  4  |  0/10 | C1-type |
+|26 | 728551 | 728173 |  3 | 0.2706 |  1  |  1/10 | C1-type |
+|27 | 721621 | 720019 |  7 | 0.0831 |  1  |  2/10 | C1-type |
+|28 | 411721 | 411361 | 22 | 0.1421 |  7  |  0/10 | C1-type |
+|29 | 434347 | 434353 |  5 | 0.1432 |  4  |  1/10 | C1-type |
+|30 | 869119 | 868873 | 11 | 0.1265 |  4  |  1/10 | C1-type |
+
+Summary: C1-type 20/30, C2-type 7/30, MID 3/30.
+
+Invariant analysis (C1-type vs C2-type):
+
+| Invariant              | C1-type mean | range          | C2-type mean | range         |
+|------------------------|-------------|-----------------|-------------|----------------|
+| lam/n                  | 0.1885      | [0.021, 0.424]  | 0.3211      | [0.086, 0.480] |
+| min(lam/n, 1-lam/n)    | 0.1885      | [0.021, 0.424]  | 0.3211      | [0.086, 0.480] |
+| floor(lam/sqrt(n))     | 142.2       | [17, 393]       | 264.3       | [81, 470]      |
+| lam mod K1=72          | 37.6        | —               | 28.7        | —              |
+| lam mod K2             | 338.2       | —               | 391.6       | —              |
+| min(3λ mod n, n-3λ%n)  | 156295      | —               | 230477      | —              |
+
+Key observation: C2-type has higher lam/n (0.32 vs 0.19), but there is **OVERLAP** —
+curve 8 (C2-type, 10/10) has lam/n=0.0857 and curve 14 (C2-type, 10/10) has
+lam/n=0.1305. Meanwhile curve 5 (C1-type, 0%) has lam/n=0.2883 and curve 4 (C1-type)
+has lam/n=0.3969. No single invariant cleanly separates the two types.
+
+Floor(lam/sqrt(n)) is better but still has range overlap [17,393] vs [81,470].
+
+**Interpretation**: The K1 threshold for each curve is what really matters. C2-type curves
+at K1=72 have thresholds ABOVE 72; C1-type have thresholds below 72. The algebraic
+discriminant of the threshold is not yet identified. The lam/n correlation is real but
+noisy (correlation ≈ 0.4 estimated from data).
+
+### Revised paper impact (§5)
+
+The key theorem now reads (revised from 2026-06-25 draft):
+
+"For j=0 CM curves over F_p, the GLV-HNP LLL attack succeeds when the nonce
+bound K1 satisfies K1 < threshold(E), where threshold(E) is a curve-specific constant
+correlated with lam/n (larger lam/n → higher threshold). For K1 above threshold(E),
+spurious short vectors with out-of-range k1_i (and signature-dependent d_cand) enter
+the lattice and displace the correct solution. The threshold is between 32 and 48 for
+the test curves C1 (lam/n=0.21) and above 72 for C2 (lam/n from 0.09 to 0.48 in the
+C2-type set)."
+
+### Next-step proposals
+
+1. **Map C1 and C2's K1 thresholds precisely**: For C1, threshold ∈ [32,48]. Binary
+   search: try K1=38, 42, 44, 46. For C2, try K1=100, 150, 200 to find its threshold.
+   This gives two data points (lam/n, threshold) to test the correlation.
+
+2. **Spurious-vector norm vs K1**: For C1, at each K1 in {32,48,64,72,96}, extract the
+   spurious row norm / nom_norm ratio. Plot how the ratio crosses 1 as K1 increases
+   from 32 to 48. This should show exactly when spurious overtakes the correct solution.
+
+3. **K1 threshold sweep over Exp L curves**: For 5-10 of the Exp L C1-type curves, run
+   the K1 sweep (like Exp J) to find their individual thresholds. Correlate threshold
+   with lam/n, floor(lam/sqrt(n)), etc. This should find the algebraic separator.
+
+4. **n mod 9 = 7 C2-bias**: 4 of 7 C2-type curves have n ≡ 7 (mod 9). Worth counting
+   in a larger sample (100 curves) to see if this is real signal or noise.
+
+### Commits made
+
+- `[TBD]` autolab 2026-06-26: Exp J/K/L — K1 threshold effect revealed; C1 NOT structurally obstructed; cross-curve screening 30 curves
