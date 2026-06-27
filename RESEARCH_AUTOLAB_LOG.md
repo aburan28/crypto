@@ -3370,4 +3370,4 @@ Computed additional curve invariants for C1 vs C2:
 
 ### Commits made
 
-- `[pending]` autolab 2026-06-27: Exp M/N/O — K1 threshold mapped; lam/n falsified as predictor; C2 threshold 128-200
+- `73b9a3f` autolab 2026-06-27: Exp M/N/O — K1 threshold mapped; lam/n falsified as predictor; C2 threshold 128-200
