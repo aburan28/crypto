@@ -3256,3 +3256,118 @@ C2-type set)."
 ### Commits made
 
 - `d1b98cd` autolab 2026-06-26: Exp J/K/L — K1 threshold effect revealed; C1 NOT structurally obstructed; cross-curve screening 30 curves
+
+---
+
+## 2026-06-27 (autolab run)
+
+### Task picked
+
+Thread 5 (GLV-HNP Phase 2), continued from 2026-06-26. Yesterday's Exp J
+showed C1's K1 threshold is between 32 (10/10) and 48 (4/10). Today:
+(a) fine-scan C1's threshold to ±2 (Exp M), (b) sweep K1 over 5 diverse
+Exp-L C1-type curves to test whether threshold correlates with lam/n (Exp N),
+(c) escalate K1 on 3 C2-type curves to find their upper threshold (Exp O).
+
+### Work done
+
+- Installed `fpylll==0.6.4` + `cysignals==1.12.5` (absent in fresh container).
+- Wrote `secp256k1_cm_audit/glv_hnp_k1_threshold.py` with Exp M/N/O.
+- Ran all three experiments (~1.3s total wall time).
+- Confirmed `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Exp M — Fine K1 scan on C1 (p=524743, n=523597, λ/n=0.2114, m=12, 20 seeds)**
+
+| K1  | K1/n    | recovery | avg_ratio | min_ratio |
+|-----|---------|----------|-----------|-----------|
+|  33 | 0.00006 |  19/20   |  1.0097   |  0.9471   |
+|  35 | 0.00007 |  17/20   |  1.0069   |  0.9445   |
+|  37 | 0.00007 |  17/20   |  1.0153   |  0.9662   |
+|  40 | 0.00008 |  10/20   |  1.0553   |  0.9388   |
+|  42 | 0.00008 |  13/20   |  1.0127   |  0.9368   |
+|  44 | 0.00008 |  14/20   |  1.0024   |  0.9368   |
+|  46 | 0.00009 |   7/20   |  1.0441   |  0.9415   |
+|  50 | 0.00010 |   8/20   |  1.0010   |  0.9418   |
+|  55 | 0.00011 |   4/20   |  0.9837   |  0.7980   |
+|  60 | 0.00011 |   2/20   |  0.9598   |  0.7996   |
+|  70 | 0.00013 |   0/20   |  0.9275   |  0.7659   |
+
+K1 threshold (first K1 < 50% recovery): **K1=46**. The transition is gradual
+rather than a step function: 85-95% success at K1≤37, ~50-70% at K1=40-50,
+falling to 0% at K1=70.
+
+Norm ratio observation: at K1≤37, avg_ratio ≈ 1.00-1.02 (recovered vector
+at nominal norm, no compression needed). At K1=55-70, avg_ratio drops to
+0.92-0.98 (spurious vectors are SHORTER than nominal, displacing the solution).
+The spurious-vs-nominal norm crossing happens in K1=50-60.
+
+**Exp N — K1 threshold sweep, 5 Exp-L C1-type curves (m=12, 6 seeds)**
+
+| Curve | p      | n      | b  | λ/n   | K1_threshold |
+|-------|--------|--------|----|-------|-------------|
+| #2    | 343963 | 345109 |  2 | 0.034 |  40          |
+| #9    | 327553 | 326479 | 10 | 0.097 |  48          |
+| #15   | 339139 | 337999 |  2 | 0.237 |  40          |
+| #5    | 321889 | 321163 | 19 | 0.288 |  40          |
+| #25   | 951001 | 949423 | 11 | 0.404 |  56          |
+
+**Critical finding: lam/n does NOT predict K1_threshold for C1-type curves.**
+All five curves have thresholds in a tight range [40, 56], spanning lam/n from
+0.034 to 0.404 — a 12× difference in lam/n gives only a 1.4× difference in
+threshold. The earlier hypothesis (higher lam/n → higher threshold) is
+**falsified**. The algebraic separator between C1-type (low threshold) and C2-type
+(high threshold) must be a different invariant.
+
+**Exp O — C2-type upper threshold (K1 escalation, m=12, 6 seeds)**
+
+| Curve | p      | n      | b  | λ/n   | C2 threshold |
+|-------|--------|--------|----|-------|-------------|
+| #8    | 903367 | 904369 |  3 | 0.086 |   ~200       |
+| #14   | 812233 | 811297 | 15 | 0.131 |   ~200       |
+| #11   | 318001 | 319129 | 13 | 0.480 |   ~128       |
+
+C2-type curves have K1_threshold ~128-200, compared to C1-type ~40-56.
+At K1=72 (the shared test point in Exp L), all C2 succeed and all C1 fail:
+the gap of ≥72 between the two classes explains the clean Exp-L classification.
+
+Norm ratio for C2 at K1=72: avg_ratio ≈ 0.67-0.75 (correct solution
+compressed ~25-33% below nominal). This is a structural property: the C2
+lattice geometry places the correct solution far inside the LLL ball.
+The C1 lattice does not, at K1=72.
+
+**Open question: what algebraic invariant of E determines K1_threshold(E)?**
+
+Computed additional curve invariants for C1 vs C2:
+- Trace of Frobenius t: C2 #8→-1001, C2 #14→936, C1 main→1146, C1 #2→-1147.
+  No obvious separator.
+- lam² mod n = n-lam-1 (confirmed identity, not new info).
+- lam mod small primes, lam*4 mod n: no clean separator found.
+
+**n mod 9 signal check (Exp L data):**
+- C2-type n≡9 distribution: {#8: n%9=4, #14: n%9=1, #11: n%9=7, #16: n%9=7, #19: n%9=7} → 3/5 have n≡7
+- C1-type n≡9 distribution: {#2:4, #9:4, #15:4, #5:7, #25:4} → 1/5 have n≡7
+- Tentative n%9 signal survives Exp N subset, but 6 seeds is low; needs larger sample.
+
+### Next step proposal
+
+1. **Find algebraic separator for K1_threshold**: Compute the continued-fraction
+   expansion of lam/n for C1 vs C2 curves. Hypothesis: C1-type curves have a
+   particularly good rational approximation p/q with q ≤ K1_threshold, while
+   C2-type curves do not. This would explain why spurious vectors emerge at K1≈q
+   (they are related to the CF convergent q). Concrete: for each test curve,
+   find the smallest CF convergent q of lam/n with q > 32, and check if
+   K1_threshold ≈ q.
+
+2. **n mod 9 = 7 C2-bias — larger sample**: Run Exp L variant on 100 curves to
+   get reliable statistics on n mod 9 for C1 vs C2.
+
+3. **Norm-ratio vector anatomy**: For C2 #8 at K1=72, extract the full reduced
+   lattice row that encodes d (the one with ratio 0.67). Decode its k1_i, k2_i
+   entries. Determine if k2_i ≪ K2/2 (small k2 explaining compression) or if
+   the compression is from linear combinations.
+
+### Commits made
+
+- `[pending]` autolab 2026-06-27: Exp M/N/O — K1 threshold mapped; lam/n falsified as predictor; C2 threshold 128-200
