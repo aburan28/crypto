@@ -3507,4 +3507,4 @@ might work better than the max_q rule, but needs further testing on a larger sam
 
 ### Commits made
 
-- TBD (to be filled after commit)
+- `79f352d` autolab 2026-06-28: Exp P/Q/R — CF-convergent separator falsified; spurious-row anatomy; 30-curve prediction test
