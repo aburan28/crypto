@@ -3371,3 +3371,140 @@ Computed additional curve invariants for C1 vs C2:
 ### Commits made
 
 - `73b9a3f` autolab 2026-06-27: Exp M/N/O — K1 threshold mapped; lam/n falsified as predictor; C2 threshold 128-200
+
+---
+
+## 2026-06-28 (autolab run)
+
+### Task picked
+
+Thread 5 (GLV-HNP Phase 2), continued from 2026-06-27. Yesterday mapped K1_threshold
+for C1 (~46) and C2 (~128-200), falsified lam/n as predictor. Today: test CF-convergent
+hypothesis (does max CF convergent denominator ≤ 300 separate C1 from C2?), decode the
+spurious lattice row, and run a 30-curve prediction test.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_cf_separator.py` (Exp P/Q).
+- Wrote `secp256k1_cm_audit/glv_hnp_cf_separator_r.py` (Exp R, fast Cornacchia-based).
+- Ran Exp P: CF analysis on 9 known curves (C1 main + 5 Exp-N C1-type + 3 Exp-O C2-type).
+- Ran Exp Q: Spurious-row anatomy at K1=46 on C1 main (4 failing seeds).
+- Ran Exp R + R2: 30 fresh CM curves via Cornacchia generation; tested max_q_cf separator.
+- Confirmed `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Exp P — CF convergent analysis (9 known curves)**
+
+| Curve    | class | λ/n    | q_cf_small | residual | K1_thresh | q_cf≈thresh? |
+|----------|-------|--------|------------|----------|-----------|--------------|
+| C1 main  | C1    | 0.2114 | 52         | 5091     | 46        | YES          |
+| #2       | C1    | 0.0340 | 29         | 4823     | 40        | NO           |
+| #9       | C1    | 0.0969 | 31         | 1496     | 48        | NO           |
+| #15      | C1    | 0.2370 | 21         | 7433     | 40        | NO           |
+| #5       | C1    | 0.2883 | 52         | 3181     | 40        | NO           |
+| #25      | C1    | 0.4039 | 47         | 14443    | 56        | YES          |
+| #8       | C2    | 0.0857 | 23         | 25226    | 200       | NO           |
+| #14      | C2    | 0.1305 | 23         | 889      | 200       | NO           |
+| #11      | C2    | 0.4801 | 25         | 552      | 128       | NO           |
+
+**FALSIFICATION of original CF hypothesis**: C2 curves also have small first CF
+convergent q_cf (23-25), so "q_cf < 100 → predict C1" is wrong — would misclassify
+ALL C2 curves as C1.
+
+**Revised observation**: max CF convergent denominator in [1,300]:
+- C1 curves: max_q_cf ∈ {194, 147, 227, 135, 111, 203} — all ≥ 111
+- C2 curves: max_q_cf ∈ {35, 23, 25} — all ≤ 35
+- Gap [35, 111] appears clean on the 9-curve known set.
+
+**Exp Q — Spurious-row anatomy at K1=46**
+
+For C1 main (n=523597, lam=110663, CF convergent 11/52, residual=5091):
+4 failing seeds analysed. Key findings:
+- k2 component gcd = S_K2 = 723 (= n//K2), NOT q_cf=52.
+  The spurious row's k2 values are raw integer multiples of S_K2, confirming
+  the vector is a general lattice combination, NOT the simple "q copies of row m+1+i"
+  implied by the CF mechanism.
+- k1 components are O(K1) integers (within lattice bounds), as expected.
+- k2_i/S_K2 magnitudes: 79–984 (much larger than q_cf=52), spanning the full K2 range.
+- Row norms: 1.78M–1.90M, comparable to the target norm (~n*sqrt(25.25) ≈ 2.63M).
+  The spurious vector is ~30% shorter than the target at K1=46.
+
+Conclusion: the spurious vector is a DENSE linear combination of many lattice rows,
+not a sparse structure derivable from CF convergents.
+
+**Exp R — max_q_cf separator on 30 fresh curves (Cornacchia generation, ~0.4s)**
+
+Prediction rule tested: max_q_cf > 60 → C1, max_q_cf ≤ 60 → C2.
+
+Results:
+- ACCURACY: 21/30 = 70.0%
+- C1 sensitivity: 18/21
+- C2 specificity: 3/9  ← POOR (only 3 of 9 C2 curves correctly identified)
+
+Selected failures:
+- n=614773 (actual C2, max_q=117 → wrongly predicted C1): 6/6 recovered
+- n=695377 (actual C2, max_q=119 → wrongly predicted C1): 5/6 recovered
+- n=1038937 (actual C2, max_q=205 → wrongly predicted C1): 3/6 recovered
+- n=99577  (actual C1, max_q=7   → wrongly predicted C2): 2/6 recovered
+- n=93337  (actual C1, max_q=3   → wrongly predicted C2): 0/6 recovered
+
+Critical observation — near-identical max_q, opposite C1/C2:
+- C1 n=507781: max_q=118, max_a=38, 0/6 recovered
+- C2 n=614773: max_q=117, max_a=7,  6/6 recovered
+- C1 n=182431: max_q=119, max_a=58, 0/6 recovered
+- C2 n=695377: max_q=119, max_a=10, 5/6 recovered
+
+**FALSIFICATION of revised max_q_cf hypothesis**.
+
+Exp R2 result: C1 max_q range [3, 265] and C2 max_q range [11, 205] have major overlap.
+max_partial_quotient also overlaps: C1 range [3,85], C2 range [4,17].
+
+**Key negative result**: CF-based invariants of lam/n (q_cf, max_q_cf,
+max_partial_quotient) do not predict K1_threshold. The algebraic separator
+for C1/C2 classification is NOT a simple Diophantine approximation property.
+
+**Spurious k2 anatomy (Exp Q)** also rules out the simple CF null-vector mechanism:
+the spurious vectors are lattice combinations spanning the full K2 range, not
+compact CF-structured vectors.
+
+**Distribution insight (Exp R data)**:
+- K1_threshold is approximately continuous (not sharply bimodal):
+  - 0/6 at K1=72: strong C1 (threshold well below 72)
+  - 2-3/6 at K1=72: borderline (threshold ≈ 72)
+  - 5-6/6 at K1=72: strong C2 (threshold well above 72)
+- Borderline cases: n=263047(2/6), n=1036291(2/6), n=1038937(3/6)
+- The C1/C2 binary classification is an artifact of evaluating at K1=72;
+  the actual threshold is a continuous curve-specific invariant.
+
+**Possible new separator (not yet tested)**: The max_a observation from the
+near-identical max_q cases: C1 pairs have max_a=38-58, C2 pairs have max_a=7-10.
+For the full Exp R dataset: C1 max_a range [3,85], C2 max_a range [4,17] — still overlapping
+but the UPPER TAIL of max_a for C1 is much heavier. A threshold like max_a ≥ 18 → C1
+might work better than the max_q rule, but needs further testing on a larger sample.
+
+### Next step proposal
+
+1. **max_a as C1-predictor**: From Exp R data, C2 curves have max_a ≤ 17 while
+   C1 curves reach max_a up to 85. A threshold max_a ≤ 17 → predict C2 / max_a ≥ 18 →
+   predict C1 should be tested on 50 fresh curves. The near-identical max_q case shows
+   max_a clearly separates while max_q does not. Implement as Exp S.
+
+2. **K1_threshold vs max_a regression**: Rather than binary C1/C2, treat K1_threshold
+   as a continuous quantity. For 20 curves with known K1_threshold (from Exp M/N/O),
+   fit K1_threshold ~ f(max_a, max_q, lam/n). This could reveal the algebraic formula.
+
+3. **Pivot to Thread 2 (CHLRS Igusa)**: If Exp S shows max_a also fails (C1/C2 separator
+   still unknown), the GLV-HNP thread has hit a sustained wall (5 consecutive experiments
+   without finding the separator). Recommend pivoting to Thread 2 for next session.
+
+4. **Paper impact**: The "C1 vs C2" distinction corresponds to curves where the GLV-HNP
+   attack has K1_threshold below vs above K1=72. Since K1_threshold appears to be a
+   continuous curve-specific quantity without a simple algebraic formula, the paper claim
+   can be weakened to: "For typical CM j=0 curves over ~19-bit primes, approximately 70%
+   are C1-type (K1_threshold < 72) and 30% are C2-type. The threshold has no simple
+   closed-form from standard curve invariants."
+
+### Commits made
+
+- TBD (to be filled after commit)
