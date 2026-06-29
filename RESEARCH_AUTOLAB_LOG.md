@@ -3508,3 +3508,112 @@ might work better than the max_q rule, but needs further testing on a larger sam
 ### Commits made
 
 - `79f352d` autolab 2026-06-28: Exp P/Q/R — CF-convergent separator falsified; spurious-row anatomy; 30-curve prediction test
+
+---
+
+## 2026-06-29 (autolab run)
+
+### Task picked
+
+**Priority 5 continued: GLV-HNP Phase 2 — Exp S (max_a separator test) + Cornacchia trace probe.**
+Thread 1 CLOSED (P-521 HP LLL resolved). Thread 2 BLOCKED (Sage unavailable). Thread 3 substantially
+resolved. Thread 4 CLOSED. Thread 6 CLOSED. Thread 5 had measurable progress yesterday (falsified
+CF-convergent separator) and a clear next step (Exp S: test max_a ≥ 18 as C1-predictor). Executing.
+
+### Work done
+
+- Installed PARI/GP via apt-get (--fix-missing, pari-gp 2.15.4 now in PATH).
+- `fpylll` unavailable (PyPI timeout); implemented pure Python LLL in `secp256k1_cm_audit/glv_hnp_exp_s.py`.
+  Verified correctness: known C2 curve (n=893341, max_q=41) recovers 6/6 seeds in Python LLL. ✓
+- Ran Exp S: 50 fresh CM curves (Cornacchia), K1=72, m=12, 6 seeds/curve. (~136s wall time)
+- Ran secondary probe: Cornacchia trace a_corn/n = |p+1-n|/n vs C1/C2 classification. (~60s)
+- Rust tests: `cargo test --test curve_audit` → 5/5 PASS ✓
+
+### Findings
+
+**Exp S — max_a (max partial quotient) as C1-predictor on 50 fresh curves:**
+
+Rule tested: max_a ≤ 17 → predict C2 / max_a ≥ 18 → predict C1.
+
+| Metric | Value |
+|---|---|
+| Accuracy | **17/50 = 34.0%** |
+| C1 sensitivity | 8/40 (20%) |
+| C2 specificity | 9/10 (90%) |
+
+Key distributions:
+- C1 (LLL fails) max_a range: [3, 104] — full range
+- C2 (LLL ok) max_a range: [3, 56] — **includes max_a=56**!
+
+C1/C2 prevalence: 40/50 = 80% C1 (consistent with Exp R: 21/30 = 70%).
+
+**FALSIFICATION**: max_a is NOT a C1-predictor. Accuracy 34% is *worse* than the trivial
+"always predict C1" baseline of 80%. Complete range overlap at every max_a value 3–17 shows
+C1 and C2 curves are interspersed throughout, with no monotone relationship.
+
+Notable anomaly: n=236209 (λ/n=0.018, max_a=56) is C2 (recovers 6/6). This violates the
+intuition that large max_a → C1, and also shows that very small λ/n can still be C2.
+
+**Secondary probe — Cornacchia trace a_corn/n:**
+
+a_corn = |p+1-n| (the Frobenius trace for the CM curve). 
+- C1 range: [0.0018, 0.0070]
+- C2 range: [0.0018, 0.0053]
+- **COMPLETE OVERLAP**: No separation possible.
+
+The a_corn/n ratio is bounded by ~1/√n for 17-20 bit primes (since a_corn ≤ 2√p ≈ 2√n),
+so it varies in [0.001, 0.01] for ALL curves at this bit level — useless as a separator.
+
+**Sustained wall — 6 consecutive experiments without finding algebraic separator:**
+
+| Exp | Hypothesis | Result |
+|---|---|---|
+| M/N/O (Jun 27) | λ/n as continuous predictor | FAILED (overlapping ranges) |
+| P (Jun 28) | q_cf (first small CF convergent) | FAILED (falsified) |
+| Q (Jun 28) | Spurious row anatomy (CF mechanism) | NOT CF-derived |
+| R (Jun 28) | max_q_cf > 60 → C1 | FAILED (70% on 30 curves, but overlap) |
+| S (Jun 29) | max_a ≥ 18 → C1 | FAILED (34% on 50 curves) |
+| probe (Jun 29) | a_corn/n | FAILED (complete overlap) |
+
+**FAILED INVARIANTS** (all tried, all overlap between C1 and C2):
+δ/n (Jun 21), κ(M) (Jun 23), q_cf (Jun 28), max_q_cf (Jun 28), max_a (Jun 29), a_corn/n (Jun 29).
+
+The algebraic separator for K1_threshold is NOT captured by any simple closed-form invariant
+of (n, λ, a_corn). The separator likely requires a **lattice-geometric computation**:
+specifically, whether the BV lattice for (n, λ) admits a short non-planted vector whose norm
+is less than sqrt(m) * K1 * S_K1. This depends on the combination of n, λ, AND the
+specific signature distribution — no single curve-level invariant predicts it.
+
+**Paper impact (revised)**:
+
+The C1/C2 binary classification (at K1=72) is a threshold phenomenon with NO simple
+closed-form predictor from standard curve invariants. For the paper, the claim is:
+
+  "For typical j=0 CM curves over small primes, approximately 75-80% exhibit
+   K1_threshold < 72 (C1-type), where the threshold is a continuous curve-specific
+   lattice quantity determined by the shortest non-planted vector in the BV lattice.
+   No known closed-form algebraic invariant of the curve predicts K1_threshold."
+
+This is a NEGATIVE result for the GLV-HNP thread but a POSITIVE result for the paper
+(it supports that the BV attack on generic CM curves is harder than simple parameters suggest).
+
+### Next step proposal
+
+**Exp T — K1_threshold via binary search (5 curves, 10 seeds each)**:
+Pick 5 specific curves (3 C1, 2 C2) from Exp S. For each, binary-search K1 ∈ [10, 300]
+at m=12, 10 seeds. This gives actual K1_threshold values for a handful of curves.
+Cost: ~50 LLL calls × 5 curves × ~0.5s = ~125s. Produces the TABLE:
+
+  | n | λ/n | K1_threshold | max_a | max_q |
+
+Plotting K1_threshold vs every curve invariant would finally show whether ANY invariant
+correlates (even weakly). If even K1_threshold shows no algebraic pattern, document as
+"K1_threshold is a non-algebraic curve quantity" and close Thread 5.
+
+Alternatively: **Pivot to ePrint survey** (Fallback Step 4). The GLV-HNP thread has
+run for 9 days with increasingly diminishing returns. The negative result IS the result:
+"no simple separator exists." Document and move to literature survey.
+
+### Commits made
+
+- [pending — see below]
