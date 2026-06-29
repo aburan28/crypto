@@ -3616,4 +3616,4 @@ run for 9 days with increasingly diminishing returns. The negative result IS the
 
 ### Commits made
 
-- [pending — see below]
+- `9a67645` autolab 2026-06-29: Exp S — max_a predictor falsified (34% accuracy); Cornacchia trace also fails; 6th consecutive separator hypothesis rejected
