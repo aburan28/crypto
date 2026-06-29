@@ -13,3 +13,8 @@ Cargo.lock
 # from the checked-in .c sources; not artifacts to track).
 research/ecdlp_autolab/phase21_rho_v3
 research/ecdlp_autolab/phase22_rho_barrett
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+*.pyo
