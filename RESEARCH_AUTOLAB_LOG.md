@@ -3617,3 +3617,125 @@ run for 9 days with increasingly diminishing returns. The negative result IS the
 ### Commits made
 
 - `9a67645` autolab 2026-06-29: Exp S — max_a predictor falsified (34% accuracy); Cornacchia trace also fails; 6th consecutive separator hypothesis rejected
+
+---
+
+## 2026-06-30 (autolab run)
+
+### Task picked
+
+**Fallback (Step 4): ePrint survey + new attack variant proposal.**
+
+Thread status at session start:
+- Thread 1 (P-521 LLL NaN): **CLOSED** (§10.5 confirmed 3/3 at m=16, 2026-06-06)
+- Thread 2 (CHLRS Igusa): **BLOCKED** (Sage required for CQ normalization; Richelot structurally obstructed for Z/3Z family; F_43 toy case fully resolved 2026-06-12)
+- Thread 3 (Howe sextic twists): **CLOSED** (5/15 glueable confirmed 2026-05-30)
+- Thread 4 (Cross-curve LLL): **CLOSED** (3/3 seeds at 256/384 bits 2026-06-14)
+- Thread 5 (GLV-HNP Phase 2): **DEAD END** — 9 consecutive days (Jun 21–29) of separator hypothesis falsifications with no "resolved" outcome. Six hypotheses tried (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n); all overlap between C1 and C2 curves. Negative result is the result.
+- Thread 6 (B5 over F_{p^k}): **CLOSED** (extended to all k≥1, 2026-05-27)
+
+All threads closed, blocked, or at dead-end → Fallback.
+
+### Work done
+
+**Part (a): ePrint survey** — searched IACR ePrint and arXiv for papers since 2026-06-22 on:
+"isogeny-graph ECDLP", "Boneh-Venkatesan/HNP ECDSA", "(N,N)-cover Jacobian". WebSearch via proxy (direct ePrint fetch blocked, HTTP 403).
+
+**Part (b): New attack variant proposal** — derived from survey + open questions in §9.1 of PAPER_STRUCTURAL_COMPLETENESS.md.
+
+### Findings
+
+#### ePrint survey — 5 most relevant 2026 papers
+
+**1. eprint 2026/039** (= arXiv 2601.05922) — Decru, Kunzweiler. "Abelian surfaces in Hesse form and explicit isogeny formulas." January 2026.
+
+> Derives explicit **(3,3)-isogeny formulas** between principally polarized abelian surfaces using Hesse-form models in ℙ⁸ (symmetric level-3 theta structure). The Burkhardt quartic threefold parametrizes (3,3)-isogeny kernels. Generalizes to higher dimensions/degrees.
+
+**Direct relevance**: Our B5 analysis (Block 5) covers cover-cost argument by Gaudry's L[1/2] bound for genus-2 Jacobians over F_p, but only for generic (N,N)-covers. We have *never* explicitly walked the (3,3)-isogeny graph from a CM product surface and verified that each Jacobian in the walk has #Jac ≈ p². Decru-Kunzweiler gives the computational tool to do this. Also relevant to Thread 2: the Hesse-form theta structure is related to the modular-form approach we needed for CHLRS, and may unlock the blocked CQ normalization question (their ℙ⁸ model is explicit).
+
+**2. eprint 2026/1199** — Idris, Hedabou. "A Post-Quantum Commitment Scheme from Richelot Isogeny Walks on Superspecial Genus-2 Jacobians." 2026.
+
+> Commitment scheme based on **punctured Richelot (2,2)-isogeny walks** on superspecial genus-2 Jacobians. Puncturing rule: skip any step with I₁₀=0 (product locus detection). Shows rapid mixing is preserved. Spectral gap argument via Richelot graph expansion.
+
+**Direct relevance**: I₁₀=0 is the EXACT condition we computed in `igusa_f43_howe.gp` and `igusa_clebsch_complete.gp` to detect the naive cover / Howe-glued product locus. Their use of I₁₀ as a locus detector is *dual* to our use: they avoid the product locus; we target it. Their spectral gap result for (2,2)-isogeny walks on the superspecial graph may be adaptable to the ordinary graph (our setting) to give a mixing-rate bound for B2 (class-group orbit analysis).
+
+**3. arXiv 2602.01491** — Sanjaya, Mishra. "Sleep Reveals the Nonce: Breaking ECDSA using Sleep-Based Power Side-Channel Vulnerability." February 2026.
+
+> **New nonce-leakage source**: sleep-induced power spikes during processor context switches reveal ECDSA nonce bits. Tested on RustCrypto, BearSSL, GoCrypto across ARM and RISC-V. Lattice (BV) recovery used after extracting biased nonce bits.
+
+**Direct relevance to Thread 5**: This confirms the HNP/lattice attack remains active in 2026 practice. The sleep-based leakage gives a different bias structure than GLV decomposition: it's a *temporal* bias (nonce bits correlated with sleep duration) rather than an *algebraic* bias (k₁ bounded from above). Standard BV lattice is applied post-extraction. Note: they do NOT use GLV decomposition — the full nonce k is biased, not just k₁. This is closer to Thread 5's Phase 1 (standard HNP) than Phase 2 (k₁-only leak).
+
+**4. eprint 2026/106** — Kim, Jang, Wang, et al. "New Quantum Circuits for ECDLP: Breaking Prime Elliptic Curve Cryptography." 2026.
+
+> Optimized quantum point-addition circuits for Shor's ECDLP. **58–82% improvement** in qubit·T-depth product and **43–87%** in qubit·full-depth product over prior work. Under NIST MAXDEPTH constraint (depth ≤ 2^40), P-521 requires depth 2^{28.9}.
+
+**Relevance to paper**: Places the quantum baseline for our §8 completeness theorem. The theorem is classical; this paper confirms quantum ECDLP remains exponentially hard in practice (Shor requires millions of logical qubits). Not a new classical attack — context only.
+
+**5. arXiv 2601.17142** — Barbulescu, Barcau, Pasol, Turcas. "Logarithmic Density of Rank ≥1 and Rank ≥2 Genus-2 Jacobians and Applications to Hyperelliptic Curve Cryptography." January 2026.
+
+> Asymptotically, almost all integral genus-2 curves with two rational points at infinity have Jacobian Mordell-Weil rank ≥1 over Q (logarithmic density 13/14). Explicit subfamily with rank ≥2 has density ≥5/7.
+
+**Relevance to B5**: This is a result over Q (number fields), not over F_p (finite fields). For finite fields, DLP cost is controlled by group order size (#Jac ≈ p²), not rank. However, the density result means the set of "cryptographically safe" genus-2 curves (those with near-maximal #Jac and no structural weakness) is of the *same* density as all curves — which actually supports our B5 claim that no exploitable structural weakness exists in the cover. Marginally relevant.
+
+#### Confirmed literature gap
+
+No 2026 paper found covering: (a) GLV-decomposition-specific lattice bias, (b) (3,3)-isogeny attacks on CM curves over prime fields, or (c) non-hyperelliptic genus-g DLP over prime fields. These remain open in the literature and in this project.
+
+### New attack variant proposal
+
+**"(3,3)-Isogeny Walk Falsifier: DLP cost along Hesse-form isogeny paths from E×E_t"**
+
+#### Motivation
+
+Block B5 of PAPER_STRUCTURAL_COMPLETENESS.md uses Gaudry's `L[p, 1/2]` bound generically for all genus-g Jacobians in the cover. All prior concrete work in this repository focused on **(2,2)-isogenies** (Richelot, Howe gluing — Threads 2, 3). The **Decru-Kunzweiler paper (eprint 2026/039)** now makes **(3,3)-isogenies** computationally explicit via Hesse-form theta structure. The degree-9 (3,3)-isogeny case has qualitatively different behavior:
+- Larger degree → more Jacobians reachable per step
+- Different product-locus detection condition (not I₁₀=0 for degree-3 kernels)
+- The Hesse-form model (ℙ⁸) is different from the sextic model we used for (2,2)
+
+#### Proposed falsifier
+
+**Goal**: Show that walking the (3,3)-isogeny graph from E×E_t (secp256k1 product surface) never produces a Jacobian with #Jac < p² (which would indicate a faster DLP).
+
+**Experiment (Exp U)**:
+1. Pick a 32-bit prime p with a j=0 CM curve E: y²=x³+7 (secp256k1-type, scaled down).
+2. Construct the product abelian surface A = E×E_t as a starting ppas (polarization matrix diag(1,1)).
+3. **Enumerate (3,3)-isogeny neighbors** of A: the kernel choices are isotropic subgroups of A[3] ≅ (Z/3Z)⁴. There are (3⁴-1)/(3-1) = 40 maximal isotropic subgroups, of which a subset are Galois-stable. For each, compute the image ppas via the Hesse-form formulas.
+4. At each step, compute #Jac(C_i)(F_p) for the resulting genus-2 curve C_i via `hyperellcharpoly`.
+5. Verify: #Jac(C_i) ≈ p² for all reachable C_i.
+
+**Expected outcome**: All (3,3)-isogeny neighbors of E×E_t have #Jac ≈ p². The minimum #Jac over all neighbors is ≥ p (≥ 2^32 for the toy prime), while DLP on E costs O(√p) = O(2^16). Ratio: 2^{16} slower — confirming B5 for (3,3) degree.
+
+**Falsifying outcome** (would require follow-up): If any neighbor C_i has #Jac(C_i)(F_p) significantly less than p² (e.g., #Jac ≈ p^{1.5} or less), it would signal a structural weakness. The main theorem predicts this CANNOT happen (Gaudry bound is tight for genus 2), but we've never verified it empirically for the (3,3) case.
+
+**Script outline** (`secp256k1_cm_audit/hesse_33_walk_falsifier.gp`, ~100 lines PARI):
+
+```
+/* Setup: 32-bit CM prime, secp256k1-type curve */
+p32 = nextprime(2^31 + 7*6);  \\ p ≡ 1 mod 6
+E_b7 = ...; \\ find b so that E: y²=x³+b is j=0 over F_p32
+t_E = p32 + 1 - ellcard(ellinit([0,0,0,0,b], p32));
+
+/* (3,3)-kernel enumeration: isotropic subgroups of E[3]×E_t[3] */
+/* Use Hesse-form coordinate map from Decru-Kunzweiler §3 */
+/* For each Galois-stable kernel K: */
+/*   Compute quotient Jacobian image curve via explicit formulas */
+/*   Call hyperellcharpoly() on result */
+/*   Record #Jac, compare to p32^2 */
+```
+
+**Estimated cost**: For a 32-bit prime, each (3,3)-isogeny step involves arithmetic over F_{p³} (since 3-torsion lives there for j=0 curves with p≡1 mod 3). ~40 kernel choices × O(p³/p)-cost per step × `hyperellcharpoly` ≈ ~20s total. Single PARI session.
+
+**Value for paper**: Would provide a concrete empirical table extending B5 from (2,2)- to (3,3)-degree isogenies, directly citing Decru-Kunzweiler 2026 as the computational tool.
+
+### Next step proposal
+
+**Execute Exp U** — implement `hesse_33_walk_falsifier.gp` and run. Primary obstacle: transcribing the Hesse-form (3,3)-isogeny kernel formulas from Decru-Kunzweiler (2026/039) §3 into PARI syntax. The paper gives explicit polynomial maps in ℙ⁸ coordinates; these need to be adapted to work with PARI's finite-field arithmetic.
+
+Expected session effort: 1-2 hours (transcription + PARI debugging).
+
+Secondary: if the (3,3)-walk script runs successfully, extend to (5,5)-degree (requires different tools, likely out of scope for PARI) or apply the walk to the pair (E, E_2) where E_2 is the cubic twist — one of the 5 Howe-glueable pairs confirmed in Thread 3.
+
+### Commits made
+
+- none (log-only session — survey + proposal)
+
