@@ -3739,3 +3739,65 @@ Secondary: if the (3,3)-walk script runs successfully, extend to (5,5)-degree (r
 
 - none (log-only session — survey + proposal)
 
+
+---
+
+## 2026-07-01 (autolab run)
+
+### Task picked
+
+**Exp U — (3,3)-isogeny walk falsifier for j=0 CM curves (Block B5 confirmation)**
+
+Proposed by the 2026-06-30 session. gp/PARI unavailable in this environment, so pivoted to a pure Python implementation.
+
+### Work done
+
+Implemented `secp256k1_cm_audit/hesse_33_walk_falsifier.py` — a brute-force Python script that:
+1. Searches for primes p≡1 mod 3 with j=0 CM curves E: y²=x³+b having ≥2 F_p-rational 3-isogeny kernels.
+2. For each kernel x₀ (root of ψ₃(x)=3x(x³+4b)=0 in F_p), computes the Vélu isogenous curve E' using the correct full-kernel formula.
+3. Verifies #E'(F_p) = #E(F_p) for all neighbors (Honda-Tate).
+4. Reports the DLP gap: O(√(#E·#E_t)) / O(√#E) for each split (3,3)-isogeny surface.
+
+**Vélu formula (corrected through this session):**
+```
+w_Q = 2y_Q² + t_Q·x_Q = 5x₀³+2b   (for E: y²=x³+b, A=0)
+ΣT = 6x₀²,  ΣW = 10x₀³+4b   (over K\{O} = {P, -P})
+A' = -5ΣT = -30x₀²
+B' = b-7ΣW = -27b-70x₀³
+```
+Key insight: −27 is always a 6th power mod p for p≡1 mod 3 (because −3 is a QR mod p≡1 mod 3, so (−3)³=(−27) is a 6th power), guaranteeing that B'=−27b puts E' in the same sextic twist class as E when x₀=0.
+
+**Kernel finding (corrected):**
+- x₀=0 is a valid 3-isogeny kernel for E: y²=x³+b for ANY b≠0 over any prime p. The Galois-stable kernel {O,(0,y₀),(0,−y₀)} gives a valid F_p-rational isogeny even when y₀∉F_p (Frobenius stabilizes the SET {±y₀}). Prior incorrect condition `legendre(b,p)==1` removed.
+- x₀³=−4b kernels require only that −4b be a cube in F_p (not that −3b be a QR). Prior incorrect QR condition removed.
+
+### Findings
+
+**Empirical (4 instances, 4 kernels each = 16 kernel-curve pairs):**
+
+| Instance | p  | b  | #E | Kernels | #E' matches #E | DLP gap |
+|----------|----|----|-----|---------|----------------|---------|
+| 1 | 61 | 7  | 61  | 4 | ✓ ALL | 9.6× |
+| 2 | 61 | 2  | 61  | 4 | ✓ ALL | 9.6× |
+| 3 | 61 | 5  | 63  | 4 | ✓ ALL | 7.9× |
+| 4 | 61 | 13 | 63  | 4 | ✓ ALL | 7.9× |
+
+ORDER PRESERVATION confirmed: every 3-isogeny neighbor E' satisfies #E'(F_p) = #E(F_p). Split surfaces E'×E_t have #(E'×E_t) ≈ p² >> p (DLP on E).
+
+**Theoretical (non-split):** Frobenius char-poly preservation under isogeny (Honda-Tate) guarantees #(E×E_t)/K(F_p) = #E(F_p)·#E_t(F_p) ≈ p² for ANY Galois-stable K⊂(E×E_t)[3]. No reduction in group order is possible. B5 holds for (3,3)-degree isogenies.
+
+**Formula debugging history (documented for reproducibility):**
+- Initial error: half-system (summing over {P} only) → coefficients -15x₀², -20b-42x₀³ → all mismatches.
+- After partial fix, correctly identified that −27 must be a 6th power mod p for the x₀=0 formula to preserve the sextic class; this holds universally for p≡1 mod 3.
+- Final formula (summing over full K\{O}={P,−P}): -30x₀², -27b-70x₀³ → all matches.
+
+### Next step proposal
+
+**Exp V — extend the (3,3)-walk to a 2-step chain** from E×E_t: take one step to E'×E_t and one more step to E''×E_t, verify that #E''=p+1−t for some |t|<2√p. This would confirm B5 is stable along walks of depth ≥2 (i.e., no "accumulation" effect reduces the DLP target after multiple steps).
+
+Alternatively, connect to the Decru-Kunzweiler genus-2 curves: verify that for a "mixed" (3,3)-isogeny kernel (not the product split), the image is indeed a Jacobian of a hyperelliptic curve with #Jac≈p², by computing the image curve explicitly via Hesse-form coordinates.
+
+### Commits made
+
+- `secp256k1_cm_audit/hesse_33_walk_falsifier.py`: Exp U (3,3)-isogeny walk falsifier (corrected Vélu formula, all-match result)
+- `RESEARCH_AUTOLAB_LOG.md`: 2026-07-01 run log
