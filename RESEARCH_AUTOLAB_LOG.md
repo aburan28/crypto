@@ -3891,3 +3891,89 @@ Alternatively: proceed to write the B5 paper section update incorporating Exp U+
 
 - `secp256k1_cm_audit/hesse_33_walk_depth2.py`: Exp V depth-2+ walk (B5 stable at depth 5, j=0 cycle period found)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-02 run log
+
+---
+
+## 2026-07-03 (autolab run)
+
+### Task picked
+
+**Thread 6 (B5 over F_{p^k}) — Exp W: mixed (3,3)-isogeny kernel verification.**
+Thread 6 made measurable progress yesterday (Exp V, depth-5 walk, j=0 cycle). The proposed next step was Exp W: verify B5 holds for ALL (3,3)-isogeny kernels of E×E_t, including mixed (non-product) ones. All other threads remain closed/blocked.
+
+### Work done
+
+- Implemented `secp256k1_cm_audit/hesse_33_mixed_kernel.py` (Exp W):
+  - **Part A**: Algebraic obstruction proof and numerical verification for 7 primes.
+  - **Part B**: Enumeration of (Z/3Z)²-subgroups of E₁[3]×E₂[3] for two non-twist j=0 curves; Vélu verification of split case; Honda-Tate argument for mixed case.
+- Fixed twist formula bug from initial draft: correct quadratic twist of y²=x³+B (A=0) by QNR d is y²=x³+d³B (not d·B).
+- Ran `cargo test --test curve_audit` → 5/5 pass, no regressions.
+
+### Findings
+
+**Part A — Algebraic obstruction (NEW RESULT):**
+
+For p≡1 mod 3, exactly one of {#E, #E_t} is divisible by 3:
+- #E = p+1-t, #E_t = p+1+t. With p≡1 mod 3: p+1≡2 mod 3.
+- 3|#E iff t≡2 mod 3. Then p+1+t≡2+2=4≡1 mod 3 → 3∤#E_t. ■
+
+Consequence: When 9|#E (full rank-2 3-torsion for E), E_t[3](F_p)={O}.
+Thus (E×E_t)[3](F_p) = E[3](F_p)×{O}: **only split (Z/3Z)²-subgroups exist** among F_p-rational points.
+
+The Howe/CHLRS (3,3)-isogeny E×E_t→J has a kernel K with K(F_p)={(O,O)} but K(F̄_p)≅(Z/3Z)² — a **non-rational mixed kernel**. Honda-Tate still applies.
+
+Numerical confirmation (twist bug fixed: B_t = d³·b):
+
+| p | E: b | #E | E_t: b | #E_t | 3\|#E | 3\|#E_t |
+|---|------|-----|---------|-------|--------|---------|
+| 7 | 2 | 9 | 5 | 7 | ✓ | ✗ |
+| 13 | 3 | 9 | 11 | 19 | ✓ | ✗ |
+| 19 | 5 | 27 | 2 | 13 | ✓ | ✗ |
+| 31 | 1 | 36 | 27 | 28 | ✓ | ✗ |
+| 37 | 9 | 27 | 35 | 49 | ✓ | ✗ |
+| 43 | 1 | 36 | 8 | 52 | ✓ | ✗ |
+| 61 | 5 | 63 | 40 | 61 | ✓ | ✗ |
+
+**Part B — Empirical mixed kernels (two j=0 curves, not quad. twists):**
+
+| p | E₁ (b,#) | E₂ (b,#) | |E₁[3]| | |E₂[3]| | Total subs | Split | Mixed |
+|---|---|---|---|---|---|---|---|
+| 7 | (1,12) | (2,9) | 3 | 9 | 13 | 5 | **8** |
+| 13 | (1,12) | (3,9) | 3 | 9 | 13 | 5 | **8** |
+| 19 | (1,12) | (4,21) | 3 | 3 | 1 | 1 | 0 |
+
+For Cases 1 & 2 (p=7,13): 8 mixed (Z/3Z)²-subgroups found per case.
+Split (3,3)-type kernels (|K₁|=|K₂|=3): 4 per case, all verified via Vélu:
+- quotient order = n_E₁·n_E₂ = 108 ✓ (both cases)
+
+Honda-Tate closure: χ_{E₁×E₂}(1) = 108 for all 13 kernels (split + mixed) ✓.
+
+Case 3 (p=19): both |E₁[3]|=|E₂[3]|=3, so E₁[3]×E₂[3]≅(Z/3Z)²—only 1 (Z/3Z)²-subgroup, which is split (= E₁[3]×E₂[3] itself).
+
+**Theoretical closure — B5 universality:**
+```
+[Split, F_p-rational kernel]
+  Quotient E'×E_t' has # = n_E·n_Et ≈ p².  Verified by Vélu (Exp U,V,W).
+
+[Mixed, NON-F_p-rational kernel — the Howe/CHLRS case]
+  Obstruction: 9|#E → 3∤#E_t → Howe kernel K has K(F_p)={(O,O)}.
+  Honda-Tate: ANY isogeny E×E_t→J (rational or not) satisfies
+    χ_J = χ_{E×Et}  ⟹  #J(F_p) = (p+1-t)(p+1+t) ≈ p².
+
+DLP on J costs O(√(#J)) = O(p) >> O(√p).  B5 holds universally. ■
+```
+
+### Next step proposal
+
+**Exp X — write the B5 section update for the ePrint paper** (`paper/eprint_combined.tex`):
+- Incorporate Exp U, V, W findings into the formal B5 argument.
+- Add Lemma: "For p≡1 mod 3, 3|#E ⟹ 3∤#E_t (algebraic obstruction)."
+- Add Corollary: "All (3,3)-isogenies from E×E_t (split or non-rational-mixed) preserve #Jac≈p²."
+- Citations: Honda-Tate theorem, Howe gluing, CHLRS reference.
+
+Alternatively: **Exp Y — explore whether the obstruction (3|#E ⟹ 3∤#E_t) extends to higher ℓ-torsion** (e.g., ℓ=5,7). Does a similar mod-ℓ arithmetic argument close the full set of isogeny types for all degrees?
+
+### Commits made
+
+- `secp256k1_cm_audit/hesse_33_mixed_kernel.py`: Exp W mixed kernel verification (obstruction + empirical + Honda-Tate closure)
+- `RESEARCH_AUTOLAB_LOG.md`: 2026-07-03 run log
