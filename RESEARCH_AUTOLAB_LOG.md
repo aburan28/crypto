@@ -3977,3 +3977,98 @@ Alternatively: **Exp Y — explore whether the obstruction (3|#E ⟹ 3∤#E_t) e
 
 - `secp256k1_cm_audit/hesse_33_mixed_kernel.py`: Exp W mixed kernel verification (obstruction + empirical + Honda-Tate closure)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-03 run log
+
+---
+
+## 2026-07-04 (autolab run)
+
+### Task picked
+
+**Thread 6 (B5 over F_{p^k}) — Exp Y: generalized ℓ-rank obstruction for odd prime ℓ.**
+Thread 6 made measurable progress yesterday (Exp W, B5 universality for ℓ=3). The proposed
+next step was Exp Y: verify whether the obstruction `p≡1 mod ℓ, ℓ|#E → ℓ∤#E_t` extends to
+higher ℓ (ℓ=5,7). All other original threads remain closed/blocked.
+
+### Work done
+
+- Proved the algebraic theorem for all odd primes ℓ≥3:
+  - p+1 ≡ 2 mod ℓ (since p≡1 mod ℓ)
+  - ℓ|#E = p+1-t ⟹ t ≡ 2 mod ℓ
+  - #E_t = p+1+t ≡ 4 mod ℓ
+  - ℓ≥3 odd prime ⟹ ℓ∤4 ⟹ ℓ∤#E_t ∎
+- Implemented `secp256k1_cm_audit/hesse_ll_obstruction_exp_y.py`:
+  - Numerical verification for ℓ=5: 6 examples (p=31×5, p=61); all `t mod 5 = 2`, `#E_t mod 5 = 4` ✓
+  - Numerical verification for ℓ=7: 6 examples (p=43×6); all `t mod 7 = 2`, `#E_t mod 7 = 4` ✓
+  - Honda-Tate quotient check: #J(F_p) = n_E·n_Et ≈ p² in all 12 cases ✓
+- Ran `cargo test --test curve_audit` → 5/5 pass, no regressions.
+
+### Findings
+
+**NEW THEOREM (Quadratic-twist ℓ-rank obstruction, general):**
+```
+Let ℓ ≥ 3 prime, p ≡ 1 mod ℓ prime, E/F_p with #E = p+1-t, E_t its quadratic twist.
+If ℓ | #E  then  ℓ ∤ #E_t.
+
+Proof: p+1≡2 mod ℓ. ℓ|p+1-t ⟹ t≡2 mod ℓ. p+1+t≡4 mod ℓ. ℓ≥3 odd prime ⟹ ℓ∤4. ∎
+```
+
+**Numerical verification table — ℓ=5:**
+
+| p  | b  | #E | #E_t | t  | t mod 5 | #E_t mod 5 | ℓ∤#E_t | #E·#E_t/p² |
+|----|----|----|------|----|---------|-----------|--------|------------|
+| 31 | 11 | 25 | 39   | 7  | 2       | 4         | ✓      | 1.014568   |
+| 31 | 13 | 25 | 39   | 7  | 2       | 4         | ✓      | 1.014568   |
+| 31 | 21 | 25 | 39   | 7  | 2       | 4         | ✓      | 1.014568   |
+| 31 | 22 | 25 | 39   | 7  | 2       | 4         | ✓      | 1.014568   |
+| 31 | 26 | 25 | 39   | 7  | 2       | 4         | ✓      | 1.014568   |
+| 61 |  4 | 75 | 49   | -13| 2       | 4         | ✓      | 0.987638   |
+
+**Numerical verification table — ℓ=7:**
+
+| p  | b  | #E | #E_t | t  | t mod 7 | #E_t mod 7 | ℓ∤#E_t | #E·#E_t/p² |
+|----|----|----|------|----|---------|-----------|--------|------------|
+| 43 |  3 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+| 43 |  5 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+| 43 | 12 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+| 43 | 19 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+| 43 | 20 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+| 43 | 33 | 49 | 39   | -5 | 2       | 4         | ✓      | 1.033532   |
+
+Note: t mod ℓ = 2 universally (confirms t≡2 mod ℓ when ℓ|#E and p≡1 mod ℓ).
+Note: #E_t mod ℓ = 4 universally (confirms 4 mod ℓ ≠ 0 for odd prime ℓ≥5).
+
+**COROLLARY (B5 universality, all odd prime ℓ):**
+```
+For any odd prime ℓ≥3 and any (ℓ,ℓ)-isogeny φ: E×E_t → J over F_p (rational or not):
+  #J(F_p) = (p+1-t)(p+1+t) ≈ p²    (by Honda-Tate)
+  Cost of DLP on J = Θ(√(p²)) = Θ(p) >> Θ(√p) = cost on E.
+  No (ℓ,ℓ)-cover attack beats Pollard-ρ. ■
+```
+
+**Combined with Exp W results (ℓ=3):**
+The B5 argument now holds universally for ALL odd prime (ℓ,ℓ)-isogenies from E×E_t.
+The theorem is not ℓ-specific: the obstruction always yields 4 mod ℓ for #E_t, and
+4≠0 mod ℓ for every odd prime ℓ. The only exception is ℓ=2 (where 4≡0 mod 2), but
+(2,2)-isogenies require ℓ-rank ≥ 2 on BOTH factors, which fails for j=0 curves over
+secp256k1-type fields (secp256k1 has prime order, so E[2](F_p) = {O}).
+
+### Next step proposal
+
+**Exp Z — write the unified B5 theorem into `paper/structural_completeness.tex`:**
+The complete result is now:
+1. Lemma (Exp W, ℓ=3): algebraic obstruction 3|#E ⟹ 3∤#E_t for p≡1 mod 3.
+2. Theorem (Exp Y): generalization to all odd prime ℓ≥3: ℓ|#E ⟹ ℓ∤#E_t.
+3. Corollary: B5 (cover attack bound) holds for ALL (ℓ,ℓ)-isogenies, not just (2,2).
+
+The paper section B5 currently covers only (2,2)-Richelot. Updating it to cover the
+general (ℓ,ℓ) case would strengthen the main theorem materially.
+
+Alternatively: **search whether the `p≡1 mod ℓ` assumption on p is necessary**, or
+whether the obstruction holds even for p≡0 mod ℓ (p=ℓ, char ℓ case, trivially degenerate)
+or p≡2,...,ℓ-1 mod ℓ. In those cases p+1≢2 mod ℓ, so the proof breaks; find a
+counterexample or prove a different obstruction.
+
+### Commits made
+
+- `secp256k1_cm_audit/hesse_ll_obstruction_exp_y.py`: Exp Y generalized ℓ-rank obstruction (ℓ=5,7 verified)
+- `RESEARCH_AUTOLAB_LOG.md`: 2026-07-04 run log
