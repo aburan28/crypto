@@ -4152,3 +4152,5 @@ Alternatively: **ePrint survey** (fallback) for new papers on cover attacks or (
 
 ### Commits made
 
+
+- `2e87150` autolab 2026-07-05: Exp Z — unified B5 theorem; (ℓ,ℓ)-universality lemma + corollary
