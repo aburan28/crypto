@@ -4072,3 +4072,83 @@ counterexample or prove a different obstruction.
 
 - `secp256k1_cm_audit/hesse_ll_obstruction_exp_y.py`: Exp Y generalized ℓ-rank obstruction (ℓ=5,7 verified)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-04 run log
+
+---
+
+## 2026-07-05 (autolab run)
+
+### Task picked
+
+**Thread 6 (B5 over F_{p^k}) — Exp Z: write unified B5 theorem into the paper.**
+Thread 6 made measurable progress on 2026-07-04 (Exp Y: ℓ-rank obstruction generalized
+to all odd primes ℓ≥3; B5 universality proven for all (ℓ,ℓ)-isogenies). The proposed
+continuation (Exp Z) was to incorporate these findings into `paper/structural_completeness.tex`
+and `PAPER_STRUCTURAL_COMPLETENESS.md`. All other threads are CLOSED, BLOCKED, or DEAD END.
+
+### Work done
+
+- Read current B5 section in `paper/structural_completeness.tex` (lines 267–276): two sentences,
+  generic Gaudry bound, no (ℓ,ℓ) specificity, no Honda-Tate argument.
+- Confirmed secp256k1 field prime residues: p mod 3 = 1, p mod 7 = 1 (computed directly).
+  So Lemma applies to ℓ=3 and ℓ=7 for secp256k1.
+- Added to `paper/structural_completeness.tex` after the existing B5 text:
+  1. **Lemma (Quadratic-twist ℓ-rank obstruction)**: for p≡1 mod ℓ, ℓ|#E ⟹ ℓ∤#E^t.
+     Self-contained 3-line proof (modular arithmetic, no citations needed).
+  2. **Corollary (B5 universality for (ℓ,ℓ)-isogenies)**: for any (ℓ,ℓ)-isogeny
+     E×E^t→J (rational or not), #J(F_p) = (p+1-t)(p+1+t) ≈ p². Proof uses Honda-Tate
+     [tate1966] + Gaudry [gaudry2000].
+  3. **Remark**: secp256k1 specifics (p≡1 mod 3,7); references Exp U–Y scripts.
+- Fixed LaTeX bug: bare `F_p-rational` in text → `$\FF_p$-rational`.
+- Updated open-questions section: added the open sub-question (whether the p≡1 mod ℓ
+  condition in the Lemma is tight, and whether counterexamples exist for other residue
+  classes).
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md` with matching Markdown content (Lemma, Corollary,
+  numerical verification table).
+- Ran `cargo test --test curve_audit`: 5/5 pass, no regressions.
+
+### Findings
+
+**Paper strengthening:**
+- B5 now has a Lemma + Corollary with full proofs, not just a one-sentence appeal to Gaudry.
+- The new material explicitly covers ALL odd-prime-degree (ℓ,ℓ)-isogenies (not just (2,2)-Richelot).
+- Honda-Tate is the key structural argument: group order = #E·#E^t ≈ p² regardless of kernel
+  structure (rational or non-rational). The Lemma explains why F_p-rational kernels are
+  blocked (ℓ-rank obstruction), but the Corollary does not depend on it.
+- secp256k1: both (3,3)- and (7,7)-isogeny attacks are ruled out explicitly.
+
+**TeX changes summary:**
+```
+paper/structural_completeness.tex:
+  - B5 section extended from 10 lines to ~60 lines.
+  - Added \begin{lemma}...\end{lemma} (Quadratic-twist ℓ-rank obstruction)
+  - Added \begin{corollary}...\end{corollary} (B5 universality, all odd prime ℓ)
+  - Added \begin{remark}...\end{remark} (secp256k1 specifics, Exp U–Y citation)
+  - Fixed $\FF_p$-rational (was bare F_p-rational in text mode)
+  - Open-questions: added p≢1 mod ℓ counterexample question
+
+PAPER_STRUCTURAL_COMPLETENESS.md:
+  - B5 section extended with matching Markdown lemma/corollary/verification block.
+```
+
+**Proposed open question (Exp Z′):** Does the ℓ-rank obstruction hold when p≢1 mod ℓ?
+- The proof requires p≡1 mod ℓ ⟹ p+1≡2 mod ℓ to get t≡2. If p≡2 mod ℓ, then p+1≡0 mod ℓ,
+  so ℓ|#E iff t≡0 mod ℓ, and #E^t = p+1+t ≡ t mod ℓ = 0 — so ℓ|#E^t too!
+- This means the p≡2 mod ℓ case gives a COUNTEREXAMPLE to the lemma as stated: if t≡0 mod ℓ,
+  then both ℓ|#E and ℓ|#E^t. But then a split (ℓ,ℓ)-kernel exists over F_p.
+- HOWEVER: for secp256k1, the relevant case is p≡1 mod 3 and p≡1 mod 7, so this is moot.
+  For other curves (p≢1 mod ℓ), the B5 corollary still holds via Honda-Tate (the group
+  order is still ≈p²); only the "kernel obstruction" part of the proof changes.
+
+### Next step proposal
+
+**Exp Z′ — document and verify the p≢1 mod ℓ counterexample:**
+- Find a prime p≡2 mod 3 and a j=0 curve E/F_p with 3|#E and 3|#E^t.
+- Verify that a split (3,3)-kernel K = E[3]×E^t[3] exists over F_p.
+- Confirm Honda-Tate still gives #J≈p² (so B5 holds!) but the Lemma's conclusion fails.
+- This would clarify the exact scope of Lemma 1 vs. Corollary 1 in the paper.
+- Quick PARI script, <30 lines.
+
+Alternatively: **ePrint survey** (fallback) for new papers on cover attacks or (ℓ,ℓ)-isogenies.
+
+### Commits made
+
