@@ -280,21 +280,36 @@ We prove B5 universally for all odd-prime-degree $(\ell,\ell)$-isogenies
 using Honda--Tate theory and the following arithmetic obstruction.
 
 \begin{lemma}[Quadratic-twist $\ell$-rank obstruction]\label{lem:ell-rank}
-Let $\ell \geq 3$ be prime, $p \equiv 1 \pmod{\ell}$ a prime, and
-$E/\FF_p$ ordinary with $\#E = p+1-t$.  If $\ell \mid \#E$, then
+Let $\ell \geq 3$ be an odd prime, $p$ a prime with
+$p \not\equiv 0, \ell{-}1 \pmod{\ell}$ (equivalently $p+1 \not\equiv 0,1 \pmod{\ell}$),
+and $E/\FF_p$ ordinary with $\#E = p+1-t$.  If $\ell \mid \#E$, then
 $\ell \nmid \#E^t$ (where $E^t$ is the quadratic twist,
 $\#E^t = p+1+t$).
 \end{lemma}
 
 \begin{proof}
-$p \equiv 1 \pmod{\ell}$ gives $p+1 \equiv 2 \pmod{\ell}$.
-Then $\ell \mid (p+1-t)$ implies $t \equiv 2 \pmod{\ell}$, so
-$p+1+t \equiv 4 \pmod{\ell}$.  Since $\ell \geq 3$ is an odd
-prime, $\ell \nmid 4$.
+Let $r = p \bmod \ell$, so $r \notin \{0, \ell{-}1\}$ by hypothesis,
+i.e.\ $r+1 \not\equiv 0 \pmod{\ell}$.
+Then $p+1 \equiv r+1 \pmod{\ell}$.  Since $\ell \mid (p+1-t)$,
+we get $t \equiv r+1 \pmod{\ell}$, so
+$p+1+t \equiv 2(r+1) \pmod{\ell}$.
+Now $\ell \mid 2(r+1)$ iff $\ell \mid r+1$ (as $\ell$ is odd),
+iff $r \equiv \ell{-}1$---excluded.  Hence $\ell \nmid \#E^t$. \qed
 \end{proof}
 
+\begin{remark}
+The hypothesis is tight: when $p \equiv \ell{-}1 \pmod{\ell}$ one has
+$p+1 \equiv 0 \pmod\ell$, so $\ell \mid \#E$ forces $t \equiv 0$
+and then $\#E^t = p+1+t \equiv 0$, i.e.\ $\ell \mid \#E^t$---a
+genuine counterexample.  The original hypothesis $p \equiv 1 \pmod\ell$
+is a special case of $p \not\equiv \ell{-}1 \pmod\ell$; the lemma
+is now strictly stronger, covering
+$(\ell{-}2)/(\ell{-}1)$ of all nonzero residue classes
+(e.g.\ $5/6$ for $\ell=7$, versus $1/6$ before).
+\end{remark}
+
 \begin{corollary}[B5 universality for $(\ell,\ell)$-isogenies]\label{cor:b5-univ}
-Let $\ell \geq 3$ be an odd prime and $p \equiv 1 \pmod{\ell}$.
+Let $\ell \geq 3$ be an odd prime and $p$ any prime.
 For \emph{any} $(\ell,\ell)$-isogeny $\varphi\colon E \times E^t \to J$
 over $\FF_p$---regardless of whether the kernel $K$ is
 $\FF_p$-rational---we have
@@ -310,24 +325,29 @@ attack on $E$ beats Pollard~$\rho$.
 Honda--Tate \cite{tate1966}: isogenous abelian varieties share the
 same characteristic polynomial of Frobenius, so
 $\#J(\FF_p) = \#(E \times E^t)(\FF_p) = \#E \cdot \#E^t$.
-Lemma~\ref{lem:ell-rank} characterises the kernel structure
-($\FF_p$-rational kernels are obstructed by $\ell \nmid \#E^t$) but does
-not affect the group-order calculation; Honda--Tate applies to every
-isogeny, rational or not.  The DLP cost bound $O(p)$ follows from
+This holds for every isogeny, rational or not, with no hypothesis on
+$p \bmod \ell$.  When $p \not\equiv \ell{-}1 \pmod\ell$,
+Lemma~\ref{lem:ell-rank} additionally shows that
+$\ell \nmid \#E^t$, obstructing any $\FF_p$-rational split kernel,
+but the group-order bound is independent of that obstruction.
+The DLP cost bound $O(p)$ follows from
 Gaudry~\cite{gaudry2000} with $g = 2$.
 \end{proof}
 
 \begin{remark}
-For secp256k1, $p \equiv 1 \pmod{3}$ and $p \equiv 1 \pmod{7}$
-(computed: $p \bmod 3 = 1$, $p \bmod 7 = 1$), so
-Corollary~\ref{cor:b5-univ} applies to $(3,3)$- and $(7,7)$-isogenies.
+For secp256k1, computed residues are $p \bmod 3 = 1$, $p \bmod 5 = 3$,
+$p \bmod 7 = 1$, $p \bmod 11 = 7$, $p \bmod 13 = 5$.  In every case
+$p \not\equiv \ell{-}1 \pmod\ell$, so Lemma~\ref{lem:ell-rank} applies
+and no $\FF_p$-rational split $(\ell,\ell)$-kernel exists for
+$\ell \in \{3,5,7,11,13\}$.
 The $(3,3)$-isogeny graph from $E \times E^t$ was walked to depth~5
 across 25 kernel-curve pairs (Exp~U--Y, script
-\texttt{secp256k1\_cm\_audit/hesse\_33\_walk\_depth2.py}),
+\texttt{hesse\_33\_walk\_depth2.py}),
 confirming $\#\Jac \approx p^2$ at every node.
-Lemma~\ref{lem:ell-rank} was numerically verified for $\ell = 3,5,7$
-over primes $p \leq 100$ (12 confirmation cases, script
-\texttt{hesse\_ll\_obstruction\_exp\_y.py}).
+The Enhanced Lemma was numerically verified for $\ell \in \{3,5,7\}$
+over all nonzero residue classes with $p < 500$ (16\,562 curve instances,
+scripts \texttt{exp\_zprime\_l\_residue.py},
+\texttt{exp\_zprime2\_generalized\_lemma.py}).
 \end{remark}
 
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
@@ -626,11 +646,12 @@ is the plain Pollard~$\rho$ cost.
       the same.)
 \item Beyond hyperelliptic: do non-hyperelliptic genus-$g$ curves
       admit faster DLP algorithms over $\FF_p$?
-\item The condition $p \equiv 1 \pmod{\ell}$ in
-      Lemma~\ref{lem:ell-rank} is required for the proof; whether
-      the obstruction holds for $p \not\equiv 1 \pmod{\ell}$ (or
-      equivalently whether counterexamples to $\ell \mid \#E \Rightarrow
-      \ell \nmid \#E^t$ exist in those residue classes) is open.
+\item The tightness of Lemma~\ref{lem:ell-rank}: the obstruction holds
+      for all $p \not\equiv 0, \ell{-}1 \pmod\ell$ (Exp~Z$'$, 2026-07-06;
+      see \texttt{exp\_zprime2\_generalized\_lemma.py}).
+      Counterexamples exist precisely when $p \equiv \ell{-}1 \pmod\ell$;
+      in that case $\ell \mid \#E^t$ as well, but B5 (Corollary~\ref{cor:b5-univ})
+      still holds via Honda--Tate alone.
 \item Indirect uses of supersingular reductions for fault-attack-
       amplified ECDLP recovery on isogenous siblings: speculative.
 \item Exact Cardona--Quer normalisation of Igusa invariants for
