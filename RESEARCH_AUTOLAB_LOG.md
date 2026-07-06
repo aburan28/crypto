@@ -4255,7 +4255,4 @@ walks). Then CLOSE Thread 6.
 
 ### Commits made
 
-- `exp_zprime_l_residue.py`: Exp Z' — counterexample search for p≢1 mod ℓ
-- `exp_zprime2_generalized_lemma.py`: Enhanced Lemma proof + secp256k1 residue check
-- `paper/structural_completeness.tex`: Lemma strengthened, Corollary generalized
-- `RESEARCH_AUTOLAB_LOG.md`: 2026-07-06 run log
+- `eebb9fe` autolab 2026-07-06: Exp Z' — Enhanced ℓ-rank Lemma; p≢0,ℓ-1 mod ℓ; secp256k1 safe for ℓ≤13
