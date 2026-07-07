@@ -4357,4 +4357,4 @@ untouched — either is valid.
 
 ### Commits made
 
-- (to be filled after commit)
+- `310ba7e` autolab 2026-07-07: Exp Z'' — Enhanced Lemma verified ℓ∈{3..13}; secp256k1 safe ℓ≤29; Thread 6 CLOSED
