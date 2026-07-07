@@ -345,9 +345,17 @@ across 25 kernel-curve pairs (Exp~U--Y, script
 \texttt{hesse\_33\_walk\_depth2.py}),
 confirming $\#\Jac \approx p^2$ at every node.
 The Enhanced Lemma was numerically verified for $\ell \in \{3,5,7\}$
-over all nonzero residue classes with $p < 500$ (16\,562 curve instances,
+over all nonzero residue classes with $p < 500$ (16\,562 ordinary curve instances,
 scripts \texttt{exp\_zprime\_l\_residue.py},
-\texttt{exp\_zprime2\_generalized\_lemma.py}).
+\texttt{exp\_zprime2\_generalized\_lemma.py}),
+and extended to $\ell \in \{11,13\}$ with $p < 500$ (1\,802 additional instances,
+script \texttt{exp\_zdoubleprime\_lemma\_extended.py}).
+For $\ell = 13$, all 11 valid residue classes $r \in \{1,\ldots,11\}$
+are represented with $0$ failures; $r = 12 = \ell{-}1$ yields 94 failures
+as predicted.  Total: 18\,364 curve instances, $0$ spurious violations.
+The secp256k1 prime satisfies $p \not\equiv \ell{-}1 \pmod{\ell}$ for every
+odd prime $\ell \leq 29$, so Lemma~\ref{lem:ell-rank} applies uniformly
+across the first nine primes $\{3,5,7,11,13,17,19,23,29\}$.
 \end{remark}
 
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
