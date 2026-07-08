@@ -4358,3 +4358,142 @@ untouched — either is valid.
 ### Commits made
 
 - `310ba7e` autolab 2026-07-07: Exp Z'' — Enhanced Lemma verified ℓ∈{3..13}; secp256k1 safe ℓ≤29; Thread 6 CLOSED
+
+## 2026-07-08 (autolab run)
+
+### Task picked
+
+**Thread 3 (Howe gluing on j=0 sextic twists)** — no recent work; recommended by
+2026-07-07 log as "next run option (PARI quick check)." Thread 6 was CLOSED
+yesterday; all other threads BLOCKED or DEAD END; Thread 3 was the last untouched
+structural question in the ePrint draft.
+
+Also discovered during orientation: **Thread 1 (P-521 LLL NaN) was incorrectly
+recorded as BLOCKED** in all log entries since 2026-07-07. The thread is actually
+CLOSED per `RESEARCH_LLL_GS_ANALYSIS.md` §10.3/10.5 (resolved 2026-05-22).
+Correcting that status in this entry.
+
+### Work done
+
+- Read `RESEARCH_MESTRE_HOWE.md` for H1/H2/H3 definitions and prior context.
+- Found pre-existing scripts:
+  - `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (PARI/GP)
+  - `secp256k1_cm_audit/howe_sextic_twists_check.py` (Python, verified via scalar mult)
+- PARI not installed in environment; ran Python script exclusively.
+- Python script ran to completion in <2 min using native EC scalar multiplication to
+  match each b_k to its CM trace (avoids PARI dependency).
+- Noted bug in PARI script: it assigns traces to b_k using CM formula ordering
+  directly (without scalar-mult verification), giving wrong trace for k=1,2,4,5.
+  The Python ground-truth corrects this.
+- Computed exact non-unit gcds for all pairs where gcd > 1.
+- Verified Thread 1 resolution: `src/cryptanalysis/lattice.rs` has
+  `lll_reduce_hp` with HP_PREC=2048 BigInt fixed-point GS, no rug/MPFR needed.
+
+### Findings
+
+**2-torsion patterns of the 6 sextic twists (y² = x³ + b_k):**
+```
+  k | trace                          | order (N_k)                              | x³+b_k pattern
+  --|--------------------------------|------------------------------------------|----------------
+  0 | +t      (432420...327)         | 115792...337  (prime = n_secp256k1)      | [3] irred
+  1 | +(t+3s)/2  (671331...420)      | 115792...244  = 12 * large               | [1,1,1] split
+  2 | +(3s-t)/2  (238911...093)      | 115792...571                             | [3] irred
+  3 | -t         (-432420...327)     | 115792...991  = 9*169 * large            | [3] irred
+  4 | -(t+3s)/2  (-671331...420)     | 115792...084  = 28 * large               | [1,1,1] split
+  5 | +(t-3s)/2  (-238911...093)     | 115792...757  = 3 * large                | [3] irred
+```
+(t = 432420386565659656852420866390673177327, s = 303414439467246543595250775667605759171)
+
+**H2-classes:**
+- `[3]`-class (irreducible, odd group order): k = {0, 2, 3, 5}
+- `[1,1,1]`-class (splits, 4 | N_k): k = {1, 4}
+
+Both classes are stable under the Galois-module argument: all [3]-class curves
+have Frobenius char poly ≡ x²+x+1 mod 2 (order-3 cyclic action on E[2]);
+all [1,1,1]-class have trivial Galois action on 2-torsion.
+
+**Non-unit gcds among the 15 pairs:**
+```
+  (i,j) | gcd(N_i, N_j) | factored
+  -------|---------------|----------
+  (1,3)  | 3             | 3
+  (1,4)  | 4             | 2²
+  (1,5)  | 3             | 3
+  (3,5)  | 3             | 3
+```
+
+**All 15 pairwise Howe conditions:**
+```
+  (i,j) | H1 | H2 | H3 | Glueable?
+  -------|----|----|----|-----------
+  (0,1)  |  ✓ |  ✗ |  ✓ | no  (H2 fails: [3] vs [1,1,1])
+  (0,2)  |  ✓ |  ✓ |  ✓ | YES ← Howe-glueable
+  (0,3)  |  ✓ |  ✓ |  ✓ | YES ← Howe-glueable (known: secp256k1 × quad-twist)
+  (0,4)  |  ✓ |  ✗ |  ✓ | no  (H2 fails: [3] vs [1,1,1])
+  (0,5)  |  ✓ |  ✓ |  ✓ | YES ← Howe-glueable
+  (1,2)  |  ✓ |  ✗ |  ✓ | no
+  (1,3)  |  ✓ |  ✗ |  ✗ | no  (H2 and H3 both fail)
+  (1,4)  |  ✓ |  ✓ |  ✗ | no  (H3 fails: gcd=4)
+  (1,5)  |  ✓ |  ✗ |  ✗ | no
+  (2,3)  |  ✓ |  ✓ |  ✓ | YES ← Howe-glueable
+  (2,4)  |  ✓ |  ✗ |  ✓ | no
+  (2,5)  |  ✓ |  ✓ |  ✓ | YES ← Howe-glueable
+  (3,4)  |  ✓ |  ✗ |  ✓ | no
+  (3,5)  |  ✓ |  ✓ |  ✗ | no  (H3 fails: gcd=3; CM structure causes shared factor)
+  (4,5)  |  ✓ |  ✗ |  ✓ | no
+```
+
+**Result: 5/15 pairs Howe-glueable.**
+
+Glueable pairs: {(0,2), (0,3), (0,5), (2,3), (2,5)}.
+All within the [3]-class {0,2,3,5}; missing pair (3,5) fails H3 (gcd=3).
+
+Secp256k1 (k=0) participates in **3** glueable pairs:
+- (0,3): with its quadratic twist (previously known from `howe_gluing_test.gp`)
+- (0,2): with "cubic-twist A" (trace=(3s-t)/2 ≈ 2.389×10^38)
+- (0,5): with "cubic-twist B" (trace=(t-3s)/2 ≈ -2.389×10^38, quad-twist of k=2)
+
+The pairs (2,5) and (0,3) are structurally identical: each is a curve with its
+own quadratic twist. The pairs (0,2), (0,5), (2,3) are cross-genus-class pairings.
+
+**ECDLP implication:** None. Each Jac(C) for a glueable pair has order
+N_i × N_j ≈ p². Best generic algorithm for genus-2 HCDLP is Pollard-ρ at cost
+~p, worse than ECDLP on secp256k1 (cost ~√p). Per structural-completeness paper,
+no cover from this family provides a sub-√p ECDLP attack.
+
+**Thread 1 status correction:**
+`RESEARCH_LLL_GS_ANALYSIS.md` §10.3 (dated 2026-05-22) records P-521 LLL NaN
+as CLOSED via BigInt HP GS. Confirmed: `src/cryptanalysis/lattice.rs` line 36
+has `HP_PREC = 2048`, `lll_reduce_hp` at line 139. No rug/MPFR needed.
+3/3 seeds recovered for P-521 (§10.4). §10.5 also CLOSED (m=32 tested).
+Previous log entries listing Thread 1 as BLOCKED were incorrect.
+
+### Revised thread summary (all threads)
+
+1. Thread 1 (P-521 LLL): **CLOSED** (2026-05-22) via BigInt HP GS.
+   *Prior BLOCKED status was a misrecording.*
+2. Thread 2 (CHLRS Igusa): **BLOCKED** — no Sage, PARI port pending.
+3. Thread 3 (Howe sextic twists): **CLOSED TODAY** — 5/15 glueable, full table.
+4. Thread 4 (cross-curve LLL 384-bit): **DEAD END** — structural obstruction.
+5. Thread 5 (GLV-HNP toy): **DEAD END** — no 32-bit GLV curve with suitable j.
+6. Thread 6 (B5 over F_{p^k}): **CLOSED** (2026-07-07).
+
+All threads resolved. Next run should use Fallback (Step 4).
+
+### Next step proposal
+
+All 6 threads are CLOSED/BLOCKED/DEAD END. Recommend **Fallback (Step 4)**:
+
+(a) **ePrint survey**: search IACR for papers since 2026-06-29 with keywords
+   "isogeny-graph ECDLP", "Boneh-Venkatesan HNP", "(2,2)-isogeny cover",
+   "sextic twist genus-2". Summarise top 3-5 papers.
+
+(b) **Propose Thread 7**: the 5 glueable pairs yield genus-2 Jacobians
+   Jac(C) with Jac(C) → E_i × E_j via (2,2)-isogeny. Do any of these C
+   admit further covers (genus 3)? This is Diem's threshold — genus-3 index
+   calculus on F_p is sub-exponential. A PARI quick-check: does the Richelot
+   (2,2)-isogeny on Jac(C) hit another Jacobian (not a product), suggesting
+   a depth-2 isogeny graph path with a genus-3 fiber? This is unexplored.
+
+### Commits made
+
