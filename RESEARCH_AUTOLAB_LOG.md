@@ -4634,3 +4634,5 @@ curves with CM by a specific quartic CM field K_4. If so:
   secp256k1.
 
 ### Commits made
+
+- `2d62998` autolab 2026-07-09: Thread 7 CLOSED — Honda-Tate obstruction; depth-2 Richelot stays in products; naive-cover D=-12 CM pattern
