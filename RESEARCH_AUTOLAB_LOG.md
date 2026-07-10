@@ -4724,4 +4724,4 @@ Thread 9: Investigate the squarefree pattern sf(D_new) = sf(a1²-4(a2-2p)):
   identify the exact quartic CM field for each.
 
 ### Commits made
-- [hash TBD] autolab 2026-07-10: Thread 8 — discriminant bug in thread7 fixed; 28 simple Jacobians identified; all 5 tests pass
+- `1098c9f` autolab 2026-07-10: Thread 8 — discriminant bug in thread7 fixed; 28 simple Jacobians identified; all 5 tests pass
