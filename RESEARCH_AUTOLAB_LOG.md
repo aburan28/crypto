@@ -4636,3 +4636,92 @@ curves with CM by a specific quartic CM field K_4. If so:
 ### Commits made
 
 - `2d62998` autolab 2026-07-09: Thread 7 CLOSED — Honda-Tate obstruction; depth-2 Richelot stays in products; naive-cover D=-12 CM pattern
+
+## 2026-07-10 (autolab run)
+
+### Task picked
+Thread 8 (new): Audit the discriminant formula in thread7_richelot_depth2.py and
+re-identify genuinely simple naive-cover Jacobians; investigate their quartic CM
+fields. Chosen because all original threads (1-7) are closed and the last log entry
+proposed this follow-up to the D=-12 pattern.
+
+### Work done
+- Identified discriminant bug in `secp256k1_cm_audit/thread7_richelot_depth2.py::check_split`:
+  - Code used `D = a1² - 4*(a2 - p)` [WRONG]
+  - Correct: `D = a1² - 4*(a2 - 2p)` [RIGHT]
+  - Derivation: `(T²-t1T+p)(T²-t2T+p)` expands to give `a2 = t1*t2 + 2p`, so `t1*t2 = a2 - 2p`.
+  - Bug inflated "non-split" count from 0 genuine cases to 36 in thread7 (off by 4p per case).
+- Wrote and ran `secp256k1_cm_audit/thread8_igusa_cm_field.py`:
+  - Reprocessed all 47 glueable pairs at 10 primes with corrected formula.
+  - Verified corrected traces against twist tables for split cases.
+- Ran `cargo test --test curve_audit` — 5/5 tests pass.
+
+### Findings
+
+**Bug impact:** The 36 "non-split" cases in thread7 were mostly misclassified. Corrected counts:
+
+| Category | thread7 count (buggy) | thread8 count (fixed) |
+|---|---|---|
+| SPLIT (t1≠t2, both integer traces) | 11 | 9 |
+| SPLIT-REPEATED (t1=t2) | 0 | 10 |
+| SIMPLE D_new<0 (irreducible, no real resolvent) | 36 | 0 |
+| SIMPLE D_new>0 non-sq (irred, real quadratic resolvent) | 0 | 28 |
+
+**Key corrected cases (D_old vs D_new):**
+- p=19, (1,4): D_old=-12 → NON-SPLIT [WRONG]; D_new=64=8² → SPLIT(t1=7,t2=-1) ✓
+- p=19, (1,5): D_old=-76 → NON-SPLIT [WRONG]; D_new=0 → SPLIT-REP(t=-1) ✓
+- p=31, (1,2): D_old=360 → NON-SPLIT [WRONG]; D_new=484=22² → SPLIT(t1=11,t2=-11) ✓
+- p=43, (1,2): D_old=504 → NON-SPLIT [WRONG]; D_new=676=26² → SPLIT(t1=13,t2=-13) ✓
+
+**The "D=-12" pattern from thread7 was entirely an artifact of the bug:**
+- Every D_old=-12 case had D_new=64 (perfect square) → actually SPLIT.
+- No genuinely irreducible-over-Q (D_new < 0) cases exist in this family.
+
+**28 genuinely simple Jacobians (D_new > 0, not a perfect square):**
+These have irreducible char poly over Q. By Honda-Tate they are simple abelian
+surfaces over F_p. The quadratic resolvent satisfies u² - a1·u + (a2-2p) = 0 with
+discriminant D_new > 0 irrational, so if the Jacobian has CM the CM field has
+real subfield K⁺ = Q(√sf(D_new)).
+
+Selected squarefree parts of D_new across primes:
+```
+p=13,(1,4):  sf=13  [D_new=52=4·13]
+p=19,(1,2):  sf=73  [D_new=292=4·73]   <- 73 recurs at p=37,p=67
+p=31,(1,4):  sf=7   [D_new=112=16·7]
+p=37,(1,4):  sf=37  [D_new=148=4·37]   <- p divides sf at p=37
+p=43,(1,4):  sf=10  [D_new=160=16·10]  <- sf=10 also at p=67
+p=61,(1,4):  sf=13  [D_new=52=4·13]    <- sf=13 also at p=13
+```
+
+Notable: sf=73 appears for (1,2)/(4,5) pairs at p=19, 37, 67 (primes ≡ 1 mod 6 where
+-35 or +1 appears as a2). The pattern sf=p (squarefree part equals the prime) at p=37
+and proximity of sf to p-related values at other primes suggests a norm-form relation
+between the prime p and the quadratic field Q(√sf).
+
+**HCDLP cost for all simple Jacobians:** Jac(C) is a simple abelian surface, #Jac(C) ~ p².
+Best known: Pollard-ρ on Jac(C)(F_p) costs O(p). This is **worse** than secp256k1's O(√p).
+No threat. Structural completeness theorem holds.
+
+**Thread 7 conclusion (Honda-Tate obstruction) stands:**
+The actual Howe-glued cover (= true (2,2)-isogenous surface to E_i × E_j) is ALWAYS
+split (it's in the same isogeny class as E_i × E_j, which has reducible Frobenius poly).
+The naive cover y²=(x³+b_i)(x³+b_j) is a DIFFERENT surface than the Howe cover; some
+of these naive covers are genuinely simple (not E_i × E_j isogenous), but:
+1. They are NOT the surface you'd reach via the actual (2,2)-isogeny walk from secp256k1.
+2. Even if reachable, HCDLP costs O(p) on them — still harder than O(√p).
+
+### Next step proposal
+Thread 9: Investigate the squarefree pattern sf(D_new) = sf(a1²-4(a2-2p)):
+- For the (1,4) pair across primes, sf cycles through 13, 7, 10, 13, 10, ... 
+- For the (1,2) pair, sf=73 appears three times (p=19,37,67). Conjecture: sf depends
+  on the class number or CM discriminant of the pair's residue class mod 6.
+- Falsifier: compute sf for primes p=127, 139, 151 (next p≡1 mod 6). If sf=73 still
+  appears for (1,2) pair at many of these, it's a structural invariant, not coincidence.
+- Alternatively (more impactful): write a PARI script to explicitly construct the
+  genus-2 curves y²=(x³+b_1)(x³+b_4) for the 28 simple cases, compute their Igusa
+  invariants (J2:J4:J6:J10) over F_p, and check against published CM-point tables
+  (e.g., van Wamelen's list of CM genus-2 curves). If they match CM points, we can
+  identify the exact quartic CM field for each.
+
+### Commits made
+- [hash TBD] autolab 2026-07-10: Thread 8 — discriminant bug in thread7 fixed; 28 simple Jacobians identified; all 5 tests pass
