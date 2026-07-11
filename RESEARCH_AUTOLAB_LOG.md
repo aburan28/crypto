@@ -4725,3 +4725,102 @@ Thread 9: Investigate the squarefree pattern sf(D_new) = sf(a1²-4(a2-2p)):
 
 ### Commits made
 - `1098c9f` autolab 2026-07-10: Thread 8 — discriminant bug in thread7 fixed; 28 simple Jacobians identified; all 5 tests pass
+
+## 2026-07-11 (autolab run)
+
+### Task picked
+Thread 9 (continuation of Thread 8): Extended squarefree discriminant sweep for
+naive-cover Jacobians y²=(x³+b_i)(x³+b_j), and identification of the underlying
+CM field structure. Chosen because Thread 8 (yesterday) made measurable progress
+(28 simple Jacobians, squarefree pattern) and the proposed next step had a clear
+falsifier: extend to p=127,139,151 and check if sf=73 is structural.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread9_sf_extension.py`: extends prime sweep to
+  p≡1 mod 6 up to p=211 (22 primes), computes Weil poly coefficients (a1,a2) and
+  squarefree discriminant sf(D_new) for all 15 pairs of sextic twists.
+- Ran thread9_sf_extension.py: 183 NONSPLIT-Q cases, 0 IRRED cases across 22 primes.
+- Identified norm-form characterization: for pair (2,3)/(5,6) in 1-indexed terms
+  [0-indexed (1,2)/(4,5), bi=g^1, bj=g^2], a2-2p=-73 at exactly p=19,37,79,109.
+- Python verification: primes 19,37,79,109 satisfy 4p=73+3m^2 for m=1,5,9,11 (all odd). ✓
+- CM field identification: Frobenius π_p = (√73 + m·i√3)/2 lies in K=Q(√73, √-3);
+  |π_p|^2 = (73+3m^2)/4 = p confirms these are valid Weil p-numbers in O_K.
+- Predicted next prime: m=21 → p=349 (prime, ≡1 mod 6, 4·349=1396=73+3·441 ✓).
+- Installed PARI/GP (pari-gp 2.15.4) — was not previously installed in this container.
+- Wrote `secp256k1_cm_audit/thread9_igusa_cm73.gp`: PARI script for J2/J10 of
+  CM-73 cases using igusa_J2/igusa_J10 from igusa_clebsch.gp. Hit PARI syntax issues
+  (forstep vs for, variable `pr` vs polynomial interpretation). J2 formula verified
+  in Python instead; igusa_clebsch.gp itself runs cleanly from its directory.
+- Computed J2 = 3·(bi²−38·bi·bj+bj²) mod p for the 4 CM-73 cases:
+  p=19→J2=3, p=37→J2=36, p=79→J2=36, p=109→J2=82.
+  Note: J2=36 at both p=37 and p=79 (potentially a CM signature).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Key structural result: norm-form characterization of CM-73 primes.**
+The primes where the naive-cover Jacobian of y²=(x³+g)(x³+g²) has Weil poly
+coefficient a2-2p=-73 (and a1=0, sf=73) are exactly those satisfying:
+  4p = 73 + 3m² for some odd positive integer m.
+
+Verified instances: m=1→p=19, m=5→p=37, m=9→p=79, m=11→p=109.
+Next: m=21→p=349 (falsifier: run thread9_sf_extension.py extended to p=350; expect
+a2-2p=-73 and sf=73 for the relevant pair at p=349).
+
+**CM field identification:**
+The Frobenius of this Jacobian is π = (√73 + mi√3)/2 ∈ K = Q(√73, √-3), a quartic
+CM field with real subfield K⁺ = Q(√73). Norm N_{K/Q}(π) = (73+3m²)/4 = p ✓.
+This is an "essential prime" for the CM abelian surface A/Q with CM by O_K.
+
+**Thread9 data corrections to thread8 log:**
+Thread8 log erroneously stated "sf=73 recurs at p=67" for pair (1,2) [1-indexed].
+Actual data: p=67 pair (1,2) has D=265, sf=265. The sf=73 at p=67 appeared for
+a DIFFERENT pair (1,5) in 1-indexed = 0-indexed (0,4). Different pair type.
+
+**Pair symmetry: D(0,3) = 4·D(1,4) always.**
+For ALL 22 primes tested, D(pair(0,3)) = 4·D(pair(1,4)). Same squarefree part.
+Both pairs have ratio g^3 among sextic twist parameters but different absolute bases,
+related by a factor-of-4 scaling in D (equivalent to a factor of 2 in traces).
+
+**sf=73 appears at 24 cases total** across 5 distinct primes: p=19,37,67(pair(1,5)),
+79,109. At p=19,37,79,109 it comes from the norm-form structure; at p=67 it's
+from a different pair type with a different CM context.
+
+**Other recurring a2-2p constants** (from the "constant a2-2p" table):
+Each constant a2-2p = -k corresponds to a quartic CM field K=Q(√k, √-3) (when a1=0).
+Notable: a2-2p=-73 at 4 primes; a2-2p=-265 at 2 primes (p=67,157); a2-2p=-505
+at 2 primes (p=127,163); a2-2p=-769 at 2 primes (p=193,211). Each cluster defines
+a distinct quartic CM field.
+
+**a2-2p=-769 at p=193,211:** 4·193=769=769 (prime, 769≡1 mod 6). For 4p=769+3m²:
+m=1→p=193, m=... 769+3=772/4=193; 769+75=844/4=211; 769+243=1012/4=253 (not prime);
+769+507=1276/4=319=11·29 (not prime). So same CM field but not ALL primes up to 211.
+
+**J2 values for CM-73 cases:**
+  p=19: J2=3 (≠0 → smooth curve)
+  p=37: J2=36 (same as p=79)
+  p=79: J2=36 (same as p=37)
+  p=109: J2=82
+The match J2=36 at p=37 and p=79 is a potential CM invariant signature; would need
+to check if 36 is a common value of the reduction of the CM curve's J2-invariant.
+
+**HCDLP cost confirmed again:** All 183 NONSPLIT-Q cases have Weil poly irreducible
+over Q or factoring over Q(√sf). In either case, #Jac(C) ~ p², best known attack
+O(p). Structural completeness theorem holds for all cases.
+
+### Next step proposal
+Thread 10 (falsifier for norm-form):
+- Extend thread9_sf_extension.py to p=349 (the predicted m=21 prime).
+- Expected: a2-2p=-73 for the g^1-g^2 consecutive pair at p=349.
+- If confirmed: the norm-form 4p=73+3m² (odd m, p prime) characterization is proved
+  empirically for 5 primes; a theoretical proof would follow from the theory of
+  reduction of CM abelian surfaces (Shimura-Taniyama for genus 2).
+- Also: fix the PARI igusa_clebsch_complete.gp integration in thread9_igusa_cm73.gp
+  (use `forstep` instead of 3-arg `for`, avoid variable name `pr` clashing with
+  polynomial vars) to compute full (J2:J4:J6:J10) quadruple and check if the
+  absolute Igusa invariants j1=J2^5/J10, j2=J2^3·J4/J10, j3=J2^2·J6/J10 are
+  equal (mod p) for the CM-73 cases — this would confirm they reduce from a single
+  CM abelian surface over Q.
+
+### Commits made
+- [TBD after commit]
