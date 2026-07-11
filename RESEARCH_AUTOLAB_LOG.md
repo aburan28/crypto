@@ -4823,4 +4823,4 @@ Thread 10 (falsifier for norm-form):
   CM abelian surface over Q.
 
 ### Commits made
-- [TBD after commit]
+- `3afdefd` autolab 2026-07-11: Thread 9 — norm-form 4p=73+3m² identifies CM field Q(sqrt(73),sqrt(-3)); sf=73 primes confirmed; PARI installed
