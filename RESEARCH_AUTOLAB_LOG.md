@@ -4916,4 +4916,4 @@ Thread 11: Characterize the SPLIT condition for pair (g^1,g^2).
   toy example — draft a one-paragraph note for paper/eprint_combined.tex.
 
 ### Commits made
-[pending]
+`0b7d258` autolab 2026-07-12: Thread 10 — Thread9 conjecture refuted; no CM-73 in (109,350]; SPLIT Jacobians at p=241,283,307 discovered
