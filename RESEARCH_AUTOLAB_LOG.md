@@ -4824,3 +4824,96 @@ Thread 10 (falsifier for norm-form):
 
 ### Commits made
 - `3afdefd` autolab 2026-07-11: Thread 9 — norm-form 4p=73+3m² identifies CM field Q(sqrt(73),sqrt(-3)); sf=73 primes confirmed; PARI installed
+
+## 2026-07-12 (autolab run)
+
+### Task picked
+Thread 10 (continuation of Thread 9): Falsifier for norm-form characterization
+4p=73+3m² (odd m, p prime) → a2-2p=-73 for pair (g^1,g^2). Chosen because
+Thread 9 (yesterday) proposed this specific falsifier with a clear predicted outcome,
+and all 6 original priorities are closed.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread10_norm_form_falsifier.py`: targeted script that
+  (a) enumerates norm-form primes 4p=73+3m² up to m=61, (b) computes (a1,a2) for
+  pair (g^1,g^2) at each p≤500, (c) checks a2-2p=-73.
+- Ran thread10_norm_form_falsifier.py on p=19,37,79,109,349,487 (known and predicted).
+- Ran diagnostic for ALL 15 pairs at p=349 and p=487 to check if any pair gives
+  a2-2p=-73.
+- Swept ALL primes p≡1 mod 6 in (211,350] (11 primes) for a2-2p=-73 on pair (g^1,g^2).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THREAD 9 CONJECTURE REFUTED.** The norm form 4p=73+3m² (odd m) does NOT guarantee
+a2-2p=-73 for pair (g^1,g^2). Specifically:
+
+| m  | p   | g | a1 | a2-2p | sf   | a2-2p=-73? |
+|----|-----|---|----|-----------|----|------------|
+|  1 |  19 | 2 |  0 |   -73 |  73 | ✓          |
+|  5 |  37 | 2 |  0 |   -73 |  73 | ✓          |
+|  9 |  79 | 3 |  0 |   -73 |  73 | ✓          |
+| 11 | 109 | 6 |  0 |   -73 |  73 | ✓          |
+| 21 | 349 | 2 |  0 |  -313 | 313 | ✗ FAIL     |
+| 25 | 487 | 3 |  0 | -1273 |1273 | ✗ FAIL     |
+
+**No pair at p=349 or p=487 gives a2-2p=-73** (checked all 15 pairs via diagnostic).
+At p=349 the a1=0 pairs are (1,4): a2-2p=-1204, sf=301; (2,3): -313, sf=313;
+(5,6): -313, sf=313. At p=487 the a1=0 pairs are (1,4): -1360, sf=85;
+(2,3): -1273, sf=1273; (5,6): -1273, sf=1273.
+
+**No CM-73 prime in (109,350].** Full sweep of all 11 primes p≡1 mod 6 in (211,350]
+confirmed no pair (g^1,g^2) gives a2-2p=-73. Empirical CM-73 set for this pair:
+{19, 37, 79, 109} (may be finite).
+
+**NEW FINDING: SPLIT Jacobians at p=241,283,307.**
+Among primes (211,350], three have pair (g^1,g^2) giving a2-2p = −k² (perfect square):
+- p=241, g=7, pair=(7,49): a2-2p=-961=-31² → D=62², Jac SPLITS as E(t=-31)×E(t=+31)
+  #E₁(F_241)=273=3·7·13, #E₂(F_241)=211 (prime).
+- p=283, g=3, pair=(3,9):  a2-2p=-625=-25² → D=50², Jac SPLITS.
+  #E₁(F_283)=259=7·37, #E₂(F_283)=309=3·103.
+- p=307, g=5, pair=(5,25): a2-2p=-1225=-35² → D=70², Jac SPLITS.
+  #E₁(F_307)=273=3·7·13, #E₂(F_307)=343=7³.
+  Note: #E₂=7³=343 at p=307 — a highly smooth order (only prime 7).
+
+These SPLIT cases confirm that the pair (g^1,g^2) does NOT always produce a simple
+(NONSPLIT-Q) Jacobian — it depends on p. The Howe conditions (H1)/(H2)/(H3) are
+violated for these specific primes.
+
+**Weil polynomial algebra (a1=0 case):**
+For pair (g^1,g^2) with a1=0: Weil poly = T^4 + (2p+Δ)T^2 + p^2 where Δ=a2-2p.
+  - NONSPLIT-Q: D=-4Δ is positive non-square → irreducible over Q
+  - SPLIT: D=-4Δ=k² → factors as (T^2+kT/2+p)(T^2-kT/2+p) over Q; Jac = E₁×E₂
+  - IRRED: Δ>0 → D<0 → char poly has complex CM; quadratic extension needed
+At p=241,283,307: Δ=-t² for t=31,25,35 respectively.
+
+**p=307 SPLIT with #E=7³: HCDLP note.** The elliptic curve E₂ over F_307 with
+#E₂=343=7³ has a 7-smooth order — the ECDLP on E₂ is trivially solvable by
+Pohlig-Hellman in O(7^(3/2)) ≈ 18.5 field operations. This is a concrete example
+of the B5 "cover-then-smooth-order" threat materializing at toy scale (p=307).
+However, this is for a toy prime, not secp256k1.
+
+**Norm form revisited:** The correct interpretation is:
+  4p=73+3m² (odd m) is NECESSARY but NOT SUFFICIENT for pair (g^1,g^2) to be CM-73.
+  The sufficient condition likely involves a 12th-power residue criterion for g mod p
+  relative to primes above 73 in Z[ω₁₂] (ring of 12th roots of unity). This is an
+  open problem in CM theory.
+
+**HCDLP security not affected:** All NONSPLIT-Q cases have #Jac~p², best attack O(p).
+The SPLIT cases (p=241,283,307) have Jac≅E₁×E₂, attack on E₁/E₂ directly — but
+secp256k1 is not among these primes.
+
+### Next step proposal
+Thread 11: Characterize the SPLIT condition for pair (g^1,g^2).
+- Question: for which primes p≡1 mod 6 does the pair (g^1,g^2) give a SPLIT Jacobian?
+  Is there a modular condition (e.g., the primitive root g satisfying some power-residue
+  criterion mod p)?
+- Approach: extend the p-sweep to ≤600 and catalog SPLIT vs NONSPLIT-Q cases.
+  Compute j-invariants of the component elliptic curves for SPLIT cases.
+- Separately: check the finite CM-73 hypothesis by verifying no prime in (109,1000) gives
+  pair (g^1,g^2) with a2-2p=-73.
+- The p=307 SPLIT with #E=7³ is worth highlighting in §B5 of the paper as a concrete
+  toy example — draft a one-paragraph note for paper/eprint_combined.tex.
+
+### Commits made
+[pending]
