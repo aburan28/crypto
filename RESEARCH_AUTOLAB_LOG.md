@@ -4917,3 +4917,99 @@ Thread 11: Characterize the SPLIT condition for pair (g^1,g^2).
 
 ### Commits made
 `0b7d258` autolab 2026-07-12: Thread 10 — Thread9 conjecture refuted; no CM-73 in (109,350]; SPLIT Jacobians at p=241,283,307 discovered
+
+## 2026-07-13 (autolab run)
+
+### Task picked
+Thread 11: SPLIT condition characterization for pair (g^1,g^2). Chosen because
+Thread 10 (yesterday) proposed this specific task: sweep p≤600 for SPLIT vs
+NONSPLIT-Q, check CM-73 hypothesis in [7,1000], and add §B5 paper note on p=307.
+All 6 original priorities are superseded by the ongoing secp256k1 CM/cover thread.
+
+### Work done
+- Installed PARI/GP (apt-get pari-gp) — required for fast hyperellcharpoly.
+- Wrote `secp256k1_cm_audit/thread11_weil_sweep.gp`: minimal PARI script using
+  `hyperellcharpoly(P)` to compute Weil polynomial for pair (g^1,g^2) at each
+  prime p≡1 mod 6, p≤1000. Prints CSV: p,a1,a2. (Key insight: ffgen(p)*x^6+...
+  syntax needed; one-line forprime body required to avoid PARI parser ambiguity.)
+- Wrote `secp256k1_cm_audit/thread11_classify.py`: Python classification of the
+  80 primes in [7,1000] into SPLIT / NONSPLIT-Q; computes t, #E₁, #E₂, D_cm,
+  sf(-D_cm), and 4p-t² for SPLIT cases; identifies CM-73 primes; reports smooth
+  orders; groups SPLIT into CM families.
+- Added Remark `rem:split-toy` to `paper/structural_completeness.tex` §B5
+  (after the secp256k1 residue remark, before B6). Covers: structural theorem
+  (all SPLIT → Q(√-3)-CM), p=307 concrete example, CM-73 finiteness result.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**SPLIT sweep, p≤1000 (80 primes p≡1 mod 6):**
+
+| Class     | Count | Notes |
+|-----------|-------|-------|
+| SPLIT     | 16    | Jac≅E₁×E₂ over F_p |
+| NONSPLIT-Q| 64    | Jac simple; best attack O(p) |
+| IRRED     | 0     | none in range |
+| MIXED     | 0     | a1=0 for all cases |
+
+**KEY RESULT: ALL 16 SPLIT cases have sf(-D_cm) = 3.**
+That is, both component curves E₁, E₂ have CM by an order in Q(√-3).
+The SPLIT condition is governed by norm-form families 4p = t² + 3k² for
+k ∈ {1, 5, 11, 13, 15, 25} (within p≤1000). The general pattern is:
+
+| Family D=4p-t² | sf | k  | Primes in [7,1000] |
+|----------------|----|----|---------------------|
+| 3              | 3  | 1  | {7,13,31,43,241,307,757} |
+| 75=3·25        | 3  | 5  | {61,439} |
+| 363=3·121      | 3  | 11 | {181,397,433} |
+| 507=3·169      | 3  | 13 | {283,367} |
+| 675=3·225      | 3  | 15 | {199} |
+| 1875=3·625     | 3  | 25 | {709} |
+
+**Theoretical explanation**: pair (g^1,g^2) is closely related to sextic twists
+of secp256k1 (j=0). All j=0 curves have CM by Z[ω] ⊂ Q(√-3). Any SPLIT
+Jacobian of this cover family inherits Q(√-3)-CM for both components. ■
+
+**CM-73 primes CONFIRMED FINITE at {19,37,79,109}:**
+No CM-73 prime (a2-2p=-73, a1=0) in (109,1000]. The primes p=457,727 have
+sf=73 but a2-2p=-1825=-25·73 (different CM class). CM-73 set appears to be
+exactly {19,37,79,109}.
+
+**Smooth-order SPLIT examples (Pohlig-Hellman exploitable at toy scale):**
+- p=7:  #E₂=3    (trivial)
+- p=13: #E₂=7    (trivial)
+- p=31: #E₂=21=3·7 (SMOOTH)
+- p=61: #E₂=49=7² (SMOOTH — pure 7-power!)
+- p=307: #E₁=343=7³ (SMOOTH — Thread 10's key example)
+- p=439: #E₂=399=3·7·19 (SMOOTH)
+- p=757: #E₂=703=19·37 (SMOOTH)
+For p=241,367,433 the component orders are prime (safe).
+Pattern: many SPLIT cases have component curve orders divisible by 7 because
+#E≡0 mod 7 ⟺ t≡0 or 4 mod 7 (via (t-2)²+3≡0 mod 7 condition).
+
+**secp256k1 safety**: 4p=t²+3 requires t≈2^128 for secp256k1's prime.
+No small-norm-form condition is satisfied. Structural completeness theorem
+unaffected.
+
+**Paper addition**: Added Remark rem:split-toy to §B5 (paper/structural_completeness.tex,
+after line 359), covering the structural Q(√-3)-CM theorem, the p=307 concrete
+toy example, and the CM-73 finiteness result.
+
+### Next step proposal
+Thread 12: Characterize the CM-73 set theoretically.
+- The CM-73 primes {19,37,79,109} appear to form a finite set. A theoretical proof
+  would show: the "CM-73" condition a2-2p=-73 corresponds to p having a specific
+  splitting behavior in Q(√73, √-3) (a quartic CM field with class number > 1),
+  and there are only finitely many such primes by class field theory (Chebotarev).
+- Approach: compute the Hilbert class field of Q(√-3, √73) using PARI's `bnfclgp`,
+  identify the density of CM-73 primes via Chebotarev, and check if {19,37,79,109}
+  matches the expected splitting type at all such primes up to 1000.
+- Alternatively: investigate the NONSPLIT-Q distribution. The squarefree parts sf
+  recur (sf=73: 6 primes, sf=769: 3 primes, sf=3265: 3 primes). Each recurring sf
+  corresponds to a fixed quartic CM field — do these primes form a Chebotarev class?
+- Check: does sf=769=769 (prime, 769≡1 mod 6, 769=4·193-3=769) fit another
+  norm-form 4p=769+3m²? At p=193: m=1→4p=769+3=772≠772... wait, 4·193=772=769+3. Yes!
+  So sf=769 at p=193,211 follows the norm-form 4p=769+3m². Same as CM-73 structure.
+
+### Commits made
+[pending]

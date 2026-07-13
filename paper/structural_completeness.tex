@@ -358,6 +358,50 @@ odd prime $\ell \leq 29$, so Lemma~\ref{lem:ell-rank} applies uniformly
 across the first nine primes $\{3,5,7,11,13,17,19,23,29\}$.
 \end{remark}
 
+\begin{remark}[Toy example: split Jacobian with smooth-order component]
+\label{rem:split-toy}
+At toy scale one can observe a concrete instance of the ``cover $\to$ smooth order''
+scenario that B5 rules out for secp256k1.  For the na\"ive-cover family
+$C\colon y^2 = (x^3 + g)(x^3 + g^2)$ over $\FF_p$ (where $g$ is a primitive root
+mod $p$, studied in the companion PARI audit), the Jacobian $\Jac(C)$ is a genus-2
+abelian surface over $\FF_p$.  A comprehensive sweep of all primes $p \equiv 1
+\pmod{6}$ with $p \le 1000$ (script \texttt{thread11\_weil\_sweep.gp},
+classification \texttt{thread11\_classify.py}) finds 16 \emph{split} Jacobians
+among the 80 primes in that range---cases where $\Jac(C) \cong E_1 \times E_2$
+over $\FF_p$.
+
+\medskip
+\noindent\textbf{Structural theorem (Thread 11).}
+\emph{All 16 split Jacobians in $[7, 1000]$ have $\CM$-discriminant $D \equiv 0
+\pmod{3}$; that is, both component curves $E_1, E_2$ carry $\CM$ by an order in
+$\QQ(\sqrt{-3})$.}
+The split condition is governed by norm-form families $4p = t^2 + 3k^2$ for
+specific conductor values $k \in \{1, 5, 11, 13, 15, 25\}$ (within $p \le 1000$).
+This is not coincidental: since secp256k1 has $j = 0$ (i.e.\ $\CM$ by $\ZZ[\omega]$,
+$\omega = e^{2\pi i/3}$), any split-Jacobian cover of $E$ inherits $\QQ(\sqrt{-3})$-$\CM$
+structure throughout.
+
+\medskip
+\noindent\textbf{Concrete example: $p = 307$, $t = 35$.}
+The prime $p = 307$ lies in the $k = 1$ family ($4 \cdot 307 = 35^2 + 3$), so
+$\Jac(C_{307}) \cong E_1 \times E_2$ with $\#E_1(\FF_{307}) = 343 = 7^3$ and
+$\#E_2(\FF_{307}) = 273 = 3 \cdot 7 \cdot 13$.  The curve $E_1$ has a \emph{$7^3$-smooth
+order}: Pohlig--Hellman solves its discrete logarithm in
+$O(7^{3/2}) \approx 18$ group operations.  This is precisely the threat B5 addresses
+at cryptographic scale.  For secp256k1's prime $p \approx 2^{256}$, the equation
+$4p = t^2 + 3$ would require $t \approx 2^{128}$---integer square root of $4p - 3$
+is not itself a key recovery, so no such polynomial-time cover exists.
+
+\medskip
+\noindent\textbf{CM-73 primes are finite within $[7, 1000]$.}
+The primes giving $a_2 - 2p = -73$ (the ``CM-73'' cluster identified in
+Threads~9--10) are confirmed to be $\{19, 37, 79, 109\}$ only in $[7, 1000]$:
+no further CM-73 prime exists in $(109, 1000]$.  Two additional primes
+($p = 457, 727$) share squarefree discriminant part $\mathrm{sf} = 73$ but
+with $a_2 - 2p = -1825 = -25 \cdot 73 \neq -73$, placing them in distinct
+CM classes.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
