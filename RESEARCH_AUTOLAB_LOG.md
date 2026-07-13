@@ -5012,4 +5012,4 @@ Thread 12: Characterize the CM-73 set theoretically.
   So sf=769 at p=193,211 follows the norm-form 4p=769+3m². Same as CM-73 structure.
 
 ### Commits made
-[pending]
+`9d88726` autolab 2026-07-13: Thread 11 — SPLIT condition; all 16 SPLIT Jacobians p≤1000 have Q(sqrt(-3))-CM; CM-73 set confirmed {19,37,79,109}; B5 remark added
