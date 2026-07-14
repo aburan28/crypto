@@ -5013,3 +5013,110 @@ Thread 12: Characterize the CM-73 set theoretically.
 
 ### Commits made
 `9d88726` autolab 2026-07-13: Thread 11 — SPLIT condition; all 16 SPLIT Jacobians p≤1000 have Q(sqrt(-3))-CM; CM-73 set confirmed {19,37,79,109}; B5 remark added
+
+## 2026-07-14 (autolab run)
+
+### Task picked
+Thread 12: CM-73 set characterization via quartic CM field theory. Chosen because
+Thread 11 (yesterday) proposed this exact task and made foundational progress
+(swept p≤1000, identified CM-73 primes {19,37,79,109}, proposed class-field
+theory approach).
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread12_cm73_sweep.gp` — PARI script (32MB stack,
+  function-based to avoid multi-line forprime parse issues). Parts A-G:
+  extended sweep p≤5000; class groups; Kronecker symbols; Galois groups of Weil
+  polys; nffactor over Q(√-219); subfield structure derivation.
+- Ran `cargo test --test curve_audit`: 5/5 pass (unchanged).
+- Updated `paper/structural_completeness.tex` (rem:split-toy, lines 396-425):
+  extended CM-73 claim to p≤5000, added quartic CM field paragraph with
+  Galois group V_4, three quadratic subfields, class numbers, Kronecker splitting.
+
+### Findings
+
+**A. Extended sweep (p≤5000): CM-73 primes = {19, 37, 79, 109} only.**
+- 621 primes p≡1 mod 6 in [7,5000] checked.
+- 11 norm-form primes 4p=73+3k² found (k=1,5,9,11,21,25,31,35,41,55,65).
+- Only k=1,5,9,11 (p≤109) give a2-2p=-73. k≥21 do NOT.
+- Non-CM-73 a2-2p values: {-313,-1273,-2881,-1873,-4873,-5473,-10873}.
+
+**B. Class groups (PARI bnfinit):**
+| Field | h | clgp |
+|-------|---|------|
+| Q(√-219) | 4 | Z/4Z |
+| Q(√-73) | 4 | Z/4Z |
+| Q(√-3) | 1 | trivial |
+
+**C. Kronecker symbols:**
+- ALL CM-73 primes: kron(-219,p)=+1 (p splits in Q(√-219)) — necessary condition.
+- kron(-3,p)=+1 for all (p≡1 mod 6 ⟹ p≡1 mod 3 ⟹ -3 is QR).
+- kron(-73,p): p=19,79 give -1; p=37,109 give +1. Not uniform.
+- p=349 (norm-form, not CM-73): kron(-219,349)=+1 too (necessary not sufficient).
+- p=601,907: kron(-219,p)=-1 (neither norm-form primes of the right type).
+
+**D. Galois groups of CM-73 Weil polynomials:**
+All four: Gal(T⁴+(2p-73)T²+p²/Q) = E(4) = V₄ (Klein four-group, Z/2×Z/2).
+NOT cyclic Z/4Z. The polynomial is biquadratic (only even powers of T).
+
+**E. Factoring over Q(√-219):**
+- p=19 (k=1): (x²+(-√-219-35)/2)(x²+(√-219-35)/2)
+- p=37 (k=5): (x²+(-5√-219+1)/2)(x²+(5√-219+1)/2)
+- p=79 (k=9): (x²+(-9√-219+85)/2)(x²+(9√-219+85)/2)
+- p=109 (k=11): (x²+(-11√-219+145)/2)(x²+(11√-219+145)/2)
+Pattern: coefficients are (±k√-219 + (2p-73))/2 with k²=(4p-73)/3.
+
+**F. Quartic CM splitting field subfields (derived analytically for p=19):**
+Let α=(35+√-219)/2, β=√α. Then:
+- F₁ = Q(√-219) (α-ᾱ = √-219)
+- F₂ = Q(√73): (β+19/β)² = α+38+ᾱ = 35+38 = 73
+- F₃ = Q(√-3): (β-19/β)² = α-38+ᾱ = 35-38 = -3
+F₁ = F₂·F₃ (compositum) since -219 = (-3)·73. ✓
+
+**OPEN**: Why do k=1,5,9,11 give CM-73 but k≥21 don't? Likely a ring class field
+condition: the CM-73 condition forces the Frobenius ideal (π) to lie in a specific
+ideal class in the order O of conductor dividing some N in Q(√-219). With h(-219)=4
+(cyclic of order 4), there is one principal class. The 4 CM-73 primes may correspond
+exactly to the 4 principal prime ideals of norm ≤109 in the order O_{-219}.
+This would be a finite set — but computing the ring class field requires Magma or
+Sage's CM theory tools (not easily available here). BLOCKED: needs Sage/Magma.
+
+### Next step proposal
+Thread 13: Verify the "principal ideal" hypothesis.
+- In PARI: for each CM-73 prime p, factor the principal ideal (p) in Z[√-219] (or
+  the maximal order of Q(√-219)). Check if p factors as π·π̄ with π principal
+  (norm generator). Compare with p=349 where (p) is also split but π is not principal.
+  Concretely: `bnfinit(x^2+219); bnfisprincipal(K, idealprimedec(K,p)[1])`
+  — if result is [0,...] then π is principal; else not.
+- Expected: CM-73 primes give principal splitting; p=349 gives non-principal.
+  This would prove the CM-73 set = {p : p splits as a principal ideal in Z[(1+√-219)/2]}.
+  By class number formula, there are finitely many such primes (counting by norm
+  in each ideal class), so {19,37,79,109} being the full set up to 5000 would
+  be consistent with the set being truly finite (or having very sparse density).
+
+### Commits made
+TBD (will record after commit)
+
+**BONUS (Thread 12 addendum): principal ideal hypothesis REFUTED.**
+`bnfisprincipal` in Q(√-219) (class group Z/4Z) gives:
+- p=19,37,79,109 (CM-73): class_exp = [2]~ (order 2, NOT principal)
+- p=349,487,739,...,3187 (norm-form, not CM-73): class_exp = [2]~ (also order 2!)
+- p=61,67,97 (split but not norm-form): class_exp = [0]~ (principal)
+
+The CM-73 primes and the non-CM-73 norm-form primes are in the SAME ideal class
+(order 2 in Z/4Z). The distinction is NOT captured by ideal class structure
+of Q(√-219). The CM-73 condition must arise from the specific Frobenius
+isomorphism class of Jac(C_p) — a finer invariant than the splitting type
+of p in Q(√-219). Full explanation requires CM theory for the abelian variety
+Jac(C) over Q-bar (Shimura-Taniyama). OPEN.
+
+Paper paragraph updated to reflect this accurate negative result.
+
+**Revised next step proposal (Thread 13):**
+Try to distinguish CM-73 from non-CM-73 norm-form primes via a DIFFERENT invariant.
+Candidate: compare the Igusa-Clebsch invariants (j₁,j₂,j₃) of the genus-2 curve
+Jac(C_p) for CM-73 vs non-CM-73 norm-form primes. If the CM-73 Jacobians correspond
+to a unique Weierstrass point on the Humbert surface H₃ (the locus of abelian surfaces
+with Z[ω]-action), then the distinction arises from the specific CM type, and
+{19,37,79,109} may be the complete set of primes where our SPECIFIC curve lands
+on a CM-73 Humbert stratum. Compute Igusa invariants via PARI's `hyperellcharpoly`
+output and compare.

@@ -393,13 +393,39 @@ $4p = t^2 + 3$ would require $t \approx 2^{128}$---integer square root of $4p - 
 is not itself a key recovery, so no such polynomial-time cover exists.
 
 \medskip
-\noindent\textbf{CM-73 primes are finite within $[7, 1000]$.}
+\noindent\textbf{CM-73 primes confirmed finite: $\{19, 37, 79, 109\}$ up to $p \le 5000$.}
 The primes giving $a_2 - 2p = -73$ (the ``CM-73'' cluster identified in
-Threads~9--10) are confirmed to be $\{19, 37, 79, 109\}$ only in $[7, 1000]$:
-no further CM-73 prime exists in $(109, 1000]$.  Two additional primes
-($p = 457, 727$) share squarefree discriminant part $\mathrm{sf} = 73$ but
-with $a_2 - 2p = -1825 = -25 \cdot 73 \neq -73$, placing them in distinct
-CM classes.
+Threads~9--10) are confirmed to be $\{19, 37, 79, 109\}$ in $[7, 5000]$:
+an extended PARI sweep (\texttt{thread12\_cm73\_sweep.gp}, 32\,MB stack) over
+all 621 primes $p \equiv 1 \pmod{6}$ with $p \le 5000$ finds no CM-73 prime
+beyond $p = 109$.  Among the 11 primes satisfying the necessary norm form
+$4p = 73 + 3k^2$ in this range (with $k \in \{1,5,9,11,21,25,31,35,41,55,65\}$),
+only $k \le 11$ produce a CM-73 Weil polynomial; the seven with $k \ge 21$
+give $a_2 - 2p \in \{-313, -1273, -2881, -1873, -4873, -5473, -10873\}$.
+
+\medskip
+\noindent\textbf{Quartic CM field structure (Thread 12).}
+For each CM-73 prime, $\mathrm{polgalois}(T^4 + (2p{-}73)T^2 + p^2) = V_4$
+(Klein four-group, order~4).  The Weil polynomial factors over $\QQ(\sqrt{-219})$
+as $(T^2 + \tfrac{k}{2}\sqrt{-219} + \tfrac{2p{-}73}{2})(T^2 - \tfrac{k}{2}\sqrt{-219} + \tfrac{2p{-}73}{2})$,
+with $k^2 = (4p-73)/3$.  The three quadratic subfields of the degree-4 CM splitting
+field are $\QQ(\sqrt{-219})$, $\QQ(\sqrt{73})$, and $\QQ(\sqrt{-3})$---consistent
+with $-219 = (-3)(73)$.  Class-number computation gives $h(-219) = h(-73) = 4$
+and $h(-3) = 1$.  All four CM-73 primes satisfy the necessary splitting condition
+$\left(\frac{-219}{p}\right) = +1$; the norm-form prime $p = 349$ also splits
+($\left(\frac{-219}{349}\right) = +1$) but does not give a CM-73 Weil polynomial.
+A PARI \texttt{bnfisprincipal} check shows that \emph{both} CM-73 primes
+and norm-form non-CM-73 primes ($k \ge 21$) have their prime ideal above $p$
+in the \emph{same} ideal class of order~2 in $\Cl(\ZZ[(1+\sqrt{-219})/2]) \cong \ZZ/4\ZZ$;
+the distinction between the two sets is therefore \emph{not} captured by the
+ideal class of $p$ in $\QQ(\sqrt{-219})$ alone.
+The CM-73 condition appears to depend on the specific Frobenius endomorphism
+of the Jacobian $\Jac(C_{p})$ (not merely on $p$'s splitting type), and a full
+explanation likely requires CM theory for the specific abelian variety $\Jac(C)$
+over $\overline{\QQ}$---a computation involving the CM type and the field of
+definition of CM points (see Shimura--Taniyama theory).
+This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up to
+$p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
