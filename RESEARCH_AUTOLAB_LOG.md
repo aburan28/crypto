@@ -5120,3 +5120,6 @@ with Z[ω]-action), then the distinction arises from the specific CM type, and
 {19,37,79,109} may be the complete set of primes where our SPECIFIC curve lands
 on a CM-73 Humbert stratum. Compute Igusa invariants via PARI's `hyperellcharpoly`
 output and compare.
+
+### Commits made
+`6c67a29` autolab 2026-07-14: Thread 12 — CM-73 set {19,37,79,109} confirmed p<=5000; V4 Galois; three quadratic subfields; principal-ideal hypothesis refuted; paper B5 remark extended
