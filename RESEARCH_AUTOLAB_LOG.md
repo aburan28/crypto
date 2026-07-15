@@ -5123,3 +5123,109 @@ output and compare.
 
 ### Commits made
 `6c67a29` autolab 2026-07-14: Thread 12 — CM-73 set {19,37,79,109} confirmed p<=5000; V4 Galois; three quadratic subfields; principal-ideal hypothesis refuted; paper B5 remark extended
+
+## 2026-07-15 (autolab run)
+
+### Task picked
+Thread 13: Igusa-Clebsch invariants + CM discriminant to distinguish CM-73 from non-CM-73
+norm-form primes. Chosen as direct continuation of Thread 12's "next step proposal":
+compute the CM discriminant sf(a₂²-4p²) and compare Igusa quadruples for both families.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread13_igusa_cm_compare.gp` (v3, 200 lines). Parts A-F:
+  - Part A: Verify CM-73 primes {19,37,79,109} all have sf(a₂²-4p²) = -219. ✓
+  - Part B: All norm-form primes 4p=73+3k² (k odd, k≤89): 12 primes swept.
+  - Part C: Factor Weil poly T⁴+a₂T²+p² over Q(√sf) for non-CM-73 primes (k=21,31,41).
+  - Part D: CM-73 Weil polys factor over Q(√-219) (verified for p=37,79,109; p=19 confirmed by direct PARI test).
+  - Part E: KEY RESULT — sf(a₂²-4p²)=-219 is BOTH NECESSARY AND SUFFICIENT for CM-73 (k≤89).
+  - Part F: Full Igusa quadruple (I2,I4,I6,I10) comparison table.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Noted: thread12's claim "Gal=V₄ as distinguisher" was WRONG — ALL biquadratic Weil
+  polys T⁴+a₂T²+p² have resolvent cubic = (T-a₂)(T-2p)(T+2p), splitting over Q,
+  so Gal ≤ V₄ universally. The V₄ result is not special to CM-73.
+
+### Findings
+
+**MAIN RESULT (Part E):**
+```
+sf(a₂²-4p²) = -219 ⟺ p ∈ {19,37,79,109} (CM-73 condition a₂-2p=-73)
+```
+Verified for all 12 norm-form primes 4p=73+3k², k odd, k≤89.
+No false positives; no CM-73 misses.
+
+**CM discriminant table (Part B):**
+| k  | p    | a₂    | disc4=a₂²-4p²  | sf(disc4) | CM-73? |
+|----|------|-------|-----------------|-----------|--------|
+| 1  | 19   | -35   | -219            | -219      | YES ✓  |
+| 5  | 37   | 1     | -5475           | -219      | YES ✓  |
+| 9  | 79   | 85    | -17739          | -219      | YES ✓  |
+| 11 | 109  | 145   | -26499          | -219      | YES ✓  |
+| 21 | 349  | 385   | -338979         | **-939**  | no     |
+| 25 | 487  | -299  | -859275         | **-3819** | no     |
+| 31 | 739  | -1403 | -216075         | **-8643** | no     |
+| 35 | 937  | 1     | -3511875        | **-5619** | no     |
+| 41 | 1279 | -2315 | -1184139        | **-14619**| no     |
+| 55 | 2287 | -899  | -20113275       | **-16419**| no     |
+| 65 | 3187 | -4499 | -20386875       | **-32619**| no     |
+| 85 | 5437 | -9791 | -22380195       | **-61995**| no     |
+
+**Pattern: All sf values divide by -3:**
+- CM-73:     sf = -219 = -3·73
+- Non-CM-73: sf = -3·D where D ∈ {313, 1273, 2881, 1873, 4873, 5473, 10873, 20665}
+The universal factor -3 reflects the ζ₃-automorphism of y²=(x³+g)(x³+g²). The extra
+factor 73 appears ONLY for k∈{1,5,9,11}, making Q(√73) the distinguishing real
+quadratic subfield of the quartic CM field.
+
+**Weil poly factorization fields (Part C):**
+- CM-73: factors over Q(√-219) with Frobenius: T²-(a₂±k√-219)/2 = 0, k²=(4p-73)/3.
+- k=21, p=349:  factors over Q(√-939).  Frobenius: T²-((385±19√-939)/2)=0.
+- k=31, p=739:  factors over Q(√-8643). Frobenius: T²-((-1403±5√-8643)/2)=0.
+- k=41, p=1279: factors over Q(√-14619). Frobenius: T²-((-2315±9√-14619)/2)=0.
+These are ALL different imaginary quadratic CM fields.
+
+**Resolvent cubic correction (Thread 12 error):**
+T⁴+a₂T²+p² has resolvent cubic = (T-a₂)(T-2p)(T+2p) for ANY prime p (since the
+constant term p² is a perfect square). This always splits over Q, so Gal=V₄ for ALL
+biquadratic Weil polynomials, not just CM-73. Thread 12's "V₄ as distinguisher" was
+an artifact of not checking non-CM-73 cases — they ALSO have Gal=V₄.
+
+**Igusa quadruples (Part F):**
+```
+CM-73:     p=19: (6,0,3,1)     j1=5
+           p=37: (35,4,16,10)  j1=19
+           p=79: (72,66,33,52) j1=49
+           p=109:(55,60,87,38) j1=77
+Non-CM-73: p=349:(41,156,65,289)  j1=249
+           p=487:(228,335,53,271) j1=92
+           p=739:(296,514,107,293) j1=8
+```
+No simple pattern in j1 values (they live in different fields F_p*).
+Note: I4=0 mod 19 at p=19 — the only CM-73 prime where I4 vanishes.
+
+**Theoretical explanation of CM-73 finiteness:**
+For norm-form prime 4p=73+3k²: disc4 = a₂²-4p². The CM-73 condition a₂=2p-73 gives
+disc4 = (2p-73)²-4p² = -292p+5329 = -219·k². So sf(disc4) = sf(-219k²) = -219·(core k²/k²)
+= -219 (since -219k² = -219·k² and k² is a perfect square). For non-CM-73 primes,
+the ACTUAL a₂ ≠ 2p-73 and sf(a₂²-4p²) ≠ -219.
+
+The CM-73 set {19,37,79,109} = primes p where the primitive-root pair (g,g²) happens
+to be in the "Frobenius class corresponding to α=(k√-219-(2p-73))/2 ∈ Q(√-219)".
+For k≥21, the pair (g,g²) maps to a DIFFERENT Frobenius class in Q(√-219), giving
+a₂≠2p-73 and a different CM field. This is a CM theory result: the specific pair
+(g,g²) selects a unique Frobenius for each p, and only 4 primes hit the CM-73 class.
+
+### Next step proposal
+Thread 14: Verify the "different Frobenius class" interpretation for non-CM-73 primes.
+- For p=349 (k=21), the Frobenius in Q(√-939) has norm 349. What ideal class does it
+  lie in? Compute bnfisprincipal in Q(√-939) for the prime (349) to see if the
+  non-CM-73 Frobenius IS principal in its field (unlike CM-73 in Q(√-219) where it's
+  NOT principal, class order 2).
+- Alternatively: extend the sweep to k≤199 (about 20 more norm-form primes) to confirm
+  sf=-219 never recurs. This would further strengthen the characterization theorem.
+- Medium-term: prove analytically that sf(a₂²-4p²) = -219 has at most finitely many
+  solutions — this follows from the Brauer-Siegel theorem for imaginary quadratic fields
+  (a fixed CM discriminant -219 can only be the CM discriminant of finitely many
+  primitive norm forms of given shape), but would need formal verification.
+
+### Commits made
+TBD (will record after commit)
