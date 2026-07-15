@@ -11,7 +11,7 @@
 //!   aes     encrypt <key-hex> <nonce-hex> <msg>
 //!   chacha  encrypt <key-hex> <nonce-hex> <msg>
 //!   hkdf    <ikm-hex> <salt-hex> <info> <length>
-//!   pqc     kyber                      — Kyber KEM demo
+//!   pqc                                — PQC demos (ML-KEM, ML-DSA, SQIsign, toy Kyber)
 
 use clap::{Parser, Subcommand};
 use crypto_lib::{
@@ -27,6 +27,9 @@ use crypto_lib::{
     hash::{blake3_hash, sha256, sha3_256},
     kdf::hkdf::hkdf,
     pqc::kyber::{kyber_decapsulate, kyber_encapsulate, kyber_keygen},
+    pqc::ml_dsa::{ml_dsa_65_keygen, ml_dsa_65_sign, ml_dsa_65_verify},
+    pqc::ml_kem::{ml_kem_decaps, ml_kem_encaps, ml_kem_keygen, ML_KEM_768},
+    pqc::sqisign::{sqisign_keygen, sqisign_sign, sqisign_verify},
     symmetric::{
         aes::{aes_gcm_decrypt, aes_gcm_encrypt, AesKey},
         chacha20::{chacha20_poly1305_decrypt, chacha20_poly1305_encrypt},
@@ -75,7 +78,7 @@ enum Cmd {
     Chacha,
     /// HKDF key derivation demo
     Hkdf,
-    /// Post-quantum Kyber KEM demo
+    /// Post-quantum demos: ML-KEM, ML-DSA, SQIsign, toy Kyber
     Pqc,
     /// Run all demos
     Demo,
@@ -1180,7 +1183,36 @@ fn cmd_hkdf() {
 }
 
 fn cmd_pqc() {
-    println!("=== Kyber KEM (simplified ML-KEM educational demo) ===");
+    println!("=== ML-KEM-768 (NIST FIPS 203) ===");
+    let (ek, dk) = ml_kem_keygen(&ML_KEM_768);
+    println!("Key pair generated: ek = {} bytes, dk = {} bytes.", ek.0.len(), dk.0.len());
+    let (ct, ss_enc) = ml_kem_encaps(&ML_KEM_768, &ek).expect("fresh key is valid");
+    println!("Encapsulated ({} bytes). Shared secret (encaps): {}", ct.len(), to_hex(&ss_enc));
+    let ss_dec = ml_kem_decaps(&ML_KEM_768, &dk, &ct).expect("well-formed ciphertext");
+    println!("Decapsulated.             Shared secret (decaps): {}", to_hex(&ss_dec));
+    println!("Secrets match: {}", ss_enc == ss_dec);
+
+    println!("\n=== ML-DSA-65 (NIST FIPS 204) ===");
+    let mut seed = [0u8; 32];
+    crypto_lib::utils::random::random_bytes(&mut seed);
+    let (pk, sk) = ml_dsa_65_keygen(&seed);
+    let msg = b"post-quantum signatures";
+    let sig = ml_dsa_65_sign(&sk, msg, &[0u8; 32]);
+    println!("Signed {} bytes -> {} byte signature.", msg.len(), sig.len());
+    println!("Verify: {}", ml_dsa_65_verify(&pk, msg, &sig));
+
+    println!("\n=== SQIsign (toy p = 431 educational demo) ===");
+    let (spk, ssk) = sqisign_keygen();
+    println!("Public key: j(E_A) = {:?} on the supersingular 2-isogeny graph.", spk.j);
+    let ssig = sqisign_sign(&spk, &ssk, msg);
+    println!(
+        "Signature: commitment j(E_1) = {:?}, response path of {} steps.",
+        ssig.commitment,
+        ssig.response.len() - 1
+    );
+    println!("Verify: {}", sqisign_verify(&spk, msg, &ssig));
+
+    println!("\n=== Kyber KEM (pre-standard toy, kept for comparison) ===");
     let sk = kyber_keygen();
     println!("Key pair generated.");
 
