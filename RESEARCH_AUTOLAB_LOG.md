@@ -5094,7 +5094,7 @@ Thread 13: Verify the "principal ideal" hypothesis.
   be consistent with the set being truly finite (or having very sparse density).
 
 ### Commits made
-TBD (will record after commit)
+`f7278fc` autolab 2026-07-15: Thread 13 — sf(a2^2-4p^2)=-219 iff CM-73; Weil poly splits over Q(sqrt(-219)) only for {19,37,79,109}; Igusa quadruples computed; resolvent-cubic V4 correction
 
 **BONUS (Thread 12 addendum): principal ideal hypothesis REFUTED.**
 `bnfisprincipal` in Q(√-219) (class group Z/4Z) gives:
@@ -5228,4 +5228,4 @@ Thread 14: Verify the "different Frobenius class" interpretation for non-CM-73 p
   primitive norm forms of given shape), but would need formal verification.
 
 ### Commits made
-TBD (will record after commit)
+`f7278fc` autolab 2026-07-15: Thread 13 — sf(a2^2-4p^2)=-219 iff CM-73; Weil poly splits over Q(sqrt(-219)) only for {19,37,79,109}; Igusa quadruples computed; resolvent-cubic V4 correction
