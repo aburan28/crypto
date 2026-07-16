@@ -5322,3 +5322,4 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 - Also: for the case sf=-3 (p=12889), verify directly that the Frobenius element in Q(√-3) is an explicit Eisenstein prime π with Nm(π)=12889.
 
 ### Commits made
+`015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
