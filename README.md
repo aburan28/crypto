@@ -17,8 +17,10 @@ companion as much as a working library.
 >   operation leaks via timing.  AES uses a lookup-table S-box vulnerable
 >   to cache-timing attacks.
 > - **No third-party audit.**
-> - **Non-standard Kyber.**  The implementation here is *not* compatible
->   with NIST ML-KEM (FIPS 203).
+> - **Two Kybers.**  `pqc::ml_kem` is real FIPS 203 ML-KEM (validated
+>   against the NIST ACVP vectors, but still not constant-time);
+>   `pqc::kyber` is a pre-standard toy that is *not* compatible with
+>   FIPS 203 and is kept only for comparison.
 > - **Toy McEliece parameters** (m=6, n=32, t=3) — far below any security
 >   level.
 >
@@ -278,7 +280,11 @@ The same machinery powers every other attack's test output — run any
 
 | Module                       | Algorithm                                | Notes                              |
 |------------------------------|------------------------------------------|------------------------------------|
-| `pqc::kyber`                 | Kyber / ML-KEM (simplified)              | Not FIPS-203 compatible            |
+| `pqc::ml_kem`                | ML-KEM-512/768/1024 (Kyber)              | FIPS 203; NIST ACVP KATs pass      |
+| `pqc::ml_dsa`                | ML-DSA-65 (Dilithium)                    | FIPS 204; NIST ACVP KATs pass      |
+| `pqc::slh_dsa`               | SLH-DSA (SPHINCS+)                       | FIPS 205                           |
+| `pqc::sqisign`               | SQIsign (isogeny-based signature)        | Toy p = 431; BFS in place of KLPT  |
+| `pqc::kyber`                 | Kyber / ML-KEM (simplified toy)          | Not FIPS-203 compatible            |
 | `pqc::frodo`                 | FrodoKEM (LWE-based)                     | Conservative simplified            |
 | `pqc::ntru`                  | NTRU lattice cryptosystem                | NTRU encrypt 1996                  |
 | `pqc::ntru_prime`            | NTRU Prime (Streamlined / NTRU LPRime)   | NTRU Prime spec                    |
@@ -649,7 +655,7 @@ src/
 ├── symmetric/                 — AES, ChaCha, Serpent, Threefish, SM4, Magma, Kuznyechik
 ├── hash/                      — SHA-2/3, BLAKE3, RIPEMD-160, SipHash, SM3, Streebog
 ├── asymmetric/                — RSA, Paillier, ElGamal, EC-ElGamal
-├── pqc/                       — Kyber, Frodo, NTRU/NTRU-Prime, McEliece, HQC, BIKE, CSIDH, X-Wing
+├── pqc/                       — ML-KEM, ML-DSA, SLH-DSA, SQIsign, Kyber (toy), Frodo, NTRU/NTRU-Prime, McEliece, HQC, BIKE, CSIDH, X-Wing
 ├── kdf/                       — HKDF, PBKDF2, HMAC-DRBG
 ├── zk/                        — Schnorr, Pedersen, Chaum-Pedersen, Merkle, KZG, Bulletproofs, Groth16, PLONK, STARK
 ├── cryptanalysis/             — see Cryptanalysis suite section above
@@ -691,6 +697,8 @@ src/
 - FIPS 180-4 — SHA-2
 - FIPS 202 — SHA-3 / Keccak
 - FIPS 203 — ML-KEM (Kyber)
+- FIPS 204 — ML-DSA (Dilithium)
+- FIPS 205 — SLH-DSA (SPHINCS+)
 - FIPS 186-4 — ECDSA + NIST curves
 - RFC 8439 — ChaCha20-Poly1305
 - RFC 7748 — X25519 / X448

@@ -45,7 +45,13 @@ right requires careful KAT validation.
 
 **Total**: ~1250 LoC, 1-2 days.
 
-### 3. **ML-KEM (Kyber)** — NIST-standardised PQC KEM
+### 3. **ML-KEM (Kyber)** — NIST-standardised PQC KEM ✅ SHIPPED
+
+> **Update:** shipped as `src/pqc/ml_kem.rs` — full FIPS 203
+> (NTT, K-PKE, FO transform, all three parameter sets), validated
+> against the official NIST ACVP known-answer vectors.  The toy
+> `pqc::kyber` module is kept for comparison.  A toy-parameter
+> **SQIsign** (`src/pqc/sqisign.rs`) shipped in the same session.
 
 **Why deferred**: needs ring-LWE polynomial arithmetic over
 `Z_q[x]/(x²⁵⁶ + 1)` with Number-Theoretic Transform (NTT) for fast
@@ -69,10 +75,15 @@ upgrading it to actual FIPS 203 ML-KEM is the deferred work.
 
 ## Tier 2 (large effort, very high impact)
 
-### 4. **ML-DSA (Dilithium)** — NIST-standardised PQC signature
+### 4. **ML-DSA (Dilithium)** — NIST-standardised PQC signature ✅ SHIPPED
 
 Same NTT infrastructure as ML-KEM, plus rejection-sampling
 signature scheme.  ~2500 LoC.
+
+> **Update:** shipped as `src/pqc/ml_dsa.rs` (ML-DSA-65), now also
+> validated against the official NIST ACVP known-answer vectors
+> (keygen, deterministic signing, and verification including the
+> hint-canonicity rejection cases).
 
 ### 5. **SLH-DSA (SPHINCS+)** — NIST-standardised stateless hash signature
 
