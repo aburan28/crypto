@@ -91,12 +91,35 @@ Pure hash-based; no number theory.  Needs WOTS+, FORS, and a
 Merkle-tree harness.  ~2000 LoC.  Easier than Dilithium but with
 significantly larger signatures (~17 KB).
 
-### 6. **FN-DSA (Falcon)** — NIST-standardised PQC signature (lattice)
+### 6. **FN-DSA (Falcon)** — NIST-standardised PQC signature (lattice) ✅ SHIPPED (educational)
 
 Hardest of the four NIST PQC signatures: needs floating-point
 fast Fourier transform, Gaussian sampling, and tower-of-fields
 arithmetic.  ~4000 LoC.  Notoriously hard to implement correctly;
 several early implementations had subtle floating-point bugs.
+
+> **Update:** shipped as `src/pqc/fn_dsa.rs` at toy parameters
+> (`n = 16, q = 257`).  Keygen solves the NTRU equation
+> `f·G − g·F = q` *exactly* (resultants + Bézout over `BigInt`, then
+> Babai reduction of `(F, G)`); signing is GPV hash-and-sign with the
+> deterministic Babai nearest-plane in place of Falcon's randomised
+> FFT Gaussian sampler.  The module documents why that substitution is
+> exactly the NTRUSign leak Falcon's sampler exists to prevent.
+
+### On-ramp additional signatures — ✅ SHIPPED (educational)
+
+The full NIST additional-signatures round-3 slate now has toy-parameter
+educational implementations, alongside SQIsign (shipped earlier):
+
+| Family | Modules | Core idea |
+|---|---|---|
+| Multivariate | `uov`, `mayo`, `qr_uov`, `snova` | oil-and-vinegar trapdoor + structure |
+| Lattice | `hawk`, `fn_dsa` | LIP / NTRU hash-and-sign |
+| MPC-in-the-head | `sdith`, `mqom`, `faest` (`mpcith` engine) | prove a hard instance in the head |
+
+All are toy-scale and non-constant-time; the `mpcith` engine's
+soundness (forged-witness and tampered-proof rejection) is exercised
+in each MPC scheme's tests.
 
 ---
 

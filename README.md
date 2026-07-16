@@ -283,7 +283,17 @@ The same machinery powers every other attack's test output — run any
 | `pqc::ml_kem`                | ML-KEM-512/768/1024 (Kyber)              | FIPS 203; NIST ACVP KATs pass      |
 | `pqc::ml_dsa`                | ML-DSA-65 (Dilithium)                    | FIPS 204; NIST ACVP KATs pass      |
 | `pqc::slh_dsa`               | SLH-DSA (SPHINCS+)                       | FIPS 205                           |
-| `pqc::sqisign`               | SQIsign (isogeny-based signature)        | Toy p = 431; BFS in place of KLPT  |
+| `pqc::sqisign`               | SQIsign (isogeny-based signature)        | Round-3 on-ramp; toy p = 431, BFS in place of KLPT |
+| `pqc::uov`                   | UOV (unbalanced oil & vinegar)           | Round-3 on-ramp; toy GF(256) params |
+| `pqc::mayo`                  | MAYO (whipped UOV)                       | Round-3 on-ramp; toy GF(16) params |
+| `pqc::qr_uov`                | QR-UOV (quotient-ring UOV)               | Round-3 on-ramp; F_31³ blocks, toy |
+| `pqc::snova`                 | SNOVA (UOV over a matrix ring)           | Round-3 on-ramp; M₂(GF(16)), toy   |
+| `pqc::hawk`                  | HAWK (lattice-isomorphism signature)     | Round-3 on-ramp; toy dim 32        |
+| `pqc::fn_dsa`                | FN-DSA / Falcon (NTRU hash-and-sign)     | Draft FIPS 206; toy n = 16, Babai for ffSampling |
+| `pqc::sdith`                 | SDitH (syndrome decoding in the head)    | Round-3 on-ramp; MPC-in-the-head, toy |
+| `pqc::mqom`                  | MQOM (MQ on my mind)                     | Round-3 on-ramp; MPC-in-the-head, toy |
+| `pqc::faest`                 | FAEST (AES in the head)                  | Round-3 on-ramp; MPC-in-the-head, toy |
+| `pqc::mpcith`                | Shared MPC-in-the-head proof engine      | Underlies SDitH / MQOM / FAEST     |
 | `pqc::kyber`                 | Kyber / ML-KEM (simplified toy)          | Not FIPS-203 compatible            |
 | `pqc::frodo`                 | FrodoKEM (LWE-based)                     | Conservative simplified            |
 | `pqc::ntru`                  | NTRU lattice cryptosystem                | NTRU encrypt 1996                  |
@@ -699,6 +709,8 @@ src/
 - FIPS 203 — ML-KEM (Kyber)
 - FIPS 204 — ML-DSA (Dilithium)
 - FIPS 205 — SLH-DSA (SPHINCS+)
+- FIPS 206 (draft) — FN-DSA (Falcon)
+- NIST PQC additional-signatures on-ramp (round 3) — UOV, MAYO, QR-UOV, SNOVA, HAWK, SQIsign, SDitH, MQOM, FAEST
 - FIPS 186-4 — ECDSA + NIST curves
 - RFC 8439 — ChaCha20-Poly1305
 - RFC 7748 — X25519 / X448
