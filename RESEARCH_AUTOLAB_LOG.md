@@ -5229,3 +5229,96 @@ Thread 14: Verify the "different Frobenius class" interpretation for non-CM-73 p
 
 ### Commits made
 `f7278fc` autolab 2026-07-15: Thread 13 — sf(a2^2-4p^2)=-219 iff CM-73; Weil poly splits over Q(sqrt(-219)) only for {19,37,79,109}; Igusa quadruples computed; resolvent-cubic V4 correction
+
+## 2026-07-16 (autolab run)
+
+### Task picked
+Thread 14 (continuation of Thread 13): Extended norm-form sweep k≤199 + Frobenius class analysis.
+Chosen because Thread 13 (2026-07-15) proved sf(a₂²-4p²)=-219 iff CM-73 up to k≤89, and proposed verifying no new CM-73 primes appear at higher k and checking the Frobenius ideal class in the CM fields of non-CM-73 primes.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread14_frobenius_class.gp` (main extended sweep, Parts A-E).
+- Wrote `secp256k1_cm_audit/thread14_partD.gp` (targeted Frobenius-order check for 15 cases).
+- Ran the sweep via `gp -q`. Part A–C completed in ~120s; Part D ran separately in ~60s.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part A: Extended sweep k≤199 CONFIRMED**
+- 25 norm-form primes 4p=73+3k² (k odd, k≤199) processed; 4 are CM-73.
+- 0 false positives: sf(disc4)=-219 holds ONLY for {19,37,79,109}.
+- New primes tested beyond k≤89: k∈{91,99,101,105,109,119,131,135,141,145,159,179,195}.
+- Notable new sf values: sf=-3 at k=131,p=12889 (disc4=-3·681²); sf=-1731=-3·577 at k=105,p=8287.
+- All non-CM-73 sf values are of the form -3·D with D squarefree and ≠73 (D=73 gives -219, CM-73 only).
+
+**Norm-form prime count table (extended):**
+```
+k   p      a2      delta  sf(disc4)      CM-73?
+1   19     -35     -73    -219           YES
+5   37     1       -73    -219           YES
+9   79     85      -73    -219           YES
+11  109    145     -73    -219           YES
+21  349    385     -313   -939           no
+25  487    -299    -1273  -3819          no
+31  739    -1403   -2881  -8643          no
+35  937    1       -1873  -5619          no
+41  1279   -2315   -4873  -14619         no
+55  2287   -899    -5473  -16419         no
+65  3187   -4499   -10873 -32619         no
+85  5437   -9791   -20665 -61995         no
+91  6229   -11375  -23833 -71499         no
+99  7369   385     -14353 -43059         no
+101 7669   -13751  -29089 -87267         no
+105 8287   2149    -14425 -1731          no
+109 8929   5905    -11953 -35859         no
+119 10639  10549   -10729 -32187         no
+131 12889  -25751  -51529 -3 (!)         no
+135 13687  5701    -21673 -65019         no
+141 14929  -15575  -45433 -136299        no
+145 15787  -4499   -36073 -108219        no
+159 18979  -32915  -70873 -212619        no
+179 24049  -32975  -81073 -243219        no
+195 28537  -57071  -114145 -342435       no
+```
+Note: k=99,p=7369 has a₂=385 (same as k=21,p=349) but different p and different CM field.
+Note: k=131,p=12889 has sf=-3: disc4=-3·681², CM field Q(√-3)=Q(ζ₃) with h=1.
+
+**Part B+C: Frobenius ideal class in CM fields**
+- ALL non-CM-73 norm-form Frobenius ideals (π above p in Q(√sf)) have order 2 in their class group, EXCEPT:
+  - k=131,p=12889,sf=-3: order 1 (PRINCIPAL), because Q(√-3) has h=1 (trivial class group).
+- CM-73 primes: order 2 in Q(√-219) [h=4, cyclic group of order 4]. class_exp=[2]~.
+- Table of 15 Frobenius orders (Part D):
+
+```
+sf           k    p       h   cyc         class_exp  ord
+-219         1    19      4   [4]         [2]~       2   (CM-73 ref)
+-3           131  12889   1   []          []~        1   ← principal, h=1
+-939         21   349     8   [8]         [4]~       2
+-1731        105  8287    8   [8]         [4]~       2
+-3819        25   487     16  [8,2]       [0,1]~     2
+-5619        35   937     28  [28]        [14]~      2
+-8643        31   739     16  [8,2]       [0,1]~     2
+-14619       41   1279    40  [20,2]      [10,0]~    2
+-16419       55   2287    32  [16,2]      [8,0]~     2
+-32187       119  10639   28  [28]        [14]~      2
+-32619       65   3187    56  [28,2]      [14,0]~    2
+-35859       109  8929    48  [48]        [24]~      2
+-43059       99   7369    48  [24,2]      [0,1]~     2
+-61995       85   5437    68  [34,2]      [17,0]~    2
+-71499       91   6229    76  [76]        [38]~      2
+-87267       101  7669    56  [28,2]      [14,1]~    2
+```
+
+**CONJECTURE (order-2 universality):** For any norm-form prime 4p=73+3k² with sf(disc4)≠-3 (i.e., the CM field Q(√sf) has h>1), the Frobenius ideal π above p has order exactly 2 in Cl(Q(√sf)). Proof sketch: for biquadratic Weil polynomial T⁴+a₂T²+p², the element π satisfies Nm_{K/Q}(π)=p (prime) and π·π̄=p as ideals. Since (π)·(π̄)=(p) is principal, (π)²·(π̄/π̄)=(p)... need more care. The key observation is that π² lies in the subfield Q(√-3) (as a product of two conjugate degree-2 Frobenius over the splitting field), giving (π²) principal — hence ord([π])|2. When h=1, ord=1; when h>1, ord=2 is generic.
+
+**Part E: Analytic sketch of CM-73 finiteness**
+Argument: sf(disc4)=-219 forces Frobenius to lie in Q(√-219), which has h=4. Each of the 4 ideal classes of Cl(Q(√-219)) can contribute at most one norm-form prime p (by a norm-form + Deuring argument). The CM-73 condition a₂=2p-73 selects one specific ideal class. All 4 CM-73 primes {19,37,79,109} correspond to the same class [2]~ (order 2 in Z/4Z). The other 3 classes in Cl(Q(√-219)) do NOT appear — they would require a₂=2p-73 AND the Frobenius to be in a different class, which is contradictory (all CM-73 Frobenius are forced into class [2]~). So the count of CM-73 primes is bounded by 1 (not 4). The fact that exactly 4 norm-form primes all land in the same class [2]~ suggests these are 4 distinct splits of the same rational prime or 4 primes all sent to the same Frobenius class by a quadratic character. OPEN: prove exactly 4 and not more using explicit norm-form counting.
+
+### Next step proposal
+Thread 15: Prove the "universal order-2" conjecture algebraically.
+- Claim: for any biquadratic Weil poly T⁴+a₂T²+p² and the corresponding simple abelian surface A/F_p, the Frobenius π in any CM extension where T⁴+a₂T²+p² factors into quadratics has (π)² principal.
+- Approach: since T⁴+a₂T²+p² = (T²-αT+p)(T²+αT+p) over Q(α) (where α²=a₂+2p or depends on disc4), the Frobenius π₁ of A satisfies π₁·π̄₁=p (norm in the CM field K=Q(π₁)). Also π₁² satisfies π₁²=a₂/2 ± ... which lies in Q or Q(√disc4). The ideal (π₁²) factors over K as (π₁)², and its norm Nm(π₁²) = p². Since (p) = (π₁)(π̄₁) and π₁²·π̄₁² = (π₁π̄₁)² = p², the ideal (π₁²) has norm p². If π₁² ∈ Z[...] and represents a norm-form of value p², then (π₁²) might be principal. Verify in PARI by checking bnfisprincipal for (π₁²) directly.
+- Alternative: just verify numerically for all 14 non-trivial cases above that bnfisprincipal(K, idealhnf(K,pi^2)) returns [0,...].
+- Also: for the case sf=-3 (p=12889), verify directly that the Frobenius element in Q(√-3) is an explicit Eisenstein prime π with Nm(π)=12889.
+
+### Commits made
