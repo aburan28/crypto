@@ -54,6 +54,7 @@
 
 use crate::hash::sha3::{sha3_256, sha3_512, shake128, shake256};
 use crate::utils::random::random_bytes;
+use subtle::{ConditionallySelectable, ConstantTimeEq};
 
 // ── Ring parameters ───────────────────────────────────────────────────────────
 
@@ -331,7 +332,13 @@ fn byte_encode(f: &Poly, d: usize) -> Vec<u8> {
 }
 
 /// `ByteDecode_d`: inverse of `ByteEncode_d`.  For d = 12 the decoded
-/// values are additionally reduced mod q per the standard.
+/// values are additionally reduced mod q per FIPS 203 (Algorithm 6),
+/// which makes decoding *lossy*: a non-canonical 12-bit coefficient in
+/// [q, 2¹²) collapses onto its residue.  Callers must therefore NOT
+/// treat a successful decode as proof of canonicity — the "modulus
+/// check" of §7.2 is done by `ml_kem_check_ek` via a decode/re-encode
+/// roundtrip (the re-encoded bytes differ from a non-canonical input),
+/// never by inspecting decoded values.
 fn byte_decode(bytes: &[u8], d: usize) -> Poly {
     debug_assert_eq!(bytes.len(), 32 * d);
     let mut f = Poly::zero();
@@ -611,13 +618,20 @@ pub fn ml_kem_decaps(
     j_input.extend_from_slice(c);
     let k_bar: [u8; 32] = shake256(&j_input, 32).try_into().unwrap();
 
-    // Re-encrypt and compare (FO transform).
+    // Re-encrypt and compare (FO transform).  The comparison and the
+    // resulting key selection are done in constant time: a data-
+    // dependent branch here would leak, via timing, how much of the
+    // re-encryption matched — an oracle on ciphertext validity that
+    // defeats the point of implicit rejection (FIPS 203 §7.3 requires
+    // the comparison be independent of the secret).  `ct_eq` scans all
+    // bytes with no early exit and `conditional_select` is branchless.
     let c_prime = kpke_encrypt(p, ek, &m_prime, &r_prime);
-    if c_prime == c {
-        Some(k_prime)
-    } else {
-        Some(k_bar)
+    let matches = c_prime.ct_eq(c);
+    let mut out = [0u8; SHARED_SECRET_BYTES];
+    for i in 0..SHARED_SECRET_BYTES {
+        out[i] = u8::conditional_select(&k_bar[i], &k_prime[i], matches);
     }
+    Some(out)
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

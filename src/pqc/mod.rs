@@ -9,20 +9,36 @@
 //! hybrid (X-Wing), and isogeny-based schemes (CSIDH key exchange,
 //! SQIsign signatures — both with toy parameters).
 //!
+//! NIST additional-signatures ("on-ramp") round-3 candidates, all as
+//! educational toy-parameter implementations:
+//!   - Multivariate: `uov`, `mayo`, `qr_uov`, `snova`.
+//!   - Lattice: `hawk` (LIP), `fn_dsa` (Falcon / draft FIPS 206).
+//!   - MPC-in-the-head (`mpcith` engine): `sdith`, `mqom`, `faest`.
+//!
 //! See individual modules for algorithm documentation and limitations.
 
 pub mod bike;
 pub mod classic_mceliece;
 pub mod csidh;
+pub mod faest;
+pub mod fn_dsa;
 pub mod frodo;
+pub mod hawk;
 pub mod hqc;
 pub mod kyber;
+pub mod mayo;
+pub mod mpcith;
+pub mod mqom;
 pub mod mceliece;
 pub mod ml_dsa;
 pub mod ml_kem;
 pub mod ntru;
 pub mod ntru_prime;
+pub mod qr_uov;
 pub mod slh_dsa;
+pub mod uov;
+pub mod sdith;
+pub mod snova;
 pub mod sqisign;
 pub mod x_wing;
 
@@ -41,6 +57,28 @@ pub use ml_dsa::{ml_dsa_65_keygen, ml_dsa_65_sign, ml_dsa_65_verify, MlDsaPublic
 pub use sqisign::{
     sqisign_keygen, sqisign_sign, sqisign_verify, SqiSignPublicKey, SqiSignSecretKey, SqiSignature,
 };
+
+// NIST additional-signatures (on-ramp) round-3 candidates.
+
+pub use uov::{uov_keygen, uov_sign, uov_verify, UovPublicKey, UovSecretKey};
+
+pub use mayo::{mayo_keygen, mayo_sign, mayo_verify, MayoPublicKey, MayoSecretKey, MayoSignature};
+
+pub use qr_uov::{qr_uov_keygen, qr_uov_sign, qr_uov_verify, QrUovPublicKey, QrUovSecretKey};
+
+pub use snova::{snova_keygen, snova_sign, snova_verify, SnovaPublicKey, SnovaSecretKey};
+
+pub use hawk::{hawk_keygen, hawk_sign, hawk_verify, HawkPublicKey, HawkSecretKey, HawkSignature};
+
+pub use fn_dsa::{
+    fn_dsa_keygen, fn_dsa_sign, fn_dsa_verify, FnDsaPublicKey, FnDsaSecretKey, FnDsaSignature,
+};
+
+pub use sdith::{sdith_keygen, sdith_sign, sdith_verify, SdithPublicKey, SdithSecretKey};
+
+pub use mqom::{mqom_keygen, mqom_sign, mqom_verify, MqomPublicKey, MqomSecretKey};
+
+pub use faest::{faest_keygen, faest_sign, faest_verify, FaestPublicKey, FaestSecretKey};
 
 pub use mceliece::{
     mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McEliecePrivateKey, McElieceePublicKey,

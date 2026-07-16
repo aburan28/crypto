@@ -264,8 +264,30 @@ pub fn graph() -> &'static IsogenyGraph {
 
 // ── Walks ─────────────────────────────────────────────────────────────────────
 
-/// Random non-backtracking walk of `len` steps starting at `start`.
-/// Returns the full vertex path (length `len + 1`).
+/// Candidate next vertices for a walk step: the neighbours of `cur`
+/// with the predecessor removed (so the *preferred* step never
+/// backtracks).  Only when every neighbour equals the predecessor —
+/// i.e. `cur` is a degree-1 or ramified vertex whose sole edge leads
+/// back — do we fall back to the full neighbour set, forcing a
+/// backtrack because there is no other way to continue.  Returns an
+/// empty vector iff `cur` has no neighbours at all (not a supersingular
+/// graph vertex); callers must treat that as the end of the walk rather
+/// than index into it.
+fn step_choices(g: &IsogenyGraph, cur: &Fp2, prev: Option<Fp2>) -> Vec<Fp2> {
+    let forward: Vec<Fp2> =
+        g.neighbors(cur).iter().copied().filter(|n| Some(*n) != prev).collect();
+    if forward.is_empty() {
+        g.neighbors(cur).to_vec()
+    } else {
+        forward
+    }
+}
+
+/// Random walk of up to `len` steps starting at `start`.  Each step
+/// avoids backtracking where the graph allows it (see `step_choices`);
+/// it can only step back at a forced dead-end.  Returns the vertex
+/// path (length `len + 1` for the well-connected toy graph, shorter
+/// only if a vertex with no neighbours is reached).
 fn random_walk(start: Fp2, len: usize) -> Vec<Fp2> {
     let g = graph();
     let mut rng = OsRng;
@@ -273,22 +295,21 @@ fn random_walk(start: Fp2, len: usize) -> Vec<Fp2> {
     for _ in 0..len {
         let cur = *path.last().unwrap();
         let prev = if path.len() >= 2 { Some(path[path.len() - 2]) } else { None };
-        let choices: Vec<Fp2> = g
-            .neighbors(&cur)
-            .iter()
-            .copied()
-            .filter(|n| Some(*n) != prev)
-            .collect();
-        let choices = if choices.is_empty() { g.neighbors(&cur).to_vec() } else { choices };
+        let choices = step_choices(g, &cur, prev);
+        if choices.is_empty() {
+            break;
+        }
         path.push(choices[rng.gen_range(0..choices.len())]);
     }
     path
 }
 
-/// The deterministic challenge walk: `CHL_WALK_LEN` non-backtracking
-/// steps from `start`, with each step's edge index taken from a
-/// SHAKE256 stream over `(pk, commitment, msg)`.  Both signer and
-/// verifier recompute this identically.
+/// The deterministic challenge walk from `start`, with each step's
+/// edge index taken from a SHAKE256 stream over `(pk, commitment,
+/// msg)`.  Steps avoid backtracking where possible (see `step_choices`)
+/// and back-step only at forced dead-ends.  Both signer and verifier
+/// recompute this identically, so any early stop at a neighbour-less
+/// vertex is agreed by both.
 fn challenge_walk(pk: &Fp2, commitment: &Fp2, msg: &[u8]) -> Vec<Fp2> {
     let g = graph();
     let mut input = b"SQIsign-toy-challenge".to_vec();
@@ -301,13 +322,10 @@ fn challenge_walk(pk: &Fp2, commitment: &Fp2, msg: &[u8]) -> Vec<Fp2> {
     for &byte in stream.iter() {
         let cur = *path.last().unwrap();
         let prev = if path.len() >= 2 { Some(path[path.len() - 2]) } else { None };
-        let choices: Vec<Fp2> = g
-            .neighbors(&cur)
-            .iter()
-            .copied()
-            .filter(|n| Some(*n) != prev)
-            .collect();
-        let choices = if choices.is_empty() { g.neighbors(&cur).to_vec() } else { choices };
+        let choices = step_choices(g, &cur, prev);
+        if choices.is_empty() {
+            break;
+        }
         path.push(choices[byte as usize % choices.len()]);
     }
     path
@@ -351,6 +369,19 @@ pub fn sqisign_keygen() -> (SqiSignPublicKey, SqiSignSecretKey) {
 /// KLPT (see module docs).  Like real SQIsign the signature therefore
 /// consists of one curve and one isogeny path; unlike real SQIsign the
 /// path is not sampled independently of the secret.
+///
+/// # ⚠️ The secret key is deliberately unused
+/// This toy signer derives the response entirely from public data
+/// (`pk` and the toy isogeny graph), so **`sk` is ignored and anyone
+/// holding only the public key can produce a valid signature** — the
+/// scheme is completely forgeable at these parameters.  The `sk`
+/// argument is kept solely so the signature matches the real SQIsign
+/// API, where producing the response *requires* the secret endomorphism
+/// data via the Deuring correspondence + KLPT.  Recovering that data
+/// from `pk` is the isogeny path problem, which is infeasible at real
+/// parameters but trivial (a BFS) here.  Do not read secret-key
+/// dependence into this signer.  See `sqisign_keygen` and the module
+/// docs.
 pub fn sqisign_sign(
     pk: &SqiSignPublicKey,
     _sk: &SqiSignSecretKey,

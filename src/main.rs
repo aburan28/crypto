@@ -1212,6 +1212,9 @@ fn cmd_pqc() {
     );
     println!("Verify: {}", sqisign_verify(&spk, msg, &ssig));
 
+    println!("\n=== NIST on-ramp additional signatures (toy educational params) ===");
+    cmd_pqc_onramp(msg);
+
     println!("\n=== Kyber KEM (pre-standard toy, kept for comparison) ===");
     let sk = kyber_keygen();
     println!("Key pair generated.");
@@ -1222,6 +1225,43 @@ fn cmd_pqc() {
     let ss_dec = kyber_decapsulate(&sk, &ct);
     println!("Decapsulated. Shared secret (decaps): {}", to_hex(&ss_dec));
     println!("Secrets match: {}", ss_enc == ss_dec);
+}
+
+/// Sign + verify `msg` under each NIST additional-signatures (on-ramp)
+/// round-3 candidate, at this library's toy educational parameters.
+fn cmd_pqc_onramp(msg: &[u8]) {
+    use crypto_lib::pqc::{
+        faest_keygen, faest_sign, faest_verify, fn_dsa_keygen, fn_dsa_sign, fn_dsa_verify,
+        hawk_keygen, hawk_sign, hawk_verify, mayo_keygen, mayo_sign, mayo_verify, mqom_keygen,
+        mqom_sign, mqom_verify, qr_uov_keygen, qr_uov_sign, qr_uov_verify, sdith_keygen,
+        sdith_sign, sdith_verify, snova_keygen, snova_sign, snova_verify, uov_keygen, uov_sign,
+        uov_verify,
+    };
+
+    macro_rules! demo {
+        ($name:expr, $family:expr, $ok:expr) => {
+            println!("  {:<8} ({:<16}) sign+verify: {}", $name, $family, $ok);
+        };
+    }
+
+    let (pk, sk) = uov_keygen();
+    demo!("UOV", "multivariate", uov_verify(&pk, msg, &uov_sign(&sk, msg)));
+    let (pk, sk) = mayo_keygen();
+    demo!("MAYO", "multivariate", mayo_verify(&pk, msg, &mayo_sign(&sk, msg)));
+    let (pk, sk) = qr_uov_keygen();
+    demo!("QR-UOV", "multivariate", qr_uov_verify(&pk, msg, &qr_uov_sign(&sk, msg)));
+    let (pk, sk) = snova_keygen();
+    demo!("SNOVA", "multivariate", snova_verify(&pk, msg, &snova_sign(&sk, msg)));
+    let (pk, sk) = hawk_keygen();
+    demo!("HAWK", "lattice (LIP)", hawk_verify(&pk, msg, &hawk_sign(&sk, msg)));
+    let (pk, sk) = fn_dsa_keygen();
+    demo!("FN-DSA", "lattice (NTRU)", fn_dsa_verify(&pk, msg, &fn_dsa_sign(&sk, msg)));
+    let (pk, sk) = sdith_keygen();
+    demo!("SDitH", "MPC-in-the-head", sdith_verify(&pk, msg, &sdith_sign(&pk, &sk, msg)));
+    let (pk, sk) = mqom_keygen();
+    demo!("MQOM", "MPC-in-the-head", mqom_verify(&pk, msg, &mqom_sign(&pk, &sk, msg)));
+    let (pk, sk) = faest_keygen();
+    demo!("FAEST", "MPC-in-the-head", faest_verify(&pk, msg, &faest_sign(&pk, &sk, msg)));
 }
 
 fn cmd_demo() {
