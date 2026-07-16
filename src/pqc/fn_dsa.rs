@@ -185,12 +185,20 @@ fn poly_adjoint_big(p: &[BigInt]) -> Vec<BigInt> {
 fn poly_mul_mod_q(a: &[i64], b: &[i64]) -> Vec<i64> {
     let mut out = vec![0i64; N];
     for i in 0..N {
-        if a[i] == 0 {
+        // Reduce each operand into [0, Q) *before* multiplying.  This is
+        // a no-op for the internal callers (their coefficients are
+        // already reduced) but is essential on the verification path,
+        // where `a` is the untrusted signature `sig.s2`: without it,
+        // `a[i] * b[j]` on an adversarially large `i64` would overflow
+        // (debug panic / release wraparound).  After reduction the
+        // product is < Q² ≈ 2²⁶, comfortably inside i64.
+        let ai = a[i].rem_euclid(Q);
+        if ai == 0 {
             continue;
         }
         for j in 0..N {
             let k = i + j;
-            let t = a[i] * b[j] % Q;
+            let t = ai * b[j].rem_euclid(Q) % Q;
             if k < N {
                 out[k] = (out[k] + t).rem_euclid(Q);
             } else {
@@ -545,6 +553,16 @@ pub fn fn_dsa_verify(pk: &FnDsaPublicKey, msg: &[u8], sig: &FnDsaSignature) -> b
     if sig.s2.len() != N || sig.salt.len() != SALT_BYTES {
         return false;
     }
+    // Reject out-of-range coefficients before any squaring.  A genuine
+    // signature has ‖(s1, s2)‖² ≤ BOUND, so |s2[i]| ≤ √BOUND; anything
+    // larger cannot verify anyway, and rejecting it here keeps the
+    // norm computation from overflowing i64 on an adversarial `s2`
+    // (Falcon's decoder likewise bounds coefficient magnitudes).  The
+    // bound is written as a two-sided compare rather than `abs()` so
+    // that i64::MIN (whose `abs()` itself overflows) is handled.
+    if sig.s2.iter().any(|&x| x < -BOUND || x > BOUND) {
+        return false;
+    }
     let c = hash_to_point(&sig.salt, msg);
     let s2h = poly_mul_mod_q(&sig.s2, &pk.h);
     let s1: Vec<i64> = (0..N).map(|i| centered(c[i] - s2h[i])).collect();
@@ -606,6 +624,18 @@ mod tests {
         let (pk, sk) = fn_dsa_keygen();
         let sig = fn_dsa_sign(&sk, b"one");
         assert!(!fn_dsa_verify(&pk, b"two", &sig));
+    }
+
+    #[test]
+    fn verify_handles_adversarial_signature_without_overflow() {
+        // `sig.s2` is untrusted: extreme i64 coordinates must be rejected
+        // without overflowing the modular multiply or the norm (no debug
+        // panic, no release wraparound).
+        let (pk, _) = fn_dsa_keygen();
+        let sig = FnDsaSignature { salt: vec![0u8; SALT_BYTES], s2: vec![i64::MAX; N] };
+        assert!(!fn_dsa_verify(&pk, b"m", &sig));
+        let sig2 = FnDsaSignature { salt: vec![0u8; SALT_BYTES], s2: vec![i64::MIN; N] };
+        assert!(!fn_dsa_verify(&pk, b"m", &sig2));
     }
 
     #[test]

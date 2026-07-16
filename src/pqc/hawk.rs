@@ -155,28 +155,39 @@ pub fn hawk_keygen() -> (HawkPublicKey, HawkSecretKey) {
 }
 
 pub fn hawk_sign(sk: &HawkSecretKey, msg: &[u8]) -> HawkSignature {
-    let mut salt = vec![0u8; SALT_BYTES];
-    random_bytes(&mut salt);
-    let h = hash_to_parities(&salt, msg);
+    loop {
+        let mut salt = vec![0u8; SALT_BYTES];
+        random_bytes(&mut salt);
+        let h = hash_to_parities(&salt, msg);
 
-    // Bh mod 2 tells which coordinates of the short vector e = Bu must
-    // be odd; pick e ∈ {0, ±1}^DIM in that coset (sign random — real
-    // HAWK samples e from a discrete Gaussian on the coset instead).
-    let bh: Vector =
-        (0..DIM).map(|i| (0..DIM).map(|j| sk.b[i][j] * h[j]).sum::<i64>()).collect();
-    let mut signs = vec![0u8; DIM];
-    random_bytes(&mut signs);
-    let e: Vector = bh
-        .iter()
-        .zip(&signs)
-        .map(|(&p, &r)| if p.rem_euclid(2) == 0 { 0 } else if r & 1 == 0 { 1 } else { -1 })
-        .collect();
+        // Bh mod 2 tells which coordinates of the short vector e = Bu must
+        // be odd; pick e ∈ {0, ±1}^DIM in that coset (sign random — real
+        // HAWK samples e from a discrete Gaussian on the coset instead).
+        let bh: Vector =
+            (0..DIM).map(|i| (0..DIM).map(|j| sk.b[i][j] * h[j]).sum::<i64>()).collect();
+        let mut signs = vec![0u8; DIM];
+        random_bytes(&mut signs);
+        let e: Vector = bh
+            .iter()
+            .zip(&signs)
+            .map(|(&p, &r)| if p.rem_euclid(2) == 0 { 0 } else if r & 1 == 0 { 1 } else { -1 })
+            .collect();
 
-    // u = B⁻¹e satisfies u ≡ h (mod 2); publish s = (h − u)/2.
-    let u: Vector =
-        (0..DIM).map(|i| (0..DIM).map(|j| sk.b_inv[i][j] * e[j]).sum::<i64>()).collect();
-    let s: Vector = h.iter().zip(&u).map(|(&hi, &ui)| (hi - ui) / 2).collect();
-    HawkSignature { salt, s }
+        // If every Bh coordinate is even then e = 0, giving u = 0 and a
+        // signature that `hawk_verify` rejects (it forbids the all-zero
+        // coset representative).  This is negligibly rare (~2⁻³²) but a
+        // real correctness hole, so re-draw the salt — which reseeds h —
+        // until e is nonzero.
+        if e.iter().all(|&x| x == 0) {
+            continue;
+        }
+
+        // u = B⁻¹e satisfies u ≡ h (mod 2); publish s = (h − u)/2.
+        let u: Vector =
+            (0..DIM).map(|i| (0..DIM).map(|j| sk.b_inv[i][j] * e[j]).sum::<i64>()).collect();
+        let s: Vector = h.iter().zip(&u).map(|(&hi, &ui)| (hi - ui) / 2).collect();
+        return HawkSignature { salt, s };
+    }
 }
 
 pub fn hawk_verify(pk: &HawkPublicKey, msg: &[u8], sig: &HawkSignature) -> bool {
@@ -185,9 +196,20 @@ pub fn hawk_verify(pk: &HawkPublicKey, msg: &[u8], sig: &HawkSignature) -> bool 
     }
     let h = hash_to_parities(&sig.salt, msg);
     // u = h − 2s ranges over the coset h + 2Z^DIM as s ranges over Z^DIM;
-    // accept iff u is short in the Q-metric (and nonzero).
-    let u: Vector = h.iter().zip(&sig.s).map(|(&hi, &si)| hi - 2 * si).collect();
+    // accept iff u is short in the Q-metric (and nonzero).  `sig.s` is
+    // untrusted, so compute u in i128 — `hi - 2*si` on a raw i64 `si`
+    // could overflow (debug panic / release wraparound before the check
+    // even runs).
+    let u: Vec<i128> = h.iter().zip(&sig.s).map(|(&hi, &si)| hi as i128 - 2 * si as i128).collect();
     if u.iter().all(|&x| x == 0) {
+        return false;
+    }
+    // A genuine signature is a short vector, so its coordinates are
+    // tiny.  Reject absurd coordinates before the quadratic form so the
+    // i128 accumulation (a triple product u·q·u summed over DIM² terms)
+    // cannot overflow; 2⁴⁰ is far above any real coordinate yet leaves
+    // ~2⁷ bits of headroom per term.
+    if u.iter().any(|&x| x.abs() > (1i128 << 40)) {
         return false;
     }
     let mut norm: i128 = 0;
@@ -196,7 +218,7 @@ pub fn hawk_verify(pk: &HawkPublicKey, msg: &[u8], sig: &HawkSignature) -> bool 
             continue;
         }
         for j in 0..DIM {
-            norm += (u[i] as i128) * (pk.q[i][j] as i128) * (u[j] as i128);
+            norm += u[i] * (pk.q[i][j] as i128) * u[j];
         }
     }
     norm <= BOUND
@@ -238,6 +260,18 @@ mod tests {
         let msg = b"lattice isomorphism problem";
         let sig = hawk_sign(&sk, msg);
         assert!(hawk_verify(&pk, msg, &sig));
+    }
+
+    #[test]
+    fn verify_handles_adversarial_signature_without_overflow() {
+        // Untrusted signatures must never panic (debug) or wrap (release)
+        // in the `h − 2s` / quadratic-form computation.  Extreme i64
+        // coordinates must simply be rejected.
+        let (pk, _) = hawk_keygen();
+        let sig = HawkSignature { salt: vec![0u8; SALT_BYTES], s: vec![i64::MAX; DIM] };
+        assert!(!hawk_verify(&pk, b"m", &sig));
+        let sig2 = HawkSignature { salt: vec![0u8; SALT_BYTES], s: vec![i64::MIN; DIM] };
+        assert!(!hawk_verify(&pk, b"m", &sig2));
     }
 
     #[test]
