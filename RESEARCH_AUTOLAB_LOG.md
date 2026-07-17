@@ -5406,3 +5406,4 @@ Thread 16: Extend the norm form. The proof above applies to ANY biquadratic Weil
   The Hasse-Witt matrix and CM theory suggest the answer is more complex for non-biquadratic case.
 
 ### Commits made
+fdb529e autolab 2026-07-17: Thread 15 conjecture confirmed + gp script
