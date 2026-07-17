@@ -5390,4 +5390,4 @@ Thread 16: Incorporate the order-2 theorem into the paper draft.
 - Alternative: extend sweep to k≤499 to further confirm no new CM-73 primes appear.
 
 ### Commits made
-[to be filled after push]
+`7dd6041` autolab 2026-07-17: Thread 15 — order-2 Frobenius conjecture proved; (pi)^2 principal via explicit generator; 16/16 cases verified in PARI
