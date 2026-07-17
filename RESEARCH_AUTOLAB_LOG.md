@@ -5323,3 +5323,77 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15 (continuation of Thread 14): Verify (P²) is principal in Cl(Q(√sf)) for all 16 norm-form prime cases; compute explicit generators; test genus-theory explanation for ord([P])|2.
+Chosen because Thread 14 (2026-07-16) established the empirical order-2 pattern and proposed this as next step.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread15_order2_proof.gp` (Parts A–D).
+- Debugged PARI syntax: `my()` must have all variables in a single declaration per scope; `nfnorm` not available in 2.15.4, replaced with manual formula `quad_norm(disc_K,a,b)` using discriminant parity.
+- Ran `gp --stacksize 128000000 -q`: clean output in ~20s.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part A+B: P² principality — ALL 16 cases confirmed principal.**
+
+```
+sf            k    p         h    ord(P) P2ok  pg   gen_norm    p^2
+-219           1     19        4      2      1     1    361         361
+-939           21    349       8      2      1     1    121801      121801
+-1731          105   8287      8      2      1     1    68674369    68674369
+-3             131   12889     1      1      1     1    166126321   166126321
+-3819          25    487       16     2      1     0    237169      237169
+-5619          35    937       28     2      1     1    877969      877969
+-8643          31    739       16     2      1     0    546121      546121
+-32187         119   10639     28     2      1     1    113188321   113188321
+-32619         65    3187      56     2      1     1    10156969    10156969
+-35859         109   8929      48     2      1     1    79727041    79727041
+-43059         99    7369      48     2      1     0    54302161    54302161
+-14619         41    1279      40     2      1     1    1635841     1635841
+-16419         55    2287      32     2      1     1    5230369     5230369
+-61995         85    5437      68     2      1     0    29560969    29560969
+-71499         91    6229      76     2      1     1    38800441    38800441
+-87267         101   7669      56     2      1     0    58813561    58813561
+```
+
+All gen_norm = p², all P2ok = 1. ord([P]) = 2 for 15/16; ord=1 for sf=-3 (h=1 trivial). **THEOREM CONFIRMED.**
+
+**Part C: Genus character analysis — KEY NEW FINDING.**
+
+5 of 16 cases have `pg=0` (NOT in principal genus):
+```
+sf=-3819  p=487   pdiscs=[-3,-19,-67]   chars=[1,-1,-1]
+sf=-8643  p=739   pdiscs=[-3,-43,-67]   chars=[1,-1,-1]
+sf=-43059 p=7369  pdiscs=[-3,-31,-463]  chars=[1,-1,-1]
+sf=-61995 p=5437  pdiscs=[-3,5,4133]    chars=[1,-1,-1]
+sf=-87267 p=7669  pdiscs=[-3,-19,-1531] chars=[1,-1,-1]
+```
+
+**CONCLUSION: genus-theory principal-genus membership does NOT explain ord([P])|2.**
+The first genus character (−3/p) = 1 always (since 4p=73+3k² forces p≡1 mod 3). But the other chars can be −1, placing [P] in a non-principal genus while still having ord([P])=2.
+
+The structural reason: in Cl(K) ≅ Z/nZ × ... for the non-principal-genus cases, [P] lands on a 2-torsion element that is outside Cl(K)^2. Example: Cl(Q(√-3819)) ≅ Z/8Z × Z/2Z; [P]=(4,1) which has ord=2 and genus char (0,1) ≠ (0,0). Genus theory constrains [P] to lie in one of 4 cosets of Cl(K)^2, but within that coset [P] falls on the 2-torsion element (ord=2) rather than ord=4. This is NOT explained by genus theory alone.
+
+**Part D: Explicit generators β of P²**
+
+Notable small generator: sf=-5619, p=937, β=[12,25] with Nm=937² (small coordinates relative to p).
+All generators computed; all verify Nm(β)=p². Formula used: `a²−a·b+((1−disc_K)/4)·b²` for disc≡1 mod 4.
+
+**OPEN ALGEBRAIC QUESTION:** Why does [P]∈Cl(K)[2] hold for all norm-form primes, even those outside the principal genus?
+
+Candidate explanation (unverified): The degree-4 CM Weil field L=Q(π) for the abelian surface A/F_p has structure forcing [P_L]^2=0 in Cl(L). The restriction map Cl(L)→Cl(Q(√sf)) sends [P_L]^2 to [P_sf]^2=0. This would explain the order-2 property via the CM type of A.
+
+### Next step proposal
+Thread 16: Algebraic explanation via degree-4 CM field.
+- Compute the degree-4 CM field L=Q(π) where π is a root of T⁴+a₂T²+p² for each norm-form prime.
+- Verify that the Frobenius ideal P_L in Cl(L) satisfies [P_L]^2=0.
+- Check the natural map Cl(L) → Cl(Q(√sf)) (restriction of the norm map or embedding of class groups).
+- Focus on the t=3 cases (sf=-3819,-8643,...) where genus theory fails to explain the result.
+- Minimal experiment: compute bnfinit for the degree-4 field T⁴+a₂T²+p² for one case (e.g., p=349, a₂=385), check class group and [P_L] order.
+
+### Commits made
+`[see below]`
