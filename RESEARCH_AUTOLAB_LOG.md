@@ -5409,4 +5409,4 @@ Thread 16: **Generalization verification + genus theory connection.**
 - Write a PARI script: for each (p, sf) pair, compute `bnfinit(x^2-sf).nf.disc` prime factors, then check Kronecker(-|sf|/d, p) for each genus discriminant d.
 
 ### Commits made
-`[TBD]` autolab 2026-07-17: Thread 15 — Universal order-2 Frobenius theorem proved; (π₁²)=P² principal for all 25 norm-form primes k≤199; genus-theory link identified
+`36845d8` autolab 2026-07-17: Thread 15 — Universal order-2 Frobenius theorem proved; (π₁²)=P² principal for all 25 norm-form primes k≤199; genus-theory link identified
