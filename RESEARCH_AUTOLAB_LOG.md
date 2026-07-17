@@ -5500,4 +5500,4 @@ Recommendation: do Thread 17b (GLV-HNP toy, 32-bit curve) on the next run, since
 directly tests a potential attack vector rather than consolidating known results.
 
 ### Commits made
-[to be filled after commit]
+`025c62a` autolab 2026-07-17: Thread 16 — general order-2 Frobenius theorem verified for 50 non-norm-form cases; B5 remark added to paper
