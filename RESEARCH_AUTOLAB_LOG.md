@@ -5498,4 +5498,4 @@ bounds than the lattice (HNP) for the GLV case specifically — i.e., does direc
 algebraic key recovery dominate for 2-signature GLV attacks?
 
 ### Commits made
-PENDING (to be filled after commit)
+`51e1dda` autolab 2026-07-17: Thread 16 — universal order-2 theorem confirmed for 50 non-norm-form (p,a2) pairs; splitting lemma proved
