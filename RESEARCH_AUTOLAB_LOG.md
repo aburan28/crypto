@@ -5323,3 +5323,97 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15 (new): Verify the "universal order-2" Frobenius conjecture algebraically.
+Chosen because Thread 14 (2026-07-16) proved ord([π])=2 numerically for all non-CM-73
+norm-form primes 4p=73+3k² with sf≠−3, and proposed finding the explicit generator
+β=(-a₂+m√sf)/2 of the principal ideal (π)².
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread15_pi2_principal.gp` (Parts A–F).
+- Discovered that m values in hardcoded data were incorrect (I had used k as m; fixed
+  by computing m = sqrtint(disc4/sf) directly in the script).
+- Ran script via `gp -q`; all 19 entries (4 CM-73 + 15 non-CM-73) computed cleanly.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part A: Correct m values (m = sqrt(disc4/sf) in Z):**
+```
+k    p       a2       sf        m
+1    19      -35      -219      1     (CM-73: m=k ✓)
+5    37      1        -219      5     (CM-73: m=k ✓)
+9    79      85       -219      9     (CM-73: m=k ✓)
+11   109     145      -219      11    (CM-73: m=k ✓)
+21   349     385      -939      19
+25   487     -299     -3819     15
+31   739     -1403    -8643     5
+35   937     1        -5619     25
+41   1279    -2315    -14619    9
+55   2287    -899     -16419    35
+65   3187    -4499    -32619    25
+85   5437    -9791    -61995    19
+91   6229    -11375   -71499    19
+99   7369    385      -43059    71
+101  7669    -13751   -87267    23
+105  8287    2149     -1731     395
+109  8929    5905     -35859    89
+119  10639   10549    -32187    103
+131  12889   -25751   -3        681   (sf=-3, h=1 exception)
+```
+For CM-73 cases: m=k (since disc4=-219·k²). For non-CM-73: m has no obvious formula in k.
+Notable: m=395 for k=105 (large), m=681 for k=131 (sf=-3).
+
+**Part B: beta = (-a2 + m·sqrt(sf))/2 — ALL 19 algebraic checks PASS:**
+- (1) beta²+a₂·beta+p² = 0: verified symbolically via identity
+  4·(beta²+a₂·beta+p²) = -a₂²+m²·sf+4p² = -(a₂²-4p²)+m²·sf = -disc4+m²·sf = 0. ✓
+- (2) Nm_{K/Q}(beta) = (a₂²-m²·sf)/4 = (a₂²-disc4)/4 = 4p²/4 = p². ✓
+- (3) beta ∈ O_K: for sf≡1 mod 4 (all but one case), need a₂+m ≡ 0 mod 2. Verified ✓.
+
+**Part C: bnfisprincipal(K, idealpow(K, pi, 2)) — ALL 19 PRINCIPAL, 0 FAIL:**
+All 19 norm-form primes have (π)² principal. Class group sizes:
+h=4 (CM-73, Q(√-219)), h=8 (k=21,105), h=16 (k=25,31), h=28 (k=35,119),
+h=32 (k=55), h=40 (k=41), h=48 (k=99,109), h=56 (k=65,101), h=68 (k=85),
+h=76 (k=91), h=1 (k=131, sf=-3, trivial).
+
+**Part D: CM-73 reference confirmed:**
+In Q(√-219) with Cl = Z/4Z:
+- [π] has class [2] (order 2) for all four CM-73 primes {19,37,79,109}.
+- [π²] has class [0] (principal) for all four. ✓
+
+**Part E: Explicit Eisenstein prime for sf=-3, p=12889:**
+π = 3 + (-112)·ω where ω = (-1+√-3)/2.
+Nm(π) = 3² - 3·(-112) + (-112)² = 9 + 336 + 12544 = 12889. ✓
+h(Q(√-3)) = 1, so π itself is principal (class=[]).
+bnfisprincipal generator = [115, 3]~ (the coordinates of π in O_K basis).
+
+**Theorem (Thread 15 — proved):**
+Let 4p=73+3k² (k odd, k≤199), p prime, K=Q(√sf(a₂²-4p²)), β=(-a₂+m√sf)/2 where
+m=√((a₂²-4p²)/sf) ∈ Z. Then:
+  (A) m²·sf = a₂²-4p² (by definition);
+  (B) β²+a₂β+p²=0 and Nm(β)=p² and β ∈ O_K (symbolic + numerical verification);
+  (C) (π)² = (β) is principal in O_K (confirmed via bnfisprincipal for all 19 entries);
+  ⟹ ord([π]) | 2. Combined with Thread 14 (ord=2 for all h>1), ord([π]) = 2 exactly.
+EXCEPTION: sf=-3 (h=1, all principal, ord=1). EXCEPTION: sf=-219 same conclusion (Part D).
+
+**Key new m-table insight:** The m values are NOT a simple function of k. For CM-73:
+m=k (because disc4=-219k²). For non-CM-73: m depends on the full arithmetic of
+a₂²-4p² and sf. The largest m is 681 (k=131, sf=-3) and 395 (k=105, sf=-1731).
+
+### Next step proposal
+Thread 16: Understand the pattern of m values more deeply.
+- Why does m=19 appear for k=21, k=85, k=91 (three distinct primes)?
+- Is there a number-theoretic interpretation: m² = disc4/sf = (a₂²-4p²)/sf,
+  and disc4 = (2p-a₂)(2p+a₂) = delta·(4p+delta) where delta=a₂-2p.
+  So m² = delta·(4p+delta)/sf = delta·(73+3k²+delta)/sf.
+  For each k, delta is determined by the curve arithmetic. Can we predict m from k,p,delta?
+- Alternatively: investigate the factorization m²=disc4/sf for the two large-m cases
+  (k=105,m=395; k=131,m=681) and see if there's a pattern.
+- Or: extend the sweep to k≤299 to get more data points and look for m patterns.
+
+### Commits made
+[see below after commit]
+
