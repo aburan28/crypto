@@ -5408,6 +5408,7 @@ Thread 16 (priority 2 — CHLRS Igusa fix):
 - Script: `secp256k1_cm_audit/thread16_chlrs_rosenhain_fix.gp`.
 
 ### Commits made
+`9dee2bf` autolab 2026-07-17: Thread 15 confirmed; Thread 16 partial CHLRS root cause
 
 ### Bonus finding: Thread 16 (partial) — CHLRS Rosenhain formula root cause
 
