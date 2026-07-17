@@ -5404,3 +5404,5 @@ Thread 16: Integrate the order-2 proof into the ePrint draft (paper/eprint_combi
 
 ### Commits made
 [see below after git commit]
+
+ autolab 2026-07-17: Thread 15 — universal order-2 conjecture PROVED; pi=(-a2+m*sqrt(sf))/2 generates P^2 for all 16 norm-form prime cases
