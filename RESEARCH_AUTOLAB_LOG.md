@@ -5418,3 +5418,4 @@ Thread 16: Extend the algebraic identity gen(P²)=±π₁² to ALL non-CM-73 nor
 - If identity holds for all 15 non-CM-73 cases, we have a UNIFORM closed form for all norm-form primes.
 
 ### Commits made
+`b044f80` autolab 2026-07-17: P^2 principal for all 16 norm-form cases; gen(P^2)=±pi_1^2 verified; Eisenstein prime p=12889 computed
