@@ -5404,3 +5404,5 @@ Thread 16: Complete the genus theory verification for all 18 cases (fix the PARI
 - (c) Search for a UNIFORM reason: does the norm-form condition 4p=73+3k² imply a specific congruence p≡r (mod q) for each prime q|disc(Q(√sf(disc4(p))))? This would be the heart of the proof.
 
 ### Commits made
+
+`92bec3a` autolab 2026-07-17: Thread 15 — universal order-2 conjecture confirmed; P^2 principal for all 19 norm-form primes; explicit generators and Eisenstein prime found
