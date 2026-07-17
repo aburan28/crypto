@@ -5323,3 +5323,97 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15 (continuation of Thread 14): algebraic verification of the "universal order-2" conjecture proposed 2026-07-16.
+Thread 14 observed empirically that for every norm-form prime p (4p=73+3k², k≤199), the Frobenius ideal Pp above p in K=Q(√sf) has order exactly 2 in Cl(K) (or order 1 when h=1). Thread 15 proves this by exhibiting an explicit generator of Pp².
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread15_order2_verify.gp`.
+- Fixed two PARI 2.15 syntax issues: multi-line array literals at top-level parse-fail (moved to single-line); `for()` loop bodies require `{}` for multi-statement bodies.
+- Ran PARI script for all 25 norm-form primes (k≤199): 25/25 OK in ~120s.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 15, empirically verified):** For every norm-form prime p in the family 4p = 73+3k² (k≤199, 25 primes total), with sf = squarefree-part(a₂²−4p²) and m = sqrt((a₂²−4p²)/sf):
+
+  **(Pp)² = (π₁²)  as ideals in O_{Q(√sf)},**
+
+where π₁² := (−a₂ + m√sf)/2.
+
+This proves **ord_{Cl(K)}([Pp]) | 2** for every such prime.
+
+**Verification columns (25/25 OK):**
+
+| k   | p      | sf        | m   | h   | norm_ok | eq  | princ |
+|-----|--------|-----------|-----|-----|---------|-----|-------|
+| 1   | 19     | -219      | 1   | 4   | 1       | 1   | 1     |
+| 5   | 37     | -219      | 5   | 4   | 1       | 1   | 1     |
+| 9   | 79     | -219      | 9   | 4   | 1       | 1   | 1     |
+| 11  | 109    | -219      | 11  | 4   | 1       | 1   | 1     |
+| 21  | 349    | -939      | 19  | 8   | 1       | 1   | 1     |
+| 25  | 487    | -3819     | 15  | 16  | 1       | 1   | 1     |
+| 31  | 739    | -8643     | 5   | 16  | 1       | 1   | 1     |
+| 35  | 937    | -5619     | 25  | 28  | 1       | 1   | 1     |
+| 41  | 1279   | -14619    | 9   | 40  | 1       | 1   | 1     |
+| 55  | 2287   | -16419    | 35  | 32  | 1       | 1   | 1     |
+| 65  | 3187   | -32619    | 25  | 56  | 1       | 1   | 1     |
+| 85  | 5437   | -61995    | 19  | 68  | 1       | 1   | 1     |
+| 91  | 6229   | -71499    | 19  | 76  | 1       | 1   | 1     |
+| 99  | 7369   | -43059    | 71  | 48  | 1       | 1   | 1     |
+| 101 | 7669   | -87267    | 23  | 56  | 1       | 1   | 1     |
+| 105 | 8287   | -1731     | 395 | 8   | 1       | 1   | 1     |
+| 109 | 8929   | -35859    | 89  | 48  | 1       | 1   | 1     |
+| 119 | 10639  | -32187    | 103 | 28  | 1       | 1   | 1     |
+| 131 | 12889  | -3        | 681 | 1   | 1       | 1   | 1     |
+| 135 | 13687  | -65019    | 105 | 60  | 1       | 1   | 1     |
+| 141 | 14929  | -136299   | 69  | 84  | 1       | 1   | 1     |
+| 145 | 15787  | -108219   | 95  | 84  | 1       | 1   | 1     |
+| 159 | 18979  | -212619   | 41  | 128 | 1       | 1   | 1     |
+| 179 | 24049  | -243219   | 71  | 104 | 1       | 1   | 1     |
+| 195 | 28537  | -342435   | 1   | 88  | 1       | 1   | 1     |
+
+- `norm_ok=1`: Nm_K(π₁²) = p² (algebraic identity (a₂²−disc4)/4 = p²).
+- `eq=1`: idealdiv((π₁²), Pp²) has norm 1, confirming (π₁²) = Pp².
+- `princ=1`: bnfisprincipal(K, Pp²) returns class_exp=0, confirming Pp² is principal.
+
+**Integrality spot-check (minpoly ∈ Z[x]):**
+```
+k=1 : minpoly = x^2 - 35*x + 361
+k=5 : minpoly = x^2 + x + 1369
+k=9 : minpoly = x^2 + 85*x + 6241
+k=11: minpoly = x^2 + 145*x + 11881
+```
+Constant term = p² in each case (product of roots = Nm(π₁²) = p²). ✓
+
+**Why this works (algebraic sketch):**
+- π₁ (Frobenius of the abelian surface A/F_p) satisfies T⁴+a₂T²+p²=0.
+- Setting u=T²: u satisfies u²+a₂u+p²=0, so u = (−a₂±√(a₂²−4p²))/2 = (−a₂±m√sf)/2.
+- Hence π₁² ∈ K = Q(√sf) for each choice of sign.
+- Nm_K(π₁²) = p² (product of two conjugates).
+- The element π₁² is in O_K (minpoly ∈ Z[x]).
+- Therefore (π₁²) is a principal ideal of norm p².
+- Pp² is the unique ideal of norm p² in the "same" class (not (p) = Pp·P̄p, which has different structure).
+- PARI confirms (π₁²) = Pp² for all 25 cases.
+
+**h=1 special case (k=131, p=12889, sf=−3):**
+- K = Q(√−3) = Eisenstein integers, h=1; every ideal principal.
+- Pp itself is principal (class=[[]~], Nm=12889).
+- Pp² is principal (class=[[]~], Nm=166126321=12889²).
+- "ord([Pp])|2" holds trivially (ord=1 divides 2). ✓
+
+**OPEN: Prove algebraically (without PARI) that (π₁²) = Pp² (not P̄p²).**
+The sign ambiguity (±m√sf) selects one of Pp or P̄p. The correct sign is the one for which the Frobenius eigenvalue of A/F_p has positive real part in some embedding — this requires knowing the Frobenius explicitly, which depends on the curve. The PARI verification uses eq1 first, then eq2 (conjugate) if eq1 fails; in all 25 cases eq1=1 (first choice gives Pp², not P̄p²). This may be a consequence of the sign convention a₂ = a₂(A) > 0 for most cases.
+
+### Next step proposal
+Thread 16: Theoretical proof of the order-2 conjecture.
+- The PARI verification closes the empirical side. Needed: a formal proof.
+- Approach A (Deuring/CM theory): use that A/F_p is an abelian surface with CM by O_{K×Q(√sf)} and apply Deuring's theorem on Frobenius ideals in CM fields. The identity (π₁²) = Pp² follows if one can show that the Frobenius π₁² lands in the specific ideal class of Pp.
+- Approach B (direct): factor the ideal (p) = Pp·P̄p in O_K (since p splits: Kronecker (sf/p)=+1 for all 25 cases) and show that π₁²·π̄₁² = (p²) = (Pp·P̄p)² forces (π₁²) to be one of {Pp², P̄p², (p)} — and norm consideration eliminates (p) (norm p² vs p²: works, but (p) has norm p², same issue). Needs to show (π₁²) ≠ (p) via: (p) = Pp·P̄p, so if (π₁²) = (p), then π₁² = u·p for a unit u, giving Nm(π₁²)/p² = |u|² = 1, but also π₁ would satisfy (π₁/√p)² = u ∈ O_K×, implying π₁/√p is a unit in the CM field — contradiction since |π₁|² = p (Weil number).
+- Alternative next task: run the PARI check for k up to 499 (extending the sweep) to gather more evidence. Estimated ~10 min runtime.
+
+### Commits made
+[to be filled after git commit]
