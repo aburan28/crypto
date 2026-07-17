@@ -5323,3 +5323,90 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15: Prove/verify the "universal order-2" Frobenius conjecture — that [P]² = 1 in Cl(Q(√sf)) for every norm-form prime 4p=73+3k².
+Chosen as direct continuation of Thread 14 (2026-07-16), which observed empirically that all Frobenius ideals have order ≤ 2 and proposed a proof.
+
+### Work done
+- Installed PARI/GP 2.15.4 (was missing from environment).
+- Wrote `secp256k1_cm_audit/thread15_order2_proof.gp` (5 verification parts + theorem statement).
+- Ran script: all parts verified, clean output.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**Part A — Numerical: P² principal for ALL 25 norm-form primes k≤199**
+
+| k   | p     | a2      | sf        | m   | Nm(P²)    | P² princ? | ord([P]) | Cat  |
+|-----|-------|---------|-----------|-----|-----------|-----------|----------|------|
+| 1   | 19    | -35     | -219      | 1   | 361       | YES       | 2        | CM73 |
+| 5   | 37    | 1       | -219      | 5   | 1369      | YES       | 2        | CM73 |
+| 9   | 79    | 85      | -219      | 9   | 6241      | YES       | 2        | CM73 |
+| 11  | 109   | 145     | -219      | 11  | 11881     | YES       | 2        | CM73 |
+| 21  | 349   | 385     | -939      | 19  | 121801    | YES       | 2        | gen  |
+| 25  | 487   | -299    | -3819     | 15  | 237169    | YES       | 2        | gen  |
+| 31  | 739   | -1403   | -8643     | 5   | 546121    | YES       | 2        | gen  |
+| 35  | 937   | 1       | -5619     | 25  | 877969    | YES       | 2        | gen  |
+| 41  | 1279  | -2315   | -14619    | 9   | 1635841   | YES       | 2        | gen  |
+| 55  | 2287  | -899    | -16419    | 35  | 5230369   | YES       | 2        | gen  |
+| 65  | 3187  | -4499   | -32619    | 25  | 10156969  | YES       | 2        | gen  |
+| 85  | 5437  | -9791   | -61995    | 19  | 29560969  | YES       | 2        | gen  |
+| 91  | 6229  | -11375  | -71499    | 19  | 38800441  | YES       | 2        | gen  |
+| 99  | 7369  | 385     | -43059    | 71  | 54302161  | YES       | 2        | gen  |
+| 101 | 7669  | -13751  | -87267    | 23  | 58813561  | YES       | 2        | gen  |
+| 105 | 8287  | 2149    | -1731     | 395 | 68674369  | YES       | 2        | gen  |
+| 109 | 8929  | 5905    | -35859    | 89  | 79727041  | YES       | 2        | gen  |
+| 119 | 10639 | 10549   | -32187    | 103 | 113188321 | YES       | 2        | gen  |
+| 131 | 12889 | -25751  | -3        | 681 | 166126321 | YES       | 1        | sf=-3|
+| 135 | 13687 | 5701    | -65019    | 105 | 187333969 | YES       | 2        | gen  |
+| 141 | 14929 | -15575  | -136299   | 69  | 222875041 | YES       | 2        | gen  |
+| 145 | 15787 | -4499   | -108219   | 95  | 249229369 | YES       | 2        | gen  |
+| 159 | 18979 | -32915  | -212619   | 41  | 360202441 | YES       | 2        | gen  |
+| 179 | 24049 | -32975  | -243219   | 71  | 578354401 | YES       | 2        | gen  |
+| 195 | 28537 | -57071  | -342435   | 1   | 814360369 | YES       | 2        | gen  |
+
+Summary: 24 with ord([P])=2 (2-torsion), 1 with ord([P])=1 (sf=-3, h=1).
+0 failures.
+
+**Part B — Explicit element check (k≤99, 14 cases):**
+- `(2·π₁²) = (m·x - a₂)` has the correct ideal: `(2·π₁²) = (2)·P²` for all 14 tested cases.
+- Nm(2·π₁²) = a₂² - m²·sf = a₂² - disc4 = 4p²: verified for all 14 cases.
+
+**Part E — Norm identity:**
+- `Nm(π₁²) = (a₂² - disc4)/4 = 4p²/4 = p²`: verified for ALL 25 norm-form primes k≤199.
+
+**THEOREM (Thread 15):**
+Let 4p=73+3k², a₂ = hyperellcharpoly coeff, disc4=a₂²-4p², sf=sf_part(disc4), m=sqrt(disc4/sf).
+Set π₁² = (-a₂ + m·√sf)/2 ∈ O_{Q(√sf)}.
+
+Then:
+1. Nm(π₁²) = p². [Algebraic identity: (a₂²-disc4)/4 = p²]
+2. (π₁²) is PRINCIPAL of norm p² in O_{Q(√sf)}. [Numerical: all 25 primes ✓]
+3. [P]² = 1 in Cl(Q(√sf)), i.e., ord([P]) divides 2. [Follows from 2]
+
+**Algebraic proof of why (π₁²) is principal:**
+- Nm(π₁²) = p² ⟹ ideal (π₁²) has norm p². The three ideals of norm p² are P², P·P̄=(p), P̄².
+- The case (π₁²) = P·P̄ = (p) is impossible: it would require π₁²/p ∈ O_K* = {±1} (for |sf|>3). But π₁² = (-a₂+m√sf)/2 is non-real (m≥1, sf<0), while ±1 are real. Contradiction.
+- Hence (π₁²) = P² or P̄² (both principal — they ARE the ideal (π₁²) or its conjugate). QED.
+- Exception: sf=-3 (h=1): P itself is principal (ord([P])=1), trivially P²=(π₁²) is principal.
+
+**This completely explains Thread 14's empirical order-2 universality** — it is not a coincidence specific to norm-form primes. The proof applies to ANY simple abelian surface A/F_p with Weil polynomial T⁴+a₂T²+p² and sf(a₂²-4p²) < 0. The Weil polynomial structure forces π₁² ∈ O_{Q(√sf)} with |π₁²|=p, which is the only hypothesis needed.
+
+**Minor generalization recognized:** The same proof gives [P]² = 1 for ALL primes p and ALL a₂ satisfying:
+- disc4 = a₂²-4p² has squarefree part sf < 0 (imaginary CM field)
+- m = sqrt(disc4/sf) is a positive integer (disc4/sf is a perfect square)
+- These conditions hold automatically for any a₂ arising from a biquadratic Weil polynomial.
+This means the result is NOT specific to the norm-form family 4p=73+3k².
+
+### Next step proposal
+Thread 16: **Generalization verification + genus theory connection.**
+- Test that [P]² = 1 also holds for NON-norm-form primes with biquadratic Weil polynomials.
+  - Pick 10-20 random primes p ≡ 1 (mod 3), compute hyperellcharpoly for random genus-2 curves over F_p, verify [P]² = 1 in Q(√sf(a₂²-4p²)) for the generic (non-norm-form) cases.
+- Connect to Gauss genus theory: [P]² = 1 iff p splits in the GENUS FIELD of Q(√sf). The genus characters χ of Q(√sf) are determined by the prime factorization of sf. Verify: for each norm-form prime p, all genus characters χ_{d|sf}(p) = +1 (i.e., p is in the principal genus). If true, this gives a quadratic-character explanation of why [P] is 2-torsion.
+- Write a PARI script: for each (p, sf) pair, compute `bnfinit(x^2-sf).nf.disc` prime factors, then check Kronecker(-|sf|/d, p) for each genus discriminant d.
+
+### Commits made
+`[TBD]` autolab 2026-07-17: Thread 15 — Universal order-2 Frobenius theorem proved; (π₁²)=P² principal for all 25 norm-form primes k≤199; genus-theory link identified
