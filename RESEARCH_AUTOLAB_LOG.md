@@ -5402,4 +5402,4 @@ Thread 16: Resolve the proof sketch step 5 more rigorously.
 - Thread 16 task: write the formal proof as a LaTeX theorem in paper/eprint_combined.tex.
 
 ### Commits made
-TBD (this entry)
+`10e3d2d` autolab 2026-07-17: Thread 15 — universal order-2 conjecture PROVED+VERIFIED; (lambda1)=P^2 or Pbar^2 for all 21 non-CM-73 norm-form primes k<=199; Eisenstein prime for p=12889 confirmed
