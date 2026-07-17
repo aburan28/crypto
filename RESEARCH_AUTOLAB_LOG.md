@@ -5427,4 +5427,4 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
   biquadratic Weil polynomials, relevant to the cover-cost analysis).
 
 ### Commits made
-[to be filled]
+`aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
