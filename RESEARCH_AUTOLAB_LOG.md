@@ -5415,5 +5415,5 @@ Thread 16: Understand the pattern of m values more deeply.
 - Or: extend the sweep to k≤299 to get more data points and look for m patterns.
 
 ### Commits made
-[see below after commit]
+`97be09d` autolab 2026-07-17: Thread 15 — pi^2 principal proved; beta=(-a2+m*sqrt(sf))/2 generates (pi)^2 for all 19 norm-form primes; corrected m-table (m != k for non-CM-73 cases)
 
