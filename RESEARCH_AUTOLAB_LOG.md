@@ -5432,4 +5432,4 @@ Approach:
 Update to next step: formalize this parity proof in PARI (trivial, 2 lines), add to the LEMMA. Thread 15 is now essentially **CLOSED** modulo a 2-line formal proof.
 
 ### Commits made
-(to be filled after push)
+`3465af9` autolab 2026-07-17: Thread 15 — (pp)^2 principal proved; pi^2 explicit generator; Eisenstein prime 115+3omega; parity lemma confirmed k<=199 + unconditional proof
