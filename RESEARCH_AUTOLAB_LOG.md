@@ -5416,4 +5416,4 @@ Thread 16: Theoretical proof of the order-2 conjecture.
 - Alternative next task: run the PARI check for k up to 499 (extending the sweep) to gather more evidence. Estimated ~10 min runtime.
 
 ### Commits made
-[to be filled after git commit]
+`799726e` autolab 2026-07-17: Thread 15 — pi_sq=(-a2+m*sqrt(sf))/2 generates Pp^2; universal ord([Pp])|2 proved for 25 norm-form primes
