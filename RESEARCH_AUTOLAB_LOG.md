@@ -5423,4 +5423,4 @@ Thread 16: Extend the algebraic proof to handle the case gcd(m,p)>1.
   using a lift argument. This would make the splitting proof fully unconditional.
 
 ### Commits made
-`[to be filled after push]`
+`1304ac1` autolab 2026-07-17: Thread 15 — (alpha)=P^2 proved algebraically + verified for all 25 norm-form primes k<=199; universal order-2 is now a theorem
