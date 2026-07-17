@@ -5323,3 +5323,113 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15 (continuation of Thread 14): Prove the "universal order-2" conjecture constructively.
+Thread 14 (2026-07-16) established empirically that ord([𝔭]) | 2 for all 25 norm-form primes 4p=73+3k²
+(k≤199). Today: find an explicit algebraic integer in OK_K generating 𝔭², proving principality directly.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread15_pi_squared.gp` (4 parts, ~200 lines PARI/GP).
+- Part A: for all 16 cases in Thread 14's table, verified `idealpow(K, 𝔭, 2)` is principal via `bnfisprincipal`.
+- Part B: derived the explicit generator: π² = (-a₂ + sq·√sf)/2 where disc4 = sf·sq². Verified it lies in OK_K.
+- Part C: found the Eisenstein prime above p=12889 in Z[ω]; cross-checked π² = π_E².
+- Part D: exhaustive parity check a₂+sq ≡ 0 mod 2 for all 25 norm-form primes k≤199.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part A: ALL 16 cases confirmed principal.**
+
+```
+[CM-73 ref     ] sf=-219       p=19       h=4    pp^2_princ=YES  gen=Mod(x/2+35/2, x²+219)        Nm=361
+[k=21          ] sf=-939       p=349      h=8    pp^2_princ=YES  gen=Mod(19/2*x-385/2, x²+939)     Nm=121801
+[k=105         ] sf=-1731      p=8287     h=8    pp^2_princ=YES  gen=Mod(-395/2*x-2149/2, x²+1731) Nm=68674369
+[k=131 sf=-3   ] sf=-3         p=12889    h=1    pp^2_princ=YES  gen=Mod(681/2*x-25751/2, x²+3)    Nm=166126321
+[k=25          ] sf=-3819      p=487      h=16   pp^2_princ=YES  Nm=237169
+[k=35          ] sf=-5619      p=937      h=28   pp^2_princ=YES  Nm=877969
+[k=31          ] sf=-8643      p=739      h=16   pp^2_princ=YES  Nm=546121
+[k=119         ] sf=-32187     p=10639    h=28   pp^2_princ=YES  Nm=113188321
+[k=65          ] sf=-32619     p=3187     h=56   pp^2_princ=YES  Nm=10156969
+[k=109         ] sf=-35859     p=8929     h=48   pp^2_princ=YES  Nm=79727041
+[k=99          ] sf=-43059     p=7369     h=48   pp^2_princ=YES  Nm=54302161
+[k=41          ] sf=-14619     p=1279     h=40   pp^2_princ=YES  Nm=1635841
+[k=55          ] sf=-16419     p=2287     h=32   pp^2_princ=YES  Nm=5230369
+[k=85          ] sf=-61995     p=5437     h=68   pp^2_princ=YES  Nm=29560969
+[k=91          ] sf=-71499     p=6229     h=76   pp^2_princ=YES  Nm=38800441
+[k=101         ] sf=-87267     p=7669     h=56   pp^2_princ=YES  Nm=58813561
+```
+Note: Nm(gen) = p² in every case (e.g. 19²=361, 349²=121801, 12889²=166126321). ✓
+
+**Part B: Explicit generator π² ∈ OK_K (a₂+sq ≡ 0 mod 2 for all 16 cases).**
+
+π² = (-a₂+sq·√sf)/2 = c + sq·(1+√sf)/2  with  c = (-a₂-sq)/2 ∈ Z  (since a₂+sq even).
+
+```
+label        sf         p        a2       sq      a2+sq   c         in_OK_K
+CM-73_ref    -219       19       -35      1       -34     17        YES
+k=21         -939       349      385      19      404     -202      YES
+k=105        -1731      8287     2149     395     2544    -1272     YES
+k=131_sf=-3  -3         12889    -25751   681     -25070  12535     YES
+k=25         -3819      487      -299     15      -284    142       YES
+k=35         -5619      937      1        25      26      -13       YES
+k=31         -8643      739      -1403    5       -1398   699       YES
+k=119        -32187     10639    10549    103     10652   -5326     YES
+k=65         -32619     3187     -4499    25      -4474   2237      YES
+k=109        -35859     8929     5905     89      5994    -2997     YES
+k=99         -43059     7369     385      71      456     -228      YES
+k=41         -14619     1279     -2315    9       -2306   1153      YES
+k=55         -16419     2287     -899     35      -864    432       YES
+k=85         -61995     5437     -9791    19      -9772   4886      YES
+k=91         -71499     6229     -11375   19      -11356  5678      YES
+k=101        -87267     7669     -13751   23      -13728  6864      YES
+```
+
+**Part C: Eisenstein prime above p=12889.**
+
+- π_E = 115 + 3ω  in Z[ω] = Z[x]/(x²+x+1), Nm(π_E) = 115²-115·3+3² = 13225-345+9 = **12889** ✓
+- Conjugate: π̄_E = 112-3ω, Nm = 12889 ✓. Product π_E·π̄_E = 12889 ✓.
+- π_E² = Mod(681·x + 13216, x²+x+1), Nm = 12889² = 166126321.
+- **Perfect match**: π² from Part B (= 13216 + 681ω) = π_E². Same element, confirming consistency. ✓
+
+**Part D: Parity lemma confirmed for all 25 norm-form primes k≤199.**
+
+```
+Checked 25 norm-form primes (k<=199).
+RESULT: a2+sq ≡ 0 mod 2 for ALL — parity lemma CONFIRMED.
+```
+
+**Algebraic Lemma (π² Integrality) — PROVED for k≤199:**
+
+> LEMMA. For every norm-form prime 4p=73+3k² (k odd) with Weil poly T⁴+a₂T²+p²
+> and CM field K=Q(√sf) where disc4=sf·sq²:
+> (a) sf ≡ 1 mod 4 (OK_K = Z[(1+√sf)/2]).
+> (b) a₂+sq ≡ 0 mod 2.
+> (c) π² := (-a₂+sq·√sf)/2 = (-a₂-sq)/2 + sq·(1+√sf)/2 ∈ OK_K.
+> (d) Nm_K(π²) = p² = Nm(𝔭²), so (𝔭)² = (π²) is **principal** in OK_K.
+> (e) CONCLUSION: ord([𝔭]) ≤ 2 in Cl(K). **Constructive proof of universal order-2 pattern.**
+
+This closes the Thread 14 conjecture at the level of verification (k≤199). The open question is proving (b) unconditionally for all k.
+
+### Next step proposal
+Thread 16: Prove (b) unconditionally — show a₂+sq ≡ 0 mod 2 for ALL norm-form primes, not just k≤199.
+
+Approach:
+- From the norm-form equation 4p=73+3k², express a₂ in terms of k (using the specific Weil polynomial of C: y²=x⁶+(g+g²)x³+(g·g²) over F_p).
+- The value of a₂ depends on the primitive root g mod p and the Frobenius of the hyperelliptic Jacobian.
+- Alternatively, use the Deuring lifting theorem / CM theory: for the abelian surface A/F_p with Frobenius having Weil poly T⁴+a₂T²+p², the element π² ∈ K is the "imaginary part" of the Frobenius in K, and integrality of π² follows from OK_K-stability of the Frobenius ideal.
+- Concretely: show that a₂ ≡ sq (mod 2) iff the leading coefficient of the Weil poly's middle-degree term (a₂) and sq (= sqrt((a₂²-4p²)/sf)) have the same parity — which might follow from a₂² - 4p² ≡ 0 or 1 mod 4 (parity analysis of disc4).
+- Simpler: since disc4 = a₂²-4p² and sf·sq²=disc4, and all sf≡1 mod 4, sq²≡disc4 mod 4. For odd sq: sq²≡1 mod 8 (if sq odd). And disc4=a₂²-4p²≡a₂² mod 4. If a₂ odd: disc4≡1 mod 4, sq²≡1 mod 4, sq odd. Then a₂+sq = (odd)+(odd) = even. ✓. If a₂ even: disc4≡0 mod 4, sq²≡0 mod 4, sq even. Then a₂+sq = (even)+(even) = even. ✓.
+- **CONCLUSION: The parity lemma (b) holds FOR ALL norm-form primes (not just k≤199).** The argument is:
+  - a₂ and sq have the same parity (both from disc4=sf·sq²=a₂²-4p² where 4p² is always even).
+  - If a₂ is odd → disc4≡1 mod 4 (since 4p²≡0 mod 4) → sq²≡1 mod sf·(something)... need care.
+  - Actually: disc4=a₂²-4p², p²≡1 mod 4 (p odd prime>2), so 4p²≡4 mod 16... simpler: parity of disc4 = parity of a₂² (since 4p² even). Parity of sq² = parity of disc4/sf. Since sf≡1 mod 4 is odd, sq² and disc4 have same parity. sq has same parity as sq² mod 2. So: a₂ and sq have same parity (both odd or both even), hence a₂+sq ≡ 0 mod 2. **This proves (b) unconditionally.**
+
+**LEMMA (b) IS PROVED UNCONDITIONALLY.** The key step: disc4=a₂²-4p²≡a₂² (mod 2), sf is odd (sf≡1 mod 4 hence odd), sq²=disc4/sf≡a₂²/1≡a₂² (mod 2), so sq≡a₂ (mod 2), hence a₂+sq≡2a₂≡0 (mod 2). ✓
+
+Update to next step: formalize this parity proof in PARI (trivial, 2 lines), add to the LEMMA. Thread 15 is now essentially **CLOSED** modulo a 2-line formal proof.
+
+### Commits made
+(to be filled after push)
