@@ -5393,3 +5393,5 @@ Thread 16: Extend norm-form sweep to k≤499 (p up to ~187k) to confirm no new C
 - Also: compare explicit generators (-a₂-m√SF)/2 for the CM-73 cases to the Deuring lift theory.
 
 ### Commits made
+
+`f554463` autolab 2026-07-17: Thread 15 — universal ord=2 conjecture proved; P_p^2 principal via explicit generator; 18/18 cases verified
