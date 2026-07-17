@@ -5405,3 +5405,4 @@ find a K-element α with α²=a₂+2p, set π=A/2 + sqrt(A/4-p), compute π² ex
 and compare with bnfisprincipal's generator. Doable in PARI with bnfinit over the appropriate field.
 
 ### Commits made
+`ad23dab` autolab 2026-07-17: Thread 15 — universal P²=(π²) principal conjecture CONFIRMED; all 19 norm-form primes; Eisenstein prime π=115+3ω for p=12889
