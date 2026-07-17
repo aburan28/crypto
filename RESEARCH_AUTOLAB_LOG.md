@@ -5396,4 +5396,4 @@ Thread 16: Algebraic explanation via degree-4 CM field.
 - Minimal experiment: compute bnfinit for the degree-4 field T⁴+a₂T²+p² for one case (e.g., p=349, a₂=385), check class group and [P_L] order.
 
 ### Commits made
-`[see below]`
+`8f6e279`
