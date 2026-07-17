@@ -5416,3 +5416,5 @@ Next concrete step: implement Approach 2 for 5+ primes with 4p=t²+3u² (the CM-
 norm-form condition), tabulate all (a,c) solutions, and check against {b·b', b+b', b/b', ω·b, ...}.
 
 ### Commits made
+
+`257ff09` autolab 2026-07-17: chlrs_igusa_formula bug; Howe-glued curve in symmetric degree-6 family; formula tested p=7/p=19
