@@ -5323,3 +5323,96 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Priority thread 2 (CHLRS Igusa formula): `chlrs_igusa_formula.gp` had not been run
+empirically; recent log entries (Threads 11–14) focused on CM-73 norm-form theory.
+P-521 LLL (priority 1) is CLOSED per §10.5 of RESEARCH_LLL_GS_ANALYSIS.md.
+
+### Work done
+- Ran `chlrs_igusa_formula.gp` via `gp -q` (PARI installed fresh this session).
+- Wrote `secp256k1_cm_audit/thread15_howe_search.gp` (v1, had PARI syntax errors).
+- Wrote `secp256k1_cm_audit/thread15_howe_search_v2.gp` (v2, cleaner; ran fully).
+- Ran exhaustive brute-force search of symmetric degree-6 family y²=x⁶+ax³+c over F_7.
+- Ran targeted search of same family over F_19.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**FINDING A: chlrs_igusa_formula.gp bug confirmed.**
+The Rosenhain cross-ratio formula gives `match = 0` for ALL 3 Möbius-transform variants
+(p=1009, b=11, t=43).  Actual charpy of the constructed Rosenhain Jac:
+  y²=x(x-1)(x-661)(x-637)(x-954) → charpy = T⁴ + 334T² + 1009²
+Target for (2,2)-iso to E1×E2: T⁴ + 169T² + 1009²  (since 169 = 2p-t² = 2·1009-43²).
+Root cause: the formula uses x-coordinates of E1[2] and E2[2] as Weierstrass points of
+Jac(C), but those are 2-torsion coordinates of the ELLIPTIC CURVES, not of the Jacobian.
+The Howe construction maps Jac(C)[2] ≅ E1[2]×E2[2] / G_α, which is not the same as the
+Weierstrass points of C.
+
+**FINDING B: Product curve y²=(x³+b)(x³+b') has wrong isogeny type.**
+For p=1009, b=11, b'=515:
+  charpy(y²=(x³+11)(x³+515)) = T⁴ - 84T³ + 3361T² - 84756T + 1009²
+This has a₃ = -84 ≠ 0 (non-biquadratic Frobenius), so the Jacobian is NOT split as
+E1×E2.  The degree-3 map (x,y)→(x³,y) from C to the elliptic curve v²=(u+b)(u+b')
+gives a (3,3)-isogeny, NOT a (2,2)-isogeny.
+
+**FINDING C: Howe-glued curve lives in symmetric degree-6 family.**
+Brute-force search over y²=x⁶+ax³+c (Z/3Z-symmetric family) for p=7, b=3, t=-5
+(target charpy T⁴-11T²+49, target #Jac=39):
+
+  FOUND: y² = x⁶ + 2x³ + 6   charpy = T⁴-11T²+49  ✓
+  FOUND: y² = x⁶ + 5x³ + 6   (same curve via x→-x)
+
+No degree-5 curves with target charpy exist (Part C search: 2058 polynomials checked).
+
+For p=7, the formula a=ω (primitive cube root of unity mod p), c=b-b' gives MATCH=1.
+  - p=7, b=3, d=3, ω=2, b'=4, b-b'=-1≡6 mod 7.
+  - Curve y²=x⁶+2x³+6: charpy T⁴-11T²+49. ✓
+
+**FINDING D: Formula a=ω, c=b-b' does NOT generalize.**
+For p=19, b=2, d=2, ω=7, b'=16: formula gives a=7, c=b-b'=5 → charpy a₂=-3 ≠ target -11.
+Exhaustive search of symmetric family over F_19 found 6 solutions (3 isomorphism classes):
+```
+(a,c) = (1,18), (18,18)   → class 1  [note: c=b+b'=18]
+(a,c) = (7,8), (12,8)     → class 2  [a=ω, c≠b-b']
+(a,c) = (8,12), (11,12)   → class 3
+```
+All have charpy T⁴-11T²+361. The 3 isomorphism classes (under x→-x) correspond to
+the 3 non-trivial (2,2)-isogeny kernels G_α: E1[2]→E2[2] (there are 3 choices of α
+preserving the Weil pairing, corresponding to the 3 non-identity elements of PGL₂(F₂)).
+
+**FINDING E: Igusa invariants of Howe-glued p=7 curve.**
+For y²=x⁶+2x³+6 over F_7:
+  J₂ mod 7 = 6   J₁₀ mod 7 = 1
+Product curve y²=x⁶+5 (=(x³+3)(x³+4) mod 7):
+  J₂ mod 7 = 2   J₁₀ mod 7 = 4  (different invariants, wrong charpy T⁴-6T³+19T²-42T+49)
+
+**Cargo tests:** 5/5 pass.
+
+### Next step proposal
+Thread 16: Determine the explicit formula for the 3 gluing classes for j=0 pairs.
+The key question: given E1: y²=x³+b and E2: y²=x³+bd³ (d non-square) over F_p (p≡1 mod 3),
+what are the parameters (a₁,c₁), (a₂,c₂), (a₃,c₃) of the 3 Howe-glued genus-2 curves?
+
+Approach 1 (algebraic): The 3 gluing classes correspond to the 3 isomorphisms α: E1[2]→E2[2]
+(in GL₂(F₂)/centre ≅ S₃, the Weil-pairing-preserving isomorphisms form a coset of order 3).
+For j=0 curves with irreducible x³+b over F_p, the 2-torsion is in F_{p³} and the 3 choices
+of α are the 3 Frobenius-conjugates of the "natural" map (x,0)↦(dx,0).  The Igusa invariants
+of each Howe-glued surface can then be read off from the theta function of E1×E2 / G_α.
+
+Approach 2 (empirical): For each new prime p (found via 4p=t²+3u²), run the symmetric
+family search and tabulate (a_i, c_i) vs (b, b', ω, p).  Look for patterns:
+  - Does one gluing always have a=ω?
+  - Is c always one of {bb', b+b', b-b', ±ω·(b+b'), ...}?
+  - What do the 3 (a_i,c_i) triples represent modulo the action of Aut(E1[2])=S₃?
+
+Approach 3 (Kummer surface): Compute the Kummer surface equations of E1×E2 over F_p³
+(where E1[2] is rational), then quotient by G_α (each of the 3 choices) to get the
+Kummer surface of Jac(Ci).  Read off the Igusa invariants from the Kummer quartic.
+
+Next concrete step: implement Approach 2 for 5+ primes with 4p=t²+3u² (the CM-by-Z[ζ₃]
+norm-form condition), tabulate all (a,c) solutions, and check against {b·b', b+b', b/b', ω·b, ...}.
+
+### Commits made
