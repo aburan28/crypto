@@ -5407,4 +5407,4 @@ Thread 16: Extend the algebraic argument to characterise the exact element π it
 - Alternative: Thread 16b — move to open thread 3 (Howe gluing on j=0 sextic twists, 15 pairs PARI check). Clean and independent from Threads 13–15.
 
 ### Commits made
-`TBD` autolab 2026-07-17: Thread 15 — π² ∈ O_K proved; ord([π])=2 closed; Eisenstein prime 115+3ω at p=12889
+`da0db5d` autolab 2026-07-17: Thread 15 — π² ∈ O_K proved; ord([π])=2 closed; Eisenstein prime 115+3ω at p=12889
