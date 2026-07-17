@@ -5323,3 +5323,108 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15: Algebraic proof + numerical verification of the "universal order-2 Frobenius"
+conjecture from Thread 14. All six original priority threads are CLOSED or BLOCKED, so
+this picks up the active research thread proposed in Thread 14's next-step.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread15_order2_algebraic.gp` (~180 lines) verifying 5
+  conditions for each of the 25 norm-form primes k≤199 (k odd, 4p=73+3k² prime).
+- Proved algebraically (with PARI numerical confirmation) the conjecture from Thread 14.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Completed fallback Step 4(a): ePrint survey (see Findings §3).
+
+### Findings
+
+**THEOREM (Thread 15 — algebraic proof of universal order-2):**
+For any norm-form prime p with biquadratic Weil polynomial T⁴+a₂T²+p² and
+D = a₂²−4p² = sf·m² (sf squarefree, m>0), let β = (−a₂+m√sf)/2.
+
+(A) β is an algebraic integer: satisfies x²+a₂x+p² = 0 (monic, Z coefficients). ✓
+(B) β ∈ K = Q(√sf). ✓
+(C) N_{K/Q}(β) = p²; so (β) is an O_K-ideal of norm p². ✓
+(D) If p ∤ a₂, then (β) ≠ (p): case (β)=(p) would require β/p ∈ O_K^× with
+    N(β/p)=1, hence p | a₂ and p | m. Verified p ∤ a₂ for all 25 primes. ✓
+(E) Therefore (β) = P² or P̄² for a prime P above p in O_K. Hence [P]² = 1. □
+
+**Numerical verification — all 25 norm-form primes k≤199:**
+
+| k   | p     | sf       | m   | h  | minpoly(β)          | N(β)=p²? | p∤a₂? | (β)=P²? | [P]²=1? |
+|-----|-------|----------|-----|----|---------------------|----------|-------|---------|---------|
+| 1   | 19    | -219     | 1   | 4  | x²-35x+361          | YES      | YES   | YES     | YES     |
+| 5   | 37    | -219     | 5   | 4  | x²+x+1369           | YES      | YES   | YES     | YES     |
+| 9   | 79    | -219     | 9   | 4  | x²+85x+6241         | YES      | YES   | YES     | YES     |
+| 11  | 109   | -219     | 11  | 4  | x²+145x+11881       | YES      | YES   | YES     | YES     |
+| 21  | 349   | -939     | 19  | 8  | x²+385x+121801      | YES      | YES   | YES     | YES     |
+| 25  | 487   | -3819    | 15  | 16 | x²-299x+237169      | YES      | YES   | YES     | YES     |
+| 31  | 739   | -8643    | 5   | 16 | x²-1403x+546121     | YES      | YES   | YES     | YES     |
+| 35  | 937   | -5619    | 25  | 28 | x²+x+877969         | YES      | YES   | YES     | YES     |
+| 41  | 1279  | -14619   | 9   | 40 | x²-2315x+1635841    | YES      | YES   | YES     | YES     |
+| 55  | 2287  | -16419   | 35  | 32 | x²-899x+5230369     | YES      | YES   | YES     | YES     |
+| 65  | 3187  | -32619   | 25  | 56 | x²-4499x+10156969   | YES      | YES   | YES     | YES     |
+| 85  | 5437  | -61995   | 19  | 68 | x²-9791x+29560969   | YES      | YES   | YES     | YES     |
+| 91  | 6229  | -71499   | 19  | 76 | x²-11375x+38800441  | YES      | YES   | YES     | YES     |
+| 99  | 7369  | -43059   | 71  | 48 | x²+385x+54302161    | YES      | YES   | YES     | YES     |
+| 101 | 7669  | -87267   | 23  | 56 | x²-13751x+58813561  | YES      | YES   | YES     | YES     |
+| 105 | 8287  | -1731    | 395 | 8  | x²+2149x+68674369   | YES      | YES   | YES     | YES     |
+| 109 | 8929  | -35859   | 89  | 48 | x²+5905x+79727041   | YES      | YES   | YES     | YES     |
+| 119 | 10639 | -32187   | 103 | 28 | x²+10549x+113188321 | YES      | YES   | YES     | YES     |
+| 131 | 12889 | -3       | 681 | 1  | x²-25751x+166126321 | YES      | YES   | YES     | YES     |
+| 135 | 13687 | -65019   | 105 | 60 | x²+5701x+187333969  | YES      | YES   | YES     | YES     |
+| 141 | 14929 | -136299  | 69  | 84 | x²-15575x+222875041 | YES      | YES   | YES     | YES     |
+| 145 | 15787 | -108219  | 95  | 84 | x²-4499x+249229369  | YES      | YES   | YES     | YES     |
+| 159 | 18979 | -212619  | 41  | 128| x²-32915x+360202441 | YES      | YES   | YES     | YES     |
+| 179 | 24049 | -243219  | 71  | 104| x²-32975x+578354401 | YES      | YES   | YES     | YES     |
+| 195 | 28537 | -342435  | 1   | 88 | x²-57071x+814360369 | YES      | YES   | YES     | YES     |
+
+ALL 25 PASSED. The conjecture from Thread 14 is now a theorem (algebraically proved in (A)-(E);
+numerically confirmed for k≤199 in all five checks).
+
+Notable special cases:
+- k=131, p=12889, sf=-3, h=1: h=1 so P is principal trivially; [P]²=1 holds as [P]=1.
+- k=195, p=28537, m=1: D=sf=-342435 (squarefree), β=(-57071+√-342435)/2 still generates P². ✓
+- k=105, p=8287, m=395: largest m value; (β)=P² still holds despite large m. ✓
+
+**ePrint survey (Step 4a, papers since 2026-07-16):**
+
+1. ePrint 2025/705 — "Breaking ECDSA with Two Affinely Related Nonces" — key recovery
+   from only 2 signatures with affine nonce relation k₁=αk₂+β; closed-form (no lattice).
+   RELEVANCE: complements our GLV-HNP thread; GLV gives k₁=λ·k₂ (a specific affine
+   relation). This paper's technique may apply to GLV nonces without lattice reduction.
+
+2. ePrint 2024/296 — "Attacking ECDSA with Nonce Leakage by Lattice Sieving: Bridging
+   the Gap with Fourier Analysis" — combines lattice sieving with Fourier analysis for
+   partial-nonce-leak HNP. RELEVANCE: extends our Priority 5 (GLV-HNP toy) attack.
+
+3. ePrint 2025/155 — "Cycles and Cuts in Supersingular L-Isogeny Graphs" — structural
+   properties of supersingular ℓ-isogeny graphs. RELEVANCE: background for Priority 1
+   (now closed); no new ECDLP attack.
+
+4. Fisher & Liu, "Minimisation of 2-coverings of genus 2 Jacobians" (arXiv 2309.06220,
+   manuscripta 2025) — minimizing 2-descent pairs of quadratic forms on genus-2 Jacobians.
+   RELEVANCE: tangential to Priority 3 (Howe sextic twists); not directly applicable.
+
+No papers found on "(N,N)-cover Jacobian" or "GLV decomposition lattice attack" in 2025-2026.
+
+### Next step proposal
+Thread 16: State the Theorem cleanly and check if it extends to non-norm-form primes.
+- Claim: for ANY elliptic curve E/F_p (not just secp256k1's norm-form family), if the
+  Weil polynomial T⁴+a₂T²+p² has D=a₂²-4p²=sf·m² with sf squarefree and p ∤ a₂,
+  then [P]² = 1 in Cl(Q(√sf)). The proof (A)-(E) is completely general: it uses only
+  (T) the Weil polynomial shape, not the specific norm-form condition.
+- Experiment: pick 10 random primes p (not norm-form) with D>0 (factoring Weil poly
+  over some imaginary quadratic field), and verify [P]² = 1 in those cases too.
+- If confirmed, this is a general Theorem about biquadratic Weil polynomials, not just
+  the secp256k1 norm-form family.
+- Cite ePrint 2025/705 in a remark: the affine-nonce relation k₁=λk₂ in GLV is a
+  special case of Theorem 1 of that paper.
+- Also: Integrate Theorem from Thread 15 into PAPER_STRUCTURAL_COMPLETENESS.md §B5
+  remark (the order-2 structure of Frobenius ideals is a structural property of
+  biquadratic Weil polynomials, relevant to the cover-cost analysis).
+
+### Commits made
+`aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
