@@ -270,6 +270,25 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Thread 15–16 — order-2 structure of Frobenius ideals).** For any prime `p`
+and any integer trace `t` with `0 < |t| < 2√p`, set `a₂ = 2p − t²` and
+`D = a₂² − 4p² = t²(t² − 4p) < 0`.  Write `D = sf · m²` with `sf` squarefree negative
+and `m > 0`.  Let `K = Q(√sf)` and `P` a prime of `O_K` above `p` (which splits since
+`sf < 0`).  **If `p ∤ a₂`, then `[P]² = 1` in `Cl(K)`.**
+
+*Proof sketch.* Set `β = (−a₂ + m√sf)/2`.  Then:
+(A) `β` satisfies `x² + a₂x + p² = 0` (algebraic integer in `O_K`);
+(B) `N_{K/Q}(β) = p²`, so `(β)` has norm `p²`;
+(C) since `p ∤ a₂` the ideal `(β) ≠ (p)`, so `(β) = P²` or `P̄²`;
+(D) hence `[P]² = 1` in `Cl(K)`. □
+
+*Significance for B5.* The Frobenius of the product surface `E × Eᵗ` generates a
+principal ideal `(β) = P²` in the CM order.  This is a structural property of the
+biquadratic Weil polynomial `T⁴ + a₂T² + p²` — it is independent of the specific curve
+family and holds for *every* ordinary prime-field elliptic curve.  Verified algebraically
+(Thread 15) and numerically for 25 norm-form primes (k ≤ 199) and 10 non-norm-form
+primes with 5 traces each (Thread 16, script `thread16_general_order2.gp`; 50/50 pass).
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

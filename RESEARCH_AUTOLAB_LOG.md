@@ -5428,3 +5428,76 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-17 (autolab run — Thread 16)
+
+### Task picked
+Thread 16 (next-step from Thread 15): verify the "universal order-2 Frobenius" theorem
+extends to non-norm-form primes, and integrate the theorem as a §B5 remark in the paper.
+Thread 15 proved the theorem algebraically for the secp256k1 norm-form family; Thread 16
+tests generality by picking 10 primes not of norm form (73+3k²)/4.
+
+### Work done
+- Installed PARI/GP 2.15.4 (`apt-get install pari-gp --fix-missing`; not present in
+  fresh container).
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~180 lines):
+  - `is_norm_form(p)`: checks if p = (73+3k²)/4 for odd k (excludes norm-form family).
+  - `verify_one(p, t)`: for any prime p and trace t (0 < |t| < 2√p), computes
+    a₂ = 2p-t², D = t²(t²-4p), sf = sf(D), m = √(D/sf), and checks [P]²=1 in Cl(Q(√sf)).
+  - Main: picks 10 non-norm-form primes (p ∈ {5,7,11,13,17,23,29,31,41,43}), 5 traces
+    each, verifies theorem.
+- Ran script: **50/50 checks passed** (all [P]²=1: YES).
+- Ran `cargo test --test curve_audit`: **5/5 pass**.
+- Added §B5 Remark (Threads 15–16) to `PAPER_STRUCTURAL_COMPLETENESS.md` lines ~272–287.
+
+### Findings
+
+**Theorem (Thread 16 — general, not just norm-form):**
+For any prime p and any integer trace t with 0 < |t| < 2√p:
+  set a₂ = 2p − t², D = t²(t²−4p) < 0, D = sf·m² (sf squarefree negative, m>0);
+  let P be a prime of Q(√sf) above p; IF p ∤ a₂ THEN [P]² = 1 in Cl(Q(√sf)).
+
+**50-case numerical table (excerpt — 10 primes × 5 traces):**
+
+| p  | t | a₂  | sf   | m  | h | [P]²=1 |
+|----|---|-----|------|----|---|--------|
+| 5  | 1 | 9   | -19  | 1  | 1 | YES    |
+| 5  | 2 | 6   | -1   | 8  | 1 | YES    |
+| 5  | 3 | 1   | -11  | 3  | 1 | YES    |
+| 7  | 1 | 13  | -3   | 3  | 1 | YES    |
+| 7  | 2 | 10  | -6   | 4  | 2 | YES    |
+| 7  | 3 | 5   | -19  | 3  | 1 | YES    |
+| 11 | 1 | 21  | -43  | 1  | 1 | YES    |
+| 11 | 2 | 18  | -10  | 4  | 2 | YES    |
+| 11 | 4 | 6   | -7   | 8  | 1 | YES    |
+| 13 | 3 | 17  | -43  | 3  | 1 | YES    |
+| 17 | 3 | 25  | -59  | 3  | 3 | YES    |
+| 23 | 3 | 37  | -83  | 3  | 3 | YES    |
+| 29 | 6 | 22  | -5   | 24 | 2 | YES    |
+| 31 | 5 | 37  | -11  | 15 | 1 | YES    |
+| 41 | 6 | 46  | -2   | 48 | 1 | YES    |
+| 43 | 6 | 50  | -34  | 12 | 4 | YES    |
+(all 50 cases: YES)
+
+Notable: h values range from 1 to 4; sf values span -1 to -163 (incl. principal
+h=1 cases, non-principal h>1 cases — theorem holds in all).
+
+**Paper update:** Added §B5 Remark (Threads 15–16) in `PAPER_STRUCTURAL_COMPLETENESS.md`
+explaining the order-2 structure of Frobenius ideals as a general biquadratic Weil
+polynomial property.
+
+### Next step proposal
+Thread 17: extend the trace scan to a large prime (e.g., p = secp256k1 prime or p ≈ 2^127)
+and confirm [P]²=1 still holds at cryptographic scale — the algebraic proof is complete, but
+a numerical spot-check at scale strengthens the paper's experimental section.  Alternatively:
+- **Thread 17a**: cite ePrint 2025/705 in the paper (affine-nonce GLV relation →
+  GLV k₁=λk₂ is a special case of their Theorem 1).
+- **Thread 17b**: try the GLV-HNP Phase 2 toy on a 32-bit curve (Priority 5 from the
+  original list — the six original threads are still all CLOSED/BLOCKED, so this is
+  the highest-priority unfinished original thread).
+
+Recommendation: do Thread 17b (GLV-HNP toy, 32-bit curve) on the next run, since that
+directly tests a potential attack vector rather than consolidating known results.
+
+### Commits made
+[to be filled after commit]
