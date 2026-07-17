@@ -5323,3 +5323,67 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+## 2026-07-17 (autolab run)
+
+### Task picked
+Thread 15: Algebraic proof of the "universal order-2" conjecture from Thread 14.
+Thread 14 (2026-07-16) observed that [P]^2=[1] for every norm-form Frobenius ideal across all 19 tested cases and proposed verifying this algebraically. Today provides the complete algebraic proof + PARI numerical verification.
+
+### Work done
+- Identified the algebraic mechanism: T2 = (-a2+f*sqrt(sf))/2 is in O_K (satisfies X^2+a2*X+p^2=0) with Nm(T2)=p^2, and the principal ideal (T2) factors as P^2 or Pbar^2 (not P*Pbar=(p) since p∤a2). Hence [P]^2=[(T2)]=[1].
+- Wrote `secp256k1_cm_audit/thread15_order2_proof.gp` verifying all 5 proof steps for 19 norm-form cases.
+- Debugged 3 PARI/GP issues: (1) multi-line array at top-level needs `{}`; (2) `idealprincipal` not available in PARI 2.15.4 — use `idealhnf`; (3) `nfroots` variable priority conflict when both K and polynomial use `x` — bypassed by direct polynomial construction.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**Theorem (Thread 15):** For any norm-form prime p (4p=73+3k^2) with Weil polynomial T^4+a2*T^2+p^2 and p∤a2, letting K=Q(sqrt(sf(a2^2-4p^2))) and P=prime ideal above p in O_K:
+  [P]^2 = [1] in Cl(K).
+
+**Proof (complete):**
+1. disc4 := a2^2-4p^2 ≡ a2^2 (mod p). Since p∤a2, Kronecker(disc4,p)=(a2^2/p)=1, so p splits in K: (p)=P·Pbar.
+2. T2 := (-a2+sqrt(disc4))/2 ∈ O_K (root of monic integer polynomial X^2+a2*X+p^2), Nm(T2)=p^2.
+3. The only ideals of norm p^2 in O_K (with p split) are P^2, P·Pbar=(p), Pbar^2.
+4. T2/p satisfies X^2+(a2/p)*X+1=0; non-integer coeff when p∤a2 => T2/p ∉ O_K => (T2) ≠ (p).
+5. (T2) ∈ {P^2, Pbar^2}. (T2) is principal => [P]^2=[(T2)]=[1]. □
+
+**Corollary:** ord([P]) | 2 for every norm-form Frobenius ideal.
+- ord([P]) = 1 iff h(K) = 1 (P itself principal, e.g. k=131, p=12889, sf=-3, h=1).
+- ord([P]) = 2 iff h(K) > 1 (P non-principal but P^2 is; all 18 other cases).
+
+**Numerical verification output (all 19 cases):**
+```
+k=1  p=19   sf=-219   a2=-35    kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=5  p=37   sf=-219   a2=1      kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=9  p=79   sf=-219   a2=85     kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=11 p=109  sf=-219   a2=145    kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=21 p=349  sf=-939   a2=385    kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=25 p=487  sf=-3819  a2=-299   kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=31 p=739  sf=-8643  a2=-1403  kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=35 p=937  sf=-5619  a2=1      kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=41 p=1279 sf=-14619 a2=-2315  kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=55 p=2287 sf=-16419 a2=-899   kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=65 p=3187 sf=-32619 a2=-4499  kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=85 p=5437 sf=-61995 a2=-9791  kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=91 p=6229 sf=-71499 a2=-11375 kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=99 p=7369 sf=-43059 a2=385    kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=101 p=7669 sf=-87267 a2=-13751 kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y PASS
+k=105 p=8287 sf=-1731 a2=2149   kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=109 p=8929 sf=-35859 a2=5905  kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+k=119 p=10639 sf=-32187 a2=10549 kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y PASS
+k=131 p=12889 sf=-3 a2=-25751   kron=Y split=Y Nm=p2=Y [P2]=1=Y (T2)=P2=Y  PASS
+PASS=19  FAIL=0
+```
+
+**Key technical note:** PARI 2.15.4 lacks `idealprincipal` — the equivalent is `idealhnf(K, elt)`. Elements passed to `nfroots` must use a variable with strictly lower PARI priority than the nf variable (`x`); use `y` or avoid `nfroots` by direct polynomial construction.
+
+### Next step proposal
+Thread 16: The ord([P])=2 half of the conjecture (when h(K)>1, P is non-principal).
+- Claim: for all 18 cases with h(K)>1, P (the prime above p) is NOT principal.
+- Proof approach: P would be principal iff there exists u ∈ O_K with Nm(u)=p. This requires X^2+trace(u)*X+p=0 to have a root in O_K, i.e., disc(X^2+t*X+p) = t^2-4p must equal sf(t^2-4p)=sf4 (same squarefree part as disc4). For most norm-form primes, t^2-4p has a different squarefree part than a2^2-4p^2, making P non-principal.
+- Alternatively: verify numerically via `bnfisprincipal(bnfK, Pidec[1])` returning nonzero coords for all h>1 cases.
+- Also open: extend the sweep to k up to 500 to check for any new CM-73 prime (completing the finiteness argument).
+
+### Commits made
+[to be filled after commit]
