@@ -5386,4 +5386,4 @@ Thread 16: The ord([P])=2 half of the conjecture (when h(K)>1, P is non-principa
 - Also open: extend the sweep to k up to 500 to check for any new CM-73 prime (completing the finiteness argument).
 
 ### Commits made
-[to be filled after commit]
+`027161b` autolab 2026-07-17: Thread 15 — [P]^2=[1] algebraically proven; T2=P^2 principal for all 19 norm-form cases (PASS=19/19)
