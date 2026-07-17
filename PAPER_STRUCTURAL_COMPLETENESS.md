@@ -270,6 +270,32 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (universal order-2 structure of Frobenius ideals, Threads 15–16).**
+For any prime `p` and any integer `a₂` with `0 < |a₂| < 2p` and `p ∤ a₂`, let
+`D = a₂² − 4p²` and write `D = sf · m²` with `sf` squarefree (so `sf < 0`).
+Let `K = Q(√sf)` and `P` the prime of norm `p` in `O_K` above `p`.
+
+> **Theorem (autolab Threads 15–16).** Under the above hypotheses:
+> (SPLIT) `p` always **splits** in `K`: `sf ≡ (a₂/m)² (mod p)` is a nonzero QR,
+>         so `(sf/p) = 1`.
+> (ORD2)  `[P]² = 1` in `Cl(K)`.
+>
+> *Proof.* `β = (−a₂ + m√sf)/2` satisfies `x² + a₂x + p² = 0` over `Z`
+> (algebraic integer, norm `p²`). Since `p ∤ a₂`, `β/p ∉ O_K`, so `(β) ≠ (p)`.
+> But `N(β) = p²` and `p` splits (SPLIT), so the only ideals of norm `p²` whose
+> prime factors lie above `p` are `P²` and `P̄²`. Hence `(β) ∈ {P², P̄²}` and
+> `[P]² = [(β)] = 1`. □
+>
+> *Verification.* Confirmed for (a) all 25 norm-form primes `k ≤ 199`
+> (`thread15_order2_algebraic.gp`) and (b) 50 additional pairs — 10 non-norm-form
+> primes `{101,103,107,113,127,131,137,139,149,151}` × 5 values of `a₂` each —
+> all with `leg(sf/p) = 1` and `[P]² = 1` (`thread16_general_primes.gp`).
+
+This is relevant to B5's cover-cost analysis: biquadratic Weil polynomials `T⁴ + a₂T² + p²`
+(the case of "split" Jacobians `E × Eᵗ` where the trace of each factor is `±a₂/...`)
+generate Frobenius ideals of ideal-class order at most 2.  This structural constraint
+limits the arithmetic of the CM orders associated to cover Jacobians.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

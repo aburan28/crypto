@@ -5428,3 +5428,74 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-17 (autolab run — Thread 16)
+
+### Task picked
+Thread 16 (proposed by Thread 15 next-step): extend the universal order-2 Frobenius theorem
+from norm-form primes to arbitrary primes. Thread 15 closed same day; Thread 16 was the
+clearest immediate continuation with a concrete experiment.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_primes.gp` (~190 lines).
+- Selected 10 non-norm-form primes: {101, 103, 107, 113, 127, 131, 137, 139, 149, 151}.
+  (Verified none satisfies 4p = 73 + 3k² for odd k ≤ 400.)
+- For each prime, tested 5 values of a₂: {1, −1, p−1, p+1, −(2p−3)}, giving 50 pairs.
+- Also ran "sharpness check" with a₂ = p (violating p ∤ a₂ hypothesis) for each prime.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added general theorem as a Remark in PAPER_STRUCTURAL_COMPLETENESS.md §B5.
+
+### Findings
+
+**KEY NEW FACT — SPLITTING LEMMA:**
+When p ∤ a₂, p ALWAYS SPLITS in Q(√sf) where sf = sqf(a₂²−4p²).
+Proof: D = a₂²−4p² ≡ a₂² (mod p) [since 4p²≡0 mod p]; D = sf·m²; p ∤ D (since p ∤ a₂);
+so m is invertible mod p and sf ≡ (a₂·m⁻¹)² (mod p), a nonzero QR. Hence leg(sf/p) = +1.
+Verified: leg(sf/p) = 1 for ALL 50 standard pairs. ✓
+Consequence: the inert-prime case is automatically excluded; the proof in Thread 15 is tight.
+
+**50/50 standard cases: [P]² = 1 in Cl(Q(√sf)). ALL PASSED.**
+
+Selected results (h = class number of Q(√sf)):
+
+| p   | a₂    | sf      | m  | h   | leg | ord[P] | [P]²=1? |
+|-----|-------|---------|----|-----|-----|--------|---------|
+| 101 |  1    | -40803  |  1 |  32 |  1  |   2    | YES     |
+| 101 |  100  |  -7701  |  2 |  56 |  1  |   2    | YES     |
+| 101 |  102  |   -19   | 40 |   1 |  1  |   1    | YES     |
+| 113 |  1    |  -227   | 15 |   5 |  1  |   1    | YES     |
+| 127 |  1    | -64515  |  1 |  64 |  1  |   2    | YES     |
+| 137 |  136  | -14145  |  2 | 112 |  1  |   2    | YES     |
+| 151 |  1    | -91203  |  1 |  48 |  1  |   2    | YES     |
+
+Notably: h as large as 112 (p=137, a₂=136, sf=-14145), yet [P]²=1 ✓.
+Cases with h≥32 and ord[P]=2 are the most meaningful verifications (not trivial).
+
+**Sharpness check (a₂ = p, violating p ∤ a₂):**
+All 10 sharpness cases also gave [P]²=1 — but trivially, because a₂=p always yields
+sf=-3 (since D = p²-4p² = -3p² = (-3)·p², squarefree part -3) and Q(√(-3)) always has
+h=1. So [P] is principal (h=1), ord[P]=1, [P]²=1 trivially regardless of the theorem.
+A genuine counterexample to [P]²=1 would require a larger violated-hypothesis case,
+but |a₂| < 2p and a₂ = kp forces |k| = 1 (only k=±1 gives |a₂|=p < 2p for p>0),
+giving sf∈{-3,-3} in both cases. The p∤a₂ hypothesis is therefore sufficient but its
+necessity cannot be tested with |a₂|<2p constraint (only one violating value exists and
+it always lands in Q(√(-3)) with h=1).
+
+**Paper update:** Added Remark (Threads 15–16) to §B5 of PAPER_STRUCTURAL_COMPLETENESS.md
+with statement, proof sketch, and numerical verification citation.
+
+### Next step proposal
+Thread 17: Push the theorem further to confirm for LARGE class numbers.
+Currently the largest h tested is 112 (p=137, a₂=136). Find (p, a₂) pairs with h(Q(√sf)) ≥ 500
+and verify [P]²=1. Strategy: for large negative sf (large prime sf₀), h(Q(√sf₀)) can be
+computed; pick a₂ = 1 (gives sf ≈ -4p², large negative discriminant) and sweep primes
+p in [1000, 5000]. This would give class numbers in the hundreds while still being
+tractable for bnfisprincipal. Also worth doing: extend the ePrint 2025/705 remark
+(GLV nonce relation as affine k₁=λk₂) and check if their Theorem 1 gives better
+bounds than the lattice (HNP) for the GLV case specifically — i.e., does direct
+algebraic key recovery dominate for 2-signature GLV attacks?
+
+### Commits made
+PENDING (to be filled after commit)
