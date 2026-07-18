@@ -5530,4 +5530,4 @@ class has order ≤ 2?
   `bnfisprincipal`.
 
 ### Commits made
-[see below after push]
+`935a7d1` autolab 2026-07-18: Thread 16 — universal order-2 Frobenius generalised to non-norm-form primes; 30/30 verified; Theorem added to paper B5
