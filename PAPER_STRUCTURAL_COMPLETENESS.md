@@ -270,6 +270,35 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal order-2 structure — Threads 15–16).**
+For completeness we record a structural consequence of Honda–Tate theory for the
+special class of genus-2 Jacobians whose Weil polynomial is *biquadratic*:
+
+> **Theorem.** Let `p` be a prime, `a₂` an integer with `D = a₂² − 4p²`,
+> `D = sf · m²` (`sf` squarefree, `m > 0`, `D < 0`), and `p ∤ a₂`.
+> Let `K = Q(√sf)` (an imaginary quadratic field) and `P` a prime of `O_K`
+> above `p`.  Then `[P]² = 1` in `Cl(K)`.
+>
+> *Proof sketch.* Set `β = (−a₂ + m√sf)/2`.
+> (A) `β` satisfies `x² + a₂x + p² = 0`, so `β ∈ O_K`.
+> (B) `N(β) = p²`, so `(β)` is an `O_K`-ideal of norm `p²`.
+> (C) Since `p ∤ a₂`, `D ≡ a₂² (mod p)` is a nonzero square, so `p` splits
+>     in `K` (i.e. `(p) = P P̄`). The only norm-`p²` ideals are `P²`, `P̄²`, `(p)`.
+> (D) `(β) = (p)` would require `β/p ∈ O_K×`, but `N(β/p) = 1` forces `p | a₂`
+>     — excluded.  Hence `(β) = P²` or `P̄²`, so `[P]² = 1`. □
+
+This theorem holds for *any* prime `p` (not just norm-form primes of the form
+`4p = 73 + 3k²`).  Numerical verification for 70 cases spanning 15 non-norm-form
+primes confirmed `[P]² = 1` in all cases, including 62 non-trivial cases with
+`h(K) ≥ 2` (class numbers up to `h = 28`); see
+`secp256k1_cm_audit/thread16_non_normform.gp`.
+
+*Impact on B5.*  This is a structural curiosity: the order-2 condition constrains
+the class of the Frobenius ideal in the CM field but does not affect the DLP cost
+on `Jac(C)(F_p)`, which is determined by `#Jac = p²` regardless of CM type.
+The Theorem reinforces that biquadratic Weil polynomials carry their own arithmetic
+rigidity, further distinguishing the genus-2 world from the genus-1 ECDLP setting.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

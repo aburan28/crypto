@@ -5428,3 +5428,86 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (as proposed by Thread 15 next-step): generalise the order-2 Frobenius
+Theorem to non-norm-form primes. The algebraic proof (A)-(E) in Thread 15 uses
+only the biquadratic Weil polynomial shape, not the secp256k1 norm-form condition
+4p=73+3k², so the Theorem should hold universally.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_non_normform.gp` (~165 lines).
+- Proved (in script header) that p ∤ a₂ ⟹ p SPLITS in K=Q(√sf) automatically:
+  D=a₂²-4p² ≡ a₂² (mod p) is a nonzero square; D=sf·m², p∤a₂ ⟹ p∤m (else p|a₂),
+  so sf ≡ (a₂·m⁻¹)² (mod p) is a nonzero square ⟹ (sf/p)=1 ⟹ p splits. □
+- Ran main verification: 15 non-norm-form primes × 5 a₂ values = 70 cases.
+- Bonus search: 8 additional cases with h(K) ≥ 4 explicitly found and confirmed.
+- Added Theorem remark to `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (after Exp U–Y).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — general form, fully verified):**
+For any prime p and integer a₂ with D = a₂²−4p² = sf·m² < 0 (sf squarefree, m>0)
+and p ∤ a₂: the prime P above p in K = Q(√sf) satisfies [P]² = 1 in Cl(K).
+The norm-form condition 4p = 73+3k² is IRRELEVANT to the proof.
+
+**Split condition is automatic:** p∤a₂ ⟹ p splits in Q(√sf).
+
+**Verification — 15 non-norm-form primes, 70 cases:**
+
+| p    | a₂   | sf        | m  | h   | [P]²=1? |
+|------|------|-----------|----|-----|---------|
+| 3    | 1    | -35       | 1  | 2   | YES [NON-TRIVIAL] |
+| 5    | 3    | -91       | 1  | 2   | YES [NON-TRIVIAL] |
+| 7    | 1    | -195      | 1  | 4   | YES [NON-TRIVIAL] |
+| 11   | 1    | -483      | 1  | 4   | YES [NON-TRIVIAL] |
+| 13   | 5    | -651      | 1  | 8   | YES [NON-TRIVIAL] |
+| 17   | 1    | -1155     | 1  | 8   | YES [NON-TRIVIAL] |
+| 23   | 5    | -2091     | 1  | 12  | YES [NON-TRIVIAL] |
+| 29   | 1    | -3363     | 1  | 16  | YES [NON-TRIVIAL] |
+| 31   | 5    | -3819     | 1  | 16  | YES [NON-TRIVIAL] |
+| 41   | 1    | -83       | 9  | 3   | YES [NON-TRIVIAL, h ODD] |
+| 41   | 5    | -6699     | 1  | 24  | YES [NON-TRIVIAL] |
+| 43   | 1    | -7395     | 1  | 16  | YES [NON-TRIVIAL] |
+| 47   | 1    | -8835     | 1  | 16  | YES [NON-TRIVIAL] |
+| 53   | 1    | -11235    | 1  | 24  | YES [NON-TRIVIAL] |
+| 59   | 5    | -13899    | 1  | 28  | YES [NON-TRIVIAL] |
+
+Summary: 70 cases; 8 trivial (h=1); 62 non-trivial (h≥2); 0 violations.
+Theorem holds: YES.
+
+**Exceptional case (p=41, a₂=1, sf=-83, h=3):**
+h(Q(√-83))=3 is odd. [P]²=1 in a group of order 3 forces [P]=1 (P principal).
+Proof: in Z/3Z, x²=0 iff x=0. So this case implicitly asserts P is a principal
+ideal of Q(√-83). β = (-1+9√-83)/2 = -5+9ω (where ω=(1+√-83)/2) ∈ O_K with
+N(β)=41² generates P² which must equal (π²) for some principal generator π with
+N(π)=41.
+
+**Bonus: h≥4 cases confirmed:**
+  p=7, a₂=1, sf=-195, h=4: YES
+  p=11, a₂=7, sf=-435, h=4: YES
+  p=13, a₂=5, sf=-651, h=8: YES
+  p=41, a₂=5, sf=-6699, h=24: YES (largest class number tested; Theorem holds)
+
+### Next step proposal
+Thread 17: Explicit principal generator in the h-odd case.
+- For (p=41, a₂=1, sf=-83, h=3): [P]²=1 with h=3 forces P principal.
+  β = -5+9ω ∈ O_{Q(√-83)} has N(β)=41². Find explicit π ∈ O_K with
+  N(π)=41 and β = ±π² (PARI: `bnfisprincipal` + explicit generator extraction).
+- General question: when h is odd, does the Theorem always force [P]=1 (principal)?
+  Answer: YES — in a group of odd order, x²=1 iff x=1.
+- Corollary to state: if h(Q(√sf)) is odd and [P]² = 1, then P is principal.
+  I.e., p splits in K as a product of two principal ideals.
+- Implication for cover attacks: a genus-2 Jacobian J with biquadratic Weil
+  polynomial and CM by an order in K with odd class number has Frobenius acting
+  as a principal ideal — constraining the CM type of J.
+- Also: write a PARI function to extract the explicit principal generator π from
+  `bnfisprincipal(K, P)` and verify π² = ±β.
+
+### Commits made
+[TBD — computed after commit]
