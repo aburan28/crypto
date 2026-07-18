@@ -28,6 +28,7 @@ pub mod hawk;
 pub mod hqc;
 pub mod kyber;
 pub mod lwe;
+pub mod lms;
 pub mod mayo;
 pub mod mpcith;
 pub mod mqom;
@@ -46,6 +47,7 @@ pub mod ring_lwe;
 pub mod sis;
 pub mod snova;
 pub mod sqisign;
+pub mod xmss;
 pub mod x_wing;
 
 pub use kyber::{
