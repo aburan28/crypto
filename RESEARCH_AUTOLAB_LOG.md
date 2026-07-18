@@ -5506,4 +5506,4 @@ Thread 17: Integrate Thread 16's general theorem into the paper.
   of Honda-Tate that may be unattributed in the literature.
 
 ### Commits made
-`[see below after commit]`
+`65d4d36` autolab 2026-07-18: Thread 16 — general biquadratic Weil theorem; 40/40 non-norm-form cases confirm [P]^2=1
