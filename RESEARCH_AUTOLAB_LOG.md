@@ -5522,4 +5522,4 @@ Thread 17: State the cleanest version of the theorem and look for its converse.
   recovers the discrete log.
 
 ### Commits made
-(to be filled after git commit)
+`72bec59` autolab 2026-07-18: Thread 16 — order-2 Frobenius generalised; 33/33 verified; paper B5 remark added
