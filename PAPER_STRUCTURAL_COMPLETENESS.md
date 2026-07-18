@@ -270,6 +270,37 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Biquadratic Weil polynomial — universal order-2 Frobenius ideal).**
+Let E/F_p be an ordinary elliptic curve with trace t (t ≠ 0, p ∤ t).
+The Jacobian of any genus-2 curve C with Jac(C) ~ E × E^t has Frobenius
+characteristic polynomial T⁴ + a₂T² + p², where a₂ = 2p − t².
+Set D = a₂² − 4p² = t²(t² − 4p) < 0 (negative since |t| < 2√p),
+K = Q(√sf(D)), and let P be a prime above p in O_K.
+
+> **Theorem (Thread 15–16).** Under the above hypotheses,
+> [P]² = 1 in Cl(K).
+>
+> *Proof.*  β = (−a₂ + m√sf)/2 (where m = √(D/sf)) lies in O_K,
+> satisfies x² + a₂x + p² = 0, and has norm N(β) = p².
+> Since p ∤ a₂ (equivalent to p ∤ t), β/p ∉ O_K, ruling out (β) = (p).
+> The only ideals of norm p² in O_K are P², P̄², and (p); therefore
+> (β) = P² or P̄², and [P]² = 1 in Cl(K). □
+
+This theorem is purely algebraic: it depends only on the biquadratic shape
+of the Weil polynomial and is independent of any CM structure, the specific
+choice of curve, or the norm-form condition (73 + 3k²)/4 used in earlier
+secp256k1 audits.
+
+*Numerical verification (script `secp256k1_cm_audit/thread16_general_weil_order2.gp`):*
+30 cases, 10 non-norm-form primes p ∈ {101, 127, 211, 307, 503, 751, 1009, 2003, 5003, 10007},
+3 traces each — all 30 returned [P]² = 1. Class numbers h ranged from 1 to 118.
+
+*Cover-attack relevance:* The theorem implies that for any E/F_p with
+biquadratic Weil product, the ideal class structure of the associated
+imaginary quadratic field K carries a universal order-2 constraint.
+This is a structural property of the E × E^t pairing, not a lattice
+vulnerability; it does not provide an attack vector.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

@@ -5428,3 +5428,106 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+
+**Thread 16**: Generalize the "universal order-2 Frobenius ideal" theorem (proved
+algebraically in Thread 15 for norm-form primes) to arbitrary non-norm-form primes.
+Thread 15 was completed yesterday (2026-07-17) with progress (algebraic proof), so
+Thread 16 is the direct natural continuation.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/thread16_general_weil_order2.gp` (~140 lines):
+  - Picks 10 non-norm-form primes p ∈ {101, 127, 211, 307, 503, 751, 1009, 2003, 5003, 10007}.
+  - For each, tests 3 traces t (small, medium, near-maximal with |t| < 2√p, t≠0, p∤t).
+  - Computes a2 = 2p−t², D = t²(t²−4p) < 0, sf = squarefree_part(D), m = √(D/sf).
+  - Verifies [P]² = 1 in Cl(Q(√sf)) via `bnfisprincipal(K, idealpower(K, P, 2))`.
+- Ran the script: 30/30 passed, 0 failures.
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (after "Numerical verification Exp U–Y"):
+  added the **Theorem (Thread 15–16)** remark with full proof sketch and the 30-case
+  numerical confirmation.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 15–16 — Universal order-2 Frobenius, general version):**
+For any ordinary E/F_p with trace t (t ≠ 0, p ∤ t), set a₂ = 2p−t²,
+D = t²(t²−4p) < 0, K = Q(√sf(D)), P a prime above p in O_K.
+Then [P]² = 1 in Cl(K).
+
+*Proof.*  β = (−a₂ + m√sf)/2 ∈ O_K satisfies x²+a₂x+p² = 0 with N(β) = p².
+Since p ∤ a₂ (because p ∤ t), (β) ≠ (p). Hence (β) = P² or P̄², so [P]² = 1. □
+
+**30-case numerical check (non-norm-form primes):**
+
+| p     | t   | sf       | m    | h   | [P]²=1 |
+|-------|-----|----------|------|-----|--------|
+| 101   | 1   | -403     | 1    | 2   | YES    |
+| 101   | 3   | -395     | 3    | 8   | YES    |
+| 101   | 10  | -19      | 40   | 1   | YES    |
+| 127   | 1   | -3       | 13   | 1   | YES    |
+| 127   | 3   | -499     | 3    | 3   | YES    |
+| 127   | 11  | -43      | 33   | 1   | YES    |
+| 211   | 1   | -843     | 1    | 6   | YES    |
+| 211   | 4   | -23      | 24   | 3   | YES    |
+| 211   | 14  | -2       | 252  | 1   | YES    |
+| 307   | 1   | -1227    | 1    | 4   | YES    |
+| 307   | 5   | -1203    | 5    | 6   | YES    |
+| 307   | 17  | -939     | 17   | 8   | YES    |
+| 503   | 1   | -2011    | 1    | 7   | YES    |
+| 503   | 7   | -1963    | 7    | 6   | YES    |
+| 503   | 22  | -382     | 44   | 8   | YES    |
+| 751   | 1   | -3003    | 1    | 8   | YES    |
+| 751   | 9   | -2923    | 9    | 6   | YES    |
+| 751   | 27  | -91      | 135  | 2   | YES    |
+| 1009  | 1   | -4035    | 1    | 12  | YES    |
+| 1009  | 10  | -246     | 40   | 12  | YES    |
+| 1009  | 31  | -123     | 155  | 2   | YES    |
+| 2003  | 1   | -8011    | 1    | 25  | YES    |
+| 2003  | 14  | -1954    | 28   | 28  | YES    |
+| 2003  | 44  | -31      | 616  | 3   | YES    |
+| 5003  | 1   | -20011   | 1    | 37  | YES    |
+| 5003  | 23  | -19483   | 23   | 21  | YES    |
+| 5003  | 70  | -3778    | 140  | 24  | YES    |
+| 10007 | 1   | -40027   | 1    | 26  | YES    |
+| 10007 | 33  | -38939   | 33   | 118 | YES    |
+| 10007 | 100 | -7507    | 200  | 11  | YES    |
+
+ALL 30 PASSED. Class numbers h ranged from 1 (principal, trivially [P]²=1) to 118.
+The theorem is independent of norm-form structure and holds for arbitrary ordinary primes.
+
+**Key insight:** The condition p ∤ t (equiv. p ∤ a₂) is necessary and sufficient.
+For t = 0 (supersingular-like), D = 0 and the argument degenerates.
+For ordinary curves with t ≠ 0, Hasse gives |t| < 2√p, so p | t iff t = 0 (in the
+range |t| < p), confirming the condition is vacuous for true ordinary curves.
+
+**Cover-attack relevance (added to §B5 remark in paper):** The order-2 constraint is
+a structural algebraic property of the E × E^t pairing. It does not provide an attack
+vector; it is evidence of a rigid ideal-class obstruction in the associated imaginary
+quadratic field.
+
+### Next step proposal
+
+**Thread 17**: The theorem covers biquadratic Weil polynomials (products E × E^t).
+Extension question: does the order-2 result generalize to non-product abelian surfaces?
+
+Concretely: for a Weil polynomial T^4 + aT^3 + bT^2 + apT + p^2 (general genus-2 surface
+not isogenous to a product), is there still a natural prime P in some CM field whose
+class has order ≤ 2?
+
+- Experiment: pick 5 random genus-2 curves C/F_p (non-product Jacobian, confirmed by
+  checking the characteristic polynomial is irreducible over Q), factor the Weil polynomial
+  over its CM field, and check whether any prime ideal above p has order-2 class.
+- If the answer is "yes always", the theorem extends to all abelian surfaces.
+- If "sometimes no", identify the obstruction (likely related to whether the CM type is
+  primitive or not).
+- Script: `secp256k1_cm_audit/thread17_general_g2_weil.gp`, using `hyperellcharpoly` and
+  `bnfisprincipal`.
+
+### Commits made
+[see below after push]
