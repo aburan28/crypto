@@ -5513,3 +5513,4 @@ Thread 17: Extend to non-biquadratic Weil polynomials.
   untouched since the original prioritization.
 
 ### Commits made
+`a29e8c9` autolab 2026-07-18: Thread 16 -- universal order-2 Frobenius theorem; 90/90 non-norm-form checks; B5 remark added
