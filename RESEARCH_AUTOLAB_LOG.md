@@ -5504,4 +5504,4 @@ Thread 17: Examine the boundary case where p | a₂ (excluded from the theorem).
   still hold in some cases (e.g., if h(Q(√−3))=1, [P]=1 trivially).
 
 ### Commits made
-`[to be filled]`
+`7420a5a` autolab 2026-07-18: Thread 16 — order-2 theorem general; 23 cases verified; B5 remark integrated
