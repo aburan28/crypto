@@ -5525,4 +5525,4 @@ Thread 17: Explore whether the principality result in (ii) generalizes further.
   complete the comparison table.
 
 ### Commits made
-[to be filled by commit step]
+`db6e542` autolab 2026-07-18: Thread 16 — product Weil poly family; P principal; 15/15 non-norm-form cases; B5 remark
