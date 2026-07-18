@@ -5515,4 +5515,4 @@ where ord([P]) = 2 (not just = 1)?
 - Small script: for k=1..20, t²=4p-219 (p prime), check ord([P]) in Q(√-219).
 
 ### Commits made
-`[to be filled]`
+``42234b1` autolab 2026-07-18: Thread 16 — universal order-2 Frobenius for general biquadratic Weil polys; 51 non-norm-form cases verified`
