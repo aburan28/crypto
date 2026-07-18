@@ -5428,3 +5428,110 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Generalise the universal order-2 Frobenius theorem (proven in Thread 15
+for secp256k1 norm-form primes) to arbitrary biquadratic Weil polynomials T⁴+a₂T²+p²
+over non-norm-form primes.  This was the explicit "next step" proposal in the
+2026-07-17 log.  All six original priority threads remain CLOSED/BLOCKED.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.py` (~380 lines): implements
+  Gauss composition of binary quadratic forms (Cohen CCANT Algorithm 5.4.2) in pure
+  Python stdlib; implements class-group order computation via repeated composition.
+- Fixed three bugs in the form arithmetic before final clean run:
+  (1) Kronecker symbol: infinite mutual recursion via `kronecker(2,n)` call — rewrote
+      as fully iterative with a `_kronecker2` helper.
+  (2) `reduce_form`: did not update `c` when shifting `b` — fixed to propagate
+      `c' = ak²+bk+c` on each shift step.
+  (3) `reduce_form` boundary: Python banker's rounding `round(3.5)=4` caused infinite
+      loop when `b = -a`; replaced with integer formula `k = (-a-b)//(2a)+1`.
+- Part A: verified 20 (prime p, a₂) pairs with p ∈ {23,…,127} NOT in secp256k1
+  norm-form family.  Class group computed via binary quadratic form arithmetic.
+- Part B: counted #C(F_p) and #C(F_{p²}) for genus-2 curves y²=x⁶+c over F₃₁
+  (expensive but correct for p≤31); extracted biquadratic Weil poly; verified theorem.
+- Added **Remark B5.2** to §B5 of `PAPER_STRUCTURAL_COMPLETENESS.md` with the
+  Proposition and its proof, plus numerical confirmation summary.
+- Ran `cargo test --test curve_audit`: **5/5 pass**.
+
+### Findings
+
+**RESULT (Thread 16)**:
+The order-2 Frobenius constraint is GENERAL — it depends only on the biquadratic
+shape of the Weil polynomial, not on the secp256k1 norm-form condition.
+
+**Part A — 20 non-norm-form (p, a₂) pairs (p ∈ {23,…,127}):**
+
+| p   | a₂ | sf       | disc      | h  | P_form        | ord([P]) | PASS? |
+|-----|-----|----------|-----------|-----|---------------|----------|-------|
+| 23  | 7   | -2067    | -2067     | 8   | (23,7,23)     | 2        | YES   |
+| 29  | 11  | -3243    | -3243     | 8   | (29,11,29)    | 2        | YES   |
+| 31  | 13  | -3       | -3        | 1   | (1,1,1)       | 1        | YES   |
+| 41  | 17  | -715     | -715      | 4   | (11,11,19)    | 2        | YES   |
+| 43  | 19  | -7035    | -7035     | 16  | (43,19,43)    | 2        | YES   |
+| 47  | 21  | -8395    | -8395     | 12  | (47,21,47)    | 2        | YES   |
+| 53  | 23  | -10707   | -10707    | 12  | (53,23,53)    | 2        | YES   |
+| 59  | 27  | -13195   | -13195    | 16  | (59,27,59)    | 2        | YES   |
+| 61  | 29  | -14043   | -14043    | 24  | (61,29,61)    | 2        | YES   |
+| 67  | 31  | -16995   | -16995    | 32  | (67,31,67)    | 2        | YES   |
+| 71  | 33  | -763     | -763      | 4   | (7,7,29)      | 2        | YES   |
+| 73  | 35  | -20091   | -20091    | 32  | (73,35,73)    | 2        | YES   |
+| 83  | 41  | -115     | -115      | 2   | (5,5,7)       | 2        | YES   |
+| 89  | 43  | -3315    | -3315     | 8   | (15,15,59)    | 2        | YES   |
+| 97  | 47  | -723     | -723      | 4   | (3,3,61)      | 2        | YES   |
+| 101 | 51  | -38203   | -38203    | 28  | (101,51,101)  | 2        | YES   |
+| 103 | 53  | -4403    | -4403     | 20  | (17,17,69)    | 2        | YES   |
+| 107 | 55  | -42771   | -42771    | 60  | (107,55,107)  | 2        | YES   |
+| 113 | 57  | -283     | -283      | 3   | (1,1,71)      | 1        | YES   |
+| 127 | 63  | -60547   | -60547    | 26  | (127,63,127)  | 2        | YES   |
+
+ALL 20 PASSED. ord([P]) ∈ {1,2} in every case; class numbers range h=1 to h=60.
+
+Notes:
+- p=31, sf=-3, h=1: P is principal (trivial class); [P]²=1 holds as [P]=1. (Same as k=131 in Thread 15.)
+- p=113, sf=-283, h=3: odd class number h=3 is unusual; [P]=1 (P already principal).
+  Reason: 283≡3 mod 4, so disc=-1132 and... actually disc=-283≡1 mod 4, h=3. The element β
+  of norm p²=12769=113² lies in a class that happens to be principal, so P itself is principal.
+- p=107, sf=-42771, h=60: largest class number tested; composition ran to 60 steps, ord=2. ✓
+
+**Part B — Genus-2 curves y²=x⁶+c over F₃₁ (biquadratic by x→-x symmetry):**
+
+All 5 instances found (c=15,23,27,29,30) gave #C(F₃₁)=32, a₁=0, a₂=46, D=-1728, sf=-3.
+All have P_form=(1,1,1) (principal over Q(√-3) since h=1). **5/5 PASS**.
+
+Note: the 5 curves all give the SAME a₂=46 — reflecting that y²=x⁶+c for c a non-zero
+cube modulo F₃₁ give isomorphic Jacobians over F₃₁ (the cube twist acts by scaling x).
+This means part B really verified 5 instances of ONE algebraic class; a richer Part B
+sample would require p > 31 (too slow for F_{p²} brute-force with current approach).
+TODO next session: implement baby-step-giant-step Jacobian point-counting for p≤100.
+
+**Algebraic proof (unchanged from Thread 15):**
+  β = (-a₂ + m√sf)/2 ∈ O_K, N(β)=p², p∤a₂ ⟹ (β)≠(p) ⟹ (β)=P² or P̄² ⟹ [P]²=1. □
+
+**Paper update:**
+Added Remark B5.2 to §B5 of `PAPER_STRUCTURAL_COMPLETENESS.md`, including the
+Proposition, proof, and numerical confirmation summary.
+
+### Next step proposal
+Thread 17: Richer Part B sample using baby-step-giant-step (or Schoof) Jacobian
+point-counting for genus-2 curves y²=x⁶+c over F_p with p ∈ {37,41,43,47}.
+- Implement BSGS-like counting for genus-2 Jacobians (or use the group law on
+  the Jacobian directly to find the group order from the characteristic polynomial).
+- Goal: find 10 genus-2 curves with distinct (sf, h) pairs for Part B confirmation.
+- Alternative: use a2 = 0 case (Weil poly T⁴+p²; D=-4p², sf=-1, but sf=-1 means
+  K=Q(√-1)=Q(i), h=1, trivially [P]²=1). Try to find examples with h>1 in Part B.
+
+OR:
+
+Thread 17 (higher priority): Cite ePrint 2025/705 ("Breaking ECDSA with Two Affinely
+Related Nonces") in a remark noting that the GLV decomposition k₁=λk₂ is a special
+case of their affine relation, and that their closed-form key recovery (Theorem 1) may
+apply to GLV signatures WITHOUT lattice reduction.
+- Check: does their Theorem 1 directly give the secret key from 2 secp256k1 signatures
+  with the same nonce structure k₁=λk₂ mod n?
+- This is potentially a new attack vector (independent of LLL) for Priority 5.
+
+### Commits made
+(to be filled after commit)

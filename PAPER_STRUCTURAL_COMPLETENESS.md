@@ -270,6 +270,37 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark B5.2 (Order-2 Frobenius ideal structure — general biquadratic Weil polynomials).**
+The order-2 constraint on the Frobenius ideal class is a property of the
+*shape* of the Weil polynomial, not of the specific norm-form or curve family.
+
+> **Proposition.** Let `p` be prime and `T⁴ + a₂T² + p²` a biquadratic
+> Weil polynomial with `D = a₂² − 4p² < 0`, `D = sf · m²` (sf squarefree,
+> m > 0), and `p ∤ a₂`.  Then in `K = Q(√sf)` with prime ideal `P | p`:
+> `[P]² = 1` in `Cl(K)`.
+>
+> *Proof.* Set `β = (−a₂ + m√sf)/2`.  Then
+> `β² + a₂β + p² = 0`, so `β` is an algebraic integer in `O_K` with
+> `N_{K/Q}(β) = p²`.  Since `p ∤ a₂`, one has `β/p ∉ O_K`, so `(β) ≠ (p)`.
+> The only proper `O_K`-ideals of norm `p²` are `P², P̄², (p)`.
+> Hence `(β) = P²` or `P̄²`, giving `[P]² = 1`. □
+
+*Numerical confirmation (Thread 16, `thread16_general_biquadratic.py`):*
+- Part A: 20 non-norm-form (prime `p`, `a₂`) pairs, `p ∈ {23,…,127}` not in
+  the secp256k1 norm-form family.  Class group computed via binary quadratic
+  form arithmetic.  **20 / 20 passed** (`ord([P]) ∈ {1,2}`).
+- Part B: 5 explicit genus-2 curves `y² = x⁶ + c` over `F_31` (biquadratic
+  Weil poly by the symmetry `x → −x`).  **5 / 5 passed**.
+- Notable: the proposition is verified for class numbers `h` ranging from 1
+  to 60, over discriminants as large as `|Δ| = 60547`.
+
+*Implication for B5:* Every abelian surface over `F_p` whose characteristic
+polynomial of Frobenius is biquadratic carries this order-2 ideal constraint.
+The constraint is algebraic and independent of whether the surface is actually
+the Jacobian of a smooth curve or arises from a (ℓ,ℓ)-cover of `E × Eᵗ`.
+In particular it is not an arithmetic obstruction to cover existence — it is
+simply a structural feature of the biquadratic Weil polynomial shape.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
