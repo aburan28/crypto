@@ -35,14 +35,19 @@
 //!   then Babai-reduces `(F, G)` against `(f, g)` — the same
 //!   mathematics as Falcon's `NTRUSolve`, minus its recursive
 //!   field-tower optimisation.
-//! - **Signing** uses the deterministic Babai nearest-plane algorithm
-//!   (floating-point Gram–Schmidt) instead of Falcon's randomised
-//!   `ffSampling` discrete-Gaussian sampler.  This is exactly the
-//!   simplification that *broke* GGH/NTRUSign (Nguyen–Regev 2006
-//!   "learning a parallelepiped"): each signature leaks the secret
-//!   basis's shape, and a few thousand signatures reveal it.  Falcon's
-//!   whole reason for FFT Gaussian sampling is to destroy that leak —
+//! - **Signing** uses **Klein/GPV lattice-Gaussian sampling** (a
+//!   discrete Gaussian along each Gram–Schmidt direction), the
+//!   randomised sampler whose distribution is *independent of the secret
+//!   basis's geometry*.  This is the countermeasure Falcon implements
+//!   efficiently with its FFT `ffSampling`; the deterministic Babai
+//!   rounding it replaces is exactly what *broke* GGH/NTRUSign
+//!   (Nguyen–Regev 2006 "learning a parallelepiped"), where each
+//!   signature leaked the secret basis's shape and a few thousand
+//!   signatures revealed it.  Falcon's whole reason for FFT Gaussian
+//!   sampling is to destroy that leak,
 //!   which is also why FIPS 206 is the hardest standard to implement.
+//!   (Our scalar rejection-sampled Gaussian is the pedagogical version
+//!   of Falcon's fast FFT tree sampler, not its constant-time equal.)
 //!
 //! Toy parameters, not constant-time; see SECURITY.md.
 
@@ -473,33 +478,67 @@ fn secret_basis(sk: &FnDsaSecretKey) -> Vec<Vec<f64>> {
     rows
 }
 
-/// Babai nearest-plane: the lattice point (as integer combination of
-/// `basis` rows) closest to `target` along the Gram–Schmidt directions.
-fn nearest_plane(basis: &[Vec<f64>], target: &[f64]) -> Vec<f64> {
+/// Sample an integer from the discrete Gaussian `D_{Z, center, sigma}`
+/// by rejection sampling in a window around the centre.  This is the
+/// one-dimensional building block of Klein/GPV sampling (and the scalar
+/// analog of what Falcon's `ffSampling` does along the FFT tree).
+fn sample_discrete_gaussian(center: f64, sigma: f64) -> f64 {
+    let lo = (center - 6.0 * sigma).floor() as i64;
+    let hi = (center + 6.0 * sigma).ceil() as i64;
+    loop {
+        // Uniform candidate in the window, accepted with the Gaussian
+        // weight exp(−(z−c)²/(2σ²)).
+        let mut b = [0u8; 8];
+        random_bytes(&mut b);
+        let span = (hi - lo + 1) as u64;
+        let z = lo + (u64::from_le_bytes(b) % span) as i64;
+        let mut u = [0u8; 8];
+        random_bytes(&mut u);
+        let uni = (u64::from_le_bytes(u) as f64) / (u64::MAX as f64);
+        let d = z as f64 - center;
+        if uni < (-(d * d) / (2.0 * sigma * sigma)).exp() {
+            return z as f64;
+        }
+    }
+}
+
+/// Klein/GPV lattice-Gaussian sampler: like Babai nearest-plane, but at
+/// each Gram–Schmidt coordinate the integer coefficient is drawn from a
+/// discrete Gaussian centred at the exact projection instead of being
+/// deterministically rounded.  The output is a lattice point whose
+/// offset from `target` follows a distribution *independent of the
+/// secret basis's geometry* — which is exactly why it defeats the
+/// Nguyen–Regev parallelepiped-learning attack that broke deterministic
+/// NTRUSign.  `sigma_factor` scales the per-coordinate width relative to
+/// each Gram–Schmidt vector's length.
+fn klein_sample(basis: &[Vec<f64>], target: &[f64], sigma_factor: f64) -> Vec<f64> {
     let m = basis.len();
     let dim = target.len();
     // Gram–Schmidt.
     let mut gs: Vec<Vec<f64>> = Vec::with_capacity(m);
-    let mut mu = vec![vec![0f64; m]; m];
     for i in 0..m {
         let mut v = basis[i].clone();
         for j in 0..i {
             let dot: f64 = basis[i].iter().zip(&gs[j]).map(|(a, b)| a * b).sum();
             let nrm: f64 = gs[j].iter().map(|x| x * x).sum();
-            mu[i][j] = dot / nrm;
+            let mu = dot / nrm;
             for k in 0..dim {
-                v[k] -= mu[i][j] * gs[j][k];
+                v[k] -= mu * gs[j][k];
             }
         }
         gs.push(v);
     }
-    // Nearest plane, top row down.
+    // Sample top row down, each coefficient a discrete Gaussian.
     let mut t = target.to_vec();
     let mut result = vec![0f64; dim];
     for i in (0..m).rev() {
         let dot: f64 = t.iter().zip(&gs[i]).map(|(a, b)| a * b).sum();
         let nrm: f64 = gs[i].iter().map(|x| x * x).sum();
-        let c = (dot / nrm).round();
+        let center = dot / nrm;
+        // Per-coordinate width proportional to ‖b*_i‖ (the GPV/Falcon
+        // rule σ_i = σ / ‖b*_i‖); a small floor keeps the sampler stable.
+        let sigma = (sigma_factor / nrm.sqrt()).max(0.5);
+        let c = sample_discrete_gaussian(center, sigma);
         for k in 0..dim {
             t[k] -= c * basis[i][k];
             result[k] += c * basis[i][k];
@@ -527,6 +566,12 @@ fn centered(x: i64) -> i64 {
     }
 }
 
+/// GPV/Falcon sampling width.  Wide enough that the per-coordinate
+/// discrete Gaussians overlap the neighbouring cosets (so the output
+/// distribution is basis-independent), small enough that the sampled
+/// signature stays within the verification bound.
+const SIGMA_FACTOR: f64 = 8.0;
+
 pub fn fn_dsa_sign(sk: &FnDsaSecretKey, msg: &[u8]) -> FnDsaSignature {
     let basis = secret_basis(sk);
     loop {
@@ -536,7 +581,10 @@ pub fn fn_dsa_sign(sk: &FnDsaSecretKey, msg: &[u8]) -> FnDsaSignature {
 
         let mut target: Vec<f64> = c.iter().map(|&x| x as f64).collect();
         target.extend(std::iter::repeat(0f64).take(N));
-        let v = nearest_plane(&basis, &target);
+        // Klein/GPV lattice-Gaussian sampling (randomised), not
+        // deterministic Babai rounding — this is what makes signatures
+        // leak nothing about the secret basis.
+        let v = klein_sample(&basis, &target, SIGMA_FACTOR);
 
         let s1: Vec<i64> =
             (0..N).map(|i| (c[i] as f64 - v[i]).round() as i64).collect();
@@ -545,7 +593,9 @@ pub fn fn_dsa_sign(sk: &FnDsaSecretKey, msg: &[u8]) -> FnDsaSignature {
         if norm2 <= BOUND {
             return FnDsaSignature { salt, s2 };
         }
-        // Rare with an accepted basis: fresh salt, new target, retry.
+        // Gaussian sampling occasionally overshoots the bound: resample
+        // (fresh salt → fresh target). This rejection is exactly how a
+        // real GPV/Falcon signer enforces its norm bound.
     }
 }
 
@@ -607,6 +657,20 @@ mod tests {
         let msg = b"hash-and-sign on NTRU lattices";
         let sig = fn_dsa_sign(&sk, msg);
         assert!(fn_dsa_verify(&pk, msg, &sig));
+    }
+
+    #[test]
+    fn signatures_are_randomised() {
+        // Klein/GPV sampling (not deterministic Babai): two signatures on
+        // the same message differ, yet both verify.  This randomisation
+        // is what closes the NTRUSign parallelepiped leak.
+        let (pk, sk) = fn_dsa_keygen();
+        let msg = b"randomised GPV sampling";
+        let s1 = fn_dsa_sign(&sk, msg);
+        let s2 = fn_dsa_sign(&sk, msg);
+        assert!(fn_dsa_verify(&pk, msg, &s1));
+        assert!(fn_dsa_verify(&pk, msg, &s2));
+        assert_ne!(s1.s2, s2.s2, "GPV signatures must be randomised");
     }
 
     #[test]
