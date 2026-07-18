@@ -5528,4 +5528,4 @@ T⁴+a2*T²+p² (over prime F_p), ord([P]) is EXACTLY 2 (not just divides 2).
   ord([P]) = 2 otherwise (for non-trivial class groups, h>1).
 
 ### Commits made
-[to be filled after commit]
+`cc38985` autolab 2026-07-18: Thread 16 — structural dichotomy of order-2 Frobenius; non-rational-split iff ord([P])=2; 50+5 cases verified; B5 remark added
