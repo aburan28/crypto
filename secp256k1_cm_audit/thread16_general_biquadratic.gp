@@ -4,13 +4,17 @@
 \\ for non-norm-form primes, including genuinely non-trivial h(K) > 1 cases.
 \\
 \\ Theorem (Thread 15, general form — no norm-form assumption):
-\\   Let p prime, a2 integer with D = a2^2 - 4p^2 < 0 = sf*m^2 (sf squarefree, m>0).
-\\   If p does not divide a2, then [P]^2 = 1 in Cl(K) for K = Q(sqrt(sf)).
+\\   Let p prime, a2 integer with D = a2^2 - 4p^2 < 0; write D = sf*m^2
+\\   (sf squarefree, m > 0).  If p does not divide a2, then [P]^2 = 1
+\\   in Cl(K) for K = Q(sqrt(sf)).
 \\
 \\ Proof sketch (purely from the Weil polynomial; norm-form irrelevant):
+\\   p splits in K: sf*m^2 = a2^2 - 4p^2 == a2^2 (mod p) and p !| a2,
+\\     so p !| sf and p !| m, and sf == (a2/m)^2 (mod p) is a nonzero
+\\     square mod p; p is unramified (p !| disc K) and (sf/p) = 1.
 \\   beta = (-a2 + m*sqrt(sf))/2  satisfies  x^2 + a2*x + p^2 = 0  (A,B)
 \\   N_{K/Q}(beta) = p^2  =>  (beta) has ideal-norm p^2  (C)
-\\   p !| a2  =>  beta/p not a unit  =>  (beta) != (p)  (D)
+\\   p !| a2  =>  beta/p not in O_K  =>  (beta) != (p)  (D)
 \\   Only options: (beta) = P^2 or Pbar^2  =>  [P]^2 = 1.  QED  (E)
 \\
 \\ Run: gp -q thread16_general_biquadratic.gp
@@ -96,7 +100,7 @@ print("--- Phase 2: Search for h(K)>1 cases (p in [50,500]) ---");
   found = List();
   forprime(p = 50, 500,
     if(is_norm_form(p), next);
-    for(t = 1, 2*sqrtint(p),
+    for(t = 1, sqrtint(4*p),
       a2 = 2*p - t^2;
       D = a2^2 - 4*p^2;
       if(D >= 0, next);
@@ -145,7 +149,7 @@ print("--- Phase 3: Targeting h(K)>=3 cases (p in [50,2000]) ---");
   found3 = List();
   forprime(p = 50, 2000,
     if(is_norm_form(p), next);
-    for(t = 1, 2*sqrtint(p),
+    for(t = 1, sqrtint(4*p),
       a2 = 2*p - t^2;
       D = a2^2 - 4*p^2;
       if(D >= 0, next);

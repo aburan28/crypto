@@ -5540,5 +5540,17 @@ Theorem/Corollary environment. Also:
 - Optional: check if the p∤a₂ hypothesis can be dropped (i.e., is there a case with
   p|a₂ where [P]²≠1?). If yes, an explicit counterexample sharpens the theorem.
 
+### Review fixes (Augment, PR #24)
+- `800229e`: Corollary error — P is principal with generator γ of norm p, NOT (β)
+  (N(β)=p² ≠ N(P)=p; β generates P²). Fixed in paper + log.
+- Trace-bound bug: `for(t=1, 2*sqrtint(p))` undercounts by 1 when
+  ⌊2√p⌋ > 2⌊√p⌋ (e.g. p=59: 14 vs 15). Fixed to `sqrtint(4*p)` in Phase 2+3.
+  Re-run: recorded results unchanged (capped searches find identical first
+  cases; boundary traces for affected primes give h(K)=1 fields, filtered out).
+- Added splitting justification to proof sketch (paper + script header):
+  p∤a₂ ⟹ p∤sf·m ⟹ sf ≡ (a₂·m⁻¹)² (mod p) nonzero square ⟹ (sf/p)=1,
+  p unramified, pO_K = P·P̄ — the decomposition step (C) relies on.
+
 ### Commits made
 `49167cf` autolab 2026-07-18: Thread 16 — general biquadratic Weil poly theorem; 37 non-norm-form cases incl h(K)=9 verified; odd-h corollary (P principal); B5 remark updated
+`800229e` Fix corollary: P is principal with generator of norm p, not (β)

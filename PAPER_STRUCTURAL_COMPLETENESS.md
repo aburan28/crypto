@@ -277,6 +277,10 @@ F_p-isogenous to E × E^t), and that p ∤ a₂.  There is no norm-form
 assumption.  Concretely: set β = (−a₂+m√sf)/2 where D=a₂²−4p²=sf·m² (sf
 squarefree).  Then (A) β ∈ O_K, (B) N_{K/Q}(β)=p², (C) p∤a₂ forces
 (β)≠(p), so (β)=P² or P̄² in O_K, giving [P]²=1 in Cl(K).
+(Note p∤a₂ also guarantees p splits in K: sf·m² = a₂²−4p² ≡ a₂²
+(mod p) with p∤a₂ gives p∤sf and p∤m, so sf ≡ (a₂·m⁻¹)² (mod p) is
+a nonzero square; p is unramified and (sf/p)=1, hence pO_K = P·P̄
+with P ≠ P̄ — the decomposition used in step (C).)
 
 Numerical confirmation (Thread 16,
 `secp256k1_cm_audit/thread16_general_biquadratic.gp`): 37/37 test cases
