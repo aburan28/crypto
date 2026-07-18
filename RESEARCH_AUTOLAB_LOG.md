@@ -5518,4 +5518,4 @@ NON-biquadratic Weil polynomials in a suitable generalization. Specifically:
     as a formal Theorem (with proof in the appendix, citing the PARI scripts).
 
 ### Commits made
-[to be filled after commit]
+`b5fe07b` autolab 2026-07-18: Thread 16 — universal [P]^2=1 theorem confirmed for irreducible biquadratic Weil polynomials; 118/118 verified; B5 remark added
