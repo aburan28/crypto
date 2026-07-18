@@ -20,6 +20,7 @@
 pub mod bike;
 pub mod classic_mceliece;
 pub mod csidh;
+pub mod csi_fish;
 pub mod faest;
 pub mod fn_dsa;
 pub mod frodo;
