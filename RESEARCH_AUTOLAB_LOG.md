@@ -5428,3 +5428,100 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 — generalize the universal order-2 Frobenius theorem (proved in Thread 15)
+from the norm-form family to arbitrary non-norm-form primes.  Thread 15 closed yesterday
+with a complete algebraic proof; Thread 16 is the natural extension.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_theorem.gp` (~140 lines).
+- Constructed biquadratic Weil polynomials algebraically: W(T) = (T²−αT+p)(T²+αT+p),
+  giving a₂ = 2p−α², valid for 0 < α² < 4p. No actual curve construction needed.
+- Noted key automaticity: p ∤ a₂ for all valid α, since a₂ ≡ −α² (mod p) and
+  |α| ≤ 2√p ≪ p implies p ∤ α.
+- Ran 10 non-norm-form primes (101 to 4294967311), 3 α values each → 30 cases.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added §B5 remark to `PAPER_STRUCTURAL_COMPLETENESS.md` with proof sketch + pointer
+  to Thread 16 script.
+
+### Findings
+
+**RESULT (Thread 16): 30/30 PASS — theorem generalises to all non-norm-form primes tested.**
+
+Full output table:
+
+| p          | α    | a₂           | sf          | m      | h     | ord[P] | [P]²=1 |
+|------------|------|--------------|-------------|--------|-------|--------|--------|
+| 101        | 1    | 201          | -403        | 1      | 2     | 1      | YES    |
+| 101        | 3    | 193          | -395        | 3      | 8     | 1      | YES    |
+| 101        | 10   | 102          | -19         | 40     | 1     | 1      | YES    |
+| 1009       | 1    | 2017         | -4035       | 1      | 12    | 1      | YES    |
+| 1009       | 3    | 2009         | -4027       | 3      | 9     | 1      | YES    |
+| 1009       | 31   | 1057         | -123        | 155    | 2     | 1      | YES    |
+| 10007      | 1    | 20013        | -40027      | 1      | 26    | 1      | YES    |
+| 10007      | 3    | 20005        | -40019      | 3      | 78    | 1      | YES    |
+| 10007      | 100  | 10014        | -7507       | 200    | 11    | 1      | YES    |
+| 100003     | 1    | 200005       | -400011     | 1      | 230   | 1      | YES    |
+| 100003     | 3    | 199997       | -400003     | 3      | 76    | 1      | YES    |
+| 100003     | 316  | 100150       | -75039      | 632    | 330   | 1      | YES    |
+| 1000033    | 1    | 2000065      | -444459     | 3      | 116   | 1      | YES    |
+| 1000033    | 3    | 2000057      | -4000123    | 3      | 242   | 1      | YES    |
+| 1000033    | 1000 | 1000066      | -83337      | 6000   | 100   | 1      | YES    |
+| 9999991    | 1    | 19999981     | -39999963   | 1      | 1372  | 1      | YES    |
+| 9999991    | 3    | 19999973     | -39999955   | 3      | 1044  | 1      | YES    |
+| 9999991    | 3162 | 10001738     | -153070     | 44268  | 164   | 1      | YES    |
+| 99999989   | 1    | 199999977    | -399999955  | 1      | 3064  | 1      | YES    |
+| 99999989   | 3    | 199999969    | -399999947  | 3      | 5061  | 1      | YES    |
+| 99999989   | 9999 | 100019977    | -300019955  | 9999   | 5268  | 1      | YES    |
+| 999999937  | 1    | 1999999873   | -3999999747 | 1      | 12512 | 1      | YES    |
+| 999999937  | 3    | 1999999865   | -3999999739 | 3      | 11166 | 1      | YES    |
+| 999999937  | 31622| 1000048990   | -187503054  | 126488 | 10064 | 1      | YES    |
+| 2147483647 | 1    | 4294967293   | -8589934587 | 1      | 17184 | 1      | YES    |
+| 2147483647 | 3    | 4294967285   | -8589934579 | 3      | 17456 | 1      | YES    |
+| 2147483647 | 46340| 2147571694   | -1610634747 | 92680  | 5336  | 1      | YES    |
+| 4294967311 | 1    | 8589934621   | -17179869243| 1      | 27376 | 1      | YES    |
+| 4294967311 | 3    | 8589934613   | -17179869235| 3      | 21536 | 1      | YES    |
+| 4294967311 | 65536| 4294967326   | -357913943  | 393216 | 13182 | 1      | YES    |
+
+**STRONGER THAN THEOREM**: All 30 cases have ord[P] = 1 (P itself PRINCIPAL), not
+merely ord[P] ≤ 2.  The theorem (Thread 15) guarantees [P]² = 1; these computations
+show P is always principal in this construction.  This holds even for class numbers
+up to h = 27376 where the "generic" prime above p need not be principal.
+
+**Structural explanation (conjecture)**: For α ∈ Z with 0 < α² < 4p, the Weil
+polynomial W(T) = (T²−αT+p)(T²+αT+p) corresponds to J ≅ E×E^t where E/F_p has
+trace of Frobenius α.  The Frobenius ideal P above p in K = Q(√sf) is always
+principal because p is represented by the norm form of K — specifically, the
+representation comes from the CM theory of E: the endomorphism ring End(E) ⊗ Q
+contains an element of norm p, implying p splits principal in the corresponding
+ring class field.  This would imply ord[P] = 1 universally (not just ≤ 2).
+
+**B5 paper update**: Added "Remark (Frobenius ideal structure — Thread 15/16)" to
+`PAPER_STRUCTURAL_COMPLETENESS.md` after the B5 universality corollary.
+
+### Next step proposal
+Thread 17: Prove or disprove the "ord[P] = 1 always" conjecture.
+
+Method: For an elliptic curve E/F_p with trace α and a₂ = 2p−α², the discriminant
+of the endomorphism ring End(E) divides D = α²−4p. The prime p is always normed
+by the Frobenius: π = α+√(α²−4p) ∈ End(E) and N(π) = p. So π (or its conjugate)
+generates a principal ideal of norm p in the appropriate order in K.
+
+Experiment: Find ONE case where ord[P] = 2 (i.e., [P] ≠ 1 but [P]² = 1) in the
+biquadratic Weil polynomial setting — or prove it can never happen. If it can never
+happen, update the theorem statement from "[P]² = 1" to "[P] = 1".
+
+Candidate: try non-integer α (non-realizable Weil polynomials) — but by the
+Hasse–Weil theorem, integer α always corresponds to an actual elliptic curve, so
+every integer α in range is realizable. So the conjecture may be:
+
+  CONJECTURE (Thread 17): For any prime p and integer α with 0 < α² < 4p,
+  the prime P above p in K = Q(√(α²−4p)) is PRINCIPAL.
+
+This is a clean number-theoretic statement about representations by norm forms.
+
+### Commits made
+See below.

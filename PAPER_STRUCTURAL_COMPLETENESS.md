@@ -270,6 +270,25 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal structure — Thread 15/16).** The biquadratic Weil polynomial
+`W(T) = T⁴ + a₂T² + p² = (T² − αT + p)(T² + αT + p)` (with `a₂ = 2p − α²`)
+carries an additional algebraic structure: writing `D = a₂² − 4p² = sf·m²` with `sf`
+squarefree, set `β = (−a₂ + m√sf)/2 ∈ O_{Q(√sf)}`.  Then:
+
+- `β` satisfies `x² + a₂x + p² = 0` (algebraic integer, norm `p²`);
+- `(β) = P²` for a prime `P` above `p` in `Q(√sf)`, hence `[P]² = 1` in `Cl(Q(√sf))`.
+
+*Proof sketch.* Since `N(β) = p²`, the ideal `(β)` has norm `p²`.  The only norm-`p²`
+ideals are `P², P̄², (p)`.  Case `(β) = (p)` requires `p | a₂`; but `a₂ ≡ −α² (mod p)`
+and `p ∤ α` for `|α| ≤ 2√p ≪ p`, so this case is impossible.  Hence `(β) = P²` and
+`[P]² = 1`. □
+
+This is purely a statement about Weil polynomial arithmetic, independent of which actual
+abelian surface realises the polynomial.  Computational verification (Thread 16):
+30 cases — 10 non-norm-form primes from 101 to 4 × 10⁹, 3 values of `α` each — all
+pass, with `ord[P] = 1` in every case (P itself principal, stronger than `[P]² = 1`).
+See `secp256k1_cm_audit/thread16_general_theorem.gp`.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
