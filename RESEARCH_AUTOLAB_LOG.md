@@ -5508,4 +5508,4 @@ Thread 17: Prove or disprove the converse of the general theorem.
   the `glv_hnp_phase2_toy.gp` script may be runnable now.
 
 ### Commits made
-[to be filled in after git commit]
+`c2459d5` autolab 2026-07-18: Thread 16 — order-2 Frobenius theorem extended to non-norm-form primes; 50/50 cases pass; §B5 remark added
