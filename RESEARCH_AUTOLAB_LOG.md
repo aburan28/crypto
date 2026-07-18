@@ -5509,4 +5509,4 @@ Thread 17: Push the general theorem one step further.
     in the reproducibility table (§10 of the paper).
 
 ### Commits made
-[to be filled after commit]
+`75a208f` autolab 2026-07-18: Thread 16 — general Frobenius order-2 theorem; 84/84 non-norm-form cases verified
