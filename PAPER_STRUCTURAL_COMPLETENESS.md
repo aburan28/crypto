@@ -270,6 +270,34 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Theorem (Universal order-2 Frobenius, Threads 15–16).**
+For any prime `p`, integer `t` with `0 < |t| < 2√p`, set `a₂ = 2p − t²`
+and `D = a₂² − 4p² = t²(t²−4p) < 0`.  Write `D = sf · m²` with `sf`
+squarefree.  Let `K = Q(√sf)` and `P` any prime ideal above `p` in `O_K`.
+Then `[P]² = 1` in `Cl(K)`.
+
+> *Proof.*  Let `β = (−a₂ + m√sf)/2`.
+> (A) `β` satisfies `x² + a₂x + p² = 0` (monic, integer coefficients),
+>     so `β` is an algebraic integer in `K`.
+> (B) `N_{K/Q}(β) = (a₂² − m²sf)/4 = p²`.
+> (C) `(β) ≠ (p)`: that would require `p | a₂ = 2p − t²`, hence `p | t²`,
+>     hence `p | t`.  But `0 < |t| < 2√p < p`, so `p ∤ t`.
+> (D) Therefore `(β) = P²` or `P̄²`, giving `[P]² = 1` in `Cl(K)`. □
+
+*Splitting observation:*  `D ≡ t⁴ ≡ (t²)² (mod p)`, so `D` is a non-zero
+perfect square mod `p`; thus `sf` is a quadratic residue mod `p` and `p`
+**always splits** in `K`.  The theorem is non-vacuous in every case.
+
+*Numerical evidence:* verified for 25 secp256k1 norm-form primes `k ≤ 199`
+(`thread15_order2_algebraic.gp`) and for 51 additional non-norm-form cases
+spanning `p = 101` to `p = 999,983`, class numbers `h = 1..122`
+(`thread16_general_order2.gp`); 0 failures in 76 total cases.
+
+*Relevance to B5:* the theorem shows that the Frobenius of `J = E × E^t`
+has bounded order in `Cl(Q(√sf(D)))`.  This is an intrinsic algebraic
+rigidity of biquadratic Weil polynomials — not an attack, but additional
+structural context for why cover Jacobians are algebraically constrained.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
