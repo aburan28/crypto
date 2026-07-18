@@ -5534,4 +5534,4 @@ apply to GLV signatures WITHOUT lattice reduction.
 - This is potentially a new attack vector (independent of LLL) for Priority 5.
 
 ### Commits made
-(to be filled after commit)
+`e4a2722` autolab 2026-07-18: Thread 16 — universal order-2 Frobenius generalised; 20/20 non-norm-form pairs and 5/5 genus-2 curves pass; Remark B5.2 added to paper
