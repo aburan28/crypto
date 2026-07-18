@@ -261,7 +261,7 @@ fn poly_sqrt_mod_g(v: &Poly, g: &Poly, gf: &GfTables) -> Poly {
 // ── Goppa code: parity-check construction and Patterson decoder ──────────────
 
 /// Build the t×n parity-check matrix over GF(2^m): H[i][j] = α_jⁱ / g(α_j).
-fn parity_check_gf(support: &[u32], g: &Poly, gf: &GfTables) -> Vec<Vec<u32>> {
+pub fn parity_check_gf(support: &[u32], g: &Poly, gf: &GfTables) -> Vec<Vec<u32>> {
     let n = support.len();
     let t = g.len() - 1;
     let mut h = vec![vec![0u32; n]; t];
@@ -281,7 +281,7 @@ fn parity_check_gf(support: &[u32], g: &Poly, gf: &GfTables) -> Vec<Vec<u32>> {
 
 /// Expand each GF(2^m) entry into m binary rows: produces an (m·t)×n binary
 /// parity-check matrix.
-fn expand_to_binary(h: &[Vec<u32>]) -> Vec<Vec<u8>> {
+pub fn expand_to_binary(h: &[Vec<u32>]) -> Vec<Vec<u8>> {
     let t = h.len();
     let n = h[0].len();
     let mut h_bin = vec![vec![0u8; n]; t * M];
@@ -451,7 +451,7 @@ fn invert_binary(m: &BinMat) -> Option<BinMat> {
 /// Gaussian elimination with column swaps.  Returns the reduced matrix and a
 /// permutation `perm` such that column `i` of the reduced matrix is column
 /// `perm[i]` of the input.
-fn systematic_form(h: &BinMat) -> Option<(BinMat, Vec<usize>)> {
+pub fn systematic_form(h: &BinMat) -> Option<(BinMat, Vec<usize>)> {
     let mt = h.len();
     let n = h[0].len();
     let mut a: BinMat = h.iter().map(|r| r.clone()).collect();
@@ -510,7 +510,7 @@ fn generator_from_systematic(h_sys: &BinMat) -> BinMat {
 /// Sample a random irreducible polynomial of degree `t` over GF(2^m).
 /// Strategy: random monic poly of degree t, reject if it has a root in
 /// GF(2^m).  For t ≤ 3 this is equivalent to irreducibility.
-fn random_irreducible_poly(t: usize, gf: &GfTables) -> Poly {
+pub fn random_irreducible_poly(t: usize, gf: &GfTables) -> Poly {
     assert!(t >= 1 && t <= 3, "this implementation supports t ≤ 3");
     let mut rng = rand::rngs::OsRng;
     loop {
