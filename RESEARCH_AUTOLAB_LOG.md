@@ -5499,4 +5499,4 @@ Thread 17: Quantify the class-number h = |Cl(Q(√sf))| more carefully.
   relation k₁ = λ·k₂ and ECDSA key recovery.
 
 ### Commits made
-[to be filled after push]
+`da06c3a` autolab 2026-07-18: Thread 16 — order-2 theorem confirmed for non-norm-form primes; 34/34 cases pass; B5 remark added to paper
