@@ -5508,4 +5508,4 @@ Thread 17: Integrate the generalised theorem into the paper.
   (a2 > 2p) to see if [P]²=1 in the real quadratic class group.
 
 ### Commits made
-[to be filled after commit]
+`f0b9a6c` autolab 2026-07-18: Thread 16 — order-2 Frobenius theorem confirmed for 190 non-norm-form cases
