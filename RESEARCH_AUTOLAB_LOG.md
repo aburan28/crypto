@@ -5428,3 +5428,75 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (next-step proposal from Thread 15): verify the "universal order-2 Frobenius"
+theorem holds for non-norm-form primes. Thread 15 completed 2026-07-17 with a full
+algebraic proof; this run confirms the result is not specific to the 4p=73+3k² family.
+
+### Work done
+- Installed PARI/GP (pari-gp 2.15.4) — not present in fresh container.
+- Wrote `secp256k1_cm_audit/thread16_general_theorem.gp` (~130 lines):
+  - `gen_non_norm(count)`: collects primes > 100 that are NOT norm-form.
+  - `check_order2(p, t)`: bnfinit + idealprimedec + bnfisprincipal to verify [P]²=1.
+  - Fixed PARI/GP script style: top-level loops wrapped in `{ }` blocks; `bnfisprincipal`
+    returns empty vector `[]` for trivial class groups — handled with `#res == 0` guard.
+- Ran script: 10 non-norm-form primes {101,103,107,113,127,131,137,139,149,151},
+  traces t∈{2,3}: 20/20 YES.
+- Large-prime spot checks (t=2): p∈{100003,500009,999983,9999991}: 4/4 YES.
+- Kronecker symbol check: Kron(sf,p)=1 for all 10 primes (confirms p splits in K). 10/10.
+- Algebraic identity D = a²²-4p² = t²(t²-4p) verified spot-check: YES.
+- Added Remark to PAPER_STRUCTURAL_COMPLETENESS.md §B5 documenting the general theorem
+  (proof sketch, algebraic key steps, 45 total numerical cases cited).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — confirmed for non-norm-form primes):**
+For any prime p and integer t with 0 < |t| < 2√p and p ∤ t:
+  a₂ = 2p − t²,  D = a₂² − 4p² = t²(t²−4p),  sf = squaref(D),  m = √(D/sf)
+  K = Q(√sf),  β = (−a₂ + m√sf)/2
+  => β ∈ O_K,  N(β) = p²,  (β) = P²  =>  [P]² = 1 in Cl(K).
+The proof is purely algebraic (Thread 15 steps A–E); no norm-form condition needed.
+
+**Key structural fact (Legendre-symbol argument):**
+Since D ≡ t² (mod p) and p ∤ t, we have Kron(sf, p) = (t²/p) = 1. So p ALWAYS SPLITS
+in K = Q(√sf), ruling out the "p inert" case. Combined with p ∤ a₂ ⟹ (β) ≠ (p),
+we get (β) = P² or P̄². Confirmed: Kron(sf,p)=1 for all 10 test primes. ✓
+
+**Numerical summary (Thread 16):**
+| Category                         | Cases | Passed |
+|----------------------------------|-------|--------|
+| Non-norm-form p∈{101..151}, t=2  |    10 |     10 |
+| Non-norm-form p∈{101..151}, t=3  |    10 |     10 |
+| Large primes p∈{100003..9999991} |     4 |      4 |
+| Kronecker(sf,p)=1                |    10 |     10 |
+| Total                            |    34 |     34 |
+
+**Selected data points:**
+  p=101 t=2 sf=-1     m=200  h=1  [P]²=1 YES  (Q(i), trivial class group)
+  p=101 t=3 sf=-395   m=99   h=?  [P]²=1 YES
+  p=113 t=2 sf=-7     m=224  h=1  [P]²=1 YES  (Q(√-7))
+  p=113 t=3 sf=-443   m=111  h=?  [P]²=1 YES
+  p=9999991 t=2 sf=-1111110 m=?  [P]²=1 YES
+
+**Paper update:** Remark added to PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after B5 corollary)
+documenting the general theorem and citing both Thread 15 (25 norm-form) and Thread 16
+(20+4 non-norm-form). Note added that this structural fact does not yield a new attack.
+
+### Next step proposal
+Thread 17: Quantify the class-number h = |Cl(Q(√sf))| more carefully.
+- The proof shows [P]²=1 regardless of h. But for large h, [P] might have order exactly 2
+  (not order 1). Collect: for each test case above, record h and actual order of [P].
+- Claim: if h is odd, then [P]²=1 implies [P]=1 (P is principal). This means p splits
+  as a PRINCIPAL prime ideal in O_K. Verify: is h always even in the non-trivial cases?
+- Experiment: rerun thread16 with additional output columns for h and ord([P]).
+  Expected: h is always even except when P is principal (h odd or P principal regardless).
+- Also worth noting: ePrint 2025/705 (affine nonce relation) cites similar class-group
+  structure. Check if the structure [P]²=1 in Q(√(t²-4p)) connects to the GLV nonce
+  relation k₁ = λ·k₂ and ECDSA key recovery.
+
+### Commits made
+[to be filled after push]

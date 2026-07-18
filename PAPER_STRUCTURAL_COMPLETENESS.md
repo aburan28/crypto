@@ -270,6 +270,28 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+> **Remark (Frobenius ideal order-2 structure; Thread 15–16).** For the
+> biquadratic Weil polynomial `T⁴ + a₂T² + p²` of `E × E^t`, set
+> `D = a₂² − 4p²  =  t²(t² − 4p)` (where `a₂ = 2p − t²`) and let
+> `K = Q(√sf)` where `sf` is the squarefree part of `D`.  If `p ∤ t`
+> then `p` splits in `K` (since `Kron(sf, p) = (t²/p) = 1`) and the
+> prime ideal `P` above `p` satisfies `[P]² = 1` in `Cl(K)`.
+>
+> *Proof sketch.* `β = (−a₂ + m√sf)/2` (where `m = √(D/sf)`) satisfies
+> `β² + a₂β + p² = 0` (monic, ℤ-coefficients) so `β ∈ O_K` and
+> `N(β) = p²`.  Since `p ∤ a₂`, we have `(β) ≠ (p)`, so `(β) = P²` or
+> `P̄²`.  Hence `[P]² = 1`. □
+>
+> This is a general fact about biquadratic Weil polynomials, not specific
+> to secp256k1's norm-form family.  Verified numerically:
+> 25/25 norm-form primes `k ≤ 199` (Thread 15; script
+> `thread15_order2_algebraic.gp`) and 20/20 cases for 10 non-norm-form
+> primes `p ∈ {101,103,…,151}` with traces `t ∈ {2,3}`, plus 4
+> large-prime spot checks up to `p ≈ 10⁷` (Thread 16; script
+> `thread16_general_theorem.gp`).  The structure does not yield a new
+> attack: it is a property of the ideal class group of the CM field, not
+> of the DLP difficulty.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
