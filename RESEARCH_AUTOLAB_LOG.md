@@ -5428,3 +5428,94 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (new, following Thread 15's next-step proposal): Verify the universal
+[P]²=1 theorem beyond the secp256k1 norm-form family. Thread 15 proved the result
+algebraically; Thread 16 confirms it for generic primes p with non-norm-form biquadratic
+Weil polynomials, distinguishing the trivial (product) and non-trivial (irreducible) cases.
+
+### Work done
+- Installed PARI/GP 2.15.4 (required `apt-get install pari-gp --fix-missing`).
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~190 lines): tests the
+  theorem on product-construction biquadratic Weil polynomials (a2 = 2p−t²) for
+  15 small non-norm-form primes (t=1), 8 large primes (varied t), 30 consecutive primes
+  near p=10⁴ (t=7), and 15 primes with h(K)≥4.
+- Wrote `secp256k1_cm_audit/thread16_irreducible_check.gp` (~105 lines): explicitly
+  tests IRREDUCIBLE biquadratic Weil polynomials (where 2p−a2 is not a perfect square),
+  filtering for h(K)≥3 and recording ord([P]).
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 with the Thread 15–16 theorem
+  (proof sketch A–E, numerical evidence, product vs. irreducible distinction, relevance
+  to B5 cover analysis).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part 1 (15 small primes, t=1): 15/15 passed.**
+All ord([P])=1 — product construction gives P principal (trivial).
+
+**Part 2 (8 large primes, varied t): 8/8 passed.**
+Largest case: p=999983, t=29, a2=1999125, h(K)=434. Still ord([P])=1.
+
+**Part 3 (30 consecutive primes ~10⁴, t=7): 30/30 passed.**
+h(K) up to 56; class numbers vary widely, ord([P])=1 throughout.
+
+**Part 4 (15 primes with h(K)≥4): 15/15 passed.** Still ord([P])=1.
+
+**Key structural observation (product vs. irreducible):**
+For the product construction a2 = 2p−t², T⁴+a2T²+p² factors as
+(T²−tT+p)(T²+tT+p). The Frobenius of each factor directly generates P,
+so P is principal and ord([P])=1 trivially. This is NOT the interesting case.
+
+For IRREDUCIBLE biquadratic polynomials (2p−a2 not a perfect square), the
+Frobenius lives in a quartic CM field; P can genuinely have order 2.
+
+**Part 5 (50 irreducible cases for p=23, h(K)≥3): 50/50 passed.**
+
+| a2  | sf     | m  | h  | ord([P]) | [P]²=1 |
+|-----|--------|----|----|----------|--------|
+| -41 | -435   | 1  | 4  | 2        | YES    |
+| -40 | -129   | 2  | 12 | 2        | YES    |
+| -37 | -83    | 3  | 3  | 1        | YES    |
+| -5  | -2091  | 1  | 12 | 2        | YES    |
+| -2  | -33    | 8  | 4  | 2        | YES    |
+| ... | ...    | .. | .. | ...      | YES    |
+
+48/50 cases: ord([P])=2 (P NOT principal, but P² IS). This is the
+genuinely non-trivial confirmation of the theorem — matching the norm-form
+behavior observed in Thread 15.
+
+2/50 cases: ord([P])=1 (P principal by coincidence, h=3 and h=4).
+
+**TOTAL across all Thread 16 runs: 118/118 passed.**
+
+**Summary of Theorem status after Threads 15+16:**
+| Case | Count | od([P])=1 | ord([P])=2 | Theorem status |
+|------|-------|-----------|------------|----------------|
+| norm-form (irreducible) | 25 | — | most | PROVED + VERIFIED |
+| product (reducible) | 68 | 68 | 0 | trivial |
+| irreducible non-norm-form | 50 | 2 | 48 | VERIFIED (non-trivial) |
+
+The theorem is universal. It applies to ANY biquadratic Weil polynomial with
+p ∤ a2, regardless of whether the polynomial is reducible or irreducible, and
+regardless of origin (secp256k1 norm-form, product, or generic irreducible).
+
+### Next step proposal
+Thread 17: Investigate whether the "order-2 Frobenius" theorem extends to
+NON-biquadratic Weil polynomials in a suitable generalization. Specifically:
+
+(A) For a general degree-4 palindromic Weil polynomial T⁴+a1T³+a2T²+a1pT+p²
+    (a1 ≠ 0), define D' = discriminant of the characteristic polynomial of Frobenius
+    projected to a quadratic field. Does some version of [P]^k=1 hold?
+
+(B) Simpler experiment: For a1=0 (biquadratic) with D=a2²-4p² having a large
+    squarefree part (class number h(K)≥10), check if the order of [P] can be
+    larger than 2 (it cannot by the proof, but verify computationally for h up to 50).
+
+(C) Update paper: Integrate the Thread 15–16 theorem into `paper/eprint_combined.tex`
+    as a formal Theorem (with proof in the appendix, citing the PARI scripts).
+
+### Commits made
+[to be filled after commit]

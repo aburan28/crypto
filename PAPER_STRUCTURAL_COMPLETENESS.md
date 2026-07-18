@@ -270,6 +270,43 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Universal order-2 Frobenius in imaginary quadratic class groups).**
+The following theorem, proved algebraically in `secp256k1_cm_audit/thread15_order2_algebraic.gp`
+and confirmed numerically in `thread16_general_biquadratic.gp` + `thread16_irreducible_check.gp`,
+provides a structural refinement of the B5 cover analysis:
+
+> **Theorem (Thread 15–16).** Let p be a prime and let T⁴ + a₂T² + p² be any
+> biquadratic Weil polynomial with D := a₂² − 4p² < 0.  Write D = sf · m²
+> with sf squarefree and m ≥ 1 a positive integer.  If p ∤ a₂, then every
+> prime ideal P above p in K = Q(√sf) satisfies [P]² = 1 in Cl(K).
+>
+> *Proof sketch (steps A–E).*  Set β = (−a₂ + m√sf)/2.
+> (A) β is an algebraic integer (satisfies x² + a₂x + p² = 0).
+> (B) β ∈ K.
+> (C) N_{K/Q}(β) = p², so (β) is an O_K-ideal of norm p².
+> (D) Since p ∤ a₂, (β) ≠ (p).
+> (E) The only O_K-ideals of norm p² are P², P̄², and (p); by (C)–(D),
+>     (β) = P² or P̄², hence [P]² = 1. □
+
+*Numerical evidence.*  Verified for:
+- 25/25 secp256k1 norm-form primes (4p = 73 + 3k², k ≤ 199) — **irreducible** biquadratic
+  Weil polynomials, typically with ord([P]) = 2 (non-trivial confirmation);
+- 68/68 product-construction cases (a₂ = 2p − t², always ord([P]) = 1, trivial);
+- 50/50 irreducible biquadratic cases with h(K) ≥ 3 for p = 23 — 48/50 with
+  ord([P]) = 2 (genuinely non-trivial; P not principal but P² is).
+
+*Distinction.* When T⁴ + a₂T² + p² is **reducible** over Q (product form,
+a₂ = 2p − t² a perfect square), the Frobenius of each elliptic factor generates
+P directly, so P is principal (ord([P]) = 1).  When the polynomial is
+**irreducible**, P can have order exactly 2 — the theorem provides a non-trivial
+constraint on the class group structure of K.
+
+*Relevance to B5.*  For any (N,N)-cover J → E × E^t, the Weil polynomial of J is
+biquadratic, so [P]² = 1 is a structural invariant of the cover.  This constrains
+the class-ideal factorization in imaginary quadratic fields associated to every
+prime that could appear in a cover-based attack; it is an obstruction structural
+property, not an attack vector.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
