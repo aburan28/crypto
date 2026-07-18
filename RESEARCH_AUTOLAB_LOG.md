@@ -5428,3 +5428,84 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: generalise the order-2 Frobenius theorem (Thread 15) to non-norm-form primes.
+Thread 15 gave an algebraic proof for norm-form primes (4p=73+3k²); the proof sketch (A)-(E)
+is fully general, so this thread tests whether it holds empirically outside that family.
+
+### Work done
+- Discovered PARI/GP not installed; pivoted to Python (sympy available).
+- Wrote `secp256k1_cm_audit/thread16_general_order2.py` (~270 lines):
+  - Custom reduce_form, is_identity, find_b, P2_principal (Gauss-form squaring).
+  - Bug found and fixed in reduce_form: original else:break fired when b=-a (not in open
+    interval), yielding non-reduced form (1,-1,c) instead of (1,1,c). Fix: replace
+    `else: break` with a proper continuation check; let the loop handle b≡0 mod 2a shift.
+  - Three sub-cases in P2_principal: (i) b=0 → p ramified, P²=(p) trivially principal;
+    (ii) b≡0 mod p → Gauss a₃=a₁a₂/d²=p²/p²=1, directly principal; (iii) gcd(b,p)=1 →
+    Shanks squaring t≡-c·b⁻¹(mod p), reduce, check identity form.
+- Ran three verification sweeps:
+  - Section 1: 15 non-norm-form primes in [100,10000], ~9 a2 values each → 135 valid cases.
+  - Section 2: 50 non-norm-form primes in [10000,100000], a2=p//3 (silent) → 50 valid.
+  - Section 3: 5 non-norm-form primes with sf(D)=-3 (secp256k1's CM field) → 5 valid.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**RESULT: 190/190 cases PASS, 0 FAIL.**
+
+The theorem [P]²=1 holds for every tested (p, a2) pair, confirming the algebraic proof
+is not an artefact of the norm-form family.
+
+Detailed counts:
+| Section | Description                                      | Valid | PASS | FAIL |
+|---------|--------------------------------------------------|-------|------|------|
+| 1       | 15 NNF primes [100,10000], 9 a2 values each      | 135   | 135  | 0    |
+| 2       | 50 NNF primes [10000,100000], a2=p//3            | 50    | 50   | 0    |
+| 3       | 5 NNF primes with sf=-3 (secp256k1 CM field)     | 5     | 5    | 0    |
+
+NNF = non-norm-form (4p ≠ 73+3k² for any k).
+
+Section 3 primes (sf=-3, same CM field as secp256k1):
+  p=103  a2=37  m=117  → P²→reduced=(1,1,1) [PASS] (disc=-3, h=1)
+  p=127  a2=107 m=133  → P²→(1,1,1)         [PASS]
+  p=139  a2=22  m=160  → P²→(1,1,1)         [PASS]
+  p=151  a2=59  m=171  → P²→(1,1,1)         [PASS]
+  p=157  a2=118 m=168  → P²→(1,1,1)         [PASS]
+(disc=-3 has h=1, so P is always principal; P²=(P)²=(1) trivially.)
+
+Representative Section 2 results:
+  p=10007 a2=3335 sf=-389437971 m=1  → PASS
+  p=10009 a2=3336 sf=-97397857  m=1  → PASS
+  p=10457 a2=3485 sf=-...(large)     → PASS
+(sf values for large p are O(p²), giving large-discriminant imaginary quadratic fields,
+yet [P]²=1 holds in all cases — consistent with the general proof.)
+
+**Key observation (reduce_form output pattern):**
+P² always reduces to (1, 0, |sf|/4) for disc≡0(mod 4) or (1, 1, (1+|disc|)/4) for disc≡1(mod 4).
+These are exactly the identity forms of the respective imaginary quadratic rings.
+No non-trivial fixed point was observed — every case hits the identity.
+
+**Corrected THEOREM statement (Thread 16 upgrade):**
+For any prime p and any integer a2 with D=a2²-4p²<0 and p∤a2, defining
+  sf = squarefree_part(D),  m = sqrt(D/sf),  K = Q(sqrt(sf)),
+the prime ideal P above p in O_K satisfies [P]²=1 in Cl(K).
+The proof depends only on the biquadratic Weil polynomial T⁴+a2T²+p²; the
+norm-form condition 4p=73+3k² (secp256k1-specific) is not required.
+
+### Next step proposal
+Thread 17: Integrate the generalised theorem into the paper.
+- Add a new Theorem B5.2 to `PAPER_STRUCTURAL_COMPLETENESS.md`:
+    "THEOREM B5.2 (General Order-2 Frobenius). For any prime p and a2 with
+     D=a2²-4p²<0 and p∤a2, the prime P above p in Q(sqrt(sf(D))) satisfies
+     [P]²=1 in Cl(Q(sqrt(sf(D))))."
+- Update §B5 remark in the paper to cite this as a consequence of the
+  algebraic proof (Thread 15), now confirmed for 190 non-norm-form cases.
+- Possible further experiment: check D>0 (real quadratic case). The proof still
+  holds formally (steps A-E don't use Im(K)); verify with 10 real quadratic examples
+  (a2 > 2p) to see if [P]²=1 in the real quadratic class group.
+
+### Commits made
+[to be filled after commit]
