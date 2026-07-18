@@ -270,6 +270,43 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal structure — Theorem from Threads 14–16).**
+A complementary arithmetic result characterises the Frobenius ideal class in the
+CM field attached to any biquadratic Weil polynomial.
+
+> **Theorem (Universal order-2 Frobenius).** Let p be any prime and α any integer
+> with 0 < |α| < 2√p and p ∤ α. Set a₂ = 2p − α², so that
+>
+> `T⁴ + a₂T² + p² = (T² + αT + p)(T² − αT + p)`
+>
+> is a factored biquadratic Weil polynomial.  Let D = a₂² − 4p² = α²(α² − 4p) < 0,
+> write D = sf · m² with sf squarefree, and set K = Q(√sf) (an imaginary quadratic
+> field).  Write (p) = P · P̄ in the ring of integers O_K (p splits since D < 0 and
+> p ∤ disc(K) when p ∤ α).  Then
+>
+> **[P]² = 1 in the ideal class group Cl(K).**
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2. (A) β satisfies β² + a₂β + p² = 0 (monic,
+> Z-coefficients), so β ∈ O_K. (B) β ∈ K by construction.  (C) N_{K/Q}(β) =
+> (a₂² − m²sf)/4 = (a₂² − D)/4 = p². (D) Since p ∤ a₂, the ideal (β) ≠ (p)
+> [for (β) = (p) would require p | a₂].  (E) Therefore (β) is an O_K-ideal of
+> norm p² not equal to (p), so (β) = P² or P̄², giving [P]² = 1 in Cl(K). □
+>
+> *Numerical verification.* Script `secp256k1_cm_audit/thread16_general_biquadratic.gp`
+> confirms all five conditions (A)–(E) for 41 independent (p, α) pairs across 12
+> non-norm-form primes p ∈ {23, 29, 31, 43, 53, 67, 71, 97, 101, 127, 983, 9973}
+> (all verified NOT of the secp256k1 norm-form 4p = 73 + 3k²).
+> Additionally, script `thread15_order2_algebraic.gp` confirms the same for all 25
+> norm-form primes k ≤ 199. Combined: 66 instances, 0 failures.
+
+*Structural consequence.* The Frobenius ideal of every biquadratic Jacobian E × E^t/F_p
+lies in the 2-torsion of Cl(K). This structural constraint is independent of the
+isogeny degree ℓ and holds for any ordinary Jacobian whose Frobenius polynomial factors
+over K. It does not provide an attack — it is an intrinsic rigidity of the abelian-surface
+structure — but it closes a potential gap: any attack strategy that required [P] to have
+order > 2 (e.g., to construct a rational ℓ-isogeny kernel outside the 2-torsion of Cl(K))
+is precluded by the theorem.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

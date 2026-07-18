@@ -5428,3 +5428,110 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Generalise the universal order-2 Frobenius theorem (proved in Thread 15 for
+secp256k1 norm-form primes 4p=73+3k²) to arbitrary biquadratic Weil polynomials. The
+proof (A)–(E) made no use of the norm-form condition, so the theorem should hold for any
+prime p with biquadratic T⁴+a₂T²+p² (i.e., a₂=2p−α², |α|<2√p, p∤α).
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~180 lines) verifying all
+  five conditions (A)–(E) for 41 (p,α) pairs across 12 non-norm-form primes.
+- Ran the script: all 41 cases pass [P]²=1. ✓
+- Noted PARI not present (installed via apt-get --fix-missing during session).
+- Integrated the theorem (with proof + numerical verification citation) into
+  `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 as a new "Remark (Frobenius ideal structure)".
+- Ran `cargo test --test curve_audit`: 5/5 pass. ✓
+
+### Findings
+
+**THEOREM (Thread 16 — full generalisation):**
+Let p be any prime and α any integer with 0 < |α| < 2√p and p ∤ α.
+Set a₂ = 2p − α², D = a₂² − 4p² = α²(α²−4p) < 0.
+Write D = sf·m² (sf squarefree, m > 0) and K = Q(√sf).
+Then for any prime ideal P above p in O_K: **[P]² = 1 in Cl(K)**.
+
+Proof: identical to Thread 15 steps (A)–(E), no norm-form assumption used.
+
+**Numerical verification — 41 non-norm-form (p,α) pairs:**
+
+```
+p=23        a=1    sf=-91          h=2     [P]^2=1:YES  ord([P])=1
+p=23        a=2    sf=-22          h=2     [P]^2=1:YES  ord([P])=1
+p=23        a=3    sf=-83          h=3     [P]^2=1:YES  ord([P])=1
+p=23        a=4    sf=-19          h=1     [P]^2=1:YES  ord([P])=1
+p=29        a=1    sf=-115         h=2     [P]^2=1:YES  ord([P])=1
+p=29        a=3    sf=-107         h=3     [P]^2=1:YES  ord([P])=1
+p=29        a=5    sf=-91          h=2     [P]^2=1:YES  ord([P])=1
+p=31        a=1    sf=-123         h=2     [P]^2=1:YES  ord([P])=1
+p=31        a=4    sf=-3           h=1     [P]^2=1:YES  ord([P])=1
+p=31        a=5    sf=-11          h=1     [P]^2=1:YES  ord([P])=1
+p=43        a=1    sf=-19          h=1     [P]^2=1:YES  ord([P])=1
+p=43        a=3    sf=-163         h=1     [P]^2=1:YES  ord([P])=1
+p=43        a=5    sf=-3           h=1     [P]^2=1:YES  ord([P])=1
+p=43        a=7    sf=-123         h=2     [P]^2=1:YES  ord([P])=1
+p=53        a=1    sf=-211         h=3     [P]^2=1:YES  ord([P])=1
+p=53        a=4    sf=-1           h=1     [P]^2=1:YES  ord([P])=1
+p=53        a=7    sf=-163         h=1     [P]^2=1:YES  ord([P])=1
+p=67        a=1    sf=-267         h=2     [P]^2=1:YES  ord([P])=1
+p=67        a=5    sf=-3           h=1     [P]^2=1:YES  ord([P])=1
+p=67        a=8    sf=-51          h=2     [P]^2=1:YES  ord([P])=1
+p=71        a=1    sf=-283         h=3     [P]^2=1:YES  ord([P])=1
+p=71        a=6    sf=-62          h=8     [P]^2=1:YES  ord([P])=1
+p=71        a=8    sf=-55          h=4     [P]^2=1:YES  ord([P])=1
+p=97        a=1    sf=-43          h=1     [P]^2=1:YES  ord([P])=1
+p=97        a=7    sf=-339         h=6     [P]^2=1:YES  ord([P])=1
+p=97        a=9    sf=-307         h=3     [P]^2=1:YES  ord([P])=1
+p=97        a=12   sf=-61          h=6     [P]^2=1:YES  ord([P])=1
+p=101       a=1    sf=-403         h=2     [P]^2=1:YES  ord([P])=1
+p=101       a=8    sf=-85          h=4     [P]^2=1:YES  ord([P])=1
+p=101       a=13   sf=-235         h=2     [P]^2=1:YES  ord([P])=1
+p=127       a=1    sf=-3           h=1     [P]^2=1:YES  ord([P])=1
+p=127       a=9    sf=-427         h=2     [P]^2=1:YES  ord([P])=1
+p=127       a=15   sf=-283         h=3     [P]^2=1:YES  ord([P])=1
+p=127       a=21   sf=-67          h=1     [P]^2=1:YES  ord([P])=1
+p=983       a=1    sf=-3931        h=11    [P]^2=1:YES  ord([P])=1
+p=983       a=15   sf=-3707        h=14    [P]^2=1:YES  ord([P])=1
+p=983       a=31   sf=-2971        h=11    [P]^2=1:YES  ord([P])=1
+p=9973      a=1    sf=-39891       h=56    [P]^2=1:YES  ord([P])=1
+p=9973      a=30   sf=-2437        h=18    [P]^2=1:YES  ord([P])=1
+p=9973      a=77   sf=-33963       h=42    [P]^2=1:YES  ord([P])=1
+p=9973      a=150  sf=-1087        h=9     [P]^2=1:YES  ord([P])=1
+```
+
+ALL 41 PASSED. Combined with 25 norm-form primes from Thread 15: 66/66 total. 0 failures.
+
+**Observation — ord([P])=1 in ALL general cases:**
+Interestingly, for every (p,α) pair tested, the prime P above p is itself principal
+(ord=1, not 2). This contrasts with the norm-form case where many primes had ord=2.
+Explanation: the CM field K=Q(√sf) for sf = squarefree(α²(α²-4p)) is "random" and
+often has h=1 or small class number; p often represents a principal prime in K
+(e.g., p=23, α=1 gives K=Q(√-91), h=2, and P=((1+√-91)/2) IS principal since
+Norm((1+√-91)/2) = 1/4 + 91/4 = 23 in the maximal order Z[(1+√-91)/2] with -91≡1 mod 4).
+The norm-form condition 4p=73+3k² is a SPECIAL FAMILY that consistently lands in
+CM fields Q(√-219) etc. with h≥4, where [P] has order exactly 2. The theorem [P]²=1
+still holds (covering both ord=1 and ord=2 cases).
+
+**Paper update:**
+Added "Remark (Frobenius ideal structure — Theorem from Threads 14–16)" to
+PAPER_STRUCTURAL_COMPLETENESS.md §B5, with full theorem statement, proof (A)–(E),
+66-instance numerical verification, and structural consequence paragraph.
+
+### Next step proposal
+Thread 17: Attempt to find a (p, α) instance where ord([P]) = 2 in the GENERAL case
+(not norm-form). The norm-form family is a recipe for finding such primes (they land in
+Q(√-219) with h=4 and [P] order exactly 2). Is there a simpler non-norm-form recipe?
+- Approach: for p=7, α=1: a₂=13, D=13²-4×49=-27, sf=-3, K=Q(√-3) h=1, ord=1 trivially.
+- Try p where h(Q(√sf))>1 AND p does not split into a principal prime.
+- The Theorem (A)–(E) does not require ord=2; it just says ord | 2. Finding ord=2 examples
+  in the general case would demonstrate the theorem is non-trivial (not "always principal").
+- PARI approach: for each large prime p, iterate α and check ord(bnfisprincipal(K,P)[1])>0.
+- Alternative: revisit p=71, α=6 (h=8, highest h in our test set): check [P] is principal
+  or has order 2 explicitly by printing bnfisprincipal result.
+- Also: re-examine p=9973, α=30 (h=18) for the exponent vector.
+
+### Commits made
+TBD (will be filled after push)
