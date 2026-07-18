@@ -5534,4 +5534,4 @@ Q(√-219) with h=4 and [P] order exactly 2). Is there a simpler non-norm-form r
 - Also: re-examine p=9973, α=30 (h=18) for the exponent vector.
 
 ### Commits made
-TBD (will be filled after push)
+`5fe9d81` autolab 2026-07-18: Thread 16 — universal order-2 Frobenius generalised to all biquadratic Weil polynomials; 41 non-norm-form cases verified
