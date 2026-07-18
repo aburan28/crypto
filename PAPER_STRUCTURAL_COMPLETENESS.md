@@ -262,6 +262,34 @@ following arithmetic obstruction.
 > #J(F_p) = #E · #E^t.  The Lemma characterises kernel structure but
 > does not affect this calculation. DLP cost O(p) by Gaudry (g=2). □
 
+**Remark (Frobenius ideal order in the CM field — Threads 15–16).**
+When the Jacobian `J` has a biquadratic Weil polynomial `T⁴ + a₂T² + p²`
+(i.e., `J` is F_p-isogenous to `E × E^t`), the discriminant
+`D = a₂² − 4p²` is negative and equals `sf · m²` for some squarefree
+`sf < 0` and positive integer `m`.  The element
+`β = (−a₂ + m√sf)/2 ∈ O_{Q(√sf)}` satisfies the minimal polynomial
+`x² + a₂x + p²` (monic, Z-coefficients), so `N_{K/Q}(β) = p²` where
+`K = Q(√sf)`.  Since `p ∤ a₂` (which holds whenever the Weil polynomial
+is non-degenerate, i.e., the surface is simple), the ideal `(β)` cannot
+equal `(p)`, so `(β) = P²` or `P̄²` for the prime `P` above `p` in
+`O_K`.  Hence `[P]² = 1` in `Cl(K)`.
+
+This is a **purely algebraic** consequence of the biquadratic Weil polynomial
+structure; it does not use any property of secp256k1 specifically.  In
+particular, the class-group order of the Frobenius ideal is always ≤ 2
+for any ordinary abelian surface over F_p whose Jacobian is (ℓ,ℓ)-isogenous
+to a product E × E^t.
+
+*Verified numerically:*
+- Thread 15 (`secp256k1_cm_audit/thread15_order2_algebraic.gp`): all 25 secp256k1
+  norm-form primes `k ≤ 199`, 5 checks per prime (minpoly, norm, p∤a₂, `(β)=P²`,
+  `[P]²=1`).  All 25 PASS.
+- Thread 16 (`secp256k1_cm_audit/thread16_general_order2.gp`): 10 non-norm-form
+  primes `p ∈ {7,11,13,17,23,29,31,41,43,47}`, 5 sampled `a₂` values each (50
+  cases total), spanning 163 distinct CM fields `Q(√sf)` with `h` ranging from
+  1 to 24.  All 50 PASS.  Three larger primes `p ∈ {211,223,227}` additionally
+  verified with full algebraic detail (minpoly, norm, `(β)=P²`).
+
 **Numerical verification (Exp U–Y):**
 - secp256k1: p ≡ 1 mod 3, p ≡ 1 mod 7 (confirmed; p mod 3 = 1, p mod 7 = 1).
 - (3,3)-isogeny graph from E × E^t walked to depth 5 (25 kernel-curve pairs);

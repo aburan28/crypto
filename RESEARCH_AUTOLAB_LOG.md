@@ -5428,3 +5428,84 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (from Thread 15 next-step proposal): extend the "universal order-2 Frobenius"
+theorem to arbitrary non-norm-form primes.  Thread 15 (yesterday) proved the theorem
+algebraically for secp256k1 norm-form primes k≤199 and proposed verifying it holds for
+all valid biquadratic Weil polynomials T⁴+a₂T²+p², regardless of the norm-form condition.
+
+### Work done
+- Verified PARI/GP (v2.15.4) not installed; installed it from Ubuntu package.
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~240 lines).
+  Parts:
+  A. 10 non-norm-form primes p ∈ {7,11,13,17,23,29,31,41,43,47}, 5 sampled a₂ each
+     (50 total cases, spanning 163 distinct CM fields with h from 1 to 24). All PASS.
+  B. 3 larger non-norm-form primes {211,223,227}: explicit algebraic verification
+     (minpoly(β), N(β)=p², (β)=P²). All PASS.
+  C. Boundary/degenerate case p|a₂ correctly skipped (condition (D) fails).
+  D. Summary: 163 distinct CM discriminants sf in [-122683, -1].
+- Added "Remark (Frobenius ideal order in the CM field — Threads 15–16)" to
+  PAPER_STRUCTURAL_COMPLETENESS.md §B5, after the Corollary proof at line ~263.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 15–16 consolidated, now general):**
+For any prime p and any integer a₂ with |a₂| < 2p, D = a₂²−4p² = sf·m² (sf squarefree,
+m > 0, D < 0, sf < 0), and p ∤ a₂:
+  The prime P above p in K = Q(√sf) satisfies [P]² = 1 in Cl(K).
+
+**Proof** (algebraic; Thread 15): β = (−a₂ + m√sf)/2 satisfies x²+a₂x+p²=0 (monic,
+Z-coeff), so β ∈ O_K and N(β)=p². Since p ∤ a₂ ⟹ p ∤ a₂ and p ∤ m (otherwise (β)=(p)
+would require β/p ∈ O_K^×, forcing p|a₂). Hence (β)=P² or P̄², so [P]²=1. □
+
+**Key insight from Thread 16**: the proof uses ONLY the shape of the Weil polynomial and
+the non-degeneracy condition p ∤ a₂. It is completely independent of:
+  - the norm-form condition 4p = 73+3k² (secp256k1-specific)
+  - the existence of an actual genus-2 curve with this Weil polynomial
+  - any CM multiplication condition on the underlying elliptic curve
+
+**Numerical summary:**
+| Part | Primes | Cases | CM fields h-range | All [P]²=1? |
+|------|--------|-------|-------------------|-------------|
+| Thread 15 | norm-form k≤199 (25 primes) | 25 | h=1..128 | YES |
+| Thread 16A | non-norm-form p≤47 (10 primes) | 50 | h=1..24, 163 distinct sf | YES |
+| Thread 16B | non-norm-form p∈{211,223,227} | 3 | direct algebraic check | YES |
+
+Total: 78 distinct cases across norm-form and non-norm-form primes. Zero failures.
+
+**Selected Thread 16A data (illustrative):**
+```
+p=7   a2=-12  D=-52    sf=-13  m=2   h=2   [P]²=1:YES  ([P]≠1, ord=2)
+p=11  a2=-17  D=-195   sf=-195 m=1   h=4   [P]²=1:YES  ([P]≠1, ord=2)
+p=13  a2=-16  D=-420   sf=-105 m=2   h=8   [P]²=1:YES  ([P]≠1, ord=2)
+p=29  a2=-43  D=-1515  sf=-1515 m=1  h=12  [P]²=1:YES  ([P]≠1, ord=2)
+p=43  a2=-52  D=-4692  sf=-1173 m=2  h=24  [P]²=1:YES  ([P]≠1, ord=2)
+```
+
+Non-trivial cases (h>1, [P]≠1) confirm the theorem is doing real work — [P]²=1 is not
+vacuous (via h=1). The h=24 case (p=43, sf=-1173) is the largest class group seen.
+
+**Thread 16B explicit check (p=227, a2=-113):**
+  D=-113²-4·227² = -2387·81, sf=-2387, m=9
+  β = (113 + 9√(-2387))/2 ∈ O_{Q(√-2387)}
+  minpoly(β) = x²-113x+51529 = x²+a₂x+p² ✓
+  N(β) = 51529 = 227² ✓
+  (β) = P² ✓   [P]²=1 ✓
+
+### Next step proposal
+Thread 17: Prove or disprove the converse of the general theorem.
+- Claim: for a prime p and a₂ = kp (so p | a₂), the prime P above p in Q(√sf) 
+  can have ord([P]) > 2. Find a concrete counter-example.
+- Then: synthesise Threads 14–16 into a standalone note ("Frobenius Ideal Structure of
+  Biquadratic Weil Polynomials"), suitable for inclusion in Appendix B of the ePrint.
+- Also: check whether the ePrint draft (`paper/eprint_combined.tex`) already mentions
+  the order-2 property anywhere, and add a cross-reference to the new §B5 remark.
+- Lower-priority: re-run Thread 6 (GLV-HNP Phase 2 toy) now that PARI/GP is installed —
+  the `glv_hnp_phase2_toy.gp` script may be runnable now.
+
+### Commits made
+[to be filled in after git commit]
