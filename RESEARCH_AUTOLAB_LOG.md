@@ -5539,4 +5539,4 @@ Theorem/Corollary environment. Also:
   p|a₂ where [P]²≠1?). If yes, an explicit counterexample sharpens the theorem.
 
 ### Commits made
-[to be filled after commit]
+`49167cf` autolab 2026-07-18: Thread 16 — general biquadratic Weil poly theorem; 37 non-norm-form cases incl h(K)=9 verified; odd-h corollary (P principal); B5 remark updated
