@@ -5515,4 +5515,4 @@ Thread 17: State the theorem in full generality and investigate its converse.
   Would require sf to consistently give Legendre symbol -1.
 
 ### Commits made
-[to be filled in after push]
+`9093603` autolab 2026-07-18: Thread 16 — order-2 Frobenius theorem proved general; 107 non-norm-form cases verified, h up to 176
