@@ -5428,3 +5428,101 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Extend the order-2 Frobenius theorem (proved in Thread 15 for 25 secp256k1
+norm-form primes) to arbitrary biquadratic Weil polynomials. The Thread 15 log proposed
+this as the natural continuation: "the proof (A)-(E) is completely general — it uses only
+the Weil polynomial shape, not the specific norm-form condition." Thread 15 was worked
+yesterday with clear progress (theorem proved); Thread 16 is the direct continuation.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~300 lines).
+- Introduced the "product Weil polynomial" family: for prime p and t with |t| < 2√p,
+  T⁴+(2p−t²)T²+p² = (T²−tT+p)(T²+tT+p). This family is NOT restricted to the
+  norm-form 4p=73+3k².
+- Proved and numerically verified two theorems for this family:
+  - (General) For any biquadratic Weil poly: [P]²=1 in Cl(Q(√sf)).
+  - (Product, Refined) When a₂=2p−t²: P is PRINCIPAL with explicit generator
+    α=(t+m′√sf)/2, Nm(α)=p, α²=β. Proved α²=β algebraically.
+- Ran the script: 15/15 test cases passed both theorems.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Integrated both theorems as a new Remark in `PAPER_STRUCTURAL_COMPLETENESS.md` §B5.
+
+### Findings
+
+**THEOREM (Thread 16 — general, from Thread 15):**
+For any prime p and a₂ with T⁴+a₂T²+p² a biquadratic Weil polynomial,
+D=a₂²−4p²=sf·m² (sf squarefree, m>0), K=Q(√sf): [P]²=1 in Cl(K).
+(Proof in Thread 15 steps (A)-(E); general — no norm-form condition needed.)
+
+**REFINED THEOREM (Thread 16, new):**
+For the product family T⁴+(2p−t²)T²+p² = (T²−tT+p)(T²+tT+p):
+Let m′=m/t (positive integer). Then α=(t+m′√sf)/2 satisfies Nm(α)=p and α²=β.
+Hence P=(α) is principal, ord([P])=1.
+Proof: m′²sf = (t²−4p) (by definition), so
+  α² = (t²+m′²sf)/4 + (tm′√sf)/2 = (t²−2p)/2 + (m√sf)/2 = β. □
+
+**KEY OBSERVATION (always splits):** D ≡ t⁴ (mod p) is a perfect square mod p,
+so (sf/p)=1 and p ALWAYS splits in K for the product family. No inert cases.
+
+**Numerical output — all 15 test cases:**
+```
+(p=11 , t=1 ): a2=21    D=-43    sf=-43    m=1   h=1  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=11 , t=3 ): a2=13    D=-315   sf=-35    m=3   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=13 , t=1 ): a2=25    D=-51    sf=-51    m=1   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=13 , t=3 ): a2=17    D=-387   sf=-43    m=3   h=1  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=17 , t=1 ): a2=33    D=-67    sf=-67    m=1   h=1  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=17 , t=3 ): a2=25    D=-531   sf=-59    m=3   h=3  (sf/p)=1  ord([P])=1  (β)=P²:YES ← h=3 bonus
+(p=19 , t=1 ): a2=37    D=-75    sf=-3     m=5   h=1  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=19 , t=5 ): a2=13    D=-1275  sf=-51    m=5   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=23 , t=1 ): a2=45    D=-91    sf=-91    m=1   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=23 , t=3 ): a2=37    D=-747   sf=-83    m=3   h=3  (sf/p)=1  ord([P])=1  (β)=P²:YES ← h=3 bonus
+(p=29 , t=1 ): a2=57    D=-115   sf=-115   m=1   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=37 , t=5 ): a2=49    D=-3075  sf=-123   m=5   h=2  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=43 , t=5 ): a2=61    D=-3675  sf=-3     m=35  h=1  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=53 , t=3 ): a2=97    D=-1827  sf=-203   m=3   h=4  (sf/p)=1  ord([P])=1  (β)=P²:YES
+(p=61 , t=5 ): a2=97    D=-5475  sf=-219   m=5   h=4  (sf/p)=1  ord([P])=1  (β)=P²:YES ← KEY
+```
+Case (p=61, t=5): sf=-219 = disc(Q(√-219)), same CM field as the secp256k1 norm-form
+family (Threads 13-15), but p=61 is NOT a norm-form prime (4·61=244, 244-73=171=3·57,
+57 not a square). Confirms theorem is independent of the norm-form structure.
+
+**Refined theorem output — α generators:**
+```
+(p=11 , t=1 ): m′=1   α=(1 +1·√(-43))/2   Nm=11 ✓  α²=β ✓
+(p=11 , t=3 ): m′=1   α=(3 +1·√(-35))/2   Nm=11 ✓  α²=β ✓
+(p=13 , t=1 ): m′=1   α=(1 +1·√(-51))/2   Nm=13 ✓  α²=β ✓
+(p=17 , t=3 ): m′=1   α=(3 +1·√(-59))/2   Nm=17 ✓  α²=β ✓  [P is principal despite h=3]
+(p=23 , t=3 ): m′=1   α=(3 +1·√(-83))/2   Nm=23 ✓  α²=β ✓  [P is principal despite h=3]
+(p=43 , t=5 ): m′=7   α=(5 +7·√(-3))/2    Nm=43 ✓  α²=β ✓  [large m′]
+(p=53 , t=3 ): m′=1   α=(3 +1·√(-203))/2  Nm=53 ✓  α²=β ✓  [h=4]
+(p=61 , t=5 ): m′=1   α=(5 +1·√(-219))/2  Nm=61 ✓  α²=β ✓  [h=4, sf=-219]
+```
+All 15/15 pass.
+
+**Contrast with norm-form cases:** For the secp256k1 norm-form family (Thread 15),
+a₂ is NOT of the form 2p-t² in general. For k=1, p=19, sf=-219, h=4: the prime P
+above 19 in Q(√-219) has ord([P])=2 (NOT principal). The product-case principality
+(ord=1) is special to split Jacobians E×Eᵗ.
+
+**h=3 bonus:** For h=3 cases (sf=-59, sf=-83), [P]²=1 in ℤ/3ℤ forces [P]=1 (since 2
+is invertible mod 3). The generators are (3+√-59)/2 and (3+√-83)/2 respectively
+(both verified: norm=p, generator²=β).
+
+### Next step proposal
+Thread 17: Explore whether the principality result in (ii) generalizes further.
+- Claim: for ANY abelian surface A/F_p isogenous over F_p to E₁×E₂ (not just
+  E×Eᵗ), if the Weil poly factors as (T²-t₁T+p)(T²-t₂T+p) with t₁≠t₂, do the
+  primes above p in Q(√(t₁t₂-4p)·sf) enjoy special ideal-class properties?
+- Alternatively: use the results to add a definitive statement to §B5 about the
+  Frobenius ideal structure being trivial for SPLIT Jacobians, and restate the
+  cover-attack impossibility argument in terms of this structure.
+- Also worth doing: run `gp -q secp256k1_cm_audit/thread15_order2_algebraic.gp`
+  and record which of the 25 norm-form primes have ord([P])=1 vs ord([P])=2, to
+  complete the comparison table.
+
+### Commits made
+[to be filled by commit step]
