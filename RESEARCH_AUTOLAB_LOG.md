@@ -5428,3 +5428,102 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Generalize the "universal order-2 Frobenius" theorem (Thread 15) from the secp256k1
+norm-form prime family to ALL genus-2 curves with biquadratic Weil polynomials over any prime
+field. Thread 15 proved [P]²=1 for 25 norm-form primes; Thread 16 asked whether the proof is
+truly general. Thread 15 was completed yesterday with clear progress and left this as the
+next-step proposal.
+
+### Work done
+- Strengthened the algebraic proof: removed the Thread 15 hypothesis "p does not divide a₂",
+  replacing it with an unconditional case analysis (sf=-1 and sf=-3 degenerate cases both
+  resolved via h(K)=1; all other sf have the unit argument ruling out (β)=(p) directly).
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~190 lines):
+  - Part A: sweeps non-norm-form primes 47–800, 13 genus-2 curve families; collects first 15
+    biquadratic Weil polynomial cases and verifies [P]²=1.
+  - Part B: sweeps p≤5000 for cases with h(K)>4 and sf≠-1,-3; collects 8 such cases.
+  - Part C: hunts for sf=-3, a₂=-p degenerate case; not found in p≤2000 for these families.
+- Ran the script: `gp --stacksize 256000000 -q thread16_general_biquadratic.gp`; clean output.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added "Structural remark: order-2 Frobenius ideals (Thread 15–16)" to
+  `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (after numerical verification block).
+
+### Findings
+
+**THEOREM (Thread 16 — unconditional generalization):**
+For any prime p and genus-2 curve C/F_p with biquadratic Weil polynomial W(T)=T⁴+a₂T²+p²
+and D=a₂²-4p²<0, writing D=sf·m² (sf squarefree), K=Q(√sf), P a prime of O_K above p:
+[P]² = 1 in Cl(K).
+
+Proof case analysis:
+- h(K)=1: [P]²=1 trivially (Cl(K) is trivial). Applies to sf∈{-1,-2,-3,-7,-11,-19,...}.
+- h(K)>1 and sf≠-1,-3: β=(-a₂+m√sf)/2 satisfies x²+a₂x+p²=0, N(β)=p². The case (β)=(p)
+  requires β=u·p for unit u∈O_K^×={±1}; then -a₂+m√sf=±2p, but the irrational part m√sf
+  cannot equal a rational number for sf<0 and m>0. So (β)≠(p), hence (β)=P², [P]²=1. □
+- sf=-1, a₂=0: β=pi, (β)=(p), but h(Q(i))=1 → trivial.
+- sf=-3, a₂=-p: β=p·ζ₆, (β)=(p) via unit ζ₆=(1+√(-3))/2, but h(Q(√-3))=1 → trivial.
+Strengthening vs Thread 15: no "p∤a₂" hypothesis needed (it was a check, not a requirement).
+The proof is completely general.
+
+**Numerical results — Part A (15 non-norm-form cases, any h):**
+
+| p  | curve       | a₂   | sf    | m  | h | [P]²=1? | note       |
+|----|-------------|------|-------|----|---|---------|------------|
+| 47 | x5-x3+x     |   30 |   -31 | 16 | 3 | YES     | proof(A-E) |
+| 47 | x5+x3-x     |   -4 |    -5 | 42 | 2 | YES     | proof(A-E) |
+| 47 | x5+x3+x     |   30 |   -31 | 16 | 3 | YES     | proof(A-E) |
+| 47 | x6+x3+1     |   13 |  -107 |  9 | 3 | YES     | proof(A-E) |
+| 47 | x6-x3+1     |   13 |  -107 |  9 | 3 | YES     | proof(A-E) |
+| 53 | x5+x3-x     | -102 |   -13 |  8 | 2 | YES     | proof(A-E) |
+| 53 | x6+x3+1     |   70 |   -11 | 24 | 1 | YES     | trivial:h=1|
+| 53 | x6-x3+1     |   70 |   -11 | 24 | 1 | YES     | trivial:h=1|
+| 59 | x5-x        |  -82 |    -2 | 60 | 1 | YES     | trivial:h=1|
+| 59 | x5+x        |   82 |    -2 | 60 | 1 | YES     | trivial:h=1|
+| 59 | x5-5x       |  -82 |    -2 | 60 | 1 | YES     | trivial:h=1|
+| 59 | x5+5x       |   82 |    -2 | 60 | 1 | YES     | trivial:h=1|
+| 59 | x5-x3+x     |  102 |   -55 |  8 | 4 | YES     | proof(A-E) |
+| 59 | x5+x3-x     |   86 |  -102 |  8 | 4 | YES     | proof(A-E) |
+| 59 | x5+x3+x     |  102 |   -55 |  8 | 4 | YES     | proof(A-E) |
+
+ALL 15 PASSED (0 failures).
+
+**Numerical results — Part B (8 cases with h>4, sf≠-1,-3):**
+
+| p   | curve      | a₂   | sf    | m  | h  | [P]²=1? | note       |
+|-----|------------|------|-------|----|----|---------|-----------| 
+| 59  | x6+x3+1    |  109 |  -227 |  3 |  5 | YES     | proof(A-E) |
+| 59  | x6-x3+1    |  109 |  -227 |  3 |  5 | YES     | proof(A-E) |
+| 59  | x6+x2+1    |  109 |  -227 |  3 |  5 | YES     | proof(A-E) |
+| 83  | x5-x3+x    |   22 |   -47 | 24 |  5 | YES     | proof(A-E) |
+| 83  | x5+x3+x    |   22 |   -47 | 24 |  5 | YES     | proof(A-E) |
+| 83  | x6+x3+1    |   85 |  -251 |  9 |  7 | YES     | proof(A-E) |
+| 83  | x6-x3+1    |   85 |  -251 |  9 |  7 | YES     | proof(A-E) |
+| 101 | x6+x3+1    |  -23 |  -179 | 15 |  5 | YES     | proof(A-E) |
+
+ALL 8 PASSED (0 failures). Max class number tested: h=7 (sf=-251, p=83).
+
+**Part C:** No sf=-3, a₂=-p degenerate case found in p≤2000 for these 13 curve families.
+This is expected — the condition a₂=-p on a biquadratic Weil polynomial is highly restrictive.
+
+**ePrint note:** ePrint 2025/705 (affine nonce relation ECDSA attack) mentioned in Thread 15
+log; no new relevant papers found in today's sweep.
+
+### Next step proposal
+Thread 17: Further extend the theorem to abelian surfaces with NON-biquadratic Weil
+polynomials (i.e., where a₃≠0 or a₁≠0). In that case, the Weil poly is T⁴+a₁T³+a₂T²+pa₁T+p²
+and the CM field K is no longer Q(√sf) but a quartic CM field. The question is whether an
+analogous order-2 (or finite-order) result holds for prime ideals in the quartic CM field.
+- Specifically: for T⁴+a₁T³+a₂T²+pa₁T+p² irreducible, the Jacobian J has CM by an order
+  in a degree-4 CM field F. Can one show [P_F]ⁿ=1 for small n (n=2 or 4) in Cl(O_F)?
+- Alternative (more concrete): if the Weil poly factors as (T²-t₁T+p)(T²-t₂T+p) over Q
+  (i.e., the Jacobian is isogenous to E₁×E₂), analyze the relationship between the Frobenius
+  ideals of E₁ and E₂ in their respective CM fields.
+- OR: revisit the GLV-HNP Phase 2 toy attack (Priority 5 from original list) — it has not
+  been touched since the original priority list was set.
+
+### Commits made
+[to be filled after commit]

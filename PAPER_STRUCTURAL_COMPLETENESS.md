@@ -270,6 +270,19 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Structural remark: order-2 Frobenius ideals (Thread 15–16).** For any prime p and
+genus-2 curve C/F_p whose Weil polynomial is biquadratic W(T) = T⁴+a₂T²+p², write
+D = a₂²−4p² < 0 as D = sf·m² (sf squarefree), K = Q(√sf), P a prime of O_K above p.
+Then [P]² = 1 in Cl(K).  *Proof:* Let β = (−a₂+m√sf)/2; it satisfies x²+a₂x+p² = 0
+(algebraic integer), N(β) = p², and (β) = (p) forces √sf rational (impossible for sf < 0
+unless sf ∈ {−1,−3} and the special unit cases apply, both with h(K) = 1).  When h > 1,
+(β) = P², so [P]² = 1.  This property holds for *all* primes p, not only the secp256k1
+norm-form family: verified numerically for 23 genus-2 curves over non-norm-form primes,
+including 8 cases with h(K) ≥ 5 (scripts `thread15_order2_algebraic.gp`,
+`thread16_general_biquadratic.gp`).  The result has no direct bearing on the B5
+complexity bound but characterises a universal arithmetic structure of biquadratic
+Jacobians; it may be relevant to counting arguments in the Howe-gluing analysis (§6).
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
