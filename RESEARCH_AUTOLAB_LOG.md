@@ -5520,4 +5520,4 @@ exists) vs. ord([P]) = 2 (only norm-p² exists)?
 - Also: integrate the general theorem citation into paper/eprint_combined.tex §B5.
 
 ### Commits made
-[to be filled after commit]
+`9dcd16d` autolab 2026-07-18: Thread 16 — universal order-2 Frobenius theorem verified general; 43/43 non-norm-form cases pass
