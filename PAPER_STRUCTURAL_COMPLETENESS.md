@@ -270,6 +270,32 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal structure; Threads 15–16).** For any biquadratic Weil
+polynomial `T⁴ + a₂T² + p²` of an abelian surface `A/F_p`, let
+`D = a₂² − 4p²`, `sf = squarefree-part(D) < 0`, `K = Q(√sf)`, and `P` a
+prime of `O_K` above `p`.  Then `β = (−a₂ + m√sf)/2 ∈ O_K` (norm `p²`) and
+`(β) = P²`, so `[P]² = 1` in `Cl(K)`.  (Proof: `β` satisfies
+`x² + a₂x + p² = 0`, `N(β) = p²`, and `p ∤ a₂` for ordinary `A`; so `(β) ≠ (p)`
+and `(β) = P² or P̄²`. □)
+
+*Sharpening.*  The order of `[P]` in `Cl(K)` depends on whether the Weil
+polynomial factors over `Z`:
+
+- **Rational-split case** (`2p − a₂ = t²` for some `t ∈ Z`, i.e., `A ≅ E × E^t`
+  over `F_p`): the Frobenius `π = (t + √(t²−4p))/2 ∈ O_K` generates `P`, so
+  `[P] = 1` (trivially principal).
+- **Non-rational-split case** (`2p − a₂` not a perfect square): `β = π²` holds
+  only in a degree-4 extension; `P` need not be principal, and `ord([P]) = 2`
+  generically.  All secp256k1 norm-form Jacobians (`4p = 73 + 3k²`) fall into
+  this case — verified for 25 primes `k ≤ 199` (Thread 15, PARI script
+  `thread15_order2_algebraic.gp`).  Five additional non-norm-form, non-rational-split
+  examples at `p = 53` confirm `ord([P]) = 2` (Thread 16, script
+  `thread16b_nonsplit_check.gp`).
+
+This structural dichotomy does not affect the B5 cost argument (which depends only on
+`#A(F_p) = p²`, not on ideal class structure) but clarifies why the secp256k1 genus-2
+cover has an arithmetically richer Frobenius structure than a simple product `E × E^t`.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

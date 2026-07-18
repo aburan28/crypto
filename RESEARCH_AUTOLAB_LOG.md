@@ -5428,3 +5428,104 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Verify the universal order-2 Frobenius theorem (Thread 15) extends to
+non-norm-form primes, clarify the structural scope of the theorem, and integrate
+the result into PAPER_STRUCTURAL_COMPLETENESS.md §B5. Picked because Thread 15
+(completed 2026-07-17) explicitly proposed this as the next step.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp`: tests 10 non-norm-form
+  primes (101 to 50021), 5 curves y²=x³+ax+b each (50 cases total).
+- Discovered structural distinction: ALL 50 cases gave ord([P])=1, NOT order 2.
+  Investigation: for E×E^t with integer trace t, β = π² where π=(t+√(t²-4p))/2 ∈ O_K.
+  Then (π)=P (principal), so ord([P])=1 trivially. The order-2 phenomenon
+  requires the Weil polynomial to be non-rational-split (2p−a2 not a perfect square).
+- Wrote `secp256k1_cm_audit/thread16b_nonsplit_check.gp`: confirms the
+  structural dichotomy with three-part verification (Part 1: rational-split → ord=1;
+  Part 2: search genus-2 curves for non-rational-split examples → ord=2; Part 3:
+  secp256k1 norm-form primes confirmed non-rational-split → ord=2).
+- Integrated new remark into PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after the
+  Numerical verification block, before §B6).
+- Ran `cargo test --test curve_audit` to confirm no regressions.
+
+### Findings
+
+**50/50 cases: ord([P])=1 for all rational-split E×E^t.**
+Representative sample from thread16_general_order2.gp:
+```
+p=101  a=20 b=38 : t=14   sf=-13   h=2  ord([P])=1  [P]^2=1:YES
+p=503  a=71 b=131: t=6    sf=-494  h=28 ord([P])=1  [P]^2=1:YES  (h=28!)
+p=20011 a=54 b=100: t=70  sf=-18786 h=152 ord([P])=1 [P]^2=1:YES
+p=50021 a=71 b=131: t=-105 sf=-189059 h=244 ord([P])=1 [P]^2=1:YES  (h=244!)
+```
+Even with class number h=244, [P]=1 because P=(π) is principal (π∈O_K, N(π)=p).
+
+**Key algebraic identity:** For a2=2p−t² (rational split),
+  β = (-a2+m√sf)/2 = π² (where π=(t+√(t²-4p))/2 ∈ O_K).
+  Proof: π²=(t+√D_E)²/4=(t²+2t√D_E+D_E)/4=(t²+2t√D_E+(t²-4p))/4
+        = (2t²-4p)/4 + (2t/4)√D_E = (t²-2p)/2 + (t/2)√D_E.
+  And β=(-a2+m√sf)/2=(t²-2p)/2+(m/2)√sf. Since D_E=t²-4p=sf·m0², √D_E=m0·√sf
+  and m=|t|·m0, so (t/2)√D_E=(t/2)·m0·√sf=(m·sgn(t)/2)·√sf. For t>0: β=π². ✓
+  So (β)=(π)²=P² and [P]=(π)=1. The order-2 phenomenon CANNOT arise for
+  rational splits — it's algebraically impossible.
+
+**5 non-rational-split examples found at p=53 (thread16b_nonsplit_check.gp):**
+```
+p=53  y²=x⁵+x+13:  a2=-50  2p-a2=156  (156=4·39, not a square)  sf=-546  h=24  ord([P])=2  [P]²=1:YES
+p=53  y²=x⁵+2x+17: a2=82   2p-a2=24   (24=4·6,  not a square)   sf=-282  h=8   ord([P])=2  [P]²=1:YES
+```
+
+**All 6 secp256k1 norm-form primes confirmed non-rational-split:**
+```
+p=19:  a2=35  2p-a2=3    (not square)  sf=-219 h=4 ord([P])=2
+p=37:  a2=1   2p-a2=73   (not square)  sf=-219 h=4 ord([P])=2
+p=79:  a2=-85 2p-a2=243  (not square)  sf=-219 h=4 ord([P])=2
+p=109: a2=-145 2p-a2=363 (not square)  sf=-219 h=4 ord([P])=2
+p=349: a2=385  2p-a2=313 (not square)  sf=-939 h=8 ord([P])=2
+p=487: a2=-299 2p-a2=1273 (not square) sf=-3819 h=16 ord([P])=2
+```
+
+**STRUCTURAL THEOREM (Thread 16, complete statement):**
+Let T⁴+a2·T²+p² be a biquadratic Weil polynomial of an ordinary abelian surface
+A/F_p, sf=squarefree-part(a2²-4p²), K=Q(√sf), P a prime of O_K above p.
+Then [P]² = 1 in Cl(K). Moreover:
+  (i)  If 2p−a2=t² for some t∈Z (rational split, A≅E×E^t):
+       π=(t+√(t²-4p))/2 ∈ O_K generates P; ord([P])=1.
+  (ii) If 2p−a2 is not a perfect square (non-rational split):
+       β=(−a2+m√sf)/2 generates P² but P need not be principal;
+       ord([P]) ∈ {1,2} with ord([P])=2 observed in all secp256k1
+       norm-form cases and all 5 non-norm-form genus-2 examples found.
+
+**Cargo test result:** 5/5 curve_audit tests pass (no regressions).
+
+**Explicit β check for p=307 (sanity, non-norm-form rational-split):**
+```
+t=28, a2=-170, D=-348096, sf=-111, m=56
+beta = (170 + 56√-111)/2 = 85+28√-111 = (14+√-111)² = π²
+minpoly(beta) = x²-170x+94249 (= x²+a2*x+p² ✓)
+N(beta) = 94249 = 307² ✓,  idealhnf(K,beta)=P² ✓,  [P]²=1 ✓
+```
+
+### Next step proposal
+Thread 17: Prove that for ALL non-rational-split biquadratic Weil polynomials
+T⁴+a2*T²+p² (over prime F_p), ord([P]) is EXACTLY 2 (not just divides 2).
+- Approach: when would [P]=1 (P principal) with 2p-a2 not a perfect square?
+  P=(γ) for some γ∈O_K with N(γ)=p. Then γ·γ̄=p, trace(γ)=γ+γ̄∈Z, and γ²−trace(γ)·γ+p=0.
+  So a2_γ = 2p−trace(γ)² IS a perfect square! That means if a2 ≠ 2p−t² for any t,
+  then no such γ exists, hence P is NOT principal. ← This is actually a proof!
+- Claim: if 2p−a2 is not a perfect square, then P is non-principal and ord([P])=2.
+- Proof: suppose (P)=(γ). Then γ∈O_K, N(γ)=p, Tr(γ)=t∈Z (integer trace).
+  γ satisfies T²−tT+p=0 (minimal poly over Q). The Weil poly of the surface with
+  this Frobenius would be (T²−tT+p)(T²+tT+p)=T⁴+(2p−t²)T²+p², so a2=2p−t²=t²
+  is a perfect square. Contradiction. □
+- Verify this claim for a few cases where h>1 and 2p-a2 not square but P is
+  declared non-principal; confirm the proof by checking no γ∈O_K with N(γ)=p exists.
+- If confirmed, combine with Thread 15 to give: ord([P]) = 1 iff rational-split,
+  ord([P]) = 2 otherwise (for non-trivial class groups, h>1).
+
+### Commits made
+[to be filled after commit]
