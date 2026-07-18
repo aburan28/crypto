@@ -262,6 +262,36 @@ following arithmetic obstruction.
 > #J(F_p) = #E · #E^t.  The Lemma characterises kernel structure but
 > does not affect this calculation. DLP cost O(p) by Gaudry (g=2). □
 
+**Structural remark: order-2 Frobenius ideal for any ordinary curve (Thread 15–16).**
+The abelian surface A = E × E^t has Weil polynomial T⁴ + a₂T² + p²
+where a₂ = 2p − a² (a = trace of E).  Its discriminant D = a₂² − 4p² =
+a²(a² − 4p) < 0 factors as D = sf·m² (sf squarefree).  The element
+β = (−a₂ + m√sf)/2 ∈ K = Q(√sf) satisfies β² + a₂β + p² = 0, hence is
+an algebraic integer with N_{K/Q}(β) = p².  Since |a| < 2√p < p and
+a ≠ 0 implies p ∤ a₂, the ideal (β) ≠ (p) in O_K, so (β) = P² or P̄²
+for the prime P above p.
+
+> **Theorem (universal order-2 Frobenius ideal).**
+> For every ordinary elliptic curve E/F_p with trace a ≠ 0,
+> the prime ideal P above p in K = Q(√(squarefree(a²(a²−4p))))
+> satisfies `[P]² = 1` in `Cl(K)`.
+>
+> *Proof.* Steps (A)–(E) above; no norm-form condition is used.
+> The result is a consequence of the Hasse bound alone. □
+
+*Numerical verification:* Confirmed for all 25 secp256k1 norm-form primes k ≤ 199
+(Thread 15, `thread15_order2_algebraic.gp`), and additionally for 84 curve/prime pairs
+spanning 10 non-norm-form primes p ∈ {101,103,107,113,127,149,163,197,211,229}
+with diverse CM fields sf ranging from −1 to −763 and class numbers h = 1..12
+(Thread 16, `thread16_general_frobenius.gp`).  All 84 cases: N(β)=p²✓, p∤a₂✓,
+(β)=P²✓, [P]²=1✓.  Also verified: Legendre(sf,p) = +1 in every case,
+confirming that p always splits in K for ordinary E (not just for the CM-73 family).
+
+*Connection to cover cost:* The Theorem implies that the Frobenius action on
+the class group Cl(K) always has order ≤ 2, regardless of the ambient CM structure.
+This places a structural cap on the Cl(K)-orbit-walking speed for any genus-2 cover
+constructed from E × E^t — the orbit has length at most 2 before cycling.
+
 **Numerical verification (Exp U–Y):**
 - secp256k1: p ≡ 1 mod 3, p ≡ 1 mod 7 (confirmed; p mod 3 = 1, p mod 7 = 1).
 - (3,3)-isogeny graph from E × E^t walked to depth 5 (25 kernel-curve pairs);

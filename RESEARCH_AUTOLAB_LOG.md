@@ -5428,3 +5428,85 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: test whether the algebraic Theorem from Thread 15 ([P]²=1 for norm-form primes)
+generalises to ALL ordinary elliptic curves over arbitrary primes — as the algebraic
+proof steps (A)–(E) make no use of the norm-form condition 4p=73+3k².
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_frobenius.gp` (~170 lines).
+- Installed pari-gp (2.15.4) via apt; prior sessions had it missing.
+- Script tests 10 non-norm-form primes p ∈ {101,103,107,113,127,149,163,197,211,229},
+  10 curve-parameter pairs (a4,a6) each, verifying all five theorem conditions.
+- Also runs a Legendre-symbol check confirming p always splits in Q(√sf) for ordinary E.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Integrated generalised Theorem into PAPER_STRUCTURAL_COMPLETENESS.md §B5 remark.
+
+### Findings
+
+**THEOREM (Thread 16 — complete generalisation):**
+The order-2 Frobenius ideal property holds for EVERY ordinary elliptic curve E/F_p
+with trace a ≠ 0, not just the norm-form family 4p=73+3k².
+
+Proof key: the algebraic steps (A)–(E) use only:
+(i) β = (-a₂+m√sf)/2 satisfies x²+a₂x+p²=0 (Hasse bound gives |a|<2√p; a≠0).
+(ii) N_{K/Q}(β)=p², so (β) has norm p² in O_K.
+(iii) Since |a|<p, a≠0 ⟹ p∤a ⟹ p∤a₂=2p−a² ⟹ (β)≠(p).
+(iv) Only remaining ideals of norm p²: P² or P̄². Hence [P]²=1.
+
+**Numerical verification — 84 cases across 10 non-norm-form primes:**
+
+All 84 cases: N(β)=p² ✓, p∤a₂ ✓, (β)=P² ✓, [P]²=1 ✓.
+
+Selected cases:
+
+| p   | a  | (a4,a6) | sf    | m   | h  | [P]²=1 |
+|-----|----|---------|-------|-----|----|--------|
+| 101 | 2  | (1,0)   | -1    | 40  | 1  | YES    |
+| 101 |-12 | (11,13) | -65   | 24  | 8  | YES    |
+| 103 | 20 | (0,1)   | -3    | 40  | 1  | YES    |
+| 107 | 3  | (1,1)   | -419  | 3   | 9  | YES    |
+| 113 |-12 | (3,7)   | -77   | 24  | 8  | YES    |
+| 127 | 22 | (2,3)   | -6    | 44  | 2  | YES    |
+| 163 | 4  | (11,13) | -159  | 8   | 10 | YES    |
+| 197 |-24 | (1,1)   | -53   | 48  | 6  | YES    |
+| 211 | 10 | (5,5)   | -186  | 20  | 12 | YES    |
+| 229 |-15 | (3,7)   | -691  | 15  | 5  | YES    |
+
+Key stats:
+- sf range: -1 to -763 (diverse CM fields, not CM-73 specific)
+- h range: 1 to 12 (various class group sizes)
+- nP = 2 in all cases: p always splits (never inert) — confirmed by Legendre check
+
+**Legendre symbol result (bonus):**
+For every ordinary E/F_p with trace a≠0 and every test prime:
+  Legendre(sf, p) = +1 always.
+Proof: sf = squarefree(a²(a²-4p)). (sf/p) = (a²/p)·((a²-4p)/p) = 1·(a²/p) = 1.
+So p ALWAYS splits in K = Q(√sf) for ordinary curves — a consequence of the
+Legendre symbol being a multiplicative character and a≢0(mod p).
+
+**Paper update:**
+Added a "Structural remark: order-2 Frobenius ideal for any ordinary curve (Thread 15–16)"
+block in PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after the B5 universality corollary).
+Includes the Theorem statement, proof sketch, numerical verification summary,
+and a note on the structural cap this places on Cl(K)-orbit walking for genus-2 covers.
+
+### Next step proposal
+Thread 17: Push the general theorem one step further.
+(a) **Width of the [P]² class**: when [P]=1 (h=1 or P principal), the cover's
+    Frobenius fixes the unique class. When [P] has exact order 2, the orbit has
+    length 2. Can we characterise WHICH primes p and traces a give [P]=1 vs [P] of
+    order exactly 2? From the data: h=1 always gives [P]=1 (trivially). The non-trivial
+    cases (h>1) all have [P] of order 1 or 2 — but we haven't separated them.
+    Experiment: add an `ord_P` column to the output to distinguish order-1 from order-2.
+(b) **Extend to larger primes**: run the verification on 5 cryptographic-size primes
+    (e.g., random 64-bit primes, not deployed curves) to confirm the theorem is
+    scale-independent. This is theoretically guaranteed but empirically useful.
+(c) **Paper B5 integration**: cite Thread 15–16 theorem formally with the script
+    in the reproducibility table (§10 of the paper).
+
+### Commits made
+[to be filled after commit]
