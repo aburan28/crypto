@@ -5510,4 +5510,4 @@ Thread 17: Explicit principal generator in the h-odd case.
   `bnfisprincipal(K, P)` and verify π² = ±β.
 
 ### Commits made
-[TBD — computed after commit]
+`1cb0180` autolab 2026-07-18: Thread 16 — Theorem generalised to all non-norm-form primes; 70/70 cases confirmed, h up to 28
