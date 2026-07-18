@@ -270,6 +270,40 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Thread 16 — general order-2 Frobenius ideal, 2026-07-18).**
+The CM computations in Threads 11–15 established an order-2 pattern for
+norm-form primes `4p = 73 + 3k²`.  Thread 16 shows this is a *general theorem*:
+
+> **Theorem (Order-2 Frobenius ideal).** Let p be any prime, and let
+> `T⁴ + a₂T² + p²` be any biquadratic Weil polynomial with
+> `D = a₂² − 4p² = sf · m²` (sf squarefree, m ≥ 1) and **p ∤ a₂**.
+> Then the prime ideal P above p in K = Q(√sf) satisfies [P]² = 1 in Cl(K).
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2.
+> (A) β satisfies x² + a₂x + p² = 0 (monic, Z-coefficients) → β ∈ O_K.
+> (B) N_{K/Q}(β) = (a₂² − m²sf)/4 = (a₂² − D)/4 = p².
+> (C) If (β) = (p), then β/p ∈ O_K satisfies p·x² + a₂·x + p = 0,
+>     which has non-integer leading coefficient after dividing by p —
+>     a contradiction if p ∤ a₂ (β/p would not be an algebraic integer).
+> (D) Every ideal of norm p² in O_K is P², P̄², or P·P̄ = (p).
+>     Since (β) ≠ (p), we have (β) = P² (or P̄²), hence [P]² = 1. □
+>
+> *The proof uses no property of the norm-form 4p = 73 + 3k² whatsoever.*
+
+**Computational verification** (script `secp256k1_cm_audit/thread16_general_order2.py`):
+- Part 1: 50/50 non-norm-form prime cases PASS via BQF squaring (binary quadratic
+  forms), including 48 cases with h(K) > 2 (non-trivial class group).
+- Part 2: targeted search found 10 cases with h(K) ∈ {4, …, 80}; all PASS.
+- Part 3: algebraic conditions (A)–(D) verified for 40 non-norm-form (p, a₂) pairs.
+
+**Relevance to B5.** The Frobenius ideal of any biquadratic Weil polynomial (the
+characteristic polynomial of an abelian surface arising from a `(N,N)`-cover
+`E×E^t → J`) always has [P]² = 1 when p ∤ a₂.  This is a structural property
+of all such covers, independent of the specific curve.  It does not yield a DLP
+attack — the order-2 property means the cover's CM field has restricted class
+group, but #J(F_p) = N(P)² = p² is unchanged.  The cover-cost bound in B5
+(DLP on J costs Θ(p)) still applies.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

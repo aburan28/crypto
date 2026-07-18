@@ -5428,3 +5428,78 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Generality of order-2 Frobenius theorem. Thread 15 (yesterday) proved the
+theorem for norm-form primes 4p=73+3k² and proposed extending to general primes.
+Thread 15 made measurable progress, so Thread 16 continues directly from that next-step.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.py` (~340 lines, Python 3).
+  Note: PARI/GP not available in this environment; reimplemented BQF class group
+  arithmetic (Gauss squaring via Shanks formula) in pure Python.
+  Key fix: squaring formula must use b_new = b - 2ay (MINUS sign); plus-sign variant
+  fails when a ∤ 2c (assertion caught: fixed in commit).
+- Ran all three verification parts and obtained clean output.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Integrated Theorem into `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 remark.
+
+### Findings
+
+**THEOREM (Thread 16 — general, not norm-form-specific):**
+For any prime p, any a₂ with 0 < |a₂| < 2p and p ∤ a₂, set D = a₂²-4p² < 0,
+D = sf·m² (sf squarefree). Then P above p in K = Q(√sf) has [P]² = 1 in Cl(K).
+
+Proof steps verified:
+  (A) β = (-a₂+m√sf)/2  satisfies  x²+a₂x+p² = 0  →  β ∈ O_K.
+  (C) N(β) = (a₂²-m²sf)/4 = (a₂²-D)/4 = p².
+  (D) p ∤ a₂  →  β/p not an alg. int.  →  (β) ≠ (p).
+  (E) (β) = P² or P̄²  →  [P]² = 1.
+
+**Computational verification results:**
+
+Part 1 (10 non-norm-form primes p ∈ {211,223,...,263}, 5 a₂ each):
+  50/50 PASS via BQF squaring, 0 FAIL, 0 ERROR.
+  48/50 non-trivial (h(K) > 2). Sample:
+  | p   | a₂  | sf       | h(K) | [P]²=id? |
+  |-----|-----|----------|------|----------|
+  | 223 | 35  | -197691  | 104  | PASS     |
+  | 239 | 260 | -4469    | 92   | PASS     |
+  | 251 | -62 | -15510   | 80   | PASS     |
+  | 229 | 304 | -29337   | 96   | PASS     |
+
+Part 2 (targeted search for h(K)>2):
+  10/10 non-trivial cases PASS. Examples with explicit BQF evidence:
+  | p   | a₂ | sf      | m  | h  | bqf_P          | P²               | id               |
+  |-----|----|---------|----|----|-----------------|------------------|------------------|
+  | 101 | 2  | -102    | 20 | 4  | (101,-20,2)     | (1,0,102)        | (1,0,102) ✓      |
+  | 101 | 4  | -1133   | 6  | 28 | (101,66,22)     | (1,0,1133)       | (1,0,1133) ✓     |
+  | 101 | 10 | -159    | 16 | 10 | (101,-89,20)    | (1,1,40)         | (1,1,40) ✓       |
+
+Part 3 (algebraic conditions A–D for 40 non-norm-form pairs):
+  40/40 PASS. All conditions hold for all pairs.
+
+**Paper update:**
+Added "Remark (Thread 16 — general order-2 Frobenius ideal)" to §B5 of
+PAPER_STRUCTURAL_COMPLETENESS.md, including the full theorem statement and proof.
+Noted that [P]²=1 is a structural property of all biquadratic Weil polynomials,
+but does NOT yield a DLP speedup (cover-cost bound Θ(p) unchanged).
+
+### Next step proposal
+Thread 17: Characterize the EXCEPTIONAL cases (p | a₂) more carefully.
+- When p | a₂ but D < 0: (β) = (p) = P·P̄. This means β = p·u for a unit u.
+  With a₂ = 0: D = -4p², sf = -1, K = Q(i), β = pi = p·i. N(β) = p². ✓
+  [P]·[P̄] = [(p)] = 1, so [P]·[P̄] = 1 (but [P]² ≠ 1 if p ≡ 1 mod 4 and h(Z[i])≠...).
+  Wait h(Q(i))=1, so [P]=1 trivially. Exceptional cases all have h=1?
+- Conjecture: when p | a₂ (exceptional case), the discriminant Δ has p² | Δ
+  (i.e., p is ramified with multiplicity ≥ 2), forcing h(K)/h_0 structure.
+  This is likely trivial from the ramification theory but worth documenting.
+- Alternatively: skip Thread 17 as marginal and proceed to one of the original
+  open threads. Recommend: Thread 5 (GLV-HNP Phase 2 toy) or Thread 3 (Howe sextic).
+
+### Commits made
+See below after push.
