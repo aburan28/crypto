@@ -270,6 +270,29 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Threads 15–16: order-2 structure of Frobenius ideals).** For any biquadratic
+Weil polynomial `T⁴ + a₂T² + p²` with discriminant `D = a₂² − 4p² = sf·m²` (sf
+squarefree, `sf < 0`), any prime `P` above `p` in `O_{Q(√sf)}` satisfies `[P]² = 1`
+in `Cl(Q(√sf))`, provided `p ∤ a₂`.
+
+*Proof sketch.* Set `β = (−a₂ + m√sf)/2 ∈ O_{Q(√sf)}`.  Then `N(β) = p²`, so
+`(β)` is an ideal of norm `p²`.  The only `O_K`-ideals of norm `p²` are `P²`, `P̄²`,
+and `(p)`.  Since `p ∤ a₂`, we have `(β) ≠ (p)`, hence `(β) = P²` or `P̄²`, giving
+`[P]² = 1`.  □
+
+*Scope.* For `E × E^t` products (trace `t`, quadratic twist): `a₂ = 2p − t²` and
+`p ∤ a₂` iff `t ≠ 0`.  Verified:
+- All 25 norm-form primes `k ≤ 199` (`4p = 73 + 3k²`) — 25/25 pass (Thread 15;
+  `secp256k1_cm_audit/thread15_order2_algebraic.gp`).
+- 10 non-norm-form primes {101, 251, 503, 1009, 2003, 4001, 8011, 10007, 20011, 50021}
+  with diverse `sf ∈ {−395, −26, −1931, −3, −1999, −14915, −36779, −179635}` and
+  `h ∈ {1, …, 77}` — 10/10 pass (Thread 16; `secp256k1_cm_audit/thread16_general_biquadratic.gp`).
+
+This is a purely algebraic property of biquadratic Weil polynomials, independent of
+the CM structure of any particular curve.  It implies that for any isogeny-graph walk
+landing on an `E × E^t`-type surface, the Frobenius ideal order is at most 2 in the
+relevant class group — no exotic class-group leverage is available.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

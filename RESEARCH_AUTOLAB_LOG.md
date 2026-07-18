@@ -5428,3 +5428,74 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Verify the order-2 Frobenius theorem (proved algebraically in Thread 15 for
+25 norm-form primes) extends to non-norm-form primes — i.e., to arbitrary biquadratic
+Weil polynomials T⁴ + a₂T² + p². Thread 15 was completed yesterday (2026-07-17) with
+measurable progress, and Thread 16 was the explicit proposed next step.
+
+### Work done
+- Fixed PARI/GP installation (gp not in PATH; installed pari-gp 2.15.4 via apt).
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~145 lines).
+  - Constructs biquadratic Weil poly via E × E^t: a₂ = 2p − t², where t = trace(E/F_p).
+  - For each prime p: finds smallest elliptic curve (a,b) with t ≠ 0, computes a₂, sf, m,
+    then verifies (β) = P² and [P]² = 1 in Cl(Q(√sf)).
+  - Main loop: 10 non-norm-form primes {101, 251, 503, 1009, 2003, 4001, 8011, 10007,
+    20011, 50021}. Bonus: 6 distinct traces at p=1009.
+- Fixed paren-counting bug in nested `for` loops (PARI/GP: `break(n)` + explicit closing
+  paren discipline); re-ran cleanly.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added "Remark (Threads 15–16)" block to `PAPER_STRUCTURAL_COMPLETENESS.md` §B5
+  (after the numerical verification at line ~271), stating and citing the theorem.
+
+### Findings
+
+**Main result — 10/10 non-norm-form primes:**
+
+| p     | curve             | t    | a₂      | sf       | m     | h   | (β)=P²? | [P]²=1? |
+|-------|-------------------|------|---------|----------|-------|-----|---------|---------|
+| 101   | y²=x³+x+1        | −3   | 193     | −395     | 3     | 8   | YES     | YES     |
+| 251   | y²=x³+x+1        | −30  | −398    | −26      | 60    | 6   | YES     | YES     |
+| 503   | y²=x³+x+1        | 9    | 925     | −1931    | 9     | 21  | YES     | YES     |
+| 1009  | y²=x³+1          | 62   | −1826   | −3       | 496   | 1   | YES     | YES     |
+| 2003  | y²=x³+x+1        | −4   | 3990    | −1999    | 8     | 27  | YES     | YES     |
+| 4001  | y²=x³+x+1        | 33   | 6913    | −14915   | 33    | 56  | YES     | YES     |
+| 8011  | y²=x³+1          | −88  | 8278    | −3       | 7920  | 1   | YES     | YES     |
+| 10007 | y²=x³+x+1        | −57  | 16765   | −36779   | 57    | 77  | YES     | YES     |
+| 20011 | y²=x³+1          | −112 | 27478   | −3       | 16800 | 1   | YES     | YES     |
+| 50021 | y²=x³+x+1        | 143  | 79593   | −179635  | 143   | 64  | YES     | YES     |
+
+**Bonus — 6 distinct traces at p=1009:**
+sf ∈ {−3, −3, −3, −1, −865, −7}, h ∈ {1, 1, 1, 1, 16, 1}: all 6/6 passed.
+
+**Structural observation:** sf(D) is highly variable across the 10 primes (−3, −26, −395,
+−1931, −1999, −14915, −36779, −179635), and h ranges from 1 to 77. The theorem holds
+for ALL these diverse class groups, confirming the proof is not an artifact of a
+special class-group structure.
+
+**Scope of the theorem (as now stated in the paper):**
+- Purely algebraic: holds for any (a₂, p) with p prime, p ∤ a₂, D = a₂² − 4p² < 0.
+- Not specific to secp256k1, its norm-form family, or any CM structure.
+- Implication for the paper: any isogeny-graph walk landing on a biquadratic Weil
+  polynomial surface has [P]² = 1, so no exotic class-group leverage is available.
+
+### Next step proposal
+Thread 17: Extend the theorem to the case where D > 0 (real quadratic field).
+- When a₂ > 2p (which can happen for abelian surfaces with real multiplication), D > 0
+  and sf > 0. Then K = Q(√sf) is real quadratic with a different unit structure.
+- Claim: the proof (A)-(E) still gives [P]² = 1 in Cl(Q(√sf)) for the real quadratic
+  case, since N(β) = p² and (p) is excluded the same way.
+- Experiment: find an a₂ with |a₂| > 2p (not from E × E^t, since |a₂| = |2p − t²| ≤ 2p);
+  instead use an arbitrary biquadratic polynomial with D > 0 and check [P]² = 1.
+- Alternatively: broaden the sweep to also cover the "inert" case (p inert in K, which
+  occurs in 2 of the 10 test primes above for some sf values) — verify the theorem
+  applies vacuously there.
+
+Alternatively (if Thread 17 hits a wall quickly): transition to ePrint survey mode
+and write up the full theorem in a paper section (LaTeX in `paper/eprint_combined.tex`).
+
+### Commits made
+(to be filled after commit)
