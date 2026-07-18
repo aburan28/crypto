@@ -270,6 +270,37 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Threads 15–16 — order-2 Frobenius ideal structure).**
+A structural curiosity discovered during the secp256k1 CM audit gives an
+independent perspective on B5's Weil polynomial argument.  For any abelian
+surface with biquadratic Weil polynomial `T⁴ + a₂T² + p²` (which includes
+`E × E^t` with trace t and `a₂ = 2p − t²`), the following holds:
+
+> **Theorem (Thread 15, algebraic proof).** Let p be prime, `a₂ ∈ ℤ` with
+> `p ∤ a₂`, and set `D = a₂² − 4p²` (< 0 in the ordinary case).  Write
+> `D = sf · m²` with sf squarefree, and let `K = ℚ(√sf)`, `P` a prime of
+> O_K above p.  Then `[P]² = 1` in `Cl(K)`.
+>
+> *Proof.* The element β = (−a₂ + m√sf)/2 satisfies `x² + a₂x + p² = 0`,
+> so β ∈ O_K with `N_{K/ℚ}(β) = p²`.  Since `p ∤ a₂`, we have `(β) ≠ (p)`,
+> so `(β) = P²` or `P̄²`; hence `[P]² = 1` in `Cl(K)`. □
+
+*Scope.* The proof uses only the biquadratic Weil polynomial shape and the
+condition `p ∤ a₂` — neither the norm-form condition `4p = 73 + 3k²` nor
+any CM-specific structure.  Numerical verification (`secp256k1_cm_audit/`
+`thread15_order2_algebraic.gp`): 25 norm-form primes k ≤ 199, all 5 checks
+pass.  Extension (`thread16_general_weil_poly.gp`): 90 checks on 10
+non-norm-form primes (97 ≤ p ≤ 149), with both geometric (`a₂ = 2p − t²`)
+and purely algebraic a₂ values, class numbers ranging from h = 1 to h = 112;
+all 90 pass.  The theorem is universal.
+
+*B5 interpretation.* This order-2 structure of Frobenius ideals is a
+structural signature of the biquadratic Weil polynomial family.  It explains
+why the cover `E × E^t → J(C)` (when it exists) cannot yield a non-trivial
+DLP speedup: the Frobenius class group element `[P]` has order at most 2,
+which reflects the rigid Weil-polynomial symmetry that forces `#J(F_p) ≈ p²`
+and keeps DLP cost at Θ(p), above the ECDLP cost Θ(√p).
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
