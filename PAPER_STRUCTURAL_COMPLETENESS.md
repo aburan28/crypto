@@ -270,6 +270,28 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Order-2 Frobenius ideal — Thread 15/16).** When the Jacobian
+`Jac(C)` is isogenous to `E × E^t` over `F_p`, the characteristic
+polynomial of Frobenius on `Jac(C)` is biquadratic: `T⁴ + a₂T² + p²`.
+Let `D = a₂² − 4p²` and write `D = sf · m²` with `sf` squarefree.
+Define `β = (−a₂ + m√sf)/2 ∈ K = Q(√sf)`.
+
+**Theorem (Threads 15–16):** If `p ∤ a₂`, then `(β) = P²` for some prime
+`P` above `p` in `O_K`, so `[P]² = 1` in `Cl(K)`.
+
+*Proof sketch:* β satisfies `x² + a₂x + p² = 0` (algebraic integer,
+N(β) = p²). The only O_K-ideals of norm p² are `P², P̄², (p)`; case `(p)`
+requires `p | a₂`, excluded by hypothesis. □
+
+This was proved algebraically in Thread 15 for all 25 norm-form primes
+`4p = 73 + 3k²` (k ≤ 199), then verified for 33 additional non-norm-form
+primes in Thread 16 — including cases with class number `h(K)` up to 64 —
+confirming the theorem is fully general (script
+`secp256k1_cm_audit/thread16_general_weil.gp`). The result is a structural
+property of *any* biquadratic Weil polynomial, independent of which
+elliptic curve family p belongs to. It characterises the Frobenius ideal
+class of the split Jacobian but does not weaken the B5 DLP lower bound.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

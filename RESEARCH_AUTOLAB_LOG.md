@@ -5428,3 +5428,98 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (proposed by Thread 15 as next step): verify that the order-2 Frobenius
+theorem ([P]²=1 in Cl(Q(√sf))) from Thread 15 is fully general — holds for ANY prime p
+with a biquadratic Weil polynomial T⁴+a₂T²+p², not only norm-form primes 4p=73+3k².
+
+### Work done
+- Installed PARI/GP 2.15.4 (was not in PATH in this session; `apt-get install pari-gp`).
+- Wrote `secp256k1_cm_audit/thread16_general_weil.gp` (~180 lines) with four parts:
+  (A) 15 specific non-norm-form primes with hand-picked a₂ values;
+  (B) targeted search for 8 examples with h(K) ≥ 4;
+  (C) 8 edge cases (p=2,3,5; a₂ near 0 and near 2p);
+  (D) 2 norm-form primes (p=19, p=37) tested with NON-norm-form a₂ values.
+- Ran the script: all 33 examples verified [P]²=1; zero failures.
+- Added §B5 remark to PAPER_STRUCTURAL_COMPLETENESS.md (Theorem + citation to Threads 15–16).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — confirmed general):**
+For ANY prime p, if T⁴+a₂T²+p² with D=a₂²-4p²=sf·m² (sf squarefree) and p ∤ a₂,
+then [P]²=1 in Cl(Q(√sf)). This holds INDEPENDENTLY of whether p is a norm-form prime.
+
+**Part A — 15 non-norm-form primes, one a₂ each:**
+
+| p   | a₂  | sf       | m  | h   | nP | [P]²=1? |
+|-----|-----|----------|----|-----|----|---------|
+| 23  | 10  | -14      | 12 | 4   | 2  | YES     |
+| 29  | 15  | -3139    | 1  | 10  | 2  | YES     |
+| 31  | 20  | -861     | 2  | 24  | 2  | YES     |
+| 41  | 10  | -46      | 12 | 4   | 2  | YES     |
+| 43  | 20  | -1749    | 2  | 40  | 2  | YES     |
+| 47  | 30  | -31      | 16 | 3   | 2  | YES     |
+| 53  | 20  | -301     | 6  | 8   | 2  | YES     |
+| 59  | 30  | -814     | 4  | 12  | 2  | YES     |
+| 61  | 30  | -874     | 4  | 20  | 2  | YES     |
+| 67  | 35  | -11      | 39 | 1   | 2  | YES     |
+| 71  | 40  | -4641    | 2  | 64  | 2  | YES     |
+| 73  | 50  | -6       | 56 | 2   | 2  | YES     |
+| 83  | 50  | -174     | 12 | 12  | 2  | YES     |
+| 89  | 60  | -7021    | 2  | 56  | 2  | YES     |
+| 97  | 70  | -2046    | 4  | 32  | 2  | YES     |
+
+Notable: p=43,a₂=20 gives h=40; p=71,a₂=40 gives h=64 — largest class numbers tested.
+
+**Part B — targeted search for h≥4 (8 examples found):**
+
+| p   | a₂ | sf    | m | h  | [P]²=1? |
+|-----|----|-------|---|----|---------|
+| 11  | 2  | -30   | 4 | 4  | YES     |
+| 13  | 2  | -42   | 4 | 4  | YES     |
+| 17  | 3  | -1147 | 1 | 6  | YES     |
+| 23  | 2  | -33   | 8 | 4  | YES     |
+| 29  | 2  | -210  | 4 | 8  | YES     |
+| 31  | 3  | -3835 | 1 | 12 | YES     |
+| 41  | 2  | -105  | 8 | 8  | YES     |
+| 43  | 2  | -462  | 4 | 8  | YES     |
+
+**Part C — edge cases (p=2,3,5; a₂ near 0 and near 2p):**
+All 8 edge cases passed [P]²=1 including p=97, a₂=192 (near 2p=194): sf=-193 (prime),
+h=4, YES.
+
+**Part D — norm-form p with alternate a₂:**
+- p=19 (norm-form, k=1), a₂=10 (not the norm-form a₂=-35): sf=-21, h=4, [P]²=1: YES
+- p=37 (norm-form, k=5), a₂=30 (not the norm-form a₂≈-1): sf=-286, h=12, [P]²=1: YES
+Theorem holds for norm-form p with ANY a₂, confirming it's about (p,a₂) pairs.
+
+**Paper update:** Added remark to PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after Exp U–Y)
+citing the theorem with proof sketch, Threads 15–16 references, and noting the result
+is independent of the norm-form family and does not weaken the B5 DLP lower bound.
+
+**printf cosmetic issue in PARI:** The `[P]^2=1?` column header caused PARI printf
+format-string warnings (brackets parsed as vectors) but did NOT affect computations.
+All data rows printed correctly. Noted for future scripts: use `ord2=1?` in headers.
+
+### Next step proposal
+Thread 17: State the cleanest version of the theorem and look for its converse.
+- CONVERSE conjecture: For ANY prime P in O_K (K imaginary quadratic, P above p),
+  does there exist a biquadratic Weil polynomial T⁴+a₂T²+p² with p ∤ a₂ such that
+  the Frobenius ideal (β) = P² in O_K? (I.e., does the theorem surject onto all
+  order-2 ideal classes?)
+- Experiment: fix K=Q(√-14) (h=4, Cl(K)=Z/4Z), p=23 (splits). There are 2 primes
+  P, P̄ above 23. Find all a₂ with p∤a₂ that give (β)=P² vs (β)=P̄². Do both arise?
+- Also: look at whether the SPLIT condition (#Pp=2 in the script) can be replaced by
+  a simpler formula in terms of the Legendre symbol (sf/p).
+- Alternative Thread 17: GLV-HNP Phase 2 toy (Priority 5) — implement the 32-bit toy
+  curve GLV-aware lattice attack as a Rust test or PARI script to see if the lattice
+  recovers the discrete log.
+
+### Commits made
+(to be filled after git commit)
