@@ -5526,4 +5526,4 @@ analogous order-2 (or finite-order) result holds for prime ideals in the quartic
   been touched since the original priority list was set.
 
 ### Commits made
-[to be filled after commit]
+`4fe6d0d` autolab 2026-07-18: Thread 16 — unconditional order-2 Frobenius theorem; 23 non-norm-form cases verified
