@@ -5503,3 +5503,4 @@ Thread 17: Characterize the EXCEPTIONAL cases (p | a₂) more carefully.
 
 ### Commits made
 See below after push.
+`8e1bf80` autolab 2026-07-18: Thread 16 — general order-2 Frobenius; 50/50 BQF + 40/40 algebraic pass
