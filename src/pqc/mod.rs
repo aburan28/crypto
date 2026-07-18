@@ -41,6 +41,7 @@ pub mod newhope;
 pub mod niederreiter;
 pub mod ntru;
 pub mod ntru_prime;
+pub mod picnic;
 pub mod qr_uov;
 pub mod slh_dsa;
 pub mod uov;
