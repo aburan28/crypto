@@ -5428,3 +5428,82 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (continuation of Thread 15): Thread 15 proved the order-2 Frobenius theorem
+algebraically for all 25 norm-form primes (4p=73+3k², k≤199). Thread 15's next-step
+proposal was to verify the theorem is GENERAL — holding for arbitrary primes not satisfying
+the norm-form condition. This is a fresh thread with no prior work (last run proposed it,
+did not execute it).
+
+### Work done
+- Installed PARI/GP 2.15.4 (`apt-get install --fix-missing pari-gp`).
+- Wrote `secp256k1_cm_audit/thread16_general_weil_order2.gp` (~150 lines):
+  - Verifies 10 non-norm-form primes × 3 a₂ values each (30 main cases).
+  - Two extra suites: boundary (a₂=2p-3, 5 cases) and minimal (a₂=1, 5 cases).
+  - Total: 40 (p, a₂) test cases.
+  - For each case: computes D=a₂²-4p², sf=squarefree part, m=√(D/sf); checks
+    Kronecker (sf/p), splits in Q(√sf), and ord([P]) in Cl(K).
+- Ran script: 40/40 cases passed; all showing QR=YES, nP=2, [P]²=1.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — general biquadratic Weil polynomial):**
+For ANY prime p and ANY integer a₂ with |a₂| < 2p and p∤a₂:
+  Let D = a₂² − 4p² = sf·m² (sf squarefree, m > 0).
+  Then: (i) sf is a QR mod p; (ii) p SPLITS in Q(√sf); (iii) [P]² = 1 in Cl(Q(√sf)).
+
+**KEY REASON for (i):** D ≡ a₂² (mod p), and D = sf·m². Since m² is a perfect square,
+  (D/p) = (sf·m²/p) = (sf/p)·(m²/p) = (sf/p)·1. And (D/p) = (a₂²/p) = 1 (since p∤a₂).
+  Hence (sf/p) = 1 — sf is ALWAYS a QR mod p, regardless of the choice of p or a₂.
+
+**This means the norm-form condition is IRRELEVANT.** Thread 15 proved the theorem for
+norm-form primes because that is where the secp256k1 Weil polynomials arise, but the
+proof (A)-(E) required no norm-form assumption. Thread 16 confirms this empirically.
+
+**Selected interesting cases from the 40-case run:**
+
+| Case | p   | a₂  | sf       | m  | h  | ord([P]) | Note                                        |
+|------|-----|-----|----------|----|----|----------|---------------------------------------------|
+| #14  | 97  | -25 | -219     | 13 | 4  | 1        | sf=-219 = secp256k1 CM discriminant! [P] principal |
+| #21  | 127 | 85  | -339     | 13 | 6  | 1        | [P] principal (h=6, P happens to be principal) |
+| #37  | 41  | 1   | -83      | 9  | 3  | 1        | h=3 (odd) forces [P]=1 (every element order 1 or 3; [P]²=1 ∧ ord|3 ∧ ord|2 → ord=1) |
+| #36  | 23  | 1   | -235     | 3  | 2  | 2        | h=2, [P] the non-trivial class, [P]²=1 ✓  |
+| #31  | 23  | 43  | -267     | 1  | 2  | 2        | near-boundary a₂=43≈2p-3; works ✓         |
+
+Case #14 is particularly striking: the discriminant sf=-219 (= disc of Q(√-219), the CM
+field of secp256k1's gluing family) appears naturally for the unrelated prime p=97 with
+a₂=-25, and has h=4 with [P] principal (ord 1). This confirms that Q(√-219) is not
+special to the secp256k1 norm-form family — it emerges for generic (p, a₂) pairs.
+
+**h-values across 40 tests:** range h∈{2,3,4,6,8,10,12,16,20,24,40,48,64,72,80,88}.
+No exceptional field (h=1) appeared, but ord([P])=1 (principal P) appeared in 3 cases
+(#14, #21, #37) — all consistent with the theorem ([P]²=1 is trivially satisfied if [P]=1).
+
+**PARI note:** printf format strings with `%-6s %-4s %s` header caused a one-time syntax
+warning (PARI 2.15.4 sensitive to format-string line breaks in `-q` mode), but the
+computation block ran correctly. Fixed in the column header display; no impact on results.
+
+**Consequence for the paper:** Theorem in PAPER_STRUCTURAL_COMPLETENESS.md §B5 remark
+should be updated to state the general form (not just the norm-form family). The result is:
+  "For any biquadratic Weil polynomial T⁴+a₂T²+p² with p∤a₂, the Frobenius ideal P
+   above p in Q(√sf(a₂²-4p²)) is 2-torsion in the class group."
+
+### Next step proposal
+Thread 17: Integrate Thread 16's general theorem into the paper.
+- Edit `PAPER_STRUCTURAL_COMPLETENESS.md` §B5: replace norm-form-specific remark with
+  the general theorem (3-4 sentence proof sketch, citing Thread 15 proof (A)-(E)).
+- Add a one-paragraph remark: "Q(√-219) arose for the non-norm-form pair (p=97, a₂=-25),
+  confirming that this imaginary quadratic field is not structurally special to secp256k1."
+- Check whether the general theorem has a known citation (e.g., in Waterhouse 1969
+  "Abelian varieties over finite fields", or Tate 1966, or more recent CM abelian surface
+  literature). If found, cite; otherwise note it appears to be a straightforward corollary
+  of Honda-Tate that may be unattributed in the literature.
+
+### Commits made
+`[see below after commit]`
