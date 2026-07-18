@@ -5428,3 +5428,91 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16 (new): extend the order-2 Frobenius theorem (proved in Thread 15 for the
+25 secp256k1 norm-form primes) to all biquadratic Weil polynomials. The Thread 15
+log proposed this as the natural next step; no prior work existed on it.
+
+### Work done
+- Installed PARI/GP (pari-gp 2.15.4) via apt on the remote environment.
+- Derived the product-of-twists construction: for prime p > 4 and trace t ≠ 0
+  with t² < 4p, the abelian surface E × E^t has Weil polynomial T⁴+(2p-t²)T²+p²,
+  giving a₂ = 2p-t², D = t²(t²-4p) = -t²(4p-t²), sf = -core(4p-t²).
+- Proved the KEY LEMMA (new): p always splits in K = Q(√sf).
+  Proof: n = 4p-t², p ∤ n (since n ≡ -t² ≢ 0 mod p for |t|<2√p<p), so
+  (n/p) = (-t²/p) = (-1/p). Then (sf/p) = (-1/p)(n/p) = (-1/p)² = 1. □
+- Confirmed p ∤ a₂ always holds: a₂ = 2p-t² ≡ -t² ≢ 0 (mod p).
+- Therefore the Thread 15 proof (A)-(E) applies to ALL (p,t) pairs, giving
+  [P]² = 1 in Cl(Q(√sf)) universally, not just for the norm-form family.
+- Wrote `secp256k1_cm_audit/thread16_general_weil.gp` (~170 lines):
+  - Part A: 15 non-norm-form (p,t) pairs (p ∈ {101..10007}, varied t). All pass.
+  - Part B: Kronecker sweep — 688 pairs (p prime in [5,200], 1≤t<2√p).
+    Confirmed (sf/p)=1 for all 688. No exceptions.
+  - Part C: Symbolic (-1/p)² = 1 = (sf/p) confirmed for primes 5..53.
+- Integrated Theorem into PAPER_STRUCTURAL_COMPLETENESS.md §B5 as Remark B5-A.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — generalisation of Thread 15):**
+For any prime p > 4 and integer t with 0 < t² < 4p:
+  (a) sf = sf(t²(t²-4p)) = -core(4p-t²)
+  (b) p always splits in K = Q(√sf). [New. Proof: (sf/p) = (-1/p)² = 1.]
+  (c) p does not divide a₂ = 2p-t². [p ∤ (-t²) mod p since p ∤ t.]
+  (d) [P]² = 1 in Cl(K). [Follows from Thread 15 proof (A)-(E) + (b) + (c).]
+
+**Numerical results — Part A (15 non-norm-form primes):**
+
+| p      | t  | a₂      | sf        | m   | h  | (sf/p) | [P]²=1 |
+|--------|----|---------|-----------|-----|----|--------|--------|
+| 101    | 5  | 177     | -379      | 5   | 3  | 1      | YES    |
+| 103    | 7  | 157     | -3        | 77  | 1  | 1      | YES    |
+| 107    | 3  | 205     | -419      | 3   | 9  | 1      | YES    |
+| 113    | 9  | 145     | -371      | 9   | 8  | 1      | YES    |
+| 127    | 5  | 229     | -483      | 5   | 4  | 1      | YES    |
+| 131    | 11 | 141     | -403      | 11  | 2  | 1      | YES    |
+| 137    | 7  | 225     | -499      | 7   | 3  | 1      | YES    |
+| 139    | 3  | 269     | -547      | 3   | 3  | 1      | YES    |
+| 149    | 5  | 273     | -571      | 5   | 5  | 1      | YES    |
+| 151    | 9  | 221     | -523      | 9   | 5  | 1      | YES    |
+| 157    | 7  | 265     | -579      | 7   | 8  | 1      | YES    |
+| 163    | 11 | 205     | -59       | 33  | 3  | 1      | YES    |
+| 503    | 13 | 837     | -1843     | 13  | 6  | 1      | YES    |
+| 1009   | 21 | 1577    | -3595     | 21  | 8  | 1      | YES    |
+| 10007  | 7  | 19965   | -39979    | 7   | 35 | 1      | YES    |
+
+ALL 15/15 PASSED.
+
+**Part B:** Kronecker sweep — 688 pairs (p prime in [5,200], all t in [1, ⌊2√p⌋-1]).
+  All 688 satisfy (sf/p) = 1. Zero exceptions. Confirms Key Lemma exhaustively.
+
+**Part C:** (-1/p)² = 1 = (sf/p) for all 14 primes in [5,53]. Identity holds.
+
+Notable: p=103, t=7 gives sf=-3, h=1 (principal ideal ring). [P]²=1 trivially
+(since [P]=1). p=10007, t=7 gives sf=-39979, h=35 — large class number, yet
+[P]² = 1 still holds non-trivially.
+
+**Paper update:** Remark B5-A added to PAPER_STRUCTURAL_COMPLETENESS.md after
+the B5 numerical verification section, stating the Theorem and Key Lemma with
+full proof sketch and citing the PARI scripts.
+
+### Next step proposal
+Thread 17: Explicit construction of an actual genus-2 curve over F_p with biquadratic
+Weil polynomial for one of the 15 test cases, to confirm the abelian surface E×E^t
+really exists as a Jacobian. Use PARI's ellap() or a random curve search:
+  - Pick p=163, t=11. Find an elliptic curve E/F_163 with ellap(E,163) = 11.
+  - Form E^t (quadratic twist). Verify #E(F_163) * #E^t(F_163) = 163^2+... = p^2-...
+  - Verify the Weil polynomial of E×E^t is T^4+205*T^2+163^2 as predicted.
+  - Bonus: check if J = E×E^t is isomorphic to a Jacobian of a genus-2 curve
+    (by checking if the product is principally polarizable).
+Alternatively: Thread 18 — implement the P-521 bigfloat LLL (open priority-1 thread).
+The scalar-double-f64 approach is still unimplemented; could use MPFR via rug if GMP
+is available (apt), or implement a simple 2×f64 double-double arithmetic manually.
+
+### Commits made
+PENDING (will be filled after commit)

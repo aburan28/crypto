@@ -270,6 +270,28 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+> **Remark B5-A (Frobenius ideal, order-2 structure).** For any prime `p > 4`
+> and integer `t` with `0 < t² < 4p`, set `a₂ = 2p − t²` and let `K = Q(√sf)`
+> where `sf = sf(t²(t²−4p)) = −core(4p−t²)`.  Then:
+>
+> (i) **`p` always splits in `K`.**  Write `n = 4p−t²`.  Since `|t| < 2√p < p`,
+>     `p ∤ t`, so `n ≡ −t² ≢ 0 (mod p)`.  The Legendre symbol `(n/p) = (−t²/p)
+>     = (−1/p)·(t²/p) = (−1/p)`.  Hence `(sf/p) = (−n/p) = (−1/p)·(n/p) =
+>     (−1/p)² = 1`, i.e. `p` splits.
+>
+> (ii) **`[P]² = 1` in `Cl(K)`** where `P` is either prime of `O_K` above `p`.
+>     Let `β = (−a₂ + m√sf)/2` where `m = |t|·√((4p−t²)/core(4p−t²))`.
+>     Then `β` satisfies `x² + a₂x + p² = 0` (alg. int., `N(β) = p²`).
+>     Since `p ∤ a₂` (as `a₂ ≡ −t² ≢ 0 (mod p)`), the ideal `(β)` cannot
+>     equal `(p)`; the only remaining ideals of norm `p²` in `O_K` (when `p`
+>     splits) are `P²` and `P̄²`.  Hence `(β) = P²` or `P̄²`, so `[P]² = 1`. □
+>
+> **Numerical verification** (autolab Thread 15–16, scripts
+> `secp256k1_cm_audit/thread15_order2_algebraic.gp` and
+> `thread16_general_weil.gp`): 15 non-norm-form primes (100–10007) × varied
+> traces, all 15/15 passed; Kronecker sweep confirmed `(sf/p)=1` for all 688
+> pairs `(p,t)` with `p` prime in `[5,200]` and `1 ≤ t < 2√p`.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
