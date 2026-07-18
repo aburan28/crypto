@@ -5524,4 +5524,4 @@ every integer α in range is realizable. So the conjecture may be:
 This is a clean number-theoretic statement about representations by norm forms.
 
 ### Commits made
-See below.
+`9bd7104` autolab 2026-07-18: Thread 16 — universal [P]^2=1 theorem verified for 30 non-norm-form primes; P always principal; B5 paper remark added
