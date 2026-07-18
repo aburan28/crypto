@@ -95,6 +95,59 @@ pub use mqom::{mqom_keygen, mqom_sign, mqom_verify, MqomPublicKey, MqomSecretKey
 
 pub use faest::{faest_keygen, faest_sign, faest_verify, FaestPublicKey, FaestSecretKey};
 
+// Further round-3 / historically notable signatures.
+
+pub use rainbow::{rainbow_keygen, rainbow_sign, rainbow_verify, RainbowPublicKey, RainbowSecretKey};
+
+pub use hfe::{hfe_keygen, hfe_sign, hfe_verify, HfePublicKey, HfeSecretKey};
+
+pub use picnic::{picnic_keygen, picnic_sign, picnic_verify, PicnicPublicKey, PicnicSecretKey};
+
+pub use csi_fish::{
+    csi_fish_keygen, csi_fish_sign, csi_fish_verify, ActionCycle, CsiFishPublicKey,
+    CsiFishSecretKey, CsiFishSignature,
+};
+
+// Lattice foundations and further KEMs.
+
+pub use lwe::{lwe_decrypt, lwe_encrypt, lwe_keygen, LweCiphertext, LwePublicKey, LweSecretKey};
+
+pub use ring_lwe::{
+    ring_lwe_decrypt, ring_lwe_encrypt, ring_lwe_keygen, RingLweCiphertext, RingLwePublicKey,
+    RingLweSecretKey,
+};
+
+pub use sis::{find_collision, AjtaiHash};
+
+pub use ggh::{ggh_decrypt, ggh_encrypt, ggh_keygen, GghPublicKey, GghSecretKey};
+
+pub use newhope::{
+    newhope_decaps, newhope_encaps, newhope_keygen, NewHopeCiphertext, NewHopePublicKey,
+    NewHopeSecretKey,
+};
+
+pub use saber::{
+    saber_decaps, saber_encaps, saber_keygen, SaberCiphertext, SaberPublicKey, SaberSecretKey,
+};
+
+// Stateful hash-based and further code-based schemes.
+
+pub use lms::{
+    hss_keygen, hss_sign, hss_verify, lms_keygen, lms_sign, lms_verify, HssPrivateKey,
+    HssSignature, LmsPrivateKey, LmsPublicKey, LmsSignature,
+};
+
+pub use xmss::{xmss_keygen, xmss_sign, xmss_verify, XmssPrivateKey, XmssPublicKey, XmssSignature};
+
+pub use niederreiter::{
+    niederreiter_decrypt, niederreiter_encrypt, niederreiter_keygen, NiederreiterPublicKey,
+    NiederreiterSecretKey,
+};
+
+pub use stern::{stern_keygen, stern_sign, stern_verify, SternPublicKey, SternSecretKey};
+
+pub use rqc::{rqc_decrypt, rqc_encrypt, rqc_keygen, RqcPublicKey, RqcSecretKey};
+
 pub use mceliece::{
     mceliece_decrypt, mceliece_encrypt, McElieceKeyPair, McEliecePrivateKey, McElieceePublicKey,
 };

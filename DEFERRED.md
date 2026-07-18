@@ -8,6 +8,30 @@ what each would take to ship responsibly.
 
 ---
 
+## Still open: SIDH / SIKE (the famous 2022 break)
+
+**Why deferred**: a *faithful* SIDH needs the full supersingular
+elliptic-curve toolkit over `F_{p²}` — Montgomery (or Weierstrass)
+point arithmetic, Vélu isogeny **evaluation** on points (not just
+codomain `j`-invariants), torsion-basis generation, and the
+`2^a`/`3^b`-isogeny strategies — because the shared secret is obtained
+by *pushing the peer's torsion-point images* through one's own
+isogeny.  That torsion-point transmission is also exactly the structure
+the Castryck–Decru attack exploits.  The other isogeny schemes here
+(`csidh`, `sqisign`, `csi_fish`) only need `j`-invariant/graph walks via
+modular polynomials, which is why they shipped; SIDH's point-and-isogeny
+stack is a self-contained ~500-LoC sub-project and is not shippable
+without careful cross-checking of the isogeny-evaluation formulas
+against a reference.
+
+**Estimated cost**: `F_{p²}` arithmetic incl. `sqrt` (~200 LoC),
+Montgomery curve + point ops (~200 LoC), Vélu 2-/3-isogeny eval and
+chaining (~200 LoC), the SIDH round + torsion bases (~150 LoC), plus a
+demonstration of the Castryck–Decru key-recovery.  Best done as its own
+focused session with reference test vectors.
+
+---
+
 ## Tier 1 (medium effort, high impact)
 
 ### 1. **Ed25519 + X25519** — modern ECC

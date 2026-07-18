@@ -245,6 +245,10 @@ pub fn lms_verify(pk: &LmsPublicKey, msg: &[u8], sig: &LmsSignature) -> bool {
 
 #[derive(Clone)]
 pub struct HssPrivateKey {
+    /// The top tree.  In this two-level toy the bottom certificate is
+    /// precomputed at keygen, so `top` is retained only as part of the
+    /// key material (a deeper HSS would re-sign new bottom roots with it).
+    #[allow(dead_code)]
     top: LmsPrivateKey,
     bottom: LmsPrivateKey,
     bottom_pub: LmsPublicKey,

@@ -49,6 +49,7 @@ pub const MU: usize = 5;
 
 const Q: i64 = 1 << EQ;
 const P: i64 = 1 << EP;
+#[allow(dead_code)] // used by tests (ciphertext modulus bound)
 const T: i64 = 1 << ET;
 
 type Poly = Vec<i64>;

@@ -289,17 +289,32 @@ The same machinery powers every other attack's test output — run any
 | `pqc::qr_uov`                | QR-UOV (quotient-ring UOV)               | Round-3 on-ramp; F_31³ blocks, toy |
 | `pqc::snova`                 | SNOVA (UOV over a matrix ring)           | Round-3 on-ramp; M₂(GF(16)), toy   |
 | `pqc::hawk`                  | HAWK (lattice-isomorphism signature)     | Round-3 on-ramp; toy dim 32        |
-| `pqc::fn_dsa`                | FN-DSA / Falcon (NTRU hash-and-sign)     | Draft FIPS 206; toy n = 16, Babai for ffSampling |
+| `pqc::fn_dsa`                | FN-DSA / Falcon (NTRU hash-and-sign)     | Draft FIPS 206; toy n = 16, Klein/GPV Gaussian sampling |
 | `pqc::sdith`                 | SDitH (syndrome decoding in the head)    | Round-3 on-ramp; MPC-in-the-head, toy |
 | `pqc::mqom`                  | MQOM (MQ on my mind)                     | Round-3 on-ramp; MPC-in-the-head, toy |
 | `pqc::faest`                 | FAEST (AES in the head)                  | Round-3 on-ramp; MPC-in-the-head, toy |
-| `pqc::mpcith`                | Shared MPC-in-the-head proof engine      | Underlies SDitH / MQOM / FAEST     |
+| `pqc::mpcith`                | Shared MPC-in-the-head proof engine      | Underlies SDitH / MQOM / FAEST / Picnic |
+| `pqc::picnic`                | Picnic (LowMC block cipher in the head)  | Round-3 alternate; MPC-in-the-head, toy |
+| `pqc::rainbow`               | Rainbow (layered UOV)                    | Round-3 finalist; **broken** (Beullens 2022), toy |
+| `pqc::hfe`                   | HFEv- (Hidden Field Equations)           | Basis of GeMSS/Gui; univariate trapdoor, toy |
+| `pqc::csi_fish`              | CSI-FiSh (isogeny Fiat–Shamir signature) | Group-action signature; Φ₃ cycle, toy p = 419 |
 | `pqc::kyber`                 | Kyber / ML-KEM (simplified toy)          | Not FIPS-203 compatible            |
+| `pqc::newhope`               | NewHope-Simple (Ring-LWE KEM)            | Google CECPQ1 2016; 4:1 encoding, toy |
+| `pqc::saber`                 | Saber (Module-LWR KEM)                   | Round-3 finalist; rounding not noise, toy |
 | `pqc::frodo`                 | FrodoKEM (LWE-based)                     | Conservative simplified            |
 | `pqc::ntru`                  | NTRU lattice cryptosystem                | NTRU encrypt 1996                  |
 | `pqc::ntru_prime`            | NTRU Prime (Streamlined / NTRU LPRime)   | NTRU Prime spec                    |
+| `pqc::lwe`                   | Regev LWE public-key encryption          | The LWE assumption itself, toy     |
+| `pqc::ring_lwe`              | Ring-LWE (LPR) encryption                | The ring the KEMs build on, toy    |
+| `pqc::sis`                   | SIS / Ajtai collision-resistant hash     | With collision→SIS reduction, toy  |
+| `pqc::ggh`                   | GGH lattice encryption                   | **Broken** (Nguyen 1999), demonstrated in code |
+| `pqc::lms`                   | LMS/HSS stateful hash signatures         | RFC 8554 / NIST SP 800-208, toy    |
+| `pqc::xmss`                  | XMSS stateful hash signatures            | RFC 8391 / NIST SP 800-208, toy    |
 | `pqc::mceliece`              | Educational binary-Goppa McEliece (toy params) | Original 1978 |
+| `pqc::niederreiter`          | Niederreiter (syndrome dual of McEliece) | Reuses Goppa/Patterson, toy        |
 | `pqc::classic_mceliece`      | Classic McEliece (NIST round-3) skeleton | NIST round-3 spec                  |
+| `pqc::stern`                 | Stern code-based ZK identification/sig   | 1993; ancestor of MPC-in-the-head, toy |
+| `pqc::rqc`                   | Rank-metric encryption (Gabidulin/RQC)   | Rank syndrome decoding, toy        |
 | `pqc::hqc`                   | HQC (code-based KEM)                     | NIST round-3 / round-4             |
 | `pqc::bike`                  | BIKE (QC-MDPC code-based)                | NIST round-3                       |
 | `pqc::csidh`                 | CSIDH (isogeny-based) — group action     | Castryck–Lange–Martindale–Panny–Renes 2018 |
@@ -711,6 +726,13 @@ src/
 - FIPS 205 — SLH-DSA (SPHINCS+)
 - FIPS 206 (draft) — FN-DSA (Falcon)
 - NIST PQC additional-signatures on-ramp (round 3) — UOV, MAYO, QR-UOV, SNOVA, HAWK, SQIsign, SDitH, MQOM, FAEST
+- Lattice foundations — LWE (Regev), Ring-LWE (LPR), SIS/Ajtai; GGH (broken, Nguyen 1999)
+- Lattice KEMs — NewHope (CECPQ1), Saber (round-3 finalist)
+- Stateful hash signatures — LMS/HSS (RFC 8554), XMSS (RFC 8391), NIST SP 800-208
+- Code-based — Niederreiter, Stern ZK identification, rank-metric (Gabidulin/RQC)
+- Multivariate — Rainbow (round-3 finalist, broken 2022), HFEv- (GeMSS/Gui)
+- Isogeny signatures — CSI-FiSh (group-action Fiat–Shamir)
+- MPC-in-the-head — Picnic (LowMC), alongside SDitH/MQOM/FAEST
 - FIPS 186-4 — ECDSA + NIST curves
 - RFC 8439 — ChaCha20-Poly1305
 - RFC 7748 — X25519 / X448

@@ -70,7 +70,7 @@ fn expand_params() -> LowMcParams {
         pos += 1;
         b
     };
-    let mut matrix = |bitref: &mut dyn FnMut() -> u8| {
+    let matrix = |bitref: &mut dyn FnMut() -> u8| {
         (0..N).map(|_| (0..N).map(|_| bitref()).collect()).collect::<Vec<Vec<u8>>>()
     };
     let lin = (0..R).map(|_| matrix(&mut bit)).collect();

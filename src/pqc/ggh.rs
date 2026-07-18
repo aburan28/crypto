@@ -64,10 +64,6 @@ fn identity(n: usize) -> Matrix {
     m
 }
 
-fn mat_vec(m: &Matrix, v: &[i64]) -> Vector {
-    (0..m.len()).map(|i| (0..v.len()).map(|j| m[i][j] * v[j]).sum()).collect()
-}
-
 /// Row-vector times matrix: `v·M` (used for `m·B`).
 fn vec_mat(v: &[i64], m: &Matrix) -> Vector {
     let cols = m[0].len();
