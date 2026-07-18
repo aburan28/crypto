@@ -270,6 +270,39 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (B5 structural corollary — general biquadratic Weil polynomial).**
+For any abelian surface A/F_p whose Frobenius characteristic polynomial is
+*biquadratic*, i.e., χ_A(T) = T⁴ + a₂T² + p², the Frobenius ideal class
+satisfies a universal order-2 property:
+
+> **Theorem (Thread 15–16).** Let p be prime, a₂ ∈ Z with p ∤ a₂, and
+> D = a₂² − 4p² < 0.  Write D = sf · m² (sf squarefree, m > 0) and
+> let K = Q(√sf), P a prime of O_K above p (assuming p splits).
+> Then [P]² = 1 in Cl(K).
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2.  Then β satisfies x² + a₂x + p² = 0
+> (monic, integer coefficients), so β ∈ O_K.  The norm N_{K/Q}(β) =
+> (a₂² − m² sf)/4 = (a₂² − D)/4 = p².  The ideal (β) has norm p².
+> The only ideals of norm p² in O_K are P², P̄², and (p) = PP̄.
+> Since p ∤ a₂, β/p ∉ O_K^×, so (β) ≠ (p).
+> Hence (β) = P² or P̄², giving [P]² = 1 in Cl(K). □
+
+*Verification.*  Confirmed for:
+- All 25 secp256k1 norm-form primes 4p = 73+3k², k ≤ 199
+  (Thread 15, script `thread15_order2_algebraic.gp`).
+- 10 non-norm-form primes p ∈ {97,101,127,151,167,197,211,251,307,353}
+  with various a₂; class numbers h ∈ {6,16,24,32,44,48,56,144,...}
+  (Thread 16, script `thread16_verify.py`).
+- Edge cases: sf ∈ {−1,−2} (h=1), negative a₂, p ∈ {3,5,13,1009,2003,4001}.
+- Section F: the identity N(β) = p² verified algebraically + spot-checked for
+  10 additional (p, a₂) pairs (all `N(β)=p²:True`).
+
+*Relevance to B5.*  This theorem characterises the ideal-class structure of
+every biquadratic Weil polynomial.  In particular, the Frobenius endomorphism
+π of any genus-2 Jacobian with biquadratic χ_J satisfies [π]² = 1 in the CM
+field — a constraint that is independent of the norm-form or cover construction
+and holds universally over any prime field.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

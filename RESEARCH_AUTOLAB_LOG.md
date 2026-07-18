@@ -5428,3 +5428,80 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-18 (autolab run)
+
+### Task picked
+Thread 16: Verify "universal order-2 Frobenius" theorem (proved in Thread 15) is
+completely GENERAL — not restricted to the secp256k1 norm-form family 4p=73+3k².
+Picked because Thread 15 proposed this as the natural next step, and no other
+priority thread has unblocked since 2026-07-17.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_verify.py` (~180 lines, pure Python — PARI/GP
+  and SageMath unavailable in container; class-number computed via BQF reduction).
+- Verified the theorem for 10 non-norm-form primes (Section A) + 13 targeted edge
+  cases (Sections B–F).
+- Confirmed the algebraic identity N(β)=p² is unconditional (Section F, 10 spot checks).
+- Integrated the generalized theorem as a named remark into
+  `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (between the Corollary proof and §B6).
+- Confirmed `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Section A — 10 non-norm-form primes, various a₂:**
+
+| label | p   | a₂ | sf         | m | h   | N(β)=p²? | [P]²=1? |
+|-------|-----|----|------------|---|-----|----------|---------|
+| A1    | 97  | 5  | -4179      | 3 | 16  | YES      | YES     |
+| A2    | 101 | 7  | -40755     | 1 | 32  | YES      | YES     |
+| A3    | 127 | 9  | -1315      | 7 | 6   | YES      | YES     |
+| A4    | 151 | 11 | -91083     | 1 | 48  | YES      | YES     |
+| A5    | 167 | 13 | -111387    | 1 | 56  | YES      | YES     |
+| A6    | 197 | 3  | -155227    | 1 | 44  | YES      | YES     |
+| A7    | 211 | 5  | -178059    | 1 | 144 | YES      | YES     |
+| A8    | 251 | 17 | -251715    | 1 | large| YES    | YES     |
+| A9    | 307 | 21 | -376555    | 1 | large| YES    | YES     |
+| A10   | 353 | 7  | -498387    | 1 | large| YES    | YES     |
+
+**Targeted edge cases — all PASS:**
+- Negative a₂: (103,−7), (199,−13), (251,−17) — same D as positive case, symmetric.
+- sf=−1 (K=Q(i), h=1): p=5 a₂=6 (D=−64); p=13 a₂=10 (D=−576). [P]²=1 trivially since h=1.
+- sf=−2 (h=1): p=3, a₂=2, D=−32=−2·16, m=4. [P]²=1.
+- Large p: p∈{1009,2003,4001}, a₂ small — all PASS.
+
+**Algebraic identity N(β)=p² — 10 additional spot checks:**
+For p∈{7,11,13,17,19,23,29,31,37,41} with small a₂: N(β)=p² in every case.
+This is the identity (a₂²−m²·sf)/4 = (a₂²−D)/4 = 4p²/4 = p², which holds
+unconditionally — no arithmetic needed beyond the definition of sf and m.
+
+**Theorem status:**
+The proof (A)→(E) from Thread 15 uses only:
+  (i)   β = (−a₂+m√sf)/2 ∈ O_K (monic integer minpoly x²+a₂x+p²),
+  (ii)  N(β) = p² (algebraic identity),
+  (iii) (β) ≠ (p) iff p∤a₂,
+  (iv)  norm-p² ideal ≠ (p) ⟹ (β) = P² or P̄².
+None of (i)–(iv) uses the norm-form condition 4p=73+3k².
+**Theorem is fully general for all biquadratic Weil polynomials T⁴+a₂T²+p².**
+
+**Paper integration:**
+Added ~30-line "Remark (B5 structural corollary)" block to
+`PAPER_STRUCTURAL_COMPLETENESS.md` §B5 after the Corollary proof, citing
+Threads 15–16 and noting relevance to Frobenius endomorphism structure of
+genus-2 Jacobians with biquadratic characteristic polynomial.
+
+### Next step proposal
+Thread 17: Examine the boundary case where p | a₂ (excluded from the theorem).
+- When p | a₂, does (β) = (p) actually occur, or is there still a structural reason
+  for [P]²=1?
+- Experiment: pick small p and a₂ = p (so p|a₂). Then D = p²−4p² = −3p² = −3·p².
+  sf = −3, m = p. β = (−p + p√(−3))/2 = p·(−1+√(−3))/2 = p·ζ₃ ∈ O_{Q(√−3)}.
+  So (β) = (p)·(ζ₃) = (p) (since ζ₃ is a unit in O_{Q(√−3)}).
+  Check: is [P]²=1 still? If p splits in Q(√−3), then (p) = PP̄ and (β)=(p)
+  contributes nothing — ord([P]) could be any divisor of h.
+- Propose: run spot checks for p∈{7,13,19,31,37,43} with a₂=p (all divisible by p).
+  Expected: theorem inapplicable (proof breaks at step (iii)), but [P]²=1 may
+  still hold in some cases (e.g., if h(Q(√−3))=1, [P]=1 trivially).
+
+### Commits made
+`[to be filled]`
