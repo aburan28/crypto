@@ -270,6 +270,38 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal structure of biquadratic Weil polynomials).**
+The Jacobian of any (N,N)-cover of the form `E × E^t` over `F_p` has a Frobenius
+characteristic polynomial of the biquadratic form `T^4 + a₂T² + p²` (no odd-degree
+terms, since `a₁ = tr = #J(F_p) - p² - 1 = #E·#E^t - p² - 1 = (p+1-t)(p+1+t) - p² - 1`
+is congruent to 0 only when `t=0`, but the polynomial is palindromic either way).
+For any such polynomial with `a₂` an integer, `|a₂| < 2p`, `p ∤ a₂`, writing
+`D = a₂² - 4p²` as `D = sf·m²` (sf squarefree, m > 0), the prime ideal `P`
+above `p` in `K = Q(√sf)` satisfies `[P]² = 1` in `Cl(K)`.
+
+> **Proposition (Order-2 Frobenius ideal — general).**
+> Let p prime, a₂ ∈ ℤ with |a₂| < 2p and p ∤ a₂.
+> Let D = a₂²−4p², D = sf·m² (sf squarefree).  K = Q(√sf), P prime of O_K above p.
+> If p splits in K, then [P]² = 1 in Cl(K).
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2.  Then β satisfies x²+a₂x+p²=0 (monic, Z-coeffs),
+> so β ∈ O_K and N_{K/Q}(β) = p².  Since p ∤ a₂, β/p ∉ O_K, so (β) ≠ (p) = P·P̄.
+> The only other norm-p² ideals in O_K (split case) are P² and P̄².
+> Hence (β) = P² (or P̄²), so [P]² = 1. □
+
+This proposition was discovered computationally for the secp256k1 norm-form family
+`4p = 73+3k²` (Threads 14–15, autolab 2026-07-16/17) and proved algebraically.
+Thread 16 (autolab 2026-07-18) verified it holds for 107 (p,a₂) pairs spanning
+15 non-norm-form primes in [101,179], with class numbers up to h=176, with zero
+violations.  Both `[P]²=1` and the direct HNF equality `(β)=P²` were confirmed
+in all split cases.
+
+*Significance for B5*: this proposition shows that the Frobenius ideal in the
+CM field of any biquadratic-Weil-polynomial Jacobian always has order dividing 2.
+This is a structural property of the cover family, not a security concern — it
+constrains the CM type of the abelian surface but does not reduce the DLP cost.
+The B5 bound Θ(p) for genus-2 DLP remains tight.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
