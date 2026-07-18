@@ -5498,4 +5498,4 @@ Alternatively (if Thread 17 hits a wall quickly): transition to ePrint survey mo
 and write up the full theorem in a paper section (LaTeX in `paper/eprint_combined.tex`).
 
 ### Commits made
-(to be filled after commit)
+`f908304` autolab 2026-07-18: Thread 16 — order-2 Frobenius theorem for non-norm-form primes; 10/10 verified; B5 remark added
