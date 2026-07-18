@@ -5515,4 +5515,4 @@ The scalar-double-f64 approach is still unimplemented; could use MPFR via rug if
 is available (apt), or implement a simple 2×f64 double-double arithmetic manually.
 
 ### Commits made
-PENDING (will be filled after commit)
+`89549bd` autolab 2026-07-18: Thread 16 — order-2 theorem generalises to all biquadratic Weil polys; 15/15 non-norm-form primes verified; Kronecker sweep 688 pairs
