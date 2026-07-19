@@ -5500,3 +5500,5 @@ as a self-contained proposition for the ePrint draft's §B5 appendix.
 
 ### Commits made
 (see below after commit)
+
+`449cb36` autolab 2026-07-19: Thread 16 — order-2 Frobenius ideal theorem generalized to non-norm-form primes; 10/10 product-Jacobian pairs confirmed; B5 paper remark added
