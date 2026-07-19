@@ -5493,4 +5493,4 @@ Thread 17: Integrate the Theorem cleanly into PAPER_STRUCTURAL_COMPLETENESS.md.
   closed-form key recovery from 2 GLV-paired ECDSA signatures without lattice reduction.
 
 ### Commits made
-[to be filled after commit]
+`e702580` autolab 2026-07-19: Thread 16 — 32 non-norm-form pairs verified; structural equivalence proved
