@@ -5516,4 +5516,4 @@ always and N(γ) = p! Thread 17 should:
   gcd(t, core(t^2-4p)) = 1 (i.e., t and the squarefree part of t^2-4p are coprime).
 
 ### Commits made
-(see commit hash below after push)
+`028039f` autolab 2026-07-19: Thread 16 — universal order-2 Frobenius for general biquadratic Weil polys; 30/30 non-norm-form cases verified; §B5 remark added
