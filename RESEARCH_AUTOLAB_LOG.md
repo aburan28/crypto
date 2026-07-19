@@ -5495,4 +5495,4 @@ Thread 17: Determine the *exact* 2-rank of `Cl(Q(√sf))` for the norm-form case
   either 1 or 2; and is 1 iff `P` is principal iff `β/p ∈ O_K`.*
 
 ### Commits made
-`[pending]` autolab 2026-07-19: Thread 16 — theorem (A-E) confirmed general; 50/50 non-norm-form primes pass; §B5 remark added
+`372b133` autolab 2026-07-19: Thread 16 — theorem (A-E) confirmed general; 50/50 non-norm-form primes pass; §B5 remark added
