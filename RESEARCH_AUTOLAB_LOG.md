@@ -5518,4 +5518,4 @@ Observation: sf in {-19, -105, -157, -205, -258, -385, -598, -1653, -1870, -1905
 these are 10 distinct imaginary quadratic discriminants (or near-discriminants), no obvious pattern.
 
 ### Commits made
-[to be filled after push]
+`bf1bba9` autolab 2026-07-19: Thread 16 — order-2 theorem verified for 10 non-norm-form primes; theorem is fully general
