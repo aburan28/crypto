@@ -270,6 +270,29 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal order-2 — Threads 15–16).** For any abelian
+surface `J/F_p` with biquadratic Weil polynomial `T⁴ + a₂T² + p²` and
+discriminant `D = a₂² − 4p²`, write `D = sf·m²` (sf squarefree, m > 0),
+`K = Q(√sf)`, and let `P` be a prime of `O_K` above `p`.  If `p ∤ a₂`,
+then `[P]² = 1` in `Cl(K)`.
+
+*Proof sketch.* Set `β = (−a₂ + m√sf)/2`.  Then `β` satisfies the monic
+polynomial `x² + a₂x + p² = 0`, so `β ∈ O_K` with `N(β) = p²`.  The ideal
+`(β)` has norm `p²`, so it lies in `{P², P̄², P·P̄ = (p)}`.  Because
+`p ∤ a₂` the case `(β) = (p)` is excluded; hence `(β) = P²` or `P̄²`, so
+`[P]² = 1`. □
+
+*Significance.* The Frobenius prime `P` is always a 2-torsion element of
+`Cl(K)`, regardless of which abelian surface or prime field is in play.
+This order-2 constraint is a structural property of the biquadratic Weil
+polynomial — not a secp256k1 artifact — and reinforces why the DLP on `J`
+inherits no unexpected shortcuts from the class-group structure of `K`.
+
+*Verification.* Proved algebraically in `thread15_order2_algebraic.gp`
+and confirmed numerically for 25 secp256k1 norm-form primes `k ≤ 199`
+(Thread 15) and 50 independent non-norm-form primes (Thread 16, script
+`thread16_general_order2.gp`); 0 failures in all tests.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

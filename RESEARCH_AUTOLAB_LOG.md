@@ -5428,3 +5428,71 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 — extend the Thread 15 theorem to non-norm-form primes.  Thread 15
+proved algebraically (steps A–E) that `[P]² = 1` in `Cl(Q(√sf))` for any
+biquadratic Weil polynomial; the proof uses no norm-form condition.
+Thread 16 confirms this generality by running the class-group check on 50
+diverse primes not in the norm-form family `4p = 73 + 3k²`.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~95 lines).
+  Defines `is_norm_form`, `sf_part`, `verify_general(p,a2)` and two test harnesses.
+- Ran 20 fixed cases: diverse `p ∈ {7,11,13,...,251}` with various `a2` values.
+- Ran 30 stress-test cases: non-norm-form primes `p ∈ [1000,5000]`, `a2 = p\3`.
+- All 50 cases pass: `[P]² = 1` confirmed.
+- Added Frobenius ideal remark to `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (after
+  the numerical-verification block, before §B6).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (confirmed general):**
+For any prime `p`, integer `a2` with `D = a2²−4p² < 0` and `p ∤ a2`,
+squarefree `sf = core(D)`, and prime `P` above `p` in `Q(√sf)`:
+`[P]² = 1` in `Cl(Q(√sf))`.  The norm-form condition plays no role.
+
+**Fixed-case sample (20 cases):**
+
+| p   | a2  | sf       | m  | #P  | h   | [P]²=1? |
+|-----|-----|----------|----|-----|-----|---------|
+| 7   | 3   | -187     | 1  | 2   | 2   | YES     |
+| 7   | 5   | -19      | 3  | 2   | 1   | YES     |
+| 13  | 1   | -3       | 15 | 2   | 1   | YES     |
+| 97  | 61  | -33915   | 1  | 2   | 32  | YES     |
+| 199 | 113 | -145635  | 1  | 2   | 112 | YES     |
+| 251 | 199 | -212403  | 1  | 2   | 84  | YES     |
+
+All 20 fixed cases: 0 failures.
+
+**Stress test (30 cases, p in [1009,1213]):**
+All 30 pass.  Class numbers range from h=8 to h=896; theorem holds for
+large h too (e.g., p=1201, h=896, [P]²=1).
+
+Notable: `p=13, a2=1, sf=-3, m=15, h=1` — trivially principal; and
+`p=1201, a2=400, sf=-1402401, h=896` — largest class number tested; still confirmed.
+
+**Paper update:** Added §B5 remark ("Frobenius ideal order-2 — Threads 15–16")
+documenting the theorem and proof sketch in `PAPER_STRUCTURAL_COMPLETENESS.md`,
+with pointers to both GP scripts.
+
+### Next step proposal
+Thread 17: Determine the *exact* 2-rank of `Cl(Q(√sf))` for the norm-form cases.
+- We know `[P]² = 1` ↔ `[P]` is 2-torsion.  But is `[P] = 1` (principal) or exactly
+  order 2?
+- Thread 15 shows `[P] ≠ 1` for cases with `h` even and `p ∤ a₂` (since
+  `(β) = P²` is principal but `P` itself is not necessarily so).
+- Experiment: for each of the 25 norm-form primes, check `bnfisprincipal(K, P)[1]`
+  to determine whether `[P] = 1` or `[P]` has exact order 2.
+- Expected: for `sf = -3, h = 1` (p=12889) `[P] = 1`; for most others `[P]` has
+  order exactly 2 (confirmed trivially since P^2 is principal but P is not if
+  `P ≠ Pbar`).  But if `p` ramifies (`P = Pbar`), then `P² = (p)` is principal
+  and `[P]` could have order 2 or 1.
+- This would sharpen Thread 15's theorem to: *exact order of `[P]` in `Cl(K)` is
+  either 1 or 2; and is 1 iff `P` is principal iff `β/p ∈ O_K`.*
+
+### Commits made
+`[pending]` autolab 2026-07-19: Thread 16 — theorem (A-E) confirmed general; 50/50 non-norm-form primes pass; §B5 remark added
