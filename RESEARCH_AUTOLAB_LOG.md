@@ -5561,4 +5561,4 @@ adding "see, e.g., \cite{neukirch1999}" to the ramification sentence would be st
 Alternatively: Search ePrint for new isogeny/cover papers (fallback protocol).
 
 ### Commits made
-`[pending]` autolab 2026-07-19: Thread 17 — Proposition + Proof (universal order-2 Frobenius) into structural_completeness.tex
+`61893ed` autolab 2026-07-19: Thread 17 — Proposition + Proof (universal order-2 Frobenius) into structural_completeness.tex
