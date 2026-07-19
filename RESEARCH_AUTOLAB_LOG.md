@@ -5498,3 +5498,75 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-19 (autolab run — second pass)
+
+### Task picked
+Thread 17 — Integrate Theorem (15–16) into the ePrint draft (`paper/structural_completeness.tex`).
+Chosen because: Thread 16 completed earlier today; Thread 17 was the explicitly proposed
+next step; all 6 original priority threads are CLOSED/BLOCKED/DEAD END; the theorem
+is clean and publishable.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread17_p_splits.gp` (~75 lines): verifies the splitting
+  claim (p never ramifies, never inert, always splits in Q(√sf)) for 10 explicit (p, a₂)
+  pairs with p∤a₂. Covers D<0 (imaginary quadratic) and D>0 (real quadratic) cases,
+  range p ∈ {7,11,13,19,23,47,53,101,257,1009}.
+- Ran `gp -q thread17_p_splits.gp` — 10/10 SPLITS OK (clean output, no warnings).
+- Added `\begin{proposition}[Universal order-2 Frobenius ideal and prime splitting]
+  \label{prop:order2-split}` to `paper/structural_completeness.tex` (between the
+  closing `\end{remark}` of the CM-73 remark and `\subsection*{B6}`).
+  — Proposition: 3-part statement (splitting, Frobenius element, order-2 class).
+  — Proof: self-contained, ~8 lines, covering non-ramification, non-inertness, and
+    the ideal-norm argument.
+  — Following \begin{remark}: connects to Jacobian CM type; cites scripts; notes
+    generic applicability (p∤a₂ is the only hypothesis).
+- Checked LaTeX environment balance: proposition 2/2, proof 5/5, remark 5/5 (all balanced).
+- Ran `cargo test --test curve_audit` — 5/5 pass.
+
+### Findings
+
+**Splitting verification — 10/10 cases:**
+
+| p    | a₂   | sf       | kron(sf,p) | Result     |
+|------|------|----------|------------|------------|
+| 23   | 4    | -21      | +1         | SPLITS OK  |
+| 53   | 10   | -174     | +1         | SPLITS OK  |
+| 101  | 6    | -13      | +1         | SPLITS OK  |
+| 257  | 14   | -165     | +1         | SPLITS OK  |
+| 1009 | 44   | -1017597 | +1         | SPLITS OK  |
+| 7    | 16   | 15       | +1         | SPLITS OK  |
+| 11   | 24   | 23       | +1         | SPLITS OK  |
+| 13   | 28   | 3        | +1         | SPLITS OK  |
+| 19   | 40   | 39       | +1         | SPLITS OK  |
+| 47   | 98   | 3        | +1         | SPLITS OK  |
+
+Total empirical evidence for Proposition prop:order2-split:
+- Threads 15–16: 82 cases (algebraic + numerical)
+- Thread 17: 10 new cases (explicit splitting check)
+- Grand total: 92 cases, 0 failures.
+
+**Proposition (as added to paper):**
+Let p odd prime, a₂ ∈ Z with p∤a₂, a₂≠0. D = a₂²-4p², sf = squarefree part,
+K = Q(√sf). Then:
+  (1) p splits in O_K (not inert, not ramified).
+  (2) β := (-a₂ + m√sf)/2 ∈ O_K with N(β)=p².
+  (3) (β) = P² or P̄²  ⇒  [P]² = 1 in Cl(K).
+Proof sketch: non-ramification from p∤sf (else p|a₂); non-inertness from
+Tr(β)=-a₂ ∉ pZ; part (3) from ideal-norm argument and (β)≠(p).
+
+### Next step proposal
+Thread 18: Check whether Proposition prop:order2-split (or its non-inertness half)
+appears in the CM literature:
+- Silverman, Advanced Topics in the Arithmetic of Elliptic Curves §II.10 (CM ideal theory).
+- Cohen–Strömberg, Modular Forms §5.11 or Neukirch, Algebraic Number Theory §I.8.
+- If it is known, add a citation to the remark after the proof.
+- If it is not known (likely for the non-ramification + non-inertness combination
+  stated for ALL (p, a₂) with p∤a₂, not just CM curves), note it as a mild novelty.
+Alternatively: Thread 18 could be "finalize paper for ePrint submission" — add abstract,
+check all citations, run a bibliography pass.
+
+### Commits made
+[see git hash after this entry]

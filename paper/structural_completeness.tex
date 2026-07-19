@@ -428,6 +428,63 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal and prime splitting]
+\label{prop:order2-split}
+Let $p$ be an odd prime, $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, write $D = \mathit{sf} \cdot m^2$ with $\mathit{sf}$ squarefree
+and $m \in \ZZ_{>0}$, and let $K = \QQ(\sqrt{\mathit{sf}})$.
+Then:
+\begin{enumerate}
+\item \emph{(Splitting)} $p$ splits in $\mathcal{O}_K$: there exist distinct prime
+  ideals $\mathfrak{P}, \overline{\mathfrak{P}} \subset \mathcal{O}_K$ with
+  $\mathfrak{P}\,\overline{\mathfrak{P}} = (p)$.  In particular $p$ is neither
+  inert nor ramified in $K$.
+\item \emph{(Frobenius element)} Setting
+  $\beta := \frac{-a_2 + m\sqrt{\mathit{sf}}}{2} \in \mathcal{O}_K$, one has
+  $\beta^2 + a_2 \beta + p^2 = 0$ and $\mathrm{N}_{K/\QQ}(\beta) = p^2$.
+\item \emph{(Order-2 class)} $(\beta) = \mathfrak{P}^2$ or $\overline{\mathfrak{P}}^2$,
+  hence $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\emph{(1) Not ramified}: $p$ ramifies in $K$ iff $p \mid \disc(K)$ iff $p \mid \mathit{sf}$
+(for odd $p$).  But $\mathit{sf} \mid D = a_2^2 - 4p^2$, so $p \mid \mathit{sf}$
+forces $p \mid a_2^2$, hence $p \mid a_2$ --- excluded by hypothesis.
+\emph{Not inert}: If $p$ were inert, $(p)$ would be the unique prime ideal of norm $p^2$
+in $\mathcal{O}_K$, so $(\beta) = (p)$, giving $\beta = pu$ for some
+$u \in \mathcal{O}_K^\times$.
+Then $\mathrm{Tr}_{K/\QQ}(\beta) = p\,\mathrm{Tr}(u) \in p\ZZ$, but also
+$\mathrm{Tr}(\beta) = \beta + \overline{\beta} = -a_2$, forcing $p \mid a_2$
+--- excluded.
+Hence $p$ splits as claimed in~(1).
+
+\emph{(2)} $\beta$ is a root of $x^2 + a_2 x + p^2$, which has integer coefficients
+and leading~1, so $\beta \in \mathcal{O}_K$.
+$\mathrm{N}(\beta) = \beta\overline{\beta} = p^2$ by Vieta's formula (product of roots).
+
+\emph{(3)} Since $p$ splits, the ideals of norm $p^2$ in $\mathcal{O}_K$ are
+$\mathfrak{P}^2$, $\overline{\mathfrak{P}}^2$, and $(p) = \mathfrak{P}\overline{\mathfrak{P}}$.
+From~(2) and the inertness argument, $(\beta) \neq (p)$
+(otherwise $p \mid a_2$).  Hence $(\beta) \in \{\mathfrak{P}^2, \overline{\mathfrak{P}}^2\}$,
+giving $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+\end{proof}
+
+\begin{remark}
+This proposition is purely algebraic: it uses no elliptic-curve structure,
+only that $p$ is an odd prime and $p \nmid a_2$.
+For a biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$ arising from
+a genus-2 Jacobian over $\FF_p$, the coefficient $a_2 = 2p - t_1 - t_2$
+(where $t_1, t_2$ are the Frobenius traces of the two elliptic-curve factors);
+$p \nmid a_2$ is generically satisfied.
+The conclusion $[\mathfrak{P}]^2 = 1$ constrains the CM type of the Jacobian:
+any cover attack using an abelian surface with this Weil polynomial confronts
+a class group in which the prime above $p$ is at most a 2-torsion element.
+Verified numerically for 82 cases ($D < 0$ and $D > 0$, norm-form and generic primes
+$p \in [7, 5000]$, scripts \texttt{thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp}, \texttt{thread17\_p\_splits.gp}).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
