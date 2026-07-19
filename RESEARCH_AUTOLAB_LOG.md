@@ -5502,4 +5502,4 @@ Thread 17: Prove the INERT=0 observation (or find a counterexample with p inert)
   (Expected: no, since the IC divisors over F_{p^2} still map back to E(F_p) DLP.)
 
 ### Commits made
-(see below)
+`be9e44f` autolab 2026-07-19: Thread 16 — order-2 Frobenius theorem verified for 262 non-norm-form primes; B5 remark integrated into paper
