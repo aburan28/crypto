@@ -5512,4 +5512,4 @@ to refine the GLV-HNP Phase 2 toy attack.
   using existing mathematics, and adds a concrete reference to GLV-ECDSA security.
 
 ### Commits made
-(see below after push)
+`b26d42c` autolab 2026-07-19: Thread 16 — universal order-2 theorem verified for non-norm-form primes; 79/79 pairs pass; B5 remark added to paper
