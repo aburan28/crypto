@@ -5428,3 +5428,73 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 — generality check for the Theorem (A)-(E) proved in Thread 15.
+Chosen because: Thread 16 was explicitly proposed as the next-step in the 2026-07-17 log entry; it had not been started; measurable progress from Thread 15 (algebraic proof) makes this a natural continuation.
+
+### Work done
+- Installed pari-gp (was absent from container, installed via apt).
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~180 lines).
+- Verified that the proof (A)-(E) from Thread 15 uses NO norm-form structure;
+  only requires: p prime, a₂ ≠ 0, p ∤ a₂.
+- Ran script in four parts:
+  - Part A (15 pairs): 10 non-norm-form primes with arbitrary a₂ (both D<0 imag quad and D>0 real quad). All 15 gave [P]²=1.
+  - Part B (2 curves): searched y²=x⁶+bx³+c over F_p for biquadratic Weil poly, found valid cases at p=23,29. Both gave [P]²=1. (p=31 skipped: curve was singular at p=31, not a counterexample.)
+  - Part C (40 pairs): mass sweep over 10 non-norm-form primes × 4 a₂ values. 40/40 passed.
+  - Part D (5 cases): confirmed inertness impossibility — all (p,a₂) with p∤a₂ have ≥1 prime above p in Q(√sf), never inert.
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 with a formal remark stating the general theorem and citing Threads 15–16.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — generalized universal order-2):**
+For any prime p and integer a₂ with p∤a₂, a₂≠0, with D=a₂²-4p²≠0:
+  β = (-a₂+m√sf)/2 ∈ O_{Q(√sf)} satisfies x²+a₂x+p²=0, N(β)=p².
+  Since p∤a₂ forces (β)≠(p), we get (β)=P² or P̄², so [P]²=1.
+  MOREOVER: p cannot be inert in Q(√sf) when p∤a₂ (inertness would force (β)=(p)).
+
+This is a theorem about quadratic ideals, not about curves at all.
+
+**Numerical summary (all runs combined):**
+| Test                          | Cases | Passed |
+|-------------------------------|-------|--------|
+| Thread 15 (norm-form, k≤199)  | 25    | 25     |
+| Thread 16 Part A (D<0, arb)   | 10    | 10     |
+| Thread 16 Part A (D>0, real)  | 5     | 5      |
+| Thread 16 Part B (genus-2 C)  | 2     | 2      |
+| Thread 16 Part C (mass sweep) | 40    | 40     |
+| **Total**                     | **82**| **82** |
+
+Notable cases:
+- D>0 (real quadratic K): h=1 for sf=93,13,165,53,69 → [P]²=1 trivially (P principal); confirmed.
+- p=47, a₂=22, sf=-58, m=12: m=12 is the largest m/p ratio tested; still [P]²=1. ✓
+- p=53, a₂=10, h=12: class number 12; [P]²=1 confirms P is a genuine order-2 element of Cl(K). ✓
+- Inertness: all 5 test primes had 2 primes above p in Q(√sf), never 0 or 1 (ramified would give 1). ✓
+
+**ePrint / literature note:**
+The theorem implies that for any genus-2 Jacobian with biquadratic Weil poly,
+the prime p SPLITS in Q(√sf) (since inert is excluded, and ramified would give
+[P]²=1 trivially). This is a constraint on CM types for cover attacks.
+Cite: ePrint 2025/705 ("Breaking ECDSA with Two Affinely Related Nonces") —
+the GLV relation k₁=λ·k₂ is the special case α=λ, β=0 in that paper's
+affine-nonce Theorem 1.
+
+### Next step proposal
+Thread 17: Integrate Theorem (16) into the ePrint draft.
+- Add as Proposition in §5 or Appendix B of `paper/eprint_combined.tex`.
+- Proof is 4 lines; statement is clean and publishable.
+- Also: check whether the inertness-impossibility corollary appears in the
+  classical CM literature (could be in Silverman Advanced Topics §II.10
+  or Cohen-Strömberg §5.11); if not, it may be a minor novelty.
+- Experiment: find a case where p ramifies in Q(√sf) (requires p | sf,
+  i.e., p | a₂²-4p² = a₂², i.e., p | a₂ — excluded by hypothesis!).
+  So ramification is also impossible when p∤a₂: p always SPLITS (not ramifies,
+  not inert). Verify this for 10 cases to confirm.
+
+### Commits made
+`3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified

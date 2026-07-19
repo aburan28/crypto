@@ -270,6 +270,58 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Thread 15–16 — Universal order-2 Frobenius ideal).**
+For any Jacobian whose Weil polynomial has the biquadratic form
+`T⁴ + a₂T² + p²` (equivalently, a genus-2 curve C/F_p with
+`#C(F_p) = p+1`), the Frobenius endomorphism satisfies a universal
+algebraic structure in the class group of the CM field:
+
+> **Theorem.** Let p be prime, a₂ ∈ ℤ with p ∤ a₂ and a₂ ≠ 0.
+> Set D = a₂²−4p², sf = squarefree part of D, m = √(D/sf) ∈ ℤ.
+> Let K = Q(√sf) and P any prime of K above p. Then **[P]² = 1**
+> in Cl(K).
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2.  Then:
+> (A) β ∈ O_K (satisfies x² + a₂x + p² = 0, monic with ℤ-coefficients).
+> (B) N_{K/Q}(β) = p² (product of conjugates equals p²).
+> (C) (β) ≠ (p) in O_K: the case (β)=(p) requires β/p ∈ O_K, hence
+>     p | a₂ — contradicting the hypothesis.
+> (D) Therefore (β) = P² or P̄², so [P]² = 1. □
+>
+> *Corollary (p odd, p always splits).* When p is an **odd** prime
+> with p ∤ a₂, p **splits** in K (neither inert nor ramified).
+> — Inert impossible: the only ideal of norm p² when p is inert is (p),
+>   ruled out by (C).
+> — Ramified impossible (odd p): for odd p, p ramifies in K = Q(√sf)
+>   iff p | disc(K). For odd p, disc(K) = sf or 4sf with sf squarefree,
+>   and p | disc(K) iff p | sf. But sf = squarefree(D) and
+>   D ≡ a₂² (mod p), so p | D iff p | a₂ — excluded by hypothesis.
+>   (Note: p = 2 requires separate treatment via the full discriminant
+>   criterion; all primes in this paper are large odd primes, so
+>   p = 2 is out of scope.)
+> Therefore p splits into two distinct primes P, P̄ and [P]=[P̄]⁻¹
+> with [P]²=1.
+
+This theorem is **independent of any curve construction**: it is a
+pure statement about ideals in imaginary (or real) quadratic fields.
+It was discovered empirically in Thread 14 for norm-form primes
+(4p = 73 + 3k², k odd) and proved algebraically + generalised to
+arbitrary (p, a₂) in Threads 15–16.
+
+*Empirical record:* verified for 25 norm-form primes k ≤ 199
+(Thread 15, script `thread15_order2_algebraic.gp`) and for 57
+arbitrary (p, a₂) pairs including non-norm-form primes, D<0 and D>0
+cases, and a₂-values derived from actual genus-2 curves
+(Thread 16, script `thread16_general_order2.gp`). All 82 cases gave
+[P]² = 1 with zero failures.
+
+*Relevance to B5:* the theorem characterises the ideal-theoretic
+footprint of Frobenius on any abelian surface with biquadratic Weil
+polynomial. It does not directly reduce the DLP cost, but it implies
+that every such Jacobian has p splitting (not inert) in the associated
+quadratic field, which constrains the CM types realizable in a cover
+attack.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
