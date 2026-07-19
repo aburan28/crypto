@@ -5533,4 +5533,4 @@ Thread 17: Two directions, either or both.
   "hidden number problem ECDSA", "(N,N)-cover Jacobian" for papers since 2026-07-19.
 
 ### Commits made
-[to be filled after commit]
+`392a5a2` autolab 2026-07-19: Thread 16 — [P]^2=1 universality for non-norm-form primes; 237/237 verified
