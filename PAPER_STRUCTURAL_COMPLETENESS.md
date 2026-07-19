@@ -288,14 +288,19 @@ algebraic structure in the class group of the CM field:
 >     p | a₂ — contradicting the hypothesis.
 > (D) Therefore (β) = P² or P̄², so [P]² = 1. □
 >
-> *Corollary (p always splits).* When p ∤ a₂, p **splits** in K
-> (neither inert nor ramified).
+> *Corollary (p odd, p always splits).* When p is an **odd** prime
+> with p ∤ a₂, p **splits** in K (neither inert nor ramified).
 > — Inert impossible: the only ideal of norm p² when p is inert is (p),
 >   ruled out by (C).
-> — Ramified impossible: p ramifies iff p | sf = squarefree(D). But
+> — Ramified impossible (odd p): for odd p, p ramifies in K = Q(√sf)
+>   iff p | disc(K). For odd p, disc(K) = sf or 4sf with sf squarefree,
+>   and p | disc(K) iff p | sf. But sf = squarefree(D) and
 >   D ≡ a₂² (mod p), so p | D iff p | a₂ — excluded by hypothesis.
-> Therefore p splits into two distinct primes P, P̄ and [P]=[P̄]⁻¹ with
-> [P]²=1.
+>   (Note: p = 2 requires separate treatment via the full discriminant
+>   criterion; all primes in this paper are large odd primes, so
+>   p = 2 is out of scope.)
+> Therefore p splits into two distinct primes P, P̄ and [P]=[P̄]⁻¹
+> with [P]²=1.
 
 This theorem is **independent of any curve construction**: it is a
 pure statement about ideals in imaginary (or real) quadratic fields.

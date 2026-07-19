@@ -56,6 +56,14 @@ verify_pair(p, a2, label) = {
     return(-1));
 
   sf  = sf_part(D);
+
+  \\ Guard: sf=1 means D is a positive perfect square => K=Q (not quadratic).
+  \\ bnfinit(x^2-1,1) would error since x^2-1 is reducible; skip these.
+  if(sf == 1,
+    printf("  SKIP %-30s p=%d a2=%d: D=%d is a perfect square (K=Q, not quadratic)\n",
+           label, p, a2, D);
+    return(-1));
+
   m2  = D / sf;
   if(denominator(m2) != 1 || m2 <= 0,
     printf("  ERROR %-29s D/sf=%Ps not pos int\n", label, m2);
@@ -74,10 +82,13 @@ verify_pair(p, a2, label) = {
   K    = bnfinit(x^2 - sf, 1);
   Pp   = idealprimedec(K, p);
 
-  if(#Pp == 0,
-    \\ p inert in K: impossible since p∤a2 (algebraic argument)
-    printf("  PARADOX %-28s p=%d inert in Q(sqrt(%d)) -- should not happen!\n",
-           label, p, sf);
+  \\ For a quadratic field, idealprimedec always returns >=1 ideal.
+  \\ #Pp==2 => split; #Pp==1,e=1 => inert; #Pp==1,e=2 => ramified.
+  \\ Our theorem (p odd, p∤a2) guarantees split; anything else is a bug.
+  if(#Pp != 2,
+    my(e = Pp[1][3]);
+    printf("  PARADOX %-28s p=%d in Q(sqrt(%d)): %s -- should not happen!\n",
+           label, p, sf, if(e == 2, "RAMIFIED", "INERT"));
     return(0));
 
   P      = Pp[1];
@@ -186,7 +197,7 @@ find_biquadratic_curve(p) = {
 \\ Part C: Mass sweep — 50 random (p, a2) pairs, p non-norm-form
 \\====================================================================
 
-print("Part C: Mass sweep — 50 (p,a2) pairs, p non-norm-form");
+print("Part C: Mass sweep — 40 (p,a2) pairs, p non-norm-form");
 print();
 
 {
@@ -194,7 +205,7 @@ print();
   primes = [23, 29, 31, 41, 43, 47, 53, 59, 61, 67,
             71, 73, 83, 89, 97, 101, 103, 107, 113, 127];
 
-  \\ 50 pairs: 5 a2 values per prime (10 primes x 5)
+  \\ 40 pairs: 4 a2 values per prime (10 primes × 4; j=0 skipped)
   cnt = 0;
   for(i=1, 10,
     my(p = primes[i]);
@@ -214,27 +225,50 @@ print();
 \\         If p∤a2, then p CANNOT be inert in Q(sqrt(sf)).
 \\====================================================================
 
-print("Part D: Inertness impossibility — p∤a2 => p not inert in Q(sqrt(sf))");
+print("Part D: Splitting corollary — p∤a2 (p odd) => p SPLITS in Q(sqrt(sf))");
+print("  (not inert: #Pp=1,e=1,f=2; not ramified: #Pp=1,e=2,f=1)");
 print();
 
+\\ For quadratic K=Q(sqrt(sf)):
+\\   idealprimedec(K,p) returns a length-2 vector => SPLIT
+\\                      returns a length-1 vector, entry[3]=1,entry[4]=2 => INERT
+\\                      returns a length-1 vector, entry[3]=2,entry[4]=1 => RAMIFIED
+\\ Our corollary says: when p odd and p∤a2, we ALWAYS get SPLIT.
+
 {
-  my(sf, K, Pp, D);
+  my(sf, K, Pp, D, split_type, ok_count, total_count);
+  ok_count = 0; total_count = 0;
   my(examples = [
     [3,   1],
     [5,   2],
     [7,   3],
     [11,  4],
-    [13,  5]
+    [13,  5],
+    [17,  6],
+    [23,  7],
+    [29,  8]
   ]);
   for(i=1, #examples,
     my(p=examples[i][1], a2=examples[i][2]);
     D = a2^2 - 4*p^2;
     sf = sf_part(D);
+    if(sf == 1, printf("  SKIP p=%d a2=%d: D perfect square\n", p, a2); next);
     K = bnfinit(x^2 - sf, 1);
     Pp = idealprimedec(K, p);
-    printf("  p=%d a2=%d: sf=%d, #primes_above_p=%d  (0 would be paradox)\n",
-      p, a2, sf, #Pp));
+    if(#Pp == 2,
+      split_type = "SPLIT";
+      ok_count++;
+    ,
+      my(e = Pp[1][3], f = Pp[1][4]);
+      if(e == 2, split_type = Str("RAMIFIED(e=",e,") PARADOX!"));
+      if(f == 2, split_type = Str("INERT(f=",f,") PARADOX!"))
+    );
+    total_count++;
+    printf("  p=%d a2=%d: sf=%d, #Pp=%d  => %s\n",
+      p, a2, sf, #Pp, split_type));
+  printf("\nPart D: %d/%d confirmed SPLIT (0 paradoxes expected)\n",
+    ok_count, total_count);
 }
 
 print();
-print("DONE. All checks above should show [P]^2=1:YES and no paradoxes.");
+print("DONE. All checks above should show [P]^2=1:YES and Part D all SPLIT.");
