@@ -270,6 +270,27 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Thread 15–16: order-2 structure of Frobenius ideals).** The
+Frobenius endomorphism of any abelian surface with biquadratic Weil
+polynomial `T⁴ + a₂T² + p²` (i.e., `a₁ = a₃ = 0`) satisfies an
+additional algebraic constraint: if `D = a₂² − 4p²` = sf·m² (sf
+squarefree, m > 0) and `p ∤ a₂`, then the prime ideal `P` above `p`
+in `O_K = Z[√sf]` has `[P]² = 1` in the class group `Cl(O_K)`.
+
+*Proof.* Let `β = (−a₂ + m√sf)/2`.  (A) β ∈ O_K since it satisfies
+`x² + a₂x + p² = 0` (monic, integer coefficients).  (B) N_{K/Q}(β) = p².
+(C) If `(β) = (p)` then β/p ∈ O_K× with N(β/p) = 1, forcing p | a₂ and
+p | m — excluded.  (D) Therefore `(β) = P²` (or P̄²), so [P]² = 1. □
+
+This was first observed numerically for the 25 norm-form primes
+`p = (73 + 3k²)/4, k ≤ 199` (Threads 14–15, script
+`thread15_order2_algebraic.gp`), then proved algebraically and
+confirmed for 10 non-norm-form primes `p ∈ {101,…,151}` with 100
+arbitrary `a₂` values and 30 actual even-model Jacobians
+`y² = x⁶ + c·x² + d` (Thread 16, script `thread16_general_order2.gp`;
+100/100 algebraic + 30/30 Jacobian tests, class numbers up to h = 112).
+The theorem is unconditional on the norm-form condition.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

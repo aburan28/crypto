@@ -5428,3 +5428,95 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 — extend the Thread-15 universal-order-2 Frobenius theorem to
+non-norm-form primes. The last log entry (2026-07-17) proposed this exact
+experiment as the next concrete sub-task: pick 10 non-norm-form primes, verify
+[P]² = 1 for arbitrary a₂ values AND for actual even-model Jacobians.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~150 lines):
+  - PART A: 10 non-norm-form primes p ∈ {101,103,107,113,127,131,137,139,149,151},
+    10 arbitrary a₂ values per prime (± p/2, ± p/3, ± p/5, ± 1, ± (p-1));
+    100 algebraic theorem tests covering 30+ distinct imaginary quadratic fields.
+  - PART B: For each prime, finds 3 smooth even-model genus-2 curves
+    y² = x⁶+c·x²+d with biquadratic Weil polynomial (a₁=a₃=0 confirmed via
+    hyperellcharpoly; involution x→-x forces this). Verifies [P]²=1 for those
+    actual Jacobians. 30 distinct (p,a₂) pairs from real hyperelliptic curves.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added §B5 remark to PAPER_STRUCTURAL_COMPLETENESS.md with full theorem
+  statement, proof sketch, and citation to scripts.
+
+**PARI quirks encountered and resolved:**
+- `#list` at top level is a PARI meta-command, not the length operator;
+  must use `length(v)` at top level or wrap in `{ ... }` blocks.
+- `hyperellcharpoly(f, p)` (2-arg form) not available in PARI 2.15.4;
+  correct call is `hyperellcharpoly(f * Mod(1,p))` (poly with Mod coefficients).
+- `{...}` blocks inside for/while bodies are rejected; use `;`-separated statements.
+
+### Findings
+
+**THEOREM (Thread 16 — general, not norm-form-specific):**
+For ANY prime p and integer a₂ with p ∤ a₂, if D = a₂²−4p² = sf·m²
+(sf squarefree, m > 0) and K = Q(√sf), then the prime ideal P above p
+in O_K satisfies [P]² = 1 in Cl(O_K).
+
+*Proof is identical to Thread 15's (A)-(E); the norm-form condition
+4p = 73 + 3k² is never invoked.*
+
+**Part A numerical results — 100/100 PASS:**
+
+| p   | a₂     | sf       | m  | h   | split | verdict |
+|-----|--------|----------|----|-----|-------|---------|
+| 101 | 1      | -40803   | 1  | 32  | split | PASS    |
+| 101 | 33     | -235     | 13 | 2   | split | PASS    |
+| 107 | 106    | -15      | 48 | 2   | split | PASS    |
+| 113 | 1      | -227     | 15 | 5   | split | PASS    |
+| 127 | 126    | -190     | 16 | 4   | split | PASS    |
+| 131 | 130    | -66      | 28 | 8   | split | PASS    |
+| 137 | 136    | -14145   | 2  | 112 | split | PASS    |
+| 139 | 46     | -58      | 36 | 2   | split | PASS    |
+| 149 | 148    | -669     | 10 | 12  | split | PASS    |
+| 151 | 30     | -1411    | 8  | 4   | split | PASS    |
+(10 representative rows; all 100 pass, h ranges 1 to 112)
+
+Key non-trivial cases: h=112 (p=137, a₂=136, sf=-14145) — class group order
+112=2^4·7; [P]² = 1 with [P] of order 1 or 2. For odd-order h (e.g., h=7 at
+p=107, a₂=70, sf=-71): gcd(2,7)=1 forces [P]=1 (P itself is principal). ✓
+
+**Part B — 30/30 PASS (actual even-model Jacobians):**
+
+Sample results from PARI output:
+- p=101, c=1, d=8:  a₂=198, sf=-1, h=1  (K=Q(i), h=1, trivially principal)
+- p=107, c=1, d=2:  a₂=70,  sf=-71, h=7 (h=7 odd, [P]=1)
+- p=113, c=1, d=5:  a₂=145, sf=-371, h=8
+- p=127, c=1, d=16: a₂=-2,  sf=-7, h=1
+- p=131, c=1, d=1:  a₂=246, sf=-127, h=5
+- p=139, c=1, d=10: a₂=22,  sf=-3, h=1  (K=Q(√-3), Eisenstein integers)
+
+Confirmed: the biquadratic Weil polynomial involution (a₁=a₃=0) is automatic
+for y²=x⁶+c·x²+d by the involution symmetry (no cases violated this).
+
+**PAPER update:** §B5 remark added covering:
+- Full statement of the theorem
+- 4-step proof sketch (A)-(D)
+- Citations to thread15_order2_algebraic.gp and thread16_general_order2.gp
+- Summary: 130/130 tests (25 norm-form + 100 algebraic + 30 Jacobian)
+
+### Next step proposal
+Thread 17: Inert-case census + GLV-HNP connection.
+- The inert case (p inert in Q(√sf)) did not appear in these 100 tests.
+  Find primes p and a₂ where Kronecker(sf, p) = -1, confirm P is principal
+  (not just [P]²=1 but actually [P]=1 by the even-stronger inert-case argument).
+- Connect to ePrint 2025/705: the GLV relation k₁=λk₂ (mod n) is an
+  affine-nonce relation with α=λ, β=0. Implement the closed-form key recovery
+  from §3 of that paper for a 32-bit toy GLV curve, check if it gives the
+  same result as the lattice reduction in glv_hnp_phase2_lattice.gp.
+- If the closed-form works: Thread 17 completes Priority 5 (GLV-HNP Phase 2 toy).
+
+### Commits made
