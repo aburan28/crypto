@@ -5526,4 +5526,4 @@ Thread 17b: Port the general theorem statement and proof into `paper/eprint_comb
   as a named lemma (Lemma on Frobenius ideal 2-torsion), with proper LaTeX formatting.
 
 ### Commits made
-[to be filled after commit]
+`373efc8` autolab 2026-07-19: Thread 16 — general biquadratic theorem; 34/34 PASS including real quadratic K; B5 remark added to paper
