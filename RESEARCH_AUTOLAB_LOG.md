@@ -5569,4 +5569,4 @@ Alternatively: Thread 18 could be "finalize paper for ePrint submission" — add
 check all citations, run a bibliography pass.
 
 ### Commits made
-[see git hash after this entry]
+`23e6213` autolab 2026-07-19 (Thread 17): add Proposition prop:order2-split to paper; 10/10 splitting verified
