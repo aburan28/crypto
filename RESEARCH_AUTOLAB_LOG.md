@@ -5428,3 +5428,88 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (proposed next step from Thread 15): verify the universal [P]²=1 theorem
+extends beyond norm-form primes to ALL primes p; then integrate the theorem as a
+named remark in PAPER_STRUCTURAL_COMPLETENESS.md §B5.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_nonnorm_extension.gp` (~160 lines).
+  PARI 2.15.4 required refactoring: loop bodies moved into helper functions
+  (part1_one, part4_one); avoided `foreach`, `left()`, `#list` in loop bounds.
+- Ran script: 5 parts, 79 (p, a2) pairs tested across non-norm-form primes,
+  edge cases, full a2 sweep, larger primes, and h=1 field survey.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added "Remark (Frobenius ideal order-2 structure — Thread 15/16)" to
+  PAPER_STRUCTURAL_COMPLETENESS.md after the B5 conclusion (line 325).
+
+### Findings
+
+**THEOREM (Thread 16 extension — universality confirmed numerically):**
+For any prime p and any a2 with p !| a2 and D = a2^2 - 4p^2 < 0:
+  [P]^2 = 1 in Cl(Q(sqrt(D))), where P is the prime above p in Q(sqrt(sf(D))).
+The norm-form condition 4p = 73 + 3k^2 is NOT required.
+
+**Part 1 — 10 non-norm-form primes, a2=1 and a2=p-1:**
+| p    | a2=1                       | a2=p-1                    |
+|------|----------------------------|---------------------------|
+| 3    | sf=-35,  h=2,  split: PASS | sf=-2,   h=1,  split: PASS |
+| 5    | sf=-11,  h=1,  split: PASS | sf=-21,  h=4,  split: PASS |
+| 7    | sf=-195, h=4,  split: PASS | sf=-10,  h=2,  split: PASS |
+| 11   | sf=-483, h=4,  split: PASS | sf=-6,   h=2,  split: PASS |
+| 13   | sf=-3,   h=1,  split: PASS | sf=-133, h=4,  split: PASS |
+| 17   | sf=-1155,h=8,  split: PASS | sf=-1,   h=1,  split: PASS |
+| 23   | sf=-235, h=2,  split: PASS | sf=-102, h=4,  split: PASS |
+| 29   | sf=-3363,h=16, split: PASS | sf=-645, h=16, split: PASS |
+| 31   | sf=-427, h=2,  split: PASS | sf=-46,  h=4,  split: PASS |
+| 41   | sf=-83,  h=3,  split: PASS | sf=-1281,h=24, split: PASS |
+ALL 20 PASS (0 fail).
+
+**Part 2 — edge cases p|a2 (a2=p, D=-3p^2, sf=-3):**
+p=5,11,23,41,83: p inert in Q(sqrt(-3)) (p≡2 mod 3) => TRIVIAL
+p=61: p≡1 mod 3 => split in Q(sqrt(-3)), h=1 => PASS
+All 6 PASS/TRIVIAL.
+
+**Part 3 — full a2 sweep, p=23, a2 in [1,44] with p!|a2:**
+43/43 PASS/TRIVIAL (0 fail). Covers all valid biquadratic Weil poly values for p=23.
+
+**Part 4 — larger non-norm-form primes:**
+| p     | a2=1                         | a2=p//3                      |
+|-------|------------------------------|------------------------------|
+| 1009  | sf=-4072323, h=400:  PASS    | sf=-1177,     h=12:  PASS    |
+| 2003  | sf=-1783115, h=648:  PASS    | sf=-1733683,  h=192: PASS    |
+| 4999  | sf=-11106667,h=464:  PASS    | sf=-2083,     h=7:   PASS    |
+| 9973  | sf=-397842915,h=3344:PASS    | sf=-96698485, h=3936:PASS    |
+| 49999 | sf=-3077747, h=496:  PASS    | sf=-607615278,h=13296:PASS   |
+ALL 10 PASS. Notable: h=13296 for (p=49999, a2=16666) — large class group,
+theorem still holds.
+
+**Part 5 — h=1 fields for a2=1, p<100:**
+p=5 → Q(sqrt(-11)), h=1.
+p=13 → Q(sqrt(-3)), h=1.
+(Most primes with a2=1 give h>1, so the theorem is non-trivial for them.)
+
+**Grand total: 79 PASS/TRIVIAL, 0 FAIL.**
+
+**Paper update:** Added named Remark "Frobenius ideal order-2 structure —
+Thread 15/16" to PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after line 324).
+Remark states the theorem (steps A–E), cites both scripts, notes the p|a2
+edge case, and draws the structural implication for (N,N)-cover Jacobians.
+
+### Next step proposal
+Thread 17: Use the ePrint 2025/705 result (affine nonce relation k1=alpha*k2+beta)
+to refine the GLV-HNP Phase 2 toy attack.
+- GLV decomposition gives k = k1 + lambda*k2 with k1 = lambda*k2 + r (affine relation).
+- Theorem 1 of ePrint 2025/705 gives key recovery from 2 signatures with k1=alpha*k2+beta.
+- Experiment: write a 32-bit toy curve with GLV endomorphism; generate 2 signatures
+  with affinely-related nonces; apply the closed-form recovery (no lattice).
+- If successful, this upgrades Priority 5 from "lattice toy" to "closed-form toy"
+  using existing mathematics, and adds a concrete reference to GLV-ECDSA security.
+
+### Commits made
+(see below after push)

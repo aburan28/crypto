@@ -323,6 +323,31 @@ for `p = secp256k1` prime, `k = 1..6`, `g = 2..5`:
 **Conclusion**: B5 holds for all `k ≥ 1`.  Neither generic algorithms
 nor Diem's sub-exponential yield a cover-based speedup for secp256k1.
 
+> **Remark (Frobenius ideal order-2 structure — Thread 15/16).**  For
+> any prime `p` and any integer `a₂` with `p ∤ a₂` and
+> `D = a₂² − 4p² < 0`, write `D = sf · m²` (sf squarefree, m > 0)
+> and let `K = ℚ(√sf)`, `β = (−a₂ + m√sf)/2 ∈ O_K`.  Then:
+>
+> (A) β is an algebraic integer (satisfies `x² + a₂x + p² = 0`). \
+> (B) `N_{K/ℚ}(β) = p²`, so `(β)` is an O_K-ideal of norm p². \
+> (C) Since `p ∤ a₂`, one checks `(β) ≠ p·O_K`. \
+> (D) Therefore `(β) = P²` or `P̄²` for the prime `P` above `p` in O_K. \
+> (E) Hence **`[P]² = 1` in `Cl(K)`** — the prime above `p` always has
+>     order dividing 2 in the class group of `ℚ(√(a₂²−4p²))`.
+>
+> *Algebraic proof*: steps (A)–(E) use only the Weil-polynomial shape
+> `T⁴ + a₂T² + p²`; the norm-form condition `4p = 73 + 3k²` is not needed.
+> *Numerical verification*: confirmed for 25 norm-form primes k ≤ 199
+> (Thread 15, `secp256k1_cm_audit/thread15_order2_algebraic.gp`) and for
+> 10 non-norm-form primes plus a full a₂-sweep at p = 23 — 79 pairs, 0
+> failures (Thread 16, `secp256k1_cm_audit/thread16_nonnorm_extension.gp`).
+> For p | a₂ the ideal `(β)` may equal `p·O_K` but `[P]² = 1` still holds
+> (trivially for inert p; via `[(p)] = 1` for ramified p; via h = 1 for
+> `sf = −3` when `a₂ = p`).  This is a structural property of biquadratic
+> Weil polynomials; it implies that any (N,N)-cover Jacobian with Weil
+> polynomial `T⁴ + a₂T² + p²` lies in a genus-2 isogeny class whose
+> endomorphism-ring arithmetic is constrained at the 2-torsion level.
+
 ### B7: Supersingular reductions live in a disjoint world
 
 > For an ordinary curve `E/F_p`, the supersingular reductions
