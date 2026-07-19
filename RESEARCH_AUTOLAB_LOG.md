@@ -5523,4 +5523,4 @@ proving that the inert/ramified cases never arise in the biquadratic Weil polyno
   direction, it's time to attempt the 32-bit GLV lattice toy experiment.
 
 ### Commits made
-PLACEHOLDER (fill in after commit)
+`8ee7c5c` autolab 2026-07-19: Thread 16 — universal order-2 theorem generalised to non-norm-form primes; 38/38 PASS
