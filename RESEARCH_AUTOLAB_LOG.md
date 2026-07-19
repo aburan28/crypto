@@ -5497,4 +5497,4 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
   not inert). Verify this for 10 cases to confirm.
 
 ### Commits made
-(to be filled after push)
+`3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
