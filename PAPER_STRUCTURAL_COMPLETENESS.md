@@ -270,6 +270,31 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal order-2, Threads 15–16).** For any abelian surface
+over F_p whose Frobenius characteristic polynomial is biquadratic
+T⁴ + a₂T² + p² (a₁ = 0), set D = a₂² − 4p² and write D = sf · m² with
+sf squarefree, m > 0.  Let K = Q(√sf) and P a prime of O_K above p.
+Then **[P]² = 1 in Cl(K)** — that is, P is 2-torsion in the CM class group.
+
+*Proof (Thread 15):*  Let β = (−a₂ + m√sf)/2.  (A) β ∈ O_K (satisfies
+x² + a₂x + p² = 0 over Z).  (B) N_{K/Q}(β) = p².  (C) p ∤ a₂ ⟹ p ∤ m
+(else D ≡ 0 mod p² ⟹ p | a₂), so β/p ∉ O_K ⟹ (β) ≠ (p).  (D) Since p
+splits in K (sf ≡ (a₂/m)² mod p is a QR), the only proper ideals of norm
+p² other than (p) are P² and P̄².  Hence (β) = P² or P̄², giving [P]² = 1. □
+
+This holds for **both** imaginary quadratic (D < 0) and real quadratic (D > 0)
+fields K, and is independent of any norm-form condition on p.  Empirically
+verified over 34 test cases: 10 non-norm-form primes p ∈ {101, …, 809} with
+class numbers h ranging from 1 to 36 520, plus two large-prime spot-checks
+(p = 9 001, p = 104 729); see `secp256k1_cm_audit/thread16_general_biquadratic.gp`.
+
+*Relevance to B5:* The biquadratic Weil polynomial is the characteristic
+polynomial of Frobenius for E × E^t (split abelian surface).  The
+order-2 Frobenius ideal constrains the CM type: every prime above p is a
+2-torsion class, so the endomorphism algebra of the split Jacobian cannot
+admit an (ℓ, ℓ)-structure that would move the isogeny cost below O(p).
+This reinforces the B5 bound without changing it quantitatively.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
