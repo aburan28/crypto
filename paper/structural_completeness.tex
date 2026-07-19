@@ -428,6 +428,67 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal, Threads~15--16]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ \setminus \{0\}$ with $p \nmid a_2$.
+Write $D = a_2^2 - 4p^2 = \mathit{sf} \cdot m^2$ with $\mathit{sf}$ squarefree, $m \geq 1$,
+and let $K = \QQ(\sqrt{\mathit{sf}})$ with ring of integers $\mathcal{O}_K$.
+Define
+\[
+  \beta = \tfrac{-a_2 + m\sqrt{\mathit{sf}}}{2} \;\in\; \mathcal{O}_K.
+\]
+Then:
+\begin{enumerate}
+  \item[\textup{(i)}] $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ and $N_{K/\QQ}(\beta) = p^2$.
+  \item[\textup{(ii)}] $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$ for a prime ideal $\mathfrak{P}$
+        above $p$ in $\mathcal{O}_K$.  In particular, $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+  \item[\textup{(iii)}] $p$ \emph{splits} in $K$: $p$ is neither inert nor ramified in $\mathcal{O}_K$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\textbf{(i)} Expanding directly:
+\[
+  \beta^2 + a_2\beta + p^2
+  = \frac{m^2\mathit{sf} - a_2^2 + 4p^2}{4}
+  = \frac{m^2\mathit{sf} - (a_2^2 - 4p^2)}{4}
+  = \frac{m^2\mathit{sf} - m^2\mathit{sf}}{4} = 0,
+\]
+using $D = a_2^2 - 4p^2 = m^2\mathit{sf}$.  Hence $N(\beta) = \beta\bar\beta = p^2$.
+
+\textbf{(ii)} Since $N(\beta) = p^2$, the ideal $(\beta)$ has norm $p^2$.
+All ideals of norm $p^2$ have the form $\mathfrak{P}^2$, $\bar{\mathfrak{P}}^2$, $\mathfrak{P}\bar{\mathfrak{P}} = (p)$
+(split case), or $(p)$ (inert or ramified case).
+If $(\beta) = (p)$ then $p \mid a_2$, contradicting $p \nmid a_2$.
+Hence $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$, so $[\mathfrak{P}]^2 = 1$.
+
+\textbf{(iii)} If $p$ were inert, $(p)$ is the \emph{unique} ideal of norm $p^2$,
+forcing $(\beta) = (p)$, i.e.\ $p \mid a_2$---contradiction.
+If $p$ were ramified, then $p \mid \mathit{sf}$ (since $\mathrm{disc}(K) \mid 4\mathit{sf}$),
+but $p \mid \mathit{sf}$ implies $p \mid a_2^2 - m^2 \mathit{sf} = a_2^2$, so $p \mid a_2$---contradiction.
+Therefore $p$ splits in $K$. \qed
+\end{proof}
+
+\begin{remark}[Scope and verification]
+Proposition~\ref{prop:order2-frobenius} is a theorem about quadratic ideals, not
+about any particular curve: it holds for every Jacobian over $\FF_p$ whose Weil
+polynomial takes the biquadratic form $T^4 + a_2 T^2 + p^2$ (with $p \nmid a_2$).
+It was verified in 82 independent cases across two PARI/GP scripts:
+25 norm-form primes ($k \le 199$, Thread~15, \texttt{thread15\_order2\_algebraic.gp})
+and 57 general cases including non-norm-form primes, mass sweeps, and
+genus-2 hyperelliptic curves with biquadratic Weil polynomials
+(Thread~16, \texttt{thread16\_general\_order2.gp}).
+All 82 passed; no counterexample was found.
+
+\noindent\textbf{Consequence for cover attacks.}
+Every abelian surface $J/\FF_p$ with Weil polynomial $T^4 + a_2 T^2 + p^2$
+(the output of a split-Jacobian cover $E \times E^t$) forces $p$ to \emph{split}
+in the associated imaginary quadratic field $K$.
+In particular, the prime ideal $\mathfrak{P}$ above $p$ satisfies $[\mathfrak{P}]^2 = 1$,
+which is a strong constraint on the CM type of such Jacobians and
+rules out inert-$p$ lattices in potential cover-cost arguments.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

@@ -5498,3 +5498,60 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-19 second run (autolab run)
+
+### Task picked
+Thread 17 — integrate Proposition (order-2 Frobenius, Threads 15–16) into `paper/structural_completeness.tex`.
+Chosen because: Thread 17 was explicitly proposed as the next-step in the 2026-07-19 first-run log entry; no prior work.
+
+### Work done
+- Read `paper/structural_completeness.tex` to locate the B5 section (~line 429).
+- Confirmed the Thread 15–16 theorem is in `PAPER_STRUCTURAL_COMPLETENESS.md` but absent from the `.tex` paper.
+- Inserted a formal `\begin{proposition}...\end{proposition}` block with a `\begin{proof}...\end{proof}` and a `\begin{remark}[Scope and verification]` after the CM-73 remark (before §B6, ~line 431 in the original).
+- Fixed the proof of part (i) to a clean one-equation form: `(m²·sf − a₂² + 4p²)/4 = (D−D)/4 = 0`.
+- Compiled with `pdflatex`: confirmed zero new errors (all pre-existing errors are at lines 40, 377–381, unrelated to the insertion).
+- Wrote `secp256k1_cm_audit/thread17_prop_verify.gp` — a PARI/GP script verifying all three proposition parts.
+- Ran the script; debugged PARI syntax issues (multiline arrays, `#v/2` in for-loop bounds, flat vector indexing); rewritten following thread16 idioms exactly.
+- Final script: clean run, no errors.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Proposition prop:order2-frobenius** (now in §B5 of `paper/structural_completeness.tex`):
+  For odd prime p and a₂ ∈ Z\{0} with p∤a₂, D=a₂²-4p²=sf·m², K=Q(√sf):
+  (i)  β = (−a₂+m√sf)/2 satisfies x²+a₂x+p²=0; N(β)=p².
+  (ii) [P]²=1 in Cl(K).
+  (iii) p splits in K (not inert, not ramified).
+  4-line proof in the paper: part (iii) follows because inertness forces (β)=(p)⟹p|a₂ and
+  ramification forces p|sf⟹p|a₂², both contradicting p∤a₂.
+
+**Verification summary `thread17_prop_verify.gp`:**
+| Battery                          | Cases | Passed |
+|----------------------------------|-------|--------|
+| I: D<0, fixed pairs              | 20    | 20     |
+| II: D>0, fixed pairs             | 10    | 10     |
+| III: mass sweep p≤53, 1≤a₂<p    | 364   | 364    |
+| **Total (Thread 17)**            | **394** | **394** |
+
+Combined with Thread 15 (25 cases) and Thread 16 (57 cases): **476/476 total**.
+
+**PARI syntax note** (for future scripts):
+- Use `{ my(total=0, ok=0); my(cases=[...]); for(i=1,#cases,...) }` blocks — NOT `#cases/2` in for-bound.
+- Use `core(abs(n))` for squarefree parts, not custom factoring.
+- Vector-of-vectors `cases[i][1]` works; flat vector with arithmetic indexing does not.
+
+### Next step proposal
+Thread 18: Check whether the inertness-impossibility corollary in Proposition (iii) appears in the classical CM literature.
+- Search Silverman "Advanced Topics in the Arithmetic of Elliptic Curves" §II.10 or Cohen–Strömberg §5.11
+  for a statement that "p always splits in the CM field when p ∤ a₂".
+- If absent: this may be a minor novelty worth a footnote.
+- Also: the remark at the end of Proposition mentions that for abelian surfaces with biquadratic Weil poly,
+  p splits in K. Check whether this constraint on CM types appears in Shimura–Taniyama theory for abelian surfaces
+  (cite van Wamelen "Examples of genus 2 CM curves over Q" or Bisson–Robert for CM type constraints).
+- Concrete task: WebSearch for "biquadratic Weil polynomial p splits CM field" and "abelian surface CM type inertness".
+
+### Commits made
+TBD (commit follows)
