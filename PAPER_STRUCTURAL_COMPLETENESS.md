@@ -270,6 +270,32 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Thread-15/16: Frobenius ideal order in Cl(K)).**
+For the Weil polynomial `T⁴ + a₂T² + p²` of a Jacobian `J ≅ E × E^t`, with
+`a₂ = 2p − t²` (Frobenius trace `t` of `E`), the associated imaginary quadratic
+field is `K = Q(√sf)` where `sf = sf_part(a₂² − 4p²) = −core(4p − t²)`.
+Let `P` be a prime of `O_K` above `p`.
+
+*Theorem (Threads 14–16):* If `p ∤ a₂`, then `[P]² = 1` in `Cl(K)`.
+*Proof sketch:* `β = (−a₂ + m√sf)/2` is an algebraic integer in `O_K`
+with `N(β) = p²`; since `p ∤ a₂`, `(β) ≠ (p)`, so `(β) = P²` or `P̄²`,
+giving `[P]² = 1`. □
+
+*Stronger rigidity for E × E^t:* For the specific parameterization `a₂ = 2p − t²`,
+the element `γ = (t + s√sf)/2` with `s = √((4p − t²)/core(4p − t²))` satisfies
+`N(γ) = (t² + s² · core(4p − t²))/4 = (t² + 4p − t²)/4 = p`, and lies in `O_K`
+whenever `sf ≡ 1 (mod 4)` and `t ≡ s (mod 2)` (verified universally for `t` odd
+and `core(4p − t²) ≡ 3 (mod 4)`). In all 30 non-norm-form test cases across 10 primes
+(p = 1009,...,100003), `[P] = 1` exactly (P principal); `ord([P]) = 2` cases exist
+but require `a₂` values that do NOT arise from the Frobenius trace formula
+(example: p = 3, a₂ = 4, K = Q(√(−5)), h = 2, `[P] = 2`, `(β) = P²`).
+
+*Connection to ePrint 2025/705* (two-affinely-related-nonce attack): the GLV
+nonce relation `k₁ = λk₂` is a special case of the affine relation `k₁ = αk₂ + β`
+studied in that paper. The GLV endomorphism fixes the Weil polynomial shape and hence
+fixes `sf`; the prime `P` above `p` in `Q(√sf)` is always principal for any deployed
+prime-order curve, providing a structural obstruction to class-group-based attacks.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

@@ -5428,3 +5428,87 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: extend the universal order-2 Frobenius ideal theorem (Thread 15) from
+the secp256k1 norm-form family to arbitrary biquadratic Weil polynomials T⁴+a₂T²+p².
+Last work was Thread 15 (2026-07-17); this is the direct next-step proposed there.
+
+### Work done
+- Installed PARI/GP 2.15.4 (was absent; `apt-get install pari-gp`).
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~170 lines) in two phases:
+  Phase 1: 10 non-norm-form primes × 3 traces (30 cases); verified [P]²=1 for each.
+  Phase 2: systematic search for ord([P])=2 cases among p≤3000, t≤15; found zero.
+- Ran concrete manual check (PARI inline): p=3, a₂=4, K=Q(√-5), h=2 → ord([P])=2
+  with (β)=P² confirmed. This is the first explicit non-trivial (ord=2) case.
+- Derived algebraic reason why ord([P])=1 always holds for a₂=2p-t²:
+  γ=(t+s√sf)/2 with s=√((4p-t²)/core(4p-t²)) satisfies N(γ)=(t²+4p-t²)/4=p;
+  γ∈O_K whenever sf≡1 mod 4 and t≡s mod 2 (holds universally for t odd, c≡3 mod 4).
+  Hence P=(γ) is principal → ord([P])=1 always for the E×E^t parameterization.
+- Added Theorem remark to `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (after Exp U–Y).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Phase 1 results — 30 non-norm-form (p,t) pairs, all SPLIT, all [P]²=1:**
+
+| p       | t | a₂       | sf        | m   | h   | ord([P]) | [P]²=1 |
+|---------|---|----------|-----------|-----|-----|----------|--------|
+| 1009    | 1 | 2017     | -4035     | 1   | 12  | 1        | YES    |
+| 1009    | 3 | 2009     | -4027     | 3   | 9   | 1        | YES    |
+| 1009    | 7 | 1969     | -443      | 21  | 5   | 1        | YES    |
+| 1013    | 1 | 2025     | -4051     | 1   | 11  | 1        | YES    |
+| 1013    | 3 | 2017     | -4043     | 3   | 16  | 1        | YES    |
+| 1013    | 7 | 1977     | -4003     | 7   | 13  | 1        | YES    |
+| ...     | . | ...      | ...       | ... | ... | ...      | ...    |
+| 99991   | 1 | 199981   | -399963   | 1   | 104 | 1        | YES    |
+| 99991   | 3 | 199973   | -399955   | 3   | 152 | 1        | YES    |
+| 99991   | 7 | 199933   | -44435    | 21  | 102 | 1        | YES    |
+| 100003  | 1 | 200005   | -400011   | 1   | 230 | 1        | YES    |
+| 100003  | 3 | 199997   | -400003   | 3   | 76  | 1        | YES    |
+| 100003  | 7 | 199957   | -399963   | 7   | 104 | 1        | YES    |
+
+Total: 30/30 passed; no failures. Class numbers ranged from h=1 to h=230.
+
+**Key structural finding:**
+For a₂=2p-t² (the E×E^t Frobenius trace parameterization), P is ALWAYS PRINCIPAL
+(ord=1), not just of order ≤2. The stronger reason:
+  γ = (t + s·√sf)/2,  s = √((4p-t²)/core(4p-t²)),  N(γ) = p  (exact, always)
+When γ∈O_K (verified: holds whenever sf≡1 mod 4 and t≡s mod 2), (γ)=P and [P]=1.
+
+Phase 2 search (p≤3000, t≤15, h even, SPLIT, P non-principal): found ZERO ord=2 cases.
+
+**First explicit ord=2 example** (PARI-verified):
+  p=3, a₂=4, D=-20, sf=-5, m=2; K=Q(√-5), h=2 (class group Z/2Z).
+  P above 3 in Q(√-5) is NON-PRINCIPAL (3 not represented by x²+5y²).
+  β=(-4+2√-5)/2=-2+√-5; N(β)=4+5=9=p². (β)=P² (PARI confirmed). [P]²=1. ord=2. ✓
+  Note: a₂=4=6-2=2p-t² requires t²=2, so t=√2 ∉ Z. This a₂ does NOT arise from
+  any actual E×E^t Frobenius trace formula. This explains why ord=2 doesn't appear
+  in the E×E^t sweep.
+
+**Interpretation:**
+The theorem [P]²=1 is tight: ord=2 is achievable in principle (for a₂ outside the
+Frobenius trace image), but for all actual E×E^t Jacobians (the attack-relevant cases),
+the stronger P-is-principal holds. This is a structural rigidity of the Weil polynomial
+family T⁴+(2p-t²)T²+p²: the prime P above p in Q(√sf) is always principal, closing
+any class-group-based attack using this Frobenius ideal.
+
+ePrint 2025/705 connection: "Breaking ECDSA with Two Affinely Related Nonces" covers
+the case k₁=αk₂+β. GLV nonce relation k₁=λk₂ is the special case α=λ, β=0. The
+paper's closed-form key recovery (no lattice reduction) might apply to GLV without LLL;
+this is a potential shortcut for Priority 5 (GLV-HNP Phase 2 toy).
+
+### Next step proposal
+Thread 17: Apply the ord=2 structural finding to articulate a precise "class group
+obstruction" lemma for the paper: *For E/F_p prime-order ordinary, the Frobenius
+ideal P above p in End(J) is always principal; hence no class-group-orbit attack on
+J distinguishes E from its twist.* Then:
+(a) Check whether the ePrint 2025/705 closed-form technique (k₁=λk₂ → direct key
+    recovery without LLL) applies to secp256k1's GLV nonce relation. If so, the
+    Phase 2 toy (Priority 5) simplifies: replace LLL with a closed-form quadratic solve.
+(b) Write and run a 32-bit toy PARI/Python script to confirm GLV key recovery.
+
+### Commits made
+[see below after git commit]
