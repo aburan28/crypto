@@ -5507,4 +5507,4 @@ Thread 17: Interesting non-trivial case — p=307, t=11, sf=-123, h(Q(√-123))=
   to confirm symmetry (sf and m are the same since D depends on t²).
 
 ### Commits made
-`[to be filled after commit]`
+`7de3eee` autolab 2026-07-19: Thread 16 — order-2 Frobenius generalised; 10/10 non-norm-form primes verified; B5 remark added
