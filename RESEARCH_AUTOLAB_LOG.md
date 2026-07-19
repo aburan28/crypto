@@ -5511,4 +5511,4 @@ Thread 17: Test the THEOREM T16 edge cases and extensions.
     research notes (the affine nonce k₁=λk₂ is the GLV special case of that paper's framework).
 
 ### Commits made
-[see below after commit]
+`a7e192b` autolab 2026-07-19: Thread 16 general T16 proof; 15/15 non-norm-form; 15844-pair audit; B5 remark
