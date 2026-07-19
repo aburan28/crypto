@@ -5498,3 +5498,4 @@ Thread 17: Priority 5 (GLV-HNP Phase 2 toy attack).
 - Success criterion: d recovered from <=50 signatures on 32-bit curve.
 
 ### Commits made
+`e07c0e1` autolab 2026-07-19: Thread 16 -- general order-2 Frobenius; 123/123 non-norm-form primes verified; paper B5 remark added
