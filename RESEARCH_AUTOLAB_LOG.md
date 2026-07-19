@@ -5505,4 +5505,4 @@ Thread 17: The Theorem is now established universally. Two natural follow-ups:
     get the Theorem. Check if it has a §B5 equivalent and add the remark there too.
 
 ### Commits made
-[pending — see below]
+`9fc57e6` autolab 2026-07-19: Thread 16 — universal order-2 Frobenius confirmed for all non-norm-form primes; Lemma 1 (sf always QR mod p) proved; 156/156 pairs pass; B5 remark added to paper
