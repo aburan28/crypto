@@ -5520,3 +5520,4 @@ Thread 17: Inert-case census + GLV-HNP connection.
 - If the closed-form works: Thread 17 completes Priority 5 (GLV-HNP Phase 2 toy).
 
 ### Commits made
+`18a1998` autolab 2026-07-19: Thread 16 — universal order-2 Frobenius theorem confirmed for non-norm-form primes; 130/130 tests pass
