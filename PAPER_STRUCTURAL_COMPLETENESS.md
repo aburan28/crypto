@@ -323,6 +323,32 @@ for `p = secp256k1` prime, `k = 1..6`, `g = 2..5`:
 **Conclusion**: B5 holds for all `k ≥ 1`.  Neither generic algorithms
 nor Diem's sub-exponential yield a cover-based speedup for secp256k1.
 
+**Remark (Thread 15–16): Universal order-2 Frobenius in biquadratic Weil polynomials.**
+An auxiliary structural result from the computational audit provides an independent
+perspective on the Frobenius class group structure underlying B5.
+
+> **Theorem (Threads 15–16).** Let p be any prime, a₂ any integer with p ∤ a₂, and
+> D = a₂² − 4p² ≠ 0.  Set sf = squarefree_part(D), m = √(D/sf), K = Q(√sf).
+> Let P be any prime ideal above p in O_K.  Then [P]² = 1 in Cl(K).
+
+*Proof sketch.* Let β = (−a₂ + m√sf)/2.  Since β satisfies x² + a₂x + p² = 0
+(monic, integer coefficients), β is an algebraic integer in K.  Computing:
+N_{K/Q}(β) = β·β̄ = (a₂² − m²sf)/4 = (a₂² − D)/4 = p².
+Hence (β) is an O_K-ideal of norm p².  The ideals of norm p² in O_K are P², P̄², and
+(p) = P·P̄.  The case (β) = (p) would require β/p ∈ O_K× with N(β/p) = 1, forcing
+p | a₂ — excluded by hypothesis.  Therefore (β) = P² or P̄², so [P]² = 1. □
+
+This theorem was first proved for the secp256k1 norm-form family (Thread 15;
+script `secp256k1_cm_audit/thread15_order2_algebraic.gp`, 25/25 cases verified)
+and extended to arbitrary primes in Thread 16 (`thread16_general_weil.gp`, 123/123
+cases across p ∈ {2,…,1999}, class numbers h ∈ {1,…,1248}).
+
+The Frobenius ideal β = (−a₂ + m√sf)/2 arises naturally from biquadratic Weil
+polynomials T⁴ + a₂T² + p² of abelian surfaces isogenous to E × E^t.  The result
+shows the Frobenius class [P] is always 2-torsion, regardless of field or curve
+family — a structural constraint on any cover-based attack attempting to exploit
+the Cl(K) orbit of the Frobenius endomorphism.
+
 ### B7: Supersingular reductions live in a disjoint world
 
 > For an ordinary curve `E/F_p`, the supersingular reductions

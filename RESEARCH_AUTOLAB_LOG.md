@@ -5428,3 +5428,73 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (continuing from Thread 15's next-step proposal, 2026-07-17). Thread 15
+proved the order-2 Frobenius theorem algebraically for the secp256k1 norm-form family
+(25/25 primes, 2 days ago). Thread 16 verifies the theorem holds for ALL primes — the
+algebraic proof is fully general and no norm-form condition was ever actually used.
+
+### Work done
+- Installed pari-gp (2.15.4) which was absent from environment.
+- Wrote `secp256k1_cm_audit/thread16_general_weil.gp` (~140 lines):
+  4 phases testing non-norm-form primes with multiple a2 values.
+- Ran script: 123/123 cases passed across:
+  - Phase 1: 25 cases, h >= 2 (non-trivial class group), p in {2..11}
+  - Phase 2: 70 cases, first 15 non-norm-form primes, a2 in {1,2,3,4,5}
+  - Phase 3: 20 cases, p in {997,1009,1013,1019,1021}, a2 in {1,2,3,p-1}
+  - Phase 4:  8 cases, p=1999, a2 in {1..8}
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added §B5 Remark (Threads 15-16) to PAPER_STRUCTURAL_COMPLETENESS.md
+  with the general theorem statement and proof sketch.
+
+### Findings
+
+**THEOREM GENERALIZED (Thread 16 — general Frobenius order-2):**
+For any prime p, integer a2 with p ∤ a2, D = a2^2-4p^2 < 0:
+set sf = sqfree(D), m = sqrt(D/sf), K = Q(sqrt(sf)).
+Any prime P above p in O_K satisfies [P]^2 = 1 in Cl(K).
+
+The proof is purely algebraic; the norm-form condition 4p=73+3k^2 was never used.
+
+**Selected results — 123/123 passed:**
+
+| p    | a2   | sf        | h    | [P]^2=1? |
+|------|------|-----------|------|----------|
+| 2    | 1    | -15       | 2    | YES      |
+| 5    | 4    | -21       | 4    | YES      |
+| 7    | 1    | -195      | 4    | YES      |
+| 11   | 8    | -105      | 8    | YES      |
+| 13   | 4    | -165      | 8    | YES      |
+| 17   | 4    | -285      | 16   | YES      |
+| 23   | 5    | -2091     | 12   | YES      |
+| 41   | 5    | -6699     | 24   | YES      |
+| 53   | 4    | -2805     | 48   | YES      |
+| 997  | 1    | -3976035  | 368  | YES      |
+| 1021 | 1020 | -782341   | 616  | YES      |
+| 1999 | 4    | -3995997  | 1120 | YES      |
+| 1999 | 8    | -3995985  | 1248 | YES      |
+
+All 123 test cases: N(beta)=p^2 verified, [P]^2=1 confirmed.
+Class numbers tested range from h=1 (trivial) up to h=1248.
+The theorem is non-trivial in all h>=2 cases (class group order-2 membership
+is a real constraint when h>2 — confirmed for h=4,8,12,16,24,48,368,616,1120,1248).
+
+**Paper update:** Added Remark (Threads 15-16) after B5 conclusion, with the
+general theorem statement, proof sketch, and reference to both scripts.
+
+### Next step proposal
+Thread 17: Priority 5 (GLV-HNP Phase 2 toy attack).
+- The ePrint 2025/705 result (Thread 15 fallback §3, entry 1) showed that two
+  affinely-related nonces k1=alpha*k2+beta suffice for closed-form key recovery.
+  For GLV, the relation is k1 = lambda*k2 (alpha=lambda, beta=0 — purely linear).
+- Experiment: on a 32-bit toy curve with efficient GLV (say, E: y^2=x^3+1 over a
+  31-bit prime with j=0), generate 50 ECDSA signatures using GLV nonce decomposition
+  (k = k1 + lambda*k2, k1,k2 in [0,sqrt(n))), set up the GLV-HNP lattice (BV96
+  form), run LLL, check if d is recovered.
+- Script: `secp256k1_cm_audit/thread17_glv_hnp_toy.gp` — PARI/GP toy ECDSA + LLL.
+- Success criterion: d recovered from <=50 signatures on 32-bit curve.
+
+### Commits made
