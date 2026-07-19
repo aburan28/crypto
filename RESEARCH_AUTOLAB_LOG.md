@@ -5428,3 +5428,87 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: Generalise the "universal order-2 Frobenius" theorem (Thread 15) from secp256k1
+norm-form primes to arbitrary biquadratic Weil polynomials T⁴+a₂T²+p². Thread 15 (2026-07-17)
+proved and verified the theorem for the 25 norm-form primes k≤199; Thread 16 checks whether
+the same proof and result hold for completely unrelated (p, a₂) pairs — confirming it is a
+general theorem, not an artifact of the secp256k1 family.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~170 lines):
+  - 15-case main batch: non-norm-form primes p ∈ {23,29,41,53,97,113,127,151,211,257,503,751,881,1013} with various a₂, class numbers h up to 928.
+  - Split-type audit: 15,844 (p,a₂) pairs with p ∈ [20,300], |a₂|<2p, p∤a₂ — checks that p never inerts in Q(√sf).
+- Fixed PARI GP inner-loop syntax (`forstep` instead of `for` with 4-arg step form).
+- Installed PARI/GP 2.15.4 (apt; was missing from container).
+- Integrated Theorem T16 into `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 as a numbered remark with full proof statement.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM T16 (general biquadratic Weil polynomial — proved + verified):**
+For any prime p, integer a₂ with |a₂|<2p and p∤a₂:
+  D=a₂²-4p² <0, sf=squarefree_part(D) <0, m=√(D/sf)∈Z⁺, K=Q(√sf).
+  Then [P]²=1 in Cl(K) for any prime P of O_K above p.
+  Proof: β=(-a₂+m√sf)/2 satisfies x²+a₂x+p²=0; N(β)=p²; (β)≠(p) since p∤a₂;
+  therefore (β)=P² or P̄²; hence [P]²=1. □
+  Bonus: p cannot inert in K (algebraically blocked by p∤a₂).
+
+**Numerical results — main batch (15/15 passed):**
+
+| p    | a₂   | sf       | m   | h    | split-type | [P]²=1 | norm-form |
+|------|------|----------|-----|------|------------|--------|-----------|
+| 23   | 5    | -2091    | 1   | 12   | splits     | YES    | no        |
+| 29   | 8    | -33      | 10  | 4    | splits     | YES    | no        |
+| 41   | 10   | -46      | 12  | 4    | splits     | YES    | no        |
+| 41   | -18  | -1       | 80  | 1    | splits     | YES    | no        |
+| 53   | 20   | -301     | 6   | 8    | splits     | YES    | no        |
+| 97   | 50   | -61      | 24  | 6    | splits     | YES    | no        |
+| 113  | -30  | -1       | 224 | 1    | splits     | YES    | no        |
+| 127  | 70   | -46      | 36  | 4    | splits     | YES    | no        |
+| 151  | 60   | -181     | 22  | 10   | splits     | YES    | no        |
+| 211  | 100  | -4669    | 6   | 32   | splits     | YES    | no        |
+| 257  | -120 | -62449   | 2   | 176  | splits     | YES    | no        |
+| 503  | 200  | -27001   | 6   | 104  | splits     | YES    | no        |
+| 751  | 300  | -541501  | 2   | 360  | splits     | YES    | no        |
+| 881  | -400 | -736161  | 2   | 928  | splits     | YES    | no        |
+| 1013 | -500 | -963669  | 2   | 768  | splits     | YES    | no        |
+
+- Class numbers range h=1 to h=928; theorem holds for ALL h (non-trivially for h>1).
+- ALL 15 showed split-type "splits" (never ramified or inerted in this batch).
+
+**Split-type audit:**
+- 15,844 pairs (p,a₂) with p∈[20,300] non-norm-form, |a₂|<2p, p∤a₂.
+- Inert count: **0** — theorem's algebraic obstruction confirmed computationally.
+
+**Cumulative theorem status:**
+- Thread 15: 25 norm-form primes (k≤199) — all verified.
+- Thread 16: 15 non-norm-form pairs (diverse p, a₂, h) — all verified.
+- Audit: 15,844 pairs — no exception found.
+- The theorem is GENERAL (not secp256k1-specific). Proof is ~5 lines algebraically.
+
+**Paper integration:**
+- Added "Remark (Frobenius ideal structure of biquadratic Weil polynomials — Thread 15/16)"
+  in `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 (between Corollary B5 universality and
+  Numerical verification block), with full proof statement and significance note.
+
+### Next step proposal
+Thread 17: Test the THEOREM T16 edge cases and extensions.
+(a) Ramified case: find (p, a₂) where p | sf (i.e., p ramifies in K) and verify [P]²=1
+    trivially. Example: p=2, a₂=1, D=1-4p²=1-16=-15, sf=-15, 2∤sf so 2 doesn't ramify there.
+    Try p=5, a₂=4, D=16-100=-84=-4·21, sf=-21, 5∤21. Try p=7, a₂=1, D=1-196=-195=-3·5·13, sf=-195,
+    7∤195. Finding a ramified example requires p | sf = sf(a₂²-4p²). Since sf | (a₂²-4p²) and
+    p | sf, we need p | a₂² which means p | a₂ (contradiction with p∤a₂). So RAMIFICATION
+    IS ALSO ALGEBRAICALLY BLOCKED by p∤a₂! Proof: if p|sf and sf|D=a₂²-4p², then p|a₂². 
+    Since p is prime, p|a₂ — contradicts p∤a₂. So p ALWAYS SPLITS (not ramifies, not inerts)
+    when p∤a₂. This is an even stronger statement.
+(b) Strengthen the theorem statement: include the proof that p always splits (not just 
+    "splits or ramifies") as a refinement.
+(c) Cite ePrint 2025/705 ("Breaking ECDSA with Two Affinely Related Nonces") in the GLV-HNP
+    research notes (the affine nonce k₁=λk₂ is the GLV special case of that paper's framework).
+
+### Commits made
+[see below after commit]

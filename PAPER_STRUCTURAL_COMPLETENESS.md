@@ -270,6 +270,40 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal structure of biquadratic Weil polynomials — Thread 15/16).**
+The (N,N)-cover Jacobian `J` has biquadratic Weil polynomial `T⁴ + a₂T² + p²`
+(trace-0 case `s₁=0`).  A structural property of such polynomials holds unconditionally:
+
+> **Theorem T16.** Let `p` be any prime, `a₂` any integer with `|a₂| < 2p` and `p ∤ a₂`.
+> Set `D = a₂² − 4p²`, `sf = squarefree_part(D)`, `m = √(D/sf)`,
+> and `K = Q(√sf)` (imaginary quadratic since `D < 0`).
+> Let `P` be any prime of `O_K` above `p`.  Then `[P]² = 1` in `Cl(K)`.
+> Moreover `p` cannot be inert in `K`; it necessarily splits or ramifies.
+>
+> *Proof.* Let `β = (−a₂ + m√sf)/2`.
+> (A) `β` satisfies `x² + a₂x + p² = 0` (monic, Z-coefficients), so `β ∈ O_K`.
+> (B) `N_{K/Q}(β) = p²`, so `(β)` is an `O_K`-ideal of norm `p²`.
+> (C) If `p` were inert, the unique prime `P₀` above `p` satisfies `N(P₀)=p²` and
+>     `(β)=P₀` forces `β = ε·p` for a unit `ε`, implying `p | a₂` — contradiction.
+>     Hence `p` splits or ramifies.
+> (D) The ideals of `O_K` with norm `p²` above `p` are `P²`, `P̄²`, and `(p)`.
+>     Case `(β)=(p)` requires `p | a₂` — excluded.
+> (E) Therefore `(β) = P²` or `P̄²`, whence `[P]² = 1`.  □
+
+Verified numerically: (i) 25 secp256k1 norm-form primes `k ≤ 199` (Thread 15,
+script `thread15_order2_algebraic.gp`); (ii) 15 non-norm-form primes `p ≤ 1013`
+with diverse `a₂` and class numbers `h ≤ 928` (Thread 16, script
+`thread16_general_order2.gp`); (iii) split-type audit: 15,844 pairs `(p, a₂)` with
+`p ∈ [20, 300]`, `|a₂| < 2p`, `p ∤ a₂` — inert count = **0** in all cases.
+
+*Significance for B5:* Theorem T16 shows that every prime `p` above which the
+cover Jacobian carries a biquadratic Weil polynomial automatically forces `[P]² = 1`
+in the associated imaginary quadratic class group.  This is a structural constraint
+on the CM-type of `J`, independent of whether a smooth cover `C → E` exists.
+It does not alter the B5 complexity conclusion (`O(p) > O(√p)`), but it refines
+the Frobenius ideal picture: the "escape" from principal via `(β) = (p)` is
+algebraically blocked precisely by `p ∤ a₂`, which holds generically.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
