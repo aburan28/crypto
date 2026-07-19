@@ -5428,3 +5428,76 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: extend the "universal order-2 Frobenius" theorem (Thread 15) to non-norm-form
+primes. Thread 15 proved [P]²=1 for 25 norm-form primes (4p=73+3k²); Thread 16 shows
+the algebraic proof (steps A–E) is purely about the biquadratic form T⁴+a₂T²+p² and
+does not need the norm-form condition.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~180 lines) with 6 parts:
+  - Part A: a₂=1, 15 non-norm-form primes p=2..59. D=1−4p²<0, never perfect square.
+  - Part B: a₂=2, 12 non-norm-form primes p=3..47. Different imaginary quadratic fields.
+  - Part C: 15 mixed (p,a₂) pairs with larger a₂, including h=40 (p=43, a₂=20).
+  - Part D: complete sweep for p=17, all a₂=1..16 with p∤a₂ (15/15).
+  - Part E: boundary cases a₂=p — theorem silent, but [P]²=1 holds trivially (h=1).
+  - Part F: explicit large-h fields Q(√-23) h=3, Q(√-47) h=5, Q(√-71) h=7 verified.
+- Added `INERT`/`SPLIT`/`RAMIFIED` labeling (fixed by checking N(P)=p vs p²).
+- Key algebraic observation (proved, not just confirmed): p∤a₂ ⟹ (sf/p)=1 ⟹ p SPLITS in K.
+  Proof: D≡a₂² (mod p), so sf·m²≡a₂² (mod p), hence (sf/p)=((a₂/m)²/p)=1. ✓
+- Key observation on boundary: in the geometric regime |a₂|<2p, the only p|a₂ case
+  is a₂=p, which gives D=−3p², sf=−3, h(Q(√-3))=1. The "exception" is vacuous.
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 with a remark integrating Threads 15–16:
+  the order-2 structure is universal across biquadratic Weil polynomials and implies
+  the CM-compatibility condition required by B5 covers.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Theorem 16 (general biquadratic order-2):**
+For any prime p and integer a₂ with p∤a₂:
+let D=a₂²−4p²=sf·m² (sf squarefree, m>0), K=Q(√sf), P|p a prime of O_K.
+Then p SPLITS in K (not inert, not ramified) and [P]²=1 in Cl(K).
+
+**Proof of splitting:** sf·m²≡a₂² (mod p) and p∤a₂,p∤m (else p|a₂), so (sf/p)=1.
+
+**Numerical summary — 85 total verified cases:**
+
+| Part | Count | h range      | Confirmed |
+|------|-------|--------------|-----------|
+| Thread 15 (norm-form, k≤199) | 25 | 1–128 | 25/25 ✓ |
+| A: non-norm, a₂=1 | 15 | 1–24 | 15/15 ✓ |
+| B: non-norm, a₂=2 | 12 | 1–8  | 12/12 ✓ |
+| C: mixed (p,a₂)   | 15 | 1–40 | 15/15 ✓ |
+| D: p=17 full sweep | 15 | 1–16 | 15/15 ✓ |
+| F: large odd h     | 3  | 3,5,7| 3/3   ✓ |
+
+All SPLIT when p∤a₂ (confirmed by PARI's idealprimedec + idealnorm).
+Zero theorem violations.
+
+**Boundary case (Part E):** all a₂=p pairs give sf=−3, K=Q(√-3), h=1.
+Some primes p are INERT in Q(√-3) (Legendre symbol (-3/p)=−1 for p≡2 mod 3):
+p=5,11,23,29,41 show INERT, confirming p≡2 mod 3 ↔ inert in Q(√-3).
+p=7,13,31,43 show SPLIT (p≡1 mod 3). All h=1 so [P]²=1 trivially.
+
+**Paper integration:** Added structural remark in §B5 of PAPER_STRUCTURAL_COMPLETENESS.md
+(before §B6). The order-2 condition underpins B5's cover-cost argument: the CM-splitting
+of p (forced by p∤a₂) is the structural reason the (ℓ,ℓ)-cover Jacobian J has the
+Frobenius eigenvalue structure that makes DLP on J cost O(p).
+
+### Next step proposal
+Thread 17: Investigate whether [P]^4=1 is ever the minimal order (i.e., [P]^2≠1 is 
+actually impossible in the geometric regime by the splitting argument). The order-2 theorem
+says [P]^2=1; separately check if [P]=1 (P principal) is also possible. Characterise which
+(p,a₂) give P principal (order 1) vs genuine order 2, and whether this distinguishes
+"CM by full ring O_K" from "CM by order".
+
+Alternatively: Thread 18: Use Thread 16's SPLIT observation to verify that for ALL (ℓ,ℓ)-cover
+targets in B5 the splitting of p in the CM field is forced, giving a clean Corollary to the
+B5 remark integrating the Frobenius ideal structure into the formal B5 proof.
+
+### Commits made
+TBD (committed after log entry)

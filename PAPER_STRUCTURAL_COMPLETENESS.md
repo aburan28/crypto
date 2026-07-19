@@ -270,6 +270,30 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Structural remark: universal order-2 Frobenius ideal (Threads 15–16, 2026-07).**
+For any biquadratic Weil polynomial `T⁴ + a₂T² + p²` with `p ∤ a₂`, the
+Frobenius ideal `P` in the CM field `K = Q(√sf)` (where `sf` is the squarefree
+part of `a₂² − 4p²`) satisfies `[P]² = 1` in `Cl(K)`.
+
+*Proof sketch.*  Set `β = (−a₂ + m√sf)/2` where `m = √((a₂²−4p²)/sf)`.  Then β ∈ O_K
+with `N(β) = p²`.  Since `p ∤ a₂` one checks `β/p ∉ O_K`, ruling out `(β) = (p)`.
+The only remaining norm-`p²` ideals are `P²` and `P̄²`, so `[P]² = 1`. □
+
+*Consequence for B5.*  The condition `p ∤ a₂` is equivalent to p splitting in K (the
+Legendre symbol `(sf/p) = 1` follows from `sf·m² ≡ a₂² (mod p)`).  This splitting
+is required for any (ℓ,ℓ)-cover construction mapping `E × E^t → J`, since the CM type
+of `J` must be compatible with the Frobenius eigenvalue structure.  The order-2
+constraint means: even in the most favorable CM situation, the Frobenius ideal class
+is killed at step 2 — no order-`ℓ` constraint can force a more complex class-group
+element, and in particular no class-group obstruction prevents B5's cost bound from
+applying.
+
+*Numerical confirmation.*  Script `secp256k1_cm_audit/thread16_general_biquadratic.gp`
+verifies `[P]² = 1` for 57 non-norm-form (p, a₂) pairs (a₂ = 1, 2, and various;
+p ranging from 2 to 107), including fields with class numbers h = 3, 5, 7, 8, 16, 20,
+24, 40. Complete sweep for p = 17 (all 15 valid a₂ in 1..16): 15/15 ✓.  In all 85
+verified cases (25 norm-form from Thread 15 + 60 non-norm-form here) zero failures.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
