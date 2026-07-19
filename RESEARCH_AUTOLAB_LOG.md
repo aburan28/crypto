@@ -5428,3 +5428,94 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: Extend the "universal order-2 Frobenius" theorem (proved in Thread 15) to
+non-norm-form primes. Thread 15's algebraic proof (A)-(E) uses only the biquadratic
+Weil polynomial shape and the condition p ∤ a₂ — no norm-form hypothesis is needed.
+Thread 15 was 2 days ago and this is the proposed continuation.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_nonnorm_order2.gp` (~175 lines).
+- Debugged PARI type issues: `ffgen(p,'w)` + `lift()` gives `t_POL` discriminants
+  (double-lift artefact); fixed by using `Mod(coeff,p)*x^k` construction instead.
+  Confirmed `hyperellcharpoly(f)` (1-arg) accepts `t_INTMOD`-coefficient polys.
+- Ran script: found 10 non-norm-form primes in [50,200] with biquadratic genus-2
+  curves y² = x⁵ + aa·x³ + bb·x + cc, verified [P]² = 1 in Cl(Q(√sf)) for each.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Noted one degenerate case (p=83, a2=166=2p, D=0 — non-simple Jacobian, excluded).
+
+### Findings
+
+**THEOREM 16 (general):** The order-2 property is NOT specific to secp256k1 norm-form primes.
+For any prime p and any genus-2 curve C/F_p whose Weil polynomial is biquadratic
+(T⁴ + a₂T² + p², i.e. #C(F_p) = p+1), with D = a₂²-4p² = sf·m² (sf squarefree,
+m>0) and p ∤ a₂, the prime ideal P above p in Q(√sf) satisfies **[P]² = 1**.
+Proof: exactly (A)-(E) from Thread 15 — the norm-form condition was never used.
+
+**Numerical verification — 10 non-norm-form primes:**
+
+| p   | a₂   | sf    | m  | h  | curve (x⁵+aa·x³+bb·x+cc)    | [P]²=1 |
+|-----|------|-------|----|----|-------------------------------|--------|
+| 53  | 68   | -1653 | 2  | 16 | x⁵+33x³+32x+1                | YES    |
+| 59  | 66   | -598  | 4  | 8  | x⁵+19x³+35x+35               | YES    |
+| 61  | 42   | -205  | 8  | 8  | x⁵+14x³+47x+49               | YES    |
+| 67  | 38   | -258  | 8  | 8  | x⁵+37x³+2x+31                | YES    |
+| 71  | -112 | -1905 | 2  | 24 | x⁵+40x³+6x+62                | YES    |
+| 73  | 104  | -105  | 10 | 8  | x⁵+5x³+7x+38                 | YES    |
+| 89  | -42  | -1870 | 4  | 16 | x⁵+35x³+42x+34               | YES    |
+| 97  | 114  | -385  | 8  | 8  | x⁵+71x³+26x+23               | YES    |
+| 101 | 102  | -19   | 40 | 1  | x⁵+69x³+28x+58               | YES    |
+| 103 | -180 | -2509 | 2  | 28 | x⁵+92x³+86x+36               | YES    |
+
+ALL 10 PASSED. (p=79 norm-form — skipped; p=83 degenerate D=0 — skipped.)
+
+**Notable special cases:**
+- p=101, sf=-19, h=1: class number 1, so [P]² = 1 trivially (P is principal).
+  Largest m value (m=40) in the table: a₂=102, D=-128 — wait, recheck:
+  D = 102²-4·101² = 10404 - 40804 = -30400. sf(-30400) = sf(-2⁷·5²·19) = -2·19 = -38?
+  Hmm: -30400 = -1·2⁷·5²·19. Squarefree part: -1·2·19 = -38? But the script says sf=-19, m=40.
+  Recheck: -30400 / -19 = 1600 = 40². sf core(-30400): 30400 = 2^6 * 475 = 2^6 * 5^2 * 19.
+  core(30400) = 2*19 = 38 (keep one 2, one 19, drop 5^2 and 2^5). Hmm, 2^6 = (2^3)^2 * 2, so
+  remaining factor 2 stays. core(30400) = 2 * 19 = 38. So sf(-30400) = -38.
+  But the script reported sf=-19. Let me re-examine.
+  Actually core() in PARI computes the squarefree kernel correctly:
+  30400 = 2^6 * 5^2 * 19 = (2^3)^2 * 5^2 * 19. Squarefree part (keeping odd power factors):
+  2^(6 mod 2=0 ... wait, 6 is even, so 2 contributes nothing). 5 is even power (5^2), so 5 contributes nothing.
+  19 is odd power (19^1), so 19 contributes. core(30400) = 19. sf(-30400) = -19. m² = 30400/19 = 1600. m=40. ✓
+  So sf=-19, h(Q(√-19)) = 1. Correct.
+- p=71, sf=-1905: 1905 = 3·5·127. h(Q(√-1905)) = 24.
+- p=103, sf=-2509: 2509 = prime. h(Q(√-2509)) = 28.
+  Largest class number in the sample; [P]² = 1 non-trivially (P is not principal).
+
+**Degenerate case (p=83, a₂=2p=166, D=0):**
+Weil poly becomes (T²+p)², a perfect square. The Jacobian is NOT simple — it splits
+as E × E for a supersingular elliptic curve E/F_p. The K = Q(√0) field degenerates.
+This is the correct exclusion: D = a₂²-4p² = 0 iff a₂ = ±2p iff J is non-simple.
+
+**Cross-check — norm-form prime p=79:**
+Found a biquadratic curve y²=x⁵+7x³+48x over F_79 with a₂=156, sf=-157, h=6.
+(This is NOT the secp256k1 norm-form curve for p=79, which would have sf=-219.)
+[P]²=1 holds for this non-secp256k1 curve too. ✓
+
+### Next step proposal
+Thread 17: Integrate Theorem 16 into PAPER_STRUCTURAL_COMPLETENESS.md as a standalone
+proposition (§B5 remark or a new §B6):
+
+  "PROPOSITION (Biquadratic Frobenius order-2): For any prime p and genus-2 curve
+   C/F_p with #C(F_p) = p+1 and a₂² ≠ 4p², if p ∤ a₂, then [P]² = 1 in Cl(Q(√sf))
+   where sf = squarefree-part(a₂²-4p²)."
+
+Also worth investigating: Does [P]² = 1 FORCE #C(F_p) = p+1? Partial converse:
+if [P]² = 1, can we always find a genus-2 curve realising this P? (This would be a
+CM lifting question — harder, needs theory of CM abelian surfaces.)
+
+Additionally: Check whether all 10 sf values above share a common structural property
+(e.g., are they all discriminants of imaginary quadratic fields with some special property?).
+Observation: sf in {-19, -105, -157, -205, -258, -385, -598, -1653, -1870, -1905, -2509} —
+these are 10 distinct imaginary quadratic discriminants (or near-discriminants), no obvious pattern.
+
+### Commits made
+[to be filled after push]
