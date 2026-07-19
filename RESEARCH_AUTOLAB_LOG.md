@@ -5537,4 +5537,4 @@ Alternatively: investigate the precision warning for h=30032 (p=50021) — use b
 with higher precision to confirm ord([P])=2 explicitly.
 
 ### Commits made
-[to be filled after commit]
+`ab4abb0` autolab 2026-07-19: Thread 16 — order-2 Frobenius theorem generalised to all primes; 29/29 non-norm-form cases verified; Remark B5.1 added to paper
