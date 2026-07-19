@@ -5428,3 +5428,69 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (next step proposed by Thread 15): verify that the universal order-2 Frobenius
+theorem holds for NON-NORM-FORM (p, a2) pairs. Thread 15 proved this algebraically for the
+25 norm-form primes 4p=73+3k²; Thread 16 generalises to arbitrary (p, a2) with D=a2²-4p²<0,
+p∤a2, covering multiple imaginary quadratic fields with h up to 24.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~190 lines).
+- Implemented `verify_general(p, a2, label)` replicating Thread 15 checks (i)-(v) for
+  arbitrary (p, a2): minpoly(β), N(β)=p², p∤a2, (β)=P², [P]²=1 in Cl(Q(√sf)).
+- Implemented `find_case(sf_target, p_lo, p_max)` to auto-search for (p, a2) with
+  sf_part(a2²-4p²) = sf_target, using Kronecker symbol pre-filter.
+- Proved the structural equivalence (Part E, no computation): p∤a2 ⟺ p splits in Q(√sf).
+- Ran `gp --stacksize 128000000 -q thread16_general_order2.gp`: all 32 cases pass.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**RESULT (Thread 16): 32/32 non-norm-form pairs verified, all with [P]²=1.**
+
+| Part | Cases | Fields          | h       | Notable                                               |
+|------|-------|-----------------|---------|-------------------------------------------------------|
+| A    | 4     | Q(i)            | 1       | Sanity; ord([P])=1 (principal)                       |
+| B    | 4     | Q(√-5)          | 2       | B4: p=307, ord([P])=2 (generates Cl(Q(√-5))=Z/2Z)   |
+| C    | 2     | Q(√-23)         | 3       | C1,C2: p=59,101; ord([P])=1 in h=3 field             |
+| D    | 2     | Q(√-14),Q(√-47) | 4,5     | D1: p=71, ord=2; D2: p=83, ord=1                     |
+| F    | 20    | Various         | 1..24   | F13: p=61, Q(√-930), h=24, ord=2; F6: h=8, ord=2    |
+
+**STRUCTURAL EQUIVALENCE (new, Thread 16):**
+For D = a2²-4p² < 0, the condition p∤a2 is EQUIVALENT to p splitting in K=Q(√sf):
+- Ramified case (p|sf): p|D and p|4p², so p|a2². Since p prime, p|a2. Contradicts p∤a2.
+- Inert case: (p) is the unique O_K-prime of norm p². N(β)=p² => (β)=(p) => p|a2. Contradicts p∤a2.
+- Split case: no obstruction; theorem gives [P]²=1 (non-trivial class-group statement).
+COROLLARY: the split hypothesis in the theorem statement is automatically satisfied by p∤a2.
+This simplifies the theorem: "if p prime, |a2|<2p, p∤a2, then [P]²=1 in Cl(Q(√sf(a2²-4p²)))".
+
+**Numerical highlights (non-trivial class group checks):**
+- p=307, sf=-5, h=2: [P] has ord=2, generating the full Cl(Q(√-5))≅Z/2Z. [P]²=1 ✓.
+- p=71, sf=-14, h=4: [P] has ord=2 in Cl(Q(√-14)) of order 4. [P]²=1 ✓.
+- p=29, sf=-210, h=8: [P] has ord=2. [P]²=1 ✓ (checked in Part F sweep).
+- p=61, sf=-930, h=24: [P] has ord=2. [P]²=1 ✓ (largest h tested).
+
+**Observation on ord([P]):**
+In the split case, (β) = P² or P̄². If β is a unit × P², then [P]²=1 but [P] might be 1 or 2.
+The data shows ord([P]) ∈ {1, 2}: always ord([P])=2 when sf is "complicated" (many prime factors),
+always ord([P])=1 when h is small or sf=-1,-2,-3 (principal primes). This is consistent with the
+theorem and expected from class field theory for primes above p with N(P)=p.
+
+### Next step proposal
+Thread 17: Integrate the Theorem cleanly into PAPER_STRUCTURAL_COMPLETENESS.md.
+- Current §B5 remark (added Thread 12) mentions the order-2 structure informally.
+- Upgrade to a formal Corollary: "For any biquadratic Weil polynomial T⁴+a₂T²+p²
+  with |a₂|<2p and p∤a₂, the Frobenius ideal P above p in Q(√sf(a₂²-4p²)) satisfies
+  [P]²=1. Proof: β=(-a₂+m√sf)/2 is an algebraic integer with N(β)=p², (β)=P², QED."
+- Cross-reference Thread 15 (norm-form, 25 cases) and Thread 16 (general, 32 cases).
+- Also: check ePrint 2025/705 ("Two Affinely Related Nonces") for GLV-HNP applicability.
+  The GLV relation k₁=λk₂ is an affine relation; Theorem 1 of that paper may give a
+  closed-form key recovery from 2 GLV-paired ECDSA signatures without lattice reduction.
+
+### Commits made
+[to be filled after commit]
