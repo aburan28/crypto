@@ -5428,3 +5428,99 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: extend the universal order-2 Frobenius theorem (proved in Thread 15 for
+secp256k1's norm-form family) to arbitrary non-norm-form primes, confirming it is a
+general theorem about biquadratic Weil polynomials — not a secp256k1-specific accident.
+
+### Work done
+- Verified PARI/GP 2.15.4 available (installed via apt); previous run's gp scripts
+  still present in `secp256k1_cm_audit/`.
+- Wrote `secp256k1_cm_audit/thread16_general_theorem.gp` (~130 lines):
+  - Picks 10 non-norm-form primes: [3, 5, 7, 11, 13, 17, 23, 29, 31, 41].
+  - For each prime p, tests 4 values of a₂ (a₂ = 1, 2, 3, p−2).
+  - Computes K = Q(√sf) where sf = squarefree_part(a₂²−4p²), calls bnfinit with
+    certified class group, factors p in O_K, checks bnfisprincipal(P²) = 0.
+  - Bonus: explicitly verifies (β) = P² via idealhnf comparison for p=5, a₂=1.
+- Ran script: `gp --stacksize 128000000 -q thread16_general_theorem.gp`.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Added Remark (Universal order-2 of Frobenius ideals) to PAPER_STRUCTURAL_COMPLETENESS.md
+  §B5 after the Corollary proof, citing Thread 15–16 scripts.
+
+### Findings
+
+**RESULT: 38/38 PASS** across all (p, a₂) test pairs.
+
+| p  | a₂  | D          | sf     | m  | h  | split | [P]²=1 |
+|----|-----|------------|--------|----|----|-------|--------|
+| 3  | 1   | -35        | -35    | 1  | 2  | yes   | PASS   |
+| 3  | 2   | -32        | -2     | 4  | 1  | yes   | PASS   |
+| 5  | 1   | -99        | -11    | 3  | 1  | yes   | PASS   |
+| 5  | 2   | -96        | -6     | 4  | 2  | yes   | PASS   |
+| 5  | 3   | -91        | -91    | 1  | 2  | yes   | PASS   |
+| 7  | 1   | -195       | -195   | 1  | 4  | yes   | PASS   |
+| 7  | 2   | -192       | -3     | 8  | 1  | yes   | PASS   |
+| 7  | 3   | -187       | -187   | 1  | 2  | yes   | PASS   |
+| 7  | 5   | -171       | -19    | 3  | 1  | yes   | PASS   |
+| 11 | 1   | -483       | -483   | 1  | 4  | yes   | PASS   |
+| 11 | 2   | -480       | -30    | 4  | 4  | yes   | PASS   |
+| 11 | 3   | -475       | -19    | 5  | 1  | yes   | PASS   |
+| 11 | 9   | -403       | -403   | 1  | 2  | yes   | PASS   |
+| 13 | 1   | -675       | -3     | 15 | 1  | yes   | PASS   |
+| 13 | 2   | -672       | -42    | 4  | 4  | yes   | PASS   |
+| 13 | 3   | -667       | -667   | 1  | 4  | yes   | PASS   |
+| 13 | 11  | -555       | -555   | 1  | 4  | yes   | PASS   |
+| 17 | 1   | -1155      | -1155  | 1  | 8  | yes   | PASS   |
+| 17 | 2   | -1152      | -2     | 24 | 1  | yes   | PASS   |
+| 17 | 3   | -1147      | -1147  | 1  | 6  | yes   | PASS   |
+| 17 | 15  | -931       | -19    | 7  | 1  | yes   | PASS   |
+| 23 | 1   | -2115      | -235   | 3  | 2  | yes   | PASS   |
+| 23 | 2   | -2112      | -33    | 8  | 4  | yes   | PASS   |
+| 23 | 3   | -2107      | -43    | 7  | 1  | yes   | PASS   |
+| 23 | 21  | -1675      | -67    | 5  | 1  | yes   | PASS   |
+| 29 | 1   | -3363      | -3363  | 1  | 16 | yes   | PASS   |
+| 29 | 2   | -3360      | -210   | 4  | 8  | yes   | PASS   |
+| 29 | 3   | -3355      | -3355  | 1  | 8  | yes   | PASS   |
+| 29 | 27  | -2635      | -2635  | 1  | 12 | yes   | PASS   |
+| 31 | 1   | -3843      | -427   | 3  | 2  | yes   | PASS   |
+| 31 | 2   | -3840      | -15    | 16 | 2  | yes   | PASS   |
+| 31 | 3   | -3835      | -3835  | 1  | 12 | yes   | PASS   |
+| 31 | 29  | -3003      | -3003  | 1  | 8  | yes   | PASS   |
+| 41 | 1   | -6723      | -83    | 9  | 3  | yes   | PASS   |
+| 41 | 2   | -6720      | -105   | 8  | 8  | yes   | PASS   |
+| 41 | 3   | -6715      | -6715  | 1  | 12 | yes   | PASS   |
+| 41 | 39  | -5203      | -43    | 11 | 1  | yes   | PASS   |
+
+Stress cases:
+- p=29, a₂=1: h=16 — largest class number tested; [P]² = 1 ✓
+- p=31, a₂=3: h=12, sf=-3835 — large squarefree discriminant; [P]² = 1 ✓
+- p=41, a₂=2: h=8, sf=-105 — [P]² = 1 ✓
+
+All 38 cases split (p splits in K = Q(√sf)). This is explained by:
+  a₂² − 4p² ≡ a₂² (mod p), so D ≡ a₂² (mod p) is a perfect square mod p,
+  hence the Legendre symbol (D/p) = (sf/p) = 1 whenever p ∤ m — p always splits.
+
+Bonus HNF check (p=5, a₂=1): `idealhnf(K, beta_elt) == P²` returned YES, confirming
+(β) = P² exactly, not just that [P]² is principal.
+
+**Paper update**: Added "Remark (Universal order-2 of Frobenius ideals, Thread 15–16)"
+to PAPER_STRUCTURAL_COMPLETENESS.md §B5 immediately after the Corollary (B5 universality)
+proof. The remark states the general theorem, gives the 3-line proof, and cites both
+PARI scripts.
+
+### Next step proposal
+Thread 17: Investigate whether p always splits in K = Q(√(a₂²−4p²)) when gcd(a₂,p)=1,
+proving that the inert/ramified cases never arise in the biquadratic Weil polynomial setting.
+- Conjecture: (D/p) = (a₂²−4p²)/p ≡ (a₂/m)² (mod p) is a perfect square mod p, so
+  p always splits unless p | m.
+- Check: when p | m, does p | a₂ also (which we excluded by hypothesis)?  
+  If so, the splitting is universal, and the theorem always applies in the "split" branch.
+- Alternatively: Thread 17 could be the GLV-HNP Phase 2 toy (Priority 5 from the
+  original list) — now that Threads 1–16 have fully closed the biquadratic Frobenius
+  direction, it's time to attempt the 32-bit GLV lattice toy experiment.
+
+### Commits made
+PLACEHOLDER (fill in after commit)

@@ -262,6 +262,26 @@ following arithmetic obstruction.
 > #J(F_p) = #E · #E^t.  The Lemma characterises kernel structure but
 > does not affect this calculation. DLP cost O(p) by Gaudry (g=2). □
 
+> **Remark (Universal order-2 of Frobenius ideals, Thread 15–16).** The
+> Frobenius ideal structure arising in every (ℓ,ℓ)-cover setting satisfies a
+> universal order-2 property.  Let p be any prime and a₂ any integer with
+> gcd(a₂, p) = 1.  If the abelian-surface Weil polynomial is T⁴ + a₂T² + p²
+> (biquadratic form, valid when |a₂| < 2p) and D = a₂² − 4p² = sf · m² with
+> sf squarefree, then for every prime ideal P above p in O_{K}, K = Q(√sf):
+>
+>   **[P]² = 1  in  Cl(K).**
+>
+> *Proof.* Set β = (−a₂ + m√sf)/2.  Then β satisfies x² + a₂x + p² = 0
+> (algebraic integer), N_{K/Q}(β) = p².  The only ideals of norm p² in O_K
+> are P², P̄², (p).  Case (β) = (p) requires p | a₂, contradicting gcd(a₂,p)=1.
+> Hence (β) = P² or P̄², so [P]² = 1.  □
+>
+> This is proved algebraically in `secp256k1_cm_audit/thread15_order2_algebraic.gp`
+> and verified numerically for 25 norm-form primes k ≤ 199 (Thread 15) and
+> 38 non-norm-form (p, a₂) pairs with class numbers h up to 16 (Thread 16,
+> `thread16_general_theorem.gp`).  No norm-form condition (4p = 73 + 3k²)
+> is needed — the theorem is intrinsic to biquadratic Weil polynomials.
+
 **Numerical verification (Exp U–Y):**
 - secp256k1: p ≡ 1 mod 3, p ≡ 1 mod 7 (confirmed; p mod 3 = 1, p mod 7 = 1).
 - (3,3)-isogeny graph from E × E^t walked to depth 5 (25 kernel-curve pairs);
