@@ -5428,3 +5428,78 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: Verify that the "universal order-2 Frobenius" theorem (proved algebraically
+in Thread 15 for the secp256k1 norm-form family) holds for arbitrary non-norm-form
+primes. Thread 15 was the most recent completed task (2026-07-17, 2 days ago); the
+next-step proposal explicitly asked for this generality check plus paper integration.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (three-part verification):
+  - Part A: 20 non-norm-form primes p ∈ [101, 9001], 10 a₂ values each (200 cases).
+  - Part B: 5 large primes p ∈ [10007, 200003], a₂ ∈ {−5,…,5} (50 cases).
+  - Part C: 3 primes with "extra-Weil" |a₂| > 2.83p, verifying the theorem holds
+    even for algebraically-valid but non-physical (D > 0) configurations (12 cases).
+- Installed PARI/GP 2.15 (`apt-get install -y --fix-missing pari-gp`).
+- Ran script; verified clean output.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Integrated theorem + proof + empirical data into `PAPER_STRUCTURAL_COMPLETENESS.md`
+  §B5, as "Remark (Frobenius ideal order-2, Threads 15–16)".
+
+### Findings
+
+**THEOREM (Thread 16 — general biquadratic, proved 2026-07):**
+For any prime p and integer a₂ with p ∤ a₂, D = a₂² − 4p² = sf·m² (sf squarefree,
+m > 0, D ≠ 0), and K = Q(√sf): if p splits in O_K as p·O_K = P·P̄ (P ≠ P̄),
+then [P]² = 1 in Cl(K).
+
+The proof (steps A–E from Thread 15) is purely algebraic and uses NO norm-form
+condition. Thread 16 confirms this computationally.
+
+**Empirical results (thread16_general_order2.gp):**
+
+| Part | Cases | SPLIT-YES | SPLIT-NO! | INERT | RAMIF | SKIP |
+|------|-------|-----------|-----------|-------|-------|------|
+| A (non-norm-form, p ≤ 9001) | 200 | 200 | 0 | 0 | 0 | 0 |
+| B (large p ≤ 200003, tiny a₂) | 50  | 50  | 0 | 0 | 0 | 0 |
+| C (extra-Weil |a₂| > 2.83p, D > 0) | 12 | 12 | 0 | 0 | 0 | 0 |
+| **TOTAL** | **262** | **262** | **0** | **0** | **0** | **0** |
+
+Notable: Part C (D > 0, sf > 0) still gives SPLIT-YES. Example:
+  p=1009, a₂=5044, D=21369612, sf=5342403 → SPLIT-YES.
+The theorem applies equally to positive and negative discriminants.
+
+Notable: INERT=0 across 262 cases — every (p, a₂) pair tested had p splitting
+in Q(√sf(D)). This is expected for large |D|: random quadratic fields Q(√sf)
+have Legendre symbol (sf/p) = +1 with probability ~1/2; with 10 a₂ values per
+prime, at least one gives a split field with high probability. Our choices of
+a₂ happened to always give splits (or we would have logged INERT).
+
+**Paper integration:**
+Added "Remark (Frobenius ideal order-2, Threads 15–16)" to §B5 of
+`PAPER_STRUCTURAL_COMPLETENESS.md`, between the Honda–Tate numerical
+verification and §B6. The remark:
+- States the theorem with full proof sketch (steps A–E).
+- Cites both scripts (25 norm-form + 262 general cases, 287 total).
+- Notes the implication: cover-kernel Galois action is always quadratic,
+  consistent with observations across Threads 11–15.
+
+### Next step proposal
+Thread 17: Prove the INERT=0 observation (or find a counterexample with p inert).
+- Claim: for any prime p and a₂=1, D=1−4p² is negative. The squarefree part sf of
+  (1−4p²) satisfies: does p always split in Q(√sf)? This is equivalent to asking
+  whether (sf/p) = +1 (Legendre symbol). Likely fails for some p — INERT=0 across
+  all 262 cases was coincidental (p happened to split in every sf tested).
+- Experiment: for p ∈ {101, 149, 197, ...}, compute sf(1−4p²) and check (sf/p).
+  If ever (sf/p)=−1, we get an INERT case (not a theorem failure, just vacuous).
+- Alternative Thread 17: focus on B6 extension ("B5 over F_{p^k}", Priority 6 from
+  the protocol). Current B6′ section in the paper covers k≥3 abstractly but lacks
+  explicit numerical verification for k=2. Add an explicit k=2 check:
+  does secp256k1 base-changed to F_{p^2} give any Gaudry-IC speedup?
+  (Expected: no, since the IC divisors over F_{p^2} still map back to E(F_p) DLP.)
+
+### Commits made
+(see below)

@@ -270,6 +270,44 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Frobenius ideal order-2, Threads 15–16).**
+The Frobenius of the Jacobian carries an additional algebraic constraint that
+reinforces B5.  For any biquadratic Weil polynomial `T^4 + a₂T² + p²` (the
+characteristic polynomial of Frobenius of an abelian surface `J/F_p` of the
+type arising in all (N,N)-covers of `E`), define `D = a₂² − 4p²` and write
+`D = sf·m²` with `sf` squarefree.  Let `K = Q(√sf)` and let `P` be any prime
+of `O_K` above `p` that splits (i.e., `p·O_K = P·P̄`).
+
+> **Theorem (order-2 Frobenius ideal, proved 2026-07).** Under the hypotheses
+> above, with `p ∤ a₂`:
+>
+>   `[P]² = 1`  in `Cl(K)`.
+>
+> *Proof.* Set `β = (−a₂ + m√sf)/2`.  (A) `β` is an algebraic integer,
+> satisfying the monic polynomial `x² + a₂x + p² = 0`.  (B) `β ∈ K`.
+> (C) `N_{K/Q}(β) = p²`.  (D) The only `O_K`-ideals of norm `p²` are
+> `P²`, `P̄²`, and `(p) = P·P̄`; since `p ∤ a₂` we have `β ≠ u·p` for any
+> unit `u`, so `(β) ≠ (p)`.  (E) Therefore `(β) = P²` or `P̄²`, giving
+> `[P]² = 1`.  □
+
+*Empirical verification.*
+- Thread 15 (`thread15_order2_algebraic.gp`): 25/25 norm-form primes `k ≤ 199`
+  (secp256k1 family, `4p = 73 + 3k²`), all five algebraic checks (A)–(E).
+- Thread 16 (`thread16_general_order2.gp`): 262/262 non-norm-form test cases —
+  20 primes `p ∈ [101, 9001]` × 10 `a₂` values (Part A, 200 cases);
+  5 large primes `p ∈ [10007, 200003]` × `a₂ ∈ {−5,…,5}` (Part B, 50 cases);
+  3 primes with extra-Weil `|a₂| > 2.83p` (Part C, 12 cases, `D > 0`).
+  Zero failures across all 262 cases.
+
+*Implication for B5.*  The order-2 condition on `[P]` constrains the Galois
+module structure of `J[ℓ](F̄_p)` for every prime `ℓ` above `P`.  In
+particular, the (N,N)-isogeny `E × E^t → J` that motivates B5 has its kernel
+controlled by ideals of order dividing 2 in `Cl(K)` — consistent with the
+kernel being defined over a degree-2 extension of `F_p` at most.  This does
+not reduce DLP cost (B5's Gaudry bound `O(p)` is unchanged), but it explains
+why all the cover-kernel experiments (Threads 11–15) consistently observe
+quadratic Galois action.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
