@@ -5428,3 +5428,84 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: Generalise the order-2 Frobenius theorem (Thread 15) from
+secp256k1 norm-form primes to ALL primes. Thread 15 algebraically proved
+[P]²=1 in Cl(Q(√sf)) for 25 norm-form primes; the proof used only
+(a₂ ∈ ℤ, p prime, p∤a₂), so it is fully general. This run verifies it
+numerically for non-norm-form primes and integrates the result into the paper.
+
+### Work done
+- Installed PARI/GP 2.15.4 (was missing from path; `apt-get install pari-gp --fix-missing`).
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~185 lines):
+  - Defines `is_norm_form(n)`, `sqfree_kernel(n)`, and `verify_one(pp, a2)`.
+  - `verify_one` checks: minpoly of β = x²+a₂x+p², N(β)=p², [P]²=1 via
+    `bnfisprincipal(K, P²)`, and (β)·O_K = P² via `idealhnf` comparison.
+  - Primary sweep: 10 non-norm-form primes {2,3,5,7,11,13,17,23,29,31},
+    4 a₂ values each → 40 cases.
+  - Stress-test: 5 primes ∈ {1013,10007,50021,99991,100003}, 2 a₂ values
+    each → 10 cases.
+- Fixed GP file-structure bug: top-level multi-line loops must be wrapped
+  in `{}` blocks; function defs with `={}` bodies are at top level.
+- Confirmed PASS 50/50 with 0 failures.
+- Confirmed all split types are "S" (split) — p is never inert when p∤a₂.
+- Ran `cargo test --test curve_audit`: 5/5 pass (unchanged).
+- Added "Structural remark (Thread 15–16)" to §B5 of
+  `PAPER_STRUCTURAL_COMPLETENESS.md`, stating the general theorem and its
+  connection to the cover construction.
+
+### Findings
+
+**THEOREM (Thread 16 — fully general):**
+For any prime p and a₂ ∈ ℤ with p ∤ a₂, set D = a₂²−4p² = sf·m²
+(sf squarefree, m ≥ 1).  Every prime P above p in O_{Q(√sf)} satisfies
+[P]² = 1 in Cl(O_{Q(√sf)}).
+
+**Key observations from numerical sweep:**
+- All 50 cases: split type "S" (p always splits; never inert when p∤a₂). ✓
+- Both algebraic checks passed in every case: minpoly(β) = x²+a₂x+p²,
+  N(β) = p².
+- (β)·O_K = P² confirmed via idealhnf ∀ non-trivial cases.
+- Theorem holds for class numbers h ranging from 1 up to h = 33184
+  (p=99991, a₂=1, sf=-39992800323).
+
+**Selected results (non-trivial class groups):**
+
+| p     | a₂  | sf              | m    | h     | split | result |
+|-------|-----|-----------------|------|-------|-------|--------|
+| 7     | 1   | -195            | 1    | 4     | S     | PASS   |
+| 17    | 1   | -1155           | 1    | 8     | S     | PASS   |
+| 23    | 24  | -385            | 2    | 8     | S     | PASS   |
+| 29    | 1   | -3363           | 1    | 16    | S     | PASS   |
+| 31    | 32  | -705            | 2    | 24    | S     | PASS   |
+| 1013  | 1   | -2027           | 45   | 11    | S     | PASS   |
+| 10007 | 1   | -400560195      | 1    | 4480  | S     | PASS   |
+| 50021 | 1   | -10008401763    | 1    | 30032 | S     | PASS   |
+| 99991 | 1   | -39992800323    | 1    | 33184 | S     | PASS   |
+| 100003| 1   | -4444711115     | 3    | 23488 | S     | PASS   |
+
+**Corollary (confirmed numerically):**
+Under conditions of the theorem, p necessarily splits or ramifies in
+Q(√sf). Inert primes are impossible when p ∤ a₂.
+
+**Proof summary (four steps, each verified):**
+(A) β = (−a₂+m√sf)/2 satisfies x²+a₂x+p²=0 → β ∈ O_K.
+(B) N_{K/Q}(β) = p².
+(C) p∤a₂ → (β) ≠ (p)·O_K (else β/p ∈ O_K^× needs a₂/p ∈ ℤ, contradicts p∤a₂).
+(D) Only norm-p² ideals in O_K are P², P̄², and (p). So (β) = P² → [P]²=1. ✓
+
+### Next step proposal
+Thread 17 — Cite ePrint 2025/705 ("Breaking ECDSA with Two Affinely Related
+Nonces") in the GLV remark of RESEARCH_GLV_HNP.md and connect to Thread 16:
+- The GLV decomposition k = k₁ + k₂·λ gives a₂ = 0 (mod λ) structure;
+  for the secp256k1 endomorphism, check whether the GLV-pair Weil polynomial
+  factors via the general theorem.
+- Alternatively, pivot to Priority 5 (GLV-HNP Phase 2 toy attack on 32-bit
+  curve): implement the GLV-aware lattice attack and test if the lattice
+  recovers d. This is the highest-priority UNBLOCKED thread.
+
+### Commits made
+TBD (committed below)

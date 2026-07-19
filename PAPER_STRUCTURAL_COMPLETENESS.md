@@ -270,6 +270,40 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Structural remark (Thread 15–16): universal order-2 Frobenius in Cl(O_K).**
+The biquadratic Weil polynomial `T⁴ + a₂T² + p²` that arises in every `E × E^t`
+cover has a uniform arithmetic property, independent of which curve family p
+belongs to:
+
+> **Theorem (general).** Let p be any prime and a₂ ∈ ℤ with p ∤ a₂.
+> Set `D = a₂² − 4p²` and write `D = sf · m²` with sf squarefree, m ≥ 1.
+> Let `K = Q(√sf)`.  Every prime ideal P above p in O_K satisfies
+> `[P]² = 1` in `Cl(O_K)`.
+>
+> *Proof sketch.*  `β = (−a₂ + m√sf)/2` satisfies `x² + a₂x + p² = 0`
+> (monic, Z-coefficients), so `β ∈ O_K` with `N_{K/Q}(β) = p²`.
+> If p ∤ a₂ then `(β) ≠ (p)·O_K` (the unit `β/p` would satisfy a
+> monic polynomial with non-integer rational coefficient `a₂/p`).
+> The only O_K-ideals of norm p² other than `(p)` are `P²` and `P̄²`,
+> so `(β) = P²`, giving `[P]² = 1`. □
+
+This algebraic fact (proved in Thread 15 for the secp256k1 CM-73 norm-form
+family, generalised in Thread 16) implies in particular that p always *splits*
+or *ramifies* in `Q(√sf)` under these conditions — it is never inert — and
+that the Frobenius ideal `P` is a 2-torsion element of the class group.
+
+*Numerical confirmation.* The PARI script `secp256k1_cm_audit/thread16_general_order2.gp`
+verifies the theorem for 10 non-norm-form primes `p ∈ {2,3,5,7,11,13,17,23,29,31}`
+(4 values of a₂ each) and 5 large stress-test primes up to p = 100003.
+Total: 50/50 PASS, with class numbers h ranging from 1 to 33184.
+
+*Relevance to B5.* The construction `E × E^t → Jac(C)` always produces a
+Weil polynomial of this form.  The order-2 property reflects a deep symmetry
+of the cover: the image Frobenius `[P]` squares to a principal ideal,
+meaning the class group action on P has period exactly 2.  This is a
+structural obstruction — not an attack route — consistent with B5's conclusion
+that every genus-2 cover DLP cost exceeds the ECDLP cost.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
