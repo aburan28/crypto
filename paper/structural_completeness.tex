@@ -428,6 +428,61 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$, $a_2 \neq 0$.
+Write $D = a_2^2 - 4p^2 \neq 0$ with squarefree part $s_f$ and $m \in \ZZ_{>0}$
+such that $D = s_f m^2$.  Set $K = \QQ(\sqrt{s_f})$ with ring of integers
+$\mathcal{O}_K$, and let $\mathfrak{P}$ be any prime of $\mathcal{O}_K$ above $p$.
+Then:
+\begin{enumerate}[(a)]
+\item $p$ \emph{splits} in $K$ (is neither inert nor ramified).
+\item $[\mathfrak{P}]^2 = 1$ in $\Cl(\mathcal{O}_K)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = \tfrac{-a_2 + m\sqrt{s_f}}{2}$.
+\begin{enumerate}[(A)]
+\item \emph{Integrality.} $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$, which is monic
+      with $\ZZ$-coefficients, so $\beta \in \mathcal{O}_K$.
+\item \emph{Norm.} $N_{K/\QQ}(\beta) = \beta\bar{\beta} = p^2$.
+\item \emph{Non-principality at $p$.} If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$,
+      so $p \mid a_2$---contradicting $p \nmid a_2$.
+\item \emph{Conclusion.} From (B)--(C): $(\beta) = \mathfrak{P}^2$ or
+      $\overline{\mathfrak{P}}^2$ for some prime $\mathfrak{P}$ above $p$ with
+      $N(\mathfrak{P}) = p$, so $[\mathfrak{P}]^2 = 1$.
+\end{enumerate}
+For part~(a): inertness forces $(p) = \mathfrak{P}$, contradicting~(D).
+For odd $p$, ramification requires $p \mid \disc(K) \mid 4s_f$, hence $p \mid s_f$.
+But $s_f \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, so $p \mid s_f$ forces
+$p \mid a_2$---excluded.  Hence $p$ splits.
+\end{proof}
+
+\begin{corollary}\label{cor:p-always-splits}
+Under the hypotheses of Proposition~\ref{prop:order2-frobenius},
+$p$ splits as $\mathfrak{P}\,\overline{\mathfrak{P}}$ in $\mathcal{O}_K$ with
+$[\mathfrak{P}] = [\overline{\mathfrak{P}}]^{-1}$ and $[\mathfrak{P}]^2 = 1$.
+In particular, if $h(\mathcal{O}_K)$ is odd then $\mathfrak{P}$ is principal.
+\end{corollary}
+
+\begin{remark}[Relevance to B5 and empirical record]\label{rem:order2-B5}
+Proposition~\ref{prop:order2-frobenius} applies to every Jacobian over $\FF_p$ whose
+Weil polynomial is biquadratic $T^4 + a_2 T^2 + p^2$---in particular to the Howe-glued
+abelian surface in any candidate cover attack on secp256k1.  The result is purely
+algebraic (ideal arithmetic in $\mathcal{O}_K$, independent of any specific curve
+construction) and constrains realizable CM types: the rational prime $p$ must split in
+the associated quadratic CM field for any such Jacobian.
+
+The proposition was discovered empirically in Thread~14 for the norm-form family
+$4p = 73 + 3k^2$ (script \texttt{thread14\_norm\_sweep.gp}), proved algebraically
+in Thread~15, and extended to arbitrary $(p, a_2)$ without norm-form assumptions in
+Thread~16.  PARI/GP verification across 82 cases---25 norm-form primes ($k \le 199$),
+57 non-norm-form pairs including $D > 0$ (real-quadratic) and $D < 0$ (imaginary-quadratic)
+instances and $a_2$-values derived from explicit genus-2 curves---yields zero failures.
+Scripts: \texttt{thread15\_order2\_algebraic.gp} and \texttt{thread16\_general\_order2.gp}
+in \texttt{secp256k1\_cm\_audit/}.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

@@ -5498,3 +5498,67 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-19 (autolab run — Thread 17)
+
+### Task picked
+Thread 17: Integrate the universal order-2 Frobenius ideal theorem (Threads 15–16)
+into the LaTeX paper `paper/structural_completeness.tex`.
+Chosen because: Thread 16 (today's prior run) explicitly proposed this as next step;
+all six original priorities are closed/blocked; the TeX paper had no Thread 13-16
+material in the B5 section; the theorem is clean and publishable.
+
+### Work done
+- Read `paper/structural_completeness.tex` structure; found insertion point after
+  Thread 11–12 Remark (line 429), before B6 subsection (line 431).
+- Added three new environments between existing B5 Remark and B6:
+  1. `\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15-16]`
+     with label `prop:order2-frobenius` — full theorem statement.
+  2. `\begin{proof}` — 4-step proof (A)-(D) proving integrality, norm, non-principality,
+     and conclusion; plus splitting/ramification arguments.
+  3. `\begin{corollary}` with label `cor:p-always-splits`.
+  4. `\begin{remark}[Relevance to B5 and empirical record]` with label `rem:order2-B5`
+     citing scripts, 82-case empirical record, and relevance to cover attacks.
+- All `\begin{...}` / `\end{...}` environments are balanced (verified by Python counter).
+- All macros (`\ZZ`, `\QQ`, `\FF`, `\Cl`, `\mathcal{O}_K`, `\mathfrak{P}`) are
+  defined in the preamble. Labels correctly set. `[(a)]` / `[(A)]` enumerate options
+  supported by `enumitem` package (loaded in preamble).
+- No LaTeX compiler available in container; environment balance check passed.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+**Proposition (Thread 17 — in paper/structural_completeness.tex, after line 429):**
+
+For any odd prime p and a₂ ∈ ℤ with p ∤ a₂, setting β = (−a₂ + m√sf)/2 gives:
+- β satisfies x² + a₂x + p² = 0 (integral in O_K)
+- N(β) = p²
+- (β) ≠ (p) since p ∤ a₂
+- Therefore (β) = P² → [P]² = 1 and p splits in Q(√sf).
+
+Proof is 4 labelled steps (A)-(D) + two sentences on splitting/ramification.
+The result occupies ~55 lines of LaTeX including the proof, corollary, and remark.
+
+**Placement:** Proposition 4.x, Corollary 4.y, Remark 4.z — between B5's Thread 11–12
+Remark (now ends at line 429) and B6 (now starts at line 486).
+TeX file grew from 851 to ~905 lines.
+
+**Literature check:** The splitting result (p splits in K when p ∤ a₂ and N(β) = p²)
+is a standard corollary of ideal-norm theory in quadratic fields — appears in substance
+in any algebraic number theory textbook (e.g., Neukirch §I.8 or Silverman AECF §II.8).
+The novelty in our context is the explicit connection to the biquadratic Weil polynomial
+shape and the "p must split" constraint on cover-attack CM types.
+
+**5/5 cargo tests green** after the TeX-only change.
+
+### Next step proposal
+Thread 18: Check the `paper/lll_degeneracy_note.tex` companion note for a similar
+gap — Threads 15–16 theorem could appear there as a brief sidebar if relevant.
+Also: Search for an existing reference in Neukirch or Cohen-Strömberg for the
+splitting lemma, and add a `\cite{}` in the proof. The current proof cites nothing;
+adding "see, e.g., \cite{neukirch1999}" to the ramification sentence would be standard.
+Alternatively: Search ePrint for new isogeny/cover papers (fallback protocol).
+
+### Commits made
+`[pending]` autolab 2026-07-19: Thread 17 — Proposition + Proof (universal order-2 Frobenius) into structural_completeness.tex
