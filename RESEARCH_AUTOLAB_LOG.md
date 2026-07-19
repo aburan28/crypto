@@ -5533,4 +5533,4 @@ EXACTLY 2 in Cl(Q(√sf)).
   hyperelliptic curve y²=g(x) (with a different g) gives [P] order 2.
 
 ### Commits made
-[to be filled after commit]
+`10e3de9` autolab 2026-07-19: Thread 16 — order-2 theorem confirmed for non-norm-form primes; P principal for product surfaces; non-split dichotomy documented
