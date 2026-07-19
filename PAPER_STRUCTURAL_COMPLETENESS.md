@@ -270,6 +270,36 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Structural remark: order-2 Frobenius ideal (Thread 15–16).**
+For any prime p and ordinary E/F_p with Frobenius trace t ≠ 0, the
+product Jacobian J = E × E^t has biquadratic Weil polynomial
+`T⁴ + a₂T² + p²` with `a₂ = 2p − t²`.  Set
+`D = a₂² − 4p² = t²(t² − 4p) < 0` (Hasse) and let `sf` be the
+squarefree part of D (so `sf < 0`).  Then:
+
+> **Lemma (Order-2 Frobenius ideal).** Let P be any prime of
+> `O_{Q(√sf)}` above p.  Then `[P]² = 1` in `Cl(Q(√sf))`.
+>
+> *Proof.* Set `β = (−a₂ + m√sf)/2` where `m² = D/sf`.
+> (A) β satisfies `x² + a₂x + p² = 0` (monic, integer coefficients), so β ∈ O_{K}.
+> (B) β ∈ K = Q(√sf).
+> (C) N_{K/Q}(β) = p², so (β) has norm p² in O_K.
+> (D) p ∤ a₂ (since |t| < p for p > 4, t ≠ 0 ⟹ p ∤ t ⟹ p ∤ t²), so (β) ≠ (p).
+> (E) The only ideals of norm p² in O_K other than (p) are P² and P̄²;
+>     hence (β) = P² (or P̄²), so [P]² = 1 in Cl(K). □
+
+This result is purely algebraic: it holds for *any* prime p and any
+biquadratic Weil polynomial with p ∤ a₂, regardless of CM discriminant or
+norm-form conditions.  Verified numerically for 25 norm-form primes k ≤ 199
+(Thread 15, all 5 checks pass) and 10 non-norm-form primes with the
+product-Jacobian construction (Thread 16, script
+`secp256k1_cm_audit/thread16_general_weil_poly.gp`, all YES).
+
+The lemma is a structural *curiosity* for B5: it says the Frobenius
+ideal of any product Jacobian E × E^t has order ≤ 2, reflecting the
+arithmetic symmetry between E and its twist.  It does not affect the
+DLP cost bound (which depends on #J, not on Cl(K)).
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

@@ -5428,3 +5428,75 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (proposed in Thread 15 next-step): generalize the algebraic order-2
+Frobenius theorem beyond the norm-form family 4p=73+3k². The proof (A)-(E) from
+Thread 15 makes no reference to the norm-form condition, so it should hold for
+any prime p and any biquadratic Weil coefficient a2 with p ∤ a2.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_weil_poly.gp` (~120 lines).
+- Used the product Jacobian construction: E/F_p with Frobenius trace t (t ≠ 0)
+  gives J = E × E^twist with Weil polynomial T⁴ + (2p−t²)T² + p², so a2 = 2p−t².
+- D = t²(t²−4p) < 0 by Hasse (t² < 4p), so sf < 0 (imaginary quadratic field).
+- p ∤ a2 is guaranteed since p ∤ t for |t| < 2√p < p (p > 4, t ≠ 0).
+  => All conditions of the Thread 15 algebraic proof hold automatically.
+- Ran gp -q on 10 non-norm-form primes: p = 53,59,61,67,71,73,83,89,97,101.
+  All 10 returned [P]²=1: YES.
+- Added "Structural remark: order-2 Frobenius ideal (Thread 15–16)" to
+  PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after Exp U–Y numerical verification).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Numerical results — 10 non-norm-form primes:**
+
+| p   | t   | a2   | sf      | m   | h  | [P]²=1 |
+|-----|-----|------|---------|-----|----|--------|
+| 53  | -4  | 90   | -1      | 56  | 1  | YES    |
+| 59  | -3  | 109  | -227    | 3   | 5  | YES    |
+| 61  | 12  | -22  | -1      | 120 | 1  | YES    |
+| 67  | 12  | -10  | -31     | 24  | 3  | YES    |
+| 71  | 13  | -27  | -115    | 13  | 2  | YES    |
+| 73  | 2   | 142  | -2      | 24  | 1  | YES    |
+| 83  | -6  | 130  | -74     | 12  | 10 | YES    |
+| 89  | -10 | 78   | -1      | 160 | 1  | YES    |
+| 97  | 1   | 193  | -43     | 3   | 1  | YES    |
+| 101 | -3  | 193  | -395    | 3   | 8  | YES    |
+
+Notable: h=1 cases (sf=-1,-2,-43) confirm [P]²=1 trivially (P principal ⟹ [P]=1).
+High h cases (h=10 at p=83, sf=-74) confirm the non-trivial part of the theorem.
+
+**Algebraic confirmation:** The proof (A)-(E) from Thread 15 is fully general.
+The norm-form condition 4p=73+3k² enters only the curve-construction step
+(which gives the specific a2 values), not the ideal-theoretic argument itself.
+
+**Paper update:** Added a named Lemma (Order-2 Frobenius ideal) to §B5 of
+PAPER_STRUCTURAL_COMPLETENESS.md with a self-contained proof and citations to
+Thread 15 (25 norm-form primes) and Thread 16 (10 non-norm-form primes).
+Clarified that the lemma is a structural curiosity (arithmetic symmetry of
+E × E^t) and does not affect the DLP cost bound.
+
+### Next step proposal
+Thread 17: Check whether the order-2 Frobenius ideal theorem also holds for
+D > 0 (real quadratic case, i.e., |a2| > 2p). The algebraic proof (A)-(E) is
+stated for any a2 with D = a2²−4p² a perfect square times a squarefree integer
+and p ∤ a2 — it does NOT require D < 0. However, |a2| > 2p means the Weil
+polynomial T⁴ + a2T² + p² does NOT have all roots on the circle of radius √p
+(i.e., it's not a valid Weil polynomial). So the D > 0 case is a purely
+algebraic statement about ideals with no geometric interpretation.
+Experiment: pick p=101 and a2=210 (D = 44100-40804=3296=16·206, sf=206, m=4).
+Check [P]²=1 in Cl(Q(√206)). This would demonstrate the algebraic proof holds
+even outside the Weil bound — or find a counterexample showing p ∤ a2 is
+necessary but not sufficient.
+
+Also: Consider writing a short standalone note (TeX) summarising Threads 14-16
+as a self-contained proposition for the ePrint draft's §B5 appendix.
+
+### Commits made
+(see below after commit)
