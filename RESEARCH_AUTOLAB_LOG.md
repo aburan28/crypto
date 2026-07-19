@@ -5511,4 +5511,4 @@ J distinguishes E from its twist.* Then:
 (b) Write and run a 32-bit toy PARI/Python script to confirm GLV key recovery.
 
 ### Commits made
-[see below after git commit]
+0cd94f4 autolab 2026-07-19: Thread 16 — universal order-2 Frobenius generalised to non-norm-form primes
