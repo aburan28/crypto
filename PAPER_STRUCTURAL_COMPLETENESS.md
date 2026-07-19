@@ -270,6 +270,44 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Universal order-2 Frobenius — Threads 15–16).** The B5 analysis
+above uses the Weil polynomial `T⁴ + a₂T² + p²` of the product abelian surface
+`E × E^t`.  A deeper arithmetic fact about these polynomials was discovered
+during the CM-73 audit:
+
+> **Theorem (biquadratic Weil polynomial, universal order-2 Frobenius).**
+> Let `p` be any prime, `a₂` any integer with `|a₂| < 2p` and `p ∤ a₂`.
+> Set `D = a₂² − 4p²`, write `D = sf · m²` with `sf` squarefree.
+> Let `K = Q(√sf)` and let `P` be a prime ideal of `O_K` above `p`.
+> Then `[P]² = 1` in `Cl(K)`.
+>
+> *Proof.* Set `β = (−a₂ + m√sf)/2`.  Then β satisfies `x² + a₂x + p² = 0`
+> (monic, integer coefficients), so β ∈ `O_K` and `N_{K/Q}(β) = p²`.
+> The ideal `(β)` therefore has norm `p²` in `O_K`.  Since `p ∤ a₂`, one
+> checks β/p ∉ `O_K` (otherwise p | a₂ and p | m), so `(β) ≠ (p)O_K`.
+> The only norm-`p²` ideals other than `(p)O_K` are `P²` and `P̄²`,
+> proving `(β) = P²` (or `P̄²`) and hence `[P]² = 1`. □
+>
+> **Lemma (sf is always a QR mod p).** With the same notation,
+> `D ≡ a₂² (mod p)`, so `sf · m² ≡ a₂²`, giving `sf ≡ (a₂/m)² (mod p)`.
+> Thus `Legendre(sf, p) ∈ {0, 1}`: `p` *never inerts* in `K`.
+> This confirms the proof's consistency (no inert-prime paradox).
+
+The theorem is completely general: it holds for every prime `p` and every
+valid Weil coefficient `a₂`.  Numerical verification: all 25 secp256k1
+norm-form primes k ≤ 199 (Thread 15), then all 156 (p, a₂) pairs over
+non-norm-form primes p ≤ 200 (Thread 16), with class numbers h ranging
+from 1 to 112 — all confirmed `[P]² = 1`.  Scripts:
+`secp256k1_cm_audit/thread15_order2_algebraic.gp`,
+`secp256k1_cm_audit/thread16_general_biquadratic.gp`.
+
+*Relevance to B5.*  The B5 argument uses Honda–Tate at the level of
+isogeny classes (same char. poly.).  The theorem above is finer: it shows
+that the Frobenius *ideal* `P` in the CM field always has 2-power order,
+reflecting that `E × E^t` has Weil polynomial of the specific form
+`T⁴ + a₂T² + p²`.  This is a structural constraint on all product abelian
+surfaces of this type, not just secp256k1.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic

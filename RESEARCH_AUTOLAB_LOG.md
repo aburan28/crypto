@@ -5428,3 +5428,81 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (proposed in Thread 15): extend the universal order-2 Frobenius Theorem to
+non-norm-form primes. Thread 15 proved the result algebraically for secp256k1's norm-form
+family; the proof uses only general properties of biquadratic Weil polynomials, so the
+extension is natural and verifiable numerically.
+
+### Work done
+- Installed PARI/GP (not present at session start; installed via apt-get --fix-missing).
+- Wrote `secp256k1_cm_audit/thread16_general_biquadratic.gp` (~180 lines):
+  - Collected 10 non-norm-form primes p ∈ {7,11,13,17,23,29,31,41,43,47}.
+  - For each prime, tested 4 a₂ values: {2, -2, ⌊p/3⌋+1, -(⌊p/3⌋+1)}.
+  - Verified: (a) D = a₂²-4p² = sf·m² with sf squarefree, (b) sf is a QR mod p
+    (kronecker(sf,p) ≠ -1), (c) (β)=P² in O_K via idealhnf, (d) [P]²=1 via
+    bnfisprincipal, (e) Lemma 1 sweep over all non-norm-form p ≤ 200.
+- Wide sweep: all non-norm-form primes p ≤ 200, 4 a₂ values each (156 total pairs).
+- Lemma 1 sweep: all (p,a₂) with p ≤ 200, 1 ≤ a₂ < p/2, p non-norm-form.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Updated `PAPER_STRUCTURAL_COMPLETENESS.md`: added "Remark (Universal order-2 Frobenius
+  — Threads 15–16)" in §B5, including full theorem statement, proof sketch, Lemma 1,
+  and reference to scripts.
+
+### Findings
+
+**THEOREM (Thread 16 — generality confirmed):**
+For ANY prime p and ANY integer a₂ with |a₂| < 2p and p ∤ a₂, the prime ideal P
+above p in K = Q(√sf(a₂²-4p²)) satisfies [P]² = 1 in Cl(K).
+
+Proof summary (Thread 15 proof, now confirmed as general):
+β = (-a₂+m√sf)/2 satisfies x²+a₂x+p²=0 (algebraic integer), N(β)=p²,
+β/p ∉ O_K (since p ∤ a₂), so (β)=P² or P̄², hence [P]²=1. □
+
+**LEMMA 1 (new, proved here):**
+sf(a₂²-4p²) ≡ (a₂/m)² (mod p). Therefore Legendre(sf,p) ∈ {0,1}: p never
+inerts in Q(√sf) for this choice of sf. The theorem is self-consistent because
+there always exists a degree-1 prime P above p.
+
+**Numerical results — wide sweep (156 pairs, all non-norm-form p ≤ 200):**
+- 156/156 passed all 5 checks.
+- nP = 2 in EVERY case (p always splits): consistent with Lemma 1.
+- Class numbers h encountered: 1 to 112 (e.g. p=193, a₂=65, sf=-144771, h=112).
+- ord([P]) is always 1 (when h=1) or 2: no [P] of higher order found.
+- Lemma 1 sweep: zero counterexamples for all (p,a₂) with p ≤ 200, 1 ≤ a₂ < p/2.
+
+Selected notable cases:
+| p   | a₂  | sf       | m   | h   | (β)=P²? | [P]²=1? |
+|-----|-----|----------|-----|-----|---------|---------|
+| 7   | 3   | -187     | 1   | 2   | YES     | YES (ord 2)|
+| 43  | 15  | -7171    | 1   | 20  | YES     | YES (ord 2)|
+| 127 | 2   | -7       | 96  | 1   | YES     | YES (ord 1)|
+| 163 | 55  | -103251  | 1   | 64  | YES     | YES (ord 2)|
+| 193 | 65  | -144771  | 1   | 112 | YES     | YES (ord 2)|
+
+### Next step proposal
+Thread 17: The Theorem is now established universally. Two natural follow-ups:
+
+(a) **Ramification case:** When p | sf (i.e. p ramifies in K), [P]²=1 trivially
+    since (p) = P² and P is ramified. The script always found p split (kron=1),
+    never kron=0. Is this because the a₂ choices avoid ramification? Investigate:
+    for which (p, a₂) does p | sf(a₂²-4p²)? Answer: p | D = a₂²-4p², so p | a₂².
+    Since p ∤ a₂, we have p ∤ a₂², so p ∤ D, hence p ∤ sf. Ramification NEVER
+    occurs for p ∤ a₂. This is another structural lemma (Lemma 2): can add to paper.
+
+(b) **Positive D:** The Theorem statement assumed D < 0 (|a₂| < 2p). What about
+    D > 0 (a₂ > 2p is hypothetically possible over larger base fields or as a
+    degenerate case)? In that case the biquadratic Weil polynomial is no longer
+    a valid Weil polynomial for an abelian surface over F_p. But the algebraic
+    proof (A)-(E) still holds for D > 0 as long as sf·m² = D and p ∤ a₂. Verify.
+
+(c) **Paper integration:** ePrint draft `paper/eprint_combined.tex` should also
+    get the Theorem. Check if it has a §B5 equivalent and add the remark there too.
+
+### Commits made
+[pending — see below]
