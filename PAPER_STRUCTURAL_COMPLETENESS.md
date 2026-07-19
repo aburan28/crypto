@@ -270,6 +270,31 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark B5.1 (Order-2 structure of Frobenius ideals for biquadratic Weil polynomials).**
+Let p be any prime and a₂ any integer with p ∤ a₂ and D = a₂² − 4p² = sf·m²
+(sf squarefree negative, m ≥ 1). Let K = Q(√sf) and P a prime of O_K above p. Then:
+
+> **Theorem.** [P]² = 1 in Cl(K).
+
+*Proof sketch.* The element β = (−a₂ + m√sf)/2 ∈ O_K satisfies x²+a₂x+p² = 0
+(monic, integral coefficients), so N_{K/Q}(β) = p². The only O_K-ideals of norm p² are
+P², P̄², and (p). Since p ∤ a₂ implies β/p ∉ O_K^×, we have (β) ≠ (p). Hence
+(β) = P² or P̄², so [P]² = 1. □
+
+*Relevance to B5.* The Weil polynomial T⁴+a₂T²+p² is the characteristic polynomial of
+Frobenius for an abelian surface A/F_p isogenous to E × E^σ over F̄_p. Remark B5.1 shows
+the Frobenius ideal in K = Q(√sf) always squares to a principal ideal — a structural
+property independent of the specific curve or prime. This constrains which ideal classes
+can appear as Frobenius in any genus-2 cover of E, providing an obstruction to
+isogeny-graph navigation that is intrinsic to the arithmetic of K.
+
+*Verification.* Proved algebraically in `secp256k1_cm_audit/thread15_order2_algebraic.gp`
+for all 25 secp256k1 norm-form primes k ≤ 199. Extended to non-norm-form primes in
+`secp256k1_cm_audit/thread16_nonorm_generalize.gp`: verified for 20 arbitrary primes
+p ∈ {103, 199, …, 50021} (via actual genus-2 curves y² = x⁶+b₄x⁴+b₂x²+b₀ and via
+purely algebraic (p, a₂) pairs), confirming the theorem holds universally, not only
+for the secp256k1 norm-form family.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
