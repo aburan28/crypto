@@ -5428,3 +5428,92 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: verify the universal order-2 Frobenius theorem (proved in Thread 15 for the
+secp256k1 norm-form family) holds for arbitrary non-norm-form primes and arbitrary
+biquadratic Weil polynomials T^4 + a2*T^2 + p^2. This was the explicit next-step
+proposal from Thread 15 and is logically prior to any paper integration.
+
+### Work done
+- PARI/GP is not installed in this environment; implemented the full verification in
+  pure Python (`secp256k1_cm_audit/thread16_general_biquadratic.py`, ~240 lines).
+- Implemented: squarefree decomposition, quadratic field discriminant, class number
+  enumeration via reduced binary quadratic forms (Cohen §5.2.1), reduced form algorithm
+  with correct normalisation (fixed b=-a edge case that was missing in naive implementations),
+  Kronecker symbol, ambiguous-form check for 2-torsion detection.
+- Ran three experiments (30 cases total):
+  - Exp1: 10 non-norm-form primes p ∈ [101,167], a2 = 2p-t^2 (Weil coeff of E×E^t)
+  - Exp2: 10 non-norm-form primes p ∈ [101,163], generic a2 ∈ (-2p,2p)
+  - Exp3: 10 larger non-norm-form primes p ∈ [503,571], various a2
+- Discovered and fixed a bug in reduce_form: the formula k=(b+a)//(2a) gives k=0 for
+  b=-a (so the form stays non-reduced); correct formula uses Python's natural modulo:
+  b = ((b-1+a) % (2a)) - (a-1), which maps b=-a → b=+a correctly.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Integrated the Theorem into PAPER_STRUCTURAL_COMPLETENESS.md §B5 as a new Remark.
+
+### Findings
+
+**ALL 30 CASES PASSED. [P]^2 = 1 in all experiments.**
+
+Summary by experiment:
+
+| Exp | Description            | Cases | Pass | Fail | h range   | form types     |
+|-----|------------------------|-------|------|------|-----------|----------------|
+| 1   | a2=2p-t^2 (E×E^t)      |  10   |  10  |   0  | 1–8       | all [1,1,c]    |
+| 2   | generic a2, p<200      |  10   |  10  |   0  | 12–136    | b=0, b=a, a=c  |
+| 3   | larger p (500–600)     |  10   |  10  |   0  | 20–560    | b=0, b=a, a=c  |
+
+Key observations:
+
+1. **Exp1 (E×E^t) always gives P principal**: all reduced forms are [1,1,(1-d)/4] =
+   principal form in Cl(K). For p=101, t=3: γ=(1+ω) with ω=(1+√-395)/2 satisfies
+   N(γ)=101, P=(γ), and β=γ^2 ∈ O_K — so P is principal (not just P^2).
+   **Conjecture (Thread 16b)**: for a2=2p-t^2 with |t|<2√p, the prime P above p in
+   Q(√(core(t^2-4p))) is always principal, not merely order ≤ 2.
+
+2. **Exp2/3 (generic a2) give genuinely 2-torsion P**: forms like [107,40,107] (a=c),
+   [6,6,35] (b=a), [7,0,38] (b=0) confirm [P] has order EXACTLY 2 in Cl(K), i.e.,
+   P is NOT principal but P^2 is. This is the "interesting" case where the theorem
+   provides a non-trivial fact. Example: p=107, a2=40, sf=-11049, h=104, [P]=[107,40,107]
+   has order 2 in Cl(-44196). P^2 is principal (proven by β=(-40+2√-11049)/2 ∈ O_K
+   with N(β)=107^2 and 107∤40). ✓
+
+3. **Class numbers span a wide range** (h=1 to h=560), confirming the theorem holds
+   in high-class-number fields where the result is non-trivial.
+
+4. **Independent verification method**: the ambiguous-form check (b=0, b=a, or a=c in
+   reduced form) is INDEPENDENT of the algebraic proof (conditions A-E of Thread 15).
+   Both methods agree on all 30 cases: [P] is ambiguous iff [P]^2=1 in Cl(K). ✓
+
+5. **Paper §B5 Remark**: integrated as "Universal order-2 Frobenius ideal (Threads 15-16)":
+   confirms the 2-torsion structure of Frobenius ideals for all biquadratic Weil polys
+   and notes this reinforces (not undermines) the B5 DLP-cost argument.
+
+### Next step proposal
+Thread 17 (Thread 16b conjecture): Prove that for a2=2p-t^2 and P above p in K=Q(√sf),
+P is actually PRINCIPAL (not just order ≤ 2). The observation is that β=(-a2+m√sf)/2
+can be written as γ^2 for some γ ∈ O_K with N(γ)=p (when a2=2p-t^2). This would follow
+from an explicit formula: γ = (t + m_inner*√sf_inner) / 2 where sf_inner=core(t^2-4p) and
+m_inner = sqrt(|t^2-4p|/sf_inner). Verify: N(γ) = (t^2 - m_inner^2*sf_inner)/4
+= (t^2 - (t^2-4p))/4 = p. ✓ And γ ∈ O_K iff (t^2 - m_inner^2*sf_inner)/4 ∈ Z
+iff 4 | t^2 - (t^2-4p) = 4p. ✓ (always true). So γ = (t + m_inner*√sf_inner)/2 ∈ O_K
+always and N(γ) = p! Thread 17 should:
+  (a) Verify γ^2 = β explicitly: γ^2 = (t^2 + 2t*m_inner*√sf_inner + m_inner^2*sf_inner)/4
+      = (t^2 + m_inner^2*sf_inner + 2t*m_inner*√sf_inner)/4
+      = ((t^2 + t^2-4p) + 2t*m_inner*√sf_inner)/4 ... hmm, needs sf_inner = sf?
+  (b) Check: is sf_inner = sf (squarefree part of t^2(t^2-4p) = squarefree part of t^2-4p
+      when t is squarefree itself)? Not in general.
+  (c) Identify exactly when γ^2 = β and when the factorisation breaks down.
+  Concrete experiment: for p=101, t=3, γ=(3+√-395)/2. γ^2=(9+6√-395-395)/4=(-386+6√-395)/4
+  = (-193+3√-395)/2 = β. ✓ So sf=-395 = core(9-404) = core(-395) = -395. And sf_inner
+  = core(t^2-4p) = core(9-404)=core(-395) = -395 = sf. So sf=sf_inner when t itself is
+  squarefree (or more precisely, when squarefree_part(t^2*(t^2-4p)) = squarefree_part(t^2-4p)).
+  This holds whenever t and (t^2-4p) have no common odd prime factors (which was true for
+  all Exp1 cases). Generalise: Thread 17 should prove P is principal via γ whenever
+  gcd(t, core(t^2-4p)) = 1 (i.e., t and the squarefree part of t^2-4p are coprime).
+
+### Commits made
+(see commit hash below after push)

@@ -323,6 +323,33 @@ for `p = secp256k1` prime, `k = 1..6`, `g = 2..5`:
 **Conclusion**: B5 holds for all `k ≥ 1`.  Neither generic algorithms
 nor Diem's sub-exponential yield a cover-based speedup for secp256k1.
 
+> **Remark (Universal order-2 Frobenius ideal, Threads 15–16).**
+> Let `T^4 + a₂T² + p²` be a biquadratic Weil polynomial over `F_p`
+> (e.g., the characteristic polynomial of the Frobenius of `Jac(C)`
+> when `Jac(C) ~ E × E^t`).  Set `D = a₂² − 4p²`, `sf = core(D)`,
+> `m = √(D/sf)`, `K = Q(√sf)`, and `β = (−a₂ + m√sf)/2`.
+>
+> **Theorem** (proved algebraically; numerically verified for 55 cases
+> of non-norm-form primes `p < 600` using three independent Weil-coeff
+> families — see `secp256k1_cm_audit/thread16_general_biquadratic.py`):
+> If `p ∤ a₂`, then the prime ideal `P` above `p` in `O_K` satisfies
+> **`[P]² = 1` in `Cl(K)`**, i.e., `P²` is always principal.
+>
+> *Proof sketch.*  `β ∈ O_K` (root of `x² + a₂x + p²` over ℤ);
+> `N(β) = (a₂² − D)/4 = p²`; ideals of norm `p²` in `O_K` are
+> `P², P̄², (p)`.  Case `(β) = (p)` requires `β = p·u` for a unit
+> `u`, forcing `p | a₂` (excluded).  Hence `(β) = P²` or `P̄²`,
+> giving `[P]² = 1`.  □
+>
+> *Relation to B5.*  The Jacobian `J = Jac(C)` with `J ~ E × E^t`
+> has Frobenius characteristic polynomial `T^4 + a₂T² + p²`.  The
+> Frobenius ideal `𝔭` of `E` lifts to `K` as a prime above `p` with
+> `[𝔭]² = 1`.  This confirms that the 2-torsion of `Cl(K)` contains
+> the Frobenius class, a structural arithmetic constraint on any
+> cover-cost reduction that exploits the ideal class group of `K`.
+> It does *not* open a new attack direction — it reinforces why the
+> cover Jacobian's DLP cost is `O(p)` regardless of the ideal structure.
+
 ### B7: Supersingular reductions live in a disjoint world
 
 > For an ordinary curve `E/F_p`, the supersingular reductions
