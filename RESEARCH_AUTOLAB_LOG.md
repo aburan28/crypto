@@ -5428,3 +5428,109 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (proposed by Thread 15 next-step): verify the order-2 Frobenius theorem
+beyond the norm-form family. Thread 15 proved algebraically that [P]²=1 in Cl(Q(√sf))
+for norm-form primes; the proof uses only the biquadratic form, so it should hold generally.
+Thread 15 was from 2026-07-17 (2 days ago); this is a direct continuation with measurable progress.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_general_order2.gp` (~170 lines).
+- For 10 non-norm-form primes p ∈ {23,29,41,43,53,59,61,67,71,73} and 3 curves each:
+  - Computed t_E = ellap(y²=x³+ax+b, p) for (a,b) ∈ {(1,1),(2,3),(3,7)}.
+  - Set a₂ = 2p-t_E² (Weil polynomial of A = E × E').
+  - Ran full verify_order2(p, a2) check: N(β)=p², p∤a₂, (β)=P², [P]²=1.
+- Extension: 5 larger primes {1009,1013,1019,1021,1031} (one supersingular skip).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**PRIMARY RESULT — 27/27 non-norm-form cases PASS; 4/4 large-prime cases PASS:**
+
+| p   | curve             | t_E | a2   | sf      | h  | [P]²=1? | [P]=1? |
+|-----|-------------------|-----|------|---------|-----|---------|--------|
+| 23  | x³+x+1           | -4  | 30   | -19     | 1   | YES     | YES    |
+| 29  | x³+x+1           | -6  | 22   | -5      | 2   | YES     | YES    |
+| 29  | x³+2x+3          | -6  | 22   | -5      | 2   | YES     | YES    |
+| 29  | x³+3x+7          | -2  | 54   | -7      | 1   | YES     | YES    |
+| 41  | x³+x+1           | 7   | 33   | -115    | 2   | YES     | YES    |
+| 41  | x³+2x+3          | 6   | 46   | -2      | 1   | YES     | YES    |
+| 41  | x³+3x+7          | -5  | 57   | -139    | 3   | YES     | YES    |
+| 43  | x³+x+1           | 10  | -14  | -2      | 1   | YES     | YES    |
+| 43  | x³+2x+3          | -2  | 82   | -42     | 4   | YES     | YES    |
+| 43  | x³+3x+7          | 4   | 70   | -39     | 4   | YES     | YES    |
+| 53  | x³+x+1           | -4  | 90   | -1      | 1   | YES     | YES    |
+| 53  | x³+2x+3          | -10 | 6    | -7      | 1   | YES     | YES    |
+| 59  | x³+x+1           | -3  | 109  | -227    | 5   | YES     | YES    |
+| 59  | x³+2x+3          | -12 | -26  | -23     | 3   | YES     | YES    |
+| 61  | x³+x+1           | 12  | -22  | -1      | 1   | YES     | YES    |
+| 61  | x³+2x+3          | -6  | 86   | -13     | 2   | YES     | YES    |
+| 61  | x³+3x+7          | 4   | 106  | -57     | 4   | YES     | YES    |
+| 67  | x³+x+1           | 12  | -10  | -31     | 3   | YES     | YES    |
+| 67  | x³+2x+3          | 12  | -10  | -31     | 3   | YES     | YES    |
+| 67  | x³+3x+7          | -4  | 118  | -7      | 1   | YES     | YES    |
+| 71  | x³+x+1           | 13  | -27  | -115    | 2   | YES     | YES    |
+| 71  | x³+2x+3          | -16 | -114 | -7      | 1   | YES     | YES    |
+| 71  | x³+3x+7          | 12  | -2   | -35     | 2   | YES     | YES    |
+| 73  | x³+x+1           | 2   | 142  | -2      | 1   | YES     | YES    |
+| 73  | x³+2x+3          | 4   | 130  | -69     | 8   | YES     | YES    |
+| 73  | x³+3x+7          | 10  | 46   | -3      | 1   | YES     | YES    |
+| ... | (2 supersingular skips: t=0 → D=0) |   |      |         |     |         |        |
+| 1009| x³+x+1           | -24 | 1442 | -865    | 16  | YES     | YES    |
+| 1013| x³+x+1           | 48  | -278 | -437    | 20  | YES     | YES    |
+| 1019| x³+x+1           | -32 | 1014 | -763    | 4   | YES     | YES    |
+| 1021| x³+x+1           | -20 | 1642 | -921    | 20  | YES     | YES    |
+
+**CRITICAL OBSERVATION: P is PRINCIPAL in ALL 31 tested cases** (not merely [P]²=1).
+This is STRONGER than the theorem requires, and has a clean algebraic explanation:
+
+**THEOREM (Thread 16 — P principal for product surfaces):**
+For ordinary E/F_p with trace t (p∤t), the element
+  π_E = (t + √(t²-4p))/2 ∈ O_{Q(√sf)}  (sf = squarefree_part(t²-4p))
+satisfies N(π_E) = p. So (π_E) IS the prime P above p, and P is principal. □
+
+PROOF: π_E satisfies x²-tx+p = 0, so N(π_E) = p directly. ✓
+
+COROLLARY: For A = E × E' (product abelian surface, ordinary E), the prime P above p
+in Q(√sf(a₂²-4p²)) is ALWAYS PRINCIPAL. Hence [P]²=1 is trivially satisfied.
+
+**KEY DICHOTOMY:**
+- Non-norm-form primes (product surfaces): P = (π_E) is PRINCIPAL → [P]²=1 is trivial.
+- Norm-form primes (hyperelliptic Jacobians, Threads 11-15): P is NON-PRINCIPAL of
+  order exactly 2 in Cl(Q(√-219)) → [P]²=1 is NON-TRIVIAL.
+
+The norm-form Jacobian Jac(y²=x^6+(g+g^2)x^3+g^3) is an abelian surface that is
+NOT a product E×E'; its Weil polynomial arises from a genuine genus-2 CM structure.
+The Frobenius does not factor as π_E for any elliptic curve over F_p, so the argument
+"P=(π_E) is principal" does not apply. The ideal class [P] is genuinely order-2.
+
+IMPLICATION FOR THE PAPER: The "universal order-2 Frobenius" theorem from Thread 15
+is INTERESTING precisely because it handles non-split Jacobians (norm-form family)
+where P is non-principal. For split Jacobians (product surfaces), the result is trivial.
+This contrast should be stated clearly in §B5.
+
+**Full PARI output (representative lines):**
+```
+p=59 x³+x+1 t_E=-3  a2=109  sf=-227  m=3  h=5  N(b)=p^2:Y  (b)=P^2:Y  [P]^2=1:1(P princ)
+p=73 x³+2x+3 t_E=4   a2=130  sf=-69   m=8  h=8  N(b)=p^2:Y  (b)=P^2:Y  [P]^2=1:1(P princ)
+p=1013 x³+x+1 t=48  a2=-278  sf=-437  m=96 h=20 N(b)=p^2:Y  (b)=P^2:Y  [P]^2=1:1(P princ)
+```
+
+### Next step proposal
+**Thread 17**: Find a non-norm-form prime p and a genus-2 hyperelliptic Jacobian
+(NOT a product surface) with biquadratic Weil poly T⁴+a₂T²+p² where [P] has order
+EXACTLY 2 in Cl(Q(√sf)).
+- Approach: use PARI's `hyperellcharpoly` on random curves y²=f(x) (degree 6);
+  check if the char. poly is biquadratic (a₁=a₃=0 coefficient) and [P] has order 2.
+- Expected: such Jacobians exist and correspond to abelian surfaces with genuine
+  (non-product) CM structure — the analog of the norm-form family but for different CM types.
+- Also: update PAPER_STRUCTURAL_COMPLETENESS.md §B5 with the product-vs-non-split
+  dichotomy and the Thread 16 corollary (product surfaces: P principal trivially).
+- Alternative: search for non-norm-form primes p where the Frobenius in the norm-form
+  hyperelliptic curve y²=g(x) (with a different g) gives [P] order 2.
+
+### Commits made
+[to be filled after commit]
