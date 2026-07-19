@@ -5500,4 +5500,4 @@ targets in B5 the splitting of p in the CM field is forced, giving a clean Corol
 B5 remark integrating the Frobenius ideal structure into the formal B5 proof.
 
 ### Commits made
-TBD (committed after log entry)
+`eb769f6` autolab 2026-07-19: Thread 16 — general biquadratic order-2; 60 non-norm-form pairs verified; B5 remark added
