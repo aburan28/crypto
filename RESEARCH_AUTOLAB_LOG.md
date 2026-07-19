@@ -5554,4 +5554,4 @@ Thread 18: Check whether the inertness-impossibility corollary in Proposition (i
 - Concrete task: WebSearch for "biquadratic Weil polynomial p splits CM field" and "abelian surface CM type inertness".
 
 ### Commits made
-TBD (commit follows)
+`b52a738` autolab 2026-07-19 run2: Thread 17 — Proposition in paper; 394 new cases
