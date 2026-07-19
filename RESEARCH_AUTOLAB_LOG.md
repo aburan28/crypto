@@ -5508,4 +5508,4 @@ Nonces") in the GLV remark of RESEARCH_GLV_HNP.md and connect to Thread 16:
   recovers d. This is the highest-priority UNBLOCKED thread.
 
 ### Commits made
-TBD (committed below)
+`b037a36` autolab 2026-07-19: Thread 16 — general order-2 Frobenius theorem; 50/50 non-norm-form primes PASS
