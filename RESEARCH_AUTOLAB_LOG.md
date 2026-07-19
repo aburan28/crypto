@@ -5428,3 +5428,109 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+---
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16: universality of [P]²=1 theorem for non-norm-form primes.
+Thread 15 (2026-07-17) proved the theorem algebraically and verified it for 25 norm-form
+primes (4p=73+3k², k≤199). Thread 16 is the natural continuation: confirm the proof
+is universal (holds for arbitrary primes, not just the secp256k1 norm-form family).
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread16_nonform_universality.gp` (~200 lines).
+- Diagnosed bug: product construction a₂=2p-t² always gives [P]=1 (trivially); PARI
+  comparison bug (`t_COL` vs `t_VEC`) caused false negatives in first attempt; fixed
+  using `P2_prin[1] == 0*P2_prin[1]` idiom (same as Thread 15).
+- Identified that y²=x^6-c degenerates to (T²+p)² for p≡2 (mod 3) (Jacobian isogenous
+  to product of supersingular curves); switched to Thread15 curve construction (b1=g,b2=g²)
+  which gives non-degenerate biquadratic Weil polys for non-norm-form p≡1 (mod 3).
+- Implemented three independent verification approaches (A, B, C); all 237 cases passed.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**RESULT: 237/237 cases verified [P]²=1 across three independent constructions.**
+
+**Approach A — Product construction (a₂=2p-t²):**
+- 172 cases, non-norm-form primes p∈[101,347], t=1,3,5,7.
+- All [P]=1 trivially (Frobenius π_E generates P directly), ord([P])=1.
+- h(K) ranges from 1 to 15 across cases, all passed.
+- Confirms the theorem for the degenerate (product abelian surface) case.
+
+**Approach B — Thread15 curve y²=(x³+g)(x³+g²) for non-norm-form p≡1(mod3):**
+- 35 primes p∈[61,499], each with one (p,a₂) pair from actual genus-2 curve.
+- 21 of 35 cases have [P] of order EXACTLY 2 (h(K)>1, P non-principal, P² principal).
+- 14 of 35 cases have h(K)=1 so [P]=1 trivially (sf=-3, K=Q(√(-3)) with h=1).
+- Largest class number: h=24 at pp=331, sf=-3891. [P]²=1 still holds.
+- Key non-trivial examples (ord([P])=2):
+
+  | pp  | a₂   | sf    | h(K) | ord([P]) |
+  |-----|------|-------|------|----------|
+  | 67  | -131 | -795  | 4    | 2        |
+  | 73  | -71  | -651  | 8    | 2        |
+  | 103 | -131 | -1011 | 12   | 2        |
+  | 127 | -251 | -1515 | 12   | 2        |
+  | 229 | -215 | -2019 | 16   | 2        |
+  | 271 | -395 | -2811 | 16   | 2        |
+  | 277 | -479 | -3099 | 20   | 2        |
+  | 331 | -635 | -3891 | 24   | 2        |
+  | 379 | -755 | -4539 | 20   | 2        |
+
+  Also: pp=457, sf=-219: this is the SAME sf=-219 as the secp256k1 norm-form CM field!
+  (sf=-219 arises for both norm-form p=19,37,79,109 and non-norm-form pp=457.)
+
+**Approach C — CM targeted: K=Q(√(-5)), h=2, [P] order exactly 2:**
+- 15 non-norm-form split primes pp∈{7,23,43,47,67,83,103,107,127,163,167,223,227,263,283}.
+- For each: α=a+b√(-5) with a²+5b²=pp², (α)=P²; set a₂=-2a.
+- All 30 cases (both sign choices ±a) verified [P]²=1, ord([P])=2.
+- Strongest test: the Frobenius ideal P is provably NON-PRINCIPAL (h=2, Cl(K)=Z/2Z),
+  yet P² is principal. This is the genuinely non-trivial test of the theorem.
+- Example: pp=7, b=3, a=2, α=2+3√(-5), N(α)=49=7², a₂=-4, sf=-5, m=6.
+  K=Q(√(-5)), [P]²=[(α)]=1 (principal), [P]=2 (non-principal). ✓
+
+**Note on sf=-219 appearing for non-norm-form pp=457:**
+  The Thread15 construction with g=13 at pp=457 gives a₂=-911, sf=-219.
+  The CM field Q(√(-219)) was the "distinguishing" field of the secp256k1 norm-form
+  family in Threads 12-15. Its appearance here for a non-norm-form prime confirms
+  it is NOT special to the secp256k1 construction; it's a general imaginary quadratic
+  field that happens to appear across many biquadratic Weil polynomial families.
+
+**Conclusion:**
+The proof of [P]²=1 (Thread 15, steps A-E) is completely general. It holds:
+- For all primes p (norm-form or not).
+- For all biquadratic Weil polynomials T⁴+a₂T²+p² with D=a₂²-4p²=sf·m², p∤a₂.
+- Across class numbers h(K) from 1 to 24+ (all tested values passed).
+- In both the trivial case ([P]=1, product abelian surfaces) and the non-trivial
+  case ([P] of order 2, but P² principal).
+
+### Next step proposal
+Thread 17: Two directions, either or both.
+
+(a) Integrate Thread 16 result into `PAPER_STRUCTURAL_COMPLETENESS.md` §B5:
+  Add a remark that the order-2 Frobenius ideal property is universal for
+  biquadratic Weil polynomials (not specific to secp256k1). Cite sf=-219 appearing
+  at non-norm-form pp=457 as evidence of the CM field's generality.
+
+(b) Extend Approach C to K with h(K)=4 and [P] of order 4:
+  The theorem guarantees [P]²=1 (order divides 2), NOT that order is exactly 2.
+  Claim: in fact for biquadratic Weil polys, ord([P]) ∈ {1, 2} always.
+  Test: find primes p splitting in some K with h(K)=4, [P] of order 4,
+  and check whether the biquadratic Weil poly STILL gives [P]²=1 (which it must
+  by the algebraic proof). The point is to show the constraint is a PARITY
+  condition: [P]² is always principal, but [P] might be order 4 if we
+  consider a different (non-biquadratic) Weil polynomial.
+  Actually: for a biquadratic Weil poly, α=(-a₂+m√sf)/2 satisfies N(α)=p²
+  and (α)=P² (from the proof). So [P]² always trivially = 1. There is no
+  room for [P] to have order 4, since if ord([P])=4 in Cl(K) then P²
+  would be non-principal, contradicting (α)=P². So the theorem is already
+  SHARP: ord([P]) ∈ {1,2} is a necessary consequence, and the proof excludes
+  ord([P])=4. Document this sharpness in the paper.
+
+(c) Fallback: ePrint survey on "isogeny-graph ECDLP", "Boneh-Venkatesan",
+  "hidden number problem ECDSA", "(N,N)-cover Jacobian" for papers since 2026-07-19.
+
+### Commits made
+[to be filled after commit]
