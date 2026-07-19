@@ -5428,3 +5428,83 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
 
 ### Commits made
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
+
+## 2026-07-19 (autolab run)
+
+### Task picked
+Thread 16 (priority: active continuation of Thread 15). Thread 15 (2026-07-17) proved
+algebraically that [P]² = 1 in Cl(Q(√sf)) for all 25 norm-form primes k ≤ 199; its
+next-step proposal was to verify that the theorem generalises to non-norm-form primes
+and to integrate the result into PAPER_STRUCTURAL_COMPLETENESS.md §B5.
+
+### Work done
+- PARI/GP unavailable (not installed; apt dependency failure on mesa package).
+- Discovered Sage is importable but has no `sage.all` namespace and no `sage` binary.
+- Implemented verification in pure Python (`thread16_general_order2.py`, ~220 lines):
+  - Miller-Rabin primality, squarefree-part decomposition, Kronecker symbol — no deps.
+  - Arithmetic checks for proof steps (A)–(D): N(β)=p², p∤a₂, p splits in K.
+  - Step (E) follows as a logical consequence (unique factorisation in Dedekind domains).
+- Ran script: all 10 non-norm-form primes passed in ~0.01s.
+- Added remark to PAPER_STRUCTURAL_COMPLETENESS.md §B5 (between numerical-verification
+  block and §B6) stating the generalised theorem with proof sketch and implication.
+- Verified `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**THEOREM (Thread 16 — general order-2 Frobenius):**
+For any prime p and any t with 0 < |t| < 2√p and p ∤ t, let a₂ = 2p − t²,
+D = t²(t²−4p) < 0, sf = squarefree part of D, K = Q(√sf). Then [P]² = 1 in Cl(K)
+where P is any prime of O_K above p.
+
+The algebraic proof (A)–(E) from Thread 15 uses ONLY:
+  (C) N(β) = p²  — arithmetic consequence of a₂² − D = 4p²
+  (D) p ∤ a₂ = 2p−t² ≡ −t² (mod p), and p ∤ t  — follows from Hasse bound + p∤t
+  (E) (β) has norm p², ≠ (p) ⟹ (β) = P² ⟹ [P]² = 1  — Dedekind domain theory
+
+None of these steps use the norm-form condition 4p = 73 + 3k². The theorem is
+a universal structural property of biquadratic Weil polynomials T⁴+a₂T²+p².
+
+**Numerical table (10 non-norm-form primes, all passed):**
+
+| label           | p    | t  | a₂   | sf     | m   | N(β)=p² | p∤a₂ | p↑K | [P]²=1 |
+|-----------------|------|----|------|--------|-----|---------|------|-----|--------|
+| p=101,t=3       |  101 |  3 |  193 |  -395  |   3 | YES     | yes  | YES | YES    |
+| p=127,t=5       |  127 |  5 |  229 |  -483  |   5 | YES     | yes  | YES | YES    |
+| p=157,t=7       |  157 |  7 |  265 |  -579  |   7 | YES     | yes  | YES | YES    |
+| p=199,t=9       |  199 |  9 |  317 |  -715  |   9 | YES     | yes  | YES | YES    |
+| p=251,t=4       |  251 |  4 |  486 |  -247  |   8 | YES     | yes  | YES | YES    |
+| p=307,t=11      |  307 | 11 |  493 |  -123  |  33 | YES     | yes  | YES | YES    |
+| p=401,t=6       |  401 |  6 |  766 |    -2  | 168 | YES     | yes  | YES | YES    |
+| p=503,t=13      |  503 | 13 |  837 | -1843  |  13 | YES     | yes  | YES | YES    |
+| p=601,t=10      |  601 | 10 | 1102 |    -1  | 480 | YES     | yes  | YES | YES    |
+| p=701,t=15      |  701 | 15 | 1177 | -2579  |  15 | YES     | yes  | YES | YES    |
+
+Notable cases:
+- p=601, t=10: sf=-1, K=Q(i) (Gaussian integers). [P]²=1 in the class group of Z[i]
+  (which has h=1, so every ideal is principal trivially — but the theorem still asserts
+  correctly that P² = (β) is principal).
+- p=401, t=6: sf=-2, K=Q(√-2), h=1 — same observation.
+- p=307, t=11: sf=-123 = -3·41, m=33. Class number of Q(√-123) is 2 — so [P] itself
+  may have order 2, and [P]²=1 is non-trivially meaningful (P is not principal).
+
+**Paper update:**
+Added remark to PAPER_STRUCTURAL_COMPLETENESS.md §B5 (after "Numerical verification
+(Exp U–Y)" block), titled "Remark (Threads 15–16 — Order-2 Frobenius ideal)."
+Remark includes: theorem statement, proof sketch (A)–(E), generality note (holds for
+any p, not just secp256k1 norm-form family), and B5 implication (no new attack surface).
+
+### Next step proposal
+Thread 17: Interesting non-trivial case — p=307, t=11, sf=-123, h(Q(√-123))=2.
+- [P] has order exactly 2 in Cl(Q(√-123)): verify P is NOT principal (i.e., [P]≠1),
+  hence [P]²=1 is the exact order. This confirms the theorem is tight (not trivially
+  satisfied by h=1 class groups).
+- Propose: implement a pure-Python discriminant-class-group via reduced binary quadratic
+  forms (Cohen §5.4) for imaginary quadratic fields with |disc| < 10^4. This would
+  replace the PARI bnfinit() calls and make Thread 15/16 fully self-contained in Python.
+- Also: integrate the general theorem into `paper/eprint_combined.tex` §6 (cover
+  complexity analysis), mirroring the PAPER_STRUCTURAL_COMPLETENESS.md update.
+- Alternative quick win: run the 10 test cases also with NEGATIVE traces (t → -t)
+  to confirm symmetry (sf and m are the same since D depends on t²).
+
+### Commits made
+`[to be filled after commit]`

@@ -270,6 +270,36 @@ following arithmetic obstruction.
   (12 cases; script `hesse_ll_obstruction_exp_y.py`).
 - `t mod ℓ = 2` and `#E^t mod ℓ = 4` in all cases, confirming the proof. ✓
 
+**Remark (Threads 15–16 — Order-2 Frobenius ideal; structural property of biquadratic Weil polynomials).**
+For any prime `p` and any elliptic curve `E/F_p` with trace `t` (satisfying
+`0 < |t| < 2√p` and `p ∤ t`), form the product Jacobian `J = E × E^t` with
+biquadratic Weil polynomial `T⁴ + a₂T² + p²`, where `a₂ = 2p − t²`.
+Let `D = a₂² − 4p² = t²(t² − 4p) < 0`, let `sf` be the squarefree part of `D`
+(so `D = sf · m²` for a positive integer `m`), and let `K = Q(√sf)`.
+The prime ideal `P` of `O_K` above `p` satisfies `[P]² = 1` in `Cl(K)`.
+
+*Proof.* Set `β = (−a₂ + m√sf)/2`.
+(A) `β` satisfies `x² + a₂x + p² = 0` (monic, `Z`-coefficients), so `β ∈ O_K`.
+(B) `β ∈ K` since `√D = m√sf`.
+(C) `N_{K/Q}(β) = (a₂² − m²sf)/4 = (a₂² − D)/4 = p²`.
+(D) `a₂ = 2p − t² ≡ −t² (mod p)`; since `p ∤ t`, we have `p ∤ a₂`,
+    so `(β) ≠ (p)` in `O_K`.
+(E) The only `O_K`-ideals of norm `p²` are `P²`, `P̄²`, and `(p) = PP̄`.
+    Since `(β) ≠ (p)`, we have `(β) = P²` or `P̄²`, hence `[P]² = 1`. □
+
+This theorem holds for *any* prime `p`, not only the secp256k1 norm-form family
+`4p = 73 + 3k²`.  The norm-form condition merely determines *which* imaginary
+quadratic field `K` and which class group element arise; the order-2 constraint
+on `[P]` is a universal consequence of the biquadratic Weil polynomial shape.
+Verified algebraically for 25 norm-form primes `k ≤ 199` and numerically for
+10 independent non-norm-form primes in the range `[101, 701]`
+(scripts `thread15_order2_algebraic.gp`, `thread16_general_order2.py`).
+
+*B5 implication.* The order-2 structure does not introduce any new attack surface
+on `E(F_p)`.  It is a statement about ideal classes in the CM field of `Jac(J)`,
+not about the discrete-logarithm problem on `E`.  In particular `#J(F_p) = p² − 1 ≈ p²`
+remains unchanged, and Gaudry's genus-2 DLP cost `O(p)` still exceeds `O(√p)`.
+
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
 > Diem's 2011 sub-exponential DLP algorithm for hyperelliptic
