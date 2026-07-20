@@ -5580,4 +5580,4 @@ Thread 18: GLV-HNP Phase 2 toy (Priority 5 from system prompt, never attempted).
   computational attack thread that's been pending since Priority 5 was opened.
 
 ### Commits made
-(to be filled after commit)
+`f07fc40` autolab 2026-07-20: Thread 17 — Proposition/Corollary for order-2 Frobenius in structural_completeness.tex; 10/10 split verification cases
