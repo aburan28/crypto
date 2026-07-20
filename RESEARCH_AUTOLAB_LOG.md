@@ -5573,4 +5573,4 @@ Recommend Thread 18 first (howe_gluing_test already has infrastructure) since it
 directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
-TBD (will be added after commit)
+`641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
