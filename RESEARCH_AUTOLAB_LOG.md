@@ -5555,4 +5555,4 @@ Thread 18: Check the inertness-impossibility corollary appears in the classical 
 - Also: Add a forward reference in the B5 Corollary (label `cor:b5-univ`, ~line 311) to the new Proposition~\ref{prop:order2-frobenius} so readers see the connection.
 
 ### Commits made
-PENDING — see below
+`64c2d1e` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius proposition into TeX paper; 101/101 cases verified
