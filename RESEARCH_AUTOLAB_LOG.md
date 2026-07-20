@@ -5561,4 +5561,4 @@ Thread 18: Clean up the pre-existing LaTeX errors in `paper/structural_completen
   * Edit `tests/lll_degeneracy_probe.rs` to try 80-bit GS target.
 
 ### Commits made
-`[see below]` autolab 2026-07-20: Thread 17 — p always splits; 408 pairs; Proposition added to LaTeX
+`56723f3` autolab 2026-07-20: Thread 17 — p always splits; 408 pairs; Proposition added to LaTeX
