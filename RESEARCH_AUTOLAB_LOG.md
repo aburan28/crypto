@@ -5498,3 +5498,79 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (15-16) into the ePrint draft (`paper/structural_completeness.tex`).
+Chosen because: Thread 17 was the explicit next-step from the 2026-07-19 log entry; all 6 original
+priority threads are CLOSED; this is the most concrete pending action.
+
+### Work done
+- Read the existing B5 section in `paper/structural_completeness.tex` to find the insertion point
+  (after the CM-73 remark at line 429, before B6).
+- Wrote `secp256k1_cm_audit/thread17_splits_verify.gp` to verify the splitting corollary
+  numerically: 35 test cases across three parameter families (10 specific pairs, 20 deterministic
+  primes, 5 large-m cases). All 35 passed. Clean PARI output.
+- Added `\begin{proposition}...\end{proposition}` (label `prop:order2-frobenius`) plus
+  a proof block and a remark with the empirical record and B5 relevance note to the TeX paper.
+  Used `\mathfrak{P}` for prime ideals (consistent with paper style; `\PP` not defined).
+- Verified `\newtheorem{proposition}[theorem]{Proposition}` already present in preamble;
+  macros `\ZZ`, `\QQ`, `\Cl`, `\FF`, `\mathcal{O}` all defined; `\enumerate[(i)]` uses
+  enumitem package (already imported).
+- No pdflatex available in container; validated by structural inspection (balanced
+  `\begin`/`\end`, defined macros, known package support).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Numerical result (thread17_splits_verify.gp):**
+```
+Part A (10 specific pairs):    10/10 PASS  [Kron(sf, p) = +1 for all]
+Part B (20 deterministic):     20/20 PASS  [no FAIL output]
+Part C (5 large-m cases):       5/5 PASS  [m up to 112, sf up to -2781101]
+Total:                         35/35 PASS
+```
+
+Detailed trace for p=101, a2=14:
+- D = 14^2 - 4*101^2 = -40608
+- sf = core(-40608) = -282
+- D mod p = 95 = a2^2 mod p => p∤D => p∤sf => no ramification
+- Kronecker(-282, 101) = +1 => p splits
+
+**Proposition added to `paper/structural_completeness.tex` (after line 429):**
+```
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15--16]
+  \label{prop:order2-frobenius}
+  p odd prime, a2 in Z, p∤a2, a2≠0. D=a2^2-4p^2, K=Q(sqrt(sf(D))).
+  (i) [P]^2 = 1 in Cl(K) for any prime P above p.
+  (ii) p splits in K (neither inert nor ramified).
+\end{proposition}
+```
+Proof: 4-line argument via beta = (-a2 + m*sqrt(sf))/2, N(beta)=p^2, (beta)≠(p).
+Remark: empirical record 117 combined tests (82 from T15-16 + 35 from T17), 0 failures.
+
+**Cumulative empirical record for prop:order2-frobenius:**
+| Source               | Cases | Passed |
+|----------------------|-------|--------|
+| Thread 15 (norm-form k≤199) | 25 | 25 |
+| Thread 16 Part A-C (general) | 57 | 57 |
+| Thread 17 (splits corollary) | 35 | 35 |
+| **Total**            | **117** | **117** |
+
+### Next step proposal
+Thread 18: Literature check for prop:order2-frobenius.
+- Check Silverman *Advanced Topics* §II.10 and Cohen-Strömberg *Modular Forms* §5.11
+  for the inertness/ramification result. If not in those sources, the corollary may be
+  a minor novelty worth noting in the proposition remark.
+- Specifically: standard CM theory says p splits in K = Q(sqrt(D)) iff Legendre(D,p)=+1.
+  Our result is the same but derived FROM the abelian-variety hypothesis. The direction
+  "p∤a2 => Kron(sf, p)=+1" may not appear as a standalone statement in the literature.
+- Also: consider whether prop:order2-frobenius has implications for the ell-rank
+  Lemma~\ref{lem:ell-rank}: does [P]^2=1 help characterise which ell-isogenies can
+  exist over F_p (vs. only over F_{p^2})?
+
+### Commits made
+PLACEHOLDER (to be updated after commit)

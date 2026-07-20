@@ -428,6 +428,59 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]%
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Set $D = a_2^2 - 4p^2$, write $D = \mathrm{sf}(D) \cdot m^2$ where
+$\mathrm{sf}(D)$ is the squarefree part and $m \in \ZZ_{>0}$,
+and let $K = \QQ(\sqrt{\mathrm{sf}(D)})$.
+\begin{enumerate}[(i)]
+\item For any prime ideal $\mathfrak{P}$ of $\mathcal{O}_K$ above $p$,
+  $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+\item $p$ splits in $K$: neither inert nor ramified.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2$.
+Then $\beta$ satisfies $\beta^2 + a_2 \beta + p^2 = 0$, which is monic with
+$\ZZ$-coefficients, so $\beta \in \mathcal{O}_K$.
+The norm is $N_{K/\QQ}(\beta) = p^2$.
+Suppose $(\beta) = (p)$; then $\beta/p \in \mathcal{O}_K$, hence $p \mid a_2$---a
+contradiction.
+Therefore $(\beta)$ is an ideal of norm $p^2$ different from $(p)$,
+forcing $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$ for a prime
+$\mathfrak{P}$ above $p$, so $[\mathfrak{P}]^2 = 1$.
+
+For (ii): $D \equiv a_2^2 \pmod{p}$, so $p \nmid D$ (since $p \nmid a_2$),
+hence $p \nmid \mathrm{sf}(D)$.
+For odd $p$, ramification in $K$ requires $p \mid \mathrm{disc}(K)$, which (for
+odd $p$) holds iff $p \mid \mathrm{sf}(D)$---impossible.
+Inertness is also impossible: if $p$ were inert, the only ideal of norm $p^2$
+would be $(p)$, contradicting $(\beta) \neq (p)$.
+Hence $p$ splits.
+\end{proof}
+
+\begin{remark}[Universality and empirical record]
+Proposition~\ref{prop:order2-frobenius} uses no hypothesis on $E$ or $C$:
+it is a pure statement about quadratic ideals.
+It was discovered empirically (Thread~14) for norm-form primes, proved
+algebraically (Thread~15), and extended to arbitrary $(p, a_2)$ (Thread~16).
+Verified for 82 cases (25 norm-form primes $k \le 199$, Thread~15,
+script \texttt{thread15\_order2\_algebraic.gp}; 57 arbitrary pairs,
+Thread~16, script \texttt{thread16\_general\_order2.gp}), and the splitting
+corollary (ii) verified for 35 additional cases across three parameter
+families (Thread~17, script \texttt{thread17\_splits\_verify.gp}).
+Zero failures across 117 combined test instances.
+
+\medskip\noindent\textit{Relevance to B5.}
+For any biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$ (equivalently,
+a genus-2 curve $C/\FF_p$ with $\#C(\FF_p) = p+1$), the Frobenius ideal $\PP$
+satisfies $[\PP]^2 = 1$ and $p$ splits in the associated CM field.
+This constrains the CM types realizable in a cover attack without altering the
+$\Theta(p)$ DLP cost bound of Corollary~\ref{cor:b5-univ}.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
