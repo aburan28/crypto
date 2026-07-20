@@ -5572,4 +5572,4 @@ which has been deferred since Priority 1 was closed. Now that all algebraic thre
 are nearing stabilization, a concrete computational experiment is high-value.
 
 ### Commits made
-(to be filled after commit)
+`9d82b74` autolab 2026-07-20: Thread 17 — port order-2 Frobenius theorem (Threads 15-16) to LaTeX draft
