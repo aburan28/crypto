@@ -428,6 +428,55 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal and splitting corollary]%
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Write $D = a_2^2 - 4p^2 \neq 0$, decompose $D = m^2 \cdot \mathrm{sf}(D)$ with
+$\mathrm{sf}(D)$ squarefree and $m \geq 1$, and let $K = \QQ(\sqrt{\mathrm{sf}(D)})$.
+Define $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2 \in \mathcal{O}_K$.  Then:
+\begin{enumerate}[label=(\roman*)]
+  \item $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ and $N_{K/\QQ}(\beta) = p^2$.
+  \item $(\beta) \neq (p)$ in $\mathcal{O}_K$, so $(\beta) = \mathfrak{P}^2$
+        for some prime ideal $\mathfrak{P}$ above $p$.
+        In particular $[\mathfrak{P}]^2 = 1$ in $\mathrm{Cl}(K)$:
+        $\mathfrak{P}$ is an \emph{order-$2$ element} (or principal).
+  \item $p$ \textbf{splits} in $K$\textup{:} $\left(\frac{\mathrm{sf}(D)}{p}\right) = +1$
+        (neither inert nor ramified).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) Direct computation: $\beta^2 + a_2\beta + p^2
+    = \tfrac{1}{4}(m^2 \cdot \mathrm{sf}(D) - a_2^2) + p^2
+    = \tfrac{D - a_2^2}{4} + p^2 = -p^2 + p^2 = 0$.
+And $N(\beta) = \beta\bar\beta = p^2$ (product of the two roots of $x^2+a_2 x+p^2$).
+
+(ii) If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K^\times$, so
+$\beta = p u$ for a unit $u$.  Comparing the rational part gives $-a_2/2 = p \cdot \Re(u)$.
+Since $\Re(u) \in \tfrac{1}{2}\ZZ$ (for any quadratic integer unit), this forces $p \mid a_2$,
+contradicting the hypothesis.  So $(\beta) \neq (p)$; since $N(\beta)=p^2$, every prime
+above $p$ divides $(\beta)$, and $(\beta)$ is a product of two such, giving
+$(\beta) = \mathfrak{P}^2$ (or $\bar{\mathfrak{P}}^2$).
+
+(iii) \emph{Ramification}: $p \mid \mathrm{sf}(D) \Leftrightarrow
+p \mid (a_2^2 - 4p^2) = a_2^2 \Leftrightarrow p \mid a_2$---excluded.
+So $p \nmid \mathrm{sf}(D)$, ruling out ramification.
+\emph{Inertness}: if $p$ were inert, the only ideal of norm $p^2$ is $(p)$,
+but $(\beta) \neq (p)$ by part (ii). Contradiction.
+Hence $p$ splits. \qed
+\end{proof}
+
+\begin{remark}
+This proposition is purely quadratic-ideal arithmetic; it uses no specific CM theory of
+the underlying abelian surface.  When $a_2$ is the middle coefficient of a biquadratic
+Weil polynomial $T^4 + a_2 T^2 + p^2$ (as arises for $\Jac(C)$ with $\#C(\FF_p)=p+1$),
+the Frobenius ideal $\mathfrak{P}$ in $\QQ(\sqrt{\mathrm{sf}(D)})$ always has order $\leq 2$
+in the class group.  Verified for 82 cases (Threads 15--16, scripts
+\texttt{thread15\_order2\_algebraic.gp}, \texttt{thread16\_general\_order2.gp}) and
+the splitting corollary numerically confirmed for 408 pairs $(p, a_2)$
+with $p \in [5, 541]$ (Thread 17, script \texttt{thread17\_p\_splits.gp}).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
