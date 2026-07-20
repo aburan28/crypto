@@ -5580,4 +5580,4 @@ Thread 19 (fallback if Thread 18 is trivial):
   Check whether ePrint 2025/705 is already cited anywhere in the paper.
 
 ### Commits made
-PLACEHOLDER — to be filled after commit
+`cf1adc5` autolab 2026-07-20: Thread 17 — add prop:univ-order2 to paper; Threads 15-16 theorem formalized in TeX
