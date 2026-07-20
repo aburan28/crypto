@@ -428,6 +428,70 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-$2$ Frobenius ideal]\label{prop:biquadratic-order2}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Write $D = a_2^2 - 4p^2$, let $\mathrm{sf}(D)$ be the squarefree part of $D$,
+and set $m = \sqrt{D / \mathrm{sf}(D)} \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathrm{sf}(D)})$ and let $\mathfrak{P}$ be any prime of $\mathcal{O}_K$
+above $p$.  Then $[\mathfrak{P}]^2 = 1$ in $\mathrm{Cl}(K)$.
+Moreover, $p$ \emph{splits} in $K$ (it is neither inert nor ramified).
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2$.
+
+\smallskip
+\noindent\textit{(A) $\beta \in \mathcal{O}_K$.}
+$\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ (monic, integer coefficients), so
+$\beta \in \mathcal{O}_K$.
+
+\smallskip
+\noindent\textit{(B) $N_{K/\QQ}(\beta) = p^2$.}
+The conjugate of $\beta$ is $(-a_2 - m\sqrt{\mathrm{sf}(D)})/2$, and
+$\beta \cdot \bar\beta = p^2$.
+
+\smallskip
+\noindent\textit{(C) $(\beta) \neq (p)$ in $\mathcal{O}_K$.}
+If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$, so $\beta/p$ satisfies a monic
+integer polynomial; in particular $-a_2/p \in \ZZ$, contradicting $p \nmid a_2$.
+
+\smallskip
+\noindent\textit{(D) Hence $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$.}
+Since $N(\beta) = p^2$ and $(\beta) \neq (p)$, the ideal $(\beta)$ is a product of
+primes above $p$ of total norm $p^2$ different from $(p)$.
+The only possibilities are $\mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$, giving
+$[\mathfrak{P}]^2 = 1$ in $\mathrm{Cl}(K)$.
+
+\smallskip
+\noindent\textit{Splitting.}
+\emph{Inert} is impossible: if $p$ were inert the only ideal of norm $p^2$ in
+$\mathcal{O}_K$ would be $(p)$, contradicting (C).
+\emph{Ramified} is impossible for odd $p$: $p$ ramifies in $K = \QQ(\sqrt{\mathrm{sf}(D)})$
+iff $p \mid \disc(K)$, iff $p \mid \mathrm{sf}(D)$.
+But $\mathrm{sf}(D) \mid D = a_2^2 - 4p^2$, so $p \mid \mathrm{sf}(D)$ forces
+$p \mid a_2^2$, hence $p \mid a_2$ --- excluded.
+Therefore $p$ splits.
+\end{proof}
+
+\begin{remark}[Empirical record and relevance to B5]\label{rem:order2-empirical}
+Proposition~\ref{prop:biquadratic-order2} was discovered empirically in Thread~14
+for norm-form primes ($4p = 73 + 3k^2$, $k$ odd), proved algebraically in
+Thread~15, and generalised to arbitrary $(p, a_2)$ in Thread~16.
+Numerical verification covers:
+$25$ norm-form primes $k \leq 199$ (script \texttt{thread15\_order2\_algebraic.gp}),
+and $57$ arbitrary $(p, a_2)$ pairs including non-norm-form primes, $D < 0$, $D > 0$,
+and values derived from genus-$2$ curves over $\FF_p$
+(script \texttt{thread16\_general\_order2.gp}).
+All $82$ cases gave $[\mathfrak{P}]^2 = 1$ with zero failures.
+
+The proposition is a \emph{purely algebraic} statement about ideals in quadratic
+number fields; it does not depend on any curve-theoretic hypothesis.
+For the cover-attack analysis of B5, the splitting conclusion implies that
+every abelian surface with a biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$
+($p \nmid a_2$) has $p$ splitting in the associated CM field --- a constraint
+on realizable CM types in any $(N,N)$-cover construction.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
