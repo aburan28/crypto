@@ -428,6 +428,55 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$,
+and $m = \sqrt{D/\mathit{sf}} \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathit{sf}})$ and let $\mathfrak{P}$ be any prime of $\mathcal{O}_K$ above $p$.
+Then
+\[
+  [\mathfrak{P}]^2 = 1 \quad \text{in } \operatorname{Cl}(K).
+\]
+Moreover, $p$ \emph{splits} in $K$ (neither inert nor ramified).
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.
+Then $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ (monic, integer coefficients),
+so $\beta \in \mathcal{O}_K$ and $N_{K/\QQ}(\beta) = p^2$.
+Since $p \nmid a_2$, the element $\beta/p = (-a_2/p) + (m/p)\sqrt{\mathit{sf}}/2$
+is not in $\mathcal{O}_K$, hence $(\beta) \neq (p)$.
+Because $(\beta)$ is an ideal of norm $p^2$ that is not the principal ideal $(p)$,
+it must equal $\mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+giving $[\mathfrak{P}]^2 = 1$.
+
+Inertness is impossible: the unique ideal of norm $p^2$ in the inert case is $(p)$,
+excluded above.
+Ramification is impossible for odd $p$: $p$ ramifies in $K$ iff $p \mid \disc(K)$,
+i.e.\ $p \mid \mathit{sf}$; but $D = \mathit{sf} \cdot m^2$, so $p \mid \mathit{sf}$
+would give $p \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, hence $p \mid a_2$
+--- excluded by hypothesis.  Therefore $p \nmid \mathit{sf}$ and $p$ does not ramify.
+Hence $p$ splits.
+\end{proof}
+
+\begin{remark}[Threads~15--16: empirical verification and scope]
+\label{rem:order2-empirical}
+This proposition is independent of any curve construction: it is a pure statement
+about ideals in quadratic fields.  It was discovered empirically in Thread~14 for
+norm-form primes ($4p = 73 + 3k^2$, $k$ odd) and proved and generalised in
+Threads~15--16 (scripts \texttt{thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp}).
+Verified for 82 pairs $(p, a_2)$ across norm-form primes ($k \le 199$),
+non-norm-form odd primes, $D < 0$ (imaginary quadratic $K$), $D > 0$ (real quadratic),
+and $a_2$ values from actual genus-2 curves over $\FF_p$: zero failures.
+\emph{Relevance to B5}: when a genus-2 Jacobian $J/\FF_p$ has biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$, Proposition~\ref{prop:order2-frobenius} constrains the ideal-theoretic
+CM type of the associated quadratic field $K$; it confirms that $p$ always splits in $K$,
+ruling out inert or ramified configurations and thereby constraining the family of
+cover attacks realizable over $\FF_p$.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
