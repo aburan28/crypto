@@ -5551,3 +5551,4 @@ All threads CLOSED/BLOCKED/DEAD END; no new paper-content thread is obvious.
   essentially guarantees), the sublattice exists but is still too large for subexp.
 
 ### Commits made
+`ffd4ee0` autolab 2026-07-20: Thread 17 — Proposition (biquadratic Weil splitting) added to paper §B5
