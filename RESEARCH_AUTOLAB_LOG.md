@@ -5552,4 +5552,4 @@ Then re-compile to confirm clean build (0 fatal errors). This unblocks a clean a
 After that, Thread 19: GLV-HNP Phase 2 toy — try the GLV-aware lattice attack on a 32-bit toy curve (Priority 5 from the main thread list; no recent work on it).
 
 ### Commits made
-[to be filled after commit]
+`12a31c2` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius proposition into ePrint draft
