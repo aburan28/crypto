@@ -5573,4 +5573,4 @@ Thread 18: Literature check for prop:order2-frobenius.
   exist over F_p (vs. only over F_{p^2})?
 
 ### Commits made
-PLACEHOLDER (to be updated after commit)
+`ea171cf` autolab 2026-07-20: Thread 17 — prop:order2-frobenius added to paper; 35/35 splits verified
