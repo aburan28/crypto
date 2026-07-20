@@ -5579,3 +5579,5 @@ Thread 18: re-examine the P-521 LLL NaN issue (Priority 1, untouched for many ru
   document this clearly and write a feature-flagged stub.
 
 ### Commits made
+
+`df799ff` autolab 2026-07-20: Thread 17 — Proposition prop:order2-frob added to LaTeX; 10/10 new pairs verified; 92/92 total
