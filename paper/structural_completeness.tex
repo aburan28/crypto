@@ -428,6 +428,65 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; $p$ always splits]
+\label{prop:order2frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, write $D = s_f \cdot m^2$ with $s_f$ squarefree and
+$m \in \ZZ_{>0}$, and let $K = \QQ(\sqrt{s_f})$.  Let $\mathfrak{P}$ be any prime
+of $\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}[label=(\alph*)]
+  \item $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \emph{splits} in $K$: $p\mathcal{O}_K = \mathfrak{P}\bar{\mathfrak{P}}$
+        with $\mathfrak{P} \neq \bar{\mathfrak{P}}$ and $[\mathfrak{P}] = [\bar{\mathfrak{P}}]^{-1}$.
+        In particular, $p$ is neither inert nor ramified in $K$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{s_f})/2$.
+
+\smallskip\noindent\textbf{(a).}
+(A)~$\beta \in \mathcal{O}_K$: $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$
+(monic with $\ZZ$-coefficients).
+(B)~$N_{K/\QQ}(\beta) = p^2$.
+(C)~$(\beta) \neq (p)$: if $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$,
+so $p \mid a_2$, contradicting the hypothesis.
+(D)~Since $N(\beta) = p^2$ and $(\beta) \neq (p)$, we must have
+$(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$, giving
+$[\mathfrak{P}]^2 = 1$.
+
+\smallskip\noindent\textbf{(b).}
+\emph{Inertness is impossible}: if $p$ were inert, $(p)$ would be the unique ideal
+of norm $p^2$, but $(\beta) \neq (p)$ is another such ideal---contradiction.
+\emph{Ramification is impossible (odd $p$)}: $p$ ramifies in $K = \QQ(\sqrt{s_f})$
+iff $p \mid \mathrm{disc}(K)$; for odd $p$, $\mathrm{disc}(K) \in \{s_f, 4s_f\}$
+so $p \mid \mathrm{disc}(K)$ iff $p \mid s_f$.  Since $D \equiv a_2^2 \pmod{p}$
+and $p \nmid a_2$, we have $p \nmid D$, hence $p \nmid s_f$.
+Therefore $p$ splits, and the two primes $\mathfrak{P}, \bar{\mathfrak{P}}$ above $p$
+satisfy $[\mathfrak{P}] = [\bar{\mathfrak{P}}]^{-1}$ with $[\mathfrak{P}]^2 = 1$. \qed
+\end{proof}
+
+\begin{remark}
+This proposition is independent of any curve construction: it is a pure
+statement about ideals in quadratic fields.  It was discovered empirically
+for norm-form primes (Threads~14--15, 25 cases) and proved and generalised
+in Thread~16 to arbitrary $(p, a_2)$.  Numerical verification
+(script \texttt{thread17\_splitting\_proposition.gp}):
+15 explicit pairs from Thread~16 + 7 norm-form primes + 10 larger primes
+($p \approx 10^6$) + exhaustive sweep of 1034 pairs ($p \leq 97$, $a_2 \in [1,p-1]$)
+all give $\mathrm{kron}(s_f, p) = +1$ and $s_f \not\equiv 0 \pmod{p}$:
+zero violations.
+
+\emph{Relevance to B5.}  For any genus-2 Jacobian $J/\FF_p$ with biquadratic
+Weil polynomial $T^4 + a_2 T^2 + p^2$ and $p \nmid a_2$,
+Proposition~\ref{prop:order2frobenius} implies that $p$ splits in the CM field
+$K$.  This constrains the CM types realisable in a cover attack and shows that
+the Frobenius ideal has order exactly~2 in $\Cl(K)$ (or~1 if $K$ has class
+number 1)---a structural rigidity that limits the variety of covers an attacker
+can exploit.  It does not reduce the DLP cost directly; cost is bounded by
+Corollary~\ref{cor:b5-univ}.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

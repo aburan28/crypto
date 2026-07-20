@@ -5498,3 +5498,79 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem from Threads 15–16 into the ePrint draft as a formal Proposition.
+Chosen because: the Thread 16 next-step explicitly proposed this; the Theorem exists in
+`PAPER_STRUCTURAL_COMPLETENESS.md` but was absent from `paper/structural_completeness.tex`.
+
+### Work done
+- Installed pari-gp (absent from fresh container, installed via apt --fix-missing).
+- Wrote `secp256k1_cm_audit/thread17_splitting_proposition.gp` (~100 lines).
+- Ran four verification parts: Part A (15 Thread-16 pairs), Part B (7 norm-form primes
+  with a2=2p-73), Part C (10 primes p~10^6), Part D (exhaustive sweep 1034 pairs p≤97).
+- Added `Proposition 5.1` (order-2 + splitting corollary) and `Proof` to
+  `paper/structural_completeness.tex`, inserted after the CM-73 remark (end of B5 block).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Checked LaTeX brace balance: 556 open = 556 close; all environments balanced.
+
+### Findings
+
+**Script output (gp -q thread17_splitting_proposition.gp):**
+
+| Part | Description                     | Pairs | Passed |
+|------|---------------------------------|-------|--------|
+| A    | Thread 16 explicit pairs        | 15    | 15     |
+| B    | Norm-form primes (a2=2p-73)     | 7     | 7      |
+| C    | Large primes (p ~ 10^6)         | 10    | 10     |
+| D    | Exhaustive sweep p≤97, a2∈[1,p) | 1034  | 1034   |
+
+**Part D details:**
+- 1034 pairs (p odd prime ≤97, a2 ∈ [1,p-1]).
+- Inert violations: 0 (confirmed: kron(sf,p) never -1 when p∤a2).
+- Ramification violations: 0 (confirmed: sf%p never 0 when p∤a2).
+
+**Proposition added to paper (lines ~430–490 of structural_completeness.tex):**
+
+```
+Proposition [Universal order-2 Frobenius ideal; p always splits]
+  Let p be an odd prime, a2 ∈ Z with p∤a2, a2≠0.
+  Set D = a2^2-4p^2, write D = sf*m^2 (sf squarefree), K = Q(sqrt(sf)),
+  P any prime of O_K above p. Then:
+  (a) [P]^2 = 1 in Cl(K).
+  (b) p splits in K (neither inert nor ramified).
+Proof: 4-step ideal argument (A)-(D) for (a); inertness/ramification ruled out for (b).
+```
+
+**Cumulative verification record (all threads):**
+
+| Thread | Cases | Passed | Result               |
+|--------|-------|--------|----------------------|
+| 14     | 25    | 25     | order-2 pattern disc. |
+| 15     | 25    | 25     | algebraic proof      |
+| 16     | 57    | 57     | generalized theorem  |
+| 17     | 1066  | 1066   | splitting corollary  |
+| **Total** | **1173** | **1173** | **zero violations** |
+
+### Next step proposal
+Thread 18: check whether Proposition 5.1 (splitting corollary) appears in the classical
+CM literature.  Likely candidates:
+- Silverman, *Advanced Topics in the Arithmetic of Elliptic Curves*, §II.10 (CM theory).
+- Cohen–Strömberg, *Modular Forms*, §5.11.
+- Neukirch, *Algebraic Number Theory*, Ch. I §8 (splitting in quadratic fields).
+Experiment: the statement "p splits in Q(sqrt(D)) whenever p∤D and D≡a^2 mod p for some a
+with p∤a" is standard algebraic number theory (quadratic reciprocity + Dedekind); it may
+be a corollary of standard Dedekind factorisation (Neukirch I.8.3). If so, add a citation
+to the Proposition rather than claiming novelty. If not found, the Corollary (inertness
+impossible, ramification impossible) is at minimum a clean application worth stating.
+
+Alternative Thread 18 option: Priority 5 (GLV-HNP toy) — implement the GLV-aware lattice
+attack on a 32-bit toy curve and verify key recovery. This has been pending since Thread 6.
+A toy run would take ~1h to implement and would produce a concrete empirical result.
+
+### Commits made
+TBD (committed after writing this entry)
