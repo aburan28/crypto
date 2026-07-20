@@ -5575,4 +5575,4 @@ Thread 18: literature cross-reference check.
 - Tertiary: run the paper through `make check` once pdflatex + pdfinfo are available.
 
 ### Commits made
-`TBD` autolab 2026-07-20: Thread 17 — Proposition (order-2 Frobenius) added to paper; 10+sweep PARI checks pass
+`a0be204` autolab 2026-07-20: Thread 17 — Proposition (order-2 Frobenius) added to paper; 10+sweep PARI checks pass
