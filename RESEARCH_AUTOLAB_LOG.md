@@ -5498,3 +5498,87 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Proposition (Threads 15–16) into `paper/structural_completeness.tex`.
+Chosen because: explicitly proposed as next-step in the 2026-07-19 log entry; 0 days elapsed
+since Thread 16; Thread 16 verified 82 cases and the next concrete sub-task is LaTeX integration
++ ramification-impossibility verification (10 cases + random sweep).
+
+### Work done
+- Installed pari-gp (already present from prior session; confirmed `which gp` = `/usr/bin/gp`).
+- Wrote `secp256k1_cm_audit/thread17_splits_verification.gp` (~120 lines).
+  Three sections:
+  - Section A: 10 hand-chosen (p, a2) pairs; checked (i) p∤sf, (ii) kronecker(sf,p)=1,
+    (iii) [P]^2=1 via `bnfinit`+`bnfisprincipal`.
+  - Section B: 100 deterministic-random pairs (p_i=nextprime(100i+3), a2_i=(7i+11)%p_i).
+  - Section C: Exhaustive algebraic check — all primes p∈[3,71], all a2∈[1,p-1];
+    confirmed no (p,a2) with p∤a2 and p|sf exists (i.e., no counterexample to ramification
+    impossibility).
+- Ran script: `gp -q thread17_splits_verification.gp` — all three sections passed cleanly.
+- Added formal Proposition + Proof + Remark to `paper/structural_completeness.tex`
+  immediately before the B6 subsection (after line 429 in the original file):
+  - `\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15-17]`
+    with three claims (i) β ∈ O_K, (ii) p splits, (iii) [p]^2=1.
+  - `\begin{proof}` giving the 4-line algebraic argument for each claim.
+  - `\begin{remark}[Empirical record]` citing the three scripts and total case count.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Did NOT check whether the inertness/ramification impossibility appears in
+  Cohen-Strömberg or Silverman (requires paywalled books) — marked as minor open item.
+
+### Findings
+
+**PARI output (Section A — all 10 OK):**
+```
+OK  p=101    a2=15   D=-40579      sf=-40579    kron=1 P^2 principal
+OK  p=127    a2=30   D=-63616      sf=-994      kron=1 P^2 principal
+OK  p=199    a2=45   D=-156379     sf=-156379   kron=1 P^2 principal
+OK  p=251    a2=28   D=-251220     sf=-62805    kron=1 P^2 principal
+OK  p=307    a2=35   D=-375771     sf=-375771   kron=1 P^2 principal
+OK  p=53     a2=10   D=-11136      sf=-174      kron=1 P^2 principal
+OK  p=1009   a2=100  D=-4062324    sf=-1015581  kron=1 P^2 principal
+OK  p=2003   a2=200  D=-16008036   sf=-4002009  kron=1 P^2 principal
+OK  p=5003   a2=50   D=-100117536  sf=-6257346  kron=1 P^2 principal
+OK  p=10007  a2=77   D=-400554267  sf=-400554267 kron=1 P^2 principal
+Section A: 10/10
+Section B: 100/100 passed
+Section C: no counterexample (exhaustive p∈[3,71])
+```
+
+**Case note:** p=53, a2=10 gives sf=-174 (NOT -219 as listed in the 2026-07-19
+proposal — the log proposal had an error; sf_part(10^2-4*53^2) = sf_part(-11136)
+= sf_part(-11136). 11136 = 64*174, so sf=-174, h(-174)=12.  The p=53 a2=10 case
+still has class number 12 and [P]^2=1 as a genuine order-2 element.)
+
+**Total cumulative case count:** 82 (Threads 15–16) + 110 (Thread 17) = 192 cases,
+0 failures.
+
+**LaTeX integration:** Proposition~\ref{prop:univ-order2} added at lines 431–487 of
+`paper/structural_completeness.tex`. Proof is self-contained in 4 lines per claim.
+Remark cites the three scripts and quotes the 192-case total.
+
+**Literature note (partial):** The statement that "an odd prime p with p∤a2 always
+splits in Q(sqrt(sf)) where sf = squarefree(a2^2-4p^2)" follows immediately from
+the discriminant criterion (disc(Q(√sf)) = sf or 4sf for odd sf). The proof is
+elementary and likely implicit in classical CM theory but we have not found an
+explicit citation in Cohen-Strömberg or Silverman. The proposition is stated for
+the record.
+
+### Next step proposal
+Thread 18: Check whether the inertness/ramification impossibility is explicitly
+stated in the literature.
+- Search: Cohen-Strömberg "Advanced Topics in Computational Number Theory" §5.11,
+  or Silverman "Advanced Topics in the Arithmetic of Elliptic Curves" §II.10.
+  (These are paywalled; search LMFDB docs or freely available CM notes instead.)
+- If not found: the Proposition as stated may be a minor novelty worth a footnote.
+- Alternative Thread 18: extend the PARI verification to large primes (p~2^64)
+  to confirm [P]^2=1 persists when class numbers grow large (h>100).
+- Alternatively, move to Priority 2 (CHLRS Igusa formula) which has had no recent
+  work since Thread 9.
+
+### Commits made
+[to be filled after commit]

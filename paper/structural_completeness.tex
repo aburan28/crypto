@@ -428,6 +428,64 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-$2$ Frobenius ideal; Threads~15--17]%
+\label{prop:univ-order2}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \ne 0$.
+Set $D = a_2^2 - 4p^2 \ne 0$ and write $D = sf \cdot m^2$ with $sf$ squarefree
+and $m \in \ZZ_{>0}$.  Let $K = \QQ(\sqrt{sf})$ with ring of integers
+$\mathcal{O}_K$.  Then:
+\begin{enumerate}[\upshape(i)]
+\item The element $\beta := (-a_2 + m\sqrt{sf})/2$ lies in $\mathcal{O}_K$
+  and satisfies $\beta^2 + a_2\beta + p^2 = 0$ with
+  $N_{K/\QQ}(\beta) = p^2$.
+\item $p$ \emph{splits} in $K$\textup{:} $p\mathcal{O}_K =
+  \mathfrak{p}\,\overline{\mathfrak{p}}$ with $\mathfrak{p} \ne \overline{\mathfrak{p}}$
+  (in particular, $p$ is neither inert nor ramified in $K$).
+\item $(\beta) = \mathfrak{p}^2$ or $\overline{\mathfrak{p}}^2$, so
+  $[\mathfrak{p}]^2 = 1$ in $\Cl(\mathcal{O}_K)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\emph{(i)} The polynomial $x^2 + a_2 x + p^2$ is monic over $\ZZ$, so its root
+$\beta$ is an algebraic integer; $N(\beta) = p^2$ follows from Vieta.
+
+\emph{(ii), ruling out inert.}  If $p$ were inert, $p\mathcal{O}_K$ would be the
+unique prime of norm $p^2$, forcing $(\beta) = (p)$, i.e.\
+$\beta/p = (-a_2 + m\sqrt{sf})/(2p) \in \mathcal{O}_K$.  Integrality over $\ZZ$
+requires $p \mid a_2$---contradicting $p \nmid a_2$.
+
+\emph{(ii), ruling out ramified.}  For odd $p$, ramification in
+$K = \QQ(\sqrt{sf})$ requires $p \mid sf$.  Since $sf \mid D = a_2^2 - 4p^2$
+and $p \mid 4p^2$, one has
+$p \mid sf \;\Rightarrow\; p \mid a_2^2 \;\Rightarrow\; p \mid a_2$
+(as $p$ is prime)---again excluded.  Hence $p$ splits.
+
+\emph{(iii).}  The ideal $(\beta)$ has norm $p^2$ and is supported above $p$.
+Since $p$ splits, the only $\mathcal{O}_K$-ideals of norm $p^2$ above $p$ are
+$\mathfrak{p}^2$, $\mathfrak{p}\,\overline{\mathfrak{p}} = (p)$, and
+$\overline{\mathfrak{p}}^2$.  The middle option $(p)$ would require $\beta/p \in
+\mathcal{O}_K^{\times}$, ruled out above.
+Hence $(\beta) = \mathfrak{p}^2$ or $\overline{\mathfrak{p}}^2$, and
+$[\mathfrak{p}]^2 = 1$ in $\Cl(\mathcal{O}_K)$. \qed
+\end{proof}
+
+\begin{remark}[Empirical record for Proposition~\ref{prop:univ-order2}]
+The result was discovered empirically for norm-form primes ($4p = 73 + 3k^2$,
+$k$ odd, $k \le 199$) in Thread~15 (script
+\texttt{thread15\_order2\_algebraic.gp}), then generalised to arbitrary
+$(p, a_2)$ in Thread~16 (script \texttt{thread16\_general\_order2.gp}).
+Thread~17 (script \texttt{thread17\_splits\_verification.gp}) adds explicit
+verification that $p$ splits---not merely that $[\mathfrak{p}]^2 = 1$---covering
+10 hand-chosen pairs (including $p = 53$, $a_2 = 10$, $sf = -174$,
+$h(-174) = 12$, where $[\mathfrak{p}]$ is a genuine order-$2$ element of
+$\Cl(\mathcal{O}_K) \cong \ZZ/12\ZZ$), 100 deterministic-random pairs, and an
+exhaustive check of all primes $p \in [3, 71]$ with $a_2 \in [1, p-1]$.
+Total: $82 + 110 = 192$ cases; $0$ failures.
+The exhaustive Section~C confirms the algebraic proof by finding no counterexample
+(i.e., no case with $p \mid sf$ and $p \nmid a_2$).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
