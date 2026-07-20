@@ -5498,3 +5498,70 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate the Universal order-2 Frobenius theorem (Threads 15–16) into the LaTeX paper, and verify "p always splits" for additional cases. Chosen because: Threads 1–6 (original priorities) are all CLOSED/DEAD END/BLOCKED; Thread 17 was the explicit next-step proposed in the 2026-07-19 log; PAPER_STRUCTURAL_COMPLETENESS.md already had the theorem as a markdown remark but `paper/structural_completeness.tex` did not contain it.
+
+### Work done
+- Installed pari-gp (was already present from prior session; `gp --version` = 2.15.4).
+- Wrote `secp256k1_cm_audit/thread17_splits_verify.gp` (~120 lines).
+  - 10 fresh (p, a2) pairs with p ∈ {307,311,313,317,331,337,347,349,353,359} and assorted a2.
+  - 3 large-p spot checks: p ∈ {100003, 100019, 100043}, a2 ∈ {999, -12345, 7777}.
+  - For each: computes squarefree D, Kronecker symbol (splits check), and BNF [P]^2 principality.
+  - Algebraic argument printed inline: (RAM) p|disc(K) iff p|sf; sf|D=a2^2 (mod p), so p|sf=>p|a2 excluded; (INE) inertness forces (beta)=(p) which requires p|a2.
+- Fixed PARI syntax: replaced `i` loop variable (reserved imaginary unit) with `k`/`idx`; used single-branch `if()` at end.
+- Ran script to completion: **13/13 new cases PASS**, zero failures.
+- Added `Proposition~\ref{prop:order2-frobenius}` to `paper/structural_completeness.tex`:
+  - Inserted after the CM-73 remark (line 429 of original, now ~475) and before B6.
+  - Contains: formal statement (two-part: [P]^2=1 and p splits), complete 6-line proof in LaTeX.
+  - Companion `\begin{remark}` citing scripts, 95-case numerical tally, and B5 relevance.
+- Ran `cargo test --test curve_audit`: **5/5 pass**, no regressions.
+
+### Findings
+
+**Numerical summary (Thread 17 new cases):**
+| Test set                          | n  | Passed |
+|-----------------------------------|----|--------|
+| Threads 15–16 (prior)             | 82 | 82     |
+| Thread 17 fresh p ∈ [307,359]     | 10 | 10     |
+| Thread 17 large-p ≈ 10^5          | 3  | 3      |
+| **Total**                         |**95**|**95**|
+
+**Selected new cases:**
+- p=307, a2=60, sf=-93349, kron=+1, [P]^2 principal ✓
+- p=359, a2=-160, sf=-13609, kron=+1, [P]^2 principal ✓
+- p=100003, a2=999, sf=-40001402035, kron=+1, [P]^2 principal ✓
+- p=100043, a2=7777, sf=-39973925667, kron=+1, [P]^2 principal ✓
+
+All 13 new cases: kron=+1 (p always SPLITS), [P]^2 principal (order-2 confirmed).
+
+**LaTeX integration:**
+New Proposition `prop:order2-frobenius` added to §B5 of `paper/structural_completeness.tex`.
+Proof is self-contained (6 lines: membership, non-triviality, order-2, not-inert, not-ramified).
+Remark ties numerical record (95 cases) to B5 relevance.
+
+**CM literature note (Thread 17 open question from 2026-07-19):**
+The corollary "p splits in Q(sqrt(sf)) when p∤a2" is a consequence of standard CM theory
+(the Frobenius at p must be a split prime for the Frobenius endomorphism to lie in a
+specific ideal class), but the explicit Corollary stated here — that inertness is impossible
+when p∤a2 because (beta)≠(p) — does not appear in this exact form in Silverman AEC or ATEC,
+or Cohen-Stromberg. It is a clean elementary observation worth retaining as a named Corollary.
+
+### Next step proposal
+Thread 18: Clean up and cross-reference.
+- Add `\label{cor:p-splits}` as a named Corollary after Proposition~\ref{prop:order2-frobenius},
+  stating just "p splits in K" as a standalone corollary for citation ease.
+- Check whether `paper/structural_completeness.tex` compiles (requires pdflatex; test with
+  `pdflatex -interaction=nonstopmode structural_completeness.tex`).
+- If pdflatex is available, verify the new proposition renders correctly.
+- Alternative: extend Thread 17 to D>0 (real quadratic K) — the proof is identical but
+  the class group is infinite (units); check whether [P]^2=1 still holds or whether it
+  now means P is principal (trivially so when h=1). This was mentioned in Thread 16 but
+  not fully resolved for h>1 real quadratic fields.
+
+### Commits made
+(to be filled after commit)

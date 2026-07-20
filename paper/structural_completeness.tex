@@ -428,6 +428,56 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal --- Threads~15--16]%
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf}$ be the squarefree part of $D$,
+and write $m = \sqrt{D/\mathrm{sf}} \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathrm{sf}})$ and let $\mathfrak{P}$ be any prime ideal
+of $\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}
+  \item[(i)] $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$; and
+  \item[(ii)] $p$ \emph{splits} in $K$ (is neither inert nor ramified).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2$.
+\textit{(Membership)} $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$, so
+$\beta \in \mathcal{O}_K$ and $N_{K/\QQ}(\beta) = p^2$.
+\textit{(Non-triviality)} If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$,
+forcing $p \mid a_2$---contradicting the hypothesis.
+\textit{(i)} Therefore $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+so $[\mathfrak{P}]^2 = 1$.
+\textit{(ii, not inert)} If $p$ were inert the only $\mathcal{O}_K$-ideal of
+norm $p^2$ is $(p)$, ruling out $(\beta) \neq (p)$---contradiction.
+\textit{(ii, not ramified)} For an odd prime $p$, ramification in $K$
+requires $p \mid \mathrm{disc}(K)$.  Since $\mathrm{disc}(K) \mid 4\,\mathrm{sf}$
+and $\mathrm{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$,
+we get $p \mid \mathrm{sf} \Rightarrow p \mid a_2$---excluded.
+\end{proof}
+
+\begin{remark}
+This proposition is a pure statement about quadratic ideals, independent
+of any curve construction.
+It was discovered empirically for norm-form primes (Thread~14), proved
+algebraically and extended to arbitrary $(p, a_2)$ in Threads~15--16
+(scripts \texttt{thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp},
+\texttt{thread17\_splits\_verify.gp}).
+Numerical verification: 95 cases with zero failures
+(25 norm-form primes $k \le 199$; 70 arbitrary $(p,a_2)$ pairs including
+$p \approx 10^5$ and non-norm-form, positive, and negative discriminants).
+
+\medskip
+\noindent\textit{Relevance to B5.}
+Every abelian surface $J/\FF_p$ whose Weil polynomial has the biquadratic
+form $T^4 + a_2 T^2 + p^2$ (i.e.\ $\#J(\FF_p) = (p+1-t)(p+1+t)$,
+the B5 bound) has $p$ splitting in the associated quadratic CM field $K$.
+The proposition thus constrains the realizable CM types in any cover attack:
+inert and ramified CM types are structurally excluded when $p \nmid a_2$.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
