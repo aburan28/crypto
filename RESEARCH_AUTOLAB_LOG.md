@@ -5498,3 +5498,86 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (15–16) into the ePrint draft.
+Chosen because: all 6 original priority threads are CLOSED/BLOCKED/DEAD END; Threads 7–16
+similarly closed; Thread 17 was the explicit next-step proposal from the 2026-07-19 log.
+This is straightforward clean-up work: add a clean Proposition to the TeX paper.
+
+### Work done
+- Verified paper file location: `paper/structural_completeness.tex` (851 lines pre-edit;
+  note: `paper/eprint_combined.tex` referenced in prior log entries does not exist —
+  log error from earlier runs).
+- Read B5 section (lines 267–429) and §6 Howe-gluing section to identify insertion point.
+- Inserted at line 431 (just before B6 subsection), after the CM-73 remark:
+  - `\begin{proposition}[Universal order-2 Frobenius ideal --- Threads 15--16]`
+    `\label{prop:univ-order2}` — full statement with items (i) [P]²=1 and (ii) p splits.
+  - `\begin{proof}` — 8-line self-contained proof via norm argument.
+  - `\begin{remark}` — scope note + empirical record (82 cases, both scripts).
+- Updated Reproducibility table (line 813): added
+  `thread15_order2_algebraic.gp (177 LOC)` and `thread16_general_order2.gp (274 LOC)`;
+  updated total from 3533 to 3984.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+- Did NOT attempt LaTeX compilation (pdflatex not installed in container).
+
+### Findings
+
+**Proposition as inserted** (condensed):
+> Let p odd prime, a₂ ∈ Z with p∤a₂, a₂≠0. Write D=a₂²-4p²=d·m² (d squarefree).
+> Let K=Q(√d), P any prime of O_K above p. Then:
+> (i) [P]²=1 in Cl(K).
+> (ii) p splits in K.
+>
+> Proof: β=(-a₂+m√d)/2 satisfies x²+a₂x+p²=0, so β∈O_K with N(β)=p².
+> (β)=(p) would force p|a₂, contradiction; so (β)=P² or P̄², giving [P]²=1.
+> Inertness excluded (unique norm-p² ideal when inert is (p), ruled out).
+> Ramification: p|disc(K) forces p|d, hence p|D≡a₂² mod p, hence p|a₂ — excluded. □
+
+**LaTeX correctness check (manual):**
+- All macros used: `\ZZ`, `\QQ`, `\Cl`, `\disc`, `\mathcal{O}_K`, `\mathfrak{P}` —
+  all defined or standard (amssymb loaded). ✓
+- Environments: `proposition`, `proof`, `remark`, `enumerate[label=\textup{(\roman*)}]` —
+  all declared in preamble (proposition,remark via amsthm; enumitem loaded). ✓
+- Cross-reference `\label{prop:univ-order2}` — no `\ref` used in remark (avoided forward
+  ref danger); the remark uses `Proposition~\ref{prop:univ-order2}` which points to itself
+  (self-referencing is fine in LaTeX). ✓
+- `\qed` at end of proof — consistent with existing paper style (see line 297). ✓
+
+**Literature check on inertness-impossibility corollary:**
+The statement "p∤a₂ implies p splits in Q(√sf)" is a direct consequence of the norm
+factorization argument. It does not appear to be an explicitly named theorem in Silverman
+AEC/ATEC or Cox "Primes of the form x²+ny²", but it is subsumed by the general theory
+of ideal factorization in quadratic fields (e.g., Cohen "Advanced Topics" §5.1–5.2).
+The result is not novel as a pure algebraic statement; its novelty here is the application
+to biquadratic Weil polynomials and the consequent constraint on CM types in cover attacks.
+
+**Reproducibility table update:**
+| Script | LOC |
+|--------|-----|
+| thread15_order2_algebraic.gp | 177 |
+| thread16_general_order2.gp | 274 |
+| Updated total | 3984 |
+
+### Next step proposal
+Thread 18: LaTeX compilation check.
+- Install texlive-full (or use an online compiler) and verify `paper/structural_completeness.tex`
+  compiles cleanly with the new Proposition.
+- If the `\mathfrak{P}` notation renders poorly (some reviewers prefer `\mathfrak{p}` or
+  `\wp`), consider switching to `\mathfrak{p}` (lowercase).
+- Alternatively: check whether the paper appears on ePrint and whether an updated preprint
+  should be submitted (out of scope for autolab, requires human action).
+
+Thread 19 (fallback if Thread 18 is trivial):
+- Review the ePrint 2025/705 ("Breaking ECDSA with Two Affinely Related Nonces") reference
+  added in Thread 16's log as a remark-to-add. The log says to "cite ePrint 2025/705 in a
+  remark: the GLV relation k₁=λ·k₂ is the special case α=λ, β=0 in Theorem 1 of that paper."
+  This would be a remark in §5 (Novel proposals: CGA-HNC) or §8 (Structural-completeness theorem).
+  Check whether ePrint 2025/705 is already cited anywhere in the paper.
+
+### Commits made
+PLACEHOLDER — to be filled after commit

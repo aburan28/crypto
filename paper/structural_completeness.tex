@@ -428,6 +428,44 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal --- Threads 15--16]%
+\label{prop:univ-order2}
+Let $p$ be an odd prime, $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \ne 0$.
+Write $D = a_2^2 - 4p^2 = d \cdot m^2$ where $d$ is squarefree and
+$m \in \ZZ_{>0}$.  Let $K = \QQ(\sqrt{d})$ and $\mathfrak{P}$ any prime
+of $\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+\item $p$ \emph{splits} in $K$ (neither inert nor ramified).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{d})/2$.  Since $\beta$ satisfies
+$x^2 + a_2 x + p^2 = 0$ (monic, $\ZZ$-coefficients), we have
+$\beta \in \mathcal{O}_K$ with $N_{K/\QQ}(\beta) = p^2$.
+If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$ forces $p \mid a_2$,
+contradicting the hypothesis; so $(\beta) = \mathfrak{P}^2$ or
+$\overline{\mathfrak{P}}^{\,2}$, giving $[\mathfrak{P}]^2 = 1$ (item~(i)).
+For~(ii): inertness is excluded because the unique norm-$p^2$ ideal when $p$
+is inert is $(p)$, already ruled out above.  Ramification requires
+$p \mid \disc(K)$; for odd $p$ this forces $p \mid d$,
+hence $p \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$,
+hence $p \mid a_2$---also excluded. \qed
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:univ-order2} is a purely algebraic statement about
+quadratic ideals, independent of any elliptic-curve construction.
+Its relevance to the cover-attack bound is that every Jacobian with
+biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$ has $p$ splitting in
+$K = \QQ(\sqrt{d})$, constraining the CM types realizable in a cover attack.
+Verified for 82 instances: 25 norm-form primes ($k \le 199$) and 57
+arbitrary $(p, a_2)$ pairs with both $D < 0$ and $D > 0$
+(scripts \texttt{thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp}; zero failures).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
@@ -773,8 +811,10 @@ File & LOC \\
 \texttt{glv\_hnp\_phase1.gp} & 180 \\
 \texttt{fp3\_obstruction\_secp256k1.gp} & 200 \\
 \texttt{igusa\_f43\_howe.gp} & 58 \\
+\texttt{thread15\_order2\_algebraic.gp} & 177 \\
+\texttt{thread16\_general\_order2.gp} & 274 \\
 \midrule
-\textbf{Total} & \textbf{$\approx 3533$} \\
+\textbf{Total} & \textbf{$\approx 3984$} \\
 \bottomrule
 \end{tabular}
 \end{center}
