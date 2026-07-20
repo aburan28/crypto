@@ -5556,4 +5556,4 @@ Also: check if `paper/lll_degeneracy_note.tex` should cite rem:order2-frobenius
 (the B5 complement point is relevant to the LLL note's §3 if it exists).
 
 ### Commits made
-(to be filled after git commit)
+2561862 autolab 2026-07-20: Thread 17 — add order-2 Frobenius theorem (Threads 15-16) to LaTeX draft
