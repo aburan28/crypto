@@ -5574,4 +5574,4 @@ Thread 17 continuation (sub-task 17b):
   "Weil polynomial biquadratic". This is the fallback protocol (Step 4a).
 
 ### Commits made
-`[see below after push]`
+`f7edef7` autolab 2026-07-20: Thread 17 — prop:order2-frobenius in LaTeX; 30/30 split verification
