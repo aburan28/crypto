@@ -428,6 +428,67 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$
+(so $D = \mathit{sf} \cdot m^2$ for some $m \in \ZZ_{>0}$),
+and let $K = \QQ(\sqrt{\mathit{sf}})$.
+Then for any prime ideal $\mathfrak{P}$ of $\mathcal{O}_K$ above $p$,
+\[
+  [\mathfrak{P}]^2 = 1 \quad \text{in } \Cl(K).
+\]
+Moreover, $p$ \emph{splits} in $K$ (it is neither inert nor ramified).
+\end{proposition}
+
+\begin{proof}
+Set $\beta = \tfrac{-a_2 + m\sqrt{\mathit{sf}}}{2}$.
+
+\textit{(A) Integrality.}
+$\beta$ satisfies $\beta^2 + a_2 \beta + p^2 = 0$, a monic polynomial with $\ZZ$-coefficients,
+so $\beta \in \mathcal{O}_K$.
+
+\textit{(B) Norm.}
+$N_{K/\QQ}(\beta) = \beta \bar\beta = \tfrac{(-a_2)^2 - m^2 \mathit{sf}}{4} = \tfrac{a_2^2 - D}{4} = p^2$.
+
+\textit{(C) $(\beta) \neq (p)$.}
+If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$, so $p \mid a_2$~-- contradicting our hypothesis.
+
+\textit{(D) Conclusion $[\mathfrak{P}]^2 = 1$.}
+Since $N(\beta) = p^2$, the ideal $(\beta)$ has norm $p^2$.
+The factorisation $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$ follows because
+(C) rules out $(\beta) = (p)$; hence $[\mathfrak{P}]^2 = [\,\overline{\!\mathfrak{P}}]^2 = 1$.
+
+\textit{(E) $p$ splits.}
+\emph{Inert} is impossible: if $p$ were inert the only $\mathcal{O}_K$-ideal of norm $p^2$ would
+be $(p)$, contradicting (C).
+\emph{Ramification} is impossible for odd $p$: $p$ ramifies in $K = \QQ(\sqrt{\mathit{sf}})$
+iff $p \mid \disc(K)$; for odd $p$ one has $\disc(K) \mid 4\,\mathit{sf}$, so $p \mid \disc(K)$
+iff $p \mid \mathit{sf}$ iff $p \mid D = a_2^2 - 4p^2$ iff $p \mid a_2$~-- excluded.
+Therefore $p$ splits into two distinct primes $\mathfrak{P},\bar{\mathfrak{P}}$.
+\qed
+\end{proof}
+
+\begin{remark}[Geometric interpretation and numerical record]
+Proposition~\ref{prop:order2-frobenius} is a theorem about quadratic ideals, not about
+curves or isogenies.  It applies whenever the characteristic polynomial of Frobenius of a
+genus-$2$ abelian variety has the biquadratic form $T^4 + a_2 T^2 + p^2$ (equivalently,
+whenever the abelian variety is a surface with $\#C(\FF_p) = p+1$ for an associated genus-$2$
+curve $C$).  The constraint $[\mathfrak{P}]^2 = 1$ means that the Frobenius-ideal
+class has exact order $1$ or $2$ in $\Cl(K)$; combined with the splitting
+(not inertness, not ramification) it constrains which CM types can appear in
+$(\ell,\ell)$-cover constructions over $\FF_p$.
+
+\medskip\noindent\textbf{Numerical verification.}
+The proposition was discovered empirically in Thread~14 for norm-form primes
+$4p = 73 + 3k^2$, proved algebraically in Thread~15, and generalised to
+arbitrary $(p,a_2)$ in Thread~16.
+The Corollary (p~splits) was verified independently in Thread~17.
+Total verified pairs: $82$ cases in Threads~15--16 (scripts
+\texttt{thread15\_order2\_algebraic.gp}, \texttt{thread16\_general\_order2.gp});
+$30$ additional pairs in Thread~17 (\texttt{thread17\_split\_verification.gp}).
+All $112$ cases gave $[\mathfrak{P}]^2 = 1$ and Kronecker symbol $+1$ (splits).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

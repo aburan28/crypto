@@ -5498,3 +5498,80 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem from Threads 15-16 into the ePrint LaTeX paper.
+Chosen because: Thread 16 was last touched 2026-07-19 (yesterday) with successful progress
+(82/82 cases, algebraic proof complete); Thread 17 was the explicit next-step in that log entry;
+the task is concrete (add a Proposition + proof to LaTeX) and bounded.
+
+### Work done
+- Read last 100 log lines: confirmed Thread 16 done 2026-07-19, Thread 17 not started.
+- Located target file: `paper/structural_completeness.tex` (not `eprint_combined.tex`, which
+  doesn't exist); insertion point is after the CM-73 remark (original line 429, before B6).
+- Wrote PARI script `secp256k1_cm_audit/thread17_split_verification.gp`:
+  - Tests 30 new (p, a₂) pairs (not in Thread 16) across three batches:
+    - Batch 1: 15 pairs, D < 0 (imaginary quadratic K), primes 101..241
+    - Batch 2: 10 pairs, D > 0 (real quadratic K), small primes with a₂ > 2p
+    - Batch 3: 5 pairs, large primes (1009, 1013, 1019, 2003, 3001)
+  - Computes Kronecker symbol (disc(K)/p) to verify p always splits.
+  - Two script rewrites needed (syntax issues: PARI requires `{...}` wrapper blocks for
+    multi-statement for-body, and `#v` not `length(v)` for vector cardinality).
+- Ran script: **30/30 SPLITS**, 0 failures.
+- Inserted `\begin{proposition}...\end{proposition}` + proof + remark into LaTeX paper:
+  - After original line 429 (end of CM-73 remark), before B6 subsection.
+  - Label: `prop:order2-frobenius`.
+  - Four-step proof (A)-(E): integrality, norm, (β)≠(p), [P]²=1, p splits.
+  - Remark: geometric interpretation, numerical record (82 + 30 = 112 total cases).
+- Fixed a "Frobenius Frobenius-ideal" duplicate-word typo in the remark.
+- Verified LaTeX compiles: 0 new errors introduced; pre-existing errors (`\CM` undefined at
+  line 377, `\gcd` redefinition at line 40) are pre-existing and unrelated to my changes.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**PARI result (Thread 17 new 30 pairs):**
+
+| Batch | Description            | Pairs | All SPLITS? |
+|-------|------------------------|-------|-------------|
+| 1     | D<0, primes 101..241   | 15    | YES (30/30) |
+| 2     | D>0, small primes      | 10    | YES         |
+| 3     | Large primes to 3001   | 5     | YES         |
+
+Representative samples:
+- p=101, a₂=10: D=-40704, sf=-159, disc=-159, kron=+1 [SPLITS]
+- p=229, a₂=42: D=-208000, sf=-130, disc=-520, kron=+1 [SPLITS]
+- p=31, a₂=64: D=252, sf=7, disc=28, kron=+1 [SPLITS (real quadratic)]
+- p=3001, a₂=150: D=-36001504, sf=-2250094, kron=+1 [SPLITS]
+
+**Cumulative split record: 112/112 (82 from Threads 15-16 + 30 new).**
+Zero counterexamples.
+
+**LaTeX insertion:** Proposition 4.X (auto-numbered by `\newtheorem`) now appears between
+the CM-73 remark and B6 in `paper/structural_completeness.tex`. The proposition has:
+- Full 5-step proof (A)-(E) as originally sketched in PAPER_STRUCTURAL_COMPLETENESS.md
+- Remark citing the 112 verified cases and all three PARI scripts
+- Correct cross-reference label `prop:order2-frobenius` (used in proof step D)
+
+**Literature note:** No search was done for this corollary in Cohen-Strömberg or Silverman AEC II
+— that is the next open sub-task.
+
+### Next step proposal
+Thread 17 continuation (sub-task 17b):
+- Search Cohen-Strömberg "Advanced Topics in Computational Number Theory" §5.11 and
+  Silverman "Advanced Topics in the Arithmetic of Elliptic Curves" §II.10 for the
+  statement "p splits in Q(sqrt(sf)) whenever p∤a" (or equivalent discriminant condition).
+  The theorem is elementary, but if it appears in the literature, cite it; if not,
+  flag as minor novelty in the remark.
+- Alternative: move to Thread 18 (ePrint survey), since the Proposition is now in the paper
+  and Thread 17's core goal is complete.
+- Suggested: Thread 18 — ePrint survey for new 2025-2026 papers on:
+  "isogeny-graph ECDLP", "Boneh-Venkatesan GLV HNP", "(N,N)-cover Jacobian",
+  "Weil polynomial biquadratic". This is the fallback protocol (Step 4a).
+
+### Commits made
+`[see below after push]`
