@@ -5564,4 +5564,4 @@ still fails, try target_bits=100 or 80.
   most tractable purely-computational task available today.
 
 ### Commits made
-`TBD` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius proposition + corollary into ePrint draft
+`91681a3` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius proposition + corollary into ePrint draft
