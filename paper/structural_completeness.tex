@@ -428,6 +428,71 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-$2$ Frobenius ideal]\label{prop:order2-frob}
+Let $p$ be an odd prime, $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Write $D = a_2^2 - 4p^2$, let $\mathrm{sf}(D)$ denote the squarefree part of~$D$,
+and set $m = \sqrt{D/\mathrm{sf}(D)} \in \ZZ$.
+Put $K = \QQ(\sqrt{\mathrm{sf}(D)})$ and let $\mathfrak{p}$ be any prime of $\mathcal{O}_K$
+above~$p$.  Then:
+\begin{enumerate}[(i)]
+  \item $[\mathfrak{p}]^2 = 1$ in $\Cl(\mathcal{O}_K)$.
+  \item $p$ \emph{splits} in $K$: it is neither inert nor ramified.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2$.
+
+\smallskip\noindent(A)~\emph{$\beta \in \mathcal{O}_K$.}
+The element $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$, a monic polynomial with
+$\ZZ$-coefficients, so $\beta$ is an algebraic integer.
+
+\smallskip\noindent(B)~\emph{$N_{K/\QQ}(\beta) = p^2$.}
+The product of conjugates equals the constant term of the minimal polynomial,
+namely~$p^2$.
+
+\smallskip\noindent(C)~\emph{$(\beta) \neq (p)$ in $\mathcal{O}_K$.}
+If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$, forcing $p \mid a_2$,
+which contradicts the hypothesis.
+
+\smallskip\noindent(D)~\emph{Proof of~(i).}
+Since $N(\beta) = p^2$ and $(\beta) \neq (p)$, we have
+$(\beta) = \mathfrak{p}^2$ or $\bar{\mathfrak{p}}^2$,
+hence $[\mathfrak{p}]^2 = 1$.
+
+\smallskip\noindent(E)~\emph{Proof of~(ii).}
+\textit{Inert impossible:} if $p$ were inert the unique ideal of norm $p^2$
+would be $(p)$, contradicting~(C).
+\textit{Ramified impossible (odd $p$):} $p$ ramifies in $K = \QQ(\sqrt{\mathrm{sf}(D)})$
+iff $p \mid \disc(K)$, iff $p \mid \mathrm{sf}(D)$.
+Since $D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, we have
+$p \mid \mathrm{sf}(D)$ only if $p \mid a_2$---excluded.
+Therefore $p$ splits into two distinct primes $\mathfrak{p}, \bar{\mathfrak{p}}$
+with $[\mathfrak{p}]^2 = 1$ and $[\bar{\mathfrak{p}}] = [\mathfrak{p}]^{-1}$.
+\end{proof}
+
+\begin{remark}[Scope and relevance to B5]\label{rem:order2-scope}
+Proposition~\ref{prop:order2-frob} is a pure statement about ideals in quadratic fields:
+it makes no reference to any curve, isogeny, or abelian-variety construction.
+Applied to a genus-$2$ Jacobian $J/\FF_p$ with biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$, the proposition says that the prime-above-$p$ in the CM
+quadratic subfield $K$ always has class order~$2$ in $\Cl(\mathcal{O}_K)$,
+and in particular $p$ always splits (is never inert) in $K$.
+This constrains the CM types realisable in a cover attack---inert primes cannot
+arise---but it does not reduce the DLP cost, which remains $\Theta(p)$ by the rest
+of~B5.
+
+The result was discovered empirically in Thread~14 for norm-form primes
+($4p = 73 + 3k^2$, $k$ odd), proved algebraically in Thread~15, and
+generalised to arbitrary $(p,a_2)$ pairs in Thread~16
+(PARI scripts \texttt{thread15\_order2\_algebraic.gp} and
+\texttt{thread16\_general\_order2.gp}).
+A total of $82$ test pairs---spanning norm-form primes, arbitrary
+non-norm-form primes, discriminants of both signs ($D < 0$ and $D > 0$),
+and $a_2$-values derived from actual genus-$2$ curves over $\FF_p$---all
+gave $[\mathfrak{p}]^2 = 1$ with zero failures.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

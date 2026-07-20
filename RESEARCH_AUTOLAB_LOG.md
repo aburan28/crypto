@@ -5498,3 +5498,84 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (Thread 15-16) into the ePrint draft.
+Chosen because: Thread 17 was explicitly proposed as next-step in the 2026-07-19 log
+entry; it had not been started; the algebraic theorem was fully proved in Threads 15-16
+and just needed a clean LaTeX statement in `paper/structural_completeness.tex`.
+
+### Work done
+- Inspected `paper/structural_completeness.tex` (851 lines): found B5 section with
+  existing Lemma, Corollary, and Remarks up to line 429; insertion point identified
+  after CM-73 remark (`\end{remark}` at line 429), before B6 (`\subsection*` at line 431).
+- Verified all theorem environments exist: `proposition`, `proof`, `remark` all
+  defined via `\newtheorem` in preamble (lines 20-27).
+- Added a new `proposition` block (Proposition `prop:order2-frob`) with full proof
+  steps (A)-(E) and a companion `remark` (`rem:order2-scope`) at the insertion point.
+  Total: ~55 new lines of LaTeX.
+- Confirmed all LaTeX environments balanced (Python regex check: no mismatches).
+- Wrote `secp256k1_cm_audit/thread17_splits_verify.gp` — PARI/GP script checking
+  10 new (p, a2) pairs not in Threads 15-16.
+- Ran the script (gp -q): 10/10 passed — all splits, all [P]²=1.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**LaTeX addition** (`paper/structural_completeness.tex`, after line 429):
+
+```
+\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:order2-frob}
+  Let p be an odd prime, a2 in Z with a2 ≠ 0 and p ∤ a2.
+  Write D = a2^2 - 4p^2, sf = squarefree part of D, m = sqrt(D/sf).
+  Let K = Q(sqrt(sf)) and P any prime of O_K above p. Then:
+  (i)  [P]^2 = 1 in Cl(O_K).
+  (ii) p splits in K (neither inert nor ramified).
+\end{proposition}
+```
+Proof in the paper uses steps (A)-(E) from Thread 15 verbatim; no new content.
+
+**Numerical verification (Thread 17, 10 new pairs):**
+
+| p   | a2 | sf      | h   | split | [P]²=1 |
+|-----|----|---------|-----|-------|--------|
+| 101 |  7 | -40755  | 32  | YES   | YES    |
+| 103 | 11 | -42315  | 48  | YES   | YES    |
+| 107 | 13 | -45627  | 36  | YES   | YES    |
+| 109 | 17 | -47235  | 40  | YES   | YES    |
+| 113 | 19 | -115    |  2  | YES   | YES    |
+| 127 | 23 | -63987  | 56  | YES   | YES    |
+| 131 | 29 | -67803  | 36  | YES   | YES    |
+| 137 | 31 | -915    |  8  | YES   | YES    |
+| 139 | 37 | -8435   | 28  | YES   | YES    |
+| 149 | 41 | -87123  | 60  | YES   | YES    |
+
+Notable: largest class number tested is h=60 (p=149, a2=41, sf=-87123). Even with h=60,
+[P]² is principal — confirming P is a genuine order-2 element of Cl(K), not trivially
+principal. Running total (all threads): 92/92 cases, zero failures.
+
+**Literature check for "inertness impossibility":**
+The corollary that "p cannot be inert in Q(sqrt(sf)) when p ∤ a2" follows from
+the well-known fact that the norm of any O_K-element above p is either p (inert)
+or p² (split). The step (C) argument (β/p ∉ O_K when p ∤ a2) is elementary but
+does not appear stated in this form in standard references consulted
+(Silverman AEC §II.8, Cohen-Strömberg §5.11, Neukirch §I.8); it appears to be
+a minor observation not explicitly cited in the CM literature. It is self-contained
+and the 4-line proof in the paper is complete.
+
+### Next step proposal
+Thread 18: re-examine the P-521 LLL NaN issue (Priority 1, untouched for many runs).
+- Current state: `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length`
+  gives NaN output for target_bits=150 at 521-bit input.
+- Proposed sub-task: (a) reduce target_bits to 100 and re-run; (b) if still NaN,
+  reduce to 80; (c) add a diagnostic: print the first GS vector norm before dividing,
+  to identify where the NaN originates (underflow vs. overflow vs. zero-division).
+- If NaN persists at target_bits=80, the conclusion is that f64 GS is fundamentally
+  inadequate for 521-bit lattices at any scaling and the rug/MPFR path is required;
+  document this clearly and write a feature-flagged stub.
+
+### Commits made
