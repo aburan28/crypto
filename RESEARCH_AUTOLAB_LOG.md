@@ -5573,4 +5573,4 @@ attack on a 32-bit toy curve and verify key recovery. This has been pending sinc
 A toy run would take ~1h to implement and would produce a concrete empirical result.
 
 ### Commits made
-TBD (committed after writing this entry)
+`cb5be70` autolab 2026-07-20: Thread 17 — formal Proposition for order-2/splitting theorem; 1066/1066 cases verified
