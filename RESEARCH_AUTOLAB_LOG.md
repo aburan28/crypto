@@ -5571,4 +5571,4 @@ necessarily mean [P]²=1 in the narrow class group. Clarify whether the proof gi
 Cl(K) or in the narrow class group for D>0, and whether this matters for cover attacks.
 
 ### Commits made
-`[pending]`
+`983b594` autolab 2026-07-20: Thread 17 — Prop 4.x added to TeX paper; 10/10 splits; 92/92 total
