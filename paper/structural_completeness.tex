@@ -428,6 +428,56 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:order2frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Write $D = a_2^2 - 4p^2 = \mathrm{sf} \cdot m^2$ with $\mathrm{sf}$ squarefree,
+$m \in \ZZ_{>0}$, and let $K = \QQ(\sqrt{\mathrm{sf}})$ with ring of integers $O_K$.
+For any prime ideal $\mathfrak{p}$ of $O_K$ above $p$,
+\[
+  [\mathfrak{p}]^2 = 1 \quad \text{in } \Cl(O_K).
+\]
+Moreover, $p$ \emph{splits} in $K$: it is neither inert nor ramified.
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2 \in O_K$; it satisfies the monic
+integer polynomial $x^2 + a_2 x + p^2 = 0$, so $\beta$ is an algebraic integer.
+\begin{enumerate}[label=(\Alph*)]
+  \item $N_{K/\QQ}(\beta) = p^2$: the norm of $\beta$ equals the constant term of
+        its minimal polynomial $x^2 + a_2 x + p^2$.
+  \item $(\beta) \neq (p)$: if $(\beta) = (p)$, then $\beta / p \in O_K$, so
+        $p \mid a_2$---contradicting $p \nmid a_2$.
+  \item $p$ \emph{splits}: if $p$ is inert, the unique ideal of norm $p^2$ is $(p)$,
+        excluded by (B).  If $p$ is ramified ($\mathfrak{p}^2 = (p)$ for a single
+        prime $\mathfrak{p} \mid p$), the unique ideal of norm $p^2$ is again $(p)$,
+        excluded by (B).  Hence $p$ splits: $p \cdot O_K = \mathfrak{p}\bar{\mathfrak{p}}$
+        with $\mathfrak{p} \neq \bar{\mathfrak{p}}$ and $N(\mathfrak{p}) = p$.
+  \item $[\mathfrak{p}]^2 = 1$: from (A) and (C), $(\beta)$ has norm $p^2$ with $p$
+        split, so $(\beta) = \mathfrak{p}^2$ or $\bar{\mathfrak{p}}^2$ (the only
+        norm-$p^2$ ideals other than $(p) = \mathfrak{p}\bar{\mathfrak{p}}$, which
+        is excluded by (B)).  Therefore $[\mathfrak{p}]^2 = 1$.
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[Empirical scope and relevance to B5]\label{rem:order2empirical}
+Proposition~\ref{prop:order2frobenius} is a theorem about quadratic ideals,
+independent of any specific curve construction.  It was discovered empirically
+for the norm-form family $4p = 73 + 3k^2$ (Thread~14, $25$ primes, $k \le 199$),
+proved algebraically and extended to all odd $p$ with $p \nmid a_2$ in
+Thread~15 (script \texttt{thread15\_order2\_algebraic.gp}), and verified for
+arbitrary $(p, a_2)$ pairs---including non-norm-form primes, both signs of $D$,
+and Weil polynomials arising from actual genus-$2$ curves over $\FF_p$---in
+Thread~16 (script \texttt{thread16\_general\_order2.gp}).  Combined:
+$82$ cases, $0$ failures.
+
+The proposition constrains the CM types realizable in a cover attack: every
+biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$ over $\FF_p$ forces $p$ to
+split in the associated quadratic field $K = \QQ(\sqrt{\mathrm{sf}})$, ruling
+out inert and ramified primes as obstructions to the cover construction.  It
+does not, however, reduce the DLP cost: the bound $\Theta(p)$ in
+Corollary~\ref{cor:b5-univ} holds independently via Honda--Tate theory.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
@@ -734,6 +784,14 @@ is the plain Pollard~$\rho$ cost.
       amplified ECDLP recovery on isogenous siblings: speculative.
 \item Exact Cardona--Quer normalisation of Igusa invariants for
       $C_{43}$ (cross-verification with Sage / Magma pending).
+\item Classical CM literature check for Proposition~\ref{prop:order2frobenius}:
+      does the inertness/ramification-impossibility corollary appear in
+      Silverman \emph{Advanced Topics} \S{}II.10 or Cohen--Str\"omberg
+      \S{}5.11?  If not, the splitting statement may be a minor novelty worth
+      a standalone note.
+\item Finiteness of the CM-73 set $\{19,37,79,109\}$: whether there are CM-73
+      primes beyond $p = 109$ remains open; current methods confirm finiteness
+      up to $p \le 5000$ but do not give an analytic bound.
 \end{itemize}
 
 \subsection*{Out-of-scope: separate attack programmes}

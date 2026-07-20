@@ -5498,3 +5498,58 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Proposition (Thread 15–16) into ePrint draft.
+Chosen because: the 2026-07-19 log entry explicitly proposed this as the next step, and Thread 16 completed cleanly (82/82 cases, algebraic proof). The proposition is publication-ready; integration is the natural next move.
+
+### Work done
+- Read `paper/structural_completeness.tex` structure; identified insertion point between the CM-73 `\end{remark}` (line 429) and `\subsection*{B6}` (line 431).
+- Added `\begin{proposition}[Universal order-2 Frobenius ideal]` with label `prop:order2frobenius`, including:
+  - Clean statement: for odd prime p, a₂ with p∤a₂, the prime ideal P above p satisfies [P]²=1 in Cl(O_K), and p splits in K=Q(√sf).
+  - Proof in 4 labeled steps (A)–(D): algebraic integer → norm p² → (β)≠(p) → [P]²=1.
+  - Splitting proof inline in step (D): inert excluded (unique norm-p² ideal is (p), ruled out by (B)); ramified excluded (same argument); therefore splits.
+- Added `\begin{remark}[Empirical scope and relevance to B5]` with label `rem:order2empirical`, citing Threads 14–16 and scripts `thread15_order2_algebraic.gp`, `thread16_general_order2.gp`; 82/82 cases summary.
+- Updated `\section{Open questions}` with two new items:
+  - CM literature check for the splitting corollary (Silverman §II.10 / Cohen–Strömberg §5.11).
+  - Finiteness of the CM-73 set {19,37,79,109} as an explicit open question.
+- Compiled `structural_completeness.tex` with pdflatex (nonstopmode): no new errors introduced; all 4 fatal errors (`\CM` undefined × 4, `\gcd` redefined) are pre-existing in the original file.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Proposition (integrated into §B5 of structural_completeness.tex):**
+Let p be an odd prime, a₂ ∈ ℤ with p∤a₂, a₂≠0. Set D = a₂²−4p², sf = squarefree(D),
+m = √(D/sf), K = Q(√sf). Then:
+- [P]² = 1 in Cl(O_K) for any prime P|p in O_K.
+- p splits in K (neither inert nor ramified).
+
+Proof strategy (4 steps):
+(A) β = (−a₂+m√sf)/2 ∈ O_K (satisfies monic integer polynomial x²+a₂x+p²=0).
+(B) N(β) = p² (constant term of minimal polynomial).
+(C) (β) ≠ (p) (else p|a₂, contradiction).
+(D) p inert → unique norm-p² ideal is (p), excluded by (C). p ramified → same. Hence p splits;
+    (β) = P² or P̄², giving [P]² = 1.
+
+**LaTeX output:** 2 new environments (proposition + remark), 2 new open questions items.
+**Compilation:** PDF generated (329 KB); no new errors beyond pre-existing `\CM`/`\gcd` issues.
+**Tests:** 5/5 curve_audit pass.
+
+**Pre-existing issues in structural_completeness.tex (not introduced by this run):**
+- `\CM` undefined (used in remark at lines 375–381); 4 fatal errors.
+- `\gcd` redefined (defined in preamble, already in amsthm/amsmath).
+- These should be fixed separately: `\renewcommand{\gcd}{\operatorname{gcd}}` or remove the custom definition; define `\newcommand{\CM}{\mathrm{CM}}`.
+
+### Next step proposal
+Thread 18: Fix the two pre-existing LaTeX bugs in `structural_completeness.tex`:
+1. Replace `\newcommand{\gcd}{\operatorname{gcd}}` in preamble with `\renewcommand{\gcd}{\operatorname{gcd}}`.
+2. Add `\newcommand{\CM}{\mathrm{CM}}` to preamble.
+Then re-compile to confirm clean build (0 fatal errors). This unblocks a clean arXiv/ePrint submission.
+After that, Thread 19: GLV-HNP Phase 2 toy — try the GLV-aware lattice attack on a 32-bit toy curve (Priority 5 from the main thread list; no recent work on it).
+
+### Commits made
+[to be filled after commit]
