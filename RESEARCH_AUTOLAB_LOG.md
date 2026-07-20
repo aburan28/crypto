@@ -5498,3 +5498,56 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Proposition (biquadratic Weil splitting) into `paper/structural_completeness.tex`.
+Chosen because: all 6 original priority threads are CLOSED/BLOCKED/DEAD END; Thread 17 was explicitly proposed as next step in the 2026-07-19 log entry; it is concrete and unblocked (pure LaTeX editing, no Sage/Magma required).
+
+### Work done
+- Checked thread status: P-521 LLL CLOSED, CHLRS BLOCKED (Sage), Howe CLOSED, Cross-curve LLL CLOSED, GLV-HNP DEAD END, B5 CLOSED.
+- Read `paper/structural_completeness.tex` §B5 section (lines 279–430) to locate insertion point.
+- Read `PAPER_STRUCTURAL_COMPLETENESS.md` lines 273–323 for the fully-written theorem statement.
+- Inserted new `\begin{proposition}...\end{proposition}` + `\begin{proof}` + `\begin{remark}` block into the paper at line 431, between the CM-73 remark and §B6.
+- Python syntax checks: braces balanced (depth=0), environments balanced (14 begin=14 end), all 15 cross-references have matching labels; new labels `prop:biqu-split` and `rem:biqu-split-verify` defined.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- pdflatex not available in container; structural checks confirm the LaTeX is syntactically valid.
+
+### Findings
+
+**Proposition added (lines 431–497 of paper/structural_completeness.tex):**
+```
+Proposition [Biquadratic Weil polynomial: p always splits]
+Let p be odd prime, a₂ ∈ Z with a₂≠0 and p∤a₂.
+Write D = a₂²−4p² = sf·m² (sf squarefree), K = Q(√sf).
+(a) β = (−a₂+m√sf)/2 ∈ O_K, β²+a₂β+p²=0, N(β)=p².
+(b) p SPLITS in K: pO_K = PP̄ with P≠P̄.
+(c) (β)=P² or P̄²; in particular [P]²=1 in Cl(O_K).
+```
+Proof in paper: 3 paragraphs — (a) direct computation; (b)+(c) rule out inert (forces p|a₂) and ramified (p|sf iff p|a₂, excluded), leaving only split; then (p) is distinct from P² or P̄², so [P]²=1.
+
+**Remark added:** 82-case empirical record; B5 interpretation (constrains CM types but doesn't reduce DLP cost below Corollary B5-univ).
+
+**Stats:**
+- Lines added to paper: ~67 (proposition + proof + remark)
+- cargo test: 5/5 PASS
+- LaTeX syntax: CLEAN (brace depth 0, 0 unresolved refs)
+
+### Next step proposal
+Thread 18: ePrint survey (Fallback Step 4a).
+All threads CLOSED/BLOCKED/DEAD END; no new paper-content thread is obvious.
+- Search IACR ePrint for papers since 2026-07-19 with keywords: "isogeny-graph ECDLP",
+  "Boneh-Venkatesan", "hidden number problem ECDSA", "(N,N)-cover Jacobian",
+  "biquadratic Weil polynomial".
+- Summarise 2-5 most relevant in log.
+- Optional new attack variant: "GLV-endomorphism class group walk" — use the GLV
+  endomorphism φ on secp256k1 to define a modified class-group action, then ask
+  whether the volcano floor has a φ-stable sublattice exploitable by a 2D random walk.
+  Falsifier: compute the φ-orbit of the floor crater and check its size vs
+  the full class-group orbit. If |φ-orbit| < |Cl(O)| (which floor structure
+  essentially guarantees), the sublattice exists but is still too large for subexp.
+
+### Commits made

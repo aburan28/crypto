@@ -428,6 +428,74 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Biquadratic Weil polynomial: $p$ always splits]%
+\label{prop:biqu-split}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \ne 0$ and $p \nmid a_2$.
+Write $D = a_2^2 - 4p^2 = \mathrm{sf} \cdot m^2$ with $\mathrm{sf}$ squarefree
+and $m \ge 1$, and let $K = \QQ(\sqrt{\mathrm{sf}})$ with ring of integers $O_K$.
+\begin{enumerate}[label=\emph{(\alph*)},topsep=2pt,itemsep=0pt]
+  \item The element $\beta = \tfrac{-a_2 + m\sqrt{\mathrm{sf}}}{2} \in O_K$
+        satisfies $\beta^2 + a_2\beta + p^2 = 0$ and
+        $N_{K/\QQ}(\beta) = p^2$.
+  \item $p$ \textbf{splits} in $K$: $pO_K = P\bar{P}$ with
+        $P \ne \bar{P}$ distinct prime ideals.
+  \item $(\beta) = P^2$ or $(\beta) = \bar{P}^2$; in particular
+        $[P]^2 = 1$ in $\Cl(O_K)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(a) One has $\beta + \bar\beta = -a_2$ and
+$\beta\bar\beta = \tfrac{a_2^2 - m^2\mathrm{sf}}{4} = \tfrac{a_2^2 - D}{4} = p^2$,
+so $\beta^2 + a_2\beta + p^2 = 0$ and $N(\beta) = p^2$.
+
+(b)--(c)
+Since $N(\beta) = p^2$ the ideal $(\beta)$ has norm $p^2$.
+We rule out the two degenerate splitting types of $p$ in $K$.
+
+\smallskip\noindent\textit{Inert impossible.}
+If $pO_K$ were prime ($p$ inert), it would be the unique ideal of norm $p^2$,
+forcing $(\beta) = (p)$, i.e.\ $\beta/p \in O_K$.
+Then $\mathrm{tr}(\beta/p) = -a_2/p \in \ZZ$, so $p \mid a_2$---contradicting the hypothesis.
+
+\smallskip\noindent\textit{Ramified impossible.}
+If $pO_K = P^2$ ($p$ ramified) then again $(p) = P^2/(\text{unit})$ is the
+unique ideal of norm $p^2$, giving the same contradiction.
+(For odd $p$, ramification requires $p \mid \disc(O_K)$; since $\disc(O_K)$
+divides $4\,\mathrm{sf}$ and $p$ is odd, $p \mid \mathrm{sf}$ would be needed.
+But $\mathrm{sf} = \mathrm{sqfree}(D)$ and $D \equiv a_2^2 \pmod{p}$,
+so $p \mid \mathrm{sf}$ iff $p \mid a_2$---excluded.)
+
+\smallskip\noindent
+Hence $p$ splits: $pO_K = P\bar{P}$ with $P \ne \bar{P}$.
+The norm-$p^2$ ideals of $O_K$ are then $P^2$, $P\bar{P} = (p)$,
+and $\bar{P}^2$.  Since $(\beta) \ne (p)$ we have $(\beta) = P^2$
+or $\bar{P}^2$, and both give $[P]^2 = [(\beta)]^{\pm 1} = 1$.
+\end{proof}
+
+\begin{remark}[Empirical verification and relevance to B5]%
+\label{rem:biqu-split-verify}
+Proposition~\ref{prop:biqu-split} is a pure statement about ideals
+in quadratic fields, independent of any curve construction.
+It was verified computationally for 82 pairs $(p, a_2)$:
+25 norm-form primes ($4p = 73 + 3k^2$, $k \le 199$) proved algebraically
+and confirmed via \texttt{bnfisprincipal} in Thread~15
+(PARI script \texttt{thread15\_order2\_algebraic.gp}),
+and 57 arbitrary pairs including non-norm-form primes, $D < 0$, $D > 0$,
+and $a_2$-values derived from actual genus-2 Jacobians in Thread~16
+(script \texttt{thread16\_general\_order2.gp}).
+All 82 instances gave $[P]^2 = 1$ with zero failures.
+
+In the context of B5: for every Jacobian $\Jac(C)/\FF_p$ whose Weil
+polynomial is biquadratic ($T^4 + a_2 T^2 + p^2$ with $p \nmid a_2$),
+the prime $p$ splits in the associated CM field
+$K = \QQ(\sqrt{\mathrm{sqfree}(a_2^2 - 4p^2)})$
+and the Frobenius ideal lies in the order-2 subgroup of $\Cl(O_K)$.
+This constrains the CM types realizable in a cover attack
+but does not by itself reduce the DLP cost
+below the bound of Corollary~\ref{cor:b5-univ}.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
