@@ -5498,3 +5498,67 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate the universal order-2 / p-always-splits theorem into the ePrint LaTeX draft.
+Chosen because: Thread 16 made clean measurable progress (82/82 verified) and explicitly proposed
+Thread 17 as the next step. No recent log entry for Thread 17. Priority-1 thread (P-521 LLL) remains
+blocked on bigfloat runtime; Thread 17 was the explicit continuation from yesterday.
+
+### Work done
+- Installed PARI/GP (required `apt-get install --fix-missing pari-gp`).
+- Wrote `secp256k1_cm_audit/thread17_p_splits.gp` (~100 lines):
+  * Part A: 10 named (p, a2) pairs — all SPLIT.
+  * Part B: 50 primes × up to 8 a2 values = 398 pairs — all SPLIT.
+  * Part C: algebraic check — confirmed no p|sf case for p∈[5,300], a2∈[1,p-1].
+  * Part D: inertness sweep — confirmed kron(sf,p) ≠ -1 for p∈[5,541].
+  All 408 pairs verified; 0 failures.
+- Added `\begin{proposition}[Universal order-2 Frobenius ideal and splitting corollary]`
+  + proof + remark to `paper/structural_completeness.tex` (after line 429, before B6).
+  * Proposition has 3 parts: (i) β satisfies min poly; (ii) [P]²=1; (iii) p always splits.
+  * Proof: 3 short paragraphs, one per part.
+  * Remark: cites 82-case numerical verification (Threads 15-16) and 408-case
+    splitting corollary (Thread 17).
+- Used `enumitem` `label=(\roman*)` syntax (file already has `\usepackage{enumitem}`).
+- Confirmed LaTeX errors are pre-existing (line 40: \gcd redefined, line 377: \CM undef) —
+  no new errors in inserted content (lines 431-478).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Numerical summary for Thread 17:**
+| Test                            | Pairs | SPLIT | INERT | RAMIFIED |
+|---------------------------------|-------|-------|-------|----------|
+| Part A (10 named)               |  10   |  10   |   0   |    0     |
+| Part B (mass sweep 50 primes)   | 398   | 398   |   0   |    0     |
+| Part C (ramification algebraic) | —     |   —   |   —   |    0     |
+| Part D (inertness sweep)        | ~2000 | all   |   0   |    —     |
+
+**Algebraic proof recap (why p always splits):**
+- Ramification: p|sf ⟺ p|D=a₂²−4p²≡a₂² (mod p) ⟺ p|a₂. Excluded by hypothesis.
+- Inertness: p inert ⟹ only ideal of norm p² is (p). But (β)≠(p) (else p|a₂). Contradiction.
+- Conclusion: p always SPLITS. kronecker(sf, p) = +1 universally.
+
+**LaTeX insertion location:** `paper/structural_completeness.tex`, after line 429
+(end of CM-73 remark), before `\subsection*{B6}`. Proposition label: `prop:order2-frobenius`.
+
+**Pre-existing LaTeX errors (NOT introduced by this session):**
+- l.40: `\gcd` redefined (pre-existing `\newcommand{\gcd}` conflict with amsmath).
+- l.377, 380-381: `\CM`, `\Jac`, `\disc` undefined (macros defined elsewhere, not in this file's preamble).
+
+### Next step proposal
+Thread 18: Clean up the pre-existing LaTeX errors in `paper/structural_completeness.tex`:
+  (a) Remove `\newcommand{\gcd}` (l.40) — amsmath already provides `\gcd`.
+  (b) Add `\newcommand{\CM}{\mathrm{CM}}`, `\newcommand{\Jac}{\mathrm{Jac}}`,
+      `\newcommand{\disc}{\mathrm{disc}}` to the preamble (lines ~29-50).
+  (c) Compile to PDF and report page count + proposition location.
+- Alternatively, continue to Priority-1 thread (P-521 LLL bigfloat):
+  * Try `target_bits = 80` before reaching for `rug`/MPFR.
+  * Edit `tests/lll_degeneracy_probe.rs` to try 80-bit GS target.
+
+### Commits made
+`56723f3` autolab 2026-07-20: Thread 17 — p always splits; 408 pairs; Proposition added to LaTeX
