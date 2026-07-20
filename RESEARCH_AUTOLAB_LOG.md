@@ -5498,3 +5498,66 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — Integrate Proposition from Threads 15–16 into `paper/structural_completeness.tex`.
+Chosen because: Thread 17 was the explicit next-step from the 2026-07-19 log; it hadn't been started;
+the algebraic proof is complete (Thread 15) and generalised (Thread 16), making formalisation the
+natural next step before any further arithmetic work.
+
+### Work done
+- Re-ran `secp256k1_cm_audit/thread16_general_order2.gp` under fresh pari-gp 2.15.4:
+  Part A 15/15, Part B 2/2 (p=31 singular skip, expected), Part C 40/40, Part D 8/8. Total 65/65.
+- Added **Proposition 1** (`\label{prop:universal-order2}`) to `paper/structural_completeness.tex`
+  between the CM-73 remark (end of B5) and B6, lines 431–481.
+- Proposition statement: for odd prime p, a₂ ∈ ℤ with p∤a₂, set D=a₂²−4p², sf=sqfree(D),
+  K=Q(√sf), P any prime of O_K above p: (i) [P]²=1 in Cl(K); (ii) p splits in K.
+- Proof is 4-step (β ∈ O_K, N(β)=p², (β)≠(p), ideals), plus inertness/ramification impossibility.
+- Added accompanying remark (Thread 15–16) explaining CM-type constraint for cover attacks.
+- Verified all preamble environments needed (proposition, enumitem) already loaded.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- No LaTeX toolchain in container (pdflatex absent); syntax reviewed manually.
+
+### Findings
+**Proposition** placed at `structural_completeness.tex:431–481`.
+
+**Proof structure (4 steps + 2 impossibility arguments):**
+| Step | Content |
+|------|---------|
+| (A) | β=(-a₂+m√sf)/2 ∈ O_K (satisfies x²+a₂x+p²=0) |
+| (B) | N(β)=p² (product of conjugates) |
+| (C) | (β)≠(p): else p∣a₂, contradiction |
+| (D) | (β)=P² or P̄², so [P]²=1 |
+| (E) | Inertness impossible: (p) is unique ideal of norm p² when p inert, but (β)≠(p) |
+| (F) | Ramification impossible: p∣disc(K) iff p∣sf iff p∣a₂ — excluded |
+
+**CM-type constraint:** for any cover attack exploiting a biquadratic Weil polynomial T⁴+a₂T²+p²
+with p∤a₂, the prime p SPLITS in Q(√sf). Attacks requiring p to be inert are structurally ruled out.
+
+**Empirical count (cumulative):** 82 pairs (p,a₂) verified in Threads 14–16, zero failures.
+
+**Script outputs (this run):**
+- Part A: 15/15 (10 D<0 imag quad + 5 D>0 real quad)
+- Part B: 2/2 (genus-2 curve a₂ from hyperellcharpoly; p=31 skipped — singular curve)
+- Part C: 40/40 (mass sweep, 10 non-norm-form primes × 4 a₂ values)
+- Part D: 8/8 (all confirmed SPLIT, zero inert/ramified)
+
+### Next step proposal
+Thread 18: Check whether the splitting corollary (Proposition part ii) appears in classical
+CM literature (Silverman Advanced Topics §II.10, or Cohen–Strömberg Modern Computational
+Number Theory §5.11). Options:
+- If it appears: add a literature reference to the Proposition remark.
+- If it doesn't: note as a minor novelty in the open-questions section (§"In-scope refinements").
+Concrete task: search for "p splits in imaginary quadratic field" + "Frobenius norm" in
+standard references available via WebSearch/ePrint; write a 3-4 sentence assessment.
+
+Alternatively, if literature check proves fruitless, move to priority-4 thread:
+re-run `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` with seeds 1,2,3
+to confirm whether 384-bit resolution is consistent across 3 seeds.
+
+### Commits made
+TBD (committed below)

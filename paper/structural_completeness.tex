@@ -428,6 +428,58 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal splitting and order-2 ideal in biquadratic CM fields]
+\label{prop:universal-order2}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf} = \mathrm{sqfree}(D)$ and
+$m = \sqrt{D/\mathrm{sf}} \in \ZZ$.  Let $K = \QQ(\sqrt{\mathrm{sf}})$ and
+$P$ any prime of $\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}[(i)]
+  \item $[P]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \emph{splits} in $K$ (is neither inert nor ramified).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2$.
+\begin{itemize}[leftmargin=*]
+\item \emph{$\beta \in \mathcal{O}_K$:} $\beta$ satisfies $x^2 + a_2 x + p^2 = 0$
+      (monic, integer coefficients), so $\beta$ is an algebraic integer.
+\item \emph{$\mathrm{N}_{K/\QQ}(\beta) = p^2$:} the product of conjugates
+      $\tfrac{-a_2 + m\sqrt{\mathrm{sf}}}{2} \cdot \tfrac{-a_2 - m\sqrt{\mathrm{sf}}}{2}
+      = \tfrac{a_2^2 - m^2\,\mathrm{sf}}{4} = \tfrac{a_2^2 - D}{4} = p^2$.
+\item \emph{$(\beta) \neq (p)$:} otherwise $\beta/p \in \mathcal{O}_K$,
+      so $p \mid a_2$---contradicting the hypothesis.
+\item \emph{(i):} Since $\mathrm{N}(\beta) = p^2$ and $(\beta) \neq (p)$,
+      we get $(\beta) = P^2$ or $\bar{P}^2$, hence $[P]^2 = 1$.
+\end{itemize}
+For~(ii): \emph{Inertness} is impossible---when $p$ is inert the unique ideal
+of norm $p^2$ in $\mathcal{O}_K$ is $(p)$, but $(\beta) \neq (p)$.
+\emph{Ramification} of an odd prime $p$ in $K = \QQ(\sqrt{\mathrm{sf}})$ requires
+$p \mid \mathrm{disc}(K)$.  For odd $p$, $\mathrm{disc}(K) \in \{\mathrm{sf}, 4\,\mathrm{sf}\}$
+and $p \mid \mathrm{disc}(K)$ iff $p \mid \mathrm{sf}$.  Since
+$\mathrm{sf} = \mathrm{sqfree}(a_2^2 - 4p^2) \equiv \mathrm{sqfree}(a_2^2) \pmod{p}$,
+we have $p \mid \mathrm{sf}$ iff $p \mid a_2$---again excluded.
+Hence $p$ splits: two distinct primes $P, \bar{P}$ lie above $p$,
+$[P] = [\bar{P}]^{-1}$, and $[P]^2 = 1$.
+\end{proof}
+
+\begin{remark}[Thread~15--16: CM-type constraint for cover attacks]
+Proposition~\ref{prop:universal-order2} is a theorem about quadratic ideals,
+independent of any curve construction.  For abelian surfaces, the biquadratic
+Weil polynomial $T^4 + a_2 T^2 + p^2$ arises precisely when the genus-2 curve
+satisfies $\#C(\FF_p) = p+1$.  The splitting corollary (ii) rules out the CM type
+having $p$ inert in $\QQ(\sqrt{\mathrm{sf}})$, a structural constraint on
+Howe-gluing constructions: any cover attack requiring $p$ to be inert fails for
+all biquadratic Weil polynomials with $p \nmid a_2$.
+
+\emph{Empirical record:} verified for 82 pairs $(p,a_2)$: 25~norm-form primes
+($4p = 73 + 3k^2$, $k \le 199$; script \texttt{thread15\_order2\_algebraic.gp})
+and 57~arbitrary non-norm-form pairs including $D < 0$, $D > 0$, and $a_2$-values
+derived from actual genus-2 curves
+(script \texttt{thread16\_general\_order2.gp}).  Zero failures.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
