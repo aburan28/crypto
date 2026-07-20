@@ -428,6 +428,60 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; $p$ always splits]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$,
+and write $D = \mathit{sf} \cdot m^2$ with $m \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathit{sf}})$ and let $P$ be any prime of $K$ above $p$.
+Then:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item\label{it:order2} $[P]^2 = 1$ in $\Cl(K)$;
+\item\label{it:split} $p$ \emph{splits} in $K$: it is neither inert nor ramified.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.  Then:
+\begin{itemize}
+\item[(A)] $\beta \in \mathcal{O}_K$: it satisfies the monic $\ZZ$-polynomial
+  $x^2 + a_2 x + p^2 = 0$ (check: discriminant $a_2^2 - 4p^2 = \mathit{sf}\cdot m^2$).
+\item[(B)] $N_{K/\QQ}(\beta) = p^2$ (product of conjugates is the constant term).
+\item[(C)] $(\beta) \neq (p)$: if $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$,
+  forcing $p \mid a_2$---excluded.
+\item[(D)] Therefore $(\beta) = P^2$ or $\bar{P}^2$
+  (the only ideals of norm $p^2$ other than $(p)$ when $p$ splits or ramifies),
+  giving $[P]^2 = 1$.  This proves~\ref{it:order2}.
+\end{itemize}
+For~\ref{it:split}: \emph{Inert} is impossible by (C) (if $p$ were inert the only
+ideal of norm $p^2$ would be $(p)$).
+\emph{Ramification} is impossible for odd $p$ with $p \nmid a_2$:
+$p$ ramifies in $K = \QQ(\sqrt{\mathit{sf}})$ iff $p \mid \disc(K)$;
+for odd $p$ this means $p \mid \mathit{sf}$.
+But $\mathit{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, so
+$p \mid \mathit{sf} \Rightarrow p \mid a_2$---excluded.
+Hence $p$ splits into two distinct primes $P, \bar{P}$ and $[P] = [\bar{P}]^{-1}$,
+$[P]^2 = 1$.
+\end{proof}
+
+\begin{remark}[Scope and provenance]
+The proposition is independent of any curve construction: it is a pure
+statement about ideals in quadratic fields.
+It applies to \emph{any} genus-2 Jacobian whose Weil polynomial has the
+biquadratic form $T^4 + a_2 T^2 + p^2$ (equivalently, $\#C(\FF_p) = p+1$).
+Discovered empirically in Thread~14 for norm-form primes ($4p = 73 + 3k^2$,
+$k$ odd) and proved algebraically in Threads~15--16; Threads~15--17 extend it
+to arbitrary $(p, a_2)$ with $p \nmid a_2$, confirming $92/92$ cases in total
+($25$ norm-form, $57$ non-norm-form, $10$ explicit split/ramification checks).
+Scripts: \texttt{secp256k1\_cm\_audit/thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp},
+\texttt{thread17\_splits\_verification.gp}.
+The inertness-exclusion step in (C) does not appear to have a standard reference
+in the classical CM literature (cf.\ Silverman~\cite{silverman2009} AEC
+\S{}II.1--4 and Cohen--Str\"{o}mberg~\cite{cohenstromberg2017} \S{}5.11);
+it may be a minor novelty.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
@@ -845,6 +899,14 @@ related schemes'', in \emph{Crypto 1996}, LNCS 1109, Springer
 point multiplication on elliptic curves with efficient
 endomorphisms'', in \emph{Crypto 2001}, LNCS 2139, Springer (2001),
 190--200.
+
+\bibitem{silverman2009} J.~H.~Silverman, \emph{The Arithmetic of
+Elliptic Curves}, 2nd ed., Graduate Texts in Mathematics 106,
+Springer, New York (2009).
+
+\bibitem{cohenstromberg2017} H.~Cohen, F.~Str\"{o}mberg,
+\emph{Modular Forms: A Classical Approach}, Graduate Studies in
+Mathematics 179, American Mathematical Society (2017).
 
 \end{thebibliography}
 

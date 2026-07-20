@@ -309,18 +309,27 @@ It was discovered empirically in Thread 14 for norm-form primes
 arbitrary (p, a₂) in Threads 15–16.
 
 *Empirical record:* verified for 25 norm-form primes k ≤ 199
-(Thread 15, script `thread15_order2_algebraic.gp`) and for 57
+(Thread 15, script `thread15_order2_algebraic.gp`), for 57
 arbitrary (p, a₂) pairs including non-norm-form primes, D<0 and D>0
 cases, and a₂-values derived from actual genus-2 curves
-(Thread 16, script `thread16_general_order2.gp`). All 82 cases gave
-[P]² = 1 with zero failures.
+(Thread 16, script `thread16_general_order2.gp`), and for 10 explicit
+split-vs-ramification checks (Thread 17, script `thread17_splits_verification.gp`).
+All 92 cases gave [P]² = 1 with zero failures; p splits in all 10
+Thread-17 cases (discriminant check confirms ramification impossible).
+
+**Strengthened corollary (Thread 17):** for odd p with p∤a₂, p *splits*
+(is neither inert nor ramified) in K = Q(√sf). Algebraic proof:
+- inert: excluded by (C) as above.
+- ramified: p | disc(K) iff p | sf; but sf | D = a₂²−4p² ≡ a₂² (mod p),
+  so p | sf ⟹ p | a₂ — excluded. QED.
+This is now Proposition 5.1 in `paper/structural_completeness.tex`.
 
 *Relevance to B5:* the theorem characterises the ideal-theoretic
 footprint of Frobenius on any abelian surface with biquadratic Weil
-polynomial. It does not directly reduce the DLP cost, but it implies
-that every such Jacobian has p splitting (not inert) in the associated
-quadratic field, which constrains the CM types realizable in a cover
-attack.
+polynomial. The splitting result (not just order-2) implies that
+every such Jacobian has p splitting (not inert, not ramified) in the
+associated quadratic field, constraining CM types realizable in a
+cover attack and providing a clean structural corollary for the paper.
 
 ### B6: Diem 2011 sub-exp is inapplicable to prime fields
 
