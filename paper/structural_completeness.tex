@@ -37,8 +37,9 @@
 \newcommand{\Jac}{\operatorname{Jac}}
 \newcommand{\Res}{\operatorname{Res}}
 \newcommand{\disc}{\operatorname{disc}}
-\newcommand{\gcd}{\operatorname{gcd}}
+\renewcommand{\gcd}{\operatorname{gcd}}
 \newcommand{\NS}{\operatorname{NS}}
+\newcommand{\CM}{\mathrm{CM}}
 
 \title{Structural Completeness of Prime-Field Elliptic Curves \\
        Against Isogeny-Graph Cryptanalysis}
@@ -426,6 +427,56 @@ over $\overline{\QQ}$---a computation involving the CM type and the field of
 definition of CM points (see Shimura--Taniyama theory).
 This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up to
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
+\end{remark}
+
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]\label{prop:order2}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Write $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$,
+and set $m = \sqrt{D/\mathit{sf}} \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathit{sf}})$ and $P$ any prime of $\mathcal{O}_K$ above $p$.
+Then:
+\begin{enumerate}[label=\textup{(\alph*)}]
+  \item $[P]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \emph{splits} in $K$: it is neither inert nor ramified.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(a) Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.  The minimal polynomial of $\beta$ over $\ZZ$ is
+$x^2 + a_2 x + p^2 = 0$, so $\beta \in \mathcal{O}_K$ and $N_{K/\QQ}(\beta) = p^2$.
+If $(\beta) = (p)$, then $\beta/p \in \mathcal{O}_K$ forces $p \mid a_2$---contradicting the
+hypothesis.  Hence $(\beta) \neq (p)$, and the only ideal of norm $p^2$ other than $(p)$
+is $P^2$ or $\overline{P}^2$, giving $[P]^2 = 1$.
+
+(b) \emph{Inert impossible}: if $p$ is inert, the only $\mathcal{O}_K$-ideal of norm $p^2$ is $(p)$,
+contradicting (a).
+\emph{Ramified impossible}: for an odd prime $p$, ramification in $K = \QQ(\sqrt{\mathit{sf}})$
+requires $p \mid \mathrm{disc}(K)$.  Since $\mathrm{disc}(K) \mid 4\mathit{sf}$ and
+$p$ is odd, this means $p \mid \mathit{sf}$.
+But $\mathit{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, so $p \mid \mathit{sf}$
+forces $p \mid a_2$---excluded.  Therefore $p$ splits into two distinct primes
+$P, \overline{P}$ with $[P]^2 = 1$.
+\end{proof}
+
+\begin{remark}[Empirical record for Proposition~\ref{prop:order2}]
+The proposition was discovered empirically in Thread~14 for the norm-form family
+$4p = 73 + 3k^2$ (secp256k1 cover primes), proved algebraically in Thread~15 for
+25 norm-form primes $k \le 199$ (script \texttt{thread15\_order2\_algebraic.gp}),
+and generalised in Thread~16 to arbitrary $(p, a_2)$---including $D < 0$, $D > 0$,
+and $a_2$ values from actual genus-2 curve Weil polynomials (script
+\texttt{thread16\_general\_order2.gp}).  Total: 82 cases, 0 failures.
+Thread~17 additionally verified 10 new pairs with $p$ up to $3.2 \times 10^7$
+(script \texttt{thread17\_splitting\_verify.gp}) and confirmed the ramification
+impossibility by exhaustive sweep over all odd $p \le 200$ and $|a_2| \le 50$
+(script \texttt{thread17\_ram\_sweep.gp}): no ramified case found, as the
+proof predicts.
+
+\emph{Relevance to cover attacks}: Proposition~\ref{prop:order2} is a pure statement
+about ideals in quadratic fields, independent of curve constructions.  It implies that
+any abelian surface with biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$ (equivalently,
+a genus-2 curve $C/\FF_p$ with $\#C(\FF_p) = p+1$) has $p$ splitting in the associated
+quadratic CM field.  This constrains the CM types realisable in a cover attack and
+confirms that B5's cost bound is not vacuously avoided by choosing a degenerate CM type.
 \end{remark}
 
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
