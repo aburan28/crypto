@@ -5586,4 +5586,4 @@ Alternatively if GLV-HNP setup is complex: Thread 18b — check whether B5 gener
 to abelian-surface DLPs over F_{p^k} for small k≥2 (Priority 6, last open thread).
 
 ### Commits made
-TBD (commit follows this log append)
+`de7c3bd` autolab 2026-07-20: Thread 17 — p always splits; Prop 5.1 added to LaTeX; 92/92 cases verified
