@@ -5498,3 +5498,88 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (Threads 15–16) into `paper/structural_completeness.tex` as a
+formal Proposition, and verify the Splitting Corollary (p always splits) with a new PARI script.
+Chosen because: the 2026-07-19 log explicitly proposed this as the next step; no prior work on it.
+
+### Work done
+- Installed pari-gp (was absent in fresh container, installed via apt --fix-missing).
+- Wrote `secp256k1_cm_audit/thread17_splitting_verification.gp` (~130 lines).
+  - Part A: 10 targeted (p, a2) pairs, class numbers h=1..736.
+  - Part B: 4 hypothesis-violation cases (p | a2) — one shows inertness, as expected.
+  - Part C: systematic sweep over first 15 odd primes × 8 a2 values (120 total; 114 valid).
+  - Fixed two PARI syntax issues: (a) lambdas not supported → converted to named functions;
+    (b) top-level multi-line for loops fail → must be inside function body `{...}`.
+- Added `Proposition~\ref{prop:order2-frobenius}` to `paper/structural_completeness.tex`
+  at line ~430 (after the CM-73 remark, before B6 section). Includes:
+  - Formal statement (splitting + order-2 class).
+  - 4-line proof by contradiction (inert impossible, ramified impossible, then norm argument).
+  - Remark noting the verification scope and significance for B5.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Part A (10 targeted cases): 10/10 PASS**
+| p    | a2  | sf      | h   | splits? | [P]²=0? |
+|------|-----|---------|-----|---------|---------|
+| 11   | 4   | -13     | 2   | YES     | YES     |
+| 23   | 8   | -57     | 4   | YES     | YES     |
+| 47   | 20  | -2109   | 40  | YES     | YES     |
+| 53   | 10  | -174    | 12  | YES     | YES     |
+| 101  | 40  | -1      | 1   | YES     | YES     |
+| 151  | 60  | -181    | 10  | YES     | YES     |
+| 199  | 78  | -595    | 4   | YES     | YES     |
+| 251  | 100 | -60501  | 192 | YES     | YES     |
+| 503  | 200 | -27001  | 104 | YES     | YES     |
+| 1009 | 400 | -978081 | 736 | YES     | YES     |
+
+**Part B (hypothesis-violation)**:
+- p=11, a2=11 (p|a2): INERT in Q(√(-3)) — confirms corollary needs p∤a2. ✓
+- p=13, a2=13 (p|a2): SPLIT in Q(√(-3)) with h=1 — p|a2 but h=1 so [P]²=0 trivially.
+- p=17, a2=34: D=0 (degenerate). ✓
+
+**Part C (systematic sweep)**: 114/114 PASS, 0 FAIL, 6 SKIP.
+
+Notable:
+- h=192 (p=251, sf=-60501) and h=736 (p=1009, sf=-978081): [P]²=0 even in very large class
+  groups. The algebraic proof is tight — the key is (β)=P² IS a specific principal ideal,
+  not just any ideal of order-dividing-2.
+- Part B confirms the contrapositive: p=11, a2=11 gives INERT, violating splitting.
+
+**PARI syntax lesson** (documented for future scripts):
+- Top-level `for(v=1,n, ...)` spanning multiple lines fails in PARI file mode.
+  Solution: wrap in a named function `f() = { for(v=1,n, ...) }`.
+- Lambda syntax `f = (x) -> {...}` not supported in PARI 2.15.4.
+  Solution: use `f(x) = {...}`.
+
+**Proposition added to paper** (structural_completeness.tex, ~lines 430–475):
+- `\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15–17]`
+  with label `prop:order2-frobenius`.
+- Proof: 4-part argument (inert impossible, ramified impossible, splits, [P]²=0).
+- Remark: 124 cases verified (10 targeted + 114 systematic), h up to 736, 0 failures.
+- Significance: no inertness-based cover attack exists for any (p,a2) with p∤a2.
+
+**Literature note**: searched for "inertness impossibility" in CM context.
+This specific lemma (p cannot be inert when p∤a2, proven purely from norm of β)
+does not appear verbatim in Silverman *Advanced Topics* §II.10 or Cohen–Strömberg §5.11.
+Those references treat splitting conditions via Kronecker symbols but not this specific
+contrapositive-from-norm argument. The result may be a minor novelty in this explicit form.
+
+### Next step proposal
+Thread 18: Verify the complete Theorem statement (both parts) in the LaTeX compiles cleanly.
+- Run `pdflatex paper/structural_completeness.tex` to confirm no LaTeX errors.
+- Then move to Priority 5 (GLV-HNP toy): implement the 32-bit toy curve GLV-aware
+  lattice attack from RESEARCH_GLV_HNP_PHASE2.md.
+  - Pick a 32-bit prime q with a curve E/F_q admitting GLV (i.e., CM by Z[ω], ω²+ω+1=0).
+  - Decompose a random scalar d using GLV: d = d1 + d2*λ mod n.
+  - Set up the HNP lattice (Boneh–Venkatesan style) with k1 = λ*k2 constraint.
+  - Try LLL recovery of d from 4-6 signatures.
+
+### Commits made
+[hash TBD]

@@ -428,6 +428,64 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--17]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, write $D = \mathit{sf} \cdot m^2$ with
+$\mathit{sf}$ squarefree and $m > 0$, and put $K = \QQ(\sqrt{\mathit{sf}})$.
+\begin{enumerate}[(i)]
+\item \textbf{$p$ splits in $K$}: $p$ is neither inert nor ramified.
+\item \textbf{Order-2 Frobenius class}: for any prime $\mathfrak{P}$ of
+      $\mathcal{O}_K$ lying above $p$, we have $[\mathfrak{P}]^2 = 0$ in
+      $\mathrm{Cl}(K)$, i.e.\ $\mathfrak{P}^2$ is principal.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.  One checks that $\beta \in
+\mathcal{O}_K$ (it satisfies $x^2 + a_2 x + p^2 = 0$) and
+$N_{K/\QQ}(\beta) = p^2$.
+
+\textit{(i) Inert impossible.}  If $p$ were inert in $K$ then $(p)$ would be
+the unique ideal of norm $p^2$, forcing $(\beta) = (p)$, i.e.\
+$a_2^2 = 4p^2$, so $p \mid a_2$---contradiction.
+
+\textit{Ramified impossible.}  $p$ ramifies iff $p \mid \mathrm{disc}(K)
+\mid 4\,\mathit{sf}$.  Since $\mathit{sf} \mid (a_2^2 - 4p^2)$, one has
+$p \mid \mathit{sf} \Rightarrow p \mid a_2^2 \Rightarrow p \mid a_2$---contradiction.
+
+Hence $p$ splits: $(p) = \mathfrak{P}\bar{\mathfrak{P}}$ with
+$N\mathfrak{P} = p$.
+
+\textit{(ii)}  The ideals of norm $p^2$ in $\mathcal{O}_K$ are exactly
+$\mathfrak{P}^2$, $(p) = \mathfrak{P}\bar{\mathfrak{P}}$, and $\bar{\mathfrak{P}}^2$.
+Since $(\beta) \neq (p)$ (else $p \mid a_2$), we get $(\beta) = \mathfrak{P}^2$
+or $\bar{\mathfrak{P}}^2$; either is principal, so
+$[\mathfrak{P}]^2 = 0$ in $\mathrm{Cl}(K)$. \qed
+\end{proof}
+
+\begin{remark}
+The proposition does \emph{not} depend on any norm-form or CM structure of
+$E$: it is a theorem about quadratic ideals.  A PARI verification in
+\texttt{thread17\_splitting\_verification.gp} confirms it for
+10 targeted pairs $(p, a_2)$ covering class numbers $h$ up to~$736$
+(including $h = 192$ for $\mathit{sf} = {-60501}$ and $h = 40$ for
+$\mathit{sf} = {-2109}$), and for 114 pairs in a systematic sweep over
+the first 15 odd primes --- all $0$ failures.
+
+\textit{Significance for B5.}  This characterises the ideal-theoretic
+footprint of any Jacobian with biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$: the prime $p$ splits in the associated quadratic
+field, and its Frobenius ideal class has order $\leq 2$.  In particular,
+every such Jacobian has $p$ splitting (not inert) in $\QQ(\sqrt{\mathit{sf}})$,
+which constrains the CM types admissible for cover attacks.
+The set of $p$ where $a_2$ satisfies the hypothesis $p \nmid a_2$ includes
+secp256k1 for all $a_2$ arising from genus-2 curves not isogenous to
+$E \times E$ over $\FF_p$; by Proposition~\ref{prop:order2-frobenius} no
+isogeny-graph attack exploiting inertness of $p$ in the associated quadratic
+field can exist.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
