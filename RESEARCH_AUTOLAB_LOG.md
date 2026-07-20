@@ -5569,4 +5569,4 @@ minor novel corollary worth a footnote. Proposed experiment:
 - If novel in this context, add a brief remark noting it as an observation.
 
 ### Commits made
-[to be filled after commit]
+`7d75913` autolab 2026-07-20: Thread 17 — order-2+splits Prop in paper; 13/13 p-splits verified
