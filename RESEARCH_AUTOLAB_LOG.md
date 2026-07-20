@@ -5498,3 +5498,70 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate the general order-2 Frobenius theorem (Threads 15–16) into
+the ePrint draft `paper/structural_completeness.tex`.
+Chosen because: Thread 16 closed yesterday (2026-07-19) with a clear next-step
+proposal to add Proposition + Corollary to the `.tex`; this is a natural direct
+continuation with well-defined scope.
+
+### Work done
+- Read `paper/structural_completeness.tex` (851 lines before) to locate insertion
+  point: after the CM-73 remark (`\end{remark}` at line 429), before B6.
+- Added `\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:universal-order2}`:
+  statement, 4-step proof (A–D), and `\end{proposition}`.
+- Added `\begin{corollary}[Frobenius splitting]\label{cor:frobenius-split}`:
+  proves p splits (not inert, not ramified) when p∤a₂. Proof: inert excluded by
+  step (C); ramified excluded because p|disc(K) iff p|sf iff p|a₂ (excluded).
+- Added a `\begin{remark}` block under the proposition documenting:
+  (i) empirical record (82 cases, zero failures);
+  (ii) relevance to B5 (constrains CM types for rational (ℓ,ℓ)-kernels);
+  (iii) note on p=2 out of scope;
+  (iv) GLV connection cite (eprint2025705).
+- Added `\subsection*{Recently resolved}` to Open Questions, marking Thread 16 done.
+- Added `\bibitem{eprint2025705}` and `\cite{eprint2025705}` (Breaking ECDSA with
+  Two Affinely Related Nonces, IACR ePrint 2025/705).
+- Updated Reproducibility table: added thread15 (177 LOC) and thread16 (274 LOC);
+  corrected total from ~3533 to ~3984.
+- Ran `cargo test --test curve_audit`: **5/5 pass**.
+- Ran Python structural check on LaTeX: begin/end balance OK; both new labels
+  defined and referenced; bibitem defined and cited.
+
+### Findings
+
+**Content added to paper (102 lines net):**
+
+Proposition (prop:universal-order2):
+> Let p prime, a₂∈ℤ with p∤a₂, a₂≠0. Set D=a₂²−4p², sf=squarefree(D), K=Q(√sf).
+> For any prime ideal 𝔓 of O_K above p: [𝔓]²=1 in Cl(K).
+> Proof: β=(-a₂+m√sf)/2 satisfies x²+a₂x+p²=0 (alg. int.), N(β)=p²,
+> (β)≠(p) since p∤a₂. Hence (β)=𝔓² or 𝔓̄², so [𝔓]²=1. □
+
+Corollary (cor:frobenius-split):
+> p splits in K (not inert: (p) ruled out by proof step C;
+> not ramified: p|disc(K) iff p|a₂, excluded). New result.
+
+**Cross-check:**
+- Labels prop:universal-order2 and cor:frobenius-split: defined=True, referenced=True
+- bibitem eprint2025705: defined=True, cited=True
+- Reproducibility table LOCs match actual file sizes (177, 274 lines confirmed).
+- Paper now 952 lines (was 851 before Thread 17).
+
+### Next step proposal
+Thread 18: Priority-4 task — cross-curve LLL with scaled-GS fix.
+Re-run `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` with 3
+different seeds (only 1 seed was run before). Goal: confirm 384-bit LLL resolves
+consistently across all 3 seeds (prior log showed 1/1 pass; need 3/3). If P-521
+still fails, try target_bits=100 or 80.
+- Why now: Thread 17 (paper integration) is closed. Priority-1 (P-521 bigfloat)
+  remains open but needs rug/MPFR; priority-2 (CHLRS Igusa) requires a literature
+  lookup; priority-3 (Howe sextic twists) needs a PARI session; priority-4 is the
+  most tractable purely-computational task available today.
+
+### Commits made
+`TBD` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius proposition + corollary into ePrint draft

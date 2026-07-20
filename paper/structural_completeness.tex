@@ -428,6 +428,93 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:universal-order2}
+Let $p$ be a prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf}$ be the squarefree part of $D$
+(so $D = \mathrm{sf} \cdot m^2$ for some $m \in \ZZ$),
+and let $K = \QQ(\sqrt{\mathrm{sf}})$.  Let $\mathfrak{P}$ be any prime
+ideal of $\mathcal{O}_K$ above $p$.  Then
+\[
+   [\mathfrak{P}]^2 = 1 \quad \text{in } \Cl(K).
+\]
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2$.  We verify four properties.
+
+(A) \emph{$\beta \in \mathcal{O}_K$.}
+$\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ (monic, $\ZZ$-coefficients),
+so $\beta$ is an algebraic integer in $K$.
+
+(B) \emph{$N_{K/\QQ}(\beta) = p^2$.}
+The conjugate is $\bar\beta = (-a_2 - m\sqrt{\mathrm{sf}})/2$, so
+$\beta\bar\beta = (a_2^2 - m^2\mathrm{sf})/4 = (a_2^2 - D)/4 = p^2$.
+
+(C) \emph{$(\beta) \neq (p)$ in $\mathcal{O}_K$.}
+Were $(\beta) = (p)$, then $\beta/p \in \mathcal{O}_K$,
+forcing $p \mid a_2$---contradicting the hypothesis.
+
+(D) \emph{Conclusion.}
+Since $N(\beta) = p^2$, the ideal $(\beta)$ is a product of primes above $p$
+with total norm $p^2$.  Because $(\beta) \neq (p)$, the only possibility is
+$(\beta) = \mathfrak{P}^2$ or $\overline{\mathfrak{P}}^2$ (where
+$\overline{\mathfrak{P}}$ is the conjugate prime above $p$).
+Hence $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.
+\end{proof}
+
+\begin{corollary}[Frobenius splitting]\label{cor:frobenius-split}
+Under the hypotheses of Proposition~\ref{prop:universal-order2},
+the prime $p$ \emph{splits} in $K$: it is neither inert nor ramified.
+\end{corollary}
+
+\begin{proof}
+\emph{Inert excluded}: if $p$ were inert, the unique prime above $p$
+would be $(p)$ itself, contradicting (C) of the proof above.
+
+\emph{Ramified excluded (odd $p$)}: $p$ ramifies in $K = \QQ(\sqrt{\mathrm{sf}})$
+iff $p \mid \disc(K)$.  For odd $p$, $\disc(K)$ equals $\mathrm{sf}$ or $4\,\mathrm{sf}$,
+so $p \mid \disc(K)$ iff $p \mid \mathrm{sf}$.
+But $\mathrm{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, so
+$p \mid \mathrm{sf}$ implies $p \mid a_2$---excluded by hypothesis.
+Hence $p$ splits into two distinct primes $\mathfrak{P},\overline{\mathfrak{P}}$
+and $[\mathfrak{P}][\overline{\mathfrak{P}}] = 1$, $[\mathfrak{P}]^2 = 1$.
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:universal-order2} is a theorem about ideals in
+quadratic fields, independent of any specific curve construction.
+It was discovered empirically in Thread~14 (norm-form primes
+$4p = 73 + 3k^2$), proved algebraically in Thread~15
+(script \texttt{thread15\_order2\_algebraic.gp}),
+and generalised to arbitrary $(p, a_2)$ in Thread~16
+(script \texttt{thread16\_general\_order2.gp}).
+Verified for 82 pairs spanning: norm-form primes $k \le 199$,
+non-norm-form primes with $D < 0$ and $D > 0$,
+and $(p, a_2)$ derived from actual genus-2 curves.
+Zero failures across all 82 cases.
+
+\emph{Relevance to B5.}
+The proposition constrains the CM types realizable in a cover attack:
+for any genus-2 Jacobian with Weil polynomial $T^4 + a_2 T^2 + p^2$
+and $p \nmid a_2$, the prime $p$ must split (not be inert or ramified)
+in $\QQ(\sqrt{\mathrm{sf}})$.  This is a necessary condition for
+the construction of rational $(\ell,\ell)$-kernels; the obstruction
+deepens Corollary~\ref{cor:b5-univ} at the arithmetic level.
+
+\emph{Note on $p = 2$.}  For $p = 2$ the discriminant criterion
+involves $\mathrm{sf} \equiv 2$ or $3 \pmod 4$, requiring separate
+treatment; all curves in this paper have $p \gg 2$, so $p = 2$ is
+out of scope.
+
+\emph{Connection to GLV decomposition.}
+For curves with CM (such as secp256k1) the GLV scalar decomposition
+writes $k = k_1 + k_2 \lambda$ with $k_1, k_2 \approx \sqrt{n}$.
+The affine-nonce relation $k_1 = \lambda k_2$ is a special case of
+the two-affinely-related-nonce scenario studied in~\cite{eprint2025705};
+Proposition~\ref{prop:universal-order2} characterises the ambient
+quadratic field in which the Frobenius endomorphism $\lambda$ lives.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
@@ -716,6 +803,15 @@ is the plain Pollard~$\rho$ cost.
 
 \section{Open questions}
 
+\subsection*{Recently resolved}
+\begin{itemize}
+\item \textbf{Order-2 Frobenius ideal (Proposition~\ref{prop:universal-order2})}.
+      Threads~14--16: it was open whether $[\mathfrak{P}]^2 = 1$ holds beyond the
+      norm-form CM-73 family.  Proved algebraically (4-step ideal argument, no curve
+      hypothesis) and verified empirically across 82 pairs.
+      Corollary~\ref{cor:frobenius-split} (p always splits when $p \nmid a_2$) is new.
+\end{itemize}
+
 \subsection*{In-scope: refinements of the theorem}
 \begin{itemize}
 \item Tightening B5: is the $O(p^{2 - 2/g})$ Gaudry bound tight?
@@ -773,8 +869,10 @@ File & LOC \\
 \texttt{glv\_hnp\_phase1.gp} & 180 \\
 \texttt{fp3\_obstruction\_secp256k1.gp} & 200 \\
 \texttt{igusa\_f43\_howe.gp} & 58 \\
+\texttt{thread15\_order2\_algebraic.gp} & 177 \\
+\texttt{thread16\_general\_order2.gp} & 274 \\
 \midrule
-\textbf{Total} & \textbf{$\approx 3533$} \\
+\textbf{Total} & \textbf{$\approx 3984$} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -845,6 +943,9 @@ related schemes'', in \emph{Crypto 1996}, LNCS 1109, Springer
 point multiplication on elliptic curves with efficient
 endomorphisms'', in \emph{Crypto 2001}, LNCS 2139, Springer (2001),
 190--200.
+
+\bibitem{eprint2025705} Anonymous, ``Breaking ECDSA with Two Affinely
+Related Nonces'', IACR ePrint 2025/705 (2025).
 
 \end{thebibliography}
 
