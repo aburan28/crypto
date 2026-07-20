@@ -5564,4 +5564,4 @@ Thread 18: Clean up and cross-reference.
   not fully resolved for h>1 real quadratic fields.
 
 ### Commits made
-(to be filled after commit)
+`6c0dd6d` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius prop into paper; 95/95 cases verified
