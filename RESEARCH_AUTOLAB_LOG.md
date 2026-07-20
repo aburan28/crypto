@@ -5581,4 +5581,4 @@ stated in the literature.
   work since Thread 9.
 
 ### Commits made
-[to be filled after commit]
+`e696137` autolab 2026-07-20: Thread 17 — formal Proposition for universal order-2 Frobenius; 192/192 splits verified
