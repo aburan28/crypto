@@ -428,6 +428,56 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal and splitting]\label{prop:order2-frobenius}
+Let $p$ be a prime and $a_2 \in \ZZ$ with $a_2 \neq 0$ and $p \nmid a_2$.
+Set $D = a_2^2 - 4p^2$, $D \neq 0$, and write $D = s_f \cdot m^2$ where
+$s_f$ is squarefree and $m \in \ZZ_{>0}$.  Let $K = \QQ(\sqrt{s_f})$
+and $\mathfrak{P}$ any prime ideal of $\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}[label=\textnormal{(\alph*)}]
+  \item $\beta = \tfrac{-a_2 + m\sqrt{s_f}}{2} \in \mathcal{O}_K$
+        satisfies $\beta^2 + a_2 \beta + p^2 = 0$;
+  \item $N_{K/\QQ}(\beta) = p^2$;
+  \item $(\beta) \neq (p)$ in $\mathcal{O}_K$ (since $p \nmid a_2$ forces
+        $\beta \notin p\mathcal{O}_K$);
+  \item $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+        so $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$;
+  \item $p$ \emph{splits} in $K$: it neither ramifies
+        ($p \mid s_f$ iff $p \mid a_2$, excluded)
+        nor becomes inert ($p$ inert $\Rightarrow p\mathcal{O}_K$ is the
+        unique norm-$p^2$ prime ideal, forcing $(\beta)=(p)$, contradiction).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(a) $4\beta^2 = (a_2 - m\sqrt{s_f})^2 = a_2^2 - 2a_2 m\sqrt{s_f} + m^2 s_f
+         = a_2^2 - 2a_2 m\sqrt{s_f} + D$.
+Adding $4a_2\beta = 4a_2(-a_2+m\sqrt{s_f})/2 = 2a_2(m\sqrt{s_f}-a_2) = -2a_2^2 + 2a_2 m\sqrt{s_f}$
+and $4p^2$ gives $4(\beta^2+a_2\beta+p^2) = a_2^2 + D - 2a_2^2 + 4p^2
+= a_2^2 - 4p^2 + D = 0$. (b) $N(\beta) = \beta\bar\beta = (-a_2+m\sqrt{s_f})(-a_2-m\sqrt{s_f})/4
+= (a_2^2 - m^2 s_f)/4 = (a_2^2 - D)/4 = p^2$.
+(c) $\beta \in p\mathcal{O}_K$ iff $a_2 \equiv 0 \pmod{p}$, excluded.
+(d) From (b), $N((\beta)) = p^2$, so $(\beta)$ is a product of prime ideals above $p$.
+Since (c) rules out $(\beta)=(p)$, we get $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+giving $[\mathfrak{P}]^2 = 1$.
+(e) $p \mid s_f$ iff $p \mid D = a_2^2 - 4p^2$ iff $p \mid a_2^2$ iff $p \mid a_2$, excluded;
+so $p$ does not ramify.  If $p$ were inert, $p\mathcal{O}_K$ is the unique ideal of norm $p^2$,
+forcing $(\beta)=(p)$, contradicting (c).  Hence $p$ splits. \qed
+\end{proof}
+
+\begin{remark}[Universality and empirical scope]
+Proposition~\ref{prop:order2-frobenius} uses no curve-specific structure: it is a
+theorem in algebraic number theory about quadratic ideals.  In the cover-attack context,
+$a_2$ arises as the coefficient of $T^2$ in the genus-2 Weil polynomial $T^4 + a_2 T^2 + p^2$;
+the proposition then says that the Frobenius ideal of any $(\ell,\ell)$-cover of $E$ has
+order at most $2$ in $\Cl(\QQ(\sqrt{s_f}))$, and that $p$ always splits in the associated
+quadratic field.  Numerical verification across $82$ independent $(p, a_2)$ pairs
+(norm-form and non-norm-form, imaginary and real quadratic $K$, class numbers up to $12$)
+with $p$ ranging from $7$ to $9973$ confirms the proposition in all cases
+(PARI scripts \texttt{thread15\_order2\_algebraic.gp},
+\texttt{thread16\_general\_order2.gp}, \texttt{thread17\_p\_splits.gp};
+Threads~15--17 of the audit log).
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for

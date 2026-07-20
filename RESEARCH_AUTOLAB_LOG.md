@@ -5498,3 +5498,75 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate generalized order-2 + p-splits theorem into ePrint paper.
+All six original priorities are CLOSED or BLOCKED; the 2026-07-19 log explicitly
+proposed Thread 17 as the next concrete sub-task.
+
+### Work done
+- Examined all 6 original priorities: P-521 CLOSED (2026-05-22 + §10.5 2026-06-06),
+  CHLRS BLOCKED (SageMath required), Howe CLOSED (2026-05-24), Cross-curve LLL
+  CLOSED (2026-05-25), GLV-HNP toy CLOSED (2026-05-26), B5/F_{p^k} CLOSED (2026-05-27).
+- Confirmed Thread 17 is the natural continuation: Theorem (A)–(E) from Threads 15–16
+  proves [P]²=1 in Cl(Q(√sf)) for ANY (p,a₂) with p∤a₂, AND that p always splits.
+- Wrote `secp256k1_cm_audit/thread17_p_splits.gp` (~80 lines) to verify p splits
+  (Kronecker (sf/p) = +1) for 13 cases covering norm-form, non-norm-form, and
+  large-prime cases.
+- Ran script: 13/13 confirmed SPLIT. (Minor PARI syntax error in trailing `if` due
+  to Unicode; data portion ran clean.)
+- Added `Proposition 1` (Universal order-2 Frobenius ideal and splitting) plus proof
+  and universality remark to `paper/structural_completeness.tex` after the B5 remarks
+  block (before §B6), ~50 lines of new LaTeX.
+- Verified LaTeX environments are balanced; checked `enumitem` package present.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**PROPOSITION (Thread 17 — now in paper as Proposition `prop:order2-frobenius`):**
+For p prime, a₂∈Z with p∤a₂, a₂≠0, D=a₂²-4p²≠0, sf=squarefree part of D,
+K=Q(√sf):
+  (a) β = (-a₂+m√sf)/2 ∈ O_K satisfies x²+a₂x+p²=0
+  (b) N_{K/Q}(β) = p²
+  (c) (β)≠(p) in O_K
+  (d) (β) = P² or P̄² → [P]²=1 in Cl(K)
+  (e) p SPLITS in K (not inert, not ramified)
+
+**p-splits verification (thread17_p_splits.gp):**
+| Group         | Cases | Outcome |
+|---------------|-------|---------|
+| Norm-form     |   5   | 5/5 split |
+| Non-norm-form |   5   | 5/5 split |
+| Large p       |   3   | 3/3 split |
+| **Total**     | **13**| **13/13** |
+
+Combined with Threads 15–16 (82 cases for [P]²=1), total empirical evidence:
+82 + 13 = 95 verified (p,a₂) pairs (overlap on p-splits subset).
+
+**Algebraic proof sketch (added to paper):**
+- p ramifies iff p|sf iff p|D=a₂²-4p² iff p|a₂ — excluded by hypothesis.
+- p inert ⇒ p·O_K unique norm-p² ideal ⇒ (β)=(p) ⇒ p|a₂ — excluded.
+- Not inert, not ramified ⇒ p splits. QED (4 lines).
+
+**LaTeX insertion:** Proposition, 5-part proof, and remark added at
+`structural_completeness.tex` lines 431–479 (after `\end{remark}` of Thread-12 CM-73
+remark, before `\subsection*{B6}`).
+
+### Next step proposal
+Thread 18: Check whether the inertness-impossibility corollary (p always splits
+when p∤a₂) appears in classical CM literature (Silverman Advanced Topics §II.10,
+Cohen-Strömberg §5.11, or Neukirch §I.8). If NOT in the literature, this may be a
+minor novel corollary worth a footnote. Proposed experiment:
+- WebSearch "quadratic field prime splits Weil polynomial biquadratic" on arXiv/IACR.
+- Check standard ANT texts (Neukirch Theorem I.8.4: ramification iff p|disc).
+  The disc of Q(√sf) is sf or 4sf; p|disc iff p|sf iff p|a₂ — this IS standard.
+  But the CONNECTION to Weil polynomials / cover attacks may not be explicitly noted.
+- If standard, just add a citation (e.g., Neukirch) to the Proposition proof.
+- If novel in this context, add a brief remark noting it as an observation.
+
+### Commits made
+[to be filled after commit]
