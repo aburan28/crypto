@@ -5581,4 +5581,4 @@ order-2 constraint, not just principality of P.
   this may be a minor novelty worth a footnote in the ePrint.
 
 ### Commits made
-TBD (will be filled after git commit)
+`a9840fb` autolab 2026-07-20: Thread 17 — add Proposition (order-2 Frobenius) to LaTeX; 15 new cases 97/97 total
