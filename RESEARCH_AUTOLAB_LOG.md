@@ -5498,3 +5498,86 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (16) into the TeX paper draft.
+Chosen because: Thread 16 (2026-07-19) made measurable progress (82/82 cases; algebraic
+proof complete) and explicitly proposed Thread 17 as the next concrete step.
+
+### Work done
+- Located actual TeX paper at `paper/structural_completeness.tex` (not `eprint_combined.tex`
+  which does not exist; the log's prior reference was aspirational).
+- Verified `paper/eprint_combined.tex` absent; `paper/structural_completeness.tex` is the
+  active draft (851 lines). The B5 remark (lines 361–429) already contained Threads 11–14
+  material but had NO Thread 15/16 content in the TeX (only in PAPER_STRUCTURAL_COMPLETENESS.md).
+- Added three new LaTeX environments after line 429 (`\end{remark}`), before B6 subsection:
+  1. `\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15–16]` — clean 4-step
+     proof (A)–(D) with `enumerate[(A)]`, using `\mathfrak{P}`, `\mathcal{O}_K`, `\Cl`.
+  2. `\begin{corollary}[p splits in K; Thread 16]` — proves inertness and ramification
+     both impossible when p∤a₂ (odd p).
+  3. `\begin{remark}[Empirical record and relevance to B5]` — cites threads 14/15/16,
+     all 82 cases, and states the B5 relevance.
+- All existing theorem environments (`proposition`, `corollary`, `remark`) already declared
+  in preamble; no new macros needed. `enumitem` package already loaded.
+- Removed spurious `\qed` inside the `proof` environment (auto-supplied by amsthm).
+- Wrote `secp256k1_cm_audit/thread17_split_verify.gp`:
+  - Checks 3 conditions for each of 10 (p, a₂) pairs: p∤disc(K), kron(sf,p)=+1, [P]²=1.
+  - Includes 2 D>0 cases (a₂>2p: p=113 a₂=227; p=131 a₂=263).
+  - Output: 10/10 PASS.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- Literature check: could not access Silverman Advanced Topics or Cohen-Strömberg (no
+  physical copies, no internet). The splitting corollary (p always splits when p∤a₂ for
+  biquadratic Weil poly) may be a known folk theorem in CM theory; BLOCKED: needs library
+  access to confirm novelty.
+
+### Findings
+
+**Thread 17 PARI output (all 10 cases):**
+```
+PASS  p=11  a2=3   sf=-19    kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=17  a2=5   sf=-1131  kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=23  a2=7   sf=-2067  kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=41  a2=9   sf=-6643  kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=53  a2=11  sf=-1235  kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=67  a2=13  sf=-3     kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=97  a2=19  sf=-1491  kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=101 a2=21  sf=-40363 kron=1  p!|disc=1  [P]^2=1=1
+PASS  p=113 a2=227 sf=453    kron=1  p!|disc=1  [P]^2=1=1   (D>0)
+PASS  p=131 a2=263 sf=21     kron=1  p!|disc=1  [P]^2=1=1   (D>0)
+Summary: 10/10 passed
+```
+
+**Total empirical record (Threads 14–17):**
+| Source            | Cases | Passed | Notes                        |
+|-------------------|-------|--------|------------------------------|
+| Thread 15 (norm-form k≤199) | 25 | 25 | Algebraic proof, norm-form primes |
+| Thread 16 Part A–D          | 57 | 57 | Non-norm-form, D<0 and D>0   |
+| Thread 17                   | 10 | 10 | Incl. D>0 (a₂>2p); kron check |
+| **Total**                   | **92** | **92** | **0 failures** |
+
+**TeX integration (lines added to paper/structural_completeness.tex):**
+- Proposition~\ref{prop:order2-frobenius}: labels `prop:order2-frobenius`
+- Corollary~\ref{cor:p-splits}: labels `cor:p-splits`  
+- Remark: empirical record + B5 relevance.
+- All uses: `\mathfrak{P}`, `\mathcal{O}_K`, `\Cl(\mathcal{O}_K)`, `\QQ(\sqrt{\mathit{sf}})`.
+
+**Key algebraic observation (Corollary proof):**
+p ramifies in K = Q(√sf) iff p | disc(K). For odd p, disc(K) | 4sf, so p | disc iff p | sf.
+Now sf = sqfree(D), D = a₂²−4p² ≡ a₂² (mod p), so p|D iff p|a₂ — excluded.
+Therefore: p never ramifies. Combined with inertness impossible → p always SPLITS.
+This is algebraically complete; the PARI check is purely confirmatory.
+
+### Next step proposal
+Thread 18: GLV-HNP Phase 2 toy (Priority 5 from system prompt, never attempted).
+- Build a 32-bit toy curve with GLV endomorphism (small CM discriminant, e.g. D=-3 or D=-7).
+- Recover a 32-bit private key d using the GLV-aware HNP lattice from RESEARCH_GLV_HNP_PHASE2.md.
+- Expected output: lattice dimension, number of signatures needed, recovered d (yes/no).
+- Rationale: Threads 11–17 have all been algebraic structure work; time to pick up the
+  computational attack thread that's been pending since Priority 5 was opened.
+
+### Commits made
+(to be filled after commit)

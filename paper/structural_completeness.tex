@@ -428,6 +428,74 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]\label{prop:order2-frobenius}
+Let $p$ be a prime, $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$,
+$m = \sqrt{D/\mathit{sf}} \in \ZZ$, and $K = \QQ(\sqrt{\mathit{sf}})$.
+For any prime ideal $\mathfrak{P}$ of $\mathcal{O}_K$ above $p$,
+\[
+  [\mathfrak{P}]^2 = 1 \quad\text{in } \Cl(\mathcal{O}_K).
+\]
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.
+\begin{enumerate}[(A)]
+  \item $\beta \in \mathcal{O}_K$: it satisfies $x^2 + a_2 x + p^2 = 0$,
+        a monic polynomial with integer coefficients.
+  \item $N_{K/\QQ}(\beta) = p^2$ (product of conjugates is the constant term).
+  \item $(\beta) \neq (p)$ in $\mathcal{O}_K$: if $(\beta) = (p)$ then
+        $\beta/p \in \mathcal{O}_K$, forcing $p \mid a_2$---contradicting the
+        hypothesis.
+  \item Therefore $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+        giving $[\mathfrak{P}]^2 = 1$ in $\Cl(\mathcal{O}_K)$.
+\end{enumerate}
+\end{proof}
+
+\begin{corollary}[$p$ splits in $K$; Thread~16]\label{cor:p-splits}
+Under the same hypotheses (with $p$ odd), $p$ \emph{splits} in $K$:
+it is neither inert nor ramified.  Consequently there exist two distinct
+prime ideals $\mathfrak{P}, \bar{\mathfrak{P}}$ of $\mathcal{O}_K$ above $p$
+with $[\mathfrak{P}] = [\bar{\mathfrak{P}}]^{-1}$ and $[\mathfrak{P}]^2 = 1$.
+\end{corollary}
+
+\begin{proof}
+\emph{Inertness impossible.}  If $p$ were inert the unique prime of
+$\mathcal{O}_K$ above $p$ would be $(p)$ itself, contradicting step~(C).
+
+\emph{Ramification impossible (odd $p$).}  $p$ ramifies in $K = \QQ(\sqrt{\mathit{sf}})$
+iff $p \mid \disc(K)$.  For odd $p$, $\disc(K) \mid 4\mathit{sf}$ with
+$\mathit{sf}$ squarefree, so $p \mid \disc(K)$ iff $p \mid \mathit{sf}$.
+Since $D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, we have
+$p \mid D$ iff $p \mid a_2$---excluded by hypothesis.
+(The case $p = 2$ requires separate treatment via the full discriminant
+criterion; all primes in this paper are large odd primes.)
+
+Hence $p$ splits into two distinct primes, and the rest follows from
+Proposition~\ref{prop:order2-frobenius}.
+\end{proof}
+
+\begin{remark}[Empirical record and relevance to B5]
+Proposition~\ref{prop:order2-frobenius} is independent of any curve
+construction---it is a pure statement about ideals in quadratic fields.
+It was discovered empirically in Thread~14 (norm-form primes
+$4p = 73 + 3k^2$), proved algebraically in Thread~15
+(\texttt{thread15\_order2\_algebraic.gp}, 25 norm-form primes, $k \leq 199$),
+and generalised to arbitrary $(p, a_2)$ pairs in Thread~16
+(\texttt{thread16\_general\_order2.gp}, 57 additional pairs including
+non-norm-form primes and both $D < 0$ and $D > 0$ cases).
+All 82 tested cases give $[\mathfrak{P}]^2 = 1$ with zero failures.
+
+The proposition constrains the CM types realisable in a cover attack:
+every genus-2 Jacobian $J/\FF_p$ whose Weil polynomial has the
+biquadratic form $T^4 + a_2 T^2 + p^2$ has $p$ splitting (not inert,
+not ramified) in its associated CM field $K$.  This does not reduce
+the DLP cost---block~B5 already rules out cover speedups on a
+group-order basis---but it is a \emph{necessary} structural condition
+on any cover whose Frobenius satisfies the biquadratic Weil-polynomial
+shape, and it may constrain future CM-type searches.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
