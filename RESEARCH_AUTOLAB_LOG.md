@@ -5571,3 +5571,5 @@ Thread 18: Verify Proposition~\ref{prop:order2-frob} is not already in the CM li
 
 ### Commits made
 [pending — see below]
+
+`c38ddf3` autolab 2026-07-20: Thread 17 — Prop/Cor/Rem for universal order-2 Frobenius ideal in paper
