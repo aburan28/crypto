@@ -5582,4 +5582,4 @@ Thread 18: Verify the complete Theorem statement (both parts) in the LaTeX compi
   - Try LLL recovery of d from 4-6 signatures.
 
 ### Commits made
-[hash TBD]
+`0019590` autolab 2026-07-20: Thread 17 — Splitting Corollary; formal Proposition in paper; 124/124 PASS
