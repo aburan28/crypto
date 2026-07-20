@@ -5498,3 +5498,78 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17: integrate the order-2 Frobenius theorem (Threads 15–16) into the LaTeX ePrint
+draft. All six original priority threads are CLOSED/BLOCKED as of 2026-07-08; Thread 16
+(2026-07-19, yesterday) made measurable progress (82/82 verified) and explicitly proposed
+Thread 17 as the next concrete step.
+
+### Work done
+- Read `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 remark (lines 273–323): found the full
+  theorem statement, proof (A)-(D), splitting corollary, empirical record, and relevance note.
+- Confirmed the result is NOT yet in `paper/structural_completeness.tex` — only in the
+  markdown notes. The LaTeX at that point had only a one-sentence mention at line 419
+  (same ideal class of order 2 in Cl(Z[(1+√-219)/2]) ≅ Z/4Z), not the general theorem.
+- Inserted `\begin{proposition}...\end{proposition}`, `\begin{proof}...\end{proof}`, and
+  `\begin{remark}[Scope and significance]...\end{remark}` into
+  `paper/structural_completeness.tex` at lines 431–478 (between the CM-73 remark and the
+  B6 subsection).
+- Corrected `\PP` (undefined macro) to `\mathfrak{p}` (standard ideal notation, defined
+  via amssymb in the preamble).
+- Verified all macros used are defined: `\mathit{sf}`, `\mathfrak{p}`, `\bar{\mathfrak{p}}`,
+  `\mathcal{O}_K`, `\ZZ`, `\QQ`, `\Cl`, `\disc` — all present in preamble or standard.
+- All environments (`proposition`, `proof`, `remark`) are declared in the preamble via
+  `\newtheorem{proposition}[theorem]{Proposition}` etc.
+- Ran `cargo test --test curve_audit`: 5/5 pass (unchanged).
+- No pdflatex available in container; verified by reading preamble and macros manually.
+- Checked Open Questions section: no entry needed for this proposition (it's a proved result
+  within B5, not an open question).
+- Secondary check (Thread 17 proposal): whether the inertness-impossibility appears in
+  Silverman or Cohen-Strömberg. No citation added — could not verify classical source
+  in this environment. Left remark with empirical record only; the proof is self-contained.
+
+### Findings
+
+**LaTeX insertion: Proposition 1 (Universal order-2 Frobenius ideal; Threads 15–16)**
+
+Inserted at `paper/structural_completeness.tex` lines 431–478.
+
+Statement (verbatim from insertion):
+> Let p be an odd prime and a₂ ∈ Z with p∤a₂ and a₂≠0.
+> Set D=a₂²-4p², sf=squarefree part of D, m=√(D/sf) ∈ Z.
+> Let K=Q(√sf) and 𝔭 any prime of K above p.
+> Then [𝔭]²=1 in Cl(K). Moreover, p splits in K.
+
+Proof sketch (A)-(D):
+- Set β=(-a₂+m√sf)/2 ∈ O_K (satisfies x²+a₂x+p²=0).
+- N(β)=p². (β)≠(p) because β/p ∈ O_K ⟹ p|a₂ (excluded).
+- ∴ (β)=𝔭² or 𝔭̄², so [𝔭]²=1.
+- Inert impossible: only ideal of norm p² when inert is (p), excluded.
+- Ramified impossible (odd p): p|disc(K) ⟺ p|sf ⟺ p|a₂, excluded.
+
+Empirical record cited: 82 cases, 0 failures (scripts thread15_order2_algebraic.gp,
+thread16_general_order2.gp).
+
+Relevance-to-B5 remark: theorem constrains CM types realizable in a cover attack;
+does not reduce DLP cost; structural invariant complementary to Cor. cor:b5-univ.
+
+**Test results:** `cargo test --test curve_audit` → 5/5 pass.
+
+### Next step proposal
+Thread 18: ePrint literature check — does the splitting corollary (p always splits when
+p∤a₂ in Q(√sf) for biquadratic Weil polynomials) appear in standard CM references?
+Candidates: Silverman "Advanced Topics in the Arithmetic of Elliptic Curves" §II.10,
+Cohen-Strömberg "Modular Forms" §5.11, or Neukirch "Algebraic Number Theory" §I.8.
+If the result is classical, add a `\cite{...}` in the remark's statement; if not,
+note it as a minor novelty in the Open Questions section.
+Alternatively: propose Thread 18 as the GLV-HNP Phase 2 toy (original Priority 5),
+which has been deferred since Priority 1 was closed. Now that all algebraic threads
+are nearing stabilization, a concrete computational experiment is high-value.
+
+### Commits made
+(to be filled after commit)

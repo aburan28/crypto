@@ -428,6 +428,56 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$, and
+$m = \sqrt{D/\mathit{sf}} \in \ZZ$.  Let $K = \QQ(\sqrt{\mathit{sf}})$ and
+$\mathfrak{p}$ any prime of $K$ above $p$.  Then $[\mathfrak{p}]^2 = 1$ in $\Cl(K)$.
+Moreover, $p$ \emph{splits} in $K$ (it is neither inert nor ramified).
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.  Then:
+(A)~$\beta \in \mathcal{O}_K$, since $\beta$ satisfies
+$x^2 + a_2 x + p^2 = 0$ (a monic polynomial with $\ZZ$-coefficients,
+as $(-a_2)^2 - 4p^2 = D = \mathit{sf} \cdot m^2$).
+(B)~$N_{K/\QQ}(\beta) = p^2$.
+(C)~$(\beta) \neq (p)$: the equation $(\beta) = (p)$ would require
+$\beta/p \in \mathcal{O}_K$, forcing $p \mid a_2$---contradicting the hypothesis.
+(D)~Therefore $(\beta) = \mathfrak{p}^2$ or $\bar{\mathfrak{p}}^2$,
+so $[\mathfrak{p}]^2 = 1$.
+For the splitting claim: \emph{inert} is impossible, since if $p$ were inert
+the only $\mathcal{O}_K$-ideal of norm $p^2$ would be $(p)$, contradicting~(C).
+\emph{Ramified} is impossible for odd $p$: $p$ ramifies in $K = \QQ(\sqrt{\mathit{sf}})$
+iff $p \mid \disc(K)$, and for odd $p$ this holds iff $p \mid \mathit{sf}$.
+But $\mathit{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$, so
+$p \mid \mathit{sf}$ forces $p \mid a_2$---excluded.
+Hence $p$ splits into two distinct primes $\mathfrak{p}, \bar{\mathfrak{p}}$ with
+$[\mathfrak{p}] = [\bar{\mathfrak{p}}]^{-1}$ and $[\mathfrak{p}]^2 = 1$. \qed
+\end{proof}
+
+\begin{remark}[Scope and significance]
+Proposition~\ref{prop:order2-frobenius} is independent of any curve construction:
+it is a pure statement about ideals in quadratic fields $K = \QQ(\sqrt{\mathit{sf}})$
+(imaginary or real, according to the sign of $\mathit{sf}$).
+It was discovered empirically in Thread~14 for norm-form primes ($4p = 73 + 3k^2$,
+$k$ odd) and proved algebraically in Threads~15--16.
+Numerically verified for $82$ independent $(p, a_2)$ pairs: $25$ norm-form
+primes $k \le 199$ (script \texttt{thread15\_order2\_algebraic.gp}) and $57$
+arbitrary pairs including non-norm-form primes, real and imaginary $K$,
+and $a_2$ values from actual genus-2 curves
+(\texttt{thread16\_general\_order2.gp}); zero failures across all $82$ cases.
+
+\smallskip\noindent\textit{Relevance to B5.}
+The proposition characterises the ideal-theoretic footprint of Frobenius
+on any abelian surface with biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$.
+It does not directly reduce the DLP cost, but it implies that for every such
+Jacobian the prime $p$ splits (not inert) in the associated quadratic field,
+constraining the CM types realisable in a cover attack and providing a
+structural invariant complementary to Corollary~\ref{cor:b5-univ}.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
