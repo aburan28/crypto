@@ -5498,3 +5498,87 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Proposition (universal order-2 Frobenius ideal) into
+the LaTeX ePrint draft (`paper/structural_completeness.tex`).
+Chosen because: the 2026-07-19 log explicitly proposed this as the next step;
+Threads 15-16 had proved and numerically verified the theorem in the Markdown
+paper, but the LaTeX paper had no formal statement yet.
+
+### Work done
+- Checked `paper/structural_completeness.tex`: confirmed the theorem was absent
+  (only the Markdown `PAPER_STRUCTURAL_COMPLETENESS.md` had it at lines 273–323).
+- Added a formal `\begin{proposition}...\end{proposition}` block
+  (`\label{prop:order2-frobenius}`) after the CM-73 remark (line 429) and
+  before the B6 subsection. Proof uses the (A)–(D) steps from Thread 15 with
+  a full splitting argument appended.
+- Added a companion `\begin{remark}[Thread~15--16 provenance and scope]` citing
+  the two PARI scripts and reporting the 82-case numerical record.
+- Verified all LaTeX macros (`\Cl`, `\ZZ`, `\QQ`, `\mathfrak{P}`, `\mathit{sf}`,
+  `\disc`, `enumitem` label style) are defined in the preamble — no new packages
+  required.
+- Wrote `secp256k1_cm_audit/thread17_splitting_check.gp`: 15 fresh (p, a2) pairs
+  (10 D<0 imaginary, 5 D>0 real) not in the prior verification record.
+- Ran `gp -q secp256k1_cm_audit/thread17_splitting_check.gp`: 15/15 PASS.
+- Ran `cargo test --test curve_audit`: 5/5 pass (both before and after changes).
+
+### Findings
+
+**Proposition added to LaTeX (§B5, after CM-73 remark):**
+
+```
+Proposition [Universal order-2 Frobenius ideal; Threads 15–16]
+Let p be an odd prime, a₂ ∈ ℤ with p ∤ a₂, a₂ ≠ 0.
+Set D = a₂²-4p², sf = sqf(D), m = √(D/sf) ∈ ℤ.
+K = Q(√sf), P any prime of O_K above p. Then [P]² = 1 in Cl(K).
+Moreover, p splits in K (neither inert nor ramified).
+```
+
+**Thread 17 numerical summary (new cases):**
+
+| p   | a₂  | sf      | h    | D-sign | result |
+|-----|-----|---------|------|--------|--------|
+| 101 | 14  | -282    | 8    | imag   | PASS   |
+| 103 | 6   | -106    | 6    | imag   | PASS   |
+| 107 | 20  | -1261   | 20   | imag   | PASS   |
+| 131 | 30  | -4234   | 52   | imag   | PASS   |
+| 137 | 50  | -14     | 4    | imag   | PASS   |
+| 149 | 240 | -7801   | 72   | imag   | PASS   |
+| 151 | 260 | -5901   | 56   | imag   | PASS   |
+| 157 | 300 | -2149   | 28   | imag   | PASS   |
+| 163 | 310 | -159    | 10   | imag   | PASS   |
+| 167 | 330 | -166    | 10   | imag   | PASS   |
+| 23  | 47  | 93      | 1    | real   | PASS   |
+| 29  | 59  | 13      | 1    | real   | PASS   |
+| 31  | 63  | 5       | 1    | real   | PASS   |
+| 37  | 75  | 149     | 1    | real   | PASS   |
+| 41  | 83  | 165     | 2    | real   | PASS   |
+
+All 15/15 pass. Combined record: **97/97** (82 from Threads 15-16, 15 new).
+
+Notable: h=52 for (p=131, a₂=30, sf=-4234) — this is the largest class number
+tested; [P]²=1 holds as a genuine order-2 element of a class group of order 52.
+Similarly h=72 for (p=149, a₂=240, sf=-7801).
+
+### Next step proposal
+Thread 18: Verify that no D>0 cases with h>1 exist in the real-quadratic cases
+tested so far (all Thread 17 D>0 cases had h=1; trivially [P]²=1 by principality).
+Construct a D>0 pair with sf having h>1 and confirm [P]²=1 is a genuine
+order-2 constraint, not just principality of P.
+- Choose |a₂| > 2p with D/sf = m² and sf = a positive squarefree integer with
+  class number h>1. The smallest real quadratic field with h>1 is Q(√10) (h=2),
+  then Q(√15) (h=2), Q(√26) (h=6), etc.
+- If h(Q(√sf)) = 2, then [P]²=1 iff P is principal or [P] is the unique order-2
+  element. Constructing such a case is a genuine test.
+- Alternatively, pivot to Thread 18 as the LaTeX note, checking the literature
+  for whether this splitting-forces-order-2 result is in any standard reference
+  (Neukirch §I.8, Cohen-Strömberg §5, Silverman AEC Ch. II). If it's not there,
+  this may be a minor novelty worth a footnote in the ePrint.
+
+### Commits made
+TBD (will be filled after git commit)

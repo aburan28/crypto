@@ -428,6 +428,61 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathit{sf}$ be the squarefree part of $D$, and
+$m = \sqrt{D/\mathit{sf}} \in \ZZ$.  Let $K = \QQ(\sqrt{\mathit{sf}})$ and
+$\mathfrak{P}$ any prime of $\mathcal{O}_K$ above $p$.  Then
+\[
+  [\mathfrak{P}]^2 = 1 \quad \text{in } \Cl(K).
+\]
+Moreover, $p$ \emph{splits} in $K$ (it is neither inert nor ramified).
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathit{sf}})/2$.
+\begin{enumerate}[label=(\Alph*)]
+\item $\beta \in \mathcal{O}_K$: it satisfies $x^2 + a_2 x + p^2 = 0$, a monic
+  polynomial with $\ZZ$-coefficients.
+\item $N_{K/\QQ}(\beta) = p^2$: product of conjugates is $(-a_2+m\sqrt{\mathit{sf}})(-a_2-m\sqrt{\mathit{sf}})/4 = (a_2^2 - m^2 \mathit{sf})/4 = (a_2^2-D)/4 = p^2$.
+\item $(\beta) \neq (p)$ in $\mathcal{O}_K$: if $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$
+  forces $p \mid a_2$, contradicting the hypothesis.
+\item Therefore $(\beta) = \mathfrak{P}^2$ or $\overline{\mathfrak{P}}^2$, so
+  $[\mathfrak{P}]^2 = 1$.
+\end{enumerate}
+
+\textit{$p$ splits:}
+inertness is impossible since the only ideal of norm $p^2$ for an inert prime is $(p)$,
+ruled out by~(C).
+Ramification requires $p \mid \mathrm{disc}(K)$.
+For odd $p$, $\mathrm{disc}(K) \mid 4\mathit{sf}$, so $p \mid \mathrm{disc}(K)$ iff
+$p \mid \mathit{sf}$.
+Since $\mathit{sf} = \mathrm{sqf}(D)$ and $D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$,
+we get $p \mid \mathit{sf}$ iff $p \mid a_2$---excluded.
+Hence $p$ splits into two distinct primes $\mathfrak{P}, \overline{\mathfrak{P}}$. \qed
+\end{proof}
+
+\begin{remark}[Thread~15--16 provenance and scope]
+The proposition is independent of any curve construction: it is a pure statement
+about ideals in quadratic fields.
+It applies for any real or imaginary quadratic $K$, and for $\mathit{sf}$ negative
+(imaginary) or positive (real).
+It was discovered empirically in Thread~14 for the norm-form family
+$4p = 73 + 3k^2$ ($k$ odd), proved algebraically in Thread~15
+(script \texttt{thread15\_order2\_algebraic.gp}), and generalised to arbitrary
+$(p, a_2)$ in Thread~16 (script \texttt{thread16\_general\_order2.gp}).
+Numerical record: verified for 25 norm-form primes and 57 arbitrary $(p,a_2)$
+pairs (including $D > 0$, $D < 0$, and $a_2$ values derived from actual
+genus-2 curves); all 82 cases gave $[\mathfrak{P}]^2 = 1$ with zero failures.
+
+\textit{Relevance to B5:} the proposition constrains the CM types realizable
+in a cover attack---specifically, the prime $p$ must split (not be inert) in
+the CM field of any abelian surface with biquadratic Weil polynomial.  It does
+not alter the DLP cost bound established above, but tightens the structural
+picture for future work on cover-attack obstructions.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
