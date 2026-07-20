@@ -428,6 +428,59 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:order2-frob}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$, $a_2 \ne 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf}$ denote the squarefree part of $D$,
+write $D = \mathrm{sf} \cdot m^2$ with $m \in \ZZ_{>0}$, and let
+$K = \QQ(\sqrt{\mathrm{sf}})$ with ring of integers $O_K$.
+Let $P \subset O_K$ be any prime above $p$.  Then:
+\begin{enumerate}
+  \item $[P]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \emph{splits} in $K$: $p O_K = P \bar{P}$ with $P \ne \bar{P}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2 \in K$.
+
+\noindent\textbf{(A)} $\beta \in O_K$: it satisfies the monic integer polynomial
+$x^2 + a_2 x + p^2 = 0$ (verify: $\beta^2 = (a_2^2 - m^2\mathrm{sf})/4 - a_2\beta
+= p^2 - a_2\beta$).
+
+\noindent\textbf{(B)} $N_{K/\QQ}(\beta) = p^2$: product of $\beta$ with its
+conjugate $(-a_2 - m\sqrt{\mathrm{sf}})/2$ equals $(a_2^2 - m^2\mathrm{sf})/4 = p^2$.
+
+\noindent\textbf{(C)} $(\beta) \ne (p)$ in $O_K$: if $(\beta) = (p)$ then $\beta/p \in O_K$,
+so $p \mid a_2$---contradicting the hypothesis.
+
+\noindent\textbf{(D)} Since $N(\beta) = p^2$ and $(\beta) \ne (p)$,
+we have $(\beta) = P^2$ or $\bar{P}^2$, hence $[P]^2 = 1$.
+
+\noindent For~(2): $p$ cannot be inert (then the only ideal of norm $p^2$ is $(p)$,
+excluded by~(C)).  For odd $p$, $p$ ramifies in $K = \QQ(\sqrt{\mathrm{sf}})$ iff
+$p \mid \disc(K)$, i.e.\ $p \mid \mathrm{sf}$.  But $\mathrm{sf} \mid D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$,
+so $p \mid \mathrm{sf}$ forces $p \mid a_2$---again excluded.
+Hence $p$ splits.  \qed
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:order2-frob} is a pure ideal-arithmetic statement, independent
+of any curve construction.  It was discovered empirically for norm-form primes
+($4p = 73 + 3k^2$, Threads~14--15) and proved algebraically in Thread~15, then
+generalised to arbitrary $(p, a_2)$ in Thread~16.
+
+\textit{Empirical record.} Verified for 25 norm-form primes ($k \le 199$),
+57 arbitrary $(p,a_2)$ pairs including D~$>$~0 (real quadratic $K$) and
+$a_2$ derived from hyperelliptic Weil polynomials, plus 10 fresh pairs
+confirming splitting in Thread~17.  Total: 92 cases, 0 failures.
+
+\textit{Relevance to B5.} The proposition shows that for any abelian surface
+with biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$, the prime $p$ always
+splits in the associated quadratic field $K$.  This constrains which CM types
+can appear in cover attacks: the Frobenius ideal lies in a specific order-2
+subgroup of $\Cl(K)$, ruling out inert or ramified configurations.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
