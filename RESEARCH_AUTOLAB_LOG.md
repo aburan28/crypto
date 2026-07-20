@@ -5498,3 +5498,62 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate the general order-2 theorem (Threads 15–16) into the ePrint LaTeX draft.
+Chosen because: the 2026-07-19 log explicitly proposed Thread 17 as the next step; it was
+not yet started; the algebraic proof is complete and compact (4 lines), making TeX integration
+straightforward.
+
+### Work done
+- Identified the insertion point: `paper/structural_completeness.tex` line 429 (end of CM-73
+  remark, Threads 11–12) to line 431 (`\subsection*{B6:...}`). No Thread 15–16 content was
+  present in the LaTeX file.
+- Added `\begin{remark}[Threads~15--16: universal order-2 Frobenius ideal]\label{rem:order2-frobenius}`
+  block (~50 lines) containing:
+  - Theorem statement (p prime, a₂ ∈ ℤ, p ∤ a₂, D = a₂²−4p², sf = squarefree(D)):
+    any prime P of Q(√sf) above p satisfies [P]² = 1 in Cl(Q(√sf)).
+  - 4-line proof (β = (−a₂ + m√sf)/2 ∈ O_K, N(β) = p², (β) ≠ (p), hence (β) = P²).
+  - Corollary: p always splits (not inert, not ramified) when p ∤ a₂.
+  - Empirical record: 82/82 cases, citing thread15_order2_algebraic.gp and thread16_general_order2.gp.
+  - Relevance-to-B5 paragraph.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+- LaTeX environment balance check: all 9 environment types balanced (5 remark, 3 theorem,
+  5 proof, 2 corollary, 1 proposition, 1 lemma, 1 document, 3 enumerate, 6 itemize).
+  (No LaTeX compiler available in container; pdflatex not installed.)
+
+### Findings
+
+**Theorem now in LaTeX (rem:order2-frobenius):**
+For any odd prime p with p ∤ a₂, if D = a₂²−4p², sf = squarefree(D), K = Q(√sf),
+then any prime P of O_K above p satisfies [P]² = 1 in Cl(K).
+Proof: β = (−a₂ + m√sf)/2 ∈ O_K, N(β) = p², (β) ≠ (p) (since p ∤ a₂),
+hence (β) = P² → [P]² = 1.
+
+**Corollary:** p splits in K (inert impossible by (β)≠(p); ramified impossible
+since p | disc(K) ↔ p | sf ↔ p | a₂, excluded).
+
+**File delta:** `paper/structural_completeness.tex` grew from 851 to 902 lines (+51 lines).
+
+**LaTeX location:** lines 431–480, immediately before \subsection*{B6}.
+
+### Next step proposal
+Thread 18: verify the p-splits corollary holds for p = 2 edge case (currently excluded
+by "odd p" hypothesis), and consider whether the theorem extends to composite m (i.e.,
+non-fundamental discriminants D). Specifically:
+- If D/sf = m² with m > 1, the ideal (β) factors in the order Z[m√sf] ⊂ O_K. Is the
+  statement still [P]² = 1 in Cl(O_K)? Or does it hold only in Cl(Z[m√sf])?
+- Write a PARI script `thread18_order_vs_ring.gp` testing: for the same (p, a₂) but
+  using O = Z[(m√sf)/2] vs O_K, does [P]² = 1 in Cl(O) (conductor-m order)?
+  Expected: yes — the proof only uses N_{K/Q}(β) = p², which is an O_K statement.
+  Counterexample would refine the theorem.
+
+Also: check if `paper/lll_degeneracy_note.tex` should cite rem:order2-frobenius
+(the B5 complement point is relevant to the LLL note's §3 if it exists).
+
+### Commits made
+(to be filled after git commit)

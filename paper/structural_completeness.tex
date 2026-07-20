@@ -428,6 +428,57 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{remark}[Threads~15--16: universal order-2 Frobenius ideal]\label{rem:order2-frobenius}
+For any genus-2 curve $C/\FF_p$ whose Weil polynomial has the biquadratic form
+$T^4 + a_2 T^2 + p^2$, the Frobenius satisfies a universal constraint in the
+class group of the associated quadratic field.
+
+\medskip
+\noindent\textbf{Theorem (universal order-2).}
+\emph{Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf}(D)$ be the squarefree part of $D$,
+and $m = \sqrt{D/\mathrm{sf}(D)} \in \ZZ$.
+Let $K = \QQ(\sqrt{\mathrm{sf}(D)})$ and $\mathfrak{P}$ any prime of
+$\mathcal{O}_K$ above $p$.  Then $[\mathfrak{P}]^2 = 1$ in $\Cl(K)$.}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2$.
+This element satisfies $x^2 + a_2 x + p^2 = 0$ (monic, integer coefficients),
+so $\beta \in \mathcal{O}_K$ with $N_{K/\QQ}(\beta) = p^2$.
+If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$, forcing $p \mid a_2$---a
+contradiction.  Hence $(\beta) = \mathfrak{P}^2$ or $\bar{\mathfrak{P}}^2$,
+giving $[\mathfrak{P}]^2 = 1$. \qedhere
+\end{proof}
+
+\medskip
+\noindent\textbf{Corollary ($p$ always splits when $p \nmid a_2$).}
+\emph{Under the same hypotheses, $p$ is neither inert nor ramified in $K$.}
+Inertness is ruled out: if $p$ were inert the unique ideal of norm $p^2$
+in $\mathcal{O}_K$ would be $(p)$, contradicting $(\beta) \neq (p)$.
+Ramification requires $p \mid \mathrm{sf}(D)$; since $D \equiv a_2^2 \pmod{p}$,
+this forces $p \mid a_2$---excluded.
+Hence $p$ splits as $\mathfrak{P}\bar{\mathfrak{P}}$ with
+$[\mathfrak{P}]^2 = 1$ and $[\bar{\mathfrak{P}}] = [\mathfrak{P}]^{-1}$.
+
+\medskip
+\noindent\textbf{Empirical verification.}
+All 82 test cases yielded $[\mathfrak{P}]^2 = 1$ with zero failures:
+25 norm-form primes $k \leq 199$ (Thread~15,
+script \texttt{thread15\_order2\_algebraic.gp}) and 57 arbitrary $(p, a_2)$
+pairs including non-norm-form primes, $D < 0$ and $D > 0$ cases, and values
+derived from actual genus-2 curve sweeps (Thread~16,
+script \texttt{thread16\_general\_order2.gp}).
+
+\medskip
+\noindent\textbf{Relevance to B5.}
+This is a pure quadratic-ideal result, independent of any curve construction.
+It characterises the ideal-theoretic footprint of Frobenius on any abelian
+surface with biquadratic Weil polynomial, and implies that $p$ splits (is
+neither inert nor ramified) in the associated CM field.  This constrains which
+CM types are realisable in a cover attack, providing a structural obstruction
+that complements the group-order bound of B5.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
