@@ -5498,3 +5498,76 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (16) into `paper/structural_completeness.tex` as a
+formal Proposition. Chosen because: the 2026-07-19 log explicitly proposed Thread 17
+as the next-best concrete sub-task; all six original priority threads are closed or
+blocked; the algebraic result from Threads 15–16 is clean, short, and paper-ready.
+
+### Work done
+- Read `paper/structural_completeness.tex` and `PAPER_STRUCTURAL_COMPLETENESS.md` to
+  locate the B5 remark block ending at line 429 (Thread 12 content).
+- Inserted three new environments after the existing `\end{remark}` at line 429:
+  1. `\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]`
+     (label: `prop:order2-frob`): states the theorem that [P]²=1 in Cl(K).
+  2. `\begin{corollary}[Splitting of p in K]` (label: `cor:p-splits`): deduces
+     p always splits (not inert, not ramified) in K when p∤a₂.
+  3. `\begin{remark}[Empirical record and relevance to B5]`
+     (label: `rem:order2-empirical`): records the 82-case verification, the scripts,
+     and the relevance to cover attacks.
+- Confirmed `enumitem` package already loaded (line 10); `label=(\Alph*)` is consistent
+  with existing usage in the file.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**New content in paper/structural_completeness.tex (lines 431–482):**
+
+```
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--16]
+  label: prop:order2-frob
+  Statement: [P]^2 = 1 in Cl(K) for any odd prime p with p∤a₂.
+  Proof: 4-step (A)-(D) via beta = (-a₂ + m√sf)/2 ∈ O_K.
+\end{proposition}
+
+\begin{corollary}[Splitting of p in K]
+  label: cor:p-splits
+  p splits in K (not inert, not ramified) when p∤a₂.
+  Proof: inertness ⟹ (β)=(p) [ruled out by (C)]; ramification ⟹ p|sf ⟹ p|a₂ [excluded].
+\end{corollary}
+
+\begin{remark}[Empirical record and relevance to B5]
+  label: rem:order2-empirical
+  82 test cases (25 norm-form primes k≤199, 57 arbitrary (p,a₂)): all [P]²=1.
+  Relevance: p always splits in the CM field of a biquadratic Weil poly.
+\end{remark}
+```
+
+**Compile check**: no pdflatex available in container; structure validated manually:
+- `enumitem` loaded; `[label=(\Alph*)]` consistent with existing use at line 532.
+- `\Cl`, `\QQ`, `\ZZ`, `\FF`, `\mathfrak{P}`, `\mathrm{sf}` all defined via existing
+  `\newcommand` or `amsmath`/`amssymb`.
+- `\begin{proof}` / `\begin{corollary}` / `\begin{proposition}` all declared via
+  `\newtheorem` at lines 19–23 of the preamble.
+- `\qedhere` inside enumerate: correct usage with enumitem+amsthm.
+
+### Next step proposal
+Thread 18: Verify Proposition~\ref{prop:order2-frob} is not already in the CM literature.
+- Search: Cohen-Strömberg §5 (class-group of imaginary quadratic fields) and Silverman
+  AEC §II.10 (CM by orders). The statement "if N(β)=p² and (β)≠(p) then [P]²=1" is
+  elementary ideal theory — it may appear as an exercise but is unlikely to be stated
+  in this exact form for arbitrary (p, a₂).
+- If it is in the literature: add a citation to prop:order2-frob.
+- If it is not: add a sentence "this appears not to be stated in the literature in this
+  generality" and note it as a minor novelty.
+- Also: run `grep -n "cor:p-splits\|prop:order2-frob" paper/structural_completeness.tex`
+  to confirm the new labels are referenced correctly in the summary table (§7 / Table 2).
+  If the table has a row for B5, add a reference to Proposition~\ref{prop:order2-frob}.
+
+### Commits made
+[pending — see below]
