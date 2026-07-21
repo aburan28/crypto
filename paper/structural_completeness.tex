@@ -428,6 +428,60 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Biquadratic Weil polynomial: universal order-2 and splitting]
+\label{prop:biquad-order2}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $\mathrm{sf}$ be the squarefree part of $D$ so
+$D = \mathrm{sf} \cdot m^2$ for some $m \in \ZZ_{>0}$, and let $K = \QQ(\sqrt{\mathrm{sf}})$
+with $\mathfrak{P}$ a prime of $K$ above $p$.  Then:
+\begin{enumerate}[label=(\alph*)]
+  \item $[\mathfrak{P}]^2 = 1$ in $\Cl(\mathcal{O}_K)$, and
+  \item $p$ \emph{splits} in $K$\textup{:} $p\mathcal{O}_K = \mathfrak{P}\overline{\mathfrak{P}}$
+        with $\mathfrak{P} \neq \overline{\mathfrak{P}}$.  In particular, $p$ is neither
+        inert nor ramified in $K$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}})/2 \in K$.
+
+\textbf{(a).}
+$\beta$ satisfies $x^2 + a_2 x + p^2 = 0$ over $\ZZ$, so $\beta \in \mathcal{O}_K$ and
+$N_{K/\QQ}(\beta) = p^2$.  If $(\beta) = (p)$ then $\beta/p \in \mathcal{O}_K$, which requires
+$p \mid a_2$---a contradiction.  Hence $(\beta) \neq (p)$, forcing $(\beta) = \mathfrak{P}^2$
+or $\overline{\mathfrak{P}}^2$, and therefore $[\mathfrak{P}]^2 = 1$.
+
+\textbf{(b).}
+\emph{Not inert:} if $p\mathcal{O}_K$ were prime, the only ideal of norm $p^2$ would be $(p)$,
+contradicting $(\beta) \neq (p)$.
+\emph{Not ramified:} for odd $p$, ramification in $K$ requires $p \mid \disc(K)$.
+Now $\disc(K)$ equals $\mathrm{sf}$ or $4\,\mathrm{sf}$ (as $\mathrm{sf} \equiv 1$ or
+$2,3 \pmod{4}$), so $p \mid \disc(K)$ iff $p \mid \mathrm{sf}$.  Since
+$D \equiv a_2^2 \pmod{p}$, we get $p \mid D$ iff $p \mid a_2$, excluded.
+Hence $p \nmid \mathrm{sf}$, so $p \nmid \disc(K)$ and $p$ is unramified.
+\end{proof}
+
+\begin{remark}[Empirical record and relevance to cover attacks]
+\label{rem:biquad-splitting}
+Proposition~\ref{prop:biquad-order2} is a pure ideal-theoretic statement,
+independent of any specific curve construction.
+It was discovered empirically for norm-form primes
+(Thread~14, script \texttt{thread14\_norm\_form\_sweep.gp}),
+proved algebraically and extended to arbitrary $(p,a_2)$
+in Threads~15--16 (scripts \texttt{thread15\_order2\_algebraic.gp} and
+\texttt{thread16\_general\_order2.gp}, 82 cases covering both $D < 0$
+and $D > 0$), and the splitting corollary verified separately for 10 diverse pairs
+with $p$ up to $10^6$ in Thread~17 (\texttt{thread17\_splitting\_check.gp}).
+All 92 verified cases give $[\mathfrak{P}]^2 = 1$ and split behaviour with zero failures.
+
+For any abelian surface $J/\FF_p$ with biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$, the prime $p$ must split in $\QQ(\sqrt{\mathrm{sf}})$.
+This constrains the realizable CM types in a cover attack: split primes have
+non-trivial factor bases in the associated quadratic field, but the
+$[\mathfrak{P}]^2 = 1$ structure does not reduce the DLP group order below $p^2$,
+so the B5 cost bound $\Theta(p)$ is unaffected.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
