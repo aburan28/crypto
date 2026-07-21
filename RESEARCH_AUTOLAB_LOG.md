@@ -5674,4 +5674,4 @@ Two candidate next steps:
 Recommend Thread 21 first (paper improvement, well-scoped); Thread 22 second (theoretical).
 
 ### Commits made
-`[pending]` autolab 2026-07-21: Thread 20 — N-torsion field degree + cover DLP lower bounds for N=2,3,5
+`05ed83e` autolab 2026-07-21: Thread 20 — N-torsion field degree + cover DLP lower bounds for N=2,3,5
