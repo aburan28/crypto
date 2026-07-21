@@ -18,3 +18,9 @@ research/ecdlp_autolab/phase22_rho_barrett
 __pycache__/
 *.pyc
 *.pyo
+
+# LaTeX build artifacts (intermediate files only; committed PDFs are tracked)
+*.aux
+*.log
+*.out
+texput.log
