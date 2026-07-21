@@ -5574,3 +5574,112 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists (all 15 pairs).
+Chosen because: Thread 17 completed yesterday (LaTeX integration); Thread 18 was the
+next-step proposal in the 2026-07-20 log entry (ranked above Thread 19 GLV-HNP toy);
+no prior autolab run had actually *executed* `howe_sextic_twists_all15.gp` to get
+numerical results from the actual secp256k1 prime.
+
+### Work done
+- Installed pari-gp (absent from container; installed via `apt-get install -y --fix-missing pari-gp`).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` on the real secp256k1 prime p (256-bit).
+- Obtained full 15-pair Howe-condition table (H1, H2, H3 for each pair).
+- Wrote `secp256k1_cm_audit/thread18_howe_sextic_h3_diagnostic.gp` to diagnose the
+  2 pairs that pass H2 but fail H3, compute their gcds, and explain them algebraically.
+- Ran the diagnostic script; obtained partial factorisations of all 6 twist orders.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.77s).
+
+### Findings
+
+**Main result: 5 out of 15 sextic-twist pairs are Howe-glueable.**
+
+**2-torsion classes** (partition of the 6 twists by `factor(x^3 + b_k) mod p`):
+| Class | Twists | Pattern | Reason |
+|-------|--------|---------|--------|
+| A     | k=0,2,3,5 | `[3]` (irreducible) | `7*u^k` not a cube mod p for these k |
+| B     | k=1,4  | `[1,1,1]` (split) | `7*u^k` is a cube mod p for k=1,4 |
+
+Note: k=0 is secp256k1 itself (b=7, pattern [3]); k=3 is the quadratic twist (b=-7, pattern [3]).
+
+**Full 15-pair table:**
+
+| Pair | H1 | H2 | H3 (gcd) | Glueable? |
+|------|----|----|-----------|-----------|
+| (0,1) | Y | N (cross-class) | 1 | no |
+| (0,2) | Y | Y | 1 | **YES** |
+| (0,3) | Y | Y | 1 | **YES** |
+| (0,4) | Y | N (cross-class) | 1 | no |
+| (0,5) | Y | Y | 1 | **YES** |
+| (1,2) | Y | N (cross-class) | 1 | no |
+| (1,3) | Y | N (cross-class) | 3 | no |
+| (1,4) | Y | Y | 1 | **YES** |
+| (1,5) | Y | N (cross-class) | 3 | no |
+| (2,3) | Y | Y | 1 | **YES** |
+| (2,4) | Y | N (cross-class) | 1 | no |
+| (2,5) | Y | Y | 4 | no (H3 fail) |
+| (3,4) | Y | N (cross-class) | 1 | no |
+| (3,5) | Y | Y | 3 | no (H3 fail) |
+| (4,5) | Y | N (cross-class) | 1 | no |
+
+**H1 always holds** (all 6 orders distinct — since traces are pairwise distinct by CM formula).
+
+**H2 holds iff same 2-torsion class**: 6 intra-A + 1 intra-B = 7 pairs pass H2; 8 cross-class pairs fail.
+
+**H3 failures** (pass H2 but fail H3):
+- **(2,5): gcd = 4.** N_2 + N_5 = 2(p+1); since (p+1) ≡ 0 (mod 4), both N_2 and N_5 are divisible by 4.
+- **(3,5): gcd = 3.** p ≡ t ≡ 1 (mod 3), so N_3 = p+1+t ≡ 0 (mod 3) and N_5 = p+1-(t+3s)/2 ≡ 0 (mod 3).
+
+Both gcds are tiny (4 and 3). Not large prime obstructions — these are Sylow remnants from CM arithmetic.
+
+**Partial factorisations of twist orders** (trial division to 10^6):
+| k | Small factors of N_k |
+|---|----------------------|
+| 0 | none (N_0 = secp256k1 prime group order n, proved prime) |
+| 1 | 3 × 199 × 18979 × [large cofactor] |
+| 2 | 2² × 7² × 10903 × [large cofactor] |
+| 3 | 3² × 13² × 3319 × 22639 × [large cofactor] |
+| 4 | 109903 × [large cofactor] |
+| 5 | 2² × 3 × [large cofactor] |
+
+Consistent with the gcd table: k=1,3,5 are divisible by 3; k=2,5 by 4.
+
+**Glueable pairs involving secp256k1 (k=0):** (0,2), (0,3), (0,5).
+- (0,3) = secp256k1 × quadratic-twist: previously confirmed in `howe_gluing_test.gp`.
+- (0,2) and (0,5) are new: secp256k1 glueable with the ±(t+3s)/2 trace twists.
+- For all 3: Jac(C) has order N_0 × N_k ≈ p²; DLP on Jac costs ~p via Pollard ρ.
+- **No sub-√p attack** from any Howe-glueable sextic pair.
+
+**The intra-B pair (1,4)** (both have all 2-torsion F_p-rational, pattern [1,1,1]):
+- Orders N_1 and N_4 are coprime (gcd=1), H2 holds → Howe-glueable.
+- A Howe-gluing of two "fully torsion-rational" curves at 2-torsion is the generic
+  Richelot case; the resulting Jacobian Jac(C)/F_p has all its 2-torsion F_p-rational.
+- Relevant to CHLRS/Igusa formula work (Thread 2) because such Jacobians have a
+  specific Rosenhain model.
+
+### Next step proposal
+
+Two candidates for Thread 19:
+
+**Option A: GLV-HNP Phase 2 toy (original priority-5).**
+Script `glv_hnp_phase2_toy.gp` already exists. Run it and check if the GLV-aware
+lattice recovers d on a 32-bit toy curve. One session should suffice.
+
+**Option B: Thread 18 extension — explicitly identify b-values for pair (1,4).**
+The intra-B pair (k=1, k=4) is interesting because both twists have fully split
+2-torsion. The Howe-glued Jacobian of this pair might have explicit Rosenhain form.
+Write a short PARI script to:
+1. Find a random point on E_1 (b_1 = 7*u) to confirm the [1,1,1] factor holds.
+2. Compute the Rosenhain parameters of the anticipated gluing.
+This would connect Thread 18 to Thread 2 (CHLRS Igusa formula).
+
+**Recommend Option A** (GLV-HNP toy is long-deferred; Option B is a nice follow-on but
+less urgent since Thread 18's core result is complete).
+
+### Commits made
+`[see below after push]`
