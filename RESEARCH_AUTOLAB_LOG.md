@@ -5323,3 +5323,75 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 
 ### Commits made
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists.
+Chosen because: 2026-07-20 log entry proposed it as next-best concrete step after Thread 17 (paper integration); no prior work had been done on it.
+
+### Work done
+- Read existing `howe_gluing_test.gp` (prior work covered only the single pair (E, E^t)).
+- Derived CM-trace formula for all 6 sextic twists of secp256k1: using 4p = t² + 3b² (j=0 CM decomposition), the 6 Frobenius traces are t, (t−3b)/2, −(t+3b)/2, −t, (3b−t)/2, (t+3b)/2.
+- Computed b = sqrtint((4p−t²)/3) = 303414439467246543595250775667605759171 (verified t²+3b²=4p ✓).
+- Wrote new PARI script `secp256k1_cm_audit/howe_sextic_twists.gp` checking (H1)+(H2)+(H3) for all 15 pairs. (PARI 2.15 caveat: multi-line for bodies fail; all bodies placed on single lines.)
+- For (H2): computed cubic character of −B_k for each twist using `Mod(-B_k,p)^{(p-1)/3}`.
+- For (H3): computed gcd(n_i, n_j) for all 15 pairs.
+- Ran `cargo test --test curve_audit` → 5/5 pass ✓.
+
+### Findings
+
+**2-torsion partition** (via cubic character of −B_k):
+- IRREDUCIBLE (−B_k non-cube): E_0 (secp256k1), E_2, E_3 (quad twist), E_5
+- SPLIT (−B_k is a cube → x³+B_k has 3 rational roots): E_1, E_4
+
+**Structure**: the 6 twists form 3 quadratic-twist pairs:
+- {E_0, E_3}: traces t, −t (secp256k1 ↔ quad twist)
+- {E_1, E_4}: traces (t−3b)/2, −(t−3b)/2 (cubic-A ↔ its quad twist)
+- {E_2, E_5}: traces −(t+3b)/2, (t+3b)/2 (cubic-B ↔ its quad twist)
+
+**15-pair Howe results**:
+| Pair | H1 | H2 | H3 gcd | ALL |
+|------|----|----|--------|-----|
+| (E_0,E_1) | ✓ | ✗ | 1 | ✗ |
+| (E_0,E_2) | ✓ | ✓ | 1 | **✓** |
+| (E_0,E_3) | ✓ | ✓ | 1 | **✓** |
+| (E_0,E_4) | ✓ | ✗ | 1 | ✗ |
+| (E_0,E_5) | ✓ | ✓ | 1 | **✓** |
+| (E_1,E_2) | ✓ | ✗ | 1 | ✗ |
+| (E_1,E_3) | ✓ | ✗ | 3 | ✗ |
+| (E_1,E_4) | ✓ | ✓ | 1 | **✓** |
+| (E_1,E_5) | ✓ | ✗ | 3 | ✗ |
+| (E_2,E_3) | ✓ | ✓ | 1 | **✓** |
+| (E_2,E_4) | ✓ | ✗ | 1 | ✗ |
+| (E_2,E_5) | ✓ | ✓ | 4 | ✗ |
+| (E_3,E_4) | ✓ | ✗ | 1 | ✗ |
+| (E_3,E_5) | ✓ | ✓ | 3 | ✗ |
+| (E_4,E_5) | ✓ | ✗ | 1 | ✗ |
+
+**Result: 5 / 15 pairs satisfy all 3 Howe conditions.**
+
+**Key observations**:
+1. (H1) holds for ALL 15 pairs (all 6 traces are distinct ✓).
+2. (H2) fails for "cross-class" pairs (IRRED vs SPLIT). The 2-torsion partition {IRRED, SPLIT} has 4+2 split. 8 pairs are cross-class; 7 pairs are same-class. Of the 7 same-class pairs, 5 pass H3.
+3. (H3) failures: pairs (E_1,E_3), (E_1,E_5), (E_3,E_5) all have gcd=3 — meaning 3 | #E_1, 3 | #E_3, 3 | #E_5. Pair (E_2,E_5) has gcd=4, meaning 4 | #E_2 and 4 | #E_5.
+4. New finding: the "cubic-B" pair {E_2,E_5} fails H3 (gcd=4), while the "cubic-A" pair {E_1,E_4} succeeds. The IRRED pairs {E_0,E_3} and {E_2,E_3} and {E_0,E_2} are distinct Howe-gluable pairs.
+5. The pair (E_1,E_4) is the only "both-SPLIT" pair with gcd=1 — it admits a smooth Howe gluing with both curves having a rational 2-torsion point. This Jacobian would have a rational 2-torsion point too (non-trivial structure).
+
+**ECDLP implication**: None. All 5 smooth Jac(C)/F_p have order ≈ p²; HCDLP cost ≈ p ≫ ECDLP cost ≈ p^{1/2}. Structural findings only.
+
+### Next step proposal
+Two candidates:
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+`glv_hnp_phase2_toy.gp` already exists. Run it and check whether the GLV-aware lattice recovers d on a 32-bit toy curve. Expected: either d is recovered (validates attack direction) or a concrete failure mode found. Well-scoped for one session.
+
+**Thread 20 (new): Investigate why 4 | #E_2 (cubic-B twist).**
+For secp256k1's cubic-B twist class: the group order has factor 4. Is this a universal property for all j=0 primes with this CM structure, or specific to secp256k1's prime? A small-prime PARI sweep over p ≡ 1 mod 6 primes would determine whether this is structural or accidental.
+
+Recommend Thread 19 first (longer-deferred priority task).
+
+### Commits made
+[see below after commit]
