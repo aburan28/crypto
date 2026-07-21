@@ -5650,4 +5650,4 @@ Alternative: return to priority-1 thread (P-521 LLL NaN) — try target_bits=100
 Recommend Thread 19 first (script already exists, concrete yes/no expected).
 
 ### Commits made
-`[see below]` autolab 2026-07-21: Thread 18 — Howe gluing for all 15 j=0 sextic twist pairs; 5/15 pass all conditions
+`0622169` autolab 2026-07-21: Thread 18 — Howe gluing for all 15 j=0 sextic twist pairs; 5/15 pass all conditions
