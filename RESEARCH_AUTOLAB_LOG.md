@@ -5682,4 +5682,4 @@ for the new glueable pair (0,5) or (1,4) using Howe's algorithm sketch in
 tractable because both twists have full F_p-rational 2-torsion.
 
 ### Commits made
-`[see below after commit]`
+`7ef1a08` autolab 2026-07-21: Thread 18 — 5/15 sextic twist pairs Howe-glueable; gcd structure explains 4 H3 failures
