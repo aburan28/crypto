@@ -5673,4 +5673,4 @@ Recommend Thread 21 first: it requires only arithmetic (no new deps), produces
 a concrete numerical bound, and directly enhances the paper.
 
 ### Commits made
-[to be filled after commit]
+`6fddcc4` autolab 2026-07-21: Thread 19 — GLV-HNP Phase 2 confirmed at 32-bit; LLL 3/3 at m=10 (m_thresh=8)
