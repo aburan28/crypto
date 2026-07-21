@@ -5394,4 +5394,4 @@ For secp256k1's cubic-B twist class: the group order has factor 4. Is this a uni
 Recommend Thread 19 first (longer-deferred priority task).
 
 ### Commits made
-[see below after commit]
+`93805c0` autolab 2026-07-21: Thread 18 — Howe sextic-twist pairwise check; 5/15 pairs gluable
