@@ -5699,3 +5699,5 @@ Recommend Thread 20 first (easy, concrete, high-value).
 
 ### Commits made
 [see below after git commit]
+
+`8d90cb7` autolab 2026-07-21: Thread 18 — cubic-residue classification; 5/15 confirmed; ePrint survey
