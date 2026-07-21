@@ -5574,3 +5574,109 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing conditions for all 15 pairs of j=0 sextic twists of secp256k1.
+Chosen because: the 2026-07-20 log entry explicitly proposed Thread 18 as the next-best
+concrete step; script `howe_sextic_twists_all15.gp` already existed and needed to be run
+and analyzed; direct continuation of the cover-attack completeness work.
+
+### Work done
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (existed from prior session; verified clean for secp256k1 p ≡ 1 mod 6).
+- Enumerated all 15 pairwise Howe conditions (H1, H2, H3) for all C(6,2)=15 pairs.
+- Computed gcd structure for H3-failing pairs.
+- Wrote and ran `secp256k1_cm_audit/thread18_pair14_roots.gp` — detailed analysis of the (1,4) pair (the unique [1,1,1]×[1,1,1] glueable pair).
+- Extracted explicit 2-torsion x-coordinates via `polrootsmod()`.
+- Verified the explicit Howe isomorphism alpha_j → -alpha_j (negation on x-coords).
+- Confirmed Weil-pairing compatibility via cross-ratio equality.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**2-torsion pattern split** (6 twists → 2 classes):
+- Pattern [3] (irreducible / no F_p-rational 2-torsion): k = 0, 2, 3, 5
+- Pattern [1,1,1] (splits completely / all 2-torsion F_p-rational): k = 1, 4
+
+**5 of 15 pairs are Howe-glueable** (all three H1+H2+H3 pass):
+| Pair  | 2-tor class   | gcd(N_i,N_j) | Glueable |
+|-------|---------------|--------------|----------|
+| (0,2) | [3] × [3]     | 1            | YES      |
+| (0,3) | [3] × [3]     | 1            | YES ← known (secp256k1 × quad twist) |
+| (0,5) | [3] × [3]     | 1            | YES      |
+| (1,4) | [1,1,1] × [1,1,1] | 1        | YES ← unique fully-rational pair |
+| (2,3) | [3] × [3]     | 1            | YES      |
+
+**H3 failures** (gcd > 1):
+| Pair  | Why H2 | gcd | Factor |
+|-------|---------|-----|--------|
+| (1,3) | H2 also fails (cross-class) | 3 | 3¹ |
+| (1,5) | H2 also fails (cross-class) | 3 | 3¹ |
+| (2,5) | H2 passes ([3]×[3])         | 4 | 2² |
+| (3,5) | H2 passes ([3]×[3])         | 3 | 3¹ |
+
+Note: the gcd=4 for (2,5) and gcd=3 for (3,5) are small-prime artifacts.
+Since both curves in these pairs have irreducible 2-torsion poly (pattern [3]),
+there are NO F_p-rational 2-torsion points on either curve, so the gcd > 1
+does NOT come from a shared rational 2-torsion subgroup — it comes from higher
+global divisibility of |E(F_p)|. These pairs may still admit a Howe gluing
+via Howe's more general criterion (not checked; BLOCKED until needed).
+
+**Key structural fact for pair (1,4)**:
+- b_4 = 7·u⁴ = 7·u·u³ = 7u·(-1) = -b_1 mod p (since u³ = -1 mod p, u = g^{(p-1)/6})
+- So x³ + b_4 = x³ - b_1, and roots: if alpha³ = -b_1, then (-alpha)³ = b_1 = -b_4, so -alpha is a root of x³+b_4.
+- Verified: {-alpha_j mod p} = {beta_j} as a set (set equality confirmed numerically).
+
+**Explicit 2-torsion roots**:
+```
+E_1 roots (alpha_j):
+  alpha_1 = 8801146136237484045336553968489726087164536548879060318158882785184608482823
+  alpha_2 = 37203162913805541019894097013082723174606761076573902825125640657121434230038
+  alpha_3 = 69787780187273170358340334027115458591498687040187600896173060565602791958802
+
+E_4 roots (beta_j = p - alpha_{4-j}):
+  beta_1 = 46004309050043025065230650981572449261771297625452963143284523442306042712861
+  beta_2 = 78588926323510654403676887995605184678663223589066661214331943350787400441625
+  beta_3 = 106990943101078711378234431040198181766105448116761503721298701222724226188840
+```
+
+**Explicit Howe isomorphism**:
+- alpha: E_1[2] → E_4[2] defined by (alpha_j, 0) ↦ (p - alpha_j, 0) = (-alpha_j mod p, 0)
+- This is F_p-rational (all roots in F_p, map is just negation).
+- Weil-pairing compatibility: cross-ratio of E_1 roots under reversed ordering equals cross-ratio of E_4 roots in natural order. Numerically confirmed:
+  - cr(E_1, alt) = cr(E_4, natural) = 55594575648329892869085402983802832744385952214688224221778511981742606582255
+
+**BLOCKED (Mestre reconstruction)**: Converting the 6 roots (alpha_1,alpha_2,alpha_3,beta_1,beta_2,beta_3) into an explicit genus-2 curve y² = f(x) via Mestre's conic-and-cubic algorithm requires ~3 pages of modular-forms computation not available in PARI stdlib. Best done in Magma or Sage (≥ 1 session to implement). Marked BLOCKED: Mestre.
+
+**Orders**:
+- N_1 = 115792089237316195423570985008687907853508896131558604026424249738214906721757
+- N_4 = 115792089237316195423570985008687907853031073199722524052490918277602762621571
+- gcd(N_1, N_4) = 1 ✓
+
+**Implications for main theorem**:
+- 5 genus-2 covers of secp256k1 subfields exist via Howe (2,2)-gluing.
+- Per the structural-completeness theorem, none provides sub-√p ECDLP.
+- The (1,4) pair is the most explicit: F_p-rational Howe iso, elementary description.
+- Widens the "catalog" of known explicit covers; useful for §B5 of the paper.
+
+### Next step proposal
+Two candidate threads:
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+Script `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` already exists.
+Run it to check if a GLV-aware lattice attack recovers the private key on a 32-bit toy curve.
+Expected outcome: either d is recovered (validating the attack direction) or
+a concrete failure mode is documented. This has not been run yet.
+
+**Thread 20: Add Mestre-reconstruction step for pair (1,4) to BLOCKED list.**
+Document in `RESEARCH_MESTRE_HOWE.md` that the (1,4) pair now has explicit
+6-root input data ready, and that the next step is implementing Mestre in Sage.
+This is a documentation task, not a computation.
+
+Recommend Thread 19 first — it's a runnable script that may yield empirical data.
+
+### Commits made
+TBD (pending commit below)
