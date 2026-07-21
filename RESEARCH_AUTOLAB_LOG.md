@@ -90,6 +90,7 @@ precision does not find the short vector.
   (b) f64 precision loss in 521-bit LLL steps, or (c) need for BKZ vs LLL?
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 See next git hash after this entry.
 
@@ -172,6 +173,7 @@ Full test suite: 11/11 unit tests + 5/5 integration tests pass.
    experiment.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 [see next git hash after this entry]
 
@@ -273,6 +275,7 @@ These invariants describe the naive cover, NOT the Howe-glued curve.
 4. **Priority 5 (GLV-HNP Phase 2 toy)**: 32-bit toy curve GLV lattice attack.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 autolab 2026-05-23: complete Igusa-Clebsch ABCD; negative Rosenhain result  (10ac375)
 
@@ -350,6 +353,7 @@ PAPER_STRUCTURAL_COMPLETENESS.md Block B5.
    would complete this; record as BLOCKED pending environment upgrade.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 none (2026-05-24 run had no commits — Python/PARI scripts not committed)
 
@@ -426,6 +430,7 @@ n^4 ≈ 2^{1536}).
    rho cost.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 
 ---
@@ -517,6 +522,7 @@ k2 slots (`k2 * S_k2 ≈ 14 * 13 = 182`).
 3. **CHLRS (still BLOCKED)**: needs SageMath `HyperellipticCurveFromInvariants`.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `2f90eec` autolab 2026-05-26: GLV-HNP Phase 2 toy lattice recovery (Priority 5 closed)
 
@@ -626,6 +632,7 @@ Or alternatively: add rug behind a feature flag in Cargo.toml with `optional = t
 and run the P-521 test under `--features bigfloat`.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `35172f7` autolab 2026-05-27: B5 over F_{p^k} verified; B6' gap patched (Priority 6 closed)
 
@@ -707,6 +714,7 @@ Alternatively, if m=16 LLL succeeds at ~55s, this closes Priority 1 completely a
 we have a fully working attack pipeline for P-521 HNP.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `b905818` autolab 2026-05-28: incremental GS swap in lll_reduce_hp; P-521 5.7x faster
 
@@ -782,6 +790,7 @@ Priority 2 requires genuine Mestre/CHLRS reconstruction:
 **Immediate blocker**: Cardona-Quer 2005 formulas for I4 and I6 are not yet transcribed in the PARI scripts (see `igusa_clebsch.gp` lines 85-83: "implementing this transvectant machinery is more than 50 lines"). Next step: implement the transvectant-based I4 and I6 computation in `igusa_clebsch.gp`, then use the Cardona-Quer Igusa formulas for the quotient surface.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `1a5dfd7` autolab 2026-05-29: P-521 m=16 3/3 confirmed (§10.5 closed); CHLRS Rosenhain root-cause diagnosed
 
@@ -875,6 +884,7 @@ The Rosenhain formula requires F_{p³} extension (since x³+7 has no roots mod p
 **Alternative next step (Priority 5, GLV-HNP Phase 2):** Script `glv_hnp_phase2_toy.gp` exists and may be runnable. This is a concrete 1-session task: run a GLV-aware lattice attack on a 32-bit toy curve.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `7d38bc9` autolab 2026-05-30: Howe 15-pair check — 5/15 glueable pairs confirmed
 
@@ -979,6 +989,7 @@ The correct next step is to find the EXPLICIT equation of the Howe-glued curve o
 **Alternative (GLV-HNP Phase 2):** Implement the actual LLL lattice for the GLV-aware attack on the toy 32-bit curve. The `glv_hnp_phase2_toy.gp` script establishes the equation structure; the LLL implementation is the next concrete step.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `623ddca` autolab 2026-05-31: CHLRS naive-cover ≠ Howe-glued when 2-torsion irreducible
 
@@ -1076,6 +1087,7 @@ Implementation:
 Estimated complexity: O(p^3) field operations over F_{p^3}, fully tractable in a single PARI session.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `02c7f7d` autolab 2026-06-01: Howe-glued Z/3Z search — 28 curves, 7 classes, 7th-root structure
 
@@ -1167,6 +1179,7 @@ Implement the (2,2)-isogeny kernel enumeration in PARI over F_{43^3}:
 4. Compute the quotient ppav and match its Igusa invariants against the table above.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `howe_richelot_v5.gp`, `igusa_7classes.gp`, `igusa_7classes_full.gp` added
 
@@ -1220,6 +1233,7 @@ immediate next concrete task — the specific algorithm is fully specified
 match Igusa invariants). Estimated 1-2 PARI sessions.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `d9e7414` autolab 2026-06-06: §10.5 CLOSED — P-521 HP LLL 3/3 at m=16 (23s/probe), 1/1 at m=32 (57s)
 
@@ -1323,6 +1337,7 @@ This gives a Γ_α ⊂ E1[2]×E2[2] with the correct isotropic structure, and th
 Richelot image should land in one of the 7 canonical Z/3Z classes.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `howe_richelot_p43_v2.gp` added (Richelot from naive cover, fixed for PARI 2.15.4 syntax)
 
@@ -1436,6 +1451,7 @@ a prime p ≡ 1 mod 6 where both b₁ and b₄ (the [1,1,1] twists) have small
 enough orders that the isogeny can be verified by direct point-counting.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `3eaf753` autolab 2026-06-09: 5/15 sextic-twist pairs Howe-glueable for secp256k1; Priority-2 Richelot structural obstruction diagnosed
 
@@ -1506,6 +1522,7 @@ The Howe-glued curve for (E1,E2) over F_43 is a general genus-2 curve outside th
 The Mestre algorithm is the alternative if the Richelot quotient is not presented as a sextic directly.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `d1a266f` autolab 2026-06-10: Z/3Z sub-factor traces — Howe-glued curve confirmed outside Z/3Z family
 
@@ -1578,6 +1595,7 @@ Since |E1(F_43)| = 31 and |E2(F_43)| = 57 are both ODD, neither E1 nor E2 has an
 4. **Priority 2 status**: RESOLVED for the F_43 toy case. The Howe-glued curve y²=x^6+20x³+5 exists but the isogeny is only over F_{43³}. The structural obstruction theorem is now concretely verified.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `eddc591` autolab 2026-06-11: Howe-glued curve y²=(x³+7)(x³+13) identified; F_{p³} obstruction confirmed
 
@@ -1675,6 +1693,7 @@ t_secp = 432420386565659656852420866390673177327 (~2^129)
 4. **Pair (2,5) analysis (low priority)**: The [1,1,1]×[1,1,1] pair has no F_{p³} obstruction — the Howe cover exists over F_p. This is a different attack scenario (NOT targeting secp256k1 directly) but worth noting for completeness of the security argument.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `8352a7f` autolab 2026-06-12: secp256k1 F_{p³} obstruction verified numerically; Igusa J4/J6 for F_43 Howe curve
 
@@ -1742,6 +1761,7 @@ from 2026-06-11/12 sessions (which did have PARI). The computation is reproducib
 3. **Thread 5 (GLV-HNP toy)**: `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` — try 32-bit toy curve.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `181f925` autolab 2026-06-13: paper integration — F_{p^3} obstruction Prop + Cor added to §5
 
@@ -1807,6 +1827,7 @@ complete through 384 bits. P-521 is CLOSED via HP-LLL (§10.5). The entire LLL a
 3. **Thread 6 (B5 over F_{p^k})** has never been touched and is not blocked.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `12a75a3` autolab 2026-06-14: Thread 4 CLOSED — P-384 and secp256k1 LLL 3/3 across all seeds
 
@@ -1882,6 +1903,7 @@ by actual execution (first run with fpylll). The claim was pre-emptive; it is co
 4. **Thread 2 (Igusa CQ normalization)**: Still BLOCKED on Sage. Skip until Sage is available.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `18e5a92` autolab 2026-06-15: Thread 5 confirmed — GLV HNP Phase 2 5/5 at m=6, small-λ failure mode diagnosed
 
@@ -1982,6 +2004,7 @@ scaling of m with bit size is the open empirical question.
    without Sage or equivalent (Oscar.jl?).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `172f7ff` autolab 2026-06-16: GLV Phase 2 20-bit confirmed, BKZ rescue negative
 
@@ -2061,6 +2084,7 @@ The eff ceiling for LLL success at 20-bit is ~0.05-0.076, far below the ~0.15 th
 3. **Igusa CQ (Thread 2)**: Still BLOCKED (no Sage/Oscar in container). Consider Oscar.jl install.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `5a2658e` autolab 2026-06-17: GLV Phase 2 — sharp K1 phase transition, lam/n-dependent eff ceiling
 
@@ -2162,6 +2186,7 @@ an unusually high overhead.
    reduction rescues the failure — as a data point on the impact of reduction quality.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `8af4810` autolab 2026-06-18: lam/n hypothesis falsified — Curve C (lam/n=0.29) succeeds at all K1; failure is curve-specific
 
@@ -2274,6 +2299,7 @@ The BKZ ceiling of Curve A matches Curve C's LLL ceiling roughly. The difference
    Testing at 32-bit is the next scale before attacking secp256k1 parameters.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `b6b55a3` autolab 2026-06-19: Curve A LLL failure is reduction-quality, not structural — BKZ-20 rescues K1=55 at m=14
 
@@ -2392,6 +2418,7 @@ This supports the main paper thesis (no attack beats ρ for prime-field ECC).
    the empirical eff ceiling for the GLV-HNP approach at secp256k1 scale.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `2059779` autolab 2026-06-20: BKZ-40 fails at K1≥72 for Curve A — structural obstruction confirmed; Curve C CM eigenvalue corrected
 
@@ -2480,6 +2507,7 @@ not a δ/n threshold effect. The condition "λ/n ≈ 1/3" captures the true obst
    secp256k1 satisfies this criterion, confirming the K1=72 eff=0.10 ceiling.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `1ed426b` autolab 2026-06-21: delta/n threshold mapped — obstruction at lam/n≈1/3 confirmed; secp256k1 firmly in obstructed regime
 
@@ -2593,6 +2621,7 @@ which is the operationally precise characterisation.
    Extend to m=30 for the λ/n≈0.30, λ/n≈0.35 pairs (clearest intermediate cases).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `f6928d5` autolab 2026-06-22: Effect A boundary mapped — δ/n<0.02 structurally obstructed; per-curve lattice variance documented
 - Note: resolved long-standing detached-HEAD issue — 48 accumulated commits (Jun 4–22) fast-forward merged to main and pushed.
@@ -2691,6 +2720,7 @@ C. **CM arithmetic:** The two curves in PAIR 1 have p=524743,n=523597 (FAIL) vs
    variance at larger δ/n remains an open sub-question.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `102576d` autolab 2026-06-23: κ(M) hypothesis falsified — per-curve LLL variance is not numerical; discriminating property unknown
 
@@ -2815,6 +2845,7 @@ The three experiments together give a coherent picture:
    rather than a global lattice geometry quantity."
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `4af0ce9` restore RESEARCH_AUTOLAB_LOG.md: full 2695-line log (was truncated to ~5KB by prior agent)
 - `8b3abd7` add glv_hnp_target_vector.py — Exp A/B/C analysis (target norm, spurious vectors, Kannan-row norm comparison)
@@ -2938,6 +2969,7 @@ Is it computable from the CM discriminant without running the attack?
    - Conclusion: lattice recovery is curve-specific, not uniformly exploitable
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `eeb1346` autolab 2026-06-24: Exp D/E/F — BKZ rescues C1 at v/GH=1.18; 50-seed stat shows 4% vs 100% recovery; δ/n not a predictor
 
@@ -3083,6 +3115,7 @@ exists. This is a curve-specific algebraic property of (p_C1, n_C1, λ_C1).
    lam/n, etc.) to find the distinguishing algebraic invariant.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `b6affe5` autolab 2026-06-25: Exp G/H/I — C1 structural obstruction confirmed; spurious sublattice is lattice artifact
 
@@ -3254,6 +3287,7 @@ C2-type set)."
    in a larger sample (100 curves) to see if this is real signal or noise.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `d1b98cd` autolab 2026-06-26: Exp J/K/L — K1 threshold effect revealed; C1 NOT structurally obstructed; cross-curve screening 30 curves
 
@@ -3369,6 +3403,7 @@ Computed additional curve invariants for C1 vs C2:
    the compression is from linear combinations.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `73b9a3f` autolab 2026-06-27: Exp M/N/O — K1 threshold mapped; lam/n falsified as predictor; C2 threshold 128-200
 
@@ -3506,6 +3541,7 @@ might work better than the max_q rule, but needs further testing on a larger sam
    closed-form from standard curve invariants."
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `79f352d` autolab 2026-06-28: Exp P/Q/R — CF-convergent separator falsified; spurious-row anatomy; 30-curve prediction test
 
@@ -3615,6 +3651,7 @@ run for 9 days with increasingly diminishing returns. The negative result IS the
 "no simple separator exists." Document and move to literature survey.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `9a67645` autolab 2026-06-29: Exp S — max_a predictor falsified (34% accuracy); Cornacchia trace also fails; 6th consecutive separator hypothesis rejected
 
@@ -3736,6 +3773,7 @@ Expected session effort: 1-2 hours (transcription + PARI debugging).
 Secondary: if the (3,3)-walk script runs successfully, extend to (5,5)-degree (requires different tools, likely out of scope for PARI) or apply the walk to the pair (E, E_2) where E_2 is the cubic twist — one of the 5 Howe-glueable pairs confirmed in Thread 3.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - none (log-only session — survey + proposal)
 
@@ -3798,6 +3836,7 @@ ORDER PRESERVATION confirmed: every 3-isogeny neighbor E' satisfies #E'(F_p) = #
 Alternatively, connect to the Decru-Kunzweiler genus-2 curves: verify that for a "mixed" (3,3)-isogeny kernel (not the product split), the image is indeed a Jacobian of a hyperelliptic curve with #Jac≈p², by computing the image curve explicitly via Hesse-form coordinates.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `secp256k1_cm_audit/hesse_33_walk_falsifier.py`: Exp U (3,3)-isogeny walk falsifier (corrected Vélu formula, all-match result)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-01 run log
@@ -3888,6 +3927,7 @@ Alternatively: proceed to write the B5 paper section update incorporating Exp U+
 (the (3,3)-degree case extends the existing (2,2)-Howe analysis).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `secp256k1_cm_audit/hesse_33_walk_depth2.py`: Exp V depth-2+ walk (B5 stable at depth 5, j=0 cycle period found)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-02 run log
@@ -3974,6 +4014,7 @@ DLP on J costs O(√(#J)) = O(p) >> O(√p).  B5 holds universally. ■
 Alternatively: **Exp Y — explore whether the obstruction (3|#E ⟹ 3∤#E_t) extends to higher ℓ-torsion** (e.g., ℓ=5,7). Does a similar mod-ℓ arithmetic argument close the full set of isogeny types for all degrees?
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `secp256k1_cm_audit/hesse_33_mixed_kernel.py`: Exp W mixed kernel verification (obstruction + empirical + Honda-Tate closure)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-03 run log
@@ -4069,6 +4110,7 @@ or p≡2,...,ℓ-1 mod ℓ. In those cases p+1≢2 mod ℓ, so the proof breaks;
 counterexample or prove a different obstruction.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `secp256k1_cm_audit/hesse_ll_obstruction_exp_y.py`: Exp Y generalized ℓ-rank obstruction (ℓ=5,7 verified)
 - `RESEARCH_AUTOLAB_LOG.md`: 2026-07-04 run log
@@ -4151,6 +4193,7 @@ PAPER_STRUCTURAL_COMPLETENESS.md:
 Alternatively: **ePrint survey** (fallback) for new papers on cover attacks or (ℓ,ℓ)-isogenies.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 
 - `2e87150` autolab 2026-07-05: Exp Z — unified B5 theorem; (ℓ,ℓ)-universality lemma + corollary
@@ -4254,6 +4297,7 @@ Recommended: Option A (20 min, high value — extends verification to the exact 
 walks). Then CLOSE Thread 6.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `eebb9fe` autolab 2026-07-06: Exp Z' — Enhanced ℓ-rank Lemma; p≢0,ℓ-1 mod ℓ; secp256k1 safe for ℓ≤13
 
@@ -4356,6 +4400,7 @@ Alternative: ePrint survey (fallback Step 4) since Thread 3 was last listed as
 untouched — either is valid.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `310ba7e` autolab 2026-07-07: Exp Z'' — Enhanced Lemma verified ℓ∈{3..13}; secp256k1 safe ℓ≤29; Thread 6 CLOSED
 
@@ -4496,6 +4541,7 @@ All 6 threads are CLOSED/BLOCKED/DEAD END. Recommend **Fallback (Step 4)**:
    a depth-2 isogeny graph path with a genus-3 fiber? This is unexplored.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `31545e2` autolab 2026-07-08: Thread 3 CLOSED — 5/15 sextic twist pairs Howe-glueable; Thread 1 status corrected to CLOSED
 
@@ -4634,6 +4680,7 @@ curves with CM by a specific quartic CM field K_4. If so:
   secp256k1.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 
 - `2d62998` autolab 2026-07-09: Thread 7 CLOSED — Honda-Tate obstruction; depth-2 Richelot stays in products; naive-cover D=-12 CM pattern
 
@@ -4724,6 +4771,7 @@ Thread 9: Investigate the squarefree pattern sf(D_new) = sf(a1²-4(a2-2p)):
   identify the exact quartic CM field for each.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 - `1098c9f` autolab 2026-07-10: Thread 8 — discriminant bug in thread7 fixed; 28 simple Jacobians identified; all 5 tests pass
 
 ## 2026-07-11 (autolab run)
@@ -4823,6 +4871,7 @@ Thread 10 (falsifier for norm-form):
   CM abelian surface over Q.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 - `3afdefd` autolab 2026-07-11: Thread 9 — norm-form 4p=73+3m² identifies CM field Q(sqrt(73),sqrt(-3)); sf=73 primes confirmed; PARI installed
 
 ## 2026-07-12 (autolab run)
@@ -4916,6 +4965,7 @@ Thread 11: Characterize the SPLIT condition for pair (g^1,g^2).
   toy example — draft a one-paragraph note for paper/eprint_combined.tex.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `0b7d258` autolab 2026-07-12: Thread 10 — Thread9 conjecture refuted; no CM-73 in (109,350]; SPLIT Jacobians at p=241,283,307 discovered
 
 ## 2026-07-13 (autolab run)
@@ -5012,6 +5062,7 @@ Thread 12: Characterize the CM-73 set theoretically.
   So sf=769 at p=193,211 follows the norm-form 4p=769+3m². Same as CM-73 structure.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `9d88726` autolab 2026-07-13: Thread 11 — SPLIT condition; all 16 SPLIT Jacobians p≤1000 have Q(sqrt(-3))-CM; CM-73 set confirmed {19,37,79,109}; B5 remark added
 
 ## 2026-07-14 (autolab run)
@@ -5094,6 +5145,7 @@ Thread 13: Verify the "principal ideal" hypothesis.
   be consistent with the set being truly finite (or having very sparse density).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `f7278fc` autolab 2026-07-15: Thread 13 — sf(a2^2-4p^2)=-219 iff CM-73; Weil poly splits over Q(sqrt(-219)) only for {19,37,79,109}; Igusa quadruples computed; resolvent-cubic V4 correction
 
 **BONUS (Thread 12 addendum): principal ideal hypothesis REFUTED.**
@@ -5122,6 +5174,7 @@ on a CM-73 Humbert stratum. Compute Igusa invariants via PARI's `hyperellcharpol
 output and compare.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `6c67a29` autolab 2026-07-14: Thread 12 — CM-73 set {19,37,79,109} confirmed p<=5000; V4 Galois; three quadratic subfields; principal-ideal hypothesis refuted; paper B5 remark extended
 
 ## 2026-07-15 (autolab run)
@@ -5228,6 +5281,7 @@ Thread 14: Verify the "different Frobenius class" interpretation for non-CM-73 p
   primitive norm forms of given shape), but would need formal verification.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `f7278fc` autolab 2026-07-15: Thread 13 — sf(a2^2-4p^2)=-219 iff CM-73; Weil poly splits over Q(sqrt(-219)) only for {19,37,79,109}; Igusa quadruples computed; resolvent-cubic V4 correction
 
 ## 2026-07-16 (autolab run)
@@ -5322,6 +5376,7 @@ Thread 15: Prove the "universal order-2" conjecture algebraically.
 - Also: for the case sf=-3 (p=12889), verify directly that the Frobenius element in Q(√-3) is an explicit Eisenstein prime π with Nm(π)=12889.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `015d7f1` autolab 2026-07-16: Thread 14 — extended norm-form sweep k<=199 confirms {19,37,79,109} final; universal order-2 Frobenius pattern
 
 ## 2026-07-17 (autolab run)
@@ -5427,6 +5482,7 @@ Thread 16: State the Theorem cleanly and check if it extends to non-norm-form pr
   biquadratic Weil polynomials, relevant to the cover-cost analysis).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `aa3826e` autolab 2026-07-17: Thread 15 — algebraic proof of universal order-2 Frobenius; 25/25 norm-form primes verified
 
 ---
@@ -5497,6 +5553,7 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
   not inert). Verify this for 10 cases to confirm.
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
 
 ---
@@ -5558,3 +5615,4 @@ Thread 18: Check CM literature for the p-splits corollary.
   one-paragraph introduction statement of the main theorem).
 
 ### Commits made
+`4c51f59` autolab 2026-07-21: Thread 17 — Proposition prop:order2-frobenius in paper; 92/92 verified
