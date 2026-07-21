@@ -5574,3 +5574,121 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+**Thread 18** — Howe gluing on j=0 sextic twists (priority-3 open task).
+Chosen per 2026-07-20 recommendation: script `howe_sextic_twists_all15.gp` already
+existed and just needed running. Thread 17 (paper integration) was completed last
+session with no blocker, so moving to next item.
+Also ran **Thread 19** (GLV-HNP Phase 2 toy lattice) as a secondary task.
+
+### Work done
+
+**Thread 18 — Howe sextic twists (all 15 pairs):**
+- Installed PARI/GP (not present at session start; `apt-get install pari-gp` succeeded).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` — clean output, no errors.
+- Ran supplemental `gcd_simple2.gp` to compute exact gcd values for all 15 pairs.
+
+**Thread 19 — GLV-HNP Phase 2 toy LLL:**
+- Wrote `secp256k1_cm_audit/thread19_glv_hnp_phase2_lll.gp` — first attempt to
+  implement the (2m+1)-dim Phase 2 lattice on the toy curve (n=199, m=5).
+- Fixed two bugs: `lll()` → `qflll()` in modern PARI; lattice basis column convention
+  (qflll takes column vectors, so must transpose).
+- Ran LLL. The recovered vector did not match d=190.
+- Investigated: determined the negative result is FUNDAMENTAL (not a bug).
+- Confirmed: `cargo test --test curve_audit` — 5/5 pass (7.96s).
+
+### Findings
+
+**Thread 18 — 5/15 sextic twist pairs are Howe-glueable:**
+
+2-torsion factorisation patterns for the 6 twists (b_k = 7*u^k mod p):
+| k | trace T_k         | deg-pattern | note                         |
+|---|-------------------|-------------|------------------------------|
+| 0 | +t                | [3]         | secp256k1; E[2] cyclic Z/3  |
+| 1 | (t-3s)/2          | [1,1,1]     | E[2] all F_p-rational        |
+| 2 | -(t+3s)/2         | [3]         | E[2] cyclic Z/3              |
+| 3 | -t                | [3]         | quadratic twist; E[2] Z/3   |
+| 4 | (3s-t)/2          | [1,1,1]     | E[2] all F_p-rational        |
+| 5 | (t+3s)/2          | [3]         | E[2] cyclic Z/3              |
+
+(t = 432420386565659656852420866390673177327,
+ s = 303414439467246543595250775667605759171  from 4p = t² + 3s²)
+
+H2 holds iff same deg-pattern: [3]-group = {0,2,3,5}, [1,1,1]-group = {1,4}.
+
+pairwise gcd(N_i, N_j) for all 15 pairs:
+```
+(0,1)=1  (0,2)=1  (0,3)=1  (0,4)=1  (0,5)=1
+(1,2)=1  (1,3)=3  (1,4)=1  (1,5)=3
+(2,3)=1  (2,4)=1  (2,5)=4
+(3,4)=1  (3,5)=3
+(4,5)=1
+```
+
+Howe-glueable pairs (H1+H2+H3 all pass):
+- **(0,3)**: secp256k1 × quadratic-twist (confirmed; previously known)
+- **(0,2)**: twist 0 × twist 2 (new)
+- **(0,5)**: twist 0 × twist 5 (new)
+- **(1,4)**: twist 1 × twist 4 (new; the only [1,1,1]-pair)
+- **(2,3)**: twist 2 × twist 3 (new)
+
+Failing pairs by reason:
+- H2 only: (0,1),(0,4),(1,2),(2,4),(3,4),(4,5) — different 2-torsion types
+- H2 + H3: (1,3) gcd=3, (1,5) gcd=3 — different type AND shared 3-factor
+- H3 only: (2,5) gcd=4, (3,5) gcd=3 — same type, but shared factor
+
+Structural note on H3 failures: gcd(N_2, N_5) = 4 because
+N_2 = p+1+(t+3s)/2 and N_5 = p+1-(t+3s)/2 sum to 2(p+1) and
+gcd(N_2,N_5) | gcd(2(p+1), t+3s) = 4. Similarly gcd=3 cases
+arise from the CM discriminant D=-3 of secp256k1 (3 | N_k for k≠0).
+
+ECDLP implication: all 5 genus-2 Jacobians project onto pairs of
+secp256k1 sextic twists via (2,2)-isogenies. None provide a sub-√p
+attack per Theorem 4.X in `paper/structural_completeness.tex`.
+
+**Thread 19 — GLV-HNP Phase 2: negative result in k1-only-biased model:**
+
+Attempted LLL on the (2m+1)-dim lattice for n=199, K1_BOUND=2, m=5.
+LLL (via qflll) ran, but no column recovered d=190.
+
+Root cause (analytical): in the k1-only-biased model (k2 ∈ [0,n) freely):
+- For any d ∈ [1,n) and any signature (A_i, B_i):
+  k2_i = λ^{-1} * (A_i + B_i*d - k1_i) mod n
+  is ALWAYS in [0,n) for any k1_i ∈ {0,...,K1B-1}.
+- The constraint is vacuous: every d satisfies all m per-signature conditions.
+- The lattice cannot distinguish the true d from any wrong d.
+
+This is a FUNDAMENTAL result, not a bug: the (2m+1)-dim Phase 2 lattice
+works ONLY when k2 is also BOUNDED (e.g., k2 < √n ≈ 2^128 in the
+standard GLV decomposition). The "k1-only-bias, k2 full-range" threat model
+assumed in RESEARCH_GLV_HNP_PHASE2.md §1 is NOT attackable by this lattice.
+
+Consequence: the correct Phase 2 toy must use the standard signed-halfscalar
+GLV decomposition where both k1 and k2 are bounded by ≈√n.
+
+### Next step proposal
+
+**Thread 18A (immediate follow-up):**
+For pairs (2,5) and (3,5) that have H2=YES but H3=NO (gcd=4 and gcd=3):
+Howe's original theorem requires gcd=1 (coprimality). However, Howe's 1996
+Remark after Theorem 1 discusses what happens when gcd(#E_1,#E_2) > 1.
+PARI check: does a (2,2)-gluing still produce a smooth Jacobian for (2,5)
+or (3,5), or is there a singularity/product? This would clarify whether
+"gcd > 1" is truly a blocker or merely adds a kernel constraint.
+
+**Thread 19A (redesign):**
+Rewrite `thread19_glv_hnp_phase2_lll.gp` with CORRECT GLV decomposition:
+- Pick random k ∈ [1,n), compute (k1,k2) = GLV_decompose(k) with k1,k2 < √n
+- Apply extra bias on k1: truncate k1 to K1B bits (giving 2^c / √n fraction)
+- This gives a bounded k2 ≈ 2^128 / K1B and the lattice attack becomes feasible
+
+Recommend Thread 18A first (short PARI check, builds on existing infrastructure),
+then Thread 19A in the next session.
+
+### Commits made
+`[TBD — see below]`
