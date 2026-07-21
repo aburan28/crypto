@@ -5726,3 +5726,4 @@ a scalar multiple; failure mode (if any) informs the Phase 2 attack design.
 This thread is the remaining unresolved item from the original 6 priority list.
 
 ### Commits made
+973ee6c6cebfe64a67f7b03a33f8120fdce905e5 autolab 2026-07-21: Thread 18 — trace-assignment bug fixed; correct Howe-glueable pairs verified
