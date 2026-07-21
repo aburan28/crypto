@@ -5498,3 +5498,79 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-20 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem from Threads 15–16 into the ePrint/paper LaTeX draft.
+Chosen because: the 2026-07-19 log entry proposed this as the next-best concrete step
+(after proving and generalising the order-2 theorem, publish it in the paper);
+no intervening work had been done on this thread.
+
+### Work done
+- Read `paper/structural_completeness.tex` (~851 lines before edit); identified
+  insertion point after the Thread 12 remark (line 429, end of `\end{remark}`),
+  immediately before `\subsection*{B6}`.
+- Confirmed all required LaTeX macros already defined: `\ZZ`, `\QQ`, `\Cl`,
+  `\disc`, `\mathcal`, `\mathfrak` — all from `amsmath,amssymb,amsthm` (line 4).
+- `\newtheorem{proposition}` already declared (line 23).
+- Inserted **Proposition + Proof + Remark** (63 new lines, final file ~914 lines):
+  - `\begin{proposition}[Universal order-2 Frobenius ideal]\label{prop:biquadratic-order2}`
+    — formal statement: for odd prime p, p∤a₂, a₂≠0, with D=a₂²−4p² and
+    K=Q(√sf(D)), we have [P]²=1 in Cl(K) AND p splits in K.
+  - `\begin{proof}` — 4-step proof (A)-(D) matching the algebraic argument from
+    Threads 15–16, plus the inert/ramified impossibility argument.
+  - `\begin{remark}[Empirical record and relevance to B5]\label{rem:order2-empirical}`
+    — 82 verified cases, cite scripts `thread15_order2_algebraic.gp` and
+    `thread16_general_order2.gp`, note relevance to CM types in (N,N)-cover
+    construction.
+- Verified: `cargo test --test curve_audit` → 5/5 pass (6.93s).
+- Note: `pdflatex` not installed in container; LaTeX validity confirmed by:
+  (a) manual inspection of all environments and commands, (b) all macros
+  verified against preamble, (c) `\begin`/`\end` tags balanced by visual check.
+
+### Findings
+
+**Proposition 4.X (Universal order-2 Frobenius ideal)** — now in the paper:
+- Statement: for any odd prime p with p∤a₂, a₂≠0, the ideal [P] above p in
+  Q(√sf(a₂²−4p²)) has order dividing 2 in the class group.
+- Proof: 4 lines (β = (-a₂+m√sf)/2 satisfies x²+a₂x+p²=0; norm = p²;
+  (β)≠(p) since p∤a₂; hence (β)=P² or P̄²).
+- Corollary (in proof): p always splits (not inert, not ramified) when p∤a₂.
+- 82 numerical verifications across Threads 15–16 with 0 failures.
+
+**Literature note**: the splitting conclusion (p splits iff p∤a₂) is an
+elementary consequence of quadratic reciprocity / discriminant theory, but
+the specific packaging as "Frobenius ideal has order ≤ 2" in the context
+of biquadratic Weil polynomials does not appear to be explicitly stated
+in standard references (Cox "Primes of the Form x²+ny²", Silverman
+"Advanced Topics", Neukirch "ANT"). The result is elementary but the
+connection to cover-attack CM types appears new to this paper.
+
+**Paper diff**: `paper/structural_completeness.tex` +63 lines at line 430
+(Proposition `prop:biquadratic-order2` + proof + Remark `rem:order2-empirical`).
+
+### Next step proposal
+Two candidate next threads:
+
+**Thread 18 (priority-3 from task list): Howe gluing on j=0 sextic twists.**
+secp256k1 has 6 sextic twists; do the Howe (H1)+(H2)+(H3) conditions hold
+pairwise for all 15 pairs? PARI check. This is well-scoped for one session:
+enumerate the 6 twists over F_p for a small prime p≡1(mod6), check each of
+the 15 pairs with the `howe_gluing_test.gp` or a new script. Expected outcome:
+either all 15 pairs fail (ruling out sextic-twist Howe gluing) or some succeed
+(a lead for the Mestre-Howe open thread).
+
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy.**
+Try the GLV-aware lattice attack on a 32-bit toy curve. `glv_hnp_phase2_toy.gp`
+already exists; run it and check if the lattice recovers d.
+Expected: either d is recovered (validates the attack direction) or a concrete
+failure mode is found.
+
+Recommend Thread 18 first (howe_gluing_test already has infrastructure) since it
+directly extends the cover-attack coverage; Thread 19 is a good fallback.
+
+### Commits made
+`641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
