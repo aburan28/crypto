@@ -5574,3 +5574,107 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Fallback (Step 4) — all 6 original priority threads are CLOSED/BLOCKED/DEAD END, and the
+Thread 18 proposed by the 2026-07-20 log (Howe gluing on j=0 sextic twists) was redundant
+with Thread 3 (CLOSED 2026-07-08: 5/15 glueable pairs confirmed; script `howe_sextic_twists_all15.gp`
+already exists). Thread 19 (GLV-HNP Phase 2 toy) was previously marked DEAD END. Both
+were verified invalid before falling back.
+
+### Work done
+
+- **Orientation**: read log tail; confirmed last genuine new work was Thread 17 (2026-07-20,
+  integrating order-2 Frobenius ideal into `paper/structural_completeness.tex`). Current branch:
+  `claude/serene-curie-rkj8q6`. PARI/GP (`gp`) confirmed unavailable in this container.
+
+- **Thread 18 redundancy check**: `howe_sextic_twists_all15.gp` already exists and was generated
+  as part of Thread 3 (2026-07-08). The 2026-07-20 recommendation to run it was a re-proposal
+  of closed work. No new execution possible (no `gp`); script inspection confirms it is complete.
+
+- **Thread 19 (GLV-HNP Phase 2) dead-end confirmation** (numerical proof):
+  For toy curve p=1051, b=7, n=1093, λ=941 (GLV eigenvalue, λ²+λ+1≡0 mod 1093):
+  With bias bound K=16 (k₁∈[0,16)), tested 99 candidate d values (d∈[1,99]) against
+  5 generated signatures. **All 99/99 candidate d values are consistent with all 5 signatures.**
+  Root cause: for any d, choosing k_{i,2} = λ⁻¹·(A_i + B_i·d) mod n gives k_{i,1} = 0 ∈ [0,K).
+  The Phase 2 constraints are trivially satisfiable for every d independently per signature.
+  The lattice formulation in `RESEARCH_GLV_HNP_PHASE2.md` cannot distinguish the correct d.
+  **DEAD END confirmed with proof.** The `glv_hnp_phase2_toy.gp` script acknowledges this
+  limitation ("doesn't actually distinguish wrong d's from right ones") — this run provides
+  the explicit numerical backing.
+
+- **ePrint survey** (via WebSearch agent): searched for papers since 2026-07-20.
+
+- **New attack variant proposal** (Thread 20, see below).
+
+### Findings
+
+#### ePrint survey — top 5 relevant papers (2025–2026)
+
+| ePrint | Title | Authors | Relevance |
+|--------|-------|---------|-----------|
+| 2026/1431 | The Isogeny Problems | Castryck, De Feo, Galbraith, Kutas, Reijnders | Systematic hardness landscape for supersingular isogeny problems; shows isogeny graphs are Ramanujan (Pizer); best classical algorithms O(p^{1/2}). Directly grounds our ordinary-curve hardness analogy. |
+| 2026/546 | Hyperelliptic Gluing Isogeny Diffie-Hellman (HGIDH) | Idris, Hedabou | Constructs key-exchange from Frey-Kani (N,N)-gluing E₁×E₂→J(C); security reduces to supersingular isogeny hardness. COMPLEMENTARY to our paper: they prove security for supersingular covers; we prove hardness for ordinary covers. |
+| 2026/1199 | Post-Quantum Commitment from Richelot Walks on Superspecial Genus-2 Jacobians | Idris, Hedabou | (2,2)-Richelot isogeny walks on superspecial J(C); binding reduces to Short Richelot Endomorphism Problem (SREP). Another supersingular companion to our ordinary-curve theorem. |
+| 2026/114 | Chasing Rabbits Through Hypercubes: Better Algorithms for Higher Dimensional 2-Isogeny Computations | Dartois, Duparc | Faster chains of (2,2,2,2)-isogenies in dimension 4 (abelian fourfolds), used in SQIsignHD. **See Thread 20 proposal.** |
+| 2025/705 | Breaking ECDSA with Two Affinely Related Nonces | Gilchrist, Buchanan, Finlow-Bates | Already cited in our paper as the affine-nonce GLV special case. |
+
+**Literature alignment note**: Papers 2026/546, 2026/1199, and 2026/1431 together form a
+consistent picture of the supersingular isogeny landscape. None of them attack ordinary curves;
+they confirm our main theorem's scope as the ordinary-curve complement to their work.
+
+#### GLV-HNP Phase 2 dead-end proof (concrete)
+
+```python
+# p=1051, b=7, n=1093, lam=941, K=16, m=5 signatures, seed=42
+# For ANY d in [1,99]: check if k_{i,2} exists s.t. k_{i,1} = (A_i+B_i*d-lam*k_{i,2})%n < K
+# Result: 99/99 consistent (proof that Phase 2 is a dead end)
+```
+
+The constraint `0 ≤ (A_i + B_i·d − λ·k_{i,2}) mod n < K` has K solutions for k_{i,2} per
+signature for every choice of d, making the system indistinguishable. A viable Phase 2 attack
+would need the GLV half-scalar split to be DETERMINISTIC and the constraint to be
+on the MINIMUM-NORM Babai-rounded split — not just existence of some (k₁,k₂) pair.
+
+### Proposed Thread 20: Kani dimension-4 cover obstruction and B5 extension
+
+**Background**: Paper 2026/114 (Dartois-Duparc) gives faster (2,2,2,2)-isogeny chains in
+dimension 4. Kani's theorem states that an endomorphism of degree d² on E gives an isogeny
+from E^4 to an abelian fourfold A. For E=secp256k1 with End(E)⊇Z[ζ₃], Kani's construction
+is non-trivial.
+
+**Proposed experiment**:
+1. Describe explicitly the abelian fourfold A := (E × E × E × E) / Γ₂ via a (2,2,2,2)-kernel
+   (Kani decomposition, using the [2] endomorphism on E and the CM involution [ζ₃]).
+2. Determine if A ≅ J(C₁) × J(C₂) for genus-2 curves C₁, C₂ (product abelian surface),
+   or if A is a simple abelian fourfold (generic case).
+3. Check B5 for A: DLP cost on A is O(|A(F_p)|^{1/2}) ≈ O(p²) vs ECDLP cost O(p^{1/2}).
+   Ratio is p^{3/2} → no improvement. But if A factors as J(C)², then DLP on J(C) costs
+   O(|J(C)(F_p)|^{1/2}) ≈ O(p) → still no improvement (p > p^{1/2}).
+
+**Expected outcome**: no win — B5 extends to dimension 4 by the same argument.
+**Interest**: connects Dartois-Duparc (2026/114) computation to our structural theorem.
+  The Dartois-Duparc methods give FAST ways to WALK dimension-4 isogeny graphs, but
+  fast walking ≠ faster DLP.
+
+**Falsifier**: find a genus-2 curve C/F_p such that Jac(C) → secp256k1 via a cover with
+  index-calculus complexity sub-O(p^{1/2}). Expected: no such C exists.
+  Scope: one session; PARI port once gp is available.
+
+### Next step proposal
+Two options:
+1. **Thread 20 scoping** (theory): Write the Kani theorem / B5-extension argument into
+   `PAPER_STRUCTURAL_COMPLETENESS.md` §B5 or a new §B7 (dimension-4 covers), citing
+   2026/114. No gp needed; purely theoretical.
+2. **Literature integration**: add the 2026/546 (HGIDH) and 2026/1431 (Isogeny Problems)
+   papers as citations in `paper/structural_completeness.tex`, noting complementarity to
+   our ordinary-curve theorem (they cover supersingular setting, we cover ordinary).
+
+Recommend Option 2 first (lower effort, concrete deliverable), then Thread 20.
+
+### Commits made
+none (fallback run; no code changes)
