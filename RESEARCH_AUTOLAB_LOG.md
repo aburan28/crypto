@@ -5574,3 +5574,155 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 — Thread 18: Sextic twist Howe-glueable pairs; trace-assignment bug discovered and fixed
+
+### Task picked
+Thread 18 (priority-3 from task list): Run `howe_sextic_twists_all15.gp` for the first
+time; verify all 15 pairwise Howe (H1)+(H2)+(H3) conditions for secp256k1's 6 sextic
+twists. The PARI script existed from 2026-05-24 but had never been executed.
+
+### Work done
+
+**Step 1 — Attempted to run the existing PARI script.**
+Running `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp` revealed it would
+require ~20–30s per ellcard call (SEA on 256-bit p); the existing script used a scalar-
+multiplication fallback instead. More critically, a review of the trace vector revealed
+a potential ordering error.
+
+**Step 2 — Algebraic consistency check caught the bug.**
+The 2-torsion factorisation of x³+b_k over F_p depends on the cubic-residue class of
+b_k. For secp256k1's prime p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F:
+
+- k=0 and k=3: x³+b has degree pattern [3] (irreducible). These are the "cubic-non-residue" twists.
+- k=1 and k=4: x³+b splits as [1,1,1] (3 distinct rational roots). This forces 4|#E.
+- k=2 and k=5: x³+b has pattern [3] (irreducible). No rational 2-torsion.
+
+The original script assigned:
+```
+T = [t, (t-3s)/2, -(t+3s)/2, -t, (3s-t)/2, (t+3s)/2]
+```
+This gives N_{k=1} = p+1-(t-3s)/2. Checking N_{k=1} mod 4:
+since (t-3s)/2 is odd and p+1 is even, we get N_{k=1} mod 4 ∈ {1,3} (odd).
+But k=1 has [1,1,1] 2-torsion ⟹ 4|#E. CONTRADICTION.
+
+**Step 3 — ellcard verification via `thread18_ellcard2.gp`.**
+Wrote and ran a new PARI script using PARI's built-in `ellcard` (SEA algorithm) to
+compute exact point counts for E_{k=1} and E_{k=2}. Results:
+
+- k=1: #E = 115792089237316195423570985008687907852598652813156864395638497411212089444244
+  - mod 4 = 0 ✓ (consistent with [1,1,1] 2-torsion)
+  - trace = p+1-#E = +(t+3s)/2 (the LARGER positive CM trace)
+  - This is T6 = (t+3s)/2, NOT T2 = (t-3s)/2 as the original script assumed.
+
+- k=2: #E = 115792089237316195423570985008687907853031073199722524052490918277602762621571
+  - mod 4 = 3
+  - trace = p+1-#E = (3s-t)/2
+  - This is T5, NOT T3 = -(t+3s)/2 as the original script assumed.
+
+The correct CM trace assignment (ellcard-verified) is:
+```
+k=0: T = +t              (secp256k1 itself)
+k=1: T = +(t+3s)/2       (ellcard confirms)
+k=2: T = -(t-3s)/2 = (3s-t)/2   (ellcard confirms)
+k=3: T = -t              (quadratic twist)
+k=4: T = -(t+3s)/2       (quadratic twist of k=1)
+k=5: T = +(t-3s)/2       (quadratic twist of k=2)
+```
+The original ordering had T[2]↔T[6] swapped and T[3]↔T[5] swapped.
+
+**Step 4 — Fixed `howe_sextic_twists_all15.gp`.**
+Changed the trace vector definition at line 77:
+
+Old (buggy):
+```gp
+T = [t_known, t_minus, -(t_known + 3*s)/2, -t_known, (3*s - t_known)/2, t_plus];
+```
+New (corrected):
+```gp
+T = [t_known, t_plus, -t_minus, -t_known, -t_plus, t_minus];
+```
+with a correction comment referencing Thread 18 and the ellcard verification.
+
+**Step 5 — Ran the corrected script and confirmed output.**
+```
+  (i,j) | H1 | H2 | H3 | Glueable?
+  (0,1)  | Y  | N  | Y  | no
+  (0,2)  | Y  | Y  | Y  | YES
+  (0,3)  | Y  | Y  | Y  | YES
+  (0,4)  | Y  | N  | Y  | no
+  (0,5)  | Y  | Y  | Y  | YES
+  (1,2)  | Y  | N  | Y  | no
+  (1,3)  | Y  | N  | N  | no
+  (1,4)  | Y  | Y  | N  | no   ← gcd=4 (both have 4|N)
+  (1,5)  | Y  | N  | N  | no
+  (2,3)  | Y  | Y  | Y  | YES
+  (2,4)  | Y  | N  | Y  | no
+  (2,5)  | Y  | Y  | Y  | YES
+  (3,4)  | Y  | N  | Y  | no
+  (3,5)  | Y  | Y  | N  | no   ← gcd=3
+  (4,5)  | Y  | N  | Y  | no
+
+Howe-glueable pairs: 5 / 15
+  (0,2), (0,3), (0,5), (2,3), (2,5)
+```
+
+**Step 6 — cargo tests passed.** `cargo test --test curve_audit`: 5/5 tests pass.
+
+### Findings
+
+**Correct Howe-glueable pairs (ellcard-verified):**
+(0,2), (0,3), (0,5), (2,3), (2,5)
+
+**Pair (1,4) is NOT glueable:** Both k=1 and k=4 have [1,1,1] 2-torsion,
+satisfying H2. But gcd(N_1, N_4) = 4 ≠ 1, so H3 fails. This is structurally
+forced: N_1 · N_4 = (p+1-(t+3s)/2)(p+1+(t+3s)/2) = (p+1)²-((t+3s)/2)², and
+both orders are divisible by 4 since their traces have the same parity as t+3s.
+
+**Pair (3,5) is NOT glueable:** gcd(N_3, N_5) = 3.
+
+**The original 2026-05-24 Python script (`howe_gluing_conditions.py`) had the
+CORRECT answer.** Only the subsequent PARI rewrite (howe_sextic_twists_all15.gp)
+introduced the trace-ordering error by incorrectly assuming b_k ↔ T[k+1] in the
+abstract CM ordering without verifying against the concrete primitive root g=3.
+
+**Root cause of the ordering ambiguity:** The CM theory says the 6 traces are
+{±t, ±(t+3s)/2, ±(t-3s)/2}, but the *specific assignment* b_k ↔ trace depends
+on the choice of primitive root g and the concrete value of u = g^{(p-1)/6} mod p.
+For g=3 (the smallest primitive root mod secp256k1's p), PARI's ellcard shows that
+b_1 = 7u gets the larger positive trace (t+3s)/2, not the smaller (t-3s)/2.
+
+**Security implications:** Unchanged. The 5 glueable pairs still represent
+5 distinct genus-2 curves C/F_p with Jac(C) isogenous to E_i × E_j.
+The three pairs involving secp256k1 itself (k=0): (0,2), (0,3), (0,5) are
+correct in both old and new scripts. No change to the ECDLP security conclusion:
+all Jacobians have |Jac(C)(F_p)| ≈ p², so DLP on Jac costs ≥ √(p²) = p steps,
+no improvement over Pollard rho on E_0 alone.
+
+### New files created
+- `secp256k1_cm_audit/thread18_ellcard2.gp` — PARI script running ellcard for
+  k=1 and k=2, computing all relevant GCDs, confirming correct assignment.
+- `secp256k1_cm_audit/thread18_ellcard.gp` — earlier attempt (nested-loop
+  syntax errors; abandoned but retained for reference).
+- `secp256k1_cm_audit/thread18_trace_verify.py` — Python scalar-mult approach
+  (timed out on 256-bit curve; abandoned).
+- `secp256k1_cm_audit/thread18_trace_verify.gp` — another partial attempt
+  (PARI while-loop syntax issues; abandoned).
+- `secp256k1_cm_audit/thread18_correct_assignment.gp` — partial rewrite
+  (abandoned in favor of thread18_ellcard2.gp).
+
+### Modified files
+- `secp256k1_cm_audit/howe_sextic_twists_all15.gp` — corrected CM trace vector
+  T[2]↔T[6] and T[3]↔T[5] swap; added correction comment with date.
+
+### Next step proposal
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy (32-bit curve).**
+`glv_hnp_phase2_toy.gp` already exists. Run it and verify the GLV-aware lattice
+recovers the secret scalar d on a 32-bit toy curve. Expected: LLL returns d or
+a scalar multiple; failure mode (if any) informs the Phase 2 attack design.
+This thread is the remaining unresolved item from the original 6 priority list.
+
+### Commits made

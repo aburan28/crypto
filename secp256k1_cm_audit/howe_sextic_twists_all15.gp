@@ -61,15 +61,20 @@ print("");
 
 \\ ---- 3. Six traces from CM ----
 \\ Traces of the 6 sextic twists (order corresponds to the ζ₆^k twist):
-\\ T_0 =  t (secp256k1 itself)
-\\ T_1 = (t - 3s)/2
-\\ T_2 = -(t + 3s)/2
-\\ T_3 = -t  (quadratic twist)
-\\ T_4 = -(t - 3s)/2 = (3s - t)/2
-\\ T_5 =  (t + 3s)/2
+\\ CORRECTED 2026-07-21 (Thread 18): original script had T[2]<->T[6] and T[3]<->T[5] swapped.
+\\ Correct assignment verified by PARI ellcard (SEA) for k=1 and k=2:
+\\ T_0 =  t               (secp256k1 itself)
+\\ T_1 = +(t + 3s)/2
+\\ T_2 =  (3s - t)/2
+\\ T_3 = -t               (quadratic twist)
+\\ T_4 = -(t + 3s)/2
+\\ T_5 =  (t - 3s)/2
+\\ The original ordering [t, (t-3s)/2, -(t+3s)/2, -t, (3s-t)/2, (t+3s)/2]
+\\ assigns T_plus to k=5 and T_minus to k=1, but ellcard shows it should be reversed:
+\\ k=1 gets the LARGER positive trace (t+3s)/2 and k=5 gets the smaller (t-3s)/2.
 t_plus  = (t_known + 3*s) / 2;
 t_minus = (t_known - 3*s) / 2;
-T = [t_known, t_minus, -(t_known + 3*s)/2, -t_known, (3*s - t_known)/2, t_plus];
+T = [t_known, t_plus, -t_minus, -t_known, -t_plus, t_minus];
 \\ Use jj (not k) to avoid polluting k with t_POL after vector() returns
 N = vector(6, jj, p + 1 - T[jj]);
 
