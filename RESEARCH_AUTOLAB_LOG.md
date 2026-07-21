@@ -5574,3 +5574,105 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists.
+Chosen because: 2026-07-20 run completed Thread 17 (paper integration) and
+explicitly recommended Thread 18 as the next step. Prior `howe_gluing_test.gp`
+only checked the one pair (secp256k1, quadratic twist); this run checks all 15.
+
+### Work done
+- Installed PARI/GP 2.15.4 (not present in container by default; `apt-get install pari-gp`).
+- Wrote `secp256k1_cm_audit/howe_sextic_twists.gp` (full analysis script):
+  - CM decomposition: solved a²+ab+b²=p with 2a+b=t, giving a=367917413...,
+    b=-303414439...
+  - Computed all 6 Frobenius traces: {±T₀, ±T₁, ±T₂} where T₀=t=432420386...327,
+    T₁=671331852...420, T₂=238911465...093.
+  - Found omega_p = 60197513...409 (primitive 6th root of unity in F_p via
+    sqrt(-3) mod p using p≡3 mod 4).
+  - b-coefficients: d[k] = 7·omega_p^k mod p for k=0,...,5.
+  - 2-torsion splitting of x³+d[k]: d[0,2,3,5] → irreducible [3]; d[1,4] → [1,1,1].
+  - Ran `ellcard` for all 6 twists (PARI SEA algorithm, ~60s total):
+    - d[0]=7: N₀=n (confirmed)
+    - d[1]: N₁=...244, trace=T₁ (split 2-torsion, v₂(N₁)=2)
+    - d[2]: N₂=...571, trace=T₂ (irred 2-torsion, v₂(N₂)=0)
+    - d[3]=-7 mod p: N₃=...991, trace=-T₀ (irred, v₂(N₃)=0)
+    - d[4]: N₄=...084, trace=-T₁ (split, v₂(N₄)=2)
+    - d[5]: N₅=...757, trace=-T₂ (irred, v₂(N₅)=0)
+  - Wrote flat `secp256k1_cm_audit/howe_sextic_final.gp` to work around
+    PARI 2.15.4 "embedded braces not implemented" limitation in nested for-loops.
+  - Ran full H1+H2+H3 check.
+
+### Findings
+
+**H2 analysis:**
+- (H2) holds iff d[j]/d[i] = omega_p^(j-i) is a cube mod p.
+- omega_p^3 = −1 mod p. Key fact: (p−1)/3 ≡ 2 mod 4 (since p≡7 mod 12 →
+  p−1≡6 mod 12 → (p−1)/3≡2 mod 4). So (−1)^((p−1)/3) = 1, i.e., −1 IS a cube mod p.
+- Hence d[j]/d[i] is a cube iff (j−i) ≡ 0 mod 3.
+- Only 3 pairs satisfy H2: {0,3}, {1,4}, {2,5} — one per cubic-twist class.
+  (12 of 15 pairs fail H2 outright.)
+
+**H3 analysis for H2-compatible pairs:**
+
+| Pair | Curves | gcd | H3 | Howe-gluable? |
+|------|--------|-----|-----|--------------|
+| {0,3} | secp256k1 + quadratic twist | 1 | ✓ | **YES** |
+| {1,4} | cubic twist + quad twist    | 4 | ✗ | NO (4|N₁, 4|N₄ from split 2-torsion) |
+| {2,5} | sextic twist + quad twist   | 1 | ✓ | **YES** |
+
+**Result: exactly 2 of 15 pairs are Howe-gluable.**
+
+**New finding:** Pair {2,5} (the `d[2]` sextic twist + its quadratic twin `d[5]`)
+also satisfies all three Howe conditions. This gives a second smooth genus-2 Jacobian
+cover, of the curve y²=x³+d[2] (NOT of secp256k1 directly).
+
+**Why pair {1,4} fails:**
+d[1] and d[4] both have completely split 2-torsion ([1,1,1]), so
+E_{d[k]}[2](F_p) ≅ (Z/2Z)² and 4 | N_k for k∈{1,4}. Hence gcd(N₁,N₄)≥4.
+The Howe-gluing kernel is not étale — H3 obstruction.
+
+**ECDLP implications:**
+- Pair {0,3} cover: already analyzed in the paper (B5). #Jac ≈ p², no speedup.
+- Pair {2,5} cover: #Jac(C) = N₂·N₅ ≈ p², Pollard ρ cost ≈ √p = 2^128 = cost
+  of ECDLP on secp256k1 itself. No speedup.
+- Confirms B5: all j=0 sextic-twist Howe covers have genus-2 Jacobians with
+  Pollard cost ≥ ECDLP cost on secp256k1.
+
+**Numerical results:**
+```
+p = 0xFFFFFFFFFFF...EFFFFFC2F  (256-bit)
+omega_p = 60197513588986302554485582024885075108884032450952339817679072026166228089409
+
+6 traces: {±432420386565659656852420866390673177327,
+           ±671331852483699643819086596696745227420,
+           ±238911465918039986966665730306072050093}
+
+gcd(N0,N3) = 1   [H3 ✓]
+gcd(N1,N4) = 4   [H3 ✗]
+gcd(N2,N5) = 1   [H3 ✓]
+```
+
+**cargo test --test curve_audit: 5/5 PASS (6.07s)**
+
+### Next step proposal
+Two strong candidates:
+
+**Thread 19 (GLV-HNP Phase 2 toy):** Run `glv_hnp_phase2_toy.gp` on a 32-bit
+toy curve. Script already exists; just needs execution + result documentation.
+Expected outcome: lattice recovers d (the secret scalar) or documents failure mode.
+
+**Thread 20 (new — paper update for Thread 18 findings):**
+Add the sextic-twist Howe analysis as a Proposition to `paper/structural_completeness.tex`
+(parallel to Proposition `prop:biquadratic-order2` added in Thread 17). Statement:
+"Among all 15 pairs of j=0 sextic twists of secp256k1, exactly 2 satisfy H1+H2+H3;
+both give genus-2 covers with ECDLP cost ≥ √p." ~30 additional lines in the paper.
+
+Recommend Thread 19 first (concrete computation; has script ready), then Thread 20.
+
+### Commits made
+[will record after push]
