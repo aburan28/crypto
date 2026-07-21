@@ -5574,3 +5574,146 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+**Fallback** — all 6 original priority threads are CLOSED/BLOCKED/DEAD END:
+- Thread 1 (P-521 LLL): CLOSED (2026-06-06, HP-LLL 3/3 at m=16)
+- Thread 2 (CHLRS Igusa): BLOCKED (no Sage for CQ normalisation)
+- Thread 3 (Howe sextic twists): CLOSED (5/15 glueable, 2026-07-08)
+- Thread 4 (Cross-curve LLL): CLOSED (3/3 seeds at 256/384 bits)
+- Thread 5 (GLV-HNP Phase 2): DEAD END (9 days, 6 hypotheses falsified)
+- Thread 6 (B5 over F_{p^k}): CLOSED (2026-07-04)
+
+Note: The 2026-07-20 log incorrectly proposed "Thread 18 = Howe gluing"
+as next step — that task (Thread 3) was already CLOSED on 2026-07-08.
+
+Fallback protocol: (a) ePrint survey, (b) propose new attack variant.
+
+### Work done
+
+**(a) ePrint survey** — searched IACR ePrint and arXiv for papers since
+2026-07-20 with keywords: isogeny-graph ECDLP, Boneh-Venkatesan, hidden
+number problem ECDSA, (N,N)-cover Jacobian.
+
+5 relevant papers found:
+
+1. **eprint 2026/1431** — "The Isogeny Problems" — Castryck, De Feo,
+   Galbraith, Kutas, Reijnders, Wesolowski (and 6 others). Survey of
+   7 foremost unsolved problems in isogeny-based cryptography, by 11
+   experts. Not directly about ECDLP cover attacks; useful field survey.
+
+2. **eprint 2026/110** (= arXiv 2601.17142) — "Logarithmic Density of
+   Rank ≥1 and Rank ≥2 Genus-2 Jacobians and Applications to Hyperelliptic
+   Curve Cryptography" — Barbulescu, Barcau, Pasol, Turcas (Jan 2026).
+   Shows logarithmic density ≥13/14 for genus-2 Jacobians over Q with
+   rank ≥1, with applications to Regev's quantum ECDLP algorithm for
+   hyperelliptic curves. RELEVANT: Regev quantum on genus-2 Jacobians is
+   a new attack surface not analysed in our structural-completeness paper
+   (which covers the classical case only, per §9.2).
+
+3. **eprint 2026/1199** — "A Post-Quantum Commitment Scheme from Richelot
+   Isogeny Walks on Superspecial Genus-2 Jacobians" — Idris, Hedabou
+   (June 8, 2026). Punctured Richelot walk commitment scheme; puncturing
+   rule skips steps landing in product locus (I₁₀ = 0). RELEVANT: product
+   locus condition (I₁₀ = 0 ↔ Jacobian splits as E_i × E_j) is exactly
+   the B5 obstruction domain we analysed in Threads 7–8. Their puncturing
+   rule implicitly exploits the same structural fact proved there.
+
+4. **eprint 2026/1219** — "Algorithms for solving the isogeny problem with
+   oriented elliptic curves" (WayFinder) — Corte-Real Santos, Herlédan Le
+   Merdy, Macula, Meyer, Morrison, Orvis (June 9, 2026). WayFinder
+   framework generalises Delfs-Galbraith and SuperSolver for supersingular
+   isogeny. MARGINALLY RELEVANT: orientation theory connects to Thread 16
+   universal order-2 Frobenius ideal.
+
+5. **arXiv 2607.03376** — "Derivative-Free Richelot Isogenies via
+   Subresultants with Algebraic Certification" — Dang, Nguyen (July 2026).
+   Subresultant-based reformulation of the Richelot (2,2)-isogeny step
+   over finite fields, with certified admissibility check. DIRECTLY
+   RELEVANT: algorithmic improvement to the (2,2)-isogeny computation
+   step that underlies Howe gluing and our Thread 3 pair analysis.
+
+**(b) Thread 18 — Regev quantum + (2,2)-cover falsifier:**
+
+New attack variant (§9.3 Category 2: combination of families).
+Question: can the (2,2)-cover E → C → Jac(C) be combined with Regev's
+quantum ECDLP algorithm (Barbulescu et al. 2026/110) to get a quantum
+speedup BETTER than direct Regev on E?
+
+Implemented `thread18_regev_cover_cm_field.gp`: for primes p ≡ 1 (mod 12)
+in [13, 200], enumerate all Howe-glueable j=0 sextic twist pairs; compute
+CM discriminants sf(T_i²-4p) and h(Q(√sf)); measure Regev cost proxy
+log2(n_i * n_j) / log2(#E(F_p)).
+
+### Findings
+
+**Empirical results from `thread18_regev_cover_cm_field.gp`:**
+
+```
+16 glueable pairs across p in {13,37,61,73,97,109,157,181,193}
+All pairs: sf_i = sf_j = -3 (CM by Q(ζ₃) on both components)
+h(Q(√(-3))) = 1 for all pairs
+log2(Jac)/log2(E) ratio: min=1.857  max=2.132  mean=2.012
+```
+
+Full table (selected rows):
+```
+p=13:  (1,4) T=(−5, 5)   sf=−3,−3  h=1,1  ratio=2.069
+p=37:  (1,4) T=(−11,11)  sf=−3,−3  h=1,1  ratio=1.857
+p=61:  (1,4) T=(1,−1)    sf=−3,−3  h=1,1  ratio=2.132
+p=109: (1,4) T=(−17,17)  sf=−3,−3  h=1,1  ratio=2.003
+p=193: (2,5) T=(−25,25)  sf=−3,−3  h=1,1  ratio=2.001
+```
+
+**Structural observation**: ALL glueable j=0 sextic-twist pairs have
+sf_i = sf_j = -3, confirming that the cover Jacobian Jac(C) has CM by
+Q(√(−3)) × Q(√(−3)) (biquadratic, both factors equal). This is the
+CM-3 family: secp256k1's CM type propagates to both glueable components.
+
+**Regev cost analysis**:
+- Regev's quantum ECDLP cost ∝ log₂(group order)
+  (polylog in #G, not sqrt)
+- For Jac(C): log₂(n_i * n_j) ≈ 2 × log₂(#E) (ratio ~2.0, confirmed)
+- Cover-Regev: step 1 (construct cover) = O(poly(p)) classical; step 2
+  (Regev on Jac) = ~2× more expensive than Regev on E directly
+- Net: Cover-Regev is STRICTLY WORSE by factor ~2 in the Regev exponent
+
+**Falsifier result**: CONFIRMED NEGATIVE.
+The (2,2)-cover + Regev combination provides no quantum advantage over
+direct Regev on E. This extends our §9.2 out-of-scope note with a
+concrete quantitative argument: the cover Jacobian's log-order is
+~2× that of E, making the quantum phase more expensive, not less.
+
+**Corollary**: the 2026/110 paper's Regev+genus-2 result does NOT imply
+a new attack on secp256k1 via cover. The paper's construction needs the
+JACOBIAN itself to be the primary target, not a lift from an elliptic
+curve; when the Jacobian is a cover of E, you're already committed to a
+harder DLP.
+
+**Tests**: `cargo test --test curve_audit` → 5/5 pass (7.29s).
+
+### Next step proposal
+Two candidates:
+
+**Thread 19 (paper §9.1 — non-hyperelliptic)**: The paper states "Beyond
+hyperelliptic: do non-hyperelliptic genus-g curves admit faster DLP
+over F_p? Believed no, but not proved." A falsifier: for a plane quartic
+C_3/F_p covering secp256k1, compute Prym(C_3/E) and check whether Prym
+is simple or splits. Expected: Prym simple (→ no attack); if Prym = E'×E''
+with E', E'' unrelated to E → no useful cover either. Doable in PARI for
+small p (brute-force Weil poly of a random quartic covering j=0 curve).
+
+**Thread 20 (from 2607.03376)**: The derivative-free Richelot formulation
+uses subresultants. Verify that the admissibility condition from that paper
+matches our H1+H2+H3 Howe conditions (Thread 3). If they match, this gives
+a citation-ready reference for our Howe gluing computation. Quick PARI check
+using the subresultant formula on one of our 16 glueable pairs.
+
+Recommend Thread 20 first (short, uses existing pairs, gives a paper cite).
+
+### Commits made
+`TBD` autolab 2026-07-21: Thread 18 — Regev+cover falsifier confirmed; 16 glueable pairs, ratio~2.0; ePrint survey 5 papers
