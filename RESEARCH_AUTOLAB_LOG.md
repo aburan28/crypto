@@ -5574,3 +5574,103 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 19 (original priority-5): GLV-HNP Phase 2 toy — scale the existing
+lattice attack to a 32-bit j=0 prime-order toy curve and verify d recovery.
+Chosen because:
+- P-521 LLL (priority 1): CLOSED (2026-05-22).
+- CHLRS Igusa (priority 2): BLOCKED (no Sage/Magma).
+- Howe sextic twists (priority 3): CLOSED (2026-07-08, Thread 3).
+- Cross-curve LLL (priority 4): CLOSED (3/3 seeds at 256/384 bits, 2026-06-14).
+- GLV-HNP Phase 2 toy (priority 5): 8-bit (n=199) and 20-bit attacks confirmed
+  in prior sessions, but 32-bit was never tested. 2026-07-20 log proposed this
+  as "Thread 19" next step.
+- B5 over F_{p^k} (priority 6): CLOSED (2026-07-07).
+
+### Work done
+- Audited log history: confirmed all 6 original threads CLOSED/BLOCKED/DEAD END;
+  identified 32-bit scaling as the remaining open GLV-HNP sub-task.
+- Installed `fpylll` + `sympy` (pip3, not available by default in this container).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_32bit.py`:
+  - Uses Eisenstein CM decomposition to find 32-bit j=0 prime-order curve
+    without brute-force point counting.
+  - Finds p=2147483713 (32-bit prime, p≡1 mod 6), n=2147436397 (31-bit prime,
+    n≡1 mod 3), lam=978203460, b=5. Elapsed: <0.1s.
+  - Sets K1_BOUND=2317, K2_BOUND=46341 (≈sqrt(n)), eff=0.05000, m_thresh=8.
+  - Builds (2m+2)-dimensional lattice with column-diagonal balancing
+    (same structure as `glv_hnp_phase2_attack.py` / `glv_hnp_phase2_20bit.py`).
+  - Sweeps m=6..13 with 3 seeds each, recording first-full-recovery m.
+  - Also reproduces 8-bit and 12-bit reference results for comparison.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.98s). No regressions.
+
+### Findings
+
+**32-bit LLL recovery results:**
+```
+Curve: y² = x³ + 5 over F_{2147483713}, n = 2147436397 (31-bit)
+lam = 978203460, lam/n = 0.4555 (balanced GLV)
+K1_BOUND = 2317, K2_BOUND = 46341, eff = 0.050, m_thresh = 8
+
+m=6:  0/3  (below thresh)
+m=7:  0/3  (below thresh)
+m=8:  2/3  (at thresh)     ← partial
+m=9:  2/3  (above thresh)  ← partial
+m=10: 3/3  (above thresh)  ← FIRST FULL RECOVERY
+m=11: 3/3
+m=12: 3/3
+m=13: 3/3
+```
+
+**Reference comparison (reproduced from 2026-06-15):**
+```
+ 8-bit  n=199  lam/n=0.53: 3/3 at m=4  (m_thresh=3, ratio=1.33x)
+12-bit  n=2659 lam/n=0.66: 3/3 at m=7  (m_thresh=5, ratio=1.40x)
+32-bit  n≈2.1B lam/n=0.46: 3/3 at m=10 (m_thresh=8, ratio=1.25x)
+```
+
+**Scaling law (empirical):**
+- Ratio m_first_full / m_thresh ≈ 1.25–1.40 across 8-bit to 32-bit.
+- Wall-clock for 32-bit LLL is sub-millisecond (lattice dim=22 at m=10,
+  entries up to ~n²/K1 ≈ 2×10^{15}, well within fpylll integer range).
+- No BKZ rescue needed at lam/n=0.46 (balanced regime).
+
+**Confirmed negative: k1-only-leak model is not the right formulation.**
+The attack requires BOTH k1 and k2 bounded (k2 ∈ [0, sqrt(n))), not just k1.
+The k1-only-leak model described in `RESEARCH_GLV_HNP_PHASE2.md` §1-2 has a
+fundamental flaw: for any candidate d', there always exists a valid k_{i,2}
+(since lam is invertible mod n, any target residue is achievable). The
+lattice in the PARI toy script `glv_hnp_phase2_toy.gp` correctly deferred
+this point. The GLV-aware attack works in the BOTH-bounded model; the
+k1-only-leak model requires a different (harder) formulation.
+
+**Paper implication:** The BOTH-bounded GLV-HNP attack confirms the
+structural-completeness theorem is COMPATIBLE with a side-channel threat:
+recovering d via lattice from partial nonce knowledge is possible in the
+GLV decomposition setting, but this is a scalar-side attack, not an
+isogeny-graph attack. Consistent with Theorem 1 in `paper/eprint_combined.tex`.
+
+### Next step proposal
+Two candidates:
+
+1. **Thread 20 (CHLRS Igusa revisit):** The `secp256k1_cm_audit/chlrs_igusa_formula.gp`
+   script exists but requires PARI. Since `gp` binary is unavailable, attempt a
+   pure-Python port of the Cardona-Howe-Lercier-Ritzenthaler-Streng Igusa formula.
+   Specifically: compute J2, J4, J6, J10 (Igusa-Clebsch invariants) for the 28
+   simple Jacobians from Thread 8, and check against van Wamelen's CM curve tables.
+
+2. **Thread 21 (scaling law extrapolation):** From the 8/12/20/32-bit data points,
+   fit a model for "required m as a function of n_bits and lam/n." Predict when
+   the attack becomes infeasible against real secp256k1 (n≈2^256). Expected answer:
+   infeasible (m would need to be enormous), which STRENGTHENS the structural
+   completeness result.
+
+Recommend Thread 21 first: it requires only arithmetic (no new deps), produces
+a concrete numerical bound, and directly enhances the paper.
+
+### Commits made
+[to be filled after commit]
