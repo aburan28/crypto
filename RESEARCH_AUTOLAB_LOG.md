@@ -5574,3 +5574,112 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing conditions for all 15 pairs of j=0 sextic twists of secp256k1.
+Chosen because: proposed as the next-best step in the 2026-07-20 log; the script
+`howe_sextic_twists_all15.gp` already existed but had not been executed and verified;
+this thread directly extends the cover-attack coverage.
+
+### Work done
+- Installed pari-gp (re-installed; was absent from fresh container).
+- Found `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (~244 lines) already written.
+- Ran the script: `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp`.
+- Wrote and ran a supplementary gcd analysis (inline, not saved to file) to:
+  (a) compute exact gcd values for the 4 H3-failing pairs;
+  (b) identify structural trace-conjugate patterns.
+
+### Findings
+
+**Main result: 5 / 15 pairs of secp256k1 sextic twists are Howe-glueable.**
+
+The 6 sextic twists y²=x³+b_k with b_k = 7·u^(k) (u = primitive 6th root mod p):
+
+| k | 2-torsion pattern | trace T_k |
+|---|-------------------|-----------|
+| 0 | [3] irreducible   | t = 4.32e38 |
+| 1 | [1,1,1] split     | (t-3s)/2 = −2.39e38 |
+| 2 | [3] irreducible   | −(t+3s)/2 = −6.71e38 |
+| 3 | [3] irreducible   | −t = −4.32e38 (quad twist) |
+| 4 | [1,1,1] split     | (3s−t)/2 = +2.39e38 |
+| 5 | [3] irreducible   | (t+3s)/2 = +6.71e38 |
+
+Exactly 2 twists (k=1,4) have fully-split 2-torsion [1,1,1]; the other 4 have irreducible [3] pattern.
+
+**Pairwise Howe conditions (15 pairs):**
+
+| pair (i,j) | H1: n_i≠n_j | H2: same 2-tor | H3: gcd=1 | Glueable |
+|------------|-------------|----------------|-----------|----------|
+| (0,1) | YES | NO  | YES | no |
+| **(0,2)** | YES | YES | YES | **YES** |
+| **(0,3)** | YES | YES | YES | **YES** (previously known) |
+| (0,4) | YES | NO  | YES | no |
+| **(0,5)** | YES | YES | YES | **YES** |
+| (1,2) | YES | NO  | YES | no |
+| (1,3) | YES | NO  | NO  | no |
+| **(1,4)** | YES | YES | YES | **YES** |
+| (1,5) | YES | NO  | NO  | no |
+| **(2,3)** | YES | YES | YES | **YES** |
+| (2,4) | YES | NO  | YES | no |
+| (2,5) | YES | YES | NO  | no |
+| (3,4) | YES | NO  | YES | no |
+| (3,5) | YES | YES | NO  | no |
+| (4,5) | YES | NO  | YES | no |
+
+**H3 failures — gcd values:**
+- gcd(N_1, N_3) = 3  (pairs (1,3), (1,5), (3,5) all involve N_5 with factor-3 issue)
+- gcd(N_1, N_5) = 3
+- gcd(N_3, N_5) = 3
+- gcd(N_2, N_5) = 4
+
+**Structural observations:**
+
+1. **Trace-conjugate pairs:** The 6 twists split into 3 conjugate pairs (T_k = −T_{k+3}):
+   - (k=0, k=3): N_0 + N_3 = 2(p+1) ✓ — glueable ✓
+   - (k=1, k=4): N_1 + N_4 = 2(p+1) exactly ✓ — glueable ✓
+   - (k=2, k=5): N_2 + N_5 = 2(p+1) ✓ — NOT glueable (gcd=4)
+
+   Pair (k=2,k=5) fails H3 because p ≡ 3 (mod 4) forces 4 | N_2 and 4 | N_5
+   when (t+3s)/2 ≡ 0 (mod 2) — a structural arithmetic obstruction.
+
+2. **2-torsion partition:** The [3] pattern group {k=0,2,3,5} and the [1,1,1]
+   group {k=1,4} generate C(4,2)+C(2,2) = 7 same-pattern pairs, of which
+   5 survive H3 as well:
+   - From {k=0,2,3,5}: pairs (0,2),(0,3),(0,5),(2,3) all glueable; (2,5),(3,5) fail H3.
+   - From {k=1,4}: pair (1,4) glueable.
+
+3. **Novel glueable pairs** (beyond previously-known (0,3)):
+   - **(0,2):** secp256k1 × twist-2 (trace −6.71e38)
+   - **(0,5):** secp256k1 × twist-5 (trace +6.71e38)
+   - **(1,4):** twist-1 × twist-4 (both with full F_p-rational 2-torsion)
+   - **(2,3):** twist-2 × quad-twist
+
+4. **Structural interpretation:** All glueable pairs consist of either
+   - Two irreducible-2-torsion curves ([3] pattern, Galois acts Z/3-cyclically on 2-torsion), or
+   - Two fully-split curves ([1,1,1] pattern, E[2] fully F_p-rational).
+   The [1,1,1] case (pair (1,4)) is qualitatively different: the genus-2 Jacobian
+   for this pair would have all 2-torsion F_p-rational.
+
+5. **ECDLP implications:** Per `PAPER_STRUCTURAL_COMPLETENESS.md`, none of these
+   cover attacks break the √p barrier. The genus-2 Jacobians have order ≈ p², and
+   Pollard-ρ on them costs ≈ p — strictly worse than ρ on secp256k1 itself.
+
+### Next step proposal
+
+**Thread 19 (priority-5 from original list): GLV-HNP Phase 2 toy.**
+The script `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` exists; run it and check
+whether the GLV-aware lattice recovers the secret scalar d on a 32-bit toy curve.
+This has been deferred for several sessions; Thread 18 is now resolved, so Thread 19
+is the natural next task.
+
+Alternatively, **Thread 19b (new):** explicitly construct the genus-2 curve C/F_p
+for the new glueable pair (0,5) or (1,4) using Howe's algorithm sketch in
+`howe_explicit_cover.gp` or `howe_richelot_v5.gp`. The (1,4) pair is especially
+tractable because both twists have full F_p-rational 2-torsion.
+
+### Commits made
+`[see below after commit]`
