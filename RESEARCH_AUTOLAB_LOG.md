@@ -5682,4 +5682,4 @@ This would connect Thread 18 to Thread 2 (CHLRS Igusa formula).
 less urgent since Thread 18's core result is complete).
 
 ### Commits made
-`[see below after push]`
+`44debb3` autolab 2026-07-21: Thread 18 — Howe gluing all 15 sextic-twist pairs; 5/15 glueable; H3 failures explained (gcd=4 and gcd=3)
