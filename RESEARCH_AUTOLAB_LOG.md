@@ -5574,3 +5574,131 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 (priority 3) — Howe gluing on j=0 sextic twists.
+Chosen because 2026-07-20 log explicitly proposed this as the next step; `howe_sextic_twists_all15.gp` was already written but had not been run (no previous log entry shows its output).
+Also ran Thread 19 (GLV-HNP Phase 2 toy) since the prerequisite (P-521 LLL resolved 2026-05-22) was satisfied and `glv_hnp_phase2_attack.py` had never been executed.
+
+### Work done
+
+**Thread 18 — Howe sextic twists**
+- Confirmed pari-gp v2.15.4 installed via apt-get.
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (first execution).
+  Checked H1, H2, H3 for all C(6,2)=15 pairs of secp256k1's 6 sextic twists.
+
+**Thread 19 — GLV-HNP Phase 2 toy**
+- Installed `fpylll` (v0.6.4) and `cysignals` (v1.12.5) via pip3.
+- Ran `secp256k1_cm_audit/glv_hnp_phase2_attack.py` (first execution).
+  Python/fpylll implementation of the GLV-aware lattice with column-diagonal scaling.
+
+**Cargo tests**: `cargo test --test curve_audit` → 5/5 pass (7.64s). No code changes.
+
+### Findings
+
+**Thread 18 — Howe sextic twists (5/15 pairs glueable)**
+
+p ≡ 1 (mod 6), so secp256k1 has exactly 6 sextic twist classes y²=x³+b_k,
+where b_k = 7·u^k, u = g^{(p-1)/6} a primitive 6th root mod p.
+
+CM formula gives all 6 traces directly (t, (t-3s)/2, -(t+3s)/2, -t, (3s-t)/2, (t+3s)/2)
+with 4p = t² + 3s², s = 303414439467246543595250775667605759171.
+
+2-torsion factorisation of x³+b_k mod p:
+```
+k=0 (b=7):         [3]       — irreducible; Gal acts as Z/3
+k=1:               [1,1,1]   — splits completely; all 2-torsion F_p-rational
+k=2:               [3]
+k=3 (b=-7≡p-7):   [3]
+k=4:               [1,1,1]
+k=5:               [3]
+```
+Pattern: twists k=0,2,3,5 have irreducible 2-torsion poly; k=1,4 split completely.
+This is the cubic-residue split: b_k is a cube mod p iff k ≡ 0 (mod 3).
+
+H2 (same 2-torsion Galois module) fails between any [3]-twist and [1,1,1]-twist.
+H3 (gcd(n_i, n_j)=1) fails for 3 pairs: (1,3), (1,5), (2,5).
+
+Full 15-pair table:
+```
+(0,1): H1✓ H2✗ H3✓  no
+(0,2): H1✓ H2✓ H3✓  YES ← glueable
+(0,3): H1✓ H2✓ H3✓  YES ← glueable (secp256k1 × quad-twist, confirming howe_gluing_test.gp)
+(0,4): H1✓ H2✗ H3✓  no
+(0,5): H1✓ H2✓ H3✓  YES ← glueable
+(1,2): H1✓ H2✗ H3✓  no
+(1,3): H1✓ H2✗ H3✗  no
+(1,4): H1✓ H2✓ H3✓  YES ← glueable
+(1,5): H1✓ H2✗ H3✗  no
+(2,3): H1✓ H2✓ H3✓  YES ← glueable
+(2,4): H1✓ H2✗ H3✓  no
+(2,5): H1✓ H2✓ H3✗  no
+(3,4): H1✓ H2✗ H3✓  no
+(3,5): H1✓ H2✓ H3✗  no
+(4,5): H1✓ H2✗ H3✓  no
+```
+
+Glueable pairs: **(0,2), (0,3), (0,5), (1,4), (2,3)** — 5 of 15.
+
+H2 is the binding constraint (eliminates 8 of 10 non-glueable pairs).
+H3 eliminates 2 more: (2,5) and (3,5) share order factors.
+H1 is satisfied for all 15 pairs (all 6 twists have distinct trace by CM formula).
+
+ECDLP implications: same as for (0,3) — for each glueable pair (i,j), a genus-2
+curve C/F_p exists with Jac(C)→E_i×E_j via a (2,2)-isogeny, but Jac(C)(F_p)
+has order n_i·n_j ≈ p², and no sub-√p ECDLP follows.
+
+**Thread 19 — GLV-HNP Phase 2 attack: KEY RESULT**
+
+Python/fpylll (`glv_hnp_phase2_attack.py`) with column-diagonal scaling recovers d.
+
+Toy curve: y²=x³+2 over F_211, n=199, λ=106.
+Bias model: k1 ∈ [0, K1_BOUND=2), k2 ∈ [0, K2_BOUND=15) — GLV domain (k2 < sqrt(n)).
+Lattice: (2m+2)×(2m+2) Kannan-embedded, column-scaled by S_k1=99, S_d=1, S_k2=13, S_kan=199.
+
+Info-theoretic threshold: (K1_BOUND·K2_BOUND/n)^m < 1/n → m ≥ 3.0.
+
+Sweep results (5 seeds per m):
+```
+m=2: 2/5 seeds (below threshold)
+m=3: 3/5
+m=4: 3/5
+m=5: 4/5
+m=6: 5/5  ← 100% recovery
+m=7: 5/5
+```
+
+At m=4 (one above threshold): planted vector norm=312.1; basis min norm=10494.
+Ratio = 0.03 (planted vector is 33× shorter than any basis row — LLL finds it easily).
+Witness row for d=104: [99, 0, 0, 0, -95, 39, 143, 117, 39, 199].
+Recovery: |row[dim-1]|==S_KANNAN=199 marks the Kannan embedding; d = |row[m]| mod n = 104.
+
+**Critical distinction from PARI toy (`glv_hnp_phase2_toy.gp`):**
+The PARI toy uses k2 ∈ [0, n) (full-range), which makes k_full uniform mod n —
+the script correctly reports that standard HNP fails. The Python attack uses k2 < sqrt(n)
+(the true GLV domain constraint), giving a meaningful bias on k2 that the lattice exploits.
+For secp256k1: K2_BOUND ≈ sqrt(n) ≈ 2^128; K1_BOUND = attacker-controlled (e.g., top c bits of k1 leaked).
+
+**Unresolved**: the Python toy uses K2_BOUND=15≈sqrt(199) (exact GLV domain). On secp256k1 the
+analogous attack needs K2_BOUND≈2^128 and n≈2^256, requiring the HP-LLL (resolved) or fpylll's
+BKZ. The dimension is 2m+2 ≈ 14 for m=6 — small enough for BKZ-30 to work.
+
+### Next step proposal
+Two threads immediately actionable:
+
+**Thread 20 (new): GLV-HNP Phase 2 on secp256k1 at toy bit-length.**
+Scale K1_BOUND, K2_BOUND, n to 32-bit toy secp256k1-like curve (p≡1 mod 6, n prime,
+n ≈ 2^32). Verify that the column-scaled lattice recovers d with m=6–10 signatures
+using fpylll LLL. This bridges the toy (n=199) and the real (n≈2^256) case.
+Expected: d recovered in < 1s.
+
+**Thread 21 (new): H3-failure analysis for the 3 failing Howe pairs.**
+Pairs (1,3), (1,5), (2,5): gcd(n_i, n_j) > 1. Compute the actual gcd values and
+check if the shared factor yields a non-trivial Richelot kernel. Could reveal
+an obstructed (2,2)-isogeny class (a "degenerate" cover instead of a smooth Jacobian).
+
+### Commits made
