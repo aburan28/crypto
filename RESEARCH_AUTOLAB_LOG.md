@@ -5574,3 +5574,80 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 (priority 3): Howe gluing on j=0 sextic twists.
+Chosen because: 2026-07-20 log entry explicitly proposed this as the next-best concrete step after Thread 17 (paper LaTeX integration). No prior work existed on Thread 18.
+
+### Work done
+- Installed PARI/GP (apt-get, version 2.15.4) — not present on fresh container.
+- Inspected existing `secp256k1_cm_audit/howe_gluing_test.gp`: it only checks one pair (E₀, E₀^t quadratic twist). Thread 18 requires all 15 pairs of 6 sextic twists.
+- Designed a no-SEA approach:
+  - Group orders from CM formula: solve 4p = t₀² + 3v² (Cornacchia), giving 6 traces analytically.
+  - 2-torsion type from cubic character χ₃(-b_k) = lift(Mod(-b_k,p)^((p-1)/3)) — fast modular exponentiation, no ellcard needed.
+  - For p≡1(mod 3): x³+b_k is always [3] (irred) or [1,1,1] (split); no [1,2] case.
+- Wrote `secp256k1_cm_audit/thread18_sextic_twist_howe.gp` (two draft iterations to fix PARI syntax issues: no embedded `{...}` inside `for()` bodies in v2.15).
+- Ran script; confirmed clean output. Ran `cargo test --test curve_audit` (5/5 pass).
+
+### Findings
+
+**CM parameters:**
+- t₀ = p+1-n = 432420386565659656852420866390673177327  (t₀≡1 mod 2, ≡1 mod 3)
+- v = 303414439467246543595250775667605759171  (4p = t₀²+3v²  ✓)
+- Sextic non-residue dnr = 3 (d^((p-1)/6) has order 6 in F_p*)
+
+**2-torsion type (with dnr=3):**
+- Type-B (split, [1,1,1]): k = 1, 4 (sextic-twist ordering w/ dnr=3)
+- Type-A (irred, [3]):      k = 0, 2, 3, 5
+- In canonical CM ordering: type-B corresponds to CM-k=2,5 (those with N≡0 mod 4)
+- Both classifiers agree on COUNT: 2 type-B, 4 type-A ✓
+
+**H1/H2/H3 for all 15 pairs (canonical CM ordering):**
+
+| pair  | H1     | H2       | H3       | Result |
+|-------|--------|----------|----------|--------|
+| (0,1) | OK     | OK(A+A)  | gcd=1    | **PASS** |
+| (0,2) | OK     | FAIL(A+B)| gcd=1    |        |
+| (0,3) | OK     | OK(A+A)  | gcd=1    | **PASS** |
+| (0,4) | OK     | OK(A+A)  | gcd=1    | **PASS** |
+| (0,5) | OK     | FAIL(A+B)| gcd=1    |        |
+| (1,2) | OK     | FAIL(A+B)| gcd=1    |        |
+| (1,3) | OK     | OK(A+A)  | gcd=3    |        |
+| (1,4) | OK     | OK(A+A)  | gcd=1    | **PASS** |
+| (1,5) | OK     | FAIL(A+B)| gcd=3    |        |
+| (2,3) | OK     | FAIL(A+B)| gcd=1    |        |
+| (2,4) | OK     | FAIL(A+B)| gcd=1    |        |
+| (2,5) | OK     | OK(B+B)  | gcd=4    |        |
+| (3,4) | OK     | OK(A+A)  | gcd=1    | **PASS** |
+| (3,5) | OK     | FAIL(A+B)| gcd=3    |        |
+| (4,5) | OK     | FAIL(A+B)| gcd=1    |        |
+
+**Summary of conditions:**
+- H1: ALL 15 pairs pass (all 6 CM traces are distinct) ✓
+- H2: 7 of 15 pairs pass (6 A+A + 1 B+B)
+- H3: 10 of 15 pairs have gcd=1; 3 have gcd=3; 1 has gcd=4; 1 has gcd=3
+- ALL 3: **5 of 15 pairs pass** (0,1), (0,3), (0,4), (1,4), (3,4)
+
+**Structural explanations:**
+- B+B pair (CM 2,5): gcd=4 because both type-B orders are divisible by 4 (full 2-torsion). H3 requires gcd=1 — fails necessarily for any two type-B j=0 sextic twists over F_p.
+- A+A pair (1,3): gcd=3 because for secp256k1 with p≡1(mod 3), certain cross-class pairs share a 3-torsion factor (t₀≡1 mod 3 ⟹ N_1≡N_3≡0 mod 3 via CM trace arithmetic).
+- The pair (0,3) (original + quadratic twist) is confirmed to be one of the 5 passing pairs — consistent with `howe_gluing_test.gp`. ✓
+
+**ECDLP implication:** None. Each of the 5 Howe-gluable pairs gives a genus-2 Jacobian J/F_p with |J(F_p)|≈p². Pollard-ρ on J costs O(p); ECDLP on E costs O(√p). All 5 pairs are worse by a factor of √p.
+
+**Open sub-question:** For the B+B pair, the strict gcd=1 condition fails. Howe's theorem in its stronger form may still permit a (2,2)-gluing if the kernel is chosen carefully — this requires checking the full Howe (1996) conditions beyond the simple gcd criterion. Not done here.
+
+### Next step proposal
+**Thread 19 (original priority 5): GLV-HNP Phase 2 toy.**
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` exists. Run it, check if the lattice recovers d on a 32-bit toy curve. If it fails, document the failure mode (lattice reduction quality, basis, determinant). Expected time: 10-30 min.
+
+Alternative: return to priority-1 thread (P-521 LLL NaN) — try target_bits=100 or 80 to see if the NaN clears before attempting double-double GS.
+
+Recommend Thread 19 first (script already exists, concrete yes/no expected).
+
+### Commits made
+`[see below]` autolab 2026-07-21: Thread 18 — Howe gluing for all 15 j=0 sextic twist pairs; 5/15 pass all conditions
