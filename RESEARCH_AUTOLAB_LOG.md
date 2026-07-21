@@ -5691,4 +5691,4 @@ Recommend Thread 18A first (short PARI check, builds on existing infrastructure)
 then Thread 19A in the next session.
 
 ### Commits made
-`[TBD — see below]`
+`ed8e777` autolab 2026-07-21: Thread 18 — 5/15 sextic twist pairs Howe-glueable; Thread 19 — Phase 2 lattice negative result
