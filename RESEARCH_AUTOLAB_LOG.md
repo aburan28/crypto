@@ -5677,4 +5677,4 @@ Two options:
 Recommend Option 2 first (lower effort, concrete deliverable), then Thread 20.
 
 ### Commits made
-none (fallback run; no code changes)
+`6962525` autolab 2026-07-21: fallback run — Phase 2 GLV-HNP dead end confirmed; ePrint survey; Thread 20 proposed
