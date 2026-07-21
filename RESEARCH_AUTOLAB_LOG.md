@@ -5749,4 +5749,4 @@ Next autolab run should:
   is directly relevant to B5 cost analysis for (3,3) covers.
 
 ### Commits made
-`[hash]` autolab 2026-07-21: Fallback — ePrint survey; Thread 20 (3,3)-Howe-gluing script; no PARI/GP in container
+`615f61a` autolab 2026-07-21: Fallback — ePrint survey; Thread 20 (3,3)-Howe-gluing script; no PARI/GP in container
