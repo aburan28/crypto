@@ -5745,3 +5745,5 @@ Two candidates:
 Recommend Thread 19 first (new code); paper update can follow in the next session.
 
 ### Commits made
+
+`09d3890` autolab 2026-07-21: fallback — ePrint survey; Thread 18 Jacobian PH-safety; component-separation B5 argument; affine-GLV-nonce proposal
