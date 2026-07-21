@@ -5702,3 +5702,4 @@ check if the shared factor yields a non-trivial Richelot kernel. Could reveal
 an obstructed (2,2)-isogeny class (a "degenerate" cover instead of a smooth Jacobian).
 
 ### Commits made
+`d1bd890` autolab 2026-07-21: Thread 18 (Howe sextic 5/15 glueable) + Thread 19 (GLV-HNP Phase 2 5/5@m=6)
