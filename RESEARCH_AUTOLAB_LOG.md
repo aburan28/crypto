@@ -5574,3 +5574,119 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists.
+Chosen because: 2026-07-20 log explicitly recommended it as the next-best concrete step
+(infrastructure for Howe gluing already present; well-scoped; extends the cover-attack
+coverage analysis). Previous run (Thread 17) added the order-2 Frobenius proposition to
+the paper; Thread 18 is the natural followup.
+
+### Work done
+- Read existing `secp256k1_cm_audit/howe_gluing_test.gp` and `RESEARCH_MESTRE_HOWE.md`
+  for context on prior Howe-gluing work (which only handled the E × E^t pair).
+- Identified three issues with the prior script: (a) only covered 1 pair, not all 15;
+  (b) assumed all sextic twists have the same 2-torsion structure (incorrect for cubic twists);
+  (c) did not compute the algebraic traces from CM decomposition.
+- Wrote new script `secp256k1_cm_audit/sextic_twist_howe_check.gp`:
+  - CM decomposition: 4p = t₀² + 3b² → extracted (a,b) = (367917413016453100223835821029139468249,
+    303414439467246543595250775667605759171) from the Frobenius π = a + bζ₃.
+  - Derived all 6 traces algebraically: Tr(ζ₆ᵏ·π) for k=0,...,5.
+  - Found h (primitive 6th root of unity mod p) via h = −ζ₃ where ζ₃ = (−1+√(−3))/2 mod p,
+    computing √(−3) = (−3)^{(p+1)/4} mod p (valid since p ≡ 3 mod 4). Verified ord(h)=6.
+  - Factored x³ + 7·hᵏ over F_p via PARI `factormod` for k=0,...,5 to get 2-torsion patterns.
+  - Checked H1, H2, H3 for all 15 pairs; produced full table.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.36s). ✓
+- Note: PARI/GP not pre-installed; installed via `apt-get install pari-gp`.
+
+### Findings
+
+**CM decomposition:**
+```
+p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+t₀ = p+1-n = 432420386565659656852420866390673177327   (secp256k1 trace)
+a  = 367917413016453100223835821029139468249
+b  = 303414439467246543595250775667605759171
+  Check: 2a-b = t₀ ✓,  a²-ab+b² = p ✓
+  Sum of squares: (2a-b)² + (a-2b)² + (a+b)² = 6p ✓
+```
+
+**6 traces of sextic twists:**
+```
+t₀ =  432420386565659656852420866390673177327  (secp256k1, k=0)
+t₁ = -238911465918039986966665730306072050093  (k=1)
+t₂ = -671331852483699643819086596696745227420  (k=2, cubic twist)
+t₃ = -432420386565659656852420866390673177327  (quadratic twist, k=3)
+t₄ =  238911465918039986966665730306072050093  (k=4)
+t₅ =  671331852483699643819086596696745227420  (k=5, cubic twist)
+Sum checks: t₀+t₂+t₄=0, t₁+t₃+t₅=0  ✓
+```
+
+**2-torsion polynomial factorizations (x³ + 7·hᵏ mod p):**
+```
+k=0: [3] — irreducible  (secp256k1: no F_p-rational 2-torsion)
+k=1: [3] — irreducible
+k=2: [1,1,1] — splits completely  (cubic twist: 4 | n₂)
+k=3: [3] — irreducible  (quadratic twist)
+k=4: [3] — irreducible
+k=5: [1,1,1] — splits completely  (cubic twist: 4 | n₅)
+```
+The 6 twists partition into two Galois-module types:
+- **Type I** (k ∈ {0,1,3,4}): irreducible 2-torsion poly [3], no F_p-rational non-trivial 2-torsion.
+- **Type II** (k ∈ {2,5}): completely split [1,1,1], full 2-torsion E_k[2] ≃ (Z/2Z)² in F_p.
+
+**H2 check:** 7/15 pairs pass (pairs within {0,1,3,4}×{0,1,3,4} plus pair (2,5)).
+
+**H3 check:** 11/15 pairs pass (gcd=1). The 4 failing pairs:
+```
+(1,3): gcd(n₁,n₃) = 3
+(1,5): gcd(n₁,n₅) = 3   (also fails H2)
+(2,5): gcd(n₂,n₅) = 4
+(3,5): gcd(n₃,n₅) = 3   (also fails H2)
+```
+
+**Full Howe-condition table — 5/15 pairs satisfy H1+H2+H3:**
+```
+(0,1): ✓✓✓  → NEW: E_0×E_1 Howe-glueable
+(0,3): ✓✓✓  → KNOWN: secp256k1 × quadratic twist (confirmed)
+(0,4): ✓✓✓  → NEW: E_0×E_4 Howe-glueable
+(1,4): ✓✓✓  → NEW: E_1×E_4 Howe-glueable  (quadratic-twist pair, t₁=-t₄)
+(3,4): ✓✓✓  → NEW: E_3×E_4 Howe-glueable
+```
+
+**Key structural observations:**
+1. The quadratic-twist pairs are (0,3) and (1,4) — both pass. Also (2,5) would be a
+   quadratic-twist pair but fails H3 (gcd=4 due to shared full 2-torsion).
+2. The cubic-twist pairs ({0,2}, {0,5}, {1,2}, {3,5}, {4,5}) all fail H2 (different
+   2-torsion types).
+3. The pair (1,3) has matching 2-torsion but gcd(n₁,n₃)=3: the cubic character of the
+   CM field introduces a 3-divisibility in the order relationship.
+4. The 4 new Howe-glueable pairs give 4 additional genus-2 covers of secp256k1 (via
+   projection Jac(C)→E₀ for pairs involving k=0). No ECDLP speedup: genus-2 HCDLP
+   cost ≥ Pollard ρ on secp256k1.
+
+**Correction to prior claim in howe_gluing_test.gp:**
+The comment at line 179 ("d³ is automatically a cube so both polynomials have the same
+splitting") is WRONG for k=2,5 (cubic twists h² = ζ₃ and h⁵ = -ζ₃²): these DO change
+the cubic character of the 2-torsion polynomial, splitting it completely. The prior
+analysis silently assumed k=3 (quadratic twist), not all 6 twists.
+
+### Next step proposal
+Two threads in priority order:
+
+**Thread 5 (GLV-HNP Phase 2 toy):**
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` exists but hasn't been run and verified.
+Run it and confirm whether the 32-bit toy lattice attack recovers d. Expected: either
+clean recovery (validating the attack direction) or a documented failure mode.
+
+**Thread 2 (CHLRS Igusa formula):**
+Look up the Cardona-Howe-Lercier-Ritzenthaler-Streng explicit polynomial for Igusa-Clebsch
+invariants of (E×E^t)/Γ_α. The 4 new qualifying pairs from Thread 18 give 4 additional
+targets for this computation.
+
+### Commits made
+PENDING — see below.
