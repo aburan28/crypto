@@ -5498,3 +5498,84 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 17 — integrate the Thread 15–16 universal order-2 Frobenius theorem into
+the TeX paper (`paper/structural_completeness.tex`). Chosen because: Thread 16
+(2026-07-19) explicitly proposed Thread 17 as the next step; the theorem existed
+in `PAPER_STRUCTURAL_COMPLETENESS.md` but not in the actual TeX file; measurable
+prior progress made this a natural continuation.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread17_splitting_verify.gp` (~100 lines):
+  - Part A: 10 explicit pairs (p, a2) with p∤a2 → all kron(sf,p)=+1 (SPLITS).
+  - Part B: 5 engineered cases a2=p*(p+2) where p|sf → all kron=0 (RAMIFIED);
+    confirms that ramification requires p|sf, and p|sf iff p|a2 (corrected a
+    mistaken intuition that a2=p gives ramification — it does NOT; only the
+    construction a2=p*(p+2) does, because v_p(k^2-4)=1 is odd).
+  - Part C: 80-pair mass sweep (20 primes × 4 a2 values, all a2<p) → 80/80 SPLITS.
+  - All 95 cases passed cleanly.
+- Added `\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15–17]`
+  to `paper/structural_completeness.tex` (just before \subsection*{B6}):
+  - Full 4-step proof: (A) integrality, (B) norm, (C) (β)≠(p), (D) [p]^2=1.
+  - Splitting corollary with explicit exclusion of inert and ramified cases.
+  - Remark citing PARI verification totals (172 zero-failure cases combined).
+- Confirmed pdflatex produces 11-page PDF (pre-existing `\gcd` and `\CM` errors
+  are NOT from this run; they are pre-existing preamble issues).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**PARI splitting verification (thread17_splitting_verify.gp):**
+| Test                         | Cases | SPLITS | RAMIFIED | INERT |
+|------------------------------|-------|--------|----------|-------|
+| Part A (10 explicit pairs)   | 10    | 10     | 0        | 0     |
+| Part B (5 engineered cases)  | 5     | 0      | 5        | 0     |
+| Part C (80 mass-sweep)       | 80    | 80     | 0        | 0     |
+| **Total**                    | **95**| **90** | **5**    | **0** |
+
+Part B result: Ramification requires the deliberate construction a2=p*(p+2),
+i.e., k≡2 (mod p) with v_p(k^2-4)=1 odd. The hypothesis p∤a2 excludes this
+entirely. Note: a2=p gives D=-3p^2, sf=-3, and kronecker(-3,p)=±1 depending
+on p mod 3 — NEVER ramified for p≠3.
+
+**Corrected claim**: p SPLITS in Q(sqrt(sf)) when p∤a2. The splitting is
+unconditional (not just "non-inert"): ramification is also impossible.
+
+**New proposition in paper:**
+`\begin{proposition}[Universal order-2 Frobenius ideal; Threads 15–17]`
+at position in structural_completeness.tex between the CM-73 remark and
+the B6 subsection. Contains 4-step proof + splitting corollary + remark.
+
+**Combined verification record (Threads 15–17):**
+| Source                        | Cases |
+|-------------------------------|-------|
+| Thread 15 (norm-form, k≤199)  | 25    |
+| Thread 16 (general, 82 total) | 82    |
+| Thread 17 Part A (new splits) | 10    |
+| Thread 17 Part C (mass sweep) | 80    |
+| **Grand total (splits)**      | **197**|
+(Thread 17 Part B verifies 5 ramification cases as expected boundary.)
+
+### Next step proposal
+Thread 18: Literature check for the splitting corollary.
+- The fact that p always SPLITS in Q(sqrt(a2^2-4p^2)) when p∤a2 is a clean
+  number-theoretic result. Check whether this appears in Silverman's "Advanced
+  Topics in the Arithmetic of Elliptic Curves" §II.10 (CM lifting), or in
+  Neukirch §I.8-9 (ramification theory), or in the classical "ideal theory"
+  section of any algebraic number theory text.
+- If NOT in the literature, add a sentence to the proposition's remark noting
+  "we are unaware of an explicit reference for this special case."
+- ALSO: the PAPER_STRUCTURAL_COMPLETENESS.md has the remark "Thread 17's next
+  step" section still referencing the p=2 case exclusion — verify the TeX proof
+  correctly scopes to "odd p" (it does, at line with "For odd $p$").
+- ALSO: check whether `\CM` being undefined in the pre-existing paper text
+  (lines 375-381) warrants a fix by defining `\newcommand{\CM}{\mathrm{CM}}` in
+  the preamble (low priority; doesn't affect the core content).
+
+### Commits made
+TBD (will be set after commit below)

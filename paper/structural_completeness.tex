@@ -428,6 +428,69 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--17]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime, $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, write $D = s_f \cdot m^2$ with $s_f$ squarefree
+(so $s_f = \mathrm{core}(D)$ with sign), $K = \QQ(\sqrt{s_f})$, and
+let $\mathfrak{p}$ be any prime of $K$ above $p$.  Then:
+\begin{enumerate}
+  \item[(i)] $[\mathfrak{p}]^2 = 1$ in $\Cl(K)$; and
+  \item[(ii)] $p$ \textbf{splits} in $K$ (i.e.\ $\left(\frac{s_f}{p}\right) = +1$).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = \tfrac{-a_2 + m\sqrt{s_f}}{2}$.
+
+\medskip\noindent\emph{(A) $\beta \in O_K$.}  We have $\beta^2 + a_2\beta + p^2 = 0$
+(check directly), so $\beta$ is an algebraic integer.
+
+\medskip\noindent\emph{(B) $N_{K/\QQ}(\beta) = p^2$.}  The conjugate is
+$\bar\beta = \tfrac{-a_2 - m\sqrt{s_f}}{2}$, so
+$\beta\bar\beta = \tfrac{a_2^2 - m^2 s_f}{4} = \tfrac{a_2^2 - D}{4} = p^2$.
+
+\medskip\noindent\emph{(C) $(\beta) \neq (p)$ in $O_K$.}
+If $(\beta) = (p)$ then $\beta/p \in O_K$, hence $p \mid a_2$---contradicting
+our hypothesis.
+
+\medskip\noindent\emph{(D) $[\mathfrak{p}]^2 = 1$ in $\Cl(K)$.}
+Since $N_{K/\QQ}(\beta) = p^2$ and $p$ is a prime, the factorisation of
+$(\beta)$ in $O_K$ has norm $p^2$.  The only ideal of norm $p^2$ in $O_K$
+that is a principal ideal with generator of norm $p^2$ is $\mathfrak{p}^2$,
+$\bar{\mathfrak{p}}^2$, or $(p)$; (C) excludes $(p)$, so $(\beta) = \mathfrak{p}^2$ or
+$\bar{\mathfrak{p}}^2$, giving $[\mathfrak{p}]^2 = 1$.
+
+\medskip\noindent\emph{Splitting claim (ii).}
+\emph{Inert impossible}: if $p$ were inert, the unique ideal above $p$ of
+norm $p^2$ would be $(p)$, contradicting (C).
+\emph{Ramified impossible}: $p$ ramifies in $K = \QQ(\sqrt{s_f})$ iff
+$p \mid \mathrm{disc}(K)$, which (for odd $p$) is equivalent to
+$p \mid s_f$.  Since $D \equiv a_2^2 \pmod{p}$ and $p \nmid a_2$,
+we have $p \nmid D$, hence $p \nmid s_f$.
+Therefore $p$ splits, i.e.\ $\bigl(\tfrac{s_f}{p}\bigr) = +1$. \qed
+\end{proof}
+
+\begin{remark}
+This proposition is purely algebraic; it does not use any specific curve
+construction.  It was discovered empirically in Thread~14 for norm-form
+primes ($4p = 73 + 3k^2$, $k$ odd) and proved in Threads~15--16.
+Thread~17 verified the splitting claim (ii) with an explicit PARI script
+(\texttt{thread17\_splitting\_verify.gp}): Part~A confirms $\bigl(\tfrac{s_f}{p}\bigr) = 1$
+for 10 explicit pairs $(p, a_2)$; Part~B verifies that introducing $p \mid s_f$
+\emph{does} produce ramification (5 engineered cases with $a_2 = p(p+2)$);
+Part~C confirms no failure in an 80-pair mass sweep ($20$ primes $\times$
+$4$ values of $a_2 < p$).  Combined with the 82 prior cases
+from Threads~15--16, the total verification record is 172 zero-failure cases.
+
+\emph{Relevance to B5}: every Jacobian with biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$ (the class produced by $(N,N)$-cover attacks) has
+$p$ splitting in the associated quadratic field $K$.  This constrains the
+CM types realizable in such a cover, but does not by itself reduce the DLP
+cost.  B5's complexity argument (Gaudry, Corollary~\ref{cor:b5-univ})
+independently closes the cover attack.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
