@@ -5734,4 +5734,4 @@ provides an independent algorithmic proof of non-decomposability for secp256k1's
 p-isogeny graph neighborhood. If yes, add a citation to Block B5 in `paper/eprint_combined.tex`.
 
 ### Commits made
-PLACEHOLDER — see below
+`82effb8` autolab 2026-07-21: Thread 20 — CM class numbers for glueable pair Jacobians; h=1 for all j=0 biquadratic covers; perfect-square poldisc for pair (0,2)
