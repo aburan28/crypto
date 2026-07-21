@@ -5574,3 +5574,164 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+
+Fallback (Step 4): all 6 original threads are CLOSED/BLOCKED/DEAD END.
+- Thread 1 (P-521 LLL NaN): CLOSED (2026-06-06, HP LLL 3/3 at m=16)
+- Thread 2 (CHLRS Igusa): BLOCKED (Sage required)
+- Thread 3 (Howe sextic twists): CLOSED (5/15 glueable confirmed 2026-05-30; re-confirmed 2026-07-08)
+- Thread 4 (Cross-curve LLL): CLOSED (2026-06-14)
+- Thread 5 (GLV-HNP Phase 2): DEAD END (2026-06-29)
+- Thread 6 (B5 over F_{p^k}): CLOSED (2026-07-07)
+
+Executed both fallback sub-tasks: (a) ePrint survey; (b) new attack variant (Thread 20).
+
+### Work done
+
+**Part (a): ePrint survey (papers since 2026-07-20)**
+
+Searched IACR ePrint and arXiv for: "isogeny-graph ECDLP", "hidden number problem ECDSA",
+"(N,N)-cover Jacobian", "Weil descent genus-2", "Howe cover". WebSearch (direct ePrint
+fetch HTTP 403 via proxy).
+
+**Part (b): Thread 20 — CM class numbers for secp256k1 glueable pair Jacobians**
+
+New PARI script: `secp256k1_cm_audit/thread20_cm_classno_covers.gp`.
+Motivation: Thread 17 proved [P]²=1 in Cl(K) for biquadratic Weil polynomial covers
+(K = Q(√sf(a₂²-4p²))). Never asked: what is h(K) for secp256k1's specific glueable pairs?
+If h=1, Thread 17's Proposition is trivially satisfied — no actual algebraic constraint.
+
+Work done:
+- Computed trace t₀ = 432420386565659656852420866390673177327 for secp256k1.
+- Verified Cornacchia: 4p = t₀² + 3u₀² with u₀ = 303414439467246543595250775667605759171. ✓
+- Computed all 6 sextic-twist traces from the j=0 Cornacchia decomposition:
+  - t₀ = 432420386565659656852420866390673177327 (k=0)
+  - ta = (t₀+3u₀)/2 = 671331852483699643819086596696745227420 (k=1)
+  - tb = (t₀-3u₀)/2 = -238911465918039986966665730306072050093 (k=2)
+  - -t₀, -ta, -tb (k=3,4,5)
+- Verified Cornacchia for ta and tb independently: 4p = ta²+3ua², 4p = tb²+3ub². ✓
+- For each of the 5 glueable pairs from Thread 3, computed Weil polynomial:
+  - (0,3) and (1,4): BIQUADRATIC (t_j = -t_i); computed sf(D) and h(CM field).
+  - (0,2), (0,5), (2,3): NON-BIQUADRATIC; computed poldisc of quartic Weil polynomial.
+- `cargo test --test curve_audit`: 5/5 pass. ✓
+
+### Findings
+
+#### ePrint survey — 4 relevant 2026 papers
+
+**1. eprint 2026/1431** — Castryck, De Feo, Galbraith, Kutas, Reijnders, Wesolowski.
+"The Isogeny Problems." July 2026.
+> Comprehensive treatment of the Supersingular ℓ-Isogeny Path Problem. Notes that
+> supersingular isogeny graphs are Ramanujan graphs of size O(p); best classical
+> complexity Õ(p^{1/2}). Focuses on supersingular curves — does NOT attack ordinary
+> prime-field ECDLP. Not directly relevant to our theorem, but confirms that the
+> isogeny-graph attack landscape for supersingular curves remains at p^{1/2}.
+
+**2. eprint 2026/110** (= arXiv 2601.17142) — Barbulescu, Barcau, Pasol.
+"Logarithmic density of rank ≥1 and ≥2 genus-2 Jacobians and applications to HCC."
+January 2026.
+> Shows that asymptotically the density of genus-2 Jacobians (ordered by naive height
+> of integral Weierstrass models) with Mordell-Weil rank ≥1 over Q is 13/14, and
+> rank ≥2 density is ≥5/7. Explicitly constructs split-Jacobian families of rank 2.
+> Section on "applications to HCC" discusses Regev's quantum algorithm (eprint 2024/2004)
+> for hyperelliptic curve DLP. RELEVANCE: identifies dense families of rank-2 Jacobians
+> that could serve as targets for Regev's quantum attack if they cover secp256k1.
+
+**3. eprint 2026/007** — Dang.
+"A Certified Framework for Deterministic Navigation in Higher-Genus p-Isogeny Graphs."
+January 2026.
+> Introduces PICS (Certified p-Isogeny Step) using Hasse-Witt invariants and ND
+> (Non-Decomposition Certificate) for algebraic filtering of product-decomposable
+> Jacobians. Relevant to our Block B5 analysis: the ND certificate provides an
+> independent algebraic check for non-decomposability of genus-2 Jacobians near
+> secp256k1 in the p-isogeny graph. NOT reviewed in our paper; could strengthen B5.
+
+**4. eprint 2026/110 companion** — see also: eprint 2024/2004 (Regev's attack on HCC).
+"Regev's attack on hyperelliptic cryptosystems" (2024, cited by 2026/110).
+> The Regev quantum algorithm attacks genus-g DLP using CM structure. The 2026/110
+> paper establishes existence of rank-2 Jacobians as potential inputs. Inapplicable
+> to secp256k1 cover attacks because: (a) rank over Q ≠ DLP structure over F_p;
+> (b) even if J/F_p covers E, the DLP cost in J(F_p) via Gaudry is O(p) — no win.
+
+#### Thread 20: CM class numbers
+
+**Numerical results (from `thread20_cm_classno_covers.gp`):**
+
+Biquadratic pairs:
+```
+Pair (0,3): a2 = 2p-t0^2
+  sf(D) = -3
+  h(Q(sqrt(-3))) = 1   ← TRIVIAL
+  [P]^2=1 trivially YES (h=1, Cl(K) = {1})
+
+Pair (1,4): a2 = 2p-ta^2
+  sf(D) = -3
+  h(Q(sqrt(-3))) = 1   ← TRIVIAL
+  [P]^2=1 trivially YES
+```
+
+Non-biquadratic pairs (general quartic CM field):
+```
+Pair (0,2): t0+tb = 193508920647619669885755136084601127234
+  poldisc(P_02) = 305...560000
+  core(poldisc) = 1    ← poldisc is a PERFECT SQUARE
+  => Galois group of Weil poly ≤ A_4 over Q
+
+Pair (0,5): poldisc(P_05) = 2108...049296
+Pair (2,3): poldisc(P_23) = 2108...049296   (same; P_23(x) = P_05(-x) symmetry)
+```
+
+**Key findings:**
+
+1. **h(CM field) = 1 for all biquadratic covers**: For secp256k1 (j=0, CM by Z[ζ₃]),
+   the CM field of any biquadratic Howe-glueable pair Jacobian is Q(√-3) with h(Q(√-3)) = 1.
+   Thread 17's Proposition ([P]²=1 in Cl(K)) is vacuously true — every ideal is already
+   principal. This means the order-2 Frobenius constraint provides NO algebraic obstruction
+   for j=0 curves with biquadratic Weil polynomials.
+
+2. **Structural reason**: Since every j=0 sextic twist E_k satisfies the Cornacchia equation
+   4p = t_k² + 3u_k², we have sf(t_k²-4p) = sf(-3u_k²) = -3 universally. So the CM field
+   for any biquadratic pair is always Q(√-3) regardless of which pair is chosen.
+
+3. **Perfect-square poldisc for pair (0,2)**: The Weil polynomial of the Jacobian for the
+   non-biquadratic pair (E_0, E_2) has a discriminant that is a perfect square over Q.
+   This implies Gal(P_02/Q) ≤ A_4 (alternating group), a non-trivial constraint on the
+   Galois action on Frobenius eigenvalues for this mixed-twist pair.
+
+4. **P_23(x) = P_05(-x)**: Pairs (0,5) and (2,3) have the same poldisc because their
+   Weil polynomials are related by P_23(x) = P_05(-x) — a consequence of the Frobenius
+   negation symmetry (quadratic twist t → -t) composed with the cubic twist action.
+
+5. **Implication for main theorem**: The Frobenius-ideal order-2 constraint (Prop in §4 of
+   paper) is not the binding obstruction for secp256k1 — that role belongs to Gaudry's
+   index calculus bound (Block B5). Thread 17's Proposition is still useful for GENERAL
+   primes p (where h(Q(√sf(D))) can be > 1), but gives no information for j=0 curves.
+
+### Next step proposal
+
+**Thread 21: Non-biquadratic class number via toy prime**
+
+The class number of the quartic CM field for pairs (0,2), (0,5), (2,3) is unknown
+(bnfinit infeasible for 256-bit p). Workaround: find a TOY prime p_toy ≡ 1 mod 6 with
+j=0 curves, verify the same 5 glueable pairs exist, and run bnfinit on the quartic
+Weil polynomial of the non-biquadratic pairs. If the pattern (h=1 or h=2) holds for
+several toy primes, it suggests the quartic CM field also has small class number for
+secp256k1 — further degenerating Thread 17's algebraic obstruction.
+
+Expected outcome: h ∈ {1, 2, 3} for the quartic CM field at toy primes. If h=1 for all,
+the entire algebraic cover-attack analysis via Frobenius ideals is vacuous for j=0 curves.
+PARI implementation: bnfinit on a quartic with small-prime coefficients is fast (< 1s).
+
+**Alternative Thread 21B: Cite Dang 2026/007 ND certificate in Block B5**
+
+Read Dang 2026/007 more carefully (if accessible) and determine if the ND certificate
+provides an independent algorithmic proof of non-decomposability for secp256k1's
+p-isogeny graph neighborhood. If yes, add a citation to Block B5 in `paper/eprint_combined.tex`.
+
+### Commits made
+PLACEHOLDER — see below
