@@ -5573,4 +5573,4 @@ The codebase has `tests/lll_degeneracy_probe.rs` and `tests/gs_precision_benchma
 - Success criterion: `probe_lll_sweep_by_bit_length` returns non-NaN for 521-bit inputs.
 
 ### Commits made
-[see below]
+`fa9327a` autolab 2026-07-21: Thread 17 — biquadratic Weil polynomial proposition added to TeX paper; 10/10 splitting cases verified
