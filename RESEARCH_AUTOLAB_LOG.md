@@ -5555,4 +5555,4 @@ Thread 18: Literature cross-check for the splitting corollary.
   of a₂). Write a PARI snippet checking p=2 cases.
 
 ### Commits made
-[TBD after push]
+`b7a17bc` autolab 2026-07-21: Thread 17 — integrate order-2 Frobenius prop into ePrint; fix LaTeX pre-existing errors; 12-page clean compile
