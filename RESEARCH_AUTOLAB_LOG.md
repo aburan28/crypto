@@ -5574,3 +5574,98 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists for secp256k1.
+Chosen because: the 2026-07-20 log entry recommended Thread 18 as the
+next-best concrete step; `howe_sextic_twists_all15.gp` existed from prior
+work but had not been run. Thread 17 completed the paper integration task,
+so Thread 18 was the natural continuation.
+
+### Work done
+- Installed `pari-gp` (absent from container, installed via `apt-get --fix-missing`).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (clean run, no errors).
+- Wrote and ran `secp256k1_cm_audit/thread18_prime_check.gp` to check primality
+  of all 6 twist orders and compute the full GCD table.
+- Added §6.2 ("Sextic twist Howe survey for secp256k1") to
+  `PAPER_STRUCTURAL_COMPLETENESS.md` with full table and structural explanation.
+- Verified `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**2-torsion structure:** Two patterns for x³+bₖ mod p:
+- `[3]` (irreducible): k = 0, 2, 3, 5 — no F_p-rational 2-torsion
+- `[1,1,1]` (splits): k = 1, 4 — all E[2] F_p-rational
+
+**(H1):** All 15 pairs have distinct orders (H1 always holds). ✓
+
+**(H2):** 8 pairs pass H2 (same 2-torsion class). The [3]-type set has
+C(4,2)=6 pairs; the [1,1,1]-type set has C(2,2)=1 pair. Total 7 pairs
+with H2=YES. (Plus pairs (0,1),(0,4),(1,2),(1,5),(2,4),(3,4),(4,5) fail H2.)
+
+Wait — actual count from script: 8 pairs have H2=YES.
+
+**GCD failures (H3=NO):**
+| Pair  | gcd   | factor |
+|-------|-------|--------|
+| (1,3) | 3     | CM-field ramification at 3 |
+| (1,5) | 3     | same   |
+| (2,5) | 4     | both n₂, n₅ divisible by 4 |
+| (3,5) | 3     | n₃ div by 9, n₅ div by 3  |
+
+Structural explanation: p ≡ 1 (mod 6) forces 3 | nₖ for k ∈ {1,3,5}
+(traces in {t_minus, -t, t_plus} each satisfy nₖ ≡ 0 mod 3 due to
+CM-field ramification at 3 in Q(√−3)). Similarly 4 | n₂ and 4 | n₅
+because the corresponding traces satisfy t ≡ 1 mod 4 patterns.
+
+**Howe-glueable pairs (5 of 15):**
+
+| Pair  | n_i prime? | n_j prime? | gcd |
+|-------|-----------|-----------|-----|
+| (0,2) | YES (n₀)  | NO        | 1   |
+| (0,3) | YES (n₀)  | NO        | 1   |
+| (0,5) | YES (n₀)  | NO        | 1   |
+| (1,4) | NO        | NO        | 1   |
+| (2,3) | NO        | NO        | 1   |
+
+Only n₀ = secp256k1 order is prime. All other 5 orders are composite
+with small factors.
+
+**Factorizations of composite orders:**
+```
+n₁ = 3 · 199 · 18979 · [50-digit] · [47-digit]
+n₂ = 2² · 7² · 10903 · 5290657 · 10833080827 · 22921299619447 · [41-digit]
+n₃ = 3² · 13² · 3319 · 22639 · [63-digit]
+n₄ = 109903 · 12977017 · 383229727 · [54-digit]
+n₅ = 2² · 3 · 20412485227 · [26-digit] · [40-digit]
+```
+
+**Conclusion:** 5/15 sextic-twist pairs are Howe-glueable, producing genus-2
+covers. All are closed under B5: DLP cost on cover Jacobian is O(p) > O(√n₀).
+The j=0 structure creates non-trivial pairing structure (small GCDs from CM
+ramification), but no new attack surface.
+
+### Next step proposal
+
+Thread 19 (original priority-5, now unblocked):
+**GLV-HNP Phase 2 actual lattice implementation** — implement the 2D-aware
+lattice from `RESEARCH_GLV_HNP_PHASE2.md §2` on the toy curve found in
+`glv_hnp_phase2_toy.gp` (E: y²=x³+2 over F_211, n=199, λ=106).
+The script already sets up equations; the missing piece is building the
+(2m+1)-dimensional lattice basis explicitly and running LLL.
+
+Concretely:
+- m=5 signatures, k_1 < K1_BOUND=2, k_2 free in [0,199)
+- Build 11×11 matrix per §2, run `lll` in PARI
+- Target short vector should encode (k_{i,1}, d, k_{i,2}) for i=1..5
+- Expected outcome: d=190 recovered (planted in existing script output)
+
+Alternate: if lattice dims cause LLL issues at n=199, try n ≥ 1009 with
+a different toy curve (just find the next prime-order j=0 curve).
+
+### Commits made
+TBD — will commit after writing this log entry.

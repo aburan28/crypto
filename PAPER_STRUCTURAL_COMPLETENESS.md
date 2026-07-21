@@ -477,6 +477,83 @@ in §6) and on B5's complexity argument.  Any genus-2 cover —
 literal Howe-glue or otherwise — has DLP cost `≥ O(p) > √n`, so
 ECDLP is unaffected either way.
 
+### 6.2 Sextic twist Howe survey for secp256k1 (Thread 18)
+
+For the special case `j(E) = 0` over a prime field `p ≡ 1 (mod 6)`,
+there are exactly **6 sextic twist isomorphism classes**: the curves
+`y² = x³ + bₖ` with `bₖ = 7 · u^k mod p` and `u = g^{(p-1)/6}` a
+primitive 6th root of unity.  secp256k1 is the `k = 0` twist; the
+quadratic twist is `k = 3`.
+
+**Computation** (`secp256k1_cm_audit/howe_sextic_twists_all15.gp`,
+`thread18_prime_check.gp`): all C(6,2) = 15 pairwise Howe conditions
+were checked for secp256k1's 6 sextic twists.
+
+**2-torsion structure (H2):** There are exactly two factorisation
+patterns for `x³ + bₖ mod p`:
+
+| Pattern     | Twists (k=)       | Meaning                            |
+|-------------|-------------------|------------------------------------|
+| `[3]`       | k = 0, 2, 3, 5    | no F_p-rational 2-torsion (cyclic) |
+| `[1, 1, 1]` | k = 1, 4          | E[2] all F_p-rational              |
+
+(H2) holds iff two twists have the same pattern, i.e., they lie in the
+same cubic residue class mod `p`.
+
+**GCD structure (H3):** Of the 15 pairs:
+
+| Pair   | H2   | gcd(nᵢ, nⱼ) | H3  | Glueable? |
+|--------|------|-------------|-----|-----------|
+| (0,1)  | NO   | 1           | YES | no        |
+| (0,2)  | YES  | 1           | YES | **YES**   |
+| (0,3)  | YES  | 1           | YES | **YES**   |
+| (0,4)  | NO   | 1           | YES | no        |
+| (0,5)  | YES  | 1           | YES | **YES**   |
+| (1,2)  | NO   | 1           | YES | no        |
+| (1,3)  | NO   | 3           | NO  | no        |
+| (1,4)  | YES  | 1           | YES | **YES**   |
+| (1,5)  | NO   | 3           | NO  | no        |
+| (2,3)  | YES  | 1           | YES | **YES**   |
+| (2,4)  | NO   | 1           | YES | no        |
+| (2,5)  | YES  | 4           | NO  | no        |
+| (3,4)  | NO   | 1           | YES | no        |
+| (3,5)  | YES  | 3           | NO  | no        |
+| (4,5)  | NO   | 1           | YES | no        |
+
+**Result**: **5 of 15 pairs are Howe-glueable**: (0,2), (0,3), (0,5),
+(1,4), (2,3).
+
+**H3 failures** (4 pairs) arise from small factors characteristic of
+j=0 curves:
+- Three pairs share factor **3**: the prime 3 ramifies in the CM field
+  Q(√−3) / Q (since `−3 = −3·1²` is the discriminant), causing
+  `3 | n_k` for k = 1, 3, 5 (orders with trace ≡ 0 mod 3).
+- One pair (2,5) shares factor **4**: both n₂ and n₅ are divisible
+  by 4.
+
+**Primality of twist orders:** Only the secp256k1 order `n₀` is prime.
+The other five orders are composite:
+
+```
+n₁ = 3 · 199 · 18979 · (50-digit prime) · (47-digit prime)
+n₂ = 4 · 7² · 10903 · 5290657 · 10833080827 · … · (42-digit prime)
+n₃ = 9 · 13² · 3319 · 22639 · (63-digit prime)
+n₄ = 109903 · 12977017 · 383229727 · (54-digit prime)
+n₅ = 4 · 3 · 20412485227 · (26-digit prime) · (40-digit prime)
+```
+
+**Implication**: the 5 glueable pairs include secp256k1 (n₀ prime) paired
+with composite-order twists in cases (0,2), (0,3), (0,5); and two
+composite-order twists paired together in (1,4) and (2,3).  The ECDLP
+threat to secp256k1 operates in the prime-order subgroup of `E₀`; the
+cover attack would land in the Jacobian of a genus-2 curve, where by B5
+the cost is `O(p) > O(√n₀)`.  All 5 glueable pairs are therefore
+**closed under B5** regardless of the primality structure.
+
+This does not change the §8 verdict, but provides a complete sextic-twist
+picture: the j=0 structure produces non-trivial glueable pairs (5 of 15),
+yet the B5 argument closes all of them.
+
 ## 7. Empirical verification on deployed curves
 
 The companion script
