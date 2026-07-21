@@ -637,6 +637,39 @@ $O(\sqrt{n}) \approx 2^{128}$.
 The cover-based attack is $2^{256}$ times \emph{slower} than direct ECDLP.
 \end{corollary}
 
+\begin{remark}[Cubic-residue classification of the 6 sextic twists]\label{rem:cubic-residue}
+Since $p \equiv 7 \pmod{18}$, one computes $(p-1)/3 \equiv 2 \pmod{6}$, so for
+any primitive $6$th root of unity $u\in\FF_p^*$, the element $u^{(p-1)/3}$
+equals $\omega := u^2$, a primitive cube root of unity.  Thus for
+$b_k = 7u^k$ the cubic-residue test gives
+\[
+  b_k^{(p-1)/3} = 7^{(p-1)/3} \cdot \omega^k = \omega^{k_0 + k},
+\]
+where $k_0 \in \{1,2\}$ is fixed by $7^{(p-1)/3} = \omega^{k_0}$.
+For secp256k1, $7^{(p-1)/3} = \omega^2$ (i.e.\ $k_0 = 2$), so
+$b_k^{(p-1)/3} = 1$ iff $k \equiv 1 \pmod{3}$, i.e.\ $k \in \{1,4\}$.
+
+Consequence: the 6 sextic twists split into two \emph{2-torsion classes}:
+\begin{itemize}
+\item $k \in \{0,2,3,5\}$: $b_k$ is a non-cube; $x^3 + b_k$ is
+      \textbf{irreducible} over $\FF_p$ (degree pattern $[3]$); no
+      $\FF_p$-rational affine $2$-torsion.
+\item $k \in \{1,4\}$: $b_k$ is a cube; $x^3 + b_k$
+      \textbf{splits completely} over $\FF_p$ (degree pattern $[1,1,1]$);
+      $E_k$ has full $\FF_p$-rational $2$-torsion $(\ZZ/2)^2$.
+\end{itemize}
+Howe's condition \textbf{(H2)} holds for a pair $(i,j)$ iff both are in
+the same class.  This leaves exactly $\binom{4}{2} + \binom{2}{2} = 7$
+pairs compatible with (H2); of these, $5$ also satisfy \textbf{(H3)}
+(coprime orders), for a total of $5/15$ glueable pairs.
+
+The pair $\{1,4\}$ is the sole $[1,1,1]$--$[1,1,1]$ glueable pair.  Its
+Howe cover $\Jac(C')\to E_1\times E_4$ could in principle be defined
+over $\FF_p$ (both $2$-torsion groups are already $\FF_p$-rational), but
+this cover attacks $E_1$ and $E_4$---not secp256k1 ($E_0$).
+Verified by \texttt{secp256k1\_cm\_audit/thread18\_sextic\_cubic\_residue.py}.
+\end{remark}
+
 \paragraph{Toy verification ($p = 43$).}
 For the analogous toy case $p = 43$, the Howe-glued curve
 $C_{43}\colon y^2 = (x^3 + 7)(x^3 + 13)$ (the two glueable-partner

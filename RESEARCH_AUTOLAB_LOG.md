@@ -5574,3 +5574,128 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 18 — algebraic cubic-residue classification of all 6 sextic twists of secp256k1.
+Chosen because: 2026-07-20 log proposed Thread 18 as the next concrete step; PARI/GP is
+unavailable this session, so the PARI script `howe_sextic_twists_all15.gp` cannot be run
+directly. Instead, implemented the core algebraic argument in pure Python
+(`thread18_sextic_cubic_residue.py`), which requires only Python stdlib (no sympy/PARI).
+Also executed Step 4 Fallback (ePrint survey via WebSearch).
+
+### Work done
+- Derived the algebraic cubic-residue formula: for b_k = 7·u^k mod p (u = primitive
+  6th root of unity), b_k^{(p-1)/3} = 7^{(p-1)/3} · ω^k = ω^{k₀+k}, where ω=u^2
+  has order 3 and k₀ is fixed by the cubic residue class of 7 mod p.
+- Verified: p ≡ 7 (mod 18), so (p-1)/3 ≡ 2 (mod 6), giving u^{(p-1)/3} = ω = u^2.
+- Verified: 7^{(p-1)/3} = ω^2 mod p (confirmed numerically: 5559...254 = ω^2).
+- Consequence: b_k^{(p-1)/3} = ω^{2+k mod 3}. Equals 1 iff k ≡ 1 (mod 3).
+- **Correction to initial claim**: initial analysis incorrectly assumed "all 6 b_k
+  are non-cubes". Empirical check found k=1 and k=4 ARE cubes (ω^{2+1}=ω^3=1,
+  ω^{2+4}=ω^6=1). Corrected and re-verified.
+- Wrote `secp256k1_cm_audit/thread18_sextic_cubic_residue.py` (pure Python, ~240 lines).
+  Fixed: initial float-based sqrt hung on 512-bit integers; replaced with `math.isqrt`.
+  Script runs in <5s, no external dependencies.
+- Ran full 15-pair Howe check in Python. Confirmed 5/15 glueable pairs (matching
+  2026-05-24 PARI result).
+- Added Remark `rem:cubic-residue` to `paper/structural_completeness.tex` (41 lines):
+  - Algebraic formula for cubic residue class of b_k
+  - Split into two 2-torsion classes: k∈{0,2,3,5} → [3], k∈{1,4} → [1,1,1]
+  - Structural count: 7 pairs pass H2, 5 of those pass H3 → 5/15 glueable
+  - Note: pair {1,4} is the sole [1,1,1]-[1,1,1] glueable pair; its cover doesn't
+    attack secp256k1 (E_0) directly
+- Conducted ePrint survey via WebSearch (Fallback Step 4a); 5 topics surveyed with
+  12 papers found (see Findings below).
+
+### Findings
+
+**Thread 18 numerical results (pure Python, secp256k1 parameters):**
+
+Cubic residue classes of b_k = 7·u^k:
+  k=0: ω^2 → non-cube → x³+7 IRREDUCIBLE [3]
+  k=1: 1   → cube    → x³+b₁ splits [1,1,1]
+  k=2: ω   → non-cube → [3]
+  k=3: ω^2 → non-cube → [3]
+  k=4: 1   → cube    → x³+b₄ splits [1,1,1]
+  k=5: ω   → non-cube → [3]
+
+15-pair Howe table (H1/H2/H3):
+  Glueable: (0,2), (0,3), (0,5), (1,4), (2,3)  — 5 / 15
+  H2 fails (mixed pattern): (0,1),(0,4),(1,2),(1,3),(1,5),(2,4),(3,4),(4,5) — 8 pairs
+  H3 fails despite H2 pass:
+    (2,5): gcd=#E₂,#E₅) = 4
+    (3,5): gcd(#E₃,#E₅) = 3
+  Also noted: gcd(#E₁,#E₃)=3, gcd(#E₁,#E₅)=3 (though these also fail H2)
+
+Key 6 curve orders:
+  N_0 = 1157...337 (secp256k1 order, prime)
+  N_1 = 1157...757
+  N_2 = 1157...084
+  N_3 = 1157...991 (quadratic twist order)
+  N_4 = 1157...571
+  N_5 = 1157...244
+
+**ePrint survey findings (2025–2026):**
+
+1. [2026/1431] "The Isogeny Problems" (Castryck, De Feo, et al., 2026)
+   Community exposition of 7 open problems in isogeny-based crypto.
+   URL: eprint.iacr.org/2026/1431
+
+2. [2025/076] "Decompose and Conquer: ZVP Attacks on GLV Curves"
+   (Suchánek, Sedláček, Sýs — CRoCS/Masaryk, ACNS 2025)
+   ZVP side-channel on GLV multi-scalar mult (secp256k1 targeted);
+   recovers 2× more key bits than classical ZVP. Relevant to GLV-HNP direction.
+   URL: eprint.iacr.org/2025/076; impl: github.com/crocs-muni/dcp-glv
+
+3. [2025/147] "Efficient Algorithms for (N,N)-Splittings and Endomorphisms"
+   (Kutas et al., JCryptol 2025 / PKC 2024)
+   Detects whether superspecial genus-2 Jacobian is (N,N)-split for N≤11;
+   gives 25–160× speedup on Costello–Smith dimension-2 attack.
+   URL: eprint.iacr.org/2025/147
+
+4. [2025/136] "Computing Isomorphisms between Products of Supersingular Elliptic Curves"
+   (Gaudry, Soumier, Spaenlehauer, 2025)
+   Poly-time Las Vegas algorithm for isomorphisms between products of SS curves;
+   directly relevant to (2,2)-cover splitting.
+   URL: eprint.iacr.org/2025/136
+
+5. [2024/296] "Attacking ECDSA with Nonce Leakage by Lattice Sieving"
+   Combines lattice sieving + Fourier analysis for HNP; closes gap between
+   two main HNP-solving paradigms. (Published ASIACRYPT 2024)
+   URL: eprint.iacr.org/2024/296
+
+6. [2026/1198] "Splittings and Endomorphism Rings" (Kutas, Shen, 2026)
+   Extends 2025/147; connects (N,N)-splittings to endomorphism ring algorithms.
+   URL: eprint.iacr.org/2026/1198
+
+**Key observation from ePrint survey:**
+- No 2025/2026 paper directly attacks classical ECDLP on named prime-field curves
+  via isogeny-graph or genus-2 cover techniques. The structural-completeness thesis
+  remains unchallenged in the literature.
+- 2025/076 (ZVP GLV attack) is the closest to the GLV-HNP thread: it's a
+  side-channel attack exploiting GLV structure, not a pure lattice/HNP attack.
+  The GLV lattice (Thread 19, closed 2026-05-26) is distinct from ZVP.
+- 2025/147 and 2025/136 operate on SUPERSPECIAL abelian surfaces, not ordinary
+  ones (our setting). The Howe cover construction is in the ordinary setting.
+
+### Next step proposal
+Two candidate threads:
+
+**Thread 19 (new, previously "closed")**: Integrate the 2025/076 ZVP-GLV finding
+into the paper's "Out-of-scope" section. The paper currently lists "GLV-aware HNP
+variant" as out-of-scope; 2025/076 is a real-world incarnation of GLV exploitation
+that could be cited as evidence that GLV does matter in practice (side-channel),
+even though the lattice-only attack (Thread 5/19) remains sub-√p.
+
+**Thread 20 (paper citation update)**: Add the 5 most relevant 2025/2026 ePrint
+citations to `paper/structural_completeness.tex`. The bibliography currently has
+no citations newer than 2023. Adding 2025/076, 2025/147, 2025/136, 2024/296 would
+bring the paper's literature survey up to date.
+Recommend Thread 20 first (easy, concrete, high-value).
+
+### Commits made
+[see below after git commit]
