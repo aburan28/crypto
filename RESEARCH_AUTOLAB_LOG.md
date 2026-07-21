@@ -5716,4 +5716,4 @@ using the subresultant formula on one of our 16 glueable pairs.
 Recommend Thread 20 first (short, uses existing pairs, gives a paper cite).
 
 ### Commits made
-`TBD` autolab 2026-07-21: Thread 18 — Regev+cover falsifier confirmed; 16 glueable pairs, ratio~2.0; ePrint survey 5 papers
+`bd55722` autolab 2026-07-21: Thread 18 — Regev+cover falsifier confirmed; 16 glueable pairs, ratio~2.0; ePrint survey 5 papers
