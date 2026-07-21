@@ -5679,4 +5679,4 @@ This is a documentation task, not a computation.
 Recommend Thread 19 first — it's a runnable script that may yield empirical data.
 
 ### Commits made
-TBD (pending commit below)
+`4422acc` autolab 2026-07-21: Thread 18 — 5/15 sextic-twist pairs Howe-glueable; explicit iso for (1,4) via negation
