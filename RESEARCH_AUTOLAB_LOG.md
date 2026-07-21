@@ -5498,3 +5498,79 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (Threads 15–16) into the ePrint TeX paper as a formal proposition.
+Chosen because: Thread 17 was the explicit next-step proposal from the 2026-07-19 log entry (Thread 16 complete); no prior work on Thread 17 existed.
+
+### Work done
+- Read `paper/structural_completeness.tex` to locate insertion point (end of B5 remark block, after CM-73 remark, line 429).
+- Confirmed `\newtheorem{proposition}[theorem]{Proposition}` already defined in paper preamble (line 23).
+- Wrote `secp256k1_cm_audit/thread17_splitting_check.gp` — PARI script that:
+  - For 10 diverse (p, a2) pairs (p from 11 to 1,000,003, non-norm-form),
+  - Verifies p splits in Q(sqrt(sf)) using `idealprimedec` (#Pp == 2 check),
+  - Confirms [P]^2 = 1 using `bnfisprincipal(K, P^2)`,
+  - Guards against inert/ramified cases and reports them as FAILs.
+- Ran script: `gp --stacksize 128000000 -q secp256k1_cm_audit/thread17_splitting_check.gp`
+  — all 10/10 cases: SPLIT, [P]^2=1:YES.
+- Added to `paper/structural_completeness.tex` (after line 429):
+  - `\begin{proposition}...\end{proposition}` (Prop. labeled `prop:biquad-order2`):
+    statement of parts (a) [P]^2=1 and (b) p splits (not inert, not ramified).
+  - `\begin{proof}...\end{proof}`: 4-step algebraic proof (β construction, norm check,
+    (β)≠(p) argument for (a); inert and ramified impossibility for (b)).
+  - `\begin{remark}...\end{remark}` (labeled `rem:biquad-splitting`): empirical record
+    (92 total cases verified), citation of Threads 14–17 and scripts, relevance to B5.
+- Verified all LaTeX environments matched (begin/end pairs balanced).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Thread 17 PARI output (splitting check, 10 cases):**
+```
+OK   p=11        a2=6       sf=-7          h=1    D<0  SPLIT  [P]^2=1:YES
+OK   p=23        a2=10      sf=-14         h=4    D<0  SPLIT  [P]^2=1:YES
+OK   p=47        a2=22      sf=-58         h=2    D<0  SPLIT  [P]^2=1:YES
+OK   p=53        a2=10      sf=-174        h=12   D<0  SPLIT  [P]^2=1:YES
+OK   p=101       a2=12      sf=-10165      h=48   D<0  SPLIT  [P]^2=1:YES
+OK   p=199       a2=18      sf=-2470       h=32   D<0  SPLIT  [P]^2=1:YES
+OK   p=1009      a2=30      sf=-994        h=16   D<0  SPLIT  [P]^2=1:YES
+OK   p=9001      a2=44      sf=-81017517   h=4064 D<0  SPLIT  [P]^2=1:YES
+OK   p=32771     a2=100     sf=-1073935941 h=23872 D<0 SPLIT  [P]^2=1:YES
+OK   p=1000003   a2=200     sf=-1000005990009 h=872192 D<0 SPLIT [P]^2=1:YES
+RESULT: 10/10 SPLIT — Theorem (Thread 16 Corollary) verified.
+```
+
+**Cumulative verification record:**
+| Source                                           | Cases | Passed |
+|--------------------------------------------------|-------|--------|
+| Thread 15 (norm-form k≤199, algebraic proof)     | 25    | 25     |
+| Thread 16 Part A (non-NF, D<0 and D>0)           | 15    | 15     |
+| Thread 16 Part B (genus-2 curves, actual a2)      | 2     | 2      |
+| Thread 16 Part C (mass sweep 10 primes × 4 a2)   | 40    | 40     |
+| Thread 17 (splitting corollary, p up to 10^6)    | 10    | 10     |
+| **Total**                                         | **92**| **92** |
+
+**LaTeX addition (paper/structural_completeness.tex, lines 431–483):**
+- `\begin{proposition}[Biquadratic Weil polynomial: universal order-2 and splitting]` — clean 2-part statement
+- Proof: β = (-a2 + m√sf)/2 satisfies x²+a2x+p²=0; N(β)=p²; (β)≠(p) gives [P]²=1; inert/ramified ruled out by norm and discriminant arguments
+- Remark: 92-case empirical record, relevance to B5 cost bound
+
+**Notable class-number range in Thread 17:**
+- h ranges from 1 (p=11, sf=-7) to 872,192 (p=1,000,003, sf=-10^15).
+- [P]²=1 confirmed even for h=872,192 — the theorem is not a small-h artifact.
+
+### Next step proposal
+Thread 18: P-521 LLL (Priority 1 — still open).
+The codebase has `tests/lll_degeneracy_probe.rs` and `tests/gs_precision_benchmark.rs`.
+- Try target_bits=80 (vs current 150) to see if NaN disappears for P-521.
+- If still NaN: implement a double-double (two-f64) GS orthogonalization variant.
+- Concretely: modify `src/lll.rs` (or wherever GS is implemented) to use a struct
+  `DoubleDouble { hi: f64, lo: f64 }` with compensated add/mul.
+- Success criterion: `probe_lll_sweep_by_bit_length` returns non-NaN for 521-bit inputs.
+
+### Commits made
+`fa9327a` autolab 2026-07-21: Thread 17 — biquadratic Weil polynomial proposition added to TeX paper; 10/10 splitting cases verified
