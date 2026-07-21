@@ -5498,3 +5498,63 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 17 — integrate Theorem (16) (Universal Order-2 Frobenius ideal) into the ePrint
+LaTeX draft. Chosen because: the 2026-07-19 log explicitly proposed this as next step;
+no work had been done on it; all six original priority threads are CLOSED or BLOCKED.
+
+### Work done
+- Installed pari-gp (absent from container, installed via apt --fix-missing).
+- Wrote `secp256k1_cm_audit/thread17_splits_verify.gp` (10 new (p,a₂) pairs).
+- Ran script: 10/10 SPLIT + [P]²=1; no INERT or RAMIFIED case found.
+- Inserted `\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--17]`
+  and associated `\begin{proof}` and `\begin{remark}` into
+  `paper/structural_completeness.tex`, after the Thread 12 remark (was line 429)
+  and before the B6 subsection.
+- Added `\newcommand{\cO}{\mathcal{O}}` and `\newcommand{\PP}{\mathfrak{P}}` to
+  the preamble (lines 42–43); both were undefined before.
+- Verified LaTeX environment balance (proposition/proof/remark all paired).
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Thread 17 verification (10 new cases, all D<0 or D>0, none in prior test sets):**
+| p   | a₂   | sf      | D    | split | [P]²=1 |
+|-----|------|---------|------|-------|--------|
+| 131 |  43  | -66795  | D<0  | SPLIT | YES    |
+| 137 |  55  | -72051  | D<0  | SPLIT | YES    |
+| 149 |  61  | -85083  | D<0  | SPLIT | YES    |
+| 151 | -63  | -87235  | D<0  | SPLIT | YES    |
+| 157 |  65  | -94371  | D<0  | SPLIT | YES    |
+| 163 |  67  | -101787 | D<0  | SPLIT | YES    |
+| 53  | 107  |  213    | D>0  | SPLIT | YES    |
+| 61  | 123  |  5      | D>0  | SPLIT | YES    |
+| 71  | 143  |  285    | D>0  | SPLIT | YES    |
+| 79  | 159  |  317    | D>0  | SPLIT | YES    |
+
+**Total empirical record across Threads 15–17:** 92/92 cases; 0 failures.
+
+**LaTeX change:** `paper/structural_completeness.tex` gains 51 lines (Proposition,
+Proof, Remark) with label `prop:order2-frobenius`. Preamble gains `\cO`, `\PP`.
+The insertion is after the CM-73 remark and before B6.
+
+### Next step proposal
+Thread 18: Check CM literature for the p-splits corollary.
+- Cohen & Strömberg "Modular Forms: A Classical and Computational Introduction" §5.
+- Silverman "Advanced Topics in the Arithmetic of Elliptic Curves" §II.10.
+- Neukirch "Algebraic Number Theory" §I.8 (Minkowski theory, discriminants).
+- If the statement "p∤a₂ implies p splits in Q(√(a₂²-4p²))" does not appear
+  verbatim in any of these, it may be a minor novelty worth a footnote.
+  (The result itself follows immediately from the standard discriminant criterion;
+  the non-triviality is the context: biquadratic Weil polynomials of genus-2 Jacobians.)
+- Alternatively (if literature check takes too long): begin Thread 19 — write the
+  "Abstract" and "Introduction" sections of the ePrint draft in `paper/structural_completeness.tex`
+  (§§1–2 are currently thin; the B5 proof is now Proposition-quality and warrants a
+  one-paragraph introduction statement of the main theorem).
+
+### Commits made

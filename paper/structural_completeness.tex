@@ -39,6 +39,8 @@
 \newcommand{\disc}{\operatorname{disc}}
 \newcommand{\gcd}{\operatorname{gcd}}
 \newcommand{\NS}{\operatorname{NS}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\PP}{\mathfrak{P}}
 
 \title{Structural Completeness of Prime-Field Elliptic Curves \\
        Against Isogeny-Graph Cryptanalysis}
@@ -426,6 +428,55 @@ over $\overline{\QQ}$---a computation involving the CM type and the field of
 definition of CM points (see Shimura--Taniyama theory).
 This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up to
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
+\end{remark}
+
+\begin{proposition}[Universal order-2 Frobenius ideal; Threads~15--17]
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime, $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Set $D = a_2^2 - 4p^2$, let $sf$ be the squarefree part of $D$ \textup{(}$D \neq 0$
+since $|a_2| \neq 2p$ generically\textup{)}, and write $D = sf \cdot m^2$ with
+$m \in \ZZ_{>0}$.  Let $K = \QQ(\sqrt{sf})$ and let $\PP$ be any prime of $K$ above $p$.
+Then:
+\begin{enumerate}[label=\textup{(\alph*)}]
+  \item $[\PP]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \emph{splits} in $K$ \textup{(}neither inert nor ramified\textup{)}.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{sf})/2$.
+
+\smallskip\noindent\textbf{(a)}
+$\beta$ satisfies $x^2 + a_2 x + p^2 = 0$, so $\beta \in \cO_K$ and
+$\mathrm{N}_{K/\QQ}(\beta) = p^2$.  Thus $(\beta) = \PP^2$ or $\bar{\PP}^2$
+for some prime $\PP \mid p$, giving $[\PP]^2 = 1$---provided $(\beta) \neq (p)$.
+Indeed, $(\beta) = (p)$ would require $\beta/p \in \cO_K$, hence $p \mid a_2$,
+contradicting the hypothesis.
+
+\smallskip\noindent\textbf{(b)}
+\emph{Inert impossible:} if $p$ is inert, the only $\cO_K$-ideal of norm $p^2$ is
+$(p)$; part~(a) shows $(\beta) \neq (p)$, contradiction.
+\emph{Ramified impossible for odd $p$:} $p$ ramifies in $K = \QQ(\sqrt{sf})$ iff
+$p \mid \mathrm{disc}(K)$.  For odd $p$, $\mathrm{disc}(K) \in \{sf, 4sf\}$, so
+$p \mid \mathrm{disc}(K)$ iff $p \mid sf$.  Since $sf = \mathrm{sqfree}(D)$ and
+$D \equiv a_2^2 \pmod{p}$, we have $p \mid D$ iff $p \mid a_2$---excluded.
+Hence $p$ splits. \qed
+\end{proof}
+
+\begin{remark}
+The proposition is a statement about quadratic ideals, entirely independent of
+any curve construction.  It was discovered empirically in Thread~14 for norm-form
+primes ($4p = 73 + 3k^2$, $k$ odd) and proved algebraically in Thread~15
+(\texttt{thread15\_order2\_algebraic.gp}), then generalised to arbitrary $(p, a_2)$
+in Thread~16 (\texttt{thread16\_general\_order2.gp}).
+Empirical record: 82 cases in Threads~15--16 plus 10 new pairs in Thread~17
+(\texttt{thread17\_splits\_verify.gp}), covering $D < 0$ (imaginary quadratic)
+and $D > 0$ (real quadratic); all 92 gave $[\PP]^2 = 1$ and splitting type SPLIT.
+
+\emph{Relevance to B5:} the corollary that $p$ always splits constrains the CM
+types realizable in a cover attack.  Any genus-2 abelian surface with biquadratic
+Weil polynomial $T^4 + a_2 T^2 + p^2$ must have $p$ split in the associated
+quadratic field $\QQ(\sqrt{sf})$.
 \end{remark}
 
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
