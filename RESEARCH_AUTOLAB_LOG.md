@@ -5498,3 +5498,61 @@ Thread 17: Integrate Theorem (16) into the ePrint draft.
 
 ### Commits made
 `3d8ae15` autolab 2026-07-19: Thread 16 — general order-2 theorem; p always splits when p∤a2; 82/82 cases verified
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+Thread 17 — integrate generalized order-2 Frobenius theorem into `paper/structural_completeness.tex`.
+Chosen because: explicitly proposed as next step in the 2026-07-19 log entry; Thread 16 completed the algebraic generalization; natural follow-through is to publish the theorem in the ePrint draft.
+
+### Work done
+- Examined `paper/structural_completeness.tex` structure (851→903 lines after edits).
+- Found that `PAPER_STRUCTURAL_COMPLETENESS.md` already had the theorem in a B5 remark (lines 273–323) but `paper/structural_completeness.tex` had NOT yet incorporated it.
+- Installed `texlive-latex-base` + `texlive-latex-extra` (were absent from container) to enable compilation checks.
+- Identified and fixed two pre-existing LaTeX errors:
+  - `\newcommand{\gcd}` → `\renewcommand{\gcd}` (conflict with amsmath built-in).
+  - Missing `\newcommand{\CM}{\mathrm{CM}}` macro (used on 4 lines, never defined).
+- Added `Proposition [Universal order-2 Frobenius ideal — Threads 15–16]` (label `prop:order2-frobenius`) to B5 section, after the CM-73 remark (line 430):
+  - Full statement: two-part (i) [P]²=1, (ii) p splits.
+  - Complete 5-line proof inline (reduction via β = (−a₂+m√sf)/2, norm, inertness excluded, ramification excluded via discriminant).
+  - Remark citing 82 verified cases, scripts, and geometric interpretation.
+- Added an item to the Open Questions §"In-scope" list:
+  - Marks the splitting corollary as *Resolved* (Proposition ref), clarifies the prior empirical pattern is now proved.
+- Verified PDF compilation: `pdflatex structural_completeness.tex` → **12 pages, no errors**.
+- Ran `cargo test --test curve_audit`: **5/5 pass**.
+
+### Findings
+
+**Proposition added to paper (verbatim structure):**
+```
+Proposition [Universal order-2 Frobenius ideal — Threads 15–16] (label: prop:order2-frobenius)
+  (i)  [P]² = 1 in Cl(K)
+  (ii) p splits in K  (neither inert nor ramified)
+Proof: 5 steps (β ∈ O_K; N(β)=p²; (β)≠(p); inert excluded; ramified excluded by disc).
+Remark: 82 empirical cases, scripts thread15/16_*.gp, geometric consequence.
+```
+
+**Pre-existing LaTeX fixes (opportunistic):**
+| Bug | Fix |
+|-----|-----|
+| `\newcommand{\gcd}` clashes with amsmath | changed to `\renewcommand` |
+| `\CM` used but undefined | added `\newcommand{\CM}{\mathrm{CM}}` |
+
+**PDF page count:** 11 → 12 pages (proposition + proof + remark + open-questions update).
+
+### Next step proposal
+Thread 18: Literature cross-check for the splitting corollary.
+- Claim: for odd p with p∤a₂, p cannot be inert or ramified in Q(√sf(a₂²−4p²)).
+  Check whether this exact statement (or an equivalent) appears in:
+  (a) Silverman, Advanced Topics in the Arithmetic of Elliptic Curves, §II.10 (CM theory).
+  (b) Cohen & Strömberg, Modular Forms, §5.11 (CM forms and splitting).
+  (c) Neukirch, Algebraic Number Theory, §I.8 or §II.7 (discriminant and splitting).
+- If not found verbatim, it may be a minor publishable corollary.
+- Alternatively: check if the proof applies when p=2 (the odd-p hypothesis was used
+  to rule out ramification; for p=2, disc(Q(√sf)) may include factor 4 independently
+  of a₂). Write a PARI snippet checking p=2 cases.
+
+### Commits made
+[TBD after push]

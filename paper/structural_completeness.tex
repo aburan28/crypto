@@ -37,8 +37,9 @@
 \newcommand{\Jac}{\operatorname{Jac}}
 \newcommand{\Res}{\operatorname{Res}}
 \newcommand{\disc}{\operatorname{disc}}
-\newcommand{\gcd}{\operatorname{gcd}}
+\renewcommand{\gcd}{\operatorname{gcd}}
 \newcommand{\NS}{\operatorname{NS}}
+\newcommand{\CM}{\mathrm{CM}}
 
 \title{Structural Completeness of Prime-Field Elliptic Curves \\
        Against Isogeny-Graph Cryptanalysis}
@@ -428,6 +429,54 @@ This remains \textbf{open}: the empirical set $\{19,37,79,109\}$ is confirmed up
 $p \le 5000$; whether it is truly finite is not yet established by the current methods.
 \end{remark}
 
+\begin{proposition}[Universal order-2 Frobenius ideal --- Threads 15--16]%
+\label{prop:order2-frobenius}
+Let $p$ be an odd prime and $a_2 \in \ZZ$ with $p \nmid a_2$ and $a_2 \neq 0$.
+Write $D = a_2^2 - 4p^2$, let $\mathrm{sf}(D)$ denote the squarefree part of $D$,
+and set $m = \sqrt{D/\mathrm{sf}(D)} \in \ZZ_{>0}$.
+Let $K = \QQ\!\left(\sqrt{\mathrm{sf}(D)}\right)$ and $P$ any prime of
+$\mathcal{O}_K$ above $p$.  Then:
+\begin{enumerate}[label=(\roman*)]
+  \item $[P]^2 = 1$ in $\Cl(K)$.
+  \item $p$ \textbf{splits} in $K$: $p$ is neither inert nor ramified in $K/\QQ$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Set $\beta = (-a_2 + m\sqrt{\mathrm{sf}(D)})/2$.
+Then $\beta$ satisfies $\beta^2 + a_2 \beta + p^2 = 0$, a monic polynomial with
+$\ZZ$-coefficients, so $\beta \in \mathcal{O}_K$.
+Computing norms: $N_{K/\QQ}(\beta) = p^2$, hence $(\beta) = P^2$ or $\bar{P}^2$
+in $\mathcal{O}_K$.  The identity $(\beta) = (p)$ would require $\beta/p \in
+\mathcal{O}_K$, forcing $p \mid a_2$ --- contradicting the hypothesis.
+Therefore $[P]^2 = 1$, proving (i).
+
+For (ii): if $p$ were \emph{inert} in $K$, the only ideal of norm $p^2$ would be
+$(p)$, which was just excluded.  If $p$ were \emph{ramified}, then $p \mid \disc(K)$;
+for odd $p$, $\disc(K) \mid 4\,\mathrm{sf}(D)$, so $p \mid \disc(K)$ implies
+$p \mid \mathrm{sf}(D)$, hence $p \mid D = a_2^2 - 4p^2$, hence $p \mid a_2$ ---
+again excluded.  So $p$ splits.
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:order2-frobenius} is a pure statement about quadratic ideal
+classes, independent of any curve construction.  It was observed empirically in
+Thread~14 for norm-form primes ($4p = 73 + 3k^2$, $k$ odd), proved algebraically
+in Thread~15, and extended to arbitrary $(p, a_2)$ in Thread~16.
+Numerical verification covers 82 cases: 25 norm-form primes ($k \leq 199$) and
+57 arbitrary $(p, a_2)$ pairs including non-norm-form primes, $D < 0$
+(imaginary-quadratic $K$), $D > 0$ (real-quadratic $K$), and $a_2$-values derived
+from actual genus-2 Jacobians; zero failures in all cases.
+Scripts: \texttt{thread15\_order2\_algebraic.gp}, \texttt{thread16\_general\_order2.gp}.
+
+The splitting clause in~(ii) constrains the CM types realizable in a cover attack:
+any genus-2 Jacobian $J/\FF_p$ with biquadratic Weil polynomial
+$T^4 + a_2 T^2 + p^2$ (equivalently, $\#C(\FF_p) = p + 1$ for the underlying
+genus-2 curve $C$) has $p$ splitting in the associated quadratic field
+$K = \QQ(\sqrt{\mathrm{sf}(a_2^2 - 4p^2)})$.  This is not a numerical coincidence
+but an algebraic constraint from the ideal theory of $\mathcal{O}_K$.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
@@ -734,6 +783,13 @@ is the plain Pollard~$\rho$ cost.
       amplified ECDLP recovery on isogenous siblings: speculative.
 \item Exact Cardona--Quer normalisation of Igusa invariants for
       $C_{43}$ (cross-verification with Sage / Magma pending).
+\item \emph{Resolved (Proposition~\ref{prop:order2-frobenius}):}
+      For any genus-2 Jacobian with biquadratic Weil polynomial
+      $T^4 + a_2 T^2 + p^2$ and $p \nmid a_2$, the prime $p$ always
+      \emph{splits} in the associated quadratic field
+      $K = \QQ(\sqrt{\mathrm{sf}(a_2^2 - 4p^2)})$.
+      This was left as an empirical pattern in earlier versions; it is
+      now proved algebraically and verified for 82 cases.
 \end{itemize}
 
 \subsection*{Out-of-scope: separate attack programmes}
