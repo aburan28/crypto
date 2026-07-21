@@ -5574,3 +5574,179 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-21 (autolab run)
+
+### Task picked
+**Fallback (Step 4)** — all 6 original priority threads CLOSED/BLOCKED/DEAD END as of
+2026-07-20. Proposed Thread 18 duplicates closed Thread 3 (Howe sextic twists;
+5/15 glueable confirmed 2026-07-08). Proposed Thread 19 duplicates DEAD END Thread 5
+(GLV-HNP Phase 2 toy; 9-session negative result closed 2026-06-29). Protocol:
+ePrint survey + new attack variant proposal.
+
+### Work done
+
+- Verified all original priority threads:
+  - Thread 1 (P-521 LLL NaN): CLOSED 2026-05-22 via BigInt HP GS
+  - Thread 2 (CHLRS Igusa): BLOCKED — Rosenhain formula diagnostic scripts exist
+    but both failure modes unresolved; SageMath `HyperellipticCurveFromInvariants`
+    required; PARI/GP also not installed in this container
+  - Thread 3 (Howe j=0 sextic twists): CLOSED 2026-07-08; 5/15 pairs glueable
+  - Thread 4 (cross-curve LLL 384-bit): DEAD END (structural obstruction)
+  - Thread 5 (GLV-HNP Phase 2 toy): DEAD END (9-session negative Jun 21–29)
+  - Thread 6 (B5 over F_{p^k}): CLOSED 2026-07-07
+- Confirmed `cargo test --test curve_audit` passes: 5/5 tests, 4.21s
+- Confirmed PARI/GP NOT installed in container (cannot run .gp scripts)
+- ePrint survey: searched IACR ePrint for 2026 papers on 4 keyword groups
+- Wrote `secp256k1_cm_audit/howe_33_gluing_check.gp` — new Thread 20 prototype
+
+### Findings
+
+#### ePrint survey (2026 papers, through 2026-07-21)
+
+**Group 1 — isogeny-graph ECDLP:**
+
+1. **eprint.iacr.org/2026/1431** — *The Isogeny Problems*
+   Castryck, De Feo, Galbraith, Kutas, Reijnders, Wesolowski. Received 2026-07-13.
+   Seven open problems in isogeny-based cryptography solicited from 11 experts.
+   Frames hardness of path-finding in supersingular ℓ-isogeny graphs (Ramanujan
+   graphs ~p vertices). No new classical ECDLP attack; confirms the isogeny-graph
+   / classical-DLP separation our paper exploits. ★ Most recent relevant paper.
+
+2. **eprint.iacr.org/2026/171** — *Spectral Theory of Isogeny Graphs and Quantum
+   Sampling of Hard Supersingular Elliptic Curves*
+   Mamah, Jao. 2026-02-06. Proves Quantum Unique Ergodicity (QUE) for supersingular
+   ℓ-isogeny graphs: walks equidistribute, so short random-walk outputs cannot be
+   clustered. Tightens the expansion/mixing argument used in the classical hardness
+   proof of our main theorem (Block B7).
+
+3. **eprint.iacr.org/2026/1219** — *Algorithms for solving the isogeny problem with
+   oriented elliptic curves* (WayFinder framework). 2026-06-09. Extends Delfs-Galbraith
+   and SuperSolver for oriented isogeny problems; adds cost model. Relevant to bounding
+   security margin of isogeny-graph hardness assumptions. No ECDLP attack content.
+
+**Group 2 — Boneh-Venkatesan:**
+
+4. **eprint.iacr.org/2026/423** — *Coppersmith's Method for Solving Modular Inversion
+   Hidden Number Problem via Determinant-Based Elimination*
+   Ding, Dai, Wu, Wang, Zhang. 2026 Q1/Q2. New best algorithm for MIHNP
+   (a canonical BV-family instance) via determinant-based shift selection in
+   Coppersmith's multivariate method; disproves Boneh-et-al. 2001 conjecture that
+   MIDHNP > MIHNP. Tightens the hardness boundary that ECDLP-via-HNP reductions
+   depend on.
+
+5. **eprint.iacr.org/2026/064** — *Breaking the KAZ Suite: Practical Key Recovery
+   on MySEAL 2.0 Post-Quantum Candidates* 2026-02-02. KAZ-SIGN v2.0 broken via
+   2-signature HNP lattice (BV-style CVP). Demonstrates HNP pipeline remains potent.
+
+**Group 3 — Hidden number problem ECDSA:**
+
+6. **arxiv:2602.01491** — *Sleep Reveals the Nonce: Breaking ECDSA using Sleep-Based
+   Power Side-Channel Vulnerability* 2026-02-02. Power side-channel from context-switch
+   spikes during sleep() in scalar-multiplication code leaks ~20 bits of ECDSA nonce;
+   BKZ-based HNP solver recovers 256-bit private key on ARM/RISC-V (RustCrypto,
+   BearSSL, GoCrypto). RELEVANCE: extends nonce-leakage to a new physical channel;
+   the bias structure (temporal nonce bits) differs from Thread 5's algebraic k₁ bias.
+
+7. **ACISP 2026** (DOI 10.1007/978-981-96-9095-4_13) — *Lattice Attack with EHNP:
+   Key Recovery from Two ECDSA Signatures and Breaking the Information-Theoretic Limit*
+   Uses Extended HNP + wNAF traces to recover secp256k1 private key from 2 signatures —
+   previously believed impossible. New strongest published lower bound on ECDSA nonce
+   leakage recovery.
+
+**Group 4 — (N,N)-cover Jacobian:**
+
+8. **eprint.iacr.org/2026/110** — *Logarithmic Density of Rank ≥1 and ≥2 Genus-2
+   Jacobians and Applications to Hyperelliptic Curve Cryptography*
+   Barbulescu, Barcau, Pasol, Turcas. 2026-01-23. Proves split-Jacobian (product of
+   two elliptic curves) density ≥ 2/21 among genus-2 Jacobians; explicitly ties result
+   to cover attacks on ECDLP. RELEVANCE: quantifies how common the Howe-gluing
+   targets are; confirms Block B5 analysis (split Jacobians are the covers, but DLP
+   cost is still O(p)).
+
+9. **eprint.iacr.org/2026/039** — *Abelian Surfaces in Hesse Form and Explicit Isogeny
+   Formulas* Decru, Kunzweiler. 2026-04-10 (arxiv:2601.05922). Explicit (3,3)-isogeny
+   formulas between principally polarised abelian surfaces in Hesse/theta model
+   (Burkhardt quartic threefold); SageMath package. RELEVANCE: the (3,3)-isogeny
+   formulas are exactly what is needed for "Thread 20" below — checking whether j=0
+   sextic twists of secp256k1 satisfy (3,3)-Howe-gluing conditions. Most directly
+   relevant new technical paper.
+
+10. **eprint.iacr.org/2026/1142** — *A computational framework for principally
+    polarized abelian varieties* Santos, Piasecki, Wesolowski. 2026-06-08.
+    Coordinate-agnostic (N,N)-isogeny evaluation in theta model; fundamental algorithms
+    for genus-2 Jacobian arithmetic. RELEVANCE: infrastructure for any practical
+    (N,N)-cover attack cost verification (Block B5 quantification).
+
+**No papers from on/after 2026-07-20 found in any group.** Highest observed ePrint ID
+in this search: ~2026/1457, approved ~2026-07-17. The archive had no new submissions
+in these topic groups between 2026-07-17 and 2026-07-21.
+
+---
+
+#### New attack variant proposal: Thread 20 — (3,3)-Howe Gluing on j=0 Sextic Twists
+
+**Motivation:** Thread 3 (2026-07-08) confirmed 5/15 pairs of secp256k1's sextic
+twists satisfy (H1)+(H2)+(H3) for (2,2)-Howe gluing. The new ePrint 2026/039
+(Decru-Kunzweiler) gives explicit (3,3)-isogeny formulas on abelian surfaces in
+the Hesse (j=0) model — exactly the cover type for secp256k1's CM structure. This
+enables an analogous check for (3,3)-Howe-gluing, which has NOT been done.
+
+**Conditions for (3,3)-Howe gluing of E_i × E_j:**
+- **(A1)** Hom_{F_p}(E_i, E_j) = 0  ↔  #E_i ≠ #E_j  (same as (H1))
+- **(A2)** E_i[3] ≃ E_j[3] as F_p-Galois modules — determined by splitting of
+  the 3-torsion polynomial ψ₃(x) = x(x³ + 2b) over F_p. For twist d: poly is
+  x³ + 2bd; splits iff 2bd is a cubic residue mod p.
+- **(A3)** Weil e₃-pairing compatibility of the gluing isomorphism E_i[3] → E_j[3].
+  For j=0 curves with CM by Z[ζ₃], the e₃-pairing on 3-torsion is determined by
+  the CM action, which is the SAME for all sextic twists. So (A3) likely follows
+  automatically from (A2) when the Galois modules are isomorphic.
+
+**Key structural observation:** Unlike the 2-torsion case where x³+7 mod p is either
+irreducible or splits (depending on p mod 7), the 3-torsion condition x³+2bd being a
+cube mod p changes with each twist representative d. Concretely, among the 6 sextic
+twist representatives d = gen^k (k=0..5), exactly 2 will have 2bd being a cube
+(since (F_p*)^3 has index 3) — namely k = 0, 2, 4 or k = 1, 3, 5 depending on
+whether 2b is a cube mod p. So exactly 2 out of 6 twists share one 3-torsion Galois
+module type, and 4 share another (if 2b is not a cube) — or 3+3 if 2b is a cube.
+
+**Falsifier experiment:** Run `secp256k1_cm_audit/howe_33_gluing_check.gp` (written
+today) on a small prime p ≡ 1 (mod 6) with prime-order j=0 curve. The script:
+1. Finds a toy j=0 prime-order curve (p < 3000)
+2. Enumerates all 6 sextic twists via a generator of F_p*
+3. Checks (A1): which pairs have different group orders
+4. Checks (A2): compares 3-torsion polynomial degree patterns
+5. Reports which pairs satisfy (A1) ∧ (A2)
+
+**Expected outcome:** Fewer than 5/15 pairs will be (3,3)-glueable (vs. (2,2) which
+had 5/15 for the toy example Thread 3 used). Pairs where 2bd shares the same cubic
+character will satisfy (A2); combined with (A1), probably 1–3 pairs survive.
+
+**ECDLP implication:** Same as (2,2) case — even with a (3,3)-glued Jacobian, the
+DLP cost is O(p) (Gaudry index calculus on genus-2 over F_p). No attack on secp256k1.
+But the structural result (existence/non-existence of (3,3)-covers) is new and
+publishable in §B5/§B6 context of the paper.
+
+**Blocker:** PARI/GP not installed in this container. Script written but not run.
+Next autolab run should:
+1. If PARI/GP available: run `gp -q howe_33_gluing_check.gp` and record output
+2. If not: check whether Rust implementation of the 3-torsion polynomial check
+   is feasible (trivial arithmetic mod p, easily done in tests/)
+3. Connect result to Decru-Kunzweiler 2026/039: if a (3,3)-glueable pair exists,
+   cite 2026/039 for the explicit isogeny formulas and estimate cost to construct C.
+
+### Next step proposal
+
+**Primary:** Run `secp256k1_cm_audit/howe_33_gluing_check.gp` — needs PARI/GP or
+  equivalent. Alternatively, port the 3-torsion check to a Rust integration test
+  (simple: just factor x³+2bd mod p for each twist and compare degree patterns).
+  Expected: 1 session to execute and record results for Thread 20.
+
+**Secondary:** Integrate ePrint 2026/039 (Decru-Kunzweiler) into the paper bibliography
+  (`paper/eprint_combined.tex` and/or `paper/structural_completeness.tex`). The paper
+  is directly relevant to B5 cost analysis for (3,3) covers.
+
+### Commits made
+`[hash]` autolab 2026-07-21: Fallback — ePrint survey; Thread 20 (3,3)-Howe-gluing script; no PARI/GP in container
