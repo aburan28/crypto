@@ -5675,4 +5675,4 @@ both give genus-2 covers with ECDLP cost ≥ √p." ~30 additional lines in the 
 Recommend Thread 19 first (concrete computation; has script ready), then Thread 20.
 
 ### Commits made
-[will record after push]
+`efa68fb` autolab 2026-07-21: Thread 18 — Howe gluing 15 pairs; 2/15 gluable
