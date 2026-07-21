@@ -5578,4 +5578,4 @@ Thread 18: Literature check for the splitting corollary.
   the preamble (low priority; doesn't affect the core content).
 
 ### Commits made
-TBD (will be set after commit below)
+`cd584f7` autolab 2026-07-21: Thread 17 — splitting corollary verified; Proposition added to TeX paper
