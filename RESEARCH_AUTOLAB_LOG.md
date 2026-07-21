@@ -5689,4 +5689,4 @@ invariants of (E×E^t)/Γ_α. The 4 new qualifying pairs from Thread 18 give 4 a
 targets for this computation.
 
 ### Commits made
-PENDING — see below.
+`a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
