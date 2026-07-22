@@ -5574,3 +5574,98 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists (all 15 pairs).
+Chosen because: 2026-07-20 log explicitly proposed this as the next-best concrete step, with `howe_sextic_twists_all15.gp` already written and just needing execution. No intervening work.
+
+### Work done
+- Installed pari-gp (absent from container; `apt-get install --fix-missing pari-gp`).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` on the actual secp256k1 prime `p`.
+- Checked primality of all 6 sextic-twist orders (quick follow-up script).
+- Ran `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` (Thread 19 equation sanity, see below).
+
+### Findings
+
+**MAIN RESULT: 5 of 15 sextic-twist pairs are Howe-glueable.**
+
+**2-torsion factorisation of x³+b_k over F_p (secp256k1 prime):**
+
+| twist k | b_k (truncated)       | 2-tor pattern | note |
+|---------|-----------------------|---------------|------|
+| 0       | 7                     | [3]           | secp256k1 itself |
+| 1       | 7·u¹                  | [1,1,1]       | splits completely |
+| 2       | 7·u²                  | [3]           | irreducible |
+| 3       | -7 ≡ p-7              | [3]           | quadratic twist |
+| 4       | 7·u⁴                  | [1,1,1]       | splits completely |
+| 5       | 7·u⁵                  | [3]           | irreducible |
+
+Two distinct patterns: `[3]` for k∈{0,2,3,5}, `[1,1,1]` for k∈{1,4}.
+
+**Pairwise Howe conditions (all 15 pairs):**
+
+| pair  | H1: n_i≠n_j | H2: 2-tor match | H3: gcd=1 | Glueable? |
+|-------|-------------|-----------------|-----------|-----------|
+| (0,1) | YES | NO  | YES | no  |
+| (0,2) | YES | YES | YES | **YES** |
+| (0,3) | YES | YES | YES | **YES** |
+| (0,4) | YES | NO  | YES | no  |
+| (0,5) | YES | YES | YES | **YES** |
+| (1,2) | YES | NO  | YES | no  |
+| (1,3) | YES | NO  | NO  | no  |
+| (1,4) | YES | YES | YES | **YES** |
+| (1,5) | YES | NO  | NO  | no  |
+| (2,3) | YES | YES | YES | **YES** |
+| (2,4) | YES | NO  | YES | no  |
+| (2,5) | YES | YES | NO  | no — gcd=4 |
+| (3,4) | YES | NO  | YES | no  |
+| (3,5) | YES | YES | NO  | no — gcd=3 |
+| (4,5) | YES | NO  | YES | no  |
+
+**H3 failure analysis:**
+- `gcd(N[2], N[5]) = 4` (= 2²): pair (2,5) are a quadratic-twist pair; both orders divisible by 4. This follows from p≡3 mod 4 (so p+1≡0 mod 4) and (t+3s)/2 being even: N[2]=p+1+(t+3s)/2 and N[5]=p+1-(t+3s)/2 are both ≡0 mod 4.
+- `gcd(N[3], N[5]) = 3`: N[3]=quadratic-twist order and N[5] share factor 3. This is a CM artifact; N[3] = p+1+t ≡ 0 mod 3 (secp256k1 quad-twist order is composite, divisible by 3).
+
+**Primality of the 6 twist orders:**
+- N[0] = secp256k1's n is **prime** (by construction).
+- N[1], N[2], N[3], N[4], N[5] are all **composite** (orders of the 5 other sextic twists).
+- secp256k1's design choice of prime order makes it the unique prime-order twist.
+
+**Structural interpretation:**
+- The 6 twists split into two H2-classes: {0,2,3,5} (2-tor=[3]) and {1,4} (2-tor=[1,1,1]).
+- Within {0,2,3,5}: C(4,2)=6 pairs; 4 glueable + 2 fail H3 (pairs (2,5) and (3,5)).
+- Within {1,4}: 1 pair; 1 glueable.
+- Cross-class: all 8 pairs fail H2.
+- **secp256k1 (k=0) is glueable with 3 twists: (0,2), (0,3), (0,5)**.
+  This extends the earlier howe_gluing_test.gp result (which checked only (0,3)).
+
+**ECDLP implication (none):** Per the structural-completeness paper (PAPER_STRUCTURAL_COMPLETENESS.md), no (2,2)-cover attack on secp256k1 improves over ρ. The 5 glueable pairs each yield a genus-2 Jacobian J with #J(F_p) ≈ p², making index-calculus cost ≈ p (worse than √p for ECDLP).
+
+**Thread 19 partial (GLV toy sanity):**
+- `glv_hnp_phase2_toy.gp` ran to completion (toy curve y²=x³+2 over F_211, n=199).
+- Sanity check passes: all 5 signatures satisfy A+Bd ≡ k_1+λ·k_2 mod n.
+- k_full distribution confirmed uniform (standard HNP attack fails as designed).
+- Lattice implementation still deferred; script is structural setup only.
+
+### Next step proposal
+
+**Thread 19 continued (Phase 2 lattice implementation):** Implement the GLV-aware
+lattice in the PARI script. The dimension-(2m+1) lattice is sketched in the toy
+script at line 159–176; the next step is to actually build the matrix, call LLL,
+and check whether the short vector encodes d. Expected: on the toy curve (n=199),
+with K1_BOUND≈2, d should be recovered from m=5 signatures. If LLL fails, debug
+the lattice normalization.
+
+**Thread 20 (CHLRS Igusa formula):** Priority-2 thread. Implement the
+Igusa-Clebsch invariant formula from the Cardona-Howe-Lercier-Ritzenthaler-Streng
+paper. Port the explicit polynomial to PARI; `igusa_clebsch.gp` already exists as
+scaffolding.
+
+Recommend Thread 19 first since lattice implementation is a natural continuation.
+
+### Commits made
+[see below]
