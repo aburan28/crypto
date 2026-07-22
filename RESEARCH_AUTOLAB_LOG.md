@@ -5726,4 +5726,4 @@ is the Igusa class polynomial for this CM type?
 Feasible in Python (stdlib, no PARI): ~100-line enumeration using Frobenius detection.
 
 ### Commits made
-`[hash]` autolab 2026-07-22: Thread 20 — Igusa quadruple verified; ePrint survey; CHLRS reference resolved
+`9f22a87` autolab 2026-07-22: Thread 20 — Igusa quadruple verified; ePrint survey; CHLRS reference resolved
