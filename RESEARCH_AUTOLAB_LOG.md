@@ -5684,4 +5684,4 @@ Requires: (a) verifying whether Howe's Theorem 2 (the general case) applies;
 Recommend Thread 19 first (quick executable check), then Thread 20.
 
 ### Commits made
-(to be filled after git push)
+4ce17fa autolab 2026-07-22: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 pass
