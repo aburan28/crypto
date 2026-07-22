@@ -5574,3 +5574,95 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18: Howe gluing conditions for all 15 pairs of j=0 sextic twists.
+Chosen because it was the top proposal from the 2026-07-20 log and no 2026-07-21 run
+occurred.  The script `howe_sextic_twists_all15.gp` already existed and ran, but
+a CM trace-assignment bug corrupted 4 of the 15 H3 results.
+
+### Work done
+- Ran `howe_sextic_twists_all15.gp` under PARI/GP 2.15.4 (freshly installed). Output:
+  5/15 pairs claimed Howe-glueable: {(0,2),(0,3),(0,5),(1,4),(2,3)}.
+- Discovered CM trace-assignment bug via **parity argument**:
+  - `x³+b_k` irreducible over F_p (pattern `[3]`) ⟺ `#E_k` is odd (by Cauchy's theorem).
+  - `x³+b_k` splits completely (pattern `[1,1,1]`) ⟺ full 2-torsion over F_p ⟺ `4 | #E_k`.
+  - The 6 CM traces split into 4 ODD (T₀,T₁,T₃,T₄) and 2 EVEN (T₂,T₅).
+  - Pattern `[3]` for b₀,b₂,b₃,b₅ → must have ODD orders → traces from {T₀,T₁,T₃,T₄}.
+  - Pattern `[1,1,1]` for b₁,b₄ → must have EVEN orders → traces from {T₂,T₅}.
+  - Buggy script used b_k ↔ T_k (m=1), misassigning T₁,T₂,T₄,T₅ to wrong b-values.
+- Identified correct assignment: `b_k ↔ T_{5k mod 6}` (m=5). Unique m satisfying:
+  - Fixed points: b₀↔T₀ and b₃↔T₃ (definition constraints).
+  - Odd constraint: m ≡ 1 (mod 2), i.e., m ∈ {1,3,5}. m=1 wrong, m=3 wrong, m=5 ✓.
+- Computed all 15 pairwise gcds (Python, exact arithmetic) with CORRECT order assignment.
+- Wrote corrected script `secp256k1_cm_audit/thread18_howe_sextic_twists_corrected.gp`
+  with embedded parity verification (all 6 checks: OK).
+- Script sanity-checks: `order_of[0] = n_secp256k1` ✓; `order_of[3] = p+1+t` ✓.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.61s).
+
+### Findings
+
+**2-torsion partition:**
+| Group | Twists (b-index) | 2-torsion pattern | Order parity |
+|-------|-----------------|-------------------|-------------|
+| A     | b₀,b₂,b₃,b₅     | `[3]` (irreducible) | ODD         |
+| B     | b₁,b₄           | `[1,1,1]` (split)  | ≡ 0 (mod 4) |
+
+**Corrected 15-pair Howe table:**
+```
+(0,1): H2=NO  (cross-group)            -> not glueable
+(0,2): H1=YES H2=YES H3=YES (gcd=1)   -> GLUEABLE ✓
+(0,3): H1=YES H2=YES H3=YES (gcd=1)   -> GLUEABLE ✓  [known: secp256k1 x quad-twist]
+(0,4): H2=NO  (cross-group)            -> not glueable
+(0,5): H1=YES H2=YES H3=YES (gcd=1)   -> GLUEABLE ✓
+(1,2): H2=NO  (cross-group)            -> not glueable
+(1,3): H2=NO  + H3=NO  (gcd=3)        -> not glueable
+(1,4): H2=YES H3=NO   (gcd=4)         -> NOT glueable  [old script wrong: said YES]
+(1,5): H2=NO  + H3=NO  (gcd=3)        -> not glueable
+(2,3): H1=YES H2=YES H3=YES (gcd=1)   -> GLUEABLE ✓
+(2,4): H2=NO  (cross-group)            -> not glueable
+(2,5): H1=YES H2=YES H3=YES (gcd=1)   -> GLUEABLE ✓   [old script wrong: said NO]
+(3,4): H2=NO  (cross-group)            -> not glueable
+(3,5): H2=YES H3=NO   (gcd=3)         -> not glueable
+(4,5): H2=NO  (cross-group)            -> not glueable
+```
+
+**Corrected glueable pairs: {(0,2),(0,3),(0,5),(2,3),(2,5)} = 5/15 — all within Group A.**
+
+Key structural observations:
+1. **Group B pair (1,4) is NOT glueable:** `gcd(#E₁,#E₄)=4`. Both full-2-torsion
+   curves have orders divisible by 4, so their orders share factor ≥4. Howe's H3
+   (gcd=1) fails. This makes geometric sense: attempted (2,2)-gluing of two curves
+   with full rational 2-torsion encounters a non-trivial rational kernel intersection.
+2. **Group A failure (3,5): `gcd(#E₃,#E₅)=3`.** The quadratic twist (b₃=-7) and
+   the twist b₅ share a rational 3-torsion structure. Specifically, both orders are
+   divisible by 3 (3|A₃ and 3|A₁ in CM notation), blocking H3.
+3. **All 5 glueable pairs involve only Group A twists.** The secp256k1 base curve
+   (b₀) is involved in 3 of them: (0,2),(0,3),(0,5). Twist b₂ is involved in 3:
+   (0,2),(2,3),(2,5). Together these 5 cover the entire glueable set.
+4. **The old script's bug:** it said (1,4) is glueable (wrong, gcd=4) and (2,5) is
+   not glueable (wrong, gcd=1). Total count 5/15 was coincidentally correct but
+   the specific pair list was wrong.
+
+**CM trace assignment CM-theory explanation:** The correct m=5 (rather than m=1)
+corresponds to using the conjugate embedding K→F_p (prime P̄ above p rather than P),
+which sends the primitive 6th root of unity ζ₆ ∈ K to u^5 = u^{-1} in F_p*.
+The buggy script implicitly assumed ζ₆ ↦ u (i.e., P rather than P̄).
+
+### Next step proposal
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy.**  
+`glv_hnp_phase2_toy.gp` exists in `secp256k1_cm_audit/`; run it and see if the
+GLV-aware lattice recovers `d` on a 32-bit toy curve.  Expected output: either `d`
+is recovered (validates the attack direction) or a concrete failure mode is found.
+This is well-scoped for one session.
+
+**Alternate: Integrate Thread 18 corrected result into paper (`paper/structural_completeness.tex`).**
+The corrected Howe table is publishable: "Among all 15 pairs of j=0 sextic twists over
+F_p (p≡1 mod 6), exactly those 5 within Group A are Howe-(2,2)-glueable. The 2 Group B
+curves (full rational 2-torsion) fail H3 pairwise because gcd=4."
+
+### Commits made
