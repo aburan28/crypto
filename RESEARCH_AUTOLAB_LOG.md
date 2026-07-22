@@ -5574,3 +5574,113 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists (priority-3).
+Chosen because: 2026-07-20 log explicitly proposed this as first next step after Thread 17;
+`howe_sextic_twists_all15.gp` already existed but had never been executed;
+measurable scope (15 pairs, binary outcome per pair).
+
+### Work done
+- Confirmed pari-gp installed (v2.15.4). Verified `znprimroot(p)` runs in <2s for
+  secp256k1 (p-1 = 2·3·7·13441·L where L is a 72-digit prime; factorization is
+  smooth enough for PARI to handle; znprimroot = 3).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` to completion.
+- Ran supplementary gcd computation for all H3-passing and H3-failing pairs.
+- Ran `cargo test --test curve_audit`: 5/5 pass (no regressions).
+
+### Findings
+
+**2-torsion structure of 6 sextic twists (y²=x³+b_k, b_k = 7·u^k):**
+
+| k | b_k (mod p) | x³+b_k deg-pattern | group |
+|---|-------------|---------------------|-------|
+| 0 | 7           | [3] (irreducible)   | A     |
+| 1 | 74006327…74 | [1,1,1] (split)     | B     |
+| 2 | 74006327…67 | [3] (irreducible)   | A     |
+| 3 | p-7         | [3] (irreducible)   | A     |
+| 4 | 41785761…89 | [1,1,1] (split)     | B     |
+| 5 | 41785761…96 | [3] (irreducible)   | A     |
+
+Group A = irreducible 2-torsion (Gal acts as Z/3Z); 4 twists.
+Group B = split 2-torsion (all 2-torsion F_p-rational); 2 twists.
+
+**Howe (H1)+(H2)+(H3) check — all 15 pairs:**
+
+| Pair | H1 | H2 | H3 | gcd(n_i,n_j) | Glueable? |
+|------|----|----|-----|--------------|-----------|
+| (0,1) | YES | NO  | YES | 1            | no (H2)   |
+| (0,2) | YES | YES | YES | **1**        | **YES**   |
+| (0,3) | YES | YES | YES | **1**        | **YES**   |
+| (0,4) | YES | NO  | YES | 1            | no (H2)   |
+| (0,5) | YES | YES | YES | **1**        | **YES**   |
+| (1,2) | YES | NO  | YES | 1            | no (H2)   |
+| (1,3) | YES | NO  | NO  | 3            | no (H2+H3)|
+| (1,4) | YES | YES | YES | **1**        | **YES**   |
+| (1,5) | YES | NO  | NO  | 3            | no (H2+H3)|
+| (2,3) | YES | YES | YES | **1**        | **YES**   |
+| (2,4) | YES | NO  | YES | 1            | no (H2)   |
+| (2,5) | YES | YES | NO  | 4            | no (H3)   |
+| (3,4) | YES | NO  | YES | 1            | no (H2)   |
+| (3,5) | YES | YES | NO  | 3            | no (H3)   |
+| (4,5) | YES | NO  | YES | 1            | no (H2)   |
+
+**Summary: 5 of 15 pairs are Howe-(2,2)-glueable.**
+
+Glueable pairs (0-indexed twist):
+- **(0,2)**: secp256k1 (k=0) paired with sextic twist k=2 (group A-A).
+- **(0,3)**: secp256k1 (k=0) paired with quadratic twist k=3 (A-A). Confirms prior `howe_gluing_test.gp` result.
+- **(0,5)**: secp256k1 (k=0) paired with sextic twist k=5 (A-A).
+- **(1,4)**: the two group-B twists (both split 2-torsion) paired together.
+- **(2,3)**: two group-A twists (neither secp256k1 itself).
+
+**H3-failure anatomy (gcd > 1):**
+
+| Pair | gcd = | Structural cause |
+|------|-------|-----------------|
+| (1,3) | 3 | gcd(n_1,n_3) = 3; both orders divisible by 3 |
+| (1,5) | 3 | gcd(n_1,n_5) = 3 |
+| (2,5) | 4 | gcd(n_2,n_5) = 4 = 2²; orders share factor of 4 |
+| (3,5) | 3 | gcd(n_3,n_5) = 3 |
+
+The gcd=3 failures occur when one twist is from group B and the other from A (for (1,3),(1,5))
+or both from A (for (3,5)). The gcd=4 failure for (2,5) arises from
+gcd(2(p+1), t+3s) being divisible by 4 — a CM arithmetic coincidence.
+Note: (1,3) also has H2=NO (cross-group), so the H3=NO is redundant there.
+(2,5) and (3,5) have H2=YES but H3=NO — the gcd obstruction is the sole blocker.
+
+**ECDLP implications (none):**
+Each of the 5 glueable pairs yields a genus-2 curve C/F_p with Jac(C) →
+E_i × E_j via a (2,2)-isogeny. Jac(C)(F_p) has order ~p². Best HCDLP:
+Pollard ρ at cost ~p; index calculus (Gaudry, Diem) is heuristic O(p) for
+genus-2 over F_p. Both are strictly worse than ECDLP cost ~√p. Consistent
+with the structural-completeness theorem.
+
+**Structural note — universality:**
+The 5/15 glueable pattern is not specific to secp256k1. For any j=0 prime-order
+curve E/F_p with p ≡ 1 (mod 6), the same CM analysis applies: there are exactly
+2 groups of twists by 2-torsion structure, and the glueable count is determined
+by which within-group pairs have coprime orders. The gcd > 1 failures are
+arithmetic properties of the specific CM traces t, s. For a generic prime p,
+the 5/15 count may vary, but the group-structure split (A vs B) persists.
+
+### Next step proposal
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy attack.**
+`glv_hnp_phase2_toy.gp` already exists. Run it. Expected: either the lattice
+recovers the secret scalar d on a 32-bit toy curve (validates the attack
+direction) or a specific failure mode is found (rank-deficient Gram matrix,
+precision issue, or LLL not short enough). This is the next-best concrete
+sub-task and is well-bounded.
+
+**Thread 18b (optional extension): Incorporate 5/15 result into paper.**
+Add a remark to `paper/structural_completeness.tex` (or `eprint_combined.tex`)
+noting that for secp256k1 there are exactly 5 Howe-(2,2)-glueable sextic-twist
+pairs, all in Jac-genus-2, none providing sub-√p ECDLP. 2-3 sentences.
+
+### Commits made
+`[see below]` autolab 2026-07-22: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 glueable
