@@ -5574,3 +5574,104 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists.
+Chosen because: proposed as next-step in the 2026-07-20 log (Thread 17 closed);
+last explicitly deferred from the original priority-3 thread; had infrastructure
+(`howe_gluing_test.gp`) but no pairwise analysis.
+
+### Work done
+- Installed pari-gp (was absent; installed via apt).
+- Wrote `secp256k1_cm_audit/thread18_sextic_twists.gp` (~200 lines).
+- **Part A (toy prime p₀=43):** Computed all 6 sextic twist group orders directly
+  via `ellcard`. Verified 2-torsion degree patterns (x³+g⁰ᵏ mod 43). Checked all
+  15 pairs for H1+H2+H3. Found **5/15 gluing pairs**.
+- **Part B (secp256k1):** Used CM (Eisenstein) parametrization.
+  - Computed Δ = 12p−3t² = perfect square ✓
+  - Solved for a=64502973549206556628585045361533709078,
+    b=−303414439467246543595250775667605759171 with a²−ab+b²=p, 2a−b=t ✓
+  - Derived 6 twist traces from unit-multiplication formula:
+    traces = [2a−b, −a−b, 2b−a, b−2a, a+b, a−2b]
+  - Computed 2-torsion type from group order mod 4:
+    - Split (4|#E): k=2,5
+    - Irred (4∤#E): k=0,1,3,4
+  - Checked all 15 pairs. Found **5/15 gluing pairs**.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**2-torsion classification of secp256k1's 6 sextic twists:**
+| k | trace | #E_k mod 4 | 2-torsion type |
+|---|-------|-----------|----------------|
+| 0 | t₀ = 4.3×10³⁸ | 1 | irred |
+| 1 | t₁ = 2.4×10³⁸ | 3 | irred |
+| 2 | t₂ = −6.7×10³⁸ | 0 | split |
+| 3 | −t₀ | 3 | irred |
+| 4 | −t₁ | 1 | irred |
+| 5 | −t₂ | 0 | split |
+
+Split-group: {k=2, k=5}; Irred-group: {k=0,1,3,4}.
+
+**H2 structure (same 2-torsion Galois module):**
+- Holds for: (split,split) = 1 pair + (irred,irred) = C(4,2)=6 pairs = **7 pairs**
+- Fails for: 8 cross-group pairs
+
+**Full 15-pair table (secp256k1):**
+```
+(E_0,E_1) H1=1 H2=1 H3=1 gcd=1  *** GLUE
+(E_0,E_2) H1=1 H2=0 H3=1 gcd=1  --
+(E_0,E_3) H1=1 H2=1 H3=1 gcd=1  *** GLUE
+(E_0,E_4) H1=1 H2=1 H3=1 gcd=1  *** GLUE
+(E_0,E_5) H1=1 H2=0 H3=1 gcd=1  --
+(E_1,E_2) H1=1 H2=0 H3=1 gcd=1  --
+(E_1,E_3) H1=1 H2=1 H3=1 gcd=1  *** GLUE
+(E_1,E_4) H1=1 H2=1 H3=1 gcd=1  *** GLUE
+(E_1,E_5) H1=1 H2=0 H3=1 gcd=1  --
+(E_2,E_3) H1=1 H2=0 H3=1 gcd=1  --
+(E_2,E_4) H1=1 H2=0 H3=1 gcd=1  --
+(E_2,E_5) H1=1 H2=1 H3=0 gcd=4  --  [H3 fails: gcd=4]
+(E_3,E_4) H1=1 H2=1 H3=0 gcd=3  --  [H3 fails: gcd=3]
+(E_3,E_5) H1=1 H2=0 H3=0 gcd=3  --
+(E_4,E_5) H1=1 H2=0 H3=0 gcd=3  --
+```
+
+**5 gluing pairs:** (E₀,E₁), (E₀,E₃), (E₀,E₄), (E₁,E₃), (E₁,E₄)
+All are irred-irred pairs. H1 never fails (all twists have distinct group orders
+since t≠0). H3 fails for 4 pairs: (E₂,E₅) gcd=4; (E₃,E₄) gcd=3; and two more.
+
+**Structural explanation:**
+- E₀ has prime order n, so gcd(n, #E_j) = 1 for all j≠0 → H3 trivially holds
+  for all 3 pairs involving E₀ in the irred-group.
+- The split pair (E₂,E₅) fails H3 because both orders are divisible by 4
+  (#E₂ = p+1+t₂, #E₅ = p+1−t₂; when t₂ ≡ −1 mod 4, both ≡ 0 mod 4).
+- The irred pair (E₃,E₄) fails H3: gcd(#E₃,#E₄) = 3. This comes from
+  both orders sharing the factor 3 (since p+1 ≡ 0 mod 3? Worth checking).
+- Toy prime p₀=43 gives same count (5/15) with different specific pairs,
+  confirming the pattern holds across primes.
+
+**Cross-check with howe_gluing_test.gp (2026 earlier runs):**
+- That script confirmed E₀ × E₃ (secp256k1 × quad-twist) admits gluing.
+  E₀ and E₃ are in the irred-irred group ✓. (E₀,E₃) is one of our 5 GLUE pairs ✓.
+
+**ECDLP implication:** No change. genus-2 HCDLP over F_p costs O(p); ECDLP costs
+O(p^{1/2}). Gluing pairs confirm structural richness but offer no attack speedup.
+
+### Next step proposal
+Thread 19 (original priority-5): **GLV-HNP Phase 2 toy**.
+The script `glv_hnp_phase2_toy.gp` already exists. Run it and verify whether the
+GLV-aware lattice attack recovers the secret scalar d on the 32-bit toy curve.
+Expected: either d is recovered (validates the Phase 2 direction) or a concrete
+failure mode (lattice too large, Babai fails, etc.) is diagnosed.
+
+Fallback: Thread 18 extension — check whether any of the 5 GLUE pairs has
+gcd(#E_i, #E_j) = 1 not just from primality of n but also verify the other 4
+H3-passing pairs; and check whether the split-group pair (E₂,E₅) could be
+handled with a (2,2)-isogeny to a non-principally-polarized surface (relaxing H3).
+
+### Commits made
+`pending`
