@@ -5574,3 +5574,94 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 (priority 3) — Howe gluing on j=0 sextic twists.
+Last run (2026-07-20) proposed this as the best-next task after completing Thread 17
+(LaTeX integration). No intervening work; selected based on existing script
+`howe_sextic_twists_all15.gp` and supporting `howe_gluing_test.gp` infrastructure.
+
+### Work done
+- Attempted `gp -q howe_sextic_twists_all15.gp`: PARI/GP not installed in container.
+- Implemented full Thread 18 computation in Python (pure stdlib, no external deps):
+  - `secp256k1_cm_audit/thread18_howe_sextic_twists.py` — self-contained, runnable.
+  - Also wrote scratch scripts in session scratchpad for iterative debugging.
+- Key computational steps:
+  1. CM decomposition: 4p = t² + 3s², verified s integer. ✓
+  2. Primitive 6th root u = (1+√-3)/2 mod p via Tonelli-Shanks. u⁶≡1, u³≡-1 ✓
+  3. Six b-values: b_k = 7·u^k mod p, k=0..5.
+  4. Cubic residuosity of -b_k: determines [1,1,1] vs [3] factorisation of x³+b_k.
+     → 4 irred twists (k=0,2,3,5), 2 split twists (k=1,4).
+  5. Orders of irred twists: k=0 is n (secp256k1, prime); k=3 is n_twist (quad twist).
+     For k=2 and k=5: resolved ambiguity via EC scalar multiplication — found a point
+     on y²=x³+b_2 at x=4, verified N_b2·P = O (annihilated by N_b2 = p+1-(3s-t)/2).
+  6. GCD check for all 15 pairs. Full pairwise table computed.
+- Cargo test: 5/5 pass (6.39s). ✓
+
+### Findings
+
+**Howe-glueable pairs: 5 / 15**
+
+| Pair (i,j) | H1 | H2 | H3 | Glueable |
+|------------|----|----|-----|---------|
+| (0,2)  secp256k1 × cubic-twist b₂ | YES | YES (both irred) | gcd=1 | **YES** |
+| (0,3)  secp256k1 × quadratic-twist | YES | YES (both irred) | gcd=1 | **YES** |
+| (0,5)  secp256k1 × cubic-twist b₅ | YES | YES (both irred) | gcd=1 | **YES** |
+| (2,3)  cubic b₂ × quadratic-twist  | YES | YES (both irred) | gcd=1 | **YES** |
+| (2,5)  cubic b₂ × cubic b₅         | YES | YES (both irred) | gcd=1 | **YES** |
+| (1,4)  split-twist pair             | YES | YES (both split) | 4\|gcd | no |
+| (3,5)  quad-twist × cubic b₅       | YES | YES (both irred) | gcd=**3** | no |
+| 8 cross-pattern pairs              | YES | NO               | N/A | no |
+
+**Structural reason for the single irred-irred failure (3,5):**
+- n_twist = p+1+t ≡ 0 (mod 3). Structural: p≡1 (mod 3), n≡1 (mod 3) ⟹ n_twist = 2p+2-n ≡ 0 (mod 3).
+- N_b5 ≡ 0 (mod 3) as well (the cubic sextic twist b₅ whose order shares the factor 3 with n_twist).
+- gcd(n_twist, N_b5) = 3 → H3 fails for this pair.
+
+**Twist assignment (from CM + EC check):**
+- k=0: secp256k1, order = n (prime, ≡1 mod 4)
+- k=1: split twist, order ≡ 0 (mod 4)
+- k=2: cubic twist, order = p+1-(3s-t)/2 ≡ 3 (mod 4), NOT divisible by 3
+- k=3: quadratic twist, order = n_twist (≡0 mod 3, ≡3 mod 4)
+- k=4: split twist, order ≡ 0 (mod 4)
+- k=5: cubic² twist, order = p+1-(t-3s)/2 ≡ 1 (mod 4), divisible by 3
+
+Note: the naive k↔T[k] trace assignment (T[k]=2Re(ζ₆ᵏ·π)) is WRONG; the correct
+assignment of traces to b_k values differs from k to k. The k=2 twist (b₂=7u²)
+has trace T4=(3s-t)/2, NOT T2=-(t+3s)/2 as the formula predicts (verified by EC mul).
+
+**Implications:**
+- 5 genus-2 curves C/F_p exist with Jac(C) → E_i × E_j via (2,2)-isogeny, where
+  (i,j) ranges over the 5 glueable pairs.
+- Per the main theorem (PAPER_STRUCTURAL_COMPLETENESS.md), none provides a sub-√p ECDLP
+  algorithm (Howe gluing is genus-2, so best known HCDLP is ρ at cost √|Jac|≈p, worse
+  than ECDLP at cost ≈√n≈√p).
+- New finding vs prior howe_gluing_test.gp: pair (0,3) was already known (the main
+  "slice-3 hit"). Now 4 ADDITIONAL Howe-glueable pairs found: (0,2), (0,5), (2,3), (2,5).
+
+### Next step proposal
+Two candidate next threads:
+
+**Thread 18 extension (optional, medium priority):** The non-glueable pair (3,5) has
+gcd=3. Factoring n_twist (the quadratic twist order) would reveal whether it has any
+small prime factors beyond 3 that might enable a different cover attack or GHS variant.
+Quick: check n_twist mod 5, 7, 11, ... up to 10^6 and check if N_b5 shares any of them.
+
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy.**
+The GLV-HNP lattice attack on a 32-bit toy curve. Script `glv_hnp_phase2_toy.gp` already
+exists. Should be implementable in Python if PARI/GP remains unavailable. Expected:
+either the lattice recovers d (attack validated) or a concrete failure mode is found.
+Recommend this next — it has been deferred multiple sessions.
+
+**Thread 1 re-check (priority-1, P-521 LLL):**
+Thread 1 (P-521 bigfloat LLL) remains the top priority per the original list. The session
+scratchpad shows it was not recently re-attempted. Recommend: next run should try the
+`target_bits=100` or `target_bits=80` sub-task (avoid NaN in Gram-Schmidt) before
+attempting a full rug/MPFR implementation.
+
+### Commits made
+`[to be filled]` thread18_howe_sextic_twists.py + log entry
