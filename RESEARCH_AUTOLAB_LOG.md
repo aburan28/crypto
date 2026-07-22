@@ -5574,3 +5574,79 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Weil polynomials of Howe-glueable sextic twist pairs for secp256k1.
+Chosen because: the 2026-07-20 proposal listed Thread 18 as the recommended next step
+after Thread 17 integrated Theorem 15-16 into the paper; it directly extends the
+cover-attack analysis in Block B5 with concrete numerical results for all 5 glueable pairs.
+(Threads 19 = GLV-HNP Phase 2 toy, already closed 2026-05-26.)
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread18_weil_polynomials.gp` (~110 lines, PARI 2.15.4 compatible).
+- Computed secp256k1 CM parameter S: 4p = t₀² + 3S² → S = 303414439467246543595250775667605759171.
+- Derived all 6 sextic twist traces from (t₀, S) via Eisenstein CM arithmetic.
+- For each of the 5 Howe-glueable pairs (0,2),(0,3),(0,5),(1,4),(2,3):
+  computed W(T) = (T²-tᵢT+p)(T²-tⱼT+p), classified biquadratic/not, computed |Jac(C)|.
+- Applied Theorem 15-16 to the two biquadratic pairs.
+- Added `\begin{remark}[Howe-glueable pairs, biquadratic Weil polynomials, and Block B5]`
+  (label: `rem:thread18-howe-weil`) to `paper/structural_completeness.tex` after
+  `rem:order2-empirical` (paper grew from 915 → 967 lines).
+- Ran `cargo test --test curve_audit`: 5/5 pass both before and after paper edit.
+
+### Findings
+
+**CM parameter (exact):**
+- t₀ = 432420386565659656852420866390673177327 (secp256k1 trace, ~128 bits)
+- S  = 303414439467246543595250775667605759171
+- 4p = t₀² + 3S²  ✓
+
+**Six sextic twist traces (k=0..5):**
+
+| k | trace | bits |
+|---|-------|------|
+| 0 | +432420386565659656852420866390673177327 | ~128 |
+| 1 | +671331852483699643819086596696745227420 | ~129 |
+| 2 | +238911465918039986966665730306072050093 | ~127 |
+| 3 | −432420386565659656852420866390673177327 | ~128 |
+| 4 | −671331852483699643819086596696745227420 | ~129 |
+| 5 | −238911465918039986966665730306072050093 | ~127 |
+
+**Weil polynomials and DLP costs for the 5 glueable pairs:**
+
+| Pair | Biquadratic? | log₂|Jac| | Jac DLP bits | Extra over ECDLP |
+|------|-------------|------------|-------------|--------------|
+| (0,2) | NO  | 512.00 | 256.00 | +128.00 bits |
+| (0,3) | YES | 512.00 | 256.00 | +128.00 bits |
+| (0,5) | NO  | 512.00 | 256.00 | +128.00 bits |
+| (1,4) | YES | 512.00 | 256.00 | +128.00 bits |
+| (2,3) | NO  | 512.00 | 256.00 | +128.00 bits |
+
+All five: generic Jac DLP cost ~2^256 vs ECDLP ~2^128. Cover attack makes DLP 2^128 HARDER.
+
+**Biquadratic pairs — Theorem 15-16 verification:**
+- Pair (0,3): a₂ = 2p+t₀t₃ = 4.46×10⁷⁶; sf(a₂²-4p²) = **-3** → K = Q(√-3). p ∤ a₂ ✓; p splits in K ✓.
+- Pair (1,4): a₂ = 2p+t₁t₄ = -2.19×10⁷⁷; sf(a₂²-4p²) = **-3** → K = Q(√-3). p ∤ a₂ ✓; p splits in K ✓.
+
+Both biquadratic pairs give K = Q(√-3) — the CM field of secp256k1 (j=0, Z[ω₃]). This is structurally expected: the biquadratic pairs are exactly the quadratic-twist pairs (tᵢ+tⱼ=0), and the quadratic-twist CM field of any j=0 curve is Q(√-3).
+
+**Non-biquadratic pairs (0,2),(0,5),(2,3):** Weil poly has c₃ = -(tᵢ+tⱼ) ≠ 0. Theorem 15-16 does not apply (not of T⁴+a₂T²+p² form). Block B5 still holds via generic cost argument.
+
+**Structural insight:** Among the 5 glueable pairs, biquadratic ↔ quadratic-twist pair. This is general: for any j=0 curve, sextic-twist pairs (k,k+3) are quadratic twists, so tₖ+tₖ₊₃=0 always, and any Howe-glueable quadratic-twist pair gives a biquadratic Weil polynomial. The CM field is always Q(√-3) for j=0 twists.
+
+### Next step proposal
+Thread 19: Check whether the structural insight (biquadratic ↔ quadratic-twist among Howe-glueable pairs) is provable in general for any j=0 curve over F_p with p≡1 mod 6.
+
+Conjecture: for any pair (Eᵢ, Eⱼ) of j=0 sextic twists satisfying H1+H2+H3 (Howe-glueable), the Weil polynomial of the Howe-glued Jacobian is biquadratic iff Eᵢ and Eⱼ are quadratic twists of each other (i.e., |i-j| ≡ 3 mod 6).
+
+Proof sketch: H2 requires same 2-torsion pattern. For j=0, the 2-torsion pattern of Eₖ is determined by whether x³+bₖ splits over F_p. The 6 b-values fall into 3 cubic residue classes: {b₀,b₃}, {b₁,b₄}, {b₂,b₅}. Within each class, the two curves are quadratic twists. H2 is satisfied iff i and j are in the same cubic residue class, i.e., iff (i,j) is a quadratic-twist pair or a same-class-non-twin pair. But H3 (gcd coprimality) then selects only the quadratic-twist pairs as fully glueable...
+
+This would be a short algebraic proof (possibly 10 lines) adding Corollary 4.X to the paper.
+
+Alternatively: Mestre explicit cover for pair (1,4) — the fully F_p-rational 2-torsion case — which is the simplest glueable pair (Howe gluing is defined over F_p, not just over an extension).
+
+### Commits made

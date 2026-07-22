@@ -492,6 +492,58 @@ every abelian surface with a biquadratic Weil polynomial $T^4 + a_2 T^2 + p^2$
 on realizable CM types in any $(N,N)$-cover construction.
 \end{remark}
 
+\begin{remark}[Howe-glueable pairs, biquadratic Weil polynomials, and Block B5]\label{rem:thread18-howe-weil}
+Among the six sextic twists $E_k : y^2 = x^3 + 7\cdot u^k$ of \textsc{secp256k1}
+(where $u$ is a primitive sixth root of unity mod~$p$),
+exactly five of the fifteen pairwise Howe-gluing conditions $(H1)+(H2)+(H3)$
+are satisfied:  pairs $(0,2)$, $(0,3)$, $(0,5)$, $(1,4)$, $(2,3)$
+(verified by script \texttt{howe\_sextic\_twists\_all15.gp}, 2026-06-09).
+Among these five, \emph{exactly two} yield a biquadratic Weil polynomial
+$W(T) = T^4 + a_2 T^2 + p^2$\,:
+\begin{itemize}
+\item Pair $(0,3)$: $E_0 \times E_3$ (secp256k1 and its quadratic twist, $t_3 = -t_0$).
+  $a_2 = 2p + t_0 t_3 = 2p - t_0^2 \approx 4.46\times10^{76}$.
+\item Pair $(1,4)$: $E_1 \times E_4$ (the other quadratic-twist pair among sextic twists,
+  $t_4 = -t_1$).
+  $a_2 = 2p + t_1 t_4 = 2p - t_1^2 \approx -2.19\times10^{77}$.
+\end{itemize}
+For both biquadratic pairs, a PARI computation (script \texttt{thread18\_weil\_polynomials.gp})
+gives $\mathrm{sf}(a_2^2 - 4p^2) = -3$, so the associated CM field is
+$K = \QQ(\sqrt{-3})$ --- the CM field of \textsc{secp256k1} itself (j-invariant 0,
+endomorphism ring $\ZZ[\omega_3]$, discriminant $-3$).
+Proposition~\ref{prop:biquadratic-order2} therefore applies:
+$p \nmid a_2$ for both pairs (verified numerically), so $[\mathfrak{P}]^2 = 1$
+in $\Cl(\QQ(\sqrt{-3}))$ and $p$ splits in $\QQ(\sqrt{-3})$ --- both expected from
+standard CM theory for j=0 at a prime $p \equiv 1 \pmod{3}$.
+
+The three non-biquadratic pairs $(0,2)$, $(0,5)$, $(2,3)$ have $t_i + t_j \neq 0$,
+so their Weil polynomials $W(T) = (T^2 - t_i T + p)(T^2 - t_j T + p)$ carry
+nonzero $T^3$ and $T$ coefficients.
+Proposition~\ref{prop:biquadratic-order2} does not apply to these.
+
+\textbf{DLP cost for all five pairs} (script \texttt{thread18\_weil\_polynomials.gp}):
+
+\begin{center}
+\begin{tabular}{lccrr}
+\hline
+Pair & Biquadratic & $\log_2|{\rm Jac}|$ & Jac DLP (bits) & Extra over ECDLP \\
+\hline
+$(0,2)$ & no  & $512.00$ & $256.00$ & $+128.00$ \\
+$(0,3)$ & yes & $512.00$ & $256.00$ & $+128.00$ \\
+$(0,5)$ & no  & $512.00$ & $256.00$ & $+128.00$ \\
+$(1,4)$ & yes & $512.00$ & $256.00$ & $+128.00$ \\
+$(2,3)$ & no  & $512.00$ & $256.00$ & $+128.00$ \\
+\hline
+\end{tabular}
+\end{center}
+
+All five Howe-glued Jacobians have $|{\rm Jac}(C)| \approx p^2 \approx 2^{512}$.
+Generic DLP in ${\rm Jac}(C)$ costs $\sqrt{|{\rm Jac}|} \approx 2^{256}$ group operations,
+versus $\sqrt{n} \approx 2^{128}$ for the secp256k1 ECDLP.
+Lifting the ECDLP to the Jacobian via the cover map makes the problem
+$\approx 2^{128}$ times \emph{harder}, consistent with Block B5.
+\end{remark}
+
 \subsection*{B6: Diem 2011 sub-exp is inapplicable to prime fields}
 
 Diem's 2011 sub-exponential DLP algorithm~\cite{diem2011} for
