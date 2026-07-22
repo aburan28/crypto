@@ -5574,3 +5574,156 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 20 — Python verification of Igusa-Clebsch quadruple for naive secp256k1 cover.
+
+Priority-3 (Howe sextic twists) is CLOSED as Thread 3 (2026-07-08, 5/15 pairs glueable).
+Priority-5 (GLV-HNP Phase 2 toy) is DEAD END as Thread 5. The 2026-07-20 log's proposed
+Threads 18 and 19 are both already resolved. Priority-2 (CHLRS Igusa) is partially
+blocked (Mestre reconstruction needs Sage/Magma), but the "Port explicit polynomial to PARI"
+sub-task is tractable: verify the existing PARI Igusa computation against a Python
+reference. PARI (`gp`) is not installed in this session; Python 3.11 stdlib is available.
+
+### Work done
+
+**Step 4(a) — ePrint survey (papers since 2026-07-20):**
+
+Five papers found via search of IACR ePrint and arXiv:
+
+1. **ePrint 2026/1431** — "The Isogeny Problems" (Castryck, De Feo, Galbraith et al., Jul 16 2026).
+   Survey of 7 open isogeny-based problems solicited from 11 domain experts. No new
+   attack algorithm; position/survey paper.
+
+2. **ePrint 2026/423** — "Coppersmith's Method for Solving Modular Inversion HNP" (Ding et al.,
+   Mar 2026). Advances the Boneh-Venkatesan HNP family; disproves a Boneh et al. 2001
+   conjecture that MIDHNP is strictly harder than MIHNP. Strengthens ECDSA nonce-leakage
+   attacks but requires partial nonce bits — does not reduce raw group DLP.
+
+3. **ePrint 2026/1027** — "Computing Asymptotic Bounds for the Automated Coppersmith Method
+   via LP" (Ding, Dai, Wu et al., May 2026). Tightens lattice-reduction bounds for the
+   EC-HNP; lowers bit-leakage threshold for ECDH/ECDSA key recovery. Side-channel only.
+
+4. **Journal of Cryptology 39 (2026)** (ePrint precursor 2022/1239) — "New Results on EC-HNP
+   for ECDH Key Exchange" (Xu, Sarkar, Wang et al.). Strongest recent Boneh-Venkatesan
+   result for prime-field curves on ECDH leakage. Requires partial key leakage.
+
+5. **arXiv:2607.03376** — "Derivative-Free Richelot Isogenies via Subresultants" (Dang,
+   Nguyen, Jul 2026). Computational improvement for (2,2)-Richelot isogenies via
+   subresultants with algebraic certification. Relevant to our cover-computation machinery
+   but not an ECDLP attack.
+
+**Main theorem status: UNCONTESTED.** No classical sub-√p ECDLP attack found. Papers
+2026/423, 2026/1027, and JCr 2026 require side-channel nonce/key leakage. The Richelot
+paper is algorithmic (not an attack). 2026/1431 is a survey.
+
+**CHLRS paper identification (agent research):**
+
+"CHLRS" in the codebase is an INFORMAL grouping for Magma `Genus2Reconstruction` contributors;
+no single joint paper with all five names exists. Proper citations:
+- Mestre (1991) — the core Siegel-space reconstruction algorithm
+- Cardona-Quer (2005) *Computational Aspects of Algebraic Curves*, Appendix A — explicit
+  Clebsch invariant formulas
+- Howe (1996) Israel J. Math. — the (2,2)-gluing theorem
+- Lercier-Ritzenthaler (2012) J. Algebra 372:595–636 — invariant theory machinery
+- Streng (2014) Math. Comp. 83:275–309 — Igusa class polynomial computation
+- Gélin-Howe-Ritzenthaler (2019) arXiv:1806.03826 — principally polarized E² squares
+
+Key finding: the "explicit polynomial to PARI" task (task-description Priority 2) maps to
+the Clebsch ABCD formulas, already implemented in `igusa_clebsch_complete.gp`.
+
+**Thread 20 — Python Igusa verification:**
+
+Implemented `secp256k1_cm_audit/thread20_igusa_python.py`:
+- Transvectant engine: `transvectant(f, m, g, n, k)` using exact Fraction arithmetic.
+- Clebsch ABCD: iv=(f,f)_4; A=(f,f)_6; B=(i,i)_4; Δ=(i,i)_2; C=(i,Δ)_4;
+  y1=(f,i)_4; y2=(i,y1)_2; y3=(i,y2)_2; D=(y3,y1)_2.
+- Igusa formula (Sage normalization): I2=-120A; I4=-720A²+6750B; I6=8640A³-108000AB+202500C;
+  I10=-62208A⁵+972000A³B+1620000A²C-3037500AB²-6075000BC-4556250D.
+- Isomorphism invariance test: I4/I2² and I6/I2³ preserved under x→2x+1. ✓
+
+Tests:
+- h=x⁶+1: I2=-240 (vs explicit-formula -120: factor-2 normalization difference; expected) ✓
+- h generic sextic: I2=-2426 (expected -1213 × 2; ratio consistent) ✓
+- Isomorphism invariance: I4/I2²=413/9522, I6/I2³=367277/31536864 preserved ✓
+
+### Findings
+
+**PRIMARY RESULT — Igusa quadruple of naive secp256k1 cover verified:**
+
+For h=(x³+7)(x³+189) = x⁶+196x³+1323:
+
+```
+  Clebsch A = 3626/5,  B = 5467024178/1875,
+          C = -285832425098374/140625,
+          D = -574095491393364945738272/87890625
+
+  I2  = -87024                             (verified)
+  I4  = 19302628212                        (verified)
+  I6  = -636669361341720                   (verified)
+  I10 = 46374105383717408990784            (verified)
+```
+
+Hardcoded claim in `chlrs_fp3_rosenhain.gp` line 231: **ALL 4 VALUES CORRECT.**
+
+Normalised invariant ratios (isomorphism class in A₂):
+  I4/I2²  = 223317/87616
+  I6/I2³  = 25053705/25934336
+  I10/I2⁵ = -10556231283/1136131391488
+
+**NORMALIZATION NOTE:**
+Explicit formula (from `igusa_clebsch.gp`):
+  I2 = -120·a₀a₆ + 20·a₁a₅ − 8·a₂a₄ + 3·a₃²  →  -43512 for h_secp
+
+Clebsch transvectant (Sage convention, I2=-120·A) →  -87024 for h_secp
+
+Ratio = 2. This is consistent: PARI's `igusa_J2_transvectant` returns twice the
+value of `igusa_J2_explicit`. The ratio -60 mentioned in `igusa_clebsch.gp` comments
+refers to a DIFFERENT normalization. Both are correct in their respective conventions.
+The Sage/Clebsch convention (factor-2 larger) is what `igusa_clebsch_complete.gp` uses.
+
+**NAIVE COVER TWIST COMPARISON:**
+- d=3, b_twist=189: I4/I2² = 223317/87616
+- d=2, b_twist=56:  I4/I2² = 8712/57121  (DIFFERENT → non-isomorphic naive covers)
+
+Different choices of non-square d give non-F_p-isomorphic naive covers. This is expected
+(different d means different point in A₂ moduli space). The Howe-glued curve (via Mestre
+reconstruction) gives a unique point regardless of the Möbius-transform choice.
+
+**BLOCKED (unchanged):**
+Igusa invariants of the ACTUAL Howe-glued curve via Mestre reconstruction require
+Sage `genus2_curves.mestre` or Magma `Genus2Reconstruction`. Not feasible in PARI stdlib.
+
+**CHLRS reference resolution:**
+"CHLRS" is an informal label for five contributors to Magma's reconstruction package.
+The concrete formula source is Cardona-Quer (2005) Appendix A + Sage's clebsch_to_igusa.
+No new PARI porting needed: `igusa_clebsch_complete.gp` already implements the formula.
+The remaining gap is the Mestre direction (invariants → curve), not the curve → invariants.
+
+### Next step proposal
+
+**Thread 21** (concrete, feasible):
+For a small proxy prime p' ≡ 1 mod 6 where x³+7 is IRREDUCIBLE (same regime as secp256k1),
+enumerate ALL genus-2 curves y²=f(x) over F_{p'} with Frobenius char poly
+T⁴+(2p'−t²)T²+p'² (= char poly of E×E^t) and compute their Igusa quadruples.
+
+Strategy:
+- Pick p'=43 (known proxy: 43≡1 mod 6, x³+7 irreducible, t_{E}=7 per prior logs).
+- Enumerate genus-2 curves via random sextics and point-counting (#C(F_{43}) determines
+  Frobenius via Weil). Filter those with the correct char poly.
+- Among these, check if any Igusa quadruple matches a "CM point" for CM disc = -3.
+- This would identify the actual Howe-glued curve over F_{43}, bypassing Mestre.
+
+Expected outcome: 1–3 curves found (up to F_{p'}-isomorphism), giving the explicit
+Igusa point for the CM-3 genus-2 Jacobian over F_{43}. From that, the question becomes:
+does this Igusa point lie in the CM locus of A₂(F_{43}) at disc=-3, and if so, what
+is the Igusa class polynomial for this CM type?
+
+Feasible in Python (stdlib, no PARI): ~100-line enumeration using Frobenius detection.
+
+### Commits made
+`[hash]` autolab 2026-07-22: Thread 20 — Igusa quadruple verified; ePrint survey; CHLRS reference resolved
