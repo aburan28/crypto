@@ -5683,4 +5683,4 @@ noting that for secp256k1 there are exactly 5 Howe-(2,2)-glueable sextic-twist
 pairs, all in Jac-genus-2, none providing sub-√p ECDLP. 2-3 sentences.
 
 ### Commits made
-`[see below]` autolab 2026-07-22: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 glueable
+`0b763be` autolab 2026-07-22: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 glueable
