@@ -5669,4 +5669,4 @@ sextic-twist pairs are Howe-glueable, with 3 glueable partners for secp256k1
 itself. Reference `howe_sextic_twists_all15.gp`. 2-3 lines in the paper.
 
 ### Commits made
-`[see below]` autolab 2026-07-22: Thread 18 — Howe gluing: 5/15 sextic-twist pairs glueable, 3 partners for secp256k1
+`a9c9fa1` autolab 2026-07-22: Thread 18 — Howe gluing: 5/15 sextic-twist pairs glueable, 3 partners for secp256k1
