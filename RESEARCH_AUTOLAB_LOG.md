@@ -5657,4 +5657,4 @@ This has a direct implication: the "easiest" cover attacks would use CM fields w
 **Alternative Thread 19b**: Incorporate ePrint 2026/1431 ("The Isogeny Problems") into the paper's related-work section (`paper/eprint_combined.tex`) — add a citation and a 1-paragraph remark on how the 7 open problems frame our main result.
 
 ### Commits made
-PENDING (will be committed in this session)
+`146d2a2` autolab 2026-07-22: Thread 18 — splitting confirmed 20/20; CM-73 density 289 pairs in [5,10000]; ePrint survey 5 papers
