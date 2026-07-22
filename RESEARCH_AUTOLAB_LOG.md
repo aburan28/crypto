@@ -5687,3 +5687,4 @@ compiles correctly by adding the 2026-07-20 Proposition to the LaTeX document (T
 added it to structural_completeness.tex; it should also appear in eprint_combined.tex).
 
 ### Commits made
+`2eb901b` autolab 2026-07-22: Thread 20 — GLV-HNP Phase 2 LLL diagnosis; ePrint survey 5 papers
