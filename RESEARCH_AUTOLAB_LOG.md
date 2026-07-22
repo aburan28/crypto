@@ -5665,5 +5665,5 @@ Thread 19 (genuine):
   suggest a new concrete experiment or paper integration.
 
 ### Commits made
-[see below after push]
+`bdc6027` autolab 2026-07-22: Thread 18 — splitting verification; Legendre-symbol proof; paper update
 
