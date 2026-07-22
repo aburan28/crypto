@@ -5694,4 +5694,4 @@ Thread 20: Identify the C1/C2 distinction more precisely.
   specifically) resistant to GLV-HNP with moderate K1B" finding is publishable.
 
 ### Commits made
-TBD (see below)
+`6390a4d` autolab 2026-07-22: Thread 19 — Phase 2 GLV-HNP lattice attack confirmed; λ/n threshold scan; effective-bias discriminator identified
