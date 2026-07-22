@@ -5574,3 +5574,83 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## AutoLab run 2026-07-22 — Thread 18: Howe sextic-twist gluing for all 15 pairs
+
+### Task picked
+Thread 18 (priority-3): Howe gluing on j=0 sextic twists.
+Check all 15 pairs of secp256k1's 6 sextic twists against Howe's (H1)+(H2)+(H3) conditions.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread18_sextic_twist_howe.gp` (257 lines).
+- Ran via `gp -q`. PARI 2.15.4 limitations worked around by:
+  moving ALL for-loop bodies into named single-arg helper functions (no `my()` in loops).
+- Sanity check: p=7 (the smallest prime with gcd((p-1)/6,6)=1); all 6 twist traces distinct
+  and match CM formula A²-AB+B²=7, [traces] = {-4,1,5,4,-1,-5} = {2A-B,A-2B,-A-B,B-2A,2B-A,A+B}.
+- Full secp256k1 computation: CM decomposition verified, H2 types computed, all 15 pairs checked.
+- Cargo tests: 5/5 pass.
+
+### Findings
+
+**CM decomposition** for secp256k1 (p=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F):
+- A = 367917413016453100223835821029139468249
+- B = 303414439467246543595250775667605759171
+- A²−AB+B² = p ✓, 2A−B = t₀ ✓
+
+**H2 types** (2 SPLIT, 4 IRR — matches cubic residue theory):
+- k=0 IRR, k=1 SPLIT, k=2 IRR, k=3 IRR, k=4 SPLIT, k=5 IRR
+
+**All 15 Howe pairs** (H1=all 15 trivially, since all 6 CM traces are distinct):
+
+| Pair  | H1 | H2   | H3   | gcd    | Result          |
+|-------|----|------|------|--------|-----------------|
+| (0,1) | ✓  | fail | ✓    | 1      |                 |
+| (0,2) | ✓  | ✓    | ✓    | 1      | **ALL MET**     |
+| (0,3) | ✓  | ✓    | ✓    | 1      | **ALL MET**     |
+| (0,4) | ✓  | fail | ✓    | 1      |                 |
+| (0,5) | ✓  | ✓    | ✓    | 1      | **ALL MET**     |
+| (1,2) | ✓  | fail | ✓    | 1      |                 |
+| (1,3) | ✓  | fail | fail | 3      |                 |
+| (1,4) | ✓  | ✓    | ✓    | 1      | **ALL MET**     |
+| (1,5) | ✓  | fail | fail | 3      |                 |
+| (2,3) | ✓  | ✓    | ✓    | 1      | **ALL MET**     |
+| (2,4) | ✓  | fail | ✓    | 1      |                 |
+| (2,5) | ✓  | ✓    | fail | 4      |                 |
+| (3,4) | ✓  | fail | ✓    | 1      |                 |
+| (3,5) | ✓  | ✓    | fail | 3      |                 |
+| (4,5) | ✓  | fail | ✓    | 1      |                 |
+
+**Summary counts:**
+- H1: 15/15 (all 6 CM traces distinct; guaranteed by CM theory for p≡1 mod 6 with gcd((p-1)/6,6)=1)
+- H2: 7/15 (matches theory: C(2,2)+C(4,2) = 1+6 = 7; one S/S pair + six I/I pairs)
+- H1+H2+H3: **5/15 Howe-glueable pairs**
+
+**The 5 Howe-glueable pairs** (smooth genus-2 Jacobians exist via Howe (1996) Theorem 1):
+- (k=0,k=2): E₀ (IRR) × E₂ (IRR)
+- (k=0,k=3): E₀ (IRR) × E₃ (IRR)
+- (k=0,k=5): E₀ (IRR) × E₅ (IRR) — E₀ = secp256k1 × E₅ is a twist pair
+- (k=1,k=4): E₁ (SPLIT) × E₄ (SPLIT) — the two SPLIT twists
+- (k=2,k=3): E₂ (IRR) × E₃ (IRR)
+
+Note: pair (k=0,k=3) is E₀×E₃ where E₃ has trace −t₀ (the quadratic twist); this matches
+the earlier `howe_gluing_test.gp` result. Pairs (k=2,k=5) and (k=3,k=5) fail H3 (gcd=4 resp. 3)
+— the non-trivial gcds arise from #E_k sharing small factors despite large prime-order groups.
+
+**Non-trivial gcds** (pairs failing H3):
+- gcd(#E₁, #E₃) = 3, gcd(#E₁, #E₅) = 3, gcd(#E₂, #E₅) = 4, gcd(#E₃, #E₅) = 3
+
+**ECDLP implications**: None. Each Howe-glueable pair gives a genus-2 Jacobian with
+#Jac ≈ #E_i · #E_j ≈ p². Pollard-ρ on g=2 costs ~√(p²) = p, worse than ECDLP (cost ~√p).
+Diem sub-exp index calculus requires g≥3. These are structural facts about secp256k1's
+CM geometry, not attacks.
+
+### Next step proposal
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+`glv_hnp_phase2_toy.gp` exists; run it and check if the lattice recovers d on a 32-bit toy curve.
+Alternatively, revisit CHLRS Igusa formula (priority-2) to construct explicit genus-2 models
+for the 5 Howe-glueable pairs.
+
+### Commits made
+`(see below)` autolab 2026-07-22: Thread 18 — Howe sextic-twist conditions for all 15 pairs
