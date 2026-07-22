@@ -5693,4 +5693,4 @@ Recommend Thread 19 (GLV-HNP toy lattice) — self-contained, uses already-set-u
 toy curve, concrete deliverable (either d recovered or clear failure mode).
 
 ### Commits made
-See below.
+`32b7d0a` autolab 2026-07-22: Thread 18 — 5/15 sextic-twist pairs Howe-glueable
