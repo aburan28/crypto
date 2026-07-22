@@ -5574,3 +5574,114 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists: check all 15 pairs of the 6 sextic
+twists of secp256k1 for Howe conditions (H1)+(H2)+(H3).
+Chosen because: 2026-07-20 log proposed this as next step; no intervening commits.
+
+### Work done
+- Installed PARI/GP 2.15.4 (was not present in container).
+- Wrote `secp256k1_cm_audit/thread18_sextic_twist_howe.gp`: Eisenstein factorization,
+  6 traces, per-twist analysis. First run hit multi-line `if`/`for` parse errors in
+  PARI script mode (Unicode ∤ characters in strings, multi-line `if` without `{}`
+  wrapping). Key math DID compute correctly.
+- Wrote `secp256k1_cm_audit/thread18_pairs.gp`: compact rewrite using `{}` blocks
+  to avoid syntax issues. Ran cleanly.
+- Ran `gp -q thread18_pairs.gp` — clean output, all 15 pairs checked.
+
+### Findings
+
+**Eisenstein factorization of secp256k1's prime p in Z[ζ₃]:**
+- a = 367917413016453100223835821029139468249
+- b = 303414439467246543595250775667605759171
+- a²−ab+b² = p ✓, 2a−b = t0 ✓
+
+**Six sextic twist traces (sum of each fundamental triple = 0):**
+- s1 =  432420386565659656852420866390673177327  (= t0, secp256k1 trace)
+- s2 = −671331852483699643819086596696745227420  (4|s2 → SPLIT 2-torsion)
+- s3 =  238911465918039986966665730306072050093
+
+**Six group orders (N[i] = p+1−trace):**
+- E_1 (secp256k1):  N = n (large prime)                    trace = s1,  irred
+- E_2 (quad twist): N = 3²·13²·3319·22639·(large)          trace = −s1, irred
+- E_3 (split A):    N = 115792…5579899084                  trace = s2,  SPLIT
+- E_4 (split B):    N = 115792…2089444244                  trace = −s2, SPLIT
+- E_5:              N = 109903·12977017·383229727·(large)   trace = s3,  irred
+- E_6:              N = 3·199·18979·(large)·(large)         trace = −s3, irred
+
+**All 15 Howe pair results:**
+```
+Pair     type  H1  H2  H3  gcd   result
+(1,2)    (ii)  Y   Y   Y   1     PASS  ← known from howe_gluing_test.gp
+(1,3)    (si)  Y   N   Y   1     fail
+(1,4)    (si)  Y   N   Y   1     fail
+(1,5)    (ii)  Y   Y   Y   1     PASS  ← new
+(1,6)    (ii)  Y   Y   Y   1     PASS  ← new
+(2,3)    (si)  Y   N   Y   1     fail
+(2,4)    (si)  Y   N   N   3     fail
+(2,5)    (ii)  Y   Y   Y   1     PASS  ← new
+(2,6)    (ii)  Y   Y   N   3     fail  ← H3 blocked by gcd=3
+(3,4)    (ss)  Y   Y   N   4     fail  ← H3 blocked by gcd=4
+(3,5)    (si)  Y   N   Y   1     fail
+(3,6)    (si)  Y   N   Y   1     fail
+(4,5)    (si)  Y   N   Y   1     fail
+(4,6)    (si)  Y   N   N   3     fail
+(5,6)    (ii)  Y   Y   Y   1     PASS  ← new
+```
+
+**5/15 pairs satisfy all Howe conditions** (all are (ii)=irred×irred type).
+**8/15 pairs are (si) mixed type**, automatically failing H2.
+**1 (ss) pair** (E_3, E_4) fails H3 with gcd=4 (both have 4|#E, expected).
+**1 (ii) pair** (E_2, E_6) fails H3 with gcd=3 (N[2] = 3²×… and N[6] = 3×…).
+
+**Structure of the 5 passing pairs:**
+Among the 4 irred-2-torsion twists {E_1, E_2, E_5, E_6}, 5 of the C(4,2)=6 pairs
+pass all conditions. The single irred failure (2,6) is due to a shared factor 3 in
+the group orders — not an intrinsic obstruction from the Galois module structure.
+
+**ECDLP implications:** None directly. By Howe (1996), each of the 5 passing pairs
+yields a smooth genus-2 curve C with Jac(C) (2,2)-isogenous to E_i × E_j. The
+best DLP on genus-2 Jac over F_p (Gaudry/Diem index calculus) costs ~ O(p), strictly
+worse than ECDLP on secp256k1 (~ O(√p)). These are structural existence results,
+not attacks.
+
+**Factorisation details (trial division to 10⁶) of irred-twist group orders:**
+- N[1] = [prime] (secp256k1's large prime order n)
+- N[2] = 3² · 13² · 3319 · 22639 · (256-bit probable prime)
+- N[5] = 109903 · 12977017 · 383229727 · (192-bit probable prime)
+- N[6] = 3 · 199 · 18979 · (73-bit factor) · (153-bit factor)
+
+**Cross-check:** gcd(N[1], N[2]) = 1 ✓ (matches howe_gluing_test.gp).
+
+**Note on (ss) pair (3,4):** Howe's general theorem allows gcd > 1 with additional
+conditions. For gcd=4 (fully-rational 2-torsion on both curves), the (2,2)-gluing
+exists but the kernel choice is more constrained. This pair deserves separate analysis.
+
+**Note on (ii) pair (2,6) with gcd=3:** Howe's condition H3 in the form gcd=1 is
+*sufficient*, not necessary. For gcd=3, a smooth Jacobian might still exist by choosing
+an appropriate 3-isogeny kernel. This is an open sub-problem.
+
+### Next step proposal
+Two candidates:
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+Run `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` to check if the GLV-aware lattice
+recovers d on a 32-bit toy curve. Infrastructure already exists; no new code needed.
+Expected: ~5 min run in gp; either d recovered (validates attack direction) or concrete
+failure mode found.
+
+**Thread 20 (new): Pair (2,6) deeper analysis.**
+Pair (E_2, E_6) with gcd=3: check Howe's extended condition for gcd=3 case.
+Requires: (a) verifying whether Howe's Theorem 2 (the general case) applies;
+(b) checking if E_2 and E_6 share a 3-isogeny; (c) small-prime analogue computation.
+~30 min.
+
+Recommend Thread 19 first (quick executable check), then Thread 20.
+
+### Commits made
+(to be filled after git push)
