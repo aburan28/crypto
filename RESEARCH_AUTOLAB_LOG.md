@@ -5650,3 +5650,5 @@ This would be a short algebraic proof (possibly 10 lines) adding Corollary 4.X t
 Alternatively: Mestre explicit cover for pair (1,4) — the fully F_p-rational 2-torsion case — which is the simplest glueable pair (Howe gluing is defined over F_p, not just over an extension).
 
 ### Commits made
+ autolab 2026-07-22: Thread 18 — Weil polynomials script + Block B5 DLP table + paper remark rem:thread18-howe-weil
+`43c35cb` autolab 2026-07-22: Thread 18 Weil polynomials script + Block B5 DLP table + paper remark
