@@ -5683,4 +5683,4 @@ add a citation note in the paper.
 Recommend Thread 21 first (computationally concrete, 1-session executable).
 
 ### Commits made
-`none yet` — commit at end of this run with log + thread20 script.
+`dcdc4b8` autolab 2026-07-22: Fallback — CM-73 Jacobian PH smoothness check; 3 ePrint surveys; Thread 20 new attack variant
