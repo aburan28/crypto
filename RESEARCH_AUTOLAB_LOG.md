@@ -5574,3 +5574,158 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+
+**Fallback (Step 4)** — all original threads (1–6) are CLOSED/BLOCKED/DEAD END per logs
+through 2026-07-08.  Threads 7–17 are complete. The 2026-07-20 run proposed
+Thread 18 (Howe sextic twists — already closed 2026-07-08) and Thread 19
+(GLV-HNP toy — DEAD END since 2026-06-29). No active thread to continue.
+
+Executed the full fallback: ePrint survey + new attack variant (Thread 18, redefined as
+the (3,3)-isogeny cover probe, and cross-validation of the PARI sextic-twists script).
+
+### Work done
+
+**A. PARI bug confirmation + cross-validation (`howe_sextic_twists_all15.gp`)**
+- Installed PARI/GP (was missing in 2026-07-08 run, which used Python instead).
+- Ran `howe_sextic_twists_all15.gp` on full secp256k1 prime (~100s).
+- Result: 5/15 glueable, BUT with wrong pair set {(0,2),(0,3),(0,5),(1,4),(2,3)}.
+  Python (2026-07-08) found {(0,2),(0,3),(0,5),(2,3),(2,5)}.
+  Discrepancy: PARI has (1,4), Python has (2,5).
+- Root cause: PARI script assigns traces to b_k via CM formula ordering without
+  scalar-mult verification, giving wrong trace for k=1,2,4,5.
+- Wrote `secp256k1_cm_audit/thread18_trace_verify.gp` to verify via scalar mult.
+- Ran it: confirmed gcd(N_{b1},N_{b4})=4 (PARI says 1, Python says 4 — Python wins)
+  and gcd(N_{b2},N_{b5})=1 (PARI says ≠1, Python says 1 — Python wins).
+- **Correct scalar-mult verified assignments** (confirming 2026-07-08 Python ground truth):
+  k=1 ↔ trace=+(t+3s)/2; k=2 ↔ +(3s−t)/2; k=4 ↔ −(t+3s)/2; k=5 ↔ (t−3s)/2.
+- **Correct glueable set remains {(0,2),(0,3),(0,5),(2,3),(2,5)}** (5/15). ✓
+
+**B. Thread 18 (new): (3,3)-isogeny cover probe**
+- Wrote `secp256k1_cm_audit/thread18_33cover_probe.gp`.
+- Key question: do sextic twists of secp256k1 satisfy the (3,3)-analogue of Howe's
+  H1/H2/H3 conditions?
+- Key computations (PARI inline, clean verification):
+
+  **(1) 3-division polynomial of secp256k1:** ψ₃(x) = 3x(x³+28).
+  **(2) x³+28 factorisation mod p = [1,1,1]** (splits completely into 3 linear factors).
+  - This means all 3 non-trivial 3-torsion x-coordinates (from x³+28=0) are in F_p.
+  - BUT: 7, 3, −21 are all NON-QR mod p → y-coordinates for these x-values not in F_p.
+  - So E[3](F_p) = {O} (consistent with n prime and 3∤n since n≡1 mod 3).
+  - Surprising: the 3-torsion x-coordinates are all rational even though the points aren't.
+
+  **(3) Char poly of Frobenius on E[3] mod 3:**
+  t ≡ 1 mod 3, p ≡ 1 mod 3 → char poly = x²−x+1 ≡ x²+2x+1 = (x+1)² mod 3.
+  Frobenius has eigenvalue −1 ≡ 2 mod 3 (double root → Jordan block, non-semisimple).
+  Reason non-semisimple: −Id on E[3] requires p≡−1 mod 3, but p≡1 mod 3. ✗
+
+  **(4) (3,3)-matching condition:** t'≡1 mod 3 (same char poly mod 3 → same Galois module type).
+  Among the 6 scalar-mult-verified twists:
+  - k∈{0,2,4}: t_k≡1 mod 3 (matching)
+  - k∈{1,3,5}: t_k≡2 mod 3 (no match)
+
+  **(5) GCD check for matching pairs (H3-analogue):**
+  | Pair  | gcd(N_i, N_j) | H3 |
+  |-------|---------------|-----|
+  | (0,2) | 1             | ✓  |
+  | (0,4) | 1             | ✓  |
+  | (2,4) | 1             | ✓  |
+  All three pairs with matching Galois-module type are mutually coprime in order.
+
+**C. ePrint survey (Step 4a)**
+Searched IACR ePrint for papers since 2026-07-20 on: isogeny-graph ECDLP,
+hidden number problem ECDSA, (N,N)-cover Jacobian, Boneh-Venkatesan.
+
+Relevant papers found:
+
+1. **"The Isogeny Problems"** (2026/1431) — Castryck, De Feo, Galbraith, Kutas, Reijnders,
+   Wesolowski. Exposes 7 unsolved problems in isogeny-based crypto from 11 experts.
+   RELEVANCE: background for our isogeny-graph paper; confirms (2,2)-Jacobian covers
+   are an active open area. No direct ECDLP-on-prime-field content.
+
+2. **"Chasing Rabbits Through Hypercubes: Better algorithms for higher-dim 2-isogeny
+   computations"** (2026/114) — Dartois, Duparc. Improves algorithms for computing
+   (2,2,...,2)-isogenies between abelian varieties using theta functions.
+   RELEVANCE: Faster computation of the Howe (2,2)-covering map. Does NOT change the
+   ECDLP hardness on the target Jacobian (Pollard-ρ cost ~p still dominates).
+
+3. **"One Bit to Rule Them All – Imperfect Randomness Harms Lattice Signatures"**
+   (PKC 2025, eprint 2025/820) — Damm, Kraus, May, Nowakowski, Thietke. Shows
+   1-bit nonce bias in lattice-based signatures (Dilithium-family) is exploitable via HNP.
+   RELEVANCE: Confirms HNP framework active in 2025; different bias structure (temporal/
+   algorithmic) than GLV (algebraic). Suggests generalizing our Phase 2 lattice to
+   lattice-signature bias rather than ECDSA-GLV bias.
+
+4. **"Algebraic Isogeny Model"** (2026/032). Establishes DLog=CDH for SIDH derivatives.
+   RELEVANCE: Background; not directly applicable to ECDLP over F_p via covers.
+
+5. **"Attacking ECDSA with Nonce Leakage by Lattice Sieving"** (Asiacrypt 2025,
+   Springer). New lattice-sieving approach for HNP, bridges gap with Fourier attacks.
+   RELEVANCE: Potential improvement over LLL/BKZ in our GLV-HNP Phase 2 lattice.
+
+### Findings
+
+**Confirmed findings this run:**
+
+1. **PARI bug confirmed:** `howe_sextic_twists_all15.gp` assigns wrong traces to
+   k=1,2,4,5, giving wrong glueable pair set. Python ground truth (2026-07-08)
+   stands: **{(0,2),(0,3),(0,5),(2,3),(2,5)}** is the correct glueable set.
+
+2. **(3,3)-cover probe — Thread 18:**
+   - x³+28 splits completely mod secp256k1's p (new result, not previously noted).
+   - Char poly of Frobenius on E[3] mod 3 = (x+1)² → non-semisimple Jordan representation.
+   - 3 of 6 sextic twists (k=0,2,4) satisfy the H2-analog for (3,3)-gluing (matching t mod 3).
+   - All 3 inter-pairs {(0,2),(0,4),(2,4)} have gcd=1 (H3-analog passes).
+   - Whether the FULL Galois-module isomorphism E_0[3] ≅ E_2[3] ≅ E_4[3] holds (beyond
+     char-poly matching) is an OPEN question requiring deeper representation theory.
+   - **ECDLP impact: zero.** Even with a (3,3)-cover, Jac order ≈ p² and Pollard-ρ
+     costs ~p >> √p. Block B5 applies at ℓ=3 for the same reasons as ℓ=2.
+
+3. **New ePrint papers:** No paper found that challenges the main theorem. 2026/114
+   gives faster (2,2)-isogeny computations but doesn't change the ECDLP landscape.
+
+**New empirical numbers:**
+| Fact | Value |
+|------|-------|
+| x³+28 factorisation mod p | [1,1,1] (splits completely) |
+| 7 is QR mod p | NO |
+| -21 is QR mod p | NO |
+| 3 is QR mod p | NO |
+| Char poly of Frob on E[3] mod 3 | (x+1)² (double eigenvalue at −1) |
+| Twists with t≡1 mod 3 | k ∈ {0,2,4} (3 of 6) |
+| gcd(N_0,N_2) | 1 |
+| gcd(N_0,N_4) | 1 |
+| gcd(N_2,N_4) | 1 |
+| cargo test --test curve_audit | 5/5 pass |
+
+### Next step proposal
+
+**Thread 19: Galois-module isomorphism for (3,3)-gluing.**
+The open question from Thread 18: is E_0[3] ≅ E_2[3] as F_p-Galois representations
+(not just same char poly mod 3)?
+
+Concretely: compute the Galois representation on E[3] explicitly using the Weil
+pairing. For j=0 curves over F_p, the Galois action on E[3] is given by the
+endomorphism ring structure (CM by ζ₆ for sextic twists). The 3-torsion Galois
+representation for a sextic twist E_k is determined by χ₃(Frob) where χ₃ is the
+3-power residue character. Check whether the extension class in H¹(F_p, E[3]) that
+defines the non-semisimple module is the SAME for k=0,2,4.
+
+Sub-task: write a small PARI script that explicitly computes the action of the
+Frobenius on a basis of E[3] over F_{p^6} (where the 3-torsion is defined) and
+checks whether the resulting 2×2 matrices over F_3 are conjugate.
+
+**Thread 20 (alternative): BKZ-sieving for GLV-HNP Phase 2.**
+The 2025 lattice-sieving paper (Asiacrypt 2025) proposes sieving as an alternative
+to BKZ for HNP. Implement a variant of the Phase 2 attack using lattice sieving
+instead of LLL/BKZ. Expected: improvement in key recovery threshold (current: m≥6
+at k_1 < n/100; target: m≥4 or k_1 < n/50 with sieving).
+
+Recommend Thread 19 first (direct continuation of today's work).
+
+### Commits made
