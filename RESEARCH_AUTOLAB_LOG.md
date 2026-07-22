@@ -5574,3 +5574,116 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Step 4 Fallback — ePrint survey + Thread 20 (GLV-HNP Phase 2 lattice implementation).
+Rationale: all 6 original priority threads are CLOSED/BLOCKED/DEAD END; active CM
+research threads 8–17 all completed through 2026-07-20. The 2026-07-20 "next step"
+proposal listed Thread 18 (Howe sextic twists) and Thread 19 (GLV-HNP toy), but
+both were already done (Thread 3 CLOSED 2026-07-08, Thread 5 DEAD END). Today:
+(a) ePrint survey for papers since 2026-07-20; (b) Thread 20 — implement the LLL
+reduction that was "deferred" in glv_hnp_phase2_toy.gp to diagnose the DEAD END.
+
+### Work done
+
+**Step 4(a) — ePrint survey (since 2026-07-20):**
+
+1. **ePrint 2026/1431** — "The Isogeny Problems" (Castryck, De Feo, Galbraith, Kutas,
+   Reijnders, Wesolowski). Curated list of 7 unsolved problems in isogeny-based
+   cryptography (supersingular isogeny path, endomorphism ring, etc.). These are
+   *post-quantum* isogeny problems, not classical prime-field ECDLP. No threat to
+   our main theorem (which is about classical attacks on ordinary prime-field curves).
+
+2. **ePrint 2026/1369** — "Algebraic Modelings of the Supersingular Isogeny Problem"
+   (Caminata, Sanguineti, Sconza). Gröbner basis approach for solving isogeny problems
+   (degree-2 and degree-3 isogenies). Targets isogeny-based KE schemes (SIDH/CSIDH),
+   not classical ECDLP. Not threatening.
+
+3. **ePrint 2026/1244** — "Resource Estimation of a Distributed Quantum Algorithm for
+   ECDLP" (Khajeian). Quantum attack requiring 1080–1140 logical qubits for 256-bit
+   curves via distributed Shor. Classical security unaffected. Note: our paper is
+   explicitly about *classical* isogeny-graph attacks.
+
+4. **ePrint 2026/280** — "Reducing the Number of Qubits in Quantum Discrete Logarithms
+   on Elliptic Curves" (Chevignard, Fouque, Schrottenloher). EUROCRYPT 2026. Shor's
+   algorithm for ECDLP: 1098 logical qubits for 256-bit curves (down from 2124).
+   Quantum, not classical. No impact.
+
+5. **ePrint 2026/1219** — "Algorithms for solving the isogeny problem with oriented
+   elliptic curves" (WayFinder). Improves Delfs-Galbraith/SuperSolver for supersingular
+   isogeny problem. Post-quantum, no classical ECDLP relevance.
+
+Survey conclusion: 0 of 5 papers threaten the main theorem. All 5 concern either
+quantum ECDLP or post-quantum isogeny-based crypto.
+
+**Step 4(b) Thread 20 — GLV-HNP Phase 2 LLL implementation:**
+
+- PARI/GP re-installed (gp available at /usr/bin/gp).
+- Ran `glv_hnp_phase2_toy.gp`: confirmed toy curve exists (E: y²=x³+2 over F_211,
+  n=199, λ=106, λ²+λ+1≡0 mod 199 ✓). Script was mislabeled "DEAD END"; it runs fine.
+- Implemented `glv_hnp_phase2_lll.gp`: built the (2m+2=12)-dimensional Kannan lattice
+  as specified in RESEARCH_GLV_HNP_PHASE2.md and ran qflll.
+- LLL completed in <1s. Did NOT recover d_secret=190.
+- Diagnosed TWO bugs in the Phase 2 setup:
+
+  **Bug 1 (k2 generation):** The toy script uses `k2 = random(n_val)` which generates
+  k2 ∈ [0, 199). But GLV decomposition guarantees |k2| ≤ sqrt(n) ≈ 14. Computed the
+  correct GLV short basis via PARI:
+  - v1 = (13, −2), |v1| ≈ 13.15 ≈ √199
+  - v2 = (2, 15),  |v2| ≈ 15.13 ≈ √199
+  - Verified: over all k ∈ [1,198], Babai decomposition gives max|k1|=7, max|k2|=8.
+  - The toy's k2v = [99,192,160,47,179] are all OUTSIDE the GLV bound (should be ≤8).
+
+  **Bug 2 (lattice scaling):** The d-column in the lattice has K1B=2, so the target
+  short vector encodes d as d·K1B = 190·2 = 380 ≈ n. This is NOT short; LLL finds
+  the d-row itself (norm ≈ √(B_i² + K1B²) ≈ 18 for small B_i) rather than the
+  target. Fix: apply Nguyen-Shparlinski (2002) scaling — scale the d column by K1B/n
+  so d·(K1B/n) ≈ K1B (balanced). For integer lattice: multiply k_i rows by n and
+  scale appropriately.
+
+- The "DEAD END" label from the prior log (reason: "no 32-bit GLV curve") was WRONG.
+  The real issue is the two bugs above. The dead end is fixable.
+
+- Ran `cargo test --test curve_audit`: 5/5 pass, 9.09s. ✓
+
+### Findings
+
+**Empirical:**
+- GLV short basis for toy (n=199, λ=106): v1=(13,−2), v2=(2,15). max Babai k2 bound = 8.
+- 12×12 Kannan LLL: runs in <1s. Finds vectors of norm ≈29 (the d-row itself).
+  Target vector norm ≈ sqrt(380² + 5·8²) ≈ 381. Target is 13× larger than LLL min.
+
+**Structural finding (Thread 20):**
+The GLV-aware Phase 2 lattice attack requires both:
+  (A) GLV-correct k2 generation: |k_{i,2}| ≤ C·√n (Babai decomposition), NOT random(n).
+  (B) Nguyen-Shparlinski column scaling: scale d-column by K1B/n (or t = ⌊n/K1B⌋)
+      so the target vector has ALL entries O(K1B). Without this, d·K1B ≈ n·K1B >> K1B.
+These two fixes are necessary (and likely sufficient) for the lattice to work.
+
+**ePrint survey:** 0/5 papers threaten main theorem.
+
+### Next step proposal
+
+**Thread 21: Implement N-S scaled GLV-aware lattice.**
+Fix the two bugs documented above:
+1. Use proper Babai GLV decomposition for k2 generation.
+2. Apply NS02 scaling: replace K1B in the d-column with t = ⌊n/K1B⌋ (making the
+   d entry t·d/n ≈ t, balanced with k_i ≈ K1B).
+   Concretely: the new d-row = (B_1·t/n,...,B_m·t/n, 1, 0,...) — but for integers,
+   multiply through by n: row = (B_1·t, ..., B_m·t, n, 0...) and divide target k_i
+   by n. Or equivalently use the Kannan-BV lattice from NS02 §4.
+3. Test: does LLL recover d=190 on the toy (n=199, m=5, K1B=2, proper GLV k2)?
+4. Expected: YES, since m=5 ≥ n_bits/c ≈ 8/1 = 8... hmm, borderline. May need m=8.
+   If LLL fails, try BKZ-2 or enumerate 2^(K1B_bits)·m = 2^5 = 32 k1 combinations.
+
+Estimated effort: 1 session (PARI script ≈ 40 lines).
+
+**Alternatively:** Thread 21 could verify the Proposition from §5 of eprint_combined.tex
+compiles correctly by adding the 2026-07-20 Proposition to the LaTeX document (Thread 17
+added it to structural_completeness.tex; it should also appear in eprint_combined.tex).
+
+### Commits made
