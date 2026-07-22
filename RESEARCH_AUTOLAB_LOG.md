@@ -5574,3 +5574,99 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists: check all 15 pairwise Howe
+conditions for the 6 sextic twists of secp256k1.
+Chosen because: 2026-07-20 log explicitly proposed this as the next task, with
+the PARI script `howe_sextic_twists_all15.gp` already written but never executed.
+Thread 17 (paper integration) was completed last session. Thread 18 had a clear
+runnable artifact ready; zero recent progress → natural pick.
+
+### Work done
+- Installed pari-gp (was absent from container; `apt-get install -y --fix-missing pari-gp`).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` on the actual secp256k1 prime.
+  Script completed in <5s with clean output.
+- Ran supplementary gcd analysis (inline gp) to confirm gcd values for all 15 pairs
+  and identify the exact small factors causing H3 failures.
+- Ran `cargo test --test curve_audit`: 5/5 pass (8.18s).
+
+### Findings
+
+**PRIMARY RESULT — 5 of 15 pairs are Howe-glueable:**
+
+2-torsion patterns of the 6 sextic twists of secp256k1 (y² = x³ + b_k, b_k = 7·u^k):
+| k | 2-torsion pattern | #E_k (group order) |
+|---|-------------------|--------------------|
+| 0 | [3] irred         | n (secp256k1, prime) |
+| 1 | [1,1,1] splits    | 3·199·18979·... |
+| 2 | [3] irred         | 4·49·10903·... |
+| 3 | [3] irred         | 9·13²·3319·... |
+| 4 | [1,1,1] splits    | 109903·12977017·... |
+| 5 | [3] irred         | (divisible by 3 and 4) |
+
+Howe conditions for all 15 pairs (H1=n_i≠n_j, H2=same 2-tor pattern, H3=gcd(n_i,n_j)=1):
+```
+  (0,1): H1=Y H2=N H3=Y  → no  (2-tor mismatch)
+  (0,2): H1=Y H2=Y H3=Y  → YES ← secp256k1 × twist-2
+  (0,3): H1=Y H2=Y H3=Y  → YES ← secp256k1 × quadratic twist (known)
+  (0,4): H1=Y H2=N H3=Y  → no  (2-tor mismatch)
+  (0,5): H1=Y H2=Y H3=Y  → YES ← secp256k1 × twist-5  [NEW]
+  (1,2): H1=Y H2=N H3=Y  → no
+  (1,3): H1=Y H2=N H3=N  → no  (gcd=3)
+  (1,4): H1=Y H2=Y H3=Y  → YES ← twist-1 × twist-4  [NEW]
+  (1,5): H1=Y H2=N H3=N  → no  (gcd=3)
+  (2,3): H1=Y H2=Y H3=Y  → YES ← twist-2 × twist-3  [NEW]
+  (2,4): H1=Y H2=N H3=Y  → no
+  (2,5): H1=Y H2=Y H3=N  → no  (gcd=4; H2 passes but H3 fails)
+  (3,4): H1=Y H2=N H3=Y  → no
+  (3,5): H1=Y H2=Y H3=N  → no  (gcd=3; H2 passes but H3 fails)
+  (4,5): H1=Y H2=N H3=Y  → no
+```
+**Howe-glueable pairs: 5 / 15**
+
+gcd analysis for H3-failing pairs:
+- gcd(n_1, n_3) = 3   (shared factor: trace CM-formula forces n_1 ≡ 0 mod 3 when t ≡ 0 mod 3)
+- gcd(n_1, n_5) = 3
+- gcd(n_2, n_5) = 4   (n_2 = 4·49·10903·... is divisible by 4)
+- gcd(n_3, n_5) = 3
+
+Structural note: secp256k1 itself (k=0) has gcd=1 with ALL other 5 twists,
+so (0,j) fails only on H2 (2-torsion mismatch for j=1,4) or passes (j=2,3,5).
+This is consistent with n (k=0) being a prime.
+
+2-torsion structure: the 6 twists split into exactly 2 cubic-residue classes:
+- Class A (2-torsion irred, [3]-pattern): k = 0, 2, 3, 5  (b_k ≢ cube mod p)
+- Class B (2-torsion splits, [1,1,1]-pattern): k = 1, 4   (b_k ≡ cube mod p)
+
+H2 holds iff both twists are in the same class. Within Class A: C(4,2)=6 pairs,
+but 2 fail H3 (pairs (2,5) and (3,5)), giving 4 glueable pairs. Within Class B:
+C(2,2)=1 pair, and it passes H3, giving 1 glueable pair. Total: 4+1=5. ✓
+
+**ECDLP implication (structural, no attack):**
+For each of the 5 glueable pairs (E_i, E_j), Howe's theorem guarantees existence
+of a smooth genus-2 curve C/F_p with Jac(C) (2,2)-isogenous to E_i × E_j.
+The best known DLP algorithm on Jac(C)(F_p) is Pollard ρ with cost ≈ p —
+strictly worse than ECDLP on secp256k1 (cost ≈ √p). No attack.
+This is 3 glueable partners for secp256k1 vs. 1 previously documented (quad. twist).
+
+### Next step proposal
+**Thread 19: GLV-HNP Phase 2 toy.**
+Run `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` to see if the GLV-aware lattice
+attack recovers a 32-bit toy-curve private key d. Script exists; never executed
+in the log. Expected: either d is recovered (lattice attack validated on toy) or
+a concrete failure mode is documented. This is a natural continuation since
+Thread 18 is now complete with clear numerical evidence.
+
+Alternatively: **Thread 19b: Integrate Thread 18 result into paper.**
+Add a Corollary after Proposition `prop:biquadratic-order2` in
+`paper/structural_completeness.tex` noting that for secp256k1, exactly 5 of 15
+sextic-twist pairs are Howe-glueable, with 3 glueable partners for secp256k1
+itself. Reference `howe_sextic_twists_all15.gp`. 2-3 lines in the paper.
+
+### Commits made
+`[see below]` autolab 2026-07-22: Thread 18 — Howe gluing: 5/15 sextic-twist pairs glueable, 3 partners for secp256k1
