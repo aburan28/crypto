@@ -5682,4 +5682,4 @@ Their DLP cost ≥ max(√n_i, √n_j) ≈ √p. No speedup over secp256k1 ECDLP
   CM unit analysis should give 3 | gcd from the lattice of j=0 CM orders.
 
 ### Commits made
-[to be filled after push]
+`d0aa690` autolab 2026-07-22: Thread 18+19 — 5/15 Howe pairs confirmed; biquadratic pair CM analysis; GLV-HNP 5/5 at m=6
