@@ -5647,9 +5647,48 @@ The proposed "Thread 18" (Howe sextic twists) was already CLOSED in Thread 3 (20
 continuation.
 
 **ePrint survey (Fallback Step 4 — all 6 original threads permanently closed):**
-Survey run via WebSearch (agent-based); results pending. See update below when agent
-completes. Keywords: "isogeny-graph ECDLP", "Boneh-Venkatesan", "hidden number problem
-ECDSA", "(N,N)-cover Jacobian".
+Survey window: 2026-07-15 to 2026-07-22. Keywords: "isogeny-graph ECDLP",
+"Boneh-Venkatesan HNP", "hidden number problem ECDSA", "(N,N)-cover Jacobian".
+
+1. **ePrint 2026/1431 — "The Isogeny Problems"** (Castryck, De Feo, Galbraith, Kutas,
+   Reijnders, Wesolowski; July 13, 2026). Invited exposition of seven open problems in
+   isogeny-based cryptography; includes hardness of computing isogenies between
+   supersingular curves and the endomorphism-ring/graph-navigation relationship.
+   RELEVANCE: directly relevant to our main theorem (no isogeny-graph attack beats ρ
+   for prime-field ECC). Confirms that the "isogeny graph ECDLP" hardness question
+   remains open at the highest research level.
+
+2. **arXiv:2607.13816 — "Quantum Algorithm for ECDLP with Space-Efficient Point
+   Addition"** (Luo, Yang, Luo et al.; July 15, 2026). Space-efficient Shor variant:
+   3n+O(log n) logical qubits, ~919n³/log n Toffoli gates; cuts qubit count for 256-bit
+   curves from 1098 (Chevignard, Eurocrypt 2026) to 835.
+   RELEVANCE: Classical ECDLP hardness baseline; quantum cost informs security margins.
+
+3. **ePrint 2026/423 — "Coppersmith's Method for MIHNP via Determinant-Based
+   Elimination"** (Ding, Dai, Wu, Wang, Zhang; ~March 2026). Extends Boneh-Venkatesan
+   HNP to the Modular Inversion HNP (MIHNP); improved bit-leakage thresholds via
+   determinant-based polynomial selection.
+   RELEVANCE: Extends Thread 5 (GLV-HNP) context; MIHNP is analogous to but distinct
+   from the GLV k₁-bounded HNP we studied.
+
+4. **ePrint 2026/1198 — "Splittings and Endomorphism Rings"** (Kutas, Shen; ~June 10,
+   2026). Proves polynomial-time reduction from computing a non-trivial endomorphism of
+   a supersingular elliptic curve to finding an (N,N)-splitting of a ppas.
+   RELEVANCE: **HIGH** — directly connects endomorphism-ring hardness (security of
+   isogeny-graph ECDLP) to (N,N)-cover/splitting obstruction (our B5 analysis). The
+   splitting problem is precisely the Honda-Tate obstruction proved in Thread 7.
+
+5. **ePrint 2026/1199 — "Post-Quantum Commitment from Richelot Isogeny Walks on
+   Genus-2 Jacobians"** (Idris, Hedabou; ~June 8, 2026). Commitment scheme from
+   kernel-tagged (2,2)-isogeny walks on superspecial genus-2 Jacobians; puncturing
+   rule avoids product-locus / (2,2)-splitting attacks.
+   RELEVANCE: Directly in the genus-2 (N,N)-cover space; references and sidesteps
+   the product-locus obstruction we proved in Thread 7 (Honda-Tate).
+
+**Survey summary**: No new papers appear to break any claim in our main theorem.
+ePrint 2026/1198 (Kutas-Shen) is the most significant: it confirms that
+endomorphism-ring hardness and (N,N)-splitting obstruction are tightly linked,
+consistent with our B5 analysis. Recommend citing 2026/1198 in B5/B6 of the paper.
 
 ### Next step proposal
 Thread 19 (genuine):
