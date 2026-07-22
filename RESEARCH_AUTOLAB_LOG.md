@@ -5700,3 +5700,4 @@ cited in examples needs correction.
 `secp256k1_naive_cover_check.gp` — new script; see Commits.
 
 ### Commits made
+ autolab 2026-07-22: Thread 18 — CHLRS Rosenhain formula failure diagnosed; naive cover NOT Howe-glued
