@@ -5717,4 +5717,4 @@ route to CHLRS via Hesse theta coordinates — worth investigating in a future s
 if abstract/PDF becomes accessible.
 
 ### Commits made
-`[pending]` autolab 2026-07-22: Thread 18 — compositum capitulation; ord-3 in Kc from K3
+`15fab65` autolab 2026-07-22: Thread 18 — compositum capitulation; ord-3 in Cl(K_c) via Kuroda
