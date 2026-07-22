@@ -5574,3 +5574,96 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Explicit splitting-type verification for Proposition `prop:biquadratic-order2`.
+Chosen because: all 6 original priority threads are permanently CLOSED/BLOCKED/DEAD-END
+(confirmed from log: line 4507, 4622); the 2026-07-20 proposed "Thread 18" (Howe sextic
+twists) was incorrect (Thread 3 closed this 2026-07-08) and "Thread 19" (GLV-HNP toy)
+was also incorrect (Thread 5 declared DEAD-END 2026-06-29). This session corrects those
+proposals and picks up the genuine next step: the Proposition (prop:biquadratic-order2,
+added to paper in Thread 17) claimed p splits in Q(√sf(D)) for all (p,a₂) with p∤a₂, but
+had never been verified via explicit `idealfactor` / `idealprimedec` calls — only proved
+algebraically. Thread 18 fills this empirical gap and discovers a simpler proof.
+
+### Work done
+- Installed pari-gp (absent from container, installed via apt --fix-missing).
+- Wrote `secp256k1_cm_audit/thread18_splitting_verification.gp` (~160 lines):
+  - Part A (4 cases): CM-73 primes (a₂=2p-73, sf=-219) — verify p splits.
+  - Part B (7 cases): non-CM-73 norm-form primes 4p=73+3k² (k=21,25,31,35,41,55,65,
+    primes p=349,487,739,937,1279,2287,3187) — compute a₂ from actual cover Jacobian
+    via `hyperellcharpoly`, then verify p splits in Q(√sf(a₂²-4p²)).
+  - Part C (8 cases): arbitrary (p,a₂) pairs with no norm-form assumption.
+  - Part D (4 negative controls): p|a₂ (hypothesis violated), verify p NOT guaranteed
+    to split (expected inert/ramified).
+- Ran the script: all 19 positive cases PASS, all 4 controls show "inert".
+- Observed: k=35 (p=937) gives a₂=1 (cover Jacobian has nearly-zero Weil coefficient).
+- Discovered simpler Legendre-symbol proof of the splitting claim (not in original paper).
+- Updated `paper/structural_completeness.tex` (remark `rem:order2-empirical`):
+  added Thread 18 data (19 cases + 4 controls) and the Legendre-symbol proof as an
+  alternative to the inertness-impossibility argument.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.41s).
+
+### Findings
+
+**Splitting verification: 19/19 PASS, 4/4 controls show non-split.**
+
+| Part | Cases | p splits? |
+|------|-------|-----------|
+| A: CM-73 primes (sf=-219)            | 4  | all split |
+| B: non-CM-73 norm-form primes        | 7  | all split |
+| C: arbitrary (p,a₂) pairs            | 8  | all split |
+| D: controls with p\|a₂ (hyp. violated)| 4 | all inert |
+
+Notable data points from Part B:
+- k=35, p=937: a₂=1 (cover Jacobian has Weil poly T⁴+T²+937²), sf(D)=-5619=-3·1873 ✓
+- k=21, p=349: a₂=385, sf=-939=-3·313 ✓
+- k=65, p=3187: a₂=-4499, sf=-32619 ✓
+
+Part D controls (p|a₂, hypothesis violated):
+- p=5, a₂=5: sf=-3, inert (5≡2 mod 3 in Q(√-3)) ✓
+- p=11, a₂=11: sf=-3, inert ✓
+- p=29, a₂=29: sf=-3, inert ✓
+- p=7, a₂=21: sf=5, inert (Legendre(5/7)=-1) ✓
+
+**New finding — simpler Legendre-symbol proof of splitting:**
+For p∤a₂: D = a₂²-4p² ≡ a₂² (mod p), nonzero. Writing D=k²·sf(D):
+since p²∤D (because p²|D ⟹ p|a₂, excluded), we have p∤k.
+Therefore sf(D) ≡ (a₂k⁻¹)² (mod p), a nonzero QR, so Legendre(sf/p)=1 and p splits.
+This replaces the two-step "inert-impossible + ramified-impossible" argument with
+a single Legendre symbol computation. Added to paper as alternative proof in remark.
+
+**Paper diff:** `paper/structural_completeness.tex` +20 lines at remark `rem:order2-empirical`
+(lines 486-502): Thread 18 verification data + Legendre-symbol alternative proof.
+
+**Correction to 2026-07-20 next-step proposal:**
+The proposed "Thread 18" (Howe sextic twists) was already CLOSED in Thread 3 (2026-07-08:
+5/15 glueable confirmed). The proposed "Thread 19" (GLV-HNP toy) was DEAD-END in Thread 5
+(2026-06-29). Both proposals were incorrect; Thread 18 as executed here is the correct
+continuation.
+
+**ePrint survey (Fallback Step 4 — all 6 original threads permanently closed):**
+Survey run via WebSearch (agent-based); results pending. See update below when agent
+completes. Keywords: "isogeny-graph ECDLP", "Boneh-Venkatesan", "hidden number problem
+ECDSA", "(N,N)-cover Jacobian".
+
+### Next step proposal
+Thread 19 (genuine):
+- The Legendre-symbol proof (added to paper) shows splitting follows from a₂²≡D (mod p).
+  The stronger claim [P]²=1 (order-2 Frobenius ideal) requires the full algebraic proof.
+  Open: is there a Legendre-symbol proof of [P]²=1 as well?
+  Proposal: check whether [P]²=1 follows from the Kronecker symbol and genus theory,
+  without constructing β explicitly. If so, the Proposition has an entirely elementary proof.
+- Alternative Thread 19: extend the norm-form sweep k≤500 to confirm no new CM-73 primes
+  beyond k=11 in a larger range (current: k≤199 from Thread 14, roughly p≤10,000).
+  k≤500 reaches p≈93,750. Script would be a direct extension of thread14_frobenius_class.gp.
+- Alternative Thread 20: ePrint survey results from this session's fallback search may
+  suggest a new concrete experiment or paper integration.
+
+### Commits made
+[see below after push]
+

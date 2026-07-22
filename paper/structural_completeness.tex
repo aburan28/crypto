@@ -483,6 +483,23 @@ and $57$ arbitrary $(p, a_2)$ pairs including non-norm-form primes, $D < 0$, $D 
 and values derived from genus-$2$ curves over $\FF_p$
 (script \texttt{thread16\_general\_order2.gp}).
 All $82$ cases gave $[\mathfrak{P}]^2 = 1$ with zero failures.
+Thread~18 verified the splitting conclusion directly via \texttt{idealprimedec}
+in \texttt{PARI/GP} for $19$ further cases (script
+\texttt{thread18\_splitting\_verification.gp}): $4$ CM-73 primes, $7$
+non-CM-73 norm-form primes with $k \in \{21,25,31,35,41,55,65\}$, and $8$
+arbitrary $(p,a_2)$ pairs; all $19$ showed $p$ splits in
+$\QQ(\sqrt{\mathrm{sf}(D)})$.
+Four negative controls with $p \mid a_2$ (hypothesis violated) yielded inert
+primes, confirming the necessity of $p \nmid a_2$.
+
+\smallskip
+\noindent\textit{Alternative Legendre-symbol proof of splitting.}
+Since $D = a_2^2 - 4p^2 \equiv a_2^2 \pmod{p}$ and $p \nmid a_2$, we have
+$p \nmid D$, hence $p^2 \nmid D$.
+Writing $D = k^2 \cdot \mathrm{sf}(D)$ with $p \nmid k$, we get
+$\mathrm{sf}(D) \equiv (a_2 k^{-1})^2 \pmod{p}$, a nonzero quadratic residue,
+so $\left(\frac{\mathrm{sf}(D)}{p}\right) = 1$ and $p$ splits in
+$\QQ(\!\sqrt{\mathrm{sf}(D)}\,)$ directly from the Legendre symbol.
 
 The proposition is a \emph{purely algebraic} statement about ideals in quadratic
 number fields; it does not depend on any curve-theoretic hypothesis.
