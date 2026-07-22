@@ -5729,3 +5729,4 @@ at k_1 < n/100; target: m≥4 or k_1 < n/50 with sieving).
 Recommend Thread 19 first (direct continuation of today's work).
 
 ### Commits made
+`19d7557` autolab 2026-07-22: Thread 18 — (3,3)-cover probe; PARI trace-assignment bug confirmed; x^3+28 splits completely; ePrint survey
