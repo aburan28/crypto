@@ -5668,4 +5668,4 @@ scaffolding.
 Recommend Thread 19 first since lattice implementation is a natural continuation.
 
 ### Commits made
-[see below]
+`2290024` autolab 2026-07-22: Thread 18 — Howe gluing for all 15 sextic-twist pairs; 5/15 glueable
