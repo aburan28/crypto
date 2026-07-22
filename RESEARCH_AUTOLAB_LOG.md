@@ -5664,4 +5664,4 @@ scratchpad shows it was not recently re-attempted. Recommend: next run should tr
 attempting a full rug/MPFR implementation.
 
 ### Commits made
-`[to be filled]` thread18_howe_sextic_twists.py + log entry
+`335a309` autolab 2026-07-22: Thread 18 — Howe sextic twists; 5/15 pairs glueable
