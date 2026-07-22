@@ -5653,4 +5653,4 @@ Thread 20: scale the Phase 2 attack to 32-bit (or estimate required m for 256-bi
   the dim analysis ≈ 2 * (256-128+c) / (128-c) for c=64: ≈ 4 (theory) → practical ~8-12.
 
 ### Commits made
-[hash TBD]
+`9f979d7` autolab 2026-07-22: Thread 19 CLOSED — Phase 2 GLV-HNP lattice attack verified; 5/5 at m=6; 20-bit scaling; secp256k1 extrapolation
