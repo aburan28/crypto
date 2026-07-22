@@ -5666,3 +5666,4 @@ F_p (p≡1 mod 6), exactly those 5 within Group A are Howe-(2,2)-glueable. The 2
 curves (full rational 2-torsion) fail H3 pairwise because gcd=4."
 
 ### Commits made
+`7b1cd76` autolab 2026-07-22: Thread 18 — corrected Howe 15-pair sextic-twist analysis; m=5 CM fix
