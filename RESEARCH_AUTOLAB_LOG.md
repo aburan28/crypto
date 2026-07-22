@@ -5574,3 +5574,123 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe (H1)+(H2)+(H3) for all 15 pairs of j=0 sextic twists.
+Chosen because: Thread 17 completed on 2026-07-20 (order-2 Frobenius integrated into paper);
+Thread 18 was the top next-step proposal from the 2026-07-20 log entry; script
+`howe_sextic_twists_all15.gp` existed but had never been run (no recorded output).
+
+### Work done
+- Read `howe_sextic_twists_all15.gp` (244 lines): used `znprimroot(p)` for the 256-bit
+  secp256k1 prime, which is potentially slow (requires factoring p-1).
+- Wrote a fast Python analytic check (`howe_sextic_twists_check.py` already existed;
+  used it as reference) and a PARI/GP script `thread18_sextic_twists.gp` avoiding
+  `znprimroot` by searching for a small base g with u=g^{(p-1)/6} of order 6.
+- Installed pari-gp (was absent from container, as usual).
+- Ran `thread18_sextic_twists.gp`: CM computations and all 15 pairwise checks
+  completed correctly. Minor PARI printf syntax warnings in header/footer display
+  code only; all condition checks and gcd computations ran cleanly.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.62s).
+
+### Findings
+
+**MAIN RESULT: 5 / 15 pairs of j=0 sextic twists of secp256k1 are Howe-glueable.**
+
+Setup:
+- p ≡ 1 (mod 6) → exactly 6 sextic twist classes y²=x³+b_k, b_k = 7·u^k mod p.
+- u = 3^{(p-1)/6} mod p (primitive 6th root of unity).
+- CM formula 4p = t²+3s², s = 303414439467246543595250775667605759171.
+- Six traces T[k] ∈ {±t, ±(t±3s)/2}; six group orders N[k] = p+1-T[k].
+
+Torsion pattern partition (H2 — degree pattern of x³+b_k over F_p):
+- [3]-pattern (x³+b_k irreducible): k ∈ {0, 2, 3, 5}
+- [1,1,1]-pattern (x³+b_k splits completely): k ∈ {1, 4}
+Note: [1,2] does NOT occur for p ≡ 1 (mod 3) (Frobenius on cube roots has order 1 or 3).
+
+Non-trivial gcds (H3 failures):
+```
+gcd(N[1], N[3]) = 3    (different pattern classes → H2 already fails)
+gcd(N[1], N[5]) = 3    (different pattern classes → H2 already fails)
+gcd(N[2], N[5]) = 4    (same [3]-class → H3 FAILS; blocks gluing)
+gcd(N[3], N[5]) = 3    (same [3]-class → H3 FAILS; blocks gluing)
+```
+
+N[5] divisibility: 3 | N[5] and 4 | N[5] (12 | N[5]).
+  N[5] mod 3 = 0, N[5] mod 4 = 0. This is the obstruction for pairs involving k=5.
+
+15-pair table (H1=YES for all 15; only H2 and H3 vary):
+```
+(i,j) | H2? | H3 (gcd)?           | Glueable?
+(0,1) | NO  | gcd=1               | no
+(0,2) | YES | gcd=1               | YES
+(0,3) | YES | gcd=1               | YES  ← secp256k1 + quadratic twist!
+(0,4) | NO  | gcd=1               | no
+(0,5) | YES | gcd=1               | YES
+(1,2) | NO  | gcd=1               | no
+(1,3) | NO  | gcd=3               | no
+(1,4) | YES | gcd=1               | YES
+(1,5) | NO  | gcd=3               | no
+(2,3) | YES | gcd=1               | YES
+(2,4) | NO  | gcd=1               | no
+(2,5) | YES | gcd=4               | no  ← H3 fails
+(3,4) | NO  | gcd=1               | no
+(3,5) | YES | gcd=3               | no  ← H3 fails
+(4,5) | NO  | gcd=1               | no
+```
+**Glueable pairs: (0,2), (0,3), (0,5), (1,4), (2,3) → 5 / 15.**
+
+Key structural notes:
+1. N[0] (secp256k1 order) is prime → gcd(N[0], N[k]) = 1 for all k ≠ 0. secp256k1
+   passes H3 with all 5 other twists (but H2 only holds for k ∈ {2,3,5}).
+2. Count 5/15 is INVARIANT to permutation of the trace assignment within the
+   [3]-subgroup. Even if b_2,b_3,b_5 were assigned to N[2],N[3],N[5] in a different
+   order, exactly 2 of the 6 intra-[3]-group pairs would fail H3 (since gcd(N[2],N[5])=4
+   and gcd(N[3],N[5])=3 are fixed numbers; any permutation of {N[2],N[3],N[5]} to
+   {b_2,b_3,b_5} gives the same 2 "bad" pairs).
+3. Notable instance: pair (0,3) = secp256k1 + its own quadratic twist are
+   Howe-glueable. This means there exists a genus-2 curve C/F_p whose Jacobian
+   is (2,2)-isogenous to E_secp256k1 × E_{quad-twist}. Per Theorem 1, this does
+   not yield a sub-√p ECDLP algorithm.
+4. Security interpretation: the 5 glueable pairs confirm EXISTENCE of genus-2 covers;
+   Theorem 1 of `paper/structural_completeness.tex` proves none beat Pollard-ρ.
+   These findings strengthen the COMPLETENESS record of the paper's cover analysis.
+
+Numerical verification:
+- N[0] = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+- N[3] = 115792089237316195423570985008687907853702405052206223696310004874299507848991
+- gcd(N[0], N[3]) = 1 ✓ (N[0] prime, N[3] ≠ N[0])
+- N[5] mod 12 = 0 (divisible by both 3 and 4)
+- All 5 glueable pairs: gcd = 1 confirmed.
+- All pattern assignments confirmed via pow(-b_k, (p-1)/3, p) ∈ {1, ≠1}.
+
+### Next step proposal
+
+Two candidates:
+
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy lattice.**
+`glv_hnp_phase2_toy.gp` (218 lines) already sets up the GLV decomposition, plants
+the secret d, and generates 5 signatures. But the lattice CONSTRUCTION is deferred
+to "once secp256k1 LLL-degeneracy is resolved." The concrete next sub-task:
+implement the (2m+1)-dimensional GLV-aware lattice for the toy curve (m=5),
+run LLL, and check if the short vector recovers d. This is implementable in
+PARI/GP without needing bigfloat (toy curve n ≈ few hundreds → LLL trivially
+works at this scale). Expected: short vector = (k_{1,1},...,k_{1,m},d,k_{2,1},...,k_{2,m}).
+
+**Thread 20 (new): P-521 LLL bigfloat approach.**
+The original priority-1 thread. Current status: scaled-f64 GS fails (NaN) at
+target_bits=150 for 521-bit. The 2026-07-22 run did not work this thread (chose
+Thread 18 instead because it was the previously-proposed next-step with a ready
+script). Next concrete sub-task: try target_bits=100 or 80 in the Rust
+`gs_precision_benchmark.rs` and see if that avoids NaN. If it does, the lattice
+might work at a reduced security-level estimate.
+
+Recommend Thread 19 (GLV-HNP toy lattice) — self-contained, uses already-set-up
+toy curve, concrete deliverable (either d recovered or clear failure mode).
+
+### Commits made
+See below.
