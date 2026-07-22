@@ -5685,4 +5685,4 @@ Recommend Thread 20 first (natural extension of today's successful Thread 19 res
 Thread 21 second (blocker for secp256k1-scale Phase 2).
 
 ### Commits made
-[to be filled after commit]
+`49a5881` autolab 2026-07-22: Thread 18 (5/15 sextic-twist pairs Howe-glueable) + Thread 19 (Phase 2 GLV lattice recovers d at m=6)
