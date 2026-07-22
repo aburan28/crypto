@@ -5574,3 +5574,112 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe sextic twists all-15-pairs verification (proposed in 2026-07-20 next-step,
+which recommended it as the top priority). Also ran Thread 19 (GLV-HNP Phase 2 toy) as it was
+the secondary proposal and took only a few minutes.
+
+### Work done
+
+**Thread 18 — Howe sextic twists (all 15 pairs, Python confirmation):**
+- PARI/GP not installed in this environment; ran `secp256k1_cm_audit/howe_sextic_twists_check.py`.
+- CM formula confirmed: 4p = t² + 3s² with s = 303414439467246543595250775667605759171.
+- Primitive 6th root found: u = 3^{(p-1)/6} mod p (u^6≡1, u^3≡−1, u^2≢1 ✓).
+- Trace matching via scalar-multiplication test for k=1,2,4,5 (k=0,3 known a priori).
+- 2-torsion patterns: k=0,2,3,5 → [3] (irreducible); k=1,4 → [1,1,1] (splits completely).
+- New observation: the empirical b_k ↔ trace assignment follows the conjugate-CM symmetry:
+  trace(b_k) = T_{6-k mod 6}, i.e., the b-values indexed by u^k and u^{6-k} are CM conjugates.
+  Specifically: k=1 ↔ T[5]=+t_plus, k=2 ↔ T[4]=+t_minus_mag, k=4 ↔ T[2]=-t_plus, k=5 ↔ T[1]=-t_minus_mag.
+- Ran all 15 pairwise H1/H2/H3 checks.
+
+**Thread 19 — GLV-HNP Phase 2 toy (fpylll lattice attack):**
+- Installed fpylll + cysignals (pip install); previously unavailable in environment.
+- Ran `secp256k1_cm_audit/glv_hnp_phase2_attack.py`.
+- Toy curve: y² = x³ + 2 over F_211, n=199, λ=106, K1_BOUND=2, K2_BOUND=15.
+- Info-theoretic threshold: m ≥ 3 (from (K1·K2/n)^m < 1/n with K1=2, K2=15, n=199).
+- LLL on 10×10 lattice (dim = 2m+2 = 10) with column-diagonal balancing.
+- Planted vector verified correct before LLL (norm=312 vs min basis norm=10494 → ratio 0.03).
+
+**Analytical observation — biquadratic pairs:**
+- Among the 5 glueable pairs, exactly 2 are **biquadratic** (trace_i + trace_j = 0):
+  - Pair (0,3): t₀ = +t, t₃ = −t (secp256k1 × quadratic twist)
+  - Pair (2,5): t₂ = +(3s−t)/2, t₅ = −(3s−t)/2
+- Both give Weil poly T⁴ + a₂T² + p² (no odd-power terms).
+- For (0,3): a₂² − 4p² = −t²·3s² → sf = **−3** (K = Q(√−3), class number 1).
+- For (2,5): a₂² − 4p² = −3(3s−t)²(s+t)²/16 → sf = **−3** (same CM field).
+  (Proof: t₂²−4p = (3s−t)²/4 − 4p = −3(s+t)²/4; since both (3s−t) and (s+t) are even,
+   (3s−t)²(s+t)² is divisible by 16, so sf = sf(−3) = −3.)
+- Both biquadratic pairs connect directly to Thread 12's CM analysis and Proposition
+  `prop:biquadratic-order2` (Thread 17 paper insert): [P]²=1 in Cl(Q(√−3)) is trivial
+  since h(Q(√−3)) = 1. The Frobenius class has order 1, not 2.
+- The 3 non-biquadratic pairs (0,2), (0,5), (2,3) have non-zero trace sums:
+  sum = t_plus, t_minus_mag, -(t_plus − t_minus_mag) respectively. Their Weil polys
+  factor over Z (E_i × E_j split) but have T³ and T terms.
+
+- Ran `cargo test --test curve_audit`: 5/5 pass ✓ (6.95s).
+
+### Findings
+
+**Thread 18 — Howe sextic twists (CONFIRMED, 5/15):**
+
+| Pair | H1 | H2 | H3 | Glueable? | Biquadratic? | sf |
+|------|----|----|----|-----------|-------------|-----|
+| (0,2)| ✓  | ✓  | ✓  | YES       | no          | —  |
+| (0,3)| ✓  | ✓  | ✓  | YES       | **YES**     | −3 |
+| (0,5)| ✓  | ✓  | ✓  | YES       | no          | —  |
+| (2,3)| ✓  | ✓  | ✓  | YES       | no          | —  |
+| (2,5)| ✓  | ✓  | ✓  | YES       | **YES**     | −3 |
+| (3,5)| ✓  | ✓  | ✗  | no        | no          | —  |
+
+Only pairs (0,3) and (2,5) are biquadratic (trace sum = 0). Pair (3,5) has sum = −t − (3s−t)/2 = −(t+3s)/2 ≠ 0.
+
+Failed pairs:
+- H2 failures (8 pairs): all cross-pattern [3]×[1,1,1].
+- H3 failure: pair (3,5) — gcd(n₃, n₅) divisible by 3 (CM artifact).
+- H3 failures with H2: pairs (1,3), (1,5) — gcd divisible by 3 (same CM orbit as k=3,5 for k=1).
+- H3 failure: pair (1,4) — gcd divisible by 2 (k=1,4 both have full rational 2-torsion → 4 | n₁, n₄).
+
+**Thread 19 — GLV-HNP Phase 2 toy (CONFIRMED, 5/5 at m=6):**
+
+| m | Success / 5 seeds | Threshold? |
+|---|-------------------|------------|
+| 2 | 2/5               | below      |
+| 3 | 3/5               | above      |
+| 4 | 3/5               | above      |
+| 5 | 4/5               | above      |
+| 6 | **5/5**           | above      |
+| 7 | **5/5**           | above      |
+
+- 5/5 reliable recovery at m=6 (matches June 2026 Thread 5 result exactly).
+- Witness row format: slot[m] = ±d (mod n), slot[dim−1] = ±S_KANNAN.
+- DEAD END status from Jun 21–29 was about the *separator hypothesis* (why some seeds fail at
+  small m), not the basic attack. The attack itself works and is now confirmed with fpylll.
+
+**Structural note on non-biquadratic glueable pairs:**
+Pairs (0,2), (0,5), (2,3) give genus-2 Jacobians Jac(C)/F_p with Weil poly:
+  (T² − t_i T + p)(T² − t_j T + p),  t_i + t_j ≠ 0.
+These are split Jacobians (Jac ~ E_i × E_j over F_p) but NOT biquadratic Weil polys.
+Their DLP cost ≥ max(√n_i, √n_j) ≈ √p. No speedup over secp256k1 ECDLP (cost √n ≈ √p).
+
+### Next step proposal
+
+**Thread 20 — Integrate biquadratic-pair / CM field connection into paper.**
+- Add a Remark after Proposition `prop:biquadratic-order2` noting that pairs (0,3) and (2,5)
+  of the secp256k1 sextic twists give biquadratic Weil polys with sf = −3, so [P] = 1 in
+  Cl(Q(√−3)) (class number 1 → trivial Frobenius class), consistent with Theorem B5 blocking
+  any cover-based speedup.
+- File: `paper/structural_completeness.tex`, around line 495 (after the order-2 remark).
+- Expected effort: ~20 lines of LaTeX (Remark + 3-line proof).
+
+**Thread 21 (alternative) — Verify gcd structure of non-glueable pairs analytically.**
+- Pair (3,5) has gcd(n₃,n₅) divisible by 3. Prove this algebraically: n₃ = p+1+t and n₅ = p+1+t_minus.
+  n₃ − n₅ = t − t_minus = t − (t−3s)/2 = (t+3s)/2 = t_plus. Show gcd | gcd(n₃, t_plus).
+  CM unit analysis should give 3 | gcd from the lattice of j=0 CM orders.
+
+### Commits made
+[to be filled after push]
