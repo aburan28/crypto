@@ -5681,4 +5681,4 @@ Howe-glueable; secp256k1 itself (prime order) is automatically H3-satisfied."
 Recommend Thread 19 first (direct experiment; unrun script; fast).
 
 ### Commits made
-TBD (see below)
+`451db5d` autolab 2026-07-22: Thread 18 — 5/15 sextic twist pairs Howe-glueable; secp256k1 in 3 of them
