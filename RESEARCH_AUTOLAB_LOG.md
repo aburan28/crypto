@@ -5574,3 +5574,115 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on all 15 pairs of j=0 sextic twists (secp256k1).
+Chosen because: the 2026-07-20 log entry explicitly recommended it as the next-best concrete step.
+Also ran Thread 19 (GLV-HNP Phase 2 toy lattice attack) in the same session; script `glv_hnp_phase2_attack.py` already existed and needed only fpylll installed.
+
+### Work done
+**Thread 18 — Sextic twist Howe gluing (all 15 pairs):**
+- Ran `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp` on the actual secp256k1 prime (p = FFFFFFFE...FFFFFC2F).
+- Script ran cleanly after installing PARI/GP 2.15.4 (`apt-get install pari-gp`).
+- Ran supplementary GCD analysis (`howe_gcd_analysis.gp`) to get exact gcd values for H3-failing pairs.
+
+**Thread 19 — GLV Phase 2 lattice attack:**
+- Ran `gp -q secp256k1_cm_audit/glv_hnp_phase2_lattice.gp` → planted vector verified in lattice, LLL (PARI unscaled) did not recover d.
+- Installed fpylll (`pip install fpylll cysignals`) and ran `secp256k1_cm_audit/glv_hnp_phase2_attack.py`.
+- Attack recovered d successfully.
+- Ran cargo test --test curve_audit: 5/5 pass (8.56s).
+
+### Findings
+
+**Thread 18 — 5 of 15 pairs are Howe-glueable:**
+
+Two 2-torsion classes among the 6 sextic twists (p ≡ 1 mod 6):
+- **Type [3]** (irreducible): twists k=0 (secp256k1), k=2, k=3 (quad twist), k=5
+- **Type [1,1,1]** (completely split): twists k=1, k=4
+
+H2 holds only between twists of the same type (same cubic-residue class of b-value mod p).
+
+All 15 pairwise (H1, H2, H3) results:
+```
+(0,1) H1✓ H2✗ H3✓ → no   (0,2) H1✓ H2✓ H3✓ → YES
+(0,3) H1✓ H2✓ H3✓ → YES  (0,4) H1✓ H2✗ H3✓ → no
+(0,5) H1✓ H2✓ H3✓ → YES  (1,2) H1✓ H2✗ H3✓ → no
+(1,3) H1✓ H2✗ H3✗ → no   (1,4) H1✓ H2✓ H3✓ → YES
+(1,5) H1✓ H2✗ H3✗ → no   (2,3) H1✓ H2✓ H3✓ → YES
+(2,4) H1✓ H2✗ H3✓ → no   (2,5) H1✓ H2✓ H3✗ → no
+(3,4) H1✓ H2✗ H3✓ → no   (3,5) H1✓ H2✓ H3✗ → no
+(4,5) H1✓ H2✗ H3✓ → no
+```
+
+Glueable pairs (0-indexed): **(0,2), (0,3), (0,5), (1,4), (2,3)** — 5 of 15.
+
+H3 failures (gcd > 1):
+- Pair (1,3): gcd(N[2], N[4]) = 3
+- Pair (1,5): gcd(N[2], N[6]) = 3
+- Pair (2,5): gcd(N[3], N[6]) = 4 (= 2²)
+- Pair (3,5): gcd(N[4], N[6]) = 3
+
+(1,3), (1,5), (3,5) share factor 3 in group orders. (2,5) share factor 4.
+Structural reason: twists k=1 and k=3 have complementary GLV signs (traces ±T); the
+orders differ by t and -t, so GCD picks up small common factors from the CM discriminant.
+
+**ECDLP implication**: all 5 glueable pairs produce genus-2 Jacobians with order ~N[i]·N[j] ≈ p²,
+requiring Pollard ρ at √p ≈ 2^128 — no speedup over secp256k1 ECDLP (cost √n ≈ 2^128). ✓
+
+**Thread 19 — GLV Phase 2 lattice attack WORKS on toy curve:**
+
+Setup: y² = x³+2 over F_{211}, n=199, λ=106, K1_BOUND=2 (k_1 ∈ {0,1}), K2_BOUND=15 (GLV bound, k_2 ≤ √n).
+
+Lattice: (2m+2)-dimensional with column-diagonal balancing:
+- S_K1 = n//K1_BOUND = 99  (scale k_1 columns)
+- S_D = 1                   (d column unscaled)
+- S_K2 = n//K2_BOUND = 13  (scale k_2 columns)
+- S_KANNAN = n = 199        (Kannan embedding weight)
+
+Results from `glv_hnp_phase2_attack.py` sweep (5 seeds per m):
+```
+m=2: 2/5  (below threshold)
+m=3: 3/5  (above threshold)
+m=4: 3/5
+m=5: 4/5
+m=6: 5/5  ← consistent recovery
+m=7: 5/5
+```
+
+Info-theoretic threshold: m ≥ ceil(log(n)/log(n/(K1·K2))) = ceil(log(199)/log(199/30)) = 3.
+Practical 5/5 threshold: m=6.
+
+Key: planted vector norm ≈ 312 vs basis row norms ≈ 10494–25437.
+Planted vector / min-basis-norm ratio: 0.03 → very short, LLL easily finds it.
+
+This CONFIRMS the Phase 2 attack direction works at toy scale when:
+1. k_2 is GLV-bounded (k_2 ≤ √n, not full-range), and
+2. Column-diagonal balancing is used (S_K1 ≈ n/K1, S_K2 ≈ n/K2, S_D=1).
+
+The full-range k_2 in `glv_hnp_phase2_toy.gp` is the wrong model — real GLV
+implementations bound both halves, making the attack applicable.
+
+### Next step proposal
+Two candidates:
+
+**Thread 20 (NEW — Thread 19 extension): Scale the Phase 2 attack to 32-bit curves.**
+- Use a 32-bit prime p with n prime and GLV-applicable.
+- K1_BOUND = 256 (8-bit bias on k_1); K2_BOUND ≈ √n ≈ 65536.
+- Verify that the (2m+2)-dimensional lattice with column balancing still recovers d at m ≈ 10.
+- If yes: write a clear "secp256k1 scaling path" document estimating required m for c-bit bias.
+- Concrete: add a `glv_hnp_phase2_32bit.py` script that sweeps n from 2^20 to 2^32.
+
+**Thread 21 (priority 4 from task list): Cross-curve LLL degeneracy re-check.**
+- Re-run `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` for 384-bit curves,
+  testing 3 independent seeds to confirm whether the scaled-GS fix is consistent.
+- Needed before any secp256k1-scale Phase 2 attempt (the same LLL degeneracy may affect Phase 2).
+
+Recommend Thread 20 first (natural extension of today's successful Thread 19 result);
+Thread 21 second (blocker for secp256k1-scale Phase 2).
+
+### Commits made
+[to be filled after commit]
