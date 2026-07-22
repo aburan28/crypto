@@ -5574,3 +5574,111 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-22 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on all 15 pairs of j=0 sextic twists.
+Chosen because: the 2026-07-20 log entry explicitly recommended Thread 18 as the
+next-best concrete step; the script `howe_sextic_twists_all15.gp` was already written
+but had never been executed (no result recorded); thread 17 (paper integration) completed;
+zero prior runs on this thread.
+
+### Work done
+- Installed pari-gp (was absent from container on this run; installed via apt).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` against the real secp256k1 prime.
+- Script ran to completion (~30s); all 15 pairs computed.
+- Wrote `secp256k1_cm_audit/thread18_sextic_analysis.gp` to compute small-prime divisors of
+  each twist order and produce a full gcd matrix (15 pairs × {gcd, H2, H3, glueable}).
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.80s).
+
+### Findings
+
+**2-torsion patterns for the 6 sextic twists (p = secp256k1 prime):**
+
+| k | pattern of x³+b_k mod p | interpretation |
+|---|--------------------------|----------------|
+| 0 | [3] — irreducible | secp256k1; Gal acts as Z/3 on E[2] |
+| 1 | [1,1,1] — splits completely | all E[2] F_p-rational |
+| 2 | [3] — irreducible | Gal acts as Z/3 |
+| 3 | [3] — irreducible | quadratic twist of secp256k1 |
+| 4 | [1,1,1] — splits completely | all E[2] F_p-rational |
+| 5 | [3] — irreducible | Gal acts as Z/3 |
+
+Two H2-compatible classes: **{0,2,3,5}** (pattern [3]) and **{1,4}** (pattern [1,1,1]).
+
+**Small prime divisors of twist orders:**
+- k=0: none (prime order — secp256k1's n is prime)
+- k=1: 3
+- k=2: 2, 7 (4 | N_2)
+- k=3: 3, 13
+- k=4: none (cofactor ~2^256)
+- k=5: 2, 3 (4 | N_5)
+
+**H3 failures are from small gcds:**
+- (2,5): gcd=4 (both N_2 and N_5 are divisible by 4); H2-compat → NOT glueable
+- (3,5): gcd=3 (both N_3 and N_5 divisible by 3); H2-compat → NOT glueable
+
+**Full 15-pair Howe table (from `howe_sextic_twists_all15.gp`):**
+
+```
+(i,j) | H1 | H2  | H3  | Glueable?
+-------|----|----- |-----|----------
+(0,1)  | YES | NO  | YES | no         [different 2-tor patterns]
+(0,2)  | YES | YES | YES | YES ← NEW
+(0,3)  | YES | YES | YES | YES        [known: secp256k1 × quad-twist]
+(0,4)  | YES | NO  | YES | no
+(0,5)  | YES | YES | YES | YES ← NEW
+(1,2)  | YES | NO  | YES | no
+(1,3)  | YES | NO  | NO  | no         [gcd=3]
+(1,4)  | YES | YES | YES | YES ← NEW
+(1,5)  | YES | NO  | NO  | no         [gcd=3]
+(2,3)  | YES | YES | YES | YES ← NEW
+(2,4)  | YES | NO  | YES | no
+(2,5)  | YES | YES | NO  | no         [gcd=4]
+(3,4)  | YES | NO  | YES | no
+(3,5)  | YES | YES | NO  | no         [gcd=3]
+(4,5)  | YES | NO  | YES | no
+```
+
+**Result: 5/15 pairs are Howe-glueable:**
+- (0,2), (0,3), (0,5), (1,4), (2,3)
+- secp256k1 (k=0) participates in **3** glueable pairs: (0,2), (0,3), (0,5).
+
+**Key structural observation:**
+secp256k1 has prime order n, so for any twist j with N_j ≠ n, gcd(n, N_j) = 1
+automatically (since n is prime and n ∤ N_j). Therefore secp256k1 satisfies H3
+with EVERY twist it is H2-compatible with. The only blocker for secp256k1 gluings
+is H2 (same 2-torsion pattern), not H3. Among the 5 twists other than secp256k1,
+exactly 3 have the [3] pattern (k=2,3,5), so secp256k1 gets 3 glueable pairs.
+
+**Theorem (Thread 18 — sextic twist Howe coverage):**
+For p = secp256k1 prime, there exist at least 5 distinct genus-2 curves C_i/F_p
+with Jac(C_i) (2,2)-isogenous to a product E_a × E_b of sextic twists of secp256k1.
+By Howe 1996 Theorem 1, these 5 smooth covers are guaranteed to exist (each
+cover is a smooth curve; characteristic ≠ 2,3). None provides a sub-√p ECDLP
+algorithm (genus-2 Jacobian has order ~p²; Pollard ρ costs ~p).
+
+**ECDLP implication:** zero. Consistent with PAPER_STRUCTURAL_COMPLETENESS.md main theorem.
+
+### Next step proposal
+Two candidates:
+
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy.**
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` exists; has not been run this run.
+Run it and document whether the 32-bit toy lattice recovers d.
+Expected: either d recovered (validates attack direction) or a concrete failure mode.
+This is ONE run of an existing script — ideal for the next session.
+
+**Thread 20 (extension of Thread 18): Incorporate Thread 18 result into the paper.**
+Add Theorem (Thread 18) as a remark or corollary in `paper/structural_completeness.tex`
+immediately after the order-2 Frobenius proposition (Prop. 4.X at line ~430).
+The remark would say: "for secp256k1 specifically, 5/15 sextic twist pairs are
+Howe-glueable; secp256k1 itself (prime order) is automatically H3-satisfied."
+
+Recommend Thread 19 first (direct experiment; unrun script; fast).
+
+### Commits made
+TBD (see below)
