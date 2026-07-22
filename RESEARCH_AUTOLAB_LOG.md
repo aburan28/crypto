@@ -5674,4 +5674,4 @@ H3-passing pairs; and check whether the split-group pair (E₂,E₅) could be
 handled with a (2,2)-isogeny to a non-principally-polarized surface (relaxing H3).
 
 ### Commits made
-`pending`
+`5358e13` autolab 2026-07-22: Thread 18 — Howe sextic-twist pairwise analysis; 5/15 pairs glue for secp256k1
