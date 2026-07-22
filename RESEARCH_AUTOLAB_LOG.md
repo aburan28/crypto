@@ -5701,3 +5701,4 @@ cited in examples needs correction.
 
 ### Commits made
  autolab 2026-07-22: Thread 18 — CHLRS Rosenhain formula failure diagnosed; naive cover NOT Howe-glued
+`89b0f59` autolab 2026-07-22: Thread 18 — CHLRS Rosenhain formula failure diagnosed; naive cover NOT Howe-glued
