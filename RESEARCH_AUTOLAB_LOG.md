@@ -5670,3 +5670,5 @@ normalized so the Gaussian heuristic predicts success. Specifically:
 
 ### Commits made
 
+
+`a0a22df0acb45d0f1d61711fba5666779db6af89` autolab 2026-07-23: Thread 20 — GLV-HNP Phase 2 brute force with GLV-bounded k_2 succeeds; integer LLL fails
