@@ -5574,3 +5574,112 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on all 15 pairs of j=0 sextic twists.
+Chosen because: 2026-07-20 log entry explicitly proposed Thread 18 as the next-best concrete step
+(after integrating Theorem to the paper); no intervening work done; script
+`howe_sextic_twists_all15.gp` was already fully written and ready to execute.
+
+### Work done
+- Installed pari-gp (absent from container; `apt-get install pari-gp --fix-missing`).
+- Ran `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp` — completed cleanly in ~3s.
+- Computed auxiliary GCDs for the two H3-failure pairs via inline PARI.
+- All arithmetic verified against known secp256k1 values (N[1] = n_secp256k1 ✓, N[4] = n_quad_twist ✓).
+
+### Findings
+
+**Main result: 5 of 15 pairs of secp256k1 sextic twists are Howe-glueable.**
+
+**2-torsion partition (H2 structure):**
+The 6 sextic twists split into exactly 2 Galois-module classes:
+- **Pattern [3]** (x³+b_k irreducible, Z/3 Galois action): k = 0, 2, 3, 5
+  (i.e., secp256k1 itself, the cubic twist at t=-(t+3s)/2, the quadratic twist, and the sextic-5 twist)
+- **Pattern [1,1,1]** (x³+b_k splits completely, trivial Galois action): k = 1, 4
+
+**Full pairwise table:**
+
+| Pair | H1 (n_i≠n_j) | H2 (same 2-tor) | H3 (gcd=1) | Glueable? |
+|------|--------------|-----------------|------------|-----------|
+| (0,1) | YES | NO  | YES | no |
+| (0,2) | YES | YES | YES | **YES** |
+| (0,3) | YES | YES | YES | **YES** |
+| (0,4) | YES | NO  | YES | no |
+| (0,5) | YES | YES | YES | **YES** |
+| (1,2) | YES | NO  | YES | no |
+| (1,3) | YES | NO  | NO  | no |
+| (1,4) | YES | YES | YES | **YES** |
+| (1,5) | YES | NO  | NO  | no |
+| (2,3) | YES | YES | YES | **YES** |
+| (2,4) | YES | NO  | YES | no |
+| (2,5) | YES | YES | NO  | no |
+| (3,4) | YES | NO  | YES | no |
+| (3,5) | YES | YES | NO  | no |
+| (4,5) | YES | NO  | YES | no |
+
+**Glueable pairs (5 total):** (0,2), (0,3), (0,5), (1,4), (2,3).
+
+**Structure of glueable pairs:**
+- Pairs from [3]-class: {(0,2), (0,3), (0,5), (2,3)} — 4 of C(4,2)=6 possible [3]-class pairs.
+- Pairs from [1,1,1]-class: {(1,4)} — the unique [1,1,1]-class pair.
+- Cross-class pairs (one [3], one [1,1,1]): all 8 fail H2, hence none glueable.
+
+**H3-failure analysis:**
+- Pair (2,5): gcd(N[2], N[5]) = **4** = 2².
+  Structural reason: T[3]+T[6] = -(t+3s)/2 + (t+3s)/2 = 0, so N[2]+N[5] = 2(p+1).
+  Both orders share a factor of 4 (consequence of 4 | 2(p+1) and the CM structure).
+- Pair (3,5): gcd(N[3], N[5]) = **3**.
+  N[3] = p+1+t (quadratic-twist order, composite), N[5] = p+1-(t+3s)/2; both divisible by 3.
+  This is a CM arithmetic consequence (j=0 curves have CM by Z[ζ₃]; 3 divides the order
+  of certain twists when p ≡ 1 mod 3).
+- Two remaining [3]-class pairs that are NOT glueable: (2,5) [gcd=4] and (3,5) [gcd=3].
+
+**Key new structural fact:**
+secp256k1 (k=0) Howe-glues with **THREE** sextic twists — not just the quadratic twist (k=3,
+known since `howe_gluing_test.gp`) but also k=2 (trace = -(t+3s)/2 ≈ -3×10³⁸) and k=5
+(trace = +(t+3s)/2 ≈ +3×10³⁸). Each of these 3 pairs yields, by Howe's theorem, a
+genus-2 Jacobian Jac(C)/F_p with a (2,2)-isogeny Jac(C) → E_0 × E_k.
+
+**CM traces of the 6 twists** (from 4p = t²+3s², s=303414439467246543595250775667605759171):
+| k | trace T_k | order N_k |
+|---|-----------|-----------|
+| 0 | +432420386565659656852420866390673177327 | 115792...494337 (n_secp256k1, prime) |
+| 1 | -238911465918039986966665730306072050093 | 115792...721757 |
+| 2 | -671331852483699643819086596696745227420 | 115792...899084 |
+| 3 | -432420386565659656852420866390673177327 | 115792...848991 (n_quad_twist, composite) |
+| 4 | +238911465918039986966665730306072050093 | 115792...621571 |
+| 5 | +671331852483699643819086596696745227420 | 115792...444244 |
+
+**ECDLP implications**: None. Each glueable pair yields a genus-2 Jacobian of order
+≈ p², and the best HCDLP algorithms (Pollard ρ on genus-2: cost ≈ p; Gaudry–Diem
+index calculus on genus-2 over F_p: heuristic cost ≈ p) are strictly worse than
+ECDLP on E itself (cost ≈ p^{1/2}). Per PAPER_STRUCTURAL_COMPLETENESS.md, this
+is a structural hit confirming the richness of the cover structure, not an attack.
+
+### Next step proposal
+Two candidates:
+
+**Thread 19 (GLV-HNP Phase 2 toy)**: Run `secp256k1_cm_audit/glv_hnp_phase2_toy.gp`
+to try the GLV-aware lattice attack on a 32-bit toy curve.
+- Expected output: lattice either recovers d (validates the attack direction) or
+  fails with a concrete error (narrows the gap to close).
+- This is original priority-5 and has never been run.
+
+**Thread 20 (Howe-glueable pair characterisation)**: Determine algebraically which
+[3]-class pairs satisfy H3.
+- Observation: 4 of 6 [3]-class pairs are glueable; exactly (2,5) and (3,5) fail H3.
+  The failing pairs have T_i + T_j = 0 (for (2,5)) or share the CM factor 3 (for (3,5)).
+- Claim: a [3]-class pair (i,j) fails H3 iff T_i + T_j = 0 (mod 2) or specific CM
+  structure forces gcd > 1. Formalise and verify for a second j=0 prime p'.
+- This would complete the full classification of Howe-glueable sextic-twist pairs for
+  any j=0 prime-order curve.
+
+Recommend **Thread 19** next (has never been run; direct continuation of original
+priority list; concrete executable outcome).
+
+### Commits made
+`[hash to be filled]` autolab 2026-07-23: Thread 18 — 5/15 sextic-twist pairs Howe-glueable; gcd failures explained
