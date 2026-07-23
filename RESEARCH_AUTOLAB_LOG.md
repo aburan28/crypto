@@ -5669,4 +5669,4 @@ Recommend Thread 19 as next: concrete implementation milestone on the GLV-HNP di
 well-bounded (toy scale), can succeed in one session.
 
 ### Commits made
-[to be filled after commit]
+`d351f10` autolab 2026-07-23: Thread 18 — 5/15 sextic-twist pairs Howe-glueable; secp256k1 has 3 partners; complete enumeration in paper
