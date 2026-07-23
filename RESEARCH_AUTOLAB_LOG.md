@@ -5670,3 +5670,4 @@ Fallback: if gp script fails, port to Python using the existing `howe_sextic_twi
 as template.
 
 ### Commits made
+`d68186c` autolab 2026-07-23: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 glueable; gcd obstruction classified
