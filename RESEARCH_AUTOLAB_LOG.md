@@ -5690,4 +5690,4 @@ Recommend Thread 19 (GLV-HNP Phase 2) next as it's a different direction
 that has been dormant the longest.
 
 ### Commits made
-[to be filled after commit]
+`5b9de0f` autolab 2026-07-23: Thread 18 — Howe sextic-twist all-15-pairs check; 5/15 glueable
