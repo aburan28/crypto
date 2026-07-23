@@ -5682,4 +5682,4 @@ Recommend **Thread 19** next (has never been run; direct continuation of origina
 priority list; concrete executable outcome).
 
 ### Commits made
-`[hash to be filled]` autolab 2026-07-23: Thread 18 — 5/15 sextic-twist pairs Howe-glueable; gcd failures explained
+`a7833a0` autolab 2026-07-23: Thread 18 — 5/15 sextic-twist pairs Howe-glueable; gcd failures explained
