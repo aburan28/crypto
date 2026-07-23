@@ -5574,3 +5574,113 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 — Thread 19: GLV-HNP bounded-k₂ threat model toy demonstration
+
+### Task
+Execute Thread 19: GLV-aware HNP Phase 2 — run the toy k₁-only-bias demonstration
+(`glv_hnp_phase2_toy.gp` already exists but deferred the lattice with unbounded k₂).
+The goal was to identify the correct threat model, verify brute-force d recovery,
+and set up the lattice dimension analysis for Thread 20.
+
+### Context
+All 6 original priority threads are CLOSED/BLOCKED/DEAD END (last updated 2026-07-08).
+The 2026-07-20 log (Thread 17) proposed Thread 18 (Howe sextic twists = Thread 3, already
+CLOSED 2026-07-08) and Thread 19 (GLV-HNP toy, not yet run). Thread 19 is the concrete
+next step.
+
+### Work done
+
+**Script written**: `secp256k1_cm_audit/glv_hnp_bounded_k2_toy.gp`
+
+**Threat model analysis** — identified the fundamental flaw in `glv_hnp_phase2_toy.gp`:
+- That script used k₂ ∈ [0, n) (unbounded). For any target T, choose k₁=0,
+  k₂=T·λ⁻¹ mod n → k₁+λ·k₂ ≡ T for ANY T. So the bias set S = ℤₙ, and every
+  candidate d' passes all m signature checks. Attack is impossible.
+- The correct GLV threat model uses the Babai rounding bound: k₁, k₂ ∈ [-√n, √n].
+  So K2_BOUND = floor(√199) = 14.
+
+**Bias set S computation**:
+- S = {k₁ + λ·k₂ mod n : k₁ ∈ [0,5), k₂ ∈ [0,14)}
+- |S| = 70 out of n = 199 (density = 0.352)
+- Toy curve: y² = x³+2 over F₂₁₁, n=199, λ=106 (same as glv_hnp_phase2_toy.gp)
+
+**False positive analysis** with m signatures:
+- m=5 : FP ≈ 1.07 (too many)
+- m=8 : FP ≈ 0.046
+- m=10: FP ≈ 0.0057 (chosen)
+- m=12: FP ≈ 0.00071
+
+**Signature generation**: planted d=62, generated 10 valid ECDSA signatures with
+k₁ ∈ [0,5), k₂ ∈ [0,14). Sanity check: A_i+B_i·d ≡ k₁_i+λ·k₂_i (mod n) for all 10.
+
+**Brute-force d recovery**:
+- For each d' ∈ [1,198]: check A_i+B_i·d' mod n ∈ S for all i=1..10
+- Found 1 candidate: [62] = d_secret ✓
+- **RESULT: UNIQUE RECOVERY CONFIRMED d=62**
+
+**Unbounded comparison** (wrong d=63):
+- Bounded (k₂ ∈ [0,14)): 2/10 sigs pass → rejected ✓
+- Unbounded (k₂ ∈ [0,199)): 10/10 sigs pass → any d accepted (zero info gain) ✓
+
+**Lattice dimension analysis** (Thread 20 setup):
+- Dimension: 2m+2 = 22
+- Target short vector components:
+  - k_{i,1} entries: ~5
+  - d·K1_BOUND: ~995 (DOMINATES vs K2² = 196)
+  - k_{i,2}·K2_BOUND: ~196
+- Target norm ≈ 586, Minkowski bound ≈ 39.6
+- Imbalance: d·K1 = 995 >> K2² = 196. Standard LLL won't find short vector.
+- **Fix identified**: replace d by d mod (n/K2_BOUND) ≈ 14 steps → d-entry reduces
+  to (n/K2)·K1 ≈ 70 ≈ K2². This balanced lattice is deferred to Thread 20.
+
+**PARI syntax notes** (for reproducibility): PARI/GP does not support embedded `{...}`
+inside `for()`/`while()` body; multi-arg `print()` calls spanning multiple lines inside
+loops need to be on a single line or wrapped in outer `{...}`. All issues resolved in
+the final script.
+
+**Tests**: `cargo test --test curve_audit` → 5/5 pass (new script is pure PARI, no
+Rust changes).
+
+### Findings
+
+**Confirmed**: GLV-HNP with bounded k₂ (Babai GLV constraint) is a valid attack
+direction. Density |S|/n = 70/199 ≈ 0.35 gives unique d recovery with m=10 signatures
+on a toy n=199 curve.
+
+**Confirmed**: Unbounded k₂ (any k₂ ∈ [0,n)) renders the bias set S = ℤₙ, giving
+zero discriminating power. The threat model in `glv_hnp_phase2_toy.gp` was incorrect.
+
+**Key theorem verified empirically**: For the bounded threat model with K1_BOUND=5,
+K2_BOUND=14, density=0.352, and m=10 signatures, the expected false positive count is
+0.0057, giving near-certain unique recovery. PARI brute-force confirms: 1 candidate,
+matches planted d.
+
+**Lattice challenge identified**: The d·K1_BOUND entry (≈995) dominates the k_{i,2}·K2_BOUND
+entries (≈196) by 5×. LLL will not find the short vector in this unbalanced form.
+The fix — reduce d modulo n/K2_BOUND — collapses the d entry from ≈n·K1 ≈ 995 to
+≈K2·K1 ≈ 70, achieving balance with the k_{i,2} entries. This transformed lattice
+is the Thread 20 implementation target.
+
+**Literature note**: The bounded-k₂ vs unbounded-k₂ distinction for GLV-HNP does not
+appear to be explicitly analyzed in Nguyen-Shparlinski (2002), Aranha et al. LadderLeak
+(CCS 2020), or Bauer-Naccache (2007). The correct threat model requires the Babai
+rounding bound on both k₁ AND k₂; attacking only the k₁ bias while treating k₂ as
+unbounded is provably impossible (S=ℤₙ). This is a necessary prerequisite clarification
+for any published GLV-HNP attack.
+
+### Next step proposal
+
+**Thread 20 (priority): 22-dim balanced PARI LLL lattice attack.**
+Implement the balanced GLV-HNP lattice:
+1. Replace d with d' = d mod (n/K2_BOUND) (reduces d-entry from ≈995 to ≈70)
+2. Build the (2m+2)-dim lattice with properly scaled K1, K2 diagonals
+3. Run `qflll()` (PARI LLL) and check if d is in the short vectors
+4. Verify on the same toy curve (n=199, λ=106, d=62)
+Expected: PARI LLL recovers d=62 from the 22-dim lattice with m=10 signatures.
+If LLL succeeds on toy, scale to n≈2^64 and then P-256 before secp256k1.
+
+### Commits made
+`autolab 2026-07-23: Thread 19 — GLV-HNP bounded-k₂ toy (PARI, unique d recovery confirmed)`
