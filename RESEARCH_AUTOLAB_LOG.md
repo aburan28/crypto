@@ -5574,3 +5574,120 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists (all 15 pairs).
+Chosen because: the 2026-07-20 log entry explicitly proposed this as the
+next-best concrete step. No work had been done since 2026-07-20.
+secp256k1 has 6 sextic-twist iso-classes over F_p (p ≡ 1 mod 6); the
+question was whether any of the C(6,2)=15 pairs satisfy all three Howe
+(1996) conditions for (2,2)-gluing to a smooth genus-2 Jacobian.
+
+### Work done
+- Confirmed PARI/GP unavailable (gp not in PATH). Used Python instead.
+- Wrote `secp256k1_cm_audit/thread18_howe_sextic_all15.py` (new script,
+  ~200 lines). Key design choices:
+  - Trace assignment via CM formula 4p=t²+3s² (no scalar mult needed;
+    all 6 traces ±t, ±(t±3s)/2 determined analytically).
+  - 2-torsion pattern via cube test: for p≡1(mod 3), x³+b has pattern
+    [1,1,1] iff (-b)^{(p-1)/3} ≡ 1 (mod p), else [3] (irreducible).
+    Intermediate case [1,2] is impossible for p≡1(mod 3).
+  - gcd(n_i,n_j) computed directly from the 6 curve orders.
+- Ran script; completed in ~3 seconds. All 6 orders computed.
+  Primitive 6th root found: u = 3^{(p-1)/6} mod p (g=3 is a generator).
+- Cargo test: 5/5 pass (7.06s). No regressions.
+
+### Findings
+
+**Primitive root**: g=3, u = 3^{(p-1)/6} mod p.
+
+**Six sextic-twist b-values** (b_k = 7·u^k mod p):
+- k=0: b=7 (secp256k1)
+- k=1: b=74006327410955531610686119148131802202378273159744686605380752159437092610874
+- k=2: b=74006327410955531610686119148131802202378273159744686605380752159437092610867
+- k=3: b=p-7 (quadratic twist)
+- k=4: b=41785761826360663812884865860556105650891711505895877434076831848471742060789
+- k=5: b=41785761826360663812884865860556105650891711505895877434076831848471742060796
+
+**2-torsion pattern split**:
+- k ∈ {1,4}: pattern [1,1,1] — -b_k is a cube mod p; E has F_p-rational
+  2-torsion; curve order is even.
+- k ∈ {0,2,3,5}: pattern [3] — x³+b_k irreducible; no F_p-rational
+  2-torsion; curve order is odd (secp256k1 has prime order = odd ✓).
+
+**Structure**: -b_k = -7·u^k. Since u has order 6, the cube test
+(-7·u^k)^{(p-1)/3} = 1 holds for exactly k ≡ k_0 (mod 3) where
+k_0 is the unique offset making -7·u^{k_0} a cube. Here k_0 = 1
+(and 1+3=4), giving the 2-element subset {1,4}.
+
+**All 15 pairwise Howe results**:
+
+| Pair  | H1(n≠n) | H2(same 2-tor) | H3(gcd=1) | gcd     | Glueable? |
+|-------|---------|----------------|-----------|---------|-----------|
+| (0,1) | ✓       | ✗ [3] vs [111] | ✓         | 1       | no        |
+| (0,2) | ✓       | ✓ [3] vs [3]   | ✓         | 1       | **YES**   |
+| (0,3) | ✓       | ✓ [3] vs [3]   | ✓         | 1       | **YES**   |
+| (0,4) | ✓       | ✗ [3] vs [111] | ✓         | 1       | no        |
+| (0,5) | ✓       | ✓ [3] vs [3]   | ✓         | 1       | **YES**   |
+| (1,2) | ✓       | ✗ [111] vs [3] | ✓         | 1       | no        |
+| (1,3) | ✓       | ✗ [111] vs [3] | ✗         | 3       | no        |
+| (1,4) | ✓       | ✓ [111] vs[111]| ✓         | 1       | **YES**   |
+| (1,5) | ✓       | ✗ [111] vs [3] | ✗         | 3       | no        |
+| (2,3) | ✓       | ✓ [3] vs [3]   | ✓         | 1       | **YES**   |
+| (2,4) | ✓       | ✗ [3] vs [111] | ✓         | 1       | no        |
+| (2,5) | ✓       | ✓ [3] vs [3]   | ✗         | 4       | no        |
+| (3,4) | ✓       | ✗ [3] vs [111] | ✓         | 1       | no        |
+| (3,5) | ✓       | ✓ [3] vs [3]   | ✗         | 3       | no        |
+| (4,5) | ✓       | ✗ [111] vs [3] | ✓         | 1       | no        |
+
+**Summary**: **5 / 15 pairs are Howe-glueable**: (0,2), (0,3), (0,5), (1,4), (2,3).
+
+- H1 never fails: all 6 traces are distinct (6 distinct curve orders).
+- H2 fails for 8 pairs: all cross-pattern pairs (one from {1,4},
+  one from {0,2,3,5}).
+- H3 fails for 4 pairs:
+  - (1,3): gcd(n_1, n_3) = 3
+  - (1,5): gcd(n_1, n_5) = 3
+  - (2,5): gcd(n_2, n_5) = 4
+  - (3,5): gcd(n_3, n_5) = 3
+  These small-gcd failures are structurally interesting — the sextic-twist
+  orders share small prime factors despite very different trace values.
+
+**Which pairs include secp256k1 (k=0)**:
+- (0,2), (0,3), (0,5) are all glueable. So secp256k1 is glueable with
+  3 out of its 5 non-trivial sextic twists.
+- (0,3) = secp256k1 × quad twist was already confirmed in thread 3 work.
+- (0,2), (0,5) are **new findings** (sextic twists beyond quad twist).
+
+**ECDLP implication**: None. For each glueable pair (i,j), Howe's theorem
+guarantees a smooth genus-2 curve C/F_p with Jac(C) →(2,2)→ E_i × E_j.
+But |Jac(C)(F_p)| = n_i · n_j ≈ p², and Pollard-ρ on Jac costs √(p²) = p,
+strictly worse than ECDLP on secp256k1 (cost √n ≈ p^{1/2}).
+
+### Next step proposal
+Two candidate threads:
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` already exists; no PARI
+so re-check if `glv_hnp_phase2_lattice.gp` or a Python analogue exists.
+Run the 32-bit toy GLV-aware lattice attack; check if d is recovered.
+This is a self-contained computation: define a small curve with CM disc=-3
+and endomorphism, set up the GLV-HNP lattice, run LLL (or just use Python's
+`sympy.Matrix.lll()` / `fpylll` if available).
+
+**Thread 20 (new): Weil-polynomial products for glueable pairs.**
+For each of the 5 glueable pairs, compute the quartic Weil polynomial of
+Jac(C) = (x²-T_ix+p)(x²-T_jx+p) and verify it is the Weil polynomial of
+a genuine genus-2 Jacobian (i.e., has real eigenvalues with |α_i|=√p).
+This gives the Igusa invariants entry-point for explicit cover construction.
+Could connect back to the CHLRS Igusa formula work (Thread 2).
+
+Recommend Thread 19 (GLV-HNP Phase 2) next as it's a different direction
+that has been dormant the longest.
+
+### Commits made
+[to be filled after commit]
