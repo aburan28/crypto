@@ -5574,3 +5574,99 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists: check all 15 pairs of secp256k1's 6 sextic twists for Howe (H1)+(H2)+(H3) conditions.
+Chosen because: explicitly proposed in the 2026-07-20 entry as the top next-step; no runs on 2026-07-21 or 2026-07-22; the script `howe_sextic_twists_all15.gp` already existed in the repo and only needed to be executed.
+
+### Work done
+- Installed pari-gp (`apt-get install --fix-missing pari-gp`; was absent from container).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` on secp256k1's actual 256-bit prime p.
+- Computed gcd values for all 4 H3-failing pairs via a separate short gp session.
+- Derived the algebraic reason for each gcd obstruction from the CM trace formula.
+
+### Findings
+
+**2-torsion dichotomy (7 words: half split, half don't):**
+Among the 6 sextic twists of secp256k1 (y²=x³+b_k, b_k = 7·u^k mod p):
+- **Type-A** (x³+b_k irreducible over F_p, deg-pattern [3]): k = 0,2,3,5 (four twists)
+- **Type-B** (x³+b_k splits completely, deg-pattern [1,1,1]): k = 1,4 (two twists)
+
+Condition (H2) holds iff both twists have the same type.
+
+**Pairwise table (abbreviated):**
+
+| Pair (i,j) | Type | H1 | H2 | H3 | Glueable? |
+|------------|------|----|----|-----|-----------|
+| (0,1) | A×B | ✓ | ✗ | ✓ | no |
+| (0,2) | A×A | ✓ | ✓ | ✓ | **YES** |
+| (0,3) | A×A | ✓ | ✓ | ✓ | **YES** (secp256k1 × quad-twist, previously known) |
+| (0,4) | A×B | ✓ | ✗ | ✓ | no |
+| (0,5) | A×A | ✓ | ✓ | ✓ | **YES** |
+| (1,2) | B×A | ✓ | ✗ | ✓ | no |
+| (1,3) | B×A | ✓ | ✗ | **✗ (gcd=3)** | no |
+| (1,4) | B×B | ✓ | ✓ | ✓ | **YES** |
+| (1,5) | B×A | ✓ | ✗ | **✗ (gcd=3)** | no |
+| (2,3) | A×A | ✓ | ✓ | ✓ | **YES** |
+| (2,4) | A×B | ✓ | ✗ | ✓ | no |
+| (2,5) | A×A | ✓ | ✓ | **✗ (gcd=4)** | no |
+| (3,4) | A×B | ✓ | ✗ | ✓ | no |
+| (3,5) | A×A | ✓ | ✓ | **✗ (gcd=3)** | no |
+| (4,5) | B×A | ✓ | ✗ | ✓ | no |
+
+**Result: 5 of 15 pairs are Howe-glueable: (0,2), (0,3), (0,5), (1,4), (2,3).**
+
+Four are "new" (beyond the previously known (0,3) pair).
+
+**Six twist orders:**
+```
+N_0 = 115792...494337  (secp256k1, prime)
+N_1 = 115792...721757  (type-B; 3 | N_1)
+N_2 = 115792...899084  (type-A; 4 | N_2)
+N_3 = 115792...848991  (quad-twist; 3 | N_3)
+N_4 = 115792...621571  (type-B; 3 ∤ N_4, 4 ∤ N_4)
+N_5 = 115792...444244  (type-A; 3 | N_5 AND 4 | N_5)
+```
+
+**Algebraic reason for H3 obstructions:**
+
+*gcd=3 (pairs (1,3), (1,5), (3,5)):*
+The CM formula 4p = t²+3s² with t≡1 (mod 3), s≡0 (mod 3) gives traces
+T_1 = (t-3s)/2, T_3 = -t, T_5 = (t+3s)/2. Modulo 3, all three ≡ 2 (mod 3)
+since 3|s eliminates the s-terms and 1/2 ≡ 2 (mod 3). Hence p+1-T_k ≡ 0 (mod 3)
+for k ∈ {1,3,5}. Any pair within this set shares factor 3, so gcd ≥ 3.
+
+*gcd=4 (pair (2,5)):*
+p ≡ 3 (mod 4), so p+1 ≡ 0 (mod 4). Traces T_2 = -(t+3s)/2 and T_5 = (t+3s)/2
+satisfy N_2 + N_5 = 2(p+1) ≡ 0 (mod 8), and separately s ≡ 7 (mod 8) forces
+4 | N_2 and 4 | N_5, so gcd(N_2, N_5) ≥ 4. Confirmed: gcd=4.
+
+**ECDLP impact:** None. Each glueable pair gives a genus-2 curve C/F_p with
+Jac(C) → E_i × E_j via (2,2)-isogeny; genus-2 HCDLP is ≥ √(p²) ≈ p cost
+(Pollard ρ) or ~ O(p) heuristic (Gaudry index calculus). Both are worse than
+ECDLP on secp256k1 itself (cost ~ p^{1/2}).
+
+**Structural consequence:**
+All type-A × type-A pairs that COULD be glueable (i.e., H2 holds): 6 pairs.
+Of these, 4 are glueable (gcd=1) and 2 fail H3 (gcd=3 or 4). The H3 obstructions
+are exactly predicted by divisibility mod 3 (from s≡0 mod 3) and mod 4 (from p≡3 mod 4).
+This is a complete classification — no further pairs exist.
+
+**Consistency check:**
+Pair (0,3) was already confirmed glueable by `howe_gluing_test.gp` (see earlier log
+entries). The current script independently confirms (0,3) as glueable ✓.
+
+### Next step proposal
+Thread 19: GLV-HNP Phase 2 toy.
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` already exists; run it and check
+whether the GLV-aware lattice recovers d on a 32-bit toy curve.
+Expected: either d is recovered (validates the attack direction) or a concrete
+failure mode (e.g., lattice rank deficiency) is documented.
+Fallback: if gp script fails, port to Python using the existing `howe_sextic_twists_check.py`
+as template.
+
+### Commits made
