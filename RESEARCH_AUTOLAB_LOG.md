@@ -5574,3 +5574,99 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+
+**Thread 20: GLV-HNP Phase 2 — toy-scale implementation with GLV-bounded k₂**
+
+Previous session (2026-07-20, Thread 17) proposed Thread 18 (Howe sextic
+twists) and Thread 19 (GLV-HNP Phase 2 toy) as next steps. Thread 18 had
+already been completed as "Thread 3 / 2026-07-08" (5/15 Howe pairs glueable).
+This session continues the GLV-HNP Phase 2 implementation, numbered Thread 20
+to avoid ambiguity with the proposal numbering.
+
+### Work done
+
+Created `secp256k1_cm_audit/thread20_glv_lattice.gp` — a complete PARI/GP
+script implementing the GLV-HNP Phase 2 toy attack:
+
+**Setup**: j=0 prime-order toy curve y²=x³+2 over F_211, n=199, λ=106
+(λ²+λ+1≡0 mod n confirmed).
+
+**Threat model**: m=5 signatures; k₁<K1=3 (exploited bias); k₂<B2=⌊√199⌋=14
+(GLV-realistic bound). False alarm rate per sig: K1·B2/n≈0.211; for all 5
+sigs jointly: ≈0.083 expected false alarms under wrong d.
+
+**Method 1 (Brute force)**: Iterate d∈[1,n). For each d, check all m
+signatures: T_i=(A_i+B_i·d) mod n; search k₂∈[0,B2) for k₁=T_i−λ·k₂ mod n
+< K1. Complexity O(n·m·B2)=O(n^{3/2}·m). Result: 1 candidate found, d=85
+(planted d=85), **correct=1**.
+
+**Method 2 (Integer qflll, 2m+2 dim)**: Built a 12×12 integer Kannan lattice
+with n on the diagonal (mod-n rows), B_i in the d-row, −λ in the k₂-rows, and
+A_i as the Kannan embedding target. Ran `qflll(Mt, 1)` on the transposed
+basis. Result: d=1 (wrong), **correct=0**. The LLL found short vectors with
+‖v‖²=205 and Kannan=0 — combinations of n-diagonal rows, not the secret-d
+vector.
+
+**Mathematical analysis**: Target vector has d·K1=255 as dominant entry
+(d=85, K1=3). ‖target‖≈259. Gaussian minimum≈13. Ratio=19.73>>1 →
+**UNFAVORABLE**: the integer lattice target is far outside the short-vector
+regime; LLL cannot recover d.
+
+**Full-range k₂ baseline**: For k₂∈[0,n) (no GLV bound), checked d=1..20:
+all 20 are trivially consistent with all 5 signatures (20/20). Every d has
+some (k₁,k₂) pair per signature — brute force fails with unbounded k₂.
+
+All 5 `cargo test --test curve_audit` tests pass.
+
+### Findings
+
+**GLV-bounded k₂ enables brute force at toy scale**: With k₂<√n (GLV-realistic
+half-scalar size), the O(n^{3/2}·m) brute force correctly and uniquely
+identifies d. The false-alarm analysis predicts ≈0.083 false alarms jointly
+across m=5 signatures, and empirically only d=85 was found. At secp256k1
+scale (n≈2^256, B2≈2^128), this is O(2^384) — completely infeasible.
+
+**Integer lattice fails as expected**: The unscaled 2m+2=12 dimensional
+Kannan lattice cannot recover d. Root cause: the target vector's d·K1 entry
+(≈n·K1) is O(n) in norm, roughly 20× larger than the Gaussian minimum. LLL
+finds short combinations of the n-modular rows (trivial lattice elements with
+Kannan=0) instead.
+
+**Fix for secp256k1**: Use floating-point qflll with d scaled by K1/n.
+The substitution d→d' where d'=d·(K1/n) brings the d-entry of the target
+vector from d·K1≈n·K1 down to K1·(d/n)≈K1~3 (since d<n). With this scaling
+the target norm becomes ≈K1·√(2m+1)≈3·√11≈10, which is BELOW the Gaussian
+minimum (~13 for the toy params). This fractional-scaled qflll variant is
+described in RESEARCH_GLV_HNP_PHASE2.md §2 and is the natural Phase 2 next
+step.
+
+**k₂ model matters**: The attack requires GLV-realistic k₂<√n. With
+unrestricted k₂∈[0,n), every candidate d trivially satisfies all m signature
+constraints — the attacker cannot distinguish d from any other value. The bias
+must appear in k₁ (via a side-channel on the k₁ code path) AND the
+implementation must use GLV so that k₂ is naturally bounded by ~√n.
+
+### Next step proposal
+
+**Thread 21 (immediate)**: Implement the fractional-scaled qflll attack on the
+same toy curve. Replace the integer d-row scaling (K1) with floating-point
+scaling K1/n·n_val=K1, and represent d in the lattice as d_scaled=d·K1
+normalized so the Gaussian heuristic predicts success. Specifically:
+
+- Scale the lattice: divide the d-row entries by n and multiply by K1 (or
+  equivalently use rational arithmetic via `matsolve` / `lindep` approach)
+- For toy scale: use exact rational representation (PARI supports rationals
+  natively with Mod arithmetic)
+- Verify the LLL recovers d=85 on the same 5 signatures
+- Document the minimal required K1 (bias bits) for success as a function of m
+
+**Thread 22 (follow-up)**: Scale to n≈2^60 synthetic curve with K1=2^10
+(10-bit k₁ bias) and BKZ instead of LLL. This bridges the gap between toy
+(n≈200) and secp256k1 (n≈2^256).
+
+### Commits made
+
