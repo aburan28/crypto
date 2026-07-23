@@ -5714,4 +5714,4 @@ thread is BLOCKED until SageMath is available.
 (a weaker claim) and gives a concrete genus-2 curve example for the paper.
 
 ### Commits made
-`[hash]` autolab 2026-07-23: Thread 20 proposal + Python port thread16_python_verify.py (64/64)
+`571fbe5` autolab 2026-07-23: Thread 20 proposal + Python port thread16_python_verify.py (64/64)
