@@ -5644,4 +5644,4 @@ Swap T assignments to match verified ordering. Add an empirical verification ste
 Recommend Thread 20 first (small, cleans up a known bug); Thread 19 is the main research thread.
 
 ### Commits made
-(to be filled in after commit)
+`f6c1f8e` autolab 2026-07-23: Thread 18 — Howe gluing all 15 sextic-twist pairs; 5/15 glueable; trace-assignment bug found and fixed via ellcard verification
