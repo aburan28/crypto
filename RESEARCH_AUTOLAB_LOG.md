@@ -5574,3 +5574,99 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — complete Howe-gluing enumeration for all 15 pairs of j=0 sextic twists of secp256k1.
+Chosen because: Thread 17 proposed this as the next concrete step; prior script
+`howe_sextic_twists_all15.gp` existed but had never been run; measurable progress
+from prior Howe work (Thread 17) makes this a direct continuation; well-scoped for one session.
+
+### Work done
+- Installed pari-gp (absent from container; installed via `apt-get install -y --fix-missing pari-gp`).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` — clean output, all 15 pairs checked.
+- Wrote and ran `secp256k1_cm_audit/thread18_sextic_analysis.gp` — GCD analysis, primality
+  check of all 6 orders, trace structure of glueable pairs, cubic-residue classification.
+- Updated `paper/structural_completeness.tex`:
+  - Added `\newcommand{\ck}{\checkmark}` to preamble.
+  - Clarified labeling footnote in Prop. proof (line 616–617): fp3-script labeling vs. all15 labeling,
+    with map k_{fp3} = (5*k_{all15} mod 6).
+  - Added `\begin{remark}[Complete sextic-twist Howe enumeration]\label{rem:sextic-all15}` after
+    Corollary~\ref{cor:fp3cost}, with complete 5/15 table.
+- Ran `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**MAIN RESULT (Thread 18):**
+Of the C(6,2)=15 pairs of secp256k1 sextic twists, exactly **5 are Howe-glueable**:
+
+| Pair (0-based) | H1 | H2 | H3 (gcd) | Glueable |
+|---|---|---|---|---|
+| (0,2) | ✓ | ✓ | 1 | YES |
+| (0,3) | ✓ | ✓ | 1 | YES |
+| (0,5) | ✓ | ✓ | 1 | YES |
+| (1,4) | ✓ | ✓ | 1 | YES |
+| (2,3) | ✓ | ✓ | 1 | YES |
+| (2,5) | ✓ | ✓ | 4 | NO |
+| (3,5) | ✓ | ✓ | 3 | NO |
+| (remaining 8) | — | NO | — | NO |
+
+**2-torsion classification:**
+- Class [3] (x³+b_k irreducible, b_k NOT a cube mod p): k=0,2,3,5
+- Class [1,1,1] (x³+b_k fully split, b_k a cube mod p): k=1,4
+- (H2) holds iff both twists in same class (7 pairs total with H2=YES; 2 fail H3).
+
+**Order primality:**
+- N[0] (secp256k1): PRIME.
+- N[1]: COMPOSITE; factors include 3, 199, 18979, large primes.
+- N[2]: COMPOSITE; factors include 2², 7², 10903, 5290657, ...
+- N[3]: COMPOSITE; factors include 3², 13², 3319, 22639, ...
+- N[4]: COMPOSITE; factors include 109903, 12977017, 383229727, ...
+- N[5]: COMPOSITE; factors include 2², 3, 20412485227, ...
+
+**H3 failures explained:**
+- gcd(N[2], N[5]) = 4: both divisible by 4 (each even since [1,1,1]-type orders include even cofactors).
+
+  Wait — N[2] and N[5] are k=2,5 which are both [3]-type, not [1,1,1]. The shared factor 4 comes from
+  N[2] = 4 · (cofactor with 7², 10903, ...) and N[5] = 4 · (cofactor with 3, ...).
+- gcd(N[3], N[5]) = 3: N[3] divisible by 9 and N[5] by 3.
+
+**Secp256k1's 3 glueable partners confirmed:** k=2,3,5 (0-based) = k=1,3,4 (fp3-script labeling).
+  All three have [3]-pattern (x³+b_k irreducible) → F_{p³} obstruction applies → cover-attack
+  cost ≫ 2^128 (as per Corollary~\ref{cor:fp3cost}).
+
+**Two non-secp256k1 glueable pairs:**
+- (1,4): The two [1,1,1]-split twists; they are quadratic twists of each other (T[4] = -T[1]).
+  N[1] and N[4] are both composite with gcd=1; Howe cover exists but does NOT involve secp256k1.
+- (2,3): k=2 ([3]-type, -(t+3s)/2 trace) and k=3 (quadratic twist of secp256k1, -t trace).
+  Neither of these provides an ECDLP attack on secp256k1.
+
+**GLV-HNP Phase 2 toy (secondary):** also ran `glv_hnp_phase2_toy.gp`; toy curve E: y²=x³+2
+over F_211, n=199 (prime), λ=106. Sanity check passed (all 5 signatures satisfy A+Bd ≡ k₁+λ·k₂ mod n).
+Lattice construction deferred (as per existing note; no regression).
+
+### Next step proposal
+
+**Thread 19 (priority-5): Implement the GLV-HNP Phase 2 lattice on the 32-bit toy curve.**
+The toy setup from `glv_hnp_phase2_toy.gp` is ready (n=199, λ=106, 5 signatures planted).
+Implement the (2m+1)×(2m+1) lattice from the script's §"Phase 2 lattice formulation":
+- Rows 1..m: n·e_i (mod-n constraint per signature)
+- Row m+1: (B_1, ..., B_m, K1_BOUND, 0, ..., 0) (d-embedding row)
+- Rows m+2..2m+1: (-λ·e_i, 0, n·e'_i) (GLV decomposition rows)
+Apply LLL/BKZ (PARI's `lll()`) and extract d from the short vector.
+Expected outcome: d recovered correctly at toy scale (n=199 < 2^8), validating the lattice design.
+If successful: extend to a 64-bit toy to stress-test scalability.
+
+**Thread 20 (priority-2): CHLRS Igusa formula.**
+Look up Cardona-Howe-Lercier-Ritzenthaler-Streng (CHLRS) paper; implement the explicit
+(E×E^t)/Γ_α Igusa-Clebsch invariants in PARI using the Rosenhain-root gluing formula
+documented in `secp256k1_cm_audit/chlrs_igusa_formula.gp` (already exists, check status).
+
+Recommend Thread 19 as next: concrete implementation milestone on the GLV-HNP direction;
+well-bounded (toy scale), can succeed in one session.
+
+### Commits made
+[to be filled after commit]

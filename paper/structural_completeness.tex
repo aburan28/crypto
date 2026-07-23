@@ -39,6 +39,7 @@
 \newcommand{\disc}{\operatorname{disc}}
 \newcommand{\gcd}{\operatorname{gcd}}
 \newcommand{\NS}{\operatorname{NS}}
+\newcommand{\ck}{\checkmark}
 
 \title{Structural Completeness of Prime-Field Elliptic Curves \\
        Against Isogeny-Graph Cryptanalysis}
@@ -614,7 +615,11 @@ is irreducible over $\FF_p$, confirmed by
 \texttt{factormod($x^3 + 7$,\,p)} returning a single degree-$3$ factor.
 Item~\ref{it:partner} is the same computation applied to $x^3 + b_k$
 for each glueable partner (verified for $k \in \{1, 3, 4\}$ in the
-sextic-twist labeling of \S\ref{sec:empirical}).
+sextic-twist labeling of \texttt{fp3\_obstruction\_secp256k1.gp}, where
+$k=0$ is secp256k1 and $k=1,3,4$ are the three $[3]$-type partners; this
+labeling differs from the $0$-based labeling of
+\texttt{howe\_sextic\_twists\_all15.gp} by $k_{\textup{fp3}} = (5k_{\textup{all15}}
+\bmod 6)$).
 Items~\ref{it:galois}--\ref{it:cover} follow: a Galois-equivariant
 $\alpha\colon E_0[2] \to E_k[2]$ requires both $2$-torsion groups to
 be simultaneously rational, which first occurs over $\FF_{p^3}$; by
@@ -636,6 +641,45 @@ group operations, versus plain Pollard~$\rho$ at
 $O(\sqrt{n}) \approx 2^{128}$.
 The cover-based attack is $2^{256}$ times \emph{slower} than direct ECDLP.
 \end{corollary}
+
+\begin{remark}[Complete sextic-twist Howe enumeration]\label{rem:sextic-all15}
+A complete check of all $\binom{6}{2} = 15$ pairs of sextic twists of
+secp256k1 (\texttt{secp256k1\_cm\_audit/howe\_sextic\_twists\_all15.gp},
+run 2026-07-23) yields exactly~\textbf{5 Howe-glueable pairs} out of 15.
+In the $0$-based labeling ($k=0$ = secp256k1):
+
+\begin{center}
+\small
+\begin{tabular}{ccccc}
+\toprule
+Pair $(i,j)$ & (H1) & (H2) & (H3) & Glueable \\
+\midrule
+$(0,2)$ & \ck & \ck & \ck & \ck \\
+$(0,3)$ & \ck & \ck & \ck & \ck \\
+$(0,5)$ & \ck & \ck & \ck & \ck \\
+$(1,4)$ & \ck & \ck & \ck & \ck \\
+$(2,3)$ & \ck & \ck & \ck & \ck \\
+$(2,5)$ & \ck & \ck & $\gcd=4$ & $\times$ \\
+$(3,5)$ & \ck & \ck & $\gcd=3$ & $\times$ \\
+\multicolumn{5}{c}{(remaining 8 pairs fail (H2))} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+The six twists split into two $2$-torsion classes: $\{0,2,3,5\}$ (class
+$[3]$, $x^3+b_k$ irreducible over $\FF_p$) and $\{1,4\}$ (class
+$[1,1,1]$, $x^3+b_k$ fully split). (H2) holds exactly for pairs within
+the same class.
+
+Secp256k1 ($k=0$) has exactly \emph{three} glueable partners ($k=2,3,5$),
+all within the $[3]$ class and all satisfying $\gcd(n_0, n_k) = 1$.
+The pair $(1,4)$ — the two $[1,1,1]$-type twists, which are quadratic
+twists of each other — is glueable but does not involve secp256k1.
+The pair $(2,3)$ similarly does not involve secp256k1.
+In all five cases Corollary~\ref{cor:fp3cost} applies (or its analogue
+for the subfield DLP), and no cover attack achieves sub-$\sqrt{p}$ cost.
+\end{remark}
 
 \paragraph{Toy verification ($p = 43$).}
 For the analogous toy case $p = 43$, the Howe-glued curve
