@@ -5574,3 +5574,144 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+
+Step 4 Fallback. Status check revealed all 6 original priority threads are
+closed or blocked: Priority 1 (P-521 LLL) CLOSED 2026-06-06; Priority 2 (CHLRS
+Igusa) BLOCKED (SageMath required); Priority 3 (Howe sextic twists) CLOSED
+2026-05-24 AND 2026-06-09 (5/15 pairs glueable); Priority 4 (cross-curve LLL
+3-of-3) CLOSED 2026-05-25; Priority 5 (GLV-HNP toy) CLOSED 2026-05-26;
+Priority 6 (B5 over F_{p^k}) CLOSED 2026-05-27. The 2026-07-20 recommendation
+(Thread 18: Howe sextic twists) was based on incomplete session awareness — that
+task was already done in June. Executing: (a) ePrint survey, (b) new attack
+variant proposal, plus (c) concrete PARI-free Python deliverable.
+
+### Work done
+
+**Step 4a — ePrint / literature survey (since 2026-07-20):**
+
+Searched IACR ePrint for: "isogeny-graph ECDLP", "hidden number problem ECDSA
+GLV", "(2,2)-isogeny Jacobian", "Boneh-Venkatesan lattice".  Key finds:
+
+1. **ePrint 2026/1431 "The Isogeny Problems"** (Castryck, De Feo, Galbraith,
+   Kutas, Reijnders, Wesolowski; July 2026). Survey of 7 foremost open problems
+   in isogeny-based cryptography, compiled from 11 experts.  NOT about ordinary
+   prime-field ECDLP; focused on SIDH/CSIDH/SQIsign-style supersingular isogeny
+   problems.  Relevance: confirm that our main theorem (no isogeny-graph attack
+   beats ρ for prime-field ECC) is NOT addressed by any of the 7 listed problems;
+   it sits in a different part of the literature and the paper fills a gap.
+
+2. **ePrint 2026/039 "Abelian surfaces in Hesse form and explicit isogeny
+   formulas"** (Decru, Kunzweiler; Jan 2026, also arXiv:2601.05922). Provides
+   explicit (2,2)-Richelot isogeny formulas for abelian surfaces in Hesse form,
+   with a SageMath package (GitHub: sabrinakunzweiler/richelot-isogenies).
+   **HIGH RELEVANCE** to the long-blocked CHLRS/Mestre-Howe thread (Priority 2).
+   If Hesse-form formulas are elementary enough, they could unblock the explicit
+   Howe-glued cover construction for pair (0,3) without requiring Magma.
+   SageMath package availability is still required; pure-Python feasibility TBD.
+
+3. **ePrint 2025/705 "Breaking ECDSA with Two Affinely Related Nonces"**
+   (Gilchrist, Buchanan, Finlow-Bates; Apr 2025). Already cited in log entry for
+   Thread 16 (2026-07-19). The GLV relation k₁=λk₂ is α=λ, β=0 in Theorem 1.
+
+4. **ePrint 2025/1461 "Hard Instances of Discrete Logarithm Problem and
+   Cryptographic Applications"** (Battarbee, Darbinyan, Kahrobaei; Nov 2025).
+   DLP hardness in infinite/abstract groups. Weakly relevant; not ECC-specific.
+
+5. **ePrint 2025/155 "Cycles and Cuts in Supersingular L-Isogeny Graphs"**
+   (Arpin, Bowden, LeGrow, Maughan; 2025). Supersingular L-isogeny graph
+   structure. Not directly relevant (different setting from ordinary prime-field).
+
+**Step 4b — New attack variant proposal (Thread 20):**
+
+See "Next step proposal" below.
+
+**Step 4c — Concrete deliverable: Python port of Thread 16 verification:**
+
+`secp256k1_cm_audit/thread16_python_verify.py` — PARI-free Python implementation
+of Proposition prop:biquadratic-order2 verification. Works in sessions without
+PARI/GP installed (like this one). Implements:
+- `squarefree_part(n)`: trial-division squarefree kernel (works for n up to ~10^8
+  with fast factoring; for large n uses algebraic identity instead of trial div)
+- `legendre(a, p)`: Legendre symbol via Euler's criterion (pow built-in)
+- `verify_pair(p, a2, label)`: checks D=a2²-4p², sf(D), Legendre symbol,
+  N(β)=p², SPLIT confirmation
+
+Ran 64 cases across 4 test parts:
+- Part A: 15 explicit pairs from Thread 16 (10 D<0, 5 D>0) → 15/15 SPLIT
+- Part C: 40 sweep pairs (p ≤ 67, various a2) → 40/40 SPLIT
+- Part D: 8 inertness-corollary checks → 8/8 SPLIT
+- Part E: secp256k1 pair (0,3) (sf(D)=-3 algebraically) → 1/1 PASSED
+
+### Findings
+
+**64/64 checks passed.** Proposition prop:biquadratic-order2 confirmed without
+PARI.
+
+**Part E key result** (new, not in Thread 16 PARI script):
+For pair (0,3) = (secp256k1, quad-twist), the product Weil polynomial
+T⁴ + (2p-t²)T² + p² has:
+- a₂ = 2p - t² ≈ 2^255  (255-bit number, t ≈ 2^129)
+- D = a₂² - 4p² = -3(ts)²  (where 4p = t² + 3s², s ≈ 2^128)
+- sf(D) = -3   (algebraic identity; trial division infeasible for 512-bit D)
+- Q(√sf(D)) = Q(√(-3)) = secp256k1's own CM field
+- Cl(Q(√(-3))) is trivial (h=1), so [P]²=1 is vacuous
+- p ≡ 1 mod 6 → p SPLITS in Q(√(-3)): confirmed (Legendre symbol = +1)
+
+This establishes: pair (0,3) is the only glueable secp256k1 twist pair whose
+product Weil poly is biquadratic; the Proposition applies but gives no new
+information (trivial class group). Non-trivial class groups arise only for
+non-j=0 (a₁≠0) abelian surfaces.
+
+**ePrint 2026/039 note**: Decru-Kunzweiler (2026) give explicit Richelot
+formulas in Hesse coordinates for j=0 abelian surfaces. Pair (0,3) = (E₀, E₃)
+is the natural candidate: both j=0 curves have Hesse-form models, so their
+Hesse coordinates are computable in F_p. The Decru-Kunzweiler Algorithm (likely
+Algorithm 1 of 2026/039) would give an explicit Richelot image. This is the
+most promising path to unblocking CHLRS.
+
+**Cargo test**: `cargo test --test curve_audit` → 5/5 pass (6.90s), unchanged.
+
+### Next step proposal
+
+**Thread 20 (new): Hesse-form Richelot for secp256k1 pair (0,3) via ePrint
+2026/039.**
+
+*Setup*: E₀ (secp256k1, y²=x³+7) and E₃ (quad-twist, y²=x³-7) are both j=0
+curves and naturally represented in Hesse form (three-term cubics:
+X³+Y³+Z³=mXYZ). The Decru-Kunzweiler 2026/039 explicit formulas give a Richelot
+isogeny from E₀×E₃ to a (possibly non-split) ppas J.
+
+*Would-be experiment*:
+1. Convert secp256k1 to Hesse form: find m₀ such that X³+Y³+Z³=m₀XYZ is
+   isomorphic to y²=x³+7 over F_p. (Known: j=0 ↔ Hesse parameter m satisfying
+   m³≡−27 for some m.)
+2. Apply Decru-Kunzweiler Algorithm for (2,2)-Richelot on (E₀,E₃) in Hesse
+   coordinates — elementary F_p arithmetic per their formulas.
+3. Determine if J is simple (→ Jac(C) for genus-2 C) or split (→ E₁'×E₂').
+4. If simple: extract the sextic defining C from the Hesse invariants of J.
+
+*Expected outcome*: J is a genuine Jacobian (pair (0,3) is Howe-glueable by
+the June 2026 verification). The Decru-Kunzweiler formula gives the explicit
+Richelot image without requiring SageMath `HyperellipticCurveFromInvariants`.
+This would complete the CHLRS Mestre-Howe thread (Priority 2, blocked since
+2026-05-23) using a new 2026 tool.
+
+*Feasibility*: Medium. The Hesse conversion requires solving X³+Y³+Z³=mXYZ
+(one cubic over F_p — feasible). The Richelot step requires the 2026/039 paper
+formulas (not yet read; blocked by 403 on ePrint). If the GitHub repo
+(sabrinakunzweiler/richelot-isogenies) has plain Sage scripts, porting the key
+algorithms to Python F_p arithmetic could be done in 1-2 sessions. If not, the
+thread is BLOCKED until SageMath is available.
+
+*Falsifier*: if we find the explicit sextic h(x) s.t. y²=h(x) has
+|Jac(C)(F_p)| = N₀·N₃, that falsifies "no explicit cover can be written down"
+(a weaker claim) and gives a concrete genus-2 curve example for the paper.
+
+### Commits made
+`[hash]` autolab 2026-07-23: Thread 20 proposal + Python port thread16_python_verify.py (64/64)
