@@ -5672,4 +5672,4 @@ Still NaN at target_bits=150 with scaled-f64 GS. Try target_bits=80 to see if th
 Recommend Thread 19 (GLV-HNP Phase 2 toy) for next session — it's well-scoped and the infrastructure exists.
 
 ### Commits made
-[to be filled after commit]
+`1e01794` autolab 2026-07-23: Thread 18 — Howe gluing on all 15 sextic-twist pairs; 5/15 glueable; GP trace-assignment bug documented
