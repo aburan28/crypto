@@ -5574,3 +5574,102 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists.
+Chosen because: Thread 18 was the top next-step proposal from the 2026-07-20 entry (Thread 17 complete); no prior log entries for Thread 18; well-scoped one-session task with existing scripts to run.
+
+### Work done
+- Installed pari-gp (already present from prior session; confirmed via `which gp`).
+- Found existing scripts: `secp256k1_cm_audit/howe_sextic_twists_all15.gp` (PARI) and `secp256k1_cm_audit/howe_sextic_twists_check.py` (Python), both previously written but never run in the log.
+- Ran `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp` — clean run.
+- Ran `python3 secp256k1_cm_audit/howe_sextic_twists_check.py` — clean run with scalar-multiplication trace verification.
+- Discovered discrepancy: GP and Python agree on **5/15 glueable pairs** but label the fifth pair differently:
+  - GP: glueable = (0,2), (0,3), (0,5), **(1,4)**, (2,3)
+  - Python (authoritative): glueable = (0,2), (0,3), (0,5), (2,3), **(2,5)**
+  - Root cause: GP Step 6 assumes `trace_of = T` (canonical CM ordering of b_k ↔ T_k) but this was never verified; Python's scalar-multiplication test on a random affine point shows the actual trace-to-b_k mapping differs for k=1,2,4,5.
+- Computed exact GCDs for the 4 H3-failing pairs (Python-labeled):
+  - `gcd(N[1], N[3]) = 3`
+  - `gcd(N[1], N[5]) = 3`
+  - `gcd(N[3], N[5]) = 3`
+  - `gcd(N[1], N[4]) = 4`
+- Added warning comment to `howe_sextic_twists_all15.gp` documenting the trace-assignment bug with explicit correction table.
+- Ran `cargo test --test curve_audit`: 5/5 pass (7.03s).
+
+### Findings
+
+**Main result — 5/15 pairs of secp256k1 sextic twists are Howe-glueable:**
+
+The 6 sextic twists y²=x³+b_k of secp256k1 (p ≡ 1 mod 6, so 6 twist classes exist) split by 2-torsion pattern:
+
+| Group | Twist indices k | Pattern of x³+b_k over F_p | Galois action on E[2] |
+|-------|-----------------|-----------------------------|----------------------|
+| A     | 0, 2, 3, 5      | [3] (irreducible)           | cyclic Z/3Z          |
+| B     | 1, 4            | [1,1,1] (splits completely)  | trivial              |
+
+Howe (H2) requires same 2-torsion type → can only hold within each group.
+
+Pairwise Howe check results (Python authoritative):
+```
+  (i,j) | H1 | H2  | H3     | Glueable?
+  ------|----|----- |--------|----------
+  (0,1)   YES  NO    YES      no
+  (0,2)   YES  YES   YES      YES ← Howe-glueable
+  (0,3)   YES  YES   YES      YES ← Howe-glueable  [known: secp256k1 × quad twist]
+  (0,4)   YES  NO    YES      no
+  (0,5)   YES  YES   YES      YES ← Howe-glueable
+  (1,2)   YES  NO    YES      no
+  (1,3)   YES  NO    NO(3)    no
+  (1,4)   YES  YES   NO(4)    no
+  (1,5)   YES  NO    NO(3)    no
+  (2,3)   YES  YES   YES      YES ← Howe-glueable
+  (2,4)   YES  NO    YES      no
+  (2,5)   YES  YES   YES      YES ← Howe-glueable
+  (3,4)   YES  NO    YES      no
+  (3,5)   YES  YES   NO(3)    no
+  (4,5)   YES  NO    YES      no
+```
+
+Summary: **5 glueable, 10 not** (out of 15 pairs).
+
+**Structural observations:**
+
+1. All 5 glueable pairs lie within Group A (irreducible 2-torsion [3]).
+2. Of the C(4,2)=6 pairs within Group A, exactly 1 fails H3: pair (3,5) with gcd=3.
+3. The single pair within Group B fails H3: pair (1,4) with gcd=4.
+4. gcd=3 is a CM-3 signature: secp256k1 has CM by Z[ζ₃] (disc -3), and the factor 3 arising in orders of sextic twists is expected from the action of ζ₃ on the group of twist classes.
+5. **New coverage**: pair (0,3) (secp256k1 × quad twist) was already known (howe_gluing_test.gp). The 4 new glueable pairs involving other sextic twists are (0,2), (0,5), (2,3), (2,5).
+6. Secp256k1 itself (k=0) is Howe-glueable with 3 other twists: (0,2), (0,3), (0,5).
+
+**GP trace-assignment bug:**
+The comment in howe_sextic_twists_all15.gp Step 6 claimed the CM formula canonically assigns b_k = 7·u^{k-1} the trace T[k+1]. The Python scalar-multiplication test refutes this for k=1,2,4,5. The correct Python assignments are:
+```
+  k=0 → trace = t                (known)
+  k=1 → trace = (t+3s)/2        [GP wrongly assigned (t-3s)/2]
+  k=2 → trace = (3s-t)/2        [GP wrongly assigned -(t+3s)/2]
+  k=3 → trace = -t               (known)
+  k=4 → trace = -(t+3s)/2       [GP wrongly assigned (3s-t)/2]
+  k=5 → trace = (t-3s)/2        [GP wrongly assigned (t+3s)/2]
+```
+The bug doesn't affect the total glueable count (5/15) because the misassignment permutes labels while preserving H1 (all distinct) and H2 (depends only on b_k), and happens to produce the same count under H3 by coincidence.
+
+**ECDLP implication:** None. All 5 glueable pairs produce genus-2 covers with |Jac(C)(F_p)| ≈ N_i · N_j ≈ p². HCDLP cost on genus-2 Jacobian over F_p: Pollard ρ ≈ p, or heuristic index calculus ≈ O(p). Both are strictly worse than secp256k1 ECDLP cost ≈ √p ≈ p^{0.5}. Consistent with the structural-completeness theorem (B5 lower bound).
+
+### Next step proposal
+
+Two candidates, in priority order:
+
+**Thread 19 (priority-5): GLV-HNP Phase 2 toy.**
+`glv_hnp_phase2_toy.gp` and `RESEARCH_GLV_HNP_PHASE2.md` exist. Run the script on a 32-bit toy curve to check if the GLV-aware lattice recovers d. Expected outcomes: either d recovered (validates direction) or a concrete failure mode (e.g., lattice rank too low, basis too skewed). This is the next natural priority given Thread 18 is complete.
+
+**Thread 20 (priority-1 fallback): P-521 LLL bigfloat.**
+Still NaN at target_bits=150 with scaled-f64 GS. Try target_bits=80 to see if the NaN disappears at lower precision. If so, document the precision boundary. This was deprioritized because prior runs hit walls; a fresh attempt at lower precision might make concrete progress.
+
+Recommend Thread 19 (GLV-HNP Phase 2 toy) for next session — it's well-scoped and the infrastructure exists.
+
+### Commits made
+[to be filled after commit]

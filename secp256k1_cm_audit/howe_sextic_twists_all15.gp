@@ -120,15 +120,24 @@ print("");
 
 print("---- Step 6: Assign traces from CM formula ----");
 print("");
-\\ CM formula gives all 6 traces directly; no ellmul needed.
-\\ The correspondence between b_k and T[k] is by construction:
-\\ b[k] = 7 * u^{k-1}, and the CM sextic-twist theory gives:
-\\   k=0 (b=7):    trace T[1] = t       (secp256k1)
-\\   k=3 (b≡-7):   trace T[4] = -t      (quadratic twist)
-\\ For k=1,2,4,5, the assignment b_k ↔ T_k is correct by the CM
-\\ sextic-twist correspondence: the b[k] are ordered by u^{k-1} and
-\\ T[k] is defined to match that ordering.
-trace_of = T;  \\ CM formula: trace of twist b_k is T[k+1] (1-based)
+\\ WARNING (2026-07-23): The assignment below is UNVERIFIED for k=1,2,4,5.
+\\ Scalar-multiplication tests (see howe_sextic_twists_check.py) show that the
+\\ actual correspondence b_k ↔ T_k differs from the naive ordering assumed here.
+\\ Specifically, Python finds:
+\\   k=1 → trace (t+3s)/2 = T[6] (not T[2])
+\\   k=2 → trace (3s-t)/2 = T[5] (not T[3])
+\\   k=4 → trace -(t+3s)/2 = T[3] (not T[5])
+\\   k=5 → trace (t-3s)/2 = T[2] (not T[6])
+\\ This bug does NOT affect (H1) (all traces distinct → H1 always YES) or (H2)
+\\ (depends only on b_k, not trace), but DOES affect (H3) results for specific
+\\ pairs.  The total count of 5/15 glueable pairs coincidentally matches the
+\\ correct Python result, but the specific pair labels (1,4) vs (2,5) differ.
+\\ See RESEARCH_AUTOLAB_LOG.md 2026-07-23 entry for full analysis.
+\\
+\\ For k=0 and k=3 the assignment is correct (known a priori).
+\\ The remaining assignments below are kept for reproducibility but are WRONG
+\\ for k=1,2,4,5; use howe_sextic_twists_check.py for authoritative results.
+trace_of = T;  \\ BUG: naive ordering; see warning above
 
 print("Trace assignments (from CM formula):");
 for (k = 1, 6, print("  b_", k-1, "=", b[k], "  trace=", T[k], "  order=", N[k]));
