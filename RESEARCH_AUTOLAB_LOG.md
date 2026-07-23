@@ -5668,4 +5668,4 @@ Alternatively, Thread 19 could be:
 Recommend the congruence obstruction check as a concrete 1-session PARI task.
 
 ### Commits made
-[to be filled after commit]
+`34bbbe3` autolab 2026-07-23: Thread 18 — principal-form criterion classifies [P] ord-1 vs ord-2
