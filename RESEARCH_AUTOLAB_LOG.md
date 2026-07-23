@@ -5574,3 +5574,74 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists: all 15 pairs.
+Chosen because: Thread 17 (LaTeX integration) completed 2026-07-20 and proposed Thread 18 as next-best concrete step. Script `howe_sextic_twists_all15.gp` already existed from an earlier session; no prior run output was present.
+
+### Work done
+- Installed pari-gp (was absent from container; reinstalled via apt).
+- Ran `secp256k1_cm_audit/howe_sextic_twists_all15.gp` — produced full output saved to `howe_sextic_twists_all15_output.txt`.
+- Discovered a **trace-assignment bug** in `howe_sextic_twists_all15.gp`: the script assumed `b_k ↔ T[k+1]` by CM ordering without empirical verification. The "sanity" test in the original script only checked k=0 and k=3 (secp256k1 and its quadratic twist).
+  - Symptom: original script printed N[k=1] = 3 × 199 × ... (odd), but assigned `[1,1,1]` 2-torsion (which requires 4|N). Contradiction.
+- Wrote `howe_sextic_gcds.gp` to compute true pairwise gcds; confirmed H3 failures at (1,3)→gcd=3, (1,5)→gcd=3, (2,5)→gcd=4, (3,5)→gcd=3 (indexing from original script).
+- Wrote `howe_sextic_verify_traces.gp` using `ellcard()` (SEA algorithm) to obtain verified orders for all 6 twists. Runtime ~90s for 6 ellcard calls at 256 bits.
+- Ran `howe_sextic_verify_traces.gp` — all 6 orders computed; full 15-pair table regenerated with verified data. Output saved to `howe_sextic_verify_traces_output.txt`.
+- Ran `cargo test --test curve_audit`: 5/5 pass (8.03s).
+
+### Findings
+
+**True trace assignment (ellcard-verified, 0-indexed twist k):**
+| k | b_k | trace | order N_k | 4\|N? | 2-torsion |
+|---|-----|-------|-----------|-------|-----------|
+| 0 | 7 | +t | 115792...337 (prime) | NO | [3] |
+| 1 | 7u | +(t+3s)/2 | 115792...244 | YES | [1,1,1] |
+| 2 | 7u² | +(t-3s)/2 | 115792...571 | NO | [3] |
+| 3 | 7u³=-7 | -t | 115792...991 | NO | [3] |
+| 4 | 7u⁴ | -(t+3s)/2 | 115792...084 | YES | [1,1,1] |
+| 5 | 7u⁵ | -(t-3s)/2 | 115792...757 | NO | [3] |
+
+(t = 432420386565659656852420866390673177327, s = 303414439467246543595250775667605759171)
+
+**Bug in original script**: original T vector order was `[t, t_minus, -t_plus, -t, -t_minus, t_plus]` but actual assignment is `[t, t_plus, t_minus, -t, -t_plus, -t_minus]`. Swapped twists 1↔2 and 4↔5 in the trace column. The original script reported (1,4) as glueable, but the verified result shows (2,5) is glueable and (1,4) is NOT.
+
+**Verified Howe-glueable pairs: 5 / 15**
+| Pair (i,j) | H1 | H2 | H3 | Result |
+|---|---|---|---|---|
+| (0,2) | YES | YES ([3],[3]) | YES (gcd=1) | **GLUEABLE** |
+| (0,3) | YES | YES ([3],[3]) | YES (gcd=1) | **GLUEABLE** |
+| (0,5) | YES | YES ([3],[3]) | YES (gcd=1) | **GLUEABLE** |
+| (2,3) | YES | YES ([3],[3]) | YES (gcd=1) | **GLUEABLE** |
+| (2,5) | YES | YES ([3],[3]) | YES (gcd=1) | **GLUEABLE** |
+
+**Non-glueable structure:**
+- 7 pairs fail H2 (one [3] + one [1,1,1] → different 2-torsion Galois structure)
+- 3 pairs fail H3: (1,3)→gcd=3, (1,5)→gcd=3, (3,5)→gcd=3
+- 1 pair (1,4) fails H3: gcd=4 (both [1,1,1] twists share full 2-torsion → 4|N for both)
+- Pair (0,3) = secp256k1 × quadratic twist — confirmed glueable (matches prior `howe_gluing_test.gp` result)
+
+**Structural interpretation:**
+- The 4 twists with `[3]` 2-torsion (k=0,2,3,5) yield C(4,2)=6 pairs; 5 of 6 are glueable.
+  - Only non-glueable among them: (3,5) has gcd=3 (both N[3],N[5] divisible by 3).
+- The 2 twists with `[1,1,1]` 2-torsion (k=1,4) participate in ZERO glueable pairs:
+  - (1,4) fails H3: gcd=4 (structural — 4|N_1 and 4|N_4 since E[2]⊂E(F_p) for both)
+  - All 4 cross-pairs (k∈{1,4} with k∈{0,2,3,5}) fail H2 (different 2-torsion type)
+- ECDLP implications: each of the 5 glueable pairs produces a genus-2 Jacobian Jac(C) isogenous to E_i × E_j. For all 5, the cover provides NO sub-√p ECDLP speedup (genus-2 Gaudry/Diem costs ~ O(p) on F_p). This confirms the structural-completeness claim for j=0 sextic-twist Howe covers.
+
+### Next step proposal
+Two threads of equal priority:
+
+**Thread 19 (original priority-5): GLV-HNP Phase 2 toy lattice.**
+`glv_hnp_phase2_toy.gp` sets up the 2D-aware HNP equations but defers the LLL step. The lattice formulation is sketched (2m+1 dimensional). Next concrete sub-task: implement the LLL call in PARI on the toy curve (p~1000, n~1000, K1_BOUND~n/100). Expected outcome: either LLL recovers d on the toy, or a clear failure mode (rank deficiency, Gram-Schmidt collapse) is found.
+
+**Thread 20: Fix the trace-assignment in `howe_sextic_twists_all15.gp`.**
+Swap T assignments to match verified ordering. Add an empirical verification step (scalar-mul or ellcard check) as a correctness guard. Update expected output file. Low complexity, high correctness value.
+
+Recommend Thread 20 first (small, cleans up a known bug); Thread 19 is the main research thread.
+
+### Commits made
+(to be filled in after commit)
