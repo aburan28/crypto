@@ -5574,3 +5574,94 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — Howe gluing on j=0 sextic twists (all 15 pairs).
+Chosen because: the 2026-07-20 log entry proposed Thread 18 as the next-best concrete step
+(Thread 17 had just completed; Thread 18 directly extends cover-attack coverage);
+no work had been done on Thread 18 since.
+
+### Work done
+- Confirmed `secp256k1_cm_audit/howe_sextic_twists_all15.gp` existed (created prior to this run, infrastructure ready).
+- Installed pari-gp (was absent; installed via `apt-get install -y --fix-missing pari-gp`, Version 2.15.4).
+- Ran the script: `gp -q secp256k1_cm_audit/howe_sextic_twists_all15.gp` — completed cleanly.
+- Verified all 15 pairwise Howe conditions (H1, H2, H3) for all C(6,2)=15 pairs of sextic twists.
+- Checked cargo tests: `cargo test --test curve_audit` → 5/5 pass.
+- Computed explicit gcd values for all H3-failing pairs.
+
+### Findings
+
+**Two 2-torsion classes among the 6 sextic twists (y²=x³+b_k, b_k=7·u^k):**
+
+| Class | Twist indices (0-based k) | Pattern of x³+b_k | Description |
+|-------|--------------------------|-------------------|-------------|
+| A     | {0, 2, 3, 5}             | [3] (irreducible) | No F_p-rational 2-torsion; Gal acts cyclically (Z/3Z) |
+| B     | {1, 4}                   | [1,1,1] (split)   | All 2-torsion F_p-rational; Gal trivial |
+
+Secp256k1 is class A (k=0). Its quadratic twist is also class A (k=3, b_3=-7).
+
+**Six curve orders (all 256-bit):**
+```
+k=0: order = ...837564279074904382605163141518161494337  (secp256k1, prime n)
+k=1: order = ...508896131558604026424249738214906721757
+k=2: order = ...941316518124263683276670604605579899084
+k=3: order = ...702405052206223696310004874299507848991  (quadratic twist)
+k=4: order = ...031073199722524052490918277602762621571
+k=5: order = ...598652813156864395638497411212089444244
+```
+
+**All 15 pairwise Howe conditions:**
+
+| Pair (i,j) | H1: n_i≠n_j | H2: same 2-tor | H3: gcd=1 | Glueable? | gcd if H3 fails |
+|-----------|-------------|----------------|-----------|-----------|-----------------|
+| (0,1)     | YES         | NO             | YES       | no        | —               |
+| (0,2)     | YES         | YES (A,A)      | YES       | **YES**   | —               |
+| (0,3)     | YES         | YES (A,A)      | YES       | **YES**   | —               |
+| (0,4)     | YES         | NO             | YES       | no        | —               |
+| (0,5)     | YES         | YES (A,A)      | YES       | **YES**   | —               |
+| (1,2)     | YES         | NO             | YES       | no        | —               |
+| (1,3)     | YES         | NO             | NO        | no        | gcd=3           |
+| (1,4)     | YES         | YES (B,B)      | YES       | **YES**   | —               |
+| (1,5)     | YES         | NO             | NO        | no        | gcd=3           |
+| (2,3)     | YES         | YES (A,A)      | YES       | **YES**   | —               |
+| (2,4)     | YES         | NO             | YES       | no        | —               |
+| (2,5)     | YES         | YES (A,A)      | NO        | no        | gcd=4           |
+| (3,4)     | YES         | NO             | YES       | no        | —               |
+| (3,5)     | YES         | YES (A,A)      | NO        | no        | gcd=3           |
+| (4,5)     | YES         | NO             | YES       | no        | —               |
+
+**Result: 5 of 15 pairs are Howe-glueable.**
+
+Glueable pairs: (0,2), (0,3), (0,5), (1,4), (2,3).
+
+**Structural analysis:**
+
+- H1: all 15 pairs pass (all 6 twists have distinct traces → distinct orders; secp256k1 has prime order so cannot be isogenous to any other sextic twist).
+- H2: holds iff both twists are in the same class (A or A, or B or B). Cross-class pairs (A,B) always have different 2-torsion patterns → H2 fails for all 8 cross-class pairs.
+- H3: among the 7 same-class pairs (6 within A + 1 within B), H3 fails for 2 pairs in class A: (2,5) with gcd=4, (3,5) with gcd=3. The unique class-B pair (1,4) has gcd=1.
+- Note: 4 of the H3-NO pairs are also H2-NO (they fail both conditions). Only (2,5) and (3,5) are "H2-pass but H3-fail" cases.
+
+**Notable structural facts:**
+- Pair (0,3) = (secp256k1, quadratic twist): this was already verified in `howe_gluing_test.gp` (prior work); confirmed here as part of the systematic check.
+- Pair (1,4): both twists have ALL 2-torsion F_p-rational (class B). The Howe gluing for this pair involves identifying trivial Galois modules E_1[2] ≅ E_4[2] ≅ (Z/2Z)² — structurally different from the class-A pairs where the Galois module identification is via a non-trivial (Z/3Z)-equivariant map.
+- The gcd=4 case (2,5): N[3] = ...083 ≡ 0 (mod 4) and N[6] = ...244 ≡ 0 (mod 4). Both divisible by 4, implying each curve has a rational 4-torsion structure that obstructs smooth Howe gluing at the 2-torsion level.
+- The gcd=3 cases (1,3), (1,5), (3,5): cross-class pairs (1,3) and (1,5) also fail H2, so gcd=3 is not the binding constraint there. For (3,5): N[4]=...848991 and N[6]=...444244 share a factor of 3.
+
+**ECDLP implications:**
+All 5 glueable pairs produce genus-2 Jacobians J/F_p via (2,2)-isogenies J → E_i × E_j.
+As for (secp256k1, quad-twist), the order of J is ≈ p²; Pollard ρ on genus-2 costs ≈ p, strictly worse than √p ECDLP on secp256k1.
+The cover attack is structurally confirmed to exist but provably non-competitive, consistent with the main theorem of `PAPER_STRUCTURAL_COMPLETENESS.md`.
+
+### Next step proposal
+Thread 19 — GLV-HNP Phase 2 toy attack.
+- Script `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` already exists.
+- Run it and check if the GLV-aware lattice recovers the secret key d on a 32-bit toy curve.
+- Expected outcome: either d is recovered (validates the attack direction) or a concrete failure mode (lattice dimension, HNP slack) is identified.
+- This is a well-scoped one-session task: run the existing script, document the result, diagnose if it fails.
+
+### Commits made
+`TBD` autolab 2026-07-23: Thread 18 — all 15 sextic-twist pairs checked; 5/15 Howe-glueable
