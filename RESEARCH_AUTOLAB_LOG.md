@@ -5664,4 +5664,4 @@ Thread 19 — GLV-HNP Phase 2 toy attack.
 - This is a well-scoped one-session task: run the existing script, document the result, diagnose if it fails.
 
 ### Commits made
-`TBD` autolab 2026-07-23: Thread 18 — all 15 sextic-twist pairs checked; 5/15 Howe-glueable
+`af25758` autolab 2026-07-23: Thread 18 — all 15 sextic-twist pairs checked; 5/15 Howe-glueable
