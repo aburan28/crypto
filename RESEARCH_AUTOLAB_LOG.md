@@ -5574,3 +5574,98 @@ directly extends the cover-attack coverage; Thread 19 is a good fallback.
 
 ### Commits made
 `641fd71` autolab 2026-07-20: Thread 17 — integrate order-2 Frobenius ideal theorem into paper
+
+---
+
+## 2026-07-23 (autolab run)
+
+### Task picked
+Thread 18 — classify [P] as principal (order 1) vs. order exactly 2 in Cl(K).
+Chosen because: Thread 17 (2026-07-20) added Proposition `prop:biquadratic-order2`
+to the paper but left the story incomplete — the Proposition says ord([P]) ∈ {1,2}
+but does not specify when each case holds. Thread 18 fills this gap, adding a
+Corollary with an explicit principal-form criterion.
+
+The 2026-07-20 log's recommended "Thread 18 = Howe gluing" and "Thread 19 =
+GLV-HNP toy" are both ALREADY CLOSED (2026-05-24 and 2026-05-26 respectively).
+Thread 18 here is a fresh, natural continuation of the algebraic thread.
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread18_principal_vs_order2.gp` (~250 lines) using
+  PARI `bnfisprincipal` to classify [P] for 40 (p,a₂) pairs across four parts:
+  - Part A: broad scan classifying each pair by sf(D) and reporting h(K) and ord([P])
+  - Part B: verify the principal-form criterion for sf=-219 (using CORRECT a₂=2p-73
+    for CM-73) and sf=-3
+  - Part C: search for [P]=1 with h(K)>1 (even class number, P still principal)
+  - Part D: Corollary statement printed
+- Identified and corrected a bug in Part B: initial cases used wrong a₂ values
+  for CM-73 (e.g. a₂=4 instead of a₂=2p-73). Separate verification script fixed this.
+- Ran `thread18_principal_vs_order2.gp` to completion (clean, no errors).
+- Ran secondary verification script confirming CM-73 correct cases and principal-form
+  cross-check for sf=-6.
+- Added Corollary `cor:order-classification` (22 lines) to
+  `paper/structural_completeness.tex` immediately after the Proof of Proposition
+  `prop:biquadratic-order2` (insert at line 474).
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.96s). No regressions.
+
+### Findings
+
+**Empirical classification (35 valid pairs in Part A, 7 additional in verification):**
+
+| D sign | Generic result | Exception |
+|--------|----------------|-----------|
+| D < 0 (imaginary K) | [P] ord = 2 | ord=1 iff p rep by principal form |
+| D > 0 (real K, h=1) | [P] ord = 1 (trivial: h=1) | — |
+| D > 0 (real K, h=2) | Mixed: sf=165, p=41→ord=1, p=13→ord=2 | principal-form criterion holds |
+
+**CM-73 cases (sf=-219, a₂=2p-73, h=4):**
+- p=19  a₂=-35  D=-219      sf=-219  h=4  [P] ord=2
+- p=37  a₂=1    D=-5475     sf=-219  h=4  [P] ord=2
+- p=79  a₂=85   D=-17739    sf=-219  h=4  [P] ord=2
+- p=109 a₂=145  D=-26499    sf=-219  h=4  [P] ord=2
+- p=349 a₂=625  D=-96579    sf=-219  h=4  [P] ord=2  (k=21)
+- p=487 a₂=901  D=-136875   sf=-219  h=4  [P] ord=2  (k=25)
+All give ord=2. p is NOT represented by principal form x²+xy+55y² of disc=-219.
+
+**sf=-3 cases (h=1): all give [P] ord=1** (6 cases verified):
+p=7,a₂=2; p=7,a₂=11; p=7,a₂=13; p=13,a₂=1; p=13,a₂=22; p=13,a₂=23.
+
+**Part C: [P]=1 with h(K)>1** — 8 found (p≤300):
+- p=7,  a₂=10, sf=-6,  h=2: 7=1²+6·1² → [P]=1 ✓ (principal form x²+6y²)
+- p=11, a₂=13, sf=-35, h=2: [P]=1
+- p=17, a₂=25, sf=-59, h=3: [P]=1 (h odd, so trivially 1)
+- p=19, a₂=2,  sf=-10, h=2: [P]=1
+- And 4 more. Confirms the criterion is non-vacuous.
+
+**Cross-check of principal-form criterion (sf=-6, disc=-24, principal form x²+6y²):**
+- p=7:  7=1²+6·1² → [P]=1 ✓
+- p=11: 11≠x²+6y² for any (x,y) → [P]=2 ✓
+Criterion works perfectly.
+
+**Corollary `cor:order-classification` added to paper (`structural_completeness.tex`):**
+- States: ord([P])=1 iff p is represented by the principal form of disc(K); else ord=2.
+- Three special cases: (i) h(K) odd→[P]=1; (ii) sf=-3→[P]=1; (iii) sf=-219→ord=2 for norm-form primes.
+- Cites `thread18_principal_vs_order2.gp` for 35 additional verified pairs.
+
+### Next step proposal
+Thread 19: Proof of the Corollary (currently stated without proof).
+The proof is:
+- [P] = 1 iff (β) = (p) or N(β) = p²·(unit) for some unit... no.
+  Actually: [P] = 1 iff P is principal, i.e. P = (α) for some α ∈ O_K.
+  If P = (α), then N(P) = p = N(α) = α·ᾱ, so α is a root of x²-Tr(α)x+p=0.
+  This is the definition of p being represented by the norm form N(x,y) = x²-Tr(α)·xy+p·y²,
+  which is the principal form of disc(K) (since disc(O_K) = Tr(α)²-4p = disc of principal form).
+  Full 3-line proof: if P=(α) then N(α)=p, so α=x+y·ω for ω=generator of O_K satisfying
+  the minimal polynomial, giving the explicit form. This proof should be added to the paper.
+
+Alternatively, Thread 19 could be:
+- Identify whether norm-form primes (a₂=2p-73) are EVER represented by x²+xy+55y²
+  (the principal form of disc=-219). If never (for p prime in norm form), this would
+  explain the uniform ord=2 for all norm-form primes — a congruence obstruction.
+  Check: x²+xy+55y²≡0 mod 73? Form represents a prime p iff (-219/p)=1 AND the specific
+  genus condition holds. This is a genuine algebraic question.
+
+Recommend the congruence obstruction check as a concrete 1-session PARI task.
+
+### Commits made
+[to be filled after commit]

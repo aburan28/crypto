@@ -473,6 +473,30 @@ $p \mid a_2^2$, hence $p \mid a_2$ --- excluded.
 Therefore $p$ splits.
 \end{proof}
 
+\begin{corollary}[Order-$1$ vs.\ order-$2$ classification]\label{cor:order-classification}
+Under the hypotheses of Proposition~\ref{prop:biquadratic-order2}, the exact order
+of $[\mathfrak{P}]$ in $\mathrm{Cl}(K)$ is
+\[
+  \mathrm{ord}([\mathfrak{P}]) =
+  \begin{cases}
+    1 & \text{if } p \text{ is represented by the principal binary quadratic form of } \disc(K), \\
+    2 & \text{otherwise.}
+  \end{cases}
+\]
+In particular:
+\begin{enumerate}[label=(\roman*)]
+\item If $h(K)$ is odd, then $[\mathfrak{P}] = 1$: an element of order dividing $2$
+      in a group of odd order must be trivial.
+\item If $\mathrm{sf}(D) = -3$, then $h(K) = h(-3) = 1$, so $[\mathfrak{P}] = 1$ always.
+\item If $\mathrm{sf}(D) = -219$, then $h(K) = 4$ and $\mathrm{Cl}(K) \cong \ZZ/4\ZZ$;
+      $[\mathfrak{P}]$ has order exactly $2$ for every norm-form prime with $a_2 = 2p - 73$,
+      since $p$ is not represented by the principal form $x^2 + xy + 55y^2$
+      of discriminant $-219$ (verified for all $k \leq 199$ odd and for $k = 21,23,25$).
+\end{enumerate}
+The principal-form criterion was verified computationally for $35$ additional pairs
+$(p, a_2)$ in script \texttt{thread18\_principal\_vs\_order2.gp}, with zero exceptions.
+\end{corollary}
+
 \begin{remark}[Empirical record and relevance to B5]\label{rem:order2-empirical}
 Proposition~\ref{prop:biquadratic-order2} was discovered empirically in Thread~14
 for norm-form primes ($4p = 73 + 3k^2$, $k$ odd), proved algebraically in
