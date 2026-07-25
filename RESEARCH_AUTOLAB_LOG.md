@@ -5771,4 +5771,4 @@ validating the lattice approach.
 Finding 3 brute-force can be extended with a qflll-based lattice attack.
 
 ### Commits made
-[to be filled after commit]
+`a3dbce7` autolab 2026-07-25: Thread 5 — GLV-HNP Phase 2 toy; k_1-only vacuous; both-bounded K_BB=4 recovers d=170; 0 FP
