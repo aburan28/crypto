@@ -5690,3 +5690,115 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## 2026-07-25 (autolab run)
+
+### Task picked
+
+Thread 19 — GLV-HNP Phase 2 toy PARI verification. The 2026-07-21 log explicitly flagged
+`secp256k1_cm_audit/glv_hnp_phase2_toy.gp` as unrun. Priority 1–4 are closed; priority 5
+(GLV-HNP toy) was closed via Python on 2026-05-26 but the PARI lattice scripts had not
+been run and verified in subsequent sessions.
+
+### Work done
+
+- Ran `glv_hnp_phase2_toy.gp` (structural setup only; lattice deferred).
+  Output: toy curve y²=x³+2 over F_211, n=199, λ=106. HNP sanity check passes.
+  Confirms k_full = k_1 + λ·k_2 is uniform mod n → standard HNP fails (as expected).
+
+- Ran `glv_hnp_phase2_lattice.gp` (existing script, unscaled):
+  - Lattice construction + planted-vector verification: PASS ✓
+  - LLL recovery (PARI qflll): FAIL — script used wrong flag (3 = Gram-matrix mode)
+    and treated k_2 as full-range [0, n) → lattice severely unbalanced.
+
+- Diagnosed root causes of PARI LLL failure:
+  1. **Wrong qflll flag**: `qflll(M~, 3)` interprets input as Gram matrix (not basis).
+     Fix: use `qflll(M~)` (default flag=0, basis-column mode).
+  2. **k_2 treated as full-range**: old script used K2_BOUND = n. Correct GLV bound
+     is K2_BOUND = ceil(sqrt(n)) ≈ 15 for n=199.
+  3. **Spurious short vector**: even with correct K2_BOUND, the lattice contains
+     [0,...,n,...,0] (norm = n = 199) from the combination c_{d-row} = n.
+     The planted vector has norm ≈ sqrt(m·K1²·S_K1² + d² + m·(K2_avg·S_K2)²) ≈ 451.
+     Since 199 < 451, LLL finds the spurious vector first, not the planted one.
+
+- Wrote `glv_hnp_phase2_corrected.gp` (~150 lines):
+  - Uses correct K2_BOUND = ceil(sqrt(n)) = 15 (GLV domain)
+  - Uses balanced column scales matching Python version:
+      S_K1 = n ÷ K1_BOUND = 99,  S_D = 1,  S_K2 = n ÷ K2_BOUND = 13,  S_KANNAN = n = 199
+  - Implements `trial(seed)` function returning 1 (LLL recovery), 2 (brute-force), 0 (fail)
+  - Multi-seed sweep: unrolled loop (5 seeds: 11, 22, 33, 44, 55)
+
+- Ran `cargo test --test curve_audit`: 5/5 pass (7.12s). ✓
+
+### Findings
+
+**glv_hnp_phase2_toy.gp output:**
+```
+Curve: y² = x³ + 2 over F_211,  n=199,  λ=106
+K1_BOUND = 2,  k2 has NO bias bound
+HNP equation check: 1 (all 5 sigs)
+k_full distribution: UNIFORM mod n  ← confirms standard HNP would fail
+```
+
+**glv_hnp_phase2_corrected.gp results:**
+```
+K1_BOUND=2  K2_BOUND=15 (GLV domain, ceil(sqrt(n)))
+Scales: S_K1=99  S_K2=13  S_D=1  S_KANNAN=199
+Info-theoretic threshold: m ≥ 3  using m = 4
+
+Multi-seed sweep (m=4, 5 seeds):
+  seed=11: brute-force ✓
+  seed=22: LLL ✓
+  seed=33: LLL ✓
+  seed=44: brute-force ✓
+  seed=55: LLL ✓
+  LLL direct: 3/5   Brute-force fallback: 2/5   Total: 5/5 ← d RECOVERED ALL 5
+```
+
+**Spurious-vector analysis:**
+```
+Planted vector entries: [k1_i * S_K1, d, k2_i * S_K2, S_KANNAN]
+                       ��� [99, 190, 117/182/156/130, 199]
+Planted vector norm:   ~451
+Spurious vector:       [0,...,0, n=199, 0,...,0]  (norm = 199)
+Since 199 < 451: LLL finds spurious vector first on 2/5 seeds.
+On 3/5 seeds LLL still finds the planted vector — likely because
+the spurious vector shares entries with other reduced basis vectors
+and the specific B_i coefficients change the Gram matrix enough.
+```
+
+**Key finding:** the 2026-05-26 PARI lattice script was using:
+- `qflll(..., 3)` = WRONG flag (Gram-matrix interpretation)
+- K2_BOUND = n (full-range) instead of sqrt(n)
+
+Both were bugs. The corrected script with K2_BOUND = sqrt(n) achieves 5/5 recovery
+(3/5 via LLL, 2/5 via brute-force fallback). This validates the Phase 2 attack direction.
+
+**Comparison to Python version:**
+The Python/fpylll BKZ version (`glv_hnp_phase2_attack.py`) uses the same lattice with
+balanced scaling and achieves 5/5 via LLL alone at m=6. The PARI `qflll` (LLL-only)
+achieves 3/5 at m=4 and falls back to brute-force for the remaining 2/5. On a larger
+curve (where brute-force is infeasible), BKZ or Babai CVP would be needed for the 2/5
+failures.
+
+### Next step proposal
+
+**Thread 20 — Fix spurious vector: CVP reformulation in PARI.**
+The 2/5 LLL failures are caused by the spurious vector [0,...,n,...,0] (norm=n) being
+shorter than the planted vector. Fixes:
+1. Use Babai nearest-plane (CVP) with the LLL basis, targeting (A_1*S_K1,...,0,...,0).
+   PARI does not have a built-in CVP/Babai, but it can be implemented in ~20 lines.
+2. OR: add an extra lattice row with coefficient that makes the spurious case expensive
+   (e.g., a row encoding n*S_D in the d-slot forces d ≡ 0 to have a large contribution).
+
+**Thread 21 — CHLRS Igusa formula (Option A from 2026-05-29).**
+The Cardona-Quer 2005 Igusa formulas (Appendix A) were identified as the path to
+unblocking the CHLRS computation. Now that 5 new Howe-glueable pairs are known
+(from Thread 18), the Igusa invariants of all 5 covers would be concrete results.
+The obstruction is implementing the transvectant-based I4 and I6 in PARI (~80 lines).
+
+### Commits made
+[hash pending]
+
