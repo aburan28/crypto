@@ -5779,3 +5779,4 @@ attack only works because the GLV decomposition ITSELF bounds k_2 ≤ √n.
    on the toy curve.
 
 ### Commits made
+`8c75be0` autolab 2026-07-25: Thread 19 — GLV-HNP Phase 2 PARI/GP native LLL; m=6 → 5/5 recovery
