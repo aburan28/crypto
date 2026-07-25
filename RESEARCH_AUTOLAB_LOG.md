@@ -5780,4 +5780,4 @@ BigInt GS infrastructure (`src/lll.rs`, `HP_PREC = 2048`).  Specifically:
 Thread 18 remain as concrete targets once Sage becomes available.
 
 ### Commits made
-[see below]
+`8f94eef` autolab 2026-07-25: Thread 19 — Phase 2 GLV-HNP toy; fix k_2 bound; enumeration recovers d
