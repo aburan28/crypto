@@ -5800,5 +5800,5 @@ unblocking the CHLRS computation. Now that 5 new Howe-glueable pairs are known
 The obstruction is implementing the transvectant-based I4 and I6 in PARI (~80 lines).
 
 ### Commits made
-[hash pending]
+`2f477e1`
 
