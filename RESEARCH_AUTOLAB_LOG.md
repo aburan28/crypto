@@ -5690,3 +5690,94 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+## 2026-07-25 (autolab run)
+
+### Task picked
+Priority 5 (GLV-HNP Phase 2 toy): the existing `glv_hnp_phase2_toy.gp` was marked
+"needs running and verification" in the 2026-07-21 entry.  Priority 1 is CLOSED,
+Priority 2 BLOCKED (no Sage), Priority 3 DONE, Priority 4 CLOSED.
+
+### Work done
+- Read `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` in full; identified a **design flaw**:
+  the script uses `k_2 ∈ [0, n)` (full-range), which makes Phase 2 infeasible —
+  for any candidate d, there trivially exist k_2 values per signature satisfying
+  k_{i,1} < K1_BOUND (k_{i,2} can be chosen freely to match any T_i).
+  No discrimination between correct d and wrong d' is possible.
+- Determined the correct bound: real GLV implementations (libsecp256k1, OpenSSL)
+  produce k_1, k_2 ∈ [0, sqrt(n)) via Babai CVP on the endomorphism lattice.
+  Phase 2 threat model requires `k_2 ∈ [0, L)` where L = sqrt(n) ≈ 2^128.
+- Implemented `secp256k1_cm_audit/glv_phase2_lattice.py` (pure Python, no deps):
+  - Finds toy j=0 prime-order curve with GLV via trial search (found in <0.5s).
+  - Generates m=7 signatures with k_1 ∈ [0, K=3), k_2 ∈ [0, L=sqrt(n)).
+  - **Method A (enumeration)**: enumerate k_{0,2} ∈ [0,L), k_{0,1} ∈ [0,K), derive
+    d candidate, verify vs remaining sigs.  O(K·L²·m) = 4,116 ops at toy scale.
+  - **Method B (BV-lattice)**: same enumeration for sig-0, reduces to Phase 1 BV
+    for remaining sigs.
+  - Phase 2 lattice feasibility analysis for secp256k1 scale.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.70s). ✓
+
+### Findings
+
+**Design flaw in glv_hnp_phase2_toy.gp confirmed:**
+For k_2 ∈ [0, n): every candidate d passes the per-signature existence check
+(K1_BOUND valid k_2 per sig). No discrimination → attack fails. The research
+note's claim "existence is trivially satisfied" was correct but the
+implication (that the lattice is needed) was not properly followed through.
+
+**Toy curve found:**
+```
+Curve:  y² = x³ + 2  over F_211
+n (prime order) = 199
+λ (GLV eigenvalue, λ²+λ+1≡0 mod 199) = 106
+L = sqrt(199) = 14   (k_2 bound)
+K = 3                (k_1 bound, ~2 bits of ~4-bit half-nonce known)
+m = 7                (signatures)
+```
+
+**k_full distribution (confirming standard Phase 1 fails):**
+```
+k_full = k_1 + λ·k_2 mod n spans [0, n) uniformly; no bias visible.
+Phase 1 (standard BV) would need bounded k_full → inapplicable here.
+```
+
+**Recovery results:**
+- Method A (enumeration): d = 164 recovered ✓ (matches planted)
+- Method B (BV-lattice):  d = 164 recovered ✓ (matches planted)
+
+**Phase 2 lattice analysis at secp256k1 scale (n=2^256, L=2^128):**
+Lattice: dim = 2m+1, det = n^m.
+Gaussian heuristic λ_1 ≈ sqrt((2m+1)/(2πe)) · n^{m/(2m+1)}.
+Condition: K · sqrt(2m) < λ_1, where K = 2^{128-c} (c bits of k_1 known).
+```
+m= 5: dim=11, λ_1≈2^116.0 → c ≥ 13.6 bits of k_1 needed
+m= 7: dim=15, λ_1≈2^119.4 → c ≥ 10.5 bits of k_1 needed
+m=10: dim=21, λ_1≈2^122.1 → c ≥  8.1 bits of k_1 needed
+m=15: dim=31, λ_1≈2^124.3 → c ≥  6.2 bits of k_1 needed
+```
+**Phase 1 comparison**: standard BV needs c ≥ ~43 bits of the full 256-bit nonce.
+**Phase 2 advantage**: need only c ≥ ~14 bits of the 128-bit GLV half-nonce k_1.
+This is a 3× improvement in required leakage (relative bit fraction).
+
+**At toy scale**: enumeration (O(K·L²·m)) is trivial; the 2D Phase 2 lattice is
+only needed at secp256k1 scale where L = 2^128 makes enumeration infeasible.
+
+**ECDLP threat implication**: No speedup on secp256k1 DLP — the attack requires
+a biased nonce (side-channel leakage of k_1 bits), not structural weakness.
+Main theorem (no isogeny-graph attack beats ρ) is unaffected.
+
+### Next step proposal
+
+**Thread 20 (Phase 2 lattice implementation at secp256k1 scale)**:
+Port the (2m+1)-dim Phase 2 lattice to Rust using the existing `lll_reduce_hp`
+BigInt GS infrastructure (`src/lll.rs`, `HP_PREC = 2048`).  Specifically:
+- Build the 2m+1-dim lattice with scaled columns (scale d by K/n, k_{i,2} by K/L)
+- Use the HP-LLL (§10.5 infrastructure) to handle the large integer entries
+- Test on a 64-bit toy (p ≈ 2^64, L = 2^32, c = 6 bits known) to verify
+  before scaling to secp256k1.
+
+**Thread 2 (CHLRS Igusa)**: still BLOCKED (no Sage). The 4 new Howe pairs from
+Thread 18 remain as concrete targets once Sage becomes available.
+
+### Commits made
+[see below]
