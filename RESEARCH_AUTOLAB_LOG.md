@@ -5798,4 +5798,4 @@ Rosenhain route entirely by starting from an already-F_p-defined model.
 All other threads remain CLOSED/DEAD END.
 
 ### Commits made
-`TBD` autolab 2026-07-25: Thread 2 — CHLRS Rosenhain root cause + toy verification (match=1)
+`53e39ac` autolab 2026-07-25: Thread 2 — CHLRS Rosenhain root cause + toy verification (match=1)
