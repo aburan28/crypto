@@ -5690,3 +5690,112 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## AutoLab Run 2026-07-25
+
+### Thread selected: Thread 2 — CHLRS Igusa formula (root-cause diagnosis + toy verification)
+
+**Objective:** Diagnose why `chlrs_igusa_formula.gp` gives `match=0` at p=1009, b=11, fix
+the underlying script, and verify the Rosenhain formula on a valid toy case.
+
+### Root cause of match=0
+
+The Rosenhain construction in `chlrs_igusa_formula.gp` applies a Möbius transform T that
+sends the three 2-torsion points of E₁ to {0,1,∞}:
+
+```
+T: α → 0,  dα → 1,  ωα → ∞
+```
+
+where α is a root of x³+b in F̄_p, ω is a primitive cube root of unity in F_p, and d is a
+non-square. The transform T is F_p-defined **if and only if α ∈ F_p**, i.e., if and only if
+(-b) is a **cubic residue mod p** (equivalently, x³+b splits completely over F_p).
+
+For p=1009, b=11: `(-11)^{(1008/3)} = (-11)^{336} mod 1009 ≠ 1`. The polynomial x³+11 is
+**irreducible** over F_{1009}, so α ∈ F_{1009³} \ F_{1009}. The Möbius transform T lies in
+PGL₂(F_{p³}) but not PGL₂(F_p). The resulting "Rosenhain curve" is a **non-trivial F_p-twist**
+of the correct Howe cover, hence has different Frobenius eigenvalues → match=0.
+
+**Verified numerically in `chlrs_rosenhain_fix.gp` (Part 1):**
+```
+is_cubic_res(-11, 1009) = 0
+polrootsmod(x^3+11, 1009) = []~   (no roots — irreducible)
+```
+
+### secp256k1 is permanently BLOCKED for F_p Rosenhain
+
+```
+is_cubic_res(-7, p_secp) = 0
+```
+
+x³+7 is **irreducible over F_{p_secp}**, so the F_p Rosenhain + CHLRS Igusa route cannot
+be applied to any of the 5 Howe-glueable pairs of secp256k1. All Howe-glueable pairs
+identified in Thread 18 are in the **[3]-class** (irreducible 2-torsion): the cubic
+character of the secp256k1 CM field means (-b) is never a cubic residue for any j=0
+partner curve in this isogeny class.
+
+**Thread 2 status: CLOSED — cubic-residue obstruction is fundamental.**
+
+### Toy verification: p=7, b=6
+
+For b≡-1 mod p, we have -b≡1, which is trivially a cubic residue for any p≡1 mod 6.
+The toy case p=7, b=6 satisfies all preconditions:
+
+```
+p mod 6 = 1               ✓
+(-b) cubic res mod p? 1    ✓
+roots of x^3+6 mod 7: {1, 2, 4}  (splits completely)  ✓
+d = 3  (first non-square, Kron(3,7) = -1)  ✓
+b2 = d^3*b mod 7 = 1     (twist coefficient)
+t(E1) = 4   t(E2) = -4   ✓  (traces negate as expected)
+```
+
+Rosenhain invariants (Möbius with α=1, ω=2, d=3):
+```
+λ₁ = 6,  λ₂ = 5,  λ₃ = 3
+```
+
+Frobenius char poly verification:
+```
+hyperellcharpoly(y^2 = x(x-1)(x-6)(x-5)(x-3) over F_7)
+  = x^4 - 2*x^2 + 49
+  = (x^2 - 4x + 7)(x^2 + 4x + 7)   ← target   MATCH = 1  ✓
+```
+
+Igusa invariants of the Rosenhain curve (over Z):
+```
+J2  = 1227,    J2 mod 7 = 2
+J10 = 466560000 ≠ 0  (smooth genus-2 curve)  ✓
+```
+
+Naive cover comparison: `y^2 = (x^3+6)(x^3+1)` gives the **same** char poly. This is
+expected: the Rosenhain form is a projective change of variables of the naive cover, so
+they are F_p-isomorphic genus-2 curves and have identical Frobenius.
+
+### Files created/modified
+
+- **`secp256k1_cm_audit/chlrs_rosenhain_fix.gp`** — Complete rewrite. Parts:
+  1. Obstruction check (cubic residue failures for p=1009/b=11 and secp256k1/b=7)
+  2. Valid toy setup (p=7, b=6, all conditions confirmed)
+  3. Rosenhain formula + char poly verification (match=1)
+  4. Igusa J2/J10 of Rosenhain curve
+  5. Naive cover comparison
+
+### Thread 2 status update
+
+**CLOSED.** The CHLRS Igusa route via F_p Rosenhain is fundamentally blocked for secp256k1.
+The formula is verified correct (toy match=1), and the obstruction is proven structural,
+not a computation error.
+
+### Remaining open threads
+
+**Thread 2A (not started):** Compute Igusa invariants from `howe_richelot_v5.gp`'s
+explicit F_p genus-2 model (approach A from the next-steps list). This bypasses the
+Rosenhain route entirely by starting from an already-F_p-defined model.
+
+All other threads remain CLOSED/DEAD END.
+
+### Commits made
+`TBD` autolab 2026-07-25: Thread 2 — CHLRS Rosenhain root cause + toy verification (match=1)
