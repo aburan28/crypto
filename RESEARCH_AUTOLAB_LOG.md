@@ -5690,3 +5690,92 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## 2026-07-25 (autolab run)
+
+### Task picked
+
+Thread 19 — GLV-HNP Phase 2 toy: implement Phase 2 lattice in PARI/GP and verify d recovery.
+Chosen because: the 2026-07-21 log recommended running `glv_hnp_phase2_toy.gp` as the next
+concrete step (that script exists but defers its lattice). All 6 original priority threads are
+closed/blocked/dead-end; this thread provides a concrete deliverable (PARI native LLL implementation).
+
+### Work done
+
+- Ran existing `secp256k1_cm_audit/glv_hnp_phase2_toy.gp` — structural setup verified:
+  toy curve E: y²=x³+2 over F_211, n=199, λ=106, K1_BOUND=2. Sanity check passed (all
+  m=5 signatures satisfy A+Bd ≡ k_1+λ·k_2 mod n). Script confirms standard HNP fails
+  (k_full is uniform); lattice implementation was previously deferred.
+- Verified `glv_hnp_phase2_attack.py` (Python/fpylll):
+  - Installed fpylll-0.6.4 + cysignals-1.12.5 via pip.
+  - Script runs cleanly: m=6 → 5/5 recovery. Matches 2026-05-26 results exactly.
+  - Key insight confirmed: correct GLV threat model requires k_2 ∈ [0, K2_BOUND=15)
+    (bounded by sqrt(n)), NOT full-range k_2 ∈ [0,n) as in the `.gp` structural demo.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lattice_pari.gp` — complete PARI/GP implementation:
+  - Toy curve with correct GLV parameters: k_1 ∈ [0,2), k_2 ∈ [0,15).
+  - Column-diagonal scaling: S_K1=99, S_D=1, S_K2=13, S_KANNAN=199.
+  - Lattice dim = 2m+2 (m mod-n rows, 1 d-row, m k_2-rows, 1 Kannan row).
+  - LLL: `qflll(M~, 1)` — PARI native integer LLL (replaces deprecated `lllint`).
+  - Kannan embedding: last column = ±S_KANNAN marks the solution row; d extracted from col m+1.
+  - Planted-vector verification confirms construction is correct before running LLL.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.45s). ✓
+
+### Findings
+
+**PARI/GP GLV-HNP Phase 2 sweep (n=199, K1_BOUND=2, K2_BOUND=15, 5 seeds per m):**
+
+| m | seeds recovered/5 | note |
+|---|---|---|
+| 3 | 0/5 | at info-theoretic boundary; PARI RNG differs from Python |
+| 4 | 3/5 | above threshold |
+| 5 | 4/5 | above threshold |
+| **6** | **5/5** | **practical LLL threshold** ✓ |
+| 7 | 5/5 | |
+
+Info-theoretic threshold: m ≥ ⌈log(n) / log(n/(K1·K2))⌉ = 3. Practical LLL threshold: m=6.
+Matches Python/fpylll results from 2026-05-26.
+
+**Witness rows (m=6):**
+```
+d=104 seed=42:   [99,0,0,99,0,0, 104, 39,117,65,26,13,169, 199]  norm=345
+d=77  seed=1234: [99,99,99,0,99,99, 77, 39,156,169,91,156,104, 199]  norm=439
+```
+- k_1 slots (cols 1..m): ∈ {0, 99} = k_{i,1} × 99 with k_{i,1} ∈ {0,1} ✓
+- d-slot (col m+1): d directly (S_D=1) ✓
+- k_2 slots (cols m+2..2m+1): k_{i,2} × 13 ∈ {0,13,...,182} ✓
+- Kannan (last col): 199 = S_KANNAN ✓
+
+**Threat model clarification:** the prior `glv_hnp_phase2_toy.gp` incorrectly uses full-range
+k_2 ∈ [0,n=199). The attack requires k_2 ∈ [0, K2_BOUND=⌈√n⌉=15). With full-range k_2, the
+problem is underdetermined (any d has a valid (k_1, k_2) assignment per signature). The Phase 2
+attack only works because the GLV decomposition ITSELF bounds k_2 ≤ √n.
+
+**Key design insight (confirmed in PARI):** balanced column scaling is essential.
+- S_D=1 (not K1_BOUND): d-slot entry = d ≈ n ≈ 200, balanced against k_1 (99) and k_2 (≤182).
+- With S_D=K1_BOUND, d-slot = 2d ≈ 400, planted vector non-shortest → LLL fails.
+
+**Status:**
+- Thread 19 (GLV-HNP Phase 2 PARI): **COMPLETE** — self-contained PARI/GP script with
+  native LLL (`qflll`), full sweep results, 5/5 at m=6.
+- Original Thread 5 dead-end (K1_threshold separator, 2026-06-21 to 2026-06-29): unchanged.
+  The separator for which secp256k1-scale curves succeed at K1_threshold remains non-algebraic.
+- Thread 2 (CHLRS Igusa): BLOCKED (Sage required).
+- All other original threads: CLOSED/DEAD-END.
+
+### Next step proposal
+
+1. **Fallback Step 4 (ePrint survey)**: All six original threads are resolved. The most recent
+   ePrint survey was 2026-07-08. Reasonable to do a fresh survey for papers since then with
+   keywords: "isogeny-graph ECDLP", "GLV lattice attack", "hidden number problem GLV",
+   "genus-2 cover ECDLP", "(N,N)-isogeny Jacobian".
+
+2. **Thread 20 (new attack variant)**: Investigate whether the GLV-HNP Phase 2 attack extends
+   to the case where an attacker leaks the TOP bits of k_1 (rather than a bound on k_1).
+   This would make the threat model k_1 ∈ [K_LOW, K_HIGH) (an interval) rather than [0, K_BOUND).
+   Sketch: the Kannan embedding target would shift by K_LOW, and the lattice should still work
+   with the same dimension. Falsifier: try K_LOW = K1_BOUND/2 (half the bound, upper half biased)
+   on the toy curve.
+
+### Commits made
