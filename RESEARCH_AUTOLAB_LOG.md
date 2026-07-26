@@ -5882,4 +5882,4 @@ Script: `glv_hnp_phase2_k1_opt.py`. Expected: m* is minimized at K1_BOUND ≈ 2.
 Should be marked explicitly CLOSED in the scheduled task description.
 
 ### Commits made
-TBD (this entry)
+1501760 autolab 2026-07-26 (run 2): Thread 20 — λ/n threshold refuted; K1_BOUND is the key
