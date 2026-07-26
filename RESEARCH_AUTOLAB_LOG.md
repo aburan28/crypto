@@ -5901,4 +5901,4 @@ matches ratio's, the mechanism is entropy of the k₂ term, and min_m becomes pr
 from λ alone — including for secp256k1, without running a 256-bit lattice.
 
 ### Commits made
-(to be filled after commit)
+9e9d84d autolab 2026-07-26 (2nd): Thread 20 — no lambda threshold exists; retracts morning claim
