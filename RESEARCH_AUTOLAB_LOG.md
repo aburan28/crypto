@@ -5904,4 +5904,4 @@ Investigate WHY n=2251, λ=708 is a hard instance. Specific checks:
 If BKZ succeeds at n=2251, the hard-instance is a genuine LLL weakness (not structural).
 
 ### Commits made
-[see next git hash after this entry]
+`1ce35c0` autolab 2026-07-26 (session 2): Thread 20 — λ/n threshold bisection; hard-instance n=2251 discovered
