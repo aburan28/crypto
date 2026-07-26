@@ -5931,4 +5931,4 @@ sensitivity of the GLV-HNP attack.
 **Thread 20 (λ/n threshold):** COMPLETE (this session).
 
 ### Commits made
-(to be added after push)
+21c5d16 autolab 2026-07-26 session2: Thread 20 GLV-HNP λ/n threshold — k1_bound=8 cross-bin sweep
