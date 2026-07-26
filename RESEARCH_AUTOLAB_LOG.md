@@ -5790,4 +5790,4 @@ investigate whether P-521's NaN is GS precision (target_bits too high) or struct
 Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
-(to be filled after commit)
+9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
