@@ -5876,4 +5876,4 @@ no bias signal). The "failure" was purely due to a misconfigured threat model.
    the 256-bit m-estimate (item 2 above) or the ePrint survey (fallback Step 4).
 
 ### Commits made
-[see next git hash after this entry]
+00c5e9f autolab 2026-07-26: Thread 20 — λ/n threshold study is negative; prior failure was parameter bug
