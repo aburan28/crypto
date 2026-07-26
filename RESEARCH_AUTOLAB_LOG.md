@@ -5881,4 +5881,4 @@ Phase 2 framework clarifies it: the precision issue is separate from K1/λ inter
 File: `tests/gs_precision_benchmark.rs`. Just add a `target_bits=80` variant.
 
 ### Commits made
-[to be filled after commit]
+0564f1e autolab 2026-07-26 run#2: Thread 20 — λ/n threshold refuted; K1×λ/n interaction identified
