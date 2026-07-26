@@ -5874,4 +5874,4 @@ structural explanation.
 cover-cost bound (block B5) in the paper/eprint extends beyond prime fields.
 
 ### Commits made
-[to be filled after commit]
+460e9d4 autolab 2026-07-26b: Thread 20 — λ/n threshold bisection; bracket narrows to (0.070, 0.073)
