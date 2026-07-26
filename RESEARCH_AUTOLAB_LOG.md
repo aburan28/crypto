@@ -5765,4 +5765,4 @@ Five Howe-glueable pairs identified in Thread 18 provide 5 targets for Igusa-Cle
 Recommend Thread 4 first (closes a loose confirmation thread); Thread 2 as fallback.
 
 ### Commits made
-[to be filled after push]
+`f718885` autolab 2026-07-26: Thread 5 — GLV-HNP Phase 2 32-bit attack; LLL 5/5 at m=10
