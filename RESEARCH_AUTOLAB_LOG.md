@@ -5888,4 +5888,4 @@ results to identify the specific Howe quotient.
 λ/n between 0.07 and 0.34 (proposed in today's earlier run). This is highly actionable.
 
 ### Commits made
-[see git log after this entry]
+- `6753e1c` autolab 2026-07-26 run#2: Thread 2 — split-sextic NOT isogenous to E1×E2; y²=x⁶+x³+117 in correct isogeny class
