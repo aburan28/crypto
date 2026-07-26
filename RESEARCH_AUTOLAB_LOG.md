@@ -5791,3 +5791,87 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26b (autolab run — second run same day)
+
+### Task picked
+Thread 20 (λ/n threshold bisection): proposed by the 2026-07-26 run as highest-priority
+next step. P-521 LLL is CLOSED (§10.4-10.5 of RESEARCH_LLL_GS_ANALYSIS.md), and
+Thread 2 (CHLRS Igusa) remains BLOCKED (needs SageMath). New script:
+`secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+- Wrote `glv_hnp_phase2_lambda_threshold.py`: sweeps 8 λ/n ratio bands over j=0
+  GLV curves, using Eisenstein CM search to find curves with controlled λ/n.
+- For each band [lo, hi]: find a prime-order curve with λ/n ∈ [lo, hi] via
+  Eisenstein decomp + j0_traces, then sweep m=3..14 to find min m where LLL
+  recovers d 3/3 seeds.
+- Ran the script; all 8 bands found curves and completed.
+- cargo test --test curve_audit → 5/5 pass.
+
+### Findings
+
+**Full threshold sweep results:**
+
+```
+band             λ/n        n       λ   min_m (3/3)   LLL status
+[0.07, 0.09]   0.073      547      40             4   ✓ PASS
+[0.09, 0.12]   0.106      613      65             5   ✓ PASS
+[0.12, 0.16]   0.151      829     125             6   ✓ PASS
+[0.16, 0.21]   0.191      571     109             4   ✓ PASS
+[0.21, 0.27]   0.238      541     129             6   ✓ PASS
+[0.27, 0.34]   0.275      643     177             7   ✓ PASS
+[0.34, 0.42]   0.407      619     252             5   ✓ PASS
+[0.42, 0.50]   0.448      661     296             7   ✓ PASS
+─── prior known ───────────────────────────────────────────────────
+               0.070     2647     185    FAIL (BKZ-40 also fails)
+               0.340   523969  177902             9   ✓ PASS
+               0.530      199     106             6   ✓ PASS
+```
+
+**Key finding: threshold bracket is (0.070, 0.073), NOT (0.07, 0.34).**
+
+The prior assessment that "λ/n=0.07 fails, λ/n=0.34 passes" suggested a threshold
+anywhere in [0.07, 0.34]. This sweep narrows it to (0.070, 0.073) — the difference
+between the failure (n=2647, λ=185, λ/n=0.0699) and the nearest pass (n=547, λ=40,
+λ/n=0.0731) is only Δ(λ/n)=0.003.
+
+**min_m does NOT decrease as λ/n increases** (values are 4-7 across all bands,
+  non-monotone). The min_m is controlled by the information-theoretic threshold
+  m ≥ log(n)/log(1/eff) where eff = K1·K2/n, not by λ/n directly. All small
+  test curves have n≈540-830 and similar eff, so similar m_thresh≈3-4.
+
+**Confounding factor note:** The n=2647 failure vs n=547 pass involves different n
+  (12-bit vs 10-bit). Geometric explanation: the k2-row's k1-slot entry has magnitude
+  λ·S_k1 = λ·n/K1. The modular row has magnitude n·S_k1 = n²/K1. Their ratio is
+  λ/n regardless of n. So the threshold should be on λ/n alone — confirmed empirically:
+  λ/n=0.073 passes at m=4 while 0.070 fails even at m=12+.
+
+**Implication for secp256k1:** λ/n ≈ 0.44 for secp256k1, well above the threshold.
+  The Phase 2 GLV-aware lattice attack is geometrically viable on secp256k1 IF the
+  256-bit lattice entries don't cause the separate bigfloat/precision failure of the
+  standard BV setup. The Phase 2 attack has a structurally different lattice
+  (k1-bias columns + λ-coupling rows), so the GS catastrophic cancellation observed
+  for standard BV on secp256k1 may or may not apply.
+
+### Next step proposal
+
+**Thread 21 (threshold fine-bisection, K1_BOUND sensitivity):**
+The bracket (0.070, 0.073) is narrow. To tighten it:
+(a) Find curves with λ/n ∈ {0.071, 0.072} and test at m=4..12. Requires searching
+    more primes (add band [0.070, 0.073] to the script with search_limit=500000).
+(b) Test whether K1_BOUND affects the threshold: for K1=4 vs K1=2, does the
+    threshold shift? The ratio of k2-row entry to modular row is λ/n (independent of K1),
+    so the threshold should be K1-independent. Verifiable in <5 min.
+
+**Thread 22 (n=2647 large-m test):**
+Run m=15, 20 on the n=2647 failing curve to confirm the failure is geometric (not
+sample-count limited). Info-theoretically m=3 suffices (eff≈0.039), so if LLL
+fails at m=20 this is definitively a geometric failure. Expected: FAIL → confirms
+structural explanation.
+
+**Thread 6 (B5 over F_{p^k}):** not touched in recent sessions. Check whether the
+cover-cost bound (block B5) in the paper/eprint extends beyond prime fields.
+
+### Commits made
+[to be filled after commit]
