@@ -5890,4 +5890,4 @@ works in principle. The actual limit is on eff, not on lam/n.
    `lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` to confirm 384-bit consistency.
 
 ### Commits made
-[see below]
+5fe3e18 autolab 2026-07-26 #2: Thread 20 — lam/n threshold hypothesis REFUTED; eff<=0.08 is the true criterion
