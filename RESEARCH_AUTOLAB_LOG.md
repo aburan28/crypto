@@ -5901,4 +5901,4 @@ LLL success across 50 random λ values at fixed n=2647, K1=8. Confirm the thresh
 with higher statistical confidence.
 
 ### Commits made
-[see below after push]
+`2e79f30` autolab 2026-07-26 (session 2): Thread 20 — λ/n threshold is small-n artifact; Diophantine guide-vector mechanism
