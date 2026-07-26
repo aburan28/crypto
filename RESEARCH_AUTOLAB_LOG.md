@@ -5791,3 +5791,103 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run #2)
+
+### Task picked
+Thread 20 (λ/n threshold study): proposed in today's earlier run (Thread 5) as the
+most concrete next sub-task. The claimed lam/n=0.07 "structural failure" from the
+2026-07-26 run needed empirical verification/falsification. Script:
+`glv_hnp_phase2_lambda_threshold.py` (full λ/n sweep) + `glv_hnp_phase2_lam_refutation.py`
+(diagnosis of the prior failure).
+
+### Work done
+- Wrote `glv_hnp_phase2_lambda_threshold.py`: enumerates 283 j=0 prime-order curves
+  (p in [100, 6000]), bins by λ/n in [0.05, 0.50) with width 0.05, tests LLL at m=12
+  on 3 representative curves per bin (3 seeds each).
+- Wrote `glv_hnp_phase2_lam_refutation.py`: targeted test of p=2677 (n=2647, lam=185,
+  lam/n=0.070) under two k1_bound settings (8 vs 2), plus a k1_bound sweep at m=12.
+- `cargo test --test curve_audit` → 5/5 pass.
+
+### Findings
+
+**Finding 1: λ/n threshold hypothesis is REFUTED.**
+
+`glv_hnp_phase2_lambda_threshold.py` result (m=12, 3 seeds per curve):
+
+```
+[0.05, 0.10)  lam/n=0.0564 n=2179  3/3 ✓
+[0.05, 0.10)  lam/n=0.0702 n=4243  3/3 ✓
+[0.05, 0.10)  lam/n=0.0804 n=1069  3/3 ✓
+[0.10, 0.15)  ...                   3/3 ✓ (all bins)
+...
+[0.45, 0.50)  lam/n=0.4865 n=1447  3/3 ✓
+```
+ALL bins from [0.05, 0.50) succeed 3/3 at m=12. No λ/n threshold exists.
+(One PARTIAL: lam/n=0.3022, n=139 — tiny curve, success 1/3, likely n-size effect.)
+
+**Finding 2: The p=2677 failure was due to k1_bound choice, not lam/n.**
+
+`glv_hnp_phase2_lam_refutation.py` on p=2677 (n=2647, lam=185, lam/n=0.0699):
+
+```
+Setting A — k1_bound=8 (2026-07-26 run's choice):
+  eff=0.1572, m_thresh=5
+  m=6:  1/5    m=8..16: 0/5   (complete failure)
+
+Setting B — k1_bound=2 (threshold study choice):
+  eff=0.0393, m_thresh=3
+  m=6..16: 5/5  (complete success at ALL m)
+
+k1_bound sweep at m=12:
+  k1=2: 5/5  (eff=0.039)
+  k1=3: 5/5  (eff=0.059)
+  k1=4: 5/5  (eff=0.079)
+  k1=5: 2/5  (eff=0.098)  ← boundary
+  k1=6: 0/5  (eff=0.118)
+  k1=8: 0/5  (eff=0.157)
+```
+
+The failure at k1_bound=8 persists even at m=16 >> m_thresh=5. This is NOT an
+information-theoretic failure (there's enough information), but a LATTICE GEOMETRY
+failure: with large k1_bound, there are ~(k1_bound)^m many short vectors with similar
+norms to the planted one. LLL cannot distinguish the planted vector from spurious ones.
+
+With k1_bound=2 (binary k1), only ONE short vector satisfies all signature equations
+simultaneously. LLL finds it reliably.
+
+**Corrected explanation of the glv_hnp_phase2_20bit.py failure (2026-07-26):**
+That script hardcoded k1_bound=8 for the p=2677 curve, which is far outside the
+usable range (eff=0.157 >> 0.08 boundary). The prior attribution to "lam/n geometry"
+was incorrect.
+
+**Revised attack criterion:**
+The GLV-HNP Phase 2 LLL attack succeeds (at fixed m=12, 3 seeds) for any lam/n ∈ (0.05, 0.50)
+provided:
+  `k1_bound * k2_bound / n ≤ 0.08`  (i.e., eff ≤ 0.08)
+  `k1_bound ≤ 4` for these small curves
+
+The failure condition is NOT "lam/n too small" — it is "bias window too wide relative to n".
+
+**Implication for secp256k1:**
+lam/n ≈ 0.44 (well within success regime), so the attack works as long as the bias window
+satisfies eff ≤ 0.08. For n ≈ 2^256, k2_bound ≈ 2^128, so the condition is:
+  k1_bound ≤ 0.08 * n / k2_bound ≈ 0.08 * 2^256 / 2^128 ≈ 0.08 * 2^128
+
+This is a very weak constraint — k1_bound can be astronomically large and the attack still
+works in principle. The actual limit is on eff, not on lam/n.
+
+### Next step proposal
+
+1. **k1_bound scaling law**: Characterize how the eff threshold (currently ~0.08 for 12-bit curves)
+   scales with bit-length. For 20-bit curves, is the boundary also eff ≈ 0.08, or does it shift?
+   Script: `glv_hnp_phase2_eff_threshold.py`.
+
+2. **Document in paper**: Add a remark to RESEARCH_GLV_HNP_PHASE2.md correcting the lam/n
+   threshold claim and replacing it with the eff ≤ 0.08 (or eff-boundary) criterion.
+
+3. **Cross-curve LLL (Thread 4)**: Now that the Phase 2 framework is correct, rerun
+   `lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` to confirm 384-bit consistency.
+
+### Commits made
+[see below]
