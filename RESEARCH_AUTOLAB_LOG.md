@@ -5791,3 +5791,89 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+---
+
+## 2026-07-26 (autolab run, session 2)
+
+### Task picked
+
+Thread 5 continuation / "Thread 20" (λ/n threshold study). The prior session today
+proposed bisecting the λ/n threshold between 0.07 (LLL fails) and 0.34 (LLL succeeds).
+Threads 1–4 and 6 all CLOSED as of June 2026; Thread 5 was just completed. The
+"Thread 20 (λ/n threshold study)" was the highest-priority concrete next step.
+
+### Work done
+
+- Created `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` — a sweep script
+  that enumerates all j=0 prime-order curves with p∈[2^7,2^13], bins them by λ/n
+  ratio into 10 buckets ([0.00,0.05) through [0.45,0.50)), and tests LLL recovery
+  at m=6, 5 seeds per bucket.
+- First run (with `k1_bound = k2_bound//4 ≈ 22`): ALL buckets fail 0/5.
+- Diagnosed: k1_bound=22 makes planted vector norm >> GH bound; attack fails not
+  because of λ/n but because the bias constraint is too weak.
+- Fixed to `k1_bound = 2` (the Phase 2 extreme-bias threat model: k1∈{0,1}).
+- Second run (K1_BOUND=2): ALL buckets succeed 5/5, including λ/n=0.011.
+- Confirmed the critical finding: `cargo test --test curve_audit` → 5/5 pass.
+
+**Key diagnostic** — the prior run's "failure at λ/n=0.07" (p=2677, n=2647):
+- The 20bit.py script used K1_BOUND=36, K2_BOUND=724 (designed for n=523969).
+- Applied to n=2647: eff = 36*724/2647 = 9.85 >> 1 → essentially NO bias constraint.
+- With correct K1_BOUND=2, K2_BOUND=52, eff=0.039: LLL recovers d in a single test.
+- The "structural explanation" (small λ → λ-rows comparable to K1 rows after scaling)
+  was also wrong: with K1_BOUND=2, -λ*S_K1 = O(n^2/2) regardless of λ/n.
+
+### Findings
+
+**No λ/n threshold exists for LLL failure in Phase 2** (under correct K1_BOUND=2):
+
+| λ/n bucket   | Rep. n | λ/n    | LLL (5 seeds) |
+|-------------|--------|--------|---------------|
+| [0.00,0.05) | 8191   | 0.0110 | 5/5 OK        |
+| [0.05,0.10) | 7753   | 0.0520 | 5/5 OK        |
+| [0.10,0.15) | 7723   | 0.1187 | 5/5 OK        |
+| [0.15,0.20) | 8311   | 0.1523 | 5/5 OK        |
+| [0.20,0.25) | 7759   | 0.2267 | 5/5 OK        |
+| [0.25,0.30) | 7933   | 0.2527 | 5/5 OK        |
+| [0.30,0.35) | 8233   | 0.3173 | 5/5 OK        |
+| [0.35,0.40) | 7639   | 0.3894 | 5/5 OK        |
+| [0.40,0.45) | 8053   | 0.4342 | 5/5 OK        |
+| [0.45,0.50) | 7927   | 0.4742 | 5/5 OK        |
+
+The attack works at n≈8k (13-bit) for ALL λ/n ∈ (0, 0.5] with K1_BOUND=2 and m=6.
+
+**Retraction of prior "Thread 20" finding**:
+The log entry 2026-07-26 (session 1) reported:
+> "Critical new finding: λ/n threshold for attack viability. LLL fails for λ/n=0.07."
+
+This was a parameter bug: the 20bit.py script applied K1_BOUND=36, K2_BOUND=724
+(calibrated for n=524k) to a n=2647 curve, giving eff=9.85 (all k-values admitted,
+no bias signal). The "failure" was purely due to a misconfigured threat model.
+
+**Corrected Phase 2 status**:
+- Phase 2 GLV-HNP lattice attack with K1_BOUND=2 works for all λ/n ∈ (0, 0.5].
+- For secp256k1 (λ/n≈0.44): bucket [0.40,0.45) → 5/5 OK at 13-bit scale.
+- At 256-bit scale: the attack would require HP LLL (BigInt GS) to handle the
+  precision issues documented in §10.3 of RESEARCH_LLL_GS_ANALYSIS.md.
+- The REAL constraint is not λ/n — it is the scaling law:
+  m grows roughly as ~1.3 per 4 bits of log₂n (3 data points). For secp256k1
+  (256-bit): m_estimated ≈ 4 + (256-8)/4 * 1.3 ≈ 4 + 80.6 ≈ 85 signatures.
+  This remains unverified at 256-bit scale.
+
+### Next step proposal
+
+1. **Verify the 20bit.py small-λ failure is reproducible with wrong K1_BOUND**:
+   Add a targeted test in `glv_hnp_phase2_lambda_threshold.py` that confirms the
+   failure at K1_BOUND=36 for n=2647 (eff=9.85) to document what went wrong.
+
+2. **Cross-curve m-scaling law** (Thread 21):
+   Run the threshold script for curves at 8, 12, 16, 20 bit scale, all with K1_BOUND=2
+   and m varying from 3 to 15. Confirm the m≈4→7→9 scaling law at 3 more bit-length
+   targets. Script: `glv_hnp_phase2_m_scaling.py`.
+
+3. **Existing threads**: All 6 original threads are CLOSED or BLOCKED. The λ/n
+   threshold study is a NEGATIVE RESULT (no threshold). The next open angle is
+   the 256-bit m-estimate (item 2 above) or the ePrint survey (fallback Step 4).
+
+### Commits made
+[see next git hash after this entry]
