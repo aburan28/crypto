@@ -5905,4 +5905,4 @@ All priority threads 1-5 now have at least partial resolution. Thread 6 (B5 gene
 is the last unexplored priority thread. Pick this up next.
 
 ### Commits made
-[to be filled after commit]
+`f5eac08` autolab 2026-07-26 PM: Thread 2 CHLRS Igusa — corrected Rosenhain formula, H3 structural theorem, secp256k1 BLOCKED
