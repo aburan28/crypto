@@ -5799,3 +5799,4 @@ invariants. If yes, the CHLRS thread unblocks entirely within PARI.
 Recommend Thread 20 (quick sanity check) followed by Thread 22 (CHLRS unblock).
 
 ### Commits made
+`7c819fa` autolab 2026-07-26: Thread 19 — B5 Weil-poly analysis for all 5 Howe-glueable sextic-twist pairs
