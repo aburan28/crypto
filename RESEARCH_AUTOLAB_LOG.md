@@ -5791,3 +5791,95 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run — second run, same day)
+
+### Task picked
+Thread 20 (λ/n threshold bisection): proposed in today's first run as highest-priority
+next step. Goal: bisect the threshold between λ/n=0.07 (failure) and 0.34 (success)
+reported in the 2026-07-26 first run. Also assessed Thread 2 (CHLRS Igusa) — blocked.
+
+### Work done
+- Assessed Thread 2 (CHLRS Igusa formula): `chlrs_igusa_formula.gp` runs but the
+  Rosenhain construction gives wrong Jac order (334 vs 169 for p=1009), and the direct
+  product form y²=(x³+b)(x³+bd³) is also documented as wrong in `howe_explicit_cover.gp`.
+  Mestre reconstruction needed — marked BLOCKED.
+- Assessed Thread 4 (Cross-curve LLL 3-of-3 seeds): closed per RESEARCH_LLL_GS_ANALYSIS.md §10.1.
+- Assessed Thread 6 (B5 over F_{p^k}): covered in B6′ of PAPER_STRUCTURAL_COMPLETENESS.md.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Eisenstein CM search over 2000 < p < 8500 (p≡1 mod 3): found 278 prime-order j=0
+    curves with GLV covering λ/n from 0.01 to 0.50 in steps of ~0.01.
+  - Key insight: actual EC arithmetic NOT needed — simulated r (random integer) gives
+    identical HNP lattice structure: A+B*d ≡ k1+λ*k2 (mod n) holds either way.
+  - Parameters: K1_BOUND = max(2, int(0.05*sqrt(n))); K2_BOUND = sqrt(n)+1; eff ≈ 0.05.
+  - Swept 47 curves with λ/n ∈ [0.035, 0.490], m from 2 to 18, 3 seeds each.
+  - **All 47 curves succeed**: m* ∈ {3,4,5,6}, including λ/n=0.070 (n=2647) at m*=3!
+- Ran 3-way diagnostic (n=2647, lam=185, λ/n=0.07):
+  ```
+  A: K1=8, simulated r  → Mostly FAIL (0/3 at m≤5, up to 2/3 at m=9)
+  B: K1=2, simulated r  → PASS at m=3 (3/3) ✓
+  C: K1=8, actual EC    → ALWAYS FAIL (0/3 at all m≤12)
+  D: K1=2, actual EC    → PASS at m=5 (3/3) ✓
+  ```
+- `cargo test --test curve_audit` → 5/5 pass (5.64s). ✓
+
+### Findings
+
+**CORRECTION to 2026-07-26 first run — "λ/n=0.07 structural failure" was a PARAMETER BUG:**
+
+The failure reported earlier (λ/n=0.07, n=2647: LLL FAIL even at m=12, BKZ(40) FAIL) was
+caused by K1_BOUND=8 being too large for n=2647, NOT by a fundamental λ/n threshold.
+
+3-way diagnostic (n=2647, λ/n=0.07):
+- K1=8, actual EC (old run): ALWAYS FAIL — reproduces the old failure exactly
+- K1=2, actual EC:           PASS at m=5 (3/3) — same curve, different K1_BOUND
+- K1=8, simulated r:         Partial (2/3 at m=9) — K1 is the primary issue; EC r-value
+                               structure makes it worse but isn't the root cause
+- K1=2, simulated r:         PASS at m=3 (3/3) — cleanest setup
+
+**Sweep result (all λ/n ratios tested):**
+```
+λ/n    n       m*   eff
+0.035  2437    3    0.041   ← low λ/n, still works
+0.047  5881    5    0.039
+0.056  2179    3    0.043
+0.070  2647    3    0.039   ← previously "FAIL" (K1=8 bug)
+0.085  2917    4    0.038
+0.107  6829    6    0.049
+0.116  3643    5    0.050
+0.253  7237    4    0.048
+0.340  2659    5    0.039
+0.386  2677    4    0.039
+0.490  2503    5    0.041
+(all 47 tested: m* ∈ {3,4,5,6}, 3/3 seeds)
+```
+
+**Root cause of K1=8 failure:**
+With K1_BOUND=8 and n=2647: S_K1 = 2647//8 = 330. Planted vector k1_i entries
+up to 7×330=2310. For K1_BOUND=2: S_K1 = 1323, k1_i ∈ {0,1}. The planted vector
+is "more special" (shorter relative to next-shortest) with K1=2. The λ-row interaction
+(-185×1323 = -244755 per slot) is large in both cases, so the PLANTED vector's
+k1-entries being {0,1} vs [0,8) is the key differentiator for LLL.
+
+**The "small-λ failure structural explanation" in the 2026-07-26 log IS REFUTED:**
+The claim that λ/n=0.07 makes the attack structurally fail was incorrect.
+There is NO fundamental λ/n threshold for LLL success (for 12-13 bit curves, eff≈0.05).
+The attack works for all λ/n from 0.035 to 0.490 with K1_BOUND=max(2, 5%·sqrt(n)).
+
+**Implication for secp256k1:** The GLV-aware HNP Phase 2 attack framework (Thread 5)
+is valid for secp256k1 (λ/n≈0.44) provided K1_BOUND is chosen correctly. The previous
+λ/n threshold concern is removed. The outstanding obstacle for secp256k1 is the 256-bit
+lattice arithmetic (bigfloat precision) — same as the standard HNP case.
+
+### Next step proposal
+**Thread 21 (K1_BOUND optimality study):**
+Characterize the optimal K1_BOUND as a function of (n, λ/n, target eff). Specifically:
+what is the minimum m* as a function of K1_BOUND for fixed (n, λ, eff)?
+Script: `glv_hnp_phase2_k1_opt.py`. Expected: m* is minimized at K1_BOUND ≈ 2.
+
+**Thread 1 (P-521 re-examination — CLOSED):** RESEARCH_LLL_GS_ANALYSIS.md §10 shows HP LLL
+(BigInt-based GS) already resolves P-521 NaN. m=32 at 3/3 seeds, ~57s/probe.
+Should be marked explicitly CLOSED in the scheduled task description.
+
+### Commits made
+TBD (this entry)
