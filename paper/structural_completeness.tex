@@ -652,6 +652,53 @@ normalisation relative to Cardona--Quer; $J_{10} = 36$ is
 normalization-independent and matches both conventions.)
 Script: \texttt{secp256k1\_cm\_audit/igusa\_f43\_howe.gp}.
 
+\begin{remark}[B5 for all Howe-glueable sextic-twist pairs]\label{rem:thread19-b5-all-pairs}
+Thread~18 checked all $\binom{6}{2}=15$ pairs of sextic twists of secp256k1
+for the Howe conditions (H1)--(H3).  Exactly five pairs qualify:
+\[
+  (E_0, E_1),\quad (E_0, E_3),\quad (E_0, E_4),\quad
+  (E_1, E_4),\quad (E_3, E_4).
+\]
+Thread~19 computed the Weil polynomial
+$W_{ij}(T) = (T^2 - t_i T + p)(T^2 - t_j T + p)$
+and $\#\Jac(C_{ij})(\FF_p) = n_i n_j = W_{ij}(1)$ for each pair, yielding:
+
+\medskip
+\noindent
+\begin{tabular}{lrrr}
+\toprule
+Pair $(i,j)$ & $n_i n_j$ (512 bits) & HCDLP $\approx$ & ECDLP $\approx$ \\
+\midrule
+$(0,1)$ & $1.34\times10^{154}$ & $2^{256}$ & $2^{128}$ \\
+$(0,3)$\textsuperscript{*} & $1.34\times10^{154}$ & $2^{256}$ & $2^{128}$ \\
+$(0,4)$ & $1.34\times10^{154}$ & $2^{256}$ & $2^{128}$ \\
+$(1,4)$ & $1.34\times10^{154}$ & $2^{256}$ & $2^{128}$ \\
+$(3,4)$ & $1.34\times10^{154}$ & $2^{256}$ & $2^{128}$ \\
+\bottomrule
+\end{tabular}
+\medskip
+
+\noindent
+(\textsuperscript{*}~The reference pair $E_0\!\times\!E_3$ = secp256k1\,$\times$\,quadratic twist,
+already handled in Corollary~\ref{cor:fp3cost}.)
+
+For each pair, $W_{ij}$ factors over $\QQ$ as two irreducible quadratics
+(since $t_i \ne t_j$ for all qualifying pairs), confirming that
+$\Jac(C_{ij}) \sim E_i \times E_j$ is \emph{not} simple.
+A Hasse-bound argument gives the universal lower bound
+\[
+  \sqrt{n_i n_j}
+  \;\ge\; p - 2\sqrt{p}
+  \;\approx\; 2^{256}
+  \;\gg\; 2^{128} \;\approx\; \sqrt{n_0},
+\]
+so B5 holds for \emph{all five} Howe-glueable sextic-twist pairs.
+The two ``second-order'' pairs $(E_1,E_4)$ and $(E_3,E_4)$ do not directly
+involve secp256k1 ($E_0$) but would arise if an attacker tried to chain
+covers; they are equally infeasible.
+Script: \texttt{secp256k1\_cm\_audit/thread19\_howe\_pair\_b5.gp}.
+\end{remark}
+
 \section{Empirical verification on deployed curves}\label{sec:empirical}
 
 The companion script \texttt{multi\_curve\_audit.gp} runs the full

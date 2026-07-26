@@ -5690,3 +5690,112 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## 2026-07-26 (autolab run)
+
+### Task picked
+Thread 19 — B5 Weil polynomial and HCDLP-cost analysis for all 5 Howe-glueable
+sextic-twist pairs discovered in Thread 18 (2026-07-21).
+Chosen because: Thread 18 found 5 qualifying pairs (including 4 new ones beyond
+the known E_0×E_3) and proposed computing their Weil polynomials and B5 status as
+the next concrete step. Both previously-recommended next threads (GLV-HNP Phase 2
+and CHLRS Igusa) are CLOSED and BLOCKED respectively; Thread 19 is the natural
+continuation of Thread 18's cover-attack completeness analysis.
+
+### Work done
+- Installed pari-gp (not present in container, `apt-get install -y --fix-missing pari-gp`).
+- Wrote `secp256k1_cm_audit/thread19_howe_pair_b5.gp` (~110 lines):
+  - Computed group orders n_0..n_5 for all 6 sextic twists (from CM decomposition).
+  - For each of the 5 qualifying pairs: computed n_i·n_j, Weil polynomial W_{ij}(T),
+    and HCDLP cost vs ECDLP cost comparison.
+  - Verified W(1) == n_i·n_j for all 5 pairs.
+  - Partial factorization of n_0, n_1, n_3, n_4 (trial-divide up to 10^7).
+  - Hasse lower bound on min(n_i·n_j) confirming B5 universally.
+- Ran script: clean output, all checks passed.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.46s). ✓
+- Added Remark `rem:thread19-b5-all-pairs` to `paper/structural_completeness.tex`
+  (after toy-verification paragraph, before §Empirical), with summary table and
+  proof that B5 holds for all 5 pairs via Hasse bound argument.
+- Verified LaTeX environment balance (all `\begin/\end` matched). ✓
+
+### Findings
+
+**Group orders (full 256-bit values):**
+```
+n_0 = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+n_1 = 115792089237316195423570985008687907853508896131558604026424249738214906721757
+n_2 = 115792089237316195423570985008687907853941316518124263683276670604605579899084
+n_3 = 115792089237316195423570985008687907853702405052206223696310004874299507848991
+n_4 = 115792089237316195423570985008687907853031073199722524052490918277602762621571
+n_5 = 115792089237316195423570985008687907852598652813156864395638497411212089444244
+```
+
+**Weil polynomial verification W(1) == n_i·n_j:**
+
+| Pair  | W(1) == n_i·n_j | #Jac(C)(F_p) bits | HCDLP ~2^ | ECDLP ~2^ | ratio   | B5? |
+|-------|-----------------|-------------------|-----------|-----------|---------|-----|
+| (0,1) | ✓               | 512               | 256       | 128       | +128    | YES |
+| (0,3) | ✓               | 512               | 256       | 128       | +128    | YES |
+| (0,4) | ✓               | 512               | 256       | 128       | +128    | YES |
+| (1,4) | ✓               | 512               | 256       | 128       | +128    | YES |
+| (3,4) | ✓               | 512               | 256       | 128       | +128    | YES |
+
+All 5 pairs: #Jac(C)(F_p) is a 512-bit integer (≈ p²), so sqrt(#Jac) ≈ 2^256 >> 2^128.
+B5 holds for every Howe-glueable sextic-twist pair of secp256k1.
+
+**Exact formulas for quadratic-twist pairs:**
+```
+n_0·n_3 = (p+1)² - t_0² = 13407807929942597099574024998205846127479365...663967  (512 bits) ✓
+n_1·n_4 = (p+1)² - t_1² = 13407807929942597099574024998205846127479365...220247  (512 bits) ✓
+```
+
+**Partial factorizations (trial up to 10^7):**
+```
+n_0: [n_0, 1]          -- no small factors (n_0 = secp256k1 group order, prime)
+n_1: [3, 1; 199, 1; 18979, 1; <large>, 1]
+n_3: [3, 2; 13, 2; 3319, 1; 22639, 1; <large>, 1]
+n_4: [109903, 1; <large>, 1]
+```
+
+**Hasse lower bound:**
+```
+min n_i ≥ p - 2·floor(√p) - 1  ≈  p - 2^129
+min n_i · n_j ≥ (p - 2^129)²   ≈  p² - 4p^{3/2}  (still 512-bit)
+min sqrt(n_i·n_j) ≥ p - 2√p    ≈ 2^256 - 2^129   >> 2^128
+```
+B5 holds universally (all pairs, all seeds) via the Hasse bound alone.
+No pair-specific computation needed to establish security.
+
+**Weil polynomial structure:**
+W_{ij}(T) = (T² - t_i·T + p)(T² - t_j·T + p) is REDUCIBLE over Q for all 5 pairs
+(since t_i ≠ t_j by H1). This confirms Jac(C_{ij}) is isogenous to a product
+(not a simple abelian surface), and no CM-based acceleration applies.
+
+**New paper content:** Remark `rem:thread19-b5-all-pairs` added to
+`paper/structural_completeness.tex` after the toy-verification paragraph,
+containing the summary table and the Hasse-bound proof.
+
+### Next step proposal
+
+**Thread 20: Weil-polynomial irreducibility for non-qualifying pairs (sanity check).**
+For the 10 non-qualifying pairs (H1+H2+H3 NOT all satisfied), verify that the
+Weil polynomial W_{ij}(T) is still reducible (it always is, since we're working
+with products of elliptic curve Weil polys). This is a one-line PARI check.
+Expected: all 15 pairs give reducible W_{ij}, confirming the paper's claim.
+
+**Thread 21 (CHLRS Igusa, revisited for new pairs):**
+The 4 new qualifying pairs give 4 new candidate Jacobians Jac(C_{ij}).
+Can we compute their Igusa invariants (at least at the toy prime p=43)?
+For p=43, the 6 sextic twists are well-defined; reuse the howe_richelot_*.gp
+infrastructure to compute Igusa invariants for pairs (1,4) and (3,4) at p=43.
+
+**Thread 22 (CHLRS unblock via PARI only):**
+Instead of relying on SageMath `HyperellipticCurveFromInvariants`, check whether
+PARI's `genus2red` or `hyperellcharpoly` can recover a genus-2 curve from Igusa
+invariants. If yes, the CHLRS thread unblocks entirely within PARI.
+
+Recommend Thread 20 (quick sanity check) followed by Thread 22 (CHLRS unblock).
+
+### Commits made
