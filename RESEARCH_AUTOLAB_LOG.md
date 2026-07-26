@@ -5791,3 +5791,101 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+---
+
+## 2026-07-26 (autolab run #2)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula): highest-priority open thread (P-521 CLOSED, Threads 3/4/5/6
+CLOSED). The 2026-07-21 log proposed running the CHLRS formula on the 5 qualifying sextic
+twist pairs from Thread 18. The existing `chlrs_igusa_formula.gp` already existed but had
+never been diagnostically run to confirm correctness.
+
+### Work done
+- Ran `chlrs_igusa_formula.gp`: Part 1 (p=1009 Rosenhain formula) completed; Part 2
+  (secp256k1 Igusa invariants) errored due to missing `igusa_clebsch.gp` relative path.
+- **Rosenhain formula diagnosis**: for p=1009, E1:y²=x³+11 (trace 43), the Rosenhain
+  cross-ratio construction gave char poly T⁴+334T²+1009² (#Jac=1018416). Target is
+  T⁴+169T²+1009² (#Jac=1018251). The formula gives the WRONG element of the isogeny class.
+- **Split-sextic diagnosis**: implemented `search_split()` over all b2 with trace(E2)=-43.
+  Result: `Split-sextic count: 0`. The naive cover y²=(x³+b1)(x³+b2) also does NOT have
+  the correct Weil poly. Further: explicitly computed the split sextic for d=3 (first
+  non-square mod 1009): char poly has a1=-10 ≠ 0 — this is NOT in the isogeny class of
+  E1×E2 at all (E1×E2 has symmetric Weil poly with a1=0 by construction).
+- **Key structural finding**: the split-sextic y²=(x³+b1)(x³+b2) over F_p is NOT isogenous
+  to E1×E2 for p=1009 (a1≠0). This was previously ASSUMED to be the Howe quotient; it is not.
+- **Brute-force search** (`chlrs_findcurve.gp`): searched all y²=x⁶+ax³+b over F_1009 for
+  a₂=169. Found MANY matches. No a=0 solutions (confirmed: a=0 count=0 for p=1009).
+  First match: (a=1, b=117).
+- **Verified**: y²=x⁶+x³+117 over F_1009 has #Jac=1018251=1+169+1009² and
+  #C(F_p)=1010=p+1 (confirming a1=0 in Weil poly). This is IN the correct isogeny class.
+- **Small prime comparison**: for p=7,13,19,...,97 with b1=1, brute-force finds a=0 curves
+  first. This is because for small p, the split-sextic (x³+1)(x³+d³) can have a=1+d³≡0
+  when d³≡-1 (a coincidence at small primes). For p=1009 with b1=11, no such coincidence.
+- Ran `chlrs_weil_diagnosis.gp`: all key results confirmed.
+- `cargo test --test curve_audit`: 5/5 pass ✓.
+
+### Findings
+
+**FINDING A — Split-sextic is NOT isogenous to E1×E2:**
+```
+p=1009, b1=11, d=3 (first non-square, but actually a SQUARE mod 1009):
+  Split sextic y^2=x^6+308*x^3+240: cp = T^4 - 10*T^3 - 909*T^2 - 10090*T + 1018081
+  a1 = -10 ≠ 0.  NOT in isogeny class of E1×E2.
+```
+The split-sextic y²=(x³+b1)(x³+b2) has Jac in a DIFFERENT isogeny class than E1×E2.
+Correction: 3 is a SQUARE mod 1009 (kronecker(3,1009)=+1), so d=3 does NOT give the
+quadratic twist. One must use d with kronecker(d,1009)=-1.
+
+For the actual quadratic-twist split-sextic (using d=5 which IS non-square mod 1009):
+b2=5³·11=1375, 1375 mod 1009=366; a=11+366=377, b=11·366=4026 mod 1009=0 (degenerate!).
+
+Result: for several non-square d values, the split-sextic either degenerates (b=0) or has
+a1≠0. The Howe quotient for j=0 curves is NOT a split-sextic.
+
+**FINDING B — Rosenhain cross-ratio maps to wrong kernel:**
+The formula in `chlrs_igusa_formula.gp` (Möbius T: α→0, dα→1, ωα→∞) gives a2=334≠169.
+The coefficient 334/2=167 doesn't relate cleanly to p or t1. The error is in the CHOICE
+of kernel Γ: the cross-ratio implicitly picks a non-optimal matching of 2-torsion points
+from E1[2] and E2[2]. Different choices of Möbius transform give different elements of the
+isogeny graph of E1×E2 — only one corresponds to the principal-polarization-compatible Howe quotient.
+
+**FINDING C — Correct curves exist empirically:**
+```
+p=1009, t1=43, a2_target=169:
+  y^2 = x^6 + 1*x^3 + 117:  a1=0, a2=169, #Jac=1018251 ✓
+  y^2 = x^6 + 1*x^3 + 183:  a1=0, a2=169, #Jac=1018251 ✓
+  y^2 = x^6 + 1*x^3 + 388:  a1=0, a2=169, #Jac=1018251 ✓
+  y^2 = x^6 + 2*x^3 + 59:   a1=0, a2=169, #Jac=1018251 ✓
+  ... (many more)
+```
+All these curves are F_p-isogenous to E1×E2, but identifying which one IS the Howe
+quotient (E1×E2)/Γ requires Mestre reconstruction or an explicit CHLRS formula.
+
+**FINDING D — #C(F_p) = p+1 for all correct curves (as expected):**
+#C(F_p) = p+1 confirmed for y²=x⁶+x³+117, consistent with a1=0 in Weil poly. The
+symmetric Weil poly T⁴+a2T²+p² implies the Frobenius eigenvalues pair as ±αi with
+|α|=√p, giving Tr(Frob)=0 and #C = p+1.
+
+**FINDING E — New scripts created:**
+- `chlrs_findcurve.gp`: brute-force search over sextic diagonals for correct Weil poly
+- `chlrs_weil_diagnosis.gp`: diagnostic confirming split-sextic failure and correct curve
+- `chlrs_direct_search.gp`, `chlrs_search2.gp`: intermediate search scripts (superseded)
+
+### Next step proposal
+
+**Thread 2 next step (concrete):** Implement Mestre's reconstruction algorithm in PARI
+for the specific case of (2,2)-isogenies from genus-2 Jacobians to products of j=0 curves.
+Given the Igusa invariants (I2,I4,I6,I10) of a curve in the correct isogeny class, Mestre's
+algorithm reconstructs the genus-2 curve explicitly. Compare the output to the brute-force
+results to identify the specific Howe quotient.
+  Script: `chlrs_mestre_reconstruct.gp`.
+  Reference: Mestre, "Construction de courbes de genre 2 à partir de leurs modules" (1991).
+  Alternative: use Cardona-Quer (2002) for explicit CM case.
+
+**Thread 20 (λ/n threshold):** Implement `glv_hnp_phase2_lambda_threshold.py` to bisect
+λ/n between 0.07 and 0.34 (proposed in today's earlier run). This is highly actionable.
+
+### Commits made
+[see git log after this entry]
