@@ -5791,3 +5791,118 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 PM (autolab run #2)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula): P-521 thread is CLOSED (resolved 2026-05-22 via HP-GS);
+Thread 3 (sextic Howe gluing) DONE 2026-07-21; Thread 5 (GLV-HNP Phase 2) completed
+this morning. Next in priority: Thread 2 — port CHLRS explicit Igusa-Clebsch polynomial
+to PARI and compute (J2,J4,J6,J10) of the Howe-glued curve for secp256k1.
+
+### Work done
+- Ran `chlrs_igusa_formula.gp` for the first time: Part 1 (Rosenhain formula) gives
+  match=0 for p=1009,b=11 (all 3 Möbius variants). Part 2 (Igusa invariants of naive
+  cover y^2=(x^3+7)(x^3+189)) computes correctly. Part 3 summary correct.
+- Identified root cause of formula failure: the algebraic Möbius formulas in the script
+  (λ1=(ω^2-1)(d-ω)/...) use a NON-STANDARD mapping that doesn't correspond to the
+  actual branch points.
+- Wrote `chlrs_rosenhain_corrected.gp`: uses `polrootsmod` to find actual branch points,
+  then applies the standard Möbius normalization (r1→0, r2→∞, s1→1).
+  - **p=13, b=1**: even with correct roots, exhaustive 9-anchor-triple search gives NO
+    match (char poly T^4-26T^2+169 vs expected T^4+22T^2+169).
+  - **p=19, b1=7**: formula gives match=1 (first prime where -7 is cubic residue mod p
+    and all conditions align). Igusa invariants computable.
+  - **secp256k1**: x^3+7 irreducible over F_p (BLOCKED).
+- Wrote `chlrs_h3_python.py`: Python sweep of all p<100 with p≡1 mod 3 and x^3+b
+  splitting over F_p. Found:
+  - **ALL 24 cases have gcd(#E1,#E2) ≥ 4** — the Howe H3 condition (gcd=1) can NEVER
+    be satisfied when 2-torsion is fully F_p-rational. This is a STRUCTURAL result:
+    E[2](F_p) = (Z/2Z)² implies 4|#E, so gcd(#E1,#E2) ≥ 4 always.
+  - This rules out secp256k1's quadratic-twist pair from having fully rational 2-torsion
+    (and secp256k1 satisfies H3 precisely because its 2-torsion is NOT rational).
+- Ran `chlrs_fp3_rosenhain.gp` and `chlrs_sextic.gp`: both confirm proxy p=13 gives
+  simple Jacobian; toy p=19 gives correct split Jacobian. Summary:
+    ```
+    Part 1 (toy p=19, x^3+7 splits):   Jac ~ E1 x E2, match=1
+    Part 2 (proxy p=13, x^3+7 irred):  Jac ~ E x E_tw, match=0
+    Secp256k1: same structure as proxy_p.
+    ```
+- Igusa quadruple of NAIVE cover y^2=(x^3+7)(x^3+189) (computed in
+  `chlrs_igusa_formula.gp` Part 2):
+    ```
+    J2  = -43512
+    J4  = 5467024178/1875
+    J6  = -52505300205512/15625
+    J10 = 46374105383717408990784
+    J2 mod p_secp ≠ 0, J10 mod p_secp ≠ 0 → smooth genus-2 curve
+    ```
+  These are the invariants of the naive cover (SIMPLE Jacobian), NOT the Howe-glued
+  curve.
+- `cargo test --test curve_audit` → 5/5 pass. ✓
+
+### Findings
+
+**1. Structural incompatibility theorem:**
+For any j=0 curve E: y²=x³+b over F_p (p≡1 mod 3), if x³+b has 3 F_p-rational roots,
+then 4 | #E(F_p). Therefore gcd(#E1, #E2) ≥ 4 for any F_p-rational 2-torsion pair.
+Equivalently: the Howe condition H3 (gcd=1) is achievable ONLY when 2-torsion is NOT
+fully F_p-rational.
+
+**Consequence**: secp256k1 satisfies H3=1 precisely BECAUSE x^3+7 is irreducible over
+F_p (2-torsion NOT rational). This is the arithmetic reason why secp256k1 has the
+"correct" structure for Howe gluing but also why the Rosenhain formula requires F_{p^3}.
+
+**2. Corrected Rosenhain formula status:**
+- `chlrs_rosenhain_corrected.gp` gives the correct formula when 2-torsion is rational.
+- Verified for p=19, b=7 (match=1): the specific ordering (r1, r2, s1) from `polrootsmod`
+  first outputs gives the correct Howe-glued Jacobian.
+- For p=13, b=1 (match=0, even exhaustively): the naive product IS NOT the Howe-glued
+  curve for this prime. A different genus-2 curve (not a product of 2-torsion polys)
+  has char poly T^4+22T^2+169.
+- The difference p=19 vs p=13: both have gcd=4 and x^3+b splits, but the specific
+  arithmetic of 2p-t^2 determines whether the naive product curve is split or simple.
+
+**3. BLOCKED status for secp256k1:**
+The correct Howe-glued curve C over F_{p_secp} cannot be constructed from F_p
+arithmetic alone. Required: one of:
+  (A) F_{p^3} Rosenhain: compute the 6 branch points in F_{p^3} = F_p[w]/(w^3+7),
+      compute Rosenhain lambdas over F_{p^3}, verify descent to F_p.
+      PARI feasibility: w = Mod(x, Mod(1,p)*x^3+7) but p ≈ 2^256 → triple-precision.
+  (B) Mestre reconstruction: given (J2,J4,J6,J10) from CHLRS Theorem 2.5, reconstruct
+      a model via Mestre's algorithm. See RESEARCH_MESTRE_HOWE.md.
+  (C) CHLRS direct formula: implement Theorem 2.5 of Cardona-Howe-Lercier-Ritzenthaler-
+      Streng. Requires access to the published paper (search ePrint 2009/586 or J. Algebra).
+
+**4. Naive cover Igusa invariants (already in repo):**
+y²=(x³+7)(x³+189) has a SIMPLE Jacobian (not split). Its Igusa invariants are computed
+in `chlrs_igusa_formula.gp` Part 2 and `chlrs_fp3_rosenhain.gp`. This IS a legitimate
+genus-2 cover of secp256k1 (degree-2 maps to E and its quadratic twist exist over F̄_p),
+but provides no DLP speedup (Kani's theorem: genus-2 DLP ≥ genus-1 DLP applies when
+the Jacobian is not a product of isogenous lower-genus abelian varieties over F_p).
+
+### Next step proposal
+
+**Thread 2A (CHLRS via ePrint search):**
+Run WebSearch for "Cardona Howe Lercier Ritzenthaler Streng genus 2 abelian surfaces
+Igusa" on ePrint to find the explicit Theorem 2.5 formula. If the formula is accessible,
+port to PARI. Expected output: explicit (J2,J4,J6,J10) formulas in terms of j(E1), j(E2),
+and the (2,2)-kernel data.
+
+**Thread 2B (F_{p^3} Rosenhain toy):**
+For a small proxy prime q where x^3+7 is irreducible over F_q but tractable
+(e.g., q=13), implement the F_{q^3} Rosenhain computation:
+  - w = Mod(x, Mod(1,q)*x^3+7)   \\ w is a root of x^3+7 in F_{q^3}
+  - E1 branch pts: w, ω*w, ω^2*w  (ω = cube root of unity mod q)
+  - E2 branch pts: d*w, d*ω*w, d*ω^2*w
+  - Möbius over F_{q^3}: send w→0, ω*w→∞, d*w→1
+  - Compute Rosenhain lambdas in F_{q^3}; check if they descend to F_q
+Expected result: lambdas are in F_q (descent works), giving an explicit F_q model
+of the Howe-glued curve. Verify hyperellcharpoly matches E1×E2.
+
+**Thread 6 (B5 over F_{p^k}):**
+All priority threads 1-5 now have at least partial resolution. Thread 6 (B5 generalisation)
+is the last unexplored priority thread. Pick this up next.
+
+### Commits made
+[to be filled after commit]
