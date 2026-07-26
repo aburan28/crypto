@@ -5690,3 +5690,76 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+## 2026-07-26 (autolab run)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula): all 6 original priority threads are CLOSED/BLOCKED/DEAD END; most-recent proposal was to attempt the CHLRS Rosenhain formula. `chlrs_igusa_formula.gp` existed but had never been run to verify the claim (match = ?). Ran it and diagnosed the root cause of failure; brute-force scan produced a key new finding.
+
+### Work done
+- Confirmed thread status from log and code:
+  - Thread 1 (P-521 LLL): CLOSED (§10.3/§10.5; HP LLL 3/3 recovered at m=8 and m=16/32).
+  - Thread 3 (Howe sextic): CLOSED (Thread 18, 2026-07-21).
+  - Thread 4 (Cross-curve LLL): CLOSED/DEAD END.
+  - Thread 5 (GLV-HNP toy): DEAD END.
+  - Thread 6 (B5): CLOSED (2026-07-07).
+  - Thread 2 (CHLRS): BLOCKED (per 2026-07-07 log), but `chlrs_igusa_formula.gp` newly exists.
+- Ran `chlrs_igusa_formula.gp` over F_1009 (toy case, b1=11, d=11):
+  - All 3 Möbius variants give the SAME Jac char poly: `x^4 + 334*x^2 + 1018081`.
+  - `#Jac(C_R) = 1018416 ≠ 1018251 = n_E1*n_E2`. Match = 0 for all variants.
+  - J2, J10 of naive cover h_secp verified. J4, J6 unverified against Cardona-Quer.
+- Wrote and ran `secp256k1_cm_audit/chlrs_fp3_howe_correct.gp`:
+  - Diagnosed root cause: Möbius transform T (sending α→0, dα→1, ωα→∞) is defined over F_{p^3}, not F_p. The λ_i ARE in F_p (α cancels in the cross-ratios), but the Rosenhain model y^2 = x(x-1)(x-λ1)(x-λ2)(x-λ3) is NOT the F_p-model of the Howe-glued Jacobian.
+  - Key: since T is not F_p-rational (its fixed points are F_{p^3}-points), the Rosenhain form descends to F_{p^3} only, not F_p.
+  - Naive cover y^2=(x^3+11)(x^3+88) [note: script had d=2 QR, should be d=11; cover is y^2=(x^3+11)(x^3+515)] also does NOT give the right isogeny class.
+  - **KEY RESULT**: Brute-force scan over h(x) = x^6 + a*x^3 + c (j=0 symmetric form) found the CORRECT Howe cover for p=1009, b1=11:
+    ```
+    h(x) = x^6 + x^3 + 117  over F_1009
+    Frobenius char poly: x^4 + 169*x^2 + 1018081 = (x^2 - 43x + 1009)(x^2 + 43x + 1009)
+    #Jac = 1018251 = 967 × 1053 = n_E1 × n_{E1_twist}   ✓
+    ```
+  - First explicit example of the correct Howe-glued genus-2 cover for a j=0 curve.
+- Wrote `secp256k1_cm_audit/chlrs_ac_formula.gp`: partial pattern search for (a,c) across p=7 curves.
+  - For p=7, d^3 ≡ -1 (mod 7), 6 quadratic-twist pairs:
+    ```
+    (b1=1, b2=6): a=0, c=6   [c = b1*b2 mod 7 = 6 ✓]
+    (b1=3, b2=4): a=2, c=6   [c ≠ b1*b2=12≡5]
+    (b1=2, b2=5): a=1, c=4   [c ≠ b1*b2=10≡3]
+    ```
+  - a ∈ {0, 1, 2}, c ∈ {4, 6} = {-3, -1} mod 7. No simple formula found yet.
+- ePrint survey (Fallback 4a) — 5 relevant papers found:
+  1. **Wesolowski 2026/1486** — supersingular isogeny problem in time p^{1/3+o(1)}: sharpens hardness of isogeny-graph problems.
+  2. **Abe et al. 2024/296 (Asiacrypt 2024)** — lattice sieving + Fourier for ECDSA nonce leakage (1-bit): state-of-the-art HNP solver.
+  3. **arXiv 2504.13737 (2025)** — "Breaking ECDSA with two affinely related nonces": resultant attack; directly relevant to GLV (k = k1 + λ*k2 is an affine relation between k1 and k2).
+  4. **Barbulescu et al. 2026/110** — logarithmic density of rank≥2 genus-2 Jacobians, application to cover attacks on ECDLP.
+  5. **ePrint 2026/1199** — commitment scheme from Richelot isogeny walks on superspecial genus-2 Jacobians (SREP hardness assumption).
+- cargo test --test curve_audit: **5/5 pass** (6.38s). ✓
+
+### Findings
+
+**CORRECT HOWE COVER (p=1009, b1=11):**
+```
+y^2 = x^6 + x^3 + 117  over F_1009
+Frobenius: x^4 + 169*x^2 + 1009^2 = (x^2 - 43x + 1009)(x^2 + 43x + 1009)
+#Jac = 1018251 = n_E1 * n_{E1_twist}   ✓
+```
+The form is x^6 + a*x^3 + c (j=0 symmetric under x ↦ ωx). The naive form y^2=(x^3+b1)(x^3+b2) gives a different Jacobian (not isogenous to E1×E2). The Rosenhain form from `chlrs_igusa_formula.gp` is an F_{p^3}-model only.
+
+**ROOT CAUSE OF ROSENHAIN FORMULA FAILURE:**
+The Möbius transform T: α→0, dα→1, ωα→∞ has coefficients over F_{p^3}. Cross-ratios T(ω²α), T(dωα), T(dω²α) are F_p-rational (α cancels), giving valid λ_i ∈ F_p. But the resulting Rosenhain curve y²=x(x-1)(x-λ1)(x-λ2)(x-λ3) is NOT an F_p-model of Jac^{-1}(E1×E2); it descends from an F_{p^3}-parameterization of the (2,2)-isogeny.
+
+**PATTERN FOR (a,c):** For p=7 (d^3≡-1): (a,c) ∈ {(0,6),(2,6),(1,4)}. For p=1009 (d=11, d^3=515): (a,c)=(1,117). No simple closed-form relating (a,c) to (b1,d,ω) found. Finding the formula for general p requires CM theory / Mestre's algorithm.
+
+**ECDLP SECURITY (B5): UNAFFECTED.** The correct Howe-glued Jac(C) over F_p satisfies #Jac(C)(F_p) = n_E1 * n_E2 ≈ p^2. HCDLP cost ≥ sqrt(p^2) >> sqrt(n) = ECDLP cost. No speedup.
+
+**arXiv 2504.13737 relevance to Thread 5 (GLV):** the "two affinely related nonces" attack recovers d from 2 signatures if k1 = a*k2 + b. The GLV decomposition gives k = k_1 + λ*k_2 with k_1 and k_2 both small (~128 bits for secp256k1). This is an affine relation between k_1 and k_2, making this attack directly applicable IF both components are known. When only k_1 is biased (Thread 5 setting), the attack doesn't directly apply since k_2 is full-range.
+
+### Next step proposal
+
+1. **Formula for (a,c) via CM invariants**: For j=0 curves with CM by Z[ζ_3], try to derive (a,c) from the class polynomial / Hilbert class polynomial evaluated at j=0. Alternatively, look at whether c = |b1|^2 / b2 in the CM number field Q(ζ_3). Concrete sub-task: for p=1009, check if a=1 and c=117 satisfy c = b1 * (some CM-field element's norm) ≡ 117 mod 1009.
+
+2. **Affinely related nonces attack (arXiv 2504.13737) as new Thread 19**: If two secp256k1 signatures satisfy k_{1,i} = a*k_{1,j} (bias on k_1 component only), can the resultant attack from the paper apply in the GLV setting? Sketch the adaptation and verify on a toy curve.
+
+3. **Barbulescu et al. 2026/110**: read whether their "logarithmic density" result gives a tighter quantification of when secp256k1-type curves have Jacobians of the correct isogeny class. Could strengthen B5 remark in paper.
+
+### Commits made
