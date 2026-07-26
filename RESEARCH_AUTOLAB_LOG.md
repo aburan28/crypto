@@ -5882,4 +5882,4 @@ limiting factor — the limiting factor is whether K1_BOUND << sqrt(n) while eff
    The 20-bit curve from this morning (K1=36, eff=0.05) already confirms this approximately.
 
 ### Commits made
-[see next git hash after this entry]
+`4f8039f` autolab 2026-07-26 session2: Thread 5 — λ/n threshold refuted; K1_BOUND selection is the true constraint
