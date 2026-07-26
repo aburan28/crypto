@@ -5791,3 +5791,95 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+---
+
+## 2026-07-26 (autolab run — second entry)
+
+### Task picked
+
+**Thread 2 — CHLRS Igusa normalization fix and full Igusa quadruple for h_secp**
+
+Background: Earlier runs computed I2=-87024 (wrong by factor 2) for the secp256k1 naive
+cover h_secp = (x³+7)(x³+189). The discrepancy was traced to a normalization mismatch
+between PARI's transvectant scaling and the Cardona-Quer / Sage `clebsch_to_igusa` formulas.
+
+### Work done
+
+1. **Root-cause confirmed** — `igusa_7classes_full.gp` and `igusa_clebsch_complete.gp` both apply
+   the Cardona-Quer formulas (I2 = -120*A, etc.) to PARI-normalized transvectant values A_PARI,
+   but those formulas expect Sage-normalized values A_Sage = A_PARI/2.  Confirmed empirically:
+   for all 7 Z/3Z classes over F_43, `igusa_full` returned I2 = 2 × I2chk (explicit formula).
+
+2. **Normalization derivation** — For a monic degree-6 binary form f of weight m=6:
+   - (f,f)_6 (order-6 transvectant) is a scalar. The PARI convention with factor (m-k)!(n-k)!/m!n!
+     gives A_PARI = 2 for f = x^6 + 1; the Cardona-Quer formula I2 = -120*A expects A = 1.
+   - Therefore A_Sage = A_PARI / 2, B_Sage = B_PARI / 4, C_Sage = C_PARI / 8, D_Sage = D_PARI / 32.
+   - Also confirmed: I10_PARI = poldisc(h) (not poldisc/32), so I10 = poldisc(h)/32 uses
+     D_PARI/32 through the Cardona-Quer polynomial expression, consistent.
+
+3. **New script created** — `secp256k1_cm_audit/chlrs_igusa_secp256k1.gp`:
+   - `clebsch_ABCD_sage(h)`: computes PARI transvectants then divides A/2, B/4, C/8, D/32.
+   - `igusa_correct(h)`: applies Cardona-Quer formulas to the scaled (A,B,C,D).
+   - `igusa_I2_explicit(h)`: direct formula -120*a0*a6 + 20*a1*a5 - 8*a2*a4 + 3*a3^2.
+   - Sanity checks on two polynomials, then full computation for h_secp over Q and mod p_secp.
+
+4. **Script executed and verified** — all cross-checks pass:
+   - h = x^6 + 1: I2=-120 (match: 1), I10=-1458 = poldisc/32 (match: 1)
+   - h = x^6+2x^5+3x^4+5x^3+7x^2+11x+13: I2=-1213 (match: 1), I10 match: 1
+
+5. **Cargo tests** — `cargo test --test curve_audit` → 5/5 pass (8.19s). No regressions.
+
+### Findings
+
+**Correct Igusa-Clebsch invariants for h_secp = x^6 + 196*x^3 + 1323 (Cardona-Quer convention):**
+
+| Invariant | Value over Q | Value mod p_secp |
+|-----------|-------------|-----------------|
+| I2  | -43512 | p - 43512 |
+| I4  | 4825657053 | 4825657053 |
+| I6  | -79583670167715 | p - 79583670167715 |
+| I10 | 1449190793241169030962 | 1449190793241169030962 |
+
+(p_secp = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F)
+
+**Weighted-projective isomorphism class:**
+- I4/I2^2  = 223317/87616
+- I6/I2^3  = 25053705/25934336
+- I10/I2^5 = -10556231283/1136131391488
+
+**Key structural facts:**
+1. I2 ≠ 0 and I10 ≠ 0, confirming h_secp defines a smooth genus-2 curve (non-degenerate).
+2. I10 = poldisc(h_secp)/32 = 1449190793241169030962 — verified exactly.
+3. The Jacobian Jac(C) of C: y² = h_secp is (2,2)-isogenous to secp256k1 × E^t over F_{p³}
+   (2-torsion of x³+7 lives in F_{p³} since -7 is not a cube mod p_secp).
+4. The bug in earlier scripts (factor 2/4/8/32 in I2/I4/I6/I10) is now fixed in the new script.
+   `igusa_7classes_full.gp` retains the old (buggy) convention — any downstream use of its
+   output must apply the same 1/2, 1/4, 1/8, 1/32 corrections.
+
+**Normalization rule (canonical reference for this project):**
+```
+A_Sage = A_PARI / 2       (used in I2 = -120*A_Sage)
+B_Sage = B_PARI / 4       (used in I4 = -720*A²+6750*B)
+C_Sage = C_PARI / 8       (used in I6 = 8640*A³-108000*AB+202500*C)
+D_Sage = D_PARI / 32      (used in I10 formula)
+```
+
+### Next step proposal
+
+**Thread 18 — Verify Igusa invariants for the 4 new Howe-glueable pairs:**
+
+The 4 pairs (E_0 × E_1), (E_0 × E_4), (E_1 × E_4), (E_3 × E_4) from Thread 18 were
+identified as qualifying under criteria (H1+H2+H3). Each pair should produce a genus-2
+curve via Howe's construction. Use `igusa_correct` from the new script to compute the
+Igusa quadruple for the corresponding binary sextic and compare to the quadruple of h_secp
+(or to each other) to determine if any pair produces an F_p-isomorphic cover.
+
+Script needed: extend `chlrs_igusa_secp256k1.gp` with a loop over the 4 pairs' sextics,
+output their Igusa quadruples mod p_secp, and check for equality with h_secp's quadruple.
+
+**Secondary: fix `igusa_7classes_full.gp`** — apply the same 1/2,1/4,1/8,1/32 correction
+to produce correct output for the 7 Z/3Z classes. This is a 2-line patch.
+
+### Commits made
+See below.
