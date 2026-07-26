@@ -5791,3 +5791,121 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 run 2 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): directly proposed by the morning run as next priority.
+`glv_hnp_phase2_lambda_threshold.py` did not exist; goal was to bisect the λ/n threshold
+between the known failure (0.07, p=2677) and the known success (0.34, 20-bit). The
+morning run claimed "λ/n < ~0.15 → LLL fails"; this run tests that claim rigorously.
+
+### Work done
+- Installed fpylll + sympy (fresh container).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (~250 lines):
+  - Builds a catalogue of all prime-order j=0 GLV curves with p < 2^16 (found 1927 curves).
+  - Selects one representative per λ/n bin ([0.05,0.09], [0.09,0.13], …, [0.37,0.43]).
+  - Uses SMALLER GLV root consistently (lam_min/n < 0.5) via `glv_eigenvalue_min()`.
+  - Fixed eff ≈ 0.063 across all curves (K1_BOUND = ceil(0.06 * sqrt(n))).
+  - Ran LLL at m=5..13 with 3 seeds per curve.
+- Ran the script: all 8 bins succeeded (see results below).
+- Performed follow-up targeted experiment on the old "failing" curve
+  (p=2677, n=2647, lam=185, lam/n=0.0699):
+  - Swept K1_BOUND=2..12 at fixed m=9 to isolate eff vs lam/n.
+  - Cross-checked with a 16-bit curve (n=65029, lam/n=0.058) sweeping K1_BOUND=4..40.
+- `cargo test --test curve_audit` → 5/5 pass. ✓
+
+### Findings
+
+**Primary finding: the "λ/n threshold" from the morning run was a FALSE SIGNAL.**
+
+The morning run found "λ/n=0.07 → FAIL, λ/n=0.34 → SUCCESS" and concluded a λ/n
+threshold. This run shows those two curves differed in eff (K1*K2/n), not λ/n:
+  - morning failure:  p=2677,  n=2647,  lam/n=0.070, K1=8,  eff=0.157  → FAIL
+  - morning success:  n≈524k,  lam/n=0.340, K1=16, eff=0.063  → 3/3 at m=9
+
+**Threshold sweep (lam_min/n, smaller root, eff≈0.063, all 16-bit curves, m=5..13):**
+```
+lam/n    first 3/3 at m   n bits
+0.0578        9             16
+0.1150        9             16
+0.1343        6             17
+0.2049        7             17
+0.2253        8             17
+0.3045        7             16
+0.3286        6             16
+0.3921        6             17
+```
+**All eight bins succeed.** No evidence of a λ/n threshold anywhere in [0.05, 0.45].
+
+**eff threshold sweep (n=2647, lam/n=0.070, m=9):**
+```
+K1    eff     wins/3
+ 2   0.039    3/3  ✓
+ 3   0.059    3/3  ✓
+ 4   0.079    3/3  ✓
+ 5   0.098    2/3  (transition)
+ 6   0.118    2/3  (transition)
+ 7   0.138    1/3  (transition)
+ 8   0.157    0/3  ✗
+ 9   0.177    0/3  ✗
+```
+**eff transition for n≈2647 at m=9: eff ≈ 0.08–0.10.**
+
+**eff threshold sweep (n=65029, lam/n=0.058, m=7):**
+```
+K1    eff     wins/3
+ 4   0.016    3/3  ✓
+ 8   0.032    3/3  ✓
+16   0.063    2/3  (transition)
+24   0.094    1/3  (transition)
+32   0.126    0/3  ✗
+40   0.158    0/3  ✗
+```
+**eff transition for n≈65029 at m=7: eff ≈ 0.06–0.10.** Consistent with n≈2647.
+
+**Corrected structural understanding:**
+
+The GLV-aware HNP attack (Phase 2) viability is governed entirely by eff = K1*K2/n,
+not by λ/n. In both test curves (lam/n ∈ {0.058, 0.070}, well below the morning run's
+claimed threshold of 0.15–0.34), the attack succeeds whenever eff < ~0.08.
+
+The morning run's "small-λ failure" was an artifact of using K1_BOUND=8 for n=2647.
+With K1=4 (eff=0.079) the same curve and same lam/n=0.070 succeeds at all tested m.
+
+The eff transition is approximately:
+  - eff < 0.08 → LLL 3/3 reliable (at m≥5)
+  - eff ≈ 0.08–0.12 → probabilistic (1–2/3)
+  - eff > 0.13 → LLL fails (at reasonable m)
+
+This is n-independent in the tested range (n=2647 vs 65029 give the same eff range).
+
+**Implication for secp256k1 (full scale):**
+For secp256k1 (n≈2^256), K2=sqrt(n)≈2^128, K1_BOUND for a viable attack must satisfy
+eff = K1*2^128/2^256 = K1/2^128 < 0.08. This means K1_BOUND < 0.08 * 2^128 ≈ 2^{124}.
+In other words, the k1 component must be biased to be < 2^{124} (a 3.1% bias in the
+top bits). This is a much WEAKER requirement than previously understood (morning run
+was reasoning as if λ/n imposed an additional constraint). The λ/n value for secp256k1
+(λ/n ≈ 0.44 for the larger root, ≈ 0.56 for the larger — but lam_min/n ≈ 0.44) is
+comfortably above any threshold.
+
+**Correction to morning run Finding #3:**
+> "λ/n threshold for attack viability: λ/n ≥ 0.34 needed."
+WRONG. The correct statement: eff = K1*K2/n < ~0.10 is needed. λ/n has no independent
+effect on attack viability in the tested range [0.05, 0.45].
+
+### Next step proposal
+
+**Thread 21 (eff scaling law with n):**
+Test whether the eff threshold (~0.08–0.10) is truly n-independent or shifts as
+n grows. Use curves at 20-bit and 24-bit to compare. Expected outcome: slight downward
+drift (eff threshold ∝ 1/log(n) from HNP theory), quantified. Script:
+`glv_hnp_phase2_eff_scaling.py`.
+
+**Thread 2 (CHLRS Igusa formula):**
+The J_6 formula in `chlrs_igusa_formula.gp` is still unverified against Cardona-Quer
+2005 Appendix A. Web-search for the Cardona-Quer paper to transcribe the J_4/J_6
+formulae and verify. This is the last remaining CHLRS open item.
+
+### Commits made
+[to be filled after commit]
