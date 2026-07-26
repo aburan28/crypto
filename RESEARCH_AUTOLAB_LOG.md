@@ -5742,6 +5742,11 @@ Goal: run all three scripts, verify planted-vector recovery, and extend to 20-bi
 2. **m grows roughly as 4 → 7 → 9 bits for 8 → 12 → 20 bits**, i.e., m ≈ log_n(something)
    grows roughly as (bit_length)/8, though this is only 3 data points.
 3. **Critical new finding: λ/n threshold for attack viability.**
+   > **RETRACTED 2026-07-26 (later run, same day) — see the Thread 20 entry below.**
+   > Items 3 and 4 do not survive a 40-curve sweep. There is no λ/n threshold:
+   > successes and failures interleave across the whole λ/n range, and the best
+   > tuned rule points the *opposite* way (small μ succeeds, 0.75 accuracy).
+   > This item generalised a single curve (p=2677) into a law. Do not build on it.
    - λ/n ≥ 0.34 (all tested so far): LLL succeeds.
    - λ/n = 0.07 (p=2677): LLL AND BKZ(40) both fail. Not a reduction-strength issue.
    - **Interpretation**: when λ is small relative to n, the λ-rows in the lattice
@@ -5791,3 +5796,109 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run, second session — Thread 20)
+
+### Task picked
+Thread 20 (λ/n threshold study), the next-step proposed by this morning's entry.
+Goal was to bisect the λ/n threshold between 0.07 and 0.34. **Outcome: there is no
+threshold to bisect.** This entry retracts findings 3 and 4 of the entry above.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (5 parts, self-contained:
+  Eisenstein CM curve enumeration + Phase 2 attack + analysis; no PARI dependency).
+- Enumerated 12-bit j=0 prime-order curves, emitting **both** GLV eigenvalue roots per
+  curve (λ and n−1−λ are both legitimate; a signer may use either). 40 (curve, root)
+  records after controlling the bound product **eff = K1·K2/n ∈ [0.13, 0.18]** — eff sets
+  the information-theoretic signature threshold and would otherwise confound λ.
+- Swept m ∈ 3..14, 5 seeds each, recording min m for 5/5 recovery.
+- Tested three successive hypotheses; the first two are falsified, the third is
+  falsified *as a mechanism* but its quantity survives as the best predictor found.
+
+### Findings
+
+**(1) The 2026-07-26 morning λ/n claim is FALSIFIED.**
+Successes and failures interleave across the entire range. Sample (μ = min(λ,n−λ)/n):
+```
+μ=0.020 n=2551 λ=50    → m=7      μ=0.303 n=2377 λ=721  → FAIL
+μ=0.029 n=3571 λ=103   → m=12     μ=0.359 n=3121 λ=1121 → FAIL
+μ=0.163 n=2731 λ=446   → m=9      μ=0.386 n=2677 λ=1033 → FAIL
+μ=0.257 n=3271 λ=842   → m=9      μ=0.459 n=2833 λ=1300 → FAIL
+```
+λ/n = 0.020 — three times *smaller* than the 0.07 that "failed structurally" this
+morning — recovers d at m=7. The morning claim was one curve read as a law.
+Best tuned μ rule is **μ < 0.21 ⇒ pass, accuracy 0.75** — the opposite direction.
+
+**(2) H-bal (balance hypothesis) — FALSIFIED.**
+Since the lattice stores −λ and −λ ≡ n−λ (mod n), I predicted λ and its conjugate
+n−1−λ (same μ) must behave identically. Conjugate-pair test: **13 pairs agree, 5 split.**
+```
+n=2521 μ=0.268: λ=675 → m=13   λ_conj=1845 → FAIL     SPLIT
+n=3271 μ=0.257: λ=842 → m=9    λ_conj=2428 → FAIL     SPLIT
+n=3319 μ=0.460: λ=1527 → FAIL  λ_conj=1791 → m=10     SPLIT
+```
+So outcome is not a function of μ at all.
+
+**(3) H-dio (Diophantine) — quantity survives, mechanism inverted.**
+The lattice contains a spurious family `a·(k2-row_i) + b·(mod-n row_i)`, norm
+`√(S_K1²·r(a)² + S_K2²·a²)` with `r(a) = centered(a·λ mod n)`. Define
+`gap = min_a` of that, and `ratio = gap / planted_est(n, m=8)`.
+```
+pass: n=18  mean ratio = 0.602
+fail: n=22  mean ratio = 0.860
+best rule 'ratio < 0.67 ⇒ pass':  accuracy 0.850
+best rule 'ratio > 1.07 ⇒ pass':  accuracy 0.550
+AUC P(ratio_pass < ratio_fail) = 0.872
+```
+ratio is the best separator found (0.85 vs 0.75 for μ, 0.55 majority baseline) — but
+**with the sign inverted from the mechanism that motivated it.** A short spurious vector
+was supposed to crowd out the planted vector; instead its presence tracks *success*.
+
+**(4) The pass/fail binary is CENSORING, not a threshold.** ← the actual result
+"FAIL" only means no m ≤ 14 gave 5/5. Among the passes, min m rises continuously with ratio:
+```
+Pearson  r(ratio, min_m)   = +0.768
+Spearman rho(ratio, min_m) = +0.721
+  ratio [0.0,0.5): n=8  mean min_m =  8.6   max=12
+  ratio [0.5,0.7): n=5  mean min_m =  9.8   max=12
+  ratio [0.7,1.1): n=5  mean min_m = 12.4   max=14
+  censored (m>14): n=22 mean ratio = 0.860
+```
+So the gap ratio tracks **how many signatures the attack needs**, continuously, and the
+m ≤ 14 cutoff censors that curve into a spurious-looking binary. Every "structural
+failure" in (1)-(3) — including this morning's p=2677 — is most likely just a curve
+needing m > 14, not an attack that cannot work.
+
+**(5) Consequence for secp256k1.** The morning entry's item 4 inferred secp256k1 is in a
+"safe regime" because λ/n ≈ 0.44. That inference is void: there is no such regime. The
+open question is not "does λ/n qualify" but "what m does secp256k1's λ require", which
+the gap statistic can estimate directly and cheaply (no LLL needed).
+
+### Caveats
+- All 40 records are 11–12-bit curves; the ratio↔min_m relation is untested at
+  cryptographic size.
+- The 0.67 and 0.21 thresholds are fitted in hindsight on the same 40 points. The
+  threshold-free AUC (0.872) is the more trustworthy number; both are in-sample.
+- The mechanism behind (4) is **not** established. Plausible story, untested: a small gap
+  means λ/n has a good small-denominator rational approximation, so {λ·k₂ mod n : k₂<K₂}
+  clusters into few progressions instead of scattering, lowering the effective entropy of
+  the k₂ term and so lowering the signature requirement. This predicts gap should track
+  min_m with no LLL involved at all — directly falsifiable, see next step.
+- `cargo test --test curve_audit` → 5/5 pass (6.99s). ✓
+
+### Next step proposal
+**Thread 21 (uncensor the curve).** Re-run the same 40 records with m swept to 30 instead
+of 14 and record min_m for every record with no censoring. If (4) is right, every current
+"FAIL" acquires a finite min_m and the ratio↔min_m correlation strengthens on the full
+sample. If some records still fail at m=30, those are genuine structural failures and
+deserve separate study. This is the single cheapest experiment that would settle whether
+"structural failure" exists at all in this attack. Cost: ~4× today's run (~40 min).
+
+**Thread 22 (entropy mechanism, no LLL).** Directly test the caveat's mechanism: for each
+curve compute the empirical clustering of {λ·k₂ mod n : k₂ < K₂} (e.g. count of distinct
+residues mod the best small denominator a*) and correlate with min_m. If the correlation
+matches ratio's, the mechanism is entropy of the k₂ term, and min_m becomes predictable
+from λ alone — including for secp256k1, without running a 256-bit lattice.
+
+### Commits made
+(to be filled after commit)
