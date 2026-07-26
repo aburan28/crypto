@@ -5690,3 +5690,153 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## 2026-07-26 (autolab run)
+
+### Task picked
+
+Thread 5 (GLV-HNP Phase 2 toy), as recommended by 2026-07-21 log:
+> "Run `glv_hnp_phase2_toy.gp` and confirm whether the 32-bit toy lattice attack recovers d."
+
+Extended scope: ran all four existing Phase 2 scripts, then investigated 32-bit scaling.
+
+### Work done
+
+**Step 1 — PARI toy sanity (`secp256k1_cm_audit/glv_hnp_phase2_toy.gp`)**
+
+Installed pari-gp 2.15.4, ran script. Curve: y²=x³+2/F₂₁₁, n=199, λ=106.
+Output confirms equation structure is correct:
+```
+k_full = k1 + lam*k2 mod n  (for 5 sample sigs, k1 ∈ {0,1}, k2 ∈ [0,14])
+All m signatures satisfy A + Bd ≡ k_1 + λ·k_2 mod n? 1   ✓
+k_full distribution (10 samples): [46,14,11,9,9,...] — UNIFORM (standard HNP fails)
+```
+Script still marks Phase 2 lattice construction "deferred" — outdated; resolved in
+subsequent scripts.
+
+**Step 2 — PARI planted-vector check (`secp256k1_cm_audit/glv_hnp_phase2_lattice.gp`)**
+
+Built explicit 8×8 (2m+2, m=3) lattice for same toy curve.  Column scales:
+S_K1=N//K1=99, S_D=1, S_K2=N//K2=13, S_KANNAN=199.
+
+All 8 slot-match assertions pass:
+```
+All HNP equations consistent with planted (d, k_2, q): 1   ✓
+k1[1] slot: MATCH  k1[2] slot: MATCH  k1[3] slot: MATCH
+d slot: MATCH   k2[1] slot: MATCH  k2[2] slot: MATCH  k2[3] slot: MATCH
+Kannan slot: MATCH
+LLL recovered d (PARI, unscaled)? 0  (expected — PARI's qflll does not honour column scaling)
+```
+The planted vector IS in the lattice; PARI qflll failure is a scaling-API limitation,
+not a theoretical problem.
+
+**Step 3 — Python toy attack (`secp256k1_cm_audit/glv_hnp_phase2_attack.py`)**
+
+Installed fpylll 0.6.4.  Same 8-bit curve, K1_BOUND=2, K2_BOUND=15, LLL delta=0.99.
+
+```
+m=4: 3/5 seeds recovered
+m=6: 5/5 seeds recovered   ← confirmed ✓
+```
+
+**Step 4 — 20-bit scaling (`secp256k1_cm_audit/glv_hnp_phase2_20bit.py`)**
+
+Installed sympy 1.14.0.  Script tests 3 curves; two relevant results:
+
+| Curve        | n bits | λ/n  | K1_BOUND | K2_BOUND | Result         |
+|--------------|--------|------|----------|----------|----------------|
+| 8-bit ref    | 8      | 0.53 | 2        | 15       | 3/3 at m=4  ✓  |
+| 19-bit main  | 19     | 0.34 | ~229     | ~724     | 3/3 at m=9  ✓  |
+| 12-bit low-λ | 12     | 0.07 | ~13      | ~52      | 0–1/3 up to m=12; BKZ-40 max 1/3 ✗ |
+
+Low-λ failure (λ/n=0.07) is consistent with prior 8-bit findings: when λ/n < 0.1
+the GLV decomposition is skewed, making S_K2 too small to balance the lattice.
+
+**Step 5 — 32-bit scaling investigation (temporary scripts)**
+
+Curve found by CM D=-3 enumeration (Python, Tonelli-Shanks):
+`p=2884963381, b=2, n=2884920001, λ=457354824, λ/n=0.1585`
+
+*Attempt 1* — K1_BOUND = max(2, int(0.05·√N)) = 2685, K2_BOUND = √N+1 ≈ 53713:
+```
+Result: 0/3 at all m ∈ {6,8,10,12,15}
+```
+
+Diagnostic (glv_32bit_debug.py, m=10, dim=22):
+```
+log₂(det)          = 703.2
+det^(1/22)         = 2^31.97
+planted_norm       = 2^32.85        ← LARGER than det^(1/dim)
+shortest LLL norm  = 2^31.43
+planted / det^(1/dim) = 2^+1.7      ← planted vector NOT uniquely short
+planted_ok         = True           ← vector IS algebraically in the lattice
+```
+
+Root cause: with K1=2685 (≈5%·√N) the scale factor S_K1 = N//K1 ≈ 2^20 is too
+small; det^{1/dim} ≈ planted_norm, so spurious shorter vectors exist.
+
+*Attempt 2* — sweep over K1 ∈ {5, 50, 2685} (glv_32bit_precision.py):
+
+| K1_BOUND | K2_BOUND | eff = K1·K2/N | Result        |
+|----------|----------|----------------|---------------|
+| 5        | 53713    | 0.000093       | 3/3 at m=4  ✓ |
+| 50       | 53713    | 0.00093        | 3/3 at m=4  ✓ |
+| 2685     | 53713    | 0.0499         | 0/3 up to m=15 ✗ |
+
+Geometric explanation: K1=5 → S_K1 = N//5 ≈ 5.77×10⁸ (≈2^29),
+making det^{1/22} ≈ 2^36 >> planted_norm ≈ 2^32.5 (gap ≈ 2^3.5 ≈ 11.3×).
+LLL's approximation factor ≈ 2^{dim/4} for dim=22 is ≈ 2^5.5, comfortably covers gap.
+
+### Findings
+
+1. **Phase 2 lattice construction is correct at all tested bit-sizes (8, 12, 19, 32).**
+   The planted vector is algebraically in the lattice in every case.
+
+2. **LLL succeeds iff planted_norm / det^{1/dim} < 1.**  The critical condition is:
+   ```
+   K1·K2/N  <  1/dim                    (rough heuristic)
+   ```
+   For dim=22, need eff < 1/22 ≈ 0.045.  The standard K1=0.05·√N gives eff≈0.05 > 0.045
+   at 32-bit, which is marginal — and in practice the planted vector is not uniquely short.
+
+3. **λ/n ratio matters independently.** Low-λ (λ/n≈0.07) breaks the lattice balance
+   even at small bit-sizes; secp256k1's λ/n≈0.318 is healthy.
+
+4. **For 32-bit with K1 small (≤50), LLL recovers d with m=4 sigs.**  The practical
+   attack threshold for secp256k1-scale (256-bit) will require BKZ or a much larger m
+   to compensate for the 200× larger bit-size overhead.
+
+5. **Rust curve_audit tests: 5/5 pass (7.38s).** No regressions.
+
+### Priority queue update
+
+| Thread | Status | Note |
+|--------|--------|------|
+| Thread 1 (P-521 LLL NaN) | CLOSED | Fixed 2026-05-21 |
+| Thread 2 (CHLRS Igusa)   | BLOCKED: needs paywalled CHLRS formula lookup | — |
+| Thread 3 (secp256k1 LLL degeneracy) | CLOSED | Was FP overflow bug |
+| Thread 4 (isogeny ECDLP speed) | DEAD END | No speedup from genus-2 covers |
+| Thread 5 (GLV-HNP Phase 2) | **ACTIVE** | Toy confirmed; 32-bit threshold found |
+| Thread 6 (Sextic twist Howe) | CLOSED | 5/15 pairs qualify (2026-07-21) |
+
+### Next step proposal
+
+**Thread 5 continued — K1 threshold for secp256k1 scale (256-bit):**
+Derive the exact K1 required for LLL to succeed on a 256-bit n.  Condition is
+planted_norm < det^{1/dim}; with dim=2m+2 and S_K1=N//K1, this gives:
+```
+K1 < N / (K2 · (2m+2)^{1/2})   ≈ √N / (2m+2)^{1/2}
+```
+For m=20, dim=42: K1 < √(2^256)/√42 ≈ 2^{127}/6.5 ≈ 2^{124}.
+That is, a k₁-bias of about 2^{124}/2^{128} = 1/16 of the GLV half-range.
+Verify this threshold empirically at 64-bit (reachable with BKZ in reasonable time).
+
+**Thread 2 (CHLRS Igusa formula):**
+Try computing Igusa-Clebsch invariants for the 4 new Howe-glueable pairs found in
+Thread 18 using the Richelot-isogeny approach rather than the CHLRS formula.
+May be doable with PARI alone.
+
+### Commits made
+(this entry)
