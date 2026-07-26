@@ -5873,4 +5873,4 @@ Two paths forward:
 open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
-[pending]
+c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
