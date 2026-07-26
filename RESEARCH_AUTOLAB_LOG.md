@@ -5884,4 +5884,4 @@ BLOCKED (Sage/Magma unavailable). Can try F_{p^3} Rosenhain approach in PARI.
 The fp3_obstruction_secp256k1.gp script exists; check if it runs cleanly.
 
 ### Commits made
-PLACEHOLDER (to be filled after git commit)
+`1c6460a` autolab 2026-07-26: Thread 20 — lambda/n threshold misdiagnosis corrected; no threshold exists
