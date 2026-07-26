@@ -5874,4 +5874,4 @@ not require Sage (PARI's `hyperellcharpoly` covers what we need). Search ePrint 
 CHLRS explicit polynomial, port to PARI.
 
 ### Commits made
-[hash to be filled after commit]
+ed63706
