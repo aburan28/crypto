@@ -5791,3 +5791,117 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+---
+
+## 2026-07-26 (autolab run — session 2)
+
+### Task picked
+Thread 20 (λ/n threshold bisection), proposed by the earlier 2026-07-26 session as the
+concrete next step after Thread 5 validated the GLV-HNP Phase 2 attack. All six original
+priority threads are CLOSED or BLOCKED (per 2026-07-17 log). Goal: bisect the λ/n
+threshold between the known failure (0.07) and known success (0.34) by sweeping over
+j=0 GLV curves with controlled λ/n ratios.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - CM-based curve search (Eisenstein decomposition + j0_traces) over primes p up to 2^17
+  - quick_twist_check() for fast twist rejection (avoids 30000-iter find_generator on wrong twists)
+  - 7-bin sweep: λ/n ∈ {[0.07,0.10), [0.10,0.14), [0.14,0.19), [0.19,0.25), [0.25,0.31), [0.31,0.38), [0.38,0.50)}
+  - K1_BOUND=8, K2_BOUND=√n+1, 3 seeds, m=3..16, all curves in 12-bit range
+- Ran the threshold script; found NON-MONOTONE failure pattern (0.31-0.38 bin FAILS despite
+  0.25-0.31 and 0.38-0.50 both succeeding).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_extended_check.py`:
+  - Extended m range to 3..25, increased to 5 seeds
+  - Tested 3 curves from the 0.31-0.38 bin and 1 each from control bins
+  - Discovered n=2251 is a hard LLL instance regardless of p
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.43s). ✓
+
+### Findings
+
+**7-bin sweep (K1=8, K2=√n+1, 3 seeds, m_max=16):**
+```
+bin          lam/n    m_ok    eff    m_thresh
+0.07-0.10   0.0941    FAIL  0.1759     5
+0.10-0.14   0.1294    FAIL  0.1707     5
+0.14-0.19   0.1629       9  0.1755     5
+0.19-0.25   0.2037       6  0.1557     5
+0.25-0.31   0.2907      12  0.1683     5
+0.31-0.38   0.3145    FAIL  0.1706     5   ← unexpected
+0.38-0.50   0.4042       7  0.1801     5
+```
+
+**Extended check (5 seeds, m=3..25) for the 0.31-0.38 bin:**
+
+3 curves found in [0.31, 0.38):
+
+| curve | p    | n    | lam | lam/n  | m_success |
+|-------|------|------|-----|--------|-----------|
+| #1    | 2179 | 2251 | 708 | 0.3145 | FAIL (m>25) |
+| #2    | 2341 | 2251 | 708 | 0.3145 | FAIL (m>25) |
+| #3    | 2503 | 2557 | 835 | 0.3266 | OK at m=10 |
+
+Curves #1 and #2 share (n=2251, λ=708) but have different field primes p.
+Both fail identically at ALL m≤25 with max per-m success rate 2/5 (at m=9).
+Curve #3 (n=2557, λ=835) succeeds at m=10 with 5/5 at m≥10.
+
+**Control curves (5 seeds, m=3..25):**
+```
+lam/n=0.4042 (n=1999):  OK at m=8   (5/5 from m=8)
+lam/n=0.3266 (n=2557):  OK at m=10  (5/5 from m=10)
+lam/n=0.2907 (n=2281):  OK at m=15  (5/5 from m=15)
+```
+For "typical" curves (n ≠ 2251), lower λ/n requires more signatures: monotone trend.
+
+**Key conclusions:**
+
+1. **No clean λ/n threshold exists.** Success depends on BOTH λ/n AND n-specific LLL
+   properties. n=2251 with λ/n=0.314 fails at m≤25; n=2281 with λ/n=0.291 succeeds at m=15.
+
+2. **Hard LLL instances exist for the GLV-HNP lattice.** n=2251 is a hard instance: both
+   p=2179 and p=2341 give the same (n,λ)=(2251,708) and both fail identically. The
+   failure is a property of the (n, λ) pair, NOT the field prime p.
+   Analogy: this is the small-n analogue of secp256k1's LLL degeneracy (Thread 1), but
+   with no floating-point explanation — it is a purely lattice-algebraic phenomenon.
+
+3. **Monotone trend for typical curves:** approximate empirical law:
+   ```
+   lam/n ≈ 0.40:  m_success ≈  8
+   lam/n ≈ 0.33:  m_success ≈ 10
+   lam/n ≈ 0.29:  m_success ≈ 15
+   ```
+   Extrapolating: lam/n ≈ 0.20 might need m ≈ 20-30. LLL is still viable.
+   Breakeven near lam/n ≈ 0.13-0.15 (where 12-bit curves with K1=8 need m > 25).
+
+4. **Small-λ failure (lam/n < 0.13) still to be confirmed as universal vs per-n:**
+   Only 2 data points (n=2137 at 0.09, n=2203 at 0.13), each tested for only one curve.
+   Unknown whether failure is structural or also a hard-instance effect.
+
+**Information-theoretic vs. LLL threshold gap:**
+All curves have m_thresh ≈ 5 (information-theoretic), but LLL needs m = 8 to 25 or fails.
+The multiplicative gap is 1.6× to 5× — large variance. The gap grows as λ/n decreases.
+For secp256k1 (λ/n ≈ 0.44, 256-bit), the HP LLL would need m in the 10-20 range
+IF the bias regime matches (untested; precision at 256-bit is a separate issue).
+
+### Next step proposal
+
+**Two options in priority order:**
+
+**Thread 21 (small-λ multi-curve test):**
+Test 5+ curves per bin for λ/n ∈ [0.07, 0.14] to determine if small-λ failure is
+universal (structural) or curve-specific. Write `glv_hnp_phase2_small_lambda.py`:
+sweep over 5 curves in [0.07, 0.10) and 5 curves in [0.10, 0.14) at m=3..30, 3 seeds.
+If ≥ 4/5 curves fail for each bin, failure is likely structural.
+If ≥ 2/5 curves succeed (at large m), it's a per-n effect.
+
+**Thread 22 (hard-instance characterisation for n=2251):**
+Investigate WHY n=2251, λ=708 is a hard instance. Specific checks:
+- Compute the GS norms of the LLL-reduced basis at m=8 and compare to planted vector norm
+- Check if the hard instance persists under BKZ (β=30,40)
+- Check if using the OTHER eigenvalue (1542 = n-1-708) changes the outcome
+- Compare GS profile of n=2251 lattice to n=2557 lattice at same m
+If BKZ succeeds at n=2251, the hard-instance is a genuine LLL weakness (not structural).
+
+### Commits made
+[see next git hash after this entry]
