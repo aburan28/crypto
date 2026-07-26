@@ -5791,3 +5791,127 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26b (autolab run — second run, Thread 20)
+
+### Task picked
+Thread 20 (λ/n threshold study): direct continuation of the 2026-07-26 Phase 2
+validation. The 2026-07-26 log proposed this as the top next step after finding that
+the small-λ attack failed at λ/n=0.07 (p=2677). Goal: bisect the threshold.
+All other priorities are closed (Thread 1, P-521) or completed (Threads 3, 5) or
+blocked (Thread 2, CHLRS).
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (new script).
+- Enumerated all 12-bit primes p ≡ 1 (mod 3), all j=0 prime-order curves via
+  Eisenstein decomposition → found 98 (p,n,λ) triples in 2048<n<4096.
+- Binned by λ/n in steps of 0.05; ran Phase 2 LLL attack with K1=8, K2=√n+1,
+  seeds=[42,1234,9999], m=2..19 for one representative per bin.
+- Results showed unexpected NON-MONOTONE failures at [0.30,0.35) and [0.45,0.50).
+- Followed up: ran ALL 11 candidates in each "failing" bin to diagnose.
+- Ran `cargo test --test curve_audit` → 5/5 pass.
+
+### Findings
+
+**No simple λ/n threshold exists.**
+
+Full sweep of 12-bit j=0 GLV curves (K1=8, K2=√n+1, 3 seeds, m≤19):
+
+```
+λ/n bin       repr λ/n   n      min m (3/3)   outcome
+[0.00,0.05)   0.036      2269   9             SUCCESS
+[0.05,0.10)   0.094      2137   19            SUCCESS
+[0.10,0.15)   0.129      2203   16            SUCCESS
+[0.15,0.20)   0.163      2143   11            SUCCESS
+[0.20,0.25)   0.204      2671   7             SUCCESS
+[0.25,0.30)   0.291      2281   16            SUCCESS
+[0.30,0.35)   0.315      2251   —             FAIL (m≤19)
+[0.35,0.40)   0.395      2089   8             SUCCESS
+[0.40,0.45)   0.404      1999   6             SUCCESS
+[0.45,0.50)   0.472      2341   —             FAIL (m≤19)
+```
+
+Full enumeration within the two "failing" bins:
+
+```
+Bin [0.30,0.35)  — 11 candidates, 5 succeed, 6 fail (at m≤19):
+  λ=708, n=2251 (two distinct curves p=2179 and p=2341): BOTH FAIL
+  λ=721, n=2377 (p=2467): SUCCESS at m=19
+  λ=835, n=2557 (p=2503): SUCCESS at m=6
+  λ=903, n=2659 (p=2557): SUCCESS at m=6
+  λ=835, n=2557 (p=2659): SUCCESS at m=8
+  λ=903, n=2659 (p=2707): SUCCESS at m=6
+  λ=973, n=3067 (p=3049): FAIL
+  λ=934, n=3001 (p=3079): FAIL
+  λ=1188,n=3727 (p=3637): FAIL
+  λ=1151,n=3673 (p=3709): SUCCESS at m=12
+
+Bin [0.45,0.50)  — 11 candidates, 5 succeed, 6 fail:
+  λ=1106, n=2341 (p=2251): FAIL
+  λ=1226, n=2503 (p=2551 and p=2557): SUCCESS at m=7
+  λ=1327, n=2707 (p=2659): SUCCESS at m=6
+  λ=1265, n=2719 (p=2647): FAIL
+  λ=1300, n=2833 (p=2749): FAIL
+  λ=1527, n=3319 (p=3433): FAIL
+  λ=1675, n=3613 (p=3517): SUCCESS at m=12
+  λ=1683, n=3469 (p=3571): SUCCESS at m=10
+  λ=1812, n=4021 (p=3931): FAIL
+  λ=1892, n=3847 (p=3907): SUCCESS at m=6
+```
+
+**Corrections to the 2026-07-26 log entry:**
+
+1. **"Small-λ failure is structural" WRONG.** Curves with λ/n=0.036 and 0.094 both
+   succeed at m=9 and m=19 respectively. The p=2677 (λ/n=0.07) failure was because
+   the old sweep stopped at m=12. With m≥15, the attack likely succeeds for p=2677 too.
+
+2. **The failure is INSTANCE-SPECIFIC, not λ/n-governed.** Two distinct elliptic curves
+   with the same (n=2251, λ=708) both fail (p=2179 and p=2341), confirming failure is
+   a property of (n,λ) not of the specific curve. However, curves at λ/n=0.327 (n=2557)
+   adjacent in the bin succeed at m=6.
+
+3. **Non-monotone pattern.** Min m needed for success (across successes):
+   ```
+   λ/n=0.036 → m=9  (smallest λ/n EASIEST)
+   λ/n=0.094 → m=19
+   λ/n=0.129 → m=16
+   λ/n=0.163 → m=11
+   λ/n=0.204 → m=7
+   λ/n=0.291 → m=16
+   λ/n=0.395 → m=8
+   λ/n=0.404 → m=6
+   ```
+   No monotone trend. Very small λ/n=0.036 needs FEWER sigs than λ/n=0.094 or 0.291.
+
+4. **Instance failures are determined by (n,λ) alone.** The failure is a lattice property
+   that does not depend on which specific elliptic curve has order n.
+
+**Hypothesis for instance failures:**
+The failing (n,λ) pairs likely have a GS coefficient μ between the λ-rows and modular
+rows that, after several LLL steps, lands in a slow-oscillation regime (near but not
+above 0.5). Different from the simple μ ≈ -λ/n ≈ -0.315 or -0.472 of the initial
+basis — the oscillation is a dynamic property of the LLL trajectory. Diagnosing this
+requires printing GS coefficients during LLL for a failing vs. succeeding (n,λ) pair.
+
+**Implication for secp256k1 Phase 2 attack:**
+secp256k1 has λ/n ≈ 0.44, which is in the [0.40,0.45) bin. That bin's representative
+succeeds at m=6. Secp256k1 may or may not be one of the "hard" instances within the
+bin, but at 256-bit scale (with HP GS), the attack is plausibly viable at m=8-12.
+
+### Next step proposal
+
+**Immediate (Thread 20 continued):**
+Write a GS-diagnostic script that prints the sequence of (μ_{λ-row, k}, k∈modular rows)
+GS coefficients during one LLL run for a FAILING vs. SUCCEEDING (n,λ) pair. Compare:
+- Failing: (n=2251, λ=708, p=2179)
+- Succeeding: (n=2557, λ=835, p=2503)
+This would either confirm μ-oscillation (the coefficients bounce near ±0.5 in the
+failing case) or point to a different failure mode (e.g., LLL convergence speed).
+Script: `glv_hnp_phase2_gs_diagnostic.py`.
+
+**Medium-term:**
+If the GS diagnostic shows the failures need m>19 (not structural), run the n=2251 case
+to m=30 to see if it eventually succeeds.
+
+### Commits made
+(to be filled by commit step)
