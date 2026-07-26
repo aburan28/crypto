@@ -5774,3 +5774,4 @@ dα, dωα, dω²α} in F_{p^3}. Root cause: the Möbius map sends the wrong sub
 Option A is more concrete (direct extension of today's work). Option B is more paper-relevant (connects to the 5 new Howe-glueable pairs from Thread 18).
 
 ### Commits made
+`4d2d3a1` autolab 2026-07-26: GLV-HNP Phase 2 lattice confirmed; m=6 → 5/5 recovery
