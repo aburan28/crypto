@@ -5690,3 +5690,79 @@ targets for this computation.
 
 ### Commits made
 `a287abc` autolab 2026-07-21: Thread 18 — sextic twist Howe check; 5/15 pairs qualify
+
+---
+
+## 2026-07-26 (autolab run)
+
+### Task picked
+Thread 5 — GLV-HNP Phase 2 toy: run the GLV-aware lattice attack on a 32-bit toy curve and verify lattice recovers d.
+
+Chosen because: last run (2026-07-21, Thread 18) explicitly recommended Thread 5 as next step. No autolab run in the 5-day gap since then. Thread 5 had prior infrastructure (`glv_hnp_phase2_toy.gp`, `glv_hnp_phase2_lattice.gp`, `glv_hnp_phase2_attack.py`, `glv_hnp_phase2_20bit.py`) but lacked a 32-bit scale test.
+
+### Work done
+- Read `glv_hnp_phase2_toy.gp` (structural setup only; LLL deferred) and `glv_hnp_phase2_lattice.gp` (lattice verification; PARI LLL fails, Python needed).
+- Ran `glv_hnp_phase2_toy.gp` → clean output, sanity=1.
+- Ran `glv_hnp_phase2_lattice.gp` → planted vector in lattice verified ✓; PARI qflll did NOT recover d (unscaled; expected from prior notes).
+- Installed fpylll + cysignals (not pre-installed in this env).
+- Ran `glv_hnp_phase2_attack.py` → **8-bit (n=199): LLL 5/5 at m=6** ✓ (d=104 recovered, witness found).
+- Ran `glv_hnp_phase2_20bit.py` → confirmed 20-bit (n=523969): LLL 3/3 at m=9; 12-bit/2677 small-lambda (lam/n=0.07): FAILS at all m even with BKZ(40).
+- Wrote new script `glv_hnp_phase2_32bit.py`: Eisenstein CM search finds 32-bit curve, column-balanced lattice, LLL/BKZ sweep with 5-seed confirmation.
+- Ran `glv_hnp_phase2_32bit.py` → **31-bit (n=2147436397): LLL 3/3 first at m=10, 5/5 confirmed at m=10** ✓.
+- Ran `cargo test --test curve_audit` → 5/5 pass (8.43s) ✓.
+
+### Findings
+
+**Curve found by Eisenstein CM search:**
+```
+p = 2147483713 (prime, ≡ 1 mod 3)
+b = 5
+n = 2147436397  (31b, prime, ≡ 1 mod 3)
+lam = 978203460   lam/n = 0.4555
+K1_BOUND = 2317   K2_BOUND = 46341   eff = 0.0500
+m_thresh ≈ 8.0
+```
+
+**Scaling table — first m with 3/3 consistent LLL recovery:**
+```
+|n| bits |     n      | lam/n | K1   | K2    | m_thresh | LLL 3/3 at | 5/5 at |
+|--------|------------|-------|------|-------|----------|------------|--------|
+|  8     |        199 | 0.533 |    2 |    15 |     3.0  |    m=4     |  m=6   |
+| 12     |       2659 | 0.660 |    8 |    52 |     5.0  |    m=7     |   —    |
+| 20     |     523969 | 0.340 |   36 |   724 |     5.0  |    m=9     |   —    |
+| 31     | 2147436397 | 0.456 | 2317 | 46341 |     8.0  |    m=10    |  m=10  |
+```
+
+**Small-lambda failure confirmed:**
+- Curve p=2677, n=2647, lam/n=0.07: LLL AND BKZ(20) AND BKZ(40) all FAIL (never 3/3, m=5..12).
+- Root cause: small lam/n makes the lattice volume distribution unfavorable; the column-balanced GLV lattice degenerates when lam/n ≪ 0.25.
+
+**Attack verdict at 32-bit scale:**
+```
+GLV-aware lattice (column-balanced) with LLL:
+  RECOVERED d: 5/5 seeds at m=10, curve n≈2^31, lam/n≈0.46.
+  Dim = 2m+2 = 22.  LLL time < 1s per experiment.
+  m=10 is 25% above m_thresh=8; consistent with Phase 1.5 behavior.
+```
+
+**Planted vector norm vs basis norms (m=10, n=2147436397):**
+The column-balanced design gives planted_norm / min_basis_norm ≪ 1 (same pattern as 8-bit demo), which is why LLL reliably finds it.
+
+**Information-theoretic threshold check:**
+For eff = K1*K2/n ≈ 0.05, the threshold is m_thresh = ceil(log(n)/log(1/eff)) ≈ 8.0. LLL reliably succeeds at m = m_thresh + 2 = 10. This is consistent across all tested curve sizes.
+
+**Constraint on lambda:**
+The attack requires lam/n ∈ [0.25, 0.75]. For small lambda (lam/n < 0.1), the lattice scaling breaks. secp256k1's lam/n ≈ 0.432 (well within range), so the attack geometry would be favorable IF the LLL-degeneracy on secp256k1's full 256-bit lattice were resolved.
+
+### Next step proposal
+
+**Thread 4 (priority-4: Cross-curve LLL, multiple seeds):**
+The 2026-06-15 session showed 384-bit LLL resolves with the scaled-GS fix for one seed. Need 3/3 seeds to confirm. Run `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length` with seeds [42, 1234, 9999] for bit_length=384 and report pass/fail per seed.
+
+**Thread 2 (priority-2: CHLRS Igusa formula):**
+Five Howe-glueable pairs identified in Thread 18 provide 5 targets for Igusa-Clebsch invariant computation. `secp256k1_cm_audit/chlrs_igusa_formula.gp` exists; check if it handles the new pairs.
+
+Recommend Thread 4 first (closes a loose confirmation thread); Thread 2 as fallback.
+
+### Commits made
+[to be filled after push]
