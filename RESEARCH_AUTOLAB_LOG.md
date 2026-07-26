@@ -5763,3 +5763,4 @@ The Möbius transform T: α→0, dα→1, ωα→∞ has coefficients over F_{p^
 3. **Barbulescu et al. 2026/110**: read whether their "logarithmic density" result gives a tighter quantification of when secp256k1-type curves have Jacobians of the correct isogeny class. Could strengthen B5 remark in paper.
 
 ### Commits made
+`dc49a44` autolab 2026-07-26: Thread 2 CHLRS — correct Howe cover y^2=x^6+x^3+117 found; Rosenhain formula diagnosed
