@@ -5882,4 +5882,4 @@ output their Igusa quadruples mod p_secp, and check for equality with h_secp's q
 to produce correct output for the 7 Z/3Z classes. This is a 2-line patch.
 
 ### Commits made
-See below.
+33e5442 autolab 2026-07-26: Thread 2 — CHLRS Igusa normalization fix; verified I2/I4/I6/I10 for h_secp
