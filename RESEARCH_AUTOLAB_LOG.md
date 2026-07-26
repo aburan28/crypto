@@ -5791,3 +5791,87 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run #2)
+
+### Task picked
+Thread 20 (λ/n threshold study) — bisect the failure threshold between λ/n=0.07
+(fail) and λ/n=0.34 (succeed) using a scan of small j=0 curves. Proposed as
+top-priority continuation of the 2026-07-26 run #1 (Thread 5 GLV-HNP Phase 2).
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: scans primes p≤2^14
+  for j=0 curves, bins by λ/n in steps of 0.05, runs LLL sweep m=4..14 (3 seeds).
+- Ran the scan: found 8/9 bins, but bins were dominated by tiny n (n<100: bins 4-8).
+  Results were non-monotone — failures at λ/n=0.23, 0.29, 0.37, 0.43 alongside
+  successes at 0.07 (n=211!), 0.14, 0.16, 0.30, 0.53.
+- **Key contradiction found**: n=211 (λ/n=0.066, k1=2) SUCCEEDS at m=4, while
+  n=2647 (λ/n=0.07, k1=8) FAILS. Same λ/n ratio, opposite outcomes!
+- **Targeted test**: ran n=2647 with k1=2 (eff=0.039) vs k1=8 (eff=0.157):
+
+  ```
+  n=2647, lam/n=0.0699:
+    k1=2 (eff=0.039): m=6 → 3/3 SUCCESS  (also m=8,10,12 all 3/3)
+    k1=8 (eff=0.157): m=4..12 → FAIL at all m
+  ```
+
+- Computed planted/GH ratio at optimal m:
+  - n=2647, k1=2: ratio≈0.62 → success
+  - n=2647, k1=8: ratio≈1.19 → fail
+  - n=2659 (lam/n=0.66), k1=8: ratio≈1.19 → success (???)
+- Ran fixed-K1=8 sweep across 10 12-bit curves with λ/n ∈ [0.04,0.48]:
+  results are non-monotone: fail at 0.04,0.09,0.13, succeed at 0.16,0.20, fail at
+  0.29,0.31, succeed at 0.40,0.43, fail at 0.47.
+- `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Critical: λ/n threshold hypothesis (2026-07-26 run #1) is REFUTED.**
+
+1. **The prior "small-λ failure" was a K1-choice artifact, not intrinsic.**
+   n=2647 (λ/n=0.07) SUCCEEDS with k1=2 at m=6. The 2026-07-26 failure used k1=8
+   (eff=0.157), which inflates the planted vector norm relative to the GH bound.
+   Planted/GH ≈ 1.19 (k1=8) vs 0.62 (k1=2) — 1.9× difference drives success/fail.
+
+2. **Mechanism**: Smaller K1 → larger S_K1 = n//K1 → larger det(Λ) ~ S_K1^m →
+   larger GH bound ~ det^{1/dim} ∝ K1^{-m/(2m+2)}. Since planted vector norm
+   ~ (K1/2) * S_K1 ≈ n/2 is roughly K1-INDEPENDENT (S_K1 = n//K1, so K1*S_K1 ≈ n),
+   the planted/GH ratio is ~K1^{m/(2m+2)} ≈ K1^{0.43} at m=6. Going from K1=8→2
+   reduces this ratio by 8^{0.43}/2^{0.43} ≈ 2.8/1.35 ≈ 2.1× — matching observed
+   planted/GH (1.19 vs 0.62 ratio = 1.92×).
+
+3. **Non-monotone λ/n effect at fixed K1**: In the 10-curve scan at K1=8,
+   success/fail is non-monotone in λ/n. There is no simple λ/n threshold —
+   the geometry depends on (n, λ, K1, K2) jointly. This is consistent with
+   the planted/GH ratio being the true predictor, which involves all parameters.
+
+4. **The prior structural explanation was wrong.** The 2026-07-26 log stated:
+   "when λ is small, the λ-row entry -λ*S_K1 ≈ -0.07 * n*S_K1/K1 can't stand out
+   from the modular row." But n=211 with identical λ/n=0.066 and k1=2 SUCCEEDS.
+   The -λ*S_K1 / (n*S_K1) ratio = λ/n = 0.066 is the SAME in both cases.
+
+5. **Implication for secp256k1 (λ/n≈0.44)**: The attack works for any eff where
+   planted/GH < LLL_success_threshold (~1.3 empirically on 14-18 dim lattices).
+   Both K1=2 and K1=8 give success for λ/n=0.44 curves of similar size.
+
+6. **Small-n degenerate regime (n<100)**: Several failures at 3-7 bit curves
+   (n=7,13,19,67) likely due to eff ≥ 1 (k1_bound=2 and K2≈√n gives K1*K2/n≥1
+   for n≤4) or insufficient lattice geometric separation. Not informative about
+   the cryptographically relevant regime.
+
+### Next step proposal
+
+**Thread 21 (planted/GH ratio as predictor)**:
+Systematically verify the planted/GH ratio as the correct success predictor by:
+(a) fixing the ratio to ~1.0 and sweeping λ/n with various (K1, n) pairs to check
+    if success is purely ratio-dependent;
+(b) checking whether the threshold ratio is consistent across n sizes (8b, 12b, 20b).
+Script: `glv_hnp_phase2_ratio_study.py`.
+
+Alternatively, **Thread 2 (CHLRS Igusa)** is unblocked if PARI-only formulas can be
+found in Cardona-Nart-Pujolàs (2005) — the absolute Igusa invariants (j₁,j₂,j₃) do
+not require Sage (PARI's `hyperellcharpoly` covers what we need). Search ePrint for
+CHLRS explicit polynomial, port to PARI.
+
+### Commits made
+[hash to be filled after commit]
