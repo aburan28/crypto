@@ -5908,4 +5908,4 @@ The J_6 formula in `chlrs_igusa_formula.gp` is still unverified against Cardona-
 formulae and verify. This is the last remaining CHLRS open item.
 
 ### Commits made
-[to be filled after commit]
+dd71469 autolab 2026-07-26 run2: Thread 20 — lam/n threshold refuted; eff is the real viability parameter
