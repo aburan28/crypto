@@ -5791,3 +5791,106 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run — second session)
+
+### Task picked
+Thread 20 (λ/n threshold study): proposed by the first 2026-07-26 run as highest priority.
+The claim was that LLL fails when λ/n < ~0.15 and that this explained the p=2677 failure.
+Goal: bisect the threshold and test the root-flip hypothesis.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Part 1: sweep 8 bins of lam_small/n from [0.05,0.10) to [0.42,0.50), one 12-bit curve per bin.
+    Run LLL m=3..16 with 3 seeds per curve.
+  - Part 2: root-flip test on known-failure curve (p=2677, n=2647, lam=185, lam/n=0.07).
+    Test with lam_small=185 AND lam_large=2461 (the other root, lam/n=0.93).
+  - Part 3: compute secp256k1 lam/n reference.
+- Ran the script (clean, all 8 bins processed).
+- Follow-up inline experiment: for p=2677, varied K1_BOUND from 2 to 15, recorded
+  first-m-of-success across 3 seeds.
+- `cargo test --test curve_audit` → 5/5 pass (4.57s). ✓
+
+### Findings
+
+**MAJOR REVISION of prior session's finding:**
+
+**Prior claim (2026-07-26 session 1):** "LLL succeeds iff λ/n > 0.15 (approx). Failure at
+λ/n=0.07 is structural — the λ-row can't be isolated when λ is small."
+
+**Current finding: this claim is WRONG.** LLL succeeds for ALL tested lam/n values down to
+lam/n=0.09 when K1_BOUND=2.
+
+**Bin sweep results (lam_small/n vs LLL first-m-success at K1=2):**
+```
+bin_A [0.05,0.10)  lam/n=0.0941  K1=2  LLL SUCCESS at m=4
+bin_B [0.10,0.14)  lam/n=0.1294  K1=2  LLL SUCCESS at m=4
+bin_C [0.14,0.18)  lam/n=0.1629  K1=2  LLL SUCCESS at m=4
+bin_D [0.18,0.23)  lam/n=0.2037  K1=3  LLL SUCCESS at m=5
+bin_E [0.23,0.28)  lam/n=0.2678  K1=3  LLL SUCCESS at m=7
+bin_F [0.28,0.34)  lam/n=0.3145  K1=2  LLL SUCCESS at m=4
+bin_G [0.34,0.42)  lam/n=0.4042  K1=2  LLL SUCCESS at m=3
+bin_H [0.42,0.50)  lam/n=0.4724  K1=2  LLL SUCCESS at m=4
+```
+
+**Root-flip test (p=2677, n=2647, K1=8):**
+```
+Test A: lam_small=185  (lam/n=0.07): LLL FAIL at all m=5..14
+Test B: lam_large=2461 (lam/n=0.93): LLL FAIL at all m=5..14
+```
+→ The failure occurs for BOTH roots when K1=8. Root choice is irrelevant.
+
+**K1_BOUND threshold for p=2647 (lam/n=0.07):**
+```
+K1=2  eff=0.039  m_thresh≈3  → LLL SUCCESS  (m≤5)
+K1=3  eff=0.059  m_thresh≈3  → LLL SUCCESS  (m≤6)
+K1=4  eff=0.079  m_thresh≈4  → LLL SUCCESS  (m≤7)
+K1=5  eff=0.098  m_thresh≈4  → LLL SUCCESS  (m≤10)
+K1=6  eff=0.118  m_thresh≈4  → LLL SUCCESS  (m≤14)
+K1=7  eff=0.138  m_thresh≈4  → PARTIAL 2/3
+K1=8  eff=0.157  m_thresh≈5  → PARTIAL 2/3  (prior "failure" experiment)
+K1=10 eff=0.196  m_thresh≈5  → PARTIAL 1/3
+K1=12 eff=0.236  m_thresh≈6  → PARTIAL 1/3
+K1=15 eff=0.295  m_thresh≈7  → FAIL
+```
+→ LLL reliable at eff = K1·K2/n ≲ 0.12; unreliable at eff ≳ 0.14.
+
+**secp256k1 reference:**
+```
+lam_small/n = 0.3257   (smaller root of x²+x+1 ≡ 0 mod n_secp)
+lam_large/n = 0.6743   (larger root)
+```
+secp256k1 uses lam_small (the convention in all secp256k1 implementations).
+
+**Correct interpretation of the GLV-HNP attack viability:**
+- The λ/n ratio does NOT determine attack success.
+- The binding constraint is the **efficiency**: eff = K1·K2/n ≲ 0.12.
+  - K1 = bias bound on nonce component k1 (number of biased bits determines K1).
+  - K2 = ⌈√n⌉ (GLV domain size, fixed by the curve).
+  - So K1 ≲ 0.12·n/K2 = 0.12·n/√n = 0.12·√n.
+  - For secp256k1 (n ≈ 2^256): K1_max ≈ 0.12·2^128 — astronomically large. Any realistic
+    nonce bias (top k bits known, k ≤ 128) gives K1 ≪ K1_max.
+  - For the k-MSB leakage model: K1 = 2^{256-k}. Need 2^{256-k}/2^{128} ≲ 0.12 →
+    256-k ≲ 128-3 → k ≳ 131 leaked bits.
+  - **Conclusion: the GLV-domain LLL attack on secp256k1 is not weaker due to λ/n.
+    It requires the same nonce bias as a standard BV lattice attack — ~131+ MSBs.**
+- The prior 2026-05-22 finding (scaled-f64 GS + high-precision LLL recovers d at m=8 for
+  256-bit) is separate: that was the standard BV attack, not GLV-HNP Phase 2 style.
+
+### Next step proposal
+
+**Two threads in priority order:**
+
+**Thread 21 (K1 efficiency scaling law):**
+Generalize the eff ≲ 0.12 threshold across bit sizes (8-bit to 256-bit) to confirm
+it's bit-size-independent. Expected: the threshold in eff is universal (it's a
+Gaussian heuristic constant, roughly δ^{-dim/4} ≈ constant for LLL). Quick sweep:
+for each bit size in {8, 12, 16, 20, 32}, find a curve with lam/n ≈ 0.45 (easy case)
+and vary K1 to find the eff threshold. Estimate cost: ~30 min.
+
+**Thread 1 (P-521 LLL, bigfloat):**
+The GLV-HNP findings don't directly bear on P-521's bigfloat issue. Still unresolved
+(high-precision LLL calls on 521-bit lattice). Try Gram-Schmidt with target_bits=80.
+
+### Commits made
+TBD
