@@ -5914,4 +5914,4 @@ If the GS diagnostic shows the failures need m>19 (not structural), run the n=22
 to m=30 to see if it eventually succeeds.
 
 ### Commits made
-(to be filled by commit step)
+`88cf00d` autolab 2026-07-26b: Thread 20 — lambda/n threshold study; no simple threshold, failure is instance-specific
