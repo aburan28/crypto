@@ -5893,4 +5893,4 @@ The GLV-HNP findings don't directly bear on P-521's bigfloat issue. Still unreso
 (high-precision LLL calls on 521-bit lattice). Try Gram-Schmidt with target_bits=80.
 
 ### Commits made
-TBD
+2596bff autolab 2026-07-26 (run2): Thread 20 — λ/n threshold study; prior finding revised
