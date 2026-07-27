@@ -5977,3 +5977,5 @@ The true threshold lies between eff=0.054 and eff=0.24. Run a finer sweep:
 lower priority — Thread 21 has a faster feedback loop.
 
 ### Commits made
+
+- `3f1b385` autolab 2026-07-27: Thread 20 — λ/n threshold refuted; eff=K1*K2/n is the true attack threshold
