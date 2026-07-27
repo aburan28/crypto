@@ -5983,4 +5983,4 @@ Find genus-2 curves over small proxy primes whose Jacobian factor-splits as
 E_i × E_j for secp256k1 family twists.
 
 ### Commits made
-[to be filled after commit]
+2a961c5 autolab 2026-07-27: Thread 20 — small-λ threshold bisection; T*≈0.11, higher-order resonances at k=9,15
