@@ -5970,4 +5970,4 @@ in `paper/eprint_combined.tex` as evidence that secp256k1's λ/n ≈ 1/3 provide
 a structural obstacle to both the large-K1 and small-K1 HNP variants of the attack.
 
 ### Commits made
-[see next git hash]
+dccfe87 autolab 2026-07-27: Thread 20 — λ/n threshold bisection; two failure bands found for Phase 2 attack
