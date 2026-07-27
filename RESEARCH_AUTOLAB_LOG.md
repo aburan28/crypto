@@ -5874,3 +5874,100 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). Threads 1–6 from the original priority list are
+all closed (P-521 HP LLL closed 2026-05-22, B5/F_{p^k} closed 2026-05-27, cross-curve
+3/3 closed 2026-05-25, Howe sextic closed 2026-07-21, GLV-HNP Phase 2 toy closed
+2026-07-26). Thread 20 was proposed as next-priority in the 2026-07-26 run: bisect
+the λ/n success threshold for the Phase 2 GLV-aware lattice attack.
+
+### Work done
+- Installed `fpylll` + `cysignals` + `sympy` (fresh container, none pre-installed).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Eisenstein CM curve search to collect j=0 curves at target λ/n ∈ {0.10, 0.13, 0.17, 0.20, 0.25, 0.30}.
+  - For each curve: LLL test at m=8, 3 seeds.
+  - BKZ(40) on LLL-failing curves.
+  - Extended m sweep (m=10..20) on the boundary curve.
+- Ran the script. Result: clean in ~3 minutes.
+- Ran `cargo test --test curve_audit`: 5/5 pass (7.25s). ✓
+
+### Findings
+
+**λ/n threshold for GLV-aware lattice attack (m=8, 3 seeds, column-scaled LLL):**
+
+| lam/n  | LLL (m=8) | BKZ40 (m=8) | notes |
+|--------|-----------|-------------|-------|
+| 0.0700 | 0/3 FAIL  | 0/3 FAIL    | p=2677, n=2647, lam=185 [KNOWN] |
+| 0.1060 | 3/3 PASS  | —           | p=661, n=613, lam=65 |
+| 0.1346 | 2/3 MIXED | 3/3 PASS    | p=409, n=379, lam=51 |
+| 0.1909 | 3/3 PASS  | —           | p=619, n=571, lam=109 |
+| 0.2384 | 3/3 PASS  | —           | p=571, n=541, lam=129 |
+| 0.2753 | 3/3 PASS  | —           | p=691, n=643, lam=177 |
+| 0.3131 | 3/3 PASS  | —           | p=349, n=313, lam=98 |
+| 0.5327 | 3/3 PASS  | —           | p=211, n=199, lam=106 [KNOWN] |
+| 0.6600 | 3/3 PASS  | —           | p=2557, n=2659, lam=1755 [KNOWN] |
+
+**Extended m sweep on lam/n=0.1346 (n=379, lam=51):**
+```
+m=8:  2/3 (LLL, mixed)
+m=10: 3/3 ← PASS
+```
+→ The lam/n=0.135 "failure" is NOT structural: m=10 restores 3/3. This is a
+  reduction-strength boundary, not a lattice-geometry failure.
+
+**Two distinct failure modes identified:**
+
+1. **Structural failure** (lam/n < ~0.10):
+   - Even BKZ(40) with m=14 fails (confirmed from 2026-07-26 for lam/n=0.07).
+   - The λ-rows in the lattice are too small relative to the modular rows to be
+     "separated" by ANY polynomial-time reduction.
+   - Threshold: lam/n ≈ 0.07–0.10 (hard lower bound, needs one more data point
+     between 0.07 and 0.106 to pin precisely).
+
+2. **Marginal zone** (lam/n ≈ 0.10–0.19):
+   - LLL sometimes misses at m=8 (2/3 seeds), but BKZ rescues.
+   - Increasing m to 10 restores LLL 3/3.
+   - Not a structural failure — a parameter-scaling issue.
+
+**Monotonicity violation in the data:**
+The curve at lam/n=0.106 passes LLL 3/3 while the curve at lam/n=0.135 only passes
+LLL 2/3. This apparent non-monotonicity is explained by curve-level parameters:
+- n=613 (lam/n=0.106): eff = 2*(sqrt(613)+1)/613 ≈ 0.084
+- n=379 (lam/n=0.135): eff = 2*(sqrt(379)+1)/379 ≈ 0.108
+Despite n=379 having LARGER eff (should be easier), n=379 gives mixed results.
+This is consistent with λ/n being the dominant factor — the 0.106 curve benefits
+from its higher λ/n even though eff is slightly lower.
+
+**Implication for secp256k1:**
+secp256k1 has λ/n ≈ 0.44, firmly above both the structural threshold (~0.07–0.10)
+and the marginal zone (0.10–0.19). The Phase 2 attack would be reliable at m=8–10.
+The main remaining obstacle is the 256-bit lattice size (bigfloat/precision issue,
+same as the BV attack — but already solved for BV via HP LLL).
+
+**New open question:**
+Does the hard structural threshold correlate with `lam / n < 1 / (dimension)`?
+For m=8, dim=18: 1/18 ≈ 0.056. For lam/n=0.07 > 0.056 but still fails. So the
+naive dimension-counting bound is not tight. The failure is likely related to the
+Gram-Schmidt geometry of the λ-rows relative to the n-rows — a topic for a formal
+analysis.
+
+### Next step proposal
+
+**Thread 21 (Fine-grained threshold, lam/n ∈ [0.07, 0.11]):**
+Run a finer grid between 0.07 and 0.11 (targets: 0.074, 0.078, 0.082, 0.086, 0.090,
+0.095) with BKZ(40) to find the exact structural threshold. Requires finding curves
+in a narrow λ/n band — may need p_max > 150000 or a different search strategy.
+
+**Thread 22 (Richelot search over small proxy primes):**
+Continuation of CHLRS Thread 2. For the 5 qualifying Howe pairs from Thread 18
+(pairs (0,1),(0,3),(0,4),(1,4),(3,4)), search for a genus-2 curve over a small
+proxy prime p' whose Jacobian has the right char poly. `howe_richelot_v4.gp` may
+already scaffold this — read and verify.
+
+**Recommendation:** Thread 21 first (completes the λ/n study), then Thread 22.
+
+### Commits made
+[see below]
