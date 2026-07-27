@@ -91,7 +91,7 @@ precision does not find the short vector.
 
 ### Commits made
 
-See next git hash after this entry.
+9c0f48a autolab 2026-07-27: Thread 6 B5/abelian-surface — split Jac DLP over F_{p^k} verified; 4-reason closure
 
 ### Next step proposal
 
@@ -5981,4 +5981,4 @@ worse. The |Aut(E)|=6 factor that saves 1.3 bits in ECDLP does NOT help for the 
 
 ### Commits made
 
-See next git hash after this entry.
+9c0f48a autolab 2026-07-27: Thread 6 B5/abelian-surface — split Jac DLP over F_{p^k} verified; 4-reason closure
