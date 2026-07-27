@@ -5971,7 +5971,7 @@ finding is size-specific or fundamental, and can be done in <5 min by parameteri
 the existing script.
 
 ### Commits made
-[thread20 commit hash will be added after commit]
+e0937ed
 
 ### Thread 21 addendum (same run, quick follow-up)
 
