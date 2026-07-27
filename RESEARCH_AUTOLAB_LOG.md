@@ -5966,3 +5966,4 @@ Concretely: for p' small prime ≡ 1 (mod 3), search degree-6 polynomials f(x)
 such that `hyperellcharpoly(f) == P_{E_i} * P_{E_j}` over F_{p'}.
 
 ### Commits made
+`43886a0` autolab 2026-07-27: Thread 20 λ/n threshold — combined σ=λ/(K1·K2) metric; threshold ~0.67
