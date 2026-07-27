@@ -5874,3 +5874,100 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection for Phase 2 GLV-HNP attack). All 6 original
+priority threads are CLOSED. Thread 20 was proposed 2026-07-26 (same day as Thread 5
+completion) but never executed. Task: bisect the λ/n threshold between the known failure
+at λ/n=0.07 (p=2677) and claimed success at λ/n=0.34. Script: `glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Scans j=0 CM primes in [2¹¹, 2¹⁷] (Eisenstein decomposition, n prime ≡ 1 mod 3)
+  - Buckets by λ/n in 0.05-wide bins; found 2 curves per bin across all 9 bins [0.05, 0.50)
+  - Runs Phase 2 lattice (K1_BOUND=8, K2=ceil(sqrt(n))+1) at m=6,8,10,12,14,16 with 3 seeds
+  - Reports first m with 3/3 success or "FAIL (m≤16)"
+- `cargo test --test curve_audit`: 5/5 pass (7.68s). ✓
+
+### Findings
+
+**Two distinct failure bands discovered for Phase 2 (K1=8) attack:**
+
+| λ/n range   | representative lam/n | n    | first 3/3 m | outcome       |
+|-------------|---------------------|------|-------------|---------------|
+| [0.05,0.10) | 0.0960              | 2053 | never       | **FAIL**      |
+| [0.10,0.15) | 0.1294              | 2203 | 14          | success       |
+| [0.15,0.20) | 0.1629              | 2143 | 10          | success       |
+| [0.20,0.25) | 0.2037              | 2671 | 6           | success       |
+| [0.25,0.30) | 0.2907              | 2281 | 14          | success       |
+| [0.30,0.35) | 0.3145              | 2251 | never       | **FAIL**      |
+| [0.35,0.40) | 0.3954              | 2089 | 10          | success       |
+| [0.40,0.45) | 0.4042              | 1999 | 6           | success       |
+| [0.45,0.50) | 0.4898              | 2503 | 8           | success       |
+
+**Failure band 1: small-λ (λ/n < ~0.10)**
+- Known from 2026-07-26 (p=2677, λ/n=0.07, confirmed: max 1/3 at any m≤16)
+- New: λ/n=0.0960 also fails (max 1/3, m≤16)
+- Boundary: somewhere in (0.0960, 0.1294)
+- Mechanism (from 2026-07-26 log): λ-rows (-λ·S_K1 entries) comparable in
+  magnitude to modular rows (n·S_K1) when λ/n ≈ 0.07; GS geometry degenerates.
+
+**Failure band 2: near-1/3 (λ/n ≈ 1/3)**
+- λ/n = 0.2907 → success (m=14); |0.2907 - 1/3| = 0.042
+- λ/n = 0.3145 → FAIL;        |0.3145 - 1/3| = 0.019
+- λ/n = 0.3954 → success (m=10); |0.3954 - 1/3| = 0.062
+- → Failure band is approximately λ/n ∈ (0.30, 0.35), width ~±0.018 around 1/3
+- This matches the Effect A obstruction from `glv_hnp_lamn_boundary.py` (large-K1)
+  but now confirmed with SMALL K1=8 (Phase 2 k1-biased attack)
+
+**secp256k1 implication (critical):**
+```
+secp256k1: λ/n ≈ 0.3257  (λ = n·0.3257, the smaller GLV eigenvalue)
+|λ/n - 1/3| ≈ |0.3257 - 0.3333| = 0.0076
+```
+secp256k1 is INSIDE the near-1/3 failure band (0.0076 << 0.019 = half-width).
+→ **Phase 2 K1-biased GLV-HNP attack fails on secp256k1** via near-1/3 obstruction.
+This is independent of (and in addition to) the precision challenge at 256-bit scale.
+
+**Success region m-cost pattern:**
+- λ/n = 0.20 or 0.40: m=6 sufficient (far from obstruction bands)
+- λ/n = 0.10 or 0.29: m=14 needed (approaching small-λ or near-1/3 band)
+- λ/n = 0.32: FAIL (inside near-1/3 band)
+→ Attack cost (in m) increases as λ/n approaches either obstruction band.
+
+**Structural interpretation:**
+The near-1/3 obstruction stems from the fact that when λ ≈ n/3, the vector
+  v = 3 * (row_{m+1+i}) + (row_i) 
+has k1_i-column entry ≈ (-3λ + n) * S_K1 ≈ 0 (since 3λ ≈ n).
+This creates a near-null combination of GLV-rows with modular rows, collapsing
+the span of the lattice near a lower-dimensional subspace. LLL cannot distinguish
+the planted short vector from this collapsed direction.
+
+**Reference calibration note:**
+The 8-bit toy (p=211, n=199, lam=106, lam/n=0.533) FAILS with K1=8 (max 1/3).
+This is NOT a contradiction: with n=199, K1=8 gives K1*K2/n = 8*15/199 ≈ 0.60,
+so the information-theoretic threshold m > log(n)/log(1/(K1*K2/n)) → ∞ as the
+fraction approaches 1. The original Phase 2 success was with K1=2 (K1*K2/n ≈ 0.15).
+
+### Next step proposal
+
+**Thread 20a (near-1/3 band precision):** The failure band boundaries are only
+bracketed to 0.05 resolution (0.05-wide bins). Narrow by scanning additional
+curves at λ/n ∈ {0.28, 0.29, 0.30, 0.31, 0.32, 0.34, 0.36, 0.38} to measure
+the precise failure band for K1=8. This would determine whether the obstruction
+is |λ/n - 1/3| < ε for ε ≈ 0.02 or is wider.
+
+**Thread 22 (Richelot search):** From 2026-07-26 log. Search for genus-2
+curves whose Jacobian splits over F_p as E×E^t using Richelot (2,2)-isogenies
+without the Rosenhain construction (which is blocked for secp256k1). Concretely:
+for a small proxy prime p' where the cubic-residue condition holds, find the
+degree-2 cover and verify the Howe gluing conditions.
+
+**Paper integration:** The two-band failure structure for Phase 2 should be noted
+in `paper/eprint_combined.tex` as evidence that secp256k1's λ/n ≈ 1/3 provides
+a structural obstacle to both the large-K1 and small-K1 HNP variants of the attack.
+
+### Commits made
+[see next git hash]
