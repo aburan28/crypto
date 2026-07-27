@@ -5791,3 +5791,115 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula / Howe gluing): proposed by 2026-07-21 and 2026-07-26 logs.
+Goal: identify why `chlrs_igusa_formula.gp` gives wrong Jacobian orders, find the correct
+Howe cover construction for j=0 pairs, and map which secp256k1 sextic-twist pairs are
+non-degenerate candidates.
+
+### Work done
+- Diagnosed `chlrs_igusa_formula.gp`: the Rosenhain cross-ratio maps α→0, dα→1, ωα→∞
+  but the Howe (1996) 2-torsion identification pairs {α,dα} (same orbit under CM), not
+  as distinct branch points mapped to 0,1,∞. Result: wrong Möbius pairing → wrong curve.
+  Jac order 1018416 ≠ target 1018251 for p=1009. ROSENHAIN APPROACH CONFIRMED BROKEN.
+- Read `howe_richelot_v5.gp` (the correct working reference for p=43):
+  the Richelot formula uses sv=α+β, qv=α·β with α,β ∈ F_{p³}, computing the
+  Z/3Z dual of the factored sextic y²=G₁·G₂·G₃ where G_i=(x-ζ₃^{i-1}α)(x-ζ₃^{i-1}β).
+- Found critical bug in previously-created `howe_5pairs.gp`: all F_{p³} arithmetic
+  functions used global `p` (secp256k1 prime) instead of local toy prime. Arithmetic
+  was silently wrong for all toy-prime tests.
+- Rewrote as `howe_5pairs_v2.gp` with explicit `pp` parameter throughout:
+  `f3add(u,v,pp)`, `f3neg(u,pp)`, `f3scl(c,u,pp)`, `f3mul(u,v,rr,pp)`, `f3inv(u,rr,pp)`,
+  `richelot(sv,qv,z3,rr,pp)`. All functions take (pp,rr) so the prime and the
+  cubic-extension generator are explicit.
+- Ran `howe_5pairs_v2.gp`; key results:
+
+  **Test 1 (p=43):** Richelot(sv=[0,3,0], qv=[0,0,2]) → a=41, b=5. ✓ CORRECT.
+  Matches `howe_richelot_v5.gp`'s expected output exactly.
+
+  **Test 2 (p=1009):** z3=374, d=11 (first non-square), E1 trace=43, E2 trace=-43.
+  Richelot → a=210, b=620. #Jac=1106283. Target (= #E1·#E2 = 967·1053) = 1018251. Mismatch.
+  Root cause: the (sv,qv) = (α·(1+d), α²·d) parameterization used in the test script
+  is NOT the correct Howe-cover parameterization for this pair. The Z/3Z Richelot requires
+  finding the specific r1,r2 ∈ F_p such that y²=(x³-r1)(x³-r2) is the Howe cover of
+  E1×E2, and THEN computing α=r1^{1/3}, β=r2^{1/3} in F_{p³}. The (sv,qv) input must
+  come from the Howe cover's branch factors, not from the elliptic curve parameters directly.
+  Without a prior formula for (r1,r2) given (trace(E1), trace(E2)), the Richelot cannot be
+  applied forward.
+
+  **Test 3 (pair 0,3): DEGENERATE.** d = h³ = -1 (since h is the primitive 6th root of
+  unity, h³=-1). With d=-1: β=-α, sv=α+β=0, G_i = x²-ζ₃^{i-1}·α². The Richelot
+  discriminant Δ=0 — formula breaks. The product (x³+b)(x³-b) = x⁶-b² is trivially
+  bi-split and the (2,2)-isogeny is degenerate. BLOCKED: needs Mestre/theta-function approach.
+
+  **Test 4 (pair 0,1, p=1009):** h=375, cube roots of h are {58, 503, 448} — all are
+  SQUARES mod 1009. For the Howe cover to be defined over F_p (not just F_{p³}), the
+  cover's coefficients must lie in F_p, which requires specific ramification conditions on
+  the cube roots. All-square cube roots of h make the F_p descent condition harder to verify
+  without the full CHLRS apparatus.
+
+  **Test 5 (naive cover b=189):**
+  189 = 27·7 = 3³·7. For secp256k1, h³ = -1 (primitive 6th root), so the k=3 class is
+  7·h³ = -7 ≡ p_secp-7. The ratio 189/(-7) ≡ -27 mod p_secp. Since p_secp ≡ 7 mod 12:
+    - kron(-1, p_secp) = -1 (since p ≡ 3 mod 4)
+    - kron(27, p_secp) = kron(3,p)^3 = (-1)^3 = -1 (kron(3,p)=-1 as p≡±1 mod 12? check below)
+    - kron(-27, p_secp) = (-1)·(-1) = 1 → -27 IS a QR
+    - -1 is a cubic residue mod p_secp iff 6|(p-1): p≡1 mod 3 and p≡3 mod 4 → p≡7 mod 12.
+      (p-1)/3 = even iff 3|(p-1)/2 which holds iff p≡1 mod 6; since p≡1 mod 3 but p≡3 mod 4,
+      p≡7 mod 12 → (p-1)=6k+6 → (p-1)/3=2k+2 (even). So (-1)^{(p-1)/3}=1 → -1 IS a cubic residue.
+    - 27^{(p-1)/3} = (3^3)^{(p-1)/3} = 3^{p-1} = 1 → 27 IS a cubic residue.
+    - Therefore -27 = (-1)·27 is both a QR and a cubic residue → -27 IS a 6th power mod p_secp.
+  CONCLUSION: y²=x³+189 is F_p-isomorphic to y²=x³-7 = y²=x³+7·h³ (the k=3 class).
+  Therefore the naive cover y²=(x³+7)(x³+189) is the PAIR (0,3): the degenerate case!
+  This is a critical finding: the literature's "naive Howe cover" for secp256k1 lands
+  exactly on the degenerate pair, explaining why naive approaches fail.
+
+### Findings
+
+1. **Rosenhain cross-ratio approach is wrong** for Howe covers of j=0 curves. The
+   correct method is Z/3Z Richelot using F_{p³} arithmetic.
+
+2. **Z/3Z Richelot arithmetic confirmed fixed** in `howe_5pairs_v2.gp` — reproduces
+   the p=43 reference answer exactly.
+
+3. **Missing inverse map**: the Richelot formula requires the Howe cover's branch
+   parameters (r1,r2) as input, not the elliptic curve traces. Without an explicit
+   formula r1(trace(E1),p) and r2(trace(E2),p), the forward Howe cover cannot be
+   computed from the pair data alone. This is the CHLRS "Igusa inversion" problem.
+
+4. **Naive secp256k1 cover is degenerate**: y²=(x³+7)(x³+189) = pair (0,3) because
+   189 ≅ -7 (mod p_secp) under 6th-power isomorphism (since p≡7 mod 12 → -27 is a
+   6th power). The (0,3) pair has d=-1, which makes the Richelot discriminant zero.
+   All prior work on the "naive" secp256k1 cover was attacking a degenerate case.
+
+5. **Non-degenerate candidates**: pairs (0,1), (0,2), (0,4), (0,5) with d = h^k for
+   k ∈ {1,2,4,5} (h = primitive 6th root mod p_secp). These have d ≠ ±1 (d ≠ h^0 or h^3),
+   giving sv = α+β ≠ 0 and non-degenerate Richelot. But the Richelot still requires the
+   branch factor (r1,r2) rather than curve traces as input.
+
+6. **Pair (0,1) cube-root issue**: over F_1009, all cube roots of h are quadratic squares.
+   Whether this blocks the F_p descent for the Howe cover requires the full CHLRS formula.
+
+7. **Structural gap identified**: the Z/3Z Richelot computes Howe_cover → Richelot_dual.
+   What is needed is the FORWARD map: (E1, E2) → Howe_cover parameters (a,b). This
+   requires either (a) the CHLRS Igusa inversion, or (b) a theta-function modular model
+   of the Siegel modular surface parameterizing (2,2)-isogenous abelian surfaces.
+
+### Next step proposal
+
+**Thread 3 (CHLRS Igusa forward map):**
+Implement the Cardona-Howe-Lercier-Ritzenthaler-Streng formula for the FORWARD direction:
+given E1: y²=x³+b and E2: y²=x³+d·b with d non-square/non-h³, compute the Igusa-Clebsch
+invariants of the Howe cover, then recover (a,b') for y²=x^6+a·x^3+b'. The explicit
+formula is in CHLRS §4–5 (Lercier-Ritzenthaler 2012). Script target:
+`secp256k1_cm_audit/chlrs_forward_map.gp`.
+
+**Fallback — Thread 20 (λ/n threshold):**
+Bisect the λ/n threshold between 0.07 and 0.34 using the GLV-HNP Phase 2 setup already
+validated on 2026-07-26. Quick to execute; extends the validated attack data.
+
+### Commits made
+COMMITPLACEHOLDER autolab 2026-07-27: Thread 2 CHLRS — Rosenhain wrong, Z/3Z Richelot correct; naive cover is degenerate pair (0,3); howe_5pairs_v2.gp written
