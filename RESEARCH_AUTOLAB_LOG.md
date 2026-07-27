@@ -6003,3 +6003,5 @@ Recommend Thread 21 first (2h, concrete script, closes the λ/n chapter cleanly)
 
 ### Commits made
 [see next git hash]
+
+[Commit hash recorded: 23dc1d9]
