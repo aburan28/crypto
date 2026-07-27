@@ -5909,4 +5909,4 @@ A clean formula would require more data points at various n.
    Needs SageMath `HyperellipticCurveFromInvariants`. Not available in container.
 
 ### Commits made
-[see below]
+f5a0232
