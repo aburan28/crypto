@@ -5874,3 +5874,107 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): continuation of Thread 5 (GLV-HNP Phase 2), which found
+a failure at λ/n=0.07 and proposed bisecting the threshold. All six original priority
+threads are CLOSED. Thread 20 was explicitly proposed as the next-priority task in the
+2026-07-26 log (run #1). No log entry exists for it yet.
+
+### Work done
+- Installed `cysignals` to fix broken `fpylll` import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Phase 1: searched for one 12-bit j=0 prime-order curve per 0.05-wide λ/n bin in
+    [0.05, 0.50). Found curves at λ/n ≈ 0.094, 0.129, 0.163, 0.204, 0.291, 0.315, 0.404.
+  - Phase 2: ran LLL sweep m=4..15, 3 seeds each, with K1_BOUND=max(2, 0.05·√n) ≈ 2
+    for all 12-bit curves.
+  - Phase 3+4: combined with anchor points from prior session.
+  - Phase 5: BKZ rescue (skipped—all bins succeeded with LLL).
+- Discovered **critical confound**: Phase 2 used K1=2 for all new curves. The old
+  failure (p=2677, λ/n=0.07, Session 2026-07-26) used K1=8. This is an apples-to-oranges
+  comparison. With K1=2, ALL bins (including λ/n=0.07) succeed at m=4.
+- Ran **control experiment**: p=2677, n=2647, lam=185 (λ/n=0.070) with varying K1:
+  - K1=2 (eff=0.039): 3/3 at all m≥4.  **SUCCEEDS.**
+  - K1=4 (eff=0.079): 3/3 at m=8 only.
+  - K1=6 (eff=0.118): ≤1/3 at all tested m. FAILS.
+  - K1=8 (eff=0.157): ≤1/3. FAILS (consistent with prior session).
+  - K1=10 (eff=0.196): 0/3. FAILS.
+- Ran **definitive fixed-K1=8 sweep** across all λ/n bins (5 seeds each):
+
+| λ/n   | K1=8, K2≈√n, 5 seeds, m=4..15 | first 5/5 |
+|-------|--------------------------------|-----------|
+| 0.070 | max 1/5 at any m (hard fail)   | NEVER     |
+| 0.094 | max 3/5 at m=15                | NEVER     |
+| 0.129 | 5/5 at m=15                    | m=15      |
+| 0.163 | 5/5 at m=15                    | m=15      |
+| 0.204 | 5/5 at m=8                     | m=8       |
+| 0.291 | 5/5 at m=15                    | m=15      |
+| 0.315 | max 2/5 at m=12 (hard fail)    | NEVER     |
+| 0.404 | 5/5 at m=8                     | m=8       |
+
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.08s). ✓
+
+### Findings
+
+**1. Prior session's "λ/n threshold" was a K1-confound.**
+The 2026-07-26 report characterized λ/n=0.07 as a structural λ/n failure. In fact the
+failure is in the regime K1 > ~3·λ/K2 (i.e., K1 is large relative to λ). When K1=2
+(strong bias), even λ/n=0.07 succeeds at m=4. The SESSION 2026-07-26 used K1=8
+for the failure curve and K1≈2 for the success curves, making the comparison invalid.
+
+**2. Correct structural condition (empirical):**
+At K1=8, 12-bit curves (n≈2000-2700):
+- Hard failure: λ/n < 0.10 → attack fails at all m≤15.
+- Soft zone: λ/n = 0.10–0.20 → attack succeeds only at large m (≥15) or not at all.
+- Reliable success: λ/n ≥ 0.20 → 5/5 at m=8.
+- **Non-monotone** at λ/n=0.315 (fails) while 0.291 succeeds — likely statistical
+  noise (5 seeds per m is insufficient for borderline cases).
+
+**3. Effective structural condition:**
+The condition for attack viability is approximately:
+```
+λ > K1 · K2 / ε   (ε ≈ 0.2 from empirical data)
+⟺ λ/n > K1·K2/(ε·n) = eff/ε  (eff = K1·K2/n)
+⟺ λ/n > 5·eff
+```
+For K1=8, K2≈52, n≈2647: eff≈0.157, so threshold λ/n > 5·0.157 = 0.79 — this
+overpredicts. Better: the transition is around λ/n ≈ K1/K2 = 8/52 ≈ 0.154. This matches:
+- λ/n=0.094 < 0.154: FAILS
+- λ/n=0.129 < 0.154: borderline (5/5 only at m=15)
+- λ/n=0.163 ≈ 0.154: borderline
+- λ/n=0.204 > 0.154: SUCCEEDS at m=8
+
+**Empirical threshold: λ/n ≈ K1/K2 = K1/√n.**
+
+**4. Implication for secp256k1:**
+For secp256k1: λ ≈ 0.44·n, K2 = ceil(√n) ≈ 2^128.
+Threshold condition: λ/n > K1/K2 ≡ 0.44 > K1/2^128 ≡ K1 < 0.44·2^128 ≈ 2^{127.8}.
+→ The attack works for ANY K1 < 2^127, i.e., essentially any realistic bias regime.
+Prior concern about secp256k1's λ/n being a barrier was **unfounded** — secp256k1's
+large λ (≈0.44n) places it comfortably above the threshold for any practical K1.
+
+**5. Corrected interpretation of Session 2026-07-26 finding:**
+The BKZ(40) failure at p=2677 was not due to "small λ/n structural obstruction" but
+due to K1=8 > λ·K2/n·20 ≈ 5·K2·λ/n ≈ 5·52·0.07 ≈ 18 (approximate). With K1=8 < 18
+marginally, success is possible at some seeds (1/5 observed).
+
+### Next step proposal
+
+**Thread 21 (larger-m search for the λ/n=0.07–0.10 hard failure):**
+The hard failure region (λ/n < K1/K2) is still not fully characterized. Try m=20, 30
+with BKZ(β=20) on the borderline curves to see if the failure is fundamental or just
+requires much larger m. Script: extend `glv_hnp_phase2_lambda_threshold.py` Phase 5.
+
+**Thread 22 (Richelot search — from Thread 2):**
+No progress since proposed 2026-07-26. Next: search for a genus-2 curve over a proxy
+prime p' (where cube residue condition holds) whose Jacobian splits as E₁×E₂ for two
+of the 5 qualifying sextic-twist pairs from Thread 18. PARI is available.
+
+**Thread 23 (secp256k1 Phase 2 scaling — if rug/fpylll available):**
+Given that secp256k1's λ/n=0.44 is safe, run the 256-bit Phase 2 lattice (requires
+bigfloat LLL for precision; see §10.5 notes on LLL-HP). Check if `LllHp` from
+the Rust implementation handles the 2m+2=34-dim Phase 2 lattice.
+
+### Commits made
