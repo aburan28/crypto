@@ -5874,3 +5874,106 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All 6 original priority threads are CLOSED/DEAD END/BLOCKED.
+Thread 5 (GLV-HNP Phase 2) was completed 2026-07-26 and proposed Thread 20 as the next concrete
+sub-task: bisect the λ/n threshold between the known success (λ/n≥0.34) and known failure
+(λ/n=0.07) with curves at intermediate ratios. Thread 2 (CHLRS, closed 2026-07-26) proposed
+Thread 22 (Richelot search) as an alternative. Thread 20 picked as it directly continues the
+validated Phase 2 attack framework and has the clearest empirical protocol.
+
+### Work done
+- Installed fpylll, sympy, cysignals (pip3).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (new script, 290 lines):
+  - Finds one j=0 CM curve per λ/n ratio bucket (targets: 0.08..0.48 in steps of 0.04)
+  - Runs Phase 2 LLL sweep (m=3..17, 5 seeds) per curve
+  - Falls back to BKZ(β=40) on LLL-failed cases
+- Ran the script: 11/11 ratio buckets found (p ranging 7..211). Full LLL sweep ran. ✓
+- Ran clarifying experiment 1: n=2647, λ/n=0.07 with K1∈{2,4,8} (K2=52 fixed).
+- Ran clarifying experiment 2: K1=K2 varying from sqrt(n) to sqrt(n)/16 for 3 curves.
+- `cargo test --test curve_audit` → 5/5 pass (6.89s). ✓
+
+### Findings
+
+**PRIOR HYPOTHESIS REFUTED: λ/n is NOT the threshold parameter.**
+
+The main threshold script returned these success/failure patterns (5 seeds, m=3..17):
+
+| actual λ/n | n | n bits | LLL success m* | verdict |
+|-----------|---|--------|---------------|---------|
+| 0.066 | 211 | 8 | m=5 | LLL OK |
+| 0.140 | 43  | 6 | m=8 | LLL OK |
+| 0.161 | 31  | 5 | m=6 | LLL OK |
+| 0.213 | 61  | 6 | m=11 | LLL OK |
+| 0.231 | 13  | 4 | m=17 | LLL OK |
+| **0.286** | **7**  | **3** | **fail** | **FAIL** |
+| 0.302 | 139 | 8 | m=9 | LLL OK |
+| **0.368** | **19** | **5** | **fail** | **FAIL** |
+| 0.413 | 109 | 7 | m=13 | LLL OK |
+| **0.433** | **67** | **7** | **fail (BKZ(40) too)** | **FAIL** |
+| 0.462 | 199 | 8 | m=8 | LLL OK |
+
+The failures (n=7, n=19, n=67) are NOT distinguished by λ/n. Specifically:
+- **λ/n=0.066 (n=211) SUCCEEDS at m=5.** The prior "failure" at λ/n=0.07 (n=2647) was
+  with K1=8 from the 2026-06-15 script; the same n=2647, λ/n=0.07, K1=2 → **succeeds at m=5.**
+- Failures at n=7 (3-bit, eff=0.857), n=19 (5-bit, eff=0.526), n=67 (7-bit, eff=0.269) are
+  correlated with the effective density eff=K1*K2/n being high AND/OR n being tiny.
+- The "threshold" in λ/n is illusory: the script happened to find very small-n curves for the
+  0.28, 0.36, 0.44 targets, and those tiny curves fail for n-size reasons.
+
+**TRUE THRESHOLD PARAMETER: eff=K1*K2/n.**
+
+Clarifying experiment (K1=K2 sweep on three representative curves, 5 seeds, m=5,10,15):
+
+| K1=K2 | eff | n=2647 (λ/n=0.07) | n=199 (λ/n=0.46) | n=2659 (λ/n=0.66) |
+|-------|-----|-------------------|------------------|------------------|
+| sqrt(n) | ≈1.00 | 0/5 (all m) | 0/5 (all m) | 0/5 (all m) |
+| sqrt(n)/2 | ≈0.24 | 0/5 (all m) | 0/5 (all m) | 0/5 (all m) |
+| **sqrt(n)/4** | **≈0.054** | **5/5 at m=5** | **5/5 at m=5** | **5/5 at m=10** |
+| sqrt(n)/8 | ≈0.014 | 5/5 at m=5 | 5/5 at m=5 | 5/5 at m=5 |
+| sqrt(n)/16 | ≈0.003 | 5/5 at m=5 | 5/5 at m=5 | 5/5 at m=5 |
+
+**The phase transition occurs between eff≈0.054 and eff≈0.24, INDEPENDENT of λ/n.**
+
+This holds for all three curves (λ/n=0.07, 0.46, 0.66). The prior 2026-07-26 analysis
+explaining the λ/n=0.07 failure as a "structural λ/n issue" was **incorrect** — the failure
+was solely due to K1=8 giving eff=0.157 for that experiment.
+
+**CRITICAL IMPLICATION FOR THE PAPER:**
+
+Standard GLV-ECDSA decomposition bounds k1, k2 ≈ sqrt(n)/2. This gives:
+```
+eff_standard = (sqrt(n)/2) * (sqrt(n)/2) / n = n/4/n = 0.25
+```
+This falls in the **FAILURE regime** (eff≥0.24 → LLL fails). The Phase 2 GLV-HNP attack
+does NOT succeed against standard ECDSA with GLV nonce decomposition, regardless of λ/n.
+
+The attack only works when the signer uses nonces with k1,k2 ≤ sqrt(n)/4 (eff≤0.06), which
+is a much smaller bias than standard GLV provides. This is consistent with the paper's main
+theorem that no polynomial-time attack on the isogeny graph beats the ρ algorithm.
+
+**Prior K1=8 experiment (2026-07-26) revisited:**
+```
+n=2647, λ=185, λ/n=0.07, K1=8, K2=52, eff=0.157 → LLL FAIL (all m≤18)
+n=2647, λ=185, λ/n=0.07, K1=2, K2=52, eff=0.039 → LLL 3/3 at m=5 ✓
+n=2647, λ=185, λ/n=0.07, K1=4, K2=52, eff=0.079 → LLL 3/3 at m=8 ✓
+```
+The failure was entirely attributable to K1=8 (eff=0.157, above the threshold ≈0.054-0.10).
+
+### Next step proposal
+
+**Thread 21 (eff-threshold bisection):**
+The true threshold lies between eff=0.054 and eff=0.24. Run a finer sweep:
+- Fix curve n=2647 (representative, moderate size)
+- Test K1*K2/n at: 0.05, 0.07, 0.10, 0.13, 0.16, 0.20, 0.24 (7 points)
+- For each eff level, sweep m=3..20 with 10 seeds
+- This gives a precise crossing point (e.g., "eff=0.10±0.03 is the threshold")
+- Script: `glv_hnp_phase2_eff_threshold.py`
+
+**Thread 22 (Richelot search over small proxy primes):** still open (proposed 2026-07-26),
+lower priority — Thread 21 has a faster feedback loop.
+
+### Commits made
