@@ -5874,3 +5874,107 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+
+Thread 20 (λ/n lower-bound threshold study), proposed 2026-07-26 and never executed.
+All 6 original priority threads are CLOSED. Thread 20 was the most concrete open
+sub-task: bisect the λ/n threshold between 0.07 (known Phase 2 failure, 12-bit) and
+0.20 (known success from `lamn_boundary.py`, 20-bit). Goal: find τ_lo such that
+λ/n < τ_lo → attack fails (Effect B lower bound).
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Scans 20-bit j=0 CM primes (Eisenstein decomp) for λ/n targets
+    {0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21}.
+  - Found 2 representative curves per target (558 primes scanned to p≈531637).
+  - Re-verified 2026-06-21 anchor curves (λ/n=0.016, 0.039).
+  - Ran K1=72 LLL sweep m=10..25 (seeds=3) for all curves.
+- Extended two "complete" failures (0/3 all m) to m=25..50 (5 seeds) to confirm structural obstruction.
+- Computed δ(kλ)/n for k=1..19 for all curves; checked GS coefficient μ=-λ/n.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.89s). ✓
+
+### Findings
+
+**Thread 20 hypothesis FALSIFIED: no simple λ/n lower threshold exists.**
+
+The initial hypothesis (failure for all curves with λ/n < τ_lo ≈ some threshold below 0.20)
+is wrong. The full sweep results (K1=72, m=10..25, seeds=3, 20-bit j=0 CM curves):
+
+| curve/label     | λ/n    | first 3/3 | outcome  |
+|-----------------|--------|-----------|----------|
+| anchor-016      | 0.0159 | m=10      | SUCCESS  |
+| anchor-039      | 0.0389 | m=20      | SUCCESS  |
+| lam0.05_1       | 0.0430 | m=11      | SUCCESS  |
+| lam0.07_1       | 0.0634 | m=17      | SUCCESS  |
+| **lam0.07_0**   | 0.0819 | never     | **FAIL** (max 1/3)   |
+| lam0.09_1       | 0.0857 | m=11      | SUCCESS  |
+| lam0.09_0       | 0.0900 | m=20      | SUCCESS  |
+| lam0.11_1       | 0.1063 | m=17      | SUCCESS  |
+| lam0.11_0       | 0.1101 | m=12      | SUCCESS  |
+| lam0.13_0       | 0.1216 | m=19      | SUCCESS  |
+| lam0.13_1       | 0.1222 | m=10      | SUCCESS  |
+| lam0.15_1       | 0.1530 | m=16      | SUCCESS  |
+| lam0.15_0       | 0.1601 | m=12      | SUCCESS  |
+| **lam0.17_0**   | 0.1771 | never     | **FAIL** (max 1/3)   |
+| **lam0.17_1**   | 0.1797 | never     | **FAIL** (0/5 at m=10..50, structural) |
+| lam0.19_1       | 0.1995 | m=13      | SUCCESS  |
+| lam0.19_0       | 0.2013 | m=16      | SUCCESS  |
+| **lam0.21_0**   | 0.2114 | never     | **FAIL** (0/5 at m=10..50, structural) |
+| lam0.21_1       | 0.2158 | m=13      | SUCCESS  |
+
+**Pattern**: failures are SCATTERED across 0.07-0.22, NOT concentrated below a threshold.
+Nearby λ/n values (within ±0.02) differ in outcome:
+- 0.063 (SUCC) vs 0.082 (FAIL) — 0.019 apart
+- 0.153 (SUCC) vs 0.177 (FAIL) — 0.024 apart
+- 0.199 (SUCC) vs 0.211 (FAIL) — 0.012 apart
+- 0.216 (SUCC) vs 0.211 (FAIL) — 0.005 apart
+
+**Two structural failures confirmed (Effect-X analogy):**
+lam0.17_1 (p=526069, n=527203, λ=94756, λ/n=0.1797) and lam0.21_0 (p=524743, n=523597,
+λ=110663, λ/n=0.2114) fail at 0/5 for ALL m=10..50. This is a structural obstruction
+analogous to Effect A but at different λ/n values.
+
+**Arithmetic correlation (partial):**
+Each failing curve satisfies kλ ≈ jn for some small integers k, j:
+- lam0.07_0: 12λ ≈ n   (δ(12λ)/n = 0.018)
+- lam0.17_0: 17λ ≈ 3n  (δ(17λ)/n = 0.011)
+- lam0.17_1: 11λ ≈ 2n  (δ(11λ)/n = 0.023)
+- lam0.21_0: 19λ ≈ 4n  (δ(19λ)/n = 0.016)
+
+BUT: many SUCCEEDING curves also have small min δ(kλ)/n:
+- lam0.09_0 (SUCC): δ(11λ)/n = 0.010  (11λ ≈ n)
+- lam0.19_0 (SUCC): δ(5λ)/n  = 0.006  (5λ ≈ n)
+- lam0.15_1 (SUCC): δ(13λ)/n = 0.010  (13λ ≈ 2n)
+
+So neither μ = -λ/n, nor min_{k≤19} δ(kλ)/n, nor the companion eigenvalue
+(λ2 = n-1-λ) cleanly separates failures from successes. The obstruction mechanism
+for the structural failures (lam0.17_1, lam0.21_0) is UNIDENTIFIED.
+
+**Implication for secp256k1:** secp256k1 has λ/n ≈ 0.326 (Effect A, δ(3λ)/n ≈ 0.018).
+This remains the dominant obstruction. The new failures at 0.18-0.21 do NOT add to the
+security argument for secp256k1, since secp256k1 is NOT in the 0.18-0.21 range.
+
+**Comparison to July 26 Phase 2 run:** The 12-bit failure at p=2677 (λ/n=0.07) is
+consistent with lam0.07_0 (closest 20-bit analogue), which is borderline (max 1/3).
+The July 26 explanation ("structural failure: λ-rows too small") is WRONG — multiple
+curves at similar λ/n values SUCCEED. The failure is curve-specific, not universal.
+
+### Next step proposal
+
+**Thread 23 (Structural failure mechanism for lam0.17_1 / lam0.21_0):**
+Diagnose the LLL obstruction mechanism for the two confirmed structural failures.
+Add a diagnostic mode to the attack that records what short vector LLL finds instead
+of the planted vector. If the spurious vector has a specific arithmetic relationship
+to λ and n (analogous to Effect A's "3λ ≈ n" spurious short vector), that would
+identify the obstruction family. Script: `glv_hnp_phase2_spurious_diag.py`.
+
+**Thread 22 (Richelot search):** proposed 2026-07-26, never executed. Lower priority
+than understanding the structural failures.
+
+### Commits made
