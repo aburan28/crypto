@@ -5874,3 +5874,110 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All six original threads CLOSED or BLOCKED. Thread 5
+(GLV-HNP Phase 2 toy) completed 2026-07-26 with the key finding that λ/n=0.07 fails
+even at BKZ(40), while λ/n=0.34 succeeds. That run proposed a bisection study to
+find the precise threshold. Thread 2 (CHLRS) was closed yesterday as a negative result.
+Thread 20 is the highest-priority open task.
+
+### Work done
+- Installed fpylll (0.6.4) + cysignals + sympy (fresh container).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Enumerates 12-13 bit j=0 prime-order curves across 8 λ/n buckets: [0.07,0.09),
+    [0.09,0.12), [0.12,0.16), [0.16,0.21), [0.21,0.27), [0.27,0.34), [0.34,0.42),
+    [0.42,0.50).
+  - Uses Eisenstein decomposition + CM theory (same method as Phase 2 scripts).
+  - Fixed K1=8 across all curves to match the known-failure experiment (p=2677, K1=8).
+    (A first run with K1=2 trivially succeeded everywhere: k1 ∈ {0,1} is degenerate.)
+  - LLL sweep m=6..16, seeds={42,1234,9999} (3 seeds). BKZ(20) on LLL-failures.
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.50s). ✓
+
+Curves found (all 12-13 bit, p ≡ 1 mod 3, n prime, n ≡ 1 mod 3):
+
+| λ/n bucket       | p    | n    | λ   | ratio  |
+|------------------|------|------|-----|--------|
+| [0.07, 0.09)     | 2377 | 2467 | 216 | 0.0876 |
+| [0.09, 0.12)     | 2053 | 2137 | 201 | 0.0941 |
+| [0.12, 0.16)     | 2281 | 2203 | 285 | 0.1294 |
+| [0.16, 0.21)     | 2089 | 2143 | 349 | 0.1629 |
+| [0.21, 0.27)     | 2593 | 2521 | 675 | 0.2678 |
+| [0.27, 0.34)     | 2179 | 2251 | 708 | 0.3145 |
+| [0.34, 0.42)     | 2089 | 1999 | 808 | 0.4042 |
+| [0.42, 0.50)     | 2251 | 2341 |1106 | 0.4724 |
+
+### Findings
+
+**Non-monotone LLL behavior — threshold picture is more complex than expected.**
+
+| λ/n bucket | LLL 3/3 at m≤16 | BKZ(20) 3/3 | Assessment |
+|------------|-----------------|-------------|------------|
+| 0.0876     | NEVER           | NEVER       | HARD FAIL  |
+| 0.0941     | NEVER           | m=15        | PARTIAL (needs BKZ + many sigs) |
+| 0.1294     | m=13 (sporadic) | —           | MARGINAL   |
+| 0.1629     | m=10 (stable)   | —           | SUCCESS    |
+| 0.2678     | m=14 (sporadic) | —           | MARGINAL   |
+| 0.3145     | NEVER           | NEVER       | FAIL       |
+| 0.4042     | m=6 (trivial!)  | —           | EASY SUCCESS |
+| 0.4724     | NEVER           | NEVER       | FAIL       |
+
+**Key observations:**
+
+1. **Small-λ zone (λ/n < 0.10) is consistently hard**: LLL never achieves 3/3 at
+   m≤16 regardless of m. BKZ(20) rescues only one (λ/n=0.09, m=15).
+   This confirms the 2026-07-26 finding.
+
+2. **The success landscape is non-monotone**: λ/n=0.40 trivially succeeds at m=6,
+   but λ/n=0.31 and λ/n=0.47 both fail. This is unexpected — a simple
+   "succeed iff λ/n > threshold" model is WRONG.
+
+3. **Root cause of non-monotonicity**: With K1=8 fixed, the effective bias
+   eff = K1*K2/n ≈ 8*√n/n = 8/√n is approximately the SAME for all curves
+   (~0.17 for n≈2300). The difference is NOT the bias but the LATTICE GEOMETRY:
+   - The λ-row entry magnitude is λ*S_K1 ≈ λ*(n/8) = (λ/n)*(n²/8).
+   - The modular-row entry is n*S_K1 = n²/8.
+   - Their ratio is λ/n — this IS the critical quantity for GS orthogonality.
+   - BUT the K2 sub-lattice entries (S_K2 = n//K2, K2 = √n+1) interact with the
+     λ-rows. When λ is close to K2_BOUND*S_K2 (a resonance condition), the
+     lattice GS degenerates similarly to the P-521 bigfloat case.
+
+4. **Resonance hypothesis for 0.3145 and 0.4724 failures**:
+   - n=2251, lam=708: K2=47, S_K2=47. K2*S_K2 = 2209 ≈ n=2251. λ/K2 = 708/47 = 15.06.
+     The λ-entry (-lam*S_K1) = -708*281 = -198,948. K2_BOUND*S_K2 = 2209. The
+     λ-entry and K2-diagonal differ by factor 198948/281 ≈ 708 = λ. This is just n/K2 ≈ n^{1/2}.
+   - n=2341, lam=1106: Similar structure. No obvious distinguishing integer resonance.
+   - **Tentative**: the non-monotone behavior is statistical noise with 3 seeds.
+     The 0.31 and 0.47 cases are in the "marginal" regime and need 5-10 seeds.
+
+5. **secp256k1 implication**: λ/n ≈ 0.44 for secp256k1. At 12-bit scale, this
+   is in an apparently non-robust regime. At 256-bit scale, the problem is harder
+   (not directly comparable). The full-size Phase 2 attack feasibility remains
+   OPEN — cannot extrapolate from 12-bit toy results.
+
+**Empirical boundary (conservative):**
+- Robust LLL fail: λ/n < 0.10 (confirmed, multiple seeds).
+- Robust LLL success: λ/n ≈ 0.40 (confirmed, m=6 trivial).
+- Uncertain zone: λ/n ∈ [0.10, 0.50] shows mixed behavior at 3 seeds.
+
+### Next step proposal
+
+**Two options:**
+
+1. **More seeds** (Thread 20 continued): re-run the intermediate buckets [0.12, 0.40)
+   with seeds={42,1234,9999,5678,2222,7777,314,159,2718,1415} (10 seeds) and
+   m=10..25. This would give reliable statistics on the marginal zone and may reveal
+   whether 0.31 and 0.47 failures are seed-specific.
+
+2. **Explicit lattice inspection** (new Thread 21): for the 0.3145 FAIL curve
+   (p=2179, n=2251, lam=708), manually inspect the GS profile of the LLL-reduced
+   basis at m=12 to see whether the planted vector is present but in an unexpected
+   row position, or genuinely absent. This would distinguish "bad column scaling"
+   from "structural LLL failure."
+
+**Recommend**: Thread 21 (lattice inspection) — it's faster (a few PARI lines) and
+gives mechanistic insight before committing to 10-seed sweeps.
+
+### Commits made
