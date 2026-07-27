@@ -5978,3 +5978,4 @@ bigfloat LLL for precision; see §10.5 notes on LLL-HP). Check if `LllHp` from
 the Rust implementation handles the 2m+2=34-dim Phase 2 lattice.
 
 ### Commits made
+f6041c8 autolab 2026-07-27: Thread 20 λ/n threshold — corrected confound; empirical threshold λ/n ≈ K1/K2
