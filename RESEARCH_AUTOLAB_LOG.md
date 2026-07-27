@@ -5874,3 +5874,90 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All 6 original priority threads are closed/blocked.
+The 2026-07-26 run (Thread 5 + Thread 2) proposed Thread 20 as next step: bisect
+the λ/n threshold between 0.07 (FAIL) and 0.46 (PASS) for the GLV-HNP Phase 2 attack.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` — λ/n sweep script.
+- **V1 (K1=2, n=8-9 bit)**: Results were non-monotone. Diagnosed: toy curves too small
+  (lattice dim=8-10), LLL is near-exact SVP at that scale; geometric argument doesn't
+  apply. Redesigned with K1=8 (matching prior failure benchmark).
+- **V2 (K1=8, n∈[1000,6000])**: Found one curve per λ/n bin via CM/Eisenstein search;
+  ran LLL and BKZ(20) for m=4..9, 3 seeds (Step 2-4). Also ran planted-vector geometry.
+- Found **second curve in Bin F** (p=1237,n=1279,λ=504,λ/n=0.394) to verify Bin F
+  anomaly is not curve-specific.
+- Found **boundary curve** (p=2179,n=2251,λ=708,λ/n=0.3145) to narrow the threshold.
+- `cargo test --test curve_audit`: 5/5 pass (5.52s). ✓
+
+### Findings
+
+**All data points (K1=8, K2=√n, m=4..9, 3 seeds):**
+
+| Curve | n | λ | λ/n | LLL | BKZ(20) |
+|-------|---|---|-----|-----|---------|
+| Ref (prior) | 2647 | 185 | 0.0699 | FAIL | — |
+| Bin A | 1069 | 86 | 0.0804 | FAIL | FAIL |
+| Bin B | 1039 | 140 | 0.1347 | FAIL | FAIL |
+| Bin C | 1033 | 195 | 0.1888 | FAIL | FAIL |
+| Bin D | 1087 | 257 | 0.2364 | FAIL | FAIL |
+| Boundary | 2251 | 708 | 0.3145 | FAIL | — |
+| **Bin E** | **1129** | **387** | **0.3428** | **PASS (3/3@m=5)** | n/a |
+| Bin F1 | 1009 | 374 | 0.3707 | FAIL | FAIL |
+| Bin F2 | 1279 | 504 | 0.3941 | FAIL (best: 2/3@m=7) | — |
+| **Bin G** | **1447** | **704** | **0.4865** | **PASS (3/3@m=9)** | n/a |
+
+**Key finding: threshold is NOT monotone in λ/n.**
+- λ/n ≤ 0.31: consistently FAIL (6 data points)
+- λ/n = 0.34 (Bin E): PASS (3/3 across m=5,6,7,9)
+- λ/n = 0.37-0.39 (Bin F1, F2): FAIL — contradicts simple λ/n threshold
+- λ/n = 0.49 (Bin G): PASS
+
+**Planted-vector geometry (all bins, m=6):**
+||v_plant|| / GH_estimate ≈ 0.65-0.69 for ALL bins.
+The planted vector is shorter than GH in all cases — LLL failure is NOT because
+the planted vector is too long relative to the lattice determinant.
+
+**Structural explanation of non-monotone behavior — CF approximability of λ/n:**
+The LLL SIZE REDUCTION step considers μ_{k2-row, mod-row} = λ/n. During multi-pass
+reduction, the combination (q * k2-row_i + modular-row_i) arises for q = round(n/λ):
+- Column-i entry: (n - q*λ) * S_K1 = |n mod λ (approx)| * S_K1
+
+Critical comparison:
+```
+Bin E (PASS): q=3,  |n - 3λ| = |1129-1161| = 32   → entry = 32*141 = 4512  [SHORT]
+Bin F (FAIL): q=3,  |n - 3λ| = |1009-1122| = 113  → entry = 113*126 = 14238 [LONG]
+Bin G (PASS): q=2,  |n - 2λ| = |1447-1408| = 39   → entry = 39*180 = 7020  [MEDIUM]
+```
+
+Bin E succeeds because 3λ ≈ n (within 32/n ≈ 2.8%): the combination 3*k2-row + modular
+creates a short intermediate vector (norm ≈ 4513) that helps LLL navigate toward the
+planted vector (norm ≈ 2224). Bin F fails because no small q satisfies q*λ ≈ n mod n
+with small remainder (best: |3λ-n|=113/n ≈ 11%), giving no useful short intermediate.
+
+**New hypothesis: LLL success requires both (a) λ/n > threshold AND (b) good CF approximability.**
+More precisely: LLL succeeds when ∃ small q with |q*λ mod n| / n < ε for some ε≈0.05.
+This is the condition that λ/n has a good rational approximation p/q with small q.
+
+For Bin E: 387/1129 has CF convergent 11/32 with |387*3-1129| = 32 (q=3 works).
+For Bin F: 374/1009 has no q≤5 with |q*374 mod 1009| < 80.
+  - q=1: 374, q=2: 748, q=3: 113, q=4: 487, q=5: 861 → best is q=3 with 113.
+  - So ε_F ≈ 0.11 vs ε_E ≈ 0.028. CF condition fails for F.
+
+**BKZ(20) does NOT rescue any failing bin**, consistent with prior runs.
+
+### Next step proposal
+**Thread 21 (CF-threshold study)**: For each bin, compute min_{q≤10}(|q*λ mod n| / n)
+and test whether this quantity (not just λ/n) predicts LLL success. Find curves where
+both λ/n ≥ 0.30 AND the CF condition holds (min_q small), to confirm the joint
+hypothesis.
+
+Specifically: in Bin F (λ/n ∈ [0.35,0.43]), find a curve where ∃ q≤5 with
+|q*λ mod n| < 40, and test if LLL then succeeds.
+
+### Commits made
+PLACEHOLDER
