@@ -5973,4 +5973,4 @@ curves over small proxy primes with Jacobian matching E_i × E_j (secp256k1 sext
 Use PARI script + heuristic search.
 
 ### Commits made
-[see next commit after this entry]
+08cf5c3 autolab 2026-07-27: Thread 20 — eff=K1*K2/n controls Phase 2 LLL, not λ/n
