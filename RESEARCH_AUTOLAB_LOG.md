@@ -5998,3 +5998,4 @@ be found for small proxy primes p' where the cubic residue condition is satisfie
 Direct hyperelliptic search over small p' with factored char poly matching E_i × E_j.
 
 ### Commits made
+1ccca9a autolab 2026-07-27: Thread 4 confirmed 3/3/3/3; Thread 6 B5 over F_{p^k} closed
