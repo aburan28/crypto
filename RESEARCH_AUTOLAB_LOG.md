@@ -5874,3 +5874,157 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+
+Step 4 Fallback: all 6 original priority threads are CLOSED/DEAD-END/DONE.
+
+Thread status at run start:
+- Thread 1 (P-521 LLL NaN): CLOSED (2026-05-22 via BigInt HP GS; §10.5).
+- Thread 2 (CHLRS Igusa): CLOSED (2026-07-26 — cubic-residue obstruction proven).
+- Thread 3 (Howe sextic twists): DONE (2026-07-21 — 5/15 pairs qualify).
+- Thread 4 (Cross-curve LLL 384-bit): DEAD END (structural obstruction confirmed).
+- Thread 5 (GLV-HNP Phase 2 toy): DONE (2026-07-26 — validated; plus June runs show
+  K1_threshold analysis hit a 6-experiment wall with no algebraic separator found).
+- Thread 6 (B5 over F_{p^k}): CLOSED (2026-07-07).
+
+The 2026-07-26 run proposed Thread 20 (λ/n threshold bisection between 0.07 and 0.34),
+but that question was already substantially answered by the 2026-06-22 run: the true
+obstruction predictor is δ(3λ,n)/n < 0.02 (proximity to 1/3), not a simple λ/n
+threshold. The 2026-07-26 run appears to have re-derived this from scratch without
+knowing the prior result.
+
+Fallback protocol: (a) ePrint survey, (b) propose one new attack variant.
+
+### Work done
+
+**Step 4a — ePrint survey (2026-07-26 to 2026-07-27)**
+
+Direct access to eprint.iacr.org returned HTTP 403 (proxy blocked); ePrint search and
+individual paper pages are inaccessible in this environment. Survey conducted via
+WebSearch instead.
+
+**Papers found (2025–2026):**
+
+1. **ePrint 2026/039** — "Abelian surfaces in Hesse form and explicit isogeny formulas"
+   Thomas Decru & Sabrina Kunzweiler. Develops (3,3)-isogeny formulas between
+   principally polarized abelian surfaces using level-3 theta structures / ℙ⁸ models.
+   **Relevance**: Adjacent to our (2,2)-isogeny Howe-gluing work (Thread 3/18). Does not
+   give a new ECDLP attack. The (3,3)-isogeny framework for j=0 abelian surfaces is
+   distinct from the Richelot (2,2)-isogeny; doesn't unblock Thread 22 directly. Low
+   impact on current work.
+
+2. **ePrint 2026/334** — "Tripling on Hessian curves via isogeny decomposition"
+   Thomas Decru. Uses isogeny decomposition for efficient tripling on Hessian curves.
+   **Relevance**: Post-quantum / efficiency focus (SQIsign-related), not ECDLP. Not
+   relevant to our attack directions.
+
+3. **ASIACRYPT 2024** — "Attacking ECDSA with Nonce Leakage by Lattice Sieving:
+   Bridging the Gap with Fourier Analysis-Based Attacks" (Gao, Wang, Hu, He).
+   Published 2025 in proceedings. Combines lattice sieving (BKZ) with Fourier
+   analysis to attack ECDSA with fewer leaked bits than prior work.
+   **Relevance**: Directly relevant to the GLV-HNP thread. The Fourier approach
+   bypasses the K1_threshold problem by operating in frequency domain rather than
+   lattice domain. The key advantage: Fourier method does not require the planted
+   vector to be the shortest lattice vector — it finds d even when spurious short
+   vectors exist. This is exactly the failure mode we observed for C1-type curves.
+
+4. **SAC 2024** — "Bias from Uniform Nonce: Revised Fourier Analysis-Based Attack on
+   ECDSA" (Osaki & Kunihiro). Corrects a distributional assumption in Bleichenbacher's
+   attack, showing the actual non-uniform distribution of signature pairs requires a
+   revised analysis. Achieves more accurate key recovery at low bias levels.
+   **Relevance**: Relevant to the GLV-HNP direction (shows the Fourier method is more
+   robust than lattice method at low bias/small K1).
+
+**Survey conclusion**: No 2025/2026 paper directly attacks our main claim
+(secp256k1 ECDLP security against isogeny-graph approaches). The 2 HNP papers
+(ASIACRYPT 2024, SAC 2024) suggest a Fourier-based alternative to the lattice approach
+for the GLV-HNP direction that may circumvent the K1_threshold failure.
+
+**Step 4b — New attack variant proposal: Thread 23 (Fourier-based GLV-HNP)**
+
+**Background**: The June–July 2026 K1_threshold analysis established that:
+- LLL-based primal attack fails when spurious short vectors have norms < planted norm.
+- No algebraic invariant (λ/n, δ/n, κ(M), CF quotients, Cornacchia trace) predicts
+  the K1_threshold for a given curve.
+- BKZ escalation to β=30 does not help for C1-type curves at high K1.
+
+**Proposed direction**: Apply the Bleichenbacher/Fourier analysis approach to the
+GLV-aware HNP instead of the primal lattice approach. The Fourier method works as
+follows: rather than embedding d into a short lattice vector, compute a "scoring"
+function over d ∈ [0,n):
+```
+S(d) = Σ_{i=1}^{m} exp(2πi · (A_i + B_i·d) / n · α)
+```
+where α is chosen to amplify the bias signal (k1_i + λ·k2_i small). For the GLV
+decomposition, the "bias" is bimodal: k_full = k1 + λ·k2 with k1 ∈ [0,K1) and
+k2 ∈ [0,K2). The Fourier attack scores each candidate d by how often the "effective
+nonce" A_i + B_i·d mod n falls in the expected range [0, K1·(1+λ)) for some suitable
+effective bound.
+
+**Falsifier (Thread 23 toy experiment)**:
+Script: `secp256k1_cm_audit/glv_hnp_fourier_toy.py`
+
+For the C1-type failure curve (p=524743, n=523597, λ/n=0.21, K1=72):
+1. Generate m=20 signatures with biased nonces (k = k1 + λ·k2).
+2. Run the lattice (LLL) attack → expected: ~4% recovery (known from June data).
+3. Run the Fourier scoring attack: for each d_cand in range [0,n), compute
+   `score(d_cand) = |Σ exp(2πi · (A_i + B_i·d_cand) / n)|`
+4. Report the top-10 d_cand by score. Is the true d in the top-10?
+
+Expected outcome A (hypothesis holds): Fourier score peaks at the true d even when
+LLL fails → Fourier bypasses the spurious-vector obstruction.
+
+Expected outcome B (hypothesis fails): Fourier score is flat (random noise) for C1
+curves → failure is not about spurious lattice vectors but about the actual bias signal.
+Either outcome is informative.
+
+**Thread 23 distinguishes three hypotheses:**
+- H1: K1_threshold failure is a lattice algorithm artifact (BV embedding wrong model)
+  → Fourier succeeds where LLL fails.
+- H2: K1_threshold failure is a real bias signal problem (k_full is genuinely too
+  uniform for this curve) → both lattice and Fourier fail.
+- H3: K1_threshold failure is about K1/K2 balance (the GLV decomposition itself is
+  sub-optimal for this curve) → a different decomposition (e.g. Babai rounding) gives
+  k1, k2 with better bias.
+
+### Findings
+
+No new empirical results. This session's work was entirely survey and proposal.
+
+**ePrint 2026 summary**: Neither 2026 paper is directly relevant to an ECDLP attack.
+The most impactful near-term finding is ASIACRYPT 2024's Fourier+sieving combo,
+motivating Thread 23.
+
+**State-of-threads (updated)**:
+- Threads 1–6: all CLOSED/DONE/DEAD-END (confirmed as of 2026-07-27).
+- Thread 20 (λ/n threshold): effectively CLOSED — already answered by 2026-06-22 run
+  (obstruction predictor is δ(3λ,n)/n < 0.02). The 2026-07-26 run #1 re-derived
+  this independently.
+- Thread 21 (K1_threshold algebraic separator): DEAD END — 6 failed hypotheses,
+  confirmed as a non-algebraic curve quantity (2026-06-29).
+- Thread 22 (Richelot search over proxy primes): OPEN (proposed 2026-07-26 run #2;
+  not yet executed; concrete next step).
+- Thread 23 (Fourier-based GLV-HNP): PROPOSED this session.
+
+### Next step proposal
+
+**Priority A — Thread 22 (Richelot search)**:
+For each of the 5 qualifying Howe-glueable pairs (0,1),(0,3),(0,4),(1,4),(3,4),
+attempt to find an explicit genus-2 curve C/F_p whose Jacobian is isogenous to
+E_i × E_j via a Richelot (2,2)-isogeny. Method: search over small proxy primes
+p' ≡ 1 (mod 3) where all CM theory applies but p' is small enough for exhaustive
+polynomial search. Script: `secp256k1_cm_audit/howe_richelot_search.gp`.
+
+**Priority B — Thread 23 (Fourier GLV-HNP toy)**:
+Implement `glv_hnp_fourier_toy.py`. Run on C1 failure curve (p=524743, K1=72)
+and compare Fourier vs LLL recovery rates. Expected runtime: <1 min.
+
+Both are concrete, runnable next sessions with a clear success/failure criterion.
+
+### Commits made
+[to be filled after commit]
