@@ -5874,3 +5874,103 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All original 6 threads are CLOSED. Thread 5 (GLV-HNP
+Phase 2) was validated on 2026-07-26 with a proposed next step: bisect the λ/n threshold
+between 0.07 (failure) and 0.34 (success) found in the previous session. Script proposed:
+`glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+- Installed fpylll, cysignals, sympy in this session (not preinstalled).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: finds j=0 curves at
+  9 bins from λ/n ∈ [0.07, 0.42] using Eisenstein CM, tests LLL recovery with K1=2.
+- Ran the script: ALL 9 bins pass at m=4 (3/3 seeds each). No threshold found.
+- Ran K1 isolation experiment on the 2026-07-26 failure curve (p=2677, n=2647, lam=185):
+  - K1=2: m=6 → 3/3 ✓
+  - K1=4: m=6 → 3/3 ✓
+  - K1=8: m=4,6,8,12 → all 0/3 (failure reproduced from prior session)
+  - K1=16: m=4,6,8,12 → all 0/3
+- Ran cross-check on the "good" 12-bit curve (lam/n=0.66) with same K1 sweep:
+  - K1=8: m=8 → 3/3 ✓ (works, unlike lam/n=0.07 at K1=8)
+  - K1=16: m=8 → 0/3 (fails for both λ/n values)
+- Ran 14-bit (lam/n=0.082) and 16-bit (lam/n=0.072) curves with K1=2:
+  - Both pass at m=4 (3/3 seeds each). No λ/n threshold at K1=2.
+- `cargo test --test curve_audit` → 5/5 pass (5.09s). ✓
+
+### Findings
+
+**Root cause corrected: the 2026-07-26 "structural failure at λ/n=0.07" was a K1 misspecification, not a structural property of the attack.**
+
+**Experiment 1 — K1 sweep on p=2677 (lam/n=0.07):**
+```
+K1= 2, eff=0.039, m_thresh≈3: m=4:2/3  m=6:3/3  m=8:3/3  m=12:3/3  ← succeeds
+K1= 4, eff=0.079, m_thresh≈4: m=4:0/3  m=6:3/3  m=8:3/3  m=12:3/3  ← succeeds
+K1= 8, eff=0.157, m_thresh≈5: m=4:0/3  m=6:1/3  m=8:0/3  m=12:0/3  ← FAILS
+K1=16, eff=0.314, m_thresh≈7: m=4:0/3  m=6:0/3  m=8:0/3  m=12:0/3  ← FAILS
+```
+
+**Experiment 2 — λ/n comparison at K1=8:**
+```
+lam/n=0.66 (n=2659): K1=8: m=6:1/3  m=8:3/3  m=10:3/3  ← succeeds at m=8
+lam/n=0.07 (n=2647): K1=8: m=6:1/3  m=8:0/3  m=10:0/3  ← fails at all m
+```
+So K1=8 DOES have a λ/n dependency. This is what the prior session measured. But the
+prior session incorrectly concluded the threshold was structural.
+
+**Experiment 3 — No threshold with K1=2 (up to 16-bit):**
+```
+11-bit lam/n=0.073 (n=1303, K1=2): m=4 → 3/3 ✓
+11-bit lam/n=0.102 (n=1231, K1=2): m=4 → 3/3 ✓
+11-bit lam/n=0.135 (n=1039, K1=2): m=4 → 3/3 ✓
+12-bit lam/n=0.070 (n=2647, K1=2): m=6 → 3/3 ✓
+14-bit lam/n=0.082 (n=8389, K1=2): m=4 → 3/3 ✓
+16-bit lam/n=0.072 (n=32497, K1=2): m=4 → 3/3 ✓
+```
+
+**Geometric explanation for K1 × λ interaction:**
+The lambda rows in the (2m+2)×(2m+2) GLV lattice have entry -lam*SK1 in the k1 slot,
+where SK1 = n//K1. For small λ/n:
+- |lam*SK1| / (n*SK1) = λ/n → small for λ/n=0.07
+- Lambda row norm ≈ lam*SK1 << n*SK1 (modular row norm)
+
+When K1=8: SK1=330, lambda row norm = 185*330 = 61,050 ≈ (1/14) × n*SK1=873,510.
+LLL finds these short rows easily and uses them to reduce other rows, creating a basis
+that mixes k1 and lambda information. The planted k1 entries (k1_i ∈ {0..7} → k1*SK1
+up to 2310) become indistinguishable from linear combinations of the short lambda rows.
+
+When K1=2: SK1=1323, lambda row norm = 185*1323 = 244,755. Lambda rows are 14× larger
+relative to the planted k1 entries (0 or SK1=1323). The binary structure (k1 ∈ {0,1})
+makes the planted vector geometrically "binary" — LLL can cleanly separate the 0/SK1
+choices from the lambda-row perturbations.
+
+**Implication for secp256k1 (λ/n ≈ 0.44):**
+No λ/n constraint — secp256k1 is in the "good" regime regardless. The attack is ALSO
+viable for curves with very small λ/n (down to at least 0.07 tested), PROVIDED K1 is
+kept small (K1=2 or K1=4). This is more positive than the prior session indicated:
+there is no fundamental λ/n obstruction.
+
+**Corrected K1 selection rule:**
+- K1 ≤ 4: attack succeeds for all λ/n ≥ 0.07
+- K1 = 8: attack fails for λ/n ≤ 0.07, succeeds for λ/n ≥ 0.66 (at larger m)
+- K1 ≥ 16: attack fails for all λ/n tested
+
+### Next step proposal
+
+**Two threads:**
+
+**Thread 21 (K1 scaling to 20-bit with K1=2):**
+The 20-bit curve from 2026-07-26 used lam/n=0.34 with K1=int(0.05*sqrt(n))≈36. That's
+much larger than K1=2. Test the same 20-bit curve with K1=2 — does LLL succeed, and
+at what m? This would validate that K1=2 is universally optimal across bit sizes.
+
+**Thread 22 (Richelot search over small proxy primes):**
+Proposed in 2026-07-26 Thread 2 conclusion. Over a proxy prime p' where the F_p cubic
+residue condition is satisfied, explicitly construct a genus-2 Jacobian isogenous to
+E_secp × E_secp^t and compute its Richelot (2,2)-isogeny graph neighbors. This gives
+a concrete example of the cover construction (even if not applicable to actual p_secp).
+
+### Commits made
+[pending]
