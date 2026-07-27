@@ -5960,4 +5960,4 @@ Specifically: in Bin F (λ/n ∈ [0.35,0.43]), find a curve where ∃ q≤5 with
 |q*λ mod n| < 40, and test if LLL then succeeds.
 
 ### Commits made
-PLACEHOLDER
+7634c87 autolab 2026-07-27: Thread 20 — λ/n threshold sweep; CF-approximability explains non-monotone LLL behavior
