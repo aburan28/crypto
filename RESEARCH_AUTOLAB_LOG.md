@@ -5976,4 +5976,4 @@ Search IACR ePrint 2025-2026 for: "GLV hidden number problem", "ECDSA nonce bias
 "Boneh-Venkatesan secp256k1". Summarise any new developments.
 
 ### Commits made
-[see below]
+7d11539 autolab 2026-07-27: Thread 20 λ/n threshold — small-λ failure misdiagnosis; K1_BOUND not λ/n governs attack
