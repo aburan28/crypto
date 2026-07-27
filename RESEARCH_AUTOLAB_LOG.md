@@ -5973,4 +5973,4 @@ E_secp × E_secp^t and compute its Richelot (2,2)-isogeny graph neighbors. This 
 a concrete example of the cover construction (even if not applicable to actual p_secp).
 
 ### Commits made
-[pending]
+15d51a6 autolab 2026-07-27: Thread 20 λ/n threshold — K1 misspecification diagnosed; no threshold at K1=2
