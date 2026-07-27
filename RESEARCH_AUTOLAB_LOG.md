@@ -5874,3 +5874,111 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+
+Thread 6 (B5 over F_{p^k}): all higher-priority threads (1–5) are closed in the log
+(Thread 1 §10.5 CLOSED 2026-06-06; Thread 2 CLOSED 2026-07-26; Thread 3 done 2026-07-21;
+Thread 4 §8.3 CLOSED; Thread 5 CLOSED 2026-07-26). Thread 6 had no prior log entry.
+Goal: verify whether cover-cost analysis (block B5) generalises to abelian-surface DLPs
+specifically in the split Jac(C) = E × E^t case over F_{p^k}.
+
+### Work done
+
+- Installed PARI/GP (was absent in fresh container).
+- Ran `cover_complexity_ext.gp` (existing script, Q1/Q2/Q3): ✓ clean output.
+  Confirmed cover DLP cost >> ECDLP for all (k,g) in k=1..5, g=2..5.
+  L_{p^k}[1/2,1] < ECDLP threshold for all k (Diem is inapplicable to base-changed curves).
+- Wrote new script `secp256k1_cm_audit/b5_abelian_surface_ext.gp` addressing the GAP:
+  the prior script handled generic hyperelliptic covers but not the specific split abelian
+  surface A = E × E^t (which is what the Howe-cover gives). The new script explicitly
+  computes DLP costs when exploiting the product structure of A(F_{p^k}).
+- Ran `b5_abelian_surface_ext.gp`: 5 parts, all clean output.
+- Ran `cargo test --test curve_audit`: 5/5 pass (8.46s). ✓
+
+### Findings
+
+**Script `b5_abelian_surface_ext.gp`: product-structure DLP on A = E × E^t over F_{p^k}**
+
+**Toy example** (p=43, E: y²=x³+7, CM by ℤ[ζ₃]):
+- #E(F_43) = 31 (t_E = 13), #E^t(F_43) = 57 (t_{E^t} = -13)
+- #A(F_43) = 1767
+
+| k | #E(F_{p^k}) | #E^t(F_{p^k}) | #A(F_{p^k}) | DLP cost | vs ECDLP |
+|---|-------------|---------------|-------------|----------|----------|
+| 1 | 31          | 57            | 1767        | 2.92 bits | +0.44 bits |
+| 2 | 1767        | 1767          | 3,122,289   | 5.39 bits | +2.92 bits |
+| 3 | 78988       | 80028         | 6.32×10⁹    | 8.14 bits | +5.67 bits |
+| 4 | 3,415,611   | 3,415,611     | 1.17×10¹³   | 10.85 bits| +8.37 bits |
+
+ECDLP baseline: log2(√31) = 2.48 bits.
+
+**secp256k1 parameter extrapolation** (bit sizes, |Aut(E)|=6):
+
+| k | log₂(#E_k) | rho cost | vs ECDLP (126.71 bits) |
+|---|------------|----------|------------------------|
+| 1 | 256.0      | 128.0    | +1.3 bits              |
+| 2 | 512.0      | 256.0    | +129.3 bits            |
+| 3 | 768.0      | 384.0    | +257.3 bits            |
+| 4 | 1024.0     | 512.0    | +385.3 bits            |
+| 5 | 1280.0     | 640.0    | +513.3 bits            |
+
+Observation: k=1 gives only +1.3 bits overhead (marginal, no speedup). k≥2 is drastically
+worse. The |Aut(E)|=6 factor that saves 1.3 bits in ECDLP does NOT help for the A-DLP.
+
+**Four reasons B5 holds for abelian surfaces over F_{p^k}** (from Part 2/4/3/5 of script):
+
+1. **(R1) Product decomposition**: A(F_{p^k}) = E(F_{p^k}) × E^t(F_{p^k}). Best DLP cost
+   = max(√#E(F_{p^k}), √#E^t(F_{p^k})) ~ p^{k/2} ≥ p^{1/2} for all k ≥ 1. Strictly worse.
+
+2. **(R2) k=1 near-tie**: At k=1, cost ~ √n ~ ECDLP cost. No speedup. The A-DLP reduces to
+   ECDLP on E(F_p) (or E^t(F_p)) as subroutines. Cover adds overhead without reducing cost.
+
+3. **(R3) Diem inapplicable for k≥2**: E has a model over F_p; base-change to F_{p^k} gives
+   Weil restriction W(E) = E^k. Factor base of smooth divisors over F_p reduces to E(F_p)
+   itself; every relation costs O(p). Circular — no sub-exp speedup.
+
+4. **(R4) Galois descent obstruction**: Any cover C → E that is Galois-equivariant over
+   F_{p^k}/F_p must have C defined over F_p. There is no "genuinely F_{p^k}" cover of E/F_p
+   for k > 1 (the cover is rational over F_p by Galois theory).
+
+**Diem L_{p^k}[1/2,1] table** (hypothetical genuinely-F_{p^k} curve):
+- L_{p^k}[1/2,1] is BELOW ECDLP threshold for ALL k=1..6 (even k=1 gives 43.7 bits < 126.7).
+- But secp256k1 has no such genuinely-F_{p^k} model without an F_p model.
+- Any cover of E/F_p descends to F_p (R4). The Diem formula is moot.
+
+**Relation to paper PAPER_STRUCTURAL_COMPLETENESS.md**:
+- B5 (§B5) and B6 (§B6) were previously stated for k=1 (prime field) and for base-changed curves.
+- `b5_abelian_surface_ext.gp` provides the missing piece: explicit computation for the SPLIT
+  abelian surface A = E × E^t (the actual object produced by the Howe cover), confirming that
+  the product structure gives no advantage over plain ECDLP.
+- B5 CLOSED for all k ≥ 1 and for the specific abelian-surface form of the attack.
+
+### Next step proposal
+
+**Thread 6: CLOSED.** All six priority threads are now closed:
+1. P-521 LLL: §10.5 CLOSED (2026-06-06).
+2. CHLRS Igusa formula: CLOSED (2026-07-26, negative result: F_p Rosenhain blocked).
+3. Howe gluing sextic twists: DONE (2026-07-21, 5/15 pairs qualify).
+4. Cross-curve LLL 3-of-3: §8.3 CLOSED (secp256k1 recovers 3/3).
+5. GLV-HNP Phase 2 toy: CLOSED (2026-07-26, toy attack validated).
+6. B5 over F_{p^k}: CLOSED (2026-07-27, abelian-surface product structure verified).
+
+**Recommended next actions** (new threads to open):
+
+- **Thread 22 (Richelot search, proposed 2026-07-26)**: over small proxy primes p', search
+  for genus-2 f(x) such that hyperellcharpoly(f) == P_{E_i} * P_{E_j} for qualifying twist
+  pairs. This is the natural continuation of Thread 3 (sextic twist Howe) and Thread 2 (CHLRS).
+
+- **Thread 23 (Paper finalization)**: the paper `PAPER_STRUCTURAL_COMPLETENESS.md` and
+  `paper/eprint_combined.tex` (if it exists) should cite the new results from Threads 2–6.
+  Specifically: add §B5-ext (abelian surface DLPs over F_{p^k}) as a subsection of B5/B6.
+
+- **ePrint survey (Fallback Step 4a)**: search IACR ePrint for new papers (since 2026-07-26)
+  with keywords "isogeny-graph ECDLP", "Boneh-Venkatesan HNP", "Howe cover genus-2".
+
+### Commits made
+
+See next git hash after this entry.
