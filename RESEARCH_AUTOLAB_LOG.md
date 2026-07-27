@@ -5996,4 +5996,4 @@ Expected outcome: Depth-k chains branch into ℓ^k curves, but collisions at dep
 4. **Paper update**: Add ePrint 2026/1431 and 2026/1486 to the bibliography of `paper/eprint_combined.tex`. Low effort, high value.
 
 ### Commits made
-(see git hash after this entry)
+c5bfb32 autolab 2026-07-27: fallback — ePrint survey (2026/1431, 2026/1486, 2026/1369); Thread 23 proposed
