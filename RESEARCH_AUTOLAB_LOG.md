@@ -5791,3 +5791,86 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-26 (autolab run #2)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula). Thread 1 (P-521 LLL) is CLOSED (§10.5). Thread 5
+(GLV-HNP Phase 2) was completed in today's earlier run. Thread 2 (CHLRS Igusa formula)
+was BLOCKED in prior sessions due to PARI/GP unavailability, but PARI is now installed.
+Goal: run the existing scripts and document findings.
+
+### Work done
+- Ran `chlrs_igusa_formula.gp`: Part 1 (toy p=1009, b=11) gives match=0. Part 2
+  computes J2/J4/J6/J10 for h_secp=(x^3+7)(x^3+189) over F_{p_secp}.
+- Ran `chlrs_rosenhain_diagnostic.gp` (partial): confirmed (-11) mod 1009 is NOT
+  a cubic residue; secp256k1 (-7) mod p_secp is NOT a cubic residue.
+- Ran `chlrs_fp3_rosenhain.gp`: toy_p=19 (x^3+7 splits over F_19) gives match=1;
+  proxy_p=13 (x^3+7 irreducible) gives match=0.
+- Wrote and ran new `chlrs_cubic_residue_proof.gp`: three-experiment clean proof.
+- Ran `cargo test --test curve_audit`: 5/5 pass (8.99s). ✓
+
+### Findings
+
+**Root cause of Rosenhain failure: cubic residue obstruction.**
+
+The Rosenhain formula for the Howe-gluing construction requires:
+```
+(-b)^{(p-1)/3} ≡ 1 mod p    [cubic residue condition]
+⟺ x³ + b has 3 roots in F_p  [F_p-rational 2-torsion on E]
+```
+
+Three-experiment proof (all from `chlrs_cubic_residue_proof.gp`):
+
+| Experiment | p | b | (-b) cubic res? | x³+b roots in F_p | Jac match? |
+|------------|---|---|-----------------|-------------------|------------|
+| A (toy)    | 19 | 7 | YES (exp=1) | 3 roots: {10,13,15} | **1** ✓ |
+| B (proxy)  | 13 | 7 | NO (exp=9)  | 0 roots            | **0** ✗ |
+| C (secp256k1) | p_secp | 7 | NO (exp≠1) | 0 roots      | **BLOCKED** |
+
+**Exp A validates the formula**: for p=19, Rosenhain gives Jac char poly
+`x^4 - 26x^2 + 361 = (T^2 - 8T + 19)(T^2 + 8T + 19)` matching E × E^t exactly.
+`#Jac(C) = 336 = (19+1-8)(19+1+8) = 12 × 28`. ✓
+
+**Exp B proves the failure mode**: for proxy p=13, naive cover y²=(x³+7)(x³+4):
+- Actual char poly: `x^4 + 13x^2 + 169` (irreducible over Q, #Jac=183)
+- Expected: `x^4 - 23x^2 + 169` (#E×#E^t = 7 × 21 = 147)
+- Completely different isogeny class.
+
+**Exp C confirms secp256k1 is BLOCKED**:
+- `(-7)^{(p-1)/3} mod p_secp ≠ 1`
+- `x^3 + 7` has 0 roots in F_{p_secp}
+- 2-torsion of secp256k1 lives in F_{p³} \ F_p
+
+**Naive cover Igusa invariants** (from `chlrs_igusa_formula.gp`, Part 2):
+```
+h_secp = (x^3+7)(x^3+189)  [b2 = 189 = 7·27 = 7·3³, a "cubic twist" not quad twist]
+J2  mod p = 115792...628151  (= -43512 mod p, non-zero)
+J4  mod p = 98438...564616
+J6  mod p = 69282...162891
+J10 mod p = 46374105383717408990784  (non-zero → curve is smooth)
+```
+The curve is smooth over F_p but its Jacobian is NOT isogenous to secp256k1 × (quad twist).
+
+### Next step proposal
+
+**BLOCKED: F_p Rosenhain approach permanently blocked for secp256k1.**
+
+Two paths forward:
+1. **Richelot search** (open problem): For each of the 5 qualifying pairs
+   (0,1),(0,3),(0,4),(1,4),(3,4), directly search for a genus-2 curve C/F_p
+   whose Jacobian has char poly P_{E_i}(T)·P_{E_j}(T). This doesn't use the
+   Rosenhain formula — it searches for Richelot (2,2)-isogeny factorizations.
+   Concretely: over a small proxy prime p', find f(x) of degree 6 such that
+   `hyperellcharpoly(f) == P_{E_i} * P_{E_j}`. Requires a search that's
+   exponential in the naive approach; likely needs algebraic constraints.
+2. **F_{p³} extension** (well-defined but irrelevant): the Rosenhain formula
+   works over F_{p³} where all cube roots live. But the resulting Jacobian is
+   defined over F_{p³} not F_p, so it gives a genus-2 DLP over F_{p³}, not F_p.
+   This does NOT give an attack on secp256k1.
+
+**Recommend**: mark Thread 2 as CLOSED (negative result: F_p Rosenhain inapplicable);
+open Thread 22 (Richelot search over small proxy primes) as the continuation.
+
+### Commits made
+c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
