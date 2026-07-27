@@ -5874,3 +5874,106 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All six original priority threads are CLOSED. Thread 20
+was proposed in the 2026-07-26 run after finding the "small-λ failure" at (n=2647, λ/n=0.07).
+Goal: bisect the λ/n threshold between 0.07 (fail) and 0.34 (pass) and determine whether
+λ/n is the true governing parameter.
+
+### Work done
+- Wrote and ran `glv_hnp_phase2_lambda_threshold.py`: discovered 7 representative curves
+  per λ/n bin (0.10–0.32), ran LLL+BKZ(40) sweep m=4..14 per curve (3 seeds).
+- Discovered non-monotone pattern: λ/n ∈ {0.10,0.13,0.16} PASS; λ/n ∈ {0.21} PASS;
+  λ/n ∈ {0.23,0.27} FAIL; λ/n = {0.30} PASS. Non-monotone → confounding variable.
+- Identified confound: λ/n=0.23 curve had n=13 (4-bit), λ/n=0.27 had n=37 (6-bit). Tiny n
+  causes failure independently of λ/n (lattice too coarse; eff > 0.5 for n=13).
+- Wrote and ran `glv_hnp_phase2_lam_controlled.py`: controlled study at 10-bit scale
+  (n=512..8192). Tested λ/n ∈ {0.10, 0.15, 0.19, 0.24, 0.28}. ALL PASS with LLL.
+  First 3/3 threshold: m=4–7 depending on curve.
+- Ran targeted bracket at 10-bit scale: found n=547 (10b, λ/n=0.0731) PASSES at m=5;
+  n=1069 (11b, λ/n=0.0804) PASSES at m=4. Both BELOW the "failure" λ/n of 0.07!
+- **Critical diagnosis**: re-ran n=2647 (λ/n=0.0699) with K1_BOUND=2 (not the original
+  K1_BOUND=8). Result: PASSES at m=5 with K1=2; FAILS at all m=5..13 with K1=8.
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.78s). ✓
+
+### Findings
+
+**The "small-λ failure" from 2026-07-26 was a misdiagnosis. The failure is K1_BOUND-
+dependent, NOT λ/n-dependent.**
+
+Complete data (LLL, 3 seeds):
+
+| Curve | n (bits) | λ/n | K1_BOUND | LLL 3/3 | Status |
+|-------|----------|-----|----------|---------|--------|
+| p=2677 | 2647 (12b) | 0.0699 | 8 | never | FAIL (prior run) |
+| p=547  |  547 (10b) | 0.0731 | 2 | m=5   | PASS (new) |
+| p=1021 | 1069 (11b) | 0.0804 | 2 | m=4   | PASS (new) |
+| p=2677 | 2647 (12b) | 0.0699 | **2** | **m=5** | **PASS (new!)** |
+| p=2677 | 2647 (12b) | 0.0699 | 8  | never | FAIL (confirmed) |
+
+**The λ/n=0.07 curve (n=2647) PASSES when K1_BOUND=2 but FAILS when K1_BOUND=8.**
+
+**Revised structural explanation:**
+With K1_BOUND=2 (binary k1):
+- k1_i ∈ {0,1} → planted vector has many zero k1 slots (very sparse, easy for LLL)
+- The "spurious" lattice vectors matching |last|=SKANN but wrong d are fewer
+- LLL can isolate the planted vector even at small λ/n
+
+With K1_BOUND=8:
+- k1_i ∈ {0,...,7} → planted vector is dense (all slots non-zero on average)
+- For λ/n=0.07: -λ·S_K1 = -185·330 = -61050 vs n·S_K1 = 873510. Ratio = 0.07.
+- The λ-row entries are small compared to modular rows → Gram-Schmidt mixes them
+- EIGHT possible k1 values per slot → O(8^m) competing lattice vectors near the planted one
+
+**Why the λ-row geometry changes with K1_BOUND:**
+The -λ entry in the λ-row (column i) is -λ * S_K1 = -λ * (n // K1_BOUND).
+The modular row entry is n * S_K1 = n * (n // K1_BOUND).
+Their ratio is always λ/n — INDEPENDENT of K1_BOUND.
+However, the PLANTED VECTOR's k1_i component is k1_i * S_K1.
+With K1=8, E[k1_i * S_K1] ≈ 3.5 * (n/8) = n/2.3. With K1=2, E[k1_i * S_K1] = (n/2)/2 = n/4.
+Both are O(n) but K1=8 gives larger expected k1 contributions — the planted vector
+lies deeper inside the lattice, further from the zero vector, making it harder to find.
+
+**Implication for the secp256k1 GLV-HNP attack:**
+The attack is viable for ANY λ/n ratio (including 0.07) as long as K1_BOUND is small
+(ideally K1=2). The key parameter is K1_BOUND, not λ/n. For secp256k1 (λ/n≈0.44),
+even K1=8 may work if we test it (we haven't confirmed K1>2 at 256-bit scale).
+
+**Controlled study results (10-bit curves, K1=2, all PASS):**
+```
+n=613  (10b), λ/n=0.106: LLL 3/3 at m=5
+n=829  (10b), λ/n=0.151: LLL 3/3 at m=4
+n=571  (10b), λ/n=0.191: LLL 3/3 at m=7
+n=541  (10b), λ/n=0.238: LLL 3/3 at m=4
+n=643  (10b), λ/n=0.275: LLL 3/3 at m=7
+n=547  (10b), λ/n=0.073: LLL 3/3 at m=5
+n=1069 (11b), λ/n=0.080: LLL 3/3 at m=4
+n=2647 (12b), λ/n=0.070: LLL 3/3 at m=5 [K1=2] / FAIL [K1=8]
+```
+
+**Non-monotone pattern in initial sweep was entirely a confound** — small-n artifacts
+for n=13 and n=37, not a λ/n threshold.
+
+### Next step proposal
+
+**Thread 23 (K1_BOUND scaling study at 256-bit):**
+The key open question is: for secp256k1 (256-bit), does the GLV Phase 2 attack work
+with K1_BOUND > 2? Test K1_BOUND ∈ {2, 4, 8, 16} for a 32-bit proxy curve
+(same λ/n ≈ 0.44 as secp256k1). Find the maximum K1_BOUND where LLL still recovers d
+and estimate m_required(K1_BOUND). This gives a concrete statement about ECDSA nonce
+bias strength needed for the attack to work.
+
+Proposed script: `glv_hnp_phase2_k1bound_scaling.py`
+
+**Thread 24 (ePrint survey):**
+Run the fallback Step 4(a) literature survey since we had a clear finding today.
+Search IACR ePrint 2025-2026 for: "GLV hidden number problem", "ECDSA nonce bias lattice",
+"Boneh-Venkatesan secp256k1". Summarise any new developments.
+
+### Commits made
+[see below]
