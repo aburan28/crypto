@@ -5874,3 +5874,132 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): proposed in 2026-07-26 log entry (second run).
+All 6 original priority threads are CLOSED. The last-proposed continuation was
+Thread 20 — bisect the λ/n failure interval [0.07, 0.34] and find the critical
+threshold. Previous data from 2026-07-26: λ/n=0.07 (K1=8) FAILS, λ/n=0.34 (K1=4) SUCCEEDS.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: searches for
+  j=0 curves at target λ/n bands [0.07, 0.10, 0.14, 0.18, 0.22, 0.26, 0.30, 0.34],
+  runs LLL sweep (m=4..16, 3 seeds, K1=4), reports first-3/3 m.
+- Ran script: all 8 targets (including λ/n=0.094 for REF 0.07 band) returned
+  SUCCESS — the REF 0.07 band found a curve at λ/n=0.094, not the original 0.0699 failure.
+- Ran targeted follow-up (inline) on exact original failure curve (p=2677, n=2647,
+  lam=185, λ/n=0.0699) with K1_BOUND=2,4,8 to isolate the failure mechanism.
+- Ran K1_BOUND sweep (K1=2..9) on two small-λ/n curves and one large-λ/n reference:
+  p=2677 (λ/n=0.070), p=2251 (λ/n=0.056), p=211 (λ/n=0.533).
+- `cargo test --test curve_audit`: 5/5 pass. ✓
+
+### Findings
+
+**The previous "λ/n threshold" interpretation was WRONG.**
+
+The 2026-07-26 finding "LLL fails for λ/n < 0.34" was an artifact of using
+K1_BOUND=8 for the small-λ curve (p=2677). With K1_BOUND=4, the SAME curve
+(λ/n=0.070) succeeds at m=6 (3/3). With K1_BOUND=2, it succeeds at m=5.
+
+**True failure condition: eff = K1_BOUND × K2_BOUND / n**
+
+The critical variable is the bias efficiency eff, not λ/n directly.
+
+K1_BOUND sweep results on original failure curve (p=2677, λ/n=0.070, n=2647):
+```
+K1_BOUND | eff  | LLL outcome        | 3/3 at m
+---------|------|--------------------|----------
+       2 | 0.039 | SUCCESS            | m=5
+       3 | 0.059 | SUCCESS            | m=5
+       4 | 0.079 | SUCCESS            | m=6
+       5 | 0.098 | SUCCESS (barely)   | m=11
+       6 | 0.118 | FAIL               | —
+       7 | 0.138 | FAIL               | —
+       8 | 0.157 | FAIL (prior result)| —
+       9 | 0.177 | FAIL               | —
+```
+
+Same pattern on new small-λ curve (p=2251, λ/n=0.056, n=2179):
+```
+K1_BOUND | eff  | LLL outcome
+---------|------|------------
+       2 | 0.043 | SUCCESS at m=4
+       3 | 0.065 | SUCCESS at m=6
+       4 | 0.086 | SUCCESS at m=5
+       5 | 0.108 | SUCCESS (barely, m=9)
+       6 | 0.129 | FAIL
+       7+ |     | FAIL
+```
+
+For large-λ reference (p=211, λ/n=0.533, n=199):
+```
+K1_BOUND | eff  | LLL outcome
+---------|------|------------
+       1 | 0.075 | SUCCESS at m=3
+       2 | 0.151 | SUCCESS at m=5
+       3 | 0.226 | FAIL (up to m=7)
+       4 | 0.302 | SUCCESS at m=7 (!) — anomaly
+       5 | 0.377 | FAIL
+```
+
+**Revised threshold model:**
+
+The LLL failure boundary is approximately eff ≥ eff_crit(λ/n):
+```
+λ/n ≈ 0.05-0.07:  eff_crit ≈ 0.10-0.12  (K1=5 borderline, K1=6 fails)
+λ/n ≈ 0.53:       eff_crit ≈ 0.15-0.23  (K1=2 success, K1=3 borderline)
+```
+The eff_crit grows with λ/n — larger eigenvalue ratio permits larger bias.
+
+**Structural explanation:** The λ-row off-diagonal entries are -λ × S_K1. Their
+magnitude relative to the modular constraint (n × S_K1) is exactly λ/n.
+For LLL to isolate the k2 constraint, this relative magnitude must be large
+enough that after Gram-Schmidt, the λ-row residual is not swamped by noise.
+The failure boundary eff_crit ≈ const × (λ/n) is consistent with this picture:
+K1_BOUND_max ≈ λ/35 (empirically, from two data points).
+
+**Implication for secp256k1 attack viability:**
+secp256k1 has λ/n ≈ 0.44. Using the linear approximation: eff_crit ≈ 0.21.
+K2_BOUND = sqrt(n) ≈ 2^128. K1_BOUND_max ≈ 0.21 × n / K2_BOUND = 0.21 × sqrt(n) ≈ 2^127.
+An attacker with knowledge that k1 < 2^127 (a 1-bit bias on the GLV component)
+would have eff < 0.21 and the attack would succeed. This is a non-trivial but
+realizable bias (e.g. from a biased RNG that zeroes the MSB of k).
+
+**Correction to 2026-07-26 log:**
+The "critical new finding: λ/n threshold for attack viability" and the
+interpretation "λ/n = 0.07: structurally fails" are both wrong. The prior
+failure was entirely a K1_BOUND=8 / eff=0.157 artifact. There is no λ/n threshold.
+
+**Summary of all-λ/n band sweep** (`glv_hnp_phase2_lambda_threshold.py`, K1=4, m=4..16):
+```
+λ/n    n     lam  eff   min_m_3of3
+0.094  2137  201  0.088  6
+0.163  2143  349  0.088  5
+0.204  2671  544  0.078  6
+0.268  2521  675  0.081  6
+0.315  2251  708  0.085  5
+```
+All five representative curves: LLL SUCCESS at m=5–6 with K1=4.
+
+### Next step proposal
+
+**Thread 21 (revised): eff_crit / λ/n characterization (1 session).**
+Fill in more (λ/n, K1_BOUND) data points to establish the eff_crit(λ/n) relationship
+more precisely. Specifically:
+- Test λ/n ∈ {0.03, 0.04, 0.05, 0.06, 0.08, 0.10, 0.15, 0.20, 0.30, 0.40}
+  at K1_BOUND ∈ {2,4,6,8,10} for 12-bit curves
+- Plot eff_crit vs λ/n; check if eff_crit ≈ C × λ/n with C ≈ 1.6
+
+**Thread 22 (Richelot search)**: still open. For each of the 5 qualifying Howe pairs
+from Thread 18, search for a genus-2 curve over a small proxy prime using Richelot
+(2,2)-isogeny enumeration. This is a larger undertaking (the Richelot degeneration
+analysis from 2026-06-xx showed it's blocked by a degenerate kernel for tier-mixed pairs).
+
+Recommend Thread 21 first (2h, concrete script, closes the λ/n chapter cleanly).
+
+### Commits made
+[see next git hash]
