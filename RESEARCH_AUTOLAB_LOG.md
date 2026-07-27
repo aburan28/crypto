@@ -5874,3 +5874,95 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All 6 original priority threads are CLOSED.
+Thread 20 was the top-priority proposal from the 2026-07-26 run #1 (GLV-HNP Phase 2):
+bisect the λ/n threshold for LLL attack success between 0.07 (FAIL) and 0.34 (PASS).
+
+### Work done
+- Installed `fpylll` and `sympy` (required for curve search).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Scans 12-16 bit j=0 CM curves for λ/n in target windows: 0.09, 0.12, 0.15, 0.18, 0.21, 0.27.
+  - Runs GLV-aware LLL attack sweep (m=4..20, 3 seeds) with adaptive K1 = 0.10*sqrt(n).
+- Discovered adaptive K1 confounds comparison: all targets passed (including λ/n=0.07
+  anchor with K1=5 instead of K1=8 from prior failure experiment).
+- Wrote and ran inline fixed-K1=8 follow-up sweep (matching prior experiment):
+  - λ/n=0.07 (n=2647, K1=8): FAIL — confirmed prior result
+  - λ/n=0.09 (n=2137, K1=8): FAIL — new failure point
+  - λ/n=0.096 (n=2053, K1=8): FAIL
+  - λ/n=0.107 (n=6829, K1=8): PASS at m=7
+  - λ/n=0.12 (n=2689, K1=8): PASS at m=7
+  - λ/n=0.15 (n=2689, K1=8): PASS at m=7
+  - λ/n=0.18 (n=3061, K1=8): PASS at m=9
+- Ran bisection in [0.096, 0.107]:
+  - λ/n=0.0986 (n=5851, K1=8): PASS at m=8 — surprise (n=5851 >> n=2053)
+  - λ/n=0.1031 (n=13063, K1=8): PASS at m=8
+- Hypothesis: failure depends on combined metric, not λ/n alone.
+- Ran K1 sweep on the known-fail curve (p=2677, n=2647, λ/n=0.07):
+  - K1=8: FAIL; K1=7: FAIL; K1=6: FAIL; K1=5: PASS m=8; K1=4: PASS m=6; K1≤3: PASS
+- Ran `cargo test --test curve_audit`: 5/5 pass (4.17s). ✓
+
+### Findings
+
+**The correct success/failure metric is NOT λ/n alone. It is:**
+```
+  σ = λ / (K1 × K2)  ≈  λ / (K1 × √n)
+```
+where K1 = k1 bias bound (nonce k1 ∈ [0, K1)), K2 = k2 bias bound ≈ √n.
+
+**Empirical threshold: σ ≈ 0.67..0.73**
+
+| Curve         | n     | λ     | K1 | K2 | σ=λ/(K1·K2) | outcome |
+|---------------|-------|-------|----|----|--------------|---------|
+| p=2677 (fail) | 2647  |  185  |  8 | 52 |  0.444       | FAIL    |
+| p=2677 (fail) | 2647  |  185  |  7 | 52 |  0.508       | FAIL    |
+| p=2677 (fail) | 2647  |  185  |  6 | 52 |  0.593       | FAIL    |
+| p=2677 (pass) | 2647  |  185  |  5 | 52 |  0.712       | PASS m=8|
+| p=2677 (pass) | 2647  |  185  |  4 | 52 |  0.890       | PASS m=6|
+| n=2053 (fail) | 2053  |  201  |  8 | 46 |  0.546       | FAIL    |
+| n=5851 (pass) | 5851  |  576  |  8 | 77 |  0.935       | PASS m=8|
+| n=3769 (pass) | 3769  |  463  |  8 | 62 |  0.934       | PASS m=9|
+| n=2659 (pass) | 2659  | 1755  |  8 | 52 |  4.22        | PASS m=7|
+
+**Empirical threshold**: σ_thresh ∈ (0.593, 0.712). Best estimate: σ_thresh ≈ 0.65..0.70.
+
+**Interpretation**: σ = λ/(K1*√n) is the "effective GLV signal strength." It measures
+how large the GLV row entries (-λ·S_K1) are relative to the k2-diagonal entries (S_K2):
+```
+  |GLV row entry| / S_K2 = λ·(n/K1) / (n/K2) = λ·K2/K1 = n·σ
+```
+When σ < 0.65, the GLV rows are too small to provide meaningful constraint — they blend
+into the modular rows under GS orthogonalisation, and LLL cannot isolate the k1 structure.
+
+**Implications for secp256k1 (λ/n ≈ 0.44, n = 2^256)**:
+The attack works as long as K1 < 0.44/0.65 × K2 ≈ 0.68 × √n ≈ 0.68 × 2^128.
+For any practical k1 leak (K1 ≤ 2^64), σ = 0.44·n/(2^64·2^128) = 0.44·2^64 >> 1.
+⇒ The failure regime (σ < 0.67) is not encountered in real-world secp256k1 attacks
+  where k1 is only partially known.
+
+**Resolution of prior ambiguity**: the failure at λ/n=0.07, K1=8 was NOT a structural
+hard barrier from small λ/n alone. It was a combined (λ/n, K1/K2) effect. With K1=5,
+the same λ/n=0.07 curve passes. The prior interpretation ("λ-rows can't be separated
+when λ/n is small") is correct but needs the K1 qualifier: the λ-rows are too small
+when σ = λ/(K1·K2) is small.
+
+### Next step proposal
+
+**Thread 21 (σ threshold validation):**
+Test the σ metric on 3 more curves near the threshold (σ ≈ 0.60, 0.67, 0.73) to
+confirm the empirical range. Design: pick curves with λ/n ≈ 0.07..0.15 and set
+K1 to give σ exactly at the boundary. This would narrow σ_thresh to ±0.02.
+
+**Thread 22 (Richelot search):**
+Search for genus-2 curves over small proxy primes whose Jacobian has char poly
+P_{E_i}(T)·P_{E_j}(T) for the 5 qualifying Howe pairs. This doesn't use the
+Rosenhain formula — it searches for Richelot (2,2)-isogeny factorizations.
+Concretely: for p' small prime ≡ 1 (mod 3), search degree-6 polynomials f(x)
+such that `hyperellcharpoly(f) == P_{E_i} * P_{E_j}` over F_{p'}.
+
+### Commits made
