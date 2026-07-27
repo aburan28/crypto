@@ -5902,4 +5902,4 @@ Bisect the λ/n threshold between 0.07 and 0.34 using the GLV-HNP Phase 2 setup 
 validated on 2026-07-26. Quick to execute; extends the validated attack data.
 
 ### Commits made
-COMMITPLACEHOLDER autolab 2026-07-27: Thread 2 CHLRS — Rosenhain wrong, Z/3Z Richelot correct; naive cover is degenerate pair (0,3); howe_5pairs_v2.gp written
+9e9b0a8 autolab 2026-07-27: Thread 2 CHLRS — Rosenhain wrong, Z/3Z Richelot correct; naive cover is degenerate pair (0,3); howe_5pairs_v2.gp written
