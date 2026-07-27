@@ -5978,3 +5978,4 @@ identify the obstruction family. Script: `glv_hnp_phase2_spurious_diag.py`.
 than understanding the structural failures.
 
 ### Commits made
+c2680eb autolab 2026-07-27: Thread 20 — λ/n lower-bound hypothesis falsified; scattered structural failures at 0.18/0.21
