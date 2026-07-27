@@ -5874,3 +5874,126 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+**Fallback (Step 4): all six original priority threads are CLOSED.**
+- Thread 1 (P-521 LLL): CLOSED 2026-05-29 (§10.5)
+- Thread 2 (CHLRS Igusa): CLOSED 2026-07-26 (cubic-residue obstruction)
+- Thread 3 (Howe sextic twists): CLOSED 2026-05-24 (5/15 pairs qualify)
+- Thread 4 (Cross-curve LLL 3-of-3): CLOSED 2026-05-25
+- Thread 5 (GLV-HNP Phase 2 toy): CLOSED 2026-07-26 (d recovered, λ/n threshold found)
+- Thread 6 (B5 over F_{p^k}): CLOSED 2026-05-27
+
+Executing Step 4: (a) ePrint survey for papers since 2026-07-26; (b) new attack variant proposal.
+
+### Work done
+
+**Step 4(a): ePrint survey, keywords "isogeny-graph ECDLP", "Boneh-Venkatesan", "hidden number problem ECDSA", "(N,N)-cover Jacobian"**
+
+WebSearch to iacr.org/eprint.iacr.org. Note: direct WebFetch to eprint.iacr.org returns HTTP 403 (proxy policy). Paper details obtained from search-result snippets and secondary sources.
+
+Found 3 relevant 2026 papers (all very recent, within days of this run):
+
+---
+
+**Paper 1: "The Isogeny Problems"**
+- ePrint: 2026/1431 — https://eprint.iacr.org/2026/1431
+- Authors: Wouter Castryck, Luca De Feo, Steven D. Galbraith, Péter Kutas, Krijn Reijnders, Benjamin Wesolowski
+- Companion site: https://isogeni.es/problems
+- Date: July 2026
+
+Summary (from search snippets): A major framework paper collecting and clarifying the zoo of computational isogeny problems in one place. Topics covered include: Supersingular Isogeny Path (SIP), Vectorization for oriented elliptic curves, Hashing into supersingular curves, Optimal KLPT algorithm, Large-degree isogeny computation, Transferring endomorphism rings along isogenies, Strong encryption protocol security.
+
+**Relevance to our project**: Directly relevant to the claim in `PAPER_STRUCTURAL_COMPLETENESS.md` §§1-2 that "no isogeny-graph attack has been shown to beat ρ for prime-field ECDLP." This paper covers the *supersingular* isogeny problem zoo — none of the listed problems are equivalent to prime-field ECDLP. The paper's existence implicitly confirms that the isogeny-based attack surface is distinct from the ordinary CM attack surface we study. Strengthens our paper's negative result.
+
+---
+
+**Paper 2: "The supersingular isogeny problem in time and memory p^{1/3+o(1)}"**
+- ePrint: 2026/1486 — https://eprint.iacr.org/2026/1486
+- IACR news: https://iacr.org/news/item/29069 (July 23, 2026)
+- Date: July 2026 (very recent)
+
+Summary: Proves under a plausible heuristic (smoothness of certain random integers) that the **supersingular isogeny problem** can be solved in time AND memory p^{1/3+o(1)}. This improves on the prior best of p^{1/2}·(log p)^{O(1)} by Wesolowski. The algorithm is based on Wesolowski's attack against the "OneEnd" problem. Caveats: the o(1) term hides a superpolynomial overhead; the memory requirement is p^{1/3+o(1)}, which is extremely large for cryptographic parameters (for p ≈ 2^256, memory ≈ 2^85, infeasible).
+
+**Relevance to our project**: HIGH. This is the most significant 2026 cryptanalytic result touching the isogeny landscape. Key points for our paper:
+1. The p^{1/3+o(1)} improvement is for the *supersingular* isogeny problem, not ECDLP on ordinary prime-field curves. secp256k1 is ordinary (CM by Z[-3]); the supersingular graph has a fundamentally different structure (Ramanujan expander) vs the ordinary volcano.
+2. The algorithm's heuristic is about smoothness of ideal norms, which does NOT apply to the ρ-algorithm for ECDLP (ρ has a rigorous analysis).
+3. The superpolynomial overhead means the algorithm is not concretely faster than ρ for any parameter size currently in use.
+4. **Implication for §9 (cover-complexity lower bound)**: Our bound B5 says cover costs ≥ generic DLOG cost even if a covering curve is found. The new p^{1/3+o(1)} result does NOT change B5 because B5 is about ordinary curves; the new algorithm addresses supersingular. B5 remains valid.
+
+**New citation to add to paper**: §1 introduction should mention this paper as confirming that isogeny-graph speed-ups exist for *supersingular* problems but remain open for ordinary prime-field curves — further motivating our theorem's scope restriction to prime-field ordinary curves.
+
+---
+
+**Paper 3: "Algebraic Modelings of the Supersingular Isogeny Problem"**
+- ePrint: 2026/1369 — https://eprint.iacr.org/2026/1369
+- arXiv: 2607.05160 — Caminata, Sanguineti, Sconza
+- Date: July 2026
+
+Summary: Algebraic modeling of the supersingular isogeny problem (for degree 2 or 3) as a system of multivariate polynomial equations using Renes formulas (Montgomery form for degree-2, triangular form for degree-3). The systems are shown to be zero-dimensional; Gröbner basis solving is experimentally faster than solving via modular polynomials.
+
+**Relevance**: Lower — this is about algebraic/Gröbner attacks on the supersingular isogeny problem specifically. For our project: demonstrates that the "polynomial system" approach to isogeny computation does not obviously transfer to ordinary curves (Montgomery/triangular forms are specific to the supersingular case structure). No direct impact on our main theorem.
+
+---
+
+**Step 4(b): New attack variant proposal — Thread 23**
+
+**Thread 23: Wesolowski-style time-memory tradeoff on the ordinary ℓ-isogeny volcano — does the p^{1/3+o(1)} strategy adapt to secp256k1?**
+
+Motivation: Paper 2 (ePrint 2026/1486) uses a time-memory tradeoff on the supersingular isogeny graph to achieve p^{1/3+o(1)}. A natural question: does this generalize to the *ordinary* ℓ-isogeny volcano?
+
+Setup: secp256k1 has CM disc D = -3, class number h(Z[-3]) = 1. For any prime ℓ ≠ 3:
+- If ℓ inert in Z[-3] (i.e., ℓ ≢ 1 mod 3): no horizontal isogenies from j=0; the volcano has only descending branches. All ascending walks reach j=0 in O(log p) steps.
+- If ℓ splits in Z[-3] (i.e., ℓ ≡ 1 mod 3): j=0 IS the crater. The crater has size h(-3) = 1, so there is exactly one curve (up to isomorphism) with this CM. Walks on the crater are trivial (self-loop or permutation of two curves conjugate over F_p).
+
+The Wesolowski algorithm's power comes from the Ramanujan expander property of the supersingular graph (diameter O(log p), well-mixing). The ordinary volcano has:
+- Depth O(log p), diameter O(log p) (only in descending direction)
+- The crater is trivially small (size 1 for D=-3)
+- NO expansion: once at the crater (j=0), there is no room for a birthday paradox
+
+**Conclusion (anticipated negative result)**:
+The Wesolowski p^{1/3} trick cannot adapt to the ordinary D=-3 volcano because:
+1. The crater is a single point → no birthday space for collisions at depth p^{1/3}
+2. The volcano is not an expander → random walks don't mix rapidly at intermediate depths
+3. A collision on an ordinary ℓ-isogeny chain gives you "two paths from j=0 to the same curve at depth k," which encodes an endomorphism of degree ℓ^{2k} — NOT the ECDLP key d
+
+**Falsifier experiment** (5-10 PARI lines):
+```gp
+\\ For small p with D=-3, enumerate all ordinary ℓ-isogeny chains from j=0.
+\\ Count distinct curves at each depth k. Verify:
+\\ (a) crater has exactly 1 vertex (j=0)
+\\ (b) branching starts at depth 1 (each node has ℓ+1 children, 1 parent)
+\\ (c) any "collision" at depth k is an endomorphism of degree ℓ^{2k}
+\\ (d) ECDLP information is NOT encoded in the isogeny path
+
+p_small = 43; \\ p ≡ 1 mod 3, so -3 is a QR mod p
+ell = 7;       \\ ℓ ≡ 1 mod 3, so splits in Z[-3]
+\\ j=0 is the crater: count isogeny children from j=0 over F_43
+ellinit([0,7], p_small)  \\ secp256k1-type curve
+```
+
+Expected outcome: Depth-k chains branch into ℓ^k curves, but collisions at depth O(p^{1/3}) require storing p^{1/3} intermediate curves (infeasible for the same reason as ρ at the same exponent), and the collision is NOT more useful for DLOG than ρ itself. This would be a clean **negative result for Thread 23**, directly supporting §9 of our paper.
+
+**Value to paper**: Whether Thread 23 succeeds or fails (anticipated: fails), the result cleanly extends the scope of §9 to address ePrint 2026/1486 and show that the new supersingular algorithm does not threaten prime-field ECDLP.
+
+**Recommended action**: Implement the 5-line falsifier in PARI as `thread23_volcano_bday_probe.gp` and run it. If it confirms the negative result, add a 2-3 sentence remark in §9 noting the connection to ePrint 2026/1486. Estimated effort: 1 session.
+
+### Findings
+
+- All 6 original priority threads CLOSED (confirmed from log history).
+- ePrint 2026/1486 (p^{1/3+o(1)} supersingular isogeny) is the most significant 2026 result touching our project's scope. It does NOT invalidate our main theorem — it actually sharpens the distinction between supersingular isogeny problems and ordinary prime-field ECDLP.
+- ePrint 2026/1431 ("The Isogeny Problems") is a useful reference for §1 to cite as the current definitive survey of the isogeny problem landscape.
+- ePrint 2026/1369 is low relevance (algebraic Gröbner attacks on supersingular; no impact on ordinary curves).
+- No 2026 paper found that shows a sub-ρ algorithm for ordinary prime-field ECDLP. Our main theorem remains uncontested.
+
+### Next step proposal
+
+1. **Thread 23 (volcano birthday probe)**: Write `thread23_volcano_bday_probe.gp` (≤30 lines PARI). Confirm the negative result. Add citation + remark to §9 of `paper/eprint_combined.tex`. Estimated: 1 session.
+2. **Thread 20 (λ/n threshold bisection)**: From 2026-07-26 Phase 2 run — bisect the GLV-HNP λ/n failure threshold between 0.07 and 0.34. Estimated: 1 session.
+3. **Thread 22 (Richelot search over small proxy primes)**: From 2026-07-26 run #2 — search for genus-2 curve over small F_{p'} whose Jacobian has char poly = product of secp pair. Harder; prior art in `howe_richelot_v4.gp` and Thread 7 (Honda-Tate obstruction, CLOSED 2026-07-09).
+4. **Paper update**: Add ePrint 2026/1431 and 2026/1486 to the bibliography of `paper/eprint_combined.tex`. Low effort, high value.
+
+### Commits made
+(see git hash after this entry)
