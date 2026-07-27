@@ -6027,4 +6027,4 @@ and compare Fourier vs LLL recovery rates. Expected runtime: <1 min.
 Both are concrete, runnable next sessions with a clear success/failure criterion.
 
 ### Commits made
-[to be filled after commit]
+7d6b779 autolab 2026-07-27: Fallback — ePrint survey + Thread 23 (Fourier GLV-HNP) proposed
