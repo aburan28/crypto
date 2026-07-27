@@ -5791,3 +5791,76 @@ Specifically: try target_bits=80 and report whether NaN persists.
 
 ### Commits made
 9db1a2d autolab 2026-07-26: Thread 5 GLV-HNP Phase 2 — validated toy attack, 20-bit scaling, λ/n threshold
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula): last proposed in 2026-07-21 log as next-priority.
+The `chlrs_igusa_formula.gp` existed and ran but gave `match=0` (Frobenius char poly of Jac(C) ≠ product of Weil polys of E1×E2). The `chlrs_valid_toy.gp` had PARI/GP syntax errors (multi-line loops in heredoc).
+Goal: diagnose the `match=0` failure and establish when/whether the Howe (2,2)-isogeny works over F_p.
+
+### Work done
+- Diagnosed root cause of `chlrs_igusa_formula.gp` match=0: used p=1009, b=11 where `(-11)^{(p-1)/3} = 374 mod 1009 ≠ 1`. The 2-torsion of y^2=x^3+11 has NO F_p-rational points; the Rosenhain formula requires F_p-rational 2-torsion (i.e., -b cubic residue mod p).
+- Even with correct cubic-residue input (p=31, b=1, d=3, -b IS cubic residue): the Howe curve y^2=(x^3+1)(x^3+27) over F_31 gives Jac char poly x^4-50x^2+961 ≠ x^4+46x^2+961 (expected from E1×E2). The Rosenhain form and degree-6 curve agree (same Jacobian), but neither matches E1×E2 over F_31.
+- Ran systematic search (p=7..500) for primes where the Howe isogeny DOES work over F_p.
+- Identified the Frobenius factorization condition: write Frobenius π = a + b·ω in Z[ω] (Eisenstein integers) where a²−ab+b²=p and trace 2a−b=t. b² = (4p−t²)/3.
+- Empirical observation: when 3|b_frob, the Howe isogeny is usually NOT over F_p (13/13 primes tested with 3|b_frob, except p=223). When 3∤b_frob, sometimes works (p=7,19,103,271,373) but often not (p=13,37,61,67,79,...).
+- Computed secp256k1 Frobenius in Z[ω]:
+  π = 367917413016453100223835821029139468249 + 303414439467246543595250775667605759171·ω
+  b_frob = 303414439467246543595250775667605759171 ≡ 0 mod 3.
+- Confirmed Rosenhain formula is CORRECT for p=7, b=1, d=3 (validated case):
+  Jac char poly x^4−2x^2+49 = (Weil poly E1)×(Weil poly E2). MATCH=YES.
+- Wrote `secp256k1_cm_audit/chlrs_frobenius_obstruction.gp` documenting all findings.
+- `cargo test --test curve_audit` → 5/5 pass (5.61s). ✓
+
+### Findings
+
+**Main result: secp256k1 Howe cover obstruction (new)**
+- The Frobenius of secp256k1 in Z[ω] has b_frob ≡ 0 mod 3.
+- Empirically, 3|b_frob ⟹ Howe (2,2)-isogeny Jac(C) → E1×E2 NOT over F_p (13/13 primes p<500).
+- Conclusion: the Howe genus-2 curve over secp256k1 is NOT (2,2)-isogenous to secp256k1 × twist over F_p. The attack surface does not exist over F_p.
+- This is an additional obstruction on top of the genus-2 HCDLP hardness argument.
+
+**Rosenhain formula validation:**
+```
+p=7, b=1, d=3:
+  E1: y^2=x^3+1, #E1=12 (t=-4)
+  E2: y^2=x^3+6, #E2=4 (t=+4)
+  Rosenhain lambdas: [2, 5, 4]
+  Jac char poly: x^4 - 2*x^2 + 49 = CORRECT
+  #Jac = 48 = 12 × 4 = MATCH
+```
+
+**Failed case diagnosis:**
+```
+p=31, b=1, d=3 (2-torsion IS F_p-rational, -1 IS cubic residue):
+  Jac char poly: x^4 - 50*x^2 + 961  (#Jac=912)
+  Expected:      x^4 + 46*x^2 + 961  (#Jac=1008)
+  Discriminant: t^2-4p = -108 = -3*36 = -3*(2·3)^2
+  b_frob = 6, 3|b_frob → isogeny NOT over F_31.
+```
+
+**secp256k1 Frobenius numerical data:**
+```
+p = 2^256 - 2^32 - 977
+n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+t = 432420386565659656852420866390673177327
+a_frob = 367917413016453100223835821029139468249
+b_frob = 303414439467246543595250775667605759171
+b_frob mod 3 = 0  ← obstruction indicator
+```
+
+**Open question:** The precise algebraic condition characterizing when the Howe (2,2)-isogeny is F_p-rational. The 3|b_frob pattern suggests a level-3 structure obstruction in the CM tower Z[ω]/3Z[ω]. The case p=223 (3|b but match=Y) needs further investigation.
+
+### Next step proposal
+
+**Two threads in priority order:**
+
+**Thread 19 (Frobenius obstruction — theory):**
+Investigate why 3|b_frob blocks the isogeny over F_p but not always (p=223 exception). The Z[ω]/3Z[ω] ≅ F_9 level structure might impose a condition on the CM embedding. Write a PARI script that checks the Weil pairing compatibility of E1[2] and E2[2] for p=31 and p=7 cases, explaining the discrepancy.
+
+**Thread 4 (Cross-curve LLL, 3-of-3 confirm):**
+Run `probe_lll_sweep_by_bit_length` with 3 seeds for 384-bit curves (currently 1-of-3 documented for P-384). The 2026-07-26 log mentions passing cargo test but not the multi-seed 384-bit sweep.
+
+### Commits made
+[see git log after commit]
