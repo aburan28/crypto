@@ -5969,4 +5969,4 @@ with Jacobian char poly matching P_{E_i} * P_{E_j}. This is a search over small 
 the cubic residue condition is met. Run a brute-force PARI scan.
 
 ### Commits made
-[pending — see below]
+9c1d60e autolab 2026-07-27: Thread 20 — GLV-HNP λ/n threshold is an eff-density threshold, not a λ/n threshold
