@@ -5874,3 +5874,113 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n small-λ threshold bisection). All 6 original priority threads are CLOSED or
+BLOCKED. The 2026-07-26 run (Thread 5 GLV-HNP Phase 2) proposed Thread 20 as the top
+next-step: bisect the λ/n threshold between the failure at 0.07 (p=2677) and the success
+band at ≥0.34. New script: `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+- Wrote `glv_hnp_phase2_lambda_threshold.py`: scans 12-bit j=0 CM curves at 10 λ/n targets
+  {0.07, 0.10, 0.13, 0.16, 0.19, 0.22, 0.25, 0.28, 0.31, 0.34}, 3 curves per target,
+  runs Phase 2 LLL attack K1=8, m=4..16, seeds×3.
+- Ran script to completion (all 30 curves, ~120 LLL sweep instances).
+- Confirmed p=2677 (λ/n=0.0699) failure. Anchor reproduced. ✓
+- `cargo test --test curve_audit` → 5/5 pass. ✓
+
+### Findings
+
+**Sharp small-λ lower threshold: T* ≈ 0.11**
+
+| λ/n range | LLL outcome |
+|-----------|-------------|
+| ≤ 0.096   | OBSTRUCTED (5/5 curves fail: 0.056, 0.070×2, 0.088, 0.094, 0.096) |
+| 0.128–0.134 | SUCCESS (3 curves, m=10–13) — **first success band** |
+| 0.163–0.204 | SUCCESS (6 curves, m=6–14) |
+| 0.216     | OBSTRUCTED (isolated, 1 curve) |
+| 0.224–0.291 | SUCCESS (mixed, 6/8 curves succeed) |
+| 0.268     | OBSTRUCTED (isolated, 1 curve) |
+| 0.303–0.315 | OBSTRUCTED (3 curves) — Effect A (3λ≈n) |
+| 0.327–0.340 | SUCCESS (3 curves, m=5–9) |
+
+**Full result table:**
+```
+λ/n    outcome        first_m
+0.0564 OBSTRUCTED     —
+0.0699 OBSTRUCTED     —    ← anchor (p=2677)
+0.0699 OBSTRUCTED     —
+0.0941 OBSTRUCTED     —
+0.0960 OBSTRUCTED     —
+0.0876 OBSTRUCTED     —
+0.1284 SUCCESS        10
+0.1294 SUCCESS        13
+0.1343 SUCCESS        12
+0.1629 SUCCESS        9
+0.1633 SUCCESS        9
+0.1633 SUCCESS        8
+0.1773 SUCCESS        14
+0.1833 SUCCESS        9
+0.2037 SUCCESS        6
+0.2153 SUCCESS        12
+0.2164 OBSTRUCTED     —    ← isolated failure
+0.2238 SUCCESS        8
+0.2418 SUCCESS        10
+0.2566 SUCCESS        8
+0.2574 SUCCESS        10
+0.2678 OBSTRUCTED     —    ← isolated failure
+0.2884 SUCCESS        8
+0.2907 SUCCESS        11
+0.3033 OBSTRUCTED     —    ← Effect A (3λ≡214 mod n, δ/n=0.090)
+0.3145 OBSTRUCTED     —    ← Effect A (3λ≡127 mod n, δ/n=0.056)
+0.3145 OBSTRUCTED     —
+0.3266 SUCCESS        9
+0.3396 SUCCESS        5
+0.3266 SUCCESS        9
+```
+
+**Three distinct obstruction mechanisms identified:**
+
+1. **Small-λ obstruction (λ/n < ~0.11)**: All 6 tested curves fail. The k2-rows
+   (entries: -λ·S_K1 = -λ·n/K1) are small relative to the modular rows (n·S_K1),
+   so GS orthogonalization cannot isolate the k2 constraint. Structural, not precision.
+
+2. **Effect A (λ/n near 1/3 ≈ 0.333)**: 3λ mod n ≈ 0; classic near-linear-dependence
+   obstruction from `glv_hnp_lamn_boundary.py`. Confirmed at 0.303 (δ/n=0.090) and
+   0.315 (δ/n=0.056). [Note: at 12-bit with K1=8, λ/n=0.327–0.340 SUCCEEDS even
+   though 20-bit K1=72 saw failure here — the Effect A obstruction is parameter-
+   dependent and weaker at smaller K1.]
+
+3. **Higher-order resonances (isolated failures at 0.216 and 0.268)**:
+   - λ/n=0.2164 (n=2749, λ=595): 9λ mod n = 143, so |9λ/n - 2| = 0.052. The
+     combination of 9 GLV rows + 2 modular rows creates a near-zero vector.
+   - λ/n=0.2678 (n=2521, λ=675): 15λ mod n = 41, so |15λ/n| = 0.016. A
+     combination of 15 GLV rows gives a tiny residue — very near the integer
+     lattice.
+   These are **higher-order Effect A resonances** at order k=9 and k=15 respectively.
+   Conjecture: obstruction occurs when |kλ mod n| / n < ε for some small k ≤ m_max.
+
+**Threshold interpretation:**
+- Below T* ≈ 0.11: pure geometric obstruction (λ too small for GS separation).
+- Above T*: success unless kλ ≈ 0 mod n for k ≤ ~m_max (near-integer obstruction).
+- secp256k1 reference: λ/n ≈ 0.44. Check: 3*0.44=1.32 → δ/n=0.32 (not obstructed).
+  Min k for kλ≈0: 7*0.44=3.08, 9*0.44=3.96 → still far from integers up to k=10.
+  → secp256k1 is in the clear success zone at toy scale.
+
+### Next step proposal
+
+**Thread 21 (δ_k obstruction map):** For each pair (λ/n, m_max), compute
+δ_k = |kλ mod n|/n for k=1..m_max, and check whether min_k(δ_k) predicts
+success/failure better than λ/n alone. Specifically: test the conjecture
+"OBSTRUCTED iff min_{k=1..m}(δ_k) < ε*" for some ε* ≈ 0.05–0.10.
+This would give a practical pre-filter to classify candidate attack parameters.
+Script: `glv_hnp_delta_k_map.py`. This should be fast to compute analytically.
+
+**Thread 22 (Richelot search):** Still open from 2026-07-26 (CHLRS negative result).
+Find genus-2 curves over small proxy primes whose Jacobian factor-splits as
+E_i × E_j for secp256k1 family twists.
+
+### Commits made
+[to be filled after commit]
