@@ -5863,4 +5863,4 @@ Investigate why 3|b_frob blocks the isogeny over F_p but not always (p=223 excep
 Run `probe_lll_sweep_by_bit_length` with 3 seeds for 384-bit curves (currently 1-of-3 documented for P-384). The 2026-07-26 log mentions passing cargo test but not the multi-seed 384-bit sweep.
 
 ### Commits made
-[see git log after commit]
+`3538c3a` autolab 2026-07-27: Thread 2 CHLRS — Frobenius b-value obstruction for secp256k1 Howe cover
