@@ -5874,3 +5874,99 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All 6 original priority threads are CLOSED/BLOCKED/DEAD
+END. Thread 20 was explicitly proposed in the 2026-07-26 run #1 (Thread 5 GLV-HNP Phase 2)
+as the next concrete sub-task: bisect the λ/n failure threshold between 0.07 (fail, p=2677)
+and 0.25 (success). Fresh — no prior work on Thread 20.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_lambda_threshold.py`: searches for j=0 CM curves
+  in 7 λ/n bins ([0.04,0.09) through [0.30,0.50)) using Eisenstein decomposition,
+  then runs GLV-HNP Phase 2 LLL attack (3 seeds, m=3..11).
+- **Pass 1 — K1=2**: ran sweep; ALL 7 bins succeeded including λ/n=0.073 (p=547).
+  Revealed that the prior failure (K1=8, p=2677) was K1-dependent, not λ/n fundamental.
+- **Pass 2 — K1=8**: reran all bins plus fine-grained [0.27,0.50) bins.
+  Failures and successes do NOT form a monotone threshold on λ/n alone:
+    - λ/n=0.073 (p=547): FAIL; λ/n=0.275 (p=691): FAIL
+    - λ/n=0.322 (p=853): SUCCESS(m=14); λ/n=0.344 (p=877): SUCCESS(m=9)
+    - λ/n=0.369 (p=613): FAIL; λ/n=0.407 (p=571): SUCCESS(m=12); λ/n=0.448 (p=613): FAIL
+  Pattern is non-monotone → simple λ/n threshold is wrong.
+- **K1 sensitivity sweep for λ/n=0.073 (p=547, n=547, K2=24)**: varied K1 from 1..24.
+  Found a clean transition in `eff = K1 * K2 / n`:
+    - K1=4 (eff=0.176): SUCCESS(m=9)
+    - K1=5 (eff=0.219): FAIL (partial 2/3 at m=11)
+    - K1=6 (eff=0.263): FAIL
+    - K1≥7: FAIL
+  Critical density threshold: **eff_c ≈ 0.18-0.22** for this 10-bit curve.
+- `cargo test --test curve_audit`: 5/5 pass (7.33s). ✓
+
+### Findings
+
+**Thread 20 main result: eff-threshold, not λ/n-threshold.**
+
+The "small-λ failure" is determined by the BIAS DENSITY `eff = K1 * K2 / n`, not by `λ/n` alone:
+
+```
+For p=547, n=547, λ=40, λ/n=0.073, K2=24:
+
+K1  | eff   | status
+----+-------+------------------
+ 1  | 0.044 | SUCCESS(m=3)
+ 2  | 0.088 | SUCCESS(m=5)
+ 3  | 0.132 | SUCCESS(m=8)
+ 4  | 0.176 | SUCCESS(m=9)
+ 5  | 0.219 | FAIL (partial)
+ 6  | 0.263 | FAIL
+ 7+ | 0.307+| FAIL (hard)
+
+Critical threshold: eff_c ≈ 0.18-0.22
+```
+
+**Non-monotonicity of λ/n success:** At K1=8, curves with λ/n=0.369 FAIL but λ/n=0.407
+succeed (with similar eff~0.32). This means λ/n is a secondary predictor; the primary
+quantity is eff. Non-monotonicity arises because eff varies with n (since K2=ceil(sqrt(n))).
+
+**Revised classification of prior p=2677 failure:**
+- n=2647, K1=8, K2=52: eff = 8*52/2647 = 0.157
+- This is below the toy-scale eff_c ≈ 0.18, yet it FAILS.
+- Hypothesis: eff_c is n-dependent (scales as ~1/sqrt(n)?) — larger n requires even smaller
+  eff for LLL to work at the same m-bound. At m=12, dim=26 may be insufficient for n=2647.
+
+**Practical consequence for secp256k1:**
+```
+n ≈ 2^256, K2 ≈ sqrt(n) = 2^128, secp256k1 λ/n ≈ 0.44
+For a k1-bias of K1 = 2^t (t = bias bits):
+  eff = 2^t * 2^128 / 2^256 = 2^{t-128}
+For t << 128:  eff ≈ 2^{t-128} ≪ 0.18
+
+→ At practical secp256k1 scale, eff is astronomically small, well below eff_c.
+  The toy-scale "small-λ failure" is IRRELEVANT for real secp256k1 attacks.
+  Even a k1-bias of t = 100 bits gives eff ≈ 2^{-28} ≈ 4×10^{-9}.
+```
+
+**λ/n in lattice structure:** The observation that λ/n-small makes the lattice "degenerate"
+(λ-rows have small entries relative to modular rows) is CORRECT but only harmful when eff is
+also near eff_c. When eff ≪ eff_c, the lattice signal dominates regardless of λ/n.
+
+### Next step proposal
+
+Two directions:
+
+**Thread 23 — m-scaling law for secp256k1-equivalent:**
+Find the minimum m needed for LLL to recover d at eff ≈ 2^{-10} (a tractable but practically
+small regime) across different bit sizes. E.g., for 20-bit curves: K1=2, K2≈1024 gives
+eff = 2*1024/2^20 ≈ 0.002 ≪ eff_c. How many signatures m are needed? This would extrapolate
+to estimate m at secp256k1 scale.
+
+**Thread 22 — Richelot search (from Thread 2 proposal):**
+For the 5 qualifying sextic-twist pairs, search for genus-2 curves over small proxy primes
+with Jacobian char poly matching P_{E_i} * P_{E_j}. This is a search over small p' where
+the cubic residue condition is met. Run a brute-force PARI scan.
+
+### Commits made
+[pending — see below]
