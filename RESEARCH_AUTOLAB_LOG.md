@@ -5970,4 +5970,4 @@ already scaffold this — read and verify.
 **Recommendation:** Thread 21 first (completes the λ/n study), then Thread 22.
 
 ### Commits made
-[see below]
+94fb35d
