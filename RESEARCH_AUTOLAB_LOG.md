@@ -5913,4 +5913,4 @@ empirically that λ/n is irrelevant. Write a short proof that the k2-row GS norm
 are S_K2 regardless of λ, and add it to RESEARCH_GLV_HNP_PHASE2.md.
 
 ### Commits made
-PLACEHOLDER
+b39a282 autolab 2026-07-27: Thread 20 λ/n threshold — REFUTED; K1_crit is true failure mode
