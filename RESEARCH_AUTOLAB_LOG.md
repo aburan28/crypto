@@ -5983,3 +5983,4 @@ explicit genus-2 curves found via random search in degree-6 models. Thread 22 co
 goal achieved.
 
 ### Commits made
+6a08cd8 autolab 2026-07-27: Thread 22 — explicit genus-2 witnesses found at pp=43
