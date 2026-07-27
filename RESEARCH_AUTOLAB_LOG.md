@@ -5981,3 +5981,4 @@ Curves found (all 12-13 bit, p ≡ 1 mod 3, n prime, n ≡ 1 mod 3):
 gives mechanistic insight before committing to 10-seed sweeps.
 
 ### Commits made
+`0aac7b2` autolab 2026-07-27: Thread 20 λ/n threshold — non-monotone; fail at λ/n<0.10, success at 0.40
