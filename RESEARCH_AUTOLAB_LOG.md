@@ -5874,3 +5874,144 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): All 6 original priority threads are CLOSED/DONE
+(Threads 1/4 CLOSED 2026-05/06; Threads 2/5 CLOSED/DONE 2026-07-26; Thread 3 done
+2026-07-21; Thread 6 CLOSED). Thread 20 was the highest-priority open proposal from
+the 2026-07-26 session: bisect the LLL success threshold between λ/n=0.07 (fail)
+and λ/n=0.34 (pass). Created `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+- Wrote `glv_hnp_phase2_lambda_threshold.py`: 3-phase threshold study.
+  - Phase 1 (coarse sweep): 9 bins spanning λ/n ∈ [0.04, 0.50], m=12, 5 seeds each.
+    Found curves in 11-16 bit range using Eisenstein CM search.
+  - Phase 2 (fine bisection): 7 bins in [0.04, 0.13], m=12, 10 seeds each.
+  - Phase 3 (eigenvalue check): tested lam_max vs lam_min on marginal coarse bins.
+- Fixed k-bounds bug: initial run used k1_bound=n//100 giving eff≈0.47 (too high).
+  Fixed to k1_bound = max(2, int(0.15*sqrt(n))) giving eff≈0.15, matching prior
+  12-bit success experiments (k1_bound=8 at n=2659).
+- Ran cargo test --test curve_audit: 5/5 pass. ✓
+
+### Findings
+
+**MAIN RESULT: λ/n threshold is NOT monotone at 11-13 bit scale.**
+
+The success rate does NOT increase monotonically with λ/n. Non-monotone examples:
+```
+Fine bisection (m=12, 10 seeds, eff≈0.15):
+  λ/n=0.056 (n=2179):  0/10 FAIL
+  λ/n=0.070 (n=2647):  1/10 FAIL  ← known-fail anchor, reproduces
+  λ/n=0.079 (n=3019):  3/10 MARGINAL
+  λ/n=0.088 (n=2467):  1/10 FAIL  ← 0.088 fails while 0.079 marginal-passes!
+  λ/n=0.094 (n=2137):  9/10 PASS
+  λ/n=0.107 (n=6829):  2/10 FAIL  ← 0.107 fails while 0.094 passes!
+  λ/n=0.129 (n=2203):  8/10 PASS
+```
+Non-monotone: {0.079→3/10, 0.088→1/10} and {0.094→9/10, 0.107→2/10}.
+
+Coarse sweep also showed non-monotone behavior:
+```
+  λ/n=0.094 (n=2137): 5/5 PASS
+  ...
+  λ/n=0.315 (n=2251): 1/5 MARGINAL  ← should pass if threshold ~0.08
+  λ/n=0.395 (n=2089): 5/5 PASS
+  λ/n=0.472 (n=2341): 1/5 MARGINAL  ← should pass too
+```
+
+**Eigenvalue choice**: Switching to lam_max (the other eigenvalue) for marginal bins
+(n=2251, n=2341) does NOT improve success — marginal in both directions. The issue
+is not which of the two eigenvalues we use.
+
+**Interpretation**: At 11-13 bit scale, LLL success is dominated by CURVE-SPECIFIC
+lattice conditioning rather than λ/n alone. The prior two-point observation (n=2647
+fails at λ/n=0.07; n=523969 passes at λ/n=0.34) was at very different bit sizes —
+the two-point "monotone threshold" model is an oversimplification.
+
+**Working hypothesis for the non-monotone behavior**: For specific (λ, n) pairs where
+λ/n is close to a simple fraction (p/q with small p,q), the lattice has near-integer
+relations among the basis rows (-λ*S_K1 ≈ (p/q)*n*S_K1), creating nearly-parallel
+pairs of rows. This causes LLL to fail on THOSE SPECIFIC CURVES even when λ/n is
+in the "good" range. For example:
+- n=2251, λ=708: 708/2251 ≈ 0.314 ≈ 22/70 ≈ roughly 5/16
+- n=2467, λ=216: 216/2467 ≈ 0.0876 ≈ 7/80 ≈ roughly 2/23
+
+Neither of these is obviously a simple fraction. Investigation continues.
+
+**Known-fail anchor (n=2647, λ=185, λ/n=0.0699) with m=12**: 1/5 (MARGINAL).
+Prior 2026-07-26 result used m≤12 and got 0/5. One success here with m=12, seed=7.
+This is consistent with the curve being near-marginal, not completely broken.
+The 2026-06-15 failure at BKZ-40 used k1_bound=8, m≤12, same seeds — need to recheck
+if the single success is seed-specific.
+
+**secp256k1 outlook**: λ/n ≈ 0.44 for secp256k1, which is in the bulk of passes.
+But the non-monotone finding means we CANNOT simply claim "λ/n=0.44 is safe" based
+on the toy-scale results — whether the 256-bit lattice for secp256k1 succeeds depends
+on the specific arithmetic of that curve, not just the ratio.
+
+### Next step proposal
+
+**Two options:**
+
+**Thread 21 (larger-bit threshold study)**: Re-run the threshold study at 16-20 bit
+(same script, bit_lo=16, bit_hi=20). At larger scale, the law-of-large-numbers effects
+should average out curve-specific noise, and any true monotone threshold should emerge.
+If the 16-20 bit results ARE monotone, the toy-scale non-monotone behavior is "finite
+field noise." If still non-monotone, the threshold is genuinely curve-specific.
+Estimate: <5 min runtime.
+
+**Thread 22 (Richelot search)**: The 2026-07-26 CHLRS conclusion proposed searching
+for genus-2 curves over small proxy primes via Richelot (2,2)-isogeny factorizations.
+This is a separate thread. Longer to implement.
+
+Recommend Thread 21 first: it directly answers whether the current non-monotone
+finding is size-specific or fundamental, and can be done in <5 min by parameterizing
+the existing script.
+
+### Commits made
+[thread20 commit hash will be added after commit]
+
+### Thread 21 addendum (same run, quick follow-up)
+
+Also executed Thread 21 (16-20 bit threshold) as a quick follow-up within the same
+session, using `glv_hnp_phase2_thread21_largebit.py`.
+
+**16-20 bit sweep results (m=14, 5 seeds, eff≈0.15):**
+```
+[0.04,0.08) λ/n=0.054 (n=66499):  0/5 FAIL
+[0.08,0.12) λ/n=0.114 (n=66463):  3/5 PASS
+[0.12,0.16) λ/n=0.137 (n=65203):  1/5 MARGINAL
+[0.16,0.20) λ/n=0.185 (n=67939):  4/5 PASS
+[0.20,0.25) λ/n=0.225 (n=65647):  0/5 FAIL  ← PASS expected!
+[0.25,0.30) λ/n=0.289 (n=65437):  0/5 FAIL  ← PASS expected!
+[0.30,0.36) λ/n=0.335 (n=65287):  5/5 PASS
+[0.36,0.42) λ/n=0.388 (n=65053):  0/5 FAIL  ← PASS expected!
+[0.42,0.50) λ/n=0.446 (n=66943):  0/5 FAIL
+```
+NON-MONOTONE: same pattern as 11-13 bit (Thread 20). The non-monotone behavior
+persists at 16-17 bit scale.
+
+**Key conclusion**: LLL success in the GLV-HNP Phase 2 attack is NOT a monotone
+function of λ/n. With 5 seeds and eff≈0.15, the success rate varies dramatically
+(0/5 at 0.225, 5/5 at 0.335, 0/5 at 0.388) with no apparent λ/n ordering.
+
+**Revised interpretation**: At toy scale (11-20 bit), the bottleneck is NOT the
+λ/n ratio per se but the SPECIFIC (A_i, B_i) values derived from the signatures
+for particular (d, k_i) samples. The information-theoretic threshold is m≈6 for
+eff=0.15 and 17-bit n; we're using m=14 (well above), yet many instances fail.
+This indicates a large LLL gap — LLL sometimes fails to find the planted short
+vector even when the lattice is correct.
+
+**What this means for the research question**: The "threshold at λ/n=0.07-0.34"
+proposed in the 2026-07-26 session is FALSIFIED. The actual success rate is
+instance-dependent, and any true threshold (if one exists) would require much larger
+sample sizes (≥50 seeds per bin) to detect statistically.
+
+**Implication for the main theorem**: The GLV-HNP Phase 2 attack works
+SOMETIMES at toy scale (well above chance for favorable λ/n and seed), but is not
+reliably predictable from λ/n alone. For secp256k1 (λ/n≈0.44), whether the 256-bit
+lattice succeeds remains an open question that cannot be resolved from toy experiments.
+This does NOT refute the main theorem (which is about isogeny-graph attacks, not HNP).
+
