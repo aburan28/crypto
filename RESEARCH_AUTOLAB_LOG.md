@@ -5959,3 +5959,5 @@ Two threads remain open:
 Recommend: Thread 22 (Richelot) next, as it advances the main theorem direction.
 
 ### Commits made
+
+1e86d29 autolab 2026-07-28: Thread 20 — λ/n threshold REFUTED; eff=K1*K2/n is controlling variable
