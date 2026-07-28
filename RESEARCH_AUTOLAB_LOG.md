@@ -5973,3 +5973,5 @@ here would prove existence for the resonant pairs too; negative would confirm a 
 Recommend Thread 23 first (algebraic, no new code).
 
 ### Commits made
+
+bb680a1 autolab 2026-07-28: Thread 22 — Z/3Z genus-2 resonance theorem; 15/15 proxy predictions
