@@ -5970,4 +5970,4 @@ degree-6 search is feasible.
 the final gap between toy validation and production-scale attack viability.
 
 ### Commits made
-(see below)
+`5813c10` autolab 2026-07-28: Thread 20 λ/n threshold — prior failure was K1 artifact; no fundamental barrier
