@@ -5874,3 +5874,115 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 6 — B5 over F_{p^k}: check whether cover-cost analysis generalises to
+abelian-surface DLPs over small extensions. All 6 original priority threads are now
+in terminal states (CLOSED or DONE) per prior log entries; Thread 6 is the last
+unworked thread in the priority list. PARI/GP is unavailable in this session, so
+implemented analysis in Python (`secp256k1_cm_audit/b5_extension_fpk.py`).
+
+### Work done
+- Ported `cover_complexity_ext.gp` analysis to Python; verified numerics.
+- Added EXP-A: Diem 2011 L-formula break-even k calculation.
+- Added EXP-B: group-order obstruction — numerically verified n | #E(F_{p^2}) and
+  n | #E(F_{p^3}) using exact secp256k1 parameters.
+- Added EXP-C: genuinely-over-F_{p^2} abelian surface cost analysis.
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.01s). ✓
+
+### Findings
+
+**Q1 — Generic cover DLP cost for (k,g) pairs:**
+
+| k | g | rho(bits) | IC(bits) | best | vs ECDLP |
+|---|---|-----------|----------|------|----------|
+| 1 | 2 | 256.0 | 256.0 | 256.0 | +129.3 |
+| 1 | 3 | 384.0 | 341.3 | 341.3 | +214.6 |
+| 2 | 2 | 512.0 | 512.0 | 512.0 | +385.3 |
+| 3 | 2 | 768.0 | 768.0 | 768.0 | +641.3 |
+
+All (k,g) pairs: cover DLP cost >> ECDLP baseline (2^126.7 bits).
+
+**Q2 — Diem 2011 L_{p^k}[1/2, c=1]:**
+
+| k | L_bits | vs ECDLP |
+|---|--------|----------|
+| 1 | 43.7 | -82.97 ("below" ECDLP) |
+| 2 | 65.9 | -60.85 ("below" ECDLP) |
+| 3 | 83.4 | -43.31 ("below" ECDLP) |
+| 6 | 124.3 | -2.4 ("below" ECDLP) |
+
+ALL k=1..6 show L_formula below ECDLP threshold. This INCLUDES k=1 (prime field!)
+— proving the formula cannot be applied literally to prime-field or base-changed curves.
+
+**EXP-A (new): Diem break-even is k=1 in the formula, but k≥3 is required.**
+
+The L_{p^k}[1/2,1] formula returns values below 2^127 even for k=1. This shows
+the formula describes a smoothness-based attack that ONLY applies to curves genuinely
+defined over F_{p^k} with k≥3 (where a subfield factor base exists). For k=1 (prime
+field) and k=2, no such factor base construction exists; the formula is inapplicable.
+The correct B5 costs for k=1,2 are the polynomial Gaudry IC bounds (2^256, 2^512).
+
+**EXP-B (new): Group-order obstruction — exact secp256k1 computation.**
+
+```
+t = p + 1 - n = 432420386565659656852420866390673177327  (129 bits; Hasse: |t| ≤ 2√p ✓)
+
+#E(F_{p^2}) = (p+1-t)(p+1+t) = n · (p+1+t)
+  Verified: #E(F_{p^2}) % n == 0  ✓
+  Ratio: #E(F_{p^2}) / n = 115792089237316195423570985008687907853702405052206223696310004874299507848991
+  This equals p+1+t = #E^t(F_p) (the quadratic twist order)  ✓
+
+#E(F_{p^3}) % n == 0  ✓
+p^2 mod n = 71195301...  ≠ 0  → n ∤ p^2 - 1  (embedding degree ≠ 2)
+```
+
+Key implication: n | #E(F_{p^k}) for k=2,3, but:
+- The n-torsion subgroup E[n] ⊂ E(F_{p^2}) is a cyclic group of order n embedded in
+  a group of order n*(p+1+t) ≈ p^2. Diem's algorithm outputs elements of the full
+  Jac(C)(F_{p^k}) group; extracting the n-torsion component requires projecting onto
+  E(F_p) — which is exactly the original ECDLP (circularity confirmed).
+- The embedding degree (MOV) is NOT 2: p^2 mod n ≠ 1. Pairing-based attacks also blocked.
+
+**EXP-C (new): Genuinely-over-F_{p^2} abelian surface.**
+
+For C/F_{p^2} with Jac(C)/F_{p^2} not defined over F_p, genus g=2:
+- Generic rho cost: 2^512 bits
+- Gaudry IC cost:   2^512 bits
+- ECDLP baseline:   2^127 bits
+- Margin: +385 bits HARDER than ECDLP
+
+Diem 2011 requires k≥3; F_{p^2} is ineligible. No sub-exp option available.
+
+**Status of all 6 original priority threads:**
+
+| Thread | Description | Status |
+|--------|-------------|--------|
+| T1 | P-521 LLL NaN | CLOSED (§10.5, HP-LLL, 3/3 seeds) |
+| T2 | CHLRS Igusa formula | CLOSED (cubic-residue obstruction; Thread 22 proposed) |
+| T3 | Howe gluing on j=0 sextics | DONE (Thread 18: 5/15 pairs qualify) |
+| T4 | Cross-curve LLL scaled-GS | CLOSED (§10.4: secp256k1 3/3, brainpool 3/3) |
+| T5 | GLV-HNP Phase 2 toy | DONE (2026-07-26: 100% at 8-bit, λ/n threshold) |
+| T6 | B5 over F_{p^k} | DONE (this run: EXP-A/B/C verified) |
+
+### Next step proposal
+
+Two active open threads from prior log entries:
+
+**Thread 20 (λ/n threshold study):** Bisect the λ/n threshold between 0.07 (fails)
+and 0.34 (succeeds) for GLV-HNP Phase 2. Write `glv_hnp_phase2_lambda_threshold.py`
+using the existing Phase 2 lattice construction. Expected: a clean threshold at
+λ/n ≈ 0.15–0.25. Script should sweep 10 candidate curves with λ/n in [0.07, 0.34]
+and report LLL success rate (need 3-of-3 seeds).
+
+**Thread 22 (Richelot search):** The only remaining open attack direction. Search for
+genus-2 curves C/F_p over a small proxy prime p' whose Jacobian has char poly
+P_{E_i}(T)·P_{E_j}(T) for qualifying sextic twist pairs (0,1),(0,3),(0,4),(1,4),(3,4)
+identified in Thread 18. PARI needed; requires gp or alternate algebraic CAS.
+
+Thread 20 is the better next target since Python can run it without PARI.
+
+### Commits made
+(to be filled after push)
