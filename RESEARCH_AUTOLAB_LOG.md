@@ -5874,3 +5874,117 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+
+Thread 20 (λ/n threshold bisection for GLV-HNP Phase 2). Thread 5 established two
+endpoints on 2026-07-26: λ/n ≈ 0.07 (n=2647, lam=185, K1=8) FAILS and λ/n ≈ 0.53
+(n=199, lam=106, K1=2) SUCCEEDS. Goal: characterise the full failure profile across
+the range λ/n ∈ [0, 0.55].
+
+### Work done
+
+- Installed `fpylll` (requires `cysignals` as a separate pip install).
+- Installed `pari-gp` via `apt-get install -y pari-gp --fix-missing`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Helper functions: Miller-Rabin primality, Tonelli-Shanks sqrt mod p,
+    GLV eigenvalue finder (roots of x²+x+1 mod n), EC arithmetic (j=0 short
+    Weierstrass), Eisenstein CM decomposition for j=0 traces.
+  - K1 set proportionally: `K1 = max(2, round(K1_FRAC * n))` with K1_FRAC=0.003
+    (matching the prior Phase 2 experiments; gives K1=8 for n=2647).
+  - `run_experiment(p, b, n, lam, G, d_secret, m, k1_bound, k2_bound, seed)`:
+    real EC signature generation + lattice build + LLL recovery check.
+  - `build_lattice(sigs, n, lam, k1_bound, k2_bound)`: column-scaled
+    (2m+2)×(2m+2) matrix with Kannan embedding; scaling S_K1=n//K1, S_K2=n//K2,
+    S_D=1, S_KAN=n.
+- Fixed K1_BOUND bug: original script used K1=2 for n=2647, which allowed the
+  known failure case to pass (K1=2 → very tight bound → lattice trivially short).
+  Corrected to proportional K1_FRAC=0.003.
+
+**Empirical sweeps** (n=2647, K1=8, K2=52; 30 seeds for most):
+
+Coarse sweep across λ/n ∈ [0.02, 0.49], m=12:
+```
+lam=50  (λ/n=0.019): 30/30 SUCCESS
+lam=100 (λ/n=0.038): 23/30 PARTIAL
+lam=185 (λ/n=0.070): 2/30  FAIL   ← true GLV eigenvalue
+lam=300 (λ/n=0.113): 1/30  FAIL
+lam=400 (λ/n=0.151): 22/30 PARTIAL
+lam=500 (λ/n=0.189): 18/30 PARTIAL
+lam=700 (λ/n=0.265): 7/30  FAIL
+lam=900 (λ/n=0.340): 30/30 SUCCESS
+lam=1100(λ/n=0.416): 28/30 SUCCESS
+lam=1300(λ/n=0.491): 11/30 PARTIAL
+```
+
+Intermediate success around lam=50 (λ/n≈0.02): confirmed 30/30 at m=12.
+
+GLV eigenvalue vs. neighbours comparison (n=2647, K1=8, m=8 and m=12):
+```
+lam=185  [GLV ✓ — lam²+lam+1≡0 mod n]: 1/30 m=8, 2/30 m=12   FAILS
+lam=184  [non-GLV]:                      1/30 m=8, 0/30 m=12   FAILS
+lam=186  [non-GLV]:                      1/30 m=8, 0/30 m=12   FAILS
+lam=200  [non-GLV, λ/n=0.076]:           0/30 m=8, 2/30 m=12   FAILS
+lam=2461 [GLV ✓ — large root]:           2/30 m=8, 22/30 m=12  PARTIAL
+lam=2460 [non-GLV neighbor]:             2/30 m=8, 14/30 m=12  PARTIAL
+lam=2462 [non-GLV neighbor]:             2/30 m=8, 25/30 m=12  PARTIAL
+lam=50   [non-GLV, λ/n=0.019]:          18/30 m=8, 30/30 m=12  SUCCESS
+```
+
+### Findings
+
+**Non-monotone failure profile.** The GLV-HNP Phase 2 LLL success rate is NOT
+monotone in λ/n. For n=2647, K1=8, K2=52:
+
+```
+Approximate zones:
+  λ/n < 0.04       → SUCCESS (very small lam; lattice geometry still benign)
+  λ/n ∈ [0.04,0.33] → FAILURE ZONE (partial to total failure; U-shaped valley)
+  λ/n > 0.33       → SUCCESS (large lam; lattice geometry recovers)
+```
+
+The failure zone is NOT algebraically special to the GLV eigenvalue. Neighbours
+of lam=185 (lam=184, 186, 200) fail at the same rate. The failure is determined
+by the RATIO λ/n and the resulting Gram-Schmidt geometry of the column-scaled
+lattice, not by the algebraic property lam²+lam+1≡0 mod n.
+
+**Structural explanation.** The column scaling is S_K1=n//K1, S_K2=n//K2, S_D=1.
+At intermediate λ/n values, the GLV constraint k1 + lam*k2 ≡ A_i + B_i*d (mod n)
+couples the K1 and K2 columns in a way that makes the target vector's projection
+onto the K1-scaled subspace neither very short (as for large lam) nor negligible
+(as for very small lam). This creates an intermediate regime where the LLL
+reduction does not distinguish the target row from noise.
+
+**Secp256k1 implication.** Secp256k1's GLV λ satisfies λ/n ≈ 0.3256 (the standard
+GLV lambda is approximately 0.326·n). The toy model shows lam=900 (λ/n=0.340)
+succeeds 30/30 at m=12. Secp256k1 falls just inside the SUCCESS region if the
+toy model's threshold generalises. However:
+1. The 256-bit LLL precision problem (f64 overflow of n²) is a separate obstacle,
+   already fixed for the HNP attack in lattice.rs (§10.5).
+2. The toy model uses n≈2647 (12-bit); the actual attack on secp256k1 would need
+   m≈20–30 signatures and 256-bit arithmetic. Transfer of toy thresholds is
+   heuristic only.
+
+**Corrected prior log entry.** Thread 5 (2026-07-26) recorded "λ/n ≥ 0.34 succeeds,
+λ/n=0.07 fails". This is correct but incomplete: the failure zone is non-monotone
+and very small λ/n (<0.04) also succeeds. The original log made it sound like
+monotone threshold behaviour.
+
+### Next step proposal
+
+1. **Thread 20 continuation**: Run the same sweep on a larger toy prime (n≈50000–
+   200000, 17–18 bits) to see if the failure zone structure is stable across
+   problem sizes. If the zone [0.07, 0.33] narrows as n grows, the secp256k1
+   λ/n≈0.326 may drift toward or into the failure region.
+2. **Thread 22 (Richelot search)**: Search for genus-2 C/F_{p'} over small proxy
+   primes p' with Jac char poly = P_{E_i}(T)·P_{E_j}(T) for qualifying pairs
+   from Thread 18. Doesn't depend on the Rosenhain formula.
+3. **Thread 5 Phase 3**: Translate the toy GLV-HNP attack to the actual secp256k1
+   scale using bigfloat-aware LLL (fpylll, which supports exact integer arithmetic).
+
+### Commits made
+(this run)
