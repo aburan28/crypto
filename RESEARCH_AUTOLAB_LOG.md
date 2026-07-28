@@ -5974,4 +5974,4 @@ Jac(C) char poly = P_{E_i}·P_{E_j}. This does NOT use the blocked Rosenhain for
 but instead searches directly for Richelot (2,2)-isogeny decompositions.
 
 ### Commits made
-PLACEHOLDER
+`c7ec429` autolab 2026-07-28: Thread 20 CLOSED — no λ/n lower bound at fixed eff=0.05; small-λ failure was K1 miscalibration
