@@ -5971,4 +5971,4 @@ Use brute-force point counting over F_{p'} combined with Weil's theorem.
 Script: `secp256k1_cm_audit/richelot_proxy_search.gp`.
 
 ### Commits made
-PLACEHOLDER
+`64d3277` autolab 2026-07-28: Thread 20 — eff is causal for Phase 2 LLL failure, not λ/n
