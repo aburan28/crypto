@@ -5949,4 +5949,4 @@ Jac(y²=f) has char poly = P_{E_0}(T)·P_{E_1}(T) (from the 5 qualifying Howe pa
 This requires a search; sketch the search space size in PARI first.
 
 ### Commits made
-PLACEHOLDER
+6efc4f3 autolab 2026-07-28: Thread 20 — lambda/n threshold bisected to (0.096, 0.130) at 12-bit
