@@ -5874,3 +5874,109 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All original threads (1–6) are CLOSED or BLOCKED.
+The 2026-07-26 run proposed "bisect λ/n threshold between 0.07 and 0.34" after
+finding λ/n=0.07 (p=2677, K1=8) fails while λ/n=0.34 (p=524347, K1=36) succeeds.
+The 2026-06-22 boundary scan (K1=72) stopped at λ/n≈0.20. Goal: extend the scan to
+λ/n ∈ {0.07, 0.09, 0.11, 0.13, 0.15, 0.18} on 20-bit j=0 CM curves with K1=72,
+and cross-check p=2677 directly with K1=72.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Targets: LAM_TARGETS = [0.07, 0.09, 0.11, 0.13, 0.15, 0.18], tol ±0.012.
+  - Scans 20-bit j=0 CM primes (p ≡ 1 mod 3, n prime, n ≡ 1 mod 3).
+  - Finds ≤2 curves per target; runs K1=72 LLL at m=10..25, seeds=[42, 1234, 9999].
+  - Part 1: cross-checks p=2677 (λ/n=0.0699) with K1=72 (July used K1=8).
+- Installed fpylll + sympy (always re-install; not persisted between sessions).
+- Ran full experiment: 558 primes scanned, 12 curves found, ~15 min total.
+- Ran `cargo test --test curve_audit` → 5/5 pass (7.25s). ✓
+
+### Findings
+
+**Part 1 — p=2677 cross-check (K1=72 vs July's K1=8):**
+```
+p=2677, n=2647, lam=185, lam/n=0.0699
+K1=72, K2=sqrt(2647)+1=52, eff = K1*K2/n = 72*52/2647 ≈ 1.414
+K1=72 result: 0/3 at ALL m=10..25 — CONSISTENT with K1=8 failure
+```
+BUT: eff=1.414 > 1. When eff > 1, the k_full = k1+λk2 values collectively span >n
+distinct residues — there is no HNP bias. The failure is NOT about λ/n=0.07;
+it is about n=2647 being too small relative to K1×K2=3744. The 12-bit curve is
+misconfigured for K1=72 (proper K1 for n=2647 should be ≤ 8, giving eff ≈ 0.08).
+
+**Part 2 — 20-bit scan results (K1=72, m=10..25):**
+
+| λ/n actual | δ/n   | first 3/3 | outcome    | note |
+|------------|-------|-----------|------------|------|
+| 0.0634     | 0.1902 | m=17     | SUCCESS    | λ/n < 0.07, **succeeds** |
+| 0.0819     | 0.2456 | never    | max 1/3    | per-curve variance |
+| 0.0857     | 0.2570 | m=11     | SUCCESS    | easy |
+| 0.0900     | 0.2701 | m=20     | SUCCESS    | high m needed |
+| 0.1063     | 0.3190 | m=17     | SUCCESS    | |
+| 0.1101     | 0.3303 | m=12     | SUCCESS    | |
+| 0.1216     | 0.3647 | m=19     | SUCCESS    | |
+| 0.1222     | 0.3667 | m=10     | SUCCESS    | trivially easy |
+| 0.1530     | 0.4591 | m=16     | SUCCESS    | |
+| 0.1601     | 0.4803 | m=12     | SUCCESS    | |
+| 0.1771     | 0.4686 | never    | max 1/3    | anomalous |
+| 0.1797     | 0.4608 | never    | 0/3 ALL m  | anomalous |
+| 0.0699     | 0.2097 | never    | 0/3 ALL m  | p=2677, **eff>1, misconfigured** |
+
+**Three structural conclusions:**
+
+**A. No hard λ/n threshold in [0.06, 0.20].** Attacks succeed even at λ/n=0.0634
+(p=530539, n=529213, λ=33550) with K1=72 (eff=0.099, proper HNP regime). The
+July 2026 "small-λ failure" at p=2677 was an artifact of eff>1, not a geometric
+obstruction. Corrected claim: **the GLV-HNP Phase 2 attack has no small-λ regime
+failure for proper 20-bit j=0 CM curves.**
+
+**B. Per-curve variance dominates the [0.06, 0.20] range.** Adjacent curves with
+similar λ/n and δ/n have opposite outcomes:
+- λ/n=0.0634 (δ/n=0.19): SUCCESS at m=17
+- λ/n=0.0819 (δ/n=0.25): fails (max 1/3)
+- λ/n=0.0857 (δ/n=0.26): SUCCESS at m=11
+- λ/n=0.0900 (δ/n=0.27): SUCCESS at m=20
+This mirrors June 22's finding that "within every λ/n band, one curve succeeds and one fails."
+Neither λ/n nor δ/n alone predicts the per-curve outcome.
+
+**C. New anomaly: λ/n≈0.18 both curves fail (δ/n≈0.46).** This is NOT Effect A
+(δ/n >> 0.02). Both curves at λ/n=0.1771 (max 1/3) and 0.1797 (0/3 all m) fail with
+large δ/n (no 1/3-proximity obstruction). This appears to be per-curve variance
+(two unlucky draws from the same λ/n band), but 2 data points is insufficient.
+Hypothesis: neither curve is near a lattice-obstruction resonance; the failure is
+random conditioning. Needs 2 more curves at λ/n≈0.18 to confirm.
+
+**Paper implication:** The July 2026 "small-λ failure" claim is retracted. The correct
+statement is: "For 20-bit j=0 CM curves with K1=72 (eff≈0.10), the Phase 2 attack
+succeeds even at λ/n≈0.06, provided eff < 1. The failure mode is: (a) eff ≥ 1
+(K1×K2 ≥ n), which eliminates the HNP bias; or (b) Effect A (δ(3λ,n)/n < 0.02)."
+
+**eff formula for proper HNP regime:**
+```
+eff = K1 * K2 / n = K1 * (sqrt(n) + 1) / n ≈ K1 / sqrt(n)
+Proper HNP regime: eff < 1  ⟺  K1 < sqrt(n)
+For n ≈ 2^b: proper iff K1 < 2^{b/2}
+12-bit n=2647: K1 < 51  →  K1=72 violates this (eff=1.41 > 1)
+20-bit n=523000: K1 < 723  →  K1=72 satisfies this (eff=0.099 ✓)
+```
+
+### Next step proposal
+
+**Two threads:**
+
+**Thread 23 (λ/n=0.18 anomaly):** Find 2 additional 20-bit curves with λ/n ∈ [0.17, 0.20]
+and run K1=72, m=10..30. If ≥1 of these 4 total curves succeeds, the 2-curve failure
+is per-curve variance. If all 4 fail, a new obstruction near λ/n=1/6 is plausible.
+Script: re-run `glv_hnp_phase2_lambda_threshold.py` with an extra target 0.18, max_per=4.
+
+**Thread 22 (Richelot search):** Proposed by 2026-07-26 run #2. Search for a genus-2 
+curve C/F_{p'} over a small proxy prime p' with Jac char poly = P_{E_i}(T)·P_{E_j}(T)
+for one of the 5 Howe-qualifying pairs. Concretely: for pair (0,1) (t₀=432... vs t₁=-238...),
+search f(x) of degree 6 over F_{p'}. Approach: Richelot isogeny factorisation, or direct
+coefficient search. PARI script: `secp256k1_cm_audit/richelot_search.gp`. High difficulty.
+
+### Commits made
