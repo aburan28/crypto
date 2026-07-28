@@ -5998,4 +5998,4 @@ factorization would be a new positive result even if not directly applicable to 
 Start from `thread7_richelot_depth2.gp` and extend to explicit genus-2 curve search.
 
 ### Commits made
-[see next git hash after this entry]
+523d99d autolab 2026-07-28: Thread 20 — λ/n threshold resolved; eff is primary control; eigenvalue-choice artifact identified
