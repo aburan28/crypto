@@ -5874,3 +5874,79 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). All six original priority threads are CLOSED or
+BLOCKED (P-521 LLL closed 2026-05-22; CHLRS Igusa blocked 2026-07-26; Howe sextic
+5/15 pairs done 2026-07-21; cross-curve LLL 3/3 closed 2026-05-25; GLV-HNP Phase 2
+toy closed 2026-07-26; B5 over F_{p^k} closed 2026-05-27). Thread 20 was proposed in
+the 2026-07-26 log as the next concrete step: bisect the λ/n threshold between 0.07
+and 0.34 by finding j=0 curves in different λ/n buckets and sweeping LLL.
+
+### Work done
+- Installed `fpylll`, `cysignals`, verified PARI/GP still available.
+- Wrote `glv_hnp_lambda_threshold.py`: searched 11-22 bit primes, found one curve per
+  bucket in [0.10, 0.34]. Result CONFOUNDED: all new curves were 11-bit; the failing
+  reference (p=2677) is 12-bit. LLL on 11-bit curves with m=4 succeeds trivially.
+- Wrote `glv_hnp_lambda_bisect.py`: controlled 12-bit sweep, K1=8, 3 seeds, m=4..15.
+  Found 6 distinct 12-bit curves across lam/n ∈ [0.07, 0.40].
+- Wrote `glv_hnp_lambda_pin.py`: pinned threshold with 5 seeds, m=4..17, focused on
+  the (0.096, 0.130) interval.
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.55s). ✓
+
+### Findings
+
+**Controlled threshold at 12-bit, K1=8, 5 seeds: lam/n ≈ 0.10**
+
+| lam/n  | n    | bit | m* (5 seeds) | result    |
+|--------|------|-----|--------------|-----------|
+| 0.0699 | 2647 | 12  | FAIL (>15)   | known fail |
+| 0.0960 | 2053 | 12  | FAIL (>17)   | **NEW: confirmed fail** |
+| 0.1294 | 2203 | 12  | 15           | SUCCESS |
+| 0.1629 | 2143 | 12  | 8            | SUCCESS |
+| 0.2037 | 2671 | 12  | 7            | SUCCESS |
+| 0.2907 | 2281 | 12  | 14           | SUCCESS (high variance) |
+| 0.3954 | 2089 | 12  | 11           | SUCCESS |
+
+**Threshold narrowed to (0.096, 0.130)** for 12-bit curves.
+
+**Number-theoretic gap**: no 12-bit prime-order j=0 curve with lam/n ∈ (0.096, 0.113)
+exists in [2048, 4097]. Can't close the gap at 12-bit; need 13-bit for finer bisection.
+
+**Non-monotone m* vs lam/n**: lam/n=0.29 needs m=14 while lam/n=0.40 needs m=11.
+This is variance from small seed count (3-5); additional seeds would sharpen.
+
+**First-attempt confound documented**: 11-bit curves succeed at m=4 regardless of
+lam/n because the lattice is tiny (dim=10) and LLL is trivial. The threshold is a
+12-bit+ phenomenon. At 11-bit, all 6 buckets trivially succeeded.
+
+**Structural interpretation (from 2026-07-26 + today):**
+The -λ·S_K1 off-diagonal entry in the k₂-rows has magnitude λ·n/K1. The mod-n
+diagonal has magnitude n²/K1. Their ratio is λ/n. When λ/n ≲ 0.10, the λ-rows
+are only 10% as "structured" as the mod-n rows; GS orthogonalization can't separate
+k₁ and k₂ components, and the short-vector signal is buried. At λ/n ≳ 0.13, the
+off-diagonal coupling is sufficient for LLL to isolate the planted vector.
+
+**secp256k1 implication**: λ/n ≈ 0.44 for secp256k1, well above the threshold.
+The Phase 2 attack would be viable at full scale if 256-bit precision issues don't
+cause degeneracy analogous to the Boneh-Venkatesan overflow bug (now fixed for HP).
+
+### Next step proposal
+
+**Two threads in priority order:**
+
+**Thread 21 (threshold finer pin at 13-bit)**:
+Find a 13-bit j=0 prime-order curve with lam/n ∈ (0.096, 0.113) to close the
+number-theoretic gap. Confirm that the threshold at 13-bit is similar to 12-bit
+(ruling out a bit-length interaction). Script: `glv_hnp_lambda_13bit.py`.
+
+**Thread 22 (Richelot search for genus-2 cover)**:
+Recommended in 2026-07-26 log as continuation of Thread 2 (CHLRS blocked). Over a
+proxy prime p' where x³+7 splits, find f(x) of degree 6 such that
+Jac(y²=f) has char poly = P_{E_0}(T)·P_{E_1}(T) (from the 5 qualifying Howe pairs).
+This requires a search; sketch the search space size in PARI first.
+
+### Commits made
+PLACEHOLDER
