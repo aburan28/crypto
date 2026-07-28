@@ -5978,4 +5978,4 @@ Search for genus-2 curves C/F_p whose Jacobian is isogenous to secp256k1 ×
 Start over small proxy primes (p' ~ 50-200) where the search is exhaustive.
 
 ### Commits made
-PLACEHOLDER_HASH autolab 2026-07-28: Thread 20 — λ/n threshold non-monotone; failures isolated at specific CF structures
+`099ca74` autolab 2026-07-28: Thread 20 — λ/n threshold non-monotone; failures isolated at specific CF structures
