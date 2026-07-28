@@ -5962,4 +5962,4 @@ search for a genus-2 curve C/F_{p'} (small proxy prime p') whose Jacobian has ch
 P_{E_i}(T)·P_{E_j}(T). Uses PARI `hyperellcharpoly` search.
 
 ### Commits made
-See next git hash.
+`dab9d94` autolab 2026-07-28: Thread 20 — lambda/n threshold hypothesis refuted; attack works for all lambda/n ratios 0.006..0.45
