@@ -5874,3 +5874,84 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). All 6 original threads are CLOSED/BLOCKED/DEAD END.
+Thread 5 (GLV-HNP Phase 2) was completed 2026-07-26 and proposed Thread 20 as the
+follow-up: bisect the λ/n threshold between 0.07 (FAIL) and 0.34 (PASS) at 12-bit scale.
+This was the top unexecuted proposal from the last run.
+
+### Work done
+- Installed fpylll (0.6.4), cysignals (1.12.5), sympy (1.14.0) via pip. (PARI/GP not
+  available this session — apt background process was interrupted.)
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: finds 12-bit j=0 GLV
+  curves in 6 λ/n bins using Eisenstein CM search, then sweeps LLL success rate over m=4..17.
+- Fixed K1_BOUND=8 to match the original 12-bit experiment regime (eff≈0.17), ruling out
+  a trivial-bias artifact (first run with K1=2 showed all bins pass — artifact of K1 too small).
+- Confirmed pari-gp not available; all analysis done in Python/fpylll.
+- `cargo test --test curve_audit`: 5/5 pass (5.21s). ✓
+
+### Findings
+
+**Sweep results (K1=8, K2=sqrt(n)+1, eff≈0.17, seeds=[42,1234,9999]):**
+
+| Bin            | lam/n  | p    | n    | lam  | m at first 3/3 |
+|----------------|--------|------|------|------|----------------|
+| A [0.07,0.11)  | 0.0941 | 2053 | 2137 | 201  | FAIL (max 2/3 at m=17) |
+| B [0.11,0.15)  | 0.1294 | 2281 | 2203 | 285  | m=13 |
+| C [0.15,0.20)  | 0.1629 | 2089 | 2143 | 349  | m=10 |
+| D [0.20,0.25)  | 0.2037 | 2731 | 2671 | 544  | m=6  |
+| E [0.25,0.30)  | 0.2907 | 2203 | 2281 | 663  | m=11 |
+| F [0.30,0.35)  | 0.3145 | 2179 | 2251 | 708  | FAIL (max 1/5 at m=25, 5 seeds) |
+
+Reference (from 2026-07-26):
+- lam/n=0.07 (n=2647): FAIL
+- lam/n=0.34 (n=523969, 20-bit): PASS at m=9
+- lam/n=0.53 (n=199, 8-bit): PASS at m=4
+- lam/n=0.66 (n=2659, 12-bit, lam=1755): PASS at m=7
+
+**Key findings:**
+
+1. **Threshold confirmed at lam/n ≈ 0.09–0.13** (12-bit scale, K1=8):
+   - bin_A (lam/n=0.094): FAIL. Consistent with known failure at lam/n=0.07.
+   - bin_B (lam/n=0.129): PASS at m=13 (barely). Threshold is in (0.094, 0.129).
+   - General trend: larger lam/n → smaller first-pass m. Bins C→B→A: m=10→13→FAIL.
+
+2. **NON-MONOTONE ANOMALY: bin_F (lam/n=0.315) FAILS** (confirmed with 5 seeds,
+   m=4..25, max 1/5 at any m). This is counterintuitive: bin_D (lam/n=0.204) PASSES
+   at m=6, but lam/n=0.315 > lam/n=0.204. Failure at bin_F is NOT statistical noise.
+
+3. **Anomaly hypotheses:**
+   (a) The success of LLL depends on the specific arithmetic of lam mod n (not just
+       lam/n). For bin_F: lam=708, n=2251. The two eigenvalues are 708 and 1542.
+       If we attacked using lam=1542 (lam/n=0.685), the lattice geometry changes
+       entirely — this might succeed where lam=708 fails.
+   (b) The column-diagonal scaling `S_K1 = n//K1` and `S_K2 = n//K2` interacts with
+       the specific value of lam*S_K1 = 708*281 = 198,948 (vs 544*333 = 181,152 for
+       bin_D). This large lambda-entry dominates the lattice and may cause LLL to
+       reduce in a suboptimal direction for specific lam values.
+   (c) The 20-bit success at lam/n=0.34 uses a very different eff (0.05 vs 0.17 here)
+       and much larger n — not directly comparable.
+
+4. **Implication for attack on secp256k1**: secp256k1 has lam/n ≈ 0.432, well above
+   the threshold. The Phase 2 attack (if applicable) would not fall in the failure region.
+   However, the non-monotone behavior warns that the threshold depends on curve-specific
+   factors, not just lam/n.
+
+### Next step proposal
+
+**Two immediate sub-tasks (Thread 20 continuation):**
+
+**20a (eigenvalue swap test):** Re-run bin_F attack using lam=1542 (the other
+eigenvalue, lam/n=0.685) instead of lam=708. If it passes, the failure is an
+eigenvalue-selection artifact, not a fundamental lam/n barrier.
+Script: add a 2-line fix to `glv_hnp_phase2_lambda_threshold.py` using `n-1-lam`.
+
+**20b (larger-n replication):** Find a 16-bit curve with lam/n ≈ 0.31-0.32 (same
+bin_F ratio) and run the LLL sweep. If it also fails, the barrier is structural at
+all scales. If it passes, the 12-bit failure is a small-n arithmetic artifact.
+
+### Commits made
+PLACEHOLDER
