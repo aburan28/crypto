@@ -5969,3 +5969,4 @@ If it recovers d, the attack scales. If not, quantify the gap.
 Jacobian splits over small proxy primes for qualifying sextic-twist pairs.
 
 ### Commits made
+- ca52217 autolab 2026-07-28: Thread 20 λ/n threshold — no clean threshold; finite-size effect at K1=8
