@@ -5996,4 +5996,4 @@ approach distinct from the Rosenhain formula (which is blocked for secp256k1).
 
 ### Commits made
 
-[to be filled after push]
+caeed66 autolab 2026-07-28: Thread 20 lambda/n threshold study — eff_bias is the true variable
