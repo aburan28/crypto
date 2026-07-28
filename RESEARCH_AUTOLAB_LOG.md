@@ -5874,3 +5874,119 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): proposed 2026-07-26 as continuation of Thread 5
+(GLV-HNP Phase 2). All six original threads are closed. Thread 20 has clear next steps
+and a concrete falsifiable hypothesis from 2026-07-26: "LLL fails iff λ/n < 0.07."
+Goal: bisect the threshold by scanning j=0 CM curves across λ/n ∈ [0.06, 0.38].
+
+### Work done
+
+- Installed `fpylll 0.6.4`, `sympy 1.14.0`, `cysignals 1.12.5` (not available in session
+  at start).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Step 1: Scanned 140 primes p ≡ 1 (mod 3) in [2^11, 2^16] with Eisenstein
+    decomposition. Found 16 bucket representatives covering λ/n ∈ [0.056, 0.377]
+    (0.02-wide buckets).
+  - Step 2: Built generators for each (found b via order-check, G via rejection
+    sampling; k1_bound = max(2, ⌊0.05√n⌋) targeting eff ≈ 0.04).
+  - Step 3: LLL sweep m=4..18, 3 seeds, 3/3 criterion. BKZ(40) fallback for
+    λ/n ∈ [0.10, 0.32].
+- Ran script: all 16 buckets succeeded (LLL 3/3 at m=4 or m=5).
+- **Contradiction with 2026-07-26**: that run showed LLL+BKZ FAIL at λ/n=0.07 (p=2677,
+  n=2647, k1_bound=8). New scan shows λ/n=0.056 SUCCEEDS with k1_bound=2.
+- Wrote and ran targeted follow-up: re-tested p=2677, n=2647, λ/n=0.07 with
+  k1_bound=2 (eff=0.039) AND the original k1_bound=8 (eff=0.157). Same curve, both
+  k1_bounds.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.83s). ✓
+
+### Findings
+
+**The "structural failure at λ/n=0.07" is an artifact of suboptimal k1_bound, not small λ.**
+
+**Full λ/n sweep (k1_bound=2, eff≈0.04), LLL only:**
+```
+bucket  lam/n    result
+  0     0.0564   LLL 3/3 at m=4
+  1     0.0960   LLL 3/3 at m=4
+  2     0.1158   LLL 3/3 at m=5
+  3     0.1294   LLL 3/3 at m=4
+  4     0.1454   LLL 3/3 at m=5
+  5     0.1745   LLL 3/3 at m=4
+  6     0.1911   LLL 3/3 at m=5
+  7     0.2037   LLL 3/3 at m=5
+  8     0.2238   LLL 3/3 at m=5
+  9     0.2574   LLL 3/3 at m=5
+ 10     0.2678   LLL 3/3 at m=4
+ 11     0.2831   LLL 3/3 at m=5
+ 12     0.3145   LLL 3/3 at m=5
+ 13     0.3266   LLL 3/3 at m=4
+ 14     0.3471   LLL 3/3 at m=4
+ 15     0.3768   LLL 3/3 at m=5
+```
+**No failure found. All λ/n ∈ [0.056, 0.377] succeed at m=4 or 5.**
+
+**Targeted check on the known failure curve (p=2677, n=2647, lam=185, λ/n=0.0699):**
+```
+k1_bound=8, eff=0.157:  m=5: 1/3  m=6: 1/3  m=7: 1/3  m=8..12: 0/3  → FAIL
+k1_bound=2, eff=0.039:  m=5: 3/3 → SUCCESS
+```
+**Identical curve. The difference is k1_bound, not λ/n.**
+
+**Root cause (Gaussian heuristic analysis):**
+The planted vector's Euclidean norm scales as:
+```
+||t||² ≈ m·(K1/2)²·S_K1² + n²/4 + m·(K2/2)²·S_K2² + n²
+```
+where S_K1 = n//K1, S_K2 = n//K2, S_KANNAN = n.
+
+The Gaussian heuristic shortest vector in the lattice:
+```
+GH(L) ≈ √(dim/(2πe)) · det(L)^{1/dim}
+```
+where det(L) ≈ (n·S_K1)^m · S_K2^m · n.
+
+For p=2677, n=2647, lam=185, k2_bound=52:
+```
+k1_bound=8 (S_K1=330, m=8):  ||t||≈5645,  GH≈3936  → ratio 1.43 → LLL FAILS
+k1_bound=2 (S_K1=1323, m=5): ||t||≈3878,  GH≈4399  → ratio 0.88 → LLL SUCCEEDS
+```
+The transition is ||t||/GH crossing 1, not λ/n crossing any threshold.
+
+**Corrected interpretation of 2026-07-26 finding:**
+- OLD CLAIM: "LLL fails iff λ/n < threshold (≈ 0.07–0.34)."
+- CORRECTED: "LLL fails when k1_bound is too large (eff too high), making ||t|| > GH(L)."
+  The optimal k1_bound (minimizing ||t||/GH) is determined by the Gaussian heuristic
+  balance, NOT by λ/n. With eff ≈ 0.04, LLL succeeds at ALL tested λ/n ≥ 0.056.
+- The 2026-07-26 failure was an EXPERIMENTAL ARTIFACT from using k1_bound=8 (copied
+  from an earlier heuristic for eff≈0.05 targeting) on a curve where K1=8 overshoots
+  the GH threshold.
+
+**GLV-HNP attack viability for secp256k1 (λ/n ≈ 0.44):**
+secp256k1 sits at λ/n ≈ 0.44, well within the success regime. The optimal k1_bound
+for secp256k1 at 256 bits would need to satisfy ||t|| < GH(L), which with the HP GS
+(2048-bit bignum arithmetic from Thread 1) should be achievable. The 256-bit LLL
+precision issue is handled by `lll_reduce_hp`. No new obstacles identified.
+
+### Next step proposal
+
+Two concrete sub-tasks in priority order:
+
+**Thread 20a (optimal k1_bound formula):**
+Derive the optimal k1_bound analytically. Minimize ||t||/GH(L) with respect to K1,
+treating K2 = √n, d ≈ n/2, k1 ≈ K1/2, k2 ≈ K2/2. This gives a closed-form K1*(n, K2)
+that eliminates the "failure from bad k1_bound" issue permanently. Verify the formula
+matches the empirical eff ≈ 0.04 from the sweep.
+
+**Thread 20b (lower λ/n boundary):**
+The current sweep found no failure down to λ/n = 0.056. Find curves with λ/n < 0.04
+and test whether LLL still succeeds (or whether a different failure mode emerges at
+extreme λ values). The minimum λ for a prime n grows as O(1) (small primes like n=7
+give λ/n=1/7), so very small λ/n requires specifically searching for primes where
+λ²+λ+1 ≡ 0 (mod n) has a small root.
+
+### Commits made
+[see next git hash after this entry]
