@@ -5874,3 +5874,108 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+
+Thread 20 (λ/n threshold bisection). All 6 original priority threads are CLOSED.
+The 2026-07-26 run proposed Thread 20 as the next-priority task: bisect the λ/n
+threshold between 0.07 (failure, p=2677) and 0.34 (success, p=524347).
+Script proposed: `glv_hnp_phase2_lambda_threshold.py`.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Searches for 12-bit j=0 CM curves at λ/n targets {0.09, 0.12, 0.15, 0.18, 0.21, 0.24, 0.27, 0.30, 0.33} (±0.018 tolerance).
+  - Fixed K1=8 (matching the 2677 failure-curve parameters) for consistent eff ~ 0.15-0.23 across all curves.
+  - Sweeps m = m_thresh..m_thresh+8, 5 seeds each, using LLL (fpylll).
+  - Includes anchor curves at both endpoints: FAIL (p=2677, λ/n=0.070) and SUCC (p=524347, λ/n=0.340).
+- Ran the script to completion.
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.62s). ✓
+
+### Findings
+
+**Main result: the λ/n threshold is NOT monotone.**
+
+The hypothesis that there is a single critical λ/n threshold is REFUTED.
+Failures and successes are interleaved:
+
+| λ/n   | n      | λ     | m_thresh | first 3/5+ | outcome |
+|-------|--------|-------|----------|------------|---------|
+| 0.0699| 2647   | 185   | 5        | never      | **FAIL** |
+| 0.1024| 1231   | 126   | 5        | m=11       | PASS |
+| 0.1135| 1621   | 184   | 5        | m=10       | PASS |
+| 0.1623| 1627   | 264   | 5        | m=9        | PASS |
+| 0.1789| 1213   | 217   | 5        | never      | **FAIL** |
+| 0.2045| 1741   | 356   | 5        | m=5        | PASS |
+| 0.2425| 1237   | 300   | 5        | m=9        | PASS |
+| 0.2680| 1291   | 346   | 5        | never      | **FAIL** |
+| 0.3145| 2251   | 708   | 5        | never      | **FAIL** |
+| 0.3244| 1489   | 483   | 5        | m=6        | PASS |
+| 0.3395| 523969 | 177902| 3        | m=4        | PASS |
+
+The intermediate failures (λ/n = 0.18, 0.27, 0.31) each gave 0/5 at ALL m from
+5 to 13 — these are genuine structural failures, not noise.
+
+**δ/n analysis (proximity to nearest integer multiple k·λ/n):**
+
+The failures at 0.18, 0.27, 0.31 share a structural property: small k such that
+k·λ mod n is small relative to n:
+- λ/n=0.1789 (FAIL): 6λ ≡ 89 mod 1213 → |6λ mod n|/n = 0.073, smallest k=6
+- λ/n=0.2680 (FAIL): 4λ ≡ 93 mod 1291 → |4λ mod n|/n = 0.072, smallest k=4
+- λ/n=0.3145 (FAIL): 3λ ≡ 127 mod 2251 → |3λ mod n|/n = 0.056, smallest k=3
+
+Compare to passes at nearby λ/n:
+- λ/n=0.2045 (PASS): 5λ ≡ 63 mod 1741 → |5λ mod n|/n = 0.036, smallest k=5
+- λ/n=0.3244 (PASS): 3λ ≡ 40 mod 1489 → |3λ mod n|/n = 0.027, smallest k=3
+
+The pattern is NOT simply that curves with small |kλ mod n|/n fail — the PASS at
+λ/n=0.32 has δ/n=0.027 (smaller than all the failures). So the simple k·λ resonance
+hypothesis is also REFUTED.
+
+**Reconciliation with Effect A (lamn_boundary study):**
+
+The `glv_hnp_lamn_boundary.py` study (K1=72, 20-bit curves, m=10..25) found that
+λ/n ≈ 0.327-0.340 is "fully obstructed". This experiment (K1=8, 12-bit curves,
+m=5..13) finds λ/n=0.324 and λ/n=0.340 both PASS easily (m=6 and m=4 resp.).
+
+The reconciliation: Effect A (near-linear dependence between GLV rows and mod-n
+rows at λ/n ≈ 1/3) is a **dimension-dependent** obstruction. At K1=8 with 12-bit
+curves (lattice dim = 2*6+2 = 14), LLL can handle this near-dependence. At K1=72
+with 20-bit curves (lattice dim = 2*15+2 = 32), the near-dependence prevents LLL
+from making progress.
+
+**secp256k1 implication (λ/n ≈ 0.44):**
+
+secp256k1's GLV eigenvalue has λ/n ≈ 0.44, which is far from both the small-λ
+failure zone (< 0.07) and any of the isolated failure values found here. At small
+K1 and dimension, secp256k1 would be in the PASS regime. The Effect A obstruction
+(lamn_boundary study) applies at K1=72 and 20-bit scale; at full 256-bit scale
+with appropriate K1, the obstruction regime needs separate investigation.
+
+**Open question:** What determines whether a specific (n, λ) pair with moderate
+λ/n (0.18, 0.27, 0.31) fails? The continued-fraction structure of λ/n may be
+relevant (all three failure cases have small first partial quotient: CF[1] ≤ 6),
+but the PASS at λ/n=0.20 also has CF[1]=4, making even this hypothesis uncertain.
+
+### Next step proposal
+
+**Thread 21 (continued-fraction structure of failures):**
+For each failure at λ/n ∈ {0.18, 0.27, 0.31}, compute the full CF expansion
+of λ/n and compare to the passes. Specifically: check whether the failures have
+CF partial quotients forming a "bad" pattern for the lattice (e.g., CF[2] = 1,
+creating a "flat" plateau in the convergent rationals). Run a targeted search:
+find 5 curves with CF[1]=3 (same as 0.27 and 0.31 failures) — do they all fail?
+If yes, this would identify CF[1] ≤ 3 as the exact obstruction criterion.
+Script: `glv_hnp_cf_threshold.py`.
+
+**Thread 22 (Richelot search, from 2026-07-26 #2):**
+Search for genus-2 curves C/F_p whose Jacobian is isogenous to secp256k1 ×
+(quadratic twist) via Richelot (2,2)-isogeny. Does not use Rosenhain formula.
+Start over small proxy primes (p' ~ 50-200) where the search is exhaustive.
+
+### Commits made
+PLACEHOLDER_HASH autolab 2026-07-28: Thread 20 — λ/n threshold non-monotone; failures isolated at specific CF structures
