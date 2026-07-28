@@ -5874,3 +5874,84 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All 6 original priority threads are CLOSED/BLOCKED/DEAD
+END (Thread 1 closed 2026-05-22 via HP GS; Thread 2 blocked; Thread 3 closed Thread 18
+2026-07-21; Thread 4 dead end; Thread 5 closed 2026-07-26; Thread 6 closed 2026-07-07).
+Thread 20 was proposed 2026-07-26 as the top continuation task: bisect the λ/n failure
+boundary between the known failure (λ/n=0.07) and known success (λ/n=0.34).
+
+### Work done
+- Verified tools: pip-installed `fpylll` + `sympy` (PARI/GP not available this session).
+- Wrote new script: `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`
+- Searched 20-bit j=0 CM primes (p ∈ [2^18, 2^21]) for λ/n targets
+  {0.07, 0.10, 0.13, 0.16, 0.19, 0.22, 0.25, 0.28}, tolerance ±0.015.
+  Found 16 curves (2 per target). Actual λ/n values: {0.059, 0.060, 0.102, 0.106,
+  0.129, 0.134, 0.148, 0.164, 0.184, 0.185, 0.207, 0.209, 0.249, 0.265, 0.270, 0.281}.
+- Ran LLL (K1=72, K2=√n, m=10..22, seeds={42,1234,9999}) on all 16 curves.
+- Confirmed `cargo test --test curve_audit`: 5/5 pass.
+
+### Findings
+
+**Effect B lower boundary: λ/n ≈ 0.19–0.21 (20-bit j=0 CM curves).**
+
+| λ/n actual | p       | n       | first 3/3 | outcome        |
+|------------|---------|---------|-----------|----------------|
+| 0.059      | 262909  | 263677  | never     | OBSTRUCTED     |
+| 0.060      | 263323  | 264127  | never     | OBSTRUCTED     |
+| 0.102      | 263257  | 263119  | never     | OBSTRUCTED     |
+| 0.106      | 263323  | 262369  | never     | OBSTRUCTED     |
+| 0.129      | 263119  | 263257  | never     | OBSTRUCTED     |
+| 0.134      | 263383  | 264211  | never     | OBSTRUCTED     |
+| 0.148      | 262459  | 261643  | never     | OBSTRUCTED (max 2/3) |
+| 0.164      | 262231  | 263083  | never     | OBSTRUCTED     |
+| 0.184      | 262303  | 263209  | never     | OBSTRUCTED (max 2/3) |
+| 0.185      | 262261  | 263191  | never     | OBSTRUCTED     |
+| **0.207**  | **262819** | **263287** | **m=13** | **SUCCESS** ← |
+| **0.209**  | **263191** | **262261** | **m=18** | **SUCCESS** ← |
+| 0.249      | 263647  | 264619  | never     | OBSTRUCTED (max 1/3) |
+| 0.265      | 262621  | 261631  | m=20      | SUCCESS        |
+| 0.270      | 262153  | 262567  | m=10      | SUCCESS        |
+| 0.281      | 263047  | 262027  | m=15      | SUCCESS        |
+
+**Effect B lower threshold bracket: λ/n ∈ [0.185, 0.207]** (all curves below 0.185
+  uniformly fail; both curves at λ/n ≈ 0.207–0.209 succeed at m=13..18).
+
+**New finding: possible Effect A resonance at λ/n ≈ 1/4.**
+- Curve at λ/n=0.249 (λ=65814, n=264619): 4λ=263256, n-4λ=1363 ≪ n.
+  This means λ ≈ n/4 — same near-resonance structure as Effect A (λ ≈ n/3).
+  The four λ-rows collectively create a near-dependence of rank 1 with the
+  n-diagonal rows. Effect A at 1/3 was the only known resonance; 1/4 may be a
+  weaker instance of the same obstruction.
+- Counter-evidence: only 1/2 curves tested at λ/n≈0.25 failed (0.265 succeeds).
+  The 1/4 resonance may be weaker than 1/3 and require confirmation with more curves.
+
+**Summary of obstruction map (Effect B regime):**
+```
+λ/n:  0.00  0.10  0.19  0.21  0.25  0.28  0.30  0.33  0.34  0.50
+       |-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+       [  FAIL (Effect B)  ][ SUCCESS zone         ][ Fail  ][ ? ]
+                            ^                        ^
+                        threshold                  Eff A
+                       ≈0.19-0.21                   (1/3)
+```
+
+### Next step proposal
+
+**Two parallel threads:**
+
+**Thread 23 (Effect B boundary fine-grained):**
+Re-run with λ/n targets {0.190, 0.195, 0.200, 0.205, 0.210, 0.215} and 5 curves each
+to pin down the exact cutoff. Expected: sharp transition between FAIL and SUCCESS. If
+smooth: report distribution of first-3/3 m values as a function of λ/n.
+
+**Thread 24 (Effect A at 1/4 — verify or refute):**
+Test 5 curves at λ/n ≈ 0.249 (λ ≈ n/4). Check whether the 1/4 resonance is a real
+obstruction or just a sampling artifact. If 5/5 fail: document as new Effect A band.
+If 2-3/5 fail: it's curve-specific, not structural.
+
+### Commits made
+PLACEHOLDER
