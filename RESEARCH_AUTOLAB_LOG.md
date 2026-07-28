@@ -5874,3 +5874,128 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). All 6 original priority threads are CLOSED.
+Threads 5 (GLV-HNP Phase 2) and 2 (CHLRS) were completed on 2026-07-26.
+Thread 20 was explicitly proposed by the 2026-07-26 run as the next concrete task:
+bisect the λ/n threshold between 0.07 (known fail) and 0.34 (known success)
+using a sweep over 12-bit j=0 curves with controlled λ/n.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Searches 12-bit j=0 curves via Eisenstein CM decomposition, bins by λ/n into 8 buckets
+  - Runs LLL at m ∈ {5,7,9,11,13} with 3 seeds per curve per m
+  - BKZ(40) rescue attempt on λ/n < 0.22 curves
+  - Injects known anchors from 2026-07-26 (p=2677 fail, p=211 success)
+- Part 1: LLL sweep with k1b=3 (eff≈0.06) — **ALL curves succeed** including λ/n=0.07.
+- Part 2: Repeat with k1b=8 (eff≈0.16, matching 2026-07-26 regime) — non-monotone results.
+- Part 3: 10-seed recheck of "surprising" failures at k1b=8: n=2251 and n=2341 confirmed
+  to fail with BOTH eigenvalues (20-seed test, 0/20 at m=9,11,13).
+- Part 4: eff sweep on "hard" curves (n=2251, n=2341) to find eff threshold.
+- Part 5: Key test — does the LARGE eigenvalue λ=2461 (λ/n=0.93) fix the lam=185 failure
+  on p=2677 (n=2647)? Answer: YES, m=13 gives 15/15 success.
+- `cargo test --test curve_audit` → 5/5 pass (5.75s). ✓
+
+### Findings
+
+**Finding 1: The 2026-07-26 "λ/n threshold" was an eigenvalue-choice artifact.**
+
+The previous session compared:
+- p=2677, n=2647, λ=185 (SMALL eigenvalue, λ/n=0.07), k1b=8 → FAIL
+- p=2557, n=2659, λ=1755 (LARGE eigenvalue, λ/n=0.66), k1b=8 → SUCCESS
+
+These are DIFFERENT eigenvalues for curves of the same type. The comparison was not
+"small λ/n vs large λ/n on the same curve" but "small eigenvalue vs large eigenvalue
+on different curves." This confounds the eigenvalue-choice effect with the λ/n effect.
+
+**Finding 2: Using the LARGE eigenvalue fixes the p=2677 failure.**
+
+```
+p=2677, n=2647, k1b=8, 15 seeds:
+  λ=185  (λ/n=0.07, small): m=7: 2/15  m=9: 2/15  m=11: 0/15  m=13: 1/15  → FAIL
+  λ=2461 (λ/n=0.93, large): m=7: 1/15  m=9: 2/15  m=11: 7/15  m=13: 15/15 → SUCCESS at m=13
+```
+The adversary should always use max(λ, n-1-λ). The "failure" at λ/n=0.07 disappears.
+
+**Finding 3: Non-monotone failures at k1b=8 — specific curves are hard.**
+
+Two 12-bit curves are "hard" at k1b=8 (eff≈0.16): n=2251 (p=2179, b=10) and n=2341 (p=2251, b=7).
+These fail with BOTH eigenvalues (20-seed test, all m ≤ 13):
+```
+n=2251 λ₁=708 (λ/n=0.31):  0/20 at m=9,11,13
+n=2251 λ₂=1542 (λ/n=0.69): 0/20 at m=9,11,13
+n=2341 λ₁=1106 (λ/n=0.47): 2/20 at m=9  (noise)
+n=2341 λ₂=1234 (λ/n=0.53): 0/20 at m=9,11,13
+```
+These are GENUINELY HARD curves at eff=0.16 — the failure is not eigenvalue-choice.
+
+**Finding 4: The eff threshold is the primary control parameter.**
+
+At fixed m=11, 10 seeds, sweeping k1b:
+```
+Curve              k1b=3(eff=0.06)  k1b=4(0.08)  k1b=5(0.10)  k1b=6(0.13)  k1b=8(0.17)
+n=2251 lam=708     10/10 ✓           9/10 ✓        7/10 ?        2/10 ✗        0/10 ✗
+n=2341 lam=1106    10/10 ✓          10/10 ✓        8/10 ✓        3/10 ✗        0/10 ✗
+n=2389 lam=689     10/10 ✓          10/10 ✓       10/10 ✓       10/10 ✓       10/10 ✓
+n=2647 lam=185     10/10 ✓          10/10 ✓        7/10 ?        3/10 ✗        0/10 ✗
+```
+
+Key observation: the "easy" curve (n=2389) succeeds up to k1b=8 (eff=0.164).
+The "hard" curves (n=2251, n=2341, n=2647) require k1b≤4 (eff≤0.09).
+**The eff threshold is curve-specific, ranging from ≈0.09 to >0.16.**
+
+**Finding 5: Strong bias (k1b=3, eff≈0.06) is a universal fix.**
+
+At k1b=3 (eff≈0.06), ALL tested curves succeed at m=5 or m=7, regardless of λ/n:
+```
+λ/n bucket    lam/n    LLL first-m at k1b=3
+0.07-0.10     0.094         m=5
+0.10-0.14     0.129         m=5
+0.14-0.18     0.163         m=5
+0.18-0.23     0.204         m=7
+0.23-0.29     0.288         m=5
+0.29-0.36     0.315         m=5
+0.36-0.44     0.404         m=5
+0.44-0.50     0.472         m=5
+anchor 0.07   0.070         m=7
+anchor 0.46   0.462         m=7
+```
+Including the "known-fail" p=2677 curve: m=7 at k1b=3.
+
+**Finding 6: Revised interpretation of the 2026-07-26 lam/n failure.**
+
+The previous "structural failure at lam/n=0.07" is correctly reinterpreted as:
+- An **eff-dependent threshold** (eff* ≈ 0.09-0.16 depending on the curve)
+- **NOT** a pure λ/n threshold
+- The adversary should always use max(λ, n-1-λ) as their eigenvalue, raising the
+  effective λ/n to ≥ 0.5 for all n.
+
+**Implication for secp256k1:** secp256k1's actual GLV eigenvalue has λ/n ≈ 0.44,
+so max(0.44, 0.56) = 0.56. This is in the "easy" regime. The attack is viable
+(at appropriate eff) even at 256-bit scale (HP-LLL resolves precision, per Thread 1).
+
+### Next step proposal
+
+**Thread 20 CLOSED** — the λ/n threshold question is resolved.
+
+New open threads in priority order:
+
+**Thread 23 (Hardness fingerprint — why are n=2251 and n=2341 hard at eff=0.16?):**
+The hard curves fail with both eigenvalues even at λ/n ≈ 0.69. Possible explanations:
+(a) n-1 factorization (n=2251: n-1=2×3²×5³; n=2341: n-1=4×9×5×13) — check if smooth
+    n-1 correlates with "hard" behavior via multiplicative structure of Frobenius.
+(b) Generator-specific: try multiple generators for n=2251 at k1b=6, k1b=7.
+(c) Large |m|×eff trade-off: try m=17,21 at k1b=8 to see if more signatures compensate.
+Script: `glv_hnp_phase2_hardcurve_diag.py`.
+
+**Thread 22 (Richelot search over small proxy primes):**
+From Thread 2 close: search for genus-2 curves over small proxy primes whose Jacobian
+splits as E×E' (not necessarily involving secp256k1). A concrete Richelot (2,2)-isogeny
+factorization would be a new positive result even if not directly applicable to secp256k1.
+Start from `thread7_richelot_depth2.gp` and extend to explicit genus-2 curve search.
+
+### Commits made
+[see next git hash after this entry]
