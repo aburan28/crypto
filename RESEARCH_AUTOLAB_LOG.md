@@ -5874,3 +5874,83 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All six priority threads from the system prompt are
+CLOSED. Thread 20 was proposed in the 2026-07-26 run as the highest-priority open
+sub-thread: bisect the λ/n failure threshold between 0.07 (fail) and 0.34 (pass).
+
+### Work done
+- Installed fpylll + cysignals (not pre-installed in this session environment).
+- Wrote `glv_hnp_phase2_lambda_threshold.py`: finds prime-order j=0 curves covering
+  λ/n bins [0.03, 0.48) in width-0.03 steps; runs Phase 2 LLL attack (K1=2, m=6,
+  3 seeds) on each bin representative.
+- Wrote `glv_hnp_lam_it_diagnosis.py`: replicated prior failure setup (K1=26, K2=52,
+  n=2647) and swept m=5..25; also found a high-λ/n curve in same n range.
+- Ran inline debug: confirmed planted vector exists in lattice (norm 7698.6) but
+  shorter spurious Kannan-marked vector (norm 4772.4) is returned by LLL instead.
+- Ran K1 sweep: fixed p=2677, n=2647, λ=185; varied K1_BOUND from 2 to 52; 3 seeds, m=8.
+- `cargo test --test curve_audit`: 5/5 pass.
+- Background `lll_degeneracy_probe` test: both subtests pass (3/3 for P-256, secp256k1,
+  P-384, brainpoolP384r1).
+
+### Findings
+
+**The 2026-07-26 λ/n threshold hypothesis is REFUTED.**
+
+Key evidence:
+
+1. **Sweep with K1=2, m=6**: the "known-fail" curve (n=2647, λ/n=0.07) passes 3/3 when
+   K1_BOUND=2. Failures only occur for very small n (n≤67), not for small λ/n.
+
+2. **IT-threshold diagnosis with K1=26**: both the low-λ/n curve (λ/n=0.07) AND a
+   high-λ/n curve (λ/n=0.47) with n≈2647 fail for ALL m=5..25. Not λ/n-dependent.
+
+3. **Lattice geometry** (p=2677, K1=26, m=12):
+   - Planted vector norm: 7698.6 (exists in lattice, correct)
+   - LLL shortest vector: 2573.3 (ratio 2.99×)
+   - LLL returns a different Kannan-marked vector (d_cand=950 ≠ d_secret=2620)
+   → Non-planted short vectors with Kannan marker exist; planted not uniquely shortest.
+
+4. **K1 sweep** (n=2647, K2=52, m=8, 3 seeds):
+
+| K1 | K1/K2 | wins | verdict |
+|----|-------|------|---------|
+|  2 | 0.038 |  3/3 | PASS    |
+|  4 | 0.077 |  3/3 | PASS    |
+|  6 | 0.115 |  0/3 | FAIL    |
+|  8 | 0.154 |  1/3 | FAIL    |
+| 10 | 0.192 |  0/3 | FAIL    |
+| 13+| 0.25+ |  0/3 | FAIL    |
+| 52 | 1.000 |  0/3 | FAIL    |
+
+**Empirical threshold: K1/K2 ≈ 0.08–0.12 (K1 < ~10% of sqrt(n)).**
+
+**Revised condition for Phase 2 attack success:**
+```
+K1_BOUND  <  ~0.08 · sqrt(n)
+```
+For secp256k1: K1 < 0.08 · 2^128 ≈ 2^124.7 (3–4 bits stronger than standard GLV k1 bound).
+
+**Prior confounding (2026-07-26 analysis):** The n=199 "success" had K1=2 (K1/K2=0.13)
+and λ/n=0.44. The n=2647 "failure" had K1=26 (K1/K2=0.50) and λ/n=0.07. The experiment
+changed BOTH K1/sqrt(n) AND λ/n simultaneously. λ/n was not the causal variable.
+
+**Paper implication (revised):** The Phase 2 attack requires K1 << 0.08·sqrt(n). For
+secp256k1 this means k1 < 2^{124.7}, about 3–4 bits stronger than the standard GLV k1
+bound (~2^128). This is an extremely strong bias not present in standard ECDSA; the threat
+model for Phase 2 is considerably narrower than the 2026-07-26 assessment suggested.
+
+### Next step proposal
+
+1. **Thread 23 (Phase 2 threshold formula)**: Derive the K1/K2 threshold analytically.
+   Compute the Gaussian heuristic for the (2m+2)×(2m+2) GLV Phase 2 lattice; show the
+   planted vector is uniquely shortest in its Kannan-coset iff K1 < f(m)·K2 for some
+   f(m). Numerically f(8) ≈ 0.08 at n=2647. Does f(m) → 0 as m → ∞?
+
+2. **Thread 22 (Richelot search)**: Find genus-2 curves over small proxy primes via
+   direct Richelot (2,2)-isogeny search (proposed 2026-07-26, not yet started).
+
+### Commits made
