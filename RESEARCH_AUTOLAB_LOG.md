@@ -5874,3 +5874,88 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). Thread 5 (GLV-HNP Phase 2 toy) was completed
+2026-07-26 and proposed Thread 20 as next step: bisect the λ/n threshold between
+0.07 (known fail) and 0.34 (known pass). No prior work on Thread 20 exists.
+
+### Work done
+- Installed `fpylll`, `sympy`, `cysignals` (not present in this container).
+- Wrote and ran `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (new).
+  Three-part experiment:
+  **Part 1**: Scan 11–13-bit j=0 primes, bin by λ/n in steps of 0.05. For each
+  band, pick one representative curve and run LLL at m=6,8,10,12 with K1=2
+  (eff≈0.04, 3 seeds).
+  **Part 2**: Same curves, fixed K1=8 (same as prior "fail" test), 3 seeds.
+  **Part 3**: Same curves, K1=8, 5 seeds, M_VALS=[8,12,16].
+  Also ran isolation experiment: re-test p=2677 (lam/n=0.07) with K1=2.
+- Ran `cargo test --test curve_audit` → 5/5 pass (4.34s). ✓
+
+### Findings
+
+**REFUTATION of the 2026-07-26 "λ/n structural threshold" claim.**
+
+The prior run concluded: "λ/n=0.07 → LLL structural failure (even BKZ-40)."
+This was WRONG. The failure was due to K1_bound=8 (eff≈17%), not λ/n.
+
+**Part 1 results (K1=2, eff≈0.04):**
+All 9 bands pass 3/3 at m=6, including the lowest λ/n band tested:
+```
+[0.05,0.10)  p=2053, n=2137, lam=201, lam/n=0.094  → PASS(m=6)
+[0.10,0.15)  p=2281, n=2203, lam=285, lam/n=0.129  → PASS(m=6)
+...all bands up to [0.45,0.50) → PASS(m=6)
+```
+**Isolation experiment**: p=2677 (lam/n=0.07, the "failing" curve) re-tested
+with K1=2 instead of K1=8 → passes 3/3 at m=6. The 2026-07-26 failure was
+entirely due to K1_bound, not λ/n.
+
+**Part 2/3 results (K1=8, eff≈0.17, 5 seeds):**
+```
+lam/n=0.094 (n=2137):  0/5, 0/5, 2/5  → FAIL
+lam/n=0.129 (n=2203):  0/5, 2/5, 4/5  → FAIL (boundary)
+lam/n=0.163 (n=2143):  2/5, 4/5, 5/5  → PASS(m=16) [marginal]
+lam/n=0.204 (n=2671):  5/5, 5/5, 5/5  → PASS(m=8)
+lam/n=0.288 (n=2389):  5/5, 5/5, 5/5  → PASS(m=8)
+lam/n=0.315 (n=2251):  0/5, 1/5, 0/5  → FAIL [anomalous]
+lam/n=0.395 (n=2089):  3/5, 4/5, 5/5  → PASS(m=16)
+lam/n=0.431 (n=2293):  5/5, 5/5, 5/5  → PASS(m=8)
+lam/n=0.472 (n=2341):  0/5, 0/5, 0/5  → FAIL [anomalous]
+```
+The pattern is **not a clean λ/n threshold**. The anomalous failures at
+lam/n=0.315 and lam/n=0.472 (which should be "easy") rule out a simple
+cutoff. The dominant variable is `eff = K1*K2/n`:
+- K1=2, eff≈0.04: universal pass
+- K1=8, eff≈0.17: mixed, with instance-dependent variation
+
+The partial correlation with λ/n at fixed eff is real but secondary and noisy.
+It reflects the -λ*S_K1 entry in the GLV lattice being smaller when λ is small,
+reducing the Gram-Schmidt orthogonality of the k2-constraint rows. But this
+effect is dominated by eff at 12-bit scale.
+
+**Structural implication for secp256k1:**
+The Phase 2 GLV-aware attack validated in 2026-07-26 requires k1 << √n
+(i.e., K1 << √n, so eff << 1). For the true GLV decomposition of secp256k1:
+k1, k2 ~ √n → eff = √n * √n / n ≈ 1.0 (no useful bias). The GLV structure
+alone does not provide a lattice attack; an additional nonce bias is required.
+
+### Next step proposal
+**Thread 20 CLOSED (negative result: λ/n is not the threshold variable).**
+
+Two threads remain open:
+1. **Thread 22 (Richelot search over small proxy primes)**: Proposed 2026-07-26
+   run #2. For each of the 5 Howe-qualifying pairs (0,1),(0,3),(0,4),(1,4),(3,4),
+   search for a genus-2 curve C/F_{p'} (small proxy p') whose Jacobian has char
+   poly P_{E_i}·P_{E_j}. PARI is now available. This is the concrete next attack
+   direction.
+2. **Thread 23 (GLV Phase 2 eff threshold)**: The new finding suggests that the
+   true controlling variable is eff = K1*K2/n. A follow-up would: (a) sweep eff
+   from 0.01 to 0.50 at fixed λ/n≈0.30, (b) find the eff threshold below which
+   LLL reliably recovers d for 12-bit curves, (c) extrapolate to the 256-bit case.
+   Expected: threshold eff ~ 1/log(n), as in standard HNP analysis.
+
+Recommend: Thread 22 (Richelot) next, as it advances the main theorem direction.
+
+### Commits made
