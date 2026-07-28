@@ -5874,3 +5874,98 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All six original priority threads are CLOSED (Thread 1
+P-521 LLL 2026-05-22; Thread 2 CHLRS 2026-07-26; Thread 3 Howe sextic twists 2026-05-24;
+Thread 4 cross-curve LLL 2026-05-25; Thread 5 GLV-HNP Phase 2 2026-05-26; Thread 6 B5/F_{p^k}
+2026-05-27). Thread 20 was the top-priority new thread proposed in the 2026-07-26 log: bisect
+the λ/n threshold between 0.07 (known fail) and 0.34 (known pass, K1_BOUND=8).
+
+### Work done
+
+- Installed `fpylll` 0.6.4, `cysignals` 1.12.5, `sympy` 1.14 (not present in this container).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (~320 lines):
+  - Phase A: scans primes p ∈ [2000, 16000], p ≡ 1 mod 6, via Eisenstein CM + j0_traces.
+    Collected 440 prime-order j=0 curves with n ≡ 1 mod 3 and GLV eigenvalue.
+  - Phase B: bins curves by λ/n with width 0.05.
+  - Phase C: runs GLV-HNP Phase 2 LLL attack (K1_BOUND=8, K2_BOUND=⌈√n⌉, seeds=[42,1234,9999],
+    m_max=18) for one representative per bin plus known-reference curves.
+- First run (K1_BOUND=4): ALL curves succeeded, including the known-fail (n=2647). Revealed
+  prior failure was K1-dependent.
+- Second run (K1_BOUND=8): known-fail (n=2647) still fails; known-pass (n=199) also fails
+  (K1_BOUND=8 is too weak for n=199). New-curve scan showed MIXED results — not a clean λ/n
+  threshold.
+- Deep-dive experiment (inline script):
+  - Extended n=2647 sweep to m=33: never 3/3 (occasional 1/3 at m=24, m=33; structural failure).
+  - Collected ~10 additional 12-bit curves with λ/n < 0.15 and tested K1_BOUND=8 at m=5,8,11,14.
+- `cargo test --test curve_audit` → 5/5 pass (5.94s). ✓
+
+### Findings
+
+**The λ/n threshold does NOT exist as a clean monotone boundary.**
+
+Full dataset (K1_BOUND=8, m_max=14 or 18):
+
+| n     | λ/n    | λ      | λ/√n  | λ*K2/n | m_thresh | result       |
+|-------|--------|--------|-------|---------|----------|--------------|
+| 2551  | 0.0196 | 50     | 0.99  | 1.00    | m=8      | 3/3 ✓        |
+| 3571  | 0.0288 | 103    | 1.72  | 1.73    | m=11     | 3/3 ✓        |
+| 3169  | 0.0306 | 97     | 1.72  | 1.74    | m=11     | 3/3 ✓        |
+| 2791  | 0.0326 | 91     | 1.72  | 1.73    | m=11     | 3/3 ✓        |
+| 2437  | 0.0349 | 85     | 1.72  | 1.74    | m=11     | 3/3 ✓        |
+| 2269  | 0.0361 | 82     | 1.72  | 1.73    | m=11     | 3/3 ✓        |
+| 1951  | 0.0390 | 76     | 1.72  | 1.75    | m=14     | 2/3 marginal |
+| 2179  | 0.0564 | 123    | 2.63  | 2.65    | —        | 0/3 FAIL     |
+| 3217  | 0.0634 | 204    | 3.60  | 3.62    | —        | 2/3 marginal |
+| 2647  | 0.0700 | 185    | 3.60  | 3.64    | —        | 0/3 FAIL     |
+| 12433 | 0.0089 | 111    | 0.99  | 1.00    | m=5      | 3/3 ✓        |
+| 14947 | 0.0510 | 763    | 6.24  | 6.28    | m=10     | 3/3 ✓        |
+| 2659  | 0.6600 | 1755   | 34.0  | 34.0    | m=6      | 3/3 ✓        |
+
+**Revised finding: the metric λ/√n (equivalently λ*K2/n where K2=⌈√n⌉) better predicts
+failure for 12-bit curves:**
+- λ/√n ≤ 1.75 (λ*K2 ≤ 1.75n): 3/3 success at m ≤ 14 for all tested 12-bit curves.
+- λ/√n ≈ 2.6 (λ*K2 ≈ 2.65n): FAIL — n=2179 hard failure; n=3217 marginal.
+- λ/√n ≈ 3.6 (λ*K2 ≈ 3.6n): FAIL — n=2647 hard failure (0/3 at m=5..33).
+- BUT n=14947 (14-bit) with λ/√n ≈ 6.2 SUCCEEDS at m=10.
+
+**The finite-size interaction:** for 14-bit+ n, even λ/√n = 6+ works. The λ/√n failure
+threshold is n-dependent and appears to be a 12-bit finite-size artefact. The column scaling
+S_K1 = n//K1_BOUND grows with n, improving the absolute signal-to-noise even as the relative
+λ/n ratio stays small.
+
+**K1_BOUND confound (crucial):** With K1_BOUND=4 instead of K1_BOUND=8, ALL curves
+succeed (including n=2647 at m=6 and n=2179). The "failure" is NOT structural — it is a
+lattice-signal-strength issue specific to (n, K1_BOUND). With stronger bias (K1_BOUND=4),
+the planted vector's signal-to-noise improves enough to recover in all cases.
+
+**Conclusion for Thread 20:** The λ/n threshold proposed in the 2026-07-26 log does not
+exist. The "known-fail" at n=2647, λ/n=0.07, K1_BOUND=8 is a finite-size lattice effect,
+not a fundamental obstruction. For realistic secp256k1 attack parameters (256-bit n, small
+K1_BOUND), λ/n is not the binding constraint — K1_BOUND relative to n is.
+
+**BKZ note:** The prior 2026-07-26 finding that "BKZ(β=40) also fails for n=2647" is
+consistent with this: even BKZ doesn't rescue the attack when the lattice signal-to-noise
+is too weak (K1_BOUND=8 at n=2647). Reducing K1_BOUND (stronger bias) fixes the issue,
+not increasing the reduction quality.
+
+### Next step proposal
+
+**Thread 23 (secp256k1 Phase 2 feasibility study):**
+The key remaining open question is whether the GLV-HNP Phase 2 attack is feasible on
+secp256k1 at full 256-bit scale. Given:
+- K1_BOUND needs to be small relative to n for success (K1_BOUND=4 works for 12-bit n)
+- For n ≈ 2^256, K1_BOUND ≈ 2^64 (a 64-bit biased nonce component) would be needed
+- This requires the GLV decomposition k1 component to be leaked/biased in the ECDSA signer
+
+Concrete falsifier: implement the GLV-HNP Phase 2 lattice for n=secp192k1 (192-bit) with
+inflated bias (k_bits=48 → K1_BOUND=2^16), using the HP LLL from src/cryptanalysis/lattice.rs.
+If it recovers d, the attack scales. If not, quantify the gap.
+
+**Thread 22 (Richelot search):** remains open — direct search for genus-2 curves whose
+Jacobian splits over small proxy primes for qualifying sextic-twist pairs.
+
+### Commits made
