@@ -5969,4 +5969,4 @@ cover-attack search question independent of the LLL studies.
 Recommend Thread 21 (12-bit floor) as the more concrete next step.
 
 ### Commits made
-PLACEHOLDER
+05cc506 autolab 2026-07-28: Thread 20 λ/n threshold — hypothesis refuted; n size is primary factor
