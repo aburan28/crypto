@@ -5985,4 +5985,4 @@ identified in Thread 18. PARI needed; requires gp or alternate algebraic CAS.
 Thread 20 is the better next target since Python can run it without PARI.
 
 ### Commits made
-(to be filled after push)
+f9ef0ea autolab 2026-07-28: Thread 6 B5/F_{p^k} — EXP-A/B/C verified; all 6 priority threads closed
