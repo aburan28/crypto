@@ -5974,3 +5974,4 @@ Two sub-tasks to finalize Thread 20:
    a misattribution — the failure was eff-driven, not λ/n-driven.
 
 ### Commits made
+bea6846 autolab 2026-07-28: Thread 20 — λ/n threshold resolved as eff artifact; no structural λ/n cutoff
