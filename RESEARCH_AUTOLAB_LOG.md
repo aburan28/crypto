@@ -5954,3 +5954,4 @@ model for Phase 2 is considerably narrower than the 2026-07-26 assessment sugges
    direct Richelot (2,2)-isogeny search (proposed 2026-07-26, not yet started).
 
 ### Commits made
+4e5aebb autolab 2026-07-28: Thread 20 — λ/n threshold refuted; K1/sqrt(n) is the true failure axis
