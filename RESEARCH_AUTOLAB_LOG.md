@@ -5980,4 +5980,4 @@ Script: `glv_hnp_phase2_eff_threshold.py`.
 **Thread 22 (Richelot search):** still open, lower priority.
 
 ### Commits made
-PLACEHOLDER
+1816360 autolab 2026-07-28: Thread 20 — lam/n threshold null result; eff<0.09 is real bottleneck
