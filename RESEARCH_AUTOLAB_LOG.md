@@ -5986,3 +5986,4 @@ at 256-bit is NOT eff or λ/n but GS precision, which was already resolved via H
    mode is eff-dependent, not λ/n-dependent. Update the research notes.
 
 ### Commits made
+`e67123d` autolab 2026-07-28: Thread 20 — λ/n threshold refuted; eff=K1·K2/n is the true LLL failure parameter
