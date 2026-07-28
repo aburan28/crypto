@@ -5954,3 +5954,4 @@ Run the λ/n sweep proposed in the 2026-07-26 log using `glv_hnp_phase2_toy.gp` 
 bisect the threshold between 0.07 and 0.34. Candidates: λ/n ∈ {0.10, 0.15, 0.20, 0.25}.
 
 ### Commits made
+57ca277 autolab 2026-07-28: Thread 4 CLOSED — 384-bit LLL 3/3 seeds confirmed (P-384 + brainpoolP384r1)
