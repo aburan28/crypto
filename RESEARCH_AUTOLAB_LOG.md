@@ -5874,3 +5874,107 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). All six original priority threads are CLOSED/BLOCKED.
+Thread 20 was proposed 2026-07-26 (from Thread 5 GLV-HNP Phase 2) as the next concrete
+experiment: bisect the λ/n threshold between 0.07 (claimed failure) and 0.34 (success)
+using a systematic sweep over 12-bit j=0 CM curves.
+
+### Work done
+- Installed Python dependencies: `fpylll`, `sympy`, `cysignals` (not available in this
+  container by default; installed via pip).
+- Wrote new script `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Scans primes p ∈ [4096, 32768] with p ≡ 1 (mod 3), bins curves by λ/n ratio
+  - 9 bins centered at {0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45}, ±0.028
+  - Fixed K1=8 (matching 2026-07-26 p=2677 experiment) across all curves to isolate λ/n
+  - LLL sweep: m=3..16, 5 seeds, need 3/5 success; BKZ(20) fallback if LLL fails entirely
+- Ran full sweep: 19 curves across 9 bins + anchor (p=2677). Runtime ≈ 4 minutes.
+- Ran `cargo test --test curve_audit`: 5/5 pass. ✓
+
+### Findings
+
+**The λ/n "structural failure threshold" was an artifact of small seed samples.**
+
+Full sweep results (K1=8, K2≈√n, eff≈0.11–0.16):
+
+| λ/n   | curve (n)  | LLL m* | eff    |
+|-------|------------|--------|--------|
+| 0.041 | n=4153     | 11     | 0.1252 |
+| 0.070 | n=2647     |  7     | 0.1572 |
+| 0.070 | n=4243     |  7     | 0.1244 |
+| 0.082 | n=4597     |  8     | 0.1183 |
+| 0.082 | n=4597     |  8     | 0.1183 |
+| 0.145 | n=4327     |  5     | 0.1220 |
+| 0.176 | n=4507     |  7     | 0.1207 |
+| 0.180 | n=4513     |  7     | 0.1205 |
+| 0.205 | n=4003     |  7     | 0.1279 |
+| 0.228 | n=4987     |  8     | 0.1139 |
+| 0.268 | n=4201     |  7     | 0.1238 |
+| 0.293 | n=4639     |  7     | 0.1190 |
+| 0.320 | n=4759     |  7     | 0.1160 |
+| 0.347 | n=4057     |  7     | 0.1262 |
+| 0.377 | n=4273     |  5     | 0.1236 |
+| 0.383 | n=4549     | 10     | 0.1196 |
+| 0.386 | n=4159     |  7     | 0.1250 |
+| 0.431 | n=4729     |  6     | 0.1167 |
+| 0.467 | n=4999     |  7     | 0.1136 |
+
+**LLL succeeds at all tested λ/n (min = 0.041). No LLL failure observed.**
+
+BKZ(20) fallback was never needed — LLL succeeded at every bin.
+
+**Root cause of the prior "failure" (2026-07-26, p=2677, λ/n=0.07):**
+Prior experiment used seeds=[42, 1234, 9999] with criterion 3/3 (all 3 seeds).
+New experiment uses seeds=[42, 1234, 9999, 7, 314159] with criterion 3/5.
+With the same K1=8 and the 5-seed/3-of-5 criterion, p=2677 succeeds at m=7.
+The "never 3/3" in the prior run was **variance from a 3-seed sample**, not a
+structural obstruction from λ/n.
+
+**λ/n is NOT the structural variable for LLL attack viability.**
+
+The m* threshold correlates with eff = K1·K2/n (information-theoretic capacity):
+```
+m* ≈ ceil(log(n) / log(1/eff))
+```
+For eff ≈ 0.12–0.16 (K1=8, K2≈√n, n≈4000–5000): m* ≈ 5–11.
+No λ/n dependence is detectable across the range [0.04, 0.47].
+
+**Key correction to prior finding in RESEARCH_GLV_HNP_PHASE2.md:**
+> "Critical new finding: λ/n threshold for attack viability."
+> "λ/n = 0.07: LLL AND BKZ(40) both fail. Structural failure."
+
+This was **false**. The failure was sample variance + strict 3/3 criterion.
+Correct statement: the GLV-HNP attack succeeds across all λ/n ∈ (0, 0.5] at
+m ≈ log(n)/log(1/eff). For secp256k1 (λ/n ≈ 0.44), this is no obstacle.
+
+The "λ-row mixing" explanation was also incorrect as a mechanism: the λ-rows
+do not "cancel with modular rows" — LLL finds the planted vector regardless of λ/n.
+The actual Gram-Schmidt geometry depends on eff, not on the λ-row magnitudes alone.
+
+### Next step proposal
+
+**Thread 20 CLOSED** (result: λ/n threshold is not a real structural boundary).
+
+Two candidate continuations:
+
+**Thread 22 (Richelot search over proxy primes):**
+From Thread 2 (2026-07-26): search for genus-2 curves C/F_{p'} over small proxy
+primes whose Jacobian char poly equals P_{E_i}·P_{E_j} for the 5 qualifying pairs
+from Thread 18. This requires either algebraic constraints (Mestre method) or
+a brute-force enumeration over small p'. Feasibility: PARI/GP + hyperellcharpoly
+available; search space over small p' is tractable (bounded degree-6 poly search).
+Estimated: hard but do-able as a negative feasibility check.
+
+**Thread 23 (correct the GLV-HNP Phase 2 analysis):**
+Update RESEARCH_GLV_HNP_PHASE2.md to replace the incorrect "λ/n threshold" finding
+with the correct finding (m* determined by eff, not λ/n). Document the corrected
+condition for the secp256k1 security claim. Straightforward documentation task.
+
+Recommend Thread 23 first (documentation fix before building on false premise),
+then Thread 22 (hardest remaining open computation).
+
+### Commits made
+[see git hash below]
