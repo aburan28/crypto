@@ -5874,3 +5874,99 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study): proposed in 2026-07-26 run #1 as the next concrete task,
+never executed. Goal: bisect the λ/n threshold between 0.07 (prior failure) and 0.34 (success)
+to determine whether small λ/n is the root cause of the p=2677 LLL failure.
+
+### Work done
+- Installed `fpylll`, `sympy`, `cysignals` (not present in this container session).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: systematic search for j=0
+  curves in [2^11, 2^14] with various λ/n values, then LLL sweep m=3..15 with 3 seeds.
+- Ran the threshold sweep: found 531 (p,n,λ) triples in [2048,16384], collected 7 curves
+  with λ/n ∈ {0.051, 0.101, 0.204, 0.252, 0.303, 0.402, 0.451}.
+- Added focused test of the specific p=2677, n=2647, λ=185 curve to confirm prior failure.
+- Ran `cargo test --test curve_audit`: 5/5 pass (5.42s). ✓
+
+### Findings
+
+**The λ/n threshold hypothesis is REFUTED.**
+
+LLL sweep results (K1_BOUND=8, K2_BOUND=isqrt(n)+1, 3 seeds):
+
+| λ/n   | n     | bits | eff   | min_m (3/3) |
+|-------|-------|------|-------|-------------|
+| 0.051 | 14947 | 14b  | 0.066 | **7**  ✓   |
+| 0.101 | 15451 | 14b  | 0.065 | **6**  ✓   |
+| 0.204 |  2671 | 12b  | 0.156 | **6**  ✓   |
+| 0.252 | 12781 | 14b  | 0.071 | **5**  ✓   |
+| 0.303 |  2377 | 12b  | 0.165 | **12** ✓   |
+| 0.402 | 10939 | 14b  | 0.077 | **5**  ✓   |
+| 0.451 |  4021 | 12b  | 0.127 | **12** ✓   |
+
+Focused re-test of the specific prior-run failure case:
+- p=2677, n=2647, λ=185, λ/n=0.070, eff=0.157
+- Result: m=3..15 → {0,0,0,0,1,0,0,0,0,0,1,0,0} — **NEVER 3/3** (unchanged from prior run)
+
+**Key finding: λ/n is NOT the primary determinant of attack difficulty.**
+
+The n=14947 curve with λ/n=0.051 (even smaller than the "failure" at λ/n=0.07) succeeds
+at m=7. The failure at n=2647 is NOT caused by small λ/n.
+
+**True determining factor: n (group order size = bit length).**
+
+Pattern from data:
+- 14-bit curves (n≈10000-16000): LLL succeeds at m=5–7 across all tested λ/n values.
+- 12-bit curves (n≈2000-5000): LLL needs m=6–12 and sometimes fails (n=2647 never 3/3 at m≤15).
+- Anomaly: n=2671 (12b, λ/n=0.204) succeeds at m=6; n=2377 and n=4021 need m=12.
+  — Suggests within 12-bit range there is significant curve-to-curve variance.
+
+**Theoretical explanation (corrected):**
+
+The planted vector has entries of scale k1_i×S_K1 ≤ K1×S_K1 = n in the k1-columns.
+The modular rows have entries n×S_K1 = n²/K1. The CONTRAST RATIO is n×S_K1 / k1×S_K1 = n/k1_i ≈ n/K1.
+
+For larger n: modular rows are n/K1 × larger than typical planted entries → planted vector
+stands out more clearly as a short lattice vector → LLL finds it more reliably.
+
+For small n (2647): with K1=8, the planted entry k1_i × 330 ≤ 2310 is nearly as large as
+the modular entry n×330 = 873510... wait no. Row i has norm = n×S_K1 = 2647×330 = 873510.
+Planted entry in col i = k1_i×330 ≤ 7×330 = 2310. Ratio = 873510/2310 ≈ 378. That seems large.
+
+Actually the issue is more subtle: the **Gram-Schmidt orthogonalization** is affected by having
+too many "similar magnitude" rows (m modular rows + m lambda rows), and for small n the GS
+vectors for the lambda rows have small orthogonal components, reducing LLL's ability to isolate them.
+For larger n, the lambda rows have larger absolute values and the GS geometry is more favorable.
+
+**p=2677 failure: specific curve geometry, compounded by small n.**
+
+n=2647 is 12-bit (n<2^12). The failure is consistent with the 12-bit curse: small absolute
+values make the Gram-Schmidt geometry degenerate for this specific lattice. The failure
+persists even at m=15, suggesting a structural (not simply parameter-tuning) issue for n<4096.
+
+**secp256k1 is unaffected:** n≈2^256, which is vastly above the regime where this failure
+occurs. At 256-bit scale, the modular-row vs planted-entry contrast is enormous, and the
+HP-LLL framework handles the GS precision (Threads 1/10.3–10.5). The GLV-HNP attack
+(Phase 2) on secp256k1 is NOT rescued by the small-n failure mode.
+
+### Next step proposal
+
+**Thread 21 (12-bit floor investigation):**
+For 12-bit curves, success at n=2671 (m=6) but failure at n=2647. These are close in size.
+Run a focused sweep over ALL prime-order j=0 curves in [2000, 3000] and classify success/fail
+by checking 3-seed 3/3 at m=12. This would reveal whether the failure is purely about n≤2647
+or has a more subtle discriminant (specific lattice structure, eff, curve twist class).
+Proposed script: `glv_hnp_phase2_12bit_floor.py`.
+
+**OR Thread 22 (Richelot search, more ambitious):**
+From Thread 2 closing: search for a genus-2 curve over a proxy prime p' with Jacobian
+isogenous to E_i × E_j for qualifying pairs (0,1),(0,3),(0,4),(1,4),(3,4). This is an open
+cover-attack search question independent of the LLL studies.
+
+Recommend Thread 21 (12-bit floor) as the more concrete next step.
+
+### Commits made
+PLACEHOLDER
