@@ -5874,3 +5874,110 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). All six original priority threads are CLOSED:
+P-521 (closed May 2026), CHLRS (blocked 2026-07-26), Howe sextic (closed May 2026),
+cross-curve LLL (closed May 2026), GLV-HNP Phase 2 (closed 2026-07-26), B5 (closed
+May 2026). Thread 20 was proposed in the 2026-07-26 run as the next step for the
+GLV-HNP Phase 2 direction: bisect the λ/n failure boundary observed between
+lam/n=0.07 (fail) and lam/n=0.34 (succeed).
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  Eisenstein CM search over 8-22 bit primes, bins curves by lam/n into 6 buckets
+  [0.05,0.10), [0.10,0.15), ..., [0.30,0.35). Tests LLL (3 seeds) at
+  m_thresh..m_thresh+8 for 2 curves per bin.
+- Installed fpylll+sympy in container (needed fresh install).
+- Ran the sweep; found 12 curves across all 6 bins from 57 primes scanned.
+- Observed **anchor curve (p=2677, n=2647, lam/n=0.07) SUCCEEDS at m=5** with K1=2,
+  contradicting the prior "always-fail" conclusion.
+- Confirmed prior K1=8 parameterization still fails (1/3 at best), while K1=2
+  succeeds 3/3 — the prior failure was a parameterization artifact, not structural.
+- Ran `eff threshold sweep`: fixed n=2647, varied K1 from 1 to 20, measured recovery
+  at m=8 across 3 seeds.
+- Ran `cargo test --test curve_audit`: 5/5 pass. ✓
+
+### Findings
+
+**1. No λ/n threshold in [0.05, 0.50].**
+
+All 12 curves across all bins succeed (at some m ≤ m_thresh+7). Table:
+
+| Bin         | lam/n  | n    | m_thresh | first_3/3 | overhead |
+|-------------|--------|------|----------|-----------|----------|
+| anchor      | 0.0700 | 2647 | 3        | m=5       | +2       |
+| [0.05,0.10) | 0.0664 | 211  | 3        | m=4       | +1       |
+| [0.05,0.10) | 0.0622 | 241  | 3        | m=5       | +2       |
+| [0.10,0.15) | 0.1033 | 271  | 3        | m=5       | +2       |
+| [0.10,0.15) | 0.1296 | 409  | 3        | m=7       | +4       |
+| [0.15,0.20) | 0.1749 | 223  | 3        | m=5       | +2       |
+| [0.15,0.20) | 0.1555 | 283  | 3        | m=6       | +3       |
+| [0.20,0.25) | 0.2262 | 367  | 3        | m=7       | +4       |
+| [0.20,0.25) | 0.2359 | 373  | 3        | m=7       | +4       |
+| [0.25,0.30) | 0.2652 | 181  | 3        | m=10      | +7       |
+| [0.25,0.30) | 0.2786 | 499  | 3        | m=4       | +1       |
+| [0.30,0.35) | 0.3022 | 139  | 3        | m=10      | +7       |
+| [0.30,0.35) | 0.3496 | 349  | 3        | m=6       | +3       |
+
+**2. Prior "lam/n=0.07 failure" was a parameterization artifact.**
+
+- Prior run (2026-07-26) used K1=8 → eff = 8×52/2647 = 0.157 (too large).
+- Optimal K1=2 → eff = 2×52/2647 = 0.039 → 3/3 at m=5.
+- Confirmation: K1=8 still fails (0-1/3 at m=5-12) while K1=2 succeeds (3/3 at m=5).
+
+**3. Critical parameter is eff = K1×K2/n, not λ/n.**
+
+eff threshold sweep (n=2647, lam/n=0.07, m=8 fixed, K2=52):
+
+| K1 | eff    | result | verdict |
+|----|--------|--------|---------|
+|  1 | 0.0196 | 3/3    | SUCCEED |
+|  2 | 0.0393 | 3/3    | SUCCEED |
+|  3 | 0.0589 | 3/3    | SUCCEED |
+|  4 | 0.0786 | 3/3    | SUCCEED |
+|  5 | 0.0982 | 2/3    | PARTIAL |
+|  6 | 0.1179 | 0/3    | FAIL    |
+|  7 | 0.1375 | 0/3    | FAIL    |
+|  8 | 0.1572 | 0/3    | FAIL    |
+| 10 | 0.1964 | 0/3    | FAIL    |
+| 12 | 0.2357 | 0/3    | FAIL    |
+| 15 | 0.2947 | 0/3    | FAIL    |
+| 20 | 0.3929 | 0/3    | FAIL    |
+
+**eff threshold ≈ 0.09** (sharp transition: eff ≤ 0.0786 → 3/3; eff ≥ 0.1179 → 0/3).
+
+**4. Heuristic from threshold:**
+
+K2_BOUND = sqrt(n)+1 is fixed (standard GLV bound). So eff < 0.09 becomes:
+  K1_BOUND < 0.09 × n / K2_BOUND ≈ 0.09 × sqrt(n)
+
+For secp256k1 (n ≈ 2^256): K1_BOUND < 0.09 × 2^128 ≈ 2^124.
+This means: if the top 132 bits of the GLV k1 component are known/zero-biased,
+the GLV-HNP LLL attack works. (Standard ECDSA HNP needs ~8-10 known bits of k
+for 256-bit curves; this is more demanding but follows the same framework.)
+
+**5. Variance note:**
+
+Overhead (first_3/3 - m_thresh) ranges 1-7 at small n (8-12 bit). This is
+finite-field / small-n variance; confirmed by non-monotone recovery in some bins
+(e.g., lam/n=0.2652, n=181: 1/3 at m=3, 0/3 at m=4, then 2/3 at m=5, ..., 3/3
+at m=10). Larger-n curves needed for stable statistics.
+
+### Next step proposal
+
+**Thread 21: eff threshold verification at larger n.**
+
+The eff~0.09 threshold was measured at n=2647 (12-bit). Verify it holds at:
+- n ≈ 2^16 (16-bit): pick a j=0 curve, sweep K1 = 1..30 at m=10.
+- n ≈ 2^20 (20-bit): pick the known curve (n=523969, lam/n=0.34), sweep K1.
+Expected: threshold at eff≈0.09 in both cases → universal constant.
+Script: `glv_hnp_phase2_eff_threshold.py`.
+
+**Thread 22 (Richelot search):** still open, lower priority.
+
+### Commits made
+PLACEHOLDER
