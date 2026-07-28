@@ -5874,3 +5874,92 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold bisection). Last proposed by 2026-07-26 as the immediate
+next step after validating the Phase 2 GLV-HNP toy attack. The 07-26 log reported that
+the attack FAILED for λ/n=0.07 and hypothesised a threshold between 0.07 and 0.34.
+Today's goal: write `glv_hnp_phase2_lambda_threshold.py`, sweep all λ/n ratios, find
+the threshold empirically.
+
+### Work done
+- Installed `fpylll` (pip) and `cysignals` (pip); confirmed `gp` available.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.83s). ✓
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (250 lines):
+  - Sweeps primes p ∈ [4096, 32768] with p≡1 mod 3.
+  - For each p: Eisenstein decomposition → 6 Frobenius traces → 6 candidate n values.
+  - Selects prime n with n≡1 mod 3; computes GLV eigenvalue λ via √(-3) mod n.
+  - Groups curves by λ/n bucket (width 0.05); picks one representative per bucket.
+  - For each bucket: runs Phase 2 attack (K1_BOUND=2, K2_BOUND=ceil(√n)+1) with 3 seeds,
+    sweeps m from 3 to min(12, m_thresh+5).
+- Ran the script → 458 curves found; 10 buckets from [0.00,0.05) to [0.45,0.50).
+
+### Findings
+
+**MAIN RESULT: λ/n threshold hypothesis REFUTED.**
+
+The Phase 2 GLV-HNP attack succeeds for ALL λ/n ratios tested, including λ/n=0.006.
+
+**Curve discovery (458 curves, [4096, 32768]):**
+
+| bucket | p | n | λ | λ/n | m needed |
+|--------|---|---|---|-----|----------|
+| [0.00) | 28057 | 28393 | 168 | 0.0059 | **3** |
+| [0.05) | 22621 | 22501 | 1132 | 0.0503 | **4** |
+| [0.10) | 15313 | 15451 | 1557 | 0.1008 | **4** |
+| [0.15) | 10837 | 10909 | 1641 | 0.1504 | **5** |
+| [0.20) | 31963 | 31627 | 6419 | 0.2030 | **4** |
+| [0.25) | 28411 | 28573 | 7185 | 0.2515 | **3** |
+| [0.30) | 28549 | 28837 | 8680 | 0.3010 | **3** |
+| [0.35) | 13327 | 13099 | 4616 | 0.3524 | **4** |
+| [0.40) | 30637 | 30469 | 12222 | 0.4011 | **4** |
+| [0.45) | 30391 | 30703 | 13831 | 0.4505 | **4** |
+
+All buckets: 3/3 seeds at m=3–5. No failures.
+
+**Special case: λ²+λ+1 = n exactly (bucket [0.00)).**
+For p=28057, n=28393, λ=168: 168²+168+1 = 28393 = n. This is the minimal n for
+λ=168, the "most degenerate" possible GLV structure. Attack still succeeds at m=3.
+
+**Root cause of 07-26 "λ/n=0.07 failure" IDENTIFIED:**
+The 07-26 small-λ failure (p=2677) used K1_BOUND=36, K2_BOUND≈52:
+```
+eff = K1_BOUND × K2_BOUND / n = 36 × 52 / n ≈ 0.69 >> 0
+m_thresh = ceil(log n / log(1/eff)) ≈ 22  (requires 22 signatures)
+Tested: only 12 signatures → FAIL (information-theoretic shortfall, NOT λ/n)
+```
+With K1_BOUND=2 (tight bias): eff ≈ 0.039, m_thresh ≈ 3. SUCCESS immediately.
+
+**Revised structural understanding:**
+The attack bottleneck is `eff = K1_BOUND × K2_BOUND / n`:
+- Attack works iff eff < 1 and m > m_thresh = ceil(log n / log(1/eff))
+- λ/n has NO effect on attack viability (m_thresh is constant ≈ 3–5 across all λ/n buckets
+  when K1_BOUND=2 and K2_BOUND=√n)
+- The 07-26 λ/n hypothesis was a confounding variable: smaller n combined with fixed
+  K1_BOUND=36 raised eff toward 1, not the λ/n ratio itself
+
+**Implication for secp256k1:**
+For secp256k1 (n≈2²⁵⁶, λ≈0.44n, K2_BOUND=2¹²⁸):
+  K1_BOUND must satisfy K1_BOUND × 2¹²⁸ / 2²⁵⁶ = K1_BOUND / 2¹²⁸ < 1
+  i.e. K1_BOUND < 2¹²⁸.
+For practical attack (m_thresh ≤ 5): K1_BOUND ≤ 2¹²⁶ (eff ≤ 2⁻²).
+This requires knowing the top ~130 bits of k1 (the k1-component of GLV decomp).
+The λ/n ≈ 0.44 is well into the "safe" regime — the attack works in principle,
+but standard ECDSA does NOT bias k1; only biased-k ECDSA is vulnerable.
+
+### Next step proposal
+**Thread 21 — Update the GLV-HNP paper section** (`paper/eprint_combined.tex` or
+`RESEARCH_GLV_HNP_PHASE2.md`) with the corrected structural understanding:
+- Remove the λ/n threshold claim
+- Replace with: "The bottleneck is eff = K1·K2/n; attack works iff eff << 1 and m > m_thresh"
+- Add table of 10 λ/n buckets (all SUCCESS at m=3–5)
+
+**Thread 22 — Richelot search over proxy primes** (from 07-26):
+For each of the 5 Howe-qualifying pairs (0,1),(0,3),(0,4),(1,4),(3,4) from Thread 18,
+search for a genus-2 curve C/F_{p'} (small proxy prime p') whose Jacobian has char poly
+P_{E_i}(T)·P_{E_j}(T). Uses PARI `hyperellcharpoly` search.
+
+### Commits made
+See next git hash.
