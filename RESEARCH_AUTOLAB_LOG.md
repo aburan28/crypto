@@ -5874,3 +5874,83 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+
+**Thread 4 (Cross-curve LLL with scaled-GS fix — 3-of-3 seed confirmation).**
+
+Threads 1 (P-521 LLL) and 2 (CHLRS Igusa) are CLOSED. Thread 3 (sextic twists /
+Thread 18) was completed 2026-07-21. Thread 4 has never been run to completion: the
+2026-05-21 log showed 1-of-3 seeds passing for 384-bit curves; the test
+`probe_384bit_lll_multiseed` was written specifically to confirm the remaining 2
+seeds, but no log entry shows it was ever executed. That test (line 207 of
+`tests/lll_degeneracy_probe.rs`) is not `#[ignore]`'d, so it runs without a flag.
+
+### Work done
+
+- Confirmed build is clean (`cargo build --lib` → 121 warnings, 0 errors).
+- Ran `cargo test --test lll_degeneracy_probe probe_384bit_lll_multiseed -- --nocapture`.
+  Test runs 3 independent `(d_seed, k_seed)` pairs for each of P-384 and brainpoolP384r1
+  at `k_bits=288, m=8` with LLL reduction.
+- Ran `cargo test --test curve_audit` → 5/5 pass (5.17s). ✓
+
+### Findings
+
+**Thread 4 CLOSED: scaled-GS fix is robust for 384-bit curves across 3 independent seeds.**
+
+| Curve | Seed pair | Outcome | Time |
+|-------|-----------|---------|------|
+| P-384 | (0xC0FFEE, 0xC0FFEE) | ✓ RECOVERED | 2560ms |
+| brainpoolP384r1 | (0xC0FFEE, 0xC0FFEE) | ✓ RECOVERED | 2571ms |
+| P-384 | (0xDEADBEEF, 0xBADCFE) | ✓ RECOVERED | 2739ms |
+| brainpoolP384r1 | (0xDEADBEEF, 0xBADCFE) | ✓ RECOVERED | 2690ms |
+| P-384 | (0x12345678, 0x9ABCDEF0) | ✓ RECOVERED | 2563ms |
+| brainpoolP384r1 | (0x12345678, 0x9ABCDEF0) | ✓ RECOVERED | 2620ms |
+
+**Summary: P-384 3/3, brainpoolP384r1 3/3. Total test time: 133.56s.**
+
+Timing variance across seeds is small (<8% spread), consistent with randomness in LLL
+step count rather than any structural instability. The fix from 2026-05-21
+(`big_to_f64_scaled` with `scale_shift = max(0, max_bits - 500)`) is confirmed stable.
+
+Prior documentation in `RESEARCH_LLL_GS_ANALYSIS.md` that framed the 384-bit failures
+as open is now superseded: both P-384 and brainpoolP384r1 are fully resolved.
+
+**Thread status summary after this run:**
+
+| Thread | Description | Status |
+|--------|-------------|--------|
+| 1 | P-521 LLL NaN | CLOSED (NaN fixed; genuine SVP failure acknowledged) |
+| 2 | CHLRS Igusa / Rosenhain | CLOSED (cubic-residue obstruction; F_p approach blocked) |
+| 3/18 | Howe gluing sextic twists | CLOSED (5/15 pairs qualify; 10/15 fail H1/H2/H3) |
+| 4 | Cross-curve LLL 3-of-3 seeds | **CLOSED today** (3/3 P-384, 3/3 brainpoolP384r1) |
+| 5/20 | GLV-HNP Phase 2 + λ/n threshold | OPEN (λ/n bisect threshold not yet done) |
+| 6 | B5 over F_{p^k} | OPEN (never addressed) |
+| 22 | Richelot search (continuation of Thread 2) | OPEN (proposed 2026-07-26) |
+
+### Next step proposal
+
+**Priority 1 for next run: Thread 6 (B5 over F_{p^k})**
+
+Block B5 of the paper covers the cover-cost analysis for genus-2 Jacobians over F_p.
+The original thread asks: does the analysis generalise to abelian-surface DLPs over
+small extensions F_{p^k}? Specifically:
+- The order-2 Frobenius theorem (Threads 15–16) holds for F_p primes. Does the
+  splitting condition change over F_{p^2}?
+- For k≥2, new CM fields become accessible (Frobenius lives in a quadratic extension).
+  Does this give strictly more cover opportunities?
+
+Concrete experiment: use `cover_complexity_ext.gp` (already exists in
+`secp256k1_cm_audit/`) to probe the B5 formula for k=2,3 extensions of a small prime
+and see whether any of the 5 qualifying pairs from Thread 18 give cheaper covers over
+F_{p^k} than over F_p. Document whether the B5 lower bound is stronger or weaker
+over extensions.
+
+**Priority 2: Thread 20 (λ/n threshold bisect)**
+
+Run the λ/n sweep proposed in the 2026-07-26 log using `glv_hnp_phase2_toy.gp` to
+bisect the threshold between 0.07 and 0.34. Candidates: λ/n ∈ {0.10, 0.15, 0.20, 0.25}.
+
+### Commits made
