@@ -5987,4 +5987,4 @@ monotone threshold behaviour.
    scale using bigfloat-aware LLL (fpylll, which supports exact integer arithmetic).
 
 ### Commits made
-(this run)
+5da1f2f autolab 2026-07-28: Thread 20 — λ/n threshold non-monotone; failure zone [0.07,0.33] for n≈2647
