@@ -5954,4 +5954,4 @@ bin_F ratio) and run the LLL sweep. If it also fails, the barrier is structural 
 all scales. If it passes, the 12-bit failure is a small-n arithmetic artifact.
 
 ### Commits made
-PLACEHOLDER
+43b17bd autolab 2026-07-28: Thread 20 — λ/n threshold bisection; threshold at 0.09-0.13; curve-specific outlier identified
