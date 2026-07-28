@@ -5977,4 +5977,4 @@ Recommend Thread 23 first (documentation fix before building on false premise),
 then Thread 22 (hardest remaining open computation).
 
 ### Commits made
-[see git hash below]
+ccadaaa
