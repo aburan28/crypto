@@ -5980,3 +5980,4 @@ search f(x) of degree 6 over F_{p'}. Approach: Richelot isogeny factorisation, o
 coefficient search. PARI script: `secp256k1_cm_audit/richelot_search.gp`. High difficulty.
 
 ### Commits made
+`82c3633` autolab 2026-07-28: Thread 20 — λ/n threshold; no small-λ failure for 20-bit curves; p=2677 was eff>1 artifact
