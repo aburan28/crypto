@@ -5874,3 +5874,104 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-28 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study for Phase 2 attack). All six original priority threads
+are closed or blocked. Thread 20 was proposed on 2026-07-26 as the top follow-on:
+bisect the λ/n threshold between 0.07 (prior failure) and 0.34 (prior success) at
+fixed eff≈0.05. No prior run had executed it.
+
+### Work done
+- Installed `fpylll`, `sympy`, `cysignals` (required each session).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_small_lambda.py`:
+  - Scans 20-bit j=0 CM primes, finds 2 curves per λ/n target in {0.05,0.08,0.10,
+    0.12,0.15,0.18,0.22,0.26} (tol ±0.015). Uses Eisenstein CM machinery.
+  - Attacks with Phase 2 lattice: K1=36 (≈0.05·√n), K2=√n+1, eff≈0.05.
+  - Sweeps m=5..20, 3 seeds per m. BKZ(β=30) rescue pass for LLL failures.
+  - Includes reference points: 20-bit λ/n=0.34 anchor (prior known success),
+    12-bit λ/n=0.07 failure (prior known failure).
+- Ran the full script (486 primes scanned, ~16 curves found across 8 targets).
+- Ran `cargo test --test curve_audit`: 5/5 pass (6.95s). ✓
+
+### Findings
+
+**Summary: ALL λ/n values tested succeed with LLL. There is no small-λ threshold.**
+
+**20-bit Phase 2 sweep results (K1=36, eff≈0.05, m=5..20):**
+
+| λ/n (actual) | n       | lam    | first 3/3 m | outcome      |
+|--------------|---------|--------|-------------|--------------|
+| 0.340        | 523969  | 177902 | 9           | SUCCESS (anchor) |
+| 0.0389       | 524149  | 20387  | 8           | SUCCESS |
+| 0.0430       | 525607  | 22614  | 10          | SUCCESS |
+| 0.0756       | 529741  | 40070  | 7           | SUCCESS |
+| 0.0819       | 523903  | 42888  | 9           | SUCCESS |
+| 0.1063       | 525979  | 55928  | 10          | SUCCESS |
+| 0.1063       | 525979  | 55928  | 11          | SUCCESS |
+| 0.1101       | 523717  | 57663  | 10          | SUCCESS |
+| 0.1173       | 526627  | 61760  | 9           | SUCCESS |
+| 0.1530       | 528487  | 80883  | 8           | SUCCESS |
+| 0.1601       | 525583  | 84143  | 8           | SUCCESS |
+| 0.1771       | 524941  | 92985  | 9           | SUCCESS |
+| 0.1797       | 527203  | 94756  | 9           | SUCCESS |
+| 0.2114       | 523597  | 110663 | 7           | SUCCESS |
+| 0.2158       | 523573  | 113006 | 9           | SUCCESS |
+| 0.2523       | 524047  | 132198 | 8           | SUCCESS |
+| 0.2691       | 524341  | 141120 | 8           | SUCCESS |
+
+No BKZ rescue needed — all curves succeed with LLL alone. First 3/3 ranges m=7..11.
+
+**Critical re-finding: 12-bit λ/n=0.07 failure was K1 miscalibration.**
+
+- 2026-07-26 run: p=2677, n=2647, λ=185, K1=8 → eff=0.157 → FAIL
+- This run:      p=2677, n=2647, λ=185, K1=3 → eff=0.059 → SUCCESS at m=6
+
+The prior "small-λ failure" was NOT due to λ/n being small. K1=8 for a 12-bit
+curve gives eff=0.157, while the 20-bit reference used eff=0.05. Comparing different
+eff values produced the spurious "threshold" observation. With consistent eff≈0.05
+(K1=3 at 12-bit), the attack succeeds at m=6.
+
+**Thread 20 conclusion: CLOSED (negative result). No λ/n lower bound exists for
+the Phase 2 attack at fixed eff≈0.05 in the range λ/n ∈ [0.04, 0.34].**
+
+**Implication for Effect A (λ/n ≈ 1/3 obstruction):**
+The 2026-06-22 `glv_hnp_lamn_boundary.py` experiment (K1=72, eff≈0.10) found that
+the curve p=524347, n=523969, λ=177902 (λ/n=0.34, δ/n=0.019) NEVER succeeds at
+m=10..25. In this run, the SAME curve succeeds at m=9 with K1=36 (eff≈0.05).
+
+This suggests the Effect A obstruction is eff-dependent: at eff=0.10, the 1/3
+obstruction persists; at eff=0.05, it may disappear. This is a new open question.
+Proposed follow-on: run the λ/n≈0.34 anchor at K1=72 with m=5..25 to see if it
+succeeds at m<10 (i.e., whether the obstruction at K1=72 was a threshold-in-m
+artefact of testing only m≥10). If it fails at ALL m at K1=72 but succeeds at any
+m at K1=36, then Effect A is genuinely K1-dependent.
+
+**Verification of invariance claim:**
+Gram-Schmidt analysis shows bstar_{m+1+i} ≈ S_K2·e_{m+1+i} regardless of K1
+(the GLV-row GS orthogonal component is dominated by the k2-column entry, not the
+k1-column entry). So GS geometry IS the same for K1=36 and K1=72. The difference
+must be elsewhere — possibly in how the planted vector's S_KANNAN column interacts
+with the reduced basis at different m.
+
+### Next step proposal
+
+**Two threads:**
+
+**Thread 21 (Effect A K1-dependence, NEW):**
+Run the 20-bit λ/n≈0.34 anchor curve (p=524347, n=523969, lam=177902) at K1=72
+with m=5..15 to determine if it succeeds. The 2026-06-22 run only tested m=10..25.
+If it FAILS at all m at K1=72 but SUCCEEDS at m=9 at K1=36, Effect A is K1-dependent.
+If it SUCCEEDS at m=5..9 (just below the 2026-06-22 scan floor), then Effect A was
+a m-threshold artefact and the 2026-06-22 conclusion needs revision.
+Script: add a short test to `glv_hnp_phase2_small_lambda.py` or a new file.
+
+**Thread 22 (Richelot search, from 2026-07-26):**
+For the 5 qualifying sextic-twist pairs (0,1),(0,3),(0,4),(1,4),(3,4), search for
+a genus-2 curve C/F_{p'} over a proxy prime p' where Rosenhain works, with
+Jac(C) char poly = P_{E_i}·P_{E_j}. This does NOT use the blocked Rosenhain formula
+but instead searches directly for Richelot (2,2)-isogeny decompositions.
+
+### Commits made
+PLACEHOLDER
