@@ -5954,4 +5954,4 @@ obstruction or just a sampling artifact. If 5/5 fail: document as new Effect A b
 If 2-3/5 fail: it's curve-specific, not structural.
 
 ### Commits made
-PLACEHOLDER
+`151a68a` autolab 2026-07-28: Thread 20 — λ/n threshold bisection; Effect B boundary at ≈0.19–0.21
