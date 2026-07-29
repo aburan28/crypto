@@ -5874,3 +5874,126 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Thread 20 (λ/n threshold study)** — proposed as next-step in the 2026-07-26 run #1
+entry (log line 5779). Picked over Thread 22 (Richelot search, proposed by run #2)
+because Thread 20 is bounded and falsifiable, and because a grep of the log surfaced a
+conflict worth resolving: the 2026-07-26 entry proposed *bisecting* a λ/n threshold,
+but the 2026-06-27..29 entries (log lines 3554, 3571) had already falsified λ/n as a
+continuous predictor in the Phase-1 setting, and recorded a specific untested
+alternative (log line ~3595):
+
+> "the separator ... requires a **lattice-geometric computation**: specifically,
+>  whether the BV lattice for (n, λ) admits a short non-planted vector whose norm
+>  is less than sqrt(m) * K1 * S_K1."
+
+That quantity was conjectured on 2026-06-29 and never computed. This run computes it.
+
+New script: `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`
+Output: `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold_output.txt`
+
+### Work done
+
+- **Reproduced the two Phase-2 results of record** before changing anything, as a
+  harness check: n=199/λ=106/K1=2 → 3/3 at m=4; n=2647/λ=185/K1=8 → never 3/3.
+  Both match the 2026-07-26 entry exactly.
+- **Derived the separator in closed form.** For the Phase-2 lattice the non-planted
+  short vectors are the per-index 2-D sublattice
+      `L_glv = { (r·S_K1, a·S_K2) : r ≡ -λ·a (mod n) }`
+  and `S_glv = λ₁(L_glv)` is computed *exactly* by Lagrange-Gauss reduction (no
+  floating point, no LLL). Scale-free form `ρ = S_glv / sqrt(det L_glv)`, `ρ ∈ (0, 1.075]`.
+- **Swept 44 (curve, λ) instances** at n≈2300 (22 curves × both GLV eigenvalues),
+  m ∈ 3..24, 3 seeds, K1=8, K2=isqrt(n)+1.
+- **Held-out set**: 24 instances at n≈16500, disjoint n, with **K1 rescaled to hold
+  eff = K1·K2/n fixed at 0.167**. The first attempt at a holdout left K1=8, which drops
+  eff to 0.06 and made *every* held-out instance attackable — a degenerate test with no
+  negative examples. Matching eff is required or the comparison measures difficulty,
+  not geometry.
+- `cargo test --test curve_audit` → 5/5 pass (4.39s). ✓
+
+### Findings
+
+**1. λ/n is refuted, definitively, in the Phase-2 lattice.**
+
+| set | best single-threshold acc | majority baseline | overlap |
+|---|---|---|---|
+| training (n≈2300, 44 inst) | 29/44 = 65.9% | 65.9% | [0.056, 0.943] covers 38/44 |
+| held-out (n≈16500, 24 inst) | 17/24 = 70.8% | 70.8% | — |
+
+Both tie baseline exactly; the in-sample optimum is at τ=0.0196, i.e. the degenerate
+"always predict attackable". **There is no λ/n threshold to bisect.** Thread 20 as
+literally proposed on 2026-07-26 is CLOSED NEGATIVE. This reproduces in Phase 2 the
+Phase-1 result of 2026-06-27..29.
+
+**2. Why every closed-form invariant of June had to fail — a structural proof.**
+
+At fixed (n, K1, K2), both
+```
+det(L)  = n^m · S_K1^m · S_K2^m · n
+T(m)   ≈ n · sqrt(2m/3 + 4/3)        [planted-vector norm]
+```
+are **independent of λ**. So the entire λ-dependence of the problem lives in the
+geometry of the non-planted sublattice — i.e. in `S_glv`/`ρ` and nothing else. Any
+closed-form separator must be a proxy for it. That explains as a matter of structure,
+not luck, why δ/n, κ(M), q_cf, max_q_cf, max_a and a_corn/n all overlapped.
+
+That λ genuinely acts is confirmed directly: **7 of 22 matched eigenvalue pairs**
+— identical in p, n, b, K1, K2, det L and T(m), differing *only* in λ vs n−1−λ —
+**disagree on attackability**.
+
+**3. The 2026-06-29 conjecture is confirmed, but for the graded target, not the binary one.**
+
+ρ is a *poor* predictor of the binary "ever attackable" label (out-of-sample AUC 0.672,
+frozen-threshold accuracy 66.7% vs 70.8% baseline; the fitted cut point does not transfer).
+But the success set is **right-closed** — 0/29 training instances ever stop succeeding as
+m grows — so the informative response is `m_open` = first m with 3/3 recovery:
+
+| | Spearman(ρ, m_open) | Spearman(λ/n, m_open) | m_open range |
+|---|---|---|---|
+| training (n≈2300, 29 att.) | **+0.868** | −0.194 | 5..19 |
+| held-out (n≈16500, 17 att.) | **+0.544** | +0.099 | 8..22 |
+
+The correct statement is **not** "ρ decides whether a curve is attackable" but
+**"ρ sets how many signatures the attack costs"**. The binary framing was the wrong
+question — it is censoring-sensitive and baseline-dominated, and it is what made the
+June separator hunt look like a dead end.
+
+**4. A 100% separator appeared and was then destroyed by my own control. Recorded as a
+methodological warning.**
+
+At sweep ceiling m ≤ 14, `S_glv/n` separated the training set *perfectly*:
+success ∈ [0.988, 1.724], fail ∈ [1.848, 2.589], **44/44 = 100%, no overlap**.
+Raising the ceiling to m ≤ 24 flipped 7 "never attackable" instances to attackable and
+collapsed it to 84.1% with a 14/44 overlap band. **It was entirely a censoring artifact.**
+Any future entry reporting a sharp separator must state its m ceiling; residual censoring
+remains at n≈16500 (1/17 successes first appear at m ≥ 22 against a ceiling of 24).
+
+**5. Two-sided-window hypothesis REFUTED.** I pre-registered the rule "recovery iff
+T(m) < S_glv", predicting a two-sided window [m_info, m_geom] where extra signatures
+eventually *hurt*. Tested against the three curves of record before running the sweep:
+it calls both known successes unattackable and gets the sign backwards. The sweep
+confirms: 0/29 instances lose recovery as m grows. **More signatures never hurt.**
+The lower edge is also not m_info (2/29 exact; mean overrun +5.14 signatures).
+
+### Next step proposal
+
+**Thread 23 — regress m_open on ρ.** The graded target is the well-posed problem, and
+this run only established rank correlation. Concretely: fit `m_open ≈ α + β·log(1/(1−ρ))`
+(or similar) across n ∈ [2^11, 2^17] at fixed eff, 10 seeds, and report R² out-of-sample.
+If m_open is predictable to ±2 signatures from a quantity computable in O(log n) by Gauss
+reduction, that is a publishable statement about GLV-curve HNP cost and belongs in the
+paper's B5 block. Cost: ~1 hour; all infrastructure is in the new script.
+
+Two caveats to carry forward: (a) ρ's *cut point* drifts with bit size even at fixed eff,
+so any fit must be checked across n, not within one n; (b) for j=0 curves λ is determined
+by n, so ρ and n cannot be fully disentangled by this design — breaking that needs curves
+with the same n and genuinely independent λ, which the matched eigenvalue pairs only
+partially provide.
+
+### Commits made
+
+(recorded in the follow-up commit below)
