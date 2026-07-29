@@ -5982,4 +5982,4 @@ Since all 6 original threads are closed, do the fallback ePrint survey: search
 (Skipped this session due to Thread 20 making concrete progress.)
 
 ### Commits made
-[see git hash after this entry]
+c184d80 autolab 2026-07-29: Thread 20 λ/n threshold — non-monotone pattern; λ/n not sole factor
