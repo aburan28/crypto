@@ -293,6 +293,63 @@ The explicit cover is a **publishable individual result**:
 It would be a nice complement to the paper but is not required
 by the theorem.
 
+## 9.5. Empirical existence check at proxy scale (Thread 22, 2026-07-29)
+
+The 2026-07-26 autolab run proved that the **Rosenhain** route to the
+glued cover is blocked for secp256k1: the formula needs `x³ + b` to
+split over `F_p` (equivalently `-b` a cubic residue), and for
+secp256k1 the 2-torsion lives in `F_{p³} \ F_p`.  That entry is easy
+to misread as "the cover does not exist".  It does not say that, and
+Thread 22 confirms it does not: the obstruction is a property of the
+*parametrisation*, not of the *object*.
+
+Two scripts settle this over proxy primes:
+
+- `secp256k1_cm_audit/howe_c3_family_sweep.py` — for each of 14 primes
+  `p ≡ 1 mod 6`, builds the six `j=0` sextic twists, re-derives the
+  (H1)(H2)(H3) table of Thread 18, and exhaustively sweeps the
+  ζ₃-equivariant family `y² = x⁶ + a x³ + c` (both quadratic twists)
+  for a member whose Weil polynomial is `P_{E_i}·P_{E_j}`.
+- `secp256k1_cm_audit/howe_genus2_exhaustive.py` — searches *all*
+  genus-2 curves `y² = lc·(x⁶+b₄x⁴+b₃x³+b₂x²+b₁x+b₀)`, a model shape
+  that covers every isomorphism class for `p ≥ 7`.
+
+Result: **67 of 67 Howe-qualifying pairs across the 14 primes are
+realised by an explicit genus-2 curve over `F_p`**, every reported
+example re-verified with PARI `hyperellcharpoly`.  The qualifying
+pairs all sit in the "irreducible 2-torsion" stratum — the
+secp256k1-like case — so the proxies are faithful.
+
+The five pairs that the ζ₃ family misses are all *quadratic-twist*
+pairs `(E, E^t)`, i.e. exactly the shape of the secp256k1 target pair
+(0,3) of Thread 18.  Those turn out to be realised in the **even /
+bielliptic** family `y² = x⁶ + b₄x⁴ + b₂x² + b₀`, whose quotients by
+`x ↦ ±x` are `E₁: y² = f(u)` and `E₂: v² = u·f(u)` with
+`f(u) = u³+b₄u²+b₂u+b₀` and `u = x²`.  Fully worked example over
+`F_127`:
+
+```
+C : y² = x⁶ + x² + 64
+charpoly(Frob | Jac C) = x⁴ + 253x² + 16129
+                       = (x² − x + 127)(x² + x + 127) = P_E · P_{E^t}
+```
+
+**Scope — what this does and does not show.** It shows the isogeny
+class of `E_i × E_j` contains a Jacobian, and exhibits the curve.  It
+does *not* construct Howe's specific degree-4 gluing isogeny, and it
+does not produce an explicit cover map `C → E`; those remain the
+Mestre-reconstruction task of §§2–8.  The search is also proxy-scale
+only: matching a prescribed Weil polynomial by search costs `O(√p)`
+tries, so it does not transfer to a 256-bit prime.  A secp256k1-scale
+construction still needs the CM/Igusa route, not search.
+
+**Effect on Option D (§8).** Unchanged and slightly strengthened.
+Option D accepts existence-without-construction and leans on B5
+(cover cost ≥ ECDLP cost), which applies to any cover.  Thread 22 adds
+independent empirical evidence that the covers exist, so the paper
+must continue to rest on the *cost* argument and must not be read as
+claiming the cover is absent for secp256k1.
+
 ## 10. References
 
 - Mestre, "Construction de courbes de genre 2 à partir de leurs

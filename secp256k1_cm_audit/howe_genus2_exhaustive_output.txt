@@ -1,0 +1,203 @@
+### full exhaustive (all p^5 genus-2 models x 2 twists) ###
+===== EXHAUSTIVE (all genus-2) search, p = 7 (16807 monic sextics x 2 twists) =====
+    k=0  b=   1  t=   -4  #E=   12  2-tors II(split)
+    k=1  b=   3  t=   -5  #E=   13  2-tors I (irred)
+    k=2  b=   2  t=   -1  #E=    9  2-tors I (irred)
+    k=3  b=   6  t=    4  #E=    4  2-tors II(split)
+    k=4  b=   4  t=    5  #E=    3  2-tors I (irred)
+    k=5  b=   5  t=    1  #E=    7  2-tors I (irred)
+
+  --- pair (1, 2): Howe=True  target (c1,c2)=(-6,19) ---
+    S1 survivors (c1 = +--6): 468
+    full matches (c1 and c2): 96
+    RESULT: 96 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 3)  -> MATCH (-6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 0, 0, 5)  -> MATCH (-6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 5, 0, 0, 5)  -> MATCH (-6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 4, 0, 3)  -> MATCH (-6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 1, 1, 3, 2)  -> MATCH (-6, 19)
+
+  --- pair (1, 4): Howe=True  target (c1,c2)=(0,-11) ---
+    S1 survivors (c1 = +-0): 2771
+    full matches (c1 and c2): 8
+    RESULT: 8 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 0, 0, 6)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 5, 0, 0, 6)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(3, 2, 6, 5, 3)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(3, 5, 6, 2, 3)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(5, 2, 5, 6, 3)  -> MATCH (0, -11)
+
+  --- pair (1, 5): Howe=True  target (c1,c2)=(-4,9) ---
+    S1 survivors (c1 = +--4): 1902
+    full matches (c1 and c2): 224
+    RESULT: 224 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 1, 3, 5)  -> MATCH (-4, 9)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 2, 5, 5)  -> MATCH (-4, 9)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 3, 3, 4)  -> MATCH (-4, 9)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 3, 4, 6)  -> MATCH (-4, 9)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 4, 6, 5)  -> MATCH (-4, 9)
+
+  --- pair (2, 5): Howe=True  target (c1,c2)=(0,13) ---
+    S1 survivors (c1 = +-0): 2771
+    full matches (c1 and c2): 48
+    RESULT: 48 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 0, 1, 6)  -> MATCH (0, 13)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 0, 2, 6)  -> MATCH (0, 13)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 0, 4, 6)  -> MATCH (0, 13)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 1, 3, 2)  -> MATCH (0, 13)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 2, 5, 2)  -> MATCH (0, 13)
+
+  --- pair (4, 5): Howe=True  target (c1,c2)=(6,19) ---
+    S1 survivors (c1 = +-6): 468
+    full matches (c1 and c2): 96
+    RESULT: 96 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 5)  -> MATCH (6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 0, 0, 3)  -> MATCH (6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 6, 0, 0, 3)  -> MATCH (6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(3, 0, 3, 0, 5)  -> MATCH (6, 19)
+      lc=1 (b4,b3,b2,b1,b0)=(3, 1, 0, 3, 5)  -> MATCH (6, 19)
+
+===== EXHAUSTIVE (all genus-2) search, p = 19 (2476099 monic sextics x 2 twists) =====
+    k=0  b=   1  t=    8  #E=   12  2-tors II(split)
+    k=1  b=   2  t=    7  #E=   13  2-tors I (irred)
+    k=2  b=   4  t=   -1  #E=   21  2-tors I (irred)
+    k=3  b=   8  t=   -8  #E=   28  2-tors II(split)
+    k=4  b=  16  t=   -7  #E=   27  2-tors I (irred)
+    k=5  b=  13  t=    1  #E=   19  2-tors I (irred)
+
+  --- pair (1, 2): Howe=True  target (c1,c2)=(6,31) ---
+    S1 survivors (c1 = +-6): 207852
+    full matches (c1 and c2): 11760
+    RESULT: 11760 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 2)  -> MATCH (6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 3)  -> MATCH (6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 14)  -> MATCH (6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 2, 6, 5)  -> MATCH (6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 2, 13, 5)  -> MATCH (6, 31)
+
+  --- pair (1, 4): Howe=True  target (c1,c2)=(0,-11) ---
+    S1 survivors (c1 = +-0): 281364
+    full matches (c1 and c2): 3480
+    RESULT: 3480 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 0, 0, 18)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 1, 15, 3)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 4, 6, 6)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 4, 13, 12)  -> MATCH (0, -11)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 5, 17, 8)  -> MATCH (0, -11)
+
+  --- pair (1, 5): Howe=True  target (c1,c2)=(8,45) ---
+    S1 survivors (c1 = +-8): 101616
+    full matches (c1 and c2): 10320
+    RESULT: 10320 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 8, 12, 18)  -> MATCH (8, 45)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 12, 8, 18)  -> MATCH (8, 45)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 1, 18, 18, 18)  -> MATCH (8, 45)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 1, 4, 6)  -> MATCH (8, 45)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 2, 7, 6, 6)  -> MATCH (8, 45)
+
+  --- pair (2, 5): Howe=True  target (c1,c2)=(0,37) ---
+    S1 survivors (c1 = +-0): 281364
+    full matches (c1 and c2): 1260
+    RESULT: 1260 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 1, 0, 1)  -> MATCH (0, 37)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 4, 0, 11)  -> MATCH (0, 37)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 5, 0, 7)  -> MATCH (0, 37)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 6, 0, 11)  -> MATCH (0, 37)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 7, 0, 1)  -> MATCH (0, 37)
+
+  --- pair (4, 5): Howe=True  target (c1,c2)=(-6,31) ---
+    S1 survivors (c1 = +--6): 207852
+    full matches (c1 and c2): 11760
+    RESULT: 11760 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 10)  -> MATCH (-6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 13)  -> MATCH (-6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 0, 0, 15)  -> MATCH (-6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 1, 2, 13)  -> MATCH (-6, 31)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 1, 17, 13)  -> MATCH (-6, 31)
+
+
+### even/bielliptic family (p^3), for the primes where p^5 is out of budget ###
+===== EVEN/bielliptic family search, p = 37 (50653 monic sextics x 2 twists) =====
+    k=0  b=   1  t=  -10  #E=   48  2-tors II(split)
+    k=1  b=   2  t=  -11  #E=   49  2-tors I (irred)
+    k=2  b=   4  t=   -1  #E=   39  2-tors I (irred)
+    k=3  b=   8  t=   10  #E=   28  2-tors II(split)
+    k=4  b=  16  t=   11  #E=   27  2-tors I (irred)
+    k=5  b=  32  t=    1  #E=   37  2-tors I (irred)
+
+  --- pair (1, 4): Howe=True  target (c1,c2)=(0,-47) ---
+    S1 survivors (c1 = +-0): 5334
+    full matches (c1 and c2): 72
+    RESULT: 72 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 9, 0, 6)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 25, 0, 32)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(2, 0, 5, 0, 35)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(2, 0, 14, 0, 31)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(3, 0, 3, 0, 13)  -> MATCH (0, -47)
+
+  --- pair (2, 5): Howe=True  target (c1,c2)=(0,73) ---
+    S1 survivors (c1 = +-0): 5334
+    full matches (c1 and c2): 252
+    RESULT: 252 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 9, 0, 23)  -> MATCH (0, 73)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 17, 0, 31)  -> MATCH (0, 73)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 22, 0, 14)  -> MATCH (0, 73)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 25, 0, 14)  -> MATCH (0, 73)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 25, 0, 29)  -> MATCH (0, 73)
+
+===== EVEN/bielliptic family search, p = 61 (226981 monic sextics x 2 twists) =====
+    k=0  b=   1  t=   14  #E=   48  2-tors II(split)
+    k=1  b=   2  t=    1  #E=   61  2-tors I (irred)
+    k=2  b=   4  t=  -13  #E=   75  2-tors I (irred)
+    k=3  b=   8  t=  -14  #E=   76  2-tors II(split)
+    k=4  b=  16  t=   -1  #E=   63  2-tors I (irred)
+    k=5  b=  32  t=   13  #E=   49  2-tors I (irred)
+
+  --- pair (1, 4): Howe=True  target (c1,c2)=(0,121) ---
+    S1 survivors (c1 = +-0): 19150
+    full matches (c1 and c2): 1560
+    RESULT: 1560 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 1, 0, 11)  -> MATCH (0, 121)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 1, 0, 43)  -> MATCH (0, 121)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 6, 0, 2)  -> MATCH (0, 121)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 10, 0, 11)  -> MATCH (0, 121)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 13, 0, 28)  -> MATCH (0, 121)
+
+  --- pair (2, 5): Howe=True  target (c1,c2)=(0,-47) ---
+    S1 survivors (c1 = +-0): 19150
+    full matches (c1 and c2): 420
+    RESULT: 420 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 15, 0, 50)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 20, 0, 8)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 41, 0, 21)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 42, 0, 8)  -> MATCH (0, -47)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 56, 0, 24)  -> MATCH (0, -47)
+
+===== EVEN/bielliptic family search, p = 127 (2048383 monic sextics x 2 twists) =====
+    k=0  b=   1  t=   20  #E=  108  2-tors II(split)
+    k=1  b=   3  t=    1  #E=  127  2-tors I (irred)
+    k=2  b=   9  t=  -19  #E=  147  2-tors I (irred)
+    k=3  b=  27  t=  -20  #E=  148  2-tors II(split)
+    k=4  b=  81  t=   -1  #E=  129  2-tors I (irred)
+    k=5  b= 116  t=   19  #E=  109  2-tors I (irred)
+
+  --- pair (1, 4): Howe=True  target (c1,c2)=(0,253) ---
+    S1 survivors (c1 = +-0): 133455
+    full matches (c1 and c2): 3276
+    RESULT: 3276 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 1, 0, 64)  -> MATCH (0, 253)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 2, 0, 16)  -> MATCH (0, 253)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 4, 0, 4)  -> MATCH (0, 253)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 8, 0, 1)  -> MATCH (0, 253)
+      lc=1 (b4,b3,b2,b1,b0)=(0, 0, 9, 0, 50)  -> MATCH (0, 253)
+
+  --- pair (2, 5): Howe=True  target (c1,c2)=(0,-107) ---
+    S1 survivors (c1 = +-0): 133455
+    full matches (c1 and c2): 882
+    RESULT: 882 model(s) match; verifying with PARI:
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 30, 0, 107)  -> MATCH (0, -107)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 57, 0, 2)  -> MATCH (0, -107)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 79, 0, 32)  -> MATCH (0, -107)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 79, 0, 76)  -> MATCH (0, -107)
+      lc=1 (b4,b3,b2,b1,b0)=(1, 0, 85, 0, 2)  -> MATCH (0, -107)
+

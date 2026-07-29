@@ -5874,3 +5874,151 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 22 (Richelot / cover-existence search over small proxy primes), the
+continuation proposed at the end of the 2026-07-26 run #2 entry (line ~5873).
+Priority-1 (P-521 LLL) is CLOSED (§10.5); priority-2 (CHLRS Igusa) was worked
+2026-07-26 and ended BLOCKED; Thread 22 was its explicit successor and had not
+been started.
+
+Sharpened question. The 2026-07-26 entry proved the *Rosenhain* route is blocked
+for secp256k1 (needs `-b` a cubic residue; secp256k1's 2-torsion lives in
+F_{p³}\F_p). That is a statement about a **formula**, not about **existence**.
+Thread 22 asks the existence question directly: for the Howe-qualifying pairs of
+j=0 sextic twists found in Thread 18 (`a287abc`), does a genus-2 curve C/F_p
+with charpoly(Frob | Jac C) = P_{E_i}·P_{E_j} actually exist?
+
+### Work done
+- Installed PARI/GP (not present in a fresh container) and numpy.
+- Measured PARI `hyperellcharpoly`: >120 s for the p=43 family alone — far too
+  slow for ~10^5 curves. Replaced it with a vectorised Weil-coefficient
+  recovery from #C(F_p) and #C(F_p²) only:
+    `c1 = -1 - S1`, `c2 = (c1² + 1 + S2)/2`,  S1,S2 = quadratic-character sums.
+  Two tricks: (i) for `w = A + Bt` in F_p²=F_p[t]/(t²-r), `chi_q(w) = chi_p(A²-rB²)`,
+  so no F_p² arithmetic is needed; (ii) the character argument is linear in the
+  curve coefficients, so evaluation over the whole field is a BLAS matmul
+  (float64 is exact here, intermediates < 6p² << 2^53).
+- New `secp256k1_cm_audit/howe_c3_family_sweep.py`: for 14 primes p ≡ 1 mod 6,
+  rebuilds the six j=0 sextic twists, re-derives the Thread-18 (H1)(H2)(H3)
+  table, and exhaustively sweeps the ζ₃-equivariant family y² = x⁶+a x³+c
+  (both quadratic twists, 2p(p-1) members) for each pair's target Weil poly.
+  `--selftest` cross-checks 24/24 (c1,c2) values against PARI: **PASSED**.
+- New `secp256k1_cm_audit/howe_genus2_exhaustive.py`: searches **all** genus-2
+  curves via y² = lc·(x⁶+b₄x⁴+b₃x³+b₂x²+b₁x+b₀), lc ∈ {1,ν}. This model shape
+  is complete for p ≥ 7 (P¹(F_p) has p+1 ≥ 8 points and a sextic has ≤ 6 roots,
+  so some rational point is a non-root and can be moved to infinity; then scale
+  y and translate x to kill the x⁵ term). Two-stage filter: cheap S1 pass (p
+  evals/curve) over all p⁵, then S2 (p² evals/curve) on survivors only.
+  Singular models are deliberately not filtered — they can only ADD spurious
+  matches, so a zero-match result stays a sound negative; every positive is
+  re-verified individually with PARI.
+- `cargo test --test curve_audit` → 5/5 pass (6.50 s). ✓
+
+### Findings
+
+**Main result: 67 of 67 Howe-qualifying pairs across 14 primes are realised by
+an explicit genus-2 curve over F_p.** Every reported example re-verified with
+PARI `hyperellcharpoly`; 80 verifications, 0 MISMATCH, 0 SINGULAR.
+
+ζ₃-family sweep (`howe_c3_family_sweep_output.txt`), hits per qualifying pair:
+
+```
+ p    | qualifying | realised in C3 family | detail (pair:#hits)
+    7 |     5      |   4   | (1,2):6   (1,4):4   (1,5):2   (2,5):0   (4,5):6
+   13 |     4      |   4   | (1,2):4   (1,4):8   (1,5):12            (4,5):4
+   19 |     5      |   4   | (1,2):42  (1,4):12  (1,5):6   (2,5):0   (4,5):42
+   31 |     5      |   5   | (1,2):30  (1,4):40  (1,5):90  (2,5):20  (4,5):30
+   37 |     5      |   4   | (1,2):108 (1,4):48  (1,5):36  (2,5):0   (4,5):108
+   43 |     5      |   5   | (1,2):98  (1,4):28  (1,5):126 (2,5):56  (4,5):98
+   61 |     4      |   3   | (1,2):180 (1,4):0   (1,5):60  (2,5):80
+   67 |     5      |   5   | (1,2):330 (1,4):44  (1,5):22  (2,5):88  (4,5):330
+   73 |     5      |   5   | (1,2):216 (1,4):144 (1,5):168 (2,5):48  (4,5):216
+   79 |     5      |   5   | (1,2):78  (1,4):156 (1,5):234 (2,5):104 (4,5):78
+   97 |     5      |   5   | (1,2):288 (1,4):192 (1,5):224 (2,5):64  (4,5):288
+  103 |     4      |   4   | (1,2):782 (1,4):68  (1,5):34            (4,5):782
+  109 |     5      |   5   | (1,2):36  (1,4):216 (1,5):828 (2,5):216 (4,5):36
+  127 |     5      |   4   | (1,2):966 (1,4):0   (1,5):378 (2,5):252 (4,5):966
+```
+62/67 realised inside this tiny family. Note the labelling here is by
+`b_k = g^k` (g a primitive root), so Type II (split 2-torsion) is {0,3} and
+Type I (irreducible, secp256k1-like) is {1,2,4,5}; Thread 18's secp256k1
+labelling has Type II = {2,5}. Structure is identical up to relabelling, and
+**all qualifying pairs lie in the Type I stratum — the proxies are faithful to
+the secp256k1 case.**
+
+**All 5 ζ₃-family misses are quadratic-twist pairs (E, E^t)** — c1 = 0,
+P(T) = (T²-tT+p)(T²+tT+p) — i.e. exactly the shape of secp256k1's target pair
+(0,3). So they had to be resolved rather than waved off.
+
+Resolution (`howe_genus2_exhaustive_output.txt`):
+
+| p   | missing pair | search                  | matches | PARI |
+|-----|--------------|-------------------------|---------|------|
+| 7   | (2,5)        | FULL exhaustive (p⁵)    | 48      | ✓    |
+| 19  | (2,5)        | FULL exhaustive (p⁵)    | 1260    | ✓    |
+| 37  | (2,5)        | even/bielliptic (p³)    | 252     | ✓    |
+| 61  | (1,4)        | even/bielliptic (p³)    | 1560    | ✓    |
+| 127 | (1,4)        | even/bielliptic (p³)    | 3276    | ✓    |
+
+The misses are a **family-size artifact, not a Jacobian-free isogeny class**.
+The right small family for the (E, E^t) pairs is the even/bielliptic one
+`y² = x⁶+b₄x⁴+b₂x²+b₀`, whose quotients by `x ↦ ±x` are `E₁: y²=f(u)` and
+`E₂: v²=u·f(u)` with `f(u)=u³+b₄u²+b₂u+b₀`, `u=x²`. Worked example over F_127
+(pair (1,4), t₁=1, t₄=-1), verified end to end:
+
+```
+C : y² = x⁶ + x² + 64
+charpoly(Frob | Jac C) = x⁴ + 253x² + 16129
+factor                 = (x² − x + 127)(x² + x + 127) = P_E · P_{E^t}   ✓
+```
+
+**Interpretation.** The cubic-residue obstruction of 2026-07-26 is a property of
+the Rosenhain *parametrisation*, not of the glued object. Howe's existence
+theorem is doing exactly what it claims at proxy scale, including in the
+irreducible-2-torsion stratum where Rosenhain cannot be applied.
+
+**Scope — deliberately not overclaimed.** This shows the isogeny class of
+E_i × E_j contains a Jacobian and exhibits the curve. It does *not* construct
+Howe's degree-4 gluing isogeny, and it does not produce an explicit cover map
+C → E. It is also proxy-scale only: hitting a prescribed Weil polynomial by
+search costs O(√p) tries (observed hit density ~10⁻³–10⁻⁴ of the even family at
+p = 19…127, fluctuating with class number), so at 256 bits this is ~2⁻¹²⁸ and
+search is hopeless. A secp256k1-scale construction needs the CM/Igusa route.
+
+**Effect on the paper.** No change to the main theorem, but a correction of
+emphasis worth recording: `PAPER_STRUCTURAL_COMPLETENESS.md` must rest on B5
+(cover cost ≥ ECDLP cost, which applies to any cover) and must NOT be read as
+claiming the cover is absent for secp256k1. `RESEARCH_MESTRE_HOWE.md` §9.5 now
+records this; Option D of §8 is unchanged and slightly strengthened.
+
+### Next step proposal
+
+**Thread 23 (constructive, secp256k1-scale): even-sextic CM construction.**
+The bielliptic structure gives a much more tractable target than generic Mestre
+reconstruction. For `C : y² = f(x²)`, `Jac(C) ~ E₁ × E₂` *exactly* (an actual
+isogeny, not just a Weil-polynomial coincidence), with `E₁: y²=f(u)` and
+`E₂: v²=u f(u)`. So the secp256k1 task reduces to: find a cubic `f` over
+F_{p_secp} such that `y²=f(u)` is in secp256k1's isogeny class and
+`v²=u f(u)` is in the quadratic twist's. Concretely:
+  1. Enumerate secp256k1's isogeny class (ordinary, CM disc -3 with conductor —
+     h curves, small h expected). For each, take a model `y²=f(u)`.
+  2. The remaining freedom is `u ↦ λu + w`, a 2-parameter family; `E₂` varies
+     over it. Compute `t(E₂)` as a function of `(λ, w)` and ask whether
+     `t(E₂) = -t_secp` has a solution.
+  3. Falsifier: if `t(E₂)` is equidistributed in `(λ,w)`, the density is
+     ~1/(4√p) ≈ 2⁻¹²⁸ and the approach dies — measure this first on the proxy
+     primes where the answer is already known (p = 19…127), where the hit
+     counts above give the empirical density directly. Cheap, and it decides
+     whether step 2 is worth attempting at 256 bits.
+
+**Thread 24 (cheap, completes Thread 22).** Push the FULL p⁵ exhaustive search
+to p = 37 (69.3M models). It exceeded a 10-minute budget today with the current
+two-stage filter; the S1 pass is the bottleneck at p⁶ ≈ 2.6e9 element-ops.
+Worth doing once to confirm the even-family positives are not hiding a case
+where the even family is the *only* realisation.
+
+### Commits made
+(recorded in the follow-up commit below)
