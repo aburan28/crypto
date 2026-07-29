@@ -5972,3 +5972,4 @@ confirm it succeeds at m≥13 (validating that the old failure was just insuffic
 One-liner experiment; can piggyback on next session's start.
 
 ### Commits made
+`c983bad` autolab 2026-07-29: Thread 20 — λ/n threshold bisection; no lower threshold; Farey resonance obstruction
