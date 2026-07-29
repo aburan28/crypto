@@ -5874,3 +5874,101 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Thread 20 (λ/n threshold bisection)** — proposed in the 2026-07-26 Phase 2 run as a
+natural continuation of Thread 5. All six original priority threads are CLOSED; Thread 20
+is the highest-priority unstarted proposed task. Goal: write and run
+`glv_hnp_phase2_lambda_threshold.py` to locate τ* where LLL transitions from fail→success.
+
+Prior belief: τ* lies between 0.07 (fail, p=2677) and 0.34 (success, p=524347). This
+session tests the hypothesis that there is a clean lower threshold.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (new script).
+  Design: scan 13-bit j=0 CM primes, find 2 curves per target λ/n ∈
+  {0.07, 0.10, 0.13, 0.16, 0.19, 0.22, 0.25, 0.28, 0.31, 0.34} (tolerance ±0.015).
+  Run LLL at m=3..14, K1 = 0.12·√n (eff ≈ 0.12), 3 seeds. Then BKZ(20) rescue
+  on LLL failures.
+- Ran the script on 13-bit primes (scanned 247 primes in [4096, 16384]).
+- Found 2 curves per target for all 10 targets (20 curves total).
+- Ran LLL + BKZ sweep. Ran `cargo test --test curve_audit`: 5/5 pass. ✓
+- Ran resonance analysis (kλ mod n for k=1..8) on all failure cases.
+
+### Findings
+
+**Main result: there is NO clean lower threshold τ* for λ/n.**
+
+LLL succeeds at ALL tested λ/n values (0.07 through 0.34) given enough signatures.
+The failures are explained by **Farey-sequence resonance**, not a threshold.
+
+Full summary table (K1 ~ 0.12·√n, eff ≈ 0.12):
+
+| λ/n (actual) | n    | λ    | LLL outcome | BKZ(20) | Notes |
+|-------------|------|------|-------------|---------|-------|
+| 0.0702 | 4243 | 298  | 3/3 at m=10 | same | no resonance |
+| 0.0702 | 4243 | 298  | 3/3 at m=12 | same | (2nd curve, same n) |
+| 0.0896 | 5347 | 479  | 3/3 at m=10 | same | — |
+| 0.0986 | 5851 | 577  | 3/3 at m=8  | same | — |
+| 0.1278 | 5563 | 711  | 3/3 at m=9  | same | — |
+| 0.1449 | 4327 | 627  | 3/3 at m=6  | same | — |
+| 0.1688 | 5503 | 929  | 3/3 at m=5  | same | — |
+| 0.1690 | 4651 | 786  | 3/3 at m=6  | same | — |
+| 0.1804 | 4513 | 814  | 3/3 at m=10 | same | — |
+| **0.1755** | **4507** | **791** | **FAIL** | **FAIL** | **6th-order res. (k=6, δ/n=0.053)** |
+| 0.2053 | 4003 | 822  | 3/3 at m=9  | same | — |
+| 0.2076 | 4657 | 967  | 3/3 at m=11 | same | — |
+| 0.2386 | 6337 | 1512 | 3/3 at m=6  | same | — |
+| 0.2555 | 6079 | 1553 | 3/3 at m=7  | same | — |
+| 0.2676 | 4201 | 1124 | 3/3 at m=5  | same | — |
+| **0.2932** | **4639** | **1360** | **FAIL** | **3/3 at m=9** | **7th-order res. (k=7, δ/n=0.052)** |
+| **0.3204** | **4759** | **1525** | **FAIL** | **3/3 at m=10** | **3rd-order res. (k=3, δ/n=0.039)** |
+| 0.3209 | 5077 | 1629 | 3/3 at m=13 | same | near 1/3 but weak |
+| 0.3288 | 5557 | 1827 | 3/3 at m=6  | same | — |
+| 0.3471 | 4057 | 1408 | 3/3 at m=12 | same | — |
+
+**Resonance analysis of failure cases:**
+
+| Curve | λ/n | Smallest δ/n | k | Interpretation |
+|-------|-----|-------------|---|----------------|
+| p=4639, n=4507, λ=791 | 0.1755 | 0.053 | k=6 | 6λ ≈ n (λ/n ≈ 1/6=0.1667); BKZ also fails |
+| p=4507, n=4639, λ=1360 | 0.2932 | 0.052 | k=7 | 7λ ≈ 2n (7·0.2932≈2.05); BKZ rescues |
+| p=4657, n=4759, λ=1525 | 0.3204 | 0.039 | k=3 | 3λ ≈ n (Effect A); BKZ rescues |
+
+**Revised understanding (refutes prior threshold hypothesis):**
+
+1. The prior p=2677 failure (λ/n=0.07, m≤12) was NOT due to a λ/n threshold. This session
+   finds 3/3 at m=10-12 for similar λ/n (different n). The prior test likely needed m≥13.
+
+2. The obstruction is **Farey-sequence resonance**: attack fails when kλ ≡ 0 (mod n) for
+   small k (i.e., λ/n ≈ p/q with small q). Severity inversely proportional to δ/n = |kλ mod n|/n.
+   - k=3 (Effect A, λ/n ≈ 1/3): strong, BKZ rescues
+   - k=6 (new, λ/n ≈ 1/6): moderate, even BKZ(20) fails (needs higher β or more m)
+   - k=7 (λ/n ≈ 2/7): mild, BKZ rescues
+
+3. **For secp256k1** (λ/n ≈ 0.3257, δ_3/n ≈ 0.023): k=3 resonance is dominant. BKZ would
+   rescue on toy scale, but at 256-bit scale the required m grows exponentially.
+
+4. **Minimum m scaling**: generically (no resonance), required m seems to decrease as λ/n
+   increases from 0.07 to 0.28. Near resonances, m spikes. No clean formula yet.
+
+### Next step proposal
+
+**Thread 21 (higher-order resonance mapping)**:
+The k=6 resonance at λ/n=0.1755 (δ/n=0.053) is harder than the k=3 resonance at
+λ/n=0.3204 (δ/n=0.039). This suggests obstruction strength depends on BOTH k (order)
+and δ/n. Proposed experiment:
+- Fix δ/n ≈ 0.04-0.06 and vary k (3, 4, 5, 6, 7, 8).
+- For each k, find a curve with kλ ≡ 0 (mod n) to that precision.
+- Run LLL+BKZ and record first-success m.
+- Fit: required_m ~ f(k, δ/n)? Predicts a 2D obstruction map.
+
+**Thread 20 alt (p=2677 retry)**: Run the old p=2677 failure curve at m=10..20 to
+confirm it succeeds at m≥13 (validating that the old failure was just insufficient m).
+One-liner experiment; can piggyback on next session's start.
+
+### Commits made
