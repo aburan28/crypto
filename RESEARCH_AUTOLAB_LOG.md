@@ -6400,4 +6400,4 @@ the structural reason they cannot work.
 
 ### Commits made
 
-PENDING
+64b9ad7 autolab 2026-07-29 run 2: Thread 23 — closed form for lambda_1(L2) via scale-locked continued fractions
