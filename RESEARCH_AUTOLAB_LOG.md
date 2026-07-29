@@ -5874,3 +5874,117 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study) — the continuation proposed by the 2026-07-26 run #1
+entry. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress 2026-07-26, so its proposed
+sub-task is the correct pick under the protocol's rule (b).
+
+Goal: bisect the claimed λ/n viability threshold between 0.07 and 0.34.
+Outcome: **the threshold does not exist** — the 2026-07-26 conclusion is corrected below.
+
+### Work done
+- Environment (fresh container): installed `pari-gp` 2.15.4, `fpylll` 0.6.4, `cysignals`
+  1.12.5, `sympy` 1.14.0. Note for future runs: `pip install fpylll` alone is not enough,
+  `cysignals` is a separate runtime import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (5 experiments T1–T5),
+  reusing the lattice construction verbatim from `glv_hnp_phase2_20bit.py:262`
+  (`build_glv_lattice`) so the comparison to 2026-07-26 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold_output.txt` (185 lines).
+- Instead of bisecting, first tested whether λ/n *can* be causal at all (T1), then swept
+  20 fresh 17-bit j=0 GLV curves with λ* spread over (0, 0.5) at three bias strengths (T3),
+  then separated the λ effect from the bias-strength effect on the original pair (T4).
+- `cargo test --test curve_audit` → 5/5 pass (5.67s). ✓
+
+### Findings
+
+**T1 — λ/n cannot be causal (proof, not correlation).**
+The Phase-2 lattice contains the rows `n·S_K1·e_i`, so replacing λ by λ−n is a unimodular
+row operation. Same lattice, same planted vector:
+
+| curve | λ/n | (λ−n)/n | LLL(λ) | LLL(λ−n) | HNF equal |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.5327 | −0.4673 | 5/5 | 5/5 | True |
+| 12-bit/2557 | 0.6600 | −0.3400 | 5/5 | 5/5 | True |
+| 12-bit/2677 | 0.0699 | −0.9301 | 0/5 | 0/5 | True |
+
+Also, the two roots of x²+x+1 mod n are λ and n−1−λ, so any genuine predictor must be a
+function of λ* = min(λ, n−λ)/n. The 2026-07-26 table mixed the two root conventions
+(0.53 and 0.66 are root-2 values; `glv_eigenvalue()` in `glv_hnp_phase2_20bit.py:139`
+returns `min(r1,r2)`, so λ/n ≤ 0.5 there). Re-expressed in λ*: 0.467, 0.340, 0.070.
+
+**T3 — the λ* threshold is FALSIFIED.** 20 fresh 17-bit curves, m=12, 5 seeds:
+
+| eff = K1·K2/n | curves recovering 5/5 | λ* range of successes |
+|---|---|---|
+| 0.05 | 19/20 (20th = 4/5, BKZ 5/5) | [0.0068, 0.4913] — the *whole* range |
+| 0.15 | 3/20 | [0.318, 0.482] |
+| 0.25 | 0/20 (4 curves partial) | — |
+
+At eff=0.05 the curve with λ*=0.0068 (p=65713, n=65269, λ=442) recovers **5/5**, an order
+of magnitude below the 0.07 that was reported as a hard wall. λ* is not a viability
+threshold.
+
+**T4 — the real variable is bias strength, not λ.** Same n-size, same K2=52, K1 swept:
+
+| curve | λ* | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 12-bit/2677 | 0.070 | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Both curves succeed for K1 ≤ 4. λ* shifts the K1 wall by a factor of ~3 (K1≈12–16 vs
+K1≈4–6) but creates no structural obstruction. **The 2026-07-26 claim "LLL AND BKZ(40)
+both fail — failure is structural, not a strength-of-reduction issue" was measured at
+K1=8 only, and is hereby corrected: the same curve recovers 5/5 at K1≤4.**
+T4b: at K1=8 more data does not rescue it (m=8/12/16/24/32 → 0,0,1,0,1 of 5), so the K1
+wall is genuine — it is a K1 wall, not a λ wall.
+
+**T2 — the μ/ρ hypothesis (this run's own) is FALSIFIED.** Hypothesised that the exact
+shortest vector μ of the 2-D λ-block `⟨(n·S_K1,0), (−λ·S_K1, S_K2)⟩` governs success via
+ρ = μ/‖v_planted‖. The 2026-07-26 failure curve has the *largest* ρ of the three
+(0.686 vs 0.610 / 0.399), and in the 17-bit sweep no ρ threshold beats the majority
+baseline. Recorded as a dead hypothesis so no future run re-tries it.
+
+**T5 — structural result: the planted vector is never λ₁.**
+The shortest vector after LLL is, on every curve tested, exactly the trivial vector
+`n·S_D·e_m`: 100% of its energy sits in the d-column, |sv[m]|/n = 1.0000 exactly, and its
+Kannan coordinate is 0.
+
+| curve | K1 | sv/pv | k1-blk | d | k2-blk | kan | \|sv[m]\|/n |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.603 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+| 12-bit/2557 | 8 | 0.517 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+| 12-bit/2677 | 8 | 0.422 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+
+Across the whole 17-bit sweep sv/pv sits in [0.337, 0.368] for successes and failures
+alike. Algebraically: with S_K1·K1 ≈ S_K2·K2 ≈ S_KANNAN ≈ n and S_D = 1,
+‖v_planted‖² ≈ n²(2m/3 + 4/3) while ‖n·S_D·e_m‖² = n², so the trivial vector is shorter
+for every m ≥ 1. It carries no information (d is only defined mod n) and no choice of
+S_D removes it — both vectors scale linearly in S_D.
+
+**Consequence — this retro-explains the 2026-06-21…06-29 wall.** Recovery in this lattice
+is not an SVP condition but a BDD/coset condition: the planted vector must be shortest
+*among vectors with last coordinate ±S_KANNAN*, in the (2m+1)-dimensional projection
+along e_m. That is a property of the projected GS profile and the specific signature set,
+so it is unsurprising that six consecutive curve-level invariants (δ/n, κ(M), q_cf,
+max_q_cf, max_a, a_corn/n — log lines ~3560–3580) all failed to separate C1 from C2.
+No curve-level invariant can.
+
+### Next step proposal
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁.**
+Concretely: project the lattice along e_m (quotient out the trivial `n·e_m` direction) and
+solve BDD in the projection, or replace the Kannan embedding with an explicit CVP call
+(Babai nearest-plane on the reduced basis) targeting `(A_i·S_K1, 0, …)`. Falsifier: if
+sv/pv rises above 1 after the reformulation and the K1 wall in T4 moves outward on the
+λ*=0.07 curve (currently K1≈4–6), the reformulation is a real improvement; if the wall
+stays at K1≈4–6, then the wall is information-theoretic and Phase 2 is at its ceiling.
+Cheap to test — the T4 grid is a 2-minute run.
+
+Secondary: re-express the 2026-07-26 log's λ/n column in λ* throughout, so future runs
+do not re-derive the root-convention confusion.
+
+### Commits made
+(recorded in the follow-up commit below)
