@@ -5874,3 +5874,89 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+Thread 20 (λ/n threshold study): proposed in the 2026-07-26 log entry. No prior
+empirical work. Goal: bisect the reported λ/n threshold — λ/n=0.07 (claimed LLL
+fails, n=2647) vs λ/n=0.34 (claimed LLL succeeds, n=523969) — to determine
+whether the ratio itself is the controlling variable.
+
+### Work done
+
+**Part 1 — 7-slot λ/n scan (`glv_hnp_phase2_lambda_threshold.gp`)**
+
+- Searched j=0 prime-order curves in 7 λ/n brackets spanning [0.055, 0.360) with
+  n=1039–2647.
+- Key parameter correction: changed K1_BOUND from `sqrtint(n)//3` (eff≈0.33, near
+  information-theoretic boundary) to `max(2, sqrtint(n)//15)` (eff≈0.06, matching
+  the Python attack.py regime). Swept m from m_thresh to m_thresh+10.
+- Results (K1=max(2,√n//15), K2=√n+1, 3 seeds each, first m with 3/3 wins):
+
+```
+Slot 1: λ/n=0.0699  n=2647  K1=3  K2=52  eff=0.059  m*= 8  (was "FAIL")
+Slot 2: λ/n=0.1024  n=1231  K1=2  K2=36  eff=0.059  m*= 5
+Slot 3: λ/n=0.1347  n=1039  K1=2  K2=33  eff=0.064  m*= 4
+Slot 4: λ/n=0.1888  n=1033  K1=2  K2=33  eff=0.064  m*= 5
+Slot 5: λ/n=0.2364  n=1087  K1=2  K2=33  eff=0.061  m*= 6
+Slot 6: λ/n=0.3145  n=2251  K1=3  K2=48  eff=0.064  m*= 8
+Slot 7: λ/n=0.3428  n=1129  K1=2  K2=34  eff=0.060  m*= 4
+```
+
+ALL 7 λ/n values succeed. Immediate confound: slots with n≈2251–2647 need m*=8;
+slots with n≈1039–1129 need m*=4. Pattern follows n-size, not λ/n.
+
+**Part 2 — Controlled n-fixed sweep (`glv_lambda_ratio_sweep.gp`)**
+
+- Fixed n ∈ [2000,4000] (≈12-bit); K1=3, K2=sqrtint(n)+1 (≈K2≈47-50, so eff≈0.06).
+- Collected 50 j=0 prime-order curves with λ/n ranging 0.035–0.472.
+- Tested m=2..14, 3 seeds per m; recorded first m* with 3/3 success.
+- Computed Pearson r(λ/n, m*) from the raw 50-point dataset using Python3.
+- Result: Pearson r = −0.0994 (negligible, n=50 curves).
+
+### Findings
+
+**The 2026-07-26 λ/n threshold (fail at 0.07, succeed at 0.34) was a K1/eff artifact,
+not a genuine λ/n barrier.**
+
+Root cause reconstruction:
+- 2026-07-26 fail case: n=2647, K1=8 → eff = K1·K2/n ≈ 8·52/2647 ≈ 0.157 (too large)
+  - At eff=0.157, m_thresh≈5; but a larger m was needed; the run did not sweep far enough.
+- 2026-07-26 success case: n=523969, K1=36 → eff ≈ 36·724/523969 ≈ 0.050 (correct regime)
+  - Naturally hit the sweet spot.
+- The two cases had incompatible eff values, so comparing them as "λ/n varies, eff fixed"
+  was invalid. The difference in outcome was eff, not λ/n.
+
+**With eff properly controlled at ≈0.06 across all slots, ALL λ/n values in [0.07, 0.34]
+succeed. No threshold exists in this range.**
+
+**Pearson r(λ/n, m*) = −0.10** (50 curves, n∈[2000,4000], K1=3 fixed):
+- Not statistically significant.
+- The "λ-row can't stand out" structural argument from 2026-07-26 has some theoretical
+  basis (smaller λ/n weakens the signal in k2-rows), but in practice eff dominates at
+  these scales. The mixing effect is insufficient to prevent LLL recovery within the
+  tested range.
+
+**PARI/GP syntax note (for future scripts):**
+- PARI 2.15.4 does NOT support `{ }` braces embedded inside control structure arguments.
+- Correct: `for(i=1,m, s1; s2; s3)` — semicolons only, no inner braces.
+- Wrong: `for(i=1,m, { s1; s2 })` — parse error.
+
+**cargo test --test curve_audit: 5/5 pass.**
+
+### Next step proposal
+
+1. **Thread 22 (Richelot search)**: directly search for genus-2 curves C/F_{p'} over
+   small proxy primes p' whose Jacobian has char poly P_{E_i}·P_{E_j} for qualifying
+   pairs of secp256k1 twists. Does not require Rosenhain formula.
+2. **Thread 20 continued — secp256k1 scale**: test whether the GLV-HNP Phase 2 attack
+   at 256-bit scale remains feasible with eff≈0.06. Requires Python/fpylll (BKZ-20+),
+   not PARI LLL. At n≈2^256, m_thresh = ceil(log(n)/log(1/eff)) ≈ ceil(256/log2(17)) ≈
+   62; practical threshold likely much lower with BKZ. This is the key open question.
+
+### Commits made
+(recorded below after push)
