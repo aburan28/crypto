@@ -6132,3 +6132,209 @@ mechanism is now known to be scale-dependent, which explains all eight.
 ### Commits made
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-07-29 (autolab run #2)
+
+### Task picked
+
+**Thread 23 (closed form for ν̂)** — proposed as the top next-step by run #1
+earlier today (`e845207`). Threads 1, 3, 4, 6 CLOSED; Thread 2 permanently
+BLOCKED (`c591765`); Thread 5 completed 2026-07-26 (`9db1a2d`); Thread 20 closed
+by run #1. Thread 23 was the only open thread, was untouched, and came with an
+explicit falsifier: "if predicted-from-CF ν̂ correlates <0.9 with computed ν̂,
+the convergent-scale story is wrong."
+
+Falsifier outcome: **passed at correlation 1.0** — the CF prediction is not
+approximate, it is exact. Scope then grew to the null law and to an
+unconditional lower bound.
+
+### Work done
+
+Environment: `pip install sympy fpylll cysignals` (does not persist; re-install
+every session). PARI/GP still not installed. `cargo test --test curve_audit` →
+5/5 pass (6.91s). ✓ No Rust files touched.
+
+One new script, `secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py` (8 parts,
+29s runtime, output in `nuhat_closed_form_output.txt`). No LLL was needed —
+every number below is exact integer arithmetic or a CF expansion.
+
+### Findings
+
+#### 1. Closed form (part A) — exact, verified 1080/1080
+
+`L₂ = {(S₁(an − bλ), S₂b)}`, so for fixed `b` the min over `a` is `S₁‖bλ‖ₙ`:
+
+```
+    λ₁(L₂)² = min_{b≥0} [ S₁²·‖bλ‖ₙ² + S₂²·b² ]
+```
+
+A minimising `b>0` must satisfy `‖b'λ‖ₙ > ‖bλ‖ₙ` for all `0<b'<b` (else `b'`
+beats it, as `S₂²b'² < S₂²b²`) — that is the definition of a best approximation
+of the second kind, and by Lagrange's theorem those are exactly the CF
+convergent denominators of λ/n. `b=0` is `q₋₁=0`, contributing `S₁n`.
+
+So ν̂ is an **O(log n) continued-fraction quantity**; no lattice reduction.
+Checked against exact-integer Lagrange-Gauss on the same lattice:
+
+```
+  bits 20,24,32,64,128,192,256,384,521  ×  eff 0.02,0.10,0.50  × 40 draws
+  TOTAL: 1080/1080 exact integer agreements
+```
+
+#### 2. Localisation (part C) — the scale, not the maximum
+
+`q_{j*}` is the convergent nearest `R = √(n·K₂/K₁)` in 40–50% of cases and
+within one index in 93–99% (median |log₂(q*/R)| ≈ 1.2, stable over 20–256
+bits and eff 0.02–0.50). The min is effectively over the 2–3 convergents
+bracketing R.
+
+#### 3. Why eight invariants failed in June (part F)
+
+400 random 20-bit (n, λ), eff = 0.10:
+
+```
+  pearson(log(1+a_local), nu_hat) = -0.737   spearman -0.746
+  pearson(log(1+a_max),   nu_hat) = -0.407   spearman -0.338
+  pearson(mu,             nu_hat) = -0.071   spearman -0.058
+  pearson(log(1+a_local), log(1+a_max)) = +0.609
+```
+
+`a_local` = partial quotient at the minimising index `j*`. The global `max_a`
+carries a signal only through its +0.61 correlation with `a_local`. μ is flat,
+reproducing its falsification. Binned:
+
+```
+  a_local   count  mean a  mean nu_hat  sqrt(2/(a+1))
+      1        30     1.0       0.9695         1.0000
+      2        59     2.0       0.9009         0.8165
+     3-4      56     3.4       0.7930         0.6747
+     5-8      78     6.5       0.7072         0.5173
+     >=9     177   154.3       0.4957         0.1135
+```
+
+The `√(2/(a+1))` column is the perfect-balance idealisation; actual means sit
+above it because `j*` rarely lands exactly on the balance point.
+
+#### 4. Exact null law (part D) — ν̂ is a random-lattice statistic
+
+Normalising `u = q/R`, `w = θR/n` gives `ν̂² = min(u²+w²)`: `L₂/√det` is a
+unimodular 2-lattice. Under equidistribution `ν̂² = 1/Im τ`, τ Haar on
+`SL(2,ℤ)\ℍ` with `(3/π)dx dy/y²`, so
+
+```
+  P(nu_hat <= r) = 3r^2/pi                                        r <= 1
+                 = (3/pi)[r^2 - 2r^2*sqrt(1-r^-4) - 2asin(r^-2) + pi]
+                                                       1 <= r <= (4/3)^(1/4)
+                 = 1                                    r >= (4/3)^(1/4)
+```
+
+Support ceiling = Hermite bound `(4/3)^¼ = 1.074570`. KS vs random λ:
+
+```
+  bits=64  eff=0.05  N=8000   D=0.0125  p=0.165   max=1.0717
+  bits=64  eff=0.25  N=8000   D=0.0060  p=0.933   max=1.0682
+  bits=256 eff=0.05  N=20000  D=0.0042  p=0.877   max=1.0690
+  bits=256 eff=0.25  N=20000  D=0.0037  p=0.946   max=1.0700
+```
+
+Derived quantiles 0.229 0.324 0.512 0.724 0.886 0.971 0.997 vs the empirical
+256-bit null logged this morning (0.232 0.322 0.496 0.715 0.885 0.974 0.999).
+No sample ever exceeded the Hermite ceiling. **This retires the "extrapolation"
+caveat on the null distribution: it is not an extrapolation, it is a theorem
+about random 2-lattices, independent of bit length and of eff.**
+
+#### 5. THEOREM (part H) — unconditional ν̂ floor for j=0 GLV curves
+
+`a + bλ ≡ 0 (mod n)` with λ²+λ+1 ≡ 0 forces `a² − ab + b² ≡ b²(λ²+λ+1) ≡ 0
+(mod n)`; the form is positive definite, so `a² − ab + b² ≥ n`. Minimising
+`S₁²a² + S₂²b²` under that constraint (generalised Rayleigh quotient) gives
+
+```
+    nu_hat >= sqrt( 2 / ( r[(1+r^-2) + sqrt(1 - r^-2 + r^-4)] ) ),   r = K2/K1
+```
+
+`= √(2/3) = 0.8165` at `K₁ = K₂`, decaying as `√(K₁/K₂)`. Sharp — 200 64-bit
+j=0 curves, observed min vs proved floor, **0 violations at every ratio**:
+
+```
+  K2/K1        floor  observed min   slack
+      1     0.816497      0.816499  1.0000
+      2     0.681774      0.681853  1.0001
+      4     0.495955      0.495975  1.0000
+     16     0.249878      0.249879  1.0000
+     64     0.124996      0.125457  1.0037
+    256     0.062500      0.065515  1.0482
+   4096     0.015625      0.079644  5.0972
+   2^20     0.000977      0.101688  104.13
+```
+
+Security reading: the C2 ("recovers d on all seeds") band needs ν̂ ≤ 0.645, and
+the floor exceeds 0.645 whenever `K₂/K₁ ≤ 2.276`. **No j=0 GLV curve can be in
+the easy class when the leaked bound K₁ is within 1.19 bits of K₂** — no CM
+hypothesis, no reduction heuristic, just positive definiteness.
+
+Independently confirmed statistically (part G) — GLV λ is non-Haar exactly
+where the floor bites, and generic where it doesn't:
+
+```
+  K2/K1     GLV KS   GLV p   rand KS  rand p  GLV mean  rand mean
+      1      0.637  0.0000     0.036  0.8345    0.8822     0.6807
+      4      0.235  0.0000     0.054  0.3441    0.7517     0.6697
+    256      0.044  0.5971     0.086  0.0213    0.6868     0.7223
+  65536      0.047  0.5211     0.034  0.8829    0.6909     0.6816
+   2^24      0.034  0.8671     0.046  0.5459    0.6725     0.6919
+   2^32      0.044  0.6012     0.040  0.7125    0.6879     0.6893
+```
+
+and fraction below the 0.645 C2 ceiling: 0.0% at K₂/K₁ ∈ {1,2}, then 34.7% /
+36.3% / 42.7% at 4 / 16 / 64 against the Haar prediction of 39.7%. The Z[ω]
+arithmetic is invisible to ν̂ once the leak is strong; there the curve is no
+safer than a random λ.
+
+#### 6. Precision audit (part B) — prior numbers stand; 521-bit hard-fails
+
+The incumbent float64 `gauss_reduce_2d` (`glv_hnp_phase2_lambda_threshold.py:216`)
+is accurate to ≤2.1e-16 relative up to 384 bits — Python's exact int/int
+division rescues it — so **every published ν̂ number stands**, including
+secp256k1 (exact vs float agree to 1e-14; 0.870857 / 0.662438 / 0.585226 /
+0.685119 at eff 0.05/0.10/0.25/0.50, confirming this morning's table). At **521
+bits it raises OverflowError on 25/25 trials** (`math.sqrt` of a ≳2¹⁰²⁴ norm) —
+the same failure mode as Thread 1's P-521 NaN, in a second routine.
+`nu_hat_exact()` is overflow-free.
+
+#### 7. secp256k1 leak-size lottery (part E)
+
+ν̂ for the real (n, λ) as the leak bound K₁ = 2^c sweeps c ∈ [4,128]:
+min 0.2778 (c=104), max 0.9909 (c=76), mean 0.7165 vs Haar mean 0.6828 —
+non-monotone, jumping between adjacent c (c=12: 0.9368 → c=16: 0.3620). ν̂ is
+not a property of the curve alone; it is re-rolled by the leak size. Caveat
+unchanged: this whole thread is conditional on a non-standard nonce generator
+(k = k₁ + λk₂ with k₁ bounded) and is **not** an attack on secp256k1.
+
+### Next step proposal
+
+**Thread 24 — does the ν̂ floor lift to the full (2m+2)-dimensional lattice?**
+Part H bounds λ₁ of the 2-dimensional rival sublattice L₂. The attack's actual
+failure mode is a short *non-planted* vector in the full lattice `L` built by
+`build_glv_lattice()`. Concretely: prove or refute
+`λ₁(L \ planted) ≥ f(m)·λ₁(L₂)` for some explicit `f`. The natural attempt is
+that L contains m independent copies of the L₂ geometry (rows `i` and `m+1+i`
+for each signature), so a non-planted short vector should be forced to spend
+`√m`-ish norm. Falsifier: sample 100 curves at K₂/K₁ = 2 (where the floor
+proves ν̂ ≥ 0.6818, i.e. no curve is C2) and run the full attack at m = 8..16;
+if any curve reaches 3/3 the lift fails and the 2D bound does not control the
+attack.
+
+Cheaper sub-task if that stalls: the derived CDF makes the C2 band a *predicted
+fraction* — `P(ν̂ ≤ 0.645) = 39.7%`. Thread 20d measured 26/100 C2. Test
+whether the gap is the LLL/BKZ approximation factor by re-running 20d with
+BKZ-20 (`glv_hnp_bkz_c1.py` has the harness) and checking whether the C2 rate
+moves toward 39.7%.
+
+Not recommended: more invariant hunting. ν̂ is now closed-form, its null law is
+a theorem, and the residual variance is the reduction algorithm, not the
+arithmetic.
+
+### Commits made
+
+(hash recorded in the follow-up commit)

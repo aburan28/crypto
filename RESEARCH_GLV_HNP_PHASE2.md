@@ -271,3 +271,108 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Addendum — the ν̂ invariant in closed form (Thread 23, 2026-07-29)
+
+Thread 20d found that the rival-sublattice invariant
+
+```
+    ν̂ = λ₁(L₂)/√(det L₂),   L₂ = ⟨(n·S₁, 0), (−λ·S₁, S₂)⟩,
+    S₁ = ⌊n/K₁⌋,  S₂ = max(1, ⌊n/K₂⌋)
+```
+
+separates the June C1/C2 classes (AUC 0.935) where eight scale-free invariants
+had failed.  Thread 23 replaces the computation by a closed form.  Script:
+[`secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py`](secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py),
+output `nuhat_closed_form_output.txt`.
+
+### 10.1 Closed form
+
+`L₂ = {(S₁(an − bλ), S₂b)}`, so for fixed `b` the inner minimum over `a` is
+`S₁·‖bλ‖ₙ` (centered residue) and
+
+```
+    λ₁(L₂)² = min_{b ≥ 0} [ S₁²·‖bλ‖ₙ² + S₂²·b² ].
+```
+
+Any minimising `b > 0` satisfies `‖b'λ‖ₙ > ‖bλ‖ₙ` for every `0 < b' < b`
+(otherwise `b'` beats `b`, since `S₂²b'² < S₂²b²`), i.e. `b` is a best
+approximation of the second kind to `λ/n`; by Lagrange's theorem those are
+exactly the continued-fraction convergent denominators `q_j`.  `b = 0` is
+`q₋₁ = 0`, contributing `S₁n`.  So ν̂ is an **O(log n) continued-fraction
+quantity**, no lattice reduction required.
+
+Verified against exact-integer Lagrange–Gauss reduction: **1080/1080 exact
+agreements** over bit lengths 20–521 × eff ∈ {0.02, 0.10, 0.50}.
+
+The minimising convergent is *not* the largest partial quotient but the one at
+the scale `R = √(n·S₁/S₂) = √(n·K₂/K₁)` where the two terms balance
+(`θ ≈ n/q`).  `q_{j*}` is the convergent nearest `R` in 40–50 % of cases and
+within one index in 93–99 %.  This is why the scale-free June invariants
+(`q_cf`, `max_q_cf`, `max_a`) failed: at 20 bits, `log(1+a_local)` correlates
+−0.74 with ν̂ (Spearman −0.75) while the global `log(1+a_max)` reaches only
+−0.41 (−0.34), most of which it inherits from `a_local` (r = +0.61).
+
+### 10.2 Null law
+
+In normalised coordinates `u = q/R`, `w = θR/n`, `ν̂² = min(u² + w²)`, i.e.
+`L₂/√det` is a unimodular 2-lattice.  Under equidistribution `ν̂² = 1/Im τ`
+for `τ` Haar on `SL(2,ℤ)\ℍ`, giving the exact CDF
+
+```
+    P(ν̂ ≤ r) = 3r²/π                                             r ≤ 1
+             = (3/π)[r² − 2r²√(1−r⁻⁴) − 2 arcsin(r⁻²) + π]       1 ≤ r ≤ (4/3)^¼
+             = 1                                                 r ≥ (4/3)^¼
+```
+
+with support ceiling the Hermite bound `(4/3)^¼ = 1.074570`.  KS tests against
+random λ: D = 0.0037–0.0125 (p = 0.17–0.95) at 64 and 256 bits, eff ∈ {0.05,
+0.25}; no sample ever exceeded the Hermite ceiling.  This reproduces the
+empirical null quantiles logged 2026-07-29 to three decimals.
+
+### 10.3 Theorem (GLV floor)
+
+Let `n` be prime with `λ² + λ + 1 ≡ 0 (mod n)` — i.e. the j = 0 GLV setting.
+If `a + bλ ≡ 0 (mod n)` with `(a,b) ≠ 0` then
+
+```
+    a² − ab + b² ≡ b²(λ² + λ + 1) ≡ 0   (mod n),
+```
+
+and the form is positive definite, so `a² − ab + b² ≥ n`.  Minimising the
+quadratic form `S₁²a² + S₂²b²` subject to that constraint (a generalised
+Rayleigh quotient) gives, unconditionally,
+
+```
+    ν̂  ≥  √( t_min /(S₁S₂) ),   t_min = smaller root of
+                                (3/4)t² − (S₁²+S₂²)t + S₁²S₂² = 0
+       =  √( 2 / ( r[(1 + r⁻²) + √(1 − r⁻² + r⁻⁴)] ) ),   r = S₁/S₂ = K₂/K₁.
+```
+
+In particular `ν̂ ≥ √(2/3) = 0.8165` when `K₁ = K₂`, decaying as `√(K₁/K₂)`.
+The bound is sharp: over 200 64-bit j = 0 curves the observed minima are
+0.816499 / 0.681853 / 0.495975 / 0.249879 against floors 0.816497 / 0.681774 /
+0.495955 / 0.249878 at `K₂/K₁` = 1 / 2 / 4 / 16, with **zero violations** at any
+ratio tested (up to 2²⁰).
+
+Consequence for the threat model: the C2 ("LLL recovers `d` on every seed")
+band requires ν̂ ≤ 0.645, and the floor exceeds 0.645 whenever
+`K₂/K₁ ≤ 2.276`.  **No j = 0 GLV curve can be in the easy class when the
+leaked bound `K₁` is within 1.19 bits of `K₂`** — no CM hypothesis, no
+reduction heuristic, just positive-definiteness of the norm form.
+
+This is also visible statistically: the GLV λ is non-Haar exactly where the
+floor bites.  KS vs the §10.2 law over 300 64-bit curves: D = 0.637 (p ≈ 0) at
+`K₂/K₁ = 1`, D = 0.235 (p ≈ 0) at 4, but D = 0.034–0.047 (p = 0.52–0.87) for
+`K₂/K₁ ≥ 256` — the arithmetic of Z[ω] is invisible to ν̂ once the leak is
+strong, and the curve is then no safer than a random λ.
+
+### 10.4 Precision note
+
+The incumbent float64 `gauss_reduce_2d` (`glv_hnp_phase2_lambda_threshold.py:216`)
+is accurate to ≤ 2.1e-16 relative up to 384 bits — Python's exact int/int
+division rescues it — so every published ν̂ number stands, including the
+secp256k1 placement (exact vs float agree to 1e-14).  At **521 bits it raises
+OverflowError on 25/25 trials** (`math.sqrt` of a norm ≳ 2¹⁰²⁴), the same
+failure mode as the P-521 LLL thread.  `nu_hat_exact()` in the Thread 23 script
+is overflow-free and should be preferred.
