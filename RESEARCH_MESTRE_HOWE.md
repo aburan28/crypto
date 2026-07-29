@@ -293,8 +293,62 @@ The explicit cover is a **publishable individual result**:
 It would be a nice complement to the paper but is not required
 by the theorem.
 
+## 9.5. Thread 22 (2026-07-29): realization ≠ gluing — 15/15 vs 5/15
+
+Thread 18 (2026-07-21) found that only **5 of the 15** sextic-twist pairs
+satisfy Howe's gluing conditions (H1)(H2)(H3). Thread 22 asked the weaker
+but more relevant question — *does the isogeny class of E_i × E_j contain a
+genus-2 Jacobian at all?* — and answered it by **exhaustive** genus-2 search
+over proxy primes.
+
+Scripts: `secp256k1_cm_audit/thread22_jacobian_realization.gp` (proxy primes),
+`secp256k1_cm_audit/thread22_secp256k1_realization.gp` (secp256k1 scale).
+
+Every genus-2 curve over F_p (p ≥ 7) has a model
+`y² = f₆x⁶ + f₄x⁴ + f₃x³ + f₂x² + f₁x + f₀` with `f₆ ∈ {1, ν}` (ν a
+non-residue) — translation kills f₅, and `u⁶e⁻²` sweeps exactly the squares.
+So enumerating those `2p⁵` models is complete. Over F₇, F₁₃, F₁₉ this is
+33 614 / 742 586 / 4 952 198 models (~107 s total in PARI).
+
+Measured: a split class `E_{t₁} × E_{t₂}` over F_p contains **no** Jacobian iff
+
+- **(X1)** `|t₁ − t₂| = 1`, or
+- **(X2)** `t₁ = t₂ = t` and `t² − 4p = −3`.
+
+All other split classes are realized (12/66, 14/105, 16/153 missing at
+p = 7, 13, 19 — every missing one fits X1 or X2).
+
+Conjectural explanation of (X1), SNF-verified in the script: `Z[T]/(P_i, P_j)`
+has Smith normal form `diag(|t_i−t_j|, p·|t_i−t_j|)`, so the reduced resultant
+is `r = p·|t_i − t_j|`. Gluing along a group scheme of order n coprime to p
+needs `n | r`; when `|t_i − t_j| = 1` we get `r = p`, forcing n = 1 — only the
+product polarization survives, and that is never a Jacobian.
+
+**For secp256k1**: no two of the six traces are equal, and the minimum of
+`|t_i − t_j|` over the 15 pairs is `193508920647619669885755136084601127234 ≈ 2^127`.
+Neither exception can fire, so **all 15 classes contain a Jacobian** against
+**5/15** Howe-glueable. Counting Howe-glueable pairs undercounts available
+genus-2 covers 3×.
+
+This does **not** weaken block B5, which bounds cover *cost*, not cover *count*.
+It also gives no construction: realization is an existence statement, and
+Thread 2 (2026-07-26) showed the explicit F_p Rosenhain route stays blocked by
+the cubic-residue obstruction.
+
+Caveat: over p ∈ {7, 13, 19} no square class has `t² − 4p ∈ {−4, −7}`, so those
+discriminants are untested and (X2) may be incomplete. Irrelevant for secp256k1
+(no pair has `t_i = t_j`). The measured criterion is almost certainly a special
+case of the Howe–Nart–Ritzenthaler classification (below); the exact theorem
+statement could not be checked — arxiv.org and numdam.org are blocked by this
+environment's network policy.
+
 ## 10. References
 
+- Howe, Nart, Ritzenthaler, "Jacobians in isogeny classes of abelian
+  surfaces over finite fields", Ann. Inst. Fourier **59** (2009) 239–289;
+  arXiv:math/0607515. (Complete classification of which abelian-surface
+  isogeny classes contain a Jacobian — the published form of the criterion
+  measured empirically in §9.5. **Exact statement unverified**, see §9.5.)
 - Mestre, "Construction de courbes de genre 2 à partir de leurs
   modules", in *Effective Methods in Algebraic Geometry*, 1991.
 - Cardona, Quer, "Field of moduli and field of definition for

@@ -1,0 +1,195 @@
+================================================================
+Thread 22: Jacobian realization of j=0 sextic-twist products
+Exhaustive genus-2 search over small proxy primes p = 1 mod 6
+================================================================
+
+convention check: chi = x^4 + 5*x^3 + 24*x^2 + 65*x + 169
+  #C(F_p) counted = 19   p+1+a1 = 19   -> OK
+
+================================================================
+p = 7    (p mod 6 = 1)
+================================================================
+
+Six j=0 sextic twists  E_k : y^2 = x^3 + b_k   over F_7
+  k | b_k | #E_k | t_k | 2-torsion pattern of x^3+b_k
+  0 | 1 | 12 | -4 | [1, 1, 1]
+  1 | 3 | 13 | -5 | [3]
+  2 | 2 | 9 | -1 | [3]
+  3 | 6 | 4 | 4 | [1, 1, 1]
+  4 | 4 | 3 | 5 | [3]
+  5 | 5 | 7 | 1 | [3]
+  trace sums (should be 0 for k in {0,2,4} and {1,3,5}): 0, 0
+
+Exhaustive genus-2 enumeration over F_7 (non-residue nu = 3):
+  models scanned (f6 in {1,nu}, f5=0, f4..f0 free) = 33614  (= 2*p^5)
+  squarefree (= genus-2 curves)                    = 28812
+  distinct Frobenius char polys realized           = 192
+
+15 sextic-twist pairs:  Howe(H1,H2,H3) prediction  vs  actual realization
+  pair | H1 | H2 | H3 | Howe | (a1,a2) target      | #models | realized?
+  (0,1)  |  Y |  n |  Y |   no  | (9, 34) | 0 | no
+  (0,2)  |  Y |  n |  n |   no  | (5, 18) | 126 | YES
+  (0,3)  |  Y |  Y |  n |   no  | (0, -2) | 168 | YES
+  (0,4)  |  Y |  n |  n |   no  | (-1, -6) | 40 | YES
+  (0,5)  |  Y |  n |  Y |   no  | (3, 10) | 208 | YES
+  (1,2)  |  Y |  Y |  Y |  YES | (6, 19) | 96 | YES
+  (1,3)  |  Y |  n |  Y |   no  | (1, -6) | 40 | YES
+  (1,4)  |  Y |  Y |  Y |  YES | (0, -11) | 16 | YES
+  (1,5)  |  Y |  Y |  Y |  YES | (4, 9) | 224 | YES
+  (2,3)  |  Y |  n |  Y |   no  | (-3, 10) | 208 | YES
+  (2,4)  |  Y |  Y |  n |   no  | (-4, 9) | 224 | YES
+  (2,5)  |  Y |  Y |  Y |  YES | (0, 13) | 96 | YES
+  (3,4)  |  Y |  n |  Y |   no  | (-9, 34) | 0 | no
+  (3,5)  |  Y |  n |  Y |   no  | (-5, 18) | 126 | YES
+  (4,5)  |  Y |  Y |  Y |  YES | (-6, 19) | 96 | YES
+
+All split classes E_{t1} x E_{t2} over F_7 that are NOT realized by any Jacobian:
+    t1=-5, t2=-5  (a1,a2)=(10,39)   [E x E : square class]
+    t1=-5, t2=-4  (a1,a2)=(9,34)
+    t1=-4, t2=-3  (a1,a2)=(7,26)
+    t1=-3, t2=-2  (a1,a2)=(5,20)
+    t1=-2, t2=-1  (a1,a2)=(3,16)
+    t1=-1, t2=0  (a1,a2)=(1,14)
+    t1=0, t2=1  (a1,a2)=(-1,14)
+    t1=1, t2=2  (a1,a2)=(-3,16)
+    t1=2, t2=3  (a1,a2)=(-5,20)
+    t1=3, t2=4  (a1,a2)=(-7,26)
+    t1=4, t2=5  (a1,a2)=(-9,34)
+    t1=5, t2=5  (a1,a2)=(-10,39)   [E x E : square class]
+  -> 12 of 66 split classes over F_7 have NO Jacobian.
+
+  pairs passing H1&H2&H3            : 5/15
+  pairs whose class IS realized     : 13/15
+  CONSISTENT: every Howe-qualifying pair is realized as a Jacobian isogeny class.
+
+================================================================
+p = 13    (p mod 6 = 1)
+================================================================
+
+Six j=0 sextic twists  E_k : y^2 = x^3 + b_k   over F_13
+  k | b_k | #E_k | t_k | 2-torsion pattern of x^3+b_k
+  0 | 1 | 12 | 2 | [1, 1, 1]
+  1 | 4 | 21 | -7 | [3]
+  2 | 3 | 9 | 5 | [3]
+  3 | 12 | 12 | 2 | [1, 1, 1]
+  4 | 9 | 21 | -7 | [3]
+  5 | 10 | 9 | 5 | [3]
+  trace sums (should be 0 for k in {0,2,4} and {1,3,5}): 0, 0
+
+Exhaustive genus-2 enumeration over F_13 (non-residue nu = 2):
+  models scanned (f6 in {1,nu}, f5=0, f4..f0 free) = 742586  (= 2*p^5)
+  squarefree (= genus-2 curves)                    = 685464
+  distinct Frobenius char polys realized           = 494
+
+15 sextic-twist pairs:  Howe(H1,H2,H3) prediction  vs  actual realization
+  pair | H1 | H2 | H3 | Howe | (a1,a2) target      | #models | realized?
+  (0,1)  |  Y |  n |  n |   no  | (5, 12) | 1424 | YES
+  (0,2)  |  Y |  n |  n |   no  | (-7, 36) | 1068 | YES
+  (0,3)  |  n |  Y |  n |   no  | (-4, 30) | 384 | YES
+  (0,4)  |  Y |  n |  n |   no  | (5, 12) | 1424 | YES
+  (0,5)  |  Y |  n |  n |   no  | (-7, 36) | 1068 | YES
+  (1,2)  |  Y |  Y |  n |   no  | (2, -9) | 336 | YES
+  (1,3)  |  Y |  n |  n |   no  | (5, 12) | 1424 | YES
+  (1,4)  |  n |  Y |  n |   no  | (14, 75) | 0 | no
+  (1,5)  |  Y |  Y |  n |   no  | (2, -9) | 336 | YES
+  (2,3)  |  Y |  n |  n |   no  | (-7, 36) | 1068 | YES
+  (2,4)  |  Y |  Y |  n |   no  | (2, -9) | 336 | YES
+  (2,5)  |  n |  Y |  n |   no  | (-10, 51) | 112 | YES
+  (3,4)  |  Y |  n |  n |   no  | (5, 12) | 1424 | YES
+  (3,5)  |  Y |  n |  n |   no  | (-7, 36) | 1068 | YES
+  (4,5)  |  Y |  Y |  n |   no  | (2, -9) | 336 | YES
+
+All split classes E_{t1} x E_{t2} over F_13 that are NOT realized by any Jacobian:
+    t1=-7, t2=-7  (a1,a2)=(14,75)   [E x E : square class]
+    t1=-7, t2=-6  (a1,a2)=(13,68)
+    t1=-6, t2=-5  (a1,a2)=(11,56)
+    t1=-5, t2=-4  (a1,a2)=(9,46)
+    t1=-4, t2=-3  (a1,a2)=(7,38)
+    t1=-3, t2=-2  (a1,a2)=(5,32)
+    t1=-2, t2=-1  (a1,a2)=(3,28)
+    t1=1, t2=2  (a1,a2)=(-3,28)
+    t1=2, t2=3  (a1,a2)=(-5,32)
+    t1=3, t2=4  (a1,a2)=(-7,38)
+    t1=4, t2=5  (a1,a2)=(-9,46)
+    t1=5, t2=6  (a1,a2)=(-11,56)
+    t1=6, t2=7  (a1,a2)=(-13,68)
+    t1=7, t2=7  (a1,a2)=(-14,75)   [E x E : square class]
+  -> 14 of 105 split classes over F_13 have NO Jacobian.
+
+  pairs passing H1&H2&H3            : 0/15
+  pairs whose class IS realized     : 14/15
+  CONSISTENT: every Howe-qualifying pair is realized as a Jacobian isogeny class.
+
+================================================================
+p = 19    (p mod 6 = 1)
+================================================================
+
+Six j=0 sextic twists  E_k : y^2 = x^3 + b_k   over F_19
+  k | b_k | #E_k | t_k | 2-torsion pattern of x^3+b_k
+  0 | 1 | 12 | 8 | [1, 1, 1]
+  1 | 8 | 28 | -8 | [1, 1, 1]
+  2 | 7 | 12 | 8 | [1, 1, 1]
+  3 | 18 | 28 | -8 | [1, 1, 1]
+  4 | 11 | 12 | 8 | [1, 1, 1]
+  5 | 12 | 28 | -8 | [1, 1, 1]
+  trace sums (should be 0 for k in {0,2,4} and {1,3,5}): 24, -24
+
+Exhaustive genus-2 enumeration over F_19 (non-residue nu = 2):
+  models scanned (f6 in {1,nu}, f5=0, f4..f0 free) = 4952198  (= 2*p^5)
+  squarefree (= genus-2 curves)                    = 4691556
+  distinct Frobenius char polys realized           = 878
+
+15 sextic-twist pairs:  Howe(H1,H2,H3) prediction  vs  actual realization
+  pair | H1 | H2 | H3 | Howe | (a1,a2) target      | #models | realized?
+  (0,1)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (0,2)  |  n |  Y |  n |   no  | (-16, 102) | 30 | YES
+  (0,3)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (0,4)  |  n |  Y |  n |   no  | (-16, 102) | 30 | YES
+  (0,5)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (1,2)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (1,3)  |  n |  Y |  n |   no  | (16, 102) | 30 | YES
+  (1,4)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (1,5)  |  n |  Y |  n |   no  | (16, 102) | 30 | YES
+  (2,3)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (2,4)  |  n |  Y |  n |   no  | (-16, 102) | 30 | YES
+  (2,5)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (3,4)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+  (3,5)  |  n |  Y |  n |   no  | (16, 102) | 30 | YES
+  (4,5)  |  Y |  Y |  n |   no  | (0, -26) | 3696 | YES
+
+All split classes E_{t1} x E_{t2} over F_19 that are NOT realized by any Jacobian:
+    t1=-8, t2=-7  (a1,a2)=(15,94)
+    t1=-7, t2=-6  (a1,a2)=(13,80)
+    t1=-6, t2=-5  (a1,a2)=(11,68)
+    t1=-5, t2=-4  (a1,a2)=(9,58)
+    t1=-4, t2=-3  (a1,a2)=(7,50)
+    t1=-3, t2=-2  (a1,a2)=(5,44)
+    t1=-2, t2=-1  (a1,a2)=(3,40)
+    t1=-1, t2=0  (a1,a2)=(1,38)
+    t1=0, t2=1  (a1,a2)=(-1,38)
+    t1=1, t2=2  (a1,a2)=(-3,40)
+    t1=2, t2=3  (a1,a2)=(-5,44)
+    t1=3, t2=4  (a1,a2)=(-7,50)
+    t1=4, t2=5  (a1,a2)=(-9,58)
+    t1=5, t2=6  (a1,a2)=(-11,68)
+    t1=6, t2=7  (a1,a2)=(-13,80)
+    t1=7, t2=8  (a1,a2)=(-15,94)
+  -> 16 of 153 split classes over F_19 have NO Jacobian.
+
+  pairs passing H1&H2&H3            : 0/15
+  pairs whose class IS realized     : 15/15
+  CONSISTENT: every Howe-qualifying pair is realized as a Jacobian isogeny class.
+
+================================================================
+SUMMARY
+================================================================
+   p | Howe-qualifying | class-realized | Howe => realized ?
+  7 |      5/15       |     13/15      | OK
+  13 |      0/15       |     14/15      | OK
+  19 |      0/15       |     15/15      | OK
+
+Reading: 'Howe => realized' must always hold (H1&H2&H3 constructs an explicit
+(2,2)-glued Jacobian). 'realized' strictly exceeding 'Howe-qualifying' shows the
+Howe conditions are SUFFICIENT but NOT NECESSARY for a split isogeny class to
+contain a Jacobian -- i.e. counting Howe-glueable pairs UNDERCOUNTS the genus-2
+covers available to a cover attack.

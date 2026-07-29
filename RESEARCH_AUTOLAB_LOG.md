@@ -5874,3 +5874,151 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 22 (exhaustive Jacobian-realization search over small proxy primes) — the
+continuation proposed at the end of the 2026-07-26 run #2 entry (line ~5873), never
+started. All six original priority threads remain CLOSED/BLOCKED. The other open
+proposal, Thread 20 (λ/n threshold study), needs `fpylll`+`sympy`, neither of which is
+installed and neither installable offline; Thread 22 needs only PARI/GP, which installs
+cleanly via `apt-get install pari-gp`. Note: PARI is **not** pre-installed in a fresh
+container — it must be reinstalled every run (the 2026-07-26 entry's "PARI is now
+installed" does not survive re-cloning).
+
+### Work done
+- Wrote `secp256k1_cm_audit/thread22_jacobian_realization.gp` — exhaustive genus-2
+  enumeration over proxy primes p ≡ 1 mod 6, comparing Howe (H1)(H2)(H3) against actual
+  Jacobian realization.
+- Wrote `secp256k1_cm_audit/thread22_secp256k1_realization.gp` — applies the measured
+  criterion at secp256k1 scale; independently re-derives the Thread 18 table.
+- Outputs committed as `thread22_*_output.txt` (+ `.expected.txt`).
+- `cargo test --test curve_audit` → 5/5 pass (5.93s). ✓
+- Attempted to verify the Howe–Nart–Ritzenthaler theorem statement online.
+  **BLOCKED**: arxiv.org, numdam.org, aif.centre-mersenne.org all return 403 from the
+  agent proxy (network policy). WebSearch confirms the paper exists (Ann. Inst. Fourier
+  59 (2009) 239–289, arXiv:math/0607515) but the theorem text is unreachable. The
+  criterion below is therefore stated as **measured**, not cited.
+
+**Enumeration completeness** (this is what makes the negative results real, not
+sampling artefacts). Every genus-2 curve over F_p, p ≥ 7, has a model
+`y² = f₆x⁶ + f₄x⁴ + f₃x³ + f₂x² + f₁x + f₀` with `f₆ ∈ {1, ν}`:
+- a degree-5 model `y²=g(x)` → translate so `g(0) ≠ 0`, then `x→1/x, y→y/x³` gives a
+  degree-6 model with leading coeff `g(0) ≠ 0`;
+- `x → x − f₅/(6f₆)` kills f₅ (valid for p > 3);
+- `x→ux, y→ey` sends `f₆ → f₆u⁶/e²` and preserves `f₅=0`; `{u⁶e⁻²}` = squares of F_p*
+  (6th powers ⊆ squares, and `e⁻²` already sweeps all squares), so `f₆ ∈ {1, ν}`.
+
+Convention self-check in the script: PARI `hyperellcharpoly` returns
+`χ(T) = T⁴ + a₁T³ + a₂T² + p·a₁T + p²` with `#C(F_p) = p + 1 + a₁`
+(verified: p=13, f = x⁶+2x⁴+3x³+x+5 → χ = T⁴+5T³+24T²+65T+169, counted #C = 19 = 14+5 ✓).
+For traces t_i, t_j: `a₁ = −(t_i+t_j)`, `a₂ = 2p + t_i·t_j`.
+
+### Findings
+
+**Enumeration scale and cost** (PARI, ~107 s wall for all three primes):
+
+| p  | models = 2p⁵ | squarefree (genus-2 curves) | distinct Weil polys | Howe-qualifying | class realized |
+|----|--------------|------------------------------|---------------------|-----------------|----------------|
+| 7  | 33 614       | 28 812                       | 192                 | 5/15            | 13/15          |
+| 13 | 742 586      | 685 464                      | 494                 | 0/15            | 14/15          |
+| 19 | 4 952 198    | 4 691 556                    | 878                 | 0/15            | 15/15          |
+
+`Howe ⟹ realized` holds in all three (no contradiction ⇒ no bug). H3 (`gcd(#E_i,#E_j)=1`)
+is vacuously near-impossible at small p — at p=19 all six twists have order 12 or 28 —
+which is why p=13, 19 give 0/15 Howe-qualifying. Only p=7 is non-degenerate for H1–H3.
+
+**Measured criterion (the actual result).** Extending the same enumeration to *every*
+split class, not just the 15 twist pairs: a split class `E_{t₁} × E_{t₂}` over F_p
+contains **no** Jacobian iff
+
+```
+(X1)  |t₁ − t₂| = 1                              , or
+(X2)  t₁ = t₂ = t  and  t² − 4p = −3
+```
+
+Exhaustively confirmed — every missing class fits X1 or X2, and every class fitting
+neither is realized:
+
+| p  | split classes | no Jacobian | breakdown |
+|----|---------------|-------------|-----------|
+| 7  | 66            | 12          | 10 × (X1), 2 × (X2): t=±5, t²−4p = 25−28 = −3 |
+| 13 | 105           | 14          | 12 × (X1), 2 × (X2): t=±7, t²−4p = 49−52 = −3 |
+| 19 | 153           | 16          | 16 × (X1), 0 × (X2): no t with t²−76 = −3 (t²=73 not a square) |
+
+Cross-check on trace existence (Deuring/Waterhouse): p=13 ≡ 1 mod 4 so t=0 does not
+occur, and indeed the p=13 missing list skips `(−1,0)` and `(0,1)`; p=7, 19 ≡ 3 mod 4 do
+have t=0 and those pairs *are* in the missing lists. ✓
+
+**Structural explanation of (X1)** (conjectural; SNF verified numerically in
+`thread22_secp256k1_realization.gp`). For `P_i = T² − t_iT + p`, since
+`P_j = P_i + (t_i−t_j)T`, the ring `Z[T]/(P_i,P_j)` is `Z²/((t_i−t_j)·[[0,−p],[1,t_i]])`,
+whose Smith normal form is `diag(|t_i−t_j|, p·|t_i−t_j|)`. Hence the reduced resultant
+(the smallest positive integer in the ideal) is
+
+```
+r = p · |t_i − t_j|
+```
+
+SNF spot checks, all OK: (p,t₁,t₂) = (7,−5,−4)→[1,7]; (7,−4,−1)→[3,21];
+(13,−7,5)→[12,156]; (19,8,−8)→[16,304].
+
+Howe-style gluing along a group scheme of order n coprime to p requires `n | r`. If
+`|t_i − t_j| = 1` then `r = p`, so the only admissible n is 1: no nontrivial gluing
+exists, `E_i × E_j` carries only the product polarization, and a product with the
+product polarization is never a Jacobian. This exactly reproduces (X1).
+
+**Application to secp256k1** (`thread22_secp256k1_realization.gp`):
+
+The script re-derives the six sextic-twist traces from the CM decomposition
+`4p = t₀² + 3s²`, `s = 303414439467246543595250775667605759171`, and re-identifies each
+trace with its b-value by testing `(p+1−t)·P = O`. It reproduces **exactly** the Thread
+18 (2026-07-21) table — same six traces, same 2-torsion patterns (`[1,1,1]` only for
+k = 2, 5), and the same 5 qualifying pairs (0,1),(0,3),(0,4),(1,4),(3,4). Independent
+confirmation of Thread 18.
+
+```
+min over the 15 pairs of |t_i − t_j| = 193508920647619669885755136084601127234 ≈ 2^127
+no pair has t_i = t_j
+⟹ neither (X1) nor (X2) can fire
+⟹ ALL 15 product classes contain a genus-2 Jacobian, vs 5/15 Howe-glueable.
+```
+
+**Interpretation.** Howe's (H1)(H2)(H3) are *sufficient but far from necessary* for a
+split class to contain a Jacobian: counting Howe-glueable pairs undercounts the genus-2
+covers of secp256k1's sextic-twist family by 3×. This does **not** weaken the paper's
+block B5: B5 bounds the *cost* of the resulting genus-2 DLP, not the *number* of covers.
+For `J` with `#J ~ p² ~ n²` and `n | #J`, Pollard ρ on J costs `≳ √n`, and genus-2
+index calculus over a **prime** field has no sub-ρ algorithm (Gaudry–Thomé–Thériault–Diem
+needs g ≥ 3 or an extension field). Tripling the attacker's options is a constant factor.
+
+It also yields no attack: realization is pure existence. Thread 2 (2026-07-26) showed the
+explicit F_p Rosenhain construction is permanently blocked for secp256k1 by the
+cubic-residue obstruction, and nothing here changes that.
+
+### Next step proposal
+
+**Thread 23 (highest value, cheap): close the (X2) gap.** The proxy primes tested carry
+no square class with `t² − 4p ∈ {−4, −7}`, so (X2) may be incomplete. Extend
+`thread22_jacobian_realization.gp` to `p ∈ {31, 37, 43}` — `2p⁵` = 57M / 138M / 294M
+models, i.e. ~20 min / ~50 min / ~105 min at the measured ~11 µs/curve. p=31 has
+`t=±11 → 121−124 = −3` and p=37 has `t=±12 → 144−148 = −4` (**the first −4 test case**);
+p=43 has `t=±13 → 169−172 = −3`. Running p=37 alone settles whether −4 is an exception.
+Cheap and decisive. Guard: the `hitcnt` matrix is `(8√p+1)×(12p+1)` — still tiny.
+
+**Thread 24: is the reduced-resultant argument a proof?** The (X1) explanation above is
+an argument sketch, not a proof — it asserts "only the product polarization survives"
+without ruling out non-principal or non-split polarizations. Writing it out properly
+(or finding it in HNR) would turn a measured regularity into a citable lemma for §B5.
+Requires the HNR text; **BLOCKED on network policy** unless a copy can be reached from
+an allowed host.
+
+**Not recommended: Thread 20 (λ/n threshold).** Needs `fpylll`; unavailable and not
+installable in this environment. Either vendor a small pure-Python LLL into the repo
+(the lattices are dim ≤ 25 with ≤ 40-bit entries, so an exact-rational LLL is fine and
+would make every `glv_hnp_*.py` script runnable again) or drop the thread. Vendoring the
+LLL is itself a good self-contained next task.
+
+### Commits made
+[filled in below]
