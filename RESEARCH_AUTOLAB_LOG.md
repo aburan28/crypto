@@ -5874,3 +5874,87 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study). Explicitly proposed in the 2026-07-26 run #1 as the
+next concrete sub-task: bisect the λ/n threshold between the known-failure (0.07) and
+known-pass (0.34) regime for GLV-HNP Phase 2. No prior work on Thread 20 before today.
+
+### Work done
+- Wrote `glv_hnp_lambda_threshold.py`: searched 10-16 bit j=0 GLV curves, bucketed
+  10 representative curves by λ/n in steps of 0.05, ran LLL at 3 seeds per m=3..18.
+  Injected known-failure curve (p=2677, n=2647, K1=8) as control.
+- Key surprise: bucket [0.05,0.10) with n=1303, **λ/n=0.073**, **K1=2** → **PASS at m=4**.
+  This directly contradicts the previous hypothesis that λ/n=0.07 causes failure —
+  because the known-failure curve also has λ/n≈0.07 but uses K1=8.
+- Wrote `glv_hnp_k1_vs_lambda.py`: six-experiment decoupling study.
+  - E1: n=2647, K1=2 (same λ/n=0.070, reduce K1) → **PASS at m=4** ← KEY RESULT
+  - E2: n=1303, K1=8 (same λ/n=0.073, raise K1) → **FAIL at all m≤15** ← KEY RESULT
+  - E3: n=2647, K1=4 → **PASS at m=7** (bisect)
+  - E4: n=2647, K1=6 → **FAIL** (bisect)
+  - E5: n=1303, K1=4 → **PASS at m=7**
+  - E6: n=1447, λ/n=0.487, K1=8 → **PASS at m=9** (large λ/n rescues K1=8)
+- `cargo test --test curve_audit`: 5/5 pass (5.54s). ✓
+
+### Findings
+
+**Previous hypothesis REFUTED: λ/n is NOT the primary threshold variable.**
+
+The 2026-07-26 run #1 concluded "λ/n=0.07 causes LLL failure; λ/n≥0.34 succeeds."
+This was an artifact: the failure case used K1=8 and the success cases used K1=2.
+The actual driver is **K1_BOUND**, not λ/n.
+
+**Decoupling table (all at n≈1300-2650, K2≈n^{1/2}):**
+
+| Exp          | n    | λ/n   | K1 | min m 3/3 | result  |
+|--------------|------|-------|----|-----------|---------|
+| Known-FAIL   | 2647 | 0.070 |  8 | never     | FAIL    |
+| Known-PASS   | 1303 | 0.073 |  2 | 4         | PASS    |
+| E1 (K1↓)    | 2647 | 0.070 |  2 | 4         | PASS    |
+| E2 (K1↑)    | 1303 | 0.073 |  8 | never     | FAIL    |
+| E3 (bisect) | 2647 | 0.070 |  4 | 7         | PASS    |
+| E4 (bisect) | 2647 | 0.070 |  6 | never     | FAIL    |
+| E5 (bisect) | 1303 | 0.073 |  4 | 7         | PASS    |
+| E6 (λ/n↑)  | 1447 | 0.487 |  8 | 9         | PASS    |
+
+**Corrected structural picture:**
+
+1. **K1_BOUND ≈ 4-5 is the threshold for 12-bit curves with small λ/n (≈0.07).**
+   K1 ≤ 4 → LLL succeeds; K1 ≥ 6 → LLL fails at this bit size.
+
+2. **λ/n DOES matter but only at large K1.** For K1=8:
+   - λ/n=0.07 → FAIL
+   - λ/n=0.487 → PASS at m=9
+   So a threshold for K1=8 exists somewhere in (0.07, 0.487) — not yet bisected.
+
+3. **Mechanistic hypothesis:** With large K1, the column-scaled k1 entries
+   (k1_i * S_K1, k1_i ∈ [0,K1-1], S_K1=n/K1) range from 0 to n·(K1-1)/K1. The
+   planted vector norm is ≈ n·sqrt(2m/3) regardless of K1/K2 (scaling is exact).
+   But the lattice basis norms are also ≈ n*S_K1 = n²/K1, so smaller with larger K1.
+   The Gaussian heuristic minimum ≈ n^(3/2)/sqrt(K1*K2) decreases with K1. At some K1
+   threshold, the GH minimum drops below the planted vector norm, and LLL finds
+   shorter NON-planted vectors. The λ/n interaction enters through the k2-row
+   projection coefficient μ = -λ/n: with small λ/n, the k2-rows have very small
+   GS-orthogonal components (S_K2 = n/K2 ≈ 50), making them easy for LLL to conflate
+   with shorter non-planted linear combinations when K1 is also large.
+
+4. **For secp256k1 relevance:** In a real 256-bit GLV attack, K1 ≈ sqrt(n) ≈ 2^128.
+   This is astronomically larger than the K1=4-8 regime studied here. The structural
+   failure at K1≥6 observed in 12-bit curves suggests the 256-bit attack faces a
+   compounded obstruction beyond just dimension. The toy results do NOT invalidate the
+   paper's claim that no isogeny-graph attack beats ρ for prime-field ECC.
+
+### Next step proposal
+
+**Thread 23: K1=8, λ/n threshold bisection.**
+Binary search for the λ/n threshold within the K1=8 class: run sweep for λ/n values
+in [0.07, 0.15], [0.15, 0.25], [0.25, 0.40], [0.40, 0.49] to narrow where K1=8 + λ/n
+transitions from FAIL to PASS. Script: `glv_hnp_k1_8_lambda_sweep.py`. Requires
+finding curves at specific λ/n targets within 12-bit range.
+
+**Thread 22 (Richelot search, from 2026-07-26 #2)** remains open as alternative.
+
+### Commits made
+[see below]
