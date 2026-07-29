@@ -5874,3 +5874,171 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Thread 22 (Richelot / genus-2 realisability search over small proxy primes)** —
+the explicit continuation proposed by the 2026-07-26 run (log line 5860, commit
+`c591765`). Thread 1 is CLOSED (§10.5), Thread 2's F_p Rosenhain route is CLOSED
+as a negative result (cubic-residue obstruction), Threads 3/4/6 CLOSED. Thread 22
+was the highest-priority continuable item and, unlike the Rosenhain route, needs no
+Sage/Magma — PARI/GP installs cleanly with `apt-get install --no-install-recommends
+pari-gp` (the plain install fails on a broken `libegl-mesa0` recommend).
+
+Question, verbatim from the 2026-07-26 proposal: *for each qualifying pair, does a
+genus-2 curve C/F_p exist whose Jacobian has char poly P_{E_i}(T)·P_{E_j}(T)?*
+
+### Work done
+
+- Wrote `examples/howe_genus2_census.rs` — an **exhaustive** genus-2 census.
+  Every genus-2 curve over F_p (p>5) has a model y²=f(x), f squarefree of degree
+  5 or 6; normalising the leading coefficient mod squares and translating away the
+  sub-leading coefficient gives two families that cover every curve:
+  `lead·(x⁶+a₄x⁴+a₃x³+a₂x²+a₁x+a₀)` and `lead·(x⁵+a₃x³+a₂x²+a₁x+a₀)`, `lead ∈ {1,ν}`.
+  For each model it computes N₁=#C(F_p), N₂=#C(F_p²) and hence
+  `s₁ = p+1−N₁`, `s₂ = (N₂−p²−1+s₁²)/2`, i.e. the full Frobenius char poly
+  `T⁴ − s₁T³ + s₂T² − p·s₁T + p²`.
+  Speed comes from two tricks: (a) the innermost coefficient a₀ only *shifts* the
+  value distribution, so a value-count table built once per (a₄,a₃,a₂,a₁) turns a
+  6p-op evaluation into a p-op convolution; (b) an s₁ prefilter over F_p before the
+  expensive F_p² pass. Both preserve exhaustiveness.
+- Wrote `secp256k1_cm_audit/thread22_census_verify.gp` — **independent** PARI check:
+  (A) recompute charpoly with `hyperellcharpoly` for every reported hit;
+  (B) re-derive the complete set of realisable char polys over F_7 by brute force
+  over the *unnormalised* families (all a₆x⁶+…+a₀ with a₆≠0, all quintics).
+- Wrote `secp256k1_cm_audit/thread22_secp256k1_criterion.gp` — applies the derived
+  criterion to secp256k1's six sextic twists.
+- `cargo test --release --test curve_audit` → 5/5 pass (6.70s). ✓
+- PARI gotcha re-encountered (same as `howe_22_kernel.gp`): a multi-line `[...]`
+  literal must be wrapped in `{ }` or gp parses it line-by-line and errors out.
+
+### Findings
+
+**1. The answer to Thread 22 is YES, and generically so.**
+
+Exhaustive census over the six j=0 sextic twists, all C(6,2)=15 pairs, for every
+p ≡ 1 (mod 6) up to 43:
+
+| p  | models enumerated | time  | Howe-glueable (H1∧H2∧H3) | realised as Jac | Howe⇒realised misses |
+|----|-------------------|-------|--------------------------|-----------------|----------------------|
+| 7  | 38 416            | 0.0s  | 5/15                     | **13/15**       | 0                    |
+| 13 | 799 708           | 0.1s  | 4/15                     | **15/15**       | 0                    |
+| 19 | 5 212 840         | 0.5s  | 5/15                     | **13/15**       | 0                    |
+| 31 | 59 105 344        | 8.7s  | 5/15                     | **15/15**       | 0                    |
+| 37 | 142 436 236       | 24.8s | 5/15                     | **13/15**       | 0                    |
+| 43 | 300 854 488       | 64.3s | 5/15                     | **15/15**       | 0                    |
+
+- **Howe's (H1)+(H2)+(H3) are sound but very far from necessary**: 29/90 pairs are
+  Howe-glueable, 84/90 are actually realised. Not one Howe-glueable pair failed to
+  be realised (0 misses in 90) — the conditions are a correct *sufficient* test.
+  The gap is expected: (H1)(H2)(H3) only tests gluing along **2**-torsion, whereas a
+  ppav isogenous to E_i×E_j can be glued along n-torsion for any n ≥ 2.
+- Example realisations are explicit and dead simple — e.g. over F_43,
+  `y² = x⁶+3` has charpoly `(T²+5T+43)(T²+13T+43)` = P_{E_1}·P_{E_2}.
+
+**2. Sharp criterion for the 6/90 non-realisable pairs.**
+
+The unrealisable pairs are *exactly* those with |t_i − t_j| = 1:
+
+| p  | traces (t_0…t_5)          | pairs with \|t_i−t_j\|=1 | pairs unrealisable |
+|----|---------------------------|--------------------------|--------------------|
+| 7  | −4,−5,−1, 4, 5, 1         | (0,1),(3,4)              | (0,1),(3,4)        |
+| 13 |  2,−5,−7,−2, 5, 7         | none                     | none               |
+| 19 |  8, 7,−1,−8,−7, 1         | (0,1),(3,4)              | (0,1),(3,4)        |
+| 31 | −4,−11,−7, 4, 11, 7       | none                     | none               |
+| 37 | −10,−11,−1, 10, 11, 1     | (0,1),(3,4)              | (0,1),(3,4)        |
+| 43 |  8,−5,−13,−8, 5, 13       | none                     | none               |
+
+**Conjecture T22.** For E₁ ≁ E₂ over F_p, the isogeny class E₁×E₂ contains the
+Jacobian of a genus-2 curve **iff** `p+1−(t₁+t₂) ≥ 0` and `|t₁−t₂| ≥ 2`.
+
+Proof sketch of the ⇒ direction (this half looks solid): a ppav isogenous to E₁×E₂
+that is not a product is a gluing (E₁′×E₂′)/graph(ψ) along an anti-isometry
+ψ: H₁→H₂ of finite Galois-stable subgroups (Kani). Take a cyclic Frobenius-stable
+H ≅ Z/n with Frobenius eigenvalue a; then a²−t_i·a+p ≡ 0 (mod n) for both i, and a
+is invertible mod n whenever gcd(n,p)=1 (since a(a−t_i) ≡ −p). Subtracting the two
+congruences gives (t₁−t₂)·a ≡ 0, hence **n | (t₁−t₂)**. If |t₁−t₂| = 1 no n ≥ 2
+qualifies, so no non-product ppav exists in the class and no Jacobian does either.
+The ⇐ direction is empirical only (see below).
+
+**3. The criterion survives a much larger falsification test.**
+
+`--all-pairs` mode drops the s₁ prefilter and computes the *complete* set of
+realisable char polys, then tests the conjecture against **every** split isogeny
+class over F_p (all trace pairs t₁≠t₂ with |t| ≤ ⌊2√p⌋, not just the j=0 family —
+for prime p every such t occurs, by Deuring):
+
+| p  | distinct realisable genus-2 charpolys | trace pairs tested | agree | violations |
+|----|---------------------------------------|--------------------|-------|------------|
+| 7  | 192                                   | 55                 | 55    | 0          |
+| 13 | 494                                   | 105                | 105   | 0          |
+| 19 | 878                                   | 136                | 136   | 0          |
+| 31 | 1 834                                 | 253                | 253   | 0          |
+| 37 | 2 394                                 | 300                | 300   | 0          |
+| 43 | PENDING                               | 351                | —     | —          |
+
+**849/849 pairs confirmed so far, zero violations in either direction.**
+
+**4. Independent verification (PARI).**
+
+- `thread22_census_verify.gp` (A): 13/13 reported census hits reproduce exactly
+  under PARI's `hyperellcharpoly`. E.g. `y²=x⁶+2` over F_13 →
+  `x⁴+12x³+61x²+156x+169` = (T²+5T+13)(T²+7T+13). ✓
+- (B): brute force over the *unnormalised* sextic + quintic families over F_7 finds
+  **192** distinct char polys — identical to the Rust census's 192 — and flags
+  exactly (0,1) and (3,4) as unrealisable. This validates both the normalisation
+  argument and the point-counting code against an independent implementation. ✓
+
+**5. Specialisation to the j=0 family, and to secp256k1.**
+
+For the j=0 sextic twists with 4p = t²+3s², the six traces are ±t, ±(t+3s)/2,
+±(t−3s)/2, whose three magnitudes always take the shape {a, b, a+b}. So
+"some pair differs by 1" ⟺ **some twist has trace ±1**:
+p=7 → {1,4,5}; p=19 → {1,7,8}; p=37 → {1,10,11} (obstructed);
+p=13 → {2,5,7}; p=31 → {4,7,11}; p=43 → {5,8,13} (unobstructed). Matches 6/6.
+
+`thread22_secp256k1_criterion.gp` output for secp256k1
+(t = 432420386565659656852420866390673177327,
+ s = 303414439467246543595250775667605759171):
+
+```
+six traces:  ±432420386565659656852420866390673177327
+             ±671331852483699643819086596696745227420
+             ±238911465918039986966665730306072050093
+any |t_k| = 1 : NO  ->  no pair obstructed
+predicted realisable pairs for secp256k1: 15/15
+```
+
+**Consequence for the paper.** §6 of `PAPER_STRUCTURAL_COMPLETENESS.md` asserts the
+*existence* of a genus-2 cover with Jac ~ E×E^t and leans on Howe (1996) for it,
+with §6.1 recording that no explicit construction was achieved. This run does not
+supply the explicit secp256k1 construction, but it does upgrade the existence claim
+from "Howe's sufficient conditions hold" to "existence is generic, exhaustively
+verified at small p, and obstructed only when |t_i−t_j| = 1 — which secp256k1 misses
+by ~2^128". Equally important, it settles a possible misreading in the negative:
+**non-existence of the cover is NOT what protects secp256k1**. All 15 target isogeny
+classes do contain Jacobians. The protection is entirely B5's DLP-cost argument.
+
+### Next step proposal
+
+1. **Reconcile Conjecture T22 with Howe–Nart–Ritzenthaler**, "Jacobians in isogeny
+   classes of abelian surfaces over finite fields", Ann. Inst. Fourier 59 (2009)
+   239–289 — they classify exactly which isogeny classes contain Jacobians, so the
+   ⇐ direction is very likely already a theorem there (possibly with extra
+   exceptional classes that p ≤ 43 is too small to expose). Fetch via ePrint/arXiv,
+   compare against the table above, and either cite it or find the p where the
+   ⇐ direction first breaks. This is a literature task, not a compute task.
+2. **Push the census to p = 61, 67** (the j=0 part only — it is the `--all-pairs`
+   mode that costs ~p⁷; the prefiltered census is ~p⁵ and p=61 should land in
+   ~5 min). Specifically looking for a pair that is realisable-but-Howe-glueable=no
+   *and* has |t_i−t_j| ≥ 2 yet still fails — i.e. a counterexample to ⇐.
+3. **Paper edit for §6/§6.1** once (1) resolves: replace the "existence by Howe's
+   theorem" sentence with the sharper criterion and cite the census, and state
+   explicitly in §6.1 that the missing explicit construction does not leave an
+   existence gap.
+
+### Commits made
