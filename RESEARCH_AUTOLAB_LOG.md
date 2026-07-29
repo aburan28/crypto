@@ -5972,3 +5972,5 @@ pairs (from Thread 18). Script: `secp256k1_cm_audit/richelot_proxy_search.gp`.
 
 ### Commits made
 
+`7f8582d` autolab 2026-07-29: Thread 4 CLOSED 3/3; Thread 20 lambda/n threshold
+
