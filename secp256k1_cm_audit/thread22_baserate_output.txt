@@ -1,0 +1,469 @@
+Thread 22 control: base rate of genus-2 realisability among split isogeny classes
+
+==============================================================================
+p = 7   b = 1   coverage: COMPLETE (deg 5 + deg 6)
+==============================================================================
+elliptic traces available      : 11  (-5 .. 5)
+distinct split classes E_a x E_b: 66
+realised by a genus-2 Jacobian : 54
+BASE RATE                      : 0.8182
+
+split classes with NO genus-2 Jacobian (12):
+  s1= -10 s2=    39   from traces (t_a,t_b)=( -5, -5)   charpoly = T^4 - -10T^3 + 39T^2 - -70T + 49
+  s1=  -9 s2=    34   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 34T^2 - -63T + 49
+  s1=  -7 s2=    26   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 26T^2 - -49T + 49
+  s1=  -5 s2=    20   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 20T^2 - -35T + 49
+  s1=  -3 s2=    16   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 16T^2 - -21T + 49
+  s1=  -1 s2=    14   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 14T^2 - -7T + 49
+  s1=   1 s2=    14   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 14T^2 - 7T + 49
+  s1=   3 s2=    16   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 16T^2 - 21T + 49
+  s1=   5 s2=    20   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 20T^2 - 35T + 49
+  s1=   7 s2=    26   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 26T^2 - 49T + 49
+  s1=   9 s2=    34   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 34T^2 - 63T + 49
+  s1=  10 s2=    39   from traces (t_a,t_b)=(  5,  5)   charpoly = T^4 - 10T^3 + 39T^2 - 70T + 49
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 13/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+p = 13   b = 7   coverage: COMPLETE (deg 5 + deg 6)
+==============================================================================
+elliptic traces available      : 15  (-7 .. 7)
+distinct split classes E_a x E_b: 120
+realised by a genus-2 Jacobian : 104
+BASE RATE                      : 0.8667
+
+split classes with NO genus-2 Jacobian (16):
+  s1= -14 s2=    75   from traces (t_a,t_b)=( -7, -7)   charpoly = T^4 - -14T^3 + 75T^2 - -182T + 169
+  s1= -13 s2=    68   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 68T^2 - -169T + 169
+  s1= -11 s2=    56   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 56T^2 - -143T + 169
+  s1=  -9 s2=    46   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 46T^2 - -117T + 169
+  s1=  -7 s2=    38   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 38T^2 - -91T + 169
+  s1=  -5 s2=    32   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 32T^2 - -65T + 169
+  s1=  -3 s2=    28   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 28T^2 - -39T + 169
+  s1=  -1 s2=    26   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 26T^2 - -13T + 169
+  s1=   1 s2=    26   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 26T^2 - 13T + 169
+  s1=   3 s2=    28   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 28T^2 - 39T + 169
+  s1=   5 s2=    32   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 32T^2 - 65T + 169
+  s1=   7 s2=    38   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 38T^2 - 91T + 169
+  s1=   9 s2=    46   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 46T^2 - 117T + 169
+  s1=  11 s2=    56   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 56T^2 - 143T + 169
+  s1=  13 s2=    68   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 68T^2 - 169T + 169
+  s1=  14 s2=    75   from traces (t_a,t_b)=(  7,  7)   charpoly = T^4 - 14T^3 + 75T^2 - 182T + 169
+
+sextic-twist pairs: Howe-qualifying 4/15, realised 15/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+p = 19   b = 7   coverage: COMPLETE (deg 5 + deg 6)
+==============================================================================
+elliptic traces available      : 17  (-8 .. 8)
+distinct split classes E_a x E_b: 153
+realised by a genus-2 Jacobian : 137
+BASE RATE                      : 0.8954
+
+split classes with NO genus-2 Jacobian (16):
+  s1= -15 s2=    94   from traces (t_a,t_b)=( -8, -7)   charpoly = T^4 - -15T^3 + 94T^2 - -285T + 361
+  s1= -13 s2=    80   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 80T^2 - -247T + 361
+  s1= -11 s2=    68   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 68T^2 - -209T + 361
+  s1=  -9 s2=    58   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 58T^2 - -171T + 361
+  s1=  -7 s2=    50   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 50T^2 - -133T + 361
+  s1=  -5 s2=    44   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 44T^2 - -95T + 361
+  s1=  -3 s2=    40   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 40T^2 - -57T + 361
+  s1=  -1 s2=    38   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 38T^2 - -19T + 361
+  s1=   1 s2=    38   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 38T^2 - 19T + 361
+  s1=   3 s2=    40   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 40T^2 - 57T + 361
+  s1=   5 s2=    44   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 44T^2 - 95T + 361
+  s1=   7 s2=    50   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 50T^2 - 133T + 361
+  s1=   9 s2=    58   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 58T^2 - 171T + 361
+  s1=  11 s2=    68   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 68T^2 - 209T + 361
+  s1=  13 s2=    80   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 80T^2 - 247T + 361
+  s1=  15 s2=    94   from traces (t_a,t_b)=(  7,  8)   charpoly = T^4 - 15T^3 + 94T^2 - 285T + 361
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 13/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+p = 31   b = 7   coverage: PARTIAL (deg 5 only)
+==============================================================================
+elliptic traces available      : 23  (-11 .. 11)
+distinct split classes E_a x E_b: 276
+realised by a genus-2 Jacobian : 176
+BASE RATE                      : 0.6377
+
+split classes with NO genus-2 Jacobian (100):
+  s1= -22 s2=   183   from traces (t_a,t_b)=(-11,-11)   charpoly = T^4 - -22T^3 + 183T^2 - -682T + 961
+  s1= -21 s2=   172   from traces (t_a,t_b)=(-11,-10)   charpoly = T^4 - -21T^3 + 172T^2 - -651T + 961
+  s1= -20 s2=   161   from traces (t_a,t_b)=(-11, -9)   charpoly = T^4 - -20T^3 + 161T^2 - -620T + 961
+  s1= -19 s2=   152   from traces (t_a,t_b)=(-10, -9)   charpoly = T^4 - -19T^3 + 152T^2 - -589T + 961
+  s1= -18 s2=   139   from traces (t_a,t_b)=(-11, -7)   charpoly = T^4 - -18T^3 + 139T^2 - -558T + 961
+  s1= -18 s2=   143   from traces (t_a,t_b)=( -9, -9)   charpoly = T^4 - -18T^3 + 143T^2 - -558T + 961
+  s1= -17 s2=   134   from traces (t_a,t_b)=( -9, -8)   charpoly = T^4 - -17T^3 + 134T^2 - -527T + 961
+  s1= -16 s2=   117   from traces (t_a,t_b)=(-11, -5)   charpoly = T^4 - -16T^3 + 117T^2 - -496T + 961
+  s1= -16 s2=   125   from traces (t_a,t_b)=( -9, -7)   charpoly = T^4 - -16T^3 + 125T^2 - -496T + 961
+  s1= -15 s2=   118   from traces (t_a,t_b)=( -8, -7)   charpoly = T^4 - -15T^3 + 118T^2 - -465T + 961
+  s1= -14 s2=    95   from traces (t_a,t_b)=(-11, -3)   charpoly = T^4 - -14T^3 + 95T^2 - -434T + 961
+  s1= -14 s2=   107   from traces (t_a,t_b)=( -9, -5)   charpoly = T^4 - -14T^3 + 107T^2 - -434T + 961
+  s1= -14 s2=   111   from traces (t_a,t_b)=( -7, -7)   charpoly = T^4 - -14T^3 + 111T^2 - -434T + 961
+  s1= -13 s2=   104   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 104T^2 - -403T + 961
+  s1= -12 s2=    73   from traces (t_a,t_b)=(-11, -1)   charpoly = T^4 - -12T^3 + 73T^2 - -372T + 961
+  s1= -12 s2=    89   from traces (t_a,t_b)=( -9, -3)   charpoly = T^4 - -12T^3 + 89T^2 - -372T + 961
+  s1= -12 s2=    97   from traces (t_a,t_b)=( -7, -5)   charpoly = T^4 - -12T^3 + 97T^2 - -372T + 961
+  s1= -11 s2=    92   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 92T^2 - -341T + 961
+  s1= -10 s2=    51   from traces (t_a,t_b)=(-11,  1)   charpoly = T^4 - -10T^3 + 51T^2 - -310T + 961
+  s1= -10 s2=    71   from traces (t_a,t_b)=( -9, -1)   charpoly = T^4 - -10T^3 + 71T^2 - -310T + 961
+  s1= -10 s2=    83   from traces (t_a,t_b)=( -7, -3)   charpoly = T^4 - -10T^3 + 83T^2 - -310T + 961
+  s1= -10 s2=    87   from traces (t_a,t_b)=( -5, -5)   charpoly = T^4 - -10T^3 + 87T^2 - -310T + 961
+  s1=  -9 s2=    82   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 82T^2 - -279T + 961
+  s1=  -8 s2=    29   from traces (t_a,t_b)=(-11,  3)   charpoly = T^4 - -8T^3 + 29T^2 - -248T + 961
+  s1=  -8 s2=    53   from traces (t_a,t_b)=( -9,  1)   charpoly = T^4 - -8T^3 + 53T^2 - -248T + 961
+  s1=  -8 s2=    69   from traces (t_a,t_b)=( -7, -1)   charpoly = T^4 - -8T^3 + 69T^2 - -248T + 961
+  s1=  -8 s2=    77   from traces (t_a,t_b)=( -5, -3)   charpoly = T^4 - -8T^3 + 77T^2 - -248T + 961
+  s1=  -7 s2=    74   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 74T^2 - -217T + 961
+  s1=  -6 s2=     7   from traces (t_a,t_b)=(-11,  5)   charpoly = T^4 - -6T^3 + 7T^2 - -186T + 961
+  s1=  -6 s2=    35   from traces (t_a,t_b)=( -9,  3)   charpoly = T^4 - -6T^3 + 35T^2 - -186T + 961
+  s1=  -6 s2=    55   from traces (t_a,t_b)=( -7,  1)   charpoly = T^4 - -6T^3 + 55T^2 - -186T + 961
+  s1=  -6 s2=    67   from traces (t_a,t_b)=( -5, -1)   charpoly = T^4 - -6T^3 + 67T^2 - -186T + 961
+  s1=  -6 s2=    71   from traces (t_a,t_b)=( -3, -3)   charpoly = T^4 - -6T^3 + 71T^2 - -186T + 961
+  s1=  -5 s2=    68   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 68T^2 - -155T + 961
+  s1=  -4 s2=   -15   from traces (t_a,t_b)=(-11,  7)   charpoly = T^4 - -4T^3 + -15T^2 - -124T + 961
+  s1=  -4 s2=    17   from traces (t_a,t_b)=( -9,  5)   charpoly = T^4 - -4T^3 + 17T^2 - -124T + 961
+  s1=  -4 s2=    41   from traces (t_a,t_b)=( -7,  3)   charpoly = T^4 - -4T^3 + 41T^2 - -124T + 961
+  s1=  -4 s2=    57   from traces (t_a,t_b)=( -5,  1)   charpoly = T^4 - -4T^3 + 57T^2 - -124T + 961
+  s1=  -4 s2=    65   from traces (t_a,t_b)=( -3, -1)   charpoly = T^4 - -4T^3 + 65T^2 - -124T + 961
+  s1=  -3 s2=    64   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 64T^2 - -93T + 961
+  s1=  -2 s2=   -37   from traces (t_a,t_b)=(-11,  9)   charpoly = T^4 - -2T^3 + -37T^2 - -62T + 961
+  s1=  -2 s2=    -1   from traces (t_a,t_b)=( -9,  7)   charpoly = T^4 - -2T^3 + -1T^2 - -62T + 961
+  s1=  -2 s2=    27   from traces (t_a,t_b)=( -7,  5)   charpoly = T^4 - -2T^3 + 27T^2 - -62T + 961
+  s1=  -2 s2=    47   from traces (t_a,t_b)=( -5,  3)   charpoly = T^4 - -2T^3 + 47T^2 - -62T + 961
+  s1=  -2 s2=    59   from traces (t_a,t_b)=( -3,  1)   charpoly = T^4 - -2T^3 + 59T^2 - -62T + 961
+  s1=  -2 s2=    63   from traces (t_a,t_b)=( -1, -1)   charpoly = T^4 - -2T^3 + 63T^2 - -62T + 961
+  s1=  -1 s2=    62   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 62T^2 - -31T + 961
+  s1=   0 s2=   -59   from traces (t_a,t_b)=(-11, 11)   charpoly = T^4 - 0T^3 + -59T^2 - 0T + 961
+  s1=   0 s2=   -19   from traces (t_a,t_b)=( -9,  9)   charpoly = T^4 - 0T^3 + -19T^2 - 0T + 961
+  s1=   0 s2=    13   from traces (t_a,t_b)=( -7,  7)   charpoly = T^4 - 0T^3 + 13T^2 - 0T + 961
+  s1=   0 s2=    37   from traces (t_a,t_b)=( -5,  5)   charpoly = T^4 - 0T^3 + 37T^2 - 0T + 961
+  s1=   0 s2=    53   from traces (t_a,t_b)=( -3,  3)   charpoly = T^4 - 0T^3 + 53T^2 - 0T + 961
+  s1=   0 s2=    61   from traces (t_a,t_b)=( -1,  1)   charpoly = T^4 - 0T^3 + 61T^2 - 0T + 961
+  s1=   1 s2=    62   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 62T^2 - 31T + 961
+  s1=   2 s2=   -37   from traces (t_a,t_b)=( -9, 11)   charpoly = T^4 - 2T^3 + -37T^2 - 62T + 961
+  s1=   2 s2=    -1   from traces (t_a,t_b)=( -7,  9)   charpoly = T^4 - 2T^3 + -1T^2 - 62T + 961
+  s1=   2 s2=    27   from traces (t_a,t_b)=( -5,  7)   charpoly = T^4 - 2T^3 + 27T^2 - 62T + 961
+  s1=   2 s2=    47   from traces (t_a,t_b)=( -3,  5)   charpoly = T^4 - 2T^3 + 47T^2 - 62T + 961
+  s1=   2 s2=    59   from traces (t_a,t_b)=( -1,  3)   charpoly = T^4 - 2T^3 + 59T^2 - 62T + 961
+  s1=   2 s2=    63   from traces (t_a,t_b)=(  1,  1)   charpoly = T^4 - 2T^3 + 63T^2 - 62T + 961
+  s1=   3 s2=    64   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 64T^2 - 93T + 961
+  s1=   4 s2=   -15   from traces (t_a,t_b)=( -7, 11)   charpoly = T^4 - 4T^3 + -15T^2 - 124T + 961
+  s1=   4 s2=    17   from traces (t_a,t_b)=( -5,  9)   charpoly = T^4 - 4T^3 + 17T^2 - 124T + 961
+  s1=   4 s2=    41   from traces (t_a,t_b)=( -3,  7)   charpoly = T^4 - 4T^3 + 41T^2 - 124T + 961
+  s1=   4 s2=    57   from traces (t_a,t_b)=( -1,  5)   charpoly = T^4 - 4T^3 + 57T^2 - 124T + 961
+  s1=   4 s2=    65   from traces (t_a,t_b)=(  1,  3)   charpoly = T^4 - 4T^3 + 65T^2 - 124T + 961
+  s1=   5 s2=    68   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 68T^2 - 155T + 961
+  s1=   6 s2=     7   from traces (t_a,t_b)=( -5, 11)   charpoly = T^4 - 6T^3 + 7T^2 - 186T + 961
+  s1=   6 s2=    35   from traces (t_a,t_b)=( -3,  9)   charpoly = T^4 - 6T^3 + 35T^2 - 186T + 961
+  s1=   6 s2=    55   from traces (t_a,t_b)=( -1,  7)   charpoly = T^4 - 6T^3 + 55T^2 - 186T + 961
+  s1=   6 s2=    67   from traces (t_a,t_b)=(  1,  5)   charpoly = T^4 - 6T^3 + 67T^2 - 186T + 961
+  s1=   6 s2=    71   from traces (t_a,t_b)=(  3,  3)   charpoly = T^4 - 6T^3 + 71T^2 - 186T + 961
+  s1=   7 s2=    74   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 74T^2 - 217T + 961
+  s1=   8 s2=    29   from traces (t_a,t_b)=( -3, 11)   charpoly = T^4 - 8T^3 + 29T^2 - 248T + 961
+  s1=   8 s2=    53   from traces (t_a,t_b)=( -1,  9)   charpoly = T^4 - 8T^3 + 53T^2 - 248T + 961
+  s1=   8 s2=    69   from traces (t_a,t_b)=(  1,  7)   charpoly = T^4 - 8T^3 + 69T^2 - 248T + 961
+  s1=   8 s2=    77   from traces (t_a,t_b)=(  3,  5)   charpoly = T^4 - 8T^3 + 77T^2 - 248T + 961
+  s1=   9 s2=    82   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 82T^2 - 279T + 961
+  s1=  10 s2=    51   from traces (t_a,t_b)=( -1, 11)   charpoly = T^4 - 10T^3 + 51T^2 - 310T + 961
+  s1=  10 s2=    71   from traces (t_a,t_b)=(  1,  9)   charpoly = T^4 - 10T^3 + 71T^2 - 310T + 961
+  s1=  10 s2=    83   from traces (t_a,t_b)=(  3,  7)   charpoly = T^4 - 10T^3 + 83T^2 - 310T + 961
+  s1=  10 s2=    87   from traces (t_a,t_b)=(  5,  5)   charpoly = T^4 - 10T^3 + 87T^2 - 310T + 961
+  s1=  11 s2=    92   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 92T^2 - 341T + 961
+  s1=  12 s2=    73   from traces (t_a,t_b)=(  1, 11)   charpoly = T^4 - 12T^3 + 73T^2 - 372T + 961
+  s1=  12 s2=    89   from traces (t_a,t_b)=(  3,  9)   charpoly = T^4 - 12T^3 + 89T^2 - 372T + 961
+  s1=  12 s2=    97   from traces (t_a,t_b)=(  5,  7)   charpoly = T^4 - 12T^3 + 97T^2 - 372T + 961
+  s1=  13 s2=   104   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 104T^2 - 403T + 961
+  s1=  14 s2=    95   from traces (t_a,t_b)=(  3, 11)   charpoly = T^4 - 14T^3 + 95T^2 - 434T + 961
+  s1=  14 s2=   107   from traces (t_a,t_b)=(  5,  9)   charpoly = T^4 - 14T^3 + 107T^2 - 434T + 961
+  s1=  14 s2=   111   from traces (t_a,t_b)=(  7,  7)   charpoly = T^4 - 14T^3 + 111T^2 - 434T + 961
+  s1=  15 s2=   118   from traces (t_a,t_b)=(  7,  8)   charpoly = T^4 - 15T^3 + 118T^2 - 465T + 961
+  s1=  16 s2=   117   from traces (t_a,t_b)=(  5, 11)   charpoly = T^4 - 16T^3 + 117T^2 - 496T + 961
+  s1=  16 s2=   125   from traces (t_a,t_b)=(  7,  9)   charpoly = T^4 - 16T^3 + 125T^2 - 496T + 961
+  s1=  17 s2=   134   from traces (t_a,t_b)=(  8,  9)   charpoly = T^4 - 17T^3 + 134T^2 - 527T + 961
+  s1=  18 s2=   139   from traces (t_a,t_b)=(  7, 11)   charpoly = T^4 - 18T^3 + 139T^2 - 558T + 961
+  s1=  18 s2=   143   from traces (t_a,t_b)=(  9,  9)   charpoly = T^4 - 18T^3 + 143T^2 - 558T + 961
+  s1=  19 s2=   152   from traces (t_a,t_b)=(  9, 10)   charpoly = T^4 - 19T^3 + 152T^2 - 589T + 961
+  s1=  20 s2=   161   from traces (t_a,t_b)=(  9, 11)   charpoly = T^4 - 20T^3 + 161T^2 - 620T + 961
+  s1=  21 s2=   172   from traces (t_a,t_b)=( 10, 11)   charpoly = T^4 - 21T^3 + 172T^2 - 651T + 961
+  s1=  22 s2=   183   from traces (t_a,t_b)=( 11, 11)   charpoly = T^4 - 22T^3 + 183T^2 - 682T + 961
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 9/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+p = 37   b = 7   coverage: PARTIAL (deg 5 only)
+==============================================================================
+elliptic traces available      : 25  (-12 .. 12)
+distinct split classes E_a x E_b: 325
+realised by a genus-2 Jacobian : 221
+BASE RATE                      : 0.6800
+
+split classes with NO genus-2 Jacobian (104):
+  s1= -24 s2=   218   from traces (t_a,t_b)=(-12,-12)   charpoly = T^4 - -24T^3 + 218T^2 - -888T + 1369
+  s1= -23 s2=   206   from traces (t_a,t_b)=(-12,-11)   charpoly = T^4 - -23T^3 + 206T^2 - -851T + 1369
+  s1= -22 s2=   195   from traces (t_a,t_b)=(-11,-11)   charpoly = T^4 - -22T^3 + 195T^2 - -814T + 1369
+  s1= -21 s2=   184   from traces (t_a,t_b)=(-11,-10)   charpoly = T^4 - -21T^3 + 184T^2 - -777T + 1369
+  s1= -20 s2=   173   from traces (t_a,t_b)=(-11, -9)   charpoly = T^4 - -20T^3 + 173T^2 - -740T + 1369
+  s1= -19 s2=   164   from traces (t_a,t_b)=(-10, -9)   charpoly = T^4 - -19T^3 + 164T^2 - -703T + 1369
+  s1= -18 s2=   151   from traces (t_a,t_b)=(-11, -7)   charpoly = T^4 - -18T^3 + 151T^2 - -666T + 1369
+  s1= -18 s2=   155   from traces (t_a,t_b)=( -9, -9)   charpoly = T^4 - -18T^3 + 155T^2 - -666T + 1369
+  s1= -17 s2=   146   from traces (t_a,t_b)=( -9, -8)   charpoly = T^4 - -17T^3 + 146T^2 - -629T + 1369
+  s1= -16 s2=   129   from traces (t_a,t_b)=(-11, -5)   charpoly = T^4 - -16T^3 + 129T^2 - -592T + 1369
+  s1= -16 s2=   137   from traces (t_a,t_b)=( -9, -7)   charpoly = T^4 - -16T^3 + 137T^2 - -592T + 1369
+  s1= -15 s2=   130   from traces (t_a,t_b)=( -8, -7)   charpoly = T^4 - -15T^3 + 130T^2 - -555T + 1369
+  s1= -14 s2=   107   from traces (t_a,t_b)=(-11, -3)   charpoly = T^4 - -14T^3 + 107T^2 - -518T + 1369
+  s1= -14 s2=   119   from traces (t_a,t_b)=( -9, -5)   charpoly = T^4 - -14T^3 + 119T^2 - -518T + 1369
+  s1= -14 s2=   123   from traces (t_a,t_b)=( -7, -7)   charpoly = T^4 - -14T^3 + 123T^2 - -518T + 1369
+  s1= -13 s2=   116   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 116T^2 - -481T + 1369
+  s1= -12 s2=    85   from traces (t_a,t_b)=(-11, -1)   charpoly = T^4 - -12T^3 + 85T^2 - -444T + 1369
+  s1= -12 s2=   101   from traces (t_a,t_b)=( -9, -3)   charpoly = T^4 - -12T^3 + 101T^2 - -444T + 1369
+  s1= -12 s2=   109   from traces (t_a,t_b)=( -7, -5)   charpoly = T^4 - -12T^3 + 109T^2 - -444T + 1369
+  s1= -11 s2=   104   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 104T^2 - -407T + 1369
+  s1= -10 s2=    63   from traces (t_a,t_b)=(-11,  1)   charpoly = T^4 - -10T^3 + 63T^2 - -370T + 1369
+  s1= -10 s2=    83   from traces (t_a,t_b)=( -9, -1)   charpoly = T^4 - -10T^3 + 83T^2 - -370T + 1369
+  s1= -10 s2=    95   from traces (t_a,t_b)=( -7, -3)   charpoly = T^4 - -10T^3 + 95T^2 - -370T + 1369
+  s1= -10 s2=    99   from traces (t_a,t_b)=( -5, -5)   charpoly = T^4 - -10T^3 + 99T^2 - -370T + 1369
+  s1=  -9 s2=    94   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 94T^2 - -333T + 1369
+  s1=  -8 s2=    41   from traces (t_a,t_b)=(-11,  3)   charpoly = T^4 - -8T^3 + 41T^2 - -296T + 1369
+  s1=  -8 s2=    65   from traces (t_a,t_b)=( -9,  1)   charpoly = T^4 - -8T^3 + 65T^2 - -296T + 1369
+  s1=  -8 s2=    81   from traces (t_a,t_b)=( -7, -1)   charpoly = T^4 - -8T^3 + 81T^2 - -296T + 1369
+  s1=  -8 s2=    89   from traces (t_a,t_b)=( -5, -3)   charpoly = T^4 - -8T^3 + 89T^2 - -296T + 1369
+  s1=  -7 s2=    86   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 86T^2 - -259T + 1369
+  s1=  -6 s2=    19   from traces (t_a,t_b)=(-11,  5)   charpoly = T^4 - -6T^3 + 19T^2 - -222T + 1369
+  s1=  -6 s2=    47   from traces (t_a,t_b)=( -9,  3)   charpoly = T^4 - -6T^3 + 47T^2 - -222T + 1369
+  s1=  -6 s2=    67   from traces (t_a,t_b)=( -7,  1)   charpoly = T^4 - -6T^3 + 67T^2 - -222T + 1369
+  s1=  -6 s2=    79   from traces (t_a,t_b)=( -5, -1)   charpoly = T^4 - -6T^3 + 79T^2 - -222T + 1369
+  s1=  -6 s2=    83   from traces (t_a,t_b)=( -3, -3)   charpoly = T^4 - -6T^3 + 83T^2 - -222T + 1369
+  s1=  -5 s2=    80   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 80T^2 - -185T + 1369
+  s1=  -4 s2=    -3   from traces (t_a,t_b)=(-11,  7)   charpoly = T^4 - -4T^3 + -3T^2 - -148T + 1369
+  s1=  -4 s2=    29   from traces (t_a,t_b)=( -9,  5)   charpoly = T^4 - -4T^3 + 29T^2 - -148T + 1369
+  s1=  -4 s2=    53   from traces (t_a,t_b)=( -7,  3)   charpoly = T^4 - -4T^3 + 53T^2 - -148T + 1369
+  s1=  -4 s2=    69   from traces (t_a,t_b)=( -5,  1)   charpoly = T^4 - -4T^3 + 69T^2 - -148T + 1369
+  s1=  -4 s2=    77   from traces (t_a,t_b)=( -3, -1)   charpoly = T^4 - -4T^3 + 77T^2 - -148T + 1369
+  s1=  -3 s2=    76   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 76T^2 - -111T + 1369
+  s1=  -2 s2=   -25   from traces (t_a,t_b)=(-11,  9)   charpoly = T^4 - -2T^3 + -25T^2 - -74T + 1369
+  s1=  -2 s2=    11   from traces (t_a,t_b)=( -9,  7)   charpoly = T^4 - -2T^3 + 11T^2 - -74T + 1369
+  s1=  -2 s2=    39   from traces (t_a,t_b)=( -7,  5)   charpoly = T^4 - -2T^3 + 39T^2 - -74T + 1369
+  s1=  -2 s2=    59   from traces (t_a,t_b)=( -5,  3)   charpoly = T^4 - -2T^3 + 59T^2 - -74T + 1369
+  s1=  -2 s2=    71   from traces (t_a,t_b)=( -3,  1)   charpoly = T^4 - -2T^3 + 71T^2 - -74T + 1369
+  s1=  -2 s2=    75   from traces (t_a,t_b)=( -1, -1)   charpoly = T^4 - -2T^3 + 75T^2 - -74T + 1369
+  s1=  -1 s2=    74   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 74T^2 - -37T + 1369
+  s1=   0 s2=   -47   from traces (t_a,t_b)=(-11, 11)   charpoly = T^4 - 0T^3 + -47T^2 - 0T + 1369
+  s1=   0 s2=    -7   from traces (t_a,t_b)=( -9,  9)   charpoly = T^4 - 0T^3 + -7T^2 - 0T + 1369
+  s1=   0 s2=    25   from traces (t_a,t_b)=( -7,  7)   charpoly = T^4 - 0T^3 + 25T^2 - 0T + 1369
+  s1=   0 s2=    49   from traces (t_a,t_b)=( -5,  5)   charpoly = T^4 - 0T^3 + 49T^2 - 0T + 1369
+  s1=   0 s2=    65   from traces (t_a,t_b)=( -3,  3)   charpoly = T^4 - 0T^3 + 65T^2 - 0T + 1369
+  s1=   0 s2=    73   from traces (t_a,t_b)=( -1,  1)   charpoly = T^4 - 0T^3 + 73T^2 - 0T + 1369
+  s1=   1 s2=    74   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 74T^2 - 37T + 1369
+  s1=   2 s2=   -25   from traces (t_a,t_b)=( -9, 11)   charpoly = T^4 - 2T^3 + -25T^2 - 74T + 1369
+  s1=   2 s2=    11   from traces (t_a,t_b)=( -7,  9)   charpoly = T^4 - 2T^3 + 11T^2 - 74T + 1369
+  s1=   2 s2=    39   from traces (t_a,t_b)=( -5,  7)   charpoly = T^4 - 2T^3 + 39T^2 - 74T + 1369
+  s1=   2 s2=    59   from traces (t_a,t_b)=( -3,  5)   charpoly = T^4 - 2T^3 + 59T^2 - 74T + 1369
+  s1=   2 s2=    71   from traces (t_a,t_b)=( -1,  3)   charpoly = T^4 - 2T^3 + 71T^2 - 74T + 1369
+  s1=   2 s2=    75   from traces (t_a,t_b)=(  1,  1)   charpoly = T^4 - 2T^3 + 75T^2 - 74T + 1369
+  s1=   3 s2=    76   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 76T^2 - 111T + 1369
+  s1=   4 s2=    -3   from traces (t_a,t_b)=( -7, 11)   charpoly = T^4 - 4T^3 + -3T^2 - 148T + 1369
+  s1=   4 s2=    29   from traces (t_a,t_b)=( -5,  9)   charpoly = T^4 - 4T^3 + 29T^2 - 148T + 1369
+  s1=   4 s2=    53   from traces (t_a,t_b)=( -3,  7)   charpoly = T^4 - 4T^3 + 53T^2 - 148T + 1369
+  s1=   4 s2=    69   from traces (t_a,t_b)=( -1,  5)   charpoly = T^4 - 4T^3 + 69T^2 - 148T + 1369
+  s1=   4 s2=    77   from traces (t_a,t_b)=(  1,  3)   charpoly = T^4 - 4T^3 + 77T^2 - 148T + 1369
+  s1=   5 s2=    80   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 80T^2 - 185T + 1369
+  s1=   6 s2=    19   from traces (t_a,t_b)=( -5, 11)   charpoly = T^4 - 6T^3 + 19T^2 - 222T + 1369
+  s1=   6 s2=    47   from traces (t_a,t_b)=( -3,  9)   charpoly = T^4 - 6T^3 + 47T^2 - 222T + 1369
+  s1=   6 s2=    67   from traces (t_a,t_b)=( -1,  7)   charpoly = T^4 - 6T^3 + 67T^2 - 222T + 1369
+  s1=   6 s2=    79   from traces (t_a,t_b)=(  1,  5)   charpoly = T^4 - 6T^3 + 79T^2 - 222T + 1369
+  s1=   6 s2=    83   from traces (t_a,t_b)=(  3,  3)   charpoly = T^4 - 6T^3 + 83T^2 - 222T + 1369
+  s1=   7 s2=    86   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 86T^2 - 259T + 1369
+  s1=   8 s2=    41   from traces (t_a,t_b)=( -3, 11)   charpoly = T^4 - 8T^3 + 41T^2 - 296T + 1369
+  s1=   8 s2=    65   from traces (t_a,t_b)=( -1,  9)   charpoly = T^4 - 8T^3 + 65T^2 - 296T + 1369
+  s1=   8 s2=    81   from traces (t_a,t_b)=(  1,  7)   charpoly = T^4 - 8T^3 + 81T^2 - 296T + 1369
+  s1=   8 s2=    89   from traces (t_a,t_b)=(  3,  5)   charpoly = T^4 - 8T^3 + 89T^2 - 296T + 1369
+  s1=   9 s2=    94   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 94T^2 - 333T + 1369
+  s1=  10 s2=    63   from traces (t_a,t_b)=( -1, 11)   charpoly = T^4 - 10T^3 + 63T^2 - 370T + 1369
+  s1=  10 s2=    83   from traces (t_a,t_b)=(  1,  9)   charpoly = T^4 - 10T^3 + 83T^2 - 370T + 1369
+  s1=  10 s2=    95   from traces (t_a,t_b)=(  3,  7)   charpoly = T^4 - 10T^3 + 95T^2 - 370T + 1369
+  s1=  10 s2=    99   from traces (t_a,t_b)=(  5,  5)   charpoly = T^4 - 10T^3 + 99T^2 - 370T + 1369
+  s1=  11 s2=   104   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 104T^2 - 407T + 1369
+  s1=  12 s2=    85   from traces (t_a,t_b)=(  1, 11)   charpoly = T^4 - 12T^3 + 85T^2 - 444T + 1369
+  s1=  12 s2=   101   from traces (t_a,t_b)=(  3,  9)   charpoly = T^4 - 12T^3 + 101T^2 - 444T + 1369
+  s1=  12 s2=   109   from traces (t_a,t_b)=(  5,  7)   charpoly = T^4 - 12T^3 + 109T^2 - 444T + 1369
+  s1=  13 s2=   116   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 116T^2 - 481T + 1369
+  s1=  14 s2=   107   from traces (t_a,t_b)=(  3, 11)   charpoly = T^4 - 14T^3 + 107T^2 - 518T + 1369
+  s1=  14 s2=   119   from traces (t_a,t_b)=(  5,  9)   charpoly = T^4 - 14T^3 + 119T^2 - 518T + 1369
+  s1=  14 s2=   123   from traces (t_a,t_b)=(  7,  7)   charpoly = T^4 - 14T^3 + 123T^2 - 518T + 1369
+  s1=  15 s2=   130   from traces (t_a,t_b)=(  7,  8)   charpoly = T^4 - 15T^3 + 130T^2 - 555T + 1369
+  s1=  16 s2=   129   from traces (t_a,t_b)=(  5, 11)   charpoly = T^4 - 16T^3 + 129T^2 - 592T + 1369
+  s1=  16 s2=   137   from traces (t_a,t_b)=(  7,  9)   charpoly = T^4 - 16T^3 + 137T^2 - 592T + 1369
+  s1=  17 s2=   146   from traces (t_a,t_b)=(  8,  9)   charpoly = T^4 - 17T^3 + 146T^2 - 629T + 1369
+  s1=  18 s2=   151   from traces (t_a,t_b)=(  7, 11)   charpoly = T^4 - 18T^3 + 151T^2 - 666T + 1369
+  s1=  18 s2=   155   from traces (t_a,t_b)=(  9,  9)   charpoly = T^4 - 18T^3 + 155T^2 - 666T + 1369
+  s1=  19 s2=   164   from traces (t_a,t_b)=(  9, 10)   charpoly = T^4 - 19T^3 + 164T^2 - 703T + 1369
+  s1=  20 s2=   173   from traces (t_a,t_b)=(  9, 11)   charpoly = T^4 - 20T^3 + 173T^2 - 740T + 1369
+  s1=  21 s2=   184   from traces (t_a,t_b)=( 10, 11)   charpoly = T^4 - 21T^3 + 184T^2 - 777T + 1369
+  s1=  22 s2=   195   from traces (t_a,t_b)=( 11, 11)   charpoly = T^4 - 22T^3 + 195T^2 - 814T + 1369
+  s1=  23 s2=   206   from traces (t_a,t_b)=( 11, 12)   charpoly = T^4 - 23T^3 + 206T^2 - 851T + 1369
+  s1=  24 s2=   218   from traces (t_a,t_b)=( 12, 12)   charpoly = T^4 - 24T^3 + 218T^2 - 888T + 1369
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 7/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+p = 43   b = 7   coverage: PARTIAL (deg 5 only)
+==============================================================================
+elliptic traces available      : 27  (-13 .. 13)
+distinct split classes E_a x E_b: 378
+realised by a genus-2 Jacobian : 247
+BASE RATE                      : 0.6534
+
+split classes with NO genus-2 Jacobian (131):
+  s1= -26 s2=   255   from traces (t_a,t_b)=(-13,-13)   charpoly = T^4 - -26T^3 + 255T^2 - -1118T + 1849
+  s1= -25 s2=   242   from traces (t_a,t_b)=(-13,-12)   charpoly = T^4 - -25T^3 + 242T^2 - -1075T + 1849
+  s1= -24 s2=   229   from traces (t_a,t_b)=(-13,-11)   charpoly = T^4 - -24T^3 + 229T^2 - -1032T + 1849
+  s1= -23 s2=   218   from traces (t_a,t_b)=(-12,-11)   charpoly = T^4 - -23T^3 + 218T^2 - -989T + 1849
+  s1= -22 s2=   203   from traces (t_a,t_b)=(-13, -9)   charpoly = T^4 - -22T^3 + 203T^2 - -946T + 1849
+  s1= -22 s2=   207   from traces (t_a,t_b)=(-11,-11)   charpoly = T^4 - -22T^3 + 207T^2 - -946T + 1849
+  s1= -21 s2=   196   from traces (t_a,t_b)=(-11,-10)   charpoly = T^4 - -21T^3 + 196T^2 - -903T + 1849
+  s1= -20 s2=   177   from traces (t_a,t_b)=(-13, -7)   charpoly = T^4 - -20T^3 + 177T^2 - -860T + 1849
+  s1= -20 s2=   185   from traces (t_a,t_b)=(-11, -9)   charpoly = T^4 - -20T^3 + 185T^2 - -860T + 1849
+  s1= -19 s2=   176   from traces (t_a,t_b)=(-10, -9)   charpoly = T^4 - -19T^3 + 176T^2 - -817T + 1849
+  s1= -18 s2=   151   from traces (t_a,t_b)=(-13, -5)   charpoly = T^4 - -18T^3 + 151T^2 - -774T + 1849
+  s1= -18 s2=   163   from traces (t_a,t_b)=(-11, -7)   charpoly = T^4 - -18T^3 + 163T^2 - -774T + 1849
+  s1= -18 s2=   167   from traces (t_a,t_b)=( -9, -9)   charpoly = T^4 - -18T^3 + 167T^2 - -774T + 1849
+  s1= -17 s2=   158   from traces (t_a,t_b)=( -9, -8)   charpoly = T^4 - -17T^3 + 158T^2 - -731T + 1849
+  s1= -16 s2=   125   from traces (t_a,t_b)=(-13, -3)   charpoly = T^4 - -16T^3 + 125T^2 - -688T + 1849
+  s1= -16 s2=   141   from traces (t_a,t_b)=(-11, -5)   charpoly = T^4 - -16T^3 + 141T^2 - -688T + 1849
+  s1= -16 s2=   149   from traces (t_a,t_b)=( -9, -7)   charpoly = T^4 - -16T^3 + 149T^2 - -688T + 1849
+  s1= -15 s2=   142   from traces (t_a,t_b)=( -8, -7)   charpoly = T^4 - -15T^3 + 142T^2 - -645T + 1849
+  s1= -14 s2=    99   from traces (t_a,t_b)=(-13, -1)   charpoly = T^4 - -14T^3 + 99T^2 - -602T + 1849
+  s1= -14 s2=   119   from traces (t_a,t_b)=(-11, -3)   charpoly = T^4 - -14T^3 + 119T^2 - -602T + 1849
+  s1= -14 s2=   131   from traces (t_a,t_b)=( -9, -5)   charpoly = T^4 - -14T^3 + 131T^2 - -602T + 1849
+  s1= -14 s2=   135   from traces (t_a,t_b)=( -7, -7)   charpoly = T^4 - -14T^3 + 135T^2 - -602T + 1849
+  s1= -13 s2=   128   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 128T^2 - -559T + 1849
+  s1= -12 s2=    73   from traces (t_a,t_b)=(-13,  1)   charpoly = T^4 - -12T^3 + 73T^2 - -516T + 1849
+  s1= -12 s2=    97   from traces (t_a,t_b)=(-11, -1)   charpoly = T^4 - -12T^3 + 97T^2 - -516T + 1849
+  s1= -12 s2=   113   from traces (t_a,t_b)=( -9, -3)   charpoly = T^4 - -12T^3 + 113T^2 - -516T + 1849
+  s1= -12 s2=   121   from traces (t_a,t_b)=( -7, -5)   charpoly = T^4 - -12T^3 + 121T^2 - -516T + 1849
+  s1= -11 s2=   116   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 116T^2 - -473T + 1849
+  s1= -10 s2=    47   from traces (t_a,t_b)=(-13,  3)   charpoly = T^4 - -10T^3 + 47T^2 - -430T + 1849
+  s1= -10 s2=    75   from traces (t_a,t_b)=(-11,  1)   charpoly = T^4 - -10T^3 + 75T^2 - -430T + 1849
+  s1= -10 s2=    95   from traces (t_a,t_b)=( -9, -1)   charpoly = T^4 - -10T^3 + 95T^2 - -430T + 1849
+  s1= -10 s2=   107   from traces (t_a,t_b)=( -7, -3)   charpoly = T^4 - -10T^3 + 107T^2 - -430T + 1849
+  s1= -10 s2=   111   from traces (t_a,t_b)=( -5, -5)   charpoly = T^4 - -10T^3 + 111T^2 - -430T + 1849
+  s1=  -9 s2=   106   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 106T^2 - -387T + 1849
+  s1=  -8 s2=    21   from traces (t_a,t_b)=(-13,  5)   charpoly = T^4 - -8T^3 + 21T^2 - -344T + 1849
+  s1=  -8 s2=    53   from traces (t_a,t_b)=(-11,  3)   charpoly = T^4 - -8T^3 + 53T^2 - -344T + 1849
+  s1=  -8 s2=    77   from traces (t_a,t_b)=( -9,  1)   charpoly = T^4 - -8T^3 + 77T^2 - -344T + 1849
+  s1=  -8 s2=    93   from traces (t_a,t_b)=( -7, -1)   charpoly = T^4 - -8T^3 + 93T^2 - -344T + 1849
+  s1=  -8 s2=   101   from traces (t_a,t_b)=( -5, -3)   charpoly = T^4 - -8T^3 + 101T^2 - -344T + 1849
+  s1=  -7 s2=    98   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 98T^2 - -301T + 1849
+  s1=  -6 s2=    -5   from traces (t_a,t_b)=(-13,  7)   charpoly = T^4 - -6T^3 + -5T^2 - -258T + 1849
+  s1=  -6 s2=    31   from traces (t_a,t_b)=(-11,  5)   charpoly = T^4 - -6T^3 + 31T^2 - -258T + 1849
+  s1=  -6 s2=    59   from traces (t_a,t_b)=( -9,  3)   charpoly = T^4 - -6T^3 + 59T^2 - -258T + 1849
+  s1=  -6 s2=    79   from traces (t_a,t_b)=( -7,  1)   charpoly = T^4 - -6T^3 + 79T^2 - -258T + 1849
+  s1=  -6 s2=    91   from traces (t_a,t_b)=( -5, -1)   charpoly = T^4 - -6T^3 + 91T^2 - -258T + 1849
+  s1=  -6 s2=    95   from traces (t_a,t_b)=( -3, -3)   charpoly = T^4 - -6T^3 + 95T^2 - -258T + 1849
+  s1=  -5 s2=    92   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 92T^2 - -215T + 1849
+  s1=  -4 s2=   -31   from traces (t_a,t_b)=(-13,  9)   charpoly = T^4 - -4T^3 + -31T^2 - -172T + 1849
+  s1=  -4 s2=     9   from traces (t_a,t_b)=(-11,  7)   charpoly = T^4 - -4T^3 + 9T^2 - -172T + 1849
+  s1=  -4 s2=    41   from traces (t_a,t_b)=( -9,  5)   charpoly = T^4 - -4T^3 + 41T^2 - -172T + 1849
+  s1=  -4 s2=    65   from traces (t_a,t_b)=( -7,  3)   charpoly = T^4 - -4T^3 + 65T^2 - -172T + 1849
+  s1=  -4 s2=    81   from traces (t_a,t_b)=( -5,  1)   charpoly = T^4 - -4T^3 + 81T^2 - -172T + 1849
+  s1=  -4 s2=    89   from traces (t_a,t_b)=( -3, -1)   charpoly = T^4 - -4T^3 + 89T^2 - -172T + 1849
+  s1=  -3 s2=    88   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 88T^2 - -129T + 1849
+  s1=  -2 s2=   -57   from traces (t_a,t_b)=(-13, 11)   charpoly = T^4 - -2T^3 + -57T^2 - -86T + 1849
+  s1=  -2 s2=   -13   from traces (t_a,t_b)=(-11,  9)   charpoly = T^4 - -2T^3 + -13T^2 - -86T + 1849
+  s1=  -2 s2=    23   from traces (t_a,t_b)=( -9,  7)   charpoly = T^4 - -2T^3 + 23T^2 - -86T + 1849
+  s1=  -2 s2=    51   from traces (t_a,t_b)=( -7,  5)   charpoly = T^4 - -2T^3 + 51T^2 - -86T + 1849
+  s1=  -2 s2=    71   from traces (t_a,t_b)=( -5,  3)   charpoly = T^4 - -2T^3 + 71T^2 - -86T + 1849
+  s1=  -2 s2=    83   from traces (t_a,t_b)=( -3,  1)   charpoly = T^4 - -2T^3 + 83T^2 - -86T + 1849
+  s1=  -2 s2=    87   from traces (t_a,t_b)=( -1, -1)   charpoly = T^4 - -2T^3 + 87T^2 - -86T + 1849
+  s1=  -1 s2=    86   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 86T^2 - -43T + 1849
+  s1=   0 s2=   -83   from traces (t_a,t_b)=(-13, 13)   charpoly = T^4 - 0T^3 + -83T^2 - 0T + 1849
+  s1=   0 s2=   -35   from traces (t_a,t_b)=(-11, 11)   charpoly = T^4 - 0T^3 + -35T^2 - 0T + 1849
+  s1=   0 s2=     5   from traces (t_a,t_b)=( -9,  9)   charpoly = T^4 - 0T^3 + 5T^2 - 0T + 1849
+  s1=   0 s2=    37   from traces (t_a,t_b)=( -7,  7)   charpoly = T^4 - 0T^3 + 37T^2 - 0T + 1849
+  s1=   0 s2=    61   from traces (t_a,t_b)=( -5,  5)   charpoly = T^4 - 0T^3 + 61T^2 - 0T + 1849
+  s1=   0 s2=    77   from traces (t_a,t_b)=( -3,  3)   charpoly = T^4 - 0T^3 + 77T^2 - 0T + 1849
+  s1=   0 s2=    85   from traces (t_a,t_b)=( -1,  1)   charpoly = T^4 - 0T^3 + 85T^2 - 0T + 1849
+  s1=   1 s2=    86   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 86T^2 - 43T + 1849
+  s1=   2 s2=   -57   from traces (t_a,t_b)=(-11, 13)   charpoly = T^4 - 2T^3 + -57T^2 - 86T + 1849
+  s1=   2 s2=   -13   from traces (t_a,t_b)=( -9, 11)   charpoly = T^4 - 2T^3 + -13T^2 - 86T + 1849
+  s1=   2 s2=    23   from traces (t_a,t_b)=( -7,  9)   charpoly = T^4 - 2T^3 + 23T^2 - 86T + 1849
+  s1=   2 s2=    51   from traces (t_a,t_b)=( -5,  7)   charpoly = T^4 - 2T^3 + 51T^2 - 86T + 1849
+  s1=   2 s2=    71   from traces (t_a,t_b)=( -3,  5)   charpoly = T^4 - 2T^3 + 71T^2 - 86T + 1849
+  s1=   2 s2=    83   from traces (t_a,t_b)=( -1,  3)   charpoly = T^4 - 2T^3 + 83T^2 - 86T + 1849
+  s1=   2 s2=    87   from traces (t_a,t_b)=(  1,  1)   charpoly = T^4 - 2T^3 + 87T^2 - 86T + 1849
+  s1=   3 s2=    88   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 88T^2 - 129T + 1849
+  s1=   4 s2=   -31   from traces (t_a,t_b)=( -9, 13)   charpoly = T^4 - 4T^3 + -31T^2 - 172T + 1849
+  s1=   4 s2=     9   from traces (t_a,t_b)=( -7, 11)   charpoly = T^4 - 4T^3 + 9T^2 - 172T + 1849
+  s1=   4 s2=    41   from traces (t_a,t_b)=( -5,  9)   charpoly = T^4 - 4T^3 + 41T^2 - 172T + 1849
+  s1=   4 s2=    65   from traces (t_a,t_b)=( -3,  7)   charpoly = T^4 - 4T^3 + 65T^2 - 172T + 1849
+  s1=   4 s2=    81   from traces (t_a,t_b)=( -1,  5)   charpoly = T^4 - 4T^3 + 81T^2 - 172T + 1849
+  s1=   4 s2=    89   from traces (t_a,t_b)=(  1,  3)   charpoly = T^4 - 4T^3 + 89T^2 - 172T + 1849
+  s1=   5 s2=    92   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 92T^2 - 215T + 1849
+  s1=   6 s2=    -5   from traces (t_a,t_b)=( -7, 13)   charpoly = T^4 - 6T^3 + -5T^2 - 258T + 1849
+  s1=   6 s2=    31   from traces (t_a,t_b)=( -5, 11)   charpoly = T^4 - 6T^3 + 31T^2 - 258T + 1849
+  s1=   6 s2=    59   from traces (t_a,t_b)=( -3,  9)   charpoly = T^4 - 6T^3 + 59T^2 - 258T + 1849
+  s1=   6 s2=    79   from traces (t_a,t_b)=( -1,  7)   charpoly = T^4 - 6T^3 + 79T^2 - 258T + 1849
+  s1=   6 s2=    91   from traces (t_a,t_b)=(  1,  5)   charpoly = T^4 - 6T^3 + 91T^2 - 258T + 1849
+  s1=   6 s2=    95   from traces (t_a,t_b)=(  3,  3)   charpoly = T^4 - 6T^3 + 95T^2 - 258T + 1849
+  s1=   7 s2=    98   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 98T^2 - 301T + 1849
+  s1=   8 s2=    21   from traces (t_a,t_b)=( -5, 13)   charpoly = T^4 - 8T^3 + 21T^2 - 344T + 1849
+  s1=   8 s2=    53   from traces (t_a,t_b)=( -3, 11)   charpoly = T^4 - 8T^3 + 53T^2 - 344T + 1849
+  s1=   8 s2=    77   from traces (t_a,t_b)=( -1,  9)   charpoly = T^4 - 8T^3 + 77T^2 - 344T + 1849
+  s1=   8 s2=    93   from traces (t_a,t_b)=(  1,  7)   charpoly = T^4 - 8T^3 + 93T^2 - 344T + 1849
+  s1=   8 s2=   101   from traces (t_a,t_b)=(  3,  5)   charpoly = T^4 - 8T^3 + 101T^2 - 344T + 1849
+  s1=   9 s2=   106   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 106T^2 - 387T + 1849
+  s1=  10 s2=    47   from traces (t_a,t_b)=( -3, 13)   charpoly = T^4 - 10T^3 + 47T^2 - 430T + 1849
+  s1=  10 s2=    75   from traces (t_a,t_b)=( -1, 11)   charpoly = T^4 - 10T^3 + 75T^2 - 430T + 1849
+  s1=  10 s2=    95   from traces (t_a,t_b)=(  1,  9)   charpoly = T^4 - 10T^3 + 95T^2 - 430T + 1849
+  s1=  10 s2=   107   from traces (t_a,t_b)=(  3,  7)   charpoly = T^4 - 10T^3 + 107T^2 - 430T + 1849
+  s1=  10 s2=   111   from traces (t_a,t_b)=(  5,  5)   charpoly = T^4 - 10T^3 + 111T^2 - 430T + 1849
+  s1=  11 s2=   116   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 116T^2 - 473T + 1849
+  s1=  12 s2=    73   from traces (t_a,t_b)=( -1, 13)   charpoly = T^4 - 12T^3 + 73T^2 - 516T + 1849
+  s1=  12 s2=    97   from traces (t_a,t_b)=(  1, 11)   charpoly = T^4 - 12T^3 + 97T^2 - 516T + 1849
+  s1=  12 s2=   113   from traces (t_a,t_b)=(  3,  9)   charpoly = T^4 - 12T^3 + 113T^2 - 516T + 1849
+  s1=  12 s2=   121   from traces (t_a,t_b)=(  5,  7)   charpoly = T^4 - 12T^3 + 121T^2 - 516T + 1849
+  s1=  13 s2=   128   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 128T^2 - 559T + 1849
+  s1=  14 s2=    99   from traces (t_a,t_b)=(  1, 13)   charpoly = T^4 - 14T^3 + 99T^2 - 602T + 1849
+  s1=  14 s2=   119   from traces (t_a,t_b)=(  3, 11)   charpoly = T^4 - 14T^3 + 119T^2 - 602T + 1849
+  s1=  14 s2=   131   from traces (t_a,t_b)=(  5,  9)   charpoly = T^4 - 14T^3 + 131T^2 - 602T + 1849
+  s1=  14 s2=   135   from traces (t_a,t_b)=(  7,  7)   charpoly = T^4 - 14T^3 + 135T^2 - 602T + 1849
+  s1=  15 s2=   142   from traces (t_a,t_b)=(  7,  8)   charpoly = T^4 - 15T^3 + 142T^2 - 645T + 1849
+  s1=  16 s2=   125   from traces (t_a,t_b)=(  3, 13)   charpoly = T^4 - 16T^3 + 125T^2 - 688T + 1849
+  s1=  16 s2=   141   from traces (t_a,t_b)=(  5, 11)   charpoly = T^4 - 16T^3 + 141T^2 - 688T + 1849
+  s1=  16 s2=   149   from traces (t_a,t_b)=(  7,  9)   charpoly = T^4 - 16T^3 + 149T^2 - 688T + 1849
+  s1=  17 s2=   158   from traces (t_a,t_b)=(  8,  9)   charpoly = T^4 - 17T^3 + 158T^2 - 731T + 1849
+  s1=  18 s2=   151   from traces (t_a,t_b)=(  5, 13)   charpoly = T^4 - 18T^3 + 151T^2 - 774T + 1849
+  s1=  18 s2=   163   from traces (t_a,t_b)=(  7, 11)   charpoly = T^4 - 18T^3 + 163T^2 - 774T + 1849
+  s1=  18 s2=   167   from traces (t_a,t_b)=(  9,  9)   charpoly = T^4 - 18T^3 + 167T^2 - 774T + 1849
+  s1=  19 s2=   176   from traces (t_a,t_b)=(  9, 10)   charpoly = T^4 - 19T^3 + 176T^2 - 817T + 1849
+  s1=  20 s2=   177   from traces (t_a,t_b)=(  7, 13)   charpoly = T^4 - 20T^3 + 177T^2 - 860T + 1849
+  s1=  20 s2=   185   from traces (t_a,t_b)=(  9, 11)   charpoly = T^4 - 20T^3 + 185T^2 - 860T + 1849
+  s1=  21 s2=   196   from traces (t_a,t_b)=( 10, 11)   charpoly = T^4 - 21T^3 + 196T^2 - 903T + 1849
+  s1=  22 s2=   203   from traces (t_a,t_b)=(  9, 13)   charpoly = T^4 - 22T^3 + 203T^2 - 946T + 1849
+  s1=  22 s2=   207   from traces (t_a,t_b)=( 11, 11)   charpoly = T^4 - 22T^3 + 207T^2 - 946T + 1849
+  s1=  23 s2=   218   from traces (t_a,t_b)=( 11, 12)   charpoly = T^4 - 23T^3 + 218T^2 - 989T + 1849
+  s1=  24 s2=   229   from traces (t_a,t_b)=( 11, 13)   charpoly = T^4 - 24T^3 + 229T^2 - 1032T + 1849
+  s1=  25 s2=   242   from traces (t_a,t_b)=( 12, 13)   charpoly = T^4 - 25T^3 + 242T^2 - 1075T + 1849
+  s1=  26 s2=   255   from traces (t_a,t_b)=( 13, 13)   charpoly = T^4 - 26T^3 + 255T^2 - 1118T + 1849
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 9/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+SUMMARY
+==============================================================================
+    p  coverage  classes  realised  baserate  noJac  Hqual  pairReal
+    7      full       66        54    0.8182     12      5        13
+   13      full      120       104    0.8667     16      4        15
+   19      full      153       137    0.8954     16      5        13
+   31      deg5      276       176    0.6377    100      5         9
+   37      deg5      325       221    0.6800    104      5         7
+   43      deg5      378       247    0.6534    131      5         9

@@ -1,0 +1,306 @@
+Thread 22: Howe (H1)+(H2)+(H3) vs. exhaustive genus-2 realisability over small proxy primes
+
+==============================================================================
+p = 7   b = 1   primitive root g = 3   non-residue nu = 3
+p mod 3 = 1,  p mod 4 = 3,  p mod 12 = 7
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       1     -4     12  [1,1,1] split
+ 1       3     -5     13  [3] irred
+ 2       2     -1      9  [3] irred
+ 3       6      4      4  [1,1,1] split
+ 4       4      5      3  [3] irred
+ 5       5      1      7  [3] irred
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: COMPLETE (deg 5 + deg 6, all F_p-iso classes)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  N  Y   no    1   -9    34        0    no  
+(0,2)  Y  N  N   no    3   -5    18      135   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,3)  Y  Y  N   no    4    0    -2      204   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,4)  Y  N  N   no    3    1    -6       52   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,5)  Y  N  Y   no    1   -3    10      232   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,2)  Y  Y  Y  YES    1   -6    19       96   YES  
+(1,3)  Y  N  Y   no    1   -1    -6       52   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,4)  Y  Y  Y  YES    1    0   -11       16   YES  
+(1,5)  Y  Y  Y  YES    1   -4     9      224   YES  
+(2,3)  Y  N  Y   no    1    3    10      232   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,4)  Y  Y  N   no    3    4     9      224   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  Y  YES    1    0    13       96   YES  
+(3,4)  Y  N  Y   no    1    9    34        0    no  
+(3,5)  Y  N  Y   no    1    5    18      135   YES  FALSE NEGATIVE (H fails, realised anyway)
+(4,5)  Y  Y  Y  YES    1    6    19       96   YES  
+
+Howe-qualifying : 5/15    realised : 13/15    false-pos : 0    false-neg : 8
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 2) s1=  -5 s2=   18  p=7  f = 4*x^0 + 3*x^1 + 2*x^2 + 1*x^5
+  pair (0, 3) s1=   0 s2=   -2  p=7  f = 4*x^0 + 1*x^1 + 1*x^2 + 1*x^5
+  pair (0, 4) s1=   1 s2=   -6  p=7  f = 5*x^0 + 1*x^1 + 4*x^2 + 1*x^5
+  pair (0, 5) s1=  -3 s2=   10  p=7  f = 1*x^0 + 1*x^2 + 1*x^5
+  pair (1, 2) s1=  -6 s2=   19  p=7  f = 3*x^0 + 1*x^6
+  pair (1, 3) s1=  -1 s2=   -6  p=7  f = 2*x^0 + 1*x^1 + 3*x^2 + 1*x^5
+  pair (1, 4) s1=   0 s2=  -11  p=7  f = 6*x^0 + 2*x^3 + 1*x^6
+  pair (1, 5) s1=  -4 s2=    9  p=7  f = 5*x^0 + 3*x^1 + 1*x^2 + 2*x^3 + 1*x^6
+  pair (2, 3) s1=   3 s2=   10  p=7  f = 3*x^0 + 6*x^2 + 1*x^5
+  pair (2, 4) s1=   4 s2=    9  p=7  f = 2*x^0 + 1*x^6
+  pair (2, 5) s1=   0 s2=   13  p=7  f = 6*x^0 + 1*x^1 + 2*x^3 + 1*x^6
+  pair (3, 5) s1=   5 s2=   18  p=7  f = 3*x^0 + 3*x^1 + 5*x^2 + 1*x^5
+  pair (4, 5) s1=   6 s2=   19  p=7  f = 5*x^0 + 1*x^6
+
+==============================================================================
+p = 13   b = 7   primitive root g = 2   non-residue nu = 2
+p mod 3 = 1,  p mod 4 = 1,  p mod 12 = 1
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       7      7      7  [3] irred
+ 1       1      2     12  [1,1,1] split
+ 2       2     -5     19  [3] irred
+ 3       4     -7     21  [3] irred
+ 4       8     -2     16  [1,1,1] split
+ 5       3      5      9  [3] irred
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: COMPLETE (deg 5 + deg 6, all F_p-iso classes)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  N  Y   no    1    9    40      524   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,2)  Y  Y  Y  YES    1    2    -9      336   YES  
+(0,3)  Y  Y  N   no    7    0   -23       56   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,4)  Y  N  Y   no    1    5    12     1496   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,5)  Y  Y  Y  YES    1   12    61      112   YES  
+(1,2)  Y  N  Y   no    1   -3    16     2096   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,3)  Y  N  N   no    3   -5    12     1496   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,4)  Y  Y  N   no    4    0    22     2152   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,5)  Y  N  N   no    3    7    36     1122   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,3)  Y  Y  Y  YES    1  -12    61      112   YES  
+(2,4)  Y  N  Y   no    1   -7    36     1122   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  Y  YES    1    0     1     4298   YES  
+(3,4)  Y  N  Y   no    1   -9    40      524   YES  FALSE NEGATIVE (H fails, realised anyway)
+(3,5)  Y  Y  N   no    3   -2    -9      336   YES  FALSE NEGATIVE (H fails, realised anyway)
+(4,5)  Y  N  Y   no    1    3    16     2096   YES  FALSE NEGATIVE (H fails, realised anyway)
+
+Howe-qualifying : 4/15    realised : 15/15    false-pos : 0    false-neg : 11
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 1) s1=   9 s2=   40  p=13  f = 6*x^0 + 4*x^1 + 1*x^5
+  pair (0, 2) s1=   2 s2=   -9  p=13  f = 10*x^0 + 1*x^1 + 2*x^2 + 1*x^3 + 1*x^6
+  pair (0, 3) s1=   0 s2=  -23  p=13  f = 5*x^0 + 4*x^3 + 1*x^6
+  pair (0, 4) s1=   5 s2=   12  p=13  f = 9*x^0 + 7*x^1 + 4*x^2 + 1*x^5
+  pair (0, 5) s1=  12 s2=   61  p=13  f = 6*x^0 + 1*x^6
+  pair (1, 2) s1=  -3 s2=   16  p=13  f = 1*x^0 + 4*x^1 + 1*x^5
+  pair (1, 3) s1=  -5 s2=   12  p=13  f = 4*x^1 + 1*x^2 + 1*x^5
+  pair (1, 4) s1=   0 s2=   22  p=13  f = 9*x^1 + 1*x^2 + 1*x^3 + 1*x^5
+  pair (1, 5) s1=   7 s2=   36  p=13  f = 6*x^0 + 4*x^1 + 4*x^2 + 1*x^5
+  pair (2, 3) s1= -12 s2=   61  p=13  f = 2*x^0 + 1*x^6
+  pair (2, 4) s1=  -7 s2=   36  p=13  f = 4*x^0 + 4*x^1 + 6*x^2 + 1*x^5
+  pair (2, 5) s1=   0 s2=    1  p=13  f = 5*x^0 + 1*x^2 + 1*x^6
+  pair (3, 4) s1=  -9 s2=   40  p=13  f = 4*x^0 + 4*x^1 + 1*x^5
+  pair (3, 5) s1=  -2 s2=   -9  p=13  f = 3*x^0 + 1*x^6
+  pair (4, 5) s1=   3 s2=   16  p=13  f = 5*x^0 + 4*x^1 + 1*x^5
+
+==============================================================================
+p = 19   b = 7   primitive root g = 2   non-residue nu = 2
+p mod 3 = 1,  p mod 4 = 3,  p mod 12 = 7
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       7      8     12  [1,1,1] split
+ 1      14      7     13  [3] irred
+ 2       9     -1     21  [3] irred
+ 3      18     -8     28  [1,1,1] split
+ 4      17     -7     27  [3] irred
+ 5      15      1     19  [3] irred
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: COMPLETE (deg 5 + deg 6, all F_p-iso classes)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  N  Y   no    1   15    94        0    no  
+(0,2)  Y  N  N   no    3    7    30     8868   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,3)  Y  Y  N   no    4    0   -26     3948   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,4)  Y  N  N   no    3    1   -18     4179   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,5)  Y  N  Y   no    1    9    46     3234   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,2)  Y  Y  Y  YES    1    6    31    11760   YES  
+(1,3)  Y  N  Y   no    1   -1   -18     4179   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,4)  Y  Y  Y  YES    1    0   -11     6960   YES  
+(1,5)  Y  Y  Y  YES    1    8    45    10320   YES  
+(2,3)  Y  N  N   no    7   -9    46     3234   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,4)  Y  Y  N   no    3   -8    45    10320   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  Y  YES    1    0    37     2520   YES  
+(3,4)  Y  N  Y   no    1  -15    94        0    no  
+(3,5)  Y  N  Y   no    1   -7    30     8868   YES  FALSE NEGATIVE (H fails, realised anyway)
+(4,5)  Y  Y  Y  YES    1   -6    31    11760   YES  
+
+Howe-qualifying : 5/15    realised : 13/15    false-pos : 0    false-neg : 8
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 2) s1=   7 s2=   30  p=19  f = 8*x^0 + 16*x^1 + 1*x^3 + 1*x^5
+  pair (0, 3) s1=   0 s2=  -26  p=19  f = 17*x^1 + 1*x^3 + 1*x^5
+  pair (0, 4) s1=   1 s2=  -18  p=19  f = 10*x^0 + 13*x^1 + 1*x^3 + 1*x^5
+  pair (0, 5) s1=   9 s2=   46  p=19  f = 12*x^0 + 16*x^1 + 8*x^2 + 1*x^3 + 1*x^5
+  pair (1, 2) s1=   6 s2=   31  p=19  f = 2*x^0 + 1*x^6
+  pair (1, 3) s1=  -1 s2=  -18  p=19  f = 9*x^0 + 13*x^1 + 1*x^3 + 1*x^5
+  pair (1, 4) s1=   0 s2=  -11  p=19  f = 18*x^0 + 1*x^3 + 1*x^6
+  pair (1, 5) s1=   8 s2=   45  p=19  f = 18*x^0 + 12*x^1 + 8*x^2 + 1*x^3 + 1*x^6
+  pair (2, 3) s1=  -9 s2=   46  p=19  f = 17*x^0 + 14*x^1 + 5*x^2 + 1*x^3 + 1*x^5
+  pair (2, 4) s1=  -8 s2=   45  p=19  f = 4*x^0 + 1*x^6
+  pair (2, 5) s1=   0 s2=   37  p=19  f = 1*x^0 + 1*x^2 + 1*x^6
+  pair (3, 5) s1=  -7 s2=   30  p=19  f = 11*x^0 + 16*x^1 + 1*x^3 + 1*x^5
+  pair (4, 5) s1=  -6 s2=   31  p=19  f = 10*x^0 + 1*x^6
+
+==============================================================================
+p = 31   b = 7   primitive root g = 3   non-residue nu = 3
+p mod 3 = 1,  p mod 4 = 3,  p mod 12 = 7
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       7     11     21  [3] irred
+ 1      21      7     25  [3] irred
+ 2       1     -4     36  [1,1,1] split
+ 3       3    -11     43  [3] irred
+ 4       9     -7     39  [3] irred
+ 5      27      4     28  [1,1,1] split
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: PARTIAL (deg 5 only; classes realised only by curves with no rational Weierstrass point may be missed)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  Y  Y  YES    1   18   139        0    no  FALSE POSITIVE (H passes, not realised)
+(0,2)  Y  N  N   no    3    7    18      435   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,3)  Y  Y  Y  YES    1    0   -59        0    no  FALSE POSITIVE (H passes, not realised)
+(0,4)  Y  Y  N   no    3    4   -15        0    no  
+(0,5)  Y  N  N   no    7   15   106      120   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,2)  Y  N  Y   no    1    3    34     1680   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,3)  Y  Y  Y  YES    1   -4   -15        0    no  FALSE POSITIVE (H passes, not realised)
+(1,4)  Y  Y  Y  YES    1    0    13        0    no  FALSE POSITIVE (H passes, not realised)
+(1,5)  Y  N  Y   no    1   11    90      315   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,3)  Y  N  Y   no    1  -15   106      120   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,4)  Y  N  N   no    3  -11    90      315   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  N   no    4    0    46     2880   YES  FALSE NEGATIVE (H fails, realised anyway)
+(3,4)  Y  Y  Y  YES    1  -18   139        0    no  FALSE POSITIVE (H passes, not realised)
+(3,5)  Y  N  Y   no    1   -7    18      435   YES  FALSE NEGATIVE (H fails, realised anyway)
+(4,5)  Y  N  Y   no    1   -3    34     1680   YES  FALSE NEGATIVE (H fails, realised anyway)
+
+Howe-qualifying : 5/15    realised : 9/15    false-pos : 5    false-neg : 9
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 2) s1=   7 s2=   18  p=31  f = 5*x^0 + 8*x^1 + 15*x^2 + 1*x^5
+  pair (0, 5) s1=  15 s2=  106  p=31  f = 21*x^0 + 10*x^1 + 9*x^2 + 1*x^3 + 1*x^5
+  pair (1, 2) s1=   3 s2=   34  p=31  f = 25*x^0 + 2*x^1 + 5*x^2 + 1*x^5
+  pair (1, 5) s1=  11 s2=   90  p=31  f = 11*x^0 + 4*x^1 + 1*x^2 + 1*x^5
+  pair (2, 3) s1= -15 s2=  106  p=31  f = 26*x^0 + 18*x^1 + 3*x^2 + 1*x^3 + 1*x^5
+  pair (2, 4) s1= -11 s2=   90  p=31  f = 20*x^0 + 16*x^1 + 15*x^2 + 1*x^5
+  pair (2, 5) s1=   0 s2=   46  p=31  f = 2*x^0 + 5*x^2 + 1*x^5
+  pair (3, 5) s1=  -7 s2=   18  p=31  f = 26*x^0 + 2*x^1 + 1*x^2 + 1*x^5
+  pair (4, 5) s1=  -3 s2=   34  p=31  f = 20*x^0 + 6*x^1 + 1*x^2 + 1*x^5
+
+==============================================================================
+p = 37   b = 7   primitive root g = 2   non-residue nu = 2
+p mod 3 = 1,  p mod 4 = 1,  p mod 12 = 1
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       7     -1     39  [3] irred
+ 1      14     10     28  [1,1,1] split
+ 2      28     11     27  [3] irred
+ 3      19      1     37  [3] irred
+ 4       1    -10     48  [1,1,1] split
+ 5       2    -11     49  [3] irred
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: PARTIAL (deg 5 only; classes realised only by curves with no rational Weierstrass point may be missed)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  N  Y   no    1    9    64     1512   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,2)  Y  Y  N   no    3   10    63        0    no  
+(0,3)  Y  Y  Y  YES    1    0    73        0    no  FALSE POSITIVE (H passes, not realised)
+(0,4)  Y  N  N   no    3  -11    84     1512   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,5)  Y  Y  Y  YES    1  -12    85        0    no  FALSE POSITIVE (H passes, not realised)
+(1,2)  Y  N  Y   no    1   21   184        0    no  
+(1,3)  Y  N  Y   no    1   11    84     1512   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,4)  Y  Y  N   no    4    0   -26     5184   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,5)  Y  N  N   no    7   -1   -36     1566   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,3)  Y  Y  Y  YES    1   12    85        0    no  FALSE POSITIVE (H passes, not realised)
+(2,4)  Y  N  N   no    3    1   -36     1566   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  Y  YES    1    0   -47        0    no  FALSE POSITIVE (H passes, not realised)
+(3,4)  Y  N  Y   no    1   -9    64     1512   YES  FALSE NEGATIVE (H fails, realised anyway)
+(3,5)  Y  Y  Y  YES    1  -10    63        0    no  FALSE POSITIVE (H passes, not realised)
+(4,5)  Y  N  Y   no    1  -21   184        0    no  
+
+Howe-qualifying : 5/15    realised : 7/15    false-pos : 5    false-neg : 7
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 1) s1=   9 s2=   64  p=37  f = 23*x^0 + 5*x^1 + 2*x^2 + 1*x^5
+  pair (0, 4) s1= -11 s2=   84  p=37  f = 8*x^0 + 16*x^1 + 2*x^2 + 1*x^3 + 1*x^5
+  pair (1, 3) s1=  11 s2=   84  p=37  f = 12*x^0 + 4*x^1 + 1*x^3 + 1*x^5
+  pair (1, 4) s1=   0 s2=  -26  p=37  f = 9*x^0 + 11*x^1 + 1*x^2 + 1*x^5
+  pair (1, 5) s1=  -1 s2=  -36  p=37  f = 21*x^0 + 21*x^1 + 9*x^2 + 1*x^5
+  pair (2, 4) s1=   1 s2=  -36  p=37  f = 31*x^0 + 3*x^1 + 2*x^2 + 1*x^5
+  pair (3, 4) s1=  -9 s2=   64  p=37  f = 34*x^0 + 17*x^1 + 3*x^2 + 1*x^5
+
+==============================================================================
+p = 43   b = 7   primitive root g = 3   non-residue nu = 2
+p mod 3 = 1,  p mod 4 = 3,  p mod 12 = 7
+==============================================================================
+sextic twists  E_k : y^2 = x^3 + b*g^k
+ k   b*g^k    t_k    n_k  2-torsion pattern
+ 0       7     13     31  [3] irred
+ 1      21      8     36  [1,1,1] split
+ 2      20     -5     49  [3] irred
+ 3      17    -13     57  [3] irred
+ 4       8     -8     52  [1,1,1] split
+ 5      24      5     39  [3] irred
+trace sums: t0+t2+t4 = 0, t1+t3+t5 = 0
+enumeration coverage: PARTIAL (deg 5 only; classes realised only by curves with no rational Weierstrass point may be missed)
+
+Howe conditions vs. exhaustive genus-2 realisability:
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real  verdict
+(0,1)  Y  N  Y   no    1   21   190      168   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,2)  Y  Y  Y  YES    1    8    21        0    no  FALSE POSITIVE (H passes, not realised)
+(0,3)  Y  Y  Y  YES    1    0   -83        0    no  FALSE POSITIVE (H passes, not realised)
+(0,4)  Y  N  Y   no    1    5   -18      609   YES  FALSE NEGATIVE (H fails, realised anyway)
+(0,5)  Y  Y  Y  YES    1   18   151        0    no  FALSE POSITIVE (H passes, not realised)
+(1,2)  Y  N  Y   no    1    3    46     2352   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,3)  Y  N  N   no    3   -5   -18      609   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,4)  Y  Y  N   no    4    0    22     9408   YES  FALSE NEGATIVE (H fails, realised anyway)
+(1,5)  Y  N  N   no    3   13   126      441   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,3)  Y  Y  Y  YES    1  -18   151        0    no  FALSE POSITIVE (H passes, not realised)
+(2,4)  Y  N  Y   no    1  -13   126      441   YES  FALSE NEGATIVE (H fails, realised anyway)
+(2,5)  Y  Y  Y  YES    1    0    61        0    no  FALSE POSITIVE (H passes, not realised)
+(3,4)  Y  N  Y   no    1  -21   190      168   YES  FALSE NEGATIVE (H fails, realised anyway)
+(3,5)  Y  Y  N   no    3   -8    21        0    no  
+(4,5)  Y  N  N   no   13   -3    46     2352   YES  FALSE NEGATIVE (H fails, realised anyway)
+
+Howe-qualifying : 5/15    realised : 9/15    false-pos : 5    false-neg : 9
+
+squarefree witnesses (y^2 = f(x)); feed to hyperellcharpoly:
+  pair (0, 1) s1=  21 s2=  190  p=43  f = 33*x^0 + 8*x^1 + 8*x^2 + 1*x^3 + 1*x^5
+  pair (0, 4) s1=   5 s2=  -18  p=43  f = 13*x^0 + 20*x^1 + 7*x^2 + 1*x^3 + 1*x^5
+  pair (1, 2) s1=   3 s2=   46  p=43  f = 39*x^0 + 3*x^1 + 2*x^2 + 1*x^5
+  pair (1, 3) s1=  -5 s2=  -18  p=43  f = 5*x^1 + 4*x^2 + 1*x^3 + 1*x^5
+  pair (1, 4) s1=   0 s2=   22  p=43  f = 22*x^0 + 1*x^1 + 3*x^2 + 1*x^5
+  pair (1, 5) s1=  13 s2=  126  p=43  f = 30*x^0 + 33*x^1 + 8*x^2 + 1*x^3 + 1*x^5
+  pair (2, 4) s1= -13 s2=  126  p=43  f = 16*x^0 + 7*x^1 + 3*x^2 + 1*x^3 + 1*x^5
+  pair (3, 4) s1= -21 s2=  190  p=43  f = 4*x^0 + 5*x^1 + 4*x^2 + 1*x^3 + 1*x^5
+  pair (4, 5) s1=  -3 s2=   46  p=43  f = 9*x^0 + 7*x^1 + 1*x^2 + 1*x^5
+
+==============================================================================
+SUMMARY
+==============================================================================
+    p   b  coverage  H-qual  realised  falsePos  falseNeg
+    7   1      full       5        13         0         8
+   13   7      full       4        15         0        11
+   19   7      full       5        13         0         8
+   31   7      deg5       5         9         5         9
+   37   7      deg5       5         7         5         7
+   43   7      deg5       5         9         5         9
+
+total false positives (H passes, no genus-2 curve): 15
+total false negatives (H fails, curve exists)     : 52
+
+NOTE: false negatives on deg5-only rows are sound (a witness was found);
+      false positives on deg5-only rows are NOT conclusive (coverage is partial).
