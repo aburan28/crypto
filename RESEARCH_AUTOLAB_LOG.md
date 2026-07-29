@@ -6003,4 +6003,4 @@ failure, so the BKZ question should be re-asked in terms of eff rather than λ.
 Thread 23 first.
 
 ### Commits made
-(recorded in the follow-up commit below)
+`1e88dbb` autolab 2026-07-29: Thread 20 — lambda/n threshold falsified in both directions; LLL needs ~2x information-theoretic minimum
