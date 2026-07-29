@@ -1,0 +1,44 @@
+Thread 22 control: base rate of genus-2 realisability among split isogeny classes
+
+==============================================================================
+p = 31   b = 7   coverage: COMPLETE (deg 5 + deg 6)
+==============================================================================
+elliptic traces available      : 23  (-11 .. 11)
+distinct split classes E_a x E_b: 276
+realised by a genus-2 Jacobian : 252
+BASE RATE                      : 0.9130
+
+split classes with NO genus-2 Jacobian (24):
+  s1= -22 s2=   183   from traces (t_a,t_b)=(-11,-11)   charpoly = T^4 - -22T^3 + 183T^2 - -682T + 961
+  s1= -21 s2=   172   from traces (t_a,t_b)=(-11,-10)   charpoly = T^4 - -21T^3 + 172T^2 - -651T + 961
+  s1= -19 s2=   152   from traces (t_a,t_b)=(-10, -9)   charpoly = T^4 - -19T^3 + 152T^2 - -589T + 961
+  s1= -17 s2=   134   from traces (t_a,t_b)=( -9, -8)   charpoly = T^4 - -17T^3 + 134T^2 - -527T + 961
+  s1= -15 s2=   118   from traces (t_a,t_b)=( -8, -7)   charpoly = T^4 - -15T^3 + 118T^2 - -465T + 961
+  s1= -13 s2=   104   from traces (t_a,t_b)=( -7, -6)   charpoly = T^4 - -13T^3 + 104T^2 - -403T + 961
+  s1= -11 s2=    92   from traces (t_a,t_b)=( -6, -5)   charpoly = T^4 - -11T^3 + 92T^2 - -341T + 961
+  s1=  -9 s2=    82   from traces (t_a,t_b)=( -5, -4)   charpoly = T^4 - -9T^3 + 82T^2 - -279T + 961
+  s1=  -7 s2=    74   from traces (t_a,t_b)=( -4, -3)   charpoly = T^4 - -7T^3 + 74T^2 - -217T + 961
+  s1=  -5 s2=    68   from traces (t_a,t_b)=( -3, -2)   charpoly = T^4 - -5T^3 + 68T^2 - -155T + 961
+  s1=  -3 s2=    64   from traces (t_a,t_b)=( -2, -1)   charpoly = T^4 - -3T^3 + 64T^2 - -93T + 961
+  s1=  -1 s2=    62   from traces (t_a,t_b)=( -1,  0)   charpoly = T^4 - -1T^3 + 62T^2 - -31T + 961
+  s1=   1 s2=    62   from traces (t_a,t_b)=(  0,  1)   charpoly = T^4 - 1T^3 + 62T^2 - 31T + 961
+  s1=   3 s2=    64   from traces (t_a,t_b)=(  1,  2)   charpoly = T^4 - 3T^3 + 64T^2 - 93T + 961
+  s1=   5 s2=    68   from traces (t_a,t_b)=(  2,  3)   charpoly = T^4 - 5T^3 + 68T^2 - 155T + 961
+  s1=   7 s2=    74   from traces (t_a,t_b)=(  3,  4)   charpoly = T^4 - 7T^3 + 74T^2 - 217T + 961
+  s1=   9 s2=    82   from traces (t_a,t_b)=(  4,  5)   charpoly = T^4 - 9T^3 + 82T^2 - 279T + 961
+  s1=  11 s2=    92   from traces (t_a,t_b)=(  5,  6)   charpoly = T^4 - 11T^3 + 92T^2 - 341T + 961
+  s1=  13 s2=   104   from traces (t_a,t_b)=(  6,  7)   charpoly = T^4 - 13T^3 + 104T^2 - 403T + 961
+  s1=  15 s2=   118   from traces (t_a,t_b)=(  7,  8)   charpoly = T^4 - 15T^3 + 118T^2 - 465T + 961
+  s1=  17 s2=   134   from traces (t_a,t_b)=(  8,  9)   charpoly = T^4 - 17T^3 + 134T^2 - 527T + 961
+  s1=  19 s2=   152   from traces (t_a,t_b)=(  9, 10)   charpoly = T^4 - 19T^3 + 152T^2 - 589T + 961
+  s1=  21 s2=   172   from traces (t_a,t_b)=( 10, 11)   charpoly = T^4 - 21T^3 + 172T^2 - 651T + 961
+  s1=  22 s2=   183   from traces (t_a,t_b)=( 11, 11)   charpoly = T^4 - 22T^3 + 183T^2 - 682T + 961
+
+sextic-twist pairs: Howe-qualifying 5/15, realised 15/15
+(compare with the base rate above before reading anything into this)
+
+==============================================================================
+SUMMARY
+==============================================================================
+    p  coverage  classes  realised  baserate  noJac  Hqual  pairReal
+   31      full      276       252    0.9130     24      5        15

@@ -6144,3 +6144,49 @@ clause.
 `652ac04` autolab 2026-07-29: Thread 22 - Howe H1+H2+H3 is sufficient but not necessary
 (a second commit adds this log entry; a third adds the p=31 addendum if that run lands.)
 
+
+### Addendum (same run): p = 31 out-of-sample test CONFIRMED
+
+The full deg-5 + deg-6 enumeration at p = 31 finished (57M models, ~3.7 GB
+peak RSS, ~22 min wall). The pre-registered prediction above is confirmed
+**at the level of the sets, not just the counts**:
+
+```
+p = 31, COMPLETE (deg 5 + deg 6)
+  distinct split classes E_a x E_b : 276
+  realised by a genus-2 Jacobian   : 252
+  BASE RATE                        : 0.9130      (predicted 252/276 = 0.9130)
+  classes with NO genus-2 Jacobian : 24          (predicted 24)
+
+  predicted-not-observed : []      <- empty
+  observed-not-predicted : []      <- empty
+  EXACT SET MATCH        : True
+  extremal-clause hits   : (-11,-11) and (11,11)     [4*31 - 3 = 121 = 11^2]
+
+  sextic-twist pairs: Howe-qualifying 5/15, realised 15/15
+```
+
+This is the strongest single piece of evidence in the run: p = 31 was not used
+to fit the rule, and it is the first prime tested where the extremal clause
+fires *and* the consecutive-trace clause has to account for everything else.
+Both fired exactly as predicted, and nothing else did.
+
+Note also the last line: at p = 31 under complete coverage, **all 15**
+sextic-twist pairs are realised while only 5 satisfy (H1)+(H2)+(H3) — the same
+5-vs-15 gap predicted for secp256k1, now observed directly at a proxy prime
+with the same j = 0 sextic-twist structure.
+
+Cumulative verified evidence for the rule: 68 non-Jacobian classes across
+p = 7, 13, 19, 31 under complete enumeration, zero misclassifications.
+
+### Note on branch
+
+The daily protocol says `git push origin main`. This session's branch policy
+mandates the designated branch `claude/zen-pascal-pb4xda`, so all three
+commits went there, not to `main`. No PR was opened (none was requested).
+
+### Commits made (final)
+
+- `652ac04` autolab 2026-07-29: Thread 22 - Howe H1+H2+H3 is sufficient but not necessary
+- `5a37d35` autolab 2026-07-29: log entry for Thread 22
+- (this addendum) autolab 2026-07-29: p=31 out-of-sample confirmation
