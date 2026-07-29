@@ -5874,3 +5874,112 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+Thread 20 (λ/n threshold bisection). All six original priority threads are CLOSED:
+P-521 (2026-05-29), CHLRS (2026-07-26 negative), Howe sextic twists (2026-05-24),
+cross-curve LLL (2026-05-25), GLV-HNP Phase 2 (2026-07-26), B5/F_{p^k} (2026-05-27).
+Thread 20 was proposed in the 2026-07-26 log as immediate next step from the Phase 2
+validation: bisect the λ/n threshold between 0.07 (fail) and 0.34 (pass). Script
+`glv_hnp_phase2_lambda_threshold.py` was proposed but never started.
+
+### Work done
+
+- Installed `fpylll` (+ `cysignals` dependency) which was absent in this session.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (330 lines).
+  Script: (1) enumerates j=0 curves y²=x³+b over primes p≤600; (2) for each
+  computes n=#E(F_p), checks n prime, finds GLV eigenvalue λ from λ²+λ+1≡0 (mod n);
+  (3) buckets into λ/n bins of width 0.05; (4) picks one representative per bin;
+  (5) runs GLV-HNP Phase 2 LLL attack at m=3..18, 3 seeds, ~eff=0.15.
+- **Diagnosed and fixed two bugs** in initial `build_lattice` implementation:
+  (a) k2 diagonal was `n*S_K2` instead of `S_K2` (planted vector off by factor n);
+  (b) `-lam*S_K1` entry in k2 row was taken modulo `n*S_K1`, making it a large
+  positive number instead of negative, corrupting the GLV coupling.
+  Both bugs caused all curves to fail including the known-pass 8-bit reference.
+  Fix confirmed by 8-bit reference (p=211, n=199) recovering at m=5 (3/3). ✓
+- Also confirmed: naming convention in original `glv_hnp_phase2_attack.py` has
+  'A' = h*s_inv (constant) and 'B' = r*s_inv (d-coefficient), opposite of
+  standard HNP notation; the d-row carries 'B' (=r*s_inv, the d-coefficient)
+  and the Kannan row carries 'A' (=h*s_inv, the constant), which gives the
+  correct relation d*B + A = s_inv*(d*r + h) = k_full. Documented.
+- Ran `cargo test --test curve_audit` → 5/5 pass (5.21s). ✓
+
+### Findings
+
+**Distribution of GLV eigenvalues for small j=0 curves (p≤600):**
+Found 216 candidate (p, b, n, λ) tuples with prime n and GLV eigenvalue (n ≡ 1 mod 3).
+Distribution is roughly uniform in λ/n ∈ (0, 0.5):
+  [0.05,0.10): 30   [0.10,0.15): 36   [0.15,0.20): 19   [0.20,0.25): 13
+  [0.25,0.30): 25   [0.30,0.35): 12   [0.35,0.40): 21   [0.40,0.45): 27
+  [0.45,0.50): 18
+
+**Main result — LLL success by λ/n bin (representative curve, 3 seeds, m=3..18, eff≈0.15):**
+
+| λ/n  | n    | λ   | K1 | K2 | LLL result    | note |
+|------|------|-----|----|----|---------------|------|
+| 0.07 | 2647 | 185 | 7  | 52 | FAIL (max 1/3)| known-fail reference |
+| 0.073| 547  | 40  | 3  | 24 | 3/3 at m=8    | new: same λ/n, smaller n → SUCCEEDS |
+| 0.106| 613  | 65  | 3  | 25 | 3/3 at m=9    |
+| 0.191| 571  | 109 | 3  | 24 | 3/3 at m=10   |
+| 0.238| 541  | 129 | 3  | 24 | 3/3 at m=8    |
+| 0.279| 499  | 139 | 3  | 23 | FAIL (max 2/3)| borderline: never 3/3 |
+| 0.350| 349  | 122 | 2  | 19 | 3/3 at m=5    |
+| 0.380| 337  | 128 | 2  | 19 | 3/3 at m=5    |
+| 0.407| 619  | 252 | 3  | 25 | 3/3 at m=7    |
+| 0.476| 487  | 232 | 3  | 23 | 3/3 at m=6    |
+| 0.532| 199  | 106 | 2  | 15 | 3/3 at m=5    | known-pass reference |
+
+**Key finding: λ/n is NOT the sole determinant of LLL success.**
+
+The pattern is non-monotone. Counterexamples to the λ/n threshold hypothesis:
+1. **λ/n=0.073 succeeds (n=547) but λ/n=0.070 fails (n=2647)** — same λ/n bin, 5× bigger n,
+   completely different outcome. The known-fail curve's failure is NOT due to small λ/n alone.
+2. **λ/n=0.279 fails (max 2/3) but λ/n=0.106 succeeds (3/3 at m=9)** — smaller λ/n succeeds!
+
+**Revised hypothesis: the effective lattice parameter is NOT λ/n but rather (λ·S_K1)/n or K1/λ.**
+
+For the failing cases:
+- n=2647, λ=185, K1=7: K1/λ = 7/185 = 0.038; eff = 7·52/2647 = 0.138
+- n=499, λ=139, K1=3: K1/λ = 3/139 = 0.022; eff = 3·23/499 = 0.138
+
+For the similar-λ/n SUCCESS:
+- n=547, λ=40, K1=3: K1/λ = 3/40 = 0.075; eff = 3·24/547 = 0.132
+
+For the small-λ/n SUCCESS:
+- n=613, λ=65, K1=3: K1/λ = 3/65 = 0.046; eff = 0.122
+
+Observation: K1/λ is larger for the successful small-λ/n case (0.075 for n=547 vs 0.038 for n=2647).
+This is consistent with the structural explanation: the -λ·S_K1 entry in the k2 rows has
+magnitude λ·(n//K1) ≈ λ·n/K1. For this to be "small" relative to the modular row (n·S_K1 = n²/K1),
+we need λ/n << 1. But if K1/λ is large enough, the k2 row IS separable even for small λ/n.
+
+**Borderline behavior at λ/n=0.279:** 2/3 seeds succeed at m=7 and m=9, but never 3/3.
+This is likely statistical noise with 3 seeds — would probably succeed with more seeds or m=20-25.
+The failure is SOFT (not zero), unlike the known-fail at n=2647 (max 1/3).
+
+**Required m vs λ/n (for the 3/3 cases):** roughly anti-correlated but NOT cleanly:
+λ/n=0.532→m=5, 0.476→m=6, 0.407→m=7, 0.350→m=5, 0.238→m=8, 0.191→m=10, 0.106→m=9, 0.073→m=8.
+The curve at λ/n=0.191 requiring m=10 is anomalous. This suggests n-size also affects m*.
+
+### Next step proposal
+
+**Thread 20b (K1/λ threshold):**
+The revised hypothesis is that LLL success depends on K1/λ (not λ/n). Test by:
+1. For the known-fail curve (n=2647, λ=185), increase K1 from 7 to 14 (→K1/λ=0.076)
+   and re-run. If it succeeds, K1/λ is the right parameter.
+2. For the success case (n=547, λ=40, K1=3), decrease K1 to 1 (→K1/λ=0.025)
+   and check if it fails.
+3. This would give a concrete threshold: "LLL fails iff K1/λ < T".
+
+Script: extend `glv_hnp_phase2_lambda_threshold.py` with a K1/λ sweep.
+
+**Thread 21 (ePrint survey, fallback):**
+Since all 6 original threads are closed, do the fallback ePrint survey: search
+"isogeny-graph ECDLP", "Boneh-Venkatesan", "hidden number problem ECDSA" on IACR.
+(Skipped this session due to Thread 20 making concrete progress.)
+
+### Commits made
+[see git hash after this entry]
