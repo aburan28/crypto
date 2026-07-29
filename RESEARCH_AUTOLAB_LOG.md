@@ -6453,4 +6453,4 @@ insurance; today it recovered a two-month headline result.
 
 ### Commits made
 
-(hash recorded in the following commit)
+bd2b76d autolab 2026-07-29 (run #3): closed form for lambda_1(L2); repair merge damage from 6fd645f
