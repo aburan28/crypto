@@ -5987,4 +5987,4 @@ Secondary: re-express the 2026-07-26 log's λ/n column in λ* throughout, so fut
 do not re-derive the root-convention confusion.
 
 ### Commits made
-(recorded in the follow-up commit below)
+d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
