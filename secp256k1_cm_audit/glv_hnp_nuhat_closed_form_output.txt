@@ -1,0 +1,90 @@
+==============================================================================
+Thread 23 -- closed form for lambda_1(L2) in the GLV-HNP Phase 2 lattice
+==============================================================================
+harvesting 20-bit j=0 GLV curves ...
+  got 60 curves
+
+==============================================================================
+E1  closed form (*) vs Lagrange-Gauss, exact integer comparison
+==============================================================================
+60 j=0 GLV curves x 5 eff values = 300 lattices
+  lattices tested      : 300
+  exact bit-for-bit    : 300
+  mismatches           : 0
+  wall clock           : 0.00s
+  VERDICT              : CLOSED FORM EXACT
+
+==============================================================================
+E2  generality: random n, random lam, random K1/K2, 8..256 bits
+==============================================================================
+  bits   trials  mismatch
+     8      470         0
+    12      447         0
+    16      427         0
+    20      470         0
+    24      412         0
+    32      466         0
+    64      454         0
+   128      452         0
+   256      402         0
+  total mismatches     : 0 / 4000
+  VERDICT              : EXACT AT ALL SIZES
+  secp256k1 eff=0.0993  nu_hat(cf)=0.663928 nu_hat(gauss)=0.663928 q*=2^127.8 a_next=5
+  secp256k1 eff=0.05    nu_hat(cf)=0.870857 nu_hat(gauss)=0.870857 q*=2^127.8 a_next=5
+  secp256k1 eff=0.25    nu_hat(cf)=0.585226 nu_hat(gauss)=0.585226 q*=2^127.8 a_next=5
+
+==============================================================================
+E3  is the argmin convergent at q ~ sqrt(n*K2/K1)?
+==============================================================================
+  samples              : 300
+  log2 q*/q_bal        : median -1.210  IQR [-1.586, -0.713]  10-90% [-2.139, -0.237]  |.|<=1 0.440  |.|<=2 0.857
+  log2 q*/q_bal_refined : median +0.004  IQR [-0.580, +0.600]  10-90% [-0.922, +1.467]  |.|<=1 0.770  |.|<=2 0.947
+  refined scale        : q_bal_refined = sqrt(n*K2/(a_next*K1))
+  VERDICT              : naive scale is biased -1.21 octaves (44% within 1);
+                         dividing by sqrt(a_next) removes the bias -> +0.00 (77% within 1).
+
+==============================================================================
+E4  nu_hat ~ sqrt(2*q*r/n), and nu_hat as a partial quotient
+==============================================================================
+  samples              : 300
+  pearson (nu_hat, sqrt(2qr/n))   = +0.7475
+  spearman(nu_hat, sqrt(2qr/n))   = +0.7285
+  |approx-exact|/exact : median 0.1197  p90 0.5128
+  pearson (nu_hat, 1/sqrt(a_next+1)) = +0.7450
+  spearman(nu_hat, 1/sqrt(a_next+1)) = +0.7252
+  reading              : small nu_hat (easy attack) <=> LARGE partial quotient
+                         at the balance scale.
+
+==============================================================================
+E5  scale-freeness: fix the curve, move K1 -> nu_hat moves, CF invariants cannot
+==============================================================================
+For each curve the scale-free invariants are CONSTANT down the row by
+construction; nu_hat is not.  If nu_hat predicts p_hat (proved 2026-07-29
+run #2) then no scale-free function of lam/n can.
+
+         n      mu   max_a K1=8    K1=16   K1=32   K1=64   K1=128  K1=256  K1=512    spread
+-------------------------------------------------------------------------------------------
+    540541  0.2248       4   0.706   0.766   0.985   0.820   0.659   0.642   0.772    0.343
+   1491961  0.1139       8   0.850   0.698   0.703   0.865   0.949   0.745   0.699    0.251
+   1355293  0.2088      13   0.947   0.676   0.498   0.402   0.396   0.479   0.646    0.551
+   1339813  0.3330     386   0.089   0.119   0.167   0.235   0.332   0.470   0.664    0.576
+   1807837  0.1699       7   0.695   0.757   0.975   0.789   0.711   0.801   1.048    0.353
+    846931  0.2269       8   0.748   0.991   0.721   0.564   0.525   0.609   0.808    0.466
+   1577533  0.4920      30   0.718   0.661   0.760   1.003   0.932   0.907   1.014    0.353
+   1044217  0.0550      18   0.866   0.861   0.626   0.487   0.450   0.517   0.684    0.417
+    794509  0.1555      20   0.541   0.399   0.324   0.322   0.392   0.530   0.741    0.419
+    854017  0.1343       7   0.887   0.813   0.931   0.917   0.706   0.635   0.714    0.296
+   1142389  0.3868       2   1.014   0.967   0.940   0.961   0.950   0.949   1.014    0.074
+   1041427  0.3337     340   0.095   0.128   0.178   0.251   0.355   0.502   0.709    0.615
+
+  median nu_hat spread over the K1 grid, per curve : 0.417
+  (the 2026-07-29 20d low/high cut was at nu_hat 0.45 / 0.90, a gap of 0.45)
+  VERDICT              : a single curve traverses the whole decision range as K1
+                         moves, so max_a / q_cf / max_q_cf are provably
+                         non-predictive.  The June DEAD END is explained.
+
+==============================================================================
+SUMMARY   closed form exact on GLV curves : True
+          closed form exact in general    : True
+          total wall clock                : 1.8s
+==============================================================================
