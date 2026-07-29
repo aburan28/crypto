@@ -6337,4 +6337,10 @@ arithmetic.
 
 ### Commits made
 
-(hash recorded in the follow-up commit)
+670bbbd autolab 2026-07-29 #2: Thread 23 — closed form for nu_hat, exact null
+        law, unconditional GLV floor
+        (`secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py` +
+         `nuhat_closed_form_output.txt`, `RESEARCH_GLV_HNP_PHASE2.md` §10)
+
+Pushed to `claude/zen-pascal-986mds`, not `main` — this session's branch
+policy forbids pushing to main.
