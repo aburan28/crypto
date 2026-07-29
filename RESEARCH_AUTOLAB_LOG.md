@@ -6131,4 +6131,4 @@ mechanism is now known to be scale-dependent, which explains all eight.
 
 ### Commits made
 
-(hash recorded in the following commit)
+e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
