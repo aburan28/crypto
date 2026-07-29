@@ -293,6 +293,105 @@ The explicit cover is a **publishable individual result**:
 It would be a nice complement to the paper but is not required
 by the theorem.
 
+## 9.5. Thread 22 (2026-07-29): exhaustive realization test at proxy scale
+
+Threads 2 and 8 left the *explicit* construction blocked (Mestre
+needs Magma; the F_p Rosenhain route dies on the cubic-residue
+obstruction).  This section answers the weaker but decisive
+**realization** question by brute force at proxy scale:
+
+> For a small prime `p ≡ 1 (mod 6)`, and the six j=0 sextic twists
+> `E_0, …, E_5` of `y² = x³ + b`, does there *exist* a smooth
+> genus-2 curve `C/F_p` with
+> `charpoly_Frob(Jac C) = (T² − t_i T + p)(T² − t_j T + p)`?
+
+This is *not* answered by Thread 7's Honda–Tate argument.  Honda–Tate
+says every abelian surface in that (reducible) isogeny class is
+non-simple.  A Jacobian of a smooth genus-2 curve may perfectly well
+be *isogenous* — not isomorphic — to a product; that is exactly what
+gluing produces.  So the two questions are independent.
+
+**Method** ([`glue_realization_search.py`](secp256k1_cm_audit/glue_realization_search.py)).
+Exhaustive enumeration of all genus-2 curves over `F_p` up to
+`F_p`-isomorphism, in two families that jointly cover every class:
+
+- `A` : `y² = x⁵ + a₃x³ + a₂x² + a₁x + a₀`   (`p⁴` models)
+- `B` : `y² = c·(x⁶ + b₄x⁴ + b₃x³ + b₂x² + b₁x + b₀)`, `c ∈ {1, ν}`
+  (`2p⁵` models)
+
+Odd-degree models absorb their leading coefficient (`x ↦ cX`,
+`y ↦ c³Y`), so family `A` needs no separate quadratic twist; even-degree
+models do not, so family `B` carries `c` modulo squares.  Family `B` is
+the load-bearing one: when `x³ + b` is irreducible (the secp256k1 case)
+the glued curve has no rational Weierstrass point and family `A` misses
+it entirely.
+
+`#C(F_p)` filters candidates; survivors get their full Frobenius
+charpoly from `#C(F_p)` and `#C(F_{p²})` via Newton's identities.
+Every reported model is re-derived independently with PARI's
+`hyperellcharpoly` in
+[`glue_realization_verify.gp`](secp256k1_cm_audit/glue_realization_verify.gp).
+
+**Result.**  Realization is governed not by the Howe conditions but by
+a single arithmetic quantity, `|t_i − t_j|`:
+
+| p  | pairs with \|t_i−t_j\| = 1 | realized | pairs with \|t_i−t_j\| > 1 | realized |
+|----|---------------------------|----------|---------------------------|----------|
+| 7  | 2                         | **0**    | 13                        | 13       |
+| 13 | 0                         | –        | 15                        | 15       |
+| 19 | 2                         | **0**    | 13                        | 13       |
+| 31 | 0                         | –        | 15                        | 15       |
+| 37 | 2                         | **0**    | (not searched)            | –        |
+| 43 | 0                         | –        | 15                        | 15       |
+
+All six negatives are *exhaustive* — they are proofs of
+non-realization over that `F_p`, not search failures.
+
+**Criterion (empirical, one direction proved).**
+
+> The split class `E_i × E_j` contains the Jacobian of a smooth
+> genus-2 curve over `F_p` **iff** `|t_i − t_j| ≠ 1`.
+
+The `⟸` direction has a short proof.  Any ppav isogenous to
+`E_i × E_j` with `E_i ≁ E_j` is either the product itself or a gluing
+`(E_i × E_j)/Γ` along an anti-isometry `E_i[N] → E_j[N]` for some
+`N > 1` (Kani).  Such an isomorphism forces the mod-`N` Frobenius
+charpolys to agree, i.e. `N | (t_i − t_j)`.  If `|t_i − t_j| = 1` no
+`N > 1` divides it, so the class contains only the product, and a
+product with its product polarization is not a Jacobian.  Hence no
+genus-2 curve exists.  ∎
+
+The `⟹` direction is empirical here (71/71 pairs); Howe–Nart–Ritzenthaler
+(2009) give the complete classification of isogeny classes of abelian
+surfaces containing no Jacobian, and a full reconciliation with their
+exceptional list is left open (their paper was not retrievable from
+this environment — outbound fetches to arXiv/Numdam/EuDML return 403).
+
+**Three consequences for the programme.**
+
+1. *The Howe conditions are sufficient but far from necessary.*
+   Across `p = 7, 13, 19, 31, 43` all 24 Howe-qualifying pairs are
+   realized — but so are 47 of the 51 non-qualifying pairs, the only
+   four exceptions being the `|t_i − t_j| = 1` pairs at `p = 7, 19`.
+   Failing (H2) or (H3) does not block realization.
+
+2. *secp256k1 has 15 genus-2 covers in this family, not 5.*
+   Thread 18 found 5 of the 15 sextic-twist pairs satisfy (H1)+(H2)+(H3).
+   The smallest pairwise trace gap for secp256k1 is
+   `|t₀ − t₄| = 193508920647619669885755136084601127234` (128 bits),
+   so no pair is anywhere near the `|t_i − t_j| = 1` obstruction and the
+   criterion predicts **all 15** pairs are realized.  §6 of
+   `PAPER_STRUCTURAL_COMPLETENESS.md` can state the stronger count.
+
+3. *No attack.*  B5 is untouched: each such `Jac(C)` has DLP cost
+   `≥ O(p) > O(√n)`.  More covers existing is a structural fact, not a
+   speedup — and it reinforces why the theorem must rest on the cost
+   bound rather than on any non-existence claim.
+
+The `|t| = 1` twists that trigger the obstruction are exactly the ones
+with `n = p` or `n = p + 2`; they occur precisely for
+`p = (3b² + 1)/4` (`p = 7, 19, 37` above, with `b = 3, 5, 7`).
+
 ## 10. References
 
 - Mestre, "Construction de courbes de genre 2 à partir de leurs

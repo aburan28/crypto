@@ -477,6 +477,39 @@ in §6) and on B5's complexity argument.  Any genus-2 cover —
 literal Howe-glue or otherwise — has DLP cost `≥ O(p) > √n`, so
 ECDLP is unaffected either way.
 
+### 6.2 The Howe conditions are sufficient, not necessary
+
+An exhaustive proxy-scale search
+([`glue_realization_search.py`](secp256k1_cm_audit/glue_realization_search.py),
+cross-checked against PARI `hyperellcharpoly` in
+[`glue_realization_verify.gp`](secp256k1_cm_audit/glue_realization_verify.gp))
+enumerates *every* genus-2 curve over `F_p` for `p = 7, 13, 19, 31, 37, 43`
+and asks which of the 15 sextic-twist pairs `(E_i, E_j)` of the j=0 family
+occur as `charpoly_Frob(Jac C) = (T² − t_i T + p)(T² − t_j T + p)`.
+
+All 24 Howe-qualifying pairs are realized, as Howe (1996) predicts.  But so
+are 47 of the 51 pairs that *fail* (H2) or (H3).  Realization is governed
+instead by a single quantity:
+
+> `E_i × E_j` contains a genus-2 Jacobian over `F_p` iff `|t_i − t_j| ≠ 1`.
+
+`⟸` is a theorem: a ppav isogenous to `E_i × E_j` with `E_i ≁ E_j` is either
+the product or a gluing along an anti-isometry `E_i[N] → E_j[N]` with `N > 1`
+(Kani), which forces `N | (t_i − t_j)`; if `|t_i − t_j| = 1` only the product
+survives, and a product is not a Jacobian.  `⟹` is empirical here (71/71
+pairs); cf. Howe–Nart–Ritzenthaler (2009) for the full classification.  All
+six negatives found (at `p = 7, 19, 37`) are exhaustive, hence proofs.
+
+For secp256k1 the smallest pairwise trace gap among the six sextic twists is
+`|t₀ − t₄| = 193508920647619669885755136084601127234` (128 bits), so the
+obstruction is nowhere near applying and **all 15 pairs are expected to be
+realized**, not merely the 5 that satisfy (H1)+(H2)+(H3) (§7 table).
+
+This widens the cover count without changing the verdict: by B5 each such
+`Jac(C)` has DLP cost `≥ O(p) > O(√n)`.  It also shows why the theorem must
+rest on B5's cost bound rather than on any scarcity-of-covers argument —
+covers are *more* abundant than Howe's conditions suggest, not less.
+
 ## 7. Empirical verification on deployed curves
 
 The companion script
@@ -658,6 +691,8 @@ runtime: ~3 minutes on an M-series Mac.
 | `vfcg_experiment.gp`                  | §5.2 VFCG-ρ falsifier                          | 254  |
 | `vfcg_variants.gp`                    | §5.2 V1+V2+V3+V4 extensions; strengthened result| 284  |
 | `howe_gluing_test.gp`                 | §6 Howe (H1)+(H2)+(H3) verification             | 260  |
+| `glue_realization_search.py`          | §6.2 exhaustive genus-2 realization sweep       | 539  |
+| `glue_realization_verify.gp`          | §6.2 PARI `hyperellcharpoly` cross-check        | 73   |
 | `cover_complexity.gp`                 | B5, B6 (DLP cost across genera)                 | 165  |
 | `supersingular_reductions.gp`         | B7 (V4 closure)                                  | 171  |
 | `p256_comparison.gp`                  | §7 cross-curve (secp256k1 vs P-256)             | 283  |

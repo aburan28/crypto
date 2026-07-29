@@ -1,0 +1,257 @@
+========================================================================
+p = 7   (p mod 6 = 1),  non-residue nu = 3
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t=  -4  n=  12  #roots(x^3+b)=3
+  k=1: b=  3  t=  -5  n=  13  #roots(x^3+b)=0
+  k=2: b=  2  t=  -1  n=   9  #roots(x^3+b)=0
+  k=3: b=  6  t=   4  n=   4  #roots(x^3+b)=3
+  k=4: b=  4  t=   5  n=   3  #roots(x^3+b)=0
+  k=5: b=  5  t=   1  n=   7  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 84  (= 12p? True)
+target s1 values (= t_i+t_j): [-9, -6, -5, -4, -3, -1, 0, 1, 3, 4, 5, 6, 9]
+models whose s1 = t_i+t_j for some pair (charpoly computed): 27195
+distinct target charpolys hit by a smooth model: 13/15
+enumeration: EXHAUSTIVE (negatives are proofs)
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no    -4   -5      1   (  -9,   34)   NOT REALIZED
+(0,2)   Y  N  N    no    -4   -1      3   (  -5,   18)   REALIZED
+(0,3)   Y  Y  N    no    -4    4      8   (   0,   -2)   REALIZED
+(0,4)   Y  N  N    no    -4    5      9   (   1,   -6)   REALIZED
+(0,5)   Y  N  Y    no    -4    1      5   (  -3,   10)   REALIZED
+(1,2)   Y  Y  Y   YES    -5   -1      4   (  -6,   19)   REALIZED
+(1,3)   Y  N  Y    no    -5    4      9   (  -1,   -6)   REALIZED
+(1,4)   Y  Y  Y   YES    -5    5     10   (   0,  -11)   REALIZED
+(1,5)   Y  Y  Y   YES    -5    1      6   (  -4,    9)   REALIZED
+(2,3)   Y  N  Y    no    -1    4      5   (   3,   10)   REALIZED
+(2,4)   Y  Y  N    no    -1    5      6   (   4,    9)   REALIZED
+(2,5)   Y  Y  Y   YES    -1    1      2   (   0,   13)   REALIZED
+(3,4)   Y  N  Y    no     4    5      1   (   9,   34)   NOT REALIZED
+(3,5)   Y  N  Y    no     4    1      3   (   5,   18)   REALIZED
+(4,5)   Y  Y  Y   YES     5    1      4   (   6,   19)   REALIZED
+(searched pairs: 15/15)
+Howe-qualifying pairs: 5,  realized: 5/5
+non-qualifying pairs : 10,  realized: 8/10
+|t_i-t_j| = 1 :  2 pairs, realized 0
+|t_i-t_j| > 1 : 13 pairs, realized 13
+example models for realized pairs:
+  (0,2) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 2x^3 + 1x^2 + 0x + 4)
+  (0,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 6)
+  (0,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 3x^2 + 5x + 0)
+  (0,5) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 5)
+  (1,2) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 3)
+  (1,3) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 1x^3 + 3x^2 + 5x + 0)
+  (1,4) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 2x^3 + 0x^2 + 0x + 6)
+  (1,5) [HOWE]: y^2 = 3*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 2)
+  (2,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 5)
+  (2,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 2)
+  (2,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 2x^3 + 0x^2 + 1x + 6)
+  (3,5) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 2x^3 + 1x^2 + 0x + 4)
+  (4,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 5)
+========================================================================
+p = 13   (p mod 6 = 1),  non-residue nu = 2
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t=   2  n=  12  #roots(x^3+b)=3
+  k=1: b=  2  t=  -5  n=  19  #roots(x^3+b)=0
+  k=2: b=  4  t=  -7  n=  21  #roots(x^3+b)=0
+  k=3: b=  8  t=  -2  n=  16  #roots(x^3+b)=3
+  k=4: b=  3  t=   5  n=   9  #roots(x^3+b)=0
+  k=5: b=  6  t=   7  n=   7  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 156  (= 12p? True)
+target s1 values (= t_i+t_j): [-12, -9, -7, -5, -3, -2, 0, 2, 3, 5, 7, 9, 12]
+models whose s1 = t_i+t_j for some pair (charpoly computed): 12874
+distinct target charpolys hit by a smooth model: 15/15
+enumeration: early-exited after all targets hit (no negatives to prove)
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no     2   -5      7   (  -3,   16)   REALIZED
+(0,2)   Y  N  N    no     2   -7      9   (  -5,   12)   REALIZED
+(0,3)   Y  Y  N    no     2   -2      4   (   0,   22)   REALIZED
+(0,4)   Y  N  N    no     2    5      3   (   7,   36)   REALIZED
+(0,5)   Y  N  Y    no     2    7      5   (   9,   40)   REALIZED
+(1,2)   Y  Y  Y   YES    -5   -7      2   ( -12,   61)   REALIZED
+(1,3)   Y  N  Y    no    -5   -2      3   (  -7,   36)   REALIZED
+(1,4)   Y  Y  Y   YES    -5    5     10   (   0,    1)   REALIZED
+(1,5)   Y  Y  Y   YES    -5    7     12   (   2,   -9)   REALIZED
+(2,3)   Y  N  Y    no    -7   -2      5   (  -9,   40)   REALIZED
+(2,4)   Y  Y  N    no    -7    5     12   (  -2,   -9)   REALIZED
+(2,5)   Y  Y  N    no    -7    7     14   (   0,  -23)   REALIZED
+(3,4)   Y  N  Y    no    -2    5      7   (   3,   16)   REALIZED
+(3,5)   Y  N  Y    no    -2    7      9   (   5,   12)   REALIZED
+(4,5)   Y  Y  Y   YES     5    7      2   (  12,   61)   REALIZED
+(searched pairs: 15/15)
+Howe-qualifying pairs: 4,  realized: 4/4
+non-qualifying pairs : 11,  realized: 11/11
+|t_i-t_j| = 1 :  0 pairs, realized 0
+|t_i-t_j| > 1 : 15 pairs, realized 15
+example models for realized pairs:
+  (0,1) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 7x^2 + 2x + 9)
+  (0,2) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 1x^2 + 4x + 0)
+  (0,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 5)
+  (0,4) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 1x^3 + 4x^2 + 2x + 9)
+  (0,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 11)
+  (1,2) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 2)
+  (1,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 4x^2 + 2x + 9)
+  (1,4) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 0x + 5)
+  (1,5) [HOWE]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 3)
+  (2,3) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 11)
+  (2,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 3)
+  (2,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 4x^3 + 0x^2 + 0x + 5)
+  (3,4) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 7x^2 + 2x + 9)
+  (3,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 4x + 0)
+  (4,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 6)
+========================================================================
+p = 19   (p mod 6 = 1),  non-residue nu = 2
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t=   8  n=  12  #roots(x^3+b)=3
+  k=1: b=  2  t=   7  n=  13  #roots(x^3+b)=0
+  k=2: b=  4  t=  -1  n=  21  #roots(x^3+b)=0
+  k=3: b=  8  t=  -8  n=  28  #roots(x^3+b)=3
+  k=4: b= 16  t=  -7  n=  27  #roots(x^3+b)=0
+  k=5: b= 13  t=   1  n=  19  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 228  (= 12p? True)
+target s1 values (= t_i+t_j): [-15, -9, -8, -7, -6, -1, 0, 1, 6, 7, 8, 9, 15]
+models whose s1 = t_i+t_j for some pair (charpoly computed): 2327047
+distinct target charpolys hit by a smooth model: 13/15
+enumeration: EXHAUSTIVE (negatives are proofs)
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no     8    7      1   (  15,   94)   NOT REALIZED
+(0,2)   Y  N  N    no     8   -1      9   (   7,   30)   REALIZED
+(0,3)   Y  Y  N    no     8   -8     16   (   0,  -26)   REALIZED
+(0,4)   Y  N  N    no     8   -7     15   (   1,  -18)   REALIZED
+(0,5)   Y  N  Y    no     8    1      7   (   9,   46)   REALIZED
+(1,2)   Y  Y  Y   YES     7   -1      8   (   6,   31)   REALIZED
+(1,3)   Y  N  Y    no     7   -8     15   (  -1,  -18)   REALIZED
+(1,4)   Y  Y  Y   YES     7   -7     14   (   0,  -11)   REALIZED
+(1,5)   Y  Y  Y   YES     7    1      6   (   8,   45)   REALIZED
+(2,3)   Y  N  N    no    -1   -8      7   (  -9,   46)   REALIZED
+(2,4)   Y  Y  N    no    -1   -7      6   (  -8,   45)   REALIZED
+(2,5)   Y  Y  Y   YES    -1    1      2   (   0,   37)   REALIZED
+(3,4)   Y  N  Y    no    -8   -7      1   ( -15,   94)   NOT REALIZED
+(3,5)   Y  N  Y    no    -8    1      9   (  -7,   30)   REALIZED
+(4,5)   Y  Y  Y   YES    -7    1      8   (  -6,   31)   REALIZED
+(searched pairs: 15/15)
+Howe-qualifying pairs: 5,  realized: 5/5
+non-qualifying pairs : 10,  realized: 8/10
+|t_i-t_j| = 1 :  2 pairs, realized 0
+|t_i-t_j| > 1 : 13 pairs, realized 13
+example models for realized pairs:
+  (0,2) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 1x^2 + 8x + 9)
+  (0,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 8)
+  (0,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 5x + 13)
+  (0,5) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 1x^3 + 4x^2 + 1x + 10)
+  (1,2) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 2)
+  (1,3) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 1x^2 + 5x + 13)
+  (1,4) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 18)
+  (1,5) [HOWE]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 4)
+  (2,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 4x^2 + 1x + 10)
+  (2,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 4)
+  (2,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 0x + 1)
+  (3,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 8x + 9)
+  (4,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 10)
+========================================================================
+p = 31   (p mod 6 = 1),  non-residue nu = 3
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t=  -4  n=  36  #roots(x^3+b)=3
+  k=1: b=  3  t= -11  n=  43  #roots(x^3+b)=0
+  k=2: b=  9  t=  -7  n=  39  #roots(x^3+b)=0
+  k=3: b= 27  t=   4  n=  28  #roots(x^3+b)=3
+  k=4: b= 19  t=  11  n=  21  #roots(x^3+b)=0
+  k=5: b= 26  t=   7  n=  25  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 372  (= 12p? True)
+target s1 values (= t_i+t_j): [-18, -15, -11, -7, -4, -3, 0, 3, 4, 7, 11, 15, 18]
+models whose s1 = t_i+t_j for some pair (charpoly computed): 48414
+distinct target charpolys hit by a smooth model: 15/15
+enumeration: early-exited after all targets hit (no negatives to prove)
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no    -4  -11      7   ( -15,  106)   REALIZED
+(0,2)   Y  N  N    no    -4   -7      3   ( -11,   90)   REALIZED
+(0,3)   Y  Y  N    no    -4    4      8   (   0,   46)   REALIZED
+(0,4)   Y  N  N    no    -4   11     15   (   7,   18)   REALIZED
+(0,5)   Y  N  Y    no    -4    7     11   (   3,   34)   REALIZED
+(1,2)   Y  Y  Y   YES   -11   -7      4   ( -18,  139)   REALIZED
+(1,3)   Y  N  Y    no   -11    4     15   (  -7,   18)   REALIZED
+(1,4)   Y  Y  Y   YES   -11   11     22   (   0,  -59)   REALIZED
+(1,5)   Y  Y  Y   YES   -11    7     18   (  -4,  -15)   REALIZED
+(2,3)   Y  N  Y    no    -7    4     11   (  -3,   34)   REALIZED
+(2,4)   Y  Y  N    no    -7   11     18   (   4,  -15)   REALIZED
+(2,5)   Y  Y  Y   YES    -7    7     14   (   0,   13)   REALIZED
+(3,4)   Y  N  N    no     4   11      7   (  15,  106)   REALIZED
+(3,5)   Y  N  Y    no     4    7      3   (  11,   90)   REALIZED
+(4,5)   Y  Y  Y   YES    11    7      4   (  18,  139)   REALIZED
+(searched pairs: 15/15)
+Howe-qualifying pairs: 5,  realized: 5/5
+non-qualifying pairs : 10,  realized: 10/10
+|t_i-t_j| = 1 :  0 pairs, realized 0
+|t_i-t_j| > 1 : 15 pairs, realized 15
+example models for realized pairs:
+  (0,1) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 11)
+  (0,2) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 3x + 20)
+  (0,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 15)
+  (0,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 19)
+  (0,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 10x + 0)
+  (1,2) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 3)
+  (1,3) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 19)
+  (1,4) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 30)
+  (1,5) [HOWE]: y^2 = 3*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 5)
+  (2,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 4x + 25)
+  (2,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 5)
+  (2,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 11x + 7)
+  (3,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 11)
+  (3,5) [non-Howe]: y^2 = 3*(x^6 + 0x^4 + 1x^3 + 0x^2 + 3x + 20)
+  (4,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 11)
+========================================================================
+p = 43   (p mod 6 = 1),  non-residue nu = 2
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t=   8  n=  36  #roots(x^3+b)=3
+  k=1: b=  3  t=  -5  n=  49  #roots(x^3+b)=0
+  k=2: b=  9  t= -13  n=  57  #roots(x^3+b)=0
+  k=3: b= 27  t=  -8  n=  52  #roots(x^3+b)=3
+  k=4: b= 38  t=   5  n=  39  #roots(x^3+b)=0
+  k=5: b= 28  t=  13  n=  31  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 516  (= 12p? True)
+target s1 values (= t_i+t_j): [-21, -18, -13, -8, -5, -3, 0, 3, 5, 8, 13, 18, 21]
+models whose s1 = t_i+t_j for some pair (charpoly computed): 106818
+distinct target charpolys hit by a smooth model: 15/15
+enumeration: early-exited after all targets hit (no negatives to prove)
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no     8   -5     13   (   3,   46)   REALIZED
+(0,2)   Y  N  N    no     8  -13     21   (  -5,  -18)   REALIZED
+(0,3)   Y  Y  N    no     8   -8     16   (   0,   22)   REALIZED
+(0,4)   Y  N  N    no     8    5      3   (  13,  126)   REALIZED
+(0,5)   Y  N  Y    no     8   13      5   (  21,  190)   REALIZED
+(1,2)   Y  Y  Y   YES    -5  -13      8   ( -18,  151)   REALIZED
+(1,3)   Y  N  Y    no    -5   -8      3   ( -13,  126)   REALIZED
+(1,4)   Y  Y  Y   YES    -5    5     10   (   0,   61)   REALIZED
+(1,5)   Y  Y  Y   YES    -5   13     18   (   8,   21)   REALIZED
+(2,3)   Y  N  Y    no   -13   -8      5   ( -21,  190)   REALIZED
+(2,4)   Y  Y  N    no   -13    5     18   (  -8,   21)   REALIZED
+(2,5)   Y  Y  Y   YES   -13   13     26   (   0,  -83)   REALIZED
+(3,4)   Y  N  N    no    -8    5     13   (  -3,   46)   REALIZED
+(3,5)   Y  N  Y    no    -8   13     21   (   5,  -18)   REALIZED
+(4,5)   Y  Y  Y   YES     5   13      8   (  18,  151)   REALIZED
+(searched pairs: 15/15)
+Howe-qualifying pairs: 5,  realized: 5/5
+non-qualifying pairs : 10,  realized: 10/10
+|t_i-t_j| = 1 :  0 pairs, realized 0
+|t_i-t_j| > 1 : 15 pairs, realized 15
+example models for realized pairs:
+  (0,1) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 19)
+  (0,2) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 3x^2 + 31x + 32)
+  (0,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 2)
+  (0,4) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 1x^3 + 0x^2 + 3x + 31)
+  (0,5) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 2x^2 + 11x + 38)
+  (1,2) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 3)
+  (1,3) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 3x + 31)
+  (1,4) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 1x^2 + 19x + 16)
+  (1,5) [HOWE]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 6)
+  (2,3) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 0x^3 + 2x^2 + 11x + 38)
+  (2,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 6)
+  (2,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 0x + 2)
+  (3,4) [non-Howe]: y^2 = 1*(x^6 + 0x^4 + 1x^3 + 0x^2 + 26x + 5)
+  (3,5) [non-Howe]: y^2 = 2*(x^6 + 0x^4 + 1x^3 + 3x^2 + 31x + 32)
+  (4,5) [HOWE]: y^2 = 1*(x^6 + 0x^4 + 0x^3 + 0x^2 + 0x + 7)
+wrote 71 models to secp256k1_cm_audit/glue_realization_models.txt

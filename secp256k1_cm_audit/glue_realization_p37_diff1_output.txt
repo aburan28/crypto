@@ -1,0 +1,45 @@
+========================================================================
+p = 37   (p mod 6 = 1),  non-residue nu = 2
+========================================================================
+j=0 sextic twists  y^2 = x^3 + b:
+  k=0: b=  1  t= -10  n=  48  #roots(x^3+b)=3
+  k=1: b=  2  t= -11  n=  49  #roots(x^3+b)=0
+  k=2: b=  4  t=  -1  n=  39  #roots(x^3+b)=0
+  k=3: b=  8  t=  10  n=  28  #roots(x^3+b)=3
+  k=4: b= 16  t=  11  n=  27  #roots(x^3+b)=0
+  k=5: b= 32  t=   1  n=  37  #roots(x^3+b)=0
+  sum t_k = 0   sum t_k^2 = 444  (= 12p? True)
+
+target s1 values (= t_i+t_j): [-21, 21]
+
+models whose s1 = t_i+t_j for some pair (charpoly computed): 13500
+distinct target charpolys hit by a smooth model: 0/2
+enumeration: EXHAUSTIVE (negatives are proofs)
+
+pair  H1 H2 H3  Howe   t_i   t_j  |ti-tj|  (e1,e2)      realized?
+(0,1)   Y  N  Y    no   -10  -11      1   ( -21,  184)   NOT REALIZED
+(0,2)   Y  N  N    no   -10   -1      9   ( -11,   84)   (not searched)
+(0,3)   Y  Y  N    no   -10   10     20   (   0,  -26)   (not searched)
+(0,4)   Y  N  N    no   -10   11     21   (   1,  -36)   (not searched)
+(0,5)   Y  N  Y    no   -10    1     11   (  -9,   64)   (not searched)
+(1,2)   Y  Y  Y   YES   -11   -1     10   ( -12,   85)   (not searched)
+(1,3)   Y  N  N    no   -11   10     21   (  -1,  -36)   (not searched)
+(1,4)   Y  Y  Y   YES   -11   11     22   (   0,  -47)   (not searched)
+(1,5)   Y  Y  Y   YES   -11    1     12   ( -10,   63)   (not searched)
+(2,3)   Y  N  Y    no    -1   10     11   (   9,   64)   (not searched)
+(2,4)   Y  Y  N    no    -1   11     12   (  10,   63)   (not searched)
+(2,5)   Y  Y  Y   YES    -1    1      2   (   0,   73)   (not searched)
+(3,4)   Y  N  Y    no    10   11      1   (  21,  184)   NOT REALIZED
+(3,5)   Y  N  Y    no    10    1      9   (  11,   84)   (not searched)
+(4,5)   Y  Y  Y   YES    11    1     10   (  12,   85)   (not searched)
+
+(searched pairs: 2/15)
+Howe-qualifying pairs: 0,  realized: 0/0
+non-qualifying pairs : 2,  realized: 0/2
+|t_i-t_j| = 1 :  2 pairs, realized 0
+|t_i-t_j| > 1 :  0 pairs, realized 0
+
+example models for realized pairs:
+
+========================================================================
+p = 43   (p mod 6 = 1),  non-residue nu = 2

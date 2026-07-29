@@ -5874,3 +5874,148 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+**Thread 22 (glue realization over small proxy primes)** — the explicit
+next-step recommended by the 2026-07-26 run #2 entry (log line ~5873), never
+started. All six original priority threads are CLOSED/BLOCKED; Thread 20
+(λ/n threshold) remains the other open proposal. Chose 22 because it is
+decidable by exhaustive computation and sits on the critical path of the
+paper's §6 (existence of genus-2 covers), whereas Thread 20 only refines an
+already-characterised failure mode.
+
+Environment note: the container starts bare — `gp`, `numpy`, `sympy`, `fpylll`
+all had to be installed. `apt-get install -y pari-gp` FAILS (a stale
+`libegl-mesa0` pulled in by `pari-doc`/texlive 404s); `apt-get install -y
+--no-install-recommends pari-gp` works. Recording this so future runs skip the
+dead end. Also: the standing prompt names `paper/eprint_combined.tex` and
+`paper/methodological_note.tex`; the actual files are
+`paper/structural_completeness.tex` and `paper/lll_degeneracy_note.tex`.
+
+### Work done
+
+- **Framed the question precisely.** Thread 7 (2026-07-09) closed depth-2
+  Richelot via Honda–Tate: `P_i·P_j` reducible ⟹ every abelian surface in the
+  class is non-simple. That does NOT answer realization — a Jacobian of a
+  *smooth* genus-2 curve can be *isogenous* (not isomorphic) to a product;
+  that is exactly what gluing produces. The two questions are independent.
+- Wrote `secp256k1_cm_audit/glue_realization_search.py` (539 lines):
+  exhaustive enumeration of all genus-2 curves over `F_p` up to
+  `F_p`-isomorphism, in two families that jointly cover every class:
+  - `A`: `y² = x⁵ + a₃x³ + a₂x² + a₁x + a₀` (`p⁴` models). Odd-degree models
+    absorb their leading coefficient via `x↦cX, y↦c³Y`, so the quadratic
+    twist is already inside the monic family.
+  - `B`: `y² = c(x⁶ + b₄x⁴ + b₃x³ + b₂x² + b₁x + b₀)`, `c ∈ {1,ν}` (`2p⁵`).
+    Even-degree models do NOT absorb `c`, so `c` is carried mod squares.
+  Family `B` is load-bearing: when `x³+b` is irreducible (the secp256k1 case)
+  the glued curve has no rational Weierstrass point, so family `A` misses it.
+- Pipeline: `#C(F_p)` filter (Legendre table) → full Frobenius charpoly from
+  `#C(F_p)`, `#C(F_{p²})` via Newton's identities → `gcd(f,f')` smoothness
+  test only on charpoly hits.
+- Wrote `secp256k1_cm_audit/glue_realization_verify.gp` (73 lines): re-derives
+  every reported model's charpoly with PARI `hyperellcharpoly` and checks it
+  equals `(T²−t_iT+p)(T²−t_jT+p)`. **71/71 models confirmed, 0 mismatches.**
+- Perf: the `Σ_x chi(base[x] + b₁x + b₀)` inner loop was the hot spot as a
+  `p×p×p` int64 gather. Rewrote as `S = H @ CHIMAT` where
+  `H[b₁,v] = #{x : base[x]+b₁x = v}` (bincount) and `CHIMAT[v,b₀] = chi(v+b₀)`
+  — a BLAS `p³` matmul. Re-ran p=7,13,19: byte-identical results.
+- `cargo test --test curve_audit` → 5/5 pass (6.25s). ✓
+
+### Findings
+
+**Realization is governed by `|t_i − t_j|`, not by the Howe conditions.**
+
+| p  | Howe pairs | realized | non-Howe pairs | realized | `\|tᵢ−tⱼ\|=1` pairs | realized | enumeration |
+|----|-----------|----------|----------------|----------|----------------|----------|-------------|
+| 7  | 5  | 5/5 | 10 | 8/10  | 2 | **0/2** | exhaustive |
+| 13 | 4  | 4/4 | 11 | 11/11 | 0 | –       | early-exit (all 15 hit) |
+| 19 | 5  | 5/5 | 10 | 8/10  | 2 | **0/2** | exhaustive |
+| 31 | 5  | 5/5 | 10 | 10/10 | 0 | –       | early-exit (all 15 hit) |
+| 37 | –  | –   | 2  | 0/2   | 2 | **0/2** | exhaustive (diff-1 pairs only) |
+| 43 | 5  | 5/5 | 10 | 10/10 | 0 | –       | early-exit (all 15 hit) |
+
+- 24/24 Howe-qualifying pairs realized (as Howe 1996 predicts).
+- 47/51 non-qualifying pairs ALSO realized. Failing (H2) or (H3) does not
+  block realization — the Howe conditions are sufficient, far from necessary.
+- All 6 negatives have `|t_i − t_j| = 1`, and every one is an **exhaustive**
+  negative, i.e. a proof of non-realization over that `F_p`.
+- 71/71 pairs with `|t_i − t_j| > 1` are realized.
+
+**Criterion.** `E_i × E_j` contains a genus-2 Jacobian over `F_p`
+iff `|t_i − t_j| ≠ 1`.
+
+`⟸` proved: any ppav isogenous to `E_i × E_j` with `E_i ≁ E_j` is either the
+product or a gluing along an anti-isometry `E_i[N] → E_j[N]` for some `N > 1`
+(Kani). Such an isomorphism forces the mod-`N` Frobenius charpolys to agree,
+i.e. `N | (t_i − t_j)`. If `|t_i − t_j| = 1` no `N > 1` divides it, so the
+class contains only the product, and a product with its product polarization
+is not a Jacobian. ∎
+`⟹` empirical (71/71). Not reconciled with the full Howe–Nart–Ritzenthaler
+(2009) classification — see BLOCKED note below.
+
+**When the obstruction fires.** The 6 sextic-twist traces are
+`±(2a−b), ±(a−2b), ±(a+b)` with the three magnitudes summing as `u+v=w`
+(verified: `Σt_k = 0`, `Σt_k² = 12p` at all six primes). So `|t_i−t_j| = 1`
+happens exactly when some twist has `|t| = 1`, i.e. `n = p` or `n = p+2`,
+i.e. `4p = 1 + 3b²`. Hence `p = 7 (b=3), 19 (b=5), 37 (b=7)` — and only those,
+among the primes tested.
+
+**Consequence for secp256k1.** Smallest pairwise trace gap among the six
+sextic twists (traces from Thread 18, log line ~5610):
+```
+min |t_i - t_j| = 193508920647619669885755136084601127234   (pair (0,4), 128 bits)
+max |t_i - t_j| = 130 bits
+```
+Nowhere near the obstruction ⟹ the criterion predicts **all 15 pairs are
+realized**, not just the 5 that satisfy (H1)+(H2)+(H3) (Thread 18). secp256k1
+has 15 genus-2 covers in this family, not 5.
+
+**No attack.** B5 is untouched: each `Jac(C)` has DLP cost `≥ O(p) > O(√n)`.
+The value of the result is the opposite of an attack — it shows the
+structural-completeness theorem must rest on B5's cost bound and cannot lean
+on any scarcity-of-covers argument, because covers are *more* abundant than
+Howe's conditions suggest.
+
+**Example verified models** (all re-derived by PARI):
+```
+p=19 (1,2) HOWE : y² = x⁶ + 2                    charpoly (T²−7T+19)(T²+T+19)
+p=19 (0,1) NOT REALIZED (t=8,7, |Δt|=1, e=(15,94)) — exhaustive over all
+          2·19⁵ + 19⁴ ≈ 5.1M models
+p=43 (4,5) HOWE : y² = x⁶ + 11                   charpoly (T²−11T+43)(T²−7T+43)
+```
+
+**BLOCKED: Howe–Nart–Ritzenthaler (2009) not retrievable.** "Jacobians in
+isogeny classes of abelian surfaces over finite fields", Ann. Inst. Fourier
+59(1):239–289, is the complete classification and would let us check whether
+`|t_i−t_j| = 1` is the *only* obstruction for ordinary split classes over
+prime fields. WebFetch to arxiv.org/abs/math/0607515, numdam.org and eudml.org
+all return 403 (site-side bot blocking; the agent proxy itself is healthy —
+`__agentproxy/status` clean, `recentRelayFailures: []`). Direct curl 403s too.
+Left as an open reconciliation.
+
+### Next step proposal
+
+**Thread 23 (highest value): prove the `⟹` direction constructively.**
+The `⟸` proof shows `N | (t_i − t_j)` is necessary for a gluing. Turn it
+around: given `N > 1` dividing `t_i − t_j`, does an `F_p`-rational anti-isometry
+`E_i[N] → E_j[N]` always exist, and is the resulting ppav always a Jacobian
+rather than a product? The second half is exactly where HNR's exceptional
+cases live. Concrete sub-task: for each realized pair at `p = 7…43`, compute
+the minimal `N` that works and check it against `gcd`-divisors of `t_i − t_j`.
+Cheap — reuses the existing script's data — and would either confirm the
+criterion or expose the first counterexample.
+
+**Thread 20 (still open): λ/n threshold study.** Untouched since proposed on
+2026-07-26. Bisect the LLL-success threshold between λ/n = 0.07 and 0.34 via
+`glv_hnp_phase2_lambda_threshold.py`. Note fpylll installs cleanly with
+`pip install fpylll` (no build needed) — the 2026-06 sessions' blocker is gone.
+
+**Perf note for whoever extends the sweep.** Cost is `O(p⁶)` for the charpoly
+of every `s1`-surviving model. `p=43` early-exits in 33s; a full exhaustive
+`p=61` would need quotienting family `B` by the `x ↦ ux` action (a further
+`(p−1)`-fold reduction), which is the obvious next optimisation.
+
+### Commits made
+[filled in below]
