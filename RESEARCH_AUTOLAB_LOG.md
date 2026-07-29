@@ -5996,4 +5996,4 @@ partially provide.
 
 ### Commits made
 
-(recorded in the follow-up commit below)
+- `f474897` autolab 2026-07-29: Thread 20 — lam/n refuted; rho=lambda_1(L_glv) predicts m_open not attackability
