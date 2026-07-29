@@ -6021,4 +6021,4 @@ Worth doing once to confirm the even-family positives are not hiding a case
 where the even family is the *only* realisation.
 
 ### Commits made
-(recorded in the follow-up commit below)
+`61856a5` autolab 2026-07-29: Thread 22 — Howe cover existence; 67/67 qualifying pairs realised
