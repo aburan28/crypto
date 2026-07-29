@@ -5874,3 +5874,101 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Primary: Thread 4 (Cross-curve LLL with scaled-GS fix)** — needed 3-of-3 seeds for P-384 and
+brainpoolP384r1; only 1 seed confirmed in prior logs. Clear pass/fail criterion.
+
+**Secondary: Thread 20 (λ/n threshold bisection)** — all 6 original threads resolved; Thread 20
+was the top proposed follow-on from the 2026-07-26 log.
+
+---
+
+### Work done
+
+#### Thread 4: 384-bit multi-seed LLL confirmation
+- Ran `cargo test --test lll_degeneracy_probe probe_384bit_lll_multiseed -- --nocapture`
+- Test checks P-384 and brainpoolP384r1 at k_bits=288, m=8 across 3 seeds
+
+#### Thread 20: λ/n threshold bisection
+- Wrote `secp256k1_cm_audit/find_threshold_curves.gp` (PARI search script — PARI not available)
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Brute-force searches y²=x³+2 over F_p (p ≡ 1 mod 3, p ≤ 12000) for curves with λ_min/n ∈ [0.07, 0.35]
+  - Found 47 qualifying curves; uses fpylll LLL for attack
+- Ran focused multi-seed tests at K1_BOUND=8 with m∈{6,9} on 12 size-matched curves
+
+---
+
+### Findings
+
+#### Thread 4: **RESOLVED — P-384 3/3, brainpoolP384r1 3/3**
+
+| Curve         | Seed 1 (0xC0FFEE) | Seed 2 (0xDEADBEEF) | Seed 3 (0x12345678) | Result |
+|---------------|-------------------|---------------------|---------------------|--------|
+| P-384         | ✓ 2327 ms         | ✓ 2515 ms           | ✓ 2151 ms           | **3/3** |
+| brainpoolP384 | ✓ 2249 ms         | ✓ 2285 ms           | ✓ 2256 ms           | **3/3** |
+
+The scaled-f64 GS fix (PR merged prior) resolves 384-bit LLL degeneracy across ALL seeds. Thread 4 CLOSED.
+
+#### Thread 20: **NEGATIVE RESULT — λ/n is NOT a clean single-number threshold**
+
+Full search found 47 curves with λ_min/n ∈ [0.07, 0.35] (p ≤ 12000, y²=x³+2, n prime).
+Focused test (K1_BOUND=8, both m=6 and m=9, 5 seeds each) across 12 size-comparable curves:
+
+| Curve (n)  | λ_min | λ/n   | LLL m=6 | LLL m=9 | Verdict |
+|------------|-------|-------|---------|---------|---------|
+| 2647       | 185   | 0.070 | 1/5     | **0/5** | FAIL    |
+| 5923       | 428   | 0.072 | 3/5     | 4/5     | PART    |
+| 6343       | 557   | 0.088 | 2/5     | 1/5     | PART    |
+| 2137       | 201   | 0.094 | **0/5** | **0/5** | FAIL    |
+| 8599       | 1205  | 0.140 | 1/5     | 4/5     | PART    |
+| 6229       | 930   | 0.149 | 3/5     | 3/5     | PART    |
+| 3931       | 617   | 0.157 | 2/5     | 1/5     | PART    |
+| 3049       | 532   | 0.175 | 2/5     | 1/5     | PART    |
+| 1741       | 356   | 0.205 | 4/5     | **5/5** | PASS    |
+| 9697       | 1991  | 0.205 | 4/5     | 4/5     | PART    |
+| 2887       | 698   | 0.242 | 0/5     | 3/5     | PART    |
+| 2659       | 903   | 0.340 | 4/5     | **5/5** | PASS    |
+
+**Key observations:**
+1. λ/n does NOT predict LLL success monotonically: n=2137 (λ/n=0.094) FAILS but n=5923 (λ/n=0.072) partially passes.
+2. n=1741 (λ/n=0.205) PASSES 5/5 at m=9 with K1_BOUND=8.
+3. n=2659 (λ/n=0.340 — KNOWN-PASS) PASSES 5/5 at m=9.
+4. Success depends jointly on (λ, n, K1_BOUND, m). The 2026-07-26 "0.07 vs 0.34" boundary was CONFOUNDED with curve size.
+5. The SMALLER of the two roots of x²+x+1≡0 mod n gives equal or better attack success vs the larger root (tested for 6 key curves).
+
+**Correct framing:** The effective coupling term in the lattice is λ*S_K1 where S_K1 = n/K1_BOUND. Success requires:
+```
+λ/n ≳ threshold(n, K1_BOUND, m)
+```
+The threshold is not a constant; it depends on all three parameters. For our standard test (K1_BOUND=8, m=9), the apparent threshold is near λ/n ≈ 0.20, but with significant spread.
+
+**cargo test --test curve_audit**: 5/5 ✓ (no regressions)
+
+---
+
+### Next step proposal
+
+**Thread 21 (NEW — Isolate the threshold properly):**
+For a fixed n and K1_BOUND, what is the minimum λ/n (equivalently, minimum λ) for which LLL
+succeeds 5/5 at m=9? This can be studied by:
+
+Option A: For a fixed prime n ≈ 2000-3000, search for different y²=x³+b curves (varying b)
+that give different λ values (since the two roots 185 and 2461 are fixed for a given n, vary b
+to change the endomorphism structure — but this changes n too).
+
+Option B (cleaner): parameterize by K1_BOUND. For n=1741 (λ/n=0.205) and n=2659 (λ/n=0.340),
+sweep K1_BOUND ∈ {4,8,16,32,64} and find the maximum K1_BOUND where 5/5 is achieved. This
+gives a practical "attack boundary" independent of the λ/n ratio question.
+
+Thread 22 (Richelot search): remains open — search for genus-2 C/F_{p'} (small proxy prime p')
+whose Jacobian has char poly P_{E_i}(T)·P_{E_j}(T) for one of the 5 qualifying secp256k1 twist
+pairs (from Thread 18). Script: `secp256k1_cm_audit/richelot_proxy_search.gp`.
+
+---
+
+### Commits made
+
