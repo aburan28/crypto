@@ -6021,4 +6021,4 @@ would make every `glv_hnp_*.py` script runnable again) or drop the thread. Vendo
 LLL is itself a good self-contained next task.
 
 ### Commits made
-[filled in below]
+0f6f8a8 autolab 2026-07-29: Thread 22 — exhaustive Jacobian realization; 15/15 vs 5/15 for secp256k1
