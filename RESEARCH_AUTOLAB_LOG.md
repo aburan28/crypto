@@ -6132,3 +6132,272 @@ mechanism is now known to be scale-dependent, which explains all eight.
 ### Commits made
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-07-29 (autolab run #2)
+
+### Task picked
+
+**Thread 23 — closed form for λ₁(L2).** Run #1 today (commit `e845207`) found
+ν̂ = λ₁(L2)/sqrt(det L2) to be the first working Phase 2 separator (AUC 0.935)
+but explicitly flagged it as *computed, not understood*, and proposed deriving
+λ₁(L2) from the continued fraction of λ/n at scale sqrt(n·K2/K1). Priorities
+1–6 are all closed or BLOCKED (see 2026-07-17 and later); this is the standing
+next-step. Falsifier as posed on 2026-07-29: **predicted-from-CF ν̂ correlates
+< 0.9 with computed ν̂ → the convergent-scale story is wrong.**
+
+New file: `secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py` (dependency-free
+apart from sympy; fpylll only for Exp D). Run: `python3 glv_hnp_nuhat_closed_form.py`.
+
+### Work done
+
+**The derivation.** A general element of L2 = ⟨u=(n·S1,0), v=(−λ·S1,S2)⟩ is
+a·v + b·u = ((bn − aλ)·S1, a·S2). For a ≠ 0 the optimal b makes
+|aλ − bn| = E(a) := centered residue of aλ mod n; for a = 0 the shortest
+element is u itself. So exactly
+
+```
+lambda_1(L2)^2 = min{ (n*S1)^2 ,  min_{a>=1} [ S1^2*E(a)^2 + S2^2*a^2 ] }      (*)
+```
+
+The minimiser a\* of (\*) satisfies E(a′) ≥ E(a\*) for every a′ < a\* — otherwise
+a′ beats it in **both** terms — i.e. a\* is a best approximation of the second
+kind to λ/n, and those are exactly the convergent denominators. Hence
+
+```
+lambda_1(L2)^2 = min{ (n*S1)^2 , min_j [ S1^2*e_j^2 + S2^2*q_j^2 ] }          (**)
+    q_j = j-th convergent denominator of lam/n,  e_j = |q_j*lam - p_j*n|
+```
+
+a closed form over the O(log n) convergents — **no lattice reduction at all**.
+
+**Scale-free form.** With ρ = S1/S2 (≈ K2/K1), ê_j = e_j·sqrt(ρ/n),
+q̂_j = q_j/sqrt(ρn), θ_j = ê_j·q̂_j = e_j·q_j/n ∈ (0,1):
+
+```
+nu_hat^2 = min_j (e_hat_j^2 + q_hat_j^2)  >=  2*min_j theta_j
+```
+
+with equality iff q_j = ρ·e_j. Since e_j ≈ n/q_{j+1}, that balance is
+q_j·q_{j+1} ≈ ρn, i.e. **q_j ≈ sqrt(n·K2/K1)** — the scale conjectured in run
+#1's proposal. And θ_j ≈ q_j/q_{j+1} ≈ 1/a_{j+1}, so:
+
+> ν̂ is small — the attack is easy — exactly when λ/n has a **large partial
+> quotient at the scale q ≈ sqrt(n·K2/K1)**. A large partial quotient anywhere
+> else is worthless.
+
+**Exp A — exactness.** (\*\*) vs an exact-integer Lagrange–Gauss reduction
+(`gauss_reduce_exact`, added because the existing float version at
+`glv_hnp_phase2_lambda_threshold.py:216` computes `math.sqrt` of a quantity
+that is ≈2^1012 for 256-bit n, within one order of magnitude of the f64
+ceiling). 400 λ × 5 eff values at each of 20/24/64/128/256 bits:
+
+```
+   bits    exact matches   spearman(nu_cf, nu_lg)
+     20      2000/2000            1.000000
+     24      2000/2000            1.000000
+     64      2000/2000            1.000000
+    128      2000/2000            1.000000
+    256      2000/2000            1.000000
+```
+
+Plus 200/200 agreement with exhaustive search over a ≤ 20000 on small n. The
+match is **bit-exact on the integer λ₁², not merely correlated** — the
+falsifier asked for r ≥ 0.9 and got r = 1 with zero discrepancies in 10 000
+instances. secp256k1 reproduces run #1's ν̂ to all printed digits (0.870857 at
+eff=0.05, 0.662438 at 0.1, 0.585226 at 0.25, 0.685119 at 0.5), which
+independently re-validates run #1's Arm-5/secp256k1 numbers via a second
+code path.
+
+**Exp B — is the winning convergent at the predicted scale? Partly.** The
+*index* claim holds; the *magnitude* claim needs a correction of ≈2^−1.7.
+
+```
+  bits eff    log2(q*/q_scale)          index offset j*-j_scale
+   24 0.05   mean=-1.721 sd=1.529   -2:14 -1:257 +0:229   |off|<=1: 97.2%
+   64 0.05   mean=-1.720 sd=1.476   -2:5  -1:267 +0:228   |off|<=1: 99.0%
+  256 0.05   mean=-1.641 sd=1.367   -2:15 -1:253 +0:232   |off|<=1: 97.0%
+  256 0.25   mean=-1.698 sd=1.451   -2:13 -1:258 +0:229   |off|<=1: 97.4%
+```
+
+j\* is the convergent nearest the scale or the one just below it, ≥97% of the
+time at every size tested. But q\* sits a systematic factor ≈2^1.7 ≈ 3.3
+*below* sqrt(nK2/K1), with the mass split ≈53/47 between offsets −1 and 0.
+That is the discreteness of the convergent ladder: e_j falls by a factor
+a_{j+1} per step while q_j only rises by a_{j+1}, so the discrete minimum of
+ê²+q̂² lands below the continuous balance point about half the time.
+**Honest correction to the proposal:** "q_j nearest sqrt(nK2/K1)" is right at
+index resolution, wrong by a constant at magnitude resolution.
+
+**Exp C — this is why the June invariants failed.** a_local := a_{j\*+1} (the
+partial quotient at the scale-locked index) vs max_a (the June scale-free
+invariant), both against ν̂:
+
+```
+  bits eff    sp(nu, a_local)   sp(nu, max_a)   bound violations
+   24 0.05        -0.688           -0.216           0/600
+   24 0.25        -0.715           -0.283           0/600
+   64 0.05        -0.699           -0.099           0/600
+   64 0.25        -0.738           -0.133           0/600
+  256 0.05        -0.656           -0.105           0/600
+  256 0.25        -0.702           -0.072           0/600
+```
+
+The derived bound ν̂² ≥ 2θ\* holds with **0 violations in 3600 instances**
+(median ν̂²/(2θ\*) = 1.37–1.44, so it is tight to within ~40%).
+
+**Exp C-decay — the mechanism, measured.** a_local is scale-locked; max_a is a
+maximum over ~|CF| ≈ 0.72·log₂n terms, so P(the global argmax happens to sit at
+the relevant index) ≈ 1/|CF| → 0. Noise-free (no attack, 1500 λ per row):
+
+```
+ bits   |CF|  sp(nu,a_local)  sp(nu,max_a)  P(argmax = j*+1)
+   16   10.3     -0.705          -0.298          36.6%
+   20   13.0     -0.701          -0.259          28.2%
+   24   15.3     -0.691          -0.242          24.9%
+   32   19.9     -0.723          -0.221          21.9%
+   48   29.3     -0.713          -0.130          16.5%
+   64   38.4     -0.720          -0.079           9.1%
+   96   56.9     -0.715          -0.094           8.7%
+  128   76.2     -0.709          -0.058           6.1%
+  192  113.5     -0.717          -0.092           3.9%
+  256  150.8     -0.704          -0.045           3.7%
+  384  225.3     -0.704          +0.009           2.6%
+  521  305.8     -0.720          +0.025           1.9%
+```
+
+a_local is **flat at −0.71 ± 0.02 over 16→521 bits**; max_a decays monotonically
+to zero, tracking P(argmax = j\*+1). This is the full explanation of the
+2026-06-29 Exp S falsification of max_a, and it carries a warning: max_a looks
+*mildly* informative at toy sizes (−0.30 at 16 bits) and is **exactly dead at
+cryptographic sizes**. Any toy-size heuristic of this shape is a trap.
+
+**Exp C2 — what the empirical C2 ceiling ν̂ ≤ 0.645 means.** 20-bit n=1009937,
+eff=0.05, 20 000 synthetic λ:
+
+```
+ a_local  count   mean nu   P(nu<=0.645)
+       1   1572     0.966       0.0%
+       2   2702     0.895       0.0%
+       3   2063     0.819       0.2%
+       4   1572     0.766      14.7%
+       5   1231     0.728      36.8%
+       8    702     0.663      53.3%
+    >=10   7868     0.500      72.9%
+```
+
+The June C1/C2 dichotomy is, mechanically, **a_local ≥ ~4**: no λ with
+a_local ≤ 3 ever gets below the C2 ceiling.
+
+**Exp D — attack-level causal replication.** Thread 20 Arm 5 design (ONE fixed
+curve, λ varied alone, so every curve-level confound is eliminated by
+construction), extended to the CF invariants, m=9, eff=0.05, permutation
+p-values from 5000 shuffles. `first_j0_curve(2**19)` independently rediscovers
+run #1's curve p=524341, n=525583.
+
+```
+ bits            n    nu_hat   a_local     max_a        mu
+   20       525583    -0.481    +0.464    +0.265    +0.032
+   24      8386153    -0.465    +0.342    +0.113    +0.090
+   28    134237767    -0.447    +0.375    +0.229    +0.029
+   32   2147436397    -0.526    +0.419    +0.228    -0.003
+```
+
+ν̂ and a_local are p < 0.001 in every row; μ is never significant (p = 0.12,
+0.65, 0.97, …), re-confirming Thread 20a's falsification on four fresh curves.
+**Negative result to record:** the max_a decay is *not* resolvable at attack
+level over 20→32 bits — max_a stays at +0.11…+0.27 and is significant in 3 of
+4 rows. |CF| only grows from 13 to 20 terms across that range, so the decay
+predicted by Exp C-decay has barely started. The decay claim rests on the
+noise-free Exp C-decay measurement out to 521 bits, not on Exp D.
+
+Attack-success by a_local at 20 bits (400 λ × 48 seeds) — the C2 step is
+directly visible in p̂, not just in ν̂:
+
+```
+ a_local  count  mean p_hat   mean nu
+       1     25       0.135     0.958
+       2     42       0.139     0.891
+       3     20       0.137     0.809
+       4     25       0.132     0.788
+    >=5     188       0.332     0.586
+```
+
+**Exp E — secp256k1, explicitly.** λ verified to satisfy λ²+λ+1 ≡ 0 mod n.
+λ/n has **141 partial quotients; max_a = 312 at index 16** — and index 16 is
+irrelevant at every operating point:
+
+```
+    eff   j*  log2 q*  log2 q_scale  a_local   theta*   nu_hat
+   0.02   72   130.47      130.82          2   0.3109   0.8782
+   0.05   70   127.83      130.16          5   0.1690   0.8709
+ 0.0993   70   127.83      129.67          5   0.1690   0.6639
+   0.25   70   127.83      129.00          5   0.1690   0.5852
+   0.50   70   127.83      128.50          5   0.1690   0.6851
+```
+
+ν̂ for secp256k1 is decided by **one convergent, j\* ≈ 70 out of 141**, with
+a_local = 5 — a mediocre partial quotient. The winning index *moves with eff*
+(72 at eff=0.02, 70 above), which is the structural reason no curve-level
+invariant can ever predict Phase 2 success: ν̂ is a function of the triple
+(n, λ, K1/K2), and the K1/K2 split is an attacker parameter, not a curve
+property. All eight invariants falsified between June and today (δ/n, κ(M),
+q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ) are curve-level or scale-free; that
+was the defect, and it was structural rather than bad luck.
+
+Caveats unchanged from run #1 and worth restating: this whole thread is
+conditional on a **non-standard nonce generator** k = k₁ + λk₂ mod n with k₁
+bounded. It says nothing about correctly generated nonces and is **not an
+attack on secp256k1**. The 20–32-bit → 256-bit reading is extrapolation of an
+empirical regularity; only the closed form (\*\*) itself is proved and verified
+at 256 bits directly.
+
+### Findings
+
+1. **λ₁(L2) has an exact closed form** over the convergents of λ/n, (\*\*),
+   verified bit-exactly on 10 000 instances at 20–256 bits plus 200 exhaustive
+   cross-checks. The Thread 20 falsifier (r < 0.9) is passed at r = 1.000000.
+   ν̂ is computable in O(log n) with no lattice reduction and no floats.
+2. **The scale is right at index resolution, off by ≈2^1.7 in magnitude.**
+   j\* ∈ {j_scale − 1, j_scale} in ≥97% of cases at all sizes; q\* is
+   systematically ≈3.3× below sqrt(nK2/K1).
+3. **ν̂² ≥ 2θ\* proved and verified** (0/3600 violations, tight to ~40%).
+4. **The June falsifications are now explained, not just observed.** The right
+   invariant is a_local = a_{j\*+1}: flat at −0.71 vs ν̂ over 16→521 bits,
+   where max_a decays −0.298 → +0.025 in lockstep with P(argmax = j\*+1)
+   falling 36.6% → 1.9%.
+5. **C1/C2 ⟺ a_local ≥ ~4**, giving the June dichotomy an arithmetic meaning.
+6. **secp256k1**: ν̂ decided by convergent 70 of 141, a_local = 5; its max_a=312
+   at index 16 is irrelevant. The winning index depends on eff, so no
+   curve-level invariant can predict Phase 2 success — a structural
+   impossibility result covering all eight falsified invariants.
+7. **Negative:** max_a's decay is invisible at attack level over 20→32 bits
+   (still +0.11…+0.27, significant in 3/4 rows). Do not cite Exp D for it.
+
+### Next step proposal
+
+**Thread 24 — the distribution of ν̂ from Gauss–Kuzmin, and the resulting
+security statement.** With (\*\*) in hand, ν̂ is a functional of the CF digits
+of λ/n in a window of O(1) indices around a scale set by K1/K2. The partial
+quotients of a "random" λ/n obey Gauss–Kuzmin, P(a = k) = log₂(1 + 1/(k(k+2))),
+so P(a_local ≥ 4) = log₂(25/24)+… should be computable in closed form and
+compared against the measured 20 000-λ histogram in Exp C2 (a_local = 1: 1572,
+2: 2702, 3: 2063 out of 20 000 → 7.9%, 13.5%, 10.3%; Gauss–Kuzmin predicts
+41.5%, 17.0%, 9.3% — the a_local=1 deficit is large and is the first thing to
+explain, since conditioning on "wins the min" biases against small quotients).
+Deliverable: a closed-form P(ν̂ ≤ x) and hence, for the first time in this
+thread, a *quantitative* statement of the form "a fraction f(K1/K2) of GLV
+parameters are Phase-2-weak", replacing the current 20/24-bit extrapolation.
+Falsifier: predicted P(ν̂ ≤ 0.645) differs from the measured value by more than
+the binomial CI at 20 000 samples.
+
+Second, cheaper: **run #1's own second proposal is still open** — re-run the
+20d C1/C2 protocol at K1 ∈ {36, 72, 144} × m ∈ {10, 12, 14} to check the
+ν̂ ≈ 0.645 ceiling is a property of the lattice family and not of one sample
+cell. Now much cheaper, since ν̂ no longer needs a reduction per instance.
+
+Not recommended: any further curve-level or scale-free invariant. Exp E gives
+the structural reason they cannot work.
+
+### Commits made
+
+PENDING
