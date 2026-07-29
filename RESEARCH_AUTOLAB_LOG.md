@@ -6018,4 +6018,4 @@ of every `s1`-surviving model. `p=43` early-exits in 33s; a full exhaustive
 `(p−1)`-fold reduction), which is the obvious next optimisation.
 
 ### Commits made
-[filled in below]
+`14baa9c` autolab 2026-07-29: Thread 22 — glue realization criterion |t_i-t_j| != 1
