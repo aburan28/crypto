@@ -257,6 +257,77 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8a. Measured results (2026-07-29)
+
+Scripts: `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`,
+`secp256k1_cm_audit/glv_hnp_phase2_lambda_confirm.py`.
+
+### 8a.1 λ/n is *not* a viability parameter — falsified in both directions
+
+An earlier reading of four data points suggested the Phase-2 attack succeeds
+only when λ/n exceeds a threshold in (0.07, 0.34).  A controlled cohort study
+falsifies this.  Holding the bias efficiency `eff = K1·K2/n` pinned at ≈0.157
+and varying only λ, with 12 seeds and 12/12 required for success:
+
+| curve      | λ/n    | λ/n-rule predicts | measured | recovery tally (wins/12)          |
+|------------|--------|-------------------|----------|-----------------------------------|
+| n=2551     | 0.0196 | FAILURE           | 12/12 at m=8 | m=4:3 5:6 6:9 7:11 8:12       |
+| n=2647     | 0.0699 | FAILURE           | never    | peaks at 3/12 (m=7), 0/12 at m=14 |
+| n=2251     | 0.3145 | SUCCESS           | never    | peaks at 4/12 (m=10)              |
+| n=2293     | 0.4313 | SUCCESS           | 12/12 at m=8 | m=5:3 6:6 7:10 8:12           |
+
+n=2551 succeeds at λ/n = 0.0196 — a factor 3.6 *below* the lower end of the
+claimed threshold — while n=2251 fails at λ/n = 0.3145, comfortably inside the
+claimed "safe" band.  Across a 16-curve 12-bit cohort and a 13-curve 20-bit
+cohort at pinned `eff`, the success and failure ranges of λ/n overlap almost
+completely (12-bit: success [0.020, 0.431] vs failure [0.035, 0.315]).
+
+Two further points make the original claim untenable as *stated*:
+
+1. The two roots of `x²+x+1 ≡ 0 (mod n)` are λ and `n−1−λ`, and the lattice
+   entry `−λ·S_K1` is reducible modulo the row `n·S_K1`.  The lattice therefore
+   only sees `λ_eff = min(λ, n−λ) ≤ n/2`.  A threshold stated on λ/n ∈ (0,1) is
+   not well defined; the "independent" successes at λ/n = 0.66 and λ/n = 0.34
+   are the same value of λ_eff/n.
+2. Fixing one curve (λ/n = 0.1601, constant) and sweeping only K1 flips the
+   outcome from 3/3 at m=4 to no recovery at m≤12 (§8a.2).  λ/n cannot be the
+   controlling variable if recovery moves while λ/n is pinned.
+
+Four further candidate predictors were tested and also fail to separate the
+success and failure groups: `λ_eff/n`; `μ/‖v‖` where μ is the exact λ₁ of the
+scaled 2-D sublattice `{((c·λ mod ±n)·S_K1, c·S_K2)}` (Lagrange-reduced) and
+‖v‖ the planted-vector norm; `r_min/K1` with `r_min = min_{0<c<K2}|c·λ mod ±n|`;
+and the ambiguity margin `min_c max(|r|/K1, c/K2)`.  All overlap.  This is
+consistent with the 2026-06-27/06-28 result that the Phase-2 K1-threshold is a
+continuous, curve-specific quantity with no simple algebraic separator, and
+extends that negative result from 19-bit to the 12-bit and 20-bit regimes.
+
+### 8a.2 Answer to the open question in §8: LLL needs ≈2× the information-theoretic minimum
+
+Single curve `p=524341, b=22, n=525583, λ=84143` (λ/n = 0.1601 on every row),
+K2 = 725, K1 swept.  `m_thresh = ln(n)/ln(1/eff)` is the counting bound;
+`m*` is the smallest m with 3/3 recovery.
+
+| K1  | eff     | m_thresh | m*   | m*/m_thresh |
+|-----|---------|----------|------|-------------|
+| 4   | 0.00552 | 2.53     | 4    | 1.58        |
+| 8   | 0.01104 | 2.92     | 4    | 1.37        |
+| 16  | 0.02207 | 3.45     | 6    | 1.74        |
+| 36  | 0.04966 | 4.39     | 8    | 1.82        |
+| 72  | 0.09932 | 5.70     | 12   | 2.10        |
+| 144 | 0.19864 | 8.15     | >12  | >1.47       |
+| 288 | 0.39727 | 14.27    | >12  | >0.84       |
+
+So Phase 2 does **not** achieve the information-theoretic bound: it needs
+roughly `1.4–2.1 × m_thresh` signatures, and the multiplier grows as the bias
+weakens.  The mechanism is a race — the lattice dimension is `2m+2`, so demanding
+more signatures to compensate for a weaker bias simultaneously degrades LLL's
+approximation factor.  Past `eff ≈ 0.2` the two effects cancel and plain LLL
+stops recovering at any m in range.  Note this is a statement about the
+*attack*, not about the curve: `eff` is set by how much nonce bias the
+implementation leaks, so it is an implementation property, not a curve property.
+No curve-intrinsic invariant found so far predicts viability.
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on

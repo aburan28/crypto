@@ -5874,3 +5874,133 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study), the continuation proposed by the 2026-07-26 run of
+Thread 5 (GLV-HNP Phase 2). Threads 1, 4, 6 CLOSED; Thread 2 CLOSED 2026-07-26 with a
+negative result (F_p Rosenhain blocked by the cubic-residue obstruction) and a
+continuation (Thread 22, Richelot search) that is exponential in the naive approach;
+Thread 3 resolved 2026-07-21 (5/15 pairs). Thread 20 was the cheapest falsifiable item.
+
+Motivation to prioritise it: the 2026-07-26 entry proposed *bisecting* a λ/n threshold,
+but the 2026-06-27/06-28 sessions (log L3355–L3520) had already FALSIFIED λ/n as a
+predictor of the Phase-2 K1-threshold. Before spending a session bisecting a threshold,
+test whether it exists.
+
+### Work done
+- Installed `pari-gp`, `fpylll` 0.6.4, `cysignals`, `sympy` (not in this container by default).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (~480 lines): controlled
+  cohort study. Reuses the exact Phase-2 lattice of `glv_hnp_phase2_20bit.py`
+  (dim 2m+2, scales S_K1=n//K1, S_D=1, S_K2=n//K2, S_KANNAN=n). Adds six candidate
+  predictors and an automatic success/failure separation test.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_confirm.py`: 12-seed re-test of the
+  decisive curves so the falsification does not rest on 3-seed luck.
+- Ran four experiments: historical replication (3 curves), 12-bit cohort (16 curves),
+  20-bit cohort (13 curves, 6 with λ/n<0.10), fixed-curve K1 sweep (7 settings).
+- Updated `RESEARCH_GLV_HNP_PHASE2.md` with a new §8a (results + answer to a §8 open question).
+- `cargo test --test curve_audit` → 5/5 pass (5.54s). ✓
+
+### Findings
+
+**1. The λ/n threshold does not exist. Falsified in both directions (12 seeds, 12/12 required).**
+
+All rows at pinned eff = K1·K2/n ≈ 0.157:
+
+```
+curve     λ/n      λ/n-rule predicts   measured        tally (wins/12)
+n=2551    0.0196   FAILURE             12/12 at m=8    m=4:3 5:6 6:9 7:11 8:12
+n=2647    0.0699   FAILURE             never           peak 3/12 (m=7), 0/12 at m=14
+n=2251    0.3145   SUCCESS             never           peak 4/12 (m=10)
+n=2293    0.4313   SUCCESS             12/12 at m=8    m=5:3 6:6 7:10 8:12
+```
+n=2551 succeeds at λ/n = 0.0196 — 3.6× *below* the claimed (0.07, 0.34) band.
+n=2251 fails at λ/n = 0.3145 — inside the claimed "safe" band. 2/4 decisive cases
+contradict the claim.
+
+**2. Cohort overlap (3 seeds, 3/3 required, eff pinned ≈0.157).**
+```
+12-bit cohort (16 curves):  7 success / 9 failure
+  λ/n success range [0.0196, 0.4313]   failure range [0.0349, 0.3145]   OVERLAP
+20-bit cohort (13 curves):  2 success / 11 failure
+  λ/n success range [0.0159, 0.2523]   failure range [0.0200, 0.3586]   OVERLAP
+pooled (32 curves): every one of the six predictors overlaps.
+```
+
+**3. Why the original claim looked convincing — small-sample artefact.**
+On the 3 replicated historical points alone, λ/n *does* separate cleanly
+(success [0.533, 0.660] vs failure [0.070], gap +0.463). So does λ_eff/n, and so does
+eff (gap +0.0007, obviously spurious). Three points admit many clean separators;
+the 16- and 13-curve cohorts destroy all of them.
+
+**4. The claim is also ill-posed as stated.**
+λ and n−1−λ are both roots of x²+x+1 mod n, and the lattice entry −λ·S_K1 reduces
+modulo the row n·S_K1, so the lattice only ever sees λ_eff = min(λ, n−λ) ≤ n/2.
+A threshold on λ/n ∈ (0,1) is not well defined: the two "independent" successes at
+λ/n = 0.66 and λ/n = 0.34 are the *same* λ_eff/n = 0.34 — the 4-point dataset had
+3 effective points, not 4.
+
+**5. Four alternative predictors also falsified (honest negative result).**
+Tested alongside λ/n and λ_eff/n:
+- `μ/‖v‖`: μ = exact λ₁ of the scaled 2-D sublattice {((c·λ mod ±n)·S_K1, c·S_K2)},
+  computed by Lagrange reduction; ‖v‖ = measured planted-vector norm.
+  Pooled: success [0.340, 0.678] vs failure [0.323, 0.824]. OVERLAP.
+- `r_min/K1`, r_min = min_{0<c<K2}|c·λ mod ±n|: success [0.375, 6.50] vs
+  failure [0.807, 6.13]. OVERLAP.
+- ambiguity margin min_c max(|r|/K1, c/K2): OVERLAP.
+- eff (pinned by construction): OVERLAP.
+Consistent with, and extending, the 2026-06-28 result (`79f352d`) that the Phase-2
+threshold is a continuous curve-specific quantity with no simple algebraic separator —
+now confirmed at 12-bit and 20-bit as well as the original 19-bit.
+
+**6. Positive result — Exp 4 answers an open question in RESEARCH_GLV_HNP_PHASE2.md §8.**
+Fixed curve p=524341, b=22, n=525583, λ=84143 (λ/n = 0.1601 constant on every row),
+K2=725, K1 swept. m_thresh = ln(n)/ln(1/eff) is the counting bound; m* = smallest m
+with 3/3 recovery:
+```
+ K1   eff      m_thresh  m*    m*/m_thresh
+   4  0.00552    2.53     4     1.58
+   8  0.01104    2.92     4     1.37
+  16  0.02207    3.45     6     1.74
+  36  0.04966    4.39     8     1.82
+  72  0.09932    5.70    12     2.10
+ 144  0.19864    8.15   >12    >1.47
+ 288  0.39727   14.27   >12    >0.84
+```
+Answer to §8: Phase 2 does NOT reach the information-theoretic bound. It needs
+1.4–2.1 × m_thresh signatures, and the multiplier grows as the bias weakens. Mechanism:
+the lattice dimension is 2m+2, so buying more signatures to offset a weaker bias
+simultaneously degrades LLL's approximation factor. Past eff ≈ 0.2 the two effects
+cancel and plain LLL stops recovering at any m ≤ 12.
+
+This row set is also the cleanest single falsifier of the λ/n claim: λ/n is *identical*
+on all seven rows while the outcome flips from 3/3 at m=4 to never.
+
+**7. Consequence for secp256k1.** The 2026-07-26 entry inferred "secp256k1 has
+λ/n ≈ 0.44, which is in the safe regime, so Phase 2 would work on secp256k1 if the
+256-bit lattice does not degenerate." That inference is void — λ/n carries no
+information about viability. What the data do say is that viability is governed by
+`eff = K1·K2/n`, i.e. by how much nonce bias the *implementation* leaks, not by any
+curve invariant. secp256k1 is neither more nor less exposed than any other j=0 CM
+curve at equal leakage. This does not affect the main theorem in
+PAPER_STRUCTURAL_COMPLETENESS.md (no isogeny-graph attack beats ρ); the λ/n claim
+never propagated beyond the log — `grep` confirms it appears in no research note,
+no .tex source, and no paper file.
+
+### Next step proposal
+**Thread 23 (eff-boundary law, concrete and cheap):** Exp 4 gives one curve's
+m*/m_thresh curve. Repeat the K1 sweep on ~10 curves at 20-bit and ~10 at 24-bit to
+test whether the ceiling `eff_max ≈ 0.2` for plain LLL is universal or curve-specific,
+and whether it moves with n. If `eff_max` is stable, that is a clean, quotable,
+curve-independent statement of the Phase-2 attack's reach, and it is the honest
+replacement for the retracted λ/n claim. Script: `glv_hnp_phase2_eff_ceiling.py`.
+Secondary: check whether BKZ(β=20,40) raises eff_max — the 2026-07-26 run found BKZ
+does not rescue n=2647, which under the corrected reading was an eff/LLL-quality
+failure, so the BKZ question should be re-asked in terms of eff rather than λ.
+
+**Thread 22 (Richelot search)** remains open but is the expensive option; recommend
+Thread 23 first.
+
+### Commits made
+(recorded in the follow-up commit below)
