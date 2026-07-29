@@ -5874,3 +5874,117 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+---
+
+## 2026-07-29 — Thread 22: the sextic-coset rule for Howe covers (Thread 2 verdict revised)
+
+**Thread picked**: Thread 22 (explicit Richelot/Howe covers for the 5 qualifying
+sextic-twist pairs), opened on 2026-07-26 as the continuation of Thread 2 after the
+F_p Rosenhain route was found blocked. Priority-2 continuation of the highest-priority
+open thread.
+
+Goal: find the explicit genus-2 cover C with Jac(C) ~ E_i × E_j for each of the 5 pairs
+that pass Howe's H1+H2+H3, and determine whether Thread 2's "BLOCKED" verdict for
+secp256k1 is a real obstruction or an artifact of the cover *presentation*.
+
+### Work done
+
+Three new PARI/GP scripts in `secp256k1_cm_audit/`:
+
+- **`thread22_richelot_all_pairs.gp`** — tests the naive cover
+  y² = (x³+c_i)(x³+c_j), c_k = 7h^k, against the target char poly
+  (T²−t_iT+p)(T²−t_jT+p) for all 5 pairs over 6 proxy primes.
+- **`thread22_cover_search.gp`** — brute-force enumeration of the factored family
+  (x³+r₁)(x³+r₂) and the full sextic family x⁶+ax³+b, searching for *any* curve with
+  the correct char poly over non-cubic-split primes.
+- **`thread22_coset_rule.gp`** — the payoff script: for each pair, enumerates every
+  genuine cover and reports which 6th-power cosets of F_p* the constant term b occupies.
+
+`cargo test --test curve_audit` → 5/5 pass (9.10s). ✓
+
+### Findings
+
+**1. The naive cover fails almost everywhere — and p'=19 was a degenerate witness.**
+
+```
+p'    cubic-split   (0,1)  (0,3)  (0,4)  (1,4)  (3,4)   matched
+19        YES         1      1      0      1      1       4/5
+31        no          0      0      0      0      0       0/5
+43        no          0      0      0      0      0       0/5
+67        no          0      0      0      1      0       1/5
+79        no          0      0      0      1      0       1/5
+103       no          0      0      0      0      0       0/5
+```
+
+p'=19 is the only cubic-split proxy and the only one where the naive cover broadly
+works. But 19 is *degenerate*: 9 | (p−1) forces t₀=t₂=t₄=8, i.e. the three cubic twists
+collapse to one isomorphism class. Thread 2's positive result over p'=19 was therefore
+an artifact of that collapse, not evidence that the construction generalizes. Pair (0,4)
+fails even there, because H1 (distinct traces) fails.
+
+**2. Genuine covers DO exist over non-cubic-split primes.** Exhaustive search over F_31
+for pair (0,3) (target T⁴−59T²+961) found **40 factored pairs and 20 sextic (a,b)**, none
+of them the naive (7,24). Over F_43, 28 sextic hits. So the Howe gluing is realizable —
+the naive *presentation* of it is what fails.
+
+**3. The governing rule is a 6th-power coset condition on b, depending only on the
+pair type and not on the prime.** Writing e(z) for the discrete log of z base a
+primitive root, reduced mod 6:
+
+```
+pair          p=19    p=31      p=43      p=67     naive-b coset (31/43/67)
+(0,1) novel   [3]     [1,5]     [1,5]     [1]        3 / 3 / 5
+(0,3) QT      [3]     [3]       [3]       [3]        5 / 1 / 1
+(0,4) novel   [0]     [2,4]     []        []         0 / 0 / 2
+(1,4) QT      [3]     [3]       [3]       [3]        1 / 5 / 3
+(3,4) novel   [3]     [1,5]     [1,5]     [5]        3 / 3 / 5
+```
+
+- **QT pairs (0,3),(1,4): b lies in coset 3 — always, at every prime tested.** Coset 3
+  means b is a cube and a non-square in F_p*.
+- (0,1),(3,4): b-cosets ⊆ {1,5}, never 3.
+- (0,4): {2,4} at p=31, but **empty at p=43 and p=67**.
+
+**4. Thread 2's cubic-residue obstruction is now derived, not just observed.** The naive
+cover has b = c_i·c_j = 49·h^(i+j). For pair (0,3), h³=−1 gives b = −49, so
+
+  e(−49) = e(−1) + 2·e(7) ≡ 3 + 2·e(7) (mod 6),
+
+using e(−1) = 3 (which holds whenever (p−1)/6 is odd — true for 19, 31, 43, 67). The
+rule from finding 3 demands e(b) = 3, hence 2·e(7) ≡ 0 (mod 6), i.e. e(7) ∈ {0,3}, i.e.
+**7 is a cube mod p**. Since −1 is always a cube, that is equivalent to (−7)^((p−1)/3) ≡ 1
+— *exactly* the condition Thread 2 found empirically. The obstruction was never about
+the Howe gluing; it was the naive b landing in the wrong coset.
+
+**5. Pair (0,4) carries a genuinely separate obstruction.** Zero sextic-family covers
+exist over F_43 and F_67, despite H1+H2+H3 all passing. So passing Howe's conditions is
+necessary but not sufficient for a cover to exist *within the sextic family*.
+
+### Revision to the Thread 2 verdict
+
+Thread 2 was closed as "F_p Rosenhain inapplicable / BLOCKED for secp256k1". That verdict
+should be narrowed: **the naive cover is blocked, the Howe gluing is not.** For 4 of the 5
+qualifying pairs, genuine covers exist over non-cubic-split primes, and secp256k1's prime
+is non-cubic-split. What remains genuinely unknown is the *explicit* (a,b) over the
+256-bit prime, since brute-force search is infeasible there and `hyperellcharpoly` does
+not run at that size.
+
+**Security implication is unchanged.** Kani's bound gives genus-2 HCDLP cost ≥ Pollard ρ
+on the underlying elliptic curve, so even a fully explicit cover yields no ECDLP speedup
+for secp256k1. This revision affects the structural story, not the security conclusion.
+
+### Next step proposal
+
+**Thread 22 continuation (highest value):** the coset rule reduces cover-finding from a
+2-parameter search (a,b) to a 1-parameter one — pick any b in the pair's mandated coset
+((p−1)/6 choices), then solve for a. Empirically each valid b admits exactly 4 values of
+a, occurring as {±a₁, ±a₂} (verified for b=2 over F_43: a ∈ {1,5,38,42}), and the hit
+count for non-degenerate primes is a clean multiple of (p−1)/6. That regularity strongly
+suggests a closed form for a in terms of t_i, t_j and b. Deriving it would give the
+explicit secp256k1 cover directly, with no search. Concrete next step: fit a against
+(t_i, t_j, b, p) over p ∈ {31,43,67,79,103} and test any candidate identity at p=127.
+
+**Secondary:** determine why pair (0,4) admits no sextic cover over F_43/F_67 — likely a
+Galois-module condition on the 2-torsion that H2 does not capture. If so it is a
+sharpening of Howe's criterion worth stating precisely.
