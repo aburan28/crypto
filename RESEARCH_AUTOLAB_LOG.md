@@ -5959,4 +5959,4 @@ succeed. No threshold exists in this range.**
    62; practical threshold likely much lower with BKZ. This is the key open question.
 
 ### Commits made
-(recorded below after push)
+04af386 autolab 2026-07-29: Thread 20 — λ/n threshold study; no threshold found; 2026-07-26 result was K1/eff artifact
