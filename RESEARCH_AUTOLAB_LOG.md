@@ -5979,9 +5979,11 @@ for prime p every such t occurs, by Deuring):
 | 19 | 878                                   | 136                | 136   | 0          |
 | 31 | 1 834                                 | 253                | 253   | 0          |
 | 37 | 2 394                                 | 300                | 300   | 0          |
-| 43 | PENDING                               | 351                | —     | —          |
+| 43 | 2 998                                 | 351                | 351   | 0          |
 
-**849/849 pairs confirmed so far, zero violations in either direction.**
+**1 200/1 200 pairs, zero violations in either direction.**
+(`--all-pairs` cost scales as ~p⁷: 1.0s at p=19, 17.3s at p=31, 55.2s at p=37,
+143.4s at p=43 on 4 cores. p=61 would be ~40 min — feasible but not free.)
 
 **4. Independent verification (PARI).**
 
@@ -6043,3 +6045,4 @@ classes do contain Jacobians. The protection is entirely B5's DLP-cost argument.
 
 ### Commits made
 49d36fc autolab 2026-07-29: Thread 22 — exhaustive genus-2 census; realisability criterion |t_i-t_j|>=2
+8c68ed1 autolab 2026-07-29: record commit hash 49d36fc in log
