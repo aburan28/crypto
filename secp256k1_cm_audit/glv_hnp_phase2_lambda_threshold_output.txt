@@ -1,0 +1,135 @@
+==============================================================================
+Thread 20: is the GLV-HNP viability threshold really lambda/n?
+==============================================================================
+
+------------------------------------------------------------------------------
+Part 0: lam vs lam-n  --  do they give the same attack?
+------------------------------------------------------------------------------
+  failure curve from 2026-07-26: p=2677 n=2647 lam=185
+    eigenvalues of x^2+x+1 mod n: (185, 2461)
+    lam/n     = 0.0699   (quantity used by the prior run)
+    rho       = 0.0699   (centered, basis-invariant)
+    rho(lam_1)= 0.0699, rho(lam_2)= 0.0703  -> equal, as lam_1+lam_2=n-1
+    LLL(basis with lam) == LLL(basis with lam-n)? True
+    => the attack cannot depend on lam/n, only on rho. O1 confirmed.
+
+------------------------------------------------------------------------------
+Part 1: reproduce 2026-07-26 baseline, recomputed in rho
+------------------------------------------------------------------------------
+  8-bit/199  p=211 n=199(8b) lam=106 rho=0.467 K1=2 K2=15 eff=0.1508 m_thresh~3.0 [LLL]
+    m=3   1/3  ||v||/GH= 2.095  ||b1||/||v||= 0.596  d_req=1.0452 d_LLL=0.9745
+    m=4   3/3  ||v||/GH= 1.656  ||b1||/||v||= 0.638  d_req=1.0238 d_LLL=0.9785
+    m=5   3/3  ||v||/GH= 1.422  ||b1||/||v||= 0.602  d_req=1.0146 d_LLL=0.9723
+    m=6   3/3  ||v||/GH= 1.335  ||b1||/||v||= 0.545  d_req=1.0135 d_LLL=0.9703
+    m=7   3/3  ||v||/GH= 1.274  ||b1||/||v||= 0.500  d_req=1.0131 d_LLL=0.9701
+    m=8   3/3  ||v||/GH= 1.209  ||b1||/||v||= 0.473  d_req=1.0120 d_LLL=0.9707
+    m=9   3/3  ||v||/GH= 1.122  ||b1||/||v||= 0.464  d_req=1.0097 d_LLL=0.9716
+    m=10  3/3  ||v||/GH= 1.122  ||b1||/||v||= 0.428  d_req=1.0110 d_LLL=0.9727
+    m=11  3/3  ||v||/GH= 1.110  ||b1||/||v||= 0.405  d_req=1.0114 d_LLL=0.9739
+    m=12  3/3  ||v||/GH= 1.071  ||b1||/||v||= 0.394  d_req=1.0107 d_LLL=0.9750
+    -> first 3/3 at m=4
+  12-bit/2557  p=2557 n=2659(12b) lam=1755 rho=0.340 K1=8 K2=52 eff=0.1564 m_thresh~5.0 [LLL]
+    m=3   0/3  ||v||/GH= 3.306  ||b1||/||v||= 0.396  d_req=1.1060 d_LLL=0.9843
+    m=4   0/3  ||v||/GH= 2.603  ||b1||/||v||= 0.448  d_req=1.0703 d_LLL=0.9870
+    m=5   1/3  ||v||/GH= 2.044  ||b1||/||v||= 0.533  d_req=1.0450 d_LLL=0.9905
+    m=6   1/3  ||v||/GH= 1.756  ||b1||/||v||= 0.510  d_req=1.0330 d_LLL=0.9837
+    m=7   3/3  ||v||/GH= 1.703  ||b1||/||v||= 0.455  d_req=1.0309 d_LLL=0.9804
+    m=8   3/3  ||v||/GH= 1.555  ||b1||/||v||= 0.434  d_req=1.0259 d_LLL=0.9789
+    m=9   3/3  ||v||/GH= 1.486  ||b1||/||v||= 0.404  d_req=1.0239 d_LLL=0.9783
+    m=10  3/3  ||v||/GH= 1.433  ||b1||/||v||= 0.381  d_req=1.0223 d_LLL=0.9783
+    m=11  3/3  ||v||/GH= 1.381  ||b1||/||v||= 0.365  d_req=1.0207 d_LLL=0.9786
+    m=12  3/3  ||v||/GH= 1.348  ||b1||/||v||= 0.347  d_req=1.0197 d_LLL=0.9790
+    -> first 3/3 at m=7
+  12-bit/2677  p=2677 n=2647(12b) lam=185 rho=0.070 K1=8 K2=52 eff=0.1572 m_thresh~5.0 [LLL]
+    m=3   0/3  ||v||/GH= 3.312  ||b1||/||v||= 0.367  d_req=1.1063 d_LLL=0.9747
+    m=4   0/3  ||v||/GH= 2.605  ||b1||/||v||= 0.407  d_req=1.0704 d_LLL=0.9780
+    m=5   1/3  ||v||/GH= 2.047  ||b1||/||v||= 0.515  d_req=1.0451 d_LLL=0.9876
+    m=6   1/3  ||v||/GH= 1.759  ||b1||/||v||= 0.514  d_req=1.0331 d_LLL=0.9843
+    m=7   1/3  ||v||/GH= 1.705  ||b1||/||v||= 0.458  d_req=1.0310 d_LLL=0.9809
+    m=8   0/3  ||v||/GH= 1.558  ||b1||/||v||= 0.437  d_req=1.0260 d_LLL=0.9794
+    m=9   0/3  ||v||/GH= 1.488  ||b1||/||v||= 0.407  d_req=1.0239 d_LLL=0.9788
+    m=10  0/3  ||v||/GH= 1.436  ||b1||/||v||= 0.384  d_req=1.0223 d_LLL=0.9787
+    m=11  0/3  ||v||/GH= 1.384  ||b1||/||v||= 0.368  d_req=1.0208 d_LLL=0.9790
+    m=12  0/3  ||v||/GH= 1.350  ||b1||/||v||= 0.350  d_req=1.0198 d_LLL=0.9794
+    -> never 3/3
+
+  prior run's table, corrected:
+  curve            lam/n     rho   K1  first 3/3
+  8-bit/199        0.533   0.467    2          4
+  12-bit/2557      0.660   0.340    8          7
+  12-bit/2677      0.070   0.070    8      never
+
+------------------------------------------------------------------------------
+Part 2: FALSIFIER -- failure curve p=2677 (rho=0.070 pinned), sweep K1
+------------------------------------------------------------------------------
+  H_lambda predicts: no K1 works.   H_geo predicts: small K1 works.
+
+  K1=2   eff=0.0393  first 3/3: m=5       at m=5: ||v||/GH=1.093 ||b1||/||v||=0.562
+  K1=3   eff=0.0589  first 3/3: m=6       at m=6: ||v||/GH=1.197 ||b1||/||v||=0.486
+  K1=4   eff=0.0786  first 3/3: m=6       at m=6: ||v||/GH=1.271 ||b1||/||v||=0.529
+  K1=6   eff=0.1179  first 3/3: never   
+  K1=8   eff=0.1572  first 3/3: never   
+  K1=12  eff=0.2357  first 3/3: never   
+  K1=16  eff=0.3143  first 3/3: never   
+
+  K1 values that recover d at rho=0.07: [2, 3, 4]
+
+------------------------------------------------------------------------------
+Part 3: REVERSE CONTROL -- high-rho curve, degrade geometry via large K1
+------------------------------------------------------------------------------
+  If rho drove viability, 12-bit/2557 (rho=0.34) should keep working.
+
+  K1=8    eff=0.1564  first 3/3: m=7
+  K1=16   eff=0.3129  first 3/3: never
+  K1=32   eff=0.6258  first 3/3: never
+  K1=64   eff=1.2516  first 3/3: m=3
+  K1=128  eff=2.5032  first 3/3: m=3
+
+------------------------------------------------------------------------------
+Part 4: curve pool -- does rho predict anything once eff is fixed?
+------------------------------------------------------------------------------
+  pool: 9 curves, 11-13 bit, rho spanning [0.056, 0.404]
+
+        p       n     rho   K1     eff  first3/3  ||v||/GH
+     2251    2179   0.056    2  0.0431         3     1.782
+     2053    2137   0.094    2  0.0440         4     1.251
+     2137    2053   0.096    2  0.0448         4     1.274
+     2089    2143   0.163    2  0.0439         4     1.250
+     2293    2389   0.288    2  0.0410         4     1.256
+     2203    2281   0.291    2  0.0421         3     1.807
+     2179    2251   0.315    2  0.0426         3     1.819
+     2143    2089   0.395    2  0.0440         4     1.263
+     2089    1999   0.404    2  0.0450         3     1.620
+
+==============================================================================
+SUMMARY
+==============================================================================
+
+  Part 0: LLL(lam) == LLL(lam-n): True  -> lam/n is not a basis-invariant quantity; rho is.
+
+  Part 2 (rho pinned at 0.070, only K1 varies):
+    K1=2   eff=0.0393 -> m=5
+    K1=3   eff=0.0589 -> m=6
+    K1=4   eff=0.0786 -> m=6
+    K1=6   eff=0.1179 -> never
+    K1=8   eff=0.1572 -> never
+    K1=12  eff=0.2357 -> never
+    K1=16  eff=0.3143 -> never
+    VERDICT: H_lambda FALSIFIED. The rho=0.07 curve is attackable
+             at K1 in [2, 3, 4]; rho never changed.
+
+  Part 3 (rho pinned at 0.340, only K1 varies):
+    K1=8    eff=0.1564 -> m=7
+    K1=16   eff=0.3129 -> never
+    K1=32   eff=0.6258 -> never
+    K1=64   eff=1.2516 -> m=3
+    K1=128  eff=2.5032 -> m=3
+    VERDICT: high-rho curve FAILS at K1 in [16, 32] -- large rho is
+             not sufficient for viability.
+
+  Part 4 (eff held ~0.05, rho varies over the pool):
+    recovered: 9/9 curves
+      rho range among successes: [0.056, 0.404]
+      no failures -> rho does not gate viability at fixed eff.
+
+Done.

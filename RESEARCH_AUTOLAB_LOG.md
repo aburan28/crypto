@@ -5874,3 +5874,167 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Thread 20 (lambda/n threshold study)** — the top next-step proposed by the
+2026-07-26 run #1 (log line 5779). All six original priority threads are
+CLOSED/BLOCKED/DEAD END; Thread 20 was the designated continuation of Thread 5,
+which had made measurable progress three days earlier. Goal as stated there:
+"bisect the lambda/n threshold between 0.07 and 0.34."
+
+The bisection was not run, because the parameter it bisects turns out not to be
+well defined. What follows is a correction to the 2026-07-26 conclusion.
+
+### Work done
+
+- New `secp256k1_cm_audit/glv_hnp_phase2_common.py` — shared machinery extracted
+  so the experiment scripts import rather than duplicate (j=0 EC arithmetic,
+  Eisenstein CM curve search, GLV eigenvalues, biased-nonce signatures, the
+  column-scaled lattice, rank-2 Gauss reduction, instance runner).
+- New `glv_hnp_phase2_lambda_threshold.py` — falsification experiment.
+- New `glv_hnp_phase2_spurious_predictor.py` — mechanism hunt over 267 points.
+- New `glv_hnp_phase2_matched_eff.py` — 24-seed re-test at matched eff.
+- New `glv_hnp_phase2_verify_soundness.py` — audit of the verifier itself.
+- `cargo test --test curve_audit` → 5/5 pass (6.30s). ✓
+- Installed pari-gp 2.15.4, fpylll, cysignals, sympy (fresh container).
+
+**Methodology change, applied throughout.** Prior Phase 2 scripts scored a
+recovery by comparing the candidate against `d_secret` (`glv_hnp_phase2_20bit.py`
+`recover_d`, line ~240), which cannot distinguish recovery from coincidence and
+is not something an attacker could run. All scripts here use an oracle-free
+`verify_d`: a candidate is accepted only if *every* signature's implied nonce
+`A + B*d` admits a GLV decomposition inside the declared `(K1,K2)` box.
+Audited in part 4 below.
+
+### Findings
+
+**1. `lambda/n` is not a basis invariant, so it cannot gate anything.**
+
+Modular row `i` carries `n*S_K1` in column `i` and is zero elsewhere; GLV row
+`m+1+i` carries `-lam*S_K1` in the same column. Replacing `lam` by `lam-n` is
+therefore a single integer row operation — it generates the *same lattice*.
+Verified directly: `LLL(basis with lam) == LLL(basis with lam-n)` → `True`.
+
+The invariant is the centered ratio `rho = min(lam, n-lam)/n ∈ (0, 1/2]`.
+Recomputing the 2026-07-26 table (log line 5771):
+
+| curve | lam/n (as reported) | rho (correct) | first 3/3 |
+|-------|--------------------|---------------|-----------|
+| 8-bit/199 | 0.533 | **0.467** | m=4 |
+| 12-bit/2557 | 0.660 | **0.340** | m=7 |
+| 20-bit/523969 | 0.340 | 0.340 | m=9 |
+| 12-bit/2677 | 0.070 | 0.070 | never |
+
+Also: `rho` is not a free parameter. The two GLV eigenvalues satisfy
+`lam_1 + lam_2 = n-1`, so `centered(lam_1) = centered(lam_2) ± 1` — verified
+(0.0699 vs 0.0703 for n=2647). `rho` is an invariant of `n`, not a choice.
+
+**2. The "structural" failure at rho=0.07 is not structural — falsified.**
+
+Holding p=2677 fixed (so `rho` is pinned at 0.070) and varying only `K1`:
+
+```
+K1=2   eff=0.0393 -> 3/3 at m=5      K1=8   eff=0.1572 -> never
+K1=3   eff=0.0589 -> 3/3 at m=6      K1=12  eff=0.2357 -> never
+K1=4   eff=0.0786 -> 3/3 at m=6      K1=16  eff=0.3143 -> never
+K1=6   eff=0.1179 -> never
+```
+
+The curve the 2026-07-26 run called structurally unattackable is attacked at
+K1 ∈ {2,3,4} without `rho` moving at all. Reverse control: the high-`rho` curve
+p=2557 (`rho`=0.340) **fails** at K1=16 (eff=0.31) and K1=32 (eff=0.63). Large
+`rho` is not sufficient either.
+
+**3. `eff = K1*K2/n` — the ordinary HNP bias budget — is the dominant driver.**
+
+Over 267 `(config,m)` points clearing the information threshold:
+
+```
+eff < 0.05        96.9%  (407/420)
+0.05 <= eff <0.10 85.2%  ( 69/ 81)
+0.10 <= eff <0.20 54.2%  ( 83/153)
+0.20 <= eff <0.40 31.0%  ( 40/129)
+0.40 <= eff <1.00  0.0%  (  0/ 18)
+```
+
+At matched eff≈0.045, **9/9 pool curves recover with `rho` spanning
+[0.056, 0.404]** — no failures. At that bias level `rho` gates nothing.
+
+**4. A real curve effect does survive at marginal eff — but `rho` is not the
+best correlate, and the mechanism is open.**
+
+The prior run's two curves sit at eff≈0.157, inside the ~54% band where 3 seeds
+separate almost nothing. Re-run with **24 seeds**, pooled over m=5..12:
+
+```
+p=2557 (rho=0.340): 141/192 = 73.4%  95% CI [66.8%, 79.2%]
+p=2677 (rho=0.070):  13/192 =  6.8%  95% CI [ 4.0%, 11.2%]     CIs disjoint
+```
+
+So the gap is real, not a sampling artifact — the prior run saw something,
+it just mis-parameterized it. Across 11 curves at matched eff≈0.157:
+
+```
+corr(rho, success rate)    = +0.759
+corr(log mu, success rate) = -0.828      <- stronger
+```
+
+where `mu = lambda_1(L2)`, `L2 = {(u*S_K1, v*S_K2) : u = lam*v mod n}`, computed
+exactly by Lagrange-Gauss reduction. Small `mu` (skew rank-2 GLV lattice) goes
+with *high* success.
+
+**A mechanism I proposed and then refuted.** The lattice provably contains, for
+each signature index `i`, a vector supported on only two coordinates
+`(u0*S_K1, v0*S_K2)` drawn from `L2` — zero in the `d` and Kannan slots, hence
+useless for recovery. These are real and do occupy reduced-basis rows (measured:
+2–8 rows per basis). I predicted small `mu` would flood the basis and block
+recovery. **The data refute this**: `||v||/mu` fails to separate outcomes at all
+(successes [0.36, 3.21], failures [0.46, 3.06]), and the sign is backwards —
+p=2557 has the *smaller* mu (2738 vs 5096) yet succeeds. Whatever `mu` is
+proxying for, it is not spurious-vector crowding. **Mechanism unresolved.**
+
+**5. The verifier is sound (audit).** Small `mu` is also the regime where the
+GLV decomposition can stop being unique, which would inflate success rates. Full
+audit against the planted secret: **803/805 accepted candidates correct, 2 false
+positives (0.25%)**. The 2 landed on a curve with *zero* decomposition
+collisions, so they are chance coincidences, not systematic. Too small to move
+any rate above. Finding 4 stands.
+
+### Status change
+
+**Thread 20 (lambda/n threshold): CLOSED — negative result.** There is no
+`lambda/n` threshold; the quantity is not basis-invariant, and the correct
+invariant `rho` does not gate viability. The 2026-07-26 §"Critical new finding:
+λ/n threshold for attack viability" and its Gram-Schmidt explanation should be
+read as superseded by this entry.
+
+**Consequence for secp256k1 (corrects 2026-07-26 finding 4).** That run reasoned
+"λ ≈ 0.44·n is in the safe regime, so the Phase 2 attack would work on
+secp256k1." That inference is void — it rests on a threshold that does not
+exist. secp256k1 has `rho = 0.44`, but `rho` predicts nothing on its own; what
+matters is `eff = K1*K2/n`, i.e. how biased the nonce actually is. No claim
+about secp256k1 follows from λ's position.
+
+### Next step proposal
+
+**Thread 23 (mechanism behind the matched-eff curve effect).** The only genuinely
+open question left here. `corr(log mu, success) = -0.828` on n=11 curves is
+suggestive but under-powered, and `rho`/`mu` are themselves correlated
+(`corr(rho, log mu) = -0.391`), so the two cannot be separated at this sample
+size. Concrete sub-task: build a pool of **40+ curves at 12–16 bits with eff
+pinned to 0.157**, measure success over 24 seeds, then run a partial correlation
+of success against `log mu` controlling for `rho` and vice versa. That is enough
+power to say which (if either) survives. Script:
+`glv_hnp_phase2_mechanism_pool.py`. Cheap — the whole matched-eff run above took
+under two minutes.
+
+Secondary: re-examine whether the 20-bit scaling law in the 2026-07-26 entry
+("m ≈ bit_length/8", 3 data points) is really a `rho` effect or just eff drifting
+across those three curves — the same confound applies to it.
+
+### Commits made
+
+(see following commit hash)

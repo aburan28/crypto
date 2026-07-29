@@ -1,0 +1,97 @@
+==============================================================================
+Thread 20 (part 2): what gates the GLV-HNP attack, if not lambda/n?
+==============================================================================
+
+------------------------------------------------------------------------------
+Part A: is the spurious 2-coordinate family actually in the basis?
+------------------------------------------------------------------------------
+  curve     K1   m  dim        mu    ||v||  ||v||/mu  #spur  ok   short (u,v)
+  2677       8   8   18      5096     6162      1.21    2.3   n   (14, 43)
+  2677       2   8   18      9394     5647      0.60    2.7   Y   (1, -186)
+  2557       8   8   18      2738     6237      2.28    8.0   Y   (-3, -50)
+  199        2   6   14       278      367      1.32    5.7   Y   (2, -15)
+  (#spur = reduced-basis rows supported on a single (col i, col m+1+i)
+   pair with zero d- and Kannan-coordinates, averaged over seeds)
+
+------------------------------------------------------------------------------
+Part B: does ||v||/mu separate success from failure?
+------------------------------------------------------------------------------
+  config                K1    eff       mu m_info first 3/3  ||v||/mu at that m
+  2677(rho=.070)         2 0.0393     9394      3       m=5                0.51
+  2677(rho=.070)         3 0.0589     9342      3       m=6                0.58
+  2677(rho=.070)         4 0.0786     9323      4       m=6                0.55
+  2677(rho=.070)         6 0.1179     6538      4     never                   -
+  2677(rho=.070)         8 0.1572     5096      5     never                   -
+  2677(rho=.070)        12 0.2357     3756      6     never                   -
+  2677(rho=.070)        16 0.3143     3156      7     never                   -
+  199(rho=.467)          2 0.1508      278      3       m=4                1.13
+  199(rho=.467)          4 0.3015      218      5       m=8                2.00
+  199(rho=.467)          8 0.6030      201     11     never                   -
+  2557(rho=.340)         8 0.1564     2738      5       m=7                2.20
+  2557(rho=.340)        16 0.3129     2598      7     never                   -
+  2557(rho=.340)        32 0.6258     2562     17     never                   -
+  p=2251(rho=.056)       2 0.0431     5807      3       m=3                0.57
+  p=2053(rho=.094)       2 0.0440     9153      3       m=4                0.36
+  p=2137(rho=.095)       2 0.0448     8772      3       m=4                0.37
+  p=2089(rho=.162)       2 0.0439     6711      3       m=4                0.49
+  p=2293(rho=.288)       2 0.0410     8723      3       m=4                0.43
+  p=2203(rho=.290)       2 0.0421     8945      3       m=3                0.39
+  p=2179(rho=.314)       2 0.0426     6628      3       m=3                0.52
+  p=2143(rho=.395)       2 0.0440     5567      3       m=4                0.59
+  p=2089(rho=.404)       2 0.0450     5406      3       m=3                0.51
+
+  267 (config,m) points clear m_info: 185 full-success, 49 full-failure, 33 partial
+  ||v||/mu among full successes: [0.36, 3.21]
+  ||v||/mu among full failures : [0.46, 3.06]
+
+  success rate bucketed by ||v||/mu (m >= m_info only):
+    0.25 <= ||v||/mu < 0.50:   70/  81 =  86.4%   (27 configs)
+    0.50 <= ||v||/mu < 0.75:  256/ 270 =  94.8%   (90 configs)
+    0.75 <= ||v||/mu < 1.00:  137/ 153 =  89.5%   (51 configs)
+    1.00 <= ||v||/mu < 1.50:   37/  78 =  47.4%   (26 configs)
+    1.50 <= ||v||/mu <  inf:   99/ 219 =  45.2%   (73 configs)
+
+  success rate bucketed by eff (m >= m_info only), for contrast:
+    0.00 <= eff < 0.05:  407/ 420 =  96.9%   (140 configs)
+    0.05 <= eff < 0.10:   69/  81 =  85.2%   (27 configs)
+    0.10 <= eff < 0.20:   83/ 153 =  54.2%   (51 configs)
+    0.20 <= eff < 0.40:   40/ 129 =  31.0%   (43 configs)
+    0.40 <= eff < 1.00:    0/  18 =   0.0%   (6 configs)
+
+------------------------------------------------------------------------------
+Part C: BKZ cannot rescue -- the spurious vectors ARE the short vectors
+------------------------------------------------------------------------------
+  p=2677, K1=8: mu=5096 attained at (u,v)=(14, 43), m_info=5
+    LLL      3/3 at: never    | at m=8: ||v||/mu=1.21, spurious rows 2.3/18
+    BKZ(20)  3/3 at: never    | at m=8: ||v||/mu=1.21, spurious rows 1.3/18
+    BKZ(40)  3/3 at: never    | at m=8: ||v||/mu=1.21, spurious rows 1.3/18
+
+------------------------------------------------------------------------------
+Part D: mu vs rho -- are they the same quantity in disguise?
+------------------------------------------------------------------------------
+  pool curves at matched eff ~ 0.045 (so only the curve changes):
+  curve                    rho          mu
+  p=2251(rho=.056)       0.056        5807
+  p=2053(rho=.094)       0.094        9153
+  p=2137(rho=.095)       0.096        8772
+  p=2089(rho=.162)       0.163        6711
+  p=2293(rho=.288)       0.288        8723
+  p=2203(rho=.290)       0.291        8945
+  p=2179(rho=.314)       0.315        6628
+  p=2143(rho=.395)       0.395        5567
+  p=2089(rho=.404)       0.404        5406
+
+  Pearson corr(rho, log mu) over the pool = -0.391   (n=9)
+  -> rho carries little information about mu; they are not the
+     same quantity.  Note the extremes: smallest rho has a LARGE
+     mu and one of the largest rho has among the smallest mu.
+
+==============================================================================
+SUMMARY
+==============================================================================
+
+  rho among pool successes: [0.056, 0.094, 0.096, 0.163, 0.288, 0.291, 0.315, 0.395, 0.404]
+  rho among pool failures : []
+
+Done.
+=========================================================================

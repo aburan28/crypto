@@ -188,6 +188,31 @@ roughly 10× the Phase 1.5 time.
 definition).  Use BKZ-15 or BKZ-20 instead of large-β BKZ; the
 extra cost is manageable.
 
+> **Correction (autolab 2026-07-29, Thread 20).** An intermediate
+> result — recorded in `RESEARCH_AUTOLAB_LOG.md` under 2026-07-26 as a
+> "λ/n threshold for attack viability" — does **not** hold, and any
+> reading of this section that treats λ's size as a viability parameter
+> should be dropped.
+>
+> `λ/n` is not a basis invariant: GLV row `m+1+i` carries `-λ·S_K1` in
+> the same column where modular row `i` carries `n·S_K1`, so replacing
+> `λ` by `λ-n` is one integer row operation and yields the *same
+> lattice* (verified). The invariant is `ρ = min(λ, n-λ)/n`, and `ρ` is
+> not free either — the two GLV eigenvalues satisfy `λ₁ + λ₂ = n-1`, so
+> `ρ` is determined by `n`.
+>
+> `ρ` does not gate viability. At matched bias `eff = K1·K2/n ≈ 0.045`,
+> 9/9 test curves recover with `ρ` spanning [0.056, 0.404]. The curve
+> previously called structurally unattackable (`ρ = 0.070`) is attacked
+> at `K1 ∈ {2,3,4}` with `ρ` unchanged. What drives success is `eff`,
+> the ordinary HNP bias budget (96.9% → 0% monotone as `eff` goes
+> 0.05 → 0.40+).
+>
+> A real curve-to-curve effect does survive at marginal `eff ≈ 0.157`
+> (24 seeds, disjoint CIs), but `ρ` is not its best correlate and its
+> mechanism is open. See the 2026-07-29 log entry and
+> `secp256k1_cm_audit/glv_hnp_phase2_{lambda_threshold,spurious_predictor,matched_eff,verify_soundness}.py`.
+
 ### Risk 3: the bias model doesn't match real attacks
 
 The k₁-only-leak model assumes side-channel leakage on `k_1` but

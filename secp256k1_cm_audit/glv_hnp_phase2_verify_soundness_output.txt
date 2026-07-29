@@ -1,0 +1,29 @@
+==============================================================================
+Thread 20 (part 4): soundness audit of the oracle-free verifier
+==============================================================================
+
+  matched eff ~ 0.157, 24 seeds, m in 5..12
+
+        p    rho  K1     eff      mu collisions  accepted  correct  FALSE POS
+     2251  0.056   7  0.1510    5712          0        10       10          0
+     2053  0.094   7  0.1540    5088          0        34       34          0
+     2137  0.096   7  0.1568    4348          0         6        6          0
+     2089  0.163   7  0.1535    2667          4        76       76          0
+     2293  0.288   8  0.1641    3253          0       160      160          0
+     2203  0.291   7  0.1473    4638          0        71       71          0
+     2179  0.315   7  0.1493    5785          0        13       13          0
+     2143  0.395   7  0.1541    2442          6       106      106          0
+     2089  0.404   7  0.1576    2511          0       175      173          2
+     2557  0.340   8  0.1564    2738         10       141      141          0
+     2677  0.070   8  0.1572    5096          0        13       13          0
+
+------------------------------------------------------------------------------
+  totals: accepted=805  correct=803  false positives=2
+  => 2 wrong candidates were certified.  Success rates in the
+     Thread 20 scripts are inflated and must be recomputed against
+     the planted secret.
+
+  configurations with a non-unique decomposition (collisions > 0): 3/11
+    p=2089(coll=4, fp=0), p=2143(coll=6, fp=0), p=2557(coll=10, fp=0)
+
+Done.
