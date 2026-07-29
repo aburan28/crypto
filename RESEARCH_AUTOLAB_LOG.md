@@ -6416,4 +6416,4 @@ fails, and eight such invariants have now been falsified.
 
 ### Commits made
 
-(hash recorded in the following commit)
+4f6d97d autolab 2026-07-29 #3: Thread 23 — closed form for lambda_1(L2); recover lost run #2
