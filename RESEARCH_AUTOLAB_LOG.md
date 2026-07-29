@@ -6042,3 +6042,4 @@ classes do contain Jacobians. The protection is entirely B5's DLP-cost argument.
    existence gap.
 
 ### Commits made
+49d36fc autolab 2026-07-29: Thread 22 — exhaustive genus-2 census; realisability criterion |t_i-t_j|>=2
