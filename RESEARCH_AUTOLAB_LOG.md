@@ -6037,4 +6037,4 @@ across those three curves — the same confound applies to it.
 
 ### Commits made
 
-(see following commit hash)
+`3f23bf1` autolab 2026-07-29: Thread 20 CLOSED — no lambda/n threshold; eff is the driver
