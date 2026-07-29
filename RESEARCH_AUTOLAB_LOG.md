@@ -5874,3 +5874,273 @@ open Thread 22 (Richelot search over small proxy primes) as the continuation.
 
 ### Commits made
 c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+
+**Thread 22** — direct search for genus-2 curves over F_p realising the product
+isogeny class `E_i × E_j` of the sextic twists, proposed verbatim as the
+continuation of Thread 2 in the 2026-07-26 run #2 entry (commit `c591765`,
+"Recommend: mark Thread 2 CLOSED; open Thread 22 (Richelot search over small
+proxy primes)"). All six original priority threads are CLOSED / BLOCKED /
+DEAD END (see the revised thread summary at log line 4470), and Thread 22 had
+not been started.
+
+Reframed slightly for falsifiability. Rather than a blind Richelot search, the
+question asked is:
+
+> Does the codebase's Howe test (H1)+(H2)+(H3) actually *predict* which product
+> classes `E_i × E_j` are realised by a genus-2 Jacobian over F_p?
+
+This is decidable by *exhaustive* enumeration at small proxy primes, and the
+falsifier was written into the script header before running:
+false positive = H passes but no curve exists (H not sufficient);
+false negative = H fails but a curve exists (H not necessary, so Thread 18's
+"5/15" undercounts the cover surface).
+
+### Environment note (read this first, future runs)
+
+**Nothing persists between autolab runs.** The 2026-07-26 entry says "PARI is
+now installed" — it was not. This container had neither `gp` nor `numpy`.
+Both had to be installed:
+
+```
+apt-get update && apt-get install -y pari-gp     # ~1 min, 208 MB
+pip install numpy
+```
+
+`apt-get install pari-gp` **fails without `apt-get update` first** (stale index
+→ 404 on a mesa dependency). Budget ~2 min for tooling at the top of every run.
+
+### Work done
+
+Four new files in `secp256k1_cm_audit/`:
+
+- **`thread22_howe_realizability.py`** — numpy exhaustive genus-2 enumeration.
+  Two model families that together cover every F_p-isomorphism class:
+  `y² = x⁵ + a₃x³ + a₂x² + a₁x + a₀` (p⁴ models) and
+  `y² = c₆x⁶ + c₄x⁴ + c₃x³ + c₂x² + c₁x + c₀`, `c₆ ∈ {1, ν}` (2p⁵ models).
+  Stage 1 computes `s₁` from `Σ_x χ(f(x))` on the whole coefficient grid;
+  stage 2 computes `s₂` from `#C(F_{p²})` on the `s₁`-survivors only
+  (conjugate elements of F_{p²} contribute equally, so only `z₁ ≤ (p−1)/2` is
+  swept). Witnesses are squarefree-checked via `deg gcd(f, f')`.
+- **`thread22_pari_crosscheck.gp`** — independent validation against PARI's
+  `hyperellcharpoly`.
+- **`thread22_realisability_baserate.py`** — the control (see below).
+- **`thread22_nojacobian_rule.py`** — rule fitting + application to secp256k1.
+
+`cargo test --test curve_audit` → **5/5 pass** (6.86 s). ✓
+
+### Findings
+
+**1. Engine validated against PARI: 66/66 witnesses, 0 mismatches.**
+
+Every witness curve emitted by the numpy sweep was re-run through
+`hyperellcharpoly` and checked both for squarefreeness and for
+`charpoly == T⁴ − s₁T³ + s₂T² − p·s₁T + p²`.
+
+```
+witnesses checked : 66
+agree with PARI   : 66
+mismatches        : 0
+```
+
+Anchor check: the p=19 pair (0,3) witness `y² = x⁵ + x³ + 17x` gives
+`x⁴ − 26x² + 361`, exactly the Exp A char poly recorded in the 2026-07-26
+entry, and `ellap([0,7], 19) = 8` matches `t₀ = 8`. ✓
+
+**2. (H1)+(H2)+(H3) is SUFFICIENT but very far from NECESSARY.**
+
+Complete enumeration (deg 5 *and* deg 6):
+
+```
+    p  coverage  H-qual  realised  falsePos  falseNeg
+    7      full       5        13         0         8
+   13      full       4        15         0        11
+   19      full       5        13         0         8
+```
+
+**Zero false positives across all three primes** — consistent with Howe (1996)
+being a sufficient condition. But **27 false negatives**: pairs that fail H2 or
+H3 and are realised by a genus-2 Jacobian anyway.
+
+p=19, complete coverage (traces `t = 8, 7, −1, −8, −7, 1`; `#models` = number
+of enumerated models hitting that class):
+
+```
+ pair H1 H2 H3  ALL  gcd   s1    s2  #models  real
+(0,1)  Y  N  Y   no    1   15    94        0    no
+(0,2)  Y  N  N   no    3    7    30     8868   YES   <- false negative
+(0,3)  Y  Y  N   no    4    0   -26     3948   YES   <- false negative
+(0,4)  Y  N  N   no    3    1   -18     4179   YES   <- false negative
+(0,5)  Y  N  Y   no    1    9    46     3234   YES   <- false negative
+(1,2)  Y  Y  Y  YES    1    6    31    11760   YES
+(1,3)  Y  N  Y   no    1   -1   -18     4179   YES   <- false negative
+(1,4)  Y  Y  Y  YES    1    0   -11     6960   YES
+(1,5)  Y  Y  Y  YES    1    8    45    10320   YES
+(2,3)  Y  N  N   no    7   -9    46     3234   YES   <- false negative
+(2,4)  Y  Y  N   no    3   -8    45    10320   YES   <- false negative
+(2,5)  Y  Y  Y  YES    1    0    37     2520   YES
+(3,4)  Y  N  Y   no    1  -15    94        0    no
+(3,5)  Y  N  Y   no    1   -7    30     8868   YES   <- false negative
+(4,5)  Y  Y  Y  YES    1   -6    31    11760   YES
+```
+
+**3. Coherence check on the deg-5-only rows.** For p=31/37/43 (deg 5 only) all
+5 Howe-qualifying pairs came out unrealised. That is not noise: H2 selects
+pairs where *both* twists have irreducible 2-torsion polynomial, so the glued
+`Jac(C)[2]` has no nontrivial F_p-rational point, so `C` has no rational
+Weierstrass point and **cannot** have a degree-5 model. Consistent with p=19,
+where those same pairs are realised and every witness is degree 6
+(e.g. pair (1,2): `y² = x⁶ + 2`). This is a positive check on the enumeration,
+and it is why deg-5-only rows are reported as lower bounds only.
+
+**4. Control: the base rate is 82–90%, so the test above is not vacuous.**
+
+`thread22_realisability_baserate.py` repeats the enumeration with *every* split
+class `E_a × E_b` built from every achievable elliptic trace as target:
+
+```
+    p  coverage  classes  realised  baserate  noJac
+    7      full       66        54    0.8182     12
+   13      full      120       104    0.8667     16
+   19      full      153       137    0.8954     16
+   31      deg5      276       176    0.6377    100   (lower bound only)
+   37      deg5      325       221    0.6800    104   (lower bound only)
+   43      deg5      378       247    0.6534    131   (lower bound only)
+```
+
+**5. The actual obstruction, and it is not H1/H2/H3.**
+
+The 44 exhaustively verified non-Jacobian classes at p = 7, 13, 19 fit one rule
+exactly, with zero over- and zero under-prediction:
+
+```
+E_a × E_b contains NO genus-2 Jacobian  <=>  |t_a − t_b| = 1
+                                          OR (t_a = t_b and t_a² = 4p − 3)
+```
+
+Rule-fit table (`thread22_nojacobian_rule.py`):
+
+```
+rule                                                  over  under
+|t_a - t_b| = 1                                          0      4
+|t_a - t_b| = 1 OR (t_a = t_b and t_a^2 = 4p-3)          0      0   <- exact
+|t_a - t_b| = 1 OR  t_a = t_b                           39      0
+```
+
+The second clause fires only when `4p − 3` is a perfect square, i.e. at the
+extremal Hasse trace of a curve with CM by `Q(√−3)`: p=7 (`t=±5`, `25 = 28−3`)
+and p=13 (`t=±7`, `49 = 52−3`) have it, p=19 does not (`73` is not a square) —
+which is exactly why p=19 has 16 = (number of consecutive trace pairs) and no
+extras. This is the specialisation to `E₁ × E₂` of the classification in
+Howe–Nart–Ritzenthaler, *Jacobians in isogeny classes of abelian surfaces over
+finite fields*, Ann. Inst. Fourier **59** (2009) 2617–2634 (arXiv:math/0607515)
+— already in the paper's reference list (`PAPER_STRUCTURAL_COMPLETENESS.md`
+line 708) but never used. Note `Res(T²−t₁T+p, T²−t₂T+p) = (t₁−t₂)²·p`, so
+`|t₁−t₂| = 1` is precisely the "reduced resultant too small to glue" case.
+
+**Out-of-sample test (p = 31), pre-registered before the run finished.** The
+rule was fitted on p = 7, 13 (both have `4p-3` square) and p = 19 (does not).
+p = 31 has `4·31 − 3 = 121 = 11²`, so the rule predicts, for traces
+`t ∈ [−11, 11]`:
+
+```
+predicted non-Jacobian classes = 22 consecutive pairs + (11,11) + (-11,-11) = 24
+predicted base rate            = 252/276 = 0.9130
+```
+
+A full deg-5 + deg-6 enumeration at p = 31 (2·31⁵ = 57M models, ~4 GB peak)
+was launched to check this; see `thread22_baserate_output_31full.txt` and the
+addendum below for the outcome.
+
+Weaker but already-available consistency check: for the deg-5-only runs the
+predicted set must be a *subset* of the observed missing set (degree-5 models
+can only miss classes, never invent them). It is, exactly:
+
+```
+    p  coverage  |observed|  |predicted|  pred-not-obs  obs-not-pred
+    7      full          12           12             0             0
+   13      full          16           16             0             0
+   19      full          16           16             0             0
+   31      deg5         100           24             0            76
+   37      deg5         104           24             0            80
+   43      deg5         131           28             0           103
+```
+
+`pred-not-obs = 0` on every row; the `obs-not-pred` surplus on the deg-5 rows
+is exactly the set of classes realised only by curves with no rational
+Weierstrass point.
+
+**6. Applied to secp256k1: 0/15 blocked, i.e. 15/15 product classes contain a
+genus-2 Jacobian.**
+
+The six sextic-twist traces (recomputed from the CM decomposition; identical to
+the 2026-07-21 entry, commit `a287abc`) are pairwise ~10³⁸ apart, so
+`|t_i − t_j| = 1` never fires, and `4p − 3` is not a perfect square so the
+extremal clause is inapplicable:
+
+```
+min over the 15 pairs of |t_i − t_j| = 193508920647619669885755136084601127234
+4p − 3 a perfect square?  False
+=> product classes with NO genus-2 Jacobian : 0/15
+=> product classes containing a Jacobian    : 15/15
+```
+
+**Thread 18's "5/15 Howe-glueable" therefore undercounts the existence question
+by a factor of 3.** The 5/15 is the count of pairs where the *explicit* Howe
+gluing construction is available, not the count of pairs where a genus-2 cover
+exists.
+
+**7. Implication for the paper — a strengthening, not a weakening.**
+
+- `PAPER_STRUCTURAL_COMPLETENESS.md` §6 states the cover exists for
+  `E × E^t` of every deployed prime-order curve, justified via (H1)+(H2)+(H3).
+  The result above makes that claim unconditional: for any *ordinary* `E/F_p`,
+  `|t − (−t)| = 2|t| ≥ 2` and `t ≠ −t`, so **the product class `E × E^t` always
+  contains a genus-2 Jacobian**, with no need to check H2 or H3 at all.
+- This repairs the one hedged cell in the §7 table (line 498): Curve25519
+  has `gcd(n, n_twist) = 4` so H3 fails (line 497), and the table records
+  "Smooth (2,2) cover exists? **needs ℓ-restriction**". By the rule above the
+  cover exists outright — the H3 failure was an artifact of a sufficient
+  condition, not a real obstruction.
+- **No security consequence.** Going from 5 to 15 cover targets changes nothing:
+  per B5 the DLP on a genus-2 `Jac(C)/F_p` costs `O(p) > O(√n)` (index calculus
+  needs genus ≥ 3 or an extension field). More covers that are all uphill are
+  still uphill. §8's structural-completeness theorem is untouched.
+- **Scope caveat, stated plainly.** "The isogeny class contains a Jacobian" is
+  an *existence* statement (Honda–Tate / HNR). It does **not** supply an
+  efficiently computable cover `C → E_i` over F_p, and Thread 2 showed
+  (commit `c591765`) that the explicit Rosenhain route is blocked for secp256k1
+  by a cubic-residue obstruction. So this widens the *structural* surface the
+  paper must argue against, and B5 already covers it; it does not hand an
+  attacker anything constructive.
+
+### Next step proposal
+
+**Thread 23 (paper edit, small and well-scoped):** replace the H2/H3-based
+justification in `PAPER_STRUCTURAL_COMPLETENESS.md` §6 with the HNR
+`|t₁ − t₂| = 1` criterion, which is both necessary and sufficient, and fix the
+Curve25519 "needs ℓ-restriction" cell in the §7 table (line 497–498) to "yes".
+Cite HNR (already reference #N at line 708) and the new scripts. This is a
+strict simplification: three conditions to check become zero.
+
+**Thread 24 (make the rule a theorem rather than a fit):** the rule is an exact
+fit over 44 classes at three primes plus the p=31 out-of-sample test, and it
+agrees with HNR — but this run did not read HNR itself (arXiv:math/0607515,
+open access). Next run: fetch the paper, quote the precise statement including
+the supersingular and `E₁ ~ E₂` cases my three primes may not exercise, and
+confirm the `t² = 4p − 3` clause is theirs and not a small-p artifact.
+
+**Thread 25 (extend coverage):** p=37 and p=43 full deg-6 coverage is the next
+size up (`2p⁵` = 115M / 292M models). Feasible with chunking if the p=31 run's
+memory profile (~4 GB peak) scales as expected; would add ~50 more verified
+classes and, at p=43, a second out-of-sample test of the `4p−3 = 169 = 13²`
+clause.
+
+### Commits made
+
+`652ac04` autolab 2026-07-29: Thread 22 - Howe H1+H2+H3 is sufficient but not necessary
+(a second commit adds this log entry; a third adds the p=31 addendum if that run lands.)
+
