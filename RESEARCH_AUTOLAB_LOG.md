@@ -5988,3 +5988,6 @@ explicit secp256k1 cover directly, with no search. Concrete next step: fit a aga
 **Secondary:** determine why pair (0,4) admits no sextic cover over F_43/F_67 — likely a
 Galois-module condition on the 2-torsion that H2 does not capture. If so it is a
 sharpening of Howe's criterion worth stating precisely.
+
+### Commits made
+1c28d30 autolab 2026-07-29: Thread 22 — sextic-coset rule for Howe covers; Thread 2 verdict revised
