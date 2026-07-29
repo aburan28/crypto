@@ -5957,4 +5957,4 @@ finding curves at specific λ/n targets within 12-bit range.
 **Thread 22 (Richelot search, from 2026-07-26 #2)** remains open as alternative.
 
 ### Commits made
-[see below]
+11b5cf5 autolab 2026-07-29: Thread 20 — K1_BOUND refutes λ/n threshold hypothesis; decoupling experiments E1-E6
