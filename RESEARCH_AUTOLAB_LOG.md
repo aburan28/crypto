@@ -6260,3 +6260,4 @@ Secondary (small): fold the `centred` + `kan_frac` knobs back into
 use the tuned builder, and re-run the 2026-06-15 scaling study.
 
 ### Commits made
+9a08712 autolab 2026-08-01: Thread 23 — centred Phase-2 lattice; C1/C2 split dissolves
