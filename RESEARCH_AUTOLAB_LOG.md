@@ -6469,4 +6469,4 @@ Orthogonal and still open: **Thread 23′** from the sibling 07-29 entry
 
 ### Commits made
 
-(hash recorded in the following commit)
+00292a4 autolab 2026-08-01: Thread 23 — nu_hat closed form proven exact; scale-local quotient falsified; C2 cut is cell-local
