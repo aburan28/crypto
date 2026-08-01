@@ -6103,3 +6103,160 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-01 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the next step
+proposed by the 2026-07-29 entry (log line 6089). Rule (b) applies: Thread 20/23 was
+last touched 3 days ago *with* measurable progress (T1–T5), so it is continued rather
+than skipped. Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 closed
+2026-07-08.
+
+Outcome: the reformulation works, but not for the reason Thread 23 assumed. **Centring
+the unknowns widens the attackable bias regime by 3–4×, and the June C1/C2 split
+dissolves entirely.** Thread 5 (GLV-HNP Phase 2), declared a DEAD END on 2026-06-30,
+should be reopened.
+
+### Work done
+- New script `secp256k1_cm_audit/glv_hnp_phase2_centered.py` (610 lines, experiments
+  C1–C6), output artifact `secp256k1_cm_audit/glv_hnp_phase2_centered_output.txt`.
+  Lattice builder is the 2026-07-26 one verbatim except for two new knobs:
+  `centred` (shifts the A-column by `c = K1//2 + λ·(K2//2) mod n`) and `kan_frac`
+  (generalises `S_KANNAN = t·n`; the old builder is `t = 1.0`).
+  Planted-vector membership is asserted per instance
+  (`glv_hnp_phase2_centered.py:293`), so no result rests on an unverified lattice.
+- **Repo fix (merge damage).** The 2026-07-29 merges (b483b10 / 6fd645f / 464d1e8)
+  combined two branches that had both rewritten
+  `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`. The merge kept d525931's
+  copy (`glv_roots`, `lam_star`, `lambda_block_mu`) but also kept e845207's dependants,
+  which import `glv_eigenvalues` / `mu_of` / `rival_sublattice_nu` / `identify_twist`.
+  Both `glv_hnp_nuhat_vs_c1c2.py` and `glv_hnp_phase2_nuhat_control.py` therefore died
+  with `AttributeError` on main — i.e. the ν̂ result (AUC 0.935) was **not reproducible
+  from the repository**. Fixed by restoring e845207's module verbatim as
+  `secp256k1_cm_audit/glv_hnp_thread20c_lib.py` (with a provenance header) and
+  repointing both scripts' `spec_from_file_location`. `glv_hnp_nuhat_vs_c1c2.py` now
+  runs clean and reproduces ν̂ AUC = 0.935 / best acc 89.0%.
+- Environment (fresh container): `pip install fpylll sympy cysignals` → fpylll 0.6.4,
+  sympy 1.14.0, cysignals 1.12.5. `pari-gp` was NOT needed this run.
+- `cargo test --test curve_audit` → **5/5 pass** (5.39s). ✓
+
+### Findings
+
+**C1 — a closed form for the Phase-2 wall.** Recovery is unique-SVP in the Kannan
+coset, so the governing statistic is `r = ‖v_planted‖ / GH(L)`, with
+`GH(L) = sqrt(dim/2πe)·det(L)^(1/dim)`, `dim = 2m+2`. For the validated scaling
+(`S_K1 = n/K1, S_D = 1, S_K2 = n/K2, S_KAN = n`), `det(L) = n^(3m+1)/(K1·K2)^m`, so
+`det^(1/dim) → n/√eff` with `eff = K1·K2/n`, giving
+
+    r → sqrt(2πe/3)·√eff  = 2.386·√eff     [uncentred]  → wall at eff ≈ 0.176
+    r → sqrt(2πe/12)·√eff = 1.193·√eff     [centred]    → wall at eff ≈ 0.70
+
+The wall is a **lattice** quantity, not a curve invariant. This is the direct
+explanation of the 2026-06-21…06-29 failure: no curve-level invariant can separate
+C1 from C2 because the separator does not depend on the curve at all.
+
+**C2 — the falsifier passed.** K1 grid, m=12, 5 seeds, both historical 12-bit curves
+(`glv_hnp_phase2_centered.py:HIST`). Columns are LLL wins / mean r.
+
+| K1 | eff | 2557 un | 2557 ctr | 2677 un | 2677 ctr |
+|---|---|---|---|---|---|
+| 2 | 0.039 | 5/5 (r 0.62) | 5/5 (0.52) | 5/5 (0.62) | 5/5 (0.52) |
+| 4 | 0.078 | 5/5 (0.92) | 5/5 (0.68) | 5/5 (0.93) | 5/5 (0.68) |
+| 6 | 0.117 | 5/5 (1.15) | 5/5 (0.79) | **2/5** (1.16) | 5/5 (0.79) |
+| 8 | 0.156 | 5/5 (1.33) | 5/5 (0.92) | **0/5** (1.33) | **5/5** (0.93) |
+| 12 | 0.235 | 4/5 (1.63) | 5/5 (1.07) | 0/5 (1.65) | **5/5** (1.07) |
+| 16 | 0.313 | 1/5 (1.86) | 5/5 (1.26) | 0/5 (1.86) | **5/5** (1.26) |
+| 24 | 0.470 | 0/5 (2.28) | 4/5 (1.47) | 0/5 (2.30) | 3/5 (1.48) |
+| 32 | 0.627 | 0/5 (2.59) | 0/5 (1.72) | 0/5 (2.60) | 0/5 (1.73) |
+
+Largest eff with a full 5/5 sweep: **2557 0.156 → 0.313 (×2.0); 2677 0.079 → 0.314
+(×4.0)**. The λ*=0.070 curve that anchored the "structural failure" narrative from
+2026-06-15 onward recovers 5/5 at K1=16 — 4× the K1 at which it was declared dead.
+
+**The λ* dependence is an artifact of the uncentred lattice.** Uncentred, the two
+curves' walls differ 2× (0.156 vs 0.079); centred, they are identical (0.313 vs 0.314).
+The 2026-07-29 statement "λ* shifts the K1 wall by a factor of ~3" is hereby narrowed:
+λ* shifts the wall *only in the uncentred lattice*, and the effect vanishes under a
+representation change that costs nothing.
+
+**C3 — 20 fresh 17-bit curves × 6 eff targets × 5 seeds (600 trials per variant).**
+
+| eff target | uncentred | centred |
+|---|---|---|
+| 0.05 | 99/100 (r 0.85) | 100/100 (0.57) |
+| 0.15 | 21/100 (1.46) | **93/100** (0.96) |
+| 0.25 | 9/100 (1.86) | **56/100** (1.20) |
+| 0.40 | 0/100 (2.33) | **9/100** (1.53) |
+| 0.60 | 0/100 (2.78) | 0/100 (1.82) |
+| 0.80 | 0/100 (3.22) | 0/100 (2.11) |
+
+Pooled over both variants (240 curve-instances, 60 full-sweep successes):
+
+    AUC(r)    = 0.982      r | success: max 1.496, mean 0.833
+    AUC(eff)  = 0.963      r | failure: min 0.848, mean 2.019
+    AUC(λ*)   = 0.454      (curve invariant — no signal, consistent with T3)
+
+`r` is a single threshold that works across both lattice variants and all eff; `eff`
+alone does not (it is blind to centring), and λ* is at chance. The empirical wall is
+`r ≈ 1.0–1.5`, bracketing the GH prediction `r = 1`.
+
+**C4 — the planted vector is still not λ₁, and does not need to be.** Centring raises
+`sv/pv` from 0.354 to 0.509 (2557, K1=8) but cannot reach 1: the trivial vector
+`n·S_D·e_m` is untouched by the A-column shift. So the literal Thread 23 framing
+("make the target λ₁") is **not** what fixes Phase 2 — the recovery condition is
+shortest-in-the-Kannan-coset, and T5's `sv/pv < 1` was never the obstruction it looked
+like. My own in-script prediction that centring would make `sv/pv` worse was wrong;
+it improves, because `‖v‖` shrinks while the trivial vector does not.
+
+**C5 — the Kannan scale S_KANNAN = n is not optimal.** Minimising
+`r(t) = sqrt(C + (tn)²) / (const·(tn)^(1/dim))` gives `t*² n² = C/(dim−1)`, i.e.
+`t* → 1/√12 = 0.289` for centred unknowns at large m (predicted 0.305 / 0.303 at m=12
+for the two curves). Measured minimum of r sits flat over t ∈ [0.25, 0.35]:
+
+| t | 0.15 | 0.20 | 0.25 | 0.29 | 0.35 | 0.50 | 0.75 | 1.00 | 1.50 |
+|---|---|---|---|---|---|---|---|---|---|
+| r (2557, K1=16) | 1.164 | 1.155 | 1.150 | **1.147** | 1.147 | 1.156 | 1.195 | 1.256 | 1.426 |
+
+Fully tuned (centred, t = 0.29) the wall reaches **eff = 0.469 at 5/5** on 2557 and
+eff = 0.471 at 4/5 on 2677 — a 3.0×/4.0× widening over the 2026-07-26 builder.
+
+**C6 — the June C1/C2 split does not survive centring.** Exp S protocol regime
+(K1 = 72, m = 12, 6 seeds), 100 fresh 20-bit j=0 CM curves:
+
+| lattice | C2 curves | seed wins | mean r |
+|---|---|---|---|
+| uncentred, t = 1 (Exp S, 2026-06-29) | 24/100 | 222/600 | 1.372 |
+| centred, t = 0.29 | **100/100** | **600/600** | 0.795 |
+
+Exp S sat almost exactly on the wall (mean r = 1.372, just above 1), which is *why* a
+second-order statistic like ν̂ could separate its two classes at AUC 0.935 — ν̂ is a
+correction term that only has discriminating power in the narrow transition band. Move
+off the wall and there is nothing left to separate: the C1 class is empty. This closes
+the question opened 2026-06-21 and pursued through seven falsified invariants
+(δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, μ) plus ν̂.
+
+**Status change recommended: Thread 5 (GLV-HNP Phase 2) DEAD END → OPEN.** The
+2026-06-30 dead-end call was made against a lattice that was leaving a factor of 2 in
+‖v_planted‖ on the table for a free change of variable.
+
+### Next step proposal
+**Thread 24 — how far does the tuned lattice scale?** The tuned wall (eff ≈ 0.47,
+r ≈ 1.3) is measured only at 12–20 bits, where the `n²/3` d-term and the `S_KAN²` term
+are a large fraction of `‖v‖²` and LLL is effectively exact. Concretely:
+1. Re-run C2's K1 grid at 32, 48 and 64 bits with m ∈ {12, 20, 32}. Prediction from the
+   model: the wall stays at r ≈ 1 while LLL still reaches GH, then retreats once
+   `dim = 2m+2` grows past LLL's approximation factor — locating that crossover gives
+   the real asymptotic ceiling of Phase 2.
+2. Falsifier: if the wall at 64 bits is still eff ≈ 0.47 at m = 12, the GH model is
+   scale-free and Phase 2 tolerates ~4.4 bits less nonce bias per signature than the
+   2026-07-26 builder suggested; if it collapses back toward eff ≈ 0.18, the C2 gain is
+   a small-n artifact and the model needs an LLL-quality (δ-Hermite) correction term.
+3. Cheap addition: BKZ-20/40 at the wall, to measure how much of the remaining gap to
+   `r = 1` is reduction quality rather than geometry.
+
+Secondary (small): fold the `centred` + `kan_frac` knobs back into
+`glv_hnp_phase2_20bit.py` and `glv_hnp_delta_threshold.py` so the historical drivers
+use the tuned builder, and re-run the 2026-06-15 scaling study.
+
+### Commits made

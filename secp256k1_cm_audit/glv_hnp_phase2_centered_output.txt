@@ -1,0 +1,163 @@
+==============================================================================
+Thread 23 — centred Phase-2 lattice and the Gaussian-heuristic wall
+==============================================================================
+
+------------------------------------------------------------------------------
+C1: r = ||v_planted|| / GH(L) — closed form vs exact per-instance value
+------------------------------------------------------------------------------
+Asymptotic prediction (m -> inf):  r = sqrt(2*pi*e/3)*sqrt(eff) = 2.386*sqrt(eff)   [uncentred]
+                                   r = sqrt(2*pi*e/12)*sqrt(eff) = 1.193*sqrt(eff)  [centred]
+
+curve                m   K1    K2    eff    r_un  2.386v   r_ctr  1.193v
+8-bit/199            6    2    15  0.151   1.657   0.926   1.100   0.463
+8-bit/199            6    8    15  0.603   3.007   1.853   2.007   0.926
+12-bit/2557         12    2    52  0.039   0.751   0.472   0.449   0.236
+12-bit/2557         12    8    52  0.156   1.425   0.944   0.852   0.472
+12-bit/2677 FAIL    12    2    52  0.039   0.753   0.473   0.451   0.236
+12-bit/2677 FAIL    12    8    52  0.157   1.428   0.946   0.856   0.473
+
+(the closed form is the m -> inf limit; the small-m values carry the
+ +4/3*n^2 from the d and Kannan coordinates, so r_exact > r_asymptotic)
+
+------------------------------------------------------------------------------
+C2: K1 grid — does centring move the wall?   (m=12, 5 seeds)
+------------------------------------------------------------------------------
+Falsifier: if the centred row does not extend past the uncentred row on
+the lam*=0.070 curve, the GH model is wrong.
+
+
+12-bit/2557   lam*=0.340  n=2659  K2=52  m=12
+   K1    eff |  un: LLL      r  sv/pv |  ctr: LLL      r  sv/pv
+    2  0.039 |      5/5  0.615  0.402 |       5/5  0.517  0.477
+    3  0.059 |      5/5  0.802  0.371 |       5/5  0.555  0.536
+    4  0.078 |      5/5  0.923  0.368 |       5/5  0.681  0.500
+    6  0.117 |      5/5  1.148  0.356 |       5/5  0.787  0.522
+    8  0.156 |      5/5  1.325  0.354 |       5/5  0.922  0.509
+   12  0.235 |      4/5  1.629  0.343 |       5/5  1.066  0.526
+   16  0.313 |      1/5  1.860  0.339 |       5/5  1.256  0.503
+   24  0.469 |      0/5  2.275  0.331 |       4/5  1.467  0.515
+   32  0.626 |      0/5  2.588  0.331 |       0/5  1.721  0.499
+   48  0.939 |      0/5  3.157  0.316 |       0/5  2.019  0.496
+
+12-bit/2677 FAIL   lam*=0.070  n=2647  K2=52  m=12
+   K1    eff |  un: LLL      r  sv/pv |  ctr: LLL      r  sv/pv
+    2  0.039 |      5/5  0.615  0.406 |       5/5  0.520  0.479
+    3  0.059 |      5/5  0.809  0.371 |       5/5  0.558  0.538
+    4  0.079 |      5/5  0.925  0.371 |       5/5  0.684  0.502
+    6  0.118 |      2/5  1.161  0.355 |       5/5  0.792  0.524
+    8  0.157 |      0/5  1.328  0.356 |       5/5  0.926  0.512
+   12  0.236 |      0/5  1.647  0.345 |       5/5  1.072  0.533
+   16  0.314 |      0/5  1.864  0.350 |       5/5  1.262  0.517
+   24  0.471 |      0/5  2.298  0.341 |       3/5  1.475  0.533
+   32  0.629 |      0/5  2.596  0.319 |       0/5  1.731  0.480
+   48  0.943 |      0/5  3.187  0.292 |       0/5  2.031  0.460
+
+Largest eff with a full 5/5 sweep:
+  12-bit/2557        uncentred eff=0.156   centred eff=0.313   gain x2.00
+  12-bit/2677 FAIL   uncentred eff=0.079   centred eff=0.314   gain x4.00
+
+------------------------------------------------------------------------------
+C3: fresh 17-bit curves, eff sweep, centred vs uncentred (m=12)
+------------------------------------------------------------------------------
+Searching j=0 GLV curves with p in [65536, 131072) ...
+Found 20 curves (lam* spread over (0, 0.5)).
+
+  eff* |  uncentred wins  mean r |  centred wins  mean r
+  0.05 |          99/100   0.849 |       100/100   0.568
+  0.15 |          21/100   1.459 |        93/100   0.958
+  0.25 |           9/100   1.856 |        56/100   1.195
+  0.40 |           0/100   2.331 |         9/100   1.530
+  0.60 |           0/100   2.777 |         0/100   1.820
+  0.80 |           0/100   3.216 |         0/100   2.107
+
+Pooled instances (both variants): 240, full-sweep successes: 60
+  AUC(r)     = 0.982      <- lattice statistic
+  AUC(eff)   = 0.963      <- ignores centring
+  AUC(lam*)  = 0.454      <- curve invariant (T3: none work)
+  r | success: max = 1.496, mean = 0.833
+  r | failure: min = 0.848, mean = 2.019
+
+------------------------------------------------------------------------------
+C4: sv/pv after centring, and the S_KANNAN = n/2 variant
+------------------------------------------------------------------------------
+T5 (2026-07-29): uncentred, the shortest vector is always the trivial
+n*S_D*e_m, so sv/pv < 1 always.  Centring shrinks ||v|| while leaving the
+trivial vector untouched, so sv/pv rises toward 1 but cannot reach it:
+the planted vector is still NOT lambda_1.  Recovery does not need it to
+be — it needs the planted vector to be the shortest in its Kannan coset.
+
+curve                K1 variant                   LLL      r  sv/pv
+8-bit/199             2 uncentred, S_KAN=n        5/5  1.339  0.543
+8-bit/199             2 centred,   S_KAN=n        5/5  1.183  0.614
+8-bit/199             2 centred,   S_KAN=n/2      5/5  1.052  0.728
+12-bit/2557           8 uncentred, S_KAN=n        5/5  1.325  0.354
+12-bit/2557           8 centred,   S_KAN=n        5/5  0.922  0.509
+12-bit/2557           8 centred,   S_KAN=n/2      5/5  0.850  0.568
+12-bit/2677 FAIL      8 uncentred, S_KAN=n        0/5  1.328  0.356
+12-bit/2677 FAIL      8 centred,   S_KAN=n        5/5  0.926  0.512
+12-bit/2677 FAIL      8 centred,   S_KAN=n/2      5/5  0.853  0.572
+
+------------------------------------------------------------------------------
+C5: optimal S_KANNAN = t*n, and the wall with the fully tuned lattice
+------------------------------------------------------------------------------
+Minimising r(t) = sqrt(C + (t*n)^2) / (const * (t*n)^(1/dim)) over t gives
+t*^2*n^2 = C/(dim-1) with C = m*(E[k1^2]*S_K1^2 + E[k2^2]*S_K2^2) + n^2/3.
+Centred, large m:  C -> n^2*(m/6 + 1/3), dim-1 = 2m+1, so t* -> 1/sqrt(12)
+= 0.289.  The 2026-07-26 builder uses t = 1.0.
+
+
+12-bit/2557  K1=16  eff=0.313  m=12  t* (predicted) = 0.305
+     t       r    LLL   sv/pv
+  0.15   1.164    5/5   0.586
+  0.20   1.155    5/5   0.584
+  0.25   1.150    5/5   0.582
+  0.29   1.147    5/5   0.579
+  0.35   1.147    5/5   0.576
+  0.50   1.156    5/5   0.563
+  0.75   1.195    5/5   0.535
+  1.00   1.256    5/5   0.503
+  1.50   1.426    5/5   0.435
+
+12-bit/2677 FAIL  K1=16  eff=0.314  m=12  t* (predicted) = 0.303
+     t       r    LLL   sv/pv
+  0.15   1.167    5/5   0.604
+  0.20   1.158    5/5   0.602
+  0.25   1.153    5/5   0.600
+  0.29   1.151    5/5   0.597
+  0.35   1.150    5/5   0.593
+  0.50   1.159    5/5   0.580
+  0.75   1.199    5/5   0.551
+  1.00   1.262    5/5   0.517
+  1.50   1.434    4/5   0.447
+
+K1 grid with the tuned lattice (centred, t = 0.29):
+curve                K1    eff      r    LLL
+12-bit/2557          16  0.313  1.147    5/5
+12-bit/2557          24  0.469  1.324    5/5
+12-bit/2557          32  0.626  1.569    2/5
+12-bit/2557          48  0.939  1.822    0/5
+12-bit/2677 FAIL     16  0.314  1.151    5/5
+12-bit/2677 FAIL     24  0.471  1.331    4/5
+12-bit/2677 FAIL     32  0.629  1.574    0/5
+12-bit/2677 FAIL     48  0.943  1.832    0/5
+
+------------------------------------------------------------------------------
+C6: does the C1/C2 split survive centring?   (Exp S protocol regime)
+------------------------------------------------------------------------------
+Exp S (2026-06-29) fixed K1=72, m=12, 20-bit curves, and called a curve
+C2 if LLL recovers d on every seed, C1 otherwise.  74% were C1, and six
+curve invariants failed to separate them; nu_hat reached AUC 0.935.
+The GH model says Exp S sits *exactly at the wall* (r ~ 1), which is why a
+second-order statistic could separate at all.  Centring drops r well below
+1, so the prediction is that the C1 class disappears entirely.
+
+Harvesting 20-bit j=0 GLV curves ...
+Found 100 curves.
+
+lattice                       C2 curves    seed wins   mean r
+uncentred, t=1 (Exp S)           24/100      222/600    1.372
+centred,   t=0.29               100/100      600/600    0.795
+
+K1=72, m=12, K2 ~ sqrt(n), eff ~ 0.070
+
+Done.
