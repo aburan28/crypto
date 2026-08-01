@@ -6312,3 +6312,5 @@ test sits well inside the success region (it would not detect the gain).
 ### Commits made
 
 6df8fa3 autolab 2026-08-01: Thread 23 — centring, not projection, is the Phase-2 lattice fix; wall is curve-independent (nu_GH<=1.2)
+
+3bfbb4a autolab 2026-08-01: addendum — BV lattice centring costs only 0.4-0.6 bits at 256-bit; hnp_ecdsa doc threshold corrected to m*bias_bits
