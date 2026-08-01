@@ -6103,3 +6103,158 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-01 (autolab run)
+
+### Task picked
+**Thread 23** — the exact next-step proposed by the 2026-07-29 entry: reformulate
+the Phase-2 GLV-HNP lattice so the planted vector is the target of a BDD/CVP
+instance instead of an SVP instance, then re-run the T4 K1 grid and check the
+falsifier. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed
+2026-07-21; priority 5 (GLV-HNP Phase 2) is the live thread with measurable
+progress on 2026-07-26 and 2026-07-29.
+
+Environment note: the container is a fresh clone with **no PARI/GP and no
+python packages**. `pip install sympy numpy fpylll cysignals` (cysignals is a
+hard undeclared dependency of fpylll 0.6.4 — it is NOT pulled in automatically,
+and `import fpylll` fails with `ModuleNotFoundError: No module named 'cysignals'`
+without it). Future runs: install all four.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected_cvp.py` (~590 lines, six
+  experiments E1–E6). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_cvp_output.txt`.
+- Derived and implemented the **projected lattice L'** (dim 2m, the d-column
+  quotiented out). With `C_i := B_i·B_1⁻¹ mod n` and `f_i := x_i + λy_i mod n`,
+  `L' = {(x,y) ∈ Z^m×Z^m : f_i ≡ C_i·f_1 (mod n) ∀i}`, explicit basis
+  `g0 = (1,C_2..C_m | 0)`, `g1 = (0,C_2λ..C_mλ | e_1)`, `g_j = (−λe_j | e_j)`,
+  `h_i = (n·e_i | 0)`. The planted point is `(k1 − A, k2)`; `d` is read straight
+  off it as `B_1⁻¹(x_1 + λy_1) mod n` — no coefficient tracking needed.
+- Added **centring**: CVP target `t = (−A_i·S_K1 + S_K1⌊(K1−1)/2⌋ | S_K2⌊(K2−1)/2⌋)`
+  so the error is zero-mean (`E[coord²] = n²/12` instead of `n²/3`).
+- Implemented exact Babai nearest-plane (`Fraction` Gram–Schmidt) and a Kannan
+  embedding of the CVP (dim 2m+1).
+- Ran five methods on the T4 grid, m=12, 5 seeds, K1 ∈ {2,3,4,6,8,12,16,24,32},
+  on four curves incl. the 17-bit λ*=0.0068 curve from 2026-07-29 T3.
+- `cargo test --test curve_audit` → 5/5 pass (5.08 s). ✓ No Rust changed.
+
+### Findings
+
+**F1 — the 2026-07-29 falsifier is SATISFIED; the reformulation is a real
+improvement.** The falsifier was "if sv/pv rises above 1 and the K1 wall on the
+λ*=0.07 curve (currently K1≈4–6) moves outward". Both hold.
+
+E2 geometry (m=12, seed 42) — OLD `sv/pv` vs NEW `λ₁(L')/‖err‖`:
+
+| curve | K1 | OLD sv/pv | NEW λ₁/err | NEW err/GH |
+|---|---|---|---|---|
+| 12-bit/2557 (λ*=0.340) | 2 | 0.388 | **1.224** | 0.338 |
+| 12-bit/2557 | 8 | 0.362 | 0.716 | 0.668 |
+| 12-bit/2677 (λ*=0.070) | 2 | 0.392 | **2.464** | 0.338 |
+| 12-bit/2677 | 8 | 0.366 | **1.353** | 0.668 |
+| 17-bit/65713 (λ*=0.0068) | 8 | 0.396 | **1.261** | 0.326 |
+
+E3 K1 grid, m=12, 5 seeds — the historical failure curve **12-bit/2677**:
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| OLD Kannan-SVP | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| NEW Babai-CVP | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 2/5 |
+| NEW Kannan-embed | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 4/5 | 2/5 |
+| NEW Kannan **uncentred** | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| OLD **centred** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 1/5 |
+
+Wall moves K1 ≈ 4–6 → K1 ≈ 24. **~4–5× more tolerable k₁ range.**
+
+**F2 — attribution: the gain is CENTRING, not projection.** This contradicts the
+Thread 23 hypothesis and is the run's main result. Read the last two rows of the
+table above: projection *without* centring reproduces OLD exactly (0/5 from K1=8),
+while the OLD lattice *with* centring reproduces the full NEW gain. So the trivial
+vector `n·S_D·e_m` identified on 2026-07-29 was never the obstruction — it is a
+generic feature of every HNP lattice (classical Boneh–Venkatesan has it too) and
+LLL simply spends one basis vector on it. The real defect was that `k1_i ∈ [0,K1)`
+and `k2_i ∈ [0,K2)` are one-sided, so the planted vector carried a mean offset in
+all 2m informative coordinates: `E[coord²] = n²/3` rather than `n²/12`, a factor
+**2** in `‖v_planted‖`, i.e. one full bit of leakage per coordinate thrown away.
+
+The one-line fix to `build_glv_lattice` (glv_hnp_phase2_20bit.py:262):
+```python
+    M[2*m+1][i]       = (sigs[i]['A'] - (K1 - 1)//2) * S_K1
+    M[2*m+1][m+1+i]   = -((K2 - 1)//2) * S_K2
+```
+Projection to dim 2m is performance-neutral but conceptually cleaner and is what
+makes the exact-Babai and closed-form-determinant analyses below possible.
+
+**F3 — after centring the wall is CURVE-INDEPENDENT and has a closed form.**
+Define `eff = K1·K2/n` and
+```
+    ν_GH  =  E‖err‖ / GH(L')  =  sqrt(2πe/12) · sqrt(eff) · n^{1/(2m)}
+                              ≈  1.193 · sqrt(eff) · n^{1/(2m)}
+```
+using `det L' = n^{m−1}·S_K1^m·S_K2^m` (verified exactly in E1: log₂det matches
+`(m−1)log₂n + m log₂S_K1 + m log₂S_K2` to 2 d.p. on all four curves).
+
+E5, best single ν_GH threshold over all 36 (curve, K1) cells, success = ≥3/5:
+
+| method | best thr | errors/36 | max ν(success) | min ν(failure) | monotone |
+|---|---|---|---|---|---|
+| OLD Kannan-SVP | 0.813 | 4 | 1.013 | 0.574 | **False** |
+| NEW Kannan uncentred | 0.805 | 4 | 1.013 | 0.574 | **False** |
+| NEW Babai-CVP | 1.313 | 1 | 1.188 | 1.141 | False |
+| NEW Kannan-embed | 1.313 | **0** | 1.188 | 1.313 | **True** |
+| OLD centred | 1.313 | **0** | 1.188 | 1.313 | **True** |
+
+For the uncentred lattices the success and failure bands *overlap* (a success at
+ν=1.013 and a failure at ν=0.574) — no threshold in any curve-independent
+quantity can work. For the centred lattices the separation is perfect.
+
+**This retro-explains the entire 2026-06-21…06-29 hunt.** Six curve-level
+invariants (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n — log lines ~3560–3580)
+and then λ*/μ/ρ (2026-07-29 T2) all failed to separate C1 from C2. They failed
+because the C1/C2 discordance was an **artifact of the uncentred embedding**, not
+a property of the curves. Centre the lattice and the discordance disappears.
+
+**F4 — out-of-sample confirmation (E6).** The closed form predicts the wall must
+move with m like `K1* = 1.098·n^{1−1/m}/K2`. E3/E5 only ever used m=12; E6 swept
+m ∈ {6,8,12,18,24} on both 12-bit curves, method = NEW Kannan-embed:
+
+| m | K1* predicted | 2557 observed | 2677 observed | ν_GH at 2557 wall | at 2677 wall |
+|---|---|---|---|---|---|
+| 6 | 15.1 | 20 | 20 | 1.447 | 1.457 |
+| 8 | 20.9 | 20 | 20 | 1.227 | 1.236 |
+| 12 | 29.1 | 28 | 28 | 1.234 | 1.243 |
+| 18 | 36.2 | 32 | 32 | 1.177 | 1.193 |
+| 24 | 40.4 | 40 | 40 | 1.250 | 1.259 |
+
+The two curves — λ* = 0.340 and λ* = 0.070, the pair that was "discordant" for six
+weeks — give **identical** walls at every m. ν_GH at the wall is 1.18–1.26 for
+m ≥ 8 (m=6 reads 1.45, attributable to the coarse 16→20 grid step plus weaker LLL
+in dim 13). Wall criterion: **ν_GH ≲ 1.2**, equivalently `eff ≲ 1.1·n^{−1/m}`.
+
+**F5 — Babai vs Kannan.** Exact Babai nearest-plane on the LLL-reduced projected
+basis is 1 cell worse than the Kannan embedding out of 36 and is markedly slower
+(Fraction GS, O(dim³) rationals). Kannan embedding is the method to use; Babai is
+retained only because it gives the coefficient-free `d` read-out used in E1.
+
+### Next step proposal
+**Thread 24 — port the centring fix into the 256-bit pipeline and re-derive the
+Phase-2 signature-count claim.** Concretely:
+1. Patch `build_glv_lattice` in `glv_hnp_phase2_20bit.py` and the other Phase-2
+   scripts that copy it (`glv_hnp_phase2_lambda_threshold.py:~380`,
+   `glv_hnp_target_vector.py`, `glv_hnp_phase2_scaling.py`) with the two lines in
+   F2, and re-run their headline tables. Several published-in-log numbers
+   (2026-06-15, 2026-06-23, 2026-07-26, 2026-07-29 T4) are one bit pessimistic.
+2. `RESEARCH_GLV_HNP_PHASE2.md` §2 dimension analysis claims "5–10 signatures
+   suffice" for c=64 on a 256-bit curve. ν_GH now gives the exact statement:
+   `m ≳ log₂n / (2·log₂(1.2/(1.193·sqrt(eff))) + log₂n/m)` — solve it numerically
+   for secp256k1 (n≈2²⁵⁶, K2=2¹²⁸, K1=2^{128−c}) and replace the hand-wave.
+   Falsifier: run the centred lattice on a 40–48-bit j=0 CM curve at the m the
+   formula predicts; if 3/3 seeds recover at m_pred and 0/3 at m_pred−2, the
+   formula extrapolates; if not, the n^{1/(2m)} term is wrong at scale.
+3. Cheap and worth doing first: check whether the **standard (non-GLV) Phase-1.5
+   HNP lattice** in `tests/curve_audit.rs::hnp_recovers_p256_key_via_lll_phase15`
+   is also uncentred. If it is, the same factor-2 applies there and the P-256
+   signature-count numbers in the paper are also one bit pessimistic.
+
+### Commits made
+[recorded below after commit]

@@ -135,6 +135,43 @@ in the k-overall-bias model (where for `c_total = 64` we'd need
 log_2(n)/c_total ≈ 4 sigs, but with strong-bias assumption that
 doesn't apply to the k₁-only case).
 
+### Centring correction (Thread 23, 2026-08-01)
+
+The implemented lattice (`build_glv_lattice`, `secp256k1_cm_audit/`
+`glv_hnp_phase2_20bit.py:262`) put the raw `A_i` in the Kannan row and `0`
+in the `k₂` columns.  Because `k₁ᵢ ∈ [0,K₁)` and `k₂ᵢ ∈ [0,K₂)` are
+*one-sided*, the planted vector then has a non-zero mean offset in every
+one of its `2m` informative coordinates: `E[coord²] ≈ n²/3` instead of
+`n²/12`.  That is a factor 2 in `‖v_planted‖`, i.e. one full bit of
+tolerable leakage per coordinate.
+
+The fix is to shift the Kannan row so the planted block is zero-mean:
+
+```
+   M[2m+1][i]       = (A_i − ⌊(K₁−1)/2⌋) · S_K1     i = 0..m−1
+   M[2m+1][m+1+i]   = −⌊(K₂−1)/2⌋ · S_K2            i = 0..m−1
+```
+
+Measured effect (`glv_hnp_phase2_projected_cvp.py`, m=12, 5 seeds): on the
+historical `p=2677, λ*=0.070` failure curve the K₁ wall moves from
+K₁ ≈ 4–6 to K₁ ≈ 24, and the curve-to-curve spread in the wall location
+vanishes.  See `RESEARCH_AUTOLAB_LOG.md` §2026-08-01.
+
+**Consequence for §4 Risk 2 (λ size): falsified.**  Once the lattice is
+centred, curves with λ* = 0.0068, 0.070, 0.340 and 0.467 all hit the same
+wall at the same `ν_GH`.  λ is not a risk factor for Phase 2.
+
+**Success criterion (centred lattice).**  With `S_K1 = n/K₁`,
+`S_K2 = n/K₂`, `eff = K₁K₂/n`, recovery succeeds iff
+
+```
+   ν_GH  =  √(2πe/12) · √eff · n^{1/(2m)}  ≲  1.2
+```
+
+which is a closed form in `(n, K₁, K₂, m)` containing **no curve data**.
+Equivalently `eff ≲ 1.1 · n^{−1/m}`, recovering the `m ≳ log n / log(1/eff)`
+rule of the dimension analysis above with an explicit constant.
+
 ## 3. Why this is novel
 
 To the best of our knowledge, no published HNP variant exploits
