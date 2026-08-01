@@ -6425,4 +6425,4 @@ pre-merge blobs before assuming the work was never done. Appending a new
 
 ### Commits made
 
-(filled in by the follow-up commit below)
+1691a20 autolab 2026-08-01: Thread 23 — closed form for lambda_1(L2); restore lost 07-29 entry
