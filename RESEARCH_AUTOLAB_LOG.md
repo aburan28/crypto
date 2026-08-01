@@ -6487,4 +6487,4 @@ invariants now falsified).
 
 ### Commits made
 
-(hash recorded in the following commit)
+`6e2f510` autolab 2026-08-01: Thread 23 — closed form for nu_hat proved exactly; repair lost 07-29 session
