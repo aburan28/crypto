@@ -1,0 +1,203 @@
+GLV-HNP Phase 2 — Thread 23: closed form for nu_hat
+Deterministic seed 20260801
+
+==============================================================================
+PART A — Corollary 23.2 verified in EXACT integer arithmetic
+==============================================================================
+Testing  lambda_1(L2)^2  ==  min_j [A^2 theta_j^2 + B^2 q_j^2]
+(integer equality, not correlation)
+
+ bits    eff  trials  exact match  mismatch
+   16   0.05     120          120         0
+   16   0.25     120          120         0
+   16   0.50     120          120         0
+   20   0.05     120          120         0
+   20   0.25     120          120         0
+   20   0.50     120          120         0
+   24   0.05     120          120         0
+   24   0.25     120          120         0
+   24   0.50     120          120         0
+   32   0.05     120          120         0
+   32   0.25     120          120         0
+   32   0.50     120          120         0
+   48   0.05     120          120         0
+   48   0.25     120          120         0
+   48   0.50     120          120         0
+   64   0.05     120          120         0
+   64   0.25     120          120         0
+   64   0.50     120          120         0
+  128   0.05      40           40         0
+  128   0.25      40           40         0
+  128   0.50      40           40         0
+  256   0.05      40           40         0
+  256   0.25      40           40         0
+  256   0.50      40           40         0
+
+TOTAL: 2400/2400 exact matches (100.00%)
+VERDICT: Corollary 23.2 HOLDS exactly
+
+==============================================================================
+PART B — precision audit of glv_hnp_nuhat_lib.gauss_reduce_2d (float)
+==============================================================================
+The shipped reducer rounds  q = round(<u,v>/|v|^2)  in f64.  At the
+20/24-bit sizes the July results were measured at this is exact; the
+question is whether the 256-bit extrapolation in the 07-29 entry
+(secp256k1 nu_hat = 0.8709 etc.) was computed reliably.
+
+ bits  trials   agree  disagree   max rel err   worst nu_hat float/exact
+   20     200     200         0     2.755e-16     0.805946 / 0.805946   
+   24     200     200         0     2.583e-16     0.859683 / 0.859683   
+   32     200     200         0     2.461e-16     0.902385 / 0.902385   
+   64     200     200         0     2.686e-16     0.826713 / 0.826713   
+  128      60      60         0     2.418e-16     0.918445 / 0.918445   
+  192      60      60         0     2.191e-16     1.013565 / 1.013565   
+  256      60      60         0     2.922e-16     0.759779 / 0.759779   
+
+==============================================================================
+PART C — the winning convergent sits at the scale Q* = sqrt(n*K2/K1)
+==============================================================================
+j*      = argmin index of Cor 23.2
+j(Q*)   = index of the convergent denominator nearest Q* (log scale)
+offset  = j* - j(Q*)
+
+eff=0.05  |offset|<=1: 389/400 (97.2%)
+            offset dist: -2:11 -1:213 +0:176
+            q_j*/Q* quantiles  q10=0.063 q50=0.423 q90=0.797
+
+eff=0.25  |offset|<=1: 386/400 (96.5%)
+            offset dist: -2:14 -1:203 +0:183
+            q_j*/Q* quantiles  q10=0.071 q50=0.431 q90=0.803
+
+eff=0.50  |offset|<=1: 389/400 (97.2%)
+            offset dist: -2:11 -1:212 +0:177
+            q_j*/Q* quantiles  q10=0.072 q50=0.400 q90=0.855
+
+
+==============================================================================
+PART D — Hermite bound and the normalised (x,y) identity
+==============================================================================
+Predicted hard ceiling nu_hat <= (4/3)^(1/4) = 1.074570
+07-29 observed maxima: 1.012 (20d sample), 1.072 (20c high group)
+
+max nu_hat over 600 random 24-bit instances: 1.063272  (<= bound)
+identity nu_hat^2 == x_j*^2 + y_j*^2 : 600/600
+x*y = q*theta/n at the argmin: q10=0.0164 q50=0.1284 q90=0.3690  (AM-GM: nu_hat^2 >= 2*x*y)
+
+==============================================================================
+PART E — scale-local partial quotient vs scale-free max_a
+==============================================================================
+June falsified max_a (AUC 0.748, at the trivial baseline on Exp S).
+Cor 23.2 says the predictive quantity is the partial quotient AT the
+scale Q*, i.e. a_{j*+1}, not the largest one anywhere.
+
+Sampling REAL GLV eigenvalues (lam^2+lam+1 = 0 mod n) for relevance.
+
+n = 300 real j=0 GLV curves at 24 bits, eff=0.05
+
+  spearman(nu_hat, a_scale = a_{j*+1}) = -0.763     <- scale-LOCAL
+  spearman(nu_hat, max_a)               = -0.252     <- scale-FREE (the June invariant)
+  spearman(a_scale, max_a)              = +0.364
+
+  AM-GM prediction: a_scale >~ 2/nu_hat^2.  Check by nu_hat quartile:
+    Q1 (smallest nu_hat)   nu_hat=0.354  a_scale=  36.00  max_a=  38.63  2/nu^2=  16.00
+    Q2                     nu_hat=0.608  a_scale=  10.24  max_a=  19.15  2/nu^2=   5.41
+    Q3                     nu_hat=0.793  a_scale=  12.91  max_a=  40.09  2/nu^2=   3.18
+    Q4 (largest nu_hat)    nu_hat=0.958  a_scale=   5.19  max_a=  29.69  2/nu^2=   2.18
+
+==============================================================================
+PART F — secp256k1 closed form, BOTH GLV roots
+==============================================================================
+n     = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+lam_a = 78074008874160198520644763525212887401909906723592317393988542598630163514318
+lam_b = 37718080363155996902926221483475020450927657555482586988616620542887997980018   (= lam_a^-1 = lam_a^2 mod n)
+lam_b is the root used on 07-29: True
+
+07-29 reported (float reducer, root lam_b): eff 0.05 -> 0.8709,
+0.10 -> 0.6624, 0.25 -> 0.5852, 0.50 -> 0.6851.
+Recomputed here in exact integers and via Cor 23.2:
+
+   eff  nu(lam_a)  nu(lam_b)   |diff|   nu_min |  CF ok   j*  a_{j*+1}   q_j*/Q*   (argmin over the better root)
+  0.05   0.881527   0.870857   0.0107 0.870857 |   True   70         5    0.1994
+  0.10   0.690088   0.662438   0.0276 0.662438 |   True   70         5    0.2820
+  0.25   0.660290   0.585226   0.0751 0.585226 |   True   70         5    0.4458
+  0.50   0.810169   0.685119   0.1250 0.685119 |   True   70         5    0.6305
+
+RECONCILIATION: the nu(lam_b) column reproduces the 07-29 table to
+all printed digits (0.8709 / 0.6624 / 0.5852 / 0.6851).  The 07-29
+numbers are correct; they are simply stated for one of the two roots.
+
+Refinement: |nu(lam_a) - nu(lam_b)| is 0.011 at eff=0.05 -- inside the
+07-29 root-choice control (20a Part E, '<0.02', 6 small curves at one
+eff) -- but grows to 0.075 at eff=0.25 and 0.125 at eff=0.50.  So the
+'<0.02' bound is an eff=0.05 statement, not a universal one.  Part G
+shows this costs nothing: root choice never flips a curve across the
+viability cut.
+
+CF(lam_a/n): length 142, largest partial quotients (index:value): 17:312, 126:312, 15:163, 128:163, 63:45, 80:45
+
+CF(lam_b/n): length 141, largest partial quotients (index:value): 16:312, 125:312, 14:163, 127:163, 62:45, 79:45
+
+Reading: secp256k1's large partial quotients are NOT at the attack
+scale under either root, so nu_hat stays mid-range at every eff --
+consistent with the 07-29 percentile finding, now with an algebraic
+reason rather than an empirical one.
+
+==============================================================================
+PART G — root choice: is it a free attacker degree of freedom?  NO.
+==============================================================================
+A j=0 curve has two GLV eigenvalues lam and lam' = n-1-lam = lam^-1.
+Both give a valid HNP instance, so an attacker may use whichever has
+the smaller nu_hat.  HYPOTHESIS (this run's own): the two roots are
+untied, so min over roots is a free ~2x shot at a low-nu_hat instance.
+RESULT BELOW: FALSIFIED -- the gain is exactly 1.00x.
+
+Reversal theorem check (CF(n/lam) reversed vs CF(n/(+/-lam^-1))):
+  reversed == CF(n/ +lam^-1) : 0/200   <- the OTHER GLV root
+  reversed == CF(n/ -lam^-1) : 103/200   <- not a GLV root
+  So the REVERSAL theorem does not tie the two GLV roots: it maps
+  lam to -lam^-1 (parity-dependent), and the second GLV root is
+  +lam^-1.  A different, elementary relation ties them instead:
+
+    lam'/n = 1 - lam/n - 1/n,  and  x = [0;1,a2,a3,...]
+                                =>  1-x = [0;1+a2,a3,...]
+  i.e. the two expansions share a TAIL after a 1-term realignment,
+  perturbed only by the -1/n.  Aligned-prefix agreement measured:
+
+  secp256k1: 68 of 142 partial quotients agree after alignment (48%),
+             and the winning index j* ~ 70 sits just past that point.
+  24-bit curves: agreement fraction q10=0.22 q50=0.31 q90=0.36
+  CAVEAT (open): at 24 bits only ~1/3 of the expansion is shared, yet
+  |d nu| is still ~0.012 at eff=0.05.  Prefix sharing alone does not
+  fully account for how tightly the two roots track; not resolved here.
+
+ bits    eff  curves  mean|d nu|  max|d nu|  P(lam low)  P(min low)   gain
+   24   0.05     250      0.0119     0.0260       0.208       0.208   1.00x
+   24   0.25     250      0.0606     0.1009       0.000       0.000    nanx
+   32   0.05     150      0.0117     0.0252       0.220       0.220   1.00x
+   32   0.25     150      0.0615     0.1011       0.000       0.000    nanx
+   48   0.05     150      0.0118     0.0239       0.160       0.160   1.00x
+   48   0.25     150      0.0646     0.1011       0.000       0.000    nanx
+
+P(lam low)  = fraction with nu_hat < 0.45 using a fixed root
+P(min low)  = fraction with min over both roots < 0.45
+gain        = the free multiplier an attacker gets from root choice.
+
+VERDICT: gain = 1.00x at every (bits, eff) tested -- not one curve in
+550 changes side of the 0.45 cut when the other root is used.  Root
+choice is NOT an attacker degree of freedom.  nu_hat is well defined
+per curve up to ~0.01 (eff=0.05) / ~0.06 (eff=0.25); the 07-29
+'<0.02' root-choice control is confirmed at eff=0.05 and is mildly
+optimistic at larger eff, but the conclusion it supported is unchanged.
+
+Consequence for the 07-29 secp256k1 placement: min over both roots is
+0.5852 at eff=0.25, still above the 0.45 'easy' cut, and 0.6624 at
+eff~0.10, still above the C2 ceiling 0.645.  Placement unchanged.
+
+==============================================================================
+SUMMARY
+==============================================================================
+Corollary 23.2 exact on every trial: True
+nu_hat is now an explicit continued-fraction quantity of lam/n
+evaluated at the scale Q* = sqrt(n*K2/K1); no lattice reduction needed.
+
+Done.
