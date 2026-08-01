@@ -6532,4 +6532,4 @@ Not recommended: any further scale-free CF invariant (`q_cf`, `max_q_cf`,
 
 34b0e5e autolab 2026-08-01: Thread 23 — nu_hat closed form via continued fractions; repair lost 07-29 entry
 9f7a26c autolab 2026-08-01: E5 — nu_hat determined by a size-independent window of ~4 convergents
-(+ P-521 HP probe result, hash in the following commit)
+8df41be autolab 2026-08-01: PRIORITY 1 RESOLVED — exact-integer GS recovers P-521 3/3
