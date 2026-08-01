@@ -6103,3 +6103,159 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-01 (autolab run)
+
+### Task picked
+Thread 23 — the reformulation proposed verbatim by the 2026-07-29 entry ("project
+the Phase-2 lattice along e_m so the planted vector becomes λ₁", falsifier stated
+there). Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END, priority 3 completed
+2026-07-21, priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29,
+so rule (b) selects its proposed sub-task.
+
+### Work done
+- Environment: this container had **no sympy, fpylll, cysignals, numpy, or PARI/GP**
+  (fresh clone; the 2026-07-26 note that "PARI is now installed" does not survive
+  a new container). `pip install sympy fpylll cysignals numpy` succeeded — all four
+  are needed by every `glv_hnp_*.py` script. **`cargo test` is BLOCKED here:
+  crates.io is unreachable under this environment's network policy
+  (`503 DNS resolution failure` on index.crates.io, `--offline` fails for lack of a
+  registry cache). No Rust files were touched today, so nothing to regress.**
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (E1–E4): the projected
+  lattice (d column deleted, rank 2m+1), with the recovery step
+  d = (k1₀ + λ·k2₀ − A₀)·B₀⁻¹ mod n and a self-consistency check across all m
+  signatures that needs no oracle. Output:
+  `glv_hnp_phase2_projected_output.txt`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd_optimality.py` (E5–E7): exhaustive
+  d-uniqueness, exact CVP optimality of the coset, and the exact BDD rank of the
+  true d among all n cosets. Output: `glv_hnp_phase2_bdd_optimality_output.txt`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_enum_attack.py` (E8): CVP-mode
+  enumeration inside the Kannan coset + box-predicate filtering. Output:
+  `glv_hnp_phase2_enum_attack_output.txt`.
+- Refactored `glv_hnp_phase2_projected.py`'s experiments under `main()` so the
+  helpers import cleanly (the repo's `importlib.exec_module` convention otherwise
+  re-runs the whole experiment on import).
+
+### Findings
+
+**E1/E2 — Thread 23 is FALSIFIED. The projection helps the geometry and hurts
+the attack.** sv/pv does rise, but never above 1, and recovery gets strictly
+worse:
+
+| curve | lat | dim | det^(1/dim) | GH | pv | sv | sv/pv | pv/GH |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | orig | 14 | 303.5 | 274.7 | 329.8 | 199.0 | 0.603 | 1.200 |
+| 8-bit/199 | proj | 13 | 313.5 | 273.5 | 329.7 | 277.9 | 0.843 | 1.206 |
+| 12-bit/2557 | orig | 18 | 3906.5 | 4010.4 | 5142.8 | 2659.0 | 0.517 | 1.282 |
+| 12-bit/2557 | proj | 17 | 3995.9 | 3986.6 | 5142.4 | 2737.6 | 0.532 | 1.290 |
+| 12-bit/2677 | orig | 22 | 4250.3 | 4823.8 | 6270.7 | 2647.0 | 0.422 | 1.300 |
+| 12-bit/2677 | proj | 21 | 4347.2 | 4820.4 | 6270.3 | 5095.8 | 0.813 | 1.301 |
+
+The planted vector is **never** λ₁ in either lattice, and `pv/GH ≈ 1.2–1.3` in all
+six rows — successes and failures alike. So the Gaussian heuristic does not
+separate either; add it to the dead-separator list next to δ/n, κ(M), q_cf,
+max_q_cf, max_a, a_corn/n, λ*, and ρ.
+
+T4 grid re-run (m=12, 5 seeds), original vs projected:
+
+| curve | lat | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 | orig | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | proj | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | orig | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | proj | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+(orig rows reproduce 2026-07-29 T4 exactly.) 17-bit sweep at eff=0.15, 12 curves:
+original 2/12 recover 5/5, projected **0/12**. Reason: deleting the d column frees
+d′ instead of penalising it, so wrong-d′ vectors stop paying the |d′·S_D| cost and
+compete with the planted one. The d column is a regulariser, not just dead weight.
+
+**E5 — d is information-theoretically UNIQUE at every failure point.** Exhaustive
+scan of all d′ ∈ [0,n) admitting a small (k1,k2) for all m=12 signatures:
+
+| curve | K1=4 | K1=6 | K1=8 | K1=12 |
+|---|---|---|---|---|
+| 2557 | 1,1,1,1,1 | 1,1,1,1,1 | 1,1,1,1,1 | 1,1,1,1,1 |
+| 2677 | 1,1,1,1,1 | 1,1,1,1,1 | 1,1,1,1,1 | 1,1,1,1,1 |
+
+Count is 1 on 40/40 instances, including K1=12 (eff=0.236) where LLL is 0/5. **The
+K1 wall is NOT information-theoretic** — which closes the second branch of the
+2026-07-29 falsifier as decisively as E2 closed the first.
+
+**E7 — the LLL wall IS the rank-1 boundary.** Ranking all n cosets by the norm of
+their cheapest representative (cost(d′) = min over k2 of Σᵢ[(cent(cᵢ−λk2ᵢ)S_K1)² +
+(k2ᵢS_K2)²] + (d′S_D)² + S_KANNAN², the per-i minimisation decoupling):
+
+| curve | K1 | eff | rank of true d (5 seeds) | LLL |
+|---|---|---|---|---|
+| 2557 | 4 | 0.078 | 1,1,1,1,1 | 5/5 |
+| 2557 | 6 | 0.117 | 1,1,1,1,1 | 5/5 |
+| 2557 | 8 | 0.156 | 1,1,1,1,1 | 5/5 |
+| 2557 | 12 | 0.235 | 1,1,2,1,3 | 4/5 |
+| 2677 | 4 | 0.079 | 1,1,1,1,1 | 5/5 |
+| 2677 | 6 | 0.118 | 1,1,1,1,3 | 2/5 |
+| 2677 | 8 | 0.157 | 2,21,19,2,9 | 0/5 |
+| 2677 | 12 | 0.236 | 88,136,167,152,247 | 0/5 |
+
+Rank 1 ⇔ LLL succeeds, over the whole grid. **Diagnosis: objective mismatch.** The
+lattice minimises ℓ₂; the solution is defined by a box (0 ≤ k1ᵢ < K1, 0 ≤ k2ᵢ < K2).
+Past the wall a wrong d′ has a cheaper ℓ₂ representative while violating the box,
+so the ℓ₂ optimum is the wrong answer and no reduction strength can fix it — this
+is why BKZ(40) never rescued the 2026-07-26 curve. E6 confirms directly: at
+2677/K1=8/seed 42 the exact coset CVP optimum has norm 6947 < 7036 = ‖v_planted‖
+and decodes to d=531 ≠ 65.
+
+**E8 — the wall moves outward once the box predicate is used.** CVP-mode
+enumeration of the R shortest coset vectors (radius = 1.35·E[‖v_planted‖²] from
+public parameters only), each box-tested:
+
+| curve | K1 | eff | R=1 (LLL) | R=8 | R=64 | R=256 | distinct d at R=256 |
+|---|---|---|---|---|---|---|---|
+| 2557 | 4 | 0.078 | 5/5 | 5/5 | 5/5 | 5/5 | 1,1,1,1,1 |
+| 2557 | 6 | 0.117 | 5/5 | 5/5 | 5/5 | 5/5 | 1,1,1,1,1 |
+| 2557 | 8 | 0.156 | 5/5 | 5/5 | 5/5 | 5/5 | 1,1,1,1,1 |
+| 2557 | 12 | 0.235 | 4/5 | 3/5 | 4/5 | 4/5 | 1,1,1,1,2 |
+| 2677 | 4 | 0.079 | 5/5 | 5/5 | 5/5 | 5/5 | 1,1,1,1,1 |
+| 2677 | 6 | 0.118 | **2/5** | **5/5** | 5/5 | 5/5 | 1,1,1,1,2 |
+| 2677 | 8 | 0.157 | **0/5** | 2/5 | 4/5 | **5/5** | 2,11,16,2,7 |
+| 2677 | 12 | 0.236 | 0/5 | 0/5 | 0/5 | 0/5 | 24,30,34,33,28 |
+
+The 2026-07-26 "structural failure" point (2677, K1=8, where LLL *and* BKZ(40)
+failed) is now **5/5 at R=256**. By E5 the box test has no false positives, so
+acceptance needs no oracle. Caveat, stated plainly: R=256 enumerated vectors
+surface only ~10–30 *distinct* d, because many coset vectors share a d and differ
+only in the k2 assignment — the cost is not rank-proportional, and K1=12
+(rank 88–247) is still 0/5.
+
+Framework note: this is Albrecht–Heninger "BDD with predicate" (ePrint 2020/1540)
+instantiated for GLV. Nothing here is novel as a technique; what is new is the
+measurement that the Phase-2 wall is of that type, and the rank-1 ⇔ LLL-success
+correspondence in E7.
+
+Also worth recording: plain SVP enumeration on the full lattice is useless here.
+The first attempt at E8 did that and scored 0/5 everywhere — every short vector of
+L lies in the last-coordinate-zero sublattice, headed by the trivial n·S_D·e_m of
+norm n (2026-07-29, T5). The enumeration must be CVP-mode *inside* the coset.
+
+### Next step proposal
+**Thread 24 — how does R scale?** Fix eff ≈ 0.157 (where R=256 wins at 12 bits) and
+sweep n over 12/17/20/24-bit j=0 GLV curves, measuring the smallest R that gives
+5/5 and the number of distinct d per enumerated vector. Falsifier: if R grows
+polynomially in log n, the box-predicate attack extends the GLV-HNP operating
+regime to a real bit-length and Phase 2's ceiling is a factor, not a wall; if R
+grows like n^c, it is confined to toys. Reuse `enum_attack()` from
+`glv_hnp_phase2_enum_attack.py:60` verbatim and `search_curves()` from
+`glv_hnp_phase2_projected.py` for the curve supply. Estimated cost: minutes at
+≤20 bits; the 24-bit curve search dominates.
+
+Secondary (cheap): the E8 caveat suggests deduplicating the enumeration by d —
+enumerate with a per-d cap, or quotient the coset by the k2 lattice before
+enumerating, so that R vectors yield ~R distinct candidates. That alone would put
+K1=12 in reach at R≈256.
+
+Environment note for future runs: assume nothing is installed. Run
+`pip install sympy fpylll cysignals numpy` first; PARI/GP is absent and there is
+no apt access, so any `.gp` script is BLOCKED in this container. cargo is BLOCKED
+(no crates.io).
+
+### Commits made

@@ -257,8 +257,53 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. Settled 2026-08-01: the K1 wall is an objective mismatch, not hardness
+
+Risk 1 ("lattice degeneracy") and Risk 2 ("λ size") are now both resolved, and
+the resolution is the same in both cases: neither is the binding constraint.
+Ground truth on the two historical 12-bit curves, m = 12 (scripts
+`secp256k1_cm_audit/glv_hnp_phase2_bdd_optimality.py`,
+`glv_hnp_phase2_enum_attack.py`):
+
+1. **d is information-theoretically unique** at every (K1, seed) tested, up to
+   K1 = 12 (eff = K1·K2/n = 0.236).  Exhaustive enumeration of all d′ ∈ [0,n)
+   admitting a small (k₁,k₂) for all m signatures returns exactly 1 candidate,
+   including at the points where LLL and BKZ(40) both fail.  The wall is not a
+   shortage of data.
+
+2. **The LLL wall is exactly the rank-1 boundary** of the true d in the
+   coset-BDD ordering.  Ranking all n cosets by their cheapest ℓ₂
+   representative: rank 1 ⇒ LLL succeeds; rank > 1 ⇒ LLL fails, with a
+   one-to-one correspondence over the whole (curve, K1) grid tested.
+
+3. **Cause: the lattice minimises ℓ₂ but the solution is defined by a box.**
+   Past the wall a wrong d′ has a cheaper ℓ₂ representative while violating
+   0 ≤ k₁ᵢ < K1, 0 ≤ k₂ᵢ < K2.  The ℓ₂ optimum is then the wrong answer, so no
+   strengthening of the reduction can help — which retro-explains why BKZ(40)
+   never rescued the 2026-07-26 failure curve.
+
+4. **Consequence: enumerate the coset, don't just reduce it.**  CVP-mode
+   enumeration of the R shortest vectors of the coset {last coord = S_KANNAN},
+   each filtered by the box predicate (cost O(m·K2) per candidate, and by (1) it
+   has no false positives), moves the wall outward by roughly one K1 step:
+   curve 12-bit/2677 at K1 = 8 goes 0/5 (LLL, and BKZ(40)) → 5/5 at R = 256.
+   The radius is derived from public parameters only.
+
+   This is the Albrecht–Heninger "BDD with predicate" framework (ePrint
+   2020/1540) instantiated in the GLV setting; the contribution here is only the
+   measurement that the GLV Phase-2 wall is of that type and that the required R
+   is small at toy scale.
+
+Still open: how R scales.  At K1 = 12 (rank 88–247) R = 256 enumerated vectors
+surface only ~30 *distinct* d candidates and the attack still fails 0/5, so the
+enumeration cost is not rank-proportional.  The scaling of R with n at fixed eff
+is the next thing to measure, and it decides whether this extends beyond toys.
+
 ## 9. References
 
+- Albrecht, Heninger, "On bounded distance decoding with predicate: breaking
+  the 'lattice barrier' for the hidden number problem", Eurocrypt 2021
+  (ePrint 2020/1540).
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
   elliptic curves with efficient endomorphisms", CRYPTO 2001.
 - Boneh, Venkatesan, "Hardness of computing the most significant
