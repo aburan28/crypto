@@ -6103,3 +6103,156 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-01 (autolab run)
+
+### Task picked
+Thread 2 (CHLRS Igusa forward map) — priority 2. Last touched 2026-07-27 (5 days,
+within the 7-day window) *with* measurable progress, so protocol rule (b) applies and
+it outranks the priority-5 GLV threads that the 2026-07-29 run worked. The 07-27 entry
+left an explicit, concrete next step (Findings #3 and #7: "the FORWARD map
+(E1,E2) -> Howe cover parameters is missing"; proposed script
+`secp256k1_cm_audit/chlrs_forward_map.gp`).
+
+Outcome: **thread CLOSED**. The forward map does not need CHLRS/Mestre at all, and the
+pair the whole Mestre-Howe thread was built around — `(secp256k1, secp256k1^t)` — is
+the one pair for which no cover exists.
+
+### Work done
+- Environment (fresh container): `apt-get update` then `apt-get install -y
+  --no-install-recommends pari-gp` -> PARI/GP 2.15.4. **Note for future runs:**
+  `apt-get install pari-gp` alone fails with a 404 on an unrelated mesa dep; run
+  `apt-get update` first. `gp -q file.gp` hangs unless the file ends with `quit`,
+  and multi-line `for`/`if`/function bodies at top level MUST be wrapped in `{ }`.
+- Derived the 2-torsion gluing formula from scratch instead of looking up CHLRS
+  (§DERIVATION at the top of `chlrs_forward_map.gp`). A (2,2)-split Jacobian is
+  bielliptic; normalising the extra involution to `x -> -x` gives
+  `C: y^2 = c*(x^2-a1)(x^2-a2)(x^2-a3)` with quotients `E1: v^2 = c*prod(u-al_i)`
+  (u=x^2) and `E2: W^2 = -c*al1al2al3*prod(U-1/al_i)` (U=1/x^2). Gluing
+  `E1: y^2=prod(x-a_i)` to `E2: y^2=prod(x-b_i)` therefore requires the unique Mobius
+  `N` with `N(a_i)=b_i` to factor as `A'^-1 o inv o A` with `A,A'` affine.
+- Wrote `secp256k1_cm_audit/chlrs_forward_map.gp` (5 sections, 493 lines of output in
+  `chlrs_forward_map_output.txt`). Runs clean end to end in ~4 min.
+- `cargo test --test curve_audit` -> 5/5 pass (5.59s). No Rust code touched.
+
+### Findings
+
+**F1 — explicit forward map, validated.** Writing `N = [p0,q0; r0,s0]`, the gluing is
+constructible **iff r0 != 0**, and then
+```
+sh = s0/r0,  Na = prod_i (a_i+sh),  det0 = p0*s0-q0*r0,  t = Na*det0,
+al_i = t*(a_i+sh),   c = t.
+```
+`c = m = t` is forced mod squares by requiring the quotients to be `E1, E2` themselves
+rather than their quadratic twists. Section 1: **297/297** random split pairs over
+`F_1009` give `hyperellcharpoly(C) = charpoly(E1)*charpoly(E2)` EXACTLY (0 degenerate,
+0 mismatch) — exact equality, not just isogeny class, so both twists are right.
+
+**F2 — `r0 = 0` is the missing non-degeneracy condition.** `r0 = 0` means `N` is affine,
+i.e. `psi` is induced by an isomorphism `E1 -> E2`; then `(E1 x E2)/Gamma_psi` is
+decomposable and is not a Jacobian. Howe's (H1)/(H2)/(H3) as implemented in
+`sextic_twist_howe_check.gp` do NOT capture this, which is the root cause of the
+2026-07-27 "degenerate pair (0,3)" observation.
+
+**F3 — for j=0 the construction collapses to a closed form.** The roots of `x^3+B1` are
+`a*z3^i` and those of `x^3+B2` are `d*a*z3^{-i}`, so for the odd pairing `N(z) = d*a^2/z`
+=> `s0 = 0` => `sh = 0`, and with `tau := B1*(B1*B2)^(1/3)`:
+```
+    C : y^2 = tau*x^6 + tau^4*B1     ~     y^2 = tau*(x^6 + B2/B1)
+```
+i.e. the CLASSICAL bielliptic sextic `y^2 = c*(x^6+r)`. No Igusa inversion, no Mestre
+conic+cubic, no `A_2` moduli machinery. The multi-page program described in
+`RESEARCH_MESTRE_HOWE.md` §2 is unnecessary for this case.
+
+**F4 — exact existence criterion.** `tau ∈ F_p` iff `B1*B2` is a cube, so
+```
+   F_p-rational genus-2 cover of (E_k1, E_k2) exists
+     <=>  B_k1*B_k2 ∈ (F_p*)^3   <=>   e_k1 + e_k2 = 0 (mod 3)
+```
+where `e_k ∈ {0,1,2}` is the cubic-character index of `-B_k` (equivalently, Frobenius
+acts on the roots of `x^3+B_k` by multiplication by `z3^{e_k}`; `e_k = 0` iff `E_k[2]`
+is `F_p`-rational). Reason: the even (cyclic) root pairings are exactly the
+isomorphism-induced ones and give `r0 = 0`; the odd pairings are non-degenerate but
+Galois-equivariant only when the two Frobenius rotations are inverse.
+
+Evidence:
+
+| test | scope | result |
+|---|---|---|
+| Section 1 | 297 random split pairs / `F_1009` | 297 charpoly-EXACT, 0 mismatch |
+| Section 2 | 15 toy primes x 15 pairs x 6 pairings | criterion == observation **15/15 primes** |
+| Section 4 | closed form, 30 primes x 15 pairs = 450 | 310 correctly skipped, **140 charpoly-EXACT, 0 wrong** |
+| Section 5 | secp256k1, 2 independent code paths | **5/5** qualifying pairs `F_p`-isomorphic |
+
+Section-2 diagnostic worth recording: for a pair with `e_k1+e_k2 != 0` the odd pairing
+still yields an `F_p`-rational non-degenerate sextic — but `which_pair()` shows its
+Jacobian covers a *different* twist pair (e.g. p=43, input pair (0,1) -> the curve
+`6x^6+42` actually covers pair (0,5)). So no covers are being missed; the 6 pairings
+per pair always collapse to 3 degenerate + 1 curve (counted 3x, the three odd pairings
+give sextics differing by the square factor `z3`).
+
+**F5 — `(E, E^t)` is always dead.** For a quadratic twist `B2 = -B1`, so
+`B1*B2 = -B1^2`; `-1` is always a cube mod p, hence `e_1 = e_2` and
+`e_1+e_2 = 2e_1 = 0` only if `e_1 = 0`. secp256k1 has `e_0 = 2`, so:
+
+> **No genus-2 curve over F_p covers both secp256k1 and its quadratic twist.**
+
+`RESEARCH_MESTRE_HOWE.md` §1 asserted the opposite ("the audit verified the three Howe
+conditions hold for (secp256k1, secp256k1^t) ... Howe's theorem guarantees C exists").
+That is false: (H1)+(H2)+(H3) are not sufficient. Note added to that file.
+
+**F6 — corrected secp256k1 pair table.** `e_k = (2,1,0,2,1,0)` for `k=0..5`
+(so `x^3+7h^k` splits over `F_p` exactly for `k ∈ {2,5}`, matching the 2026-07-21
+factorisation table). Qualifying pairs:
+```
+   2026-07-21 (H1&H2&H3):  (0,1) (0,3) (0,4) (1,4) (3,4)
+   2026-08-01 (corrected): (0,1) (0,4) (1,3) (2,5) (3,4)
+```
+- `(0,3)` and `(1,4)` — the two quadratic-twist pairs — are DEGENERATE (F5).
+- `(1,3)` and `(2,5)` were wrongly excluded by `H3` (`gcd(#E1,#E2)=1`); `H3` is not
+  necessary for the glued surface to be a Jacobian, and both are constructed and
+  verified explicitly here.
+- 3 of 5 pairs agree with the old table.
+
+**F7 — explicit covers of secp256k1.** Both `(0,1)` and `(0,4)` involve `E_0 =`
+secp256k1 itself, so genus-2 covers of secp256k1 over `F_p` DO exist and are now
+written down. Closed form for pair (0,1):
+```
+y^2 = 58143629826275508634876278469338388499150432356026617846674692765025037297317*x^6
+    + 86926797315530504853260151747537324145284072510451991235174072375001528983684
+```
+Each cover is verified independently of the derivation by recovering both elliptic
+quotients from the sextic, checking the linear coefficient of the depressed cubic
+vanishes (`j = 0`) and that the recovered `B` is a 6th power times the intended
+`7*h^k` (`same6()`), i.e. `F_p`-isomorphic to the intended twist. All 5 pairs pass
+both checks on both quotients.
+
+**F8 — no cryptanalytic gain, main theorem unaffected.** The maps `C -> E_0` have
+degree 2, so the DLP lands in the order-`n` subgroup of `Jac(C)(F_p)` with
+`#Jac ~ p^2`. Best known attack there is still Pollard rho at `sqrt(n) ~ 2^128`;
+genus-2 index calculus over `F_p` is `O~(p)`, far worse. The cover-attack branch of
+`PAPER_STRUCTURAL_COMPLETENESS.md` is blocked by cost, not by non-existence — and the
+sharper statement now available is that for the specific pair the literature's "naive"
+cover targets, it is blocked by non-existence too.
+
+### Next step proposal
+**Thread 24 — feed F5/F6 back into the paper.** `PAPER_STRUCTURAL_COMPLETENESS.md` and
+`paper/eprint_combined.tex` currently justify the "no (2,2)-cover speedup" branch by a
+cost argument over the `(E, E^t)` cover. F5 gives a strictly stronger and much shorter
+statement for that pair (non-existence over `F_p`, one paragraph, fully verified), and
+F6/F7 supply the 5 pairs that *do* exist and must still be handled by the cost
+argument. Concrete sub-task: write the ~1 page "2-torsion gluing of j=0 curves"
+lemma + table into the paper, citing `chlrs_forward_map.gp` §§1-5 as the verification.
+Falsifier: if a referee-style check finds a genus-2 curve over `F_p` covering both
+secp256k1 and its quadratic twist, F5 is wrong; the criterion is testable in one line
+(`Mod(-49,p)^((p-1)/3) == 1`, which returns false).
+
+Secondary: the closed form `y^2 = tau*(x^6 + B2/B1)` makes the `#Jac` computation for
+the qualifying pairs a two-line consequence of the sextic-twist traces already tabulated
+on 2026-07-21 — worth a small table in the paper (`#Jac = #E_k1 * #E_k2`).
+
+Housekeeping note: the 2026-07-29 entry's "Commits made" lists `e845207 ... nu_hat
+separator found (AUC 0.935)`, but no `nu_hat` result appears in that entry's Findings.
+A future run continuing Thread 20 should read the commit diff rather than the log.
+
+### Commits made

@@ -13,6 +13,105 @@ that the audit in [`RESEARCH_SECP256K1_CM.md`](RESEARCH_SECP256K1_CM.md)
 > detail for a future implementation effort, with the easy parts
 > (Igusa-invariant formulas) actually computed.
 
+---
+
+## STATUS UPDATE 2026-08-01 — RESOLVED, and §1 below is WRONG
+
+`secp256k1_cm_audit/chlrs_forward_map.gp` (autolab 2026-08-01) closes this
+thread.  **Mestre reconstruction is not needed** for the 2-torsion gluing of
+two `j = 0` curves, and the pair this note is written about — `(E, E^t)` —
+turns out to be exactly the pair for which **no cover exists**.
+
+**1. Explicit forward map (elementary).**  A `(2,2)`-split Jacobian is
+bielliptic; normalising the extra involution to `x -> -x` gives
+`C : y² = c·(x²-α₁)(x²-α₂)(x²-α₃)` with quotients
+
+```
+E1 : v² = c·∏(u - α_i)                      (u,v) = (x², y)
+E2 : W² = -c·α₁α₂α₃·∏(U - 1/α_i)            (U,W) = (1/x², y/x³)
+```
+
+So gluing `E1 : y²=∏(x-a_i)` to `E2 : y²=∏(x-b_i)` along `a_i <-> b_i` needs
+the unique Möbius `N` with `N(a_i)=b_i` to factor as `A'⁻¹ ∘ inv ∘ A` with
+`A, A'` affine.  Writing `N = [p₀,q₀; r₀,s₀]` this is possible **iff
+`r₀ ≠ 0`**, and then
+
+```
+sh = s₀/r₀,  Na = ∏(a_i+sh),  det₀ = p₀s₀-q₀r₀,  t = Na·det₀,
+α_i = t·(a_i+sh),   c = t.
+```
+
+Validated: 297/297 random split pairs over `F_1009` reproduce
+`hyperellcharpoly(C) = charpoly(E1)·charpoly(E2)` exactly (so the quadratic
+twist of each quotient is right too, not just the isogeny class).
+
+**2. `r₀ = 0` ⟺ `ψ` is induced by an isomorphism `E1 → E2`**, in which case
+`(E1×E2)/Γ_ψ` is decomposable and is *not* a Jacobian.  Howe's `(H1)/(H2)/(H3)`
+as implemented in `sextic_twist_howe_check.gp` do **not** capture this.
+
+**3. For `j = 0` curves the whole thing collapses to a closed form.**  The
+roots of `x³+B₁` are `a·ζ₃^i` and those of `x³+B₂` are `δ·a·ζ₃^{-i}`, so
+`N(z) = δa²/z`, `sh = 0`, and with `τ := B₁·(B₁B₂)^{1/3}`
+
+```
+      C  :  y² = τ·x⁶ + τ⁴·B₁      ≅      y² = τ·(x⁶ + B₂/B₁)
+```
+
+— the *classical* bielliptic sextic.  No Igusa inversion, no Mestre conic.
+`τ ∈ F_p` iff `B₁B₂` is a cube, giving the existence criterion
+
+```
+   an F_p-rational genus-2 cover of (E_k1, E_k2) exists
+     <=>  B_k1·B_k2 ∈ (F_p*)³        <=>  e_k1 + e_k2 ≡ 0 (mod 3)
+```
+
+where `e_k` is the cubic-character index of `-B_k` (equivalently: Frobenius
+acts on the roots of `x³+B_k` by multiplication by `ζ₃^{e_k}`).
+Validated: 15/15 toy primes with the criterion predicting the observed set of
+pairs exactly, and 140/140 closed-form curves over 30 primes matching
+`charpoly(E1)·charpoly(E2)` on the nose (310 of 450 pairs correctly skipped).
+
+**4. Consequence for `(E, E^t)` — the pair §1 below is about.**  For a
+quadratic twist `B₂ = -B₁`, so `B₁B₂ = -B₁²`, and since `-1` is always a cube
+mod `p`, `e_1 = e_2`.  Hence `e_1+e_2 = 2e_1 ≡ 0` only when `e_1 = 0`.  For
+secp256k1 `e_0 = 2 ≠ 0`, so:
+
+> **No genus-2 curve over `F_p` covers both secp256k1 and its quadratic
+> twist.**  Every `F_p`-Galois-equivariant 2-torsion gluing of that pair is
+> decomposable.  The claim in §1 that "the audit verified the three Howe
+> conditions hold for `(secp256k1, secp256k1^t)`, so Howe's theorem
+> guarantees `C` exists" is **false** — `(H1)+(H2)+(H3)` are not sufficient.
+
+This independently confirms the 2026-07-27 autolab finding that the naive
+secp256k1 cover is the degenerate pair `(0,3)`, and explains *why* it is
+degenerate.
+
+**5. Corrected secp256k1 pair table.**  `e_k = (2,1,0,2,1,0)` for
+`k = 0..5`, so the qualifying pairs are
+
+```
+   (0,1)  (0,4)  (1,3)  (2,5)  (3,4)          [5 of 15]
+```
+
+not the `(0,1) (0,3) (0,4) (1,4) (3,4)` reported on 2026-07-21: the two
+quadratic-twist pairs `(0,3)` and `(1,4)` are degenerate, and `(1,3)`, `(2,5)`
+were wrongly excluded by `H3` (`gcd(#E₁,#E₂) = 1`), which is not necessary for
+the gluing to be a Jacobian.  Explicit covers for all five are printed in
+`secp256k1_cm_audit/chlrs_forward_map_output.txt`, each verified by recovering
+both elliptic quotients and checking they are `F_p`-isomorphic to the intended
+sextic twists.  Two independent code paths (the `F_{p³}` Möbius construction
+and the closed form) agree on all 5.
+
+**6. Cryptanalytic impact: none.**  Covers of secp256k1 *do* exist — pairs
+`(0,1)` and `(0,4)` — so the cover-attack route is not blocked by
+non-existence.  It is blocked by cost, as `PAPER_STRUCTURAL_COMPLETENESS.md`
+argues: the maps `C → E_0` have degree 2, so the DLP lands in the order-`n`
+subgroup of `Jac(C)(F_p)` (`#Jac ≈ p²`), where the best known attack is still
+Pollard ρ at `√n ≈ 2^128`; genus-2 index calculus over `F_p` is `Õ(p)`, far
+worse.  The main theorem is unaffected.
+
+---
+
 ## 1. Problem statement
 
 Given two elliptic curves `E_1, E_2 / F_p` with:

@@ -1,0 +1,491 @@
+[0;31m  ***   Warning: new stack size = 800000000 (762.939 Mbytes).[0m
+=====================================================================
+SECTION 1 -- forward map validated on generic split curves over F_p
+=====================================================================
+random split pairs over F_1009:  tried=297  charpoly-EXACT=297  degenerate=0  mismatch=0
+(charpoly-EXACT means hyperellcharpoly(C) = charpoly(E1)*charpoly(E2)
+ on the nose, so the quadratic twist of each quotient is right too.)
+
+=====================================================================
+SECTION 2 -- j=0 sextic twists: which pairs admit an F_p cover?
+=====================================================================
+
+E_k : y^2 = x^3 + B*h^k,  h = primitive 6th root of unity mod p.
+e_k in {0,1,2} defined by (-B*h^k)^((p-1)/3) = z3^{e_k}; Frobenius
+acts on the roots of x^3+B*h^k by multiplication by z3^{e_k}, and
+e_k = 0 <=> x^3+B*h^k splits over F_p <=> E_k[2] is F_p-rational.
+
+PREDICTION: pair (k1,k2) admits an F_p-rational NON-DEGENERATE
+2-torsion gluing  <=>  e_{k1} + e_{k2} = 0 (mod 3).
+Reason: all root sets are scalar multiples of each other, so the
+even (cyclic) pairings are exactly the isomorphism-induced ones and
+give r0 = 0; the odd pairings are non-degenerate but are Galois-
+equivariant only when the two Frobenius rotations e_k1, e_k2 are
+inverse.  e_k1 = e_k2 != 0 (every quadratic-twist pair) is DEAD.
+
+p = 43   B = 7   h = 37   z3 = 36
+  traces t_k = [13, 8, -5, -13, -8, 5]
+  e_k        = [2, 0, 1, 2, 0, 1]
+  pair (0,1)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 67   B = 7   h = 38   z3 = 37
+  traces t_k = [-11, 5, 16, 11, -5, -16]
+  e_k        = [2, 1, 0, 2, 1, 0]
+  pair (0,1)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,2)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,4)]
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (0,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,2)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,3)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (2,3)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,5)]
+  pair (2,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (4,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (3,4)]
+  predicted : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  observed  : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  MATCH: YES
+
+p = 79   B = 7   h = 24   z3 = 23
+  traces t_k = [13, -4, -17, -13, 4, 17]
+  e_k        = [2, 0, 1, 2, 0, 1]
+  pair (0,1)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 103   B = 7   h = 57   z3 = 56
+  traces t_k = [-7, -20, -13, 7, 20, 13]
+  e_k        = [1, 0, 2, 1, 0, 2]
+  pair (0,1)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 127   B = 7   h = 108   z3 = 107
+  traces t_k = [1, -1, 1, -1, 1, -1]
+  e_k        = [1, 1, 1, 1, 1, 1]
+  pair (0,1)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,2)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,2)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (4,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  predicted : []
+  observed  : []
+  MATCH: YES
+
+p = 151   B = 7   h = 33   z3 = 32
+  traces t_k = [19, 23, 4, -19, -23, -4]
+  e_k        = [1, 2, 0, 1, 2, 0]
+  pair (0,1)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,2)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,4)]
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (0,4)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,2)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,3)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,4)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (2,3)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,5)]
+  pair (2,4)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,4)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (4,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (3,4)]
+  predicted : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  observed  : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  MATCH: YES
+
+p = 199   B = 7   h = 107   z3 = 106
+  traces t_k = [11, -11, 11, -11, 11, -11]
+  e_k        = [1, 1, 1, 1, 1, 1]
+  pair (0,1)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,2)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,2)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (4,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  predicted : []
+  observed  : []
+  MATCH: YES
+
+p = 211   B = 7   h = 197   z3 = 196
+  traces t_k = [13, -16, -29, -13, 16, 29]
+  e_k        = [1, 0, 2, 1, 0, 2]
+  pair (0,1)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 283   B = 7   h = 239   z3 = 238
+  traces t_k = [-25, 7, 32, 25, -7, -32]
+  e_k        = [2, 1, 0, 2, 1, 0]
+  pair (0,1)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,2)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,4)]
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (0,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,2)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,3)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,1)]
+  pair (1,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (2,3)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,5)]
+  pair (2,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,5)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,3)]
+  pair (4,5)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (3,4)]
+  predicted : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  observed  : [[0, 1], [0, 4], [1, 3], [2, 5], [3, 4]]
+  MATCH: YES
+
+p = 307   B = 7   h = 290   z3 = 289
+  traces t_k = [-19, 19, -19, 19, -19, 19]
+  e_k        = [2, 2, 2, 2, 2, 2]
+  pair (0,1)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,2)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,4)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,2)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,4)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,4)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (3,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (4,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  predicted : []
+  observed  : []
+  MATCH: YES
+
+p = 331   B = 5   h = 300   z3 = 299
+  traces t_k = [-31, -32, -1, 31, 32, 1]
+  e_k        = [2, 0, 1, 2, 0, 1]
+  pair (0,1)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 367   B = 3   h = 284   z3 = 283
+  traces t_k = [4, 35, 31, -4, -35, -31]
+  e_k        = [0, 1, 2, 0, 1, 2]
+  pair (0,1)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (0,2)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,3)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (1,2)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,3)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,5)]
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (1,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,3)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (2,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (3,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (3,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (4,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  predicted : [[0, 3], [1, 2], [1, 5], [2, 4], [4, 5]]
+  observed  : [[0, 3], [1, 2], [1, 5], [2, 4], [4, 5]]
+  MATCH: YES
+
+p = 439   B = 7   h = 268   z3 = 267
+  traces t_k = [-28, -41, -13, 28, 41, 13]
+  e_k        = [0, 1, 2, 0, 1, 2]
+  pair (0,1)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (0,2)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,3)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (0,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (1,2)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,3)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,5)]
+  pair (1,4)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (1,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,3)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (2,4)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,2)]
+  pair (3,4)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,3)]
+  pair (3,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (4,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  predicted : [[0, 3], [1, 2], [1, 5], [2, 4], [4, 5]]
+  observed  : [[0, 3], [1, 2], [1, 5], [2, 4], [4, 5]]
+  MATCH: YES
+
+p = 463   B = 11   h = 22   z3 = 21
+  traces t_k = [-23, 20, 43, 23, -20, -43]
+  e_k        = [1, 0, 2, 1, 0, 2]
+  pair (0,1)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,2)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(1,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,5)]
+  pair (0,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (0,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  pair (1,3)  e=(0,1)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair none]
+  pair (2,3)  e=(2,1)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(2,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (0,2)]
+  pair (2,5)  e=(2,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,4)  e=(1,0)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (2,3)]
+  pair (3,5)  e=(1,2)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,2)  Fp-rational=3  charpoly-EXACT=0  mismatch=3  [curve actually covers pair (1,4)]
+  predicted : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  observed  : [[0, 2], [0, 5], [1, 4], [2, 3], [3, 5]]
+  MATCH: YES
+
+p = 487   B = 7   h = 233   z3 = 232
+  traces t_k = [-44, 44, -44, 44, -44, 44]
+  e_k        = [0, 0, 0, 0, 0, 0]
+  pair (0,1)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,2)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,3)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (0,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,2)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,3)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (1,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,3)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (2,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,4)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (3,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  pair (4,5)  e=(0,0)  Fp-rational=3  charpoly-EXACT=3  mismatch=0
+  predicted : [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5]]
+  observed  : [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5]]
+  MATCH: YES
+
+SECTION 2 SUMMARY: criterion matched observation on 15 / 15 toy primes
+
+=====================================================================
+SECTION 3 -- secp256k1: the 15 sextic-twist pairs
+=====================================================================
+p  = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+z3 = 60197513588986302554485582024885075108884032450952339817679072026166228089408
+     ord(z3)=3 ? 1
+h  = 55594575648329892869085402983802832744385952214688224221778511981742606582255
+     ord(h)=6 ? 1
+
+e_k (cubic character index of -7*h^k):
+  k=0  e_k=2   x^3+7h^k irreducible over F_p
+  k=1  e_k=1   x^3+7h^k irreducible over F_p
+  k=2  e_k=0   x^3+7h^k SPLITS over F_p
+  k=3  e_k=2   x^3+7h^k irreducible over F_p
+  k=4  e_k=1   x^3+7h^k irreducible over F_p
+  k=5  e_k=0   x^3+7h^k SPLITS over F_p
+
+pair   e1 e2  sum   Fp cover?   note
+(0,1)    2  1   0     YES       
+(0,2)    2  0   2     no        
+(0,3)    2  2   1     no        quadratic-twist pair
+(0,4)    2  1   0     YES       
+(0,5)    2  0   2     no        
+(1,2)    1  0   1     no        
+(1,3)    1  2   0     YES       
+(1,4)    1  1   2     no        quadratic-twist pair
+(1,5)    1  0   1     no        
+(2,3)    0  2   2     no        
+(2,4)    0  1   1     no        
+(2,5)    0  0   0     YES       both 2-torsion rational
+(3,4)    2  1   0     YES       
+(3,5)    2  0   2     no        
+(4,5)    1  0   1     no        
+
+--- explicit covers for the qualifying secp256k1 pairs ---
+
+### pair (0,1)   B1 = 7*h^0  B2 = 7*h^1
+  3 F_p-rational non-degenerate gluing(s) found
+  representative (perm #1):  C : y^2 = h(x)
+    h(x) = 74006327410955531610686119148131802202378273159744686605380752159437092610874*x^6 + 51664865576128577924089913671481466859192605211273261048205517331601862294231
+  quotient 1 is y^2=x^3+B with B = 823543
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_0 : 1
+  quotient 2 is y^2=x^3+B with B = 115792089237316195423570985008687907853269984665640564039457584007906857344920
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_1 : 1
+
+### pair (0,4)   B1 = 7*h^0  B2 = 7*h^4
+  3 F_p-rational non-degenerate gluing(s) found
+  representative (perm #4):  C : y^2 = h(x)
+    h(x) = 41785761826360663812884865860556105650891711505895877434076831848471742060789*x^6 + 51664865576128577924089913671481466859192605211273261048205517331601862294231
+  quotient 1 is y^2=x^3+B with B = 823543
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_0 : 1
+  quotient 2 is y^2=x^3+B with B = 1977326743
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_4 : 1
+
+### pair (1,3)   B1 = 7*h^1  B2 = 7*h^3
+  3 F_p-rational non-degenerate gluing(s) found
+  representative (perm #1):  C : y^2 = h(x)
+    h(x) = 74006327410955531610686119148131802202378273159744686605380752159437092610874*x^6 + 115792089237316195423570985008687907853269984665640564039457584007908834654856
+  quotient 1 is y^2=x^3+B with B = 99944539246660214385415084720145811181767977373937946533461085082405725135939
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_1 : 1
+  quotient 2 is y^2=x^3+B with B = 70162257725298373681033509939940332403764537047879626955506365538870200294603
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_3 : 1
+
+### pair (2,5)   B1 = 7*h^2  B2 = 7*h^5
+  3 F_p-rational non-degenerate gluing(s) found
+  representative (perm #1):  C : y^2 = h(x)
+    h(x) = 74006327410955531610686119148131802202378273159744686605380752159437092610874*x^6 + 64127223661187617499481071337206440994077379454367302991252066676306972360625
+  quotient 1 is y^2=x^3+B with B = 99944539246660214385415084720145811181767977373937946533461085082405724312396
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_2 : 1
+  quotient 2 is y^2=x^3+B with B = 45629831512017821742537475068747575449505447617760937083951218469040611703803
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_5 : 1
+
+### pair (3,4)   B1 = 7*h^3  B2 = 7*h^4
+  3 F_p-rational non-degenerate gluing(s) found
+  representative (perm #4):  C : y^2 = h(x)
+    h(x) = 41785761826360663812884865860556105650891711505895877434076831848471742060789*x^6 + 64127223661187617499481071337206440994077379454367302991252066676306972377432
+  quotient 1 is y^2=x^3+B with B = 115792089237316195423570985008687907853269984665640564039457584007908833848120
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_3 : 1
+  quotient 2 is y^2=x^3+B with B = 1977326743
+    j=0 (linear coeff vanishes) : 1
+    F_p-isomorphic to E_4 : 1
+
+qualifying secp256k1 pairs: 5 / 15
+
+=====================================================================
+SECTION 4 -- CLOSED FORM of the j=0 forward map
+=====================================================================
+
+Specialising the construction to E1: y^2=x^3+B1, E2: y^2=x^3+B2:
+the roots of x^3+B1 are a*z3^i, those of x^3+B2 are d*a*z3^{-i} for
+the odd pairing, so N(z) = d*a^2/z, i.e. s0 = 0, hence sh = 0 and
+
+      tau := B1 * (B1*B2)^(1/3)          [in F_p iff B1*B2 is a cube]
+      C    : y^2 = tau*x^6 + tau^4*B1
+           ~ y^2 = tau*(x^6 + B2/B1)     [x-scaling by a 6th power]
+
+So the explicit Howe-glued cover of two j=0 curves is the CLASSICAL
+bielliptic sextic y^2 = c*(x^6 + r); no Igusa inversion or Mestre
+reconstruction is involved at all.
+
+closed form over 30 primes: 450 pairs, 310 skipped (B1*B2 not a cube), 140 charpoly-EXACT, 0 WRONG
+
+--- closed form for secp256k1 ---
+pair (0,1):  y^2 = Mod(58143629826275508634876278469338388499150432356026617846674692765025037297317, 115792089237316195423570985008687907853269984665640564039457584007908834671663)*x^6 + Mod(86926797315530504853260151747537324145284072510451991235174072375001528983684, 115792089237316195423570985008687907853269984665640564039457584007908834671663)
+pair (0,4):  y^2 = Mod(57648459411040686788694706539349519354119552309613946192782891242883797374346, 115792089237316195423570985008687907853269984665640564039457584007908834671663)*x^6 + Mod(86926797315530504853260151747537324145284072510451991235174072375001528983684, 115792089237316195423570985008687907853269984665640564039457584007908834671663)
+pair (1,3):  y^2 = Mod(24079102486913297237785569440206128536697788852918865335006112047404759475626, 115792089237316195423570985008687907853269984665640564039457584007908834671663)*x^6 + Mod(6441647795754541679775265945224196771602146793601848434696261208295928884345, 115792089237316195423570985008687907853269984665640564039457584007908834671663)
+pair (2,5):  y^2 = Mod(33569356924127389550909137099143390817421763456695080857776779195479037898720, 115792089237316195423570985008687907853269984665640564039457584007908834671663)*x^6 + Mod(35306939717540232250086099206374780479588058948790421238979772841203234572324, 115792089237316195423570985008687907853269984665640564039457584007908834671663)
+pair (3,4):  y^2 = Mod(57648459411040686788694706539349519354119552309613946192782891242883797374346, 115792089237316195423570985008687907853269984665640564039457584007908834671663)*x^6 + Mod(28865291921785690570310833261150583707985912155188572804283511632907305687979, 115792089237316195423570985008687907853269984665640564039457584007908834671663)
+
+=====================================================================
+SECTION 5 -- the two constructions agree on secp256k1
+=====================================================================
+
+y^2 = A*x^6+C and y^2 = A'*x^6+C' are F_p-isomorphic iff C/C' is a
+square and (A/C)/(A'/C') is a 6th power (x -> lam*x, y -> mu*y).
+
+pair (0,1): Mobius construction == closed form  (F_p-isomorphic)
+pair (0,4): Mobius construction == closed form  (F_p-isomorphic)
+pair (1,3): Mobius construction == closed form  (F_p-isomorphic)
+pair (2,5): Mobius construction == closed form  (F_p-isomorphic)
+pair (3,4): Mobius construction == closed form  (F_p-isomorphic)
+
+agreement: 5 / 5 qualifying secp256k1 pairs
+
+done.
