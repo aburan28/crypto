@@ -6256,3 +6256,4 @@ separator found (AUC 0.935)`, but no `nu_hat` result appears in that entry's Fin
 A future run continuing Thread 20 should read the commit diff rather than the log.
 
 ### Commits made
+12ac20e autolab 2026-08-01: Thread 2 CHLRS forward map closed; (E,E^t) cover proven nonexistent
