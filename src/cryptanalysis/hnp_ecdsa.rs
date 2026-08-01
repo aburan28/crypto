@@ -133,7 +133,7 @@ pub struct BiasedSignature {
 /// Dominated by LLL on an `(m+2)`-dim lattice with `~256`-bit
 /// entries.  At `m = 20`, ~milliseconds on commodity hardware.
 /// Lattice-reduction strength for HNP.  LLL is fast but converges
-/// only when `m · k_bits ≫ n_bits`; BKZ-`β` is slower per iteration
+/// only when `m · bias_bits ≫ n_bits`; BKZ-`β` is slower per iteration
 /// but reduces the threshold by an amount that grows with `β`.  In
 /// practice, BKZ-10 or BKZ-15 recovers HNP at signature counts
 /// where LLL alone fails — at the cost of much higher CPU per call.
@@ -171,11 +171,19 @@ pub fn hnp_recover_key(
 /// HNP recovery with selectable lattice-reduction strength.
 ///
 /// **Use BKZ to lower the bias-bit / signature-count threshold**:
-/// where LLL needs `m · k_bits > ~1.5 · n_bits` for reliable
+/// where LLL needs `m · bias_bits > ~1.25 · n_bits` for reliable
 /// recovery, BKZ-`β` for moderate `β` reduces this to roughly
-/// `m · k_bits > ~1.2 · n_bits` (empirically, varies with the
+/// `m · bias_bits > ~1.2 · n_bits` (empirically, varies with the
 /// specific lattice).  Cost per call grows substantially with `β`;
 /// use sparingly when LLL fails.
+///
+/// (`bias_bits = n_bits − k_bits`, as in the table above.  The
+/// `1.25` figure is measured — 5 seeds per cell, P-256 and
+/// secp256k1 — in `secp256k1_cm_audit/hnp_centring_256bit.py`;
+/// see `RESEARCH_AUTOLAB_LOG.md` §2026-08-01.  That script also
+/// shows the basis below is *uncentred*: the target's `k_i` block
+/// is one-sided, and shifting row `m+1` by `−n·2^(k_bits−1)`
+/// buys ~0.4–0.6 bits at the LLL threshold.)
 pub fn hnp_recover_key_with_reduction(
     curve: &CurveParams,
     public_key: &EccPublicKey,

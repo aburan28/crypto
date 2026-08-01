@@ -6257,4 +6257,58 @@ Phase-2 signature-count claim.** Concretely:
    signature-count numbers in the paper are also one bit pessimistic.
 
 ### Commits made
-[recorded below after commit]
+
+### Addendum — item 3 of the next step, done today
+
+The cheap check proposed above was run in-session. **The standard (non-GLV)
+Boneh–Venkatesan lattice in `src/cryptanalysis/hnp_ecdsa.rs:216-229` has the
+same uncentred defect, but it costs much less there — ~0.4–0.6 bits, not 1 bit.**
+
+Script: `secp256k1_cm_audit/hnp_centring_256bit.py`, output
+`secp256k1_cm_audit/hnp_centring_256bit_output.txt`. The HNP instance depends
+only on `(a_i, t_i) mod n`, so no EC arithmetic is needed — `a_i` uniform,
+`t_i = (k_i − a_i d) mod n` is exactly the distribution the Rust code sees.
+Real 256-bit moduli (P-256 and secp256k1), 5 seeds/cell, LLL only.
+
+| curve | m | bias bits | m·bias/n_bits | uncentred | centred |
+|---|---|---|---|---|---|
+| P-256 | 4 | 64 | 1.000 | 0/5 | **2/5** |
+| P-256 | 6 | 48 | 1.125 | 5/5 | 5/5 |
+| P-256 | 8 | 32 | 1.000 | 0/5 | **2/5** |
+| P-256 | 8 | 40 | 1.250 | 5/5 | 5/5 |
+| P-256 | 12 | 24 | 1.125 | 5/5 | 5/5 |
+| P-256 | 20 | 16 | 1.250 | 5/5 | 5/5 |
+| P-256 | 20 | 12 | 0.938 | 0/5 | 0/5 |
+| secp256k1 | 8 | 32 | 1.000 | 0/5 | **1/5** |
+| secp256k1 | 20 | 16 | 1.250 | 5/5 | 5/5 |
+| secp256k1 | 20 | 12 | 0.938 | 0/5 | 0/5 |
+
+Centring is never worse and is strictly better in exactly the three boundary
+cells (`m·bias/n_bits = 1.00`). Everywhere else the two agree. **The P-256
+signature-count numbers in the paper are therefore NOT materially wrong** — the
+GLV-specific factor-2 of F2 does not transfer.
+
+Why the asymmetry: the BV lattice has only `m` centrable coordinates, plus a
+`d·2^kb` coordinate and an `n·2^kb` Kannan coordinate that are full-size and not
+centrable. Norm gain is `sqrt((m/3 + 2)/(m/12 + 2))` = 1.32 at m=8, 1.54 at m=20
+— i.e. 0.4–0.6 bits. The GLV Phase-2 lattice has `2m` centrable coordinates out
+of `2m+2`, hence the near-factor-2. Same defect, different leverage.
+
+Measured LLL threshold (uncentred, δ=0.75, both curves): recovery iff
+`m·bias_bits ≳ 1.25·n_bits`; `1.00` is the coin-flip boundary and `0.94` is
+already dead. The doc table at `hnp_ecdsa.rs:120-126` is accurate at 64 and 32
+bias bits and slightly conservative at 16 (measured m=20, table says 25–30).
+
+Two doc-comment slips fixed in `src/cryptanalysis/hnp_ecdsa.rs`: the
+`HnpReduction` doc and the `hnp_recover_key_with_reduction` doc both wrote the
+threshold as `m · k_bits`, but `k_bits` is the *unknown*-bit count — the correct
+quantity is `bias_bits = n_bits − k_bits`, as `hnp_ecdsa.rs:113` already states.
+Also corrected the LLL constant there from `1.5` to the measured `1.25`.
+`cargo test --test curve_audit` → 5/5 pass after the edit. ✓ Rust *code* is
+unchanged; the centring port stays as Thread 24 item 1, since a Rust-side
+implementation deserves its own verification pass and the existing regression
+test sits well inside the success region (it would not detect the gain).
+
+### Commits made
+
+6df8fa3 autolab 2026-08-01: Thread 23 — centring, not projection, is the Phase-2 lattice fix; wall is curve-independent (nu_GH<=1.2)
