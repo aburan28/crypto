@@ -6403,6 +6403,28 @@ does **not** overflow (verified: returns 1.0, not inf). The failure is the final
 to convert to float`. Not a precision problem, and no bigfloat needed — the CF
 closed form and the exact-integer Gauss both work fine at 521 bits.
 
+**E5 — the window is `W = 3`, and it does not grow with bit size.** Next-step
+item 3 below was cheap enough to answer in the same session. Restricting the
+candidate set to `{q_j : |log2(q_j/b*)| <= W}` and comparing against the full
+minimisation (Thread 20 split, 15 curves per cell):
+
+| W | 64-bit eff=.05 | 64-bit eff=.25 | 256-bit eff=.05 | 256-bit eff=.25 | mean #candidates |
+|---|---|---|---|---|---|
+| 1 | 6/15 | 7/15 | 9/15 | 6/15 | 0.9–1.3 |
+| 2 | 13/15 | 15/15 | 10/15 | 15/15 | 2.4–3.2 |
+| 3 | **15/15** | **15/15** | **15/15** | **15/15** | 3.3–4.7 |
+| 4 | 15/15 | 15/15 | 15/15 | 15/15 | 4.7–5.8 |
+
+`W = 3` is exact on 60/60 and uses a mean of 3.3–4.7 convergents; `W = 1` is
+clearly insufficient (58% exact), confirming that the *nearest* convergent alone
+does not decide ν̂. The candidate count and the sufficient window are the same at
+64 and 256 bits.
+
+So ν̂ is a function of roughly **four partial quotients of λ/n in a fixed window
+around `b*`** — a genuinely local, analytically tractable object, not a lattice
+computation and not a global CF statistic. This makes the "no curve-level
+invariant can work" reading from 2026-07-29 more precise: no *scale-free* one can.
+
 ### Priority-1 (P-521 LLL NaN) — a partial result, stated carefully
 
 The E3 pattern prompted a look at the Rust GS. Two things established:
@@ -6455,10 +6477,10 @@ recorded in the next-step section below.
    If the C2 ceiling stays near ν̂ ≈ 0.65 across all nine cells the cut is a
    property of the lattice family. **Now cheap** — ν̂ no longer needs a lattice
    reduction, just one CF expansion via `nu_hat_cf`.
-3. **Sharpen E2 into a prediction.** ν̂ is set by an O(1) window of convergents
-   around `b*`. Test whether the window `{q_j : |log2(q_j/b*)| ≤ 3}` suffices —
-   if so, ν̂ is computable from three or four partial quotients, which would make
-   it analytically tractable rather than merely cheap.
+3. ~~Sharpen E2 into a prediction.~~ **DONE this session — see E5.** `W = 3`,
+   ~4 partial quotients, size-independent. The follow-on is now analytic: write
+   ν̂ explicitly in terms of those partial quotients and derive its distribution,
+   which would turn the empirical null table in E4b into a closed form.
 
 Not recommended: any further scale-free CF invariant (`q_cf`, `max_q_cf`,
 `max_a`) — E2 now explains why that whole family cannot work.
