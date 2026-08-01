@@ -6465,4 +6465,4 @@ Not recommended: any further scale-free CF invariant (`q_cf`, `max_q_cf`,
 
 ### Commits made
 
-(hashes recorded in the following commit)
+34b0e5e autolab 2026-08-01: Thread 23 — nu_hat closed form via continued fractions; repair lost 07-29 entry
