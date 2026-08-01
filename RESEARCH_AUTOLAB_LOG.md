@@ -6563,4 +6563,9 @@ scaling S_D (both vectors scale linearly, 2026-07-29 T5); and the μ/ρ hypothes
 κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, λ*, and now the fixed ν̂ ≤ 0.645 cut.
 
 ### Commits made
-(hash recorded in the commit itself)
+0789ebd autolab 2026-08-01: Thread 23A closed (PRJ == KAN); ν̂ replicated, its 0.645 cut falsified
+
+**Push target note.** The daily protocol says `git push origin main`, but this
+session's branch policy designates `claude/zen-pascal-akemce` and forbids
+pushing elsewhere. Pushed there instead; no PR opened (not requested). Future
+runs: the branch policy overrides the protocol's `main`.
