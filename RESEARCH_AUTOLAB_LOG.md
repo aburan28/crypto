@@ -6485,4 +6485,4 @@ is not a constant.
 
 ### Commits made
 
-(hash recorded in the following commit)
+0dd2521 autolab 2026-08-01: Thread 23 — closed form for lambda_1(L2); C2 ceiling is not constant
