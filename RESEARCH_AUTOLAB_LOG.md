@@ -6457,8 +6457,12 @@ insufficient, since the deficit is hundreds of bits. Only (c) true bigfloat, or
 the exact-BigInt `gram_schmidt_hp`/`lll_reduce_hp` already in the tree
 (`lattice.rs:83`, `:167`), could work. Note the codebase **already has** the
 exact path and an `#[ignore]`d probe for it — `probe_p521_lll_hp`
-(`tests/lll_degeneracy_probe.rs:512`). It was launched this session; result
-recorded in the next-step section below.
+(`tests/lll_degeneracy_probe.rs:512`). It was launched this session
+(`cargo test --release --test lll_degeneracy_probe p521_lll_hp -- --ignored`)
+but **did not finish inside the session budget** — the release build of the
+crate alone consumed most of it. No P-521 HP result is claimed here. The probe
+is the single highest-value cheap action for the next run: it needs no new code
+and directly decides whether exact-integer GS fixes P-521.
 
 ### Verification
 
