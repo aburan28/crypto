@@ -6425,7 +6425,7 @@ around `b*`** — a genuinely local, analytically tractable object, not a lattic
 computation and not a global CF statistic. This makes the "no curve-level
 invariant can work" reading from 2026-07-29 more precise: no *scale-free* one can.
 
-### Priority-1 (P-521 LLL NaN) — a partial result, stated carefully
+### Priority-1 (P-521 LLL NaN) — **RESOLVED**, and the fix was already in the tree
 
 The E3 pattern prompted a look at the Rust GS. Two things established:
 
@@ -6457,12 +6457,49 @@ insufficient, since the deficit is hundreds of bits. Only (c) true bigfloat, or
 the exact-BigInt `gram_schmidt_hp`/`lll_reduce_hp` already in the tree
 (`lattice.rs:83`, `:167`), could work. Note the codebase **already has** the
 exact path and an `#[ignore]`d probe for it — `probe_p521_lll_hp`
-(`tests/lll_degeneracy_probe.rs:512`). It was launched this session
-(`cargo test --release --test lll_degeneracy_probe p521_lll_hp -- --ignored`)
-but **did not finish inside the session budget** — the release build of the
-crate alone consumed most of it. No P-521 HP result is claimed here. The probe
-is the single highest-value cheap action for the next run: it needs no new code
-and directly decides whether exact-integer GS fixes P-521.
+(`tests/lll_degeneracy_probe.rs:512`). **It was run this session and it
+succeeds.**
+
+```
+cargo test --release --test lll_degeneracy_probe p521_lll_hp -- --ignored --nocapture
+
+P-521[f64] k_bits=384 m=8 LLL     d_seed=0x00C0FFEE -> X not recoverable  (23463 ms)
+P-521[HP]  k_bits=384 m=8 LLL-HP  d_seed=0x00C0FFEE -> RECOVERED           (1586 ms)
+P-521[f64] k_bits=384 m=8 LLL     d_seed=0xDEADBEEF -> X not recoverable  (23374 ms)
+P-521[HP]  k_bits=384 m=8 LLL-HP  d_seed=0xDEADBEEF -> RECOVERED           (1582 ms)
+P-521[f64] k_bits=384 m=8 LLL     d_seed=0x12345678 -> X not recoverable  (23473 ms)
+P-521[HP]  k_bits=384 m=8 LLL-HP  d_seed=0x12345678 -> RECOVERED           (1482 ms)
+
+f64 LLL: 0/3 recovered
+HP  LLL: 3/3 recovered
+test result: ok. 1 passed; finished in 136.77s
+```
+
+**3-of-3 on three independent seeds, and 15x FASTER** (≈1.5 s vs ≈23.5 s —
+exact integer GS avoids the flailing that degenerate f64 GS induces in LLL).
+
+**Consequences for the three options in the standing priority-1 description:**
+
+- (a) *try target_bits = 100 or 80* — **unnecessary**. Not needed at all.
+- (b) *implement a double-double (two-f64) GS* — **unnecessary**, and would very
+  likely have been wasted work.
+- (c) *add `rug` behind a feature flag (requires GMP/MPFR)* — **NOT NEEDED.**
+  The exact-BigInt path `gram_schmidt_hp` / `lll_reduce_hp`
+  (`src/cryptanalysis/lattice.rs:83`, `:167`) already solves it with no new
+  dependency. Do not add GMP/MPFR for this.
+
+The standing thread description ("P-521 LLL still NaN … needs true bigfloat.
+The codebase doesn't have rug yet") is therefore **out of date**: the capability
+was in the tree, behind an `#[ignore]` attribute, and appears never to have been
+run. Recommend the thread be marked CLOSED and the `#[ignore]` on
+`probe_p521_lll_hp` reconsidered (it costs 137 s including the release build).
+
+Scope note: this resolves *recovery*, i.e. the operational question. It confirms
+that **precision was the binding constraint** and that nothing short of exact
+arithmetic was sufficient here. It does **not** confirm the specific
+dynamic-range mechanism hypothesised above — that remains untested, and its
+falsifier (instrumenting the GS norm ratio) is still the way to settle *why*.
+It is now a diagnostic curiosity rather than a blocker.
 
 ### Verification
 
@@ -6473,9 +6510,11 @@ and directly decides whether exact-integer GS fixes P-521.
 
 ### Next step proposal
 
-1. **Instrument the GS dynamic range** (falsifier above). This is the decisive
-   cheap test for priority 1 and it settles whether options (a) and (b) are dead.
-   Est. 30 lines of Rust + one sweep.
+1. **Priority 1 is closed** (see above) — HP GS recovers P-521 3/3. The only
+   remaining piece is diagnostic, not blocking: instrument the GS norm ratio to
+   settle *why* f64 fails. Optional. Also worth doing: drop or downgrade the
+   `#[ignore]` on `probe_p521_lll_hp`, and update the standing thread-1 text,
+   which still says "needs true bigfloat / codebase doesn't have rug".
 2. **Thread 24 — does the ν̂ cut generalise?** Still open from 2026-07-29 and not
    done here: re-run the C1/C2 separation at `K1 ∈ {36,72,144} × m ∈ {10,12,14}`.
    If the C2 ceiling stays near ν̂ ≈ 0.65 across all nine cells the cut is a
@@ -6492,3 +6531,5 @@ Not recommended: any further scale-free CF invariant (`q_cf`, `max_q_cf`,
 ### Commits made
 
 34b0e5e autolab 2026-08-01: Thread 23 — nu_hat closed form via continued fractions; repair lost 07-29 entry
+9f7a26c autolab 2026-08-01: E5 — nu_hat determined by a size-independent window of ~4 convergents
+(+ P-521 HP probe result, hash in the following commit)

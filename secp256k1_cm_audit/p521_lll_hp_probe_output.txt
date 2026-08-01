@@ -1,0 +1,20 @@
+=== P-521 LLL-HP probe (k_bits=384, tests the bigfloat-GS fix) ===
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0x00C0FFEE  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (23463 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0x00C0FFEE  →  ✓ RECOVERED                               (1586 ms)
+  seed=0x00C0FFEE | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (23463 ms) | HP=✓ RECOVERED                              (1586 ms)
+test probe_p521_lll_hp has been running for over 60 seconds
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0xDEADBEEF  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (23374 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0xDEADBEEF  →  ✓ RECOVERED                               (1582 ms)
+  seed=0xDEADBEEF | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (23374 ms) | HP=✓ RECOVERED                              (1582 ms)
+P-521[f64] k_bits=384 m= 8 reduction=LLL      d_seed=0x12345678  →  ✗ LLL did not produce a recoverable short vector — try more signatures or increase bias  (23473 ms)
+P-521[HP]  k_bits=384 m= 8 reduction=LLL-HP   d_seed=0x12345678  →  ✓ RECOVERED                               (1482 ms)
+  seed=0x12345678 | f64=✗ LLL did not produce a recoverable short vector — try more signatures or increase bias (23473 ms) | HP=✓ RECOVERED                              (1482 ms)
+
+f64 LLL: 0/3 recovered
+HP  LLL: 3/3 recovered
+✓ HP GS fix improves P-521 recovery vs f64 GS.
+✓ P-521 HNP fully resolved: HP GS + LLL recovers key 3/3.
+test probe_p521_lll_hp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 136.77s
+
