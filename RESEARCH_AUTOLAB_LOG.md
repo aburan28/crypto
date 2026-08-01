@@ -6259,3 +6259,5 @@ no apt access, so any `.gp` script is BLOCKED in this container. cargo is BLOCKE
 (no crates.io).
 
 ### Commits made
+
+34deb5e autolab 2026-08-01: Thread 23 — projection falsified; K1 wall is an objective mismatch, enumeration+box test breaks it
