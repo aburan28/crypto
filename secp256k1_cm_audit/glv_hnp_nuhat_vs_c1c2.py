@@ -4,7 +4,7 @@ GLV-HNP — Thread 20d: does nu_hat separate the June C1/C2 classes?
 Why this matters
 ----------------
 `glv_hnp_delta_threshold.py:224 build_lattice()` and the Phase 2 builder in
-`glv_hnp_phase2_lambda_threshold.py` are the SAME (2m+2)-dimensional
+`glv_hnp_phase2_nuhat_base.py` are the SAME (2m+2)-dimensional
 column-scaled lattice -- identical rows, identical S_K1/S_K2/S_KANNAN, identical
 recovery test.  The only difference is that the June runs fixed K1=72 in
 absolute terms while Phase 2 sets K1 from a target eff = K1*K2/n.
@@ -38,7 +38,7 @@ import sympy
 
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_nuhat_base.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 

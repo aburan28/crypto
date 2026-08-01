@@ -3,7 +3,7 @@ GLV-HNP Phase 2 — Thread 20b: mu-response curve, well powered.
 
 Motivation
 ----------
-`glv_hnp_phase2_lambda_threshold.py` (Thread 20a) falsified the 2026-07-26
+`glv_hnp_phase2_nuhat_base.py` (Thread 20a) falsified the 2026-07-26
 conjecture that small mu = min(lam, n-lam)/n obstructs the Phase 2 attack:
 at 20 bits with eff = K1*K2/n = 0.05, 27/28 curves reach 3/3, and the
 smallest mu in the sample (mu = 0.0200) was among the *fastest* (3/3 at m=7).
@@ -49,7 +49,7 @@ import sympy
 # Reuse the verified Thread 20a core rather than re-implementing it.
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_nuhat_base.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 
