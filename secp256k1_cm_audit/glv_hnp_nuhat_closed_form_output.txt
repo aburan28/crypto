@@ -1,0 +1,67 @@
+==============================================================================
+PART A -- is the L2 minimiser always a CF convergent denominator?
+==============================================================================
+For each (n, lam, K1): brute force b = 0..B vs CF-restricted search.
+B is the point where S_K2*b exceeds the b=0 vector n*S_K1.
+
+  trials                                   : 360
+  brute-force minimiser NOT a convergent   : 0
+  nu_hat_cf != nu_hat_bruteforce           : 0
+  VERDICT: CONFIRMED
+
+==============================================================================
+PARTS B/C/D -- closed form and scale-local a_{j*+1} on the 20d sample
+==============================================================================
+  harvested 100 curves in 0.1s (deterministic walk from nextprime(2^19))
+
+--- B: nu_hat_cf (convergents only) vs nu_hat (Lagrange-Gauss) ---
+  exact agreement (rel 1e-9)   : 100/100
+  max |nu_cf - nu_hat|         : 1.110e-16
+  pearson r                    : 1.000000
+  spearman rho                 : 1.000000
+  falsifier was r < 0.9        : PASSED (story holds)
+  mean CF length               : 12.2 quotients; winning index j mean = 6.2
+
+--- C: winning convergent vs the critical scale sqrt(n*S_K1/S_K2) ---
+  j_win - j_star histogram     : {-2: 3, -1: 43, 0: 54}
+  |j_win - j_star| <= 1        : 97/100
+  q_win / sqrt(n*S_K1/S_K2)    : min 0.257  q25 0.320  med 0.347  q75 0.561  max 0.856
+
+  600 LLL trials in 1.3s
+  C1 (fails): 74/100   C2 (6/6): 26/100   baseline = 74.0%
+
+--- D: head to head against the C1/C2 labels ---
+             invariant         kind     AUC  best acc
+nu_hat (Lagrange-Gauss)      lattice   0.935     89.0%
+nu_hat_cf (closed form)      lattice   0.935     89.0%
+  a_{j*+1} scale-local    algebraic   0.616     81.0%
+          log a_{j*+1}    algebraic   0.616     81.0%
+      max_a scale-free    algebraic   0.748     75.0%
+                    mu    algebraic   0.523     75.0%
+    (trivial baseline)                          74.0%
+
+--- D2: a_{j*+1} response (C2 rate by scale-local quotient) ---
+    a_{j*+1}  curves   C2 rate  mean wins/6  mean nu_hat
+           1      30      0.33         2.63        0.672
+           2      18      0.00         0.72        0.890
+         3-4      18      0.06         1.50        0.802
+         5-9      11      0.09         1.82        0.649
+        >=10      23      0.61         5.13        0.429
+
+==============================================================================
+PART E -- secp256k1 CF decomposition of nu_hat
+==============================================================================
+  CF(lam/n) has 141 partial quotients; max_a = 312 (scale-free, falsified)
+
+    eff                     K1    nu_hat     nu_cf   j*  a_{j*+1}  q*/scale
+ 0.0500 17014118346046924117642026945517453312    0.8709    0.8709   71         1     0.199
+ 0.0993 33790039035249189210351080085414477824    0.6639    0.6639   71         1     0.281
+ 0.1000 34028236692093848235284053891034906624    0.6624    0.6624   71         1     0.282
+ 0.2500 85070591730234615865843651857942052864    0.5852    0.5852   70         5     0.446
+ 0.5000 170141183460469231731687303715884105728    0.6851    0.6851   70         5     0.630
+
+  Reference: every C2 curve in the 20d sample has nu_hat <= 0.645
+  (heuristic 20-bit -> 256-bit extrapolation; conditional on a non-standard
+   k = k1 + lam*k2 nonce generator. NOT an attack on secp256k1.)
+
+Done.  Part A verdict: CONFIRMED
