@@ -1,0 +1,148 @@
+GLV-HNP Phase 2 — Thread 23: closed form for lambda_1(L2)
+2026-08-01 autolab run
+
+==========================================================================
+E1  CF closed form vs exact-integer Lagrange-Gauss
+==========================================================================
+H-CF: lambda_1(L2) = min over CF convergent denominators q_j of F(q_j)
+
+ bits  curves    eff  exact match  max rel err  semiconv needed
+   16      12   0.05      12/12       0.00e+00                -
+   16      12   0.10      12/12       0.00e+00                -
+   16      12   0.25      12/12       0.00e+00                -
+   20      12   0.05      12/12       0.00e+00                -
+   20      12   0.10      12/12       0.00e+00                -
+   20      12   0.25      12/12       0.00e+00                -
+   24      12   0.05      12/12       0.00e+00                -
+   24      12   0.10      12/12       0.00e+00                -
+   24      12   0.25      12/12       0.00e+00                -
+   32      12   0.05      12/12       0.00e+00                -
+   32      12   0.10      12/12       0.00e+00                -
+   32      12   0.25      12/12       0.00e+00                -
+   48      12   0.05      12/12       0.00e+00                -
+   48      12   0.10      12/12       0.00e+00                -
+   48      12   0.25      12/12       0.00e+00                -
+   64      12   0.05      12/12       0.00e+00                -
+   64      12   0.10      12/12       0.00e+00                -
+   64      12   0.25      12/12       0.00e+00                -
+   96      12   0.05      12/12       0.00e+00                -
+   96      12   0.10      12/12       0.00e+00                -
+   96      12   0.25      12/12       0.00e+00                -
+  128      12   0.05      12/12       0.00e+00                -
+  128      12   0.10      12/12       0.00e+00                -
+  128      12   0.25      12/12       0.00e+00                -
+  192      12   0.05      12/12       0.00e+00                -
+  192      12   0.10      12/12       0.00e+00                -
+  192      12   0.25      12/12       0.00e+00                -
+  256      12   0.05      12/12       0.00e+00                -
+  256      12   0.10      12/12       0.00e+00                -
+  256      12   0.25      12/12       0.00e+00                -
+
+  TOTAL exact matches: 360/360   max rel err 0.000e+00
+  cases where semiconvergents changed the answer: 0/360
+  VERDICT: H-CF CONFIRMED
+
+--------------------------------------------------------------------------
+E1b  brute force over all b < n  (small n, independent of both methods)
+--------------------------------------------------------------------------
+  n=57829   lam=27767   brute nu=0.949666(b=25    ) cf nu=0.949666(b=25    ) gauss nu=0.949666  OK
+  n=34171   lam=666     brute nu=0.877585(b=154   ) cf nu=0.877585(b=154   ) gauss nu=0.877585  OK
+  n=51577   lam=6475    brute nu=0.989373(b=8     ) cf nu=0.989373(b=8     ) gauss nu=0.989373  OK
+  n=35353   lam=2782    brute nu=0.824792(b=89    ) cf nu=0.824792(b=89    ) gauss nu=0.824792  OK
+  n=45013   lam=8301    brute nu=0.823019(b=141   ) cf nu=0.823019(b=141   ) gauss nu=0.823019  OK
+  n=51307   lam=25134   brute nu=0.906083(b=49    ) cf nu=0.906083(b=49    ) gauss nu=0.906083  OK
+  n=34297   lam=12366   brute nu=0.854257(b=147   ) cf nu=0.854257(b=147   ) gauss nu=0.854257  OK
+  n=63901   lam=25206   brute nu=0.830071(b=180   ) cf nu=0.830071(b=180   ) gauss nu=0.830071  OK
+  8/8 agree
+
+==========================================================================
+E2  is the winning convergent the one nearest b* = sqrt(n*S_K1/S_K2)?
+==========================================================================
+  Using the Thread 20 split (K2=sqrt(n), K1=eff*sqrt(n)) so that
+  b* = sqrt(n/eff) actually MOVES with eff.  Under the balanced split
+  S_K1/S_K2 = 1 for every eff, so b* = sqrt(n) is constant and the
+  question is degenerate.
+
+ bits    eff     n   |log2(q*/b*)| mean      max   rank of q* by |log2|
+   24   0.05    15                1.279    2.379 rank0 9/15, rank<=1 13
+   24   0.25    15                0.834    1.495 rank0 9/15, rank<=1 10
+   64   0.05    15                1.332    2.255  rank0 5/15, rank<=1 8
+   64   0.25    15                0.824    1.493 rank0 9/15, rank<=1 12
+  128   0.05    15                1.440    2.314  rank0 7/15, rank<=1 9
+  128   0.25    15                0.885    1.533 rank0 7/15, rank<=1 11
+  256   0.05    15                1.349    2.368 rank0 7/15, rank<=1 11
+  256   0.25    15                0.991    1.478 rank0 5/15, rank<=1 12
+
+  b* is where S_K1*r_b and S_K2*b cross (r_b ~ n/b).  A small |log2|
+  deviation means nu_hat is set by ONE convergent, the one at that scale.
+
+==========================================================================
+E3  float-precision audit of shipped gauss_reduce_2d()
+==========================================================================
+  The shipped routine computes  q = round(<u,v> / |v|^2)  with float
+  division of Python ints.  Both operands grow like (n*S_K1)^2 ~ n^4.
+
+ bits  n^4 bits  trials  float==exact  overflow/NaN  max rel err
+   16        64       8        8/8                0     1.15e-16
+   24        96       8        8/8                0     1.31e-16
+   32       128       8        8/8                0     1.36e-16
+   64       256       8        8/8                0     1.26e-16
+  128       512       8        8/8                0     2.29e-16
+  192       768       8        8/8                0     1.35e-16
+  256      1024       8        8/8                0     2.70e-16
+  384      1536       8        8/8                0     1.34e-16
+  521      2084       8        0/8                8     0.00e+00
+
+  Diagnosis of the failure mode:
+    |u|^2 has 1565 bits (float64 overflows above 1024)
+    int/int true division  <u,v>/|v|^2     -> 1.0
+    math.sqrt(|u|^2)                       -> OverflowError: int too large to convert to float
+    => Python's int/int division is correctly rounded and does NOT
+       overflow; the failure is the final math.sqrt() on a >1024-bit int.
+    RELEVANCE TO PRIORITY THREAD 1 (P-521 LLL NaN): the same pattern --
+    math.sqrt / float() applied to an exact big int -- is a candidate
+    cause of NaN at 521 bits that is NOT a Gram-Schmidt precision problem
+    and needs no bigfloat library to fix (use math.isqrt, or rescale by
+    bit_length, instead).  Worth checking before adding a rug dependency.
+
+==========================================================================
+E4  secp256k1 nu_hat, exact CF closed form vs the 2026-07-29 figures
+==========================================================================
+  n   = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  lam = 37718080363155996902926221483475020450927657555482586988616620542887997980018   (lam^2+lam+1 = 0 mod n verified)
+  lam* = min(lam,n-lam)/n = 0.325740
+
+  (a) Thread 20b/20c split  K2=sqrt(n), K1=eff*sqrt(n)  -- reproduces 2026-07-29
+   eff   S_K1/S_K2   nu_hat (exact CF)   2026-07-29   b_win/b*
+  0.05       20.00              0.8709       0.8709     0.1994
+  0.10       10.00              0.6624       0.6624     0.2820
+  0.25        4.00              0.5852       0.5852     0.4458
+  0.50        2.00              0.6851       0.6851     0.6305
+
+  (b) BALANCED split  K1 ~ K2 ~ sqrt(eff*n)  -- same eff, different nu_hat
+   eff   S_K1/S_K2   nu_hat (exact CF)   b_win/b*
+  0.05        1.00              0.9116     0.8917
+  0.10        1.00              0.9116     0.8917
+  0.25        1.00              0.9116     0.8917
+  0.50        1.00              0.9116     0.8917
+
+  nu_hat is a function of the RATIO S_K1/S_K2 (i.e. of b*), not of eff.
+  Two (K1,K2) splits with identical eff give different nu_hat.  Any future
+  use of nu_hat must therefore quote the split, not just eff.
+
+  NOTE: this is a lattice invariant of (n, lam), not an attack.  It is
+  conditional on the non-standard nonce generator k = k1 + lam*k2 with
+  k1 bounded; it says nothing about correctly generated nonces.
+
+--------------------------------------------------------------------------
+E4b  null distribution of nu_hat over random lam (256-bit n_secp), exact
+--------------------------------------------------------------------------
+  Thread 20 split, for comparability with the 2026-07-29 null table.
+  eff=0.05  q05=0.225 q25=0.516 q50=0.729 q75=0.889 q95=0.995
+            secp256k1 nu_hat=0.8709 -> percentile 71.8%
+  eff=0.10  q05=0.241 q25=0.520 q50=0.727 q75=0.881 q95=0.994
+            secp256k1 nu_hat=0.6624 -> percentile 41.5%
+
+==========================================================================
+SUMMARY: H-CF CONFIRMED over 360 (n,lam,eff) cases + brute-force cross-check
+==========================================================================
