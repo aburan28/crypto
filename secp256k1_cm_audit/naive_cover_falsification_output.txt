@@ -1,0 +1,63 @@
+[0;31m  ***   Warning: new stack size = 500000000 (476.837 Mbytes).[0m
+===========================================================
+ Does the naive cover y^2=(x^3+b1 h^i)(x^3+b1 h^j) glue (E_i,E_j)?
+===========================================================
+  p=19	distinct traces=2	naive covers with correct char poly : 9/15	[[0, 1], [0, 3], [0, 5], [1, 2], [1, 4], [2, 3], [2, 5], [3, 4], [4, 5]]
+  p=31	distinct traces=6	naive covers with correct char poly : 1/15	[[1, 4]]
+  p=43	distinct traces=6	naive covers with correct char poly : 1/15	[[1, 4]]
+  p=67	distinct traces=6	naive covers with correct char poly : 1/15	[[2, 5]]
+  p=79	distinct traces=6	naive covers with correct char poly : 1/15	[[1, 4]]
+  p=103	distinct traces=6	naive covers with correct char poly : 2/15	[[1, 4], [2, 4]]
+  p=127	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=139	distinct traces=6	naive covers with correct char poly : 1/15	[[2, 5]]
+  p=151	distinct traces=6	naive covers with correct char poly : 2/15	[[2, 3], [2, 5]]
+  p=163	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=199	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=211	distinct traces=6	naive covers with correct char poly : 1/15	[[1, 4]]
+  p=223	distinct traces=6	naive covers with correct char poly : 1/15	[[0, 3]]
+  p=271	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=283	distinct traces=6	naive covers with correct char poly : 1/15	[[2, 5]]
+  p=307	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=331	distinct traces=6	naive covers with correct char poly : 1/15	[[0, 3]]
+  p=367	distinct traces=6	naive covers with correct char poly : 1/15	[[0, 3]]
+  p=379	distinct traces=2	naive covers with correct char poly : 0/15	[]
+  p=439	distinct traces=6	naive covers with correct char poly : 1/15	[[0, 3]]
+  p=463	distinct traces=6	naive covers with correct char poly : 1/15	[[0, 3]]
+  p=487	distinct traces=2	naive covers with correct char poly : 9/15	[[0, 1], [0, 3], [0, 5], [1, 2], [1, 4], [2, 3], [2, 5], [3, 4], [4, 5]]
+  p=499	distinct traces=6	naive covers with correct char poly : 1/15	[[1, 4]]
+
+  AGGREGATE (all primes)          : 35 / 345   = 10.1 %
+  AGGREGATE (6 distinct traces)   : 17 / 225   = 7.6 %
+  (8 primes dropped from the second line because the sextic
+   twist family collapses to <6 trace values there, which makes
+   accidental agreement common.)
+
+  Interpretation: the naive product cover is NOT the Howe cover of the
+  pair it is named after.  Inspecting the hit lists, essentially all of
+  them are the three quadratic-twist pairs (0,3),(1,4),(2,5) -- exactly
+  the a=0 cases y^2 = x^6 - A^2, where the theorem in
+  chlrs_forward_map.gp gives Jac ~ E_{-A^2} x E_{A^4}.  That coincides
+  with the named target pair only when -A^2 and A^4 happen to land in
+  the right sextic classes, which is a property of p, not a general
+  construction.
+
+  Consequence for the 2026-07-27 entry (commit 9e9b0a8, Test 3): the
+  failure on pair (0,3) was attributed to a Richelot degeneracy
+  (vanishing discriminant when d = h^3 = -1).  That diagnosis is
+  mis-scoped: the naive cover does not glue (E_0,E_3) on generic p in
+  the first place, so there is no degeneracy to repair.
+
+===========================================================
+ secp256k1: re-check the 2026-07-27 claim  189 = -7  mod 6th powers
+===========================================================
+  189 / (-7) mod p = 115792089237316195423570985008687907853269984665640564039457584007908834671636
+  is a square : 1
+  is a cube   : 1
+  is a 6th power : 1
+
+  CONFIRMED: y^2=x^3+189 is F_p-isomorphic to y^2=x^3-7, so the
+  naive secp256k1 cover y^2=(x^3+7)(x^3+189) does correspond to
+  the index pair (0,3).  But per the toy-prime scan above, the
+  naive product cover does not glue (E_0,E_3) in the first place.
+
+done.

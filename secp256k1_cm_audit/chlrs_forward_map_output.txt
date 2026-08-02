@@ -1,0 +1,136 @@
+[0;31m  ***   Warning: new stack size = 500000000 (476.837 Mbytes).[0m
+===========================================================
+ PART 1 -- char-poly regression for  Jac(y^2=x^6+b) ~ E_b x E_{b^2}
+===========================================================
+  p=7  (p mod 3 = 1)   b = 1..6   mismatches = 0   OK
+  p=11  (p mod 3 = 2)   b = 1..10   mismatches = 0   OK
+  p=13  (p mod 3 = 1)   b = 1..12   mismatches = 0   OK
+  p=17  (p mod 3 = 2)   b = 1..16   mismatches = 0   OK
+  p=19  (p mod 3 = 1)   b = 1..18   mismatches = 0   OK
+  p=23  (p mod 3 = 2)   b = 1..22   mismatches = 0   OK
+  p=31  (p mod 3 = 1)   b = 1..30   mismatches = 0   OK
+  p=37  (p mod 3 = 1)   b = 1..36   mismatches = 0   OK
+  p=43  (p mod 3 = 1)   b = 1..42   mismatches = 0   OK
+  p=61  (p mod 3 = 1)   b = 1..60   mismatches = 0   OK
+  p=67  (p mod 3 = 1)   b = 1..66   mismatches = 0   OK
+  p=79  (p mod 3 = 1)   b = 1..78   mismatches = 0   OK
+  p=97  (p mod 3 = 1)   b = 1..96   mismatches = 0   OK
+  p=103  (p mod 3 = 1)   b = 1..102   mismatches = 0   OK
+  p=127  (p mod 3 = 1)   b = 1..126   mismatches = 0   OK
+  p=151  (p mod 3 = 1)   b = 1..150   mismatches = 0   OK
+  p=163  (p mod 3 = 1)   b = 1..162   mismatches = 0   OK
+  p=199  (p mod 3 = 1)   b = 1..198   mismatches = 0   OK
+  p=211  (p mod 3 = 1)   b = 1..210   mismatches = 0   OK
+  p=241  (p mod 3 = 1)   b = 1..240   mismatches = 0   OK
+  p=283  (p mod 3 = 1)   b = 1..282   mismatches = 0   OK
+  p=331  (p mod 3 = 1)   b = 1..330   mismatches = 0   OK
+  p=401  (p mod 3 = 2)   b = 1..400   mismatches = 0   OK
+  p=499  (p mod 3 = 1)   b = 1..498   mismatches = 0   OK
+  p=601  (p mod 3 = 1)   b = 1..600   mismatches = 0   OK
+  p=733  (p mod 3 = 1)   b = 1..732   mismatches = 0   OK
+  p=997  (p mod 3 = 1)   b = 1..996   mismatches = 0   OK
+
+  TOTAL: 5518 curves over 27 primes, mismatches = 0
+  (includes p = 2 mod 3, where E_b has no F_p 6th-power twist family --
+   the char-poly identity is unconditional.)
+
+===========================================================
+ PART 2 -- sextic-twist pair prediction  j = 2i - s (mod 6)
+           validated by point counting on toy primes p = 7 mod 12
+===========================================================
+  p=19	h=8	s=4	j=2i-4	mismatches=0	pairs=[[0, 2], [1, 4], [2, 0], [3, 2], [4, 4], [5, 0]]
+  p=31	h=26	s=4	j=2i-4	mismatches=0	pairs=[[0, 2], [1, 4], [2, 0], [3, 2], [4, 4], [5, 0]]
+  p=43	h=37	s=1	j=2i-1	mismatches=0	pairs=[[0, 5], [1, 1], [2, 3], [3, 5], [4, 1], [5, 3]]
+  p=67	h=38	s=5	j=2i-5	mismatches=0	pairs=[[0, 1], [1, 3], [2, 5], [3, 1], [4, 3], [5, 5]]
+  p=79	h=24	s=1	j=2i-1	mismatches=0	pairs=[[0, 5], [1, 1], [2, 3], [3, 5], [4, 1], [5, 3]]
+  p=103	h=57	s=4	j=2i-4	mismatches=0	pairs=[[0, 2], [1, 4], [2, 0], [3, 2], [4, 4], [5, 0]]
+  p=127  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=139	h=97	s=2	j=2i-2	mismatches=0	pairs=[[0, 4], [1, 0], [2, 2], [3, 4], [4, 0], [5, 2]]
+  p=151	h=33	s=5	j=2i-5	mismatches=0	pairs=[[0, 1], [1, 3], [2, 5], [3, 1], [4, 3], [5, 5]]
+  p=163  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=199  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=211	h=197	s=1	j=2i-1	mismatches=0	pairs=[[0, 5], [1, 1], [2, 3], [3, 5], [4, 1], [5, 3]]
+  p=223	h=184	s=0	j=2i-0	mismatches=0	pairs=[[0, 0], [1, 2], [2, 4], [3, 0], [4, 2], [5, 4]]
+  p=271  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=283	h=239	s=2	j=2i-2	mismatches=0	pairs=[[0, 4], [1, 0], [2, 2], [3, 4], [4, 0], [5, 2]]
+  p=307  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=331	h=300	s=3	j=2i-3	mismatches=0	pairs=[[0, 3], [1, 5], [2, 1], [3, 3], [4, 5], [5, 1]]
+  p=367	h=284	s=0	j=2i-0	mismatches=0	pairs=[[0, 0], [1, 2], [2, 4], [3, 0], [4, 2], [5, 4]]
+  p=379  b1=7   SKIP: no n with b1*h^n a 6th power
+  p=439	h=268	s=0	j=2i-0	mismatches=0	pairs=[[0, 0], [1, 2], [2, 4], [3, 0], [4, 2], [5, 4]]
+  p=463	h=22	s=3	j=2i-3	mismatches=0	pairs=[[0, 3], [1, 5], [2, 1], [3, 3], [4, 5], [5, 1]]
+  p=487	h=233	s=5	j=2i-5	mismatches=0	pairs=[[0, 1], [1, 3], [2, 5], [3, 1], [4, 3], [5, 5]]
+  p=499	h=140	s=1	j=2i-1	mismatches=0	pairs=[[0, 5], [1, 1], [2, 3], [3, 5], [4, 1], [5, 3]]
+
+  17 primes exercised, TOTAL MISMATCHES = 0
+  primes with s=5 (the secp256k1 case) reproduce the same pair set.
+
+===========================================================
+ PART 3 -- application to secp256k1
+===========================================================
+  p        = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+  p mod 12 = 7   (=> zeta_3 in F_p and p = 3 mod 4)
+  zeta_3   = 60197513588986302554485582024885075108884032450952339817679072026166228089408
+  h        = 55594575648329892869085402983802832744385952214688224221778511981742606582255
+  h^3 mod p= 115792089237316195423570985008687907853269984665640564039457584007908834671662   (should be p-1 = -1)
+  h^6 mod p= 1   (should be 1)
+
+  6th-power test on 7*h^n :
+    n=0   square=0   cube=0   6th-power=0
+    n=1   square=1   cube=0   6th-power=0
+    n=2   square=0   cube=1   6th-power=0
+    n=3   square=1   cube=0   6th-power=0
+    n=4   square=0   cube=0   6th-power=0
+    n=5   square=1   cube=1   6th-power=1
+
+  s = 5   =>   j = 2i - 5  (mod 6)
+  Equivalently 7 = h^1 modulo 6th powers.
+
+  Explicit covers  C_b : y^2 = x^6 + b   with  b = 7*h^i :
+
+    i=0  j=1
+      b = 7
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+    i=1  j=3
+      b = 41785761826360663812884865860556105650891711505895877434076831848471742060796
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+    i=2  j=5
+      b = 41785761826360663812884865860556105650891711505895877434076831848471742060789
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+    i=3  j=1
+      b = 115792089237316195423570985008687907853269984665640564039457584007908834671656
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+    i=4  j=3
+      b = 74006327410955531610686119148131802202378273159744686605380752159437092610867
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+    i=5  j=5   (DEGENERATE: E_i x E_i)
+      b = 74006327410955531610686119148131802202378273159744686605380752159437092610874
+      check  b^2 / (7*h^j) is a 6th power : 1
+
+  Distinct unordered pairs {i,j}, i != j, realised:
+    [[0, 1], [1, 3], [2, 5], [3, 4]]
+
+  Cross-reference: the 5 Howe-admissible pairs (H1+H2+H3) found on
+  2026-07-21 (commit a287abc) were  (0,1) (0,3) (0,4) (1,4) (3,4).
+  Intersection with the explicitly-covered set above is what we can
+  now actually WRITE DOWN rather than merely assert exists.
+
+===========================================================
+ PART 4 -- cost consequence (block B5)
+===========================================================
+  For any realised pair (i,j) we now have an explicit genus-2 C/F_p with
+  Jac(C) ~ E_i x E_j.  When i=0 this embeds the secp256k1 ECDLP into
+  Jac(C)(F_p), of size ~p^2.  Cost of DLP there:
+    - Pollard rho on Jac  : O(p)          (group order ~p^2)
+    - Gaudry genus-2 index calculus over F_p : Otilde(p^(2-2/g)) = Otilde(p)
+    - Pollard rho on E_0 directly          : O(p^(1/2))
+  The cover is therefore ~p^(1/2) times SLOWER than attacking secp256k1
+  head-on.  This is block B5 of PAPER_STRUCTURAL_COMPLETENESS.md, now
+  instantiated on an explicit cover rather than an abstract one.
+
+done.

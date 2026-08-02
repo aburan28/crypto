@@ -6103,3 +6103,135 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 2 (CHLRS Igusa formula)** — priority 2. Thread 1 (P-521) is CLOSED (§10.5,
+commit `d9e7414`); Thread 3 (Howe 15-pair) completed 2026-07-21 (`a287abc`). The
+2026-07-27 entry (`9e9b0a8`) made measurable progress and named an explicit next
+sub-task — implement the FORWARD map `(E_i,E_j) -> genus-2 curve`, the "CHLRS Igusa
+inversion problem", script target `chlrs_forward_map.gp`. Rule (b) of the protocol.
+
+### Work done
+- PARI/GP was absent in the fresh container (as on 2026-07-21). `apt-get install
+  pari-gp` failed on a stale mesa dep; `apt-get update` first, then
+  `--no-install-recommends`, gives PARI **2.15.4**. Record this for future runs.
+- **Abandoned the Igusa-Clebsch route.** For the j=0 sextic-twist family the Igusa
+  inversion is not needed: there is an elementary closed-form forward map. Found it
+  by deriving the two degree-2 quotients of `y^2 = x^6 + b` directly.
+- Wrote `secp256k1_cm_audit/chlrs_forward_map.gp` (+ saved output). Contains the
+  theorem, its proof, a char-poly regression, the sextic-class chain validation, and
+  the secp256k1 application.
+- Wrote `secp256k1_cm_audit/naive_cover_falsification.gp` (+ output) to test the
+  premise underlying much earlier work on the "naive cover".
+- Hypothesis tested and **FALSIFIED** en route: that the split of `y^2=x^6+ax^3+b` is
+  determined by the sextic classes of `b` and `D=a^2-4b`. ~40% mismatch over
+  p=31,43,67 (900/1764/4356 curves). Recorded so no future run re-tries it. Also
+  observed: when `b` is a 6th power the two elliptic factors are isogenous and are
+  **not** j=0 — the Z/3 acts through `M_2(End E)`, not diagonally.
+- `cargo test --test curve_audit` -> **5/5 pass** (6.72s). ✓
+
+### Findings
+
+**1. THEOREM (proved, then verified exactly).** For any odd prime p and any b in F_p^*,
+```
+    Jac(y^2 = x^6 + b)  ~  E_b  x  E_{b^2},      E_c : y^2 = x^3 + c
+```
+*Proof.* `C_b` carries `i_1:(x,y)->(-x,y)` and `i_2:(x,y)->(-x,-y)`. Then
+`C_b/i_1 = {(x^2, y)}` gives `v^2=u^3+b = E_b`; `C_b/i_2 = {(x^2, xy)}` gives
+`V^2=u(u^3+b)`, and `u=1/w, V=z/w^2, (W,Z)=(bw,bz)` turns that into `Z^2=W^3+b^2`.
+Two independent degree-2 quotients => the (2,2)-split. []
+
+This is a **(2,2)-split, not the Z/3Z Richelot** of `howe_5pairs_v2.gp`. It needs no
+cube roots, no `F_{p^3}` arithmetic and no Rosenhain form — which is exactly why it
+applies at secp256k1 size, where `hyperellcharpoly` is hopeless.
+
+Regression (`chlrs_forward_map.gp` Part 1): **5518 curves, 27 primes, 0 mismatches**,
+as an identity of Frobenius characteristic polynomials (not merely of `#Jac`).
+Holds for p = 2 mod 3 as well, so it is unconditional.
+
+**2. Sextic-pair corollary.** With `h` a primitive 6th root of unity and
+`E_k := E_{b1 h^k}`, `C_b` with `b = b1 h^i` glues `(i,j)` iff `b1 h^{2i-j}` is a 6th
+power. Letting `s` be the unique residue with `b1 h^s` a 6th power:
+```
+    j = 2i - s  (mod 6)
+```
+Validated by point counting on **17 toy primes p = 7 mod 12, 0 mismatches**
+(`chlrs_forward_map.gp` Part 2). 6 of the 23 candidate primes have no such `s`
+(7 is outside the coset), and are skipped.
+
+**3. secp256k1 application.** p = 2^256-2^32-977, p mod 12 = 7,
+h = 55594575648329892869085402983802832744385952214688224221778511981742606582255.
+6th-power test on `7*h^n`: only **n=5** qualifies (sq=1, cube=1), so **s=5** and
+**7 = h mod 6th powers**. Hence `j = 2i-5 (mod 6)`, giving the ordered pairs
+(0,1) (1,3) (2,5) (3,1) (4,3) (5,5), i.e. the distinct unordered pairs
+```
+    {0,1}   {1,3}   {2,5}   {3,4}
+```
+The headline case is `i=0`, `b=7`:
+
+> **`C : y^2 = x^6 + 7` over F_p(secp256k1) has `Jac(C) ~ secp256k1 x E_1`.**
+
+That is the explicit Howe-glued cover of secp256k1 that
+`RESEARCH_MESTRE_HOWE.md` §8 "Option D" recorded as existence-without-construction.
+`(0,1)` and `{3,4}` are both in the 5-element Howe-admissible set found on
+2026-07-21 (`a287abc`: (0,1) (0,3) (0,4) (1,4) (3,4)); `{1,3}` and `{2,5}` are new.
+Verification is by exact 6th-power test on `b^2/(7 h^j)` (returns 1 for all six i),
+so no 256-bit point counting is required and the result is rigorous.
+
+**4. The "naive cover" premise is false.** Testing char-poly equality of
+`y^2=(x^3+b1 h^i)(x^3+b1 h^j)` against `E_i x E_j` over 23 toy primes:
+```
+  all primes                : 35 / 345  = 10.1 %
+  primes with 6 distinct twist traces : 17 / 225  =  7.6 %
+```
+(8 primes drop out because the sextic family collapses to 2 trace values — e.g.
+p=19 and p=487 both give traces [t,-t,t,-t,t,-t] and a misleading 9/15.)
+15 of the 17 genuine hits are the quadratic-twist pairs (0,3),(1,4),(2,5), i.e. the
+`a=0` cases `y^2 = x^6 - A^2`, which by the theorem glue `E_{-A^2} x E_{A^4}` —
+matching the named pair only for special p.
+
+**Correction to 2026-07-27 (`9e9b0a8`, Test 3).** The failure on pair (0,3) was
+attributed to a Richelot degeneracy (`d = h^3 = -1` => vanishing discriminant). That
+diagnosis is mis-scoped: the naive cover does not glue `(E_0,E_3)` on generic p at
+all, so there is no degeneracy to repair. The separate 2026-07-27 claim that
+`189 = -7` mod 6th powers for secp256k1 is **CONFIRMED** numerically
+(`-27` is both a QR and a cubic residue).
+
+**5. Cost consequence (block B5).** For `i=0` the cover embeds the secp256k1 ECDLP
+into `Jac(C)(F_p)`, size ~p^2. Pollard rho there is O(p); Gaudry genus-2 index
+calculus over a prime field is Otilde(p^{2-2/g}) = Otilde(p); rho on `E_0` directly is
+O(p^{1/2}). The explicit cover is ~p^{1/2} times **slower** than the direct attack.
+B5 of `PAPER_STRUCTURAL_COMPLETENESS.md` is now instantiated on a concrete cover
+rather than an abstract one — this strengthens the paper rather than threatening it.
+
+**6. Literature.** `eprint.iacr.org/2011/604` ("Genus 2 Hyperelliptic Curve Families
+with Explicit Jacobian") covers the same family `Y^2=X^6+aX^3+b` and states its
+Jacobian splits over an extension of degree 1, 2, 3 or 6 — consistent with the
+"NOSPLIT" entries observed here (split over an extension, not over F_p). Full text is
+**BLOCKED**: the agent proxy returns 403 for eprint.iacr.org PDFs (both WebFetch and
+curl). Not load-bearing — the theorem above is proved and verified independently.
+No CHLRS paper with that exact author list was located; the name appears to attach to
+the Magma `Genus2Reconstruction` package rather than to a single paper.
+
+### Next step proposal
+**Thread 24 — extend the forward map off `a=0`.** The map above reaches only 4 of the
+15 sextic pairs, because `j=2i-s` is a single orbit. The remaining 11 pairs — notably
+`(0,3)` and `(0,4)`, both Howe-admissible — need a cover with `a != 0`. Concrete
+sub-task: for `y^2=x^6+ax^3+b` with `b` a square, the involution `tau: x -> c/x,
+y -> sqrt(b) y/x^3` (`c^3=b`) exists whenever `sqrt(c)` is in F_p; push the quotient
+computation through in the coordinate `z=(x-sqrt c)/(x+sqrt c)` (which conjugates
+`tau` to `z -> -z`) and read off the two elliptic factors as functions of `(a,b)`.
+Falsifier: the resulting closed form must reproduce the p=31/43/67 brute-force tables
+already computed here (they are in the run output); if it does, apply the 6th-power
+class test to secp256k1 and check whether `(0,3)` or `(0,4)` becomes reachable. If the
+descent conditions (`b` square AND `c=b^{1/3}` in F_p AND `sqrt(c)` in F_p) cannot all
+hold for the secp256k1 classes, that is itself a clean obstruction result — record it
+and close the constructive-cover thread.
+
+Secondary: `RESEARCH_MESTRE_HOWE.md` §8 should be updated — "Option D
+(existence-without-construction)" is now partly superseded for the pairs above.
+
+### Commits made
+(recorded below after commit)
