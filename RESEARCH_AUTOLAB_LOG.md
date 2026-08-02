@@ -6555,4 +6555,4 @@ Not recommended: further work on arm B (Babai). It is dominated by both K and X
 in every cell measured; the reformulation only pays off with exact CVP.
 
 ### Commits made
-(hash recorded in the following commit)
+06f114b autolab 2026-08-02: Thread 23 — CVP reformulation moves the K1 wall; eff_c = 3/(2*pi*e)
