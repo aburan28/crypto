@@ -6266,3 +6266,5 @@ labels.  Since centring changes the labels wholesale, ν̂ needs re-validation
 before it is trusted.
 
 ### Commits made
+
+eb517c5 autolab 2026-08-02: Thread 23 — d-column removal is inert; centring doubles the K1 wall
