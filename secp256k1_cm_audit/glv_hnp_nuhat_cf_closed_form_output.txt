@@ -1,0 +1,142 @@
+
+GLV-HNP Thread 23 — closed form for lambda_1(L2) behind nu_hat
+seed=20260802
+
+==========================================================================
+T1  brute force over all b  vs  CF closed form  vs  exact Gauss
+==========================================================================
+  trials=400  CF mismatches=0  exact-Gauss mismatches=0
+  verdict: CF closed form EXACT; exact Gauss EXACT
+
+==========================================================================
+T2  CF closed form vs exact-integer Lagrange-Gauss, by bit length
+==========================================================================
+   bits  trials  mismatch  verdict
+     20     500         0  EXACT
+     24     500         0  EXACT
+     64     500         0  EXACT
+    128     500         0  EXACT
+    256     500         0  EXACT
+    384     500         0  EXACT
+    521     500         0  EXACT
+  total mismatches across all sizes: 0
+
+==========================================================================
+T3  precision audit: SHIPPED float gauss_reduce_2d vs exact integers
+==========================================================================
+   bits  trials  wrong    err  max rel dev  note
+     20     400      0      0    9.978e-16  ok
+     24     400      0      0    1.847e-15  ok
+     64     400      0      0    3.620e-15  ok
+    128     400      0      0    7.092e-15  ok
+    256     400      0      0    1.423e-14  ok
+    384     400      0      0    2.837e-14  ok
+    521     400      0    400    0.000e+00  raises
+
+==========================================================================
+T4  which convergent wins?  q_j* vs the balance scale sqrt(n*S_K1/S_K2)
+==========================================================================
+  balance scale q* solves S_K1*(n/q_{j+1}) = S_K2*q_j, i.e. q ~ sqrt(n*S_K1/S_K2)
+     eff  trials  med q*/qbal                  IQR  med j*/J  frac j*<J/4  frac j*>3J/4
+    0.05    3000        0.412 [   0.199,   0.661]     0.583        0.002         0.054
+    0.10    3000        0.404 [   0.191,   0.651]     0.562        0.003         0.034
+    0.25    3000        0.424 [   0.204,   0.650]     0.538        0.006         0.023
+
+  Reading: the winning convergent sits at a FIXED scale set by (n, K1, K2).
+  Scale-free CF statistics (q_cf, max_q_cf, max_a over the whole expansion)
+  average over all j and therefore cannot see it -- which is exactly why all
+  six June CF/curve invariants sat at the trivial baseline.
+
+==========================================================================
+T5  secp256k1: exact nu_hat, cross-check against the 2026-07-29 log
+==========================================================================
+  n   = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+  lam = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72   (lam^2+lam+1 = 0 mod n: verified)
+  mu  = min(lam,n-lam)/n = 0.325740
+
+     eff  nu_hat exact  logged 07-29      delta                   q_j*    j*/J
+    0.05        0.8709        0.8709    -0.0000 303414439467246543595250775667605759171   0.500
+    0.10        0.6624        0.6624    +0.0000 303414439467246543595250775667605759171   0.500
+    0.25        0.5852        0.5852    +0.0000 303414439467246543595250775667605759171   0.500
+    0.50        0.6851        0.6851    +0.0000 303414439467246543595250775667605759171   0.500
+
+  root-choice control (lam vs n-1-lam, must agree -- both are 'the' eigenvalue):
+    eff=0.05  nu_hat(lam)=0.8709  nu_hat(lam')=0.8815  |d|=1.07e-02
+    eff=0.10  nu_hat(lam)=0.6624  nu_hat(lam')=0.6901  |d|=2.76e-02
+    eff=0.25  nu_hat(lam)=0.5852  nu_hat(lam')=0.6603  |d|=7.51e-02
+    eff=0.50  nu_hat(lam)=0.6851  nu_hat(lam')=0.8102  |d|=1.25e-01
+
+==========================================================================
+T6  normalised form  nu_hat^2 = min_j (x_j^2 + y_j^2),  x_j*y_j = q_j*eps_j/n
+==========================================================================
+  with t = S_K1/S_K2,  x_j = q_j/sqrt(t*n),  y_j = eps_j*sqrt(t/n).
+  AM-GM then gives the parameter-free lower bound
+      nu_hat >= sqrt(2 * min_j q_j*eps_j/n)   and   q_j*eps_j/n ~ q_j/q_{j+1}.
+
+  trials=2000  two-term-form mismatches=0  CONSISTENT
+  nu_hat / AM-GM lower bound:  min=1.0000  q25=2.5786  med=4.0394  q75=6.2384  max=246.2954
+  bound violated (ratio < 1) in 0/2000 cases
+
+==========================================================================
+T7  root choice: nu_hat(lam) vs nu_hat(lam') for the TWO GLV eigenvalues
+==========================================================================
+  For j=0 curves the eigenvalues are the two roots of x^2+x+1 mod n,
+  i.e. lam and lam' = n-1-lam.  nu_hat is exactly invariant under
+  lam -> n-lam (eps_centered is), but that is the WRONG involution.
+
+   bits  curves   med |d|   q90 |d|   max |d|  frac>0.02  cut flips
+     20     300    0.0262    0.0388    0.0449      0.683      0.030
+     24     300    0.0263    0.0414    0.0455      0.690      0.033
+     64     300    0.0268    0.0397    0.0454      0.673      0.047
+    128     300    0.0268    0.0380    0.0459      0.733      0.037
+    256     300    0.0274    0.0388    0.0445      0.723      0.053
+
+  eff sweep at 256 bits (300 curves each):
+     eff   med |d|   q90 |d|   max |d|  cut flips
+    0.05    0.0106    0.0204    0.0260      0.017
+    0.10    0.0265    0.0411    0.0451      0.023
+    0.25    0.0700    0.0989    0.1010      0.103
+    0.50    0.1411    0.2157    0.2262      0.000
+    1.00    0.0000    0.0000    0.0000      0.000
+
+  Consequence: nu_hat is a function of the ATTACK INSTANCE (n, lam, K1, K2),
+  not of the curve -- the two eigenvalues of one curve give different nu_hat
+  and land on opposite sides of the nu_hat=0.645 C1/C2 cut a nonzero
+  fraction of the time.  It also shows mu = min(lam, n-lam)/n symmetrises
+  over the wrong involution: nu_hat is already exactly invariant under
+  lam -> n-lam, so mu cannot be the coordinate that distinguishes the roots.
+
+==========================================================================
+T8  the eff=1 exact zero in T7 is a genuine isometry, not a bug
+==========================================================================
+  For a primitive cube root of unity, lam^2+lam+1=0 mod n gives lam^3=1,
+  hence lam' = n-1-lam = lam^2 = lam^{-1} mod n.  Writing
+      L_lam = { (a*n - b*lam)*S_K1, b*S_K2 ) },
+  the coordinate swap (x,y) -> (y,x) carries L_lam to L_{lam^{-1}} = L_{lam'}.
+  That swap is an isometry exactly when S_K1 = S_K2, giving
+      nu_hat(lam) = nu_hat(lam')   and   b*(lam) = eps*(lam'),  eps*(lam) = b*(lam').
+
+  NOTE: the codebase's eff=1 setting is K1 = isqrt(n), K2 = isqrt(n)+1, which
+  gives S_K1 != S_K2 -- only S_K1/S_K2 = 1 + O(n^-1/2).  So the T7 eff=1.00 row
+  is a NEAR-isometry (agreement to O(n^-1/2), i.e. below print precision), not
+  an exact one.  Arm A forces S_K1 = S_K2 to test the exact statement; Arm B
+  measures the codebase parameterisation.
+
+  curves=200   lam' == lam^-1 mod n: 200/200
+
+  Arm A (S_K1 = S_K2 forced):
+    lambda_1^2(lam) == lambda_1^2(lam') exactly:  200/200
+    witness pair exchanged (b* <-> eps*):         200/200
+
+  Arm B (codebase eff=1: K1=isqrt(n), K2=isqrt(n)+1):
+    S_K1/S_K2 - 1:  max 0.000e+00  min 0.000e+00
+    lambda_1^2 equal exactly:                     0/200
+    witness pair exchanged (b* <-> eps*):         200/200
+    max |nu_hat(lam) - nu_hat(lam')|:             0.000e+00
+
+  So the duality is structural (witnesses exchange even in Arm B), while the
+  numerical equality of nu_hat is exact only when S_K1 = S_K2 and otherwise
+  holds to O(n^-1/2).  Away from eff=1 the swap rescales by t = S_K1/S_K2 and
+  |d| in T7 grows with |t-1|.
+
+done.
