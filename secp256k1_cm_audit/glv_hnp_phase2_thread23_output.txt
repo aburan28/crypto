@@ -1,0 +1,97 @@
+==============================================================================
+Thread 23 — d-eliminated Phase-2 lattice: does the K1 wall move?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: correctness of the d-eliminated construction
+------------------------------------------------------------------------------
+For each historical curve: (a) the planted vector lies in the new lattice
+(checked by exact HNF membership), (b) the new lattice contains NO vector
+of the shape c*e_j with |c| = n*S_K1 shorter than the planted vector other
+than the modular rows themselves, (c) d recovers where it should.
+
+curve                  m  K1 dim_old dim_new  planted in L_new  d recovered
+8-bit/199              6   2      14      13              True         True
+12-bit/2557            8   8      18      17              True         True
+12-bit/2677 FAIL      10   8      22      21              True        False
+
+old lattice contains n*S_D*e_m (norm 2659): True
+  ||planted_old|| = 5143   ratio n/||planted|| = 0.517
+  ||planted_new|| = 5142   (d coordinate and its rival are both gone)
+
+------------------------------------------------------------------------------
+EXP E2: lattice geometry, old vs new, on the historical curves
+------------------------------------------------------------------------------
+tau = ||planted|| / GH(det,dim).  Unique-SVP via LLL needs roughly
+tau < 1/1.02^dim; tau > 1 means the planted vector is not even expected
+to be lambda_1.  sv/pv = ||shortest reduced|| / ||planted|| (measured).
+
+curve                  m  K1 |  tau_old  sv/pv_old  win_old |  tau_new  sv/pv_new  win_new
+8-bit/199              6   2 |    1.657      0.543      5/5 |    1.611      0.790      5/5
+12-bit/2557            8   8 |    1.709      0.445      5/5 |    1.676      0.475      5/5
+12-bit/2677 FAIL      10   8 |    1.539      0.387      0/5 |    1.507      0.767      0/5
+
+------------------------------------------------------------------------------
+EXP E3: THE FALSIFIER — T4's K1 grid, old lattice vs new lattice
+------------------------------------------------------------------------------
+Same two 12-bit curves, same K2 = isqrt(n)+1, same 5 seeds, m = 12 for
+both so the two arms are directly comparable.  T4 (2026-07-29) found the
+wall at K1 ~ 12-16 (lam*=0.34) and K1 ~ 4-6 (lam*=0.07) with the old
+lattice.  If the new lattice moves the wall outward, Thread 23 is a real
+improvement; if not, Phase 2 is at its lattice-geometric ceiling.
+
+curve 12-bit/2557   n=2659  lam*=0.3400  K2=52  m=12
+    K1 |  old wins  tau_old |  new wins  tau_new |  new BKZ20
+     2 |       5/5    0.751 |       5/5    0.717 |        5/5
+     3 |       5/5    0.906 |       5/5    0.871 |        5/5
+     4 |       5/5    1.035 |       5/5    1.001 |        5/5
+     6 |       5/5    1.248 |       5/5    1.215 |        5/5
+     8 |       5/5    1.425 |       5/5    1.396 |        5/5
+    12 |       4/5    1.718 |       4/5    1.695 |        4/5
+    16 |       1/5    1.962 |       1/5    1.946 |        1/5
+    24 |       0/5    2.366 |       0/5    2.365 |        0/5
+    32 |       0/5    2.701 |       0/5    2.715 |        0/5
+
+curve 12-bit/2677 FAIL   n=2647  lam*=0.0699  K2=52  m=12
+    K1 |  old wins  tau_old |  new wins  tau_new |  new BKZ20
+     2 |       5/5    0.753 |       5/5    0.719 |        5/5
+     3 |       5/5    0.908 |       5/5    0.874 |        5/5
+     4 |       5/5    1.037 |       5/5    1.003 |        5/5
+     6 |       2/5    1.251 |       1/5    1.219 |        2/5
+     8 |       0/5    1.428 |       0/5    1.399 |        0/5
+    12 |       0/5    1.722 |       0/5    1.700 |        0/5
+    16 |       0/5    1.967 |       0/5    1.952 |        0/5
+    24 |       0/5    2.372 |       0/5    2.371 |        0/5
+    32 |       0/5    2.709 |       0/5    2.722 |        0/5
+
+------------------------------------------------------------------------------
+EXP E4: control — sweep S_D in the OLD lattice
+------------------------------------------------------------------------------
+The 2026-07-29 diagnosis was that the trivial vector n*S_D*e_m (norm
+n*S_D) crowds out the planted vector (norm ~ n*sqrt(2m/3+4/3)).  Both
+scale linearly in S_D *only if d ~ n*S_D dominates the planted norm*; at
+moderate S_D the planted norm grows more slowly, so if that vector were
+the binding constraint, S_D in 2..8 should help.  It does not (see below),
+which is the same conclusion E3 reaches by a different route.
+
+curve 12-bit/2677 FAIL  n=2647  m=12  K2=52
+   S_D |   K1=2    K1=4    K1=6    K1=8    K1=12
+     1 |     5/5     5/5     2/5     0/5     0/5
+     2 |     5/5     5/5     2/5     0/5     0/5
+     4 |     5/5     5/5     1/5     0/5     0/5
+     8 |     5/5     3/5     1/5     0/5     0/5
+    16 |     3/5     2/5     1/5     0/5     0/5
+
+------------------------------------------------------------------------------
+EXP E5: scaling check on independent 17-bit curves
+------------------------------------------------------------------------------
+Three fresh j=0 GLV curves near 2^17.  Wall = largest K1 with >= 4/5.
+
+       p        n    lam*    K2   m |  wall_old  wall_new   gain
+  131113   130981  0.2214   362  12 |        24        32   1.33
+  131149   130483  0.3068   362  12 |        24        16   0.67
+  131203   131707  0.4020   363  12 |        24        24   1.00
+
+==============================================================================
+done
+==============================================================================

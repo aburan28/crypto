@@ -6103,3 +6103,178 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 GLV-HNP lattice so the planted vector is
+λ₁, the explicit next-step proposed by the 2026-07-29 entry (log line 6089).
+Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so under the protocol's rule (b) the live continuation of priority 5
+is the correct pick. The 07-29 falsifier was stated in advance:
+
+> "if sv/pv rises above 1 after the reformulation AND the K1 wall in T4 moves
+> outward on the λ*=0.07 curve (currently K1≈4–6), the reformulation is a real
+> improvement; if the wall stays at K1≈4–6, then the wall is … Phase 2 is at its
+> ceiling."
+
+**Outcome: Thread 23 is FALSIFIED, and the ceiling is now quantified.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`. PARI/GP is
+  **not** installed in this image and was not needed. Note for future runs:
+  `glv_hnp_phase2_lambda_threshold.py` runs its whole T1–T5 suite at import time
+  and cannot be imported as a library — helpers were copied verbatim instead.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23.py` (E1–E5) and
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_tau_wall.py` (addendum).
+  Outputs: `glv_hnp_phase2_thread23_output.txt`,
+  `glv_hnp_phase2_thread23_tau_wall_output.txt`.
+- Derived and implemented the **d-eliminated lattice** (dim 2m+1 vs the old
+  2m+2). With pivot i=0, from `A_i + d·B_i ≡ k1_i + λ·k2_i (mod n)`:
+      d    = B₀⁻¹(k1₀ + λ·k2₀ − A₀)                       (mod n)
+      k1_i = h_i + g_i·k1₀ + g_i·λ·k2₀ − λ·k2_i   (i ≥ 1)  (mod n)
+      g_i = B_i·B₀⁻¹,  h_i = A_i − g_i·A₀.
+  Every free parameter (k1₀, k2₀…k2_{m−1}) is now small; the large unknown d has
+  no coordinate, so the rival vector `n·S_D·e_m` does not exist. Scales
+  S_K1=n//K1, S_K2=n//K2, S_KANNAN=n are unchanged, so the arms are like-for-like.
+      old: dim 2m+2, det = nᵐ·S_K1ᵐ·S_K2ᵐ·S_KAN,  ‖target‖ ≈ n·√(2m/3+4/3)
+      new: dim 2m+1, det = nᵐ⁻¹·S_K1ᵐ·S_K2ᵐ·S_KAN, ‖target‖ ≈ n·√(2m/3+1)
+- E1 verified correctness by exact HNF membership (planted vector ∈ L_new on all
+  three historical curves) and end-to-end d-recovery.
+- E3 re-ran T4's K1 grid with both lattices, same curves, same 5 seeds, m=12.
+- E4 ran an independent control: sweep S_D in the **old** lattice.
+- E5 ran three fresh 17-bit curves through both formulations.
+- `cargo test --test curve_audit` → 5/5 pass (5.27s). ✓
+
+### Findings
+
+**E3 — the wall does not move (falsifier failed).** m=12, K2=isqrt(n)+1, 5 seeds:
+
+| K1 | 2557 old | 2557 new | 2557 new BKZ20 | 2677 old | 2677 new | 2677 new BKZ20 |
+|---|---|---|---|---|---|---|
+| 2  | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 3  | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 4  | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 6  | 5/5 | 5/5 | 5/5 | **2/5** | **1/5** | 2/5 |
+| 8  | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 |
+| 12 | 4/5 | 4/5 | 4/5 | 0/5 | 0/5 | 0/5 |
+| 16 | 1/5 | 1/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| 24+| 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Identical at every grid point on the λ*=0.34 curve; **marginally worse** (1/5 vs
+2/5 at K1=6) on the λ*=0.07 curve. BKZ-20 on the new lattice matches old LLL.
+
+**Why: the reformulation is geometrically almost a no-op.** Dropping one
+dimension and one factor of n nearly cancel. τ = ‖planted‖/GH(det,dim):
+
+| K1 | τ_old | τ_new | Δ |
+|---|---|---|---|
+| 2  | 0.751 | 0.717 | −4.5% |
+| 4  | 1.035 | 1.001 | −3.3% |
+| 8  | 1.425 | 1.396 | −2.0% |
+| 24 | 2.366 | 2.365 | −0.04% |
+
+A ≤4.5% change in τ, decaying to zero — far too small to move a grid wall.
+sv/pv *did* rise as the falsifier's first clause required (0.387 → 0.767 on the
+2677 curve, E2), confirming the trivial vector is gone; success did not change.
+**The trivial vector `n·S_D·e_m` was a symptom, not the cause.**
+
+**E4 — independent confirmation via the old lattice.** If `n·S_D·e_m` were the
+binding constraint, lengthening it by raising S_D should help. It monotonically
+*hurts* (curve 2677, m=12):
+
+| S_D | K1=2 | K1=4 | K1=6 | K1=8 | K1=12 |
+|---|---|---|---|---|---|
+| 1  | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 |
+| 2  | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 |
+| 4  | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 8  | 5/5 | 3/5 | 1/5 | 0/5 | 0/5 |
+| 16 | 3/5 | 2/5 | 1/5 | 0/5 | 0/5 |
+
+**E5 — 17-bit scaling: no systematic gain.** wall_old/wall_new = 24/32, 24/16,
+24/24 (gain 1.33, 0.67, 1.00). Median 1.00 — grid noise, not signal.
+
+**The positive result: the wall is pinned to the Gaussian heuristic.**
+τ at the measured wall, five curves (addendum, part 1):
+
+| curve | n | λ* | ν̂ | wall K1 | τ@wall | τ@next |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | 2659 | 0.3400 | 0.481 | 12 | 1.695 | 1.946 |
+| 12-bit/2677 | 2647 | 0.0699 | 0.997 | 4 | 1.003 | 1.219 |
+| 17-bit/130981 | 130981 | 0.2214 | 0.684 | 24 | 1.080 | 1.240 |
+| 17-bit/130483 | 130483 | 0.3068 | 1.032 | 24 | 1.082 | 1.242 |
+| 17-bit/131707 | 131707 | 0.4020 | 0.929 | 24 | 1.079 | 1.239 |
+
+4 of 5 curves wall in τ ∈ [1.00, 1.24]. The one outlier (2557, τ=1.70) also has
+the lowest ν̂ (0.481), the direction Thread 20c predicts (low ν̂ ⇒ skew λ-block ⇒
+easier). Caveat: with 5 curves this is suggestive only, and the 17-bit ν̂
+ordering at K1=32 runs the other way (ν̂=0.684→1/5, 0.929→2/5, 1.032→3/5). Treat
+"ν̂ modulates τ@wall" as an open hypothesis, not a result.
+
+**Closed form — this explains T3's `eff` variable.** With S_K1=n/K1, S_K2=n/K2:
+    log₂ det_new = m·(3·log₂n − log₂(K1·K2)),  dim = 2m+1,
+    ‖target‖² ≈ n²(2m/3 + 1)
+so as m → ∞
+
+    **τ → √(2πe/3)·√(K1·K2/n) = 2.3860·√eff,   eff = K1·K2/n**
+
+and the wall τ = 1 sits at **eff = 3/(2πe) = 0.17565**, independent of n and m.
+This is exactly the `eff` variable T3 found empirically on 2026-07-29 — it was
+not an arbitrary parametrisation but the asymptotic form of the GH ratio.
+Cross-check at the T3 operating point (17-bit, m=12, exact finite-m τ):
+
+| eff | τ_limit | τ_exact(m=12) | T3 result |
+|---|---|---|---|
+| 0.05 | 0.534 | 0.942 | 19/20 recover 5/5 |
+| 0.15 | 0.924 | 1.596 | 3/20 recover |
+| 0.25 | 1.193 | 2.039 | 0/20 recover |
+
+The T3 transition brackets τ_exact = 1. T3, T4, E3 and E5 are now one variable.
+
+**Convergence is slow in m** (n ≈ 2²⁵⁶, K2 = √n, exact τ):
+
+| eff | m=48 | m=200 | m=1000 | limit |
+|---|---|---|---|---|
+| 0.05 | 3.41 | 0.836 | 0.584 | 0.534 |
+| 0.17565 | 6.35 | 1.563 | 1.093 | 0.9995 |
+| 1.00 | 15.02 | 3.723 | 2.609 | 2.386 |
+
+So the limit is a *lower bound* on the requirement; at m=48 even eff=0.176 gives
+τ=6.35. Reaching τ<1 at eff=0.176 needs m ≳ 1200 signatures.
+
+**Phase 2's ceiling for secp256k1 (heuristic, this lattice family).**
+τ<1 requires eff = K1·K2/n < 0.17565, i.e. with K2 = √n = 2¹²⁸,
+
+    **K1 < 0.17565·2¹²⁸ = 2^125.49  ⟹  2.51 bits of combined bias in (k1,k2)**
+
+before the planted vector is even *expected* to be λ₁ — and LLL/BKZ need margin
+beyond that, plus m ≳ 1200. Unbiased GLV gives K1 = K2 = 2¹²⁸, eff = 1, τ → 2.386.
+**Caveat on scope:** this is a Gaussian-heuristic statement about *this* lattice
+family (the Phase-2 construction and its d-eliminated variant), not a theorem
+about all GLV-HNP attacks. It does not extend to §B5 of the paper as written.
+
+### Next step proposal
+**Thread 24 — attack the det/dim balance, since τ is now the single target.**
+Thread 23 shows that any reformulation leaving det^(1/dim) essentially unchanged
+cannot help; the only lever is a construction with materially smaller τ at the
+same eff. Two concrete candidates, in order of cheapness:
+
+1. **Sub-lattice / partial-guess hybrid.** Guess the top t bits of k2₀ and solve
+   the residual instance. Each guessed bit multiplies work by 2 but reduces K2 by
+   2, hence eff by 2 and τ by √2. Falsifier: τ should fall as 2^(−t/2) and the
+   K1 wall should move outward by exactly 2^t on the E3 grid. If the measured
+   wall does *not* track 2^t, the wall is not a τ phenomenon after all and the
+   whole Thread 23 conclusion needs revisiting. Cheap — reuse `run_new` with K2
+   replaced by K2/2^t and a known high part. This is the sharpest available test
+   of the τ theory, and it is also the only route that reaches secp256k1 (it
+   would need t ≈ 5 to buy the 2.51 bits, i.e. 32× work — worth pricing exactly).
+2. **Drop the Kannan embedding for an explicit CVP** (Babai nearest-plane on the
+   reduced basis, target `(A_i·S_K1, 0, …)`). Removes the S_KANNAN=n column,
+   lowering dim by 1 and det by log₂n. By the E3 arithmetic this is worth ≈4% in
+   τ — i.e. predicted to change nothing. Listed so a future run does not spend a
+   session rediscovering that; run it only as a control if (1) succeeds.
+
+**Do not re-try:** raising S_D (E4), d-elimination (E3/E5), BKZ-20 on the new
+lattice (E3), and — from 2026-07-29 — μ/ρ (T2) and any λ*-threshold (T3).
+
+### Commits made

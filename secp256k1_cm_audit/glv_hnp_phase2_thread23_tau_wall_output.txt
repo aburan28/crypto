@@ -1,0 +1,51 @@
+====================================================================================
+Thread 23 addendum — tau at the measured K1 wall, and nu_hat
+====================================================================================
+m = 12, K2 = isqrt(n)+1, seeds = [42, 1234, 9999, 555, 31337], old lattice, wall = largest K1 >= 4/5
+
+curve                 n    lam*  nu_hat  wall K1  tau@wall  tau@wall+1
+12-bit/2557        2659  0.3400   0.481       12     1.695       1.946
+               wins: K1=2:5/5  K1=3:5/5  K1=4:5/5  K1=6:5/5  K1=8:5/5  K1=12:4/5  K1=16:1/5  K1=24:0/5  K1=32:0/5  K1=48:0/5
+12-bit/2677        2647  0.0699   0.997        4     1.003       1.219
+               wins: K1=2:5/5  K1=3:5/5  K1=4:5/5  K1=6:2/5  K1=8:0/5  K1=12:0/5  K1=16:0/5  K1=24:0/5  K1=32:0/5  K1=48:0/5
+17-bit/130981    130981  0.2214   0.684       24     1.080       1.240
+               wins: K1=2:5/5  K1=3:5/5  K1=4:5/5  K1=6:5/5  K1=8:5/5  K1=12:5/5  K1=16:5/5  K1=24:4/5  K1=32:1/5  K1=48:0/5
+17-bit/130483    130483  0.3068   1.032       24     1.082       1.242
+               wins: K1=2:5/5  K1=3:5/5  K1=4:5/5  K1=6:5/5  K1=8:5/5  K1=12:5/5  K1=16:5/5  K1=24:5/5  K1=32:3/5  K1=48:0/5
+17-bit/131707    131707  0.4020   0.929       24     1.079       1.239
+               wins: K1=2:5/5  K1=3:5/5  K1=4:5/5  K1=6:5/5  K1=8:5/5  K1=12:5/5  K1=16:5/5  K1=24:5/5  K1=32:2/5  K1=48:0/5
+
+Reading: the wall is bracketed by tau in [tau@wall, tau@wall+1].  If every
+curve's bracket contains a common tau, the wall is a Gaussian-heuristic
+phenomenon and no det/dim-preserving reformulation can move it.
+
+====================================================================================
+Addendum part 2 — large-m limit:  tau -> sqrt(2*pi*e/3)*sqrt(eff)
+====================================================================================
+constant sqrt(2*pi*e/3) = 2.3860;  tau = 1  <=>  eff = 3/(2*pi*e) = 0.17565
+
+convergence of exact tau to the limit (n = 2^256-ish, K2 = isqrt(n)):
+    eff   K1/2^128 |  m=4      m=12     m=48     m=200    m=1000     limit
+0.05000     0.0500 | 254476140.6958 711.9364   3.4101   0.8357   0.5837   0.5335
+0.10000     0.1000 | 346288587.5418 992.9688   4.8054   1.1808   0.8254   0.7545
+0.17547     0.1755 | 444603411.2745 1300.6276   6.3471   1.5631   1.0932   0.9995
+0.25000     0.2500 | 520355806.4358 1541.5116   7.5623   1.8649   1.3047   1.1930
+0.50000     0.5000 | 708094977.9306 2150.0135  10.6565   2.6351   1.8449   1.6872
+1.00000     1.0000 | 963568565.1416 2998.7177  15.0169   3.7234   2.6086   2.3860
+
+Cross-check against T3 (2026-07-29, 20 fresh 17-bit curves, m=12).
+The limit is only approached for m in the hundreds, so the exact finite-m
+tau is the one to compare against; it runs ~1.5x the limit at m=12.
+     eff  tau_limit  tau_exact(m=12)            T3 result
+    0.05      0.534            0.942    19/20 recover 5/5
+    0.15      0.924            1.596         3/20 recover
+    0.25      1.193            2.039         0/20 recover
+  => the T3 transition brackets tau_exact = 1, same wall as E3/E5.
+
+CEILING for secp256k1 (n = order of secp256k1, K2 = sqrt(n) = 2^128):
+  tau < 1 requires eff = K1*K2/n < 0.17565,
+  i.e. K1 < 0.17565 * 2^128 = 2^125.49.
+  Unbiased GLV gives K1 = K2 = 2^128, eff = 1.  The attack therefore needs
+  log2(1/0.17565) = 2.51 bits of combined bias in (k1,k2)
+  before the planted vector is even expected to be lambda_1 -- and LLL/BKZ
+  need more than that.  This is Phase 2's ceiling, in bits.
