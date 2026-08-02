@@ -6266,3 +6266,5 @@ Cost: ~15 min; CVP enumeration at dim 2m=20…34 is the only slow part.
 success-probability observable using **fresh** curves rather than the June C1/C2 set.
 
 ### Commits made
+
+09f33c0 autolab 2026-08-02: Thread 23 — projection is a no-op; γ law locates the Phase-2 wall
