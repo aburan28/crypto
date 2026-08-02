@@ -6268,3 +6268,5 @@ Secondary (cheap): `pip install fpylll cysignals sympy` and the PARI unavailabil
 now a recurring per-session tax. Worth a one-line note at the top of this log.
 
 ### Commits made
+
+c6cf398 autolab 2026-08-02: Thread 23 CLOSED — projected lattice is a null; SVP-gap reading falsified
