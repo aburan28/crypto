@@ -6560,4 +6560,4 @@ family cannot work.
 
 ### Commits made
 
-(hash recorded in the following commit)
+7a35344 autolab 2026-08-02: Thread 23 — exact closed form for lambda_1(L2); nu_hat is CF-localised
