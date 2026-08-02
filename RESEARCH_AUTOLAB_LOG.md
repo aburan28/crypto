@@ -6259,3 +6259,5 @@ Phase 2 would then be at its real ceiling, 2× further out than believed.
 convention; the 2026-07-29 entry flagged this and it remains unfixed.
 
 ### Commits made
+
+9b7a385 autolab 2026-08-02: Thread 23 — CVP reformulation is not the fix; uncentered k1/k2 boxes were, 2x wall gain
