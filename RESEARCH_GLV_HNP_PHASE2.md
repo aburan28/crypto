@@ -243,12 +243,75 @@ quirks.
 - Quantum-aware lattice reduction (Phase 5+)
 - GLS curves (different endomorphism structure; separate proposal)
 
+## 7a. The bias-strength wall (answered 2026-08-02, Thread 23)
+
+The first open question in §8 — *does Phase 2's lattice achieve the
+counting bound?* — is answered **no**, and the binding constraint is
+not a signature count at all.  See `RESEARCH_AUTOLAB_LOG.md`
+(2026-08-02) and `secp256k1_cm_audit/glv_hnp_phase2_cvp.py`.
+
+Write `eff = K1·K2/n` for the bias strength (`K1`, `K2` the bounds on
+`k₁`, `k₂`).  The counting bound predicts recovery once
+
+```
+        m  ≥  m* = log n / log(1/eff)
+```
+
+but that bound is never the operative one.  Stating the problem as CVP
+rather than as SVP-with-Kannan-embedding (the reformulation of Thread
+23), the lattice is
+
+```
+        L0 = < n·S_K1·e_i , (B_i·S_K1 | S_D·e_m) , (−λ·S_K1·e_i | S_K2·e_{m+i}) >
+```
+
+of dimension `2m+1` and determinant `n^(3m)/(K1·K2)^m`, and the target is
+at distance `≈ n·sqrt(2m/3)`.  Comparing with the Gaussian heuristic
+radius `gh(L0) = sqrt(dim/(2πe))·det^(1/dim)`, the ratio is
+**asymptotically independent of `m`**:
+
+```
+        ||v_planted|| / gh(L0)  ⟶  sqrt(2πe/3) · sqrt(eff)  =  2.387·sqrt(eff)
+```
+
+so the planted point is the unique closest vector only while
+
+```
+        eff  <  eff_c = 3/(2πe) = 0.1755…
+```
+
+Above `eff_c` a strictly closer lattice point exists and no number of
+signatures removes it: the finite-`m` ratio decreases monotonically
+toward the asymptote, so for `eff > eff_c` it never crosses 1 (verified
+to `m = 4096`).  Measured against exact CVP on a 12-bit curve, the
+asymptotic verdict is correct at 8/8 tested `K1` values.
+
+Two consequences for the threat model of §1:
+
+- **Not a defence in practice.**  With `K2 = 2^128` fixed, `eff < eff_c`
+  means `K1 < 2^125.5` — a leak of only ~2.5 bits of `k₁` clears the
+  wall.  `eff_c` constrains toy parameters, not deployed ones.
+- **The real cost is the reduction, not the data.**  Babai on the same
+  `L0` is no better than the old Kannan+LLL; the gain comes entirely
+  from *exact* CVP (enumeration), whose cost is exponential in
+  `dim = 2m+1`.  Near the wall the required `m` is roughly 2–4× `m*`.
+
+Curves are also not interchangeable: one 12-bit curve recovered out to
+`eff = 0.313`, well past `eff_c`, which a random lattice cannot do.  The
+`L2`-block statistic `ν̂` of 2026-07-29 is the leading explanation but is
+not yet established at adequate sample size (see Thread 25 below).
+
 ## 8. Open questions
 
-- What is the **information-theoretic lower bound** on signatures
-  needed for the k₁-only-leak model?  Phase 1 brute force needs
-  `~ log_2(n) / c` signatures; does Phase 2's lattice achieve
-  this in practice?
+- ~~What is the **information-theoretic lower bound** on signatures
+  needed for the k₁-only-leak model?~~  **Answered 2026-08-02**, §7a: the
+  counting bound `m*` is not achievable and is not the binding
+  constraint; the wall is the bias-strength condition
+  `eff < 3/(2πe)`, which is independent of the signature count.
+- Why do some curves beat the Gaussian-heuristic wall?  `ν̂` correlates
+  in the predicted direction (Spearman −0.60) but on only 8 curves,
+  where |ρ| ≈ 0.71 is needed for significance, and `λ*` correlates
+  +0.50 on the same sample.  Needs ≥40 curves to separate the two.
 - Can Phase 2 be **further specialised** to exploit secp256k1's
   CM-by-Z[ω] structure beyond just GLV?  E.g., if the
   endomorphism ω acts predictably on the bias distribution, a

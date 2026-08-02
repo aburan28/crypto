@@ -1,0 +1,254 @@
+==============================================================================
+Thread 23 — CVP reformulation of the GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+R1: sanity — is the planted point really in the CVP coset a + L0?
+------------------------------------------------------------------------------
+Checks that a + w_planted is a lattice point of L0 shifted by a, i.e.
+that solving CVP(L0, -a) is the same problem the Kannan row encoded.
+
+  8-bit/199          m=6   dim(L0)=13  coset check: OK   ||planted||=2.630e+02  ||n*e_m||=1.990e+02  ratio=0.757
+  12-bit/2557        m=8   dim(L0)=17  coset check: OK   ||planted||=4.402e+03  ||n*e_m||=2.659e+03  ratio=0.604
+  12-bit/2677 FAIL   m=10  dim(L0)=21  coset check: OK   ||planted||=5.685e+03  ||n*e_m||=2.647e+03  ratio=0.466
+
+  All coset checks passed: True
+  (ratio < 1 is exactly the 2026-07-29 T5 obstruction: n*e_m is shorter
+   than the planted vector.  In CVP it is no longer a rival — it moves
+   the d-coordinate by n and therefore increases the distance.)
+
+------------------------------------------------------------------------------
+R2: the T4 falsifier grid — does the reformulation move the K1 wall?
+------------------------------------------------------------------------------
+2026-07-29 T4, Kannan+LLL, m=12, 5 seeds:
+    12-bit/2557 (lam*=0.340): 5/5 up to K1=8, 4/5 at 12, 1/5 at 16, 0/5 at 24
+    12-bit/2677 (lam*=0.070): 5/5 up to K1=4, 2/5 at 6,  0/5 at K1>=8
+Falsifier: if B/X push those walls outward the Kannan formulation was
+leaving recoverable instances on the table; if not, the wall is
+information-theoretic.
+
+curve                lam*  arm K1=2     K1=3     K1=4     K1=6     K1=8     K1=12    K1=16    K1=24   
+12-bit/2557        0.3400    K 5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+12-bit/2557        0.3400    B 5/5   5/5   5/5   5/5   4/5   2/5   0/5   0/5  
+12-bit/2557        0.3400    X 5/5   5/5   5/5   5/5   5/5   3/5   1/5   0/5  
+                             r 1.0000 1.0000 0.9798 0.9079 0.8966 0.7891 0.6523 0.5340
+
+12-bit/2677 FAIL   0.0699    K 5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+12-bit/2677 FAIL   0.0699    B 5/5   4/5   4/5   1/5   0/5   0/5   0/5   0/5  
+12-bit/2677 FAIL   0.0699    X 5/5   5/5   5/5   4/5   0/5   0/5   0/5   0/5  
+                             r 1.0000 1.0000 1.0000 0.9828 0.8872 0.7568 0.6756 0.5145
+
+legend: K = Kannan+LLL (dim 2m+2, SVP)   B = Babai on LLL(L0) (dim 2m+1)
+        X = exact CVP on L0 (enumeration)
+        r = mean ||exact CVP answer|| / ||planted point||
+            r = 1.0000  -> planted IS the closest vector (recovery is
+                           then purely an algorithmic question)
+            r < 1       -> a strictly closer point exists: the planted
+                           vector is not determined by the instance,
+                           i.e. an information-theoretic wall
+
+(eff = K1*K2/n with K2=52, n~2650: K1=2:0.039, K1=3:0.059, K1=4:0.079, K1=6:0.118, K1=8:0.157, K1=12:0.236, K1=16:0.314, K1=24:0.471)
+  timing 12-bit/2557: 0.2s for 8x5 trials x 3 arms
+  timing 12-bit/2677 FAIL: 0.2s for 8x5 trials x 3 arms
+
+------------------------------------------------------------------------------
+R3: where is the crossover?  r as a function of K1, per seed
+------------------------------------------------------------------------------
+If the wall is information-theoretic there should be a K1 at which r
+drops below 1 and stays there, coinciding with the X-arm failure.
+
+  curve 2677 (lam*=0.070), m=12
+      K1       s0       s1       s2       s3       s4   X wins
+       2   1.0000   1.0000   1.0000   1.0000   1.0000        5
+       3   1.0000   1.0000   1.0000   1.0000   1.0000        5
+       4   1.0000   1.0000   1.0000   1.0000   1.0000        5
+       6   1.0000   1.0000   1.0000   1.0000   0.9142        4
+       8   0.9852   0.9042   0.8045   0.9274   0.8145        0
+      12   0.7159   0.7789   0.7996   0.8009   0.6886        0
+      16   0.7642   0.5817   0.6571   0.7737   0.6015        0
+      24   0.4926   0.5510   0.5095   0.4961   0.5232        0
+
+  curve 2557 (lam*=0.340), m=12
+      K1       s0       s1       s2       s3       s4   X wins
+       2   1.0000   1.0000   1.0000   1.0000   1.0000        5
+       3   1.0000   1.0000   1.0000   1.0000   1.0000        5
+       4   0.9912   0.9352   1.0000   0.9728   1.0000        5
+       6   0.9370   0.7924   0.9347   0.9241   0.9515        5
+       8   0.8132   0.8568   0.9028   0.9140   0.9962        5
+      12   0.8636   0.7065   0.7274   0.8087   0.8391        3
+      16   0.7087   0.6068   0.6098   0.5943   0.7417        1
+      24   0.5352   0.5989   0.5150   0.5047   0.5165        0
+
+------------------------------------------------------------------------------
+R4: does more data rescue the CVP arms at the wall?
+------------------------------------------------------------------------------
+2026-07-29 T4b: at K1=8 the lam*=0.070 curve stayed dead under Kannan+LLL
+for m = 8,12,16,24,32 (0,0,1,0,1 of 5).  Same grid, CVP arms.
+
+  --- K1=6  (eff=0.118, counting bound m* = 4) ---
+     m        K        B        X    mean r   #(r=1)
+     6 2/5      1/5      0/5         0.9040      0/5
+     8 0/5      0/5      3/5         0.9511      3/5
+    10 0/5      0/5      4/5         0.9773      4/5
+    12 2/5      1/5      4/5         0.9828      4/5
+    14 1/5      0/5      4/5         0.9958      4/5
+    16 1/5      0/5      5/5         1.0000      5/5
+    20 2/5      1/5      5/5         1.0000      5/5
+    24 1/5      1/5      5/5         1.0000      5/5
+    32 1/5      1/5      5/5         1.0000      5/5
+
+  --- K1=8  (eff=0.157, counting bound m* = 5) ---
+     m        K        B        X    mean r   #(r=1)
+     6 1/5      0/5      0/5         0.7289      0/5
+     8 0/5      0/5      2/5         0.9032      2/5
+    10 0/5      0/5      1/5         0.8478      1/5
+    12 0/5      0/5      0/5         0.8872      0/5
+    14 0/5      0/5      1/5         0.9361      1/5
+    16 1/5      0/5      1/5         0.9563      1/5
+    20 0/5      0/5      4/5         0.9848      4/5
+    24 0/5      0/5      5/5         1.0000      5/5
+    32 1/5      0/5      5/5         1.0000      5/5
+
+  --- K1=12  (eff=0.236, counting bound m* = 6) ---
+     m        K        B        X    mean r   #(r=1)
+     6 0/5      0/5      0/5         0.5502      0/5
+     8 0/5      0/5      0/5         0.6552      0/5
+    10 0/5      0/5      0/5         0.6915      0/5
+    12 0/5      0/5      0/5         0.7568      0/5
+    14 0/5      0/5      0/5         0.7738      0/5
+    16 0/5      0/5      0/5         0.7995      0/5
+    20 0/5      0/5      0/5         0.8301      0/5
+    24 0/5      0/5      0/5         0.8644      0/5
+    32 0/5      0/5      1/5         0.9174      1/5
+
+  --- K1=16  (eff=0.314, counting bound m* = 7) ---
+     m        K        B        X    mean r   #(r=1)
+     6 0/5      0/5      0/5         0.5705      0/5
+     8 0/5      0/5      0/5         0.6138      0/5
+    10 0/5      0/5      0/5         0.6062      0/5
+    12 0/5      0/5      0/5         0.6756      0/5
+    14 0/5      0/5      0/5         0.7053      0/5
+    16 0/5      0/5      0/5         0.6954      0/5
+    20 0/5      0/5      0/5         0.7571      0/5
+    24 0/5      0/5      0/5         0.7932      0/5
+    32 0/5      0/5      0/5         0.8286      0/5
+
+------------------------------------------------------------------------------
+R5: the K1 wall re-measured — minimum m for 5/5 recovery, per arm
+------------------------------------------------------------------------------
+If the 'K1 wall' is really a fixed-m artefact of the Kannan formulation,
+then under exact CVP every K1 with eff < 1 should be recoverable once m
+exceeds the counting bound m* = ceil(log n / log(1/eff)).  Any K1 where
+no m in the grid works is a genuine wall.
+
+  curve 2677 (lam*=0.070), n=2647, K2=52
+      K1     eff   m*  min m (K)  min m (B)  min m (X)    t(s)
+       2   0.039    3          6          6          6     0.0
+       3   0.059    3          6          8          6     0.0
+       4   0.079    4          6          8          8     0.0
+       6   0.118    4        >48        >48         16     0.8
+       8   0.157    5        >48        >48         24     0.9
+      12   0.236    6        >48        >48        >48    16.6
+      16   0.314    7        >48        >48        >48    17.4
+      24   0.471   11        >48        >48        >48    18.7
+
+  curve 2557 (lam*=0.340), n=2659, K2=52
+      K1     eff   m*  min m (K)  min m (B)  min m (X)    t(s)
+       2   0.039    3          4          6          6     0.0
+       3   0.059    3          6          6          6     0.0
+       4   0.078    4          6          6          6     0.0
+       6   0.117    4          6          8          8     0.0
+       8   0.156    5          8          8          8     0.0
+      12   0.235    6         14         24         14     0.2
+      16   0.313    7        >48        >48         28     1.0
+      24   0.469   11        >48        >48        >48    15.1
+
+------------------------------------------------------------------------------
+R6: why does the wall sit where it does?  Gaussian-heuristic prediction
+------------------------------------------------------------------------------
+L0 has det = (n*S_K1)^m * S_D * S_K2^m = n^(3m) / (K1*K2)^m and dim 2m+1,
+so as m grows  det^(1/dim) -> n^1.5 / (K1*K2)^0.5 = n / sqrt(eff),  and
+
+    gh(L0) = sqrt(dim / (2*pi*e)) * det^(1/dim) ~ sqrt((2m+1)/(2*pi*e)) * n/sqrt(eff).
+
+The planted point has  E||v||^2 = m*n^2/3 + m*n^2/3 + n^2/12,  so ||v|| ~ n*sqrt(2m/3).
+Their ratio is asymptotically INDEPENDENT of m:
+
+    ||v_planted|| / gh(L0)  ->  sqrt(2*pi*e/3) * sqrt(eff)  =  2.387 * sqrt(eff).
+
+The planted point is the unique closest vector only while that ratio is < 1, i.e.
+
+    eff  <  eff_c = 3/(2*pi*e) = 0.17549...
+
+This is a *bias-strength* wall, not a data wall: no amount of extra signatures
+moves it, which is exactly what R5 shows (>48 well above the counting bound m*).
+
+  eff_c = 3/(2*pi*e) = 0.17565
+
+  Finite-m form (uses the actual integer scales, not the asymptote).
+  'pred m' = smallest m in the R5 grid with E||planted||/gh(L0) < 1.
+
+  curve                  K1     eff   asym  gh@m=32  pred m  obs m (X)   verdict
+  2677 (lam*=0.070)       2   0.039  0.473    0.544       6          6     agree
+  2677 (lam*=0.070)       3   0.059  0.579    0.664       8          6     agree
+  2677 (lam*=0.070)       4   0.079  0.669    0.766      12          8     agree
+  2677 (lam*=0.070)       6   0.118  0.819    0.935      24         16     agree
+  2677 (lam*=0.070)       8   0.157  0.946    1.077     >48         24  MISMATCH
+  2677 (lam*=0.070)      12   0.236  1.158    1.315     >48        >48     agree
+  2677 (lam*=0.070)      16   0.314  1.338    1.515     >48        >48     agree
+  2677 (lam*=0.070)      24   0.471  1.638    1.849     >48        >48     agree
+
+  2557 (lam*=0.340)       2   0.039  0.472    0.543       6          6     agree
+  2557 (lam*=0.340)       3   0.059  0.578    0.663       8          6     agree
+  2557 (lam*=0.340)       4   0.078  0.667    0.764      12          6     agree
+  2557 (lam*=0.340)       6   0.117  0.817    0.933      24          8     agree
+  2557 (lam*=0.340)       8   0.156  0.944    1.075     >48          8  MISMATCH
+  2557 (lam*=0.340)      12   0.235  1.156    1.312     >48         14  MISMATCH
+  2557 (lam*=0.340)      16   0.313  1.335    1.512     >48         28  MISMATCH
+  2557 (lam*=0.340)      24   0.469  1.635    1.845     >48        >48     agree
+
+  nu_hat (2026-07-29 separator) for the same instances:
+  L2 = <(n*S_K1,0), (-lam*S_K1, S_K2)>, nu_hat = lambda_1(L2)/sqrt(det L2)
+  curve                  K1   nu_hat
+  2677 (lam*=0.070)       8   0.7711
+  2677 (lam*=0.070)      12   0.6961
+  2677 (lam*=0.070)      16   0.6753
+  2557 (lam*=0.340)       8   0.4080
+  2557 (lam*=0.340)      12   0.4813
+  2557 (lam*=0.340)      16   0.5476
+
+  Reading: the GH threshold predicts the 2677 (low lam*) wall exactly -- it
+  falls between eff=0.157 (recovers at m=24) and eff=0.236 (dead at m=48).
+  The 2557 curve BEATS the prediction, recovering out to eff=0.313.  A curve
+  can only beat the Gaussian heuristic if L0 is non-random in a way that helps,
+  and the known non-randomness is the L2 block: nu_hat below.
+
+------------------------------------------------------------------------------
+R7: does the eff wall track nu_hat across curves?
+------------------------------------------------------------------------------
+Cross-curve test of the R6 reading.  For each curve, measure the largest
+eff at which exact CVP still recovers 3/3 (m searched up to 24), and
+compare with nu_hat.  Prediction from 2026-07-29 (low nu_hat = easier):
+negative correlation between nu_hat and the eff wall.
+
+  building test curves (12-14 bit, lam* spread)...
+  got 8 curves
+
+        p       n    lam*   nu_hat  eff wall  m at wall
+     2251    2179  0.0564   1.0231     0.129         16
+     2053    2137  0.0941   0.9395     0.110         16
+     2089    2143  0.1629   0.4910     0.154         16
+     2731    2671  0.2037   0.4778     0.311         24
+     2203    2281  0.2907   0.8155     0.168         24
+     2179    2251  0.3145   1.0338     0.128         16
+     2089    1999  0.4042   0.5016     0.315         24
+     2251    2341  0.4724   1.0233     0.167         24
+
+  spearman(nu_hat, eff wall)  = -0.595   (2026-07-29 predicts negative)
+  spearman(lam*,   eff wall)  = +0.500   (lam* was falsified 2026-07-29; expect ~0)
+  eff wall range observed: 0.110 .. 0.315   (GH prediction: 0.176 for a random lattice)
+
+==============================================================================
+done
+==============================================================================
+EXIT=0
