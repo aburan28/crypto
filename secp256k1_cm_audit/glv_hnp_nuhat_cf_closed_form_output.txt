@@ -1,0 +1,158 @@
+==========================================================================
+T1  closed form (**) vs Lagrange-Gauss ground truth
+==========================================================================
+  bits   cases  mismatches
+    16     300           0
+    20     300           0
+    24     300           0
+    32     300           0
+    48     300           0
+    64     300           0
+   128     300           0
+   256     300           0
+
+total cases    : 2400
+mismatches     : 0
+worst rel.err  : 0.000e+00
+pearson(cf,gs) : 1.000000
+spearman(cf,gs): 1.000000
+
+falsifier was 'correlation < 0.9'  ->  PASSED (exact)
+
+==========================================================================
+T2  minimising convergent vs balance scale b* = sqrt(n*S1/S2)
+==========================================================================
+offset of argmin convergent index from the last convergent <= b*:
+  offset    count    share
+      -2        1    0.1%
+      -1      138    6.9%
+       0     1852   92.6%
+       1        9    0.4%
+
+log2(q_min / b*)  q05=-4.90 q25=-2.26 q50=-1.26 q75=-0.61 q95=-0.15
+share with |log2(q_min/b*)| <= 1 (i.e. within a factor 2): 40.6%
+
+==========================================================================
+T3/T4  scale-free max_a vs scale-local a_{j+1} as predictors of nu_hat
+==========================================================================
+(real j=0 GLV pairs: n prime, n=1 mod 3, lam^2+lam+1=0 mod n)
+
+bits=20  K1=72 K2=52  N=400
+  spearman(max_a,   nu_hat) = -0.037   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = +0.010   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = +0.047   [falsified 2026-07-29]
+
+bits=20  K1=144 K2=52  N=400
+  spearman(max_a,   nu_hat) = -0.207   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.940   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = +0.064   [falsified 2026-07-29]
+
+bits=20  K1=36 K2=52  N=400
+  spearman(max_a,   nu_hat) = +0.037   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.254   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = -0.047   [falsified 2026-07-29]
+
+bits=24  K1=72 K2=52  N=300
+  spearman(max_a,   nu_hat) = +0.031   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = +0.013   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = -0.007   [falsified 2026-07-29]
+
+bits=24  K1=144 K2=52  N=300
+  spearman(max_a,   nu_hat) = -0.159   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.952   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = -0.056   [falsified 2026-07-29]
+
+bits=24  K1=36 K2=52  N=300
+  spearman(max_a,   nu_hat) = -0.032   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.270   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = +0.007   [falsified 2026-07-29]
+
+bits=32  K1=72 K2=52  N=200
+  spearman(max_a,   nu_hat) = -0.054   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = +0.074   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = +0.031   [falsified 2026-07-29]
+
+bits=32  K1=144 K2=52  N=200
+  spearman(max_a,   nu_hat) = -0.154   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.942   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = +0.091   [falsified 2026-07-29]
+
+bits=32  K1=36 K2=52  N=200
+  spearman(max_a,   nu_hat) = +0.055   [scale-free  -- the June invariant]
+  spearman(a_local, nu_hat) = -0.313   [scale-local -- this thread]
+  spearman(mu,      nu_hat) = -0.032   [falsified 2026-07-29]
+
+==========================================================================
+T6  two-parameter formula  nu_hat^2 ~ t^2 + 1/(a^2 t^2),  t = q_j/b*
+==========================================================================
+Columns: t2dom = share where the t^2 term carries the norm;
+IQR(nu) = interquartile spread of nu_hat itself over the sample;
+argmin@j_lo = share where the true SVP argmin is the convergent
+immediately below the balance scale b* = sqrt(n*r).
+
+NOTE: the first-guess explanation 'a_local works when the spread of
+t is small' is NOT supported -- IQR(t) is ~0.5 at both r=0.722 and
+r=0.361 while spearman(a,nu) goes +0.01 -> -0.94.  What does track
+it is IQR(nu): the model is informative exactly where nu_hat is
+dispersed (r <~ 0.36, IQR ~ 0.3) and uninformative where nu_hat is
+compressed (r ~ 0.7-1.4, IQR ~ 0.11).  r ~ 0.72 remains anomalous:
+t2dom there (27%) is close to r=0.361's (18%), yet spearman(a,nu)
+collapses.  Recorded as open; see the 2026-08-02 log next step.
+
+ bits    K1   K2  r=K2/K1  IQR(t)  med t  t2dom  IQR(nu)  sp(a,nu)  sp(fml,nu)  argmin@j_lo
+   20    36   52    1.444   0.250  0.835   63%    0.115    -0.254      +0.614         80%
+   20    72   52    0.722   0.558  0.395   27%    0.114    +0.010      +0.270         98%
+   20   144   52    0.361   0.522  0.485   18%    0.311    -0.940      +0.953         89%
+   20   288   52    0.181   0.485  0.393   28%    0.330    -0.884      +0.970         97%
+   24    36   52    1.444   0.243  0.838   65%    0.132    -0.270      +0.615         78%
+   24    72   52    0.722   0.586  0.371   27%    0.120    +0.013      +0.246         98%
+   24   144   52    0.361   0.505  0.474   14%    0.276    -0.952      +0.957         91%
+   24   288   52    0.181   0.446  0.453   31%    0.366    -0.923      +0.961         97%
+   32    36   52    1.444   0.246  0.811   62%    0.110    -0.313      +0.649         75%
+   32    72   52    0.722   0.584  0.455   28%    0.116    +0.074      +0.310         95%
+   32   144   52    0.361   0.514  0.505   22%    0.295    -0.942      +0.949         90%
+   32   288   52    0.181   0.444  0.412   26%    0.317    -0.899      +0.958         98%
+
+==========================================================================
+T7  nu_hat depends on (n, lam, r=K2/K1) ONLY -- not on eff=K1*K2/n
+==========================================================================
+Proof: scaling (S1,S2) -> (c*S1,c*S2) scales lambda_1 by c and
+sqrt(det)=sqrt(n*S1*S2) by c, so nu_hat is unchanged.  Since
+S1=n//K1 and S2=n//K2, nu_hat is a function of K2/K1 alone.
+
+      K1       K2   eff=K1K2/n   r=K2/K1     nu_hat
+      72       52    1.624e-15    0.7222   0.401271
+     144      104    6.495e-15    0.7222   0.401271
+     720      520    1.624e-13    0.7222   0.401271
+    7200     5200    1.624e-11    0.7222   0.401271
+
+=> identical nu_hat across four orders of magnitude of eff.
+CONSEQUENCE: the 2026-07-29 secp256k1 table indexed by 'eff' was
+mis-parameterised; the correct abscissa is r = K2/K1.  Restated below.
+
+==========================================================================
+T5  Hermite bound and secp256k1 placement via the closed form
+==========================================================================
+lam (verified lam^2+lam+1 = 0 mod n): 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72
+mu = min(lam,n-lam)/n              : 0.325740
+
+Hermite bound in dim 2: nu_hat <= (2/sqrt(3))^(1/2) = 1.074570
+(2026-07-29 measured max over the high group was 1.072 -- consistent)
+
+secp256k1 nu_hat as a function of the bias-shape ratio r = K2/K1
+(percentile = share of 2000 random lam with smaller nu_hat, same r)
+
+  r=K2/K1  nu_hat(cf)  nu_hat(gauss)  q_min bits   a_next   pctile
+   0.0156      0.8312         0.8312         124        2   65.3%
+   0.1250      0.6585         0.6585         126        4   40.6%
+   1.0000      0.9116         0.9116         128        5   79.0%
+   8.0000      0.6220         0.6220         128        5   36.6%
+  64.0000      0.8253         0.8253         131        2   64.1%
+
+null distribution of nu_hat over random lam (256-bit, r=1, 4000 draws):
+  q05=0.231 q10=0.323 q25=0.511 q50=0.720 q75=0.883 q90=0.971 q95=0.996
+  share below 0.45: 19.2%   share above 0.90: 22.4%
+
+==========================================================================
+done in 6.8s   T1 exactness: PASS
+==========================================================================
