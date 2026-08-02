@@ -257,6 +257,56 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. The viability boundary (measured, 2026-08-02)
+
+Phase 2's success/failure boundary is **not** a property of the curve.  Eight
+curve-level invariants were proposed and falsified between 2026-06-21 and
+2026-07-29 (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ/ρ).  The
+boundary is a determinant/dimension condition on the lattice.
+
+Write `eff = K1·K2/n` for the product of the two nonce-block bounds relative to
+the group order, and `m` for the number of signatures.  The BDD form of the
+Phase-2 lattice (dimension `2m`, the Kannan column and the d-column removed —
+see `secp256k1_cm_audit/glv_hnp_phase2_projected.py`) has
+
+    det L0  = n^(m-1) · S_K1^m · S_K2^m  ≈  n^(3m-1) / (K1·K2)^m
+    GH(L0)  = sqrt(2m / 2πe) · (det L0)^(1/2m)
+    ‖v‖     ≈ n · sqrt(2m/3)                (k1, k2 uniform; E[x²] = X²/3)
+
+so `‖v‖ < GH(L0)` reduces to
+
+    γ  :=  eff · n^(1/m) / (3/(2πe))  <  1,      3/(2πe) = 0.175649…
+
+Calibrated on 48 fresh j=0 GLV curves (24 at 13-bit, 24 at 15-bit, m = 10,
+`secp256k1_cm_audit/glv_hnp_phase2_gamma_wall.py`), the measured wall sits at
+median γ = 1.05, range 0.61 – 3.03.
+
+**Necessary condition.**  γ → eff / 0.17566 as m → ∞, so
+
+    eff = K1·K2/n  <  0.176
+
+is required *no matter how many signatures are collected*.  Verified at
+eff = 0.236: zero recoveries at every m from 10 to 140.
+
+**Two caveats, both important:**
+
+1. *Necessary, not sufficient.*  The calibration is at 13–15 bit n, where
+   dim-2m LLL is effectively optimal.  γ is a statement about lattice geometry
+   and says nothing about the reduction algorithm's approximation factor, which
+   is what actually dominates at cryptographic size.  A marginal instance
+   (γ_asym = 0.895) failed at every m ≤ 140.
+2. *Do not extrapolate naively.*  At 256 bits with K2 = √n the condition reads
+   K1 < 0.176·2^128 ≈ 2^125.5 — about 2.5 bits of bias below the natural GLV
+   split.  That is not a break; it is the geometric floor, and the gap between
+   it and a real attack is exactly the approximation factor.
+
+**What the reformulation buys.**  Projecting out the trivial vector `n·e_m`
+(which is always in the Kannan embedding and is always shorter than the planted
+vector) makes the planted vector λ₁, but changes the success set in *none* of
+115 measured cells.  Exact CVP by enumeration on the dim-2m lattice does move
+the wall, by a factor 1.25 in eff at 12 bits (K1 4 → 5).  Babai nearest-plane is
+worse than reading the Kannan row.
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on

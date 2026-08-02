@@ -6103,3 +6103,166 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23** — the next-step proposed at the end of the 2026-07-29 entry:
+reformulate the Phase-2 lattice so the planted vector can be λ₁, and test whether
+the K1 wall moves. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP Phase 2) is the live thread; it made
+measurable progress on 2026-07-29, so protocol rule (b) applies and its own proposed
+sub-task is the correct pick.
+
+The 2026-07-29 falsifier was pre-registered and is answered here **both ways**: the
+projection does what it was supposed to (sv/pv → 1.000) and it buys **nothing**; the
+wall moves only under exact CVP, and only by ~25% in eff.
+
+### Work done
+- Environment (fresh container). `pip install fpylll cysignals sympy` — and note for
+  future runs that **`apt-get install pari-gp` fails without a preceding
+  `apt-get update`**; with it, gp 2.15.4 installs fine. sympy is *not* preinstalled
+  (the 2026-07-29 note omitted it).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` — three formulations of the
+  same instance, sharing signatures, seeds and scales:
+  | name | dim | construction |
+  |---|---|---|
+  | `KAN` | 2m+2 | historical Kannan embedding, verbatim from `glv_hnp_phase2_lambda_threshold.py:254` |
+  | `PROJ` | 2m+1 | `KAN` projected along `e_m` (d-column deleted). Legal because `n·e_m ∈ KAN`, so deletion *is* the orthogonal projection. `d` is recovered afterwards from `d = (k1_i + λ·k2_i − A_i)/B_i mod n`, required consistent across all m signatures |
+  | `BDD` | 2m | `PROJ` minus the Kannan column and the A-row, solved as an explicit CVP against `t = (A_i·S_K1, 0)`; two solvers, Babai nearest-plane (exact rational GS) and exact `fpylll.CVP` enumeration |
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_gamma_wall.py` (48-curve calibration,
+  permutation tests) and `secp256k1_cm_audit/glv_hnp_phase2_cvp_wall.py` (15-seed
+  confirmation of the one cell where CVP beat LLL).
+- Outputs committed: `glv_hnp_phase2_projected_output.txt` (119 lines),
+  `glv_hnp_phase2_gamma_wall_output.txt`, `glv_hnp_phase2_cvp_wall_output.txt`.
+- `cargo test --test curve_audit` → **5/5 pass** (6.66s): `audit_template_exists`,
+  `pari_prelude_format`, `fresh_cm_curve_passes_audit`, `hnp_recovers_p256_key_via_lll_phase15`,
+  `all_curves_pass_structural_audit`. No Rust was touched this run.
+
+### Findings
+
+**1. The projection works, and is worthless.** sv/pv = ‖shortest reduced row‖/‖planted‖:
+
+| curve | K1 | m | sv/pv KAN | sv/pv PROJ | KAN | PROJ |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.543 | 0.790 | 5/5 | 5/5 |
+| 12-bit/2557 | 2 | 8 | 0.491 | 0.902 | 5/5 | 5/5 |
+| 12-bit/2557 | 8 | 8 | 0.445 | 0.475 | 5/5 | 5/5 |
+| 12-bit/2677 | 2 | 10 | 0.438 | **1.000** | 5/5 | 5/5 |
+| 12-bit/2677 | 8 | 10 | 0.387 | 0.767 | 0/5 | 0/5 |
+
+Arm 1 of the falsifier is met — on 12-bit/2677 at K1=2 the planted vector *is* λ₁
+after projection. Arm 2 is not: **`PROJ` and `KAN` agree in every one of the 115
+(curve, K1, seed-set) cells measured** across EXP P3 (3 curves × 8 K1 values),
+P4 (2 K1 × 8 m values) and P5. Removing the trivial vector `n·e_m` changes the
+success set not at all. The 2026-07-29 diagnosis (T5) was correct as geometry and
+wrong as a diagnosis of the obstruction: `n·e_m` costs LLL one basis slot and
+nothing else.
+
+**2. The wall (largest K1 with full recovery), EXP P3, 5 seeds:**
+
+| curve | λ* | ν̂@K1=2 | KAN | PROJ | BABAI | CVP |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | 0.549 | 3 | 3 | 3 | 2 |
+| 12-bit/2557 | 0.340 | 0.353 | 8 | 8 | 8 | 8 |
+| 12-bit/2677 | 0.070 | 0.710 | 4 | 4 | 2 | 4 |
+
+Babai nearest-plane is *worse* than reading the Kannan row (9/15 vs 15/15 at K1=4 in
+the 15-seed run) — nearest-plane rounding is the weaker of the two.
+
+**3. Exact CVP does move the wall — confirmed at 15 seeds** (`glv_hnp_phase2_cvp_wall.py`,
+12-bit/2677, m=10):
+
+| K1 | eff | γ | KAN | PROJ | BABAI | CVP |
+|---|---|---|---|---|---|---|
+| 4 | 0.0786 | 0.98 | 15/15 | 15/15 | 9/15 | 14/15 |
+| 5 | 0.0982 | 1.23 | 10/15 | 10/15 | 4/15 | **15/15** |
+| 6 | 0.1179 | 1.48 | 1/15 | 1/15 | 1/15 | **6/15** |
+| 7 | 0.1375 | 1.72 | 2/15 | 2/15 | 1/15 | 3/15 |
+| 8 | 0.1572 | 1.97 | 0/15 | 0/15 | 0/15 | 1/15 |
+
+The 5-seed blip at K1=6 was real. The wall moves 4 → 5, i.e. **eff 0.0786 → 0.0982,
+a factor 1.25**. That is an algorithmic gain from exact enumeration in dim 2m, not a
+structural gain from the reformulation — and it is one unit of K1, not an order of
+magnitude.
+
+**4. NEW — a predictive formula for the wall (first one in this thread that survives).**
+Gaussian heuristic of the BDD lattice: det L0 = n^(m−1)·S_K1^m·S_K2^m ≈ n^(3m−1)/(K1K2)^m,
+GH(L0) = √(2m/2πe)·det^(1/2m), and ‖v‖ ≈ n√(2m/3), so ‖v‖ < GH(L0) iff
+
+    γ := eff · n^(1/m) / (3/(2πe)) < 1,     eff = K1·K2/n,   3/(2πe) = 0.175649
+
+Calibrated on **48 fresh j=0 GLV curves** (24 at 13-bit, 24 at 15-bit; m=10, 5 seeds,
+wall = largest K1 with 5/5):
+
+| | min | median | max |
+|---|---|---|---|
+| γ_wall | 0.61 | **1.05** | 3.03 |
+| eff_wall | 0.0431 | 0.0716 | 0.1997 |
+
+Median γ_wall = 1.05 — the heuristic locates the wall essentially exactly, with a
+factor-≈2 spread either side. This is the first *predictive* description of the wall
+after eight falsified curve-level invariants (δ/n, κ(M), q_cf, max_q_cf, max_a,
+a_corn/n, λ/n, μ/ρ), and it retro-explains why they all failed: **the wall is not a
+property of the curve at all, it is a determinant/dimension condition on the lattice.**
+
+**Corollary (necessary condition, any m).** γ → eff/0.17566 as m → ∞, so
+**eff = K1·K2/n < 0.176 is required no matter how many signatures are collected.**
+Confirmed: at K1=12 (eff=0.236, γ_asym=1.34) the attack is 0/3 at every
+m ∈ {10,20,40,60,70,80,100,140}.
+
+**5. EXP P4 — more signatures do not rescue a marginal instance.** 12-bit/2677 at K1=8
+(eff=0.1572, γ_asym=0.895 < 1, so the GH law permits recovery at large m):
+
+| m | 10 | 20 | 40 | 60 | 70 | 80 | 100 | 140 |
+|---|---|---|---|---|---|---|---|---|
+| γ | 1.97 | 1.33 | 1.09 | 1.02 | 1.00 | 0.99 | 0.97 | 0.95 |
+| KAN = PROJ | 0/3 | 0/3 | 1/3 | 0/3 | 0/3 | 1/3 | 0/3 | 0/3 |
+
+This **extends T4b (2026-07-29, m ≤ 32) by 4.4× to m = 140** and is a genuine negative
+for the γ law's sufficiency: γ dips below 1 and recovery never becomes reliable. This
+curve has ν̂ = 0.710, above the median, and the fit in (6) predicts γ_wall ≈ 1.21 for
+it — so the discrepancy is not explained by ν̂ either. Recorded as an open discrepancy.
+
+**6. ν̂ replicates as a wall predictor, but weakly.** Same 48 curves, ν̂ evaluated at
+K1=2 so it is a curve-level quantity, γ_wall as the observable (a different observable
+from 2026-07-29, which used success probability):
+
+| sample | N | spearman(ν̂, γ_wall) | perm p | spearman(λ*, γ_wall) | perm p |
+|---|---|---|---|---|---|
+| 13-bit | 24 | **−0.562** | 0.0050 | +0.124 | 0.5673 |
+| 15-bit | 24 | −0.319 | 0.1303 | −0.189 | 0.3701 |
+| pooled | 48 | **−0.418** | **0.0035** | −0.051 | 0.7317 |
+
+Sign matches 2026-07-29 (low ν̂ → easier). λ* remains null, as it should after T3.
+Fit: log γ_wall = 0.855 − 0.933·ν̂, R² = 0.248; the ν̂ correction removes only **13%**
+of the sd of log γ_wall (0.448 → 0.388). **Caveat for future runs:** this is much
+weaker than the AUC 0.935 recorded on 2026-07-29. Either ν̂ predicts success
+probability better than it predicts the wall location, or the 0.935 is optimistic
+(it was measured on the pre-selected June C1/C2 classes, not on fresh curves).
+Do not quote 0.935 as a general figure until this is resolved.
+
+**7. Scope caveat on the γ law.** Calibrated at n of 13–15 bits, where dim-2m LLL is
+effectively optimal. It is a statement about lattice *geometry*, not about LLL's
+approximation factor, so γ < 1 is necessary-ish but **not** sufficient at cryptographic
+size. Naively at 256 bits with K2 = √n it gives K1 < 0.176·2^128 ≈ 2^125.5, i.e. only
+~2.5 bits of bias below the natural GLV split — which is obviously not a break, and is
+exactly the gap the approximation factor fills. Do not put the 2^125.5 number in the
+paper without that qualification.
+
+### Next step proposal
+**Thread 24 — does the CVP gain scale, or is Phase 2 at its ceiling?**
+The only lever that moved the wall is exact CVP in dim 2m, worth a factor 1.25 in eff
+at 12 bits. Run the `glv_hnp_phase2_cvp_wall.py` grid at 15-bit and 17-bit n and
+measure the multiplicative eff-gain of CVP over KAN.
+*Falsifier:* if the gain stays in [1.1, 1.4] across three bit-sizes, the reformulation
+axis is exhausted — close Thread 5/23 with "Phase 2 is at its lattice-geometric
+ceiling, eff < 0.18 necessary, ~0.10 achievable" and move the γ law into
+`RESEARCH_GLV_HNP_PHASE2.md`. If the gain *grows* with n, the wall is a reduction-quality
+wall after all and BKZ-in-BDD (progressive β on the dim-2m lattice) is worth a session.
+Cost: ~15 min; CVP enumeration at dim 2m=20…34 is the only slow part.
+
+*Secondary:* resolve the finding-6 discrepancy — re-measure ν̂'s AUC on the
+success-probability observable using **fresh** curves rather than the June C1/C2 set.
+
+### Commits made
