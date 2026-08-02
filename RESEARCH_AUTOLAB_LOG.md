@@ -6256,3 +6256,5 @@ continued-fraction expansion of λ·S_K1/(n·S_K1) — if so ν becomes a
 zero-cost design criterion rather than a Monte-Carlo estimate.
 
 ### Commits made
+
+316aae1 autolab 2026-08-02: Thread 23 — K1 wall is algorithmic from m>=24; block skew is the predictor (28/28)
