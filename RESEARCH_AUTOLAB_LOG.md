@@ -6434,4 +6434,4 @@ size, so re-testing members of it is wasted effort.
 
 ### Commits made
 
-(hash recorded in the following commit)
+203183b autolab 2026-08-02: Thread 23 — closed form for nu_hat; repair 2026-07-29 merge damage
