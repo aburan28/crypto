@@ -6270,4 +6270,4 @@ re-scaling that shrinks μ may be a genuine (if small) improvement. This is the
 first Phase-2 lever in a month that has not already been falsified.
 
 ### Commits made
-(recorded below after commit)
+db789bf autolab 2026-08-02: Thread 23 — projected lattice makes planted vector lambda_1 but wall is unchanged; rho separator found with reversed sign
