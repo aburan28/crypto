@@ -1,0 +1,218 @@
+==============================================================================
+Thread 23 -- CVP reformulation of the GLV-HNP Phase-2 lattice
+==============================================================================
+  8-bit/199      p=211    n=199    (8b) lam=106    lam*=0.4673 K2=15
+  12-bit/2557    p=2557   n=2659   (12b) lam=1755   lam*=0.3400 K2=52
+  12-bit/2677    p=2677   n=2647   (12b) lam=185    lam*=0.0699 K2=52
+
+------------------------------------------------------------------------------
+EXP C1: structural sanity of the two formulations
+------------------------------------------------------------------------------
+curve           K1   m   ||pv||_kan   ||sv||_kan   sv/pv    E_d    ||e||_cvp   ratio
+8-bit/199        2   6        329.8        199.0   0.603  1.000        263.0   0.797
+12-bit/2557      8   8       5142.8       2659.0   0.517  1.000       4402.0   0.856
+12-bit/2677      8  10       6270.7       2647.0   0.422  1.000       5684.6   0.907
+
+E_d = fraction of the Kannan shortest vector's energy in the d-column.
+E_d = 1.000 reproduces the 2026-07-29 T5 result (sv is always n*S_D*e_m).
+||e||_cvp / ||pv||_kan < 1: dropping the Kannan column and the d-scale
+shortens the object being searched for.
+
+------------------------------------------------------------------------------
+EXP C2: K1 wall -- Kannan+LLL vs CVP at F=1 and F=2^12   (m=10, 5 seeds)
+------------------------------------------------------------------------------
+F=1 penalises large |d| (target has 0 in the d-column); F=2^12 makes
+the d-column free, which is the faithful BDD objective.
+
+12-bit/2557  (lam*=0.3400)
+  K1  V0 Kan+LLL  Bab F=1  enum F=1  Bab F=2^12  enum F=2^12  pl=closest  d_enum/d_pl
+   2         5/5      5/5       5/5         5/5          5/5         5/5       1.0000
+   3         5/5      5/5       5/5         5/5          5/5         5/5       1.0000
+   4         5/5      5/5       5/5         5/5          5/5         3/5       0.9836
+   6         5/5      5/5       5/5         5/5          5/5         0/5       0.9100
+   8         5/5      3/5       5/5         3/5          5/5         0/5       0.9050
+  12         3/5      2/5       1/5         2/5          1/5         0/5       0.7297
+  16         0/5      0/5       0/5         0/5          0/5         0/5       0.6638
+  24         0/5      0/5       0/5         0/5          0/5         0/5       0.4933
+
+12-bit/2677  (lam*=0.0699)
+  K1  V0 Kan+LLL  Bab F=1  enum F=1  Bab F=2^12  enum F=2^12  pl=closest  d_enum/d_pl
+   2         5/5      5/5       5/5         5/5          5/5         5/5       1.0000
+   3         5/5      4/5       5/5         4/5          5/5         5/5       1.0000
+   4         5/5      2/5       5/5         2/5          5/5         5/5       1.0000
+   6         0/5      0/5       4/5         0/5          4/5         4/5       0.9773
+   8         0/5      0/5       1/5         0/5          0/5         0/5       0.8460
+  12         0/5      0/5       0/5         0/5          0/5         0/5       0.6884
+  16         0/5      0/5       0/5         0/5          0/5         0/5       0.5961
+  24         0/5      0/5       0/5         0/5          0/5         0/5       0.4764
+
+'pl=closest' (F=2^12): instances where the enumerated closest vector is
+NOT strictly closer than the planted error (d taken at its balanced
+representative).  0/5 => a closer lattice point exists => the instance
+is information-theoretically lost and no reduction can win.
+
+------------------------------------------------------------------------------
+EXP C3: S_D sweep in the Kannan/SVP form (12-bit/2677, m=10)
+------------------------------------------------------------------------------
+2026-07-29 claimed 'no choice of S_D removes the trivial vector --
+both vectors scale linearly in S_D'.  Only the trivial vector does:
+||trivial|| = n*S_D but ||planted||^2 = C^2 + (d*S_D)^2 with C fixed,
+so the ratio tends to n/d > 1 and there must be a crossover.  Swept at
+K1 = 4 (baseline already wins) and K1 = 6, 8 (baseline fails).
+
+  K1=4
+         S_D    wins  mean sv/pv  mean E_d
+           1     5/5      0.3999     1.000
+           2     5/5      0.7390     1.000
+           3     5/5      0.8549     0.102
+           4     5/5      0.7960     0.115
+           6     5/5      0.6753     0.067
+           8     4/5      0.5892     0.106
+          16     1/5      0.4157     0.031
+          32     1/5      0.3154     0.028
+          64     1/5      0.2587     0.088
+          51     1/5      0.2732     0.062
+        2647     0/5      0.0124     0.000
+
+  K1=6
+         S_D    wins  mean sv/pv  mean E_d
+           1     0/5      0.3816     1.000
+           2     0/5      0.7080     1.000
+           3     0/5      0.7840     0.002
+           4     1/5      0.7099     0.003
+           6     1/5      0.5944     0.007
+           8     1/5      0.5166     0.011
+          16     1/5      0.3712     0.000
+          32     1/5      0.2790     0.000
+          64     1/5      0.2131     0.000
+          51     1/5      0.2340     0.000
+        2647     0/5      0.0087     0.000
+
+  K1=8
+         S_D    wins  mean sv/pv  mean E_d
+           1     0/5      0.3873     1.000
+           2     0/5      0.6925     0.000
+           3     0/5      0.6297     0.000
+           4     0/5      0.5707     0.000
+           6     0/5      0.4782     0.000
+           8     0/5      0.4150     0.000
+          16     0/5      0.2964     0.000
+          32     0/5      0.2237     0.000
+          64     0/5      0.1703     0.000
+          51     0/5      0.1874     0.000
+        2647     0/5      0.0068     0.000
+
+------------------------------------------------------------------------------
+EXP C4: m sweep at the wall (12-bit/2677, K1=8), F=2^12
+------------------------------------------------------------------------------
+2026-07-29 T4b: at K1=8 the Kannan form got 0,0,1,0,1 of 5 for
+m = 8,12,16,24,32.  Does the CVP form do better?
+   m   dim   V0 Kannan   Babai   BKZ20+Bab   enum  pl=closest
+   8    17         0/5     0/5         1/5    2/5         2/5
+  10    21         0/5     0/5         0/5    0/5         0/5
+  12    25         0/5     0/5         0/5    0/5         0/5
+  14    29         0/5     0/5         0/5    1/5         1/5
+
+------------------------------------------------------------------------------
+EXP C5: decode the enumerated closest vector at the wall
+------------------------------------------------------------------------------
+If the closer-than-planted vector decodes to k1_i/k2_i OUTSIDE the
+true boxes [0,K1) x [0,K2), the loss is a RELAXATION artefact -- the
+lattice admits points the real problem forbids -- and tightening the
+encoding can recover them.  If it decodes INSIDE the boxes, a genuine
+second solution exists and the loss is information-theoretic.
+curve           K1   m   seed  d ok  d_en/d_pl  k1 out  k2 out         k1 range
+12-bit/2677      6  10     42  True     1.0000       0       0            [0,5]
+12-bit/2677      6  10   1234  True     1.0000       0       0            [0,5]
+12-bit/2677      6  10   9999  True     1.0000       0       0            [0,4]
+12-bit/2677      6  10    555  True     1.0000       0       0            [0,4]
+12-bit/2677      6  10  31337 False     0.8865       6       6           [-4,3]
+12-bit/2677      8  10     42 False     0.9968       6       8           [-4,5]
+12-bit/2677      8  10   1234 False     0.8489       2       5           [-5,4]
+12-bit/2677      8  10   9999 False     0.7085       6       4           [-5,2]
+12-bit/2677      8  10    555 False     0.9169       8       7           [-4,3]
+12-bit/2677      8  10  31337 False     0.7589       5       2           [-8,5]
+12-bit/2557     12  10     42 False     0.8140       4       9          [-14,8]
+12-bit/2557     12  10   1234  True     0.6773       0       4            [0,9]
+12-bit/2557     12  10   9999 False     0.6306       5       5           [-9,6]
+12-bit/2557     12  10    555 False     0.8090       5       3         [-12,10]
+12-bit/2557     12  10  31337 False     0.7175       6       5          [-8,16]
+
+------------------------------------------------------------------------------
+EXP C6: centered vs uncentered CVP target (m=10, 5 seeds, F=2^12)
+------------------------------------------------------------------------------
+Uncentered error carries k1_i in [0,K1); centered carries k1_i - K1/2.
+E[x^2] drops from K^2/3 to K^2/12, i.e. ||error|| halves.
+
+12-bit/2557  (lam*=0.3400)
+  K1  V0 Kan+LLL  unc Bab  unc enum  ctr Bab  ctr enum  ctr pl=cl  ||e||ctr/unc
+   2         5/5      5/5       5/5      5/5       5/5        5/5        0.7940
+   3         5/5      5/5       5/5      5/5       5/5        5/5        0.5959
+   4         5/5      5/5       5/5      5/5       5/5        4/5        0.6662
+   6         5/5      5/5       5/5      5/5       5/5        3/5        0.6010
+   8         5/5      3/5       5/5      5/5       5/5        2/5        0.6259
+  12         3/5      2/5       1/5      5/5       5/5        2/5        0.5631
+  16         0/5      0/5       0/5      5/5       2/5        0/5        0.6019
+  24         0/5      0/5       0/5      2/5       0/5        0/5        0.5533
+
+12-bit/2677  (lam*=0.0699)
+  K1  V0 Kan+LLL  unc Bab  unc enum  ctr Bab  ctr enum  ctr pl=cl  ||e||ctr/unc
+   2         5/5      5/5       5/5      5/5       5/5        5/5        0.7981
+   3         5/5      4/5       5/5      5/5       5/5        5/5        0.6026
+   4         5/5      2/5       5/5      5/5       5/5        5/5        0.6674
+   6         0/5      0/5       4/5      4/5       5/5        5/5        0.5998
+   8         0/5      0/5       0/5      4/5       5/5        5/5        0.6263
+  12         0/5      0/5       0/5      4/5       5/5        5/5        0.5619
+  16         0/5      0/5       0/5      1/5       3/5        3/5        0.6019
+  24         0/5      0/5       0/5      1/5       2/5        1/5        0.5530
+
+------------------------------------------------------------------------------
+EXP C7: ablation -- centering alone, inside the ORIGINAL Kannan/SVP form
+------------------------------------------------------------------------------
+2x2 design: {Kannan/SVP, CVP} x {uncentered, centered}, m=10, 5 seeds.
+If 'Kan ctr' matches 'CVP ctr', the operative ingredient is CENTERING
+and the CVP reformulation is cosmetic.
+
+12-bit/2557  (lam*=0.3400)
+  K1  Kan unc  Kan ctr  Kan ctr+d  CVP unc Bab  CVP ctr Bab  CVP ctr enum
+   2      5/5      5/5        5/5          5/5          5/5           5/5
+   3      5/5      5/5        5/5          5/5          5/5           5/5
+   4      5/5      5/5        5/5          5/5          5/5           5/5
+   6      5/5      5/5        5/5          5/5          5/5           5/5
+   8      5/5      5/5        5/5          3/5          5/5           5/5
+  12      3/5      5/5        5/5          2/5          5/5           5/5
+  16      0/5      5/5        5/5          0/5          5/5           2/5
+  24      0/5      2/5        2/5          0/5          2/5           0/5
+
+12-bit/2677  (lam*=0.0699)
+  K1  Kan unc  Kan ctr  Kan ctr+d  CVP unc Bab  CVP ctr Bab  CVP ctr enum
+   2      5/5      5/5        5/5          5/5          5/5           5/5
+   3      5/5      5/5        5/5          4/5          5/5           5/5
+   4      5/5      5/5        5/5          2/5          5/5           5/5
+   6      0/5      5/5        5/5          0/5          4/5           5/5
+   8      0/5      5/5        5/5          0/5          4/5           5/5
+  12      0/5      4/5        4/5          0/5          4/5           5/5
+  16      0/5      1/5        1/5          0/5          1/5           3/5
+  24      0/5      1/5        1/5          0/5          1/5           2/5
+
+------------------------------------------------------------------------------
+EXP C8: generality of the centering fix -- fresh 17-bit curves, 10 seeds
+------------------------------------------------------------------------------
+Wall = largest K1 with >=8/10 recovery.  eff = K1*K2/n at that K1.
+
+curve             lam*        n    K2  K1 wall unc  eff unc  K1 wall ctr  eff ctr   gain
+8-bit/199       0.4673      199    15            4   0.3015            6   0.4523   1.50
+12-bit/2557     0.3400     2659    52            8   0.1564           16   0.3129   2.00
+12-bit/2677     0.0699     2647    52            4   0.0786           12   0.2357   3.00
+16b/65539       0.3346    65287   256           32   0.1255           48   0.1882   1.50
+17b/65629       0.4096    66109   258           16   0.0624           32   0.1249   2.00
+17b/65647       0.0273    65719   257           16   0.0626           32   0.1251   2.00
+17b/65707       0.2115    66037   257           16   0.0623           32   0.1245   2.00
+17b/66499       0.1145    66463   258           16   0.0621           32   0.1242   2.00
+17b/66853       0.4816    67369   260           48   0.1852           64   0.2470   1.33
+
+median K1-wall gain from centering: 2.00x over 9 curves
+
+==============================================================================
+done
+==============================================================================

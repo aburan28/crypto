@@ -6103,3 +6103,159 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+
+**Thread 23** — the continuation proposed verbatim by the 2026-07-29 entry
+(log line ~6089): *"reformulate the Phase-2 lattice so the target is λ₁"*, with
+the stated falsifier *"if sv/pv rises above 1 after the reformulation and the
+K1 wall in T4 moves outward on the λ*=0.07 curve (currently K1≈4–6), the
+reformulation is a real improvement; if the wall stays at K1≈4–6, then the wall
+is information-theoretic and Phase 2 is at its ceiling."*
+
+Threads 1, 3, 4, 6 are CLOSED; Thread 2 is BLOCKED (F_p Rosenhain obstruction,
+2026-07-26); Thread 5/20 made measurable progress 2026-07-29, so protocol rule
+(b) selects its proposed sub-task.
+
+**Outcome: the falsifier's first branch fires, but for a reason the proposal did
+not anticipate.** The wall moves outward by 2–3× — and an ablation shows the CVP
+reformulation is *not* what moves it. The operative fix is a one-line change the
+Phase-2 construction has been missing since 2026-06-15: **the k1/k2 search boxes
+were never centered**.
+
+### Work done
+
+- New script `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` (8 experiments C1–C8),
+  output artifact `secp256k1_cm_audit/glv_hnp_phase2_cvp_output.txt`.
+  EC arithmetic, `gen_signatures`, and `build_glv_lattice` are copied verbatim
+  from `glv_hnp_phase2_lambda_threshold.py:229`/`:262` so every instance is
+  bit-identical to the 2026-07-26 and 2026-07-29 runs.
+- Implemented the proposed CVP reformulation: dim-(2m+1) lattice with no Kannan
+  row/column, target `t = (-A_i·S_K1)_i`, planted vector becomes the CVP *error*
+  vector. Solvers: exact-rational Babai nearest plane (`Fraction` GS, no float
+  precision risk) and `fpylll` `CVP.closest_vector` enumeration.
+- Added scale parameter `F` inflating S_K1/S_K2 relative to S_D. At F=1 the
+  target has 0 in the d-column, which silently penalises large |d|; F=2^12
+  makes the d-column free, which is the faithful BDD objective. (First pass had
+  F=1 only — the numbers below are the F=2^12 ones.)
+- Fixed the `planted_is_closest` diagnostic: `n·S_D·e_{2m}` is a lattice vector,
+  so `d` and `d−n` label the same solution. Comparing against the unbalanced `d`
+  reports "a strictly closer vector exists" for every instance with d > n/2.
+  The balanced representative is the correct comparand.
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. **`apt-get install pari-gp`
+  FAILED** (404 on `libegl-mesa0` from archive.ubuntu.com); `gp` is unavailable
+  this run. Not needed for this thread — noted for future PARI-dependent runs.
+- `cargo test --test curve_audit` → 5/5 pass (4.23s). ✓ No Rust changed.
+
+### Findings
+
+**C1 — the 2026-07-29 T5 result reproduces exactly.** E_d (fraction of the
+Kannan shortest vector's energy in the d-column) = 1.000 on all three historical
+curves: the shortest vector is `n·S_D·e_m` every time.
+
+| curve | K1 | m | ‖pv‖_kan | ‖sv‖_kan | sv/pv | E_d |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 329.8 | 199.0 | 0.603 | 1.000 |
+| 12-bit/2557 | 8 | 8 | 5142.8 | 2659.0 | 0.517 | 1.000 |
+| 12-bit/2677 | 8 | 10 | 6270.7 | 2647.0 | 0.422 | 1.000 |
+
+**C3 — the 2026-07-29 claim about S_D is corrected.** That entry stated *"no
+choice of S_D removes the trivial vector — both vectors scale linearly in S_D"*.
+Only the trivial vector does: `‖trivial‖ = n·S_D`, but
+`‖planted‖² = C² + (d·S_D)²` with C independent of S_D, so the ratio tends to
+n/d > 1 and a crossover must exist. It does — at S_D = 3 on 12-bit/2677:
+
+| S_D | 1 | 2 | 3 | 4 | 8 | 32 | n |
+|---|---|---|---|---|---|---|---|
+| mean E_d (K1=4) | 1.000 | 1.000 | 0.102 | 0.115 | 0.106 | 0.028 | 0.000 |
+| mean sv/pv (K1=4) | 0.400 | 0.739 | **0.855** | 0.796 | 0.589 | 0.315 | 0.012 |
+| wins (K1=6) | 0/5 | 0/5 | 0/5 | 1/5 | 1/5 | 1/5 | 0/5 |
+
+So the trivial vector *can* be removed, but **removing it does not restore
+recovery**: sv/pv peaks at 0.855 < 1 and a different non-planted vector
+immediately takes over as λ₁. The SVP formulation is broken in two independent
+ways, and S_D tuning fixes only the first. Recorded so no future run re-tries it.
+
+**C5 — the closer-than-planted vector is a relaxation artefact, not a second
+solution.** Decoding the enumerated closest vector back to (k1_i, k2_i) at the
+wall (12-bit/2677, K1=8, m=10, uncentered): all 5 seeds decode **outside** the
+box, with k1 ranges like [-4,5], [-5,4], [-8,5] and 2–8 of 10 coordinates out of
+range in each. The lattice was admitting negative k1_i that the real problem
+forbids. That is the diagnosis; C6 is the fix.
+
+**C6/C7 — box centering, and the ABLATION.** The construction encoded
+`k1_i ∈ [0,K1)` one-sidedly, so `E[x²] = K²/3`. Shifting the target to the box
+midpoints makes it carry `k1_i − K1/2`, giving `E[x²] = K²/12` — a free factor-2
+reduction in error norm (measured: ‖e‖_ctr/‖e‖_unc ≈ 0.55–0.67).
+
+2×2 ablation {Kannan/SVP, CVP} × {uncentered, centered}, m=10, 5 seeds,
+**12-bit/2677** (λ*=0.0699), the curve three prior sessions called a hard wall:
+
+| K1 | Kan unc | Kan ctr | Kan ctr+d | CVP unc Bab | CVP ctr Bab | CVP ctr enum |
+|---|---|---|---|---|---|---|
+| 4 | 5/5 | 5/5 | 5/5 | 2/5 | 5/5 | 5/5 |
+| 6 | **0/5** | **5/5** | 5/5 | 0/5 | 4/5 | 5/5 |
+| 8 | **0/5** | **5/5** | 5/5 | 0/5 | 4/5 | 5/5 |
+| 12 | 0/5 | 4/5 | 4/5 | 0/5 | 4/5 | 5/5 |
+| 16 | 0/5 | 1/5 | 1/5 | 0/5 | 1/5 | 3/5 |
+
+**The CVP reformulation is not the operative ingredient.** `Kan ctr` — the
+*original* Kannan/SVP lattice with only the last row shifted — matches or beats
+every CVP arm. Thread 23's hypothesis (make the planted vector λ₁) is therefore
+**not** what moves the wall; centering is, and it works inside the SVP form
+where the planted vector still is not λ₁. Centering `d` as well (`Kan ctr+d`)
+changes nothing on any cell.
+
+**C8 — generality. Median 2× wall gain, 9 curves, 10 seeds each.** Wall =
+largest K1 with ≥8/10 recovery, m=10.
+
+| curve | λ* | n | K2 | K1 wall unc | eff unc | K1 wall ctr | eff ctr | gain |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.4673 | 199 | 15 | 4 | 0.3015 | 6 | 0.4523 | 1.50 |
+| 12-bit/2557 | 0.3400 | 2659 | 52 | 8 | 0.1564 | 16 | 0.3129 | 2.00 |
+| 12-bit/2677 | 0.0699 | 2647 | 52 | 4 | 0.0786 | 12 | 0.2357 | **3.00** |
+| 16b/65539 | 0.3346 | 65287 | 256 | 32 | 0.1255 | 48 | 0.1882 | 1.50 |
+| 17b/65629 | 0.4096 | 66109 | 258 | 16 | 0.0624 | 32 | 0.1249 | 2.00 |
+| 17b/65647 | 0.0273 | 65719 | 257 | 16 | 0.0626 | 32 | 0.1251 | 2.00 |
+| 17b/65707 | 0.2115 | 66037 | 257 | 16 | 0.0623 | 32 | 0.1245 | 2.00 |
+| 17b/66499 | 0.1145 | 66463 | 258 | 16 | 0.0621 | 32 | 0.1242 | 2.00 |
+| 17b/66853 | 0.4816 | 67369 | 260 | 48 | 0.1852 | 64 | 0.2470 | 1.33 |
+
+Gain is 1.33–3.00×, median 2.00×. The fresh λ*=0.0273 curve behaves exactly like
+the λ*=0.4096 one (16 → 32 in both), **independently reconfirming the 2026-07-29
+result that λ* is not causal** — on fresh curves the prior sessions never saw.
+
+**Consequence for the record.** The "structural failure" of 12-bit/2677 recorded
+on 2026-06-15, restated 2026-07-26 as *"LLL AND BKZ(40) both fail — failure is
+structural"*, and partially corrected on 2026-07-29 to *"it is a K1 wall"*, is
+now explained: it was an **encoding defect**, not a property of the curve or of
+the lattice. The K1=6 and K1=8 cells that read 0/5 for three sessions read 5/5
+after a one-line change to the Kannan row. No curve invariant was ever going to
+separate C1 from C2 — consistent with the six failed separators at log lines
+~3560–3580.
+
+### Next step proposal
+
+**Thread 24 — is the remaining wall now the LLL/BDD bound or still an encoding
+loss?** After centering, eff at the wall is ≈0.12–0.31 (C8), still well below
+the counting bound `m ≥ log n / log(1/eff)` which at eff=0.25, n=2^17, m=10
+predicts comfortable success. Two concrete sub-tasks, both cheap:
+1. Re-run C5's decode diagnostic on the *centered* form at its new wall. If the
+   closest vector again decodes out-of-box, a further encoding tightening
+   exists (candidate: per-coordinate scaling by the true `k2_i` range rather
+   than the uniform `S_K2 = n//K2`, since `k2_i` is uniform on `[0,K2)` but the
+   λ-block makes its effective range anisotropic).
+2. Sweep K2 independently of K1. Every experiment since 2026-06-15 has fixed
+   `K2 = isqrt(n)+1`; the centering gain may differ in the K2 direction.
+
+Falsifier for (1): if ≥80% of decoded coordinates are in-box at the centered
+wall, the encoding is tight and the residual wall is a genuine BDD limit —
+Phase 2 would then be at its real ceiling, 2× further out than believed.
+
+**Housekeeping:** the 2026-07-26 log's λ/n column is still in mixed root
+convention; the 2026-07-29 entry flagged this and it remains unfixed.
+
+### Commits made
