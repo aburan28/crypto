@@ -6252,3 +6252,4 @@ that against the 17-bit T3 sweep of 2026-07-29 (which reported 19/20 at eff=0.05
 at 0.15, 0/20 at 0.25 — all uncentered, all consistent with c=0.176).
 
 ### Commits made
+8936790 autolab 2026-08-02: Thread 23 — CVP reformulation neutral; uncentered embedding was the real defect (K1 wall moves 3x to the info-theoretic limit)
