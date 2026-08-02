@@ -6560,4 +6560,4 @@ whole class fails, so re-testing members of it has no expected information.
 
 ### Commits made
 
-(hash recorded in the following commit)
+c12dbbd autolab 2026-08-02: Thread 23 — ν̂ is a continued-fraction convergent (exact); merge damage from 464d1e8 repaired
