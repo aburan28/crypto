@@ -6103,3 +6103,155 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is short,
+exactly as proposed in the 2026-07-29 entry (log line 6089). Priority 1 (P-521 LLL) is
+CLOSED (`RESEARCH_LLL_GS_ANALYSIS.md:328`, §10.5); priorities 2/3/4/6 are
+CLOSED/BLOCKED/DEAD-END; priority 5 (GLV-HNP Phase 2) made measurable progress on
+2026-07-29 and left a cheap, sharply falsifiable next step. Rule (b).
+
+**Outcome: the K1 wall is 3–4× wider than reported. Most of it was a formulation
+artifact, not an information-theoretic limit.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4.
+  PARI/GP not installed this run (not needed; no `.gp` script touched).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (5 experiments P0–P5, 108-line
+  output artifact `glv_hnp_phase2_projected_output.txt`). Four lattice variants, scored
+  by one common recovery routine so the comparison is like-for-like:
+  - **V0** baseline — verbatim geometry of `glv_hnp_phase2_20bit.py:262`
+  - **V1** recentred
+  - **V2** projected along `e_m`
+  - **V3** projected + recentred
+- Two independent defects of the 2026-06-15 lattice were identified *before* running:
+  - **(C) no recentring.** `k1_i ~ U[0,K1)`, `k2_i ~ U[0,K2)` ⇒ each planted coordinate
+    has second moment `n²/3` instead of `n²/12`. Fix: `Ã_i = A_i − λ⌊K2/2⌋ − ⌊K1/2⌋`.
+    The target stays a *lattice* vector — no CVP, no Babai, contrary to what the
+    2026-07-29 next-step sketch assumed.
+  - **(P) the d-column is charged to the norm.** `d` is only defined mod `n`, so `d²`
+    should not enter `‖v‖²`. `π(L) = L/ℤ·(n·S_D·e_m)` has rank `2m+1`,
+    `covol(πL) = covol(L)/(n·S_D)`, and the trivial vector that T5 showed is *always*
+    `λ₁` maps to `0`.
+- **No transform matrix is needed to recover `d` after projection** — the projected
+  vector still carries every `k1_i`, `k2_i`, so
+  `d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n`. This recovery routine is used for all four
+  variants (the baseline's `recover_d` read `d` out of a column that V2/V3 do not have).
+- fpylll's LLL accepts the rank-deficient projected generating set (2m+2 rows in 2m+1
+  columns) and emits one zero row — verified on a 4×3 toy before use.
+- `cargo test --test curve_audit` → 5/5 pass (4.47s). ✓
+
+### Findings
+
+**P0 — the fix was predicted in closed form before any LLL ran.**
+With `S_K1·K1 ≈ S_K2·K2 ≈ n`, `S_D = 1`:
+
+|            | `‖v_planted‖²`   | `covol`               | dim    |
+|------------|------------------|-----------------------|--------|
+| V0         | `n²(2m/3 + 4/3)` | `n^(3m+1)/(K1K2)^m`   | `2m+2` |
+| V3         | `n²(m/6 + 1)`    | `n^(3m)/(K1K2)^m`     | `2m+1` |
+
+For m=12 that is `9.33n²` vs `3.00n²`, a norm ratio `r = 1.763`. `GH ∝ K1^{−m/(2m+2)}`,
+so the critical `K1` should move outward by `r^((2m+2)/m) = 3.42×`. Predicted pv/gh on
+the historical failure curve (p=2677, K1=8, m=10): **1.549 → 0.895**, i.e. it should
+flip from fail to succeed.
+
+**P1 — it does.** Historical curves at their logged `K1`, `m`, 5 seeds:
+
+| curve | λ* | K1 | m | V0 | V1 cent | V2 proj | V3 |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | 2 | 6 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 12-bit/2557 | 0.340 | 8 | 8 | 5/5 | 5/5 | 5/5 | 5/5 |
+| **12-bit/2677** | **0.070** | **8** | **10** | **0/5** | **5/5** | **0/5** | **5/5** |
+
+The curve that 2026-07-26 called structurally obstructed, and that 2026-07-29 confirmed
+resists LLL *and* BKZ(40) at K1=8, recovers `d` on 5/5 seeds under plain LLL once the
+target is recentred.
+
+**P2 — the K1 wall moves 2–4× (T4 grid, m=12, 5 seeds).** Last `K1` reaching 5/5:
+
+| curve | λ* | V0 | V1 cent | V2 proj | V3 |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | 16 | 8 | 16 |
+| 12-bit/2677 | 0.070 | 4 | 16 | 4 | 16 |
+
+Full 2677 row, V0 → V3: `K1=6` 2/5 → 5/5; `K1=8,12,16` 0/5 → 5/5; `K1=24` 0/5 → 3/5;
+`K1=32` 0/5 → 0/5.
+
+**Two corrections to the record fall out of this.**
+1. The 2026-07-29 conclusion "the K1 wall is genuine — it is a K1 wall, not a λ wall"
+   is half right. It is not a λ wall, but the wall itself sat 3–4× lower than necessary.
+   T4b's evidence (more data does not rescue K1=8) was correct *for the uncentred
+   lattice* and is not evidence about the model.
+2. **The residual λ\* effect vanishes.** 2026-07-29 reported λ\* shifting the wall by
+   ~3× (λ\*=0.34 → K1≈12–16; λ\*=0.07 → K1≈4–6). Under V1/V3 both curves wall at
+   `K1=16`. λ\* is not a parameter of the corrected attack — closing out the entire
+   2026-06-21…07-29 line of λ-based separators.
+
+**P3 — the reformulation's stated goal was NOT achieved.** The 2026-07-29 falsifier had
+two clauses: (i) `sv/pv > 1`, (ii) the wall moves. Clause (ii) holds decisively; clause
+(i) does not. `sv/pv` after LLL (one seed, historical `m`; `*` = `d` recovered):
+
+| curve | K1 | V0 | V1 | V2 | V3 |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.603* | 0.662* | 0.843* | 0.924* |
+| 12-bit/2557 | 8 | 0.517* | 0.596* | 0.532* | 0.614* |
+| 12-bit/2677 | 8 | 0.422 | 0.560* | 0.813 | **1.000\*** |
+| 12-bit/2677 | 16 | 0.414 | 0.574 | 0.493 | 0.684 |
+
+Projection removes the *specific* competitor identified by T5 (`n·S_D·e_m`, gone: it is
+in the kernel), but other non-target vectors remain shorter than the target. **Recovery
+is still a BDD/coset condition, not SVP.** T5's structural claim survives; only its
+named competitor was eliminated. Note also V0 ≡ V2 in every success cell of P1/P2:
+projection alone buys nothing measurable. **All of the gain is recentring.**
+
+**P4 — cross-curve confirmation, 20 fresh 17-bit j=0 GLV curves, m=12, 5 seeds.**
+Directly comparable to 2026-07-29 T3:
+
+| `eff = K1K2/n` | V0 (curves 5/5) | V0 (trials) | V3 (curves 5/5) | V3 (trials) |
+|---|---|---|---|---|
+| 0.15 | 2/20 | 13/100 | **14/20** | **93/100** |
+| 0.25 | 0/20 |  6/100 | **3/20**  | **53/100** |
+
+(V0 at eff=0.15 scored 2/20 here vs 3/20 on 2026-07-29 — different curve sample, same
+search bounds; within noise.)
+
+**P5 — the closed form predicts the wall without running LLL.** Largest `K1` with
+pv/gh < 1, vs observed (m=12):
+
+| curve | variant | K1 predicted | K1 observed |
+|---|---|---|---|
+| 2557 | V0 | 3 | 8 |
+| 2557 | V3 | 12 | 16 |
+| 2677 | V0 | 3 | 4 |
+| 2677 | V3 | 12 | 16 |
+
+The heuristic is uniformly conservative by 1.3–2.7× (expected: LLL beats GH on planted
+BDD instances), but it ranks the four variants correctly and gets the *ratio* right —
+predicted 3.42×, observed 4.00× on 2677 and 2.00× on 2557, both quantized by the coarse
+grid `{2,3,4,6,8,12,16,24,32,48,64}`.
+
+### Next step proposal
+**Thread 24 — is the corrected wall the information-theoretic one?**
+At the new wall (`K1=16`, `K2=52`, `n=2647`, m=12) `eff = 0.314`, so each signature still
+carries `log2(1/eff) = 1.67` bits and `m·1.67 = 20` bits ≫ `log2 n = 11.4` bits. Counting
+says there is still ~2× of headroom. Concrete sub-task: at `K1 = 24, 32` (currently 3/5
+and 0/5) sweep `m ∈ {12,16,24,32,48}` under V3 with BKZ(20/40) retry.
+Falsifier: if success at `K1=32` is flat in `m` under BKZ as it was for V0 in T4b, the
+corrected wall is the lattice's real ceiling and the remaining gap to the counting bound
+is a genuine lattice-vs-information gap worth naming in the paper; if it rises with `m`,
+the wall is still a reduction-strength artifact and there is more to recover.
+
+Secondary (cheap): re-run the 20-bit curve of `glv_hnp_phase2_20bit.py` under V3 to
+confirm the gain holds one bit-size up, and port the recentring into
+`glv_hnp_phase2_20bit.py` itself so later runs do not re-measure the uncentred wall.
+
+Tertiary: nothing in this run touched the ν̂ separator committed at `e845207`
+(`glv_hnp_nuhat_vs_c1c2.py`, AUC 0.935). That script's results were never written into
+the 2026-07-29 log body — only into the commit subject. A future run should either
+re-derive and log them or delete the claim. **Note that any separator fitted on V0
+outcomes is now fitted on a superseded lattice.**
+
+### Commits made

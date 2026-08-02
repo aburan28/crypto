@@ -135,6 +135,70 @@ in the k-overall-bias model (where for `c_total = 64` we'd need
 log_2(n)/c_total ≈ 4 sigs, but with strong-bias assumption that
 doesn't apply to the k₁-only case).
 
+### Two defects of the 2026-06-15 construction, and the fix (2026-08-02)
+
+The implemented construction
+(`secp256k1_cm_audit/glv_hnp_phase2_20bit.py:262`, `build_glv_lattice`)
+carried two avoidable losses.  Both were measured and corrected in
+`secp256k1_cm_audit/glv_hnp_phase2_projected.py` (Thread 23); the
+numbers below are from
+`glv_hnp_phase2_projected_output.txt`.
+
+**(C) The target was never recentred.**  `k₁ᵢ` is uniform on `[0,K₁)`
+and `k₂ᵢ` on `[0,K₂)`, so each planted coordinate had second moment
+`n²/3` instead of `n²/12`.  Replacing `Aᵢ` by
+`Aᵢ − λ·⌊K₂/2⌋ − ⌊K₁/2⌋` recentres both blocks and keeps the target a
+*lattice* vector — no CVP step is needed.
+
+**(P) The `d` column was charged to the norm.**  `d` is only defined
+mod `n`, so `d²` should not appear in `‖v‖²`.  Quotienting `L` by its
+kernel direction `ℤ·(n·S_D·e_m)` gives `π(L)` of rank `2m+1` with
+`covol(π L) = covol(L)/(n·S_D)`.  The trivial vector `n·S_D·e_m` —
+which 2026-07-29 exp T5 showed is *always* `λ₁` of the baseline
+lattice — maps to `0`.  `d` is still recoverable without a
+transformation matrix: the projected vector carries every `k₁ᵢ`,
+`k₂ᵢ`, so `d = (k₁₀ + λ·k₂₀ − A₀)·B₀⁻¹ mod n`.
+
+Closed form, with `S_K1·K₁ ≈ S_K2·K₂ ≈ n` and `S_D = 1`:
+
+|            | `‖v_planted‖²`     | `covol`                  | dim    |
+|------------|--------------------|--------------------------|--------|
+| baseline   | `n²(2m/3 + 4/3)`   | `n^(3m+1)/(K₁K₂)^m`      | `2m+2` |
+| proj+cent  | `n²(m/6 + 1)`      | `n^(3m)/(K₁K₂)^m`        | `2m+1` |
+
+Since the Gaussian heuristic scales as `K₁^{−m/(2m+2)}`, a target
+shorter by a factor `r` moves the critical `K₁` outward by
+`r^{(2m+2)/m)}`.  For `m = 12`, `r = 1.763` predicts `3.4×`.
+
+Measured (`m = 12`, 5 seeds, last `K₁` reaching 5/5):
+
+| curve                       | λ\* | baseline | recentred | projected | proj+cent |
+|-----------------------------|------|----------|-----------|-----------|-----------|
+| `p=2557, n=2659`            | 0.340| `K₁=8`   | `K₁=16`   | `K₁=8`    | `K₁=16`   |
+| `p=2677, n=2647`            | 0.070| `K₁=4`   | `K₁=16`   | `K₁=4`    | `K₁=16`   |
+
+Cross-curve, 20 fresh 17-bit `j=0` GLV curves, `m = 12`:
+
+| `eff = K₁K₂/n` | baseline           | proj+cent          |
+|----------------|--------------------|--------------------|
+| 0.15           | 2/20 curves, 13/100 trials | 14/20 curves, 93/100 trials |
+| 0.25           | 0/20 curves,  6/100 trials |  3/20 curves, 53/100 trials |
+
+Consequences for this document:
+
+- The "K₁ wall" reported 2026-07-26 / 2026-07-29 is **not**
+  information-theoretic; ~3–4× of it was a formulation artifact.
+- The residual λ\* dependence of the wall (a factor ~3 between
+  λ\*=0.07 and λ\*=0.34 in the baseline) **disappears** under
+  recentring: both curves wall at `K₁ = 16`.  λ\* is not a parameter
+  of the corrected attack.
+- Projection alone changes nothing measurable (`V0 ≡ V2` in every
+  cell above).  It is worth keeping for the cleaner geometry — it
+  removes a vector shorter than the target — but the recovery
+  condition remains BDD, not SVP: `sv/pv < 1` still holds in most
+  cells even for proj+cent.  Making the target `λ₁` outright is
+  still open.
+
 ## 3. Why this is novel
 
 To the best of our knowledge, no published HNP variant exploits

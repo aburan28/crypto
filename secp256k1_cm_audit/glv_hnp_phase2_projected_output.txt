@@ -1,0 +1,108 @@
+==============================================================================
+Thread 23 — project out the d-column and recentre the GLV-HNP lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P0: closed-form planted norm vs Gaussian heuristic (no LLL)
+------------------------------------------------------------------------------
+pv = E||v_planted||, gh = Gaussian heuristic for lambda_1.
+pv/gh < 1 is the (heuristic) condition for the target to be findable.
+
+curve               K1   m variant         dim         pv         gh   pv/gh
+8-bit/199            2   6 V0 base          14        458        275   1.666
+8-bit/199            2   6 V1 center        14        303        275   1.104
+8-bit/199            2   6 V2 project       13        443        273   1.621
+8-bit/199            2   6 V3 proj+cent     13        281        273   1.026
+12-bit/2557          8   8 V0 base          18       6859       4010   1.710
+12-bit/2557          8   8 V1 center        18       4340       4010   1.082
+12-bit/2557          8   8 V2 project       17       6685       3987   1.677
+12-bit/2557          8   8 V3 proj+cent     17       4059       3987   1.018
+12-bit/2677 FAIL     8  10 V0 base          22       7470       4824   1.549
+12-bit/2677 FAIL     8  10 V1 center        22       4578       4824   0.949
+12-bit/2677 FAIL     8  10 V2 project       21       7312       4820   1.517
+12-bit/2677 FAIL     8  10 V3 proj+cent     21       4315       4820   0.895
+
+------------------------------------------------------------------------------
+EXP P1: all four variants on the historical curves, logged K1 and m
+------------------------------------------------------------------------------
+curve                lam*  K1   m        V0 base      V1 center     V2 project   V3 proj+cent
+8-bit/199           0.467   2   6            5/5            5/5            5/5            5/5
+12-bit/2557         0.340   8   8            5/5            5/5            5/5            5/5
+12-bit/2677 FAIL    0.070   8  10            0/5            5/5            0/5            5/5
+
+------------------------------------------------------------------------------
+EXP P2: the T4 K1 grid (2026-07-29), all four variants, m=12
+------------------------------------------------------------------------------
+T4 baseline for reference (m as logged, V0):
+  12-bit/2557 (lam*=0.340): 5/5 up to K1=8, 4/5 at 12, 1/5 at 16, 0/5 at 24
+  12-bit/2677 (lam*=0.070): 5/5 up to K1=4, 2/5 at 6, 0/5 from K1=8
+
+12-bit/2557  (n=2659, lam*=0.340, m=12, K2=52)
+  variant            2     3     4     6     8    12    16    24    32    48    64
+  V0 base          5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5   0/5   0/5   0/5
+  V1 center        5/5   5/5   5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5
+  V2 project       5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5   0/5   0/5   0/5
+  V3 proj+cent     5/5   5/5   5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5
+  last K1 with 5/5:  V0 base=8,  V1 center=16,  V2 project=8,  V3 proj+cent=16
+
+12-bit/2677 FAIL  (n=2647, lam*=0.070, m=12, K2=52)
+  variant            2     3     4     6     8    12    16    24    32    48    64
+  V0 base          5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+  V1 center        5/5   5/5   5/5   5/5   5/5   5/5   5/5   3/5   0/5   0/5   0/5
+  V2 project       5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+  V3 proj+cent     5/5   5/5   5/5   5/5   5/5   5/5   5/5   3/5   0/5   0/5   0/5
+  last K1 with 5/5:  V0 base=4,  V1 center=16,  V2 project=4,  V3 proj+cent=16
+
+------------------------------------------------------------------------------
+EXP P3: is the planted vector lambda_1 now?  (sv/pv, one seed)
+------------------------------------------------------------------------------
+sv = shortest nonzero vector after LLL, pv = planted vector.
+sv/pv >= 1 means nothing in the reduced basis is shorter than the target.
+
+curve               K1        V0 base      V1 center     V2 project   V3 proj+cent
+8-bit/199            2         0.603*         0.662*         0.843*         0.924*
+8-bit/199            8         0.579          0.634          0.563          0.618 
+8-bit/199           16         0.380          0.406          0.381          0.407 
+12-bit/2557          8         0.517*         0.596*         0.532*         0.614*
+12-bit/2557         16         0.493          0.595*         0.493          0.596*
+12-bit/2677 FAIL     8         0.422          0.560*         0.813          1.000*
+12-bit/2677 FAIL    16         0.414          0.574          0.493          0.684 
+(* = d recovered on that trial)
+
+------------------------------------------------------------------------------
+EXP P4: 17-bit cross-curve sweep at eff = K1*K2/n in {0.15, 0.25}
+------------------------------------------------------------------------------
+2026-07-29 T3 measured V0 at eff=0.15 -> 3/20 curves 5/5, eff=0.25 -> 0/20.
+
+found 20 17-bit j=0 GLV curves
+
+eff=0.15:  V0 base: 2/20 curves 5/5 (13/100 trials),  V3 proj+cent: 14/20 curves 5/5 (93/100 trials)
+eff=0.25:  V0 base: 0/20 curves 5/5 (6/100 trials),  V3 proj+cent: 3/20 curves 5/5 (53/100 trials)
+
+------------------------------------------------------------------------------
+EXP P5: predicted critical K1 (largest K1 with pv/gh < 1) vs observed
+------------------------------------------------------------------------------
+Prediction uses only the closed form of EXP P0 -- no LLL.  The observed
+column is the last K1 with 5/5 in EXP P2 (m=12).
+
+curve              variant        K1_crit pred  K1 obs (5/5)
+12-bit/2557        V0 base                   3             8
+12-bit/2557        V1 center                11            16
+12-bit/2557        V2 project                3             8
+12-bit/2557        V3 proj+cent             12            16
+12-bit/2677 FAIL   V0 base                   3             4
+12-bit/2677 FAIL   V1 center                11            16
+12-bit/2677 FAIL   V2 project                3             4
+12-bit/2677 FAIL   V3 proj+cent             12            16
+
+Asymptotic form.  With S_K1*K1 ~ S_K2*K2 ~ n and S_D = 1,
+  ||v||^2 = n^2 (2m/3 + 4/3)   V0      vs   n^2 (m/6 + 1)   V3
+  covol   = n^(3m+1)/(K1 K2)^m V0      vs   n^(3m)/(K1 K2)^m V3
+so pv/gh = 1 gives  K1*K2 = n^((m-1)/m) * C^((2m+2)/m)  and the V3/V0
+ratio of critical K1 is  (pv_V0/pv_V3)^((2m+2)/m):
+  12-bit/2557        pv_V0/pv_V3 = 1.763  ->  predicted 3.42x,  observed 2.00x
+  12-bit/2677 FAIL   pv_V0/pv_V3 = 1.763  ->  predicted 3.42x,  observed 4.00x
+
+==============================================================================
+done
+==============================================================================
