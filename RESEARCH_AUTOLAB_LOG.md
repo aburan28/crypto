@@ -6103,3 +6103,181 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is
+the target of a solvable problem.** This was the explicit next-step proposal of
+the 2026-07-29 run (log line ~6089), which made measurable progress, so
+protocol rule (b) applies. Original priorities 1/2/4/6 are CLOSED / BLOCKED /
+DEAD-END and priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2) is
+the live lineage.
+
+The 2026-07-29 run proved (exp T5) that the planted vector is **never** λ₁ of
+the Kannan lattice L: the trivial vector `v_triv = n·S_D·e_m` (d is only defined
+mod n) has norm `n·S_D` while `‖v_planted‖ ≈ n·√(2m/3 + 4/3)`, and both scale
+linearly in S_D so no rescaling removes it. It pre-registered a falsifier:
+*if sv/pv rises above 1 after the reformulation AND the K1 wall moves outward,
+the reformulation is a real improvement; if the wall stays, the wall is
+information-theoretic and Phase 2 is at its ceiling.*
+
+**Outcome: the falsifier resolves against the reformulation. Thread 23 CLOSED
+(negative). The first half of the conjunction holds, the second does not.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (`gp` is NOT installed in this
+  image; not needed for this thread. Note for future runs: all three pips are
+  required, `fpylll` alone is not enough.)
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (6 experiments U1–U6,
+  ~590 lines). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (141 lines).
+  It reuses the Phase-2 primitives **verbatim** from
+  `glv_hnp_phase2_lambda_threshold.py` by AST-filtering that file's
+  function/import definitions and `exec`-ing them (that file is a bare driver
+  with no `__main__` guard), so `build_glv_lattice`, `gen_signatures`,
+  `scales`, `recover_d` and `search_curves` are bit-identical to the
+  2026-07-29 run. The new file *does* have a `main()` + `__main__` guard and is
+  importable — future runs should import it rather than re-type primitives.
+- Three formulations compared on **identical** (curve, K1, m, seed) instances:
+  - **KAN** — baseline: Kannan lattice L (dim 2m+2), LLL, scan rows for
+    `|last| = S_KANNAN`.
+  - **PROJ** — quotient lattice `L' = L / ⟨n·S_D·e_m⟩`, realised by deleting
+    column m. Deletion makes the 2m+2 generators rank-deficient
+    (`n·π(row_d) = Σ_i B_i·π(row_i)`), so an explicit basis is built by hand:
+    the k1-block of L' is `Λ = {x ∈ (S_K1·Z)^m : x/S_K1 ≡ c·B mod n}`, with
+    basis `g = S_K1·(c₀·B mod n)` where `c₀ = B_0^{-1} mod n` (so `g_0 = S_K1`)
+    together with `n·S_K1·e_i, i=1..m-1` (`n·S_K1·e_0` is then redundant).
+    LLL is run with a transformation matrix U and every reduced row is lifted
+    back into L through U to read d off column m. **v_triv ∉ L', so the planted
+    vector CAN be λ₁ here.**
+  - **CVP** — no Kannan row at all. Lattice L0 (dim 2m+1) spanned by
+    `n·S_K1·e_i`, `row_d`, k2-rows; target `t = (−A_i·S_K1, 0, …, 0)`. Then
+    `v − t = (k1_i·S_K1, d·S_D, k2_i·S_K2)` exactly. Solved by **exact-rational**
+    Babai nearest-plane (Fraction GSO — no floating point anywhere, so this is
+    immune to the precision issues of `RESEARCH_LLL_GS_ANALYSIS.md`).
+- `cargo test --test curve_audit` → **5/5 pass** (5.81s). ✓
+
+### Findings
+
+**U1 — both reformulations are provably correct** (12-bit/2557, m=6, K1=2):
+
+| check | result |
+|---|---|
+| `det(L')` vs `det(L)/(n·S_D)` | `34267385178228079496998210970581901696448723610161` — **equal** |
+| `π(lift(reduced row)) == reduced row` for all 2m+1 rows | True |
+| CVP target algebra `v − t == (k1_i·S_K1, d·S_D, k2_i·S_K2)` | True |
+| KAN / PROJ / CVP all recover d | True / True / True |
+
+So `proj_basis` really is a basis of the quotient (not a sublattice), and the
+U-lift is exact. Nothing below is an artefact of a broken construction.
+
+**U2 — THE FALSIFIER: the wall does not move.** T4's K1 grid, m=12, 5 seeds,
+K2 = ⌊√n⌋+1 = 52:
+
+*12-bit/2557 (n=2659, λ\*=0.340)*
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|
+| KAN  | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 | K1 12 (eff 0.235) |
+| PROJ | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 | K1 12 (eff 0.235) |
+| CVP  | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | K1 8 (eff 0.156) |
+
+*12-bit/2677 (n=2647, λ\*=0.070 — the historical FAIL curve)*
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|
+| KAN  | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1 4 (eff 0.079) |
+| PROJ | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1 4 (eff 0.079) |
+| CVP  | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1 4 (eff 0.079) |
+
+PROJ reproduces KAN cell-for-cell. CVP is **strictly worse** (Babai nearest-plane
+demands the error lie in the GS parallelepiped — a stronger condition than
+"the planted vector appears somewhere in an LLL-reduced basis"). The wall on the
+λ\*=0.07 curve stays at K1 ≈ 4–6, exactly where 2026-07-29 left it.
+
+**U3 — the projection does what it was designed to do, and it doesn't matter.**
+sv/pv rises from a flat ≈0.37–0.44 in L to 0.38–1.00 in L', and on
+12-bit/2677 at K1=2 the shortest vector of L' **is** the planted vector
+(sv/pv = 1.000, `sv == pv` True, Kannan-energy 0.164 ≠ 0):
+
+| curve | K1 | L: sv/pv | L: \|sv[m]\|/n | L': sv/pv | L': kan-E | L': sv==pv? |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.440 | 1.0000 | 0.614 | 0.000 | False |
+| 8-bit/199 | 8 | 0.418 | 1.0000 | 0.422 | 0.000 | False |
+| 12-bit/2557 | 2 | 0.401 | 1.0000 | 0.713 | 0.000 | False |
+| 12-bit/2557 | 8 | 0.373 | 1.0000 | 0.384 | 0.000 | False |
+| 12-bit/2677 | 2 | 0.405 | 1.0000 | **1.000** | 0.164 | **True** |
+| 12-bit/2677 | 8 | 0.376 | 1.0000 | 0.724 | 0.000 | False |
+
+**So the 2026-07-29 T5 observation ("the planted vector is never λ₁") is real but
+is NOT the obstruction.** Removing the parasite changes the SVP geometry and
+changes nothing about recovery.
+
+**U6 — PROJ ≡ KAN per instance, not merely per cell.** 3 curves × K1 ∈
+{2,3,4,6,8,12,16} × 10 seeds, m=10:
+
+| quantity | value |
+|---|---|
+| instances | 210 |
+| KAN ≠ PROJ | **0** |
+| CVP succeeds where KAN fails | **0** |
+| KAN succeeds where CVP fails | 19 |
+
+Zero disagreements over 210 instances. LLL simply carries the `e_m` coordinate
+along; quotienting it out is a no-op for the reduction of the remaining
+coordinates. This is the strongest form of the negative result.
+
+**U4/U5 — what does govern the wall: eff = K1·K2/n.** Gaussian-heuristic model
+(`‖planted‖ / GH(lattice)`, unique-SVP/BDD wants < 1). In the large-n limit
+`‖pv'‖/GH → √(2πe/3)·√eff = 2.386·√eff`, so the asymptotic critical eff is
+`3/(2πe) = 0.176`:
+
+| m | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|
+| crit eff (asymptotic-n) | 0.1301 | 0.1400 | 0.1508 | 0.1566 | 0.1626 | 0.1658 |
+
+17-bit sweep, 8 curves × 5 seeds, m=12 (U5):
+
+| eff target | actual eff | r_PROJ | KAN | PROJ | CVP |
+|---|---|---|---|---|---|
+| 0.05 | 0.046–0.047 | 0.886–0.892 | **40/40** | **40/40** | 34/40 |
+| 0.15 | 0.147–0.150 | 1.541–1.552 | **13/40** | **13/40** | 11/40 |
+| 0.25 | 0.246–0.249 | 1.973–1.984 | **3/40** | **3/40** | 1/40 |
+
+eff orders the average behaviour correctly and reproduces the T3 numbers.
+**Honest caveat — the GH ratio is not a sharp threshold.** Successes occur up to
+ratio ≈ 1.72 (12-bit/2557, K1=12, 4/5), i.e. LLL beats the unique-SVP condition
+by a wide margin here; and at eff = 0.149 the per-curve spread is 0/5 … 5/5
+while r_PROJ is constant to three digits (1.541–1.552). So eff is the
+*average-case* variable and something per-curve explains the boundary spread —
+consistent with the ν̂ separator (AUC 0.935) found by the 2026-07-29 run.
+
+**Verdict.** The pre-registered falsifier is answered: sv/pv did rise to 1, the
+wall did not move, therefore **the Phase-2 wall is intrinsic to the information
+content of the instance, not to the lattice formulation.** Thread 23 CLOSED,
+negative. No further reformulation of this lattice family is worth trying.
+
+### Next step proposal
+**Thread 24 — does more data move the wall? (the model's one falsifiable
+prediction).** The GH model's critical eff *increases* with m (0.130 at m=6 →
+0.166 at m=32 asymptotically; the finite-n version rises faster still, because
+the `n^{1/(2m+1)}` factor is 1.56 at m=12 and 1.19 at m=32 for 17-bit n). But
+2026-07-29 exp T4b measured m ∈ {8,12,16,24,32} at K1=8 on the λ\*=0.07 curve
+and got 0,0,1,0,1 of 5 — **no improvement**. These two cannot both be right.
+
+Concrete test: sweep m ∈ {12, 24, 48, 96} at fixed eff ≈ 0.15 across the 8
+17-bit curves from U5 (dims 26 → 194, still cheap for LLL), method KAN.
+Falsifier: if the success rate rises monotonically with m, the GH model is
+right and T4b was a small-n artefact of the 12-bit curve, and Phase 2's wall is
+a *data* wall that more signatures defeat. If it stays flat at ~13/40, the GH
+model is wrong about the m-dependence and the wall is a genuine
+information-theoretic ceiling — which would close the whole GLV-HNP Phase 2
+lineage. Either outcome is decisive and the run is ~10 minutes.
+
+Secondary (cheap, out-of-sample): test whether the ν̂ separator from 2026-07-29
+predicts the per-curve spread at eff = 0.149 in U5's table (r_PROJ is constant
+there, so any separation is pure ν̂ signal).
+
+### Commits made
