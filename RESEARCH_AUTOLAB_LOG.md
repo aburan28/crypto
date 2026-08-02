@@ -6252,4 +6252,4 @@ log entry's λ/n column in λ* so future runs do not re-derive the
 root-convention confusion.
 
 ### Commits made
-(see following entry — recorded after commit)
+3f2dc0a autolab 2026-08-02: Thread 23 — d-elimination is a no-op (B = pi(A)); Phase 2 ceiling at eff ~ 0.15
