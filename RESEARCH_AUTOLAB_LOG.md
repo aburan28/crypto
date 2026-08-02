@@ -6103,3 +6103,170 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+Priority 5 (GLV-HNP Phase 2) → **Thread 23**, the sub-task proposed at the end of
+the 2026-07-29 entry. Priorities 1, 3, 4, 6 are CLOSED; priority 2 is BLOCKED
+(F_p Rosenhain, negative result 2026-07-26). Thread 5 made measurable progress on
+2026-07-29, so protocol rule (b) applies.
+
+Thread 23 as posed: *"project the lattice along e_m ... or replace the Kannan
+embedding with an explicit CVP call. Falsifier: if sv/pv rises above 1 AND the K1
+wall on the λ*=0.07 curve moves outward, the reformulation is a real improvement;
+if the wall stays at K1≈4–6, the wall is information-theoretic."*
+
+Answer: **split verdict.** sv/pv never crosses 1 (for a reason the 07-29 entry got
+wrong); the wall *does* move on the hard curve (K1 4→6) and *not* on the easy one;
+and in aggregate the reformulation buys nothing (+0.003 mean p̂ over 30 curves).
+The session then went past Thread 23 and settled what ν̂ actually measures.
+
+### Backfill — ν̂ was never written into this log
+The 07-29 entry's body stops before the ν̂ result; only the commit subject line
+(`e845207`) records it. Definition, for future runs:
+
+```
+nu_hat = lambda_1(L2) / sqrt(det L2),
+    L2 = < (n*S_K1, 0), (-lam*S_K1, S_K2) >   on coordinate pair (i, m+1+i)
+    det L2 = n*S_K1*S_K2   (independent of lam)
+```
+L2 is the **non-planted** 2-D sublattice appearing m times in the Phase-2 lattice.
+ν̂ ∈ (0, 2/√3 ≈ 1.075] by Hermite in dim 2. Sign: **low ν̂ ⇒ easier**. Computed by
+one Lagrange–Gauss reduction, O(log n). Code: `glv_hnp_phase2_nuhat_control.py:85`
+(reimplemented as `nu_hat()` in `glv_hnp_thread23_nuhat_under_cvp.py:85`).
+
+### Work done
+- Env (fresh container): `pip install fpylll cysignals sympy`. **PARI/GP is NOT
+  installed and `apt-get install pari-gp` failed silently — no `gp` binary.** Any
+  future run needing PARI must budget for that; today's work needed none.
+- New `secp256k1_cm_audit/glv_hnp_thread23_bdd.py` (EXP A–D) + output artifact.
+  Defines `L_cvp` = the Phase-2 lattice with the Kannan row/column deleted
+  (dim 2m+1), CVP target `t_i = -A_i*S_K1`, and the BDD radius
+  `tau = ||e|| / GH(L_cvp)`, `e = (k1_i*S_K1, d*S_D, k2_i*S_K2)`.
+- New `glv_hnp_thread23_nuhat_under_cvp.py` (30 fresh 17-bit curves, eff pinned to
+  0.13, m=12, 12 seeds, three arms) + output artifact.
+- New `glv_hnp_thread23_nuhat_causal.py` — controlled arm: n, m, K1, K2, seeds and
+  the sampling distribution all fixed, **only λ varies** over 120 values. Uses a
+  synthetic HNP instance (`A_i = k1_i + λk2_i − B_i d mod n`, B_i uniform) so no
+  EC arithmetic and no cube-root-of-unity constraint is needed; A_i stays uniform
+  for every λ, so there is no distributional confound.
+- `cargo test --test curve_audit` → **5/5 pass** (5.18 s). ✓
+
+### Findings
+
+**F1 — closed form for the K1 wall.** det(L_cvp) = (n·S_K1)^m·S_D·S_K2^m, so with
+S_K1 = n/K1, S_K2 = n/K2, S_D = 1 and eff = K1·K2/n,
+
+    tau  ->  sqrt(2*pi*e/3) * sqrt(eff)  =  2.386 * sqrt(eff)     (m -> inf)
+
+τ = 1 at **eff = 0.1756**. Measured against the T4 grid (5 seeds, m = 8/10):
+
+| | τ<1 | τ≥1 |
+|---|---|---|
+| success (≥3/5) | 6 | 2 |
+| failure | 0 | 8 |
+
+max τ among successes 1.362, min τ among failures 1.161 — τ<1 is **sufficient,
+not necessary**, and the overlap band is τ ∈ [1.16, 1.36]. EXP D on 6 fresh 17-bit
+curves (m=12, 18 trials/point): 18/18 at τ=0.60, 14/18 at τ=0.97, 6/18 at τ=1.32,
+1/18 at τ=1.83.
+
+**F2 — the 07-29 S_D claim is corrected, conclusion survives.** "Both vectors
+scale linearly in S_D" is false: ‖v_planted‖² = n²(2m/3+1) + (n·S_D)²/3 while the
+trivial rival is n·S_D, so S_D > sqrt(m+3/2) does beat it. But λ₁ then passes to
+the **L2 block**, whose length does not depend on S_D. Measured (K1=4, 5 seeds):
+
+| S_D | 1 | 2 | 3 | 4 | 6 | 8 | 16 | 32 |
+|---|---|---|---|---|---|---|---|---|
+| sv/pv (2557, m=8) | 0.462 | 0.511 | 0.456 | 0.408 | 0.338 | 0.294 | 0.214 | 0.164 |
+| sv/pv (2677, m=10) | 0.400 | 0.739 | **0.855** | 0.796 | 0.675 | 0.589 | 0.416 | 0.315 |
+| LLL (2677) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 |
+
+sv/pv peaks below 1 and turns over; τ grows monotonically in S_D and success
+follows it down. **S_D = 1 is optimal. The planted vector is not λ₁ at any S_D.**
+
+**F3 — the wall moves on the hard curve only.** K1 wall = largest K1 with ≥3/5
+recoveries (m as in the historical setup):
+
+| method | 12-bit/2557 (λ*=0.34) | 12-bit/2677 (λ*=0.07) |
+|---|---|---|
+| Kannan + LLL | 8 | 4 |
+| Kannan + BKZ(20) | 8 | 4 |
+| L_cvp + Babai | 8 | 3 |
+| **L_cvp + exact CVP** | 8 | **6** |
+
+Replicated at 12 seeds: 2677 at K1=6 gives LLL **1/12** vs exact CVP **8/12**.
+So the 2026-07-26 "structural failure" of that curve was, in part, a *reduction*
+failure after all — but only on that curve. Across 30 fresh 17-bit curves the two
+arms tie (mean p̂ 0.267 LLL vs 0.269 CVP, +0.003; CVP better on 11, worse on 6).
+
+**F4 — methodological correction, flagged so it is not repeated.** "Exact CVP is
+the information-theoretic ceiling" is **wrong**. The Kannan arm scans *every*
+reduced-basis row with |last| = S_KANNAN, i.e. it is a **list** decoder; exact CVP
+is a **unique** decoder and fails whenever the planted point is not *the* closest.
+Neither dominates: p_lll ≈ p_cvp on the 30-curve sample, p_lll > p_cvp in the
+causal arm (0.267 vs 0.198), p_cvp ≫ p_lll on 2677/K1=6.
+
+**F5 (main result) — ν̂ is a lattice-geometry invariant, not an LLL artifact.**
+H23b ("ν̂ is a reduction-quality proxy, so it will collapse under exact CVP") is
+**falsified in the informative direction** — ν̂ predicts exact-CVP success *more*
+strongly than LLL success, and is null against the LLL-vs-CVP gap.
+30 fresh 17-bit curves, eff pinned at 0.13 (so τ ≈ 1.26 for all of them), m=12,
+12 seeds, permutation test 20 000 shuffles:
+
+| target | Spearman | perm p | AUC(−ν̂) |
+|---|---|---|---|
+| p̂ Kannan+LLL | −0.567 | 0.0014 | 0.972 |
+| p̂ Kannan+BKZ(30) | −0.409 | 0.0265 | 0.972 |
+| **p̂ exact CVP** | **−0.744** | **<1e-4** | **1.000** |
+| p̂_cvp − p̂_lll (the reduction loss) | +0.142 | 0.45 | — |
+| controls: λ* vs p̂_lll / p̂_cvp | −0.145 / −0.107 | 0.44 / 0.57 | — |
+| controls: τ vs p̂_lll / p̂_cvp | −0.105 / −0.098 | 0.58 / 0.61 | — |
+
+**F6 — causal arm confirms it.** n = 131071 fixed, m = 12, K1 = 47, K2 = 363,
+eff = 0.1302, 120 λ values × 12 seeds = 1440 instances per arm. Only λ varies:
+
+| Spearman | value | perm p |
+|---|---|---|
+| (ν̂, p̂_lll) | **−0.827** | <1e-4 |
+| (ν̂, p̂_cvp) | **−0.724** | <1e-4 |
+| (λ*, p̂_lll) | −0.030 | 0.75 |
+| (λ*, p̂_cvp) | +0.032 | 0.72 |
+
+AUC(−ν̂) = 0.967 (LLL) / 0.983 (CVP). ν̂ decile table, p̂_cvp:
+
+| ν̂ bin | .14–.34 | .34–.46 | .48–.58 | .58–.67 | .69–.75 | .76–.80 | .81–.87 | .87–.94 | .94–.99 | 1.00–1.04 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| p̂_cvp | 0.979 | 0.618 | 0.243 | 0.049 | 0.021 | 0.014 | 0.021 | 0.000 | 0.014 | 0.021 |
+| p̂_lll | 1.000 | 0.812 | 0.465 | 0.188 | 0.181 | 0.028 | 0.000 | 0.000 | 0.000 | 0.000 |
+
+λ* is flat across the bins (0.23–0.34), so it is not a hidden confound. This is
+the ninth invariant tested and the first that survives a controlled arm — and it
+survives against the *unique-decoding* arm, so it is not about LLL at all.
+
+**F7 — the two-variable picture.** τ and ν̂ are complementary and near-orthogonal:
+τ = 2.386·√eff fixes *where* the wall is (a function of K1, K2, n, m only, curve-
+independent), and ν̂ fixes *which curves fall on which side of it* (a function of
+λ only, constant along an eff sweep — hence the exact null for τ inside the pinned
+sample in F5, and the `nan` for τ in F6 where it is literally constant).
+Operational rule at eff ≈ 0.13: ν̂ < 0.35 → recoverable; ν̂ > 0.6 → not.
+
+### Next step proposal
+**Thread 24 — derive the τ–ν̂ success surface, then test it at 24–32 bits.**
+Concretely: fit p̂ = f(τ, ν̂) on a grid of ~8 eff values × ~40 ν̂ values at 17 bits
+(the machinery is already in `glv_hnp_thread23_nuhat_causal.py`; only the eff loop
+is new, ~10 min of compute), then check whether the *same* surface predicts p̂ at
+24 and 32 bits with no refit. Falsifier: if the fitted surface transfers with mean
+absolute error ≲ 0.1 across bit sizes, ν̂ and τ are the complete pair of Phase-2
+predictors and the six-month search for a curve-level invariant is closed; if the
+surface drifts with n, a third variable is missing and the drift direction names it.
+
+Secondary (cheap, 5 min): re-run F3 at 17 bits with m = 10 to check whether the
+large exact-CVP gain on 12-bit/2677 (1/12 → 8/12) is a small-n effect or a real
+low-m effect — the 30-curve sample at m = 12 showed no such gain anywhere.
+
+Also worth noting for whoever picks up priority 2: **`gp` is not installed in this
+container image**, and the apt install did not succeed.
+
+### Commits made
