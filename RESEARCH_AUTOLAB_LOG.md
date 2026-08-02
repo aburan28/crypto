@@ -6103,3 +6103,152 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the sub-task proposed
+by the 2026-07-29 entry (log line ~6089). Protocol rule (b): priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END, priority 3 completed 2026-07-21, and priority 5 (GLV-HNP
+Phase 2) made measurable progress on 2026-07-26 and 2026-07-29, so its proposed
+continuation is the correct pick.
+
+Outcome: **the reformulation is neutral, but the experiment that isolates it found the
+real defect — the embedding was never centered. The Phase-2 K1 wall moves 3×, from
+eff ≈ 0.15 to the information-theoretic limit eff ≈ 0.45.**
+
+### Work done
+- Environment (fresh container): `fpylll` 0.6.4 + `cysignals` 1.12.5 + `sympy` 1.14.0 via
+  pip; `pari-gp` 2.15.4 via apt. **Note for future runs:** a bare
+  `apt-get install pari-gp` fails with a 404 on a stale `libegl-mesa0` dependency —
+  `apt-get update` first, and `--no-install-recommends` skips a 200 MB texlive/mupdf pull.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` (720 lines, 5 experiments E1–E5).
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_cvp_output.txt` (210 lines).
+  EC arithmetic, `gen_signatures` and `scales` are copied verbatim from
+  `glv_hnp_phase2_20bit.py` so every number is directly comparable to 2026-07-26/29.
+- Implemented Thread 23's reformulation as a 2m-dim CVP: lattice
+  `L = ⟨ n·S_K1·e_i ; (B_i·S_K1)_i ; −λ·S_K1·e_i + S_K2·e_{m+i} ⟩`, target
+  `t_i = −A_i·S_K1`. `d` is the *coefficient* of the `(B_i·S_K1)` generator, read off the
+  Babai coefficient vector, not a lattice coordinate — so the `d` column and the Kannan
+  column both disappear. The generator set has rank 2m from 2m+1 generators (`n·(B row)`
+  lies in the span of the `n·e_i` rows — that is exactly "d is only defined mod n");
+  fpylll's LLL on the rectangular matrix pushes the dependency out as a zero row.
+  Recovery via `d ≡ (k1_i + λ·k2_i − A_i)·B_i^{-1} (mod n)`, accepted only when all m
+  equations agree (a check that does not consult `d_secret`).
+- Noticed while writing the error vector that the historical planted vector has
+  `k1_i ~ U[0,K1)` and `k2_i ~ U[0,K2)` — errors centered at n/2, not 0. Added centering
+  as an independent second factor so the two effects can be attributed separately.
+  **Four arms**: A0 Kannan/uncentered (= the historical baseline, verbatim),
+  A1 Kannan/centered, B0 CVP/uncentered, B1 CVP/centered.
+- `cargo test --test curve_audit` → 5/5 pass (8.02s). ✓
+
+### Findings
+
+**E3 — the K1 wall (2026-07-29 T4 grid re-run, m=12, 5 seeds).**
+
+`12-bit/2677`, λ\*=0.070 — the curve 2026-07-26 called a structural failure:
+
+| K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| eff | .04 | .06 | .08 | .12 | .16 | .24 | .31 | .47 | .63 | .94 |
+| A0 uncentered (historical) | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| A1 Kannan/centered | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 0/5 | 0/5 |
+| B0 CVP/uncentered | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| B1 CVP/centered | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 0/5 | 0/5 |
+| B1 + exact CVP | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 3/5 | 0/5 | 0/5 |
+
+`12-bit/2557`, λ\*=0.340: A0 wall at K1≈12–16, A1/B1 wall at K1≈24–32. Identical to 2677
+once centered.
+
+**Thread 23 as posed is answered NEGATIVELY.** B0 vs A0 is neutral-to-slightly-worse
+(`‖e‖/GH` 1.254 → 1.157 on 2677 at K1=8; 4/5 vs 5/5 at K1=3,4). Dropping the trivial
+`n·S_D·e_m` vector buys ~7% of the target norm and does not move the wall. The 2026-07-29
+falsifier ("sv/pv rises above 1") is **not** met by the reformulation alone: uncentered,
+`‖e‖/λ₁ = 1.115` — the error is still *longer* than λ₁. Centered, `‖e‖/λ₁ = 0.768`.
+
+**The actual defect is that the embedding was never centered.** `k1_i ~ U[0,K1)` gives
+`E[x²] = n²/3` per coordinate; offsetting the Kannan row by `−(K1/2)·S_K1` and the k2
+block by `−(K2/2)·S_K2` gives `n²/12`, shortening the target by ≈1.44× for free.
+Measured on 2677 at K1=8, m=12: `‖v‖` 7.04e3 → 4.89e3 (Kannan), 6.52e3 → 4.12e3 (CVP).
+
+**E4 — one number predicts every wall in the table: ‖e‖/GH ≈ 1.**
+`GH(L) = √(N/2πe)·det^{1/N}`, computed from the exact GSO of each arm's basis.
+
+| curve/arm (K1=8, eff=0.16) | ‖e‖ | GH | ‖e‖/GH | observed |
+|---|---|---|---|---|
+| 2677 A0 uncentered | 7.04e3 | 5.61e3 | 1.254 | 0/5 |
+| 2677 A1 centered | 4.89e3 | 5.61e3 | 0.872 | 5/5 |
+| 2677 B0 CVP uncentered | 6.52e3 | 5.64e3 | 1.156 | 0/5 |
+| 2677 B1 CVP centered | 4.12e3 | 5.64e3 | 0.730 | 5/5 |
+
+Across K1 ∈ {4,8,16,32} the crossing of `‖e‖/GH = 1` lands at K1≈4–8 for the uncentered
+arms and K1≈16–24 for the centered ones, matching the observed transitions. The
+Phase-2 wall is a **Gaussian-heuristic density wall**, not a structural obstruction —
+and centering moves it by the predicted `(7.14/4.95)² ≈ 2.1`× in eff.
+
+Information-theoretic wall for m=12: `eff < n^{−1/m}` = 0.518 (K1 < 26.5) for n=2659,
+0.519 (K1 < 26.4) for n=2647. **The centered arms die exactly there** (3/5 at K1=24,
+0/5 at K1=32). Centered Phase 2 is at the information-theoretic ceiling; there is no
+remaining lattice-side headroom to recover at these parameters.
+
+**E5 — 16 fresh j=0 GLV curves, p ≈ 2^13, λ\* spread over [0,0.5], m=12, 8 seeds.**
+
+| eff | A0 uncentered mean p̂ | B1 centered mean p̂ |
+|---|---|---|
+| 0.15 | 0.500 | 0.914 |
+| 0.30 | 0.039 | 0.641 |
+| 0.45 | 0.000 | 0.148 |
+| 0.60 | 0.000 | 0.000 |
+
+At eff=0.30 centering is a **16× improvement** in success probability. eff=0.60 is past
+the info-theoretic wall (`n^{−1/12}` ≈ 0.47) and both arms are 0/8 on all 16 curves, as
+required.
+
+**ν̂ SURVIVES centering — the 2026-07-29 separator is real, not an artifact.**
+`ν̂ = λ₁(L₂)/√(det L₂)`, L₂ = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩:
+
+| eff | arm | spearman(ν̂, p̂) | spearman(λ\*, p̂) |
+|---|---|---|---|
+| 0.15 | A0 | **−0.841** | −0.032 |
+| 0.15 | B1 | **−0.760** | −0.168 |
+| 0.30 | A0 | +0.074 (floor, p̂≈0) | −0.133 |
+| 0.30 | B1 | **−0.866** | +0.282 |
+| 0.45 | B1 | −0.324 | −0.036 |
+
+Sign is negative on both arms, as 2026-07-29 found (low ν̂ → easier). λ\* stays a
+non-predictor on the centered arm too, confirming 2026-07-29's falsification.
+
+**This retro-explains 2026-07-29 T4's "λ\* shifts the K1 wall by ~3×".** ν̂ is an
+*instance* invariant (it depends on S_K1, S_K2, hence on K1), not a curve invariant.
+Computed at the K1 where T4 measured the wall:
+
+| curve | K1=4 | K1=8 | K1=16 | K1=24 |
+|---|---|---|---|---|
+| 2557 (λ\*=0.340, easy) | 0.341 | **0.408** | 0.548 | 0.666 |
+| 2677 (λ\*=0.070, hard) | 0.997 | **0.771** | 0.675 | 0.693 |
+
+At K1=8 the "easy" curve has ν̂=0.408 and the "hard" one ν̂=0.771 — the wall difference
+T4 attributed to λ\* is the ν̂ gap. And ν̂ converges as K1 grows (0.666 vs 0.693 at
+K1=24), which is why the two curves have the *same* wall once centered. λ\*'s apparent
+effect was a two-point coincidence.
+
+### Next step proposal
+**Thread 24 — port centering into the production Phase-2 code and re-run the June
+C1/C2 corpus.** `build_glv_lattice` in `glv_hnp_phase2_20bit.py:263` and the copy in
+`glv_hnp_phase2_lambda_threshold.py:254` are both uncentered; every Phase-2 result from
+2026-06-15 onward was measured through the 1.44× handicap. Concretely: add the `center`
+flag (the diff is 4 lines — offset `M[2m+1][i]` by `−(K1//2)·S_K1` and set
+`M[2m+1][m+1+i] = −(K2//2)·S_K2`), then re-run the C1/C2 separation of 2026-06-30 and
+the ν̂ AUC of 2026-07-29 on the centered lattice. Falsifier: if the centered attack
+succeeds on the C2 (failure-class) curves at their original eff, the entire
+2026-06-21…06-29 "nine days of separator falsifications" was chasing a handicap
+artifact and the C1/C2 classes dissolve; if C2 still fails, ν̂ is the genuine invariant
+and its AUC should *rise* on the centered arm. Either outcome is publishable as a
+methodological note. ~30 min of compute.
+
+Secondary, cheap: the E4 identity `‖e‖/GH ≈ 1` gives a closed-form predicted wall
+`K1·K2 < c·n` with `c = 6/(πe) ≈ 0.70` centered vs `3/(2πe) ≈ 0.176` uncentered. Check
+that against the 17-bit T3 sweep of 2026-07-29 (which reported 19/20 at eff=0.05, 3/20
+at 0.15, 0/20 at 0.25 — all uncentered, all consistent with c=0.176).
+
+### Commits made

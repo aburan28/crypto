@@ -257,6 +257,40 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. Correction (2026-08-02): the embedding was never centered
+
+The Phase-2 lattice as implemented (`secp256k1_cm_audit/glv_hnp_phase2_20bit.py:263`,
+`build_glv_lattice`) plants the vector `(k1_i·S_K1, d·S_D, k2_i·S_K2, S_KANNAN)` with
+`k1_i ~ U[0,K1)` and `k2_i ~ U[0,K2)`.  Those errors are centered at `n/2`, not at `0`,
+so `E[x²] = n²/3` per coordinate instead of `n²/12`.  Offsetting the Kannan row by
+`−(K1/2)·S_K1` in the congruence block and `−(K2/2)·S_K2` in the `k2` block centers
+them and shortens the target by a factor `≈ 1.44`, at no cost.
+
+Measured effect (`secp256k1_cm_audit/glv_hnp_phase2_cvp.py`, m = 12, 8 seeds,
+16 j=0 GLV curves with p ≈ 2^13):
+
+| eff = K1·K2/n | uncentered mean p̂ | centered mean p̂ |
+|---|---|---|
+| 0.15 | 0.500 | 0.914 |
+| 0.30 | 0.039 | 0.641 |
+| 0.45 | 0.000 | 0.148 |
+| 0.60 | 0.000 | 0.000 |
+
+The wall moves from `eff ≈ 0.15` to `eff ≈ 0.45`, which is the information-theoretic
+limit `eff < n^{−1/m} = 0.47` for these parameters.  Every "structural obstruction"
+reported for Phase 2 between 2026-06-15 and 2026-07-29 at `eff ≳ 0.15` was measured
+inside this factor-of-1.44 handicap.
+
+Two things centering does **not** change:
+
+- The trivial shortest vector `n·S_D·e_m` is still `λ₁` of the Kannan lattice; recovery
+  is a BDD/coset condition either way (2026-07-29 T5 stands).  Removing the `d` and
+  Kannan columns and solving CVP directly (arm B0) is worth only `‖e‖/GH: 1.25 → 1.16`
+  — essentially neutral.  Centering, not reformulation, is the whole effect.
+- `ν̂ = λ₁(L₂)/√(det L₂)` survives as a predictor: Spearman `(ν̂, p̂) = −0.76` at
+  eff 0.15 and `−0.87` at eff 0.30 on the *centered* arm.  `λ*` remains a non-predictor
+  (`−0.17`, `+0.28`).
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
