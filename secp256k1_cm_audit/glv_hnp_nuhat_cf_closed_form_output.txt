@@ -1,0 +1,98 @@
+==============================================================================
+GLV-HNP Thread 23 -- closed form for nu_hat via continued fractions
+==============================================================================
+
+==============================================================================
+PART A -- (C1) exactness: CF formula vs exact integer Lagrange-Gauss
+==============================================================================
+           group    agree   total
+      20-bit GLV       40      40
+   random 20-bit       40      40
+   random 24-bit       40      40
+   random 64-bit       40      40
+  random 128-bit       40      40
+  random 256-bit       40      40
+       secp256k1        5       5
+
+  RESULT: 245/245 exact integer agreement.
+  (C1) HOLDS -- lambda_1(L2) is a convergent of lam/n.
+
+==============================================================================
+PART B/C/D -- straddle (C3), closed form (C2), locality (C4)/(C5)
+==============================================================================
+
+(C3) straddle: winner j* == straddling s, among nu_hat < 1:
+  906/962 = 94.2%
+  over all 1000 rows (incl. nu_hat >= 1): 928/1000 = 92.8%
+  misses: |j*-s| max=2, nu_hat of misses in [0.866,1.038]
+  straddle is EXACT below the smallest miss: 727/727 of rows with nu_hat < 0.866
+
+(C2) closed form  nu_hat^2 ~ min_j(theta_j^2 + 1/theta_{j+1}^2):
+  pearson  = 0.9832   spearman = 0.9792
+  predicted/exact ratio: min=1.0000 q25=1.0029 median=1.0189 q75=1.0645 max=1.3222
+  straddle-only variant: pearson = 0.9738
+  falsifier C (corr < 0.9): NOT triggered
+
+(C4) lower bounds on nu_hat in terms of a*:
+  sqrt(2/(a*+2))  [rigorous]: violations    0/1000  slack median=1.293 q90=2.429 max=70.6
+  sqrt(2/(a*+1))  [naive]   : violations  144/1000  slack median=1.181 q90=2.386 max=70.6  worst=0.8427 (a*=1)
+
+(C5) locality -- correlation with nu_hat, same sample:
+  spearman(nu_hat, a*)     = -0.7613   [local: partial quotient at the scale Q]
+  spearman(nu_hat, max_a)  = -0.1481   [scale-free: the June invariant]
+  spearman(a*, max_a)      = +0.1984
+
+  nu_hat by a* bin:
+    a*  count  mean nu_hat  min nu_hat  bound sqrt(2/(a*+2))
+     1    115       0.9624      0.8427                0.8165
+     2    122       0.8893      0.7464                0.7071
+   3-4    156       0.7977      0.6088                0.5774
+   5-8    200       0.6935      0.4744                0.4472
+  9-16    141       0.5626      0.3445                0.3333
+  >=17    266       0.4506      0.0453                0.0115
+
+==============================================================================
+PART E -- a* vs nu_hat vs max_a on the Exp S C1/C2 task
+==============================================================================
+  K1=72, m=12, 6 seeds, 100 fresh 20-bit j=0 CM curves (C2 = recovers on all seeds)
+  harvested 100 curves in 0.1s
+  600 LLL trials in 1.3s
+
+  C1 (fails): 74/100   C2 (6/6): 26/100   baseline = 74.0%
+
+ invariant           C1 range           C2 range     AUC  best acc
+    nu_hat      [0.408,1.012]      [0.314,0.645]   0.935     89.0%
+    closed      [0.425,1.181]      [0.314,0.669]   0.922     90.0%
+    a_star    [1.000,419.000]    [5.000,728.000]   0.853     80.0%
+     max_a    [3.000,419.000]    [5.000,729.000]   0.748     75.0%
+        mu      [0.002,0.497]      [0.001,0.499]   0.523     75.0%
+
+  C2 rate by a*:
+    a*  count   C2 rate  mean wins/6  mean nu_hat
+     1      4      0.00         0.25        0.986
+     2     17      0.00         0.71        0.889
+   3-4     27      0.00         1.22        0.794
+   5-8     29      0.41         3.21        0.596
+   >=9     23      0.61         5.13        0.429
+
+  every C2 curve: nu_hat <= 0.645, a* >= 5
+
+==============================================================================
+PART F -- secp256k1 (n, lam): which convergent, which partial quotient
+==============================================================================
+  CF of lam/n has 141 partial quotients; max_a = 312 (at index 16)
+  geometric-mean partial quotient = 2.965 (Khinchin 2.685)
+
+   eff                     K1    s     a*   theta_s  theta_s1   nu_hat   closed    bound
+0.0200 6805647338418769410938486634724720640   72      2    0.7834    2.2241   0.8782   0.9033   0.8165
+0.0500 17014118346046924117642026945517453312   70      5    0.1994    1.0393   0.8709   0.9826   0.5774
+0.0993 33790039035249189210351080085414477824   70      5    0.2810    1.4646   0.6639   0.7383   0.5774
+0.1000 34028236692093848235284053891034906624   70      5    0.2820    1.4698   0.6624   0.7365   0.5774
+0.2500 85070591730234615865843651857942052864   70      5    0.4458    2.3239   0.5852   0.6196   0.5774
+0.5000 170141183460469231731687303715884105728   70      5    0.6305    3.2865   0.6851   0.7001   0.5774
+
+  Caveat (unchanged from 2026-07-29): this thread is conditional on a
+  NON-STANDARD nonce generator k = k1 + lam*k2 with k1 bounded.  It is
+  not an attack on secp256k1 with correctly generated nonces.
+
+Total 2.5s.  Done.
