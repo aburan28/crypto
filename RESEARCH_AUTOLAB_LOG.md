@@ -6283,3 +6283,9 @@ there, so any separation is pure ν̂ signal).
 ### Commits made
 
 9707f19 autolab 2026-08-02: Thread 23 CLOSED — lattice reformulation does not move the Phase-2 wall
+
+### Push target
+Pushed to `claude/zen-pascal-9dvqpf` (the session's designated development
+branch), not `main`. Future runs: the daily-protocol text says `git push
+origin main`, but the standing branch requirement overrides it — push to the
+designated `claude/*` branch for the run and let the PR merge into main.
