@@ -6281,3 +6281,5 @@ predicts the per-curve spread at eff = 0.149 in U5's table (r_PROJ is constant
 there, so any separation is pure ν̂ signal).
 
 ### Commits made
+
+9707f19 autolab 2026-08-02: Thread 23 CLOSED — lattice reformulation does not move the Phase-2 wall
