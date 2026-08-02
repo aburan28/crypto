@@ -1,0 +1,101 @@
+========================================================================
+GLV-HNP Thread 23 — closed form for lambda_1(L2) / nu_hat
+========================================================================
+
+========================================================================
+E1  minimiser of F(b) is a CF convergent denominator (brute force)
+========================================================================
+  trials = 300   minimiser NOT a convergent denominator: 0
+  VERDICT: PASS
+
+========================================================================
+E2  CF closed form == Lagrange-Gauss lambda_1  (exact integer test)
+========================================================================
+    20-bit n:    80 trials   mismatches = 0
+    24-bit n:    80 trials   mismatches = 0
+    64-bit n:    80 trials   mismatches = 0
+   128-bit n:    80 trials   mismatches = 0
+   256-bit n:    80 trials   mismatches = 0
+  VERDICT: PASS - identification is EXACT
+
+  --- E2b: float vs exact Lagrange-Gauss at 256 bits ---
+     eff   nu_hat(float)   nu_hat(exact)     rel.diff
+    0.05    0.8708565230    0.8708565230     1.27e-16
+    0.10    0.6624380546    0.6624380546     0.00e+00
+    0.25    0.5852263210    0.5852263210     0.00e+00
+    0.50    0.6851190374    0.6851190374     0.00e+00
+
+========================================================================
+E3  is the winning convergent the balance index j* ?
+    j* = last j with q_j <= sqrt(n*S_K1/S_K2) = sqrt(n*K2/K1)
+========================================================================
+  offset (j_win - j*)   count    frac      (400 trials, 20-bit)
+                 -1       38    0.095
+                  0      359    0.897
+                  1        3    0.007
+  |j_win - j*| <= 1 : 1.000
+
+  --- E3b: width of the window, across bit sizes and eff ---
+   bits    eff  trials   off=-1   off=0   off=+1  |off|>1
+     20   0.02     300       19     278        3        0
+     20   0.05     300       21     278        0        1
+     20   0.10     300       27     269        3        1
+     20   0.25     300       15     283        1        1
+     20   0.50     300       20     278        2        0
+     20   0.90     300       26     272        0        2
+     64   0.02     300       22     276        2        0
+     64   0.05     300       15     284        1        0
+     64   0.10     300       21     278        1        0
+     64   0.25     300       27     273        0        0
+     64   0.50     300       17     280        2        1
+     64   0.90     300       26     272        1        1
+    256   0.02     300       19     280        1        0
+    256   0.05     300       26     272        2        0
+    256   0.10     300       23     277        0        0
+    256   0.25     300       23     276        1        0
+    256   0.50     300       20     278        1        1
+    256   0.90     300       24     275        1        0
+  max |j_win - j*| observed over all cells: 2
+
+========================================================================
+E4  nu_hat vs the partial quotient at the balance scale
+========================================================================
+  (600 trials, 20-bit, eff=0.10)
+  spearman(nu_hat, a_star = a_(j*+1))  = -0.7549   <- scale-AWARE
+  spearman(nu_hat, max_a)              = -0.3229   <- scale-free (June)
+  spearman(nu_hat, sqrt(2/a_star))     = +0.7549
+  |sqrt(2/a_star) - nu_hat| / nu_hat : median 0.172   p90 0.583
+
+  nu_hat by a_star bucket:
+    a_(j*+1)   count   mean nu_hat   sqrt(2/a)
+           1      55        0.9588      1.4142
+           2      77        0.9046      1.0000
+         3-4     120        0.7816      0.7559
+         5-9     111        0.6932      0.5345
+        >=10     237        0.4754      0.3651
+
+========================================================================
+E5  secp256k1 in the closed form
+========================================================================
+  CF of lam/n: 141 partial quotients, max a_j = 312
+     eff     nu_hat  j_win    j*   a_(j*+1)    t_(j*)   t_(j*+1)  sqrt(2/a*)
+    0.05     0.8709     70    70          5     0.199      1.039      0.6325
+    0.10     0.6624     70    70          5     0.282      1.470      0.6325
+    0.25     0.5852     70    70          5     0.446      2.324      0.6325
+    0.50     0.6851     70    70          5     0.630      3.287      0.6325
+
+  Reference (2026-07-29 log): eff=0.05 -> 0.8709, 0.10 -> 0.6624,
+                              eff=0.25 -> 0.5852, 0.50 -> 0.6851
+
+========================================================================
+SUMMARY
+========================================================================
+  E1 minimiser is a convergent denominator : PASS
+  E2 CF closed form == Lagrange-Gauss      : PASS (exact)
+  E3 |j_win-j*|<=1 rate (20-bit, eff=0.10) : 1.000
+  E3b max |j_win - j*| over 5400 trials    : 2  (window is NOT provably +-1)
+  E4 spearman(nu_hat, a_(j*+1))            : -0.7549
+  E4 spearman(nu_hat, max_a)  [scale-free] : -0.3229
+
+  Thread 23 falsifier was: predicted-from-CF nu_hat correlates < 0.9
+  with computed nu_hat.  Not falsified — the relation is exact equality.
