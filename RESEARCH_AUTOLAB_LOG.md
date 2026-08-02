@@ -6567,3 +6567,10 @@ pushed to 10⁶+ draws to place secp256k1's percentile tightly.
 `dec3a98` autolab 2026-08-02: recover lost nu_hat module orphaned by the 2026-07-29 merge
 `d5fe13a` autolab 2026-08-02: Thread 23 — exact CF closed form for lambda_1(L2) / nu_hat
 (this log entry is committed in the following commit)
+
+**Push target note.** The protocol step 6 says `git push origin main`, but this
+session's branch policy pins development to `claude/zen-pascal-p6gbs2`. Pushed
+there instead; `main` was not touched. **These three commits are not on `main`
+until that branch is merged** — a future run that clones fresh and sees no ν̂
+closed-form work should check `git log --all` and the open branches before
+redoing Thread 23. This is the same class of problem as the §0 recovery above.
