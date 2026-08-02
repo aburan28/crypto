@@ -6234,4 +6234,9 @@ Secondary: `RESEARCH_MESTRE_HOWE.md` §8 should be updated — "Option D
 (existence-without-construction)" is now partly superseded for the pairs above.
 
 ### Commits made
-(recorded below after commit)
+- `c7945ec` autolab 2026-08-02: Thread 2 CHLRS — explicit forward map; Jac(y^2=x^6+7) ~ secp256k1 x E_1
+
+### Push note
+Pushed to `claude/zen-pascal-8x75f2`, not `main`: this session's branch policy pins
+development to that branch. Future runs should merge it rather than expect `main` to
+be current.
