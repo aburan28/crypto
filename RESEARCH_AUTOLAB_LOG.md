@@ -6103,3 +6103,166 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23** — the continuation proposed by the 2026-07-29 entry
+(RESEARCH_AUTOLAB_LOG.md §2026-07-29 "Next step proposal"): reformulate the
+Phase-2 GLV-HNP lattice so the planted vector is λ₁, and check whether the K1
+wall of T4 moves.  All six original priority threads remain CLOSED / BLOCKED /
+DEAD-END; Thread 23 is the only thread with recent measurable progress and a
+concrete, cheap falsifier, so it is the correct pick under protocol rule (b).
+
+Outcome: **the proposal's premise is falsified, but its falsifier fired for a
+different reason.**  Removing the trivial vector does nothing; *centring the
+residuals* doubles the admissible bias bound.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0.  (Same note as 2026-07-29:
+  cysignals is a separate runtime import.)  PARI not needed this run.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_dcol.py` (6 experiments E1–E6),
+  reusing `gen_signatures` and the `scales()` convention verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:230` so comparison to 2026-07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_dcol_output.txt`.
+- Five lattice variants, all scored by the same known-answer test as all prior
+  Phase-2 work (`d_cand == d_secret`):
+
+  | | construction |
+  |---|---|
+  | **V1**  | baseline, `(2m+2)²`, d-column, Kannan (verbatim `glv_hnp_phase2_20bit.py:262`) |
+  | **V1c** | V1 + Kannan row shifted by `−⌊K1/2⌋·S_K1`, `−⌊K2/2⌋·S_K2` |
+  | **V2**  | d-column deleted: `2m+2` generators in `Z^(2m+1)`, rank `2m+1` |
+  | **V2c** | V2 + centring |
+  | **V3**  | no Kannan at all: Babai nearest-plane CVP in `Z^(2m)`, centred target |
+
+  `d` recovered a posteriori in V2/V2c/V3 as `d = B_i^{-1}(k1_i + λk2_i − A_i)`.
+- `cargo test --test curve_audit` → 5/5 pass (6.94s). ✓
+
+### Findings
+
+**E1/E2 — the T5 diagnosis is confirmed and then neutralised.**
+The shortest LLL row in V1 is the trivial `n·S_D·e_d` vector on all three
+historical curves (`triv = 1`, exactly as T5 reported).  Deleting the d-column
+makes it the rank deficiency: the V2 generating set has rank exactly
+`gens − 1` on every curve (14→13, 18→17, 22→21).  sv/pv then rises as predicted:
+
+| curve | K1 | m | V1 | V1c | V2 | V2c | V3 |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199   | 2 | 6  | 0.603 | 0.662 | 0.843 | 0.924 | 1.000 |
+| 12-bit/2557 | 8 | 8  | 0.517 | 0.596 | 0.532 | 0.614 | 1.000 |
+| 12-bit/2677 | 8 | 10 | 0.422 | 0.560 | 0.813 | 1.000 | 1.000 |
+
+V3 gives 1.000 exactly on all three: Babai nearest-plane returns the *exact*
+planted error vector, so the CVP formulation is tight.
+
+**E3 — the K1 wall moves, but not because of the d-column.**
+Successes out of 5 seeds; "wall" = largest K1 with 5/5.
+
+`12-bit/2557` (λ*=0.340, m=8):
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| V1  | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | **8** |
+| V1c | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 0 | 0 | 0 | **12** |
+| V2  | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | **8** |
+| V2c | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | **16** |
+| V3  | 5 | 5 | 5 | 5 | 5 | 4 | 5 | 1 | 0 | 0 | **16** |
+
+`12-bit/2677` (λ*=0.070, m=10 — the historical failure curve):
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| V1  | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **4** |
+| V1c | 5 | 5 | 5 | 5 | 5 | 4 | 1 | 1 | 0 | 0 | **8** |
+| V2  | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **4** |
+| V2c | 5 | 5 | 5 | 5 | 5 | 4 | 1 | 1 | 0 | 0 | **8** |
+| V3  | 5 | 5 | 5 | 4 | 4 | 4 | 1 | 1 | 0 | 0 | **4** |
+
+**V1 ≡ V2 cell for cell, on every curve and every K1.**  Removing the trivial
+vector — the whole point of the Thread 23 proposal — has *zero* operational
+effect.  LLL locates the planted vector in a non-shortest row regardless; the
+sv/pv ratio is not the binding quantity.  **The Thread 23 premise is falsified.**
+
+**V1c ≡ V2c cell for cell** as well, so the entire gain is attributable to
+centring alone.  The d-column is inert; keep or drop it to taste.
+
+**E4 — the 2026-07-29 T4b conclusion is superseded.**
+T4b reported that at K1=8 on `12-bit/2677` more data does not rescue recovery
+(`m = 8/12/16/24/32 → 0,0,1,0,1`) and concluded the K1 wall was genuine.
+Centred:
+
+| variant | m=8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| V1 / V2   | 0 | 0 | 1 | 0 | 1 |
+| V1c / V2c | 4 | 5 | 5 | 5 | 5 |
+| V3        | 3 | 5 | 5 | 5 | 5 |
+
+The K1=8 wall was an artifact of the uncentred embedding, not an
+information-theoretic limit.
+
+**E5 — cross-curve replication (20 fresh 17-bit j=0 GLV curves, m=12, 5 seeds).**
+Curves and search procedure identical to the 2026-07-29 T3 sweep.  Count of
+curves recovering 5/5:
+
+| eff = K1·K2/n | V1 | V1c | V2c | V3 |
+|---|---|---|---|---|
+| 0.05 | **19/20** | 20/20 | 20/20 | 20/20 |
+| 0.15 | **3/20**  | 14/20 | 14/20 | 7/20 |
+| 0.25 | **0/20**  | 4/20  | 4/20  | 3/20 |
+| 0.35 | 0/20      | 0/20  | 0/20  | 0/20 |
+
+V1 reproduces the 2026-07-29 T3 numbers exactly (19/20, 3/20, 0/20), which
+validates the harness.  Centring gives a **4.7× improvement at eff=0.15** and
+breaks the hard zero at eff=0.25.  V3 (pure Babai CVP) is consistently *worse*
+than V2c despite its tight sv/pv — nearest-plane is a weaker coset solver than
+LLL+Kannan, so the Kannan embedding should be kept.
+
+**E6 — the new ceiling, and BKZ does not move it.**
+
+| eff | V1 (LLL) | V1c (LLL) | V1c (BKZ-20) |
+|---|---|---|---|
+| 0.25 | 0/20 | 4/20 | 4/20 |
+| 0.35 | 0/20 | 0/20 | 0/20 |
+| 0.45 | 0/20 | 0/20 | 0/20 |
+
+BKZ-20 adds exactly nothing on top of centring.  This is consistent with — and
+now explains — the repeated 2026-06/07 observation that stronger reduction never
+helped: the binding constraint was embedding *geometry*, which no amount of
+reduction strength repairs.  A genuine wall remains in `0.25 < eff < 0.35`.
+
+**Why centring works (closed form).**  `k1_i ∈ [0,K1)` one-sided ⇒ the scaled
+residual `S_K1·k1_i` is uniform on `[0,n)` with `E[x²] = n²/3`; centred it is
+uniform on `[−n/2,n/2)` with `E[x²] = n²/12`.  Over the `2m` residual
+coordinates:
+
+```
+  ‖v_planted‖²_V1  ≈ n²(2m/3 + 4/3)      ‖v_planted‖²_V1c ≈ n²(m/6 + 4/3)
+  ‖v_planted‖²_V2c ≈ n²(m/6 + 1)
+  ratio V1/V1c = 1.581 (m=8), 1.633 (m=10), 1.673 (m=12)
+  ratio V1/V2c = 1.690 (m=8), 1.732 (m=10), 1.764 (m=12)
+```
+
+The determinant is unchanged (centring only shifts one basis row), so this is a
+pure ~1.6–1.8× shortening of the target.  Observed effect: the K1 wall doubles.
+
+### Next step proposal
+**Thread 24 — is the `0.25 < eff < 0.35` wall the information-theoretic bound?**
+With `K2 = √n` fixed, `eff = K1/√n`, so `eff → 1` is the no-bias limit and some
+wall must exist.  The counting bound is `m·log₂(n/(K1·K2)) ≳ log₂ n`, i.e.
+`m ≳ 1/log₂(1/eff)`, which at eff=0.25 needs only `m ≳ 0.5` — so the wall is
+*not* counting-limited and there is headroom.  Concrete sub-task: sweep
+`m ∈ {12, 24, 48, 96}` at eff ∈ {0.25, 0.30, 0.35} on the 20-curve V1c set.
+Falsifier: if the eff=0.35 column stays 0/20 at m=96, the wall is a property of
+the reduction/embedding and Phase 2 is at its ceiling; if it fills in, the wall
+is just a dimension-vs-data tradeoff and the earlier "walls" were all
+under-sampled.  Cost ≈ one E5-sized run (dim up to 194, so budget generously).
+
+Secondary (cheap): re-run the 2026-06-15…06-29 Phase-2 experiments under V1c.
+Six curve-level invariants (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n) and the
+ν̂ separator (AUC 0.935, 2026-07-29) were all fitted to *uncentred* success
+labels.  Since centring changes the labels wholesale, ν̂ needs re-validation
+before it is trusted.
+
+### Commits made

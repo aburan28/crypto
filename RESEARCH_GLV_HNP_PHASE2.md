@@ -271,3 +271,69 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+---
+
+## 10. Corrected lattice: centre the residuals (2026-08-02, Thread 23)
+
+The construction implemented in `secp256k1_cm_audit/glv_hnp_phase2_20bit.py:262`
+(`build_glv_lattice`) has two defects.  Only the second one costs anything, but
+both were mistaken for structural obstructions in earlier work.
+
+### 10.1 The d-column is inert (cosmetic defect)
+
+The lattice carries an explicit `d` coordinate with `S_D = 1`.  Because
+
+```
+    n·row_d  −  Σ_i B_i·row_i   =   (0, …, 0, n·S_D, 0, …, 0)
+```
+
+is a lattice vector of norm exactly `n·S_D`, while
+`‖v_planted‖ ≈ n·√(2m/3 + 4/3)`, the planted vector is **never** `λ₁`
+(RESEARCH_AUTOLAB_LOG.md 2026-07-29, finding T5).  Recovery in Phase 2 has
+always been a BDD/coset event, not an SVP event.
+
+This is real but **operationally irrelevant**.  Deleting the `d`-column
+(variant V2: `2m+2` generators of a rank-`2m+1` lattice, the trivial vector
+becoming exactly the rank deficiency) reproduces V1's success/failure pattern
+**cell for cell** on every curve, every `K1`, every `m` tested.  LLL finds the
+planted vector in a later row regardless.  `d` is then recovered a posteriori as
+`d = B_i^{-1}(k1_i + λ·k2_i − A_i) mod n`.
+
+### 10.2 The residuals are not centred (the defect that costs)
+
+`k1_i ∈ [0, K1)` and `k2_i ∈ [0, K2)` are one-sided, so the scaled residuals
+`S_K1·k1_i`, `S_K2·k2_i` are uniform on `[0, n)` with `E[x²] = n²/3`, not on
+`[−n/2, n/2)` with `E[x²] = n²/12`.  Shifting the Kannan row by
+`−⌊K1/2⌋·S_K1` and `−⌊K2/2⌋·S_K2` fixes this and shrinks the planted vector by
+
+```
+    ‖v_planted‖ uncentred / centred  =  √((2m/3 + 4/3) / (m/6 + 4/3))
+                                     =  1.58 (m=8) … 1.67 (m=12)
+```
+
+with no change to the lattice determinant.  Empirically the admissible bias
+bound `K1` **doubles**, and the reachable `eff = K1·K2/n` rises from ≈0.05 to
+≈0.25.  See `secp256k1_cm_audit/glv_hnp_phase2_dcol.py` and its output file.
+
+### 10.3 Consequences for earlier conclusions
+
+- The "K1 wall" reported on 2026-07-26/29 (curve `n = 2647`, `λ* = 0.0699`,
+  wall at `K1 ≈ 4`) is an artifact of the uncentred embedding.  Centred, that
+  curve recovers 5/5 up to `K1 = 8`.
+- The 2026-07-29 T4b claim that more data does not rescue `K1 = 8`
+  (`m = 8/12/16/24/32 → 0,0,1,0,1`) is **superseded**: centred, the same grid
+  gives `4,5,5,5,5`.
+- BKZ-20 on top of the centred lattice adds nothing (4/20 at `eff = 0.25`, same
+  as LLL).  The binding constraint is embedding geometry, not reduction
+  strength — consistent with the 2026-07-29 finding that stronger reduction
+  never helped.
+- A genuine wall remains between `eff = 0.25` and `eff = 0.35`, now measured
+  with a correct embedding.
+
+### 10.4 Recommended construction
+
+Use `build_v1(..., centered=True)` (equivalently `build_v2(..., centered=True)`
+plus post-hoc `d` recovery) from `glv_hnp_phase2_dcol.py`.  Centring is a
+one-line change to the Kannan row and is strictly dominant; the `d`-column may
+be kept or dropped to taste.
