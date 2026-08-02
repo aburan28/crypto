@@ -6103,3 +6103,198 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is the target
+of the reduction.** This is verbatim the next-step proposed by the 2026-07-29 entry
+(log line ~6090), which also pre-registered the falsifier: *"if the K1 wall on the
+lam*=0.07 curve (currently K1≈4–6) moves outward after the reformulation, the
+reformulation is a real improvement; if the wall stays, the wall is
+information-theoretic and Phase 2 is at its ceiling."* Priorities 1/2/4/6 remain
+CLOSED/BLOCKED/DEAD-END; priority 5 made measurable progress on 2026-07-29, so its
+proposed sub-task is the correct pick under protocol rule (b).
+
+**Verdict up front: the falsifier came back NEGATIVE.** The reformulation works
+exactly as designed — the planted vector really does become λ₁ — and the K1 wall
+does not move by a single cell.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  sympy 1.14.0. **`gp` could NOT be installed this run** — `apt-get install pari-gp`
+  fails on a 404 for an unrelated mesa dependency in the Ubuntu 24.04 pool. Not
+  needed for this thread (Python/fpylll only); future PARI threads should run
+  `apt-get update` first.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_reformulation.py` (7 experiments U0–U6),
+  reusing `build_glv_lattice`/`scales`/`gen_signatures` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so the comparison to 2026-07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_reformulation_output.txt`
+  (168 lines). Whole script runs in **10.7 s**.
+- Two reformulations implemented and measured against the 2026-07-29 baseline:
+  - **A(S_D)** — historical lattice with the d-column weight S_D promoted to a free
+    parameter (`build_lattice_A`).
+  - **B** — d-column *dropped entirely* (`build_lattice_B`, dim 2m+1). d is not
+    small, so it never belonged in a BDD instance; it is still uniquely recoverable
+    from the k1/k2 columns via `d = (k1_0 + λ·k2_0 − A_0)·B_0^{-1} mod n`
+    (`recover_B`). This removes the trivial vector from the lattice outright.
+- `cargo test --test curve_audit` → 5/5 pass (5.23 s). ✓
+
+### Findings
+
+**U0 — the 2026-07-29 T5 algebra claim is WRONG (corrected).** T5 asserted "no
+choice of S_D removes [the trivial vector] — both vectors scale linearly in S_D".
+Only *one* of the 2m+2 coordinates of the planted vector scales with S_D:
+
+    ‖n·S_D·e_m‖² = (n·S_D)²
+    E‖v_planted‖² ≈ n²·(2m/3 + S_D²/3 + 1)
+    ⟹ trivial is the LONGER of the two iff S_D² > m + 3/2.
+
+So S_D* = ⌈√(m+3/2)⌉ suffices. Verified numerically:
+
+| curve | m | S_D* | ‖triv‖(S_D=1) | ‖pv‖(S_D=1) | ‖triv‖(S_D*) | ‖pv‖(S_D*) |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 6 | 3 | 199 | 329.8 | 597 | 330.1 |
+| 12-bit/2557 | 8 | 4 | 2659 | 5143 | 10640 | 5149 |
+| 12-bit/2677 | 10 | 4 | 2647 | 6271 | 10590 | 6276 |
+
+**U1 — making the planted vector λ₁ does not help; it HURTS.** S_D sweep, 5 seeds.
+`E_d` = fraction of the LLL-shortest vector's energy in the d column:
+
+| curve | S_D=1 | 2 | S_D* | 2·S_D* | 4·S_D* | 16·S_D* |
+|---|---|---|---|---|---|---|
+| 8-bit/199 (m=6) | 5/5 | 5/5 | 4/5 | 3/5 | 1/5 | 1/5 |
+| 12-bit/2557 (m=8) | 5/5 | 5/5 | 5/5 | 3/5 | 2/5 | 0/5 |
+| 12-bit/2677 (m=10) | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+`E_d` goes 1.000 → 0.000 at the very first step S_D=1→2 (the trivial vector stops
+being λ₁ long before S_D*), so the mechanism fires as intended and recovery still
+decays monotonically. **The trivial vector was never the obstruction.**
+
+**U2 — THREAD 23 FALSIFIER, NEGATIVE.** K1 wall, m=12, 5 seeds, three formulations:
+
+`12-bit/2557` (λ*=0.3400, n=2659):
+
+| formulation | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| A S_D=1 (baseline) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| A S_D=4 (U1 fix) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 1/5 | 0/5 |
+| **B d-col dropped** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| B sv/pv | 0.742 | 0.529 | 0.461 | 0.396 | 0.373 | 0.352 | 0.347 | 0.339 |
+
+`12-bit/2677` (λ*=0.0699, n=2647) — the curve the falsifier was written for:
+
+| formulation | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| A S_D=1 (baseline) | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| A S_D=4 (U1 fix) | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| **B d-col dropped** | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| B sv/pv | **1.000** | **1.000** | **1.000** | 0.901 | 0.704 | 0.502 | 0.427 | 0.349 |
+
+`sv/pv = 1.000` is the receipt that the reformulation did what Thread 23 asked:
+in formulation B the planted vector **is exactly λ₁** on this curve throughout the
+success regime. It buys nothing. Formulations A and B agree in **112/112 cells**
+(16 K1-sweep + 96 U3 grid; checked programmatically, 0 disagreements).
+Per the pre-registered criterion: **the K1 wall is not a formulation artifact.**
+
+Structurally this is unsurprising in hindsight: B is the image of A under the
+projection killing coordinate m, whose kernel on the lattice is exactly
+Z·(n·S_D·e_m). Quotienting by a rank-1 trivial summand cannot change what LLL finds
+in the complement.
+
+**U3 — closed-form order parameter.** For formulation B,
+det = n^(2m−1)/eff^m with eff = K1·K2/n, giving
+
+    γ := E‖e‖ / GH(L) = √(2πe/3) · n^(1/2m) · √eff ≈ 2.4849 · n^(1/2m) · √eff
+
+(numeric-GH vs closed form agree to ≤1.3e-2). Note γ contains **no λ** — consistent
+with the 2026-07-29 falsification of λ*. Scored on a fresh grid of 12 17-bit curves
+× 8 eff values × 5 seeds (96 cells, m=12):
+
+- γ<1 ⟹ success: **TP=24, FP=0**, accuracy 0.802 vs 0.552 majority baseline.
+- But **no sharp threshold**: max γ among successes = 1.694, min γ among failures
+  = 1.059. The transition is a band γ ∈ [1.06, 1.69], not a wall.
+
+**U4 — γ's one non-trivial prediction, and where it breaks.** At fixed eff, γ falls
+with m, so the attack must cross from failure to success at
+m* = ln n / (2·ln(1/(2.4849√eff))). Qualitatively confirmed; quantitatively wrong:
+
+| n | eff | predicted m* | observed m_obs |
+|---|---|---|---|
+| 65287 | 0.0510 | 9.6 | 6 |
+| 65287 | 0.1019 | 24.0 | 8 |
+| 65287 | 0.1608 | 1511.7 | 8 |
+| 65053 | 0.0512 | 9.6 | 6 |
+| 65053 | 0.0984 | 22.2 | 16 |
+| 65053 | 0.1613 | 2960.8 | 24 |
+| 65119 | 0.0511 | 9.6 | 6 |
+| 65119 | 0.0983 | 22.2 | **none ≤40** |
+| 65119 | 0.1612 | 2329.9 | none ≤40 |
+
+Two independent failures of γ: it is far too pessimistic at eff≳0.10 (m_obs=8 vs
+m*=1512), **and** γ<1 stops being sufficient once m varies — n=65119 at eff=0.0983
+fails at m=20/24/28/32/40 with γ = 0.99/0.94/0.91/0.89/0.86. The U3 "FP=0" result
+was an artifact of holding m=12 fixed. **γ is an order parameter, not a criterion.**
+It does retro-explain 2026-07-29 T4b (m=8…32 at K1=8 → 0,0,1,0,1): γ there runs
+1.61→1.11 and never crosses 1, so T4b never tested a crossing.
+
+**U5 — the residue is not reduction quality.** Three curves at the same n-size and
+the same eff≈0.10, LLL vs BKZ(20), 5 seeds:
+
+| n | λ* | m=40 | 48 | 64 | 80 | γ(m=40..80) |
+|---|---|---|---|---|---|---|
+| 65287 LLL | 0.3346 | 5/5 | 5/5 | 5/5 | 5/5 | 0.88→0.82 |
+| 65287 BKZ(20) | | 5/5 | 5/5 | – | – | |
+| 65053 LLL | 0.3877 | 3/5 | 3/5 | 4/5 | 1/5 | 0.86→0.80 |
+| 65053 BKZ(20) | | **5/5** | **5/5** | – | – | |
+| 65119 LLL | 0.3581 | 0/5 | 1/5 | 0/5 | 0/5 | 0.86→0.80 |
+| 65119 BKZ(20) | | **0/5** | **1/5** | – | – | |
+
+65053 is reduction-quality-limited (BKZ rescues it). 65119 is not: neither m=80
+(dim 161) nor BKZ(20) moves it, at γ≈0.8, while its sibling 65287 succeeds 5/5 at
+m=8. Three curves, same n-size, same eff, same γ, and λ* orders them 0.3346 <
+0.3581 < 0.3877 — i.e. **λ\* does not even order them monotonically** (the hardest
+curve is the middle one). This is an irreducible, curve-dependent obstruction.
+
+**U6 — the obstruction IS a function of the curve (so the invariant hunt is
+well-posed).** Before proposing a ninth curve invariant, tested whether the
+predicted quantity is a curve property at all. n is prime, so every non-identity
+point generates; changing G re-randomises every (A_i, B_i) while leaving (p, n, λ)
+— every curve invariant — fixed.
+
+| n | λ* | 20 signature seeds, G fixed (m=16) |
+|---|---|---|
+| 65287 | 0.3346 | 20/20 |
+| 65053 | 0.3877 | 9/20 |
+| 65119 | 0.3581 | **0/20** |
+
+Across 5 different generators G (m=12/16/24, 5 seeds each): 65287 gives 5/5 in all
+15 cells; 65119 gives 0–2/5 in all 15 cells; 65053 stays intermediate throughout.
+**The hardness is stable under resampling both the signatures and the generator**,
+so it is a genuine function of (p, n, λ). The eight invariants tried so far
+(δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n from 2026-06-21…06-29; λ* and ρ from
+2026-07-29) simply are not it — but a separating invariant is not ruled out, and
+U6 supplies a clean 3-curve minimal test set to screen candidates in seconds.
+
+### Next step proposal
+**Thread 24 — screen candidate invariants on the U6 triple {65287, 65053, 65119}.**
+The expensive part of every previous invariant hunt was building the empirical
+labels; U6 hands over three same-n, same-eff, same-γ curves with hardness
+20/20 : 9/20 : 0/20 that is stable under generator and signature resampling. Any
+proposed invariant must first order these three correctly — a ~1-second screen —
+before a sweep is worth running.
+First candidate to screen: the **projected GS profile** of formulation B, i.e.
+‖e‖ against ‖b*_i‖ for i in the last 2m−k coordinates, rather than against GH.
+That is the quantity BDD success actually depends on, it is curve-dependent by
+construction, and U3/U4 showed the GH-averaged version (γ) throws away exactly the
+information that separates the triple. Falsifier: if the GS-profile statistic orders
+{65287, 65053, 65119} as 20/20 : 9/20 : 0/20 it is a live candidate and should go to
+a 12-curve sweep; if it does not, it joins the eight dead invariants and the next
+move is to accept the wall as empirical and close Thread 5.
+
+Secondary (cheap, unrelated): `apt-get update` before `apt-get install pari-gp` —
+PARI was unavailable this run because of a stale package index, which would BLOCK
+Threads 2/3 if they were picked next.
+
+### Commits made
+(filled in below after commit)
