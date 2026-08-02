@@ -1,0 +1,36 @@
+==============================================================================
+GLV-HNP Thread 20d: nu_hat vs the June C1/C2 classes
+==============================================================================
+Exp S protocol replication: K1=72, m=12, 6 seeds, 100 fresh 20-bit j=0 CM curves
+C2 = recovers d on all seeds; C1 = does not (Exp S convention)
+
+  harvested 100 curves in 0.1s
+  600 LLL trials in 1.0s
+
+  C1 (fails): 74/100   C2 (6/6): 26/100
+  trivial baseline (always predict majority) = 74.0%
+  (Exp S 2026-06-29 saw 40/50 C1, 10/50 C2 -- same regime)
+
+--- Head to head: nu_hat vs the falsified invariants ---
+ invariant           C1 range           C2 range     AUC  best acc
+    nu_hat      [0.408,1.012]      [0.314,0.645]   0.935     89.0%
+        mu      [0.002,0.497]      [0.001,0.499]   0.523     75.0%
+     max_a    [3.000,419.000]    [5.000,729.000]   0.748     75.0%
+
+--- nu_hat decile response (C2 rate and mean wins/6) ---
+ decile  nu_hat mid   C2 rate  mean wins/6
+      1       0.332      1.00         6.00
+      2       0.455      0.70         5.00
+      3       0.540      0.40         4.00
+      4       0.582      0.10         2.90
+      5       0.632      0.40         3.30
+      6       0.715      0.00         1.20
+      7       0.801      0.00         0.80
+      8       0.850      0.00         0.80
+      9       0.890      0.00         1.00
+     10       0.965      0.00         0.70
+
+--- secp256k1 placement at the same eff ---
+  sample eff = 0.0993; secp256k1 at that eff: nu_hat=0.6639 (percentile 50% of sample)
+
+Done.

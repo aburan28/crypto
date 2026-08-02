@@ -6103,3 +6103,284 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposal of the 2026-07-29 entry (log line 6089). Protocol rule (b): priority
+5 / Thread 20 made measurable progress 4 days ago and this is its named continuation.
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21.
+
+Outcome: the 2026-07-29 falsifier was a **disjunction, and both branches are false**.
+The reformulation does not move the wall, *and* the wall is not information-theoretic.
+The actual lossy step is the **Kannan embedding**.
+
+### Work done
+
+- Fresh container. Installed `fpylll` 0.6.4, `cysignals` 1.12.5, `sympy` 1.14.0.
+  Note for future runs: `pip install fpylll` alone still fails at import —
+  `cysignals` must be installed separately (same trap as 2026-07-29). PARI/GP is
+  **not** installed in this image; no `gp` binary. Not needed today.
+- Wrote three scripts, each reusing the 2026-07-29 lattice construction verbatim
+  (`glv_hnp_phase2_lambda_threshold.py:254 build_glv_lattice`) so every comparison is
+  against an identical baseline. Because that module runs its whole T1–T5 suite at
+  import time (including a 17-bit curve search), the scripts exec only its helper
+  prefix rather than importing it.
+  - `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (23a) + `_output.txt`
+  - `secp256k1_cm_audit/glv_hnp_phase2_bdd_exact.py` (23b) + `_output.txt`
+  - `secp256k1_cm_audit/glv_hnp_phase2_cvp_wall.py` (23c) + `_output.txt`
+- Three attack variants, all recovering the same secret from the same instances:
+  - **A** baseline (2m+2)-dim Kannan lattice — unchanged from 2026-07-29.
+  - **B** *projected*: delete column m. ker(π) ∩ L = ⟨n·S_D·e_m⟩ exactly, so π(L) has
+    rank 2m+1, det = det(L)/(n·S_D), and the trivial vector maps to 0. d is then
+    recovered **algebraically** from the k's via A_i + d·B_i ≡ k1_i + λ·k2_i (mod n).
+  - **C** *CVP*: drop the d-column **and** the Kannan embedding. On the rank-2m
+    homogeneous lattice L0 (det = n^{m-1}·S_K1^m·S_K2^m), v = t + u with u ∈ L0, so u
+    is the closest lattice vector to −t. Babai nearest-plane, then exact enumeration
+    (`fpylll CVP.closest_vector`) in 23b/23c.
+- `cargo test --test curve_audit` → **5/5 pass** (5.17s). No Rust code touched.
+- Second half of the session went to a repository-integrity problem found while looking
+  for the 2026-07-29 ν̂ numbers (F7–F9): four scripts were dead at import because of a
+  filename collision between two parallel autolab branches. Recovered
+  `secp256k1_cm_audit/glv_hnp_nuhat_helpers.py` verbatim from `7873016`, repointed
+  `glv_hnp_nuhat_vs_c1c2.py`, `glv_hnp_phase2_nuhat_control.py` and
+  `glv_hnp_phase2_mu_response.py` at it, and re-ran both ν̂ experiments to regenerate the
+  evidence that had been lost. Output files committed alongside so the next run does not
+  have to re-derive them.
+
+### Findings
+
+**F1 — the harness is validated.** Variant A reproduces the 2026-07-29 T4 table
+cell-for-cell (`5/5 5/5 5/5 5/5 5/5 4/5 1/5 0/5` and `5/5 5/5 5/5 2/5 0/5 0/5 0/5 0/5`),
+so everything below is measured against a confirmed-identical baseline.
+
+**F2 — quotienting the trivial vector is a no-op (first branch of the falsifier: FALSE).**
+The trivial vector really is removed — sv/pv rises from 0.37 to as high as 1.000 — and
+the wall does not move at all. T4 grid, m=12, 5 seeds, largest K1 with 5/5:
+
+| curve | λ* | A (baseline) | B (projected) | C (Babai CVP) |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | 8 | 6 |
+| 12-bit/2677 | 0.070 | 4 | 4 | 2 |
+
+sv/pv, m=12: 2557 @K1=4 0.368→0.461, @K1=8 0.354→0.373; 2677 @K1=4 0.371→**1.000**,
+@K1=8 0.356→0.704. `|sv[m]|/n = 1.0000` in variant A on every instance, re-confirming
+the 2026-07-29 T5 diagnosis. Babai (C) is *worse* than LLL+Kannan, as expected.
+
+**F3 — the wall is NOT information-theoretic (second branch of the falsifier: FALSE).**
+m signatures give m·log₂n bits; the unknowns are m·log₂(K1·K2) + log₂n bits; so d is
+unique whp once eff := K1·K2/n < n^{−1/m}. At m=12, n≈2650 that is **eff < 0.5185**,
+while the observed walls sit at:
+
+| curve | λ* | wall K1 | eff@wall | eff_unicity | gap |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | 0.1564 | 0.5183 | **3.31×** |
+| 12-bit/2677 | 0.070 | 4 | 0.0786 | 0.5185 | **6.60×** |
+
+There is a 3.3–6.6× band in eff where d is information-theoretically determined and the
+attack still fails. "The wall stayed" does not imply "the wall is information".
+
+**F4 — BKZ is flat; it is not reduction strength either.** Variant B, m=12, 5 seeds,
+β ∈ {2,10,20,30,40} (β=2 is plain LLL):
+
+| curve | K1 grid | β=2 | 10 | 20 | 30 | 40 |
+|---|---|---|---|---|---|---|
+| 2677 (λ*=0.07) | 4 / 6 / 8 / 12 | 5,1,0,0 | 5,0,0,0 | 5,0,0,0 | 5,0,0,0 | 5,0,0,0 |
+| 2557 (λ*=0.34) | 8 / 12 / 16 / 24 | 5,2,1,0 | 5,2,1,0 | 5,2,1,0 | 5,2,1,0 | 5,2,1,0 |
+
+Identical at every β. Stronger reduction on the Kannan lattice buys **nothing**.
+
+**F5 — the Kannan embedding is the lossy step (the actual result).** Exact CVP on L0
+recovers d where LLL *and* BKZ-40 on the Kannan lattice recover nothing. m=12, 10 seeds
+(`glv_hnp_phase2_cvp_wall.py`):
+
+| curve | λ* | K1 | eff | LLL+Kan | BKZ40+Kan | **exact CVP** |
+|---|---|---|---|---|---|---|
+| 2557 | 0.340 | 4 | 0.078 | 10/10 | 10/10 | 10/10 |
+| 2557 | 0.340 | 6 | 0.117 | 10/10 | 10/10 | 10/10 |
+| 2557 | 0.340 | 8 | 0.156 | 10/10 | 10/10 | 9/10 |
+| 2557 | 0.340 | 12 | 0.235 | 3/10 | 4/10 | **6/10** |
+| 2557 | 0.340 | 16 | 0.313 | 3/10 | 2/10 | 3/10 |
+| 2677 | 0.070 | 4 | 0.079 | 9/10 | 10/10 | 10/10 |
+| 2677 | 0.070 | 6 | 0.118 | 2/10 | 2/10 | **8/10** |
+| 2677 | 0.070 | 8 | 0.157 | 1/10 | 0/10 | **2/10** |
+| 2677 | 0.070 | 12 | 0.236 | 0/10 | 0/10 | 0/10 |
+
+Wall (largest K1 with ≥80% recovery): 2677 goes **4 → 6, a 1.50× gain in eff**; 2557
+stays at 8 but doubles its success count at K1=12 (3/10 → 6/10). Exact CVP costs
+~1.6 ms/instance at dim 24.
+
+Why the embedding loses: Kannan turns "closest lattice point to −t" into "shortest
+vector in a coset", and 2026-07-29 T5 established the planted vector is never λ₁ of
+that lattice. Solving the CVP directly never has to make that trade.
+
+**F6 — methodological correction: never score on the recovered vector.** The GLV
+decomposition of a nonce is not unique — (k1, k2) and (k1 − λ + cn, k2 + 1) give the
+same k_full — so exact CVP legitimately returns a *shorter* decomposition of the *same*
+d. In 23b this shows up starkly at 2557/K1=6: `exact == planted` **0/5** while
+`exact CVP recovers d` **5/5**, with ‖v_exact‖/‖v_planted‖ = 0.9167. Any future run
+scoring on vector equality will read a working attack as a total failure.
+
+**Honest scope limit.** Exact CVP here is enumeration in dim 24 on a 12-bit curve. It is
+a **diagnostic** localising where the loss occurs, *not* a practical attack improvement —
+enumeration is exponential and does not scale to real curve sizes. The transferable
+claim is the negative one: for this lattice family, effort spent on stronger reduction
+(BKZ) is wasted, and effort should go into the embedding/target formulation.
+
+**F7 — a whole experiment was lost to a merge, and is now recovered.**
+The 2026-07-29 commit `e845207` is titled "ν̂ separator found (AUC 0.935)" and added
+`glv_hnp_phase2_nuhat_control.py` (Threads 20b/20c) and `glv_hnp_nuhat_vs_c1c2.py`
+(Thread 20d). But `grep -n 'nu_hat' RESEARCH_AUTOLAB_LOG.md` returned **nothing**, there
+was no output file, and **both scripts died at import** with
+`module '_t20a' has no attribute 'glv_eigenvalues'`. The result existed only as a commit
+subject line, backed by code that could not run.
+
+Root cause — a filename collision between two parallel autolab branches. Two *different*
+modules were written under the one name `glv_hnp_phase2_lambda_threshold.py`:
+
+| | branch `serene-curie` (505 lines) | branch `zen-pascal` (674 lines) |
+|---|---|---|
+| eigenvalues | `glv_eigenvalues` | `glv_roots` |
+| λ invariant | `mu_of` | `lam_star` |
+| rival geometry | `rival_sublattice_nu` | `lambda_block_mu` |
+| curve setup | `identify_twist`, `harvest_curves` | `build_curve`, `search_curves` |
+| driver | `main()` under a `__main__` guard | T1–T5 at module level |
+
+The merge (`7b5b702` / `e31dd19`) kept the zen-pascal module **and** the serene-curie ν̂
+scripts that depend on the other one. Same event lost the log section.
+
+Recovered this run: the serene-curie module is restored verbatim from `7873016` as
+`secp256k1_cm_audit/glv_hnp_nuhat_helpers.py` (a distinct filename, so the collision
+cannot recur), and the two ν̂ scripts are repointed at it with an inline note. Both now
+run. **The ν̂ claim reproduces exactly** — `glv_hnp_nuhat_vs_c1c2.py`, 100 fresh 20-bit
+j=0 CM curves, Exp S protocol (K1=72, m=12, 6 seeds, 600 LLL trials):
+
+| invariant | C1 range | C2 range | AUC | best acc |
+|---|---|---|---|---|
+| **ν̂** | [0.408, 1.012] | [0.314, 0.645] | **0.935** | **89.0%** |
+| μ (=λ*) | [0.002, 0.497] | [0.001, 0.499] | 0.523 | 75.0% |
+| max_a | [3.0, 419.0] | [5.0, 729.0] | 0.748 | 75.0% |
+
+against a 74.0% majority baseline (74 C1 / 26 C2, same regime as Exp S 2026-06-29's
+40/50 vs 10/50). The decile response is monotone and clean:
+
+| ν̂ decile | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ν̂ mid | 0.332 | 0.455 | 0.540 | 0.582 | 0.632 | 0.715 | 0.801 | 0.850 | 0.890 | 0.965 |
+| C2 rate | 1.00 | 0.70 | 0.40 | 0.10 | 0.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| mean wins/6 | 6.00 | 5.00 | 4.00 | 2.90 | 3.30 | 1.20 | 0.80 | 0.80 | 1.00 | 0.70 |
+
+So ν̂ := λ₁(L2)/√(det L2) — L2 the **non-planted** 2-D sublattice
+⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩ on coordinate pair (i, m+1+i), det L2 = n·S_K1·S_K2
+independent of λ — is the first invariant to beat the majority baseline after the six
+that failed on 2026-06-30 (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n). Its sign is the
+opposite of the naive guess: **small ν̂ (skew L2) makes the attack easier**, because
+λ₁λ₂ ~ det forces λ₂ long, leaving the planted vector comparatively short; balanced L2
+(ν̂ → 1) surrounds it with rivals of norm ~√det.
+
+Directly relevant to the main theorem: at the sample's eff = 0.0993, **secp256k1 sits at
+ν̂ = 0.6639, the 50th percentile** — decile 5–6, where the measured C2 rate is 0.00–0.40.
+secp256k1 is unexceptional on this axis, i.e. ν̂ gives no purchase against it.
+
+Note F5 is consistent with all of this: ν̂ measures the *non-planted* geometry — what
+crowds the target out — which is exactly what the Kannan embedding is sensitive to and
+what solving the CVP directly sidesteps.
+
+**F8 — the ν̂ effect is causal, not correlational (Thread 20c, also recovered).**
+`glv_hnp_phase2_nuhat_control.py` needed a second patch — it chains through
+`glv_hnp_phase2_mu_response.py`, which had the same broken import — and then ran clean
+in 31s. Four arms, all pre-registered in the script docstring:
+
+*Arm 1, 20-bit, μ-matched low-ν̂ vs high-ν̂ (30+30 curves, 48 seeds/(curve,m)).* Confound
+check passes: μ is balanced across groups (0.253 vs 0.247, perm p=0.8376).
+
+| m | p̂(low ν̂) | p̂(high ν̂) | diff | perm p |
+|---|---|---|---|---|
+| 8 | 0.910 | 0.453 | +0.457 | 0.0000 |
+| 9 | 0.973 | 0.594 | +0.378 | 0.0000 |
+| 10 | 0.996 | 0.766 | +0.230 | 0.0000 |
+| 11 | 0.999 | 0.746 | +0.253 | 0.0000 |
+
+*Arm 2, 24-bit replication* (20+20 curves; μ balanced, perm p=0.3861) — same sign, larger
+effect: diffs +0.401, +0.549, +0.503, +0.578 at m=8..11, all perm p=0.0000. Not a 20-bit
+artifact.
+
+*Arm 3, pooled Spearman:* −0.796, −0.800, −0.843, −0.839 at m=8..11, all perm p=0.0002.
+(The docstring's earlier figures of −0.339…−0.568 were the weaker 20b sample.)
+
+*Arm 5 — the causal test.* This is the arm that matters. The HNP instance only needs
+nonces of the form k = k1 + λ·k2 mod n with k1 small; λ need **not** be a real GLV
+eigenvalue for the lattice to be well posed. So the script holds
+(p, b, n, G, K1, K2) **fixed** — p=524341, n=525583, K1=36, K2=725 — and sweeps 120
+synthetic λ values, m=9, 24 seeds each. Every curve-level confound is eliminated by
+construction:
+
+| predictor | Spearman vs p̂ | perm p |
+|---|---|---|
+| **ν̂** | **−0.583** | **0.0002** |
+| μ (=λ*) | +0.003 | 0.9672 |
+
+with tertile means ν̂ = 0.341 / 0.729 / 0.951 → p̂ = 0.897 / 0.570 / 0.566. So ν̂ is a
+*cause*, μ is exactly null — which independently re-confirms the 2026-07-29 falsification
+of the λ/n threshold, on a design where nothing else can vary.
+
+**F9 — ν̂ and F5 are the same phenomenon.** Arm 4's out-of-sample anchors give ν̂ for the
+two curves used all through today's Thread 23 work:
+
+| curve | μ (=λ*) | ν̂ | Phase-2 behaviour | exact-CVP gain (F5) |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.3400 | **0.4080** (skew L2) | 3/3 at m=7 | none at the wall (8 → 8) |
+| 12-bit/2677 | 0.0699 | **0.7711** (balanced L2) | never 3/3 | **wall 4 → 6, 1.50×** |
+
+The curve where exact CVP buys the most is exactly the high-ν̂ one. That is the predicted
+relationship, not a coincidence: high ν̂ means L2 is balanced, so the planted vector is
+surrounded by rivals of norm ~√det — and *crowding is precisely what the Kannan embedding
+cannot survive and direct CVP does not care about*. The "λ*=0.07 curve is hard" story
+from 2026-07-26 is now fully dissolved: λ* is causally null (F8 Arm 5), the curve is hard
+because ν̂ = 0.77, and the hardness is an artefact of the embedding rather than of the
+instance (F5).
+
+
+### Next step proposal
+
+**Thread 24 — recover the CVP gain at polynomial cost.** Exact CVP does not scale
+(enumeration, dim 24, 12-bit curve), but it localised the loss, so the question is how
+much of the 1.5× is reachable cheaply. On the same T4 grid: (i) Babai nearest-plane on a
+**BKZ-β reduced** L0 rather than the LLL-reduced one — today's variant C used LLL only,
+which is why it underperformed even plain LLL+Kannan; (ii) randomised Babai with
+r ∈ {1, 10, 100} restarts under random unimodular perturbation, keeping the best
+candidate. Falsifier: if BKZ-20 + randomised Babai reaches ≥8/10 at 2677/K1=6 (plain
+LLL+Kannan gets 2/10, exact CVP gets 8/10), the gain is polynomial-time reachable and
+Phase 2 has real headroom; if it stays ≤3/10, the gain needs exact CVP and Phase 2 is at
+its practical ceiling. ~20 min, same shape as today's runs.
+
+**Thread 25 — does ν̂ predict the CVP gain?** F9 is currently a two-point observation
+(ν̂=0.41 → no gain, ν̂=0.77 → 1.5× gain). Falsifiable and cheap now that both harnesses
+work: harvest ~20 curves spanning ν̂ ∈ [0.3, 1.0] at fixed eff, and for each measure the
+wall under LLL+Kannan vs exact CVP. Predicted: gain increases monotonically in ν̂, ~0 for
+ν̂ ≲ 0.5. If instead the gain is flat in ν̂, F9's mechanism is wrong and the CVP advantage
+has some other source. This is the experiment that would turn ν̂ from a *predictor of
+attack success* into a *predictor of which lattice formulation to use*.
+
+Secondary, cheap: re-run today's three variants at 17- and 20-bit to confirm the 1.5×
+gain is not a 12-bit artifact.
+
+**Relevance to the main theorem.** ν̂ places secp256k1 at the **50th percentile** (ν̂ =
+0.6639 at eff = 0.0993) — unexceptional, no purchase against it. Worth a line in
+`PAPER_STRUCTURAL_COMPLETENESS.md` only if Thread 25 finds ν̂ also governs formulation
+choice; on its own it is a statement about *toy* curve difficulty, not about secp256k1.
+
+**For the human user — process, not research.** F7 is a repository bug and it has now bitten
+twice in one week. Two parallel autolab branches (`claude/zen-pascal-*`,
+`claude/serene-curie-*`) wrote different modules under the same filename; the merge kept
+one module and the other's dependent scripts, leaving four scripts dead at import and one
+full experiment's log section deleted. An experiment's only surviving record was a commit
+subject line. Today's fix (distinct filename + recovery) repairs this instance but not the
+cause. Worth either serialising autolab runs onto a single branch, or giving each run its
+own dated files (`RESEARCH_AUTOLAB_LOG/2026-08-02.md`, `secp256k1_cm_audit/<date>_*.py`)
+so that concurrent runs cannot collide. **This needs a human decision — an autolab run
+should not unilaterally restructure the repository layout.**
+
+### Commits made

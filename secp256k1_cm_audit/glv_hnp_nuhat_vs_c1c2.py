@@ -38,7 +38,15 @@ import sympy
 
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_nuhat_helpers.py")
+# NOTE (autolab 2026-08-02): this used to point at
+# glv_hnp_phase2_lambda_threshold.py.  Two parallel autolab branches wrote
+# DIFFERENT modules under that one filename, and the merge kept the other
+# branch's version -- which has glv_roots/lam_star/lambda_block_mu instead of
+# glv_eigenvalues/mu_of/rival_sublattice_nu.  This script therefore died at
+# import ("module has no attribute glv_eigenvalues") and could never have run.
+# glv_hnp_nuhat_helpers.py is the version this script was written against,
+# recovered verbatim from commit 7873016.
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 
