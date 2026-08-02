@@ -6103,3 +6103,168 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.**
+Proposed verbatim as the next step by the 2026-07-29 entry (log line ~6089), never
+started. Threads 1, 3, 4, 6 are CLOSED; Thread 2 is permanently BLOCKED (`c591765`,
+2026-07-26); Thread 5/20 made measurable progress on 2026-07-29, so protocol rule (b)
+selects its continuation.
+
+The 2026-07-29 falsifier was stated in advance and is answered here: *"if sv/pv rises
+above 1 and the K1 wall moves outward, the reformulation is a real improvement; if the
+wall stays at K1≈4–6, the wall is information-theoretic and Phase 2 is at its ceiling."*
+**The wall did not move by a single cell. Thread 23 CLOSED, negative.**
+
+The session also (a) identified exactly what the new shortest vector is, and (b) falsified
+the natural SVP-gap reading of the whole Phase-2 lattice, *with the sign reversed*.
+
+### Work done
+
+Environment (fresh container, nothing persists): `pip install fpylll cysignals sympy`
+→ fpylll 0.6.4, sympy 1.14.0. **PARI/GP did not install again** (`apt-get install
+pari-gp` cannot reach the archive) — same as 2026-07-29; any PARI-dependent thread is
+effectively blocked in this container. Not needed here, Thread 23 is pure Python.
+`cargo test --test curve_audit` → 5/5 pass (4.33s). ✓
+
+Two new scripts:
+
+- **`secp256k1_cm_audit/glv_hnp_phase2_projected.py`** (exps P0–P5) — the projected
+  lattice and the head-to-head against the baseline.
+- **`secp256k1_cm_audit/glv_hnp_phase2_rival_id.py`** (exps R1–R3) — identification of
+  the new shortest vector, and the sign test.
+
+Outputs committed alongside as `*_output.txt`.
+
+**Construction.** Only row m of the (2m+2)-dim basis has a nonzero d-column entry
+(S_D = 1), so the coordinate projection π deleting column m has
+`ker(π|_L) = L ∩ span(e_m) = nZ·e_m` (generically n ∤ B_i). Hence π(L) has rank 2m+1 and
+every fibre is a coset of nZ·e_m: **d is still determined uniquely mod n, no information
+is lost.** d is read back algebraically instead of from a column:
+`d = (k1_i − A_i + λ·k2_i)·B_i⁻¹ mod n`. Verified as exp P0 — π(v_planted) ∈ π(L) for all
+three anchors, with ‖v‖ dropping only 2.2–3.2% (the d² term).
+
+### Findings
+
+**1. The reformulation is a perfect null on recovery.** Baseline vs projected, identical
+cell-for-cell, everywhere tested — 3 anchors × 8 values of K1 × 5 seeds, an m-sweep, and
+12 fresh 17-bit curves:
+
+| 12-bit/2677, λ*=0.070, m=10 | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| base | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| **proj** | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| proj+BKZ20 | 5/5 | 5/5 | 5/5 | **3/5** | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Same for 12-bit/2557 (wall at K1≈12), same for the m-sweep, same 2/12 curves at 17 bits.
+sv/pv *did* rise as predicted (2677: 0.393 → 0.757; 17-bit mean 0.36 → 0.63) but never
+reached 1, and **the planted vector was b₁ in 0 of 70 runs.** Only BKZ-20 moves anything,
+and only in the one boundary cell K1=6.
+
+**2. The new λ₁ is identified exactly.** In the projected lattice LLL's b₁ has Kannan
+coordinate exactly 0 and a k1/k2 block-energy split *identical across signature seeds*
+(2557: 0.132/0.868; 2677: 0.822/0.178) — i.e. it does not depend on the signatures at all.
+It is exactly the Lagrange-reduced shortest vector **w** of the 2-D λ-block
+`L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` embedded in coordinate pair (i, m+i):
+
+| curve | ‖b₁‖ | ‖w‖ | match | pair |
+|---|---|---|---|---|
+| 8-bit/199 (5 seeds) | 277.9011 | 277.9011 | 5/5 | 0 |
+| 12-bit/2557 (5 seeds) | 2737.6114 | 2737.6114 | 5/5 | 0 |
+| 12-bit/2677 (5 seeds) | 5095.7728 | 5095.7728 | 4/5 | 0 |
+
+14/15 exact, to the last digit. The exception (2677, seed 31337) is *shorter* than w
+(4731.13 < 5095.77), so a third, signature-dependent rival is occasionally shorter still.
+**This is the same L2 whose normalised minimum ν̂ = λ₁(L2)/√(det L2) was found on
+2026-07-29 to separate the C1/C2 classes at AUC 0.935** — ν̂ is therefore not a heuristic
+proxy, it measures the actual first minimum of the lattice being reduced.
+
+Consequence: the trivial vector n·S_D·e_m found in exp T5 was a red herring. Removing it
+merely exposes w, and there are **m independent copies of w** (one per coordinate pair),
+all of fixed length independent of the signatures. No rescaling removes them: they are in
+the lattice as long as the k2 unknowns are.
+
+**3. The SVP-gap reading is FALSIFIED, with the sign reversed.** Define the gap
+`g = ‖v_planted‖ / ‖w‖`; g < 1 means the planted vector really is λ₁. Since
+‖v_planted‖ ≈ √(m/3)·n and ‖w‖ = ν̂·√(n·S_K1·S_K2), we get `g ≈ √(m·eff/3)/ν̂`, so the
+SVP reading predicts **high ν̂ = easier**. The 2026-07-29 result says **low ν̂ = easier**.
+Only one can survive. 14 fresh 17-bit curves, m=12, eff held at 0.15:
+
+```
+spearman(nu_hat, success) = -0.758     <- 2026-07-29 sign, replicated on fresh curves
+spearman(g,      success) = +0.728     <- SVP-gap reading predicts NEGATIVE
+```
+
+Every curve with g ≈ 1.0 (planted essentially as short as λ₁) **fails**; all three
+successes have g ≥ 2.2, i.e. the planted vector is more than twice λ₁. Being short is
+*anti*-predictive. Concretely, on 12-bit/2677 the cells with g < 1 (K1 = 2, 3, 4:
+g = 0.621, 0.678, 0.691) all recover 5/5, but so does 2557 at K1 = 6 with g = 2.109;
+and 2677 at K1 = 6 fails at g = 1.032.
+
+`g` is the **9th falsified curve-level invariant** (after μ = λ*/n, the 8th, on
+2026-07-29). Recording it so no future run re-tries the "make the planted vector shortest"
+framing: it has now been tried directly and it does not work.
+
+**4. More signatures strictly worsen the SVP gap** — the mechanism behind the T4b
+observation that data never rescues the K1 wall. With eff fixed, g ∝ √m to within ±3%,
+while ‖w‖ is *constant* in m (12-bit/2677, K1=8, ν̂ = 0.7711):
+
+| m | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| g | 1.129 | 1.425 | 1.649 | 1.944 | 2.217 |
+| g/√m | 0.3992 | 0.4112 | 0.4123 | 0.3967 | 0.3919 |
+| recover | 2/5 | 0/5 | 0/5 | 1/5 | 0/5 |
+
+Each extra signature lengthens the planted vector by √m and adds *another* copy of w
+without lengthening it. (Recovery counts differ slightly from T4b's 0,0,1,0,1 because
+`rate()` here draws a fresh d per seed rather than fixing d; the qualitative verdict —
+no rescue from m — is unchanged.)
+
+### Log repair (2026-07-29 entry)
+
+The ν̂ work is **missing from the body of the 2026-07-29 entry**: commit `e845207` appended
+a 258-line section, and the subsequent merges (`7b5b702`, `e31dd19`, PR #33) resolved the
+`RESEARCH_AUTOLAB_LOG.md` conflict by keeping `d525931`'s version of the section and
+retaining only e845207's *hash* in the "Commits made" list. The scripts survived; the prose
+did not. Recovered from `git show e845207` and recorded here so future runs can find it:
+
+- ν̂ = λ₁(L2)/√(det L2), one Lagrange-Gauss reduction, O(log n). Isolates the λ-dependence:
+  det L2 is independent of λ.
+- 20-bit, μ balanced by design: p̂ = 0.910 (low ν̂) vs 0.453 (high ν̂); permutation
+  p < 1e-4 at m = 8, 9, 10, 11; replicated at 24 bits with a larger effect.
+- Causal arm, one *fixed* curve and 120 synthetic λ: spearman(ν̂, p̂) = −0.583 (p = 0.0002),
+  while spearman(μ, p̂) = +0.003 (p = 0.97).
+- Against the June C1/C2 classes: ν̂ AUC 0.935, 89.0% vs 74.0% baseline; max_a and μ both at
+  baseline. Every C2 curve has ν̂ ≤ 0.645. Resolves the 2026-06-30 DEAD END.
+- secp256k1 (heuristic 20/24-bit → 256-bit extrapolation, and conditional on a non-standard
+  k = k1 + λ·k2 nonce generator — **not an attack**): ν̂ = 0.664 at eff = 0.0993, just above
+  the C2 ceiling; not in the low-ν̂ easy tail at any eff tested.
+- Scripts: `glv_hnp_phase2_mu_response.py`, `glv_hnp_phase2_nuhat_control.py`,
+  `glv_hnp_nuhat_vs_c1c2.py`.
+
+Today's R3b independently replicates the ν̂ sign (ρ = −0.758) on fresh 17-bit curves.
+
+### Next step proposal
+
+**Thread 24 — drop the Kannan embedding and solve the BDD directly.** This is the other
+half of the 2026-07-29 Thread 23 proposal, which this session did not execute. The
+evidence now says the embedding is provably the wrong tool: it converts BDD to SVP, and
+the resulting SVP instance carries m spurious vectors of *fixed* length ‖w‖ that the
+target must beat — a race the target loses by construction (finding 3), and loses harder
+with every extra signature (finding 4). Concretely: reduce the homogeneous sublattice
+(Kannan row removed, dim 2m), then Babai nearest-plane / randomized slicer against the
+target `(A_i·S_K1, 0, …, 0)`.
+
+Falsifier: run it on the 11 curves in R3b that fail at eff = 0.15. If CVP recovers on the
+high-ν̂ curves that the embedding fails, the embedding was the bottleneck and Phase 2 has
+headroom. If it fails on the same 11, the K1 wall is information-theoretic and Phase 2 is
+at its ceiling — at which point Thread 5 should be closed and the ν̂/L2 structure written
+up as the negative result it is. Cheap: reuses `build_lattice_proj`, ~10 min of compute.
+
+Secondary (cheap): `pip install fpylll cysignals sympy` and the PARI unavailability are
+now a recurring per-session tax. Worth a one-line note at the top of this log.
+
+### Commits made
