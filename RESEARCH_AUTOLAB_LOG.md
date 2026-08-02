@@ -6315,3 +6315,5 @@ formulation we have just shown to be strictly dominated, so it has no attack
 value; document only.
 
 ### Commits made
+
+98bf9f5 autolab 2026-08-02: Thread 23 — BDD reformulation moves the K1 wall 4x; counting-bound ceiling established
