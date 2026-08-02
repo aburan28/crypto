@@ -6297,4 +6297,7 @@ PARI was unavailable this run because of a stale package index, which would BLOC
 Threads 2/3 if they were picked next.
 
 ### Commits made
-(filled in below after commit)
+8c2bb19 autolab 2026-08-02: Thread 23 — lattice reformulation falsifier NEGATIVE; curve-structural residue isolated
+
+NOTE: pushed to branch `claude/zen-pascal-62fl76` (this session's designated
+development branch), not to `main`.
