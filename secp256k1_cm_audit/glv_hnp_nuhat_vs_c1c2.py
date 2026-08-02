@@ -38,7 +38,7 @@ import sympy
 
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_nuhat_base.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 
@@ -50,6 +50,15 @@ identify_twist = _t20a.identify_twist
 find_generator = _t20a.find_generator
 rival_sublattice_nu = _t20a.rival_sublattice_nu
 run_experiment = _t20a.run_experiment
+
+# Thread 23 (2026-08-02): the at-scale partial quotient, i.e. nu_hat's closed
+# form.  a_next = a_{j*+1} is a pure continued-fraction quantity of lam/n,
+# computed in O(log n) with no lattice reduction at all.
+_spec23 = importlib.util.spec_from_file_location(
+    "_t23", __file__.rsplit("/", 1)[0] + "/glv_hnp_nuhat_cf_closed_form.py")
+_t23 = importlib.util.module_from_spec(_spec23)
+_spec23.loader.exec_module(_t23)
+nuhat_exact = _t23.nuhat_exact
 
 # Exp S protocol (2026-06-29)
 K1_FIXED = 72
@@ -142,6 +151,10 @@ def main():
         _, _, c['nu_hat'] = rival_sublattice_nu(n, c['lam'], K1_FIXED, k2)
         c['mu'] = mu_of(c['lam'], n)
         c['max_a'] = max_partial_quotient(c['lam'], n)
+        # Thread 23: same lattice, but read off the CF ladder instead of reduced
+        rec = nuhat_exact(n, c['lam'], K1_FIXED * k2 / n)
+        c['a_next'] = rec['a_next'] or 1
+        c['inv_sqrt_a'] = 1.0 / math.sqrt(c['a_next'])
     print(f"  {len(curves)*SEEDS_N} LLL trials in {time.time()-t1:.1f}s")
 
     c2 = [c for c in curves if c['C2']]
@@ -153,7 +166,7 @@ def main():
 
     print("\n--- Head to head: nu_hat vs the falsified invariants ---")
     print(f"{'invariant':>10} {'C1 range':>18} {'C2 range':>18} {'AUC':>7} {'best acc':>9}")
-    for key in ('nu_hat', 'mu', 'max_a'):
+    for key in ('nu_hat', 'inv_sqrt_a', 'mu', 'max_a'):
         s1 = [c[key] for c in c1]
         s2 = [c[key] for c in c2]
         # AUC oriented so that "higher score => C2" ; report max(auc, 1-auc)
