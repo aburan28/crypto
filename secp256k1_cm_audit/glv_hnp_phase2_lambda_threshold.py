@@ -182,6 +182,55 @@ def lam_star(lam, n):
     return min(lam % n, n - (lam % n)) / n
 
 # ---------------------------------------------------------------------------
+# API used by Threads 20b/20c/20d and 23.
+#
+# 2026-08-02: the 20b/20c/20d scripts committed in e845207 import these four
+# names plus a 9-argument run_experiment from this module, and none of them
+# existed here -- all three died with AttributeError on import, so the
+# 2026-07-29 results were not reproducible from the committed tree.  Restored
+# below; see RESEARCH_AUTOLAB_LOG.md 2026-08-02 "Repair" for the diagnosis.
+# ---------------------------------------------------------------------------
+
+def glv_eigenvalues(n):
+    """Both roots of x^2+x+1 = 0 mod n, ascending.  Alias of glv_roots."""
+    return glv_roots(n)
+
+def mu_of(lam, n):
+    """mu = min(lam, n-lam)/n in (0, 1/2].  Alias of lam_star."""
+    return lam_star(lam, n)
+
+def identify_twist(p, n, seed=12345):
+    """The sextic-twist coefficient b with #E(F_p): y^2=x^3+b equal to n.
+    n must be prime, so a single point of order n identifies the twist."""
+    rng = random.Random((seed * 1000003) ^ (p << 1) ^ n)
+    for _ in range(400):
+        b = rng.randint(1, p - 1)
+        x = rng.randint(0, p - 1)
+        y = tonelli_shanks((pow(x, 3, p) + b) % p, p)
+        if y is None or y == 0:
+            continue
+        if ec_mul((x, y), n, p) is None:
+            return b
+    return None
+
+def rival_sublattice_nu(n, lam, k1_bound, k2_bound):
+    """(lambda_1(L2), sqrt(det L2), nu_hat) for the non-planted 2D sublattice
+
+        L2 = < (n*S_K1, 0), (-lam*S_K1, S_K2) >,   det L2 = n*S_K1*S_K2.
+
+    nu_hat = lambda_1(L2)/sqrt(det L2) is scale-free and, since det L2 does not
+    depend on lam, isolates the lam-dependence of the block geometry.
+    Ratios go through math.log so 256-bit inputs do not overflow float."""
+    S_K1, _, S_K2, _ = scales(n, k1_bound, k2_bound)
+    w = gauss_reduce_2d((n * S_K1, 0), (-(lam % n) * S_K1, S_K2))
+    nsq = w[0] * w[0] + w[1] * w[1]
+    det = n * S_K1 * S_K2
+    lam1 = math.exp(0.5 * math.log(nsq)) if nsq else 0.0
+    root_det = math.exp(0.5 * math.log(det))
+    nu_hat = math.exp(0.5 * (math.log(nsq) - math.log(det))) if nsq else 0.0
+    return lam1, root_det, nu_hat
+
+# ---------------------------------------------------------------------------
 # The lambda-block 2D sublattice and its exact shortest vector
 # ---------------------------------------------------------------------------
 
@@ -299,12 +348,29 @@ def recover_d(M_reduced, m, n, S_KANNAN, d_secret):
             return d_cand
     return None
 
-def run_experiment(curve, m, d_secret, k1_bound, seed=42, lam_override=None,
-                   use_bkz=False, bkz_beta=20):
+def run_experiment(*a, **kw):
+    """Two calling conventions, both in use across Threads 20a-20d and 23:
+
+      run_experiment(curve, m, d, k1_bound, seed=..., lam_override=...)
+          curve = (p, b, n, lam, G); returns (ok, planted_norm, shortest_norm).
+      run_experiment(p, n, lam, G, m, d, k1_bound, k2_bound, seed)
+          the flat form used by 20b/20c/20d; returns bool.  lam is used for
+          BOTH signature generation and the lattice, which is what the Arm-5
+          synthetic-lambda design requires.
+    """
+    if len(a) >= 9 and isinstance(a[0], int):
+        p, n, lam, G, m, d, k1_bound, k2_bound, seed = a[:9]
+        res = _run_experiment((p, None, n, lam, G), m, d, k1_bound, seed,
+                              k2_override=k2_bound, **kw)
+        return bool(res is not None and res[0])
+    return _run_experiment(*a, **kw)
+
+def _run_experiment(curve, m, d_secret, k1_bound, seed=42, lam_override=None,
+                    use_bkz=False, bkz_beta=20, k2_override=None):
     """Returns (recovered: bool, planted_norm, shortest_reduced_norm)."""
     p, b, n, lam, G = curve
     lam_lat = lam if lam_override is None else lam_override
-    k2_bound = math.isqrt(n) + 1
+    k2_bound = math.isqrt(n) + 1 if k2_override is None else k2_override
     # signatures always use the canonical lam (the true GLV eigenvalue);
     # only the lattice representation varies.
     sigs = gen_signatures(G, d_secret, m, n, lam, p, k1_bound, k2_bound, seed)
@@ -409,266 +475,277 @@ def search_curves(lo, hi, per_bin=2, nbins=10, max_primes=100000):
     return out
 
 
-# ===========================================================================
-# EXPERIMENT T1 — representation invariance
-# ===========================================================================
+def _driver():
+    """The T1-T5 experiment suite.  Runs only on direct execution.
 
-print("=" * 78)
-print("Thread 20 — is lam/n the predictor?  (GLV-HNP Phase 2)")
-print("=" * 78)
+    2026-08-02: this block used to sit at module level, so Threads 20b/20c/20d
+    (which import this file as a library) re-ran the entire suite, curve search
+    included, on every import.  Wrapped without other changes.
+    """
+    # ===========================================================================
+    # EXPERIMENT T1 — representation invariance
+    # ===========================================================================
 
-SEEDS = [42, 1234, 9999, 555, 31337]
+    print("=" * 78)
+    print("Thread 20 — is lam/n the predictor?  (GLV-HNP Phase 2)")
+    print("=" * 78)
 
-# Historical Phase-2 curves (from RESEARCH_AUTOLAB_LOG.md 2026-06-15 / 2026-07-26)
-HIST = [
-    # label,             p,    b, n,    lam,  K1, m
-    ("8-bit/199",        211,  2, 199,  106,  2,  6),
-    ("12-bit/2557",      2557, 2, 2659, 1755, 8,  8),
-    ("12-bit/2677 FAIL", 2677, 2, 2647, 185,  8,  10),
-]
+    SEEDS = [42, 1234, 9999, 555, 31337]
 
-hist_curves = []
-for label, p, b, n, lam, k1, m in HIST:
-    G = find_generator(p, b, n)
-    assert G is not None, f"no generator for {label}"
-    assert (lam * lam + lam + 1) % n == 0, f"bad lam for {label}"
-    hist_curves.append((label, (p, b, n, lam, G), k1, m))
+    # Historical Phase-2 curves (from RESEARCH_AUTOLAB_LOG.md 2026-06-15 / 2026-07-26)
+    HIST = [
+        # label,             p,    b, n,    lam,  K1, m
+        ("8-bit/199",        211,  2, 199,  106,  2,  6),
+        ("12-bit/2557",      2557, 2, 2659, 1755, 8,  8),
+        ("12-bit/2677 FAIL", 2677, 2, 2647, 185,  8,  10),
+    ]
 
-print("\n" + "-" * 78)
-print("EXP T1: representation invariance of the lattice under lam -> lam - n")
-print("-" * 78)
-print("The Phase-2 lattice contains the rows n*S_K1*e_i, so replacing lam by")
-print("lam - n is a unimodular row operation: SAME lattice, SAME planted vector.")
-print("If lam/n were causal, 0.07 vs -0.93 would behave differently.\n")
+    hist_curves = []
+    for label, p, b, n, lam, k1, m in HIST:
+        G = find_generator(p, b, n)
+        assert G is not None, f"no generator for {label}"
+        assert (lam * lam + lam + 1) % n == 0, f"bad lam for {label}"
+        hist_curves.append((label, (p, b, n, lam, G), k1, m))
 
-print(f"{'curve':<18} {'lam/n':>8} {'(lam-n)/n':>10} {'LLL(lam)':>9} "
-      f"{'LLL(lam-n)':>11} {'HNF equal':>10}")
-for label, curve, k1, m in hist_curves:
-    p, b, n, lam, G = curve
-    w1, t1, _ = success_rate(curve, m, k1, SEEDS)
-    w2, t2, _ = success_rate(curve, m, k1, SEEDS, lam_override=lam - n)
-    # lattice identity check on one instance
-    d0 = random.Random(42 + 7777).randint(1, n - 1)
-    k2b = math.isqrt(n) + 1
-    sg = gen_signatures(G, d0, m, n, lam, p, k1, k2b, 42)
-    same = (hnf_fingerprint(build_glv_lattice(sg, n, lam, k1, k2b))
-            == hnf_fingerprint(build_glv_lattice(sg, n, lam - n, k1, k2b)))
-    print(f"{label:<18} {lam/n:>8.4f} {(lam-n)/n:>10.4f} "
-          f"{str(w1)+'/'+str(t1):>9} {str(w2)+'/'+str(t2):>11} {str(same):>10}")
+    print("\n" + "-" * 78)
+    print("EXP T1: representation invariance of the lattice under lam -> lam - n")
+    print("-" * 78)
+    print("The Phase-2 lattice contains the rows n*S_K1*e_i, so replacing lam by")
+    print("lam - n is a unimodular row operation: SAME lattice, SAME planted vector.")
+    print("If lam/n were causal, 0.07 vs -0.93 would behave differently.\n")
 
-print("\nAlso: the two roots of x^2+x+1 mod n are lam and n-1-lam, so")
-print("lam* = min(lam, n-lam)/n is the SAME for both roots — any genuine")
-print("predictor must be a function of lam*, not of lam/n.")
-print(f"{'curve':<18} {'root1/n':>9} {'root2/n':>9} {'lam*':>8}")
-for label, curve, k1, m in hist_curves:
-    p, b, n, lam, G = curve
-    r1, r2 = glv_roots(n)
-    print(f"{label:<18} {r1/n:>9.4f} {r2/n:>9.4f} {lam_star(lam, n):>8.4f}")
+    print(f"{'curve':<18} {'lam/n':>8} {'(lam-n)/n':>10} {'LLL(lam)':>9} "
+          f"{'LLL(lam-n)':>11} {'HNF equal':>10}")
+    for label, curve, k1, m in hist_curves:
+        p, b, n, lam, G = curve
+        w1, t1, _ = success_rate(curve, m, k1, SEEDS)
+        w2, t2, _ = success_rate(curve, m, k1, SEEDS, lam_override=lam - n)
+        # lattice identity check on one instance
+        d0 = random.Random(42 + 7777).randint(1, n - 1)
+        k2b = math.isqrt(n) + 1
+        sg = gen_signatures(G, d0, m, n, lam, p, k1, k2b, 42)
+        same = (hnf_fingerprint(build_glv_lattice(sg, n, lam, k1, k2b))
+                == hnf_fingerprint(build_glv_lattice(sg, n, lam - n, k1, k2b)))
+        print(f"{label:<18} {lam/n:>8.4f} {(lam-n)/n:>10.4f} "
+              f"{str(w1)+'/'+str(t1):>9} {str(w2)+'/'+str(t2):>11} {str(same):>10}")
 
-
-# ===========================================================================
-# EXPERIMENT T2 — mu and rho for the historical curves
-# ===========================================================================
-
-print("\n" + "-" * 78)
-print("EXP T2: lambda-block shortest vector mu, and rho = mu / ||v_planted||")
-print("-" * 78)
-
-print("sv/pv = ||shortest vector after LLL|| / ||planted vector||;")
-print("       sv/pv < 1 means a NON-planted vector is shorter (structural failure).\n")
-print(f"{'curve':<18} {'lam*':>7} {'K1':>4} {'K2':>5} {'eff':>6} "
-      f"{'mu':>12} {'||v||':>12} {'rho':>7} {'sv/pv':>7} {'LLL':>6}")
-t2_rows = []
-for label, curve, k1, m in hist_curves:
-    p, b, n, lam, G = curve
-    k2 = math.isqrt(n) + 1
-    S_K1, S_D, S_K2, S_KAN = scales(n, k1, k2)
-    mu, wvec = lambda_block_mu(n, lam, S_K1, S_K2)
-    vn = planted_norm_expected(m, n, k1, k2, S_K1, S_D, S_K2, S_KAN)
-    rho = mu / vn
-    w, t, svpv = success_rate(curve, m, k1, SEEDS)
-    eff = k1 * k2 / n
-    t2_rows.append((label, lam_star(lam, n), rho, w == t))
-    print(f"{label:<18} {lam_star(lam,n):>7.4f} {k1:>4} {k2:>5} {eff:>6.3f} "
-          f"{mu:>12.1f} {vn:>12.1f} {rho:>7.3f} {svpv:>7.3f} {str(w)+'/'+str(t):>6}")
+    print("\nAlso: the two roots of x^2+x+1 mod n are lam and n-1-lam, so")
+    print("lam* = min(lam, n-lam)/n is the SAME for both roots — any genuine")
+    print("predictor must be a function of lam*, not of lam/n.")
+    print(f"{'curve':<18} {'root1/n':>9} {'root2/n':>9} {'lam*':>8}")
+    for label, curve, k1, m in hist_curves:
+        p, b, n, lam, G = curve
+        r1, r2 = glv_roots(n)
+        print(f"{label:<18} {r1/n:>9.4f} {r2/n:>9.4f} {lam_star(lam, n):>8.4f}")
 
 
-# ===========================================================================
-# EXPERIMENT T3 — 17-bit sweep with lam* spread
-# ===========================================================================
+    # ===========================================================================
+    # EXPERIMENT T2 — mu and rho for the historical curves
+    # ===========================================================================
 
-print("\n" + "-" * 78)
-print("EXP T3: 17-bit sweep, lam* spread over (0, 0.5)")
-print("-" * 78)
+    print("\n" + "-" * 78)
+    print("EXP T2: lambda-block shortest vector mu, and rho = mu / ||v_planted||")
+    print("-" * 78)
 
-LO, HI = 2**16, 2**17
-M_SIGS = 12
-
-print(f"Searching j=0 GLV curves with p in [{LO}, {HI}) ...")
-curves = search_curves(LO, HI, per_bin=2, nbins=10)
-print(f"Found {len(curves)} curves.\n")
-
-def sweep_at_eff(curves, eff_target, m_sigs, seeds):
-    print(f"\n=== eff target = {eff_target}  (m = {m_sigs}, {len(seeds)} seeds) ===")
-    print(f"{'p':>7} {'n':>7} {'lam':>7} {'lam*':>6} {'K1':>4} {'eff':>6} "
-          f"{'m_thr':>6} {'rho':>7} {'sv/pv':>7} {'LLL':>6} {'BKZ20':>6}")
-    rows = []
-    for (p, b, n, lam, G) in curves:
+    print("sv/pv = ||shortest vector after LLL|| / ||planted vector||;")
+    print("       sv/pv < 1 means a NON-planted vector is shorter (structural failure).\n")
+    print(f"{'curve':<18} {'lam*':>7} {'K1':>4} {'K2':>5} {'eff':>6} "
+          f"{'mu':>12} {'||v||':>12} {'rho':>7} {'sv/pv':>7} {'LLL':>6}")
+    t2_rows = []
+    for label, curve, k1, m in hist_curves:
+        p, b, n, lam, G = curve
         k2 = math.isqrt(n) + 1
-        k1 = max(2, int(eff_target * n / k2))
-        eff = k1 * k2 / n
-        m_thr = math.log(n) / math.log(1.0 / eff) if eff < 1 else float('inf')
         S_K1, S_D, S_K2, S_KAN = scales(n, k1, k2)
-        mu, _ = lambda_block_mu(n, lam, S_K1, S_K2)
-        vn = planted_norm_expected(m_sigs, n, k1, k2, S_K1, S_D, S_K2, S_KAN)
+        mu, wvec = lambda_block_mu(n, lam, S_K1, S_K2)
+        vn = planted_norm_expected(m, n, k1, k2, S_K1, S_D, S_K2, S_KAN)
         rho = mu / vn
-        curve = (p, b, n, lam, G)
-        w, t, svpv = success_rate(curve, m_sigs, k1, seeds)
-        if w == t:
-            bkz_str = "-"
-        else:
-            wb, tb, _ = success_rate(curve, m_sigs, k1, seeds,
-                                     use_bkz=True, bkz_beta=20)
-            bkz_str = f"{wb}/{tb}"
-        ls = lam_star(lam, n)
-        rows.append({'p': p, 'n': n, 'lam': lam, 'lam_star': ls, 'rho': rho,
-                     'svpv': svpv, 'wins': w, 'total': t, 'ok': w == t,
-                     'any': w > 0})
-        print(f"{p:>7} {n:>7} {lam:>7} {ls:>6.3f} {k1:>4} {eff:>6.3f} "
-              f"{m_thr:>6.1f} {rho:>7.3f} {svpv:>7.3f} "
-              f"{str(w)+'/'+str(t):>6} {bkz_str:>6}")
-    return rows
-
-sweeps = {}
-for eff_t in (0.05, 0.15, 0.25):
-    sweeps[eff_t] = sweep_at_eff(curves, eff_t, M_SIGS, SEEDS)
+        w, t, svpv = success_rate(curve, m, k1, SEEDS)
+        eff = k1 * k2 / n
+        t2_rows.append((label, lam_star(lam, n), rho, w == t))
+        print(f"{label:<18} {lam_star(lam,n):>7.4f} {k1:>4} {k2:>5} {eff:>6.3f} "
+              f"{mu:>12.1f} {vn:>12.1f} {rho:>7.3f} {svpv:>7.3f} {str(w)+'/'+str(t):>6}")
 
 
-# ===========================================================================
-# Predictor comparison
-# ===========================================================================
+    # ===========================================================================
+    # EXPERIMENT T3 — 17-bit sweep with lam* spread
+    # ===========================================================================
 
-print("\n" + "-" * 78)
-print("Predictor comparison on the T3 sweeps")
-print("-" * 78)
+    print("\n" + "-" * 78)
+    print("EXP T3: 17-bit sweep, lam* spread over (0, 0.5)")
+    print("-" * 78)
 
-def best_threshold(rows, key):
-    """Best single-threshold classifier (predict success iff value >= thr)."""
-    vals = sorted({r[key] for r in rows})
-    best = (0, None)
-    for i in range(len(vals) + 1):
-        thr = vals[0] - 1 if i == 0 else vals[i - 1]
-        acc = sum(1 for r in rows if (r[key] >= thr) == r['ok'])
-        if acc > best[0]:
-            best = (acc, thr)
-    return best
+    LO, HI = 2**16, 2**17
+    M_SIGS = 12
 
-def rng_str(v):
-    return f"[{min(v):.4f}, {max(v):.4f}]" if v else "(none)"
+    print(f"Searching j=0 GLV curves with p in [{LO}, {HI}) ...")
+    curves = search_curves(LO, HI, per_bin=2, nbins=10)
+    print(f"Found {len(curves)} curves.\n")
 
-for eff_t, rows in sweeps.items():
-    if not rows:
-        continue
-    print(f"\n  --- eff = {eff_t} ---")
-    for lab in ('ok', 'any'):
-        nrows = len(rows)
-        nsucc = sum(1 for r in rows if r[lab])
-        if nsucc == 0 or nsucc == nrows:
-            print(f"  [{lab}] degenerate: {nsucc}/{nrows} positives — "
-                  f"no classifier is informative.")
+    def sweep_at_eff(curves, eff_target, m_sigs, seeds):
+        print(f"\n=== eff target = {eff_target}  (m = {m_sigs}, {len(seeds)} seeds) ===")
+        print(f"{'p':>7} {'n':>7} {'lam':>7} {'lam*':>6} {'K1':>4} {'eff':>6} "
+              f"{'m_thr':>6} {'rho':>7} {'sv/pv':>7} {'LLL':>6} {'BKZ20':>6}")
+        rows = []
+        for (p, b, n, lam, G) in curves:
+            k2 = math.isqrt(n) + 1
+            k1 = max(2, int(eff_target * n / k2))
+            eff = k1 * k2 / n
+            m_thr = math.log(n) / math.log(1.0 / eff) if eff < 1 else float('inf')
+            S_K1, S_D, S_K2, S_KAN = scales(n, k1, k2)
+            mu, _ = lambda_block_mu(n, lam, S_K1, S_K2)
+            vn = planted_norm_expected(m_sigs, n, k1, k2, S_K1, S_D, S_K2, S_KAN)
+            rho = mu / vn
+            curve = (p, b, n, lam, G)
+            w, t, svpv = success_rate(curve, m_sigs, k1, seeds)
+            if w == t:
+                bkz_str = "-"
+            else:
+                wb, tb, _ = success_rate(curve, m_sigs, k1, seeds,
+                                         use_bkz=True, bkz_beta=20)
+                bkz_str = f"{wb}/{tb}"
+            ls = lam_star(lam, n)
+            rows.append({'p': p, 'n': n, 'lam': lam, 'lam_star': ls, 'rho': rho,
+                         'svpv': svpv, 'wins': w, 'total': t, 'ok': w == t,
+                         'any': w > 0})
+            print(f"{p:>7} {n:>7} {lam:>7} {ls:>6.3f} {k1:>4} {eff:>6.3f} "
+                  f"{m_thr:>6.1f} {rho:>7.3f} {svpv:>7.3f} "
+                  f"{str(w)+'/'+str(t):>6} {bkz_str:>6}")
+        return rows
+
+    sweeps = {}
+    for eff_t in (0.05, 0.15, 0.25):
+        sweeps[eff_t] = sweep_at_eff(curves, eff_t, M_SIGS, SEEDS)
+
+
+    # ===========================================================================
+    # Predictor comparison
+    # ===========================================================================
+
+    print("\n" + "-" * 78)
+    print("Predictor comparison on the T3 sweeps")
+    print("-" * 78)
+
+    def best_threshold(rows, key):
+        """Best single-threshold classifier (predict success iff value >= thr)."""
+        vals = sorted({r[key] for r in rows})
+        best = (0, None)
+        for i in range(len(vals) + 1):
+            thr = vals[0] - 1 if i == 0 else vals[i - 1]
+            acc = sum(1 for r in rows if (r[key] >= thr) == r['ok'])
+            if acc > best[0]:
+                best = (acc, thr)
+        return best
+
+    def rng_str(v):
+        return f"[{min(v):.4f}, {max(v):.4f}]" if v else "(none)"
+
+    for eff_t, rows in sweeps.items():
+        if not rows:
             continue
-        baseline = max(nsucc, nrows - nsucc)
-        marked = [dict(r, ok=r[lab]) for r in rows]
-        acc_ls, thr_ls = best_threshold(marked, 'lam_star')
-        acc_rho, thr_rho = best_threshold(marked, 'rho')
-        acc_sv, thr_sv = best_threshold(marked, 'svpv')
-        print(f"  [{lab}] curves {nrows}, positives {nsucc}, "
-              f"majority baseline {baseline}/{nrows} = {baseline/nrows:.1%}")
-        print(f"    lam* >= {thr_ls:.4f} -> {acc_ls}/{nrows} = {acc_ls/nrows:.1%}")
-        print(f"    rho  >= {thr_rho:.4f} -> {acc_rho}/{nrows} = {acc_rho/nrows:.1%}")
-        print(f"    sv/pv>= {thr_sv:.4f} -> {acc_sv}/{nrows} = {acc_sv/nrows:.1%}")
-        for key in ('lam_star', 'rho', 'svpv'):
-            s = [r[key] for r in rows if r[lab]]
-            f = [r[key] for r in rows if not r[lab]]
-            ov = bool(s and f and min(s) <= max(f) and min(f) <= max(s))
-            print(f"    {key:<9} success {rng_str(s):<20} "
-                  f"failure {rng_str(f):<20} overlap={ov}")
+        print(f"\n  --- eff = {eff_t} ---")
+        for lab in ('ok', 'any'):
+            nrows = len(rows)
+            nsucc = sum(1 for r in rows if r[lab])
+            if nsucc == 0 or nsucc == nrows:
+                print(f"  [{lab}] degenerate: {nsucc}/{nrows} positives — "
+                      f"no classifier is informative.")
+                continue
+            baseline = max(nsucc, nrows - nsucc)
+            marked = [dict(r, ok=r[lab]) for r in rows]
+            acc_ls, thr_ls = best_threshold(marked, 'lam_star')
+            acc_rho, thr_rho = best_threshold(marked, 'rho')
+            acc_sv, thr_sv = best_threshold(marked, 'svpv')
+            print(f"  [{lab}] curves {nrows}, positives {nsucc}, "
+                  f"majority baseline {baseline}/{nrows} = {baseline/nrows:.1%}")
+            print(f"    lam* >= {thr_ls:.4f} -> {acc_ls}/{nrows} = {acc_ls/nrows:.1%}")
+            print(f"    rho  >= {thr_rho:.4f} -> {acc_rho}/{nrows} = {acc_rho/nrows:.1%}")
+            print(f"    sv/pv>= {thr_sv:.4f} -> {acc_sv}/{nrows} = {acc_sv/nrows:.1%}")
+            for key in ('lam_star', 'rho', 'svpv'):
+                s = [r[key] for r in rows if r[lab]]
+                f = [r[key] for r in rows if not r[lab]]
+                ov = bool(s and f and min(s) <= max(f) and min(f) <= max(s))
+                print(f"    {key:<9} success {rng_str(s):<20} "
+                      f"failure {rng_str(f):<20} overlap={ov}")
 
 
-# ===========================================================================
-# EXPERIMENT T4 — is the "small-lambda failure" really a bias-strength (eff)
-#                 effect?  Sweep K1 on the historical success/failure pair.
-# ===========================================================================
+    # ===========================================================================
+    # EXPERIMENT T4 — is the "small-lambda failure" really a bias-strength (eff)
+    #                 effect?  Sweep K1 on the historical success/failure pair.
+    # ===========================================================================
 
-print("\n" + "-" * 78)
-print("EXP T4: K1 sweep on the historical pair (same n-size, same K2, diff lam*)")
-print("-" * 78)
-print("2026-07-26 concluded lam*=0.07 fails 'structurally'.  Both curves were")
-print("run at K1=8 only.  Here we sweep K1 to separate 'lam effect' from")
-print("'bias-strength (eff) effect'.\n")
+    print("\n" + "-" * 78)
+    print("EXP T4: K1 sweep on the historical pair (same n-size, same K2, diff lam*)")
+    print("-" * 78)
+    print("2026-07-26 concluded lam*=0.07 fails 'structurally'.  Both curves were")
+    print("run at K1=8 only.  Here we sweep K1 to separate 'lam effect' from")
+    print("'bias-strength (eff) effect'.\n")
 
-K1_GRID = [2, 3, 4, 6, 8, 12, 16, 24]
-print(f"{'curve':<18} {'lam*':>7} " + " ".join(f"K1={k:<5}" for k in K1_GRID))
-for label, curve, _k1, _m in hist_curves:
-    p, b, n, lam, G = curve
-    if n < 2000:
-        continue          # 8-bit curve has K2=15, grid not comparable
+    K1_GRID = [2, 3, 4, 6, 8, 12, 16, 24]
+    print(f"{'curve':<18} {'lam*':>7} " + " ".join(f"K1={k:<5}" for k in K1_GRID))
+    for label, curve, _k1, _m in hist_curves:
+        p, b, n, lam, G = curve
+        if n < 2000:
+            continue          # 8-bit curve has K2=15, grid not comparable
+        cells = []
+        for k1 in K1_GRID:
+            w, t, _ = success_rate(curve, 12, k1, SEEDS)
+            cells.append(f"{w}/{t}  ")
+        print(f"{label:<18} {lam_star(lam,n):>7.4f} " + " ".join(cells))
+
+    print("\n(eff = K1*K2/n with K2=52, n~2650: "
+          + ", ".join(f"K1={k}:{k*52/2647:.3f}" for k in K1_GRID) + ")")
+
+    print("\nT4b: does MORE data rescue the lam*=0.07 curve at K1=8?")
+    print("     (info-theoretic threshold at eff=0.157 is m ~ 4.3, so m=12 is")
+    print("      already 3x over; if m=32 still fails the wall is not sample size)")
+    fail_curve = [c for lbl, c, _, _ in hist_curves if c[2] == 2647][0]
     cells = []
-    for k1 in K1_GRID:
-        w, t, _ = success_rate(curve, 12, k1, SEEDS)
-        cells.append(f"{w}/{t}  ")
-    print(f"{label:<18} {lam_star(lam,n):>7.4f} " + " ".join(cells))
-
-print("\n(eff = K1*K2/n with K2=52, n~2650: "
-      + ", ".join(f"K1={k}:{k*52/2647:.3f}" for k in K1_GRID) + ")")
-
-print("\nT4b: does MORE data rescue the lam*=0.07 curve at K1=8?")
-print("     (info-theoretic threshold at eff=0.157 is m ~ 4.3, so m=12 is")
-print("      already 3x over; if m=32 still fails the wall is not sample size)")
-fail_curve = [c for lbl, c, _, _ in hist_curves if c[2] == 2647][0]
-cells = []
-for m_try in (8, 12, 16, 24, 32):
-    w, t, _ = success_rate(fail_curve, m_try, 8, SEEDS)
-    cells.append(f"m={m_try}: {w}/{t}")
-print("     " + "   ".join(cells))
+    for m_try in (8, 12, 16, 24, 32):
+        w, t, _ = success_rate(fail_curve, m_try, 8, SEEDS)
+        cells.append(f"m={m_try}: {w}/{t}")
+    print("     " + "   ".join(cells))
 
 
-# ===========================================================================
-# EXPERIMENT T5 — where does the (always shorter) non-planted vector live?
-# ===========================================================================
+    # ===========================================================================
+    # EXPERIMENT T5 — where does the (always shorter) non-planted vector live?
+    # ===========================================================================
 
-print("\n" + "-" * 78)
-print("EXP T5: anatomy of the shortest LLL vector (sv/pv ~ 0.35 everywhere)")
-print("-" * 78)
-print("Energy split of the shortest reduced row across the coordinate blocks:")
-print("  k1-block = cols 0..m-1, d = col m, k2-block = cols m+1..2m, "
-      "kan = col 2m+1\n")
-print(f"{'curve':<18} {'K1':>4} {'sv/pv':>7} {'k1-blk':>8} {'d':>8} "
-      f"{'k2-blk':>8} {'kan':>8} {'kan=S?':>7} {'sv[m]/n':>9}")
-for label, curve, k1, m in hist_curves:
-    p, b, n, lam, G = curve
-    k2b = math.isqrt(n) + 1
-    d0 = random.Random(42 + 7777).randint(1, n - 1)
-    sigs = gen_signatures(G, d0, m, n, lam, p, k1, k2b, 42)
-    M = build_glv_lattice(sigs, n, lam, k1, k2b)
-    dim = 2 * m + 2
-    A = IntegerMatrix.from_matrix(M)
-    LLL.reduction(A)
-    rows = [[A[i][j] for j in range(dim)] for i in range(dim)]
-    sv = min(rows, key=norm)
-    pv = planted_vector(sigs, d0, n, k1, k2b)
-    tot = sum(x * x for x in sv) or 1
-    e_k1 = sum(sv[i] ** 2 for i in range(m)) / tot
-    e_d = sv[m] ** 2 / tot
-    e_k2 = sum(sv[m + 1 + i] ** 2 for i in range(m)) / tot
-    e_kan = sv[dim - 1] ** 2 / tot
-    _, _, _, S_KAN = scales(n, k1, k2b)
-    print(f"{label:<18} {k1:>4} {norm(sv)/norm(pv):>7.3f} {e_k1:>8.3f} "
-          f"{e_d:>8.3f} {e_k2:>8.3f} {e_kan:>8.3f} "
-          f"{str(abs(sv[dim-1]) == S_KAN):>7} {abs(sv[m])/n:>9.4f}")
+    print("\n" + "-" * 78)
+    print("EXP T5: anatomy of the shortest LLL vector (sv/pv ~ 0.35 everywhere)")
+    print("-" * 78)
+    print("Energy split of the shortest reduced row across the coordinate blocks:")
+    print("  k1-block = cols 0..m-1, d = col m, k2-block = cols m+1..2m, "
+          "kan = col 2m+1\n")
+    print(f"{'curve':<18} {'K1':>4} {'sv/pv':>7} {'k1-blk':>8} {'d':>8} "
+          f"{'k2-blk':>8} {'kan':>8} {'kan=S?':>7} {'sv[m]/n':>9}")
+    for label, curve, k1, m in hist_curves:
+        p, b, n, lam, G = curve
+        k2b = math.isqrt(n) + 1
+        d0 = random.Random(42 + 7777).randint(1, n - 1)
+        sigs = gen_signatures(G, d0, m, n, lam, p, k1, k2b, 42)
+        M = build_glv_lattice(sigs, n, lam, k1, k2b)
+        dim = 2 * m + 2
+        A = IntegerMatrix.from_matrix(M)
+        LLL.reduction(A)
+        rows = [[A[i][j] for j in range(dim)] for i in range(dim)]
+        sv = min(rows, key=norm)
+        pv = planted_vector(sigs, d0, n, k1, k2b)
+        tot = sum(x * x for x in sv) or 1
+        e_k1 = sum(sv[i] ** 2 for i in range(m)) / tot
+        e_d = sv[m] ** 2 / tot
+        e_k2 = sum(sv[m + 1 + i] ** 2 for i in range(m)) / tot
+        e_kan = sv[dim - 1] ** 2 / tot
+        _, _, _, S_KAN = scales(n, k1, k2b)
+        print(f"{label:<18} {k1:>4} {norm(sv)/norm(pv):>7.3f} {e_k1:>8.3f} "
+              f"{e_d:>8.3f} {e_k2:>8.3f} {e_kan:>8.3f} "
+              f"{str(abs(sv[dim-1]) == S_KAN):>7} {abs(sv[m])/n:>9.4f}")
 
-print("\nIf kan-energy is ~0 the shortest vector has last coordinate 0, i.e. it")
-print("lies in the non-Kannan sublattice and can never encode d — it is a")
-print("'parasitic' vector that LLL prefers over the planted one.")
+    print("\nIf kan-energy is ~0 the shortest vector has last coordinate 0, i.e. it")
+    print("lies in the non-Kannan sublattice and can never encode d — it is a")
+    print("'parasitic' vector that LLL prefers over the planted one.")
 
-print("\nDone.")
+    print("\nDone.")
+
+
+if __name__ == '__main__':
+    _driver()
