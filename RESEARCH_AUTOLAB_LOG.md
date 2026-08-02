@@ -6384,3 +6384,12 @@ so that concurrent runs cannot collide. **This needs a human decision — an aut
 should not unilaterally restructure the repository layout.**
 
 ### Commits made
+
+`72099f5` autolab 2026-08-02: Thread 23 — Kannan embedding is the lossy step; nu_hat work recovered
+
+Files added: `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (23a),
+`glv_hnp_phase2_bdd_exact.py` (23b), `glv_hnp_phase2_cvp_wall.py` (23c),
+`glv_hnp_nuhat_helpers.py` (recovered from `7873016`), plus five `_output.txt` files.
+Files modified: `glv_hnp_nuhat_vs_c1c2.py`, `glv_hnp_phase2_nuhat_control.py`,
+`glv_hnp_phase2_mu_response.py` (import path repointed, one line + comment each).
+No Rust code touched.
