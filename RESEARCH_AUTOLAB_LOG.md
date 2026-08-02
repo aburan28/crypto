@@ -6259,3 +6259,4 @@ Secondary (carried over, still not done): re-express the 2026-07-26 log's λ/n c
 λ* throughout.
 
 ### Commits made
+12adcd9 autolab 2026-08-02: Thread 23 — d-elimination is recovery-equivalent; wall is not information-theoretic
