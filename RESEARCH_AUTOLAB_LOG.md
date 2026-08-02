@@ -6103,3 +6103,153 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+Thread 23 (reformulate the Phase-2 GLV lattice so the planted vector is λ₁) —
+the continuation pre-registered by the 2026-07-29 entry, with its falsifier
+stated in advance. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and
+priority 3 completed 2026-07-21, so priority 5 (GLV-HNP Phase 2) is the only
+thread satisfying protocol rule (b) — recent measurable progress with a
+concrete next sub-task.
+
+**Verdict: the falsifier resolves to its second branch. The trivial vector was
+never the obstruction, and Phase 2 is at its ceiling (eff ≲ 0.15).**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`
+  (fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0). Same note as 2026-07-29 —
+  `cysignals` is a separate runtime import, and `sympy` is *also* absent from
+  the base image; install all three.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_quotient.py` (671 lines,
+  experiments R0/R0b/R1/R2/R3/R4). Helper block copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:78-252` and `:356-409` so the comparison
+  to 2026-07-29 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_quotient_output.txt` (152 lines).
+- Two lattices compared throughout:
+  - **A** = legacy Phase-2 lattice (`glv_hnp_phase2_20bit.py:262`), dim 2m+2,
+    `d` carried as a coordinate; `S_D` promoted to a free parameter.
+  - **B** = *d*-eliminated lattice, dim 2m+1. Uses `B_0` invertible mod n to
+    write `k_i ≡ C_i·k_0 + D_i (mod n)` with `C_i = B_i/B_0`,
+    `D_i = A_i − C_i·A_0`, then solves each congruence for the dependent
+    unknown `k1_i = D_i + C_i·k1_0 + λ·C_i·k2_0 − λ·k2_i (mod n)`. Free
+    unknowns `k1_0, k2_0..k2_{m-1}`; no *d* column, hence no `n·S_D·e_m`.
+- `cargo test --test curve_audit` → 5/5 pass (53s build, 6.84s run). ✓
+- No Rust or PARI files touched.
+
+### Findings
+
+**R0 — lattice B is correct.** The planted vector lies in B (exact rational
+solve, integral coefficients) for all three historical curves, and B recovers
+`d` 5/5 at K1=2 where A does. dim B = 13/17/21 vs dim A = 14/18/22.
+
+**R0b — B is not merely *a* d-free lattice: it is exactly π(A).**
+`A ∩ (d-axis) = ⟨n·S_D·e_m⟩` has rank 1, so the coordinate projection π that
+deletes column *m* has `det π(A) = det A/(n·S_D) = n^{m−1}·S_K1^m·S_K2^m·S_KAN
+= det B`. Verified computationally: `HNF(π(A)) == HNF(B)` after the column
+permutation `[k1_1..k1_{m−1}, k1_0, …] → [k1_0..k1_{m−1}, …]`, True on all
+three curves. Generator-level: `π(B_0^{-1}·row_m) mod n` is B's `k1_0` row,
+`π(row_{2m+1}) − A_0·(that)` is B's constant row, `π(row_{m+1+t}) + λ·(that)`
+is B's `k2_0` row.
+
+**This is why A and B agree bit-for-bit: LLL on A already factors through π.**
+
+**R2/R3 — A ≡ B in 50/50 measured cells.** Recovery counts over 5 seeds:
+
+| curve (λ*, m) | K1= | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 199 (0.467, 6) | A, B | 5 | 5 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 2557 (0.340, 8) | A, B | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | 0 | 0 |
+| 2677 (0.070, 10) | A, B | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+(every A cell equals its B cell; 30 cells here, plus 20 more in R3). The K1
+wall does **not** move. Per the pre-registered falsifier this is the
+"information-theoretic / geometric ceiling" branch.
+
+sv/pv at the historical K1 — the planted vector is still not λ₁ in B either:
+199 → 0.843, 2557 → 0.532, 2677 → 0.813. Removing the d column raises sv/pv
+(0.603→0.843, 0.517→0.532, 0.422→0.813) but never past 1. **There is a second,
+independent short vector that the d column was masking.**
+
+**R1 — the 2026-07-29 claim "no choice of S_D removes it — both vectors scale
+linearly in S_D" is wrong, and fixing it does not help.** Only the trivial
+vector scales linearly: `‖pv‖² = d²S_D² + n²(2m/3+1)` vs `‖triv‖² = n²S_D²`,
+so `‖pv‖/‖triv‖ → d/n < 1`. Measured crossover is at S_D ≈ 2–4, close to the
+predicted `S_D* = sqrt((2m/3+1)/(1−(d/n)²)) ≈ 2.6/2.9/3.2`:
+
+| curve | S_D= | 1 | 2 | 4 | 8 | 16 | 64 | 256 |
+|---|---|---|---|---|---|---|---|---|
+| 199 | pv/triv | 1.657 | 0.829 | 0.415 | 0.209 | 0.107 | 0.036 | 0.026 |
+| 199 | recov | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 | 1/5 | 0/5 |
+| 2557 | pv/triv | 1.934 | 0.967 | 0.484 | 0.243 | 0.123 | 0.039 | 0.026 |
+| 2557 | recov | 5/5 | 5/5 | 5/5 | 3/5 | 2/5 | 0/5 | 0/5 |
+| 2677 | pv/triv | 2.369 | 1.185 | 0.593 | 0.297 | 0.150 | 0.044 | 0.026 |
+| 2677 | recov | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Making the planted vector shorter than the trivial one **monotonically hurts**.
+Reason: inflating S_D lengthens every vector with a nonzero d-coordinate —
+including the planted one — while the `d = 0` sublattice is untouched, so the
+planted vector gets relatively *longer* against its real competitors. S_D = 1
+is (near-)optimal and the trivial vector is harmless. Confirms the negative
+result, by the opposite route from the one 2026-07-29 assumed.
+
+**R3 — 20 fresh 17-bit curves, m=12, eff ≈ 0.15** (the 2026-07-29 T3 breaking
+point; reproduces it — 4/20 curves show any recovery, 3 of them 5/5):
+
+| | A S_D=1 | A S_D=16 | B |
+|---|---|---|---|
+| TOTAL | 20/100 | 14/100 | 20/100 |
+
+A and B identical on all 20 curves. S_D=16 is a *trade*, not a win: it rescues
+5 curves that S_D=1 fails (p=65713, 65707, 67783, 65707′, 65557 — 1–2 of 5
+each) while destroying the four 5/5 curves (→ 2/5, 2/5, 1/5, 2/5). Net worse.
+
+**R4 — the true competitor, and why no curve-level predictor exists.**
+Let `L0` = homogeneous (Kannan-coordinate-zero) sublattice of B, dim 2m, and
+`τ = ‖pv‖/λ₁(L0)` with λ₁ computed by BKZ-30. First: `λ₁(L0) < μ` in ~1/3 of
+cells (e.g. 199 K1=12: 0.730n vs 0.993n; 2677 K1=4: 2.768n vs 3.522n), where
+`μ` is the single-2-D-block minimum used by the 2026-07-29 T2 experiment. So
+`L0` strictly contains ⊕ᵢBᵢ — the d-row contributes a cross-block generator —
+and T2's μ was only an upper bound. Using the exact λ₁ still does not fix it:
+
+| curve (m) | last 5/5 | first 0/5 | wall in τ |
+|---|---|---|---|
+| 199 (6) | τ=1.452 | τ=1.775 | 1.5–1.8 |
+| 2557 (8) | τ=1.878 | τ=2.029 | 1.9–2.4 |
+| 2677 (10) | τ=0.840 | τ=1.064 | 0.84–1.06 |
+
+τ orders the wall correctly *within* each curve but the threshold varies by
+2.4× *across* curves, and not monotonically in m. τ is therefore not a
+curve-level predictor. It is also anti-correlated in the obvious direction:
+2677 has the *largest* λ₁(L0) (3.549n vs 1.780n at K1=2) yet the *earliest*
+wall — the same anti-correlation T2 found for ρ = 1/τ.
+
+**Consolidated statement of the ceiling.** With `eff = K1·K2/n`, recovery
+requires `eff ≲ 0.15`. Full-entropy GLV nonces have `K1 ≈ K2 ≈ √n`, i.e.
+`eff ≈ 1`. So Phase 2 needs the nonce confined to ~15% of [0,n) — about 2.7
+bits of leakage — before it recovers anything. It does not threaten
+GLV-ECDSA with full-entropy nonces. Recorded in
+`RESEARCH_GLV_HNP_PHASE2.md` §8b as the empirical answer to the first open
+question of §8.
+
+### Next step proposal
+
+**Thread 24 — test the GS-profile ("2016 estimate") success condition.**
+τ works within a curve and fails across curves, which is the signature of a
+missing dimension/GS-profile term. Compute the Gram–Schmidt profile
+`‖b*_i‖` of LLL-reduced B and test the standard condition
+`‖pv‖·√((dim−i)/dim) < ‖b*_i‖ for some i`. Falsifier: if that predicate
+matches the 50-cell success table with AUC > 0.95 it is the predictor six
+prior runs failed to find; if it does not, **stop looking** — mark Thread 5 /
+20 / 23 CLOSED at the measured ceiling and record that no per-instance
+predictor cheaper than running LLL exists. Cheap: the 50 cells are already
+generated by `glv_hnp_phase2_thread23_quotient.py`; only the profile
+extraction is new.
+
+Secondary (unchanged, still open from 2026-07-29): re-express the 2026-07-26
+log entry's λ/n column in λ* so future runs do not re-derive the
+root-convention confusion.
+
+### Commits made
+(see following entry — recorded after commit)

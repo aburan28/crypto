@@ -257,6 +257,39 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. Measured ceiling (Thread 23, 2026-08-02)
+
+Answering the first open question above, empirically.
+
+Write `eff = K1*K2/n` for the size of the nonce search space relative to `n`
+(`k = k1 + lam*k2`, `k1 < K1`, `k2 < K2`).  Full-entropy GLV nonces have
+`K1 ~ K2 ~ sqrt(n)`, i.e. `eff ~ 1`.
+
+The Phase-2 lattice recovers `d` only for `eff <~ 0.15`, and the boundary is
+set by geometry, not by any removable defect of the construction:
+
+* The trivial short vector `n*S_D*e_m` reported on 2026-07-29 is **not** the
+  obstruction.  The d-eliminated lattice of dimension `2m+1`
+  (`secp256k1_cm_audit/glv_hnp_phase2_thread23_quotient.py`, "lattice B")
+  removes it entirely, and gives bit-identical recovery to the legacy lattice
+  in all 50 measured cells.  Reason: lattice B **is** the coordinate
+  projection of the legacy lattice along the d column (verified by Hermite
+  normal form), so LLL on the legacy lattice already factors through it.
+* Inflating the d-column scale `S_D` does make the planted vector shorter
+  than `n*S_D*e_m` (crossover at `S_D ~ 2`-`4`, contra the 2026-07-29 note),
+  but it lengthens the planted vector in absolute terms and recovery gets
+  *worse*: 20/100 -> 14/100 on a 20-curve 17-bit sweep at `eff ~ 0.15`.
+* `tau = ||planted|| / lambda_1(L0)`, with `L0` the homogeneous (Kannan-zero)
+  sublattice, orders the wall correctly *within* a curve but not *across*
+  curves (wall at `tau ~ 1.5-1.8`, `1.9-2.4`, `0.84-1.06` for the three
+  historical curves), so it is not a curve-level predictor either.
+
+Consequence for the threat model: the attack needs the nonce confined to
+roughly 15% of `[0,n)` — about 2.7 bits of leakage — before the lattice
+recovers anything.  It does not threaten GLV-ECDSA with full-entropy nonces.
+
+Data: `secp256k1_cm_audit/glv_hnp_phase2_thread23_quotient_output.txt`.
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
