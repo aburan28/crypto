@@ -6270,3 +6270,4 @@ Also worth noting for whoever picks up priority 2: **`gp` is not installed in th
 container image**, and the apt install did not succeed.
 
 ### Commits made
+a86f021 autolab 2026-08-02: Thread 23 — ν̂ is a lattice invariant, not an LLL artifact; τ fixes the K1 wall
