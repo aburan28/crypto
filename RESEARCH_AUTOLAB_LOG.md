@@ -6278,3 +6278,5 @@ same eff. Two concrete candidates, in order of cheapness:
 lattice (E3), and — from 2026-07-29 — μ/ρ (T2) and any λ*-threshold (T3).
 
 ### Commits made
+
+803d592 autolab 2026-08-02: Thread 23 — d-elimination falsified; K1 wall pinned to tau=1, eff=3/(2*pi*e)
