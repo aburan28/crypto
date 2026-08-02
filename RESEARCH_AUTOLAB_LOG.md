@@ -6595,4 +6595,4 @@ the one real relation they have to ν̂ is a one-sided bound that decays with lo
 
 ### Commits made
 
-(hash recorded in the following commit)
+2ee5f63 autolab 2026-08-02: Thread 23 — lambda_1(L2) closed form; exact null law of nu_hat; 20b/20c/20d repaired
