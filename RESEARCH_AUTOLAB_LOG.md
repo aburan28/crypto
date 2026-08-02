@@ -6103,3 +6103,171 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 GLV-HNP lattice so the planted vector is
+λ₁. This is the exact next-step proposed by the 2026-07-29 entry (log line 6089).
+Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so protocol
+rule (b) selects its continuation.
+
+Outcome: **the reformulation works exactly as designed and changes nothing.**
+The 2026-07-29 falsifier resolves in the negative direction — the K1 wall is
+information-theoretic. A second, unplanned result: the λ-block quantity ρ is a
+strong instance-level separator, with the sign opposite to the one hypothesised
+(and rejected) on 2026-07-29.
+
+### Work done
+- Environment (fresh container): `pip install cysignals fpylll sympy`. Confirming
+  the 2026-07-29 note — this is needed on every run; `pari-gp` was not needed today.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (U1–U5), reusing the
+  lattice/scale/signature code verbatim from `glv_hnp_phase2_lambda_threshold.py`
+  so the comparison against 2026-07-29 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`.
+- Added an `if __name__ == "__main__":` guard to that script so its helpers are
+  importable — the older Phase-2 scripts run their suites at import time, which is
+  why every one of them re-implements the same 150 lines. Future runs should import
+  from `glv_hnp_phase2_projected` rather than copy.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lamstar_third.py` (U6) to test the
+  anomaly U4 threw up. Output: `..._lamstar_third_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (7.38 s). ✓
+
+**The reformulation.** L contains the trivial vector t = n·S_D·e_m (2026-07-29 T5).
+Since t is a multiple of a *coordinate* vector, the quotient L/(Z·t) is realised
+concretely by deleting column m:  π : Z^(2m+2) → Z^(2m+1). Then ker(π|_L) = Z·t
+exactly, so rank π(L) = 2m+1 and det π(L) = det L/(n·S_D). The secret leaves the
+lattice, but is recovered afterwards in closed form from any single signature:
+`d = (k1_i + λ·k2_i − A_i)·B_i⁻¹ mod n`, verified against all m signatures (so
+false positives are ruled out without reference to d_secret).
+
+Three arms were run head-to-head: **ORIG** (historical L, dim 2m+2), **PROJ**
+(π(L), dim 2m+1), **CVP** (drop the Kannan row too, Babai nearest-plane in dim 2m
+against target (A_i·S_K1 | 0), exact-rational Gram–Schmidt).
+
+### Findings
+
+**U1 — π is correct, and it does achieve "planted = λ₁".**
+
+| curve | m | K1 | rank | det = detL/(n·S_D) | sv/pv ORIG | sv/pv PROJ | γ |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 6 | 2 | 13 | True | 0.6035 | 0.8428 | 0.717 |
+| 12-bit/2557 | 8 | 8 | 17 | True | 0.5170 | 0.5324 | 0.671 |
+| 12-bit/2677 | 10 | 8 | 21 | True | 0.4221 | 0.8127 | 0.733 |
+
+det checked as an exact sympy integer determinant against the closed form;
+π(v_planted) verified to be an *integer* combination of the π(L) basis. In the
+success regime of the 2677 curve sv/pv = **1.0000 exactly** at K1 = 2, 3, 4 — the
+planted vector is literally λ₁ of π(L) there. Thread 23's stated goal is met.
+
+**U2 — and it changes nothing. PROJ ≡ ORIG on all 16 cells, exactly.**
+
+| curve | K1 | eff | γ | ORIG | PROJ | CVP | sv/pv O | sv/pv P |
+|---|---|---|---|---|---|---|---|---|
+| 2557 (λ*=0.340, m=8) | 2 | 0.039 | 1.289 | 5/5 | 5/5 | 5/5 | 0.491 | 0.902 |
+| | 3 | 0.059 | 1.065 | 5/5 | 5/5 | 5/5 | 0.442 | 0.636 |
+| | 4 | 0.078 | 0.930 | 5/5 | 5/5 | 5/5 | 0.462 | 0.585 |
+| | 6 | 0.117 | 0.768 | 5/5 | 5/5 | 5/5 | 0.423 | 0.475 |
+| | 8 | 0.156 | 0.671 | 5/5 | 5/5 | 5/5 | 0.445 | 0.475 |
+| | 12 | 0.235 | 0.555 | 1/5 | 1/5 | 0/5 | 0.410 | 0.424 |
+| | 16 | 0.313 | 0.484 | 0/5 | 0/5 | 0/5 | 0.428 | 0.437 |
+| | 24 | 0.469 | 0.400 | 0/5 | 0/5 | 0/5 | 0.395 | 0.409 |
+| 2677 (λ*=0.070, m=10) | 2 | 0.039 | 1.419 | 5/5 | 5/5 | 5/5 | 0.438 | **1.0000** |
+| | 3 | 0.059 | 1.170 | 5/5 | 5/5 | 4/5 | 0.405 | **1.0000** |
+| | 4 | 0.079 | 1.020 | 5/5 | 5/5 | 2/5 | 0.400 | **1.0000** |
+| | 6 | 0.118 | 0.841 | 0/5 | 0/5 | 0/5 | 0.382 | 0.945 |
+| | 8 | 0.157 | 0.733 | 0/5 | 0/5 | 0/5 | 0.387 | 0.768 |
+| | 12 | 0.236 | 0.605 | 0/5 | 0/5 | 0/5 | 0.372 | 0.543 |
+| | 16 | 0.314 | 0.527 | 0/5 | 0/5 | 0/5 | 0.380 | 0.466 |
+| | 24 | 0.471 | 0.435 | 0/5 | 0/5 | 0/5 | 0.367 | 0.377 |
+
+The 2677 wall stays in K1 ∈ (4,6]; the 2557 wall stays in K1 ∈ (8,12].
+**Per the 2026-07-29 falsifier, verbatim — "if the wall stays at K1≈4–6, then the
+wall is information-theoretic and Phase 2 is at its ceiling" — this is settled.**
+The trivial vector was a true structural observation but a red herring as an
+explanation of failure: `recover_d` scans the whole reduced basis, so λ₁ being
+uninformative never blocked anything.
+
+The **CVP arm is strictly worse** (5/5→4/5 at K1=3, 5/5→2/5 at K1=4). Babai
+nearest-plane loses to LLL-on-Kannan. Recorded so no future run re-tries it.
+
+**U3 — T4b replicates exactly** on an independently written implementation:
+m = 8/12/16/24/32 → 0,0,1,0,1 for ORIG *and* PROJ (0,0,0,0,0 for CVP), identical
+to 2026-07-29.
+
+**U5 — BKZ does not help.** BKZ(20)/BKZ(30) on π(L) match LLL on 5 of 6 cells; the
+only difference is 0/5 → 1/5 on 2677 at K1=6. Consistent with U2.
+
+**U4 — γ = GH(π(L))/‖v′‖ is not the wall.** Aggregate over 6 fresh 17-bit curves,
+m=12: eff 0.05 (γ̄=1.181) → 30/30; 0.10 (0.849) → 12/30; 0.15 (0.703) → 11/30;
+0.20 (0.612) → 9/30; 0.25 (0.549) → 6/30. But 2557 succeeds at γ=0.671 while 2677
+fails at γ=0.841, and the per-curve split was bimodal in λ*, with the two survivors
+both at λ* ≈ 1/3. That prompted U6.
+
+**U6 — |λ*−1/3| FALSIFIED; ρ rehabilitated with the sign reversed.**
+40 fresh 17–18-bit curves, λ* binned across (0, 0.5), m=12, 5 seeds, three eff
+levels, label = ≥3/5 recover. Pooled over 120 cells (32 successes, baseline 0.733):
+
+| separator | AUC | best acc | τ |
+|---|---|---|---|
+| λ* | 0.328 | 0.725 | — |
+| **\|λ*−1/3\|** | **0.567** | **0.758** | — |
+| \|λ*−1/4\| | 0.436 | 0.725 | — |
+| \|λ*−1/2\| | 0.672 | 0.783 | — |
+| δ₃ = \|3λ−n\|/n | 0.567 | 0.758 | — |
+| maxq (CF) | 0.220 | 0.658 | — |
+| **ρ = μ/E‖v′‖** | **0.891** | **0.892** | **0.4325** |
+
+H23a is dead: the U4 bimodality was a 6-curve artifact. Curves at λ* = 0.2976,
+0.3424, 0.3581, 0.3661 (all within 0.04 of 1/3) fail at every eff level, while
+λ* = 0.4449, 0.4585, 0.4816 succeed at all three.
+
+But ρ — the shortest vector of the 2-D λ-block ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩,
+normalised by E‖v′‖ — separates strongly, per eff level:
+
+| eff | AUC(ρ) | best acc | τ | baseline |
+|---|---|---|---|---|
+| 0.10 | 0.945 | 0.925 | 0.6057 | 0.650 |
+| 0.15 | **0.977** | **0.975** | 0.4181 | 0.750 |
+| 0.20 | 0.926 | 0.925 | 0.3893 | 0.800 |
+
+At eff=0.15 the rule "ρ ≤ 0.42 ⇒ success" is perfect on the positive side: all 9
+curves with ρ ≤ 0.418 recover, no curve with ρ ≥ 0.52 recovers, and the single
+error is one false negative (ρ=0.607, 3/5).
+
+**Correction to the 2026-07-29 reading of T2.** T2 recorded ρ as falsified because
+H20 predicted "ρ ≳ 1 needed for success" and the failure curve had the *largest* ρ
+(0.686 vs 0.610 / 0.399). Those three points in fact already show the correct
+orientation — **small ρ ⇒ success** — only the sign of the hypothesis was wrong.
+T2's 17-bit sweep could not detect it because it ran at eff=0.05, where 19/20
+curves recover and the 0.95 majority baseline is unbeatable. Retested at eff where
+the baseline is beatable, μ is the dominant predictor found so far.
+
+This does **not** contradict T5's argument that no *curve-level* invariant can
+predict a BDD outcome: ρ depends on (n, λ, K1, K2), so it is an *instance-level*
+invariant. It is still computable before any signature is seen, which is what makes
+it useful. Note the orientation is counter-intuitive for uSVP — μ upper-bounds
+λ₁(π(L)), so small ρ means a *shorter spurious vector* — but it is exactly what the
+BDD/coset framing predicts, since every vector of ⊕ᵢB_i has last coordinate 0 and
+can never be confused with the planted vector by the recovery criterion.
+
+### Next step proposal
+**Thread 24 — why does small μ help?** Measure the Gram–Schmidt profile of π(L)
+directly and test the concrete mechanism: for each instance record ‖b*_j‖ after
+LLL, and check whether success tracks the position of ‖v′‖ in that profile (the
+standard uSVP/BDD predictor ‖v′‖ ≤ ‖b*_{dim−k}‖ for the 2016 estimate) rather
+than the global γ. Prediction, if the BDD framing is right: the useful quantity is
+‖v′‖ vs the profile *after projecting away* ⊕ᵢB_i, and ρ is a cheap proxy for it.
+Falsifier: if the GS-profile predictor does not beat ρ's AUC 0.89–0.98 pooled, then
+ρ is the right level of description and Phase-2 predictor hunting should stop there.
+Cheap — the U6 harness already produces the instances; only the measurement changes.
+
+Secondary, if that lands: check whether ρ ≤ τ is *achievable by the attacker*
+rather than merely diagnostic — τ depends on K1/K2 through S_K1/S_K2, which the
+attacker does not choose, but the attacker does choose the *scaling*, so a
+re-scaling that shrinks μ may be a genuine (if small) improvement. This is the
+first Phase-2 lever in a month that has not already been falsified.
+
+### Commits made
+(recorded below after commit)
