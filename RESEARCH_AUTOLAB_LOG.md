@@ -6103,3 +6103,159 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 GLV-HNP lattice so the planted vector is λ₁,
+the explicit next-step proposed by the 2026-07-29 entry (log line ~6089). Priorities
+1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5
+(GLV-HNP Phase 2) made measurable progress on 2026-07-26 and 2026-07-29, so protocol
+rule (b) selects its continuation.
+
+Outcome: **Thread 23's premise is falsified, and so is the fallback inference the
+2026-07-29 falsifier attached to it.** Three hypotheses died this run; one repository
+reproducibility regression was found and repaired.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  sympy 1.14.0. PARI/GP not installed this run (not needed). Same note as 2026-07-29:
+  fpylll alone is insufficient, `cysignals` is a separate runtime import.
+- Derived and implemented the d-eliminated lattice (`glv_hnp_phase2_eliminated.py`).
+  Pivot on signature 0: `d ≡ B₀⁻¹(k1₀ + λk2₀ − A₀)`, giving the d-free congruences
+  `k1_i ≡ u_i + t_i·k1₀ + t_i·λ·k2₀ − λ·k2_i (mod n)` with `t_i = B_i B₀⁻¹`,
+  `u_i = A_i − t_i A₀`. Dimension 2m+1 instead of 2m+2; **no d-column, hence no
+  `n·S_D·e_m` trivial vector.** Membership of the planted vector is proved by exhibiting
+  the exact integer row combination (E1, exact — not a norm check).
+- A/B against the original builder (`glv_hnp_phase2_20bit.py:262`, reused verbatim) on
+  the same curves/seeds/K1 grid as exp T4 of 2026-07-29.
+- Diagnosed the result (`glv_hnp_phase2_elim_probe.py`), then tested this run's own
+  replacement hypothesis (`glv_hnp_phase2_mu_wall.py`), including a 48-cell
+  out-of-sample grid on 6 fresh 13-bit j=0 GLV curves.
+- `cargo test --test curve_audit` → 5/5 pass (5.07s). ✓
+
+### Findings
+
+**F1 — eliminating d changes the lattice but NOT recovery. Thread 23 is falsified.**
+sv/pv rose exactly as intended (the trivial vector is provably gone), yet every single
+grid cell is unchanged:
+
+| curve | K1 | sv/pv orig | sv/pv elim | ok orig | ok elim |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.544 | 0.774 | 5/5 | 5/5 |
+| 12-bit/2557 | 8 | 0.446 | 0.475 | 4/5 | 4/5 |
+| 12-bit/2677 | 8 | 0.388 | 0.750 | 1/5 | 1/5 |
+
+K1 grid (K2=52, 5 seeds), *identical row-for-row*:
+
+| curve | K1= | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2557 | orig | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| 2557 | elim | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | orig | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | elim | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Not merely equal rates: **per-seed agreement is 45/45** across (3 curves × K1∈{4,6,8} ×
+5 seeds). BKZ-20 agrees too, and the m-sweep at K1=8 agrees (m=8/12/16/24/32 →
+0,1,1,2,0 of 5 for both). The K1 wall did not move outward. Per the pre-registered
+falsifier, the reformulation is **not** an improvement.
+
+Interpretation: the d-column trivial vector identified in T5 is real but inert. LLL
+returns a *basis*, and recovery only needs the planted vector to appear as some row with
+last coordinate ±S_KANNAN — it never needed to be λ₁. T5 found a true fact but the
+wrong lever.
+
+**F2 — the wall is NOT information-theoretic.** The 2026-07-29 falsifier said that if
+the wall did not move, "the wall is information-theoretic and Phase 2 is at its ceiling."
+That inference is wrong. The counting bound `m_thresh = ⌈log n / log(1/eff)⌉`,
+`eff = K1·K2/n`, is satisfied at **every** observed failure:
+
+| curve | K1 | eff | m_thresh | m_used | enough info? | observed |
+|---|---|---|---|---|---|---|
+| 2557 | 12 | 0.235 | 6 | 8 | True | 1/5 |
+| 2557 | 16 | 0.313 | 7 | 8 | True | 0/5 |
+| 2677 | 8 | 0.157 | 5 | 10 | True | 1/5 |
+| 2677 | 12 | 0.236 | 6 | 10 | True | 0/5 |
+| 2677 | 16 | 0.314 | 7 | 10 | True | 0/5 |
+
+12/12 rows have m_used ≥ m_thresh, including all six 0/5 cells. There is ample
+information; the obstruction is algorithmic/geometric.
+
+**F3 — λ₁ of the d-free lattice is the λ-block μ.** The 2-D sublattice
+`L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` sits inside *both* constructions and is untouched
+by eliminating d. Its exact Gauss-reduced shortest vector μ is the shortest reduced row
+on 2 of 3 curves to floating-point equality (energy profile: 2 nonzeros, all in one
+k1/k2 column pair); on 12-bit/2677 at K1=8 LLL finds something shorter still (4543.4 vs
+μ=5095.8, 20 nonzeros). μ/pv = 0.843 / 0.532 / 0.813 — so **the planted vector is still
+not λ₁ even after d is gone**, which is exactly why F1 holds.
+
+**F4 — this run's own hypothesis (CRIT) is FALSIFIED.** Hypothesised from
+`μ ~ √(det L2)`, `pv ~ n√(2m/3+1)` that recovery needs
+`K1·K2·(2m/3+1) < n`, i.e. μ/pv > 1. Predicted walls K1≈2.7 / 8.1 / 6.6 look plausible
+in-sample, but:
+- μ/pv < 1 *everywhere* on 8-bit/199 and 12-bit/2557, including cells recovering 5/5
+  (μ/pv = 0.475 at 12-bit/2557, K1=6, 5/5). So μ > pv is not necessary.
+- **W2 kills it outright**: at 12-bit/2677, K1=4, raising m drives μ/pv monotonically
+  *down* (1.966 → 0.859 for m=6…32) while success goes *up* (4/5 → 5/5). The predictor
+  moves the wrong way in the m direction.
+- Out-of-sample, threshold fixed a priori at 1.0, 48 cells / 6 fresh 13-bit curves:
+  **27/48 = 0.562 agreement**, AUC 0.622. Dead.
+
+Recorded as a dead hypothesis so no future run re-tries it.
+
+**F5 — ν̂ reconciled, and its scope narrowed.** ν̂ = λ₁(L2)/√(det L2) (2026-07-29,
+commit e845207) is the *same* λ-block, det-normalised instead of pv-normalised. Because
+det L2 = n·S_K1·S_K2 is independent of m, ν̂ is exactly m-invariant (verified: 0.997 and
+0.771 constant across m=6…32 in W2) — so the det normalisation is the right one and F4's
+m-drift is an artefact of the pv normalisation. But on a sample that varies K1 and m
+rather than λ, ν̂ also degrades:
+
+| predictor | AUC | Spearman |
+|---|---|---|
+| μ/pv (high = good) | 0.622 | +0.252 |
+| −ν̂ (low = good) | 0.713 | +0.113 |
+
+vs AUC 0.935 reported 2026-07-29 at *fixed* K1=72, m=12. **ν̂ is a λ-direction predictor
+at fixed (K1, K2, m); it is not a K1-wall predictor.** On 12-bit/2677 ν̂ is non-monotone
+in K1 (0.710, 0.865, 0.997, 0.856, 0.771, 0.696…) while success falls monotonically.
+
+**F6 — REPOSITORY REGRESSION FOUND AND FIXED (reproducibility).**
+On 2026-07-29 two *different* scripts were committed to the one filename
+`secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`: d525931 wrote the T1–T5 study,
+then e845207 overwrote it with the ν̂ study (514 insertions / 345 deletions). A later
+merge (PR #33 / #35) restored the d525931 version. Consequence: in a fresh clone,
+
+    glv_hnp_nuhat_vs_c1c2.py, glv_hnp_phase2_mu_response.py,
+    glv_hnp_phase2_nuhat_control.py
+
+all died with `AttributeError: module '_t20a' has no attribute 'glv_eigenvalues'`.
+**The 2026-07-29 headline result (ν̂, AUC 0.935) was not reproducible from a clean
+checkout for four days.** Fix: e845207's version restored verbatim as
+`secp256k1_cm_audit/glv_hnp_nu_lib.py` (with a provenance header), the three scripts
+repointed at it. All three now run clean; ν̂ reproduces —
+`glv_hnp_phase2_nuhat_control.py` gives low-ν̂ tertile p̂=0.897 vs high-ν̂ p̂=0.566.
+Lesson for future runs: **never reuse a filename for a second experiment in the same
+day** — the merge resolution cannot tell which one the importers wanted.
+
+### Next step proposal
+**Thread 24 — drop the SVP framing entirely; test the BDD/Gram-Schmidt condition.**
+F1+F3 together show being λ₁ is neither necessary (5/5 recoveries at μ/pv=0.475) nor
+achievable (μ < pv structurally). The remaining principled predictor is the standard
+Babai/nearest-plane BDD condition on the *projected* profile: success should require
+`‖v_planted‖ < ½·min_i ‖b*_i‖` over the indices below the Kannan coordinate, computed
+per-instance from the LLL-reduced GS profile.
+
+Falsifier: compute the GS profile of the reduced basis and test whether
+`‖v_planted‖ / min_i ‖b*_i‖` separates success from failure on the 48-cell out-of-sample
+grid already built in `glv_hnp_phase2_mu_wall.py`. If AUC > 0.9 it is the criterion the
+six curve-level invariants (2026-06-30) and ν̂ (λ-only) could not be; if AUC ≲ 0.75 it
+joins them and Phase 2 should be declared at its ceiling on the evidence. Cheap — the
+grid and the reduced bases already exist, only the GS profile needs extracting.
+
+Note this is explicitly a *per-instance* quantity, consistent with T5's conclusion that
+no curve-level invariant can separate C1 from C2.
+
+Secondary (carried over, still not done): re-express the 2026-07-26 log's λ/n column in
+λ* throughout.
+
+### Commits made

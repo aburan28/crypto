@@ -49,7 +49,7 @@ import sympy
 # Reuse the verified Thread 20a core rather than re-implementing it.
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_nu_lib.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 

@@ -1,0 +1,69 @@
+==============================================================================
+Thread 23 probe — why elimination changed sv/pv but not recovery
+==============================================================================
+
+------------------------------------------------------------------------------
+P1: per-seed outcome agreement between orig and elim
+------------------------------------------------------------------------------
+curve                 K1    seed   orig   elim  agree
+8-bit/199              6      42  False  False   True
+8-bit/199              6    1234  False  False   True
+8-bit/199              6    9999   True   True   True
+8-bit/199              6     555  False  False   True
+8-bit/199              6   31337  False  False   True
+12-bit/2557            6      42   True   True   True
+12-bit/2557            6    1234   True   True   True
+12-bit/2557            6    9999   True   True   True
+12-bit/2557            6     555   True   True   True
+12-bit/2557            6   31337   True   True   True
+12-bit/2677 FAIL       6      42   True   True   True
+12-bit/2677 FAIL       6    1234  False  False   True
+12-bit/2677 FAIL       6    9999  False  False   True
+12-bit/2677 FAIL       6     555   True   True   True
+12-bit/2677 FAIL       6   31337  False  False   True
+
+per-seed agreement over all (curve,K1,seed): 45/45
+
+------------------------------------------------------------------------------
+P2: what is lambda_1?  ||mu(lambda-block)|| vs ||v_planted|| vs ||sv||
+------------------------------------------------------------------------------
+mu = exact shortest vector of the 2-D block <(n*S_K1,0), (-lam*S_K1,S_K2)>,
+which is a sublattice of BOTH the original and the eliminated lattice.
+
+curve                 K1       ||mu||       ||pv||   mu/pv      sv_elim  sv=mu?
+8-bit/199              2        277.9        329.7   0.843        277.9    True
+12-bit/2557            8       2737.6       5142.4   0.532       2737.6    True
+12-bit/2677 FAIL       8       5095.8       6270.3   0.813       4543.4   False
+
+------------------------------------------------------------------------------
+P2b: energy profile of the eliminated lattice's shortest vector
+------------------------------------------------------------------------------
+cols: 0..m-2 congruence | m-1 k1_0 | m..2m-1 k2_j | 2m Kannan
+curve                 K1    cong    k1_0      k2     kan   nnz
+8-bit/199              2   0.000   0.508   0.492   0.000     2
+12-bit/2557            8   0.000   0.132   0.868   0.000     2
+12-bit/2677 FAIL       8   0.638   0.021   0.341   0.000    20
+
+------------------------------------------------------------------------------
+P3: is the K1 wall information-theoretic?  counting bound vs observed
+------------------------------------------------------------------------------
+eff = K1*K2/n ; m_thresh = ceil(log n / log(1/eff)) signatures needed to
+pin d uniquely.  Observed = success at the m actually used.
+
+curve                 K1   K2     eff  m_thresh  m_used  enough info?  observed
+12-bit/2557            2   52   0.039         3       8          True       5/5
+12-bit/2557            4   52   0.078         4       8          True       5/5
+12-bit/2557            6   52   0.117         4       8          True       5/5
+12-bit/2557            8   52   0.156         5       8          True       4/5
+12-bit/2557           12   52   0.235         6       8          True       1/5
+12-bit/2557           16   52   0.313         7       8          True       0/5
+12-bit/2677 FAIL       2   52   0.039         3      10          True       5/5
+12-bit/2677 FAIL       4   52   0.079         4      10          True       5/5
+12-bit/2677 FAIL       6   52   0.118         4      10          True       2/5
+12-bit/2677 FAIL       8   52   0.157         5      10          True       1/5
+12-bit/2677 FAIL      12   52   0.236         6      10          True       0/5
+12-bit/2677 FAIL      16   52   0.314         7      10          True       0/5
+
+==============================================================================
+done
+==============================================================================
