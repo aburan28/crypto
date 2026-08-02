@@ -6255,3 +6255,5 @@ re-derive and log them or delete the claim. **Note that any separator fitted on 
 outcomes is now fitted on a superseded lattice.**
 
 ### Commits made
+
+44fcd45 autolab 2026-08-02: Thread 23 — recentring widens the GLV-HNP K1 wall 3-4x
