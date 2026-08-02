@@ -6103,3 +6103,215 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-02 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁**, the
+next-step proposed verbatim by the 2026-07-29 entry (log line ~6089). Original
+priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is the only live thread; it made
+measurable progress on 2026-07-29, so protocol rule (b) applies.
+
+Thread 23's falsifier was: *"if sv/pv rises above 1 after the reformulation
+and the K1 wall in T4 moves outward on the λ*=0.070 curve (currently K1≈4–6),
+the reformulation is a real improvement; if the wall stays at K1≈4–6, then the
+wall is information-theoretic and Phase 2 is at its ceiling."*
+
+**Outcome: the reformulation is a real improvement — the wall moves outward 4×
+on the λ*=0.070 curve (K1 4 → 16), and the T4/T4b "K1 wall" was largely an
+artifact of an uncentred target coset, not an information limit.** A closed-form
+predictor and the true ceiling are both established below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals numpy sympy`
+  → fpylll 0.6.4, cysignals 1.12.5, numpy 2.4.6, sympy 1.14.0.
+  `apt-get install pari-gp` fails until `apt-get update` is run first (stale
+  index, 404 on libegl-mesa0); after update, PARI/GP 2.15.4 installs fine.
+  Note for future runs: `numpy`/`sympy` are NOT preinstalled in this image.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd.py` (~660 lines, experiments
+  E0–E7). EC/CM/signature helpers copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py` so comparison to 07-26/07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_bdd_output.txt` (160 lines).
+- Three formulations compared under identical signatures/seeds:
+  - `kannan`  = §2 lattice verbatim (`glv_hnp_phase2_20bit.py:262`), dim 2m+2.
+  - `kannanC` = **same lattice**, target coset recentred. Achieved by the single
+    substitution `Aᵢ → Aᵢ − λ(K2//2) − K1//2 + Bᵢ(n//2) mod n`, reading
+    `d = row[m] + n//2`. Basis and determinant unchanged.
+  - `reduced` (`L_R`) = **d eliminated algebraically**, dim 2m, no trivial
+    vector. With `tᵢ = Bᵢ·B₀⁻¹ mod n`, the k₁-part lies in
+    `Λ = {x : x ≡ d·B mod n}`, basis `{(1,t₁,…,t_{m−1})} ∪ {n·eᵢ, i≥1}`,
+    `det Λ = n^{m−1}` (not `n^m`). Recentred target; solved by Kannan
+    embedding, cross-checked against exact CVP. d recovered afterwards from
+    `d = B₀⁻¹(k₁₀ + λk₂₀ − A₀) mod n`.
+- `cargo test --test curve_audit` → **5/5 pass** (8.13s). ✓
+- One bug found and fixed during the run: the d-recentring substitution needs
+  `+Bᵢ·(n//2)`, not `−`; with the wrong sign the recovered d is off by exactly
+  1 (since `2·(n//2) = n−1` for odd n) and `kannanC` scored 0/5 everywhere.
+
+### Findings
+
+**E0 — construction verified exactly (not just empirically).** For all three
+historical curves: `det(L_R) == S_K1^m · n^{m−1} · S_K2^m` as integers
+(Berkowitz determinant, e.g. 2557 → 91-digit match); the planted residual
+solves to integral basis coefficients (planted vector really is in `L_R`); and
+`d` recovered from `k₁₀,k₂₀` equals `d_secret`.
+
+**E2 — THE FALSIFIER. The K1 wall moves outward.** m=12, 5 seeds, LLL, K2=52.
+Wall = largest K1 with 5/5.
+
+| curve | λ* | `kannan` | `kannanC` | `reduced` |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 12 | 16 | **24** |
+| 12-bit/2677 | 0.070 | **4** | **16** | **16** |
+
+The 2026-07-29 T4 wall of K1≈4–6 on the λ*=0.070 curve becomes K1=16 — a
+factor **4.0×** in K1, i.e. 4× in the `eff = K1·K2/n` budget, i.e. **2 bits of
+nonce**. Critically, `kannanC` uses the *same lattice* as `kannan`: the entire
+4× on that curve comes from recentring the target coset, costing nothing (K1,
+K2 are public in the bias model). Also note the two curves' walls *converge*
+(4 vs 12 uncentred → 16 vs 16 centred): most of the "λ* shifts the wall by 3×"
+effect reported in T4 was the uncentred coset interacting with λ, not a
+property of λ.
+
+**E4 — T4b is explained and repaired.** T4b reported that at K1=8 (eff=0.157)
+the λ*=0.070 curve "is not rescued by more data (m=8/12/16/24/32 → 0,0,1,0,1
+of 5), so the K1 wall is genuine". Reproduced and resolved:
+
+| variant | m=12 | 24 | 48 | 72 | 96 | 128 | first m with ν<1 |
+|---|---|---|---|---|---|---|---|
+| `kannan`  | 0/3 | 1/3 | 0/3 | 0/3 | 1/3 | 1/3 | **79** |
+| `kannanC` | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6 |
+| `reduced` | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6 |
+
+T4b's m=8…32 sweep was nowhere near the m≈79 the predictor requires for the
+uncentred lattice — the sweep was simply too short. Centred, the same
+configuration recovers 3/3 already at m=12. **The T4b conclusion "the K1 wall
+is genuine" is hereby corrected.**
+
+**E1/E3/E6 — closed-form predictor ν, calibrated at ν* ≈ 0.9.** With
+`S_K1·K1 = S_K2·K2 = n`, `eff = K1K2/n`, `λ₁^GH = √(dim/2πe)·det^{1/dim}` on
+the underlying CVP lattice (Kannan column dropped):
+
+```
+kannan    nu = sqrt(2*pi*e/3) * sqrt(eff) * n^(+1/(2m))  ~ 2.386 * sqrt(eff) * ...
+kannanC   nu = sqrt(  pi*e/6) * sqrt(eff) * n^(+1/(2m))  ~ 1.193 * sqrt(eff) * ...
+reduced   nu = sqrt(  pi*e/6) * sqrt(eff) * n^(-1/(2m))  ~ 1.193 * sqrt(eff) * ...
+```
+
+E6 validates on 6 *fresh* 17-bit j=0 GLV curves spanning λ* ∈ [0.027, 0.446],
+m=12, 3 seeds (`p`, `n`, wall(ν at wall)):
+
+| p | n | λ* | `kannan` | `kannanC` | `reduced` |
+|---|---|---|---|---|---|
+| 65647 | 65719 | 0.0273 | 16 (0.98) | 32 (0.69) | 48 (0.82) |
+| 65707 | 65203 | 0.1372 | 16 (0.98) | 64 (0.96) | 48 (0.82) |
+| 65707 | 66037 | 0.2115 |  8 (0.70) | 48 (0.83) | 96 (1.16) |
+| 65677 | 65899 | 0.3184 | 48 (1.66) | 64 (0.96) | 64 (0.95) |
+| 65539 | 65287 | 0.3346 | 48 (1.67) | 64 (0.96) | 96 (1.16) |
+| 66457 | 66943 | 0.4456 | 16 (0.98) | 48 (0.83) | 32 (0.67) |
+
+Geometric-mean wall gain over `kannan`: **2.52× for `kannanC`, 2.88× for
+`reduced`**. ν at the wall over all 18 (curve, variant) cells:
+min 0.667, max 1.668, **mean 0.987**. Restricted to the centred variants it is
+tight — `kannanC` ν* ∈ [0.69, 0.96], `reduced` ν* ∈ [0.67, 1.16]; the four
+cells above 1.6 are all `kannan` (uncentred). **This is the first closed-form
+success predictor for the Phase-2 attack**, and it is consistent with T5's
+conclusion that no *curve-level* invariant can work: ν is a function of
+(n, m, K1, K2) and of the formulation, not of the curve. (Six curve-level
+separators failed between 2026-06-21 and 2026-06-29, log lines ~3560–3580.)
+
+Caveat, honestly stated: ν is computed against `λ₁^GH`, whereas the measured
+`λ₁` after LLL is 1.7–2.3× *shorter* than the Gaussian heuristic on these very
+skewed bases (E1: `nu_meas` 1.52–2.51 where `nu_cf` = 0.66–1.35). ν is a
+usable predictor with the calibration ν*≈0.9, not an absolute criterion.
+
+**E5 — the wall is BDD-uniqueness, not weak reduction.** `L_R`, m=8 (dim 16),
+exact CVP enumeration as oracle, and `d_res/d_pl` = ‖true closest vector
+residual‖ / ‖planted residual‖:
+
+| curve | K1 | eff | ν | LLL | BKZ(30) | CVP oracle | d_res/d_pl |
+|---|---|---|---|---|---|---|---|
+| 2557 |  4 | 0.078 | 0.55 | 3/3 | 3/3 | 3/3 | 0.978 |
+| 2557 |  8 | 0.156 | 0.77 | 3/3 | 3/3 | 3/3 | 0.983 |
+| 2557 | 16 | 0.313 | 1.09 | 3/3 | 3/3 | 1/3 | 0.881 |
+| 2557 | 24 | 0.469 | 1.34 | 1/3 | 1/3 | 0/3 | 0.784 |
+| 2557 | 32 | 0.626 | 1.55 | 0/3 | 0/3 | 0/3 | 0.610 |
+| 2677 |  4 | 0.079 | 0.55 | 3/3 | 3/3 | 3/3 | **1.0000** |
+| 2677 |  8 | 0.157 | 0.77 | 3/3 | 3/3 | 3/3 | **1.0000** |
+| 2677 | 16 | 0.314 | 1.10 | 2/3 | 2/3 | 0/3 | 0.859 |
+| 2677 | 32 | 0.629 | 1.55 | 0/3 | 0/3 | 0/3 | 0.664 |
+
+`d_res/d_pl = 1.0000` at K1 ≤ 8 means the planted residual **is** the closest
+vector; it drops below 1 between K1=8 (ν=0.77) and K1=16 (ν=1.10), so
+BDD uniqueness is genuinely lost right where ν crosses 1 — an
+algorithm-independent calibration of ν*≈1. `BKZ(30) == LLL` in every cell, so
+reduction strength is never the binding constraint. This *upholds* the
+2026-07-26 "LLL and BKZ both fail → structural" claim while identifying what
+"structural" means (BDD uniqueness) and showing it is not invariant — it moves
+4× under recentring. Note LLL+embedding beats the CVP oracle at K1=16 (3/3 vs
+1/3): the embedding scan tests *every* reduced row with `|last| = emb`, so it
+can find the planted vector even when it is not the strict closest vector.
+
+**E7 — the ceiling. Phase 2 is now within ~1.5× of the information-theoretic
+limit.** The binding limit is a counting bound, not a lattice bound: a wrong d
+places all m signatures in the K1×K2 box with probability `eff^m`, and there
+are ~n wrong d, so uniqueness requires `n·eff^m < 1`, i.e.
+
+```
+    eff  <  n^(-1/m)          (information-theoretic / counting bound)
+```
+
+Both the counting bound and the Gaussian heuristic scale as `n^(−1/m)`; they
+differ only by a constant. Measuring `c_emp = eff_at_wall / n^(−1/m)` over all
+8 curves × 3 variants:
+
+| variant | c_emp min | max | mean | GH prediction |
+|---|---|---|---|---|
+| `kannan`  | 0.079 | 0.474 | 0.263 | 0.176 |
+| `kannanC` | 0.315 | 0.633 | 0.545 | 0.703 |
+| `reduced` | 0.313 | 0.948 | **0.661** | 0.703 |
+
+`L_R` reaches 0.66 of the counting bound (and 0.94 of its own GH prediction),
+versus 0.26 for the historical lattice. **So Thread 23 recovers ~2.5× of the
+~4× that was on the table, and at most ~1.5× remains for any further lattice
+engineering.** The scaling `eff < n^{−1/m}` also says the useful signature
+count is `m ≳ log n / log(1/eff_target)` — matching Phase 1's
+`~log₂(n)/c` estimate in `RESEARCH_GLV_HNP_PHASE2.md` §8 — and, since it
+demands `K1·K2 < n^{1−1/m}`, it confirms the attack still needs a genuine
+two-sided GLV-shaped bias and is no threat to unbiased ECDSA. The
+structural-completeness theorem is unaffected.
+
+**Open sub-question (new, not claimed):** in the *uncentred* lattice only,
+curves with λ* ≈ 1/3 over-perform ν by ~1.7× (2557 λ*=0.340 wall at ν=1.63;
+17-bit λ*=0.318 and 0.335 walls at ν=1.66, 1.67 — all four ν>1.6 cells are
+uncentred and λ*∈[0.318,0.340]). The effect vanishes on recentring
+(`kannanC` ν* = 0.94–0.96 for the same curves). This is *not* the μ/ρ
+λ-block hypothesis, which T2 falsified 2026-07-29 — that predicted a
+*penalty* keyed to a short λ-block vector, whereas this is a *bonus* keyed to
+λ ≈ n/3, present only under a one-sided coset.
+
+### Next step proposal
+**Thread 24 — close the last 1.5× with a per-instance ν, then stop.**
+Two cheap sub-tasks, in order:
+1. Replace `λ₁^GH` in ν by the *measured* projected Gram–Schmidt profile of
+   `L_R` (`GSO.Mat(...).r()`), i.e. predict success from
+   `‖res‖ < min_i ‖b*_i‖·(something)` rather than from the Gaussian
+   heuristic. E1 shows GH is off by 1.7–2.3× on these skewed bases, so a
+   GS-profile ν should tighten ν* from [0.67, 1.16] to a much narrower band
+   and explain the residual per-curve spread (2557 `reduced` wall 24 vs 2677's
+   16). Falsifier: if the GS-profile ν* band is not tighter than ±25%, the
+   remaining spread is not a reduction-quality effect and Thread 23's ceiling
+   estimate of 0.66 is final.
+2. Test whether `L_R` + recentring changes anything at *cryptographic* size:
+   run `reduced` on a 256-bit GLV curve (secp256k1 itself) at eff just inside
+   `0.66·n^{−1/m}` with m ≈ 40–80. Expected outcome: recovery, at a K1K2
+   budget 2.5× larger than the historical lattice, and *no* recovery for any
+   eff a factor 2 beyond it. This is the only remaining experiment that
+   changes the paper's §B5 numbers.
+
+Deprioritised: the λ*≈1/3 uncentred bonus above. It is a curiosity about a
+formulation we have just shown to be strictly dominated, so it has no attack
+value; document only.
+
+### Commits made

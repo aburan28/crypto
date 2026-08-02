@@ -271,3 +271,63 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Reformulation as BDD (Thread 23, 2026-08-02)
+
+The lattice of §2 is a Kannan embedding whose shortest vector is always the
+*trivial* vector `n·S_D·e_m` (all energy in the d column), never the planted
+vector — see `RESEARCH_AUTOLAB_LOG.md` 2026-07-29, T5. Recovery is therefore a
+BDD condition, and two defects of §2's construction were costing budget.
+
+**Defect 1 — the coset is not centred.** The planted coordinates are
+`k₁ᵢ ∈ [0,K₁)`, `k₂ᵢ ∈ [0,K₂)`, `d ∈ [0,n)`, all one-sided, so
+`E[x²] = X²/3` instead of `X²/12`. Substituting
+`k₁ = k₁' + K₁/2`, `k₂ = k₂' + K₂/2`, `d = d' + n/2` is achieved by the single
+public substitution
+
+```
+Aᵢ  ->  Aᵢ − λ·(K₂//2) − K₁//2 + Bᵢ·(n//2)   (mod n),   d = row[m] + n//2
+```
+
+The lattice is *unchanged* (same basis, same determinant); only the target
+coset moves. This halves `E‖v_planted‖`, which is a factor 4 in the
+`eff = K₁K₂/n` budget, i.e. **2 free bits of nonce**.
+
+**Defect 2 — d carries a whole factor of n of determinant.** Eliminating d
+algebraically with `tᵢ = Bᵢ·B₀⁻¹ mod n`, the k₁-part lives in
+`Λ = {x ∈ ℤᵐ : x ≡ d·B (mod n)}`, which has basis
+`{(1,t₁,…,t_{m−1})} ∪ {n·eᵢ : i ≥ 1}` and determinant `n^{m−1}`, not `n^m`.
+The resulting lattice `L_R` has
+
+```
+dim = 2m,   det = S_K1^m · n^{m−1} · S_K2^m
+```
+
+against §2's `dim = 2m+1`, `det = S_K1^m · n^m · S_K2^m` (Kannan column
+excluded from both). d is recovered afterwards from
+`d = B₀⁻¹(k₁₀ + λ·k₂₀ − A₀) mod n`. There is no trivial vector because there
+is no d column.
+
+**Predictor.** With `S_K1·K₁ = S_K2·K₂ = n` and
+`λ₁^GH(L) = √(dim/2πe)·det^{1/dim}`, the BDD ratio `ν = E‖res‖/λ₁^GH` is
+
+| lattice | ν |
+|---|---|
+| §2 as built (`L_K`) | `√(2πe/3)·√eff·n^{+1/(2m)}` ≈ `2.386·√eff·n^{+1/(2m)}` |
+| centred (`L_KC`) | `√(πe/6)·√eff·n^{+1/(2m)}` ≈ `1.193·√eff·n^{+1/(2m)}` |
+| reduced (`L_R`) | `√(πe/6)·√eff·n^{−1/(2m)}` ≈ `1.193·√eff·n^{−1/(2m)}` |
+
+The m-dependence is only `n^{±1/(2m)}`, which is why more signatures barely
+move the wall (log 2026-07-29, T4b).
+
+**Ceiling.** The information-theoretic limit is a counting bound, not a
+lattice bound: a wrong d puts all m signatures in the `K₁×K₂` box with
+probability `eff^m`, and there are ~n wrong d, so uniqueness requires
+`n·eff^m < 1`, i.e. **`eff < n^{−1/m}`**. `L_R`'s measured wall sits at
+`eff = 0.66·n^{−1/m}` (mean over 8 curves), against `0.70·n^{−1/m}` predicted
+by the Gaussian heuristic and `1.0·n^{−1/m}` for the counting bound. So after
+this reformulation Phase 2 is within a factor ~1.5 of the counting bound and
+there is little left for lattice engineering to recover.
+
+Script: `secp256k1_cm_audit/glv_hnp_phase2_bdd.py`
+Output: `secp256k1_cm_audit/glv_hnp_phase2_bdd_output.txt`
