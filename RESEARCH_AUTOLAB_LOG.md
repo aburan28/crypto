@@ -6482,4 +6482,4 @@ reason — the relevant CF data is local to b\*, so no global statistic can work
 
 ### Commits made
 
-(hash recorded below)
+10e6477 autolab 2026-08-02: Thread 23 — exact CF closed form for nu_hat; scale-invariance; log restore
