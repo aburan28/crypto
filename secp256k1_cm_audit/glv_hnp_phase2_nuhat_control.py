@@ -54,8 +54,14 @@ import time
 import sympy
 
 import importlib.util
+# NOTE (repaired 2026-08-03): this module was originally the Thread 20a script
+# named glv_hnp_phase2_lambda_threshold.py.  Two parallel autolab sessions on
+# 2026-07-29 (d525931 and e845207) wrote DIFFERENT files under that same name;
+# the merge in 7b5b702/e31dd19 kept d525931's version, which broke the imports
+# below.  The e845207 version was restored as
+# glv_hnp_thread20a_mu_bisection.py and the import is repointed here.
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_thread20a_mu_bisection.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 

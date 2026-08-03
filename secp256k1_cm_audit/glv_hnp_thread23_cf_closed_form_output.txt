@@ -1,0 +1,145 @@
+GLV-HNP Thread 23 -- closed form for lambda_1(L2) / nu_hat
+date 2026-08-03; continues Thread 20 (e845207, 2026-07-29)
+
+==========================================================================
+A. Exhaustive check: brute force (*) vs Gauss reduction vs CF (**)
+==========================================================================
+Small n so that a can be enumerated to n.  eff = K1*K2/n controls Q.
+
+harvested 40 j=0 CM curves in [2^13, 2^16)
+   eff  curves  Gauss=BF   CF=BF  CF+semi=BF  argmin is convergent
+  0.02      40        40      40          40                    40
+  0.05      40        40      40          40                    40
+  0.10      40        40      40          40                    40
+  0.25      40        40      40          40                    40
+  0.50      40        40      40          40                    40
+
+VERDICT A: closed form (**) reproduces brute force exactly on all 200 cases: True
+           (pure convergents suffice -- semiconvergents add nothing)
+
+==========================================================================
+B. 256-bit scale: CF (**) vs exact-integer Gauss vs float Gauss
+==========================================================================
+At 256 bits nrm2() reaches ~2^1012, close to the float ceiling 2^1024.
+
+   eff   nu_hat CF  nu_hat exact  nu_hat float   CF-exact  float-exact
+  0.02    0.878210      0.878210      0.878210   0.00e+00     1.11e-16
+  0.05    0.870857      0.870857      0.870857   0.00e+00     1.11e-16
+  0.10    0.662438      0.662438      0.662438   0.00e+00     0.00e+00
+  0.25    0.585226      0.585226      0.585226   0.00e+00     0.00e+00
+  0.50    0.685119      0.685119      0.685119   0.00e+00     0.00e+00
+  1.00    0.911581      0.911581      0.911581   0.00e+00     0.00e+00
+
+worst |CF - exact|   = 0.000e+00
+worst |float - exact| = 1.110e-16
+VERDICT B: CF form is exact at 256 bits; the float Gauss reduction is
+           also adequate here (no overflow), so prior nu_hat numbers stand.
+
+==========================================================================
+C. Is argmin of (**) the convergent with q_j nearest Q?
+==========================================================================
+Q = sqrt(n*S_K1/S_K2) = sqrt(n*K2/K1) is the predicted scale.
+
+harvested 120 j=0 CM curves in [2^19, 2^21)
+
+   eff     n  nearest-Q is argmin  corr(nearestQ, true)  median t*
+  0.02   120            36/120                  -0.5084      0.359
+  0.05   120            40/120                  -0.0502      0.376
+  0.10   120            64/120                   0.0439      0.347
+  0.25   120            86/120                   0.3504      0.530
+
+t* = q_{j*}/Q.  The unweighted optimum of theta^2/t^2 + t^2 is at
+t = sqrt(theta) < 1, so t* clustering just below 1 is expected.
+
+==========================================================================
+D. FALSIFIER: corr(CF-predicted nu_hat, computed nu_hat) on a
+   20d-style sample.  <0.9 refutes the convergent-scale story.
+==========================================================================
+harvested 100 20-bit j=0 CM curves (20d used 100 at K1=72, m=12)
+
+               setting   pearson  spearman  max |diff|
+           K1=72 (20d)   1.00000   1.00000    1.11e-16
+                 K1=36   1.00000   1.00000    2.22e-16
+                K1=144   1.00000   1.00000    2.22e-16
+              eff=0.05   1.00000   1.00000    2.22e-16
+              eff=0.25   1.00000   1.00000    2.22e-16
+
+VERDICT D: the CF form is not merely correlated with the computed
+           nu_hat, it is EQUAL to it -- correlation 1.0, diff ~1e-16.
+           The falsifier (<0.9) is not triggered; the
+           convergent-scale story is confirmed.
+
+==========================================================================
+E. Bounds: nu_hat <= (4/3)^(1/4) = 1.074570 (Hermite, dim 2), and
+   nu_hat^2 >= 2*min_j theta_j (relaxing t to the reals).
+==========================================================================
+750 (curve, eff) cells
+  nu_hat range      : [0.139028, 1.072217]
+  Hermite ceiling   : 1.074570   violations: 0
+  2*theta floor     : violations: 0
+  quantiles q05=0.332 q25=0.590 q50=0.753 q75=0.880 q95=0.997
+
+The 2026-07-29 'high nu_hat' group max of 1.072 was therefore sitting
+ON the Hermite bound: nu_hat cannot exceed 1.0746, so the separator
+has a hard ceiling and 'high nu_hat' means 'L2 nearly hexagonal'.
+
+==========================================================================
+F. secp256k1: which convergent of lam/n realises nu_hat?
+==========================================================================
+lam^2 + lam + 1 = 0 mod n  verified;  mu = 0.325740
+CF of lam/n has 141 convergents; max partial quotient = 312
+
+   eff    nu_hat   j*  log2 q*   log2 Q      t*    theta* sqrt(2 th*)
+  0.02  0.878210   72   130.47   130.82   0.783   0.31094    0.788591
+  0.05  0.870857   70   127.83   130.16   0.199   0.16902    0.581411
+  0.10  0.662438   70   127.83   129.66   0.282   0.16902    0.581411
+  0.25  0.585226   70   127.83   129.00   0.446   0.16902    0.581411
+  0.50  0.685119   70   127.83   128.50   0.630   0.16902    0.581411
+  1.00  0.911581   70   127.83   128.00   0.892   0.16902    0.581411
+
+Caveats unchanged from 2026-07-29: this is a 20/24-bit -> 256-bit
+extrapolation of an empirical regularity, and the whole thread is
+conditional on a NON-STANDARD nonce generator k = k1 + lam*k2 with k1
+bounded.  It is NOT an attack on secp256k1.
+
+==========================================================================
+G. Exp C falsified the 'nearest Q' rule.  Correct characterisation:
+   in (q_j^2, e_j^2) coordinates the convergents form a monotone
+   staircase and the winner is where a line of slope -S_K2^2/S_K1^2
+   is tangent to it.  Consequences, checked here.
+==========================================================================
+
+G1. theta_j spread within one curve's CF (60 curves):
+    max_j theta_j / min_j theta_j : median 7.2x, max 279.4x
+    theta_j varies by orders of magnitude, so 'the convergent nearest
+    Q' is often beaten by a neighbour with much smaller theta.  That
+    is exactly why C scores 30-72% instead of ~100%.
+
+G2. index offset j* - j_nearestQ (eff=0.10, 60 curves):
+    offset  -2:   2 curves
+    offset  -1:  22 curves
+    offset  +0:  36 curves
+    The winner is always a near neighbour -- the scale story is right,
+    the argmin is just not exactly at Q.
+
+G3. secp256k1: nu_hat vs eff is one convergent's hyperbola.
+       eff    nu_hat   j*      t*    theta*  sqrt(theta^2/t^2+t^2)
+      0.05  0.870857   70   0.199   0.16902               0.870857
+      0.10  0.662438   70   0.282   0.16902               0.662438
+      0.15  0.599002   70   0.345   0.16902               0.599002
+      0.20  0.581953   70   0.399   0.16902               0.581953
+      0.25  0.585226   70   0.446   0.16902               0.585226
+      0.35  0.617195   70   0.528   0.16902               0.617195
+      0.50  0.685119   70   0.630   0.16902               0.685119
+      0.75  0.802618   70   0.772   0.16902               0.802618
+      1.00  0.911581   70   0.892   0.16902               0.911581
+    A single convergent (j*=70) wins across eff in [0.05, 1.0], so the
+    non-monotone nu_hat(eff) reported 2026-07-29 (0.871, 0.662, 0.585,
+    0.685) is not noise: it is the convex curve theta^2/t^2 + t^2
+    traced by that one convergent, with minimum sqrt(2*theta) = 0.5814
+    attained at t = sqrt(theta) = 0.411.  eff=0.25 (t*=0.446) is the
+    closest sampled point to that minimum -- matching nu_hat=0.585.
+
+==========================================================================
+A exact: True   B exact at 256 bits: True
+Done.
