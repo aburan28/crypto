@@ -6595,4 +6595,4 @@ winning index depends on `K1/K2`; nine invariants have now been falsified
 
 ### Commits made
 
-(hash recorded in the following commit)
+396f83b autolab 2026-08-03: Thread 23 — closed form for nu_hat; nearest-Q rule falsified; 2026-07-29 log+scripts repaired
