@@ -6281,3 +6281,4 @@ Do NOT re-try: the S_D lift (T23-B), Babai/CVP reformulation (T23-C), the
 condition (part 2), or ρ = μ/‖pv‖ (07-29 T2). All falsified.
 
 ### Commits made
+1e2fc49 autolab 2026-08-03: Thread 23 — BDD reformulation falsified; Ψ=γ·δ^dim has interior optimum
