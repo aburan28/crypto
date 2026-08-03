@@ -6290,3 +6290,4 @@ answer and Phase 2 predictor work is closed; if b is significantly positive, mor
 signatures genuinely relax the ν̂ requirement and the ceiling is softer in m than in K1.
 
 ### Commits made
+be1eade autolab 2026-08-03: Thread 23 falsified — trivial vector is a spectator; ν̂ mechanism found
