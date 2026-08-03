@@ -6296,4 +6296,4 @@ module scope. Move its driver under `if __name__ == '__main__':` and repoint it 
 `glv_hnp_lib.py` so the canonical helpers have exactly one definition.
 
 ### Commits made
-(recorded after commit)
+2f07f55 autolab 2026-08-03: Thread 23 — d-column removal is a no-op; nu_proj unifies the Phase-2 wall
