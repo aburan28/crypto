@@ -6103,3 +6103,160 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.** This is
+verbatim the "Next step proposal" of the 2026-07-29 entry (log line 5990ff), which is the
+most recent run and made measurable progress (T5: the planted vector is never λ₁ because
+the trivial vector `n·S_D·e_m` of norm n is always shorter). Protocol Step 2 rule (b)
+applies: priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END, priority 3 completed
+2026-07-21, and priority 5's own continuation is this thread. Nothing has been logged in
+the 5 days since.
+
+The 07-29 entry pre-registered a two-part falsifier; this run executes it.
+**Outcome: criterion A′ met, criterion B not met — the reformulation is structurally
+correct and operationally worthless. Thread 23 CLOSED, negative.**
+
+### Work done
+- Environment (fresh container): `apt-get install pari-gp`, `pip install cysignals fpylll
+  sympy` → fpylll 0.6.4, sympy 1.14.0. (Same note as 07-29: `cysignals` must be installed
+  explicitly, it is not pulled in as an fpylll dependency.)
+- New script `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (5 experiments U0–U5),
+  output artifact `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (147 lines).
+  EC arithmetic, `gen_signatures` and `build_glv_lattice` are copied verbatim from
+  `glv_hnp_phase2_20bit.py:262` so the comparison to 06-15 / 07-26 / 07-29 is exact.
+- **Constructed π(L) explicitly.** Since e_m is a standard basis direction, orthogonal
+  projection onto e_m^⊥ is exactly "delete coordinate m", so the trivial vector maps to 0
+  and `det(π L) = det(L)/(n·S_D)`, rank 2m+1. An explicit basis needs no HNF: in the first
+  m columns the rows `n·S_K1·e_i` and `S_K1·(B_i)_i` generate `S_K1·Λ` with
+  `Λ = nℤ^m + ℤB`; n is prime and every `B_i ≢ 0`, so `[Λ : nℤ^m] = n` and with
+  `u = B_0^{-1} mod n`, `w = (1, uB_1, …, uB_{m-1})` the set `{w, n·e_1, …, n·e_{m-1}}` is
+  a basis of Λ. See `glv_hnp_phase2_projected.py:163-190`.
+- **d is recovered algebraically, no transformation matrix needed.** From any
+  `v ∈ π(L)`: `k1_i = v_i/S_K1`, `k2_i = v_{m+i}/S_K2`, `κ = v_{2m}/S_KANNAN`, then
+  `d ≡ (k1_i + λ·k2_i − κ·A_i)·B_i^{-1} (mod n)` for every i — an m-fold redundant check
+  (`glv_hnp_phase2_projected.py:200`). This sidesteps the fpylll `U`-tracking question
+  entirely and is stricter than the original `recover_d`, which only read column m.
+- Ran the full 07-29 T4 grid in both formulations: 3 curves × {LLL, BKZ-20, BKZ-40} ×
+  K1 ∈ {2,3,4,6,8,12,16,24,32} × 5 seeds = 810 reductions.
+- `cargo test --test curve_audit` → see Findings.
+
+### Findings
+
+**U0 — the projected basis is correct.** Exact (sympy) determinant check and planted-vector
+membership, all three historical curves:
+
+| curve | m | dim(L) | dim(πL) | det(πL)·n == det(L) | planted ∈ πL |
+|---|---|---|---|---|---|
+| C1/2557 | 8 | 18 | 17 | True | True |
+| C2/2677 | 10 | 22 | 21 | True | True |
+| C0/199 | 6 | 14 | 13 | True | True |
+
+**U1 — criterion A′ MET: the planted vector does become λ₁.** `sv/pv` is the norm of the
+shortest vector found over the planted-vector norm:
+
+| curve | K1 | sv/pv orig | sv/pv proj | GH/pv proj | recovered |
+|---|---|---|---|---|---|
+| C1/2557 | 2 | 0.5280 | **1.0000** | 1.635 | yes |
+| C1/2557 | 4 | 0.4986 | 0.6470 | 1.105 | yes |
+| C1/2557 | 8 | 0.4865 | 0.5324 | 0.775 | yes |
+| C2/2677 | 2 | 0.4302 | **1.0000** | 1.591 | yes |
+| C2/2677 | 4 | 0.4116 | **1.0000** | 1.090 | yes |
+| C2/2677 | 8 | 0.4048 | 0.8127 | 0.769 | no |
+| C0/199 | 2 | 0.5693 | 0.8428 | 0.829 | yes |
+| C0/199 | 4 | 0.5392 | 0.6230 | 0.564 | no |
+| C0/199 | 8 | 0.5285 | 0.5259 | 0.448 | no |
+
+orig: sv/pv ∈ [0.405, 0.569], never above 0.57, on every cell — the trivial vector wins
+every time, as T5 predicted. proj: reaches exactly 1.0000 in 3/9 cells, 0/9 in orig.
+
+**Correction to the 07-29 falsifier statement.** It asked for "sv/pv rises above 1". That
+is unachievable by construction: `sv` is the shortest vector *found*, so `sv/pv ≤ 1`
+always, with equality exactly when the planted vector is the one found. The criterion is
+recorded here in its corrected form (`sv/pv → 1.0000`) so no future run re-derives this.
+
+**U2 — criterion B NOT MET: the K1 wall does not move. At all.** wins/5 seeds:
+
+| curve | mode | algo | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| C1/2557 | orig | LLL | 5|5|5|5|5|1|0|0|0| 8 |
+| C1/2557 | proj | LLL | 5|5|5|5|5|1|0|0|0| 8 |
+| C1/2557 | orig | BKZ-40 | 5|5|5|5|5|1|0|0|0| 8 |
+| C1/2557 | proj | BKZ-40 | 5|5|5|5|5|1|0|0|0| 8 |
+| C2/2677 | orig | LLL | 5|5|5|1|0|0|0|0|0| 4 |
+| C2/2677 | proj | LLL | 5|5|5|1|0|0|0|0|0| 4 |
+| C2/2677 | orig | BKZ-40 | 5|5|5|2|0|0|0|0|0| 4 |
+| C2/2677 | proj | BKZ-40 | 5|5|5|2|0|0|0|0|0| 4 |
+| C0/199 | orig | LLL | 5|5|3|1|0|0|0|0|0| 4 |
+| C0/199 | proj | LLL | 5|5|3|1|0|0|0|0|0| 4 |
+
+The orig and proj rows are **cell-for-cell identical** across all 3 curves × 3 algorithms ×
+9 K1 values, with one exception that is noise (C0 proj BKZ-20/40 scores 1/5 at K1=16 where
+orig scores 0/5). BKZ-40 also never beats LLL, in either formulation.
+
+**Interpretation — the trivial vector was never the problem.** LLL and BKZ size-reduce and
+apply Lovász to the Gram-Schmidt *projections* `b_i*`, so after they place the trivial
+vector as `b_1` they are already reducing in π(L) for `b_2 … b_dim`. Quotienting it out
+explicitly is therefore a no-op for recovery. What the projection buys is a *correct SVP
+formulation* — an exact SVP oracle on L returns the useless `n·S_D·e_m`, on π(L) it returns
+the secret — but no attack power at LLL/BKZ-40 strength.
+
+**U4 — GH(πL)/‖pv‖ is a good but not clean forward predictor** (27 grid points):
+
+| | range |
+|---|---|
+| GH/pv over successes (≥3/5) | [0.5643, 1.6352] |
+| GH/pv over failures | [0.2192, 0.8436] |
+
+Best single threshold GH/pv ≥ 0.564: **accuracy 0.889** vs majority baseline 0.593. It
+locates each curve's own wall to within one grid step, but the bands overlap across curves:
+C1 at K1=8 succeeds at GH/pv = 0.775 while C2 at K1=8 fails at 0.769. So this is the 7th
+quantity tried and the 7th that does not cleanly separate C1 from C2 — but note it is *not*
+a curve-level invariant (it depends on K1, m, n), so it does not contradict the 07-29
+conclusion that no curve-level invariant can work. It is much better than the six
+previously falsified separators, all of which had full overlap.
+
+**U5 — what the wall actually is.** Expected spurious secrets `≈ n·eff^m`, `eff = K1·K2/n`,
+so recovery is information-theoretically possible while `K1 < (n/K2)·n^(-1/m)`:
+
+| curve | λ* | m | K2 | K1_info | K1_wall (proj/LLL) | gap |
+|---|---|---|---|---|---|---|
+| C0/199 | 0.467 | 6 | 15 | 5.5 | 4 | **1.4×** |
+| C1/2557 | 0.340 | 8 | 52 | 19.1 | 8 | **2.4×** |
+| C2/2677 | 0.070 | 10 | 52 | 23.1 | 4 | **5.8×** |
+
+This is the run's one genuinely new positive result. The gap to the counting bound is
+monotone in λ*: at λ*=0.47 the attack is essentially AT the information limit (1.4×, i.e.
+nothing left on the table), at λ*=0.34 within 2.4×, at λ*=0.07 a factor 5.8 short. So the
+wall is **information-theoretic for large λ* and lattice-geometric for small λ***. This
+reconciles the last three entries: 07-26 claimed a hard λ/n obstruction (wrong — 07-29 T3
+falsified it with a 5/5 recovery at λ*=0.0068), 07-29 measured a "~3× shift in the K1 wall"
+attributable to λ* (right, and here it is quantified as a 1.4× → 5.8× monotone gap to the
+counting bound). Low λ* costs real attack power; it does not create a structural
+obstruction.
+
+**Regression.** `cargo test --test curve_audit` → 5/5 pass. No Rust files were touched.
+
+### Next step proposal
+**Thread 24 — close the 5.8× gap on C2 with a λ-adapted k1-column scaling, or prove it
+cannot be closed.** U5 localises the remaining slack precisely: it is entirely on the
+small-λ* curve, and it is a lattice-geometry loss (U2 rules out reduction strength; U1/U0
+rule out the trivial vector). The natural suspect is the uniform column scale `S_K1 = n/K1`
+applied to all m signature columns, which ignores that for small λ the k2-block rows
+`(-λ·S_K1 e_i, S_K2 e_{m+i})` are already nearly orthogonal to the k1 block and so
+contribute almost nothing to shortening. Concretely: sweep a per-block scale ratio
+`S_K2 → c·S_K2` for c ∈ {1/8, 1/4, 1/2, 1, 2, 4, 8} on C2 at K1 ∈ {6, 8, 12} and see
+whether any c pushes the wall past 4. Falsifier: if the best c leaves the C2 wall at 4
+while C1's stays at 8, the gap is intrinsic to the small-λ* geometry and Phase 2 should be
+marked DEAD END for good; if some c moves C2's wall to 8+, the uniform scaling was the
+defect and the whole 06-21…07-29 failure series needs re-running under the corrected scale.
+Cost: ~200 reductions in dim ≤ 22, under 5 minutes — the same order as this run.
+
+Secondary (cheap, and it makes the above a fair test): U4's GH/pv is computed from a single
+seed, which makes it non-monotone in K1 (C1: 0.759 at K1=6 but 0.775 at K1=8, because
+`S_K1 = ⌊n/K1⌋` and ‖pv‖ depends on the sampled k1_i). Average ‖pv‖ over the 5 seeds before
+using GH/pv as a predictor.
+
+### Commits made

@@ -1,0 +1,152 @@
+==============================================================================
+Thread 23 -- projected (quotient) Phase-2 lattice   [GLV-HNP]
+==============================================================================
+  C1/2557: p=2557 n=2659 (12b) lam=1755 lam*=0.3400 m=8
+  C2/2677: p=2677 n=2647 (12b) lam=185 lam*=0.0699 m=10
+  C0/199: p=211 n=199 (8b) lam=106 lam*=0.4673 m=6
+
+------------------------------------------------------------------------------
+U0: projected basis is correct (determinant + planted-vector membership)
+------------------------------------------------------------------------------
+curve       m  dim(L)  dim(piL)   det(piL)*n == det(L)  pv in piL
+C1/2557     8      18        17                   True       True
+C2/2677    10      22        21                   True       True
+C0/199      6      14        13                   True       True
+
+------------------------------------------------------------------------------
+U1: sv/pv and GH/pv -- is the planted vector lambda_1 after projection?
+------------------------------------------------------------------------------
+curve      K1  mode  dim    sv/pv    GH/pv   ok
+C1/2557     2  orig   18   0.5280   1.4751  True
+C1/2557     2  proj   17   1.0000   1.6352  True
+C1/2557     4  orig   18   0.4986   1.0232  True
+C1/2557     4  proj   17   0.6470   1.1046  True
+C1/2557     8  orig   18   0.4865   0.7337  True
+C1/2557     8  proj   17   0.5324   0.7752  True
+C2/2677     2  orig   22   0.4302   1.4736  True
+C2/2677     2  proj   21   1.0000   1.5913  True
+C2/2677     4  orig   22   0.4116   1.0286  True
+C2/2677     4  proj   21   1.0000   1.0897  True
+C2/2677     8  orig   22   0.4048   0.7378 False
+C2/2677     8  proj   21   0.8127   0.7688 False
+C0/199      2  orig   14   0.5693   0.7860  True
+C0/199      2  proj   13   0.8428   0.8294  True
+C0/199      4  orig   14   0.5392   0.5508 False
+C0/199      4  proj   13   0.6230   0.5643 False
+C0/199      8  orig   14   0.5285   0.4427 False
+C0/199      8  proj   13   0.5259   0.4478 False
+
+------------------------------------------------------------------------------
+U2: K1-wall grid -- does the wall move outward under projection?
+    (wins out of 5 seeds; wall = largest K1 with >=3/5)
+------------------------------------------------------------------------------
+curve      mode    algo     2    3    4    6    8   12   16   24   32   wall
+C1/2557    orig     LLL     5    5    5    5    5    1    0    0    0      8
+C1/2557    proj     LLL     5    5    5    5    5    1    0    0    0      8
+C1/2557    orig   BKZ20     5    5    5    5    5    1    0    0    0      8
+C1/2557    proj   BKZ20     5    5    5    5    5    1    0    0    0      8
+C1/2557    orig   BKZ40     5    5    5    5    5    1    0    0    0      8
+C1/2557    proj   BKZ40     5    5    5    5    5    1    0    0    0      8
+C2/2677    orig     LLL     5    5    5    1    0    0    0    0    0      4
+C2/2677    proj     LLL     5    5    5    1    0    0    0    0    0      4
+C2/2677    orig   BKZ20     5    5    5    2    0    0    0    0    0      4
+C2/2677    proj   BKZ20     5    5    5    2    0    0    0    0    0      4
+C2/2677    orig   BKZ40     5    5    5    2    0    0    0    0    0      4
+C2/2677    proj   BKZ40     5    5    5    2    0    0    0    0    0      4
+C0/199     orig     LLL     5    5    3    1    0    0    0    0    0      4
+C0/199     proj     LLL     5    5    3    1    0    0    0    0    0      4
+C0/199     orig   BKZ20     5    5    3    1    0    0    0    0    0      4
+C0/199     proj   BKZ20     5    5    3    1    0    0    1    0    0      4
+C0/199     orig   BKZ40     5    5    3    1    0    0    0    0    0      4
+C0/199     proj   BKZ40     5    5    3    1    0    0    1    0    0      4
+
+------------------------------------------------------------------------------
+U3: verdict on the 2026-07-29 falsifier
+------------------------------------------------------------------------------
+sv/pv  orig: min=0.4048 max=0.5693
+sv/pv  proj: min=0.5259 max=1.0000
+NOTE: the 2026-07-29 falsifier asked for 'sv/pv > 1'. That is unachievable
+      by construction -- sv is the shortest vector FOUND, so sv/pv <= 1 always,
+      with equality exactly when the planted vector is the shortest one found.
+      Corrected criterion A: sv/pv -> 1.0000 in the recovering regime.
+criterion A' (sv/pv == 1): proj 3/9 cells, orig 0/9 cells -> MET
+  wall C1/2557   LLL   : orig=  8  proj=  8  same
+  wall C1/2557   BKZ20 : orig=  8  proj=  8  same
+  wall C1/2557   BKZ40 : orig=  8  proj=  8  same
+  wall C2/2677   LLL   : orig=  4  proj=  4  same
+  wall C2/2677   BKZ20 : orig=  4  proj=  4  same
+  wall C2/2677   BKZ40 : orig=  4  proj=  4  same
+  wall C0/199    LLL   : orig=  4  proj=  4  same
+  wall C0/199    BKZ20 : orig=  4  proj=  4  same
+  wall C0/199    BKZ40 : orig=  4  proj=  4  same
+criterion B (K1 wall moves outward): NOT MET
+
+VERDICT: criterion A' MET (planted vector becomes lambda_1), criterion B
+         NOT MET (wall does not move, in any of 3 curves x 3 algorithms).
+         The trivial vector n*S_D*e_m was NEVER the cause of the K1 wall:
+         LLL/BKZ already reduce in the projection along their own GS profile,
+         so quotienting it out is a no-op for RECOVERY.  What the projection
+         buys is correctness of the SVP formulation, not attack power.
+         BKZ-40 does not beat LLL in either formulation either -> the wall is
+         not a reduction-strength limit.  See U5 for what it actually is.
+
+------------------------------------------------------------------------------
+U4: is GH(piL)/||pv|| a forward predictor of success?
+------------------------------------------------------------------------------
+curve      K1    GH/pv  wins/5
+C1/2557     2   1.6352       5
+C1/2557     3   1.1457       5
+C1/2557     4   1.1046       5
+C1/2557     6   0.7590       5
+C1/2557     8   0.7752       5
+C1/2557    12   0.5305       1
+C1/2557    16   0.5457       0
+C1/2557    24   0.3749       0
+C1/2557    32   0.3901       0
+C2/2677     2   1.5913       5
+C2/2677     3   1.2790       5
+C2/2677     4   1.0897       5
+C2/2677     6   0.8436       1
+C2/2677     8   0.7688       0
+C2/2677    12   0.5888       0
+C2/2677    16   0.5419       0
+C2/2677    24   0.4144       0
+C2/2677    32   0.3855       0
+C0/199      2   0.8294       5
+C0/199      3   0.6635       5
+C0/199      4   0.5643       3
+C0/199      6   0.4356       1
+C0/199      8   0.4478       0
+C0/199     12   0.3097       0
+C0/199     16   0.3342       0
+C0/199     24   0.2192       0
+C0/199     32   0.2391       0
+
+GH/pv over successes: [0.5643, 1.6352]
+GH/pv over failures : [0.2192, 0.8436]
+clean separation (min success > max failure): False
+best single threshold GH/pv >= 0.5643: accuracy 0.889 (27 points, majority baseline 0.593)
+
+------------------------------------------------------------------------------
+U5: lattice wall vs the counting (uniqueness) bound
+------------------------------------------------------------------------------
+Expected number of spurious secrets: n * eff^m with eff = K1*K2/n.
+Recovery is information-theoretically possible while n*eff^m < 1, i.e.
+    K1 < (n / K2) * n^(-1/m).
+
+curve       lam*   m   K2  K1_info  K1_wall  gap = K1_info/K1_wall
+C1/2557    0.340   8   52     19.1        8                    2.4x
+C2/2677    0.070  10   52     23.1        4                    5.8x
+C0/199     0.467   6   15      5.5        4                    1.4x
+
+Reading: C0 (lam*=0.47) sits essentially AT its counting bound -- nothing is
+left on the table there.  C1 (lam*=0.34) is within ~2x.  C2 (lam*=0.07) is
+~6x short of its counting bound, and that gap is exactly the lam* penalty
+measured as ~3x in the 2026-07-29 T4 grid.  So the wall is information-
+theoretic for large lam* and lattice-geometric for small lam*: low lam* costs
+real attack power, it just does not create the hard obstruction that the
+2026-07-26 entry claimed.
+
+==============================================================================
+done
+==============================================================================
