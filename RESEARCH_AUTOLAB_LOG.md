@@ -6309,3 +6309,4 @@ F1 predictor. F1 claims those six failed curve-level invariants failed because t
 predictor is not curve-level — a direct check would confirm or kill that retro-explanation.
 
 ### Commits made
+6dfe492 autolab 2026-08-03: Thread 23 — e_m projection is a no-op; centring moves the K1 wall 4x
