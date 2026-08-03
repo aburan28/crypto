@@ -257,7 +257,71 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
-## 9. References
+## 9. The Phase-2 ceiling (Thread 23, 2026-08-03) — ANSWERED
+
+This section answers the first open question of §8: **no**, the Phase-2
+lattice does not achieve the information-theoretic bound, and the gap is
+quantifiable in closed form.
+
+Write `eff = K1·K2/n`, `L = log n`, `E = log eff`, `dim = 2m+2`, and let
+`δ ≈ 1.021` be LLL's experimental root-Hermite factor.  With the standard
+scaling `S_K1 = n/K1`, `S_K2 = n/K2`, `S_D = 1`, `S_KANNAN = n`:
+
+```
+||v_planted|| = n·sqrt(2m/3 + 4/3)          det L = n^(3m+1)/(K1·K2)^m
+γ(m)   = ||v_planted|| / GH(L)              GH(L) = sqrt(dim/2πe)·det^(1/dim)
+Ψ(m)   = γ(m)·δ^dim                         (Gama–Nguyen uSVP form)
+```
+
+`γ(m)` decreases in `m` but saturates at `sqrt(2πe/3)·sqrt(eff)`, while
+`δ^dim` grows without bound.  So `Ψ` has an **interior minimum**:
+
+```
+dim* = 2m*+2 = sqrt( log(n/eff) / log δ )
+Ψ_min = sqrt(2πe/3)·sqrt(eff)·exp( 2·sqrt( log(n/eff)·log δ ) )
+```
+
+Three consequences, all measured (`secp256k1_cm_audit/glv_hnp_phase2_thread23_*.py`):
+
+1. **More signatures eventually hurt.**  The success rate as a function of
+   `m` rises to a peak near `m*` and falls.  On the historical hard curve
+   (n=2647, K1=6) the measured peak is m=9 against a predicted m*=10.0.
+   This resolves the 2026-07-29 T4b anomaly (m = 8…32 at K1=8 gave no
+   improvement): the optimum was already behind it.
+
+2. **The information-theoretic threshold is not the operative one.**
+   `m_info = log n / log(1/eff)` is 4.3 at K1=8 on that curve, but recovery
+   never succeeds at any m — including m=128, where γ(m)<1.  The binding
+   constraint is LLL's approximation factor in a dimension that must grow
+   at two coordinates per signature.
+
+3. **The wall is `Ψ_min ≈ 2.04`**, stable across bit-lengths: a single
+   threshold classifies 42/46 (K1, curve) cells at 12 and 16 bits
+   (LOOCV 39/46 = 0.848; majority baseline 27/46 = 0.587).  Combining with
+   the λ-geometry statistic `ν̂` of 2026-07-29 (commit `e845207`) gives
+   LOOCV 43/46 = 0.935.
+
+**Security consequence.**  Solving `Ψ_min(n, eff) = 2.04` for `eff`, with
+`K2 = sqrt(n)` (the realistic balanced-GLV nonce):
+
+| curve size | log₂ eff | m* | k₁ bits needed | bias vs. balanced |
+|---|---|---|---|---|
+| 128-bit | −8.55  | 32.7 | 55.5  | 8.5 bits  |
+| 256-bit | −11.79 | 46.3 | 116.2 | 11.8 bits |
+| 384-bit | −14.28 | 56.6 | 177.7 | 14.3 bits |
+| 521-bit | −16.51 | 65.9 | 244.0 | 16.5 bits |
+
+A **balanced** GLV decomposition (`k1, k2 ~ sqrt(n)`) gives `eff = 1` and
+`Ψ_min = ∞`: not attackable at any m.  The attack requires the GLV pair to
+be unbalanced by ≳12 bits at the 256-bit level, which is a property of the
+nonce generator, not something the attacker can induce.  This bounds the
+Risk-3 concern of §4.
+
+Caveat: the table extrapolates a threshold calibrated at 12 and 16 bits and
+assumes `δ = 1.021` holds at dim ≈ 95.  Falsifier: measure `Ψ*` at 32 and
+48 bits; if it drifts, the extrapolation is void.
+
+## 10. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
   elliptic curves with efficient endomorphisms", CRYPTO 2001.

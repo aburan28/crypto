@@ -6103,3 +6103,181 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23** — the pre-registered falsifier proposed by the 2026-07-29 run
+(log line ~6089): reformulate the Phase-2 lattice so the planted vector is
+findable, by quotienting out the trivial `n·S_D·e_m` direction that T5 proved
+is always λ₁. Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3
+closed 2026-07-21; priority 5 (GLV-HNP Phase 2) made measurable progress on
+2026-07-29, so rule (b) selects its proposed sub-task.
+
+Outcome: the falsifier resolves **negative** — the trivial-vector obstruction is
+not the binding constraint. But the diagnostic work needed to establish that
+produced a closed form for the real constraint, which is the session's result.
+
+### Work done
+- Env (fresh container): `pip install cysignals fpylll sympy` (fpylll 0.6.4).
+  `apt-get install pari-gp` failed in this container — no `gp` available. Not
+  needed for this thread; noted for future runs that need PARI.
+- Wrote four scripts, each with its committed output artifact:
+  - `glv_hnp_phase2_thread23_bdd.py` (+`_output.txt`, 202 lines) — T23-A…E
+  - `glv_hnp_phase2_thread23_mwall.py` (+`_output.txt`) — the m_lat falsifier
+  - `glv_hnp_phase2_thread23_psi.py` (+`_output.txt`) — the Ψ interior optimum
+  - `glv_hnp_phase2_thread23_calibration.py` (+`_output.txt`) — Ψ* calibration,
+    ν̂ combination, LOOCV, extrapolation
+  Lattice construction reused verbatim from `glv_hnp_phase2_20bit.py:262`
+  (only S_D promoted to a parameter) so all comparisons to 07-26/07-29 are exact.
+- `glv_hnp_phase2_thread23_bdd.py` experiment block moved under a
+  `if __name__ == "__main__"` guard so the other three can import its helpers.
+- `cargo test --test curve_audit` → 5/5 pass (5.68s). ✓
+
+### Findings
+
+**T23-C — THE FALSIFIER IS NEGATIVE. Babai-CVP does not move the wall.**
+Dropped the Kannan row/column entirely (dim 2m+1) and solved the BDD instance
+directly by nearest-plane with target `t = (−A_i·S_K1 | 0 | 0)`, error vector
+exactly `e = (k1_i·S_K1, d·S_D, k2_i·S_K2)`. Recovery is uniformly **≤** the
+Kannan+LLL baseline, never better:
+
+| curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 2557 Kannan | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 Babai  | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 |
+| 2677 Kannan | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 Babai  | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Fresh 16-bit sweep (10 curves × 5 seeds, T23-E): Kannan 49/50 vs Babai 40/50 at
+eff=0.047; 11/50 vs 9/50 at eff=0.148; 4/50 vs 2/50 at eff=0.247. BKZ(20)-Babai
+matches Kannan-LLL, never beats it. **The T5 trivial vector was never the
+obstruction** — removing it by construction changes nothing.
+
+**T23-B — the S_D lift is also dead, but the 07-29 reasoning for it was wrong.**
+The 07-29 entry stated "no choice of S_D removes it — both vectors scale
+linearly in S_D". That is false: only 1 of the planted vector's 2m+2 coordinates
+carries S_D, so `‖pv‖² = n²(2m/3+1) + d²S_D²` and `S_D > sqrt(m+3/2)` does make
+the planted vector shorter than `n·S_D·e_m`. Measured at m=12 (crossover 3.67):
+sv/pv does **not** rise above 1 — it *falls* (2557 at K1=4: 0.368 → 0.102 as
+S_D goes 1 → 64), because raising S_D exposes a *different* family of short
+non-planted vectors while inflating γ. Success degrades monotonically
+(2557/K1=4: 5/5, 5/5, 5/5, 4/5, 3/5, 1/5 for S_D = 1,2,4,8,16,64). Conclusion
+unchanged, reason corrected.
+
+**T23-D — `max_j|μ_j| < 1/2` is sufficient but NOT necessary for d-recovery.**
+Agreement with observed Babai outcome is only 20/36, and *every* mismatch is
+pred=False / recovered=True. Reason: the 2m-dimensional sublattice spanned by
+rows 0..m−1 and m+1..2m has zero e_m-coordinate, so nearest-plane can miss the
+closest vector and still return the right `d`. Any future exact criterion must
+be stated on the projection along e_m, not on the full CVP.
+
+**T23-A — closed form for γ, and the m_lat conjecture it suggests.**
+```
+γ(m) = ||v_planted||/GH(L),  log γ(m) = ½log(2πe(m+2)/(3(m+1))) + (log n + m·log eff)/(2m+2)
+γ(∞) = sqrt(2πe/3)·sqrt(eff) = 2.3860·sqrt(eff)        eff = K1·K2/n
+```
+Convergence is governed by `(n/eff)^{1/(2m+2)}`, i.e. only like `exp(log n/2m)`.
+This suggested `γ(m)<1` as the criterion, giving
+`m_lat = (log n + 1.7394)/(log(1/eff) − 1.7394)` and a hard wall at
+`eff_crit = 3/(2πe) = 0.1756`.
+
+**T23 part 2 — m_lat is FALSIFIED.** On 2677 the formula predicts K1=6 flips at
+m≈27 and K1=8 at m≈96. Measured (5 seeds):
+
+| K1=6 | m=12 | 16 | 20 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|
+| γ | 1.251 | 1.132 | 1.065 | 1.021 | 0.968 | 0.917 |
+| LLL | 2/5 | 1/5 | 2/5 | 1/5 | 1/5 | 0/5 |
+
+| K1=8 | m=12 | 24 | 32 | 48 | 64 | 80 | 96 | 128 |
+|---|---|---|---|---|---|---|---|---|
+| γ | 1.428 | 1.172 | 1.113 | 1.056 | 1.028 | 1.011 | 1.000 | 0.986 |
+| LLL | 0/5 | 0/5 | 1/5 | 1/5 | 0/5 | 1/5 | 0/5 | 0/5 |
+
+γ drops below 1 at m=96 and 128 with **0/5** recovery. γ<1 is not sufficient.
+
+**T23 part 3 — the operative quantity is Ψ(m) = γ(m)·δ^dim, and it has an
+interior minimum. This is the session's positive result.**
+Under Gama–Nguyen (λ₂/λ₁ ≳ τ·δ^dim, λ₂ ≈ GH, λ₁ = ‖pv‖, δ ≈ 1.021 for LLL):
+```
+dim* = 2m*+2 = sqrt( log(n/eff) / log δ )
+Ψ_min = sqrt(2πe/3)·sqrt(eff)·exp( 2·sqrt( log(n/eff)·log δ ) )
+```
+γ saturates; δ^dim does not; so **adding signatures past m\* is
+counterproductive**. Measured on 2677/K1=6 (10 seeds/cell, predicted m*=10.0):
+
+| m | 4 | 5 | 6 | 7 | 8 | **9** | 10 | 11 | 12 | 14 | 16 | 20 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Ψ | 3.01 | 2.62 | 2.40 | 2.27 | 2.19 | **2.15** | 2.13 | 2.13 | 2.15 | 2.21 | 2.30 | 2.55 | 2.89 | 3.82 | 7.03 |
+| LLL | 0 | 1 | 3 | 2 | 3 | **4** | 2 | 2 | 3 | 4 | 4 | 4 | 3 | 3 | 1 |
+
+The rising half (m=4→9, never measured before) is unambiguous; peak at m=9 vs
+predicted 10.0; falls to 1/10 by m=48. Ψ overstates the large-m penalty (the
+fall is slower than Ψ), and the K1=8 sweep is too noisy (0–2/10 throughout) to
+locate a peak. **P3 unconfirmed**: BKZ(20) was predicted to move m\* out by
+1.28× but is statistically indistinguishable from LLL at this success rate.
+
+**T23 part 4 — Ψ\* ≈ 2.04 is stable across bit-length.** 46 (curve, K1) cells at
+12 and 16 bits, single threshold, predict full recovery iff Ψ_min < Ψ\*:
+
+| predictor | in-sample | LOOCV |
+|---|---|---|
+| majority baseline | 27/46 = 0.587 | 0.587 |
+| **Ψ_min alone** | **42/46 = 0.913** | **39/46 = 0.848** |
+| ν̂ alone (07-29) | 27/46 = 0.587 | — |
+| Ψ/ν̂ | 36/46 = 0.783 | — |
+| **log Ψ − c·log ν̂, c = −0.6** | **45/46 = 0.978** | **43/46 = 0.935** |
+
+All four Ψ-only misses are high-λ\* curves (2557 λ\*=0.340 at Ψ=2.32; 17b/65287
+λ\*=0.335 at Ψ=2.60; 17b/67369 λ\*=0.482 at Ψ=2.59; 17b/66751 4/5) — i.e. the
+residual is exactly the λ effect, and ν̂ (which isolates it) removes 4 of them
+out of sample. Ψ and ν̂ are complementary: ν̂ carries no signal on its own here
+because K1 varies across cells and Ψ dominates that variation.
+
+**Security consequence (recorded in `RESEARCH_GLV_HNP_PHASE2.md` §9, which this
+also makes the answer to that note's first §8 open question).** Solving
+Ψ_min = 2.04 for eff with K2 = sqrt(n):
+
+| bits | log₂ eff | m\* | k₁ bits | bias vs. balanced |
+|---|---|---|---|---|
+| 128 | −8.55 | 32.7 | 55.5 | 8.5 |
+| 256 | −11.79 | 46.3 | 116.2 | 11.8 |
+| 384 | −14.28 | 56.6 | 177.7 | 14.3 |
+| 521 | −16.51 | 65.9 | 244.0 | 16.5 |
+
+Balanced GLV (k1,k2 ~ sqrt(n)) → eff = 1 → Ψ_min = ∞: **not attackable at any
+m**. So Phase 2 bites only against an unbalanced GLV nonce generator, needing
+≳12 bits of imbalance at 256 bits with ~46 signatures. Extrapolation caveat:
+Ψ\* calibrated at 12/16 bits only, δ=1.021 assumed at dim≈95.
+
+**Documentation gap noticed.** Commit `e845207` (2026-07-29) announces the ν̂
+separator (AUC 0.935) in its *message*, but no ν̂ section was ever written into
+this log — only the T1–T5 λ/n material is present at lines 5990–6105. The work
+itself survives in `secp256k1_cm_audit/glv_hnp_nuhat_vs_c1c2.py`. Definition,
+for future runs: `L2 = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩`, one of m identical copies
+inside the Phase-2 lattice; `ν̂ = λ₁(L2)/sqrt(det L2)` via one Lagrange–Gauss
+reduction, O(log n).
+
+### Next step proposal
+**Thread 24 — validate Ψ\* at 32 bits (this is also original priority-5's
+"32-bit toy curve" item, still unexecuted).**
+The entire security table rests on a threshold calibrated at 12 and 16 bits.
+Generate ~10 32-bit j=0 GLV curves, run the (K1, m) grid at m = m\*(n, eff)
+rather than a fixed m=12 — every prior campaign used m=12, which is *below* m\*
+for n ≥ 2^16 and therefore systematically underestimated the attack. Falsifier:
+if the best single threshold at 32 bits lands in [1.8, 2.3], the extrapolation
+stands and the security table can go into the paper; if it drifts monotonically
+with log n, refit Ψ\* as a function of n and the table is void. Cost: dim ≈ 70
+at m\*≈33, ~10 minutes.
+
+Secondary (cheap, do first if time is short): re-run the 2026-07-29 T4 grid at
+`m = m*` instead of m=12. Prediction from part 3: 2677/K1=6 goes from 2/5 to
+~4/10 and 2557/K1=12 improves — i.e. some cells previously logged as failures
+were only failures at the wrong m.
+
+Do NOT re-try: the S_D lift (T23-B), Babai/CVP reformulation (T23-C), the
+`max|μ|<1/2` predicate as an exact criterion (T23-D), γ<1 as a sufficient
+condition (part 2), or ρ = μ/‖pv‖ (07-29 T2). All falsified.
+
+### Commits made
