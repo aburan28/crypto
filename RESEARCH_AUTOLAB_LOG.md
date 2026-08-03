@@ -6103,3 +6103,166 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is the BDD
+target**, the continuation proposed by the 2026-07-29 entry (log line ~6089).
+Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed
+2026-07-21; priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29,
+so its proposed sub-task is the correct pick under protocol rule (b).
+
+The 2026-07-29 falsifier was: *quotient out the trivial `n·S_D·e_m` direction; if
+the K1 wall on the λ*=0.07 curve moves outward the reformulation is real, if it
+stays the wall is information-theoretic and Phase 2 is at its ceiling.*
+Outcome: **the projection does nothing, but a one-line change the falsifier did
+not anticipate — centering the CVP target — moves the wall ~3× and erases the
+λ* dependence entirely.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. `pari-gp` not needed this run.
+- Extracted the shared helpers (EC arithmetic, Eisenstein/GLV utilities,
+  `build_glv_lattice`, `planted_vector`, `search_curves`) **verbatim** from
+  `glv_hnp_phase2_lambda_threshold.py:78-410` into a new importable module
+  `secp256k1_cm_audit/glv_hnp_common.py`. The two older scripts are left
+  untouched as frozen artifacts. Future runs should import this module rather
+  than copy the construction a third time.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_bdd.py` (~500 lines): four
+  formulations on *identical* signature sets, plus structural checks and GS
+  diagnostics. Artifact: `secp256k1_cm_audit/glv_hnp_thread23_output.txt`
+  (re-runs bit-for-bit identical).
+- `cargo test --test curve_audit` → 5/5 pass (5.85s). ✓
+
+The four formulations:
+
+| name | construction | dim | error norm |
+|---|---|---|---|
+| `full` | original Kannan lattice (= T4 baseline) | 2m+2 | — |
+| `proj` | d-column deleted = orthogonal projection along e_m | 2m+1 | — |
+| `bdd` | explicit CVP in L'' (d- and Kannan-columns both dropped) | 2m | n·√(2m/3) |
+| `bdd_c` | same L'', **centered** target (shift by K1/2·S_K1, K2/2·S_K2) | 2m | n·√(m/6) |
+
+**Bug found and fixed mid-run.** The first draft used `d_secret = 1234 + seed`
+unreduced. For the 12-bit curves (n ≈ 2650) two of five seeds give d > n, which
+can never be matched, silently capping *every* cell at 3/5. All E1/E3 numbers
+below are from the corrected run (`secret_for()`, 8 seeds). E4 was unaffected
+(n ≈ 2^16.5 > all seeds). Any future run reusing this harness: reduce d mod n.
+
+### Findings
+
+**F1 — the projection is a complete no-op.** `full` and `proj` agree in *every
+one* of the 20 cells of the T4 grid, not merely on average — same seed-level
+counts. Removing the trivial vector `n·S_D·e_m` changes nothing.
+
+Structural checks (all pass, `CHECK A` in the artifact):
+- A1: `n·row_m − Σ B_i·row_i = n·S_D·e_m` exactly (norm 2659 = n·S_D).
+- A2: all `B_i ≠ 0 mod n`, so `L ∩ R·e_m = n·S_D·Z` and column-deletion is
+  legitimately the projection.
+- A3: ‖v_planted‖/‖trivial‖ = 1.989 > 1, reconfirming T5.
+- A4: `log det(L'') = 133.095623` measured vs `133.095623` predicted from
+  **det(L'') = S_K1^m · n^(m−1) · S_K2^m**, rank 2m as predicted.
+- A5: the CVP error vector equals the planted `(k1_i·S_K1, k2_i·S_K2)` exactly.
+
+The reason the projection cannot help: it removes one dimension *and* a factor n
+of determinant, and the two cancel in the Gaussian heuristic. Explicitly
+`GH(π(L)) = GH(L'')·n^(1/(2m+1))·(1+o(1))` — the trivial vector was never
+competing with the planted vector for LLL's attention, it was simply a different
+coset.
+
+**F2 — centering moves the wall ~3×, and this is the whole effect.**
+T4 grid, 8 seeds, `≥75%` = wall:
+
+| curve | λ* | m | `full` | `proj` | `bdd` | `bdd_c` |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | eff 0.156 (K1=8) | 0.156 | 0.117 | **0.235 (K1=12)** |
+| 12-bit/2677 | 0.070 | 10 | eff 0.079 (K1=4) | 0.079 | 0.079 | **0.236 (K1=12)** |
+
+**F3 — the λ* effect is an artifact of the uncentered embedding.** This is the
+main result. Under `full` the two curves have different walls (K1 = 8 vs 4, the
+"factor ~3" recorded on 2026-07-29). Under `bdd_c` **both curves wall at exactly
+eff = 0.2357, K1 = 12.** λ* has no residual effect once the error is centered.
+In the E2 separation analysis λ* scores acc = 0.667 = the majority baseline
+(i.e. zero information), while `rho_gh_c` scores acc = 1.000. Combined with
+T3 (2026-07-29), λ is now falsified as a predictor in *every* form tested:
+as a threshold, as a continuous variable, and as a wall-shifter.
+
+**F4 — quantitative wall law, confirmed to 1–5%.** With eff = K1·K2/n,
+
+    det(L'') = n^(3m−1)/(K1·K2)^m
+    ‖error‖_uncentered = n·√(2m/3),   ‖error‖_centered = n·√(m/6)
+  ⇒ ρ_GH := ‖error‖/GH(L'') = √(2πe/3) · √eff · n^(1/(2m)) · {1 or ½}
+
+with √(2πe/3) = 2.386. Predicted vs measured ρ on the E4 sweep (17-bit,
+m=12, 12 curves × 8 seeds = 96 trials/cell):
+
+| eff | 0.02 | 0.05 | 0.10 | 0.20 | 0.30 | 0.45 | 0.70 |
+|---|---|---|---|---|---|---|---|
+| predicted ρ_c | 0.272 | 0.430 | 0.608 | 0.859 | 1.052 | 1.289 | 1.608 |
+| measured ρ_c | 0.267 | 0.428 | 0.602 | 0.829 | 1.035 | 1.252 | 1.553 |
+| ratio | 1.018 | 1.004 | 1.009 | 1.036 | 1.017 | 1.029 | 1.035 |
+
+Note ρ_GH contains **no λ** — the determinant of L'' is λ-independent. F3 says
+this is not an omission: λ genuinely does not matter once centered.
+
+**F5 — E4 success curves locate the wall at ρ_c ≈ 1.** 96 trials per cell:
+
+| eff | 0.02 | 0.05 | 0.10 | 0.15 | 0.20 | 0.25 | 0.30 | 0.35 | 0.40 | 0.45 | 0.55 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `full` | 96 | 95 | 58 | 32 | 30 | 13 | 2 | 1 | 0 | 0 | 0 |
+| `bdd_c` | 96 | 96 | 96 | 96 | 91 | 90 | 62 | 43 | 16 | 5 | 0 |
+| ρ_c | .27 | .43 | .60 | .74 | .83 | .91 | 1.04 | 1.10 | 1.18 | 1.25 | 1.37 |
+
+50% crossings (linear interpolation): `full` eff = **0.119**, `bdd_c` eff =
+**0.337** — a **2.83× gain in tolerable bias**, i.e. ~1.5 extra bits of nonce
+randomness the attack can absorb. `bdd_c` crosses 50% at ρ_c = 1.04: **the wall
+sits exactly where the centered error norm equals the Gaussian heuristic of
+L''.** `full` crosses at ρ_c ≈ 0.62, so the original Kannan embedding was
+leaving a factor ~1.7 in error norm on the table.
+
+**F6 — "more data doesn't help" is also an artifact.** T4b (2026-07-29)
+concluded the K1 wall was genuine because m = 8…32 did not rescue K1=8 in the
+`full` formulation. Under `bdd_c`, at K1=16 (eff ≈ 0.31):
+
+| m | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0/8 | 3/8 | 8/8 | 8/8 | 8/8 | 8/8 |
+| 12-bit/2677 | 1/8 | 3/8 | 7/8 | 8/8 | 8/8 | 8/8 |
+| ρ_c | 1.45 | 1.23 | 1.00 | 0.92 | 0.82 | 0.74 |
+
+More data does help, exactly as ρ_c ∝ n^(1/(2m)) predicts — but only
+logarithmically, and success tracks ρ_c crossing 1 rather than m per se.
+
+**F7 — exact CVP is not better than the Kannan read-off.** `bdd` (uncentered,
+exact `CVP.closest_vector`) is equal to or slightly *worse* than `full`
+(0.117 vs 0.156 on curve 2557). Exact CVP returns the true nearest point, which
+is not the planted point once the error exceeds the covering radius, whereas the
+Kannan/LLL read-off scans every row and can still find the planted vector when
+it is not the closest. Centering, not exactness, is what buys the gain.
+
+### Next step proposal
+**Thread 24 — close the remaining factor ~1.7 by reducing ‖error‖ further,
+and re-test whether any λ-dependence survives at 20+ bits.**
+Two concrete sub-tasks, in order:
+
+1. *Per-coordinate rebalancing.* ρ_GH is minimised when every error coordinate
+   contributes equally, i.e. when K1·S_K1 = K2·S_K2. With `S_K1 = ⌊n/K1⌋`,
+   `S_K2 = ⌊n/K2⌋` the two blocks are already nominally balanced, but the
+   *rounding* (S_K2 = 51 vs n/K2 = 51.13) and the k2 range being
+   [0, √n) rather than a power of two leave a few percent. Falsifier: exact
+   rational scaling should move the E4 50%-crossing from eff 0.337 by <5%; if
+   it moves more, the scaling is a real second-order lever. Cheap — E4 rerun.
+2. *Does λ reappear at larger n?* All of F3 is at 12–17 bits, where n^(1/(2m))
+   is a large correction (1.6–1.9). Re-run E1 at 20 and 24 bits with m=16.
+   Falsifier: if the two λ* extremes still wall at the same eff under `bdd_c`,
+   λ-independence is structural; if they diverge, the 12-bit agreement was a
+   small-n coincidence. `find_20bit_curve()` in `glv_hnp_phase2_20bit.py:168`
+   already exists; budget ~20 min.
+
+Secondary (documentation): `RESEARCH_GLV_HNP_PHASE2.md` still states the λ/n
+threshold as an open question. It should be updated to record that λ is
+falsified in all three forms (T3 2026-07-29, F3 today) and that the governing
+quantity is ρ_GH = 2.386·√eff·n^(1/(2m))·{1,½}.
+
+### Commits made

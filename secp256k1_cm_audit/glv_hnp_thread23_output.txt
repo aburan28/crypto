@@ -1,0 +1,181 @@
+
+GLV-HNP Phase 2, Thread 23: reformulate the lattice so the planted vector is
+the target of a BDD/CVP instance rather than a (hopeless) SVP instance.
+
+Motivation (RESEARCH_AUTOLAB_LOG.md, 2026-07-29, exp T5):
+  The Phase-2 lattice always contains the trivial vector n*S_D*e_m (norm
+  n*S_D), because  n*row_m - sum_i B_i*row_i  cancels every k1-column.  The
+  planted vector has norm ~ n*sqrt(2m/3 + 4/3) > n, so it is NEVER lambda_1.
+  Recovery is therefore not an SVP condition but a BDD/coset condition.
+  That run proposed Thread 23: quotient out the trivial direction and/or
+  replace the Kannan embedding by an explicit CVP call, then ask whether the
+  K1 wall measured in T4 moves outward.
+
+  Falsifier stated on 2026-07-29:
+    if the wall moves outward on the lam*=0.07 curve (currently K1 ~ 4-6),
+    the reformulation is a real improvement; if the wall stays, the wall is
+    information-theoretic and Phase 2 is at its ceiling.
+
+Four formulations are compared on identical signature sets:
+
+  full   the original (2m+2)-dim Kannan lattice          [baseline, = T4]
+  proj   the same lattice with the d-column DELETED.  Deleting column m is
+         exactly the orthogonal projection along e_m, and since
+         L cap R*e_m = n*S_D*Z*e_m (proved below in check_A2), the image is
+         a rank-(2m+1) integer lattice in which the trivial vector is 0.
+         d is recovered afterwards from signature 0.
+  bdd    explicit CVP.  Drop the Kannan row AND the Kannan column AND the
+         d-column: L'' = rowspan(rows 0..2m) restricted to the k1- and
+         k2-columns, rank 2m, det = S_K1^m * n^(m-1) * S_K2^m.  The planted
+         relation becomes  (k1_i*S_K1, k2_i*S_K2) = w + a  with w in L'' and
+         a = (A_i*S_K1, 0), i.e. w is the lattice point nearest to -a and the
+         error IS the planted small vector.
+  bdd_c  same lattice, CENTERED target: shift by (K1/2*S_K1, K2/2*S_K2) so the
+         error is symmetric about 0.  E[x^2] drops from X^2/3 to X^2/12, i.e.
+         ||error|| halves.  This costs nothing and is the only one of the four
+         changes that alters the error norm rather than just the dimension.
+
+Analytic prediction being tested (derived in the log entry for 2026-08-03):
+  det(L'') = n^(3m-1)/(K1*K2)^m ,  ||error||_uncentered = n*sqrt(2m/3), so
+      rho_GH := ||error|| / GH(L'') = sqrt(2*pi*e/3) * sqrt(eff) * n^(1/(2m))
+  with eff = K1*K2/n.  The leading factor sqrt(2*pi*e/3) = 2.386, so
+  rho_GH = 1 at eff = 0.176 * n^(-1/m).  Centering divides rho_GH by 2, which
+  should move the eff wall by a factor of 4 (K1 wall by 4x) if rho_GH is the
+  governing quantity.  Note rho_GH does NOT depend on lambda at all, so if the
+  lam*=0.34 and lam*=0.07 curves keep their factor-~3 gap under bdd_c, then
+  lambda acts through the GS profile of L'' and not through its determinant.
+
+
+
+==============================================================================
+Thread 23 -- BDD reformulation of the GLV-HNP Phase 2 lattice
+==============================================================================
+  12-bit/2557    p=2557 n=2659 lam=1755 lam*=0.3400 K2=52
+  12-bit/2677    p=2677 n=2647 lam=185 lam*=0.0699 K2=52
+
+==============================================================================
+CHECK A -- structural claims about the lattice
+==============================================================================
+A1  n*row_m - sum B_i*row_i == n*S_D*e_m                 : True   (norm 2659 = n*S_D = 2659)
+A2  all B_i != 0 mod n (=> L cap R*e_m = n*S_D*Z)        : True
+A3  ||v_planted|| / ||trivial|| = 1.989   (>1 => planted is never lambda_1)
+A4  log det(L'')  measured 133.095623   predicted 133.095623   rank 16 (expect 16)
+A5  CVP error == planted (k1_i*S_K1, k2_i*S_K2)          : True   (d recovered: True)
+
+==============================================================================
+EXP E1 -- does the reformulation move the K1 wall?  (T4 grid)
+==============================================================================
+
+12-bit/2557   lam*=0.3400  n=2659  K2=52  m=8
+    K1     eff |   full   proj    bdd  bdd_c |  rho_gh_u rho_gh_c
+     2  0.0391 |   8/8   8/8   8/8   8/8 |    0.486   0.535
+     3  0.0587 |   8/8   8/8   8/8   8/8 |    0.747   0.564
+     4  0.0782 |   8/8   8/8   8/8   8/8 |    0.755   0.708
+     6  0.1173 |   8/8   8/8   8/8   8/8 |    1.177   0.838
+     8  0.1564 |   6/8   6/8   2/8   8/8 |    1.109   0.902
+    12  0.2347 |   1/8   1/8   1/8   8/8 |    1.732   1.163
+    16  0.3129 |   0/8   0/8   0/8   3/8 |    1.623   1.233
+    24  0.4693 |   0/8   0/8   0/8   1/8 |    2.512   1.656
+    32  0.6258 |   0/8   0/8   0/8   0/8 |    2.324   1.701
+    48  0.9387 |   0/8   0/8   0/8   0/8 |    3.587   2.347
+
+12-bit/2677   lam*=0.0699  n=2647  K2=52  m=10
+    K1     eff |   full   proj    bdd  bdd_c |  rho_gh_u rho_gh_c
+     2  0.0393 |   8/8   8/8   8/8   8/8 |    0.542   0.484
+     3  0.0589 |   8/8   8/8   8/8   8/8 |    0.686   0.492
+     4  0.0786 |   8/8   8/8   7/8   8/8 |    0.815   0.627
+     6  0.1179 |   3/8   3/8   3/8   8/8 |    1.077   0.727
+     8  0.1572 |   1/8   1/8   1/8   8/8 |    1.179   0.812
+    12  0.2357 |   0/8   0/8   0/8   8/8 |    1.577   1.001
+    16  0.3143 |   0/8   0/8   0/8   5/8 |    1.707   1.108
+    24  0.4715 |   0/8   0/8   0/8   2/8 |    2.286   1.425
+    32  0.6286 |   0/8   0/8   0/8   0/8 |    2.444   1.537
+    48  0.9430 |   0/8   0/8   0/8   0/8 |    3.259   2.019
+
+  Wall summary (last eff with >=75% -> first eff with 0):
+  curve          form      last_ok   first_0   K1 last_ok
+  12-bit/2557    full       0.1564    0.3129            8
+  12-bit/2557    proj       0.1564    0.3129            8
+  12-bit/2557    bdd        0.1173    0.3129            6
+  12-bit/2557    bdd_c      0.2347    0.6258           12
+  12-bit/2677    full       0.0786    0.2357            4
+  12-bit/2677    proj       0.0786    0.2357            4
+  12-bit/2677    bdd        0.0786    0.2357            4
+  12-bit/2677    bdd_c      0.2357    0.6286           12
+
+==============================================================================
+EXP E2 -- is rho_GH = ||error||/GH(L) the governing quantity?
+==============================================================================
+rho_GH is lambda-INDEPENDENT (det(L'') has no lam in it).  If the two
+curves keep different walls at equal rho_GH, lambda acts through the GS
+profile, not the determinant.
+
+  curve            K1     eff  rho_gh_c  bdd_c   mu/e_c  lam1/e_c  np_marg
+  12-bit/2557       2  0.0391     0.535   8/8    1.115     1.115    0.558
+  12-bit/2557       3  0.0587     0.564   8/8    1.008     1.008    0.504
+  12-bit/2557       4  0.0782     0.708   8/8    0.814     0.814    0.407
+  12-bit/2557       6  0.1173     0.838   8/8    0.749     0.749    0.375
+  12-bit/2557       8  0.1564     0.902   8/8    0.765     0.765    0.382
+  12-bit/2557      12  0.2347     1.163   8/8    0.700     0.700    0.350
+  12-bit/2557      16  0.3129     1.233   3/8    0.751     0.751    0.376
+  12-bit/2557      24  0.4693     1.656   1/8    0.680     0.680    0.271
+  12-bit/2557      32  0.6258     1.701   0/8    0.759     0.673    0.266
+  12-bit/2557      48  0.9387     2.347   0/8    0.674     0.537    0.190
+  12-bit/2677       2  0.0393     0.484   8/8    2.012     2.012    0.843
+  12-bit/2677       3  0.0589     0.492   8/8    2.407     2.358    0.735
+  12-bit/2677       4  0.0786     0.627   8/8    2.180     1.752    0.600
+  12-bit/2677       6  0.1179     0.727   8/8    1.613     1.335    0.540
+  12-bit/2677       8  0.1572     0.812   8/8    1.302     1.302    0.433
+  12-bit/2677      12  0.2357     1.001   8/8    0.953     0.953    0.412
+  12-bit/2677      16  0.3143     1.108   5/8    0.835     0.835    0.383
+  12-bit/2677      24  0.4715     1.425   2/8    0.667     0.667    0.266
+  12-bit/2677      32  0.6286     1.537   0/8    0.660     0.660    0.246
+  12-bit/2677      48  0.9430     2.019   0/8    0.575     0.559    0.194
+
+  Single-threshold separation of bdd_c success (>=75%) vs failure (<=25%):
+    rho_gh_c   acc=1.000  thr=1.1626  (majority baseline 0.667; 12 pos / 6 neg)
+    eff        acc=1.000  thr=0.2357  (majority baseline 0.667; 12 pos / 6 neg)
+    lam_star   acc=0.667  thr=0.0699  (majority baseline 0.667; 12 pos / 6 neg)
+    mu_over_e  acc=0.944  thr=0.7001  (majority baseline 0.667; 12 pos / 6 neg)
+    lam1_over_e acc=1.000  thr=0.7001  (majority baseline 0.667; 12 pos / 6 neg)
+
+==============================================================================
+EXP E3 -- m-dependence.  rho_GH ~ 2.386*sqrt(eff)*n^(1/(2m)) predicts
+==============================================================================
+that more signatures help only logarithmically (n^(1/2m) -> 1).
+T4b (2026-07-29) found m = 8..32 does NOT rescue K1=8 in the `full`
+formulation.  Re-test under bdd_c.
+
+  curve            K1 m=6     m=8     m=12    m=16    m=24    m=32   
+  12-bit/2557       8 6/8(1.09) 8/8(0.90) 8/8(0.73) 8/8(0.67) 8/8(0.60) 8/8(0.55)
+  12-bit/2557      16 0/8(1.45) 3/8(1.23) 8/8(1.00) 8/8(0.92) 8/8(0.82) 8/8(0.74)
+  12-bit/2677       8 7/8(1.09) 8/8(0.90) 8/8(0.73) 8/8(0.67) 8/8(0.60) 8/8(0.55)
+  12-bit/2677      16 1/8(1.45) 3/8(1.24) 7/8(1.00) 8/8(0.92) 8/8(0.82) 8/8(0.74)
+
+==============================================================================
+EXP E4 -- where is the eff wall on fresh curves?  predicted 0.176*n^(-1/m)
+==============================================================================
+  12 fresh 17-bit j=0 GLV curves (lam* spread over 6 bins, 0.0s)
+
+  m=12, 12 curves x 8 seeds per eff cell
+     eff |      full     bdd_c |  rho_gh_c
+   0.020 |   96/96     96/96   |     0.267
+   0.050 |   95/96     96/96   |     0.428
+   0.100 |   58/96     96/96   |     0.602
+   0.150 |   32/96     96/96   |     0.737
+   0.200 |   30/96     91/96   |     0.829
+   0.250 |   13/96     90/96   |     0.913
+   0.300 |    2/96     62/96   |     1.035
+   0.350 |    1/96     43/96   |     1.100
+   0.400 |    0/96     16/96   |     1.175
+   0.450 |    0/96      5/96   |     1.252
+   0.550 |    0/96      0/96   |     1.373
+   0.700 |    0/96      0/96   |     1.553
+
+==============================================================================
+SUMMARY
+==============================================================================
+  12-bit/2557    lam*=0.3400  eff wall  full 0.1564 -> bdd_c 0.2347   (1.50x)   K1 wall 8 -> 12
+  12-bit/2677    lam*=0.0699  eff wall  full 0.0786 -> bdd_c 0.2357   (3.00x)   K1 wall 4 -> 12
+
+Done.
