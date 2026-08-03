@@ -1,0 +1,139 @@
+==============================================================================
+Thread 23 — reformulating the Phase-2 lattice (GLV-HNP)
+==============================================================================
+
+Historical curves (lam* = min(lam, n-lam)/n, the representation-
+invariant size of the eigenvalue; see 2026-07-29 T1):
+  curve                     p      n    lam    lam*   K1   m
+  8-bit/199               211    199    106  0.4673    2   6
+  12-bit/2557            2557   2659   1755  0.3400    8   8
+  12-bit/2677 FAIL       2677   2647    185  0.0699    8  10
+
+------------------------------------------------------------------------------
+EXP E1: correctness — every variant must recover d in the easy regime
+------------------------------------------------------------------------------
+If a reformulation is wrong (bad target, bad elimination) it fails here.
+Curve 8-bit/199, K1=2, m=6; and 12-bit/2557 at K1=2, m=8.
+
+  curve                  m  K1      V0      V1      V2      V3
+  8-bit/199              6   2     5/5     5/5     5/5     5/5
+  12-bit/2557            8   2     5/5     5/5     5/5     5/5
+
+  E1 verdict: PASS — all four formulations are correct
+
+------------------------------------------------------------------------------
+EXP E2: sv/pv — is the planted vector lambda_1 now?
+------------------------------------------------------------------------------
+sv = norm of the shortest row after LLL, pv = norm of the planted vector.
+2026-07-29 T5 measured sv/pv in [0.34, 0.61] for V0 (planted is NEVER
+shortest).  The Thread 23 falsifier asks whether sv/pv rises above 1.
+
+  curve                 K1   V0 sv/pv   V1 sv/pv   V2 sv/pv   V3 sv/pv
+  8-bit/199              2      0.543      0.650      0.790      0.960
+  12-bit/2557            8      0.445      0.500      0.475      0.538
+  12-bit/2677 FAIL       8      0.387      0.421      0.767      0.838
+
+  Note: for V0/V2 the planted vector is a lattice vector and sv/pv < 1
+  means it is not shortest.  For V1/V3 (CVP) pv is the target distance,
+  so sv/pv > 1 is the BDD-friendly regime (dist < lambda_1).
+
+------------------------------------------------------------------------------
+EXP E3: the K1 wall (2026-07-29 T4 grid) under all four formulations
+------------------------------------------------------------------------------
+T4 found the wall at K1 ~ 12-16 for lam*=0.34 and K1 ~ 4-6 for lam*=0.07.
+Falsifier: a real reformulation moves the wall outward (to larger K1).
+
+  12-bit/2557  (m=8, 5 seeds)
+    variant    K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+    V0          5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+    V1          5/5     5/5     5/5     5/5     5/5     0/5     0/5     0/5
+    V2          5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+    V3          5/5     5/5     5/5     5/5     5/5     0/5     0/5     0/5
+    -> V0 wall (largest K1 with 5/5): K1 = 8
+    -> V1 wall (largest K1 with 5/5): K1 = 8
+    -> V2 wall (largest K1 with 5/5): K1 = 8
+    -> V3 wall (largest K1 with 5/5): K1 = 8
+
+  12-bit/2677 FAIL  (m=10, 5 seeds)
+    variant    K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+    V0          5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+    V1          5/5     4/5     2/5     0/5     0/5     0/5     0/5     0/5
+    V2          5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+    V3          5/5     4/5     2/5     0/5     0/5     0/5     0/5     0/5
+    -> V0 wall (largest K1 with 5/5): K1 = 4
+    -> V1 wall (largest K1 with 5/5): K1 = 2
+    -> V2 wall (largest K1 with 5/5): K1 = 4
+    -> V3 wall (largest K1 with 5/5): K1 = 2
+
+------------------------------------------------------------------------------
+EXP E4: T4b control — does more data rescue K1=8 on the lam*=0.07 curve?
+------------------------------------------------------------------------------
+2026-07-29 T4b: under V0, m = 8/12/16/24/32 gave 0,0,1,0,1 out of 5.
+If a reformulation is information-theoretically better, more data should
+now help.
+
+  12-bit/2677 FAIL, K1=8
+    variant     m=8    m=12    m=16    m=24    m=32
+    V0          0/5     0/5     1/5     0/5     1/5
+    V1          0/5     0/5     0/5     0/5     0/5
+    V2          0/5     0/5     1/5     0/5     1/5
+    V3          0/5     0/5     0/5     0/5     0/5
+
+------------------------------------------------------------------------------
+EXP E5: is sv/pv a PREDICTOR of the wall in the d-eliminated lattice?
+------------------------------------------------------------------------------
+With the trivial vector gone (V2), sv is a genuine lambda_1 proxy and pv
+is the planted-vector norm, so BDD theory predicts success iff pv < sv,
+i.e. sv/pv > 1.  Every curve-level separator tried between 2026-06-21 and
+2026-06-29 failed; this one is instance-level, computable before running
+the attack, and has a parameter-free threshold at 1.0.
+GH = Gaussian-heuristic lambda_1 of the (kannan-free) d-eliminated lattice:
+    det = n^(m-1) * S_K1^m * S_K2^m,  dim = 2m,  GH = sqrt(dim/2*pi*e)*det^(1/dim)
+
+  8-bit/199  (m=6, n=199, K2=15, lam*=0.4673)
+      K1     eff   V2 win    sv/pv    GH/pv  pred(sv/pv>1)
+       2   0.151      5/5    0.790    0.939        failure  [success MISS]
+       3   0.226      5/5    0.636    0.708        failure  [success MISS]
+       4   0.302      2/5    0.578    0.649        failure  [partial --]
+       6   0.452      2/5    0.504    0.484        failure  [partial --]
+       8   0.603      0/5    0.466    0.447        failure  [failure ok]
+      12   0.905      0/5    0.336    0.326        failure  [failure ok]
+      16   1.206      0/5    0.327    0.315        failure  [failure ok]
+      24   1.809      0/5    0.237    0.228        failure  [failure ok]
+
+  12-bit/2557  (m=8, n=2659, K2=52, lam*=0.3400)
+      K1     eff   V2 win    sv/pv    GH/pv  pred(sv/pv>1)
+       2   0.039      5/5    0.902    1.761        failure  [success MISS]
+       3   0.059      5/5    0.636    1.257        failure  [success MISS]
+       4   0.078      5/5    0.585    1.144        failure  [success MISS]
+       6   0.117      5/5    0.475    0.841        failure  [success MISS]
+       8   0.156      5/5    0.475    0.767        failure  [success MISS]
+      12   0.235      1/5    0.424    0.576        failure  [partial --]
+      16   0.313      0/5    0.437    0.530        failure  [failure ok]
+      24   0.469      0/5    0.409    0.400        failure  [failure ok]
+
+  12-bit/2677 FAIL  (m=10, n=2647, K2=52, lam*=0.0699)
+      K1     eff   V2 win    sv/pv    GH/pv  pred(sv/pv>1)
+       2   0.039      5/5    1.000    1.858        failure  [success MISS]
+       3   0.059      5/5    1.000    1.369        failure  [success MISS]
+       4   0.079      5/5    1.000    1.162        failure  [success MISS]
+       6   0.118      0/5    0.945    0.899        failure  [failure ok]
+       8   0.157      0/5    0.767    0.788        failure  [failure ok]
+      12   0.236      0/5    0.543    0.615        failure  [failure ok]
+      16   0.314      0/5    0.466    0.544        failure  [failure ok]
+      24   0.471      0/5    0.377    0.429        failure  [failure ok]
+
+  sv/pv>1 rule:  11 correct, 10 wrong, 3 partial-outcome rows  (of 24)
+  GH/pv>1 rule:  17 correct (of 24) — closed form, no LLL needed
+
+==============================================================================
+SUMMARY
+==============================================================================
+  12-bit/2557          wall  V0:K1<=8  V1:K1<=8  V2:K1<=8  V3:K1<=8
+  12-bit/2677 FAIL     wall  V0:K1<=4  V1:K1<=2  V2:K1<=4  V3:K1<=2
+  T4b(K1=8) totals over m in [8, 12, 16, 24, 32]:
+    V0: 2/25
+    V1: 0/25
+    V2: 2/25
+    V3: 0/25
+==============================================================================

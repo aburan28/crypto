@@ -6103,3 +6103,178 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁.** This is the
+continuation proposed verbatim by the 2026-07-29 entry (log line ~6089), which is the
+most recent thread and made measurable progress, so protocol rule (b) applies.
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21.
+
+Falsifier as stated on 2026-07-29: *"if sv/pv rises above 1 after the reformulation and
+the K1 wall in T4 moves outward on the λ*=0.07 curve (currently K1≈4–6), the
+reformulation is a real improvement; if the wall stays at K1≈4–6, then the wall is
+information-theoretic and Phase 2 is at its ceiling."*
+
+Outcome: **the wall does not move. Thread 23 is falsified.** But the reformulation is
+what made the wall *measurable*, and it yielded the first closed-form sufficient
+condition for the attack (§Findings E5/E6) — which every curve-level separator attempt
+between 2026-06-21 and 2026-06-29 was looking for and could not find.
+
+### Work done
+- Environment (fresh container, as on 2026-07-29): `pip install fpylll cysignals sympy`
+  → fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0, mpmath 1.3.0. Still required every run.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_reformulation.py` (E1–E5). Four
+  lattice variants compared on **identical signature sets** (same seeds, same `gen_signatures`
+  as `glv_hnp_phase2_lambda_threshold.py:230`, so every comparison to 2026-07-29 is exact):
+  - **V0** baseline Kannan embedding, dim 2m+2, LLL + scan rows for |last|=S_KANNAN
+    (verbatim `glv_hnp_phase2_20bit.py:263`).
+  - **V1** same lattice, Kannan row deleted (dim 2m+1), recovery by exact-rational
+    Babai nearest-plane against t = (−A_i·S_K1, 0, …).
+  - **V2** *d eliminated algebraically*, + Kannan (dim 2m+1). With t_i = B_i·B_0⁻¹ mod n
+    and C_i = A_i − t_i·A_0 mod n, the m congruences k1_i + λk2_i − A_i ≡ B_i·d become
+    m−1 congruences with no d at all:
+    `k1_i + λ·k2_i − t_i·k1_0 − t_i·λ·k2_0 ≡ C_i (mod n)`, i ≥ 1.
+    **The d column — and with it the trivial vector n·S_D·e_m — is gone.**
+  - **V3** d eliminated, no Kannan (dim 2m), Babai nearest-plane against t = (0, −C_i·S_K1, …).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_ghpv_validation.py` — 14 fresh j=0 GLV
+  curves in [2¹³, 2¹⁵) bucketed into 7 λ* bins × 9 K1 values = **126 rows**, 5 seeds each.
+- Outputs: `glv_hnp_phase2_thread23_output.txt`, `glv_hnp_phase2_thread23_ghpv_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (5.74s). ✓
+
+### Findings
+
+**E1 — all four formulations are correct.** 8-bit/199 (m=6,K1=2) and 12-bit/2557
+(m=8,K1=2): V0/V1/V2/V3 all 5/5. So the elimination and both CVP targets are wired right;
+any later failure is a property of the lattice, not a bug.
+
+**E2 — sv/pv rises substantially, exactly as Thread 23 predicted.** Removing the trivial
+vector does what it was supposed to do:
+
+| curve | λ* | K1 | V0 sv/pv | V1 | V2 | V3 |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | 2 | 0.543 | 0.650 | 0.790 | **0.960** |
+| 12-bit/2557 | 0.340 | 8 | 0.445 | 0.500 | 0.475 | 0.538 |
+| 12-bit/2677 | 0.070 | 8 | 0.387 | 0.421 | **0.767** | **0.838** |
+
+On the historical failure curve sv/pv doubles (0.387 → 0.767). The remaining trivial
+vectors in V2/V3 are n·S_K1·e_{x0} and n·S_K2·e_{yj}, of norm n²/K1 and n²/K2 — a factor
+~n/K1 *longer* than the planted vector instead of ~2× shorter.
+
+**E3 — but the K1 wall does not move. THREAD 23 FALSIFIED.** 5 seeds, K1 grid:
+
+12-bit/2557 (m=8, λ*=0.340):
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | wall |
+|---|---|---|---|---|---|---|---|---|---|
+| V0 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | **K1≤8** |
+| V1 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | K1≤8 |
+| V2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | **K1≤8** |
+| V3 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | K1≤8 |
+
+12-bit/2677 (m=10, λ*=0.070) — the historical failure curve:
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | wall |
+|---|---|---|---|---|---|---|---|---|---|
+| V0 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | **K1≤4** |
+| V1 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1≤2 |
+| V2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | **K1≤4** |
+| V3 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1≤2 |
+
+V2's grid is **cell-for-cell identical to V0's** on both curves. Deleting the trivial
+vector changed sv/pv by 2× and changed the success rate by exactly nothing. **The trivial
+vector n·S_D·e_m was never the obstruction**, and "make the planted vector λ₁" is not the
+lever. The 2026-07-29 falsifier resolves to its second branch: the K1 wall is
+information-theoretic, and the Phase-2 lattice is at its ceiling.
+
+**E3b — Babai CVP is strictly WORSE than the Kannan scan.** V1/V3 lose ground on the
+λ*=0.07 curve (wall K1≤2 vs K1≤4) and over the whole 126-row validation set score
+330/630 vs V2's 380/630. Reason: nearest-plane commits to one coset representative,
+whereas scanning all rows of the reduced Kannan basis effectively tests every row that
+carries ±S_KANNAN. **Recorded as a dead approach — do not re-try explicit CVP here.**
+
+**E4 — T4b control reproduces exactly.** 12-bit/2677 at K1=8, m ∈ {8,12,16,24,32}:
+V0 → 0,0,1,0,1 (matches 2026-07-29 T4b verbatim); V2 → 0,0,1,0,1; V1/V3 → all 0.
+More data does not rescue the K1 wall under any formulation.
+
+**E5/E6 — NEW POSITIVE RESULT: a closed-form sufficient condition.**
+With the d column gone, the V3 lattice is clean enough that the Gaussian heuristic
+applies directly. det = n^(m−1)·S_K1^m·S_K2^m, dim = 2m, S_K1 = n/K1, S_K2 = n/K2, and
+E‖v_planted‖ ≈ n·√(2m/3), so
+
+```
+GH/pv = sqrt(dim/2πe)·det^(1/dim) / E‖v_planted‖ = sqrt(3/(2πe)) · eff^(-1/2) · n^(-1/(2m))
+```
+
+with eff = K1·K2/n. Hence **GH/pv > 1 ⟺**
+
+```
+(*)   eff · n^(1/m)  <  3/(2πe)  =  0.175665...
+```
+
+Validation (`glv_hnp_phase2_thread23_ghpv_validation.py`, 14 fresh curves × 9 K1 × 5 seeds
+= 126 rows, λ* spread over 7 bins covering [0.019, 0.486]):
+
+| | rows | of which 5/5 |
+|---|---|---|
+| satisfying (*) | 42 | **42 — zero counterexamples** |
+| GH/pv computed exactly (not closed form) > 1 | 44 | **44 — zero counterexamples** |
+| violating (*) but still 5/5 (bound is loose) | 22 | — |
+
+Overlap band of the statistic eff·n^(1/m): max over 5/5 rows = 0.4112, min over non-5/5
+rows = 0.2008. So (*) at 0.1757 sits just below the empirical boundary at 0.2008 — the
+safety margin is ~14%, i.e. the bound is tight, not vacuous, and one-sided (sufficient,
+not necessary). Same result on the historical curves: 6/6 rows satisfying (*) recovered.
+
+**E6b — (*) retro-explains the 12-bit/2677 wall to the cell.** n=2647, m=10 →
+n^(−1/m) = 0.4546, so (*) predicts recovery for eff < 0.1757·0.4546 = **0.0799**.
+Measured: K1=4 → eff = 0.0786 → 5/5 ✓; K1=6 → eff = 0.1180 → 0/5 ✓. The wall that six
+consecutive curve-level invariants failed to separate between 2026-06-21 and 2026-06-29
+is simply where GH/pv crosses 1. It is an *instance*-level quantity (n, m, K1, K2), which
+is why no curve-level invariant could ever have found it — confirming the 2026-07-29 T5
+diagnosis from the other direction.
+
+**E6c — λ* still has no threshold role.** Inside the overlap band (40 rows), mean λ* is
+0.285 for successes vs 0.222 for failures — a weak shift in the direction T4 reported
+(λ* buys ~3× in K1) and nowhere near a separator. Consistent with 2026-07-29 T1/T3.
+Nothing here revives λ*.
+
+**E6d — CORRECTION to a formula that lives in the code.** `glv_hnp_phase2_20bit.py:337`
+prints `m_thresh = ceil(log n / log(1/eff))`, the naive information-theoretic signature
+count. The lattice-geometric requirement from (*) is
+
+```
+m  >  ln n / ln(0.175665 / eff)        (defined only for eff < 0.1757)
+```
+
+i.e. `1/eff` is replaced by `0.1757/eff`. This is strictly more signatures. Worked
+example at eff = 0.05, n ≈ 2²⁵⁶: naive m = ⌈177.4/3.00⌉ = **60**; correct m =
+⌈177.4/1.256⌉ = **142**, a factor 2.4×. The printed `m_thresh` in that script is
+therefore an underestimate by ~2.4× at realistic eff, and every "m below threshold"
+remark in the 2026-06 log entries that relied on it should be read with that factor.
+(The script was left unmodified so its `.expected.txt` artifacts still reproduce.)
+
+### Next step proposal
+**Thread 24 — test (*) at cryptographic scale, and find where the constant comes from.**
+Two concrete sub-tasks, in order:
+
+(a) *Scale test.* (*) is calibrated on 13–15-bit n. Run the validation grid on 24-bit and
+32-bit j=0 GLV curves at m = 8, 16, 32 and check whether the zero-false-positive property
+survives and whether the empirical boundary stays near 0.20. Falsifier: any row with
+eff·n^(1/m) < 0.1757 that fails to recover 5/5. Expected cost: the V2 attack at m=32 is
+dim 65, ~seconds per LLL, so a 3-curve × 6-K1 × 5-seed grid is a ~30-minute run.
+Cheapest possible first cut: reuse `search_curves(2**23, 2**24, per_bin=1, nbins=3)`.
+
+(b) *Explain the 0.1757 → 0.2008 gap.* The empirical boundary sits ~14% above the GH
+prediction, consistently across all 14 curves. Hypothesis H24: the gap is the LLL
+approximation factor acting on the *projected* GS profile rather than a defect in the
+Gaussian heuristic, so it should shrink toward 1 under BKZ-β as β grows. Falsifier: run
+the overlap-band rows (eff·n^(1/m) ∈ [0.2008, 0.4112], 40 rows already identified) under
+BKZ-20 and BKZ-40. If the boundary moves toward 0.1757 the gap is reduction quality; if
+it stays at 0.2008 the gap is in the heuristic and the constant should be re-derived.
+
+Explicitly NOT worth re-trying (this run's dead ends): making the planted vector λ₁,
+explicit Babai/CVP recovery, and any further curve-level separator for the K1 wall.
+
+### Commits made
