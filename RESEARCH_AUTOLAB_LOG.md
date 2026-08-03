@@ -6599,4 +6599,4 @@ within-regime power).
 
 ### Commits made
 
-(hash recorded in the following commit)
+b9827f3 autolab 2026-08-03: Thread 23a — quotient reformulation is exact but inert; ν̂ replicates out-of-sample (AUC 1.000)
