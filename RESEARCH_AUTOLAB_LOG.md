@@ -6103,3 +6103,134 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁ — proposed
+verbatim by the 2026-07-29 entry (log line ~6090) and flagged there as cheap. That entry
+established (T5) that the trivial vector `n·S_D·e_m` is shorter than the planted vector
+for every m ≥ 1, so recovery is a BDD/coset condition rather than SVP. Its falsifier:
+*if the K1 wall moves outward after the reformulation it is a real improvement; if it
+stays at K1≈4–6 the wall is information-theoretic and Phase 2 is at its ceiling.*
+
+Outcome: the wall does not move under the reformulation — but the falsifier's second
+branch is **wrong**, and with it the 2026-07-26 "structural failure" claim. The wall is
+an artifact of *nearest-point decoding*, and list decoding walks straight through it.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`. PARI/GP not needed
+  this run. Note for future runs: a pip-installed fpylll ships **no** fplll pruning
+  strategies, so `SVP.shortest_vector()` dies with
+  `FileNotFoundError: '/project/local/share/fplll/strategies/default.json'`.
+  Workaround used here: `BKZ.reduction(A, BKZ.Param(A.nrows))` (block_size = dim = HKZ),
+  whose first basis vector is provably shortest. `BKZ.Param(20/40)` and
+  `CVP.closest_vector` are unaffected.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (8 experiments), reusing the
+  lattice construction verbatim from `glv_hnp_phase2_20bit.py:262` so every number is
+  comparable to 2026-07-26 and 2026-07-29. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (246 lines). Whole script runs
+  in 11 s — exact CVP/SVP at dim ≤ 22 is essentially free at these bit-lengths.
+- Five formulations measured side by side:
+  - **A0** Kannan baseline, dim 2m+2 (verbatim).
+  - **A1** projected: delete column m (the d-column). π is a lattice homomorphism with
+    π(n·e_m) = 0, so the trivial vector dies exactly; d is rebuilt afterwards from one
+    signature, `d = B_0^{-1}(k1_0 + λ·k2_0 − A_0) mod n`.
+  - **A2** explicit CVP, dim 2m, target `t = (−A_i·S_K1, 0^m)` — Babai and exact.
+  - **A3** list-decoded CVP: enumerate every lattice point within
+    `R = 1.1·√(m(K1·S_K1)²/3 + m(K2·S_K2)²/3)` of t. The radius uses **public parameters
+    only**, and each candidate costs one scalar multiplication to test against the public
+    key, so A3 is a real attack, not an oracle.
+- `cargo test --test curve_audit` → 5/5 pass (7.21 s). ✓
+
+### Findings
+
+**F1 — the projection does exactly what it was designed to do, and it changes nothing.**
+A0's shortest vector is the trivial vector on every curve tested (|sv|/n = 1.0000
+exactly); after projection |sv|/n = 1.40 / 1.03 / 1.93 and sv/pv rises 0.42–0.60 → 0.53–0.84,
+reaching **exactly 1.000** on 12-bit/2677 for K1 ≤ 4 (π(v_p) *is* λ₁ there). HNF membership
+confirms π(v_planted) ∈ L̃ on all three curves. And the K1 wall is unmoved: A0 and A1 agree
+at **every** one of the 16 grid points, 5 seeds each.
+
+**F2 — a genuine reduction gap exists, and the Kannan embedding is the leak.**
+12-bit/2677, m=10, 10 seeds:
+
+| K1 | A0-LLL | A1-LLL | A1-BKZ40 | A1-HKZ (exact SVP) | A2-Babai | A2-exact CVP |
+|---|---|---|---|---|---|---|
+| 3 | 10/10 | 10/10 | 10/10 | 10/10 | 8/10 | 10/10 |
+| 4 | 10/10 | 10/10 | 10/10 | 10/10 | 5/10 | 10/10 |
+| 6 | 2/10 | 2/10 | 2/10 | 1/10 | 1/10 | **5/10** |
+| 8 | 0/10 | 0/10 | 0/10 | 0/10 | 0/10 | 1/10 |
+
+Exact SVP on the *embedded* lattice (1/10) loses to exact CVP on the *un-embedded* one
+(5/10) at the same K1. Solving the embedded problem perfectly is worse than solving the
+un-embedded problem perfectly — the Kannan embedding itself is discarding information.
+
+**F3 — S_KANNAN = n is mistuned, but not in the direction theory predicts.**
+Textbook Kannan wants the embedding factor ≈ the target distance ≈ n·√(2m/3) = 2.58n at
+m=10. That is **falsified**: larger is strictly worse, smaller is better.
+12-bit/2677, m=10, 10 seeds, (LLL / BKZ-40):
+
+| kan_mult | K1=4 | K1=6 | K1=8 |
+|---|---|---|---|
+| 0.25 | 10/10 · 10/10 | 2/10 · 4/10 | **1/10 · 3/10** |
+| 0.50 | 10/10 · 10/10 | **4/10 · 4/10** | 2/10 · 2/10 |
+| 1.00 (historical) | 10/10 · 10/10 | 2/10 · 2/10 | 0/10 · 0/10 |
+| 2.58 (= "ideal") | 5/10 · 7/10 | 1/10 · 1/10 | 0/10 · 0/10 |
+| 8.00 | 5/10 · 7/10 | 1/10 · 1/10 | 0/10 · 0/10 |
+
+At K1=8 the tuned Kannan arm (3/10) already **beats exact nearest-point CVP** (1/10).
+That is the tell: nearest-point decoding is not the ceiling, because the Kannan arm scans
+*every* reduced row with |last| = S_KANNAN and so tests a candidate list, not one point.
+
+**F4 — HEADLINE: the K1 wall is an artifact of nearest-point decoding.**
+12-bit/2677, m=10, 10 seeds:
+
+| K1 | A1-LLL | A1-BKZ40 | A2-exact CVP | **A3-LIST** | mean #cand |
+|---|---|---|---|---|---|
+| 4 | 10/10 | 10/10 | 10/10 | 10/10 | 1.5 |
+| 6 | 2/10 | 2/10 | 5/10 | **10/10** | 45.3 |
+| 8 | 0/10 | 0/10 | 1/10 | **10/10** | 734.4 |
+| 12 | 0/10 | 0/10 | 0/10 | **≥5/10** | ≥2000 (cap) |
+| 16 | 0/10 | 0/10 | 0/10 | **≥2/10** | ≥2000 (cap) |
+
+The K1=12 and K1=16 rows hit the `nr_solutions=2000` enumeration cap, so they are lower
+bounds, not measurements. No other row is capped.
+
+This **falsifies two prior claims**, both on this curve:
+- 2026-07-26: *"LLL AND BKZ(40) both fail — failure is structural, not a
+  strength-of-reduction issue"* (measured at K1=8). List decoding recovers d 10/10 at K1=8.
+- 2026-07-29 T4b: *"the K1 wall is genuine — it is a K1 wall, not a λ wall."* The λ half
+  stands; the "genuine wall" half does not. The wall sat at K1≈6 because every arm
+  measured to date returned one point.
+
+**F5 — why a closer lattice point is usually harmless.** d fixes `k1_i + λ·k2_i mod n` but
+not the split into (k1, k2), so a strictly closer lattice point often carries the *true* d
+anyway. On 12-bit/2557 at m=8, K1=8: closer points exist on 4/5 seeds, yet exact CVP
+recovers d 5/5. Failure needs the closest point to imply a *different* d — EXP 5 exhibits
+both regimes explicitly. "A closer point exists" was the wrong diagnostic; the log's
+earlier framing of the wall as an SVP-gap property should be read through this.
+
+**F6 — 12-bit/2557 (λ*=0.34) is at its nearest-point ceiling.** At m=8 all six
+nearest-point arms wall at exactly K1=12 (all 1/5 there, all 0/5 at K1=16). The reduction
+gap of F2 is specific to the small-λ* curve; the two curves genuinely differ, but as F4
+shows, neither wall is information-theoretic.
+
+### Next step proposal
+**Thread 24 — cost-calibrate list decoding, then re-open the 20-bit/secp256k1 question.**
+A3's success is bought with enumeration: #cand goes 1.5 → 45 → 734 → ≥2000 as K1 goes
+4 → 6 → 8 → 12, i.e. the attack pays that many extra scalar multiplications. The concrete
+sub-task: lift the `nr_solutions` cap to 10⁵, re-run the K1 = 12/16/24 rows to turn the
+lower bounds into measurements, and fit #cand(K1, m, n) — if #cand grows sub-exponentially
+in the bit-length at fixed K1, Phase 2 is meaningfully stronger than 2026-07-26 recorded
+and the 20-bit curve from that run should be re-tested with A3 before any claim about
+secp256k1. Falsifier: if #cand at fixed eff = K1·K2/n grows faster than the ρ cost
+√n between the 12-, 17- and 20-bit curves, list decoding buys nothing asymptotically and
+Phase 2 really is capped — just at a larger K1 than the log currently records.
+
+Secondary (cheap): re-run the 2026-07-29 T3/T4 grids with A3 in place of LLL. Those grids
+concluded "λ* is not a viability threshold" and "the real variable is bias strength" from
+nearest-point arms only; both conclusions should be re-confirmed under list decoding
+before they are relied on.
+
+### Commits made

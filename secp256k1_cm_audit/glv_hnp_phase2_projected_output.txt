@@ -1,0 +1,246 @@
+==============================================================================
+Thread 23 -- projected lattice / explicit CVP  (GLV-HNP Phase 2)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP 1: does the projection kill the trivial vector, and is pi(v_p) now lambda_1?
+------------------------------------------------------------------------------
+A0 = Kannan (2m+2)-dim; A1 = projected (2m+1)-dim.  sv/pv < 1 means the
+planted vector is NOT the shortest vector after reduction.
+
+curve                 K1   m   A0 sv/pv  A1 sv/pv  A0 |sv|/n  A1 |sv|/n   A0 ok A1 ok
+8-bit/199              2   6      0.603     0.843     1.0000     1.3965    True  True
+12-bit/2557            8   8      0.517     0.532     1.0000     1.0296    True  True
+12-bit/2677 FAIL       8  10      0.422     0.813     1.0000     1.9251   False False
+
+Membership check: is pi(v_planted) actually in the projected lattice?
+  8-bit/199            pi(v_p) in L~ : True
+  12-bit/2557          pi(v_p) in L~ : True
+  12-bit/2677 FAIL     pi(v_p) in L~ : True
+
+------------------------------------------------------------------------------
+EXP 2: the K1 wall under all three formulations (T4 grid replication)
+------------------------------------------------------------------------------
+2026-07-29 T4 measured the A0 column only.  If A1/A2 push the wall
+outward, the reformulation is a real improvement.
+
+12-bit/2557  (lam*=0.340, n=2659, m=8, 5 seeds)
+    K1      A0    A1    A2    A0 sv/pv A1 sv/pv
+     2    5/5   5/5   5/5       0.491    0.902
+     3    5/5   5/5   5/5       0.442    0.636
+     4    5/5   5/5   5/5       0.462    0.585
+     6    5/5   5/5   5/5       0.423    0.475
+     8    5/5   5/5   5/5       0.445    0.475
+    12    1/5   1/5   0/5       0.409    0.424
+    16    0/5   0/5   0/5       0.428    0.437
+    24    0/5   0/5   0/5       0.395    0.409
+
+12-bit/2677 FAIL  (lam*=0.070, n=2647, m=10, 5 seeds)
+    K1      A0    A1    A2    A0 sv/pv A1 sv/pv
+     2    5/5   5/5   5/5       0.438    1.000
+     3    5/5   5/5   4/5       0.405    1.000
+     4    5/5   5/5   2/5       0.400    1.000
+     6    0/5   0/5   0/5       0.382    0.945
+     8    0/5   0/5   0/5       0.387    0.767
+    12    0/5   0/5   0/5       0.372    0.543
+    16    0/5   0/5   0/5       0.380    0.466
+    24    0/5   0/5   0/5       0.367    0.377
+
+------------------------------------------------------------------------------
+EXP 3: exact CVP oracle -- is the planted point even the closest one?
+------------------------------------------------------------------------------
+If dist(t, CVP(t)) < dist(t, w_planted) then a closer lattice point
+exists and NO algorithm reading only this lattice can return the true d.
+That makes the wall information-theoretic, not a reduction failure.
+
+curve                 m  K1    seed      d(t,w_p)    d(t,CVP)    ratio   CVP=planted
+12-bit/2557           6   2      42        3065.1      3065.1    1.000          True
+12-bit/2557           6   2    1234        4555.6      4555.6    1.000          True
+12-bit/2557           6   2    9999        4314.0      4314.0    1.000          True
+                      6   2  -> exact-CVP recovers d: 3/3; strictly closer non-planted point: 0/3
+12-bit/2557           6   4      42        3205.7      3092.4    0.965         False
+12-bit/2557           6   4    1234        4837.0      4227.7    0.874         False
+12-bit/2557           6   4    9999        4414.4      4414.4    1.000          True
+                      6   4  -> exact-CVP recovers d: 3/3; strictly closer non-planted point: 2/3
+12-bit/2557           6   8      42        3421.9      2685.7    0.785         False
+12-bit/2557           6   8    1234        5059.7      3531.7    0.698         False
+12-bit/2557           6   8    9999        4500.9      3178.6    0.706         False
+                      6   8  -> exact-CVP recovers d: 2/3; strictly closer non-planted point: 3/3
+12-bit/2557           6  12      42        5149.8      2649.2    0.514         False
+12-bit/2557           6  12    1234        4681.6      2529.0    0.540         False
+12-bit/2557           6  12    9999        4876.0      2912.3    0.597         False
+                      6  12  -> exact-CVP recovers d: 1/3; strictly closer non-planted point: 3/3
+12-bit/2557           6  16      42        3517.2      2169.6    0.617         False
+12-bit/2557           6  16    1234        5111.2      2503.4    0.490         False
+12-bit/2557           6  16    9999        4657.4      2264.1    0.486         False
+                      6  16  -> exact-CVP recovers d: 0/3; strictly closer non-planted point: 3/3
+12-bit/2677 FAIL      6   2      42        3005.0      3005.0    1.000          True
+12-bit/2677 FAIL      6   2    1234        4472.2      4472.2    1.000          True
+12-bit/2677 FAIL      6   2    9999        4241.8      4241.8    1.000          True
+                      6   2  -> exact-CVP recovers d: 3/3; strictly closer non-planted point: 0/3
+12-bit/2677 FAIL      6   4      42        3147.0      3147.0    1.000          True
+12-bit/2677 FAIL      6   4    1234        4756.0      4573.9    0.962         False
+12-bit/2677 FAIL      6   4    9999        4343.0      4343.0    1.000          True
+                      6   4  -> exact-CVP recovers d: 2/3; strictly closer non-planted point: 1/3
+12-bit/2677 FAIL      6   6      42        4973.2      4572.0    0.919         False
+12-bit/2677 FAIL      6   6    1234        4493.9      3828.5    0.852         False
+12-bit/2677 FAIL      6   6    9999        4728.9      4257.9    0.900         False
+                      6   6  -> exact-CVP recovers d: 0/3; strictly closer non-planted point: 3/3
+12-bit/2677 FAIL      6   8      42        3364.1      2841.9    0.845         False
+12-bit/2677 FAIL      6   8    1234        4978.4      2250.8    0.452         False
+12-bit/2677 FAIL      6   8    9999        4428.4      3518.8    0.795         False
+                      6   8  -> exact-CVP recovers d: 0/3; strictly closer non-planted point: 3/3
+12-bit/2677 FAIL      6  12      42        5096.4      2645.5    0.519         False
+12-bit/2677 FAIL      6  12    1234        4599.3      1786.2    0.388         False
+12-bit/2677 FAIL      6  12    9999        4815.3      2821.3    0.586         False
+                      6  12  -> exact-CVP recovers d: 0/3; strictly closer non-planted point: 3/3
+12-bit/2677 FAIL      8   4      42        4170.0      4170.0    1.000          True
+12-bit/2677 FAIL      8   4    1234        5554.6      5554.6    1.000          True
+12-bit/2677 FAIL      8   4    9999        5609.5      5609.5    1.000          True
+                      8   4  -> exact-CVP recovers d: 3/3; strictly closer non-planted point: 0/3
+12-bit/2677 FAIL      8   6      42        5341.5      5341.5    1.000          True
+12-bit/2677 FAIL      8   6    1234        5099.5      5099.5    1.000          True
+12-bit/2677 FAIL      8   6    9999        5564.5      4895.5    0.880         False
+                      8   6  -> exact-CVP recovers d: 2/3; strictly closer non-planted point: 1/3
+12-bit/2677 FAIL      8   8      42        4334.7      4334.7    1.000          True
+12-bit/2677 FAIL      8   8    1234        5866.9      4799.4    0.818         False
+12-bit/2677 FAIL      8   8    9999        5797.8      4565.3    0.787         False
+                      8   8  -> exact-CVP recovers d: 1/3; strictly closer non-planted point: 2/3
+
+------------------------------------------------------------------------------
+EXP 4: exact CVP at the *same* (m, K1) where EXP 2's LLL wall sits
+------------------------------------------------------------------------------
+EXP 3 used m=6/8 for enumeration speed; the EXP 2 walls were measured at
+m=8 (2557) and m=10 (2677).  This closes the gap: exact CVP (dim 2m, up
+to 20) run exactly where LLL fails.
+
+Columns: LLL on A0 / LLL on A1 / BKZ-20 on A1 / BKZ-40 on A1 /
+Babai on A2 / EXACT CVP on A2.  The exact-CVP column is the
+information-theoretic boundary: it is what an unbounded-time algorithm
+reading this lattice can do.
+
+12-bit/2557  (m=8, dim(A0)=18, dim(A2)=16, 5 seeds)
+    K1   A0-LLL A1-LLL A1-BKZ20 A1-BKZ40 A2-Babai A2-EXACT    closer pt mean ratio
+     2      5/5    5/5      5/5      5/5      5/5      5/5          0/5      1.000
+     3      5/5    5/5      5/5      5/5      5/5      5/5          0/5      1.000
+     4      5/5    5/5      5/5      5/5      5/5      5/5          2/5      0.978
+     6      5/5    5/5      5/5      5/5      5/5      5/5          5/5      0.917
+     8      5/5    5/5      5/5      5/5      5/5      5/5          4/5      0.897
+    12      1/5    1/5      1/5      1/5      0/5      1/5          5/5      0.699
+    16      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.643
+    24      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.438
+
+12-bit/2677 FAIL  (m=10, dim(A0)=22, dim(A2)=20, 5 seeds)
+    K1   A0-LLL A1-LLL A1-BKZ20 A1-BKZ40 A2-Babai A2-EXACT    closer pt mean ratio
+     2      5/5    5/5      5/5      5/5      5/5      5/5          0/5      1.000
+     3      5/5    5/5      5/5      5/5      4/5      5/5          0/5      1.000
+     4      5/5    5/5      5/5      5/5      2/5      5/5          0/5      1.000
+     6      0/5    0/5      1/5      1/5      0/5      4/5          1/5      0.977
+     8      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.846
+    12      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.688
+    16      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.596
+    24      0/5    0/5      0/5      0/5      0/5      0/5          5/5      0.476
+
+------------------------------------------------------------------------------
+EXP 5: when a closer point exists, does it decode to a DIFFERENT d?
+------------------------------------------------------------------------------
+d fixes k1_i + lam*k2_i mod n but not the split, so a closer lattice
+point can still carry the true d.  The attack only fails when the closer
+point implies a different d.
+
+curve                 m  K1    seed   closer   d ok     implied d        true d
+12-bit/2677 FAIL      6   4      42    False   True            65            65
+12-bit/2677 FAIL      6   4    1234     True  False          1098          2187
+12-bit/2677 FAIL      6   4    9999    False   True          1750          1750
+12-bit/2677 FAIL      6   6      42     True  False          2416            65
+12-bit/2677 FAIL      6   6    1234     True  False          1815          2187
+12-bit/2677 FAIL      6   6    9999     True  False           550          1750
+12-bit/2677 FAIL      6   8      42     True  False          2613            65
+12-bit/2677 FAIL      6   8    1234     True  False           429          2187
+12-bit/2677 FAIL      6   8    9999     True  False            32          1750
+12-bit/2677 FAIL      6  12      42     True  False          1893            65
+12-bit/2677 FAIL      6  12    1234     True  False           429          2187
+12-bit/2677 FAIL      6  12    9999     True  False          1093          1750
+
+------------------------------------------------------------------------------
+EXP 6: the gap point -- 12-bit/2677, m=10, 10 seeds
+------------------------------------------------------------------------------
+EXP 4 shows LLL/BKZ-40 at 0-1/5 where exact CVP is at 4/5.  Widen the
+seed set and add EXACT SVP on the projected lattice to decide whether
+the gap is real and whether the projection makes it reachable.
+
+    K1   A0-LLL A1-LLL A1-BKZ40  A1-SVP* A2-Babai  A2-CVP*      (* = exact)
+     3     10/10   10/10     10/10     10/10      8/10     10/10
+     4     10/10   10/10     10/10     10/10      5/10     10/10
+     6      2/10    2/10      2/10      1/10      1/10      5/10
+     8      0/10    0/10      0/10      0/10      0/10      1/10
+
+------------------------------------------------------------------------------
+EXP 7: is S_KANNAN = n mistuned?
+------------------------------------------------------------------------------
+EXP 6 shows exact SVP on the embedded lattice (1/10) losing to exact CVP
+on the un-embedded one (5/10) at K1=6 -- the embedding itself is leaking.
+Standard Kannan wants the embedding factor ~ the target distance, which
+here is ||(k1*S_K1, k2*S_K2)|| ~ n*sqrt(2m/3), not n.
+
+  m=10: n*sqrt(2m/3) => kan_mult_ideal = 2.58
+   kan_mult    K1=4 LLL   BKZ40    K1=6 LLL   BKZ40    K1=8 LLL   BKZ40
+       0.25       10/10    10/10        2/10     4/10        1/10     3/10
+       0.50       10/10    10/10        4/10     4/10        2/10     2/10
+       1.00       10/10    10/10        2/10     2/10        0/10     0/10
+       2.00        5/10     8/10        1/10     1/10        0/10     0/10
+       2.58        5/10     7/10        1/10     1/10        0/10     0/10
+       4.00        5/10     7/10        1/10     1/10        0/10     0/10
+       8.00        5/10     7/10        1/10     1/10        0/10     0/10
+
+  (baseline for reference: exact CVP = 10/10, 5/10, 1/10 at K1 = 4, 6, 8)
+
+------------------------------------------------------------------------------
+EXP 8: list-decoding -- the actual information-theoretic ceiling
+------------------------------------------------------------------------------
+EXP 7 shows a tuned Kannan arm (3/10 at K1=8) beating exact nearest-point
+CVP (1/10), so nearest-point decoding is NOT the ceiling.  A3 enumerates
+every lattice point within R = 1.1 * sqrt(m*(K1*S_K1)^2/3 +
+m*(K2*S_K2)^2/3) of t -- a radius computed from public parameters only --
+and accepts if any candidate decodes to the true d.
+
+#cand is the enumeration list size = the number of extra scalar
+multiplications the attack pays; 2000.0 means the nr_solutions cap was
+hit, so that row's success rate is a LOWER bound.
+
+    K1    A1-LLL  A1-BKZ40  A2-CVP*  A3-LIST    mean #cand
+     4      10/10      10/10     10/10     10/10           1.5
+     6       2/10       2/10      5/10     10/10          45.3
+     8       0/10       0/10      1/10     10/10         734.4
+    12       0/10       0/10      0/10      5/10        2000.0
+    16       0/10       0/10      0/10      2/10        2000.0
+
+------------------------------------------------------------------------------
+SUMMARY
+------------------------------------------------------------------------------
+Wall = first K1 in the grid where the arm drops to a MINORITY of seeds
+(<3/5).  NOTE: A2-EXACT is the ceiling only for NEAREST-POINT decoding;
+EXP 7 and EXP 8 both beat it, so it is not an information-theoretic
+bound.  The list-decoding arm (EXP 8) is the best ceiling measured here,
+and its K1=12/16 rows are LOWER BOUNDS -- enumeration was capped at
+nr_solutions=2000, which both rows hit.
+
+  12-bit/2557 (m=8):
+      A0-LLL     wall K1 = 12
+      A1-LLL     wall K1 = 12
+      A1-BKZ20   wall K1 = 12
+      A1-BKZ40   wall K1 = 12
+      A2-Babai   wall K1 = 12
+      A2-EXACT   wall K1 = 12
+      -> NO GAP vs nearest-point CVP (both wall at K1=12); see EXP 8 for list decoding.
+  12-bit/2677 FAIL (m=10):
+      A0-LLL     wall K1 = 6
+      A1-LLL     wall K1 = 6
+      A1-BKZ20   wall K1 = 6
+      A1-BKZ40   wall K1 = 6
+      A2-Babai   wall K1 = 4
+      A2-EXACT   wall K1 = 8
+      -> REDUCTION GAP: BKZ-40 fails at K1=6 but the
+         information is still present up to K1=8.
+
+Done.
