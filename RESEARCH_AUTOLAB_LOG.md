@@ -6103,3 +6103,179 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the
+next-step proposed verbatim by the 2026-07-29 entry (log line 6089). All six
+original priority threads remain CLOSED/BLOCKED/DEAD-END (status table at log
+line 4473); priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29
+(commit `e845207`, ν̂ separator AUC 0.935), so protocol rule (b) selects its
+proposed sub-task.
+
+The 2026-07-29 falsifier was stated in advance and is quoted verbatim in the
+script header. **Outcome: the falsifier fires negative.** The reformulation is
+correct, exact, and changes nothing.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll sympy` **then**
+  `pip install cysignals` — as the 2026-07-29 entry warned, `cysignals` is a
+  separate runtime import and `fpylll` fails to import without it. PARI/GP is
+  *not* preinstalled either (not needed today).
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_projected.py` (E1–E4).
+  Lattice constructions:
+  - **O** = original Phase-2 lattice, dim 2m+2, copied verbatim from
+    `glv_hnp_phase2_20bit.py:262` so the comparison is exact.
+  - **P** = O projected along `e_m` (d-column deleted), dim 2m+1, square
+    full-rank basis. Derivation of why dropping row *j* is lossless is in the
+    comment block above `build_projected_lattice`. d is back-solved after the
+    fact from `d = B_i^{-1}(k1_i + λ·k2_i − A_i) mod n`.
+  - **C** = same lattice, Kannan row removed, solved as explicit CVP with
+    Babai nearest-plane (`GSO.Mat.babai`, `float_type='mpfr'`) against the
+    target `t = (−A_i·S_K1 ; 0)` — the second variant named in the proposal.
+  Output artifact: `glv_hnp_thread23_projected_output.txt`.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_sv_anatomy.py` (A1–A4) to identify
+  what λ₁(P) actually is once the trivial vector is gone.
+  Output artifact: `glv_hnp_thread23_sv_anatomy_output.txt`.
+- Refactored the E1–E4 experiment block of `glv_hnp_thread23_projected.py` into
+  `run_experiments()` under an `if __name__ == "__main__"` guard so the anatomy
+  script can import the lattice builders without re-running the sweep.
+- `cargo test --test curve_audit` → 5/5 pass (5.62 s). ✓ (no Rust changed)
+
+### Findings
+
+**E1 — the reformulation is exact, not an approximation.**
+For all three historical curves: the planted vector has integral coordinates in
+both P and C (solved over ℚ with sympy, denominators all 1), and
+`HNF(square basis P) == HNF(rank-deficient 2m+2 generator set)` — i.e. deleting
+row *j* lost nothing, and P is genuinely `O / ⟨n·e_m⟩`.
+
+**E2 — sv/pv rises but never reaches 1. Half the falsifier fails.**
+
+| curve | K1 | m | O sv/pv | P sv/pv | C dist/pv | O | P | C |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.543 | 0.790 | 0.717 | 5/5 | 5/5 | 5/5 |
+| 12-bit/2557 | 8 | 8 | 0.445 | 0.475 | 0.794 | 5/5 | 5/5 | 5/5 |
+| 12-bit/2677 | 8 | 10 | 0.387 | 0.767 | 0.865 | 0/5 | 0/5 | 0/5 |
+
+Removing the trivial vector roughly doubles sv/pv on the failure curve
+(0.387 → 0.767) — so the 2026-07-29 diagnosis of *what* λ₁ was is confirmed —
+but a second rival is still shorter than the planted vector.
+
+**E3 — THE FALSIFIER. The K1 wall does not move.**
+
+12-bit/2557 (λ\*=0.340, m=8), K1 = 2,3,4,6,8,12,16,24:
+
+| variant | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | last 5/5 |
+|---|---|---|---|---|---|---|---|---|---|
+| O | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | **8** |
+| P | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 | **8** |
+| C | 5 | 5 | 5 | 5 | 5 | 0 | 0 | 0 | 8 |
+
+12-bit/2677 (λ\*=0.070, m=10):
+
+| variant | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | last 5/5 |
+|---|---|---|---|---|---|---|---|---|---|
+| O | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | **4** |
+| P | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | **4** |
+| C | 5 | 4 | 2 | 0 | 0 | 0 | 0 | 0 | 2 |
+
+**Per the pre-registered falsifier: the wall stays at K1 ≈ 4–6 on the λ\*=0.07
+curve, therefore the wall is information-theoretic and Phase 2 is at its
+ceiling.** Thread 23 is CLOSED (negative result). Babai/CVP (C) is strictly
+*worse*, never better — the Kannan embedding was not the bottleneck either.
+
+**E3/E4 — O and P are operationally identical, cell for cell.**
+Checked programmatically: O == P in **16/16** K1-wall cells and **36/36**
+eff-sweep cells (17-bit, m=12, eff ∈ {0.05, 0.15, 0.25}, 12 curves × 5 seeds).
+C matches O in only 27/36. Curves at full 5/5, eff = 0.05 / 0.15 / 0.25:
+O = 10,4,0 · P = 10,4,0 · C = 7,3,0 (out of 12).
+
+Explanation: column *m* of O is touched by exactly one basis row, so LLL
+isolates `n·e_m` and reduces the rest in the quotient anyway. **The trivial
+vector was diagnostically real but operationally inert.** This is the main
+correction to the 2026-07-29 entry, whose "reformulate and the wall moves"
+expectation is now falsified.
+
+**A1 — λ₁(P) is a single λ-block vector, in closed form.** (H23a, 9/9)
+For every (curve, seed) the LLL shortest vector of P is supported on exactly
+one coordinate pair (i, m+i), has Kannan coordinate 0, and has
+`‖sv‖/μ = 1.0000` exactly, where μ is the Lagrange–Gauss shortest vector of
+
+    L2 = ⟨ (n·S_K1, 0), (−λ·S_K1, S_K2) ⟩,   det L2 = n·S_K1·S_K2
+
+*independent of i* — so there is no min over blocks; all m blocks are the same
+lattice. **λ₁(P) is therefore computable in O(log n) without running LLL.**
+Energy split of sv (k1-block / k2-block) is curve-specific: 0.508/0.492
+(199), 0.132/0.868 (2557), 0.822/0.178 (2677).
+
+Limit of H23a: at m=12 a multi-block combination beats μ in 4/12 curves — all
+4 have μ/pv ≥ 0.967. μ is the binding constraint only while it is small; it is
+always a valid *upper bound* on λ₁(P).
+
+**New capability P has that O never had.** In O the trivial vector beat the
+planted vector for every m ≥ 1, so the planted vector could *never* be λ₁. In P
+it can: `sv/pv = 1.000` exactly at 2677/K1∈{2,3,4} and 2557/K1=2. This is a
+real structural gain — it just does not buy any additional recoveries.
+
+**A2/A3 — μ/pv predicts within a slice, not across.**
+Within 17-bit/m=12/eff=0.15 the separation is total (successes μ/pv ∈
+[0.387, 0.541], failures ∈ [0.601, 1.156]; threshold μ/pv ≤ 0.541 gives 12/12
+vs 0.583 baseline), and **the direction is LOW-μ/pv-wins**, matching the
+2026-07-29 ν̂ sign ("a short rival makes the attack easier"). Note: scanning
+only `>=` would have reported a spurious null here — the script now scans both
+directions. Across slices μ/pv does not separate (A2: successes [0.478, 1.601]
+overlap failures [0.384, 0.997]).
+
+**A4 — pooled two-regime model, 27/28.** Pooling all three slices (12-bit m=8,
+12-bit m=10, 17-bit m=12; 28 configs, 5 seeds each):
+
+    R_A:  μ/pv > 1   ⟺  planted vector IS λ₁(P)          → predict success
+    R_B:  μ/pv ≤ 1   →  success iff ν̂ = μ/√(det L2) ≤ τ
+
+| model | accuracy |
+|---|---|
+| majority baseline | 16/28 = 0.571 |
+| regime A alone (μ/pv > 1) | 19/28 = 0.679 |
+| ν̂ alone, τ = 0.4644 | 24/28 = 0.857 |
+| **two-regime, τ = 0.4644** | **27/28 = 0.964** |
+
+Single misclassification: `17b/67369`, μ/pv = 0.421, ν̂ = 0.4843, predicted
+fail, actual 5/5. R_A is derived (not fitted); the ν̂ direction was
+pre-registered by `e845207`; **τ is fitted in-sample on these 28 points** — this
+is a model fit, not a validated predictor, and is recorded as such.
+
+This unifies the 2026-07-29 ν̂ result with today's μ: ν̂ = μ/√(n·S_K1·S_K2) is
+just μ normalised by the block determinant, which is exactly the factor that
+changes when K1 (hence S_K1) changes between slices. That is *why* raw μ/pv
+failed to transfer across slices in A2 while ν̂ pooled to 0.857.
+
+Caveat on units: A2/A3 use the realised ‖v_planted‖ of one seed; A4 uses the
+analytic expectation ‖v_planted‖ ≈ n·√(2m/3 + 1) for P, so the two μ/pv columns
+differ by a few percent (e.g. 12b/2647 K1=2: 1.601 realised vs 1.282 analytic).
+The regime boundary μ/pv = 1 is unaffected in these data.
+
+### Next step proposal
+
+**Thread 24 — out-of-sample validation of the two-regime rule.**
+τ = 0.4644 is fitted. Freeze it, generate ~40 *fresh* GLV curves at a bit-length
+not used today (e.g. 21-bit) and at least one unseen m, and score the frozen
+rule. Falsifier: if held-out accuracy drops to the ~0.6 majority baseline, the
+rule is overfit to 28 points and ν̂ is a within-slice artefact; if it holds
+above ~0.85, ν̂ is a genuine closed-form O(log n) predictor of Phase-2
+viability and belongs in the paper's B5 cost discussion. Cheap — no LLL is
+needed to compute the prediction, only to score it.
+
+Secondary (independent, cheap): the two-regime rule says recovery is possible
+exactly when the planted vector is λ₁ **or** the rival is so skew it does not
+compete. Regime A is checkable *before* collecting signatures, since μ/pv
+depends only on (n, λ, K1, K2, m). If it survives Thread 24 it gives an exact
+signature-count/bias-budget formula for when the GLV-HNP attack is worth
+mounting at all — the first constructive output of the Phase-2 line.
+
+### Commits made
+
+(recorded below after commit)

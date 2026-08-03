@@ -1,0 +1,127 @@
+============================================================================================
+Thread 23 addendum -- anatomy of lambda_1 in the projected lattice P
+============================================================================================
+
+--------------------------------------------------------------------------------------------
+A1: is the LLL shortest vector a single lambda-block vector?
+--------------------------------------------------------------------------------------------
+curve                 K1   seed   sv/pv   mu/pv   sv/mu  #blocks  kan=0   E_k1   E_k2
+8-bit/199              2     42   0.843   0.843  1.0000        1   True  0.508  0.492
+8-bit/199              2   1234   0.755   0.755  1.0000        1   True  0.508  0.492
+8-bit/199              2   9999   0.768   0.768  1.0000        1   True  0.508  0.492
+12-bit/2557            8     42   0.532   0.532  1.0000        1   True  0.132  0.868
+12-bit/2557            8   1234   0.420   0.420  1.0000        1   True  0.132  0.868
+12-bit/2557            8   9999   0.424   0.424  1.0000        1   True  0.132  0.868
+12-bit/2677 FAIL       8     42   0.813   0.813  1.0000        1   True  0.822  0.178
+12-bit/2677 FAIL       8   1234   0.740   0.740  1.0000        1   True  0.822  0.178
+12-bit/2677 FAIL       8   9999   0.721   0.721  1.0000        1   True  0.822  0.178
+
+H23a holds (sv is exactly one lambda-block vector) in 9/9 cases.
+
+--------------------------------------------------------------------------------------------
+A2: does mu/pv predict recovery?  Sweep the K1 grid on both 12-bit curves.
+    (recovery data from E3: identical for O and P)
+--------------------------------------------------------------------------------------------
+curve                 K1   mu/pv   sv/pv  wins(E3)
+12-bit/2557            2   1.011   1.000         5
+12-bit/2557            3   0.667   0.667         5
+12-bit/2557            4   0.647   0.647         5
+12-bit/2557            6   0.478   0.478         5
+12-bit/2557            8   0.532   0.532         5
+12-bit/2557           12   0.425   0.425         1
+12-bit/2557           16   0.493   0.493         0
+12-bit/2557           24   0.407   0.407         0
+12-bit/2677 FAIL       2   1.601   1.000         5
+12-bit/2677 FAIL       3   1.552   1.000         5
+12-bit/2677 FAIL       4   1.514   1.000         5
+12-bit/2677 FAIL       6   0.997   0.940         0
+12-bit/2677 FAIL       8   0.813   0.813         0
+12-bit/2677 FAIL      12   0.556   0.556         0
+12-bit/2677 FAIL      16   0.493   0.493         0
+12-bit/2677 FAIL      24   0.384   0.384         0
+
+  mu/pv over full successes (5/5): min=0.478 max=1.601
+  mu/pv over full failures  (0/5): min=0.384 max=0.997
+  separable by a single threshold: False
+
+--------------------------------------------------------------------------------------------
+A3: out-of-sample check on fresh 17-bit curves at eff=0.15 (E4 truth).
+--------------------------------------------------------------------------------------------
+      p       n    lam*   K1   mu/pv   sv/pv  wins(E4)
+  65647   65719  0.0273   38   0.982   0.705         1
+  65713   65269  0.0068   38   0.663   0.663         0
+  65707   65203  0.1372   38   0.617   0.617         0
+  66271   66751  0.1559   38   1.156   0.916         0
+  65707   66037  0.2115   38   0.645   0.645         0
+  65719   65647  0.2253   38   0.967   0.873         0
+  65677   65899  0.3184   38   0.471   0.471         5
+  65677   65167  0.3045   38   0.462   0.462         5
+  65539   65287  0.3346   38   0.387   0.387         5
+  65557   65053  0.3877   38   0.601   0.601         0
+  66457   66943  0.4456   38   1.140   0.940         0
+  66853   67369  0.4816   38   0.541   0.541         5
+
+  mu/pv successes: min=0.387 max=0.541  (n=4)
+  mu/pv failures : min=0.601 max=1.156  (n=7)
+  best threshold  mu/pv <= 0.541: accuracy 1.000 (majority baseline 0.583)
+  direction: LOW mu/pv predicts success  -- 2026-07-29 nu_hat sign was 'short rival => easier'
+
+  lambda_1(P) == mu (single lambda-block) in 8/12 of the m=12 curves
+  cases where a MULTI-block combination beats mu:
+    n=65719  mu/pv=0.982  sv/pv=0.705  wins=1
+    n=66751  mu/pv=1.156  sv/pv=0.916  wins=0
+    n=65647  mu/pv=0.967  sv/pv=0.873  wins=0
+    n=66943  mu/pv=1.140  sv/pv=0.940  wins=0
+  all of them have mu/pv >= 0.967 -- mu is the binding constraint only while it is small
+
+============================================================================================
+done
+============================================================================================
+
+--------------------------------------------------------------------------------------------
+A4: pooled model across all three slices (12-bit m=8, 12-bit m=10, 17-bit m=12).
+    Two regimes, only ONE fitted parameter:
+      R_A  mu/pv > 1   <=>  the planted vector IS lambda_1(P)  ->  predict success
+      R_B  mu/pv <= 1  ->   success iff nu_hat = mu/sqrt(det L2) <= tau
+    R_A is derived, not fitted.  tau is the single fitted parameter.
+    Direction of tau was pre-registered by the 2026-07-29 nu_hat result (e845207).
+--------------------------------------------------------------------------------------------
+curve          m  K1   mu/pv   nu_hat  regime  wins
+12b/2659       8   2   0.707   0.3525       B     5
+12b/2659       8   3   0.550   0.3360       B     5
+12b/2659       8   4   0.484   0.3410       B     5
+12b/2659       8   6   0.430   0.3710       B     5
+12b/2659       8   8   0.409   0.4080       B     5
+12b/2659       8  12   0.394   0.4813       B     1
+12b/2659       8  16   0.388   0.5476       B     0
+12b/2659       8  24   0.384   0.6657       B     0
+12b/2647      10   2   1.282   0.7099       A     5
+12b/2647      10   3   1.275   0.8646       A     5
+12b/2647      10   4   1.272   0.9968       A     5
+12b/2647      10   6   0.892   0.8557       B     0
+12b/2647      10   8   0.695   0.7711       B     0
+12b/2647      10  12   0.512   0.6961       B     0
+12b/2647      10  16   0.431   0.6753       B     0
+12b/2647      10  24   0.361   0.6931       B     0
+17b/65719     12  38   0.826   0.9562       B     1
+17b/65269     12  38   0.575   0.6670       B     0
+17b/65203     12  38   0.535   0.6208       B     0
+17b/66751     12  38   0.901   1.0394       B     0
+17b/66037     12  38   0.542   0.6268       B     0
+17b/65647     12  38   0.813   0.9419       B     0
+17b/65899     12  38   0.396   0.4577       B     5
+17b/65167     12  38   0.400   0.4644       B     5
+17b/65287     12  38   0.336   0.3887       B     5
+17b/65053     12  38   0.521   0.6052       B     0
+17b/66943     12  38   0.889   1.0233       B     0
+17b/67369     12  38   0.421   0.4843       B     5
+
+  best tau = 0.4644:  27/28 = 0.964 (majority baseline 0.571)
+  nu_hat alone (no regime A): best tau = 0.4644: 24/28 = 0.857
+  regime A alone (mu/pv > 1): 19/28
+
+  misclassified by the two-regime rule at best tau:
+    17b/67369    mu/pv=0.421 nu_hat=0.4843 predicted=fail actual=5/5
+
+  CAVEAT: tau is fitted in-sample on these 28 configs.  The DIRECTION and
+  regime A are not fitted.  Out-of-sample validation is the next step.
