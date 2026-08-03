@@ -6259,4 +6259,4 @@ Secondary (independent, also cheap): re-run E7b at m=64 to check whether V2's K1
 cell (currently 1/10) is data-limited or wall-limited.
 
 ### Commits made
-[filled in below]
+19b01a1 autolab 2026-08-03: Thread 23 — projection is a no-op, exact CVP moves the K1 wall; T4b falsified
