@@ -6260,3 +6260,5 @@ seed, which makes it non-monotone in K1 (C1: 0.759 at K1=6 but 0.775 at K1=8, be
 using GH/pv as a predictor.
 
 ### Commits made
+
+490fb2f autolab 2026-08-03: Thread 23 CLOSED — projection makes planted vector λ₁ but K1 wall is unmoved
