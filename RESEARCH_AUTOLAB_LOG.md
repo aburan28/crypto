@@ -6103,3 +6103,134 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+Thread 23 (reformulate the Phase-2 lattice so the planted vector is λ₁) — the explicit
+continuation proposed by the 2026-07-29 entry (log line ~6089). Priorities 1/2/3/4/6 are
+CLOSED / BLOCKED / completed; priority 5 (GLV-HNP Phase 2) made measurable progress on
+2026-07-29, so rule (b) applies.
+
+**Outcome: the falsifier fires, but for the opposite reason.** The K1 wall moves outward
+by 5.3× — but the d-column projection contributes *nothing*. The entire gain comes from
+**centering the k1/k2 unknowns**, a one-line change that no prior entry had tried.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` — ok (fpylll 0.6.4,
+  sympy 1.14.0). `apt-get install pari-gp` **failed** (no `apt-get update` first); `gp` is
+  unavailable this run. Not needed for Thread 23. Note for future runs: run
+  `apt-get update && apt-get install -y pari-gp`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (E1–E4) and
+  `secp256k1_cm_audit/glv_hnp_phase2_eff_ceiling.py` (E5), outputs committed alongside.
+  EC arithmetic, `gen_signatures` and the baseline `build_glv_lattice` are copied verbatim
+  from `glv_hnp_phase2_20bit.py:262` so the comparison to 2026-07-26/07-29 is exact.
+- 2×2 design: {baseline dim 2m+2, projected dim 2m+1} × {uncentered, centered}.
+  V0 = baseline (prior art), V1 = baseline+centered, V2 = projected, V3 = both.
+
+**PROJECTION (V2).** Delete the d-column. The trivial vector `n·S_D·e_m` — which
+2026-07-29 T5 identified as λ₁ on every instance — maps to 0 and leaves the lattice
+outright. d is recovered afterwards in closed form from the k1/k2 blocks:
+`d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ (mod n)`.
+Basis subtlety: `{B·S_K1} ∪ {n·S_K1·e_i}` is m+1 generators of a rank-m lattice. Normalise
+`B' = B·B_0⁻¹ (mod n)` so `B'_0 = 1`; then `{B'·S_K1} ∪ {n·S_K1·e_i, i=1..m−1}` is an
+honest basis, and `n·e_0 = n·B' − Σ_{i≥1} n·B'_i·e_i` stays in the span.
+E1 verifies this on all three reference curves, both centerings: **rank 13/13, planted
+vector ∈ L, det = S_K1^m·n^(m−1)·S_K2^m·S_KANNAN exactly.**
+
+**CENTERING (V1).** `k1_i ∈ [0,K1)` has `E[(k1_i·S_K1)²] ≈ n²/3`; substituting
+`k1_i = k1'_i + K1//2`, `k2_i = k2'_i + K2//2` drops it to the variance `n²/12`. The only
+cost is a shift of the A-row: `A'_i = A_i − K1//2 − λ·(K2//2) (mod n)`.
+
+- `cargo test --test curve_audit` → 5/5 pass (4.79s). ✓
+
+### Findings
+
+**F1 — the projection is a no-op for recovery.** E3, K1-grid at m=12, 5 seeds, last K1
+with 5/5:
+
+| curve | λ* | V0 base | V1 base+ctr | V2 proj | V3 proj+ctr |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 12 | **16** | 12 | **16** |
+| 12-bit/2677 | 0.070 | 3 | **16** | 3 | **16** |
+
+V2 ≡ V0 and V3 ≡ V1 cell-for-cell across the whole grid. Removing the trivial λ₁ vector
+does not help at all: the recovery condition was never limited by it. This **closes the
+2026-07-29 T5 line of attack** — "make the planted vector λ₁" is the wrong objective.
+
+**F2 — sv/pv > 1 is neither necessary nor sufficient for recovery.** E2:
+
+| curve | K1 | m | V0 | V1 | V2 | V3 |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.545 | 0.616 | 0.739 | 0.845 |
+| 12-bit/2557 | 8 | 8 | 0.434 | 0.562 | 0.483 | 0.645 |
+| 12-bit/2677 | 8 | 8 | 0.437 | 0.565 | 0.751 | 0.928 |
+| 12-bit/2677 | 4 | 8 | 0.451 | 0.542 | **1.000** | **1.000** |
+
+At 2677/K1=8, V3 has sv/pv = 0.928 < 1 yet recovers 5/5; V0 has 0.437 and recovers 0/5.
+The projection does raise sv/pv (0.437 → 0.751) and at K1=4 makes the planted vector
+exactly λ₁ (1.000) — the reformulation *works as designed* — and it still changes nothing
+empirically. Recovery is a coset/BDD property, as 2026-07-29 concluded; sv/pv is not the
+governing statistic. **Recorded as a dead metric so no future run re-tries it.**
+
+**F3 — centering annihilates the λ* effect entirely.** On the λ*=0.070 curve the wall
+moves 3 → 16 (5.3×); on λ*=0.340 it moves 12 → 16. Both curves then have *identical*
+grids: 5/5 through K1=16, 2/5 at K1=24, 0/5 at K1=32. The residual 3× λ*-dependence that
+2026-07-29 T4 measured (and attributed to λ*) was an artifact of the uncentered
+parameterisation. The 2026-07-26 claim of a "structural small-λ failure" is now fully
+explained: **there is no λ effect, only a badly-scaled lattice.**
+
+**F4 — a closed-form eff ceiling that predicts the wall.** With eff = K1·K2/n, the
+competitor is the last-coord-0 sublattice (rank 2m, det = det(L)/S_KANNAN):
+`GH_0 ≈ √(2m/(2πe))·n^(1−1/(2m))/√eff` vs `‖pv‖ = n·√(C(m))`, C = m/6+1 centered,
+2m/3+1 uncentered. `GH_0 > ‖pv‖` gives
+
+    eff  <  [2m/(2πe)] / [C(m) · n^(1/m)]
+
+Ratio centered/uncentered = (2m/3+1)/(m/6+1) → **4 asymptotically, 3.00 at m=12**.
+Predicted vs observed crossover (last eff with majority 5/5 → first eff with none):
+
+| setting | observed | predicted |
+|---|---|---|
+| 12-bit n≈2650, m=12, uncentered | 0.079 → 0.157 | **0.081** |
+| 12-bit n≈2650, m=12, centered | 0.313 → 0.626 | 0.243 |
+| 17-bit n≈75000, m=12, uncentered | 0.05 → 0.15 | **0.061** |
+| 17-bit n≈75000, m=12, centered | 0.15 → 0.35 | 0.184 |
+
+Agreement within ~1.3× in all four cells, and near-exact in the uncentered ones. Note the
+asymptotes 3/(πe)=0.351 and 3/(4πe)=0.0878 are **not** attained at m=12 — the n^(1/m)
+factor is still 1.9–2.5. Future runs should use the finite-m form.
+
+**F5 — E5, 12 fresh 17-bit curves with λ* spread over [0.0035, 0.4982], m=12, 5 seeds.**
+Curves recovering 5/5, out of 12:
+
+| eff | 0.05 | 0.15 | 0.25 | 0.35 | 0.45 |
+|---|---|---|---|---|---|
+| uncentered | 12 | 4 | 0 | 0 | 0 |
+| centered | 12 | 6 | 3 | 0 | 0 |
+
+(2026-07-29 T3, uncentered, 20 curves: eff=0.05 → 19, 0.15 → 3, 0.25 → 0. Reproduced.)
+λ* remains non-predictive in both variants: at eff=0.15 the successes span the *full*
+λ* range [0.003, 0.498] while the failures span the strictly narrower [0.034, 0.393].
+The centered gain here is real but smaller than the 12-bit grid suggested (0.05→0.15
+rather than →0.31), exactly as the n^(1/m) term in F4 predicts.
+
+### Next step proposal
+**Thread 24 — attack the C(m) constant, not the lattice shape.** F1/F2 show the geometry
+of the embedding is not the binding constraint; F4 shows the binding constraint is the
+scalar `C(m)·n^(1/m)`. Two concrete levers, in order:
+1. **Kill the n^(1/m) factor** by dropping the Kannan row and calling Babai nearest-plane
+   CVP against target `(A'_i·S_K1, 0, …)` on the rank-2m sublattice. That removes S_KANNAN
+   from the determinant, so the predicted ceiling gains the whole n^(1/(2m)) — a factor of
+   ~1.6 at m=12, n=2^17. Falsifier: if the 17-bit eff=0.25 row goes from 3/12 to ≥8/12,
+   the CVP form is the right one; if it stays at 3/12, the GH model is over-optimistic and
+   Phase 2 is at its information-theoretic ceiling.
+2. **Per-coordinate rescaling.** k2_i is uniform on [0,K2) but k1_i on [0,K1) with
+   K1 ≪ K2; a single S_K1/S_K2 pair is optimal only if both blocks contribute equally.
+   Cheap to sweep; expect a modest constant-factor gain on top of (1).
+
+Note the ceiling is on **eff = K1·K2/n**, and for a real GLV signer K2 ≈ √n with k1 of
+full size, i.e. eff ≈ 1 — two orders of magnitude above the ceiling. Nothing here
+threatens secp256k1; the thread is about how far the toy attack can be pushed.
+
+### Commits made

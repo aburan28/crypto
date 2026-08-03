@@ -1,0 +1,85 @@
+==============================================================================
+GLV-HNP Phase 2 -- Thread 23: projected + centered lattice reformulation
+==============================================================================
+  8-bit/199      p=  211 n=  199 lam=   92 lam*=0.4623
+  12-bit/2557    p= 2557 n= 2659 lam=  903 lam*=0.3396
+  12-bit/2677    p= 2677 n= 2647 lam=  185 lam*=0.0699
+
+==============================================================================
+E1: projected-basis sanity (membership of planted vector, determinant)
+==============================================================================
+  8-bit/199      ctr=0  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+  8-bit/199      ctr=1  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+  12-bit/2557    ctr=0  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+  12-bit/2557    ctr=1  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+  12-bit/2677    ctr=0  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+  12-bit/2677    ctr=1  rank=13/13  planted in L: True  det==S_K1^m*n^(m-1)*S_K2^m*S_KAN: True
+
+==============================================================================
+E2: sv/pv  (>1.0 means the planted vector is at or below lambda_1)
+==============================================================================
+  curve           K1   m       V0 base   V1 base+ctr       V2 proj   V3 proj+ctr
+  8-bit/199        2   6         0.545         0.616         0.739         0.845
+  12-bit/2557      8   8         0.434         0.562         0.483         0.645
+  12-bit/2677      8   8         0.437         0.565         0.751         0.928
+  12-bit/2677      4   8         0.451         0.542         1.000         1.000
+
+==============================================================================
+E3: T4 K1-wall replication (m=12, 5 seeds).  2026-07-29 baseline in brackets.
+==============================================================================
+
+  12-bit/2557  (lam*=0.340)
+    variant        K1=2   K1=3   K1=4   K1=6   K1=8   K1=12  K1=16  K1=24  K1=32  K1=48 
+    [2026-07-29]     5      5      5      5      5      4      1      0      -      -   
+    V0 base        5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5   0/5  
+    V1 base+ctr    5/5   5/5   5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5  
+    V2 proj        5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5   0/5  
+    V3 proj+ctr    5/5   5/5   5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5  
+    last K1 with 5/5: V0 base=12, V1 base+ctr=16, V2 proj=12, V3 proj+ctr=16
+
+  12-bit/2677  (lam*=0.070)
+    variant        K1=2   K1=3   K1=4   K1=6   K1=8   K1=12  K1=16  K1=24  K1=32  K1=48 
+    [2026-07-29]     5      5      5      2      0      0      0      0      -      -   
+    V0 base        5/5   5/5   4/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5  
+    V1 base+ctr    5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5  
+    V2 proj        5/5   5/5   4/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5  
+    V3 proj+ctr    5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5  
+    last K1 with 5/5: V0 base=3, V1 base+ctr=16, V2 proj=3, V3 proj+ctr=16
+
+==============================================================================
+E4: Gaussian-heuristic prediction for the projected+centered lattice
+==============================================================================
+  Projected lattice: dim 2m+1, det = S_K1^m * n^(m-1) * S_K2^m * S_KANNAN.
+  With S_K1=n/K1, S_K2=n/K2, S_KANNAN=n and eff=K1*K2/n:
+      det = n^(3m) / (K1*K2)^m = n^(2m) / eff^m
+  The competitor is the last-coord-0 sublattice (rank 2m, det = det/S_KANNAN):
+      GH_0 = sqrt(2m/(2*pi*e)) * (n^(2m-1)/eff^m)^(1/(2m))
+           = sqrt(2m/(2*pi*e)) * n^(1-1/(2m)) / sqrt(eff)
+  Planted norm (centered):  ||pv|| = n*sqrt(2m/12 + 1) = n*sqrt(m/6 + 1)
+  Recovery predicted when GH_0 > ||pv||, i.e.
+      sqrt(eff) < sqrt(2m/(2*pi*e)) / (sqrt(m/6+1) * n^(1/(2m)))
+  As m -> infinity this tends to eff < 3/(pi*e) = 0.351 (centered),
+  and to eff < 3/(4*pi*e) = 0.0878 (uncentered, ||pv||=n*sqrt(2m/3)).
+
+  CAUTION: those are asymptotes in m and are NOT attained at m=12 -- the n^(1/m)
+  factor is still 1.9-2.5 there. Use the finite-m form
+      eff < [2m/(2*pi*e)] / [C(m) * n^(1/m)],  C = m/6+1 centered, 2m/3+1 uncentered,
+  which is what glv_hnp_phase2_eff_ceiling.py tabulates against observation.
+
+  curve           K1     eff  GH0/pv V2   V2 emp  GH0/pv V3   V3 emp
+  12-bit/2557      2   0.039      1.438    5/5        2.491    5/5  
+  12-bit/2557      4   0.078      1.017    5/5        1.762    5/5  
+  12-bit/2557      8   0.156      0.719    5/5        1.246    5/5  
+  12-bit/2557     16   0.313      0.509    2/5        0.881    5/5  
+  12-bit/2557     32   0.626      0.360    0/5        0.623    0/5  
+  12-bit/2557     48   0.939      0.294    0/5        0.509    0/5  
+  12-bit/2677      2   0.039      1.435    5/5        2.486    5/5  
+  12-bit/2677      4   0.079      1.015    4/5        1.758    5/5  
+  12-bit/2677      8   0.157      0.718    0/5        1.243    5/5  
+  12-bit/2677     16   0.314      0.508    0/5        0.879    5/5  
+  12-bit/2677     32   0.629      0.359    0/5        0.622    0/5  
+  12-bit/2677     48   0.943      0.293    0/5        0.508    0/5  
+
+==============================================================================
+DONE
+==============================================================================
