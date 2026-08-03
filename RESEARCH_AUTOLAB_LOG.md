@@ -6266,3 +6266,5 @@ falsified in all three forms (T3 2026-07-29, F3 today) and that the governing
 quantity is ρ_GH = 2.386·√eff·n^(1/(2m))·{1,½}.
 
 ### Commits made
+
+b27dd48 autolab 2026-08-03: Thread 23 — centered BDD reformulation; lam* effect falsified as embedding artifact
