@@ -6103,3 +6103,176 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the
+continuation proposed verbatim at the end of the 2026-07-29 entry
+(`RESEARCH_AUTOLAB_LOG.md:6089`). Protocol rule (b): priority 5 (GLV-HNP Phase 2)
+made measurable progress on 2026-07-29 and left a cheap, pre-stated falsifier.
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 closed 2026-07-21.
+
+**Verdict: the falsifier fires negative. Thread 23 is CLOSED. The Phase-2 K1 wall
+is information-theoretic, not an artefact of the `d` column or of LLL's budget.**
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_v2_lattice.py` (768 lines, 9 experiments
+  A–I). Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_v2_lattice_output.txt`
+  (144 lines). EC/CM/signature helpers copied verbatim from
+  `glv_hnp_phase2_20bit.py:22-260`, and `build_v1` is a byte-for-byte copy of
+  `build_glv_lattice` (`glv_hnp_phase2_20bit.py:262`), so V1 numbers are directly
+  comparable to 2026-07-29.
+- Implemented the **V2 lattice**: eliminate `d` using signature 0, the standard HNP
+  substitution. With `C_i = B_i·B_0^{-1}`, `D_i = A_i − C_i·A_0` (mod n),
+  `k_i = D_i + C_i·k_0`, so for i = 1..m−1
+
+      k1_i = D_i + C_i·k1_0 + λ·C_i·k2_0 − λ·k2_i  (mod n)
+
+  Free unknowns `k1_0, k2_0..k2_{m-1}` (m+1), derived `k1_1..k1_{m-1}` (m−1); every
+  coordinate is now bounded. dim = 2m+1 (V1 was 2m+2). `d` is read back afterwards
+  from `d = (k1_0 + λ·k2_0 − A_0)·B_0^{-1} mod n`.
+- Implemented **V3**: V2 with the m−1 λ-blocks Lagrange-Gauss pre-reduced. This is a
+  unimodular row operation, so V3 and V2 are the *same lattice* — only LLL's starting
+  basis differs. Separates "LLL budget" from "information-theoretic".
+- `cargo test --test curve_audit` → 5/5 pass (7.01s, 51.5s build). ✓
+- Environment note for future runs: `pip install fpylll cysignals sympy` works
+  as-is, but `apt-get install pari-gp` **fails with a 404 unless `apt-get update`
+  is run first**. After `apt-get update` PARI/GP 2.15.4 (GMP-6.3.0) installs
+  cleanly. The 2026-07-29 note omitted the update step.
+
+### Findings
+
+**A/B — V2 does remove the trivial vector, but the planted vector still is not λ₁.**
+`sv` = shortest row after LLL, `pv` = planted vector, m and K1 as in the historical
+runs:
+
+| curve | K1 | m | V1 sv/pv | V1 d-col | V2 sv/pv | V2 dim |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.603 | 1.000 | 0.843 | 13 |
+| 12-bit/2557 | 8 | 8 | 0.517 | 1.000 | 0.532 | 17 |
+| 12-bit/2677 | 8 | 10 | 0.422 | 1.000 | 0.813 | 21 |
+
+"d-col" is the fraction of `sv`'s energy in the d column; 1.000 confirms T5 exactly —
+V1's λ₁ is the trivial `n·S_D·e_m`. V2 has no d column and the trivial vector is gone
+(`sv/pv` rises on 2/3 curves), but **sv/pv stays below 1 on all three**. The
+pre-stated falsifier required sv/pv > 1. It does not happen.
+
+**C — the K1 wall does not move. At all.** 5 seeds per cell, LLL:
+
+| curve | λ* | ver | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | V1 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 | 0.340 | V2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 | 0.070 | V1 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | 0.070 | V2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Cell-for-cell identical. (Minor correction to the 2026-07-29 T4 table: at m=8/m=10
+and 5 seeds, 2557 reads 1/5 at K1=12 and 0/5 at K1=16, and 2677 drops to 0/5 already
+at K1=6. Same wall, one grid step tighter than recorded.)
+
+**D — eff sweep on 12 fresh 17-bit j=0 GLV curves, m=12, 5 seeds (60 trials/cell):**
+
+| eff = K1·K2/n | V1 curves 5/5 | V1 trials | V2 curves 5/5 | V2 trials | GH(V1) | GH(V2) |
+|---|---|---|---|---|---|---|
+| 0.05 | 12/12 | 60/60 | 12/12 | 60/60 | 0.92 | 0.89 |
+| 0.10 | 4/12 | 32/60 | 4/12 | 32/60 | 1.30 | 1.27 |
+| 0.15 | 2/12 | 13/60 | 2/12 | 13/60 | 1.57 | 1.55 |
+| 0.25 | 0/12 | 4/60 | 0/12 | 4/60 | 1.99 | 1.98 |
+
+GH = ‖planted‖ / λ₁^GH. The two lattices have essentially the same GH ratio — which
+is why the reformulation cannot help: det(V2) = det(V1)/n and dim drops by exactly 1,
+so `det^{1/dim}` is unchanged to first order.
+
+**E — 100% instance-level agreement, 240 instances, zero discordant pairs.**
+
+| | V2 succeeds | V2 fails |
+|---|---|---|
+| **V1 succeeds** | 109 | 0 |
+| **V1 fails** | 0 | 131 |
+
+Not merely matching totals — the *same* (curve, seed, eff) instances succeed. V2 is
+the quotient of V1 by the trivial direction and recovery is invariant under it. **The
+`d` column was never the obstruction.**
+
+**F — λ₁(V2) is *exactly* the λ-block vector.** L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩
+is the 2-D sublattice spanned by modulus row i and the k2_i row; `l1(L2)` computed by
+exact Lagrange-Gauss reduction:
+
+| curve | K1 | \|sv(V2)\|/n | λ₁(L2)/n | ratio | ν̂ | \|pv\|/n |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 1.396 | 1.396 | **1.000** | 0.549 | 1.657 |
+| 12-bit/2557 | 8 | 1.030 | 1.030 | **1.000** | 0.408 | 1.934 |
+| 12-bit/2677 | 8 | 1.925 | 1.925 | **1.000** | 0.771 | 2.369 |
+
+This identifies the ν̂ separator of commit `e845207` as *literally λ₁ of the
+reformulated lattice*, and it is irreducible: L2 encodes the genuine GLV
+re-decomposition ambiguity `(k1,k2) → (k1 − λt mod n, k2 + t)`, which leaves `k_full`
+fixed and is ruled out only by the bounds K1, K2. It cannot be quotiented away the
+way the d column was — there are ~K1·K2/n = eff such decoys per signature, so eff
+*is* the information-theoretic parameter.
+
+**G — ν̂ replicated independently (fresh 17-bit sample, V2 lattice).** `r = ‖pv‖/λ₁(L2)`;
+eff must be held fixed since it is the dominant variable:
+
+| eff | succ | fail | AUC(r) | AUC(1/r) | AUC(ν̂) |
+|---|---|---|---|---|---|
+| 0.05 | 60 | 0 | — | — | — |
+| 0.10 | 32 | 28 | 0.243 | 0.757 | **0.812** |
+| 0.15 | 13 | 47 | 0.026 | 0.974 | **0.979** |
+| 0.25 | 4 | 56 | 0.246 | 0.754 | **0.857** |
+
+Pooled across eff, r is nearly useless (AUC 0.612, 71.2% vs 54.6% baseline) —
+consistent with eff dominating. Stratified, AUC(r) < 0.5 throughout: the naive
+reading is **backwards**. Since ‖pv‖ is ~constant at fixed eff, r varies through
+1/λ₁(L2), so this is the ν̂ signal with the sign already reported in `e845207`
+(low ν̂ → high success), now confirmed at AUC 0.812/0.979/0.857 on a fresh sample.
+Mechanism (consistent with the data, not yet independently tested): a *very short*
+λ-block vector means the block is highly skewed, LLL disposes of it cheaply and the
+orthogonal complement where `pv` lives keeps a clean GS profile; when ν̂ ≈ 1 the m
+copies of L2 all sit at the *same* length scale as `pv` and crowd it.
+
+**H — pre-reducing the λ-blocks does not move the wall either (V3).** Unimodular, so
+same lattice, better starting basis:
+
+| curve | ver | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | V2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 | V3 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 | V2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | V3 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+V3 buys exactly one trial at K1=6 on 2677 — the same 1/5 that BKZ(20) and BKZ(40)
+buy (EXP E of the output file). **Three independent interventions — quotient out the
+trivial vector (V2), pre-reduce the competing blocks (V3), and strengthen the
+reduction to BKZ-40 — all leave the wall at K1 ≈ 4–6 on the λ*=0.07 curve.**
+
+**Conclusion.** The 2026-07-29 falsifier is answered: sv/pv did not rise above 1 and
+the K1 wall did not move. Phase 2 is at its information-theoretic ceiling, which is
+governed by eff = K1·K2/n (how many bounded GLV re-decompositions of the same k_full
+exist), with ν̂ = λ₁(L2)/√(det L2) as the second-order per-curve correction. Threads
+20 and 23 are both closed; the GLV-HNP Phase-2 direction (priority 5) should be
+retired unless a genuinely different formulation appears.
+
+### Next step proposal
+
+**Thread 24 — test the crowding mechanism directly, then retire priority 5.**
+The one claim above that is asserted rather than measured is the *mechanism* for ν̂'s
+inverted sign. Falsifier: instrument the LLL-reduced GS profile of V2 and regress
+success on `min_i ‖b*_i‖` restricted to the projection orthogonal to the m λ-blocks.
+If that projected-GS quantity separates success at AUC ≳ ν̂'s 0.979 at eff=0.15, the
+crowding story is confirmed and ν̂ is explained rather than merely observed; if it
+does not, ν̂ stays an empirical invariant and priority 5 should be closed as-is
+either way. Cheap: reuse `run_one(..., want_stats=True)` and add a GS dump — the
+240-instance grid is a ~4-minute run.
+
+Since priority 5 is now at its ceiling regardless of Thread 24's outcome, the next
+run should default to **Step 4 fallback** (ePrint survey + one new attack variant)
+rather than opening another Phase-2 sub-thread. Note that all six original priority
+threads plus threads 7, 20, 22, 23 are CLOSED/BLOCKED/DEAD-END.
+
+### Commits made
+
+(hash recorded below after commit)

@@ -1,0 +1,144 @@
+==============================================================================
+Thread 23 — V2 lattice (d eliminated) vs V1 (Kannan on unbounded d)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP A: is the planted vector lambda_1?   (sv = shortest reduced row)
+------------------------------------------------------------------------------
+sv/pv < 1 means some non-planted vector is shorter than the planted one,
+i.e. the Kannan embedding is NOT solving SVP.  T5 (2026-07-29) measured
+sv/pv in [0.34, 0.61] for V1.  V2 should push it above 1.
+
+curve               K1   m |  V1 sv/pv V1 d-col  V1 ok |  V2 sv/pv  V2 row  V2 ok
+8-bit/199            2   6 |     0.603    1.000   True |     0.843       5   True
+12-bit/2557          8   8 |     0.517    1.000   True |     0.532       8   True
+12-bit/2677 FAIL     8  10 |     0.422    1.000  False |     0.813    None  False
+
+V1 'd-col' = fraction of the shortest vector's energy in the d column
+(1.000 == the trivial vector n*S_D*e_m).  V2 has no d column.
+
+------------------------------------------------------------------------------
+EXP B: does the planted vector become the SHORTEST row in V2?
+------------------------------------------------------------------------------
+curve               ver  dim   |pv|/n   |sv|/n   sv/pv  sv==pv  sv Kan
+8-bit/199            V1   14     1.66     1.00   0.603   False    0.00
+8-bit/199            V2   13     1.66     1.40   0.843   False    0.00
+12-bit/2557          V1   18     1.93     1.00   0.517   False    0.00
+12-bit/2557          V2   17     1.93     1.03   0.532   False    0.00
+12-bit/2677 FAIL     V1   22     2.37     1.00   0.422   False    0.00
+12-bit/2677 FAIL     V2   21     2.37     1.93   0.813   False    0.00
+
+------------------------------------------------------------------------------
+EXP C: T4 replication — K1 wall on the two 12-bit curves, V1 vs V2
+------------------------------------------------------------------------------
+2026-07-29 T4 measured V1.  If V2 moves the wall outward the
+reformulation is a real improvement; if not, the wall is
+information-theoretic.
+
+12-bit/2557   lam*=0.340  n=2659  m=8  K2=52
+    K1       2       3       4       6       8      12      16      24
+    V1     5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+    V2     5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+   GH2    0.87    1.06    1.21    1.46    1.68    2.03    2.32    2.81
+
+12-bit/2677 FAIL   lam*=0.070  n=2647  m=10  K2=52
+    K1       2       3       4       6       8      12      16      24
+    V1     5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+    V2     5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+   GH2    0.78    0.94    1.08    1.31    1.51    1.83    2.10    2.54
+
+------------------------------------------------------------------------------
+EXP D: eff = K1*K2/n sweep on fresh 17-bit curves, V1 vs V2
+------------------------------------------------------------------------------
+found 12 17-bit j=0 GLV curves (n bits 16-17)
+
+   eff |  V1 curves 5/5  V1 trials |  V2 curves 5/5  V2 trials |   GH1   GH2
+  0.05 |          12/12      60/60 |          12/12      60/60 |  0.92  0.89
+  0.10 |           4/12      32/60 |           4/12      32/60 |  1.30  1.27
+  0.15 |           2/12      13/60 |           2/12      13/60 |  1.57  1.55
+  0.25 |           0/12       4/60 |           0/12       4/60 |  1.99  1.98
+
+------------------------------------------------------------------------------
+EXP E: does BKZ change the V2 verdict at the wall?
+------------------------------------------------------------------------------
+12-bit/2677 FAIL  m=10
+  K1   V2 LLL  V2 BKZ20  V2 BKZ40   V1 LLL
+   4      5/5       5/5       5/5      5/5
+   6      0/5       1/5       1/5      0/5
+   8      0/5       0/5       0/5      0/5
+  12      0/5       0/5       0/5      0/5
+
+------------------------------------------------------------------------------
+EXP F: per-instance agreement V1 vs V2 (not just matching totals)
+------------------------------------------------------------------------------
+If V2 is the quotient of V1 by the trivial direction, the SAME instances
+should succeed.  Contingency over all (curve, seed, eff) triples.
+
+  both succeed :  109
+  V1 only      :    0
+  V2 only      :    0
+  neither      :  131
+  total        :  240   agreement = 100.0%
+
+------------------------------------------------------------------------------
+EXP G: what IS lambda_1 of V2?  (test the lambda-block hypothesis)
+------------------------------------------------------------------------------
+L2 = <(n*S_K1, 0), (-lam*S_K1, S_K2)> is a 2-D sublattice sitting inside
+BOTH V1 and V2 (modulus row i paired with the k2_i row).  Its shortest
+vector is the nu_hat quantity from commit e845207.  If |sv(V2)| matches
+lambda_1(L2), then V2's ceiling is the lambda-block, not the d column.
+
+curve               K1 |  |sv(V2)|/n  l1(L2)/n   ratio  nu_hat  |pv|/n
+8-bit/199            2 |       1.396     1.396   1.000   0.549   1.657
+12-bit/2557          8 |       1.030     1.030   1.000   0.408   1.934
+12-bit/2677 FAIL     8 |       1.925     1.925   1.000   0.771   2.369
+
+------------------------------------------------------------------------------
+EXP H: is r = ||planted|| / lambda_1(L2) the recovery criterion?
+------------------------------------------------------------------------------
+L2 is the ONLY competing short family left in V2, and it encodes a real
+ambiguity: (k1,k2) -> (k1 - lam*t mod n, k2 + t) leaves k_full fixed and
+is excluded only by the bounds.  So r < 1 should mean 'planted is
+lambda_1' and r > 1 should mean 'a bounded-looking decoy exists'.
+
+  n instances = 240   success = 109   fail = 131
+  r | success : min 0.552  med 1.201  max 3.042
+  r | failure : min 0.776  med 1.509  max 3.132
+  AUC (lower r = success) = 0.612
+  best threshold r <= 0.857: accuracy 71.2% (majority baseline 54.6%)
+
+  Stratified by eff (eff is the known dominant variable — an honest
+  test of r must hold eff fixed):
+      eff  succ  fail  AUC(r)  AUC(1/r)  AUC(nu)
+     0.05    60     0     nan       nan      nan
+     0.10    32    28   0.243     0.757    0.812
+     0.15    13    47   0.026     0.974    0.979
+     0.25     4    56   0.246     0.754    0.857
+
+  AUC(r) < 0.5 means the naive reading is BACKWARDS: within fixed eff,
+  a LARGER ||planted||/lambda_1(L2) predicts SUCCESS.  Since ||planted||
+  is ~constant at fixed eff, r varies through 1/lambda_1(L2), so this is
+  the same signal as nu_hat = lambda_1(L2)/sqrt(det L2) with the sign
+  reported in commit e845207 (low nu_hat -> high success).  AUC(nu) is
+  printed for the direct comparison.
+
+------------------------------------------------------------------------------
+EXP I: V3 — V2 with the m-1 lambda-blocks pre-reduced (Lagrange-Gauss)
+------------------------------------------------------------------------------
+Rows (modulus j, k2_j) span L2 in columns (j-1, m+j).  Replacing that
+pair by its Gauss-reduced basis is unimodular, so the LATTICE is
+identical and any exact-SVP oracle is unaffected; only LLL's starting
+basis changes.  If the K1 wall moves, the wall was an LLL-budget
+artefact.  If not, it is information-theoretic.
+
+12-bit/2557   lam*=0.340  m=8
+    K1       2       3       4       6       8      12      16      24
+    V2     5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+    V3     5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+
+12-bit/2677 FAIL   lam*=0.070  m=10
+    K1       2       3       4       6       8      12      16      24
+    V2     5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+    V3     5/5     5/5     5/5     1/5     0/5     0/5     0/5     0/5
+
+Done.
