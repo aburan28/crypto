@@ -6103,3 +6103,190 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁.** Proposed verbatim
+as the next step in the 2026-07-29 entry (log line ~6089) and never started. Protocol
+rule (b): priority 5 (GLV-HNP Phase 2) is the only original thread with recent
+measurable progress; threads 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and 3 completed
+2026-07-21 (`a287abc`).
+
+The falsifier as stated on 2026-07-29:
+- sv/pv rises above 1 **and** the K1 wall on the λ*=0.070 curve (then K1≈4–6) moves
+  outward → the reformulation is a real improvement;
+- the wall stays put → the wall is information-theoretic and Phase 2 is at its ceiling.
+
+**Outcome: the second branch, decisively.** The trivial vector is a spectator, not an
+obstruction. Two by-products are worth more than the falsified hypothesis: a *mechanism*
+for the 2026-07-29 ν̂ separator, and a fixed ν̂ cut that transfers across (eff, m).
+
+### Work done
+
+Environment: `pip install fpylll sympy cysignals` → fpylll 0.6.4, sympy 1.14.0,
+cysignals 1.12.5. Confirms the 2026-07-29 note: **this never persists between sessions,
+always re-install.** `cargo test --test curve_audit` → 5/5 pass (5.68 s). ✓
+
+New script `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (~700 lines), single
+reproducible artifact `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`
+(225 lines), seven experiments E1–E7.
+
+**Construction.** L has coordinates (k1_0..k1_{m-1} | d | k2_0..k2_{m-1} | kannan).
+Let π drop the d coordinate. ker(π|_L) = Z·(n·S_D·e_m) **exactly**, so L' = π(L) has
+rank 2m+1 and the trivial vector is gone by construction. Explicit basis, with
+C_i = B_i·B_0⁻¹ mod n (C_0 = 1):
+
+```
+u_0 = S_K1·(1, C_1, …, C_{m-1} | 0 | 0)
+u_i = n·S_K1·e_i                            i = 1..m-1
+w_j = −lam·S_K1·e_j + S_K2·e_{m+j}          j = 0..m-1
+z   = S_K1·(A_0, …, A_{m-1} | 0 | 0) + S_KANNAN·e_{2m}
+```
+
+Recovery inverts the u_0 coefficient t = d·B_0 mod n: read (k1_i, k2_i) off any row with
+|last| = S_KANNAN, then d = (k1_i + lam·k2_i − A_i)·B_i⁻¹ mod n. This is the same lattice
+one gets by eliminating d algebraically first (substitute d = (k_0−A_0)/B_0 into the other
+m−1 congruences); dimensions and determinants coincide.
+
+**Anchor-curve identification** (the log has been naming these by p only; recorded here so
+future runs stop re-deriving them):
+
+| log name | p | n | λ | λ* |
+|---|---|---|---|---|
+| 8-bit/199 | 199 | 211 | 14 | 0.0664 |
+| 12-bit/2557 | 2557 | **2659** | 903 | 0.3396 |
+| 12-bit/2677 | 2677 | 2647 | 185 | 0.0699 |
+
+(p=2557 also carries n=2503, λ*=0.4898 — *not* the curve of the T4 table.)
+
+### Findings
+
+**E1 — the projection is exact.** All three anchors: planted vector ∈ L' ✓;
+det(L')·n·S_D = det(L) as exact integers ✓ (2557/2659:
+`1417287295406165951530143878259657041015351230070784`); n·S_D·e_m ∈ L ✓. sv/pv does
+rise — 0.4660→0.5913 and 0.4683→0.8127 at m=6, K1=4 — but **not above 1 in general**, so
+the falsifier's first clause already fails.
+
+**E2/E3/E4 — the K1 wall does not move, and A ≡ B trial-for-trial.**
+
+```
+  2677/n=2647 (lam*=0.0699), m=12, 5 seeds
+    K1      eff  |  A wins  B wins  |  A sv/pv  B sv/pv
+    2     0.0393  |  5/5     5/5     |   0.3970   1.0000
+    3     0.0589  |  5/5     5/5     |   0.3799   1.0000
+    4     0.0786  |  5/5     5/5     |   0.3692   1.0000
+    6     0.1179  |  2/5     2/5     |   0.3609   0.9072
+    8     0.1572  |  0/5     0/5     |   0.3551   0.6971
+   12     0.2357  |  0/5     0/5     |   0.3511   0.5082
+   16     0.3143  |  0/5     0/5     |   0.3470   0.4215
+   24     0.4715  |  0/5     0/5     |   0.3448   0.3514
+```
+
+Wall still at K1≈4–6 for λ*=0.070 and K1≈16 for λ*=0.340 — **in both lattices, in every
+cell**. Note K1 ≤ 4 has sv/pv(B) = 1.0000 exactly: the planted vector *is* λ₁ of L'
+there, and recovery is still unchanged. E3 (10 fresh 17-bit curves, m∈[5,12]): 104/400
+vs 104/400 total wins, identical first-all-m on all 10. E4 (7 curves × K1∈{3,6,12} ×
+m∈{6..9} × 4 seeds): **336/336 identical outcome, 0 disagreements.**
+
+This is not a surprise in hindsight — it *confirms* T5's own wording. T5 said recovery is
+"shortest vector among those with last coordinate ±S_KANNAN, in the (2m+1)-dimensional
+projection along e_m". L' **is** that projection, so A and B are literally the same
+problem. The trivial vector is a spectator LLL parks in one basis slot while `recover_*`
+scans all rows. **The K1 wall is information-theoretic; Phase 2 is at its ceiling.**
+
+**E5 — the projection buys a diagnostic, not an attack.** 40 fresh 17-bit curves,
+eff=0.10, m=8, 8 seeds (7 curves C1, 32 C2, 1 mid):
+
+| predictor | AUC(C1 vs C2) | spearman(pred, rate) | best single cut |
+|---|---|---|---|
+| sv/pv (B) | **0.987** (low=easy) | −0.437 | 0.950 |
+| ν̂ | **0.987** (low=easy) | **−0.576** | 0.950 |
+| λ* | 0.714 | −0.003 | 0.850 |
+| sv/pv (A) | 0.513 | +0.263 | 0.825 |
+
+In L the statistic is pinned by the trivial vector and carries no signal (0.513, a coin
+flip); in L' it is a near-perfect separator. But ν̂ matches it exactly at O(log n) (one
+Lagrange–Gauss reduction) instead of a full LLL, and is the better *graded* predictor
+(spearman −0.576 vs −0.437), so **sv/pv(B) is strictly dominated as a practical
+predictor**. This also independently replicates the 2026-07-29 ν̂ result (AUC 0.935 on
+the June C1/C2 classes at 20/24 bits) on fresh 17-bit curves.
+
+**E6 — MECHANISM for ν̂ (new).** λ₁(L') is the λ-block vector μ = λ₁(L2) *exactly when
+the attack succeeds*, and a diffuse all-block combination when it fails:
+
+```
+   curve              nu_hat  |  sv/pv_B  mu/pv  |  sv is   blocks  rate
+   p=65539 n=65287    0.3166  |  0.3967  0.3967  |  mu       1.0    5/6
+   p=65677 n=65899    0.4251  |  0.5313  0.5313  |  mu       1.0    6/6
+   p=65677 n=65167    0.4349  |  0.5444  0.5444  |  mu       1.0    6/6
+   p=65899 n=65677    0.4135  |  0.5195  0.5195  |  mu       1.0    1/6
+   p=65557 n=65053    0.6748  |  0.6654  0.8442  |  other    8.0    0/6
+   p=65707 n=66037    0.7057  |  0.6906  0.8828  |  other    8.0    0/6
+   p=65617 n=65119    0.8809  |  0.6803  1.1024  |  other    8.0    0/6
+   p=65719 n=65647    0.9848  |  0.6724  1.2370  |  other    8.0    0/6
+```
+
+Low ν̂ → sv/pv_B == mu/pv to 4 decimals, 1 of m λ-blocks occupied. High ν̂ → μ is no
+longer shortest, λ₁ spans all 8 blocks. So ν̂ is not merely *correlated* with success —
+it measures **which of two regimes the lattice is in**. This supplies the mechanism the
+2026-07-29 entry lacked, and explains its "sign is opposite to the naive guess" remark:
+a short rival block vector is the signature of a skew L2, not a competitor for the
+planted vector.
+
+**E7 — this run's own scaling law is FALSIFIED.** The E6 mechanism implies the decision
+variable is μ/‖v_planted‖, and since μ = ν̂·n/√eff and ‖v_planted‖ ≈ n·√(2m/3+1),
+
+```
+    nu_hat_crit(eff, m) = c · sqrt(eff) · sqrt(2m/3 + 1),   c universal
+```
+
+Fitted independently over a 4×4 grid (eff ∈ {0.07,0.09,0.11,0.13} × m ∈ {6,8,10,12}), 30
+curves, 5 seeds: **c spreads 110.8% — no better than ν̂_crit's own 116.6%.** A first
+2-setting probe had looked supportive (c = 0.553 vs 0.578, 4.3% spread); that was a lucky
+pair, and the wider grid kills it.
+
+Like-for-like comparison (each rule one global free parameter, fitted on the same pooled
+data), mean per-setting accuracy:
+
+| rule | well-separated (9 settings) | all fitted (14) |
+|---|---|---|
+| R1 constant ν̂ ≤ 0.620 | 0.9407 | **0.8571** |
+| R2 scaling ν̂ ≤ 0.590·√eff·√(2m/3+1) | **0.9481** | 0.8381 |
+| R3 direct μ/‖pv‖ ≤ 0.590 | 0.9407 | 0.8333 |
+
++0.7 pp on the clean subset, −1.9 pp overall — no meaningful gain. Direct evidence
+against the law: at fixed m, ν̂_crit is roughly *constant* as eff nearly doubles
+(m=8: 0.482, 0.508, 0.468, 0.474 over eff 0.068→0.129) where the law predicts
+0.444→0.613. There is a mild upward drift with m that neither rule captures well.
+
+Caveat on scope: outside the transition band the fit is undefined — at eff≈0.05 every
+curve succeeds regardless of ν̂ (consistent with 2026-07-29 T3) and at eff≈0.13, m=6
+every curve fails. 2 of 16 grid settings were degenerate and are reported unfitted rather
+than silently dropped.
+
+**Practical takeaway:** a single fixed cut **ν̂ ≤ 0.62** transfers across eff ∈
+[0.068, 0.129] and m ∈ {6,8,10,12} without recalibration, at ~94% accuracy on
+well-separated settings and ~86% overall. That is a stronger claim than 2026-07-29 made
+(which established ν̂ only at fixed eff and m).
+
+### Next step proposal
+
+**Thread 24 — close out Phase 2 and write ν̂ into the paper.** Phase 2's K1 wall is now
+established as information-theoretic (E2/E4), so further lattice-engineering on this
+construction is not worth session time. The transferable asset is ν̂ with its E6
+mechanism. Concrete sub-task: add a short subsection to
+`paper/eprint_combined.tex` stating (i) ν̂ = λ₁(L2)/√det L2 with the Lagrange–Gauss
+computation, (ii) the E6 two-regime mechanism, (iii) the fixed-cut result, and (iv) the
+explicit non-result that this is *conditional on a non-standard k = k1 + λ·k2 nonce
+generator and is not an attack on ECDSA as specified* — the 2026-07-29 entry already
+flagged this framing for secp256k1 (ν̂ = 0.664 at eff = 0.0993) and it must not drift.
+
+**Secondary — Thread 25 (cheap, falsifiable):** the E7 residual is a drift in ν̂_crit with
+m that neither rule captures. Fit ν̂_crit = a + b·m at fixed eff over m ∈ {6,8,10,12,14,16}
+with 40+ curves. Falsifier: if b is within noise of 0, the fixed cut ν̂ ≤ 0.62 is the final
+answer and Phase 2 predictor work is closed; if b is significantly positive, more
+signatures genuinely relax the ν̂ requirement and the ceiling is softer in m than in K1.
+
+### Commits made
