@@ -6103,3 +6103,209 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposal from the 2026-07-29 entry (log lines ~6089–6098). Priorities 1–6 of
+the standing list remain CLOSED/BLOCKED/DEAD-END (1 closed §10.5; 2 BLOCKED 2026-07-26
+and 2026-07-27; 3 completed 2026-07-21; 4 completed; 5 superseded by Threads 20/23), and
+Thread 20 made measurable progress on 2026-07-29, so protocol rule (b) applies.
+
+**Outcome, up front:** the *literal* proposal (project along e_m so the planted vector
+becomes λ₁) is a **bit-exact no-op**. But diagnosing *why* it is a no-op yields a closed-form
+predictor for the Phase-2 wall, and that predictor points at a different fix — **centring
+the nonce limbs**, a standard HNP step that the Phase-2 lattice simply omitted. Centring
+moves the K1 wall **4× outward on exactly the λ*=0.0699 curve the falsifier named**.
+
+### Work done
+- Environment (fresh container): `pip install fpylll` (0.6.4) `cysignals` (1.12.5)
+  `sympy` (1.14.0). PARI/GP was *not* needed this run. Note for future runs: `sympy` is
+  also absent from the base image, not just fpylll/cysignals.
+- New scripts (all runnable, outputs committed alongside as `*_output.txt`):
+  - `secp256k1_cm_audit/glv_hnp_phase2_centered.py` — predictor + E0–E5, 2×2 factorial
+    over {baseline, centred} × {unprojected, projected}. Lattice construction and scaling
+    reused verbatim from `glv_hnp_phase2_lambda_threshold.py:254` so the comparison to
+    2026-07-29 is exact.
+  - `secp256k1_cm_audit/glv_hnp_phase2_centered_addendum.py` — checks A (mechanism),
+    B (curve-label audit), C (finite-m vs asymptotic gap).
+  - `secp256k1_cm_audit/glv_hnp_phase2_centered_e3fix.py` — E3 re-run on the correct
+    curves (see F5) plus E6 (high-m).
+- ≈2600 LLL/BKZ reductions total, dims 18–194.
+- `cargo test --test curve_audit` → **5/5 pass** (7.82s). ✓
+
+### Findings
+
+**F1 — closed-form predictor for the Phase-2 wall (new).**
+With the standing scalings S_K1=n/K1, S_K2=n/K2, S_D=1, S_KANNAN=n and eff = K1·K2/n:
+
+```
+det(L) = (n·S_K1)^m · S_D · S_K2^m · S_KANNAN = n^(2m+1) · eff^(-m)
+E‖v_planted‖²  = m·(K1²/a)·S_K1² + m·(K2²/a)·S_K2² + (n²/3)·S_D² + S_KANNAN²
+gap            = GH(det, D) / ‖v_planted‖ ,   D = 2m+2
+```
+
+with **a = 3** for the limbs as Phase 2 draws them (k ∈ [0,K)) and **a = 12** if they are
+centred (u = k − K/2). Asymptotically gap → √a / √(2πe·eff), so the wall sits at
+
+```
+eff_wall = a / (2πe)  =  0.176  uncentred      0.703  centred
+```
+
+The uncentred 0.176 **reproduces the 2026-07-29 T3 sweep with no fitted parameter**
+(eff 0.05 → 19/20, 0.15 → 3/20, 0.25 → 0/20). This is the separator Thread 20 concluded
+could not exist — and Thread 20 was right about *why*: it is not a curve-level invariant,
+it is a function of (n, K1, K2, m).
+
+Calibration over 20 curves × 10 eff values × 5 seeds, pooled (E2, unprojected variants):
+
+| gap | pts | seed-level success | full 5/5 |
+|---|---|---|---|
+| [0.00,0.50) | 80 | 0.00 | 0.00 |
+| [0.50,0.70) | 140 | 0.05 | 0.03 |
+| [0.70,0.85) | 60 | 0.28 | 0.08 |
+| [0.85,1.00) | 20 | 0.47 | 0.15 |
+| [1.00,1.20) | 60 | 0.85 | 0.65 |
+| [1.20,1.50) | 20 | 0.99 | 0.95 |
+| [1.50,2.00) | 20 | 1.00 | 1.00 |
+
+Monotone, with the 50% crossing at gap ≈ 1.02. **Use `gap ≥ 1` as the go/no-go test.**
+
+**F2 — the e_m projection is a bit-exact no-op (Thread 23's literal proposal FALSIFIED).**
+E2b, paired per (curve, eff, centring) over 200 points each:
+
+```
+base vs proj        total 179 vs 179 ; points differing: 0/200 ; max |delta| = 0
+cent vs cent+proj   total 442 vs 442 ; points differing: 0/200 ; max |delta| = 0
+```
+
+Not "similar" — *identical*, seed by seed. Mechanism (addendum check A, 12/12 cases):
+LLL always isolates the trivial vector n·S_D·e_m as an explicit basis row, and reduces
+the remainder inside its orthogonal complement — which **is** the projected lattice.
+Deleting column m from the LLL-reduced unprojected basis reproduces the reduced projected
+basis exactly (row-norm multisets equal, 12/12). Quotienting by hand tells LLL nothing it
+had not already done.
+
+Corollary, and a trap for future runs: the GH gap *computed on the projected lattice* is
+over-optimistic by ≈1.6× (it drops a factor n from det while dropping only 1 from D). At
+projected gap ∈ [1.0,1.2) the measured success rate is 0.09, versus 0.85 at unprojected
+gap ∈ [1.0,1.2). **Always score this lattice with the unprojected gap.**
+
+So "make the planted vector λ₁" was the wrong goal: being λ₁ was never the binding
+constraint, and Thread 20's T5 observation, while correct, was not actionable.
+
+**F3 — centring the nonce limbs is the actual fix (and was simply missing).**
+Absorb K1/2 + λ·K2/2 into the constants A_i so the planted limbs are u = k1 − K1/2 and
+v = k2 − K2/2. This is textbook HNP (Boneh–Venkatesan; Nguyen–Shparlinski) — **not a new
+idea, and it should not be written up as one.** The Phase-2 construction of 2026-06-15 just
+omitted it. It cuts E[limb²] from K²/3 to K²/12, i.e. ‖v_planted‖ by 2× asymptotically.
+
+E1, 20 curves × 5 seeds at m=12 (LLL):
+
+| eff | base | cent | base gap | cent gap |
+|---|---|---|---|---|
+| 0.05 | 100/100 | 100/100 | 1.18 | 1.97 |
+| 0.10 | 43/100 | **99/100** | 0.84 | 1.41 |
+| 0.15 | 18/100 | **91/100** | 0.69 | 1.16 |
+| 0.20 | 10/100 | **65/100** | 0.61 | 1.01 |
+| 0.25 | 5/100 | **47/100** | 0.55 | 0.91 |
+| 0.30 | 3/100 | **32/100** | 0.50 | 0.84 |
+| 0.40 | 0/100 | **8/100** | 0.44 | 0.73 |
+| 0.55 | 0/100 | 0/100 | 0.38 | 0.63 |
+| 0.70 | 0/100 | 0/100 | 0.34 | 0.57 |
+
+50% crossing moves eff ≈ 0.095 → ≈ 0.235, a factor **2.5**. Predicted factor at m=12 is
+2.70 (the asymptotic 4× is diluted by the S_KANNAN and S_D terms, which do not shrink);
+predicted and measured agree within seed noise.
+
+**F4 — the falsifier's own criterion is met: the K1 wall moves 4× outward.**
+E3-fixed, on the actual λ*=0.0699 curve (p=2677, n=2647, λ=185), m=12, 5 seeds:
+
+| K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| base | 5/5 | 5/5 | 5/5 | 0/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| cent | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | **5/5** | **4/5** | **2/5** | **1/5** | 0/5 |
+
+Base wall K1 ≈ 4–6 — a clean replication of 2026-07-29 T4. Centred wall K1 ≈ 16–24.
+On the λ*=0.3396 curve (p=2557, n=2659) the wall moves K1 ≈ 12–16 → 16–24. Note the
+larger gain on the *low*-λ* curve: centring removes most of what the 2026-07-26 run
+mistook for a λ effect.
+
+**F5 — curve-label correction for the historical log (p vs n).**
+The 2026-07-29 T4 table's "12-bit/2557" and "12-bit/2677" are **p** values, not group
+orders; the 2026-06-15 session's "p=2677, lam=185" is the same curve. Resolved (addendum
+check B):
+
+| label | correct reading | λ | λ* |
+|---|---|---|---|
+| 2557 | p=2557, n=2659 | 903 | 0.3396 |
+| 2677 | p=2677, n=2647 | 185 | 0.0699 |
+
+Reading them as group orders gives *different* curves (n=2557 ⇒ p=2503, λ*=0.3266;
+n=2677 ⇒ p=2647, λ*=0.3859). E3 in this run's first script made exactly that mistake and
+so never tested the λ*=0.0699 curve; `glv_hnp_phase2_centered_e3fix.py` supersedes it.
+The E3 block inside `glv_hnp_phase2_centered.py` is retained but is **not** the T4
+comparison — read E3-fixed instead. Future runs: in this log, bare 4-digit curve numbers
+before 2026-08-03 mean p.
+
+**F6 — why extra signatures do not rescue a bad eff (sharpens T4b).**
+gap(m) rises toward its asymptote from *below*, and slowly (det^(1/D) carries n^(−1/D)).
+Addendum check C, n=65287:
+
+| eff | m=8 | 12 | 20 | 32 | 64 | 128 | 512 | asympt |
+|---|---|---|---|---|---|---|---|---|
+| 0.247 base | 0.447 | 0.547 | 0.649 | 0.716 | 0.778 | 0.811 | 0.836 | 0.843 |
+| 0.247 cent | 0.707 | 0.916 | 1.150 | 1.320 | 1.490 | 1.585 | 1.661 | 1.686 |
+| 0.549 base | 0.314 | 0.379 | 0.443 | 0.486 | 0.525 | 0.546 | 0.561 | 0.566 |
+| 0.549 cent | 0.496 | 0.633 | 0.786 | 0.896 | 1.005 | 1.067 | 1.115 | 1.131 |
+
+So m *does* help — but only logarithmically, which is why T4b's m ∈ {8,…,32} sweep read as
+a flat wall. T4b's conclusion stands; its stated reason ("the K1 wall is genuine") is now
+quantified rather than asserted.
+
+And empirically the logarithmic gain is cancelled by LLL's approximation factor degrading
+with dimension (E6, 4 curves × 5 seeds, dim 2m+2 up to 194):
+
+| eff | m=32 | 48 | 64 | 96 |
+|---|---|---|---|---|
+| 0.40 base | 0/20 (gap 0.57) | 0/20 (0.60) | 0/20 (0.62) | 0/20 (0.63) |
+| 0.40 cent | 14/20 (1.05) | 10/20 (1.13) | 10/20 (1.18) | 12/20 (1.23) |
+| 0.55 cent | 4/20 (0.90) | 4/20 (0.97) | 4/20 (1.01) | 4/20 (1.05) |
+
+Success is **flat or falling** while gap rises. At eff=0.40, m=32 gap=1.05 gives 14/20;
+at eff=0.55, m=96 gap=1.05 gives 4/20. **The gap rule is calibrated for LLL at dim ≈ 26
+and degrades above it** — a caveat on F1 that should be stated wherever the rule is used.
+
+**F7 — BKZ(20) does not cross the wall.** E5, centred lattice, m=12, 8 curves × 5 seeds:
+eff=0.70 → LLL 0/40, BKZ20 0/40 (gap 0.57); eff=0.85 → 0/40, 0/40 (gap 0.52). Consistent
+with a geometry wall rather than a reduction-strength wall at those gaps.
+
+**F8 — the wall is not information-theoretic.** At n≈65537, m=12, eff=0.25 the counting
+bound m_thresh = log n / log(1/eff) ≈ 8.0 is comfortably satisfied, yet base recovers
+5/100. The binding constraint is GH geometry (F1), roughly eff ≲ a/(2πe), not the counting
+bound eff < 1. Phase 2 is therefore **not** at an information-theoretic ceiling — it is at
+a lattice-geometry ceiling, and F3 shows that ceiling was 2.5–4× lower than it needed to be.
+
+### Next step proposal
+**Thread 24 — close the remaining gap between the counting bound (eff < 1) and the
+centred GH wall (eff ≈ 0.7 asymptotic, ≈ 0.24 at m=12).** Two concrete sub-tasks, cheapest
+first:
+
+1. *Predictor-guided m selection.* F6 shows gap and LLL quality trade off, so there is an
+   optimal m, and E6 hints it is near 32 rather than "as many as possible". Sweep m ∈
+   [8,64] at fixed eff ∈ {0.25, 0.40} recording both success and the realised Hermite
+   factor δ, and fit gap_needed(δ, D). Falsifier: if success at fixed eff is unimodal in m
+   with a peak, the peak location is a free 1.5–2× in eff for any real attack; if success
+   is monotone in m, F6's cancellation claim is wrong and should be retracted. ~20 min.
+2. *Progressive BKZ instead of one-shot BKZ(20).* E5 tested BKZ(20) only at gap ≈ 0.55,
+   where nothing should work. The interesting regime is gap ∈ [0.85, 1.05] (E1: cent at
+   eff 0.25–0.30), where LLL gets 32–47%. Falsifier: if progressive BKZ(β up to 40) lifts
+   that to >80% the wall is partly reduction-strength after all and F7 needs qualifying;
+   if it stays ≈50% the GH wall is confirmed as the true ceiling.
+
+Also worth doing once, cheaply: re-run the 2026-06-21…06-29 C1/C2 curve pair through the
+F1 predictor. F1 claims those six failed curve-level invariants failed because the true
+predictor is not curve-level — a direct check would confirm or kill that retro-explanation.
+
+### Commits made

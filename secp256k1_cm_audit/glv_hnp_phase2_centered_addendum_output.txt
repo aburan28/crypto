@@ -1,0 +1,44 @@
+==============================================================================
+A — is the e_m projection the same lattice LLL already works in?
+==============================================================================
+      n    eff  cent  trivial row present   norm multisets equal
+  65287   0.10 False                  yes                   True
+  65287   0.10  True                  yes                   True
+  65287   0.30 False                  yes                   True
+  65287   0.30  True                  yes                   True
+  65053   0.10 False                  yes                   True
+  65053   0.10  True                  yes                   True
+  65053   0.30 False                  yes                   True
+  65053   0.30  True                  yes                   True
+  65119   0.10 False                  yes                   True
+  65119   0.10  True                  yes                   True
+  65119   0.30 False                  yes                   True
+  65119   0.30  True                  yes                   True
+
+==============================================================================
+B — p vs n for the two '12-bit' curves of the 2026-07-29 T4 table
+==============================================================================
+
+reading '2557' as p:
+   p=2557 -> n=  2659 lam=   903 lam*=0.3396
+   p=2557 -> n=  2503 lam=  1226 lam*=0.4898
+reading '2557' as n:
+   p=  2503 -> n=2557 lam=   835 lam*=0.3266
+   p=  2659 -> n=2557 lam=   835 lam*=0.3266
+
+reading '2677' as p:
+   p=2677 -> n=  2647 lam=   185 lam*=0.0699
+reading '2677' as n:
+   p=  2647 -> n=2677 lam=  1033 lam*=0.3859
+
+==============================================================================
+C — asymptote vs finite-m: gap(m) for base and cent at fixed eff
+==============================================================================
+n=65287  (gap -> sqrt(a)/sqrt(2*pi*e*eff) as m -> infinity)
+   eff m=8     m=12    m=20    m=32    m=64    m=128   m=512     asympt
+ 0.247 0.447   0.547   0.649   0.716   0.778   0.811   0.836     0.843  base
+ 0.247 0.707   0.916   1.150   1.320   1.490   1.585   1.661     1.686  cent
+ 0.549 0.314   0.379   0.443   0.486   0.525   0.546   0.561     0.566  base
+ 0.549 0.496   0.633   0.786   0.896   1.005   1.067   1.115     1.131  cent
+
+done.

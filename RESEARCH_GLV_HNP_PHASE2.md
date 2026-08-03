@@ -245,10 +245,11 @@ quirks.
 
 ## 8. Open questions
 
-- What is the **information-theoretic lower bound** on signatures
+- ~~What is the **information-theoretic lower bound** on signatures
   needed for the k₁-only-leak model?  Phase 1 brute force needs
   `~ log_2(n) / c` signatures; does Phase 2's lattice achieve
-  this in practice?
+  this in practice?~~  **Answered 2026-08-03 (§10): no.  The binding
+  constraint is lattice geometry, not counting.**
 - Can Phase 2 be **further specialised** to exploit secp256k1's
   CM-by-Z[ω] structure beyond just GLV?  E.g., if the
   endomorphism ω acts predictably on the bias distribution, a
@@ -271,3 +272,75 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Viability criterion and the centring correction (2026-08-03)
+
+Measured over ≈2600 LLL/BKZ reductions on 17-bit and 12-bit j=0 GLV curves.
+Scripts: `secp256k1_cm_audit/glv_hnp_phase2_centered{,_addendum,_e3fix}.py`.
+Full data and derivation: `RESEARCH_AUTOLAB_LOG.md`, entry 2026-08-03.
+
+### 10.1 When does the Phase-2 lattice work?
+
+Let `eff = K1·K2/n` (K1 = k₁ bound, K2 = k₂ bound ≈ √n), m = signatures.
+With the §2 scalings S_K1 = n/K1, S_K2 = n/K2, S_D = 1, S_KANNAN = n:
+
+```
+det(L)          = n^(2m+1) · eff^(-m)                     D = 2m+2
+E‖v_planted‖²   = m·(K1²/a)·S_K1² + m·(K2²/a)·S_K2²
+                  + (n²/3)·S_D² + S_KANNAN²
+gap             = GH(det, D) / ‖v_planted‖
+```
+
+`a = 3` for limbs drawn as k ∈ [0,K); `a = 12` if they are centred (§10.2).
+**Recovery succeeds iff gap ≳ 1** — measured 0.00 success below gap 0.5,
+0.47 at gap 0.85–1.00, 0.85 at 1.00–1.20, 1.00 above 1.5.
+
+Asymptotically gap → √a / √(2πe·eff), so the ceiling is `eff ≈ a/(2πe)`:
+**0.176 uncentred, 0.703 centred.**  This is far below the counting bound
+`eff < 1`, so Phase 2 is limited by lattice geometry, not by information.
+
+Two caveats, both load-bearing:
+
+- gap approaches its asymptote **from below** and only logarithmically in m,
+  so at the m ≈ 12 used throughout Phase 2 the realised ceiling is much
+  lower — gap = 1 lands near eff ≈ 0.07 uncentred, ≈ 0.21 centred.
+- the criterion is calibrated for **LLL at D ≈ 26**.  Above that, LLL's
+  approximation factor degrades about as fast as the gap improves, and
+  success stops tracking gap: at eff = 0.40, m = 32 (gap 1.05) recovery is
+  14/20, while at eff = 0.55, m = 96 (gap 1.05) it is 4/20.  Adding
+  signatures past m ≈ 32 bought nothing measurable.
+
+### 10.2 Centring the nonce limbs (correction to §2)
+
+The §2 lattice plants `k1_i ∈ [0,K1)` and `k2_i ∈ [0,K2)` directly.  Absorb
+`K1/2 + λ·K2/2` into the constants `A_i` instead, so the planted limbs are
+`u_i = k1_i − K1/2` and `v_i = k2_i − K2/2`.  This is the standard HNP
+centring step (Boneh–Venkatesan; Nguyen–Shparlinski) — **not a new technique;
+the §2 construction simply omitted it.**  It cuts E[limb²] from K²/3 to
+K²/12, halving ‖v_planted‖ asymptotically and buying 4× in eff (2.5–2.7× at
+m = 12).  Measured, m = 12, 20 curves × 5 seeds:
+
+| eff | §2 as written | centred |
+|---|---|---|
+| 0.10 | 43/100 | 99/100 |
+| 0.15 | 18/100 | 91/100 |
+| 0.20 | 10/100 | 65/100 |
+| 0.25 | 5/100 | 47/100 |
+| 0.40 | 0/100 | 8/100 |
+
+On the (p=2677, n=2647, λ=185) curve the K1 wall moves from ≈4–6 to ≈16–24.
+**Centring should be treated as part of the construction from here on.**
+
+### 10.3 What does *not* help
+
+- **Projecting out the d column.**  The trivial vector `n·S_D·e_m` is always
+  shorter than the planted vector, so the planted vector is never λ₁.
+  Quotienting it out is a **bit-exact no-op** — identical results seed by
+  seed, 0/200 paired points differing.  LLL already isolates that vector and
+  reduces inside its orthogonal complement, which *is* the projected lattice.
+  Being λ₁ was never the binding constraint.
+  Trap: the GH gap computed on the *projected* lattice is ≈1.6× optimistic.
+  Always score with the unprojected gap.
+- **BKZ(20) past the wall.**  At eff 0.70/0.85 (gap 0.57/0.52), LLL 0/40 and
+  BKZ(20) 0/40.  Untested in the interesting regime gap ∈ [0.85, 1.05].
+- **More signatures**, beyond the logarithmic effect noted in §10.1.
