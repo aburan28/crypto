@@ -47,11 +47,15 @@ import time
 import sympy
 
 # Reuse the verified Thread 20a core rather than re-implementing it.
-import importlib.util
-_spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
-_t20a = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_t20a)
+import importlib.util  # still used below for sibling-script imports
+
+# 2026-08-03 (Thread 23): this script originally loaded the helpers out of
+# glv_hnp_phase2_lambda_threshold.py, which (a) executes experiments T1-T5 at
+# module scope and (b) never defined glv_eigenvalues / mu_of / identify_twist /
+# rival_sublattice_nu, so the import raised AttributeError and the script could
+# not run as committed.  The helpers now live in the side-effect-free
+# glv_hnp_lib.py with identical definitions.
+import glv_hnp_lib as _t20a
 
 eisenstein_decompose = _t20a.eisenstein_decompose
 j0_traces = _t20a.j0_traces
@@ -60,7 +64,7 @@ mu_of = _t20a.mu_of
 identify_twist = _t20a.identify_twist
 find_generator = _t20a.find_generator
 rival_sublattice_nu = _t20a.rival_sublattice_nu
-run_experiment = _t20a.run_experiment
+run_experiment = _t20a.run_experiment_flat   # 9-arg flat signature these scripts call
 
 # ---------------------------------------------------------------------------
 # Configuration

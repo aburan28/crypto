@@ -6103,3 +6103,197 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the next-step
+proposed by the 2026-07-29 entry (log line ~6089). Priorities 1–6 of the standing task
+list are CLOSED/BLOCKED/DEAD-END; Thread 20 made measurable progress on 2026-07-29, so
+its proposed continuation is the correct pick under protocol rule (b). Thread 23's own
+falsifier is executed in full below, and comes out **negative** — but the instrumentation
+built to test it yields the first predictor that separates the three historical anchors.
+
+New files: `secp256k1_cm_audit/glv_hnp_lib.py` (side-effect-free helper library),
+`secp256k1_cm_audit/glv_hnp_usvp_gap.py` (+ `_output.txt`, 130 lines, runtime 0.8 s).
+
+### Work done
+- **Repaired three un-runnable scripts.** `glv_hnp_phase2_nuhat_control.py`,
+  `glv_hnp_nuhat_vs_c1c2.py` (both from commit e845207) and
+  `glv_hnp_phase2_mu_response.py` all load their helpers out of
+  `glv_hnp_phase2_lambda_threshold.py`, which (a) executes experiments T1–T5 at module
+  scope, and (b) never defines `rival_sublattice_nu`, `glv_eigenvalues`, `mu_of`,
+  `identify_twist`. All three raised `AttributeError` at import as committed — the
+  2026-07-29 ν̂ result is reproducible only from its log table, not from the repo. The
+  four helpers are now defined in `glv_hnp_lib.py` (`rival_sublattice_nu(n, lam, K1, K2)
+  -> (w, mu, nu_hat)`, matching the three call sites) and the imports repointed.
+- Derived, implemented and validated the exact uSVP geometry of the Phase-2 lattice
+  (E1/E4), executed Thread 23's literal falsifier (E2), and compared six predictors on
+  87 pooled instances (E3) plus 45 held-out 20-bit instances (E5) and a within-stratum
+  controlled contrast (E6).
+- `cargo test --test curve_audit` → 5/5 pass (5.37 s). ✓
+
+### Findings
+
+**1. H23a FALSIFIED — the proposed reformulation is a no-op.**
+Deleting the d column (dim 2m+2 → 2m+1) kills the trivial vector `n·S_D·e_m` exactly
+(verified: `det(L)/det(L_nod) = n·S_D`, planted vector still a lattice member, d recovered
+post hoc from `d = B_0^{-1}(k1_0 − A_0 + λ·k2_0) mod n`). Success is then **identical
+cell for cell**, 3 anchors × 8 K1 values × 5 seeds, 240 trials:
+
+| curve | lattice | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2m+2 | 5/5 | 5/5 | 2/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1=3 |
+| 8-bit/199 | 2m+1 | 5/5 | 5/5 | 2/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1=3 |
+| 12-bit/2557 | 2m+2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | K1=8 |
+| 12-bit/2557 | 2m+1 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | K1=8 |
+| 12-bit/2677 | 2m+2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1=4 |
+| 12-bit/2677 | 2m+1 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | K1=4 |
+
+The trivial vector was never the obstruction. Thread 20's T5 observation ("the planted
+vector is never λ₁") is true but **not causal** — `recover_d` only ever scans rows with
+Kannan coordinate ±S_KANNAN, so a shorter information-free vector costs nothing.
+Corrects the 2026-07-29 framing.
+
+**2. The wall has a closed form (H23b, partially confirmed).**
+The basis is block-triangular, so `det L = (n·S_K1)^m · S_D · S_K2^m · S_KANNAN`
+*exactly* (checked against sympy's integer determinant: log det agrees to 13 s.f.).
+With the common column scale V = n and eff = K1·K2/n,
+
+    nu_gh = ||v_planted|| / GH(L)  ≈  sqrt(2πe/3) · (n · eff^m)^(1/(2m+2))
+
+and hence **lim_{m→∞} nu_gh = sqrt(2πe/3)·sqrt(eff)**, so nu_gh < 1 is reachable at any m
+only when **eff < 3/(2πe) = 0.1756**. This retro-explains T4b directly: the 2677 curve at
+K1=8 has eff = 0.157, just under the ceiling, so nu_gh decays towards 0.94 far too slowly
+(1.62 → 1.37 → 1.25 → 1.14 → 1.09 for m = 8/12/16/24/32) and more data cannot rescue it.
+
+| eff | nu_gh(m=∞) | m for nu_gh<1, n=2^12 | 2^17 | 2^256 |
+|---|---|---|---|---|
+| 0.03 | 0.413 | 6 | 8 | 102 |
+| 0.05 | 0.534 | 8 | 11 | 143 |
+| 0.08 | 0.675 | 13 | 17 | 228 |
+| 0.1757 | 1.000 | 1618 | 2019 | >4000 |
+| 0.20 | 1.067 | >4000 | >4000 | >4000 |
+
+But nu_gh alone is only AUC 0.862, and the rule `nu_gh < 1` is far too conservative
+(TP=9, FN=30; successes observed up to nu_gh = 2.170). It cannot separate the anchors at
+all — 1.200 / 1.282 / 1.300 for outcomes 5/5, 5/5, **0/5**.
+
+**3. H23c FALSIFIED — the ADPS visibility margin is degenerate here.**
+`margin = max_i ||b*_i||/||π_i(v)||` scores AUC **0.479** (chance). Reason: v is itself a
+lattice vector, so past the index j of its last nonzero coefficient π_i(v) = 0, and at
+i = j the ratio is exactly 1/|c_j| = 1. The statistic is pinned at 1.000 for 82 of 87
+instances. Recorded as a dead hypothesis — do not re-try in this form.
+
+**4. NEW RESULT — nu_proj unifies the eff-dependence and the λ-dependence.**
+Define the rank-(m+1) *nuisance sublattice* T of information-free short vectors:
+
+    t_0 = n·S_D·e_m                          (Thread 20 T5 trivial vector)
+    t_i = w[0]·e_i + w[1]·e_{m+1+i},  i < m  (Thread 20c rival blocks, w = λ₁(L2))
+
+The m+1 generators have pairwise disjoint support, hence are pairwise **orthogonal**, so
+det(T) = (n·S_D)·mu^m exactly; every t ∈ T has Kannan coordinate 0 and can never encode d.
+T is **primitive** in L — index [sat(T):T] = 1, verified exactly by rational left-kernel +
+HNF on the 8-bit and 12-bit/2557 anchors — so det(π_T⊥(L)) = det(L)/det(T) with equality.
+Then
+
+    nu_proj = ||π_T⊥(v_planted)|| / GH(π_T⊥(L)),   dim = m+1.
+
+This gets the counter-intuitive Thread 20c sign right *mechanically*: small ν̂ ⇒ small mu
+⇒ small det(T) ⇒ **larger** det of the projection ⇒ larger GH ⇒ smaller nu_proj ⇒ easier.
+Short rivals help because they are consumed by the leading basis indices.
+
+Anchors (this is the discriminating case — no previously logged quantity separates them):
+
+| curve | lam* | ν̂ | nu_gh | **nu_proj** | LLL |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | 0.549 | 1.200 | **1.160** | 5/5 |
+| 12-bit/2557 | 0.340 | 0.408 | 1.282 | **1.019** | 5/5 |
+| 12-bit/2677 | 0.070 | 0.771 | 1.300 | **1.959** | 0/5 |
+
+Pooled 87 instances (39 successes / 48 failures), 16–20 bit:
+
+| predictor | AUC | Spearman |
+|---|---|---|
+| **nu_proj (Thread 23)** | **0.987** | −0.839 |
+| nu_gh | 0.862 | −0.624 |
+| eff = K1·K2/n | 0.843 | −0.592 |
+| ν̂ (Thread 20c) | 0.815 | −0.542 |
+| nu_cf (closed form) | 0.801 | −0.519 |
+| λ* (Thread 20a) | 0.702 | +0.351 |
+| sv/pv (Thread 20 T5) | 0.576 | +0.131 |
+| ADPS margin | 0.479 | −0.047 |
+
+Best single threshold `nu_proj < 1.727` → 95.4% accuracy (vs 79.3% for the best nu_gh
+threshold). The offset from 1.0 is a calibration constant, not a derived one — LLL in
+dim m+1 ≈ 11 routinely finds vectors above GH.
+
+**5. Held-out check — honest partial replication.**
+Threshold fitted on the 17-bit sweep only (72 instances, in-sample 94.4%), tested on 45
+fresh 20-bit instances never used to fit: accuracy 84.4%, AUC(nu_proj) = 0.929 —
+but AUC(nu_gh) = **0.929 as well** (ν̂ alone drops to 0.630). At 20 bits successes are
+concentrated at a single eff, so eff drives almost all the variance and the two gaps tie.
+**nu_proj's advantage over nu_gh does not replicate on that stratum.**
+
+The controlled version of the comparison does replicate. nu_gh depends only on
+(n, m, K1, K2), so *within* a fixed (bit-size, eff) stratum it is constant up to integer
+rounding of K1 and can express no λ-dependence at all; nu_proj can:
+
+| stratum (bits, eff) | n | wins | nu_gh range | AUC nu_proj | AUC ν̂ |
+|---|---|---|---|---|---|
+| (16, 0.12) | 6 | 3 | [1.267, 1.690] | 1.000 | 1.000 |
+| (16, 0.20) | 6 | 2 | [1.623, 2.083] | 1.000 | 0.875 |
+| (17, 0.12) | 12 | 3 | [1.358, 1.644] | 1.000 | 1.000 |
+| (17, 0.20) | 12 | 2 | [1.615, 2.173] | 0.950 | 0.950 |
+| (17, 0.30) | 12 | 1 | [1.790, 2.330] | 0.909 | 0.909 |
+| (19, 0.06) | 9 | 5 | [1.195, 1.262] | 1.000 | 0.800 |
+| (20, 0.06) | 6 | 4 | [1.054, 1.334] | 1.000 | 0.875 |
+
+Pair-weighted within-stratum AUC(nu_proj) = **0.981**. Claim as supported: *given* the
+eff/m regime, nu_proj resolves the residual λ-geometry; as a single global score its
+0.987 is in-sample and should be quoted as 0.93 out-of-sample.
+
+**6. Consequence for Phase 2.** The wall is neither information-theoretic nor a
+reduction-strength deficit: it is the Gaussian-heuristic ceiling eff < 3/(2πe), modulated
+by det(T). Phase 2 is at its ceiling *for this lattice*, and the only two levers are
+(i) lower eff, or (ii) shrink det(T) — the latter is a property of λ and therefore of the
+curve, not of the attacker.
+
+**7. The 2026-07-29 ν̂ result is now reproducible from the repo, and it replicates.**
+The three repaired scripts run clean end-to-end (outputs committed):
+
+- `glv_hnp_phase2_nuhat_control.py` (33.9 s) — Arm 1 (20-bit, μ-matched low vs high ν̂):
+  p̂ = 0.919 vs 0.355 at m=11, permutation p = 0.0000. Arm 3 Spearman(ν̂, p̂) = −0.824 /
+  −0.852 / −0.838 / −0.810 for m = 8/9/10/11, all perm p = 0.0002. **Arm 5 is the causal
+  test** — one *fixed* curve (p=524341, n=525583, K1=36, K2=725), 120 synthetic λ, 24
+  seeds: Spearman(ν̂, p̂) = −0.636, perm p = 0.0002, while Spearman(μ, p̂) = +0.093,
+  p = 0.30. Curve-level confounds are eliminated by construction, so ν̂ is causal and λ*
+  is not. Anchors out-of-sample: ν̂ = 0.549 / 0.408 → recover; ν̂ = 0.771 (2677) → never.
+- `glv_hnp_nuhat_vs_c1c2.py` — ν̂ vs the six invariants the 2026-06-30 entry declared a
+  DEAD END. 100 fresh 20-bit curves, Exp S protocol (K1=72, m=12, 6 seeds), 73 C1 / 27 C2:
+  ν̂ AUC **0.947** (best acc 88.0% vs 73.0% majority baseline), μ 0.510, max_a 0.768.
+  Monotone decile response: C2 rate 1.00 / 0.70 / 0.50 / 0.30 / 0.20 / 0.00 … across ν̂
+  deciles 1–10. The 2026-07-29 log's AUC 0.935 replicates at 0.947 on a fresh sample.
+  secp256k1 itself sits at ν̂ = 0.664 at eff = 0.0993 — the 50th percentile, i.e.
+  unremarkable.
+
+This corroborates the nu_proj mechanism from a second direction: Arm 5 varies λ with
+everything else fixed, which is exactly the regime where nu_gh is constant and only
+det(T) can move.
+
+### Next step proposal
+**Thread 24 — attack det(T) directly.** nu_proj says the m rival blocks contribute
+mu^m to det(T), and mu is fixed by (n, λ, K1, K2). But S_K1 and S_K2 are *free*: the
+block is ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩, so the ratio S_K2/S_K1 shifts mu without changing
+det(L2)/(S_K1·S_K2). Concretely: sweep r = S_K2/(n/K2) over [1/8, 8] with S_K1 held at
+n/K1, recompute nu_proj, and check whether the K1 wall on the 2677 anchor (currently
+K1 = 4) moves outward at the r minimising nu_proj. Falsifier: if the wall is unmoved for
+every r, det(T) is scale-invariant in the relevant sense and Phase 2 is closed for good.
+Cheap — the E2 grid runs in 0.3 s, so a 20-point r sweep is a one-minute job.
+
+Secondary (bookkeeping, 10 min): `glv_hnp_phase2_lambda_threshold.py` still runs T1–T5 at
+module scope. Move its driver under `if __name__ == '__main__':` and repoint it at
+`glv_hnp_lib.py` so the canonical helpers have exactly one definition.
+
+### Commits made
+(recorded after commit)

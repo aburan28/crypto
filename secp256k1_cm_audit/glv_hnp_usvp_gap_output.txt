@@ -1,0 +1,165 @@
+
+==============================================================================
+E1  Exact uSVP geometry of the three anchor curves
+==============================================================================
+nu_gh = ||v_planted|| / GH(L).  nu_gh > 1 means the Gaussian heuristic predicts
+~nu_gh^dim lattice vectors SHORTER than the target, i.e. uSVP is ill-posed.
+
+curve           m  K1    eff   lam*  nu_hat   nu_gh   nu_cf  nu_proj   sv/pv  margin  i*   LLL
+8-bit/199       6   2  0.151  0.467   0.549   1.200   1.548    1.160   0.603   1.000   6   5/5
+12-bit/2557     8   8  0.156  0.340   0.408   1.282   1.621    1.019   0.517   1.000   9   5/5
+12-bit/2677    10   8  0.157  0.070   0.771   1.300   1.472    1.959   0.422   1.000  17   0/5
+
+Closed-form check: nu_cf is computed from (n, m, K1, K2) alone; nu_gh uses the
+exact integer det and the exact planted norm of seed 42.
+nu_proj is the gap in the projection orthogonal to the rank-(m+1)
+nuisance sublattice T = <n*S_D*e_m> + <rival block shortest vectors>.
+T is primitive in L (index [sat(T):T] = 1, verified exactly by HNF on
+the 8-bit and 12-bit/2557 anchors), so det(pi(L)) = det(L)/det(T) holds
+with equality, not as a heuristic.
+
+==============================================================================
+E2  H23a -- Thread 23's proposed reformulation (delete the d column)
+==============================================================================
+Left block: the (2m+2)-dim Phase-2 lattice (Thread 20 baseline).
+Right block: the (2m+1)-dim lattice with column m deleted; the trivial
+vector n*S_D*e_m maps to 0 and d is recovered post hoc from
+d = B_0^{-1}(k1_0 - A_0 + lam*k2_0) mod n.
+
+curve            lat   K1=2   K1=3   K1=4   K1=6   K1=8  K1=12  K1=16  K1=24
+8-bit/199       2m+2    5/5    5/5    2/5    2/5    0/5    0/5    0/5    0/5
+8-bit/199       2m+1    5/5    5/5    2/5    2/5    0/5    0/5    0/5    0/5
+
+12-bit/2557     2m+2    5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+12-bit/2557     2m+1    5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+
+12-bit/2677     2m+2    5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+12-bit/2677     2m+1    5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+
+Wall position = largest K1 with >= 3/5 recoveries:
+  8-bit/199        2m+2  K1_wall = 3
+  8-bit/199        2m+1  K1_wall = 3
+  12-bit/2557      2m+2  K1_wall = 8
+  12-bit/2557      2m+1  K1_wall = 8
+  12-bit/2677      2m+2  K1_wall = 4
+  12-bit/2677      2m+1  K1_wall = 4
+
+==============================================================================
+E3  H23b/H23c -- predictor comparison (fresh 17-bit curves)
+==============================================================================
+Searching fresh j=0 GLV curves, 17-bit, lam* spread over 6 bins ...
+  found 6 curves in 0.16s
+
+       n   lam*  nu_hat    eff   K1   nu_gh   nu_cf  nu_proj   margin   LLL
+   65719  0.027   0.886  0.051   13   1.020   1.020    1.124    1.000   3/3
+   65719  0.027   0.986  0.121   31   1.409   1.514    2.955    1.000   0/3
+   65719  0.027   0.948  0.199   51   1.726   1.898    3.609    1.000   0/3
+   65719  0.027   1.003  0.301   77   1.893   2.289    2.425    1.000   0/3
+   65203  0.137   0.910  0.051   13   0.849   1.021    1.479    1.000   3/3
+   65203  0.137   0.652  0.122   31   1.269   1.516    1.727    1.000   0/3
+   65203  0.137   0.597  0.200   51   1.624   1.901    2.180    1.000   0/3
+   65203  0.137   0.606  0.298   76   1.999   2.279    2.719    1.000   0/3
+   66037  0.211   0.923  0.051   13   1.018   1.018    1.693    1.266   3/3
+   66037  0.211   0.659  0.121   31   1.406   1.511    1.998    1.000   0/3
+   66037  0.211   0.601  0.198   51   1.723   1.895    2.352    1.000   0/3
+   66037  0.211   0.608  0.300   77   1.890   2.285    2.669    1.000   0/3
+   65899  0.318   0.447  0.051   13   1.019   1.019    0.586    1.000   3/3
+   65899  0.318   0.437  0.121   31   1.407   1.512    0.891    1.000   3/3
+   65899  0.318   0.501  0.199   51   1.724   1.896    1.423    1.000   2/3
+   65899  0.318   0.590  0.300   77   1.891   2.287    1.723    1.000   1/3
+   65287  0.335   0.233  0.051   13   0.848   1.021    0.386    1.000   3/3
+   65287  0.335   0.352  0.122   31   1.267   1.515    0.913    1.000   3/3
+   65287  0.335   0.450  0.200   51   1.623   1.900    1.471    1.020   2/3
+   65287  0.335   0.552  0.302   77   1.995   2.292    2.265    1.000   0/3
+   66943  0.446   0.616  0.050   13   0.999   1.016    1.144    1.000   3/3
+   66943  0.446   0.926  0.120   31   1.358   1.508    2.364    1.000   0/3
+   66943  0.446   1.009  0.201   52   1.917   1.908    2.012    1.000   0/3
+   66943  0.446   0.946  0.302   78   2.094   2.294    2.405    1.000   0/3
+
+Pooled instances: 87  (successes 39, failures 48)
+
+predictor                              AUC  Spearman   direction
+nu_proj (Thread 23, unified)         0.987    -0.839   smaller is better
+nu_gh   = ||v||/GH(L)                0.862    -0.624   smaller is better
+nu_cf   (closed form)                0.801    -0.519   smaller is better
+margin  = max||b*_i||/||pi_i(v)||    0.479    -0.047   larger is better
+nu_hat  (Thread 20c)                 0.815    -0.542   smaller is better
+lam*    (Thread 20a)                 0.702     0.351   larger is better
+eff     = K1*K2/n                    0.843    -0.592   smaller is better
+sv/pv   (Thread 20 T5)               0.576     0.131   larger is better
+
+Best single threshold on nu_proj: 'nu_proj < 1.727' => accuracy 95.4%
+
+Best single threshold on nu_gh: 'nu_gh < 1.291' => accuracy 79.3%
+
+Rule 'nu_gh < 1 => recoverable':  TP=9 FP=0 FN=30 TN=48   accuracy=65.5%
+  nu_gh over successes: min 0.848  max 2.170
+  nu_gh over failures : min 1.269  max 2.382
+Rule 'margin >= 1 => recoverable': TP=39 FP=43 FN=0 TN=5   accuracy=50.6%
+
+==============================================================================
+E5  Held-out validation: fit the threshold on 17-bit, test on 20-bit
+==============================================================================
+Threshold fitted on the 17-bit sweep only (72 instances): nu_proj < 1.727  (in-sample accuracy 94.4%)
+
+Searching fresh 20-bit curves (never used to fit) ...
+  found 5 curves
+
+        n   lam*  nu_hat    eff   K1   nu_gh  nu_proj  pred   LLL    
+   523903  0.082   0.992  0.059   43   1.236    2.350    no   1/3  ok
+   523903  0.082   0.710  0.140  101   1.849    3.052    no   0/3  ok
+   523903  0.082   0.641  0.240  174   2.342    3.724    no   0/3  ok
+   525583  0.160   0.449  0.059   43   1.055    0.921   yes   3/3  ok
+   525583  0.160   0.659  0.139  101   1.699    2.271    no   0/3  ok
+   525583  0.160   0.859  0.240  174   2.003    3.613    no   0/3  ok
+   524047  0.252   0.681  0.059   43   1.236    1.073   yes   3/3  ok
+   524047  0.252   0.572  0.140  101   1.848    1.475   yes   0/3  MISS
+   524047  0.252   0.610  0.240  174   2.342    2.303    no   0/3  ok
+   523969  0.340   0.920  0.059   43   1.236    2.773    no   1/3  ok
+   523969  0.340   0.852  0.140  101   1.849    3.485    no   0/3  ok
+   523969  0.340   0.727  0.240  174   2.342    4.018    no   0/3  ok
+   526297  0.458   0.530  0.059   43   1.054    1.447   yes   1/3  MISS
+   526297  0.458   0.667  0.139  101   1.698    2.795    no   0/3  ok
+   526297  0.458   0.843  0.240  174   2.002    3.961    no   0/3  ok
+
+Held-out: 45 instances (9 successes, 36 failures)
+  AUC(nu_proj)               = 0.929
+  AUC(nu_gh)                 = 0.929
+  AUC(nu_hat)                = 0.630
+  accuracy of the fitted rule = 84.4%
+
+==============================================================================
+E6  Controlled contrast -- within a stratum of near-constant nu_gh
+==============================================================================
+nu_gh depends only on (n, m, K1, K2), so inside a stratum of fixed
+bit-size and fixed eff it is constant up to the integer rounding of K1
+and cannot express any lam dependence.  nu_proj can.  AUC computed
+*within* each stratum therefore isolates exactly the lam-geometry term.
+
+stratum (bits, eff)      n  wins       nu_gh range  AUC nu_proj  AUC nu_hat
+(16, 0.12)               6     3    [1.267, 1.690]        1.000       1.000
+(16, 0.2)                6     2    [1.623, 2.083]        1.000       0.875
+(17, 0.12)              12     3    [1.358, 1.644]        1.000       1.000
+(17, 0.2)               12     2    [1.615, 2.173]        0.950       0.950
+(17, 0.3)               12     1    [1.790, 2.330]        0.909       0.909
+(19, 0.06)               9     5    [1.195, 1.262]        1.000       0.800
+(20, 0.06)               6     4    [1.054, 1.334]        1.000       0.875
+
+Pair-weighted within-stratum AUC(nu_proj) = 0.981   (nu_gh is uninformative here by construction)
+
+==============================================================================
+E4  Asymptotic ceiling implied by H23b
+==============================================================================
+lim_{m->inf} nu_gh = sqrt(2*pi*e/3) * sqrt(eff),  so nu_gh < 1 is
+reachable at large m only if eff < 3/(2*pi*e) = 0.1756.
+
+    eff  nu_gh(m=inf)   m needed for nu_gh<1 (n=2^12 / 2^17 / 2^256)
+ 0.0300         0.413        6      8    102
+ 0.0500         0.534        8     11    143
+ 0.0800         0.675       13     17    228
+ 0.1757         1.000     1618   2019  >4000
+ 0.2000         1.067    >4000  >4000  >4000
+ 0.2500         1.193    >4000  >4000  >4000
+
+Total runtime 0.46s
+Done.

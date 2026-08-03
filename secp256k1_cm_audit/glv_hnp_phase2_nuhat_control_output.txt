@@ -1,0 +1,57 @@
+==============================================================================
+GLV-HNP Phase 2 — Thread 20c: controlled test of nu_hat
+==============================================================================
+eff=0.05, cuts: low<=0.45 high>=0.9, mu restricted to (0.05,0.45), 48 seeds/(curve,m)
+
+--- Arm 1 harvest: 20-bit ---
+  harvested low=30 high=30 from 1055 primes in 0.1s
+
+--- Arm 1: 20-bit, mu-matched low vs high nu_hat ---
+  nu_hat  low group: mean=0.347 [0.222, 0.447]
+  nu_hat high group: mean=0.971 [0.901, 1.072]
+  CONFOUND CHECK mu: low=0.253 high=0.247 diff=+0.006 perm p=0.8376 (balanced)
+  m=8   p_hat(low nu_hat)=0.908  p_hat(high nu_hat)=0.442  diff=+0.465  perm p=0.0000 ***
+  m=9   p_hat(low nu_hat)=0.971  p_hat(high nu_hat)=0.576  diff=+0.395  perm p=0.0000 ***
+  m=10  p_hat(low nu_hat)=0.997  p_hat(high nu_hat)=0.728  diff=+0.269  perm p=0.0000 ***
+  m=11  p_hat(low nu_hat)=0.999  p_hat(high nu_hat)=0.759  diff=+0.240  perm p=0.0000 ***
+
+--- Arm 2 harvest: 24-bit ---
+  harvested low=20 high=20 from 536 primes in 0.1s
+
+--- Arm 2: 24-bit replication ---
+  nu_hat  low group: mean=0.361 [0.234, 0.438]
+  nu_hat high group: mean=0.977 [0.905, 1.050]
+  CONFOUND CHECK mu: low=0.288 high=0.253 diff=+0.036 perm p=0.3861 (balanced)
+  m=8   p_hat(low nu_hat)=0.456  p_hat(high nu_hat)=0.079  diff=+0.377  perm p=0.0000 ***
+  m=9   p_hat(low nu_hat)=0.679  p_hat(high nu_hat)=0.146  diff=+0.533  perm p=0.0000 ***
+  m=10  p_hat(low nu_hat)=0.867  p_hat(high nu_hat)=0.343  diff=+0.524  perm p=0.0000 ***
+  m=11  p_hat(low nu_hat)=0.919  p_hat(high nu_hat)=0.355  diff=+0.564  perm p=0.0000 ***
+
+--- Arm 3: Spearman permutation p-values (pooled 20-bit sample) ---
+  m=8   spearman(nu_hat, p_hat)=-0.824  perm p=0.0002
+  m=9   spearman(nu_hat, p_hat)=-0.852  perm p=0.0002
+  m=10  spearman(nu_hat, p_hat)=-0.838  perm p=0.0002
+  m=11  spearman(nu_hat, p_hat)=-0.810  perm p=0.0002
+
+--- Arm 4: historical anchor curves (out of sample) ---
+  n=199    mu=0.4673 nu_hat=0.5491   8-bit/199,  3/3 at m=4
+  n=2659   mu=0.3400 nu_hat=0.4080   12-bit/2557, 3/3 at m=7
+  n=2647   mu=0.0699 nu_hat=0.7711   12-bit/2677, NEVER 3/3
+  (2026-07-26 Thread 20a single binary failure: n=525913, nu_hat=0.9993 = 96th pct of that sample)
+
+--- Arm 5: causal test — ONE fixed curve, synthetic lambda sweep ---
+  The lattice attack only needs the nonce to be generated as
+  k = k1 + lam*k2 mod n with k1 small; lam need not be a GLV
+  eigenvalue for the HNP instance to be well posed.  So we can hold
+  (p, b, n, G, K1, K2) FIXED and vary lam alone.  Any curve-level
+  confound is eliminated by construction.
+  fixed curve: p=524341, n=525583, K1=36, K2=725
+  n=120 synthetic lambdas, m=9, 24 seeds each
+    spearman(nu_hat, p_hat) = -0.636  perm p=0.0002
+    spearman(mu,     p_hat) = +0.093  perm p=0.2995
+    low  nu_hat tertile: nu_hat=0.341  p_hat=0.896  mu=0.258
+    mid  nu_hat tertile: nu_hat=0.729  p_hat=0.572  mu=0.231
+    high nu_hat tertile: nu_hat=0.951  p_hat=0.542  mu=0.281
+
+Total wall time 33.9s
+Done.
