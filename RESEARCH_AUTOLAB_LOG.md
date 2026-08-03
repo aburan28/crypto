@@ -6261,4 +6261,4 @@ curve-level information at all**. Future runs should predict with r and stop loo
 invariants of the curve.
 
 ### Commits made
-(recorded below)
+867905c autolab 2026-08-03: Thread 23 — projection is a no-op; wall is GH-packing at r~1.75, not IT
