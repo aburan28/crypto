@@ -6103,3 +6103,175 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.**
+The explicit next-step proposed by the 2026-07-29 entry (log line ~6089), which made
+measurable progress, so protocol rule (b) applies. Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+is the live lineage.
+
+Outcome: **Thread 23 as posed is falsified, and the reason is a structure theorem that
+retires the whole "make the planted vector λ₁" program.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Same note as 2026-07-29: cysignals is
+  a separate runtime import. PARI not needed this run.)
+- Five new scripts in `secp256k1_cm_audit/`, each with a committed `*_output.txt`:
+  - `glv_hnp_phase2_projected.py` — three arms O/P/C + EXP A/B/C
+  - `glv_hnp_phase2_projected_diag.py` — D1/D2/D3 (instance-level agreement, rival ID)
+  - `glv_hnp_phase2_exact_cvp.py` — E1/E2 (exact CVP by fpylll enumeration)
+  - `glv_hnp_phase2_block_vote.py` — F1/F2/F3 (per-block corruption, majority vote)
+  - `glv_hnp_phase2_quotient_check.py` — G (the structure theorem, index check)
+- All lattice/signature/scale code copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so numbers are directly comparable to
+  2026-07-29. Arms:
+
+  | arm | lattice | dim | solver |
+  |---|---|---|---|
+  | O | original, verbatim baseline | 2m+2 | LLL |
+  | P | column m (the d-column) deleted | 2m+1 | LLL |
+  | C | L0 = arm P minus Kannan row/col | 2m | Babai nearest-plane, exact `Fraction` |
+  | X | L0 | 2m | **exact CVP**, `fpylll.CVP.closest_vector` |
+
+  Arms P/C/X have no d-column, so d is recovered algebraically:
+  `d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n`.
+- `cargo test --test curve_audit` → 5/5 pass (4.33s). ✓
+- Runtimes: full arm sweep 1.3 s, exact-CVP sweep (dim 20 enumeration) 18.8 s.
+
+### Findings
+
+**1. The projection works geometrically and does nothing operationally.**
+Deleting the d-column removes the trivial vector `n·S_D·e_m` exactly as T5 predicted, and
+sv/pv moves a long way. Recovery does not move at all.
+
+| eff | arm O | arm P | arm C | sv/pv O | sv/pv P |
+|---|---|---|---|---|---|
+| 0.05 | 50/50 | 50/50 | 43/50 | 0.3610 | 0.8593 |
+| 0.10 | 27/50 | 27/50 | 23/50 | 0.3547 | 0.7327 |
+| 0.15 | 16/50 | 16/50 | 12/50 | 0.3566 | 0.6065 |
+| 0.20 | 9/50 | 9/50 | 7/50 | 0.3541 | 0.5332 |
+| 0.25 | 4/50 | 4/50 | 4/50 | 0.3487 | 0.4828 |
+| 0.35 | 1/50 | 1/50 | 1/50 | 0.3550 | 0.4374 |
+
+(10 fresh 17-bit j=0 GLV curves, m=12, 5 seeds.) The T4 K1 grid is likewise identical
+for O and P on both historical 12-bit curves — 2557 fails at K1≥16, 2677 at K1≥6, exactly
+as on 2026-07-29. **D1: agreement is instance-level, not aggregate — 300/300 trials,
+0 disagreements** (107 both recovered, 193 neither).
+
+**Correction to the 2026-07-29 falsifier.** It asked whether "sv/pv rises above 1". It
+cannot: the planted vector is a lattice vector, so ‖λ₁‖ ≤ ‖v_planted‖ always. The
+intended criterion is sv/pv → 1.0. It does reach 1.0 on 12/45 instances, and recovery
+still does not change.
+
+**2. D2 — the remaining rival is the λ-block vector, and it has Kannan coordinate 0.**
+Over 45 instances: sv(P) equals μ = λ₁(L2) *exactly* on 21, supported on a single column
+pair (i, m+i) on the same 21, and the planted vector is λ₁ on 12. The complement is exact:
+
+```
+sv(P) has Kannan coord 0 : 33/45      planted vector IS lambda_1 : 12/45
+```
+
+i.e. **whenever the planted vector is not λ₁, λ₁ has Kannan coordinate 0** (33/33). Those
+rivals are filtered out at readout by the `|last| == S_KANNAN` test, so they never
+competed in the first place. Making the planted vector λ₁ is the wrong target.
+
+**3. STRUCTURE THEOREM (this run) — L0/L_λ ≅ Z/n, and d is the coset label.**
+Let `L_λ := ⊕_i L2^(i)` where `L2^(i) = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩` sits in columns
+(i, m+i). A vector of `L2^(i)` is
+`c1(n·S_K1,0) + c2(−λ·S_K1,S_K2) = ((c1·n − c2·λ)S_K1, c2·S_K2)`, so
+`Δk1_i = c1·n − c2·λ`, `Δk2_i = c2`, hence
+
+```
+Δk1_i + λ·Δk2_i = c1·n − c2·λ + λ·c2 = c1·n ≡ 0  (mod n)
+```
+
+The readout `d_i = (k1_i + λ·k2_i − A_i)·B_i⁻¹` depends on `(k1_i,k2_i)` only through
+`k1_i + λ·k2_i mod n`, so **d is invariant under all of L_λ**. And `L_λ ⊂ L0` has index
+exactly n — verified numerically, `det(L_λ)/det(L0) = n` on 6/6 configurations
+(n = 4003, 4153, 4129 × (eff,m) = (0.10,4), (0.20,5)), `glv_hnp_phase2_quotient_check.py`.
+
+So `L0/L_λ ≅ Z/nZ` and the coset label *is* the candidate d. Three things follow, all
+confirmed empirically:
+
+- the λ-block rivals are **harmless** — they cannot change the answer, so removing them
+  cannot change recovery. This *is* the explanation of the 300/300 in D1.
+- block-wise disagreement is **impossible**: either all m blocks report the true d, or
+  none do. F1 confirms — clean-block counts are bimodal at {0, m}, mean clean
+  10.00 / 4.60 / 2.80 / 0.60 / 0.20 / 0.20 / 0.00 across eff, **median 0 in every failing
+  row**, and `all-m-clean` equals the recovery count exactly at every eff.
+- majority-vote readout over the m blocks gains **exactly nothing**: X@0 = X@maj = 92/350.
+  (F2 was written to exploit sparse corruption; the hypothesis is falsified — corruption
+  is never sparse.) Recorded so no future run re-tries it.
+
+**4. E1/E2 — exact CVP does not beat LLL. The wall is information-theoretic.**
+10 curves, m=10 (L0 dim 20), 5 seeds, exhaustive enumeration:
+
+| eff | arm O (LLL) | arm C (Babai) | arm X (exact CVP) | closer-than-true exists | mean d_cvp/d_true |
+|---|---|---|---|---|---|
+| 0.05 | 50/50 | 44/50 | 50/50 | 12/50 | 0.9660 |
+| 0.10 | 26/50 | 17/50 | 23/50 | 40/50 | 0.8803 |
+| 0.15 | 13/50 | 11/50 | 14/50 | 46/50 | 0.7739 |
+| 0.20 | 6/50 | 3/50 | 3/50 | 50/50 | 0.6465 |
+| 0.25 | 3/50 | 3/50 | 1/50 | 50/50 | 0.5853 |
+| 0.35 | 0/50 | 0/50 | 1/50 | 50/50 | 0.5071 |
+| 0.50 | 0/50 | 0/50 | 0/50 | 50/50 | 0.4117 |
+
+Totals: arm O 98/350, arm X 92/350 — indistinguishable, and exact CVP is *not* better.
+A strictly closer lattice point than the true nonce offset exists on **298/350 (85.1%)**
+of instances. By Theorem 3 a closer point in the *correct* coset still yields the right d,
+which is why eff=0.05 shows 12/50 closer-than-true alongside 50/50 recovery — no
+contradiction, and no exploitable slack.
+
+**Verdict: Phase 2 is at its ceiling for this formulation.** Better reduction (BKZ,
+sieving) cannot help, because the exact optimum of the CVP instance already fails wherever
+LLL fails. Any real improvement must change the *instance*, not the solver.
+
+**5. Retraction of a confounded reading generated inside this run.** D3 first reported
+"μ > ‖v_planted‖ → recovered 13/14, μ ≤ ‖v_planted‖ → 6/31". That split is confounded by
+eff: at eff=0.05 essentially everything recovers, and μ/pv > 1 is common there because K1
+is small. Stratified within eff, the direction **reverses** and matches 2026-07-29:
+
+| eff | lo μ/pv half | hi μ/pv half | mean μ/pv recovered | mean μ/pv failed |
+|---|---|---|---|---|
+| 0.05 | 7/7 | 8/8 | 1.2300 | — |
+| 0.15 | 3/7 | 1/8 | 0.5391 | 0.7854 |
+| 0.25 | 0/7 | 0/8 | — | 0.5193 |
+
+Low μ (skew L2) is the easier case, consistent with `spearman(ν̂, p̂) = −0.583` from
+2026-07-29. The script prints the confounded numbers explicitly labelled as retracted so
+they are not re-derived.
+
+### Next step proposal
+
+**Thread 24 — closed-form BDD threshold from coset-distance extreme-value statistics.**
+Theorem 3 turns Phase 2 into a clean, fully-specified decoding problem: recovery succeeds
+iff the true coset's closest point beats the closest point of all n−1 wrong cosets, in
+`L_λ = ⊕_i L2^(i)` — a *direct sum of m two-dimensional lattices*, so per-coset distances
+are sums of m independent 2-D coset distances and are analytically tractable.
+
+- ‖true offset‖² = m·n²·(2/3) (k1, k2 uniform in their boxes).
+- For a wrong coset, per-block E[dist²] ≈ c·det(L2) = c·n·S_K1·S_K2 = c·n²/eff, with c a
+  shape constant set by the skewness of L2 — which is exactly ν̂. Summing over m blocks
+  and taking the **minimum over n−1 cosets** (extreme-value, not typical) should yield the
+  observed eff thresholds *and* the sign of the ν̂ effect from one formula.
+- Falsifier: the predicted threshold must reproduce the measured eff curve
+  (50/26/13/6/3/0/0 at m=10) to within a bin, and must predict low-ν̂-is-easier. If it
+  predicts a threshold far from eff≈0.1 or gets the ν̂ sign wrong, the independence
+  assumption across blocks is broken and the model is dead.
+- Cheap: the empirical arm is already written (`glv_hnp_phase2_exact_cvp.py`, 19 s/run);
+  only the analytic predictor and a per-coset distance histogram need adding.
+
+**Secondary (unchanged from 2026-07-29):** re-express the 2026-07-26 log's λ/n column in
+λ* throughout, so future runs do not re-derive the root-convention confusion.
+
+**Not worth retrying** (falsified this run): projecting out the d-column; Babai or exact
+CVP as a substitute for LLL; block-wise majority voting; any reformulation whose goal is
+to make the planted vector λ₁.
+
+### Commits made

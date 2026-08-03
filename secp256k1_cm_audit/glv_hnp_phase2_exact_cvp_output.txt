@@ -1,0 +1,47 @@
+==============================================================================
+Thread 23 -- exact CVP: reduction-quality wall or information-theoretic?
+==============================================================================
+
+10 fresh 17-bit j=0 GLV curves, m=10 signatures, L0 dimension 20
+
+------------------------------------------------------------------------------
+E1 -- recovery by arm, and WHY exact CVP fails when it fails
+------------------------------------------------------------------------------
+d_true / d_cvp : distance from target to the true offset vs. to the
+exact closest lattice point.  ratio < 1 means the true nonce pair is
+NOT the closest point -> information-theoretic failure.
+
+  eff |    arm O    arm C    arm X |  X closer-than-true  mean d_cvp/d_true
+------------------------------------------------------------------------------
+ 0.05 |   50/50    44/50    50/50  |         12/50                   0.9660
+ 0.10 |   26/50    17/50    23/50  |         40/50                   0.8803
+ 0.15 |   13/50    11/50    14/50  |         46/50                   0.7739
+ 0.20 |    6/50     3/50     3/50  |         50/50                   0.6465
+ 0.25 |    3/50     3/50     1/50  |         50/50                   0.5853
+ 0.35 |    0/50     0/50     1/50  |         50/50                   0.5071
+ 0.50 |    0/50     0/50     0/50  |         50/50                   0.4117
+
+------------------------------------------------------------------------------
+E2 -- verdict
+------------------------------------------------------------------------------
+  exact-CVP gain over the historical LLL arm, per eff:
+    eff=0.05: +0
+    eff=0.10: -3
+    eff=0.15: +1
+    eff=0.20: -3
+    eff=0.25: -2
+    eff=0.35: +1
+    eff=0.50: +0
+
+  totals: arm O 98/350, arm X 92/350
+  instances where a strictly closer lattice point than the true nonce
+  pair exists: 298/350 (85.1%)
+
+  Reading: an exact-CVP failure with a strictly closer point is an
+  information-theoretic failure of THIS lattice formulation -- no
+  amount of BKZ/sieving can recover those instances.  An exact-CVP
+  failure WITHOUT a closer point would be a bug, not a wall.
+
+==============================================================================
+done
+==============================================================================

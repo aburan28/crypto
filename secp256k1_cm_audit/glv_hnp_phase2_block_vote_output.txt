@@ -1,0 +1,40 @@
+==============================================================================
+Thread 23 -- per-block corruption and majority-vote readout
+==============================================================================
+
+10 fresh 17-bit j=0 GLV curves, m=10, L0 dimension 20
+
+------------------------------------------------------------------------------
+F1/F2 -- clean-block count and majority vote, exact-CVP offsets
+------------------------------------------------------------------------------
+clean  = blocks whose d_i equals the true d
+O      = historical arm (LLL, d read from its own column)
+X@0    = exact CVP, d read from block 0 only  (previous experiment)
+X@maj  = exact CVP, modal d over all m blocks (this experiment)
+
+  eff |       O     X@0   X@maj | mean clean median clean  all-m clean
+------------------------------------------------------------------------------
+ 0.05 |  50/50   50/50   50/50  |      10.00           10      50/50  
+ 0.10 |  26/50   23/50   23/50  |       4.60            0      23/50  
+ 0.15 |  13/50   14/50   14/50  |       2.80            0      14/50  
+ 0.20 |   6/50    3/50    3/50  |       0.60            0       3/50  
+ 0.25 |   3/50    1/50    1/50  |       0.20            0       1/50  
+ 0.35 |   0/50    1/50    1/50  |       0.20            0       1/50  
+ 0.50 |   0/50    0/50    0/50  |       0.00            0       0/50  
+
+------------------------------------------------------------------------------
+F3 -- verdict
+------------------------------------------------------------------------------
+  totals over 350 instances:
+    arm O   (LLL, direct d column) : 98/350
+    arm X@0 (exact CVP, block 0)   : 92/350
+    arm X@maj (exact CVP, modal d) : 92/350
+
+  If X@maj > X@0 but X@maj ~= O, majority voting only restores the
+  immunity arm O already had, and Phase 2 gains nothing.
+  If X@maj > O, the block structure is genuinely exploitable and the
+  historical readout was leaving recoveries on the table.
+
+==============================================================================
+done
+==============================================================================

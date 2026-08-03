@@ -1,0 +1,26 @@
+==============================================================================
+Thread 23 -- L0 / L_lambda = Z/n, with d as the coset label
+==============================================================================
+
+Algebra.  A lambda-block vector in block i is
+  c1*(n*S_K1, 0) + c2*(-lam*S_K1, S_K2)
+     = ((c1*n - c2*lam)*S_K1,  c2*S_K2),
+so  dk1_i = c1*n - c2*lam  and  dk2_i = c2, hence
+  dk1_i + lam*dk2_i = c1*n - c2*lam + lam*c2 = c1*n = 0  (mod n).
+
+The readout d_i = (k1_i + lam*k2_i - A_i) * B_i^-1  (mod n) depends
+on (k1_i, k2_i) only through k1_i + lam*k2_i mod n, so d_i is
+INVARIANT under all of L_lam.  QED.
+
+Numerical check of the index [L0 : L_lam]  (expect exactly n):
+      n   eff   m |      index  index == n
+----------------------------------------------
+   4003  0.10   4 |       4003        True
+   4003  0.20   5 |       4003        True
+   4153  0.10   4 |       4153        True
+   4153  0.20   5 |       4153        True
+   4129  0.10   4 |       4129        True
+   4129  0.20   5 |       4129        True
+
+all indices equal n: True
+==============================================================================
