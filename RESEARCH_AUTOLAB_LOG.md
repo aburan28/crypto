@@ -6297,3 +6297,9 @@ module scope. Move its driver under `if __name__ == '__main__':` and repoint it 
 
 ### Commits made
 2f07f55 autolab 2026-08-03: Thread 23 — d-column removal is a no-op; nu_proj unifies the Phase-2 wall
+
+**Push target note for future runs:** the daily protocol says `git push origin main`, but
+this session's branch policy pins development to `claude/zen-pascal-qap8mi`. Pushed there,
+not to main. Same as the 2026-07-26/27/29 runs, whose work reached main only via PRs
+#30/#32/#33/#34/#35 — so expect the log to arrive on main one merge behind.
+
