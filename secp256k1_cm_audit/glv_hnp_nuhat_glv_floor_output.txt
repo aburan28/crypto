@@ -1,0 +1,30 @@
+==============================================================================
+Thread 23b -- nu_hat floor for GLV lam vs random lam
+==============================================================================
+real j=0 GLV curves harvested (20-bit): 300, K1 = 72
+
+     sample      min      q05      q25      med      q75      q95      max
+    GLV lam   0.3123   0.3315   0.5379   0.7029   0.8618   0.9809   1.0285
+ random lam   0.0917   0.2594   0.5102   0.7373   0.8842   0.9985   1.0632
+
+     sample  frac<0.45  frac<0.30  frac<0.20
+    GLV lam      0.183      0.000      0.000
+ random lam      0.213      0.080      0.040
+
+j* offset from the CF midpoint (index units):
+      GLV  med +0.0  q05 +0.0  q95 +2.0  max|off| 2.0
+   random  med +0.5  q05 -1.5  q95 +2.5  max|off| 4.0
+
+Is the CF of lam/n an exact palindrome for GLV lam?
+  exact palindrome of a_1..a_last: 0/60  -> NO; the symmetry pins the BALANCE POINT, not the quotients.
+
+==============================================================================
+VERDICT
+==============================================================================
+GLV floor   min nu_hat = 0.3123, none below 0.30
+random floor min nu_hat = 0.0917, 8.0% below 0.30
+H-floor: SUPPORTED
+
+Caveats: 20-bit sample, one K1, empirical only.  The floor is NOT yet
+proved; see the 2026-08-03 log entry for the proposed proof route via
+the successive minima of an ideal of Z[omega].

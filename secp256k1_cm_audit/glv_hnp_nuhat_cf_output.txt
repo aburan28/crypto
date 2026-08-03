@@ -1,0 +1,111 @@
+==============================================================================
+T1  CF closed form vs Lagrange-Gauss (f64) -- is it exact?
+==============================================================================
+  bits  trials   max rel diff
+    16      40      2.144e-16
+    20      40      2.211e-16
+    24      40      2.152e-16
+    32      40      2.267e-16
+    48      40      2.085e-16
+    64      40      2.405e-16
+    96      40      2.142e-16
+   128      40      2.214e-16
+   192      40      1.685e-16
+   256      40      2.299e-16
+
+worst relative difference over 400 trials: 2.405e-16
+verdict: EXACT (agrees to f64 rounding)
+
+exhaustive cross-check (a = 0..n, small n):
+  300 random instances, exhaustive disagreements: 0
+
+==============================================================================
+T2  which convergent attains lambda_1?  test q_j* ~ sqrt(n*K2/K1)
+==============================================================================
+  bits     n   median log2(q*/pred)   |log2|<=1
+    32   200                 -1.243      40.0%
+    64   200                 -1.365      35.5%
+   128   200                 -1.204      42.0%
+   256   200                 -1.270      39.0%
+
+lambda_1 attained by the trivial a=0 vector: 0/800 (0.0%)
+winning convergent index as a fraction of CF depth: median 0.514, q05 0.425, q95 0.632
+
+reading: the 2026-07-29 guess q_j* ~ sqrt(n*K2/K1) is the right SCALE but
+is biased.  q* is systematically about 2.4x SMALLER than that balance
+point (median log2 ratio ~ -1.25, stable across 32..256 bits), and only
+~40% of instances land within a factor 2.  So sqrt(n*K2/K1) locates the
+winning convergent to within a couple of CF indices but does NOT pin it:
+lambda_1 must still be taken as the min over all q_j.  That min is the
+closed form -- it is exact and costs O(log n).
+
+==============================================================================
+T3  scale dependence -- why every scale-free invariant had to fail
+==============================================================================
+fixed n = 17447744474170368901 (64-bit), 400 random lam, nu_hat rank correlation
+     eff     0.02     0.05      0.1     0.25      0.5
+    0.02    1.000    0.593    0.302    0.085    0.011
+    0.05    0.593    1.000    0.763    0.377    0.167
+     0.1    0.302    0.763    1.000    0.662    0.350
+    0.25    0.085    0.377    0.662    1.000    0.782
+     0.5    0.011    0.167    0.350    0.782    1.000
+
+The winning convergent index j* moves with eff on the SAME (n, lam):
+         lam (first 8)     eff=0.02    eff=0.05     eff=0.1    eff=0.25     eff=0.5
+  10616263673793770613     j*=22/42    j*=22/42    j*=22/42    j*=22/42    j*=20/42
+  15336046528214329765     j*=22/36    j*=22/36    j*=22/36    j*=22/36    j*=22/36
+   9918529297068163736     j*=25/40    j*=24/40    j*=24/40    j*=24/40    j*=24/40
+    737452180081462804     j*=17/42    j*=17/42    j*=17/42    j*=17/42    j*=17/42
+   8221550294592765602     j*=18/34    j*=18/34    j*=18/34    j*=18/34    j*=18/34
+  12322070952040558200     j*=22/34    j*=22/34    j*=20/34    j*=20/34    j*=20/34
+  10095530183374886611     j*=19/39    j*=19/39    j*=17/39    j*=17/39    j*=17/39
+  11095583905313211842     j*=25/41    j*=24/41    j*=23/41    j*=22/41    j*=22/41
+
+Any invariant that is a function of (n, lam) alone -- delta/n, kappa(M),
+q_cf, max_q_cf, max_a, a_corn/n, lam/n, mu: all eight falsified June-July
+-- is constant down each column of the j* table above, while the quantity
+that governs recovery changes.  That is the mechanism, not a coincidence.
+
+==============================================================================
+T4  secp256k1 in exact integer arithmetic
+==============================================================================
+n   = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+lam = 37718080363155996902926221483475020450927657555482586988616620542887997980018   (verified lam^2+lam+1 = 0 mod n)
+CF depth of lam/n: 141 partial quotients, max a_i = 312
+
+   eff   nu_hat (CF)   nu_hat (f64 GG)    j*  depth   log2 q*  log2 pred
+  0.05        0.8709            0.8709    70    140    127.83     130.16
+   0.1        0.6624            0.6624    70    140    127.83     129.66
+  0.25        0.5852            0.5852    70    140    127.83     129.00
+   0.5        0.6851            0.6851    70    140    127.83     128.50
+
+2026-07-29 (e845207) reported, via f64 Lagrange-Gauss:
+  eff=0.05 nu_hat=0.8709 | eff=0.10 0.6624 | eff=0.25 0.5852 | eff=0.50 0.6851
+The CF column above is the exact-arithmetic recomputation of those.
+
+==============================================================================
+T5  precision: where f64 Lagrange-Gauss breaks, CF does not
+==============================================================================
+  bits      f64 gauss_reduce_2d     CF closed form
+   256                 0.252192           0.252192
+   384                 0.491581           0.491581
+   448                 0.286461           0.286461
+   512            OverflowError           0.250092
+   521            OverflowError           0.969886
+   640            OverflowError           0.890014
+   768            OverflowError           0.450079
+  1024            OverflowError           0.909614
+
+Note the entries are ~ (n*S_K1)^2 ~ n^4/K1^2; the f64 conversion inside
+gauss_reduce_2d overflows once that exceeds ~1.8e308.  This is the same
+class of failure as the original Thread 1 P-521 LLL NaN.  The CF form
+never converts a large integer to f64: the minimisation is pure integer
+arithmetic and the final ratio is taken with math.isqrt at 1e-20.
+
+==============================================================================
+SUMMARY
+==============================================================================
+CF closed form matches Lagrange-Gauss: YES
+The 2026-07-29 falsifier asked for correlation >= 0.9 between
+predicted-from-CF and computed nu_hat.  The relation is not a
+correlation but an identity, so the falsifier is passed at its ceiling.
