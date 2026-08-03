@@ -6408,4 +6408,4 @@ vector λ₁. F3 and F6 close both of those off.
 
 ### Commits made
 
-(hash recorded in the following commit)
+2f846de autolab 2026-08-03: Thread 23 — wall is algorithmic; recentring moves it 4x
