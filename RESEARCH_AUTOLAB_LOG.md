@@ -6243,4 +6243,4 @@ Secondary: re-run E10 on 3–5 *fresh* 17-bit curves to check the β<0.466 / β>
 brackets are not specific to these two 12-bit curves.
 
 ### Commits made
-See next git hash after this entry.
+`66c4510` autolab 2026-08-03: Thread 23 — projection falsifier negative; GS-profile beta separator (AUC 0.961)
