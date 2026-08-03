@@ -6103,3 +6103,162 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the continuation
+proposed verbatim by the 2026-07-29 entry (log line ~6089). Threads 1/3/4/6 are CLOSED,
+Thread 2 is BLOCKED (F_p Rosenhain, 2026-07-26), Thread 5/GLV-HNP made measurable progress
+on 2026-07-29, so its own proposed sub-task is the correct pick under protocol rule (b).
+
+Thread 23's falsifier as stated on 2026-07-29: *"if sv/pv rises above 1 after the
+reformulation and the K1 wall on the λ*=0.07 curve (currently K1≈4–6) moves outward, the
+reformulation is a real improvement; if the wall stays at K1≈4–6, then the wall is
+information-theoretic and Phase 2 is at its ceiling."*
+
+**Outcome: the wall does not move — but the dichotomy in that falsifier is false.** The
+wall is neither a reduction-quality wall nor an information-theoretic one. It is a
+lattice-packing wall at r ≈ 1.75, sitting at ≈ 0.5 of the information-theoretic bound.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0, mpmath 1.3.0. (PARI not needed this run.)
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_projection.py` (E0–E3) and
+  `secp256k1_cm_audit/glv_hnp_thread23_ghfit.py` (F1–F5). Both `exec` the helper prefix of
+  `glv_hnp_phase2_lambda_threshold.py` (split on its `# EXPERIMENT T1` banner) instead of
+  copying it, so `scales` / `gen_signatures` / `build_glv_lattice` are **bit-identical** to
+  the 2026-07-29 and 2026-07-26 runs. Future runs should reuse this exec-the-prefix idiom.
+- Built and validated four attacks on **identical signature sets**:
+  | | lattice | dim | method | recovery |
+  |---|---|---|---|---|
+  | **A** | original Kannan | 2m+2 | LLL | scan rows for \|last\|=S_KANNAN (baseline) |
+  | **B** | column m deleted | 2m+1 | LLL | scan, then d = (k1_i+λk2_i−A_i)·B_i⁻¹ |
+  | **C** | col m deleted, Kannan row dropped | 2m | Babai nearest-plane, **exact Fraction GSO** | offset read-off |
+  | **D** | same as C | 2m | **fplll exact CVP enumeration (oracle)** | offset read-off |
+- B/C/D recover d by agreement across *all m* signatures (strictly stronger than the
+  baseline `recover_d`, which only compares one candidate to the known d).
+- Every generator family of π(L) is divisible by S_K1 in the k1-columns and S_K2 in the
+  k2-columns, so the (k1_i,k2_i) read-off is exact — never rounded. Verified as an assert.
+- Artifacts: `glv_hnp_thread23_projection_output.txt` (131 lines),
+  `glv_hnp_thread23_ghfit_output.txt` (F1–F5, 3190 trials).
+- `cargo test --test curve_audit` → 5/5 pass (7.33s). ✓
+
+### Findings
+
+**1 — Removing the trivial vector changes nothing. A ≡ B on 100% of cells.**
+2 curves × 9 K1 values × 5 seeds, plus 8 curves × 3 eff levels × 3 seeds: variants A and B
+agree on **every single cell**, including every partial (4/5, 2/5, 1/3).
+
+12-bit/2677 (λ*=0.0699, m=10, K2=52) — the historical failure curve:
+
+| K1 | eff | A | B | C | D |
+|---|---|---|---|---|---|
+| 2 | 0.039 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 3 | 0.059 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 4 | 0.079 | 5/5 | 5/5 | 3/5 | 5/5 |
+| 6 | 0.118 | 2/5 | 2/5 | 0/5 | 3/5 |
+| 8 | 0.157 | 0/5 | 0/5 | 0/5 | 1/5 |
+| 12+ | ≥0.236 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+12-bit/2557 (λ*=0.34, m=8): A=B=D at every K1; wall at K1≈8 (4/5) → 12 (0/5).
+
+**2 — The projection does raise sv/pv, but not to 1.** The trivial vector was not the only
+rival:
+
+| curve | A sv/pv | A \|sv_m\|/n | B sv/pv | B's λ₁ is the planted vector? |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.501 | 1.0000 | 0.532 | **False** |
+| 12-bit/2677 | 0.413 | 1.0000 | 0.813 | **False** |
+
+So the first half of the falsifier's antecedent fails: quotienting out `n·S_D·e_m` removes
+*the* shortest vector (T5's |sv_m|/n = 1.0000 replicates exactly) but another rival is
+waiting behind it at 0.53–0.81 of the planted norm.
+
+**3 — An exact-CVP oracle does not move the wall either.** D is not a heuristic: it returns
+the true closest vector. It gains one seed at two grid points on 2677 (K1=6: 2/5→3/5;
+K1=8: 0/5→1/5) and nothing elsewhere. At eff=0.25 across the 17-bit curves A scored 1/24
+and **D scored 0/24** — A can find the planted vector as a *non-shortest* basis row, which
+exact CVP cannot when the planted offset is not the closest vector. **The Phase-2 wall is
+therefore not a reduction-quality wall**; BKZ/CVP/re-embedding are all at the ceiling of
+this lattice. Babai (C) is uniformly the weakest, as expected.
+
+**4 — The predictor is the Gaussian-heuristic ratio, and its wall is at r ≈ 1.75, not 1.**
+Pooled grid: 16 curves (12/14/16/17-bit), m ∈ {6,8,10,12,16}, K1 ∈ {2..24}, 5 seeds =
+**3190 trials**, 2678 successes. With
+`r = ‖v_planted‖ / GH(L)`, `GH(L) = sqrt(dim/2πe)·det^(1/dim)`:
+
+| r bin | trials | rate |
+|---|---|---|
+| [0.00,0.90) | 1220 | 1.000 |
+| [0.90,1.05) | 430 | 0.995 |
+| [1.05,1.20) | 330 | 0.945 |
+| [1.20,1.40) | 320 | 0.900 |
+| [1.40,1.70) | 355 | 0.744 |
+| [1.70,3.01) | 535 | 0.310 |
+
+50% crossing at **r ≈ 1.75**. LLL-plus-basis-scan therefore beats the Gaussian heuristic by
+a factor of ~1.75 — exactly because recovery is a scan over all 2m+2 basis rows and not an
+SVP call, which is the constructive flip side of T5. This is the single most useful number
+this thread has produced: it turns "will Phase 2 work here?" into an O(1) closed form.
+
+| predictor | AUC | best acc | threshold |
+|---|---|---|---|
+| **r = ‖t‖/GH(L)** | **0.948** | **0.919** | 1.721 |
+| eff/IT bound | 0.949 | 0.917 | 0.512 |
+| eff = K1·K2/n | 0.921 | 0.896 | 0.235 |
+| ν̂ (2026-07-29) | 0.574 | 0.839 | 1.056 |
+
+(majority baseline 0.839.)
+
+**5 — The wall is NOT information-theoretic — ~2× headroom remains.**
+IT bound: (m−1)·log n ≥ m·log(K1·K2), i.e. eff ≤ n^(−1/m). Among the 2678 successes,
+`max eff/IT = 0.8735`, 90th percentile 0.322, and the best single threshold sits at
+eff/IT = 0.512. **The lattice attack dies at roughly half the information-theoretic
+limit.** So the 2026-07-29 falsifier's "if the wall stays, it is information-theoretic" is
+wrong: the wall stays *and* there is a factor ≈2 in eff that no re-embedding of this
+lattice reaches.
+
+**6 — CORRECTION to 2026-07-29: ν̂'s AUC 0.935 does not generalise.**
+Pooled over the (m, K1) grid, ν̂ = λ₁(L2)/√(det L2) scores AUC **0.574** and its best
+threshold does not beat the majority baseline (0.839 vs 0.839). Because r is a function of
+(n, m, K1) only, the fair test is *within* fixed (n-bits, m, K1) strata, where r is constant
+and any separation is genuine curve-level signal. 36 mixed strata, ≥20 trials each:
+
+| n bits | strata | mean ν̂ AUC | above 0.5 |
+|---|---|---|---|
+| 14 | 15 | 0.750 | 13/15 |
+| 16 | 10 | 0.848 | 9/10 |
+| 17 | 11 | **0.503** | 6/11 |
+
+overall mean 0.702 (28/36 above 0.5). So ν̂ **is** real residual curve-level signal — it is
+not a ninth falsified invariant — but it is far weaker than 0.935 and **it is at chance for
+the largest curves tested**. The 0.935 figure was measured on the fixed-(m,K1) C1/C2 slice,
+where it is partly reading the r that varies across that slice. Future runs should quote
+ν̂'s within-stratum AUC, not its pooled AUC, and should re-check it at ≥20 bits before
+relying on it.
+
+### Next step proposal
+**Thread 24 — Bleichenbacher FFT on the GLV split, to test the ~2× headroom.**
+Finding 5 says the unreachable region is eff/IT ∈ [0.5, 1.0], i.e. r ∈ [1.75, ~3.5]. That
+region is closed to lattices by construction (it is a packing bound, and A/B/C/D all sit on
+the same packing). Bleichenbacher's bias/FFT method is not GH-limited — it trades many more
+signatures for no dimension growth — and the GLV structure k = k1 + λk2 gives a *known*
+two-term bias whose Fourier peak is at a computable frequency pair.
+- Concrete sub-task: on the 12-bit/2677 curve at K1 = 8 (eff = 0.157, eff/IT = 0.63,
+  r ≈ 2.1 — where **all four** variants score 0/5), run a Bleichenbacher pass with
+  L = 2^16…2^20 signatures and check for a peak at the λ-shifted frequency.
+- **Falsifier**: if the peak resolves d at eff/IT ≈ 0.63, the headroom is real and lattice
+  methods were the bottleneck all along. If Bleichenbacher also dies near eff/IT ≈ 0.5,
+  then the IT bound as computed here is loose by ~2× and the true wall is ≈ 0.5·IT — which
+  would be the cleanest possible close-out for Phase 2.
+- Cost: no new dependencies (numpy FFT), ~1 session.
+
+**Secondary — retire the curve-invariant search.** Findings 4+6 explain why six curve-level
+invariants failed 2026-06-21…06-29 and why the seventh (ν̂) only half-worked: ≈95% of the
+separable variance is carried by r, which is a function of (n, m, K1) and contains **no
+curve-level information at all**. Future runs should predict with r and stop looking for
+invariants of the curve.
+
+### Commits made
+(recorded below)
