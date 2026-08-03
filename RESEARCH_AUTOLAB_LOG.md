@@ -5885,3 +5885,315 @@ The fp3_obstruction_secp256k1.gp script exists; check if it runs cleanly.
 
 ### Commits made
 `1c6460a` autolab 2026-07-26: Thread 20 — lambda/n threshold misdiagnosis corrected; no threshold exists
+
+## 2026-07-26 (autolab run #3)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula). Thread 1 (P-521 LLL) is CLOSED (§10.5). Thread 5
+(GLV-HNP Phase 2) was completed in today's earlier run. Thread 2 (CHLRS Igusa formula)
+was BLOCKED in prior sessions due to PARI/GP unavailability, but PARI is now installed.
+Goal: run the existing scripts and document findings.
+
+### Work done
+- Ran `chlrs_igusa_formula.gp`: Part 1 (toy p=1009, b=11) gives match=0. Part 2
+  computes J2/J4/J6/J10 for h_secp=(x^3+7)(x^3+189) over F_{p_secp}.
+- Ran `chlrs_rosenhain_diagnostic.gp` (partial): confirmed (-11) mod 1009 is NOT
+  a cubic residue; secp256k1 (-7) mod p_secp is NOT a cubic residue.
+- Ran `chlrs_fp3_rosenhain.gp`: toy_p=19 (x^3+7 splits over F_19) gives match=1;
+  proxy_p=13 (x^3+7 irreducible) gives match=0.
+- Wrote and ran new `chlrs_cubic_residue_proof.gp`: three-experiment clean proof.
+- Ran `cargo test --test curve_audit`: 5/5 pass (8.99s). ✓
+
+### Findings
+
+**Root cause of Rosenhain failure: cubic residue obstruction.**
+
+The Rosenhain formula for the Howe-gluing construction requires:
+```
+(-b)^{(p-1)/3} ≡ 1 mod p    [cubic residue condition]
+⟺ x³ + b has 3 roots in F_p  [F_p-rational 2-torsion on E]
+```
+
+Three-experiment proof (all from `chlrs_cubic_residue_proof.gp`):
+
+| Experiment | p | b | (-b) cubic res? | x³+b roots in F_p | Jac match? |
+|------------|---|---|-----------------|-------------------|------------|
+| A (toy)    | 19 | 7 | YES (exp=1) | 3 roots: {10,13,15} | **1** ✓ |
+| B (proxy)  | 13 | 7 | NO (exp=9)  | 0 roots            | **0** ✗ |
+| C (secp256k1) | p_secp | 7 | NO (exp≠1) | 0 roots      | **BLOCKED** |
+
+**Exp A validates the formula**: for p=19, Rosenhain gives Jac char poly
+`x^4 - 26x^2 + 361 = (T^2 - 8T + 19)(T^2 + 8T + 19)` matching E × E^t exactly.
+`#Jac(C) = 336 = (19+1-8)(19+1+8) = 12 × 28`. ✓
+
+**Exp B proves the failure mode**: for proxy p=13, naive cover y²=(x³+7)(x³+4):
+- Actual char poly: `x^4 + 13x^2 + 169` (irreducible over Q, #Jac=183)
+- Expected: `x^4 - 23x^2 + 169` (#E×#E^t = 7 × 21 = 147)
+- Completely different isogeny class.
+
+**Exp C confirms secp256k1 is BLOCKED**:
+- `(-7)^{(p-1)/3} mod p_secp ≠ 1`
+- `x^3 + 7` has 0 roots in F_{p_secp}
+- 2-torsion of secp256k1 lives in F_{p³} \ F_p
+
+**Naive cover Igusa invariants** (from `chlrs_igusa_formula.gp`, Part 2):
+```
+h_secp = (x^3+7)(x^3+189)  [b2 = 189 = 7·27 = 7·3³, a "cubic twist" not quad twist]
+J2  mod p = 115792...628151  (= -43512 mod p, non-zero)
+J4  mod p = 98438...564616
+J6  mod p = 69282...162891
+J10 mod p = 46374105383717408990784  (non-zero → curve is smooth)
+```
+The curve is smooth over F_p but its Jacobian is NOT isogenous to secp256k1 × (quad twist).
+
+### Next step proposal
+
+**BLOCKED: F_p Rosenhain approach permanently blocked for secp256k1.**
+
+Two paths forward:
+1. **Richelot search** (open problem): For each of the 5 qualifying pairs
+   (0,1),(0,3),(0,4),(1,4),(3,4), directly search for a genus-2 curve C/F_p
+   whose Jacobian has char poly P_{E_i}(T)·P_{E_j}(T). This doesn't use the
+   Rosenhain formula — it searches for Richelot (2,2)-isogeny factorizations.
+   Concretely: over a small proxy prime p', find f(x) of degree 6 such that
+   `hyperellcharpoly(f) == P_{E_i} * P_{E_j}`. Requires a search that's
+   exponential in the naive approach; likely needs algebraic constraints.
+2. **F_{p³} extension** (well-defined but irrelevant): the Rosenhain formula
+   works over F_{p³} where all cube roots live. But the resulting Jacobian is
+   defined over F_{p³} not F_p, so it gives a genus-2 DLP over F_{p³}, not F_p.
+   This does NOT give an attack on secp256k1.
+
+**Recommend**: mark Thread 2 as CLOSED (negative result: F_p Rosenhain inapplicable);
+open Thread 22 (Richelot search over small proxy primes) as the continuation.
+
+### Commits made
+c591765 autolab 2026-07-26: Thread 2 CHLRS — cubic-residue obstruction proven; F_p Rosenhain BLOCKED for secp256k1
+
+## 2026-07-27 (autolab run)
+
+### Task picked
+Thread 2 (CHLRS Igusa formula / Howe gluing): proposed by 2026-07-21 and 2026-07-26 logs.
+Goal: identify why `chlrs_igusa_formula.gp` gives wrong Jacobian orders, find the correct
+Howe cover construction for j=0 pairs, and map which secp256k1 sextic-twist pairs are
+non-degenerate candidates.
+
+### Work done
+- Diagnosed `chlrs_igusa_formula.gp`: the Rosenhain cross-ratio maps α→0, dα→1, ωα→∞
+  but the Howe (1996) 2-torsion identification pairs {α,dα} (same orbit under CM), not
+  as distinct branch points mapped to 0,1,∞. Result: wrong Möbius pairing → wrong curve.
+  Jac order 1018416 ≠ target 1018251 for p=1009. ROSENHAIN APPROACH CONFIRMED BROKEN.
+- Read `howe_richelot_v5.gp` (the correct working reference for p=43):
+  the Richelot formula uses sv=α+β, qv=α·β with α,β ∈ F_{p³}, computing the
+  Z/3Z dual of the factored sextic y²=G₁·G₂·G₃ where G_i=(x-ζ₃^{i-1}α)(x-ζ₃^{i-1}β).
+- Found critical bug in previously-created `howe_5pairs.gp`: all F_{p³} arithmetic
+  functions used global `p` (secp256k1 prime) instead of local toy prime. Arithmetic
+  was silently wrong for all toy-prime tests.
+- Rewrote as `howe_5pairs_v2.gp` with explicit `pp` parameter throughout:
+  `f3add(u,v,pp)`, `f3neg(u,pp)`, `f3scl(c,u,pp)`, `f3mul(u,v,rr,pp)`, `f3inv(u,rr,pp)`,
+  `richelot(sv,qv,z3,rr,pp)`. All functions take (pp,rr) so the prime and the
+  cubic-extension generator are explicit.
+- Ran `howe_5pairs_v2.gp`; key results:
+
+  **Test 1 (p=43):** Richelot(sv=[0,3,0], qv=[0,0,2]) → a=41, b=5. ✓ CORRECT.
+  Matches `howe_richelot_v5.gp`'s expected output exactly.
+
+  **Test 2 (p=1009):** z3=374, d=11 (first non-square), E1 trace=43, E2 trace=-43.
+  Richelot → a=210, b=620. #Jac=1106283. Target (= #E1·#E2 = 967·1053) = 1018251. Mismatch.
+  Root cause: the (sv,qv) = (α·(1+d), α²·d) parameterization used in the test script
+  is NOT the correct Howe-cover parameterization for this pair. The Z/3Z Richelot requires
+  finding the specific r1,r2 ∈ F_p such that y²=(x³-r1)(x³-r2) is the Howe cover of
+  E1×E2, and THEN computing α=r1^{1/3}, β=r2^{1/3} in F_{p³}. The (sv,qv) input must
+  come from the Howe cover's branch factors, not from the elliptic curve parameters directly.
+  Without a prior formula for (r1,r2) given (trace(E1), trace(E2)), the Richelot cannot be
+  applied forward.
+
+  **Test 3 (pair 0,3): DEGENERATE.** d = h³ = -1 (since h is the primitive 6th root of
+  unity, h³=-1). With d=-1: β=-α, sv=α+β=0, G_i = x²-ζ₃^{i-1}·α². The Richelot
+  discriminant Δ=0 — formula breaks. The product (x³+b)(x³-b) = x⁶-b² is trivially
+  bi-split and the (2,2)-isogeny is degenerate. BLOCKED: needs Mestre/theta-function approach.
+
+  **Test 4 (pair 0,1, p=1009):** h=375, cube roots of h are {58, 503, 448} — all are
+  SQUARES mod 1009. For the Howe cover to be defined over F_p (not just F_{p³}), the
+  cover's coefficients must lie in F_p, which requires specific ramification conditions on
+  the cube roots. All-square cube roots of h make the F_p descent condition harder to verify
+  without the full CHLRS apparatus.
+
+  **Test 5 (naive cover b=189):**
+  189 = 27·7 = 3³·7. For secp256k1, h³ = -1 (primitive 6th root), so the k=3 class is
+  7·h³ = -7 ≡ p_secp-7. The ratio 189/(-7) ≡ -27 mod p_secp. Since p_secp ≡ 7 mod 12:
+    - kron(-1, p_secp) = -1 (since p ≡ 3 mod 4)
+    - kron(27, p_secp) = kron(3,p)^3 = (-1)^3 = -1 (kron(3,p)=-1 as p≡±1 mod 12? check below)
+    - kron(-27, p_secp) = (-1)·(-1) = 1 → -27 IS a QR
+    - -1 is a cubic residue mod p_secp iff 6|(p-1): p≡1 mod 3 and p≡3 mod 4 → p≡7 mod 12.
+      (p-1)/3 = even iff 3|(p-1)/2 which holds iff p≡1 mod 6; since p≡1 mod 3 but p≡3 mod 4,
+      p≡7 mod 12 → (p-1)=6k+6 → (p-1)/3=2k+2 (even). So (-1)^{(p-1)/3}=1 → -1 IS a cubic residue.
+    - 27^{(p-1)/3} = (3^3)^{(p-1)/3} = 3^{p-1} = 1 → 27 IS a cubic residue.
+    - Therefore -27 = (-1)·27 is both a QR and a cubic residue → -27 IS a 6th power mod p_secp.
+  CONCLUSION: y²=x³+189 is F_p-isomorphic to y²=x³-7 = y²=x³+7·h³ (the k=3 class).
+  Therefore the naive cover y²=(x³+7)(x³+189) is the PAIR (0,3): the degenerate case!
+  This is a critical finding: the literature's "naive Howe cover" for secp256k1 lands
+  exactly on the degenerate pair, explaining why naive approaches fail.
+
+### Findings
+
+1. **Rosenhain cross-ratio approach is wrong** for Howe covers of j=0 curves. The
+   correct method is Z/3Z Richelot using F_{p³} arithmetic.
+
+2. **Z/3Z Richelot arithmetic confirmed fixed** in `howe_5pairs_v2.gp` — reproduces
+   the p=43 reference answer exactly.
+
+3. **Missing inverse map**: the Richelot formula requires the Howe cover's branch
+   parameters (r1,r2) as input, not the elliptic curve traces. Without an explicit
+   formula r1(trace(E1),p) and r2(trace(E2),p), the forward Howe cover cannot be
+   computed from the pair data alone. This is the CHLRS "Igusa inversion" problem.
+
+4. **Naive secp256k1 cover is degenerate**: y²=(x³+7)(x³+189) = pair (0,3) because
+   189 ≅ -7 (mod p_secp) under 6th-power isomorphism (since p≡7 mod 12 → -27 is a
+   6th power). The (0,3) pair has d=-1, which makes the Richelot discriminant zero.
+   All prior work on the "naive" secp256k1 cover was attacking a degenerate case.
+
+5. **Non-degenerate candidates**: pairs (0,1), (0,2), (0,4), (0,5) with d = h^k for
+   k ∈ {1,2,4,5} (h = primitive 6th root mod p_secp). These have d ≠ ±1 (d ≠ h^0 or h^3),
+   giving sv = α+β ≠ 0 and non-degenerate Richelot. But the Richelot still requires the
+   branch factor (r1,r2) rather than curve traces as input.
+
+6. **Pair (0,1) cube-root issue**: over F_1009, all cube roots of h are quadratic squares.
+   Whether this blocks the F_p descent for the Howe cover requires the full CHLRS formula.
+
+7. **Structural gap identified**: the Z/3Z Richelot computes Howe_cover → Richelot_dual.
+   What is needed is the FORWARD map: (E1, E2) → Howe_cover parameters (a,b). This
+   requires either (a) the CHLRS Igusa inversion, or (b) a theta-function modular model
+   of the Siegel modular surface parameterizing (2,2)-isogenous abelian surfaces.
+
+### Next step proposal
+
+**Thread 3 (CHLRS Igusa forward map):**
+Implement the Cardona-Howe-Lercier-Ritzenthaler-Streng formula for the FORWARD direction:
+given E1: y²=x³+b and E2: y²=x³+d·b with d non-square/non-h³, compute the Igusa-Clebsch
+invariants of the Howe cover, then recover (a,b') for y²=x^6+a·x^3+b'. The explicit
+formula is in CHLRS §4–5 (Lercier-Ritzenthaler 2012). Script target:
+`secp256k1_cm_audit/chlrs_forward_map.gp`.
+
+**Fallback — Thread 20 (λ/n threshold):**
+Bisect the λ/n threshold between 0.07 and 0.34 using the GLV-HNP Phase 2 setup already
+validated on 2026-07-26. Quick to execute; extends the validated attack data.
+
+### Commits made
+9e9b0a8 autolab 2026-07-27: Thread 2 CHLRS — Rosenhain wrong, Z/3Z Richelot correct; naive cover is degenerate pair (0,3); howe_5pairs_v2.gp written
+
+## 2026-07-29 (autolab run)
+
+### Task picked
+Thread 20 (λ/n threshold study) — the continuation proposed by the 2026-07-26 run #1
+entry. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress 2026-07-26, so its proposed
+sub-task is the correct pick under the protocol's rule (b).
+
+Goal: bisect the claimed λ/n viability threshold between 0.07 and 0.34.
+Outcome: **the threshold does not exist** — the 2026-07-26 conclusion is corrected below.
+
+### Work done
+- Environment (fresh container): installed `pari-gp` 2.15.4, `fpylll` 0.6.4, `cysignals`
+  1.12.5, `sympy` 1.14.0. Note for future runs: `pip install fpylll` alone is not enough,
+  `cysignals` is a separate runtime import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py` (5 experiments T1–T5),
+  reusing the lattice construction verbatim from `glv_hnp_phase2_20bit.py:262`
+  (`build_glv_lattice`) so the comparison to 2026-07-26 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold_output.txt` (185 lines).
+- Instead of bisecting, first tested whether λ/n *can* be causal at all (T1), then swept
+  20 fresh 17-bit j=0 GLV curves with λ* spread over (0, 0.5) at three bias strengths (T3),
+  then separated the λ effect from the bias-strength effect on the original pair (T4).
+- `cargo test --test curve_audit` → 5/5 pass (5.67s). ✓
+
+### Findings
+
+**T1 — λ/n cannot be causal (proof, not correlation).**
+The Phase-2 lattice contains the rows `n·S_K1·e_i`, so replacing λ by λ−n is a unimodular
+row operation. Same lattice, same planted vector:
+
+| curve | λ/n | (λ−n)/n | LLL(λ) | LLL(λ−n) | HNF equal |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.5327 | −0.4673 | 5/5 | 5/5 | True |
+| 12-bit/2557 | 0.6600 | −0.3400 | 5/5 | 5/5 | True |
+| 12-bit/2677 | 0.0699 | −0.9301 | 0/5 | 0/5 | True |
+
+Also, the two roots of x²+x+1 mod n are λ and n−1−λ, so any genuine predictor must be a
+function of λ* = min(λ, n−λ)/n. The 2026-07-26 table mixed the two root conventions
+(0.53 and 0.66 are root-2 values; `glv_eigenvalue()` in `glv_hnp_phase2_20bit.py:139`
+returns `min(r1,r2)`, so λ/n ≤ 0.5 there). Re-expressed in λ*: 0.467, 0.340, 0.070.
+
+**T3 — the λ* threshold is FALSIFIED.** 20 fresh 17-bit curves, m=12, 5 seeds:
+
+| eff = K1·K2/n | curves recovering 5/5 | λ* range of successes |
+|---|---|---|
+| 0.05 | 19/20 (20th = 4/5, BKZ 5/5) | [0.0068, 0.4913] — the *whole* range |
+| 0.15 | 3/20 | [0.318, 0.482] |
+| 0.25 | 0/20 (4 curves partial) | — |
+
+At eff=0.05 the curve with λ*=0.0068 (p=65713, n=65269, λ=442) recovers **5/5**, an order
+of magnitude below the 0.07 that was reported as a hard wall. λ* is not a viability
+threshold.
+
+**T4 — the real variable is bias strength, not λ.** Same n-size, same K2=52, K1 swept:
+
+| curve | λ* | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 12-bit/2677 | 0.070 | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Both curves succeed for K1 ≤ 4. λ* shifts the K1 wall by a factor of ~3 (K1≈12–16 vs
+K1≈4–6) but creates no structural obstruction. **The 2026-07-26 claim "LLL AND BKZ(40)
+both fail — failure is structural, not a strength-of-reduction issue" was measured at
+K1=8 only, and is hereby corrected: the same curve recovers 5/5 at K1≤4.**
+T4b: at K1=8 more data does not rescue it (m=8/12/16/24/32 → 0,0,1,0,1 of 5), so the K1
+wall is genuine — it is a K1 wall, not a λ wall.
+
+**T2 — the μ/ρ hypothesis (this run's own) is FALSIFIED.** Hypothesised that the exact
+shortest vector μ of the 2-D λ-block `⟨(n·S_K1,0), (−λ·S_K1, S_K2)⟩` governs success via
+ρ = μ/‖v_planted‖. The 2026-07-26 failure curve has the *largest* ρ of the three
+(0.686 vs 0.610 / 0.399), and in the 17-bit sweep no ρ threshold beats the majority
+baseline. Recorded as a dead hypothesis so no future run re-tries it.
+
+**T5 — structural result: the planted vector is never λ₁.**
+The shortest vector after LLL is, on every curve tested, exactly the trivial vector
+`n·S_D·e_m`: 100% of its energy sits in the d-column, |sv[m]|/n = 1.0000 exactly, and its
+Kannan coordinate is 0.
+
+| curve | K1 | sv/pv | k1-blk | d | k2-blk | kan | \|sv[m]\|/n |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.603 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+| 12-bit/2557 | 8 | 0.517 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+| 12-bit/2677 | 8 | 0.422 | 0.000 | 1.000 | 0.000 | 0.000 | 1.0000 |
+
+Across the whole 17-bit sweep sv/pv sits in [0.337, 0.368] for successes and failures
+alike. Algebraically: with S_K1·K1 ≈ S_K2·K2 ≈ S_KANNAN ≈ n and S_D = 1,
+‖v_planted‖² ≈ n²(2m/3 + 4/3) while ‖n·S_D·e_m‖² = n², so the trivial vector is shorter
+for every m ≥ 1. It carries no information (d is only defined mod n) and no choice of
+S_D removes it — both vectors scale linearly in S_D.
+
+**Consequence — this retro-explains the 2026-06-21…06-29 wall.** Recovery in this lattice
+is not an SVP condition but a BDD/coset condition: the planted vector must be shortest
+*among vectors with last coordinate ±S_KANNAN*, in the (2m+1)-dimensional projection
+along e_m. That is a property of the projected GS profile and the specific signature set,
+so it is unsurprising that six consecutive curve-level invariants (δ/n, κ(M), q_cf,
+max_q_cf, max_a, a_corn/n — log lines ~3560–3580) all failed to separate C1 from C2.
+No curve-level invariant can.
+
+### Next step proposal
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁.**
+Concretely: project the lattice along e_m (quotient out the trivial `n·e_m` direction) and
+solve BDD in the projection, or replace the Kannan embedding with an explicit CVP call
+(Babai nearest-plane on the reduced basis) targeting `(A_i·S_K1, 0, …)`. Falsifier: if
+sv/pv rises above 1 after the reformulation and the K1 wall in T4 moves outward on the
+λ*=0.07 curve (currently K1≈4–6), the reformulation is a real improvement; if the wall
+stays at K1≈4–6, then the wall is information-theoretic and Phase 2 is at its ceiling.
+Cheap to test — the T4 grid is a 2-minute run.
+
+Secondary: re-express the 2026-07-26 log's λ/n column in λ* throughout, so future runs
+do not re-derive the root-convention confusion.
+
+### Commits made
+
+d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
+
+e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
