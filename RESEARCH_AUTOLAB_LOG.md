@@ -6278,3 +6278,5 @@ Explicitly NOT worth re-trying (this run's dead ends): making the planted vector
 explicit Babai/CVP recovery, and any further curve-level separator for the K1 wall.
 
 ### Commits made
+
+ba70d1c autolab 2026-08-03: Thread 23 falsified; closed-form sufficient condition eff*n^(1/m) < 3/(2*pi*e)
