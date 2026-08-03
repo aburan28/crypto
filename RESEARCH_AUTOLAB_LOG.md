@@ -6234,3 +6234,5 @@ nearest-point arms only; both conclusions should be re-confirmed under list deco
 before they are relied on.
 
 ### Commits made
+
+841f020 autolab 2026-08-03: Thread 23 — K1 wall is a nearest-point-decoding artifact; list decoding recovers 10/10 at K1=8
