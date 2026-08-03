@@ -1,0 +1,152 @@
+==========================================================================
+Thread 23 -- reformulated GLV-HNP Phase-2 lattice
+==========================================================================
+
+E1  construction check (planted vector is in the lattice, d reads back)
+  curve          variant  dim  ||pv||/n ||sv||/||pv||  rec
+  8-bit/199      base     14     2.124        0.3950 False
+  8-bit/199      proj     13     2.123        0.3565 False
+  12-bit/2557    base     26     2.784        0.3592 True
+  12-bit/2557    proj     25     2.708        0.4493 True
+  12-bit/2677    base     26     2.764        0.3618 True
+  12-bit/2677    proj     25     2.683        1.0000 True
+
+E2  K1 wall  (wins out of 5 seeds; K1*K2/n effective bias grows left to right)
+
+  8-bit/199  (n=199, lam*=0.4673, m=6, K2=15)
+    K1              2     3     4     6     8    12    16    24    32    48    64
+    eff          0.15  0.23  0.30  0.45  0.60  0.90  1.21  1.81  2.41  3.62  4.82
+    base          5/5   5/5   4/5   1/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    proj          5/5   5/5   5/5   1/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    projc         5/5   5/5   4/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    cvp           5/5   5/5   4/5   1/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+
+  12-bit/2557  (n=2659, lam*=0.3400, m=12, K2=52)
+    K1              2     3     4     6     8    12    16    24    32    48    64
+    eff          0.04  0.06  0.08  0.12  0.16  0.23  0.31  0.47  0.63  0.94  1.25
+    base          5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5   0/5   0/5
+    proj          5/5   5/5   5/5   5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+    projc         5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5   0/5
+    cvp           5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5   0/5   0/5
+
+  12-bit/2677  (n=2647, lam*=0.0699, m=12, K2=52)
+    K1              2     3     4     6     8    12    16    24    32    48    64
+    eff          0.04  0.06  0.08  0.12  0.16  0.24  0.31  0.47  0.63  0.94  1.26
+    base          5/5   5/5   5/5   3/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    proj          5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    projc         5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   1/5   0/5   0/5
+    cvp           5/5   5/5   5/5   1/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+
+E3  mean ||sv||/||pv|| across the K1 grid  (>1 means planted is the shortest)
+
+  8-bit/199
+    base         0.52  0.52  0.48  0.45  0.36  0.33  0.30  0.26  0.19  0.14  0.11
+    proj         0.76  0.64  0.55  0.46  0.34  0.32  0.29  0.25  0.19  0.15  0.11
+    projc        0.94  0.86  0.78  0.63  0.51  0.45  0.44  0.35  0.28  0.21  0.17
+
+  12-bit/2557
+    base         0.39  0.38  0.37  0.36  0.36  0.35  0.34  0.34  0.33  0.32  0.28
+    proj         0.71  0.54  0.46  0.40  0.37  0.36  0.35  0.34  0.34  0.31  0.29
+    projc        0.93  0.82  0.70  0.62  0.60  0.57  0.57  0.56  0.56  0.52  0.48
+
+  12-bit/2677
+    base         0.39  0.38  0.37  0.36  0.36  0.35  0.35  0.35  0.32  0.30  0.28
+    proj         1.00  1.00  1.00  0.92  0.71  0.52  0.43  0.36  0.33  0.31  0.29
+    projc        1.00  1.00  1.00  1.00  1.00  0.82  0.70  0.58  0.54  0.50  0.48
+
+E4  BKZ(beta=30) vs LLL on the projected lattice at the wall
+  curve            K1  proj-LLL  proj-BKZ30
+  8-bit/199         8       0/5         0/5
+  8-bit/199        12       0/5         0/5
+  8-bit/199        16       0/5         0/5
+  8-bit/199        24       0/5         0/5
+  12-bit/2557       8       5/5         5/5
+  12-bit/2557      12       5/5         5/5
+  12-bit/2557      16       0/5         0/5
+  12-bit/2557      24       0/5         0/5
+  12-bit/2677       8       0/5         0/5
+  12-bit/2677      12       0/5         0/5
+  12-bit/2677      16       0/5         0/5
+  12-bit/2677      24       0/5         0/5
+
+E5  the lambda-block parasite L2 = <(n*S_K1,0), (-lam*S_K1,S_K2)>
+    mu = lambda_1(L2) does NOT depend on m; ||pv|| ~ n*sqrt(2m/3+1).
+    So the planted vector cannot be lambda_1 for m above m_cross.
+  curve            K1         mu  copies  ||pv||(m=12)  m_cross
+  8-bit/199         4      218.2       5         598.8    -0.20
+  8-bit/199         8      200.8       5         593.6    -0.50
+  12-bit/2557       4     3235.8      11        8110.3     0.22
+  12-bit/2557       8     2737.6      11        8110.3    -0.41
+  12-bit/2677       4     9323.5      11        8021.5    16.93
+  12-bit/2677       8     5095.8      11        8016.3     3.63
+
+E6  m-sweep at the wall (K1=8, eff~0.157; info-theoretic floor m~4.3)
+    T4b tested m = 8..32 only.  If mu is the obstruction, small m should win.
+
+  12-bit/2557 (lam*=0.3400)
+    m             3     4     5     6     7     8    10    12
+    base        0/5   0/5   0/5   0/5   3/5   5/5   5/5   5/5
+    proj        0/5   0/5   0/5   0/5   2/5   5/5   5/5   5/5
+
+  12-bit/2677 (lam*=0.0699)
+    m             3     4     5     6     7     8    10    12
+    base        0/5   0/5   0/5   0/5   0/5   0/5   1/5   0/5
+    proj        0/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+
+E7  uniqueness of the secret (exhaustive over all d in [1,n))
+    #consistent d = 1  -> wall is algorithmic (reduction too weak)
+    #consistent d > 1  -> wall is information-theoretic
+  curve            K1   m    eff  seed  #consistent d  true d in set   LLL
+  12-bit/2557       4  12   0.08     1              1           True  True
+  12-bit/2557       4  12   0.08     2              1           True  True
+  12-bit/2557       4  12   0.08     3              1           True  True
+  12-bit/2557       6  12   0.12     1              1           True  True
+  12-bit/2557       6  12   0.12     2              1           True  True
+  12-bit/2557       6  12   0.12     3              1           True  True
+  12-bit/2557       8  12   0.16     1              1           True  True
+  12-bit/2557       8  12   0.16     2              1           True  True
+  12-bit/2557       8  12   0.16     3              1           True  True
+  12-bit/2557      12  12   0.23     1              1           True  True
+  12-bit/2557      12  12   0.23     2              1           True  True
+  12-bit/2557      12  12   0.23     3              1           True  True
+  12-bit/2677       4  12   0.08     1              1           True  True
+  12-bit/2677       4  12   0.08     2              1           True  True
+  12-bit/2677       4  12   0.08     3              1           True  True
+  12-bit/2677       6  12   0.12     1              1           True False
+  12-bit/2677       6  12   0.12     2              1           True  True
+  12-bit/2677       6  12   0.12     3              1           True False
+  12-bit/2677       8  12   0.16     1              1           True False
+  12-bit/2677       8  12   0.16     2              1           True False
+  12-bit/2677       8  12   0.16     3              1           True False
+  12-bit/2677      12  12   0.24     1              1           True False
+  12-bit/2677      12  12   0.24     2              1           True False
+  12-bit/2677      12  12   0.24     3              1           True False
+
+E8  attribution -- recentring vs d-elimination (m=12, 5 seeds)
+
+  12-bit/2557 lam*=0.3400
+    K1            2     3     4     6     8    12    16    24    32    48    64
+    base        5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5   0/5   0/5
+    proj        5/5   5/5   5/5   5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+    projc       5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5   0/5
+    basec       5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   0/5   0/5   0/5
+
+  12-bit/2677 lam*=0.0699
+    K1            2     3     4     6     8    12    16    24    32    48    64
+    base        5/5   5/5   5/5   3/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    proj        5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+    projc       5/5   5/5   5/5   5/5   5/5   5/5   5/5   2/5   1/5   0/5   0/5
+    basec       5/5   5/5   5/5   5/5   5/5   5/5   4/5   3/5   0/5   0/5   0/5
+
+E9  replication on fresh 17-bit j=0 GLV curves (m=12, 5 seeds)
+        p       n   lam* | K1=8    K1=16   K1=24   K1=32  
+    65647   65719  0.027 | 5->5    5->5    2->5    0->5   
+    65707   65203  0.137 | 5->5    3->5    0->5    0->5   
+    65707   66037  0.211 | 5->5    4->5    0->5    0->5   
+    65677   65899  0.318 | 5->5    5->5    5->5    5->5   
+    65539   65287  0.335 | 5->5    5->5    5->5    5->5   
+    66457   66943  0.446 | 5->5    5->5    0->5    0->5   
+
+  (cells are base -> projc, wins out of 5)
+
+Done.
