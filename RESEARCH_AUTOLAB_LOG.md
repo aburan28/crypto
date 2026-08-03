@@ -6103,3 +6103,196 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+
+**Thread 23** — the next-step proposed at the end of the 2026-07-29 entry (log
+line 6089): "reformulate the Phase-2 lattice so the target is λ₁", with the
+falsifier *"if sv/pv rises above 1 AND the K1 wall on the λ\*=0.07 curve moves
+outward, the reformulation is a real improvement; if the wall stays at K1≈4–6,
+then the wall is information-theoretic and Phase 2 is at its ceiling."*
+
+Priorities 1/2/4/6 remain CLOSED / BLOCKED / DEAD-END; priority 3 closed
+2026-07-21; priority 5 (GLV-HNP Phase 2) made measurable progress 2026-07-29,
+so protocol rule (b) selects its proposed continuation.
+
+Outcome: **the falsifier fires on neither branch, and its second branch is
+wrong.** The wall is not information-theoretic — it is the Gaussian-heuristic
+uSVP wall, which sits a *constant* 2πe/3 = 5.69× (2.51 bits) inside the
+information-theoretic boundary.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy`
+  (fpylll 0.6.4, sympy 1.14.0). **PARI/GP unavailable this run** —
+  `apt-get install pari-gp` 404s on a `libegl-mesa0` dependency from the
+  Ubuntu mirror. Thread 23 needs no PARI. Future runs needing `.gp` scripts
+  should try `apt-get update` first.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_gh_boundary.py` (7 experiments A–G),
+  copying the lattice/EC core verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so the numbers are directly
+  comparable to 2026-07-29. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_gh_boundary_output.txt` (206 lines).
+  Reproduces the 2026-07-29 T4 grid cell-for-cell (2647: 5/5 at K1≤4, 2/5 at
+  K1=6, 0/5 at K1=8).
+- `cargo test --test curve_audit` → 5/5 pass (5.28 s). ✓
+
+### Findings
+
+**A — closed form for the Phase-2 uSVP margin.** With dim = 2m+2 and the
+2026-06-15 scales (S_K1 = n//K1, S_D = 1, S_K2 = n//K2, S_KANNAN = n):
+
+    det L    = n^(3m+1) / (K1·K2)^m
+    E‖v_pl‖² = n²(2m/3 + 4/3)
+    γ = E‖v_planted‖ / GH(L),   eff = K1·K2/n
+
+    γ² = 2πe · (m+2)/(3(m+1)) · n^(1/(m+1)) · eff^(m/(m+1))
+
+    eff*(m,n) = [3(m+1)/(2πe(m+2))]^((m+1)/m) · n^(−1/m)
+    eff*(∞)   = 3/(2πe) = 0.17565            ← hard asymptotic ceiling
+
+Closed form vs exact floored scales agrees to **≤ 0.10 %** over
+n ∈ {2647, 131101, 16777259} × m ∈ {8,12,20} × K1 ∈ {2,4,8,16}; eff* by
+closed form vs bisection agrees to ≤ 4 %. **Every scale S\_\* cancels out of γ
+at leading order** — this is why no re-scaling reformulation can move the wall.
+
+**Every observed Phase-2 wall, back to 2026-06-15, is eff*(m,n).**
+
+| setting | eff* predicted | observed |
+|---|---|---|
+| 17-bit, m=12 (T3, 2026-07-29) | 0.0525 | 19/20 at eff=0.05; 3/20 at 0.15; 0/20 at 0.25 |
+| n=2647, m=12 (T4) | 0.0727 | 5/5 to K1=4 (eff 0.079), 0/5 at K1=8 (0.157) |
+| n=2647, m=8 (T4b) | 0.0469 | 0/5 at eff 0.157 |
+
+**B — two-factor structure: γ sets the scale, ν̂ the curve-specific offset.**
+Same γ, opposite outcome, and ν̂ (2026-07-29's separator) explains it:
+
+| curve | λ* | K1=8: eff | γ | ν̂ | LLL |
+|---|---|---|---|---|---|
+| 12-bit/2557 (n=2659) | 0.340 | 0.1564 | 1.425 | 0.408 | **5/5** |
+| 12-bit/2677 (n=2647) | 0.070 | 0.1572 | 1.428 | 0.771 | **0/5** |
+
+Empirical γ at the wall: 2557 passes to γ=1.72, 2647 only to γ=1.04.
+
+**C — bit-length invariance (12/16/20/24 bits, 3 curves each, m=12, 480 LLL
+runs).** The wall is not a fixed K1 and not a λ\* band; it tracks eff*(12,n),
+which falls like n^(−1/12):
+
+| bits | eff*(12,n) | empirical wall (pooled, ≥3/5) | ratio |
+|---|---|---|---|
+| 12 | 0.072 | 0.100 | 1.39 |
+| 16 | 0.057 | 0.100 | 1.75 |
+| 20 | 0.045 | 0.070 | 1.55 |
+| 24 | 0.036 | 0.050 | 1.39 |
+
+Ratio ≈ 1.5 and flat over 12 bits of n — the usual LLL-vs-GH slack, not drift.
+
+**D — CORRECTION to the 2026-07-29 T4b claim.** T4b concluded "at K1=8 more
+data does not rescue it (m=8/12/16/24/32 → 0,0,1,0,1 of 5), so the K1 wall is
+genuine." It stopped one step short. Fixed n=2647, K1=8 (eff = 0.1572):
+
+| m | 6 | 8 | 12 | 16 | 24 | 32 | **40** |
+|---|---|---|---|---|---|---|---|
+| dim | 14 | 18 | 26 | 34 | 50 | 66 | 82 |
+| γ | 2.029 | 1.714 | 1.428 | 1.297 | 1.172 | 1.113 | **1.078** |
+| LLL | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 | **2/5** |
+| BKZ(30) | 0/5 | 1/5 | 0/5 | 1/5 | 1/5 | 1/5 | **4/5** |
+
+More data *does* rescue it, exactly when γ drops to ≈1.08. The counting bound
+says m ≥ 4.3 suffices information-theoretically at this eff — so the lattice
+needs a **~10× data overhead** over information theory. Above eff = 0.1756 no m
+ever suffices (γ → 1⁺ from above).
+
+**E — the Thread-23 falsifier: both reformulations fail, on both branches.**
+
+*V1 (rescale S_D so the planted vector becomes λ₁).* Algebraically S_D >
+sqrt((2m/3+1)/(1−(d/n)²)) should make the planted vector shortest. Empirically
+sv/pv peaks at **0.81** (n=2647, K1=4, S_D=4) and then *falls* again; it never
+reaches 1, and success degrades monotonically past S_D≈4:
+
+| curve | K1 | S_D=1 | 2 | 4 | 8 | 16 | 64 |
+|---|---|---|---|---|---|---|---|
+| 2557 | 8 | 5/5 | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 |
+| 2677 | 4 | 5/5 | 5/5 | 5/5 | 3/5 | 2/5 | 1/5 |
+| 2677 | 8 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 |
+
+*V2 (drop the Kannan row, solve BDD directly by Babai nearest-plane on the
+(2m+1)-dim lattice — no trivial-vector competition at all).* Equal or **worse**
+than V0 at every one of 12 grid points; the 2647 wall stays at K1≈4–6:
+
+| curve | K1 | γ | V0 Kannan+LLL | V2 Babai BDD |
+|---|---|---|---|---|
+| 2557 | 8 | 1.425 | 5/5 | 4/5 |
+| 2557 | 12 | 1.718 | 4/5 | 2/5 |
+| 2677 | 4 | 1.037 | 5/5 | 4/5 |
+| 2677 | 6 | 1.251 | 2/5 | 1/5 |
+| 2677 | 8 | 1.428 | 0/5 | 0/5 |
+
+**F — stronger reduction does NOT move the wall either.** n=2647, m=12,
+dim=26, so β=40 is essentially exact SVP:
+
+| K1 | eff | γ | β=2 | 20 | 30 | 40 |
+|---|---|---|---|---|---|---|
+| 4 | 0.079 | 1.037 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 6 | 0.118 | 1.251 | 2/5 | 3/5 | 3/5 | 3/5 |
+| 8 | 0.157 | 1.428 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+At γ = 1.43 exact SVP still fails, so the wall is not a reduction-quality
+artefact — past γ ≈ 1 the planted vector simply is not distinguished. Combined
+with D: the only lever is **more signatures** (lowers γ), not better reduction.
+
+**G — held-out validation of the two-factor model.** 112 pooled cells (14
+curves × 8 settings × 5 seeds), "easy" = ≥3/5:
+
+| predictor | AUC | best acc |
+|---|---|---|
+| majority baseline | — | 0.616 |
+| ν̂ alone | 0.765 | 0.741 |
+| **γ alone (zero fitted parameters)** | **0.942** | **0.866** |
+| γ + 1.25·ν̂ (one fitted weight) | 0.973 | 0.920 |
+
+γ is an *a priori* O(1) predictor — no lattice reduction, no fitting — and
+already beats every curve-level invariant tried since 2026-06-21. ν̂ scores
+lower here (0.765) than the 0.935 reported 2026-07-29 only because that AUC was
+measured at *fixed* eff, where γ is constant by construction; the two results
+are consistent.
+
+**Consequence for the paper.** The Phase-2 GLV-HNP lattice is at a hard ceiling
+of eff = K1·K2/n < 3/(2πe) = 0.1756, i.e. **2.51 bits inside the
+information-theoretic boundary eff < 1**, and that gap is the generic Gaussian
+heuristic gap — independent of n, of m, of every scaling, of Kannan-vs-BDD, and
+of reduction strength up to exact SVP. Since K2 ≈ √n is forced by the GLV
+decomposition, the usable nonce-leak budget is K1 < 0.1756·√n. This bounds the
+whole GLV-HNP direction rather than any one experiment, and is the honest
+answer to "is Phase 2 at its ceiling?" — yes, and the ceiling is quantified.
+
+### Next step proposal
+
+**Thread 24 — write the eff\* ceiling into the paper as a proposition.**
+`PAPER_STRUCTURAL_COMPLETENESS.md` currently treats the GLV-HNP direction
+qualitatively. The γ closed form gives a citable statement:
+
+> *Proposition.* For the GLV-decomposed HNP lattice with nonce bounds
+> (K1, K2), LLL/BKZ recovery requires K1·K2/n ≲ 3/(2πe), a factor 2πe/3
+> inside the information-theoretic bound K1·K2 < n, uniformly in m and n.
+
+Insertion point: alongside the Thread 17 order-2 Frobenius proposition
+(`paper/eprint_combined.tex`, after line 429). Include table C as the
+supporting measurement. Cheap — one session.
+
+**Secondary (Thread 25) — does the ceiling survive a non-uniform k2?**
+Every experiment so far draws k2 ~ U[0,K2). The GLV decomposition of a *real*
+nonce gives k2 concentrated near ±√n/2 with a lattice-dependent shape. Falsifier:
+re-run the EXP C grid with k2 drawn from the true GLV-decomposition
+distribution; if the empirical wall still lands at 1.4–1.7 × eff*(m,n) the
+ceiling is distribution-robust, if it moves by >2× the uniform model has been
+flattering the attack and every prior Phase-2 number needs re-basing.
+
+**Blocked / carried forward:** PARI/GP install failed this run (mirror 404), so
+no `.gp` script was exercised. Threads 2/3 (CHLRS, Howe gluing) stay parked.
+
+### Commits made
+
+(recorded below after commit)
