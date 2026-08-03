@@ -1,0 +1,203 @@
+==============================================================================
+Thread 23 — reformulating the Phase-2 lattice so the target is lambda_1
+==============================================================================
+
+------------------------------------------------------------------------------
+E1: shortest-vector / planted-vector ratio, V0 (Kannan) vs V1 (projected)
+------------------------------------------------------------------------------
+2026-07-29 T5 measured sv/pv in [0.34, 0.61] for V0 and showed the
+minimiser is always the trivial vector n*S_D*e_m.  If projection works,
+V1's sv/pv should rise to 1.0 (planted vector IS lambda_1).
+
+curve                lam*  K1   m     pv(V0)     sv(V0)     r0     pv(V1)     sv(V1)     r1
+8-bit/199           0.467   2   6      329.8      199.0  0.603      329.7      277.9  0.843
+12-bit/2557         0.340   8   8     5142.8     2659.0  0.517     5142.4     2737.6  0.532
+12-bit/2677 FAIL    0.070   8  10     6270.7     2647.0  0.422     6270.3     5095.8  0.813
+
+(r = sv/pv.  r < 1 means some OTHER vector is shorter than the planted
+ one, i.e. the planted vector is not lambda_1 and recovery is BDD.)
+
+------------------------------------------------------------------------------
+E2: sanity — all three variants in the easy regime (K1 = 2)
+------------------------------------------------------------------------------
+Secret-free verification: a win means the recovered d satisfies
+d*G == Q for the public key Q.  d == d_secret is then asserted.
+
+curve                m  K1      V0      V1      V2
+8-bit/199            6   2     5/5     5/5     5/5
+12-bit/2557          8   2     5/5     5/5     5/5
+12-bit/2677 FAIL    10   2     5/5     5/5     5/5
+
+------------------------------------------------------------------------------
+E3: K1 wall, V0 vs V1 vs V2  (THE FALSIFIER)
+------------------------------------------------------------------------------
+2026-07-29 T4 walls (V0):  lam*=0.340 curve -> K1 ~ 12-16
+                           lam*=0.070 curve -> K1 ~  4-6
+If V1/V2 push the wall outward, the reformulation is a real improvement.
+If the wall does not move, it is information-theoretic.
+
+
+curve 12-bit/2557   n=2659  lam=1755  lam*=0.340  m=8
+variant        2      3      4      6      8     12     16     24
+V0           5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+V1           5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+V2           5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+
+curve 12-bit/2677 FAIL   n=2647  lam=185  lam*=0.070  m=10
+variant        2      3      4      6      8     12     16     24
+V0           5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+V1           5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+V2           5/5    5/5    5/5    4/5    0/5    0/5    0/5    0/5
+
+------------------------------------------------------------------------------
+E4: m-sweep at K1 = 8 on the lam*=0.07 curve
+------------------------------------------------------------------------------
+2026-07-29 T4b (V0): m = 8/12/16/24/32 -> 0,0,1,0,1 out of 5.
+If V1/V2 convert this to consistent wins, the K1 wall was an artefact
+of the embedding rather than of the data.
+
+variant       m=8    m=12    m=16    m=24    m=32
+V0            0/5     0/5     1/5     0/5     1/5
+V1            0/5     0/5     1/5     0/5     1/5
+V2            2/5     0/5     2/5     5/5     5/5
+
+------------------------------------------------------------------------------
+E5: control — BKZ on V0/V1 vs exact CVP on V2, lam*=0.07 curve, K1=8
+------------------------------------------------------------------------------
+E4 showed V2 winning 5/5 at m=24,32 where V0/V1 win 0-1/5.  If BKZ at
+large beta closes that gap, the gain is better reduction and NOT the
+reformulation.  If it does not, the d-elimination is doing the work.
+
+variant            m=8    m=12    m=16    m=24    m=32
+V0 LLL             0/5     0/5     1/5     0/5     1/5
+V0 BKZ-20          1/5     0/5     1/5     1/5     1/5
+V0 BKZ-40          1/5     0/5     1/5     1/5     1/5
+V1 BKZ-40          1/5     0/5     1/5     1/5     1/5
+V2 CVP             2/5     0/5     2/5     5/5     5/5
+
+------------------------------------------------------------------------------
+E6: cost of exact CVP, and the identity of lambda_1 in V1
+------------------------------------------------------------------------------
+V2 uses fplll enumeration, which is exponential in the lattice rank 2m.
+Median wall-clock per instance, lam*=0.07 curve, K1=8:
+
+   m  rank   V0 LLL s   V2 CVP s    ratio
+   8    16      0.001      0.001      1.1x
+  12    24      0.002      0.002      1.3x
+  16    32      0.003      0.004      1.4x
+  24    48      0.007      0.011      1.6x
+  32    64      0.013      0.037      2.8x
+
+Energy split of the V1 shortest vector (projection removed the
+trivial vector n*S_D*e_m, yet E1 still shows sv/pv < 1 — so what is
+shorter than the planted vector now?):
+
+curve                sv/pv   k1-blk   k2-blk   kannan
+8-bit/199            0.843    0.508    0.492    0.000
+12-bit/2557          0.532    0.132    0.868    0.000
+12-bit/2677 FAIL     0.813    0.822    0.178    0.000
+
+------------------------------------------------------------------------------
+E7: 10-seed confirmation, and the K1 wall at large m
+------------------------------------------------------------------------------
+E4/E5 used 5 seeds.  Re-run the decisive cells at 10 seeds, then ask
+the sharper question: with m=32 signatures, how far out in K1 can V2
+go?  V0's wall on this curve is K1 ~ 4-6 (2026-07-29 T4).
+
+(a) K1=8, m-sweep, 10 seeds
+variant             m=8     m=12     m=16     m=24     m=32
+V0 LLL             1/10     1/10     2/10     0/10     4/10
+V0 BKZ-40          2/10     1/10     2/10     4/10     4/10
+V2 CVP             2/10     1/10     3/10    10/10    10/10
+
+(b) m=32, K1-sweep, 10 seeds  — does the WALL move outward?
+variant            K1=4     K1=6     K1=8    K1=12    K1=16    K1=24    K1=32
+V0 LLL            10/10     3/10     4/10     0/10     0/10     0/10     0/10
+V0 BKZ-40         10/10     4/10     4/10     1/10     0/10     0/10     0/10
+V2 CVP            10/10    10/10    10/10     1/10     0/10     0/10     0/10
+
+(c) information-theoretic reference: the attack needs
+    m*log2(K1*K2) + log2(n) <= m*log2(n), i.e. m >= log(n)/log(n/(K1*K2)).
+    n=2647, K2=52
+   K1   eff=K1*K2/n    m_min
+    4         0.079        4
+    6         0.118        4
+    8         0.157        5
+   12         0.236        6
+   16         0.314        7
+   24         0.471       11
+   32         0.629       17
+
+------------------------------------------------------------------------------
+E8: does dist/GH predict the residual V2 wall?
+------------------------------------------------------------------------------
+E7(c) shows K1=12 needs only m_min=6 signatures, yet V2 with m=32
+still fails there — so the residual wall is NOT information-theoretic.
+Test the lattice-geometry explanation instead.  For the V2 lattice L2
+(rank 2m) the determinant is exactly
+      det(L2) = S_K1^m * n^(m-1) * S_K2^m        (verified symbolically)
+so the Gaussian heuristic is GH = det^(1/2m) * sqrt(2m/(2*pi*e)) and the
+BDD target distance is ||(k1_i*S_K1, k2_i*S_K2)|| ~ n*sqrt(2m/3).
+Closed form:  dist/GH ~ sqrt(2*pi*e/3) * sqrt(K1*K2/n) * n^(1/2m).
+
+curve 12-bit/2557, lam*=0.340, m=32, rank=64, n=2659, K2=52
+  K1     eff           GH    dist(emp)   dist/GH  V2 10-seed  V0 10-seed
+   4   0.078      16239.4      10698.4     0.659       10/10       10/10
+   6   0.117      13264.4      11135.5     0.840       10/10       10/10
+   8   0.156      11483.0      11136.2     0.970       10/10       10/10
+  12   0.235       9368.8      11485.9     1.226       10/10       10/10
+  16   0.313       8119.7      11366.4     1.400       10/10        7/10
+  24   0.469       6609.7      11646.1     1.762        0/10        0/10
+  32   0.626       5741.5      11516.3     2.006        0/10        0/10
+
+curve 12-bit/2677 FAIL, lam*=0.070, m=32, rank=64, n=2647, K2=52
+  K1     eff           GH    dist(emp)   dist/GH  V2 10-seed  V0 10-seed
+   4   0.079      16007.9      10549.4     0.659       10/10       10/10
+   6   0.118      13075.4      11119.4     0.850       10/10        3/10
+   8   0.157      11310.7      10983.1     0.971       10/10        4/10
+  12   0.236       9235.2      11472.7     1.242        1/10        0/10
+  16   0.314       7997.9      11214.3     1.402        0/10        0/10
+  24   0.471       6530.3      11657.8     1.785        0/10        0/10
+  32   0.629       5638.2      11331.5     2.010        0/10        0/10
+
+The two curves have lam* = 0.340 and 0.070 and, under V0, WALLS THAT
+DIFFER BY ~3x (2026-07-29 T4).  If both V2 columns break at the same
+dist/GH, the curve-to-curve variation was an artefact of the Kannan
+embedding and the CVP formulation depends only on eff = K1*K2/n.
+
+A sharp transition in the last column that lines up with dist/GH
+crossing a fixed constant would be the first PREDICTIVE quantity in
+this thread (nine curve-level invariants failed, 2026-06-21..06-29).
+
+------------------------------------------------------------------------------
+E9: cross-curve validation — is dist/GH the same at every wall?
+------------------------------------------------------------------------------
+E8 fits two curves, which is over-fitting.  Take 6 fresh 17-bit j=0
+GLV curves with lam* spread over (0, 0.5), locate each one's V2 wall
+in eff = K1*K2/n, and ask whether dist/GH (or dist/mu) is constant
+there.  A constant would be a genuine, curve-independent predictor.
+
+V2 (exact CVP), m=24, 5 seeds.  Wall := largest eff with >= 4/5.
+   lam*       n    0.05   0.10   0.15   0.20   0.25   0.30   0.40   0.50
+  0.027   65719     5/5    5/5    2/5    0/5    0/5    0/5    0/5    0/5
+  0.137   65203     5/5    5/5    4/5    0/5    0/5    0/5    0/5    0/5
+  0.211   66037     5/5    5/5    5/5    1/5    0/5    0/5    0/5    0/5
+  0.318   65899     5/5    5/5    5/5    5/5    5/5    4/5    0/5    0/5
+  0.335   65287     5/5    5/5    5/5    5/5    5/5    2/5    0/5    0/5
+  0.446   66943     5/5    5/5    1/5    0/5    0/5    0/5    0/5    0/5
+
+   lam*  wall eff    K1         mu         GH       dist  dist/mu  dist/GH
+  0.027      0.10    26     200602     273800     262876    1.310    0.960
+  0.137      0.15    38     104620     224269     260812    2.493    1.163
+  0.211      0.15    39     105486     225068     264148    2.504    1.174
+  0.318      0.30    77      70893     159784     263596    3.718    1.650
+  0.335      0.25    64      65606     173404     261148    3.981    1.506
+  0.446      0.10    26     179265     280424     267772    1.494    0.955
+
+NOTE: lambda_1(L2) == mu EXACTLY in every cell measured (E8 side
+check), i.e. the shortest vector of the whole rank-2m lattice is the
+shortest vector of a single 2-D lambda block.
+
+==============================================================================
+done
+==============================================================================

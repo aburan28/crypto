@@ -6103,3 +6103,160 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+Thread 23 — the continuation proposed verbatim by the 2026-07-29 entry
+("reformulate the Phase-2 lattice so the target is λ₁"). Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21. Priority 5 (GLV-HNP) made
+measurable progress on 2026-07-29, so protocol rule (b) selects its proposed sub-task.
+
+The 2026-07-29 falsifier: *if sv/pv rises above 1 after reformulation AND the K1 wall
+on the λ*=0.07 curve moves outward, the reformulation is real; if the wall stays at
+K1≈4–6, the wall is information-theoretic and Phase 2 is at its ceiling.*
+
+**Verdict: SPLIT. The diagnosis was wrong, the prescription was right.** The trivial
+vector `n·S_D·e_m` was real but was never the limiter — removing it changes literally
+nothing. The *Kannan embedding* was the limiter; replacing it with an explicit CVP
+moves the wall and falsifies T4b.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  sympy 1.14.0. (Same note as 2026-07-29: `cysignals` is a separate runtime import.)
+- Extracted `glv_hnp_phase2_lambda_threshold.py:78–410` **verbatim** into a new
+  `secp256k1_cm_audit/glv_hnp_lib.py` so experiments share bit-identical curve /
+  signature / lattice construction. No behavioural change; removes the copy-paste that
+  every prior GLV script carried.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (9 experiments E1–E9).
+  Artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (203 lines).
+- Three variants, fed bit-identical signatures:
+  - **V0** baseline Kannan lattice (dim 2m+2) — the 2026-06-15 construction.
+  - **V1** V0 with the d-column deleted (rank 2m+1). The trivial vector maps to 0.
+  - **V2** d eliminated *and* Kannan dropped: rank-2m lattice + **exact CVP**
+    (fplll enumeration) to target `t = (−A_i·S_K1, 0,…,0)`.
+- Recovery made **secret-free**: a candidate d is accepted iff `d·G == Q` (public key),
+  then `assert d == d_secret`. Wins are genuine attacks, not oracle queries.
+- `cargo test --test curve_audit` → **5/5 pass** (7.10s). ✓
+
+### Findings
+
+**F1 — μ-ALIASES: a recovery-criterion trap that cost this run an hour.**
+LLL usually returns *not* the planted vector but `planted + (Δk1_i, Δk2_i)` where
+(Δk1,Δk2) is a short vector of the λ-block sublattice `⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩`,
+so `Δk1 + λ·Δk2 ≡ 0 (mod n)`. Worked example (curve 2557, K1=4, seed 42, coordinate
+i=2): planted (k1,k2) = (0,43); LLL returned (3,−7); Δ = (3,−50) and
+3 + 1755·(−50) ≡ 0 (mod 2659). **d is unchanged**, so the alias is a perfectly valid
+solution — it just has k2 outside [0,K2).
+Consequence: a recovery test that demands the exact planted (k1,k2) rejects these and
+under-counts V0 by ~2 K1-steps (5/5 → 0/5 at K1=6). Documented in
+`glv_hnp_phase2_projected.py::d_from_block`. **Future runs: verify d against the public
+key, never against the (k1,k2) decomposition.**
+
+**F2 — the projection (V1) is an operational NO-OP.** V0 ≡ V1 in *every one* of the 61
+measured cells (E3 40 cells, E4 5, E5 5, plus E1/E2). sv/pv does rise —
+
+| curve | λ* | sv/pv (V0) | sv/pv (V1) |
+|---|---|---|---|
+| 8-bit/199 | 0.467 | 0.603 | 0.843 |
+| 12-bit/2557 | 0.340 | 0.517 | 0.532 |
+| 12-bit/2677 | 0.070 | 0.422 | 0.813 |
+
+— but never reaches 1, and the V1 shortest vector carries **zero Kannan energy**
+(0.000 on all three curves; k1/k2-block split 0.51/0.49, 0.13/0.87, 0.82/0.18).
+So λ₁ of the projected lattice is *still* outside the target coset. The
+2026-07-29 T5 conclusion "the planted vector is never λ₁" survives; its implied
+cause ("because of `n·S_D·e_m`") is **wrong** — that vector was never binding.
+
+**F3 — V2 (exact CVP) moves the wall. T4b is FALSIFIED.**
+λ*=0.070 curve, K1=8, **10 seeds** (E7a):
+
+| variant | m=8 | m=12 | m=16 | m=24 | m=32 |
+|---|---|---|---|---|---|
+| V0 LLL | 1/10 | 1/10 | 2/10 | 0/10 | 4/10 |
+| V0 BKZ-40 | 2/10 | 1/10 | 2/10 | 4/10 | 4/10 |
+| **V2 CVP** | 2/10 | 1/10 | 3/10 | **10/10** | **10/10** |
+
+2026-07-29 T4b said "at K1=8 more data does not rescue it (m=8/12/16/24/32 → 0,0,1,0,1
+of 5), so the K1 wall is genuine." V0 reproduces that flat profile; **V2 converts it
+into a sharp threshold at m≥24.** More data *does* rescue it — but only once the
+embedding is gone.
+
+**F4 — CONTROL: the gain is the reformulation, not stronger reduction.** BKZ-40 on
+V0/V1 tops out at 4/10 exactly where V2 gets 10/10 (row 2–3 above). Cost (E6): exact
+CVP is only **1.1×–3.1× LLL** at ranks 16–64 (0.036 s at rank 64) — enumeration is
+exponential asymptotically but is not the bottleneck at these sizes.
+
+**F5 — the wall itself moves outward.** λ*=0.070 curve, m=32, 10 seeds (E7b):
+
+| variant | K1=4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|
+| V0 LLL | 10/10 | 3/10 | 4/10 | 0/10 | 0/10 | 0/10 |
+| V0 BKZ-40 | 10/10 | 4/10 | 4/10 | 1/10 | 0/10 | 0/10 |
+| **V2 CVP** | 10/10 | **10/10** | **10/10** | 1/10 | 0/10 | 0/10 |
+
+Wall moves from K1≈6 (2026-07-29 T4: "K1≈4–6") to K1≈8–12.
+
+**F6 — the residual wall is NOT information-theoretic.** The counting bound
+`m ≥ log n / log(n/(K1·K2))` gives m_min=6 at K1=12, yet V2 with m=32 gets 1/10. The
+residual obstruction is lattice geometry, not missing data.
+
+**F7 — two exact structural facts about the V2 lattice L2.**
+- `det(L2) = S_K1^m · n^(m−1) · S_K2^m` — verified against sympy's exact determinant
+  for m∈{3,4,5} × K1∈{4,8}, all 6 cases match exactly.
+- **λ₁(L2) = μ exactly** in all 14 measured cells, where μ is the Gauss-reduced
+  shortest vector of the 2-D λ-block. The shortest vector of the whole rank-2m lattice
+  is the shortest vector of a single 2-D block.
+
+**F8 — a partial predictor: dist/GH.** With `GH = det^(1/2m)·√(2m/2πe)` and
+`dist ≈ n·√(2m/3)`, the closed form is `dist/GH ≈ √(2πe/3)·√(K1·K2/n)·n^(1/2m)`.
+Per curve the transition is sharp (E8, m=32): λ*=0.070 breaks between dist/GH = 0.971
+(10/10) and 1.242 (1/10); λ*=0.340 breaks between 1.400 (10/10) and 1.762 (0/10).
+**But the constant is not curve-independent.** Cross-curve on 6 *fresh* 17-bit GLV
+curves (E9, m=24), dist/GH at each wall:
+
+| λ* | wall eff | μ | dist/μ | **dist/GH** |
+|---|---|---|---|---|
+| 0.027 | 0.10 | 200602 | 1.310 | 0.960 |
+| 0.137 | 0.15 | 104620 | 2.493 | 1.163 |
+| 0.211 | 0.15 | 105486 | 2.504 | 1.174 |
+| 0.318 | 0.30 | 70893 | 3.718 | 1.650 |
+| 0.335 | 0.25 | 65606 | 3.981 | 1.506 |
+| 0.446 | 0.10 | 179265 | 1.494 | 0.955 |
+
+dist/GH ∈ [0.955, 1.650] collapses a 3× spread in the eff-wall (0.10→0.30) to ~1.7×,
+which is the best any quantity in this thread has managed (nine curve-level invariants
+failed outright, 2026-06-21…06-29) — but it is **not** the separator. dist/μ is worse
+(1.31–3.98).
+
+**F9 — the V2 wall is NON-MONOTONIC in λ*.** It peaks at λ*≈0.32 (eff wall 0.25–0.30)
+and falls to 0.10 at *both* ends (λ*=0.027 and λ*=0.446). This is why no monotone
+function of λ* was ever going to separate C1 from C2, and it is consistent with — and
+sharpens — the 2026-07-29 T4 observation that λ* "shifts the K1 wall by ~3× but creates
+no structural obstruction."
+
+**Bookkeeping correction.** The 2026-07-29 T4 table lists the λ*=0.340 curve as 4/5 at
+K1=12 and 1/5 at K1=16. Re-running the *archived* `success_rate` code path today gives
+1/5 and 0/5. This run's V0 reproduces the archived code exactly (5,5,5,5,5,1,0,0 across
+K1=2,3,4,6,8,12,16,24), so all comparisons here are sound; the logged table appears to
+carry a transcription or seed-set slip in those two cells.
+
+### Next step proposal
+**Thread 24 — explain the non-monotonic λ* dependence of the V2 wall (F9).**
+dist/GH normalises by a *random-lattice* heuristic, but F7 shows L2 is not random: its
+λ₁ is a single 2-D λ-block vector. Hypothesis: the wall is governed by the **skew** of
+the 2-D block — its orthogonality defect `μ·μ'/det_2D` (μ' = second Gauss minimum,
+det_2D = n·S_K1·S_K2) — rather than by μ or GH alone. That quantity is non-monotone in
+λ* by construction, which is the right shape.
+Falsifier: sweep ~20 fresh curves with λ* spread over (0,0.5), locate each V2 wall in
+eff as in E9, and regress the wall on the block skew. If the wall in eff is constant in
+the skew variable, that is the first curve-independent predictor in this thread; if the
+residual spread stays at ~1.7× (no better than dist/GH), abandon the 2-D-block family
+and treat the wall as a full GS-profile property. Cheap: E9 as written is a 22-second
+run, so 20 curves is ~2 minutes.
+
+Secondary (independent, also cheap): re-run E7b at m=64 to check whether V2's K1=12
+cell (currently 1/10) is data-limited or wall-limited.
+
+### Commits made
+[filled in below]
