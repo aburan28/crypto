@@ -6573,3 +6573,5 @@ Not recommended: any further scale-free curve invariant. Nine are now
 falsified and the mechanism explains all nine.
 
 ### Commits made
+
+7c1a164 autolab 2026-08-03: Thread 23 — nu_hat is a continued-fraction quantity; scale explains the June falsification streak
