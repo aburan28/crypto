@@ -6186,7 +6186,7 @@ GH = ‖planted‖ / λ₁^GH. The two lattices have essentially the same GH rat
 is why the reformulation cannot help: det(V2) = det(V1)/n and dim drops by exactly 1,
 so `det^{1/dim}` is unchanged to first order.
 
-**E — 100% instance-level agreement, 240 instances, zero discordant pairs.**
+**F — 100% instance-level agreement, 240 instances, zero discordant pairs.**
 
 | | V2 succeeds | V2 fails |
 |---|---|---|
@@ -6197,7 +6197,7 @@ Not merely matching totals — the *same* (curve, seed, eff) instances succeed. 
 the quotient of V1 by the trivial direction and recovery is invariant under it. **The
 `d` column was never the obstruction.**
 
-**F — λ₁(V2) is *exactly* the λ-block vector.** L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩
+**G — λ₁(V2) is *exactly* the λ-block vector.** L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩
 is the 2-D sublattice spanned by modulus row i and the k2_i row; `l1(L2)` computed by
 exact Lagrange-Gauss reduction:
 
@@ -6214,7 +6214,7 @@ fixed and is ruled out only by the bounds K1, K2. It cannot be quotiented away t
 way the d column was — there are ~K1·K2/n = eff such decoys per signature, so eff
 *is* the information-theoretic parameter.
 
-**G — ν̂ replicated independently (fresh 17-bit sample, V2 lattice).** `r = ‖pv‖/λ₁(L2)`;
+**H — ν̂ replicated independently (fresh 17-bit sample, V2 lattice).** `r = ‖pv‖/λ₁(L2)`;
 eff must be held fixed since it is the dominant variable:
 
 | eff | succ | fail | AUC(r) | AUC(1/r) | AUC(ν̂) |
@@ -6234,7 +6234,7 @@ Mechanism (consistent with the data, not yet independently tested): a *very shor
 orthogonal complement where `pv` lives keeps a clean GS profile; when ν̂ ≈ 1 the m
 copies of L2 all sit at the *same* length scale as `pv` and crowd it.
 
-**H — pre-reducing the λ-blocks does not move the wall either (V3).** Unimodular, so
+**I — pre-reducing the λ-blocks does not move the wall either (V3).** Unimodular, so
 same lattice, better starting basis:
 
 | curve | ver | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
