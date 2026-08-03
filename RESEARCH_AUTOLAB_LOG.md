@@ -6275,3 +6275,5 @@ CVP as a substitute for LLL; block-wise majority voting; any reformulation whose
 to make the planted vector λ₁.
 
 ### Commits made
+
+8d86555 autolab 2026-08-03: Thread 23 — projection inert; L0/L_lam = Z/n; exact CVP no better than LLL
