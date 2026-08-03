@@ -1,0 +1,29 @@
+==============================================================================
+GLV-HNP Thread 23 (T6): a_loc vs nu_hat vs the falsified invariants
+==============================================================================
+Exp S protocol: K1=72, m=12, 6 seeds, 100 fresh 20-bit j=0 CM curves
+C2 = recovers d on all seeds; C1 = does not (Exp S convention)
+
+  harvested 100 curves in 0.1s
+  600 LLL trials in 1.0s
+  max |nu_hat(closed form) - nu_hat(Gauss)| over the sample = 1.110e-16   (Theorem T23 re-check)
+
+  C1 (fails): 74/100   C2 (6/6): 26/100
+  trivial baseline (always predict majority) = 74.0%
+
+--- Head to head against the C1/C2 labels ---
+ invariant             C1 range             C2 range     AUC  best acc
+    nu_hat        [0.408,1.012]        [0.314,0.645]   0.935     89.0%
+     a_loc       [1.000,16.000]      [5.000,728.000]   0.911     84.0%
+     max_a      [3.000,419.000]      [5.000,729.000]   0.748     75.0%
+        mu        [0.002,0.497]        [0.001,0.499]   0.523     75.0%
+                                    trivial baseline             74.0%
+
+--- a_loc response (mean wins/6 by bucket) ---
+     a_loc  count   C2 rate  mean wins/6  mean nu_hat
+         1     22      0.00         0.77        0.848
+         2     18      0.00         1.17        0.823
+       3-4     14      0.00         1.64        0.778
+       5-8     27      0.44         3.37        0.578
+      9-16      9      0.44         5.00        0.483
+      17-+     10      1.00         6.00        0.332

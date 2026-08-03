@@ -1,0 +1,111 @@
+
+GLV-HNP Thread 23 -- closed form for nu_hat
+autolab 2026-08-03
+
+========================================================================
+T1  Theorem T23: CF closed form vs exact Lagrange-Gauss
+========================================================================
+  For each (n, lam, K1, K2): lambda_1^2 from convergents of lam/n
+  must equal lambda_1^2 from exact-integer Gauss reduction.
+
+   bits  trials   agree  max rel err
+     20     120     120    0.000e+00
+     24     120     120    0.000e+00
+     32     120     120    0.000e+00
+     64     120     120    0.000e+00
+    128     120     120    0.000e+00
+    256     120     120    0.000e+00
+
+  VERDICT: THEOREM T23 HOLDS on all trials (exact integer equality).
+
+========================================================================
+T2  Precision audit of the 2026-07-29 gauss_reduce_2d  [PRE-REGISTERED
+    HYPOTHESIS FALSIFIED -- the routine was correct]
+========================================================================
+  Hypothesis going in: `q = round((u.v) / |v|^2)` looked like an f64
+  rounding hazard, since at 256 bits |v|^2 ~ 2^500 -- far past the
+  53-bit mantissa -- so the 2026-07-29 secp256k1 numbers might be wrong.
+
+  This is FALSE.  CPython's int.__truediv__ is correctly rounded for
+  arbitrary-precision operands: it does NOT convert each operand to
+  double first.  The quotient here is small, so `q` is exact.
+  Column 3 = the original routine; column 4 = the same line ported
+  naively to fixed-width doubles (float(a)/float(b)), which is what a
+  C/Rust/numpy translation would do.  Reference = CF closed form.
+
+   bits  trials  orig wrong  naive-f64 wrong
+     20      60           0                0
+     24      60           0                0
+     64      60           0                0
+    128      60           0                0
+    256      60           0                0
+    320      60           0                0
+    512      60           0               60
+   1100      60           0               60
+
+  => 2026-07-29 needs NO numerical correction at any bit size, and the
+     restored entry's secp256k1 values stand (independently confirmed
+     in T4 below).  The exact-integer rounding now in
+     glv_hnp_nuhat_lib.gauss_reduce_2d is a portability hardening, not
+     a bug fix: it is what the naive-f64 column shows you need once the
+     routine leaves CPython.
+
+========================================================================
+T3  Mechanism: scale-localised vs scale-free partial quotient
+========================================================================
+  Sample: 400 random 20-bit (n, lam), eff = K1*K2/n = 0.05.
+  Claim: nu_hat is governed by the partial quotient AT the scale
+  q* = sqrt(n*A/B), not by the global max partial quotient.
+
+  n = 400 instances
+  spearman(nu_hat, max_a) = -0.302   <- scale-free, falsified June 2026
+  spearman(nu_hat, a_loc) = -0.767   <- scale-localised
+
+  The winning convergent sits at the predicted scale q* = sqrt(n*A/B):
+    q_win / q*  quantiles:  q05=0.042  q25=0.219  q50=0.417  q75=0.654  q95=0.854
+    winning index j / #convergents: median 0.56
+
+  nu_hat by a_loc bucket (AM-GM predicts nu_hat ~ sqrt(2/a_loc)):
+         a_loc  count  mean nu_hat  sqrt(2/a_loc)
+             1    103        0.843          1.414
+             2     66        0.860          1.000
+           3-4     55        0.765          0.765
+           5-8     59        0.647          0.569
+          9-16     46        0.488          0.412
+          17-+     71        0.340          0.117
+
+========================================================================
+T4  secp256k1 placement, recomputed in exact arithmetic
+========================================================================
+  lambda^2 + lambda + 1 = 0 mod n   VERIFIED
+
+     eff  nu_hat (exact)   2026-07-29 (f64)  float ok  j_win  #conv
+    0.05          0.8709             0.8709       yes     70    141
+    0.10          0.6624             0.6624       yes     70    141
+    0.25          0.5852             0.5852       yes     70    141
+    0.50          0.6851             0.6851       yes     70    141
+
+  NOTE: this is a lattice invariant of (n, lambda, K1, K2) only.
+  It is NOT an attack on secp256k1 -- the whole Phase-2 thread is
+  conditional on a non-standard nonce generator k = k1 + lambda*k2
+  with k1 bounded.  Correctly generated nonces are unaffected.
+
+========================================================================
+T5  Hermite ceiling and the null distribution of nu_hat
+========================================================================
+  Hermite bound in dimension 2: nu_hat <= (4/3)^(1/4) = 1.0746
+  (2026-07-29 observed max 1.012 / 1.072 -- consistent.)
+
+  eff=0.05  q05=0.243 q25=0.522 q50=0.727 q75=0.890 q95=0.996  max=1.0705
+            frac < 0.45 (easy tail) = 0.190   frac > 0.90 = 0.233   violations of Hermite = 0
+  eff=0.25  q05=0.237 q25=0.517 q50=0.727 q75=0.887 q95=0.997  max=1.0665
+            frac < 0.45 (easy tail) = 0.186   frac > 0.90 = 0.230   violations of Hermite = 0
+
+========================================================================
+SUMMARY
+========================================================================
+  T23 theorem: CONFIRMED
+  nu_hat is computable by one Euclidean-algorithm pass over lam/n;
+  no lattice reduction is required.  It is small exactly when lam/n
+  has a large partial quotient AT the scale q* = sqrt(n*K2/K1),
+  which is why every scale-free CF invariant tried in June failed.
