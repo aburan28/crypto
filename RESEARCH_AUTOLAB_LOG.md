@@ -6275,4 +6275,4 @@ threads plus threads 7, 20, 22, 23 are CLOSED/BLOCKED/DEAD-END.
 
 ### Commits made
 
-(hash recorded below after commit)
+28de43a autolab 2026-08-03: Thread 23 CLOSED — d-column reformulation is a no-op; Phase-2 wall is information-theoretic
