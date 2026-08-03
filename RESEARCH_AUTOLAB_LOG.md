@@ -6234,3 +6234,4 @@ full size, i.e. eff ≈ 1 — two orders of magnitude above the ceiling. Nothing
 threatens secp256k1; the thread is about how far the toy attack can be pushed.
 
 ### Commits made
+0b583f2 autolab 2026-08-03: Thread 23 — projection is a no-op; centering moves the K1 wall 5.3x
