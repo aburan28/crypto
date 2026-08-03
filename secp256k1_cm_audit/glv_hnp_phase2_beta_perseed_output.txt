@@ -1,0 +1,40 @@
+==============================================================================
+Thread 23 part 4 — per-instance test of the Babai criterion beta < 1/2
+==============================================================================
+
+collected 160 instances (2 curves x 8 K1 x 10 seeds)
+
+==============================================================================
+E10 — does beta < 1/2 imply recovery, per instance?
+==============================================================================
+  instances with beta <  0.5 :   51   of which recovered:   50   (98.0%)
+  instances with beta >= 0.5 :  109   of which recovered:   25   (22.9%)
+
+  sufficiency violations (beta<0.5 yet failed): 1
+    12-bit/2677  K1=4   seed=1618033  beta=0.4662
+
+  successes beyond the Babai guarantee (beta>=0.5 yet worked): 25
+    12-bit/2557  K1=12  seed=1234     beta=0.9343
+    12-bit/2557  K1=8   seed=1234     beta=0.8409
+    12-bit/2557  K1=6   seed=1234     beta=0.8021
+    12-bit/2557  K1=8   seed=9999     beta=0.7794
+    12-bit/2557  K1=8   seed=1618033  beta=0.7288
+    12-bit/2557  K1=6   seed=9999     beta=0.7152
+    12-bit/2557  K1=8   seed=42       beta=0.7020
+    12-bit/2557  K1=6   seed=555      beta=0.6763
+    12-bit/2557  K1=6   seed=141421   beta=0.6680
+    12-bit/2557  K1=6   seed=1618033  beta=0.6606
+
+  beta | recovered  : n= 75  min=0.220 median=0.424  max=0.934
+  beta | failed     : n= 85  min=0.466 median=0.912  max=2.376
+  AUC (beta separates failure from success): 0.9611
+  best empirical threshold: beta* = 0.6768  (accuracy 90.0%)
+  majority baseline accuracy: 53.1%
+
+  --- per-curve breakdown at the empirical threshold ---
+  12-bit/2557: max beta among successes = 0.934, min beta among failures = 0.677
+  12-bit/2677: max beta among successes = 0.652, min beta among failures = 0.466
+
+==============================================================================
+done
+==============================================================================

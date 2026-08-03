@@ -1,0 +1,42 @@
+==============================================================================
+Thread 23 part 5 — secret-free proxy beta_hat for the Babai criterion
+==============================================================================
+
+collected 160 instances
+
+==============================================================================
+E11 — beta_hat (public) vs beta (secret) as predictors of recovery
+==============================================================================
+
+  beta      (secret-dependent)
+    recovered : n= 75 min=0.220 median=0.424 max=0.934
+    failed    : n= 85 min=0.466 median=0.912 max=2.376
+    AUC=0.9611   best threshold=0.6768 (accuracy 90.0%)
+    certified-success region: x < 0.4662  (45/75 of all successes)
+    certified-failure region: x > 0.9343  (40/85 of all failures)
+
+  beta_hat  (public)          
+    recovered : n= 75 min=0.198 median=0.353 max=0.634
+    failed    : n= 85 min=0.317 median=0.610 max=0.823
+    AUC=0.8032   best threshold=0.3580 (accuracy 75.6%)
+    certified-success region: x < 0.3168  (23/75 of all successes)
+    certified-failure region: x > 0.6335  (30/85 of all failures)
+
+  Pearson corr(beta, beta_hat) = 0.7328
+  mean ratio beta/beta_hat     = 1.4739
+
+  --- per-curve, per-K1 mean beta_hat vs success ---
+
+  12-bit/2557  m=8   lam*=0.3400
+    K1              2       3       4       6       8      12      16      24
+    beta_hat    0.353   0.454   0.516   0.581   0.610   0.634   0.663   0.783
+    wins        10/10   10/10   10/10    9/10    7/10    1/10    0/10    0/10
+
+  12-bit/2677  m=10   lam*=0.0699
+    K1              2       3       4       6       8      12      16      24
+    beta_hat    0.208   0.275   0.321   0.385   0.437   0.498   0.571   0.718
+    wins        10/10   10/10    8/10    0/10    0/10    0/10    0/10    0/10
+
+==============================================================================
+done
+==============================================================================

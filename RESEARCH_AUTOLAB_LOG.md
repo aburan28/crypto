@@ -6103,3 +6103,144 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 lattice so the planted vector can be λ₁.
+Explicitly proposed as the next step by the 2026-07-29 entry (log line ~6089). All six
+original priority threads remain CLOSED/BLOCKED (see 2026-07-19, log line ~5331), so the
+active-frontier rule applies.
+
+**Outcome: the Thread 23 falsifier resolves NEGATIVE — the reformulation does not move the
+wall.** But the four follow-on experiments it forced produced the best instance-level
+predictor this project has: β, AUC 0.961 (previous best ν̂, 0.935).
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals` → fpylll 0.6.4. `sympy` is
+  NOT installed here and `apt-get install pari-gp` failed — neither is needed for this
+  thread. Note for future runs: don't `import sympy` in Phase-2 scripts unless you install it.
+- Wrote 4 new scripts, each importing the previous (experiment blocks guarded behind
+  `if __name__ == "__main__"` so they are importable):
+  - `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (E1–E4)
+  - `secp256k1_cm_audit/glv_hnp_phase2_bdd.py` (E5–E7)
+  - `secp256k1_cm_audit/glv_hnp_phase2_babai.py` (E8–E9)
+  - `secp256k1_cm_audit/glv_hnp_phase2_beta_perseed.py` (E10)
+  - `secp256k1_cm_audit/glv_hnp_phase2_betahat.py` (E11)
+  All reuse `gen_signatures`/`scales` verbatim from `glv_hnp_phase2_20bit.py:262`, so the
+  comparison to 2026-07-26 / 2026-07-29 is exact. Outputs saved as `*_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (7.70s). ✓
+
+**The projection.** Since `ker(φ) = ⟨n·S_D·e_m⟩` exactly (n prime, all B_i ≠ 0), deleting
+column m is a lattice homomorphism `φ: L → Z^{2m+1}` with `det(φ(L)) = det(L)/(n·S_D)`.
+It is **lossless for the secret**: two preimages of φ(v_planted) differ by a multiple of
+n·S_D·e_m, i.e. d → d+n, so d mod n survives. It is recovered algebraically from the
+surviving coordinates: `k_full_0 = k1_0 + λ·k2_0 mod n`, then `d = (k_full_0 − A_0)·B_0⁻¹`,
+verified against all m signatures (`recover_d_projected`).
+
+### Findings
+
+**E1–E3 — the trivial vector was never the obstruction.** The K1 grids are identical:
+
+| curve | lattice | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 (m=8) | original | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 (m=8) | projected | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 (m=10) | original | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 (m=10) | projected | 5/5 | 5/5 | 4/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+sv/pv did rise as the falsifier asked (2677: 0.400 → **1.000**, i.e. the planted vector *is*
+now λ₁; 2557: 0.462 → 0.585), and the wall did not move — projection is if anything
+marginally *worse*. **So 2026-07-29's T5 was a true observation but a false diagnosis:
+recovery never required the planted vector to be λ₁, only that it appear among the LLL
+basis rows, which the trivial vector never prevented.**
+
+**E4 — the Gaussian heuristic under-predicts and is not calibrated across curves.**
+τ = E‖v_planted‖/λ₁^GH predicts the wall at K1=3 (2557, observed 12) and K1=4 (2677,
+observed 6). τ at the observed walls: **2.05 vs 1.35** — no common value.
+
+**E5 — the BDD-radius framing also fails, and fails loudly.**
+γ = ‖v_planted‖/λ₁(L′₀), where L′₀ = {v : last coord 0} is the Kannan-free sublattice:
+
+| curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | flip bracket |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 γ | 1.108 | 1.575 | 1.727 | 2.109 | 2.127 | 2.361 | 2.308 | 2.450 | (2.13, 2.31) |
+| 2677 γ | 0.621 | 0.705 | 0.864 | 1.060 | 1.308 | 1.844 | 2.157 | 2.653 | (0.71, 0.86) |
+
+Brackets a factor ~3 apart. Worse: 2557 recovers **5/5 at γ = 2.13**, far beyond the
+unique-decoding radius γ < 1/2 and even beyond γ = 1 — there exist noise vectors *shorter
+than the planted error* and recovery still succeeds. Recovery is not nearest-point decoding.
+
+**E6 — the wall survives m-control.** The 2026-07-29 T4 table compared 2557@m=8 against
+2677@m=10; that confound is now removed. Wall (first <5/5) for m ∈ {8,10,12,16}:
+2557 → K1=12,12,12,12;  2677 → K1=6,4,6,6. The λ*-linked difference is real and m-stable.
+
+**E7 — BKZ-40 does not move the wall** in the projected lattice either (only change across
+10 cells: 2677/K1=4, 4/5 → 5/5). Consistent with 2026-07-26 and 07-29.
+
+**E8 — more signatures soften the wall but saturate; they do not break it** (10 seeds):
+
+| curve | K1 | m=8 | 12 | 16 | 24 | 32 | 40 |
+|---|---|---|---|---|---|---|---|
+| 2557 | 8 | 7/10 | 10/10 | 10/10 | 10/10 | 10/10 | 10/10 |
+| 2557 | 12 | 1/10 | 4/10 | 7/10 | 9/10 | 8/10 | 8/10 |
+| 2557 | 16 | 0/10 | 1/10 | 3/10 | 2/10 | 2/10 | 2/10 |
+| 2677 | 4 | 6/10 | 8/10 | 9/10 | 9/10 | 10/10 | 9/10 |
+| 2677 | 6 | 0/10 | 1/10 | 1/10 | 3/10 | 3/10 | 1/10 |
+| 2677 | 8 | 0/10 | 0/10 | 0/10 | 1/10 | 0/10 | 1/10 |
+
+Quintupling m from 8 to 40 never converts a hard-failing K1 into a reliable one. This
+generalises T4b (which tested m-variation only at 2677/K1=8) to both curves and m ≤ 40.
+
+**E9/E10 — the right criterion is the GS PROFILE, not any norm.**
+Mechanism: the Kannan column forces exactly one LLL basis vector into the target coset;
+LLL size-reduces it against L′₀. That succeeds when Babai nearest-plane returns the planted
+representative, i.e. when `β = max_i |⟨v_planted, b*_i⟩| / ‖b*_i‖² < 1/2` over the
+BKZ-30-reduced basis of L′₀. Tested **per instance** (160 instances = 2 curves × 8 K1 × 10
+seeds — seed-averaging β is the wrong comparison, since Babai is a per-instance statement):
+
+```
+beta <  0.5 :  51 instances, 50 recovered  (98.0%)
+beta >= 0.5 : 109 instances, 25 recovered  (22.9%)
+recovered : n=75  min=0.220  median=0.424  max=0.934
+failed    : n=85  min=0.466  median=0.912  max=2.376
+AUC = 0.9611     best empirical threshold beta* = 0.677 (accuracy 90.0%, baseline 53.1%)
+```
+Two-sided certified brackets over the whole dataset: **β < 0.466 → 50/50 recovered;
+β > 0.934 → 0/40 recovered.** Exactly one sufficiency violation (2677, K1=4, seed 1618033,
+β=0.4662). This beats ν̂ (AUC 0.935, 2026-07-29) and is the first *instance-level* — rather
+than curve-level — predictor found. It is consistent with the 2026-07-29 consequence that
+no curve-level invariant can separate C1 from C2: β varies seed-to-seed at fixed (curve,K1).
+
+**E11 — the isotropic secret-free proxy loses most of the signal.**
+β̂ = E‖v_planted‖/(√D·min_i‖b*_i‖) < 1/2 uses only public data (K1, K2, scales, GS profile):
+
+```
+beta_hat: AUC = 0.8032   best threshold 0.358 (accuracy 75.6%)
+corr(beta, beta_hat) = 0.7328,  mean beta/beta_hat = 1.474
+```
+And β̂ is *anti-aligned across curves* — 2557 wins 7/10 at β̂=0.610 while 2677 wins 0/10 at
+β̂=0.385 — so it cannot carry a single threshold. **Interpretation: β measures the
+ALIGNMENT between the planted error and the GS directions, not its size; the isotropic
+approximation averages exactly that away.** This is where λ* enters — λ sets the alignment
+between the planted vector's k1/k2 block structure and the GS basis of L′₀ — which
+reconciles the 2026-07-29 pair of results: λ* is not a threshold (T3) yet does shift the
+wall (T4). Every norm-only statistic tried to date (τ, γ, β̂, ν̂, and the six curve-level
+invariants at log lines ~3560–3580) fails for the same reason.
+
+### Next step proposal
+**Thread 24 — a secret-free ALIGNMENT proxy.** β̂ failed because it assumes isotropy. Build
+a proxy from the block structure that is already public: for each b*_i of the reduced L′₀
+basis, compute its energy split (e_k1, e_k2, e_kan) across the k1-block / k2-block / Kannan
+coordinate, and form `β̃ = max_i (σ_k1·√e_k1 + σ_k2·√e_k2)/‖b*_i‖` with σ_k1 = K1·S_K1/√12,
+σ_k2 = K2·S_K2/√12 the public per-coordinate spreads. Falsifier: if β̃ reaches AUC ≥ 0.93 on
+the same 160-instance dataset it is a genuine attack-usable predictor (decide whether an
+instance is worth reducing before reducing it); if it stays near β̂'s 0.80, then the
+alignment is irreducibly secret-dependent and Phase 2 has no public instance selector.
+Cheap — the GS profiles are already computed in `glv_hnp_phase2_betahat.py:instance`.
+
+Secondary: re-run E10 on 3–5 *fresh* 17-bit curves to check the β<0.466 / β>0.934 certified
+brackets are not specific to these two 12-bit curves.
+
+### Commits made
+See next git hash after this entry.
