@@ -6103,3 +6103,162 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-03 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposed by the 2026-07-29 entry (log line 6089). Priorities 1, 3, 4, 6 are
+CLOSED; priority 2 is BLOCKED (F_p Rosenhain cubic-residue obstruction, 2026-07-26);
+priority 5 made measurable progress on 2026-07-29, so protocol rule (b) applies.
+
+Both reformulations named there were implemented, plus the falsifier the entry specified.
+**Outcome: Thread 23 is answered negatively, and this run's own ceiling conjecture is
+falsified by its own data.** Details below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0. (Same note as 2026-07-29: cysignals is a separate
+  runtime import, not pulled in by fpylll alone.)
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_projected.py` (5 experiments U1–U5),
+  reusing `build_glv_lattice`, `scales`, `gen_signatures` verbatim from
+  `glv_hnp_phase2_20bit.py:262` so the comparison to 2026-06-15 / 07-26 / 07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_thread23_projected_output.txt` (110 lines).
+- Three lattice variants implemented:
+  - **A** baseline, `L`, dim 2m+2, Kannan embedding (unchanged).
+  - **B** proposal (a): `π_{e_m}(L)` — delete the d-column. Rank 2m+1; the generating set
+    has 2m+2 rows with one dependency (`n·row_m − Σ B_i·row_i = 0`), which fplll's LLL
+    handles by emitting a zero row. d is no longer a coordinate; it is recovered
+    arithmetically as `d = B_0^{-1}(k1_0 + λ·k2_0 − A_0) mod n`.
+  - **D** proposal (b): explicit CVP, Babai nearest-plane (exact `Fraction` GS) on the
+    projected congruence lattice, no Kannan row, rank 2m.
+- U1 verifies the planted vector really is in `L_B` by explicit integer combination
+  (True on all 3 historical curves), and that the variant-D readout recovers d when
+  handed an *exact* CVP answer.
+- **Bug found and fixed mid-run in variant D**: Babai's error is `tgt − cv = −(k1_i·S_K1,
+  k2_i·S_K2)`, i.e. negated. The first pass read it unnegated and scored D at 0/5
+  everywhere, which would have been reported as "proposal (b) is strictly dominated".
+  After the fix D matches A/B almost exactly. Recorded because the wrong version was
+  briefly convincing.
+- `cargo test --test curve_audit` → 5/5 pass (7.17s). ✓
+
+### Findings
+
+**U2 — the falsifier fires: the K1 wall does NOT move. `A ≡ B` bit-for-bit.**
+The 2026-07-29 T4 grid, re-run for all three variants (5 seeds/cell):
+
+12-bit/2557 (n=2659, λ*=0.340, K2=52, m=8):
+
+| K1 | 1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| eff | .020 | .039 | .059 | .078 | .117 | .156 | .235 | .313 | .469 |
+| A | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| B | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| D | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 |
+
+12-bit/2677 (n=2647, λ*=0.070, K2=52, m=10):
+
+| K1 | 1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| A | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| B | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| D | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 1/5 | 0/5 |
+
+A and B agree in **every one of the 138 pooled trials** of U2+U3+U5, not just in the
+aggregate. Removing the trivial vector `n·S_D·e_m` changes nothing at all.
+
+**Consequence — the 2026-07-29 T5 diagnosis was a correct observation but a wrong causal
+claim.** The planted vector is indeed never λ₁ (confirmed again in U1: sv/pv = 0.42–0.60
+in variant A). But that is not why recovery fails, and it is not even necessary for
+recovery: in variant B at 12-bit/2557, K1=6 and K1=8 both recover 5/5 while sv/pv = 0.475,
+i.e. LLL returns a *basis row* that is twice as long as λ₁ and the readout still works.
+Recovery is a "does the planted vector survive as a reduced basis row" event, not an SVP
+event and not a λ₁ event. **Thread 23 is CLOSED (negative).**
+
+**U3 — Gaussian-heuristic predictor.** With rank r = 2m+1 and
+`det L_B = (n·S_K1)^m · S_K2^m · S_KANNAN / n` (= det L / (n·S_D), S_D=1), define
+α = E‖v_planted‖ / GH(L_B). Closed form: α < 1 ⟺ `n·eff^m < C(m)^(2m+1)` with
+`C(m) = sqrt((2m+1) / (2πe·(2m/3+1)))`, giving
+
+    eff_ceiling(m, n) = C(m)^((2m+1)/m) · n^(−1/m),   sup_m = 3/(2πe) = 0.1756.
+
+17-bit sweep, 8 fresh curves, m=12, 5 seeds:
+
+| eff | α | curves 5/5 (B) | trials (B) | trials (A) |
+|---|---|---|---|---|
+| 0.05 | 0.925 | 8/8 | 40/40 | 40/40 |
+| 0.10 | 1.281 | 3/8 | 18/40 | 18/40 |
+| 0.15 | 1.551 | 2/8 | 11/40 | 11/40 |
+| 0.20 | 1.783 | 1/8 | 9/40 | 9/40 |
+| 0.25 | 1.989 | 0/8 | 6/40 | 6/40 |
+
+**U5 — the 0.1756 ceiling is FALSIFIED as a hard cap, by this run's own data.**
+m swept at fixed eff on 5 of the 17-bit curves (3 seeds; m* = smallest m with α<1):
+
+| eff | m* | m=12 | m=24 | m=36 | m=48 |
+|---|---|---|---|---|---|
+| 0.100 | 25 | 6/15 | 11/15 | 10/15 | 9/15 |
+| 0.125 | 41 | 5/15 | 8/15 | 6/15 | 5/15 |
+| 0.150 | 87 | 4/15 | 5/15 | 5/15 | 4/15 |
+| 0.200 | >cap | 2/15 | 4/15 | 3/15 | 4/15 |
+
+Two things break the ceiling story. (i) eff=0.200 is above the asymptotic cap, yet still
+recovers 4/15 at m=48 — no m should ever work there. (ii) success is **not monotone in m**:
+at eff=0.10 it peaks at m=24 and *declines* through m=36 and m=48. More signatures do not
+monotonically help, which no density argument predicts.
+
+**The per-curve breakdown says why — ν̂ dominates, and it is curve-level, not eff-level:**
+
+| n | λ* | ν̂ | eff=0.10 | 0.125 | 0.15 | 0.20 |
+|---|---|---|---|---|---|---|
+| 65287 | 0.335 | **0.323** | 12/12 | 12/12 | 12/12 | **11/12** |
+| 65053 | 0.388 | 0.675 | 6/12 | 5/12 | 5/12 | 2/12 |
+| 65119 | 0.358 | 0.881 | 3/12 | 3/12 | 0/12 | 0/12 |
+| 66109 | 0.410 | 0.894 | 8/12 | 3/12 | 0/12 | 0/12 |
+| 65719 | 0.027 | 0.975 | 7/12 | 1/12 | 1/12 | 0/12 |
+
+n=65287 recovers essentially always, at every eff tested including 0.20; the ν̂≈0.9 curves
+fail almost everywhere. The "eff ceiling" is real per curve but its location is set by ν̂,
+not by the density of the lattice. α is a *statement about the average curve* and is the
+wrong object.
+
+**U4 — predictor scores, pooled 138 trials (eff 0.02–0.47, m 8–48, n 8–17 bits):**
+
+| predictor | AUC |
+|---|---|
+| α = ‖v‖/GH(L_B) | 0.716 |
+| eff = K1·K2/n | 0.769 |
+| **ν̂ = λ₁(L2)/√(det L2)** | **0.854** |
+| α·√ν̂ (combined) | **0.898** |
+
+α<1 as a hard rule: 101/138 correct (73.2%), with 14 false positives and 23 false
+negatives — so α<1 is neither necessary nor sufficient. (An earlier 56-trial subset of
+this run had 0 false positives; that did not survive the extension to m=24–48, where
+α<1 curves with high ν̂ fail. Reported here as the corrected number.)
+
+**Independent replication of the 2026-07-29 ν̂ result.** That run measured AUC 0.935 on a
+design that held eff fixed and balanced λ*. Here ν̂ scores 0.854 on a grid built for a
+completely different purpose, with eff varying by a factor of 20 and m by a factor of 6.
+This is the first invariant in this thread to survive an out-of-design replication — the
+prior eight (λ/n, λ*, ρ, δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n) all failed.
+
+**ν̂ is not a proxy for λ*.** n=65719 has the most extreme λ* in the sample (0.027) but
+ν̂=0.975 and fails; n=65287 has an unremarkable λ*=0.335 but ν̂=0.323 and always wins.
+Confirms the 2026-07-29 λ* falsification from an independent direction.
+
+### Next step proposal
+**Thread 24 — is ν̂ causal or correlational? Force it.**
+ν̂ is a deterministic function of (n, λ, S_K1, S_K2), and S_K1, S_K2 are *our* choices, not
+the curve's. So ν̂ can be moved without changing the curve at all: perturb S_K1 → c·S_K1
+(any c ≥ 1 keeps the lattice integral and only rescales one column block). Falsifier: take
+the ν̂=0.975 curve n=65719 at eff=0.125 (currently 1/12) and search c over a small grid for
+one that drops ν̂ below 0.4; if recovery jumps to ≳10/12 at the *same* eff and m, ν̂ is
+causal and Phase 2 has a free tuning knob that no prior session has used. If recovery does
+not move, ν̂ is a correlate of something else in the curve and the search continues.
+Cheap: one Lagrange-Gauss reduction per candidate c, then the existing U5 grid. ~10 min.
+
+Secondary, if Thread 24 confirms causality: re-run the 20-bit and 12-bit failure curves
+with ν̂-optimised scaling and check whether the K1 wall in U2 finally moves — that would be
+the first genuine improvement to Phase 2 since 2026-06-15.
+
+### Commits made

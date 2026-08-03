@@ -271,3 +271,57 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Status of the open questions (updated 2026-08-03)
+
+### 10.1 Lattice formulation is settled — all three are equivalent
+
+Three formulations of the Phase-2 lattice have now been measured head to head
+(`secp256k1_cm_audit/glv_hnp_thread23_projected.py`, 138 trials):
+
+- **A** the original dim-`2m+2` Kannan embedding (`glv_hnp_phase2_20bit.py:262`);
+- **B** its projection `π_{e_m}(L)` along the trivial vector `n·S_D·e_m`, rank `2m+1`,
+  with `d` recovered as `B_0^{-1}(k1_0 + λ·k2_0 − A_0) mod n`;
+- **D** explicit CVP (Babai nearest-plane) on the projected congruence lattice, rank `2m`.
+
+A and B agree in **every** trial; D agrees except for a small deficit at the margin. The
+trivial short vector identified on 2026-07-29 is therefore not the obstruction, and
+recovery is not an SVP event: at `n=2659, K1=8, m=8` the attack succeeds 5/5 while the
+planted vector is only `0.475·‖λ₁‖`. Recovery is the event that the planted vector
+survives as a row of the LLL-reduced basis.
+
+### 10.2 The information-theoretic question (§8, first bullet)
+
+Partially answered. The density condition for the projected lattice is
+
+    α = E‖v_planted‖ / GH(L_B) < 1
+      ⟺ n·eff^m < C(m)^(2m+1),   C(m) = sqrt((2m+1) / (2πe·(2m/3+1))),
+    eff = K1·K2/n,   eff_ceiling(m,n) = C(m)^((2m+1)/m) · n^(−1/m),
+    sup_m eff_ceiling = 3/(2πe) = 0.1756.
+
+Empirically α is only a weak predictor (AUC 0.716) and the 0.1756 cap is **not** a hard
+wall: a curve with `ν̂ = 0.323` recovers 11/12 at `eff = 0.200`. So Phase 2 does not sit at
+the information-theoretic bound; the binding constraint is curve-level, not density-level.
+
+### 10.3 The binding constraint is `ν̂`
+
+    L2 = ⟨ (n·S_K1, 0), (−λ·S_K1, S_K2) ⟩,   ν̂ = λ₁(L2) / sqrt(det L2)
+
+Low `ν̂` ⇒ recovery. AUC 0.854 pooled over eff ∈ [0.02, 0.47], m ∈ [8, 48], n ∈ [8, 17]
+bits — the first invariant in this thread to replicate outside the design it was found in
+(2026-07-29, AUC 0.935). Combined with the density term, `α·√ν̂` reaches AUC 0.898.
+
+`ν̂` is *not* a proxy for `λ* = min(λ, n−λ)/n`: `n=65719` has `λ*=0.027` (extreme) but
+`ν̂=0.975` and fails, while `n=65287` has `λ*=0.335` (unremarkable) and `ν̂=0.323` and
+always succeeds.
+
+**Open (Thread 24):** `ν̂` depends on `S_K1` and `S_K2`, which are chosen by the attacker,
+not fixed by the curve. If `ν̂` is causal rather than correlational, rescaling one column
+block is a free tuning knob. Falsifier and protocol in `RESEARCH_AUTOLAB_LOG.md`
+(2026-08-03, "Next step proposal").
+
+### 10.4 The LLL-degeneracy question (§8, third bullet)
+
+Does not apply: Threads 1 and 4 closed the degeneracy issue for 256/384/521-bit curves
+(`RESEARCH_LLL_GS_ANALYSIS.md` §10.3–10.5), and the Phase-2 experiments here run in exact
+integer arithmetic via fplll, so no floating-point GS path is involved.
