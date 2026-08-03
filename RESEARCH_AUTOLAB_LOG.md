@@ -6295,4 +6295,4 @@ no `.gp` script was exercised. Threads 2/3 (CHLRS, Howe gluing) stay parked.
 
 ### Commits made
 
-(recorded below after commit)
+8988040 autolab 2026-08-03: Thread 23 — Phase-2 wall is the GH uSVP boundary eff* = 3/(2*pi*e)
