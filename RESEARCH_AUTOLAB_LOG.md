@@ -6371,7 +6371,7 @@ mechanism is now known to be scale-dependent, which explains all eight.
 
 ### Commits made
 
-(hash recorded in the following commit)
+e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
 
 ## 2026-08-03 (autolab run)
 
@@ -6583,4 +6583,4 @@ function of eff, not as the constant 0.645.**
 failed; a ninth will fail for the same reason.
 
 ### Commits made
-(hash recorded in the following commit)
+0e3db5d autolab 2026-08-03: Thread 23a — exact CF closed form for lambda_1(L2); nu_hat is O(log n)
