@@ -6278,4 +6278,4 @@ mounting at all — the first constructive output of the Phase-2 line.
 
 ### Commits made
 
-(recorded below after commit)
+`d9a2822` autolab 2026-08-03: Thread 23 CLOSED negative — projection is a no-op; λ₁(P) is closed-form
