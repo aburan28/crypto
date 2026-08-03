@@ -6262,3 +6262,4 @@ with ν̂-optimised scaling and check whether the K1 wall in U2 finally moves �
 the first genuine improvement to Phase 2 since 2026-06-15.
 
 ### Commits made
+50574f7 autolab 2026-08-03: Thread 23 CLOSED (negative) — projection is a no-op; nu_hat replicates out-of-design
