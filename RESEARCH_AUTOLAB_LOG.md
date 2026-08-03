@@ -6520,4 +6520,4 @@ head-to-heads exact.
 
 ### Commits made
 
-(hashes recorded in the following commit)
+8b8ede1 autolab 2026-08-03: Thread 23 CLOSED — d-free lattice is a projection of the original; K1 wall is information-theoretic
