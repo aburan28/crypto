@@ -1,0 +1,157 @@
+==============================================================================
+Thread 23 — d-free reformulation of the GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: is the d-free construction correct?
+------------------------------------------------------------------------------
+For each curve: (a) the planted vector must lie IN the d-free lattice,
+(b) d must be recoverable from it through the pivot, (c) the lattice
+must contain no vector of norm ~n (the defect of the original).
+
+curve                m  K1  planted in L  d via pivot  min triv/n
+8-bit/199            6   2          True         True       1.396
+12-bit/2557          8   8          True         True       1.030
+12-bit/2677 FAIL    10   8          True         True       1.925
+
+  E1 verdict: PASS (planted vector in lattice AND d recoverable, all curves)
+  'min triv/n' is the shortest vector of the homogeneous sublattice,
+  in units of n.  The ORIGINAL lattice has this = 1.000 exactly on
+  every curve (log 2026-07-29 T5).  Anything > sqrt(2m/3+1) means the
+  planted vector can be lambda_1.
+
+------------------------------------------------------------------------------
+EXP E2: sv/pv (shortest reduced vector / planted norm), old vs d-free
+------------------------------------------------------------------------------
+Falsifier part 1: sv/pv must rise above 1 in the d-free lattice.
+
+curve                m  K1  old sv/pv     old  dfree sv/pv   dfree
+8-bit/199            6   2      0.543 5/5            0.790 5/5    
+12-bit/2557          8   8      0.445 5/5            0.475 5/5    
+12-bit/2677 FAIL    10   8      0.387 0/5            0.767 0/5    
+
+------------------------------------------------------------------------------
+EXP E3: K1 wall replication (2026-07-29 T4), old vs d-free
+------------------------------------------------------------------------------
+Falsifier part 2: on 12-bit/2677 (lam*=0.070) the old wall is K1 ~ 4-6.
+If the d-free wall moves outward, the reformulation is a real gain;
+if it stays, the wall is information-theoretic.
+
+  12-bit/2557  (lam*=0.340, m=8)
+    variant      2     3     4     6     8    12    16    24
+    orig       5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+    dfree      5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+
+  12-bit/2677 FAIL  (lam*=0.070, m=10)
+    variant      2     3     4     6     8    12    16    24
+    orig       5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+    dfree      5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP E4: 17-bit multi-curve head-to-head at three bias strengths
+------------------------------------------------------------------------------
+  found 20 17-bit j=0 GLV curves (lam* in [0.0068, 0.4913])
+
+   eff   orig 5/5   dfree 5/5  orig sv/pv  dfree sv/pv
+  0.05   19/20       19/20          0.359        0.936
+  0.15    3/20        3/20          0.356        0.669
+  0.25    0/20        0/20          0.354        0.530
+
+  per-curve detail (eff, n, lam*, K1, orig wins, dfree wins):
+    0.05  n=65719   lam*=0.0273  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65269   lam*=0.0068  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->0.63
+    0.05  n=66499   lam*=0.0539  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=66457   lam*=0.0990  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->0.97
+    0.05  n=65203   lam*=0.1372  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=66463   lam*=0.1145  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=66751   lam*=0.1559  K1=12   orig=4/5  dfree=4/5  sv/pv 0.36->1.03
+    0.05  n=67939   lam*=0.1847  K1=13   orig=5/5  dfree=5/5  sv/pv 0.35->1.00
+    0.05  n=66037   lam*=0.2115  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65647   lam*=0.2253  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=66301   lam*=0.2976  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65437   lam*=0.2892  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65287   lam*=0.3346  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->0.38
+    0.05  n=65899   lam*=0.3184  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->0.78
+    0.05  n=65053   lam*=0.3877  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65119   lam*=0.3581  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=66109   lam*=0.4096  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=65173   lam*=0.4144  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.05  n=67369   lam*=0.4816  K1=12   orig=5/5  dfree=5/5  sv/pv 0.36->0.91
+    0.05  n=69259   lam*=0.4913  K1=13   orig=5/5  dfree=5/5  sv/pv 0.36->1.00
+    0.15  n=65719   lam*=0.0273  K1=38   orig=1/5  dfree=1/5  sv/pv 0.37->0.78
+    0.15  n=65269   lam*=0.0068  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.61
+    0.15  n=66499   lam*=0.0539  K1=38   orig=0/5  dfree=0/5  sv/pv 0.36->0.70
+    0.15  n=66457   lam*=0.0990  K1=38   orig=0/5  dfree=0/5  sv/pv 0.36->0.79
+    0.15  n=65203   lam*=0.1372  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.57
+    0.15  n=66463   lam*=0.1145  K1=38   orig=2/5  dfree=2/5  sv/pv 0.36->0.73
+    0.15  n=66751   lam*=0.1559  K1=38   orig=0/5  dfree=0/5  sv/pv 0.36->0.79
+    0.15  n=67939   lam*=0.1847  K1=39   orig=0/5  dfree=0/5  sv/pv 0.35->0.73
+    0.15  n=66037   lam*=0.2115  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.59
+    0.15  n=65647   lam*=0.2253  K1=38   orig=0/5  dfree=0/5  sv/pv 0.37->0.85
+    0.15  n=66301   lam*=0.2976  K1=38   orig=0/5  dfree=0/5  sv/pv 0.36->0.77
+    0.15  n=65437   lam*=0.2892  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.74
+    0.15  n=65287   lam*=0.3346  K1=38   orig=5/5  dfree=5/5  sv/pv 0.35->0.36
+    0.15  n=65899   lam*=0.3184  K1=38   orig=5/5  dfree=5/5  sv/pv 0.37->0.45
+    0.15  n=65053   lam*=0.3877  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.55
+    0.15  n=65119   lam*=0.3581  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.69
+    0.15  n=66109   lam*=0.4096  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.76
+    0.15  n=65173   lam*=0.4144  K1=38   orig=0/5  dfree=0/5  sv/pv 0.35->0.78
+    0.15  n=67369   lam*=0.4816  K1=38   orig=5/5  dfree=5/5  sv/pv 0.36->0.47
+    0.15  n=69259   lam*=0.4913  K1=39   orig=3/5  dfree=3/5  sv/pv 0.36->0.67
+    0.25  n=65719   lam*=0.0273  K1=63   orig=0/5  dfree=0/5  sv/pv 0.34->0.56
+    0.25  n=65269   lam*=0.0068  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.60
+    0.25  n=66499   lam*=0.0539  K1=64   orig=0/5  dfree=0/5  sv/pv 0.36->0.61
+    0.25  n=66457   lam*=0.0990  K1=64   orig=0/5  dfree=0/5  sv/pv 0.36->0.61
+    0.25  n=65203   lam*=0.1372  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.43
+    0.25  n=66463   lam*=0.1145  K1=64   orig=0/5  dfree=0/5  sv/pv 0.36->0.60
+    0.25  n=66751   lam*=0.1559  K1=64   orig=0/5  dfree=0/5  sv/pv 0.36->0.60
+    0.25  n=67939   lam*=0.1847  K1=65   orig=0/5  dfree=0/5  sv/pv 0.36->0.55
+    0.25  n=66037   lam*=0.2115  K1=64   orig=0/5  dfree=0/5  sv/pv 0.35->0.43
+    0.25  n=65647   lam*=0.2253  K1=63   orig=0/5  dfree=0/5  sv/pv 0.34->0.57
+    0.25  n=66301   lam*=0.2976  K1=64   orig=0/5  dfree=0/5  sv/pv 0.36->0.56
+    0.25  n=65437   lam*=0.2892  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.60
+    0.25  n=65287   lam*=0.3346  K1=63   orig=1/5  dfree=1/5  sv/pv 0.35->0.36
+    0.25  n=65899   lam*=0.3184  K1=64   orig=3/5  dfree=3/5  sv/pv 0.36->0.41
+    0.25  n=65053   lam*=0.3877  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.42
+    0.25  n=65119   lam*=0.3581  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.48
+    0.25  n=66109   lam*=0.4096  K1=64   orig=0/5  dfree=0/5  sv/pv 0.35->0.64
+    0.25  n=65173   lam*=0.4144  K1=63   orig=0/5  dfree=0/5  sv/pv 0.35->0.62
+    0.25  n=67369   lam*=0.4816  K1=64   orig=3/5  dfree=3/5  sv/pv 0.36->0.42
+    0.25  n=69259   lam*=0.4913  K1=65   orig=2/5  dfree=2/5  sv/pv 0.36->0.52
+
+------------------------------------------------------------------------------
+EXP E5: do the two lattices agree instance-by-instance, not just in rate?
+------------------------------------------------------------------------------
+E3/E4 report identical win COUNTS in every cell.  That is consistent
+with two different attacks of equal strength.  Here we check the
+stronger claim: the SAME (curve, seed) instances succeed in both.
+Also runs a BKZ(20) arm to see whether the d-free geometry lets a
+stronger reduction convert instances that LLL misses.
+
+  LLL      instances=300   both=129   orig-only=0    dfree-only=0    neither=171   disagreements=0
+  BKZ(20)  instances=300   both=129   orig-only=0    dfree-only=0    neither=171   disagreements=0
+
+------------------------------------------------------------------------------
+EXP E6: is L_dfree exactly the quotient L_orig / <n*S_D*e_m> ?
+------------------------------------------------------------------------------
+Prediction from the construction:
+    det(L_orig) = (n*S_K1)^m * S_D * S_K2^m * S_KAN
+    det(L_free) = (n*S_K1)^(m-1) * S_K1 * S_K2^m * S_KAN
+  => det(L_orig)/det(L_free) = n*S_D = ||trivial vector|| exactly,
+  and dim drops by exactly 1.  If so the two lattices have the SAME
+  geometry once the trivial direction is projected out, which would
+  explain E5's 0/300 disagreements structurally rather than by luck.
+
+curve                dim o/f  det ratio  pi(L_o) subset L_f  L_f subset pi(L_o)
+8-bit/199            14/13         True                True                True
+12-bit/2557          18/17         True                True                True
+12-bit/2677 FAIL     22/21         True                True                True
+
+  E6 verdict: PASS — L_free = pi(L_orig) EXACTLY.
+  The d-free lattice is not a new lattice: it is the original with the
+  trivial direction n*S_D*e_m projected out.  Recovery is therefore the
+  same BDD problem in both, which explains E5's 0/300 disagreements
+  structurally.  The d-column costs LLL one wasted dimension and nothing
+  else; removing it cannot move the wall.
+
+Done.
