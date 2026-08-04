@@ -6298,4 +6298,4 @@ recorded `.expected.txt` output; a future run should patch both together.
 
 ### Commits made
 
-(recorded below)
+`4905259` autolab 2026-08-04: Thread 23 — reformulation does not move the wall (120/120 identical); closed form gamma_gh for the eff barrier; eff* = 0.1756 soft ceiling
