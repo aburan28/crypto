@@ -1,0 +1,62 @@
+==============================================================================
+Thread 23 part 2 -- the eff wall (F / G / H)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP F -- harness cross-check against glv_hnp_phase2_lambda_threshold.py
+------------------------------------------------------------------------------
+Runs the ORIGINAL 2026-07-29 module's own success_rate() on the T4 grid.
+If it agrees with Part 1's Exp A, the logged T4 table is what differs.
+
+curve          source                       K1=2   K1=3   K1=4   K1=6   K1=8  K1=12  K1=16  K1=24
+12-bit/2557    ORIGINAL module, LLL            5      5      5      5      5      1      0      0
+12-bit/2557    ORIGINAL module, BKZ(20)        5      5      5      5      5      1      0      0
+12-bit/2557    logged T4 table (07-29)         5      5      5      5      5      4      1      0
+12-bit/2557    agrees with logged?        LLL=False  BKZ20=False
+
+12-bit/2677    ORIGINAL module, LLL            5      5      5      0      0      0      0      0
+12-bit/2677    ORIGINAL module, BKZ(20)        5      5      5      1      0      0      0      0
+12-bit/2677    logged T4 table (07-29)         5      5      5      2      0      0      0      0
+12-bit/2677    agrees with logged?        LLL=False  BKZ20=False
+
+------------------------------------------------------------------------------
+EXP G -- is the eff wall at the same eff for every n?
+------------------------------------------------------------------------------
+Part 1 bracketed the 12-bit wall to eff in (0.079, 0.118), m-independent
+out to m=48.  Sweep eff THROUGH that band on three curve sizes.
+
+12-bit  p=2677 n=2647 (12b) lam*=0.070 K2=52  (Babai d)
+    m |         eff~0.04 |         eff~0.06 |         eff~0.08 |         eff~0.10 |         eff~0.12 |         eff~0.16 |         eff~0.24
+   12 | K1=2 555 e=0.039 | K1=3 554 e=0.059 | K1=4 554 e=0.079 | K1=5 220 e=0.098 | K1=6 221 e=0.118 | K1=8 000 e=0.157 | K1=12 000 e=0.236
+   24 | K1=2 555 e=0.039 | K1=3 555 e=0.059 | K1=4 444 e=0.079 | K1=5 110 e=0.098 | K1=6 111 e=0.118 | K1=8 000 e=0.157 | K1=12 000 e=0.236
+  (cell = K1, then F0/F1/F2 wins out of 5, then realised eff)
+
+17-bit  p=65539 n=65287 (16b) lam*=0.335 K2=256  (Babai d)
+    m |         eff~0.04 |         eff~0.06 |         eff~0.08 |         eff~0.10 |         eff~0.12 |         eff~0.16 |         eff~0.24
+   12 | K1=10 555 e=0.039 | K1=15 555 e=0.059 | K1=20 555 e=0.078 | K1=26 555 e=0.102 | K1=31 554 e=0.122 | K1=41 554 e=0.161 | K1=61 221 e=0.239
+   24 | K1=10 555 e=0.039 | K1=15 555 e=0.059 | K1=20 555 e=0.078 | K1=26 555 e=0.102 | K1=31 555 e=0.122 | K1=41 555 e=0.161 | K1=61 553 e=0.239
+  (cell = K1, then F0/F1/F2 wins out of 5, then realised eff)
+
+20-bit  p=524341 n=525583 (20b) lam*=0.160 K2=725  (Babai mpfr)
+    m |         eff~0.04 |         eff~0.06 |         eff~0.08 |         eff~0.10 |         eff~0.12 |         eff~0.16 |         eff~0.24
+   12 | K1=29 555 e=0.040 | K1=43 555 e=0.059 | K1=58 554 e=0.080 | K1=72 553 e=0.099 | K1=87 110 e=0.120 | K1=116 000 e=0.160 | K1=174 000 e=0.240
+   24 | K1=29 555 e=0.040 | K1=43 555 e=0.059 | K1=58 555 e=0.080 | K1=72 555 e=0.099 | K1=87 554 e=0.120 | K1=116 331 e=0.160 | K1=174 000 e=0.240
+  (cell = K1, then F0/F1/F2 wins out of 5, then realised eff)
+
+------------------------------------------------------------------------------
+EXP H -- does stronger reduction move the wall, once the parasite is gone?
+------------------------------------------------------------------------------
+12-bit/2677, m=12, K1 across the wall.  LLL vs BKZ(20) vs BKZ(40),
+on F0 (parasite present) and F1 (parasite removed).
+
+    K1     eff |      F0/0     F0/20     F0/40      F1/0     F1/20     F1/40
+     4  0.0786 |         5         5         5         5         5         5
+     5  0.0982 |         2         5         5         2         5         5
+     6  0.1179 |         2         3         3         2         3         3
+     7  0.1375 |         1         1         1         1         1         1
+     8  0.1572 |         0         0         0         0         0         0
+    10  0.1964 |         0         0         0         0         0         0
+    12  0.2357 |         0         0         0         0         0         0
+  (columns: formulation / BKZ block size; 0 = plain LLL; wins out of 5)
+
+Done.
