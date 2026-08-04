@@ -6253,6 +6253,22 @@ Housekeeping for future runs: when a run rewrites a helper module, later merges
 can silently drop it. Check that every script in `secp256k1_cm_audit/` still
 imports before trusting a prior run's numbers.
 
+### Housekeeping done this run
+Ran that check over all 34 `secp256k1_cm_audit/*.py`. Two defects, both fixed:
+
+1. The three nu_hat scripts (dead since merge `6fd645f`) — see above.
+2. `glv_hnp_target_vector.py` was committed with literal `\n` two-character
+   escapes instead of real newlines: the whole 393-line file was **one line**
+   and had never been syntactically valid Python. Repaired by unescaping `\\`
+   and `\n` (the only two sequences present; 393 and 8 occurrences). It now
+   parses and runs, reproducing the exact PAIR-1 curves the 2026-06-28 entry
+   describes (p=524743/n=523597 lam/n=0.2114 delta/n=0.3659, and
+   p=525043/n=524269 lam/n=0.2122 delta/n=0.3635) — so the 06-28 numbers were
+   real; only the committed artifact was corrupt. Note it needs `numpy`, which
+   is not in the base image.
+
+All 34 scripts now parse; the four nu_hat-chain scripts import cleanly.
+
 ### Commits made
 
 8c94a75 autolab 2026-08-04: restore lost nu_hat module; closed form nu_hat = F(tau, theta); C2 ceiling is per-(eff,m)

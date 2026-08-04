@@ -1,1 +1,393 @@
-"""\nGLV-HNP Phase 2: Target-vector length + spurious-vector analysis for PAIR 1.\n\nFrom 2026-06-23: κ(M) hypothesis falsified. The discriminating property between\ndiscordant PAIR 1 curves (same λ/n≈0.20, opposite LLL outcomes) is UNKNOWN.\n\nToday's two sub-experiments for PAIR 1:\n  FAIL  curve: p=524743, n=523597 (lam/n=0.2114, δ/n=0.366)\n  SUCCEED curve: p=525043, n=524269 (lam/n=0.2122, δ/n=0.364)\n\nExp A — Target vector norm:\n  Compute ‖v_target‖ for K1=72, m=12, seeds=[0xDEAD, 0xBEEF, 0xCAFE].\n  If ‖v_fail‖ >> ‖v_succeed‖, obstruction is a size mismatch.\n\nExp B — Spurious-vector check:\n  Run LLL at m=12, inspect ALL rows of reduced basis.\n  Count rows with |last_col| == S_KANNAN (Kannan-embedded rows).\n  If failing curve has 0 such rows, the solution was never found.\n  If it has rows but none match d, there are spurious Kannan vectors.\n"""\n\nimport math\nimport random\nimport sympy\nimport numpy as np\nfrom fpylll import IntegerMatrix, LLL\n\n# ---------------------------------------------------------------------------\n# EC arithmetic (from glv_hnp_conditioning.py)\n# ---------------------------------------------------------------------------\n\ndef modinv(a, m):\n    return pow(a, -1, m)\n\ndef ec_add(P, Q, p):\n    if P is None: return Q\n    if Q is None: return P\n    x1, y1 = P; x2, y2 = Q\n    if x1 == x2:\n        if (y1 + y2) % p == 0: return None\n        s = 3 * x1 * x1 * modinv(2 * y1, p) % p\n    else:\n        s = (y2 - y1) * modinv(x2 - x1, p) % p\n    x3 = (s * s - x1 - x2) % p\n    y3 = (s * (x1 - x3) - y1) % p\n    return (x3, y3)\n\ndef ec_mul(P, k, p):\n    if k == 0: return None\n    R, Q = None, P\n    while k > 0:\n        if k & 1: R = ec_add(R, Q, p)\n        Q = ec_add(Q, Q, p)\n        k >>= 1\n    return R\n\ndef tonelli_shanks(n, p):\n    n %= p\n    if n == 0: return 0\n    if pow(n, (p - 1) // 2, p) != 1: return None\n    if p % 4 == 3: return pow(n, (p + 1) // 4, p)\n    q, s = p - 1, 0\n    while q % 2 == 0: q //= 2; s += 1\n    z = 2\n    while pow(z, (p - 1) // 2, p) != p - 1: z += 1\n    m2, c, t, r = s, pow(z, q, p), pow(n, q, p), pow(n, (q + 1) // 2, p)\n    while True:\n        if t == 0: return 0\n        if t == 1: return r\n        i, tmp = 0, t\n        while tmp != 1: tmp = tmp * tmp % p; i += 1\n        b = pow(c, 1 << (m2 - i - 1), p)\n        m2, c, t, r = i, b * b % p, t * b * b % p, r * b % p\n\ndef find_generator(p, b_param, n):\n    rng = random.Random(12345)\n    for _ in range(50000):\n        x = rng.randint(0, p - 1)\n        rhs = (pow(x, 3, p) + b_param) % p\n        y = tonelli_shanks(rhs, p)\n        if y is not None and y != 0:\n            P = (x, y)\n            if ec_mul(P, n, p) is None:\n                return P\n    return None\n\ndef glv_eigenvalue(n):\n    neg3 = (n - 3) % n\n    sq = tonelli_shanks(neg3, n)\n    if sq is None: return None\n    inv2 = modinv(2, n)\n    r1 = (n - 1 + sq) * inv2 % n\n    r2 = (n - 1 + (n - sq)) * inv2 % n\n    if (r1 * r1 + r1 + 1) % n != 0: r1, r2 = r2, r1\n    if (r1 * r1 + r1 + 1) % n != 0: return None\n    return min(r1, r2)\n\ndef find_b_for_n(p, n):\n    for b_try in range(1, min(p, 500)):\n        rng2 = random.Random(99)\n        for _ in range(20):\n            x = rng2.randint(0, p - 1)\n            rhs = (pow(x, 3, p) + b_try) % p\n            y = tonelli_shanks(rhs, p)\n            if y is not None and y != 0:\n                P = (x, y)\n                if ec_mul(P, n, p) is None:\n                    return b_try\n                break\n    return None\n\n# ---------------------------------------------------------------------------\n# Lattice construction\n# ---------------------------------------------------------------------------\n\ndef build_lattice(sigs, n, lam, K1):\n    m = len(sigs)\n    K2 = math.isqrt(n) + 1\n    dim = 2 * m + 2\n    S_K1 = n // K1\n    S_K2 = max(1, n // K2)\n    S_KANNAN = n\n    M = [[0] * dim for _ in range(dim)]\n    for i in range(m):\n        M[i][i] = n * S_K1\n    for i in range(m):\n        M[m][i] = sigs[i]['B'] * S_K1\n    M[m][m] = 1\n    for i in range(m):\n        M[m + 1 + i][i] = -lam * S_K1\n        M[m + 1 + i][m + 1 + i] = S_K2\n    for i in range(m):\n        M[2*m+1][i] = sigs[i]['A'] * S_K1\n    M[2*m+1][dim-1] = S_KANNAN\n    return M, S_K1, S_K2, S_KANNAN\n\n# ---------------------------------------------------------------------------\n# Signature generation\n# ---------------------------------------------------------------------------\n\ndef gen_signatures(p, b_param, n, lam, G, m_sigs, K1, seed):\n    K2 = math.isqrt(n) + 1\n    rng = random.Random(seed)\n    d_secret = rng.randint(1, n - 1)\n    k1_vals, k2_vals = [], []\n    sigs = []\n    attempts = 0\n    while len(sigs) < m_sigs and attempts < 200000:\n        attempts += 1\n        k1 = rng.randint(0, K1 - 1)\n        k2 = rng.randint(0, K2 - 1)\n        k_full = (k1 + lam * k2) % n\n        if k_full == 0: continue\n        R = ec_mul(G, k_full, p)\n        if R is None: continue\n        r = R[0] % n\n        if r == 0: continue\n        h = rng.randint(0, n - 1)\n        s = modinv(k_full, n) * (h + d_secret * r) % n\n        if s == 0: continue\n        s_inv = modinv(s, n)\n        A = h * s_inv % n\n        B = r * s_inv % n\n        sigs.append({'A': A, 'B': B})\n        k1_vals.append(k1)\n        k2_vals.append(k2)\n    return d_secret, sigs, k1_vals, k2_vals\n\n# ---------------------------------------------------------------------------\n# Experiment A: Target vector norm\n# ---------------------------------------------------------------------------\n\ndef target_vector_norm(k1_vals, k2_vals, d, S_K1, S_K2, S_KANNAN):\n    norm_sq = sum(k1 * k1 * S_K1 * S_K1 for k1 in k1_vals)\n    norm_sq += d * d\n    norm_sq += sum(k2 * k2 * S_K2 * S_K2 for k2 in k2_vals)\n    norm_sq += S_KANNAN * S_KANNAN\n    return math.sqrt(norm_sq)\n\n# ---------------------------------------------------------------------------\n# Experiment B: Spurious-vector check\n# ---------------------------------------------------------------------------\n\ndef spurious_vector_check(M_red, m, n, d_secret, S_KANNAN):\n    dim = 2 * m + 2\n    kannan_rows = 0\n    correct_rows = 0\n    row_details = []\n    for row_idx, row in enumerate(M_red):\n        last = row[dim - 1]\n        if abs(last) == S_KANNAN:\n            kannan_rows += 1\n            sign = 1 if last > 0 else -1\n            d_cand = (sign * row[m]) % n\n            is_correct = (d_cand == d_secret)\n            if is_correct:\n                correct_rows += 1\n            row_details.append((row_idx, last, d_cand, is_correct))\n    return kannan_rows, correct_rows, kannan_rows - correct_rows, row_details\n\n# ---------------------------------------------------------------------------\n# Main analysis\n# ---------------------------------------------------------------------------\n\ndef analyze_pair1_curve(label, p, n, K1, m, seeds):\n    print(f"\\n{'='*60}")\n    print(f"  Curve: {label}  p={p}  n={n}")\n\n    lam = glv_eigenvalue(n)\n    if lam is None:\n        print("  ERROR: no GLV eigenvalue found")\n        return\n\n    b_param = find_b_for_n(p, n)\n    if b_param is None:\n        print("  ERROR: no b_param found")\n        return\n\n    lam_n = lam / n\n    K2 = math.isqrt(n) + 1\n    S_K1 = n // K1\n    S_K2 = max(1, n // K2)\n    S_KANNAN = n\n    print(f"  lam/n={lam_n:.4f}  K1={K1}  K2={K2}  S_K1={S_K1}  S_K2={S_K2}")\n\n    G = find_generator(p, b_param, n)\n    if G is None:\n        print("  ERROR: no generator found")\n        return\n\n    print(f"\\n  {'Seed':<12} {'‖v_target‖':>14} {'GH_estimate':>13} {'v/GH':>8} {'Recovered':>10} {'Kannan#':>8} {'Correct':>8} {'Spurious':>9}")\n    print("  " + "-" * 90)\n\n    dim = 2 * m + 2\n    log2_vol = m * math.log2(n * S_K1) + m * math.log2(S_K2) + math.log2(S_KANNAN)\n    gh_est = math.sqrt(dim / (2 * math.pi * math.e)) * 2 ** (log2_vol / dim)\n\n    for seed in seeds:\n        d_secret, sigs, k1_vals, k2_vals = gen_signatures(\n            p, b_param, n, lam, G, m, K1, seed)\n\n        if len(sigs) < m:\n            print(f"  seed={hex(seed):<10}  FAIL: only {len(sigs)} sigs generated")\n            continue\n\n        v_norm = target_vector_norm(k1_vals, k2_vals, d_secret, S_K1, S_K2, S_KANNAN)\n\n        M_int, _, _, _ = build_lattice(sigs, n, lam, K1)\n        A = IntegerMatrix.from_matrix(M_int)\n        LLL.reduction(A)\n        M_red = [[A[i][j] for j in range(dim)] for i in range(dim)]\n\n        recovered = False\n        for row in M_red:\n            last = row[dim - 1]\n            if abs(last) == S_KANNAN:\n                sign = 1 if last > 0 else -1\n                d_cand = (sign * row[m]) % n\n                if d_cand == d_secret:\n                    recovered = True\n                    break\n\n        k_rows, c_rows, s_rows, details = spurious_vector_check(\n            M_red, m, n, d_secret, S_KANNAN)\n\n        print(f"  seed={hex(seed):<10} "\n              f"{v_norm:14.0f} {gh_est:13.0f} {v_norm/gh_est:8.3f} "\n              f"{'YES':>10}" if recovered else\n              f"  seed={hex(seed):<10} "\n              f"{v_norm:14.0f} {gh_est:13.0f} {v_norm/gh_est:8.3f} "\n              f"{'NO':>10}", end="")\n        print(f" {k_rows:8d} {c_rows:8d} {s_rows:9d}")\n\n        if details:\n            for (ridx, last_col, d_cand, ok) in details[:5]:\n                status = "CORRECT" if ok else "spurious"\n                print(f"    row[{ridx}]: last_col={last_col}  d_cand={d_cand}  [{status}]")\n\n\n# ---------------------------------------------------------------------------\n# Entry point\n# ---------------------------------------------------------------------------\n\nif __name__ == '__main__':\n    K1 = 72\n    m = 12\n    SEEDS = [0xDEAD, 0xBEEF, 0xCAFE]\n\n    print("=== GLV-HNP Target-Vector Length + Spurious-Vector Analysis ===")\n    print("PAIR 1: λ/n≈0.20 discordant pair")\n    print(f"K1={K1}, m={m}, seeds={[hex(s) for s in SEEDS]}\\n")\n\n    print("Searching for PAIR 1 curves (scanning 20-bit CM primes)...")\n\n    def eisenstein_decompose(p):\n        for a in range(1, 2 * math.isqrt(p // 3) + 3):\n            disc = 4 * p - 3 * a * a\n            if disc < 0: break\n            s = math.isqrt(disc)\n            if s * s != disc: continue\n            for num in [a + s, a - s]:\n                if num % 2 == 0:\n                    b2 = num // 2\n                    if b2 >= 0 and a * a - a * b2 + b2 * b2 == p:\n                        return (a, b2)\n        return None\n\n    def j0_traces(a, b2):\n        return [2*a - b2, -2*a + b2, -(a + b2), a + b2, 2*b2 - a, a - 2*b2]\n\n    def delta_ratio(lam, n):\n        x = (3 * lam) % n\n        return min(x, n - x) / n\n\n    TARGET = 0.20\n    TOL = 0.015\n    found = []\n    p = sympy.nextprime(2**19 - 1)\n    while p < 2**20 and len(found) < 2:\n        if p % 3 == 1:\n            eis = eisenstein_decompose(p)\n            if eis is not None:\n                a_e, b_e = eis\n                for tr in j0_traces(a_e, b_e):\n                    n_cand = p + 1 - tr\n                    if n_cand < 2: continue\n                    if not sympy.isprime(n_cand): continue\n                    if n_cand % 3 != 1: continue\n                    lam_cand = glv_eigenvalue(n_cand)\n                    if lam_cand is None: continue\n                    lam_n_c = lam_cand / n_cand\n                    if abs(lam_n_c - TARGET) <= TOL:\n                        b_p = find_b_for_n(p, n_cand)\n                        if b_p is None: continue\n                        dr = delta_ratio(lam_cand, n_cand)\n                        found.append((p, n_cand, lam_cand, lam_n_c, dr))\n                        print(f"  Found: p={p}, n={n_cand}, lam/n={lam_n_c:.4f}, δ/n={dr:.4f}")\n                        break\n        p = sympy.nextprime(p)\n\n    if len(found) < 2:\n        print(f"Only found {len(found)} curve(s) near lam/n=0.20. Need 2 for pair analysis.")\n\n    for i, (p_c, n_c, lam_c, lam_n_c, dr_c) in enumerate(found):\n        label = f"PAIR1_C{i+1} (lam/n={lam_n_c:.4f}, δ/n={dr_c:.4f})"\n        analyze_pair1_curve(label, p_c, n_c, K1, m, SEEDS)\n\n    print("\\n\\n=== Extended LLL sweep m=10..22 for PAIR 1 ===")\n    for i, (p_c, n_c, lam_c, lam_n_c, dr_c) in enumerate(found):\n        b_param = find_b_for_n(p_c, n_c)\n        if b_param is None:\n            print(f"C{i+1}: no b_param")\n            continue\n        G = find_generator(p_c, b_param, n_c)\n        if G is None:\n            print(f"C{i+1}: no generator")\n            continue\n        K2 = math.isqrt(n_c) + 1\n        S_K1 = n_c // K1\n        S_K2 = max(1, n_c // K2)\n        S_KANNAN = n_c\n        lam_c_val = glv_eigenvalue(n_c)\n        print(f"\\n  C{i+1}: p={p_c}, n={n_c}, lam/n={lam_n_c:.4f}", end="")\n        sweep_str = ""\n        first_3of3 = None\n        for m_sweep in range(10, 23):\n            wins = 0\n            for seed in SEEDS:\n                d_sec, sigs, k1v, k2v = gen_signatures(\n                    p_c, b_param, n_c, lam_c_val, G, m_sweep, K1, seed)\n                if len(sigs) < m_sweep:\n                    continue\n                M_int, _, _, _ = build_lattice(sigs, n_c, lam_c_val, K1)\n                dim = 2 * m_sweep + 2\n                A = IntegerMatrix.from_matrix(M_int)\n                LLL.reduction(A)\n                M_red = [[A[j2][j3] for j3 in range(dim)] for j2 in range(dim)]\n                for row in M_red:\n                    last = row[dim - 1]\n                    if abs(last) == S_KANNAN:\n                        sign = 1 if last > 0 else -1\n                        d_cand = (sign * row[m_sweep]) % n_c\n                        if d_cand == d_sec:\n                            wins += 1\n                            break\n            sweep_str += f" m{m_sweep}:{wins}"\n            if wins == 3 and first_3of3 is None:\n                first_3of3 = m_sweep\n        print(f"\\n  {sweep_str}")\n        f33 = f"m={first_3of3}" if first_3of3 else "NEVER"\n        print(f"  First 3/3: {f33}")\n\n    print("\\nDone.")\n
+"""
+GLV-HNP Phase 2: Target-vector length + spurious-vector analysis for PAIR 1.
+
+From 2026-06-23: κ(M) hypothesis falsified. The discriminating property between
+discordant PAIR 1 curves (same λ/n≈0.20, opposite LLL outcomes) is UNKNOWN.
+
+Today's two sub-experiments for PAIR 1:
+  FAIL  curve: p=524743, n=523597 (lam/n=0.2114, δ/n=0.366)
+  SUCCEED curve: p=525043, n=524269 (lam/n=0.2122, δ/n=0.364)
+
+Exp A — Target vector norm:
+  Compute ‖v_target‖ for K1=72, m=12, seeds=[0xDEAD, 0xBEEF, 0xCAFE].
+  If ‖v_fail‖ >> ‖v_succeed‖, obstruction is a size mismatch.
+
+Exp B — Spurious-vector check:
+  Run LLL at m=12, inspect ALL rows of reduced basis.
+  Count rows with |last_col| == S_KANNAN (Kannan-embedded rows).
+  If failing curve has 0 such rows, the solution was never found.
+  If it has rows but none match d, there are spurious Kannan vectors.
+"""
+
+import math
+import random
+import sympy
+import numpy as np
+from fpylll import IntegerMatrix, LLL
+
+# ---------------------------------------------------------------------------
+# EC arithmetic (from glv_hnp_conditioning.py)
+# ---------------------------------------------------------------------------
+
+def modinv(a, m):
+    return pow(a, -1, m)
+
+def ec_add(P, Q, p):
+    if P is None: return Q
+    if Q is None: return P
+    x1, y1 = P; x2, y2 = Q
+    if x1 == x2:
+        if (y1 + y2) % p == 0: return None
+        s = 3 * x1 * x1 * modinv(2 * y1, p) % p
+    else:
+        s = (y2 - y1) * modinv(x2 - x1, p) % p
+    x3 = (s * s - x1 - x2) % p
+    y3 = (s * (x1 - x3) - y1) % p
+    return (x3, y3)
+
+def ec_mul(P, k, p):
+    if k == 0: return None
+    R, Q = None, P
+    while k > 0:
+        if k & 1: R = ec_add(R, Q, p)
+        Q = ec_add(Q, Q, p)
+        k >>= 1
+    return R
+
+def tonelli_shanks(n, p):
+    n %= p
+    if n == 0: return 0
+    if pow(n, (p - 1) // 2, p) != 1: return None
+    if p % 4 == 3: return pow(n, (p + 1) // 4, p)
+    q, s = p - 1, 0
+    while q % 2 == 0: q //= 2; s += 1
+    z = 2
+    while pow(z, (p - 1) // 2, p) != p - 1: z += 1
+    m2, c, t, r = s, pow(z, q, p), pow(n, q, p), pow(n, (q + 1) // 2, p)
+    while True:
+        if t == 0: return 0
+        if t == 1: return r
+        i, tmp = 0, t
+        while tmp != 1: tmp = tmp * tmp % p; i += 1
+        b = pow(c, 1 << (m2 - i - 1), p)
+        m2, c, t, r = i, b * b % p, t * b * b % p, r * b % p
+
+def find_generator(p, b_param, n):
+    rng = random.Random(12345)
+    for _ in range(50000):
+        x = rng.randint(0, p - 1)
+        rhs = (pow(x, 3, p) + b_param) % p
+        y = tonelli_shanks(rhs, p)
+        if y is not None and y != 0:
+            P = (x, y)
+            if ec_mul(P, n, p) is None:
+                return P
+    return None
+
+def glv_eigenvalue(n):
+    neg3 = (n - 3) % n
+    sq = tonelli_shanks(neg3, n)
+    if sq is None: return None
+    inv2 = modinv(2, n)
+    r1 = (n - 1 + sq) * inv2 % n
+    r2 = (n - 1 + (n - sq)) * inv2 % n
+    if (r1 * r1 + r1 + 1) % n != 0: r1, r2 = r2, r1
+    if (r1 * r1 + r1 + 1) % n != 0: return None
+    return min(r1, r2)
+
+def find_b_for_n(p, n):
+    for b_try in range(1, min(p, 500)):
+        rng2 = random.Random(99)
+        for _ in range(20):
+            x = rng2.randint(0, p - 1)
+            rhs = (pow(x, 3, p) + b_try) % p
+            y = tonelli_shanks(rhs, p)
+            if y is not None and y != 0:
+                P = (x, y)
+                if ec_mul(P, n, p) is None:
+                    return b_try
+                break
+    return None
+
+# ---------------------------------------------------------------------------
+# Lattice construction
+# ---------------------------------------------------------------------------
+
+def build_lattice(sigs, n, lam, K1):
+    m = len(sigs)
+    K2 = math.isqrt(n) + 1
+    dim = 2 * m + 2
+    S_K1 = n // K1
+    S_K2 = max(1, n // K2)
+    S_KANNAN = n
+    M = [[0] * dim for _ in range(dim)]
+    for i in range(m):
+        M[i][i] = n * S_K1
+    for i in range(m):
+        M[m][i] = sigs[i]['B'] * S_K1
+    M[m][m] = 1
+    for i in range(m):
+        M[m + 1 + i][i] = -lam * S_K1
+        M[m + 1 + i][m + 1 + i] = S_K2
+    for i in range(m):
+        M[2*m+1][i] = sigs[i]['A'] * S_K1
+    M[2*m+1][dim-1] = S_KANNAN
+    return M, S_K1, S_K2, S_KANNAN
+
+# ---------------------------------------------------------------------------
+# Signature generation
+# ---------------------------------------------------------------------------
+
+def gen_signatures(p, b_param, n, lam, G, m_sigs, K1, seed):
+    K2 = math.isqrt(n) + 1
+    rng = random.Random(seed)
+    d_secret = rng.randint(1, n - 1)
+    k1_vals, k2_vals = [], []
+    sigs = []
+    attempts = 0
+    while len(sigs) < m_sigs and attempts < 200000:
+        attempts += 1
+        k1 = rng.randint(0, K1 - 1)
+        k2 = rng.randint(0, K2 - 1)
+        k_full = (k1 + lam * k2) % n
+        if k_full == 0: continue
+        R = ec_mul(G, k_full, p)
+        if R is None: continue
+        r = R[0] % n
+        if r == 0: continue
+        h = rng.randint(0, n - 1)
+        s = modinv(k_full, n) * (h + d_secret * r) % n
+        if s == 0: continue
+        s_inv = modinv(s, n)
+        A = h * s_inv % n
+        B = r * s_inv % n
+        sigs.append({'A': A, 'B': B})
+        k1_vals.append(k1)
+        k2_vals.append(k2)
+    return d_secret, sigs, k1_vals, k2_vals
+
+# ---------------------------------------------------------------------------
+# Experiment A: Target vector norm
+# ---------------------------------------------------------------------------
+
+def target_vector_norm(k1_vals, k2_vals, d, S_K1, S_K2, S_KANNAN):
+    norm_sq = sum(k1 * k1 * S_K1 * S_K1 for k1 in k1_vals)
+    norm_sq += d * d
+    norm_sq += sum(k2 * k2 * S_K2 * S_K2 for k2 in k2_vals)
+    norm_sq += S_KANNAN * S_KANNAN
+    return math.sqrt(norm_sq)
+
+# ---------------------------------------------------------------------------
+# Experiment B: Spurious-vector check
+# ---------------------------------------------------------------------------
+
+def spurious_vector_check(M_red, m, n, d_secret, S_KANNAN):
+    dim = 2 * m + 2
+    kannan_rows = 0
+    correct_rows = 0
+    row_details = []
+    for row_idx, row in enumerate(M_red):
+        last = row[dim - 1]
+        if abs(last) == S_KANNAN:
+            kannan_rows += 1
+            sign = 1 if last > 0 else -1
+            d_cand = (sign * row[m]) % n
+            is_correct = (d_cand == d_secret)
+            if is_correct:
+                correct_rows += 1
+            row_details.append((row_idx, last, d_cand, is_correct))
+    return kannan_rows, correct_rows, kannan_rows - correct_rows, row_details
+
+# ---------------------------------------------------------------------------
+# Main analysis
+# ---------------------------------------------------------------------------
+
+def analyze_pair1_curve(label, p, n, K1, m, seeds):
+    print(f"\n{'='*60}")
+    print(f"  Curve: {label}  p={p}  n={n}")
+
+    lam = glv_eigenvalue(n)
+    if lam is None:
+        print("  ERROR: no GLV eigenvalue found")
+        return
+
+    b_param = find_b_for_n(p, n)
+    if b_param is None:
+        print("  ERROR: no b_param found")
+        return
+
+    lam_n = lam / n
+    K2 = math.isqrt(n) + 1
+    S_K1 = n // K1
+    S_K2 = max(1, n // K2)
+    S_KANNAN = n
+    print(f"  lam/n={lam_n:.4f}  K1={K1}  K2={K2}  S_K1={S_K1}  S_K2={S_K2}")
+
+    G = find_generator(p, b_param, n)
+    if G is None:
+        print("  ERROR: no generator found")
+        return
+
+    print(f"\n  {'Seed':<12} {'‖v_target‖':>14} {'GH_estimate':>13} {'v/GH':>8} {'Recovered':>10} {'Kannan#':>8} {'Correct':>8} {'Spurious':>9}")
+    print("  " + "-" * 90)
+
+    dim = 2 * m + 2
+    log2_vol = m * math.log2(n * S_K1) + m * math.log2(S_K2) + math.log2(S_KANNAN)
+    gh_est = math.sqrt(dim / (2 * math.pi * math.e)) * 2 ** (log2_vol / dim)
+
+    for seed in seeds:
+        d_secret, sigs, k1_vals, k2_vals = gen_signatures(
+            p, b_param, n, lam, G, m, K1, seed)
+
+        if len(sigs) < m:
+            print(f"  seed={hex(seed):<10}  FAIL: only {len(sigs)} sigs generated")
+            continue
+
+        v_norm = target_vector_norm(k1_vals, k2_vals, d_secret, S_K1, S_K2, S_KANNAN)
+
+        M_int, _, _, _ = build_lattice(sigs, n, lam, K1)
+        A = IntegerMatrix.from_matrix(M_int)
+        LLL.reduction(A)
+        M_red = [[A[i][j] for j in range(dim)] for i in range(dim)]
+
+        recovered = False
+        for row in M_red:
+            last = row[dim - 1]
+            if abs(last) == S_KANNAN:
+                sign = 1 if last > 0 else -1
+                d_cand = (sign * row[m]) % n
+                if d_cand == d_secret:
+                    recovered = True
+                    break
+
+        k_rows, c_rows, s_rows, details = spurious_vector_check(
+            M_red, m, n, d_secret, S_KANNAN)
+
+        print(f"  seed={hex(seed):<10} "
+              f"{v_norm:14.0f} {gh_est:13.0f} {v_norm/gh_est:8.3f} "
+              f"{'YES':>10}" if recovered else
+              f"  seed={hex(seed):<10} "
+              f"{v_norm:14.0f} {gh_est:13.0f} {v_norm/gh_est:8.3f} "
+              f"{'NO':>10}", end="")
+        print(f" {k_rows:8d} {c_rows:8d} {s_rows:9d}")
+
+        if details:
+            for (ridx, last_col, d_cand, ok) in details[:5]:
+                status = "CORRECT" if ok else "spurious"
+                print(f"    row[{ridx}]: last_col={last_col}  d_cand={d_cand}  [{status}]")
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+if __name__ == '__main__':
+    K1 = 72
+    m = 12
+    SEEDS = [0xDEAD, 0xBEEF, 0xCAFE]
+
+    print("=== GLV-HNP Target-Vector Length + Spurious-Vector Analysis ===")
+    print("PAIR 1: λ/n≈0.20 discordant pair")
+    print(f"K1={K1}, m={m}, seeds={[hex(s) for s in SEEDS]}\n")
+
+    print("Searching for PAIR 1 curves (scanning 20-bit CM primes)...")
+
+    def eisenstein_decompose(p):
+        for a in range(1, 2 * math.isqrt(p // 3) + 3):
+            disc = 4 * p - 3 * a * a
+            if disc < 0: break
+            s = math.isqrt(disc)
+            if s * s != disc: continue
+            for num in [a + s, a - s]:
+                if num % 2 == 0:
+                    b2 = num // 2
+                    if b2 >= 0 and a * a - a * b2 + b2 * b2 == p:
+                        return (a, b2)
+        return None
+
+    def j0_traces(a, b2):
+        return [2*a - b2, -2*a + b2, -(a + b2), a + b2, 2*b2 - a, a - 2*b2]
+
+    def delta_ratio(lam, n):
+        x = (3 * lam) % n
+        return min(x, n - x) / n
+
+    TARGET = 0.20
+    TOL = 0.015
+    found = []
+    p = sympy.nextprime(2**19 - 1)
+    while p < 2**20 and len(found) < 2:
+        if p % 3 == 1:
+            eis = eisenstein_decompose(p)
+            if eis is not None:
+                a_e, b_e = eis
+                for tr in j0_traces(a_e, b_e):
+                    n_cand = p + 1 - tr
+                    if n_cand < 2: continue
+                    if not sympy.isprime(n_cand): continue
+                    if n_cand % 3 != 1: continue
+                    lam_cand = glv_eigenvalue(n_cand)
+                    if lam_cand is None: continue
+                    lam_n_c = lam_cand / n_cand
+                    if abs(lam_n_c - TARGET) <= TOL:
+                        b_p = find_b_for_n(p, n_cand)
+                        if b_p is None: continue
+                        dr = delta_ratio(lam_cand, n_cand)
+                        found.append((p, n_cand, lam_cand, lam_n_c, dr))
+                        print(f"  Found: p={p}, n={n_cand}, lam/n={lam_n_c:.4f}, δ/n={dr:.4f}")
+                        break
+        p = sympy.nextprime(p)
+
+    if len(found) < 2:
+        print(f"Only found {len(found)} curve(s) near lam/n=0.20. Need 2 for pair analysis.")
+
+    for i, (p_c, n_c, lam_c, lam_n_c, dr_c) in enumerate(found):
+        label = f"PAIR1_C{i+1} (lam/n={lam_n_c:.4f}, δ/n={dr_c:.4f})"
+        analyze_pair1_curve(label, p_c, n_c, K1, m, SEEDS)
+
+    print("\n\n=== Extended LLL sweep m=10..22 for PAIR 1 ===")
+    for i, (p_c, n_c, lam_c, lam_n_c, dr_c) in enumerate(found):
+        b_param = find_b_for_n(p_c, n_c)
+        if b_param is None:
+            print(f"C{i+1}: no b_param")
+            continue
+        G = find_generator(p_c, b_param, n_c)
+        if G is None:
+            print(f"C{i+1}: no generator")
+            continue
+        K2 = math.isqrt(n_c) + 1
+        S_K1 = n_c // K1
+        S_K2 = max(1, n_c // K2)
+        S_KANNAN = n_c
+        lam_c_val = glv_eigenvalue(n_c)
+        print(f"\n  C{i+1}: p={p_c}, n={n_c}, lam/n={lam_n_c:.4f}", end="")
+        sweep_str = ""
+        first_3of3 = None
+        for m_sweep in range(10, 23):
+            wins = 0
+            for seed in SEEDS:
+                d_sec, sigs, k1v, k2v = gen_signatures(
+                    p_c, b_param, n_c, lam_c_val, G, m_sweep, K1, seed)
+                if len(sigs) < m_sweep:
+                    continue
+                M_int, _, _, _ = build_lattice(sigs, n_c, lam_c_val, K1)
+                dim = 2 * m_sweep + 2
+                A = IntegerMatrix.from_matrix(M_int)
+                LLL.reduction(A)
+                M_red = [[A[j2][j3] for j3 in range(dim)] for j2 in range(dim)]
+                for row in M_red:
+                    last = row[dim - 1]
+                    if abs(last) == S_KANNAN:
+                        sign = 1 if last > 0 else -1
+                        d_cand = (sign * row[m_sweep]) % n_c
+                        if d_cand == d_sec:
+                            wins += 1
+                            break
+            sweep_str += f" m{m_sweep}:{wins}"
+            if wins == 3 and first_3of3 is None:
+                first_3of3 = m_sweep
+        print(f"\n  {sweep_str}")
+        f33 = f"m={first_3of3}" if first_3of3 else "NEVER"
+        print(f"  First 3/3: {f33}")
+
+    print("\nDone.")
