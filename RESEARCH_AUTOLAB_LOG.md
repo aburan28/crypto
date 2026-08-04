@@ -6103,3 +6103,166 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the continuation
+proposed by the 2026-07-29 entry (log line ~6089). Priorities 1, 2, 4, 6 remain
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+made measurable progress on 2026-07-29, so its own proposed sub-task is the correct pick
+under protocol rule (b).
+
+The 2026-07-29 falsifier, verbatim: *"if sv/pv rises above 1 after the reformulation and
+the K1 wall in T4 moves outward on the λ*=0.07 curve (currently K1≈4–6), the
+reformulation is a real improvement; if the wall stays at K1≈4–6, then the wall is
+information-theoretic and Phase 2 is at its ceiling."*
+
+**Outcome: the falsifier splits.** sv/pv does rise to 1.000 under the proposed
+projection, but the wall does not move at all — 160/160 grid cells identical to the
+baseline. The wall *does* move 3× outward, but from an unrelated one-line fix
+(centring the target) that the 2026-07-29 analysis did not consider.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.5,
+  sympy 1.14.0. Same note as 2026-07-29: `cysignals` is a separate runtime import.
+  PARI/GP not needed this run.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_projected.py` (556 lines, sections P0–P4,
+  selectable: `python3 glv_hnp_thread23_projected.py P3`). Signature generation, scales,
+  and the baseline lattice are copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:229` (`scales`/`gen_signatures`/`build_glv_lattice`)
+  so the `orig` column reproduces the 2026-07-29 T4 numbers exactly. It does: 2557 walls
+  at K1=8, 2677 at K1=4, matching T4.
+- Output artifact: `secp256k1_cm_audit/glv_hnp_thread23_projected_output.txt` (153 lines).
+- Four formulations compared on the same instances:
+  - `orig` — (2m+2)-dim, uncentred. The 2026-07-29 baseline.
+  - `proj` — (2m+1)-dim. Column m (the d column) dropped, i.e. L quotiented by the
+    trivial direction ⟨n·S_D·e_m⟩ that T5 identified as λ₁. The 2m+2 generators are fed
+    to fplll directly (it handles rank deficiency and emits one zero row). d is then
+    recovered algebraically: d = (k1_i + λ·k2_i − A_i)·B_i⁻¹ mod n from signature 0.
+  - `cent` — (2m+2)-dim, target centred. k1 ~ U[0,K1) and k2 ~ U[0,K2) contribute X²/3
+    rather than X²/12 to ‖v_planted‖². Replacing A_i by A_i − ⌊K1/2⌋ − λ·⌊K2/2⌋ mod n
+    re-centres both nonce halves. This changes the *target*, not the lattice.
+  - `projcent` — both.
+- `cargo test --test curve_audit` → 5/5 pass (6.98s). ✓ (No Rust touched; run per protocol.)
+
+### Findings
+
+**P0 — the projection is the intended quotient.** LLL returns rank 2m+1 from 2m+2
+generators, and log₂ det drops by exactly log₂(n·S_D):
+
+| curve | cfg | dim | rank | log₂ det | drop | log₂(n·S_D) |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | orig | 18 | 18 | 214.77 | — | 11.38 |
+| 12-bit/2557 | proj | 17 | 17 | 203.39 | 11.38 | 11.38 |
+| 12-bit/2677 | orig | 22 | 22 | 265.17 | — | 11.37 |
+| 12-bit/2677 | proj | 21 | 21 | 253.80 | 11.37 | 11.37 |
+
+**P1 — sv/pv does rise to 1, exactly as 2026-07-29 predicted.** The trivial vector is
+gone from the projected lattice and at K1=2 the planted vector *is* the shortest vector:
+
+| curve | K1 | cfg | sv/pv | ‖pv‖/n | GH/n | recovered |
+|---|---|---|---|---|---|---|
+| 12-bit/2677 | 2 | orig | 0.446 | 2.241 | 3.426 | Y |
+| 12-bit/2677 | 2 | proj | **1.000** | 2.217 | 3.528 | Y |
+| 12-bit/2677 | 2 | projcent | **1.000** | 2.028 | 3.528 | Y |
+| 12-bit/2677 | 8 | orig | 0.418 | 2.392 | 1.822 | n |
+| 12-bit/2677 | 8 | proj | 0.725 | 2.369 | 1.821 | n |
+| 12-bit/2677 | 8 | cent | 0.551 | 1.815 | 1.822 | **Y** |
+| 12-bit/2677 | 8 | projcent | 0.962 | 1.785 | 1.821 | **Y** |
+
+Note the K1=8 rows: `proj` raises sv/pv from 0.418 to 0.725 and still fails, while `cent`
+*lowers* sv/pv to 0.551 and succeeds. sv/pv is not the operative quantity.
+
+**P2 — the K1 wall (5 seeds per cell, historical curves).** Wall = largest K1 with ≥4/5:
+
+| curve | λ* | orig | cent | proj | projcent |
+|---|---|---|---|---|---|
+| 12-bit/2557 (m=8) | 0.3400 | 8 | **12** | 8 | **12** |
+| 12-bit/2677 (m=10) | 0.0699 | 4 | **12** | 4 | **12** |
+
+`proj` reproduces `orig` in every one of the 72 cells (2 curves × 4 configs × 9 K1 values
+× 5 seeds), digit for digit.
+
+**P3 — replication on 8 fresh 17-bit j=0 curves, m=12, 5 seeds, K1 ∈ {16,24,32,48,64}.**
+(2026-07-29 used K1=12 at 17 bits; that is far inside the wall — this run's first attempt
+saturated at 60/60 for all four configs and was rerun over the discriminating range.
+Wall position scales with eff = K1·K2/n and K2 = ⌊√n⌋+1 ≈ 256 here vs 52 at 12 bits, so
+the informative K1 range is ~5× larger.) Totals out of 40 trials per cell:
+
+| cfg | K1=16 | K1=24 | K1=32 | K1=48 | K1=64 | wall (≥80%) |
+|---|---|---|---|---|---|---|
+| orig | 38 | 24 | 13 | 9 | 5 | 16 |
+| proj | 38 | 24 | 13 | 9 | 5 | 16 |
+| cent | 40 | 40 | **40** | 34 | 29 | **48** |
+| projcent | 40 | 40 | **40** | 34 | 29 | **48** |
+
+`proj` = `orig` in all 40 cells again — **160/160 identical cells across P2 and P3, zero
+exceptions.** `cent` = `projcent` in all 40. At K1=32 the reformulated attack recovers
+40/40 where the baseline recovers 13/40.
+
+**Result 1 — the trivial vector is real but operationally inert.** T5 (2026-07-29) was
+right that λ₁ = n·S_D·e_m and that the planted vector is never λ₁. Removing it does
+exactly what T5 predicted to the geometry and *nothing* to recovery. Reason: the d column
+contributes only E[d²·S_D²] = n²/3 out of ‖v_planted‖² ≈ n²(2m/3 + 4/3), i.e. a 2.1% norm
+reduction at m=10 — while recovery scans the coset {last coord = ±S_KANNAN}, in which the
+trivial vector (last coord 0) never appears. It shortens λ₁ without competing for the
+answer. **Thread 23 as posed is answered: the projection is not an improvement.**
+
+**Result 2 — centring is a free 3× on the bias bound.** Expected planted norms, all
+confirmed by the measured ‖pv‖ column:
+
+| cfg | E‖pv‖/n | m=10 | m=12 |
+|---|---|---|---|
+| orig | √(2m/3 + 4/3) | 2.828 | 3.055 |
+| proj | √(2m/3 + 1) | 2.769 | 3.000 |
+| cent | √(m/6 + 4/3) | 1.732 | 1.826 |
+| projcent | √(m/6 + 1) | 1.633 | 1.732 |
+
+Centring shrinks the target by 1.63–1.67×. Since GH(L) ∝ K1^{−m/(2m+2)} ≈ K1^{−0.462} at
+m=12, an f× shorter target buys f^(1/0.462) = f^2.165 in K1: **predicted 1.673^2.165 =
+3.05×, measured 48/16 = 3.00×.** The model is quantitatively correct, not just directional.
+
+**Result 3 — the λ* wall shift of 2026-07-29 does not survive centring.** T4 reported
+that λ* moves the K1 wall by ~3× (λ*=0.34 → wall 12–16; λ*=0.07 → wall 4–6). Under `cent`
+both historical curves wall at exactly K1=12. On the 17-bit sample the per-curve `cent`
+walls are {32, 48, 48, 48, 64, 64, 64, 64} and λ* does not order them (λ*=0.388 → 64 but
+λ*=0.358 → 48; λ*=0.0068 → 48 but λ*=0.027 → 32). λ* is now the 9th falsified invariant —
+the apparent T4 effect was an artifact of the uncentred target, not of the eigenvalue.
+
+**P4 — the GH crossing under-predicts the wall by a constant factor.** Largest K1 with
+E‖pv‖ < GH(L), versus the measured wall:
+
+| curve | cfg | GH-crossing K1 | measured wall |
+|---|---|---|---|
+| 12-bit/2557 | orig | 2 | 8 |
+| 12-bit/2557 | cent | 6 | 12 |
+| 12-bit/2677 | orig | 3 | 4 |
+| 12-bit/2677 | cent | 8 | 12 |
+
+LLL recovers 1.5–4× beyond the point where the planted vector stops being λ₁ under the
+Gaussian heuristic. Consistent with Result 1: recovery is a coset/BDD condition, and the
+BDD radius here exceeds λ₁. The *ratio* of walls between configs is predicted well (P4
+predicts cent/orig = 6/2 and 8/3 ≈ 2.7–3.0; measured 12/8 and 12/4); the *absolute*
+crossing is not the right threshold.
+
+### Next step proposal
+**Thread 24 — is the centred wall the information-theoretic one?**
+The counting bound for the k₁-only-leak model: the attack has m·log₂(K1·K2) bits of
+constraint against log₂ n + m·log₂(K1·K2) bits of unknown, so recovery should be possible
+whenever eff = K1·K2/n < 1 given enough m, independent of any lattice. The centred attack
+walls at eff = 48·256/65536 = 0.1875 at m=12. Concrete sub-task: for the centred
+formulation, sweep m ∈ {8,12,16,24,32,48} at eff ∈ {0.19, 0.25, 0.35, 0.5} on the same 8
+fresh 17-bit curves and locate the (m, eff) frontier.
+Falsifier: if the frontier keeps moving outward in eff as m grows, the wall is a
+reduction-quality wall and BKZ/progressive-BKZ is the next lever; if it saturates at some
+eff* < 1 independent of m, the wall is structural to this lattice family and Phase 2 is at
+its ceiling. T4b (2026-07-29) already found no rescue from m alone in the *uncentred*
+formulation (m = 8/12/16/24/32 → 0,0,1,0,1 of 5), so the centred repeat is the honest
+test. Cost: ~24 grid points × 8 curves × 5 seeds; the P3 grid (40 cells × 4 configs) ran
+in about 12 minutes, so this is ~30 minutes.
+
+Secondary (cheap): re-run P2/P3 with BKZ(β=20,40) on `cent` only, to separate
+"reduction-quality wall" from "structural wall" without the m sweep.
+
+### Commits made

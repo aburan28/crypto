@@ -1,0 +1,153 @@
+==============================================================================
+Thread 23 — reformulate the Phase-2 GLV lattice so the planted vector
+            can be lambda_1 (projection + centring)
+sections: P0 P1 P2 P3 P4
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P0: lattice sanity — the projection drops exactly one dimension
+------------------------------------------------------------------------------
+Check that pi(L) really is L / <n*S_D*e_m>: LLL returns rank 2m+1 from
+the 2m+2 generators (one zero row), and log2 det drops by log2(n*S_D).
+
+curve          cfg     dim  rank   log2 det     drop  log2(n*S_D)
+12-bit/2557    orig     18    18     214.77        —        11.38
+12-bit/2557    proj     17    17     203.39    11.38        11.38
+12-bit/2677    orig     22    22     265.17        —        11.37
+12-bit/2677    proj     21    21     253.80    11.37        11.37
+
+------------------------------------------------------------------------------
+EXP P1: does the planted vector become lambda_1?   (sv/pv ratio)
+------------------------------------------------------------------------------
+2026-07-29 measured sv/pv in [0.34, 0.61] for 'orig' — the planted
+vector is 2-3x LONGER than lambda_1.  A ratio of 1.000 means the
+shortest vector found IS the planted vector.
+
+curve           K1 cfg         sv/pv   |pv|/n   |sv|/n    GH/n  E|pv|/n  rec
+12-bit/2557      2 orig        0.558    1.791    1.000   2.794    2.582    Y
+12-bit/2557      2 cent        0.523    1.912    1.000   2.794    1.633    Y
+12-bit/2557      2 proj        1.000    1.761    1.761   2.880    2.517    Y
+12-bit/2557      2 projcent    0.945    1.884    1.780   2.880    1.528    Y
+
+12-bit/2557      8 orig        0.510    1.962    1.000   1.508    2.582    Y
+12-bit/2557      8 cent        0.585    1.709    1.000   1.508    1.633    Y
+12-bit/2557      8 proj        0.532    1.934    1.030   1.499    2.517    Y
+12-bit/2557      8 projcent    0.614    1.677    1.030   1.499    1.528    Y
+
+12-bit/2677      2 orig        0.446    2.241    1.000   3.426    2.828    Y
+12-bit/2677      2 cent        0.487    2.055    1.000   3.426    1.732    Y
+12-bit/2677      2 proj        1.000    2.217    2.217   3.528    2.769    Y
+12-bit/2677      2 projcent    1.000    2.028    2.028   3.528    1.633    Y
+
+12-bit/2677      8 orig        0.418    2.392    1.000   1.822    2.828    n
+12-bit/2677      8 cent        0.551    1.815    1.000   1.822    1.732    Y
+12-bit/2677      8 proj        0.725    2.369    1.716   1.821    2.769    n
+12-bit/2677      8 projcent    0.962    1.785    1.716   1.821    1.633    Y
+
+------------------------------------------------------------------------------
+EXP P2: the K1 wall — does the reformulation move it outward?
+------------------------------------------------------------------------------
+2026-07-29 T4 grid, replayed for all four formulations, 5 seeds each.
+Baseline ('orig'): 2557 walls at K1 ~ 12-16, 2677 walls at K1 ~ 4-6.
+
+12-bit/2557  (n=2659, lam*=0.3400, m=8)
+  cfg          2    3    4    6    8   12   16   24   32
+  orig         5    5    5    5    4    1    0    0    0
+  cent         5    5    5    5    5    5    3    0    0
+  proj         5    5    5    5    4    1    0    0    0
+  projcent     5    5    5    5    5    5    3    0    0
+
+12-bit/2677  (n=2647, lam*=0.0699, m=10)
+  cfg          2    3    4    6    8   12   16   24   32
+  orig         5    5    5    2    1    0    0    0    0
+  cent         5    5    5    5    5    5    2    3    0
+  proj         5    5    5    2    1    0    0    0    0
+  projcent     5    5    5    5    5    5    2    3    0
+
+Wall = largest K1 with >=4/5 recoveries:
+curve               orig      cent      proj  projcent
+12-bit/2557            8        12         8        12
+12-bit/2677            4        12         4        12
+
+------------------------------------------------------------------------------
+EXP P3: independent replication on fresh 17-bit curves
+------------------------------------------------------------------------------
+The two historical curves are 2 data points.  Sweep 8 fresh j=0 GLV
+curves across the K1 range that brackets the 'orig' wall at 17 bits.
+Wall position scales with eff = K1*K2/n, and K2 = isqrt(n)+1 ~ 256
+here (vs 52 at 12 bits), so the discriminating K1 range is ~5x larger.
+
+8 fresh 17-bit j=0 curves, m=12, 5 seeds, K1 in [16, 24, 32, 48, 64]
+
+curve                   lam* cfg        K1=16  K1=24  K1=32  K1=48  K1=64
+p=65539/n=65287       0.3346 orig           5      5      5      4      3
+p=65539/n=65287       0.3346 cent           5      5      5      5      5
+p=65539/n=65287       0.3346 proj           5      5      5      4      3
+p=65539/n=65287       0.3346 projcent       5      5      5      5      5
+
+p=65557/n=65053       0.3877 orig           4      1      0      0      0
+p=65557/n=65053       0.3877 cent           5      5      5      5      5
+p=65557/n=65053       0.3877 proj           4      1      0      0      0
+p=65557/n=65053       0.3877 projcent       5      5      5      5      5
+
+p=65617/n=65119       0.3581 orig           5      2      0      0      0
+p=65617/n=65119       0.3581 cent           5      5      5      4      2
+p=65617/n=65119       0.3581 proj           5      2      0      0      0
+p=65617/n=65119       0.3581 projcent       5      5      5      4      2
+
+p=65629/n=66109       0.4096 orig           5      3      0      0      0
+p=65629/n=66109       0.4096 cent           5      5      5      4      3
+p=65629/n=66109       0.4096 proj           5      3      0      0      0
+p=65629/n=66109       0.4096 projcent       5      5      5      4      3
+
+p=65647/n=65719       0.0273 orig           4      2      0      0      0
+p=65647/n=65719       0.0273 cent           5      5      5      2      2
+p=65647/n=65719       0.0273 proj           4      2      0      0      0
+p=65647/n=65719       0.0273 projcent       5      5      5      2      2
+
+p=65677/n=65899       0.3184 orig           5      5      5      5      2
+p=65677/n=65899       0.3184 cent           5      5      5      5      5
+p=65677/n=65899       0.3184 proj           5      5      5      5      2
+p=65677/n=65899       0.3184 projcent       5      5      5      5      5
+
+p=65707/n=66037       0.2115 orig           5      1      0      0      0
+p=65707/n=66037       0.2115 cent           5      5      5      5      5
+p=65707/n=66037       0.2115 proj           5      1      0      0      0
+p=65707/n=66037       0.2115 projcent       5      5      5      5      5
+
+p=65713/n=65269       0.0068 orig           5      5      3      0      0
+p=65713/n=65269       0.0068 cent           5      5      5      4      2
+p=65713/n=65269       0.0068 proj           5      5      3      0      0
+p=65713/n=65269       0.0068 projcent       5      5      5      4      2
+
+TOTAL (/40)                      K1=16  K1=24  K1=32  K1=48  K1=64
+                             orig          38     24     13      9      5
+                             cent          40     40     40     34     29
+                             proj          38     24     13      9      5
+                             projcent      40     40     40     34     29
+
+Wall = largest K1 with >=80% of trials recovering:
+  orig      16
+  cent      48
+  proj      16
+  projcent  48
+
+------------------------------------------------------------------------------
+EXP P4: GH crossing vs measured wall
+------------------------------------------------------------------------------
+Model: the planted vector is lambda_1 iff E||pv|| < GH(L).  Report the
+largest K1 satisfying that, next to the measured wall from P2.
+
+curve          cfg        GH-crossing K1  measured wall
+12-bit/2557    orig                    2              8
+12-bit/2557    cent                    6             12
+12-bit/2557    proj                    2              8
+12-bit/2557    projcent                6             12
+12-bit/2677    orig                    3              4
+12-bit/2677    cent                    8             12
+12-bit/2677    proj                    3              4
+12-bit/2677    projcent                8             12
+
+==============================================================================
+done
+==============================================================================

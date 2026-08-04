@@ -135,6 +135,50 @@ in the k-overall-bias model (where for `c_total = 64` we'd need
 log_2(n)/c_total ≈ 4 sigs, but with strong-bias assumption that
 doesn't apply to the k₁-only case).
 
+### Centring the target (measured 2026-08-04)
+
+The target-vector norm above assumes `k_{i,1} ∈ [0, K1)` and
+`k_{i,2} ∈ [0, K2)` enter the lattice as-is.  They should not:
+an uncentred unknown on `[0,X)` contributes `X²/3` to the squared
+norm, a centred one on `[−X/2, X/2)` contributes `X²/12`.
+Both halves are re-centred at zero cost by replacing
+
+```
+        A_i   ->   A_i − ⌊K1/2⌋ − λ·⌊K2/2⌋   (mod n)
+```
+
+in the target row, which shifts the unknowns to
+`c_{i,1} = k_{i,1} − ⌊K1/2⌋` and `c_{i,2} = k_{i,2} − ⌊K2/2⌋`.
+The lattice itself is unchanged.  Expected planted norm:
+
+```
+   uncentred   E‖v‖/n = √(2m/3 + 4/3)      (m=12: 3.055)
+   centred     E‖v‖/n = √(m/6  + 4/3)      (m=12: 1.826)
+```
+
+Since `GH(L) ∝ K1^{−m/(2m+2)}`, an `f`× shorter target buys
+`f^{(2m+2)/m}` in the bias bound `K1`.  Measured on 8 fresh 17-bit
+j=0 curves at `m=12`: the wall moves from `K1 = 16` to `K1 = 48`
+(predicted 3.05×, measured 3.00×), and at `K1 = 32` recovery goes
+from 13/40 trials to 40/40.
+
+Two negative results from the same experiment:
+
+- Quotienting the lattice by the trivial direction `⟨n·S_D·e_m⟩`
+  (the shortest vector, identified 2026-07-29) makes the planted
+  vector `λ₁` but changes recovery in **none** of 160 grid cells.
+  The d column is only ~2% of the planted norm, and the trivial
+  vector has last coordinate 0 so it never competes in the
+  Kannan coset that recovery scans.
+- The apparent dependence of the wall on `λ* = min(λ, n−λ)/n`
+  (Risk 2 below, and the 2026-07-29 T4 table) does not survive
+  centring: both historical 12-bit curves then wall at the same
+  `K1 = 12` despite `λ*` of 0.34 vs 0.07.
+
+Script: `secp256k1_cm_audit/glv_hnp_thread23_projected.py`;
+data: `..._output.txt`; full write-up in `RESEARCH_AUTOLAB_LOG.md`
+under 2026-08-04.
+
 ## 3. Why this is novel
 
 To the best of our knowledge, no published HNP variant exploits
