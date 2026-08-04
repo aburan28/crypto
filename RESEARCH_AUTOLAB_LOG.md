@@ -6277,4 +6277,5 @@ Secondary: if Thread 24 succeeds, re-run the 2026-07-29 T3 17-bit sweep
 to measure how far the eff wall actually moves.
 
 ### Commits made
-(recorded in the follow-up commit below)
+
+2eddd23 autolab 2026-08-04: Thread 23 — d-column projected out; wall is ALGORITHMIC, not information-theoretic
