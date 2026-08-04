@@ -6103,3 +6103,156 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the next-step
+proposed verbatim by the 2026-07-29 entry (log line ~6089). Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so priority 5 (GLV-HNP
+Phase 2) is the live thread; it made measurable progress 6 days ago, so protocol rule (b)
+applies.
+
+Outcome: **the falsifier's two clauses split.** sv/pv did NOT rise above 1, yet the K1
+wall DID move outward — because the effect comes from a change the 2026-07-29 entry did
+not consider. The trivial vector was a red herring; **centering the CVP target is the
+whole effect**, and it roughly doubles the tolerable bias strength.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`. Note for future
+  runs — sympy is NOT preinstalled either; the 2026-07-29 note only mentioned fpylll and
+  cysignals. Full install line: `pip install fpylll cysignals sympy`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (7 experiments U1–U7), reusing
+  `scales()`, `gen_signatures()` and `build_glv_lattice()` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:227,230,254` so every number is directly comparable
+  to the 2026-07-29 tables. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (129 lines).
+- Implemented all four lattice variants and compared them as a 2×2 factorial:
+  - `orig`  — Thread-20 lattice, dim 2m+2 (baseline, unchanged).
+  - `proj`  — reformulation A: quotient out the `n·S_D·e_m` direction. dim 2m+1. The
+    k1-block becomes `S_K1 · L_0` with `L_0` the classical Boneh–Venkatesan HNP lattice
+    of rank m, det `n^(m-1)`; basis `S_K1·(1,b_2..b_m)` with `b_i = B_1^{-1}B_i mod n`,
+    plus `n·S_K1·e_i` for i≠pivot. d is no longer a coordinate — it is reconstructed as
+    `d = B_i^{-1}(k1_i + λk2_i − A_i) mod n` and cross-checked against all m signatures.
+  - `origc`/`projc` — reformulation C (new this run): same lattices but the Kannan row
+    embeds the **centered** target, `(A_i − K1/2)·S_K1` in the k1 block and
+    `−(K2/2)·S_K2` in the k2 block. Uses only the public GLV bounds K1, K2.
+  - `cvp`   — reformulation B: no embedding at all, Babai nearest-plane (own GS
+    reconstruction from fpylll `GSO.Mat`) on the centered target.
+- `cargo test --test curve_audit` → 5/5 pass (4.22s). No Rust changed. ✓
+- `python3 glv_hnp_phase2_projected.py` → exit 0, 129 lines, clean. ✓
+
+### Findings
+
+**U1 — the projection is constructed correctly.** On all three historical curves the
+planted vector is an integer combination of the projected basis, and
+`det = S_K1^m · n^(m−1) · S_K2^m · S_KANNAN` exactly — i.e. `det(L)/(n·S_D)`, confirming
+the kernel of the projection restricted to L is exactly `Z·(n·S_D·e_m)`.
+
+**U2 — the trivial vector really is gone, and it doesn't matter.**
+
+| curve | K1 | m | orig sv/pv | win | proj sv/pv | win | projc sv/pv | win |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.543 | 5/5 | 0.790 | 5/5 | 0.906 | 5/5 |
+| 12-bit/2557 | 8 | 8 | 0.445 | 5/5 | 0.475 | 5/5 | 0.629 | 5/5 |
+| 12-bit/2677 | 8 | 10 | 0.387 | 0/5 | 0.767 | 0/5 | **0.998** | **5/5** |
+
+sv/pv rises as intended but stays below 1 — the planted vector is still not λ₁ even
+after the quotient. The win column is unchanged by the projection.
+
+**U3/U4/U5/U6 — REFORMULATION A IS AN EXACT NO-OP.** `orig` and `proj` agree
+cell-for-cell in every single measurement taken this run: 16 (curve, K1) cells in U3,
+10 (curve, m) cells in U4, 40 curve-instances in U5, 16 cells in U6. **The trivial
+vector `n·S_D·e_m` identified in T5 (2026-07-29) is short but never obstructed
+recovery.** Recorded as a dead hypothesis so no future run re-tries it.
+
+**U6 — 2×2 factorial: centering carries 100% of the effect.** 12-bit/2677, λ*=0.070,
+m=10, K1 grid 2/3/4/6/8/12/16/24, 5 seeds:
+
+| variant | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| orig  (proj− ctr−) | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| proj  (proj+ ctr−) | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| origc (proj− ctr+) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 |
+| projc (proj+ ctr+) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 |
+
+Same pattern on 12-bit/2557 (λ*=0.340): wall moves K1≈12 → K1≈24
+(orig/proj `…5/5 1/5 0/5 0/5`; origc `…5/5 5/5 4/5 0/5`; projc `…5/5 5/5 5/5 1/5`).
+Babai-CVP (`cvp`) tracks `projc` closely (4/5 vs 5/5 at K1=6–12), confirming the gain is
+the target choice and not the embedding-vs-CVP distinction.
+
+**The K1 wall on the λ*=0.07 curve moves from K1≈4–6 to K1≈12–16 — a factor ~3.**
+
+**U4 — this overturns the T4b control of 2026-07-29.** That entry concluded "at K1=8 more
+data does not rescue it (m = 8/12/16/24/32 → 0,0,1,0,1 of 5), so the K1 wall is genuine."
+With centering, same curve, same K1=8:
+
+| m | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| orig/proj | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 |
+| origc/projc | 4/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+
+More data *does* rescue it once the target is centered. The T4b "genuine K1 wall" was an
+artefact of the uncentered target.
+
+**U5 — population effect, 20 fresh 17-bit j=0 GLV curves, m=12, 5 seeds.**
+Curves recovering 5/5:
+
+| eff = K1·K2/n | orig | proj | projc |
+|---|---|---|---|
+| 0.15 | 3/20 | 3/20 | **14/20** |
+| 0.25 | 0/20 | 0/20 | **4/20** |
+
+At eff=0.15 the 17 curves that `orig` failed include the whole λ* range — e.g. λ*=0.0068
+goes 0/5 → 5/5, λ*=0.3877 goes 0/5 → 5/5. Consistent with 2026-07-29 T3: λ* is not the
+variable.
+
+**U7 — the new population wall.** projc, m=12, 17-bit, 20 curves:
+
+| eff | full recovery | mean win rate |
+|---|---|---|
+| 0.15 | 14/20 | 0.93 |
+| 0.25 | 4/20 | 0.56 |
+| 0.35 | 0/20 | 0.22 |
+| 0.45 | 0/20 | 0.02 |
+| 0.60 | 0/20 | 0.00 |
+
+Old wall ≈ eff 0.15, new wall ≈ eff 0.35 (hard by 0.45). **Centering roughly doubles the
+tolerable bias strength, from eff ≈ 0.10 to eff ≈ 0.25.**
+
+**Mechanism (why it works, no lattice magic).** Uncentered, the planted nonce coordinates
+are `k1_i·S_K1 ∈ [0, n)` and `k2_i·S_K2 ∈ [0, n)`, so `E[x²] = X²/3`. Centered they are
+`(k1_i − K1/2)·S_K1 ∈ [−n/2, n/2)`, so `E[x²] = X²/12`. Hence
+
+  ‖v_planted‖² : n²(2m/3 + 1) → n²(m/6 + 1)   (projected; +1/3 for the d column in orig)
+
+a factor 1.63× shorter at m=10, 1.70× at m=12 — obtained for free from the public bounds
+K1 and K2, with no change to the lattice determinant. A 1.6–1.7× shorter BDD target at
+fixed det is worth roughly a 2× relaxation in eff, which is what U7 measures.
+
+**Correction to the historical record.** Every Phase-2 number logged between 2026-06-15
+and 2026-07-29 — the eff walls, the K1 walls, the T4/T4b grids, the λ*/ρ/ν̂ separator
+studies — was measured on an **uncentered** target and understates the attack by ~2× in
+eff. Prior *relative* conclusions (λ* is not causal, ρ is not a separator, the projection
+is irrelevant) survive; the *absolute* thresholds do not.
+
+### Next step proposal
+**Thread 24 — re-run the separator studies on the centered lattice.**
+The 2026-07-29 ν̂ separator (AUC 0.935, commit `e845207`) and the six failed curve-level
+invariants (log lines ~3560–3580) were all fitted against uncentered failures. Since
+centering moves 11/20 curves at eff=0.15 from fail to succeed, the entire label set they
+were fitted on has changed. Concretely: re-fit ν̂ on the `projc` labels from U5/U7 at
+eff=0.25 and 0.35 (where there is now a real mix of successes and failures — at eff=0.15
+projc is 14/20 and nearly saturated). Falsifier: if ν̂'s AUC on the centered labels stays
+≥0.9, it is a genuine BDD-instance invariant; if it collapses to ~0.5, it was fitting the
+uncentered target's geometry and should be retired alongside ρ and λ*.
+
+**Secondary — Thread 25: is centering optimal, or just better?**
+Centering assumes `k_j ~ U[0, K_j)`. If the true nonce distribution is known to be
+non-uniform, the optimal target is its mean and the optimal per-block scale is its
+standard deviation, not `n/K_j`. Sketch: replace `S_K1 = n/K1` with `S_K1 = n/(σ_1·√12)`
+and re-run U7. Expected outcome: no change for uniform nonces (σ = K/√12 makes it
+identical), which would be a null result confirming the current scaling is already
+optimal for the uniform model — cheap to run and worth closing off.
+
+### Commits made
