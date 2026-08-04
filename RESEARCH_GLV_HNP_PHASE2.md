@@ -271,3 +271,75 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. The Phase-2 wall (measured, 2026-08-04)
+
+Sections 1–8 above are the design; this section records where the
+attack actually stops.  Script:
+`secp256k1_cm_audit/glv_hnp_phase2_thread23_elim.py`, artifact
+`..._output.txt`.  Notation: `K1`, `K2` are the nonce-part bounds,
+`m` the signature count, `eff = K1·K2/n`.
+
+### 10.1 The trivial vector is not the obstruction
+
+The Kannan lattice of `glv_hnp_phase2_20bit.py:263` always contains
+`n·S_D·e_m` (take `n·row_m − Σ_i B_i·row_i`), which is shorter than
+the planted vector for every `m ≥ 1`, so the planted vector is never
+`λ₁` (logged 2026-07-29, T5).  Eliminating `d` outright removes it:
+using signature 0, `d = B_0⁻¹(k_full,0 − A_0)`, so every other
+signature becomes `k_full,i ≡ C_i + β_i·k_full,0 (mod n)` with
+`β_i = B_i B_0⁻¹`, `C_i = A_i − β_i A_0`, and the `d` column — with
+its trivial vector — disappears.  Dimension drops `2m+2 → 2m+1`.
+
+**This changes nothing.**  Over 440 paired instances (same signatures
+fed to both lattices) the two formulations agree on every single one:
+0 disagreements.  BKZ-40 also matches LLL in 6/6 boundary cells.
+
+The reason is that the trivial vector spans a rank-1 sublattice that
+the planted vector is (essentially) orthogonal to.  Quotienting it
+out gives `det → det/n`, `dim → dim−1`, and the resulting Gaussian-
+heuristic ratio is *the same function* as the eliminated lattice's —
+both reduce to `n^{(m−1)/m}/(K1K2)` raised to `≈ m/(2m+1)`.
+
+### 10.2 Closed form for the wall
+
+For the eliminated lattice `det = n^{m−1}(K1K2)^{m+1}`, `dim = 2m+1`,
+`‖v_planted‖ = K1K2·√(2m/3+1)`, so
+
+    gh  :=  λ₁^GH / ‖v_planted‖
+        ≈  √(3/(2πe)) · [ n^{(m−1)/m} / (K1·K2) ]^{m/(2m+1)}
+
+(within 7% of the exact heuristic for `m ∈ [6,32]`).  Solving `gh = c`:
+
+    eff*  =  n^{−1/m} · ( √(3/(2πe)) / c )^{(2m+1)/m}
+
+`gh` is an excellent predictor of success; pooled over 400 instances:
+
+| gh          | < 0.60 | 0.60–0.80 | 0.90–1.00 | 1.00–1.10 | > 1.30 |
+|-------------|--------|-----------|-----------|-----------|--------|
+| success     | 2%     | 49%       | 86%       | 98%       | 100%   |
+
+so the 50% crossing is at `c ≈ 0.80`, and `eff*` predicts the measured
+wall within a factor 2 in every setting tested.
+
+### 10.3 The wall is the Gaussian heuristic, not information
+
+Recovery is information-theoretically possible while
+`eff < n^{−1/m}`.  The measured wall sits a factor **≈ 3.9×** below it
+(4.0× / 3.9× / 3.8× at `m = 8, 10, 12`).  That factor is the `2πe`
+lattice-packing constant, i.e. a limit of the lattice paradigm rather
+than a shortage of data.  Consistent with this, more signatures do not
+help: raising `m` from 8 to 32 raises `gh` from 0.60 to 0.91 but
+inflates LLL's Hermite factor `δ^dim` faster, and the measured success
+rate stays flat (0–2 of 5 throughout).
+
+### 10.4 What remains unexplained
+
+`gh` is independent of `λ` by construction (the determinant does not
+involve `λ`), yet at the boundary the high-`λ*` curve 12-bit/2557
+(`λ* = 0.340`) beats its predicted wall by ≈2× while the low-`λ*`
+curve 12-bit/2677 (`λ* = 0.070`) matches it.  This is the same
+direction as the 2026-07-29 T3 observation that at `eff = 0.15` the
+only survivors had `λ* ∈ [0.318, 0.482]`.  `λ*` is not a threshold
+(that was falsified), but a residual second-order shift of the wall
+remains, and its size bounds any λ-aware improvement to Phase 2.

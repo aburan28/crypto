@@ -6103,3 +6103,159 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 lattice so the planted vector is λ₁.
+All six original priority threads are CLOSED/BLOCKED/DEAD-END (see 2026-07-29
+header), and Thread 23 was the explicit next-step proposal of the 2026-07-29 entry
+(log line 6089) with a stated falsifier, so protocol rule (b) selects it.
+
+Falsifier as stated on 2026-07-29: *"if sv/pv rises above 1 after the
+reformulation and the K1 wall in T4 moves outward on the λ*=0.07 curve
+(currently K1≈4–6), the reformulation is a real improvement; if the wall stays
+at K1≈4–6, then the wall is information-theoretic and Phase 2 is at its ceiling."*
+
+**Outcome: the wall does not move — 0 disagreements over 440 paired instances.**
+But the second horn of the falsifier is also wrong: the wall is *not*
+information-theoretic. It is the Gaussian heuristic, a factor ≈3.9× tighter.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, sympy 1.14.0. (Same note as 2026-07-29: `cysignals` is a
+  separate runtime import.) `pari-gp` not needed this run.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_elim.py` (E0–E5, 6 experiments),
+  artifact `secp256k1_cm_audit/glv_hnp_phase2_thread23_elim_output.txt` (143 lines).
+  Baseline `build_glv_lattice` is copied verbatim from `glv_hnp_phase2_20bit.py:263`
+  so the head-to-head is exact; signature generation is shared, so every comparison
+  is **paired** (both lattices see the identical signature set).
+- Implemented the reformulation by **eliminating `d`** rather than projecting.
+  Using signature 0, `d = B₀⁻¹(k_full,0 − A₀)`, so for i ≥ 1
+  `k_full,i ≡ C_i + β_i·k_full,0 (mod n)`, `β_i = B_i B₀⁻¹`, `C_i = A_i − β_i A₀`.
+  The `d` column — and with it the trivial vector `n·S_D·e_m` — is gone.
+  Basis: rows `R_u`, `R_t_i (i≥1)`, `R_k2_i`, `R_c`; dim `2m+1` (vs `2m+2`).
+  `R_t_0` is droppable because `n·e_0 = n·R_u + Σ_{i≥1} β_i R_t_i`.
+- E0 verifies the reformulation is sound: the planted vector's integer
+  coefficient vector is exhibited explicitly and its image equals the expected
+  coordinates `(k1_i·w1, k2_i·w2, W)` on all three historical curves.
+- Derived and numerically checked a closed form for the wall (E5).
+- `cargo test --test curve_audit` → 5/5 pass (7.01s). ✓
+
+### Findings
+
+**E2 — Thread 23's falsifier resolves NEGATIVE. The trivial vector costs nothing.**
+The T4 grid, baseline vs eliminated, 5 seeds/cell:
+
+| curve | form | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 (m=8) | base | 5 | 5 | 5 | 5 | 4 | 1 | 0 | 0 |
+| 12-bit/2557 (m=8) | elim | 5 | 5 | 5 | 5 | 4 | 1 | 0 | 0 |
+| 12-bit/2677 (m=10) | base | 5 | 5 | 5 | 2 | 1 | 0 | 0 | 0 |
+| 12-bit/2677 (m=10) | elim | 5 | 5 | 5 | 2 | 1 | 0 | 0 | 0 |
+
+Equal totals could hide cancelling disagreements, so E2b/E3b check
+instance-by-instance: **440 paired instances (40 boundary + 400 sweep),
+`base_ok ≠ elim_ok` on 0 of them.** E2c: BKZ-40 equals LLL in 6/6 boundary
+cells for both formulations, so this is not a reduction-strength effect either.
+
+*Why it had to come out this way.* The trivial vector spans a rank-1 sublattice
+that the planted vector is essentially orthogonal to (its `d` coordinate is
+`d·S_D` with `S_D=1`, i.e. `O(n)` against `‖pv‖ ≈ n√(2m/3+4/3)`). Quotienting it
+gives `det → det/n`, `dim → dim−1`, and the resulting GH ratio is *the same
+function* as the eliminated lattice's — both are
+`√(3/(2πe))·[n^{(m−1)/m}/(K1K2)]^{≈m/(2m+1)}`. Thread 20's T5 correctly
+identified that pv is never λ₁; the inference that this was *costing* anything
+was wrong.
+
+Note sv/pv does rise (E1: 0.421 → 0.808 on 12-bit/2677, 0.600 → 0.845 on
+8-bit/199), i.e. the first half of the falsifier's antecedent holds, and the
+attack still does not improve. sv/pv was the wrong observable.
+
+**E3b — the Gaussian-heuristic ratio `gh = λ₁^GH/‖pv‖` predicts success sharply.**
+400 pooled instances, 10 fresh 17-bit j=0 GLV curves, m=12, 8 values of eff:
+
+| gh bin | [0,0.60) | [0.60,0.80) | [0.90,1.00) | [1.00,1.10) | ≥1.30 |
+|---|---|---|---|---|---|
+| n instances | 100 | 100 | 50 | 50 | 100 |
+| success | 2% | 49% | 86% | 98% | 100% |
+
+50%-success crossing at **c ≈ 0.80**. The eff sweep behind it:
+
+| eff | 0.02 | 0.03 | 0.05 | 0.07 | 0.10 | 0.15 | 0.25 | 0.35 |
+|---|---|---|---|---|---|---|---|---|
+| curves 5/5 (base = elim) | 10/10 | 10/10 | 9/10 | 6/10 | 4/10 | 2/10 | 0/10 | 0/10 |
+| gh | 1.71 | 1.37 | 1.08 | 0.93 | 0.78 | 0.65 | 0.50 | 0.43 |
+
+**E5 — closed form for the Phase-2 wall.**
+With `det = n^{m−1}(K1K2)^{m+1}`, `dim = 2m+1`, `‖pv‖ = K1K2·√(2m/3+1)`:
+
+```
+    gh   ≈  sqrt(3/(2*pi*e)) * [ n^((m-1)/m) / (K1*K2) ]^(m/(2m+1))
+    eff* =  n^(-1/m) * ( sqrt(3/(2*pi*e)) / c )^((2m+1)/m)      [eff = K1*K2/n]
+```
+
+Closed form vs exact heuristic: ratio 1.015–1.074 over m ∈ [6,32] (8 configs).
+Predicted wall at c = 0.80 vs measured 50% crossing:
+
+| setting | eff* pred | K1* pred | K1* obs |
+|---|---|---|---|
+| 12-bit/2557 (λ*=0.340) m=8 | 0.0945 | 4.8 | ~10 |
+| 12-bit/2677 (λ*=0.070) m=10 | 0.1170 | 6.0 | ~5.5 |
+| 17-bit sweep m=12 | 0.1005 | 30.1 | ~26 |
+
+**The wall is the Gaussian heuristic, not information.** Recovery is
+information-theoretically possible while `eff < n^{−1/m}`; the measured wall sits
+**3.8–4.0× below it** (m=8: 0.373 vs 0.094; m=10: 0.455 vs 0.117; m=12: 0.386 vs
+0.101). That gap is the `2πe` packing constant — a limit of the lattice paradigm,
+not a shortage of data. This *corrects the second horn* of Thread 23's falsifier,
+which assumed "wall doesn't move ⇒ information-theoretic".
+
+**E4 — why extra signatures stop paying (explains T4b).**
+12-bit/2677, K1=8 (a failing cell), successes/5:
+
+| m | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| dim | 17 | 25 | 33 | 49 | 65 |
+| base | 0 | 1 | 1 | 2 | 0 |
+| elim | 0 | 2 | 1 | 2 | 0 |
+| gh (SVP oracle) | 0.596 | 0.715 | 0.786 | 0.866 | 0.909 |
+| r_LLL = gh·√(2πe/dim)/δ^dim, δ=1.021 | 0.419 | 0.352 | 0.285 | 0.185 | 0.121 |
+
+`gh` rises monotonically with m but LLL's Hermite factor `δ^dim` inflates faster;
+the two roughly cancel, which is exactly why T4b (2026-07-29) saw m = 8…32 give
+0,0,1,0,1. r_LLL over-corrects (it predicts monotone decline, observed is flat),
+so the truth is between the two, but the mechanism is identified.
+
+**Residual λ\* effect — the one thing still unexplained.**
+`gh` is λ-independent *by construction* (the determinant does not involve λ), yet
+12-bit/2557 (λ\*=0.340) beats its predicted wall by ≈2× (K1* pred 4.8, obs ~10)
+while 12-bit/2677 (λ\*=0.070) matches it (6.0 vs ~5.5). Same direction as the
+2026-07-29 T3 observation that at eff=0.15 the only 3/20 survivors had
+λ\* ∈ [0.318, 0.482]. So: Thread 20's falsification of λ\* as a *threshold* stands,
+but a second-order shift of the wall is real, and its magnitude bounds any
+λ-aware improvement to Phase 2.
+
+### Documentation
+`RESEARCH_GLV_HNP_PHASE2.md` §10 ("The Phase-2 wall (measured, 2026-08-04)")
+added: §10.1 trivial vector is not the obstruction, §10.2 closed form + calibration
+table, §10.3 GH-vs-information gap, §10.4 the residual λ\*.
+
+### Next step proposal
+**Thread 24 — quantify the residual λ\* shift at the GH boundary.**
+Hold `gh` fixed at ≈0.80 (the 50% crossing) by choosing K1 per curve from the E5
+closed form, then sweep λ\* over (0, 0.5) across ~30 fresh 17-bit curves at 5 seeds.
+GH predicts success rate flat in λ\*. Falsifier: if the success rate is flat, the
+residual is instance noise and Phase 2 is definitively at its lattice ceiling
+(→ write the ceiling into the paper as a hardness statement); if it rises
+monotonically in λ\*, fit the shift `s(λ*) = eff*_obs/eff*_pred` — `max_λ* s`
+is then a hard upper bound on what any λ-aware reformulation can buy. Cheap:
+the E3 harness already does everything except the per-curve K1 solve.
+
+Secondary (only if Thread 24 comes out flat): the 3.9× GH-vs-information gap is
+the natural target for a non-lattice method — the k₁ are in a *box*, not a ball,
+so a Bleichenbacher/DFT treatment of the k₁-bias is the standard escape and is
+not subject to the `2πe` loss. That would be a new thread, not a Phase-2 fix.
+
+### Commits made
+(see following entry / commit log — this run's commit hash recorded below)

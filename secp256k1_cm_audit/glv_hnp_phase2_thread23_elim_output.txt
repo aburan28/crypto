@@ -1,0 +1,143 @@
+==============================================================================
+Thread 23 -- eliminate d: does removing the trivial vector move the wall?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E0: correctness of the eliminated lattice
+------------------------------------------------------------------------------
+Checks: (a) the planted vector is an integer combination of the basis,
+        (b) its coordinates are exactly (k1_i*w1, k2_i*w2, W),
+        (c) end-to-end d recovery on a known-good configuration.
+
+  8-bit/199          m=6   K1=2   in-span=True  coords-ok=True  recover=YES
+  12-bit/2557        m=8   K1=8   in-span=True  coords-ok=True  recover=YES
+  12-bit/2677 FAIL   m=10  K1=8   in-span=True  coords-ok=True  recover=no
+
+------------------------------------------------------------------------------
+EXP E1: geometry -- where does the planted vector sit?
+------------------------------------------------------------------------------
+sv/pv = ||shortest reduced row|| / ||planted||.  sv/pv >= 1 means the
+planted vector is (at least) as short as anything LLL found.
+gh = Gaussian-heuristic lambda_1 / ||pv||; gh > 1 predicts success.
+
+  curve               K1   m | base sv/pv base gh*  triv/pv | elim sv/pv  elim gh
+  8-bit/199            2   6 |      0.600    0.825    0.600 |      0.845    0.831
+  12-bit/2557          8   8 |      0.514    0.771    0.514 |      0.533    0.775
+  12-bit/2677 FAIL     8  10 |      0.421    0.766    0.421 |      0.808    0.767
+
+  base gh* uses the lattice PROJECTED along the trivial n*e_m direction
+  (the fair comparison; the unprojected lattice has lambda_1 = n exactly).
+
+------------------------------------------------------------------------------
+EXP E2: the T4 grid -- baseline vs eliminated (Thread 23 falsifier)
+------------------------------------------------------------------------------
+Falsifier stated 2026-07-29: if the K1 wall moves outward the
+reformulation is a real improvement; if it stays, the wall is not the
+trivial vector's fault.  5 seeds per cell; entries are successes/5.
+
+  curve              form     2    3    4    6    8   12   16   24
+  12-bit/2557        base     5    5    5    5    4    1    0    0
+  12-bit/2557        elim     5    5    5    5    4    1    0    0
+                     (lam*=0.340, m=8, K2=52, n=2659)
+  12-bit/2677 FAIL   base     5    5    5    2    1    0    0    0
+  12-bit/2677 FAIL   elim     5    5    5    2    1    0    0    0
+                     (lam*=0.070, m=10, K2=52, n=2647)
+
+  E2b: PAIRED per-instance agreement in the boundary cells.
+  Equal column totals could in principle hide disagreements that
+  cancel; this checks instance by instance (same signatures both ways).
+  curve               K1 |  base  elim  agree  b-only  e-only
+  12-bit/2557          4 |     5     5    5/5       0       0
+  12-bit/2557          6 |     5     5    5/5       0       0
+  12-bit/2557          8 |     4     4    5/5       0       0
+  12-bit/2557         12 |     1     1    5/5       0       0
+  12-bit/2677 FAIL     4 |     5     5    5/5       0       0
+  12-bit/2677 FAIL     6 |     2     2    5/5       0       0
+  12-bit/2677 FAIL     8 |     1     1    5/5       0       0
+  12-bit/2677 FAIL    12 |     0     0    5/5       0       0
+  TOTAL paired instances: 40, agree 40, disagree 0
+
+  E2c: does BKZ-40 rescue the eliminated lattice at the boundary?
+  curve               K1 |  elim LLL  elim BKZ40  base BKZ40
+  12-bit/2557          8 |         4           4           4
+  12-bit/2557         12 |         1           1           1
+  12-bit/2557         16 |         0           0           0
+  12-bit/2677 FAIL     8 |         1           1           1
+  12-bit/2677 FAIL    12 |         0           0           0
+  12-bit/2677 FAIL    16 |         0           0           0
+
+------------------------------------------------------------------------------
+EXP E3: eff = K1*K2/n sweep on fresh 17-bit curves
+------------------------------------------------------------------------------
+info bound: recovery is information-theoretically possible while
+eff < n^(-1/m).  GH bound: predicted lattice limit (gh > 1).
+
+  found 10 fresh 17-bit j=0 GLV curves
+  m=12: info bound eff < 0.397
+
+     eff   K1 |  base 5/5  elim 5/5 | base gh*  elim gh
+    0.02    5 |   10/10     10/10   |    1.678    1.710
+    0.03    8 |   10/10     10/10   |    1.339    1.365
+    0.05   13 |    9/10      9/10   |    1.060    1.081
+    0.07   18 |    6/10      6/10   |    0.907    0.925
+    0.10   25 |    4/10      4/10   |    0.765    0.779
+    0.15   38 |    2/10      2/10   |    0.633    0.645
+    0.25   64 |    0/10      0/10   |    0.493    0.503
+    0.35   89 |    0/10      0/10   |    0.420    0.428
+
+  E3b: calibration of the Gaussian-heuristic predictor.
+  All E3 instances pooled and binned by gh (eliminated lattice).
+          gh bin     n   base ok   elim ok
+  [0.00,0.60)   100        2%        2%
+  [0.60,0.80)   100       49%       49%
+  [0.90,1.00)    50       86%       86%
+  [1.00,1.10)    50       98%       98%
+  [1.30,9.90)   100      100%      100%
+  paired instances 400, base != elim on 0
+
+------------------------------------------------------------------------------
+EXP E4: does extra data rescue the eliminated lattice?
+------------------------------------------------------------------------------
+T4b (2026-07-29) showed the baseline does NOT improve with m at the
+failing K1=8 on 12-bit/2677.  Same grid, both formulations.
+
+  curve 12-bit/2677 FAIL,  K1=8,  successes/5
+  gh assumes an SVP oracle; r_LLL discounts it by LLL's Hermite factor
+  delta^dim with delta=1.021.
+     m   dim   base   elim  elim gh    r_LLL
+     8    17      0      0    0.596    0.419
+    12    25      1      2    0.715    0.352
+    16    33      1      1    0.786    0.285
+    24    49      2      2    0.866    0.185
+    32    65      0      0    0.909    0.121
+
+------------------------------------------------------------------------------
+EXP E5: closed form for the wall
+------------------------------------------------------------------------------
+  gh ~ sqrt(3/(2 pi e)) * [ n^((m-1)/m) / (K1 K2) ]^(m/(2m+1))
+  =>  eff* = K1K2/n at the wall = n^(-1/m) * (sqrt(3/(2 pi e))/c)^((2m+1)/m)
+
+     m        n   K1   K2 |  gh exact  gh closed   ratio
+    12    90000   13  301 |    1.1510     1.1961  1.0392
+    12    90000   25  301 |    0.8409     0.8739  1.0392
+    12    90000   89  301 |    0.4572     0.4751  1.0392
+     8     2659    8   52 |    0.5968     0.6309  1.0572
+    10     2647    8   52 |    0.6642     0.6951  1.0465
+    24     2647    8   52 |    0.8658     0.8833  1.0202
+    32     2647    8   52 |    0.9094     0.9232  1.0153
+     6      199    2   15 |    0.6218     0.6680  1.0742
+
+  predicted wall (c = 0.80) vs measured 50%-success crossing:
+  setting                       eff* pred  K1* pred  K1* obs
+  12-bit/2557 (lam*=0.340) m=8     0.0945       4.8      ~10
+  12-bit/2677 (lam*=0.070) m=10     0.1170       6.0     ~5.5
+  17-bit sweep m=12                0.1005      30.1      ~26
+
+  info-theoretic bound for comparison (eff < n^(-1/m)):
+    m=8   n=2659    info 0.373   GH(c=0.80) 0.094   gap 4.0x
+    m=10  n=2647    info 0.455   GH(c=0.80) 0.117   gap 3.9x
+    m=12  n=90000   info 0.386   GH(c=0.80) 0.101   gap 3.8x
+
+==============================================================================
+done
+==============================================================================
