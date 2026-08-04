@@ -6610,4 +6610,4 @@ falsified and the ninth would fail for the same reason.
 
 ### Commits made
 
-(hash recorded in the following commit)
+bf7beab autolab 2026-08-04: Thread 23 — closed form for nu_hat; repair 07-29 merge regression
