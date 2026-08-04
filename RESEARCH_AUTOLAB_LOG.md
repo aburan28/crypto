@@ -6252,4 +6252,4 @@ be a clean independent confirmation on already-generated data.
 
 ### Commits made
 
-(recorded below after commit)
+b6296b7 autolab 2026-08-04: Thread 23 — CVP reformulation moves the GLV-HNP wall 2-3x
