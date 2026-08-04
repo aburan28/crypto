@@ -6374,7 +6374,7 @@ mechanism is now known to be scale-dependent, which explains all eight.
 
 ### Commits made
 
-a6ab968 autolab 2026-08-04: Thread 23 — ν̂ is the Hermite invariant; CF-shortcut falsified; 07-29 run #2 recovered
+e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
 
 ## 2026-08-04 (autolab run)
 
