@@ -1,0 +1,72 @@
+==============================================================================
+GLV-HNP Thread 23 -- closed form for nu_hat via continued fractions
+==============================================================================
+
+[A] EXACTNESS: Lagrange-Gauss lambda_1^2  ==  CF-scan lambda_1^2
+    (exact integer comparison; sizes 16..521 bits, eff 0.01..0.9)
+    checked = 4000   mismatches = 0
+    => VERDICT: lambda_1(L2) is attained at a convergent
+       denominator of lam/n in every case.  Closed form CONFIRMED.
+
+[B] SCALE LOCALISATION: is the minimising j the convergent
+    nearest q ~ sqrt(n*S_K1/S_K2) = sqrt(n*K2/K1)?  (64-bit)
+    trials=1500  j* == nearest-in-log: 652 (43.5%)  |dj|<=1: 1467 (97.8%)  |dj|<=2: 1500 (100.0%)
+
+[C] CLOSED FORM  nu_hat^2 = min_j theta_j*(t_j + 1/t_j),
+    theta_j = r_j*q_j/n,  t_j = r_j*S_K1/(q_j*S_K2)
+    trials=1200  max relative error vs Gauss nu_hat = 2.380e-16
+    floor  nu_hat >= sqrt(2*min_j theta_j)  holds: 1200/1200
+    nu_hat vs the partial quotient a_{j*+1} that follows the
+    minimising convergent (quintiles):
+       quintile  nu_hat mid  mean a_(j*+1)  median a
+              1       0.335         298.64        28
+              2       0.580          24.02         8
+              3       0.742          73.81         4
+              4       0.868          14.82         3
+              5       0.979           4.07         2
+
+[D] WHY THE JUNE SCALE-FREE CF INVARIANTS FAILED
+    20-bit sample, eff=0.10, 400 draws:
+      spearman(max_a,        nu_hat) = -0.270   <- June's invariant
+      spearman(a_(j*+1),     nu_hat) = -0.755   <- scale-selected one
+    FIXED 64-bit (n, lam), max_a = 563 is constant; sweep the scale:
+         eff   nu_hat   j*  a_(j*+1)
+        0.01   0.9831   20         1
+        0.02   0.8713   19         2
+        0.05   0.8038   19         2
+        0.10   0.9667   19         2
+        0.20   0.9971   17         1
+        0.40   0.9170   17         1
+        0.80   0.9872   16         1
+    one curve, nu_hat ranges over [0.8038, 0.9971] as K1 moves.
+    => a scale-free function of (n, lam) cannot predict nu_hat.
+
+[E] secp256k1 in CF terms
+    max_a over the whole CF of lam/n = 312
+      eff  nu(Gauss)    nu(CF)  exact   j*  /len  q* bits  a_(j*+1)   theta       t
+     0.05     0.8709    0.8709   True   71   142      128         5  0.1690   4.252
+     0.10     0.6624    0.6624   True   71   142      128         5  0.1690   2.126
+     0.25     0.5852    0.5852   True   71   142      128         5  0.1690   0.850
+     0.50     0.6851    0.6851   True   71   142      128         5  0.1690   0.425
+
+[F] REACHABILITY: which convergents can any choice of K1 select?
+    secp256k1: CF of lam/n has 142 convergents; max_a = 312 at index 16 (q is 29 bits)
+    n is 256 bits, so sqrt(n) ~ 128 bits
+             eff   nu_hat   j*  q* bits  a_(j*+1)
+        1.00e+00   0.9116   71      128         5
+        1.78e-01   0.5860   71      128         5
+        3.16e-02   1.0344   73      131         2
+        5.62e-03   0.8561   73      131         2
+        1.00e-03   0.8338   74      132         2
+        1.78e-04   0.8938   76      134         1
+        3.16e-05   0.8174   78      136         7
+        5.62e-06   0.5136   78      136         7
+        1.00e-06   0.9285   78      136         7
+    reachable j over eff in [1e-6, 1]: 71..78  of 0..141
+    => the max_a index 16 is UNREACHABLE at every eff: secp256k1's largest
+       partial quotient (312) sits below the sqrt(n) scale floor and can never
+       be selected.  max_a is not merely scale-free, it is measuring an invisible
+       part of the CF.
+    min nu_hat over the whole reachable scale range = 0.5136  (easy tail is < 0.45)
+
+==============================================================================
