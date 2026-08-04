@@ -6251,4 +6251,4 @@ the family F1 proves cannot work. They should be marked DEAD in a header comment
 future run re-derives this.
 
 ### Commits made
-(recorded in the follow-up commit)
+`a0a98fc` autolab 2026-08-04: Thread 2 CHLRS forward map CLOSED (split case) — wrong family diagnosed, criterion b1*b2 cube, explicit secp256k1 covers
