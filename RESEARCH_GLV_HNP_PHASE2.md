@@ -135,6 +135,76 @@ in the k-overall-bias model (where for `c_total = 64` we'd need
 log_2(n)/c_total ≈ 4 sigs, but with strong-bias assumption that
 doesn't apply to the k₁-only case).
 
+### 2.5 The CVP reformulation — L23 (Thread 23, 2026-08-04)
+
+**Do not use the Kannan embedding for this lattice.**  The implemented
+Phase-2 lattice (`build_glv_lattice`, `secp256k1_cm_audit/glv_hnp_phase2_20bit.py:263`)
+appends a Kannan row and asks LLL for a short vector.  That formulation is
+strictly lossy, for a reason that is visible in the basis itself:
+
+```
+    n·row_d − Σ_i B_i·row_i  =  (0, …, 0, n·S_D, 0, …, 0)
+```
+
+is always in the lattice, and with `S_D = 1` its norm is `n`, whereas the
+planted vector has norm `≈ n·√(2m/3 + 4/3)`.  So λ₁ is *never* the planted
+vector — it is this trivial vector, on every curve tested (2026-07-29, T5:
+`|sv[m]|/n = 1.0000` exactly).  Both vectors scale linearly in `S_D`, so no
+choice of scaling removes it.
+
+The fix is not to make the planted vector λ₁; it is to stop solving SVP.
+Drop the Kannan coordinate and solve CVP directly on the (2m+1)-dimensional
+lattice `L23`:
+
+```
+   cols:  0..m−1   k₁ columns   (scale S_K1 = n // K1)
+          m        d  column    (scale S_D  = 1)
+          m+1..2m  k₂ columns   (scale S_K2 = n // K2)
+
+   rows:  i         :  n·S_K1    at col i                    (i < m)
+          m         :  B_i·S_K1  at col i (all i),  S_D at col m
+          m+1+i     : −λ·S_K1    at col i,  S_K2 at col m+1+i
+
+   target  t[i] = −A_i·S_K1 + (K1//2)·S_K1
+           t[m] = n//2
+           t[m+1+i] = (K2//2)·S_K2                    ("centered" variant)
+```
+
+The trivial vector `n·S_D·e_m` is still in `L23`, but it is now *harmless*:
+adding it maps `d ↦ d + n`, and `d` is only defined mod `n`.  Recovery reads
+`d = v[m] / S_D mod n` from the closest vector.  Centering the target halves
+each error coordinate and is worth roughly as much as the reformulation
+itself at the margin.
+
+Measured effect (`secp256k1_cm_audit/glv_hnp_phase23_cvp.py`, output in
+`glv_hnp_phase23_cvp_output.txt`).  The wall is the largest `K1` at which the
+attack recovers `d` on 5/5 seeds; larger `K1` = weaker bias = harder:
+
+| curve | λ\* | Kannan+LLL | Kannan+BKZ-30 | Babai on L23 | exact CVP on L23 |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | K1 = 6 | 6 | **12** | **12** |
+| 12-bit/2677 | 0.070 | K1 = 4 | 4 | **12** | **12** |
+
+Replicated on 12 fresh curves (`glv_hnp_phase23_cvp_scaling.py`): 9/12 show a
+strictly wider CVP wall, 3/12 tie, **0/12 worse**; mean shift 1.78× at 17 bits
+and 1.50× at 20 bits.
+
+Two consequences worth carrying forward:
+
+1. **Babai ≈ exact CVP.**  Nearest-plane matched fplll's enumeration at every
+   grid point but one, so the gain costs nothing asymptotically — no
+   enumeration is needed, only LLL plus an `O(dim²)` nearest-plane pass.
+   This is what would scale to real curve sizes.
+
+2. **`‖v_cvp − t‖ / ‖v* − t‖` is a usable wall diagnostic.**  When the ratio
+   is `1.0000`, the planted vector *is* the closest vector and any failure is
+   a formulation or reduction artifact.  When it drops below 1, some other
+   lattice point is strictly closer than the truth and the failure is
+   information-theoretic — no reduction algorithm can recover it.  On
+   12-bit/2677 the ratio stays at `1.0000` through `K1 = 12` and falls to
+   `0.84 / 0.71` at `K1 = 24 / 32`, placing the genuine information wall a
+   factor of ~3 beyond where the Kannan formulation appeared to stop.
+
 ## 3. Why this is novel
 
 To the best of our knowledge, no published HNP variant exploits
@@ -249,6 +319,10 @@ quirks.
   needed for the k₁-only-leak model?  Phase 1 brute force needs
   `~ log_2(n) / c` signatures; does Phase 2's lattice achieve
   this in practice?
+  *(Partially addressed 2026-08-04, §2.5: the ratio
+  `‖v_cvp − t‖ / ‖v* − t‖` separates formulation loss from a genuine
+  information wall.  Still open: a closed form for where that ratio
+  crosses 1 as a function of `eff = K1·K2/n`, `m`, and `n`.)*
 - Can Phase 2 be **further specialised** to exploit secp256k1's
   CM-by-Z[ω] structure beyond just GLV?  E.g., if the
   endomorphism ω acts predictably on the bias distribution, a

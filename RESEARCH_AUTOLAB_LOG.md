@@ -6103,3 +6103,153 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+
+**Thread 23** — reformulate the Phase-2 GLV-HNP lattice so recovery is not an
+SVP condition. This is the exact next-step proposed by the 2026-07-29 entry
+(log line ~6089), which made measurable progress, so protocol rule (b) selects
+it. Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 closed
+2026-07-21, so no earlier thread is eligible.
+
+The 2026-07-29 falsifier was: *if the K1 wall on the λ\*=0.07 curve (then
+K1 ≈ 4–6) moves outward, the reformulation is a real improvement; if the wall
+stays, the wall is information-theoretic and Phase 2 is at its ceiling.*
+
+**Outcome: the reformulation is a real improvement. The wall moves 3×, and the
+2026-07-26 "structural failure" and 2026-07-29 "genuine K1 wall" were both
+artifacts of the Kannan embedding.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy`
+  (fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0). **Note for future runs:**
+  `apt-get install pari-gp` now fails in this image (404 on an `libegl-mesa0`
+  dependency) without a preceding `apt-get update`. PARI was not needed today.
+- New: `secp256k1_cm_audit/glv_hnp_phase23_cvp_lib.py` — shared library holding
+  the EC arithmetic, `gen_signatures`, the Kannan baseline `build_glv_lattice`
+  (copied verbatim from `glv_hnp_phase2_20bit.py:263` so the comparison to
+  2026-07-29 is exact), and the new `build_cvp_lattice` / `attack_cvp`.
+- New: `secp256k1_cm_audit/glv_hnp_phase23_cvp.py` (EXP A–D on the three
+  historical curves) → `glv_hnp_phase23_cvp_output.txt`.
+- New: `secp256k1_cm_audit/glv_hnp_phase23_cvp_scaling.py` (replication on 12
+  fresh curves at 17 and 20 bits) → `glv_hnp_phase23_cvp_scaling_output.txt`.
+- `RESEARCH_GLV_HNP_PHASE2.md` §2.5 written up with the construction and table;
+  §8 open-questions updated.
+- `cargo test --test curve_audit` → 5/5 pass (3.79s). ✓ (changes are Python-only)
+
+**The construction (L23).** Drop the Kannan coordinate; solve CVP on the
+(2m+1)-dim lattice with columns `[k1 | d | k2]`:
+
+```
+rows:  i        :  n·S_K1   at col i                  (i < m)
+       m        :  B_i·S_K1 at col i (all i), S_D at col m
+       m+1+i    : −λ·S_K1   at col i, S_K2 at col m+1+i
+target t[i] = −A_i·S_K1 + (K1//2)·S_K1,  t[m] = n//2,  t[m+1+i] = (K2//2)·S_K2
+recover  d = v[m]/S_D  mod n
+```
+
+The trivial vector `n·S_D·e_m` (2026-07-29 T5) is *still in L23* — but in a CVP
+it maps `d ↦ d+n`, and `d` is only defined mod `n`, so it is harmless. **The
+answer to Thread 23 as posed is that you do not need to make the planted vector
+λ₁; you need to stop asking for λ₁.**
+
+### Findings
+
+**F1 — the K1 wall moves 2–3× on the historical curves** (5 seeds, wall = largest
+K1 scoring 5/5; larger K1 = weaker bias = harder):
+
+| curve | λ\* | m | Kannan+LLL | Kannan+BKZ-30 | Babai/L23 | exact CVP/L23 |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | 6 | 6 | **12** | **12** |
+| 12-bit/2677 | 0.070 | 10 | 4 | 4 | **12** | **12** |
+
+Per-point detail on 12-bit/2677 (`kannan / bkz30 / babai_c / cvp_c`, of 5):
+K1=6 → 1/2/5/5;  K1=8 → 0/0/4/5;  K1=12 → 0/0/5/5;  K1=16 → 0/0/2/4.
+
+**F2 — the 2026-07-29 T4b "genuine K1 wall" is retracted.** T4b concluded the
+K1=8 wall on 12-bit/2677 was real because more data did not help (Kannan+LLL
+scored 0,0,1,0,1 of 5 at m = 8,12,16,24,32). Exact CVP on the same signature
+sets scores **5/5 at every one of those m**. The wall was the formulation.
+
+| m | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| Kannan+LLL | 0/5 | 0/5 | 1/5 | 0/5 | 2/5 |
+| exact CVP  | **5/5** | **5/5** | **5/5** | **5/5** | **5/5** |
+
+**F3 — a computable diagnostic that separates formulation loss from an
+information wall.** Report `r = ‖v_cvp − t‖ / ‖v* − t‖`, where `v*` is the
+planted vector. `r = 1` ⟺ the truth is the closest vector, so any failure is
+formulation/reduction. `r < 1` ⟺ some other lattice point is strictly closer
+than the truth, so *no* reduction algorithm can recover `d`. On 12-bit/2677:
+
+| K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| r | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9765 | 0.8365 | 0.7119 |
+| v\*=closest | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 0/5 | 0/5 |
+
+The genuine information wall is at K1 ≈ 16–24 (eff ≈ 0.31–0.47), not the K1 ≈ 4–6
+that the Kannan formulation reported. `r` is the first *exact* separator found in
+this project: the eight falsified candidates (δ/n, κ(M), q_cf, max_q_cf, max_a,
+a_corn/n, ρ, λ\*) were all curve-level, and 2026-07-29 T5 argued no curve-level
+invariant can work. The one prior success, ν̂ = λ₁(L2)/√det(L2) (commit `e845207`,
+AUC 0.935), is also curve-level and therefore probabilistic; `r` is instance-level
+and deterministic, which is why it separates exactly rather than at AUC < 1.
+
+*Housekeeping:* commit `e845207` ("ν̂ separator found (AUC 0.935)") has no
+corresponding text in this log — the 2026-07-29 entry stops after T5. The ν̂
+result is recoverable from that commit message and from
+`secp256k1_cm_audit/glv_hnp_nuhat_vs_c1c2.py` / `glv_hnp_phase2_nuhat_control.py`,
+but it was never written up here. Flagging for a future run.
+
+**F4 — replication on 12 fresh curves** (`glv_hnp_phase23_cvp_scaling.py`,
+λ\* spread over (0,0.5), K1 grid extended to 192 so no wall is right-censored):
+
+| bits | m | curves | strictly wider | tie | worse | mean shift | max shift |
+|---|---|---|---|---|---|---|---|
+| 17 | 10 | 6 | 5 | 1 | 0 | 1.78× | 2.67× |
+| 20 | 12 | 6 | 4 | 2 | 0 | 1.50× | 2.00× |
+
+Aggregate 9/12 strictly wider, 3/12 tie, **0/12 worse**. The shift is real but
+modest and does not obviously grow with `n` — at 20 bits the mean is smaller
+than at 17. In `eff = K1·K2/n` terms the CVP walls land at eff ≈ 0.04–0.25;
+the tolerable bias weakness improves by a constant factor, not an asymptotic one.
+
+**F5 — Babai ≈ exact CVP; centering is half the win.** Nearest-plane matched
+fplll enumeration at every grid point but one (12-bit/2557, K1=16: babai 3/5 vs
+cvp 1/5 — Babai *beat* exact CVP there, i.e. past the wall the closest vector is
+no longer the truth and approximation is not worse). So the gain needs no
+enumeration: LLL plus an O(dim²) nearest-plane pass. Separately, centering the
+target matters as much as the reformulation at the margin — on 12-bit/2677 at
+K1=8, uncentered Babai scores 0/5 and centered 4/5 (EXP A).
+
+**F6 — λ₁(L23) is still the trivial vector.** EXP D: `λ₁(L23)/n = 1.0000` on 5 of
+6 rows (the exception is 8-bit/199 at K1=8, `0.9048`, which is far past that
+curve's wall at eff=0.60), and `sv/pv ∈ [0.55, 0.86]` — better than the Kannan
+lattice's [0.34, 0.61] but still below 1 everywhere. The reformulation did *not*
+make the planted vector shortest. It did not need to. Recording this so no future
+run re-attempts "make v\* the shortest vector" as a goal.
+
+### Next step proposal
+
+**Thread 24 — locate the `r = 1` crossing in closed form.** `r` is instance-level
+and cheap (one LLL + one CVP call), so the crossing `eff*(m, n)` where `r` first
+drops below 1 can be mapped empirically over a grid and fitted. Concretely:
+sweep `eff ∈ [0.1, 0.6]` × `m ∈ {8,…,32}` on ~10 curves at 17–20 bits, record
+`r`, and test the natural Gaussian-heuristic prediction
+`r < 1 ⟺ ‖v* − t‖ > gh(L23) = √(dim/2πe)·det(L23)^{1/dim}`.
+Falsifier: if the measured crossing tracks `gh(L23)` within ~10% across the
+grid, the information wall of the k₁-only-leak model has a closed form and
+Phase 2's ceiling is characterised; if it does not track, the discrepancy
+localises whatever extra structure `L23` has beyond a random lattice.
+
+Secondary (cheap): re-run the 2026-07-29 T3 17-bit sweep at eff = 0.15 and 0.25
+with `babai_c` instead of Kannan. That run recorded 3/20 and 0/20 curves
+recovering; F1/F4 predict both numbers should rise substantially, which would
+be a clean independent confirmation on already-generated data.
+
+### Commits made
+
+(recorded below after commit)
