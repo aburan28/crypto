@@ -6254,4 +6254,8 @@ can silently drop it. Check that every script in `secp256k1_cm_audit/` still
 imports before trusting a prior run's numbers.
 
 ### Commits made
-(recorded below after commit)
+
+8c94a75 autolab 2026-08-04: restore lost nu_hat module; closed form nu_hat = F(tau, theta); C2 ceiling is per-(eff,m)
+
+Pushed to `claude/zen-pascal-wvl2x5` (the branch this session is assigned to),
+not `main` as the stock protocol text says.
