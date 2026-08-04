@@ -271,3 +271,72 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Capacity law and the centering fix (2026-08-04, Thread 23)
+
+Script: `secp256k1_cm_audit/glv_hnp_phase2_bdd.py`
+Output: `secp256k1_cm_audit/glv_hnp_phase2_bdd_output.txt`
+
+### 10.1 The defect
+
+The Phase-2 lattice of §2 embeds the planted vector as
+
+```
+v = (k1_i·S_K1 | d·S_D | k2_i·S_K2 | S_KANNAN)
+```
+
+with `k1_i ∈ [0,K1)`, `k2_i ∈ [0,K2)`, `d ∈ [0,n)` — all **one-sided**.
+For `x ~ U[0,X)`, `E[x²] = X²/3`, whereas a centred coordinate
+`x − ⌊X/2⌋` has `E[x²] ≈ X²/12`.  The embedding therefore inflates
+`‖v‖` by a factor ≈ 2 over the achievable minimum, for free.
+
+The fix is one line: subtract `c1 = K1//2`, `c2 = K2//2`, `n//2` from the
+embedding row (`build_kannan_centered`), and add `n//2` back when reading `d`.
+
+### 10.2 Measured effect (m = 12, 5 seeds, wall = largest K1 with ≥3/5)
+
+| curve | n | λ\* | K (baseline) | KC (centred) |
+|---|---|---|---|---|
+| 8-bit/199 | 199 | 0.467 | 6 | 6 |
+| 12-bit/2557 | 2659 | 0.340 | 12 | 24 |
+| 12-bit/2677 | 2647 | 0.070 | **4** | **24** |
+| fresh 16-bit | 65053 | 0.388 | 16 | 64 |
+| fresh 19-bit | 523969 | 0.340 | 32 | 96 |
+
+The curve that six earlier sessions treated as a structural failure
+(n = 2647, λ\* = 0.070; log entries 2026-06-15 … 2026-07-29) gains **6×**.
+
+### 10.3 Capacity law
+
+Projecting out the d-column gives `L' ⊂ Z^{2m}` with
+`det L' = n^{m−1}·S_K1^m·S_K2^m = n^{2m−1}/eff^m`, `eff = K1·K2/n`, so under the
+Gaussian heuristic `λ₁(L') ≈ √(m/πe)·n^{1−1/(2m)}/√eff`.  With
+`‖e‖ ≈ n√(2m/3)` (uncentred) or `n√(m/6)` (centred), success requires
+
+```
+C := √eff · n^{1/(2m)}  <  C_max
+```
+
+Measured over 9 curves (12–20 bit):
+
+| formulation | C_emp | sd |
+|---|---|---|
+| K   Kannan, uncentred, LLL | 0.570 | 0.164 |
+| KC  Kannan, centred, LLL | 0.787 | 0.120 |
+| P   projected exact CVP, uncentred | 0.549 | 0.150 |
+| PC  projected exact CVP, centred | **0.825** | **0.083** |
+| PCb projected Babai, centred | 0.763 | 0.143 |
+
+Centring raises the capacity constant by 1.5× (≈2.25× in `K1`) **and** halves
+its dispersion.  The residual spread that six earlier sessions tried to explain
+with curve-level invariants (δ/n, κ(M), q_cf, max_a, a_corn/n, λ\*) was largely
+the uncentred-embedding artefact.
+
+### 10.4 What the projection does *not* buy
+
+Thread 23 was posed as "quotient out the trivial vector `n·S_D·e_m`".  Doing so
+(formulation P) is worth at most one grid step over the baseline: `C_emp` 0.549
+vs 0.570.  Exact CVP over Babai is likewise worth ~0.06 in `C_emp`.  The trivial
+vector is a red herring — the same vector exists in the classical
+Boneh–Venkatesan/Nguyen–Shparlinski HNP lattice, where the attack works anyway,
+because recovery scans the reduced *basis*, not just `b₁`.
