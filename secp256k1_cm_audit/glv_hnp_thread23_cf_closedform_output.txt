@@ -1,0 +1,104 @@
+GLV-HNP Thread 23 -- closed form for lambda_1(L2)
+continuation of Thread 20d (e845207, 2026-07-29)
+
+==============================================================================
+EXP A -- is the CF closed form (*) EXACT against Lagrange-Gauss?
+==============================================================================
+falsifier from 2026-07-29 was corr < 0.9; the claim tested is equality
+
+  bits    eff  cases   exact   max rel err    ms/CF    ms/LG
+    20   0.05     40  40/40       0.00e+00    0.007    0.007
+    20   0.10     40  40/40       0.00e+00    0.008    0.006
+    20   0.25     40  40/40       0.00e+00    0.007    0.005
+    20   0.50     40  40/40       0.00e+00    0.006    0.005
+    24   0.05     40  40/40       0.00e+00    0.008    0.008
+    24   0.10     40  40/40       0.00e+00    0.013    0.010
+    24   0.25     40  40/40       0.00e+00    0.007    0.006
+    24   0.50     40  40/40       0.00e+00    0.007    0.007
+    32   0.05     40  40/40       0.00e+00    0.011    0.012
+    32   0.10     40  40/40       0.00e+00    0.010    0.009
+    32   0.25     40  40/40       0.00e+00    0.012    0.008
+    32   0.50     40  40/40       0.00e+00    0.010    0.008
+    64   0.05     40  40/40       0.00e+00    0.031    0.024
+    64   0.10     40  40/40       0.00e+00    0.031    0.021
+    64   0.25     40  40/40       0.00e+00    0.032    0.023
+    64   0.50     40  40/40       0.00e+00    0.027    0.018
+   128   0.05     40  40/40       0.00e+00    0.062    0.041
+   128   0.10     40  40/40       0.00e+00    0.062    0.042
+   128   0.25     40  40/40       0.00e+00    0.060    0.042
+   128   0.50     40  40/40       0.00e+00    0.060    0.039
+   256   0.05     40  40/40       0.00e+00    0.156    0.107
+   256   0.10     40  40/40       0.00e+00    0.150    0.104
+   256   0.25     40  40/40       0.00e+00    0.164    0.111
+   256   0.50     40  40/40       0.00e+00    0.154    0.105
+
+  TOTAL exact: 960/960
+  pearson(nu_hat_cf, nu_hat_gauss) = 1.000000
+
+==============================================================================
+EXP A2 -- brute force: is the minimiser always a CF convergent?
+==============================================================================
+  instances tested                : 300
+  CF value != brute-force value   : 0
+  brute-force argmin NOT a q_j    : 0
+  (both zero => the Pareto/best-approximation argument is sound)
+
+==============================================================================
+EXP B -- localisation: is the winner the convergent at q_crit?
+==============================================================================
+  q_crit = sqrt(n*S1/S2) = sqrt(n*K2/K1)
+
+  bits    eff    N   dj=0  |dj|<=1   median q*/q_crit  prod dj=0
+    24   0.05   60     29       60              0.406         41
+    24   0.10   60     22       58              0.339         38
+    24   0.25   60     25       58              0.429         44
+    24   0.50   60     27       58              0.489         38
+    64   0.05   60     32       59              0.477         39
+    64   0.10   60     25       57              0.396         37
+    64   0.25   60     25       60              0.346         44
+    64   0.50   60     30       60              0.372         40
+   256   0.05   60     35       60              0.483         47
+   256   0.10   60     26       59              0.484         37
+   256   0.25   60     24       59              0.376         39
+   256   0.50   60     29       59              0.451         46
+
+==============================================================================
+EXP C -- scale-LOCAL vs scale-FREE partial quotient as nu_hat predictor
+==============================================================================
+  a_local = a_{j*+1}, the partial quotient just past the winning
+  convergent;  max_a = largest partial quotient anywhere (June, falsified)
+
+  bits    eff    N   sp(a_local,nu_hat)        p   sp(max_a,nu_hat)        p
+    24   0.05  200               -0.683   0.0010             -0.231   0.0040
+    24   0.10  200               -0.733   0.0010             -0.339   0.0010
+    24   0.25  200               -0.698   0.0010             -0.233   0.0030
+    64   0.05  200               -0.704   0.0010             -0.172   0.0120
+    64   0.10  200               -0.653   0.0010             -0.025   0.7233
+    64   0.25  200               -0.720   0.0010             -0.005   0.9331
+   256   0.05  200               -0.663   0.0010             -0.004   0.9620
+   256   0.10  200               -0.731   0.0010             -0.158   0.0200
+   256   0.25  200               -0.747   0.0010             -0.043   0.5215
+
+  Interpretation: a large partial quotient helps the attacker only
+  when it sits AT the critical scale.  max_a cannot see the scale,
+  which is why it (and q_cf, max_q_cf) failed Exp S in June.
+
+==============================================================================
+EXP D -- secp256k1: where is the critical index?
+==============================================================================
+  CF of lam/n has 141 convergents;  max_a = 312
+
+   eff    nu_hat   j*   a_local   q*/q_crit  agrees LG
+  0.05    0.8709   70         5       0.199       True
+  0.10    0.6624   70         5       0.282       True
+  0.25    0.5852   70         5       0.446       True
+  0.50    0.6851   70         5       0.630       True
+
+  Caveats unchanged from 2026-07-29: the whole thread is conditional
+  on a non-standard nonce generator k = k1 + lam*k2 with k1 bounded.
+  It is not an attack on secp256k1.
+
+==============================================================================
+VERDICT: closed form exact on all random instances : True
+         convergent-only argument verified by brute: True
+==============================================================================
