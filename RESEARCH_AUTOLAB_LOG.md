@@ -6591,3 +6591,5 @@ Not recommended: more binary-C2 grid work at a single operating point. §5 shows
 that measurement is confounded by cell difficulty.
 
 ### Commits made
+
+`2245071` autolab 2026-08-04: Thread 23 — closed form for ν̂ via CF convergents; Thread 23b grid; restored lost 2026-07-29 ν̂ work
