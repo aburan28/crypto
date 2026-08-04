@@ -6374,7 +6374,7 @@ mechanism is now known to be scale-dependent, which explains all eight.
 
 ### Commits made
 
-(hash recorded in the following commit)
+a6ab968 autolab 2026-08-04: Thread 23 — ν̂ is the Hermite invariant; CF-shortcut falsified; 07-29 run #2 recovered
 
 ## 2026-08-04 (autolab run)
 
@@ -6593,4 +6593,4 @@ and further μ/λ-ratio work (eight invariants falsified; mechanism now known).
 
 ### Commits made
 
-(hash recorded in the following commit)
+a6ab968 autolab 2026-08-04: Thread 23 — ν̂ is the Hermite invariant; CF-shortcut falsified; 07-29 run #2 recovered
