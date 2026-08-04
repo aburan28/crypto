@@ -6244,4 +6244,6 @@ if a future container has network for apt, `apt-get install pari-gp` is the only
 step required.
 
 ### Commits made
-See next git hash after this entry.
+88f67e9 autolab 2026-08-04: Thread 23 — projection is a dead end; exact CVP falsifies the T4b ceiling
+
+Pushed to branch `claude/zen-pascal-n6ielw` (this session's designated branch), not `main`.
