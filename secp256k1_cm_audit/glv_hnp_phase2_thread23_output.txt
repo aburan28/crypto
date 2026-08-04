@@ -1,0 +1,122 @@
+==============================================================================
+Thread 23 — quotient out the trivial vector n*S_D*e_m  (GLV-HNP Phase 2)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: geometry per variant.  Does sv/pv rise above 1?
+------------------------------------------------------------------------------
+sv = shortest nonzero row after LLL (variant cvp: the CVP residual).
+pv = planted vector of that variant.  gh = Gaussian heuristic.
+
+curve                lam*  K1   m  variant  rank   log2det      ||pv||      ||sv||   sv/pv   pv/gh  rec
+-------------------------------------------------------------------------------------------------------
+8-bit/199           0.467   2   6  kannan     14     115.4       339.8       199.0   0.586   1.237  YES
+8-bit/199           0.467   2   6  proj       13     107.8       329.7       277.9   0.843   1.206  YES
+8-bit/199           0.467   2   6  cvp        12     100.2       262.9       262.9   1.000   0.963  YES
+12-bit/2557         0.340   8   8  kannan     18     214.8      5147.8      2659.0   0.517   1.284  YES
+12-bit/2557         0.340   8   8  proj       17     203.4      5142.4      2737.6   0.532   1.290  YES
+12-bit/2557         0.340   8   8  cvp        16     192.0      4401.5      3642.6   0.828   1.109  YES
+12-bit/2677 FAIL    0.070   8  10  kannan     22     265.2      6506.2      2647.0   0.407   1.349  no
+12-bit/2677 FAIL    0.070   8  10  proj       21     253.8      6270.3      5095.8   0.813   1.301  no
+12-bit/2677 FAIL    0.070   8  10  cvp        20     242.4      5684.2   1661174.8 292.243   1.179  no
+
+------------------------------------------------------------------------------
+EXP E2: the T4 K1-wall grid, per variant.  Does the wall move?
+------------------------------------------------------------------------------
+5 seeds per cell; entries are #recovered/5.  K1 grid = [2, 3, 4, 6, 8, 12, 16, 24]
+
+
+curve 12-bit/2557   n=2659  lam*=0.340  m=8
+  variant      2     3     4     6     8    12    16    24
+  --------------------------------------------------------
+  kannan       5     5     5     5     5     0     0     0
+  proj         5     5     5     5     5     0     0     0
+  cvp          5     5     5     5     5     0     0     0
+  wall(kannan) = K1 <= 8
+  wall(proj) = K1 <= 8
+  wall(cvp) = K1 <= 8
+
+curve 12-bit/2677 FAIL   n=2647  lam*=0.070  m=10
+  variant      2     3     4     6     8    12    16    24
+  --------------------------------------------------------
+  kannan       5     5     5     2     0     0     0     0
+  proj         5     5     5     2     0     0     0     0
+  cvp          5     5     5     1     0     0     0     0
+  wall(kannan) = K1 <= 4
+  wall(proj) = K1 <= 4
+  wall(cvp) = K1 <= 4
+
+------------------------------------------------------------------------------
+EXP E3: m-sweep at K1=8 on the lam*=0.07 curve (T4b replication)
+------------------------------------------------------------------------------
+curve 12-bit/2677 FAIL  n=2647  K1=8   entries #recovered/5
+  variant      8    12    16    24    32
+  --------------------------------------
+  kannan       0     0     0     1     1
+  proj         0     0     0     1     1
+  cvp          2     1     1     5     5
+
+==============================================================================
+VERDICT
+==============================================================================
+  E1 8-bit/199          kannan   sv/pv = 0.586  (shorter vector exists)
+  E1 8-bit/199          proj     sv/pv = 0.843  (shorter vector exists)
+  E1 8-bit/199          cvp      sv/pv = 1.000  (planted IS lambda_1-scale)
+  E1 12-bit/2557        kannan   sv/pv = 0.517  (shorter vector exists)
+  E1 12-bit/2557        proj     sv/pv = 0.532  (shorter vector exists)
+  E1 12-bit/2557        cvp      sv/pv = 0.828  (shorter vector exists)
+  E1 12-bit/2677 FAIL   kannan   sv/pv = 0.407  (shorter vector exists)
+  E1 12-bit/2677 FAIL   proj     sv/pv = 0.813  (shorter vector exists)
+  E1 12-bit/2677 FAIL   cvp      sv/pv = 292.243  (planted IS lambda_1-scale)
+
+  E2 wall 12-bit/2557        kannan   K1 <= 8
+  E2 wall 12-bit/2557        proj     K1 <= 8
+  E2 wall 12-bit/2557        cvp      K1 <= 8
+  E2 wall 12-bit/2677 FAIL   kannan   K1 <= 4
+  E2 wall 12-bit/2677 FAIL   proj     K1 <= 4
+  E2 wall 12-bit/2677 FAIL   cvp      K1 <= 4
+
+==============================================================================
+E4 — formulation or enumeration?  Babai-only vs exact CVP vs BKZ-Kannan
+==============================================================================
+curve 12-bit/2677 FAIL  n=2647  K1=8  eff=K1*sqrt(n)/n=0.157
+entries: #recovered/5   (mean seconds per seed in parentheses)
+
+  method                    12            16            20            24            28            32
+  --------------------------------------------------------------------------------------------------
+  kannan-LLL       0/5 (0.00s)   0/5 (0.00s)   0/5 (0.00s)   1/5 (0.00s)   2/5 (0.01s)   1/5 (0.01s)
+  kannan-BKZ20     0/5 (0.00s)   0/5 (0.00s)   1/5 (0.00s)   2/5 (0.01s)   0/5 (0.01s)   2/5 (0.02s)
+  kannan-BKZ40     0/5 (0.00s)   0/5 (0.00s)   1/5 (0.01s)   1/5 (0.01s)   1/5 (0.01s)   2/5 (0.02s)
+  proj-LLL         0/5 (0.00s)   0/5 (0.00s)   0/5 (0.00s)   1/5 (0.00s)   2/5 (0.00s)   1/5 (0.01s)
+  babai-LLL        0/5 (0.00s)   0/5 (0.00s)   0/5 (0.01s)   0/5 (0.01s)   0/5 (0.02s)   0/5 (0.02s)
+  cvp-LLL          1/5 (0.00s)   1/5 (0.01s)   4/5 (0.01s)   5/5 (0.02s)   5/5 (0.03s)   5/5 (0.06s)
+
+==============================================================================
+E5 — (K1, m) recovery frontier: exact CVP vs Kannan embedding
+==============================================================================
+curve 12-bit/2677 FAIL  n=2647  K2=52  5 seeds/cell
+min-m = smallest m in [6, 8, 12, 16, 20, 24, 32, 40] reaching >=3/5
+
+    K1     eff  m_thresh  min-m(kannan)  min-m(cvp)  t_cvp@min-m
+  --------------------------------------------------------------
+     8   0.157         5            >40          20        0.01s
+    12   0.236         6            >40         >40            -
+    16   0.314         7            >40         >40            -
+    24   0.471        11            >40         >40            -
+    32   0.629        17            >40         >40            -
+
+==============================================================================
+E6 — distinct-nonce control (draw (k1,k2) without replacement)
+==============================================================================
+curve 12-bit/2677 FAIL  n=2647  K1=8  K2=52  nonce space = 416
+P(>=1 repeat) with replacement, per m:
+   m=12:0.15  m=16:0.25  m=20:0.37  m=24:0.48  m=28:0.60  m=32:0.70
+
+entries: #recovered/5
+
+  method                     12     16     20     24     28     32
+  ----------------------------------------------------------------
+  kannan-with-repl            0      0      0      1      2      1
+  kannan-distinct             0      0      0      2      0      2
+  cvp-with-repl               1      1      4      5      5      5
+  cvp-distinct                1      2      3      5      5      5

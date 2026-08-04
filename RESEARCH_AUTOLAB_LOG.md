@@ -6103,3 +6103,145 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁. This is the
+exact next-step proposed by the 2026-07-29 entry (log line ~6089), which is the most
+recent thread with measurable progress; priorities 1/2/4/6 remain CLOSED/BLOCKED/
+DEAD-END and priority 3 completed 2026-07-21. The 2026-07-29 falsifier is tested
+verbatim, and the answer splits: the projection fails it, but a control experiment it
+motivated overturns the T4b ceiling.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` — OK.
+  **`apt-get install pari-gp` FAILED in this container** (no package lists / no network
+  for apt); `gp` is unavailable. Recorded for future runs: PARI-dependent threads (2, 3,
+  22) are BLOCKED today for environment reasons, not mathematical ones. fpylll installs
+  fine, so all Python/lattice threads are unaffected.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_projection.py` (6 experiments
+  E1–E6). Arithmetic helpers and the baseline lattice are copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:87` / `glv_hnp_phase2_20bit.py:263` so the
+  comparison to 2026-07-26 and 2026-07-29 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt` (122 lines).
+- Three formulations, identical signature sets throughout:
+  - **kannan** — baseline, dim 2m+2, cols (k1ᵢ | d | k2ᵢ | Kannan).
+  - **proj** — dim 2m+1, d-column deleted. Legitimate: L ∩ span(e_m) = ℤ·n·S_D·e_m, so
+    deleting coordinate m *is* the projection L → L/(ℤ·v_triv), and det(L′) = det(L)/n.
+    d is not lost — it is recoverable from any single signature once (k1ᵢ,k2ᵢ) are known,
+    via d = Bᵢ⁻¹(k1ᵢ + λk2ᵢ − Aᵢ) mod n.
+  - **cvp** — dim 2m, Kannan column dropped too, explicit closest-vector call
+    (fplll exact CVP; Babai nearest-plane available separately as **babai**).
+- `cargo test --test curve_audit` → 5/5 pass (4.41s). ✓ No Rust files touched.
+
+### Findings
+
+**E1 — the projection works geometrically but not enough.** sv/pv rises on every curve,
+substantially so on the failure curve, but never crosses 1:
+
+| curve | λ* | variant | rank | log₂det | ‖pv‖ | ‖sv‖ | sv/pv | pv/gh |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | kannan | 14 | 115.4 | 339.8 | 199.0 | 0.586 | 1.237 |
+| 8-bit/199 | 0.467 | proj | 13 | 107.8 | 329.7 | 277.9 | 0.843 | 1.206 |
+| 12-bit/2557 | 0.340 | kannan | 18 | 214.8 | 5147.8 | 2659.0 | 0.517 | 1.284 |
+| 12-bit/2557 | 0.340 | proj | 17 | 203.4 | 5142.4 | 2737.6 | 0.532 | 1.290 |
+| 12-bit/2677 | 0.070 | kannan | 22 | 265.2 | 6506.2 | 2647.0 | 0.407 | 1.349 |
+| 12-bit/2677 | 0.070 | proj | 21 | 253.8 | 6270.3 | 5095.8 | 0.813 | 1.301 |
+
+**Why it cannot work — the cancellation is exact to first order.** Deleting the
+d-column removes v_triv but costs exactly log₂(n) of determinant over one fewer
+dimension, while ‖pv‖² only drops by E[d²] = n²/3 out of n²(2m/3 + 4/3). Writing
+eff = K1·K2/n, S_K1·S_K2 = n/eff:
+
+```
+det(L)  = n^(2m+1)/eff^m,  dim 2m+2    pv/gh ~ sqrt(2m/3+4/3)·n^(1/(2m+2))·eff^(m/(2m+2))
+det(L') = n^(2m)/eff^m,    dim 2m+1    pv/gh ~ sqrt(2m/3+1)  ·n^(1/(2m+1))·eff^(m/(2m+1))
+```
+Both are < 1 iff m·log(1/eff) > log n — the *same* condition. The projection changes
+the constant, not the threshold, which is why pv/gh moves by <4% (1.237→1.206,
+1.284→1.290, 1.349→1.301) and even rises on one curve.
+
+**E2 — the K1 wall does not move; the 2026-07-29 falsifier is answered "no".**
+The T4 grid reproduces exactly for all three variants (5 seeds, #recovered/5):
+
+| curve | variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | wall |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | kannan/proj/cvp | 5 | 5 | 5 | 5 | 5 | 0 | 0 | 0 | K1 ≤ 8 |
+| 12-bit/2677 | kannan | 5 | 5 | 5 | 2 | 0 | 0 | 0 | 0 | K1 ≤ 4 |
+| 12-bit/2677 | proj | 5 | 5 | 5 | 2 | 0 | 0 | 0 | 0 | K1 ≤ 4 |
+| 12-bit/2677 | cvp | 5 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | K1 ≤ 4 |
+
+**Thread 23 as literally proposed (project along e_m) is CLOSED — dead end.**
+
+**E3/E4 — but the T4b ceiling is FALSIFIED by the explicit CVP call.** At K1=8 on the
+λ*=0.070 curve, 2026-07-29 concluded "more data does not rescue it (m = 8/12/16/24/32 →
+0,0,1,0,1 of 5), so the K1 wall is genuine". That holds for the Kannan embedding and for
+BKZ, but not for an explicit closest-vector call:
+
+| method | m=12 | 16 | 20 | 24 | 28 | 32 | t/seed @ m=32 |
+|---|---|---|---|---|---|---|---|
+| kannan-LLL | 0/5 | 0/5 | 0/5 | 1/5 | 2/5 | 1/5 | 0.01s |
+| kannan-BKZ20 | 0/5 | 0/5 | 1/5 | 2/5 | 0/5 | 2/5 | 0.02s |
+| kannan-BKZ40 | 0/5 | 0/5 | 1/5 | 1/5 | 1/5 | 2/5 | 0.02s |
+| proj-LLL | 0/5 | 0/5 | 0/5 | 1/5 | 2/5 | 1/5 | 0.01s |
+| babai-LLL | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0.02s |
+| **cvp-LLL** | 1/5 | 1/5 | **4/5** | **5/5** | **5/5** | **5/5** | 0.06s |
+
+**The gain is the enumeration, not the formulation.** Babai nearest-plane on the *same*
+dim-2m lattice scores 0/5 everywhere; only the exact CVP call recovers. Yet it is cheap
+— 0.06 s at m=32 (dim 64) — because this is a genuine BDD instance, so fplll's
+enumeration radius from the Babai residual is tiny. Equivalent extra reduction power
+given to the Kannan embedding (BKZ-40) does *not* close the gap, so the Kannan
+embedding itself is what discards the signal, not the amount of reduction.
+
+**E6 — not a nonce-collision artifact.** Only K1·K2 = 416 nonces exist at K1=8, K2=52,
+so sampling with replacement repeats one with probability 0.48 at m=24, and a repeated
+ECDSA nonce leaks d = (A_j−A_i)/(B_i−B_j) with no lattice at all. Redrawing (k1,k2)
+without replacement:
+
+| method | m=12 | 16 | 20 | 24 | 28 | 32 |
+|---|---|---|---|---|---|---|
+| kannan-with-repl | 0 | 0 | 0 | 1 | 2 | 1 |
+| kannan-distinct | 0 | 0 | 0 | 2 | 0 | 2 |
+| cvp-with-repl | 1 | 1 | 4 | 5 | 5 | 5 |
+| cvp-distinct | 1 | 2 | 3 | 5 | 5 | 5 |
+
+The cvp gain survives (5/5 at m = 24/28/32). **Every prior Phase-2 measurement in this
+log used sampling with replacement** — a caveat worth carrying forward, though E6 shows
+it did not drive any conclusion here.
+
+**E5 — the gain is one grid step wide, and the ceiling is real.** min-m for ≥3/5 on the
+λ*=0.070 curve, against the information-theoretic m_thresh = ⌈log n / log(1/eff)⌉:
+
+| K1 | eff | m_thresh | min-m (kannan) | min-m (cvp) |
+|---|---|---|---|---|
+| 8 | 0.157 | 5 | >40 | **20** |
+| 12 | 0.236 | 6 | >40 | >40 |
+| 16 | 0.314 | 7 | >40 | >40 |
+| 24 | 0.471 | 11 | >40 | >40 |
+| 32 | 0.629 | 17 | >40 | >40 |
+
+Even where CVP wins it needs 4× m_thresh, and at eff ≳ 0.2 the practical requirement
+diverges from the bound entirely. So the corrected picture is: the wall is **not**
+information-theoretic (the bound says m=6 suffices at K1=12), and **not** a
+reduction-strength wall (BKZ-40 does not help), but a property of how much of the BDD
+structure each formulation preserves — and exact CVP recovers only the first step of it.
+
+### Next step proposal
+**Thread 24 — why does exact CVP win where BKZ-40 on the embedding loses?**
+Both are "more search". The E4 timings say the CVP instances are easy BDD (0.06 s at
+dim 64), so the interesting quantity is the *Babai residual* ‖t − Babai(t)‖ divided by
+the true residual ‖(k1ᵢS_K1 | k2ᵢS_K2)‖: measure this ratio across the E5 grid and check
+whether it predicts the min-m frontier. Falsifier: if the ratio crosses ~1 exactly at
+the (K1,m) cells where cvp flips to ≥3/5, then the frontier is precisely the BDD
+Babai-decodability boundary and the whole Phase-2 ceiling has a closed form; if it does
+not track the flip, the enumeration is doing something the residual does not capture.
+Cheap — `babai_nearest_plane()` and the grid already exist in the Thread 23 script.
+
+Secondary (blocked today, cheap when PARI is available): Threads 2/3/22 need `gp`;
+if a future container has network for apt, `apt-get install pari-gp` is the only setup
+step required.
+
+### Commits made
+See next git hash after this entry.
