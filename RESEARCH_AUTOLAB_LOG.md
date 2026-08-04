@@ -6103,3 +6103,199 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁.** Proposed verbatim
+as the next step by the 2026-07-29 run (commits `d525931`, `e845207`, log line ~6089).
+Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so protocol rule (b)
+selects its proposed sub-task.
+
+Thread 23's own falsifier, quoted: *"if sv/pv rises above 1 after the reformulation AND
+the K1 wall in T4 moves outward on the λ*=0.07 curve (currently K1≈4–6), the reformulation
+is a real improvement; if the wall stays at K1≈4–6, then the wall is information-theoretic
+and Phase 2 is at its ceiling."*
+
+**Outcome: the wall stays. Phase 2 is at its ceiling.** Details below, plus a closed form
+that explains the wall quantitatively.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy`. Same note as
+  2026-07-29 — `cysignals` is a separate runtime import. `gp` is NOT installed in this
+  image (no PARI work this session).
+- New `secp256k1_cm_audit/glv_hnp_common.py` — verbatim extract of lines 85–409 of
+  `glv_hnp_phase2_lambda_threshold.py` (2026-07-29, `d525931`), which itself took
+  `build_glv_lattice`/`gen_signatures`/`scales` verbatim from
+  `glv_hnp_phase2_20bit.py:262`. Extracted so new experiments reuse the identical
+  construction without re-running the 07-29 suite on import. **The 07-29 script is left
+  unmodified** so its recorded output stays reproducible.
+- New `secp256k1_cm_audit/glv_hnp_phase2_thread23.py` (experiments E1–E5), output
+  artifact `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt` (147 lines).
+- Built the d-eliminated lattice and **verified correctness before measuring**: exact
+  rational solve of `v = x·M` shows the planted vector is in the lattice with integral
+  coordinates and Kannan coefficient exactly +1.
+- `cargo test --test curve_audit` → 5/5 pass (5.89s). ✓
+
+### Findings
+
+#### E3 — the Thread-23 falsifier resolves NEGATIVE
+
+Reformulation: pivot on signature 0, `R_i = B_i·B_0⁻¹`, `C_i = A_i − R_i·A_0`, so
+
+```
+k1_i ≡ C_i + R_i·k1_0 + R_i·λ·k2_0 − λ·k2_i   (mod n),   i = 1..m−1
+```
+
+and `d` never appears. dim drops 2m+2 → 2m+1; there is no d column, so the parasitic
+vector `n·S_D·e_m` that T5 (2026-07-29) identified as λ₁ **cannot exist**.
+
+Half of the falsifier fires: **sv/pv does rise, and reaches exactly 1.000** on the
+λ*=0.07 curve at K1≤4 — i.e. the planted vector genuinely becomes λ₁, exactly as Thread 23
+wanted. The other half does not:
+
+| curve | λ* | K1 wall, original | K1 wall, reformulated |
+|---|---|---|---|
+| 8-bit/199 | 0.467 | K1 ≤ 6 | K1 ≤ 6 — unchanged |
+| 12-bit/2557 | 0.340 | K1 ≤ 12 | K1 ≤ 12 — unchanged |
+| 12-bit/2677 | 0.070 | K1 ≤ 4 | K1 ≤ 4 — unchanged |
+
+Stronger than "unchanged": **120/120 per-instance agreement**. Over 3 curves × 8 K1 values
+× 5 seeds, the original and reformulated lattices recover exactly the same instances — zero
+disagreements. Recovery is a property of the signature set, not of the lattice formulation.
+
+**Consequence — the "find the parasite" programme is dead.** It ran from 2026-06-21 to
+2026-07-29 (six failed curve-level invariants, then ρ, then T5). Note the direction of the
+correlation: 12-bit/2557 (λ*=0.34) *retains* a second parasite after d-elimination
+(sv/pv 0.34–0.74) while 12-bit/2677 (λ*=0.07) reaches sv/pv = 1.000 — and yet 2557's wall
+(K1≤12) is **3× better** than 2677's (K1≤4). Parasite presence is anti-correlated with
+failure. No parasite-based predictor can work.
+
+#### E1/E2 — closed form for the governing ratio
+
+Recovery is BDD of the target in `L_0` = the lattice vectors with Kannan coordinate 0
+(rows 0..2m, cols 0..2m). `L_0` is block-triangular, so exactly
+
+```
+det(L_0) = (n·S_K1)^m · S_D · S_K2^m = n^{2m} / eff^m,     eff = K1·K2/n
+‖v'‖     = n·sqrt((2m+1)/3)                (planted vector minus Kannan coord)
+
+γ_gh := GH(L_0)/‖v'‖ = sqrt(3/(2πe)) · (n·eff^m)^{−1/(2m+1)},   sqrt(3/(2πe)) = 0.41911
+```
+
+Verified against the exact determinant: rel. err ≤ 1.16% over n ∈ {199, 2647, 2659, 100003},
+m ∈ {6, 12, 16, 20}.
+
+Predictor comparison — E1 = 3 historical curves × 8 K1, m=12, 5 seeds, ok ⇔ ≥3/5;
+E2 = 16 fresh 17-bit j=0 GLV curves × 4 eff levels, m=12, 3 seeds, ok ⇔ ≥2/3:
+
+| predictor | E1 AUC | E2 AUC | pooled AUC |
+|---|---|---|---|
+| **γ_gh** | **0.916** | 0.884 | **0.886** |
+| −eff | 0.902 | **0.923** | — |
+| γ_emp = λ₁^LLL(L_0)/‖v'‖ | 0.874 | 0.672 | 0.737 |
+| ρ (T2, falsified 07-29) | 0.748 | 0.668 | — |
+| λ* (falsified 07-29) | 0.556 | 0.578 | — |
+
+majority baselines 0.542 (E1) / 0.641 (E2).
+
+- **γ_emp — this run's own hypothesis — is FALSIFIED.** The idea was that the *measured*
+  λ₁(L_0) would beat the heuristic. It does not: λ₁(L_0) is itself the λ-block parasite, so
+  γ_emp sits in 0.32–0.51 essentially independent of everything (AUC 0.672 on E2, barely
+  above the 0.641 baseline). Recorded as a dead hypothesis so no future run retries it.
+- γ_gh and −eff are statistically indistinguishable — γ_gh is a monotone function of eff at
+  fixed (n, m). γ_gh's value is not better separation; it is that it is dimensionless,
+  comparable across n and m, and yields the closed form below.
+
+#### E4 — why more signatures do not help, and the corrected data threshold
+
+γ_gh ≥ 1 ⟺ `m ≥ (ln n + 0.868)/(ln(1/eff) − 1.736)`. The threshold printed by
+`sweep_curve` in `glv_hnp_phase2_20bit.py` is the naive information bound
+`ceil(ln n / ln(1/eff))` and is far too optimistic (n = 2659):
+
+| eff | naive m_thresh | corrected m |
+|---|---|---|
+| 0.02 | 3 | 5 |
+| 0.05 | 3 | 7 |
+| 0.08 | 4 | 12 |
+| 0.10 | 4 | 16 |
+| 0.12 | 4 | 23 |
+| 0.15 | 5 | 56 |
+| ≥ 0.1756 | 5–6 | **infeasible** |
+
+As m → ∞, `γ_gh → 0.41911/sqrt(eff) =: γ_∞`, a **finite** limit. Data has a bounded payoff,
+and `eff* = 0.41911² = 0.1756` is where γ_∞ = 1.
+
+E4b confirms the m-flatness directly (12-bit/2677, 3 seeds, m = 8/12/16/24/32):
+
+| eff | K1 | m=8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|
+| 0.039 | 2 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 |
+| 0.079 | 4 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 |
+| 0.118 | 6 | 1/3 | 1/3 | 0/3 | 1/3 | 1/3 |
+| 0.157 | 8 | 0/3 | 0/3 | 1/3 | 0/3 | 0/3 |
+
+Flat in m in all four rows. This **retro-explains T4b** (2026-07-29), which observed the
+same flatness (`m=8/12/16/24/32 → 0,0,1,0,1`) without an explanation.
+
+#### E5 — eff* is a SOFT ceiling; this run's sharp prediction is partly falsified
+
+Prediction made before running: rows with γ_∞ < 1 stay 0/3 at every block size and every m.
+Result (12-bit/2677, 3 seeds):
+
+| K1 | eff | γ_∞ | m | LLL | BKZ20 | BKZ30 | BKZ40 |
+|---|---|---|---|---|---|---|---|
+| 6 | 0.118 | 1.221 | 12 | 1/3 | 2/3 | 2/3 | 2/3 |
+| 6 | 0.118 | 1.221 | 20 | 1/3 | 2/3 | 2/3 | 2/3 |
+| 8 | 0.157 | 1.057 | 12 | 0/3 | 0/3 | 0/3 | 0/3 |
+| 8 | 0.157 | 1.057 | 20 | 0/3 | 1/3 | 1/3 | 1/3 |
+| 12 | 0.236 | 0.863 | 12 | 0/3 | 0/3 | 0/3 | 0/3 |
+| 12 | 0.236 | 0.863 | 20 | 0/3 | **1/3** | 1/3 | 1/3 |
+| 16 | 0.314 | 0.748 | 12 | 0/3 | 0/3 | 0/3 | 0/3 |
+| 16 | 0.314 | 0.748 | 20 | 0/3 | 0/3 | 0/3 | 0/3 |
+
+The γ_∞ > 1 rows are rescued by β exactly as predicted (0.118: 1/3 → 2/3; 0.157 at m=20:
+0/3 → 1/3). But **eff = 0.236 with γ_∞ = 0.863 < 1 yields 1/3 at m=20**, past the predicted
+ceiling. So eff* is a heuristic average-case boundary, not a proof-grade wall: the success
+probability collapses across it but does not vanish. This is consistent with the sporadic
+isolated successes already visible in T4b. Also: **BKZ(30) and BKZ(40) never beat BKZ(20)
+anywhere in the grid** — the reduction-quality axis saturates almost immediately.
+
+#### Net picture — attackable region of the Phase-2 GLV lattice
+
+| lever | reach in eff = K1·K2/n |
+|---|---|
+| LLL | ≲ 0.08–0.10 |
+| BKZ(β ≥ 20) | ≲ 0.12–0.16, sporadic to ~0.24 |
+| heuristic ceiling γ_∞ = 1 | eff* = 0.1756 |
+| more signatures (any m) | **no help at all** |
+| lattice reformulation (d-elimination) | **no help at all** (120/120 identical) |
+
+### Next step proposal
+
+**Thread 24 — attack the eff barrier from the modelling side, not the reduction side.**
+E3 and E5 close the two obvious levers (formulation, reduction effort) and E4 closes the
+third (data). The only remaining lever is the *constant* 0.41911 = sqrt(3/(2πe)), which is
+the Gaussian-heuristic constant for a rank-(2m+1) **Z**-lattice. Proposal: rebuild the
+lattice as a rank-(m+1) module over **Z**[ω] (ω a primitive cube root of unity), treating
+each GLV pair (k1_i, k2_i) as a single Eisenstein integer rather than two independent
+rational integers. Same determinant, half the rank, and the relevant sphere constant
+becomes the **Z**[ω]-analogue.
+
+Falsifier: compute γ_∞ for the module formulation on 12-bit/2677 at eff=0.157 and compare
+to the measured 1.057. If the module γ_∞ exceeds 0.41911/sqrt(eff), the barrier moves and
+Thread 24 is live; if it equals it, the barrier is representation-independent and the
+Phase-2 GLV-HNP direction is closed for good. Cheap — the construction is ~40 lines on top
+of `glv_hnp_common.py`, and the comparison is arithmetic.
+
+Secondary (cheap, do not skip): `sweep_curve` in `glv_hnp_phase2_20bit.py` prints the naive
+`m_thresh = ceil(ln n / ln(1/eff))`, which E4 shows understates the requirement by 3–10×
+and hides the eff* infeasibility. Left unpatched this session only because that script has a
+recorded `.expected.txt` output; a future run should patch both together.
+
+### Commits made
+
+(recorded below)

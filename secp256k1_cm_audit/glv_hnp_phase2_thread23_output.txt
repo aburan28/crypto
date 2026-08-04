@@ -1,0 +1,171 @@
+==============================================================================
+Thread 23 — reformulate the Phase-2 lattice so the target is findable
+==============================================================================
+GH constant sqrt(3/(2*pi*e)) = 0.41911
+predicted hard wall eff* = exp(-2*ln(1/GH_CONST)) = 0.17565
+
+------------------------------------------------------------------------------
+EXP E1: BDD geometry of the coset sublattice L_0, historical curves
+------------------------------------------------------------------------------
+L_0 = lattice vectors with Kannan coordinate 0 (rows 0..2m, cols 0..2m).
+v' = planted vector minus its Kannan coordinate.  Recovery is BDD of
+the target in L_0, so the governing ratio should be lambda_1(L_0)/||v'||.
+
+curve               K1    eff   lam*   g_emp   g_gh    rho    ok
+8-bit/199            2  0.151  0.467   0.446  1.069  0.568   5/5
+8-bit/199            3  0.226  0.467   0.413  0.816  0.452   5/5
+8-bit/199            4  0.302  0.467   0.431  0.737  0.434   5/5
+8-bit/199            6  0.452  0.467   0.372  0.526  0.361   3/5
+8-bit/199            8  0.603  0.467   0.414  0.503  0.386   0/5
+8-bit/199           12  0.905  0.467   0.365  0.368  0.343   0/5
+8-bit/199           16  1.206  0.467   0.324  0.355  0.300   0/5
+8-bit/199           24  1.809  0.467   0.195  0.259  0.183   0/5
+12-bit/2557          2  0.039  0.340   0.512  2.138  0.811   5/5
+12-bit/2557          3  0.059  0.340   0.402  1.381  0.516   5/5
+12-bit/2557          4  0.078  0.340   0.416  1.245  0.467   5/5
+12-bit/2557          6  0.117  0.340   0.376  0.927  0.381   5/5
+12-bit/2557          8  0.156  0.340   0.383  0.821  0.368   5/5
+12-bit/2557         12  0.235  0.340   0.363  0.646  0.341   4/5
+12-bit/2557         16  0.313  0.340   0.361  0.569  0.339   1/5
+12-bit/2557         24  0.469  0.340   0.348  0.455  0.328   0/5
+12-bit/2677 FAIL     2  0.039  0.070   0.516  2.134  1.627   5/5
+12-bit/2677 FAIL     3  0.059  0.070   0.406  1.382  1.327   5/5
+12-bit/2677 FAIL     4  0.079  0.070   0.418  1.241  1.360   5/5
+12-bit/2677 FAIL     6  0.118  0.070   0.379  0.926  0.876   1/5
+12-bit/2677 FAIL     8  0.157  0.070   0.385  0.818  0.692   0/5
+12-bit/2677 FAIL    12  0.236  0.070   0.369  0.646  0.491   0/5
+12-bit/2677 FAIL    16  0.314  0.070   0.372  0.567  0.416   0/5
+12-bit/2677 FAIL    24  0.471  0.070   0.362  0.455  0.341   0/5
+
+Predictor comparison on E1 (ok = >=3/5 seeds recovered):
+  majority baseline           0.542
+  gamma_emp                  AUC=0.874  best-threshold acc=0.792
+  gamma_gh                   AUC=0.916  best-threshold acc=0.875
+  -eff                       AUC=0.902  best-threshold acc=0.833
+  lam_star                   AUC=0.556  best-threshold acc=0.625
+  rho                        AUC=0.748  best-threshold acc=0.750
+
+------------------------------------------------------------------------------
+EXP E2: same predictors on a fresh 17-bit multi-curve sweep
+------------------------------------------------------------------------------
+Searching j=0 GLV curves with p in [65536, 131072) ...
+Found 16 curves.  m=12, seeds=[42, 1234, 9999]
+
+  eff~0.05: 16/16 curves recover  gamma_gh in [1.294,1.529]  gamma_emp in [0.385,0.451]
+  eff~0.12:  4/16 curves recover  gamma_gh in [0.707,0.800]  gamma_emp in [0.330,0.368]
+  eff~0.18:  3/16 curves recover  gamma_gh in [0.652,0.808]  gamma_emp in [0.366,0.455]
+  eff~0.25:  0/16 curves recover  gamma_gh in [0.503,0.561]  gamma_emp in [0.331,0.370]
+
+Predictor comparison on E2 (pooled, ok = >=2/3 seeds):
+  majority baseline           0.641
+  gamma_emp                  AUC=0.672  best-threshold acc=0.766  thr=0.3850
+  gamma_gh                   AUC=0.884  best-threshold acc=0.906  thr=0.8082
+  -eff                       AUC=0.923  best-threshold acc=0.891  thr=-0.1165
+  lam_star                   AUC=0.578  best-threshold acc=0.672  thr=0.4816
+  rho                        AUC=0.668  best-threshold acc=0.828  thr=1.1273
+
+Pooled E1+E2:
+  gamma_emp                  AUC=0.737  acc=0.773  thr=0.3719
+  gamma_gh                   AUC=0.886  acc=0.875  thr=0.8082
+
+------------------------------------------------------------------------------
+EXP E3: THE FALSIFIER — d-eliminated reformulation, head to head
+------------------------------------------------------------------------------
+Reformulated lattice: d removed algebraically (pivot on signature 0),
+dim 2m+2 -> 2m+1, no d column, so the parasitic n*S_D*e_m vector that
+T5 (2026-07-29) identified as lambda_1 cannot exist.
+Falsifier: does sv/pv rise above 1, and does the K1 wall move?
+
+curve               K1    eff |  orig ok   sv/pv |  elim ok   sv/pv
+8-bit/199            2  0.151 |      5/5   0.399 |      5/5   0.567
+8-bit/199            3  0.226 |      5/5   0.392 |      5/5   0.473
+8-bit/199            4  0.302 |      5/5   0.379 |      5/5   0.422
+8-bit/199            6  0.452 |      3/5   0.366 |      3/5   0.385
+8-bit/199            8  0.603 |      0/5   0.373 |      0/5   0.381
+8-bit/199           12  0.905 |      0/5   0.352 |      0/5   0.358
+8-bit/199           16  1.206 |      0/5   0.289 |      0/5   0.293
+8-bit/199           24  1.809 |      0/5   0.191 |      0/5   0.194
+12-bit/2557          2  0.039 |      5/5   0.413 |      5/5   0.742
+12-bit/2557          3  0.059 |      5/5   0.379 |      5/5   0.529
+12-bit/2557          4  0.078 |      5/5   0.376 |      5/5   0.461
+12-bit/2557          6  0.117 |      5/5   0.364 |      5/5   0.396
+12-bit/2557          8  0.156 |      5/5   0.360 |      5/5   0.373
+12-bit/2557         12  0.235 |      4/5   0.350 |      4/5   0.352
+12-bit/2557         16  0.313 |      1/5   0.345 |      1/5   0.347
+12-bit/2557         24  0.469 |      0/5   0.337 |      0/5   0.339
+12-bit/2677 FAIL     2  0.039 |      5/5   0.417 |      5/5   1.000
+12-bit/2677 FAIL     3  0.059 |      5/5   0.379 |      5/5   1.000
+12-bit/2677 FAIL     4  0.079 |      5/5   0.379 |      5/5   1.000
+12-bit/2677 FAIL     6  0.118 |      1/5   0.363 |      1/5   0.901
+12-bit/2677 FAIL     8  0.157 |      0/5   0.363 |      0/5   0.704
+12-bit/2677 FAIL    12  0.236 |      0/5   0.352 |      0/5   0.502
+12-bit/2677 FAIL    16  0.314 |      0/5   0.356 |      0/5   0.427
+12-bit/2677 FAIL    24  0.471 |      0/5   0.347 |      0/5   0.349
+
+K1 wall (largest K1 with >=3/5 recovery):
+  8-bit/199          original K1<=6   reformulated K1<=6   unchanged
+  12-bit/2557        original K1<=12  reformulated K1<=12  unchanged
+  12-bit/2677 FAIL   original K1<=4   reformulated K1<=4   unchanged
+
+sv/pv > 1 in the reformulated lattice: 0/24 configurations  (original: 0/24)
+
+------------------------------------------------------------------------------
+EXP E4: closed form for gamma_gh and the eff* wall
+------------------------------------------------------------------------------
+Claim:  gamma_gh = sqrt(3/(2*pi*e)) * (n * eff^m)^(-1/(2m+1))
+Check against the exact determinant of L_0:
+
+      n  K1   m    exact   closed   rel.err
+   2659   4  12   1.0369   1.0388    0.18%
+   2659   8  12   0.7434   0.7448    0.18%
+   2647   6  12   0.8459   0.8534    0.87%
+   2647   4  20   1.1849   1.1960    0.92%
+    199   2   6   0.6602   0.6680    1.16%
+ 100003  10  16   1.5749   1.5761    0.07%
+
+m required for gamma_gh >= 1:  m >= (ln n + 0.868)/(ln(1/eff) - 1.736)
+(no solution once eff >= eff* = 0.1756)
+
+   eff  ln(1/eff)   m_required   naive m_thresh
+0.0200      3.912            5                3
+0.0500      2.996            7                3
+0.0800      2.526           12                4
+0.1000      2.303           16                4
+0.1200      2.120           23                4
+0.1500      1.897           56                5
+0.1763      1.736   infeasible                5
+0.2000      1.609   infeasible                5
+0.2500      1.386   infeasible                6
+
+E4b: does more data help?  m-sweep at fixed eff, curve 12-bit/2677
+   eff  K1 m=8    m=12   m=16   m=24   m=32  
+ 0.039   2 3/3    3/3    3/3    3/3    3/3   
+ 0.079   4 3/3    3/3    3/3    3/3    3/3   
+ 0.118   6 1/3    1/3    0/3    1/3    1/3   
+ 0.157   8 0/3    0/3    1/3    0/3    0/3   
+
+------------------------------------------------------------------------------
+EXP E5: is eff* a real ceiling, or just an LLL limitation?
+------------------------------------------------------------------------------
+As m -> inf the closed form has the finite limit
+    gamma_inf = 0.41911 / sqrt(eff)
+so eff* is where gamma_inf = 1: beyond it the planted vector is longer
+than the Gaussian-heuristic lambda_1(L_0) NO MATTER how much data is
+used, and no amount of reduction effort can help.  Sharp prediction:
+BKZ can push the achievable eff up towards eff* but never past it.
+
+ K1    eff  g_inf   m      LLL    BKZ20    BKZ30    BKZ40
+  6  0.118  1.221  12      1/3      2/3      2/3      2/3
+  6  0.118  1.221  20      1/3      2/3      2/3      2/3
+  8  0.157  1.057  12      0/3      0/3      0/3      0/3
+  8  0.157  1.057  20      0/3      1/3      1/3      1/3
+ 12  0.236  0.863  12      0/3      0/3      0/3      0/3
+ 12  0.236  0.863  20      0/3      1/3      1/3      1/3
+ 16  0.314  0.748  12      0/3      0/3      0/3      0/3
+ 16  0.314  0.748  20      0/3      0/3      0/3      0/3
+
+Prediction: rows with gamma_inf < 1 (eff > eff* = 0.1756) stay 0/3
+across every block size and every m.  Rows with gamma_inf > 1 may be
+rescued by larger beta.
+
+Done.
