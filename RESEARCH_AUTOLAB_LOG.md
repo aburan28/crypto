@@ -6103,3 +6103,142 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁" — the
+continuation proposed by the 2026-07-29 entry (log line ~6089), which came with a
+pre-registered falsifier. Threads 1/3/4/6 CLOSED, Thread 2 BLOCKED (2026-07-26),
+Thread 5/GLV-HNP made measurable progress 2026-07-29, so protocol rule (b) selects it.
+
+**Verdict: the falsifier fires in the negative. The reformulation is valid, exact, and
+buys nothing. Phase 2 is at its ceiling — but the reason is not the one Thread 23
+assumed, and the session ends with a quantitative model of the wall instead.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0. No PARI in this container (`gp` absent); not needed.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (5 experiments U0–U5), reusing
+  `build_glv_lattice` / `gen_signatures` / `scales` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so the comparison to 2026-07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (108 lines).
+- Implemented the projection π = "delete column m" and a matching recovery routine
+  (`recover_d_projected`) that reads the nonces out of the k-columns and then closes with
+  `d = (k1 + λ·k2 − A_i)·B_i⁻¹ mod n` from a single signature.
+- `cargo test --test curve_audit` → 5/5 pass (8.14s). ✓
+
+### Findings
+
+**U0 — the trivial vector is confirmed, and it is primitive.** The 2026-07-29 T5 identity
+`n·row_m − Σᵢ Bᵢ·row_i = n·S_D·e_m` holds exactly on all three historical curves. Further,
+solving `x·M = t·e_m` over Q and clearing denominators gives the exact generator of
+`L ∩ R·e_m`:
+
+| curve | m | identity | gen(L ∩ Re_m) | = n·S_D |
+|---|---|---|---|---|
+| 8-bit/199 | 6 | True | 199 | True |
+| 12-bit/2557 | 8 | True | 2659 | True |
+| 12-bit/2677 | 10 | True | 2647 | True |
+
+(The 2026-07-29 entry inferred this from LLL output; it is now exact. Note for future
+runs: an HNF row supported only on e_m does *not* exist — HNF is echelon, not axis-aligned
+— so testing for one returns nothing. Use the solve-and-clear-denominators method.)
+
+**U1 — the projection is a valid reformulation.** π(L) has full rank 2m+1,
+`log det(π L)` from the fpylll GS profile matches the predicted `log det(L) − log(n·S_D)`
+to 4 decimals (74.7202/140.9813/175.9230, predicted identical), and π(v_planted) ∈ π(L)
+on every curve. Deleting the d-column loses nothing: d was never load-bearing, it was
+carrying a short trivial vector and no information.
+
+**U2 — THE FALSIFIER: the K1 wall does not move. Not by one cell.** Kannan-L and π(L)
+recover on *exactly* the same configurations, all 42 of them (24 here + 18 in U3):
+
+| curve (λ*) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 (0.467) Kannan | 5/5 | 5/5 | 2/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 8-bit/199 **projected** | 5/5 | 5/5 | 2/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2557 (0.340) Kannan | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 **projected** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 (0.070) Kannan | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 **projected** | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The falsifier's other clause also fails: svP/pnP never rises above 1. It *falls*
+monotonically in K1 (2677: 1.000, 1.000, 1.000, 0.945, 0.767, 0.543, 0.466, 0.377).
+Killing the trivial vector does not promote the planted vector to λ₁ — at every failing
+K1 there is still a *non-trivial* lattice vector shorter than it.
+
+**U3 — a predictor that is principled, and the correction it forces.**
+r := ‖π(v_planted)‖ / GH(π L), with GH the Gaussian heuristic. Pooled over U2 + a fresh
+17-bit sweep (6 curves × 3 eff × 5 seeds, m=12), 42 configurations, 20 success / 22 failure:
+
+| predictor | AUC | best threshold | accuracy |
+|---|---|---|---|
+| **r = pnP/GH(πL)** | **0.923** | **1.379** | **0.857** |
+| eff = K1·K2/n | 0.918 | 0.1176 | 0.833 |
+| λ* = min(λ,n−λ)/n | 0.514 | 0.393 | 0.595 |
+| (majority baseline) | — | — | 0.524 |
+
+λ* at 0.514 AUC is *chance* — an independent third reconfirmation of the 2026-07-29 T3
+falsification, on fresh curves. r edges out eff but the two are near-equivalent, which
+U5 explains: they are the same variable in different coordinates.
+
+**The threshold is r = 1.379, not r = 1. This refutes the premise of Thread 23.** LLL/BKZ
+recovers the planted vector even when it is ~40% *longer* than the Gaussian heuristic —
+i.e. when it is provably not λ₁ and not even close. The planted vector was never required
+to be the shortest vector, so removing a competitor was never going to help. That is why
+U2 came out flat, and it is the substantive correction to the 2026-07-29 framing
+("the planted vector is never λ₁" is true, and irrelevant).
+
+**U4 — failure mode is uniform: not a reduction-strength problem.** For every failing
+configuration r > 1 and BKZ-20 matches LLL (13/13 configurations; one single seed flips,
+2677/K1=6, 0/5 → 1/5). No failure is LLL-limited. This supersedes the 2026-07-26 claim
+"failure is structural" with a mechanism, and is consistent with 07-29 T4b.
+
+**U5 — closed form for the wall.** ‖π(v)‖ is independent of eff (kᵢ·S_K1 ranges over
+[0,n) whatever K1 is) while GH ∝ det^(1/dim) ∝ eff^(−m/dim), so r ∝ eff^(m/dim) and
+
+    eff_1 = [ n^(2m) · C^dim / (n·√(2m/3+1))^dim ]^(1/m),   C = √(dim/(2πe)), dim = 2m+1
+    eff(r) = eff_1 · r^(dim/m)                     →   eff_1 → 3/(2πe) = 0.1756 as m → ∞
+
+| curve | m | n | eff_1 (r=1) | eff observed | obs/pred |
+|---|---|---|---|---|---|
+| 8-bit/199 | 6 | 199 | 0.0539 | 0.264 | 4.90× |
+| 12-bit/2557 | 8 | 2659 | 0.0522 | 0.196 | 3.74× |
+| 12-bit/2677 | 10 | 2647 | 0.0665 | 0.099 | 1.48× |
+| 17-bit sweep | 12 | 65719 | 0.0598 | 0.100 | 1.67× |
+
+Internal consistency check (the two thresholds in U3 were fitted independently, on the
+same pooled data but in different coordinates): mapping the r-threshold 1.379 through
+eff(r) at m=12, n=65719 gives **eff = 0.1169**, against the directly-fitted **0.1176**.
+The model reproduces the empirical split to 0.6%.
+
+**Residual — one honest anomaly, not a claim.** At fixed m=12 and fixed eff≈0.149, the
+17-bit sweep is bimodal and the survivors are contiguous in λ*: λ*=0.318 → 5/5 and
+λ*=0.335 → 5/5, while 0.027, 0.137, 0.211, 0.446 all give 0/5–1/5. The same two curves are
+the only survivors at eff≈0.25 (3/5 each). The historical λ*=0.340 curve is likewise the
+most tolerant of the three. So r explains ~86% and the residual looks like a *band* near
+λ* ≈ 1/3, not the monotone trend that was falsified. Caveat: 6 curves, one eff stratum —
+this is 2 data points inside a band. It is also in tension with the 2026-07-29 conclusion
+that "no curve-level invariant can separate C1 from C2", so it deserves a real test rather
+than adoption.
+
+### Next step proposal
+**Thread 24 — is there a λ* ≈ 1/3 survival band?** Fix m=12 and eff=0.15 (the stratum
+where U3 is bimodal), sweep ~40 fresh 17-bit curves with λ* dense over (0,0.5), 10 seeds
+each. Falsifier: if success is confined to a band around 1/3 with width < 0.1, λ* is a
+real *non-monotone* covariate and the 2026-07-29 "no curve-level invariant" conclusion
+needs narrowing to *monotone* invariants; if successes scatter over λ*, the U3 bimodality
+was 5-seed noise and r is the whole story. ~15 min at m=12. Cheap and decisive either way.
+
+Secondary (only if Thread 24 comes back positive): the natural mechanism is the
+Gauss-reduced 2-D block ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩, i.e. the continued-fraction
+expansion of λ/n — but note 2026-07-29 T2 already falsified the specific functional
+ρ = μ/‖v_planted‖ built from it, so a positive Thread 24 needs a *different* functional,
+not a retry of ρ.
+
+**Do not retry:** the Kannan→projection reformulation (dead, U2), ρ = μ/‖v‖ (dead, T2),
+λ*-as-monotone-threshold (dead three times: 06-27, 07-29 T3, 08-04 U3),
+BKZ-as-rescue (dead, U4 + 07-29 T4b).
+
+### Commits made

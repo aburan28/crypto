@@ -1,0 +1,147 @@
+==============================================================================
+Thread 23 — project out the trivial direction; does the K1 wall move?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP U0: is n*S_D*e_m really in L, and is L ∩ R*e_m exactly <n*S_D*e_m>?
+------------------------------------------------------------------------------
+Claim (2026-07-29 T5): n*row_m - sum_i B_i*row_i = n*S_D*e_m.
+Second column: the exact generator of L ∩ R*e_m, i.e. the least t>0 with
+t*e_m in L.  Computed by solving x*M = t*e_m over Q and clearing
+denominators: t_min = lcm(denominators of the m-th row of M^-1).
+curve                  m  identity holds    gen(L ∩ Re_m)   = n*S_D
+8-bit/199              6            True              199      True
+12-bit/2557            8            True             2659      True
+12-bit/2677 FAIL      10            True             2647      True
+
+------------------------------------------------------------------------------
+EXP U1: the projected lattice piL — rank, determinant, planted membership
+------------------------------------------------------------------------------
+pi = delete column m.  det(piL) should equal det(L)/(n*S_D), and
+pi(v_planted) must still lie in piL (else the reformulation is invalid).
+curve                 dim  rank   log det(piL)    predicted  pi(v) in piL
+8-bit/199              13    13        74.7202      74.7202          True
+12-bit/2557            17    17       140.9813     140.9813          True
+12-bit/2677 FAIL       21    21       175.9230     175.9230          True
+
+------------------------------------------------------------------------------
+EXP U2: THE FALSIFIER — K1 grid, Kannan-L vs projected piL, 5 seeds
+------------------------------------------------------------------------------
+2026-07-29 T4 walls: 12-bit/2557 fails at K1>=12-16; 12-bit/2677 at K1>=6-8.
+If the projection is a real improvement the piL column must survive
+further right than the K vector column.
+
+8-bit/199  (n=199, lam*=0.4673, m=6, K2=15)
+    K1     eff |  Kannan   proj |  svP/pnP  pnP/GH_P
+     2   0.151 |   5/5    5/5   |    0.790     1.289
+     3   0.226 |   5/5    5/5   |    0.636     1.644
+     4   0.302 |   2/5    2/5   |    0.578     1.806
+     6   0.452 |   2/5    2/5   |    0.504     2.318
+     8   0.603 |   0/5    0/5   |    0.466     2.544
+    12   0.905 |   0/5    0/5   |    0.336     3.323
+    16   1.206 |   0/5    0/5   |    0.327     3.508
+    24   1.809 |   0/5    0/5   |    0.237     4.602
+
+12-bit/2557  (n=2659, lam*=0.3400, m=8, K2=52)
+    K1     eff |  Kannan   proj |  svP/pnP  pnP/GH_P
+     2   0.039 |   5/5    5/5   |    0.902     0.685
+     3   0.059 |   5/5    5/5   |    0.636     0.917
+     4   0.078 |   5/5    5/5   |    0.585     1.012
+     6   0.117 |   5/5    5/5   |    0.475     1.328
+     8   0.156 |   5/5    5/5   |    0.475     1.461
+    12   0.235 |   1/5    1/5   |    0.424     1.889
+    16   0.313 |   0/5    0/5   |    0.437     2.062
+    24   0.469 |   0/5    0/5   |    0.409     2.657
+
+12-bit/2677 FAIL  (n=2647, lam*=0.0699, m=10, K2=52)
+    K1     eff |  Kannan   proj |  svP/pnP  pnP/GH_P
+     2   0.039 |   5/5    5/5   |    1.000     0.625
+     3   0.059 |   5/5    5/5   |    1.000     0.823
+     4   0.079 |   5/5    5/5   |    1.000     0.961
+     6   0.118 |   0/5    0/5   |    0.945     1.219
+     8   0.157 |   0/5    0/5   |    0.767     1.383
+    12   0.236 |   0/5    0/5   |    0.543     1.743
+    16   0.314 |   0/5    0/5   |    0.466     1.965
+    24   0.471 |   0/5    0/5   |    0.377     2.456
+
+------------------------------------------------------------------------------
+EXP U3: is pnP/GH(piL) the predictor? (17-bit sweep, lam* spread)
+------------------------------------------------------------------------------
+collected 6 fresh 17-bit j=0 GLV curves
+        p       n    lam*    eff |   Kan  proj |  pnP/GH_P
+    65647   65719  0.0273  0.051 |  5/5   5/5  |     0.857
+    65647   65719  0.0273  0.149 |  1/5   1/5  |     1.380
+    65647   65719  0.0273  0.250 |  0/5   0/5  |     1.793
+    65707   65203  0.1372  0.051 |  5/5   5/5  |     0.845
+    65707   65203  0.1372  0.149 |  0/5   0/5  |     1.468
+    65707   65203  0.1372  0.251 |  0/5   0/5  |     1.800
+    65707   66037  0.2115  0.051 |  5/5   5/5  |     0.855
+    65707   66037  0.2115  0.152 |  0/5   0/5  |     1.422
+    65707   66037  0.2115  0.249 |  0/5   0/5  |     1.832
+    65677   65899  0.3184  0.051 |  5/5   5/5  |     0.856
+    65677   65899  0.3184  0.148 |  5/5   5/5  |     1.378
+    65677   65899  0.3184  0.250 |  3/5   3/5  |     1.790
+    65539   65287  0.3346  0.051 |  5/5   5/5  |     0.844
+    65539   65287  0.3346  0.149 |  5/5   5/5  |     1.467
+    65539   65287  0.3346  0.251 |  3/5   3/5  |     1.799
+    66457   66943  0.4456  0.050 |  5/5   5/5  |     0.847
+    66457   66943  0.4456  0.151 |  0/5   0/5  |     1.425
+    66457   66943  0.4456  0.251 |  0/5   0/5  |     1.820
+
+Separation of the predictor r = ||pi(v_planted)|| / GH(piL)
+(pooled over EXP U2 + EXP U3; 'success' = projected formulation >= 3/5)
+  pooled configurations: 42  (success 20, failure 22)
+  r = pnP/GH(piL)            AUC(small=success)  0.923   best threshold   1.3787  acc 0.857
+  eff = K1*K2/n              AUC(small=success)  0.918   best threshold   0.1176  acc 0.833
+  lam* = min(lam,n-lam)/n    AUC(small=success)  0.514   best threshold   0.3928  acc 0.595
+  majority baseline accuracy  0.524
+
+------------------------------------------------------------------------------
+EXP U4: failure-mode diagnosis on the projected lattice
+------------------------------------------------------------------------------
+For failing configurations: is pi(v_planted) still the shortest vector
+(=> LLL missed it, BKZ should rescue) or is something shorter present
+(=> the instance is not uSVP; no amount of reduction helps)?
+
+  curve                 K1  proj LLL  proj BKZ20  svP/pnP  pnP/GH_P          verdict
+  8-bit/199              6    2/5         2/5       0.504     2.318         not uSVP
+  8-bit/199              8    0/5         0/5       0.466     2.544         not uSVP
+  8-bit/199             12    0/5         0/5       0.336     3.323         not uSVP
+  8-bit/199             16    0/5         0/5       0.327     3.508         not uSVP
+  8-bit/199             24    0/5         0/5       0.237     4.602         not uSVP
+  12-bit/2557           12    1/5         1/5       0.424     1.889         not uSVP
+  12-bit/2557           16    0/5         0/5       0.437     2.062         not uSVP
+  12-bit/2557           24    0/5         0/5       0.409     2.657         not uSVP
+  12-bit/2677 FAIL       6    0/5         1/5       0.945     1.219         not uSVP
+  12-bit/2677 FAIL       8    0/5         0/5       0.767     1.383         not uSVP
+  12-bit/2677 FAIL      12    0/5         0/5       0.543     1.743         not uSVP
+  12-bit/2677 FAIL      16    0/5         0/5       0.466     1.965         not uSVP
+  12-bit/2677 FAIL      24    0/5         0/5       0.377     2.456         not uSVP
+
+------------------------------------------------------------------------------
+EXP U5: closed form for the wall, and where it actually sits
+------------------------------------------------------------------------------
+Solving ||pi(v_planted)|| = GH(piL) for eff = K1*K2/n gives
+  eff_1 = [ n^(2m) * C^dim / (n*sqrt(2m/3+1))^dim ]^(1/m),  C=sqrt(dim/(2*pi*e))
+with dim = 2m+1.  As m -> infinity this tends to 3/(2*pi*e) = 0.1756.
+eff_obs = midpoint of the observed pass/fail transition in EXP U2/U3.
+
+  curve                  m       n  eff_1 (r=1)   eff_obs  obs/pred
+  8-bit/199              6     199       0.0539    0.2640      4.90x
+  12-bit/2557            8    2659       0.0522    0.1955      3.74x
+  12-bit/2677 FAIL      10    2647       0.0665    0.0985      1.48x
+  17-bit sweep (pooled)  12   65719       0.0598    0.1000      1.67x
+
+The observed wall sits ~2-4x above the r=1 point, i.e. LLL/BKZ recovers the
+planted vector even when it is LONGER than the Gaussian heuristic.  The best
+empirical split in EXP U3 is r = 1.379, not r = 1.  So the planted vector was
+never required to be lambda_1 -- which is exactly why removing the trivial
+vector (EXP U2) changed nothing.
+
+Cross-check: eff(r) = eff_1 * r^(dim/m), so the empirical r=1.379 split must
+map onto the empirical eff split (0.1176 from EXP U3) if the model is right:
+  eff at r=1.379, m=12, n=65719: 0.1169   (EXP U3 best eff threshold: 0.1176)
+
+==============================================================================
+done
+==============================================================================
