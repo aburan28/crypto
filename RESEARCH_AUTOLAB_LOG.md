@@ -6264,4 +6264,4 @@ has an unrelated (and now fully characterised) trivial-vector structure.
 
 ### Commits made
 
-(recorded below after commit)
+092c564 autolab 2026-08-04: Thread 23 — d-eliminated Phase-2 lattice; wall does not move
