@@ -6624,4 +6624,8 @@ Still not recommended: further μ/λ-ratio work. Eight invariants falsified, and
 
 ### Commits made
 
-(hash recorded in the following commit)
+`c23e720` autolab 2026-08-04: Thread 23a — ν̂ closed form via CF of λ/n; 23c ceiling not universal
+
+Pushed to `claude/zen-pascal-biov2h` (this session's designated branch), not
+`main`. Prior autolab entries reached `main` via PR merges; this one will need
+the same.
