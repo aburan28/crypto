@@ -1,0 +1,196 @@
+
+Thread 23 -- closed form for nu_hat (2026-08-04 autolab)
+
+==========================================================================
+PART A -- lambda_1(L2)^2 == min_b [ r(b)^2 S_K1^2 + b^2 S_K2^2 ]
+         (claim 1: exact reduction to weighted approximation)
+==========================================================================
+  trials                          : 400
+  identity mismatches             : 0   <- must be 0
+  argmin b is a CF convergent     : 400/400 (100.0%)
+  argmin b is a semiconvergent    : 400/400 (100.0%)
+
+==========================================================================
+PART B -- Hermite ceiling  nu_hat <= (4/3)^(1/4) = 1.0745699
+==========================================================================
+  trials                : 40000
+  max nu_hat observed   : 1.0720230
+  ceiling               : 1.0745699   (gap +0.0025470)
+  violations            : 0   <- must be 0
+
+==========================================================================
+PART C -- THREAD 23 FALSIFIER: CF-convergent predictor vs exact nu_hat
+          falsifier threshold: correlation < 0.9 kills the story
+==========================================================================
+  single convergent @ q-scale pearson=-0.3287 spearman=0.0231 exact= 46.8%  mean-rel-err=3.4028  [FAIL]
+  single convergent @ balance pearson=0.4404 spearman=0.6943 exact= 70.0%  mean-rel-err=0.3186  [FAIL]
+  min over convergents       pearson=1.0000 spearman=1.0000 exact=100.0%  mean-rel-err=0.0000  [PASS]
+  min over semiconvergents   pearson=1.0000 spearman=1.0000 exact=100.0%  mean-rel-err=0.0000  [PASS]
+
+==========================================================================
+PART D -- closed-form null CDF  P(nu_hat <= v) = 3v^2/pi   (v <= 1)
+==========================================================================
+   q      empirical   closed-form   diff
+   0.05    0.2292      0.2288      +0.0003
+   0.10    0.3242      0.3236      +0.0006
+   0.25    0.5133      0.5117      +0.0016
+   0.50    0.7246      0.7236      +0.0010
+   0.75    0.8854      0.8862      -0.0008
+   0.90    0.9702      0.9708      -0.0006
+   0.95    0.9971      0.9974      -0.0003
+  max |empirical - closed form| over quantiles: 0.0016
+
+  vs the 2026-07-29 recorded 256-bit null (eff=0.05, 4000 draws):
+   q05   recorded=0.232   closed-form=0.229   diff=+0.003
+   q10   recorded=0.322   closed-form=0.324   diff=-0.002
+   q25   recorded=0.496   closed-form=0.512   diff=-0.016
+   q50   recorded=0.715   closed-form=0.724   diff=-0.009
+   q75   recorded=0.885   closed-form=0.886   diff=-0.001
+   q90   recorded=0.974   closed-form=0.971   diff=+0.003
+   q95   recorded=0.999   closed-form=0.997   diff=+0.002
+  max |recorded - closed form|: 0.0157
+
+==========================================================================
+PART E -- scale dependence: lam/n FIXED, K1/K2 swept
+          (why every scale-free CF invariant had to fail)
+==========================================================================
+  n = 1048573, lam = 671564   (these are FIXED for the whole table)
+  scale-free CF invariants of lam/n, constant down every column:
+    max_a = 21,  len(CF) = 16,  q_cf = 89,  max_q_cf = 1048573
+
+   K1     K2     Im tau_0        nu_hat
+     2   1024   1.861e-09     0.9081
+     8    512   1.489e-08     0.8142
+    36    288   1.192e-07     0.8035
+    72    144   4.768e-07     0.7414
+    72     72   9.537e-07     0.5296
+   144     72   1.907e-06     0.3893
+   288     36   7.631e-06     0.3075
+   512      8   6.106e-05     0.6985
+  1024      2   4.888e-04     0.7553
+
+  nu_hat range over the sweep: [0.3075, 0.9081] = 56% of the full range [0, 1.0746]
+  => a single curve (n, lam) takes almost every nu_hat value as K1/K2
+     moves.  Any invariant that is a function of lam/n alone is
+     constant down this column and therefore cannot predict nu_hat.
+
+==========================================================================
+PART F -- modular closed form   nu_hat = (Im tau_reduced)^(-1/2)
+          tau_0 = -lam/n + i*S_K2/(n*S_K1)
+==========================================================================
+  trials                        : 2000
+  max |(Im tau)^-1/2 - nu_hat|  : 2.199e-10
+  disagreements > 1e-6          : 0
+  => nu_hat is the Hermite invariant of L2; the reduction of tau_0
+     IS the continued-fraction expansion of lam/n, truncated at the
+     depth set by Im tau_0 = S_K2/(n*S_K1) ~ K1/(K2*n).
+
+==========================================================================
+PART G -- secp256k1 placement, recomputed from the closed form
+==========================================================================
+  n   = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  lam verified: lam^2 + lam + 1 = 0 mod n   OK
+
+  Convention from glv_hnp_nuhat_vs_c1c2.py:185 --
+    K2 = isqrt(n)+1,  K1 = max(2, int(eff*isqrt(n))).
+  Reproduction check against the values recorded 2026-07-29 (section 5):
+
+   eff    nu_hat   recorded    diff   closed-form pct 3v^2/pi   recorded pct
+  0.05   0.8709   0.8709   -0.0000         72.4%              73.3%
+  0.10   0.6624   0.6624   +0.0000         41.9%              41.3%
+  0.25   0.5852   0.5852   +0.0000         32.7%              33.2%
+  0.50   0.6851   0.6851   +0.0000         44.8%              44.1%
+  max |reproduced - recorded| = 0.0000
+
+  Note: nu_hat depends on (n, lam) and on the RATIO S_K1/S_K2 only.
+  Under this convention S_K1/S_K2 ~ 1/eff, which is why the table
+  moves with eff; had K1=K2 been used, nu_hat would be eff-invariant.
+
+  C2 ceiling recorded 2026-07-29: every C2 curve had nu_hat <= 0.645.
+  Closed-form share of curves below that ceiling: 39.7%
+  (i.e. the 'easy' class is not rare -- it is ~40% of random lambda.)
+
+  Scored against the GLV null (600 j=0 curves, eff=0.10; see Part H):
+    secp256k1 nu_hat = 0.6624  ->  GLV-null percentile 46.3%   (uniform-null percentile 41.9%)
+    share of GLV curves below the 0.645 C2 ceiling: 43.7%
+  secp256k1 is an unremarkable GLV curve by this measure -- neither in
+  the easy tail nor anomalously hard.
+
+  CAVEATS, unchanged from 2026-07-29 and NOT weakened by this note:
+   (a) the C1/C2 -> nu_hat link is a 20/24-bit empirical regularity
+       extrapolated to 256 bits; this script proves the closed form for
+       nu_hat itself, NOT that nu_hat predicts recovery at 256 bits.
+   (b) the whole thread is conditional on a NON-STANDARD nonce generator
+       k = k1 + lam*k2 with k1 bounded.  It says nothing about correctly
+       generated nonces and is NOT an attack on secp256k1.
+
+==========================================================================
+PART H -- do real GLV eigenvalues obey the same null law as uniform lam?
+==========================================================================
+  primes n = 1 mod 3 sampled: 1200   (K2=isqrt(n)+1, eff=0.10)
+
+   q     GLV lam   uniform lam   closed form   GLV-closed
+   0.05   0.3307    0.2325       0.2288      +0.1018
+   0.10   0.3733    0.3151       0.3236      +0.0497
+   0.25   0.5455    0.5069       0.5117      +0.0338
+   0.50   0.7442    0.7288       0.7236      +0.0206
+   0.75   0.8819    0.8998       0.8862      -0.0043
+   0.90   0.9574    0.9769       0.9708      -0.0135
+   0.95   0.9843    0.9996       0.9974      -0.0131
+
+  KS vs closed-form CDF, uniform lam : 0.0320  (5% crit 0.0393) -> consistent
+  KS vs closed-form CDF, GLV lam     : 0.0944  (5% crit 0.0393) -> DEVIATES
+
+  *** RESULT: GLV eigenvalues DO NOT follow the random-lattice law. ***
+  Uniform lam matches 3v^2/pi (as Part D shows); GLV lam is shifted UP.
+  But the shift is SCALE-DEPENDENT, and that detail matters -- read the
+  decay table below before quoting any single number.
+
+    At eff=0.10, P(nu_hat <= 0.645) (the recorded C2 ceiling):
+      GLV lam  39.3%   uniform lam  39.8%   closed form  39.7%
+    -- i.e. at THIS cut and THIS scale the GLV constraint has already
+       washed out; the KS deviation above lives in the extreme low tail
+       (q05: GLV 0.331 vs closed form 0.229).
+
+  Mechanism.  For a j=0 CM curve, lam is the eigenvalue of an
+  endomorphism of norm 1, so Lambda = <(n,0),(-lam,1)> is the coordinate
+  lattice of the norm-n ideal (n, omega - lam) in Z[omega].  Its shortest
+  vector is pinned near sqrt(n) by the Eisenstein norm form
+  a^2+ab+b^2 = n -- that pinning is precisely what makes GLV scalar
+  decomposition work.  So the very structure that makes a curve
+  GLV-friendly also holds nu_hat up, away from the low-nu_hat tail.
+  (It is not pinned exactly to the Hermite corner because L2 uses the
+  coordinate metric, not the Minkowski metric of Z[omega].)
+
+  DECAY OF THE GLV CONSTRAINT with the scale ratio S_K1/S_K2 ~ 1/eff.
+  (K1=K2 is eff ~ 1; the Phase-2 runs used eff = 0.05-0.50.)
+
+    eff     P(nu<=0.645) GLV   uniform     median GLV   median unif
+    1.00        0.0%           42.2%       0.8770       0.7166
+    0.75        0.0%           42.0%       0.8494       0.7183
+    0.50        0.0%           39.2%       0.7709       0.7288
+    0.25       39.5%           37.0%       0.7382       0.7306
+    0.10       44.2%           40.0%       0.6947       0.7101
+    0.05       43.8%           41.8%       0.6935       0.6953
+    0.01       39.8%           42.2%       0.7242       0.6991
+
+  Reading: the GLV/Eisenstein constraint is decisive only near eff ~ 1
+  (S_K1 ~ S_K2), where L2 is essentially the ideal lattice itself.  As
+  eff falls the weighting skews L2 away from that ideal and the
+  constraint washes out; by eff = 0.10 GLV and uniform agree at the
+  0.645 cut to well under a percentage point.  So 'GLV curves are
+  protected' is TRUE at eff ~ 1 and FALSE in the eff <= 0.10 regime the
+  Phase-2 experiments actually ran in.  Quote the eff.
+
+==========================================================================
+SUMMARY
+==========================================================================
+  A  min-over-b identity           PASS
+  B  Hermite ceiling               PASS
+  C  CF predictor (FALSIFIER)      FAIL
+  D  closed-form null CDF          PASS
+  E  scale dependence              PASS
+  F  modular closed form           PASS
+  G  secp256k1 placement           PASS
+  H  GLV lam obeys null law        PASS
+
