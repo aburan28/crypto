@@ -6273,5 +6273,7 @@ All 34 scripts now parse; the four nu_hat-chain scripts import cleanly.
 
 8c94a75 autolab 2026-08-04: restore lost nu_hat module; closed form nu_hat = F(tau, theta); C2 ceiling is per-(eff,m)
 
+9f11d97 autolab 2026-08-04: repair glv_hnp_target_vector.py (file was one line of literal \n escapes)
+
 Pushed to `claude/zen-pascal-wvl2x5` (the branch this session is assigned to),
 not `main` as the stock protocol text says.
