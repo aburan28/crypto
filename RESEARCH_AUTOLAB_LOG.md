@@ -6103,3 +6103,186 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is λ₁.**
+The exact next-step proposed by the 2026-07-29 entry (log line ~6089). Priorities 1, 2,
+4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so priority 5
+(GLV-HNP Phase 2) is the only thread with measurable recent progress; rule (b) applies.
+
+Outcome: the reformulation is **correct and it works**, but per the 2026-07-29
+pre-registered falsifier it is **not an improvement** — the K1 wall does not move. The
+run also identifies the *real* obstruction, which is deeper than T5's, and revives a
+predictor that 2026-07-29 had killed.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` (fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0). `apt-get install pari-gp` FAILED (Ubuntu 24.04 mirror
+  404 on a libegl-mesa0 dependency) — not needed for this thread, but note for future
+  runs that PARI is **not** available in this container image.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_eliminated.py` (7 experiments E0–E7 + a
+  predictor scorecard). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_eliminated_output.txt` (263 lines).
+  EC arithmetic, `gen_signatures`, the old `build_glv_lattice` and the curve search are
+  copied verbatim from `glv_hnp_phase2_lambda_threshold.py` so old-vs-new is exact.
+- `cargo test --test curve_audit` → 5/5 pass (5.19s). ✓
+
+**The eliminated lattice.** Solve signature 0 for d and substitute, which removes the
+d column entirely:
+
+    d = (k_0 − A_0)·B_0⁻¹,  so for i = 1..m−1
+    k1_i ≡ C_i + t_i·k1_0 + t_i·λ·k2_0 − λ·k2_i  (mod n),
+    t_i = B_i·B_0⁻¹ mod n,   C_i = A_i − t_i·A_0 mod n.
+
+Free: k1_0, k2_0, k2_1..k2_{m−1} (m+1). Determined: k1_1..k1_{m−1} (m−1, each mod n).
+Dimension 2m+1 (was 2m+2); det = n^{m−1}·S_K1^m·S_K2^m·S_KAN, unchanged. The m−1 lost
+equations are exactly paid for by the m−1 lost unknowns plus d's own log n bits, so the
+information balance m·log n ≥ m(log K1 + ½log n) + log n is untouched.
+
+### Findings
+
+**E0 — construction verified.** For all three historical curves the planted vector has
+exact integer coordinates in the eliminated basis, Σ coeff_r·row_r reproduces it
+byte-for-byte, and d round-trips from k1_0, k2_0 alone. dim 13 / 17 / 21.
+
+**E1 — T5's parasite is gone.** sv/pv (LLL shortest vector ÷ planted vector) rises on
+every curve, most on the historical failure curve:
+
+| curve | K1 | m | eff | old dim | old sv/pv | new dim | new sv/pv |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.151 | 14 | 0.543 | 13 | 0.790 |
+| 12-bit/2557 | 8 | 8 | 0.156 | 18 | 0.445 | 17 | 0.475 |
+| 12-bit/2677 | 8 | 10 | 0.157 | 22 | 0.387 | 21 | 0.767 |
+
+**E1b — the surviving λ₁ is identified exactly, and it is NOT removable.**
+On every curve × seed the LLL shortest vector has Kannan coordinate **0** and every
+coordinate pair (a_i, b_i) satisfies **a_i + λ·b_i ≡ 0 (mod n)**. It is a vector of the
+scaled *GLV kernel block*
+
+    Λ'  =  ⟨ (n·S_K1, 0), (−λ·S_K1, S_K2) ⟩       (m mutually orthogonal copies)
+
+i.e. the kernel of the splitting map (k1,k2) ↦ k1 + λk2 mod n. These vectors express the
+genuine non-uniqueness of the (k1,k2) split of a nonce. **Unlike T5's n·S_D·e_m, they are
+not an artifact of a badly-chosen coordinate — they are forced by the structure that
+defines the GLV small set, so no re-parametrisation in these coordinates can delete them.**
+
+**Proposition (Thread 23).** With S_K1 = n/K1, S_K2 = n/K2, S_KAN = n and eff = K1K2/n,
+
+    λ₁(L) ≤ μ ≤ (2/√3)^{1/2}·n/√eff      (Minkowski on the 2-D block, det = n·S_K1·S_K2)
+    E‖v_planted‖ = n·√(2m/3 + 1).
+
+So the planted vector is provably **not** λ₁ whenever 2m/3 + 1 > (2/√3)/eff. Since
+information theory forces m ≥ ln n / ln(1/eff), and pv grows as √m while μ is
+m-independent, there is a **two-sided window in m** which closes as n grows (E5):
+
+| n bits | eff* | m_min@eff* | dim | bias bits | K1 (K2=√n) |
+|---|---|---|---|---|---|
+| 32 | 0.1369 | 11.2 | 25 | 2.87 | 2^13.1 |
+| 128 | 0.0542 | 30.4 | 63 | 4.20 | 2^59.8 |
+| 256 | 0.0325 | 51.8 | 105 | 4.94 | 2^123.1 |
+| 384 | 0.0238 | 71.2 | 145 | 5.39 | 2^186.6 |
+| 521 | 0.0188 | 90.8 | 183 | 5.74 | 2^254.8 |
+
+Above eff* the planted vector is not λ₁ **for any m**. (Necessary, not sufficient: μ ≤ the
+Minkowski value, and the measured μ runs well below it — 0.71× on 12-bit/2677.)
+
+**E2 — THE FALSIFIER, and it fails.** K1 grid, 5 seeds, old vs eliminated. The two
+columns are **identical at all 20 grid points**:
+
+| curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2557 old | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2557 new | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 old | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 new | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The 2026-07-29 falsifier read: *"if sv/pv rises above 1 AND the K1 wall moves outward, the
+reformulation is a real improvement; if the wall stays at K1≈4–6, the wall is
+information-theoretic and Phase 2 is at its ceiling."* sv/pv does reach exactly 1.000
+(2677 at K1 ∈ {2,3,4}) but **the wall does not move** — 2557 still breaks between K1=8 and
+12, 2677 still between K1=4 and 6. **Verdict: the second branch. The wall is a BDD/coset
+property, not a lattice-shape artifact.**
+
+Note 2557 recovers 5/5 at K1=8 with sv/pv = 0.475: λ₁-ness is *sufficient* for recovery,
+not necessary. That is the BDD framing of T5, now confirmed from the other side.
+
+**E3 — reducing m does not rescue.** μ/pv is largest at the smallest admissible m
+(m_thresh = 4.26 for 2677 at K1=8), so the natural fix is *less* data. It does not work:
+
+| m | 5 | 6 | 7 | 8 | 10 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| μ/pv | 0.932 | 0.868 | 0.816 | 0.772 | 0.701 | 0.648 | 0.569 | 0.471 | 0.411 |
+| new LLL | 1/5 | 1/5 | 1/5 | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 |
+
+μ/pv never crosses 1 even at m = m_thresh, because this curve's actual μ (1.925n) is only
+0.71× its Minkowski bound. The window predicted by E5 is empty for this curve.
+
+**E4 — 20 curves × 3 eff, old vs eliminated: aggregate identical.**
+full-recovery counts old/new = 19/20 vs 19/20 (eff 0.05), 3/20 vs 3/20 (0.15), 0/20 vs
+0/20 (0.25). Four per-curve disagreements, all ±1 seed, both directions — noise.
+
+**Predictor scorecard — μ/pv > 1 works, in the right lattice.** Over all 60 E4 rows:
+
+| | rows | full 5/5 |
+|---|---|---|
+| μ/pv > 1 | 15 | 14 (93.3%) |
+| μ/pv ≤ 1 | 45 | 8 (17.8%) |
+
+Accuracy 85.0% (51/60) vs a 63.3% majority baseline; precision 93.3%, recall 63.6%.
+**This is the same ρ = μ/‖v_planted‖ that T2 (2026-07-29) recorded as a dead hypothesis.**
+T2 was right about the old lattice and wrong about the quantity: with the n·S_D·e_m
+parasite present, μ was never λ₁ and could not predict anything. Once d is eliminated μ
+*is* the λ₁ candidate and the predictor separates. **T2's "dead hypothesis" note should be
+read as scoped to the 2m+2 lattice only.**
+
+**E6/E7 — column re-weighting: helps only when it crosses 1, else it strictly hurts.**
+Stretch k1 columns by c, shrink k2 columns by c (kernel-block det invariant, so
+Minkowski's bound on μ is invariant, but the block's *shape* — and μ — moves). ‖v_planted‖
+is minimised at c = 1.
+
+E6, 12-bit/2677, m=10 — the one case where re-weighting crosses μ/pv = 1:
+
+| K1 | eff | best c | μ/pv @c | μ/pv @1 | rec @c | rec @1 |
+|---|---|---|---|---|---|---|
+| 4 | 0.079 | 1.000 | 1.283 | 1.283 | 5/5 | 5/5 |
+| **6** | **0.118** | **1.189** | **1.011** | **0.899** | **3/5** | **0/5** |
+| 8 | 0.157 | 1.414 | 0.812 | 0.701 | 1/5 | 0/5 |
+
+K1=6 crosses 1 and goes 0/5 → 3/5: the wall moves out one grid step (eff 0.079 → 0.118,
+1.5×). E7 then applies the same argmax-c rule to all 20 curves at eff = 0.15 and 0.25 —
+where **no** curve's max_c μ(c)/pv(c) reaches 1 (best 0.902):
+
+| eff | recoveries c=1 | recoveries best-c | improved | regressed |
+|---|---|---|---|---|
+| 0.15 | 22/100 | 4/100 | 0 | 7 |
+| 0.25 | 7/100 | 0/100 | 0 | 4 |
+
+**Rule: re-weight iff max_c μ(c)/pv(c) > 1; otherwise c = 1 is strictly better**, because
+away from the crossing the only effect of c ≠ 1 is to inflate ‖v_planted‖ and degrade the
+BDD margin. The rule is checkable in O(log n) (one 2×2 Gauss reduction per c) before any
+lattice reduction is run.
+
+### Next step proposal
+**Thread 24 — attack the BDD directly instead of hoping for λ₁.**
+E2/E3 close the "make it SVP" route: the kernel block is intrinsic, so λ₁-ness is
+achievable only in the μ/pv > 1 corner, which E5 shows shrinks to eff < 0.033 at 256 bits.
+The remaining lever is the *coset* solver, not the basis. Concretely: run Babai
+nearest-plane (and then randomised-rounding / Lindner–Peikert with a few hundred
+candidates) on the LLL-reduced eliminated basis, targeting the coset representative
+(C_i·S_K1)_i, and measure the K1 wall of *that*. Falsifier: if the K1 wall on 12-bit/2677
+moves past 6 with Babai+LP where E2 could not move it at all, the ceiling was the
+enumeration strategy; if it stays at 4–6, the wall is information-theoretic and Phase 2 is
+finished at this parameterisation. Cheap — the E2 grid is a ~2-minute run.
+
+Secondary (5 min, mechanical): the 2026-07-29 T2 entry should be annotated in place as
+"falsified for the 2m+2 lattice; revived at 93.3% precision for the 2m+1 eliminated
+lattice, see 2026-08-04 E4 scorecard", so no future run re-kills it.
+
+Not attempted (out of scope this run): PARI is unavailable in the current container image,
+so Threads 2/3-style `.gp` work is BLOCKED until the apt mirror issue is resolved or PARI
+is built from source.
+
+### Commits made
+[recorded below]
