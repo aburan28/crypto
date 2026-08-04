@@ -6548,4 +6548,4 @@ no more 12-bit-anchored conclusions of any kind.
 
 ### Commits made
 
-(hash recorded in the following commit)
+b0fbaa1 autolab 2026-08-04: Thread 23 closed negative; eff wall is n- and m-dependent
