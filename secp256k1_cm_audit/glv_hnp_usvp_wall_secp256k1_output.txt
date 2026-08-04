@@ -1,0 +1,40 @@
+==============================================================================
+Thread 23 part 4 — the Psi floor at cryptographic size
+==============================================================================
+gamma = 0.65, Psi_crit = 0.9603 (fit at 14-22 bits, m=12, plain LLL)
+
+==============================================================================
+secp256k1
+  n      = 115792089237316195423570985008687907852837564279074904382605163141518161494337  (256 bits)
+  lambda = 37718080363155996902926221483475020450927657555482586988616620542887997980018   lam* = 0.325740
+  K2     = isqrt(n)+1 = 2^128.00  (generic GLV half)
+
+   log2 K1      eff=r   nu_inf   nu_hat  Psi_floor     floor   m needed
+       128    1.00000   2.3860   0.9116     2.2467   blocked -- never --
+       127    0.50000   1.6872   0.6851     1.3195   blocked -- never --
+       126    0.25000   1.1930   0.5852     0.8422    clears        685
+       125    0.12500   0.8436   0.6220     0.6196    clears        205
+       124    0.06250   0.5965   0.7903     0.5119    clears        144
+       123    0.03125   0.4218   1.0294     0.4298    clears        113
+       122    0.01562   0.2983   0.8253     0.2633    clears         70
+       121    0.00781   0.2109   0.8019     0.1827    clears         55
+       120    0.00391   0.1491   0.9625     0.1455    clears         48
+
+  => the floor first clears Psi_crit at K1 ~ 2^126
+     i.e. k1 must be at least 2.00 bits shorter than the generic GLV half sqrt(n) ~ 2^128.0
+     and this is INDEPENDENT of the number of signatures.
+
+secp192k1: n has no GLV eigenvalue (n !≡ 1 mod 3) — skipped
+
+==============================================================================
+Reading
+
+The floor is shallow: for secp256k1 the requirement is a bias of a couple of
+bits in k1 relative to sqrt(n), not a large one.  That is the same qualitative
+place the 2026-07-29 run left it (secp256k1 nu_hat = 0.664 at eff = 0.0993,
+"just above the C2 ceiling"), now with an m-independent reason attached: no
+quantity of signatures moves Psi below 2.386*sqrt(r)*nu_hat^0.65, so the
+attack is bounded by the nonce generator's bias alone.
+
+This says nothing about ECDSA as deployed -- see the module docstring.
+
