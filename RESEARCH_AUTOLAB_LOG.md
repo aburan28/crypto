@@ -6320,3 +6320,5 @@ optimal for the uniform model — cheap to run and worth closing off.
 
 ### Commits made
 a8776c4 autolab 2026-08-04: Thread 23 — projection is a no-op; centering the CVP target doubles tolerable bias strength
+
+Pushed to `claude/zen-pascal-penfwj` (the session-designated branch), not `main`.
