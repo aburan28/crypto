@@ -6611,3 +6611,12 @@ falsified and the ninth would fail for the same reason.
 ### Commits made
 
 bf7beab autolab 2026-08-04: Thread 23 — closed form for nu_hat; repair 07-29 merge regression
+
+### Push target (note for future runs)
+
+The daily protocol says `git push origin main`, but this session's harness
+designates branch `claude/zen-pascal-2u64ng` and forbids pushing elsewhere.
+Commits `bf7beab` and `6df564c` are on that branch, not on `main`; no PR was
+opened. Future runs starting from a fresh clone of `main` will not see this
+work until the branch is merged — check `git branch -r` for unmerged
+`claude/*` branches before concluding a thread was never worked.
