@@ -6103,3 +6103,174 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposal of the 2026-07-29 entry (log line ~6089). Threads 1, 3, 4, 6 are
+CLOSED; Thread 2 was closed 2026-07-26 (`c591765`) with a permanent BLOCKED verdict;
+Thread 5/20 is the only line with recent measurable progress, and Thread 23 was its
+stated, unstarted continuation. Cheap to execute as scoped (a K1 grid), so the session
+had room to follow the negative result to its cause.
+
+Outcome: the reformulation is **exactly neutral** (23a). Chasing why produced a
+quantitative model of the Phase-2 ceiling (23b/23c), and falsified two prior claims —
+one of my own from earlier in this session, one from 2026-07-29 (T4b).
+
+### Work done
+
+Environment (fresh container): `pip install fpylll sympy cysignals` → fpylll 0.6.4,
+sympy 1.14.0, cysignals 1.12.5. As on 2026-07-29, this never persists; always re-install.
+Pure Python, no PARI needed. `cargo test --test curve_audit` → **5/5 pass (5.23s)**. ✓
+
+Three new scripts, each answering the previous one's question:
+
+- **`secp256k1_cm_audit/glv_hnp_phase2_projected.py`** (23a) — the proposed
+  reformulation. L contains `n·S_D·e_m`, so `L/⟨n·S_D·e_m⟩` is realised as
+  *delete column m*; d is recovered from the projected vector by
+  `d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n`. Three arms: baseline Kannan `L`,
+  projection `L_proj`, and a Babai-nearest-plane CVP arm (exact `Fraction` GS) on
+  `L_proj` with the Kannan row dropped. Lattice construction copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so the comparison to 07-29 is exact.
+- **`glv_hnp_phase2_density_wall.py`** (23b) — closed-form geometry, plus eff/m/n
+  sweeps to test a proposed fixed threshold.
+- **`glv_hnp_phase2_gh_collapse.py`** (23c) — 3024-trial grid,
+  bits ∈ {14,17,20} × 8 curves × m ∈ {6,8,12,16,24,32} × eff ∈ {0.04…0.30} × 3 seeds,
+  scoring `‖pv‖/GH` against `eff`, `m` and `ν̂` by AUC.
+
+Outputs: `glv_hnp_phase2_{projected,density_wall,gh_collapse}_output.txt`.
+
+### Findings
+
+**1. The reformulation is exactly neutral — Thread 23's falsifier fails on both legs.**
+17-bit, 20 curves, m=12, 5 seeds (the 07-29 T3 protocol), `L` vs `L_proj`:
+
+| eff | L (curves 5/5, trials) | L_proj (curves 5/5, trials) |
+|---|---|---|
+| 0.05 | 16/20, 96/100 | 16/20, **96/100** |
+| 0.15 | 3/20, 18/100 | 3/20, **18/100** |
+| 0.25 | 0/20, 9/100 | 0/20, **9/100** |
+
+Identical in every cell. The K1 grid on the two 12-bit anchors is identical cell-for-cell
+too (2557: 5/5 through K1=8, 1/5 at 12, 0/5 at 16+; 2677: 5/5 through K1=4, 3/5 at 6,
+0/5 from 8 — for *both* lattices). BKZ-20 in the hard regime: L 3/30, L_proj 3/30.
+The CVP arm is strictly **worse** (2557 at K1=2: 4/5 vs 5/5; 0/5 from K1=8), as expected —
+Babai rounding is weaker than reading the Kannan row.
+
+And sv/pv does **not** rise above 1: projecting lifts it (2677 at K1=8: 0.418 → 0.813)
+but the shortest vector is now a genuine mixed decoy (energy 0.822 k1-block /
+0.178 k2-block, versus 1.000 on the d-column before). Removing one masking vector just
+promotes the next one. **The trivial `n·e_m` vector was never the obstruction.**
+
+**2. The obstruction is lattice density.** With `eff = K1·K2/n`, `D = 2m+2`:
+
+```
+det(L) = n^(2m+1) / eff^m ,   E‖pv‖² = n²(2m/3 + 4/3)
+‖pv‖/GH = n^(1/D) · eff^(m/D) · sqrt( 2πe(2m+4) / 3D )
+```
+
+`det(L_proj) = det(L)/(n·S_D)` and `dim` drops by 1, so the two ratios agree to ~2%
+at every (m, eff) tested — the projection removes a vector but not any density. That is
+*why* 23a is neutral, and it is a proof, not a correlation.
+
+**3. FALSIFIED — my own 23b closed form.** The `m → ∞` limit of the ratio is
+`sqrt(2πe·eff/3) = 2.386·√eff`, giving a clean m- and n-independent threshold
+`eff* = 3/(2πe) = 0.1756`. That limit is real but **useless at practical m**: the
+`n^(1/D)` factor decays only like `exp(log n / 2m)`, and at 17 bits
+
+| eff | m=6 | m=12 | m=24 | m=48 | limit |
+|---|---|---|---|---|---|
+| 0.05 | 1.637 | 0.976 | 0.730 | 0.626 | 0.533 |
+| 0.25 | 3.263 | 2.052 | 1.581 | 1.376 | 1.191 |
+
+The empirical 50% crossing at m=12 is eff = 0.097, not 0.176. Recorded as dead so no
+future run re-derives it.
+
+**4. FALSIFIED — T4b of 2026-07-29 ("more data does not rescue it").** That read
+`m = 8/12/16/24/32 → 0,0,1,0,1 of 5` off one curve × 5 seeds. At 30 trials/cell the
+rise is unambiguous:
+
+| eff | m=6 | m=8 | m=12 | m=16 | m=24 | m=32 |
+|---|---|---|---|---|---|---|
+| 0.08 | 0.40 | 0.60 | 0.70 | 0.80 | 0.87 | 0.93 |
+| 0.14 | 0.00 | 0.07 | 0.03 | 0.27 | 0.33 | 0.37 |
+| 0.22 | 0.00 | 0.00 | 0.00 | 0.10 | 0.13 | 0.03 |
+
+Signatures do help; the K1 wall is a wall in `eff` **at fixed m**, and it moves outward
+with m exactly as `‖pv‖/GH` predicts. The 07-29 cell was underpowered, not wrong-signed.
+
+**5. `‖pv‖/GH` is the dominant predictor; ν̂ is a genuine second-order term.**
+3024 trials pooled over bits ∈ {14,17,20}, m ∈ {6…32}, eff ∈ {0.04…0.30}:
+
+```
+AUC   ||pv||/GH  0.897     eff alone  0.842     nu_hat  0.693     -m  0.669
+```
+
+Binned success rate against `‖pv‖/GH` (all m, all n): 0.99, 0.94, 0.86, 0.81, 0.65,
+0.54, 0.29, 0.16, 0.04, 0.01 across bins 0.7 / 0.85 / 1.0 / 1.15 / 1.3 / 1.5 / 1.75 /
+2.0 / 2.5 / ∞. Empirical 50% crossing **τ = 1.424** — LLL keeps working well past the
+Gaussian-heuristic point `pv/GH = 1`, as usual for unique-SVP.
+
+The collapse is good but **not** complete: within the 1.30–1.50 bin, m=6 gives 0.96 and
+m=32 gives 0.39, i.e. at equal density a larger dimension is harder (ordinary LLL
+quality decay). Residual n-dependence is smaller but visible. So `‖pv‖/GH` orders the
+grid; it does not fully determine it.
+
+Conditioning on it, **ν̂ = λ₁(L₂)/√det L₂ survives**: within-cell AUC **0.728** over the
+882 trials in mixed cells (fixed m, eff, n → `‖pv‖/GH` constant by construction). The
+2026-07-29 ν̂ separator is therefore complementary to the density term, not a proxy for
+it — density sets the band, ν̂ places the curve inside it.
+
+**6. This is a lattice bound, not an information-theoretic one.** The solution stays
+uniquely determined while `m·log₂(1/eff) > log₂ n`, i.e. up to eff ≈ 0.37 at m=12,
+n=2¹⁷. The lattice wall at eff ≈ 0.10 is *strictly tighter*. Thread 23's falsifier
+offered "improvement" vs "information-theoretic ceiling" as the two outcomes; the true
+answer is neither — it is a formulation-independent **density** ceiling for this family
+of embeddings, and a genuinely different embedding (not a projection of this one) is
+not ruled out by anything measured here.
+
+**7. Quantitative ceiling for secp256k1.** Solving `‖pv‖/GH = τ = 1.424` for eff, with
+K2 = √n = 2¹²⁸ (heuristic: assumes the C1 collapse holds at cryptographic size, verified
+here only to 20 bits, and *optimistic for the attacker* since the residual m-penalty in
+finding 5 is ignored):
+
+| m | eff | k1 bound | bits of k1 that must be known |
+|---|---|---|---|
+| 12 | 2⁻²³·⁰⁶ | 2¹⁰⁴·⁹ | 23.1 |
+| 128 | 2⁻³·⁵¹ | 2¹²⁴·⁵ | 3.5 |
+| 1024 | 2⁻¹·⁷⁴ | 2¹²⁶·³ | 1.7 |
+
+Asymptote `eff → (τ/√(2πe/3))² = 0.356`. This is the ordinary HNP trade-off: the GLV
+structure buys the attacker the extra k2 block but **no asymptotic advantage** — the
+per-signature leakage requirement still only falls as O(log n / m). As on 2026-07-29,
+this is conditional on a non-standard nonce generator `k = k1 + λ·k2` with biased k1;
+it is **not** an attack on standard ECDSA, where no such decomposition is available to
+the attacker.
+
+### Next step proposal
+
+**Thread 24 — attack the density term instead of the geometry.** Every reformulation
+tried so far (Kannan / projection / CVP) preserves `det` and `dim` and therefore `‖pv‖/GH`,
+which finding 2 shows is exactly why they are neutral. The only lever left is to *lower
+det at fixed dim* by adding algebraic relations the current lattice ignores. Concrete
+candidate: the GLV relation `λ² + λ + 1 ≡ 0 (mod n)` means the pair (k1, k2) also
+satisfies `k ≡ k1 + λk2` **and** `λ·k ≡ −k2 + (k1−k2)λ`, i.e. multiplying a signature by
+λ gives a second congruence in the *same* two unknowns. Adjoining those m extra rows
+adds m constraints without adding unknowns, and should cut log det by ~m·log n while
+adding m to the dimension.
+Falsifier: compute `‖pv‖/GH` for the augmented lattice at (17-bit, m=12, eff=0.15). If it
+drops below the current 1.53 and the measured success rate rises above the current 0.19,
+the density lever is real; if the extra rows are in the span of the existing ones — check
+by HNF rank, which is the likely outcome since λ-multiplication may be a unimodular
+row operation exactly as `λ → λ−n` was in T1 (2026-07-29) — Thread 24 dies immediately
+and Phase 2 is at its ceiling for this unknown-set.
+Cost: ~30 min, reuses `build_glv_lattice` and the C1 harness verbatim.
+
+**Secondary (cheap, 10 min):** re-fit τ with the m-penalty as a second regressor
+(`logit(success) ~ a·log(pv/GH) + b·log D`) and redo the finding-7 table; the current
+extrapolation is known-optimistic and a two-term fit would bound how optimistic.
+
+### Commits made
+(recorded below after commit)
