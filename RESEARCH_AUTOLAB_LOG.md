@@ -6311,3 +6311,5 @@ container. Any future run picking up a PARI thread (Thread 2 CHLRS, Thread 22
 Richelot search) should first check `which gp` and budget for a source build.
 
 ### Commits made
+
+086fe36 autolab 2026-08-04: Thread 23 — trivial vector is not the obstruction; wall splits into decoy wall + reduction wall
