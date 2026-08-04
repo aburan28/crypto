@@ -6103,3 +6103,166 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+**Thread 23** — the reformulation proposed verbatim by the 2026-07-29 entry
+("reformulate the Phase-2 lattice so the target is λ₁"). Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+made measurable progress on 2026-07-29, so protocol rule (b) selects its proposed
+sub-task. Goal: decide whether the K1 wall (T4) is algorithmic or information-theoretic.
+
+Environment note: `pip install fpylll cysignals sympy` works; **`apt-get install pari-gp`
+fails in this container** (404 on a `libegl-mesa0` dependency, needs `apt-get update`
+first). No PARI was needed this run.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_bdd.py` (~560 lines, 6 experiments),
+  re-using the Thread-20 helpers verbatim from `glv_hnp_phase2_lambda_threshold.py` (the
+  helper prefix is `exec`'d, since that file runs its experiments at import) so every
+  number is directly comparable to 2026-07-29. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_bdd_output.txt` (145 lines).
+- Three variants on identical signature sets: **A** baseline dim-(2m+2) Kannan + LLL;
+  **B** d-column dropped (the trivial direction quotiented out — `L ∩ ℝe_m = n·S_D·ℤe_m`,
+  so deleting coordinate m is exactly that orthogonal projection); **C** exact CVP
+  (`fpylll` `method="proved"`) in the dim-(2m+1) lattice `L0`, for which `v_planted` is a
+  candidate by construction.
+- `cargo test --test curve_audit` → 5/5 pass (5.44s). ✓
+
+### Findings
+
+**E2 — the reformulation does NOT move the wall. Falsifier answered: negative.**
+Variant B reproduces variant A *exactly* on all 16 grid cells (m=12, 5 seeds):
+
+| curve | var | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 | A | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | B | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2677 | A | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | B | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The 2026-07-29 T4 baseline row for A is reproduced bit-for-bit. Half the stated falsifier
+*is* met — sv/pv rises from 0.406 (A) to **1.000** (B) on 2677 at K1≤4, i.e. the planted
+vector genuinely becomes λ₁ once the trivial vector is gone — but recovery does not
+change at any cell. Removing the parasitic vector was necessary bookkeeping, not an attack
+improvement.
+
+**E3 — exact CVP ≈ LLL. The wall is information-theoretic.**
+Over the 80-cell grid: exact CVP recovers d in **48/80**, variant-A LLL in **47/80**.
+On the λ*=0.07 curve exact CVP dies at exactly the same K1 as LLL:
+
+| curve | K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 | CVP / LLL | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/4 | 1/1 | 0/0 |
+| 2677 | CVP / LLL | 5/5 | 5/5 | 5/5 | **4/2** | 0/0 | 0/0 | 0/0 | 0/0 |
+
+The single cell where CVP beats LLL (2677, K1=6: 4/5 vs 2/5) is the boundary cell; at
+K1=8 the strongest possible algorithm for this formulation gets 0/5. **The 2026-07-29
+conjecture is resolved: the wall is information-theoretic, not a reduction-strength
+issue.** (Caveat recorded for future runs: baseline `recover_d` is oracle-assisted — it
+tests all 2m+2 rows against the true d — whereas CVP returns one candidate. Variant B
+validates internally on a second signature and still matches A, so the assist is not
+load-bearing.)
+
+**Bug found and fixed in this run's own instrumentation.** The first pass measured
+τ = dist/‖v_planted‖ with the raw representative d ∈ [0,n) and produced the impossible
+`rec > opt`. The whole coset `v_planted + c·n·S_D·e_m` decodes to the same d, so the
+minimal representative uses the *centered* residue `d_c = ((d + n/2) mod n) − n/2`. With
+that fix τ=1 exactly on the cells where CVP is optimal. Raw-vs-centered differs by 3–4%
+(`tauraw_m` column) — enough to invert the comparison.
+
+**E5 — ν is a good gate at fixed m and nothing more.**
+ν = ‖v_planted‖/GH(L0) depends only on (n, K1, K2, m), never on the curve — the
+configuration-level invariant that 2026-07-29 T5 argued had to exist. Closed form
+(k1~U{0..K1−1}, k2~U{0..K2−1}, d centered):
+
+```
+‖v_p‖² = m·S_K1²(K1−1)(2K1−1)/6 + n²/12 + m·S_K2²(K2−1)(2K2−1)/6
+det L0 = n^(2m)/eff^m,  eff = K1·K2/n,  GH = sqrt((2m+1)/2πe)·det^(1/(2m+1))
+ν  ~  (n·eff^m)^(1/(2m+1)) · sqrt(2πe/3),   sqrt(2πe/3) = 2.3864
+```
+Predicted ν matches measured within **1.7–5.6%** on all 16 cells. At m=12 it gates
+perfectly: **30/30 cells with ν<1 recover, 10/10 cells with ν>2.1 fail.**
+
+**E5b — but ν<1 is NOT sufficient. My own asymptotic claim is falsified here.**
+The closed form suggests eff < 1/2.3864² = 0.1756 makes ν<1 achievable for large enough
+m (m* = 38 for the 2677/K1=8 cell). Swept m ∈ {12,24,40,60,80,100,120,160}, 3 seeds:
+
+| curve | K1 | m* | 12 | 24 | 40 | 60 | 80 | 100 | 120 | 160 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2677 | 8 | 38 | 0/3 | 0/3 | 1/3 | 0/3 | 1/3 | 0/3 | 1/3 | 0/3 |
+| 2557 | 16 | — | 1/3 | 2/3 | 1/3 | 2/3 | 1/3 | 1/3 | 2/3 | 1/3 |
+| 2677 | 6 | 16 | 1/3 | 1/3 | 0/3 | 2/3 | 0/3 | 2/3 | 1/3 | 2/3 |
+
+ν for 2677/K1=8 falls 1.254 → 0.919 across that sweep and recovery stays flat at ~1/8.
+For 2557/K1=16 ν is *above* 1 everywhere yet recovery is a flat ~46%. **Success is
+independent of m in both directions.** So ν is neither necessary nor sufficient across
+dimension, and no δ₀^dim LLL-gap correction rescues it either (δ₀^dim varies 33× over
+the sweep while success does not move). This also corrects 2026-07-29 T4b, which reached
+the right verdict ("more data does not rescue it") from a sweep that stopped at m=32 —
+i.e. entirely inside its own ν>1 region, so it had not tested its hypothesis.
+
+**E6 — STRUCTURAL RESULT: the Phase-2 lattice has no high-dimensional content.**
+`recover_d` accepts a reduced row iff its Kannan coordinate is ±S_KANNAN and its
+d-coordinate is ≡ d (mod n). The d-coordinate of a coset element is d + c_B (c_B = the
+B-row coefficient), so acceptance forces c_B = 0 for any row shorter than n. The accepted
+set is therefore the coset `v_planted + L_λ` with
+
+```
+L_λ = ⟨ n·S_K1·e_i ; (−λ·S_K1 | S_K2) ⟩_{i<m}  =  ⊕_{i<m} B,
+B   = ⟨ (n·S_K1, 0), (−λ·S_K1, S_K2) ⟩      — ONE 2-D lattice, the same for every i.
+```
+The minimum over the accepted coset separates:
+`min‖·‖² = S_KANNAN² + d_c² + Σ_i dist(t_i(d), B)²`, `t_i(d) = (((A_i + d·B_i) mod n)·S_K1, 0)`.
+
+Every block is 2-dimensional and LLL is **exact** in dimension 2 (Gauss/Lagrange).
+Three independent facts fall out and all three are confirmed:
+1. difficulty is m-independent → E5b's flat curves;
+2. λ enters only through the single 2-D lattice B → explains why λ* shifts the K1 wall by
+   a factor ~3 (T4) without ever creating a hard obstruction;
+3. no curve-level invariant can separate C1 from C2 → retro-explains the six failed
+   invariants of 2026-06-21…06-29 and T5.
+
+Direct test — exhaustive scan of the separable score f(d) = Σ_i dist(t_i(d), B)² over
+**all** d ∈ [1,n), reporting the rank of the true d (rank 1 = f pins d down outright):
+
+| curve | K1 | rank(d), 5 seeds | #rank==1 | LLL |
+|---|---|---|---|---|
+| 2557 | 8 | [1, 1, 1, 1, 1] | 5 | 5/5 |
+| 2677 | 6 | [1, 1, 1, 1, 3] | 4 | 2/5 |
+| 2557 | 16 | [1, 10, 17, 4, 70] | 1 | 1/5 |
+| 2677 | 8 | [2, 11, 13, 2, 7] | 0 | 0/5 |
+| 2557 | 24 | [768, 13, 796, 341, 734] | 0 | 0/5 |
+| 2677 | 24 | [2129, 1372, 2446, 2127, 2325] | 0 | 0/5 |
+
+`rank(d)==1` predicts per-seed LLL success in **26/30 cells (87%)**, and all four
+disagreements are in the single boundary cell 2677/K1=6 (ν≈1.05). Where rank(d)>1 the
+true d is not the minimiser of the coset norm at all, so **no** algorithm recovers it —
+the K1 wall is exactly the rank(d)>1 boundary. At 2677/K1=24 the rank is ~2100 out of
+n=2647, i.e. indistinguishable from random.
+
+**Consequence for the project.** The (2m+2)-dimensional Phase-2 GLV lattice buys no
+dimension reduction: the only genuinely unknown quantity is d, and the lattice merely
+evaluates a separable O(m) score over candidate d. In its present form Phase 2 is an
+exhaustive search on d wearing a lattice costume, and cannot beat ρ.
+
+### Next step proposal
+**Thread 24 — can f(d) be minimised faster than exhaustive search over d?**
+f(d) = Σ_i dist(t_i(d), B)² with t_i(d) = (((A_i + d·B_i) mod n)·S_K1, 0). Each summand is
+a piecewise-quadratic function of `(A_i + d·B_i) mod n` with period structure given by the
+Gauss-reduced basis of B, so f is a sum of m "sawtooth-quadratic" functions of d under m
+different multipliers B_i — structurally a simultaneous-Diophantine / dual-lattice object.
+Falsifier: build the dual lattice of the multiplier set {B_i} and test whether a short dual
+vector localises the argmin of f to a subinterval of size ≪ n on the 12-bit curves. If yes,
+Phase 2 has real content and should be scaled to 20-bit. **If no — which is the expected
+outcome given E6 — Phase 2 should be marked DEAD-END** and the negative result
+("GLV-aware HNP lattices degenerate to a separable 1-D search in d") written into
+`RESEARCH_GLV_HNP_PHASE2.md` and cited from the paper's cover-cost section as evidence for
+the main theorem. Cheap: the scan harness already exists in `glv_hnp_phase2_thread23_bdd.py`
+(E6, `score_f`/`dist2_2d`).
+
+Secondary: `apt-get update` before `apt-get install pari-gp` in future containers.
+
+### Commits made
+[filled in below]

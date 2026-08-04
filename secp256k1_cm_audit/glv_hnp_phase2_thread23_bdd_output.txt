@@ -1,0 +1,262 @@
+
+==============================================================================
+Thread 23 — BDD/coset reformulation of the Phase-2 GLV lattice
+==============================================================================
+
+Variants
+  A  baseline  dim 2m+2 Kannan lattice, LLL           (2026-07-26/29 verbatim)
+  B  projected d-column dropped (trivial vector quotiented out), LLL
+  C  exact CVP dim 2m+1, no Kannan embedding, method="proved"
+
+Decoding margin  tau = dist(-a, L0) / ||v_planted||  in (0,1].
+  tau == 1  planted vector IS the closest vector -> failures are algorithmic.
+  tau <  1  something else is closer -> the instance is unsolvable in this
+            lattice formulation by any algorithm (information-theoretic).
+
+------------------------------------------------------------------------------
+E1: sanity — all three variants, 8-bit/199, K1=2, m=6
+------------------------------------------------------------------------------
+   seed    A    B    C      tau   svA/pv   svB/pv
+     42 True True True   1.0000   0.6035   0.8428
+   1234 True True True   1.0000   0.5068   0.7552
+   9999 True True True   0.7692   0.5260   0.7677
+    555 True True True   0.9547   0.5618   0.8119
+  31337 True True True   0.6805   0.5184   0.7717
+
+------------------------------------------------------------------------------
+E2: K1 wall — does dropping the d-column move it?  m=12, 5 seeds
+------------------------------------------------------------------------------
+(2026-07-29 T4 baseline for A: 2557 -> 5,5,5,5,5,4,1,0 ; 2677 -> 5,5,5,2,0,0,0,0)
+
+curve           var K1=2   K1=3   K1=4   K1=6   K1=8   K1=12  K1=16  K1=24 
+12-bit/2557       A 5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+12-bit/2557       B 5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+12-bit/2677       A 5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+12-bit/2677       B 5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+
+curve           var mean sv/pv (shortest nonzero / planted)
+12-bit/2557       A  0.402  0.371  0.368  0.356  0.354  0.343  0.339  0.331
+12-bit/2557       B  0.742  0.529  0.461  0.396  0.373  0.352  0.347  0.339
+12-bit/2677       A  0.406  0.371  0.371  0.355  0.356  0.345  0.350  0.341
+12-bit/2677       B  1.000  1.000  1.000  0.901  0.704  0.502  0.427  0.349
+
+------------------------------------------------------------------------------
+E3: exact CVP on the same grid — is the planted vector the optimum?
+------------------------------------------------------------------------------
+opt = #seeds with tau == 1 (planted vector IS the closest vector)
+rec = #seeds exact CVP returns the true d;  lll = variant-A LLL wins
+nu  = ||v_planted|| / GH(L0), the Gaussian-heuristic decodability index
+
+curve            K1   opt   rec   lll   tau_min  tau_mean  tauraw_m  nu=pv/GH     sec
+12-bit/2557       2     5     5     5    1.0000    1.0000    0.9672    0.5296     0.0
+12-bit/2557       3     5     5     5    1.0000    1.0000    0.9734    0.7108     0.0
+12-bit/2557       4     2     5     5    0.9352    0.9798    0.9556    0.8241     0.0
+12-bit/2557       6     0     5     5    0.7924    0.9079    0.8866    1.0389     0.0
+12-bit/2557       8     0     5     5    0.8132    0.8966    0.8762    1.2079     0.0
+12-bit/2557      12     0     3     4    0.7065    0.7891    0.7717    1.5011     0.0
+12-bit/2557      16     0     1     1    0.5943    0.6586    0.6446    1.7243     0.1
+12-bit/2557      24     0     0     0    0.5047    0.5345    0.5222    2.1287     0.1
+12-bit/2677       2     5     5     5    1.0000    1.0000    0.9661    0.5285     0.0
+12-bit/2677       3     5     5     5    1.0000    1.0000    0.9735    0.7168     0.0
+12-bit/2677       4     5     5     5    1.0000    1.0000    0.9743    0.8240     0.0
+12-bit/2677       6     4     4     2    0.9142    0.9828    0.9596    1.0515     0.0
+12-bit/2677       8     0     0     0    0.8045    0.8872    0.8677    1.2090     0.0
+12-bit/2677      12     0     0     0    0.6886    0.7695    0.7523    1.5190     0.0
+12-bit/2677      16     0     0     0    0.5817    0.6799    0.6665    1.7263     0.1
+12-bit/2677      24     0     0     0    0.4926    0.5145    0.5028    2.1518     0.2
+
+Totals over the 80 (curve,K1,seed) cells of the grid:
+  planted vector is the CVP optimum : 31/80
+  exact CVP recovers d              : 48/80
+  variant-A LLL recovers d          : 47/80
+
+------------------------------------------------------------------------------
+E4: variant B — where does the shortest vector's energy sit now?
+------------------------------------------------------------------------------
+(2026-07-29 T5 for variant A: e_d = 1.000 exactly, |sv[m]|/n = 1.0000)
+
+curve            K1   sv/pv    e_k1    e_k2   e_kan  kan=S?
+12-bit/2557       2   0.713   0.710   0.290   0.000   False
+12-bit/2557       8   0.384   0.132   0.868   0.000   False
+12-bit/2557      24   0.337   0.016   0.984   0.000   False
+12-bit/2677       2   1.000   0.123   0.713   0.164    True
+12-bit/2677       8   0.724   0.822   0.178   0.000   False
+12-bit/2677      24   0.349   0.339   0.661   0.000   False
+
+------------------------------------------------------------------------------
+E5: nu = ||v_planted|| / GH(L0) as a closed form, and its prediction
+------------------------------------------------------------------------------
+
+E3 shows nu is a near-perfect gate: every one of the 30 grid cells with
+nu < 1 recovered d, and every one of the 10 cells with nu > 2.1 failed.
+nu depends only on (n, K1, K2, m) -- NOT on the curve -- which is exactly the
+kind of invariant 2026-07-29 T5 argued had to exist (no curve-level invariant
+can separate C1 from C2, because the condition is a property of the projected
+GS profile and the signature set).
+
+Closed form.  With k1 ~ U{0..K1-1}, k2 ~ U{0..K2-1}, d centered in
+[-n/2, n/2), and S_K1 = floor(n/K1), S_K2 = max(1, floor(n/K2)), S_D = 1:
+
+  ||v_p||^2 = m*S_K1^2*(K1-1)(2K1-1)/6 + n^2/12 + m*S_K2^2*(K2-1)(2K2-1)/6
+  det(L0)   = (n*S_K1)^m * S_D * S_K2^m = n^(2m) / eff^m,   eff = K1*K2/n
+  GH(L0)    = sqrt((2m+1)/(2*pi*e)) * det(L0)^(1/(2m+1))
+
+Taking S_K1 -> n/K1, S_K2 -> n/K2 and K1,K2 -> infinity gives the asymptotic
+
+  nu ~ (n * eff^m)^(1/(2m+1)) * sqrt((2m/3 + 1/12) * 2*pi*e / (2m+1))
+     -> (n * eff^m)^(1/(2m+1)) * sqrt(2*pi*e/3)      as m -> infinity.
+
+sqrt(2*pi*e/3) = 2.3864, so nu < 1 needs m*ln(1/eff) > ln n + (2m+1)*ln(2.3864),
+i.e. asymptotically  eff < 1/2.3864^2 = 0.1756  REGARDLESS of m.  Above that
+bias strength no number of signatures ever makes the planted vector decodable
+in this lattice -- a hard ceiling that the information-theoretic bound
+m >= ln n / ln(1/eff) (m_thresh in glv_hnp_phase2_20bit.py) completely misses.
+
+Predicted-vs-measured nu at m=12 (measured column from E3):
+curve            K1     eff   nu_pred   nu_meas   ratio
+12-bit/2557       2  0.0391    0.5588    0.5296  1.0552
+12-bit/2557       3  0.0587    0.7225    0.7108  1.0165
+12-bit/2557       4  0.0782    0.8561    0.8241  1.0388
+12-bit/2557       6  0.1173    1.0735    1.0389  1.0334
+12-bit/2557       8  0.1564    1.2522    1.2079  1.0366
+12-bit/2557      12  0.2347    1.5455    1.5011  1.0296
+12-bit/2557      16  0.3129    1.7884    1.7243  1.0372
+12-bit/2557      24  0.4693    2.1898    2.1287  1.0287
+12-bit/2677       2  0.0393    0.5580    0.5285  1.0558
+12-bit/2677       3  0.0589    0.7223    0.7168  1.0077
+12-bit/2677       4  0.0786    0.8565    0.8240  1.0394
+12-bit/2677       6  0.1179    1.0745    1.0515  1.0219
+12-bit/2677       8  0.1572    1.2537    1.2090  1.0370
+12-bit/2677      12  0.2357    1.5478    1.5190  1.0189
+12-bit/2677      16  0.3143    1.7912    1.7263  1.0376
+12-bit/2677      24  0.4715    2.1935    2.1518  1.0194
+
+m* = smallest m with nu_exact < 1  (m_it = information-theoretic bound ln n / ln(1/eff))
+curve            K1     eff   m_it     m*   nu(12)   nu(m*)
+12-bit/2557       2  0.0391      3      5   0.5588   0.8917
+12-bit/2557       3  0.0587      3      7   0.7225   0.9173
+12-bit/2557       4  0.0782      4      9   0.8561   0.9568
+12-bit/2557       6  0.1173      4     16   1.0735   0.9877
+12-bit/2557       8  0.1564      5     37   1.2522   0.9997
+12-bit/2557      12  0.2347      6  >4000   1.5455      n/a
+12-bit/2557      16  0.3129      7  >4000   1.7884      n/a
+12-bit/2557      24  0.4693     11  >4000   2.1898      n/a
+12-bit/2677       2  0.0393      3      5   0.5580   0.8899
+12-bit/2677       3  0.0589      3      7   0.7223   0.9169
+12-bit/2677       4  0.0786      4      9   0.8565   0.9570
+12-bit/2677       6  0.1179      4     16   1.0745   0.9888
+12-bit/2677       8  0.1572      5     38   1.2537   0.9984
+12-bit/2677      12  0.2357      6  >4000   1.5478      n/a
+12-bit/2677      16  0.3143      7  >4000   1.7912      n/a
+12-bit/2677      24  0.4715     11  >4000   2.1935      n/a
+
+The 2026-07-29 T4b experiment ("at K1=8 more data does not rescue the lam*=0.07
+curve": m = 8,12,16,24,32 -> 0,0,1,0,1 of 5) stopped at m=32.  The nu law says
+m* for that cell is far beyond 32.  So T4b did not test its own hypothesis --
+it sampled entirely inside the nu > 1 region.  Direct test below.
+
+------------------------------------------------------------------------------
+E5b: FALSIFIER — sweep m at the cells T4b declared hopeless
+------------------------------------------------------------------------------
+Prediction: recovery switches ON at m ~ m*, not at the m_it bound.
+
+curve            K1    m* m=12   m=24   m=40   m=60   m=80   m=100  m=120  m=160 
+12-bit/2677       8    38 0/3    0/3    1/3    0/3    1/3    0/3    1/3    0/3   
+12-bit/2557      16  None 1/3    2/3    1/3    2/3    1/3    1/3    2/3    1/3   
+12-bit/2677       6    16 1/3    1/3    0/3    2/3    0/3    2/3    1/3    2/3   
+
+curve            K1 m=12   m=24   m=40   m=60   m=80   m=100  m=120  m=160    (nu_exact)
+12-bit/2677       8 1.254  1.063  0.993  0.959  0.943  0.933  0.927  0.919 
+12-bit/2557      16 1.788  1.526  1.430  1.383  1.361  1.347  1.338  1.327 
+12-bit/2677       6 1.075  0.908  0.848  0.818  0.804  0.796  0.790  0.783 
+
+------------------------------------------------------------------------------
+E6: does the recoverable coset factorise?  (explains E5b's flat curves)
+------------------------------------------------------------------------------
+
+E5b kills nu as a sufficient condition: for (2677, K1=8) nu drops below 1 at
+m=40 and reaches 0.919 at m=160, yet LLL recovery stays flat at ~1/8 for every
+m in 12..160.  For (2557, K1=16) nu is ABOVE 1 at every m yet recovery is a
+flat ~46%.  Success does not move with m at all -- in either direction.  So
+neither nu < 1 nor any dimension-dependent LLL gap factor delta_0^dim explains
+the data: both vary by more than an order of magnitude over that sweep.
+
+The structural explanation.  Look at which lattice vectors recover_d() accepts:
+a reduced row is accepted iff its Kannan coordinate is +-S_KANNAN and its
+d-coordinate is ~ d (mod n).  The d-coordinate of a coset element is d + c_B
+where c_B is the coefficient of the B-row, so acceptance forces c_B = 0 for any
+row shorter than n.  The set of accepted vectors is therefore the coset
+
+    v_planted + L_lam,   L_lam = < n*S_K1*e_i ; (-lam*S_K1 | S_K2) >_{i<m}
+
+and L_lam is the ORTHOGONAL DIRECT SUM of m copies of one 2-D lattice
+
+    B = < (n*S_K1, 0), (-lam*S_K1, S_K2) >      (same B for every i).
+
+So the minimum over the accepted coset separates:
+
+    min ||.||^2 = S_KANNAN^2 + d_c^2 + sum_i dist( t_i(d), B )^2,
+    t_i(d) = ( ((A_i + d*B_i) mod n) * S_K1,  0 ).
+
+Every block is 2-dimensional, and LLL is EXACT in dimension 2 (Gauss/Lagrange).
+The lattice problem therefore has NO dimension-2m+2 content whatsoever: its
+difficulty is independent of m -- exactly the flatness E5b measured -- and it
+depends on lam only through the single 2-D lattice B, which is why lam* shifts
+the K1 wall (2026-07-29 T4) without ever creating a hard obstruction.
+
+Consequence, if true: the only genuinely unknown quantity is d, and f(d) below
+is a separable score computable in O(m) per candidate.  Phase 2's (2m+2)-dim
+lattice would then buy no dimension reduction over exhaustive search on d.
+
+TEST: compute f(d) = sum_i dist(t_i(d), B)^2 for EVERY d in [1,n) and report
+the rank of the true d.  rank 1 = the score function identifies d outright.
+
+curve            K1    seed   LLL   rank(d)         f(d)        f_min     gap
+12-bit/2677       8      42 False         2     4.25e+07    4.097e+07   1.037
+12-bit/2677       8    1234 False        11    4.847e+07    3.975e+07   1.219
+12-bit/2677       8    9999 False        13    5.287e+07    3.368e+07   1.570
+12-bit/2677       8     555 False         2    3.865e+07    3.426e+07   1.128
+12-bit/2677       8   31337 False         7    4.652e+07    2.988e+07   1.557
+12-bit/2677       6      42 False         1     4.49e+07     4.49e+07   1.000
+12-bit/2677       6    1234  True         1     4.27e+07     4.27e+07   1.000
+12-bit/2677       6    9999 False         1    4.642e+07    4.642e+07   1.000
+12-bit/2677       6     555 False         1    4.635e+07    4.635e+07   1.000
+12-bit/2677       6   31337  True         3    4.797e+07     4.01e+07   1.196
+12-bit/2557      16      42  True         1    2.283e+07    2.283e+07   1.000
+12-bit/2557      16    1234 False        10    3.419e+07    1.923e+07   1.778
+12-bit/2557      16    9999 False        17    3.715e+07    2.147e+07   1.730
+12-bit/2557      16     555 False         4    2.808e+07    1.483e+07   1.894
+12-bit/2557      16   31337 False        70    4.485e+07    2.767e+07   1.621
+12-bit/2557       8      42  True         1    2.901e+07    2.901e+07   1.000
+12-bit/2557       8    1234  True         1    3.648e+07    3.648e+07   1.000
+12-bit/2557       8    9999  True         1    4.417e+07    4.417e+07   1.000
+12-bit/2557       8     555  True         1    3.299e+07    3.299e+07   1.000
+12-bit/2557       8   31337  True         1     4.72e+07     4.72e+07   1.000
+12-bit/2557      24      42 False       768    3.509e+07    1.311e+07   2.677
+12-bit/2557      24    1234 False        13    1.959e+07    1.535e+07   1.276
+12-bit/2557      24    9999 False       796    3.558e+07    1.413e+07   2.519
+12-bit/2557      24     555 False       341    3.013e+07    1.351e+07   2.231
+12-bit/2557      24   31337 False       734    3.477e+07      1.4e+07   2.483
+12-bit/2677      24      42 False      2129    4.384e+07    1.217e+07   3.603
+12-bit/2677      24    1234 False      1372    3.764e+07    1.369e+07   2.750
+12-bit/2677      24    9999 False      2446    4.887e+07    1.351e+07   3.618
+12-bit/2677      24     555 False      2127    4.407e+07    1.189e+07   3.707
+12-bit/2677      24   31337 False      2325    4.685e+07    1.446e+07   3.241
+
+curve            K1               rank(d) over 5 seeds  #rank==1
+12-bit/2677       8                  [2, 11, 13, 2, 7]         0
+12-bit/2677       6                    [1, 1, 1, 1, 3]         4
+12-bit/2557      16                 [1, 10, 17, 4, 70]         1
+12-bit/2557       8                    [1, 1, 1, 1, 1]         5
+12-bit/2557      24           [768, 13, 796, 341, 734]         0
+12-bit/2677      24     [2129, 1372, 2446, 2127, 2325]         0
+
+Read-off: wherever rank(d) == 1 the separable score f already pins down d
+outright, so all the information the (2m+2)-dimensional lattice can hold is
+present in m independent 2-D problems -- LLL's failure there is purely a
+failure to reach the coset minimum, not a missing-information failure.
+Wherever rank(d) >> 1 the information genuinely is not there and no reduction
+strength can help.
+
+
+Done.
