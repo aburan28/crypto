@@ -6103,3 +6103,211 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+
+Thread 23 — reformulate the GLV-HNP Phase-2 lattice so the planted vector is
+the target of the search, proposed verbatim as the next step by the 2026-07-29
+entry (log line ~6089). Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END;
+priority 3 closed 2026-07-21; priority 5 (GLV-HNP Phase 2) made measurable
+progress on 2026-07-26 and 2026-07-29, so protocol rule (b) selects its
+continuation. Last log entry 2026-07-29, so no ePrint survey was due.
+
+**Thread 23 as posed is answered NEGATIVELY. The falsifier's second half fires
+positively by a different route: an exact decoder does move the wall, and the
+gap widens with m.** Both results below.
+
+### Work done
+
+Environment (fresh container): `pip install fpylll cysignals sympy` →
+fpylll 0.6.4, sympy 1.14.0. **`apt-get install pari-gp` FAILED this run** (no
+usable apt repo in the container); PARI was not needed for this thread but
+future PARI-dependent threads should budget for building from source.
+
+Five new scripts, all in `secp256k1_cm_audit/`, each with a committed
+`*_output.txt`:
+
+| script | experiments |
+|---|---|
+| `glv_hnp_thread23_bdd.py` | U1 baseline vs Babai, U2 S_D sweep, U3 decoder ladder, U4 loose GS bound |
+| `glv_hnp_thread23_cvp_wall.py` | U5 exact-CVP wall, U6 BKZ-β ladder, U7 nearest-plane criterion |
+| `glv_hnp_thread23_replication.py` | U8 per-instance criterion, U9 replication on 6 fresh 17-bit curves |
+| `glv_hnp_thread23_mlever.py` | U10 m-lever on 12-bit/2677 with the exact decoder |
+| `glv_hnp_thread23_gap_replication.py` | U11 gap replication at m=18 on fresh curves |
+
+Lattice construction reused verbatim from `glv_hnp_phase2_20bit.py:262`
+(`build_glv_lattice`) so every number is comparable to 2026-07-26 / 07-29.
+Four arms: A0 Kannan+LLL (the 2026-07-26 setup), A1 Kannan+LLL with an S_D
+knob, A2 embedding-free BDD + Babai nearest-plane, A4 exact CVP by enumeration
+(`fpylll.CVP.closest_vector`). `cargo test --test curve_audit` → 5/5 pass
+(5.59s). ✓
+
+### Findings
+
+**U1/U2/U3 — the trivial vector is NOT the obstruction. Three independent
+disproofs.** 2026-07-29 EXP T5 correctly observed that `n·S_D·e_m` is always
+shorter than the planted vector; it inferred that this was why recovery fails.
+It is not.
+
+(a) *Removing the embedding does nothing.* A2 (Babai nearest-plane, dim 2m+1,
+no Kannan row, so the SVP competition is gone entirely) matches or slightly
+underperforms A0 on the whole T4 K1 grid:
+
+| curve | arm | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | A0 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 | A2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | A0 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | A2 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+(b) *Making the planted vector shorter than the trivial one actively hurts.*
+Because `t_triv ∈ L`, the planted class has a reduced representative with
+d' = d−n when d > n/2, so the crossover is at S_D > sqrt((8m+12)/9) — 2.91 for
+m=8, 3.20 for m=10. The crossover is observed exactly there, and recovery
+degrades monotonically past it (12-bit/2677, m=10):
+
+| S_D | ‖pv^red‖/n | triv/n | pv<triv | K1=2 | 3 | 4 | 6 |
+|---|---|---|---|---|---|---|---|
+| 1 | 2.53 | 1 | no | 5/5 | 5/5 | 5/5 | 0/5 |
+| 2 | 2.58 | 2 | no | 5/5 | 5/5 | 5/5 | 0/5 |
+| 4 | 2.75 | 4 | **YES** | 5/5 | 5/5 | 5/5 | 1/5 |
+| 8 | 3.31 | 8 | YES | 5/5 | 3/5 | 4/5 | 1/5 |
+| 16 | 4.81 | 16 | YES | 3/5 | 2/5 | 1/5 | 1/5 |
+| 32 | 8.30 | 32 | YES | 1/5 | 1/5 | 1/5 | 1/5 |
+
+Reason: S_D multiplies det by S_D but ‖pv‖ by ~S_D, so ‖pv‖/GH degrades like
+S_D^{1−1/(2m+2)}. Winning the comparison against `t_triv` costs more than it
+buys. Same shape on 8-bit/199 and 12-bit/2557.
+
+(c) *Stronger reduction does not help either* (U6, Kannan+BKZ-β):
+
+| curve | K1 | LLL | β=20 | 30 | 40 | 50 | 60 | Babai | exact CVP |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2677 | 4 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 2/5 | 5/5 |
+| 12-bit/2677 | 6 | 0/5 | 1/5 | 1/5 | 1/5 | 1/5 | 1/5 | 0/5 | **4/5** |
+| 12-bit/2677 | 8 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 |
+| 12-bit/2557 | 12 | 1/5 | 1/5 | 1/5 | 1/5 | 1/5 | 1/5 | 0/5 | 1/5 |
+
+**U5 — where the exact decoder stops.** Metric: does a strictly closer decoy
+exist? *Caveat, recorded so future runs do not over-read it:* a closer decoy
+that happens to share the d-coordinate mod n still decodes correctly, so
+"closer decoy exists" is necessary but not sufficient for failure. 12-bit/2557
+K1=6 has closer-decoys 5/5 and CVP 5/5.
+
+| curve | CVP wall (≥4/5) | closer-decoy 5/5 from |
+|---|---|---|
+| 8-bit/199 (λ*=0.467, m=6) | K1=2 | K1=3 |
+| 12-bit/2557 (λ*=0.340, m=8) | K1=8 | K1=12 |
+| 12-bit/2677 (λ*=0.070, m=10) | K1=6 | K1=12 |
+
+So on 12-bit/2677 the algorithmic wall sits at K1≈4 and the exact-decoder wall
+at K1≈6–8 — **the K1≈4–6 wall reported 2026-07-26 and re-measured 2026-07-29
+(T4) is not information-theoretic.** On 12-bit/2557 the two walls coincide
+(K1≈12), so the gap is not universal.
+
+**U7/U8 — an exact, cheap success predictor for the Babai arm.** Nearest-plane
+returns the planted point iff |⟨e,b*_i⟩|/‖b*_i‖² < 1/2 for every i. Checked
+per instance, 120 instances:
+
+|  | recovered | not recovered |
+|---|---|---|
+| max_i coef < 1/2 | 28 | **0** |
+| max_i coef ≥ 1/2 | 22 | 70 |
+
+The implication holds on every instance; the 22 (18.3%) are the slack from
+needing only the d-coordinate, not the whole point. The loose global bound
+‖e‖ < min_i‖b*_i‖/2 tried first (U4) is useless — it reads 3.0–7.9 while
+scoring 5/5 — because min_i‖b*_i‖ is pinned to exactly n by the trivial
+vector, independently of K1 (visible in the U4 table as `min‖b*‖/n = 1.00`).
+
+**U9 — the gap does NOT replicate at m=10.** 6 fresh 17-bit j=0 GLV curves
+binned by λ*, common eff = K1·K2/n grid, m=10, 5 seeds. gap = eff_wall(CVP) −
+eff_wall(LLL):
+
+| p | λ* | ν̂ | wall_LLL | wall_CVP | gap |
+|---|---|---|---|---|---|
+| 65647 | 0.0273 | 0.9486 | 0.08 | 0.08 | +0.00 |
+| 65707 | 0.1372 | 0.9512 | 0.04 | 0.08 | +0.04 |
+| 65707 | 0.2115 | 0.9154 | 0.04 | 0.04 | +0.00 |
+| 65677 | 0.3184 | 0.5196 | 0.16 | 0.16 | +0.00 |
+| 65539 | 0.3346 | 0.1898 | 0.16 | 0.16 | +0.00 |
+| 66457 | 0.4456 | 0.5078 | 0.08 | 0.08 | +0.00 |
+
+spearman(λ*, gap) = +0.429, spearman(ν̂, gap) = −0.086 — nothing, on 6 points.
+
+**U10 — but m moves the exact-decoder wall, and LLL cannot follow.**
+12-bit/2677, exact CVP with BKZ-20 pre-reduction, 5 seeds, 0 timeouts:
+
+| m | dim | K1=6 LLL / CVP / closer | K1=8 LLL / CVP / closer | K1=12 LLL / CVP / closer |
+|---|---|---|---|---|
+| 6 | 13 | 2/5 · 0/5 · 5/5 | 1/5 · 0/5 · 5/5 | 0/5 · 0/5 · 5/5 |
+| 10 | 21 | 0/5 · 4/5 · 1/5 | 0/5 · 1/5 · 4/5 | 0/5 · 0/5 · 5/5 |
+| 14 | 29 | 1/5 · 4/5 · 1/5 | 0/5 · 1/5 · 4/5 | 0/5 · 0/5 · 5/5 |
+| 18 | 37 | 1/5 · **5/5** · 0/5 | 0/5 · **4/5** · 1/5 | 0/5 · 0/5 · 5/5 |
+
+At K1=8 the CVP arm goes 0 → 1 → 1 → 4 of 5 as m goes 6 → 18, and the
+closer-decoy count falls 5 → 4 → 4 → 1. The Kannan+LLL arm stays at 0–1/5
+throughout. This directly corrects EXP T4b of 2026-07-29 ("at K1=8 more data
+does not rescue it, m=8/12/16/24/32 → 0,0,1,0,1 of 5"): **more data does
+rescue it — T4b measured the LLL arm, which cannot see past its own wall.**
+K1=12 is untouched by m up to 18 (closer-decoy 5/5 throughout): a real wall.
+
+**U11 — the gap replicates on a fresh small-λ* curve, but only at m=18.**
+3 seeds, CVP capped at 150s, 0 timeouts:
+
+| p | λ* | m | eff | dim | K+LLL | CVP | closer |
+|---|---|---|---|---|---|---|---|
+| 65647 | 0.0273 | 10 | 0.08 | 21 | 2/3 | 3/3 | 0/3 |
+| 65647 | 0.0273 | 10 | 0.12 | 21 | 0/3 | 0/3 | 3/3 |
+| 65647 | 0.0273 | 18 | 0.08 | 37 | 3/3 | 3/3 | 0/3 |
+| 65647 | 0.0273 | 18 | 0.12 | 37 | 0/3 | **2/3** | 1/3 |
+| 65677 | 0.3184 | 10 | 0.08 | 21 | 3/3 | 3/3 | 3/3 |
+| 65677 | 0.3184 | 10 | 0.12 | 21 | 3/3 | 2/3 | 3/3 |
+| 65677 | 0.3184 | 18 | 0.08 | 37 | 3/3 | 3/3 | 3/3 |
+| 65677 | 0.3184 | 18 | 0.12 | 37 | 3/3 | 3/3 | 3/3 |
+
+This explains the U9 null: at m=10 the small-λ* curve is genuinely decoy-limited
+(0/3 both arms at eff=0.12), so there is nothing for a better decoder to find.
+At m=18 the decoys are gone (closer 1/3) and the gap opens: LLL 0/3, CVP 2/3.
+The mid-λ* curve shows no gap at any m tested. Two-for-two on small λ*
+(2677 λ*=0.070, 65647 λ*=0.027), zero-for-five on λ* ≥ 0.13 — consistent with
+ν̂ (commit e845207) as a *reduction-quality* separator, not an information one,
+but 2 positives is not evidence yet.
+
+**Net.** Thread 23's premise was wrong (the trivial vector is a symptom, not a
+cause) and all three proposed reformulations fail. The wall it was aimed at is
+real but splits in two: a decoy/information wall that only m moves, and — on
+small-λ* curves only — a reduction wall strictly inside it that neither
+LLL, BKZ-60, nor Babai reaches. No cryptanalytic consequence: the only decoder
+that crosses the reduction wall is exponential-time enumeration, and it stops
+at the decoy wall regardless. Phase 2 remains a toy-scale attack.
+
+### Next step proposal
+
+**Thread 24 — is the small-λ* reduction gap real, and does it survive a
+polynomial-time decoder?** Two sub-tasks, both cheap:
+
+(a) *Power the observation.* 10–12 fresh 17-bit curves with λ* spread, m ∈
+{10, 18, 26}, 5 seeds, at each curve's own eff wall ±1 step. Statistic:
+gap = eff_wall(CVP) − eff_wall(LLL) as a function of λ* and ν̂. Falsifier:
+if gap > 0 concentrates on λ* < 0.1 with a rank correlation surviving a
+permutation test at m=18, the ν̂/λ* separator is a reduction-quality effect and
+should be recorded as such in `RESEARCH_GLV_HNP_PHASE2.md`; if gap is flat, the
+two positives here are instance noise and the thread closes.
+Cost note: dim 2m+1 = 53 at m=26; keep the SIGALRM cap and report timeouts.
+
+(b) *Close the gap cheaply.* If (a) holds, the gap is by definition reachable
+without enumeration: try randomized-slicer / repeated-randomized-Babai on the
+BKZ-20 basis (k random unimodular re-reductions, take the best of k) at the
+2677 K1=6, m=18 point where CVP scores 5/5 and LLL 1/5. Falsifier: if
+best-of-32 randomized Babai reaches ≥3/5 there, the wall is a basis-quality
+artifact with a polynomial fix; if it stays ≤1/5, the gap needs enumeration and
+has no attack significance.
+
+Secondary, unrelated and still open: `apt-get install pari-gp` failed in this
+container. Any future run picking up a PARI thread (Thread 2 CHLRS, Thread 22
+Richelot search) should first check `which gp` and budget for a source build.
+
+### Commits made
