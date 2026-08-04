@@ -6103,3 +6103,155 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+Priority 5 (GLV-HNP Phase 2), continuing the 2026-07-29 entry under protocol
+rule (b). Priorities 1/2/4/6 are CLOSED/BLOCKED/DEAD-END, priority 3 completed
+2026-07-21.
+
+Orienting turned up a repo defect that reordered the session: commit `e845207`
+("nu_hat separator found (AUC 0.935)") added three scripts and a **rewritten**
+`glv_hnp_phase2_lambda_threshold.py`, but merge `6fd645f` ("Merge origin/main
+and resolve PR conflicts") resolved that file's conflict in favour of the
+`d525931` version. The rewrite was discarded, so on `main`
+`_t20a.rival_sublattice_nu` did not exist and **all three nu_hat scripts were
+dead code** (`AttributeError` on import). The nu_hat findings also never reached
+the log body — they existed only in the commit message of `e845207`. So the
+headline result of the last run was neither reproducible nor documented.
+
+Session goals therefore: (1) restore and verify, (2) document, (3) push the
+result further.
+
+### Work done
+- Env (fresh container): `pip install fpylll cysignals sympy`. `gp` is NOT
+  installed this run; no PARI was needed.
+- Recovered the lost module from the commit tree
+  (`git show e845207:...`) as `secp256k1_cm_audit/glv_hnp_thread20c_lib.py`
+  (505 lines) and repointed the three importers at it. Kept the `d525931`
+  file untouched — it is a *different* experiment (T1–T5) and is the one
+  paired with `glv_hnp_phase2_lambda_threshold_output.txt`.
+- Re-ran both recovered experiments; both reproduce exactly (they are seeded).
+- New: `glv_hnp_nuhat_closed_form.py` (Thread 21) — derives and tests a closed
+  form for nu_hat. Output: `glv_hnp_nuhat_closed_form_output.txt`.
+- New: `glv_hnp_nuhat_eff_ceiling.py` (Thread 21b) — tests whether the "C2
+  ceiling 0.645" transports across operating points. Output:
+  `glv_hnp_nuhat_eff_ceiling_output.txt`. 7200 LLL trials, 34s.
+- Added §6b to `RESEARCH_GLV_HNP_PHASE2.md` so nu_hat is discoverable outside
+  this log.
+- `cargo test --test curve_audit` → 5/5 pass (7.63s). ✓
+
+### Findings
+
+**R1 — the 2026-07-29 nu_hat result replicates.** `glv_hnp_nuhat_vs_c1c2.py`:
+AUC 0.935, best acc 89.0% vs 74.0% baseline, C2 range [0.314, 0.645], mu at
+0.523 and max_a at 0.748. `glv_hnp_phase2_nuhat_control.py`: fixed-curve causal
+arm spearman(nu_hat, p_hat) = −0.583 (perm p = 0.0002) vs spearman(mu, p_hat) =
++0.003 (p = 0.97). Independently at 120 fresh curves today: ceiling 0.6451 at
+the same eff. The separator is real.
+
+**R2 — nu_hat has an exact closed form; n drops out entirely.** With
+`L2 = D·Λ`, `D = diag(S_K1,S_K2)`, `Λ = {(x,b) : x + λb ≡ 0 mod n}`, and
+`n = u²−uv+v²`, Λ is the coordinate image of the Eisenstein ideal (π),
+π = u+vω, so `Λ = A_π Z²`, `A_π = [[u,−v],[v,u−v]]`. Multiplication by π is
+sqrt(n)·R_θ in the Minkowski plane, and the scale cancels:
+
+```
+nu_hat = lambda_1( G(tau,theta) Z^2 ) / sqrt(tau)
+G(tau,theta) = diag(tau,1) * C^-1 * R_theta * C,   C = [[1,-1/2],[0,sqrt3/2]]
+tau = S_K1/S_K2 ~ 1/eff,   theta = arg(u + v*omega)
+```
+
+**The curve enters only through the CM angle theta.** Falsifier run: 1600
+(curve, root, eff) triples, max |closed − Lagrange-Gauss| = **1.144e-14**.
+CONFIRMED. Also: 60°-periodicity exact to 1e-14 (the six units of Z[ω]); the
+two GLV roots sit at theta and 60°−theta with theta1+theta2 = 60.0000 exactly,
+and give *different* nu_hat (no reflection symmetry).
+
+theta equidistribution on [0,60), 10 bins, chi2 (5% crit. 16.92):
+
+| bits | 20 | 24 | 32 | 48 |
+|---|---|---|---|---|
+| curves | 36 | 480 | 1200 | 1200 |
+| chi2 | 2.89 | 12.92 | 5.13 | 3.50 |
+
+(The 16-bit row in the output has only 2 curves — the harvest stride is too
+coarse for that range; ignore it, it is not evidence either way.)
+
+**R3 — secp256k1 exactly, not extrapolated.** Prior runs quoted nu_hat = 0.664
+as a heuristic 20/24-bit → 256-bit extrapolation. The closed form is exact at
+any bit length. Cornacchia gives
+`(u,v) = (303414439467246543595250775667605759171, 367917413016453100223835821029139468248)`,
+u²−uv+v² = n verified, **theta = 9.448519°** (other root 50.551481°).
+
+| eff | 0.0200 | 0.0500 | 0.0993 | 0.1500 | 0.2500 | 0.5000 |
+|---|---|---|---|---|---|---|
+| nu_hat (root 1) | 0.8782 | 0.8709 | **0.6639** | 0.5990 | 0.5852 | 0.6851 |
+| nu_hat (root 2) | 0.8853 | 0.8815 | 0.6913 | 0.6441 | 0.6603 | 0.8102 |
+
+0.6639 at eff = 0.0993 matches the previously quoted 0.664 — that number was
+right, but it is now derived rather than extrapolated.
+
+**R4 — the "C2 ceiling 0.645" does NOT transport across operating points.**
+This corrects a reading that both the 07-29 entry and this run initially made.
+Taking 0.645 as a fixed ceiling makes secp256k1 look like it enters the easy
+tail at eff = 0.15/0.25. It does not: the ceiling itself moves. 120 curves,
+6 seeds, max{nu_hat : recovers on all seeds}:
+
+| eff | 0.02 | 0.05 | 0.0993 | 0.15 | 0.25 |
+|---|---|---|---|---|---|
+| C2 rate, m=12 | 100% | 53.3% | 28.3% | 20.0% | 0% |
+| ceiling, m=12 | 1.0364 | 1.0151 | 0.6451 | 0.6017 | — empty |
+| AUC, m=12 | n/a | 0.842 | 0.918 | 0.874 | n/a |
+| C2 rate, m=20 | 100% | 73.3% | 55.0% | 34.2% | 11.7% |
+| ceiling, m=20 | 1.0364 | 1.0213 | 0.8674 | 0.7743 | 0.6690 |
+| AUC, m=20 | n/a | 0.871 | 0.914 | 0.874 | 0.736 |
+
+At eff = 0.25, m = 12 the C2 class is **empty** — no curve of any angle is
+attackable, so secp256k1's low nu_hat there buys nothing (marked "vacuous").
+Against (eff, m)-matched ceilings secp256k1 is below at every point except
+(0.0993, m=12): it sits near the boundary, not systematically inside or
+outside it. Corrected claim: **nu_hat is a within-operating-point separator
+(AUC 0.74–0.92, stable across eff and m), and the 2026-07-29 sentence
+"secp256k1 ... not in the low-nu_hat easy tail at any eff tested" overstates
+what a single-(eff,m) calibration can support.**
+
+**R5 — why a_corn/n was falsified (2026-06-29) but nu_hat is not.** Same
+Cornacchia datum, different coordinate. `a_corn = |u|` is the radial part, but
+|π| = sqrt(n) for every curve, so a_corn/n is pinned to a ~n^(−1/2) sliver
+(measured: 0.000231–0.000772 across 8 consecutive 20-bit curves) while theta
+ranges over the whole interval and nu_hat over [0.42, 0.97] on the same 8.
+Structurally: all Eisenstein ideals are similar as lattices (class number 1,
+hexagonal), so *no isotropic invariant can separate them*; the signal is in the
+angle and is only exposed by the anisotropic weighting diag(tau,1). This
+retro-explains six of the eight falsified invariants — they were all isotropic
+or lam-only functions.
+
+Standing caveat, unchanged: all of this assumes a non-standard nonce generator
+k = k1 + lam*k2 mod n with k1 small. Not an attack on deployed ECDSA, and it
+does not touch the main theorem.
+
+### Next step proposal
+**Thread 22 — turn the closed form into a design criterion, then falsify it.**
+nu_hat = F(tau, theta) is a 2-parameter function that can be tabulated once.
+Concretely: (a) compute the exact minimiser theta*(tau) of F and check whether
+any *standardised* j=0 or GLV curve (secp256k1, secp160k1, secp192k1,
+secp224k1, BN/BLS r-values) lands near it; (b) pre-register the prediction
+"success probability is monotone in F(tau, theta) at fixed (eff, m)" and test
+it on curves chosen *by angle* rather than harvested at random — the current
+evidence is correlational across a random sample plus one fixed-curve arm, and
+angle-targeted sampling would make it interventional. Falsifier: if curves
+selected at theta = theta*(tau) do not beat curves at the argmax by a wide
+margin at matched (eff, m), F is not the operative quantity.
+
+Secondary, cheap: Thread 23 (proposed 2026-07-29, still untouched) —
+reformulate the lattice so the planted vector is lambda_1 by quotienting out
+the trivial `n·S_D·e_m` direction, and see whether the K1 wall moves.
+
+Housekeeping for future runs: when a run rewrites a helper module, later merges
+can silently drop it. Check that every script in `secp256k1_cm_audit/` still
+imports before trusting a prior run's numbers.
+
+### Commits made
+(recorded below after commit)

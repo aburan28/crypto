@@ -235,6 +235,101 @@ tailored to GLV implementations.  Other side-channel attacks
 (LadderLeak, Minerva, TPM-FAIL) target different implementation
 quirks.
 
+## 6b. The ν̂ separator and its closed form (Threads 20c/20d/21)
+
+After eight curve-level invariants were falsified as predictors of
+whether LLL recovers `d` (δ/n, κ(M), q_cf, max_q_cf, max_a,
+a_corn/n, λ/n, and μ = min(λ,n−λ)/n — see the autolab log,
+2026-06-27 … 2026-07-29), the first invariant that does separate is
+lattice-geometric.
+
+**Definition.** The (2m+2)-dimensional Phase 2 lattice contains, on
+each coordinate pair `(i, m+1+i)`, a copy of the *non-planted* 2-D
+sublattice
+
+```
+L2 = ⟨ (n·S_K1, 0), (−λ·S_K1, S_K2) ⟩,     det L2 = n·S_K1·S_K2.
+```
+
+`det L2` does not depend on λ, so
+
+```
+ν̂ = λ₁(L2) / sqrt(det L2)
+```
+
+isolates exactly the λ-dependence of the geometry in one
+Lagrange–Gauss reduction, `O(log n)`.  Empirically (Thread 20d,
+120 fresh 20-bit curves, replicated 2026-08-04): **AUC 0.918** against
+the June C1/C2 classes at eff = 0.0993, m = 12, versus 0.523 for μ and
+0.748 for max_a.
+
+**Sign.** Opposite to the naive guess: *small* ν̂ makes the attack
+*easier*.  With `λ₁·λ₂ ≈ det`, a small λ₁ means L2 is skew, so its
+second minimum is unusually long and the planted vector is
+comparatively short; a balanced L2 (ν̂ → 1) surrounds the planted
+vector with 2m rivals of norm ≈ sqrt(det).
+
+**Closed form (Thread 21).**  Strip the scaling: `L2 = D·Λ` with
+`D = diag(S_K1, S_K2)` and `Λ = {(x,b) ∈ Z² : x + λb ≡ 0 mod n}`.
+For a j=0 curve `n = u² − uv + v²` is an Eisenstein norm and Λ is the
+coordinate image of the principal ideal `(π)`, `π = u + vω`, w.r.t.
+the basis `{1, ω}`:
+
+```
+Λ = A_π Z²,   A_π = [[u, −v], [v, u−v]],   det A_π = n.
+```
+
+Multiplication by π is (scale by sqrt(n)) ∘ (rotate by θ = arg π) in
+the Minkowski plane, so with `C = [[1, −1/2], [0, sqrt(3)/2]]` the
+n-dependence cancels **exactly**:
+
+```
+ν̂ = λ₁( G(τ,θ) Z² ) / sqrt(τ),
+G(τ,θ) = diag(τ,1) · C⁻¹ · R_θ · C,      τ = S_K1/S_K2 ≈ 1/eff.
+```
+
+The curve enters *only* through the CM angle θ = arg(u + vω), and n
+does not appear at all.  Verified to 1.1e-14 on 1600 (curve, root,
+eff) triples — `secp256k1_cm_audit/glv_hnp_nuhat_closed_form.py`.
+Consequences:
+
+- ν̂ is 60°-periodic in θ (the six units of Z[ω]); the two GLV roots
+  sit at θ and 60°−θ and give *different* ν̂ (no reflection symmetry).
+- θ is equidistributed on [0°,60°) — χ² = 2.9/12.9/5.1/3.5 on 10 bins
+  at 20/24/32/48 bits (5% critical value 16.92).
+- ν̂ for secp256k1 is **exact**, not a 20/24-bit extrapolation:
+  θ = 9.448519°, and ν̂ = 0.8782 / 0.8709 / 0.6639 / 0.5990 / 0.5852
+  at eff = 0.02 / 0.05 / 0.0993 / 0.15 / 0.25.
+
+**Why a_corn/n failed but ν̂ works.**  Both come from the same
+Cornacchia datum.  `a_corn = |u|` is the *radial* part, but
+`|π| = sqrt(n)` for every curve, so a_corn/n is pinned to a ~n^(−1/2)
+sliver.  All Eisenstein ideals are similar as lattices (class number
+1, hexagonal), so no isotropic invariant can separate them; the
+information lives in the angle and only becomes visible under the
+anisotropic weighting `diag(τ,1)`.
+
+**Scope limit (Thread 21b).**  The "C2 ceiling" max{ν̂ : curve
+recovers on all seeds} is *not* a constant — it depends on the
+operating point `(eff, m)`:
+
+| eff | 0.02 | 0.05 | 0.0993 | 0.15 | 0.25 |
+|---|---|---|---|---|---|
+| ceiling, m=12 | 1.0364 | 1.0151 | 0.6451 | 0.6017 | — (C2 empty) |
+| ceiling, m=20 | 1.0364 | 1.0213 | 0.8674 | 0.7743 | 0.6690 |
+
+So ν̂ is a *within-operating-point* separator (AUC 0.74–0.92
+throughout), and any claim of the form "secp256k1 is / is not in the
+easy tail" is meaningful only against an (eff, m)-matched ceiling.
+Against matched ceilings secp256k1 is below at every point tested
+except (eff = 0.0993, m = 12) — i.e. it is near the boundary, not
+systematically inside or outside it.
+
+**Standing caveat.** All of this is conditional on a *non-standard*
+nonce generator `k = k1 + λ·k2 mod n` with `k1` small.  It is not an
+attack on ECDSA as deployed, and nothing here bears on the main
+theorem of `PAPER_STRUCTURAL_COMPLETENESS.md`.
+
 ## 7. Out-of-scope for Phase 2
 
 - Real-world hardware target identification (Phase 3)
