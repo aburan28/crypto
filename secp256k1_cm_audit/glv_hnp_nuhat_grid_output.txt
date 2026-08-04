@@ -1,0 +1,97 @@
+==============================================================================
+GLV-HNP Thread 23b: nu_hat cut across the (K1, m) grid
+==============================================================================
+K1 in (36, 72, 144), m in (10, 12, 14), 4 seeds, 60 fresh 20-bit j=0 CM curves
+C2 = recovers d on ALL seeds (Exp S / 20d convention)
+Falsifier: C2 ceiling drifts far from nu_hat ~ 0.65 across cells
+
+harvested 60 curves in 0.0s
+
+  cell K1= 36 m=10: C2 22/60   (   0.4s elapsed)
+  cell K1= 36 m=12: C2 26/60   (   0.9s elapsed)
+  cell K1= 36 m=14: C2 38/60   (   1.6s elapsed)
+  cell K1= 72 m=10: C2  5/60   (   2.0s elapsed)
+  cell K1= 72 m=12: C2 10/60   (   2.5s elapsed)
+  cell K1= 72 m=14: C2 17/60   (   3.2s elapsed)
+  cell K1=144 m=10: C2  0/60   (   3.5s elapsed)
+  cell K1=144 m=12: C2  4/60   (   4.0s elapsed)
+  cell K1=144 m=14: C2  6/60   (   4.8s elapsed)
+
+2160 LLL trials in 4.8s
+
+------------------------------------------------------------------------------
+GRID: C2 ceiling (max nu_hat among C2 curves) and separation quality
+------------------------------------------------------------------------------
+   K1   m    C2/N   base     AUC     acc  C2 ceiling  C1 floor          overlap
+   36  10  22/60    0.63   0.819   81.7%       1.066     0.444    [0.444,1.066]
+   36  12  26/60    0.57   0.831   78.3%       1.015     0.477    [0.477,1.015]
+   36  14  38/60    0.63   0.821   78.3%       1.072     0.521    [0.521,1.072]
+   72  10   5/60    0.92   0.960   95.0%       0.546     0.332    [0.332,0.546]
+   72  12  10/60    0.83   0.900   90.0%       0.645     0.408    [0.408,0.645]
+   72  14  17/60    0.72   0.923   86.7%       0.655     0.498    [0.498,0.655]
+  144  10   0/60    1.00       -       -              degenerate cell
+  144  12   4/60    0.93   0.857   93.3%       0.594     0.444    [0.444,0.594]
+  144  14   6/60    0.90   0.920   90.0%       0.594     0.444    [0.444,0.594]
+
+C2 ceiling across 8 non-degenerate cells: min=0.546 max=1.072 mean=0.774
+20d published ceiling (K1=72, m=12, 6 seeds, 100 curves) = 0.645
+
+------------------------------------------------------------------------------
+AUC head-to-head vs the falsified invariants, per cell
+------------------------------------------------------------------------------
+   K1   m   nu_hat       mu    max_a
+   36  10    0.819    0.512    0.692
+   36  12    0.831    0.554    0.698
+   36  14    0.821    0.663    0.557
+   72  10    0.960    0.731    0.758
+   72  12    0.900    0.550    0.682
+   72  14    0.923    0.580    0.772
+  144  10          (degenerate cell)
+  144  12    0.857    0.616    0.652
+  144  14    0.920    0.713    0.716
+
+------------------------------------------------------------------------------
+POOLED across all cells (curve-cell pairs)
+------------------------------------------------------------------------------
+   nu_hat: AUC 0.810  best-cut acc 84.8%  at 0.4536 (sign -1)
+       mu: AUC 0.508  best-cut acc 76.3%  at 0.4920 (sign +1)
+    max_a: AUC 0.645  best-cut acc 76.3%  at 419.0000 (sign +1)
+  trivial baseline = 76.3%   (n = 540 pairs)
+
+  pooled nu_hat decile response
+   decile  nu_hat mid   C2 rate  mean wins/4
+        1       0.385      0.89         3.65
+        2       0.502      0.35         2.20
+        3       0.578      0.30         1.89
+        4       0.636      0.35         1.80
+        5       0.721      0.13         1.39
+        6       0.777      0.06         0.54
+        7       0.815      0.06         0.39
+        8       0.867      0.09         0.87
+        9       0.939      0.06         0.74
+       10       1.013      0.09         1.56
+
+------------------------------------------------------------------------------
+G2: nu_hat vs m_threshold (smallest m with all-seeds success)
+------------------------------------------------------------------------------
+  K1= 36  spearman(nu_hat, m_thr) = +0.602   (mu -0.033, max_a -0.333)   censored 5/60
+      low  nu_hat tertile: nu_hat=0.445  mean m_thr= 9.95  censored=0
+      mid  nu_hat tertile: nu_hat=0.717  mean m_thr=13.55  censored=2
+      high nu_hat tertile: nu_hat=0.972  mean m_thr=14.30  censored=3
+  K1= 72  spearman(nu_hat, m_thr) = +0.759   (mu +0.084, max_a -0.504)   censored 35/60
+      low  nu_hat tertile: nu_hat=0.504  mean m_thr=13.85  censored=4
+      mid  nu_hat tertile: nu_hat=0.723  mean m_thr=17.90  censored=11
+      high nu_hat tertile: nu_hat=0.907  mean m_thr=21.00  censored=20
+  K1=144  spearman(nu_hat, m_thr) = +0.555   (mu +0.361, max_a -0.338)   censored 46/60
+      low  nu_hat tertile: nu_hat=0.572  mean m_thr=17.35  censored=10
+      mid  nu_hat tertile: nu_hat=0.766  mean m_thr=20.40  censored=16
+      high nu_hat tertile: nu_hat=0.903  mean m_thr=21.00  censored=20
+
+  Reading: a POSITIVE spearman means high nu_hat needs MORE signatures,
+  i.e. low nu_hat = easier -- the 2026-07-29 direction.  Unlike the C2
+  ceiling, m_threshold is comparable across K1 columns.
+  max_a comes out NEGATIVE (large partial quotient => fewer signatures),
+  which is the same mechanism seen through a scale-free proxy: it has
+  the right sign but roughly half the rank correlation of nu_hat.
+
+Done.
