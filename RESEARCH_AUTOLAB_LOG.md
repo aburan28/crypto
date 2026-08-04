@@ -6630,4 +6630,4 @@ invariant that cannot see the critical index is predicted to fail.
 
 ### Commits made
 
-(hash recorded in the following commit)
+5c34f8e autolab 2026-08-04: Thread 23 — closed form for lambda_1(L2); scale-free CF invariants explained
