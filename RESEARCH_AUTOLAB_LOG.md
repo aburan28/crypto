@@ -6258,4 +6258,6 @@ so a Bleichenbacher/DFT treatment of the k₁-bias is the standard escape and is
 not subject to the `2πe` loss. That would be a new thread, not a Phase-2 fix.
 
 ### Commits made
-(see following entry / commit log — this run's commit hash recorded below)
+bf40b54 autolab 2026-08-04: Thread 23 — d-elimination changes nothing; the Phase-2 wall is the Gaussian heuristic
+
+Pushed to branch `claude/zen-pascal-u3fapp` (session branch), not `main`.
