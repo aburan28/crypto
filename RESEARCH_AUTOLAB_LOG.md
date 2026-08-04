@@ -6273,4 +6273,4 @@ Cost: ~30 min, reuses `build_glv_lattice` and the C1 harness verbatim.
 extrapolation is known-optimistic and a two-term fit would bound how optimistic.
 
 ### Commits made
-(recorded below after commit)
+e8a5875 autolab 2026-08-04: Thread 23 — projection is neutral; Phase-2 wall is lattice density (AUC 0.897)
