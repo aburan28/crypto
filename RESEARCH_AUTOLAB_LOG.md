@@ -6285,4 +6285,4 @@ so Threads 2/3-style `.gp` work is BLOCKED until the apt mirror issue is resolve
 is built from source.
 
 ### Commits made
-[recorded below]
+9a16d9d autolab 2026-08-04: Thread 23 — d-elimination removes T5 parasite; GLV kernel block is the real ceiling
