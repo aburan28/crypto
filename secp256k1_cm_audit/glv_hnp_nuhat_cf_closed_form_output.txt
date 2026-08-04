@@ -1,0 +1,131 @@
+==============================================================================
+GLV-HNP Phase 2 -- Thread 23a: closed form for nu_hat via the
+continued fraction of lam/n
+==============================================================================
+
+==============================================================================
+V0  Ladder identities  (a) r_j = D(q_j)   (b) r_j*q_{j+1}+r_{j+1}*q_j = n
+==============================================================================
+  300 random (n, lam);  rungs = 3285, adjacent pairs = 3285
+  (a) r_j != D(q_j)   [corrected ladder]  : 0 violations
+  (b) r_j*q_{j+1}+r_{j+1}*q_j != n  [raw]    : 0 violations
+  --> the Euclidean remainders ARE the centred residues, so
+      nu_hat needs one Euclidean run and no modular multiplication.
+
+==============================================================================
+V1  THEOREM 23a vs exhaustive min over all a in [0,n]
+==============================================================================
+  cases                       : 240
+  lambda_1^2 mismatches       : 0
+  ties (equal norm, other a)  : 0
+  --> THEOREM 23a CONFIRMED on 240/240 cases
+
+==============================================================================
+V2  CF closed form vs rival_sublattice_nu() [float Lagrange-Gauss]
+==============================================================================
+  eff=0.05  n_curves=120  pearson=1.000000  spearman=1.000000  max rel.dev=2.403e-16
+  eff=0.1   n_curves=120  pearson=1.000000  spearman=1.000000  max rel.dev=2.157e-16
+  eff=0.25  n_curves=120  pearson=1.000000  spearman=1.000000  max rel.dev=3.065e-16
+
+  secp256k1 (n = order of secp256k1, lam the GLV eigenvalue):
+    lam^2+lam+1 = 0 mod n : True
+    eff         nu_hat (CF, exact)   nu_hat (Gauss, float)   rung  rungs
+    0.05                  0.870857                0.870857     71    142
+    0.1                   0.662438                0.662438     71    142
+    0.25                  0.585226                0.585226     71    142
+    0.5                   0.685119                0.685119     71    142
+  (2026-07-29 logged: 0.8709 / 0.6624 / 0.5852 / 0.6851)
+
+==============================================================================
+V3  Is the selected rung the one nearest the balance point?
+==============================================================================
+  balance point: tau = S1/S2, minimise tau*y^2 + x^2/tau on x*y ~ 1
+  => q* ~ sqrt(n*tau).  Offset = rung(selected) - rung(nearest q*).
+  eff=0.05  offset==0: 50/150 (33.3%)  |offset|<=1: 146/150 (97.3%)
+           offset distribution: -2:4 -1:96 +0:50
+  eff=0.25  offset==0: 108/150 (72.0%)  |offset|<=1: 150/150 (100.0%)
+           offset distribution: -1:42 +0:108
+
+==============================================================================
+V4  Scale dependence of the selected rung (fixed curve, eff swept)
+==============================================================================
+  The CF ladder of lam/n is FIXED.  Only tau = S1/S2 ~ K2/K1 moves.
+  If the selected rung moves with eff, no scale-free function of the
+  partial quotients (q_cf, max_q_cf, max_a) can predict nu_hat.
+
+  n=525583  lam=84143  mu=0.1601  rungs=10  max_a=16
+       eff  rung         q         r    nu_hat
+      0.01     6      1268        25    0.3909
+      0.02     6      1268        25    0.3474
+      0.05     6      1268        25    0.4192
+       0.1     6      1268        25    0.5616
+       0.2     6      1268        25    0.7829
+      0.35     5       431       406    1.0114
+       0.5     5       431       406    0.8972
+      0.75     5       431       406    0.8267
+      0.95     5       431       406    0.8160
+    distinct rungs selected across eff sweep: 2 [5, 6]
+
+  n=523969  lam=177902  mu=0.3395  rungs=14  max_a=17
+       eff  rung         q         r    nu_hat
+      0.01     9      2583        53    0.8234
+      0.02     9      2583        53    0.7235
+      0.05     9      2583        53    0.8605
+       0.1     7       592       215    0.9769
+       0.2     7       592       215    0.7595
+      0.35     7       592       215    0.6973
+       0.5     7       592       215    0.7144
+      0.75     7       592       215    0.7864
+      0.95     7       592       215    0.8526
+    distinct rungs selected across eff sweep: 2 [7, 9]
+
+  n=523177  lam=187613  mu=0.3586  rungs=20  max_a=3
+       eff  rung         q         r    nu_hat
+      0.01    12      3179        53    0.8616
+      0.02    12      3179        53    0.8069
+      0.05    11      1174       145    0.9694
+       0.1    11      1174       145    0.8162
+       0.2    11      1174       145    0.8519
+      0.35    11      1174       145    1.0175
+       0.5     9       343       488    1.0127
+      0.75     9       343       488    0.8813
+      0.95     9       343       488    0.8328
+    distinct rungs selected across eff sweep: 3 [9, 11, 12]
+
+  Aggregate over 100 curves: how many distinct rungs are selected
+  as eff ranges over the 9 values above?
+    1 distinct rung(s): 11 curves
+    2 distinct rung(s): 34 curves
+    3 distinct rung(s): 43 curves
+    4 distinct rung(s): 9 curves
+    5 distinct rung(s): 3 curves
+    --> 89% of curves change rung with scale; nu_hat is NOT a function of the CF alone.
+
+==============================================================================
+V5  Bounds from (**), and the secp256k1 ladder near the balance point
+==============================================================================
+  nu_hat^2 = min_j [ tau*y_j^2 + x_j^2/tau ],  x_j*y_{j+1}+x_{j+1}*y_j = 1
+  AM-GM on a single rung: tau*y^2 + x^2/tau >= 2*x*y, so if some rung
+  sat exactly at the balance point with x*y = c then nu_hat^2 >= 2c.
+  eff=0.05  n=300  min=0.2211 q05=0.2598 q25=0.5014 med=0.6976 q75=0.8947 q95=1.0111 max=1.0722
+  eff=0.25  n=300  min=0.4945 q05=0.5007 q25=0.5827 med=0.7472 q75=0.8883 q95=0.9746 max=1.0015
+
+  Empirical ceiling above is the sqrt(2)-ish bound predicted by (**).
+
+  secp256k1 ladder around the balance point (eff=0.10):
+    CF of lam/n has 140 partial quotients, max_a=312, rungs=142
+    balance point q* = sqrt(n*tau) ~ 2^129.66
+      rung    log2 q    log2 r   term (nu^2)
+        68    123.84    130.48    313.109691
+        69    125.09    130.17    203.800360
+        70    125.60    128.11     11.693789
+        71    127.83    125.60      0.438824  <== selected
+        72    130.22    125.09      2.338259
+        73    130.47    123.84      3.100098
+        74    131.98    122.44     24.737718
+    nu_hat = 0.662438
+
+==============================================================================
+Ladder identities hold: True
+THEOREM 23a exhaustively validated: True
+Done.

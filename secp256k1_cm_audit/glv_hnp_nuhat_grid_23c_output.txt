@@ -1,0 +1,38 @@
+==============================================================================
+GLV-HNP Phase 2 -- Thread 23c: nu_hat C2 ceiling across (K1, m)
+==============================================================================
+grid K1=[36, 72, 144] x m=[10, 12, 14], 100 shared 20-bit curves, 6 seeds
+harvested 100 curves in 0.1s
+
+     K1   m     eff    C2   base%     AUC   acc%  C2 ceiling  C1 floor
+     36  10   0.050    38    62.0   0.826   81.0       1.002     0.414
+     36  12   0.050    49    51.0   0.883   82.0       1.072     0.524
+     36  14   0.050    61    61.0   0.835   76.0       1.066     0.591
+     72  10   0.099    15    85.0   0.970   93.0       0.526     0.332
+     72  12   0.099    24    76.0   0.958   91.0       0.605     0.408
+     72  14   0.099    36    64.0   0.921   85.0       0.700     0.408
+    144  10   0.198     0   100.0      --     --      (degenerate cell)
+    144  12   0.198     1    99.0   0.808   99.0       0.539     0.442
+    144  14   0.198     9    91.0   0.785   91.0       0.647     0.442
+
+  AUC is for nu_hat (lower nu_hat => easier, so AUC is computed on
+  the C2-positive convention used in glv_hnp_nuhat_vs_c1c2.py).
+
+  non-degenerate cells        : 8/9
+  C2 ceiling  range           : [0.526, 1.072]  spread=0.546
+  AUC         range           : [0.785, 0.970]
+  2026-07-29 20d single cell  : ceiling 0.645, AUC 0.935 (K1=72, m=12)
+
+  H-23c(i)  separation, AUC > 0.5 in all live cells : SUPPORTED (min AUC 0.785)
+  H-23c(ii) universal ceiling within 0.1            : FALSIFIED (spread 0.546)
+
+  Ceiling vs cell, grouped by eff (rows) and m (cols):
+       K1     eff      m=10      m=12      m=14
+       36             1.002     1.072     1.066
+       72             0.526     0.605     0.700
+      144                --     0.539     0.647
+    --> the ceiling rises with m and falls with K1: it tracks the
+        difficulty of the cell, so it is NOT a universal constant.
+
+Total wall time 9.4s
+Done.
