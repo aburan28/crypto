@@ -6242,3 +6242,4 @@ not a retry of ρ.
 BKZ-as-rescue (dead, U4 + 07-29 T4b).
 
 ### Commits made
+c3912d0 autolab 2026-08-04: Thread 23 — projection reformulation buys nothing; wall is r=1.379, not r=1
