@@ -6266,3 +6266,4 @@ Secondary (cheap): re-run P2/P3 with BKZ(β=20,40) on `cent` only, to separate
 "reduction-quality wall" from "structural wall" without the m sweep.
 
 ### Commits made
+2e28f0b autolab 2026-08-04: Thread 23 — projection is inert, centring buys 3x on the bias bound
