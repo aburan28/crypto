@@ -253,9 +253,35 @@ quirks.
   CM-by-Z[ω] structure beyond just GLV?  E.g., if the
   endomorphism ω acts predictably on the bias distribution, a
   3D-aware HNP variant could exploit a third dimension.
-- Does the **secp256k1 LLL-degeneracy** generalize to the GLV-
+- ~~Does the **secp256k1 LLL-degeneracy** generalize to the GLV-
   aware lattice?  If yes, the entire Phase 2 needs a different
-  base reduction algorithm.
+  base reduction algorithm.~~ **ANSWERED (2026-08-04).** No, on
+  both counts.  The "degeneracy" was never lattice-theoretic: it
+  was the `f64` overflow in `gram_schmidt` fixed 2026-05-21
+  (`RESEARCH_LLL_GS_ANALYSIS.md` §10.3).  The GLV-aware lattice
+  has an unrelated structure — it always contains the trivial
+  vector `n·S_D·e_m`, shorter than the planted vector for every
+  m ≥ 1, so recovery here was never an SVP event.  Eliminating
+  `d` algebraically removes that vector (`det` drops by exactly
+  a factor of n, dim by 1) and changes **no** outcome on 420
+  matched instances, so no different base reduction algorithm is
+  indicated.  See `secp256k1_cm_audit/glv_hnp_phase2_deliminated.py`
+  and the 2026-08-04 entry of `RESEARCH_AUTOLAB_LOG.md`.
+
+### 8.1 Falsified predictors of the Phase-2 recovery event
+
+Recorded so no future session re-tries them.  All are **curve-level**
+invariants, and 2026-07-29 (T5) argues no curve-level invariant can
+work, because the recovery event is decided per signature-set:
+
+`δ/n`, `κ(M)`, `q_cf`, `max_q_cf`, `max_a`, `a_corn/n` (all
+2026-06-21…06-29); `λ/n` and `λ* = min(λ,n−λ)/n` (2026-07-29, T1/T3);
+`ρ = μ/‖v_planted‖` (2026-07-29, T2); `‖v_planted‖/GH(L)`, the
+Gaussian-heuristic uSVP criterion (2026-08-04, T23-5 — 11/16, and
+anti-correlated at the wall: 1.464 succeeds vs 1.314 fails).
+
+`ν̂ = λ₁(L₂)/√det(L₂)` (2026-07-29, AUC 0.935) is the one predictor
+not yet falsified, but it too is curve-level.
 
 ## 9. References
 

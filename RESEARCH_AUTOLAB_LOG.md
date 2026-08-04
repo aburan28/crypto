@@ -6103,3 +6103,165 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁**, the
+continuation proposed verbatim by the 2026-07-29 entry (log line 6089). Threads 1, 2,
+4, 6 are CLOSED/BLOCKED/DEAD-END; thread 3 closed 2026-07-21; thread 5 (GLV-HNP) made
+measurable progress 2026-07-29, so protocol rule (b) selects its proposed sub-task.
+
+**Outcome: Thread 23 is answered NEGATIVELY by its own pre-registered falsifier.**
+The trivial vector is removed exactly as designed, and the K1 wall does not move by a
+single cell. Phase 2 is at its information-theoretic ceiling as measured.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4.
+  Same note as 2026-07-29: `cysignals` is a separate runtime import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_deliminated.py` (9 experiments T23-1…T23-9,
+  ~560 lines), reusing `scales()`/`gen_signatures()` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:227` so every comparison to 2026-07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_deliminated_output.txt`.
+  Whole script runs in 2.8 s.
+- Implemented **both** routes proposed on 2026-07-29, not just the first:
+  route one = quotient out the trivial direction (`build_lattice_23`, dim 2m+1);
+  route two = explicit CVP with the Kannan row stripped (`build_lattice_cvp`, dim 2m).
+- `cargo test --test curve_audit` → 5/5 pass (4.50 s). ✓  No Rust changed.
+
+### Findings
+
+**Why the trivial vector existed — general statement (new).**
+For any column `c` whose pivot row's other entries all lie in columns carrying an
+`n·e_j` reduction row, `n·R_c` reduces to `n·S_c·e_c ∈ L`, of norm `n·S_c`. Since
+`‖v_planted‖ ≈ n·sqrt(dim/3)`, that trivial vector is competitive **iff `S_c = O(√dim)`**.
+Every unknown except `d` is small, so its scale `S_c ≈ n/bound` is huge and its trivial
+vector is irrelevant; `d` is the only full-size (~n) unknown, forcing `S_D = 1`. So the
+2026-07-29 T5 phenomenon has exactly one cause, and rescaling cannot fix it (confirmed
+2026-07-29) — only eliminating `d` can.
+
+**L23 (d-eliminated, dim 2m+1).** Pivot on signature 0:
+`d ≡ B₀⁻¹(k1₀ + λ·k2₀ − A₀) (mod n)`; substituting gives, for i = 1…m−1,
+`k1_i ≡ D_i + C_i·k1₀ + C_i·λ·k2₀ − λ·k2_i (mod n)` with `C_i = B_i B₀⁻¹`,
+`D_i = A_i − C_i A₀`. Verified (T23-1): the planted vector is an **explicit integer
+combination** of the L23 rows (not asserted — the congruence quotient is checked exact),
+`d` is recoverable from it, and the closed-form determinant matches sympy's exact `det`.
+
+`det(L_old) = n·det(L23)` **exactly** — the index of the trivial sublattice.
+
+**T23-2 — the trivial vector is gone, and sv/pv does rise:**
+
+| curve | K1 | sv/pv old | sv/pv L23 | triv/pv old | triv/pv L23 |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.543 | 0.790 | 0.437 | 44.7 |
+| 12-bit/2557 | 8 | 0.445 | 0.475 | 0.388 | 132.1 |
+| 12-bit/2677 | 8 | 0.387 | 0.767 | 0.357 | 120.2 |
+
+The trivial vector goes from ~0.36–0.44 of the planted norm to 45–132×. But sv/pv still
+does **not** reach 1 (0.475 on 2557): the planted vector is still not λ₁ even with `d`
+eliminated. The falsifier's first clause is therefore only half-met.
+
+**T23-3 — THE WALL DOES NOT MOVE.** Full K1 grid, both curves, both m, 5 seeds:
+
+| curve | m | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 (λ*=0.340) | 8 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 2557 | 10 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 0/5 | 0/5 |
+| 2677 (λ*=0.070) | 8 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | 10 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+**L23 reproduces every one of these 32 cells bit-for-bit.** So does BKZ-40 on L23 except
+for two marginal cells on 2677 (K1=6: 2/5, K1=8: 1/5), and T23-6 shows those are a BKZ
+effect, not an L23 effect — matched old-vs-L23 at 10 seeds is identical under LLL *and*
+under BKZ-40 in all 4 cells.
+
+**T23-7 — 60 seeds, 420 matched instances, still bit-identical**, and the "wall" is a
+soft sigmoid rather than a hard 0 (the 5 historical seeds were unrepresentative):
+
+| curve | m | K1 | old /60 | L23 /60 | rate |
+|---|---|---|---|---|---|
+| 2677 | 8 | 4 | 55/60 | 55/60 | 0.92 |
+| 2677 | 8 | 6 | 13/60 | 13/60 | 0.22 |
+| 2677 | 8 | 8 | 0/60 | 0/60 | 0.00 |
+| 2677 | 10 | 6 | 18/60 | 18/60 | 0.30 |
+| 2557 | 8 | 8 | 46/60 | 46/60 | 0.77 |
+| 2557 | 8 | 12 | 6/60 | 6/60 | 0.10 |
+| 2557 | 8 | 16 | 0/60 | 0/60 | 0.00 |
+
+Correction to 2026-07-29 T4: the cells reported there as hard `0/5` are 0.22–0.30, and
+`1/5` is 0.10. Future runs should use ≥40 seeds; 5 seeds cannot resolve a 20% rate.
+
+**m-confound in the 2026-07-29 T4 table is removed.** That table ran 2557 at m=8 and
+2677 at m=10. Run at matched m (both rows above), 2557 still succeeds through K1=8 and
+2677 still fails from K1=6, so **the λ*-dependent shift of the K1 wall is real** and is
+not an artifact of the differing m. (This corroborates 2026-07-29's "λ* shifts the wall
+by ~3× but is not a threshold".)
+
+**T23-5 — pv/GH is falsified as a separator (9th falsified invariant).**
+Gaussian-heuristic uSVP criterion `‖v_planted‖/GH(L) < 1`: agreement with observed
+majority recovery is 11/16, and it fails in the *systematic* direction — recovery occurs
+up to pv/GH = 1.71. Worse, it is **anti-correlated** where it matters: at K1=6 the curve
+that succeeds has pv/GH = 1.464 and the curve that fails has pv/GH = 1.314. Recorded as
+dead so no future run re-tries it.
+
+**T23-8/9 — exact CVP is the only variant that is not identical, and it is not better.**
+60 seeds, paired instances:
+
+| curve | m | K1 | LLL(L23) | exact CVP | Δ |
+|---|---|---|---|---|---|
+| 2677 | 8 | 4 | 55/60 | 47/60 | −0.133 |
+| 2677 | 8 | 6 | 13/60 | 13/60 | +0.000 |
+| 2677 | 8 | 8 | **0/60** | **5/60** | +0.083 |
+| 2677 | 10 | 6 | 18/60 | 22/60 | +0.067 |
+| 2557 | 8 | 8 | 46/60 | 35/60 | −0.183 |
+| 2557 | 8 | 12 | 6/60 | 4/60 | −0.033 |
+| 2557 | 8 | 16 | 0/60 | 0/60 | +0.000 |
+
+CVP breaks the one hard-zero cell (0/60 → 5/60; McNemar p ≈ 0.03, all 5 discordant one
+way) but **loses 13–18 points in the working regime**. Mechanism: exact CVP is a
+*single-candidate* decoder — it returns the closest lattice point, right or wrong —
+whereas the Kannan scan tests every basis row with |last| = S_KANNAN and accepts any
+that verifies. So CVP wins only where the planted vector is genuinely closest yet absent
+from the reduced basis, and loses wherever the multi-candidate scan had extra shots.
+Net: not an improvement.
+
+**Verdict on the 2026-07-29 falsifier**, quoted: *"if sv/pv rises above 1 after the
+reformulation and the K1 wall in T4 moves outward, the reformulation is a real
+improvement; if the wall stays at K1≈4–6, then the wall is information-theoretic and
+Phase 2 is at its ceiling."* — sv/pv rises but not above 1; the wall stays exactly where
+it was, across 2 lattices, 3 reduction/decoding algorithms, 2 values of m, 8 values of
+K1 and 60 seeds. **Second clause holds: Phase 2 is at its ceiling.**
+
+**Consequence — T5 is true but causally inert.** The trivial vector never obstructed
+anything. Recovery in this construction is not an SVP event at all: it is the event
+"LLL places the planted vector in the reduced *basis*", which is insensitive to whether
+a shorter uninformative vector is also present. Removing that vector (det drops by a
+factor of exactly n, dim by 1) changes no outcome on 420 matched instances. Future runs
+should not spend further effort on the *ambient lattice*; the remaining variance is in
+the per-instance geometry.
+
+### Next step proposal
+
+**Thread 24 — per-instance (not curve-level) prediction of the recovery event.**
+T23-7 gives cells with rates strictly between 0 and 1 (0.10, 0.22, 0.30, 0.77, 0.92) —
+i.e. success is decided *within* a curve, by the signature set. Every predictor tried so
+far has been curve-level (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ*, ρ, ν̂, pv/GH —
+9 falsified, and 2026-07-29 T5 argues no curve-level invariant can work). Concretely:
+take the ~120 instances at 2677/m=8/K1=6 and 2557/m=8/K1=12, compute the **projected GS
+profile of L23 along the Kannan direction** (`‖b*_i‖` after LLL, plus the BDD distance
+`‖v_planted‖` relative to `‖b*_{2m}‖`), and ROC these against the observed outcome.
+Falsifier: AUC > 0.8 ⇒ recovery is explained by local projected geometry and the wall
+has a computable per-instance criterion; AUC ≈ 0.5 ⇒ even the local geometry does not
+determine it and Phase 2 should be written up as closed at the ceiling measured today.
+Cheap — the instances already run in 2.8 s.
+
+Secondary (documentation, no new computation): §8 of `RESEARCH_GLV_HNP_PHASE2.md` still
+lists "does the secp256k1 LLL-degeneracy generalize to the GLV-aware lattice?" as open;
+it is answered — the degeneracy was the 2026-05-21 f64 overflow bug, and the GLV lattice
+has an unrelated (and now fully characterised) trivial-vector structure.
+
+### Commits made
+
+(recorded below after commit)
