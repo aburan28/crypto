@@ -6454,4 +6454,4 @@ shows why the class is empty.
 
 ### Commits made
 
-(hash recorded in the following commit)
+18deb10 autolab 2026-08-04: Thread 23 — nu_hat closed form via continued fractions; merge-damage repair
