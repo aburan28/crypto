@@ -309,3 +309,42 @@ by the theorem.
 - Streng, "Computing Igusa class polynomials", Math. Comp. 2014.
 - The Magma `Genus2Reconstruction` package, by Cardona, Howe,
   Lercier, Ritzenthaler, Streng et al.
+
+---
+
+## 11. RESOLVED 2026-08-04 — the explicit cover, via the correct normal form
+
+The "forward map" gap recorded on 2026-07-27 (§ autolab log) is closed for the
+split-bielliptic case. The obstruction was that the repo was working inside the
+wrong family.
+
+**Wrong family** — `C: y² = x⁶ + a x³ + b` (the Z/3-symmetric family used by
+`howe_richelot_v5.gp`, `howe_5pairs_v2.gp`, `chlrs_igusa_formula.gp`). Its two
+bielliptic quotients are, in closed form (with c³ = b, e² = b):
+
+    E± :  Y² = (a ∓ 2e) Z³ + 9c Z² ∓ (6e/c) Z + 1
+
+and they **always have equal trace**, so `#Jac` is always a perfect square; and
+`j(E₊) = 0 ⟺ a = −5e/2` while `j(E₋) = 0 ⟺ a = +5e/2`, so **both quotients can
+never have j = 0**. This family cannot glue two j=0 curves at all.
+
+**Right family** — `C: y² = u x⁶ + v`, with quotients
+
+    E₁ : y² = x³ + u²v      (X = x²,   Y = y)
+    E₂ : y² = x³ + v²u      (X = 1/x², Y = y/x³)
+
+**Criterion.** Two j=0 curves `E_{b₁}, E_{b₂}/F_p` are the two quotients of a
+split-bielliptic genus-2 curve **iff `b₁·b₂` is a cube in `F_p*`**. Exactly 5 of
+the 15 sextic-twist pairs qualify, for every `p ≡ 1 (mod 3)`.
+
+For secp256k1 the qualifying pairs are **(0,2), (0,5), (1,4), (2,3), (3,5)** and
+explicit 256-bit `(u,v)` are printed by
+`secp256k1_cm_audit/bielliptic_j0_criterion.py`. Note this differs from the
+2026-05-30 H1/H2/H3 table in two entries — see the 2026-08-04 autolab log entry.
+
+Scope: this settles the *split*-bielliptic case. The non-split case
+(`x ↦ c/x` with `c` a non-square, possible since `p_secp ≡ 3 mod 4`) is open;
+the criterion is proven sufficient, not necessary.
+
+Verification: `secp256k1_cm_audit/bielliptic_j0_verify.py` (715/715 and 1404/1404,
+exhaustive over small primes).

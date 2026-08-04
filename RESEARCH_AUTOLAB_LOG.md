@@ -6103,3 +6103,152 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+**Thread 2 (CHLRS Igusa / Howe gluing)** — the explicit "forward map"
+`(E₁,E₂) → cover parameters` that the 2026-07-27 entry (log line ~5960, commit
+`9e9b0a8`) identified as the missing piece ("Finding 7: structural gap"). Thread 1
+(P-521) is CLOSED (§10.5); Thread 2 was last touched 2026-07-27, i.e. 8 days ago —
+outside the 7-day window — and made measurable progress, so it is the correct pick
+under protocol rule (a).
+
+### Work done
+
+- **Environment**: PARI/GP is **not** installed in this container and `apt-get install
+  pari-gp` **FAILS** (archive.ubuntu.com returns 404 for `libegl-mesa0`; the image's
+  apt index is stale). The 2026-07-26 entry's "PARI is now installed" does not carry
+  over — containers are fresh each run. All work this session is pure Python, no deps.
+  *Note for future runs: do not budget time on `gp`; write Python.*
+- Derived, and then verified exhaustively, the closed-form elliptic quotients of the
+  Z/3 family the repo has been using, and of the family it should have been using.
+- New files:
+  - `secp256k1_cm_audit/bielliptic_j0_criterion.py` (+ `_output.txt`) — the criterion,
+    the secp256k1 table, explicit 256-bit `(u,v)`, and the p=1009 post-mortem.
+  - `secp256k1_cm_audit/bielliptic_j0_verify.py` (+ `_output.txt`) — exhaustive
+    small-prime evidence for every claim below.
+  - `RESEARCH_MESTRE_HOWE.md` §11 — the resolution, cross-referenced.
+- `cargo test --test curve_audit` → **5/5 pass** (6.81s). ✓
+
+### Findings
+
+**F1 — the repo has been working in the wrong family. `y² = x⁶+ax³+b` provably cannot
+glue two j=0 curves.**
+With `c³ = b`, `e² = b`, the involution `τ:(x,y)↦(c/x, ey/x³)` has quotient
+`E₊: Y² = (a−2e)Z³ + 9cZ² − (6e/c)Z + 1`, and `τ' (e↦−e)` gives `E₋`. Then
+`j(E₊)=0 ⟺ a = −5e/2` and `j(E₋)=0 ⟺ a = +5e/2`; both simultaneously forces `e=0`,
+i.e. `b=0`, i.e. singular. **Both quotients j=0 is impossible.** Every script in
+`secp256k1_cm_audit/howe_*.gp` and `chlrs_igusa_formula.gp` operates in this family.
+
+**F2 — in that family the two quotients always have equal trace, so `#Jac` is always a
+perfect square.**
+
+| p | 13 | 19 | 31 | 37 | 43 | total |
+|---|---|---|---|---|---|---|
+| `#Jac == #E₁·#E₂` | 22/22 | 51/51 | 145/145 | 210/210 | 287/287 | **715/715** |
+| `trace(E₁)==trace(E₂)` | 22/22 | 51/51 | 145/145 | 210/210 | 287/287 | **715/715** |
+| `(j₁,j₂)==(0,0)` | 0 | 0 | 0 | 0 | 0 | **0** |
+
+(An exploratory sweep also covering p=61,67 gave 2013/2013 equal traces, 0 both-j=0.)
+Proof: `σ:(x,y)↦(ζ₃x,y)` acts on `H⁰(Ω_C)` with eigenvalues `ζ₃, ζ₃²`, so
+`Q(ζ₃) ↪ End⁰(Jac C)`. A field embeds in a product `K₁×K₂` only via injective
+projections; if `E₊ ≁ E₋` that forces `Q(ζ₃) ⊆ End⁰(E±)`, i.e. `j(E±)=0` — excluded
+by F1. Hence `E₊ ~ E₋`. ∎
+
+**F3 — this retro-explains the 2026-07-27 "Test 2 mismatch" as a structural
+impossibility, not a parameterisation bug.**
+That test targeted `#Jac = #E₁·#E₂ = 967·1053 = 1018251` over p=1009 with traces
++43/−43. By F2 the family only produces perfect squares, and `1018251` is not one
+(`1009² = 1018081`). The 07-27 diagnosis — "the (sv,qv) parameterisation is NOT the
+correct Howe parameterisation … without a prior formula for (r1,r2) the Richelot
+cannot be applied forward" — was chasing a target that no `(a,b)` can hit.
+Further: of the 28224 pairs `(b₁,b₂)` over F_1009 with those two traces, **0** have
+`b₁b₂` a cube, so the target is unreachable by the correct family either.
+
+**F4 — the correct family and the criterion (the forward map, closed).**
+A split-bielliptic genus-2 curve `y² = a₆x⁶+a₄x⁴+a₂x²+a₀` has both quotients of
+j-invariant 0 **iff `a₄ = a₂ = 0`**. (Conditions are `3a₂a₆ = a₄²` and `3a₄a₀ = a₂²`;
+with `a₂a₄ ≠ 0` they force the sextic to be `(αx²+β)³` — singular.) So the family is
+
+    C:  y² = u x⁶ + v      →    E₁: y² = x³ + u²v ,   E₂: y² = x³ + v²u
+
+`#Jac(C) = #E₁·#E₂` verified **1404/1404** over p = 7, 13, 19, 31.
+
+> **CRITERION.** `E_{b₁}, E_{b₂}` (both j=0) over `F_p` are the two elliptic quotients
+> of a split-bielliptic genus-2 curve **⟺ `b₁·b₂ ∈ (F_p*)³`.**
+
+In `F_p*/(F_p*)⁶ ≅ Z/6` with classes `i₁,i₂`, solving `2s+t ≡ i₁`, `s+2t ≡ i₂ (mod 6)`
+is possible iff `i₁+i₂ ≡ 0 (mod 3)` — exactly "`b₁b₂` is a cube". This gives exactly
+**5 of the 15** sextic-twist pairs for every `p ≡ 1 mod 3` — the 5/15 count is forced
+by the group theory, not a secp256k1 coincidence.
+
+**F5 — secp256k1: explicit covers, and a two-entry disagreement with the 2026-05-30
+table.**
+`p_secp ≡ 7 mod 12`; `t₀ = 432420386565659656852420866390673177327`;
+`4p − t₀² = 3f²` with `f = 303414439467246543595250775667605759171`.
+With `b_k = 7·h^k` (`h` a primitive 6th root of unity):
+
+| pair | `b₁b₂` cube? | Howe H2 | gcd(N₁,N₂) | repo 2026-05-30 |
+|---|---|---|---|---|
+| (0,2) | **YES** | YES | 1 | YES |
+| (0,3) | no | YES | 1 | **YES** ← disagree |
+| (0,5) | **YES** | YES | 1 | YES |
+| (1,4) | **YES** | YES | 4 | YES |
+| (2,3) | **YES** | YES | 1 | YES |
+| (3,5) | **YES** | YES | 3 | **no** ← disagree |
+| all others | no | — | — | no |
+
+- criterion set: **{(0,2), (0,5), (1,4), (2,3), (3,5)}** — 5/15
+- repo 2026-05-30 (`7d38bc9`, log line ~838): {(0,2), (0,3), (0,5), (1,4), (2,3)} — 5/15
+- overlap 4/5.
+
+Explicit 256-bit `(u,v)` for all five are printed by the script; for each, both
+quotient checks pass (`u²v/b_i` is a 6th power **and** the trace matches).
+Example, pair (0,2):
+```
+u = 69787780187273170358340334027115458591498687040187600896173060565602791958802
+v = 37203162913805541019894097013082723174606761076573902825125640657121434230038
+```
+
+**The (0,3) disagreement is independently corroborated.** (0,3) is the
+quadratic-twist pair; `b₀b₃ = −49`, and `−1` is always a cube mod p while `χ₃(7) ≠ 1`,
+so `χ₃(−49) = χ₃(7)² ≠ 1` — not a cube. Independently, the **2026-07-27 run found
+pair (0,3) DEGENERATE by a completely different route** (`d = h³ = −1` ⟹ `sv = α+β = 0`
+⟹ Richelot discriminant `Δ = 0`, log line ~5919), and also showed the literature's
+"naive cover" `y²=(x³+7)(x³+189)` *is* the pair (0,3). Two independent methods now say
+(0,3) fails. The 2026-05-30 table admitted it on H1∧H2∧H3; Howe's H3 (coprimality) is
+**sufficient for the glued surface to be a Jacobian, not necessary**, so that table
+over-admits (0,3) and, symmetrically, wrongly excludes (3,5) on `gcd = 3`.
+
+**F6 — scope limit (stated, not hidden).** F4/F5 characterise the **split**-bielliptic
+case (involution `x↦c/x` with rational fixed points ≅ `x↦−x`). Since `p_secp ≡ 3 mod 4`,
+**non-split** bielliptic involutions also exist. Sweeping the non-split normal form
+`f = a₆x⁶+a₅x⁵+a₄x⁴+a₃x³+ca₄x²+c²a₅x+c³a₆` (`c` non-square) exhaustively:
+
+| p | char polys realised | j=0 pairs w/ `b₁b₂` cube realised | w/ `b₁b₂` non-cube realised |
+|---|---|---|---|
+| 7 | 18 | 1 | **1** — (3,4) |
+| 13 | 36 | 4 | **8** |
+
+Matching char poly pins only the isogeny class (Tate), **not** that the quotients are
+those curves — so this is *inconclusive*, but it blocks any claim of necessity.
+**The criterion is proven sufficient; necessity is open.**
+
+### Next step proposal
+**Thread 24 — settle the non-split bielliptic case.** Derive the quotient pair in
+closed form for `τ: x↦c/x, y↦ey/x³` with `e² = −c³` (`c` non-square; exists iff
+`p ≡ 3 mod 4`), exactly as F1 did for `e² = +c³`. Then test whether `j₁ = j₂ = 0` is
+solvable there. Falsifier: if the non-split quotient pair also forces `b₁b₂ ∈ (F_p*)³`,
+the criterion is necessary and the secp256k1 5/15 table in F5 is complete and final;
+if it admits a non-cube pair, then (0,3) may be glueable after all by a non-split
+curve and F5 is only a lower bound. Cheap — same machinery, ~1 session, and it is
+decisive either way. Concretely check the p=7 pair (3,4) flagged above by constructing
+the curve and computing its actual quotients rather than its char poly.
+
+Secondary: the `secp256k1_cm_audit/howe_*.gp` and `chlrs_*.gp` scripts all operate in
+the family F1 proves cannot work. They should be marked DEAD in a header comment so no
+future run re-derives this.
+
+### Commits made
+(recorded in the follow-up commit)
