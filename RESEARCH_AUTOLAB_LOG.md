@@ -6245,4 +6245,4 @@ Secondary (cheap): `C_emp` is measured on 9 curves at m=12 only. Sweep m ∈ {6,
 two curves to confirm the `n^{1/(2m)}` exponent — the law's only untested term.
 
 ### Commits made
-(recorded below after commit)
+eff84ee autolab 2026-08-04: Thread 23 — centring, not projection, is the Phase-2 fix
