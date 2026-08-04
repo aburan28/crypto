@@ -6265,4 +6265,5 @@ the main theorem. Cheap: the scan harness already exists in `glv_hnp_phase2_thre
 Secondary: `apt-get update` before `apt-get install pari-gp` in future containers.
 
 ### Commits made
-[filled in below]
+
+702d29c autolab 2026-08-04: Thread 23 — Phase-2 GLV lattice coset factorises into m copies of one 2-D lattice
