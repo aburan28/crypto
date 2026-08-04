@@ -6103,3 +6103,178 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-04 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the
+continuation proposed verbatim by the 2026-07-29 entry (log line ~6089).
+Priorities 1, 3, 4, 6 are CLOSED; priority 2 BLOCKED; priority 5's live
+sub-task is Thread 23, and 2026-07-29 made measurable progress, so protocol
+rule (b) selects it.
+
+The 2026-07-29 falsifier was a dichotomy: *either* the reformulation moves the
+K1 wall (real improvement) *or* the wall is information-theoretic and Phase 2
+is at its ceiling. **The answer is neither.** The reformulation is correct and
+behaviourally inert, and the wall is *not* information-theoretic — E5 below
+proves the key is uniquely determined exactly where LLL and BKZ-40 both fail.
+
+### Work done
+- Env (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4.
+  `apt-get install pari-gp` FAILED in this container (no `gp`); not needed —
+  Thread 23 is pure Python/fpylll. Future runs: don't assume `gp` is present.
+- `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (E1–E3) — the d-free
+  lattice, plus old-vs-new comparison harness. Experiments guarded under
+  `if __name__ == "__main__"` so follow-ups can import the helpers.
+- `..._projected_e4.py` (E4a–c) — identity of the new shortest vector; 10-seed
+  LLL/BKZ-20/BKZ-40 head-to-head; more-data-at-the-wall.
+- `..._projected_e5.py` — exhaustive search over all d ∈ [1,n) (n=2647 is
+  enumerable) to decide information-theoretic vs algorithmic.
+- `..._projected_e6.py` (E6, E6b) — closed-form spectral bias of the GLV nonce
+  set, and the multiplier-identity check.
+- Outputs committed alongside each script as `*_output.txt`.
+- `cargo test --test curve_audit` → **5/5 pass** (6.91s). ✓
+
+**The reformulation.** The 2026-07-29 T5 blocker was the trivial vector
+`n·S_D·e_m` (d is only defined mod n). Fix: delete the d-column outright. The
+d-row `(B_i·S_K1 | 0 | 0)` then becomes linearly *dependent* on the mod-rows
+(`n·(d-row) ≡ 0`), so the 2m+2 generators drop to rank 2m+1 — fpylll would
+silently reduce a rank-deficient basis. Replace mod-rows + d-row by an explicit
+HNF basis of the rank-m sublattice they generate in the k1-columns:
+
+    Λ = {u ∈ Z^m : ∃x, u ≡ x·B mod n} = {u : u_i ≡ u_0·c_i}, c_i = B_i·B_0⁻¹
+    HNF basis: (1, c_1, …, c_{m-1}) and n·e_i for i=1..m-1,   det Λ = n^(m-1)
+
+d is no longer a coordinate; it is reconstructed from one recovered signature,
+`d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n`.
+
+### Findings
+
+**E1 — the construction is correct.** dim 2m+1; `det == S_K1^m·S_K2^m·S_KAN·n^(m-1)`
+exactly (= det(L_old)/n) on all three historical curves; planted vector verified
+a lattice member; the `|sv[d]|/n = 1.0000` signature of the trivial vector is
+gone. sv/pv rose — but stayed **below 1**:
+
+| curve | sv/pv old | sv/pv new |
+|---|---|---|
+| 8-bit/199 | 0.589 | 0.843 |
+| 12-bit/2557 | 0.508 | 0.532 |
+| 12-bit/2677 | 0.417 | 0.813 |
+
+**E2 — FALSIFIER, first branch: the wall does not move. Bit-identical grids.**
+5 seeds, 9 K1 values, both 12-bit curves — every cell equal:
+
+| curve | K1= | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2557 (m=8) | old | 5 | 5 | 5 | 5 | 4 | 1 | 0 | 0 | 0 |
+| 2557 | new | 5 | 5 | 5 | 5 | 4 | 1 | 0 | 0 | 0 |
+| 2677 (m=10) | old | 5 | 5 | 4 | 3 | 0 | 0 | 0 | 0 | 0 |
+| 2677 | new | 5 | 5 | 4 | 3 | 0 | 0 | 0 | 0 | 0 |
+
+E4b confirms at 10 seeds and three reduction strengths: NEW beats OLD in
+**0/8** cells, loses in **0/8**. The 5-seed "BKZ gain" glimpsed in E3 was
+BKZ helping *equally* in both lattices. **The trivial vector was never the
+obstruction** — removing it changes nothing observable.
+
+**E4a — H23a CONFIRMED: the new shortest vector is the λ-block vector μ.**
+15/18 cells have `sv(L') == |μ|` to machine precision, where μ is the exact
+Gauss-reduced shortest vector of the 2-D block `⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩`,
+with support in a **single** (col j, col m+j) plane and Kannan coordinate 0:
+
+| curve | K1 | \|μ\| | sv(L') | sv/\|μ\| | supp k1 | supp k2 | kan |
+|---|---|---|---|---|---|---|---|
+| 2557 | 4/8/16 | 3235.8 / 2737.6 / 2598.2 | same | 1.0000 | 1 | 1 | 0 |
+| 2677 | 8/16 | 5095.8 / 3155.7 | same | 1.0000 | 1 | 1 | 0 |
+| 2677 | 4 | 9323.5 | 6158–6911 | 0.66–0.74 | 5–8 | 9–10 | S_KAN |
+
+The 3 exceptions are exactly the *successful* regime (2677, K1=4), where a
+planted-type vector (full support, Kannan coord = S_KAN) is shorter than μ.
+
+**This is the real structure.** μ encodes the non-uniqueness of the GLV split:
+`(k1, k2) → (k1 − λt, k2 + t)` leaves `k_full = k1 + λk2` fixed. There is one
+such vector per signature plane, so L' contains an **m-dimensional sublattice of
+uninformative short vectors**. Removing the d-direction merely exposed the next
+one. Phase-2 has two families of uninformative vectors; Thread 23 killed one.
+
+**E5 — the "information-theoretic ceiling" reading is FALSIFIED.**
+n=2647 is enumerable, so survivors were counted exhaustively: how many
+d ∈ [1,n) admit a valid GLV decomposition for *every* signature.
+
+| curve | K1 | eff | #survivors | unique? | LLL | BKZ-40 | verdict |
+|---|---|---|---|---|---|---|---|
+| 2557 | 12 | 0.235 | 1 | yes | 1/5 | 1/5 | solved |
+| 2557 | 16 | 0.313 | 1 | yes | 0/5 | 0/5 | **ALGORITHMIC** |
+| 2557 | 24 | 0.469 | 4 | no | 0/5 | 0/5 | info absent |
+| 2677 | 6 | 0.118 | 1 | yes | 3/5 | 5/5 | solved |
+| 2677 | 8 | 0.157 | 1 | yes | 0/5 | 0/5 | **ALGORITHMIC** |
+| 2677 | 12 | 0.236 | 1 | yes | 0/5 | 0/5 | **ALGORITHMIC** |
+| 2677 | 16 | 0.314 | 1 | yes | 0/5 | 0/5 | **ALGORITHMIC** |
+| 2677 | 24 | 0.471 | 3 | no | 0/5 | 0/5 | info absent |
+
+**d is uniquely determined at K1 = 8, 12, 16 on the very curve that has been
+recorded as a structural failure since 2026-06-15 — one survivor out of 2646.**
+The lattice wall sits at eff ≈ 0.157; the information wall sits at eff ≈ 0.47.
+That is a **3× gap in K1** in which the answer exists and no lattice method
+tried finds it. Note the counting bound already coded into `sweep_curve`
+(`m_thresh = ⌈log n / log(1/eff)⌉`, `glv_hnp_phase2_20bit.py`) gives m_thresh=5
+at K1=8 while m=10 signatures are supplied — and E4c confirms m up to 32 does
+not help (old 0,0,0,0,1 / new 0,0,0,0,1 of 5; BKZ-40 0,0,1,1,1). More data is
+not the missing ingredient; a different algorithm is.
+
+**E6 — the spectral route reaches into the gap.** The GLV nonce set
+`S = {k1 + λk2 mod n}` is not an interval but a union of K2 intervals scattered
+by λ, so its bias factorises exactly:
+`B(ω) = |G(ω,K1)|/K1 · |G(ωλ,K2)|/K2`, `G(a,K) = Σ_{j<K} e^{2πiaj/n}`.
+
+| curve | K1 | eff | B(1) | B(λ⁻¹) | max_ω B | m ≈ 1/B² | interval ref |
+|---|---|---|---|---|---|---|---|
+| 2677 | 8 | 0.157 | 0.0806 | 0.560 | **0.856** | 1.4 | 0.960 |
+| 2677 | 16 | 0.314 | 0.0805 | 0.109 | **0.786** | 1.6 | 0.845 |
+| 2677 | 24 | 0.471 | 0.0805 | 0.158 | 0.676 | 2.2 | 0.672 |
+| 2557 | 16 | 0.313 | 0.0186 | 0.070 | **0.853** | 1.4 | 0.847 |
+
+Noise floor 1/√n = 0.0194. The naive ω=1 detector is at (2557) or barely above
+(2677) the floor — which is why nobody saw this. But the *optimised* multiplier
+gives bias ≈ 0.79–0.86 right inside the algorithmic gap, statistically
+indistinguishable from a plain-interval nonce set of the same cardinality.
+
+**E6b — H23b CONFIRMED 10/10: the obstruction and the key are the same object.**
+The optimal ω is exactly the ω-component of the Gauss-reduced shortest vector of
+`W = ⟨(K1, λ·K2), (0, n·K2)⟩` — the same λ-block that produces μ. Bias at the
+predicted ω matches the brute-force argmax to 5 decimals in all 10 cells:
+
+| curve | K1 | ω_pred | ω_argmax | ω̃ | (ωλ)˜ | B(ω_pred) |
+|---|---|---|---|---|---|---|
+| 2557 | 8 | 50 | 2609 (=−50) | 50 | 3 | 0.95830 |
+| 2677 | 8 | 43 | 43 | 43 | 14 | 0.85630 |
+| 2677 | 16 | 43 | 43 | 43 | 14 | 0.78592 |
+
+ω works precisely when ω and ωλ mod n are *simultaneously* small — i.e. the
+λ-block short vector. **The sublattice that blocks LLL is the multiplier that
+un-blocks the spectral attack.**
+
+*Caveat, stated plainly:* E6 computes the bias of the nonce set — a necessary
+condition and a sample-complexity estimate, not a demonstrated key recovery.
+The attack itself has not been run.
+
+### Next step proposal
+**Thread 24 — GLV-aware Bleichenbacher: run the attack E6 says should work.**
+Take the 2677 instance at K1=8 (eff=0.157, unique d per E5, LLL/BKZ-40 0/5),
+compute ω by Gauss-reducing `⟨(K1, λK2), (0, nK2)⟩`, and evaluate
+`Z(d) = Σ_i exp(2πi·ω·(A_i + B_i d)/n)` over all d ∈ [1,n) — 2646 candidates,
+a direct evaluation, no FFT needed at this size. `src/cryptanalysis/bleichenbacher.rs`
+already has the machinery (gated to n_bits ≤ 24; n=2647 is 12 bits, comfortably
+inside).
+*Falsifier:* peak height for the correct d should be ≈ m·B ≈ 10·0.856 ≈ 8.6
+against a noise floor of √m ≈ 3.2 — a peak ratio ≈ 2.7. If the correct d is the
+argmax of |Z| at m=10, the algorithmic gap is real and Thread 5 (recorded DEAD
+END on 2026-07-07) **reopens**. If the peak does not separate, the bias
+calculation is missing a dependence between signatures and E6 is wrong.
+Cheap: one script, minutes to run.
+
+Secondary: if Thread 24 succeeds, re-run the 2026-07-29 T3 17-bit sweep
+(eff = 0.15 and 0.25, where LLL got 3/20 and 0/20) with the spectral detector
+to measure how far the eff wall actually moves.
+
+### Commits made
+(recorded in the follow-up commit below)

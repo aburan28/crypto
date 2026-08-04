@@ -1,0 +1,33 @@
+==============================================================================
+Thread 23 / E5 - information-theoretic or algorithmic?  (exhaustive d)
+==============================================================================
+
+  12-bit/2557  n=2659  lam*=0.3400  m=8  K2=52  d_secret=983
+   K1    eff  m_thresh |  #survivors  unique? |  LLL  B40 |                    verdict
+  ----------------------------------------------------------------------------------
+    2  0.039         3 |           1     True |    5    5 |        solved, info unique
+    3  0.059         3 |           1     True |    5    5 |        solved, info unique
+    4  0.078         4 |           1     True |    5    5 |        solved, info unique
+    6  0.117         4 |           1     True |    5    5 |        solved, info unique
+    8  0.156         5 |           1     True |    4    4 |        solved, info unique
+   12  0.235         6 |           1     True |    1    1 |        solved, info unique
+   16  0.313         7 |           1     True |    0    0 |        ALGORITHMIC failure
+   24  0.469        11 |           4    False |    0    0 |      info genuinely absent
+   32  0.626        17 |          53    False |    0    0 |      info genuinely absent
+
+  12-bit/2677 FAIL  n=2647  lam*=0.0699  m=10  K2=52  d_secret=979
+   K1    eff  m_thresh |  #survivors  unique? |  LLL  B40 |                    verdict
+  ----------------------------------------------------------------------------------
+    2  0.039         3 |           1     True |    5    5 |        solved, info unique
+    3  0.059         3 |           1     True |    5    5 |        solved, info unique
+    4  0.079         4 |           1     True |    4    5 |        solved, info unique
+    6  0.118         4 |           1     True |    3    5 |        solved, info unique
+    8  0.157         5 |           1     True |    0    0 |        ALGORITHMIC failure
+   12  0.236         6 |           1     True |    0    0 |        ALGORITHMIC failure
+   16  0.314         7 |           1     True |    0    0 |        ALGORITHMIC failure
+   24  0.471        11 |           3    False |    0    0 |      info genuinely absent
+   32  0.629        17 |           9    False |    0    0 |      info genuinely absent
+
+==============================================================================
+done
+==============================================================================
