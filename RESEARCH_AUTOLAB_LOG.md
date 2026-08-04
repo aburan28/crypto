@@ -6599,4 +6599,4 @@ shows why — the live variables are lattice-geometric (ν, ν̂), not arithmeti
 
 ### Commits made
 
-(hash recorded in the following commit)
+36452d0 autolab 2026-08-04: Thread 23 — the GLV-HNP wall is a Gaussian-heuristic wall; Psi = nu*nu_hat^0.65 collapses it
