@@ -6218,3 +6218,4 @@ Secondary (also cheap): apply the centring fix to the **Phase-1** lattice
 error is present there too, several earlier "walls" in this log may be similarly inflated.
 
 ### Commits made
+27eb811 autolab 2026-08-05: Thread 23 — K1 wall is not information-theoretic; centring + multi-candidate give ~4x
