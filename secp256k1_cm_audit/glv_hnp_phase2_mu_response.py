@@ -47,9 +47,14 @@ import time
 import sympy
 
 # Reuse the verified Thread 20a core rather than re-implementing it.
+# Repaired 2026-08-05: this used to exec glv_hnp_phase2_lambda_threshold.py
+# (which runs its whole experiment suite on import, and does not define
+# glv_eigenvalues / mu_of / identify_twist / rival_sublattice_nu, so this
+# script died with AttributeError).  glv_hnp_phase2_core.py is the same code,
+# import-safe, and exports these names.
 import importlib.util
 _spec = importlib.util.spec_from_file_location(
-    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
+    "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_core.py")
 _t20a = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_t20a)
 

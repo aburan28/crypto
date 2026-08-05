@@ -1,0 +1,51 @@
+==============================================================================
+Thread 24 — the coset mechanism behind Phase-2 recovery
+==============================================================================
+
+==============================================================================
+E5 — decomposition of the winning row  (tests P1)
+==============================================================================
+For every trial where `verified` succeeds, take the winning row w,
+sign-normalise it, and test w - v_planted:
+  d,kan ok : the Kannan coordinate of the difference is 0 and its
+             d-coordinate is a multiple of n*S_D (i.e. a multiple of
+             the trivial vector T, which does not change d mod n)
+  in L2^m  : each (k1-col i, k2-col i) block lies in L2_i (exact test)
+
+curve           K1  trials  verified   exact   d,kan ok   in L2^m  pv_red/pv
+12-bit/2557      2       5         5       5          5         5      1.000
+12-bit/2557      4       5         5       2          5         5      0.984
+12-bit/2557      6       5         5       0          5         5      0.926
+12-bit/2557      8       5         5       0          5         5      0.914
+12-bit/2647      2       5         5       5          5         5      1.000
+12-bit/2647      4       5         5       5          5         5      1.000
+12-bit/2647      6       5         2       2          2         2      1.000
+12-bit/2647      8       5         0       0          0         0      1.000
+
+E5 verdict: P1 HOLDS on every winning trial
+
+==============================================================================
+E6 — pv_red vs pv as a predictor, on fresh 17-bit curves
+==============================================================================
+harvested 20 curves in 0.0s
+
+  eff  n_curves  mean p_hat  mean pv/GH  mean pvred/GH  mean shrink
+ 0.05        20       0.990       0.844          0.832        0.986
+  0.1        20       0.460       1.214          1.188        0.978
+ 0.15        20       0.180       1.443          1.407        0.975
+  0.2        20       0.090       1.684          1.633        0.970
+ 0.25        20       0.040       1.867          1.790        0.959
+
+pooled over all 100 (curve, eff) cells, 29 of them 5/5:
+  pv/GH        spearman(., p_hat) = -0.745   AUC(5/5 vs not) = 0.929
+  pv_red/GH    spearman(., p_hat) = -0.835   AUC(5/5 vs not) = 0.960
+  nu_hat       spearman(., p_hat) = -0.328   AUC(5/5 vs not) = 0.712
+
+within-eff (removes the dominant eff effect):
+  eff=0.05: pv/GH -0.259   pv_red/GH -0.259   nu_hat +0.020
+  eff=0.1: pv/GH -0.053   pv_red/GH -0.254   nu_hat -0.268
+  eff=0.15: pv/GH -0.238   pv_red/GH -0.739   nu_hat -0.478
+  eff=0.2: pv/GH -0.038   pv_red/GH -0.521   nu_hat -0.488
+  eff=0.25: pv/GH -0.216   pv_red/GH -0.521   nu_hat -0.488
+
+Done.

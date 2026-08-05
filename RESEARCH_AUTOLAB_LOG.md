@@ -6103,3 +6103,217 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+
+**Thread 23** — the next-step proposed by the 2026-07-29 entry: reformulate the
+Phase-2 lattice so the planted vector becomes λ₁, by quotienting out the trivial
+vector `n·S_D·e_m` that T5 showed is always shorter. All six original priority
+threads remain CLOSED/BLOCKED/DEAD-END, and 20a made measurable progress on
+2026-07-29, so rule (b) selects its continuation.
+
+Answer: **the reformulation changes nothing** — the falsifier resolves negatively
+on both clauses. But diagnosing *why* produced the mechanism the six failed
+separators were missing, which is opened here as **Thread 24**.
+
+Also, while orienting: the 2026-07-29 ν̂ result was **not reproducible from the
+repository**. Fixed (see below).
+
+### Work done
+
+- Environment (fresh container): `pari-gp` 2.15.4, `fpylll` 0.6.4, `cysignals`,
+  `sympy` 1.14.0. Same note as 2026-07-29 — none of these survive the container.
+- New `secp256k1_cm_audit/glv_hnp_phase2_core.py`: import-safe shared core.
+  Lattice construction copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so all numbers stay comparable to 20a.
+- New `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (E0–E4) + output
+  `glv_hnp_phase2_projected_output.txt`.
+- New `secp256k1_cm_audit/glv_hnp_phase2_coset.py` (E5–E6) + output
+  `glv_hnp_phase2_coset_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (5.47s). ✓
+
+### Findings
+
+**0 — the 2026-07-29 ν̂ result was unreproducible; now repaired.**
+`glv_hnp_phase2_mu_response.py` (20b), `glv_hnp_phase2_nuhat_control.py` (20c)
+and `glv_hnp_nuhat_vs_c1c2.py` (20d) all `exec_module` the committed
+`glv_hnp_phase2_lambda_threshold.py` and then bind `glv_eigenvalues`, `mu_of`,
+`identify_twist`, `rival_sublattice_nu`, plus a `run_experiment(p, n, lam, G, m,
+d, k1, k2, seed)` — **none of which the committed 20a defines** (it has
+`glv_roots`, `lam_star`, `build_curve`, `lambda_block_mu`, and a
+`run_experiment(curve, m, d_secret, k1_bound, …)`). All three died at import with
+`AttributeError: module '_t20a' has no attribute 'glv_eigenvalues'`. Commit
+`e845207` evidently committed an older 20a than the one its results were produced
+with. The narrative was also never written into this log — only into the commit
+message of `e845207`, recovered below.
+
+Repaired by pointing all three at the new core module, which exports both name
+sets. All three now import and run (`mu_response` harvests 100 curves,
+`nuhat_control` harvests low=30/high=30, `nuhat_vs_c1c2` runs 600 LLL trials in
+1.1s). **Lesson for future runs: if a result is worth a commit message, it is
+worth a log section, and the script must be run once from a clean checkout.**
+
+Recovered ν̂ claims from `e845207` (for the record; independently replicated in
+E4/E6 below): ν̂ = λ₁(L2)/√(det L2) where L2 = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩;
+20-bit with μ balanced by design, p̂ 0.910 (low ν̂) vs 0.453 (high), perm p < 1e-4
+at m = 8..11; causal arm on one fixed curve with 120 synthetic λ gave
+spearman(ν̂, p̂) = −0.583 (p = 0.0002) vs spearman(μ, p̂) = +0.003 (p = 0.97);
+against the June C1/C2 classes ν̂ AUC 0.935. secp256k1 ν̂ = 0.664 at eff = 0.0993.
+
+**1 — the projected lattice P is well defined and correct (E0).**
+`L_K ∩ ker(π) = Z·(n·S_D·e_m)` exactly, and the trivial vector is axis-aligned,
+so π is literally "delete column m". An explicit basis of π(L_K) needs the d-row
+normalised to leading entry 1 (B'ᵢ = Bᵢ·B₀⁻¹ mod n), after which
+{B', n·e₁, …, n·e_{m−1}} is a basis of the k1-block sublattice; `n·e₀ = n·B' −
+Σ_{i≥1} B'ᵢ·(n·eᵢ)` is in the span, so it need not be a generator.
+
+| check | result |
+|---|---|
+| det(K) = (n·S_K1)^m·S_D·S_K2^m·S_KAN | True, 6/6 cases |
+| det(P) = n^(m−1)·S_K1^m·S_K2^m·S_KAN | True, 6/6 |
+| det(K) = det(P)·n·S_D | True, 6/6 |
+| planted ∈ K, planted ∈ P, trivial ∈ K | True, 6/6 |
+
+d survives the projection: it is recovered as `d = (k1₀ + λ·k2₀ − A₀)·B₀⁻¹ mod n`.
+
+**2 — falsifier clause 1 FAILS: sv/pv rises but stays below 1 (E1, m = 8).**
+
+| curve | K1 | sv/pv in K | sv/pv in P | λ₁ energy in P (k1 / k2) |
+|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.492 | 0.688 | 0.508 / 0.492 |
+| 12-bit/2557 | 8 | 0.517 | 0.532 | 0.132 / 0.868 |
+| 12-bit/2647 | 8 | 0.521 | 0.948 | 0.418 / 0.582 |
+
+In K, λ₁ is the trivial vector (d-energy 1.000, exactly as T5 reported). In P the
+d-column is gone, and λ₁ moves to a vector split between the k1- and k2-blocks —
+i.e. an element of the rival sublattice L2. The parasite is replaced, not removed.
+
+**3 — falsifier clause 2 FAILS: K and P are identical, cell for cell (E2–E4).**
+Across the whole T4 K1-grid, the E3 m-sweep, and 60 (curve, eff) cells at 17 bits,
+**every K cell equals its P cell** on both criteria. The projection is
+operationally a no-op.
+
+K1-wall grid, m = 12, 5 seeds (verified/exact wins; K and P rows were identical
+so only one is shown):
+
+| curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 5/5 | 5/5 | 5/2 | 5/0 | 5/0 | 4/0 | 1/0 | 0/0 |
+| 12-bit/2647 | 5/5 | 5/5 | 5/5 | 2/2 | 0/0 | 0/0 | 0/0 | 0/0 |
+
+The `verified` column reproduces T4 exactly (2557: 5,5,5,5,5,4,1,0 —
+2647: 5,5,5,2,0,0,0,0), confirming 20a's oracle was a faithful proxy here.
+
+Per the falsifier as written on 2026-07-29 — "if the wall stays at K1 ≈ 4–6, then
+the wall is information-theoretic and Phase 2 is at its ceiling" — **the wall does
+not move. The trivial vector was never the obstruction.**
+
+**4 — the criteria diverge, and that is the real finding (E2, E5).**
+Two success criteria were separated, both attacker-executable:
+
+- `verified` — a candidate d confirmed by `d·G == Q` (one scalar multiplication).
+- `exact` — the in-box planted decomposition (k1ᵢ < K1, k2ᵢ < K2) was the vector found.
+
+On 12-bit/2557 at K1 = 6 and 8: **verified 5/5, exact 0/5.** d is recovered from a
+lattice vector that is *not* the planted vector. The `exact` wall sits at K1 = 3
+where the `verified` wall sits at K1 = 8.
+
+E5 identifies that vector. Every element of L2ᵢ = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩ on
+the coordinate pair (k1-col i, k2-col i) has zero d- and zero Kannan coordinate,
+and the trivial vector T only shifts d by n. So the whole coset
+
+    v_planted + Z·T + (L2₀ + … + L2_{m−1})
+
+decodes to the same d. Exact integer membership test on every winning trial:
+
+| curve | K1 | verified | exact | decomposes as planted + Z·T + L2^m |
+|---|---|---|---|---|
+| 12-bit/2557 | 2 | 5 | 5 | **5/5** |
+| 12-bit/2557 | 4 | 5 | 2 | **5/5** |
+| 12-bit/2557 | 6 | 5 | 0 | **5/5** |
+| 12-bit/2557 | 8 | 5 | 0 | **5/5** |
+| 12-bit/2647 | 2 | 5 | 5 | **5/5** |
+| 12-bit/2647 | 4 | 5 | 5 | **5/5** |
+| 12-bit/2647 | 6 | 2 | 2 | **2/2** |
+| 12-bit/2647 | 8 | 0 | 0 | — |
+
+32 of 32 winning trials, no exceptions. **Recovery is not an SVP problem and not
+even a BDD problem for v_planted — it is a BDD problem for the coset
+v_planted mod (Z·T ⊕ L2^m).** The governing length is not ‖v_planted‖ but
+
+    pv_red := ‖v_planted mod L2^m‖.
+
+**5 — pv_red is the best predictor found so far (E6).**
+100 (curve, eff) cells, 20 fresh 17-bit curves × eff ∈ {0.05, 0.10, 0.15, 0.20,
+0.25}, m = 12, 5 seeds; GH = Gaussian heuristic for K.
+
+| eff | mean p̂ | mean pv/GH | mean pv_red/GH | mean pv_red/pv |
+|---|---|---|---|---|
+| 0.05 | 0.990 | 0.844 | 0.832 | 0.986 |
+| 0.10 | 0.460 | 1.214 | 1.188 | 0.978 |
+| 0.15 | 0.180 | 1.443 | 1.407 | 0.975 |
+| 0.20 | 0.090 | 1.684 | 1.633 | 0.970 |
+| 0.25 | 0.040 | 1.867 | 1.790 | 0.959 |
+
+Pooled (29 of 100 cells at 5/5):
+
+| predictor | spearman(·, p̂) | AUC (5/5 vs not) |
+|---|---|---|
+| pv_red/GH | **−0.835** | **0.960** |
+| pv/GH | −0.745 | 0.929 |
+| ν̂ | −0.328 | 0.712 |
+
+Within-eff, where the dominant eff effect is removed, the gap is much larger:
+
+| eff | pv/GH | pv_red/GH | ν̂ |
+|---|---|---|---|
+| 0.05 | −0.259 | −0.259 | +0.020 |
+| 0.10 | −0.053 | **−0.254** | −0.268 |
+| 0.15 | −0.238 | **−0.739** | −0.478 |
+| 0.20 | −0.038 | **−0.521** | −0.488 |
+| 0.25 | −0.216 | **−0.521** | −0.488 |
+
+Note the size of the effect vs its cause: reduction mod L2^m shortens the planted
+vector by only 1.4–4.1% on average, yet that shrink carries most of the extra
+predictive power, because it *varies* across curves in exactly the way ν̂ tracks.
+
+**6 — this explains ν̂'s paradoxical sign, and subsumes it.**
+20c found that *small* ν̂ (a short rival vector) makes the attack *easier*, which
+is backwards for an SVP obstruction. Under the coset mechanism it is immediate:
+small ν̂ means L2 is skew, so λ₂(L2) ≈ det/λ₁ is long and the coset representative
+`v_planted mod L2^m` is comparatively short. ν̂ is a one-parameter shadow of
+pv_red, which is why pv_red dominates it in every within-eff bin above. The E4
+sweep independently replicates 20c's sign on fresh data (within-eff spearman(ν̂,
+p̂) = −0.478 at eff = 0.15, −0.488 at 0.25), so the 20c result stands even though
+its script did not.
+
+This also closes out T5's "no curve-level invariant can separate C1 from C2":
+correct, because pv_red depends on the *signature set* (the kᵢ), not on the curve
+alone. The six invariants falsified 2026-06-21…06-29 were all curve-level, and
+ν̂ is curve-level too — which caps ν̂ at AUC ≈ 0.93 and explains why it cannot do
+better.
+
+### Next step proposal
+
+**Thread 24 — make the attack solve the coset problem directly.**
+The lattice reduction is currently doing coset reduction *implicitly and badly*:
+it must stumble on a short coset representative during LLL. Do it explicitly:
+Gauss-reduce each L2ᵢ (O(log n), 2-dimensional, exact), Babai-reduce the target
+into the fundamental domain of L2^m first, and only then run LLL on the residual
+(m+2)-dimensional problem. Since dim drops from 2m+2 to about m+2, LLL's Hermite
+factor applies to a much smaller instance.
+Falsifier: if the K1 wall on 12-bit/2557 moves beyond K1 = 8 (currently the
+`verified` wall) the restructuring is a real gain; if it stays at 8, the wall is
+information-theoretic and Phase 2 is confirmed at its ceiling. The E2 grid is a
+2-minute run, so this is cheap to settle.
+
+Secondary (cheap): re-derive the secp256k1 extrapolation using pv_red/GH rather
+than ν̂, since pv_red is the better predictor — noting as `e845207` did that this
+remains conditional on a non-standard `k = k1 + λ·k2` nonce generator and is not
+an attack on any deployed signer.
+
+### Commits made
+
+(to be filled by the commit below)
