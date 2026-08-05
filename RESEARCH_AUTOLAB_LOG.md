@@ -6272,4 +6272,4 @@ below 1.1. If eff* holds, the Phase-2 data requirement at 256 bits is fixed in
 closed form and can go in the paper as a bound rather than an empirical table.
 
 ### Commits made
-(recorded in the follow-up commit below)
+`8252039` autolab 2026-08-05: Thread 23 CLOSED negative — projecting out the trivial vector is a no-op
