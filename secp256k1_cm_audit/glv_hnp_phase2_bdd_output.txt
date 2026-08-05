@@ -1,0 +1,127 @@
+==============================================================================
+Thread 23 — reformulating the Phase-2 lattice so the planted vector
+            is the search target (BDD/CVP instead of Kannan SVP)
+==============================================================================
+  8-bit/199          p=  211 n=  199 lam=  106 lam*=0.4673 K1=2 m=6
+  12-bit/2557        p= 2557 n= 2659 lam= 1755 lam*=0.3400 K1=8 m=8
+  12-bit/2677 FAIL   p= 2677 n= 2647 lam=  185 lam*=0.0699 K1=8 m=10
+
+------------------------------------------------------------------------------
+T23-A: does S_D scaling remove the trivial vector n*S_D*e_m?
+------------------------------------------------------------------------------
+2026-07-29 T5 claimed: 'no choice of S_D removes it - both vectors scale
+linearly in S_D.'  Only the trivial vector scales fully:
+  ||n*S_D*e_m||^2 = n^2 * S_D^2
+  ||v_planted||^2 ~ n^2 * (2m/3 + S_D^2/3 + 1)   (only ONE coord has S_D)
+  => trivial is longer once S_D^2/1 > 2m/3 + S_D^2/3 + 1, i.e. S_D > sqrt(m+3/2)
+The cost is only det^(1/dim): S_D^(1/(2m+2)).
+
+curve                m   S_D* | S_D=1    S_D=2    S_D=4    S_D=8    S_D=16   S_D=64  
+                              | w/5      w/5      w/5      w/5      w/5      w/5     
+8-bit/199            6   2.74 | 5/5      5/5      4/5      1/5      1/5      1/5     
+12-bit/2557          8   3.08 | 5/5      5/5      5/5      3/5      2/5      0/5     
+12-bit/2677 FAIL    10   3.39 | 0/5      0/5      0/5      0/5      0/5      0/5     
+
+Shortest-vector identity after LLL (is it the trivial n*S_D*e_m?):
+curve              S_D=1    S_D=2    S_D=4    S_D=8    S_D=16   S_D=64  
+8-bit/199          triv     othr     othr     othr     othr     othr    
+12-bit/2557        triv     othr     othr     othr     othr     othr    
+12-bit/2677 FAIL   triv     othr     othr     othr     othr     othr    
+
+------------------------------------------------------------------------------
+T23-B/C: BDD reformulation (d eliminated; dim 2m, det n^(m-1))
+------------------------------------------------------------------------------
+Solvers: Babai nearest-plane on the LLL basis, and EXACT CVP
+(fpylll method='proved').  Exact CVP is the ceiling of this formulation:
+if it fails, no amount of reduction strength can help.
+'closest' = is the planted vector the true closest lattice point to t?
+
+curve               ctr     sd  kannan   babai     cvp  closest  d_pl/d_cvp
+---------------------------------------------------------------------------
+8-bit/199          False        5/5     2/5     2/5     2/5           1.1812
+8-bit/199          True        5/5     5/5     5/5     5/5           1.0000
+12-bit/2557        False        5/5     1/5     1/5     1/5           1.1234
+12-bit/2557        True        5/5     4/5     4/5     2/5           1.0209
+12-bit/2677 FAIL   False        0/5     0/5     1/5     1/5           1.1995
+12-bit/2677 FAIL   True        0/5     4/5     5/5     5/5           1.0000
+
+------------------------------------------------------------------------------
+T23-D: K1 wall, Kannan vs BDD-exact-CVP  (2026-07-29 T4 grid)
+------------------------------------------------------------------------------
+2026-07-29 T4: 12-bit/2557 wall at K1~12-16; 12-bit/2677 wall at K1~4-6.
+Falsifier: if the wall moves outward under exact CVP the reformulation
+is a real improvement; if it does not, the wall is information-theoretic.
+
+12-bit/2557  (m=8, lam*=0.340)
+    K1      2      3      4      6      8     12     16     24
+   kannan    5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+  bdd-cvp    5/5    5/5    4/5    4/5    4/5    2/5    1/5    0/5
+  closest    5/5    5/5    4/5    3/5    2/5    2/5    1/5    0/5
+
+12-bit/2677 FAIL  (m=10, lam*=0.070)
+    K1      2      3      4      6      8     12     16     24
+   kannan    5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+  bdd-cvp    5/5    5/5    5/5    5/5    5/5    5/5    3/5    1/5
+  closest    5/5    5/5    5/5    5/5    5/5    5/5    3/5    1/5
+
+
+------------------------------------------------------------------------------
+T23-E CONTROL: centering alone vs. d-elimination + centering
+------------------------------------------------------------------------------
+The BDD arm changed two things at once.  'kan-ctr' is the ORIGINAL Kannan
+embedding with only the target centered -- it isolates the centering effect.
+
+12-bit/2557  (m=8, lam*=0.340)
+        K1      2      3      4      6      8     12     16     24
+    kannan    5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5
+   kan-ctr    5/5    5/5    5/5    5/5    5/5    5/5    4/5    0/5
+   bdd-cvp    5/5    5/5    4/5    4/5    4/5    2/5    1/5    0/5
+
+12-bit/2677 FAIL  (m=10, lam*=0.070)
+        K1      2      3      4      6      8     12     16     24
+    kannan    5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5
+   kan-ctr    5/5    5/5    5/5    5/5    5/5    4/5    1/5    1/5
+   bdd-cvp    5/5    5/5    5/5    5/5    5/5    5/5    3/5    1/5
+
+------------------------------------------------------------------------------
+T23-F: list decoding -- CVP solution + neighbourhood scan (self-checked,
+       no secret oracle).  Matches the candidate budget the Kannan
+       row-scan already spends.
+------------------------------------------------------------------------------
+12-bit/2557  (m=8)
+        K1      2      3      4      6      8     12     16     24
+  bdd-list    5/5    5/5    5/5    5/5    5/5    4/5    2/5    0/5
+     cands      1      1      2      2      2    209    363      1
+
+12-bit/2677 FAIL  (m=10)
+        K1      2      3      4      6      8     12     16     24
+  bdd-list    5/5    5/5    5/5    5/5    5/5    5/5    3/5    2/5
+     cands      1      1      1      1      1      1    321    486
+
+------------------------------------------------------------------------------
+T23-G: does centering generalise?  17-bit sweep, m=12, 5 seeds.
+       (replicates 2026-07-29 T3: 19/20, 3/20, 0/20 at eff .05/.15/.25)
+------------------------------------------------------------------------------
+collected 20 fresh 17-bit j=0 GLV curves
+
+  eff |  kannan 5/5  kan-ctr 5/5 |  kannan tot  kan-ctr tot
+ 0.05 |   18/20        20/20     |   98/100      100/100   
+ 0.15 |    3/20        12/20     |   17/100       88/100   
+ 0.25 |    0/20         5/20     |    6/100       54/100   
+ 0.35 |    0/20         0/20     |    1/100       20/100   
+
+------------------------------------------------------------------------------
+T23-H: seed-robustness of the headline cells (20 seeds, not 5)
+------------------------------------------------------------------------------
+curve                K1    kannan   kan-ctr   bdd-cvp
+12-bit/2557           6    20/20     20/20     18/20 
+12-bit/2557           8    17/20     20/20     16/20 
+12-bit/2557          12     4/20     20/20     16/20 
+12-bit/2557          16     0/20     16/20      8/20 
+12-bit/2677 FAIL      6     7/20     20/20     20/20 
+12-bit/2677 FAIL      8     1/20     20/20     20/20 
+12-bit/2677 FAIL     12     0/20     18/20     20/20 
+12-bit/2677 FAIL     16     0/20     12/20     15/20 
+==============================================================================
+done
+==============================================================================

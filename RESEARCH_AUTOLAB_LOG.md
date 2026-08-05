@@ -6103,3 +6103,155 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 (reformulate the Phase-2 lattice so the planted vector is the search
+target) — the explicit next-step proposal of the 2026-07-29 entry. Priorities 1, 2,
+4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so priority 5
+(GLV-HNP Phase 2) is the only thread with measurable recent progress; protocol rule
+(b) applies.
+
+Outcome: **the K1 wall is an artifact of an uncentered target vector.** It is not
+structural and not information-theoretic. Centering the existing Kannan embedding —
+a four-line change to its last row — roughly triples the tolerable bias K1. The
+2026-07-26 claim ("failure is structural") and the 2026-07-29 T4 claim ("the K1 wall
+is genuine") are both corrected below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4.
+  PARI not needed this session. Same note as 2026-07-29: `cysignals` is a separate
+  runtime import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd.py` (experiments T23-A…T23-H), reusing
+  `gen_signatures` and `build_glv_lattice` verbatim from `glv_hnp_phase2_20bit.py:236`
+  and `:262` so the baseline arm reproduces 2026-07-29 exactly. Artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_bdd_output.txt`. Whole run is 3.2s.
+- Implemented three new arms: (i) S_D as a free parameter of the Kannan lattice,
+  (ii) a **BDD reformulation** in which d is eliminated algebraically rather than
+  embedded, giving a 2m-dim lattice of det n^(m-1) solved by Babai nearest-plane and
+  by *exact* CVP (fpylll `method="proved"`), (iii) **centered Kannan** — the original
+  lattice with only the target shifted to the centre of each box.
+- `cargo test --test curve_audit` → 5/5 pass (4.81s). ✓
+
+### Findings
+
+**T23-A — the 2026-07-29 S_D claim is wrong, but the conclusion drawn from it stands.**
+T5 stated "no choice of S_D removes [the trivial vector] — both vectors scale linearly
+in S_D." Only the trivial vector scales fully; the planted vector has S_D in *one*
+coordinate out of 2m+2:
+
+    ||n·S_D·e_m||²  = n²·S_D²
+    ||v_planted||²  ≈ n²·(2m/3 + S_D²/3 + 1)      ⟹ crossover at S_D = sqrt(m + 3/2)
+
+Verified: the LLL shortest vector stops being `n·S_D·e_m` at S_D ≥ 2 on all three
+curves. But removing it *hurts* — recovery decays monotonically (8-bit/199: 5/5, 5/5,
+4/5, 1/5, 1/5, 1/5 at S_D = 1, 2, 4, 8, 16, 64). The trivial vector was never the
+obstruction: `recover_d` scans every row of the reduced basis, so a shorter useless
+vector costs nothing. **T5's diagnosis was right for the wrong reason.**
+
+**T23-E — the K1 wall is caused by the uncentered target (the headline).**
+The 2m+2 Kannan lattice places the target at a *corner* of the solution box: the
+planted vector has coordinates k1_i·S_K1 with k1_i ∈ [0,K1), i.e. entries ~U(0,n),
+when they could be ~U(−n/2,n/2). Shifting the last row by half a box in every column
+(including the d column, whose planted entry is d·S_D with d ~ U(0,n)):
+
+| curve | arm | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | kannan | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 | **kan-ctr** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | **5/5** | **4/5** | 0/5 |
+| 12-bit/2557 | bdd-cvp | 5/5 | 5/5 | 4/5 | 4/5 | 4/5 | 2/5 | 1/5 | 0/5 |
+| 12-bit/2677 | kannan | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | **kan-ctr** | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | **4/5** | 1/5 | 1/5 |
+| 12-bit/2677 | bdd-cvp | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | **5/5** | 3/5 | 1/5 |
+
+**T23-H — robust at 20 seeds** (not 5):
+
+| curve | K1 | kannan | kan-ctr | bdd-cvp |
+|---|---|---|---|---|
+| 12-bit/2557 | 8 | 17/20 | **20/20** | 16/20 |
+| 12-bit/2557 | 12 | 4/20 | **20/20** | 16/20 |
+| 12-bit/2557 | 16 | 0/20 | **16/20** | 8/20 |
+| 12-bit/2677 | 6 | 7/20 | **20/20** | **20/20** |
+| 12-bit/2677 | 8 | 1/20 | **20/20** | **20/20** |
+| 12-bit/2677 | 12 | 0/20 | **18/20** | **20/20** |
+| 12-bit/2677 | 16 | 0/20 | 12/20 | 15/20 |
+
+**T23-G — it generalises.** 20 fresh 17-bit j=0 GLV curves, m=12, 5 seeds, replicating
+the 2026-07-29 T3 protocol. The kannan column reproduces T3's 3/20 and 0/20 exactly,
+confirming the baseline is the same code path:
+
+| eff = K1·K2/n | kannan (curves 5/5) | kan-ctr (curves 5/5) | kannan (per-instance) | kan-ctr (per-instance) |
+|---|---|---|---|---|
+| 0.05 | 18/20 | **20/20** | 98/100 | **100/100** |
+| 0.15 | 3/20 | **12/20** | 17/100 | **88/100** |
+| 0.25 | 0/20 | **5/20** | 6/100 | **54/100** |
+| 0.35 | 0/20 | 0/20 | 1/100 | **20/100** |
+
+**Why ~3×, quantitatively.** Centering shrinks the target from
+n·sqrt(2m/3 + 4/3) to n·sqrt(m/6 + 13/12) — a factor 1.71 at m=10 (measured on
+p=2677, seed 42: 2.369n → 1.847n for that particular d-draw). ||v_planted|| is
+essentially K1-independent, because k1_i·S_K1 = k1_i·(n/K1) ~ U(0,n) whatever K1 is;
+what K1 changes is the determinant, det^{1/dim} ∝ S_K1^{m/(2m+2)} ≈ (n/K1)^{0.48}.
+Offsetting a 1.71× shorter target therefore permits K1 to grow by 1.71^{1/0.48} ≈ 3.1×.
+Predicted wall shift 3.1×; observed 4–6 → 12–16 on 2677 and 8–12 → 16 on 2557. ✓
+
+**T23-B/C/D — d-elimination is the *wrong* fix; it is centering that matters.**
+The BDD reformulation (d eliminated via d ≡ B_0^{-1}(u_0+λv_0), giving m−1 congruences
+on 2m unknowns, rank 2m, det n^(m-1)) works and is fully oracle-free — its
+`decode_candidate` self-checks all m congruences against 0 ≤ k1_i < K1, 0 ≤ k2_i < K2
+with no knowledge of the secret — but it does **not** beat centered Kannan, and on
+12-bit/2557 it is worse (16/20 vs 20/20 at K1=8). Diagnosis via exact CVP: the
+`closest` column of T23-D tracks the `cvp` column cell-for-cell, so the CVP solver is
+optimal and the residual failures are exactly the instances where **the planted vector
+is not the closest lattice point** (mean d_planted/d_cvp = 1.02 on 2557-centered, with
+only 2/5 instances closest). Single-closest-point decoding is therefore strictly weaker
+than the Kannan row-scan, which tests ~dim candidates in the correct coset for free.
+T23-F confirms: giving BDD a matching candidate budget (CVP solution ± b_i ± b_j,
+self-checked) restores 5/5 at K1 ≤ 8 on 2557 at a cost of 1–2 candidates below the
+wall, 200–360 at it.
+
+Uncentered BDD is much worse than centered BDD (2677: 1/5 vs 5/5), which is the same
+centering effect measured in a second, independent lattice.
+
+**Note on oracle fairness.** Both `recover_d` and `recover_d_centered` compare against
+`d_secret`, as the 2026-06/07 baseline did, so the arms are directly comparable. The
+result does not depend on that: the BDD arm is fully oracle-free and reproduces the
+same wall shift on 2677 (20/20 at K1=8 and K1=12).
+
+**Where the wall actually is.** At K1=24, m=8, n=2659 the instance is
+information-theoretically ambiguous: eff = 0.47 gives log n / log(1/eff) ≈ 10.4 > m,
+and T23-F finds self-consistent *wrong* d values (predicted ~6 spurious solutions per
+instance; observed first-candidate acceptance with d ≠ d_secret). The 0/5 at K1=24 is
+a genuine information wall, not a lattice one. The 2026-07-26/07-29 walls at K1 = 4–8
+were nowhere near it.
+
+**Bug found and fixed mid-session** (recorded so it is not re-introduced): writing the
+centering offset as `-(n * S_D) // 2` floors the *negative*, desynchronising it from the
+`+ (n * S_D) // 2` added back in recovery by one unit for odd n, which made the centered
+arm read 0/5 everywhere. Use one explicit `half = (n*S_D)//2` and negate it.
+`glv_hnp_phase2_bdd.py:build_glv_lattice_centered` carries a comment.
+
+### Next step proposal
+**Thread 24 — re-run the Phase-1/Phase-2 scaling ladder with the centered target.**
+Every negative Phase-2 result from 2026-06-15 onward was measured on the uncentered
+lattice, so the recorded bit-length ceiling is not the real one. Concretely: re-run
+`glv_hnp_phase2_scaling.py` and the 20-bit ladder in `glv_hnp_phase2_20bit.py` with
+`build_glv_lattice_centered`, and re-measure the largest n for which recovery holds at
+eff = 0.15. Falsifier: if the centered ladder reaches a strictly larger bit-length at
+fixed eff, the Phase-2 ceiling recorded in RESEARCH_GLV_HNP_PHASE2.md must be revised
+upward; if it stops at the same bit-length, the ceiling is dimension-driven and
+centering only buys the constant measured here. Cheap — the ladder is minutes.
+
+Secondary: fold `build_glv_lattice_centered` back into `glv_hnp_phase2_20bit.py` as the
+default construction so future runs do not re-measure the uncentered baseline by
+accident, and add a note to RESEARCH_GLV_HNP_PHASE2.md that the pre-2026-08-05 K1/eff
+numbers are uncentered-lattice measurements.
+
+Tertiary: the ν̂ separator (AUC 0.935, 2026-07-29 e845207) was fitted on uncentered
+failures. Most of those instances now succeed, so the separator is probably measuring
+the centering deficit rather than a curve invariant — worth re-fitting before it is
+cited anywhere.
+
+### Commits made
+(recorded below after commit)
