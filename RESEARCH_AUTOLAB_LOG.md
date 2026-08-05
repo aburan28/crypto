@@ -6257,4 +6257,4 @@ GLV-nonce bias is exploitable, suitable for the B5/cover-cost discussion in
 realistic parameters (eff ≈ 1 for honest GLV nonces).
 
 ### Commits made
-(to be filled by the commit below)
+84a4ee3 autolab 2026-08-05: Thread 23 — GH ratio governs Phase-2 LLL; T4b and T5 corrected
