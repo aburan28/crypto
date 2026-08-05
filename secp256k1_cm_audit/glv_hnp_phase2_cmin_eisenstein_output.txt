@@ -1,0 +1,35 @@
+==============================================================================
+Thread 23e — cmin in closed form via the Eisenstein decomposition of n
+==============================================================================
+
+------------------------------------------------------------------------------
+Part 1: brute-force cmin vs closed form, all j=0 GLV group orders
+------------------------------------------------------------------------------
+12-bit: 98/98 agree
+16-bit: 848/848 agree
+
+------------------------------------------------------------------------------
+Part 2: cmin for deployed j=0 / GLV curves
+------------------------------------------------------------------------------
+curve               bits                                       cmin   cmin/sqrt(n)
+secp256k1            256     64502973549206556628585045361533709077       0.189557
+                           n = a^2-ab+b^2 with a=367917413016453100223835821029139468248, b=64502973549206556628585045361533709077
+                           attained at e*=303414439467246543595250775667605759171  (e*/K2 = 0.891655)
+                           direct check lam*e* = +-cmin (mod n): True
+BN254 (Fr)           254                        9931322734385697763       0.000000
+                           n = a^2-ab+b^2 with a=147946756881789319010696353538189108491, b=9931322734385697763
+                           attained at e*=147946756881789319000765030803803410728  (e*/K2 = 1.000000)
+                           direct check lam*e* = +-cmin (mod n): True
+BLS12-381 (Fr)       255                                          1       0.000000
+                           n = a^2-ab+b^2 with a=228988810152649578064853576960394133504, b=1
+                           attained at e*=228988810152649578064853576960394133504  (e*/K2 = 1.000000)
+                           direct check lam*e* = +-cmin (mod n): True
+
+Interpretation: the Thread-23d mechanism needs cmin < K1, and K1 at the
+information-theoretic wall is ~0.1*sqrt(n).  So a curve is anomalous only
+if cmin/sqrt(n) << 0.1.  Values of order 0.1-1.0 mean NO anomaly: the
+Phase-2 wall sits at the generic information-theoretic point.
+
+==============================================================================
+done
+==============================================================================

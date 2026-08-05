@@ -6103,3 +6103,184 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposal of the 2026-07-29 entry (log line ~6089). Priorities 1, 2, 4, 6
+are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP
+Phase 2) made measurable progress on 2026-07-29, so its proposed sub-task is the
+correct pick under protocol rule (b).
+
+Outcome: Thread 23's falsifier came back **NEGATIVE** (the reformulation buys
+nothing), but diagnosing *why* produced the substantive result of this run — a
+closed-form curve-level invariant `cmin` that predicts the K1 wall, verified
+exactly on 946 curves.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Same as 2026-07-29; sympy is a
+  separate install from fpylll, both are needed.)
+- Four new scripts in `secp256k1_cm_audit/`, each with its `_output.txt`:
+  `glv_hnp_phase2_projected.py` (23), `glv_hnp_phase2_coset_diagnostic.py` (23b),
+  `glv_hnp_phase2_cmin.py` (23c), `glv_hnp_phase2_cmin_matched.py` (23d),
+  `glv_hnp_phase2_cmin_eisenstein.py` (23e).
+- `cargo test --test curve_audit` → 5/5 pass (4.36s). ✓
+
+### Findings
+
+**23 — the projection works and buys nothing. Thread 23 falsifier: NEGATIVE.**
+Deleting column m (the orthogonal projection π along e_m) removes the trivial
+vector `n·S_D·e_m` exactly as intended: ker(π) ∩ L = n·S_D·e_m·ℤ has rank 1, so
+π(L) has rank 2m+1 and the trivial vector maps to 0. Measured sv/pv (m=12):
+
+| curve | λ* | BASE sv/pv | PROJ sv/pv |
+|---|---|---|---|
+| 8-bit/199 | 0.4673 | 0.3992 | 0.5696 |
+| 12-bit/2557 | 0.3400 | 0.3537 | 0.3732 |
+| 12-bit/2677 | 0.0699 | 0.3563 | 0.7035 |
+
+The ratio rises but **never reaches 1**: even with n·e_m gone, the planted vector
+is still not λ₁. The trivial vector was not the only shorter vector, so the
+2026-07-29 framing ("remove the trivial vector and the target becomes λ₁") was
+incomplete. And the K1 wall does not move at all — PROJ ties BASE cell-for-cell
+across K1 ∈ {2,3,4,6,8,12,16,24} on both historical curves. CVP (Babai
+nearest-plane, exact rational GS, no Kannan embedding) is equal or worse
+(4/5 vs 5/5 in two cells). **Thread 23 is CLOSED, negative.**
+
+**23b — why: the attack never needed the planted vector.**
+Two success criteria had silently diverged. The one used for every Phase-2 number
+in this log since 2026-06-15 (`glv_hnp_phase2_20bit.py:recover_d`) reads
+`d = sign·row[m] mod n` off any Kannan row. That is a legitimate attack — the
+attacker checks `d·G == Q` against the public key, ~dim scalar mults — and it is
+what the T4 numbers measure. The criterion I first wrote (STRICT) additionally
+demanded the recovered k1/k2 blocks be the planted nonce split. On 12-bit/2557,
+m=12:
+
+| K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| HIST (= 2026-07-29 T4 row, reproduced exactly) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| STRICT | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+From K1 ≥ 4 the attack succeeds on rows that are **not** the planted vector.
+Writing a reduced row with last coordinate S_KANNAN as
+`w = (Kannan row) + δ·(d-row) + Σγ_i·(k2-row_i) − Σc_i·(n·e_i)`, we get
+`w[m] = δ` and `w[i]/S_K1 ≡ k1_i + λ(k2_i − γ_i) (mod n)`. So *every* γ gives a
+row with the same δ = d — i.e. an alternative GLV split
+`k_full,i = k1_i + λk2_i = k1'_i + λγ_i` of the **same** nonce. Measured at K1=8
+on 2557: the recovered rows have γ − k2 = ±50 in 4–6 of the 12 coordinates,
+`coset formula holds = True` in every case, and |w|/|v_planted| = 0.72–0.90 —
+the alternative rows are *shorter* than the planted one. The 2-D λ-lattice
+⟨(n,0), (−λ,1)⟩ has minimum (−3, 50) for 2557: shifting k2 by 50 costs only 3 in
+k1, and 3 < K1 = 8. For 2677 the minimum is (−14, 43): a shift costs 14 > 8, no
+alternative is admissible, and the attack dies at K1 ≈ 4–6.
+
+**This resolves the original C1/C2 mystery** (2026-06-21…06-29), where six
+successive curve-level invariants failed to separate the two curves.
+
+**23c — H-cmin as stated is falsified; the mechanism is real but narrowly scoped.**
+Define the curve-level invariant
+`cmin(n,λ,K2) = min_{0<|e|≤K2} |λ·e mod n|_centered`.
+Over 20 fresh 17-bit curves (m=12, 5 seeds, real criterion):
+`Spearman(cmin, K1-wall) = +0.4708` — H-cmin predicted **negative**. But on all
+20 curves cmin ≥ 49 while the measured wall was ≤ 32, i.e. cmin > K1 everywhere:
+the mechanism is switched OFF across the entire sample, so the +0.47 is not it.
+(`Spearman(λ*, wall) = −0.0100`, consistent with 2026-07-29's falsification of λ*.)
+
+**23d — matched test: cmin predicts the wall, AUC 0.953.**
+The mechanism needs cmin < K1, which requires cmin ≪ √n (the 2-D lattice has
+covolume n, so generically cmin ~ √n). Matched 12-bit curves, m=12, 5 seeds,
+real criterion, 8 low-r vs 8 typical-r where r = cmin/√n:
+
+| group | n | λ* | cmin | r | K1 wall |
+|---|---|---|---|---|---|
+| low | 3907 | 0.0159 | 1 | 0.016 | 16 |
+| low | 2551 | 0.0196 | 1 | 0.020 | 12 |
+| low | 3847 | 0.4918 | 2 | 0.032 | 16 |
+| low | 2707 | 0.4902 | 2 | 0.038 | 12 |
+| low | 2503 | 0.4898 | 2 | 0.040 | 8, 12 |
+| low | 2557 | 0.3266 | 3 | 0.059 | 8, 12 |
+| typ | 2593 | 0.4385 | 41 | 0.805 | 8 |
+| typ | 2521 | 0.2678 | 41 | 0.817 | 6 |
+| typ | 2791 | 0.0326 | 30 | 0.568 | 8 |
+| typ | 2797 | 0.3933 | 33 | 0.624 | 6, 6 |
+| typ | 2803 | 0.1473 | 27 | 0.510 | 8 |
+| typ | 2467 | 0.0876 | 34 | 0.685 | 4 |
+| typ | 2833 | 0.4589 | 37 | 0.695 | 4 |
+
+low-r walls [16,12,16,12,8,12,8,12] median 12, mean 12.0;
+typical-r walls [8,6,8,6,6,8,4,4] median 6, mean 6.2.
+**AUC(low-r wall > typical-r wall) = 0.9531.** A curve-level invariant *does*
+separate — contradicting the 2026-07-29 remark "no curve-level invariant can".
+That remark was drawn after six specific invariants failed and after T2 tested
+the 2-D minimum μ only as the ratio ρ = μ/‖v_planted‖, which divides out the
+quantity that matters. cmin is μ's k1-*coordinate*, not its length.
+
+Distribution of r over all 98 12-bit j=0 GLV group orders: min 0.0160, median
+0.5459, max 0.9696. Empirical P(r<0.1) = 0.082 vs the area heuristic c² = 0.010 —
+low-r curves are ~8× more common than a random 2-D lattice would give, because
+L_λ is not random (see 23e).
+
+**23e — cmin in closed form: it is the Eisenstein decomposition of n. VERIFIED EXACT.**
+L_λ = {(x,y) : x ≡ λy mod n} is the ideal lattice of one of the two primes above
+n in ℤ[ω], with norm form x² − xy + y². Its minimal vectors are the six unit
+multiples of the Eisenstein integer of norm n. With n = a² − ab + b² (Cornacchia,
+polylog):
+
+> **cmin = min |x| over the associates (x,y) of a + bω, subject to
+> (i) |y| ≤ K2 = ⌊√n⌋+1 and (ii) x ≡ ±λy (mod n).**
+
+Both side conditions are essential and each cost a debugging round: (i) the
+associate with smallest |x| usually has |y| just *above* K2 and is unreachable
+(56/98 without it); (ii) n splits as π·π̄ and only one unit-orbit lies in L_λ —
+including the conjugate orbit gives 56/98 the other way. With both:
+
+| sample | agreement with brute force |
+|---|---|
+| all 12-bit j=0 GLV orders | **98/98** |
+| all 16-bit j=0 GLV orders | **848/848** |
+
+So the K1 wall is computable from n alone in polylog time — no lattice
+reduction, no signatures, no curve arithmetic.
+
+**Deployed curves** (`cmin`, `r = cmin/√n`, `e*/K2`; each verified by the direct
+check λ·e* ≡ ±cmin mod n):
+
+| curve | cmin | r | e*/K2 |
+|---|---|---|---|
+| secp256k1 | 64502973549206556628585045361533709077 | 0.1896 | 0.8917 |
+| BN254 (Fr) | 9931322734385697763 | 7.6e−20 | 1.000000 |
+| BLS12-381 (Fr) | **1** | 4e−39 | 1.000000 |
+
+secp256k1: r = 0.19, entirely generic — **no anomaly**, the Phase-2 wall sits at
+the information-theoretic point. This is a clean negative result for the paper.
+The two pairing-friendly curves are extreme outliers because their n is
+polynomially parameterised (BLS12: n = a² − a + 1 with a = x², so b = 1 exactly).
+
+**Caveat, stated explicitly:** for BN254 and BLS12-381 the minimising e* lands
+*exactly* on the boundary e* = K2 = ⌊√n⌋+1, so whether the mechanism is available
+depends on the nonce-bound convention (K2 = ⌊√n⌋+1 here). With K2 = ⌊√n⌋ the
+vector is excluded. This is **not** an attack on those curves: 23d measured a
+factor-2 shift in the K1 wall, not a break, GLV-HNP still requires biased nonces
+to begin with, and the 256-bit extrapolation from 12-bit experiments is
+conjectural.
+
+### Next step proposal
+**Thread 24 — resolve the K2-boundary sensitivity, then scale-test cmin.**
+(a) Cheap and decisive: re-run the 23d matched test with K2 = ⌊√n⌋ instead of
+⌊√n⌋+1 and see whether the low-r group's advantage survives. If the AUC collapses
+to ~0.5, the whole effect is a boundary artifact of the convention and cmin is
+not a real invariant. Expected: it survives, because the 23d low-r curves have
+e* well inside the box (e* = 49–63 vs K2 = 45–63), unlike the pairing curves.
+(b) Then check the wall really scales as cmin predicts by constructing curves
+with prescribed cmin: pick a small, solve a² − ab + b² = n for prime n, and
+measure the wall at 16 and 20 bits. Falsifier: if a constructed cmin=1 curve at
+20 bits does not wall later than a matched cmin~√n curve, the invariant does not
+scale and the 12-bit result is a small-n artifact.
+
+Secondary: the STRICT-vs-real criterion divergence means the E2/E3/E4 tables in
+`glv_hnp_phase2_projected_output.txt` understate the attack; a header note has
+been added to that script so future runs do not mix the two conventions.
+
+### Commits made

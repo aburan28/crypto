@@ -1,0 +1,39 @@
+==============================================================================
+Thread 23b — the Phase-2 attack recovers d WITHOUT recovering the nonces
+==============================================================================
+
+12-bit/2557: n=2659, lam=1755, lam*=0.3400, K2=52
+  2-D lam-lattice <(n,0),(-lam,1)> shortest vector: (-3, 50), norm 50.1
+   K1   seed  #Kan  d found  gamma==k2  max|shift|  nz  k1 in range  coset ok  |w|/|pv|
+    2     42     1      yes       True           0   0         True      True    1.0000
+    2   1234     1      yes       True           0   0         True      True    0.9491
+    2   9999     1      yes       True           0   0         True      True    0.9792
+    4     42     1      yes      False          50   1         True      True    0.9925
+    4   1234     1      yes      False          50   3         True      True    0.9049
+    4   9999     1      yes       True           0   0         True      True    0.9819
+    8     42     1      yes      False          50   6         True      True    0.8416
+    8   1234     1      yes      False          50   4         True      True    0.8428
+    8   9999     1      yes      False          50   5        False      True    0.8984
+   12     42     2      yes      False          50   4        False      True    0.8819
+   12   1234     1      yes      False          50   5         True      True    0.7230
+   12   9999     2      yes      False          50   5         True      True    0.8742
+
+12-bit/2677: n=2647, lam=185, lam*=0.0699, K2=52
+  2-D lam-lattice <(n,0),(-lam,1)> shortest vector: (-14, 43), norm 45.2
+   K1   seed  #Kan  d found  gamma==k2  max|shift|  nz  k1 in range  coset ok  |w|/|pv|
+    2     42     1      yes       True           0   0         True      True    1.0000
+    2   1234     1      yes       True           0   0         True      True    0.9476
+    2   9999     1      yes       True           0   0         True      True    0.9785
+    4     42     1      yes       True           0   0         True      True    1.0000
+    4   1234     1      yes       True           0   0         True      True    0.9571
+    4   9999     1      yes       True           0   0         True      True    0.9813
+    8     42     3       no
+    8   1234     3       no
+    8   9999     3       no
+   12     42     2       no
+   12   1234     3       no
+   12   9999     3       no
+
+==============================================================================
+done
+==============================================================================
