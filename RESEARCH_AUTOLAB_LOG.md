@@ -6270,4 +6270,4 @@ whether `λ₁(L') = min(μ, ‖pv‖)` holds at 15/16 or better across curves, 
 promote it from an observation to a stated lemma.
 
 ### Commits made
-(recorded below after commit)
+9b400f9 autolab 2026-08-05: Thread 23 — projection does not move the K1 wall; lambda_1(L')=min(mu,pv)
