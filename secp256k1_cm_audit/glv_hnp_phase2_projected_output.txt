@@ -1,0 +1,115 @@
+==============================================================================
+Thread 23 -- make the planted vector lambda_1 (GLV-HNP Phase 2)
+==============================================================================
+
+------------------------------------------------------------------------------
+A0: geometry of ORIG (dim 2m+2) vs PROJ (dim 2m+1)
+------------------------------------------------------------------------------
+ORIG always contains the trivial vector t = n*S_D*e_m (norm n*S_D),
+so lambda_1(ORIG) <= n and ||v||/lambda_1 > 1 by construction.
+PROJ quotients Z*t out: det drops by exactly n*S_D, dim by 1,
+and ||v||^2 drops by (n*S_D)^2/3.  S_D cancels from det(PROJ).
+
+curve               K1   m ||v||o/GHo ||v||p/GHp  l1(orig)=n  ||v||o/n
+8-bit/199            2   6      1.657      1.611         199     2.288
+12-bit/2557          8   8      1.709      1.676        2659     2.578
+12-bit/2677 FAIL     8  10      1.539      1.507        2647     2.804
+
+------------------------------------------------------------------------------
+A1: correctness of the two reformulations on the anchors
+------------------------------------------------------------------------------
+ORIG/PROJ = Kannan embedding, d-column kept / quotiented out.
+suffix c = centred inhomogeneous term.  CVP = Babai nearest-plane.
+
+curve               K1   m   ORIG  ORIGc   PROJ  PROJc   CVPc   CVPu
+8-bit/199            2   6    5/5    5/5    5/5    5/5    5/5    5/5
+12-bit/2557          8   8    5/5    5/5    5/5    5/5    5/5    5/5
+12-bit/2677 FAIL     8  10    0/5    5/5    0/5    5/5    4/5    0/5
+
+------------------------------------------------------------------------------
+A2: sv/pv and rank of v_planted among reduced basis vectors
+------------------------------------------------------------------------------
+sv/pv = ||shortest reduced row|| / ||v_planted||.  rank = how many
+reduced rows are strictly shorter than v_planted (0 => v is lambda_1).
+
+curve               K1  sv/pv ORIG  rk ORIG  sv/pv PROJ  rk PROJ  sv/pv PROJc  rk PROJc
+8-bit/199            2       0.543      8.4       0.790      6.8        0.906       6.0
+12-bit/2557          8       0.445     12.2       0.475     10.4        0.629       8.6
+12-bit/2677 FAIL     8       0.387     17.4       0.767     16.0        0.998       1.8
+
+------------------------------------------------------------------------------
+A3: the T4 K1 wall -- ORIG vs PROJ vs CVP (5 seeds each)
+------------------------------------------------------------------------------
+2026-07-29 T4 measured, for ORIG: 12-bit/2557 walls at K1~12-16,
+12-bit/2677 walls at K1~4-6.  Falsifier: does PROJ/CVP move it out?
+
+
+12-bit/2557   (lam* = 0.340, m = 8, n = 2659)
+K1             2     3     4     6     8    12    16    24    32    48
+ORIG         5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5   0/5   0/5
+ORIGc        5/5   5/5   5/5   5/5   5/5   5/5   4/5   0/5   0/5   0/5
+PROJ         5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5   0/5   0/5
+PROJc        5/5   5/5   5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+CVPc         5/5   5/5   5/5   5/5   5/5   4/5   5/5   1/5   0/5   0/5
+
+12-bit/2677 FAIL   (lam* = 0.070, m = 10, n = 2647)
+K1             2     3     4     6     8    12    16    24    32    48
+ORIG         5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+ORIGc        5/5   5/5   5/5   5/5   5/5   4/5   1/5   1/5   0/5   0/5
+PROJ         5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5   0/5   0/5
+PROJc        5/5   5/5   5/5   5/5   5/5   4/5   1/5   1/5   0/5   0/5
+CVPc         5/5   5/5   5/5   4/5   4/5   4/5   1/5   1/5   0/5   0/5
+
+------------------------------------------------------------------------------
+A4: Gaussian-heuristic prediction of the wall location
+------------------------------------------------------------------------------
+PROJ:  ||v||^2 ~ n^2(2m/3 + 1),  det = S_K1^m n^(m-1) S_K2^m S_KAN.
+Asymptotically ||v||/GH -> sqrt(2*pi*e/3) * sqrt(eff) = 2.38*sqrt(eff)
+with eff = K1*K2/n, so the predicted uncentred wall is
+  eff = 3/(2*pi*e)  = 0.1756
+and centring (E[x^2]: X^2/3 -> X^2/12) moves it out by 4x:
+  eff = 12/(2*pi*e) = 0.7026
+
+curve                K1     eff  ||v||/GH  PROJ obs  ||v||c/GH  PROJc obs
+12-bit/2557           2   0.039     0.873       5/5      0.530        5/5
+12-bit/2557           3   0.059     1.056       5/5      0.641        5/5
+12-bit/2557           4   0.078     1.209       5/5      0.734        5/5
+12-bit/2557           6   0.117     1.464       5/5      0.889        5/5
+12-bit/2557           8   0.156     1.676       5/5      1.018        5/5
+12-bit/2557          12   0.235     2.028       1/5      1.232        5/5
+12-bit/2557          16   0.313     2.322       0/5      1.410        5/5
+12-bit/2557          24   0.469     2.811       0/5      1.709        1/5
+12-bit/2557          32   0.626     3.218       0/5      1.954        0/5
+12-bit/2557          48   0.939     3.896       0/5      2.368        0/5
+12-bit/2677 FAIL      2   0.039     0.779       5/5      0.460        5/5
+12-bit/2677 FAIL      3   0.059     0.945       5/5      0.558        5/5
+12-bit/2677 FAIL      4   0.079     1.083       5/5      0.640        5/5
+12-bit/2677 FAIL      6   0.118     1.314       0/5      0.777        5/5
+12-bit/2677 FAIL      8   0.157     1.507       0/5      0.891        5/5
+12-bit/2677 FAIL     12   0.236     1.828       0/5      1.081        4/5
+12-bit/2677 FAIL     16   0.314     2.096       0/5      1.239        1/5
+12-bit/2677 FAIL     24   0.471     2.543       0/5      1.503        1/5
+12-bit/2677 FAIL     32   0.629     2.917       0/5      1.726        0/5
+12-bit/2677 FAIL     48   0.943     3.537       0/5      2.091        0/5
+
+------------------------------------------------------------------------------
+A5: fresh 17-bit curves -- the eff ceiling, uncentred vs centred
+------------------------------------------------------------------------------
+2026-07-29 T3 measured (uncentred, ORIG): eff 0.05 -> 19/20 curves
+recovering, eff 0.15 -> 3/20, eff 0.25 -> 0/20.  If centring is the
+real variable the ceiling should move out by ~4x in eff.
+
+Searching j=0 GLV curves with p in [2^16, 2^17) ...
+Found 10 curves.  m = 12, 5 seeds each.
+
+   eff   PROJ (uncentred)   PROJc (centred)   lam* of PROJc wins
+  0.05               9/10             10/10       [0.027, 0.482]
+  0.15               2/10              6/10       [0.054, 0.482]
+  0.25               0/10              3/10       [0.211, 0.482]
+  0.40               0/10              0/10                    -
+  0.60               0/10              0/10                    -
+  0.80               0/10              0/10                    -
+
+==============================================================================
+done
+==============================================================================

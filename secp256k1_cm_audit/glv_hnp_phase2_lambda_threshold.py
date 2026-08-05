@@ -410,6 +410,15 @@ def search_curves(lo, hi, per_bin=2, nbins=10, max_primes=100000):
 
 
 # ===========================================================================
+# Everything above is a helper library; everything below is the T1-T5 suite.
+# Importing this file (e.g. from glv_hnp_phase2_projected.py) gives the helpers
+# without running the suite.  Running it directly is unchanged.
+# ===========================================================================
+
+if __name__ != "__main__":
+    raise SystemExit(0)
+
+# ===========================================================================
 # EXPERIMENT T1 — representation invariance
 # ===========================================================================
 

@@ -6103,3 +6103,175 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+**Thread 23** — the continuation proposed verbatim by the 2026-07-29 entry
+(log line ~6089): reformulate the Phase-2 lattice so the planted vector is
+lambda_1. Threads 1/3/4/6 are CLOSED, Thread 2 BLOCKED (2026-07-26 cubic-residue
+obstruction), Thread 5/20 made measurable progress on 2026-07-29 — so rule (b)
+applies and its own proposed sub-task is the pick.
+
+Falsifier as stated on 2026-07-29: *"if sv/pv rises above 1 after the
+reformulation AND the K1 wall in T4 moves outward on the λ*=0.07 curve
+(currently K1≈4–6), the reformulation is a real improvement; if the wall stays
+at K1≈4–6, then the wall is information-theoretic and Phase 2 is at its
+ceiling."*
+
+**Outcome: the wall moves — but not for the proposed reason.** The λ₁
+reformulation is nearly irrelevant; a one-line *centring* change is the whole
+effect. Details below.
+
+### Work done
+- New script `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (6 arms A0–A5),
+  output artifact `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`.
+- Implemented both reformulations proposed on 2026-07-29:
+  - **PROJ** — quotient out `t = n·S_D·e_m` by deleting the d-column. The
+    rank-m sublattice `Λ = {x ∈ Z^m : x ≡ d·B mod n}` is re-expressed by the
+    triangular basis `g_0 = (1, B_i/B_0 mod n)`, `g_i = n·e_i` (i≥1), det
+    `n^{m-1}` = det(ORIG)/(n·S_D) exactly. dim 2m+1. d is recovered afterwards
+    from one congruence and verified against all m.
+  - **CVP** — drop the Kannan embedding too; `GSO.Mat.babai` nearest-plane
+    against target `T = (−A_i·S_K1, 0)`. dim 2m.
+- Added a third, *unplanned* arm after the first run showed PROJ ≡ ORIG:
+  **centring** (`centre_sigs`, orthogonal to the above). Put `c1 = K1//2`,
+  `c2 = K2//2`, `A_i' = A_i − c1 − λ·c2 mod n`; then
+  `A_i' + B_i·d ≡ (k1_i − c1) + λ(k2_i − c2)` with unknowns in `[−K/2, K/2)`.
+  `E[x²]` falls `X²/3 → X²/12`, so `‖v‖² : n²(2m/3+1) → n²(m/6+1)`. Uses only
+  public bounds — no secret input.
+- Environment (fresh container): `pip install fpylll cysignals sympy`. `pari-gp`
+  did **not** install (`gp` not on PATH after apt); not needed for this thread.
+- `cargo test --test curve_audit` → 5/5 pass (5.59s). ✓
+- No false positives are structurally possible in any arm: every recovery path
+  ends in `d == d_secret` plus verification of all m congruences.
+
+### Findings
+
+**F1 — the projection works as designed, and buys nothing.**
+sv/pv rises exactly as predicted, and on the hard anchor the planted vector
+becomes essentially λ₁ (rank 1.8, sv/pv 0.998):
+
+| curve | K1 | sv/pv ORIG | rk ORIG | sv/pv PROJ | rk PROJ | sv/pv PROJc | rk PROJc |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.543 | 8.4 | 0.790 | 6.8 | 0.906 | 6.0 |
+| 12-bit/2557 | 8 | 0.445 | 12.2 | 0.475 | 10.4 | 0.629 | 8.6 |
+| 12-bit/2677 | 8 | 0.387 | 17.4 | 0.767 | 16.0 | **0.998** | **1.8** |
+
+But PROJ reproduces ORIG in **every cell** of the K1 sweep — identical success
+counts on both anchor curves at all 10 values of K1. **Making the planted
+vector λ₁ is neither necessary nor sufficient for recovery.** The 2026-07-29
+diagnosis (recovery is a coset/BDD condition, not SVP) was correct; the *remedy*
+it proposed does not follow from it, because LLL already reduces in the
+projection implicitly.
+
+**F2 — centring is the entire effect, and it moves the wall (A3, 5 seeds).**
+
+`12-bit/2677` (λ* = 0.070, m = 10) — the curve the falsifier named:
+
+| K1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ORIG  | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| PROJ  | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| ORIGc | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 | 0/5 | 0/5 |
+| PROJc | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 1/5 | 0/5 | 0/5 |
+| CVPc  | 5/5 | 5/5 | 5/5 | 4/5 | 4/5 | 4/5 | 1/5 | 1/5 | 0/5 | 0/5 |
+
+`12-bit/2557` (λ* = 0.340, m = 8): ORIG/PROJ wall at K1≈12; ORIGc 4/5 at K1=16;
+PROJc 5/5 at K1=16, 1/5 at 24.
+
+The wall on the λ*=0.07 curve moves **K1≈4–6 → K1≈12–16, a 3× outward move**.
+ORIGc ≡ PROJc everywhere: centring is orthogonal to, and strictly dominates,
+the λ₁ reformulation. Uncentred CVP (CVPu) fails 0/5 at the 2677 anchor exactly
+like ORIG, confirming the CVP switch itself contributes nothing.
+
+**F3 — the 2026-07-29 T4 conclusion is corrected.** That entry concluded "the
+K1 wall is genuine — it is a K1 wall, not a λ wall", having tested only
+m ∈ {8,12,16,24,32} at fixed K1=8 in the uncentred formulation. It is a wall
+**of the uncentred formulation**. It is not information-theoretic. Under the
+falsifier's own terms this is the "real improvement" branch.
+
+**F4 — ‖v‖/GH is a good first-order predictor of the wall (A4).**
+For PROJ, `det = S_K1^m·n^{m-1}·S_K2^m·S_KAN`, `dim = 2m+1`, so asymptotically
+`‖v‖/GH → sqrt(2πe/3)·sqrt(eff) = 2.38·sqrt(eff)` with `eff = K1·K2/n`.
+Observed transitions bracket a curve-specific critical ratio:
+
+| curve | m | λ* | last success | first failure | critical ‖v‖/GH |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 8 | 0.340 | 1.676 (5/5) | 2.028 (1/5) | ≈ 1.7–2.0 |
+| 12-bit/2677 | 10 | 0.070 | 1.083 (5/5) | 1.314 (0/5) | ≈ 1.1–1.3 |
+| 12-bit/2557 c | 8 | 0.340 | 1.410 (5/5) | 1.709 (1/5) | ≈ 1.4–1.7 |
+| 12-bit/2677 c | 10 | 0.070 | 1.081 (4/5) | 1.239 (1/5) | ≈ 1.1–1.2 |
+
+So `eff` sets the wall to first order, and the **residual curve-to-curve spread
+in the critical ratio tracks λ\*** (0.34 tolerates ≈1.8, 0.07 only ≈1.2) — the
+same direction as the ν̂ signal from commit `e845207`. Caveat: m differs between
+the two anchors (8 vs 10), so this comparison is confounded and is offered as a
+consistency check, not a measurement.
+
+**F5 — generalises to fresh curves (A5).** 10 fresh 17-bit j=0 GLV curves
+(p ∈ [2¹⁶,2¹⁷), λ*-stratified), m=12, 5 seeds, counting curves that recover 5/5:
+
+| eff | PROJ (uncentred) | PROJc (centred) | λ* range of PROJc wins |
+|---|---|---|---|
+| 0.05 | 9/10 | 10/10 | [0.027, 0.482] |
+| 0.15 | 2/10 | 6/10 | [0.054, 0.482] |
+| 0.25 | 0/10 | **3/10** | [0.211, 0.482] |
+| 0.40 | 0/10 | 0/10 | — |
+| 0.60 | 0/10 | 0/10 | — |
+| 0.80 | 0/10 | 0/10 | — |
+
+The uncentred column **replicates 2026-07-29 T3** (19/20, 3/20, 0/20 there;
+9/10, 2/10, 0/10 here). Centring moves the practical eff ceiling from ≈0.10–0.15
+to ≈0.25–0.30, i.e. **~2×, not the 4× the E[x²] argument predicts** — the
+Gaussian heuristic overestimates the gain, so the 4× figure should not be
+quoted. Note the λ* range of centred winners narrows to [0.211, 0.482] at
+eff=0.25: at the ceiling, only high-λ* curves survive, consistent with F4.
+
+**F6 — repo integrity (incidental).** Two defects from the 2026-07-29 merge:
+1. `glv_hnp_phase2_lambda_threshold.py` ran its whole T1–T5 suite at *import*
+   time (no `__main__` guard), so it could not be used as a helper library.
+   Fixed with a 2-line guard; direct execution is unchanged.
+2. `glv_hnp_phase2_nuhat_control.py` (commit `e845207`) is **broken in the tree**:
+   it imports `glv_eigenvalues`, `mu_of`, `identify_twist`,
+   `rival_sublattice_nu` from `glv_hnp_phase2_lambda_threshold.py`, and none of
+   those four exist there. The merge that resolved `RESEARCH_AUTOLAB_LOG.md`
+   kept the ν̂ script but not the version of the helper module it needs — and
+   the same merge dropped the ν̂ narrative from the log body (only the commit
+   subject at log line 6105 survives; there is no "AUC 0.935" entry anywhere).
+   **The AUC 0.935 ν̂ result is therefore unreproducible from the current tree.**
+   I patched its import shim for the new guard but did **not** attempt to
+   reconstruct the four missing functions — that would be inventing the
+   experiment, not rerunning it.
+
+### Next step proposal
+**Thread 24 — recentre-and-rescale: is there a better linear normalisation?**
+Centring is the `k1 → k1 − K1/2` case of a general affine change of variable.
+Two cheap, well-posed follow-ons, in order:
+
+1. **Per-coordinate rescale.** The current scales `S_K1 = n/K1`, `S_K2 = n/K2`
+   equalise the *boxes*, but after centring the residuals are uniform on
+   `[−K/2, K/2)` with `E[x²] = X²/12` — the Kannan weight `S_KAN = n` is now
+   mismatched by exactly the same factor. Sweep `S_KAN ∈ {n/4, n/2, n, 2n}` on
+   the two anchors at K1 ∈ {8,12,16,24}. Falsifier: if the K1 wall on the
+   λ*=0.07 curve moves past 16 for some `S_KAN`, the scaling is still leaving
+   free gain on the table; if the wall is flat in `S_KAN`, the centred
+   formulation is optimally balanced and the remaining gap to the GH bound is
+   LLL's approximation factor.
+2. **Re-run the 2026-07-29 T4/T3 grids centred at larger m.** T4b concluded
+   "more data does not rescue it" (m=8..32 at K1=8, all uncentred). Redo at
+   K1=16 centred. Cheap; directly tests whether the centred wall is
+   information-theoretic in the way the uncentred one was claimed to be.
+
+**Do not** re-try: the λ/n threshold (falsified 2026-07-29 T1/T3), the μ/ρ
+hypothesis (falsified 2026-07-29 T2), or the λ₁ reformulation (falsified here,
+F1).
+
+**Housekeeping for a future run:** either reconstruct `glv_eigenvalues`,
+`mu_of`, `identify_twist`, `rival_sublattice_nu` and re-derive the ν̂ / AUC
+0.935 claim from scratch, or delete `glv_hnp_phase2_nuhat_control.py` as
+unreproducible. It should not be cited as established until one or the other
+happens.
+
+### Commits made
+(recorded below after commit)

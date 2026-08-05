@@ -57,7 +57,10 @@ import importlib.util
 _spec = importlib.util.spec_from_file_location(
     "_t20a", __file__.rsplit("/", 1)[0] + "/glv_hnp_phase2_lambda_threshold.py")
 _t20a = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_t20a)
+try:
+    _spec.loader.exec_module(_t20a)   # helpers only; the T1-T5 suite self-skips
+except SystemExit:
+    pass
 
 eisenstein_decompose = _t20a.eisenstein_decompose
 j0_traces = _t20a.j0_traces
