@@ -6322,3 +6322,5 @@ K1 ≤ 32) and bears on the GLV-HNP side-direction only. It does **not** touch
 the main theorem of `PAPER_STRUCTURAL_COMPLETENESS.md`.
 
 ### Commits made
+
+6f2f852 autolab 2026-08-05: Thread 23 — projected-CVP reformulation; recentring moves the K1 wall 4x
