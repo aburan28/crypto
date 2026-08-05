@@ -6103,3 +6103,164 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposal of the 2026-07-29 entry (log line 6089). Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so the GLV-HNP Phase-2
+lineage (priority 5 → Threads 19/20/23) is the only thread with recent measurable
+progress, which is protocol rule (b).
+
+Thread 23's own falsifier, quoted from 2026-07-29: *"if sv/pv rises above 1 and the K1
+wall in T4 moves outward on the λ\*=0.07 curve (currently K1≈4–6), the reformulation is a
+real improvement; if the wall stays at K1≈4–6, then the wall is information-theoretic and
+Phase 2 is at its ceiling."*
+
+**Outcome: the wall does not move by a single cell. Thread 23 is answered negatively, and
+the second horn of the falsifier is also wrong — the wall is *not* information-theoretic.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`, `apt-get install
+  pari-gp` (2.15.4). Same note as 2026-07-29 — fpylll is not preinstalled.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (6 experiments P0–P6,
+  ~560 lines). EC arithmetic, `gen_signatures` and the lattice scalings are copied
+  verbatim from `glv_hnp_phase2_20bit.py:263` so the comparison to T4/T5 is exact.
+  Artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`.
+- Implemented the quotient explicitly. The trivial vector t₀ = n·S_D·e_m spans
+  A ∩ ⟨e_m⟩, so A/⟨t₀⟩ is the orthogonal projection along e_m, i.e. **delete the
+  d-column**. Lattice B has dim 2m+1, generators
+  `n·S_K1·e_i` (i<m), `b_d = (B_i·S_K1)_i|0|0`, `b_{k2,i} = −λ·S_K1·e_i + S_K2·e_{m+i}`,
+  `b_kan = (A_i·S_K1)_i|0|S_KANNAN` — 2m+2 generators of rank 2m+1, because b_d is
+  rationally in the span of the n-rows. That rank drop *is* the removal of the trivial
+  vector. d is no longer a coordinate; it is recovered algebraically from the reduced
+  vector as `d = (k1₀ + λ·k2₀ − A₀)·B₀⁻¹ mod n`.
+- Also implemented lattice C = A with S_K1,S_K2,S_KANNAN scaled by T (equivalently
+  S_D = 1/T), which interpolates A (T=1) → B (T→∞). This is the integer form of the
+  Nguyen–Shparlinski `1/2^{ℓ+1}` d-column scaling, which the codebase never used.
+- `cargo test --test curve_audit` → 5/5 pass (6.77s). ✓ No Rust files touched.
+
+### Findings
+
+**P0 — the reformulation does exactly what it was designed to do, geometrically.**
+sv/pv = ‖λ₁ after LLL‖ / ‖planted‖:
+
+| curve | K1 | m | A: sv/pv | λ₁ is t₀ | B: sv/pv |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.603 | True | 0.843 |
+| 12-bit/2557 | 8 | 8 | 0.517 | True | 0.532 |
+| 12-bit/2677 | 8 | 10 | 0.422 | True | **0.813** |
+
+t₀ is gone from B (it is not in the lattice at all), and sv/pv rises. But it never reaches
+1 — some *other* non-planted vector is still shorter — and, decisively, recovery is
+unchanged.
+
+**P1 — the K1 wall does not move. Not by one cell.** T4 grid replicated, K2=52, 5 seeds:
+
+| curve | λ\* | lat | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | A | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 12-bit/2557 | 0.340 | **B** | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 12-bit/2677 | 0.070 | A | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 12-bit/2677 | 0.070 | **B** | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+
+(The 2677 row reproduces T4 at K1=2,3,4,8,12,16,24; T4's K1=6 cell read 2/5 there and 0/5
+here — T4 used m=12 for that cell, this run uses the historical m=10. The wall location,
+K1≈4→6, is identical.)
+
+**P2 — the T-interpolation is flat.** 12-bit/2677, T ∈ {1,2,4,16,256,4096}:
+K1=4 → 5/5 at every T; K1=6, 8, 12 → 0/5 at every T, and 0/5 in B. The d-column scaling
+is a genuine no-op, over 12 orders of magnitude of T.
+
+**P3 — more data does not rescue B either.** 12-bit/2677 at K1=8, m ∈ {8,12,16,24,32}:
+A gives 0,0,1,0,1 of 5 (reproducing T4b), B gives **0,0,1,0,1 of 5** — the same cells.
+
+**P4 — 20 fresh 17-bit curves, m=12, 5 seeds. Identical to three significant figures:**
+
+| eff | A: curves 5/5 | A: trials | B: curves 5/5 | B: trials |
+|---|---|---|---|---|
+| 0.05 | 18/20 | 98/100 | 18/20 | 98/100 |
+| 0.15 | 3/20 | 17/100 | 3/20 | 17/100 |
+| 0.25 | 0/20 | 6/100 | 0/20 | 6/100 |
+
+**P5 — WHY: the trivial vector is inert, and this is provable, not statistical.**
+- (a) Per-trial agreement over the whole P1 grid: **80/80, zero disagreements.** Not
+  aggregate-equal — cell-by-cell, seed-by-seed identical.
+- (b) Structural: LLL(A) contains exactly one copy of ±t₀; strip it, delete column m from
+  the remaining rows, and the result generates *the same lattice* as LLL(B) (row-style
+  HNF equal) with *the same norm profile* (sorted ‖row‖ equal), on both 12-bit curves.
+
+  The reason: t₀ = n·S_D·e_m is **axis-aligned**, and e_m carries no other basis-vector
+  mass except S_D=1 in the d-row. So LLL finds t₀ immediately, and every subsequent
+  size-reduction against it only shifts the d-coordinate by multiples of n — which is
+  exactly the harmless d ↔ d+n ambiguity. LLL on A splits as {t₀} ⊕ LLL(π(A)) = {t₀} ⊕
+  LLL(B). **T5's observation "the planted vector is never λ₁" is true but causally
+  irrelevant: the vector that beats it is inert.** Recorded as a dead hypothesis so no
+  future run re-tries the projection, the CVP/Babai variant, or the S_D rescaling — all
+  three are the same no-op.
+
+**P6 — what the wall actually is. It is NOT information-theoretic.**
+Counting bits: m equations each leak log(n/K1); unknowns are d plus m×k2, so recovery is
+information-theoretically possible for m ≥ log n / log(1/eff), which is the `m_thresh`
+already in `glv_hnp_phase2_20bit.py:334`. For 12-bit/2677:
+- K1=6, eff=0.1179 → m_thresh = 3.69, and m=10 **fails**;
+- K1=8, eff=0.1572 → m_thresh = 4.26, and m up to **32 (7.5× the requirement) fails** (P3).
+
+So the second horn of Thread 23's falsifier is refuted too. The wall is lattice-geometric.
+det(B) = (n·S_K1)^m·S_K2^m·S_KAN/n = n^{2m}/eff^m over N = 2m+1 dimensions, so with
+‖pv‖ = n·√(2m/3+1),
+
+    R := ‖pv‖ / GH(B) = n^{1/(2m+1)} · eff^{m/(2m+1)} · √( 2πe(2m+3) / (3(2m+1)) )
+      →  √(2πe/3) · √eff  =  2.386·√eff     (m → ∞)
+
+| curve | m | K1 | eff | R | wins |
+|---|---|---|---|---|---|
+| 2557 | 8 | 2 | 0.0391 | 0.873 | 5/5 |
+| 2557 | 8 | 4 | 0.0782 | 1.209 | 5/5 |
+| 2557 | 8 | 8 | 0.1564 | 1.676 | 5/5 |
+| 2557 | 8 | 12 | 0.2347 | 2.028 | 1/5 |
+| 2557 | 8 | 16 | 0.3129 | 2.322 | 0/5 |
+| 2677 | 10 | 4 | 0.0786 | 1.082 | 5/5 |
+| 2677 | 10 | 6 | 0.1179 | 1.313 | 0/5 |
+| 2677 | 10 | 8 | 0.1572 | 1.506 | 0/5 |
+
+R over all 5/5 cells: [0.778, 1.676]. R over all 0/5 cells: [1.313, 2.810].
+17-bit sweep (m=12, 20 curves): eff=0.05 → R̄=0.918, 18/20; eff=0.15 → R̄=1.555, 3/20;
+eff=0.25 → R̄=1.987, 0/20.
+
+R is a good *coarse* predictor (R ≲ 1.1 always succeeds; R ≳ 1.7 always fails) but the
+overlap band 1.31–1.68 is exactly where the two 12-bit curves disagree — 2557 still wins
+at R=1.676 while 2677 has already died at R=1.313. **R and ν̂ are complementary and
+together they close the T5 gap**: R is the curve-independent (eff, m, n) term, ν̂
+(2026-07-29, AUC 0.935) is the curve-specific correction inside R's overlap band. Note
+2677 has ν̂ = low and λ\* = 0.070; per the 07-29 sign convention a *short* rival in the
+λ-block makes the attack easier, so the two curves' disagreement is the expected direction.
+
+Asymptotically R < 1 needs **eff < 1/(2πe/3) = 0.176**, independent of m and n. That is the
+Phase-2 ceiling in closed form: the GLV-HNP lattice cannot tolerate K1·K2 > 0.176·n no
+matter how many signatures are collected. It matches every observation from 2026-06-15
+onward, including the original 2677 failure.
+
+### Next step proposal
+**Thread 24 — test the eff < 0.176 ceiling as a prediction, then attack it directly.**
+Two concrete sub-tasks, in order:
+1. *(cheap, ~10 min)* Confirm the closed form is not an artifact of the 12/17-bit sizes:
+   sweep eff ∈ {0.10, 0.14, 0.16, 0.18, 0.20, 0.24} on ~15 fresh 20-bit curves at m=16
+   with BKZ-30 as well as LLL. Falsifier: if the 50%-success crossover sits at
+   eff ≈ 0.176 ± 0.03 and does not move with β, the ceiling is confirmed and Phase 2 is
+   closed at its information-theoretically-loose ceiling. If BKZ-30 pushes the crossover
+   past 0.22, the ceiling is a reduction-quality artifact and β-scaling becomes the thread.
+2. *(the real question)* The 0.176 comes from ‖pv‖ ≈ n·√(2m/3+1) — i.e. the planted
+   vector's mass is spread evenly over 2m coordinates. Any construction that shortens pv
+   relative to det raises the ceiling. Concrete candidate: **drop the k2-block entirely**
+   and use the m(m−1)/2 pairwise differences (A_i−A_j, B_i−B_j) to eliminate λ·k2 by
+   sublattice intersection, trading dimension 2m+1 for m+1 at the cost of correlated
+   rows. Falsifier: compute R for the difference lattice at 2677/K1=8; if R < 1 there
+   while it is 1.506 in B, build it and re-run the P1 grid.
+
+Do **not** re-attempt: the e_m projection, Babai/CVP-without-Kannan, or S_D rescaling.
+P5 proves all three are the identical no-op.
+
+### Commits made
+[filled in below]

@@ -1,0 +1,154 @@
+==============================================================================
+Thread 23 — projecting out the trivial vector in the GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P0: is the planted vector lambda_1 after the projection?
+------------------------------------------------------------------------------
+sv/pv = ||shortest vector after LLL|| / ||planted vector||.
+T5 (2026-07-29) measured sv/pv in [0.34, 0.61] in lattice A, with the
+shortest vector always the trivial n*S_D*e_m.  A value >= 1 means the
+planted vector is (at least) as short as anything LLL found.
+
+curve           K1   m |  A: sv/pv  triv  ok |  B: sv/pv  ok
+------------------------------------------------------------------------------
+8-bit/199        2   6 |     0.603  True True |     0.843 True
+12-bit/2557      8   8 |     0.517  True True |     0.532 True
+12-bit/2677      8  10 |     0.422  True False |     0.813 False
+
+------------------------------------------------------------------------------
+EXP P1: T4 grid replication (2026-07-29) — does the K1 wall move?
+------------------------------------------------------------------------------
+Same setup as T4: K2 = isqrt(n)+1 = 52, 5 seeds, m as in HIST.
+T4 baseline (lattice A):
+  12-bit/2557 (lam*=0.340): 5 5 5 5 5 4 1 0  for K1 = 2 3 4 6 8 12 16 24
+  12-bit/2677 (lam*=0.070): 5 5 5 2 0 0 0 0
+
+12-bit/2557  (lam*=0.340, m=8)
+   lattice A:  K1=  2:5/5   3:5/5   4:5/5   6:5/5   8:5/5  12:1/5  16:0/5  24:0/5
+   lattice B:  K1=  2:5/5   3:5/5   4:5/5   6:5/5   8:5/5  12:1/5  16:0/5  24:0/5
+
+12-bit/2677  (lam*=0.070, m=10)
+   lattice A:  K1=  2:5/5   3:5/5   4:5/5   6:0/5   8:0/5  12:0/5  16:0/5  24:0/5
+   lattice B:  K1=  2:5/5   3:5/5   4:5/5   6:0/5   8:0/5  12:0/5  16:0/5  24:0/5
+
+------------------------------------------------------------------------------
+EXP P2: T-interpolation on the 12-bit/2677 wall (lattice C = A scaled)
+------------------------------------------------------------------------------
+Lattice A with S_K1,S_K2,S_KANNAN multiplied by T (i.e. S_D = 1/T).
+T -> infinity is lattice B.  K1 = 6 and 8 straddle the T4 wall.
+
+ K1 |     T=1     T=2     T=4    T=16   T=256  T=4096 |    B
+------------------------------------------------------------------------------
+  4 |     5/5     5/5     5/5     5/5     5/5     5/5 |  5/5
+  6 |     0/5     0/5     0/5     0/5     0/5     0/5 |  0/5
+  8 |     0/5     0/5     0/5     0/5     0/5     0/5 |  0/5
+ 12 |     0/5     0/5     0/5     0/5     0/5     0/5 |  0/5
+
+------------------------------------------------------------------------------
+EXP P3: does more data rescue lattice B at the wall?  (T4b analogue)
+------------------------------------------------------------------------------
+2026-07-29 T4b: lattice A at K1=8 on 12-bit/2677 gave 0,0,1,0,1 of 5
+for m = 8,12,16,24,32 — more signatures did not help.
+
+  m |     A     B
+------------------------------------------------------------------------------
+  8 |   0/5   0/5
+ 12 |   0/5   0/5
+ 16 |   1/5   1/5
+ 24 |   0/5   0/5
+ 32 |   1/5   1/5
+
+------------------------------------------------------------------------------
+EXP P4: fresh 17-bit curve sweep, A vs B at the hard efficiencies
+------------------------------------------------------------------------------
+T3 (2026-07-29) baseline on 20 fresh 17-bit curves, m=12, 5 seeds:
+  eff=0.05 -> 19/20 curves recover 5/5;  eff=0.15 -> 3/20;  eff=0.25 -> 0/20
+If B is a real improvement the eff=0.15 and 0.25 columns must rise.
+
+collected 20 fresh 17-bit curves (lam* in [0.0068, 0.4456])
+
+   eff |  A: curves 5/5   A: trials |  B: curves 5/5   B: trials
+------------------------------------------------------------------------------
+  0.05 |          18/20      98/100 |          18/20      98/100
+  0.15 |           3/20      17/100 |           3/20      17/100
+  0.25 |           0/20       6/100 |           0/20       6/100
+
+------------------------------------------------------------------------------
+EXP P5: WHY is B identical to A?  The trivial vector is inert.
+------------------------------------------------------------------------------
+Claim: t0 = n*S_D*e_m is axis-aligned, so LLL splits A as {t0} + LLL(B).
+(a) per-trial agreement over the whole P1 grid;
+(b) structural: strip t0 from LLL(A), delete column m, compare the
+    lattice generated with LLL(B) via row-style Hermite normal form.
+
+(a) per-trial: 80 agree, 0 disagree (100.0% identical)
+
+(b) curve           K1 | t0 in LLL(A)  HNF equal  norm profile equal
+    12-bit/2557      8 |         True       True                True
+    12-bit/2677      8 |         True       True                True
+
+------------------------------------------------------------------------------
+EXP P6: what DOES set the wall?  Gaussian-heuristic ratio of lattice B.
+------------------------------------------------------------------------------
+det(B) = (n*S_K1)^m * S_K2^m * S_KAN / n = n^(2m) / eff^m,  N = 2m+1
+GH(B)  = sqrt(N/(2*pi*e)) * det^(1/N)
+||pv|| = n * sqrt(2m/3 + 1)   (k1,k2 uniform; d is gone in B)
+R = ||pv|| / GH(B).  R < 1 => planted vector is below the heuristic
+lambda_1 and unique-SVP/BDD is plausible; R >> 1 => it is not.
+
+curve            m  K1     eff       R   wins
+------------------------------------------------------------------------------
+12-bit/2557      8   2  0.0391   0.873    5/5
+12-bit/2557      8   3  0.0587   1.056    5/5
+12-bit/2557      8   4  0.0782   1.209    5/5
+12-bit/2557      8   6  0.1173   1.463    5/5
+12-bit/2557      8   8  0.1564   1.676    5/5
+12-bit/2557      8  12  0.2347   2.028    1/5
+12-bit/2557      8  16  0.3129   2.322    0/5
+12-bit/2557      8  24  0.4693   2.810    0/5
+12-bit/2677     10   2  0.0393   0.778    5/5
+12-bit/2677     10   3  0.0589   0.944    5/5
+12-bit/2677     10   4  0.0786   1.082    5/5
+12-bit/2677     10   6  0.1179   1.313    0/5
+12-bit/2677     10   8  0.1572   1.506    0/5
+12-bit/2677     10  12  0.2357   1.826    0/5
+12-bit/2677     10  16  0.3143   2.094    0/5
+12-bit/2677     10  24  0.4715   2.541    0/5
+
+R over 5/5 cells: [0.778, 1.676]  (n=8)
+R over 0/5 cells: [1.313, 2.810]  (n=7)
+
+17-bit sweep, same statistic (m=12, 20 curves):
+   eff  R (mean)  curves 5/5
+  0.05     0.918       18/20
+  0.15     1.555        3/20
+  0.25     1.987        0/20
+
+==============================================================================
+SUMMARY
+==============================================================================
+P0 8-bit/199      sv/pv  A=0.603 (trivial=True)  B=0.843
+P0 12-bit/2557    sv/pv  A=0.517 (trivial=True)  B=0.532
+P0 12-bit/2677    sv/pv  A=0.422 (trivial=True)  B=0.813
+P1 12-bit/2557    A: 2:5 3:5 4:5 6:5 8:5 12:1 16:0 24:0
+P1 12-bit/2557    B: 2:5 3:5 4:5 6:5 8:5 12:1 16:0 24:0
+P1 12-bit/2677    A: 2:5 3:5 4:5 6:0 8:0 12:0 16:0 24:0
+P1 12-bit/2677    B: 2:5 3:5 4:5 6:0 8:0 12:0 16:0 24:0
+P2 K1=4   T=1,2,4,16,256,4096 -> [5, 5, 5, 5, 5, 5]   B -> 5
+P2 K1=6   T=1,2,4,16,256,4096 -> [0, 0, 0, 0, 0, 0]   B -> 0
+P2 K1=8   T=1,2,4,16,256,4096 -> [0, 0, 0, 0, 0, 0]   B -> 0
+P2 K1=12  T=1,2,4,16,256,4096 -> [0, 0, 0, 0, 0, 0]   B -> 0
+P3 m=8   A=0/5  B=0/5
+P3 m=12  A=0/5  B=0/5
+P3 m=16  A=1/5  B=1/5
+P3 m=24  A=0/5  B=0/5
+P3 m=32  A=1/5  B=1/5
+P4 eff=0.05 A=18/20 curves, 98/100 trials   B=18/20 curves, 98/100 trials
+P4 eff=0.15 A=3/20 curves, 17/100 trials   B=3/20 curves, 17/100 trials
+P4 eff=0.25 A=0/20 curves, 6/100 trials   B=0/20 curves, 6/100 trials
+P5 per-trial agreement A vs B: 80/80
+P5 12-bit/2557    unique t0=True  HNF(proj LLL(A))==HNF(LLL(B)): True  norms equal: True
+P5 12-bit/2677    unique t0=True  HNF(proj LLL(A))==HNF(LLL(B)): True  norms equal: True
+P6 R(5/5 cells) in [0.778, 1.676]; R(0/5 cells) in [1.313, 2.810]
+==============================================================================
