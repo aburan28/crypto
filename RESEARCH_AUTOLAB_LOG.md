@@ -6304,3 +6304,8 @@ and V2-babai agree on 24/24 cells and V2-exact moves one.
 ### Commits made
 
 3ef0fd1 autolab 2026-08-05: Thread 23 — projected/CVP lattice buys nothing; wall is BDD-bound
+
+Pushed to branch `claude/zen-pascal-lnjgww`, not `main` — this session's git policy
+pins development to that branch. Future runs: if `git log main` does not show these
+commits, check `origin/claude/zen-pascal-lnjgww` (and any open PR) before assuming
+the work is missing.
