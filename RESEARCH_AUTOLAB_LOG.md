@@ -6316,4 +6316,4 @@ an attack on any deployed signer.
 
 ### Commits made
 
-(to be filled by the commit below)
+868ff0a autolab 2026-08-05: Thread 23 falsified — recovery is a coset problem, not SVP
