@@ -6103,3 +6103,160 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.**
+This was the explicit next-step proposal of the 2026-07-29 entry, with a stated
+falsifier. Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed
+2026-07-21; priority 5 (GLV-HNP Phase 2) made measurable progress 2026-07-29, so its
+proposed sub-task is the correct pick under protocol rule (b). Last run was 7 days ago.
+
+**Headline: the reformulation is a NULL RESULT — the falsifier resolves against it.**
+The K1 wall does not move by a single cell. Per the 2026-07-29 falsifier's own wording,
+"the wall is information-theoretic and Phase 2 is at its ceiling."
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. `apt-get install pari-gp` FAILS in this
+  image (stale `libegl-mesa0` 404 from archive.ubuntu.com); not needed for this thread,
+  but note for future PARI work: run `apt-get update` first.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (8 experiments P0–P7, 660 lines)
+  + artifact `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (211 lines).
+  Signature generation and scaling copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:230` / `:254` so the comparison to T4/T5 is exact.
+- `cargo test --test curve_audit` → 5/5 pass (7.03 s). ✓
+
+**Construction of the quotient lattice L̄ = L / ⟨n·S_D·e_m⟩.**
+The kernel of "delete coordinate m" on L is exactly Z·(n·S_D·e_m) (a lattice vector
+supported only on column m must be a multiple of it), so rank(L̄) = 2m+1. The naive
+generating set {n·S_K1·e_i} ∪ {B_i·S_K1} is *not* a basis — it has index B_0. Fix:
+normalise B'_i = B_0⁻¹B_i mod n so B'_0 = 1, then
+
+    P-row       (B'_i·S_K1)_i                     ← replaces the n·e_0 row
+    n-rows      n·S_K1·e_i,  i = 1..m-1           (i=0 omitted)
+    λ-rows      −λ·S_K1 at col i, S_K2 at col m+i
+    Kannan row  (A_i·S_K1)_i , S_KANNAN
+
+is a basis. Planted vector = (k1_i·S_K1 | k2_i·S_K2 | S_KANNAN), reached with P-row
+coefficient d′ = k1_0 − A_0 + λ·k2_0 (an integer ≡ B_0·d mod n). Recovery map:
+d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n — no information is lost by the projection.
+
+### Findings
+
+**P0 — construction verified.** For all three historical curves: planted vector is in L̄
+(explicit integer coefficient vector solved and the product checked against the target
+componentwise), det(L)/det(L̄) = n·S_D to 9 decimals, and the d-recovery map returns d
+exactly off the planted vector.
+
+**P1 — the projection halves the gap but does not close it.** sv/pv (min reduced-row
+norm / planted norm):
+
+| curve | K1 | m | sv/pv in L | sv/pv in L̄ | planted = λ₁? |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.603 | 0.843 | no |
+| 12-bit/2557 | 8 | 8 | 0.517 | 0.532 | no |
+| 12-bit/2677 | 8 | 10 | 0.422 | 0.813 | no |
+
+The shortest vector of L̄ still has Kannan coordinate **0** on every instance, so the
+new competitor lives in the homogeneous sublattice L0 = {v ∈ L̄ : last coord 0}, rank 2m.
+
+**P2 — THE FALSIFIER. The K1 wall does not move. Not one cell differs.** m=12, 5 seeds:
+
+| curve | λ* | lattice | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | L | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 | 0.340 | **L̄** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 | 0.070 | L | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | 0.070 | **L̄** | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Wall (largest K1 with ≥3/5): 2557 → K1=12 in both lattices; 2677 → K1=4 in both.
+**P3** repeats it on the m-sweep at the wall (2677, K1=8): L and L̄ give
+m=4/6/8/12/16/24/32 → 0,1,0,0,1,0,1 out of 5, identically. The trivial vector n·S_D·e_m
+was never costing anything: it occupies one LLL row and is orthogonal to the coset that
+recovery actually reads.
+
+**P4 — pv/GH(L̄) is a decent a-priori predictor but is beaten by eff.** 10 fresh 17-bit
+curves × K1∈{2,4,8,16,32} × m∈{8,16}, 3 seeds = 100 cells (87 success / 13 failure):
+
+| predictor | AUC | best threshold |
+|---|---|---|
+| pv/GH(L̄) (lower = success) | 0.927 | pv/GH < 1.818 → 93/100 |
+| eff = K1·K2/n (lower = success) | **0.955** | — |
+| λ* (higher = success) | 0.513 | — |
+
+λ* at chance independently re-confirms T3 (2026-07-29) on a fresh curve set.
+pv/GH does not separate (success [0.327, 1.823] vs failure [1.253, 1.826]).
+
+**P5 — λ₁(L̄) = μ, the λ-block shortest vector.** L0 splits into m identical 2-D blocks
+⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩. Exact Gauss reduction of one block vs LLL on the full
+rank-2m L0 agree in **17 of 18** cells (the exception, 2677/K1=4, has λ₁(L0)=7889.5 <
+μ=9323.5 — the P-row participates there). So the structural picture after projection is:
+
+    λ₁(L̄) = μ  <  ‖v_planted‖  on every instance tested,
+    recovery = BDD in L0 at target distance pv.
+
+Unique-BDD decoding would need ρ = μ/pv > 2. **ρ > 2 never holds anywhere in the grid**,
+including in cells that recover 5/5 (ρ as low as 0.331). Recovery therefore routinely
+happens well inside the non-unique-decoding regime, and ρ has no global threshold:
+success ρ ∈ [0.331, 1.192], failure ρ ∈ [0.311, 0.830] — overlapping. This is the
+controlled version of the T2 test (same n-size, same K2, same m; only λ and K1 vary) and
+it **re-falsifies H20 in the projected setting**.
+
+**P6/P7 — a new statistic ν = μ/n, above chance but with an unstable sign.**
+Scale-free form: μ = n · min over (a ≡ −λb mod n) of √((a/K1)² + (b/K2)²), so ν = μ/n is
+comparable across K1 and n.
+
+- P6: on the 10 curves of P4 at K1=32, m=16 — where eff and pv/GH agree to 3 decimals
+  and cannot explain the split — ν separated success from failure **perfectly**
+  (success ν ∈ [1.008, 1.769], failure ν ∈ [1.847, 2.765], AUC 1.000, 10/10), in the
+  direction **small ν = success** — the *opposite* of H20's prediction.
+- P7(a): re-run on 30 fresh curves in [2¹⁷, 2¹⁸) at the same (K1=32, m=16):
+  **AUC(ν, lower = success) = 0.820**, best threshold ν < 2.997 → 23/30 (baseline 20/30),
+  ranges overlap (success [1.006, 3.285], failure [2.474, 3.412]).
+  λ* on the same slice: AUC 0.370. So P6's perfect separation was a 10-point artefact,
+  but the direction and an above-chance signal survive.
+- P7(b): **the sign flips when K1 is swept instead of λ.** Within a single curve, success
+  *decreases* as ν decreases:
+
+  | curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+  |---|---|---|---|---|---|---|---|---|---|
+  | 2557 ν | 1.780 | 1.385 | 1.217 | 1.081 | 1.030 | 0.991 | 0.977 | 0.967 | 0.964 |
+  | 2557 win | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+  | 2677 ν | 3.549 | 3.529 | 3.522 | 2.470 | 1.925 | 1.419 | 1.192 | 0.999 | 0.921 |
+  | 2677 win | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+  Across curves at fixed K1 the direction is the reverse. **ν is therefore a slice-local
+  statistic with no stable sign, not a predictor.** Recorded so no future run re-tries it
+  as one. (The two sweeps move along different directions of the (K1, λ) plane; a real
+  predictor has to be a function of the joint GS profile of L0, not of μ alone.)
+
+### Assessment
+Thread 23 is **CLOSED as a null result**. Both proposed reformulations rest on the same
+premise — that the trivial vector n·S_D·e_m obstructs recovery — and P2/P3 show it does
+not: quotienting it out changes nothing observable. The Babai/CVP variant is not worth
+running, because it differs from the Kannan embedding only in how the same coset is
+searched, and P1 shows the binding competitor (Kannan coordinate 0, i.e. λ₁(L0) = μ) is
+present in both. Phase 2 is at its ceiling *for this lattice family*; further gains need
+a different set of linear relations, not a different embedding of these ones.
+
+### Next step proposal
+**Thread 24 — attack the λ-block directly instead of reducing around it.**
+P5 pins the obstruction precisely: L0 = (m copies of one 2-D block) ⊕ (P-row), and the
+block is the *same* for every i because λ, S_K1, S_K2 do not depend on i. Concretely:
+Gauss-reduce the single 2-D block first, apply that unimodular transform to all m block
+pairs of coordinates as a preconditioner, and only then LLL. Falsifier: this is a
+change of basis, not of lattice, so success rates must be *identical* — if they are, that
+confirms the wall is intrinsic to L0's geometry (and the remaining lever is the number of
+*distinct* λ-blocks, i.e. using several eigenvalue representatives λ, λ², … at once).
+If instead per-block preconditioning moves the 2677 wall past K1=6, then LLL's row order
+— not the lattice — was the limit all along. Cheap: the P2 grid is a ~3-minute run.
+
+Secondary (independent, cheap): P4 shows eff = K1·K2/n is the best single predictor found
+so far (AUC 0.955) and it is a *parameter*, not a curve invariant. Fit the success
+probability as a function of (eff, m) on the 100-cell grid already computed and check
+whether the residual variance is fully explained by curve identity — that would bound how
+much predictive power any λ-dependent statistic could ever add.
+
+### Commits made

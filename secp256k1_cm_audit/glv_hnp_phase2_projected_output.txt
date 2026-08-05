@@ -1,0 +1,253 @@
+==============================================================================
+Thread 23 — projecting out the trivial vector n*S_D*e_m  (GLV-HNP Phase 2)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P0: correctness of Lbar
+------------------------------------------------------------------------------
+Checks, per curve: (a) the planted vector really lies in Lbar (solve for
+the integer coefficient vector and verify), (b) det(L)/det(Lbar) = n*S_D,
+(c) the recovery map from a Kannan row returns d exactly.
+
+curve                m  planted in Lbar   det ratio / (n*S_D)  d-map ok
+8-bit/199            6             True           1.000000000      True
+12-bit/2557          8             True           1.000000000      True
+12-bit/2677 FAIL    10             True           1.000000000      True
+
+------------------------------------------------------------------------------
+EXP P1: sv/pv in L (original) vs Lbar (projected)
+------------------------------------------------------------------------------
+T5 (2026-07-29) measured sv/pv in [0.34, 0.61] in L, with 100% of the
+shortest vector's energy in the d column.  If the projection works,
+sv/pv should jump to ~1.00 in Lbar.  'kan' = |sv_last|/S_KANNAN.
+
+curve               K1   m |  sv/pv L  kan L  ok L | sv/pv Lbar  kan Lbar  ok Lbar  pv=sv?
+8-bit/199            2   6 |    0.603   0.00  True |      0.843      0.00     True   False
+12-bit/2557          8   8 |    0.517   0.00  True |      0.532      0.00     True   False
+12-bit/2677 FAIL     8  10 |    0.422   0.00 False |      0.813      0.00    False   False
+
+------------------------------------------------------------------------------
+EXP P2: EXP-T4 K1 grid, original L vs projected Lbar  (m=12, 5 seeds)
+------------------------------------------------------------------------------
+2026-07-29 falsifier: 'if the K1 wall on the lam*=0.07 curve (currently
+K1 ~ 4-6) moves outward, the reformulation is a real improvement; if it
+stays, the wall is information-theoretic and Phase 2 is at its ceiling.'
+
+curve                 lam*  lattice K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24   K1=32  
+12-bit/2557         0.3400        L 5/5    5/5    5/5    5/5    5/5    4/5    1/5    0/5    0/5   
+12-bit/2557         0.3400     Lbar 5/5    5/5    5/5    5/5    5/5    4/5    1/5    0/5    0/5   
+12-bit/2677 FAIL    0.0699        L 5/5    5/5    5/5    2/5    0/5    0/5    0/5    0/5    0/5   
+12-bit/2677 FAIL    0.0699     Lbar 5/5    5/5    5/5    2/5    0/5    0/5    0/5    0/5    0/5   
+
+(eff = K1*K2/n with K2=52, n=2647: K1=2:0.039, K1=3:0.059, K1=4:0.079, K1=6:0.118, K1=8:0.157, K1=12:0.236, K1=16:0.314, K1=24:0.471, K1=32:0.629)
+
+Wall (largest K1 with >= 3/5 recoveries):
+  12-bit/2557        L     K1_max = 12
+  12-bit/2557        Lbar  K1_max = 12
+  12-bit/2677 FAIL   L     K1_max = 4
+  12-bit/2677 FAIL   Lbar  K1_max = 4
+
+------------------------------------------------------------------------------
+EXP P3: m-sweep at the wall (K1=8, 12-bit/2677, lam*=0.070)
+------------------------------------------------------------------------------
+T4b in L: m = 8/12/16/24/32 -> 0,0,1,0,1 out of 5.  In Lbar the planted
+norm grows as sqrt(2m/3+1) while GH(Lbar) grows too -- so a genuine
+optimum in m is predicted, not monotone improvement.
+
+ lattice m=4     m=6     m=8     m=12    m=16    m=24    m=32      | pv/GH(Lbar) per m
+       L 0/5   1/5   0/5   0/5   1/5   0/5   1/5  
+    Lbar 0/5   1/5   0/5   0/5   1/5   0/5   1/5  
+  pv/GH  2.787   2.003   1.681   1.399   1.273   1.156   1.100  
+
+------------------------------------------------------------------------------
+EXP P4: pv/GH(Lbar) as an a-priori success predictor (17-bit curves)
+------------------------------------------------------------------------------
+pv/GH is computable BEFORE running LLL: it needs only (n, K1, K2, m).
+T5 argued no *curve-level* invariant can predict success; pv/GH is an
+*instance-level* (parameter-level) quantity, so it is not excluded.
+
+collected 10 17-bit j=0 GLV curves
+
+100 (curve, K1, m) cells: 87 success, 13 failure
+  pv/GH  success range [0.327, 1.823]
+  pv/GH  failure range [1.253, 1.826]
+  separable (no overlap): False
+  best threshold  pv/GH < 1.8184 -> 93/100 = 93.0%  (majority baseline 87/100 = 87.0%)
+  AUC(pv/GH, lower = success) = 0.927
+  AUC(eff, lower = success) = 0.955
+  AUC(lam_star, higher = success) = 0.513
+
+per-cell detail (first 40):
+      n   lam*  K1   m    eff   pv/GH  wins
+  65287  0.335   2   8  0.008   0.495   3/3
+  65287  0.335   2  16  0.008   0.328   3/3
+  65287  0.335   4   8  0.016   0.685   3/3
+  65287  0.335   4  16  0.016   0.459   3/3
+  65287  0.335   8   8  0.031   0.950   3/3
+  65287  0.335   8  16  0.031   0.642   3/3
+  65287  0.335  16   8  0.063   1.316   3/3
+  65287  0.335  16  16  0.063   0.898   3/3
+  65287  0.335  32   8  0.125   1.823   3/3
+  65287  0.335  32  16  0.125   1.257   3/3
+  65053  0.388   2   8  0.008   0.495   3/3
+  65053  0.388   2  16  0.008   0.328   3/3
+  65053  0.388   4   8  0.016   0.686   3/3
+  65053  0.388   4  16  0.016   0.459   3/3
+  65053  0.388   8   8  0.031   0.951   3/3
+  65053  0.388   8  16  0.031   0.643   3/3
+  65053  0.388  16   8  0.063   1.318   3/3
+  65053  0.388  16  16  0.063   0.900   3/3
+  65053  0.388  32   8  0.126   1.826   0/3
+  65053  0.388  32  16  0.126   1.259   2/3
+  65119  0.358   2   8  0.008   0.495   3/3
+  65119  0.358   2  16  0.008   0.328   3/3
+  65119  0.358   4   8  0.016   0.686   3/3
+  65119  0.358   4  16  0.016   0.459   3/3
+  65119  0.358   8   8  0.031   0.951   3/3
+  65119  0.358   8  16  0.031   0.643   3/3
+  65119  0.358  16   8  0.063   1.317   3/3
+  65119  0.358  16  16  0.063   0.899   3/3
+  65119  0.358  32   8  0.126   1.825   0/3
+  65119  0.358  32  16  0.126   1.258   0/3
+  66109  0.410   2   8  0.008   0.494   3/3
+  66109  0.410   2  16  0.008   0.327   3/3
+  66109  0.410   4   8  0.016   0.684   3/3
+  66109  0.410   4  16  0.016   0.458   3/3
+  66109  0.410   8   8  0.031   0.948   3/3
+  66109  0.410   8  16  0.031   0.641   3/3
+  66109  0.410  16   8  0.062   1.314   3/3
+  66109  0.410  16  16  0.062   0.896   3/3
+  66109  0.410  32   8  0.125   1.821   0/3
+  66109  0.410  32  16  0.125   1.255   0/3
+
+------------------------------------------------------------------------------
+EXP P5: BDD formulation — L0 = {v in Lbar : Kannan coord 0}, rank 2m
+------------------------------------------------------------------------------
+P1 shows the shortest vector of Lbar still has Kannan coordinate 0, so
+recovery is BDD with target distance pv in the rank-2m lattice L0.
+L0 splits into m identical 2-D lambda blocks <(n*S_K1,0),(-lam*S_K1,S_K2)>
+plus the (long) P-row, so lambda_1(L0) should equal the exact 2-D block
+shortest vector mu.  Unique BDD decoding needs pv < lambda_1(L0)/2,
+i.e. rho = mu/pv > 2.  This is the controlled test T2 could not make:
+same n-size, same K2, same m, ONLY lam and K1 vary.
+
+curve                 lam*  K1         mu     l1(L0)  mu=l1         pv  rho=mu/pv   wins
+12-bit/2557         0.3400   2     4732.7     4732.7   True     7966.3      0.594    5/5
+12-bit/2557         0.3400   3     3683.4     3683.4   True     7966.3      0.462    5/5
+12-bit/2557         0.3400   4     3235.8     3235.8   True     7963.7      0.406    5/5
+12-bit/2557         0.3400   6     2875.5     2875.5   True     7966.3      0.361    5/5
+12-bit/2557         0.3400   8     2737.6     2737.6   True     7963.7      0.344    5/5
+12-bit/2557         0.3400  12     2634.8     2634.8   True     7958.3      0.331    4/5
+12-bit/2557         0.3400  16     2598.2     2598.2   True     7963.7      0.326    1/5
+12-bit/2557         0.3400  24     2571.3     2571.3   True     7942.4      0.324    0/5
+12-bit/2557         0.3400  32     2562.1     2562.1   True     7963.7      0.322    0/5
+12-bit/2677 FAIL    0.0699   2     9393.6     9393.6   True     7877.3      1.192    5/5
+12-bit/2677 FAIL    0.0699   3     9341.7     9341.7   True     7877.3      1.186    5/5
+12-bit/2677 FAIL    0.0699   4     9323.5     7889.5  False     7874.6      1.184    5/5
+12-bit/2677 FAIL    0.0699   6     6537.6     6537.6   True     7877.3      0.830    2/5
+12-bit/2677 FAIL    0.0699   8     5095.8     5095.8   True     7869.2      0.648    0/5
+12-bit/2677 FAIL    0.0699  12     3756.2     3756.2   True     7869.2      0.477    0/5
+12-bit/2677 FAIL    0.0699  16     3155.7     3155.7   True     7869.2      0.401    0/5
+12-bit/2677 FAIL    0.0699  24     2644.6     2644.6   True     7869.2      0.336    0/5
+12-bit/2677 FAIL    0.0699  32     2437.3     2437.3   True     7847.8      0.311    0/5
+
+  rho  success range [0.331, 1.192]
+  rho  failure range [0.311, 0.830]
+  separable by a single rho threshold: False
+  best threshold  rho >= 0.3311 -> 13/18  (majority baseline 9/18)
+  unique-BDD prediction rho > 2 would give: 9/18
+
+------------------------------------------------------------------------------
+EXP P6: the K1=32 slice of P4 — 10 curves, identical eff and pv/GH
+------------------------------------------------------------------------------
+In P4 the curves n=65287 (recovers 3/3) and n=65053, 65119, 66109 (0/3)
+have eff and pv/GH agreeing to 3 decimals.  Neither eff nor pv/GH can
+explain the split; lam* is at chance.  Here mu = lambda_1 of the 2-D
+lambda block is the only remaining candidate, tested on a slice where
+EVERYTHING else is held fixed.
+
+      n     lam   lam*         mu         pv     rho   m=8  m=16
+  65287   21847  0.335    65820.1   164287.2   0.401   3/3   3/3
+  65053   25219  0.388   115057.5   163651.7   0.703   0/3   2/3
+  65119   23322  0.358   146812.6   163745.7   0.897   0/3   0/3
+  66109   27075  0.410   182636.5   166275.3   1.098   0/3   0/3
+  65719    1794  0.027   181717.8   165170.0   1.100   1/3   0/3
+  65899   20979  0.318    81999.4   165717.2   0.495   3/3   3/3
+  66037   13964  0.211   122004.7   165907.9   0.735   0/3   0/3
+  65269     442  0.007   112540.5   163975.1   0.686   0/3   3/3
+  65647   14787  0.225   178377.7   165073.5   1.081   0/3   0/3
+  65677   14266  0.217    78094.8   165119.3   0.473   0/3   3/3
+
+  rho  success range [0.401, 0.495]  (n=2)
+  rho  failure range [0.473, 1.100]  (n=8)
+  separable by a single rho threshold: False
+  AUC(rho, higher = success) = 0.062
+  AUC(lam*, higher = success) = 0.625
+
+------------------------------------------------------------------------------
+EXP P7: (a) enlarge the controlled slice; (b) document the sign flip
+------------------------------------------------------------------------------
+P6 (10 curves, K1=32, m=16) separated perfectly with SMALL mu = success.
+That is the OPPOSITE direction to H20 (2026-07-29), which predicted
+large rho = mu/pv = success and was falsified.  10 points can be luck,
+so (a) re-runs the slice on ~30 fresh curves.  (b) contrasts it with the
+within-curve K1 sweep, where the direction is reversed.
+nu = mu/n is the scale-free form: mu = n * min_(a,b) sqrt((a/K1)^2+(b/K2)^2)
+over a = -lam*b mod n, so nu is directly comparable across K1 and n.
+
+(a) collected 30 fresh curves in [2^17, 2^18)
+
+       n   lam*  nu=mu/n   wins
+  130981  0.221    2.642    1/3
+  130483  0.307    3.177    1/3
+  131707  0.402    3.374    0/3
+  130579  0.019    3.155    3/3
+  130987  0.108    1.558    3/3
+  130843  0.392    2.474    1/3
+  131893  0.491    3.149    0/3
+  130927  0.047    3.412    0/3
+  130957  0.033    2.997    0/3
+  132049  0.021    1.762    3/3
+  131671  0.005    1.730    3/3
+  131713  0.384    1.757    3/3
+  131203  0.495    3.263    2/3
+  131701  0.181    1.747    3/3
+  132439  0.137    3.085    1/3
+  131113  0.165    2.636    3/3
+  131371  0.426    3.182    0/3
+  132103  0.325    2.965    3/3
+  132637  0.308    2.686    3/3
+  131617  0.128    1.737    3/3
+  131941  0.460    2.924    3/3
+  132313  0.141    3.285    2/3
+  132523  0.166    1.006    3/3
+  131449  0.107    3.026    2/3
+  132523  0.166    1.006    3/3
+  132511  0.424    2.872    3/3
+  132109  0.330    3.314    0/3
+  132667  0.073    1.586    3/3
+  132739  0.389    1.122    3/3
+  131731  0.095    3.166    3/3
+
+  nu   success range [1.006, 3.285]  (n=20)
+  nu   failure range [2.474, 3.412]  (n=10)
+  separable by a single nu threshold: False
+  AUC(nu, LOWER = success)   = 0.820
+  AUC(lam*, higher=success)  = 0.370
+  best threshold nu < 2.997 -> 23/30  (majority baseline 20/30)
+
+(b) within-curve K1 sweep on the historical pair (nu vs success, m=12):
+curve              K1=2     K1=3     K1=4     K1=6     K1=8     K1=12    K1=16    K1=24    K1=32   
+12-bit/2557 nu     1.780   1.385   1.217   1.081   1.030   0.991   0.977   0.967   0.964  
+12-bit/2557 win    5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5     0/5    
+12-bit/2677 FAIL nu 3.549   3.529   3.522   2.470   1.925   1.419   1.192   0.999   0.921  
+12-bit/2677 FAIL win 5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5     0/5    
+
+  Within a curve, success DECREASES as nu decreases (large nu = success).
+  Across curves at fixed K1, success INCREASES as nu decreases.
+  => nu is not a global predictor with a fixed sign; the two sweeps move
+     along different directions of the (K1, lam) parameter plane.
+
+==============================================================================
+done
+==============================================================================
