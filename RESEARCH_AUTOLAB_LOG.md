@@ -6103,3 +6103,178 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁" — the
+next-step proposed by the 2026-07-29 entry (log line ~6089). Protocol rule (b):
+priorities 1/3/4/6 are CLOSED, priority 2 is BLOCKED (F_p Rosenhain, 2026-07-26),
+and priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29 with an
+explicit, cheap continuation. Thread 23 carried its own falsifier, so it was
+executable as stated.
+
+**Outcome: Thread 23's reformulation is dead, and T5's recovery criterion is
+falsified.** The actual recovery mechanism is identified below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll sympy cysignals` →
+  fpylll 0.6.4, sympy 1.14.0, cysignals 1.12.5. (Same note as 2026-07-29:
+  `cysignals` is a separate install, `pip install fpylll` alone leaves
+  `IntegerMatrix` unimportable.)
+- New: `secp256k1_cm_audit/glv_hnp_thread23_gh_ceiling.py` (E1–E3) +
+  `..._output.txt`; `secp256k1_cm_audit/glv_hnp_thread23_mechanism.py` (E4–E8)
+  + `..._output.txt`. Both reuse `build_glv_lattice` verbatim from
+  `glv_hnp_phase2_20bit.py:262` so every number is comparable to 2026-07-26/29.
+- Derived a closed form for the Gaussian-heuristic ratio and tested it as the
+  predictor H23 (E1, E2); implemented Thread 23's own d-column-deletion
+  reformulation (E3); then, when both failed, instrumented the recovery event
+  itself (E4–E8).
+- `cargo test --test curve_audit` → 5/5 pass (6.91s). ✓
+
+### Findings
+
+**Closed form for the GH ratio.** With the standard balanced scaling
+(S_K1=n/K1, S_D=1, S_K2=n/K2, S_KANNAN=n) and eff = K1·K2/n:
+
+    dim = 2m+2,   det L = n^(2m+1) / eff^m,
+    R = ‖v_planted‖/GH(L) = sqrt((2m+4)/(2m+2)) · sqrt(2πe/3) · n^(1/(2m+2)) · eff^(m/(2m+2))
+
+Numeric R and the closed form agree to <2e-3 across the historical curves. As
+m→∞, R → 2.3860·sqrt(eff), giving an apparent **asymptotic eff ceiling of
+1/(2πe/3) = 0.17565** — strictly stronger than the information-theoretic
+condition m·log(1/eff) > log n. Also checked analytically: S_KANNAN=n and S_D=1
+are within 1.6% and 3.3% of optimal, so the scaling has no headroom left.
+
+**E1 — R is confounded with eff, and adds nothing.** 12 fresh 17-bit j=0 GLV
+curves × 4 eff levels × 5 seeds (48 configs, m=12):
+
+| predictor | AUC |
+|---|---|
+| R | 0.9184 |
+| eff | 0.9184 |
+| λ* | 0.5114 |
+
+AUC(R) = AUC(eff) to four decimals — at fixed m and fixed n-size R *is* a
+monotone function of eff. λ* at chance independently reconfirms T3.
+
+**E2 — the finite-m prediction is FALSIFIED.** 12-bit/2677 at K1=8
+(eff = 0.1572, *below* the ceiling; predicted crossover m* = 96):
+
+| m | 12 | 24 | 40 | 56 | 72 | 88 | 104 | 128 | 160 |
+|---|---|---|---|---|---|---|---|---|---|
+| dim | 26 | 50 | 82 | 114 | 146 | 178 | 210 | 258 | 322 |
+| R | 1.428 | 1.172 | 1.078 | 1.039 | 1.018 | 1.005 | 0.996 | 0.986 | 0.978 |
+| win | 0/3 | 0/3 | 1/3 | 0/3 | 1/3 | 1/3 | 0/3 | 0/3 | 0/3 |
+
+R drops through 1 and nothing happens. This confirms T4b (which stopped at
+m=32) out to dim 322: **more data never rescues a Phase-2 instance.** Control
+E2b (K1=16, eff=0.314, above the ceiling) is 0/3 at every m, as required.
+
+**E3 — Thread 23's proposal changes nothing, on zero of 16 configurations.**
+Deleting the d column does exactly what Thread 23 wanted: the trivial vector is
+gone and sv/pv rises from ~0.45 to **1.0000** (the planted vector genuinely
+becomes λ₁). The success rates are nonetheless bit-identical, seed for seed:
+
+| 2677, m=12, K1 = | 2 | 3 | 4 | 6 | 8 | 12 | 16 |
+|---|---|---|---|---|---|---|---|
+| original (dim 2m+2) | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 |
+| d dropped (dim 2m+1) | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 |
+
+Same for 2557 (K1=4,8,12,16,24 → 5/5,5/5,4/5,1/5,0/5 both ways) and for the
+large-m grid (K1=8, m=12/40/88/160 → 0/3,1/3,1/3,0/3 both ways). R improves by
+≤3.3%. **The wall stayed exactly at K1≈4–6**, which is the branch of Thread
+23's own falsifier that reads "Phase 2 is at its ceiling."
+
+**E4 — the wall is not a reduction-strength wall.** LLL = BKZ-20 = BKZ-26 =
+BKZ-32 = BKZ-40, identical counts on all 8 configurations. At m=12 the lattice
+is 26-dimensional, so BKZ-26 is *exact HKZ reduction of the entire lattice*.
+This supersedes the 2026-07-26 "BKZ(40) also fails" observation with the
+strongest possible version. It also sharpens the C1/C2 split to its cleanest
+form — same eff, same R, opposite outcome, at every β:
+
+| curve | λ* | eff | R | LLL | β=20 | β=26 | β=32 | β=40 |
+|---|---|---|---|---|---|---|---|---|
+| 12-bit/2677 | 0.070 | 0.1572 | 1.428 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2557 | 0.340 | 0.1564 | 1.425 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+
+**E5 — T5's stated criterion is FALSIFIED.** T5 (2026-07-29) concluded recovery
+is "the planted vector is shortest among vectors with last coordinate
+±S_KANNAN". That coset is RK + L0, so the criterion is a CVP; measured exactly
+via `CVP.closest_vector` as γ = coset_min/‖v_planted‖. The criterion requires
+γ = 1 on success. Measured: γ < 1 in 56 of 60 instances, **including every 5/5
+success** (2557/K1=4: γ=0.962, 5/5; 2677/K1=4: γ=0.978, 5/5). And γ does not
+separate: 2557/K1=8 has γ=0.893 → 5/5, while 2677/K1=8 has γ=0.885 → 0/5.
+
+**E6 — the actual mechanism.** The planted vector is essentially *never* a row
+of the reduced basis — `hit` = 1/5 in one configuration and 0/5 in the other
+seven — even where recovery is 5/5. `recover_d` succeeds because it accepts
+**any** row of the ±S_KANNAN coset whose m-th coordinate is ≡ d (mod n), and
+the trivial vector n·S_D·e_m generates exactly the kernel of that map. So a
+whole 1-parameter family of rows decodes to the correct d.
+
+> Recovery is a coupon-collector event over the rows LLL leaves in the Kannan
+> coset — not an SVP event, not a coset-minimum event. The trivial vector T5
+> identified as the obstruction is in fact what makes the attack work, which is
+> why deleting it (E3) changes nothing.
+
+The count of such rows, nkan, orders all 8 configurations monotonically:
+
+| nkan | 7.2 | 7.2 | 7.0 | 5.4 | 5.4 | 4.4 | 3.8 | 2.8 |
+|---|---|---|---|---|---|---|---|---|
+| win | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 |
+
+**E7/E8 — nkan validated; ν̂ replicated.** On the mixed stratum eff≈0.12 (12
+curves) where R and λ* are at chance, nkan gives AUC 0.9630 (success [5.0,7.2],
+failure [2.6,5.6]). On a wider sample — 24 fresh 17-bit curves × 2 eff levels ×
+6 seeds, 48 configs:
+
+| predictor | AUC | kind |
+|---|---|---|
+| nkan | 0.9843 | a-posteriori (free from the reduction) |
+| ν̂ (Thread 20c) | 0.9617 | **a-priori** |
+| R | 0.5679 | — |
+| λ* | 0.5314 | — |
+
+ν̂ replicates on a fresh sample (Thread 20c/2026-07-29 reported 0.935), and
+**Spearman(ν̂, nkan) = −0.6205**, the sign Thread 20c predicted: a skew L2 (low
+ν̂) leaves the planted vector uncrowded → more rows survive in the Kannan coset
+(high nkan) → recovery fires. That closes the causal chain
+ν̂ → nkan → recovery. nkan is a diagnostic, not a screening test (it costs a
+reduction); **ν̂ remains the a-priori predictor of record.**
+
+### Status changes
+- **Thread 23: CLOSED (negative).** Removing the trivial vector is a no-op;
+  the d column is a redundant coordinate. Do not re-attempt lattice
+  reformulations aimed at making the planted vector λ₁ — E3 achieves that
+  exactly (sv/pv = 1.0000) and it buys nothing.
+- **T5 (2026-07-29) corrected.** Its geometric claim (planted vector is never
+  λ₁) is confirmed; its operational claim (recovery = coset minimum) is
+  falsified by E5, and its framing of the trivial vector as an obstruction is
+  inverted by E6.
+- **Dead hypotheses, do not re-try:** GH ratio R / eff-ceiling as a sufficient
+  condition (E1/E2); d-column deletion (E3); larger β (E4); coset minimum γ
+  (E5); basis-row containment (E6). Together with δ/n, κ(M), q_cf, max_q_cf,
+  max_a, a_corn/n (2026-06-21…29), μ/ρ (T2) and λ* (T3), that is 14 falsified
+  predictors and exactly one survivor, ν̂.
+
+### Next step proposal
+**Thread 24 — make nkan predictable, i.e. finish the ν̂ → nkan link.**
+Spearman is only −0.62, so ν̂ explains part of nkan and something else explains
+the rest. Concretely: regress nkan on (ν̂, eff, m) over ~200 configs and test
+whether the residual is explained by the *second* minimum λ₂(L2)/sqrt(det L2)
+or by the GS profile of the m modular rows. Falsifier: if a two-variable
+(ν̂, λ₂-based) model pushes AUC above ~0.99 and Spearman above 0.85, the
+recovery event is fully characterised by the 2-D block geometry and Phase 2 has
+a closed-form viability test; if the residual stays unexplained, the remaining
+variation is signature-set-level (not curve-level) and no a-priori predictor
+can do better than ν̂'s ~0.96.
+
+Cheap and decisive — the E8 harness already computes both quantities; it is a
+one-column addition plus a wider curve sweep (~15 min).
+
+Secondary (unchanged from 2026-07-29, still not done): re-express the
+2026-07-26 log's λ/n column in λ* throughout.
+
+### Commits made
+(recorded post-commit below)
