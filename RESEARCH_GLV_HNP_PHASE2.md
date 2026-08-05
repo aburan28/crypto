@@ -271,3 +271,50 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. The λ-block ceiling (Thread 23, 2026-08-05)
+
+Phase 2's recovery limit is **lattice-geometric, not information-theoretic**, and
+the limiting object is identified exactly.
+
+Write the Phase-2 lattice in its quotient form `L'` (the `d` column of
+`build_glv_lattice` deleted — `d` is only defined mod `n`, so the column
+contributes the trivial vector `n·S_D·e_d` and nothing else):
+
+```
+columns  [ k1_0..k1_{m-1} | k2_0..k2_{m-1} | kannan ],   dim = 2m+1
+||v'_planted|| ≈ n·sqrt(2m/3 + 1)                        (grows like sqrt(m))
+```
+
+`L'` contains **m disjoint copies** of the 2-D sublattice
+
+```
+L2 = < (n·S_K1, 0), (−λ·S_K1, S_K2) >      (columns k1_i, k2_i)
+μ  = λ₁(L2)  — exact, by Lagrange-Gauss in O(log n)
+     `lambda_block_mu`, secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py:209
+```
+
+`μ` depends on `(n, λ, K1, K2)` but **not on m**. Since `μ` is a lattice vector by
+construction, `λ₁(L') ≤ μ` unconditionally, while `||v'_planted||` grows like
+`sqrt(m)`. Therefore:
+
+> **Adding signatures strictly worsens the SVP gap of the Phase-2 lattice.**
+
+This is the structural reason more data never rescues a failing curve. It was
+observed empirically at `m ≤ 32` (log 2026-07-29, T4b) and is now confirmed to
+`m = 120` (dim 241) with `λ₁(L') = μ` to 4 decimal places at every `m`:
+`sv·sqrt(m)` is constant at 1.77e4 → 5.58e4 while `μ = 5095.8` never moves.
+
+Consequences:
+
+- The Gaussian heuristic does **not** apply to `L'`. A GH-based viability law
+  `gap = λ₁^GH(L')/||v'|| ≥ 1` predicts a crossing at `m ≈ 100` for the
+  `λ*=0.07 / K1=8` curve; measured recovery there is 0/3. GH over-estimates
+  `λ₁` precisely because of the m copies of `L2`.
+- The asymptotic ceiling `eff = K1·K2/n ≤ 3/(2πe) ≈ 0.176` derived from GH is
+  therefore **not** a valid bound and must not be quoted.
+- The relevant curve-level quantity remains `ν̂ = μ/sqrt(det L2)` (log 2026-07-29,
+  AUC 0.935), which is the m-independent parasite's length in normalised form.
+
+Reproduce: `python3 secp256k1_cm_audit/glv_hnp_phase2_thread23_reformulation.py`
+(≈18 s), output artifact `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt`.

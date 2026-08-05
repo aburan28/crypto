@@ -6103,3 +6103,137 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+**Thread 23** — the continuation proposed verbatim by the 2026-07-29 entry
+(log line 6089): reformulate the Phase-2 lattice so the planted vector is λ₁.
+Threads 1/3/4/6 CLOSED, Thread 2 BLOCKED (F_p Rosenhain obstruction proven
+2026-07-26), Thread 5/20 made measurable progress 2026-07-29, so its own
+proposed sub-task is the correct pick under protocol rule (b).
+
+Outcome: the reformulation **works as specified and changes nothing**, and the
+reason why is a structural result that also **falsifies this run's own
+replacement hypothesis** (a Gaussian-heuristic viability law). Both are recorded.
+
+### Work done
+- Env (fresh container): `pip install fpylll cysignals sympy` — as the 2026-07-29
+  entry warned, `cysignals` is a separate runtime import. `pari-gp` not needed today.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_reformulation.py` (7 experiments
+  A–G, 18 s total). It loads the Phase-2 primitives **verbatim** from
+  `glv_hnp_phase2_lambda_threshold.py` by exec'ing only the prefix before that
+  file's first top-level `print` (it has no `__main__` guard and would otherwise
+  re-run the whole Thread-20 sweep on import — note for future runs).
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt`.
+- Three formulations, identical curves / seeds / signatures / scales:
+  - **V0** baseline (2m+2)-dim Kannan lattice, verbatim from T4.
+  - **V1** quotient: delete the `d` column → dim 2m+1, i.e. `L/<n·S_D·e_d>`, so the
+    T5 trivial vector is quotiented away. `d` recovered arithmetically from the
+    Kannan row's `(k1_0, k2_0)` block, `d = (k1_0 − A_0 + λk2_0)·B_0^{-1} mod n`.
+  - **V2** CVP: also drop the Kannan row → homogeneous dim-2m lattice, Babai
+    nearest-plane against target `(−A_i·S_K1, 0)`.
+- `cargo test --test curve_audit` → 5/5 pass (6.88 s). ✓
+
+### Findings
+
+**A — V0 reproduces the 2026-07-29 T4 table exactly** (sanity check passed):
+2557 → 5,5,5,5,5,4,1,0 and 2677 → 5,5,5,2,0,0,0,0 over K1 = 2,3,4,6,8,12,16,24.
+
+**A/D — the quotient reformulation is a no-op. V0 ≡ V1 on all 80/80 individual
+trials**, not merely in aggregate. V2 (Babai) is never better and sometimes worse
+(2557: 4/5 vs 5/5 at K1=8, 2/5 vs 4/5 at K1=12). The K1 wall on the λ*=0.07 curve
+stays at K1≈4–6, exactly where T4 left it.
+
+**B — but sv/pv did rise, and the falsifier's two clauses came apart.** On the
+λ*=0.07 curve at K1 ≤ 4 the planted vector becomes λ₁ exactly (sv/pv = 1.000 in V1
+vs 0.37–0.41 in V0) — yet those cells already recovered 5/5 in V0. The 2026-07-29
+falsifier assumed "sv/pv > 1" and "wall moves" would travel together; they do not.
+**Being λ₁ is neither necessary nor sufficient for recovery here** — 2557 recovers
+5/5 at sv/pv = 0.37. Recovery is a coset/BDD condition, as T5 concluded, and the
+trivial vector `n·S_D·e_d` was never the obstruction.
+
+**E — this run's own GH hypothesis, FALSIFIED.** Closed form for the quotient
+lattice (`det L' = n^{2m}/eff^m`, dim 2m+1, `||v'|| = n·sqrt(2m/3+1)`):
+
+```
+gap(m, eff, n) = sqrt((2m+1)/(2πe(2m/3+1))) · n^{−1/(2m+1)} · eff^{−m/(2m+1)}
+```
+
+which predicts a `gap = 1` crossing at m ≈ 100 for the λ*=0.07 / K1=8 curve
+(eff = 0.157), i.e. that T4b's "more data does not rescue it" was merely an
+under-powered m range. Measured, m = 12…120 (dim 25…241), 3 seeds:
+
+| m | dim | gap_cf | V1 recovery | sv/pv |
+|---|---|---|---|---|
+| 12 | 25 | 0.715 | 0/3 | 0.689 |
+| 32 | 65 | 0.909 | 1/3 | 0.447 |
+| 48 | 97 | 0.956 | 0/3 | 0.360 |
+| 64 | 129 | 0.980 | 0/3 | 0.313 |
+| 80 | 161 | 0.995 | 1/3 | 0.279 |
+| 100 | 201 | **1.007** | 0/3 | 0.252 |
+| 120 | 241 | **1.015** | 1/3 | 0.232 |
+
+No transition at the crossing; sporadic 1/3 cells are noise. The GH gap law is
+dead. **The ceiling `eff ≤ 3/(2πe) ≈ 0.176` that follows from it is NOT valid and
+must not be quoted** — it is recorded here only so no future run re-derives it.
+
+**F — why GH fails, and the real structure (the payoff).** `L'` contains m disjoint
+copies of the 2-D sublattice `L2 = <(n·S_K1, 0), (−λ·S_K1, S_K2)>` whose exact
+shortest vector `μ = λ₁(L2)` (Lagrange-Gauss, O(log n)) **does not depend on m**.
+Measured over the whole m-sweep above, at every single m:
+
+```
+λ₁(L')_obs = μ = 5095.8   exactly (sv/μ = 1.000 at m = 12,32,48,64,80,100,120)
+||v'||     = 7407 → 21936  (grows like sqrt(m))
+sv·sqrt(m) = 1.77e4 → 5.58e4  ... i.e. sv itself is flat in m
+```
+
+Since `μ` is a lattice vector by construction, **`λ₁(L') ≤ μ` holds unconditionally
+while `||v'_planted||` grows like sqrt(m)**. Hence:
+
+> **Adding signatures strictly worsens the SVP gap of the Phase-2 lattice.**
+
+That is a proof, not a correlation, and it is the structural reason T4b saw no
+rescue — now confirmed to 10× T4b's m range. It also explains why GH over-estimates
+`λ₁`: the lattice is not GH-generic, it is pinned by an m-independent parasite.
+`μ` is exactly the quantity behind `ν̂ = μ/sqrt(det L2)`, the 2026-07-29 separator
+(AUC 0.935), which is now given a mechanism rather than just a correlation.
+
+Across the K1 grid at m = 12 the observed λ₁ equals `min(μ, ||v'||)` in 23/23 cells,
+including the three cells where the planted vector wins (`μ/||v'|| = 1.34–1.49`,
+all 5/5).
+
+**G — out-of-sample honesty check** (8 fresh 15-bit curves × K1 ∈ {4,12,32}, 24
+cells): the *equality* `λ₁(L') = min(μ, ||v'||)` holds in only 15/24. All 9
+violations sit in the crossover band `μ/||v'|| ∈ [0.69, 1.21]`; 8 are "a cross-block
+combination is shorter than both" and 1 is an LLL miss. **The inequality
+`λ₁(L') ≤ μ` — the one the m-independence conclusion rests on — is unaffected.**
+Secondary: `ν̂ < 0.55` → 9/9 recovery, `ν̂ ≥ 0.55` → 49/63 = 0.778, same direction
+as 2026-07-29 but confounded with K1 in this small sample.
+
+### Next step proposal
+**Thread 24 — attack `μ` directly instead of routing around it.** `μ` is a function
+of `(n, λ, K1, K2)` only, so it is controllable at lattice-design time in a way no
+curve-level invariant is. Two concrete sub-tasks, cheap:
+
+1. **Re-scale to raise μ.** `μ = λ₁(<(n·S_K1,0), (−λ·S_K1,S_K2)>)` depends on the
+   *ratio* S_K2/S_K1, which is a free design parameter (currently pinned to
+   `K1/K2` by `scales()`). Sweep `S_K2/S_K1` over ~2 decades and measure `μ/||v'||`
+   and recovery on the λ*=0.07/K1=8 curve. Falsifier: if some ratio pushes
+   `μ/||v'|| > 1` *and* recovery turns on at K1=8, the K1 wall is an artefact of
+   the scale choice, not of the instance; if `μ/||v'||` is invariant under
+   re-scaling (plausible — both scale with sqrt(S_K1·S_K2)), the wall is intrinsic
+   and Phase 2 is at its ceiling for real. ~20 min.
+2. **Block-size generalisation.** Check whether the same argument bounds `λ₁` for
+   the *standard* (non-GLV) HNP lattice, where the analogous 2-D block is
+   `<(n·S,0),(0,S_K)>` and `μ = min(n·S, S_K)`. If so the "more data hurts"
+   phenomenon is generic to Kannan-embedded HNP, not GLV-specific — which would be
+   worth a note in `paper/methodological_note.tex`.
+
+Do **not** re-try: the GH gap law (E, falsified today), `ρ = μ/||v_planted||` as a
+threshold predictor (T2, 2026-07-29), λ/n or λ* thresholds (T1/T3, 2026-07-29), or
+the six curve-level invariants falsified 2026-06-21…06-29.
+
+### Commits made
+(see below — hash recorded in the follow-up commit)

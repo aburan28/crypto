@@ -1,0 +1,207 @@
+==============================================================================
+Thread 23 — does quotienting out the trivial vector fix the Phase-2
+            lattice?  (V0 baseline / V1 quotient / V2 CVP-Babai)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP A: K1 wall, three formulations, m = 12, 5 seeds
+------------------------------------------------------------------------------
+V0 row must reproduce the 2026-07-29 T4 table exactly (sanity check).
+K2 = 52 for both curves; eff = K1*K2/n.
+
+12-bit/2557   lam* = 0.3400   n = 2659
+  var  K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+  v0   5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+  v1   5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+  v2   5/5   5/5   5/5   5/5   4/5   2/5   0/5   0/5  
+
+12-bit/2677 FAIL   lam* = 0.0699   n = 2647
+  var  K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+  v0   5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+  v1   5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+  v2   5/5   4/5   4/5   1/5   0/5   0/5   0/5   0/5  
+
+------------------------------------------------------------------------------
+EXP B: is the planted vector now the shortest vector?
+------------------------------------------------------------------------------
+sv/pv = ||shortest reduced vector|| / ||planted vector||.
+sv/pv >= 1  <=>  nothing in the lattice is shorter than the planted
+vector, i.e. recovery has become a genuine SVP problem.
+
+curve                K1    eff  sv/pv V0  sv/pv V1  GH/pv V1    V0    V1    V2
+12-bit/2557           2  0.039     0.402     0.742     1.741   5/5   5/5   5/5
+12-bit/2557           3  0.059     0.371     0.529     1.312   5/5   5/5   5/5
+12-bit/2557           4  0.078     0.368     0.461     1.134   5/5   5/5   5/5
+12-bit/2557           6  0.117     0.356     0.396     0.903   5/5   5/5   5/5
+12-bit/2557           8  0.156     0.354     0.373     0.778   5/5   5/5   4/5
+12-bit/2557          12  0.235     0.343     0.352     0.627   4/5   4/5   2/5
+12-bit/2557          16  0.313     0.339     0.347     0.547   1/5   1/5   0/5
+12-bit/2557          24  0.469     0.331     0.339     0.443   0/5   0/5   0/5
+12-bit/2677 FAIL      2  0.039     0.406     1.000     1.741   5/5   5/5   5/5
+12-bit/2677 FAIL      3  0.059     0.371     1.000     1.299   5/5   5/5   4/5
+12-bit/2677 FAIL      4  0.079     0.371     1.000     1.133   5/5   5/5   4/5
+12-bit/2677 FAIL      6  0.118     0.355     0.901     0.891   2/5   2/5   1/5
+12-bit/2677 FAIL      8  0.157     0.356     0.704     0.776   0/5   0/5   0/5
+12-bit/2677 FAIL     12  0.236     0.345     0.502     0.619   0/5   0/5   0/5
+12-bit/2677 FAIL     16  0.314     0.350     0.427     0.546   0/5   0/5   0/5
+12-bit/2677 FAIL     24  0.471     0.341     0.349     0.438   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP C: does the Gaussian-heuristic gap predict success?
+------------------------------------------------------------------------------
+gap = lambda_1^GH(L') / ||v'_planted||, L' = quotient lattice (rank 2m+1).
+Prediction rule: success iff gap >= 1 (planted is below the generic
+shortest length, so it is findable).  Scored against V1 outcomes.
+
+  gap>=1 vs ok_v0   TP=6 TN=8 FP=0 FN=2  acc=0.875
+  gap>=1 vs ok_v1   TP=6 TN=8 FP=0 FN=2  acc=0.875
+  gap>=1 vs ok_v2   TP=4 TN=9 FP=2 FN=1  acc=0.812
+
+  per-cell detail:
+  curve                K1     gap   pred    V0    V1    V2
+  12-bit/2557           2   1.741    win  True  True  True
+  12-bit/2557           3   1.312    win  True  True  True
+  12-bit/2557           4   1.134    win  True  True  True
+  12-bit/2557           6   0.903   lose  True  True  True
+  12-bit/2557           8   0.778   lose  True  True False
+  12-bit/2557          12   0.627   lose False False False
+  12-bit/2557          16   0.547   lose False False False
+  12-bit/2557          24   0.443   lose False False False
+  12-bit/2677 FAIL      2   1.741    win  True  True  True
+  12-bit/2677 FAIL      3   1.299    win  True  True False
+  12-bit/2677 FAIL      4   1.133    win  True  True False
+  12-bit/2677 FAIL      6   0.891   lose False False False
+  12-bit/2677 FAIL      8   0.776   lose False False False
+  12-bit/2677 FAIL     12   0.619   lose False False False
+  12-bit/2677 FAIL     16   0.546   lose False False False
+  12-bit/2677 FAIL     24   0.438   lose False False False
+
+------------------------------------------------------------------------------
+EXP D: are V0 and V1 the same experiment?  (per-seed agreement)
+------------------------------------------------------------------------------
+If the quotient map is injective on the Kannan coset then V0 and V1 must
+agree trial by trial, not merely in aggregate counts.
+
+  per-trial agreement V0 == V1: 80/80
+  no mismatches: the quotient changes the lattice but not the outcome.
+
+------------------------------------------------------------------------------
+EXP E: the gap law as a falsifiable prediction — m-scaling at fixed eff
+------------------------------------------------------------------------------
+Closed form for the quotient lattice (S_K1=n/K1, S_K2=n/K2, S_KAN=n):
+    det L' = n^(2m) / eff^m,   dim = 2m+1,   ||v'|| = n*sqrt(2m/3+1)
+    gap(m, eff, n) = sqrt((2m+1)/(2*pi*e*(2m/3+1)))
+                     * n^(-1/(2m+1)) * eff^(-m/(2m+1))
+As m -> infinity this tends to eff^(-1/2)*sqrt(3/(2*pi*e)), so gap >= 1
+iff eff <= 3/(2*pi*e) = 0.1756 -- a curve-INDEPENDENT ceiling strictly
+below the information-theoretic bound eff <= n^(-1/m) -> 1.
+
+2026-07-29 T4b tested m = 8,12,16,24,32 at K1=8 (eff=0.157) on the
+lam*=0.07 curve, all failed, and concluded 'the K1 wall is genuine, not
+sample size'.  The gap law says gap(32) = 0.910 < 1 so those m were ALL
+too small, and predicts the crossing near m ~ 100.  Testing that now.
+
+  curve n = 2647, K1 = 8, K2 = 52, eff = 0.157, lam* = 0.0699
+      m   dim  gap_cf  gap_obs   pred    V1   sv/pv
+     12    25   0.715    0.760   lose   0/3   0.689
+     32    65   0.909    0.988   lose   1/3   0.447
+     48    97   0.956    1.016   lose   0/3   0.360
+     64   129   0.980    1.041   lose   0/3   0.313
+     80   161   0.995    1.050   lose   1/3   0.279
+    100   201   1.007    1.073    win   0/3   0.252
+    120   241   1.015    1.092    win   1/3   0.232
+
+If V1 turns from 0/3 to 3/3 somewhere near the gap_cf = 1 crossing, the
+gap law is confirmed and the 2026-07-29 'not sample size' reading of T4b
+is corrected: it was sample size, just far more of it than was tested.
+
+------------------------------------------------------------------------------
+EXP F: why the Gaussian heuristic does not apply — the m-independent
+       lambda-block parasite
+------------------------------------------------------------------------------
+The quotient lattice contains m disjoint copies of the 2-D sublattice
+    L2 = < (n*S_K1, 0), (-lam*S_K1, S_K2) >   (columns k1_i, k2_i)
+whose exact shortest vector mu = lambda_1(L2) is computed in O(log n) by
+Lagrange-Gauss (`lambda_block_mu`, glv_hnp_phase2_lambda_threshold.py:209)
+and does NOT depend on m.  If the observed shortest vector equals mu then
+lambda_1(L') is pinned at an m-independent value while ||v'|| grows like
+sqrt(m), so the Gaussian heuristic over-estimates lambda_1 and the gap law
+of EXP E must fail.  mu is the same quantity that gives the ratio
+nu_hat = mu/sqrt(det L2), the 2026-07-29 separator (AUC 0.935).
+
+  fail curve, K1 = 8:  mu = 5095.8  nu_hat = 0.7711   (mu is independent of m)
+      m     sv_obs         mu   sv/mu     ||v'||  sv*sqrt(m)   mu/||v'||    V1
+     12     5095.8     5095.8   1.000     7407.4     17652.3       0.688   0/3
+     32     5095.8     5095.8   1.000    11405.0     28826.0       0.447   1/3
+     48     5095.8     5095.8   1.000    14180.4     35304.5       0.359   0/3
+     64     5095.8     5095.8   1.000    16304.8     40766.2       0.313   0/3
+     80     5095.8     5095.8   1.000    18298.4     45578.0       0.278   1/3
+    100     5095.8     5095.8   1.000    20243.2     50957.7       0.252   0/3
+    120     5095.8     5095.8   1.000    21936.3     55821.4       0.232   1/3
+
+  Same check across the EXP A K1 grid at m = 12 (both curves):
+  curve                K1     sv_obs         mu   sv/mu  nu_hat   mu/||v'||    V1
+  12-bit/2557           2     4732.7     4732.7   1.000  0.3525       0.738   5/5
+  12-bit/2557           3     3683.4     3683.4   1.000  0.3360       0.528   5/5
+  12-bit/2557           4     3235.8     3235.8   1.000  0.3410       0.460   5/5
+  12-bit/2557           6     2875.5     2875.5   1.000  0.3710       0.395   5/5
+  12-bit/2557           8     2737.6     2737.6   1.000  0.4080       0.372   5/5
+  12-bit/2557          12     2634.8     2634.8   1.000  0.4813       0.352   4/5
+  12-bit/2557          16     2598.2     2598.2   1.000  0.5476       0.346   1/5
+  12-bit/2557          24     2571.3     2571.3   1.000  0.6657       0.339   0/5
+  12-bit/2677 FAIL      2     6324.7     9393.6   0.673  0.7099       1.485   5/5
+  12-bit/2677 FAIL      3     6945.8     9341.7   0.744  0.8646       1.345   5/5
+  12-bit/2677 FAIL      4     6950.5     9323.5   0.745  0.9968       1.341   5/5
+  12-bit/2677 FAIL      6     6537.6     6537.6   1.000  0.8557       0.901   2/5
+  12-bit/2677 FAIL      8     5095.8     5095.8   1.000  0.7711       0.702   0/5
+  12-bit/2677 FAIL     12     3756.2     3756.2   1.000  0.6961       0.502   0/5
+  12-bit/2677 FAIL     16     3155.7     3155.7   1.000  0.6753       0.426   0/5
+  12-bit/2677 FAIL     24     2644.6     2644.6   1.000  0.6931       0.349   0/5
+
+------------------------------------------------------------------------------
+EXP G: out-of-sample test of  lambda_1(L') = min(mu, ||v'||)
+------------------------------------------------------------------------------
+EXP F saw sv = mu exactly wherever mu < ||v'||, and sv = ||v'|| exactly
+in the three cells where mu > ||v'||.  That is the law
+      lambda_1(L') = min( mu, ||v'_planted|| ) ,   mu independent of m.
+Tested here on fresh curves not used in EXP A-F.
+
+Searching fresh j=0 GLV curves with p in [16384, 32768) ...
+Found 8 curves.
+
+        n   lam*   K1    eff  nu_hat       sv_obs   min(mu,pv)   law   mu/||v'||    V1
+    16417  0.034    4  0.031  0.7688      40059.8      40059.8  True       1.775   3/3
+    16417  0.034   12  0.094  0.8898      43700.9      43044.2 False       1.104   2/3
+    16417  0.034   32  0.251  0.9202      29008.2      30096.1 False       0.689   0/3
+    16831  0.112    4  0.031  0.4355      40193.8      41622.3 False       0.992   3/3
+    16831  0.112   12  0.093  0.3879      21401.4      21401.4  True       0.478   3/3
+    16831  0.112   32  0.247  0.5308      17920.1      17920.1  True       0.394   3/3
+    16747  0.137    4  0.031  0.9902      41683.3      41683.3  True       2.250   3/3
+    16747  0.137   12  0.093  0.6487      35474.4      35474.4  True       0.797   3/3
+    16747  0.137   32  0.248  0.6328      21188.3      21188.3  True       0.468   3/3
+    16381  0.207    4  0.031  0.8402      38848.8      38848.8  True       1.996   3/3
+    16381  0.207   12  0.094  0.8143      42680.8      43394.7 False       0.987   3/3
+    16381  0.207   32  0.250  0.7099      23145.9      23145.9  True       0.547   2/3
+    16447  0.258    4  0.031  0.7891      40097.1      40097.1  True       1.824   3/3
+    16447  0.258   12  0.094  0.9717      42816.3      43080.3 False       1.207   3/3
+    16447  0.258   32  0.251  0.9723      27170.7      31828.6 False       0.729   0/3
+    16183  0.322    4  0.032  0.7788      38458.7      38458.7  True       1.839   3/3
+    16183  0.322   12  0.095  0.9121      41797.2      43516.4 False       1.099   3/3
+    16183  0.322   32  0.253  0.9893      28393.1      31747.6 False       0.758   0/3
+    16843  0.381    4  0.031  0.9432      41968.3      41968.3  True       2.149   3/3
+    16843  0.381   12  0.093  0.6247      34490.4      34490.4  True       0.770   3/3
+    16843  0.381   32  0.247  0.6230      21060.3      21060.3  True       0.462   3/3
+    16249  0.463    4  0.032  0.6585      38539.3      38539.3  True       1.558   3/3
+    16249  0.463   12  0.095  0.6379      33584.3      33584.3  True       0.770   3/3
+    16249  0.463   32  0.252  0.9110      27954.2      29351.6 False       0.699   0/3
+
+  law lambda_1(L') = min(mu, ||v'||) holds in 15/24 cells
+  violations: 8 'shorter vector exists', 1 'LLL miss'
+  all violations sit in the crossover band mu/||v'|| in [0.69, 1.21]
+  NOTE: mu is a lattice vector by construction, so lambda_1(L') <= mu
+  holds unconditionally; only the equality is approximate.  The
+  m-independence conclusion rests on the inequality, not the equality.
+  nu_hat < 0.55    recovery 9/9 = 1.000
+  nu_hat >= 0.55   recovery 49/63 = 0.778
+
+Done.
