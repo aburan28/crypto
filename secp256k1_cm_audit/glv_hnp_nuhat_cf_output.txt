@@ -1,0 +1,143 @@
+
+##############################################################################
+# GLV-HNP Thread 23-CF: closed form for nu_hat via continued fractions
+##############################################################################
+
+==============================================================================
+PART A -- closed form vs Lagrange-Gauss (exactness)
+==============================================================================
+Claim: lambda_1(L2) = min_j sqrt((S1*eta_j)^2 + (S2*q_j)^2) over the
+continued-fraction convergents of lam/n, exactly (not approximately).
+
+    16-bit:  500 trials, max rel.dev = 0.000e+00
+    20-bit:  500 trials, max rel.dev = 0.000e+00
+    24-bit:  500 trials, max rel.dev = 0.000e+00
+    32-bit:  500 trials, max rel.dev = 0.000e+00
+    48-bit:  500 trials, max rel.dev = 0.000e+00
+    64-bit:  500 trials, max rel.dev = 0.000e+00
+   128-bit:  500 trials, max rel.dev = 0.000e+00
+   256-bit:  500 trials, max rel.dev = 0.000e+00
+
+  total trials   : 4000
+  mismatches     : 0 (tolerance 1e-9)
+  VERDICT: CONFIRMED -- closed form is exact
+
+==============================================================================
+PART B -- location of the minimising convergent
+==============================================================================
+Claim: the winner q_{j*} straddles the critical scale
+       sqrt(n*S1/S2) = sqrt(n*K2/K1), i.e. q_{j*} <= crit <= q_{j*+1}.
+
+  trials                              : 2000
+  q_{j*} <= crit_scale <= q_{j*+1} : 1850/2000 (92.5%)
+  log(q_{j*} / crit_scale) quantiles :
+      q05=-3.338  q25=-1.600  q50=-0.886  q75=-0.456  q95=-0.089
+  (a value of 0 means the winner sits exactly at the critical scale)
+
+==============================================================================
+PART C -- nu_hat^2 >= 2c and the role of the critical partial quotient
+==============================================================================
+nu_hat^2 = x^2 + y^2  with  x*y = c = q*eta/n,  so nu_hat >= sqrt(2c).
+c = 1/(q_{j+1}/q_j + eta_{j+1}/eta_j), so c is small exactly when the
+NEXT partial quotient a_{j*+1} is large.  Hence: small nu_hat <=> a large
+partial quotient at the critical scale.
+
+  sample: 200 20-bit j=0 CM curves, K1=72, K2=isqrt(n)+1
+  relative gap between nu_hat and its bound sqrt(2c):
+      median=0.1048   q90=0.3644   max=0.8733
+
+  nu_hat vs a_crit (partial quotient right after the winning convergent):
+    a_crit  count  mean nu_hat      min      max
+         1      3        0.976    0.970    0.982
+         2     32        0.889    0.748    1.012
+       3-4     63        0.802    0.651    1.021
+       5-8     49        0.614    0.471    0.863
+        >8     53        0.443    0.313    0.835
+
+  spearman(a_crit, nu_hat) = -0.865
+  spearman(c,      nu_hat) = +0.874
+
+==============================================================================
+PART D -- why the June scale-free CF invariants had to fail
+==============================================================================
+max_a is the largest partial quotient ANYWHERE in the CF of lam/n.
+nu_hat depends on the partial quotient at ONE index (the critical scale).
+If that is right, curves sharing a max_a value must still show a wide
+spread of nu_hat -- so no function of max_a can reproduce nu_hat.
+
+    max_a  count  nu_hat min  nu_hat max   spread
+        6     19       0.583       0.984    0.401
+        5     18       0.645       1.012    0.367
+        4     17       0.668       1.021    0.354
+        8     15       0.481       0.982    0.501
+       13     12       0.390       1.017    0.626
+       11      9       0.421       0.957    0.536
+        3      8       0.697       0.960    0.262
+        7      8       0.518       0.863    0.345
+
+  spearman(max_a, nu_hat) over the whole sample = -0.457
+  (compare spearman(a_crit, nu_hat) from Part C)
+
+  WITNESS PAIR (identical max_a = 13):
+    n=  533149 lam=  233824  nu_hat=0.3904  a_crit=13  q*=700
+    n=  536743 lam=  258868  nu_hat=1.0165  a_crit=3  q*=593
+    nu_hat differs by 0.6262 at identical max_a.
+
+==============================================================================
+PART E -- secp256k1 in closed form
+==============================================================================
+  n   = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  lam = 37718080363155996902926221483475020450927657555482586988616620542887997980018   (lam^2+lam+1 = 0 mod n verified)
+
+     eff       K1  nu_hat(CF)  nu_hat(GG)   j*  a_crit  log2 q*  log2 crit
+    0.05     124b      0.8709      0.8709   70       5    127.8      130.2
+    0.10     125b      0.6624      0.6624   70       5    127.8      129.7
+    0.25     127b      0.5852      0.5852   70       5    127.8      129.0
+    0.50     128b      0.6851      0.6851   70       5    127.8      128.5
+
+  Partial quotients of lam/n around the critical index (eff=0.10):
+     j      a_j  log2 q_j  log2 eta_j      c_j
+    66        1    122.44      131.97   0.3324
+    67        2    123.84      130.48   0.3141
+    68        2    125.09      130.17   0.6023
+    69        1    125.60      128.11   0.2050
+    70        4    127.83      125.60   0.1690  <-- winner
+    71        5    130.22      125.09   0.6201
+    72        1    130.47      123.84   0.3109
+    73        2    131.98      122.44   0.3328
+    74        2    133.21      121.82   0.5106
+
+  total CF length of lam/n: 141 partial quotients
+  max_a (largest anywhere): 312
+
+  CAVEATS (unchanged from 2026-07-29): this is a property of a lattice
+  that only arises under a NON-STANDARD nonce generator k = k1 + lam*k2
+  with k1 bounded.  It is not an attack on secp256k1 with correct nonces.
+
+==============================================================================
+PART F -- null distribution of nu_hat over random lam
+==============================================================================
+If nu_hat is governed by CF statistics at a scale, its null law should
+match the lambda_1/sqrt(det) law of random 2D lattices (Gauss-Kuzmin /
+equidistribution).  Compare against the 2026-07-29 measured quantiles.
+
+  256-bit, eff=0.05, 4000 random lam (CF closed form):
+    q05=0.232 q10=0.336 q25=0.516 q50=0.728 q75=0.883 q90=0.969 q95=0.995
+  2026-07-29 measured (Lagrange-Gauss, same setting):
+    q05=0.232 q10=0.322 q25=0.496 q50=0.715 q75=0.885 q90=0.974 q95=0.999
+
+    P(nu_hat < 0.45) = 18.6%   (2026-07-29: 20.5%)
+    P(nu_hat > 0.90) = 22.2%   (2026-07-29: 22.4%)
+
+  small-t check against the Siegel mean-value prediction
+      P(nu_hat <= t) ~ (pi/2)*t^2/zeta(2) = 3t^2/pi   (t -> 0)
+       t  empirical    3t^2/pi
+    0.05     0.0032     0.0024
+    0.10     0.0095     0.0095
+    0.15     0.0210     0.0215
+    0.20     0.0365     0.0382
+    0.30     0.0800     0.0859
+
+==============================================================================
+DONE.  Closed form exact: True
+==============================================================================

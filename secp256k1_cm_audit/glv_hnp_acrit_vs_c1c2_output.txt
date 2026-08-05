@@ -1,0 +1,41 @@
+==============================================================================
+Thread 23-CF Part G: a_crit (theory-derived) vs the June C1/C2 classes
+==============================================================================
+Exp S protocol: K1=72, m=12, 6 seeds, 100 fresh 20-bit j=0 CM curves
+C2 = recovers d on all seeds; C1 = does not (Exp S convention)
+
+  harvested 100 curves in 0.1s
+  600 LLL trials in 1.4s
+  max |nu_hat(CF) - nu_hat(Gauss)| on this sample = 0.000e+00
+
+  C1 (fails): 74/100   C2 (6/6): 26/100
+  trivial baseline (always predict majority) = 74.0%
+
+--- Head to head on the same sample ---
+ invariant             C1 range             C2 range     AUC  best acc
+    nu_hat        [0.408,1.012]        [0.314,0.645]   0.935     89.0%
+    a_crit              [1,419]              [5,728]   0.853     80.0%
+         c        [0.002,0.435]        [0.001,0.179]   0.848     80.0%
+     max_a              [3,419]              [5,729]   0.748     75.0%
+        mu        [0.002,0.497]        [0.001,0.499]   0.523     75.0%
+
+--- a_crit response (C2 rate and mean wins/6) ---
+  a_crit  count   C2 rate  mean wins/6  mean nu_hat
+       1      1      0.00         0.00        0.970
+       2     18      0.00         0.72        0.895
+     3-4     29      0.00         1.14        0.806
+     5-8     29      0.41         3.21        0.596
+      >8     23      0.61         5.13        0.429
+
+--- rank correlations with wins/6 ---
+  spearman( nu_hat, wins) = -0.703
+  spearman( a_crit, wins) = +0.650
+  spearman(      c, wins) = -0.631
+  spearman(  max_a, wins) = +0.476
+  spearman(     mu, wins) = -0.080
+
+--- does a_crit add anything beyond nu_hat (and vice versa)? ---
+  spearman(a_crit, nu_hat) = -0.905
+  spearman(max_a,  nu_hat) = -0.522
+
+Done.
