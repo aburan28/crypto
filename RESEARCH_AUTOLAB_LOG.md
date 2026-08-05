@@ -6103,3 +6103,126 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is λ₁.
+This is verbatim the next-step proposed by the 2026-07-29 entry (priority-5 thread,
+which made measurable progress that day, so protocol rule (b) applies). Priorities 1, 2,
+4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21.
+
+### Work done
+- Fresh clone had **no** PARI/GP, sympy, fpylll, or cysignals. Installed
+  `sympy 1.14.0`, `fpylll 0.6.4`, `cysignals 1.12.5` via pip (network OK through the
+  proxy). **`gp` and `sage` are still absent** — any PARI-only thread (2, 3, 6) is
+  BLOCKED in this container unless a future run builds PARI from source.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase23_projected.py` (~520 lines), which implements
+  three formulations side by side on *identical* signature sets (curve table, `scales()`,
+  `gen_signatures()`, and SEEDS copied verbatim from `glv_hnp_phase2_lambda_threshold.py`
+  so the numbers are directly comparable to 2026-07-29):
+  - **A** = the 2026-07-29 Kannan lattice, dim 2m+2 (baseline).
+  - **B** = A with the d-column deleted, dim 2m+1 — i.e. the quotient by the trivial
+    direction `n·S_D·e_m` that T5 identified. d is re-derived from
+    `k1ᵢ ≡ Aᵢ + Bᵢ·d − λ·k2ᵢ (mod n)`.
+  - **C** = no Kannan row *and* no d-column, dim 2m; explicit CVP via Babai
+    nearest-plane against the centred target `tᵢ = (−Aᵢ + K1/2)·S_K1`,
+    `t_{m+i} = (K2/2)·S_K2`.
+- Ran E1 (structure), E2 (the T4 K1-grid, all three variants), E3 (20 fresh 17-bit
+  curves at eff=0.15), E4 (eff ceiling sweep). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase23_projected_output.txt` (70 lines). Whole script
+  runs in **2.5 s**.
+- Implementation trap worth recording: L_C has 2m+1 generators of rank 2m (`r_B` lies in
+  the **Q**-span of the modular rows), so LLL emits a leading zero row. It must be dropped
+  before `GSO.Mat`, or Babai's recursion divides by a zero Gram–Schmidt norm.
+  Symptom is silent: `babai()` returns garbage rather than raising.
+- `cargo test --test curve_audit` → 5/5 pass (5.46 s). ✓
+
+### Findings
+
+**F1 — the T5 "trivial vector" is NOT the obstruction. Half of the Thread-23 proposal is
+FALSIFIED.** Deleting the d-column (variant B) changes **nothing**: B ties A cell-for-cell
+on every experiment, 22/100 vs 22/100 at seed level and 3/20 vs 3/20 on curves.
+
+| curve | λ* | A sv/pv | A \|sv_d\|/n | B sv/pv | B: is sv = ±planted? |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.467 | 0.595 | 1.0000 | 0.843 | **False** |
+| 12-bit/2557 | 0.340 | 0.510 | 1.0000 | 0.532 | **False** |
+| 12-bit/2677 | 0.070 | 0.418 | 1.0000 | 0.725 | **False** |
+
+sv/pv rises (0.418 → 0.725) but never reaches 1, so *some other* uninformative vector is
+still shorter than the planted one — deleting `n·e_m` just promotes the next one (the
+per-index λ-block vectors are the obvious candidate; not yet confirmed). The falsifier's
+first clause — "sv/pv rises above 1" — is not met, and correspondingly the K1 wall does
+not move at all. **LLL was already size-reducing the d-coordinate mod n, so T5, while
+literally true, was a red herring.**
+
+**F2 — the CVP reformulation (C) is a large, real improvement. The K1 wall is NOT
+information-theoretic.** E2, successes out of 5 seeds:
+
+12-bit/2557, λ*=0.340, m=8:
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| A | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| B | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| **C** | 5/5 | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | **3/5** | 0/5 |
+
+12-bit/2677 (the historical "FAIL" curve), λ*=0.070, m=10:
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| A | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| B | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| **C** | 5/5 | 5/5 | 5/5 | **5/5** | **4/5** | **5/5** | **2/5** | **3/5** |
+
+The wall on the λ*=0.070 curve moves from K1≈4–6 out to K1≈16 — a **~3× gain**, and it
+still scores 3/5 at K1=24 where A is flat zero. Falsifier clause 2 is met.
+
+**F3 — the new bias ceiling (E3/E4).** 20 fresh 17-bit j=0 curves, m=12, 5 seeds,
+eff = K1·K2/n:
+
+| eff | A seed-level | A 5/5 curves | C seed-level | C 5/5 curves |
+|---|---|---|---|---|
+| 0.15 | 22/100 | 3/20 | **89/100** | **12/20** |
+| 0.25 | 8/100 | 0/20 | **53/100** | **4/20** |
+| 0.35 | 2/100 | 0/20 | **21/100** | 0/20 |
+| 0.50 | 0/100 | 0/20 | 6/100 | 0/20 |
+| 0.70 | 0/100 | 0/20 | 0/100 | 0/20 |
+
+E4's eff=0.15 row reproduces E3 exactly (22/100, 89/100) — internal consistency check.
+C at eff=0.35 (21/100) ≈ A at eff=0.15 (22/100), so **C tolerates ≈2.3× the eff of A at
+equal success rate = ≈1.22 fewer bits of nonce bias** (log₂(0.35/0.15) = 1.22).
+
+**F4 — C corroborates the 2026-07-29 falsification of λ\*.** At eff=0.15 C recovers 5/5
+across the whole λ* range including λ*=0.0068 (p=65713, n=65269) and λ*=0.0273; the two
+curves where C does *worst* are λ*=0.1559 (2/5) and λ*=0.0273 (3/5), which is not
+monotone in λ*. λ* remains a non-predictor.
+
+**F5 — C is self-certifying, A and B are not.** From the Babai output, recompute
+`k1ᵢ` from the candidate d and reject unless every `k1ᵢ ∈ [0, K1)`. Verified on
+12-bit/2677: all 5 successes pass the range test and all 5 failures fail it, with zero
+false positives. A and B can only be scored against a known `d_secret`, so C is the first
+Phase-2 formulation that would work as an actual attack rather than as an oracle-scored
+experiment.
+
+### Next step proposal
+**Thread 24 — identify what is *now* λ₁ in variant B, then check whether it also caps C.**
+Concretely: after LLL on L_B, decompose the shortest vector's energy over the m λ-blocks
+(cols i and m+i) and compare its norm to the exact Gauss-reduced μ of the 2-D block
+`⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩` that `lambda_block_mu()` already computes at
+`glv_hnp_phase2_lambda_threshold.py:209`. Falsifier: if `sv_B` matches a single λ-block
+vector to within rounding, then the blocker is the λ-block and the fix is to rescale S_K2
+so `μ > ‖π(v_planted)‖`; if `sv_B` is spread across blocks, it is a genuine random short
+vector and L_B is at the Gaussian-heuristic limit. ~15-minute run, reuses existing code.
+
+Secondary, cheap: C's failures are self-detectable (F5), so **retry-on-reject** is free —
+re-run Babai with randomised target centring or a BKZ-β basis and keep the first candidate
+that passes the k1-range test. Expect this to convert a chunk of C's 53/100 at eff=0.25
+into successes at essentially no analytic cost.
+
+Also flag for the human user: **`gp`/`sage` are not installed in the autolab container**,
+which blocks priorities 2, 3 and 6 indefinitely. A one-line `apt-get install pari-gp` in a
+setup script would unblock three of the six threads.
+
+### Commits made

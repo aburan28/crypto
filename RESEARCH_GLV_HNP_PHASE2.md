@@ -257,7 +257,55 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
-## 9. References
+## 9. The CVP reformulation (Thread 23, 2026-08-05)
+
+The Kannan-embedding lattice of §2 is **not** the best formulation.  Two
+defects, and their fixes, measured in
+`secp256k1_cm_audit/glv_hnp_phase23_projected.py`:
+
+**Defect 1 (cosmetic).**  The lattice contains the trivial vector `n·S_D·e_m`
+(= `n·row_B − Σᵢ Bᵢ·rowᵢ`), of norm `n`, whereas
+`‖v_planted‖ ≈ n·√(2m/3 + 4/3)`.  So the planted vector is never λ₁.
+*Deleting the d-column entirely* (variant B; d is re-derived afterwards from
+`k1ᵢ ≡ Aᵢ + Bᵢ·d − λ·k2ᵢ mod n`) removes it — and changes **nothing**: B and A
+agree cell-for-cell on every experiment run so far.  LLL already size-reduces
+the d-coordinate mod n, so the trivial vector was never the obstruction.
+
+**Defect 2 (real).**  The Kannan embedding turns a BDD instance into a uSVP
+instance, and pays for it.  Variant C drops **both** the Kannan row and the
+d-column and solves the underlying CVP directly:
+
+    rows (dim 2m):  rᵢ      = n·S_K1·eᵢ                    (i < m)
+                    r_B     = (Bᵢ·S_K1)ᵢ
+                    r_{2,i} = −λ·S_K1·eᵢ + S_K2·e_{m+i}
+    target:         tᵢ = (−Aᵢ + K1/2)·S_K1,  t_{m+i} = (K2/2)·S_K2
+
+then Babai nearest-plane on the LLL-reduced basis.  From the closest point `x`,
+`k2ᵢ = x_{m+i}/S_K2` and `d ≡ (xᵢ/S_K1 + λ·k2ᵢ)·Bᵢ⁻¹ (mod n)`.
+
+Note `r_B` lies in the **Q**-span of the `rᵢ`, so L_C has rank 2m from 2m+1
+generators; LLL emits a leading zero row that must be dropped before building
+the GSO, or the nearest-plane recursion divides by a zero Gram–Schmidt norm.
+
+Variant C also gives a **self-certifying** failure test that A and B lack:
+recompute `k1ᵢ` from the candidate `d` and reject unless every `k1ᵢ ∈ [0, K1)`.
+A and B can only be scored against a known `d_secret`.
+
+Measured gain (20 fresh 17-bit j=0 curves, m = 12, 5 seeds, `eff = K1·K2/n`):
+
+| eff | A (Kannan) seed-level | C (CVP) seed-level |
+|---|---|---|
+| 0.15 | 22/100 | 89/100 |
+| 0.25 | 8/100 | 53/100 |
+| 0.35 | 2/100 | 21/100 |
+| 0.50 | 0/100 | 6/100 |
+| 0.70 | 0/100 | 0/100 |
+
+C tolerates ≈2.3× the `eff` of A at equal success rate (0.35 vs 0.15), i.e.
+**≈1.2 fewer bits of nonce bias**.  §2's construction should be considered
+superseded by L_C for all future Phase-2 work.
+
+## 10. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
   elliptic curves with efficient endomorphisms", CRYPTO 2001.
