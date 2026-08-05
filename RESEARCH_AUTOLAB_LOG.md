@@ -6263,4 +6263,4 @@ Do **not** re-attempt: the e_m projection, Babai/CVP-without-Kannan, or S_D resc
 P5 proves all three are the identical no-op.
 
 ### Commits made
-[filled in below]
+7d7e7c7 autolab 2026-08-05: Thread 23 — trivial vector is inert (80/80, HNF-equal); wall is not info-theoretic; eff<0.176 ceiling in closed form
