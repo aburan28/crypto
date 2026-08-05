@@ -6277,4 +6277,4 @@ Secondary (unchanged from 2026-07-29, still not done): re-express the 2026-07-26
 column in λ* throughout, so future runs do not re-derive the root-convention confusion.
 
 ### Commits made
-[recorded in the follow-up commit below]
+24b4e12 autolab 2026-08-05: Thread 23 — BDD reformulation beats Kannan; K1 wall was a formulation artifact
