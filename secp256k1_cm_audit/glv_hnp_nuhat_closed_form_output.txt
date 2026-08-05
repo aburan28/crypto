@@ -1,0 +1,127 @@
+
+==============================================================================
+E1  C1: continued-fraction closed form for lambda_1(L2)  [EXACT test]
+==============================================================================
+For each instance: exact Lagrange-Gauss lambda_1^2  vs  min over CF
+convergents of lam/n.  Claim: equal as integers, always.
+
+    16 bits: 400 instances, exact-integer mismatches = 0
+    24 bits: 400 instances, exact-integer mismatches = 0
+    32 bits: 400 instances, exact-integer mismatches = 0
+    64 bits: 400 instances, exact-integer mismatches = 0
+   128 bits: 400 instances, exact-integer mismatches = 0
+   256 bits: 400 instances, exact-integer mismatches = 0
+
+  TOTAL 2400 instances, mismatches = 0
+  VERDICT: C1 CONFIRMED (exact)
+
+==============================================================================
+E2  C2: shape identity nu_hat = 1/sqrt(Im tau), Hermite bound
+==============================================================================
+  3000 random instances
+  max |nu_hat - 1/sqrt(Im tau)|      = 4.441e-16
+  max nu_hat observed                = 1.061132
+  Hermite bound (4/3)^(1/4)          = 1.074570
+  VERDICT: C2 CONFIRMED
+
+==============================================================================
+E3  C3: null law  P(nu_hat <= t) = (3/pi) t^2  for random lam
+==============================================================================
+  sanity: null_cdf(1) = 0.954930   (= 3/pi = 0.954930)
+          null_cdf(hermite) = 1.000000   (must be 1)
+
+  m=500   KS D = 0.0379   (5% critical 0.0608)   PASS
+  m=2000  KS D = 0.0236   (5% critical 0.0304)   PASS
+  m=8000  KS D = 0.0089   (5% critical 0.0152)   PASS
+  VERDICT: C3 CONFIRMED if D shrinks like 1/sqrt(m) and stays under crit
+
+==============================================================================
+E4  C4: GLV lam is NOT a random lattice -- the hexagonal locus
+==============================================================================
+  (a) order-3 stability of L = {(r,b): r + b*lam = 0 mod n}
+      M = [[0,-1],[1,-1]] must map L into L for GLV lam.
+
+      harvested 1200 GLV curves (20-bit band, eff=0.05)
+      M-stability violations                  : 0
+      curves where lambda_1(Q) != sqrt(n)      : 0
+      -> L is a Z[omega]-ideal alpha*Z[omega], N(alpha) = n  CONFIRMED
+
+  (b) collapse: nu_hat vs G_rho(theta*) at fixed eff
+      rho = S1/S2 across curves: min=20.026 median=20.295 max=20.583
+      relative |nu_hat - G_rho(theta*)|: median=6.13e-16  p90=2.57e-15  max=6.23e-15
+      VERDICT: C4(b) CONFIRMED -- nu_hat is a function of theta* alone
+
+      theta(deg)    nu_hat    G_rho(theta*)   rho
+         0.133    0.22258    0.22258     20.189
+         3.606    0.39006    0.39006     20.133
+         7.359    0.69966    0.69966     20.499
+        10.370    0.95350    0.95350     20.157
+        13.625    0.80348    0.80348     20.503
+        17.653    0.68975    0.68975     20.391
+        20.727    0.69547    0.69547     20.431
+        24.178    0.99986    0.99986     20.305
+        26.739    0.64793    0.64793     20.277
+        29.723    0.38926    0.38926     20.159
+        32.395    0.53126    0.53126     20.078
+        36.176    0.98142    0.98142     20.454
+        39.923    0.63570    0.63570     20.423
+        43.523    0.85098    0.85098     20.078
+        46.481    0.81033    0.81033     20.113
+        50.047    0.93435    0.93435     20.477
+        53.233    0.65585    0.65585     20.226
+        56.325    0.40429    0.40429     20.109
+        59.394    0.22895    0.22895     20.502
+
+  (c) induced law: theta ~ U[0,60) pushed through G_rho, vs the null
+      n=1200 GLV curves, rho=20.295
+      KS D vs induced law G_rho#U[0,60) = 0.0275  (5% crit 0.0393)  PASS
+      KS D vs random-lattice null       = 0.0467  (5% crit 0.0393)  FAIL
+      sup|induced - null| = 0.0466  -> n needed to separate at 5%: ~850
+      GLV nu_hat range    : [0.2211, 1.0722]
+      GLV nu_hat quartiles: 0.5023 / 0.7201 / 0.8947
+      G_rho over theta in [0,60): [0.2219, 1.0724]
+      decile table   t : induced / null
+        0.3323 : 0.0910 / 0.1055
+        0.4362 : 0.1819 / 0.1817
+        0.5558 : 0.2727 / 0.2950
+        0.6149 : 0.3636 / 0.3610
+        0.6829 : 0.4546 / 0.4453
+        0.7641 : 0.5455 / 0.5575
+        0.8179 : 0.6364 / 0.6388
+        0.8721 : 0.7273 / 0.7263
+        0.9357 : 0.8182 / 0.8360
+        0.9821 : 0.9091 / 0.9211
+
+==============================================================================
+E5  secp256k1: exact numbers
+==============================================================================
+  lam*     = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72
+  mu       = 0.325740
+  alpha    = 367917413016453100223835821029139468248 + 64502973549206556628585045361533709077*omega
+  N(alpha) = a^2-ab+b^2 == n ?  True
+  theta*   = 9.448519 deg
+  eff=0.05    rho=  20.000  nu_hat=0.870857  (CF 0.870857, G_rho 0.870857)  null-pctile= 72.4%
+  eff=0.0993  rho=  10.070  nu_hat=0.663928  (CF 0.663928, G_rho 0.663928)  null-pctile= 42.1%
+  eff=0.15    rho=   6.667  nu_hat=0.599002  (CF 0.599002, G_rho 0.599002)  null-pctile= 34.3%
+  eff=0.25    rho=   4.000  nu_hat=0.585226  (CF 0.585226, G_rho 0.585226)  null-pctile= 32.7%
+
+  C2-class ceiling from 2026-07-29 was nu_hat <= 0.645:
+    null percentile of 0.645 = 39.7%
+    null percentile of 0.408 = 15.9%  (overlap floor)
+
+==============================================================================
+E6  consequence of C4: nu_hat is ROOT-ASYMMETRIC (mu is not)
+==============================================================================
+  The two roots of x^2+x+1 mod n are lam and n-1-lam; they give
+  conjugate ideals, theta and 60-theta.  mu is invariant under the
+  swap, nu_hat is not.  All prior runs used glv_eigenvalues()[0] =
+  min(r1,r2), an arbitrary convention.  An attacker picks the better
+  root for free, so the attack-relevant quantity is min over roots.
+
+  1200 curves; theta(root2) == -theta(root1) mod 60: 1200/1200
+  |nu_hat(lam) - nu_hat(n-1-lam)|: median=0.0104  p90=0.0205  max=0.0260
+  the non-chosen root is the smaller-nu_hat one in 627/1200 = 52.2% of curves
+
+  secp256k1, both roots:
+    min root (used so far)   theta=  9.4485 deg   nu_hat(eff=0.05)=0.870857 nu_hat(eff=0.0993)=0.663928
+    other root               theta= 50.5515 deg   nu_hat(eff=0.05)=0.881527 nu_hat(eff=0.0993)=0.691329
