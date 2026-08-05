@@ -6562,4 +6562,4 @@ why all four of them had to fail.
 
 ### Commits made
 
-(hash recorded in the following commit)
+9dcdd77 autolab 2026-08-05: Thread 23 — nu_hat closed form via continued fractions; repair 07-29 merge loss
