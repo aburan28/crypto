@@ -6260,3 +6260,4 @@ whether the residual variance is fully explained by curve identity — that woul
 much predictive power any λ-dependent statistic could ever add.
 
 ### Commits made
+09369ab autolab 2026-08-05: Thread 23 — projecting out the trivial vector changes nothing
