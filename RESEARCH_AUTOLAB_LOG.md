@@ -6226,3 +6226,5 @@ which blocks priorities 2, 3 and 6 indefinitely. A one-line `apt-get install par
 setup script would unblock three of the six threads.
 
 ### Commits made
+
+18f5b5d autolab 2026-08-05: Thread 23 — trivial-vector fix is a no-op; CVP reformulation gains ~1.2 bits
