@@ -1,0 +1,170 @@
+==============================================================================
+Thread 23 — reformulate the Phase-2 lattice so the target is lambda_1
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P1: is the planted vector lambda_1 after projection?
+------------------------------------------------------------------------------
+sv/pv = ||shortest reduced vector|| / ||planted vector||.
+T5 (2026-07-29) measured sv/pv in [0.34,0.61] for FULL, with 100% of
+the shortest vector's energy in the d column (dcol = |sv[m]|/n = 1).
+If the projection works, PROJ sv/pv should rise to ~1.0.
+
+curve               K1   m   lam*  FULL sv/pv   dcol  PROJ sv/pv   pv/GH  FULL  PROJ   BAB
+8-bit/199            2   6  0.467       0.543  1.000       0.790   1.289 5/5   5/5   5/5  
+12-bit/2557          8   8  0.340       0.445  1.000       0.475   1.461 5/5   5/5   5/5  
+12-bit/2677 FAIL     8  10  0.070       0.387  1.000       0.767   1.383 0/5   0/5   0/5  
+
+------------------------------------------------------------------------------
+EXP P2: the K1 wall.  T4 (2026-07-29) grid, re-run for all 3 methods
+------------------------------------------------------------------------------
+T4 result for FULL (5 seeds):
+  12-bit/2557 (lam*=0.340): K1=2,3,4,6,8 -> 5/5;  12 -> 4/5; 16 -> 1/5; 24 -> 0/5
+  12-bit/2677 (lam*=0.070): K1=2,3,4 -> 5/5;  6 -> 2/5;  8,12,16,24 -> 0/5
+FALSIFIER: if PROJ/BABAI do not move the wall outward, the wall is
+information-theoretic and Phase 2 is at its ceiling.
+
+
+  12-bit/2557   (n=2659, lam*=0.340, m=8)
+    K1     eff   FULL   PROJ  BABAI  FULLsv/pv  PROJsv/pv   pv/GH
+     2   0.039 5/5    5/5    5/5         0.491      0.902   0.685
+     3   0.059 5/5    5/5    5/5         0.442      0.636   0.917
+     4   0.078 5/5    5/5    5/5         0.462      0.585   1.012
+     6   0.117 5/5    5/5    5/5         0.423      0.475   1.328
+     8   0.156 5/5    5/5    5/5         0.445      0.475   1.461
+    12   0.235 1/5    1/5    0/5         0.409      0.424   1.889
+    16   0.313 0/5    0/5    0/5         0.428      0.437   2.062
+    24   0.469 0/5    0/5    0/5         0.395      0.409   2.657
+
+  12-bit/2677 FAIL   (n=2647, lam*=0.070, m=10)
+    K1     eff   FULL   PROJ  BABAI  FULLsv/pv  PROJsv/pv   pv/GH
+     2   0.039 5/5    5/5    5/5         0.438      1.000   0.625
+     3   0.059 5/5    5/5    4/5         0.405      1.000   0.823
+     4   0.079 5/5    5/5    2/5         0.400      1.000   0.961
+     6   0.118 0/5    0/5    0/5         0.382      0.945   1.219
+     8   0.157 0/5    0/5    0/5         0.387      0.767   1.383
+    12   0.236 0/5    0/5    0/5         0.372      0.543   1.743
+    16   0.314 0/5    0/5    0/5         0.380      0.466   1.965
+    24   0.471 0/5    0/5    0/5         0.367      0.377   2.456
+
+------------------------------------------------------------------------------
+EXP P3: is pv/GH (a lattice-level quantity) a predictor?
+------------------------------------------------------------------------------
+Every (curve, K1) cell of P2 is one data point: predictor value vs
+observed PROJ success rate.  A usable predictor separates the 5/5
+cells from the 0/5 cells with a single threshold across BOTH curves.
+
+curve                K1   pv/GH  PROJsv/pv   PROJ
+12-bit/2557           2   0.685      0.902 5/5   
+12-bit/2557           3   0.917      0.636 5/5   
+12-bit/2557           4   1.012      0.585 5/5   
+12-bit/2557           6   1.328      0.475 5/5   
+12-bit/2557           8   1.461      0.475 5/5   
+12-bit/2557          12   1.889      0.424 1/5   
+12-bit/2557          16   2.062      0.437 0/5   
+12-bit/2557          24   2.657      0.409 0/5   
+12-bit/2677 FAIL      2   0.625      1.000 5/5   
+12-bit/2677 FAIL      3   0.823      1.000 5/5   
+12-bit/2677 FAIL      4   0.961      1.000 5/5   
+12-bit/2677 FAIL      6   1.219      0.945 0/5   
+12-bit/2677 FAIL      8   1.383      0.767 0/5   
+12-bit/2677 FAIL     12   1.743      0.543 0/5   
+12-bit/2677 FAIL     16   1.965      0.466 0/5   
+12-bit/2677 FAIL     24   2.456      0.377 0/5   
+
+  best single threshold on pv/GH: 1.0116 -> accuracy 0.875  (majority baseline 0.500)
+
+  best single threshold on PROJ sv/pv: 0.3773 -> accuracy 0.500  (majority baseline 0.500)
+
+------------------------------------------------------------------------------
+EXP P4: does more data rescue the wall under PROJ?
+------------------------------------------------------------------------------
+T4b (FULL, 12-bit/2677, K1=8): m = 8/12/16/24/32 -> 0,0,1,0,1 of 5.
+
+  12-bit/2677 FAIL, K1=8
+     m   FULL   PROJ  BABAI  PROJsv/pv   pv/GH
+     8 0/5    0/5    0/5         0.794   1.464
+    12 0/5    0/5    0/5         0.704   1.291
+    16 1/5    1/5    0/5         0.607   1.194
+    24 0/5    0/5    0/5         0.515   1.059
+    32 1/5    1/5    0/5         0.451   1.003
+
+------------------------------------------------------------------------------
+EXP P5: exact lambda_1 of the projected lattice as a separator
+------------------------------------------------------------------------------
+P3 shows pv/GH separates at ~1.01 with 87.5% accuracy, the two misses
+being the lam*=0.340 curve at K1=6,8 (pv/GH=1.33,1.46 yet 5/5).  So the
+residual lam* effect should be a lambda_1(L') vs GH(L') GAP.  Test it
+directly: lambda_1 via BKZ at block_size = dim (HKZ in these small
+dimensions; fpylll SVP.shortest_vector is unavailable, the fplll
+strategies json is not shipped with the wheel).
+
+curve                K1         pv       lam1         GH  lam1/GH  pv/lam1   PROJ
+12-bit/2557           2       5245       4676       7657    0.611    1.122 5/5   
+12-bit/2557           3       5802       3683       6327    0.582    1.575 5/5   
+12-bit/2557           4       5588       3236       5524    0.586    1.727 5/5   
+12-bit/2557           6       6065       2876       4566    0.630    2.109 5/5   
+12-bit/2557           8       5823       2738       3987    0.687    2.127 5/5   
+12-bit/2557          12       6220       2635       3292    0.800    2.361 1/5   
+12-bit/2557          16       5933       2568       2877    0.893    2.310 0/5   
+12-bit/2557          24       6298       2571       2370    1.085    2.450 0/5   
+12-bit/2677 FAIL      2       5837       5837       9338    0.625    1.000 5/5   
+12-bit/2677 FAIL      3       6338       6338       7698    0.823    1.000 5/5   
+12-bit/2677 FAIL      4       6446       6446       6710    0.961    1.000 5/5   
+12-bit/2677 FAIL      6       6745       6369       5534    1.151    1.059 0/5   
+12-bit/2677 FAIL      8       6667       5096       4820    1.057    1.308 0/5   
+12-bit/2677 FAIL     12       6926       3756       3974    0.945    1.844 0/5   
+12-bit/2677 FAIL     16       6808       3156       3465    0.911    2.157 0/5   
+12-bit/2677 FAIL     24       7015       2645       2857    0.926    2.653 0/5   
+
+  best single threshold on pv/GH: 1.0116 -> accuracy 0.875  (majority baseline 0.500)
+
+  best single threshold on pv/lambda_1: 2.1270 -> accuracy 0.812  (majority baseline 0.500)
+
+------------------------------------------------------------------------------
+EXP P6: m-sensitivity of the K1 wall (reconciles P2 with T4)
+------------------------------------------------------------------------------
+T4 (2026-07-29) did not record m.  P2 above uses the HIST m (8 for
+2557, 10 for 2677) and differs from T4 in two cells: 2557/K1=12
+(1/5 here vs 4/5 in T4) and 2677/K1=6 (0/5 here vs 2/5 in T4).
+Sweep m to find which m reproduces T4.
+
+curve                K1    m=8   m=10   m=12   m=16
+12-bit/2557          12    1/5    3/5    4/5    5/5
+12-bit/2557          16    0/5    0/5    1/5    2/5
+12-bit/2677 FAIL      6    0/5    0/5    2/5    1/5
+12-bit/2677 FAIL      8    0/5    0/5    0/5    1/5
+
+------------------------------------------------------------------------------
+EXP P7: what IS lambda_1(L') when it is not the planted vector?
+------------------------------------------------------------------------------
+Candidate: the 2D 'lambda block' B_i = <(n*S_K1,0), (-lam*S_K1,S_K2)>
+that Thread 20 (T2) already isolated.  B_i lives in coordinate pair
+(i, m+i) of L' and is independent of i, so mu = |shortest vec of B_i|
+is a lattice vector of L' for every i.  Prediction: lambda_1(L') =
+min(mu, ||pv||), and the planted vector is lambda_1 exactly when
+||pv|| < mu.
+
+curve                K1         mu  lam1(BKZ)         pv  min(mu,pv)  == lam1  pv<mu   PROJ
+12-bit/2557           2       4733       4676       5245        4733     True  False 5/5   
+12-bit/2557           3       3683       3683       5802        3683     True  False 5/5   
+12-bit/2557           4       3236       3236       5588        3236     True  False 5/5   
+12-bit/2557           6       2876       2876       6065        2876     True  False 5/5   
+12-bit/2557           8       2738       2738       5823        2738     True  False 5/5   
+12-bit/2557          12       2635       2635       6220        2635     True  False 1/5   
+12-bit/2557          16       2598       2568       5933        2598     True  False 0/5   
+12-bit/2557          24       2571       2571       6298        2571     True  False 0/5   
+12-bit/2677 FAIL      2       9394       5837       5837        5837     True   True 5/5   
+12-bit/2677 FAIL      3       9342       6338       6338        6338     True   True 5/5   
+12-bit/2677 FAIL      4       9323       6446       6446        6446     True   True 5/5   
+12-bit/2677 FAIL      6       6538       6369       6745        6538    False  False 0/5   
+12-bit/2677 FAIL      8       5096       5096       6667        5096     True  False 0/5   
+12-bit/2677 FAIL     12       3756       3756       6926        3756     True  False 0/5   
+12-bit/2677 FAIL     16       3156       3156       6808        3156     True  False 0/5   
+12-bit/2677 FAIL     24       2645       2645       7015        2645     True  False 0/5   
+
+  lambda_1(L') == min(mu, ||pv||) in 15/16 cells (2% tol)
+
+==============================================================================
+done
+==============================================================================

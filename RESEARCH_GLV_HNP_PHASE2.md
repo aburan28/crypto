@@ -257,7 +257,49 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
-## 9. References
+## 9. Structural ceiling of the Phase-2 lattice (Thread 23, 2026-08-05)
+
+Empirical status of the lattice defined in §2, established by
+`secp256k1_cm_audit/glv_hnp_phase2_projected.py` (full data in
+`glv_hnp_phase2_projected_output.txt`; see `RESEARCH_AUTOLAB_LOG.md`
+2026-08-05 for the tables).
+
+1. **The trivial vector is not the obstruction.**  L contains
+   `n·S_D·e_m`, which is shorter than the planted vector for every
+   m ≥ 1, so the planted vector is never λ₁ (2026-07-29, T5).
+   Quotienting that direction out — `L' = L / (L ∩ R·e_m)`, with d
+   recovered algebraically as `d = (k₁₀ + λ·k₂₀ − A₀)·B₀⁻¹ mod n` —
+   changes the success rate in **0 of 16** (curve, K1) cells.
+   Dropping the Kannan embedding for a Babai/CVP formulation is
+   strictly worse (loses 3 cells, wins none).
+
+2. **λ₁(L') in closed form.**  The 2-D λ block
+   `B = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` embeds in coordinate pair
+   (i, m+i) for every i, independently of i.  Writing μ for its
+   Gauss-reduced shortest vector,
+
+   > λ₁(L') = min(μ, ‖v_planted‖)   (15/16 cells, 2% tolerance)
+
+   and the planted vector is λ₁ exactly when ‖v_planted‖ < μ.  This
+   identifies μ — the quantity Thread 20 isolated and falsified as a
+   predictor — with λ₁ of the projected lattice.
+
+3. **Recovery is a coset/BDD condition, not SVP.**  It survives
+   pv/λ₁ = 2.13 on the λ*=0.340 curve and fails at pv/λ₁ = 1.06 on the
+   λ*=0.070 curve.  Best single-threshold accuracies over the 16 cells:
+   `pv/GH(L')` 0.875, `pv/λ₁` 0.812, baseline 0.500.  Since ‖pv‖ and
+   det(L') depend only on (n, m, K1, K2), `pv/GH` carries no curve
+   structure — it is the random-lattice baseline, and the λ* effect is
+   its residual.
+
+4. **Falsified predictors** (do not re-test): λ/n, λ* = min(λ,n−λ)/n,
+   ρ = μ/‖v_planted‖, pv/λ₁, and the μ/ρ hypothesis of 2026-07-29.
+
+5. **The K1 wall is m-sensitive.**  Any reported K1 wall must state m;
+   e.g. 12-bit/2557 at K1=12 gives 1/5, 3/5, 4/5, 5/5 for m = 8, 10,
+   12, 16.
+
+## 10. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
   elliptic curves with efficient endomorphisms", CRYPTO 2001.

@@ -6103,3 +6103,171 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the next-step
+proposed verbatim by the 2026-07-29 entry (log line ~6089). Protocol rule (b):
+priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END, priority 3 completed 2026-07-21,
+and priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so its
+proposed sub-task is the correct pick.
+
+The 2026-07-29 run proved (T5) that the planted vector is never λ₁ of the Phase-2
+lattice L, because the d column carries a full `n·S_D·Z·e_m` sublattice whose
+generator is shorter than the planted vector for every m ≥ 1. Thread 23 asks
+whether removing that trivial direction moves the K1 wall.
+
+**Outcome: the pre-registered falsifier fired. It does not. Phase 2 is at its
+ceiling for this lattice family.**
+
+### Work done
+- Environment (fresh container): `pip install cysignals fpylll` → fpylll 0.6.4.
+  `apt-get install pari-gp` fails until `apt-get update` is run first (stale
+  archive index → 404 on libegl-mesa0); after update, PARI/GP 2.15.4 installs
+  clean. **Note for future runs**: `fpylll.SVP.shortest_vector` is unusable in
+  this wheel — it wants `/project/local/share/fplll/strategies/default.json`,
+  which is not shipped, and it fails even with `pruning=False`. `BKZ.reduction`
+  works without the strategies file, so exact-ish λ₁ must go through
+  `BKZ.Param(block_size=dim)` (HKZ in these dimensions).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (7 experiments P1–P7),
+  reusing `scales`/`gen_signatures`/the FULL lattice verbatim from
+  `glv_hnp_phase2_20bit.py:262` so every comparison to T4/T5 is exact.
+  Artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`.
+  **Runs end-to-end in 1 s** — cheap to re-run and extend.
+- Three methods compared on identical signature sets, 5 seeds:
+  - **FULL** — the 2026-06-15 lattice, dim 2m+2 (control).
+  - **PROJ** — `L' = L / (L ∩ R·e_m)`, realised by deleting column m. Rank 2m+1
+    with 2m+2 generators (n·drow lies in the span of the modular rows); fpylll
+    reduces the rank-deficient input and emits one zero row. d stops being a
+    lattice coordinate and is recovered algebraically from signature 0:
+    `d = (k1_0 + λ·k2_0 − A_0)·B_0⁻¹ mod n`.
+    `det(L') = det(L)/(n·S_D) = (n·S_K1)^m · S_K2^m · S_KANNAN / n`.
+  - **BABAI** — CVP form, no Kannan embedding and no d coordinate:
+    `L0 = ⟨n·S_K1·e_i, drow, k2row_i⟩` in dim 2m, target `t = (−A_i·S_K1, 0)`,
+    solved by nearest-plane on the LLL-reduced basis. Removes the `S_KANNAN = n`
+    component from the target norm.
+- `cargo test --test curve_audit` → 5/5 pass (8.06 s). ✓ (No Rust changed.)
+
+### Findings
+
+**P2 — H23b FALSIFIED. FULL ≡ PROJ in 16/16 cells, exactly.**
+T4's grid re-run, 5 seeds, PROJ success rate identical to FULL in every cell:
+
+| curve (λ*) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 (0.340), m=8 FULL | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 PROJ | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2557 BABAI | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 (0.070), m=10 FULL | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 PROJ | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 BABAI | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The K1 wall does not move. **Correction to the implicit reading of T5**: the fact
+that the planted vector is not λ₁ was never the obstruction. LLL returns a *basis*,
+not a single vector; the trivial vector `n·S_D·e_m` occupies one basis row and the
+planted vector is still delivered in another. Deleting the direction it lives in
+changes nothing. Per the falsifier stated on 2026-07-29, **the K1 wall is not an
+artifact of the lattice formulation**.
+
+**BABAI is strictly worse, never better** — it loses 3 cells (2677 at K1=3: 4/5,
+K1=4: 2/5; 2557 at K1=12: 0/5) and wins none. So the Kannan embedding is not the
+bottleneck either: nearest-plane's per-coordinate rounding is weaker than LLL's
+search over a whole basis. Both reformulations are dead as *attack improvements*.
+
+**P1 — H23a confirmed but only diagnostically.** Projection does remove the trivial
+vector (`dcol = |sv[m]|/n = 1.000` for FULL on all three historical curves, exactly
+as T5 measured; the quantity does not exist for PROJ), and sv/pv rises from
+0.387–0.543 to 0.475–0.790. It reaches exactly 1.000 (planted vector *is* the
+shortest) for 12-bit/2677 at K1 ≤ 4 — but those cells already succeeded under FULL.
+
+**P4 — more data still does not rescue the wall.** 12-bit/2677, K1=8, PROJ:
+m = 8/12/16/24/32 → 0, 0, 1, 0, 1 of 5, identical to T4b's FULL numbers. BABAI: 0
+across the board. pv/GH falls monotonically (1.464 → 1.003) without success
+following it.
+
+**P3/P5 — the best predictor found is the random-lattice baseline, and it is
+secret-independent but λ-blind.**
+`pv/GH(L')` with `GH = √(N/2πe)·det^{1/N}`, N = 2m+1, separates the 16 cells at
+threshold **1.0116 with accuracy 0.875** (majority baseline 0.500). Honest caveat:
+`‖pv‖ ≈ n√(2m/3+1)` and `det(L')` are both functions of (n, m, K1, K2) *only* —
+`pv/GH` contains no curve structure at all, so its 87.5% is exactly the accuracy of
+the best (eff, m) rule, not a new separator of the kind sought 2026-06-21…06-29.
+Both of its errors are the λ*=0.340 curve *succeeding beyond prediction*
+(pv/GH = 1.328 and 1.461, both 5/5), i.e. the residual is precisely the λ* effect.
+
+Exact λ₁(L') via BKZ at block_size = dim:
+
+| curve | K1 | ‖pv‖ | λ₁ | GH | λ₁/GH | pv/λ₁ | PROJ |
+|---|---|---|---|---|---|---|---|
+| 2557 | 2 | 5245 | 4676 | 7657 | 0.611 | 1.122 | 5/5 |
+| 2557 | 4 | 5588 | 3236 | 5524 | 0.586 | 1.727 | 5/5 |
+| 2557 | 8 | 5823 | 2738 | 3987 | 0.687 | 2.127 | 5/5 |
+| 2557 | 12 | 6220 | 2635 | 3292 | 0.800 | 2.361 | 1/5 |
+| 2557 | 24 | 6298 | 2571 | 2370 | 1.085 | 2.450 | 0/5 |
+| 2677 | 2 | 5837 | 5837 | 9338 | 0.625 | **1.000** | 5/5 |
+| 2677 | 4 | 6446 | 6446 | 6710 | 0.961 | **1.000** | 5/5 |
+| 2677 | 6 | 6745 | 6369 | 5534 | 1.151 | 1.059 | 0/5 |
+| 2677 | 8 | 6667 | 5096 | 4820 | 1.057 | 1.308 | 0/5 |
+| 2677 | 24 | 7015 | 2645 | 2857 | 0.926 | 2.653 | 0/5 |
+
+Best `pv/λ₁` threshold: 2.127 → accuracy 0.812, *worse* than pv/GH. The λ*=0.340
+curve recovers 5/5 while the planted vector is 2.13× longer than λ₁; the λ*=0.070
+curve fails at pv/λ₁ = 1.059. **Success is therefore not an SVP condition even after
+the trivial direction is removed** — recovery is still a coset/BDD property, so
+T5's structural conclusion survives the reformulation intact.
+
+**P7 — λ₁(L') identified in closed form, and it unifies Thread 20 with Thread 23.**
+The 2-D "λ block" `B = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` sits inside coordinate pair
+(i, m+i) of L' for every i and does not depend on i, so its Gauss-reduced shortest
+vector μ is a lattice vector of L'. Measured:
+
+> **λ₁(L') = min(μ, ‖v_planted‖) in 15/16 cells at 2% tolerance.**
+
+(The one miss, 2677/K1=6, is a seed-averaging artifact: μ=6538, λ₁=6369, pv=6745,
+2.7% off.) The planted vector is λ₁ exactly when ‖pv‖ < μ — true only for 2677 at
+K1 ≤ 4, which matches the `pv/λ₁ = 1.000` rows above.
+
+So **μ (Thread 20's T2 quantity) and λ₁ of the projected lattice are the same
+object**. Thread 20 falsified ρ = μ/‖pv‖ as a predictor; that is now seen to be
+exactly a falsification of "pv/λ₁ predicts success", which P5 re-measures
+independently at 0.812 accuracy. The two threads are consistent, and no future run
+needs to re-derive either. Confirmed dead as predictors: λ/n, λ*, ρ = μ/‖pv‖,
+pv/λ₁, and (2026-07-29 T2) the μ/ρ hypothesis.
+
+**P6 — reconciles P2 with T4, which did not record m.** The K1 wall is
+m-sensitive, so T4's grid is only reproducible if m is pinned:
+
+| curve | K1 | m=8 | m=10 | m=12 | m=16 |
+|---|---|---|---|---|---|
+| 2557 | 12 | 1/5 | 3/5 | 4/5 | 5/5 |
+| 2557 | 16 | 0/5 | 0/5 | 1/5 | 2/5 |
+| 2677 | 6 | 0/5 | 0/5 | 2/5 | 1/5 |
+| 2677 | 8 | 0/5 | 0/5 | 0/5 | 1/5 |
+
+T4's reported cells (2557/K1=12 → 4/5, 2677/K1=6 → 2/5) both correspond to **m=12**,
+not to the HIST m values (8 and 10) used in P2. **Future runs should state m
+explicitly in every K1-wall table**; the two-cell disagreement between P2 and T4 is
+entirely this, not a code difference.
+
+### Next step proposal
+**Thread 24 — exploit μ instead of trying to remove it.** P7 shows μ ≪ √det(B) on
+the λ*=0.340 curve (μ=2738 vs √(n·S_K1·S_K2)=6710 at K1=8), i.e. λ/n has a good
+rational approximation b/a with small a. That is a *usable* structure, not just a
+parasite: the Gauss-reduced basis of B gives a change of variables
+(k1_i, k2_i) → (k1'_i, k2'_i) in which the planted vector's two blocks are
+re-balanced. Concretely: apply the 2×2 unimodular matrix from `gauss_reduce_2d` to
+every (i, m+i) coordinate pair before reduction, and re-run the P2 grid.
+Falsifier: if the K1 wall on 12-bit/2557 moves outward past K1=12, the λ-block
+change of variables is a real improvement and explains the λ* effect mechanically;
+if the wall stays at K1≈8–12, then μ is genuinely inert and the λ* effect is a
+property of the reduction dynamics rather than of the lattice. 1 s per grid — the
+whole test is one edit to `glv_hnp_phase2_projected.py`.
+
+Secondary (cheap, closes a loose end): the P5/P7 tables use only 2 curves × 8 K1
+cells. Re-run P5/P7 over the 20-curve 17-bit set from Thread 20's T3 to check
+whether `λ₁(L') = min(μ, ‖pv‖)` holds at 15/16 or better across curves, which would
+promote it from an observation to a stated lemma.
+
+### Commits made
+(recorded below after commit)
