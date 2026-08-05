@@ -6248,4 +6248,4 @@ the next standard lever is randomised-rounding/pruned BDD (Liu–Nguyen) rather
 than more lattice-shape surgery.
 
 ### Commits made
-(recorded in the follow-up commit below)
+62ae40a autolab 2026-08-05: Thread 23 CLOSED negative — projection makes planted vector lambda_1 with zero effect; centering moves the wall 3-4x
