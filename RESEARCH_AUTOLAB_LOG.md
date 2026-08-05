@@ -6103,3 +6103,499 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+
+## 2026-07-29 (autolab run #2) — RESTORED 2026-08-05
+
+> **Provenance note (added by the 2026-08-05 run).** Two autolab sessions ran on
+> 2026-07-29 in parallel: `d525931` (10:33 UTC, the entry above) and `e845207`
+> (13:38 UTC, this entry). Both wrote a section titled `## 2026-07-29 (autolab
+> run)`. The conflict resolutions in `7b5b702` / `e31dd19` kept only the first,
+> so this section — the ν̂ result — was absent from the log between 2026-07-29
+> and 2026-08-05 even though its commit is an ancestor of `main`. Restored
+> verbatim from `git show e845207 -- RESEARCH_AUTOLAB_LOG.md`. The two sessions
+> agree on the falsification of λ/n and disagree on nothing.
+
+### Task picked
+
+**Thread 20 (λ/n threshold study)** — proposed by the 2026-07-26 run #1 as the
+top continuation of Thread 5, which had measurable progress that day. Threads 1,
+3, 4, 6 are CLOSED; Thread 2 was closed 2026-07-26 with a permanent BLOCKED
+verdict (`c591765`). Thread 20 was the only priority-ordered thread with recent
+progress and an unstarted, concrete next sub-task.
+
+Scope grew during the session: the λ/n bisection was falsified within the first
+hour, which freed the rest of the session to test — and confirm — the
+lattice-geometric predictor conjectured but never executed on 2026-06-29.
+
+### Work done
+
+Environment: `pip install fpylll sympy cysignals` (never persists between
+sessions; always re-install). PARI/GP did **not** install this session
+(`apt-get install pari-gp` failed, no network to the archive); not needed, this
+thread is pure Python. `cargo test --test curve_audit` → 5/5 pass (5.54s). ✓
+
+Four new scripts, run in sequence, each answering the previous one's question:
+
+- **`glv_hnp_phase2_lambda_threshold.py`** (Thread 20a) — bisection of the
+  conjectured λ/n threshold. Anchor reproduction first: the three curves from
+  2026-07-26 reproduce exactly (8-bit/199 3/3 at m=4; 12-bit/2557 3/3 at m=7;
+  12-bit/2677 never 3/3), so the harness matches the prior session's.
+  Then 28 fresh 20-bit j=0 CM curves bucketed across μ ∈ (0, 0.5].
+- **`glv_hnp_phase2_mu_response.py`** (Thread 20b) — 100 curves × 20 μ-bins,
+  24 seeds per (curve, m), m ∈ {8,9,10,11}; 9600 LLL trials; curve-level
+  permutation tests.
+- **`glv_hnp_phase2_nuhat_control.py`** (Thread 20c) — controlled low-vs-high
+  ν̂ contrast at two bit sizes with μ balanced by construction, plus a
+  fixed-curve synthetic-λ causal arm.
+- **`glv_hnp_nuhat_vs_c1c2.py`** (Thread 20d) — Exp S protocol replication
+  (K1=72, m=12, 6 seeds, 100 curves), testing ν̂ against the June C1/C2 classes
+  head-to-head with the falsified `max_a`.
+
+### Findings
+
+#### 1. λ/n is the wrong coordinate; μ is the curve invariant
+
+For j=0 curves the two GLV eigenvalues are λ and λ' = n−1−λ, so λ/n and
+(n−λ)/n describe the **same curve**. The invariant is the symmetric
+
+    μ = min(λ, n−λ)/n  ∈ (0, 1/2].
+
+Under μ the 2026-07-26 data reads μ = 0.467, 0.339, 0.340 succeed / μ = 0.070
+fails, and the bisection interval is μ ∈ (0.07, 0.34). Root-choice control
+(20a Part E, 6 curves): ν̂ changes by <0.02 and first-3/3 m by ≤3 between λ and
+λ′ — the two roots are interchangeable, as μ predicts.
+
+#### 2. μ is FALSIFIED as a Phase 2 predictor — 8th invariant to fall
+
+20a (28 curves, eff = K1·K2/n = 0.05, K1=36): **27/28 curves reach 3/3**,
+including μ = 0.0200 — the *smallest* μ in the sample — at m=7, faster than
+most large-μ curves. No threshold exists:
+
+```
+mu range (success): [0.0200, 0.4920]
+mu range (failure): [0.3011, 0.3011]     <- the single failure sits mid-range
+best single-cut accuracy: mu 92.9% vs trivial baseline 96.4%
+```
+
+The 2026-07-26 p=2677 failure at μ=0.070 is real but is **not** caused by small
+μ. It is the same per-curve lattice variance documented for Phase 1 on
+2026-06-22 (§"Large-pair variance"): here the single failure (n=525913,
+μ=0.3011) has a sister curve at μ=0.3002 that succeeds at m=7.
+
+20b then killed the residual "hard band" reading of the 20a graded response
+(first-3/3 m looked bumped at intermediate μ). With 100 curves × 24 seeds it is
+seed noise — μ is flat across all 20 bins:
+
+```
+m=8   p_hat in-band=0.527  out-band=0.513  diff=+0.014  perm p=0.7555
+m=9   p_hat in-band=0.657  out-band=0.619  diff=+0.038  perm p=0.3965
+m=10  p_hat in-band=0.880  out-band=0.862  diff=+0.018  perm p=0.4892
+m=11  p_hat in-band=0.866  out-band=0.814  diff=+0.052  perm p=0.1413
+spearman(mu, p_hat) = -0.043, -0.048, +0.098, +0.023   (m = 8, 9, 10, 11)
+```
+
+Note the sign: in-band is very slightly *easier*, i.e. the effect is not merely
+insignificant, it is not even in the conjectured direction. **Thread 20 as
+posed on 2026-07-26 is answered: there is no λ/n (or μ) threshold.**
+
+Overdispersion at m=10 is 2.89× binomial, so real per-curve variation exists —
+it is simply not indexed by μ. That motivated the rest of the session.
+
+#### 3. POSITIVE RESULT — ν̂, a lattice-geometric separator
+
+The 2026-06-29 entry closed the six-invariant falsification streak with an
+unexecuted conjecture: the separator "requires a lattice-geometric computation:
+specifically, whether the BV lattice for (n, λ) admits a short non-planted
+vector". In the (2m+2)-dim column-scaled lattice this is directly computable.
+Rows i and m+1+i are supported on the coordinate pair (i, m+1+i) and generate a
+2-dimensional **non-planted** sublattice (last coordinate 0, so `recover_d` can
+never read d off it):
+
+    L2 = < (n·S_K1, 0), (−λ·S_K1, S_K2) >,     det L2 = n·S_K1·S_K2
+
+det L2 is independent of λ, so the scale-free
+
+    **ν̂ = λ₁(L2) / sqrt(det L2)**        (one Lagrange-Gauss reduction, O(log n))
+
+isolates exactly the λ-dependence of the geometry. There are m independent
+copies of L2, one per signature index.
+
+**The sign is the opposite of the naive guess.** A *short* rival vector makes
+the attack EASIER. Reading through λ₁λ₂ ≈ det: small ν̂ means L2 is skew, so its
+second minimum is unusually long and the planted vector is comparatively short.
+A balanced L2 (ν̂ → 1) surrounds the planted vector with 2m rival vectors of
+norm ≈ sqrt(det), crowding it out.
+
+**20b, uncontrolled (100 curves):** spearman(ν̂, p̂) = −0.339, −0.468, −0.533,
+−0.568 at m = 8, 9, 10, 11 — strengthening monotonically with m.
+
+**20c Arm 1 (20-bit, 30 low-ν̂ vs 30 high-ν̂, μ balanced by design, 48 seeds):**
+
+```
+nu_hat  low group: mean=0.347 [0.222, 0.447]
+nu_hat high group: mean=0.971 [0.901, 1.072]
+CONFOUND CHECK mu: low=0.253 high=0.247 diff=+0.006 perm p=0.8376 (balanced)
+m=8   p_hat(low)=0.910  p_hat(high)=0.453  diff=+0.457  perm p<0.0001 ***
+m=9   p_hat(low)=0.973  p_hat(high)=0.594  diff=+0.378  perm p<0.0001 ***
+m=10  p_hat(low)=0.996  p_hat(high)=0.766  diff=+0.230  perm p<0.0001 ***
+m=11  p_hat(low)=0.999  p_hat(high)=0.746  diff=+0.253  perm p<0.0001 ***
+```
+
+**20c Arm 2 (24-bit replication, 20 vs 20):** same direction, larger effect —
+so it is not a 20-bit artifact.
+
+```
+CONFOUND CHECK mu: low=0.288 high=0.253 diff=+0.036 perm p=0.3861 (balanced)
+m=8   p_hat(low)=0.481  p_hat(high)=0.080  diff=+0.401  perm p<0.0001 ***
+m=9   p_hat(low)=0.692  p_hat(high)=0.143  diff=+0.549  perm p<0.0001 ***
+m=10  p_hat(low)=0.828  p_hat(high)=0.325  diff=+0.503  perm p<0.0001 ***
+m=11  p_hat(low)=0.923  p_hat(high)=0.345  diff=+0.578  perm p<0.0001 ***
+```
+
+**20c Arm 5 — causal, one fixed curve.** The lattice attack only requires the
+nonce to be generated as k = k₁ + λk₂ mod n with k₁ bounded; λ need not be a GLV
+eigenvalue for the HNP instance to be well posed. So (p, b, n, G, K1, K2) can be
+held FIXED while λ alone varies, eliminating every curve-level confound by
+construction. 120 synthetic λ on p=524341, n=525583, m=9, 24 seeds each:
+
+```
+spearman(nu_hat, p_hat) = -0.583  perm p=0.0002
+spearman(mu,     p_hat) = +0.003  perm p=0.9672   <- mu has zero power
+low  nu_hat tertile: nu_hat=0.341  p_hat=0.897  mu=0.258
+mid  nu_hat tertile: nu_hat=0.729  p_hat=0.570  mu=0.231
+high nu_hat tertile: nu_hat=0.951  p_hat=0.566  mu=0.281
+```
+
+The response is closer to a step at ν̂ ≈ 0.5 than a linear trend. The −0.80
+correlations in Arm 1/3 are inflated by selection on ν̂; −0.583 (Arm 5) and
+−0.57 (20b, unselected) are the honest effect sizes.
+
+#### 4. ν̂ resolves the 2026-06-30 DEAD END
+
+`glv_hnp_delta_threshold.py:224 build_lattice()` (June, Phase 1) and the Phase 2
+builder are the **same lattice** — identical rows, identical S_K1/S_K2/S_KANNAN,
+identical recovery test; only K1's parameterisation differs. So the June C1/C2
+classification is a classification of this same lattice and ν̂ applies to it
+directly. Exp S protocol replicated exactly (K1=72, m=12, 6 seeds, 100 fresh
+20-bit curves; 74/100 C1 vs Exp S's 40/50 — same regime):
+
+```
+ invariant           C1 range           C2 range     AUC  best acc
+    nu_hat      [0.408,1.012]      [0.314,0.645]   0.935     89.0%
+        mu      [0.002,0.497]      [0.001,0.499]   0.523     75.0%
+     max_a    [3.000,419.000]    [5.000,729.000]   0.748     75.0%
+                                     trivial baseline (majority) = 74.0%
+```
+
+Decile response, monotone over the whole range:
+
+```
+ decile  nu_hat mid   C2 rate  mean wins/6
+      1       0.332      1.00         6.00
+      2       0.455      0.70         5.00
+      3       0.540      0.40         4.00
+      4       0.582      0.10         2.90
+      5       0.632      0.40         3.30
+      6       0.715      0.00         1.20
+      7       0.801      0.00         0.80
+      8       0.850      0.00         0.80
+      9       0.890      0.00         1.00
+     10       0.965      0.00         0.70
+```
+
+Every C2 curve has ν̂ ≤ 0.645; no curve with ν̂ > 0.645 is C2. The classes
+overlap only on ν̂ ∈ [0.408, 0.645]. `max_a` and `μ` both sit at the trivial
+baseline on the same sample, reproducing their Exp S falsification.
+
+**Revised status of the 2026-06-29 claim.** "No known closed-form *algebraic
+invariant of the curve* predicts K1_threshold" still stands — ν̂ is not an
+algebraic invariant of the curve, and it depends on (K1, K2) as well as (n, λ).
+What is now false is the operational reading that no cheap predictor exists: a
+single Lagrange-Gauss reduction, O(log n), gives AUC 0.935. The 2026-06-29
+conjecture was right, and this is its confirmation.
+
+#### 5. secp256k1 placement (heuristic extrapolation)
+
+ν̂ for the real secp256k1 (n, λ), λ verified to satisfy λ²+λ+1 ≡ 0 mod n:
+
+```
+eff=0.05  nu_hat=0.8709  percentile vs random lambda = 73.3%
+eff=0.10  nu_hat=0.6624  percentile 41.3%     <- eff matching the K1=72 sample
+eff=0.25  nu_hat=0.5852  percentile 33.2%
+eff=0.50  nu_hat=0.6851  percentile 44.1%
+```
+
+At the eff = 0.0993 of the 20d sample, secp256k1 has ν̂ = 0.6639 — the 50th
+percentile of that sample, and just **above** the C2 ceiling (0.645): no sampled
+curve with ν̂ that large was ever C2. secp256k1 is not in the low-ν̂ easy tail at
+any eff tested.
+
+Two caveats, stated plainly. (a) This is a 20/24-bit → 256-bit extrapolation of
+an empirical regularity, not a proof. (b) The whole thread is conditional on a
+non-standard nonce generator (k = k₁ + λk₂ with k₁ bounded); it says nothing
+about correctly generated nonces, and is **not** an attack on secp256k1.
+
+Null distribution of ν̂ over random λ at 256 bits (eff=0.05, 4000 draws):
+q05=0.232, q10=0.322, q25=0.496, q50=0.715, q75=0.885, q90=0.974, q95=0.999;
+20.5% of λ fall below 0.45 (empirically easy) and 22.4% above 0.90 (hard).
+
+### Next step proposal
+
+**Thread 23 — derive λ₁(L2) in closed form and pin the threshold.** ν̂ is
+currently computed, not understood. L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩ is a
+2-dimensional lattice whose shortest vector is a classical
+three-distance/continued-fraction quantity: minimising |aλ mod n|·S_K1 against
+a·S_K2 is best rational approximation to λ/n *at the scale* S_K2/S_K1 = K1/K2.
+That is why the raw CF invariants (q_cf, max_q_cf, max_a) all failed in June —
+they are scale-free, and the relevant approximation quality is scale-dependent.
+Concretely: show λ₁(L2) is determined by the CF convergent p_j/q_j of λ/n with
+q_j nearest sqrt(n·S_K1/S_K2) = sqrt(n·K2/K1), and check whether
+
+    nu_hat ≈ f(|q_j·λ mod n|·S_K1, q_j·S_K2)
+
+reproduces the measured ν̂ on the 20d sample. Falsifier: if predicted-from-CF ν̂
+correlates <0.9 with computed ν̂, the convergent-scale story is wrong. This
+would convert an empirical predictor into an algebraic one and would explain,
+retroactively, exactly why six June invariants failed.
+
+Second, cheaper sub-task: **20d used one m and one K1.** Check whether the ν̂
+cut generalises by re-running 20d at K1 ∈ {36, 72, 144} and m ∈ {10, 12, 14} —
+if the C2 ceiling stays near ν̂ ≈ 0.65 across all nine cells, the cut is a
+property of the lattice family, not of the sample.
+
+Not recommended: further μ/λ-ratio work. Eight invariants have now been
+falsified (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ) and the
+mechanism is now known to be scale-dependent, which explains all eight.
+
+### Commits made
+
+(hash recorded in the following commit)
+
+e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+
+**Thread 23 — closed form for λ₁(L2)**, the top continuation proposed by
+`e845207` (2026-07-29 run #2). Protocol check: priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END, priority 3 completed 2026-07-21, priority 5 (GLV-HNP)
+made measurable progress on 2026-07-29 — so rule (b) selects its proposed
+sub-task. Of the two Thread-23 proposals filed that day, this one (`e845207`:
+derive λ₁(L2) from continued fractions) has the sharper falsifier than the other
+(`d525931`: reformulate the lattice so the planted vector is λ₁); the latter is
+still open and renamed **Thread 24** below to end the name collision.
+
+The proposal asked for correlation ≥ 0.9 between CF-predicted and computed ν̂.
+The result is stronger: **the identity is exact**, and it decomposes ν̂ into two
+ingredients whose separate contributions are measured in Part D.
+
+### Work done
+
+Bookkeeping first — two artifacts of the 2026-07-29 double-run were repaired:
+
+- **The ν̂ log section had been silently lost.** Two sessions ran that day
+  (`d525931` 10:33 UTC, `e845207` 13:38 UTC), both writing a section titled
+  `## 2026-07-29 (autolab run)`. The conflict resolutions in `7b5b702` /
+  `e31dd19` kept only the first, so the entire ν̂ result — the first predictor
+  ever to separate C1/C2 — was absent from the log while its commit sat in
+  `main`'s history. Restored verbatim as `## 2026-07-29 (autolab run #2)`.
+- **Two scripts were unrunnable.** `glv_hnp_phase2_nuhat_control.py` and
+  `glv_hnp_nuhat_vs_c1c2.py` import `rival_sublattice_nu`, `glv_eigenvalues`,
+  … from `glv_hnp_phase2_lambda_threshold.py`; both sessions wrote a file of
+  that name and the merge kept `d525931`'s, which has none of those symbols.
+  `e845207`'s version restored as **`glv_hnp_t20a_lib.py`** and the two imports
+  repointed. Both scripts now run.
+
+Then Thread 23 proper: **`secp256k1_cm_audit/glv_hnp_t23_nuhat_cf.py`**
+(5 parts, A–E), artifact `glv_hnp_t23_nuhat_cf_output.txt`.
+Environment: `pip install fpylll sympy cysignals` (never persists — always
+re-install). PARI/GP not needed. `cargo test --test curve_audit` → 5/5 (5.04s). ✓
+
+### Findings
+
+#### 1. Theorem (Thread 23) — λ₁(L2) is a continued-fraction minimum, exactly
+
+Every vector of L2 = ⟨(n·S1, 0), (−λ·S1, S2)⟩ is w(a,b) = ((an − bλ)S1, b·S2).
+For fixed b the first coordinate is minimised over a at the centred residue
+|bλ|ₙ, so
+
+    λ₁(L2)² = min_b [ (|bλ|ₙ·S1)² + (b·S2)² ]         (b = 0 gives (n·S1)²).
+
+A minimiser must be a **record** of b ↦ |bλ|ₙ — if some 1 ≤ b′ < b had
+|b′λ|ₙ ≤ |bλ|ₙ then w(·,b′) would be strictly shorter in both coordinates. The
+records are exactly the best approximations of the second kind to λ/n, i.e. the
+convergent denominators q_j. Hence
+
+    **λ₁(L2)² = min_j [ (|q_jλ − p_j n|·S1)² + (q_j·S2)² ]**
+
+over the O(log n) convergents. Extended Euclid on (n, λ) emits the pairs
+(|s_j|, r_j) = (q_j, |q_jλ|ₙ) directly, starting at (0, n) — which *is* the b=0
+vector, so the enumeration is uniform.
+
+**Part A — verified exact, never approximate.** CF closed form vs exact-integer
+Lagrange–Gauss, 1440 samples over 9 bit sizes × 5 values of eff = K1·K2/n:
+
+```
+ bits  samples   CF==exact   f64==exact   max f64 rel err
+   16      200     200/200      200/200        2.208e-16
+   20      200     200/200      200/200        2.220e-16
+   24      200     200/200      200/200        2.180e-16
+   32      200     200/200      200/200        2.172e-16
+   64      200     200/200      200/200        2.213e-16
+   96       60       60/60        60/60        2.216e-16
+  128       60       60/60        60/60        2.197e-16
+  192       60       60/60        60/60        2.150e-16
+  256       60       60/60        60/60        2.149e-16
+```
+
+Side result, recorded so nobody re-opens it: this run added an exact-integer
+`gauss_reduce_2d_exact` **suspecting** the f64 `gauss_reduce_2d`
+(`glv_hnp_t20a_lib.py:216`) of rounding wrongly at 256 bits, where the squared
+norms reach ≈2^780. It does not — agreement is to 2.2e-16 at every size, and
+Part E reproduces the secp256k1 ν̂ values bit-for-bit. **The 2026-07-29 numbers
+stand as published.** The exact version is kept as the reference implementation.
+
+#### 2. The scale decomposition — why six June invariants had to fail
+
+Per convergent define
+
+    D_j = q_j·|q_jλ|ₙ / n         (scale-free, ≈ 1/a_{j+1})
+    R_j = q_j·S2 / (|q_jλ|ₙ·S1)   (carries the scale S2/S1 = K1/K2)
+
+The two terms of the minimum have product D_j and ratio R_j, so
+
+    **ν̂² = min_j D_j·(R_j + 1/R_j)**
+
+verified to 1e-9 on every row tested (Part C). R_j = 1 at the *balanced* index,
+where q_j·q_{j+1} ≈ n·S1/S2 = n·K2/K1. And by Legendre, D_j ∈ [1/(a_{j+1}+2),
+1/a_{j+1}] — **28101/28101 convergents, 100.0000%**.
+
+So ν̂ is small iff λ/n has a large partial quotient **at one specific scale**,
+and that scale is a function of K1/K2, not of the curve. Every June invariant
+(δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n) aggregated over the whole
+expansion. The minimum is dominated by a single index j*, so aggregate
+statistics wash it out. This is the retroactive explanation Thread 23 was
+opened to find.
+
+**Part B — j* is pinned to the balanced index.** 2200 samples, 20/24/64/256
+bits × eff ∈ {0.05, 0.25}:
+
+```
+ bits    eff     N  j*==j_bal   |d|<=1   med q*/sqrt(nS1/S2)  med j*  med #conv
+   20   0.05   400     65.2%    100.0%                 0.423       8         14
+   20   0.25   400     72.0%    100.0%                 0.398       7         14
+   24   0.05   400     70.2%    100.0%                 0.418       9         16
+   24   0.25   400     69.2%    100.0%                 0.409       8         16
+   64   0.05   400     70.0%    100.0%                 0.392      21         39
+   64   0.25   400     67.0%    100.0%                 0.385      20         40
+  256   0.05   150     74.0%    100.0%                 0.442      77        152
+  256   0.25   150     72.0%    100.0%                 0.438      75        152
+```
+
+**|j* − j_bal| ≤ 1 in 2200/2200 cases** — the minimum is always at or adjacent
+to the balanced index, at every bit size. Note q*/sqrt(n·S1/S2) has median
+≈ 0.42, not 1: the balance condition is q_j·q_{j+1} ≈ n·S1/S2, and
+q_j = sqrt(n·S1/S2 · q_j/q_{j+1}) picks up a Gauss–Kuzmin factor. Use
+sqrt(n·K2/K1) as an *index* locator (j* is within 1), not as a value for q*.
+
+#### 3. Part D — the theory's ordering, measured
+
+The decomposition predicts a strict ranking: ν̂ (both ingredients) > the local
+partial quotient a_{j*+1} (localisation only) > max_a (neither). Exp S protocol,
+K1=72, m=12, 6 seeds, **400 fresh 20-bit j=0 CM curves = 2400 LLL trials**;
+C2 := recovers d on all 6 seeds.
+
+```
+ C2 = 90/400            trivial baseline = 77.5%
+
+  invariant           C1 range           C2 range     AUC     95% CI      perm p
+     nu_hat      [0.390,1.031]      [0.312,0.656]   0.954  [0.933,0.971]  0.0005
+    a_local    [1.000,419.000]    [4.000,735.000]   0.880  [0.845,0.911]  0.0005
+     D_star      [0.002,0.519]      [0.001,0.192]   0.879  [0.843,0.910]  0.0005
+      max_a    [3.000,419.000]    [5.000,736.000]   0.745  [0.689,0.793]  0.0005
+         mu      [0.002,0.498]      [0.001,0.499]   0.469  [0.402,0.534]  0.8256
+```
+
+ν̂ = 0.954 replicates the 0.935 of 2026-07-29 on an independent sample. Paired
+bootstrap (2000 resamples) on the gaps — every one has P(gap>0) = 1.000:
+
+```
+  AUC(nu_hat)  - AUC(a_local) = +0.074   95% CI [+0.051, +0.100]
+  AUC(a_local) - AUC(max_a)   = +0.136   95% CI [+0.097, +0.177]
+  AUC(nu_hat)  - AUC(max_a)   = +0.209   95% CI [+0.167, +0.257]
+  AUC(a_local) - AUC(mu)      = +0.411   95% CI [+0.336, +0.483]
+```
+
+**Prediction D confirmed, and the two ingredients are separately priced:**
+localising the partial quotient to the balanced index is worth **+0.136** AUC;
+adding the balance factor R is worth a further **+0.074**. Localisation is the
+larger half — which is precisely what the June sessions were missing. `max_a`
+is not *worthless* (0.745 > 0.5), it is a smeared proxy for a_local.
+
+a_local response is monotone across its whole range:
+
+```
+  a_local      1  N= 23  C2 rate=0.00  mean wins=0.39
+  a_local      2  N= 54  C2 rate=0.00  mean wins=0.24
+  a_local    3-4  N=110  C2 rate=0.01  mean wins=1.13
+  a_local    5-8  N= 94  C2 rate=0.24  mean wins=2.48
+  a_local   >=9   N=119  C2 rate=0.55  mean wins=4.48
+```
+
+μ lands at AUC 0.469, perm p = 0.826 — the 2026-07-29 falsification replicates
+on a fresh 400-curve sample. μ stays dead (9th falsification).
+
+#### 4. Part E — secp256k1, and a clean illustration of the mechanism
+
+```
+   eff  nu_hat(exact)  nu_hat(f64)   rel err   j*  a_local   max_a  q*/sqrt(nS1/S2)
+  0.05       0.870857     0.870857   1.27e-16   71        5     312           0.1994
+  0.10       0.662438     0.662438   0.00e+00   71        5     312           0.2820
+  0.25       0.585226     0.585226   0.00e+00   71        5     312           0.4458
+  0.50       0.685119     0.685119   0.00e+00   71        5     312           0.6305
+```
+
+secp256k1 is the textbook case for why max_a failed: **max_a = 312 but
+a_local = 5.** Its one large partial quotient sits at an index far from the
+balanced one, so it does nothing for an attacker. j* = 71 is stable across a
+10× sweep of eff, so this is not a knife-edge of the parameterisation.
+Consistent with 2026-07-29: secp256k1 is not in the low-ν̂ easy tail at any eff
+tested. Caveats unchanged and restated in the script: conditional on a
+non-standard nonce generator k = k₁ + λk₂ with k₁ bounded, and a 20/24-bit →
+256-bit extrapolation. **Not an attack on secp256k1.**
+
+### Next step proposal
+
+**Thread 25 — is ν̂ a curve property or an attacker's choice?** This is the
+sharpest question the closed form opens, and it was not visible before it.
+S1/S2 enters only as the *column scaling* of the lattice. S1 = n//K1 is the
+choice that balances the planted vector, but it is a choice: the attacker may
+deliberately mis-scale to move the balanced index onto whichever j maximises
+a_{j+1}. For secp256k1 that would mean re-balancing from a_local = 5 onto the
+a = 312 convergent. The tension is quantifiable and cuts both ways — mis-scaling
+shrinks D_{j*} but simultaneously lengthens the planted vector, since its
+coordinates are no longer balanced.
+*Falsifier:* sweep a scaling multiplier c on S1 (S1 → c·S1, c ∈ [2^-8, 2^8]) on
+C1 curves with a large max_a far from j*, and measure the recovery rate. If
+recovery on those curves rises above the c = 1 baseline, ν̂ is attacker-tunable
+and max_a becomes relevant again as a *tuning target*; if the planted-vector
+penalty dominates everywhere, then S1 = n//K1 is optimal and ν̂ is a genuine
+invariant of (n, λ, K1, K2). Cheap: Part D's harness runs 2400 LLL trials in
+4 s, so a 17-point c-sweep is minutes.
+
+**Thread 24 (renamed, still open)** — `d525931`'s proposal: reformulate the
+Phase-2 lattice so the planted vector is λ₁, since the shortest vector is
+always the trivial n·S_D·e_m.
+
+**Also still open, from `e845207`** — check the ν̂ cut generalises over
+K1 ∈ {36, 72, 144} × m ∈ {10, 12, 14}; this run used one cell (K1=72, m=12) of
+that nine-cell grid.
+
+**Not recommended:** any further curve-level or scale-free CF invariant. Nine
+have now been falsified (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ —
+and D_star alone, which is a_local's twin and stops at 0.879). The mechanism is
+now known to be scale-dependent, which explains all of them.
+
+### Commits made
