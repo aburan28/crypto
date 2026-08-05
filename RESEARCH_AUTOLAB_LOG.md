@@ -6103,3 +6103,222 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁**, the
+explicit next-step proposed by the 2026-07-29 entry (log line ~6089). Priorities
+1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so its
+proposed sub-task is the correct pick under protocol rule (b).
+
+**Outcome: the reformulation works, but the operative fix turned out to be
+something the 2026-07-29 proposal did not name — recentring the solution box.
+The K1 wall moves outward by 4×.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals` (fpylll 0.6.4).
+  `pari-gp` NOT needed this run. `sympy` is **not** installed in this image and
+  is not required by the new script — note for future runs that
+  `glv_hnp_phase2_lambda_threshold.py` will not import as-is.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected_cvp.py` (~700 lines,
+  runs in 5.9 s). Output artifacts:
+  `glv_hnp_phase2_projected_cvp_output.txt`,
+  `glv_hnp_phase2_projected_cvp_confirm.txt`.
+- Implemented the projected lattice `L_proj ⊂ Z^{2m}` (d-column and Kannan row
+  both removed; d recovered afterwards from the k1/k2 values):
+
+  ```
+  row 0        : (B'_i · S_K1)_i      ⊕ 0        , B'_i = B_i·B_0^{-1} mod n, B'_0 = 1
+  rows 1..m-1  : n · S_K1 · e_i
+  rows m..2m-1 : (−λ · S_K1 · e_i)    ⊕ S_K2 · e_i
+  target t     : (A_i · S_K1)_i       ⊕ 0        ,  t + u = (k1_i·S_K1 | k2_i·S_K2)
+  vol(L_proj)  = S_K1^m · S_K2^m · n^{m-1}
+  ```
+
+  Using `B'_i` (so `B'_0 = 1`) makes the d-row's free parameter *be* the first
+  k1-residue, which lets the now-redundant `n·S_K1·e_0` row be dropped — the
+  result is a genuine rank-2m basis, not a generating set. **S0 verifies by
+  exact integer arithmetic that `t + u_planted` lies in `L_proj` on all three
+  historical curves.**
+- Five methods compared on **identical** signature sets:
+  `KAN-ORIG` (2m+2 Kannan/SVP, verbatim baseline), `PROJ-CVP` / `PROJ-KAN`
+  (projected, CVP and Kannan-SVP form), and `PROJ-CVP-C` / `PROJ-KAN-C`
+  (the same two, recentred). Exact CVP via `fpylll.CVP.closest_vector`,
+  Babai nearest-plane as fallback.
+- Decoder `_decode_proj` is **self-checking and non-oracular**: it requires
+  every `k1_i ∈ [0,K1)`, every `k2_i ∈ [0,K2)`, and the derived `d` to agree
+  across all m signatures. `d == d_secret` is used only for scoring.
+- Fixed a diagnostic bug in the first draft (`dist` computed `‖u‖` instead of
+  `‖t+u‖`, giving nonsense ratios of 145–366).
+- `cargo test --test curve_audit` → see below. No Rust files touched.
+
+### Findings
+
+**F1 — the first draft of the reformulation got *worse* with more data, which
+exposed the real defect.** Uncentred `PROJ-CVP` on 12-bit/2557 went 3/5 → 0/5
+→ 0/5 → 0/5 as m went 8 → 16 → 24 → 32 (T6). More constraints cannot hurt an
+exact CVP, so this was diagnostic, not a result: **CVP/SVP minimise a norm
+centred at 0, but the planted `k1_i, k2_i` are uniform on `[0,K)` — all
+positive.** Uncentred `E‖pv‖² = m(K1·S_K1)²/3 + m(K2·S_K2)²/3`; centred it is
+`/12`. That factor-2-in-norm handicap grows with m and is what killed it.
+Recentring the target by `(K1//2·S_K1 | K2//2·S_K2)` removes it.
+
+**F2 — the K1 wall moves outward by 4×, confirmed on 10 unseen seeds.**
+12-bit/2677 (λ*=0.0699), m=24, seeds {7,13,101,202,303,404,505,606,707,808},
+none of which appear in any prior log entry:
+
+| K1 | eff = K1·K2/n | KAN-ORIG | PROJ-CVP-C | PROJ-KAN-C |
+|---|---|---|---|---|
+| 8  | 0.157 | 0/10 | **10/10** | 10/10 |
+| 12 | 0.236 | 1/10 | **10/10** | 10/10 |
+| 16 | 0.314 | 0/10 | **10/10** | 10/10 |
+| 24 | 0.471 | 0/10 | **10/10** |  8/10 |
+| 32 | 0.629 | 0/10 |  **8/10** |  2/10 |
+
+The wall on this curve was **K1 ≈ 4–6** (2026-07-29 T4). It is now **K1 ≈ 32**,
+i.e. recovery at eff = 0.63 where the baseline needed eff ≤ 0.16. The
+2026-07-29 falsifier's second clause ("the K1 wall moves outward") is met
+decisively.
+
+**F3 — 2026-07-29 T4b is corrected: more data *does* rescue the K1=8 case.**
+T4b recorded "at K1=8 more data does not rescue it (m=8/12/16/24/32 → 0,0,1,0,1
+of 5), so the K1 wall is genuine". With the reformulation (T3, same 5 seeds):
+
+| K1 | m=10 | 16 | 24 | 32 |  (PROJ-CVP-C / KAN-ORIG) |
+|---|---|---|---|---|---|
+| 8  | 5/5 ÷ 0/5 | 5/5 ÷ 1/5 | 5/5 ÷ 0/5 | 5/5 ÷ 2/5 |
+| 12 | 5/5 ÷ 0/5 | 5/5 ÷ 0/5 | 5/5 ÷ 0/5 | 5/5 ÷ 0/5 |
+| 16 | 4/5 ÷ 0/5 | 5/5 ÷ 0/5 | 5/5 ÷ 0/5 | 5/5 ÷ 0/5 |
+| 24 | 1/5 ÷ 0/5 | 3/5 ÷ 0/5 | 3/5 ÷ 0/5 | 3/5 ÷ 0/5 |
+
+**F4 — it was never a reduction-strength problem.** T4: with recentring, plain
+LLL scores 5/5 on the *entire* K1∈{8,12,16} × m∈{16,24,32} grid, and BKZ-20 /
+BKZ-30 give byte-identical tallies. Reduction strength is irrelevant; the
+embedding was wrong.
+
+**F5 — exact CVP upgrades failure diagnosis from "unknown" to "proved".**
+T1 reports `dist/pv = ‖t_c+u_cvp‖ / ‖t_c+u_planted‖`. Exact CVP makes this ≤ 1
+by construction, so a value **strictly below 1 with a decode failure proves the
+planted vector is not the closest vector** — a real BDD failure, not a
+reduction failure. Uncentred at K1=8: 0.828 (2557, m=8) and 0.848 (2677, m=10),
+both decode-fail. Recentred: **1.000 and 1.000, both decode-succeed** — the
+planted vector *is* the closest vector once the box is centred.
+
+**F6 — sv/pv: falsifier clause 1 met on one curve, not the other.**
+2026-07-29 baseline sv/pv was 0.603 / 0.517 / 0.422 (planted never λ₁).
+Seed 42, this run:
+
+| curve | KAN-ORIG | PROJ-KAN | PROJ-KAN-C |
+|---|---|---|---|
+| 8-bit/199        | 0.547 | 0.843 | 0.924 |
+| 12-bit/2557      | 0.466 | 0.532 | 0.614 |
+| 12-bit/2677 FAIL | 0.393 | 0.792 | **1.000** |
+
+On the λ*=0.07 curve the planted vector **is** λ₁ after the reformulation
+(0.393 → 1.000). On 12-bit/2557 it still is not (0.614).
+
+**F7 — the residual competitor is identified: the per-block λ-lattice.**
+Quotienting out the trivial `n·e_m` direction leaves, once per signature, the
+2-D block `⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩`. Its exact Gauss-reduced shortest
+vector μ, and the (k1,k2) offsets it encodes:
+
+| curve | K1 | μ/n | witness (k1-part, k2-part) |
+|---|---|---|---|
+| 2557 | 4  | 1.22 | (−3, 50) |
+| 2557 | 8  | 1.03 | (−3, 50) |
+| 2557 | 24 | 0.97 | (−3, 50) |
+| 2677 | 4  | 3.52 | (1, 186) |
+| 2677 | 8  | 1.93 | (−14, 43) |
+| 2677 | 24 | 1.00 | (−14, 43) |
+
+**F8 — the witnesses decode to *phantom GLV relations*, and this is a
+bound-aware invariant, not a curve-level one.** The witness on 2557 is
+`λ·50 ≡ 3 (mod n)` (1755·50 = 87750 = 33·2659 + 3); on 2677 it is
+`λ·43 ≡ 14 (mod n)` (185·43 = 7955 = 3·2647 + 14). Define
+
+```
+nu = min over nonzero (a,c) with a ≡ λc (mod n) of  max(|a|/K1, |c|/K2)
+```
+
+| K1 | 2557 (a=3, c=50) | 2677 (a=14, c=43) |
+|---|---|---|
+| 2  | 1.50 | 7.00 |
+| 3  | **1.00** | 4.67 |
+| 4  | **0.96** | 3.50 |
+| 8  | **0.96** | 1.75 |
+| 12 | **0.96** | 1.17 |
+| 16 | **0.96** | **0.88** |
+| 24 | **0.96** | **0.83** |
+
+ν ≤ 1 means a phantom relation fits inside the solution box `[0,K1)×[0,K2)`.
+2557 is ambiguous from K1=3 on; 2677 only from K1=16 on — which is exactly the
+ordering of how well the reformulation does on the two curves (2677: 10/10 out
+to K1=24; 2557: caps at 7–9/10 from K1=8 on).
+
+**Important caveat — ν does not obstruct d-recovery, only single-candidate
+decoding.** If `(a,c)` satisfies `a ≡ λc`, then `(k1+a, k2−c)` has the *same*
+`k_full = k1 + λk2`, hence the *same* d. So an in-box phantom relation makes
+the (k1,k2) split ambiguous but leaves d intact; it breaks `_decode_proj` only
+because that decoder demands `k1_i ∈ [0,K1)` and returns `None` when a
+phantom-shifted split falls outside. This is a decoder brittleness, not an
+information-theoretic wall, and it is the obvious thing to fix next (see below).
+ν is stated here as an explanation that fits 2 curves × 9 K1 values, **not** as
+a proven law.
+
+**F9 — the KAN-ORIG baseline tests 2m+2 candidates per run; PROJ-CVP-C tests
+exactly 1.** `recover_d_orig` scans every row of the reduced basis and accepts
+if any yields the right d (legitimate in a real attack — candidates are
+checkable against the public key). PROJ-CVP-C returns a single closest vector.
+The 4× wall improvement in F2 is therefore achieved *despite* a 2m+2 : 1
+candidate-budget handicap. It also explains the one place the baseline still
+wins: 2557 at K1=8,12, where ORIG is 10/10 and PROJ-CVP-C is 7/10 — precisely
+the ν ≤ 1 regime where multiple candidates are needed.
+
+**F10 — retro-explanation of the 2026-06/07 invariant hunt.** Six curve-level
+invariants (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n) failed to separate C1
+from C2 (log lines ~3560–3580), and 2026-07-29 concluded "no curve-level
+invariant can". F8 sharpens this: the separating quantity ν depends on
+**(λ, n, K1, K2)** jointly. `q_cf`-style continued-fraction invariants were
+looking at λ/n alone and were therefore structurally incapable of seeing it —
+the K1-dependence is the missing argument, not extra precision.
+
+### Test status
+
+`cargo test --test curve_audit` → **5/5 pass** (5.00 s): `audit_template_exists`,
+`all_curves_pass_structural_audit`, `pari_prelude_format`,
+`fresh_cm_curve_passes_audit`, `hnp_recovers_p256_key_via_lll_phase15`.
+No Rust source was modified this run; the whole session is one new Python
+script plus two output artifacts.
+
+### Next step proposal
+
+**Thread 24 — multi-candidate decoding for PROJ-CVP-C.** Replace the single
+`CVP.closest_vector` call with an enumeration of all lattice points within
+radius `r·‖pv_expected‖` (fpylll `Enumeration` / `enumerate_cvp`, or simply
+take every row of the BKZ-reduced basis plus the Babai point and its
+±phantom-shifts), and accept any candidate whose derived d is consistent. This
+directly targets the F9 handicap and the F8 brittleness, and is the only place
+the baseline still beats the reformulation.
+
+*Falsifier*: on 12-bit/2557 at K1=8,12 (the ν=0.96 regime), single-candidate
+PROJ-CVP-C scores 7/10. If multi-candidate decoding takes that to 10/10 while
+holding 10/10 on 2677 out to K1=24, the ν ≤ 1 cases are pure decoder
+brittleness and Thread 23's reformulation strictly dominates the baseline
+everywhere. If it stays at 7/10, then some ν ≤ 1 instances are genuinely
+unrecoverable and ν becomes a real (bound-aware) obstruction worth stating as a
+proposition. Cheap: the whole grid is a ~10 s run.
+
+*Secondary*: re-run the 17-bit 20-curve sweep from 2026-07-29 T3 with
+PROJ-CVP-C to get the eff-threshold shift on a population rather than 2 curves
+(2026-07-29 measured eff ≤ 0.05 for 19/20 recovery; F2 suggests this should
+move to eff ≈ 0.3–0.6).
+
+*Scope note*: this thread concerns biased-nonce HNP on toy curves (n ≈ 2^12,
+K1 ≤ 32) and bears on the GLV-HNP side-direction only. It does **not** touch
+the main theorem of `PAPER_STRUCTURAL_COMPLETENESS.md`.
+
+### Commits made

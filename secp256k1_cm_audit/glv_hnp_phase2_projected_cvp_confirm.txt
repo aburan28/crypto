@@ -1,0 +1,71 @@
+==============================================================================
+CONFIRM — fresh seeds + mu witnesses
+==============================================================================
+
+12-bit/2557  n=2659 lam=1755 lam*=0.3400 K2=52
+  K1=4   S_K1=664   S_K2=51   mu=   3235.8 (1.22n)  witness=(-1992, 2550)  (k1-part -3, k2-part 50)
+  K1=8   S_K1=332   S_K2=51   mu=   2737.6 (1.03n)  witness=(-996, 2550)  (k1-part -3, k2-part 50)
+  K1=12  S_K1=221   S_K2=51   mu=   2634.8 (0.99n)  witness=(-663, 2550)  (k1-part -3, k2-part 50)
+  K1=16  S_K1=166   S_K2=51   mu=   2598.2 (0.98n)  witness=(-498, 2550)  (k1-part -3, k2-part 50)
+  K1=24  S_K1=110   S_K2=51   mu=   2571.3 (0.97n)  witness=(-330, 2550)  (k1-part -3, k2-part 50)
+
+12-bit/2677 FAIL  n=2647 lam=185 lam*=0.0699 K2=52
+  K1=4   S_K1=661   S_K2=50   mu=   9323.5 (3.52n)  witness=(661, 9300)  (k1-part 1, k2-part 186)
+  K1=8   S_K1=330   S_K2=50   mu=   5095.8 (1.93n)  witness=(-4620, 2150)  (k1-part -14, k2-part 43)
+  K1=12  S_K1=220   S_K2=50   mu=   3756.2 (1.42n)  witness=(-3080, 2150)  (k1-part -14, k2-part 43)
+  K1=16  S_K1=165   S_K2=50   mu=   3155.7 (1.19n)  witness=(-2310, 2150)  (k1-part -14, k2-part 43)
+  K1=24  S_K1=110   S_K2=50   mu=   2644.6 (1.00n)  witness=(-1540, 2150)  (k1-part -14, k2-part 43)
+
+==============================================================================
+Fresh-seed confirmation of the T3 headline (10 unseen seeds, m=24)
+==============================================================================
+
+12-bit/2557 (lam*=0.3400)
+    K1     eff |   ORIG  PCVP-C  PKAN-C
+     8   0.156 |   10/10     7/10     7/10
+    12   0.235 |   10/10     7/10     7/10
+    16   0.313 |    4/10     7/10     7/10
+    24   0.469 |    0/10     9/10     8/10
+    32   0.626 |    0/10     7/10     2/10
+
+12-bit/2677 FAIL (lam*=0.0699)
+    K1     eff |   ORIG  PCVP-C  PKAN-C
+     8   0.157 |    0/10    10/10    10/10
+    12   0.236 |    1/10    10/10    10/10
+    16   0.314 |    0/10    10/10    10/10
+    24   0.471 |    0/10    10/10     8/10
+    32   0.629 |    0/10     8/10     2/10
+
+==============================================================================
+PHANTOM GLV RELATIONS — the box-ambiguity invariant
+  minimal nonzero (a,c), a = lam*c mod n (centred), inside [0,K1)x[0,K2)
+  nu = min over nonzero relations of max(|a|/K1, |c|/K2);  nu<=1 => the
+  nonce decomposition k1+lam*k2 is NOT unique => information-theoretic
+  ambiguity, independent of lattice/algorithm.
+==============================================================================
+
+12-bit/2557  n=2659 lam=1755 lam*=0.3400 K2=52
+  minimal relation: a=3, c=50   (lam*50 = 3 mod n)
+    K1  |a|/K1   c/K2     nu  in-box?
+     2    1.50   0.96   1.50   unique
+     3    1.00   0.96   1.00 AMBIGUOUS
+     4    0.75   0.96   0.96 AMBIGUOUS
+     6    0.50   0.96   0.96 AMBIGUOUS
+     8    0.38   0.96   0.96 AMBIGUOUS
+    12    0.25   0.96   0.96 AMBIGUOUS
+    16    0.19   0.96   0.96 AMBIGUOUS
+    24    0.12   0.96   0.96 AMBIGUOUS
+    32    0.09   0.96   0.96 AMBIGUOUS
+
+12-bit/2677  n=2647 lam=185 lam*=0.0699 K2=52
+  minimal relation: a=14, c=43   (lam*43 = 14 mod n)
+    K1  |a|/K1   c/K2     nu  in-box?
+     2    7.00   0.83   7.00   unique
+     3    4.67   0.83   4.67   unique
+     4    3.50   0.83   3.50   unique
+     6    2.33   0.83   2.33   unique
+     8    1.75   0.83   1.75   unique
+    12    1.17   0.83   1.17   unique
+    16    0.88   0.83   0.88 AMBIGUOUS
+    24    0.58   0.83   0.83 AMBIGUOUS
+    32    0.44   0.83   0.83 AMBIGUOUS
