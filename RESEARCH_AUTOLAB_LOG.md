@@ -6254,4 +6254,4 @@ the centering deficit rather than a curve invariant — worth re-fitting before 
 cited anywhere.
 
 ### Commits made
-(recorded below after commit)
+e8da6f0 autolab 2026-08-05: Thread 23 — K1 wall is an uncentered-target artifact, not structural
