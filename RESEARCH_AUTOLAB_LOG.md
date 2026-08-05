@@ -6103,3 +6103,158 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", proposed by the
+2026-07-29 entry (log line ~6089). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END;
+priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2) is the only thread with
+recent measurable progress, so rule (b) selects its proposed sub-task.
+
+Outcome: Thread 23's premise is answered in the negative (the planted vector cannot be
+made λ₁, and does not need to be), and the actual governing quantity is identified.
+**Two prior conclusions are corrected: T4b (2026-07-29) and T5 (2026-07-29).**
+
+### Work done
+- Environment (fresh container): re-installed `pari-gp` 2.15.4, `fpylll` 0.6.4,
+  `cysignals` 1.12.5, `sympy` 1.14.0. Note for future runs: all four are absent on a
+  fresh clone; `pip install fpylll` needs `--default-timeout=120` or it times out.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_window.py` (E0–E3), reusing the lattice
+  construction verbatim from `glv_hnp_phase2_20bit.py:263`. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_thread23_window_output.txt` (188 lines).
+  The module has a `__main__` guard (unlike `glv_hnp_phase2_20bit.py` and
+  `glv_hnp_phase2_lambda_threshold.py`), so future runs can `import` its helpers.
+- Formulated and FALSIFIED my own first hypothesis (H23a, the "window"), then
+  formulated and confirmed H23b. Both are documented in the script docstring.
+- `cargo test --test curve_audit` → 5/5 pass (6.15s). ✓
+
+### Findings
+
+**H23a (this run's own first guess) — FALSIFIED.** Reasoning: rows {0..m−1} and
+{m+1..2m} generate an orthogonal direct sum of m copies of the 2-D block
+B = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩ (block i occupies only columns i and m+1+i), so
+λ₁ of the Kannan-zero sublattice is min(n·S_D, μ) and is **independent of m**, while
+‖v_planted‖ ~ n·√(2m/3). Hence ρ = μ/‖v_planted‖ decays as 1/√m and success should be
+unimodal in m, inside a window [m_info, m_geom], m_info = log n/log(1/eff).
+Prediction: non-monotonic in m. **Observed: monotonically rising.** Recorded as a dead
+hypothesis so no future run re-tries it. ρ is not merely non-predictive (T2) — it is
+*anti*-correlated with success (AUC 0.653 in the direction opposite to its motivation).
+
+**H23b — the governing quantity is the Gaussian-heuristic ratio of the FULL lattice.**
+The lattice is triangular in the column order (0..m−1, m, m+1..2m, 2m+1), so
+
+    det(L) = (n·S_K1)^m · S_D · S_K2^m · S_KANNAN,     dim = 2m+2
+    GH(L)  = √(dim/2πe) · det^(1/dim)
+    R      = GH(L) / E‖v_planted‖
+
+With K1·S_K1 ≈ K2·S_K2 ≈ S_KANNAN ≈ n and eff = K1·K2/n, R → √(3/(2πe·eff)) as m→∞,
+**approached from below** because det^(1/dim) carries a factor n^(−1/(2m+2)) rising to 1.
+So R increases with m and saturates — which is exactly what the data does.
+
+**E2 — pooled predictor test, 6 curves × K1∈{2,4,8,16,32} × m∈{4,6,8,12,16,24},
+N=180 configs × 10 seeds.** AUC for the label "rate ≥ 0.5":
+
+| predictor | AUC(rate≥0.5) | AUC(any success) |
+|---|---|---|
+| **R (H23b)** | **0.961** | **0.947** |
+| −eff | 0.913 | 0.934 |
+| m | 0.662 | 0.634 |
+| ρ = μ/‖pv‖ (H23a, T2) | 0.653 | 0.696 |
+| λ* | 0.544 | 0.548 |
+
+λ* at AUC 0.544 is **chance**, independently re-confirming T3's falsification on a much
+larger and more varied sample. Best single threshold R ≥ 0.60 → accuracy 0.906 vs
+majority baseline 0.672.
+
+R is a well-calibrated dose–response, not just a classifier:
+
+| R bin | N | mean success rate |
+|---|---|---|
+| [0.00,0.50) | 36 | 0.061 |
+| [0.50,0.60) | 18 | 0.344 |
+| [0.60,0.70) | 15 | 0.647 |
+| [0.70,0.80) | 17 | 0.694 |
+| [0.80,0.90) | 12 | 0.775 |
+| [0.90,1.00) | 8 | 0.963 |
+| [1.00,1.20) | 16 | 0.994 |
+| ≥1.20 | 58 | 1.000 |
+
+Empirical 50% crossing at **R ≈ 0.57**; R ≥ 0.9 → ≥96%; R < 0.5 → 6%.
+
+**E1 — T4b IS CORRECTED: more data DOES rescue the K1 wall.** Curve p=2557 (n=2503,
+λ*=0.490), K1=16 — T4 reported 1/5 at m=12 and the wall was called structural:
+
+| m | 4 | 6 | 8 | 10 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|
+| rate | 0.00 | 0.00 | 0.00 | 0.00 | 0.30 | 0.40 | 0.50 | 0.60 |
+| R | 0.274 | 0.362 | 0.424 | 0.468 | 0.501 | 0.548 | 0.602 | 0.631 |
+
+Monotone rising, tracking R. The same curve at K1=8 goes 0.10→1.00 over m=4→10 and stays
+1.00 through m=32. **T4b's "more data does not rescue it" was measured on the *other*
+curve (2647) at K1=8 and does not generalise.** At K1=24 and K1=32 (R_∞ = 0.599, 0.519)
+the attack is 0/10 at every m up to 32 — those walls are real, and R predicts both.
+
+**E0 — historical failure curve p=2677, n=2647, λ=185, K1=8, 20 seeds.** R rises
+0.280→0.927 over m=3→40, ρ falls 1.061→0.367. Observed rate: 0.00, 0.00, 0.05, 0.00,
+0.15, 0.05, 0.10, 0.05, 0.20, **0.25** (m=16), 0.15, 0.20, 0.05, 0.05.
+Aggregate m<8 = 0.040, m≥8 = 0.122 — more data helps, but this curve stays weak
+(peak 25%), and the tail at m=32/40 falls back to 0.05, plausibly LLL quality decaying
+at dim 66/82. This is the one place where R over-predicts.
+
+**E3 — T5 IS CORRECTED: S_D *does* remove the trivial vector; it just doesn't help.**
+T5 stated "no choice of S_D removes it — both vectors scale linearly in S_D". That is
+wrong: ‖v_planted‖² = (k1/k2 terms, entirely S_D-free) + d²·S_D² + S_KANNAN², so only
+the d-coordinate scales, while the trivial vector is exactly n·S_D and d < n always.
+Measured (p=2677, K1=2, m=12):
+
+| S_D | 1 | 2 | 4 | 8 | 16 | 32 | 64 |
+|---|---|---|---|---|---|---|---|
+| triv/‖pv‖ | 0.330 | 0.627 | **1.062** | 1.456 | 1.649 | 1.710 | 1.726 |
+| sv/‖pv‖ | 0.404 | 0.741 | 0.807 | 0.656 | 0.453 | 0.258 | 0.135 |
+| LLL | **10/10** | 0/10 | 0/10 | 0/10 | 0/10 | 0/10 | 0/10 |
+
+The trivial vector stops being shortest at S_D = 4 (ratio 1.062, → 1.726 asymptotically).
+But recovery collapses at S_D = 2 already, because inflating the d-coordinate inflates
+‖v_planted‖ itself and destroys the uSVP gap — at S_D=4, sv/‖pv‖ = 0.807 < 1.062, i.e.
+the shortest vector is now neither the trivial vector nor the planted one. Same pattern
+on p=2677/K1=8/m=16 and p=2557/K1=16/m=16.
+
+**Consequence — Thread 23's premise is answered, negatively.** The planted vector cannot
+be made λ₁ by column rescaling, and it does not need to be: recovery succeeds at ~100%
+whenever R ≥ 0.9 despite the planted vector never being λ₁. "Make the target λ₁" is a
+DEAD END via the S_D route; the productive variable is R, i.e. the pair (eff, m).
+
+**Why six years of curve-level invariants failed (retro-explanation).** Every predictor
+tried since 2026-06-21 — δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n (log ~3560–3580),
+then λ*, ρ, ν̂ — is a *curve-level* invariant, and all were measured at fixed m (=12)
+within a fixed eff. R is not curve-level at all: it is a function of (n, K1, K2, m), i.e.
+of the *lattice shape*, and the sweeps held exactly those coordinates fixed. No
+curve-level invariant could have separated the data.
+
+**Residual — R is not the whole story at the boundary.** Two pairs at essentially equal
+eff and R disagree sharply at m=24: (n=2647, K1=8, R=0.853) → 0.20 vs (n=2503, K1=8,
+R=0.839) → 1.00; and (n=65119, K1=32, R=0.891) → 0.20 vs (n=65287, K1=32, R=0.892) → 1.00.
+The second pair rules out λ* as the explanation (both are 17-bit curves of similar λ*),
+consistent with λ*'s chance-level AUC.
+
+### Next step proposal
+**Thread 24 — the boundary residual.** For configs in the transition band R ∈ [0.8, 0.95],
+the outcome is bimodal (0.20 vs 1.00) rather than a coin flip at the mean rate, which
+suggests a genuine per-curve binary property rather than seed noise. Concrete sub-task:
+fix R ≈ 0.89 (e.g. 17-bit curves at K1=32, m=24), collect ~30 curves, and test whether
+the *Gram–Schmidt profile* of the reduced basis — specifically the position of the first
+GS-norm drop below ‖v_planted‖ — separates the 1.00 curves from the 0.20 curves.
+Falsifier: if the GS-profile statistic gives AUC ≤ 0.7 over 30 curves, the residual is
+seed noise amplified by LLL's determinism (same seeds reused across curves) and the
+correct fix is simply to report R with a confidence band. Cheap: ~10 min of LLL.
+
+Secondary (paper-facing): R gives a clean closed-form design rule for GLV-nonce HNP —
+an attack on a k = k1 + λ·k2 nonce needs eff = K1·K2/n and m with
+√(dim/2πe)·det^(1/dim) ≳ 0.6·‖v_planted‖. This is a quantitative statement of how much
+GLV-nonce bias is exploitable, suitable for the B5/cover-cost discussion in
+`PAPER_STRUCTURAL_COMPLETENESS.md`, and it is a *negative* result for the attacker at
+realistic parameters (eff ≈ 1 for honest GLV nonces).
+
+### Commits made
+(to be filled by the commit below)
