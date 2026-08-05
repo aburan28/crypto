@@ -1,0 +1,117 @@
+==========================================================================
+GLV-HNP Phase 2 / Thread 23 — BDD reformulation (no Kannan, no d-column)
+==========================================================================
+predicted eff wall: uncentred 0.1756, centred 0.7026
+
+==========================================================================
+E1  Is the trivial vector gone, and is the planted vector now lambda_1?
+==========================================================================
+curve            lam*  K1  dim  rank   lam_1/n   dist/n   sv/pv  GH/dist     eff
+8-bit/199       0.462   2   24    24     1.308    1.532   0.854    1.578  0.1508
+12-bit/2557     0.340   8   24    24     1.083    1.569   0.690    1.372  0.1564
+12-bit/2677     0.070   8   24    24     1.925    1.555   1.238    1.370  0.1572
+
+  sv/pv = lambda_1(L) / ||v_planted - t||.  In the OLD Kannan lattice this
+  ratio was 0.337-0.368 on every curve (2026-07-29 T5) because of the
+  trivial vector n*S_D*e_m.  Values > 1 here mean the planted offset is
+  shorter than any nonzero lattice vector, i.e. the BDD solution is unique.
+
+==========================================================================
+E2  T4 grid replay: K1 wall for each method (m=12, K2=52, 5 seeds)
+==========================================================================
+
+  12-bit/2557  n=2659  lam=903  lam*=0.340  K2=52
+  method            K1=2     K1=3     K1=4     K1=6     K1=8    K1=12    K1=16    K1=24
+  eff=K1K2/n       0.039    0.059    0.078    0.117    0.156    0.235    0.313    0.469
+  KANNAN-LLL         5/5      5/5      5/5      5/5      5/5      5/5      3/5      0/5
+  KANNAN-1GUESS      5/5      5/5      5/5      5/5      5/5      5/5      2/5      0/5
+  CVP-BABAI          3/5      0/5      0/5      0/5      0/5      0/5      0/5      0/5
+  CVP-BABAI-C        5/5      5/5      4/5      2/5      1/5      1/5      1/5      0/5
+  CVP-EXACT-C        5/5      5/5      4/5      2/5      1/5      1/5      1/5      0/5
+
+  12-bit/2677  n=2647  lam=185  lam*=0.070  K2=52
+  method            K1=2     K1=3     K1=4     K1=6     K1=8    K1=12    K1=16    K1=24
+  eff=K1K2/n       0.039    0.059    0.079    0.118    0.157    0.236    0.314    0.471
+  KANNAN-LLL         5/5      5/5      5/5      2/5      0/5      0/5      0/5      0/5
+  KANNAN-1GUESS      5/5      5/5      5/5      2/5      0/5      0/5      0/5      0/5
+  CVP-BABAI          5/5      4/5      4/5      1/5      0/5      0/5      0/5      0/5
+  CVP-BABAI-C        5/5      5/5      5/5      5/5      5/5      5/5      4/5      3/5
+  CVP-EXACT-C        5/5      5/5      5/5      5/5      5/5      5/5      3/5      3/5
+
+==========================================================================
+E3  eff sweep on fresh 17-bit curves (m=12, 5 seeds, CVP-EXACT-C)
+==========================================================================
+  found 6 fresh 17-bit prime-order j=0 GLV curves
+    p=131113  n=130981  lam=29000   lam*=0.2214
+    p=131149  n=130483  lam=40027   lam*=0.3068
+    p=131203  n=131707  lam=52944   lam*=0.4020
+    p=131251  n=130579  lam=2529    lam*=0.0194
+    p=131293  n=130987  lam=14170   lam*=0.1082
+    p=131311  n=130843  lam=51271   lam*=0.3919
+
+     eff  K1(typ)  BABAI-uncent    BABAI-cent    EXACT-cent
+    0.05       18         23/30         30/30         30/30
+    0.10       36          0/30         27/30         30/30
+    0.18       65          0/30         15/30         27/30
+    0.30      109          0/30          3/30         11/30
+    0.45      163          0/30          0/30          0/30
+    0.60      217          0/30          0/30          0/30
+    0.70      253          0/30          0/30          0/30
+    0.85      308          0/30          0/30          0/30
+    1.00      362          0/30          0/30          0/30
+
+  prediction: uncentred wall at eff=0.176, centred wall at eff=0.703
+
+==========================================================================
+E4  predictor study: does lambda_1/dist separate success from failure?
+==========================================================================
+  12 curves x effs {0.10,0.18,0.30} x 5 seeds, m=12
+  n=180 instances, 140 recovered (77.8%)
+
+  predictor        AUC   interpretation
+  svpv           0.890   (140 succ / 40 fail)   [higher predicts success]
+  eff            0.896   (140 succ / 40 fail)   [lower predicts success]
+  lamstar        0.457   (140 succ / 40 fail)   [higher predicts success]
+
+  best svpv threshold: 0.945  ->  accuracy 82.8% (majority baseline 77.8%)
+
+  svpv bin         recovered
+  [0.0, 0.8)       8/20    
+  [0.8, 1.0)      19/40    
+  [1.0, 1.2)      47/54    
+  [1.2, 1.5)      30/30    
+  [1.5,99.0)      36/36    
+
+  within-eff-stratum AUC of svpv (eff is constant inside each stratum):
+     eff     AUC   succ   fail   svpv range
+    0.10     nan     60      0   [0.89, 1.99]
+    0.18   0.953     57      3   [0.70, 1.53]
+    0.30   0.622     23     37   [0.60, 1.13]
+
+==========================================================================
+E5  complementarity of the two formulations: is it lam-driven or n-driven?
+==========================================================================
+  curve sets: 12 x 12-bit, 12 x 17-bit; m=12, 5 seeds
+
+  12-bit curves
+     eff    KANNAN   CVP-B-C   best-of  union gain   split by lam* (K/C)
+    0.08     59/60     60/60     60/60           0   lo 34/35  hi 25/25
+    0.12     41/60     60/60     60/60           0   lo 23/35  hi 18/25
+    0.18     25/60     52/60     52/60           0   lo 11/30  hi 14/22
+    0.24      9/60     38/60     40/60           2   lo 3/22  hi 6/16
+    0.30      4/60     29/60     31/60           2   lo 0/13  hi 4/16
+
+  17-bit curves
+     eff    KANNAN   CVP-B-C   best-of  union gain   split by lam* (K/C)
+    0.08     28/60     59/60     59/60           0   lo 16/30  hi 12/29
+    0.12     11/60     50/60     51/60           1   lo 10/26  hi 1/24
+    0.18      4/60     37/60     39/60           2   lo 4/19  hi 0/18
+    0.24      2/60     16/60     17/60           1   lo 2/12  hi 0/4
+    0.30      1/60      8/60      8/60           0   lo 1/6  hi 0/2
+
+  'union gain' = instances solved by the best-of-two but by neither
+  method alone being uniformly better; >0 means the formulations are
+  genuinely complementary.  'lo/hi' split tests whether lam* drives which
+  formulation wins (lo = lam* < 0.20, hi = lam* >= 0.20).
+
+elapsed 4.7s
