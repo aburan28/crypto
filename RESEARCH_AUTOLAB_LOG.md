@@ -6276,3 +6276,5 @@ to Thread 24.
 thread needing `gp` (Threads 2/3 follow-ups) cannot run until that is resolved.
 
 ### Commits made
+
+8be7e50 autolab 2026-08-05: Thread 23 falsified — trivial vector is not the obstruction; wall is GS-profile shape
