@@ -6127,7 +6127,7 @@ vector changes recovery on exactly zero grid cells. Exact CVP buys one grid step
 - Environment (fresh container): `pip install fpylll sympy cysignals`. Confirming the
   2026-07-29 note — `cysignals` is a separate runtime import and `pip install fpylll`
   alone leaves `from fpylll import ...` broken.
-- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (654 lines, experiments
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (800 lines, experiments
   E0–E6), reusing `build_glv_lattice` / `gen_signatures` / `scales` verbatim from
   `glv_hnp_phase2_lambda_threshold.py:254` so the grid is directly comparable to the
   2026-07-29 T4 table. Artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`
@@ -6302,3 +6302,5 @@ Not proposed: further reformulation of the Kannan embedding. E1 closes that — 
 and V2-babai agree on 24/24 cells and V2-exact moves one.
 
 ### Commits made
+
+3ef0fd1 autolab 2026-08-05: Thread 23 — projected/CVP lattice buys nothing; wall is BDD-bound
