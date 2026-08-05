@@ -271,3 +271,72 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. The ν̂ separator and its closed form (Threads 20d, 23)
+
+Added 2026-08-05.  Script: `secp256k1_cm_audit/glv_hnp_nu_cf_theory.py`
+(output: `..._output.txt`); ν̂ itself in `secp256k1_cm_audit/glv_hnp_nuhat_core.py`.
+
+**The separator.** The (2m+2)-dimensional Phase 2 lattice contains m copies of a
+*non-planted* 2-dimensional sublattice, spanned by the modular row i and the GLV
+row m+1+i, both supported on the coordinate pair (i, m+1+i):
+
+```
+L2 = < (n·S1, 0), (−λ·S1, S2) >,   S1 = n div K1,  S2 = max(1, n div K2)
+det L2 = n·S1·S2   (independent of λ)
+ν̂ = λ₁(L2) / sqrt(det L2)
+```
+
+ν̂ is the first invariant to separate the June C1/C2 recovery classes:
+AUC 0.935, 89.0% vs a 74.0% majority baseline, where δ/n, κ(M), q_cf, max_q_cf,
+max_a, a_corn/n, λ/n and μ all sat at baseline.  Its sign is counter-intuitive:
+a *short* rival vector makes the attack easier (λ₁λ₂ ≈ det, so a skew L2 leaves
+the planted vector comparatively short).
+
+**Closed form (T23-A, an identity, not a fit).** A vector of L2 is
+`(S1·(a·n − b·λ), S2·b)`, so for fixed b the inner minimum over a is the centred
+residue `r(b) = |b·λ mod± n|`.  Any b that is not a continued-fraction convergent
+denominator of λ/n is dominated — the best-approximation theorem gives a
+convergent denominator q < b with r(q) < r(b), smaller in *both* terms.  Hence,
+with p_j/q_j the convergents of λ/n and r_j = |q_j·λ − p_j·n|:
+
+```
+λ₁(L2)² = min_{j ≥ −1} [ S1²·r_j² + S2²·q_j² ]          (index −1 = (n·S1, 0))
+```
+
+Verified as exact integer equality against Lagrange-Gauss on 7200 random (n, λ)
+at 20/24/32/64/128/256 bits × eff ∈ {0.05, 0.10, 0.25}: **0 mismatches**.
+
+**Scale localisation (T23-B).** With T = sqrt(n·S1/S2) ≈ sqrt(n·K2/K1),
+`ν̂² = min_j [(q_j/T)² + (r_j·T/n)²]`, and since r_j ≈ n/q_{j+1} the minimum is
+set by the CF gap *bracketing T*: q_{j*} ≤ T < q_{j*+1}.  Writing
+g = ln(q_{j*+1}/q_{j*}) and u = ln(T/q_{j*})/g ∈ [0,1),
+
+```
+ν̂² ≈ e^{−2gu} + e^{−2g(1−u)},   floor ν̂ ≈ sqrt(2/a_{j*+1}) at u = 1/2
+```
+
+so ν̂ is small iff the gap is wide (large partial quotient) **and** T lands near
+its middle.  Two-term vs exact ν̂: pearson 0.9745, median |rel err| 2.0%.
+Empirically ν̂ ≤ 0.45 required a_{j*+1} ≥ 9 over 3000 draws (heuristic floor
+predicts ≥ 10 — the floor is approximate, not a bound).
+
+**This is why the June CF invariants failed.** q_cf, max_q_cf, max_a and
+a_corn/n are all *scale-free* statistics of the CF of λ/n.  The operative
+quantity is the partial quotient at one specific scale T.  On the same 100-curve
+C1/C2 sample: localised a_{j*+1} gives AUC 0.853 / 80.0%, scale-free max_a gives
+0.748 / 75.0% (baseline 74.0%).
+
+**Null law (T23-C).** For random λ, L2 is a random 2-dimensional lattice; Siegel
+mean-value + the primitive-point correction 1/ζ(2), with points in ± pairs, give
+`P(ν̂ ≤ t) = (3/π)·t²`.  Measured at 256 bits (4000 draws): 0.0405/0.0382 at
+t=0.20, 0.194/0.193 at t=0.45, 0.343/0.344 at t=0.60.  Max observed ν̂ = 1.0607
+against the Hermite bound (4/3)^{1/4} = 1.0746.
+
+**secp256k1.** ν̂ = 0.8709 / 0.6624 / 0.5852 / 0.6851 at eff = 0.05 / 0.10 /
+0.25 / 0.50.  A single CF gap (q ∈ [2^127.8, 2^130.2], a_next = 5) brackets T at
+every eff tested, so the sqrt(2/a) floor keeps it out of the low-ν̂ tail
+regardless of eff.  Two caveats, unchanged: this is a 20/24-bit → 256-bit
+extrapolation of an empirical regularity, and the whole thread is conditional on
+a non-standard nonce generator k = k₁ + λ·k₂ with k₁ bounded.  **It is not an
+attack on secp256k1.**

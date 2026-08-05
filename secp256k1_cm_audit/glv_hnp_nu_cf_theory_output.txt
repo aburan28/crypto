@@ -1,0 +1,141 @@
+GLV-HNP Thread 23 — closed form for nu_hat via continued fractions
+date: 2026-08-05  |  seed: 20260805
+
+==============================================================================
+T1 — T23-A as an exact identity: CF minimum vs exact Lagrange-Gauss
+==============================================================================
+  For each (bits, eff): 400 random (n, lam) pairs, n odd, lam uniform.
+  Compares lambda_1^2 as INTEGERS (no float tolerance).
+
+   bits    eff  trials  CF==Gauss  CF>Gauss  CF<Gauss  max nu_hat
+     20   0.05     400        400         0         0      1.0418
+     20   0.10     400        400         0         0      1.0554
+     20   0.25     400        400         0         0      1.0691
+     24   0.05     400        400         0         0      1.0430
+     24   0.10     400        400         0         0      1.0718
+     24   0.25     400        400         0         0      1.0716
+     32   0.05     400        400         0         0      1.0639
+     32   0.10     400        400         0         0      1.0614
+     32   0.25     400        400         0         0      1.0605
+     64   0.05     400        400         0         0      1.0594
+     64   0.10     400        400         0         0      1.0672
+     64   0.25     400        400         0         0      1.0545
+    128   0.05     400        400         0         0      1.0628
+    128   0.10     400        400         0         0      1.0450
+    128   0.25     400        400         0         0      1.0693
+    256   0.05     400        400         0         0      1.0545
+    256   0.10     400        400         0         0      1.0596
+    256   0.25     400        400         0         0      1.0509
+
+  total mismatches over 7200 trials: 0
+  (CF>Gauss would falsify T23-A; CF<Gauss would be a bug in the reference)
+
+==============================================================================
+T2 — audit of the float Lagrange-Gauss used for the 2026-07-29 numbers
+==============================================================================
+   bits  trials   agree  max |rel err|      worst nu_hat pair
+     20     300     300      3.036e-16   0.182851 vs 0.182851
+     24     300     300      2.436e-16   0.455671 vs 0.455671
+     64     300     300      2.779e-16   0.799057 vs 0.799057
+    128     300     300      2.421e-16   0.917116 vs 0.917116
+    256     300     300      2.563e-16   0.866262 vs 0.866262
+
+==============================================================================
+T3 — T23-B: nu_hat is set by the CF gap bracketing T = sqrt(n*K2/K1)
+==============================================================================
+  n = 3000 random (n, lam).
+  |log2(q_min / T)| for the CF row attaining the minimum:
+    median=1.260  q75=2.324  q90=3.658  q99=6.505  max=12.885
+    -> the minimum is always attained within a small factor of T.
+
+  Two-term approximation nu_hat^2 ~ (q_lo/T)^2 + (T/q_hi)^2:
+    pearson = +0.9745   spearman = +0.9797
+    |rel err|: median=0.0199  q90=0.1522  max=0.4742
+
+  a_next = a_(j*+1), the partial quotient of the bracketing gap:
+    spearman(a_next, nu_hat) = -0.7485
+    spearman(sqrt(2/a_next), nu_hat) = +0.7485
+      a_next   count  mean nu_hat  min nu_hat  sqrt(2/a)  frac<=0.45
+           1     314       0.9649      0.8261     1.4142       0.000
+           2     372       0.8959      0.7318     1.0000       0.000
+           3     291       0.8076      0.6406     0.8165       0.000
+         4-5     393       0.7402      0.5387     0.7071       0.000
+        6-10     518       0.6492      0.4215     0.5774       0.041
+       11-30     551       0.5491      0.2553     0.4264       0.417
+        >=31     561       0.4209      0.0108     0.2540       0.597
+
+  Joint response in (a_next, u): a wide gap only helps when T sits
+  near the MIDDLE of it (u ~ 1/2).  mean nu_hat:
+      a_next u:0.0-0.2 u:0.2-0.4 u:0.4-0.6 u:0.6-0.8 u:0.8-1.0
+         1-2     0.966     0.918     0.907     0.905     0.943
+         3-5     0.907     0.735     0.664     0.704     0.836
+        6-15     0.802     0.554     0.467     0.532     0.805
+        >=16     0.691     0.330     0.224     0.335     0.675
+
+  Necessary condition check: over the 586 draws with nu_hat <= 0.45,
+    min a_next = 9   (the floor nu_hat >= sqrt(2/a) at u=1/2 predicts a_next >= 10)
+    u range = [0.128, 0.891]
+
+==============================================================================
+T4 — T23-C: null distribution of nu_hat over random lam (256-bit)
+==============================================================================
+  4000 random lam at eff=0.05:
+    q05=0.227  q10=0.320  q25=0.514  q50=0.727  q75=0.888  q90=0.973  q95=1.001
+    max=1.0607   (Minkowski/Hermite bound (4/3)^(1/4)=1.0746)
+
+       t   P(nu<=t) measured   (3/pi)t^2   (pi/2)t^2
+    0.20              0.0405      0.0382      0.0628
+    0.30              0.0880      0.0859      0.1414
+    0.40              0.1520      0.1528      0.2513
+    0.45              0.1940      0.1934      0.3181
+    0.50              0.2362      0.2387      0.3927
+    0.60              0.3430      0.3438      0.5655
+    0.70              0.4625      0.4679      0.7697
+
+  2026-07-29 recorded 20.5% of lam below 0.45 at 256 bits/eff=0.05.
+  This run: 19.4%.
+
+==============================================================================
+T5 — secp256k1 nu_hat from the CF closed form (recorded values 2026-07-29)
+==============================================================================
+  lam^2 + lam + 1 = 0 mod n : verified
+
+     eff  nu_hat (CF)  nu_hat (exact GG)  recorded 07-29  pctile vs random lam
+    0.05       0.8709             0.8709          0.8709                 74.2%
+    0.10       0.6624             0.6624          0.6624                 42.7%
+    0.25       0.5852             0.5852          0.5852                 31.8%
+    0.50       0.6851             0.6851          0.6851                 40.0%
+
+     eff          T       q_lo       q_hi  a_next      u  nu 2-term  nu exact
+    0.05 2^130.2    2^127.8    2^130.2          5  0.977     0.9826    0.8709
+    0.10 2^129.7    2^127.8    2^130.2          5  0.767     0.7365    0.6624
+    0.25 2^129.0    2^127.8    2^130.2          5  0.489     0.6196    0.5852
+    0.50 2^128.5    2^127.8    2^130.2          5  0.279     0.7001    0.6851
+
+  Every bracketing gap of the secp256k1 lam has a_next in single digits,
+  so by the sqrt(2/a) floor no eff can put secp256k1 in the low-nu_hat
+  tail: that is the algebraic form of the 2026-07-29 empirical placement.
+
+==============================================================================
+T6 — CF quantities vs real LLL recovery (Exp S protocol, K1=72, m=12)
+==============================================================================
+  100 curves, 26 C2 / 74 C1; baseline = 74.0%
+
+               invariant     AUC  best acc
+       nu_hat (exact GG)   0.935     89.0%
+      nu_hat 2-term (CF)   0.922     90.0%
+       a_next (local CF)   0.853     80.0%
+       g = gap log-width   0.841     80.0%
+      max_a (scale-free)   0.748     75.0%
+
+  a_next is the SCALE-LOCALISED partial quotient; max_a is the
+  scale-free one falsified by Exp S.  The contrast between those two
+  rows is the point of Thread 23.
+
+==============================================================================
+VERDICT
+==============================================================================
+  T23-A holds as an exact identity on every trial: lambda_1(L2) is the
+  best-approximation minimum of lam/n weighted by (S1, S2).  nu_hat is
+  no longer an empirical quantity -- it is a continued-fraction
+  invariant of lam/n localised at scale T = sqrt(n*K2/K1).
