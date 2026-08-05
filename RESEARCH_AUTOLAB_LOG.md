@@ -6599,3 +6599,5 @@ and D_star alone, which is a_local's twin and stops at 0.879). The mechanism is
 now known to be scale-dependent, which explains all of them.
 
 ### Commits made
+
+6775f17 autolab 2026-08-05: Thread 23 — λ₁(L2) closed form is exact; scale-localised partial quotient explains the June failures
