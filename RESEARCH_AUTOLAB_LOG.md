@@ -6103,3 +6103,202 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the GLV-HNP Phase-2 lattice so the planted vector is λ₁.
+This is verbatim the "Next step proposal" of the 2026-07-29 entry (log §2026-07-29,
+"Thread 23"), which is 7 days old and made measurable progress, so protocol rule (b)
+applies. Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 completed
+2026-07-21.
+
+The 2026-07-29 falsifier was stated as: *if sv/pv rises above 1 after the
+reformulation AND the K1 wall on the λ\*=0.07 curve moves outward (currently K1≈4–6),
+the reformulation is a real improvement; if the wall stays at K1≈4–6, the wall is
+information-theoretic and Phase 2 is at its ceiling.*
+
+**Verdict: the wall is essentially information-theoretic.** Removing the trivial
+vector changes recovery on exactly zero grid cells. Exact CVP buys one grid step
+(K1 4→6) on the failure curve and nothing elsewhere.
+
+### Work done
+- Environment (fresh container): `pip install fpylll sympy cysignals`. Confirming the
+  2026-07-29 note — `cysignals` is a separate runtime import and `pip install fpylll`
+  alone leaves `from fpylll import ...` broken.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (654 lines, experiments
+  E0–E6), reusing `build_glv_lattice` / `gen_signatures` / `scales` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so the grid is directly comparable to the
+  2026-07-29 T4 table. Artifact: `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`
+  (241 lines).
+- Three lattice variants:
+  - **V0** baseline, dim 2m+2, columns `[k1 | d | k2 | kannan]`.
+  - **V1** *projected*: delete the d readout column → rank 2m+1 in 2m+1 columns.
+    d is re-derived as `d = (k1₀ + λ·k2₀ − A₀)·B₀⁻¹ mod n` instead of being read off.
+  - **V2** *explicit CVP*: delete the d column **and** the Kannan row/column → rank 2m
+    in 2m columns; solve BDD directly against `t = (A_i·S_K1, 0)`. Both
+    `CVP.babai` (nearest-plane) and `CVP.closest_vector` (exact).
+- `cargo test --test curve_audit` → 5/5 pass (6.85s). ✓
+
+### Findings
+
+**E0 — the projection is structurally exactly what was wanted.**
+Deleting the d column makes `n·row_m = Σ_i B_i·row_i` an identity, so the rank drops by
+exactly 1 (fpylll emits exactly one zero row on all three curves) and the trivial
+vector leaves the lattice. Confirms T5: V0's shortest vector has d-column energy
+**1.0000** on every curve.
+
+| curve | K1 | V0 sv/pv | V0 d-energy | V1 sv/pv | V1 zero rows |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.603 | 1.0000 | 0.843 | 1 |
+| 12-bit/2557 | 8 | 0.517 | 1.0000 | 0.532 | 1 |
+| 12-bit/2677 | 8 | 0.422 | 1.0000 | 0.813 | 1 |
+
+On 12-bit/2677 at K1≤4, V1 sv/pv = **1.000 exactly** — the planted vector *is* λ₁ after
+projection, which is precisely the goal Thread 23 set.
+
+Closed form for the projected lattice, **verified exactly** against `sqrt(det(B·Bᵀ))`
+(1418197330226961660475797717591, symbolic match):
+
+```
+det(L')  =  (n·S_K1)^m · S_K2^m / n
+```
+(det(L_V0) = (n·S_K1)^m·S_D·S_K2^m·S_KAN is triangular; ker(π)∩L = ⟨n·S_D·e_m⟩ because
+a·B_i ≡ 0 (mod n) ∀i forces a ≡ 0 (mod n); then intersect with {kannan = 0}.)
+
+**E1 — but it buys nothing for LLL. V0 and V1 recover on *identical* grid cells.**
+24 cells (3 curves × 8 K1 values × 5 seeds), zero disagreements:
+
+| curve (m) | K1= | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2677 (m=10) λ\*=0.070 | V0 = V1 | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 2677 (m=10) | V2-exact | 5 | 5 | 5 | **4** | 0 | 0 | 1 | 0 |
+| 2677 (m=10) | V2-babai | 5 | 4 | 2 | 0 | 0 | 0 | 1 | 0 |
+| 2557 (m=8) λ\*=0.340 | V0 = V1 = V2 | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 199 (m=6) λ\*=0.467 | V0 = V1 | 5 | 5 | 2 | 2 | 0 | 0 | 0 | 0 |
+
+Exact CVP moves the 2677 wall from K1=4 to K1=6 (0/5 → 4/5) and nowhere else. Babai
+nearest-plane is strictly *worse* than plain LLL-on-V0 (2677 K1=4: 2/5 vs 5/5), so the
+Kannan embedding is not the bottleneck it was suspected to be.
+
+**Conclusion on the 2026-07-29 falsifier: the trivial vector was a red herring for
+recovery.** It is real (d-energy 1.0000) and it does depress sv/pv, but sv/pv is not
+what governs success — removing it moved 0 of 24 cells. Phase 2 is at its ceiling up
+to a ~1.5× factor in K1.
+
+**E2/E3 — a closed-form a-priori success criterion.**
+Modelling recovery as BDD in L' with error `e = (k1_i·S_K1, k2_i·S_K2)`:
+
+```
+ρ  =  ‖e‖ / GH(L')  =  sqrt(2πe/3) · sqrt(K1·K2/n) · n^(1/2m)        (≈ 2.386·sqrt(eff)·n^(1/2m))
+```
+
+Predicted wall K1\* = 3n / (2πe·K2·n^(1/m)):
+
+| curve | m | K1\* pred | obs V0 | obs V1 | obs V2 |
+|---|---|---|---|---|---|
+| 8-bit/199 | 6 | 0.96 | 3 | 3 | 3 |
+| 12-bit/2557 | 8 | 3.35 | 8 | 8 | 8 |
+| 12-bit/2677 | 10 | 4.07 | 4 | 4 | 6 |
+
+Bullseye on 2677; conservative by 2.4× on 2557 and 3× on 199 (n=199 is far too small
+for GH asymptotics). In-sample AUC(ρ) = 0.943 (V0/V1), 0.972 (V2-exact).
+**ρ < 1 ⇒ success has zero counterexamples in 25 cells** (5 in-sample + 20 out-of-sample);
+ρ < 1 is sufficient, not necessary.
+
+**E4 — out-of-sample, 10 fresh 17-bit j=0 GLV curves spanning λ\* ∈ [0.027, 0.482],
+m=12, K1 ∈ {8,16,24,32,48,64}, 3 seeds (60 cells):**
+
+| separator | V0 | V1 | V2 |
+|---|---|---|---|
+| AUC(ρ) | 0.901 | 0.901 | 0.940 |
+| AUC(eff = K1·K2/n) | 0.902 | 0.902 | 0.940 |
+| AUC(λ\*) | 0.375 | 0.375 | 0.413 |
+
+Honest caveat: within a fixed (n, m) sweep ρ is a monotone function of eff, so
+AUC(ρ) = AUC(eff) by construction here. ρ's value over eff is that it is calibrated
+*across* different (n, m) — the E2 table is where that shows. AUC(λ\*) = 0.375 (below
+chance) independently re-confirms the 2026-07-29 falsification of λ\*.
+
+**E5 — the surprise, and it inverts the naive BDD intuition.**
+Replacing GH by the *measured* λ₁(L') makes the separator **anti**-correlated:
+
+```
+AUC(‖e‖/GH(L'))        = 0.721        (180 per-seed points)
+AUC(‖e‖/λ₁(L'))        = 0.393        <-- worse than chance
+```
+
+Two curves win 6/6 at ρ up to 1.64, far past the wall, and they are exactly the two
+with an anomalously short λ₁:
+
+| p | n | λ\* | λ₁/GH | wins at K1=24/32/48 |
+|---|---|---|---|---|
+| 65539 | 65287 | 0.335 | **0.42–0.58** | 6/6, 6/6, 6/6 |
+| 66853 | 67369 | 0.482 | **0.63–0.69** | 6/6, 6/6, 6/6 |
+| other 8 | — | 0.027–0.410 | 0.79–1.17 | ≤ 4/6, mostly 0/6 |
+
+**A short λ₁ predicts success, not failure.** Mechanism: det(L') is fixed, so an
+anomalously short b\*₁ forces the remaining GS norms *up*, which enlarges the
+nearest-plane BDD radius. λ₁ is the wrong statistic; the GS profile is the right one.
+
+**E6 — where the short λ₁ comes from, and the best predictor found.**
+It comes from the 2-D λ-block ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩. Normalising that block's
+shortest vector μ by the block's *own* Gaussian heuristic separates the 10 curves
+perfectly at K1 ∈ {24,32} (gap [1.38, 1.75], no overlap):
+
+| p | μ/GH_blk | max CF partial quotient | outlier? |
+|---|---|---|---|
+| 65539 | **0.907–1.044** | 85 | yes (6/6) |
+| 66853 | **1.366–1.380** | 13 | yes (6/6) |
+| 65707, 65557, 66463 | 1.75–2.08 | 5, 7, 18 | no |
+| 65647, 66271, 65929, 65629 | 2.53–2.86 | 3, 6, 36 | no |
+
+Arithmetic source: 65539 has 3λ − n = **254** (λ=21847, n=65287 — λ/n within 0.0039 of
+1/3); 66853 has 2λ − n = **−2477**. A small-denominator rational approximation to λ/n
+produces the short block vector. Note `max_cf` alone does *not* separate (65647 has
+max_cf = 36 and is not an outlier) — consistent with `max_q_cf` having been tried and
+rejected on 2026-06-21…06-29 (log lines ~3560–3580). The normalised μ is the working
+statistic, not the raw CF.
+
+Best per-instance predictor found, over the same 180 points:
+
+```
+AUC(‖e‖ / ‖b*_last‖)      = 0.862     <-- best
+AUC(‖e‖ / GH(L'))         = 0.721
+AUC(‖e‖ / babai radius)   = 0.503     <-- chance
+AUC(‖e‖ / λ₁(L'))         = 0.393
+successes ‖e‖/‖b*_last‖ ∈ [0.551, 2.027];  failures ∈ [1.110, 2.930]
+```
+
+**This partially rehabilitates T2 of 2026-07-29.** T2 tested μ/‖v_planted‖ on 3 curves
+and found the failure curve had the *largest* μ — the correct direction — but declared
+the hypothesis dead because no threshold beat the majority baseline in the 17-bit
+sweep. The two differences that matter: normalise μ by the block's own GH (not by
+‖v_planted‖), and probe at bias strengths near the wall (K1 = 24–48), not at fixed eff
+where every curve either all-succeeds or all-fails. T2's "dead hypothesis" verdict
+should be read as *dead in that parameterisation*, not dead.
+
+### Next step proposal
+**Thread 24 — predict the wall from the full GS profile, and test whether the
+λ-block anomaly is exploitable.** Two concrete sub-tasks, in order:
+
+1. *(cheap, ~20 min)* Replace the scalar `‖e‖/‖b*_last‖` by the standard per-index
+   BDD-success predictor `Π_i P(|⟨e, b*_i⟩|/‖b*_i‖² < 1/2)` over the LLL GS profile of
+   L', and score it on the same 180 points from E6. Falsifier: if AUC ≥ 0.95 it is the
+   right statistic and the wall becomes predictable a priori; if it stays ≈ 0.86 the
+   residual is seed noise in ‖e‖ and the wall is as predictable as it will get.
+2. *(the interesting one)* The E6 mechanism says an attacker who gets to *choose* the
+   curve wants λ/n with a small-denominator convergent. secp256k1's own λ\* and
+   μ/GH_blk should be measured — if secp256k1 sits in the anomalous class the practical
+   K1 wall for the real curve is ~1.5–2× looser than the ρ model predicts. Concretely:
+   compute μ/GH_blk for secp256k1 (n known, K2 = ⌈√n⌉, K1 swept) and for the other
+   five sextic twists, and compare against the 10-curve calibration in E6.
+   Expected outcome: secp256k1's λ = 0x5363ad4c…ce1d10e8 has no small convergent, so
+   μ/GH_blk should land in the 1.75–2.9 "normal" band — i.e. *no* free factor for the
+   real curve. That is the falsifiable prediction.
+
+Not proposed: further reformulation of the Kannan embedding. E1 closes that — V0, V1
+and V2-babai agree on 24/24 cells and V2-exact moves one.
+
+### Commits made

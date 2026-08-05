@@ -257,6 +257,52 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+### 8.1 Partially answered (2026-08-05, Thread 23)
+
+See `RESEARCH_AUTOLAB_LOG.md` §2026-08-05 and
+`secp256k1_cm_audit/glv_hnp_phase2_projected.py`.
+
+**On the information-theoretic bound (open question 1).**  Recovery in
+the implemented Phase-2 lattice is a BDD condition, not an SVP one.
+Projecting out the d readout column gives a lattice `L'` of rank `2m`
+with the exactly-verified volume
+
+```
+        det(L')  =  (n·S_K1)^m · S_K2^m / n
+```
+
+and the error vector `e = (k_{i,1}·S_K1, k_{i,2}·S_K2)`.  Comparing
+`‖e‖` to the Gaussian heuristic for `L'` gives a closed-form
+a-priori success criterion:
+
+```
+        ρ  =  ‖e‖ / GH(L')  =  sqrt(2πe/3) · sqrt(K1·K2/n) · n^(1/2m)  <  1
+```
+
+With `K2 ≈ √n` this is `K1 ≲ 3n / (2πe·K2·n^(1/m))`.  Empirically
+`ρ < 1 ⇒ recovery` has **no counterexamples in 25 grid cells**
+(3 historical + 10 fresh 17-bit curves), and `ρ` is a sufficient but
+not necessary condition — several curves recover up to `ρ ≈ 1.6`.
+Out-of-sample AUC(ρ) = 0.90 (LLL) / 0.94 (exact CVP).
+
+**On lattice degeneracy (Risk 1, open question 3).**  The Phase-2
+lattice's shortest vector is always the trivial `n·S_D·e_m` (d-column
+energy 1.0000), but this is *not* the obstruction: deleting the d
+column removes it and changes recovery on **0 of 24** grid cells.
+Replacing the Kannan embedding by an explicit CVP call buys one grid
+step in `K1` on the hardest curve and nothing elsewhere; Babai
+nearest-plane is strictly worse than plain LLL.  The `K1` wall is
+essentially information-theoretic.
+
+**On CM structure (open question 2).**  A curve whose `λ/n` has a
+small-denominator rational approximation gets an anomalously short
+vector in the 2-D λ-block `⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩`.  Because
+`det(L')` is fixed, this pushes the *remaining* Gram-Schmidt norms up
+and makes BDD **easier** — the opposite of the usual degeneracy
+intuition.  Two of ten fresh 17-bit curves show this (`3λ − n = 254`
+and `2λ − n = −2477`) and recover 6/6 well past `ρ = 1`.  Whether
+secp256k1 itself sits in this anomalous class is untested (Thread 24).
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
