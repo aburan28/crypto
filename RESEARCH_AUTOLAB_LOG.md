@@ -6277,4 +6277,4 @@ Secondary (unchanged from 2026-07-29, still not done): re-express the
 2026-07-26 log's λ/n column in λ* throughout.
 
 ### Commits made
-(recorded post-commit below)
+`7448524` autolab 2026-08-05: Thread 23 CLOSED — d-column removal is a no-op; recovery mechanism identified
