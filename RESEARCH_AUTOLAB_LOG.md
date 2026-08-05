@@ -6103,3 +6103,176 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is not
+dominated by trivial short vectors. This was the explicit next-step proposal of the
+2026-07-29 entry (log line ~6089, commit e845207). Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+made measurable progress 2026-07-29, so protocol rule (b) selects its continuation.
+
+Thread 23's falsifier was: *"if sv/pv rises above 1 after the reformulation and the K1
+wall moves outward, the reformulation is a real improvement; if the wall stays at
+K1≈4–6, then the wall is information-theoretic and Phase 2 is at its ceiling."*
+**Outcome: the wall does not move by a single cell — but it is NOT information-theoretic
+either.** The falsifier's disjunction was incomplete; the third branch is what is true.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4 OK.
+  `apt-get install pari-gp` **failed** in this container — `gp` unavailable. Thread 23 is
+  Python-only so this did not block; future PARI-dependent threads should check first.
+- Extracted `secp256k1_cm_audit/glv_hnp_lib.py` — a verbatim lift of lines 83–413 of
+  `glv_hnp_phase2_lambda_threshold.py` (the 2026-07-29 helper block, itself verbatim from
+  `glv_hnp_phase2_20bit.py:262`). Needed because that file runs its experiments at module
+  level and cannot be imported. Numerics are unchanged; asserted in E1 below.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd.py` (E1–E9), output artifact
+  `secp256k1_cm_audit/glv_hnp_phase2_bdd_output.txt`. Whole suite runs in **8.9 s**.
+- Same three historical curves, same `SEEDS = [42,1234,9999,555,31337]` as 2026-07-29, so
+  every cell is directly comparable to the T4 grid.
+- `cargo test --test curve_audit` → **5/5 pass** (7.02 s). ✓
+
+### Findings
+
+**E1 — the 2026-07-29 S_D claim is CORRECTED.** That entry said "no choice of S_D removes
+[the trivial vector] — both vectors scale linearly in S_D". Only the *d-coordinate* of
+v_planted carries S_D; the k1/k2/Kannan coordinates do not:
+‖pv‖² = (d·S_D)² + R², ‖triv‖² = (n·S_D)², R² independent of S_D ⇒ ratio → d/n < 1.
+Measured on 12-bit/2557 (K1=8, m=8), mean over 5 seeds:
+
+| S_D | ‖pv‖/‖triv‖ | ‖sv‖/‖pv‖ | rank(pv) | LLL |
+|---|---|---|---|---|
+| 1 | 2.277 | 0.445 | 13.2 | 5/5 |
+| 4 | 0.820 | 0.338 | 16.6 | 5/5 |
+| 16 | 0.600 | 0.178 | 17.2 | 2/5 |
+| 64 | 0.572 | 0.102 | 17.4 | 0/5 |
+| 2^24 | 0.569 | 0.000 | 19.0 | 0/5 |
+
+So S_D **does** demote the trivial vector (2.28 → 0.57), and recovery **collapses anyway**
+(5/5 → 0/5) while rank(pv) rises 13.2 → 19.0. Inflating S_D just promotes a *different*
+short vector to λ₁. Demoting the trivial vector is not merely useless, it is harmful.
+
+**E2/E3 — the reformulations reproduce the baseline exactly.** E2 deletes the d column
+outright (dim 2m+2 → 2m+1; the trivial vector is annihilated by construction) and reads d
+off the LLL transformation matrix U instead. E3 additionally deletes the Kannan row and
+solves CVP by Babai nearest-plane (dim 2m). K1 sweep at m=12:
+
+12-bit/2557 (K2=52, n=2659):
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| base | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| **E2** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 | 0/5 |
+| E3 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 | 0/5 |
+
+12-bit/2677 (K2=52, n=2647):
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| base | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| **E2** | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| E3 | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+E2 is **cell-for-cell identical to the baseline on all 18 cells**. Babai CVP is strictly
+worse (nearest-plane is weaker than scanning the whole reduced basis). **Thread 23 is
+FALSIFIED: the trivial vector was never the obstruction.**
+
+**E4 — the wall is not information-theoretic.** m_min = log n / log(n/(K1·K2)) at the
+2677 wall (K1=8) is **4.3**, while the sweep supplies m=12. Both curves fail at K1=8 with
+~3× the required data. Every failing cell up to K1=16 has m_min < 12.
+
+**E6 — the wall is not a reduction-strength wall either.** BKZ-β for β ∈ {20,30,40,50} in
+dimension 26 (β ≥ dim ⇒ effectively HKZ) is identical to plain LLL in 5 of 6 probe cells:
+
+| curve | K1 | LLL | β=20 | β=30 | β=40 | β=50 |
+|---|---|---|---|---|---|---|
+| 2557 | 8 / 12 / 16 | 5/5, 4/5, 1/5 | same | same | same | same |
+| 2677 | 4 / 6 / 8 | 5/5, 2/5, 0/5 | 5/5, **3/5**, 0/5 | same | same | same |
+
+**E5/E7 — γ = ‖pv‖/GH(L) explains the regime but not the curve.** For the E2 lattice,
+GH(L) = √(D/2πe)·det(L)^(1/D), D = 2m+1. γ is essentially **curve-independent** — it
+differs by < 0.4 % between the two curves at every K1 (K1=8: 1.288 vs 1.291) — because it
+sees only det and dim. Sweeping m at K1=8:
+
+| m | 6 | 8 | 12 | 16 | 24 | 32 | 48 | 64 |
+|---|---|---|---|---|---|---|---|---|
+| γ (2557) | 1.692 | 1.461 | 1.288 | 1.192 | 1.057 | 1.002 | 0.970 | 0.951 |
+| E2 (2557) | 3/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| γ (2677) | 1.696 | 1.464 | 1.291 | 1.194 | 1.059 | 1.003 | 0.971 | 0.953 |
+| E2 (2677) | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 | 1/5 | 0/5 |
+
+γ falls below 1 by m ≈ 48 for **both** curves, yet 2677 still fails. This also **confirms
+and extends T4b** (2026-07-29: m = 8/12/16/24/32 → 0,0,1,0,1): more data never rescues
+2677, out to m = 64. So the obstruction is the **shape of the GS profile**, not det/dim.
+
+**E8 — λ₁ is the λ-block vector μ, not the trivial vector. This supersedes T5.**
+2026-07-29 T5 concluded "the shortest vector is always the trivial vector n·S_D·e_m"; that
+holds only for the S_D=1 baseline. Once the d column is gone, λ₁ is *exactly* the Gauss-
+reduced shortest vector μ of the 2-D λ-block ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩ — verified to
+< 1.0 absolute on all four rows (K1=8, seed 42):
+
+| curve | m | ‖pv‖ | λ₁ | λ₁ = μ | rank(pv) | #rows \|last\|=S_KAN | d found |
+|---|---|---|---|---|---|---|---|
+| 2557 | 32 | 1.151e4 | 2.738e3 | True | 34/65 | 10 | True |
+| 2557 | 64 | 1.646e4 | 2.738e3 | True | 66/129 | 11 | True |
+| 2677 | 32 | 1.135e4 | 5.096e3 | True | 49/65 | 3 | False |
+| 2677 | 64 | 1.622e4 | 5.096e3 | True | 111/129 | 5 | False |
+
+The discriminator is **rank(pv) ≈ m+2 (success) vs ≈ 1.7m (failure)**, and the mechanism
+for `recover_d` is the last column: the success curve has 10–11 basis rows carrying
+|last| = S_KANNAN, the failure curve only 3–5, and none of them is the planted vector.
+λ-block invariants at K1=8:
+
+| curve | λ* | μ | blockdet/μ | skew | wrap = λ·K2/n |
+|---|---|---|---|---|---|
+| 2557 | 0.3400 | 2738 | 16446 | 6.01 | 34.32 |
+| 2677 | 0.0699 | 5096 | 8571 | 1.68 | 3.63 |
+
+Note the sign: the **failing** curve has the *larger* μ and the *more balanced* block
+(skew 1.68 vs 6.01). A skewed λ-block is good for the attacker. This is consistent with —
+and explains — T2's negative result: ρ = μ/‖pv‖ was measured on the S_D=1 lattice where
+the trivial vector, not μ, was λ₁, so ρ was measuring the wrong quantity.
+
+**E9 — T3 and T4 of 2026-07-29 are reconciled; both are correct.** Mapping T3's three
+bias levels to the γ they induce at m=12:
+
+| eff = K1·K2/n | K1 | γ(m=12) | T3 outcome (2026-07-29) |
+|---|---|---|---|
+| 0.05 | 3 | 0.764 | 19/20 curves 5/5, λ* ∈ [0.007, 0.491] — the whole range |
+| 0.15 | 8 | 1.288 | 3/20 curves, λ* ∈ [0.318, 0.482] — high-λ* only |
+| 0.25 | 13 | 1.648 | 0/20 curves |
+
+**Two-regime picture:** λ* is irrelevant when γ ≲ 1 (everything works) and irrelevant when
+γ ≳ 1.8 (nothing works); it decides *only* inside the transition band γ ≈ 1.1–1.8. T3
+("λ* is not a threshold") was measured at γ = 0.76, T4 ("λ* shifts the K1 wall 3×") at
+γ ≈ 1.3–1.8. Both are right; they were measured on opposite sides of the band.
+
+**Net status of Phase 2.** The wall is neither information-theoretic (E4: 3× surplus
+data), nor a reduction-strength wall (E6: HKZ ≡ LLL), nor a trivial-vector artefact
+(E2: identical to baseline), nor a det/dim effect (E5/E7: γ < 1 and still 0/5). It is a
+GS-profile-shape wall, and the shape is set by the λ-block geometry.
+
+### Next step proposal
+**Thread 24 — test the λ-block-shape predictor on the 17-bit sweep.**
+E8 gives two candidate curve-level quantities that were never tested because T2 measured ρ
+on the wrong lattice: the block skew `(blockdet/μ)/μ` and the wrap count `λ·K2/n`. On the
+two historical curves they separate 6.01/1.68 and 34.3/3.63 — but n=2 is not evidence.
+Falsifier: re-run `search_curves()` from `glv_hnp_phase2_lambda_threshold.py:373` for 20
+fresh 17-bit curves, fix K1 so that γ(m=12) ≈ 1.3 (**inside** the transition band — this
+is the design error in T3, which sampled at γ=0.76 and 1.65 where nothing can separate),
+and compute AUC of skew and of wrap against 5-seed success. If AUC ≥ 0.9 the λ-block shape
+is the missing separator; if AUC ≈ 0.5 it joins ρ, δ/n, κ(M), q_cf, max_a, a_corn/n on the
+dead list and Phase 2's wall should be declared structural. Cheap: the E5 γ routine makes
+the K1-calibration a one-line search, and the whole 2026-08-05 suite runs in 8.9 s.
+
+Secondary (cheap, mechanical): `rank(pv)` and `#rows with |last|=S_KANNAN` are the two
+strongest observed discriminators (34 vs 49 at m=32; 10 vs 3). Both are computable only
+*with* the secret, so they are diagnostics rather than predictors — but a search for a
+secret-free proxy for "how much Kannan mass survives reduction" is the natural companion
+to Thread 24.
+
+**BLOCKED note:** `apt-get install pari-gp` fails in the current container image, so any
+thread needing `gp` (Threads 2/3 follow-ups) cannot run until that is resolved.
+
+### Commits made

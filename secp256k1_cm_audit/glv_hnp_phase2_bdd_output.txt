@@ -1,0 +1,189 @@
+==============================================================================
+Thread 23 -- Phase-2 lattice reformulation (BDD / d-column / CVP)
+==============================================================================
+
+Curves (identical to the 2026-07-29 table):
+curve                   p      n  bits    lam    lam*    K2
+8-bit/199             211    199     8    106  0.4673    15
+12-bit/2557          2557   2659    12   1755  0.3400    52
+12-bit/2677 FAIL     2677   2647    12    185  0.0699    52
+
+------------------------------------------------------------------------------
+EXP E1: does S_D demote the trivial vector n*S_D*e_m ?
+------------------------------------------------------------------------------
+2026-07-29 claimed 'both vectors scale linearly in S_D'.  Only the
+d-coordinate of v_planted does; the k1/k2/Kannan coordinates do not.
+Prediction: ||pv||/||triv|| -> d/n < 1 as S_D grows, so the trivial
+vector stops being shortest.  Question: does recovery follow?
+
+[check] build_lattice_SD(...,S_D=1) == build_glv_lattice(...)  OK
+
+8-bit/199   (K1=2, m=6)
+         S_D  ||pv||/||triv||  ||sv||/||pv||  rank(pv)    LLL
+           1           1.8481         0.5433       9.4    5/5
+           4           0.6790         0.5478      12.4    4/5
+          16           0.5033         0.2827      13.4    1/5
+          64           0.4811         0.1512      13.4    1/5
+         256           0.4786         0.0496      15.0    0/5
+        1024           0.4784         0.0127      15.0    0/5
+       16384           0.4784         0.0008      15.0    0/5
+      262144           0.4784         0.0000      15.0    0/5
+    16777216           0.4784         0.0000      15.0    0/5
+
+12-bit/2557   (K1=8, m=8)
+         S_D  ||pv||/||triv||  ||sv||/||pv||  rank(pv)    LLL
+           1           2.2772         0.4451      13.2    5/5
+           4           0.8199         0.3379      16.6    5/5
+          16           0.5997         0.1779      17.2    2/5
+          64           0.5722         0.1015      17.4    0/5
+         256           0.5688         0.0361      19.0    0/5
+        1024           0.5686         0.0094      19.0    0/5
+       16384           0.5686         0.0006      19.0    0/5
+      262144           0.5686         0.0000      19.0    0/5
+    16777216           0.5686         0.0000      19.0    0/5
+
+12-bit/2677 FAIL   (K1=8, m=10)
+         S_D  ||pv||/||triv||  ||sv||/||pv||  rank(pv)    LLL
+           1           2.5967         0.3873      18.4    0/5
+           4           0.8828         0.5707      20.8    0/5
+          16           0.6107         0.2964      20.8    0/5
+          64           0.5760         0.1703      21.0    0/5
+         256           0.5715         0.0660      23.0    0/5
+        1024           0.5712         0.0174      23.0    0/5
+       16384           0.5711         0.0011      23.0    0/5
+      262144           0.5711         0.0001      23.0    0/5
+    16777216           0.5711         0.0000      23.0    0/5
+
+------------------------------------------------------------------------------
+EXP E2/E3: d-column-dropped Kannan lattice, and explicit Babai CVP
+------------------------------------------------------------------------------
+E2 deletes the d column (dim 2m+2 -> 2m+1); d is read from the LLL
+transformation matrix U instead.  The trivial vector is not in the
+lattice at all.  E3 additionally deletes the Kannan row and solves
+CVP directly by Babai nearest plane (dim 2m).
+
+curve               K1   m   base     E2     E3   dim b/E2/E3
+8-bit/199            2   6    5/5    5/5    5/5      14/13/12
+12-bit/2557          8   8    5/5    5/5    5/5      18/17/16
+12-bit/2677 FAIL     8  10    0/5    0/5    0/5      22/21/20
+
+------------------------------------------------------------------------------
+EXP E4: does the K1 wall move?  (m=12, the 2026-07-29 T4 grid)
+------------------------------------------------------------------------------
+T4 (2026-07-29) measured, at m=12: 2557 walls at K1~12-16, 2677 at
+K1~4-6.  If a reformulation is a real improvement the wall moves out.
+
+12-bit/2557  (m=12, K2=52, n=2659)
+  method        2      3      4      6      8     12     16     24     32
+  base        5/5    5/5    5/5    5/5    5/5    4/5    1/5    0/5    0/5
+  E2          5/5    5/5    5/5    5/5    5/5    4/5    1/5    0/5    0/5
+  E3          5/5    5/5    5/5    5/5    4/5    2/5    0/5    0/5    0/5
+  m_min       2.4    2.8    3.1    3.7    4.3    5.4    6.8   10.4   16.8
+
+12-bit/2677 FAIL  (m=12, K2=52, n=2647)
+  method        2      3      4      6      8     12     16     24     32
+  base        5/5    5/5    5/5    2/5    0/5    0/5    0/5    0/5    0/5
+  E2          5/5    5/5    5/5    2/5    0/5    0/5    0/5    0/5    0/5
+  E3          5/5    4/5    4/5    1/5    0/5    0/5    0/5    0/5    0/5
+  m_min       2.4    2.8    3.1    3.7    4.3    5.5    6.8   10.5   17.0
+
+------------------------------------------------------------------------------
+m_min = log(n)/log(n/(K1*K2)) is the information-theoretic minimum
+number of signatures; the sweep uses m=12, so any column with
+m_min < 12 is information-theoretically satisfiable and a failure
+there is a reduction/geometry failure, not a data failure.
+
+------------------------------------------------------------------------------
+EXP E5: Gaussian-heuristic crossing -- is the K1 wall a geometry wall?
+------------------------------------------------------------------------------
+For the E2 lattice (dim D = 2m+1) compute
+    GH(L) = sqrt(D/(2*pi*e)) * det(L)^(1/D)
+and the ratio  gamma = ||v_planted|| / GH(L).  gamma < 1 means the
+planted vector is (heuristically) unique-shortest-ish and a good
+reduction should find it; gamma > 1 means exponentially many lattice
+vectors are shorter than the target and NO amount of reduction helps.
+
+12-bit/2557  (m=12)
+  K1             2       3       4       6       8      12      16      24      32
+  gamma      0.578   0.764   0.884   1.110   1.288   1.597   1.834   2.261   2.586
+  E2           5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5     0/5
+
+12-bit/2677 FAIL  (m=12)
+  K1             2       3       4       6       8      12      16      24      32
+  gamma      0.577   0.770   0.885   1.123   1.291   1.615   1.838   2.284   2.593
+  E2           5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5     0/5
+
+------------------------------------------------------------------------------
+EXP E6: BKZ-beta sweep at the wall -- can better reduction cross it?
+------------------------------------------------------------------------------
+If the wall is an approximation-factor wall, raising beta moves it.
+If it is the gamma>1 geometry ceiling from E5, beta does nothing.
+
+12-bit/2557  (m=12)
+  K1         b=2    b=20    b=30    b=40    b=50    gamma
+  8          5/5     5/5     5/5     5/5     5/5    1.288
+  12         4/5     4/5     4/5     4/5     4/5    1.597
+  16         1/5     1/5     1/5     1/5     1/5    1.834
+
+12-bit/2677 FAIL  (m=12)
+  K1         b=2    b=20    b=30    b=40    b=50    gamma
+  4          5/5     5/5     5/5     5/5     5/5    0.885
+  6          2/5     3/5     3/5     3/5     3/5    1.123
+  8          0/5     0/5     0/5     0/5     0/5    1.291
+
+------------------------------------------------------------------------------
+EXP E7: gamma as a function of m -- does more data ever cross back?
+------------------------------------------------------------------------------
+2026-07-29 T4b found that at K1=8 the lam*=0.07 curve is NOT rescued by
+m = 8/12/16/24/32 (0,0,1,0,1 of 5).  If gamma(m) decreases in m there
+must be an m where it works, and T4b just did not go far enough; if
+gamma(m) increases, the K1 wall is permanent at every m and Phase 2 is
+at its ceiling.
+
+12-bit/2557  (K1=8, K2=52)
+  m              6       8      12      16      24      32      48      64
+  gamma      1.692   1.461   1.288   1.192   1.057   1.002   0.970   0.951
+  E2           3/5     5/5     5/5     5/5     5/5     5/5     5/5     5/5
+
+12-bit/2677 FAIL  (K1=8, K2=52)
+  m              6       8      12      16      24      32      48      64
+  gamma      1.696   1.464   1.291   1.194   1.059   1.003   0.971   0.953
+  E2           1/5     0/5     0/5     1/5     0/5     1/5     1/5     0/5
+
+------------------------------------------------------------------------------
+EXP E8: what IS lambda_1 once the d column is gone, and where does the
+        planted vector sit in the reduced basis?
+------------------------------------------------------------------------------
+gamma is nearly curve-independent (E5: 1.288 vs 1.291) yet the two
+curves behave completely differently, and at m>=48 gamma<1 for both
+while 2677 still fails.  So the obstruction is the SHAPE of the GS
+profile, not det/dim.  Measure it directly.
+
+curve                 m     ||pv||   lambda_1  lam_1 = mu?   rank(pv)  #|last|=SK  d found
+12-bit/2557          32  1.151e+04  2.738e+03         True      34/65          10     True
+12-bit/2557          64  1.646e+04  2.738e+03         True     66/129          11     True
+12-bit/2677 FAIL     32  1.135e+04  5.096e+03         True      49/65           3    False
+12-bit/2677 FAIL     64  1.622e+04  5.096e+03         True    111/129           5    False
+
+lambda-block invariants at K1=8 (exact Gauss reduction of the 2D block):
+curve                  lam*        mu  blockdet/mu    skew  wrap=lam*K2/n
+12-bit/2557          0.3400      2738        16446    6.01          34.32
+12-bit/2677 FAIL     0.0699      5096         8571    1.68           3.63
+
+------------------------------------------------------------------------------
+EXP E9: reconciling 2026-07-29 T3 (lam* irrelevant) with T4 (lam* shifts
+        the wall by 3x) -- the two-regime picture
+------------------------------------------------------------------------------
+T3 swept 20 curves at eff = K1*K2/n in {0.05, 0.15, 0.25}.  Map each
+eff to the gamma it induces at m=12 on a representative 12-bit curve.
+
+   eff    K1  gamma(m=12)   T3 outcome (2026-07-29)
+  0.05     3        0.764   19/20 curves 5/5, lam* range [0.007,0.491] = the WHOLE range
+  0.15     8        1.288   3/20 curves,     lam* range [0.318,0.482] = high-lam* only
+  0.25    13        1.648   0/20 curves
+
+Reading: lam* is irrelevant when gamma is small (everything works) and
+irrelevant when gamma is large (nothing works); it decides ONLY inside
+the transition band gamma ~ 1.1-1.8.  T3 and T4 are both correct and
+were measured on opposite sides of that band.
+==============================================================================
