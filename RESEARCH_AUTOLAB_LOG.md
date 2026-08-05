@@ -6633,4 +6633,4 @@ touching `RESEARCH_AUTOLAB_LOG.md`, check that every `autolab` commit subject in
 `git log --oneline --grep='^autolab' | wc -l` vs `grep -c '^## 20' RESEARCH_AUTOLAB_LOG.md`.
 
 ### Commits made
-(hash recorded in the following commit)
+4213adb autolab 2026-08-05: Thread 23-CF — closed form for nu_hat; repair 07-29 merge loss
