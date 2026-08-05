@@ -1,0 +1,145 @@
+GLV-HNP Phase 2 — Thread 23: closed form for lambda_1(L2)
+Date: 2026-08-05 (autolab)
+
+==========================================================================
+E1  CF closed form vs exhaustive brute force over all b  (small n)
+==========================================================================
+        n     lam    K1    K2         l1sq(CF)      l1sq(brute)    b_cf    b_bf ok
+    35671    8593     8   189       5001401556       5001401556     357     357 YES
+    37717   29546    16   195      17120006570      17120006570     637     637 YES
+    48731   11307     4   221      79827330256      79827330256    1099    1099 YES
+    39857   29276    16   200      20665973338      20665973338     113     113 YES
+    41999   26160     4   205      35248440592      35248440592     411     411 YES
+     3739    2357    16    62         12015009         12015009      46      46 YES
+    46933   20672     8   217      40793008720      40793008720     613     613 YES
+    46957   32616     4   217     122280472161     122280472161     370     370 YES
+     7649    5502    16    88         29741704         29741704      57      57 YES
+    55103   36899    72   235       1488032289       1488032289     112     112 YES
+    57943   29956    72   241       9886498704       9886498704     412     412 YES
+    55837   49204     4   237     161325006274     161325006274    1027    1027 YES
+
+  exact agreement: 40/40
+  => the CLAIM holds on every trial: lambda_1 is attained at a
+     convergent denominator (or b=0).  O(log n), integer-exact.
+
+Harvesting j=0 GLV curves for E2-E5 ...
+  harvested 300 curves (n in [2^19, 2^21], n prime, lambda^2+lambda+1=0 mod n)
+
+==========================================================================
+E2  CF closed form vs float Lagrange-Gauss (the 2026-07-29 routine)
+==========================================================================
+  curves checked                    : 300
+  worst |CF - Gauss| / Gauss        : 0.000e+00
+  curves where semiconvergents beat convergents : 0
+
+  => the two agree to float precision.  The CF form REPRODUCES
+     the nu_hat of 2026-07-29 exactly, and does so in integers.
+  => semiconvergents never help, as the proof in the docstring
+     predicts (best approximations of the 2nd kind = convergents).
+
+==========================================================================
+E3  FALSIFIER: corr(CF-predicted nu_hat, computed nu_hat) >= 0.9 ?
+==========================================================================
+  n curves         : 300
+  pearson  r       : 1.000000
+  spearman r       : 1.000000
+  nu_hat range     : [0.2838, 1.0615]
+
+  => PASS (r = 1.0000 >= 0.9).  The convergent-scale story is
+     correct; nu_hat is now an ALGEBRAIC quantity, not just a
+     computed one.
+
+==========================================================================
+E4  Is argmin q_j the convergent nearest sqrt(n*K2/K1) ?
+==========================================================================
+  index offset (argmin - predicted):
+    -2 :    8  (  2.7%)
+    -1 :  138  ( 46.0%)
+    +0 :  154  ( 51.3%)
+
+  within +-1 of prediction : 292/300 (97.3%)
+  log(b_argmin / sqrt(n*K2/K1)) : mean=-0.819 sd=0.409
+     => argmin denominator sits within a factor 1.51 (1 sd) of the predicted scale.
+
+==========================================================================
+E5  Scale-local a_scale vs the falsified scale-free max_a
+==========================================================================
+  n curves                          : 300
+  spearman(a_scale, nu_hat)         : -0.2866
+  spearman(max_a  , nu_hat)         : -0.2695   <- the June invariant
+
+  nu_hat by a_scale bucket:
+    a_scale = 1     n=  66  mean nu_hat = 0.6790  min=0.3790 max=1.0531
+    a_scale = 2     n=  54  mean nu_hat = 0.8522  min=0.4214 max=1.0612
+    a_scale = 3-4   n=  43  mean nu_hat = 0.7155  min=0.4404 max=1.0615
+    a_scale = 5-9   n=  55  mean nu_hat = 0.7095  min=0.4261 max=1.0004
+    a_scale = 10+   n=  82  mean nu_hat = 0.5634  min=0.2838 max=1.0114
+
+  nu_hat by max_a bucket (should be much flatter):
+    max_a   = 3-4   n=  14  mean nu_hat = 0.8466  min=0.6660 max=1.0480
+    max_a   = 5-9   n=  99  mean nu_hat = 0.7521  min=0.5229 max=1.0615
+    max_a   = 10+   n= 187  mean nu_hat = 0.6445  min=0.2838 max=1.0612
+
+  => NOT confirmed: a_scale is no better than max_a.
+
+==========================================================================
+E5b Two-factor decomposition of nu_hat^2 at the argmin index
+==========================================================================
+  curves used                              : 300
+  worst rel error of the two-factor identity: 1.965e-06
+
+  spearman(approx-quality factor, nu_hat^2): +0.8660
+  spearman(aspect factor      , nu_hat^2)  : +0.0022
+  spearman(a_next at argmin   , nu_hat^2)  : -0.8539
+
+  aspect factor distribution (2.0 = perfectly balanced):
+    q05 = 2.003
+    q25 = 2.107
+    q50 = 2.466
+    q75 = 3.358
+    q95 = 9.645
+
+  => The aspect factor is inert (it is pinned near its floor of
+     2), so nu_hat is governed almost entirely by the single
+     partial quotient a_{j*+1} AT THE ARGMIN INDEX j*.
+
+     Contrast with E5: a_scale -- the quotient at the index
+     PREDICTED from sqrt(n*K2/K1) -- correlates only weakly, even
+     though E4 shows that index is within +-1 of j* about 97% of
+     the time.  Adjacent partial quotients are independent, so an
+     off-by-one index reads an unrelated number.
+
+     Corrected explanation for the June failures: the obstruction
+     is not scale-freeness per se and not arity -- it is that j*
+     cannot be identified without performing the minimisation.
+     The O(log n) CF minimisation IS the cheapest sufficient
+     statistic; no closed-form CF summary short-circuits it.
+
+==========================================================================
+E6  256-bit: exact CF nu_hat vs the float Lagrange-Gauss routine
+==========================================================================
+  secp256k1 n   = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+  lambda^2+lambda+1 = 0 mod n : verified
+
+     eff                     K1   nu_hat(CF exact)   nu_hat(float Gauss)    rel diff
+    0.05 17014118346046924117642026945517453312           0.870857              0.870857   1.275e-16
+    0.10 34028236692093848235284053891034906624           0.662438              0.662438   0.000e+00
+    0.25 85070591730234615865843651857942052864           0.585226              0.585226   0.000e+00
+    0.50 170141183460469231731687303715884105728           0.685119              0.685119   0.000e+00
+
+  Null distribution of exact nu_hat over random lambda at 256 bits
+  (this is a distributional check only -- NOT an attack on secp256k1,
+   and conditional on the non-standard k = k1 + lam*k2 generator):
+    eff=0.05  q05=0.229 q25=0.507 q50=0.718 q75=0.879 q95=0.992   secp256k1 nu_hat=0.8709 at pct 73.8%
+    eff=0.10  q05=0.239 q25=0.518 q50=0.719 q75=0.883 q95=0.992   secp256k1 nu_hat=0.6624 at pct 42.5%
+
+==========================================================================
+SUMMARY
+==========================================================================
+  E1 CF form == brute force               : PASS
+  E2 worst rel diff vs float Gauss        : 0.000e+00
+  E3 corr(CF nu_hat, computed nu_hat)     : 1.000000 (PASS vs the 0.9 falsifier)
+  E4 argmin within +-1 of predicted index : 97.3%
+  E5 spearman(a_scale, nu_hat)=-0.2866 vs (max_a, nu_hat)=-0.2695
+  E5b two-factor spearman: approx=+0.8660 aspect=+0.0022
+
