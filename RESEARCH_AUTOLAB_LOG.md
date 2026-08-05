@@ -6274,4 +6274,4 @@ unreproducible. It should not be cited as established until one or the other
 happens.
 
 ### Commits made
-(recorded below after commit)
+653de2d autolab 2026-08-05: Thread 23 — lambda_1 reformulation falsified; centring moves the K1 wall 3x
