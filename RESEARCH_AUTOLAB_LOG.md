@@ -6236,4 +6236,4 @@ threshold predictor (T2, 2026-07-29), λ/n or λ* thresholds (T1/T3, 2026-07-29)
 the six curve-level invariants falsified 2026-06-21…06-29.
 
 ### Commits made
-(see below — hash recorded in the follow-up commit)
+ee4634e autolab 2026-08-05: Thread 23 — quotient reformulation is a no-op; lambda-block parasite pins lambda_1
