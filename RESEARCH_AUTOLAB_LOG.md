@@ -6274,3 +6274,8 @@ budget spent better.
 Secondary (bookkeeping): the 07-29 entry's "Phase 2 is at its ceiling" conditional and the
 T4 wall location (K1 ≈ 4–6) are both corrected above; future runs should read U4/U9 rather
 than T4 for wall locations.
+
+### Commits made
+632f5e0 autolab 2026-08-05: Thread 23 — Phase-2 ceiling falsified; list-CVP buys ~1 bit
+
+Pushed to `claude/zen-pascal-kzsk4k` (this session's designated branch), not `main`.
