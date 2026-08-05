@@ -1,0 +1,153 @@
+==============================================================================
+Thread 23 — project out the trivial direction; does the K1 wall move?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: is pi(v_planted) the shortest vector of pi(L)?
+------------------------------------------------------------------------------
+T5 (2026-07-29) measured sv/pv in [0.34, 0.61] in the UNPROJECTED
+lattice, with the shortest vector 100% in the d-column.  Same curves,
+same seeds, same K1 -- now in pi(L).  sv/pv >= 1 means the planted
+vector is (tied for) lambda_1.
+
+curve               K1   m  ORIG sv/pv   P1 sv/pv   P1 planted=lam1?  ||pi(v)||/GH
+8-bit/199            2   6       0.603      0.843              False         1.206
+12-bit/2557          8   8       0.517      0.532              False         1.290
+12-bit/2677 FAIL     8  10       0.422      0.813              False         1.301
+
+Energy split of the shortest vector of pi(L) (k1-blk = cols 0..m-1, k2-blk = m..2m-1, kan = col 2m):
+curve                k1-blk   k2-blk      kan  kan=S?
+8-bit/199             0.508    0.492    0.000   False
+12-bit/2557           0.132    0.868    0.000   False
+12-bit/2677 FAIL      0.822    0.178    0.000   False
+
+------------------------------------------------------------------------------
+EXP E2 (THE FALSIFIER): T4's K1 grid, all three methods, m=12, 5 seeds
+------------------------------------------------------------------------------
+T4 (2026-07-29) found the wall at K1 ~ 12-16 for lam*=0.34 and
+K1 ~ 4-6 for lam*=0.07.  If P1/P2 push those outward, the
+reformulation is a real improvement; if not, the wall is
+information-theoretic.
+
+curve                 lam* method  K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+12-bit/2557         0.3400 ORIG    5/5  5/5  5/5  5/5  5/5  4/5  1/5  0/5 
+12-bit/2557         0.3400 P1      5/5  5/5  5/5  5/5  5/5  4/5  1/5  0/5 
+12-bit/2557         0.3400 P2      5/5  5/5  5/5  5/5  4/5  2/5  0/5  0/5 
+
+12-bit/2677 FAIL    0.0699 ORIG    5/5  5/5  5/5  2/5  0/5  0/5  0/5  0/5 
+12-bit/2677 FAIL    0.0699 P1      5/5  5/5  5/5  2/5  0/5  0/5  0/5  0/5 
+12-bit/2677 FAIL    0.0699 P2      5/5  4/5  4/5  1/5  0/5  0/5  0/5  0/5 
+
+wall(K1) = largest K1 with >=3/5 recovery:
+  12-bit/2557        ORIG  wall = 12
+  12-bit/2557        P1    wall = 12
+  12-bit/2557        P2    wall = 8
+  12-bit/2677 FAIL   ORIG  wall = 4
+  12-bit/2677 FAIL   P1    wall = 4
+  12-bit/2677 FAIL   P2    wall = 4
+
+------------------------------------------------------------------------------
+EXP E2b: does more data rescue P1/P2 at the wall?  (T4b replication)
+------------------------------------------------------------------------------
+  K1=8  ORIG  m=8: 0/5   m=12: 0/5   m=16: 1/5   m=24: 0/5   m=32: 1/5
+  K1=8  P1    m=8: 0/5   m=12: 0/5   m=16: 1/5   m=24: 0/5   m=32: 1/5
+  K1=8  P2    m=8: 0/5   m=12: 0/5   m=16: 0/5   m=24: 0/5   m=32: 0/5
+
+------------------------------------------------------------------------------
+EXP E3: does ||pi(v)|| / GH(pi(L)) predict the eff wall?
+------------------------------------------------------------------------------
+Asymptotically ||pi(v)||/GH -> sqrt(2 pi e * eff / 3) = 2.266*sqrt(eff),
+so the heuristic predicts success iff eff < 3/(2 pi e) = 0.1947.
+T3 (2026-07-29) measured: eff=0.05 works, 0.15 marginal, 0.25 fails.
+
+   eff  pred ||pi(v)||/GH    heuristic
+0.0200              0.337     findable
+0.0500              0.534     findable
+0.1000              0.755     findable
+0.1500              0.924     findable
+0.1947              1.053       buried
+0.2500              1.193       buried
+0.4000              1.509       buried
+
+Measured on the historical curves (exact, not asymptotic):
+curve               K1   m     eff  ||pi(v)||/GH  P1 5-seed
+8-bit/199            2  12  0.1508         0.948 5/        5
+8-bit/199            8  12  0.6030         1.970 0/        5
+12-bit/2557          2  12  0.0391         0.597 5/        5
+12-bit/2557          8  12  0.1564         1.251 5/        5
+12-bit/2677 FAIL     2  12  0.0393         0.596 5/        5
+12-bit/2677 FAIL     8  12  0.1572         1.251 0/        5
+
+------------------------------------------------------------------------------
+EXP E4: fresh 17-bit curves, eff in {0.05, 0.15, 0.25}, ORIG vs P1 vs P2
+------------------------------------------------------------------------------
+harvested 6 17-bit curves
+
+       n    lam*    eff   ORIG     P1     P2
+   65287  0.3346  0.051    3/3    3/3    3/3
+   65053  0.3877  0.051    3/3    3/3    1/3
+   65119  0.3581  0.051    3/3    3/3    2/3
+   66109  0.4096  0.051    3/3    3/3    2/3
+   65719  0.0273  0.051    3/3    3/3    2/3
+   65899  0.3184  0.051    3/3    3/3    3/3
+
+   65287  0.3346  0.149    3/3    3/3    2/3
+   65053  0.3877  0.150    0/3    0/3    0/3
+   65119  0.3581  0.149    0/3    0/3    0/3
+   66109  0.4096  0.148    0/3    0/3    0/3
+   65719  0.0273  0.149    0/3    0/3    0/3
+   65899  0.3184  0.148    3/3    3/3    3/3
+
+   65287  0.3346  0.251    1/3    1/3    1/3
+   65053  0.3877  0.252    0/3    0/3    0/3
+   65119  0.3581  0.252    0/3    0/3    0/3
+   66109  0.4096  0.250    0/3    0/3    0/3
+   65719  0.0273  0.250    0/3    0/3    0/3
+   65899  0.3184  0.250    1/3    1/3    1/3
+
+
+------------------------------------------------------------------------------
+EXP E5: per-seed agreement -- is P1 the SAME attack as ORIG?
+------------------------------------------------------------------------------
+E2 shows identical 5-seed counts.  That could still be two different
+attacks with equal power.  Here we compare outcomes trial by trial:
+if ORIG and P1 succeed on exactly the same (curve, K1, seed) triples,
+the projection is a lattice reformulation with no effect on LLL at all.
+
+  ORIG-P1: 119/120 trials agree (99.2%)
+  ORIG-P2: 111/120 trials agree (92.5%)
+
+  ORIG/P1 disagreements (label, K1, seed, ORIG, P1):
+    ('8-bit/199', 16, 1234, False, True)
+
+------------------------------------------------------------------------------
+EXP E6: out-of-sample check of nu_hat (2026-07-29, commit e845207)
+------------------------------------------------------------------------------
+E4 at eff~0.149 splits the 17-bit curves into successes and failures
+that lam* does NOT explain (lam*=0.335 and 0.318 succeed; 0.388,
+0.358, 0.410, 0.027 fail).  nu_hat = lambda_1(L2)/sqrt(det L2) with
+L2 = <(n*S_K1,0), (-lam*S_K1,S_K2)> claims low nu_hat => easier.
+Prediction: the successes sit at LOWER nu_hat than the failures.
+
+       n    lam*   nu_hat    eff  ORIG 5-seed
+   65287  0.3346   0.3887  0.149 5/         5
+   65053  0.3877   0.6052  0.150 0/         5
+   65119  0.3581   0.7551  0.149 0/         5
+   66109  0.4096   1.0299  0.148 0/         5
+   65719  0.0273   0.9562  0.149 0/         5
+   65899  0.3184   0.4577  0.148 5/         5
+   66037  0.2115   0.6268  0.148 0/         5
+   65269  0.0068   0.6670  0.149 0/         5
+   65647  0.2253   0.9419  0.149 1/         5
+   65677  0.2172   0.4340  0.149 2/         5
+   66301  0.2976   0.9045  0.148 0/         5
+   65707  0.3921   0.6197  0.149 0/         5
+   65629  0.3048   1.0240  0.149 0/         5
+   66751  0.1559   1.0394  0.147 0/         5
+
+  successes (>=3/5): 2  mean nu_hat = 0.4232  mean lam* = 0.3265
+  failures   (<3/5): 12  mean nu_hat = 0.8003  mean lam* = 0.2495
+  AUC(nu_hat, low=success) = 0.958   (23/24 concordant pairs)
+  AUC(lam*, low=success) = 0.333   (8/24 concordant pairs)
+
+Done.

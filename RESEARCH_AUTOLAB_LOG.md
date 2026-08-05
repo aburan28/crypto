@@ -6103,3 +6103,173 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV lattice so the planted vector is λ₁,
+proposed verbatim by the 2026-07-29 entry (log line ~6080) as the continuation of
+priority-5. Priorities 1/2 are CLOSED-negative, 3 completed 2026-07-21, and the
+2026-07-29 run made measurable progress on the priority-5 lineage, so protocol
+rule (b) selects its proposed sub-task. The proposal carried an explicit falsifier,
+which is the whole point of the run: **it fires negative.**
+
+### Work done
+- Environment (fresh container): installed `pari-gp` 2.15.4, `fpylll` 0.6.4,
+  `cysignals`, `sympy`. (Recurring per-run cost; see 2026-07-29 note.)
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (6 experiments, ~1.8 s
+  total runtime). Output artifact: `glv_hnp_phase2_projected_output.txt` (144 lines).
+  Helper block copied verbatim from `glv_hnp_phase2_lambda_threshold.py:87-350`
+  rather than imported — that module executes its entire T1–T5 suite at import time.
+- Implemented both reformulations named in the 2026-07-29 proposal:
+  - **P1 (projected SVP)**: π = delete coordinate m. π(L) ⊂ Z^{2m+1}, rank 2m+1,
+    det π(L) = det(L)/(n·S_D) = n^m·S_K1^m·S_K2^m, and π(w₀)=0 where
+    w₀ = n·S_D·e_m = n·row_m − Σ B_i·row_i is T5's trivial vector. The d-row does
+    **not** become redundant (it contributes B_i·S_K1 with B_i < n), so π(L) is the
+    image of all 2m+2 rows, index n over the sublattice spanned by the other 2m+1.
+    d is still recoverable: d = (k1₀ + λ·k2₀ − A₀)·B₀⁻¹ mod n.
+  - **P2 (explicit CVP)**: drop the Kannan column too. L″ ⊂ Z^{2m}, target
+    t = (−A_i·S_K1 | 0), Babai nearest-plane via `GSO.Mat.babai` (mpfr), no embedding.
+- Ran the T4 grid (K1 ∈ {2,3,4,6,8,12,16,24}, m=12, 5 seeds) for all three methods
+  on the historical pair, plus T4b, a GH-heuristic derivation, a fresh 17-bit sweep,
+  a per-trial agreement test, and an out-of-sample ν̂ check.
+- `cargo test --test curve_audit` → 5/5 pass (4.30 s). ✓
+
+### Findings
+
+**E2 — THE FALSIFIER FIRES NEGATIVE. The K1 wall does not move.**
+
+`wall(K1)` = largest K1 with ≥3/5 recovery, m=12, seeds [42,1234,9999,555,31337]:
+
+| curve | λ* | ORIG | P1 | P2 |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.3400 | **12** | **12** | 8 |
+| 12-bit/2677 | 0.0699 | **4** | **4** | 4 |
+
+Full grid, 12-bit/2677 (the historical FAIL curve):
+```
+        K1=2  K1=3  K1=4  K1=6  K1=8  K1=12 K1=16 K1=24
+ORIG    5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+P1      5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+P2      5/5   4/5   4/5   1/5   0/5   0/5   0/5   0/5
+```
+P1 reproduces ORIG **cell for cell** on all 16 cells of the grid. P2 is strictly
+worse on the easy curve (wall 8 vs 12) and equal on the hard one. E2b (T4b
+replication): more data rescues neither — at K1=8, m ∈ {8,12,16,24,32} gives
+ORIG 0,0,1,0,1 / P1 0,0,1,0,1 / P2 0,0,0,0,0 out of 5.
+
+Per the 2026-07-29 falsifier as stated ("if sv/pv rises above 1 AND the K1 wall
+moves outward → real improvement; if the wall stays at K1≈4–6 → the wall is
+information-theoretic and Phase 2 is at its ceiling"): **both conjuncts fail.**
+**Thread 23 CLOSED, negative. Phase 2 is at its reduction ceiling.**
+
+**E1 — why it cannot help: killing w₀ just promotes the next parasite.**
+
+sv/pv after projection, same curves/seeds/K1 as T5:
+
+| curve | K1 | m | ORIG sv/pv (T5) | P1 sv/pv | π(v)=λ₁? |
+|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.603 | 0.843 | no |
+| 12-bit/2557 | 8 | 8 | 0.517 | 0.532 | no |
+| 12-bit/2677 | 8 | 10 | 0.422 | 0.813 | no |
+
+The ratio rises but stays below 1. Energy split of the new shortest vector of π(L):
+```
+curve                k1-blk   k2-blk      kan   kan=±S_KANNAN?
+8-bit/199             0.508    0.492    0.000   False
+12-bit/2557           0.132    0.868    0.000   False
+12-bit/2677 FAIL      0.822    0.178    0.000   False
+```
+Kannan-energy is **0.000** again — a *different* parasite, now split across the
+k1/k2 blocks instead of sitting in the d-column. The obstruction is the entire
+2m-dimensional `kan = 0` sublattice, not the single vector w₀. Any reformulation
+that removes one parasite promotes the next, and all of them scale in n and eff
+exactly as π(v) does.
+
+**E5 — P1 is not merely as strong as ORIG, it is the same attack.**
+Per-trial agreement over 120 (curve, K1, seed) triples: **ORIG–P1 119/120 (99.2%)**,
+ORIG–P2 111/120 (92.5%). The single ORIG/P1 disagreement is a P1 *win*
+(8-bit/199, K1=16, seed 1234) — past the wall, i.e. noise.
+This does **not** contradict T5: T5's structural claim (the planted vector is never
+λ₁ of L) is correct and confirmed. What is new is that the fact is **not causal**.
+The trivial vector was a red herring; T5's inference "recovery is a BDD/coset
+condition, so a reformulation to an SVP condition should help" does not survive.
+
+**E3 — closed-form location of the eff wall (new, positive).**
+With K1·S_K1 ≈ K2·S_K2 ≈ n and eff = K1·K2/n:
+```
+||π(v)||² ≈ n²(2m/3 + 1)
+det π(L)  = n^{3m}/(K1·K2)^m = n^{2m}/eff^m,   dim = 2m+1
+||π(v)||/GH  →  sqrt(2·π·e·eff/3) = 2.266·sqrt(eff)     (m → ∞)
+  ⇒ predicted wall at eff* = 3/(2πe) = 0.1947
+```
+This brackets every measurement to date — T3 (2026-07-29): eff=0.05 works,
+0.15 marginal, 0.25 fails; E4 here on 6 fresh 17-bit curves at 3/3 seeds:
+eff≈0.051 → 6/6 curves, eff≈0.149 → 2/6, eff≈0.251 → 0/6.
+
+But GH is **not** a separator. At m=12 the exact (non-asymptotic) ratio for
+12-bit/2557 and 12-bit/2677 at K1=8 is **identical to 3 decimals (1.251)**, with
+eff 0.1564 vs 0.1572, yet they score 5/5 and 0/5. The finite-n correction
+n^{1/(2m+1)} is large at these sizes (1.37 at n=2647, m=12), so ratio=1 is not
+the operative threshold either — curves succeed at ratio 1.251. Read E3 as:
+**eff fixes where the wall is (to within a factor ~2); it does not decide the
+marginal band.**
+
+**E6 — ν̂ replicates out of sample, λ* fails again (9th falsification).**
+14 fresh 17-bit curves, all held at eff = 0.149 (inside the marginal band), m=10,
+5 seeds, ORIG lattice. ν̂ = λ₁(L2)/√(det L2), L2 = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩:
+
+| n | λ* | ν̂ | recovery |
+|---|---|---|---|
+| 65287 | 0.3346 | **0.3887** | 5/5 |
+| 65899 | 0.3184 | **0.4577** | 5/5 |
+| 65677 | 0.2172 | 0.4340 | 2/5 |
+| 65053 | 0.3877 | 0.6052 | 0/5 |
+| 65707 | 0.3921 | 0.6197 | 0/5 |
+| 66037 | 0.2115 | 0.6268 | 0/5 |
+| 65269 | 0.0068 | 0.6670 | 0/5 |
+| 65119 | 0.3581 | 0.7551 | 0/5 |
+| 66301 | 0.2976 | 0.9045 | 0/5 |
+| 65647 | 0.2253 | 0.9419 | 1/5 |
+| 65719 | 0.0273 | 0.9562 | 0/5 |
+| 65629 | 0.3048 | 1.0240 | 0/5 |
+| 66109 | 0.4096 | 1.0299 | 0/5 |
+| 66751 | 0.1559 | 1.0394 | 0/5 |
+
+```
+AUC(nu_hat, low = success) = 0.958   (23/24 concordant pairs)
+AUC(lam*,   low = success) = 0.333   (8/24 — worse than chance)
+mean nu_hat: successes 0.423, failures 0.800
+mean lam*:   successes 0.327, failures 0.250
+```
+Out-of-sample AUC 0.958 vs the 2026-07-29 in-sample 0.935. The single discordant
+pair is n=65677, ν̂=0.434 at 2/5 — the third-lowest ν̂, i.e. right at the boundary.
+Caveat: only 2 clean successes in 14, so the AUC standard error is wide; the point
+is the replication of sign and magnitude on data ν̂ was not fitted to.
+
+### Next step proposal
+Thread 23 is closed and, with it, the "make the planted vector λ₁" family. Two
+concrete continuations, in order:
+
+**Thread 24 — calibrate the ν̂ wall, then apply it to secp256k1.**
+ν̂ is now the only surviving Phase-2 predictor (9 invariants falsified: λ/n, λ*,
+δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, ρ). It is O(log n) to compute — one
+Lagrange-Gauss reduction — so it can be evaluated directly on secp256k1 at the
+K1/K2 a real GLV implementation would leak. Concrete sub-task: for secp256k1's
+λ and n, tabulate ν̂ over the K1 grid that corresponds to 1…8 leaked nonce bits,
+and locate the crossing against the E6 boundary (ν̂ ≈ 0.45–0.55 at eff≈0.15).
+Falsifier: if secp256k1's ν̂ sits above ~0.65 across the whole realistic K1 range,
+Phase 2 offers no advantage over standard BV on secp256k1 and the GLV-HNP
+direction can be closed with a stated negative result — which is exactly what
+the main theorem in `PAPER_STRUCTURAL_COMPLETENESS.md` wants. Cheap: no lattice
+reduction needed, only ν̂ evaluation, plus a confirmatory run at one K1.
+
+**Thread 25 — does the E3 closed form survive to cryptographic sizes?**
+The eff* = 3/(2πe) prediction was derived asymptotically in m and tested only at
+n ≈ 2⁸–2¹⁷ where the n^{1/(2m+1)} correction is a factor 1.37. Re-derive with the
+finite-n term retained, then test at 32 and 48 bits where the correction drops
+below 1.1. If eff* holds, the Phase-2 data requirement at 256 bits is fixed in
+closed form and can go in the paper as a bound rather than an empirical table.
+
+### Commits made
+(recorded in the follow-up commit below)
