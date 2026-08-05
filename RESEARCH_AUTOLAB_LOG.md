@@ -6284,3 +6284,4 @@ Secondary: the STRICT-vs-real criterion divergence means the E2/E3/E4 tables in
 been added to that script so future runs do not mix the two conventions.
 
 ### Commits made
+081cdfa autolab 2026-08-05: Thread 23 falsified; cmin = Eisenstein decomposition predicts K1 wall (946/946 exact)
