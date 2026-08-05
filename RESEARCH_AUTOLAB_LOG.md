@@ -6596,4 +6596,4 @@ been falsified (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ, a_scale)
 
 ### Commits made
 
-(hash recorded in the following commit)
+e9f75d4 autolab 2026-08-05: Thread 23 — exact CF closed form for lambda_1(L2); recover lost 2026-07-29 run #2
