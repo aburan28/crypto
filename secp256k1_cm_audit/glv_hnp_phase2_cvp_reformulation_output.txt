@@ -1,0 +1,76 @@
+==============================================================================
+Thread 23 - CVP reformulation of the GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+U1: is the planted vector actually IN L', at the predicted distance?
+------------------------------------------------------------------------------
+Check  w = d*row_d + sum k2_i*row_lam,i - sum c_i*row_i  reproduces
+the offset (k1_i*S_K1 | d*S_D | k2_i*S_K2), and that
+||w-t||^2 == ||v_planted||^2 - S_KANNAN^2 (Kannan consistency).
+
+curve            m  K1  in L?      ||w-t||  sqrt(pv^2-S_K^2)  match
+12-bit/2557      8   4   True       4411.7            4411.7   True
+12-bit/2677     10   4   True       5695.5            5695.5   True
+20-bit/524347   10   4   True    1033346.2         1033346.2   True
+
+------------------------------------------------------------------------------
+U2: does the K1 wall move?  (5 seeds/cell; A0 = 2026-06-15 baseline)
+------------------------------------------------------------------------------
+A0  kannan-svp (2026-06-15 baseline)   A0c kannan-svp, centred row
+A1  cvp-babai   A2 cvp-babai-centred     A3  cvp-exact (centred)
+A4 cvp-enum: all coset vectors inside the a-priori radius, best 200 kept,
+   each candidate d tested against the public key (1 scalar mult each).
+P  = # instances where the planted vector IS a closest vector.
+     P=0 while A3 succeeds means a STRICTLY closer vector carries the
+     same d mod n -- the d-column is degenerate, not the recovery.
+
+
+curve 12-bit/2557  n=2659 lam=1755 lam*=0.340 m=8 dim(L')=17
+  K1     eff |     A0    A0c     A1     A2     A3     A4 |      P  rank  ncand |     d_pl     d_ex    sec
+   2   0.039 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      9 |     3865     3865    0.0
+   3   0.059 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1    200 |     3292     3292    0.0
+   4   0.078 |  10/10  10/10  10/10  10/10  10/10  10/10 |   9/10     1    143 |     3624     3599    0.0
+   6   0.117 |  10/10  10/10   6/10  10/10  10/10  10/10 |   7/10     1    200 |     3387     3341    0.0
+   8   0.156 |   9/10  10/10   6/10  10/10  10/10  10/10 |   7/10     1    200 |     3497     3463    0.0
+  12   0.235 |   1/10  10/10   0/10  10/10  10/10  10/10 |   5/10     1    200 |     3322     3278    0.0
+  16   0.313 |   1/10   4/10   0/10   4/10   5/10  10/10 |   3/10     3    200 |     3424     3150    0.0
+  24   0.469 |   0/10   0/10   0/10   0/10   0/10   8/10 |   0/10    64    200 |     3329     2528    0.0
+
+curve 12-bit/2677  n=2647 lam=185 lam*=0.070 m=10 dim(L')=21
+  K1     eff |     A0    A0c     A1     A2     A3     A4 |      P  rank  ncand |     d_pl     d_ex    sec
+   2   0.039 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      3 |     4112     4112    0.0
+   3   0.059 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      5 |     3589     3589    0.0
+   4   0.079 |  10/10  10/10   7/10  10/10  10/10  10/10 |  10/10     1      4 |     3927     3927    0.0
+   6   0.118 |   4/10  10/10   2/10   9/10  10/10  10/10 |  10/10     1      4 |     3752     3752    0.0
+   8   0.157 |   4/10  10/10   1/10   9/10  10/10  10/10 |  10/10     1     28 |     3831     3831    0.0
+  12   0.236 |   0/10   8/10   0/10   8/10  10/10  10/10 |  10/10     1    200 |     3665     3665    0.0
+  16   0.314 |   0/10   5/10   0/10   5/10   4/10  10/10 |   4/10     2    200 |     3750     3630    0.0
+  24   0.471 |   0/10   3/10   0/10   3/10   1/10   9/10 |   0/10    31    200 |     3672     3070    0.1
+
+curve 20-bit/524347  n=523969 lam=177902 lam*=0.340 m=10 dim(L')=21
+  K1     eff |     A0    A0c     A1     A2     A3     A4 |      P  rank  ncand |     d_pl     d_ex    sec
+   2   0.003 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      3 |   864805   864805    0.1
+   3   0.004 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      5 |   702669   702669    0.1
+   4   0.006 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      4 |   789578   789578    0.1
+   6   0.008 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      4 |   756248   756248    0.1
+   8   0.011 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      4 |   757583   757583    0.1
+  12   0.017 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      4 |   728589   728589    0.1
+  16   0.022 |  10/10  10/10  10/10  10/10  10/10  10/10 |  10/10     1      4 |   744506   744506    0.1
+  24   0.033 |   9/10  10/10   6/10  10/10  10/10  10/10 |  10/10     1      4 |   724117   724117    0.1
+
+------------------------------------------------------------------------------
+U4: verdict per curve  (first K1 at which an arm stops being 10/10)
+------------------------------------------------------------------------------
+12-bit/2557: A0 8  A0c 16  A1 6  A2 16  A3 16  A4 24   | planted-is-closest 4
+12-bit/2677: A0 6  A0c 12  A1 4  A2 6  A3 16  A4 24   | planted-is-closest 16
+20-bit/524347: A0 24  A0c None  A1 24  A2 None  A3 None  A4 None   | planted-is-closest None
+
+Read-off:
+  A4 wall >  A0 wall  ==> the reformulation is a real improvement.
+  A4 wall == A0 wall  ==> the wall is a property of the coset
+                          geometry, not of the reduction, and
+                          Phase 2 is at its ceiling for this lattice.
+  A3 <  A0            ==> single-answer CVP is strictly weaker than
+                          the multi-candidate LLL baseline; the
+                          2026-07-29 'trivial vector' premise is void.

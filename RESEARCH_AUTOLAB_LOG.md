@@ -6103,3 +6103,118 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the next-step
+proposed verbatim by the 2026-07-29 entry (log line ~6089). Priorities 1/2/4/6 remain
+CLOSED/BLOCKED/DEAD-END; priority 5 (GLV-HNP) made measurable progress on 2026-07-29,
+so protocol rule (b) selects its continuation. The 2026-07-29 falsifier was: *if the K1
+wall on the λ*=0.07 curve (then at K1≈4–6) moves outward, the reformulation is a real
+improvement; if it stays, the wall is information-theoretic and Phase 2 is at its ceiling.*
+
+**Outcome: REAL IMPROVEMENT, ~4× in K1. But not for the reason Thread 23 proposed —
+the stated premise is void.** Details below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` — OK. `apt-get
+  install pari-gp` **failed** (no package access in this container), so PARI-dependent
+  threads were not available today; nothing today needed it. *Note for future runs:
+  do not assume `gp` is present even though 2026-07-26/27 had it.*
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_cvp_reformulation.py` (~640 lines), output
+  archived to `glv_hnp_phase2_cvp_reformulation_output.txt`. EC arithmetic, signature
+  generation and the scaling formula are copied verbatim from
+  `glv_hnp_phase2_20bit.py:234,262` so instances are identical to prior runs.
+- Six arms on identical instances (same seed → same signatures, same d):
+  | arm | construction | recovery criterion |
+  |---|---|---|
+  | A0  | Kannan lattice, dim 2m+2 (2026-06-15) | any row with \|last\|=S_KANNAN carries d |
+  | A0c | same lattice, embedding row shifted to the box centre | as A0 |
+  | A1  | L' = drop the Kannan row, dim 2m+1; Babai nearest-plane | single answer |
+  | A2  | as A1, centred target | single answer |
+  | A3  | exact CVP (fpylll enumeration) on LLL(L'), centred | single answer |
+  | A4  | enumerate coset vectors in the a-priori radius, best ≤200 | any candidate d |
+- **U1 (correctness)**: verified the planted vector is in L' by explicit integer
+  combination, and that ‖w−t‖² = ‖v_planted‖² − S_KANNAN² exactly. Both curves `True`.
+- Grid: 3 curves × K1 ∈ {2,3,4,6,8,12,16,24} × **10 seeds**. Whole run < 5 s.
+- **A0 reproduces the historical baseline exactly** (2677 wall at K1≈4–6, dead by
+  K1=12), which is the control that makes the comparison meaningful.
+- `cargo test --test curve_audit` → 5/5 pass. No Rust files touched.
+
+### Findings
+
+**1. The K1 wall is NOT information-theoretic.** First K1 at which an arm stops being
+10/10:
+
+| curve | λ* | A0 | A0c | A1 | A2 | A3 | A4 |
+|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 8 | 16 | 6 | 16 | 16 | 24 |
+| 12-bit/2677 | 0.070 | 6 | 12 | 4 | 6 | 16 | **24** |
+| 20-bit/524347 | 0.340 | 24 | none | 24 | none | none | none |
+
+The 2026-07-29 T4 wall curve (2677) at K1=12, eff=0.236 — where the baseline is 0/10 —
+is 10/10 under A4. At K1=24, eff=0.471: A0 0/10, A4 9/10.
+
+**2. The gain decomposes into two formulation-level effects, neither lattice-theoretic.**
+
+*(i) Centring — factor 2, free.* k1∈[0,K1), k2∈[0,K2), d∈[0,n) are one-sided, so the
+2026-06-15 embedding row puts the target at a **corner** of the offset box. Moving it to
+the centre halves every offset coordinate, hence halves the BDD distance. A0c vs A0:
+6→12 and 8→16. Same lattice, same reduction, one row edited.
+Sign matters: `w[i] = (k1_i − A_i)·S_K1`, so the k1 shift must be **added**
+(`t[i] = −A_i·S_K1 + (K1/2)·S_K1`). Subtracting anti-centres and doubles that block —
+this was a live bug in the first version of today's script, caught only because A2
+scored *below* A1. There is now a radius-containment assertion
+(`glv_hnp_phase2_cvp_reformulation.py:~470`, `res['inR']`) that trips on it.
+
+*(ii) Multi-candidate recovery — further ~1.5×, negligible cost.* A3→A4 is 16→24 on both
+12-bit curves. The attacker enumerates the ≤200 nearest coset vectors and tests each
+candidate d against the public key (one scalar multiplication each). Median rank of the
+correct candidate: **1** for every cell up to K1=12; 2–3 at K1=16; 31–64 at K1=24. So the
+useful signal survives well past the point where the *single* nearest vector is wrong.
+
+Net: ≈4× in K1 ⇒ **2 fewer bits of nonce bias** needed than the 2026-07-26 estimate.
+
+**3. The Thread-23 premise is void — the trivial vector was never the obstruction.**
+Thread 23 was motivated by 2026-07-29 EXP T5 ("the planted vector is never λ₁ because
+`n·S_D·e_m` is always shorter"). Removing that vector is exactly what A1 does, and A1 is
+**strictly worse than A0 on all three curves** (6 vs 8, 4 vs 6, 24 vs 24). All of the
+gain is centring + multi-candidate; none is from dropping the Kannan row.
+
+Stronger: the trivial direction is *helpful*. Column P counts instances where the planted
+vector is a closest vector. On 12-bit/2557, P falls below 10/10 at K1=4 — yet A3 (exact
+CVP) still recovers d up to K1=16. Reason: vectors differing by multiples of `n·S_D·e_m`
+carry the **same d mod n**, so a whole coset of strictly-closer vectors decodes correctly.
+`d_pl` vs `d_ex` in the output quantifies it (e.g. 2557/K1=16: planted 3424, exact closest
+3150, both decode to the right d).
+⇒ **"the planted vector is not λ₁" is not an obstruction, and no future run should treat
+it as one.** This also retires the framing behind the 2026-06-21…06-29 separator hunt.
+
+**4. Methodological note for the log.** A0's success criterion (scan all rows) is a
+multi-candidate metric, while A1–A3 return one answer. Comparing a single-answer CVP
+against a multi-candidate SVP baseline understates CVP — that is why A3 initially looked
+worse than A0. A4 is the like-for-like arm. Future Phase-2 numbers should state the
+candidate budget explicitly.
+
+**5. Caveat on the 20-bit row.** eff = K1·K2/n = K1/√n, so at equal K1 the 20-bit curve
+is ~7× easier (eff 0.033 at K1=24 vs 0.471 at 12 bits). That row confirms the *ordering*
+of the arms at a larger modulus; it is not a like-for-like wall comparison. A proper
+cross-size test must hold eff fixed, not K1.
+
+### Next step proposal
+**Thread 24 — re-derive the Phase-2 bias requirement under the A2/A4 formulation, at
+fixed eff.** The 2026-07-26 scaling law (m = 4/7/9 for 8/12/20 bits) and the eff≈0.05
+viability figure of 2026-07-29 T3 were both measured with the un-centred, single-candidate
+A0. Both are now known to be ~4× pessimistic in K1. Concrete sub-task: sweep eff ∈
+{0.05, 0.15, 0.25, 0.40} at 24 and 32 bits with arms A0/A0c/A4 and 10 seeds, and report
+the eff at which A4 drops below 5/10. Falsifier: if A4's viable eff exceeds 0.25 at 32
+bits, the 2026-07-29 T3 table ("0/20 curves at eff=0.25") is superseded and the secp256k1
+projection in `RESEARCH_GLV_HNP_PHASE2.md` needs revising; if A4 collapses to A0's eff by
+32 bits, the gain is a small-modulus artifact. Cheap — the grid above ran in under 5 s.
+
+Secondary (also cheap): apply the centring fix to the **Phase-1** lattice
+(`glv_hnp_phase1.gp`) and to `tests/lll_degeneracy_probe.rs`. If the corner-vs-centre
+error is present there too, several earlier "walls" in this log may be similarly inflated.
+
+### Commits made
