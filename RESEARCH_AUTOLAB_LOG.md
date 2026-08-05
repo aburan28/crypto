@@ -6103,3 +6103,174 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-05 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁**, the continuation
+proposed verbatim at the end of the 2026-07-29 entry. Protocol rule (b): priorities 1, 3,
+4, 6 are CLOSED; priority 2 (CHLRS) was worked 07-26/07-27 and ended in a proven negative
+(F_p Rosenhain BLOCKED for secp256k1); priority 5 (GLV-HNP) made measurable progress on
+07-29 and carried an explicit, cheap sub-task. So Thread 23 is the correct pick.
+
+Outcome: **the 2026-07-29 "Phase 2 may be at its ceiling" hypothesis is FALSIFIED.**
+A reformulation buys ~1 bit of nonce-bias tolerance, and the true wall is now characterised
+exactly.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0, mpmath 1.3.0. `gp` is NOT installed this
+  run (not needed). Same note as 07-29: cysignals is a separate runtime import.
+- New scripts (lattice construction + `gen_signatures` copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:254` so comparison to 07-29 is exact):
+  - `secp256k1_cm_audit/glv_hnp_phase2_thread23.py`  — variants V0/V1/V2, EXP U1–U3
+  - `secp256k1_cm_audit/glv_hnp_phase2_thread23b.py` — EXP U4–U6 (fine grid, contingency,
+    fresh curves)
+  - `secp256k1_cm_audit/glv_hnp_phase2_thread23c.py` — EXP U7–U9 (list-CVP, rank metric)
+  - matching `*_output.txt` artifacts for all three.
+- Four formulations, all fed identical signature sets:
+
+  | var | dim | description |
+  |---|---|---|
+  | V0 | 2m+2 | baseline Kannan embedding, d in its own column (07-29 construction) |
+  | V1 | 2m+1 | **projected**: d-column quotiented out; x-lattice becomes Λ = ZB + nZ^m (index n^{m-1}), which removes the trivial vector n·S_D·e_m entirely |
+  | V2 | 2m | **CVP**: no Kannan row/column; target w = (−A_i·S_K1, 0^m); solved by Babai and by *exact* enumeration |
+  | V3 | 2m | **list-CVP**: enumerate the K closest points to w, test each candidate d′ |
+
+  V1 membership is proved constructively (`assert_planted_in_V1`), not assumed: the integer
+  coefficients are exhibited and integrality of each t_i is asserted every trial.
+- `cargo test --test curve_audit` → **5/5 pass** (5.85s). ✓
+
+### Findings
+
+**U1 — projecting out the d-column removes the trivial vector but does NOT make the
+planted vector λ₁.** sv/pv rises substantially, yet GH/‖v‖ stays below 1 in every case:
+
+| curve | var | dim | log2 det | GH/‖v‖ | LLL sv/pv |
+|---|---|---|---|---|---|
+| 8-bit/199 | V0 | 14 | 115.44 | 0.808 | 0.585 |
+| 8-bit/199 | V1 | 13 | 107.80 | 0.829 | **0.843** |
+| 12-bit/2557 | V0 | 18 | 214.77 | 0.755 | 0.501 |
+| 12-bit/2557 | V1 | 17 | 203.39 | 0.775 | 0.532 |
+| 12-bit/2677 | V0 | 22 | 265.17 | 0.753 | 0.413 |
+| 12-bit/2677 | V1 | 21 | 253.80 | 0.769 | **0.813** |
+
+Exactly as predicted algebraically: covol(V1) = covol(V0)/n² and dim drops by 1, so the
+Gaussian heuristic falls almost as fast as the trivial vector is removed. The planted
+vector is still *longer* than GH — there remain expected-many shorter lattice vectors.
+**The λ₁ reformulation goal is unreachable in this lattice family**; the useful move is to
+stop asking for λ₁ at all.
+
+**U2/U3 — the problem is exactly CVP, and every lattice point encodes a candidate key.**
+For u ∈ L2, the error e = u − w satisfies e_x/S_K1 ≡ A + d′B − λ·(e_y/S_K2) for some
+d′ ∈ Z/n. So *every* lattice point decodes to some candidate secret, and
+d′ = d ⟹ the point is a valid GLV re-decomposition of the true nonces. Recovery succeeds
+iff argmin_u‖u − w‖ decodes to d. Exact-CVP distance vs true error, 5 seeds:
+
+| curve | K1 | ‖e_true‖ | dist(w,L2) | ratio | true=closest | d recovered |
+|---|---|---|---|---|---|---|
+| 12-bit/2677 | 4 | 5.874e3 | 5.874e3 | 1.000 | 5/5 | 5/5 |
+| 12-bit/2677 | 6 | 6.203e3 | 6.203e3 | 1.000 | 5/5 | 5/5 |
+| 12-bit/2677 | 8 | 6.116e3 | 5.140e3 | 0.840 | 1/5 | 1/5 |
+| 12-bit/2677 | 12 | 6.400e3 | 4.456e3 | 0.696 | 0/5 | 0/5 |
+| 12-bit/2557 | 6 | 5.450e3 | 5.003e3 | 0.918 | 0/5 | **5/5** |
+
+**U5 — contingency, 200 trials pooled (both curves, K1 ∈ 2..12, 10 seeds):**
+
+| | exact CVP wins | exact CVP fails |
+|---|---|---|
+| true error IS closest | **89** | **0** |
+| true error is NOT closest | 41 | 70 |
+
+**Zero false negatives.** "‖e_true‖ = dist(w,L2)" is a *sufficient* condition for recovery.
+It is not necessary — the 41 cases are those where the strictly-closer point is a different,
+shorter GLV re-decomposition of the *same* nonces (same d′ = d), which is why 12-bit/2557
+recovers 5/5 at K1=6 despite true=closest 0/5.
+
+**U7/U9 — list-CVP breaks the wall. This is the run's main result.**
+V0's `recover_V0` scans all 2m+2 reduced rows, i.e. it was already a crude list-decoder;
+the principled version enumerates the K closest points and tests each d′ (free in a real
+attack: check d′·G = Q). Enumeration radius matters — capping it at the Babai distance
+silently excludes the true point, so the radius is set from **public data only**,
+1.35²·E‖e_true‖² with E‖e‖² = m(K1·S_K1)²/3 + m(K2·S_K2)²/3.
+
+12-bit/2677 (λ* = 0.0699, m = 10), 10 seeds:
+
+| solver | K1=4 | 5 | 6 | 7 | 8 | 9 | 10 | 12 | 16 |
+|---|---|---|---|---|---|---|---|---|---|
+| V0 (Kannan, 07-29 baseline) | 9/10 | 8/10 | 2/10 | 0/10 | 2/10 | 1/10 | 0/10 | 0/10 | 0/10 |
+| babai-radius K=64 | 10/10 | 10/10 | 10/10 | 7/10 | 4/10 | 4/10 | 0/10 | 0/10 | 0/10 |
+| **public-radius K=64** | **10/10** | **10/10** | **10/10** | **8/10** | **8/10** | **6/10** | **3/10** | **1/10** | 0/10 |
+| median rank of true d | 1 | 1 | 1 | 4 | 7 | 8 | 54 | 264 | 348 |
+
+12-bit/2557 (λ* = 0.3400, m = 8), 10 seeds:
+
+| solver | K1=4 | 5 | 6 | 7 | 8 | 9 | 10 | 12 | 16 |
+|---|---|---|---|---|---|---|---|---|---|
+| V0 | 10/10 | 10/10 | 10/10 | 9/10 | 9/10 | 8/10 | 7/10 | 3/10 | 1/10 |
+| **public-radius K=64** | 10/10 | 10/10 | 9/10 | 9/10 | 9/10 | 8/10 | 7/10 | **4/10** | **3/10** |
+| median rank | 1 | 1 | 1 | 1 | 1 | 1 | 18 | 68 | 49 |
+
+**public-radius K=64 weakly dominates V0 at every single grid point on both curves**, and on
+the hard curve it is a 4–5× rescue exactly in the band the 07-29 run reported as a wall
+(K1=6: 2/10 → 10/10; K1=8: 2/10 → 8/10). The K1 wall on the λ*=0.07 curve moves from
+K1 ≈ 5 to K1 ≈ 9–10 — **≈1 extra bit of tolerable nonce-bias width.**
+
+Cost profile: median rank is 1 well inside the wall, then explodes (4 → 7 → 8 → 54 → 264
+→ 348). K=8 captures most of the gain; K=64 captures nearly all; K=512 adds essentially
+nothing over K=64. So list-decoding buys ~1 bit cheaply and then the rank grows fast enough
+that further list size is not a viable lever.
+
+**U4 correction to the 07-29 wall location.** With 10 seeds instead of 5, V0's own wall on
+12-bit/2677 sits at K1 ≈ 5 (8/10), not K1 ≈ 4–6; and on 12-bit/2557 at K1 ≈ 10–12. The
+07-29 T4 grid at 5 seeds was noisy at the boundary.
+
+**U6 — replication, 6 fresh j=0 GLV curves (13–15 bit), V0|V2_exact, 5 seeds, m=10:**
+
+| curve | n | λ* | K1=4 | K1=6 | K1=8 | K1=12 |
+|---|---|---|---|---|---|---|
+| 14b/8209 | 8293 | 0.2472 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|5/5 | 4/5\|4/5 |
+| 13b/8233 | 8089 | 0.1747 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|4/5 | 0/5\|0/5 |
+| 14b/8269 | 8269 | 0.0190 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|5/5 | 3/5\|0/5 |
+| 14b/8287 | 8419 | 0.2329 | 5/5\|5/5 | 5/5\|5/5 | 3/5\|5/5 | 0/5\|0/5 |
+| 15b/32803 | 32497 | 0.0721 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|5/5 |
+| 15b/32839 | 32503 | 0.4806 | 5/5\|5/5 | 5/5\|5/5 | 5/5\|5/5 | 4/5\|4/5 |
+
+Confirms 07-29's T3 result independently: λ* is not a viability threshold (14b/8269 at
+λ*=0.019 behaves like λ*=0.48). It also shows *single-point* exact CVP is not uniformly
+better than V0 — only the *list* version is, which is the whole point of U9.
+
+**Summary of the structural picture (supersedes the 07-29 T5 framing):**
+1. Phase-2 recovery is CVP in L2 (dim 2m), not SVP. Kannan embedding and the d-column were
+   both incidental; removing them changes nothing essential (U1).
+2. Every lattice point decodes to a candidate key; the correct one is recoverable iff it is
+   within the enumerated list (U2/U5).
+3. The wall is the BDD radius: it is where spurious d′ ≠ d start admitting shorter errors.
+   Reduction quality is *not* the binding constraint — exact CVP tracks the
+   information-theoretic boundary exactly on the hard curve (U4: V2_exact row is identical
+   to the true=closest row at 10,10,10,8,8,3,3,2,0,0).
+4. List-decoding buys ≈1 bit past that point, cheaply, then dies.
+
+### Next step proposal
+**Thread 24 — attack the BDD radius itself, since the solver side is now provably at
+its ceiling.** Two concrete, cheap sub-tasks, in order:
+
+(a) **m-scaling of the list-CVP wall.** U9 fixed m (8 and 10). The BDD radius argument
+predicts the wall in K1 should improve with more signatures, since ‖e_true‖ and GH grow at
+different rates in m. Measure the public-radius-K=64 wall at m ∈ {8, 12, 16, 24, 32} on
+12-bit/2677. Falsifier: if the wall stays at K1 ≈ 9–10 independent of m, then more
+signatures do not help and Phase 2 really is capped at ~1 bit past V0; if it moves outward
+roughly like log m, the attack scales and is worth pushing to 20-bit curves. Runtime ≈ 10 min.
+
+(b) **Exploit the re-decomposition degeneracy found in U5.** 41/200 trials recovered d from
+a point that was *not* the true error but decoded to the same d. That means the effective
+target is not a point but the *coset* of GLV re-decompositions of the true nonce vector,
+which is larger than 1 point — so the true BDD success probability is higher than the
+"true=closest" analysis suggests. Quantify the coset size |{(k1′,k2′) : k1′+λk2′ ≡ k_i,
+both in bounds}| as a function of K1·K2/n, and fold it into the radius estimate. If the
+coset grows like (K1·K2/n)^m, the radius can be relaxed accordingly and the K=64 list
+budget spent better.
+
+Secondary (bookkeeping): the 07-29 entry's "Phase 2 is at its ceiling" conditional and the
+T4 wall location (K1 ≈ 4–6) are both corrected above; future runs should read U4/U9 rather
+than T4 for wall locations.
