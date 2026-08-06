@@ -6103,3 +6103,134 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector can be λ₁**, the
+continuation proposed verbatim by the 2026-07-29 entry. Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+made measurable progress on 2026-07-29 (8 days ago) and left a cheap, well-specified
+falsifier, so the protocol's clause (b) applies.
+
+### Work done
+- New script `secp256k1_cm_audit/glv_hnp_phase2_reformulation.py` (622 lines), output
+  artifact `secp256k1_cm_audit/glv_hnp_phase2_reformulation_output.txt`.
+- Ran a **2×2 factorial** over two independent modifications of the 2026-06-15 lattice,
+  so that the effect claimed by Thread 23 can be attributed rather than assumed:
+  - **ELIM** — eliminate `d` algebraically before building the lattice, using signature 0
+    as reference. With `t_i = B_i/B_0`, `c_i = A_i − t_i A_0`:
+    `k1_i = c_i + t_i(k1_0 + λk2_0) − λk2_i (mod n)`, i = 1..m−1.
+    Kills the d-column, hence kills the trivial vector `n·S_D·e_m` identified in
+    2026-07-29 EXP T5. dim 2m+2 → 2m+1, det drops by a factor n.
+    `d` recovered afterwards as `(k1_0 + λk2_0 − A_0)/B_0 mod n`.
+  - **CENTER** — represent `k1' = k1 − K1/2`, `k2' = k2 − K2/2` (and `d' = d − n/2` when
+    the d-column survives). `E[k1'²] = K1²/12` vs `K1²/3`; only the Kannan row changes.
+  - Four formulations: `R1` (baseline), `R1c` (+CENTER), `R2` (ELIM), `R2c` (both).
+- **EXP U0 (correctness gate)**: for all 3 historical curves × 4 formulations, solved
+  `Mᵀx = v_planted` exactly over ℚ and checked `x ∈ ℤ^dim` (⇒ planted vector really is in
+  the lattice), then round-tripped `d` through each recovery routine. 12/12 pass.
+- Verified `build_R1(center=False)` is **byte-identical** to the historical
+  `build_glv_lattice` (`glv_hnp_phase2_20bit.py:262`) on all tested (curve, K1, seed)
+  cells, so R1 is a true baseline and not a re-derivation.
+- `cargo test --test curve_audit` → 5/5 pass (6.86s). ✓
+- Environment note: this clone had neither `fpylll` nor `sympy`; both plus `cysignals`
+  were pip-installed (`fpylll` 0.6.4). Nothing in-repo needed changing.
+
+### Findings
+
+**U1 — geometry. ELIM does exactly what it was designed to do.**
+`sv/pv` = ‖shortest reduced vector‖ / ‖planted‖; `pv/GH` = planted vs Gaussian heuristic.
+
+| curve | form | dim | pv | GH | pv/GH | sv/pv |
+|---|---|---|---|---|---|---|
+| 12-bit/2677 | R1 | 22 | 6270.7 | 4823.8 | 1.300 | 0.422 |
+| 12-bit/2677 | R1c | 22 | 4889.6 | 4823.8 | 1.014 | 0.541 |
+| 12-bit/2677 | R2 | 21 | 6270.3 | 4820.4 | 1.301 | **0.813** |
+| 12-bit/2677 | R2c | 21 | 4725.0 | 4820.4 | **0.980** | **1.000** |
+
+`sv/pv = 1.000` means the planted vector **is** the shortest vector found — the Thread-23
+objective, achieved. On 2677 at K1 ≤ 8, R2c holds `sv/pv = 1.000` exactly.
+
+**U2 — the K1 wall (the falsifier), 5 seeds per cell.**
+
+12-bit/2677 (λ\* = 0.0699, n = 2647, m = 10, K2 = 52):
+
+| form | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R1 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| R1c | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | 4/5 | 1/5 | 1/5 | 0/5 | 0/5 |
+| R2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| R2c | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | 4/5 | 1/5 | 1/5 | 0/5 | 0/5 |
+
+12-bit/2557 (λ\* = 0.3400, m = 8, K2 = 52): R1 5/5 through K1=8; R1c through 12 (16→4/5);
+R2 through 8; **R2c through 16** (24→1/5).
+
+**The Thread-23 hypothesis is FALSIFIED, and the win comes from somewhere else.**
+The 2026-07-29 falsifier asked for `sv/pv > 1` *and* an outward wall move. Both happened —
+but the 2×2 shows they were produced by **different** modifications:
+- **ELIM** raises `sv/pv` from 0.42 to 1.00 and moves the wall by **exactly zero**.
+  R1 and R2 agree cell-by-cell in *every* cell of U2 and all 90 trials of U5.
+- **CENTER** produces the entire recovery gain while only nudging `sv/pv` (0.42 → 0.54).
+
+So **the trivial vector `n·S_D·e_m` was never the obstruction.** Making the planted vector
+λ₁ is neither necessary (R1c succeeds at `sv/pv` = 0.54) nor sufficient (R2 fails at
+`sv/pv` = 1.00). This retires the structural reading of 2026-07-29 EXP T5: that entry's
+observation was correct but its causal interpretation was not. Recovery scans *all*
+reduced rows for one with `|last| = S_KANNAN`, so it never required λ₁ in the first place.
+
+**U5 — independent confirmation, 6 fresh 17-bit curves, m=12, 3 seeds, K1 grid placed at
+{0.25, 0.5, 0.75, 1.0, 1.5}×K1_info so the comparison sits *on* the wall** (the first
+attempt used K1 ∈ {8,16}, eff ≈ 0.03–0.06, and was uninformative at 36/36 for all four):
+
+| form | successes | mean wall / K1_info |
+|---|---|---|
+| R1 | 16/90 (17.8%) | 0.164 |
+| R1c | **43/90 (47.8%)** | **0.454** |
+| R2 | 16/90 (17.8%) | 0.164 |
+| R2c | **43/90 (47.8%)** | **0.454** |
+
+CENTER main effect +30.0 points; ELIM main effect **0.0 points**, no interaction.
+
+**U4 — the wall is not information-theoretic, but is now within ~2.2× of the bound.**
+`K1_info` = largest K1 with `m(lg K1 + lg K2) < (m−1) lg n`:
+
+| curve | n | m | K2 | K1_info | K1_obs(R1) | K1_obs(R2c) |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 199 | 6 | 15 | 5.5 | 3 | 3 |
+| 12-bit/2557 | 2659 | 8 | 52 | 19.1 | 8 | **16** |
+| 12-bit/2677 | 2647 | 10 | 52 | 23.1 | 4 | **8** |
+
+A free reparametrisation moved the wall 2–2.8×, so the 2026-07-29 K1 wall was **not** an
+information-theoretic ceiling. The reformulated attack still sits at ≈0.45·K1_info, so
+there remains a ~2.2× gap that is genuinely algorithmic. This is a direct answer to open
+question 1 of `RESEARCH_GLV_HNP_PHASE2.md` §8 ("does Phase 2's lattice achieve the
+information-theoretic bound in practice?"): **no — it reaches 0.45 of it.**
+
+**U3 — BKZ(β=40) buys almost nothing over LLL in either formulation.** On 2677:
+R1 0/5 at every K1 ∈ {8,12,16,24} for both LLL and BKZ; R2c 5/5→5/5 (K1=8),
+4/5→5/5 (12), 1/5→2/5 (16), 1/5→1/5 (24). Consistent with a near-BDD-radius regime
+rather than a reduction-strength regime.
+
+**Reproducibility caveat.** At the single cell (12-bit/2557, R1, K1=12) this run measures
+1/5 where 2026-07-29 EXP T4 recorded 4/5. The lattice construction is byte-identical
+(checked above) and the seeds/`d` derivation match, so the difference is the LLL backend
+(`fpylll` 0.6.4 here; the version used on 2026-07-29 is not recorded in the log). Future
+runs should record the `fpylll` version alongside borderline cells.
+
+### Next step proposal
+**Thread 24 — close the remaining 2.2× with a per-coordinate BDD rescaling.**
+CENTER worked because it shrank the planted vector's coordinate distribution. The obvious
+next lever is that the current scales `S_K1 = n/K1`, `S_K2 = n/K2`, `S_KANNAN = n`,
+`S_D = 1` equalise *ranges*, not *variances*: after centring, the k-coordinates have
+std `K·S/√12` while the Kannan coordinate is fixed at `n`, so the Kannan coordinate is
+√12 ≈ 3.46× over-weighted. Set `S_KANNAN = n/√12` (rounded) and re-run the U2 grid.
+Falsifier: if the mean wall/K1_info on the U5 set rises above 0.454, variance-balancing is
+a real second lever; if it stays at 0.454 ± noise, the residual gap is LLL's approximation
+factor and the honest conclusion is that Phase 2 is ~2× from optimal and closing it needs
+better reduction, not better scaling. Cost: one grid re-run (~10 min), no new theory.
+
+Secondary (cheap): record `fpylll.__version__` in every future Phase-2 output artifact.
+
+### Commits made
+[filled in below]

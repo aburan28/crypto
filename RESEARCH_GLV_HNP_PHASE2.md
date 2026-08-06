@@ -245,10 +245,26 @@ quirks.
 
 ## 8. Open questions
 
-- What is the **information-theoretic lower bound** on signatures
+- ~~What is the **information-theoretic lower bound** on signatures
   needed for the k₁-only-leak model?  Phase 1 brute force needs
   `~ log_2(n) / c` signatures; does Phase 2's lattice achieve
-  this in practice?
+  this in practice?~~ **ANSWERED 2026-08-06 (Thread 23).**  With
+  `K1_info` = the largest `K1` satisfying
+  `m·(lg K1 + lg K2) < (m−1)·lg n`, the 2026-06-15 lattice reaches
+  only `0.164·K1_info`; recentring the unknowns
+  (`k1' = k1 − K1/2`, `k2' = k2 − K2/2`, `d' = d − n/2`) raises this
+  to `0.454·K1_info`.  So Phase 2 does **not** achieve the bound —
+  it lands ≈2.2× short of it, and the shortfall is algorithmic
+  (BKZ β=40 does not close it).  Measured over 6 fresh 17-bit j=0
+  GLV curves, m=12; see `secp256k1_cm_audit/glv_hnp_phase2_reformulation.py`
+  and `RESEARCH_AUTOLAB_LOG.md` §2026-08-06.
+
+  Corollary, same experiment: eliminating `d` from the lattice
+  (via `k1_i = c_i + t_i(k1_0 + λk2_0) − λk2_i mod n`) removes the
+  trivial vector `n·S_D·e_m` and makes the planted vector the true
+  shortest vector (`sv/pv` 0.42 → 1.00), yet changes the recovery
+  rate by **exactly zero** in all 90 trials.  Being λ₁ is neither
+  necessary nor sufficient for recovery here.
 - Can Phase 2 be **further specialised** to exploit secp256k1's
   CM-by-Z[ω] structure beyond just GLV?  E.g., if the
   endomorphism ω acts predictably on the bias distribution, a
