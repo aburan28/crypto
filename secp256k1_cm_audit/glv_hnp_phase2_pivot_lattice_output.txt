@@ -1,0 +1,121 @@
+==============================================================================
+Thread 23 - remove the trivial short vector (GLV-HNP Phase 2)
+==============================================================================
+
+seeds = [42, 1234, 9999, 555, 31337]   d_secret = round(0.4213*n)
+  8-bit/199      p=   211 n=   199 lam=   106 lam*=0.4673 K1=2 K2=15 m=6 eff=0.1508 d=84
+  12-bit/2557    p=  2557 n=  2659 lam=  1755 lam*=0.3400 K1=8 K2=52 m=8 eff=0.1564 d=1120
+  12-bit/2677    p=  2677 n=  2647 lam=   185 lam*=0.0699 K1=8 K2=52 m=10 eff=0.1572 d=1115
+
+------------------------------------------------------------------------------
+EXP E0: pivot-lattice sanity -- membership and the norm identity
+------------------------------------------------------------------------------
+Checks, for each curve: (i) the congruence k1_j == alpha_j + gam_j*k1_0
++ gam_j*lam*k2_0 - lam*k2_j (mod n) holds for the true nonces; (ii) the
+planted vector is an integer combination of the pivot basis rows;
+(iii) ||v_pivot||^2 == ||v_orig||^2 - (d*S_D)^2 exactly.
+
+curve           congr  in-lat  norm-id  ||v_orig||/n  ||v_piv||/n
+8-bit/199        True    True     True         1.710        1.657
+12-bit/2557      True    True     True         1.979        1.934
+12-bit/2677      True    True     True         2.406        2.369
+
+E0 verdict: ALL PASS
+
+------------------------------------------------------------------------------
+EXP E1: is the planted vector lambda_1 now?  sv/pv in both lattices
+------------------------------------------------------------------------------
+sv = shortest row after LLL, pv = ||v_planted||.  sv/pv >= 1 means the
+planted vector is (at least as short as) the shortest reduced vector.
+'triv/pv' is the trivial vector n*S_D*e_d, absent from the pivot lattice.
+
+curve           K1   m | orig sv/pv  triv/pv  orig ok |  piv sv/pv  piv ok
+8-bit/199        2   6 |     0.5848   0.5848     True |     0.8428    True
+12-bit/2557      8   8 |     0.5052   0.5052     True |     0.5324    True
+12-bit/2677      8  10 |     0.4156   0.4156    False |     0.7835   False
+
+------------------------------------------------------------------------------
+EXP E2: the K1 wall -- orig vs pivot  (THE FALSIFIER)
+------------------------------------------------------------------------------
+2026-07-29 T4 measured, with LLL on the original lattice:
+  12-bit/2557 (lam*=0.340): 5/5 up to K1=8, 4/5 at 12, 1/5 at 16, 0/5 at 24
+  12-bit/2677 (lam*=0.070): 5/5 up to K1=4, 2/5 at 6,  0/5 from 8 on
+Falsifier: if the pivot lattice moves the 2677 wall outward, the
+reformulation is a real improvement; if not, the wall is not about the
+trivial vector at all.
+
+
+  12-bit/2557  (m=8, 5 seeds; entries = #recovered/5)
+    lattice              2     3     4     6     8    12    16    24
+    orig LLL           5/5   5/5   5/5   4/5   3/5   1/5   0/5   0/5
+    pivot LLL          5/5   5/5   5/5   4/5   3/5   1/5   0/5   0/5
+    pivot BKZ20        5/5   5/5   5/5   4/5   3/5   2/5   0/5   0/5
+
+  12-bit/2677  (m=10, 5 seeds; entries = #recovered/5)
+    lattice              2     3     4     6     8    12    16    24
+    orig LLL           5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+    pivot LLL          5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+    pivot BKZ20        5/5   5/5   5/5   4/5   0/5   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP E3: does more data move the pivot wall?  (2677, K1=8)
+------------------------------------------------------------------------------
+2026-07-29 T4b: on the original lattice, m = 8/12/16/24/32 gave
+0,0,1,0,1 out of 5 -- more signatures did not rescue K1=8.
+
+   m   orig LLL  pivot LLL  pivot BKZ20  piv sv/pv
+   8        1/5        1/5          1/5     0.7749
+  12        0/5        0/5          0/5     0.7035
+  16        1/5        1/5          1/5     0.6072
+  24        0/5        0/5          1/5     0.5150
+  32        1/5        1/5          1/5     0.4513
+
+------------------------------------------------------------------------------
+EXP S: S_D sweep in the ORIGINAL lattice
+------------------------------------------------------------------------------
+2026-07-29 T5 claimed 'no choice of S_D removes the trivial vector -
+both vectors scale linearly in S_D'.  Only the trivial one does:
+  ||n*S_D*e_d|| = n*S_D          (linear in S_D)
+  ||v_planted||^2 = R^2 + d^2*S_D^2   with R independent of S_D
+so trivial > planted iff S_D > R/sqrt(n^2-d^2); the ratio saturates at n/d.
+
+
+  8-bit/199  predicted crossover S_D > 2.442   saturation n/d = 2.369
+       S_D   triv/pv    sv/pv  sv is triv  recovered
+         1    0.5501   0.5501         5/5        5/5
+         2    1.0204   0.7125         0/5        5/5
+         3    1.3787   0.6418         0/5        3/5
+         4    1.6351   0.5709         0/5        2/5
+         6    1.9415   0.4519         0/5        0/5
+         8    2.0979   0.3662         0/5        0/5
+        16    2.2915   0.2000         0/5        0/5
+        64    2.3640   0.0516         0/5        0/5
+       256    2.3687   0.0129         0/5        0/5
+
+  12-bit/2557  predicted crossover S_D > 2.770   saturation n/d = 2.374
+       S_D   triv/pv    sv/pv  sv is triv  recovered
+         1    0.4527   0.4527         5/5        3/5
+         2    0.8586   0.4420         0/5        3/5
+         3    1.1923   0.4092         0/5        4/5
+         4    1.4518   0.3737         0/5        1/5
+         6    1.7954   0.3081         0/5        0/5
+         8    1.9903   0.2561         0/5        0/5
+        16    2.2571   0.1452         0/5        0/5
+        64    2.3662   0.0381         0/5        0/5
+       256    2.3736   0.0095         0/5        0/5
+
+  12-bit/2677  predicted crossover S_D > 3.026   saturation n/d = 2.374
+       S_D   triv/pv    sv/pv  sv is triv  recovered
+         1    0.3931   0.3931         5/5        0/5
+         2    0.7554   0.7240         0/5        0/5
+         3    1.0670   0.6822         0/5        0/5
+         4    1.3220   0.6345         0/5        0/5
+         6    1.6824   0.5397         0/5        0/5
+         8    1.9016   0.4576         0/5        0/5
+        16    2.2234   0.2675         0/5        0/5
+        64    2.3637   0.0711         0/5        0/5
+       256    2.3733   0.0178         0/5        0/5
+
+==============================================================================
+done
+==============================================================================

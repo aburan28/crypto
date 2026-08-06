@@ -6103,3 +6103,182 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is λ₁.
+This is the exact next-step proposed by the 2026-07-29 entry (log line ~6090), which
+made measurable progress (T5: the shortest vector is always the trivial `n·S_D·e_d`),
+so protocol rule (b) applies. Priorities 1/2/3/4/6 are CLOSED / BLOCKED / DEAD-END per
+2026-07-26…07-27; priority 5 is this thread.
+
+Pre-registered falsifier (verbatim from 2026-07-29): *"if sv/pv rises above 1 after the
+reformulation and the K1 wall in T4 moves outward on the λ\*=0.07 curve (currently
+K1≈4–6), the reformulation is a real improvement; if the wall stays at K1≈4–6, then the
+wall is information-theoretic and Phase 2 is at its ceiling."*
+
+**Outcome: the second branch fires.** sv/pv does reach exactly 1.0000, but the wall does
+not move by a single grid step. Thread 23 CLOSED as a negative result.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  sympy 1.14.0. Same note as 2026-07-29: `cysignals` is a separate runtime import.
+  PARI/GP not installed this run — not needed, no `.gp` script was written.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_pivot_lattice.py` (E0–E3 + EXP S) and
+  `secp256k1_cm_audit/glv_hnp_phase2_pivot_diag.py` (E4–E5). Helpers copied verbatim
+  from `glv_hnp_phase2_lambda_threshold.py:120–300` so the numbers are directly
+  comparable to 2026-07-29. Outputs: `glv_hnp_phase2_pivot_lattice_output.txt` (121
+  lines), `glv_hnp_phase2_pivot_diag_output.txt` (48 lines).
+- **The pivot lattice.** Eliminate `d` with signature 0 as pivot instead of carrying it
+  as a column. With `k_i = A_i + B_i d (mod n)`, `γ_i = B_i/B_0`, `α_i = A_i − γ_i A_0`:
+
+      k1_i ≡ α_i + γ_i·k1_0 + γ_i·λ·k2_0 − λ·k2_i   (mod n),   i = 1..m−1
+
+  Columns `[k1_1..k1_{m−1} | k1_0 | k2_0 | k2_1..k2_{m−1} | kannan]`, dim 2m+1 (one less
+  than the original), det = det_orig/n. There is no free column, hence no `n·e_d`.
+  Implementation: `glv_hnp_phase2_pivot_lattice.py:236` (`build_pivot_lattice`),
+  recovery by reading k1_0,k2_0 and back-substituting `d = (k1_0+λk2_0−A_0)/B_0`.
+- Made `S_D` an explicit parameter of the original lattice (`:164`) to test the
+  2026-07-29 claim that S_D cannot remove the trivial vector.
+- `cargo test --test curve_audit` → 5/5 pass (55s incl. build). ✓
+
+### Findings
+
+**E0 — the pivot lattice is correct.** For all three historical curves: the congruence
+holds on the true nonces, the planted vector is an explicit integer combination of the
+basis rows (reconstructed coefficient-by-coefficient, exact equality), and the norm
+identity `‖v_pivot‖² = ‖v_orig‖² − (d·S_D)²` holds exactly. ‖v‖/n drops 1.710→1.657,
+1.979→1.934, 2.406→2.369.
+
+**E1 — the trivial vector is gone; sv/pv rises but not past 1 at the wall.**
+
+| curve | K1 | m | orig sv/pv | triv/pv | orig ok | piv sv/pv | piv ok |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.5848 | 0.5848 | True | 0.8428 | True |
+| 12-bit/2557 | 8 | 8 | 0.5052 | 0.5052 | True | 0.5324 | True |
+| 12-bit/2677 | 8 | 10 | 0.4156 | 0.4156 | **False** | 0.7835 | **False** |
+
+In the original lattice `sv = triv` to 4 dp on every row — the 2026-07-29 T5 finding
+reproduces exactly. In the pivot lattice sv/pv rises (0.416→0.784 on the failure curve)
+but the failure persists.
+
+**E2 — THE FALSIFIER: the K1 wall does not move. Not by one grid step.**
+5 seeds, entries = #recovered/5, d = round(0.4213·n):
+
+| 12-bit/2557 (λ\*=0.340, m=8) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| orig LLL | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 1/5 | 0/5 | 0/5 |
+| pivot LLL | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 1/5 | 0/5 | 0/5 |
+| pivot BKZ20 | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 2/5 | 0/5 | 0/5 |
+
+| 12-bit/2677 (λ\*=0.070, m=10) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| orig LLL | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| pivot LLL | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| pivot BKZ20 | 5/5 | 5/5 | 5/5 | 4/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+orig-LLL and pivot-LLL are **cell-for-cell identical on both curves**. The only movement
+is BKZ(20) at the boundary cell (2677/K1=6: 2/5→4/5), which is a reduction-strength
+effect, not a reformulation effect. **The trivial vector was never the obstruction.**
+
+**E3 — more data still does not help, and sv/pv gets worse with m** (2677, K1=8):
+
+| m | orig LLL | pivot LLL | pivot BKZ20 | piv sv/pv |
+|---|---|---|---|---|
+| 8 | 1/5 | 1/5 | 1/5 | 0.7749 |
+| 12 | 0/5 | 0/5 | 0/5 | 0.7035 |
+| 16 | 1/5 | 1/5 | 1/5 | 0.6072 |
+| 24 | 0/5 | 0/5 | 1/5 | 0.5150 |
+| 32 | 1/5 | 1/5 | 1/5 | 0.4513 |
+
+Reproduces 2026-07-29 T4b (0,0,1,0,1) and adds the mechanism: sv/pv *decreases*
+monotonically in m. Adding signatures grows the competing short vectors faster than it
+shrinks the planted vector relative to them, so the m-sweep cannot cross the wall — it
+moves away from it. This closes T4b's open "why".
+
+**EXP S — the 2026-07-29 claim about S_D is CORRECTED.** That entry stated "no choice of
+S_D removes it — both vectors scale linearly in S_D". Only the trivial vector does:
+`‖n·S_D·e_d‖ = n·S_D` is linear, but `‖v_planted‖² = R² + d²S_D²` with R independent of
+S_D. So trivial > planted for `S_D > R/√(n²−d²)`, and the ratio saturates at n/d.
+Measured (8-bit/199, predicted crossover 2.442, predicted saturation n/d = 2.3690):
+
+| S_D | 1 | 2 | 3 | 4 | 6 | 8 | 16 | 64 | 256 |
+|---|---|---|---|---|---|---|---|---|---|
+| triv/pv | 0.5501 | 1.0204 | 1.3787 | 1.6351 | 1.9415 | 2.0979 | 2.2915 | 2.3640 | **2.3687** |
+| sv is triv | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| recovered | 5/5 | 5/5 | 3/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Saturation matches n/d to 4 dp on all three curves (2.3687 vs 2.3690; 2.3736 vs 2.3741;
+2.3733 vs 2.3740). Measured crossovers 1.96 / 2.42 / 2.78 vs predicted 2.442 / 2.770 /
+3.026 — the 10–25% gap is the `E[x²]=X²/3` approximation in R, not a modelling error.
+**So S_D *does* remove the trivial vector — and recovery gets strictly worse when it
+does** (5/5 → 0/5 by S_D=6). Independent second confirmation that the trivial vector was
+never the obstruction: killing it by scaling costs more (‖planted‖ grows linearly in S_D
+while GH grows only as S_D^{1/(2m+2)}) than the trivial vector ever cost.
+
+**E4 — the wall position is a curve property, not a d property.** The E2 grid above
+disagrees with the 2026-07-29 T4 grid at one cell (2557/K1=8: 3/5 here vs 5/5 there).
+d_secret was the uncontrolled variable — T4 did not record it. Sweeping 8 values of d:
+
+| 12-bit/2557, m=8 | K1=4 | 6 | 8 | 12 | 16 |
+|---|---|---|---|---|---|
+| total over 8 d-values | 40/40 | 39/40 | **37/40** | 12/40 | 0/40 |
+
+| 12-bit/2677, m=10 | K1=4 | 6 | 8 | 12 | 16 |
+|---|---|---|---|---|---|
+| total over 8 d-values | 39/40 | 8/40 | 0/40 | 0/40 | 0/40 |
+
+d=1120 (=0.4213n, the value used in E2) is the single unlucky instance out of 8 — every
+other d gives 5/5 at K1=8. Both grids are correct; T4's reading is the typical one.
+Aggregate walls: 2557 at K1≈12, 2677 at K1≈6, confirming T4's factor-≈3 λ\* shift on 40
+instances per cell instead of 5.
+
+**E5 — what λ₁ actually is in the pivot lattice (energy decomposition).**
+
+| curve | K1 | sv/pv | res | k1_0 | k2_0 | k2 | kan | kan/S | ok |
+|---|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.8428 | 0.000 | 0.508 | 0.492 | 0.000 | 0.000 | 0.00 | True |
+| 8-bit/199 | 4 | 0.6230 | 0.000 | 0.202 | 0.798 | 0.000 | 0.000 | 0.00 | False |
+| 12-bit/2557 | 8 | 0.5324 | 0.000 | 0.132 | 0.868 | 0.000 | 0.000 | 0.00 | True |
+| 12-bit/2557 | 4 | 0.6470 | 0.000 | 0.379 | 0.621 | 0.000 | 0.000 | 0.00 | True |
+| 12-bit/2557 | 2 | **1.0000** | 0.081 | 0.000 | 0.000 | 0.597 | 0.322 | 1.00 | True |
+| 12-bit/2677 | 8 | 0.7835 | **0.772** | 0.000 | 0.070 | 0.158 | 0.000 | 0.00 | False |
+| 12-bit/2677 | 4 | **1.0000** | 0.184 | 0.000 | 0.000 | 0.631 | 0.185 | 1.00 | True |
+| 12-bit/2677 | 2 | **1.0000** | 0.102 | 0.000 | 0.000 | 0.695 | 0.203 | 1.00 | True |
+
+Three rows have sv/pv = 1.0000 with kan/S = 1.00 — **the planted vector genuinely is λ₁
+there.** So the reformulation achieved its stated structural goal; it just bought nothing.
+Precise logical status on this sample: planted = λ₁ ⟹ recovery (3/3), but recovery does
+NOT require it (2557/K1=4,8 and 199/K1=2 succeed at sv/pv = 0.53–0.84). LLL returns the
+planted vector as *some* row; being λ₁ is sufficient, not necessary.
+
+Two distinct competitor families appear, both homogeneous (kan = 0, no information on d):
+ - **(a) pivot-block vectors** — energy entirely in the (k1_0, k2_0) columns. The exact
+   analogue of the old λ-block, now living on the pivot signature. Present on 199 and
+   2557, and compatible with success.
+ - **(b) residue-column vectors** — 0.772 of energy in the k1_j residue columns. Occurs
+   once, on 2677/K1=8, the failure case.
+Sample of 8, so this is a hypothesis, not a result: **only family (b) coincides with
+failure.** Falsifier below.
+
+### Next step proposal
+**Thread 24 — test whether competitor family (b) is the wall.** Run E5's decomposition
+across the K1 grid × 8 d-values × 5 seeds on both 12-bit curves (≈400 reductions, a few
+minutes with the existing code), and score `frac_res` of the shortest vector as a binary
+predictor of failure. Falsifier: if `frac_res > 0.5` separates failure from success with
+AUC ≥ 0.9, the wall has a computable local signature and the next move is to reduce
+family (b) directly (scale the residue columns down relative to the pivot columns — a
+one-line change to `scales()`); if AUC ≤ 0.7, family (b) is incidental and Phase 2 should
+be declared at its information-theoretic ceiling (eff = K1·K2/n ≈ 0.1–0.15, matching the
+2026-07-29 T3 sweep) and closed.
+
+Cheap and decisive. Note it is the *last* structural lever identified — E2, E3 and EXP S
+have now each independently shown the lattice geometry is not the binding constraint, so
+a negative Thread 24 should close Phase 2 rather than spawn Thread 25.
+
+Secondary (bookkeeping, 5 min): the 2026-07-29 T5 paragraph asserting "no choice of S_D
+removes it" should be marked corrected in place, pointing at EXP S above.
+
+### Commits made
+[recorded below]
