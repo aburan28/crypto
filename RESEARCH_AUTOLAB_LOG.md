@@ -6566,4 +6566,4 @@ all explained by the same scale error, now diagnosed.
 
 ### Commits made
 
-(hash recorded in the following commit)
+200f8c7 autolab 2026-08-06: Thread 23 — closed form for ν̂; repair e845207 merge loss
