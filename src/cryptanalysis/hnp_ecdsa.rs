@@ -197,15 +197,30 @@ pub fn hnp_recover_key_with_reduction(
     // ── Compute (a_i, t_i) for each signature ──
     //   a_i = s_i⁻¹ · r_i (mod n)
     //   t_i = s_i⁻¹ · z_i (mod n)
+    //
+    // The `t_i` are *centred*: the raw residual `k_i = t_i + a_i·d mod n`
+    // lies in `[0, 2^k_bits)`, so the planted lattice vector has entries
+    // `n·k_i` with mean `n·2^(k_bits-1)` rather than 0.  Subtracting the
+    // half-range from `t_i` re-expresses the same instance with the SAME
+    // `d` and residuals in `[-2^(k_bits-1), 2^(k_bits-1))`, which shortens
+    // the planted vector by a factor ≈ 2 (E[u²] drops from 1/3 to 1/12).
+    // This uses only public data.  Measured effect on this basis:
+    // recovery needs 3 bias bits instead of 4 at n ≈ 2^41, m = 40 — see
+    // `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` experiment E5.
     let mut a: Vec<BigUint> = Vec::with_capacity(m);
     let mut t: Vec<BigUint> = Vec::with_capacity(m);
     for sig in signatures {
         if sig.r.is_zero() || sig.s.is_zero() || &sig.r >= n || &sig.s >= n {
             return Err("malformed signature: r,s must be in (0, n)");
         }
+        if sig.k_bits == 0 {
+            return Err("malformed signature: k_bits must be ≥ 1");
+        }
         let s_inv = mod_inverse(&sig.s, n).ok_or("s has no inverse mod n")?;
         a.push((&s_inv * &sig.r) % n);
-        t.push((&s_inv * &sig.z) % n);
+        let t_raw = (&s_inv * &sig.z) % n;
+        let half = BigUint::from(1u32) << (sig.k_bits - 1);
+        t.push((&t_raw + n - (&half % n)) % n);
     }
 
     // ── Build the Boneh–Venkatesan lattice basis ──

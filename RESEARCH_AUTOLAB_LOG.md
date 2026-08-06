@@ -6103,3 +6103,162 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 lattice so the target is λ₁ — the explicit
+next-step proposed by the 2026-07-29 entry (log line ~6089). Priorities 1, 3, 4, 6 are
+CLOSED, priority 2 BLOCKED (F_p Rosenhain, 2026-07-26); priority 5 (GLV-HNP Phase 2) made
+measurable progress on 2026-07-29 (T1–T5 + the ν̂ separator), so rule (b) applies.
+
+Outcome: the stated falsifier returns **negative** — the CVP reformulation on its own does
+not move the wall. But the diagnostic it enabled exposed a different, larger defect
+(an uncentred embedding) whose fix moves the wall by 4× on the historical failure curve
+and 5× in eff, and which also applies to the repo's Rust HNP code path.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0. Note: the first `pip install` timed out on
+  files.pythonhosted.org; `--default-timeout=120 --retries 5` succeeded. PARI/GP is NOT
+  installed in this image (`gp` absent) — not needed today.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` (E0, E0b, E1–E5; 24.7 s total).
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_cvp_output.txt`.
+  Helper code is imported **verbatim** from `glv_hnp_phase2_lambda_threshold.py`, but only
+  the prefix above its `# EXPERIMENT T1` banner is exec'd — that file runs its whole
+  experiment suite at module level, so a plain `exec_module` re-runs T1–T5. Future runs
+  reusing it should do the same (`glv_hnp_phase2_cvp.py:70-78`).
+- Implemented the 2m-dimensional reformulation: drop the Kannan row AND the d-column,
+  solve BDD against t = (−A_i·S1 | 0) and read d back out of the recovered (k1_i, k2_i).
+  Solvers compared on identical signatures: KAN (2026-07-29 baseline), BAB (Babai nearest
+  plane), CVPx (exact CVP by fpylll enumeration).
+- Added the control that decided the question: **KANc** — the *original* Kannan lattice on
+  a *centred* instance.
+- Applied the resulting fix to `src/cryptanalysis/hnp_ecdsa.rs:197-217`.
+- `cargo test --test curve_audit` → 5/5 pass. `cargo test --lib hnp` → 11/11 pass
+  (incl. `cannot_recover_from_unbiased_nonces`, so the fix creates no false positives)
+  plus 3/3 of the `--ignored` slow tests. ✓
+
+### Findings
+
+**F1 — the Thread 23 falsifier is negative. Exact CVP is no better than Kannan-LLL.**
+m=12, 5 seeds, largest K1 with a full 5/5 sweep:
+
+| curve | λ* | KAN | BAB | CVPx |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | K1≤8 | K1≤6 | K1≤8 |
+| 12-bit/2677 | 0.070 | K1≤4 | K1≤4 | K1≤4 |
+
+The wall does not move. Per the 2026-07-29 falisifier this means the wall is
+information-theoretic — and E1's kind-classification proves it directly rather than by
+inference. Classifying each exact-CVP answer as `planted` / `alt` (a strictly closer
+point that still yields d — the GLV decomposition k = k1 + λ·k2 is not unique, so a
+shorter (k1,k2) for the same k is equally valid) / `decoy` (strictly closer, does NOT
+yield d): at eff=0.15 over 50 trials the split is **planted 1, alt 10, decoy 39**; at
+eff=0.25, **decoy 48/50**; at eff=0.40, **decoy 50/50**. The true closest lattice vector
+is simply not the secret, so no reduction algorithm whatsoever can help. T5's
+"BDD/coset, not SVP" reading is confirmed, and the trivial `n·S_D·e_m` vector is
+exonerated: removing it changes nothing.
+
+**F2 — the real defect: the embedding was never centred.** The unknowns satisfy
+0 ≤ k1_i < K1 and 0 ≤ k2_i < K2, so the planted error has *non-negative* entries with
+mean (S1·K1/2, S2·K2/2). Every Phase-2 lattice built since 2026-06-15 has therefore been
+aiming CVP at a **corner** of the error box instead of its centre, inflating the planted
+vector by a factor ≈2:
+
+    uncentred  E‖e‖² = 2m·n²/3     (E[u²]=1/3, u ~ U[0,1])
+    centred    E‖e‖² = 2m·n²/12    (E[u²]=1/12, u ~ U[−1/2,1/2])
+
+The fix is a rewrite of the **public** data, not a change of lattice: with h1=(K1−1)//2,
+h2=(K2−1)//2 and A'_i = A_i − h1 − λ·h2 mod n, the shifted unknowns k1'=k1−h1,
+k2'=k2−h2 satisfy k1' + λ·k2' = A'_i + B_i·d with the *same* d. Verified as an assertion
+over 72 signatures (E0b), not just measured.
+
+**F3 — centring, not the reformulation, is what moves the wall.** Same table as F1 with
+the centred instance:
+
+| curve | λ* | KAN | CVPx | **KANc** | BABc | CVPc |
+|---|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | K1≤8 | K1≤8 | **K1≤16** | K1≤16 | K1≤12 |
+| 12-bit/2677 | 0.070 | K1≤4 | K1≤4 | **K1≤16** | K1≤12 | K1≤12 |
+
+KANc is the *original* (2m+2)-dim Kannan lattice — only the instance is rewritten. It
+matches or beats the CVP reformulation everywhere. **The CVP reformulation contributes
+nothing; the entire gain is centring.** On the historical λ*=0.07 failure curve the K1
+wall moves 4 → 16, a 4× improvement.
+
+**F4 — the usable bias regime widens ~5×.** 10 fresh 17-bit j=0 GLV curves, m=12, 5 seeds
+(50 trials per cell):
+
+| eff = K1·K2/n | KAN | CVPx | **KANc** | CVPc | centred kinds (pl/alt/dec) |
+|---|---|---|---|---|---|
+| 0.05 | 49/50 | 50/50 | 50/50 | 50/50 | 49/1/0 |
+| 0.15 | 11/50 | 11/50 | **46/50** | **50/50** | 50/0/0 |
+| 0.25 | 4/50 | 2/50 | **33/50** | **46/50** | 40/6/4 |
+| 0.40 | 0/50 | 0/50 | 4/50 | 10/50 | 7/3/40 |
+
+The wall moves from eff≈0.05 to eff≈0.25 — about 2.3 bits less bias required. The new
+wall at eff≈0.40 is again a genuine decoy wall (40/50 decoys), i.e. information-theoretic
+for this lattice.
+
+**F5 — the new wall recedes with more signatures** (5 curves × 5 seeds = 25 trials/cell,
+KANc successes):
+
+| m | eff=0.05 | 0.15 | 0.25 | 0.30 | 0.35 | 0.40 | 0.50 |
+|---|---|---|---|---|---|---|---|
+| 6  | 24 | 4  | 0  | 0  | 0  | 0  | 0 |
+| 8  | 25 | 10 | 4  | 0  | 0  | 0  | 0 |
+| 12 | 25 | 22 | 14 | 5  | 5  | 2  | 1 |
+| 16 | 25 | 25 | 14 | 12 | 10 | 5  | 3 |
+| 24 | 25 | 25 | 20 | 15 | 14 | 10 | 3 |
+| 32 | 25 | 25 | 16 | 17 | 13 | 12 | 6 |
+
+So the centred instance trades signatures for bias in the normal BDD way, which the
+uncentred one did not (2026-07-29 T4b: at K1=8, m ∈ {8,12,16,24,32} gave 0,0,1,0,1 of 5).
+
+**F6 — the same defect is in the repo's Rust HNP, and the fix is worth ~1 bias bit.**
+`src/cryptanalysis/hnp_ecdsa.rs` builds the classic Boneh–Venkatesan basis
+(`n²·e_i`; `(n·a_i, 2^l)`; `(n·t_i, …, n·2^l)`) with `t_i = s_i⁻¹·z_i mod n` — uncentred in
+exactly the same way. E5 replicates that basis in Python at n ≈ 2^41, m = 40, 10 seeds:
+
+| bias bits | uncentred | centred |
+|---|---|---|
+| 2 | 0/10 | 0/10 |
+| **3** | **0/10** | **6/10** |
+| 4 | 10/10 | 10/10 |
+| 5–8 | 10/10 | 10/10 |
+
+**Fix applied** (`src/cryptanalysis/hnp_ecdsa.rs:197-217`): `t_i ← t_i − 2^(k_bits_i−1)
+mod n`, per-signature so mixed `k_bits` are each centred on their own range. `d` is still
+read off `row[m]` — the recovery path is untouched. All HNP tests pass, including the
+`--ignored` slow ones (25.9 s for all three, against the "~3 min total" noted in their
+`#[ignore]` message — suggestive of an easier lattice, but that is an uncontrolled
+wall-clock observation, not a measurement).
+
+**F7 — bookkeeping.** Commit `e845207` (2026-07-29) has a detailed message reporting the
+ν̂ = λ₁(L2)/√det(L2) separator (20-bit p̂ 0.910 low-ν̂ vs 0.453 high-ν̂, perm p < 1e-4;
+AUC 0.935 against the June C1/C2 classes) but **no corresponding section was ever appended
+to this log** — the 2026-07-29 entry stops at T5. The scripts exist
+(`glv_hnp_phase2_mu_response.py`, `glv_hnp_phase2_nuhat_control.py`,
+`glv_hnp_nuhat_vs_c1c2.py`); their result tables live only in `git show e845207`. A future
+run should either re-run them or transcribe the commit message into the log.
+
+### Next step proposal
+**Thread 24 — re-test ν̂ on the centred lattice.** The ν̂ separator (AUC 0.935) was fitted
+on uncentred instances, where 39/50 of the failures at eff=0.15 are decoys. Centring
+removes essentially all of those. Concretely: re-run `glv_hnp_nuhat_vs_c1c2.py`'s Exp S
+protocol (K1=72, m=12, 6 seeds, 100 fresh 20-bit curves) with `centered_sigs()` applied,
+and recompute the AUC. Falsifier: if ν̂'s AUC collapses toward the 0.5 baseline, ν̂ was
+measuring the decoy geometry of a mis-centred embedding rather than anything intrinsic,
+and the "resolution of the 2026-06-30 DEAD END" needs restating; if it survives at ≈0.9,
+it is a real invariant of the GLV lattice. ~5 min run, reuses existing code.
+
+Secondary, cheap: `src/cryptanalysis/multi_key_hnp.rs` has its own lattice builder and was
+not inspected today — check whether it is uncentred too and apply the same fix.
+
+Also outstanding from 2026-07-29: re-express the 2026-07-26 log's λ/n column in
+λ* = min(λ, n−λ)/n throughout, so future runs do not re-derive the root-convention
+confusion.
+
+### Commits made
+(filled in below)
