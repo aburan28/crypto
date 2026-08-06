@@ -6269,3 +6269,5 @@ d off a dedicated column too. Worth one pass to check none of them are accidenta
 measuring the strictly-weaker "recover the planted vector" event.
 
 ### Commits made
+
+ed2b4ca autolab 2026-08-06: Thread 23 — projection is a no-op, centering breaks the K1 wall, remaining wall is information-theoretic
