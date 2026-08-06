@@ -115,18 +115,28 @@ pub struct BiasedSignature {
 /// (the LLL approximation factor `2^((dim-1)/4)` eats some of the
 /// gap).  Empirical thresholds at delta = 0.75:
 ///
-/// | bias bits | signatures needed     |
-/// |-----------|-----------------------|
-/// | 64        | 6–8                   |
-/// | 32        | 12–15                 |
-/// | 16        | 25–30                 |
-/// | 8         | 50+                   |
+/// Measured on P-256, 3 seeds per cell, smallest `m` recovering
+/// 3/3 (`tests/hnp_centering_threshold.rs`, 2026-08-06):
+///
+/// | bias bits | signatures needed       |
+/// |-----------|-------------------------|
+/// | 64        | 5                       |
+/// | 32        | 9                       |
+/// | 16        | 17                      |
+/// | 8         | not measured (slow)     |
 /// | ≤ 4       | needs BKZ; out of scope |
 ///
+/// These are ~1.5× lower than the estimates carried here before
+/// 2026-08-06, which were measured against the *uncentered*
+/// lattice (see the centering note in the basis construction).
+///
 /// At fewer sigs the target is *longer* than other lattice
-/// vectors and LLL legitimately cannot find it.  This is a
-/// fundamental property of the formulation, not a defect of the
-/// implementation.
+/// vectors and LLL legitimately cannot find it.  With the nonce
+/// intervals centered, this is a property of the formulation
+/// rather than of the implementation — but note that it was
+/// partly an implementation defect until 2026-08-06, so treat
+/// "the formulation is at its limit" claims here with suspicion
+/// until they have been re-measured.
 ///
 /// # Cost
 ///
@@ -223,8 +233,46 @@ pub fn hnp_recover_key_with_reduction(
         basis[m][i] = &n_int * a[i].to_bigint().unwrap();
     }
     basis[m][m] = two_l.clone();
+    // Center each nonce interval on the origin.
+    //
+    // The unknown is `k_i ∈ [0, 2^{k_bits_i})`, so with `t_i` used
+    // verbatim the target's i-th coordinate is `−n·k_i`, which is
+    // one-sided: `E[k_i²] = K²/3`.  Lattice reduction looks for
+    // vectors short around the *origin*, so the natural encoding
+    // subtracts the interval's midpoint.  Replacing `t_i` by
+    // `t_i − 2^{k_bits_i−1} (mod n)` makes the coordinate
+    // `−n·(k_i − K/2) ∈ [−nK/2, nK/2)`, and `E[x²]` drops from
+    // `K²/3` to `K²/12` — a factor 2 in length in every one of the
+    // `m` nonce coordinates.
+    //
+    // This is free: it is a translation of the target, not a change
+    // of lattice rank or scaling, and column `m` (which carries the
+    // `−d·2^l` encoding) is untouched, so recovery is unchanged.
+    //
+    // Effect here: `‖w‖²/(n·2^l)²` drops from `m/3 + 4/3` to
+    // `m/12 + 4/3`.  The `+4/3` is the `d` coordinate plus the
+    // constant Kannan anchor `n·2^l`, neither of which is
+    // centerable, so the gain is 1.6× in length at m=17 rather
+    // than the full factor 2 — worth about one signature.
+    // Measured on P-256 (tests/hnp_centering_threshold.rs): the
+    // 16-bit-bias threshold moves from m=18 to m=17; the 64- and
+    // 32-bit thresholds do not move, one signature being a coarser
+    // step than the gain at those depths.
+    //
+    // On the GLV-HNP Phase-2 lattice, where all three unknown
+    // blocks are centerable and the bias is a continuous knob, the
+    // same change raises pooled recovery on fresh 17-bit curves
+    // from 16/120 to 56/120 — see
+    // secp256k1_cm_audit/glv_hnp_phase2_centered_cvp.py (2026-08-06).
     for i in 0..m {
-        basis[m + 1][i] = &n_int * t[i].to_bigint().unwrap();
+        let kb = signatures[i].k_bits;
+        let half = if kb == 0 {
+            BigUint::zero()
+        } else {
+            (BigUint::one() << (kb - 1) as usize) % n
+        };
+        let t_centered = (&t[i] + n - half) % n;
+        basis[m + 1][i] = &n_int * t_centered.to_bigint().unwrap();
     }
     basis[m + 1][m + 1] = n_two_l.clone();
 

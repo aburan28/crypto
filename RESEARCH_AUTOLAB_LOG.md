@@ -6103,3 +6103,183 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+Thread 23 — "reformulate the Phase-2 lattice so the target is λ₁", the continuation
+proposed by the 2026-07-29 run (log lines ~6088–6096). Priorities 1, 3, 4, 6 are CLOSED,
+priority 2 (CHLRS) is BLOCKED on the F_p cubic-residue obstruction (2026-07-26, c591765),
+and priority 5 (GLV-HNP) made measurable progress on 2026-07-29 — so protocol rule (b)
+selects its proposed sub-task.
+
+**Outcome: Thread 23's own hypothesis is falsified, but the diagnostic that motivated it
+sat next to a real and much larger defect. The Phase-2 lattice has encoded its unknowns
+UNCENTERED since 2026-06-15. Fixing that is free and quadruples the tolerable bias
+strength. The same defect was present in the production Rust HNP
+(`src/cryptanalysis/hnp_ecdsa.rs`) and is now fixed there too, for a smaller gain.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll sympy cysignals` (fpylll 0.6.4,
+  sympy 1.14.0, cysignals 1.12.5). Same list as 2026-07-29 — the container ships none of
+  them, and `cysignals` is a separate runtime import from `fpylll`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_centered_cvp.py` (experiments C0–C5, 21 s
+  runtime; artifact `secp256k1_cm_audit/glv_hnp_phase2_centered_cvp_output.txt`). The
+  lattice construction, signature generation and scale choices are copied verbatim from
+  `glv_hnp_phase2_20bit.py:262`, so every comparison below is against the identical
+  baseline instances used on 2026-06-15 / 07-26 / 07-29.
+- Four formulations, run on the *same* signature instances:
+  - **F0** Kannan/SVP uncentered — the 2026-06-15 baseline, verbatim.
+  - **F1** Kannan/SVP centered (H23a below).
+  - **F2** projected CVP: delete column m (project along e_m), LLL, exact-rational Babai
+    nearest-plane, then read d off algebraically. This is literally Thread 23's proposal.
+  - **F3** F2 with BKZ-20 preprocessing.
+- Fixed the production Rust lattice (`src/cryptanalysis/hnp_ecdsa.rs:230`), added
+  `tests/hnp_centering_threshold.rs`, corrected the module's threshold table.
+- `cargo test --test curve_audit` → 5/5 pass. `cargo test --lib cryptanalysis::hnp_ecdsa`
+  → 5 pass / 3 ignored, including the negative control
+  `cannot_recover_from_unbiased_nonces`.
+
+### Findings
+
+**H23a — the lattice was uncentered; that is the whole story.**
+`build_glv_lattice()` encodes k1_i ~ U[0,K1), k2_i ~ U[0,K2), d ~ U[0,n). Lattice
+reduction finds vectors short around the *origin*, so the natural encoding subtracts each
+interval's midpoint. E[x²] = X²/3 uncentered vs X²/12 centered → the BDD distance halves
+in every coordinate at once, i.e. a factor 4 in bias strength eff = K1·K2/n. The fix is a
+translation of the target: with c1 = K1//2, c2 = K2//2, cd = (n−1)//2 and
+
+    Ã_i = A_i + B_i·cd − c1 − λ·c2   (mod n)
+
+the congruence k1_i = A_i + B_i d − λ k2_i (mod n) becomes
+k1_i − c1 = Ã_i + B_i(d−cd) − λ(k2_i−c2) (mod n).
+
+C0 verifies this: the core sublattice (rows 0..2m) is bit-identical, the centered planted
+vector is an explicit integer combination of the centered rows on all three curves, and
+there is no false positive on a wrong secret. (The *Kannan embedding* lattice does change —
+the Kannan row moves by a vector not in the lattice — so this is a re-embedding, not a
+unimodular transform. An earlier version of the C0 check asserted equal row spaces and
+was wrong.)
+
+**C2b — the predicted factor 2 is confirmed.** 4000-draw Monte Carlo at the same
+(m,n,K1,K2): ‖e_uncentered‖/‖e_centered‖ = 1.91 / 1.95 / 1.94 at K1=16 and
+1.94 / 1.99 / 1.99 at K1=128 for the three curves. (The 5-seed figures in the C1/C2 tables
+read 1.36–1.73 — sampling noise at m=6..10 and 5 seeds, not a modelling error.)
+
+**C1/C3 — the K1 wall moves outward.** Last K1 with ≥4/5 recoveries, 5 seeds:
+
+| curve | λ* | m | F0 K1* | F1 K1* | F2 K1* | F3 K1* | eff*(F0) | eff*(F1) |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199   | 0.467 | 6  | 3 | 3  | 3  | 3  | 0.226 | 0.226 |
+| 12-bit/2557 | 0.340 | 8  | 8 | 16 | 16 | 16 | 0.156 | 0.313 |
+| 12-bit/2677 | 0.070 | 10 | 4 | 12 | 12 | 12 | 0.079 | 0.236 |
+
+The 8-bit curve has no headroom (K1=3 is already r_GH=0.90 and K1=4 is r_GH=1.03, past
+the feasibility line), so 1× there is expected, not a counterexample.
+
+**C5 — the gain holds out of sample.** Six fresh 17-bit j=0 GLV curves, m=12, 5 seeds:
+
+| eff = K1·K2/n | F0 | F1 | F2 |
+|---|---|---|---|
+| 0.15 | 11/30 | 28/30 | 25/30 |
+| 0.25 |  4/30 | 19/30 | 19/30 |
+| 0.35 |  1/30 |  8/30 |  8/30 |
+| 0.50 |  0/30 |  1/30 |  1/30 |
+| **pooled** | **16/120** | **56/120** | **53/120** |
+
+**Thread 23's actual hypothesis is FALSIFIED.** F2 (projected CVP, the e_m quotient) and
+F3 (F2 + BKZ-20) are indistinguishable from F1 on every curve and every K1: identical
+walls in C3, 53/120 vs 56/120 pooled at 17 bits. The 3-trial deficit is if anything F2
+being handicapped — F1 scans every reduced row for a match, whereas F2 emits a single
+candidate. **The trivial vector n·S_D·e_m identified on 2026-07-29 was a red herring.**
+It is short, but it lies in the d-mod-n periodicity direction, so it never competes for
+the BDD solution. Removing it buys nothing.
+
+**The 07-29 "planted vector is never λ₁" observation survives and is irrelevant.**
+Measured sv/pv in the *centered* lattice is 0.109–0.696 — still below 1 in every cell,
+success and failure alike — yet F1 recovers d up to r_GH ≈ 1.1. Not being λ₁ is not an
+obstruction. Recovery is a coset/BDD condition, exactly as 07-29 said; the error was
+inferring from that that the formulation needed repair.
+
+**C4 — the predictor is r_GH, and it is not a curve-level invariant.** With
+det(L) = (n·S_K1)^m · S_D · S_K2^m, N = 2m+1, and centered E[x²] = X²/12:
+
+    r_GH = E‖e‖ / ( sqrt(N/2πe) · det^(1/N) )
+         = sqrt(2πe/12) · eff^(m/N) · n^(1/N)     [closed form, matches gh_ratio() to 3 dp]
+
+Pooled over three curves × 13 K1 values (39 cells):
+
+| predictor → formulation | best threshold r* | accuracy | baseline | AUC |
+|---|---|---|---|---|
+| r_GH (centered) → F1  | 1.001 | 0.974 | 0.615 | 0.994 |
+| r_GH (projected) → F2 | 0.992 | 0.974 | 0.615 | 0.994 |
+| r_GH (centered) → F0  | 0.873 | 0.923 | 0.744 | 0.972 |
+
+The threshold lands on **r\* = 1.00**, exactly the Gaussian-heuristic feasibility line
+‖e‖ = λ₁. This closes the search that ran 2026-06-21…06-29: δ/n, κ(M), q_cf, max_q_cf,
+max_a and a_corn/n all failed because **no curve-level invariant can work** — r_GH is a
+function of (m, n, K1, K2), the instance parameters, not of the curve.
+
+Asymptotic ceilings (r_GH = 1, m → ∞): **eff\* = 0.703 centered, 0.176 uncentered** —
+exactly the factor 4. The n^(1/(2m+1)) term is the finite-m penalty: 1.56 at m=12 and
+17-bit n, which is why the measured 17-bit wall sits at eff ≈ 0.25–0.35 rather than 0.70.
+For a 256-bit n that factor is 2^(256/(2m+1)), so **m ≳ 128 signatures are needed before
+the asymptotic ceiling is even approached**. The `m ≳ 5` estimate in
+`RESEARCH_GLV_HNP_PHASE2.md` §2 is superseded (§8b added there).
+
+**λ\* is dead.** The 2026-07-29 residual claim ("λ\* shifts the K1 wall by ~3×") is an
+artifact of the uncentered encoding. Under F0 the two 12-bit walls sit at r_GH = 0.79
+(λ\*=0.34) vs 0.52 (λ\*=0.070), a factor 1.5 apart; under F1 at 1.10 vs 0.87, a factor
+1.26, and the pooled AUC of 0.994 leaves essentially no room for a λ\* term. In C5 the six
+17-bit curves span λ\* ∈ [0.027, 0.410]; at eff=0.15 all six have r_GH ∈ [0.744, 0.747]
+and F1 rates of 4/5 or 5/5.
+
+**Production impact — smaller than in the toy lattice, and measured, not assumed.**
+`src/cryptanalysis/hnp_ecdsa.rs` builds the textbook Boneh–Venkatesan lattice with
+`basis[m+1][i] = n·t_i`, making the target coordinate −n·k_i with k_i ∈ [0, 2^k_bits) —
+one-sided, same defect. Fixed by centering each nonce interval on its own midpoint,
+`t_i ← t_i − 2^(k_bits_i − 1) (mod n)`; column m (the −d·2^l encoding) is untouched so the
+recovery path is unchanged. A/B on P-256, plain LLL δ=0.75, 3 seeds/cell, smallest m
+recovering 3/3 (`tests/hnp_centering_threshold.rs`, run twice with the src change
+stashed/unstashed):
+
+| bias bits | uncentered m* | centered m* |
+|---|---|---|
+| 64 | 5  | 5  |
+| 32 | 9  | 9  (m=8: 0/3 → 1/3) |
+| 16 | 18 | **17** |
+
+Here ‖w‖²/(n·2^l)² drops only from (m/3 + 4/3) to (m/12 + 4/3): the d coordinate and the
+constant Kannan anchor n·2^l are each the same order as one nonce coordinate and neither
+is centerable. That is 1.60× in length at m=17 — worth about one signature, which is why
+the 16-bit threshold moves and the 32/64-bit ones (where one signature is a coarser step
+than the gain) do not. `multi_key_hnp` delegates to `hnp_recover_key` and inherits the fix.
+The module's threshold table (previously 6–8 / 12–15 / 25–30 for 64/32/16 bias bits) was
+stale by ~1.5× against *both* formulations and has been replaced with measurements.
+
+### Next step proposal
+**Thread 24 — the anchor, not the d-coordinate.**
+The obvious follow-on (center d as well in the Rust) is not worth doing: at m=17 it moves
+‖w‖²/(n·2^l)² from 2.75 to 2.50, i.e. 1.05× in length, because the residual is dominated
+by the un-centerable Kannan anchor n·2^l. The anchor itself is the larger target: it is
+currently n·2^l while the rest of the target has length ≈ 1.32·n·2^l at m=17, so standard
+Kannan theory (embedding coefficient ≈ ‖e‖) says it is already within ~1.3× of optimal —
+but that is an argument, not a measurement. Concrete sub-task: sweep the anchor over
+{1/4, 1/2, 1, 2, 4}·n·2^l in `hnp_recover_key` and re-run the 16-bit column of
+`lll_threshold_sweep`. Falsifier: if no anchor scaling beats m=17 at 16-bit bias, the BV
+lattice is at its scaling optimum and this line closes for good — which is the useful
+outcome, since it would let the module's "fundamental property of the formulation" claim
+finally be stated with evidence behind it.
+
+**Secondary — report walls in r_GH, not K1 or eff.** Entries from 2026-06-15 onward quote
+walls in K1 or eff, which are not comparable across m or across n. r_GH is; the conversion
+is one line (`gh_ratio()` in `glv_hnp_phase2_centered_cvp.py`). Cheap bookkeeping that
+stops the next run re-deriving today's calibration.
+
+**Note for the next run on cost.** The Rust A/B above took ~45 min of wall clock, almost
+all of it in affine-coordinate EC scalar multiplication during signature generation and
+key verification (~16 scalar mults per trial), not in LLL. Budget accordingly, or add a
+projective-coordinate fast path to the test harness before sweeping large m.
+
+### Commits made
+588c174 autolab 2026-08-06: Thread 23 - Phase-2 lattice was uncentered; 4x bias-strength gain
