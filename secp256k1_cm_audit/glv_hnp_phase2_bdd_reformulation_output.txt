@@ -1,0 +1,139 @@
+==============================================================================
+Thread 23 — does removing the trivial vector n*S_D*e_m rescue Phase 2?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP U0: planted-vector membership self-check (all three arms)
+------------------------------------------------------------------------------
+  ARM A planted vector in L_A               : OK
+  ARM B planted vector in proj(L_A)         : OK
+  ARM C residual u - t in L_h - t           : OK
+  ||pv_A|| / ||pv_B|| / ||pv_C||  (n=2659, m=8) = 2.037n / 1.934n / 1.655n
+
+------------------------------------------------------------------------------
+EXP U1: sv/pv  (falsifier headline).  >1 means the planted vector IS
+        the shortest vector of the reduced lattice.
+------------------------------------------------------------------------------
+curve            lam*  K1   m   A sv/pv   B sv/pv   C sv/pv
+8-bit/199       0.467   2   6     0.526     0.772     0.926
+12-bit/2557     0.340   8   8     0.430     0.471     0.530
+12-bit/2677     0.070   8  10     0.366     0.740     0.801
+
+ARM A reproduces 2026-07-29 T5 (sv/pv in [0.34, 0.61], planted vector
+never shortest).  ARM B/C remove the free n*e_m direction.
+
+------------------------------------------------------------------------------
+EXP U2: K1 wall.  Same grid as 2026-07-29 T4 (K2 = isqrt(n)+1, 5 seeds).
+        T4 baseline for reference:
+          12-bit/2557 (lam*=0.340): 5,5,5,5,5,4,1,0  for K1=2,3,4,6,8,12,16,24
+          12-bit/2677 (lam*=0.070): 5,5,5,2,0,0,0,0
+        m=12: the 2026-07-29 log states K1, K2 and the seed list for the
+        T4 grid but not m.  m=12 is the value that reproduces BOTH logged
+        rows bit-exactly under ARM A (m=6..11 do not); it also matches the
+        m=12 used in that run's T3.  ARM A below is that reproduction.
+------------------------------------------------------------------------------
+
+12-bit/2557  (lam*=0.340, n=2659, m=12, K2=52)
+arm         2     3     4     6     8    12    16    24      eff at each K1
+A base    5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5      wall(5/5) K1=8
+B proj    5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5      wall(5/5) K1=8
+C cvp     5/5   5/5   5/5   5/5   4/5   2/5   0/5   0/5      wall(5/5) K1=6
+eff      0.04  0.06  0.08  0.12  0.16  0.23  0.31  0.47
+m*lg1/e  56.1  49.1  44.1  37.1  32.1  25.1  20.1  13.1      info bound = lg2(n) = 11.4
+
+12-bit/2677  (lam*=0.070, n=2647, m=12, K2=52)
+arm         2     3     4     6     8    12    16    24      eff at each K1
+A base    5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5      wall(5/5) K1=4
+B proj    5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5      wall(5/5) K1=4
+C cvp     5/5   4/5   4/5   1/5   0/5   0/5   0/5   0/5      wall(5/5) K1=2
+eff      0.04  0.06  0.08  0.12  0.16  0.24  0.31  0.47
+m*lg1/e  56.0  49.0  44.0  37.0  32.0  25.0  20.0  13.0      info bound = lg2(n) = 11.4
+
+------------------------------------------------------------------------------
+EXP U3: BKZ(20) at the K1 values straddling the 2677 wall.
+------------------------------------------------------------------------------
+12-bit/2677  m=12
+arm      red    K1=4     K1=6     K1=8     K1=12  
+A base   LLL    5/5      2/5      0/5      0/5    
+A base   BKZ20  5/5      3/5      0/5      0/5    
+B proj   LLL    5/5      2/5      0/5      0/5    
+B proj   BKZ20  5/5      3/5      0/5      0/5    
+C cvp    LLL    4/5      1/5      0/5      0/5    
+C cvp    BKZ20  4/5      1/5      0/5      0/5    
+
+------------------------------------------------------------------------------
+EXP U4: m sweep at K1=8 on 12-bit/2677 (T4b showed ARM A does not
+        recover: m=8/12/16/24/32 -> 0,0,1,0,1 of 5).
+------------------------------------------------------------------------------
+arm      m=8     m=12    m=16    m=24    m=32  
+A base   0/5     0/5     1/5     0/5     1/5   
+B proj   0/5     0/5     1/5     0/5     1/5   
+C cvp    0/5     0/5     0/5     0/5     0/5   
+
+------------------------------------------------------------------------------
+EXP U5: replication on 6 fresh 17-bit j=0 curves, m=10, K1 sweep.
+------------------------------------------------------------------------------
+curve            lam* arm      K1=8      K1=16     K1=32     K1=64     K1=128  
+65539/65287     0.335 A base   5/5      5/5      5/5      0/5      0/5    
+65539/65287     0.335 B proj   5/5      5/5      5/5      0/5      0/5    
+65539/65287     0.335 C cvp    5/5      5/5      5/5      0/5      0/5    
+65557/65053     0.388 A base   5/5      5/5      0/5      0/5      0/5    
+65557/65053     0.388 B proj   5/5      5/5      0/5      0/5      0/5    
+65557/65053     0.388 C cvp    5/5      0/5      0/5      0/5      0/5    
+65617/65119     0.358 A base   5/5      4/5      0/5      0/5      0/5    
+65617/65119     0.358 B proj   5/5      4/5      0/5      0/5      0/5    
+65617/65119     0.358 C cvp    5/5      4/5      0/5      0/5      0/5    
+65629/66109     0.410 A base   5/5      5/5      0/5      0/5      0/5    
+65629/66109     0.410 B proj   5/5      5/5      0/5      0/5      0/5    
+65629/66109     0.410 C cvp    5/5      4/5      0/5      0/5      0/5    
+65647/65719     0.027 A base   5/5      5/5      1/5      0/5      0/5    
+65647/65719     0.027 B proj   5/5      5/5      1/5      0/5      0/5    
+65647/65719     0.027 C cvp    5/5      4/5      1/5      0/5      0/5    
+65677/65899     0.318 A base   5/5      5/5      5/5      3/5      0/5    
+65677/65899     0.318 B proj   5/5      5/5      5/5      3/5      0/5    
+65677/65899     0.318 C cvp    5/5      5/5      5/5      2/5      0/5    
+
+TOTAL                                                                    
+aggregate             A base   30/30     29/30     11/30     3/30     0/30   
+aggregate             B proj   30/30     29/30     11/30     3/30     0/30   
+aggregate             C cvp    30/30     22/30     11/30     2/30     0/30   
+eff (approx)                   0.031    0.063    0.125    0.251    0.502  
+
+------------------------------------------------------------------------------
+EXP U6: decoupling test — is the d column inert for the reduction?
+------------------------------------------------------------------------------
+curve           K1   seed  rows w/ d!=0  energy in d col  profiles equal
+8-bit/199        2     42      8/14             3.24e-02           False
+8-bit/199        2   1234      8/14             3.46e-02           False
+8-bit/199        4     42      8/14             7.14e-02           False
+8-bit/199        4   1234     10/14             4.95e-02           False
+12-bit/2557      8     42     10/18             2.29e-02           False
+12-bit/2557      8   1234     10/18             3.05e-02           False
+12-bit/2557     16     42     10/18             5.84e-02           False
+12-bit/2557     16   1234     10/18             5.51e-02           False
+12-bit/2677      8     42     14/22             1.67e-02           False
+12-bit/2677      8   1234     15/22             1.23e-02           False
+12-bit/2677     16     42     12/22             3.60e-02           False
+12-bit/2677     16   1234     12/22             4.07e-02           False
+
+HYPOTHESIS REFUTED.  The d column is NOT a rank-1 direction that LLL
+isolates: a majority of reduced rows carry a nonzero d coordinate and the
+norm profiles of the two reduced bases never agree.  ARM A and ARM B
+therefore produce genuinely DIFFERENT reduced bases.  The identical
+scores in U2/U5 are not basis identity — tested per-trial below.
+
+------------------------------------------------------------------------------
+EXP U7: per-trial agreement, ARM A vs ARM B (same sigs, same d, same seed)
+------------------------------------------------------------------------------
+  trials compared : 120
+  A and B agree   : 120  (100.0%)
+  A and B disagree: 0
+
+  Perfect agreement on every instance, despite provably different
+  reduced bases (U6).  Removing the trivial vector changes the
+  reduction but never changes the OUTCOME: recovery is decided by the
+  BDD instance itself, not by the presence of n*S_D*e_m.
+
+==============================================================================
+done
+==============================================================================
