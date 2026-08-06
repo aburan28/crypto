@@ -6265,3 +6265,5 @@ heuristic for the eff ≈ 0.3–0.5 wall.
 
 ### Commits made
 4f483ba autolab 2026-08-06: Thread 23 — projection inert, but K1 wall is algorithmic not information-theoretic
+
+_Push target: `claude/zen-pascal-vknj39` (session branch policy overrides the protocol's `push origin main`); not merged to main. Prior runs followed the same pattern — see PRs #29–#35._
