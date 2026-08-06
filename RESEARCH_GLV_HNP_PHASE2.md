@@ -271,3 +271,73 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Thread 23 (2026-08-06): the lattice was never centred
+
+Answers the first open question of §8 ("does Phase 2's lattice achieve
+the information-theoretic bound in practice?") — **almost, once the
+target is centred.**
+
+### 10.1 The bug
+
+The Phase-2 lattice of §2 embeds the target with a Kannan row
+`(A_i·S_K1, 0, …, 0, S_KANNAN)`.  Reducing it, the planted vector is
+
+```
+v = (k1_i·S_K1,  d·S_D,  k2_i·S_K2,  S_KANNAN)
+```
+
+Every unknown block sits in the **positive orthant**: `k1_i ∈ [0,K1)`,
+`d ∈ [0,n)`, `k2_i ∈ [0,K2)`.  After scaling each block spans `[0, W)`
+with `W ≈ n`, so `E[coord²] = W²/3` rather than the `W²/12` a centred
+box would give.  The target is therefore **√(4) = 2× longer than
+necessary, uniformly in m** — a full bit of lattice margin per
+dimension, thrown away for free.
+
+The fix is to translate the target by the box centre
+`c = ((K1−1)S_K1/2, (n−1)S_D/2, (K2−1)S_K2/2)` and add `c[m]` back when
+reading off `d`.  No lattice changes; only the coset representative
+does.  Measured `‖e−c‖/‖e‖` → 0.586 at m=24 (asymptote 0.5),
+`glv_hnp_phase2_cvp_output.txt` EXP C0b.
+
+### 10.2 The residual identity
+
+Dropping the Kannan row *and* column gives `L'` of dimension `2m+1`
+(rows: `n·S_K1·e_i`; `(B_i·S_K1)_i` with `S_D` at col m;
+`−λ·S_K1` at col i with `S_K2` at col m+1+i), target
+`t = (A_i·S_K1)_i`.  Then for `v ∈ L'` the true solution satisfies
+
+```
+t − v  =  (k1_i·S_K1,  d·S_D,  k2_i·S_K2)          [*]
+```
+
+so `d` is coordinate `m` of the residual.  Verified exactly on all three
+historical curves (EXP C0).  `[*]` makes recovery a CVP; the
+2026-07-29 finding that the planted vector is never `λ₁` (because
+`n·S_D·e_m ∈ L` is always shorter) is then irrelevant — `n·e_m` is not
+a competitor in a CVP, it only maps `d ↦ d−n`.
+
+### 10.3 Effect
+
+`eff = K1·K2/n`; counting bound `[IT]`: `K1·K2 < n^((m−1)/m)`.
+20 fresh 17-bit j=0 GLV curves, m=12, 5 seeds, curves recovering 5/5
+(`glv_hnp_phase2_cvp_sweep_output.txt`):
+
+| eff | uncentred (2026-07-29 T3) | centred Kannan | centred Babai-CVP |
+|---|---|---|---|
+| 0.05 | 19/20 | 20/20 | 20/20 |
+| 0.15 | 3/20 | **14/20** | 7/20 |
+| 0.25 | 0/20 | **4/20** | 3/20 |
+| 0.32 | 0/20 | 0/20 (18/20 partial) | 0/20 (18/20 partial) |
+
+`[IT]` for these curves is `eff < n^(−1/12) = 0.397`.
+
+### 10.4 Consequences for §4 (Risks)
+
+- **Risk 2 (λ size) is void.**  The `λ*=0.07` curve that motivated it
+  recovers 5/5 at K1=12 once centred (it failed at K1≥6 uncentred).
+- **Risk 1 (lattice degeneracy)** is not what was being observed; the
+  observed degeneracy was the uncentred coset.
+- The practical wall now sits at `eff ≈ 0.25–0.32` against an `[IT]`
+  bound of `0.397` — a residual gap of only ~0.3 bits/signature, not
+  the ~2 bits implied by the pre-centring numbers.

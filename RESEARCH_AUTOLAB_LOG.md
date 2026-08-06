@@ -6103,3 +6103,187 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23 — reformulate the Phase-2 lattice so the target is λ₁** — the explicit
+continuation proposed by the 2026-07-29 run (log line 6089). Protocol rule (b): that run
+made measurable progress (T5, the structural "planted vector is never λ₁" result) and
+named a cheap next sub-task. Priority threads 1/3/4/6 remain CLOSED, 2 BLOCKED at the
+CHLRS forward map (2026-07-27).
+
+Outcome: the reformulation works, but the decisive effect turned out to be a different
+one that fell out of it — **the Phase-2 target was never centred**. Both the 2026-07-26
+"λ/n threshold" and the 2026-07-29 "genuine K1 wall" are artefacts of that.
+
+### Work done
+- Environment (fresh container): `pip install cysignals fpylll sympy` → fpylll 0.6.4.
+  `apt-get install pari-gp` did **not** succeed this run (no `gp` on PATH); Thread 23 is
+  Python-only so this did not block. Future runs needing PARI must re-check.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` (EXP C0–C3, 4 experiments) and
+  `secp256k1_cm_audit/glv_hnp_phase2_cvp_sweep.py` (T3 re-run on fresh curves).
+  Outputs: `glv_hnp_phase2_cvp_output.txt` (110 lines),
+  `glv_hnp_phase2_cvp_sweep_output.txt` (182 lines).
+  `scales()`, `gen_signatures()` and the lattice rows are verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:227` so the comparison to 2026-07-26/07-29 is exact.
+- Implemented four methods on identical signature sets: Kannan+LLL (the baseline),
+  exact-rational Babai nearest-plane on the de-embedded lattice `L'`, fplll exact CVP on
+  `L'`, and centred variants of each — a 2×2 design {Kannan, CVP} × {uncentred, centred}.
+- `cargo test --test curve_audit` → 5/5 pass (5.86s). ✓
+- Re-ran `glv_hnp_phase2_cvp.py` after refactoring its experiment block under `main()`;
+  output byte-identical (`diff -q` clean), so the committed output matches the committed
+  script.
+
+### Findings
+
+**C0 — the residual identity, verified exactly.** Drop the Kannan row *and* column to get
+`L'` of dim `2m+1`. With target `t = (A_i·S_K1)_i`, the true solution gives
+
+```
+t − v  =  (k1_i·S_K1,  d·S_D,  k2_i·S_K2)          [*]
+```
+
+so `d` is coordinate `m` of the residual. Checked exactly (integer coset membership plus
+`x ≡ −d`, `y_i ≡ −k2_i` mod n) on all three historical curves. `[*]` reframes recovery as
+a CVP, which makes the 2026-07-29 T5 obstruction moot: `n·S_D·e_m ∈ L` is still the
+shortest lattice vector, but in a CVP it is not a competitor — it only maps the residual
+`d ↦ d−n`.
+
+**C0b — the real defect: the target was never centred.** `[*]` shows every unknown block
+lives in the **positive orthant**, spanning `[0, W)` with `W ≈ n` after scaling. So
+`E[coord²] = W²/3` where a centred box gives `W²/12` — the target is **2× longer than
+necessary, uniformly in m**. Translating by the box centre
+`c = ((K1−1)S_K1/2, (n−1)S_D/2, (K2−1)S_K2/2)` costs nothing (same lattice, different
+coset representative) and reads `d` back as `e[m] + c[m] mod n`. Measured:
+
+| curve | m=6 | m=12 | m=24 |
+|---|---|---|---|
+| ‖e−c‖/‖e‖, 12-bit/2677 | 0.929 | 0.629 | 0.586 |
+
+(asymptote 0.5; the m=6 value is high because the single d-coordinate, which centres
+best, is a larger share of the norm at small m).
+
+**C1 — the 2×2 design at m=12, 5 seeds. Centring, not CVP, is what moves the wall.**
+Reference: counting bound `[IT]` `K1·K2 < n^((m−1)/m)` → `K1_max ≈ 26` for both curves.
+
+`12-bit/2677`, λ*=0.070 — the curve declared structurally hopeless on 2026-07-26 and
+given a "genuine K1 wall at K1≈4–6" on 2026-07-29:
+
+| K1 | 2 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|
+| KAN-LLL (baseline) | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| KAN-LLL-C | 5/5 | 5/5 | 5/5 | **5/5** | **5/5** | **5/5** | 3/5 | 0/5 |
+| BAB-LLL-C | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 0/5 |
+| CVP-C (exact) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 |
+
+`12-bit/2557`, λ*=0.340: KAN-LLL wall K1≈12–16 → KAN-LLL-C 5/5 at K1=16, 4/5 at K1=24.
+
+So **the K1 wall moves out by a factor of 3–4 on the λ*=0.07 curve and ~2 on the
+λ*=0.34 curve, and both land on the `[IT]` bound of ~26.** The uncentred-CVP columns
+(BAB-LLL, CVP) are *not* better than uncentred Kannan — de-embedding alone buys nothing.
+The 2026-07-29 falsifier is therefore answered in the affirmative, but for a reason that
+run did not anticipate.
+
+**C1b — why exact CVP is not the best method.** `cvpC/true` (‖t−v_CVP-C‖ / ‖t−v_true‖)
+stays at 1.0000 up to K1=12, then falls: 0.980 (K1=16), 0.918 (24), 0.783 (32),
+0.538 (64). Below 1 means a lattice point strictly closer than the truth exists, i.e. the
+`[IT]` bound has become binding. Past that point exact CVP is *worse* than Babai
+(K1=16: CVP-C 4/5 vs BAB-LLL-C 5/5 on the λ*=0.34 curve at K1=12–24), because Babai's
+suboptimality sometimes lands on the correct plane while exact CVP reliably returns the
+spurious global optimum. The crossover of `cvpC/true` below 1 tracks `[IT]` K1_max ≈ 26
+closely — the counting bound is empirically the right predictor.
+
+**C2 — T4b is reversed: more data now helps monotonically.** λ*=0.07 curve, K1=8, 5 seeds:
+
+| m | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|
+| KAN-LLL (2026-07-29 T4b) | 0/5 | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 |
+| KAN-LLL-C | 1/5 | 4/5 | 4/5 | **5/5** | 5/5 | 5/5 | 5/5 |
+
+**The 2026-07-29 conclusion "the K1 wall is genuine — it is a K1 wall, not a λ wall" is
+hereby corrected: it is neither. It was an uncentred-coset wall.** The noise-floor
+pattern (0,1,0,0,1,0,1) in the T4b row is what an attack failing for a reason unrelated
+to sample size looks like; the centred row is monotone as an information-limited attack
+should be.
+
+**C3 — locating the ceiling (λ*=0.07 curve, larger m).** Poly-time BAB-LLL-C vs exact
+CVP-C vs `[IT]`:
+
+| m | `[IT]` K1_max | BAB-LLL-C wall | CVP-C wall |
+|---|---|---|---|
+| 12 | 26.4 | 16–24 | 16–24 |
+| 16 | 31.1 | 16–24 (3/5 at both) | 24–32 |
+| 24 | 36.7 | 24–32 | 24–32 |
+
+Exact CVP buys at most one grid step over poly-time Babai. **The residual gap between the
+practical attack and the counting bound is ≤ 1 grid step (≈0.3–0.5 bits/signature).**
+
+**C4 — generalisation: 20 fresh 17-bit j=0 GLV curves, λ* spread over (0,0.5) in 10 bins,
+m=12, 5 seeds** (re-run of the 2026-07-29 T3 sweep; `[IT]` bound `eff < n^(−1/12)=0.397`).
+Curves recovering 5/5:
+
+| eff | KAN-LLL (= T3) | KAN-LLL-C | BAB-LLL-C |
+|---|---|---|---|
+| 0.05 | 19/20 | 20/20 | 20/20 |
+| 0.15 | 3/20 | **14/20** | 7/20 |
+| 0.25 | 0/20 | **4/20** | 3/20 |
+| 0.32 | 0/20 | 0/20 | 0/20 |
+| 0.38 | 0/20 | 0/20 | 0/20 |
+| 0.45 (over `[IT]`) | 0/20 | 0/20 | 0/20 |
+
+The "≥1 seed of 5" row is sharper still — uncentred 4/20 curves at eff=0.25 and 2/20 at
+0.32, versus centred **20/20** and **18/20**. So centring is not a two-curve artefact:
+it changes the outcome on essentially every curve in the band, and the centred wall
+(eff ≈ 0.25–0.32) sits just under the counting bound 0.397 while the uncentred wall
+(eff ≈ 0.05–0.15) sits a factor ~3 below it.
+
+**Summary of corrections to prior log entries.**
+1. 2026-07-26 "λ/n threshold for attack viability" — already falsified 2026-07-29; the
+   underlying failure is now explained (uncentred coset), not merely refuted.
+2. 2026-07-29 T4/T4b "the K1 wall is genuine" — **corrected**. The wall moves out 3–4×
+   under centring and more data then helps monotonically.
+3. 2026-07-29 T5 "the planted vector is never λ₁, so recovery is a BDD/coset condition
+   and no curve-level invariant can predict it" — the *diagnosis* stands and is what led
+   here, but its pessimistic reading ("Phase 2 is at its ceiling") does not: the coset
+   was simply the wrong one.
+4. `RESEARCH_GLV_HNP_PHASE2.md` §4 Risk 2 ("λ size") is void; §8's first open question
+   (does Phase 2 reach the information-theoretic bound?) is answered: within ~0.3–0.5
+   bits/signature, yes. Recorded as new §10 of that file.
+
+### Next step proposal
+**Thread 24 — carry centring to the 256-bit setting.** Everything above is ≤17-bit toy
+scale. The concrete sub-task: run the centred lattice on the 20-bit curve already found
+in `glv_hnp_phase2_20bit.py:168` (p=524347, n=523969, λ*=0.34) across the K1 grid, then
+on secp256k1 itself (λ* ≈ 0.44) with m ≈ 40–80. Falsifier: if the centred wall at 20 bits
+still sits at `eff ≈ 0.25–0.32` relative to `[IT] = n^(−1/m)`, the effect is scale-free
+and the secp256k1 estimate in `RESEARCH_GLV_HNP.md` should be revised downward by the
+same factor ~3 in `K1·K2`; if the centred wall regresses toward the uncentred one as `n`
+grows, the gain is a small-`n` artefact. Cheap: the 20-bit run is the same grid.
+
+**Thread 25 — the same defect is present in the Rust Phase-1.5 lattice. Audited this run;
+confirmed, not yet fixed.** `src/cryptanalysis/hnp_ecdsa.rs:213-233` builds the
+Boneh–Venkatesan basis with target row `(n·t_0, …, n·t_{m-1}, 0, n·2^l)` and (per its own
+module doc, `hnp_ecdsa.rs:38-41`) planted vector
+
+```
+w = (−n·k_0, …, −n·k_{m-1}, −d·2^l, −n·2^l)   with k_i ∈ [0, 2^l)
+```
+
+Every k-block coordinate is one-sided in `[−n·2^l, 0]` — the identical uncentred-coset
+defect. Textbook Nguyen–Shparlinski centres this by using `t_i + 2^{l−1}` in the target
+row so the residual is `k_i − 2^{l−1} ∈ [−2^{l−1}, 2^{l−1})`. Grep for `center|centre|
+shift|>> 1` over `hnp_ecdsa.rs` returns nothing: the shift is absent.
+
+Concrete sub-task: add the `2^{l−1}` shift to the target row and the matching correction
+on read-back, then re-run `tests/curve_audit.rs::hnp_recovers_p256_key_via_lll_phase15`
+and `tests/lll_degeneracy_probe.rs::probe_lll_sweep_by_bit_length`. Falsifier: if the
+minimum `m` at which P-256 recovers drops (predicted: by ~1 bit of margin per coordinate,
+so a modest drop in `m` at fixed `k_bits`, or ~1 more leaked bit tolerated at fixed `m`),
+the 256/384/521-bit thresholds in `RESEARCH_LLL_GS_ANALYSIS.md` §10.4–10.5 are all
+pessimistic and should be re-measured. Given that Thread 1's entire history is marginal
+LLL behaviour at 521 bits, this is the highest-value cheap fix available — but it edits
+attack code that five prior log entries' numbers depend on, so it wants its own run.
+
+### Commits made
+[recorded below after commit]
