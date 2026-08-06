@@ -6548,4 +6548,4 @@ family of edits cannot move the wall.
 
 ### Commits made
 
-(hash recorded in the following commit)
+e8cff4a autolab 2026-08-06: Thread 23 — BDD reformulation fails; wall is not information-theoretic (also: restored the 2026-07-29 run #2 ν̂ entry dropped by the PR #33 merge)
