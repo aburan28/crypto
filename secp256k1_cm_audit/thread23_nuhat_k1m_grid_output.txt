@@ -1,0 +1,47 @@
+==============================================================================
+Thread 23 (secondary): nu_hat C2 ceiling across the K1 x m grid
+==============================================================================
+K1 in [36, 72, 144], m in [10, 12, 14], 4 seeds, 40 shared 20-bit j=0 CM curves
+C2 = LLL recovers d on all 4 seeds (Exp S convention)
+nu_hat via the Thread 23 CF closed form; reference ceiling 0.645 from 20d (K1=72, m=12)
+
+harvested 40 curves in 0.0s
+  cell K1=36   m=10  done (17/40 C2)  t=0s
+  cell K1=36   m=12  done (24/40 C2)  t=0s
+  cell K1=36   m=14  done (25/40 C2)  t=1s
+  cell K1=72   m=10  done (4/40 C2)  t=1s
+  cell K1=72   m=12  done (8/40 C2)  t=1s
+  cell K1=72   m=14  done (12/40 C2)  t=2s
+  cell K1=144  m=10  done (0/40 C2)  t=2s
+  cell K1=144  m=12  done (0/40 C2)  t=2s
+  cell K1=144  m=14  done (5/40 C2)  t=3s
+
+1440 LLL trials in 2.6s
+
+   K1    m   C2 rate  AUC(nu_hat)  C2 ceiling  C1 min nu  q(C2rate)  mean a_at_t
+------------------------------------------------------------------------------
+   36   10   17/40          0.808       1.026      0.477      0.601         9.70
+   36   12   24/40          0.828       1.072      0.591      0.775         9.70
+   36   14   25/40          0.835       1.072      0.600      0.787         9.70
+   72   10    4/40          0.993       0.428      0.408      0.408        10.20
+   72   12    8/40          0.863       0.645      0.408      0.545        10.20
+   72   14   12/40          0.869       0.698      0.408      0.562        10.20
+  144   10    0/40            nan         nan      0.467        nan        10.05
+  144   12    0/40            nan         nan      0.467        nan        10.05
+  144   14    5/40          0.920       0.647      0.468      0.503        10.05
+------------------------------------------------------------------------------
+C2 ceiling across 7 non-degenerate cells: min=0.428 max=1.072 mean=0.798
+20d reference (K1=72, m=12, 100 curves, 6 seeds): 0.645
+cells with ceiling within +-0.15 of 0.645: 3/7
+
+SAMPLE CAVEAT: harvest() walks primes upward from 2^19 and takes the
+first N, exactly as glv_hnp_nuhat_vs_c1c2.harvest does. With N=40 vs
+that script's N=100, this sample is a PREFIX SUBSET of the 20d sample,
+not an independent draw. The K1 x m comparison is still valid (all
+cells share one curve set, which is the point), but agreement with the
+20d numbers at K1=72/m=12 is a consistency check, not a replication.
+
+Per-K1 a_at_t (scale-dependent, m-independent by construction):
+  K1=36   median a_at_t=   5 range [1, 83]
+  K1=72   median a_at_t=   5 range [1, 83]
+  K1=144  median a_at_t=   5 range [1, 83]

@@ -1,0 +1,101 @@
+==========================================================================
+E1  CF closed form  vs  exact Lagrange-Gauss  vs  brute force
+==========================================================================
+  (a) brute force, n < 20000 : 400/400 exact match
+
+  (b) exact integer Lagrange-Gauss
+   bits    kind    eff  trials  cf==gauss  float ok  max float err
+     16     glv   0.05      12     12/12      12/12      0.000e+00
+     16     glv   0.25      12     12/12      12/12      0.000e+00
+     16 generic   0.05      12     12/12      12/12      0.000e+00
+     16 generic   0.25      12     12/12      12/12      0.000e+00
+     32     glv   0.05      12     12/12      12/12      0.000e+00
+     32     glv   0.25      12     12/12      12/12      0.000e+00
+     32 generic   0.05      12     12/12      12/12      0.000e+00
+     32 generic   0.25      12     12/12      12/12      0.000e+00
+     64     glv   0.05      12     12/12      12/12      0.000e+00
+     64     glv   0.25      12     12/12      12/12      0.000e+00
+     64 generic   0.05      12     12/12      12/12      0.000e+00
+     64 generic   0.25      12     12/12      12/12      0.000e+00
+    128     glv   0.05      12     12/12      12/12      0.000e+00
+    128     glv   0.25      12     12/12      12/12      0.000e+00
+    128 generic   0.05      12     12/12      12/12      0.000e+00
+    128 generic   0.25      12     12/12      12/12      0.000e+00
+    256     glv   0.05      12     12/12      12/12      0.000e+00
+    256     glv   0.25      12     12/12      12/12      0.000e+00
+    256 generic   0.05      12     12/12      12/12      0.000e+00
+    256 generic   0.25      12     12/12      12/12      0.000e+00
+
+  TOTAL cf == exact-gauss : 240/240
+  TOTAL shipped-float == exact-gauss (rel < 1e-9) : 240/240
+
+==========================================================================
+E2/E3/E4  the winning convergent, the scale t, and a_at_t
+==========================================================================
+
+E2  does the winning convergent straddle t = sqrt(n*S_K1/S_K2)?
+   bits    eff     N  win==j_str  |win-j_str|<=1
+     24   0.05    60      55/60           60/60 
+     24    0.1    60      55/60           60/60 
+     24   0.25    60      55/60           60/60 
+     32   0.05    60      51/60           60/60 
+     32    0.1    60      54/60           60/60 
+     32   0.25    60      53/60           60/60 
+     64   0.05    60      54/60           60/60 
+     64    0.1    60      57/60           60/60 
+     64   0.25    60      56/60           60/60 
+    128   0.05    60      54/60           60/60 
+    128    0.1    60      58/60           60/60 
+    128   0.25    60      55/60           60/60 
+    256   0.05    60      54/60           60/60 
+    256    0.1    60      55/60           60/60 
+    256   0.25    60      48/60           60/60 
+  ALL     900  win==j_str 814/900 (90.4%)   within 1: 900/900 (100.0%)
+
+E3  approximation  nu_hat^2 ~= min_j[(t/q_(j+1))^2 + (q_j/t)^2]
+     FALSIFIER (2026-07-29): corr(predicted, exact) < 0.9 kills the story.
+  N=900  pearson=+0.9779  spearman=+0.9742
+  |approx-exact|/exact : median=0.0261 p90=0.1573 max=0.3396
+
+E4  a_at_t (scale-dependent) vs max_a (scale-free, falsified in June)
+  spearman(a_at_t, nu_hat) = -0.8094
+  spearman(max_a,  nu_hat) = -0.1662   <- scale-free
+
+  nu_hat by a_at_t bucket (all 900 rows):
+      a_at_t     N  mean nu_hat  max nu_hat  sqrt(2/a)
+           1   117       0.9641      1.0709     1.4142
+           2   118       0.8808      1.0189     1.0000
+           3   109       0.8106      1.0205     0.8165
+         4-5   155       0.7437      1.0022     0.7071
+         6-9   176       0.6375      0.9817     0.5774
+       10-19   119       0.5217      0.9818     0.4472
+        >=20   106       0.4330      0.8742     0.3162
+
+  Predicted C2 admission rule.  The 2026-07-29 C2 ceiling nu_hat <= 0.645
+  becomes a_at_t >= 2/0.645^2 = 4.81, i.e. a_at_t >= 5.
+  rows with nu_hat <= 0.645 : 362/900; of those, a_at_t >= 5 in 349
+  rows with a_at_t >= 5     : 461/900; of those, nu_hat <= 0.645 in 349
+  heuristic bound nu_hat^2 >= 2/(a_at_t+1) violated in 143/900 rows
+
+==========================================================================
+E5  secp256k1 -- reproduce the published nu_hat values from the CF
+==========================================================================
+  lam/n has 141 convergents; max partial quotient = 312 (scale-free, uninformative)
+
+     eff  t/sqrt(n)  j_str  a_at_t  nu_hat(CF)  nu_hat(Gauss)  published
+    0.05      4.472     71       5      0.8709         0.8709     0.8709
+     0.1      3.162     71       5      0.6624         0.6624     0.6624
+    0.25      2.000     71       5      0.5852         0.5852     0.5852
+     0.5      1.414     71       5      0.6851         0.6851     0.6851
+
+  The four values are reproduced exactly by one CF expansion, with no
+  lattice reduction: secp256k1's nu_hat is a statement about the partial
+  quotients of lam/n at denominators near sqrt(n/eff), nothing more.
+
+  CAVEAT (carried from 2026-07-29, unchanged): this whole thread is
+  conditional on a NON-STANDARD nonce generator k = k1 + lam*k2 with k1
+  bounded. It is not an attack on secp256k1 as deployed.
+
+==========================================================================
+E1 exactness verdict: PASS
+==========================================================================
