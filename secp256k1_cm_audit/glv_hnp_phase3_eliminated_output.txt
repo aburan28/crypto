@@ -1,0 +1,196 @@
+==============================================================================
+Thread 23 — Phase-3 lattice with d eliminated  (GLV-HNP)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: correctness of the Phase-3 construction
+------------------------------------------------------------------------------
+Checks, for each historical curve: (i) the planted vector w really is an
+integer combination of the Phase-3 basis rows; (ii) recover_d_p3 inverts
+w back to d; (iii) ||w_p3||^2 == ||v_p2||^2 - d^2 as predicted.
+
+curve                m  dim2  dim3  w in L  d ok  norm id  ||w3||/||v2||
+8-bit/199            6    14    13    True  True     True         0.9999
+12-bit/2557          8    18    17    True  True     True         0.9999
+12-bit/2677 FAIL    10    22    21    True  True     True         0.9999
+
+------------------------------------------------------------------------------
+EXP E1b: PROJECTION THEOREM — is Phase 3 just Phase 2 projected along e_d?
+------------------------------------------------------------------------------
+The d-column of the Phase-2 lattice is a coordinate axis, so orthogonal
+projection along e_d is literally deletion of column m.  Claim:
+    pi_{e_d^perp}(L2)  ==  L3   (as lattices, after aligning column order)
+Checked by integer HNF of a full-rank row basis.  If true, 'eliminating d'
+is not a new lattice at all and the T5 vector n*e_d spans ker(pi).
+
+curve              rank pi(L2)  2m+1  det3==det2/n  HNF equal
+8-bit/199                   13    13          True       True
+12-bit/2557                 17    17          True       True
+12-bit/2677 FAIL            21    21          True       True
+
+------------------------------------------------------------------------------
+EXP E2: is the planted vector lambda_1 now?   (sv/pv, Phase 2 vs Phase 3)
+------------------------------------------------------------------------------
+sv = ||first row after LLL||, pv = ||planted vector||.
+mu = Gauss-reduced shortest vector of the lambda-block (Thread 20's mu),
+which the header predicts SURVIVES elimination and stays below pv.
+
+curve               K1  sv/pv (P2)  sv/pv (P3)   mu/pv3  |sv3| is mu  kan=0 (P3)
+8-bit/199            2      0.6035      0.8428   0.8428         True        True
+12-bit/2557          8      0.5170      0.5324   0.5324         True        True
+12-bit/2677 FAIL     8      0.4221      0.8127   0.8127         True        True
+
+------------------------------------------------------------------------------
+EXP E3: THE FALSIFIER — T4 K1-grid, Phase 2 vs Phase 3
+------------------------------------------------------------------------------
+2026-07-29 T4 baseline (Phase 2, 5 seeds):
+  12-bit/2557 (lam*=0.340): K1=2,3,4,6,8 -> 5/5;  12 -> 4/5;  16 -> 1/5;  24 -> 0/5
+  12-bit/2677 (lam*=0.070): K1=2,3,4 -> 5/5;  6 -> 2/5;  8,12,16,24 -> 0/5
+Falsifier: if the Phase-3 wall on 2677 moves outward past K1 ~ 4-6, the
+reformulation is a real improvement; if it stays, the wall is
+information-theoretic and Phase 2 is at its ceiling.
+
+12-bit/2557   (lam*=0.3400, n=2659, m=12)
+    K1     2     3     4     6     8    12    16    24
+    P2   5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5
+    P3   5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5
+
+12-bit/2677 FAIL   (lam*=0.0699, n=2647, m=12)
+    K1     2     3     4     6     8    12    16    24
+    P2   5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+    P3   5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP E4: 17-bit sweep at the eff values where Phase 2 dies
+------------------------------------------------------------------------------
+2026-07-29 T3 baseline: at eff = K1*K2/n = 0.05 Phase 2 recovers 19/20
+curves; at 0.15 only 3/20; at 0.25 none.  Does Phase 3 do better?
+
+built 10 fresh 17-bit j=0 GLV curves (lam* = 0.027, 0.054, 0.137, 0.156, 0.211, 0.298, 0.335, 0.388, 0.410, 0.482)
+
+eff = 0.05   full-recovery curves:  P2 9/10   P3 9/10
+  curve               lam*    K1     P2     P3
+  p=65647           0.0273    12    5/5    5/5
+  p=66463           0.0539    12    5/5    5/5
+  p=65707           0.1372    12    5/5    5/5
+  p=66271           0.1559    12    4/5    4/5
+  p=65707           0.2115    12    5/5    5/5
+  p=65929           0.2976    12    5/5    5/5
+  p=65539           0.3346    12    5/5    5/5
+  p=65557           0.3877    12    5/5    5/5
+  p=65629           0.4096    12    5/5    5/5
+  p=66853           0.4816    12    5/5    5/5
+
+eff = 0.15   full-recovery curves:  P2 2/10   P3 2/10
+  curve               lam*    K1     P2     P3
+  p=65647           0.0273    38    1/5    1/5
+  p=66463           0.0539    38    0/5    0/5
+  p=65707           0.1372    38    0/5    0/5
+  p=66271           0.1559    38    0/5    0/5
+  p=65707           0.2115    38    0/5    0/5
+  p=65929           0.2976    38    0/5    0/5
+  p=65539           0.3346    38    5/5    5/5
+  p=65557           0.3877    38    0/5    0/5
+  p=65629           0.4096    38    0/5    0/5
+  p=66853           0.4816    38    5/5    5/5
+
+eff = 0.25   full-recovery curves:  P2 0/10   P3 0/10
+  curve               lam*    K1     P2     P3
+  p=65647           0.0273    63    0/5    0/5
+  p=66463           0.0539    64    0/5    0/5
+  p=65707           0.1372    63    0/5    0/5
+  p=66271           0.1559    64    0/5    0/5
+  p=65707           0.2115    64    0/5    0/5
+  p=65929           0.2976    64    0/5    0/5
+  p=65539           0.3346    63    1/5    1/5
+  p=65557           0.3877    63    0/5    0/5
+  p=65629           0.4096    64    0/5    0/5
+  p=66853           0.4816    64    3/5    3/5
+
+------------------------------------------------------------------------------
+EXP E5: what kind of wall is it?  info-theoretic vs unique-SVP gap
+------------------------------------------------------------------------------
+The 2026-07-29 falsifier offered a dichotomy: either the reformulation
+moves the wall, or 'the wall is information-theoretic'.  E3 shows the wall
+does not move -- but the second horn is testable too, and is WRONG.
+  m_thresh = ceil(log n / log(1/eff))  is the information-theoretic bound
+             (unknown entropy < constraint entropy).
+  ||w||/GH  is the unique-SVP gap; recovery needs it below ~1.
+Planted norms use E[x^2] = n^2/3 per bounded coordinate.
+
+12-bit/2677:  n=2647, K2=52, m=10  (m_thresh << m throughout)
+    K1     eff m_thresh  ||w3||/GH3  ||v2||/GH2  gap3/gap2  observed
+     2  0.0393        3      0.7787      0.8194     0.9503       5/5
+     3  0.0589        3      0.9446      0.9853     0.9587       5/5
+     4  0.0786        4      1.0833      1.1230     0.9647       5/5
+     6  0.1179        4      1.3140      1.3502     0.9732       0/5
+     8  0.1572        5      1.5070      1.5389     0.9793       0/5
+    12  0.2357        6      1.8280      1.8504     0.9879       0/5
+    16  0.3143        7      2.0964      2.1089     0.9941       0/5
+    24  0.4715       11      2.5429      2.5356     1.0028       0/5
+
+Reading: at K1=6 and K1=8 the information-theoretic bound is m_thresh = 4 and 5
+while m = 10 -- twice the data needed -- yet recovery is 0/5.  So the wall is
+NOT information-theoretic.  The unique-SVP gap crosses 1.0 between K1=3 (0.94)
+and K1=4 (1.08), bracketing the observed 5/5 -> 0/5 transition at K1=4 -> 6.
+Phase 3 improves the gap by only 3.5-5% (gap3/gap2 in [0.950, 1.003]), because
+it trades one dimension for a factor n in the determinant and these nearly
+cancel:  gap3/gap2 = (n*eff^m)^(-1/((2m+1)(2m+2))) -> ~0.97 at m=10.
+A 3-5% gap gain cannot move a K1 grid whose steps are 33-50% apart, which is
+exactly why E3/E4 are identical in 46 of 46 cells.
+
+------------------------------------------------------------------------------
+EXP E6: is the eff wall structural, or just a shortage of signatures?
+------------------------------------------------------------------------------
+E5 says the wall tracks the uniqueSVP gap, and the gap SHRINKS with m:
+    gap(m) ~ (n * eff^m)^(1/(2m+1)) * C   ->   sqrt(eff)*C  as m -> inf.
+So for any fixed eff there should be an m past which recovery works.
+2026-07-26 called the eff=0.157 failure 'structural'; 2026-07-29 T4b
+probed only to m=32 -- but on n=2647, where K1*K2 = 416 distinct k values
+means m=32 is already deep into birthday collisions AND the model puts the
+crossing near m~78.  Re-run on a 20-bit curve where neither problem bites.
+
+20-bit curve: p=524341, n=525583, lam*=0.1601, K2=725
+
+  eff_target=0.1   K1=72   eff=0.0993   distinct k values = 52200
+       m  dim2     gap    P2    P3
+       8    18  1.8466   0/3   0/3
+      12    26  1.3861   3/3   3/3
+      16    34  1.1955   3/3   3/3
+      20    42  1.0922   3/3   3/3
+      24    50  1.0277   3/3   3/3
+
+  eff_target=0.157   K1=114   eff=0.1573   distinct k values = 82650
+       m  dim2     gap    P2    P3
+      12    26  1.7282   0/3   0/3
+      20    42  1.3667   0/3   0/3
+      32    66  1.1933   1/3   1/3
+      48    98  1.1054   2/3   2/3
+      64   130  1.0636   0/3   0/3
+      80   162  1.0392   2/3   2/3
+
+  eff_target=0.25   K1=181   eff=0.2497   distinct k values = 131225
+       m  dim2     gap    P2    P3
+      12    26  2.1576   0/3   0/3
+      20    42  1.7124   0/3   0/3
+      32    66  1.4983   0/3   0/3
+      48    98  1.3896   0/3   0/3
+      64   130  1.3378   0/3   0/3
+      80   162  1.3075   0/3   0/3
+
+Reading:
+  eff=0.10   0/3 at m=8, then 3/3 from m=12 on.
+  eff=0.157  0/3 at m=12 and m=20, then 1/3 at m=32 and 2/3 at m=48 and m=80.
+             The 'structural' eff=0.157 wall is therefore NOT structural: it is
+             a signature-count wall.  (m=64 dipping to 0/3 is 3-seed noise; this
+             grid is too thin to place the crossing precisely.)
+  eff=0.25   still 0/3 at m=80 (dim 162), gap 1.31 and falling only slowly.
+
+Caveat, stated because it limits the model: the gap is a good predictor of the
+TREND at fixed eff, but is NOT a calibrated cross-eff threshold.  eff=0.10 at
+m=12 has gap 1.386 and recovers 3/3, while eff=0.157 at m=20 has gap 1.367 and
+recovers 0/3.  Same gap, opposite outcome -- so the constant C in the model is
+absorbing something eff-dependent that this run did not isolate.
+==============================================================================
+done
+==============================================================================

@@ -6103,3 +6103,170 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector is
+lambda_1 — the continuation proposed at the end of the 2026-07-29 entry
+(log line ~6089). All six original priority threads remain CLOSED / BLOCKED /
+DEAD-END; Thread 20 made measurable progress on 2026-07-29, so its own
+next-step is the correct pick under protocol rule (b). Last touch was 8 days
+ago, so the 7-day staleness rule does not divert.
+
+Outcome: the reformulation is **provably a no-op**, and the falsifier's own
+dichotomy turns out to be a false dichotomy — both horns are wrong. Details
+below; two prior claims are corrected.
+
+### Work done
+- Environment (fresh container): `pari-gp` 2.15.4, `fpylll` 0.6.4, `cysignals`,
+  `sympy`. Same note as 2026-07-29 applies — `pip install fpylll` alone is not
+  enough, `cysignals` is a separate runtime import.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase3_eliminated.py` (~470 lines, 6
+  experiments E1/E1b/E2/E3/E4/E5/E6). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase3_eliminated_output.txt`.
+  The Phase-2 baseline lattice and `gen_signatures` are copied verbatim from
+  `glv_hnp_phase2_20bit.py:262` so the comparison is exact.
+- Built the **Phase-3 lattice**: pivot on signature 0 to eliminate d.
+  With C_j = B_j/B_0, D_j = A_j - C_j*A_0 (mod n), the relation becomes
+      k1_j = D_j + C_j*k1_0 + C_j*lam*k2_0 - lam*k2_j + n*q_j     (j = 1..m-1)
+  so the free unknowns are (k1_0, k2_0, k2_1..k2_{m-1}) and d never appears.
+  dim = 2m+1 (one less than Phase 2); det_3 = det_2 / n.
+- `cargo test --test curve_audit` → 5/5 pass (5.41s). ✓
+- E3 initially disagreed with the logged T4 baseline on marginal cells. Cause
+  found: T4 (`glv_hnp_phase2_lambda_threshold.py:604`) swept K1 at a **fixed
+  m=12**, not at the per-curve m of the HIST table. Re-run at m=12 reproduces
+  the 2026-07-29 P2 column exactly in all 16 cells. Recorded here so future
+  runs do not re-derive it.
+
+### Findings
+
+**E1b — PROJECTION THEOREM: Phase 3 is not a new lattice.**
+The d-column of the Phase-2 lattice is a coordinate axis, so orthogonal
+projection along e_d is literally deletion of column m. Verified by integer HNF
+of a full-rank row basis (columns re-ordered to align the two conventions):
+
+| curve | rank pi(L2) | 2m+1 | det_3 == det_2/n | HNF(pi L2) == HNF(L3) |
+|---|---|---|---|---|
+| 8-bit/199 | 13 | 13 | True | **True** |
+| 12-bit/2557 | 17 | 17 | True | **True** |
+| 12-bit/2677 | 21 | 21 | True | **True** |
+
+So `pi_{e_d^perp}(L2) = L3` **as lattices**. Eliminating d by pivoting IS the
+projection along e_d, and E1's norm identity ||w_3||^2 = ||v_2||^2 - d^2 is
+just Pythagoras for that projection. The T5 vector n*e_d spans ker(pi): it was
+never an obstruction, only the lattice's intersection with the d-axis.
+**Consequence: the 2026-07-29 T5 observation ("the planted vector is never
+lambda_1, the shortest vector is always n*e_m") is a correct observation of an
+artifact, not of a mechanism.**
+
+**E2 — the pre-registered prediction held.** The script header predicted, before
+running, that elimination would NOT make the planted vector lambda_1, because
+the lambda-block vectors survive: any (x_i, y_i) with x_i + lam*y_i = 0 (mod n)
+zeroes every k_full,i and so satisfies the eliminated relation homogeneously.
+Confirmed — the Phase-3 shortest vector IS Thread 20's mu, exactly, on all
+three curves, with Kannan coordinate 0:
+
+| curve | sv/pv (P2) | sv/pv (P3) | mu/pv3 | sv3 == mu | kan==0 |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.6035 | 0.8428 | 0.8428 | True | True |
+| 12-bit/2557 | 0.5170 | 0.5324 | 0.5324 | True | True |
+| 12-bit/2677 | 0.4221 | 0.8127 | 0.8127 | True | True |
+
+Sub-planted vectors are unavoidable in **any** lattice built from this relation,
+so "make the planted vector lambda_1" is not an achievable goal. Recorded as
+dead so no future run re-tries it.
+
+**E3/E4 — the falsifier fires negative, in 46 of 46 cells.**
+P2 and P3 agree in *every* cell — not approximately, identically.
+
+E3, K1-grid at m=12, 5 seeds (P2 column reproduces the 2026-07-29 T4 baseline exactly):
+
+| curve | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 2557 P2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 P3 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2677 P2 | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 P3 | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+E4, 10 fresh 17-bit curves (lam* spread 0.027–0.482), m=12, 5 seeds:
+full-recovery counts P2/P3 = 9/9 at eff=0.05, 2/2 at eff=0.15, 0/0 at eff=0.25,
+and identical per-curve cells throughout.
+
+**E5 — the falsifier's dichotomy is a FALSE dichotomy.**
+2026-07-29 offered: either the reformulation moves the wall, or "the wall is
+information-theoretic". The wall did not move — but it is also **not**
+information-theoretic. On 12-bit/2677, n=2647, K2=52, m=10:
+
+| K1 | eff | m_thresh | \|\|w3\|\|/GH3 | \|\|v2\|\|/GH2 | gap3/gap2 | observed |
+|---|---|---|---|---|---|---|
+| 2 | 0.0393 | 3 | 0.7787 | 0.8194 | 0.9503 | 5/5 |
+| 3 | 0.0589 | 3 | 0.9446 | 0.9853 | 0.9587 | 5/5 |
+| 4 | 0.0786 | 4 | 1.0833 | 1.1230 | 0.9647 | 5/5 |
+| 6 | 0.1179 | 4 | 1.3140 | 1.3502 | 0.9732 | 0/5 |
+| 8 | 0.1572 | 5 | 1.5070 | 1.5389 | 0.9793 | 0/5 |
+| 24 | 0.4715 | 11 | 2.5429 | 2.5356 | 1.0028 | 0/5 |
+
+At K1=6 and K1=8 the information-theoretic bound is m_thresh = 4 and 5 while
+m = 10 — twice the data needed — yet recovery is 0/5. The wall is a
+**unique-SVP gap wall**, not an entropy wall.
+
+And Phase 3 buys only 3.5–5%: it trades one dimension for a factor n in the
+determinant and these nearly cancel,
+    gap3/gap2 = (n*eff^m)^(-1/((2m+1)(2m+2))) -> ~0.97 at m=10.
+A 3–5% gap gain cannot move a grid whose K1 steps are 33–50% apart. That is the
+quantitative reason E3/E4 are identical in 46 of 46 cells.
+
+**E6 — NEW POSITIVE RESULT: the eff wall is a signature-count wall, not
+structural.** Since gap(m) ~ (n*eff^m)^(1/(2m+1)) * C decreases monotonically in
+m toward sqrt(eff)*C, every fixed eff should have an m past which recovery
+works. Tested on a fresh 20-bit curve (p=524341, n=525583, lam*=0.1601, K2=725)
+chosen so that K1*K2 >> m^2/2 — on n=2647 there are only 416 distinct k values,
+so T4b's m=32 was already deep into birthday collisions in k:
+
+| eff | m=8 | 12 | 20 | 32 | 48 | 64 | 80 |
+|---|---|---|---|---|---|---|---|
+| 0.0993 | 0/3 | 3/3 | 3/3 (m=16,20,24 all 3/3) | — | — | — | — |
+| 0.1573 | — | 0/3 | 0/3 | 1/3 | 2/3 | 0/3 | 2/3 |
+| 0.2497 | — | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 |
+
+**This corrects the 2026-07-26 claim that the eff=0.157 failure is
+"structural".** It is not: 0/3 at m=12 and m=20 becomes 1/3 at m=32 and 2/3 at
+m=48 and m=80. 2026-07-29 T4b probed only to m=32, and on a curve where the gap
+model puts the crossing near m~78 — it stopped short. eff=0.25 is still dead at
+m=80 (dim 162, gap 1.31, falling slowly).
+
+**Limitation, stated because it bounds the above.** The gap is a good predictor
+of the TREND at fixed eff but is NOT a calibrated cross-eff threshold:
+eff=0.10 at m=12 has gap 1.386 and recovers 3/3, while eff=0.157 at m=20 has
+gap 1.367 and recovers 0/3 — same gap, opposite outcome. The constant C is
+absorbing something eff-dependent this run did not isolate. Also, E6 used only
+3 seeds; the m=64 dip to 0/3 at eff=0.157 is noise, and the grid is too thin to
+place any crossing precisely.
+
+### Next step proposal
+**Thread 24 — calibrate the crossing, then decide if Phase 2/3 has any ceiling
+at all.** Two concrete sub-tasks, in order:
+
+1. *(cheap, ~10 min)* Re-run E6 at eff=0.157 with 10 seeds on m ∈ {32, 40, 48,
+   56, 64, 72, 80} to replace the 3-seed noise with a real success curve, and
+   locate m_cross(eff=0.157) to within ~8. Falsifier: if success rises
+   monotonically to >=8/10 by m=80, the "wall" is fully dissolved and the only
+   remaining question is the m(eff) scaling law. If it plateaus around 50%, a
+   second variable is in play.
+2. *(follow-on)* Fit m_cross(eff) over eff ∈ {0.10, 0.157, 0.20, 0.25} and test
+   whether it matches the gap model's prediction
+   m_cross = -(ln n + ln C) / (ln eff + 2 ln C). The model already fails as a
+   cross-eff threshold (see Limitation), so the honest expectation is that it
+   does NOT fit, and the residual is the thing to characterise.
+
+Note for whoever picks this up: eff=0.25 needs m ~ 200+ by the model, i.e.
+dim ~ 400 — LLL is fine there but BKZ is not, so budget accordingly, and keep
+K1*K2 >> m^2/2 or birthday collisions in k will manufacture false successes.
+
+**Do NOT retry:** making the planted vector lambda_1 by reformulation (E1b/E2
+close this — the lambda-block vectors are unavoidable), and d-elimination in
+any form (it is the projection along e_d, provably a no-op).
+
+### Commits made
+(filled in below)
