@@ -1,0 +1,29 @@
+==============================================================================
+GLV-HNP Thread 23 secondary: nu_hat cut across K1 x m
+==============================================================================
+  100 shared 20-bit curves, 6 seeds/cell-curve, K1 in [36, 72, 144], m in [10, 12, 14]
+  nu_hat via Thread 23 exact-integer CF closed form
+  harvested 100 curves in 0.1s
+
+   K1   m     eff    C2   base    AUC    acc    cut  C2 ceil  C1 min
+------------------------------------------------------------------------
+   36  10  0.0497    35   0.65  0.908  0.850  0.454    1.047   0.444
+   36  12  0.0497    62   0.62  0.809  0.750  0.787    1.021   0.519
+   36  14  0.0497    59   0.59  0.869  0.800  0.787    1.012   0.600
+   72  10  0.0993    12   0.88  0.955  0.940  0.392    0.553   0.321
+   72  12  0.0993    27   0.73  0.925  0.880  0.515    0.655   0.408
+   72  14  0.0993    33   0.67  0.899  0.820  0.515    0.712   0.408
+  144  10  0.1986     0   1.00    nan  0.990  0.442      nan   0.442
+  144  12  0.1986     3   0.97  0.825  0.960  0.442    0.562   0.442
+  144  14  0.1986     8   0.92  0.743  0.910  0.442    0.647   0.442
+
+  C2 = curve winning ALL 6/6 seeds (easy). 'cut' = best single threshold
+  (predict C2 when nu_hat <= cut). 'C2 ceil' = largest nu_hat among C2 curves.
+
+  cells with both classes present: 8/9
+  C2 ceiling: min=0.553 max=1.047 mean=0.776   (20d single-cell value: 0.645)
+  AUC:        min=0.743 max=0.955 mean=0.867   (20d: 0.935)
+  acc - baseline: min=-0.010 max=+0.210 mean=+0.110
+
+Total wall time 9.6s
+Done.
