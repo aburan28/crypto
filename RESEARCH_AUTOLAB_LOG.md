@@ -6279,3 +6279,5 @@ Secondary (bookkeeping): the 07-29 entry's assertion that "no choice of S_D remo
 not merely refined.
 
 ### Commits made
+
+823879c autolab 2026-08-06: Thread 23 CLOSED — λ-block vector is the real λ₁; eff wall = 3/(2πe)
