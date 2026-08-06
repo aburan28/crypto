@@ -6562,4 +6562,4 @@ Threads 21/22 (Richelot over small proxy primes) need it.
 
 ### Commits made
 
-(hash recorded in the following commit)
+9169d25 autolab 2026-08-06: Thread 23 — planted-vector-as-λ₁ is the wrong goal; recovery is a coset condition
