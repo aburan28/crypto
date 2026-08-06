@@ -6264,3 +6264,4 @@ which is the mechanism U3 exposed and a better candidate predictor than the Gaus
 heuristic for the eff ≈ 0.3–0.5 wall.
 
 ### Commits made
+4f483ba autolab 2026-08-06: Thread 23 — projection inert, but K1 wall is algorithmic not information-theoretic
