@@ -6282,3 +6282,5 @@ cryptographic sizes or whether the reduction penalty dominates. This is the only
 question that bears on whether GLV-HNP is a real threat model.
 
 ### Commits made
+
+7aec54c autolab 2026-08-06: Thread 23 — centring dissolves the GLV-HNP K1 wall; attack sits on the counting bound
