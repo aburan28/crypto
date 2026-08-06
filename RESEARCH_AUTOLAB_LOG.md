@@ -6238,4 +6238,5 @@ Secondary (unblocked, cheap): `apt-get install pari-gp` at the start of any run 
 intends to touch threads 2/3/6 — it is absent from this image by default.
 
 ### Commits made
-(see below)
+
+9ea5fa7 autolab 2026-08-06: Thread 23 — d-elimination is exactly the trivial-vector projection
