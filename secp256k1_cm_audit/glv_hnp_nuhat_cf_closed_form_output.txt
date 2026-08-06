@@ -1,0 +1,149 @@
+==============================================================================
+GLV-HNP Thread 23 — closed form for nu_hat via continued fractions
+==============================================================================
+
+==============================================================================
+C1 — is lambda_1(L2) attained at a CF convergent of lam/n?  (H1)
+==============================================================================
+Exact integer comparison: min-over-convergents  vs  Lagrange-Gauss.
+ bits    eff  pairs  exact match   pearson  spearman  max rel err
+   20   0.05     60    60/60      1.000000  1.000000     0.00e+00
+   20   0.10     60    60/60      1.000000  1.000000     0.00e+00
+   20   0.25     60    60/60      1.000000  1.000000     0.00e+00
+   24   0.05     60    60/60      1.000000  1.000000     0.00e+00
+   24   0.10     60    60/60      1.000000  1.000000     0.00e+00
+   24   0.25     60    60/60      1.000000  1.000000     0.00e+00
+   32   0.05     60    60/60      1.000000  1.000000     0.00e+00
+   32   0.10     60    60/60      1.000000  1.000000     0.00e+00
+   32   0.25     60    60/60      1.000000  1.000000     0.00e+00
+   64   0.05     40    40/40      1.000000  1.000000     0.00e+00
+   64   0.10     40    40/40      1.000000  1.000000     0.00e+00
+   64   0.25     40    40/40      1.000000  1.000000     0.00e+00
+  128   0.05     40    40/40      1.000000  1.000000     0.00e+00
+  128   0.10     40    40/40      1.000000  1.000000     0.00e+00
+  128   0.25     40    40/40      1.000000  1.000000     0.00e+00
+  256   0.05     40    40/40      1.000000  1.000000     0.00e+00
+  256   0.10     40    40/40      1.000000  1.000000     0.00e+00
+  256   0.25     40    40/40      1.000000  1.000000     0.00e+00
+
+  TOTAL exact agreement: 900/900 (100.00%)
+  (H1) is CONFIRMED exactly.
+
+==============================================================================
+C2 — localisation of the active convergent around q* = sqrt(n*K2/K1)
+==============================================================================
+log2(q_active / q*) should concentrate on [-1, +1] if the critical
+scale story is right; the active index should NOT be the last one.
+ bits    eff  |log2 ratio| med     <=1     <=2  j_act/j_max  b=0 wins
+   20   0.05             1.307    0.48    0.70        0.584         0
+   20   0.25             0.950    0.53    1.00        0.522         0
+   32   0.05             1.319    0.48    0.70        0.550         0
+   32   0.25             0.953    0.57    1.00        0.515         0
+   64   0.05             1.395    0.38    0.60        0.522         0
+   64   0.25             0.921    0.62    1.00        0.508         0
+  128   0.05             1.341    0.45    0.68        0.512         0
+  128   0.25             0.875    0.72    1.00        0.505         0
+  256   0.05             1.326    0.40    0.55        0.506         0
+  256   0.25             0.977    0.57    1.00        0.501         0
+
+  j_act/j_max ~ 0.5 means the active convergent is in the MIDDLE of
+  the expansion — this is exactly why scale-free CF statistics fail.
+
+  C2b — signed offset test: is log2(q_act/q*) = -log2(a*)/2 ?
+   bits    eff  med signed  med pred  pearson  med |resid|
+     20   0.05      -1.359    -1.161   0.2771        0.650
+     20   0.25      -0.934    -1.000  -0.1477        0.485
+     64   0.05      -1.372    -1.292   0.0985        0.669
+     64   0.25      -0.916    -1.000  -0.0163        0.494
+    256   0.05      -1.424    -1.161   0.2696        0.720
+    256   0.25      -0.927    -1.000   0.0955        0.502
+
+==============================================================================
+C3/C4 — two-term form (H2) and the closed form nu_hat ~ sqrt(2/a*) (H3)
+==============================================================================
+ bits    eff    r(H2)    r(H3)   sp(H3)  r(max_a)  sp(max_a)  med |H3/nu-1|
+   20   0.05   0.9867   0.7377   0.8112    0.5431     0.5502          0.183
+   20   0.25   0.9729   0.7680   0.8105    0.3896     0.4597          0.187
+   32   0.05   0.9690   0.7233   0.7509    0.1444     0.0612          0.170
+   32   0.25   0.9555   0.7483   0.7644    0.0070     0.0144          0.230
+   64   0.05   0.9756   0.8099   0.8730    0.2197     0.1566          0.182
+   64   0.25   0.9609   0.8081   0.8554    0.0709     0.0481          0.117
+  128   0.05   0.9853   0.7472   0.8423    0.2245     0.2255          0.170
+  128   0.25   0.9723   0.7402   0.7795    0.1573     0.2205          0.127
+  256   0.05   0.9776   0.7517   0.7920    0.0679     0.0699          0.129
+  256   0.25   0.9715   0.7063   0.7359    0.1656     0.1683          0.151
+
+  Pooled (all bit sizes / eff):
+    spearman(nu_hat, a*)     = -0.7759   <- LOCAL partial quotient
+    spearman(nu_hat, max_a)  = -0.1227   <- GLOBAL max (the June invariant)
+  Both should be negative; |local| >> |global| is the retro-explanation
+  of the 2026-06 max_a falsification.
+
+==============================================================================
+C5 — does the ALGEBRAIC a* predict LLL recovery?  (20-bit curves)
+==============================================================================
+  harvested 150 20-bit j=0 CM curves in 0.1s (eff=0.05, m=9, 24 seeds each)
+  3600 LLL trials in 3.8s
+
+  spearman(nu_hat, p_hat) = -0.5181   (the 07-29 predictor)
+  spearman(a*,     p_hat) = +0.4629   <- ALGEBRAIC, local
+  spearman(max_a,  p_hat) = +0.3223   <- June invariant
+  spearman(mu,     p_hat) = -0.0051   <- falsified 07-29
+
+  AUC for predicting above-median recovery:
+    a*      : 0.751
+    -nu_hat : 0.788
+    max_a   : 0.650
+    mu      : 0.523
+
+      a*  curves  mean nu_hat  mean p_hat
+       1      16        0.980       0.737
+       2      26        0.876       0.736
+     3-4      30        0.797       0.760
+     >=5      78        0.514       0.828
+
+==============================================================================
+C5 — does the ALGEBRAIC a* predict LLL recovery?  (26-bit curves)
+==============================================================================
+  harvested 150 26-bit j=0 CM curves in 0.2s (eff=0.05, m=11, 24 seeds each)
+  3600 LLL trials in 7.4s
+
+  spearman(nu_hat, p_hat) = -0.4499   (the 07-29 predictor)
+  spearman(a*,     p_hat) = +0.4809   <- ALGEBRAIC, local
+  spearman(max_a,  p_hat) = +0.2470   <- June invariant
+  spearman(mu,     p_hat) = +0.1072   <- falsified 07-29
+
+  AUC for predicting above-median recovery:
+    a*      : 0.775
+    -nu_hat : 0.765
+    max_a   : 0.621
+    mu      : 0.545
+
+      a*  curves  mean nu_hat  mean p_hat
+       1      16        0.988       0.323
+       2       8        0.920       0.359
+     3-4      28        0.793       0.283
+     >=5      98        0.615       0.520
+
+==============================================================================
+C6 — secp256k1: active convergent, a*, and consistency with 2026-07-29
+==============================================================================
+  lam^2 + lam + 1 = 0 mod n  ... verified
+
+     eff    nu_hat    07-29     a*   j*  log2 q_act   log2 q*  sqrt(2/a*)
+    0.05    0.8709   0.8709      5   70      127.83    130.16      0.6325
+    0.10    0.6624   0.6624      5   70      127.83    129.66      0.6325
+    0.25    0.5852   0.5852      5   70      127.83    129.00      0.6325
+    0.50    0.6851   0.6851      5   70      127.83    128.50      0.6325
+
+  CF of lam/n: 140 partial quotients, max_a = 312, mean = 11.81
+  first 20 a_j: [3, 14, 3, 2, 1, 7, 1, 2, 8, 1, 1, 1, 5, 163, 1, 312, 1, 24, 3, 8]
+
+  Interpretation: max_a is a global outlier statistic; the geometry
+  only reads a* at j*, which is mid-expansion and modest.
+
+==============================================================================
+SUMMARY
+==============================================================================
+  (H1) lambda_1(L2) at a CF convergent : CONFIRMED (exact)
+  (H2)/(H3): see C3/C4 correlations above.
