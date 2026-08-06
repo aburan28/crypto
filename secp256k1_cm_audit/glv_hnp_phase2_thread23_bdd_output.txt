@@ -1,0 +1,153 @@
+==============================================================================
+Thread 23 — is the Phase-2 K1 wall algorithmic or information-theoretic?
+==============================================================================
+  8-bit/199      p=211   n=199   lam=106   lam*=0.4673  K2=sqrt(n)+1=15
+  12-bit/2557    p=2557  n=2659  lam=1755  lam*=0.3400  K2=sqrt(n)+1=52
+  12-bit/2677    p=2677  n=2647  lam=185   lam*=0.0699  K2=sqrt(n)+1=52
+
+------------------------------------------------------------------------------
+U1: trivial vector n*S_D*e_m, and sv/pv before vs after projecting along e_m
+------------------------------------------------------------------------------
+sv  = ||shortest row after LLL||,  pv = ||planted vector||
+A reformulation 'works' in the Thread-23 sense iff sv/pv >= 1 (planted is lambda_1).
+
+curve           K1   m |  sv/pv KANNAN  sv/pv PROJ | trivial in L  |sv[m]|/n
+8-bit/199        2   6 |         0.603       0.843 |         True     1.0000
+12-bit/2557      8   8 |         0.517       0.532 |         True     1.0000
+12-bit/2677      8  10 |         0.422       0.813 |         True     1.0000
+
+------------------------------------------------------------------------------
+U2: K1 wall, three decoders.  5 seeds each; entry = #recovered/5
+------------------------------------------------------------------------------
+KANNAN = 2026-07-29 baseline | PROJ = quotient e_m | BABAI = nearest-plane CVP
+CVPEX  = exact CVP (optimal decoder for this formulation)
+
+curve 12-bit/2557  (lam*=0.3400, K2=52, m=12)
+  decoder     K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+  KANNAN       5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5
+  PROJ         5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5
+  BABAI        5/5     5/5     5/5     5/5     4/5     2/5     0/5     0/5
+  CVPEX        5/5     5/5     5/5     5/5     5/5     3/5     1/5     0/5
+
+curve 12-bit/2677  (lam*=0.0699, K2=52, m=12)
+  decoder     K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+  KANNAN       5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5
+  PROJ         5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5
+  BABAI        5/5     4/5     4/5     1/5     0/5     0/5     0/5     0/5
+  CVPEX        5/5     5/5     5/5     4/5     0/5     0/5     0/5     0/5
+
+------------------------------------------------------------------------------
+U3: exact CVP oracle.  d_ex/d_pl < 1 => planted is NOT the closest vector.
+    But that does NOT mean failure: once eff=K1*K2/n is large the GLV
+    decomposition k = k1 + lam*k2 is no longer unique, so a strictly shorter
+    lattice point can carry the SAME d.  Read the 'CVP=d?' column, not the ratio.
+------------------------------------------------------------------------------
+m=6 (dim L0 = 13), seed=42
+
+curve           K1     eff  GH ratio |        d_pl        d_ex  d_ex/d_pl  CVP=d?  Babai=d?
+12-bit/2557      2  0.0391     0.980 |      3065.8      3065.8     1.0000    True      True
+12-bit/2557      3  0.0587     1.182 |      4447.3      4447.3     1.0000    True      True
+12-bit/2557      4  0.0782     1.350 |      3206.4      3093.1     0.9647    True      True
+12-bit/2557      6  0.1173     1.628 |      5027.3      4794.1     0.9536   False     False
+12-bit/2557      8  0.1564     1.859 |      3422.5      2686.5     0.7850    True      True
+12-bit/2557     12  0.2347     2.242 |      5150.3      2817.1     0.5470   False     False
+12-bit/2557     16  0.3129     2.560 |      3517.8      2202.4     0.6261   False      True
+12-bit/2557     24  0.4693     3.087 |      5252.5      1988.8     0.3786   False     False
+12-bit/2677      2  0.0393     0.982 |      3005.7      3005.7     1.0000    True      True
+12-bit/2677      3  0.0589     1.184 |      4392.2      4392.2     1.0000    True      True
+12-bit/2677      4  0.0786     1.353 |      3147.7      3147.7     1.0000    True      True
+12-bit/2677      6  0.1179     1.631 |      4973.7      4577.9     0.9204   False     False
+12-bit/2677      8  0.1572     1.862 |      3364.7      2842.1     0.8447   False     False
+12-bit/2677     12  0.2357     2.246 |      5096.8      2750.9     0.5397   False     False
+12-bit/2677     16  0.3143     2.565 |      3460.4      2570.9     0.7429   False     False
+12-bit/2677     24  0.4715     3.092 |      5214.1      1865.0     0.3577   False     False
+
+------------------------------------------------------------------------------
+U4: Gaussian-heuristic prediction of the wall (unique decoding needs ratio<1)
+------------------------------------------------------------------------------
+ratio(K1) = E||error|| / GH(L0);  asymptotically ratio -> sqrt(2*pi*e/3)*sqrt(eff)
+  => predicted critical eff = 3/(2*pi*e) = 0.1756
+
+curve 12-bit/2557 (lam*=0.3400), m=12:
+    K1      eff    ratio   KANNAN/PROJ/BABAI/CVPEX
+     2   0.0391    0.690   5/5/5/5
+     3   0.0587    0.838   5/5/5/5
+     4   0.0782    0.963   5/5/5/5
+     6   0.1173    1.169   5/5/5/5
+     8   0.1564    1.343   5/5/4/5
+    12   0.2347    1.631   4/4/2/3
+    16   0.3129    1.873   1/1/0/1
+    24   0.4693    2.275   0/0/0/0
+  predicted critical K1 = eff_crit*n/K2 = 8.98
+curve 12-bit/2677 (lam*=0.0699), m=12:
+    K1      eff    ratio   KANNAN/PROJ/BABAI/CVPEX
+     2   0.0393    0.692   5/5/5/5
+     3   0.0589    0.840   5/5/4/5
+     4   0.0786    0.965   5/5/4/5
+     6   0.1179    1.172   2/2/1/4
+     8   0.1572    1.345   0/0/0/0
+    12   0.2357    1.634   0/0/0/0
+    16   0.3143    1.877   0/0/0/0
+    24   0.4715    2.280   0/0/0/0
+  predicted critical K1 = eff_crit*n/K2 = 8.94
+
+------------------------------------------------------------------------------
+U5: m-sweep at and past the wall, LLL/Kannan vs the optimal decoder (CVPEX)
+------------------------------------------------------------------------------
+If CVPEX keeps winning where KANNAN dies, the wall is ALGORITHMIC.
+If both die at the same K1 regardless of m, it is INFORMATION-THEORETIC.
+
+curve 12-bit/2557 (lam*=0.3400), K1=6, eff=0.1173
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       5/5     5/5     5/5     5/5     5/5     5/5
+  CVPEX        3/5     5/5     5/5     5/5     5/5     5/5
+
+curve 12-bit/2557 (lam*=0.3400), K1=8, eff=0.1564
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       3/5     5/5     5/5     5/5     5/5     5/5
+  CVPEX        3/5     5/5     5/5     5/5     5/5     5/5
+
+curve 12-bit/2557 (lam*=0.3400), K1=12, eff=0.2347
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       0/5     1/5     4/5     5/5     5/5     5/5
+  CVPEX        1/5     1/5     3/5     5/5     5/5     5/5
+
+curve 12-bit/2557 (lam*=0.3400), K1=16, eff=0.3129
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       1/5     0/5     1/5     2/5     3/5     3/5
+  CVPEX        0/5     0/5     1/5     2/5     4/5     5/5
+
+curve 12-bit/2557 (lam*=0.3400), K1=24, eff=0.4693
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       0/5     0/5     0/5     0/5     0/5     0/5
+  CVPEX        0/5     0/5     0/5     0/5     0/5     0/5
+
+curve 12-bit/2677 (lam*=0.0699), K1=6, eff=0.1179
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       2/5     0/5     2/5     1/5     1/5     1/5
+  CVPEX        0/5     3/5     4/5     5/5     5/5     5/5
+
+curve 12-bit/2677 (lam*=0.0699), K1=8, eff=0.1572
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       1/5     0/5     0/5     1/5     0/5     1/5
+  CVPEX        0/5     2/5     0/5     1/5     5/5     5/5
+
+curve 12-bit/2677 (lam*=0.0699), K1=12, eff=0.2357
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       0/5     0/5     0/5     0/5     0/5     0/5
+  CVPEX        0/5     0/5     0/5     0/5     0/5     1/5
+
+curve 12-bit/2677 (lam*=0.0699), K1=16, eff=0.3143
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       0/5     0/5     0/5     0/5     0/5     0/5
+  CVPEX        0/5     0/5     0/5     0/5     0/5     0/5
+
+curve 12-bit/2677 (lam*=0.0699), K1=24, eff=0.4715
+  decoder      m=6     m=8    m=12    m=16    m=24    m=32
+  KANNAN       0/5     0/5     0/5     0/5     0/5     0/5
+  CVPEX        0/5     0/5     0/5     0/5     0/5     0/5
+
+
+==============================================================================
+done
+==============================================================================

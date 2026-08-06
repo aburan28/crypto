@@ -6103,3 +6103,164 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — the continuation proposed verbatim by the 2026-07-29 entry
+(log line ~6089): "reformulate the Phase-2 lattice so the target is λ₁", by projecting
+along `e_m` to quotient out the trivial vector `n·S_D·e_m` found in T5.
+Threads 1/2/4/6 remain CLOSED/BLOCKED/DEAD-END; the Phase-2 (priority-5) lineage is the
+only one with recent measurable progress, so protocol rule (b) selects it.
+Gap since last run: 8 days.
+
+Outcome, in two parts:
+- The Thread-23 reformulation itself is **FALSIFIED** (projection is inert).
+- But the question underneath it flipped: the K1 wall on the small-λ\* curve is
+  **ALGORITHMIC, not information-theoretic**, correcting 2026-07-29 T4b.
+
+### Work done
+- Environment (fresh container): `pip install cysignals fpylll sympy` →
+  fpylll 0.6.4, sympy 1.14.0. PARI/GP not needed this run. Note for future runs:
+  `fpylll` rank-deficient `LLL.reduction` works and accepts a transformation matrix
+  `U` (verified: `LLL.reduction(A, U)` with `U = IntegerMatrix(A.nrows, A.nrows)`,
+  zero rows land at the top) — this is what makes the projection decoder implementable.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_bdd.py` (5 experiments U1–U5),
+  copying `gen_signatures` / `build_glv_lattice` / `scales` verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:227` so the comparison to 2026-07-29 is exact.
+  Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_thread23_bdd_output.txt`
+  (153 lines). Whole run is **2.9 s** — cheap to re-run.
+- Implemented and compared **four** decoders on the same signature sets:
+  - `KANNAN` — the 2026-07-29 baseline, unchanged (full lattice, LLL, scan rows for
+    `|last| = S_KANNAN`).
+  - `PROJ` — Thread 23 as proposed: delete column `m` (= orthogonal projection along
+    `e_m`, which sends the trivial vector to 0), LLL with transformation tracking,
+    read `d` off `U[i][m] mod n`.
+  - `BABAI` — drop the Kannan row/column entirely; CVP by nearest-plane on the
+    `(2m+1)`-dim lattice `L0`, target `t = -(A_i·S_K1, 0, …, 0)`, read `d = w[m] mod n`.
+  - `CVPEX` — **exact** CVP (fplll enumeration) on the same `L0`/`t`. This is the
+    optimal decoder for the formulation, so it is what separates "LLL too weak" from
+    "information not there".
+- `cargo test --test curve_audit` → 5/5 pass (4.31 s). ✓ (no Rust touched this run)
+
+### Findings
+
+**U1 — the projection does NOT make the planted vector λ₁. Thread 23 falsified.**
+`sv` = shortest LLL row, `pv` = planted norm; the reformulation "works" iff sv/pv ≥ 1.
+
+| curve | λ\* | K1 | m | sv/pv KANNAN | sv/pv PROJ | trivial vector in L | \|sv[m]\|/n |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.4673 | 2 | 6 | 0.603 | 0.843 | True | 1.0000 |
+| 12-bit/2557 | 0.3400 | 8 | 8 | 0.517 | 0.532 | True | 1.0000 |
+| 12-bit/2677 | 0.0699 | 8 | 10 | 0.422 | 0.813 | True | 1.0000 |
+
+The identity `n·row_m − Σᵢ Bᵢ·rowᵢ = n·S_D·e_m` is confirmed exactly on all three curves
+(`trivial in L` column), so T5's algebra is right. But removing that direction only
+raises sv/pv to 0.53–0.84 — still < 1. **The trivial vector was not the binding
+obstruction; other shorter vectors remain.** T5's diagnosis was correct as far as it
+went, but the fix it implied does not follow.
+
+**U2 — PROJ is exactly equivalent to KANNAN.** m=12, 5 seeds, 8-point K1 grid:
+
+| curve (λ\*) | decoder | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 (0.340) | KANNAN | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | PROJ | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | BABAI | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 |
+| 2557 | CVPEX | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 3/5 | 1/5 | 0/5 |
+| 2677 (0.070) | KANNAN | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | PROJ | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | BABAI | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | CVPEX | 5/5 | 5/5 | 5/5 | 4/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+PROJ matches KANNAN in **all 16 cells on both curves**. Babai is strictly weaker or
+equal everywhere. Recorded so no future run re-implements the projection.
+
+**U5 — the headline. The K1 wall is ALGORITHMIC, and 2026-07-29 T4b is corrected.**
+m-sweep at fixed K1, 5 seeds, KANNAN vs the optimal decoder:
+
+| curve | K1 | eff | decoder | m=6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2677 (λ\*=0.070) | 6 | 0.118 | KANNAN | 2/5 | 0/5 | 2/5 | 1/5 | 1/5 | 1/5 |
+| 2677 | 6 | 0.118 | **CVPEX** | 0/5 | 3/5 | 4/5 | **5/5** | **5/5** | **5/5** |
+| 2677 | 8 | 0.157 | KANNAN | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 |
+| 2677 | 8 | 0.157 | **CVPEX** | 0/5 | 2/5 | 0/5 | 1/5 | **5/5** | **5/5** |
+| 2677 | 12 | 0.236 | KANNAN | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | 12 | 0.236 | CVPEX | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 |
+| 2557 (λ\*=0.340) | 8 | 0.156 | KANNAN | 3/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 2557 | 8 | 0.156 | CVPEX | 3/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| 2557 | 16 | 0.313 | KANNAN | 1/5 | 0/5 | 1/5 | 2/5 | 3/5 | 3/5 |
+| 2557 | 16 | 0.313 | CVPEX | 0/5 | 0/5 | 1/5 | 2/5 | 4/5 | **5/5** |
+| 2557 | 24 | 0.469 | both | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | 16, 24 | ≥0.31 | both | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The KANNAN row for 2677/K1=8 reads **0, 0, 1, 0, 1** for m = 8/12/16/24/32 — an exact
+reproduction of the 2026-07-29 T4b numbers, so this is the same experiment, not a
+different one. T4b concluded from it: *"at K1=8 more data does not rescue it, so the K1
+wall is genuine — it is a K1 wall, not a λ wall."* **The first half is hereby corrected:
+more data does rescue it — CVPEX reaches 5/5 at m=24 and m=32.** What T4b measured was
+the *reduction quality* of LLL-on-Kannan, not an information limit. (T4b's second half
+survives: it is still not a λ wall.)
+
+**Consequence — what λ\* actually is.** On the λ\*=0.34 curve KANNAN ≈ CVPEX everywhere
+(identical at K1=8 across all six m). On the λ\*=0.07 curve the two separate sharply
+(1/5 vs 5/5 at K1=6–8, large m). So **λ\* is a reduction-quality parameter — it measures
+how far LLL falls short of optimal decoding — not an information-theoretic one.** This is
+consistent with, and sharpens, the 2026-07-29 T3 finding that λ\* is not a viability
+threshold.
+
+**A genuine hard wall does still exist**, and it is not λ-dependent: at eff = K1·K2/n
+≳ 0.47 both decoders are 0/5 on both curves at every m tested, and on 2677 the wall is
+already hard at eff ≥ 0.31.
+
+**U3 — caution recorded: a shorter closest vector does not mean failure.**
+Exact CVP at m=6, seed 42; `d_pl` = ‖planted error‖, `d_ex` = exact CVP distance:
+
+| curve | K1 | eff | d_ex/d_pl | CVP gives correct d? |
+|---|---|---|---|---|
+| 2557 | 4 | 0.078 | 0.9647 | **True** |
+| 2557 | 8 | 0.156 | 0.7850 | **True** |
+| 2557 | 16 | 0.313 | 0.6261 | False |
+| 2677 | 6 | 0.118 | 0.9204 | False |
+
+At 2557/K1=8 the closest vector is 21% shorter than the planted one and still yields the
+right `d`. A follow-up probe confirmed the closer vector differs from the planted vector
+in coordinates **other than** `m` (it is not the trivial-vector shift, and not a
+centering effect — `d ≤ n/2` for this seed, so centering is inactive). Explanation: once
+eff = K1·K2/n grows, the GLV decomposition `k = k1 + λ·k2` with `k1<K1, k2<K2` stops
+being unique, so an alternative `(k1′, k2′)` gives a shorter vector with the same `d`.
+**The sound success criterion is the `d`-coordinate mod n, never the distance ratio.**
+The script's U3 header was corrected to say so, since the original framing would have
+misled a future run into declaring an information-theoretic wall that is not there.
+
+**U4 — the Gaussian heuristic is not sharp here.** With `‖error‖/GH(L0) → √(2πe/3)·√eff`,
+the predicted critical `eff = 3/(2πe) = 0.1756`, i.e. critical K1 ≈ 8.98 (2557) and
+8.94 (2677). Measured (CVPEX at m=32): 2557 still 5/5 at K1=16 (eff 0.313), 2677 fails
+by K1=12 (eff 0.236). So GH brackets the two curves but is off by up to ~2× in either
+direction — unsurprising, since the error vector is strongly anisotropic (m coordinates
+~K1·S_K1, m ~K2·S_K2, one ~n) while GH assumes a ball. Do not use GH ratio as a wall
+predictor for this lattice.
+
+**Scope caveat.** CVPEX is a *diagnostic*, not an attack improvement: exact CVP
+enumeration is feasible at dim 25 on 12-bit curves (2.9 s for the whole script) and
+hopeless at 256-bit. It tells us the wall's nature; it does not move the attack.
+
+### Next step proposal
+**Thread 24 — can a scalable reduction recover CVPEX's advantage?**
+The wall being algorithmic is only useful if a decoder that scales can close the gap.
+Concretely: BKZ-β preprocessing (β ∈ {20, 30, 40}) **on the `L0`/CVP formulation**, then
+Babai — note 2026-07-26 already showed BKZ-40 does *not* rescue the *Kannan* formulation,
+so the new content is BKZ applied to `L0`, not to the Kannan lattice. Test on curve 2677
+at K1 = 6 and 8, m ∈ {12, 16, 24, 32}, 5 seeds. Falsifier: if BKZ-preprocessed Babai
+reaches CVPEX's 5/5 at m ≥ 16, the practical attack inherits the improvement and the
+next question is whether it survives to 20-bit and beyond; if it stays at KANNAN levels,
+then CVPEX's advantage is enumeration-only and does not scale, and Phase 2 is at its
+practical ceiling regardless of the wall's theoretical nature. Cheap — the U5 grid is
+seconds.
+
+Secondary: derive the hard wall properly from GLV decomposition multiplicity (the
+expected number of `(k1,k2)` with `k1+λk2 ≡ k`, `k1<K1`, `k2<K2`, is ≈ K1·K2/n = eff),
+which is the mechanism U3 exposed and a better candidate predictor than the Gaussian
+heuristic for the eff ≈ 0.3–0.5 wall.
+
+### Commits made
