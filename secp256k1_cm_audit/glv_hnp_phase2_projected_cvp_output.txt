@@ -1,0 +1,136 @@
+==============================================================================
+Thread 23 - projected / CVP reformulation of the Phase-2 GLV-HNP lattice
+==============================================================================
+  8-bit/199    p=211   n=199   lam=106   lam*=0.4673  K2=isqrt(n)+1=15
+  12-bit/2557  p=2557  n=2659  lam=1755  lam*=0.3400  K2=isqrt(n)+1=52
+  12-bit/2677  p=2677  n=2647  lam=185   lam*=0.0699  K2=isqrt(n)+1=52
+
+==============================================================================
+E1 - analytic uniqueness / BDD ratios  (m=12, curve 12-bit/2677)
+==============================================================================
+  pv/gh_L      : planted norm / Gaussian heuristic of the Kannan lattice
+  pvP/gh_P     : same, in the e_m projection (Thread 23 reformulation)
+  dist0/gh0    : CVP target distance / GH of L0  (BDD: need < ~1)
+  triv/gh_L    : trivial vector n*S_D / GH of L  (< 1 => L is not random)
+
+    K1     eff   pv/gh_L  pvP/gh_P  dist0/gh0  dist0/(gh0/2)  triv/gh_L
+     2   0.039     0.753     0.719      0.692          1.383      0.248
+     3   0.059     0.908     0.874      0.840          1.680      0.300
+     4   0.079     1.037     1.003      0.965          1.929      0.342
+     6   0.118     1.251     1.219      1.172          2.344      0.413
+     8   0.157     1.428     1.399      1.345          2.691      0.472
+    12   0.236     1.722     1.700      1.634          3.269      0.569
+    16   0.314     1.967     1.952      1.877          3.753      0.649
+    24   0.471     2.372     2.371      2.280          4.559      0.783
+
+  Cross-check against T3 (2026-07-29, 17-bit sweep, m=12):
+    eff~0.05 (K1= 13, actual eff=0.051): pv/gh_L=0.960  pvP/gh_P=0.926  dist0/gh0=0.891   observed 19/20
+    eff~0.15 (K1= 38, actual eff=0.149): pv/gh_L=1.576  pvP/gh_P=1.550  dist0/gh0=1.491   observed 3/20
+    eff~0.25 (K1= 64, actual eff=0.251): pv/gh_L=2.004  pvP/gh_P=1.990  dist0/gh0=1.915   observed 0/20
+
+==============================================================================
+E2 - three-arm K1 grid, m=12, 5 seeds
+==============================================================================
+
+--- 12-bit/2557  (lam*=0.340, n=2659, K2=52, d=893) ---
+    K1    eff |  Kannan+LLL   L0+Babai  L0+exactCVP |   sv/pv  w_bab/w_pl  w_cvp/w_pl  closer?
+     2  0.039 |      5/5        5/5          5/5    |   0.397       1.000       1.000     0/5
+     3  0.059 |      5/5        5/5          5/5    |   0.388       1.000       1.000     0/5
+     4  0.078 |      5/5        5/5          5/5    |   0.375       0.996       0.996     3/5
+     6  0.117 |      5/5        5/5          5/5    |   0.367       0.963       0.963     3/5
+     8  0.156 |      5/5        5/5          5/5    |   0.361       0.933       0.933     5/5
+    12  0.235 |      5/5        2/5          4/5    |   0.355       0.954       0.865     5/5
+    16  0.313 |      0/5        0/5          0/5    |   0.345       0.722       0.706     5/5
+    24  0.469 |      0/5        0/5          0/5    |   0.342       0.569       0.531     5/5
+
+--- 12-bit/2677  (lam*=0.070, n=2647, K2=52, d=889) ---
+    K1    eff |  Kannan+LLL   L0+Babai  L0+exactCVP |   sv/pv  w_bab/w_pl  w_cvp/w_pl  closer?
+     2  0.039 |      5/5        5/5          5/5    |   0.400       1.000       1.000     0/5
+     3  0.059 |      5/5        5/5          5/5    |   0.391       1.000       1.000     0/5
+     4  0.079 |      4/5        2/5          5/5    |   0.378       1.359       1.000     0/5
+     6  0.118 |      2/5        1/5          3/5    |   0.370       1.079       0.979     2/5
+     8  0.157 |      1/5        0/5          0/5    |   0.364       1.048       0.934     5/5
+    12  0.236 |      0/5        0/5          0/5    |   0.360       0.839       0.763     5/5
+    16  0.314 |      0/5        0/5          0/5    |   0.356       0.681       0.646     5/5
+    24  0.471 |      0/5        0/5          0/5    |   0.355       0.541       0.539     5/5
+
+==============================================================================
+E3 - is the planted vector the closest lattice point?
+==============================================================================
+  "closer" above counts seeds where exact CVP found a lattice point
+  strictly closer to the target than the planted one.  Any such seed
+  is an information-theoretic failure: no algorithm can recover d.
+
+  BKZ-40 control on the two arms at the wall (K1=8, 12-bit/2677):
+    K1=  4: Kannan+BKZ40 5/5   L0+Babai(BKZ40) 2/5   L0+exactCVP(BKZ40) 5/5
+    K1=  6: Kannan+BKZ40 3/5   L0+Babai(BKZ40) 2/5   L0+exactCVP(BKZ40) 3/5
+    K1=  8: Kannan+BKZ40 1/5   L0+Babai(BKZ40) 0/5   L0+exactCVP(BKZ40) 0/5
+
+==============================================================================
+E4 - which predictor locates the wall: pv/gh_L or nu_hat?
+==============================================================================
+  nu_hat = lambda_1(L2)/sqrt(det L2) for the 2D rival block L2 =
+  <(n*S_K1,0), (-lam*S_K1,S_K2)>   (Thread 20c, AUC 0.935 on C1/C2).
+  Restored dependency: glv_hnp_phase2_nuhat_base.py
+
+  curve          lam*   K1    eff  pv/gh_L  nu_hat |   LLL   CVP
+  12-bit/2557   0.340    2  0.039    0.751   0.353 |  5/5   5/5 
+  12-bit/2557   0.340    3  0.059    0.906   0.336 |  5/5   5/5 
+  12-bit/2557   0.340    4  0.078    1.035   0.341 |  5/5   5/5 
+  12-bit/2557   0.340    6  0.117    1.248   0.371 |  5/5   5/5 
+  12-bit/2557   0.340    8  0.156    1.425   0.408 |  5/5   5/5 
+  12-bit/2557   0.340   12  0.235    1.718   0.481 |  5/5   4/5 
+  12-bit/2557   0.340   16  0.313    1.962   0.548 |  0/5   0/5 
+  12-bit/2557   0.340   24  0.469    2.366   0.666 |  0/5   0/5 
+  12-bit/2677   0.070    2  0.039    0.753   0.710 |  5/5   5/5 
+  12-bit/2677   0.070    3  0.059    0.908   0.865 |  5/5   5/5 
+  12-bit/2677   0.070    4  0.079    1.037   0.997 |  4/5   5/5 
+  12-bit/2677   0.070    6  0.118    1.251   0.856 |  2/5   3/5 
+  12-bit/2677   0.070    8  0.157    1.428   0.771 |  1/5   0/5 
+  12-bit/2677   0.070   12  0.236    1.722   0.696 |  0/5   0/5 
+  12-bit/2677   0.070   16  0.314    1.967   0.675 |  0/5   0/5 
+  12-bit/2677   0.070   24  0.471    2.372   0.693 |  0/5   0/5 
+
+==============================================================================
+E5 - OUT-OF-SAMPLE test of the two-factor predictor  P = (pv/gh_L)*nu_hat
+==============================================================================
+  E4 suggests P < 1 <=> recovery, on 16 in-sample rows / 2 curves.
+  E4 fitted the exponent (1) and threshold (1) post hoc, so this
+  section tests P on FRESH curves that played no part in choosing it.
+  Baselines: pv/gh_L alone (lam-independent) and nu_hat alone.
+
+  harvested 20 fresh 16-17-bit j=0 GLV curves, lam* in [0.007, 0.491]
+  120 out-of-sample (curve, K1) cells, [11, 12, 13] seeds each
+
+  predictor        AUC   (1.0 = perfect ordering of 5/5-success vs not)
+  P              0.981
+  pvgh           0.943
+  nu             0.693
+  eff            0.944
+
+  Confusion matrix for the PRE-REGISTERED rule 'P < 1 => 3/3 recovery':
+    P<1  & recovered :   63      P<1  & failed :    7
+    P>=1 & recovered :    1      P>=1 & failed :   49
+    accuracy = 0.933   (majority baseline = 0.533)
+
+  Fairness check - each predictor at its BEST-FIT threshold
+  (favours the baselines: P is judged at the pre-registered 1.0):
+    P      best acc=0.933 at threshold 1.009   (acc at 1.0 = 0.933)
+    pvgh   best acc=0.908 at threshold 1.058   (acc at 1.0 = 0.800)
+    nu     best acc=0.658 at threshold 0.561
+    eff    best acc=0.908 at threshold 0.063
+
+  p_hat by P decile:
+     decile   P mid  mean p_hat    n
+          1   0.235       1.000   12
+          2   0.425       1.000   12
+          3   0.520       1.000   12
+          4   0.662       1.000   12
+          5   0.772       0.889   12
+          6   0.948       0.611   12
+          7   1.093       0.333   12
+          8   1.354       0.028   12
+          9   1.531       0.000   12
+         10   1.865       0.000   12
+
+[total runtime 1.1s]

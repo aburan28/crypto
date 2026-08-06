@@ -6103,3 +6103,199 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — the reformulation proposed verbatim by the 2026-07-29 entry
+(log line ~6089): quotient the Phase-2 lattice along `e_m` / replace the Kannan
+embedding with an explicit CVP call, and test whether the K1 wall moves.
+Priority 5 (GLV-HNP Phase 2) is the correct pick under protocol rule (b):
+priorities 1, 3, 6 are CLOSED, 2 BLOCKED, 4 DEAD-END, and priority 5 made
+measurable progress on 2026-07-29 with a concrete named next sub-task.
+
+Outcome: **the falsifier resolves against the reformulation — the wall is
+information-theoretic, and Phase 2 is at its ceiling.** A secondary result
+(two-factor predictor `P`) and a repo-integrity fix came out of the same run.
+
+New artifacts:
+- `secp256k1_cm_audit/glv_hnp_phase2_projected_cvp.py` (E1–E5, runtime 1.1 s)
+- `secp256k1_cm_audit/glv_hnp_phase2_projected_cvp_output.txt` (136 lines)
+- `secp256k1_cm_audit/glv_hnp_phase2_nuhat_base.py` (restored, see "repo integrity")
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. **`apt-get install pari-gp`
+  FAILED** this run (archive.ubuntu.com 404 on a `libegl-mesa0` dependency);
+  `gp` is unavailable. Not needed here — Thread 23 is pure Python. Future runs
+  needing PARI should `apt-get update` first.
+- Built the CVP lattice `L0` (dim 2m+1, Kannan row and column deleted) with
+  target `-t = (-A_i·S_K1, 0, …, 0)`. Correctness identity, verified in code:
+  `k1_i·S_K1 = (A_i + d·B_i − λ·k2_i + c_i·n)·S_K1`, so
+  `w_planted − t ∈ L0` and CVP recovers `d = u[m]/S_D mod n`.
+- Three arms on identical signature sets: **Kannan+LLL** (the T4 baseline),
+  **L0+Babai** nearest-plane, **L0+exact CVP** (`fpylll.CVP.closest_vector`,
+  enumeration). The exact-CVP arm is the decisive one the 2026-07-29 proposal
+  did not include: it removes the reduction algorithm as a variable entirely.
+- Added the analytic layer (E1): Gaussian-heuristic ratios for `L`, its `e_m`
+  projection, and `L0`.
+- Added E4/E5 after E2 revealed a λ-dependence that `pv/gh_L` cannot express.
+- `cargo test --test curve_audit` → **5/5 pass** (3.71 s): `audit_template_exists`,
+  `fresh_cm_curve_passes_audit`, `pari_prelude_format`,
+  `all_curves_pass_structural_audit`, `hnp_recovers_p256_key_via_lll_phase15`.
+  No Rust was touched this run; this is a regression check only.
+
+### Findings
+
+**F1 — the falsifier fails on BOTH clauses. Thread 23 is closed, negatively.**
+The 2026-07-29 falsifier: "if sv/pv rises above 1 after the reformulation AND
+the K1 wall moves outward on the λ*=0.07 curve (currently K1≈4–6), the
+reformulation is a real improvement." Measured on 12-bit/2677 (λ*=0.070),
+m=12, 5 seeds:
+
+| K1 | eff | Kannan+LLL | L0+Babai | L0+exact CVP | w_cvp/w_pl | closer? |
+|---|---|---|---|---|---|---|
+| 2 | 0.039 | 5/5 | 5/5 | 5/5 | 1.000 | 0/5 |
+| 3 | 0.059 | 5/5 | 5/5 | 5/5 | 1.000 | 0/5 |
+| 4 | 0.079 | 4/5 | 2/5 | 5/5 | 1.000 | 0/5 |
+| 6 | 0.118 | 2/5 | 1/5 | 3/5 | 0.979 | 2/5 |
+| 8 | 0.157 | 1/5 | 0/5 | **0/5** | 0.934 | 5/5 |
+| 12 | 0.236 | 0/5 | 0/5 | 0/5 | 0.763 | 5/5 |
+
+The wall stays at K1≈4–6. Exact CVP buys at most one grid step (K1=4: 5/5 vs
+4/5; K1=6: 3/5 vs 2/5) and is *worse* than LLL at K1=8. sv/pv never rises above
+1 — it sits in [0.342, 0.400] across the whole grid, i.e. the trivial vector
+`n·S_D·e_m` still dominates. BKZ-40 control (E3) does not move it either:
+K1=8 → Kannan+BKZ40 1/5, L0+Babai 0/5, L0+exactCVP 0/5.
+
+**F2 — the wall is information-theoretic, proven, not inferred.**
+`closer?` counts seeds where exact CVP returned a lattice point *strictly closer
+to the target than the planted vector*. At K1=8 on 12-bit/2677 this is 5/5 with
+`w_cvp/w_pl = 0.934` and 0/5 recovery: the planted vector is not the closest
+lattice point, and the closest one carries the wrong `d`. No reduction
+algorithm and no re-embedding can fix that — it is a property of the instance.
+**Phase 2 is at its ceiling at K1≈4–6 for λ*≈0.07.**
+
+Caveat, stated precisely: `closer? > 0` is *not* by itself fatal. On 12-bit/2557
+at K1=8, `closer?` is 5/5 yet recovery is 5/5 — closer points exist whose
+d-coordinate is still ≡ d (mod n), which is all recovery requires. The decisive
+datum is the exact-CVP recovery rate, not the distance ratio.
+
+**F3 — why the e_m projection cannot help (analytic, E1).**
+Quotienting out `n·S_D·e_m` removes a lattice direction and a chunk of the
+planted norm in near-equal proportion, so the ratio barely moves:
+
+| K1 | eff | pv/gh_L | pvP/gh_P (projected) | dist0/gh0 |
+|---|---|---|---|---|
+| 2 | 0.039 | 0.753 | 0.719 | 0.692 |
+| 4 | 0.079 | 1.037 | 1.003 | 0.965 |
+| 8 | 0.157 | 1.428 | 1.399 | 1.345 |
+| 16 | 0.314 | 1.967 | 1.952 | 1.877 |
+
+The projection improves the uniqueness ratio by ≤4.5% and by <1% at K1≥12.
+`triv/gh_L` runs 0.248→0.783 (<1 throughout), confirming the T5 observation that
+`L` is *not* a random lattice — but the anomaly is benign, not the obstruction.
+
+**F4 — `pv/gh_L` retro-predicts the T3 sweep.** Against 2026-07-29 T3 (17-bit,
+m=12), with no fitting:
+
+| eff | pv/gh_L | observed (T3) |
+|---|---|---|
+| 0.051 | 0.960 | 19/20 |
+| 0.149 | 1.576 | 3/20 |
+| 0.251 | 2.004 | 0/20 |
+
+The uSVP/Gaussian-heuristic ratio crossing 1 is the wall. This retro-explains
+both the K1 wall (T4) and the eff wall (T3) as one phenomenon.
+
+**F5 — NEW: the two-factor predictor `P = (pv/gh_L)·ν̂`, validated
+out-of-sample (AUC 0.981).**
+`pv/gh_L` contains no λ at all — it is identical on both reference curves at
+equal K1 (0.751 vs 0.753 at K1=2) — so it cannot explain why 12-bit/2557
+survives to K1=12 while 12-bit/2677 dies at K1=4. The missing factor is
+Thread 20c's `ν̂ = λ₁(L2)/√det L2` for the 2D rival block
+`L2 = ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩`. On the in-sample grid, `P = (pv/gh_L)·ν̂`
+separates 16/16 rows at exactly 1.0 (every P<1 row is 5/5; every P≥1 row is
+≤4/5).
+
+Because that threshold and exponent were chosen post hoc, it was tested on 20
+FRESH 16–17-bit j=0 GLV curves (bucketed by λ*, **not** by ν̂, so the sample is
+independent of the predictor), 120 (curve, K1) cells, 3 seeds each:
+
+| predictor | AUC | best-fit accuracy | acc at threshold 1.0 |
+|---|---|---|---|
+| **P = (pv/gh_L)·ν̂** | **0.981** | 0.933 @ 1.009 | **0.933** (pre-registered) |
+| pv/gh_L | 0.943 | 0.908 @ 1.058 | 0.800 |
+| eff | 0.944 | 0.908 @ 0.063 | — |
+| ν̂ | 0.693 | 0.658 @ 0.561 | — |
+
+Confusion matrix for the pre-registered rule `P<1 ⇒ recovery`: 63 TP / 7 FP /
+1 FN / 49 TN, accuracy 0.933 against a 0.533 majority baseline. Decile response
+is monotone: p_hat = 1.000 for deciles 1–4, 0.889, 0.611, 0.333, 0.028, 0.000,
+0.000. The pre-registered threshold 1.0 is within 1% of the fitted optimum
+(1.009), so the physical reading — planted vector inside the effective
+GH radius — holds rather than being a curve-fit.
+
+`P` beats both factors even when the baselines are given a free best-fit
+threshold and `P` is held to its pre-registered one. Honest sizing of the gain:
+`P`, `pv/gh_L` and `eff` are strongly correlated, so the improvement is
+0.981 vs 0.943 AUC on 120 cells (8 misclassified vs 11) — real but modest.
+
+**F6 — this reconciles Thread 20a and Thread 20c, which appeared to conflict.**
+Thread 20c reported ν̂ with AUC 0.935; here ν̂ *alone* scores 0.693. No
+contradiction: 20c measured at essentially fixed eff, where `pv/gh_L` is
+constant and ν̂ carries all the variance. Across varying eff the ordering
+reverses. The two threads measured orthogonal factors of the same product.
+Note also that ν̂ is non-monotone in K1 on 12-bit/2677
+(0.710, 0.865, 0.997, 0.856, 0.771, 0.696, 0.675, 0.693), so it must be
+recomputed per (curve, K1) — it is not a curve-level constant.
+
+**F7 — REPO INTEGRITY: the 2026-07-29 ν̂ result was unreproducible; now fixed.**
+The two 2026-07-29 commits were parallel autolab sessions that each wrote a
+*different* file to the same path `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`
+(d525931: 674 lines; e845207: 505 lines). The merge kept d525931's version,
+orphaning e845207's — which is the module the ν̂ scripts import by path. Result:
+`glv_hnp_phase2_nuhat_control.py`, `glv_hnp_nuhat_vs_c1c2.py` and
+`glv_hnp_phase2_mu_response.py` all died at import with
+`AttributeError: module '_t20a' has no attribute 'glv_eigenvalues'`, i.e. the
+headline claim of e845207 ("ν̂ separator found, AUC 0.935") could not be
+reproduced from the repository at all.
+
+Fix: restored e845207's version verbatim (`git show e845207:… >`) as
+`secp256k1_cm_audit/glv_hnp_phase2_nuhat_base.py` and repointed the three
+importlib paths. No code was rewritten or guessed. All three scripts now run,
+and the claim reproduces exactly:
+- `glv_hnp_nuhat_vs_c1c2.py`: ν̂ AUC **0.935**, best acc 89.0%, vs μ 0.523 and
+  max_a 0.748 — matches the commit message.
+- `glv_hnp_phase2_mu_response.py`: Spearman(ν̂, p_hat) = −0.339 / −0.468 /
+  −0.533 / −0.568 at m=8/9/10/11 — matches the docstring exactly.
+- `glv_hnp_phase2_nuhat_control.py` (24.3 s): Arm 5 causal test, one fixed curve
+  with a synthetic λ sweep, Spearman(ν̂, p_hat) = **−0.583, perm p=0.0002**,
+  while μ=λ* is null (+0.003, p=0.9672). So ν̂ is causal and λ* is not —
+  independently corroborating both the 2026-07-29 T3 falsification of λ* and
+  F5 above.
+
+Lesson for future runs: two autolab sessions on the same day writing the same
+path is a live failure mode. Prefer thread-suffixed filenames.
+
+### Next step proposal
+**Thread 24 — test `P` at cryptographic scale, then decide Phase 2's fate.**
+`P<1` is validated only at 16–17 bits with m=12. Two concrete sub-tasks, in
+order:
+1. **m-dependence**: `P` currently fixes m=12. Sweep m ∈ {8, 12, 16, 24, 32} on
+   the same 20 harvested curves and check whether the threshold stays at 1.0 or
+   drifts with dimension. ~10-minute run, reuses
+   `glv_hnp_phase2_projected_cvp.py:harvest_fresh_curves` directly.
+   Falsifier: if the best-fit threshold moves outside [0.95, 1.05] as m varies,
+   `P` is a 12-signature artifact, not a law.
+2. **secp256k1 placement**: `glv_hnp_nuhat_vs_c1c2.py` already reports
+   secp256k1 at ν̂=0.6639 (50th percentile) at eff=0.0993. Combined with
+   `pv/gh_L` at realistic (m, K1), this yields the concrete `P` value for
+   secp256k1 and hence the exact nonce-leakage budget at which a GLV-aware HNP
+   attack would become viable. That number is the paper-relevant deliverable
+   and it is now a ~20-line computation.
+
+Given F2, do **not** invest further in re-embedding or stronger reduction for
+Phase 2 — that direction is exhausted. `P` is the remaining live output.
+
+### Commits made
