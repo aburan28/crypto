@@ -6598,3 +6598,5 @@ sibling commits during Step 1, and (b) prefer date+thread-scoped script names
 over generic ones.
 
 ### Commits made
+
+5071c51 autolab 2026-08-06: Thread 23 — nu_hat is a continued-fraction quantity (exact); repair lost 07-29 merge casualties
