@@ -6602,4 +6602,4 @@ structural reason.
 
 ### Commits made
 
-(hash recorded in the following commit)
+c24b6a5 autolab 2026-08-06: Thread 23 — λ₁(L2) closed form proved exact; ν̂ threshold does not generalise
