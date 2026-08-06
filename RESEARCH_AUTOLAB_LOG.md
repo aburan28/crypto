@@ -6286,4 +6286,4 @@ LLL behaviour at 521 bits, this is the highest-value cheap fix available — but
 attack code that five prior log entries' numbers depend on, so it wants its own run.
 
 ### Commits made
-[recorded below after commit]
+d39f648 autolab 2026-08-06: Thread 23 — Phase-2 target was never centred; K1 wall moves out 3-4x
