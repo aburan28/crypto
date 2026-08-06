@@ -91,7 +91,7 @@ precision does not find the short vector.
 
 ### Commits made
 
-b159eb9 autolab 2026-08-06: Thread 23 — e_m projection is a no-op; rho_GH capacity law derived
+See next git hash after this entry.
 
 ### Next step proposal
 
