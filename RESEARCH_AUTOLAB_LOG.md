@@ -6103,3 +6103,197 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.**
+Proposed verbatim as the next step by the 2026-07-29 entry (log line ~6089) and not
+yet started; 8 days since last touch. Priorities 1/2/4/6 remain CLOSED/BLOCKED/
+DEAD-END, priority 3 completed 2026-07-21, so the GLV-HNP line is the only live one.
+
+Outcome: **Thread 23 is CLOSED as a negative result.** The reformulation works exactly
+as designed — the trivial vector is gone — and buys *nothing*. Two of the 2026-07-29
+entry's claims are corrected, and the failure is relocated: it is neither
+information-theoretic nor a reduction-strength problem.
+
+New artifacts:
+- `secp256k1_cm_audit/glv_hnp_phase2_thread23.py` (experiments U0–U9, 3.1 s total)
+- `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt` (245 lines)
+
+Environment note for future runs: fresh container needed `pip install cysignals fpylll
+sympy` (fpylll 0.6.4). `apt-get install pari-gp` failed — **no `gp` in this container**;
+this thread is pure Python so it did not matter.
+
+### Work done
+
+- **U0** reproduced the 2026-07-29 T4 K1-grid exactly (same seeds `[42,1234,9999,555,
+  31337]`, m=12): 2557 → `5,5,5,5,5,4,1,0` of 5; 2677 → `5,5,5,2,0,0,0,0`. Baseline
+  confirmed byte-for-byte, so every comparison below is exact.
+- **U1** swept S_D ∈ {1..256} on the original lattice (formulation A).
+- **U2** built **formulation B**: d eliminated via signature 0, using
+  `d ≡ B₀⁻¹(k1₀ + λk2₀ − A₀)` ⇒ `k1_j ≡ C_j + D_j k1₀ + λD_j k2₀ − λk2_j (mod n)`,
+  generators `{k1₀, k2₀…k2_{m−1}}`, dim **2m+1** instead of 2m+2. The `n·e_d` direction
+  does not exist in this lattice. Ran the same K1-grid, LLL and BKZ(20).
+- **U3** anatomy of λ₁ in formulation B; **U4** tested the λ-block μ as the competitor.
+- **U5/U6** introduced τ = ‖pv‖/GH(L) and validated it out-of-sample on 16 fresh 17-bit
+  j=0 GLV curves × 3 K1 values (48 cells).
+- **U7** τ(m) for m ∈ {6,8,12,16,24,32,48} (dim up to 97).
+- **U8** brute-forced *all* d′ ∈ [1,n) for consistency with every signature.
+- **U9** BKZ β-sweep up to β = dim (HKZ).
+- `cargo test --test curve_audit` → **5/5 pass** (5.49 s). No Rust touched.
+
+### Findings
+
+**1 — CORRECTION to 2026-07-29: "no choice of S_D removes it — both vectors scale
+linearly in S_D" is false.** Only *one* component of the planted vector scales with S_D:
+`‖pv‖² = (d·S_D)² + C²` while `‖n·S_D·e_m‖ = n·S_D`. Since d < n strictly, the trivial
+vector stops being λ₁ as soon as `S_D > C/√(n²−d²)`. Measured (`sv=triv?` column):
+
+| curve / K1 | S_D=1 | 2 | 4 | 8 | 16 | 32 | 64 | 256 |
+|---|---|---|---|---|---|---|---|---|
+| 2557/K1=4 `sv=triv?` | True | False | False | False | False | False | False | False |
+| 2557/K1=4 success | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 3/5 | 1/5 | 1/5 |
+| 2557/K1=8 success | 5/5 | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 1/5 | 0/5 |
+| 2677/K1=8 success | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 | 0/5 |
+
+So the trivial vector **is** removable — and removing it makes things strictly *worse*.
+Raising S_D lengthens the planted vector while the λ-block parasites are S_D-invariant,
+so sv/pv falls monotonically (2557/K1=8: 0.354 → 0.035). **The trivial `n·e_d` vector is
+a harmless bystander, not the obstruction.**
+
+**2 — Formulation B ties formulation A on all 16 grid cells, under both LLL and BKZ(20).**
+
+| curve | form | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | A | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 12-bit/2557 | **B** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 12-bit/2677 | A | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 12-bit/2677 | **B** | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+BKZ(20) likewise identical (A-BKZ = B-BKZ in all 8 cells checked). The 2026-07-29
+falsifier was: *"if sv/pv rises above 1 and the K1 wall moves outward, the reformulation
+is a real improvement."* Half of it fires — sv/pv reaches exactly **1.000 with sv = pv**
+on 2677/K1=4 (U3), i.e. **the planted vector genuinely becomes λ₁** — but the wall does
+not move by a single cell. **Verdict: not an improvement.** Thread 23 closed.
+
+Analytic reason the tie is not a coincidence: `det_B = det_A/(n·S_D)` and
+`dim_B = dim_A − 1`, so the two lattices have the same normalised volume.
+
+**3 — μ (the 2D λ-block shortest vector) is NOT the competitor.** Dead hypothesis,
+recorded so no future run retries it. At the *same* K1=8, m=12:
+
+| curve | λ* | μ | ‖pv_B‖ | μ/pv | outcome |
+|---|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 2737.6 | 7137.3 | 0.384 | **5/5** |
+| 12-bit/2677 | 0.070 | 5095.8 | 7035.8 | 0.724 | **0/5** |
+
+The curve with the *longer* parasite fails. The correlation is inverted, so the Hermite
+model `mu < ‖pv‖ ⟺ eff > 1.155/(2m/3+1)` (predicted wall eff* = 0.128) is wrong.
+
+**4 — NEW: τ = ‖pv‖/GH(L) predicts the wall location from first principles.**
+Both lattices are block-triangular so the volume is exact:
+`det_B = n^m · S_K1^m · S_K2^m`, `GH(L) = det^{1/dim}·√(dim/2πe)`.
+
+| τ_B (m=12) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| value | 0.597 | 0.742 | 0.870 | 1.111 | 1.251 | 1.600 | 1.772 | 2.273 |
+
+Pooled over both 12-bit curves: 5/5 cells have τ ∈ [0.596, 1.251], 0/5 cells
+τ ∈ [1.251, 2.281]. Out-of-sample on 48 cells from 16 fresh 17-bit curves
+(p ≈ 2¹⁶, λ* spread [0.0068, 0.4816]):
+
+| predictor | success range | failure range | AUC |
+|---|---|---|---|
+| **τ** | [0.388, 1.348] | [1.310, 1.357] | **0.960** |
+| eff = K1·K2/n | [0.015, 0.157] | [0.155, 0.157] | 0.956 |
+| λ* | [0.007, 0.482] | [0.007, 0.446] | 0.576 |
+
+**But τ carries no curve-specific information** — `det_B` depends on K1·K2 only and
+‖pv‖ ≈ n√(2m/3+1) is K-free, so τ is an exact reparametrisation of eff. Proof by
+knife-edge: at K1=8 the two curves sit at τ_B = **1.250710 (5/5)** and
+**1.251020 (0/5)**. τ tells you *where* the generic wall is; it does not explain λ*.
+
+**5 — More signatures do not cross the wall, and now we know why.** τ(m) falls to the
+asymptote `τ_∞ = √(2πe/3 · eff)` (both ‖pv‖ and GH grow as √m):
+
+| m | 6 | 8 | 12 | 16 | 24 | 32 | 48 | τ_∞ |
+|---|---|---|---|---|---|---|---|---|
+| dim_B | 13 | 17 | 25 | 33 | 49 | 65 | 97 | — |
+| τ, K1=8 | 1.458 | 1.290 | 1.251 | 1.167 | 1.056 | 0.990 | 0.990 | 0.944 |
+| 2557 success | 3/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | |
+| 2677 success | 1/5 | 0/5 | 0/5 | 1/5 | 0/5 | 1/5 | 1/5 | |
+
+2677 at m=48 (dim 97) reaches τ = 0.991 — *below* the τ = 1.29 at which its sister curve
+already recovers 5/5 — and still returns 1/5. This is the quantitative form of T4b
+(2026-07-29) and it is stronger: the failure survives a 4× increase in data.
+
+**6 — DECISIVE: the failing instances are uniquely solvable.** n is small enough to
+enumerate every candidate secret. For each d′ ∈ [1,n) test whether `(A_i + B_i d′) mod n
+∈ S = {k1 + λk2 : k1<K1, k2<K2}` for all i:
+
+| curve | K1 | m | \|S\| | eff | #consistent d′ | E[wrong] | LLL |
+|---|---|---|---|---|---|---|---|
+| 2557 | 8 | 12 | 406 | 0.153 | **1** | 4.3e−07 | 5/5 |
+| 2557 | 8 | 24 | 406 | 0.153 | **1** | 6.9e−17 | 5/5 |
+| 2677 | 8 | 12 | 416 | 0.157 | **1** | 6.0e−07 | **0/5** |
+| 2677 | 8 | 24 | 416 | 0.157 | **1** | 1.4e−16 | **0/5** |
+
+`#consistent = 1` in **every** cell, including all 0/5 cells (the true d is of course
+always among them — asserted in code). **The λ*=0.07 wall is NOT information-theoretic.**
+This refutes the second horn of the 2026-07-29 dichotomy ("if the wall stays at K1≈4–6,
+then the wall is information-theoretic and Phase 2 is at its ceiling"): the wall did
+stay, and it is not information-theoretic.
+
+**7 — …and it is not a reduction-strength problem either.** β-sweep to β = dim (HKZ =
+exact SVP oracle on every projected block), K1=8:
+
+| curve | m | dim_B | β=2 | β=10 | β=20 | β=25 | **HKZ** |
+|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 8 | 17 | 5/5 | 5/5 | 5/5 | 5/5 | **5/5** |
+| 12-bit/2557 | 12 | 25 | 5/5 | 5/5 | 5/5 | 5/5 | **5/5** |
+| 12-bit/2677 | 8 | 17 | 0/5 | 1/5 | 1/5 | 1/5 | **1/5** |
+| 12-bit/2677 | 12 | 25 | 0/5 | 0/5 | 0/5 | 0/5 | **0/5** |
+
+Note β=2 (≡ LLL) already solves 2557/m=8 while HKZ never solves 2677/m=12.
+
+**Net structural conclusion.** On the λ*=0.07 curve at eff ≈ 0.157 the instance is
+uniquely determined (6), unaffected by removing the trivial vector (1,2), unaffected by
+4× more data (5), and unsolved by an HKZ-reduced basis (7). Precisely stated, (7) shows
+*no row of an HKZ-reduced basis encodes d* — it does not by itself prove the planted
+vector fails to minimise its Kannan coset, because HKZ constrains basis rows, not coset
+minima. But it does move the suspect from the *reduction* to the *encoding*: the
+hypothesis to kill next is that on small-λ* curves the planted vector is not the
+shortest vector of the coset `{v ∈ L : v_kannan = ±S_KAN}`, i.e. some wrong d′ yields a
+shorter lattice vector even though it is *arithmetically* inconsistent (U8 rules out
+consistency, not shortness).
+
+### Next step proposal
+
+**Thread 24 — enumerate the Kannan coset directly and settle encoding-vs-reduction.**
+For the 2677/K1=8/m=12 instance, compute for every d′ ∈ [1,n) the exact minimum-norm
+lattice vector in its coset: per signature i this is an independent 2-D CVP,
+`min over k2 of (k1_i·S_K1)² + (k2·S_K2)²` s.t. `k1_i ≡ (A_i+B_i d′) − λk2 (mod n)`
+centred — solvable exactly with the already-written `gauss_reduce_2d`
+(`glv_hnp_phase2_thread23.py:105`), so the whole sweep is O(n·m) not O(n²·m).
+Falsifier, sharp either way:
+- if `argmin_{d′} ‖v(d′)‖ ≠ d_true` → the **encoding** is lossy; the column scaling
+  `(S_K1,S_K2) = (n/K1, n/K2)` is the wrong metric on small-λ* curves, and the fix is a
+  λ-adapted scaling (Gauss-reduce the (k1,k2) box against the λ-block *before* embedding).
+  Predicted signature: the winning d′ is one whose k2 vector is unusually small.
+- if `argmin_{d′} = d_true` → the encoding is sound and the coset minimum is simply
+  unreachable by basis-row-reporting; the fix is a genuine CVP call (Babai nearest-plane
+  or enumeration on the coset), not a shorter-vector search.
+
+Runtime estimate: seconds. This is the cheapest remaining decisive experiment and it
+retires the ambiguity left by (7) above.
+
+Secondary (independent, cheap): rerun U8-style uniqueness enumeration on the four fresh
+17-bit curves that failed at K1=40 with λ* > 0.29 (65677/65167 and 65539/65287 *succeed*
+at K1=40 while 13 others fail) — those two outliers are the only cells where high λ*
+beats the τ wall, and they may be the cleanest handle on the λ* mechanism.
+
+### Commits made
+
+(hash recorded in the follow-up commit below)
