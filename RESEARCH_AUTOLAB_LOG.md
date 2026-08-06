@@ -6561,3 +6561,5 @@ invariant: eight are falsified (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ
 μ) and ν̂ already occupies that slot with a known mechanism.
 
 ### Commits made
+
+5ddea5d autolab 2026-08-06: Thread 23 falsified — trivial vector is not the wall; μ IS λ₁; restored merged-away 07-29 log entry
