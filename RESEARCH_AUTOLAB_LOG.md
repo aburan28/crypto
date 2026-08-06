@@ -6299,3 +6299,5 @@ Given F2, do **not** invest further in re-embedding or stronger reduction for
 Phase 2 — that direction is exhausted. `P` is the remaining live output.
 
 ### Commits made
+
+271f88c autolab 2026-08-06: Thread 23 closed negatively — Phase-2 wall is information-theoretic; two-factor predictor P validated out-of-sample (AUC 0.981)
