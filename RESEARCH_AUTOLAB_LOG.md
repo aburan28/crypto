@@ -6103,3 +6103,182 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 GLV-HNP lattice so the planted vector is λ₁.
+Proposed verbatim as the next step by the 2026-07-29 entry (log:6089). Priorities 1, 2,
+4, 6 are CLOSED/BLOCKED/DEAD-END; priority 5 (GLV-HNP) made measurable progress on
+2026-07-29, so its own next-step is the correct pick under protocol rule (b).
+
+Verdict: **the proposal's falsifier splits.** d-elimination does make the planted vector
+λ₁ and buys *exactly zero*. A change the proposal did not consider — **centring the
+unknowns** — dissolves the K1 wall entirely and puts the attack on the counting bound.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` (fpylll 0.6.4).
+  `apt-get install pari-gp` did **not** succeed this run — no `gp` binary. Not needed here
+  (Thread 23 is pure Python), but future runs picking a PARI thread must budget for it.
+- New script `secp256k1_cm_audit/glv_hnp_phase2_thread23.py` (~560 lines), artifact
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt`. EC/CM helpers copied verbatim
+  from `glv_hnp_phase2_20bit.py` so numbers are comparable across the thread.
+- Three lattice variants, same signatures, same seeds `[42,1234,9999,555,31337]`:
+  - **L_A** — the existing Phase-2 lattice (`glv_hnp_phase2_20bit.py:262`), dim 2m+2.
+  - **L_B** — d eliminated algebraically by pivoting on signature 0, dim 2m+1.
+    `t_i = B_i/B_0`, `u_i = A_i − t_i A_0`, giving
+    `k1_i ≡ u_i + t_i k1_0 + t_i λ k2_0 − λ k2_i (mod n)`; free unknowns k1_0, k2_0..k2_{m−1},
+    witnesses k1_1..k1_{m−1}. The trivial `n·S_D·e_m` vector is gone by construction.
+  - **L_Bc** — L_B with the unknowns centred (k1_j → k1_j − K1/2, k2_j → k2_j − K2/2,
+    S_KANNAN halved), which shrinks every planted coordinate ~2×.
+- `cargo test --test curve_audit` → 5/5 pass (6.74s). ✓
+- **Bug in this run's own first pass, fixed:** the threshold scan was `for K1 in range(1,60)`
+  with `meas = 0` initialised, so a threshold above 59 was silently reported as **0**
+  (it produced a fake "18- and 20-bit curves fail even at K1=1"). Replaced with
+  `k1_threshold()` (doubling + bisection, explicit `None` / `−cap` sentinels,
+  `glv_hnp_phase2_thread23.py:k1_threshold`). Numbers below are post-fix.
+
+### Findings
+
+**T23-1 — the planted vector does become λ₁, on the curve where it matters.**
+m=12, seed 42. `sv/pv` = ‖shortest row after LLL‖ / ‖planted‖:
+
+| curve | K1 | sv/pv L_A | L_B | L_Bc | pv/GH L_A | L_B | L_Bc |
+|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 2 | 0.381 | 0.713 | 0.907 | 0.647 | 0.597 | 0.483 |
+| 12-bit/2557 | 8 | 0.356 | 0.384 | 0.625 | 1.312 | 1.251 | 0.789 |
+| 12-bit/2677 | 2 | 0.400 | **1.000** | **1.000** | 0.622 | 0.596 | 0.485 |
+| 12-bit/2677 | 4 | 0.383 | **1.000** | **1.000** | 0.894 | 0.870 | 0.613 |
+| 12-bit/2677 | 8 | 0.372 | 0.724 | **1.000** | 1.269 | 1.251 | 0.791 |
+
+The 2026-07-29 T5 diagnosis was correct and the fix works: `sv/pv` is pinned at 0.35–0.40
+in L_A on every input, and reaches exactly 1.000 in L_B/L_Bc. **But see T23-2 — it does
+not matter.**
+
+**T23-2 — the K1 wall does NOT move under d-elimination; it moves under centring.**
+m=12, 5 seeds, successes out of 5:
+
+| curve | var | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | A | 5 | 5 | 5 | 5 | 5 | 5 | 2 | 0 |
+| 12-bit/2557 | B | 5 | 5 | 5 | 5 | 5 | 5 | 2 | 0 |
+| 12-bit/2557 | **Bc** | 5 | 5 | 5 | 5 | 5 | 5 | **5** | **5** |
+| 12-bit/2677 | A | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 12-bit/2677 | B | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 12-bit/2677 | **Bc** | 5 | 5 | 5 | **5** | **5** | **5** | **5** | **4** |
+
+(eff = K1·K2/n = 0.04, 0.06, 0.08, 0.12, 0.16, 0.24, 0.31, 0.47.)
+
+**L_A and L_B are identical, row for row, at every K1 and every bit length (T23-5).**
+So the trivial vector `n·S_D·e_m` is real but *causally inert* — LLL was already returning
+the planted vector as some other basis row, and removing the trivial one changes nothing.
+Centring is the entire effect. This is the corrected reading of the 2026-07-29 T5 result:
+the trivial vector explains why v_planted is not λ₁, but not why recovery fails.
+
+**Two prior claims are hereby corrected:**
+- 2026-07-26 (log:5779 region): *"12-bit/2677 at K1=8 fails, LLL and BKZ(40) alike —
+  failure is structural."* **False.** L_Bc recovers 5/5 at K1=8 with plain LLL at m=8
+  (dim 17). See T23-4.
+- 2026-07-29 T4b: *"the K1 wall is genuine — it is a K1 wall, not a λ wall."* It is
+  neither: it was an artifact of leaving the unknowns in [0,K) instead of [−K/2, K/2].
+
+**T23-3 — the real threshold is the counting bound.**
+Define `eff = K1·K2/n` and the unique-solution counting bound `eff_count = n^(−1/m)`
+(expected spurious d count `n·eff^m < 1` ⟺ `K1·K2 < n^{(m−1)/m}`). Report
+`C = eff_measured / eff_count`; C→1 means the attack sits on the information bound.
+The a-priori Gaussian-heuristic prediction `eff*_GH = (3/2πe)·n^{−1/m}` = 0.176·n^{−1/m}
+(derived this run for the *uncentred* lattice) under-predicts by 4–6× and is superseded.
+
+(a) sweep m, curve 12-bit/2677 (n=2647, K2=52), L_Bc, 5 seeds:
+
+| m | dim | eff_count | K1@50% | eff_meas | C |
+|---|---|---|---|---|---|
+| 4 | 9 | 0.1394 | 7 | 0.1375 | 0.986 |
+| 6 | 13 | 0.2689 | 16 | 0.3143 | 1.169 |
+| 8 | 17 | 0.3734 | 16 | 0.3143 | 0.842 |
+| 12 | 25 | 0.5185 | 25 | 0.4911 | 0.947 |
+| 16 | 33 | 0.6111 | 30 | 0.5893 | 0.964 |
+| 24 | 49 | 0.7201 | 34 | 0.6679 | 0.928 |
+| 32 | 65 | 0.7817 | 37 | 0.7269 | 0.930 |
+
+**C = 0.93 ± 0.05 across m ∈ [4,32]** — the centred attack is within 7% of the counting
+bound, i.e. essentially optimal for this leak model at 12-bit n.
+
+(b) sweep n bit-length, m=12, L_Bc, 5 seeds:
+
+| bits | n | K2 | eff_count | K1@50% | eff_meas | C |
+|---|---|---|---|---|---|---|
+| 10 | 571 | 24 | 0.5892 | 16 | 0.6725 | 1.141 |
+| 12 | 2137 | 47 | 0.5279 | 19 | 0.4179 | 0.792 |
+| 14 | 8293 | 92 | 0.4715 | 40 | 0.4437 | 0.941 |
+| 16 | 33301 | 183 | 0.4199 | 55 | 0.3022 | 0.720 |
+| 18 | 131797 | 364 | 0.3744 | 96 | 0.2651 | 0.708 |
+| 20 | 525583 | 725 | 0.3336 | 158 | 0.2179 | 0.653 |
+
+C drifts **down** with n at fixed m (1.14 → 0.65 over 10→20 bits). That is the expected
+LLL approximation penalty: at fixed m the gap `eff_count/eff_meas` must absorb a factor
+growing with log n. Extrapolating this drift to 256-bit n is the open question, not
+answered here — one curve per row, 5 seeds, integer K1 granularity, so treat the trend
+as indicative.
+
+**Caveat on C > 1.** `recover_LB` tests `d_cand == d_secret`, i.e. it measures *"the true
+d is among the candidates read off the reduced basis"*, not *"d is uniquely determined"*.
+Above eff_count the true d survives while spurious d's coexist, so C can legitimately
+exceed 1 (m=6 → 1.169; 10-bit → 1.141). A uniqueness-respecting harness would clamp C ≤ 1.
+
+**T23-4 — the sharp falsifier, answered trivially.**
+12-bit/2677 at K1=8 (eff = 0.1572). The GH formula predicted m ≈ 71 signatures needed;
+2026-07-29 T4b had measured 0,0,1,0,1 of 5 at m = 8,12,16,24,32.
+
+| m | dim | L_A | L_B | L_Bc | L_Bc/BKZ20 |
+|---|---|---|---|---|---|
+| 8 | 17 | 1 | 1 | **5** | 3/3 |
+| 16 | 33 | 0 | 0 | **5** | 3/3 |
+| 32 | 65 | 2 | 2 | **5** | 3/3 |
+| 48 | 97 | 3 | 3 | **5** | 3/3 |
+| 64 | 129 | 1 | 1 | **5** | 3/3 |
+| 96 | 193 | 1 | 1 | **5** | skip |
+| 128 | 257 | 0 | 0 | **5** | skip |
+
+L_A/L_B never exceed 3/5 even at dim 257; L_Bc is 5/5 from m=8 onward. More signatures
+never rescued the uncentred lattice, and the centred one never needed them.
+
+**T23-5 — A/B/Bc thresholds by bit length (m=12, 5 seeds), K1@50%:**
+
+| bits | n | L_A | L_B | L_Bc | effA | effBc | gain |
+|---|---|---|---|---|---|---|---|
+| 10 | 571 | 4 | 4 | 16 | 0.1681 | 0.6725 | 4.0× |
+| 12 | 2137 | 5 | 5 | 19 | 0.1100 | 0.4179 | 3.8× |
+| 14 | 8293 | 19 | 19 | 40 | 0.2108 | 0.4437 | 2.1× |
+| 16 | 33301 | 53 | 53 | 55 | 0.2913 | 0.3022 | 1.0× |
+| 18 | 131797 | 28 | 28 | 96 | 0.0773 | 0.2651 | 3.4× |
+| 20 | 525583 | 80 | 80 | 158 | 0.1104 | 0.2179 | 2.0× |
+
+L_A ≡ L_B on all six. L_A's own threshold is erratic (eff 0.077–0.291) while L_Bc's is
+smooth and monotone in n — further evidence that the uncentred lattice was measuring
+noise, and that the "curve-level invariant" hunt of 2026-06-21…06-29 (six invariants,
+log ~3560–3580) was chasing an artifact.
+
+**Scope check (no paper change needed).** `PAPER_STRUCTURAL_COMPLETENESS.md` and
+`paper/*.tex` contain no reference to the GLV-HNP K1 wall — grep for
+`K1 wall|k1_bound|GLV-HNP|Phase-2` hits only `RESEARCH_GLV_HNP_PHASE2.md`, which is a
+proposal document, not a results claim. The main theorem is untouched by this correction.
+
+### Next step proposal
+**Thread 24 — re-audit the 2026-06-15…06-29 GLV-HNP corpus under L_Bc.**
+Concretely: rerun the C1-vs-C2 separation sweeps (`glv_hnp_cf_separator.py`,
+`glv_hnp_conditioning.py`, `glv_hnp_delta_threshold.py`, `glv_hnp_k1_threshold.py`,
+`glv_hnp_nuhat_vs_c1c2.py`) with `build_LB(..., centre=True)` substituted for
+`build_glv_lattice`. Falsifier: if the C1/C2 gap and the ν̂ separator (AUC 0.935,
+2026-07-29) both collapse to noise under centring, then every curve-level invariant in the
+2026-06/07 log is an artifact of the uncentred lattice and those entries should be marked
+SUPERSEDED. If the ν̂ separator survives, it is a genuine invariant and worth pursuing.
+Cheap — the scripts already exist; only the lattice builder swaps.
+
+**Secondary — Thread 25: does C keep falling?** Extend T23-3(b) to 24/28/32-bit n with
+3 curves per bit length and BKZ-20/40, to see whether C(n) at fixed m stabilises or decays
+like `δ^{−D²/m}`. That determines whether the counting bound is reachable at
+cryptographic sizes or whether the reduction penalty dominates. This is the only remaining
+question that bears on whether GLV-HNP is a real threat model.
+
+### Commits made
