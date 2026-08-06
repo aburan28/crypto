@@ -6233,4 +6233,5 @@ better reduction, not better scaling. Cost: one grid re-run (~10 min), no new th
 Secondary (cheap): record `fpylll.__version__` in every future Phase-2 output artifact.
 
 ### Commits made
-[filled in below]
+
+10b55cb autolab 2026-08-06: Thread 23 — d-elimination is inert; recentring moves the K1 wall 2.8x
