@@ -6282,3 +6282,7 @@ removes it" should be marked corrected in place, pointing at EXP S above.
 
 ### Commits made
 31e4660 autolab 2026-08-06: Thread 23 — pivot lattice makes planted vector λ₁ but K1 wall does not move
+
+Pushed to branch `claude/zen-pascal-qkafsx` (not `main`) — this session was scoped to a
+designated feature branch, so the protocol's `git push origin main` does not apply. Not yet
+merged; a future run reading only `main` will not see this entry.
