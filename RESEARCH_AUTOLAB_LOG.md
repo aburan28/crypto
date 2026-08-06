@@ -6282,4 +6282,8 @@ key verification (~16 scalar mults per trial), not in LLL. Budget accordingly, o
 projective-coordinate fast path to the test harness before sweeping large m.
 
 ### Commits made
-588c174 autolab 2026-08-06: Thread 23 - Phase-2 lattice was uncentered; 4x bias-strength gain
+588c174 autolab 2026-08-06: Thread 23 — Phase-2 lattice was uncentered; 4x bias-strength gain
+9811519 autolab 2026-08-06: center nonce intervals in the production HNP lattice
+
+Pushed to branch `claude/zen-pascal-nhlvyw` (not `main` — this session is scoped to that
+branch; the protocol's `git push origin main` step does not apply here).
