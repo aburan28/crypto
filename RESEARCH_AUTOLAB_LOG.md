@@ -6103,3 +6103,179 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 GLV lattice so the planted vector is λ₁.**
+This is verbatim the next-step proposed by the 2026-07-29 entry (log line ~6089).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 3 closed 2026-07-21;
+priority 5 (GLV-HNP Phase 2) made measurable progress on 07-29, so protocol rule (b)
+selects its proposed continuation. Last touched 8 days ago → not "recent" under the
+7-day rule either way.
+
+The 07-29 falsifier was pre-registered and is answered below **in the negative**.
+
+### Work done
+
+- Environment (fresh container): `pari-gp` 2.15.4, `fpylll` 0.6.4, `cysignals`,
+  `sympy`. Reminder for future runs: neither `gp` nor `fpylll` is preinstalled;
+  `apt-get install pari-gp` needs `apt-get update` first.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread23_reformulation.py` (5 experiments
+  R1–R5b, 158 lines of output in
+  `secp256k1_cm_audit/glv_hnp_phase2_thread23_output.txt`). EC arithmetic, signature
+  generation and the V1 lattice are copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:230,254` so the comparison to 07-29 is exact.
+- Implemented two reformulations:
+  - **V1(S_D)** — existing lattice, `S_D` exposed as a parameter (dim 2m+2).
+  - **V2** — `d` eliminated algebraically by pivoting on signature 0 (dim 2m+1):
+    `t_i = B_i/B_0`, `c_i = A_i − t_i·A_0 (mod n)`, giving
+    `k_full_i ≡ t_i·k_full_0 + c_i (mod n)`. `d` never appears as a coordinate, so
+    the trivial vector cannot exist by construction; `d` is read back off the
+    recovered `(k1_0, k2_0)` as `d = (k1_0 + λk2_0 − A_0)/B_0`.
+  - V2 validated three ways before use: the m−1 reduced congruences hold exactly;
+    the planted vector solves `Mᵀx = pv` over **Z** (not just Q); recovery returns
+    the true `d`.
+- `cargo test --test curve_audit` → 5/5 pass (8.12s). ✓
+
+### Findings
+
+**1. The 07-29 claim "no choice of S_D removes the trivial vector" is WRONG.**
+Only the *d column* of the planted vector scales with S_D, not the whole vector:
+
+```
+E||v_planted||² = n²·(2m/3 + S_D²/3 + 1)     vs     ||n·S_D·e_m||² = n²·S_D²
+  ⇒  planted shorter  ⟺  S_D² > m + 3/2
+```
+Empirically the trivial vector stops being λ₁ at **S_D = 2** on all three historical
+curves — even earlier than the bound, because a third vector (see 3) overtakes it
+first. `trivial = sv` goes 5/5 → 0/5 between S_D=1 and S_D=2 on every curve.
+
+**2. Removing it buys nothing. sv/pv never reaches 1, and recovery does not improve.**
+
+| curve | variant | dim | sv/pv | recovered | E\|pv\|/n |
+|---|---|---|---|---|---|
+| 8-bit/199 | v1(S_D=1) | 14 | 0.543 | 5/5 | 2.29 |
+| 8-bit/199 | v1(S_D=3) | 14 | 0.613 | 4/5 | 2.81 |
+| 8-bit/199 | **v2** | 13 | **0.790** | 5/5 | 2.21 |
+| 12-bit/2557 | v1(S_D=1) | 18 | 0.445 | 5/5 | 2.58 |
+| 12-bit/2557 | v1(S_D=4) | 18 | 0.338 | 5/5 | 3.41 |
+| 12-bit/2557 | **v2** | 17 | **0.475** | 5/5 | 2.51 |
+| 12-bit/2677 | v1(S_D=1) | 22 | 0.387 | 0/5 | 2.80 |
+| 12-bit/2677 | v1(S_D=4) | 22 | 0.571 | 0/5 | 3.59 |
+| 12-bit/2677 | **v2** | 21 | **0.767** | 0/5 | 2.74 |
+
+Raising S_D actively *hurts*: 8-bit/199 goes 5/5 (S_D=1) → 4/5 (3) → 3/5 (6) → 1/5
+(8…32); 12-bit/2557 goes 5/5 → 4/5 (6) → 3/5 (8) → 1/5 (32). **S_D = 1 is optimal
+and the trivial vector is harmless.** V2 is marginally the best of the three
+(shortest planted vector, highest sv/pv) but recovers exactly the same instances.
+
+**3. STRUCTURAL — the real λ₁ is the 2-D λ-block vector, and it is
+signature-independent.** Once the trivial vector is gone, the shortest reduced row is
+in every case *exactly* the Gauss-reduced shortest vector μ of the 2-D sublattice
+`Λ_j = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` sitting in the (k1_j, k2_j) coordinate plane:
+
+| curve | variant | \|sv\|/n | μ_blk/n | k1-cols | d-col | k2-cols | kan | support |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | v1(S_D=1) | 1.000 | 1.396 | 0.000 | 1.000 | 0.000 | 0.000 | 1 |
+| 8-bit/199 | v1(S_D=3) | **1.396** | 1.396 | 0.712 | 0.000 | 0.702 | 0.000 | **2** |
+| 8-bit/199 | v2 | **1.396** | 1.396 | 0.712 | 0.000 | 0.702 | 0.000 | **2** |
+| 12-bit/2557 | v1(S_D=4) | **1.030** | 1.030 | 0.364 | 0.000 | 0.931 | 0.000 | **2** |
+| 12-bit/2557 | v2 | **1.030** | 1.030 | 0.364 | 0.000 | 0.931 | 0.000 | **2** |
+| 12-bit/2677 | v1(S_D=4) | **1.925** | 1.925 | 0.907 | 0.000 | 0.422 | 0.000 | **2** |
+| 12-bit/2677 | v2 | **1.925** | 1.925 | 0.907 | 0.000 | 0.422 | 0.000 | **2** |
+
+Exact agreement to 3 d.p., support = 2 coordinates, zero energy in the d and Kannan
+columns. Λ_j is a function of (n, λ, K1, K2) **only** — it contains no signature data,
+it is present identically in V1 and V2, and by Minkowski
+`μ ≤ (2/√3)^{1/2}·√(n·S_K1·S_K2) = 1.075·n/√eff`. So the "make the planted vector
+λ₁" programme cannot succeed by re-scaling or by removing d: **any lattice encoding
+the GLV relation `k = k1 + λk2 (mod n)` contains Λ_j.**
+
+Note μ still does *not* predict success (12-bit/2677 has the **largest** μ/n = 1.925
+and fails; 12-bit/2557 has the smallest, 1.030, and succeeds). That re-confirms the
+07-29 T2 falsification of ρ = μ/‖pv‖ from a second direction and closes it for good.
+
+**4. FALSIFIER VERDICT — the K1 wall does not move.** R3, 5 seeds per cell:
+
+*12-bit/2557 (λ\* = 0.340, m = 8)*
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| v1(S_D=1) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+| v1(S_D=4) | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 |
+| v2 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 |
+
+*12-bit/2677 (λ\* = 0.070, m = 10)*
+
+| variant | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| v1(S_D=1) | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| v1(S_D=4) | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| v2 | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+Both pre-registered conditions FAIL: sv/pv never exceeds 1 (max 0.790), and the wall
+on the λ\*=0.07 curve stays at K1 ≈ 4–6 in all three variants.
+**Per the 07-29 falsifier, the wall is information-theoretic and Phase 2 is at its
+ceiling. Thread 23 is CLOSED with a negative result.**
+
+R5b confirms it is not a reduction-strength artefact: BKZ(β=30) reproduces the LLL
+grid cell-for-cell (12 cells; the single difference is 0/5 → 1/5 at 2677/K1=6).
+
+**5. NEW POSITIVE RESULT — a closed-form model for the eff wall.** With
+`S_K1 = n/K1, S_K2 = n/K2, S_KAN = n, S_D = s`:
+```
+det(V1) = n^(3m+1)·s/(K1·K2)^m ,  dim = 2m+2
+det^(1/dim) → n·√(n/(K1·K2)) = n/√eff        (m → ∞)
+E||pv||  → n·√(2m/3)
+E||pv|| < GH = √(dim/2πe)·det^(1/dim)   ⟺   eff < 3/(2πe) = 0.1756
+```
+Checked against the R3 grid (18 cells, 5 seeds each): **16/18 correct**.
+
+| curve | m | K1 | eff | E\|pv\|/GH | observed | predicted |
+|---|---|---|---|---|---|---|
+| 2557 | 8 | 2–8 | 0.039–0.156 | 0.92–1.71 | 5/5 all | OK ✓ |
+| 2557 | 8 | 12–32 | 0.235–0.626 | 2.05–3.17 | ≤1/5 | FAIL ✓ |
+| 2677 | 10 | 2–4 | 0.039–0.079 | 0.82–1.12 | 5/5 | OK ✓ |
+| 2677 | 10 | **6, 8** | **0.118, 0.157** | 1.35, 1.54 | **0/5** | OK ✗✗ |
+| 2677 | 10 | 12–32 | 0.236–0.629 | 1.85–2.89 | 0/5 | FAIL ✓ |
+
+Both misses are on the low-λ\* curve, which walls one grid step early — consistent
+with 07-29 T4's "λ\* shifts the K1 wall by ~3× but creates no structural
+obstruction". So `eff = K1·K2/n` is the right variable (as T4 concluded) and
+**3/(2πe) ≈ 0.176 is an upper bound on the wall**, attained when λ\* is generic and
+pulled inward when λ\* is small. Cross-check against 07-29 T3 (eff = 0.05 → 19/20;
+0.15 → 3/20; 0.25 → 0/20): the bound is respected (0.25 > 0.176 fails) but the
+observed crossover sits between 0.05 and 0.15, i.e. below the bound, as expected.
+
+### Next step proposal
+
+Thread 23 is closed; the "planted-vector-as-λ₁" programme is dead (finding 3 is an
+impossibility argument, not a tuning failure). Two concrete successors, cheapest
+first:
+
+**Thread 24 — pin down the λ\* correction to the eff wall.** Finding 5 gives the wall
+to within one grid step; the residual is a λ\*-dependent shrink factor. Concretely:
+sweep the 20 fresh 17-bit curves already generated by `search_curves()` in
+`glv_hnp_phase2_lambda_threshold.py:373`, measure the empirical eff-wall per curve by
+bisection, and regress `eff_wall` against λ\* and μ/n. Falsifier: if
+`eff_wall ≈ 0.176·f(λ*)` fits with R² > 0.8 across 20 curves, the Phase-2 ceiling has
+a closed form and can go in the paper as a quantitative B-block bound; if no fit,
+the residual is instance-specific and the ceiling stays empirical. ~15 min of compute,
+all infrastructure exists.
+
+**Thread 25 — does the Λ_j obstruction survive a non-diagonal encoding?** Finding 3
+proves Λ_j is present in every *coordinate-wise* encoding of `k = k1 + λk2 (mod n)`.
+Open question: an encoding that mixes the (k1_j, k2_j) planes across j — e.g. one
+built from the rank-2 Z[ω]-module structure of the GLV decomposition rather than m
+independent 2-D blocks. Falsifier: construct such a lattice for m = 2 and check
+whether its λ₁ is still ~1.0–1.9 n. Expected outcome: it is, because Λ_j is forced by
+the *relation*, not the encoding — but this has not been checked and is the only
+remaining way the ceiling could move.
+
+Secondary (bookkeeping): the 07-29 entry's assertion that "no choice of S_D removes
+[the trivial vector]" should be read together with finding 1 above; it is corrected,
+not merely refined.
+
+### Commits made
