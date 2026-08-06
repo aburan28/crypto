@@ -1,0 +1,140 @@
+==============================================================================
+Thread 23 — make the planted vector lambda_1 (GLV-HNP Phase 2)
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP P1: structural check — the trivial vector, and its removal
+------------------------------------------------------------------------------
+(a) n*row_d - sum_i B_i*row_i == n*S_D*e_m exactly?
+(b) is that vector the shortest LLL vector of R0?
+(c) does the projected planted vector lie in R1?
+(d) rank and covolume of R0 vs R1 (predicted det(R1) = det(R0)/(n*S_D))
+
+curve                m    (a)    (b)    (c)  rk R0  rk R1  log det R0  log det R1        pred
+8-bit/199            6   True   True   True     14     13     80.0135     74.7202     74.7202
+12-bit/2557          8   True   True   True     18     17    148.8670    140.9813    140.9813
+12-bit/2677 FAIL    10   True   True   True     22     21    183.8042    175.9230    175.9230
+
+------------------------------------------------------------------------------
+EXP P2: sv/pv, R0 vs R1  (T5 of 2026-07-29 said sv/pv ~ 0.35 in R0)
+------------------------------------------------------------------------------
+sv/pv < 1 means LLL finds something SHORTER than the planted vector,
+i.e. the planted vector is not lambda_1 and SVP is the wrong target.
+
+curve                K1   m  R0 sv/pv  R1 sv/pv  R0 win  R1 win
+8-bit/199             2   6     0.543     0.790     5/5     5/5
+12-bit/2557           8   8     0.445     0.475     5/5     5/5
+12-bit/2677 FAIL      8  10     0.387     0.767     0/5     0/5
+
+------------------------------------------------------------------------------
+EXP P3: THE FALSIFIER — does the K1 wall move? (m=12, the T4 grid)
+------------------------------------------------------------------------------
+2026-07-29 T4 (R0):  lam*=0.340 -> wall at K1 ~ 12-16
+                     lam*=0.070 -> wall at K1 ~ 4-6
+If R1/R2 push the lam*=0.07 wall outward, the reformulation is real.
+
+
+[R0]
+curve                 lam* K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+12-bit/2557         0.3400 5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+12-bit/2677 FAIL    0.0699 5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+
+[R1]
+curve                 lam* K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+12-bit/2557         0.3400 5/5   5/5   5/5   5/5   5/5   4/5   1/5   0/5  
+12-bit/2677 FAIL    0.0699 5/5   5/5   5/5   2/5   0/5   0/5   0/5   0/5  
+
+[R2]
+curve                 lam* K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+12-bit/2557         0.3400 5/5   5/5   5/5   5/5   4/5   2/5   0/5   0/5  
+12-bit/2677 FAIL    0.0699 5/5   4/5   4/5   1/5   0/5   0/5   0/5   0/5  
+
+(eff = K1*K2/n with K2=52, n~2650: K1=2:0.039, K1=3:0.059, K1=4:0.079, K1=6:0.118, K1=8:0.157, K1=12:0.236, K1=16:0.314, K1=24:0.471)
+
+------------------------------------------------------------------------------
+EXP P4: Gaussian-heuristic accounting — is the wall information-theoretic?
+------------------------------------------------------------------------------
+GH(L) = sqrt(dim/(2*pi*e)) * det^(1/dim).  If ||pv|| > GH(L) the planted
+vector is no shorter than a random lattice point: NO reduction algorithm
+can single it out, and the wall is information-theoretic, not algorithmic.
+
+curve                K1    eff  R0 |pv|/GH  R1 |pv|/GH  R0 win  R1 win
+12-bit/2557           2  0.039       0.614       0.597     5/5     5/5
+12-bit/2557           3  0.059       0.757       0.742     5/5     5/5
+12-bit/2557           4  0.078       0.884       0.870     5/5     5/5
+12-bit/2557           6  0.117       1.120       1.111     5/5     5/5
+12-bit/2557           8  0.156       1.254       1.251     5/5     5/5
+12-bit/2557          12  0.235       1.592       1.600     4/5     4/5
+12-bit/2557          16  0.313       1.753       1.772     1/5     1/5
+12-bit/2557          24  0.469       2.232       2.273     0/5     0/5
+12-bit/2677 FAIL      2  0.039       0.613       0.596     5/5     5/5
+12-bit/2677 FAIL      3  0.059       0.758       0.743     5/5     5/5
+12-bit/2677 FAIL      4  0.079       0.883       0.870     5/5     5/5
+12-bit/2677 FAIL      6  0.118       1.123       1.115     2/5     2/5
+12-bit/2677 FAIL      8  0.157       1.254       1.251     0/5     0/5
+12-bit/2677 FAIL     12  0.236       1.597       1.605     0/5     0/5
+12-bit/2677 FAIL     16  0.314       1.754       1.772     0/5     0/5
+12-bit/2677 FAIL     24  0.471       2.240       2.281     0/5     0/5
+
+------------------------------------------------------------------------------
+EXP P5: BKZ retry of R1 at the wall
+------------------------------------------------------------------------------
+
+12-bit/2557 (lam*=0.3400):
+   K1=6   LLL: 5/5   BKZ20: 5/5   BKZ40: 5/5
+   K1=8   LLL: 5/5   BKZ20: 5/5   BKZ40: 5/5
+   K1=12  LLL: 4/5   BKZ20: 4/5   BKZ40: 4/5
+   K1=16  LLL: 1/5   BKZ20: 1/5   BKZ40: 1/5
+
+12-bit/2677 FAIL (lam*=0.0699):
+   K1=6   LLL: 2/5   BKZ20: 3/5   BKZ40: 3/5
+   K1=8   LLL: 0/5   BKZ20: 0/5   BKZ40: 0/5
+   K1=12  LLL: 0/5   BKZ20: 0/5   BKZ40: 0/5
+   K1=16  LLL: 0/5   BKZ20: 0/5   BKZ40: 0/5
+
+------------------------------------------------------------------------------
+EXP P6: what is lambda_1 of R1, and the BDD unique-decoding criterion
+------------------------------------------------------------------------------
+P3 showed R1 == R0 cell for cell, yet P2 shows R1 sv/pv is still < 1:
+removing the trivial vector exposed a DIFFERENT parasitic vector.
+Both R0 and R1 recover d from a vector in the coset {Kannan = +-S_KAN},
+so the governing quantity is not lambda_1 of the full lattice but
+        gamma = ||pv_0|| / (lambda_1(L_0)/2)
+where L_0 is the Kannan-0 sublattice (= the R2 lattice L2, generated by
+the modular rows, the d-row and the k2-rows) and pv_0 = (k1_i*S_K1,
+k2_i*S_K2) is the exact distance from the BDD target to L2.
+Unique decoding is possible iff gamma < 1.
+
+(a) anatomy of the shortest R1 vector (seed 42)
+curve                K1   sv/pv  k1-blk  k2-blk    kan  supp lam-blk?  sv/mu_min
+12-bit/2557           2   0.713   0.710   0.290  0.000     1     True      1.000
+12-bit/2557           4   0.467   0.379   0.621  0.000     1     True      1.000
+12-bit/2557           8   0.384   0.132   0.868  0.000     1     True      1.000
+12-bit/2557          16   0.358   0.037   0.963  0.000     1     True      1.000
+12-bit/2677 FAIL      2   1.000   0.123   0.713  0.164    12    False      0.695
+12-bit/2677 FAIL      4   1.000   0.197   0.653  0.150    12    False      0.732
+12-bit/2677 FAIL      8   0.724   0.822   0.178  0.000     1     True      1.000
+12-bit/2677 FAIL     16   0.442   0.536   0.464  0.000     1     True      1.000
+
+(b) the BDD criterion gamma = ||pv_0|| / (lambda_1(L2)/2), 5 seeds
+    lambda_1(L2) is EXACT (fpylll SVP on the LLL-reduced L2, dim 2m=24)
+
+curve                K1  mean gamma  pred<1  R1 win  agree
+12-bit/2557           2       2.465     0/5     5/5    0/5
+12-bit/2557           3       3.505     0/5     5/5    0/5
+12-bit/2557           4       4.027     0/5     5/5    0/5
+12-bit/2557           6       4.707     0/5     5/5    0/5
+12-bit/2557           8       5.005     0/5     5/5    0/5
+12-bit/2557          12       5.319     0/5     4/5    1/5
+12-bit/2557          16       5.399     0/5     1/5    4/5
+12-bit/2557          24       5.530     0/5     0/5    5/5
+12-bit/2677 FAIL      2       1.222     0/5     5/5    0/5
+12-bit/2677 FAIL      3       1.375     0/5     5/5    0/5
+12-bit/2677 FAIL      4       1.505     0/5     5/5    0/5
+12-bit/2677 FAIL      6       2.067     0/5     2/5    3/5
+12-bit/2677 FAIL      8       2.652     0/5     0/5    5/5
+12-bit/2677 FAIL     12       3.724     0/5     0/5    5/5
+12-bit/2677 FAIL     16       4.386     0/5     0/5    5/5
+12-bit/2677 FAIL     24       5.372     0/5     0/5    5/5
+
+Done.
