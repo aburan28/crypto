@@ -6103,3 +6103,156 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁.**
+Directly the next-step proposal of the 2026-07-29 entry (log line ~6089). Priorities
+1/3/6 are CLOSED, 2 is BLOCKED (F_p Rosenhain, 2026-07-26), 4 CLOSED; priority 5
+(GLV-HNP Phase 2) made measurable progress on 2026-07-29, so its proposed sub-task is
+the correct pick under protocol rule (b). Last log entry was 8 days ago, so no thread
+is inside the 7-day no-progress window.
+
+Outcome: **Thread 23 CLOSED — negative.** The reformulation does exactly what it was
+designed to do (the planted vector becomes λ₁) and buys **zero** recovery. The premise
+was wrong, and the reason is elementary; see "Findings" §3.
+
+### Work done
+
+- Environment (fresh container, nothing preinstalled): `pip install fpylll cysignals
+  sympy` → fpylll 0.6.4. Note for future runs: PARI/GP is **not** installed in the base
+  image either (`gp: command not found`); this run needed no PARI.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (5 experiments U0–U5),
+  reusing `gen_signatures` and the scale vector verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:230` so the L_O column is a bit-exact control
+  against the 2026-07-29 T4 table. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (129 lines).
+- Three lattices compared on the identical harness (m=12, seeds
+  {42,1234,9999,555,31337}, K1 ∈ {2,3,4,6,8,12,16,24}):
+  - **L_O** original, dim 2m+2 (`build_glv_lattice`, `glv_hnp_phase2_20bit.py:263`).
+  - **L_R** d-column deleted, dim 2m+1. d is no longer a coordinate; it is recovered
+    algebraically from the reduced vector via d = (k1_i + λ·k2_i − A_i)·B_i⁻¹ mod n,
+    required consistent over all i.
+  - **L_B** Kannan row+column also deleted, dim 2m; explicit CVP by exact-rational
+    Babai nearest-plane against t = (A_i·S_K1, 0^m).
+- U0 states the Gaussian-heuristic prediction **before** U3 runs, so U3 is a real test.
+- `cargo test --test curve_audit` → 5/5 pass (4.24s, build 32.9s). ✓
+
+### Findings
+
+**1. U0 — analytic prediction (recorded before measurement).**
+det(L_O) = n^(3m+1)/(K1·K2)^m, det(L_R) = det(L_O)/(n·S_D) = n^(3m)/(K1·K2)^m. Deleting
+the d-column buys exactly one factor of n·S_D in the determinant, which amortises over
+dim as n^(1/m) — an m-th root. With C = √(3/2πe) = 0.4191 the walls are
+
+| curve | variant | K1_wall (continuous) | eff_wall | gain vs O |
+|---|---|---|---|---|
+| 12-bit/2557 | O | 4.00 | 0.0782 | 1.000× |
+| 12-bit/2557 | R | 5.00 | 0.0978 | 1.250× |
+| 12-bit/2557 | B | 5.00 | 0.0978 | 1.250× |
+| 12-bit/2677 | O | 4.00 | 0.0786 | 1.000× |
+| 12-bit/2677 | R | 5.00 | 0.0982 | 1.250× |
+
+Predicted: 1.25× on a continuous K1 axis, i.e. **invisible at integer K1**.
+
+**2. U1/U2 — the reformulation is correct and achieves its stated goal.**
+rank(L_R) = 2m+1 and rank(L_B) = 2m exactly (the d-row is Q-dependent on the n·S_K1·e_i
+rows but Z-essential; fplll emits one zero row, which is dropped). v_R ∈ L_R and
+v_B − t ∈ L_B verified by exact Babai hit-test; algebraic d-recovery reproduces d_secret.
+And the 2026-07-29 falsifier's first clause is **satisfied in its strongest form** — for
+the 2677 curve the planted vector is not merely competitive but *is* the shortest vector:
+
+| curve | K1 | sv/pv (L_O) | \|sv[m]\|/n (L_O) | sv/pv (L_R) | sv == pv (L_R) |
+|---|---|---|---|---|---|
+| 2557 | 2 | 0.4008 | 1.0000 | 0.7134 | False |
+| 2557 | 4 | 0.3839 | 1.0000 | 0.4672 | False |
+| 2557 | 8 | 0.3725 | 1.0000 | 0.3836 | False |
+| 2677 | 2 | 0.4052 | 1.0000 | **1.0000** | **True** |
+| 2677 | 4 | 0.3878 | 1.0000 | **1.0000** | **True** |
+| 2677 | 8 | 0.3762 | 1.0000 | 0.7243 | False |
+
+L_O reproduces T5 exactly (sv/pv ∈ [0.37, 0.41], all energy in the d-column).
+
+**3. U3 — the wall does not move. L_R is cell-for-cell identical to L_O.**
+
+| curve | var | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 | O | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | **R** | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 1/5 | 0/5 |
+| 2557 | B | 5/5 | 5/5 | 5/5 | 5/5 | 4/5 | 2/5 | 0/5 | 0/5 |
+| 2677 | O | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | **R** | 5/5 | 5/5 | 5/5 | 2/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 | B | 5/5 | 4/5 | 4/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+The L_O row reproduces the 2026-07-29 T4 table exactly — control validated. **L_R is
+identical in all 16 cells on both curves.** L_B (explicit CVP) is strictly *worse*:
+the 2557 wall drops from K1=12 to K1=8.
+U4: BKZ(30) on L_R changes exactly one cell out of eight (2677 at K1=6, 2/5→3/5) —
+noise. Per the falsifier stated on 2026-07-29: **the wall is information-theoretic and
+Phase 2 is at its ceiling.**
+
+**4. Why the premise was wrong (the elementary reason).**
+`recover_d` (`glv_hnp_phase2_20bit.py:290`, and every variant since) scans **all** rows
+of the reduced basis for one whose Kannan entry is ±S_KANNAN. It never reads λ₁
+specifically. The trivial vector n·S_D·e_m has Kannan entry **0**, so the scanner skips
+it outright: it occupies a basis row but costs nothing. The trivial vector was
+**inert, not obstructive**. T5's measurement ("the planted vector is never λ₁") was
+correct; the consequence drawn from it ("therefore recovery is handicapped") was not.
+Recorded so no future run re-opens this.
+
+**5. U5 — new positive structural result: the L_R competitor is exactly the λ-block.**
+Energy of the L_R shortest vector by column block (k1 / k2 / Kannan), and μ = exact
+shortest vector of the 2-D block ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩ by Gauss reduction:
+
+| curve | K1 | sv/pv | E_k1 | E_k2 | E_kan | supp | λ-block? | μ/pv | recovers |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 | 2 | 0.7134 | 0.710 | 0.290 | 0.000 | 2 | True | 0.7134 | True |
+| 2557 | 4 | 0.4672 | 0.379 | 0.621 | 0.000 | 2 | True | 0.4672 | True |
+| 2557 | 6 | 0.3948 | 0.214 | 0.786 | 0.000 | 2 | True | 0.3948 | True |
+| 2557 | 8 | 0.3836 | 0.132 | 0.868 | 0.000 | 2 | True | 0.3836 | True |
+| 2557 | 12 | 0.3508 | 0.063 | 0.937 | 0.000 | 2 | True | 0.3508 | True |
+| 2677 | 2 | 1.0000 | 0.123 | 0.713 | 0.164 | 16 | False | 1.4381 | True |
+| 2677 | 4 | 1.0000 | 0.197 | 0.653 | 0.150 | 20 | False | 1.3659 | True |
+| 2677 | 6 | 0.9074 | 0.892 | 0.108 | 0.000 | 2 | True | 0.9074 | False |
+| 2677 | 8 | 0.7243 | 0.822 | 0.178 | 0.000 | 2 | True | 0.7243 | False |
+| 2677 | 12 | 0.5054 | 0.672 | 0.328 | 0.000 | 2 | True | 0.5054 | False |
+
+Whenever the planted vector is not shortest, the shortest vector is **exactly** the 2-D
+λ-block vector — support 2 on a single index pair (i, m+i), zero Kannan entry, and
+sv/pv agreeing with μ/pv to all printed digits. On the **failure** curve μ/pv crosses 1
+precisely at the wall (K1=4: 1.366 → 5/5; K1=6: 0.907 → 2/5; K1=8: 0.724 → 0/5). On the
+**success** curve μ/pv < 1 at *every* K1 including K1=2 (0.7134) and recovery still
+succeeds to K1=12. So μ is not a predictor — consistent with T2 (2026-07-29), which
+falsified ρ = μ/‖pv‖ on the 17-bit sweep — but we now know *what* the competitor is, and
+that the two curves differ by a factor ≈3 in eff at fixed μ/pv.
+
+**6. Calibration of the Gaussian heuristic against measurement.**
+GH predicts the 2677 wall accurately (predicted eff_wall 0.098, observed between
+eff=0.079 (5/5) and 0.118 (2/5)) but **underpredicts the 2557 wall by ≈3×** (observed
+4/5 at eff=0.235). Recovery is a BDD/coset condition, not SVP, so success below the GH
+threshold is expected — but the fact that the excess is ≈1× on one curve and ≈3× on the
+other is the actual remaining unknown in Phase 2.
+
+### Next step proposal
+
+**Thread 24 — explain the GH excess factor, not the raw wall.**
+Define per curve X = (observed eff wall) / (GH-predicted eff wall); measured X ≈ 1.0
+(2677) and X ≈ 3.0 (2557). Take the ~20 17-bit j=0 GLV curves already produced by
+`search_curves` in `glv_hnp_phase2_lambda_threshold.py:373`, measure X for each on the
+L_O grid, and regress X against μ/pv and λ*. Falsifier: if X is a function of μ/pv with
+R² > 0.7 we have a mechanistic curve-level predictor (which the raw-μ threshold of T2
+could not be, because in L_O the d-column vector masked μ); if X is scattered with no
+structure, Phase 2's per-curve variation is instance noise and the thread is done.
+Cost ≈ the T3 sweep, a few minutes.
+
+Caveat for whoever picks this up: T2 (2026-07-29) already falsified μ/‖pv‖ as a
+*direct* success predictor. Thread 24 is only worth running in the conditional form
+above (μ vs the GH *excess*, not vs raw success); do not re-run the direct test.
+
+**Do NOT re-attempt:** making the planted vector λ₁ (closed here); a λ/n or λ* viability
+threshold (falsified 2026-07-29 T3); ρ = μ/‖pv‖ as a direct predictor (falsified
+2026-07-29 T2); explicit Babai CVP (measured strictly worse, U3 above).
+
+### Commits made

@@ -1,0 +1,133 @@
+==============================================================================
+Thread 23 -- does removing the trivial e_m direction move the K1 wall?
+==============================================================================
+m = 12 signatures, seeds = [42, 1234, 9999, 555, 31337]
+  12-bit/2557        p=2557 n=2659 (12b) lam=1755 lam*=0.3400 K2=52
+  12-bit/2677 FAIL   p=2677 n=2647 (12b) lam=185 lam*=0.0699 K2=52
+
+------------------------------------------------------------------------------
+EXP U0: Gaussian-heuristic prediction of the K1 wall (analytic)
+------------------------------------------------------------------------------
+det(L_O) = n^(3m+1)/(K1*K2)^m,  dim 2m+2,  ||v_O||^2 ~ n^2*(2m/3 + 4/3)
+det(L_R) = n^(3m)  /(K1*K2)^m,  dim 2m+1,  ||v_R||^2 ~ n^2*(2m/3 + 1)
+Both give, with eff = K1*K2/n and C = sqrt(3/(2*pi*e)) = 0.4191:
+    L_O:  eff < C^2 * (C^2   / n)^(1/m)
+    L_R:  eff < C^2 * (C^2*3/(2m+3) * (2m+1)/(2m+3) ... )^(1/m)   [numeric below]
+i.e. dropping the d-column buys exactly one factor of  n*S_D  in the
+determinant, which amortises as  n^(1/m)  -- an m-th root.  Predicted
+gain is therefore SMALL.
+
+curve              variant  K1_wall  eff_wall  gain vs O
+12-bit/2557              O     4.00    0.0782     1.000x
+12-bit/2557              R     5.00    0.0978     1.250x
+12-bit/2557              B     5.00    0.0978     1.250x
+12-bit/2677 FAIL         O     4.00    0.0786     1.000x
+12-bit/2677 FAIL         R     5.00    0.0982     1.250x
+12-bit/2677 FAIL         B     5.00    0.0982     1.250x
+
+Per-K1 gap = GH/||planted||  (gap > 1 predicts the planted vector is
+plausibly lambda_1; gap < 1 predicts it is drowned):
+
+  12-bit/2557   (K2=52, n=2659)
+      K1     eff    gap_O    gap_R    gap_B
+       2  0.0391    1.333    1.396    1.528
+       3  0.0587    1.105    1.149    1.248
+       4  0.0782    0.968    1.001    1.081
+       6  0.1173    0.803    0.824    0.882
+       8  0.1564    0.703    0.718    0.764
+      12  0.2347    0.584    0.591    0.625
+      16  0.3129    0.511    0.515    0.540
+      24  0.4693    0.425    0.425    0.443
+
+  12-bit/2677 FAIL   (K2=52, n=2647)
+      K1     eff    gap_O    gap_R    gap_B
+       2  0.0393    1.339    1.403    1.536
+       3  0.0589    1.110    1.155    1.254
+       4  0.0786    0.973    1.006    1.087
+       6  0.1179    0.806    0.828    0.887
+       8  0.1572    0.707    0.722    0.769
+      12  0.2357    0.586    0.594    0.628
+      16  0.3143    0.513    0.517    0.544
+      24  0.4715    0.426    0.426    0.444
+
+PREDICTION (recorded before U3 runs): the L_R wall sits within ~10% of
+the L_O wall, so at integer K1 the two grids should be IDENTICAL.
+
+------------------------------------------------------------------------------
+EXP U1: correctness -- v_R in L_R, and algebraic d-recovery works
+------------------------------------------------------------------------------
+  12-bit/2557        rank(L_R)= 13 (expect 13)  v_R in L_R: True   d_alg==d: True   v_B-t in L_B: True  rank(L_B)=12 (expect 12)
+  12-bit/2677 FAIL   rank(L_R)= 13 (expect 13)  v_R in L_R: True   d_alg==d: True   v_B-t in L_B: True  rank(L_B)=12 (expect 12)
+  ALL CORRECTNESS CHECKS PASS: True
+
+------------------------------------------------------------------------------
+EXP U2: ||shortest vector after LLL|| / ||planted||, L_O vs L_R
+------------------------------------------------------------------------------
+2026-07-29 T5 measured sv/pv in [0.337, 0.368] for L_O, with the
+shortest vector always = n*S_D*e_m (all energy in the d-column).
+If the reformulation works, L_R should show sv/pv ~ 1.
+
+curve               K1  sv/pv (O) |sv[m]|/n (O)  sv/pv (R)  sv==pv (R)  rec O  rec R
+12-bit/2557          2     0.4008        1.0000     0.7134       False   True   True
+12-bit/2557          4     0.3839        1.0000     0.4672       False   True   True
+12-bit/2557          8     0.3725        1.0000     0.3836       False   True   True
+12-bit/2677 FAIL     2     0.4052        1.0000     1.0000        True   True   True
+12-bit/2677 FAIL     4     0.3878        1.0000     1.0000        True   True   True
+12-bit/2677 FAIL     8     0.3762        1.0000     0.7243       False  False  False
+
+------------------------------------------------------------------------------
+EXP U3: the 2026-07-29 T4 K1 grid, re-run for L_O / L_R / L_B
+------------------------------------------------------------------------------
+m=12, 5 seeds.  L_O column must reproduce the T4 table
+exactly (same harness, same seeds) -- that is the control.
+
+curve               var K1=2    K1=3    K1=4    K1=6    K1=8    K1=12   K1=16   K1=24  
+12-bit/2557           O 5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5    
+12-bit/2557           R 5/5     5/5     5/5     5/5     5/5     4/5     1/5     0/5    
+12-bit/2557           B 5/5     5/5     5/5     5/5     4/5     2/5     0/5     0/5    
+
+12-bit/2677 FAIL      O 5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5    
+12-bit/2677 FAIL      R 5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5    
+12-bit/2677 FAIL      B 5/5     4/5     4/5     1/5     0/5     0/5     0/5     0/5    
+
+Wall position (largest K1 with >=3/5 recovery):
+  12-bit/2557        O: K1_wall = 12
+  12-bit/2557        R: K1_wall = 12
+  12-bit/2557        B: K1_wall = 8
+  12-bit/2677 FAIL   O: K1_wall = 4
+  12-bit/2677 FAIL   R: K1_wall = 4
+  12-bit/2677 FAIL   B: K1_wall = 4
+
+------------------------------------------------------------------------------
+EXP U4: BKZ(30) retry of L_R at and just past the wall
+------------------------------------------------------------------------------
+If the wall is a reduction-quality artefact, stronger reduction moves it.
+If it is information-theoretic, BKZ changes nothing.
+
+curve              K1=4         K1=6         K1=8         K1=12       
+12-bit/2557        LLL 5/5 BKZ 5/5 LLL 5/5 BKZ 5/5 LLL 5/5 BKZ 5/5 LLL 4/5 BKZ 4/5
+12-bit/2677 FAIL   LLL 5/5 BKZ 5/5 LLL 2/5 BKZ 3/5 LLL 0/5 BKZ 0/5 LLL 0/5 BKZ 0/5
+
+------------------------------------------------------------------------------
+EXP U5: energy localisation of the L_R shortest vector
+------------------------------------------------------------------------------
+T5 (2026-07-29) localised the L_O obstruction to the d-column.  That
+column is gone in L_R, so: what is short in L_R when the planted vector
+is not?  Columns: [0..m-1] k1-block, [m..2m-1] k2-block, [2m] Kannan.
+mu = exact shortest vector of the 2D lambda-block <(n*S_K1,0), (-lam*S_K1,S_K2)>.
+
+curve               K1   sv/pv   E_k1   E_k2  E_kan  supp  lam-blk   mu/pv   rec
+12-bit/2557          2  0.7134  0.710  0.290  0.000     2     True  0.7134  True
+12-bit/2557          4  0.4672  0.379  0.621  0.000     2     True  0.4672  True
+12-bit/2557          6  0.3948  0.214  0.786  0.000     2     True  0.3948  True
+12-bit/2557          8  0.3836  0.132  0.868  0.000     2     True  0.3836  True
+12-bit/2557         12  0.3508  0.063  0.937  0.000     2     True  0.3508  True
+12-bit/2677 FAIL     2  1.0000  0.123  0.713  0.164    16    False  1.4381  True
+12-bit/2677 FAIL     4  1.0000  0.197  0.653  0.150    20    False  1.3659  True
+12-bit/2677 FAIL     6  0.9074  0.892  0.108  0.000     2     True  0.9074 False
+12-bit/2677 FAIL     8  0.7243  0.822  0.178  0.000     2     True  0.7243 False
+12-bit/2677 FAIL    12  0.5054  0.672  0.328  0.000     2     True  0.5054 False
+
+==============================================================================
+done
+==============================================================================

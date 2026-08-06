@@ -257,6 +257,36 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+### 8.1 Settled questions (do not re-open)
+
+- **"The planted vector is never λ₁ — does fixing that help?"**
+  **CLOSED, negative** (2026-08-06, Thread 23;
+  `secp256k1_cm_audit/glv_hnp_phase2_projected.py`, output in
+  `..._projected_output.txt`).  The lattice does contain the trivial
+  vector `n·S_D·e_m`, which is shorter than the planted vector for
+  every m ≥ 1 and occupies the λ₁ slot.  Deleting the d-column (dim
+  2m+1, d recovered algebraically as
+  `d = (k1_i + λ·k2_i − A_i)·B_i⁻¹ mod n`) does make the planted
+  vector λ₁, but the recovery rate is **cell-for-cell identical** to
+  the original lattice across K1 ∈ {2,3,4,6,8,12,16,24} on both
+  historical 12-bit curves.  Reason: `recover_d` scans *all* rows of
+  the reduced basis for the Kannan signature ±S_KANNAN, and the
+  trivial vector has Kannan entry 0, so it is skipped — it is inert,
+  not obstructive.  The only real cost of the d-column is one factor
+  of `n·S_D` in the determinant, worth `n^(1/m)` ≈ 1.25× in K1, which
+  is invisible at integer K1.
+- **Explicit CVP (Babai nearest-plane) instead of Kannan embedding**:
+  measured strictly *worse* (2557 wall K1=12 → K1=8).  Same run.
+- **λ/n or λ\* as a viability threshold**: falsified 2026-07-29 (T1/T3).
+  The lattice depends on λ only mod n, so λ/n is not even a causal
+  variable; λ\* shifts the K1 wall by ≈3× but creates no obstruction.
+- **ρ = μ/‖v_planted‖ as a direct success predictor** (μ = shortest
+  vector of the 2-D λ-block ⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩): falsified
+  2026-07-29 (T2).  Note however that μ *is* the competing shortest
+  vector once the d-column is removed (2026-08-06, U5): whenever the
+  planted vector is not shortest, the shortest vector is exactly the
+  λ-block vector, support 2, zero Kannan entry.
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
