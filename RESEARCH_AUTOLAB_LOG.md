@@ -6256,3 +6256,9 @@ threshold (falsified 2026-07-29 T3); ρ = μ/‖pv‖ as a direct predictor (fal
 2026-07-29 T2); explicit Babai CVP (measured strictly worse, U3 above).
 
 ### Commits made
+
+a48a707 autolab 2026-08-06: Thread 23 CLOSED — projected lattice makes planted vector λ₁ but wall does not move
+
+### Push note
+Pushed to `claude/zen-pascal-f4bkka` (this session's designated branch), not to `main`
+directly — `main` takes changes via PR in this repo, as in every prior autolab run.
