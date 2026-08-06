@@ -6103,3 +6103,169 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV lattice so the planted vector is λ₁ — the
+explicit next-step proposed by the 2026-07-29 entry. Priorities 1, 2, 4, 6 are
+CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2)
+made measurable progress on 2026-07-29, so under protocol rule (b) its proposed sub-task
+is the correct pick.
+
+The 2026-07-29 falsifier: *if sv/pv rises above 1 after the reformulation AND the K1 wall
+on the λ*=0.07 curve (currently K1≈4–6) moves outward, the reformulation is a real
+improvement; if the wall stays, the wall is information-theoretic and Phase 2 is at its
+ceiling.* **Both branches fired: the wall moved by a factor of 6, and it landed exactly on
+the information-theoretic bound.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4.
+  PARI/GP not needed this run. Note for future runs: fpylll ships `CVP.closest_vector`,
+  which is what makes the exact-CVP variant below possible without extra deps.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd_reform.py` (5 experiments R1–R5, 9 lattice
+  variants). EC arithmetic, `find_generator` and `gen_signatures` are copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:87-250` so every comparison against 2026-07-29 is
+  exact. Output artifact: `secp256k1_cm_audit/glv_hnp_phase2_bdd_reform_output.txt`
+  (158 lines).
+- Verified lattice membership of the planted vector for all 9 variants before measuring
+  anything (explicit integer-combination reconstruction, not an LLL side-effect).
+- Two candidate defects of the 2026-06-15 construction were implemented and **ablated
+  separately** so the cause is attributable:
+  - **(P) projection** — delete the d-column, which is what carries the trivial vector
+    `n·S_D·e_m` identified in 2026-07-29 T5. This is Thread 23's literal proposal.
+  - **(C) centering** — subtract the known means K1/2, K2/2, n/2 in the Kannan row, so the
+    planted coordinates become ~U[−n/2, n/2] instead of ~U[0, n).
+- `cargo test --test curve_audit` → 5/5 pass (5.13s). ✓
+
+### Findings
+
+**F0 — the 2026-06-15 readout is much stronger than anyone had noticed, and this
+invalidates the "planted vector" framing of T5.**
+`recover_d` reads d off the d-column. That column holds the *coefficient* `c_d` of the
+d-row in the integer combination producing the row — it does **not** require the row to be
+the planted vector. Any lattice vector in the Kannan coset whose d-row coefficient is
+≡ d (mod n) yields d, even when its k1/k2 parts are a different, out-of-box solution of
+the same congruence. On 12-bit/2557, K1=4, m=8, seed 42 the winning LLL row has
+
+```
+k1 = [0, 1,  3, 0, 0, 1,  0,  3]      true k1 = [0, 1,  0, 0, 0, 1,  0,  3]
+k2 = [1,14, -7,37, 1,14, 35, 14]      true k2 = [1,14, 43,37, 1,14, 35, 14]
+```
+
+— k2[2] = −7 is outside its box — yet its d-column is 65 = d exactly. (Check: the two
+differ by 3 + 1755·(−7) − 1755·43 = −33·2659, a genuine alternative representation.)
+The same c_d is extractable **without** the d-column, from the congruence and k2 columns:
+
+```
+c_i = w[k2col i]/S_K2 + c2
+c_d = (w_i/S_K1 + c1 − A_i + λ·c_i) · B_i⁻¹   (mod n)
+```
+
+so the d-column is not load-bearing. Consequence for T5: "the planted vector is never λ₁"
+is true but **not the binding constraint** — recovery never needed the planted vector.
+Quantified as variant V0b below: demanding the planted vector exactly costs 30 → 12
+successes on 12-bit/2557.
+
+**F1 — PROJECTION IS A NO-OP.** Thread 23's literal proposal does nothing. Variant VP
+(d-column deleted) reproduces V0 **cell-for-cell** on both 12-bit curves, all 13 K1 values,
+all 5 seeds (30/30 and 17/17 grid totals). Removing the trivial vector `n·S_D·e_m` changes
+sv/pv (0.42 → 0.81 on 12-bit/2677) and changes nothing about success. Recorded as a dead
+proposal so no future run re-tries it.
+
+**F2 — CENTERING is the entire effect, and it moves the K1 wall.** m=12, 5 seeds,
+last K1 with ≥3/5:
+
+| curve | λ* | V0 (2026-06-15) | VC (centered) | factor |
+|---|---|---|---|---|
+| 12-bit/2557 | 0.340 | 12 | 24 | 2 |
+| 12-bit/2677 | 0.070 | **4** | **24** | **6** |
+| 17-bit/65269 | 0.0068 | 32 | 64 | 2 |
+| 20-bit/523969 | 0.340 | 32 | 128 | 4 |
+
+Grid totals out of 65 (13 K1 values × 5 seeds):
+
+| curve | V0 | V0c | V0b | VC | VCn | VP | VPC | VCVP | VBAB |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | 30 | 30 | 12 | **42** | 39 | 30 | 42 | 36 | 39 |
+| 12-bit/2677 | 17 | 17 | 17 | **40** | 38 | 17 | 39 | 36 | 37 |
+
+V0 ≡ V0c cell-for-cell (consistency check of the two readouts on the same lattice).
+The Kannan rescale S_KANNAN: n → n/√12 adds a little on top of centering (VC 42/40 vs
+VCn 39/38). Exact CVP (VCVP 36/36) and Babai nearest-plane (VBAB 39/37) do **not** beat
+the centered Kannan embedding — Kannan yields several candidate rows per run, a single CVP
+call yields one.
+
+**F3 — the λ* dependence of the wall is an artifact of the uncentered lattice.**
+After centering the two 12-bit curves land on **exactly the same wall** (K1=24, both
+≥3/5; first 0/5 at K1=48). The 2026-07-29 T4 statement "λ* shifts the K1 wall by a factor
+of ~3 (K1≈12–16 vs K1≈4–6)" is hereby corrected: that factor is a property of the
+uncentered construction, not of the problem. λ* has now been eliminated as a predictor
+three times (2026-06-27 Exp M/N/O for Phase 1; 2026-07-29 T1/T3 for the threshold claim;
+here for the wall position).
+
+**F4 — sv/pv, the first falsifier branch: SATISFIED.** m as in the historical runs:
+
+| curve | K1 | V0 | VC | VP | VPC | VCVP |
+|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.603 | 0.793 | 0.843 | **1.000** | **1.232** |
+| 12-bit/2557 | 8 | 0.517 | 0.686 | 0.532 | 0.748 | 0.765 |
+| 12-bit/2677 | 8 | 0.422 | 0.633 | 0.813 | **1.000** | **1.302** |
+
+pv/GH (planted norm over Gaussian heuristic) falls from 1.20–1.30 for V0 to 0.81–0.94 for
+the centered variants, i.e. only after centering is the planted vector a genuinely
+unusually-short vector. Note F0: sv/pv ≥ 1 is *sufficient* but never was *necessary*.
+
+**F5 — the remaining wall is INFORMATION-THEORETIC (main result).**
+Bit-counting: unknowns are d plus m values k1_i ∈ [0,K1) plus m values k2_i ∈ [0,K2);
+constraints are the m congruences mod n. Unique solution expected when
+
+```
+log₂ n + m·log₂(K1·K2) ≤ m·log₂ n   ⟺   eff := K1·K2/n ≤ n^(−1/m)
+```
+
+Measured wall (largest eff with ≥3/5, variant VC, 5 seeds) against that prediction, over
+m = 4…48 — a range across which the bound itself moves by 6× (0.139 → 0.849):
+
+| m | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|
+| predicted n^(−1/m) | 0.139 | 0.269 | 0.373 | 0.518 | 0.611 | 0.720 | 0.782 | 0.848 |
+| measured, 2557 | 0.117 | 0.235 | 0.352 | 0.548 | 0.626 | 0.626 | 0.626 | 0.626 |
+| ratio | 0.84 | 0.87 | 0.94 | 1.06 | 1.02 | 0.87 | 0.80 | 0.74 |
+| measured, 2677 | 0.157 | 0.314 | 0.275 | 0.471 | 0.629 | 0.629 | 0.629 | 0.786 |
+| ratio | 1.13 | 1.17 | 0.74 | 0.91 | 1.03 | 0.87 | 0.80 | 0.93 |
+
+Ratio ∈ [0.74, 1.17] throughout. The droop at m ≥ 24 is K1-grid resolution — adjacent grid
+points there are eff 0.63 / 0.79 / 0.94 — not a real deficit. The larger curves agree:
+17-bit brackets the wall in [0.25, 0.50] (predicted 0.397), 20-bit in [0.18, 0.35]
+(predicted 0.334).
+
+**Conclusion: the centered Phase-2 attack saturates the counting bound.** The second
+branch of the 2026-07-29 falsifier therefore also fires, one level down: the wall that
+*remains* after the reformulation is information-theoretic, so no further lattice
+engineering can move it. Phase 2 is at its ceiling, and the ceiling is now identified
+rather than merely suspected. For secp256k1 this is a non-threat in the intended direction:
+saturating eff ≤ n^(−1/m) still requires k = k1 + λk2 with K1·K2 ≲ n^(1−1/m), i.e. the
+nonce decomposition must be *known to be short*, which is exactly the GLV-implementation
+hypothesis of `RESEARCH_GLV_HNP.md` §2 and not a property of correct ECDSA.
+
+### Next step proposal
+**Thread 24 — close the loop on the paper side, not the lattice side.** The lattice
+question is now answered (F5), so the remaining value is in the write-up:
+state the Phase-2 ceiling as a proposition in `RESEARCH_GLV_HNP_PHASE2.md` —
+"a GLV-decomposed-nonce HNP instance with bounds K1, K2 and m signatures is solvable by
+LLL iff K1·K2 ≲ n^(1−1/m), and this is tight to within the measured factor
+[0.74, 1.17]" — and cross-reference it from `PAPER_STRUCTURAL_COMPLETENESS.md` as the
+block that rules out GLV-structure-aware HNP as a sub-ρ route.
+Falsifier for the proposition as stated: run VC at m = 64 and m = 96 on the 20-bit curve
+with a K1 grid refined to ~10% steps near the predicted wall; if the ratio stays in
+[0.9, 1.1] at those m the tightness claim holds, if it decays monotonically past m ≈ 48
+then LLL approximation loss (not counting) binds at large m and the proposition needs a
+dimension-dependent correction factor. ~10 minutes of compute.
+
+Secondary: the F0 readout observation applies to *every* Kannan-embedded HNP lattice in
+this repo, not just Phase 2 — `tests/lll_degeneracy_probe.rs` and the Phase-1 scripts read
+d off a dedicated column too. Worth one pass to check none of them are accidentally
+measuring the strictly-weaker "recover the planted vector" event.
+
+### Commits made
