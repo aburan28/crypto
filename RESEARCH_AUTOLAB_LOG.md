@@ -6261,4 +6261,6 @@ Also outstanding from 2026-07-29: re-express the 2026-07-26 log's λ/n column in
 confusion.
 
 ### Commits made
-(filled in below)
+`46c9b17` autolab 2026-08-06: Thread 23 — CVP reformulation is a no-op; the embedding was
+uncentred (K1 wall 4→16 on the λ*=0.07 curve; eff 0.15 goes 11/50→50/50; BV bias
+requirement 4→3 bits; fix applied to `src/cryptanalysis/hnp_ecdsa.rs`)
