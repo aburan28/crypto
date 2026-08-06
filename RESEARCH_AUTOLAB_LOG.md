@@ -91,7 +91,7 @@ precision does not find the short vector.
 
 ### Commits made
 
-See next git hash after this entry.
+b159eb9 autolab 2026-08-06: Thread 23 — e_m projection is a no-op; rho_GH capacity law derived
 
 ### Next step proposal
 
@@ -6241,4 +6241,4 @@ Do NOT re-try: μ = λ₁(2-D λ-block) as a standalone predictor (dead, T2 2026
 
 ### Commits made
 
-See next git hash after this entry.
+b159eb9 autolab 2026-08-06: Thread 23 — e_m projection is a no-op; rho_GH capacity law derived
