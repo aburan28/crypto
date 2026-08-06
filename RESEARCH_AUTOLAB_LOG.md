@@ -6301,3 +6301,8 @@ Phase 2 — that direction is exhausted. `P` is the remaining live output.
 ### Commits made
 
 271f88c autolab 2026-08-06: Thread 23 closed negatively — Phase-2 wall is information-theoretic; two-factor predictor P validated out-of-sample (AUC 0.981)
+
+**Push target**: `claude/zen-pascal-cqc4ig` (not `main`). The session branch
+directive overrides the protocol Step 6 `git push origin main`. Future runs
+reading only this log: these commits are on that branch, not on `main`, until a
+PR is opened and merged. No PR was created (none requested).
