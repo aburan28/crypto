@@ -6103,3 +6103,4 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+326526f autolab 2026-08-06: Thread 23 — d-projected lattice makes planted vector lambda_1 but K1 wall unmoved; lambda* falsified over 16 curves; K1*(curve) established as a stable regression target
