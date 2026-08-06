@@ -6103,3 +6103,142 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the explicit
+next-step proposed by the 2026-07-29 entry (log line ~6094). All six original priority
+threads are CLOSED/BLOCKED/DEAD-END (status table at log line 4473); Thread 23 was last
+touched 8 days ago (outside the 7-day rule) and its predecessor made measurable progress,
+so protocol rule (b) applies.
+
+The 2026-07-29 falsifier is quoted verbatim in the script header. Verdict below:
+**the projection is a no-op — the falsifier fails, and Phase 2 is at its ceiling for this
+class of reformulation.** Two new positive results came out of the run anyway (E1, E7).
+
+### Work done
+
+- New script `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (7 experiments, 0.8 s
+  runtime), output artifact `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt`
+  (171 lines). `build_glv_lattice` copied **verbatim** from
+  `glv_hnp_phase2_20bit.py:262` so all numbers are directly comparable to 2026-07-26/29.
+- Implemented `project_out_d(M, m)` = delete coordinate m. This is an *exact* quotient:
+  `L ∩ ℝ·e_m = ℤ·(n·S_D·e_m)` (since `n·row_m − Σᵢ Bᵢ·rowᵢ = n·S_D·e_m`), so π is a
+  lattice homomorphism onto a rank-(2m+1) lattice with `covol(πL) = det(L)/(n·S_D)`.
+- Implemented `recover_d_projected`: **oracle-free**. d is gone from the coordinates, so
+  it is rebuilt from the k1/k2 blocks via `d = (k1ᵢ + λ·k2ᵢ − Aᵢ)·Bᵢ⁻¹ mod n`, then
+  verified against every signature. Also wrote `recover_d_original_free` so the
+  original/projected comparison is apples-to-apples — the historical `recover_d`
+  (`glv_hnp_phase2_20bit.py:299`) accepts a row iff `d_cand == d_secret`, i.e. it uses the
+  secret as an oracle. **Checked: oracle vs oracle-free disagree on 0/12 instances**, so
+  no historical number is inflated by this.
+- `cargo test --test curve_audit` → 5/5 pass (6.89 s). ✓
+- Environment note for future runs: `pip install fpylll cysignals sympy` works.
+  **`apt-get install pari-gp` FAILS** in this container (404 on
+  `libegl-mesa0_25.2.8-0ubuntu0.24.04.1_amd64.deb`); `apt-get update` first, or expect no
+  `gp`. This run needed no PARI.
+
+### Findings
+
+**F1 — Thread 23 falsifier: FAILED. Projecting out `n·e_m` changes nothing.**
+Outcome is identical between the original and projected lattices in **every single cell
+tested**: 12/12 instances in E2/E3, all 16 K1 cells across both anchor curves in E4, all
+5 m cells in E5. The K1 wall does not move:
+
+| curve | λ* | wall, original | wall, projected |
+|---|---|---|---|
+| 12b/2557 (n=2659, λ=1755) | 0.340 | K1 ≤ 8 | K1 ≤ 8 |
+| 12b/2677 (n=2647, λ=185)  | 0.070 | K1 ≤ 3 | K1 ≤ 3 |
+
+sv/pv does rise (0.33–0.44 → 0.35–1.00) but crosses 1 only where the attack *already*
+succeeded — at 12b/2677 K1=4 the projected shortest vector **is** the planted vector
+(sv/pv = 1.0000 exactly, 3/3 seeds). In every failing cell the projected λ₁ is still a
+non-planted vector (12b/2677 K1=8: sv/pv = 0.66–0.72). So the trivial vector was never
+the obstruction — LLL already spends one basis slot on it and reduces in the quotient
+regardless. Per the 2026-07-29 falsifier's own terms: **the wall is not an artifact of the
+Kannan embedding.** Thread 23 → CLOSED (negative).
+
+**F2 (new, analytic) — why more signatures cannot rescue Phase 2.**
+With S_K1 = n/K1, S_K2 = n/K2, S_D = 1, S_KANNAN = n the basis is lower-triangular, so
+det(L) = n^{3m+1}/(K1·K2)^m = n^{2m+1}·eff^{−m}, dim = 2m+2, eff := K1·K2/n. With
+k1ᵢ ~ U[0,K1), k2ᵢ ~ U[0,K2), d ~ U[0,n):
+
+    ‖pv‖² ≈ n²(2m/3 + 4/3),   GH(L) = √(dim/2πe)·det^{1/dim}
+
+    ρ_GH := ‖pv‖/GH(L)  ──m→∞──▶  ρ_∞ = √(2πe/3)·√eff = 2.3860·√eff
+
+**ρ_∞ is independent of m.** Adding signatures gives a strictly decreasing but
+*saturating* return, floored at 2.386·√eff. ρ_∞ = 1 at eff = 3/(2πe) = 0.1756.
+This is the explanation for T4b (2026-07-29), which observed empirically that at K1=8 the
+m-sweep m ∈ {8,12,16,24,32} gave 0,0,1,0,1 of 5 and concluded "the K1 wall is genuine"
+without a mechanism. Here it is: at K1=8 on 12b/2677, eff = 0.157 → ρ_∞ = 0.946, i.e. the
+instance is only *marginally* solvable even with unlimited data, and at m=32 ρ is still
+1.113 > 1. Reproduced this run (E5), original and projected identical:
+
+| m | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| ρ_GH | 1.714 | 1.428 | 1.297 | 1.172 | 1.113 |
+| orig 5 seeds | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 |
+| proj 5 seeds | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 |
+
+Also measured: the trivial vector sits at ‖t‖/GH = 0.25–0.65 (12b/2677, m=12,
+K1 = 2…16) — far below GH, which is *why* it is always λ₁, but it is inert.
+
+**F3 — ρ_GH is λ-blind, and ν̂ (Thread 20c) is exactly the missing piece.**
+ρ_GH is a function of (n, K1, K2, m) only. The two anchor curves have ρ agreeing to 3
+decimals at every K1 (0.751/0.753, 0.906/0.908, 1.035/1.037, …) yet walls of K1≤8 vs
+K1≤3. The residual is carried by ν̂ = λ₁(L2)/√(det L2) on the non-planted 2-D block
+L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩, computed here exactly by Lagrange-Gauss reduction:
+
+| curve | λ* | ν̂ at K1=8 | wall |
+|---|---|---|---|
+| 12b/2557 | 0.340 | 0.4080 | K1 ≤ 8 |
+| 12b/2677 | 0.070 | 0.7711 | K1 ≤ 3 |
+| 8b/199   | 0.467 | 0.5491 (K1=2) | — |
+
+**The ordering inverts.** The λ*=0.34 curve has the *smaller* ν̂, and small ν̂ ⇒ easier —
+the sign found in Thread 20c (commit `e845207`, AUC 0.935). ν̂ depends on the
+continued-fraction structure of λ/n, not on the magnitude of λ: for 12b/2557 the CF
+convergent q=50 gives |50·1755 mod± 2659| = 3, collapsing λ₁(L2); for 12b/2677 the best
+convergent q=43 only reaches 14. This is the mechanism behind the 2026-07-29 T3
+falsification of λ* — λ* and ν̂ are uncorrelated in sign, so a 3-curve sample can make λ*
+look predictive and a 20-curve sample cannot.
+
+**F4 (hypothesis, NOT a result) — the product χ = ρ_GH·ν̂ unifies the two curves.**
+16 cells, 2 curves, m=12, 5 seeds each:
+
+| Spearman vs wins | ρ_GH alone | ν̂ alone | χ = ρ·ν̂ |
+|---|---|---|---|
+| ρ_s | −0.861 | −0.390 | **−0.939** |
+
+and the extremes are cleanly separated across *both* curves:
+χ < 0.79 → 5/5 in 7/7 cells; χ > 1.10 → 0/5 in 5/5 cells; 0.83 ≤ χ ≤ 1.07 is the
+transition band (3/5, 4/5, 2/5, 1/5). Sixteen cells over two curves is not evidence —
+recorded as a hypothesis with the falsifier below.
+
+### Next step proposal
+
+**Thread 24 — validate or kill χ = ρ_GH·ν̂ out of sample.** Recompute χ on the 20 fresh
+17-bit curves of T3 (2026-07-29) at eff ∈ {0.05, 0.15, 0.25}, which already have measured
+p̂ (19/20, 3/20, 0/20). Falsifier, stated in advance: if χ does not beat both ρ_GH and ν̂
+individually by Spearman on that held-out set, drop the product form and report ρ_GH
+alone as the Phase-2 capacity law. The T3 harvest code is in
+`glv_hnp_phase2_lambda_threshold.py`; the χ machinery is `geometry()` + `nu_hat()` in
+`glv_hnp_phase2_projected.py` — a 15-minute job.
+
+Secondary (independent): ρ_∞ = 2.386·√eff is a *closed-form capacity bound* for the
+GLV-HNP Phase-2 lattice. If Thread 24 confirms it, it belongs in
+`RESEARCH_GLV_HNP_PHASE2.md` as the section that replaces the empirical "K1 wall"
+narrative, and the m-threshold formula currently in `glv_hnp_phase2_20bit.py:341`
+(`m_thresh = log n / log(1/eff)`, the information-theoretic bound) should be annotated as
+*necessary but far from sufficient* — at K1=8 it predicts m ≥ 4 where the lattice needs
+m = ∞.
+
+Do NOT re-try: μ = λ₁(2-D λ-block) as a standalone predictor (dead, T2 2026-07-29);
+λ*=min(λ,n−λ)/n as a threshold (dead, T3 2026-07-29); projecting out n·e_m (dead, F1 above).
+
+### Commits made
+
+See next git hash after this entry.
