@@ -6103,4 +6103,151 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — "reformulate the Phase-2 lattice so the target is λ₁", the continuation
+proposed by the 2026-07-29 entry (log line ~6089). Priorities 1–6 are all
+CLOSED/BLOCKED/DEAD-END (see 2026-06-30 line ~3630 and 2026-07-08 line ~4473), and the
+2026-07-29 run made measurable progress, so protocol rule (b) applies.
+
+Outcome: the reformulation **works as designed and does not help**. Two of the run's own
+prior claims are corrected below.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`. **Note for future
+  runs: all three are needed and none survive the container.** `apt-get install pari-gp`
+  FAILS in this image (404 on `libegl-mesa0` transitive dep) — PARI was not needed here,
+  but Thread 2/3 work will have to build PARI from source or work around it.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread23_projected_lattice.py` (E1–E7, 130 lines of
+  output in `glv_hnp_thread23_output.txt`). It re-uses the Thread 20 primitives by
+  exec'ing only the definition prefix of `glv_hnp_phase2_lambda_threshold.py` (that
+  module runs its experiments at import time), so the V0 control is bit-identical to the
+  2026-07-29 construction.
+- Implemented and compared three lattices on identical signatures/seeds:
+  - **V0** baseline, dim 2m+2, Kannan, d read off column m (`build_glv_lattice`).
+  - **V1** d-column deleted, dim 2m+1, Kannan retained. Written in Hermite form
+    (`r_0 = S_K1·(1, C_1..C_{m-1}|0|0)`, `C_i = B_i·B_0^{-1} mod n`; `r_i = n·S_K1·e_i`,
+    i≥1) so the rows are a true basis. det(V1) = det(V0)/n.
+  - **V2** d-column and Kannan row both deleted, dim 2m, solved as explicit CVP by exact
+    Fraction-arithmetic Babai nearest-plane against `t = (−A_i·S_K1 | 0)`.
+- **The key structural point**: the d-column is *redundant*, because
+  `d = (k1_i + λ·k2_i − A_i)·B_i^{-1} mod n` back-substitutes d once the small unknowns
+  are known. Deleting the column is exactly quotienting L by Z·(n·S_D·e_m), so the
+  parasitic vector of 2026-07-29 T5 is not deprioritised, it is **annihilated** (maps to
+  0) and the dimension drops by one.
+- `cargo test --test curve_audit` → 5/5 pass (6.96s). ✓
+
+### Findings
+
+**Control passes.** V0 reproduces the 2026-07-29 T4 grid exactly (m=12, seeds
+[42,1234,9999,555,31337]): 2557 → 5,5,5,5,5,4,1,0 and 2677 → 5,5,5,2,0,0,0,0. The
+comparison below is therefore like-for-like.
+
+**E3 — the reformulation does remove the parasitic vector.** Mean ‖shortest reduced
+row‖/‖planted‖:
+
+| curve | K1 | V0 sv/pv | V1 sv/pv | V2 err/pv |
+|---|---|---|---|---|
+| 12-bit/2557 λ*=0.340 | 2 | 0.402 | 0.742 | 1.000 |
+| 12-bit/2557 λ*=0.340 | 8 | 0.354 | 0.373 | 0.922 |
+| 12-bit/2677 λ*=0.070 | 2 | 0.406 | **1.000** | 1.000 |
+| 12-bit/2677 λ*=0.070 | 4 | 0.371 | **1.000** | 1.125 |
+
+V0 sits at ~0.35–0.41 everywhere (the trivial `n·e_m` vector, exactly as T5 said). In V1
+it rises, and on the hard curve in the *recovering* regime it is **exactly 1.000** — the
+planted vector IS λ₁. Thread 23's stated goal is achieved.
+
+**E2/E4 — and it buys nothing. The K1 wall does not move.** Largest K1 with ≥4/5:
+
+| curve | V0 | V1 | V2 | V2-BKZ20 |
+|---|---|---|---|---|
+| 12-bit/2557 λ*=0.340 | 12 | 12 | 8 | 8 |
+| 12-bit/2677 λ*=0.070 | 4 | 4 | 4 | 4 |
+
+V1 is cell-for-cell identical to V0 on both curves across the whole grid. **The parasitic
+vector was never the binding constraint** — it was a real property of the lattice (T5 was
+right about it) but it was epiphenomenal. V2 is strictly *worse* despite having the best
+analytic ratio (E1: 0.929 vs 1.037 at K1=4): Babai nearest-plane is a weaker recovery
+rule than scanning every row of an LLL basis, and BKZ-20 does not rescue it.
+
+⇒ **The 2026-07-29 falsifier was mis-specified.** It made "sv/pv rises above 1" and "the
+wall moves outward" a single conjunctive test. They are independent: the first holds, the
+second fails. Future runs should not treat sv/pv as a proxy for attack strength.
+
+**E5 — the wall is neither information-theoretic nor Gaussian-heuristic.**
+
+| curve | K1 observed | K1 info-theoretic | K1 at GH ratio = 1 |
+|---|---|---|---|
+| 12-bit/2557 | 12 | 26.5 | 3 |
+| 12-bit/2677 | 4 | 26.4 | 3 |
+
+Info bound is `(m−1)·log n ≥ m·log(K1·K2)` ⇒ K1 ≲ 26 — a factor 2–6 above what is
+observed, so the 2026-07-29 "the wall is information-theoretic" hypothesis is **false**.
+Conversely LLL *beats* the Gaussian heuristic by 1.5–5×. The wall lives strictly between
+the two bounds.
+
+**E6 — λ\* does NOT predict the wall; the 2026-07-29 T4 "3× λ\* shift" is falsified.**
+16 fresh 12–13-bit j=0 GLV curves, m=12, 5 seeds, V0:
+
+| λ* | 0.027 | 0.041 | 0.070 | 0.145 | 0.205 | 0.268 | 0.347 | 0.377 | 0.479 | 0.493 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| wall | 8 | 6 | 6 | **16** | 8 | 16 | 6 | 16 | **6** | 16 |
+
+Pearson r(λ*, log₂ wall) = **+0.372** over 16 curves (not significant at n=16);
+r(λ*, score) = +0.294. The extremes invert the claimed relation: λ*=0.145 walls at 16
+while λ*=0.479 walls at 6. The 2026-07-29 T4 conclusion rested on **two** curves and was
+a coincidence. λ* now joins δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n as a failed
+predictor — seven down.
+
+**E7 — but the per-curve spread is REAL, and that is the new result.** Walls re-measured
+on three *disjoint* seed blocks:
+
+| p | n | λ* | blk1 | blk2 | blk3 | 15 seeds |
+|---|---|---|---|---|---|---|
+| 4129 | 4153 | 0.041 | 6 | 6 | 6 | 6 |
+| 4159 | 4243 | 0.070 | 6 | 6 | 4 | 4 |
+| 4327 | 4273 | 0.377 | 16 | 16 | 16 | 16 |
+| 4831 | 4903 | 0.493 | 16 | 16 | 16 | 16 |
+
+The wall is stable under reseeding, so the 2.7× spread (6…16) across curves of the *same*
+bit length — for which GH predicts an identical K1=4 — is a genuine curve invariant. This
+converts the six-invariant dead end of 2026-06-30 into a better-posed problem: the target
+is no longer a binary C1/C2 label but **K1\*(curve), a stable real-valued statistic
+measurable in ~20 s/curve**, which future invariant hunts can *regress* against instead
+of classify.
+
+**Repo-integrity finding (unrelated to the above, but blocking).**
+`secp256k1_cm_audit/glv_hnp_nuhat_vs_c1c2.py` **does not run against the committed tree**.
+It binds four names off `glv_hnp_phase2_lambda_threshold.py` that do not exist there —
+`glv_eigenvalues`, `mu_of`, `identify_twist`, `rival_sublattice_nu` (the current module
+has `glv_roots`, `lam_star`, `lambda_block_mu` instead); it dies at
+`glv_hnp_nuhat_vs_c1c2.py:47` with `AttributeError`. Consequently the "**ν̂ separator
+found (AUC 0.935)**" claimed in commit `e845207`'s subject line is **not reproducible**,
+and it was never written into the log body — it appears only in that commit subject and
+in the 2026-07-29 "Commits made" list. Treat AUC 0.935 as **unverified** until the script
+is repaired. Given E6, a ν̂ separator is also now the most interesting open lead, so
+repairing it is worth doing.
+
+### Next step proposal
+**Thread 24 — regress K1\*(curve) against the GS profile.** E7 established K1* as a
+stable, cheap, real-valued target; E5 established that neither bound explains it. The
+natural candidate is a projected-BDD condition: for the V1 basis, find the index i where
+the Gram-Schmidt norm ‖b*_i‖ crosses the norm of the planted vector projected onto
+span(b*_i..b*_{dim}), and test whether that index predicts K1*. This is computable from
+the basis alone, without running the attack, so it can be swept over hundreds of curves.
+Falsifier: if Pearson r(predictor, log₂ K1*) > 0.8 over ≥30 curves it is the separator;
+if it lands near the +0.37 that λ* scored, discard it and try ν̂ next.
+
+Prerequisite (30 min): repair `glv_hnp_nuhat_vs_c1c2.py` against the current threshold
+module so the AUC 0.935 claim can be confirmed or retracted, then regress ν̂ against K1*
+rather than against the binary C1/C2 label.
+
+Cheap and worth doing either way: add an `if __name__ == "__main__":` guard to
+`glv_hnp_phase2_lambda_threshold.py` so downstream scripts can import it without running
+T1–T5 (this run had to work around that by exec'ing only the file's definition prefix).
+
+### Commits made
+
 326526f autolab 2026-08-06: Thread 23 — d-projected lattice makes planted vector lambda_1 but K1 wall unmoved; lambda* falsified over 16 curves; K1*(curve) established as a stable regression target
