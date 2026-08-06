@@ -1,0 +1,159 @@
+==============================================================================
+Thread 23 — d-eliminated GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: correctness of the d-eliminated construction
+------------------------------------------------------------------------------
+Checks (a) the planted vector really is in the lattice (integer coords in
+the basis), and (b) recovery returns the true d.  K1 kept small so both
+lattices are expected to succeed.
+
+curve               K1   m  dim_o  dim_d   orig  delim  pv in L
+8-bit/199            2   6     14     13   True   True     True
+12-bit/2557          2   8     18     17   True   True     True
+12-bit/2677 FAIL     2  10     22     21   True   True     True
+
+------------------------------------------------------------------------------
+EXP E2: is the planted vector lambda_1 now?   sv/pv and pv/GH
+------------------------------------------------------------------------------
+sv/pv < 1  =>  something shorter than the planted vector exists.
+T5 (2026-07-29) measured sv/pv in [0.34, 0.61] for 'orig'.
+
+curve               K1   m | sv/pv orig pv/GH orig |  sv/pv del  pv/GH del |   o   d
+8-bit/199            2   6 |      0.543      1.339 |      0.790      1.289 | 5/5 5/5
+12-bit/2557          8   8 |      0.445      1.510 |      0.475      1.461 | 5/5 5/5
+12-bit/2677 FAIL     8  10 |      0.387      1.425 |      0.767      1.383 | 0/5 0/5
+
+Energy profile of the shortest reduced vector (delim lattice), fraction of ||.||^2:
+curve               eq-cols     k1_0  k2-cols   kannan  == pv?
+8-bit/199             0.000    0.508    0.492    0.000   False
+12-bit/2557           0.000    0.132    0.868    0.000   False
+12-bit/2677 FAIL      0.000    0.822    0.178    0.000   False
+
+------------------------------------------------------------------------------
+EXP E3 (FALSIFIER): K1 wall, original vs d-eliminated, 5 seeds
+------------------------------------------------------------------------------
+2026-07-29 T4 walls: 12-bit/2557 -> K1 ~ 12-16;  12-bit/2677 -> K1 ~ 4-6.
+If d-elimination is a real improvement the delim row moves right.
+
+12-bit/2557  (n=2659, lam*=0.340, m=8)
+  K1            2     3     4     6     8    12    16    24
+  orig        5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+  delim       5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+  del+BKZ40    5/5   5/5   5/5   5/5   5/5   1/5   0/5   0/5
+
+12-bit/2677 FAIL  (n=2647, lam*=0.070, m=10)
+  K1            2     3     4     6     8    12    16    24
+  orig        5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+  delim       5/5   5/5   5/5   0/5   0/5   0/5   0/5   0/5
+  del+BKZ40    5/5   5/5   5/5   1/5   0/5   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP E4: more data at the wall (replicates T4b for the delim lattice)
+------------------------------------------------------------------------------
+12-bit/2677 FAIL  n=2647, K1=8, varying m
+
+  m             8    12    16    24    32
+  orig        0/5   0/5   1/5   0/5   1/5
+  delim       0/5   0/5   1/5   0/5   1/5
+
+------------------------------------------------------------------------------
+EXP E5: 17-bit head-to-head at eff = K1*K2/n = 0.15
+------------------------------------------------------------------------------
+2026-07-29 T3 measured 3/20 curves recovering 5/5 for 'orig' at this
+operating point -- the most discriminating one available.
+
+collected 20 curves in [2^16, 2^17)
+
+      p       n   lam*   K1 |   orig  delim |  sv/pv o  sv/pv d  pv/GH o  pv/GH d
+  65647   65719  0.027   38 | 1/5    1/5    |    0.368    0.780    1.413    1.380
+  65713   65269  0.007   38 | 0/5    0/5    |    0.347    0.611    1.496    1.467
+  66463   66499  0.054   38 | 0/5    0/5    |    0.360    0.705    1.439    1.409
+  66943   66457  0.099   38 | 0/5    0/5    |    0.360    0.794    1.439    1.409
+  65707   65203  0.137   38 | 0/5    0/5    |    0.347    0.568    1.497    1.468
+  66499   66463  0.114   38 | 2/5    2/5    |    0.360    0.731    1.439    1.409
+  66271   66751  0.156   38 | 0/5    0/5    |    0.361    0.793    1.436    1.406
+  67783   67939  0.185   39 | 0/5    0/5    |    0.354    0.728    1.471    1.425
+  65707   66037  0.211   38 | 0/5    0/5    |    0.354    0.588    1.461    1.431
+  65719   65647  0.225   38 | 0/5    0/5    |    0.367    0.850    1.413    1.380
+  65929   66301  0.298   38 | 0/5    0/5    |    0.360    0.772    1.441    1.411
+  65929   65437  0.289   38 | 0/5    0/5    |    0.347    0.736    1.494    1.466
+  65539   65287  0.335   38 | 5/5    5/5    |    0.347    0.356    1.496    1.467
+  65677   65899  0.318   38 | 5/5    5/5    |    0.367    0.448    1.411    1.378
+  65557   65053  0.388   38 | 0/5    0/5    |    0.347    0.553    1.498    1.469
+  65617   65119  0.358   38 | 0/5    0/5    |    0.347    0.691    1.498    1.469
+  65629   66109  0.410   38 | 0/5    0/5    |    0.354    0.764    1.461    1.430
+  65647   65173  0.414   38 | 0/5    0/5    |    0.347    0.781    1.497    1.468
+  66853   67369  0.482   38 | 5/5    5/5    |    0.361    0.466    1.430    1.401
+  68743   69259  0.491   39 | 3/5    3/5    |    0.356    0.668    1.459    1.415
+
+full recovery (5/5): orig 3/20   delim 3/20
+total seed-wins:     orig 21/100   delim 21/100
+per-curve head-to-head: delim better on 0, worse on 0, tied on 20
+
+------------------------------------------------------------------------------
+EXP E6: does ||v_planted|| / GH(L) predict the wall?
+------------------------------------------------------------------------------
+Model: recovery iff the planted vector is below the Gaussian heuristic.
+Threshold-free check = AUC (1.0 = perfect, 0.5 = coin flip).
+
+E3 grid, orig  : AUC(pv/GH) = 0.953   success pv/GH in [0.67,1.51]   failure in [1.26,2.66]
+E3 grid, delim : AUC(pv/GH) = 0.953   success pv/GH in [0.63,1.46]   failure in [1.22,2.66]
+E5 17-bit, delim : AUC(pv/GH) = 0.688   success in [1.38,1.47]   failure in [1.38,1.47]
+
+------------------------------------------------------------------------------
+EXP E7: is d-elimination EXACTLY the projection along the trivial vector?
+------------------------------------------------------------------------------
+ker(pi) & L_orig = Z*(n*S_D*e_m) is rank 1 (row m must be used n times to
+clear the B_i*S_K1 entries), so pi(L_orig) has dim 2m+1 like L_delim.
+Both live in the same coordinate space -- L_orig's equation column i and
+L_delim's (k1_0 col for i=0, equation col i-1 otherwise) both carry
+k1_i*S_K1 -- so the lattices are directly comparable.  Test: HNF equality.
+
+curve                m  dim   HNF(pi L_orig) == HNF(L_delim)  pv equal
+8-bit/199            6   13                             True      True
+12-bit/2557          8   17                             True      True
+12-bit/2677 FAIL    10   21                             True      True
+
+------------------------------------------------------------------------------
+EXP E8: the projection makes lambda_1 INFORMATIVE (instance-level)
+------------------------------------------------------------------------------
+In L_orig, lambda_1 is always the trivial vector n*S_D*e_m, so sv/pv is
+pinned near a constant (E5: 0.347-0.368 across all 20 curves) and carries
+zero information -- which retro-explains the 2026-06-21..06-29 run of failed
+separators.  In pi(L_orig) the trivial vector is gone and lambda_1 becomes
+the true rival.  Compare three predictors at the INSTANCE level
+(one row per (curve, seed), 2 operating points, 5 seeds):
+  sv/E[pv]  : shortest reduced vector / expected planted norm  (post-reduction,
+              secret-free -- E[pv] needs only n, K1, K2, m)
+  nu_hat    : lambda_1(L2)/sqrt(det L2) of the 2-D lam block  (2026-07-29,
+              a-priori curve invariant, reported AUC 0.935)
+  pv/GH     : planted norm over Gaussian heuristic
+
+200 instances, 40 successes, 160 failures
+
+predictor        AUC            success range          failure range
+sv_epv         0.883   [    0.335,    0.726] [    0.335,    0.785]
+nuhat          0.905   [    0.389,    0.956] [    0.450,    1.039]
+ghr            0.552   [    1.196,    1.854] [    1.198,    1.869]
+sv_pv          0.856   [    0.329,    0.938] [    0.325,    1.012]
+
+same statistic on L_orig (lambda_1 = trivial vector):
+sv_epv orig    0.849   [    0.333,    0.334] [    0.333,    0.334]
+
+CONFOUND CHECK.  sv_epv on L_orig has total range [0.333,0.334] -- the
+shortest vector there is exactly n*S_D, so the statistic is constant per
+operating point and its 'AUC' can only be separating the two eff arms,
+which have different base success rates.  Recompute every AUC WITHIN each
+arm, where eff is held fixed:
+
+arm         n_ok  n_fail    sv_epv     nuhat       ghr     sv_pv
+eff=0.15      21      79     0.869     0.881     0.566     0.854
+eff=0.20      19      81     0.929     0.934     0.537     0.882
+
+(L_orig sv_epv is constant within an arm, so its within-arm AUC is undefined/0.5 by construction.)
+
+==============================================================================
+done
+==============================================================================

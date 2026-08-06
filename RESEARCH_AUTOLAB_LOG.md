@@ -6103,3 +6103,139 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+Thread 23 (d-eliminated Phase-2 lattice) — the exact continuation proposed by the
+2026-07-29 entry (log line ~6090). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END;
+priority 3 completed 2026-07-21; priority 5 (GLV-HNP Phase 2) last touched 2026-07-29
+(8 days ago, outside the 7-day window) and made measurable progress, so rule (b) applies.
+
+Falsifier as stated on 2026-07-29: *"if sv/pv rises above 1 after the reformulation and
+the K1 wall moves outward on the λ*=0.07 curve (currently K1≈4–6), the reformulation is a
+real improvement; if the wall stays at K1≈4–6, then the wall is information-theoretic and
+Phase 2 is at its ceiling."*
+
+**Verdict: NEGATIVE on both clauses. The reformulation is provably a no-op.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` → fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0. **PARI/GP is NOT installed in this image** (`which gp`
+  → empty); threads 2/3/6 would need `apt-get install pari-gp` first, as on 2026-07-29.
+  Also note `tests/gs_precision_benchmark.rs`, named in the standing task brief, does not
+  exist in the tree — only `curve_audit.rs` and `lll_degeneracy_probe.rs`.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_delim.py` (8 experiments E1–E8, 159 lines of
+  output in `glv_hnp_phase2_delim_output.txt`). EC arithmetic, `scales()`,
+  `gen_signatures()` and `build_glv_lattice()` copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:87` so every comparison to 2026-07-29 is exact.
+- Implemented the d-elimination. With `t_i = B_i·B_0^{-1} mod n`, `u_i = A_i − t_i·A_0`,
+  substituting `d = (k1_0 + λ·k2_0 − A_0)·B_0^{-1}` into relation *i* gives, for i ≥ 1,
+  `k1_i ≡ u_i + t_i·k1_0 + t_i·λ·k2_0 − λ·k2_i (mod n)`. Every unknown is now small; the
+  full-size unknown d is gone. Lattice dim 2m+1 vs the original 2m+2 — exactly one
+  coordinate removed (`build_delim_lattice`, `glv_hnp_phase2_delim.py:302`).
+- `cargo test --test curve_audit` → 5/5 pass (7.11s). ✓
+
+### Findings
+
+**E7 — the reformulation is EXACTLY the projection along the trivial vector (theorem).**
+`ker(π) ∩ L_orig = Z·(n·S_D·e_m)` has rank 1 (row m must be used n times to clear the
+`B_i·S_K1` entries), so π(L_orig) has dim 2m+1 like L_delim, and both live in the same
+coordinate space (L_orig's equation column *i* and L_delim's k1_0/equation column both
+carry `k1_i·S_K1`). Hermite normal forms agree, and the planted vectors are equal:
+
+| curve | m | dim | HNF(π L_orig) == HNF(L_delim) | pv equal |
+|---|---|---|---|---|
+| 8-bit/199 | 6 | 13 | True | True |
+| 12-bit/2557 | 8 | 17 | True | True |
+| 12-bit/2677 | 10 | 21 | True | True |
+
+So "algebraically eliminate d" and "quotient out the trivial vector" — the two options
+offered in the 2026-07-29 next-step — are *the same construction*, not alternatives.
+
+**E3/E4/E5 — consequently, identical outcomes in every cell.** Not merely equal rates:
+the same seeds succeed and fail. K1 wall (5 seeds, m as in T4):
+
+| curve (λ*) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| 2557 (0.340) orig | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 2557 (0.340) delim | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 |
+| 2677 (0.070) orig | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 (0.070) delim | 5/5 | 5/5 | 5/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+| 2677 delim + BKZ-40 | 5/5 | 5/5 | 5/5 | 1/5 | 0/5 | 0/5 | 0/5 | 0/5 |
+
+17-bit head-to-head at eff = K1·K2/n = 0.15, 20 curves × 5 seeds: orig 3/20 full
+recoveries and 21/100 seed-wins; delim 3/20 and 21/100; **per-curve head-to-head delim
+better on 0, worse on 0, tied on 20.** E4 (m = 8/12/16/24/32 at K1=8 on 2677) likewise
+identical: 0,0,1,0,1 of 5 for both. The K1 wall does not move. Per the stated falsifier,
+**the wall is information-theoretic and Phase 2 is at its ceiling** for this class of
+reformulation.
+
+**E2 — the trivial vector is gone, but the planted vector is still not λ₁.**
+sv/pv rises (0.387 → 0.767 on 2677; 0.543 → 0.790 on 199) but stays below 1 everywhere.
+The new λ₁ is a pure λ-block vector — its energy is entirely in the k1_0 and k2 columns:
+
+| curve | eq-cols | k1_0 | k2-cols | kannan | == planted? |
+|---|---|---|---|---|---|
+| 8-bit/199 | 0.000 | 0.508 | 0.492 | 0.000 | False |
+| 12-bit/2557 | 0.000 | 0.132 | 0.868 | 0.000 | False |
+| 12-bit/2677 | 0.000 | 0.822 | 0.178 | 0.000 | False |
+
+Killing the trivial vector just promotes the next rival, and that rival is the λ-sublattice
+— i.e. exactly the object ν̂ was built to measure on 2026-07-29.
+
+**E8 — the projection makes λ₁ informative, and this EXPLAINS ν̂ rather than beating it.**
+In L_orig, λ₁ = n·S_D always, so sv/E[pv] has total range [0.333, 0.334] — a constant. In
+π(L_orig) it varies over [0.335, 0.785] and predicts success. Instance-level AUC
+(200 instances = 20 curves × 5 seeds × 2 operating points, m=12, 40 successes):
+
+| predictor | pooled AUC | eff=0.15 | eff=0.20 |
+|---|---|---|---|
+| sv/E[pv], π(L_orig) | 0.883 | 0.869 | 0.929 |
+| ν̂ = λ₁(L2)/√det L2 (2026-07-29) | 0.905 | 0.881 | 0.934 |
+| pv/GH | 0.552 | 0.566 | 0.537 |
+| sv/E[pv], L_orig | 0.849 | — (constant) | — (constant) |
+
+ν̂ is marginally better *and* is a-priori (needs no reduction), so this is **not** an
+improved separator. Its value is explanatory: ν̂ works because it is a cheap 2-D proxy for
+the true λ₁ of the projected lattice, which E2 shows is a λ-block vector.
+
+**METHODOLOGICAL — two corrections future runs should apply.**
+1. *Pooled AUC across operating points is confounded.* `sv/E[pv]` on L_orig scored a
+   pooled AUC of 0.849 while being constant to 3 decimals — it was separating the
+   eff=0.15 and eff=0.20 arms (different base rates), not the instances. Always report
+   within-arm AUC. The 2026-07-29 ν̂ figure (0.935) was pooled; its within-arm values here
+   are 0.881/0.934.
+2. *5-seed grid cells carry ±2/5 sampling noise.* This run measured 0/5 at
+   (2677, K1=6, m=10) where T4 reported 2/5. Re-running that same cell with 20 seeds gives
+   **8/20 (40%)** — both readings are draws from the same ~40% cell. The "K1 wall" is a
+   soft transition zone roughly one K1-step wide, not a sharp threshold, and no wall
+   location quoted from a 5-seed grid (including T4's 12–16 vs 4–6) should be read as
+   more precise than that.
+
+**E6 — GH explains where the wall is, not which curve fails at it.** pv/GH separates the
+K1 grid well (AUC 0.953 for both lattices; successes 0.63–1.51, failures 1.22–2.66) but is
+near-useless within a fixed operating point (0.537–0.566). Location of the wall is a volume
+argument; identity of the survivors is a λ-geometry argument.
+
+### Next step proposal
+**Thread 24 — attack the λ-sublattice directly, since E2 identifies it as the sole rival.**
+Concretely: in π(L_orig) the rival λ₁ has zero energy in the equation columns and in the
+Kannan column, so it lies in the (m+1)-dimensional sublattice
+`L_λ = {v ∈ L : eq-cols = 0, kannan = 0}`, spanned by the k1_0 and k2 rows subject to
+`t_j·c_0 + t_j·λ·c_{k2_0} − λ·c_{k2_j} ≡ 0 (mod n)`. Compute λ₁(L_λ) exactly (BKZ-full on
+m+1 ≈ 13 dimensions is cheap) and test whether re-scaling S_K2 to *lengthen* L_λ relative
+to the planted vector moves the K1 wall. Unlike S_D — which E7/T5 showed cancels — S_K2
+does **not** scale the planted vector and the rival equally: the rival's energy is
+0.18–0.87 in the k2 columns (E2 table) while the planted vector's is ~1/2, so a
+non-uniform reweighting has a genuine differential effect.
+Falsifier: sweep S_K2 over {1/4, 1/2, 1, 2, 4}× its default on the 2677 curve at K1=6 (the
+~40% cell, run at 20 seeds to beat the noise floor identified above). If no scaling lifts
+that cell above ~60%, the k2-column geometry is not the binding constraint either, and
+Phase 2 should be closed as DEAD-END rather than merely at-ceiling.
+
+Secondary (unblocked, cheap): `apt-get install pari-gp` at the start of any run that
+intends to touch threads 2/3/6 — it is absent from this image by default.
+
+### Commits made
+(see below)
