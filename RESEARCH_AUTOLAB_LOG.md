@@ -6281,4 +6281,4 @@ Secondary (bookkeeping, 5 min): the 2026-07-29 T5 paragraph asserting "no choice
 removes it" should be marked corrected in place, pointing at EXP S above.
 
 ### Commits made
-[recorded below]
+31e4660 autolab 2026-08-06: Thread 23 — pivot lattice makes planted vector λ₁ but K1 wall does not move
