@@ -6269,4 +6269,4 @@ close this — the lambda-block vectors are unavoidable), and d-elimination in
 any form (it is the projection along e_d, provably a no-op).
 
 ### Commits made
-(filled in below)
+27dff6f autolab 2026-08-06: Thread 23 — d-elimination is a projection (no-op); eff wall is a signature-count wall, not structural
