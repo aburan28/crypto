@@ -257,6 +257,62 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. Update 2026-08-06 — calibration of the viability condition
+
+Empirical work on toy curves (8–17 bit) has now settled how far this
+lattice reaches.  Script:
+[`secp256k1_cm_audit/glv_hnp_phase2_centered_cvp.py`](secp256k1_cm_audit/glv_hnp_phase2_centered_cvp.py);
+full log entry under `## 2026-08-06` in
+[`RESEARCH_AUTOLAB_LOG.md`](RESEARCH_AUTOLAB_LOG.md).
+
+**Center the unknowns.**  The implementation used from 2026-06-15 to
+2026-08-05 encoded `k₁ᵢ ∈ [0,K₁)`, `k₂ᵢ ∈ [0,K₂)`, `d ∈ [0,n)` one-sided.
+Lattice reduction searches around the origin, so subtracting each
+interval's midpoint from the target drops `E[x²]` from `X²/3` to `X²/12`
+— a factor 2 in the target vector's length, a factor 4 in tolerable bias
+strength.  Measured: pooled recovery on six fresh 17-bit curves (m=12,
+5 seeds, 120 trials) rises from **16/120 to 56/120**.
+
+**The viability condition is the Gaussian heuristic, nothing curve-specific.**
+With `N = 2m+1`, `det(L) = (n·S_K1)^m · S_D · S_K2^m` and centered
+`E‖e‖`, the ratio
+
+    r_GH = E‖e‖ / ( sqrt(N/2πe) · det(L)^(1/N) )
+
+separates success from failure at **r\* = 1.00** with AUC 0.994 over 39
+(curve, K₁) cells.  Writing `eff = K₁K₂/n`, the closed form is
+
+    r_GH  =  sqrt(2πe/12) · eff^(m/(2m+1)) · n^(1/(2m+1))
+          ≈  1.194 · eff^(m/(2m+1)) · n^(1/(2m+1))
+
+(verified against `gh_ratio()` to 3 decimals: m=8, n=2659, K₁=16, K₂=52 →
+1.099 predicted vs 1.098 computed).  Two regimes fall out:
+
+- **m → ∞:** `r_GH → 1.194·sqrt(eff)`, so the ceiling is `eff ≲ 0.70`,
+  i.e. `K₁·K₂ ≲ n/1.4`.  The uncentered lattice's ceiling was 4× lower,
+  `eff ≲ 0.18`.
+- **Finite m:** the `n^(1/(2m+1))` factor is a real penalty, not a
+  rounding term.  At m=12 and a 17-bit `n` it is 1.56, which is why the
+  measured 17-bit wall sits near `eff ≈ 0.25–0.35` rather than 0.70.  For
+  a 256-bit `n` the factor is `2^(256/(2m+1))`, so **`m ≳ 128` signatures
+  are needed before the asymptotic ceiling is even approached** — this is
+  the dominant cost term for any real-curve instantiation, and it is not
+  reflected in the `m ≳ 5` estimate in §2 above, which should be treated
+  as superseded.
+
+This answers the first open question above in the negative: the lattice
+does **not** reach the information-theoretic line (`K₁K₂ < n`); it stops
+at the standard Gaussian-heuristic wall, a fixed constant factor short,
+and BKZ-20 did not move it on any tested instance.
+
+**Two hypotheses closed as dead.**  (i) `λ* = min(λ, n−λ)/n` is not a
+predictor — the apparent λ*-dependence of the K₁ wall was an artifact of
+the uncentered encoding.  (ii) The planted vector is never `λ₁` of this
+lattice (the trivial vector `n·S_D·eₘ` is always shorter), but that is
+harmless: it lies in the `d mod n` periodicity direction and never
+competes for the BDD solution.  Projecting it out and solving CVP
+directly performs identically to the centered Kannan embedding.
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
