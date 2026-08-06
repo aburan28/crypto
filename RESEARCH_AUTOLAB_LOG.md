@@ -6296,4 +6296,4 @@ beats the τ wall, and they may be the cleanest handle on the λ* mechanism.
 
 ### Commits made
 
-(hash recorded in the follow-up commit below)
+daf075a autolab 2026-08-06: Thread 23 CLOSED — d-elimination ties baseline; wall is neither information-theoretic nor reduction-strength
