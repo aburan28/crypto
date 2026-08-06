@@ -1,0 +1,68 @@
+==============================================================================
+GLV-HNP Phase 2, Thread 23: d-free BDD reformulation
+==============================================================================
+
+--- E1  construction check (coset membership + recovery) ---
+  12-bit/2557          m= 8 dim(Kannan)= 18 dim(BDD)= 16 planted in t0+L0: True   recover(K1=2): True
+  12-bit/2677 FAIL     m=10 dim(Kannan)= 22 dim(BDD)= 20 planted in t0+L0: True   recover(K1=2): True
+
+--- E2  gap diagnostic on the new lattice ---
+  ratio = ||e_found||/||e_planted||   (<1 => planted is NOT closest:
+                                       information-theoretically lost)
+  curve                 K1    ||e_pl||   ||e_cvp||   ratio        lam1 lam1/2||e||  rec
+  12-bit/2557            2   4.244e+03   4.244e+03  1.0000   4.733e+03      0.5575    Y
+  12-bit/2557            4   3.974e+03   3.974e+03  1.0000   3.236e+03      0.4071    Y
+  12-bit/2557            8   3.580e+03   3.580e+03  1.0000   2.738e+03      0.3823    Y
+  12-bit/2557           16   3.459e+03   2.896e+03  0.8373   2.598e+03      0.3756    n
+  12-bit/2557           32   3.375e+03   2.400e+03  0.7111   2.287e+03      0.3388    n
+  12-bit/2677 FAIL       2   4.670e+03   4.670e+03  1.0000   9.394e+03      1.0058    Y
+  12-bit/2677 FAIL       4   4.277e+03   4.277e+03  1.0000   7.580e+03      0.8862    Y
+  12-bit/2677 FAIL       8   3.914e+03   3.914e+03  1.0000   4.963e+03      0.6340    Y
+  12-bit/2677 FAIL      16   3.779e+03   3.779e+03  1.0000   3.156e+03      0.4175    Y
+  12-bit/2677 FAIL      32   3.695e+03   2.815e+03  0.7619   2.437e+03      0.3298    n
+
+--- E3  K1 wall sweep, 4 methods x 5 seeds (successes out of 5) ---
+
+  12-bit/2557   n=2659 lam=1755 lam*=0.3400 m=8
+    method            2    3    4    6    8   12   16   24   32   48   64
+    kannan-LLL        5    5    5    5    4    2    0    0    0    0    0
+    bdd-babai         5    5    5    3    4    1    0    0    0    0    0
+    bdd-babai-C       5    5    5    5    5    5    2    0    0    0    0
+    bdd-cvp-C         5    5    5    5    5    5    1    0    0    0    0
+
+  12-bit/2677 FAIL   n=2647 lam=185 lam*=0.0699 m=10
+    method            2    3    4    6    8   12   16   24   32   48   64
+    kannan-LLL        5    5    5    1    0    0    0    0    0    0    0
+    bdd-babai         5    4    5    0    0    0    0    0    0    0    0
+    bdd-babai-C       5    5    4    5    4    5    1    1    0    0    0
+    bdd-cvp-C         5    5    5    5    5    5    4    1    0    0    0
+
+--- E4  eff = K1*K2/n scaling, fresh 17-bit curves, m=12 ---
+  found 4 curves: 65539/65287(lam*=0.335), 65557/65053(lam*=0.388), 65617/65119(lam*=0.358), 65629/66109(lam*=0.410)
+    curve              lam*         eff=0.05          eff=0.1          eff=0.2          eff=0.4          eff=0.8
+                            kan/bab/babC/cvp kan/bab/babC/cvp kan/bab/babC/cvp kan/bab/babC/cvp kan/bab/babC/cvp
+    65539/65287       0.335          3/3/3/3          3/3/3/3          2/1/3/3          0/0/1/1          0/0/0/0
+    65557/65053       0.388          3/2/3/3          1/0/2/3          0/0/2/2          0/0/0/1          0/0/0/0
+    65617/65119       0.358          3/3/3/3          0/0/3/3          0/0/3/3          0/0/2/1          0/0/0/0
+    65629/66109       0.410          3/3/3/3          0/2/3/3          0/0/2/2          0/0/0/0          0/0/0/0
+    (each cell: kannan-LLL / bdd-babai / bdd-babai-C / bdd-cvp-C, out of 3)
+
+--- E5  Gaussian-heuristic prediction of the information-theoretic wall ---
+  det(L0) = S_K1^m * S_K2^m * n^(m-1);  centred ||e|| ~ n*sqrt(2m/12)
+  N_pred  = vol(ball_2m(||e||)) / det(L0)  = expected # lattice points
+            at least as close to the target as the planted vector.
+  N_pred << 1  =>  planted vector is the unique CVP solution (recoverable)
+  N_pred >> 1  =>  information-theoretically lost, no reduction can help
+  curve                  K1   m       N_pred
+  12-bit/2557             2   8    3.507e-08
+  12-bit/2557             4   8    9.031e-06
+  12-bit/2557             8   8    2.312e-03
+  12-bit/2557            16   8    5.919e-01
+  12-bit/2557            32   8    1.515e+02
+  12-bit/2677 FAIL        2  10    1.189e-10
+  12-bit/2677 FAIL        4  10    1.227e-07
+  12-bit/2677 FAIL        8  10    1.275e-04
+  12-bit/2677 FAIL       16  10    1.306e-01
+  12-bit/2677 FAIL       32  10    1.421e+02
+
+done.

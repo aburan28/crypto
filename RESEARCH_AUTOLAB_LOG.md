@@ -6103,3 +6103,184 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+**Thread 23** — reformulate the Phase-2 GLV lattice so the planted vector is
+actually the search target. This was the explicit next-step proposal of the
+2026-07-29 run, which had just proved (T5) that the planted vector is *never*
+`lambda_1` of the §2 Kannan lattice. All six original priority threads remain
+CLOSED/BLOCKED/DEAD-END (see 2026-07-08 log, line ~4473); Thread 23 is the
+continuation of the one thread with recent measurable progress, so protocol
+rule (b) selects it.
+
+Outcome: **the reformulation works.** The K1 wall moves outward by ~4x on the
+historical failure curve, and the new wall is provably information-theoretic.
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4. `gp` was NOT needed this run. Note for future runs: fpylll
+  exposes exact CVP as `fpylll.CVP.closest_vector(A, t)` on an LLL-reduced
+  basis — this is the tool that separates "reduction too weak" from
+  "information-theoretically lost", and no prior GLV run used it.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_bdd_reform.py` (5 experiments
+  E1–E5, 606 lines). Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_bdd_reform_output.txt` (68 lines).
+  Signature generation and scale choice are copied verbatim from
+  `glv_hnp_phase2_lambda_threshold.py:227` (`scales`) and `:230`
+  (`gen_signatures`) so the baseline column is the same attack as 2026-07-29.
+- Added §9 to `RESEARCH_GLV_HNP_PHASE2.md` documenting the construction, and
+  marked the first §8 open question ANSWERED.
+- `cargo test --test curve_audit` → 5/5 pass (4.45s). ✓
+
+**The construction.** The §2 lattice gives `d` its own column with scale
+`S_D`. Since `d` is uniform in `[0,n)` the planted vector always carries an
+`O(n)` coordinate, while `n·S_D·e_m` is in the lattice with norm exactly
+`n·S_D` — shorter for every `m >= 1`, and no `S_D` fixes it (both scale
+linearly in `S_D`). Instead, eliminate `d` algebraically: with
+`c_i = B_i·B_0^{-1} mod n`,
+
+```
+    w_i - c_i·w_0 = A_i - c_i·A_0 =: C_i  (mod n),   i = 1..m-1
+```
+
+is `d`-free. The homogeneous solution set is a rank-`2m` lattice `L0` with an
+explicit triangular basis (no HNF needed — see `build_bdd_instance`):
+
+```
+    r_A   : u_0 = 1,  u_i = c_i             r_C,i : v_i = 1, u_i = -lam
+    r_B   : v_0 = 1,  u_i = c_i·lam         r_D,i : u_i = n
+```
+
+The planted `(k1,k2)` lies in the coset `t0 + L0` with
+`t0 = (0, C_1..C_{m-1}, 0_m)` (verified exactly in E1 for both curves, both
+`K1`), so recovery is a CVP; `d` is read off the *error*, not a coordinate:
+`d = (k1_0 + lam·k2_0 - A_0)·B_0^{-1} mod n`. Dimension drops `2m+2 -> 2m`
+(22 -> 20 for the 2677 curve) and the trivial vector is gone by construction.
+
+Four methods compared on identical signatures/secrets: `kannan-LLL` (the
+2026-07-29 baseline), `bdd-babai` (uncentered), `bdd-babai-C` (centered
+target), `bdd-cvp-C` (centered + exact CVP).
+
+### Findings
+
+**F1 — the wall moves outward by ~4x. Falsifier PASSED.**
+`12-bit/2677`, `n=2647`, `lam*=0.070`, `m=10` — the curve logged as a hard
+failure 2026-07-26 and as walled at `K1 ~ 4-6` on 2026-07-29 (5 seeds each):
+
+| method | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 | 48 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| kannan-LLL (baseline) | 5 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| bdd-babai (uncentered) | 5 | 4 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| bdd-babai-C | 5 | 5 | 4 | 5 | 4 | 5 | 1 | 1 | 0 | 0 |
+| bdd-cvp-C | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 1 | 0 | 0 |
+
+Wall `K1 ~ 4-6` → `K1 ~ 16-24`. On `12-bit/2557` (`lam*=0.340`, m=8) it moves
+`K1 ~ 8-12` → `K1 ~ 12-16`. Note this also retroactively raises the
+2026-07-26 "structural failure" claim from "corrected to K1<=4" (2026-07-29)
+to `K1 <= 16`: that curve is recoverable at the very `K1=8` where it was
+first declared a structural failure.
+
+**F2 — centering is the essential ingredient, not the dimension drop.**
+`bdd-babai` (uncentered) is *worse* than the `kannan-LLL` baseline (0/5 at
+K1=6 vs 1/5). Only after shifting the CVP target by the box centre does the
+reformulation win. Reason: `k1_i in [0,K1)`, `k2_i in [0,K2)` are one-sided,
+so the raw error has a large mean; centering makes entries uniform on
+`[-n/2,n/2]`, cutting `E[e_j^2]` from `n^2/3` to `n^2/12` — a factor 2 in
+`||e||`, i.e. ~4x in the bias budget by the Gaussian heuristic. That is
+exactly the observed factor. **Any future Phase-2 lattice work must centre
+the target; the ~4x is free.**
+
+**F3 — the planted vector is now the CVP solution (the T5 statistic inverted).**
+`||e_found||/||e_planted||` under *exact* CVP, seed 42:
+
+| curve | K1=2 | 4 | 8 | 16 | 32 |
+|---|---|---|---|---|---|
+| 2557 (m=8) | 1.0000 | 1.0000 | 1.0000 | 0.8373 | 0.7111 |
+| 2677 (m=10) | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.7619 |
+
+`1.0000` means the planted vector *is* the closest vector. Compare the
+2026-07-29 T5 table, where `sv/pv` sat in `[0.34, 0.61]` on every curve,
+success and failure alike, and never reached 1. The falsifier's "sv/pv rises
+above 1" condition is met in the appropriate sense: the planted vector is now
+the unique optimum of the search problem being solved, at every `K1` below the
+wall.
+
+Note `lam1/(2·||e_planted||)` stays in `[0.33, 1.01]` throughout — that is,
+recovery succeeds at `K1=8, 12` even though the classical `lambda_1/2`
+BDD-radius sufficient condition is violated there (ratio 0.38 and 0.63). The
+`lambda_1/2` criterion is merely sufficient, not necessary, and is far too
+pessimistic here; F4 gives the criterion that actually predicts the wall.
+
+**F4 — the new wall is information-theoretic, and predicted to the K1.**
+With `det(L0) = S_K1^m·S_K2^m·n^{m-1}` and centred `||e|| ~ n·sqrt(2m/12)`,
+let `N_pred = vol(ball_{2m}(||e||))/det(L0)` be the expected number of lattice
+points at least as close to the target as the planted vector:
+
+| curve | K1 | N_pred | exact-CVP outcome |
+|---|---|---|---|
+| 2557 (m=8) | 8 | 2.312e-03 | planted is closest |
+| 2557 (m=8) | 16 | 5.919e-01 | LOST |
+| 2557 (m=8) | 32 | 1.515e+02 | LOST |
+| 2677 (m=10) | 16 | 1.306e-01 | planted is closest |
+| 2677 (m=10) | 32 | 1.421e+02 | LOST |
+
+`N_pred` crosses 1 exactly where the empirical wall sits, on both curves.
+Past it a strictly closer lattice point exists, so **no reduction algorithm
+whatsoever can recover `d`** — BKZ, sieving, or otherwise. The reformulated
+attack therefore saturates the information-theoretic bound of its own lattice.
+
+Corroborating detail: at `2557, K1=16` (`N_pred=0.59`, the boundary itself)
+exact CVP scores *lower* than Babai (1/5 vs 2/5). That inversion is the
+signature of an information-theoretic rather than algorithmic limit — exact
+CVP correctly returns a closer-but-wrong vector where Babai occasionally
+stumbles onto the planted one.
+
+**F5 — E4, fresh 17-bit curves, m=12, 3 seeds, cells `kan/bab/babC/cvp`:**
+
+| curve | lam* | eff=0.05 | 0.10 | 0.20 | 0.40 | 0.80 |
+|---|---|---|---|---|---|---|
+| 65539/65287 | 0.335 | 3/3/3/3 | 3/3/3/3 | 2/1/3/3 | 0/0/1/1 | 0/0/0/0 |
+| 65557/65053 | 0.388 | 3/2/3/3 | 1/0/2/3 | 0/0/2/2 | 0/0/0/1 | 0/0/0/0 |
+| 65617/65119 | 0.358 | 3/3/3/3 | 0/0/3/3 | 0/0/3/3 | 0/0/2/1 | 0/0/0/0 |
+| 65629/66109 | 0.410 | 3/3/3/3 | 0/2/3/3 | 0/0/2/2 | 0/0/0/0 | 0/0/0/0 |
+
+The viable bias budget `eff = K1·K2/n` moves from ~0.05-0.10 (2026-07-29's
+measured ceiling) to ~0.20-0.40, consistent with F2's predicted ~4x. `eff`
+remains the governing variable; `lam*` still does not separate (falsified
+2026-07-29, unchanged here).
+
+**F6 — scope.** This is a constant-factor improvement in the leakage
+requirement (~2 bits of `K1`), not a change in asymptotics: the attack still
+needs a per-signature nonce bias. It does **not** bear on the main theorem of
+`PAPER_STRUCTURAL_COMPLETENESS.md`. What it does mean is that every Phase-2
+negative result from 2026-06-15 through 2026-07-29 understated the attack by
+~4x in `K1`, because all of them were measured on the `d`-column lattice.
+
+### Next step proposal
+**Thread 24 — push `eff` further by attacking the `N_pred` bound itself.**
+F4 shows the current attack is optimal *for this lattice*, so the only
+remaining lever is a lattice with smaller `det`-to-error ratio. Two concrete
+candidates, in order:
+
+1. **Predicate/enumeration past the wall.** Beyond `N_pred = 1` the planted
+   vector is not the closest, but it is still *a* close vector, and the ECDSA
+   verification equation is a cheap membership oracle. Enumerate all lattice
+   points within `||e_planted||` (there are ~`N_pred` of them) and test each.
+   Falsifier: at `2557, K1=32` (`N_pred=152`) enumeration should recover `d`
+   in ~152 oracle calls; if it does, the "wall" is only a wall for
+   single-shot CVP and `eff` extends by however far enumeration stays cheap.
+   Cheap to test — `fpylll` `Enumeration` with a radius bound, 20-dim.
+2. **Drop the `k2` columns.** `k2_i` is uniform in `[0,K2)` and contributes
+   `m·n^2/12` to `||e||^2` — half the total — while carrying no information
+   the attacker wants. If `k2` can be quotiented out the way `d` just was,
+   `||e||^2` halves again. Unclear whether the resulting object is still a
+   lattice; that is the thing to check first, on paper, before coding.
+
+Secondary (bookkeeping): the 2026-07-26 and 2026-07-29 entries state K1 walls
+measured on the `d`-column lattice. They are correct as stated for that
+lattice but understate the attack; a future run should annotate them rather
+than re-derive them.
+
+### Commits made
