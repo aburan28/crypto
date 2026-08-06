@@ -271,3 +271,60 @@ quirks.
 - Aldaya, Pereira, Brumley, Tuveri, García-Mariscal, Pereida-García,
   "LadderLeak: breaking ECDSA with less than one bit of nonce
   leakage", CCS 2020.
+
+## 10. Lattice geometry of the Phase-2 construction (added 2026-08-06)
+
+Empirical results from `secp256k1_cm_audit/glv_hnp_thread23_projected.py` and
+`glv_hnp_thread23_outliers.py`. These answer the third open question of §8
+("does the secp256k1 LLL-degeneracy generalize to the GLV-aware lattice?")
+negatively, and replace the working assumption that the attack is an SVP
+instance for the planted vector.
+
+**The Phase-2 lattice `L` (dim 2m+2) has two structurally short non-planted
+vectors.**
+
+1. *The trivial vector* `n·S_D·e_m`, of norm `n`, obtained as
+   `n·row_m − Σᵢ Bᵢ·row_i`. It is always λ₁, because
+   `‖v_planted‖ ≈ n·√(2m/3 + 4/3)`. It carries no information (`d` is only
+   defined mod `n`).
+2. *The λ-block vector*, the Lagrange-Gauss shortest vector `μ` of
+   `L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` embedded on a coordinate pair
+   `(i, m+i)`. Its normalisation `ν̂ = μ/√(det L2)` is the strongest known
+   per-curve difficulty predictor for Phase 2 (AUC 0.935 against the June
+   C1/C2 classes; independently replicated 2026-08-06 — the two curves of ten
+   that recover at eff ≈ 0.25 are the two lowest ν̂, p = 0.022). Low ν̂ means
+   easier, not harder.
+
+**Projecting out the trivial vector is possible but counterproductive.**
+`L ∩ span(e_m) = n·S_D·ℤ·e_m` exactly, so deleting column `m` yields
+`π(L)` of rank `2m+1` with the trivial vector annihilated, and the planted
+vector becomes λ₁ precisely when `‖π(v)‖ < μ`. Recovery does not improve:
+across a 17-bit, 10-curve, 5-seed, 5-eff panel, `π(L)` matches `L` on eight
+curves at every eff and loses on two.
+
+**Recovery is a coset condition, not an SVP condition.** The attack succeeds on
+any element of
+```
+v_planted + Z,   Z = { z ∈ L : z_Kannan = 0,  z_d ≡ 0 (mod n) },
+```
+because `d` is read from the d-column mod `n` and is insensitive to `Z`. Members
+of this coset shorter than `v_planted` itself do occur and are what LLL actually
+returns in the hardest recovered instances (norm ratios 0.692 and 0.832 at
+eff = 0.25). Any reformulation that removes the d-column — including the
+projection above — destroys this route.
+
+**Success threshold.** With `γ_GH = ‖π(v)‖ / λ₁^GH(π L)`,
+`det π(L) = (n·S_K1)^m · S_K2^m`, `λ₁^GH = √(d'/2πe)·det^{1/d'}`, `d' = 2m+1`:
+`γ_GH < 0.90` classifies recovery at 0.924 accuracy against a 0.772 majority
+baseline (p̂ 0.880 below vs 0.065 above). Asymptotically `γ_GH < 1` becomes
+```
+eff = K1·K2/n  <  3/(2πe) ≈ 0.1756,
+```
+with no fitted parameter, matching the measured 19/20 at eff = 0.05, 3/20 at
+0.15, 0/20 at 0.25.
+
+**Negative result on scaling.** Shrinking `S_K2` by a factor `c` to make
+`‖v_planted‖ < μ` fails: the λ-block degenerates and `μ` collapses faster than
+`‖v_planted‖`, whose k1-part and Kannan coordinate act as a floor. `pv/μ` is
+monotonically decreasing in `c` over `c ∈ [1/32, 2]`. The shipped
+`S_K2 = n // K2` is at or near optimal.

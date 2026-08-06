@@ -6103,3 +6103,463 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-07-29 (autolab run #2) — RESTORED 2026-08-06
+
+> **Restoration note (2026-08-06).** Two autolab sessions ran on 2026-07-29
+> (`d525931` and `e845207`), each appending its own entry. The PR-33 merge
+> conflict resolutions (`7b5b702`, `e31dd19`) kept only the `d525931` entry;
+> the 258 log lines added by `e845207` were dropped, although all four of its
+> scripts survived in `secp256k1_cm_audit/`. The section below is restored
+> verbatim from `git show e845207:RESEARCH_AUTOLAB_LOG.md`. Future runs:
+> when resolving a conflict in this file, KEEP BOTH sides — entries are
+> append-only and never mutually exclusive.
+
+### Task picked
+
+**Thread 20 (λ/n threshold study)** — proposed by the 2026-07-26 run #1 as the
+top continuation of Thread 5, which had measurable progress that day. Threads 1,
+3, 4, 6 are CLOSED; Thread 2 was closed 2026-07-26 with a permanent BLOCKED
+verdict (`c591765`). Thread 20 was the only priority-ordered thread with recent
+progress and an unstarted, concrete next sub-task.
+
+Scope grew during the session: the λ/n bisection was falsified within the first
+hour, which freed the rest of the session to test — and confirm — the
+lattice-geometric predictor conjectured but never executed on 2026-06-29.
+
+### Work done
+
+Environment: `pip install fpylll sympy cysignals` (never persists between
+sessions; always re-install). PARI/GP did **not** install this session
+(`apt-get install pari-gp` failed, no network to the archive); not needed, this
+thread is pure Python. `cargo test --test curve_audit` → 5/5 pass (5.54s). ✓
+
+Four new scripts, run in sequence, each answering the previous one's question:
+
+- **`glv_hnp_phase2_lambda_threshold.py`** (Thread 20a) — bisection of the
+  conjectured λ/n threshold. Anchor reproduction first: the three curves from
+  2026-07-26 reproduce exactly (8-bit/199 3/3 at m=4; 12-bit/2557 3/3 at m=7;
+  12-bit/2677 never 3/3), so the harness matches the prior session's.
+  Then 28 fresh 20-bit j=0 CM curves bucketed across μ ∈ (0, 0.5].
+- **`glv_hnp_phase2_mu_response.py`** (Thread 20b) — 100 curves × 20 μ-bins,
+  24 seeds per (curve, m), m ∈ {8,9,10,11}; 9600 LLL trials; curve-level
+  permutation tests.
+- **`glv_hnp_phase2_nuhat_control.py`** (Thread 20c) — controlled low-vs-high
+  ν̂ contrast at two bit sizes with μ balanced by construction, plus a
+  fixed-curve synthetic-λ causal arm.
+- **`glv_hnp_nuhat_vs_c1c2.py`** (Thread 20d) — Exp S protocol replication
+  (K1=72, m=12, 6 seeds, 100 curves), testing ν̂ against the June C1/C2 classes
+  head-to-head with the falsified `max_a`.
+
+### Findings
+
+#### 1. λ/n is the wrong coordinate; μ is the curve invariant
+
+For j=0 curves the two GLV eigenvalues are λ and λ' = n−1−λ, so λ/n and
+(n−λ)/n describe the **same curve**. The invariant is the symmetric
+
+    μ = min(λ, n−λ)/n  ∈ (0, 1/2].
+
+Under μ the 2026-07-26 data reads μ = 0.467, 0.339, 0.340 succeed / μ = 0.070
+fails, and the bisection interval is μ ∈ (0.07, 0.34). Root-choice control
+(20a Part E, 6 curves): ν̂ changes by <0.02 and first-3/3 m by ≤3 between λ and
+λ′ — the two roots are interchangeable, as μ predicts.
+
+#### 2. μ is FALSIFIED as a Phase 2 predictor — 8th invariant to fall
+
+20a (28 curves, eff = K1·K2/n = 0.05, K1=36): **27/28 curves reach 3/3**,
+including μ = 0.0200 — the *smallest* μ in the sample — at m=7, faster than
+most large-μ curves. No threshold exists:
+
+```
+mu range (success): [0.0200, 0.4920]
+mu range (failure): [0.3011, 0.3011]     <- the single failure sits mid-range
+best single-cut accuracy: mu 92.9% vs trivial baseline 96.4%
+```
+
+The 2026-07-26 p=2677 failure at μ=0.070 is real but is **not** caused by small
+μ. It is the same per-curve lattice variance documented for Phase 1 on
+2026-06-22 (§"Large-pair variance"): here the single failure (n=525913,
+μ=0.3011) has a sister curve at μ=0.3002 that succeeds at m=7.
+
+20b then killed the residual "hard band" reading of the 20a graded response
+(first-3/3 m looked bumped at intermediate μ). With 100 curves × 24 seeds it is
+seed noise — μ is flat across all 20 bins:
+
+```
+m=8   p_hat in-band=0.527  out-band=0.513  diff=+0.014  perm p=0.7555
+m=9   p_hat in-band=0.657  out-band=0.619  diff=+0.038  perm p=0.3965
+m=10  p_hat in-band=0.880  out-band=0.862  diff=+0.018  perm p=0.4892
+m=11  p_hat in-band=0.866  out-band=0.814  diff=+0.052  perm p=0.1413
+spearman(mu, p_hat) = -0.043, -0.048, +0.098, +0.023   (m = 8, 9, 10, 11)
+```
+
+Note the sign: in-band is very slightly *easier*, i.e. the effect is not merely
+insignificant, it is not even in the conjectured direction. **Thread 20 as
+posed on 2026-07-26 is answered: there is no λ/n (or μ) threshold.**
+
+Overdispersion at m=10 is 2.89× binomial, so real per-curve variation exists —
+it is simply not indexed by μ. That motivated the rest of the session.
+
+#### 3. POSITIVE RESULT — ν̂, a lattice-geometric separator
+
+The 2026-06-29 entry closed the six-invariant falsification streak with an
+unexecuted conjecture: the separator "requires a lattice-geometric computation:
+specifically, whether the BV lattice for (n, λ) admits a short non-planted
+vector". In the (2m+2)-dim column-scaled lattice this is directly computable.
+Rows i and m+1+i are supported on the coordinate pair (i, m+1+i) and generate a
+2-dimensional **non-planted** sublattice (last coordinate 0, so `recover_d` can
+never read d off it):
+
+    L2 = < (n·S_K1, 0), (−λ·S_K1, S_K2) >,     det L2 = n·S_K1·S_K2
+
+det L2 is independent of λ, so the scale-free
+
+    **ν̂ = λ₁(L2) / sqrt(det L2)**        (one Lagrange-Gauss reduction, O(log n))
+
+isolates exactly the λ-dependence of the geometry. There are m independent
+copies of L2, one per signature index.
+
+**The sign is the opposite of the naive guess.** A *short* rival vector makes
+the attack EASIER. Reading through λ₁λ₂ ≈ det: small ν̂ means L2 is skew, so its
+second minimum is unusually long and the planted vector is comparatively short.
+A balanced L2 (ν̂ → 1) surrounds the planted vector with 2m rival vectors of
+norm ≈ sqrt(det), crowding it out.
+
+**20b, uncontrolled (100 curves):** spearman(ν̂, p̂) = −0.339, −0.468, −0.533,
+−0.568 at m = 8, 9, 10, 11 — strengthening monotonically with m.
+
+**20c Arm 1 (20-bit, 30 low-ν̂ vs 30 high-ν̂, μ balanced by design, 48 seeds):**
+
+```
+nu_hat  low group: mean=0.347 [0.222, 0.447]
+nu_hat high group: mean=0.971 [0.901, 1.072]
+CONFOUND CHECK mu: low=0.253 high=0.247 diff=+0.006 perm p=0.8376 (balanced)
+m=8   p_hat(low)=0.910  p_hat(high)=0.453  diff=+0.457  perm p<0.0001 ***
+m=9   p_hat(low)=0.973  p_hat(high)=0.594  diff=+0.378  perm p<0.0001 ***
+m=10  p_hat(low)=0.996  p_hat(high)=0.766  diff=+0.230  perm p<0.0001 ***
+m=11  p_hat(low)=0.999  p_hat(high)=0.746  diff=+0.253  perm p<0.0001 ***
+```
+
+**20c Arm 2 (24-bit replication, 20 vs 20):** same direction, larger effect —
+so it is not a 20-bit artifact.
+
+```
+CONFOUND CHECK mu: low=0.288 high=0.253 diff=+0.036 perm p=0.3861 (balanced)
+m=8   p_hat(low)=0.481  p_hat(high)=0.080  diff=+0.401  perm p<0.0001 ***
+m=9   p_hat(low)=0.692  p_hat(high)=0.143  diff=+0.549  perm p<0.0001 ***
+m=10  p_hat(low)=0.828  p_hat(high)=0.325  diff=+0.503  perm p<0.0001 ***
+m=11  p_hat(low)=0.923  p_hat(high)=0.345  diff=+0.578  perm p<0.0001 ***
+```
+
+**20c Arm 5 — causal, one fixed curve.** The lattice attack only requires the
+nonce to be generated as k = k₁ + λk₂ mod n with k₁ bounded; λ need not be a GLV
+eigenvalue for the HNP instance to be well posed. So (p, b, n, G, K1, K2) can be
+held FIXED while λ alone varies, eliminating every curve-level confound by
+construction. 120 synthetic λ on p=524341, n=525583, m=9, 24 seeds each:
+
+```
+spearman(nu_hat, p_hat) = -0.583  perm p=0.0002
+spearman(mu,     p_hat) = +0.003  perm p=0.9672   <- mu has zero power
+low  nu_hat tertile: nu_hat=0.341  p_hat=0.897  mu=0.258
+mid  nu_hat tertile: nu_hat=0.729  p_hat=0.570  mu=0.231
+high nu_hat tertile: nu_hat=0.951  p_hat=0.566  mu=0.281
+```
+
+The response is closer to a step at ν̂ ≈ 0.5 than a linear trend. The −0.80
+correlations in Arm 1/3 are inflated by selection on ν̂; −0.583 (Arm 5) and
+−0.57 (20b, unselected) are the honest effect sizes.
+
+#### 4. ν̂ resolves the 2026-06-30 DEAD END
+
+`glv_hnp_delta_threshold.py:224 build_lattice()` (June, Phase 1) and the Phase 2
+builder are the **same lattice** — identical rows, identical S_K1/S_K2/S_KANNAN,
+identical recovery test; only K1's parameterisation differs. So the June C1/C2
+classification is a classification of this same lattice and ν̂ applies to it
+directly. Exp S protocol replicated exactly (K1=72, m=12, 6 seeds, 100 fresh
+20-bit curves; 74/100 C1 vs Exp S's 40/50 — same regime):
+
+```
+ invariant           C1 range           C2 range     AUC  best acc
+    nu_hat      [0.408,1.012]      [0.314,0.645]   0.935     89.0%
+        mu      [0.002,0.497]      [0.001,0.499]   0.523     75.0%
+     max_a    [3.000,419.000]    [5.000,729.000]   0.748     75.0%
+                                     trivial baseline (majority) = 74.0%
+```
+
+Decile response, monotone over the whole range:
+
+```
+ decile  nu_hat mid   C2 rate  mean wins/6
+      1       0.332      1.00         6.00
+      2       0.455      0.70         5.00
+      3       0.540      0.40         4.00
+      4       0.582      0.10         2.90
+      5       0.632      0.40         3.30
+      6       0.715      0.00         1.20
+      7       0.801      0.00         0.80
+      8       0.850      0.00         0.80
+      9       0.890      0.00         1.00
+     10       0.965      0.00         0.70
+```
+
+Every C2 curve has ν̂ ≤ 0.645; no curve with ν̂ > 0.645 is C2. The classes
+overlap only on ν̂ ∈ [0.408, 0.645]. `max_a` and `μ` both sit at the trivial
+baseline on the same sample, reproducing their Exp S falsification.
+
+**Revised status of the 2026-06-29 claim.** "No known closed-form *algebraic
+invariant of the curve* predicts K1_threshold" still stands — ν̂ is not an
+algebraic invariant of the curve, and it depends on (K1, K2) as well as (n, λ).
+What is now false is the operational reading that no cheap predictor exists: a
+single Lagrange-Gauss reduction, O(log n), gives AUC 0.935. The 2026-06-29
+conjecture was right, and this is its confirmation.
+
+#### 5. secp256k1 placement (heuristic extrapolation)
+
+ν̂ for the real secp256k1 (n, λ), λ verified to satisfy λ²+λ+1 ≡ 0 mod n:
+
+```
+eff=0.05  nu_hat=0.8709  percentile vs random lambda = 73.3%
+eff=0.10  nu_hat=0.6624  percentile 41.3%     <- eff matching the K1=72 sample
+eff=0.25  nu_hat=0.5852  percentile 33.2%
+eff=0.50  nu_hat=0.6851  percentile 44.1%
+```
+
+At the eff = 0.0993 of the 20d sample, secp256k1 has ν̂ = 0.6639 — the 50th
+percentile of that sample, and just **above** the C2 ceiling (0.645): no sampled
+curve with ν̂ that large was ever C2. secp256k1 is not in the low-ν̂ easy tail at
+any eff tested.
+
+Two caveats, stated plainly. (a) This is a 20/24-bit → 256-bit extrapolation of
+an empirical regularity, not a proof. (b) The whole thread is conditional on a
+non-standard nonce generator (k = k₁ + λk₂ with k₁ bounded); it says nothing
+about correctly generated nonces, and is **not** an attack on secp256k1.
+
+Null distribution of ν̂ over random λ at 256 bits (eff=0.05, 4000 draws):
+q05=0.232, q10=0.322, q25=0.496, q50=0.715, q75=0.885, q90=0.974, q95=0.999;
+20.5% of λ fall below 0.45 (empirically easy) and 22.4% above 0.90 (hard).
+
+### Next step proposal
+
+**Thread 23 — derive λ₁(L2) in closed form and pin the threshold.** ν̂ is
+currently computed, not understood. L2 = ⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩ is a
+2-dimensional lattice whose shortest vector is a classical
+three-distance/continued-fraction quantity: minimising |aλ mod n|·S_K1 against
+a·S_K2 is best rational approximation to λ/n *at the scale* S_K2/S_K1 = K1/K2.
+That is why the raw CF invariants (q_cf, max_q_cf, max_a) all failed in June —
+they are scale-free, and the relevant approximation quality is scale-dependent.
+Concretely: show λ₁(L2) is determined by the CF convergent p_j/q_j of λ/n with
+q_j nearest sqrt(n·S_K1/S_K2) = sqrt(n·K2/K1), and check whether
+
+    nu_hat ≈ f(|q_j·λ mod n|·S_K1, q_j·S_K2)
+
+reproduces the measured ν̂ on the 20d sample. Falsifier: if predicted-from-CF ν̂
+correlates <0.9 with computed ν̂, the convergent-scale story is wrong. This
+would convert an empirical predictor into an algebraic one and would explain,
+retroactively, exactly why six June invariants failed.
+
+Second, cheaper sub-task: **20d used one m and one K1.** Check whether the ν̂
+cut generalises by re-running 20d at K1 ∈ {36, 72, 144} and m ∈ {10, 12, 14} —
+if the C2 ceiling stays near ν̂ ≈ 0.65 across all nine cells, the cut is a
+property of the lattice family, not of the sample.
+
+Not recommended: further μ/λ-ratio work. Eight invariants have now been
+falsified (δ/n, κ(M), q_cf, max_q_cf, max_a, a_corn/n, λ/n, μ) and the
+mechanism is now known to be scale-dependent, which explains all eight.
+
+### Commits made
+
+e845207 (restored 2026-08-06; hash was recorded by follow-up 7873016)
+
+## 2026-08-06 (autolab run)
+
+### Task picked
+
+**Thread 23 — reformulate the Phase-2 lattice so the planted vector is λ₁**, the
+explicit next-step proposal of the 2026-07-29 entry (`d525931`, log line 6089).
+Threads 1/3/6 CLOSED, 2 BLOCKED (`c591765`), 4/5 DEAD END; Thread 20 made
+measurable progress on 2026-07-29, so rule (b) selects its proposed sub-task.
+
+Housekeeping done first: **the 2026-07-29 run #2 log entry was missing.** Two
+sessions ran that day; the PR-33 conflict resolutions (`7b5b702`, `e31dd19`)
+kept only `d525931`'s entry and silently dropped the 258 lines added by
+`e845207` (the ν̂ separator, AUC 0.935), even though all four of its scripts
+survived in `secp256k1_cm_audit/`. Restored verbatim at log line 6107.
+**Future runs: when this file conflicts, KEEP BOTH SIDES.**
+
+Outcome: the Thread-23 premise is **inverted**. Making the planted vector λ₁ is
+achievable but is the wrong goal, and pursuing it strictly *loses* recoveries.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` →
+  fpylll 0.6.4 / cysignals 1.12.5 / sympy 1.14.0. `apt-get install pari-gp`
+  **failed** (no archive route) — PARI unavailable this session; not needed.
+- `secp256k1_cm_audit/glv_hnp_thread23_projected.py` (E0–E6) and
+  `glv_hnp_thread23_outliers.py` (E7). Both `exec` the helper prefix of
+  `glv_hnp_phase2_lambda_threshold.py` (everything above its `# EXPERIMENT T1`
+  banner) so the lattice, signature generator and scaling are **byte-identical**
+  to the 2026-07-29 harness. Outputs: `glv_hnp_thread23_projected_output.txt`
+  (168 lines), `glv_hnp_thread23_outliers_output.txt` (44 lines).
+- The projection is implemented as **delete column m**. Since
+  `L ∩ span(e_m) = n·S_D·ℤ·e_m` is exactly the trivial-vector line (T5,
+  2026-07-29), the orthogonal projection π along e_m has kernel exactly that
+  line, so π(L) has rank 2m+1 and the trivial vector maps to 0.
+- **Oracle hygiene.** The 2026-07-29 harness scored recovery as
+  `d_cand == d_secret`. π(L) has no d-column, so its recovery reads k1ᵢ,k2ᵢ off
+  the surviving coordinates and solves `d = (k1₀+λk2₀−A₀)·B₀⁻¹ mod n`. To make
+  the two columns comparable, an oracle-free verifier was written for *both*:
+  `glv_verify(d)` accepts iff every implied nonce `(Aᵢ+Bᵢd) mod n` is
+  GLV-small, i.e. `∃k2<K2 : (k−λk2) mod n < K1` — O(√n) per signature, uses only
+  (Aᵢ,Bᵢ). First draft of the fallback path leaked the oracle by comparing
+  against `sigs[i]['k1'/'k2']`; fixed and re-run. **The corrected totals are
+  identical to the leaky ones** (49/22/11/9/6 of 50), so the E2/E3 baseline
+  numbers are unaffected — they are now simply oracle-free.
+- `cargo test --test curve_audit` → 5/5 pass (7.01s). ✓ No Rust changed.
+
+### Findings
+
+**E0 — the projection does exactly what it should.** dim 2m+2 → 2m+1, LLL emits
+exactly one zero row on all three anchor curves (so the trivial vector and
+nothing else was removed), and `|λ₁(L)|/n = 1.0000` reproduces T5 exactly.
+
+**E1 — killing the trivial vector is not enough: sv/pv rises but stays < 1.**
+
+| curve | K1 | m | sv/pv in L | sv/pv in π(L) |
+|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 0.600 | 0.843 |
+| 12-bit/2557 | 8 | 8 | 0.514 | 0.532 |
+| 12-bit/2677 | 8 | 10 | 0.421 | 0.813 |
+
+**E5 — the second parasite is the λ-block, i.e. it is exactly ν̂.** The shortest
+vector of π(L) on the anchors is *literally* a λ-block vector: supported on a
+single coordinate pair (i, m+i), with `‖sv‖/μ = 1.000` to 4 digits, where
+μ = λ₁⟨(n·S_K1,0), (−λ·S_K1,S_K2)⟩ is the Lagrange-Gauss shortest vector of the
+2-D block — the same quantity as the restored `e845207` separator
+(ν̂ = μ/√(det L2)). It survives projection because it never touched the d-column.
+
+| curve | K1 | m | ‖sv π(L)‖ | μ | sv/μ | pv/μ | pairs | λ-block? | ν̂ |
+|---|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 6 | 277.9 | 277.9 | 1.000 | 1.186 | 1 | yes | 0.549 |
+| 12-bit/2557 | 8 | 8 | 2737.6 | 2737.6 | 1.000 | 1.878 | 1 | yes | 0.408 |
+| 12-bit/2677 | 8 | 10 | 5095.8 | 5095.8 | 1.000 | 1.230 | 1 | yes | 0.771 |
+| 17-bit/65647 | 12 | 12 | 175442.1 | 269352.5 | 0.651 | **0.651** | 12 | no | 0.889 |
+| 17-bit/66463 | 12 | 12 | 186758.2 | 232539.5 | 0.803 | **0.803** | 12 | no | 0.756 |
+| 17-bit/65707 | 12 | 12 | 164630.6 | 282966.8 | 0.582 | **0.582** | 12 | no | 0.943 |
+| 17-bit/66271 | 12 | 12 | 187243.9 | 247108.8 | 0.758 | **0.758** | 12 | no | 0.800 |
+
+On the four 17-bit rows `sv/μ == pv/μ` exactly: the shortest vector of π(L) **is**
+the planted vector. So the criterion is clean and per-instance:
+
+> **In π(L) the planted vector is λ₁ ⟺ ‖π(v)‖ < μ.** Verified 4/4 at eff=0.05
+> and 3/3 (negative) on the anchors. This is the first configuration in this
+> project where the planted vector is λ₁ at all.
+
+**E2/E3 — and it does not help. The Thread-23 falsifier answers NO.**
+K1 wall at m=8, cell = #seeds of 5:
+
+| curve | lattice | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 (λ*=0.340) | L | 5 | 5 | 5 | 5 | 4 | 0 | 0 | 0 |
+| 12-bit/2557 | π(L) | 5 | 5 | 3 | 0 | 1 | 0 | 0 | 0 |
+| 12-bit/2677 (λ*=0.070) | L | 5 | 5 | 5 | 2 | 1 | 0 | 0 | 0 |
+| 12-bit/2677 | π(L) | 5 | 5 | 5 | 2 | 1 | 0 | 0 | 0 |
+
+The wall does **not** move outward on the λ*=0.07 curve — it is bit-for-bit
+identical. Per the pre-registered 2026-07-29 falsifier, *"if the wall stays at
+K1≈4–6, then the wall is information-theoretic and Phase 2 is at its ceiling."*
+
+17-bit sweep, 10 curves × 5 seeds, m=12:
+
+| eff = K1·K2/n | L | π(L) | mean γ_GH |
+|---|---|---|---|
+| 0.05 | 49/50 | 44/50 | 0.889 |
+| 0.10 | 22/50 | 12/50 | 1.265 |
+| 0.15 | 11/50 | 1/50 | 1.546 |
+| 0.20 | 9/50 | 0/50 | 1.777 |
+| 0.25 | 6/50 | 0/50 | 1.980 |
+
+**Excluding two curves (p=65539, p=66853) the two columns are identical at every
+eff** (39/40, 12, 1, 0, 0 in both). The entire gap is those two curves.
+
+**E7 — why: recovery is a COSET condition, and the useful coset contains vectors
+SHORTER than the planted one.** At eff=0.25, m=12, the only recovering rows in
+the whole 10-curve panel are on the two outliers, and both took route `d-col`,
+not `planted`:
+
+| p | seed | route | ‖w‖/‖pv‖ | ‖z‖/‖pv‖ | z d-col mod n | z Kannan |
+|---|---|---|---|---|---|---|
+| 65539 | 42 | d-col | **0.832** | 0.824 | 0 | 0 |
+| 66853 | 42 | d-col | **0.692** | 1.239 | 0 | 0 |
+
+i.e. the recovering vector is `w = v_planted + z` with `z ≠ 0`, `z_d ≡ 0 (mod n)`,
+`z_Kannan = 0` — its k-coordinates are *wrong*, its d-column is *right*, and its
+norm is **0.69–0.83 × ‖v_planted‖**. The attack does not need v_planted; it needs
+any element of the coset
+`v_planted + Z`, `Z = {z ∈ L : z_Kannan = 0, z_d ≡ 0 mod n}`,
+and LLL reaches shorter members of that coset than v_planted itself. Deleting
+the d-column destroys precisely this route, which is why π(L) fails on exactly
+these two curves and only these two.
+
+**So the 2026-07-29 T5 observation "the planted vector is never λ₁" was true but
+not a defect.** v_planted being non-shortest is irrelevant; the target was never
+v_planted. Optimising for "planted = λ₁" is a strict loss of recovery routes.
+
+**E4 — γ_GH is a real predictor (9th invariant tested, 1st to survive).**
+γ_GH = ‖π(v)‖ / λ₁^GH(π L), with det π(L) = det(L)/n = (n·S_K1)^m·S_K2^m and
+λ₁^GH = √(d'/2πe)·det^{1/d'}, d' = 2m+1:
+
+- best split at γ_GH < 0.90: **accuracy 0.924** vs majority baseline 0.772;
+  p̂ = 0.880 below the threshold vs **0.065** above.
+- asymptotically (S_K1·K1 ≈ S_K2·K2 ≈ S_KAN ≈ n, m→∞), γ_GH < 1 reduces to
+  **eff < 3/(2πe) = 0.1756**, which brackets the 2026-07-29 T3 data
+  (19/20 at 0.05, 3/20 at 0.15, 0/20 at 0.25) with no fitted parameter.
+
+**ν̂ independently replicated.** The two curves that beat γ_GH (recovering at
+eff = 0.20–0.25 where the other eight are at 0/5) are ν̂ = 0.500 and 0.557 — the
+**two lowest ν̂ of the ten** (rest: 0.587, 0.596, 0.599, 0.769, 0.867, 0.927,
+0.967, 1.000). Under the null that is p = 1/C(10,2) = 0.022. Sign matches
+`e845207`: low ν̂ ⇒ easier. This is an out-of-sample confirmation of the entry
+restored today, obtained from a different experiment at a different eff regime.
+
+**E6 — rescaling S_K2 does not rescue anything (negative).** The idea was that
+μ ∝ √S_K2 while the k2-part of ‖pv‖ ∝ S_K2, so shrinking S_K2 by c should push
+pv/μ below 1. It does the **opposite**: once S_K2 is small the λ-block degenerates
+and μ collapses faster than ‖pv‖ (which is floored by the k1-part and the Kannan
+coordinate). pv/μ for 12-bit/2557 at K1=8 across c = 1/32 … 2:
+5.29, 5.06, 4.92, 4.46, 3.45, 2.44, 1.93 — monotonically *decreasing in c*.
+Success (of 5) over the same grid: 0,0,0,0,2,1,0. The shipped scaling
+(c = 1, i.e. `S_K2 = n // K2`) is already at or near optimal. Dead knob; recorded
+so no future run re-tries it.
+
+### Next step proposal
+
+**Thread 24 — attack the coset directly (CVP on the d-fibre).** E7 says the
+target set is `v_planted + Z` with `Z = {z ∈ L : z_Kannan = 0, z_d ≡ 0 mod n}`,
+and that its short elements are what LLL actually finds. The natural
+reformulation is therefore the *opposite* of Thread 23: keep the d-column, drop
+the k-coordinate bookkeeping, and enumerate the d-fibre — for each of the
+`|Z|`-many short vectors returned by LLL/BKZ, read `d = w_m mod n` and accept on
+`glv_verify` (already implemented, O(m√n)). Concretely: score *every* row of the
+reduced basis with `|w_Kannan| = S_KAN`, not just the first, and add a small
+enumeration (fplll `SVP.shortest_vector` / pruned enumeration at radius
+1.2·‖v_planted‖) over that coset.
+Falsifier: if scoring all coset rows lifts the 17-bit eff=0.15 rate above the
+current 11/50 on curves other than the two low-ν̂ outliers, the coset is
+exploitable and the "information-theoretic ceiling" verdict is premature; if it
+does not, the E2 verdict stands and Phase 2 is closed at eff ≈ 3/(2πe).
+Cheap — the E3 grid is a ~6-minute run.
+
+**Secondary (cheap, high value): predict from ν̂ + γ_GH jointly.** Both now have
+independent evidence (AUC 0.935 restored; accuracy 0.924 today) and they
+measure different things — γ_GH is a covolume/dimension count, ν̂ is the skew of
+the λ-block. A 2-D logistic fit on the existing 250-trial E3 panel would say
+whether they are complementary. No new lattice runs needed.
+
+**Blocked:** PARI/GP could not be installed this session (`apt-get` has no route
+to the archive), so any Thread 2/3 follow-up is BLOCKED again in this container.
+Threads 21/22 (Richelot over small proxy primes) need it.
+
+### Commits made
+
+(hash recorded in the following commit)

@@ -1,0 +1,48 @@
+==============================================================================
+Thread 23 addendum — anatomy of the two outlier curves
+==============================================================================
+
+       p        n      lam   lam*  nu_hat  n%3    K2  ord(G)=n
+   65647    65719     1794  0.027   0.967    1   257      True
+   66463    66499     3582  0.054   0.867    1   258      True
+   65707    65203     8944  0.137   0.596    1   256      True
+   66271    66751    10408  0.156   0.927    1   259      True
+   65707    66037    13964  0.211   0.599    1   257      True
+   65929    66301    19729  0.298   0.769    1   258      True
+   65539    65287    21847  0.335   0.500    1   256      True
+   65557    65053    25219  0.388   0.587    1   256      True
+   65629    66109    27075  0.410   1.000    1   258      True
+   66853    67369    32446  0.482   0.557    1   260      True
+
+==============================================================================
+Anatomy of the recovering row at eff=0.25, m=12 (full lattice)
+==============================================================================
+       p   seed     route  ||w||/||pv||  ||z||/||pv||   z=0   z d-col   z kan  d ok
+   65647     42      none             -             -     -         -       - False
+   65647   1234      none             -             -     -         -       - False
+   66463     42      none             -             -     -         -       - False
+   66463   1234      none             -             -     -         -       - False
+   65707     42      none             -             -     -         -       - False
+   65707   1234      none             -             -     -         -       - False
+   66271     42      none             -             -     -         -       - False
+   66271   1234      none             -             -     -         -       - False
+   65707     42      none             -             -     -         -       - False
+   65707   1234      none             -             -     -         -       - False
+   65929     42      none             -             -     -         -       - False
+   65929   1234      none             -             -     -         -       - False
+   65539     42     d-col         0.832         0.824 False         0       0  True
+   65539   1234      none             -             -     -         -       - False
+   65557     42      none             -             -     -         -       - False
+   65557   1234      none             -             -     -         -       - False
+   65629     42      none             -             -     -         -       - False
+   65629   1234      none             -             -     -         -       - False
+   66853     42     d-col         0.692         1.239 False         0       0  True
+   66853   1234      none             -             -     -         -       - False
+
+route='planted': LLL found v_planted itself (k-coords exact) -- pi(L)
+would recover too.  route='d-col': w = v_planted + z with z != 0 and
+z's d-column a multiple of n, so only the d-column reading works and
+pi(L) necessarily fails.  If the two outliers are all 'd-col' and the
+other eight are all 'planted'/'none', hypothesis H is confirmed.
+
+Done.
