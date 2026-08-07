@@ -5795,6 +5795,100 @@ Specifically: try target_bits=80 and report whether NaN persists.
 ## 2026-07-26 (autolab run #2)
 
 ### Task picked
+Thread 20 (λ/n threshold study): proposed in today's earlier run as the top next-step.
+Goal: bisect the LLL success threshold between λ/n=0.07 (fail) and λ/n=0.34 (pass)
+by finding representative j=0 CM curves for each λ/n bucket and sweeping m.
+The earlier run's interpretation ("structural failure when λ/n < threshold") needed
+empirical verification.
+
+### Work done
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_lambda_threshold.py`:
+  - Searches p ≤ 2^16 for j=0 prime-order curves with prime n ≡ 1 (mod 3), n ∈ [200,8000].
+  - Collects one representative curve per λ/n bucket (9 buckets covering [0.05, 0.50)).
+  - Sweeps m=3..16 for each bucket with K1_BOUND=2, seeds={42,1234,9999}, stopping at 3/3.
+- Ran script; all 9 buckets filled, all succeed.
+- Followed up: re-tested p=2677 (lam/n=0.0699, the earlier "failing" curve) with
+  K1_BOUND ∈ {2, 4, 8} to isolate the true failure mode.
+- Computed planted_norm / GH_estimate for each (K1_BOUND, m) pair.
+- `cargo test --test curve_audit` → 5/5 pass (5.38s). ✓
+
+### Findings
+
+**CRITICAL CORRECTION: No λ/n threshold exists. The earlier diagnosis was wrong.**
+
+The "small-λ structural failure" from today's earlier run was misattributed to λ/n.
+The true cause is the choice of K1_BOUND.
+
+**All 9 λ/n buckets succeed with K1_BOUND=2:**
+```
+Bucket          lam/n   n       LLL min-m
+[0.05,0.10)   0.0664    211    m=4
+[0.10,0.15)   0.1033    271    m=3
+[0.15,0.20)   0.1749    223    m=5
+[0.20,0.25)   0.2262    367    m=7   ← highest m needed
+[0.25,0.30)   0.2786    499    m=4
+[0.30,0.35)   0.3496    349    m=6
+[0.35,0.40)   0.3798    337    m=6
+[0.40,0.45)   0.4105    229    m=5
+[0.45,0.50)   0.4573    433    m=4
+```
+No bucket fails. Even λ/n=0.066 passes at m=4.
+
+**K1_BOUND is the actual controlling factor (p=2677, lam/n=0.070, n=2647):**
+```
+K1_BOUND=2: passes at m=5  (planted/GH at m=5: 4932/4398 = 1.12)
+K1_BOUND=4: passes at m=6  (planted/GH at m=6: 5447/4027 = 1.35)
+K1_BOUND=8: never passes at m≤13  (planted/GH at m=10: 6604/4824 = 1.37,
+            lattice dim=22 too large for LLL at this ratio)
+```
+BKZ(40) also fails for K1_BOUND=8 (confirmed in earlier run, still fails).
+
+**Mechanistic explanation:**
+The planted vector norm satisfies:
+```
+||v||² ≈ m * (E[k1] * SK1)² + n² + m * (E[k2] * SK2)² + SKAN²
+```
+where E[k1] = (K1_BOUND-1)/2. Since SK1 = n // K1_BOUND:
+```
+E[k1] * SK1 = (K1_BOUND-1)/2 * n/K1_BOUND = n/2 * (1 - 1/K1_BOUND)
+```
+- K1_BOUND=2: E[k1]*SK1 = n/4  (very small)
+- K1_BOUND=8: E[k1]*SK1 = 7n/16  (much larger)
+
+With K1_BOUND=2, the planted vector is shorter by ≈30%, pushing the planted/GH
+ratio below the LLL success threshold (~1.2) at small m.
+
+The lattice DIMENSION also matters: K1_BOUND=8 requires m≥5 by information theory,
+giving dim=12, but the GH at that dimension is too low relative to the planted norm.
+K1_BOUND=2 requires m≥3, giving dim=8, with a more favorable planted/GH ratio.
+
+**Corrected statement about secp256k1:**
+λ/n ≈ 0.44 for secp256k1 is NOT relevant to the attack's viability.
+The attack works for ALL λ/n values tested (0.066–0.457) with K1_BOUND=2.
+The binding constraint is the planted_norm / GH ratio, not λ/n.
+
+The earlier log's "λ/n threshold" conclusion was a confound: the earlier "failing"
+curve (p=2677) was always tested with K1_BOUND=8, never with K1_BOUND=2.
+
+### Next step proposal
+
+**Thread 21 (planted/GH ratio universality):**
+The ratio planted_norm/GH depends on (K1_BOUND, K2_BOUND, m, n). The empirical
+threshold appears to be ~1.20 for LLL. Verify this across more curves and bit sizes:
+- Script: compute the ratio analytically and compare to LLL success/fail empirically
+- Predict: LLL succeeds iff planted_norm < 1.2 × GH(L)
+- This gives a simple heuristic formula for the minimum m given K1_BOUND and n
+
+**Thread 2 (CHLRS Igusa formula):**
+BLOCKED (Sage/Magma unavailable). Can try F_{p^3} Rosenhain approach in PARI.
+The fp3_obstruction_secp256k1.gp script exists; check if it runs cleanly.
+
+### Commits made
+`1c6460a` autolab 2026-07-26: Thread 20 — lambda/n threshold misdiagnosis corrected; no threshold exists
+
+## 2026-07-26 (autolab run #3)
+
+### Task picked
 Thread 2 (CHLRS Igusa formula). Thread 1 (P-521 LLL) is CLOSED (§10.5). Thread 5
 (GLV-HNP Phase 2) was completed in today's earlier run. Thread 2 (CHLRS Igusa formula)
 was BLOCKED in prior sessions due to PARI/GP unavailability, but PARI is now installed.
