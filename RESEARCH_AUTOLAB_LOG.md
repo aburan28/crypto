@@ -6315,3 +6315,212 @@ reduction pushes the empirical threshold as a function of beta.
 ### Commits made
 
 2a6879c autolab 2026-08-07: Thread 23 — d-column projection is inert; recovery is BDD not SVP; NU certificate (AUC 0.978)
+
+## 2026-08-07 (autolab run #2)
+
+### Task picked
+
+**Thread 24** — "derive nu_hat from the GS profile and close the ~1.9x gap",
+the pre-registered next-step of this morning's Thread 23 entry (log line ~6280).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP Phase 2) is again the only thread with recent
+measurable progress — protocol rule (b).
+
+Pre-registered hypothesis, verbatim from the Thread 23 entry:
+
+> **H24**: the argmax of `nu_i` concentrates at the tail indices `i ~ 2m`, and
+> `||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)` up to a constant.
+>
+> Falsifier: if the argmax is spread across `i` rather than concentrated in the
+> tail, the GS-profile explanation fails and nu_hat stays empirical.
+
+**Verdict: H24 splits. The quantitative half is confirmed sharply; the
+localisation half is FALSIFIED by its own pre-registered falsifier.**
+
+### Work done
+
+New: `secp256k1_cm_audit/glv_hnp_phase2_gsprofile.py` (7 experiments W1–W7),
+output committed as `glv_hnp_phase2_gsprofile_output.txt`. Reuses
+`glv_hnp_phase2_babai.py:{build_L0, target_and_error, gram_schmidt, lll_rows}`
+and `glv_hnp_phase2_projected.py:{run_new, SEEDS, HIST}` unchanged — no edits to
+prior scripts, so all Thread 23 numbers are still reproducible as published.
+
+Environment note for future runs: this container ships neither `fpylll` nor
+`sympy`. `pip install fpylll sympy cysignals` (fpylll's manylinux wheel does
+**not** pull `cysignals`, so importing fpylll fails until it is installed
+explicitly). ~45s total.
+
+* **W1/W1b** — argmax index of `nu_i` and quarter histogram over the Thread 23
+  U2 grid (2 curves x 11 K1 x 5 seeds = 110 instances).
+* **W2** — `||b*_last||` vs `lambda_2(L2)` and vs `det(L2)/mu`, 22 cells.
+* **W3** — tail-truncated certificates `NU_tail` at last-quarter / last-half /
+  last-index, AUC each.
+* **W4/W4b** — the nu_hat sign, pooled (confounded) and within matched K1.
+* **W5** — `NU_half` confusion matrix, bracket, and a direct soundness test.
+* **W6** — `det(L0)` vs `det(L2)^m`, i.e. the index `[L0 : L2^m]`.
+* **W7** — out-of-sample transfer to the 20 independent 17-bit curves of
+  Thread 23 exp U3 (m=12, eff in {0.05,0.15,0.25}, 5 seeds = 300 instances).
+
+### Findings
+
+**F1 — H24's localisation claim is FALSIFIED.** The argmax of `nu_i` is spread
+across the whole GS index range, not concentrated in the tail:
+
+```
+110 instances, quarter of the index range holding argmax_i nu_i:
+  q1 (head)  26  (23.6%)
+  q2         20  (18.2%)
+  q3         28  (25.5%)
+  q4 (tail)  36  (32.7%)
+  argmax in the last THREE indices: 15/110 (13.6%)
+```
+
+A mild tail bias exists (32.7% vs 25% uniform) and is slightly stronger
+out-of-sample at 17 bits (`[30,64,89,117]`, tail 39.0%), but nowhere near the
+concentration H24 asserted. **NU is not a tail statistic.**
+
+**F2 — H24's quantitative claim is CONFIRMED, and tightly.** Across all 22
+cells (K1 = 2..64, both curves, 12-bit):
+
+```
+  ||b*_last|| / lambda_2(L2)   : min 0.406  max 0.598  spread 1.47x
+  ||b*_last|| / (det(L2)/mu)   : min 0.408  max 0.606  spread 1.48x
+```
+
+`lambda_2(L2)` and `det(L2)/mu` agree to <1% throughout (L2 is essentially
+orthogonal after Lagrange reduction), so `||b*_last|| ~ 0.47 * det(L2)/mu` is a
+one-parameter law holding over a 15x range of `lambda_2` (38148 -> 2440).
+
+**F3 — the mechanism chain holds link-by-link.** Spearman over 110 instances:
+
+```
+  rho(lambda_2, ||b*_last||) = +0.982
+  rho(||b*_last||, NU)       = -0.914
+  rho(NU, recovery)          = -0.800
+```
+
+**F4 — the pooled correlations for mu are sign-flipped by a K1 confound; the
+nu_hat sign survives only at matched K1.** Pooled, `rho(mu, recovery) = +0.585`
+and `rho(mu, lambda_2) = +0.735` — both the *opposite* of what Thread 20b
+reported. Cause: `det(L2) = n*S_K1*S_K2` shrinks with K1, dragging `mu` and
+`lambda_2` down together, and K1 independently destroys recovery. Thread 20b's
+comparison was cross-curve **at matched K1**, so redone that way (W4b):
+
+```
+  K1     d(mu)   d(lam2)  d(b*last)   d(rec)   nu_hat sign ok?
+   6      3662    -11596    -4205.1       -5              YES
+   8      2358     -7768    -2589.1       -5              YES
+  12      1121     -3501     -902.2       -1              YES
+  (8 other K1 cells are recovery ties, 0/5 or 5/5 on both curves)
+```
+
+3/3 non-tied cells confirm it, and within a K1 column the duality is visible
+directly (`d(mu) > 0` <=> `d(lambda_2) < 0` in 10/11 cells). So the derivation
+*does* go through — `mu` up => `lambda_2` down => tail GS norms down => `nu_i`
+up => BDD fails — but **only as a matched-K1 statement**. Any future use of
+`nu_hat` or `mu` as a raw cross-instance score must control for `det(L2)`; the
+pooled sign is an artifact. This is a correction to how the 2026-07-29 result
+should be read, not to the result itself.
+
+**F5 — [L0 : L2^m] = n EXACTLY, in all 22 cells.** `log2 det(L0)` vs
+`m*log2 det(L2)` gives index 2659.0 for the 2557-curve and 2647.0 for the
+2677-curve — precisely their group orders `n`, to the digit, independent of K1:
+
+```
+  12-bit/2557  all K1:  index = 2659.0 = n     (I^(-1/2m) = 0.611)
+  12-bit/2677  all K1:  index = 2647.0 = n     (I^(-1/2m) = 0.674)
+```
+
+So `det(L0) = det(L2)^m / n`: the B-row has order exactly `n` in `L0/L2^m`, and
+`L0` is a cyclic index-`n` overlattice of `L2^m`. A uniform-scaling model would
+then predict `||b*_last||/lambda_2 = I^(-1/2m)` = 0.611 / 0.674; measured means
+are ~0.45 / ~0.51, i.e. a further factor 0.74 / 0.76 — consistent across the two
+curves, and attributable to the LLL profile slope, which the flat model omits.
+F2's 0.47 is therefore ~75% derived and ~25% still empirical.
+
+**F6 — the practical payoff: `NU_half` beats `NU` substantially.** Dropping the
+head half of the GS indices (`NU_half = max_{i > m} nu_i`) is a strictly better
+score even though it equals `NU` only 58.2% of the time:
+
+```
+12-bit U2 grid, N = 110:
+                 AUC     TP  FP  FN  TN   acc     ambiguous band
+  NU (full)    0.9777    25   0  16  69  0.855   27/110 (24.5%)
+  NU_half      0.9961    36   0   5  69  0.955    8/110  (7.3%)
+  NU_quarter   0.9721
+  NU_last      0.8565
+```
+
+`NU_half` converts 11 of the 16 false negatives with no new false positives, and
+shrinks the ambiguous band from 24.5% to 7.3%. The head indices are actively
+harmful: `b*_1..b*_m` are the short LLL vectors, `nu_i` there is large and
+uninformative about *Kannan-LLL* recovery (it bounds nearest-plane, which is a
+weaker algorithm).
+
+**F7 — out-of-sample at 17 bits: `NU_half`'s ranking power transfers, the
+numeric brackets do NOT, and only `NU` stays sound.** 300 fresh instances on 20
+independent curves. Recovery totals reproduce Thread 23 exp U3 to the digit
+(99/100, 21/100, 9/100 at eff = 0.05/0.15/0.25 — the script now asserts this as
+a drift guard):
+
+```
+17-bit, N = 300:
+                 AUC     TP   FP  FN   TN   acc    observed bracket
+  NU (full)    0.8597    71    0  58  171  0.807   [1.040, 2.199]
+  NU_half      0.9744   108    3  21  168  0.920   [0.698, 1.779]
+                                                12-bit was [1.068, 1.252]
+```
+
+Three consequences, all of which tighten Thread 23's claims:
+
+1. **`NU <= 1` remains sound out-of-sample: 0 false positives in 300 fresh
+   instances**, exactly as the nearest-plane theorem requires. This is now
+   tested on 410 instances across two bit-sizes.
+2. **`NU_half <= 1` is NOT sound — 3 false positives at 17 bits** (it had 0 at
+   12 bits, which would have been over-read as soundness). So the honest
+   package is: `NU` for certification, `NU_half` for ranking. Do not promote
+   `NU_half` to a certificate.
+3. **The brackets are n-dependent and do not transfer.** Against the 12-bit
+   thresholds, at 17 bits: `NU` has 9/96 violations below the lower and 14/89
+   above the upper; `NU_half` has 6/118 and 7/154. **This falsifies the
+   secondary hypothesis pre-registered this morning** ("if the bracket is
+   n-independent, NU gives a size-free viability test for Phase 2"). It is not
+   size-free. Only the hard bound `NU <= 1` is size-free.
+4. `NU`'s AUC decays with n (0.978 -> 0.860) while `NU_half`'s barely moves
+   (0.996 -> 0.974) — the head-index noise F6 identified grows with dimension.
+
+**Summary of the ~1.9x gap.** It is now partly closed and partly explained.
+`NU_half` cuts the ambiguous band from 24.5% to 7.3% at 12 bits and gives
+AUC 0.974 at 17 bits, so most of the gap was head-index noise in the `max_i`,
+not a missing structural quantity. The residual gap is genuine: Kannan-LLL still
+recovers up to `NU_half ~ 1.78`, above the nearest-plane guarantee of 1.
+
+### Next step proposal
+
+**Thread 25 — normalise `NU_half` by `det(L2)` to recover the size-free test
+that F7.3 falsified.** F7 shows the raw bracket drifts with n; F2/F5 give an
+exact scale for the GS profile (`det(L0) = det(L2)^m / n`,
+`||b*_last|| ~ 0.47 det(L2)/mu`). Concrete sub-task: define
+
+    NU_half_norm := NU_half * (det(L0))^(1/2m) / (k2_bound * S_K2)
+
+(i.e. divide out the lattice scale rather than fitting it) and re-measure the
+bracket on the *pooled* 410 instances from both bit-sizes. Falsifier: if the
+pooled 410-instance bracket is not tighter than the union of the two per-size
+brackets, normalisation does not help and the wall's n-dependence is not a scale
+effect. Cost: one pass, ~2 minutes, no new curve search — `glv_hnp_phase2_gsprofile.py`
+already computes every input.
+
+Secondary (cheap, ~5 min): the head-index noise of F6 should have a clean form.
+Record `nu_i` for `i <= m` against `||b*_i||/mu` and check whether the head
+`nu_i` are simply `~2|<e,b*_i>|/mu^2` with `<e,b*_i>` unconstrained — if so, the
+head is provably uninformative and `NU_half` can be justified rather than
+observed.
+
+Tertiary (unchanged, still open from this morning): BKZ-beta sweep against
+`NU_half` — quantify how far above `NU_half = 1.78` blockwise reduction pushes
+the empirical threshold as a function of beta.
+
+### Commits made
+
+(recorded below after commit)
