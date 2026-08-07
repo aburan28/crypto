@@ -6691,4 +6691,4 @@ Tertiary (unchanged, carried from Thread 24): BKZ-beta sweep against NU.
 
 ### Commits made
 
-(pending — see push step below)
+4eff7f8 autolab 2026-08-07 #3: Thread 25 — mu carries signal beyond NU inside the ambiguous band; pooled test is a stratification artifact
