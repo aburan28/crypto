@@ -6537,4 +6537,4 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(filled in below)
+942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
