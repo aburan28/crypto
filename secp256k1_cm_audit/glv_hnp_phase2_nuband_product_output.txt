@@ -1,0 +1,18 @@
+Thread 25c — constrained product law  P = NU * nu_hat
+======================================================================
+  NU*nu_hat^1.000    AUC 0.9395
+  NU*nu_hat^0.950    AUC 0.9397
+  NU*nu_hat^0.500    AUC 0.9124
+  NU alone           AUC 0.7996
+  nu_hat alone       AUC 0.6889
+
+  best single threshold on NU*nu_hat : 0.95512  acc 0.868
+  TP 159 FP 35 FN 31 TN 275
+  P | success : min 0.3669 median 0.7484 max 1.6340
+  P | failure : min 0.6981 median 1.3582 max 2.8424
+  bracket     : sufficient P < 0.6981 , necessary P > 1.6340
+
+  Spearman(nu_hat, eff) = +0.0052
+  Spearman(NU, eff)     = +0.7208
+  Spearman(mu, eff)     = -0.6542
+  Spearman(NU, nu_hat)  = -0.1054

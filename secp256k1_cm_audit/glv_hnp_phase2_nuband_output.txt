@@ -1,0 +1,146 @@
+==============================================================================
+Thread 25 — is mu a second coordinate? condition on NU, not on eff
+==============================================================================
+pre-registered band: 1.04 <= NU <= 2.199
+pre-registered H25 : AUC(-mu -> recovery) >= 0.8 inside the band
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+table dumped to glv_hnp_phase2_nuband_table.json (178407 bytes)
+
+overall recovery 190/500
+
+------------------------------------------------------------------------------
+EXP X1: how the pre-registered NU bracket partitions this table
+------------------------------------------------------------------------------
+  NU < 1.040  (sufficient)           N=  94  recovered    92/94  (97.9%)
+  1.040 <= NU <= 2.199 (ambiguous)   N= 366  recovered   97/366  (26.5%)
+  NU > 2.199  (necessary violated)   N=  40  recovered     1/40  (2.5%)
+
+------------------------------------------------------------------------------
+EXP X2: THE TEST — does mu still separate INSIDE the NU band?
+------------------------------------------------------------------------------
+AUC > 0.5 means SMALLER score -> more likely to recover.
+
+pre-registered band: 1.040 <= NU <= 2.199   N=366  recovered 97/366
+     score   AUC(-x)
+        mu    0.6932
+    nu_hat    0.8403
+        NU    0.5656
+      lam*    0.3212
+       eff    0.7056
+      step    0.1803
+
+  H25 (AUC(-mu) >= 0.8 inside the band): FALSIFIED (AUC = 0.6932)
+
+robustness — same test on shifted/narrowed bands:
+
+band [1.0, 2.0]: 1.000 <= NU <= 2.000   N=322  recovered 94/322
+     score   AUC(-x)
+        mu    0.6572
+    nu_hat    0.8234
+        NU    0.5661
+      lam*    0.3327
+       eff    0.7175
+      step    0.2036
+
+narrow [1.2, 1.8]: 1.200 <= NU <= 1.800   N=195  recovered 41/195
+     score   AUC(-x)
+        mu    0.7265
+    nu_hat    0.8147
+        NU    0.4023
+      lam*    0.2411
+       eff    0.5957
+      step    0.2002
+
+low    [0.8, 1.5]: 0.800 <= NU <= 1.500   N=192  recovered 97/192
+     score   AUC(-x)
+        mu    0.3316
+    nu_hat    0.6350
+        NU    0.8680
+      lam*    0.4585
+       eff    0.8615
+      step    0.3707
+
+high   [1.5, 3.0]: 1.500 <= NU <= 3.000   N=270  recovered 57/270
+     score   AUC(-x)
+        mu    0.8792
+    nu_hat    0.9471
+        NU    0.5741
+      lam*    0.2321
+       eff    0.6926
+      step    0.0638
+
+this table's own bracket: sufficient NU < 1.0105 , necessary NU > 2.1992
+
+self-consistent band: 1.011 <= NU <= 2.199   N=372  recovered 101/372
+     score   AUC(-x)
+        mu    0.6900
+    nu_hat    0.8426
+        NU    0.5688
+      lam*    0.3247
+       eff    0.7123
+      step    0.1770
+
+------------------------------------------------------------------------------
+EXP X3: two-parameter logistic fit on (log NU, log mu)
+------------------------------------------------------------------------------
+  log NU only      deviance   489.49  AUC 0.7996  acc 0.780  std-coef -1.501
+  log mu only      deviance   643.22  AUC 0.6036  acc 0.756  std-coef +0.430
+  log NU + log mu  deviance   439.73  AUC 0.8596  acc 0.786  std-coef -2.554  -1.148
+
+  likelihood-ratio (adding log mu to log NU): 49.76 on 1 df
+  chi2 95% = 3.84, 99.9% = 10.83 -> SIGNIFICANT
+
+  decision boundary (p = 1/2), raw units:
+    -7.2212*log(NU) -2.8618*log(mu) +35.8262 = 0
+
+------------------------------------------------------------------------------
+EXP X4: leave-one-curve-out CV (group by n) — is the pair real,
+        or is it memorising the 20 curves?
+------------------------------------------------------------------------------
+  log NU                 CV-AUC 0.7564   CV-acc 0.772
+  log mu                 CV-AUC 0.5688   CV-acc 0.746
+  log NU + log mu        CV-AUC 0.8200   CV-acc 0.764
+  log NU + log nu_hat    CV-AUC 0.9286   CV-acc 0.844
+
+------------------------------------------------------------------------------
+EXP X5: the W1b two-block step  step = log2||b*_{m+1}|| - log2||b*_1||
+------------------------------------------------------------------------------
+  eff     N      rec |  mean step   step|rec  step|fail |  AUC step  AUC -step
+ 0.05   100   99/100 |    -0.0079    -0.0056    -0.2378 |    0.6364     0.3636
+ 0.10   100   42/100 |    -0.0564     0.3610    -0.3587 |    0.2266     0.7734
+ 0.15   100   21/100 |    -0.1081     0.6581    -0.3117 |    0.1139     0.8861
+ 0.20   100   19/100 |    -0.1219     0.4756    -0.2621 |    0.0793     0.9207
+ 0.25   100    9/100 |    -0.1683     0.3547    -0.2200 |    0.1062     0.8938
+
+pooled AUC(-step) = 0.3286   AUC(+step) = 0.6714
+|step| test: AUC(-|step|) = 0.3360  (W1b predicts step -> 0 at the wall)
+Spearman(step, NU)     = +0.1351
+Spearman(step, mu)     = -0.6627
+Spearman(step, nu_hat) = -0.8788
+Spearman(step, eff)    = +0.0193
+
+step inside the pre-registered NU band:
+
+  (repeat): 1.040 <= NU <= 2.199   N=366  recovered 97/366
+     score   AUC(-x)
+        mu    0.6932
+    nu_hat    0.8403
+        NU    0.5656
+      lam*    0.3212
+       eff    0.7056
+      step    0.1803
+
+------------------------------------------------------------------------------
+EXP X6: is mu's power mediated by NU?  Spearman(mu, NU) overall and
+        within each NU band.
+------------------------------------------------------------------------------
+overall  Spearman(mu, NU) = -0.6452
+  NU < 1.040   N=  94  Spearman(mu, NU) = -0.3147   Spearman(nu_hat, NU) = -0.0370
+  band         N= 366  Spearman(mu, NU) = -0.4557   Spearman(nu_hat, NU) = -0.1113
+  NU > 2.199   N=  40  Spearman(mu, NU) = +0.2469   Spearman(nu_hat, NU) = +0.3095
+
+==============================================================================
+done
+==============================================================================
