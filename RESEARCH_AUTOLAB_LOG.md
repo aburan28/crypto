@@ -6538,3 +6538,152 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Priority 2 (CHLRS Igusa forward map), Thread 3** — proposed 2026-07-27
+(log line ~5976), never executed. Re-derived the priority ranking from
+first principles instead of trusting the "Priorities 1,2,4,6 are
+CLOSED/BLOCKED/DEAD-END" shorthand used by the 2026-07-29 / 2026-08-07 #1
+/ #2 entries: Priority 1 (P-521) is genuinely CLOSED (§10.5, 2026-06-06)
+and Priority 4/6 are genuinely DEAD-END/CLOSED (2026-07-07), but Priority
+2 (CHLRS) was never marked BLOCKED — the 2026-07-27 entry ends with an
+open, well-scoped next step ("Thread 3: implement the forward map") that
+nobody picked up in 9 subsequent runs. Per the stated protocol, a thread
+with no work in the last 7 days (last touch: 2026-07-27, 11 days prior)
+qualifies under rule (a) regardless of how much unrelated progress
+Priority 5 (GLV-HNP) has made in the meantime. Picking this also
+diversifies today's third run away from the GLV-HNP thread already
+covered twice today.
+
+Environment: fresh container, `apt-get install -y --no-install-recommends
+pari-gp` (2.15.4). `cargo test --test curve_audit` 5/5 pass (no Rust
+touched this run).
+
+### Work done
+
+1. **Audited what "Test 1: CORRECT" in `howe_5pairs_v2.gp` actually
+   proved.** Ran it directly: for p=43, `richelot(sv=[0,3,0],qv=[0,0,2])`
+   gives a=41,b=5 (matches the hardcoded reference), but the script's own
+   `check_jac` line reports `#Jac=2169  target=1767  match=0`. Read
+   `howe_richelot_v5.gp` (the source of the "expect a=41 b=5" reference,
+   line 67-68): its `res_check` line is a **pure arithmetic regression
+   test** against a previously-computed number, not a claim that
+   (sv,qv)=([0,3,0],[0,0,2]) is a genuine Howe pairing of any two named
+   elliptic curves. Every prior run's "Test 1 ✓ CORRECT" was validating
+   Richelot-formula bug-freedom, never a real (E1,E2) gluing. This isn't
+   itself new information but had never been stated plainly; it explains
+   why "Test 1 passes, Test 2 fails" was never a meaningful contrast.
+
+2. **`secp256k1_cm_audit/chlrs_forward_map.gp`** (new). Reuses
+   `richelot()` verbatim. For p=1009, E1: b1=11, E2: b2=515 (d=11, first
+   QR-non-residue, reproducing 2026-07-27 Test 2 exactly), tries all
+   THREE Galois-conjugate pairings alpha↔z3^k·beta (k=0,1,2) with
+   alpha³=-b1, beta³=-b2 — the "obvious" choice the 07-27 run only tried
+   at k=0. Also checks the 3 twisted targets (#E1·#E2^tw, #E1^tw·#E2,
+   #E1^tw·#E2^tw), in case the pairing is secretly gluing a twist.
+   **Result: none of the 3×4=12 combinations match.** This definitively
+   rules out "wrong conjugate branch" as 2026-07-27's root cause — the
+   naive r1=-b1, r2=-b2 choice is wrong for every sign/branch variant, not
+   just the one tried before.
+
+3. **`secp256k1_cm_audit/chlrs_bruteforce_r1r2.gp` /
+   `chlrs_bruteforce_charpoly.gp`** (new). Since (2) rules out the naive
+   r1,r2, brute-forced the full (r1,r2) ∈ F_43×F_43 grid (43²·3 = 5547
+   raw combinations, 1596 valid F_p-rational nonsingular covers) with
+   E1: b1=7 fixed, and checked EVERY b2 ∈ F_43\{7} for a match. First pass
+   (`_r1r2.gp`) only checked the scalar `#Jac` count and got noisy hits
+   (112 matches for some b2's — a collision artifact, see below). Second
+   pass (`_charpoly.gp`) requires the FULL degree-4 Frobenius char poly to
+   equal `(T²-t1·T+p)(T²-t2·T+p)` exactly (the real Honda–Tate statement
+   of "Jac(C) ~ E1×E2"), which is what a genuine forward map must satisfy.
+   **Finding: among all 1596 valid covers, only 10 DISTINCT char
+   polynomials occur, and only ONE of those 10 has first factor trace
+   t1=13 (E1's actual trace) — and it pairs with t2=5 specifically.**
+   Every b2 with trace ≠5 gets 0 hits (7 of the 8 distinct traces seen
+   among b2=1..42); every b2 with trace 5 gets the same 112 hits.
+   Interpretation: sweeping (r1,r2) over the WHOLE grid does not explore
+   anywhere near the ~1800 genus-2 curves the target space would need —
+   it collapses onto 10 outputs. The naive-cube-root construction is far
+   more restrictive than the general Howe-gluing moduli space; it cannot
+   reach an arbitrary target (E1,E2) pair, only whatever narrow orbit
+   `richelot_gen` happens to hit. This sharpens (rather than resolves)
+   the 07-27 "structural gap" finding: it is not merely that the specific
+   r1,r2 formula is unknown, but that the r1,r2 ↦ output map, for this
+   family, has a small image.
+
+4. **`secp256k1_cm_audit/chlrs_bb_invariant.gp` /
+   `_general.gp`** (new). While auditing the brute-force hits, noticed
+   the DUAL curve's constant term (`bb`, i.e. y²=x⁶+aa·x³+bb) always
+   equalled `r1·r2 mod p` exactly. Verified exhaustively:
+
+   ```
+   p=43  rr=3   bb==r1*r2:  1722/1722 match  (0 mismatches)
+   p=61  rr=2   bb==r1*r2:  3540/3540 match  (0 mismatches)
+   p=67  rr=2   bb==r1*r2:  4290/4290 match  (0 mismatches)
+   p=79  rr=2   bb==r1*r2:  6006/6006 match  (0 mismatches)
+   ```
+
+   15558/15558 across 4 primes, all 3 conjugate branches k=0,1,2, full
+   (r1,r2) grids. **This is an exact, proven identity, not a
+   coincidence**: the Z/3Z Richelot dual of `y²=(x³-r1)(x³-r2)` is
+   `y²=x⁶+aa(r1,r2,k)·x³+r1·r2` — i.e. the constant term of the dual
+   equals the constant term of the SOURCE curve's own (x³-r1)(x³-r2)
+   expansion (`r1·r2`), and is invariant under which of the 3
+   Galois-conjugate branches (k) is used. `aa` itself is NOT
+   k-invariant (spot-checked at p=1009: k=0,1,2 gave aa=210,516,949 for
+   the same b=620) but IS symmetric under r1↔r2 (checked (r1,r2)=(3,6)
+   vs (6,3) at p=43, both gave (aa,bb)=(0,18)).
+
+### Findings
+
+1. Prior "Test 1 CORRECT" claims validated arithmetic only, never a real
+   Howe pairing — worth knowing so nobody re-treats it as positive
+   evidence for the forward-map formula.
+2. The naive r1=-b1, r2=-b2 forward-map guess is wrong for ALL 3
+   conjugate branches and all 4 twist-sign targets (12/12 ruled out).
+3. **The naive-cube-root Richelot construction has a small image**: only
+   10 distinct Jacobian char-polys reachable from the full 43×43×3 grid
+   with b1=7 fixed, only 1 of which has the right first factor. This is
+   new evidence that a workable forward map needs a genuinely different
+   r1,r2 parameterization (not just a missing formula plugged into the
+   existing one) — consistent with RESEARCH_MESTRE_HOWE.md's assessment
+   that this is a multi-week moduli computation, but now with a concrete
+   negative result pinning down *why* naive brute force doesn't rescue it.
+4. **New positive, verified result**: `bb_dual = r1·r2 mod p`, exactly,
+   independent of the conjugate branch k, across 15558 test cases at 4
+   primes. This is a genuine partial closed-form piece of the explicit
+   Z/3Z Richelot self-map that was not previously recorded in this
+   codebase. `aa` remains an open (r1,r2,k)-dependent expression; no
+   closed form found this run.
+
+### Next step proposal
+
+**Immediate**: derive the closed form for `aa(r1,r2,k)`. Given (4), the
+natural approach is a SYMBOLIC run of `richelot_gen` — replace the
+numeric `p` with a polynomial ring over `Q(z3)/(z3²+z3+1)` and treat
+r1,r2 as formal indeterminates (GP supports rational function
+arithmetic natively; no new machinery needed, just swap `Mod(·,p)` int
+ops for polynomial ops in `r1,r2`). Because `bb` collapsed to the
+trivial monomial `r1*r2`, there's a real chance `aa` collapses to
+something equally simple (candidates worth testing first: `aa` as a
+polynomial in the SUM `r1+r2` and PRODUCT `r1*r2` alone, since it's
+r1↔r2-symmetric; or as `c·z3^k·(r1^{2/3}r2^{1/3} - r1^{1/3}r2^{2/3})`-type
+expression reflecting the observed k-dependence).
+
+**Following that**: once `aa(r1,r2,k)` is known in closed form, the
+actual forward-map problem is: given target traces (t1,t2), find
+(r1,r2) with `r1·r2` and `aa(r1,r2,k)` landing on a curve whose Frobenius
+factors as `(T²-t1T+p)(T²-t2T+p)`. Finding 3 shows this is NOT simply
+`r1=-b1,r2=-b2`; the relationship between (b1,b2) (the actual curve
+coefficients) and (r1,r2) (the branch data that reaches the target
+trace pair) is itself unknown and is the real remaining gap — Thread 3
+should search for that relationship next (e.g. by inspecting the 10
+distinct reachable classes' own b-values against the trace pairs they
+produce, now that the search space is enumerated and small).
+
+### Commits made
+
+(recorded in next log entry, per protocol)
