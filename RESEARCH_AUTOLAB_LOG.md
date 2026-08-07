@@ -6746,4 +6746,4 @@ pushes the threshold.
 
 ### Commits made
 
-(hash recorded below)
+c403a63 autolab 2026-08-07 #3: Thread 25 — H25 confirmed; viability test collapses to the product NU*nu_hat (AUC 0.9395)
