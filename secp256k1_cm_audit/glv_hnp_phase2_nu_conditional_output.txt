@@ -1,0 +1,169 @@
+==============================================================================
+Thread 25 — conditioning on NU: is mu a second coordinate?
+==============================================================================
+
+loaded 500 rows from /tmp/claude-0/-home-user-crypto/69a4986f-0abd-59f5-96ba-8512a048a7c2/scratchpad/strat500.json
+recovery 190/500   NU range [0.574, 3.273]
+fast_auc vs auc: max |difference| over all score columns = 0.00e+00
+
+------------------------------------------------------------------------------
+EXP X1 (H25): AUC inside NU bands.  NU is ~constant within a band,
+        so anything that still separates is a second mechanism.
+------------------------------------------------------------------------------
+band                                N     rec |       mu   nu_hat       NU      eff     lam*     step        n
+NU < 1.040  (sufficient)           94   92/94 |   0.1603   0.4592   0.9837   0.9212   0.5082   0.4511   0.5842
+1.040-1.500 (ambiguous, lower)    134  41/134 |   0.5063   0.7190   0.7034   0.8008   0.4483   0.3076   0.5060
+1.500-2.199 (ambiguous, upper)    232  56/232 |   0.8800   0.9450   0.4932   0.6593   0.2398   0.0649   0.4067
+1.040-2.199 (AMBIGUOUS BAND = H25)  366  97/366 |   0.6932   0.8403   0.5656   0.7056   0.3212   0.1803   0.4497
+NU > 2.199  (necessary violated)   40    1/40 |   1.0000   1.0000   1.0000   1.0000   0.2564   0.0000   0.6154
+
+H25 threshold is AUC(-mu) >= 0.80 in the ambiguous band:
+  AUC(-mu)     = 0.6932   permutation p = 5.00e-05   -> H25 FALSIFIED
+  AUC(-nu_hat) = 0.8403   permutation p = 5.00e-05
+  N = 366, recoveries = 97
+
+is mu's power inside the band mediated by NU?  (rank statistics)
+  Spearman(mu, NU)          = -0.4557
+  Spearman(mu, recovery)    = -0.2954
+  partial(mu, recovery | NU)= -0.3852
+  Spearman(mu, eff)         = -0.4956
+  partial(mu, recovery |eff)= -0.5473
+
+------------------------------------------------------------------------------
+EXP X2: double conditioning — NU band AND eff stratum at once.
+        Neither the bias strength nor the BDD certificate can move
+        inside a cell, so this is the strongest available control.
+------------------------------------------------------------------------------
+  eff     N      rec |   AUC mu  AUC nu_hat   AUC NU  AUC step
+ 0.05    24    23/24 |   0.4565      0.4565   0.4783    0.5217
+ 0.10    83    26/83 |   0.8819      0.8853   0.5277    0.1329
+ 0.15    96    21/96 |   0.8889      0.8825   0.3283    0.1130
+ 0.20    89    18/89 |   0.9276      0.9425   0.4695    0.0657
+ 0.25    74     9/74 |   0.8615      0.8615   0.6188    0.1179
+
+pair-weighted mean AUC over the non-degenerate cells:
+       mu: 0.8916
+   nu_hat: 0.8944
+     PROD: 0.9027
+       NU: 0.4596
+     step: 0.1092
+        n: 0.3698
+  ('n' is the size control: within a cell K1/K2 are pinned to n,
+   so a large AUC here would mean the geometry columns are proxies
+   for curve size rather than for lattice shape.)
+
+------------------------------------------------------------------------------
+EXP X3: the 2-parameter viability test — logistic on (log NU, log mu)
+------------------------------------------------------------------------------
+features                          in-sample AUC   logloss  grouped-CV AUC
+NU only                                  0.7996    0.4895          0.7258
+mu only                                  0.6036    0.6432          0.5668
+nu_hat only                              0.6889    0.5878          0.6567
+(log NU, log mu)                         0.8592    0.4399          0.7936
+(log NU, log nu_hat)                     0.9396    0.2983          0.9266
+(log NU, log nu_hat, log eff)            0.9558    0.2515          0.9402
+
+decision boundary, all 500 rows, P(recover) = 1/2 at
+  +34.0765 -6.9719*log(NU) -2.7206*log(mu) = 0
+  i.e.  NU^-6.972 * mu^-2.721 = 1.588e-15
+dimensionless version:
+  -0.3120 -8.0102*log(NU) -7.5870*log(nu_hat) = 0
+  i.e.  NU^8.010 * nu_hat^7.587 = 0.732   (recover BELOW this)
+  exponent ratio wNU/wnuhat = 1.0558
+
+------------------------------------------------------------------------------
+EXP X3b: the fitted exponents are nearly equal — does the plain
+         PRODUCT NU * nu_hat, with no free parameter, do as well?
+------------------------------------------------------------------------------
+alpha (score = NU * nu_hat^alpha)          AUC
+alpha = 0.00                            0.7996
+alpha = 0.25                            0.8642
+alpha = 0.50                            0.9124
+alpha = 0.75                            0.9348
+alpha = 0.90                            0.9393
+alpha = 1.00                            0.9395  <- the plain product
+alpha = 1.10                            0.9379
+alpha = 1.25                            0.9336
+alpha = 1.50                            0.9215
+alpha = 2.00                            0.8923
+alpha = 3.00                            0.8430
+
+best alpha on this grid = 1.00 (AUC 0.9395); the free 2-param logistic reached 0.9396 in-sample.
+AUC(-NU*nu_hat) = 0.9395  (perm p = 5.00e-05), zero fitted parameters.
+per-eff-stratum, so the product cannot score by tracking eff:
+  eff     N      rec |  AUC PROD   AUC NU  AUC nu_hat
+ 0.05   100   99/100 |    0.8384   0.8687      0.4242
+ 0.10   100   42/100 |    0.9553   0.7011      0.7484
+ 0.15   100   21/100 |    0.8668   0.3496      0.8813
+ 0.20   100   19/100 |    0.9292   0.5595      0.9337
+ 0.25   100    9/100 |    0.8852   0.7277      0.8816
+
+------------------------------------------------------------------------------
+EXP X4 (secondary): the two-block step of W1b.
+        step = log2||b*_{m+1}|| - log2||b*_1||;  W1b says step -> 0
+        exactly as the K1 wall is crossed.
+------------------------------------------------------------------------------
+  eff     N      rec |  mean step  step|rec  step|fail |  AUC step  AUC head-flat
+ 0.05   100   99/100 |    -0.0079   -0.0056    -0.2378 |    0.6364         0.3939
+ 0.10   100   42/100 |    -0.0564    0.3610    -0.3587 |    0.2266         0.7943
+ 0.15   100   21/100 |    -0.1081    0.6581    -0.3117 |    0.1139         0.8333
+ 0.20   100   19/100 |    -0.1219    0.4756    -0.2621 |    0.0793         0.8655
+ 0.25   100    9/100 |    -0.1683    0.3547    -0.2200 |    0.1062         0.8480
+
+pooled AUC(-step) = 0.3286  (perm p = 5.00e-05)
+pooled AUC(-NU)   = 0.7996
+Spearman(step, log eff)  = +0.0193
+Spearman(step, log NU)   = +0.1351
+Spearman(step, log mu)   = -0.6627
+
+head-block check of W1b: max_i<m |log2||b*_i|| - log2 mu|
+  median 0.3197 bits   p90 0.6746   max 0.8367
+
+------------------------------------------------------------------------------
+EXP X5: power extension — 15 eff strata x 20 curves x 10 seeds.
+------------------------------------------------------------------------------
+3000 instances in 13.6s   recovery 1035/3000
+
+ambiguous band: N=2001  rec=534/2001
+  AUC(-mu     ) = 0.6100
+  AUC(-nu_hat ) = 0.8050
+  AUC(-NU     ) = 0.6171
+  AUC(-eff    ) = 0.7672
+  AUC(-lam*   ) = 0.3498
+  AUC(-step   ) = 0.2133
+  permutation p for mu = 5.00e-05
+
+  double conditioning (band x eff), pair-weighted mean:
+         mu: 0.8449  (48835 pairs)
+     nu_hat: 0.8541  (48835 pairs)
+         NU: 0.4594  (48835 pairs)
+       step: 0.1495  (48835 pairs)
+  grouped-CV AUC NU only                          0.7897
+  grouped-CV AUC mu only                          0.6345
+  grouped-CV AUC nu_hat only                      0.6332
+  grouped-CV AUC (log NU, log mu)                 0.8461
+  grouped-CV AUC (log NU, log nu_hat)             0.9406
+  grouped-CV AUC (log NU, log nu_hat, log eff)    0.9504
+
+------------------------------------------------------------------------------
+EXP X6: cross-size stability.  Thread 24 W4 found NU is a
+        size-DEGRADING separator (AUC 0.978 at 12 bits -> 0.860 at
+        17).  Does the product NU*nu_hat hold its threshold?
+------------------------------------------------------------------------------
+12-bit grid: 110 instances, recovery 41/110
+
+set           stat             AUC   max|rec  min|fail  overlap
+12-bit        NU            0.9777    1.8686    1.1876     1.57x
+12-bit        NU*nu_hat     0.9781    1.1562    0.7262     1.59x
+17-bit        NU            0.7996    2.1992    1.0105     2.18x
+17-bit        NU*nu_hat     0.9395    1.6340    0.6981     2.34x
+17-bit big    NU            0.8472    2.2390    0.9836     2.28x
+17-bit big    NU*nu_hat     0.9470    1.9791    0.6570     3.01x
+
+'overlap' = max score among recoveries / min score among failures.
+1.00x would be a perfectly separating threshold; the smaller the
+ratio, the tighter the sufficient/necessary bracket.
+
+==============================================================================
+done
+==============================================================================

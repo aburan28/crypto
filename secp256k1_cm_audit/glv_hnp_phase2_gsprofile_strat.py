@@ -18,9 +18,15 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
+
+--dump-json writes the full per-instance table (added Thread 25, 2026-08-07)
+so downstream analyses do not have to regenerate it.  `collect_rows` is the
+same code path the __main__ block uses and is imported by
+glv_hnp_phase2_nu_conditional.py.
 """
 
+import json
 import math
 import os
 import random
@@ -32,6 +38,46 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
+
+# Row fields that are JSON-safe and worth keeping.  'nus' is dropped (24 floats
+# per row, only ever consumed as max = NU); 'prof' is kept because Thread 25's
+# `step` statistic reads it.
+DUMP_KEYS = ('k', 'prof', 'NU', 'argmax', 'enorm', 'mu', 'l2', 'det2', 'nuhat',
+             'S_K1', 'S_K2', 'K2', 'n', 'K1', 'ok', 'eff', 'effq', 'lamstar',
+             'seed')
+
+
+def collect_rows(curves, m, effs, seeds=SEEDS, exact=False):
+    """The eff-stratified table of W5/W6.  One row per (eff, curve, seed).
+
+    K1 is chosen per (curve, eff) as round(eff * n / K2) so that the realised
+    eff = K1*K2/n lands on the requested value; the realised value is stored
+    as 'eff' and the requested one as 'effq'.
+    """
+    rows = []
+    for eff in effs:
+        for (p, b, n, lam, G) in curves:
+            k2b = math.isqrt(n) + 1
+            k1b = max(2, int(eff * n / k2b))
+            for seed in seeds:
+                d_trial = random.Random(seed + 7777).randint(1, n - 1)
+                r = instance((p, b, n, lam, G), m, d_trial, k1b, seed,
+                             exact=exact)
+                if r is None:
+                    continue
+                rk = run_new((p, b, n, lam, G), m, d_trial, k1b, seed)
+                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
+                          'eff': k1b * k2b / n, 'effq': eff, 'seed': seed,
+                          'lamstar': lam_star(lam, n)})
+                rows.append(r)
+    return rows
+
+
+def dump_rows(rows, path):
+    with open(path, 'w') as fh:
+        json.dump([{k: r[k] for k in DUMP_KEYS if k in r} for r in rows], fh)
+    return path
+
 
 if __name__ == "__main__":
     print("=" * 78)
@@ -45,24 +91,13 @@ if __name__ == "__main__":
     EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
 
     t0 = time.time()
-    rows = []
-    for eff in EFFS:
-        for (p, b, n, lam, G) in curves17:
-            k2b = math.isqrt(n) + 1
-            k1b = max(2, int(eff * n / k2b))
-            for seed in SEEDS:
-                d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance((p, b, n, lam, G), M17, d_trial, k1b, seed,
-                             exact=False)
-                if r is None:
-                    continue
-                rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
-                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
-                          'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
-                rows.append(r)
+    rows = collect_rows(curves17, M17, EFFS)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if "--dump-json" in sys.argv:
+        path = sys.argv[sys.argv.index("--dump-json") + 1]
+        print(f"dumped {len(rows)} rows -> {dump_rows(rows, path)}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

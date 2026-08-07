@@ -6538,3 +6538,254 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6285).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread; Thread 24
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate ...  If no -- if mu's apparent
+>   power is entirely mediated by NU after all -- then the W5 result is a
+>   stratification artifact and the closed form should be retired.
+>   Secondary: define step = log2(||b*_{m+1}||) - log2(||b*_1||) and test
+>   whether step -> 0 predicts the wall better than either NU or mu.
+
+**Verdict: H25 is FALSIFIED as literally written and CONFIRMED in substance.**
+`AUC(-mu)` in the band is 0.693 (N=366) / 0.610 (N=2001), short of the 0.80
+bar. But the miss is a *units* artifact, not a mediation one: mu =
+lambda_1(L2) carries a scale ~sqrt(n*S_K1*S_K2), and the band pools eff strata
+and therefore pools K1. Pin eff as well and mu recovers to **0.892 / 0.845**,
+its dimensionless twin nu_hat = mu/sqrt(det L2) to **0.894 / 0.854** — while
+**NU itself collapses to 0.4596 / 0.4594, i.e. exactly chance.** The second
+mechanism is real, the pre-registered statistic was simply the non-normalised
+version of it. The disjunct "retire the closed form" does NOT fire.
+
+Bonus result, not pre-registered: **the two statistics combine into a
+zero-parameter product law, `NU * nu_hat`, that beats both.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Fourth run in a row where
+  `cysignals` had to be named explicitly; it is still not pulled in by fpylll.
+  Worth a `requirements-glv.txt` at some point.
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added the
+  pre-registered `--dump-json PATH` flag and factored the table build into
+  `collect_rows(curves, m, effs, seeds, exact)` / `dump_rows(rows, path)` so
+  Thread 25 and later threads reuse the exact same code path. Refactor
+  verified **output-neutral**: `diff` against the committed
+  `glv_hnp_phase2_gsprofile_strat_output.txt` differs only in the elapsed-time
+  line (3.0s -> 2.2s). The 400K dump is regenerable in 2.2s and is NOT
+  committed.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_conditional.py` — new (exp X1-X6).
+  Output: `glv_hnp_phase2_nu_conditional_output.txt` (139 lines).
+- Two numerics fixes needed to make X5 tractable, both self-checked:
+  * `fast_auc` — Mann-Whitney via mid-ranks, O(N log N). The permutation
+    loops shuffle *ranks* (permutation-invariant) rather than re-ranking, so
+    a 20000-shuffle p-value on 2001 rows costs seconds instead of hours. The
+    script asserts agreement with the O(N^2) `auc` of the parent script on
+    every score column each run: **max |difference| = 0.00e+00**.
+  * `logistic_fit` — replaced plain GD (4000 sweeps, and the 3-feature fit had
+    not converged) with ridge IRLS/Newton, ~8 steps to tol 1e-10.
+- `cargo test --test curve_audit` -> 5/5 pass (5.05s). No Rust touched.
+
+### Findings
+
+**X1 — inside its own ambiguous band, NU is spent; the geometry is not.**
+AUC > 0.5 means smaller score => more likely to recover. N=500 table.
+
+```
+band                                 N     rec |     mu  nu_hat      NU     eff    lam*    step       n
+NU < 1.040  (sufficient)            94   92/94 | 0.1603  0.4592  0.9837  0.9212  0.5082  0.4511  0.5842
+1.040-1.500 (ambiguous, lower)     134  41/134 | 0.5063  0.7190  0.7034  0.8008  0.4483  0.3076  0.5060
+1.500-2.199 (ambiguous, upper)     232  56/232 | 0.8800  0.9450  0.4932  0.6593  0.2398  0.0649  0.4067
+1.040-2.199 (AMBIGUOUS = H25)      366  97/366 | 0.6932  0.8403  0.5656  0.7056  0.3212  0.1803  0.4497
+NU > 2.199  (necessary violated)    40    1/40 | 1.0000  1.0000  1.0000  1.0000  0.2564  0.0000  0.6154
+```
+
+Both permutation p-values in the H25 row are 5.0e-05 (20000 shuffles, the
+floor). The last row is **not** a result: 1 recovery out of 40 means every
+AUC there is computed from a single positive; ignore it. The first row is
+near-degenerate for the same reason in reverse (92/94).
+
+The mediation question is settled by partial rank correlations in the band:
+
+```
+Spearman(mu, NU)            -0.4557
+Spearman(mu, recovery)      -0.2954
+partial(mu, recovery | NU)  -0.3852     <- conditioning on NU STRENGTHENS mu
+Spearman(mu, eff)           -0.4956
+partial(mu, recovery | eff) -0.5473     <- and so does conditioning on eff
+```
+
+If mu were a proxy for NU the partial would shrink toward zero. It grows.
+
+**X2 — double conditioning (NU band AND eff stratum). The decisive table.**
+
+```
+  eff     N      rec |  AUC mu  AUC nu_hat   AUC NU  AUC step
+ 0.05    24    23/24 |  0.4565      0.4565   0.4783    0.5217   (degenerate)
+ 0.10    83    26/83 |  0.8819      0.8853   0.5277    0.1329
+ 0.15    96    21/96 |  0.8889      0.8825   0.3283    0.1130
+ 0.20    89    18/89 |  0.9276      0.9425   0.4695    0.0657
+ 0.25    74     9/74 |  0.8615      0.8615   0.6188    0.1179
+
+pair-weighted mean over non-degenerate cells (N=500 / N=3000):
+     mu 0.8916 / 0.8449    nu_hat 0.8944 / 0.8541    PROD 0.9027 / --
+     NU 0.4596 / 0.4594    step 0.1092 / 0.1495      n 0.3698 / --
+```
+
+`n` is the size control: within a cell K1 and K2 are pinned to n, so a high
+AUC there would mean the geometry columns are curve-size proxies. It is 0.370,
+*below* chance. The signal is lattice shape, not curve size.
+
+**X3/X3b — the product law. `NU * nu_hat`, zero fitted parameters.**
+The free logistic on (log NU, log nu_hat) returns near-equal exponents:
+
+```
+  -0.3120 - 8.0102*log(NU) - 7.5870*log(nu_hat) = 0     ratio 1.0558
+  i.e. recover when  NU^8.010 * nu_hat^7.587 < 0.732
+```
+
+Sweeping the exponent confirms the ratio is not a fluke — the optimum sits on
+the integer:
+
+```
+alpha (score = NU * nu_hat^alpha)   0.00    0.50    0.90    1.00    1.10    1.50    3.00
+AUC                               0.7996  0.9124  0.9393  0.9395  0.9379  0.9215  0.8430
+```
+
+alpha = 1 is the grid maximum, and `AUC(-NU*nu_hat) = 0.9395` matches the free
+2-parameter logistic's 0.9396 in-sample to 1e-4. Held-out performance, grouped
+5-fold CV with whole **curves** held out so no fit can memorise a curve:
+
+```
+features                        in-sample   logloss   grouped-CV     CV (N=3000)
+NU only                            0.7996    0.4895       0.7258          0.7897
+mu only                            0.6036    0.6432       0.5668          0.6345
+nu_hat only                        0.6889    0.5878       0.6567          0.6332
+(log NU, log mu)                   0.8592    0.4399       0.7936          0.8461
+(log NU, log nu_hat)               0.9396    0.2983       0.9266          0.9406
+(log NU, log nu_hat, log eff)      0.9558    0.2515       0.9402          0.9504
+```
+
+Two readings. (i) The 2-parameter test Thread 24 asked for exists, and the
+dimensionless pair is the right one — (log NU, log mu) only reaches CV 0.794
+against (log NU, log nu_hat) at 0.927/0.941. (ii) Adding log eff on top buys
+just +0.010 CV, so **(NU, nu_hat) already absorbs essentially all of the bias
+strength**; eff is not a third coordinate.
+
+Per-stratum, so the product cannot be scoring by tracking eff:
+
+```
+  eff     N      rec |  AUC PROD   AUC NU  AUC nu_hat
+ 0.05   100   99/100 |    0.8384   0.8687      0.4242
+ 0.10   100   42/100 |    0.9553   0.7011      0.7484
+ 0.15   100   21/100 |    0.8668   0.3496      0.8813
+ 0.20   100   19/100 |    0.9292   0.5595      0.9337
+ 0.25   100    9/100 |    0.8852   0.7277      0.8816
+```
+
+NU alone swings 0.35-0.87 and nu_hat alone 0.42-0.93 — each fails in the
+regime where the other works. The product is 0.84-0.96 throughout. That is
+the substance of "two mechanisms": they are complementary, not redundant.
+
+**X6 — the product is a better RANKER but NOT a better CERTIFICATE.**
+
+```
+set           stat             AUC   max|rec  min|fail  overlap
+12-bit        NU            0.9777    1.8686    1.1876     1.57x
+12-bit        NU*nu_hat     0.9781    1.1562    0.7262     1.59x
+17-bit        NU            0.7996    2.1992    1.0105     2.18x
+17-bit        NU*nu_hat     0.9395    1.6340    0.6981     2.34x
+17-bit big    NU            0.8472    2.2390    0.9836     2.28x
+17-bit big    NU*nu_hat     0.9470    1.9791    0.6570     3.01x
+```
+
+The AUC degradation Thread 24 W4 flagged is **fixed**: NU falls 0.978 -> 0.800
+from 12 to 17 bits, the product holds 0.978 -> 0.940/0.947. But the
+sufficient/necessary bracket does *not* tighten — overlap 1.59x/2.34x/3.01x
+against NU's 1.57x/2.18x/2.28x, and it widens faster with size. So:
+
+* `NU <= 1` remains the only **sound** statement (nearest-plane guarantee,
+  96 TP / 0 FP over 410 instances across two sizes, Thread 23b + 24 W4).
+* `NU * nu_hat` is a **calibrated empirical score**, not proof-carrying, and
+  should be quoted as a ranking/triage statistic only.
+
+**X4 — the W1b `step` reading is falsified in SIGN, and the head block is not
+exact.** Thread 24 W1b said the two-block step vanishes as the K1 wall is
+crossed. The step is a strong predictor — of the opposite thing.
+
+```
+  eff     N      rec |  mean step  step|rec  step|fail |  AUC step  AUC head-flat
+ 0.05   100   99/100 |    -0.0079   -0.0056    -0.2378 |    0.6364         0.3939
+ 0.10   100   42/100 |    -0.0564    0.3610    -0.3587 |    0.2266         0.7943
+ 0.15   100   21/100 |    -0.1081    0.6581    -0.3117 |    0.1139         0.8333
+ 0.20   100   19/100 |    -0.1219    0.4756    -0.2621 |    0.0793         0.8655
+ 0.25   100    9/100 |    -0.1683    0.3547    -0.2200 |    0.1062         0.8480
+
+pooled AUC(-step) = 0.3286 (perm p = 5.0e-05);  double-conditioned 0.109/0.150
+Spearman(step, log eff) +0.0193   (log NU) +0.1351   (log mu) -0.6627
+```
+
+Recovering instances carry step = **+0.35 to +0.66 bits**; failing ones
+**-0.22 to -0.36**. AUC(-step) = 0.109 double-conditioned means AUC(+step) =
+0.891 — as strong as nu_hat, with the sign reversed from W1b's reading. A
+*positive* step (second block above the head) marks recovery; a flat or
+inverted profile marks failure. Mechanically it is largely mu in disguise
+(Spearman -0.663 against log mu) and it is nearly orthogonal to eff (+0.019),
+which is why it survives conditioning.
+
+Also correcting W1b: "the head of the profile is m repetitions of
+lambda_1(L2)" overstates the measurement. Per-instance deviation
+`max_{i<m} |log2||b*_i|| - log2 mu|` is **median 0.32 bits, p90 0.67, max
+0.84** — the head is flat to ~±0.3 bits, not exact. The flatness is itself
+informative (AUC 0.79-0.87 at eff >= 0.10, flatter => recovery), which is
+consistent with it being another view of the same mu-driven quantity.
+
+### Next step proposal
+
+**Thread 26 — is the product law a property of LLL, or of the lattice?**
+Everything above is measured with plain LLL. If `NU * nu_hat` is a geometric
+statement about L0 it should survive stronger reduction with only its constant
+moving; if it is an LLL artifact the exponent will drift. `run_new` already
+takes `use_bkz` / `bkz_beta`, so this is a parameter sweep over existing code.
+
+  H26: for beta in {2 (=LLL), 10, 20, 30} on the 17-bit stratified table,
+       (a) AUC(-NU*nu_hat) stays >= 0.90 at every beta, and
+       (b) the exponent alpha maximising AUC(NU*nu_hat^alpha) stays in
+           [0.85, 1.20], while
+       (c) the 50%-recovery threshold const(beta) increases monotonically.
+  Falsifier: if alpha drifts outside [0.85, 1.20] with beta, or AUC decays,
+       the product is LLL-specific and must be quoted as such.
+
+This also discharges the BKZ-beta sweep that has been the standing tertiary
+item since Thread 23. Cost: 4 betas x 500 instances; BKZ-30 at dim 24 is the
+only slow leg, budget ~10 min.
+
+Secondary: **push the size axis to 20 and 22 bits.** X6 shows the product's
+AUC is size-stable but its bracket widens (1.59x -> 2.34x -> 3.01x). Two
+sizes cannot distinguish "widens and plateaus" from "widens without bound";
+a third and fourth can, and the answer decides whether the product can ever
+be turned into a bracket at cryptographic sizes or is strictly a small-n
+triage tool. `glv_hnp_phase2_20bit.py` already exists as a starting point.
+
+Tertiary: derive the exponent. `nu_hat = lambda_1(L2)/sqrt(det L2)` and
+NU is a nearest-plane residual; alpha = 1 to within 5.6% asks for an
+argument that the LLL-over-Babai rescue factor scales as 1/nu_hat. Thread 23b
+measured that rescue factor at ~1.9x in aggregate but never per-instance —
+dumping it per instance and regressing log(rescue) on log(nu_hat) is the
+direct test, and it is the piece that would turn the product into a theorem.
+
+### Commits made
+
+(recorded below after commit)
