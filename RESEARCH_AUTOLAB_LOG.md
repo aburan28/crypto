@@ -6790,3 +6790,5 @@ parameters wired in (`glv_hnp_phase2_projected.py:197`) and nothing has ever
 called them.
 
 ### Commits made
+
+55818b4 autolab 2026-08-07 #3: Thread 25 — H25 splits; recovery is U-shaped in NU, so NU is retired as a coordinate
