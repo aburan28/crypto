@@ -1,0 +1,224 @@
+==============================================================================
+Thread 24 — is NU decided by the tail of the GS profile, and is the
+            tail governed by lambda_2(L2) = det(L2)/mu?
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP W1: GS profile and argmax_i of nu_i over the U2 grid
+------------------------------------------------------------------------------
+dim(L0) = 2m.  'argmax' = index i (1-based) attaining NU.
+'q' = quarter of the index range holding the argmax (1=head, 4=tail).
+
+
+12-bit/2557  (lam* = 0.340, m = 8, dim = 16)
+    K1         mu   lam2(L2)  argmax(1b)   mean NU   q-hist(1..4)  recov
+     2       4733      38148 [3, 2, 2, 5, 13]     0.517   [3, 1, 0, 1]    5/5
+     3       3683      32625 [5, 2, 2, 8, 4]     0.828   [3, 2, 0, 0]    5/5
+     4       3236      27849 [3, 2, 2, 6, 13]     0.959   [3, 1, 0, 1]    5/5
+     6       2876      20906 [5, 2, 2, 8, 4]     1.330   [3, 2, 0, 0]    5/5
+     8       2738      16464 [3, 2, 2, 6, 14]     1.332   [3, 1, 0, 1]    5/5
+    12       2635      11376 [10, 2, 2, 8, 9]     1.703   [2, 1, 2, 0]    1/5
+    16       2598       8729 [12, 2, 2, 2, 11]     1.871   [3, 0, 2, 0]    0/5
+    24       2571       5832 [11, 11, 8, 10, 9]     2.627   [0, 1, 4, 0]    0/5
+    32       2562       4402 [16, 2, 13, 11, 16]     2.844   [1, 0, 1, 3]    0/5
+    48       2555       2919 [10, 2, 12, 3, 6]     4.214   [2, 1, 2, 0]    0/5
+    64       2178       2553 [15, 16, 11, 2, 13]     3.726   [1, 0, 1, 3]    0/5
+
+12-bit/2677  (lam* = 0.070, m = 10, dim = 20)
+    K1         mu   lam2(L2)  argmax(1b)   mean NU   q-hist(1..4)  recov
+     2       9394      18646 [11, 2, 7, 9, 10]     0.522   [1, 3, 1, 0]    5/5
+     3       9342      12534 [9, 9, 12, 16, 12]     0.819   [0, 2, 2, 1]    5/5
+     4       9323       9500 [20, 20, 17, 18, 17]     1.032   [0, 0, 0, 5]    5/5
+     6       6538       9310 [14, 13, 18, 18, 19]     1.430   [0, 0, 2, 3]    0/5
+     8       5096       8696 [16, 5, 19, 10, 12]     1.699   [1, 1, 1, 2]    0/5
+    12       3756       7875 [16, 11, 20, 8, 20]     2.035   [0, 1, 1, 3]    0/5
+    16       3156       6921 [16, 17, 15, 19, 15]     1.940   [0, 0, 2, 3]    0/5
+    24       2645       5522 [8, 14, 18, 15, 18]     3.414   [0, 1, 2, 2]    0/5
+    32       2437       4534 [18, 15, 12, 19, 17]     2.937   [0, 0, 2, 3]    0/5
+    48       2284       3212 [14, 18, 11, 19, 9]     3.911   [0, 1, 2, 2]    0/5
+    64       2225       2440 [19, 20, 16, 7, 15]     4.342   [0, 1, 1, 3]    0/5
+
+------------------------------------------------------------------------------
+EXP W1b: aggregate argmax position — the PRE-REGISTERED FALSIFIER
+------------------------------------------------------------------------------
+N = 110 instances
+  quarter 1 (head):   26  ( 23.6%)
+  quarter 2 (  ):   20  ( 18.2%)
+  quarter 3 (  ):   28  ( 25.5%)
+  quarter 4 (tail):   36  ( 32.7%)
+  argmax in the LAST THREE indices: 15/110 (13.6%)
+H24 predicts quarter 4 dominant.  If the mass is spread, H24 fails.
+
+------------------------------------------------------------------------------
+EXP W2: is ||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)?
+------------------------------------------------------------------------------
+Ratios ||b*_last|| / lambda_2(L2) and ||b*_last|| / (det L2 / mu).
+H24 wants these ~constant across K1 and across curves.
+
+  curve          K1  ||b*_last||   lam2(L2)    ratio   detL2/mu    ratio
+  12-bit/2557     2      15909.2    38148.0    0.417    38080.5    0.418
+  12-bit/2557     3      15514.4    32625.2    0.476    32619.2    0.476
+  12-bit/2557     4      12521.7    27849.3    0.450    27827.3    0.450
+  12-bit/2557     6       8557.3    20906.4    0.409    20891.6    0.410
+  12-bit/2557     8       6742.5    16464.5    0.410    16445.8    0.410
+  12-bit/2557    12       4734.4    11375.8    0.416    11374.6    0.416
+  12-bit/2557    16       4029.4     8729.0    0.462     8664.2    0.465
+  12-bit/2557    24       2368.2     5832.0    0.406     5801.4    0.408
+  12-bit/2557    32       1975.8     4401.7    0.449     4393.0    0.450
+  12-bit/2557    48       1481.6     2919.0    0.508     2918.8    0.508
+  12-bit/2557    64       1303.6     2553.0    0.511     2552.3    0.511
+  12-bit/2677     2       8926.5    18646.4    0.479    18640.2    0.479
+  12-bit/2677     3       6397.2    12533.8    0.510    12495.8    0.512
+  12-bit/2677     4       5682.5     9500.5    0.598     9383.1    0.606
+  12-bit/2677     6       4352.1     9310.5    0.467     8927.7    0.487
+  12-bit/2677     8       4153.4     8696.3    0.478     8570.9    0.485
+  12-bit/2677    12       3832.1     7874.8    0.487     7751.8    0.494
+  12-bit/2677    16       3294.0     6920.7    0.476     6920.0    0.476
+  12-bit/2677    24       2721.4     5522.3    0.493     5504.9    0.494
+  12-bit/2677    32       2548.6     4533.8    0.562     4452.8    0.572
+  12-bit/2677    48       1670.7     3212.2    0.520     3187.4    0.524
+  12-bit/2677    64       1216.3     2439.6    0.499     2438.5    0.499
+
+  ||b*_last||/lambda_2 : min 0.406 max 0.598 spread 1.47x  over 22 cells
+  ||b*_last||/(detL2/mu): min 0.408 max 0.606 spread 1.48x
+
+------------------------------------------------------------------------------
+EXP W3: does a TAIL-ONLY certificate keep NU's predictive power?
+------------------------------------------------------------------------------
+  last quarter      NU_tail == NU in  36/110 ( 32.7%)   AUC(-NU_tail) = 0.9721
+  last half         NU_tail == NU in  64/110 ( 58.2%)   AUC(-NU_tail) = 0.9961
+  last index only   NU_tail == NU in   8/110 (  7.3%)   AUC(-NU_tail) = 0.8565
+  full NU (ref)                                AUC(-NU)      = 0.9777
+
+------------------------------------------------------------------------------
+EXP W4: does the GS profile explain the SIGN of nu_hat?
+------------------------------------------------------------------------------
+nu_hat = mu/sqrt(det L2) correlated NEGATIVELY with recovery (Thread
+20b).  H24's mechanism: mu up => lambda_2 down => tail GS norms down
+=> nu_i up => NU up => BDD fails.  Check each link at matched K1.
+
+    K1 |  2557: mu     lam2   b*_last      NU  rec |  2677: mu     lam2   b*_last      NU  rec
+     2 |      4733    38148   15909.2   0.517  5/5 |      9394    18646    8926.5   0.522  5/5
+     3 |      3683    32625   15514.4   0.828  5/5 |      9342    12534    6397.2   0.819  5/5
+     4 |      3236    27849   12521.7   0.959  5/5 |      9323     9500    5682.5   1.032  5/5
+     6 |      2876    20906    8557.3   1.330  5/5 |      6538     9310    4352.1   1.430  0/5
+     8 |      2738    16464    6742.5   1.332  5/5 |      5096     8696    4153.4   1.699  0/5
+    12 |      2635    11376    4734.4   1.703  1/5 |      3756     7875    3832.1   2.035  0/5
+    16 |      2598     8729    4029.4   1.871  0/5 |      3156     6921    3294.0   1.940  0/5
+    24 |      2571     5832    2368.2   2.627  0/5 |      2645     5522    2721.4   3.414  0/5
+    32 |      2562     4402    1975.8   2.844  0/5 |      2437     4534    2548.6   2.937  0/5
+    48 |      2555     2919    1481.6   4.214  0/5 |      2284     3212    1670.7   3.911  0/5
+    64 |      2178     2553    1303.6   3.726  0/5 |      2225     2440    1216.3   4.342  0/5
+
+  Spearman over all 110 instances:
+    rho(mu, lambda_2)     = +0.735   (exact duality: mu*lambda_2 = det L2 up to <=2/sqrt3)
+    rho(lambda_2, b*_last)= +0.982
+    rho(b*_last, NU)      = -0.914
+    rho(NU, recovery)     = -0.800
+    rho(mu, recovery)     = +0.585   (Thread 20b's nu_hat sign)
+
+------------------------------------------------------------------------------
+EXP W4b: the nu_hat sign, WITHIN matched K1 (removes the K1 confound)
+------------------------------------------------------------------------------
+Pooling over K1 confounds every correlation: K1 drives det(L2) and
+hence mu, lambda_2 and recovery simultaneously.  Thread 20b's nu_hat
+comparison was CROSS-CURVE AT MATCHED K1, so redo it that way: for
+each K1, sign of (mu_2677 - mu_2557) vs (rec_2677 - rec_2557).
+
+    K1     d(mu)   d(lam2)  d(b*last)    d(NU)  d(rec)   nu_hat sign ok?
+     2      4661    -19502    -6982.7    0.005       0              tie
+     3      5658    -20091    -9117.2   -0.009       0              tie
+     4      6088    -18349    -6839.2    0.074       0              tie
+     6      3662    -11596    -4205.1    0.100      -5              YES
+     8      2358     -7768    -2589.1    0.366      -5              YES
+    12      1121     -3501     -902.2    0.332      -1              YES
+    16       558     -1808     -735.5    0.069       0              tie
+    24        73      -310      353.2    0.787       0              tie
+    32      -125       132      572.8    0.093       0              tie
+    48      -272       293      189.1   -0.303       0              tie
+    64        47      -113      -87.2    0.616       0              tie
+
+  sign of nu_hat confirmed in 3/3 non-tied K1 cells (8 ties).
+
+------------------------------------------------------------------------------
+EXP W5: NU_half as a separator — sharpness, and is it still SOUND?
+------------------------------------------------------------------------------
+W3 found AUC(-NU_half) = 0.996 > AUC(-NU) = 0.978.  NU_half drops
+the head indices, so it can no longer be a nearest-plane certificate;
+check directly whether NU_half <= 1 still implies Babai success.
+
+  NU (full)  vs Kannan-LLL recovery   N = 110
+    TP  25  FP   0  FN  16  TN  69   accuracy 0.855
+    sufficient below 1.188 | necessary above 1.869 | ambiguous band 27/110 (24.5%)
+  NU_half  vs Kannan-LLL recovery   N = 110
+    TP  36  FP   0  FN   5  TN  69   accuracy 0.955
+    sufficient below 1.068 | necessary above 1.252 | ambiguous band 8/110 (7.3%)
+
+  soundness: of 36 instances with NU_half <= 1, 0 FAIL Babai nearest-plane.
+  (NU <= 1 had 0 such failures by construction — it is the theorem.)
+  => NU_half is a sharper SCORE but not a certificate; the pair
+     (NU for soundness, NU_half for ranking) is the useful package.
+
+------------------------------------------------------------------------------
+EXP W6: where does the 0.47 constant come from?  det(L0) vs det(L2)^m
+------------------------------------------------------------------------------
+L0 contains L2^m (one copy of L2 on each coordinate pair (i, m+i))
+plus the B-row, so det(L0) = det(L2)^m / [L0 : L2^m], and the whole
+GS profile is pulled down by that index.  Measure the index.
+
+  curve          K1  log2 detL0  m*log2 detL2        index  index<=n?  I^(-1/2m)  b*last/lam2
+  12-bit/2557     2      208.03        219.40       2659.0       True      0.611        0.417
+  12-bit/2557     3      203.35        214.72       2659.0       True      0.611        0.476
+  12-bit/2557     4      200.02        211.39       2659.0       True      0.611        0.450
+  12-bit/2557     6      195.35        206.72       2659.0       True      0.611        0.409
+  12-bit/2557     8      192.02        203.39       2659.0       True      0.611        0.410
+  12-bit/2557    12      187.32        198.70       2659.0       True      0.611        0.416
+  12-bit/2557    16      184.02        195.39       2659.0       True      0.611        0.462
+  12-bit/2557    24      179.27        190.64       2659.0       True      0.611        0.406
+  12-bit/2557    32      176.02        187.39       2659.0       True      0.611        0.449
+  12-bit/2557    48      171.27        182.64       2659.0       True      0.611        0.508
+  12-bit/2557    64      167.88        179.25       2659.0       True      0.611        0.511
+  12-bit/2677     2      262.47        273.84       2647.0       True      0.674        0.479
+  12-bit/2677     3      256.62        267.99       2647.0       True      0.674        0.510
+  12-bit/2677     4      252.45        263.83       2647.0       True      0.674        0.598
+  12-bit/2677     6      246.62        257.99       2647.0       True      0.674        0.467
+  12-bit/2677     8      242.43        253.80       2647.0       True      0.674        0.478
+  12-bit/2677    12      236.58        247.95       2647.0       True      0.674        0.487
+  12-bit/2677    16      232.43        243.80       2647.0       True      0.674        0.476
+  12-bit/2677    24      226.58        237.95       2647.0       True      0.674        0.493
+  12-bit/2677    32      222.35        233.72       2647.0       True      0.674        0.562
+  12-bit/2677    48      216.58        227.95       2647.0       True      0.674        0.520
+  12-bit/2677    64      212.35        223.72       2647.0       True      0.674        0.499
+
+------------------------------------------------------------------------------
+EXP W7: OUT-OF-SAMPLE — do NU / NU_half transfer to 17-bit curves?
+------------------------------------------------------------------------------
+Everything above is fitted on two 12-bit curves.  The 12-bit brackets
+were NU in [1.188, 1.869] and NU_half in [1.068, 1.252].  Re-measure
+on the 20 independent 17-bit curves of Thread 23 exp U3 (m = 12,
+eff = K1*K2/n in {0.05, 0.15, 0.25}, 5 seeds) — 300 fresh instances.
+If the brackets are n-independent, NU gives a size-free viability
+test for Phase 2.
+
+found 20 17-bit j=0 GLV curves in 0.0s
+300 instances in 1.5s
+  reproduction check vs Thread 23 exp U3 (NEW-lattice wins):
+    eff 0.05: 99/100   OK
+    eff 0.15: 21/100   OK
+    eff 0.25: 9/100   OK
+
+  NU (full)   N = 300   AUC = 0.8597
+    TP   71  FP    0  FN   58  TN  171   accuracy 0.807
+    17-bit bracket [1.040, 2.199]   12-bit bracket [1.188, 1.869]
+    transfer: 9/96 violations below the 12-bit lower threshold, 14/89 above the upper
+
+  NU_half   N = 300   AUC = 0.9744
+    TP  108  FP    3  FN   21  TN  168   accuracy 0.920
+    17-bit bracket [0.698, 1.779]   12-bit bracket [1.068, 1.252]
+    transfer: 6/118 violations below the 12-bit lower threshold, 7/154 above the upper
+
+  argmax quarter histogram at 17 bits: [30, 64, 89, 117]  (tail = 39.0%)
+
+==============================================================================
+done
+==============================================================================
