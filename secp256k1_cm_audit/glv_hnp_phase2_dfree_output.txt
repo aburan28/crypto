@@ -1,0 +1,224 @@
+==============================================================================
+Thread 23 -- d-free reformulation of the GLV-HNP Phase-2 lattice
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP E1: correctness of the d-free basis and of d-recovery
+------------------------------------------------------------------------------
+(a) planted vector has INTEGRAL coordinates in the variant-D basis
+(b) reconstructing from those coordinates reproduces it exactly
+(c) det(L_D) == det(L_A)/n  -- the quotient is exactly index n
+
+curve                m  K1  (a) integral  (b) exact  (c) det ratio
+8-bit/199            6   2          True       True            199  (n=199)
+12-bit/2557          8   8          True       True           2659  (n=2659)
+12-bit/2677 FAIL    10   8          True       True           2647  (n=2647)
+
+(d) end-to-end: does variant D recover d where variant A does?
+curve               K1      A      D   E(CVP)
+8-bit/199            2    5/5    5/5      5/5
+12-bit/2557          8    5/5    5/5      5/5
+12-bit/2677 FAIL     8    0/5    0/5      0/5
+
+------------------------------------------------------------------------------
+EXP E2: sv/pv and shortest-vector energy profile, A vs D
+------------------------------------------------------------------------------
+Variant A's sv is always n*S_D*e_m (T5).  Does dropping the d column
+raise sv/pv, and where does the new sv put its energy?
+
+curve               K1 |  A sv/pv   A:k1    A:d   A:k2  A:kan |  D sv/pv   D:k1   D:k2  D:kan
+8-bit/199            2 |    0.603  0.000  1.000  0.000  0.000 |    0.843  0.508  0.492  0.000
+12-bit/2557          8 |    0.517  0.000  1.000  0.000  0.000 |    0.532  0.132  0.868  0.000
+12-bit/2677 FAIL     8 |    0.422  0.000  1.000  0.000  0.000 |    0.813  0.822  0.178  0.000
+
+Also: |sv[d-col]|/n for variant A (T5 reported exactly 1.0000):
+  8-bit/199          |sv[m]|/n = 1.0000
+  12-bit/2557        |sv[m]|/n = 1.0000
+  12-bit/2677 FAIL   |sv[m]|/n = 1.0000
+
+------------------------------------------------------------------------------
+EXP E3: THE FALSIFIER -- K1 wall grid, A vs D vs E
+------------------------------------------------------------------------------
+2026-07-29 T4 baseline (variant A), for reference:
+  12-bit/2557 (lam*=0.340): 5,5,5,5,5,4,1,0  for K1=2,3,4,6,8,12,16,24
+  12-bit/2677 (lam*=0.070): 5,5,5,2,0,0,0,0  for K1=2,3,4,6,8,12,16,24
+If D/E move the 2677 wall outward from K1~4-6, the reformulation helps.
+If not, the wall is information-theoretic and Phase 2 is at its ceiling.
+
+12-bit/2557  (n=2659, lam=1755, lam*=0.3400, m=8)
+  variant       K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+  A              5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+  D              5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+  E(CVP)         5/5     5/5     5/5     5/5     5/5     1/5     0/5     0/5
+  sv/pv A      0.491   0.442   0.462   0.423   0.445   0.409   0.428   0.395
+  sv/pv D      0.902   0.636   0.585   0.475   0.475   0.424   0.437   0.409
+
+12-bit/2677 FAIL  (n=2647, lam=185, lam*=0.0699, m=10)
+  variant       K1=2    K1=3    K1=4    K1=6    K1=8   K1=12   K1=16   K1=24
+  A              5/5     5/5     5/5     0/5     0/5     0/5     0/5     0/5
+  D              5/5     5/5     5/5     2/5     0/5     0/5     0/5     0/5
+  E(CVP)         5/5     5/5     5/5     4/5     0/5     0/5     1/5     0/5
+  sv/pv A      0.438   0.405   0.400   0.382   0.387   0.372   0.380   0.367
+  sv/pv D      1.000   1.000   1.000   0.945   0.767   0.543   0.466   0.377
+
+------------------------------------------------------------------------------
+EXP E4: BKZ(20) on variant D at the wall
+------------------------------------------------------------------------------
+curve               K1   D-LLL   D-BKZ20   A-BKZ20
+12-bit/2557          6     5/5       5/5       5/5
+12-bit/2557          8     5/5       5/5       5/5
+12-bit/2557         12     1/5       1/5       1/5
+12-bit/2677 FAIL     6     2/5       3/5       1/5
+12-bit/2677 FAIL     8     0/5       0/5       0/5
+12-bit/2677 FAIL    12     0/5       0/5       0/5
+
+------------------------------------------------------------------------------
+EXP E5: control -- is 'planted vector is not lambda_1' pathological?
+------------------------------------------------------------------------------
+Build the CLASSICAL Nguyen-Shparlinski HNP lattice (no GLV, k_i < n/2^l,
+rows n*e_i and (B_1..B_m, 1/2^{l+1}) scaled to integers) and measure
+sv/pv.  If sv/pv < 1 there too, T5's finding is generic to HNP, not a
+defect of the Phase-2 construction.
+
+ n bits   m  ell  recovered    sv/pv    |sv[d]|  sv==n*e_d
+     64  20    8       True    0.182 18446744073709551616       True
+     64  40    4       True    0.141 18446744073709551616       True
+    128  40    8       True    0.158 340282366920938463463374607431768211456       True
+    128  60    4      False    0.112 340282366920938463463374607431768211456       True
+
+------------------------------------------------------------------------------
+EXP E6: is the K1 wall information-theoretic?
+------------------------------------------------------------------------------
+Counting argument.  Candidates for (d, k2_1..k2_m) number n * K2^m; each
+forces k1_i = A_i + B_i d - lam k2_i mod n to land in [0,K1), which for a
+random candidate happens with probability (K1/n)^m.  Expected number of
+spurious solutions is therefore
+    N_spur = n * (K1*K2/n)^m = n * eff^m,
+so the solution is information-theoretically unique iff
+    m * log2(1/eff) > log2(n)      [surplus = LHS - RHS, in bits].
+If the observed wall sits at a K1 where the surplus is still large and
+positive, the wall is NOT information-theoretic.
+
+curve                m  K1     eff  bits needed  bits avail   surplus      N_spur     A     D     E
+12-bit/2557          8   2   0.039        11.38       37.41    +26.03    1.46e-08   5/5   5/5   5/5
+12-bit/2557          8   3   0.059        11.38       32.73    +21.35    3.73e-07   5/5   5/5   5/5
+12-bit/2557          8   4   0.078        11.38       29.41    +18.03    3.73e-06   5/5   5/5   5/5
+12-bit/2557          8   6   0.117        11.38       24.73    +13.35    9.55e-05   5/5   5/5   5/5
+12-bit/2557          8   8   0.156        11.38       21.41    +10.03    9.54e-04   5/5   5/5   5/5
+12-bit/2557          8  12   0.235        11.38       16.73     +5.35    2.45e-02   1/5   1/5   1/5
+12-bit/2557          8  16   0.313        11.38       13.41     +2.03    2.44e-01   0/5   0/5   0/5
+12-bit/2557          8  24   0.469        11.38        8.73     -2.65    6.26e+00   0/5   0/5   0/5
+
+12-bit/2677 FAIL    10   2   0.039        11.37       46.70    +35.33    2.32e-11   5/5   5/5   5/5
+12-bit/2677 FAIL    10   3   0.059        11.37       40.85    +29.48    1.34e-09   5/5   5/5   5/5
+12-bit/2677 FAIL    10   4   0.079        11.37       36.70    +25.33    2.38e-08   5/5   5/5   5/5
+12-bit/2677 FAIL    10   6   0.118        11.37       30.85    +19.48    1.37e-06   0/5   2/5   4/5
+12-bit/2677 FAIL    10   8   0.157        11.37       26.70    +15.33    2.43e-05   0/5   0/5   0/5
+12-bit/2677 FAIL    10  12   0.236        11.37       20.85     +9.48    1.40e-03   0/5   0/5   0/5
+12-bit/2677 FAIL    10  16   0.314        11.37       16.70     +5.33    2.49e-02   0/5   0/5   1/5
+12-bit/2677 FAIL    10  24   0.471        11.37       10.85     -0.52    1.44e+00   0/5   0/5   0/5
+
+------------------------------------------------------------------------------
+EXP E7: does over-determination rescue the d-free variants at the wall?
+------------------------------------------------------------------------------
+T4b (2026-07-29) found variant A at K1=8 is not rescued by more data
+(m = 8/12/16/24/32 -> 0,0,1,0,1 of 5).  E6 shows the surplus at K1=8 is
+already huge, so if D or E scale with m the loss is in the lattice, not
+in the information.  Exact CVP is capped at dim 40; Babai beyond.
+
+12-bit/2677 FAIL (n=2647, lam*=0.0699), K1=8, eff=0.157
+   m  surplus(bits)      A      D      E   sv/pv D
+   8           10.0    0/5    2/5    2/5     0.796
+  12           20.7    0/5    0/5    0/5     0.704
+  16           31.3    1/5    1/5    2/5     0.607
+  24           52.7    0/5    2/5    0/5     0.515
+  32           74.1    1/5    0/5    0/5     0.451
+
+------------------------------------------------------------------------------
+EXP E8: Bleichenbacher bias of the GLV nonce -- the complementary method
+------------------------------------------------------------------------------
+E6/E7 show the leak is only log2(1/eff) = log2(sqrt(n)/K1) ~ 2.7 bits per
+signature and that the lattice loses ground as 1/sqrt(m).  The classical
+remedy in the few-bits regime is Bleichenbacher's FFT/bias method, which
+needs no lattice at all.  Its figure of merit is the nonce bias
+    B(K) = E[exp(2*pi*i*k/n)],  k = k1 + lam*k2 mod n.
+Because k1 and k2 are independent this factors exactly:
+    B = D(1, K1) * D(lam, K2),   D(c,K) = (1/K) * sum_{j<K} e^{2pi i c j/n}
+             |D(c,K)| = |sin(pi*c*K/n)| / (K*|sin(pi*c/n)|).
+The ENVELOPE of |D(lam,K2)| is 1/(K2*sin(pi*lam*)), which grows as
+lam* -> 0 -- exactly the regime where the lattice attack dies.  That
+suggests an anti-correlation; E9 tests it and refutes it.
+
+curve                 lam*  K1   K2  |D(1,K1)|  |D(lam,K2)|  |B| closed  |B| direct   M~1/|B|^2  LLL A
+8-bit/199           0.4673   2   15     0.9999       0.0021      0.0021      0.0021    223460.3    5/5
+12-bit/2557         0.3400   8   52     1.0000       0.0186      0.0186      0.0186      2899.0    5/5
+12-bit/2677 FAIL    0.0699   8   52     1.0000       0.0805      0.0805      0.0805       154.1    0/5
+
+Bias vs lam* at fixed K1=8, K2=sqrt(n), for the two 12-bit moduli:
+     n    lam*       |B|   M~1/|B|^2
+  2659   0.005    0.8970         1.2
+  2659   0.010    0.6006         2.8
+  2659   0.020    0.0351       809.8
+  2659   0.050    0.1168        73.4
+  2659   0.070    0.0801       155.8
+  2659   0.150    0.0246      1656.2
+  2659   0.250    0.0004   5734958.5
+  2659   0.340    0.0186      2899.0
+  2659   0.450    0.0187      2867.4
+
+CAUTION: |B| is NOT monotone in lam*.  Only its ENVELOPE
+1/(K2*sin(pi*lam*)) decreases; the numerator |sin(pi*lam**K2)| oscillates
+with period ~1/K2 in lam*, so |B| has near-zeros (see lam*=0.25 above,
+|B|=0.0004).  The three historical curves happen to line up with the
+anti-correlation (|B| = 0.0021 / 0.0186 / 0.0805 against LLL 5/5, 5/5,
+0/5), but that is 3 points against an oscillating function -- exactly the
+shape of the lam/n error made on 2026-07-26.  E9 tests it properly.
+
+------------------------------------------------------------------------------
+EXP E9: falsifier for E8 -- does |B| predict LLL failure at fixed eff?
+------------------------------------------------------------------------------
+Everything held fixed (n=2647, m=10, K1=8, K2=52, so eff and the
+information surplus are constant); only lam varies, over 40 values.
+For the HNP/lattice structure lam may be ANY residue -- the GLV
+eigenvalue condition lam^2+lam+1=0 matters only for realisability of
+such nonces by an implementation, not for the lattice geometry.
+If |B| separates LLL successes from failures here, E8's anti-correlation
+is real; if not, it is another 3-point coincidence.
+
+   lam    lam*       |B|     A     D      lam    lam*       |B|     A     D
+     1  0.0004   0.99935   5/5   5/5      662  0.2501   0.00042   5/5   5/5
+    34  0.0128   0.41188   0/5   1/5      695  0.2626   0.02321   0/5   0/5
+    67  0.0253   0.20284   5/5   5/5      728  0.2750   0.02053   5/5   5/5
+   100  0.0378   0.01808   3/5   3/5      762  0.2879   0.00235   5/5   5/5
+   133  0.0502   0.11474   2/5   2/5      795  0.3003   0.02215   5/5   5/5
+   166  0.0627   0.07184   5/5   5/5      828  0.3128   0.01714   2/5   2/5
+   199  0.0752   0.02309   0/5   0/5      861  0.3253   0.00600   5/5   5/5
+   232  0.0876   0.06958   4/5   4/5      894  0.3377   0.02161   1/5   1/5
+   265  0.1001   0.03746   5/5   5/5      927  0.3502   0.01327   4/5   4/5
+   298  0.1126   0.02456   1/5   1/5      960  0.3627   0.00907   0/5   0/5
+   331  0.1250   0.05023   5/5   5/5      993  0.3751   0.02081   5/5   5/5
+   364  0.1375   0.02095   4/5   3/5     1026  0.3876   0.00963   0/5   0/5
+   398  0.1504   0.02280   0/5   0/5     1059  0.4001   0.01168   5/5   5/5
+   431  0.1628   0.03907   5/5   5/5     1092  0.4125   0.01976   0/5   0/5
+   464  0.1753   0.01301   1/5   1/5     1125  0.4250   0.00614   5/5   5/5
+   497  0.1878   0.02339   4/5   5/5     1159  0.4379   0.01304   0/5   0/5
+   530  0.2002   0.03144   5/5   5/5     1192  0.4503   0.01880   0/5   1/5
+   563  0.2127   0.00582   5/5   5/5     1225  0.4628   0.00393   0/5   0/5
+   596  0.2252   0.02348   2/5   0/5     1258  0.4753   0.01512   1/5   2/5
+   629  0.2376   0.02549   0/5   0/5     1291  0.4877   0.01745   5/5   5/5
+
+variant A: 29/40 lam values with >=1/5 recovery; majority baseline 0.725
+  AUC(|B|  predicts total failure) = 0.445
+  AUC(lam* predicts total failure) = 0.357   (sign: small lam* -> failure)
+  Spearman(|B|,  wins) = +0.052
+  Spearman(lam*, wins) = -0.159
+
+variant D: 30/40 lam values with >=1/5 recovery; majority baseline 0.750
+  AUC(|B|  predicts total failure) = 0.417
+  AUC(lam* predicts total failure) = 0.347   (sign: small lam* -> failure)
+  Spearman(|B|,  wins) = +0.066
+  Spearman(lam*, wins) = -0.156
+
+==============================================================================
+done
+==============================================================================

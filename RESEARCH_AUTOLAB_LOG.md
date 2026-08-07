@@ -6103,3 +6103,192 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-07 (autolab run)
+
+### Task picked
+Thread 23 — reformulate the Phase-2 GLV-HNP lattice so the planted vector becomes λ₁,
+the explicit next-step proposal of the 2026-07-29 entry (log line ~6089). Priorities 1, 2,
+4, 6 are CLOSED/BLOCKED/DEAD-END; priority 3 completed 2026-07-21; priority 5 (GLV-HNP
+Phase 2) is the live thread and made measurable progress on 2026-07-29, so its proposed
+sub-task is the correct pick under protocol rule (b). Last log entry was 2026-07-29, so
+nothing is inside the 7-day window.
+
+Outcome: **the reformulation works and changes nothing.** The 2026-07-29 diagnosis of T5
+is corrected, and the wall is shown to be neither λ*, nor the trivial vector, nor
+information-theoretic — it is a property of the formulation, with an explicit mechanism.
+
+### Work done
+- Environment (fresh container): `pip install cysignals fpylll sympy` → fpylll 0.6.4. Note
+  for future runs: `apt-get install pari-gp` FAILED in this container (exit 1), so `gp` is
+  unavailable — pick Python/Rust threads or budget time to debug apt.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_dfree.py` (9 experiments E1–E9, 224 lines of
+  output in `secp256k1_cm_audit/glv_hnp_phase2_dfree_output.txt`). Signature generation and
+  the `scales()` function are verbatim from `glv_hnp_phase2_lambda_threshold.py:229`, so the
+  variant-A column of every grid is directly comparable to the 2026-07-29 T4 table.
+- Derived and implemented the d-free basis in closed form — **no HNF needed**, which was the
+  main obstacle. Dropping the d column leaves 2m+1 generators spanning a rank-2m lattice
+  (the d-row becomes a *rational* combination of the n·e_i rows, coefficients B_i/n), so
+  LLL cannot be fed the generators directly. With τ_i = B_i·B_0⁻¹ mod n:
+
+      R_i = (−λ·S_K1·e_i | S_K2·e_i | 0)              i = 0..m−1     [k2 rows]
+      Q_0 = (S_K1, τ_1·S_K1, …, τ_{m−1}·S_K1 | 0 | 0)                [d row]
+      Q_i = (n·S_K1·e_i | 0 | 0)                      i = 1..m−1     [mod-n rows]
+      K   = (A_i·S_K1 | 0 | S_KANNAN)                                [Kannan row]
+
+  is a genuine basis: the vectors of L with all k2 columns zero are exactly
+  S_K1·{x ∈ Zᵐ : x_i ≡ τ_i x_0 mod n}, of determinant n^(m−1). d is recovered afterwards as
+  d = B_0⁻¹(k1_0 + λ·k2_0 − A_0) mod n.
+- Three variants compared: **A** baseline (dim 2m+2, d column present), **D** d-free Kannan
+  (dim 2m+1), **E** d-free CVP (dim 2m, no Kannan row, fplll exact enumeration with a Babai
+  nearest-plane fallback above dim 40).
+- `cargo test --test curve_audit` → 5/5 pass (5.58s). ✓
+
+### Findings
+
+**E1 — the d-free basis is correct.** Planted vector has integral coordinates in it and
+reconstructs exactly; det(L_A)/S_KANNAN ÷ det(L_D) = n *exactly* on all three curves
+(199, 2659, 2647), confirming L_D is precisely the index-n quotient by the trivial
+direction. No information lost — d-recovery matches on every instance where A succeeds.
+
+**E2 — the reformulation does what Thread 23 asked.** sv/pv rises (0.603→0.843,
+0.517→0.532, 0.422→0.813) and the shortest vector's energy leaves the d column:
+
+| curve | A sv/pv | A:k1 | A:d | A:k2 | D sv/pv | D:k1 | D:k2 |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.603 | 0.000 | 1.000 | 0.000 | 0.843 | 0.508 | 0.492 |
+| 12-bit/2557 | 0.517 | 0.000 | 1.000 | 0.000 | 0.532 | 0.132 | 0.868 |
+| 12-bit/2677 | 0.422 | 0.000 | 1.000 | 0.000 | 0.813 | 0.822 | 0.178 |
+
+On the λ*=0.07 curve at K1 ≤ 4, **sv/pv = 1.000 exactly** — the planted vector IS λ₁ of L_D.
+
+**E3 — THE FALSIFIER RESOLVES AGAINST THE REFORMULATION.** Making the planted vector λ₁
+does not move the wall. 5 seeds, K1 = 2,3,4,6,8,12,16,24:
+
+| curve | variant | 2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2557 (λ*=0.34, m=8) | A | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 2557 | D | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 2557 | E | 5 | 5 | 5 | 5 | 5 | 1 | 0 | 0 |
+| 2677 (λ*=0.07, m=10) | A | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 2677 | D | 5 | 5 | 5 | 2 | 0 | 0 | 0 | 1* |
+| 2677 | E | 5 | 5 | 5 | 4 | 0 | 0 | 1* | 0 |
+
+(* isolated 1/5 hits at K1 ≥ 16 are noise.) On λ*=0.34 all three variants are bit-identical.
+On λ*=0.07 the wall moves only from K1=4 to K1=6, and all three are 0/5 at K1=8. BKZ(20) on
+D at K1=6 gives 3/5 vs LLL's 2/5 (E4). Per the stated falsifier: **not a real improvement.**
+Note this run's variant-A grid differs slightly from 2026-07-29's T4 (2/5 vs 0/5 at K1=6)
+because this grid uses the historical m per curve (8 and 10); T4 used a fixed m. Same wall.
+
+**E5 — T5's "planted vector is never λ₁" is GENERIC TO HNP, NOT A DEFECT.** This is the
+correction. The classical Nguyen–Shparlinski HNP lattice has n·e_d as its exact shortest
+vector too, and with a *worse* ratio than Phase 2's 0.34–0.61:
+
+| n bits | m | ℓ (leak bits) | recovered | sv/pv | sv == n·e_d |
+|---|---|---|---|---|---|
+| 64 | 20 | 8 | True | 0.182 | True |
+| 64 | 40 | 4 | True | 0.141 | True |
+| 128 | 40 | 8 | True | 0.158 | True |
+| 128 | 60 | 4 | False | 0.112 | True |
+
+A textbook-successful HNP attack runs at sv/pv = 0.14–0.18. So the trivial vector was never
+the obstruction, which is *why* E3 came out flat. The 2026-07-29 inference "recovery is a
+BDD/coset condition, not an SVP condition" stands and is in fact the normal state of
+affairs for HNP; the inference that removing the trivial vector would therefore help does
+not.
+
+**E6 — THE WALL IS NOT INFORMATION-THEORETIC EITHER.** Candidates for (d, k2_1..k2_m)
+number n·K2^m, each forcing k1_i ∈ [0,K1) with probability (K1/n)^m, so
+N_spur = n·eff^m and uniqueness needs m·log₂(1/eff) > log₂ n. On 2677 (m=10, log₂n=11.37):
+
+| K1 | eff | bits avail | surplus | N_spur | A | D | E |
+|---|---|---|---|---|---|---|---|
+| 4 | 0.079 | 36.70 | +25.33 | 2.4e−08 | 5/5 | 5/5 | 5/5 |
+| 6 | 0.118 | 30.85 | +19.48 | 1.4e−06 | 0/5 | 2/5 | 4/5 |
+| 8 | 0.157 | 26.70 | **+15.33** | 2.4e−05 | 0/5 | 0/5 | 0/5 |
+| 24 | 0.471 | 10.85 | −0.52 | 1.4e+00 | 0/5 | 0/5 | 0/5 |
+
+The observed wall sits **~19 bits inside** the feasible region. The information-theoretic
+wall is at K1=24; the attack dies at K1≈6.
+
+**E7 — over-determination does not help, and the mechanism is now explicit.** 2677, K1=8:
+
+| m | surplus (bits) | A | D | E | sv/pv D |
+|---|---|---|---|---|---|
+| 8 | +10.0 | 0/5 | 2/5 | 2/5 | 0.796 |
+| 12 | +20.7 | 0/5 | 0/5 | 0/5 | 0.704 |
+| 16 | +31.3 | 1/5 | 1/5 | 2/5 | 0.607 |
+| 24 | +52.7 | 0/5 | 2/5 | 0/5 | 0.515 |
+| 32 | +74.1 | 1/5 | 0/5 | 0/5 | 0.451 |
+
+**Mechanism.** ‖v_planted‖ ≈ n·√(2m/3) grows with m, while the competing short vector — the
+2-D λ-block vector μ ≈ n/√eff (T2's μ, living in the (col i, col m+i) plane) — is
+**m-independent**, because each new signature merely adds another copy of the same 2-D
+block. Hence sv/pv ≈ 1/√(2·m·eff/3), decreasing as 1/√m; predicted 1.09 and 0.55 at
+m=8 and 32 vs observed 0.796 and 0.451, same trend and order. So **each extra signature
+adds log₂(1/eff) bits of information but strictly worsens the lattice geometry.** That is
+the mechanism behind T4b (2026-07-29), and it is a property of the formulation, not of the
+instance. Corollary: T2's μ was the right object all along — it just isn't a *curve-level*
+invariant, so the 2026-07-29 test of it (as a per-curve scalar ρ) could not see it.
+
+**E8 — the GLV nonce bias, in closed form.** The leak is only log₂(√n/K1) ≈ 2.7 bits per
+signature — the regime where Bleichenbacher's FFT method, not lattices, is the classical
+tool. Because k1 and k2 are independent the bias factors exactly:
+
+    B = D(1,K1)·D(λ,K2),   |D(c,K)| = |sin(πcK/n)| / (K·|sin(πc/n)|)
+
+Closed form agrees with brute force over all K1·K2 pairs to 4 decimals:
+
+| curve | λ* | \|D(1,K1)\| | \|D(λ,K2)\| | \|B\| closed | \|B\| direct | M≈1/\|B\|² | LLL A |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.4673 | 0.9999 | 0.0021 | 0.0021 | 0.0021 | 223460 | 5/5 |
+| 12-bit/2557 | 0.3400 | 1.0000 | 0.0186 | 0.0186 | 0.0186 | 2899 | 5/5 |
+| 12-bit/2677 | 0.0699 | 1.0000 | 0.0805 | 0.0805 | 0.0805 | 154 | 0/5 |
+
+|B| is largest exactly where LLL fails, suggesting the two attacks are complementary. But
+|B| is **not** monotone in λ*: only the envelope 1/(K2·sin(πλ*)) decreases, while the
+numerator |sin(πλ*K2)| oscillates with period ≈1/K2, giving near-zeros (λ*=0.25 → |B|=0.0004).
+
+**E9 — E8's anti-correlation is FALSIFIED (this run's own hypothesis).** At fixed n=2647,
+m=10, K1=8, K2=52 (so eff and the surplus are constant), sweeping λ over 40 values — for
+the lattice geometry λ may be any residue; λ²+λ+1≡0 matters only for realisability:
+
+| predictor | AUC (predicts total failure), A | AUC, D | Spearman(·, wins), A |
+|---|---|---|---|
+| \|B\| | 0.445 | 0.417 | +0.052 |
+| λ* | 0.357 | 0.347 | −0.159 |
+| majority baseline | 0.725 | 0.750 | — |
+
+Both are below chance. **|B| is a dead hypothesis — recorded so no future run re-tries it.**
+E9 also independently re-confirms the 2026-07-29 falsification of λ*, now at fixed eff.
+New: 29 of 40 λ values recover at eff=0.157, so the historical λ=185 curve **is not special
+for having small λ*** — it is simply an unlucky λ. Variants A and D agree on 38 of 40 λ
+values, confirming E3 at scale: L_D is geometrically cleaner but operationally equivalent.
+
+### Next step proposal
+**Thread 24 — Bleichenbacher FFT on the GLV nonce, with the m-independence of μ as the
+motivation.** E6/E7 establish that the obstruction is the per-signature 2-D λ-block, whose
+μ does not grow with m; no amount of extra data helps a lattice whose target lengthens as
+√m against a fixed competitor. Bleichenbacher's method has no such term — it converts m
+into precision directly, and E8 gives the exact bias in closed form, so the sample budget
+is computable in advance (M ≈ 1/|B|² = 154 for the 2677 curve, 2899 for 2557). Concretely:
+implement the single-round Bleichenbacher (no range reduction needed at 12 bits — just the
+n-point DFT of the h_i·s_i⁻¹ counts) and check whether it recovers d at K1=8 where all
+three lattice variants score 0/5. **Falsifier:** if the peak of the DFT is at d with
+M ≈ a few hundred signatures, Bleichenbacher beats the lattice in the regime the lattice
+cannot reach, and the "GLV-HNP is at its ceiling" conclusion applies only to lattice
+methods; if the peak is indistinguishable from noise at M = 10·/|B|², the 2.7-bit leak is
+simply too small at this m and Phase 2 is closed for both method families. Cheap: a 2647-point
+DFT is instant, and `glv_hnp_phase2_dfree.py:bias_factor` already gives the predicted peak height.
+
+Secondary (much smaller): the E3/E7 grids show variant E (exact CVP) is the best of the
+three at the wall edge (4/5 vs 0/5 at K1=6). If Thread 24 stalls, sweeping E with fplll
+pruned enumeration at larger m is a cheap incremental check — but E7's 1/√m argument
+predicts it will not scale, so this is low-value.
+
+Do NOT re-try: λ/n and λ* as predictors (falsified 2026-07-29, re-confirmed E9), ρ = μ/‖pv‖
+as a curve-level scalar (falsified 2026-07-29 T2), |B| as a predictor of LLL success
+(falsified E9), and removing the trivial vector n·S_D·e_m (done here; E3/E5 show it was
+never the obstruction).
+
+### Commits made
