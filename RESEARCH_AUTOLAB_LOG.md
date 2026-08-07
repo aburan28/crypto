@@ -6538,3 +6538,122 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step from this morning's Thread 24 entry (`942c8a4`).
+Priorities 1 (P-521, CLOSED), 2 (CHLRS, BLOCKED for F_p), 3 (Howe gluing,
+completed 2026-07-21), 4 (cross-curve LLL, DEAD END), 6 (B5, extended and
+quiescent) all remain closed/blocked/dead-end. Priority 5 (GLV-HNP Phase 2)
+had measurable progress in run #2 today (Thread 24: H24 argmax clause
+falsified, W5/W6 showed NU and nu_hat*sqrt(eff) are uncorrelated at fixed
+eff), so protocol rule (b) applies and Thread 25 is the direct continuation.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`, reusing the exact
+  17-bit / 5-eff-stratum / 5-seed data collection from
+  `glv_hnp_phase2_gsprofile_strat.py` (500 instances, dim 24, float GS),
+  adding: (a) the H25 test — AUC(-mu -> recovery) restricted to the
+  ambiguous NU band [1.040, 2.199] identified by W4; (b) the W1b follow-up —
+  `step = log2(||b*_{m+1}||) - log2(||b*_1||)`, tested standalone and inside
+  the band.
+- Added `--dump-json` to both `glv_hnp_phase2_gsprofile_strat.py` and the
+  new script (per the Thread 24 next-step proposal), so the 500-row table
+  survives the run without re-running the lattice/LLL pipeline.
+- Environment: fresh container, `pip install sympy fpylll cysignals` (fourth
+  run in a row needing this; `cysignals` is not pulled in by `fpylll`, same
+  note as 2026-07-29/08-06/08-07#2).
+- Verified `glv_hnp_phase2_gsprofile_strat.py --dump-json` still reproduces
+  the exact W5/W6 numbers from run #2 (AUC nu_hat 0.4242/0.7484/0.8813/
+  0.9337/0.8816, AUC(-nu_hat*sqrt(eff)) pooled = 0.9348) — the json-dump
+  addition did not perturb the pipeline.
+- `cargo test --test curve_audit`: 5/5 pass (no Rust files touched).
+
+### Findings
+
+**H25 literal test (raw mu) — FALSIFIED at the pooled level, but for the
+same reason W3's closed form failed.** Inside the ambiguous NU band
+(366/500 instances, 97 recover / 269 fail):
+
+```
+  AUC(-mu     -> recovery) = 0.6932   (H25 threshold 0.80, NOT met)
+  AUC(-nu_hat -> recovery) = 0.8403   (H25 threshold 0.80, MET)
+  AUC(-lam*   -> recovery) = 0.3212   (control, inverted as expected)
+```
+
+Per-eff-stratum, band-only, mu and nu_hat are nearly identical and both
+clear 0.86-0.94 in every non-degenerate stratum:
+
+```
+  eff  N_band     rec   AUC mu  AUC nu_hat  AUC +step
+ 0.05      24   23/24   0.4565     0.4565      0.4783   (degenerate: 23/24 recover)
+ 0.10      83   26/83   0.8819     0.8853      0.8671
+ 0.15      96   21/96   0.8889     0.8825      0.8870
+ 0.20      89   18/89   0.9276     0.9425      0.9343
+ 0.25      74    9/74   0.8615     0.8615      0.8821
+```
+
+**Diagnosis: raw mu carries an eff-driven scale confound that the pooled
+AUC punishes; nu_hat's `/sqrt(det L2)` normalization removes exactly that
+confound.** This is the same effect W5/W6 already documented for mu vs
+nu_hat outside the NU band — det(L2) = n*S_K1*S_K2 scales with eff (S_K1
+depends on K1 = eff*n/K2), so raw mu is not comparable across eff strata
+even though its *within-stratum* ranking is excellent. **Revised H25: nu_hat
+(not raw mu) is a genuine second coordinate inside the NU-ambiguous band,
+and holds both pooled (0.8403) and per-stratum (0.86-0.94).** The (NU,
+nu_hat) pair is therefore the right 2-parameter viability test, confirming
+the Thread 25 proposal's spirit while correcting its literal statistic.
+
+**W1b follow-up — the GS-profile step is a real predictor, with sign
+opposite to mu/NU/nu_hat.** Pooled AUC(-step) = 0.3286, i.e. AUC(+step) =
+0.6714: step is POSITIVELY correlated with recovery (large step => easier),
+not negatively like mu/NU. Inside the NU band, +step performs on par with
+mu/nu_hat (0.87-0.93 in every non-degenerate stratum) but is redundant with
+them: Spearman(step, mu) = -0.6627 pooled (strong), vs Spearman(step, NU) =
++0.1351 (weak). Mean step splits cleanly by outcome at every non-degenerate
+eff (e.g. eff=0.15: step|recover = +0.658, step|fail = -0.312) — the "step
+vanishes/inverts at the wall" reading from W1b is directionally correct, but
+step is not a *new* mechanism, it is mu's information read off the profile
+shape instead of computed directly from lambda_1(L2).
+
+**Net result of Thread 24+25:** three quantities are now placed on one
+map. NU (exact BDD certificate) is sound but degrades from AUC 0.978 (12
+bit) to 0.860 (17 bit) as a *ranker*, though it stays a zero-FP
+*certificate* below 1.04. nu_hat (closed-form, no lattice work) is a
+genuine second, NU-independent coordinate that recovers most of NU's power
+even conditioned on NU (0.84 in-band). step (read directly off the GS
+profile, also no extra computation beyond the GS already needed for NU) is
+redundant with nu_hat/mu, not a third independent axis.
+
+### Next step proposal
+
+**Thread 26 — fit and test the joint (NU, nu_hat) decision rule out of
+sample.** The natural next step is a simple logistic/threshold rule on
+(log NU, log nu_hat) fit on the existing 500-row 17-bit table, then
+evaluated on a *fresh* batch of curves (not the 20 curves used for fitting)
+to check it isn't overfit to this specific curve sample. Concretely:
+1. Fit `logit(recover) ~ a*log(NU) + b*log(nu_hat) + c` on the dumped
+   `strat_rows.json`.
+2. Draw 10-20 new 17-bit curves via `search_curves` with a different bin
+   seed / p range, regenerate the same 5-eff x 5-seed grid, and report
+   held-out AUC and accuracy of the fitted rule vs. NU alone and nu_hat
+   alone.
+3. If held-out AUC clears ~0.90 with both terms but drops when either term
+   is dropped, that's the strongest evidence yet that Phase 2 recovery is
+   governed by a genuine 2D certificate rather than a single statistic.
+Cost: ~10-15 min (curve search + grid regeneration dominates; fitting is
+free). No new infrastructure needed beyond `--dump-json` output already in
+place from this run.
+
+Secondary (lower priority, unchanged from Thread 24): BKZ-beta sweep
+against NU, to quantify how far above NU ~ 1.87-2.20 blockwise reduction
+pushes the threshold — still not executed in any Thread 20-25 run.
+
+### Commits made
+
+(pending — recorded in the follow-up log-hash commit, per existing autolab
+convention.)
