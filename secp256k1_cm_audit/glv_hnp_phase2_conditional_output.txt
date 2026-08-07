@@ -1,0 +1,115 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE an NU band?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+dumped 500 rows -> glv_hnp_phase2_conditional_rows.json
+
+overall recovery 190/500
+
+------------------------------------------------------------------------------
+EXP W8: the ambiguous band.  NU in [1.040, 2.199] is exactly where
+        nearest-plane gives no answer.  Does anything else speak?
+------------------------------------------------------------------------------
+
+band occupancy 366/500   recovery 97/366
+
+       score  AUC in band   AUC all   note
+          mu       0.6932    0.3964   H25 target: >= 0.80 confirms a 2nd coordinate
+       nuhat       0.8403    0.6889   size-free mu
+        step       0.8197    0.6714   W1b: larger step -> recovery
+          NU       0.5656    0.7996   residual power of NU inside its own band
+         eff       0.7056    0.8465   CONTROL: band may just re-select bias strength
+     lamstar       0.3212    0.3829   CONTROL: falsified by Thread 20
+
+------------------------------------------------------------------------------
+EXP W8b: same, but WITHIN each eff stratum, so the band cannot be
+         re-selecting bias strength.
+------------------------------------------------------------------------------
+
+  eff  N band      rec |   AUC mu  AUC step   AUC NU  AUC lam*
+ 0.05      24    23/24 |   0.4565    0.4783   0.4783    0.3696
+ 0.10      83    26/83 |   0.8819    0.8671   0.5277    0.3711
+ 0.15      96    21/96 |   0.8889    0.8870   0.3283    0.2546
+ 0.20      89    18/89 |   0.9276    0.9343   0.4695    0.1827
+ 0.25      74     9/74 |   0.8615    0.8821   0.6188    0.1709
+
+------------------------------------------------------------------------------
+EXP W9: `step` as a predictor in its own right, per stratum.
+        step = log2||b*_{m+1}|| - log2||b*_1||,  m = 12
+------------------------------------------------------------------------------
+
+  eff     N      rec |  AUC step   AUC mu   AUC NU |   step|ok   step|no
+ 0.05   100   99/100 |    0.3636   0.4242   0.8687 |    -0.006    -0.238
+ 0.10   100   42/100 |    0.7734   0.7443   0.7011 |     0.361    -0.359
+ 0.15   100   21/100 |    0.8861   0.8873   0.3496 |     0.658    -0.312
+ 0.20   100   19/100 |    0.9207   0.9175   0.5595 |     0.476    -0.262
+ 0.25   100    9/100 |    0.8938   0.8816   0.7277 |     0.355    -0.220
+
+rank correlations (pooled, N=500):
+  Spearman( step, NU ) = +0.1351
+  Spearman( step, mu ) = -0.6627
+  Spearman( step, eff) = +0.0193
+  Spearman(   mu, NU ) = -0.6452
+  Spearman(nuhat, NU ) = -0.1054
+
+------------------------------------------------------------------------------
+EXP W10: 2-parameter viability test.  Cross-validated (5-fold) AUC
+         of a logistic fit, vs each coordinate alone.
+------------------------------------------------------------------------------
+
+                  features   CV AUC   note
+                      (NU)   0.7991   NU alone
+                      (mu)   0.5977   mu alone
+                   (nuhat)   0.6681   nu_hat alone
+                  (NU, mu)   0.8560   the pair proposed by Thread 24
+               (NU, nuhat)   0.9376   size-free variant of the pair
+         (NU, nuhat, step)   0.9425   plus the GS step
+
+in-sample decision boundary on (log NU, log nu_hat), standardised features:
+  z = -1.1229 -3.0025*u1 -2.3381*u2   (recover when z > 0)
+  u1 = (log NU     - +0.3821) / 0.3537
+  u2 = (log nu_hat - -0.3031) / 0.2899
+  in-sample accuracy 0.8660  (base rate 0.6200)
+
+------------------------------------------------------------------------------
+EXP W14: the two coefficients above are nearly equal once the
+         standardisation is undone.  If the ratio is 1 the
+         boundary is not a fitted plane but the single product
+         PI = NU * nu_hat.
+------------------------------------------------------------------------------
+
+  z = -0.3237 -8.4891*log NU -8.0657*log nu_hat
+  exponent ratio c1/c2 = 1.0525     (1.0 => a pure product)
+  equal-exponent boundary:  PI = NU*nu_hat < 0.9616
+
+  AUC(-PI) pooled, N=500: 0.9395   [NU alone 0.7996, nu_hat alone 0.6889]
+  PI is threshold-free and unfitted, so this AUC is directly
+  comparable to the 5-fold CV numbers of W10.
+
+  fixed cut sweep (pooled):
+     cut   TP   FP   FN   TN     acc  Youden J
+    0.80  112    4   78  306  0.8360     0.577
+    0.90  140   22   50  288  0.8560     0.666
+    0.96  159   38   31  272  0.8620     0.714
+    1.00  162   47   28  263  0.8500     0.701
+    1.10  175   74   15  236  0.8220     0.682
+    1.20  183  110    7  200  0.7660     0.608
+
+  per-stratum, at the fixed cut PI < 0.96:
+    eff     N  AUC(-PI) |   TP   FP   FN   TN     acc
+   0.05   100    0.8384 |   88    1   11    0   0.880
+   0.10   100    0.9553 |   40   10    2   48   0.880
+   0.15   100    0.8668 |   17   16    4   63   0.800
+   0.20   100    0.9292 |   11    6    8   75   0.860
+   0.25   100    0.8852 |    3    5    6   86   0.890
+
+  CAVEAT: the exponent ratio and the cut are both read off THESE
+  500 rows.  The product FORM is the structural claim; the cut
+  value is in-sample and must be re-measured at another bit
+  length before it is quoted as a constant.
+
+==============================================================================
+done
+==============================================================================

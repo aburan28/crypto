@@ -6538,3 +6538,212 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6494).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is still the only live thread; Thread 24
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all,
+>        the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+**Verdict: H25 CONFIRMED, in the size-free form. mu is a genuine second
+coordinate — inside the band where the BDD certificate is at chance
+(AUC 0.33-0.62), mu holds AUC 0.86-0.93.** The literal pooled-mu reading of
+H25 fails (0.693 < 0.80) for a scale reason spelled out in W8, not a
+substantive one. The result that came out of the tertiary sub-task is bigger
+than the primary one: the fitted 2-parameter boundary has equal exponents, so
+the viability test is not a fitted plane but **a single unfitted product
+`PI = NU * nu_hat`, pooled AUC 0.9395 against 0.7996 for NU alone.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Fourth run in a row where
+  `cysignals` had to be named explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_conditional.py` — new (exp W8-W10, W14).
+  Rebuilds the Thread 24 W5 design exactly (same `search_curves(2^16, 2^17,
+  per_bin=2, nbins=10)` -> 20 curves, same 5 eff strata x 5 SEEDS, m=12,
+  dim 24, 500 instances, 2.3s) and adds: the `step` field, the `--dump-json`
+  flag Thread 24 asked for, a hand-rolled logistic fit with 5-fold CV, and the
+  product test. Output `glv_hnp_phase2_conditional_output.txt` (117 lines),
+  table `glv_hnp_phase2_conditional_rows.json` (500 rows, 207 KB) — committed
+  so future runs can re-analyse without recomputing.
+- `secp256k1_cm_audit/glv_hnp_phase2_step_threshold.py` — new (exp W11-W13),
+  pure re-analysis of the JSON, runs in <1s.
+- `cargo test --test curve_audit` -> 5/5 pass (5.47s). No Rust touched.
+
+### Findings
+
+**W8 — inside the band, NU is silent and nu_hat speaks.** Band
+`1.040 <= NU <= 2.199` holds 366/500 instances, 97 of which recover.
+
+```
+       score  AUC in band   AUC all   note
+          mu       0.6932    0.3964   literal H25 target
+       nuhat       0.8403    0.6889   size-free mu
+        step       0.8197    0.6714   larger step -> recovery
+          NU       0.5656    0.7996   residual, inside its own band
+         eff       0.7056    0.8465   CONTROL
+     lamstar       0.3212    0.3829   CONTROL (Thread 20)
+```
+
+NU drops 0.7996 -> 0.5656 inside its own band, i.e. the conditioning did what
+it was supposed to. **Raw mu must not be used pooled**: across strata it
+carries the `S_K1` scale, which is why pooled-over-everything it is
+*anti*-predictive (0.396). `nu_hat = mu/sqrt(det L2)` is the size-free version
+and is the correct pooled statistic — this is exactly the caveat Thread 24 W5
+flagged ("the sqrt(det) normalisation only matters across sizes") now biting.
+
+**W8b — the decisive table. eff FIXED *and* NU banded, so neither bias
+strength nor the certificate can be the source.**
+
+```
+  eff  N band      rec |   AUC mu  AUC step   AUC NU  AUC lam*
+ 0.05      24    23/24 |   0.4565    0.4783   0.4783    0.3696   (degenerate)
+ 0.10      83    26/83 |   0.8819    0.8671   0.5277    0.3711
+ 0.15      96    21/96 |   0.8889    0.8870   0.3283    0.2546
+ 0.20      89    18/89 |   0.9276    0.9343   0.4695    0.1827
+ 0.25      74     9/74 |   0.8615    0.8821   0.6188    0.1709
+```
+
+Four non-degenerate strata, mu at 0.86-0.93 while NU sits at chance. H25's
+threshold of 0.80 is cleared in every one. Within a stratum mu and nu_hat are
+the same statistic up to a constant, so this is the honest form of the claim.
+
+**W9/W13 — `step` is a reparametrisation of mu, not a third coordinate.**
+`step = log2||b*_{m+1}|| - log2||b*_1||` tracks mu almost exactly
+(Spearman -0.6627) and its per-stratum AUC is within 0.01 of mu's everywhere.
+The W1b head-block identity is a *near*-identity, one-sided:
+
+```
+  eff |  prof0/mu:  min   median      max   exact(1e-9)
+ 0.05 |           0.6487   1.0000   1.0000     67/100
+ 0.25 |           0.7543   1.0000   1.0000     70/100
+  ALL |           0.6487   1.0000   1.0000    344/500
+||b*_{m+1}|| / lambda_2(L2):  min 0.2790  median 0.4900  max 0.6700
+```
+
+`||b*_1|| == lambda_1(L2)` exactly in 69% of instances and is *never* larger —
+the m orthogonal copies of L2 embed in L0, so `lambda_1(L0) <= lambda_1(L2)`,
+with LLL occasionally finding something shorter outside the copies. (Thread 24
+W2 measured the analogous constant at the LAST index as 0.419; at index m+1 it
+is 0.490.) So step buys nothing: adding it to the pair moves CV AUC 0.9376 ->
+0.9425.
+
+**W11 — and sign(step) is NOT the absolute cut W1b hinted at.** The fixed rule
+`recover iff step > 0` collapses on the strong-bias stratum:
+
+```
+  eff     N      rec |   TP   FP   FN   TN |    acc    TPR
+ 0.05   100   99/100 |   24    0   75    1 |  0.250  0.242   <-- collapse
+ 0.15   100   21/100 |   15   13    6   66 |  0.810  0.714
+  ALL   500  190/500 |   80   53  110  257 |  0.674  0.421
+```
+
+W12: the Youden-optimal step cut wanders across zero (-0.227 to +0.516) while
+`nu_hat`'s stays in [0.484, 0.756] and beats step's J in 4 of 5 strata. Thread
+24 W7's "rank statistic, not a threshold" verdict survives, for step too.
+
+**W10 — the pair is the viability test, and the size-free variant is the one
+that works.** 5-fold CV AUC, logistic on log-features:
+
+```
+                  features   CV AUC
+                      (NU)   0.7991
+                      (mu)   0.5977
+                   (nuhat)   0.6681
+                  (NU, mu)   0.8560
+               (NU, nuhat)   0.9376   <-- deliverable
+         (NU, nuhat, step)   0.9425
+```
+
+**W14 — THE RESULT. The boundary has equal exponents, so it is a product.**
+Undoing the standardisation of the in-sample fit:
+
+```
+  z = -0.3237 -8.4891*log NU -8.0657*log nu_hat
+  exponent ratio c1/c2 = 1.0525          <-- within 5.3% of a pure product
+  equal-exponent boundary:  PI = NU*nu_hat < 0.9616
+```
+
+`PI = NU * nu_hat` needs no fit and no calibration set, and as a threshold-free
+score it *matches the fitted 2-feature CV number*:
+
+```
+  AUC(-PI) pooled, N=500: 0.9395     [NU alone 0.7996, nu_hat alone 0.6889]
+
+  per-stratum, at the fixed cut PI < 0.96:
+    eff     N  AUC(-PI) |   TP   FP   FN   TN     acc
+   0.05   100    0.8384 |   88    1   11    0   0.880
+   0.10   100    0.9553 |   40   10    2   48   0.880
+   0.15   100    0.8668 |   17   16    4   63   0.800
+   0.20   100    0.9292 |   11    6    8   75   0.860
+   0.25   100    0.8852 |    3    5    6   86   0.890
+```
+
+The fixed cut holds 0.80-0.89 accuracy in **every** stratum including the
+degenerate eff=0.05 one where step scored 0.250 and where NU's own Youden cut
+had to move from 1.16 to 1.99 to keep up. Pooled Youden J peaks at 0.717 at the
+cut, and the conservative end is clean: `PI < 0.80` gives 112 TP against 4 FP.
+
+**Interpretation.** Thread 24 ended with two uncorrelated predictors and no
+account of why both work. The product form supplies one. NU is the
+nearest-plane certificate — it measures whether the error vector is inside the
+GS box. nu_hat measures the *skew* of the lambda-block, i.e. how far the box is
+from cubic. A skewed box of the same volume is easier to hit, so the operative
+quantity is volume x shape, and a product of the two is exactly what
+"volume x shape" should look like. That the fitted exponents come out at
+1.00 : 0.95 rather than anything else is the evidence for the reading.
+
+**Caveat, stated plainly.** The exponent ratio and the cut 0.96 are both read
+off these same 500 rows. The *form* (a product, exponent ratio ~1) is the
+structural claim and is what should be tested next; the *value* 0.96 is
+in-sample and must not be quoted as a constant until it is re-measured at
+another bit length. The eff=0.05 stratum contributes 88 of the 159 TP at the
+cut and has only 1 negative, so it inflates pooled accuracy — read the
+per-stratum column, not the pooled one.
+
+### Next step proposal
+
+**Thread 26 — is the product exponent 1 a law or a 17-bit coincidence?**
+Pre-registered:
+
+>   H26: refit the W10 logistic at 12 bits and at 22 bits. The unstandardised
+>        exponent ratio c1/c2 stays in [0.85, 1.20] at both sizes, and the
+>        equal-exponent cut PI* stays within +-20% of 0.96.
+>   Falsifier: if c1/c2 drifts monotonically with bit length, PI is a 17-bit
+>        fit and the two-coordinate plane (not the product) is the real object.
+
+Concrete: `glv_hnp_phase2_conditional.py` is already parameterised by `M17`
+and the `search_curves` window; add a `--bits` flag, run at 12 (dim 20,
+reuses the Thread 23b grid) and 22, and compare three numbers. Cost ~15 min at
+12 bits; 22 bits needs a runtime check first — the 17-bit build was 2.3s for
+500 instances, but `run_new` cost grows with the lattice dimension. The
+JSON dumps make the comparison a re-analysis, so dump all three.
+
+Secondary: the cut's conservative end (`PI < 0.80` -> 112 TP / 4 FP) looks like
+it may be a *sound* certificate the way `NU <= 1` is (Thread 24 W4: 96 TP /
+0 FP over 410 instances). Test whether some `PI < c` achieves zero false
+positives, and if so whether that c is stable across the three bit lengths.
+If it is, Phase 2 gains a sufficient viability criterion that costs one 2D
+Gauss reduction plus one Babai pass, which is strictly cheaper than the
+Kannan-LLL it would be predicting.
+
+Tertiary (carried from Thread 23, still untouched): BKZ-beta sweep against NU,
+to quantify how far above the NU ~ 1.87-2.20 bracket blockwise reduction
+pushes the threshold.
+
+### Commits made
+
+(hash recorded below)
