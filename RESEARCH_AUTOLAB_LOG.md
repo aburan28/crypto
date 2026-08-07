@@ -6780,4 +6780,4 @@ and adds chi2 18 against the pair's 191/290. Closing it.
 
 ### Commits made
 
-(recorded below after commit)
+cf33569 autolab 2026-08-07 #3: Thread 25 — the Phase-2 viability statistic is the product NU*nu_hat
