@@ -1,0 +1,139 @@
+==============================================================================
+Thread 25 — is mu a second coordinate, or mediated by NU?
+==============================================================================
+loaded 1000 cached instances from glv_hnp_phase2_thread25_table.json
+
+1000 instances, 372 recover (37.2%), dim 24, 17 bits, m=12
+NU range 0.574 .. 3.549
+
+------------------------------------------------------------------------------
+EXP X1 (H25): AUC(-mu -> recovery) INSIDE NU bands.
+        NU is held (approximately) fixed, so any separation left
+        is a second mechanism.  AUC > 0.5 => smaller mu recovers.
+------------------------------------------------------------------------------
+band                                           N       rec |   AUC mu   AUC NU  AUC nuhat  AUC step
+NU < 1.040  (nearest-plane SUFFICIENT)       169   164/169 |   0.2689   0.9561     0.5311    0.4573
+1.040 <= NU <= 2.199  (AMBIGUOUS)            725   207/725 |   0.6635   0.5826     0.8142    0.1948
+NU > 2.199  (nearest-plane says nothing)     106     1/106 |   1.0000   1.0000     1.0000    0.0000
+
+finer: NU deciles (band edges from the data, not the bracket)
+ decile          NU range     N       rec |   AUC mu  AUC nuhat  AUC step
+      1       0.574-0.913   100   100/100 |  (degenerate)
+      2       0.916-1.081   100    89/100 |   0.3759     0.5618    0.4127
+      3       1.083-1.273   100    38/100 |   0.4215     0.6464    0.3807
+      4       1.277-1.452   100    19/100 |   0.6098     0.7515    0.2651
+      5       1.455-1.612   100    18/100 |   0.6372     0.7368    0.2175
+      6       1.613-1.765   100    29/100 |   0.8944     0.9075    0.0937
+      7       1.767-1.893   100    31/100 |   0.8530     0.9226    0.0832
+      8       1.893-2.028   100    31/100 |   0.9289     0.9790    0.0145
+      9       2.031-2.217   100    17/100 |   0.9072     0.9617    0.0347
+     10       2.219-3.549   100     0/100 |  (degenerate)
+
+------------------------------------------------------------------------------
+EXP X2: logistic fit on (log NU, log mu) and the nested-model
+        likelihood-ratio test.  LR = 2*(ll_full - ll_reduced),
+        chi2 with 1 df: 3.84 at p=0.05, 10.83 at p=0.001.
+------------------------------------------------------------------------------
+model            loglik     AUC     acc   coefficients
+NU only         -489.43  0.8016  0.7780   [+1.0506  -4.2016]
+mu only         -641.90  0.5959  0.7400   [-12.3657  +0.9998]
+nuhat only      -581.01  0.6935  0.7000   [-1.5132  -3.1344]
+NU + mu         -442.19  0.8557  0.7710   [+34.3702  -7.0802  -2.7314]
+NU + nuhat      -309.13  0.9353  0.8550   [-0.1629  -8.0906  -7.5749]
+
+LR(add log mu    to NU-only) =    94.48   (1 df)
+LR(add log NU    to mu-only) =   399.43   (1 df)
+LR(add log nuhat to NU-only) =   360.60   (1 df)
+LR(add log NU to nuhat-only) =   543.77   (1 df)
+
+decision boundary (p=0.5):  +34.3702 -7.0802*log NU -2.7314*log mu = 0
+  i.e.  log mu = +12.5834 -2.5921*log NU
+  i.e.  NU^-2.5921 * mu  =  2.917e+05   (recover below)
+
+------------------------------------------------------------------------------
+EXP X3: the W1b two-block step as a predictor.
+        step = log2||b*_{m+1}|| - log2||b*_1||;  W1b saw it vanish
+        exactly as the K1 wall is crossed.  AUC > 0.5 => SMALLER
+        step recovers, which is the sign W1b predicts.
+------------------------------------------------------------------------------
+  eff     N       rec |  AUC step   AUC NU   AUC mu |  mean step  rho(step,NU)
+ 0.05   200   196/200 |    0.3852   0.8508   0.6276 |    -0.0005        0.1140
+ 0.10   200    78/200 |    0.2318   0.6509   0.7470 |    -0.0517        0.1786
+ 0.15   200    42/200 |    0.0967   0.4168   0.8963 |    -0.0929        0.1961
+ 0.20   200    36/200 |    0.0637   0.5920   0.9302 |    -0.1324        0.0165
+ 0.25   200    20/200 |    0.1183   0.7375   0.8778 |    -0.1723       -0.1837
+
+pooled (N=1000):  AUC step = 0.3177   AUC NU = 0.8016   AUC mu = 0.4041
+pooled Spearman(step, NU) = +0.0866   Spearman(step, mu) = -0.6486
+
+------------------------------------------------------------------------------
+EXP X4: mediation control — is mu just a proxy for NU?
+        If Spearman(mu, NU) ~ 0 at fixed eff (Thread 24 W6) AND mu
+        separates inside NU bands (X1), the two are independent.
+------------------------------------------------------------------------------
+  eff     N |  rho(mu,NU)  rho(nuhat,NU)  rho(mu,nuhat)
+ 0.05   200 |     -0.1169        -0.1209         0.9970
+ 0.10   200 |     -0.2692        -0.2464         0.9925
+ 0.15   200 |     -0.1975        -0.1900         0.9970
+ 0.20   200 |      0.0032         0.0350         0.9955
+ 0.25   200 |      0.1815         0.1936         0.9985
+  ALL  1000 |     -0.6115        -0.0686         0.6863
+
+AUC(-mu) in each (eff, NU-band) cell.  '.' = degenerate cell.
+  eff |          NU<1.04        1.04-2.20          NU>2.20
+ 0.05 |     0.6547 (140)     0.6726 ( 59)          . (  1)
+ 0.10 |     0.5764 ( 27)     0.8314 (170)          . (  3)
+ 0.15 |          . (  1)     0.8946 (184)          . ( 15)
+ 0.20 |          . (  1)     0.9335 (165)          . ( 34)
+ 0.25 |          . (  0)     0.8583 (147)          . ( 53)
+
+------------------------------------------------------------------------------
+EXP X5: the X2 boundary has near-equal exponents in log NU and
+        log nuhat, i.e. it collapses to a PRODUCT criterion.
+        Test  P = NU * nuhat  directly, unfitted.
+------------------------------------------------------------------------------
+free fit   : -0.1629 -8.0906*log NU -7.5749*log nuhat      loglik -309.13
+  exponent ratio  beta_nuhat/beta_NU = 0.9363   (1.0000 => exact product)
+  boundary   NU * nuhat^0.9363 = 0.9801
+
+constrained (exponents forced equal):
+  -0.3394 -7.8940*log(NU*nuhat)      loglik -309.86   LR vs free = 1.47 (1 df)
+  fitted threshold  NU*nuhat = 0.9579
+
+  AUC(-NU*nuhat)          = 0.9350
+  AUC(-NU) alone          = 0.8016
+  AUC(-nuhat) alone       = 0.6935
+
+  confusion at the unfitted cut  NU*nuhat < 1:
+    TP  312  FP   89  FN   60  TN  539   acc 0.8510  precision 0.7781
+
+  P = NU*nuhat  |  success: min 0.3669  median 0.7786  max 1.9146
+                |  failure: min 0.5554  median 1.4019  max 3.4364
+  bracket : sufficient P < 0.5554 , necessary P > 1.9146
+
+  per-eff-stratum AUC(-P), eff held FIXED:
+    eff     N       rec    AUC P   AUC NU  AUC nuhat
+   0.05   200   196/200   0.8916   0.8508     0.6403
+   0.10   200    78/200   0.9180   0.6509     0.7491
+   0.15   200    42/200   0.8907   0.4168     0.8933
+   0.20   200    36/200   0.9392   0.5920     0.9438
+   0.25   200    20/200   0.8958   0.7375     0.8778
+
+------------------------------------------------------------------------------
+EXP X6: does `step` add anything to (NU, nuhat)?  The head of the
+        profile IS lambda_1(L2) (W1b), so step = log2||b*_{m+1}||
+        - log2(mu) is partly a reparametrisation of mu.
+------------------------------------------------------------------------------
+  loglik (NU, nuhat)        = -309.13
+  loglik (NU, nuhat, step)  = -284.47   LR = 49.31 (1 df; 3.84 at p=0.05)
+  coefficients: [+3.0495  -8.4264  +0.8108  +4.7775]
+
+  Spearman(step, log mu)  = -0.6486
+  Spearman(step, log nuhat) = -0.8784
+  step is monotone in eff (X3 mean column), and its zero crossing
+  is NOT the wall: mean step is ~0 in the EASIEST stratum here,
+  while W1b's 12-bit example had step ~0 in the HARDEST one.
+
+==============================================================================
+done
+==============================================================================

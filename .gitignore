@@ -18,3 +18,9 @@ research/ecdlp_autolab/phase22_rho_barrett
 __pycache__/
 *.pyc
 *.pyo
+
+# Thread 25 instance-table caches. Derived data: the seed lists and the grid
+# live in glv_hnp_phase2_thread25.py and the tables rebuild deterministically
+# in ~2s per size with --rebuild.
+secp256k1_cm_audit/glv_hnp_phase2_thread25_table.json
+secp256k1_cm_audit/glv_hnp_phase2_thread25_t*.json

@@ -6538,3 +6538,259 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6520).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread; Thread 24
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate and the pair (NU, mu) is the
+>   2-parameter viability test Phase 2 has been missing [...]. If no [...]
+>   the W5 result is a stratification artifact and the closed form should be
+>   retired.
+
+**Verdict: H25 holds, but only after the sqrt(det) normalisation — raw mu
+misses the bar (0.6635) and nu_hat = mu/sqrt(det L2) clears it (0.8142).**
+The deliverable came out cleaner than the pre-registration anticipated: the
+logistic boundary on (log NU, log nu_hat) has near-equal exponents, so it
+collapses to a **product criterion `P = NU * nu_hat < 1`** which is unfitted,
+dimensionless, and transports across a 8-bit range of n without refitting.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` had to be named explicitly.)
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new (exp X1-X6).
+  Rebuilds the Thread 24 W5 grid at 17 bits with the seed list DOUBLED
+  (5 eff strata x 20 curves x 10 seeds = 1000 instances, dim 24), adds the
+  W1b `step` column, dumps a JSON table (the `--dump-json` the Thread 24
+  entry asked for; here it is a transparent cache, `--rebuild` to force).
+  Also carries a small pure-python IRLS logistic fitter, so no sklearn.
+  Output: `glv_hnp_phase2_thread25_output.txt`.  Runtime 3.9s for the table.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25_xsize.py` — new. Re-measures
+  the criterion at 12/14/17/20 bits with dim held at 2m = 24 (500 instances
+  per size), refits the threshold independently per size, and does the
+  fit-on-one-size / score-the-others transfer test.
+  Output: `glv_hnp_phase2_thread25_xsize_output.txt`.
+- Ad-hoc check of the W1b head identity at dim 24 (inline, not committed;
+  reproduced by 3 lines against `instance()` — see Findings X7).
+- `cargo test --test curve_audit` -> 5/5 pass (3.94s). No Rust touched.
+- The instance-table JSONs are gitignored: derived data, deterministic seeds
+  in the script, ~2s per size to rebuild.
+
+### Findings
+
+**X1 — H25 holds for nu_hat, not for mu.** 1000 instances, 17 bits, dim 24.
+
+```
+band                                      N     rec | AUC mu  AUC NU  AUC nuhat  AUC step
+NU < 1.040   (nearest-plane SUFFICIENT)  169 164/169 | 0.2689  0.9561     0.5311    0.4573
+1.040 <= NU <= 2.199  (AMBIGUOUS)        725 207/725 | 0.6635  0.5826     0.8142    0.1948
+NU > 2.199                               106   1/106 | 1.0000  1.0000     1.0000    0.0000
+```
+
+Inside the ambiguous band NU itself is nearly useless (0.5826) — as it must
+be, that is what "ambiguous" means — while nu_hat scores 0.8142 and clears the
+pre-registered 0.8 bar. Raw mu gets 0.6635 and misses it. The gap is entirely
+the `sqrt(det L2)` normalisation: X4 shows Spearman(mu, nu_hat) = 0.993-0.999
+*within* an eff stratum but only 0.686 pooled, so mu is a rescaled nu_hat at
+fixed size and a different quantity across sizes. **Thread 24 W5's phrasing
+("the operative quantity is lambda_1(L2)") is correct only within a stratum;
+pooled, the normalised nu_hat is the one that survives.**
+
+NU deciles confirm this is not a band-width artifact — AUC(-nu_hat) climbs
+monotonically through the middle of the NU range and peaks where NU says
+least:
+
+```
+decile   NU range      rec    | AUC mu  AUC nuhat  AUC step
+   2   0.916-1.081   89/100   | 0.3759     0.5618    0.4127
+   4   1.277-1.452   19/100   | 0.6098     0.7515    0.2651
+   6   1.613-1.765   29/100   | 0.8944     0.9075    0.0937
+   8   1.893-2.028   31/100   | 0.9289     0.9790    0.0145
+   9   2.031-2.217   17/100   | 0.9072     0.9617    0.0347
+```
+
+**X2 — the two-parameter fit, and the sign flip that explains Thread 24 W6.**
+
+```
+model         loglik     AUC     acc   coefficients [const, log NU, log 2nd]
+NU only      -489.43  0.8016  0.7780   [ +1.0506  -4.2016]
+mu only      -641.90  0.5959  0.7400   [-12.3657  +0.9998]
+nuhat only   -581.01  0.6935  0.7000   [ -1.5132  -3.1344]
+NU + mu      -442.19  0.8557  0.7710   [+34.3702  -7.0802  -2.7314]
+NU + nuhat   -309.13  0.9353  0.8550   [ -0.1629  -8.0906  -7.5749]
+
+LR(add log nuhat to NU-only) = 360.60  (1 df; 10.83 at p=0.001)
+LR(add log NU to nuhat-only) = 543.75  (1 df)
+LR(add log mu    to NU-only) =  94.48  (1 df)
+```
+
+Both directions are overwhelming, so **neither coordinate is mediated by the
+other** — the pre-registered dichotomy resolves to "genuine second
+coordinate". Note the coefficient signs in `NU + nuhat`: both NEGATIVE, i.e.
+the wall sits where `NU * nu_hat` is constant, so `NU ~ 1/nu_hat` along the
+boundary. Thread 24 W3 assumed the *proportional* relation
+`NU ~ C * nu_hat * sqrt(eff)` and W6 killed it. The reciprocal is why: two
+quantities whose *product* is pinned at the wall are exactly the ones that
+look uncorrelated when you regress one on the other.
+
+**X5 — the boundary is a product criterion, `NU * nu_hat < 1`.**
+
+```
+free fit      NU * nuhat^0.9363 = 0.9801     loglik -309.13
+constrained   NU * nuhat        = 0.9579     loglik -309.86   LR 1.47 (1 df)
+```
+
+Forcing the exponents equal costs 1.47 log-likelihood units on 1 df — not
+significant at any level — and the fitted threshold lands within 4% of 1.
+So the criterion is `P = NU * nu_hat < 1` with no free parameters at all.
+
+```
+AUC(-P)      0.9350        (NU alone 0.8016,  nuhat alone 0.6935)
+cut P < 1    TP 312  FP 89  FN 60  TN 539   acc 0.8510  precision 0.7781
+P | success: min 0.3669  median 0.7786  max 1.9146
+P | failure: min 0.5554  median 1.4019  max 3.4364
+
+per-eff-stratum AUC, eff held FIXED:
+  eff      rec     AUC P   AUC NU  AUC nuhat
+ 0.05  196/200    0.8916   0.8508     0.6403
+ 0.10   78/200    0.9180   0.6509     0.7491
+ 0.15   42/200    0.8907   0.4168     0.8933
+ 0.20   36/200    0.9392   0.5920     0.9438
+ 0.25   20/200    0.8958   0.7375     0.8778
+```
+
+The stratum column is the point. NU swings 0.42-0.85 and is *anti-predictive*
+at eff=0.15; nu_hat swings 0.64-0.94; the product is 0.89-0.94 in all five.
+**P is the first Phase-2 statistic that is stable against the bias strength.**
+
+**X5b/25b — and it is size-free.** 12/14/17/20 bits, dim 2m = 24 throughout,
+500 instances per size, SAME unfitted cut:
+
+```
+  bits    N   rec |  AUC P  AUC NU  AUC nuh |   acc   TP  FP  FN   TN |  refit
+12-bit  500   362 | 0.9259  0.7826   0.8484 | 0.8620 320  27  42  111 | 1.0801
+14-bit  500   273 | 0.9420  0.8096   0.7530 | 0.8600 249  46  24  181 | 0.9394
+17-bit  500   190 | 0.9395  0.7996   0.6889 | 0.8500 162  47  28  263 | 0.9457
+20-bit  500   170 | 0.9506  0.8987   0.7601 | 0.8800 145  35  25  295 | 0.9384
+POOLED 2000   995 | 0.9439  0.8378   0.7639 | 0.8630 876 155 119  850 | 0.9663
+```
+
+Independently refitted threshold: **0.9384 .. 1.0801, spread 1.151x over an
+8-bit range of n** (pre-registered falsifier was >2x). AUC(-P) is 0.926-0.951
+and, unlike nu_hat (0.848 -> 0.689 -> 0.760), shows no size trend. Transfer
+test — fit the threshold on one size, score the other three:
+
+```
+fit on   coefficients      | 12b acc  14b acc  17b acc  20b acc
+    12   [+0.453 -5.879]   |  0.8700   0.8520   0.8340   0.8640
+    14   [-0.406 -6.504]   |  0.8440   0.8480   0.8640   0.8800
+    17   [-0.466 -8.340]   |  0.8540   0.8520   0.8660   0.8720
+    20   [-0.489 -7.702]   |  0.8400   0.8480   0.8620   0.8800
+```
+
+Off-diagonal accuracy is within 0.6 points of the diagonal everywhere; the
+12-bit-fitted model scores 0.8640 on 20-bit data against the 20-bit-fitted
+0.8800. There is no overfitting to recover.
+
+**Division of labour, stated precisely.** P is a *separator*, not a
+certificate: 155 false positives at P<1 pooled. NU stays the *certificate* —
+Thread 23b/24 W4 recorded 96 TP / 0 FP at NU <= 1 over 410 instances, and
+nothing here touches that. What Thread 24 called "the ~1.9x gap" is now
+named: NU alone is sound but bias-sensitive; P alone is bias-robust but
+unsound. Use NU to prove viability, P to predict it.
+
+**X3 — the W1b `step` reading was backwards, and the zero crossing is not
+the wall.** `step = log2||b*_{m+1}|| - log2||b*_1||`.
+
+```
+  eff     rec    | AUC step  AUC NU  AUC mu | mean step  rho(step,NU)
+ 0.05 196/200    |   0.3852  0.8508  0.6276 |   -0.0005        0.1140
+ 0.10  78/200    |   0.2318  0.6509  0.7470 |   -0.0517        0.1786
+ 0.15  42/200    |   0.0967  0.4168  0.8963 |   -0.0929        0.1961
+ 0.20  36/200    |   0.0637  0.5920  0.9302 |   -0.1324        0.0165
+ 0.25  20/200    |   0.1183  0.7375  0.8778 |   -0.1723       -0.1837
+```
+
+AUC(step) far below 0.5 means LARGER step recovers; all steps here are
+negative, so **|step| -> 0 is the EASY regime at 17 bits.** W1b read the
+12-bit example the other way ("the step vanishes exactly as the wall is
+crossed"). Both are consistent with one monotone decreasing function of eff:
+the 12-bit trajectory runs +1.6 -> +0.9 -> 0 as K1 grows, the 17-bit one runs
+0 -> -0.17. **The zero crossing is wherever the two blocks happen to coincide
+for that (n, m), not a scale-free wall marker**, and the pre-registered
+"step -> 0 predicts the wall" is falsified as stated.
+
+**X6 — but step is not redundant, which is the loose end.** Adding step to
+`(log NU, log nu_hat)` gains LR = 49.31 on 1 df (loglik -309.13 -> -284.47),
+with the nu_hat coefficient collapsing -7.5749 -> +0.8108 as step takes over.
+Spearman(step, log nu_hat) = -0.878, so it is *mostly* a reparametrisation —
+but not entirely, and the residual 49 log-likelihood units are unexplained.
+
+**X7 — W1b's head identity is approximate at dim 24, not exact.** W1b was
+read off a 12-bit / dim-16 example. At 17 bits / dim 24, over 60 instances
+per stratum:
+
+```
+eff=0.05  prof[0]/mu: mean 0.9665  min 0.6487  max 1.0000 | head max/min 1.2579 (max 1.5919)
+eff=0.15  prof[0]/mu: mean 0.9567  min 0.7179  max 1.0000 | head max/min 1.2377 (max 1.6233)
+eff=0.25  prof[0]/mu: mean 0.9661  min 0.7688  max 1.0000 | head max/min 1.2255 (max 1.6463)
+```
+
+The head is neither exactly `lambda_1(L2)` (down to 0.65x) nor flat (spread
+up to 1.65x). "m orthogonal copies of L2" is the right picture but LLL does
+not leave them untouched at this dimension. Any future derivation resting on
+the exact identity needs to carry this 35% slack.
+
+### Next step proposal
+
+**Thread 26 — derive the product criterion, or find the third coordinate.**
+Two concrete sub-tasks, in order:
+
+(a) *Derive `NU * nu_hat ~ 1`.* The empirical exponent ratio is 0.936 +/- and
+    the threshold 0.94-1.08 across four sizes; that is tight enough that a
+    real derivation should exist. The reciprocal structure suggests writing
+    `NU = 2|<e, b*_j>| / ||b*_j||^2` at the argmax j and substituting
+    `||b*_j|| ~ det(L2)/mu` from the CONFIRMED clause 2 of H24 (Thread 24 W2,
+    `||b*_last|| = c * lambda_2(L2)`, c = 0.42 +/- 0.15). Then
+    `NU ~ 2||e|| mu / (sqrt(dim) det L2) = (2||e||/sqrt(dim det L2)) * nu_hat`,
+    which is proportional, NOT reciprocal — so the naive substitution gives
+    the wrong sign and the argmax index must not be where clause 2 applies
+    (consistent with W1's falsification of clause 1). Pre-registered test:
+      H26a: restrict to instances where argmax is in the last two indices
+            (35/300 at 17 bits per W1) and check whether the product
+            criterion DEGRADES there while a proportional form improves.
+      Falsifier: if the argmax-tail subset behaves the same as the rest, the
+            argmax location is not the explanation and the derivation route
+            via clause 2 is dead.
+    Cost: pure re-analysis of the cached tables, ~10 minutes.
+
+(b) *Chase the X6 residual.* step adds LR = 49 on 1 df over (NU, nu_hat) and
+    the mechanism is unknown. Concretely: regress step on (log NU, log nu_hat,
+    log eff) and test whether the residual — call it the "block-imbalance"
+    coordinate — is what carries the 49 units, or whether step is proxying
+    for eff (which is observable without any lattice work and would make it
+    uninteresting). Pre-registered: if `step - fitted(eff)` has LR < 3.84 over
+    (NU, nu_hat), the X6 gain is just eff leaking in and step is retired.
+
+Secondary, unchanged from Threads 23/24: BKZ-beta sweep against P rather than
+NU — the whole point of a bias-robust separator is that it should also track
+how far blockwise reduction moves the wall, and P is now the better candidate
+for that x-axis.
+
+Do NOT re-attempt: the GS-profile derivation of nu_hat (Thread 24 W1, dead),
+`step -> 0` as a wall marker (X3, dead), raw mu as a pooled predictor (X1,
+AUC 0.404 pooled — it is anti-predictive without the sqrt(det) normalisation).
+
+### Commits made
