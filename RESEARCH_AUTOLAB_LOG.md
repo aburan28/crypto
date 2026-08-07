@@ -6655,5 +6655,4 @@ pushes the threshold — still not executed in any Thread 20-25 run.
 
 ### Commits made
 
-(pending — recorded in the follow-up log-hash commit, per existing autolab
-convention.)
+995635f autolab 2026-08-07 #3: Thread 25 — H25 falsified for raw mu (eff-scale confound), holds for nu_hat (AUC 0.84 in-band); GS-profile step is redundant with mu
