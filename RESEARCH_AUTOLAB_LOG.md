@@ -6273,4 +6273,4 @@ Secondary (cheap): re-run 2026-07-29's T3 20-curve eff sweep under V2 with the â
 criterion, to get a like-for-like eff ceiling rather than the wall proxy used here.
 
 ### Commits made
-[filled in below]
+7308e15 autolab 2026-08-07: Thread 23 â€” centered CVP moves the K1 wall 2-3x; T4b wall was a formulation artifact
