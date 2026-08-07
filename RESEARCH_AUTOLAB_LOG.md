@@ -6565,4 +6565,4 @@ session-distinguishing suffix (`(autolab run #2)`) from the start.
 
 ### Commits made
 
-(hash recorded in the following commit)
+`0a7ebc3` autolab 2026-08-07: Thread 23 — exact CF closed form for nu_hat; 2026-07-29 merge loss repaired
