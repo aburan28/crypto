@@ -6762,4 +6762,4 @@ outside the product law — worth one look at what eff still carries.
 
 ### Commits made
 
-(recorded below after commit)
+1694625 autolab 2026-08-07 #3: Thread 25 — H25 falsified for mu, passes for nu_hat; product law NU*nu_hat < 1
