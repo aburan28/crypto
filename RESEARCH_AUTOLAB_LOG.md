@@ -6788,4 +6788,4 @@ direct test, and it is the piece that would turn the product into a theorem.
 
 ### Commits made
 
-(recorded below after commit)
+9379206 autolab 2026-08-07 #3: Thread 25 — NU is spent inside its own band; NU*nu_hat is a zero-parameter product law
