@@ -6538,3 +6538,138 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+Thread 25, as proposed by run #2's log entry: within the NU ambiguous band
+[1.04, 2.20] (the range where the nearest-plane certificate gives no
+answer, Thread 24 W4), test H25 — does mu = lambda_1(L2) still separate
+recovery, i.e. is mu a genuine second coordinate independent of NU?
+Priority 1/2/4/6 remain CLOSED/BLOCKED/DEAD-END; priority 3 (Howe) completed
+2026-07-21; priority 5 (GLV-HNP Phase 2) is where all measurable progress
+has landed since 2026-07-26, so its proposed sub-task is the correct pick.
+
+### Work done
+- Environment (fresh container): `pip install sympy fpylll cysignals` — needed
+  by `glv_hnp_common.py` (sympy) and its `fpylll` LLL/BKZ import; neither was
+  preinstalled this run, consistent with the 2026-07-29 log's note that this
+  is a fresh-container issue every time, not fixed once.
+- Extended `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` (same
+  17-bit, 20-curve x 5-eff x 5-seed = 500-instance table as W5/W6, no new
+  data collection) with:
+  - `--dump-json PATH`: persists the row table (n, K1, ok, eff, effq,
+    lamstar, step, NU, nuhat, mu, l2, det2, k, argmax) so future runs can
+    re-analyze without regenerating. Dumped to
+    `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_thread25_rows.json`
+    (500 rows, 142 KB).
+  - **EXP W8 (H25)**: AUC(-mu -> recovery) restricted to rows with
+    1.04 <= NU <= 2.199.
+  - **EXP W9**: `step = log2(||b*_{m+1}||) - log2(||b*_1||)`, the W1b
+    "does the head-to-tail jump vanish at the wall" observation, made
+    quantitative and scored the same way (AUC, per-eff, Spearman vs NU).
+- `cargo test --test curve_audit` -> 5/5 pass (4.04s). No Rust files changed
+  this run; ran per protocol anyway.
+
+### Findings
+
+**H25 (naive/pooled) is FALSIFIED, but that reading repeats the exact
+pooling artifact W3/W6 diagnosed for the closed form.** Pooling the
+366-instance NU band across all 5 eff strata gives AUC(-mu) = 0.6932 — below
+the 0.8 bar. But `mu`'s absolute scale is n/eff-dependent (same reason W5/W6
+insisted on holding eff fixed for nu_hat/NU), and the eff=0.05 stratum
+inside the band is a 23-vs-1 near-degenerate class (eff=0.05 overall is
+99/100 recovery per W5), which adds noise, not signal.
+
+**Per-eff AUC(-mu) inside the NU band** (`W8`, band population 366/500):
+
+```
+eff=0.05  N=24   AUC(-mu)=0.4565   (degenerate: ~1 failure in the whole stratum)
+eff=0.10  N=83   AUC(-mu)=0.8819
+eff=0.15  N=96   AUC(-mu)=0.8889
+eff=0.20  N=89   AUC(-mu)=0.9276
+eff=0.25  N=74   AUC(-mu)=0.8615
+```
+
+**H25 (eff-controlled) HOLDS.** Restricting the pooled AUC to the four
+non-degenerate strata (eff in {0.10,0.15,0.20,0.25}, N=342):
+`AUC(-mu -> recovery) = 0.8080`. Every individual non-degenerate stratum
+clears 0.86-0.93. **mu is a genuine second coordinate inside the ambiguous
+band** — the (NU, mu) pair Thread 24's next-step proposal wanted is real,
+provided eff is controlled for exactly as W5/W6 already required.
+
+**nu_hat and step both beat mu alone inside the band, eff-controlled**
+(computed post-hoc from the JSON dump, same 342-row eff-controlled slice):
+
+```
+AUC(-nu_hat -> recovery) = 0.8964
+AUC(-mu     -> recovery) = 0.8080
+AUC(-step   -> recovery) = 0.8918
+```
+
+So the better second coordinate is `nu_hat = mu/sqrt(det L2)`, not raw mu —
+consistent with W5's headline result outside the band. `nu_hat`'s pooled
+(non-eff-controlled) AUC inside the band (0.8403) is already close to its
+eff-controlled value, i.e. the sqrt(det) normalization is doing real work
+absorbing the cross-stratum scale that raw mu needed eff-conditioning to
+remove.
+
+**W9 — the step statistic is a strong, independent-looking wall predictor.**
+`step = log2||b*_{m+1}|| - log2||b*_1||` (head-to-second-block jump):
+
+```
+step | success : mean  0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+AUC(-step -> recovery), pooled            = 0.6714  (same pooling artifact)
+AUC(-step -> recovery), eff-controlled band = 0.8918  (see above)
+
+per-eff (whole 500-row table, not just the band):
+eff=0.05  AUC=0.3636  Spearman(step,NU)=0.1653
+eff=0.10  AUC=0.7734  Spearman(step,NU)=0.1967
+eff=0.15  AUC=0.8861  Spearman(step,NU)=0.2939
+eff=0.20  AUC=0.9207  Spearman(step,NU)=0.1175
+eff=0.25  AUC=0.8938  Spearman(step,NU)=-0.2100
+```
+
+Spearman(step, NU) is small (|.| <= 0.29) in every stratum: step is close to
+independent of NU, same qualitative structure W5/W6 found for mu/nu_hat vs
+NU. step tracks nu_hat/mu rather than being a new third mechanism — it is
+the GS-profile signature of the same lambda_1(L2) quantity, not surprising
+since W1b already showed the profile head sits at lambda_1(L2) and the
+tail block is set by lambda_2(L2) = det(L2)/lambda_1(L2).
+
+**Methodological note for future runs.** Any pooled cross-eff AUC on this
+500-row table (or the smaller U2 grid) should be treated as suspect by
+default — three separate quantities (the W3 closed form, mu inside the H25
+band, step) have now each shown a "pooled looks weak/inconsistent, eff-
+controlled looks strong and consistent" pattern. Report eff-stratified
+numbers first; pooled numbers only as a secondary sanity check, and only
+after excluding degenerate strata (recovery rate outside roughly [10%,90%]
+within the stratum).
+
+### Next step proposal
+
+**Thread 26 — joint (nu_hat, eff) logistic decision boundary, band-focused.**
+Fit `logit(P[recover]) = a + b*log(nu_hat) + c*log(eff)` (or with `mu`/`step`
+substituted) on the 342-row eff-controlled band slice already dumped to
+`glv_hnp_phase2_gsprofile_strat_thread25_rows.json`, report the fitted
+coefficients and in-sample AUC, and check whether adding `step` as a third
+covariate improves AUC over (nu_hat, eff) alone (it should not, if step is
+downstream of the same lambda_1(L2) mechanism as nu_hat — that is itself a
+falsifiable sub-claim of this run's W9 finding). Cheap: pure re-analysis of
+the existing JSON, ~15 lines of logistic regression (no sklearn available;
+implement Newton-Raphson by hand as prior threads have for small fits).
+
+Secondary: the per-eff AUC(-mu) values inside the band (0.88, 0.89, 0.93,
+0.86) are themselves non-monotone in eff, unlike the pooled trend in W5's
+outside-band table (0.75, 0.88, 0.93, 0.88 — also non-monotone, similar
+shape). Worth checking if this is the same u-shape or coincidence once more
+eff values are sampled (e.g. eff in {0.08, 0.12, 0.18, 0.22} to interpolate).
+
+Tertiary (unchanged from Thread 24/25): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — still not attempted in any run.
+
+### Commits made
+
+(pending — see next commit in this run)

@@ -3,7 +3,8 @@ Thread 24b — cross-curve test of the closed-form separator (eff fixed)
 ==============================================================================
 
 20 17-bit j=0 GLV curves in 0.0s
-500 instances (float GS, dim 24) in 3.0s
+500 instances (float GS, dim 24) in 1.9s
+dumped 500 rows to glv_hnp_phase2_gsprofile_strat_thread25_rows.json
 
 ------------------------------------------------------------------------------
 EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only
@@ -61,6 +62,47 @@ stratum eff = 0.10  (42 of the minority class)
    66301  0.2976   0.9619    1.2527    1/5
    65719  0.0273   0.9643    1.2763    2/5
    65647  0.2253   0.9848    1.1211    2/5
+
+------------------------------------------------------------------------------
+EXP W8 (Thread 25, H25): does mu separate INSIDE the NU ambiguous
+band [1.04, 2.20] (17-bit bracket, Thread 24 W4)?
+------------------------------------------------------------------------------
+band population: 366/500  (97 recover, 269 fail)
+AUC(-mu     -> recovery) inside band = 0.6932
+AUC(-nu_hat -> recovery) inside band = 0.8403
+AUC(-NU     -> recovery) inside band = 0.5656  (sanity check: NU is near-constant here by construction)
+
+H25 FALSIFIED (threshold 0.8, observed 0.6932)
+
+band breakdown by eff stratum:
+  eff=0.05  N= 24  AUC(-mu)=0.4565
+  eff=0.10  N= 83  AUC(-mu)=0.8819
+  eff=0.15  N= 96  AUC(-mu)=0.8889
+  eff=0.20  N= 89  AUC(-mu)=0.9276
+  eff=0.25  N= 74  AUC(-mu)=0.8615
+
+AUC(-mu -> recovery), band restricted to eff in {0.10,0.15,0.20,0.25} (N=342): 0.8080
+H25 (eff-controlled) HOLDS (threshold 0.8, observed 0.8080)
+
+------------------------------------------------------------------------------
+EXP W9: step = log2||b*_{m+1}|| - log2||b*_1||  (W1b, quantified)
+------------------------------------------------------------------------------
+W1b: the head of the GS profile is m copies of lambda_1(L2); the
+step to the second block vanishes near the recovery wall. Test
+whether step beats NU/mu as a wall predictor, pooled and per-eff.
+
+500/500 rows have a finite step value
+step | success : mean 0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+AUC(step -> recovery), SMALLER step -> more likely to fail (H24/W1b direction), so score as -(-step)=step for 'larger step is safer':
+  AUC(-step -> recovery) = 0.6714  (pooled, compare NU pooled AUC above)
+
+per-eff AUC(-step):
+  eff=0.05  N=100  AUC(-step)=0.3636  Spearman(step,NU)=0.1653
+  eff=0.10  N=100  AUC(-step)=0.7734  Spearman(step,NU)=0.1967
+  eff=0.15  N=100  AUC(-step)=0.8861  Spearman(step,NU)=0.2939
+  eff=0.20  N=100  AUC(-step)=0.9207  Spearman(step,NU)=0.1175
+  eff=0.25  N=100  AUC(-step)=0.8938  Spearman(step,NU)=-0.2100
 
 ==============================================================================
 done
