@@ -6315,3 +6315,226 @@ reduction pushes the empirical threshold as a function of beta.
 ### Commits made
 
 2a6879c autolab 2026-08-07: Thread 23 — d-column projection is inert; recovery is BDD not SVP; NU certificate (AUC 0.978)
+
+## 2026-08-07 (autolab run #2)
+
+### Task picked
+
+**Thread 24** — "derive nu_hat from the GS profile and close the ~1.9x gap",
+the pre-registered next-step of this morning's Thread 23 entry (log line ~6280).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread; Thread 23
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 23 entry:
+
+>   H24: the argmax concentrates at the tail indices i ~ 2m, and
+>        `||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)` up to a constant.
+>   Falsifier: if the argmax is spread across i rather than concentrated in
+>        the tail, the GS-profile explanation fails and nu_hat stays empirical.
+
+**Verdict: H24 splits. Clause 1 is FALSIFIED, clause 2 HOLDS, and the
+intended identity NU ~ C*nu_hat*sqrt(eff) is FALSE.** A different and more
+useful result came out of the control experiment: nu_hat is a *better*
+predictor of Kannan-LLL recovery than the exact BDD certificate NU, and the
+two are mutually uncorrelated at fixed bias strength — they are measuring two
+different mechanisms, not one.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Third run in a row where
+  `cysignals` had to be named explicitly; it is not pulled in by fpylll.)
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile.py` — new (exp W0-W4).
+  Exact Gram-Schmidt over the integer Gram matrix (`Fraction`, Cholesky
+  recursion, so the O(k^3) loop never touches the 2m-vectors), full GS profile
+  `log2 ||b*_i||`, per-index `nu_i`, and `l2_minima()` returning BOTH successive
+  minima of the lambda-block L2 by Gauss reduction (the existing
+  `glv_hnp_common.gauss_reduce_2d` returns only lambda_1).
+  Output: `glv_hnp_phase2_gsprofile_output.txt` (137 lines).
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — new (exp W5-W7).
+  The control W3 demanded: hold `eff = K1*K2/n` FIXED and re-measure, so a
+  predictor cannot score by being monotone in K1. 5 strata x 20 curves x 5
+  seeds at 17 bits.
+  Output: `glv_hnp_phase2_gsprofile_strat_output.txt` (60 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (6.97s). No Rust touched.
+- Process note: the first attempt piped the run through `tee ... | head -120`,
+  and `head` exiting SIGPIPE-killed python mid-W4. The truncated file looked
+  like a clean run that had simply found 0 curves. Do not pipe these scripts
+  through `head`; redirect and read the file.
+
+### Findings
+
+**W0 — float GS is safe at these dimensions; no bigfloat needed.**
+Max relative error of the Thread 23b f64 `bdd_nu` against exact Fractions:
+`8.9e-16` over the 22-cell 12-bit grid (dim <= 20) and `6.6e-16` at dim 24 /
+17 bits. Entries are ~n^2/K1 (~2^34), squared norms ~2^68, and f64 still holds.
+Every number below is from the exact path regardless.
+
+**W1 — H24 clause 1 is FALSIFIED. The argmax of nu_i is not in the tail.**
+
+```
+12-bit/2557 (dim 16, N=55)  mean argmax/(dim-1) = 0.390   last quarter  9/55
+12-bit/2677 (dim 20, N=55)  mean argmax/(dim-1) = 0.705   last quarter 27/55
+POOLED 12-bit  argmax == last index   8/110   (uniform null 6.2%)
+               argmax in last two    15/110
+17-bit (dim 24, N=300)  argmax == last index  21/300  (uniform null 4.2%)
+                        argmax in last two    35/300
+```
+
+There is a mild tail enrichment (7% vs 4.2% null at 17 bits) but nothing like
+concentration, and the 2557 profile is if anything HEAD-weighted. The
+pre-registered falsifier fires: NU is not a tail-GS phenomenon and the
+GS-profile route does not derive nu_hat.
+
+**W1b — but the profile has a clean two-block shape that explains why.**
+The first m Gram-Schmidt norms sit exactly at lambda_1(L2); only the second
+block moves with K1:
+
+```
+12-bit/2557 K1=4   log2||b*_i||  11.7 x8 | 13.3 13.4 13.3 13.3 13.2 13.4 13.3 13.5
+                   log2 lambda_1(L2)=11.7   log2 lambda_2(L2)=14.8
+12-bit/2557 K1=8   log2||b*_i||  11.4 x8 | 12.1 12.2 12.7 12.6 12.7 12.8 12.8 12.7
+                   log2 lambda_1(L2)=11.4   log2 lambda_2(L2)=14.0
+12-bit/2557 K1=32  log2||b*_i||  11.1..10.8 (flat, no step)      lambda_2 = 12.1
+```
+
+L0 contains m orthogonal copies of L2 (one per coordinate pair (i, m+i)), so
+the head of the profile is m repetitions of lambda_1(L2) and the step vanishes
+exactly as the wall is crossed. That is the structure; it just does not put
+the nu_i argmax at the tail.
+
+**W2 — H24 clause 2 HOLDS.** `||b*_last|| = c * lambda_2(L2)` with
+
+```
+12 bits (22 cells)  c: mean 0.476  min 0.406  max 0.598  spread 1.47x
+17 bits (300 inst)  c: mean 0.419  min 0.302  max 0.611
+lambda_1*lambda_2/det(L2) = 1.0001 .. 1.0429  over all 22 cells
+```
+
+The 2D reading `lambda_2 = det(L2)/mu` is exact to <=4.3%, so the geometry
+Thread 20c invoked by hand is confirmed. Clause 2 alone cannot carry the
+derivation once clause 1 fails.
+
+**W3 — the closed form is a good PREDICTOR and a false IDENTITY.**
+Chaining `||e|| ~ n*sqrt(2m/3)`, `lambda_2 = det(L2)/mu` and a generic-direction
+estimate for `<e,b*_i>` predicts `NU ~ (2/sqrt 3) * nu_hat * sqrt(eff)`.
+Pooled over the 12-bit grid this looks excellent:
+
+```
+fitted C = 6.0168 (12 bits)   6.2925 (17 bits)      predicted 2/sqrt(3) = 1.155
+AUC(-nu_hat*sqrt(eff) -> recovery)   0.9922 (12 bits)   0.9695 (17 bits)
+AUC(-NU               -> recovery)   0.9777 (12 bits)   0.8597 (17 bits)
+Thread 20b's fitted nu_hat separator                    0.935
+```
+
+C is stable to 4.5% across a 32x change in n, which is why this initially read
+as a derivation. **It is not.** The constant is 5.2x off the predicted value,
+the per-instance residual spread is 4.7x, and W6 below kills it outright.
+
+**W5 — the control. Hold eff fixed and the two predictors come apart.**
+17 bits, 20 curves x 5 seeds per stratum, dim 24. AUC > 0.5 means smaller
+score => more likely to recover.
+
+```
+  eff     N     rec |  AUC nu_hat   AUC NU  AUC lam* |   AUC mu
+ 0.05   100  99/100 |      0.4242   0.8687    0.3232 |   0.4242   (degenerate)
+ 0.10   100  42/100 |      0.7484   0.7011    0.4364 |   0.7443
+ 0.15   100  21/100 |      0.8813   0.3496    0.2544 |   0.8873
+ 0.20   100  19/100 |      0.9337   0.5595    0.1605 |   0.9175
+ 0.25   100   9/100 |      0.8816   0.7277    0.1612 |   0.8816
+
+pooled (N=500)  nu_hat*sqrt(eff) 0.9348 | NU 0.7996 | nu_hat 0.6889 | eff 0.8465
+```
+
+* **nu_hat does real cross-curve work**: 0.75-0.93 in every non-degenerate
+  stratum, with eff held constant so it cannot be re-reading the bias.
+* **NU does not**: 0.35-0.73, and at eff=0.15 it is ANTI-predictive (0.350).
+  The exact per-instance BDD certificate is beaten by a closed form that
+  needs no lattice reduction at all.
+* `mu = lambda_1(L2)` tracks nu_hat to 3 decimal places (0.424/0.744/0.887/
+  0.918/0.882). Within a stratum n and eff are nearly constant so
+  `nu_hat = mu/sqrt(det L2)` is just a rescaled mu — **the operative quantity
+  is lambda_1(L2), and the sqrt(det) normalisation only matters across sizes.**
+* `lam*` is the control column and is systematically BELOW 0.5 (0.16-0.44),
+  i.e. not merely uninformative but weakly INVERTED. Thread 20's falsification
+  of lam* stands and is sharpened: large lam* is if anything mildly helpful.
+
+**W6 — the identity is dead. NU and nu_hat*sqrt(eff) are uncorrelated.**
+
+```
+  eff    mean C      min      max   spread   Spearman(pred, NU)
+ 0.05     7.398    3.007   45.177    15.03x            -0.1783
+ 0.10     6.469    3.095   20.920     6.76x            -0.2756
+ 0.15     5.955    3.107   13.239     4.26x            -0.2474
+ 0.20     5.675    2.715    9.990     3.68x            -0.0488
+ 0.25     5.524    2.951    9.150     3.10x            +0.1638
+```
+
+Mean C drifts monotonically 7.40 -> 5.52 with eff, per-instance spread is
+3-15x, and the rank correlation between the closed form and NU is ~0 or
+NEGATIVE inside every stratum. The pooled C ~ 6 of W3 is an averaging
+artifact: both quantities are monotone in eff, and that shared trend is the
+entire correlation. **NU is not nu_hat in disguise.**
+
+**Interpretation.** Two mutually uncorrelated quantities both predict
+recovery, so they govern different things. NU governs Babai nearest-plane,
+which Thread 23b already showed Kannan-LLL beats by ~1.9x in NU; NU is
+therefore *sound* but *not* the statistic controlling the observed wall.
+The quantity that tracks the LLL wall cross-curve is the lambda-block
+minimum lambda_1(L2) itself. The ~1.9x gap Thread 24 set out to close is not
+a looseness in NU to be tightened — it is the signature of a second mechanism.
+
+**W4 — NU remains a sound certificate, and the bracket is roughly n-stable.**
+
+```
+17 bits (300 inst, dim 24)
+  NU | success : min 0.574  median 0.950  max 2.199  (n=129)
+  NU | failure : min 1.040  median 1.780  max 3.002  (n=171)
+  NU <= 1 : TP 71  FP 0
+  bracket : sufficient NU < 1.040 , necessary NU > 2.199
+12 bits (Thread 23b)
+  bracket : sufficient NU < 1.188 , necessary NU > 1.869
+```
+
+Zero false positives at 17 bits, so **96 TP / 0 FP over 410 instances at two
+sizes** — the nearest-plane guarantee holds exactly as theory requires. The
+ambiguous band widens from [1.188, 1.869] to [1.040, 2.199], i.e. NU is a
+sound size-free *certificate* but a size-degrading *separator* (AUC 0.978 ->
+0.860 from 12 to 17 bits), which is the same conclusion W5 reaches.
+
+**W7 — nu_hat is a rank statistic, not a threshold.** At eff=0.10 the ordering
+is good but not monotone: n=66463 (nu_hat 0.7089) recovers 5/5 while
+n=66037 (nu_hat 0.7057, *smaller*) recovers 0/5. No cut on nu_hat is clean.
+
+### Next step proposal
+
+**Thread 25 — find the second mechanism by conditioning on NU.**
+W5/W6 establish that recovery = f(NU, X) with X ~ mu-driven and X independent
+of NU. The concrete sub-task is to stratify the existing 500-instance 17-bit
+table by NU band and measure whether mu still separates *inside* a band:
+
+  H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+       gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+If yes, mu is a genuine second coordinate and the pair (NU, mu) is the
+2-parameter viability test Phase 2 has been missing; the deliverable is a
+logistic fit on (log NU, log mu) with its decision boundary. If no — if mu's
+apparent power is entirely mediated by NU after all — then the W5 result is a
+stratification artifact and the closed form should be retired.
+Cost: no new data, re-analysis of `glv_hnp_phase2_gsprofile_strat.py` rows,
+~5 minutes. Add a `--dump-json` flag so the table survives the run.
+
+Secondary: W1b showed the profile head is m exact copies of lambda_1(L2) and
+that the step to the second block *vanishes* right as the K1 wall is crossed.
+Quantify it — define `step = log2(||b*_{m+1}||) - log2(||b*_1||)` and test
+whether `step -> 0` predicts the wall better than either NU or mu. This is a
+one-line addition to the existing sweep and is the most direct thing W1b
+suggests.
+
+Tertiary (unchanged from Thread 23): BKZ-beta sweep against NU, to quantify
+how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
