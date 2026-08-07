@@ -1,0 +1,213 @@
+Thread 23 -- closed form for nu_hat from the continued fraction of lam/n
+seed = 20260807
+
+==============================================================================
+EXP A -- CLAIM 1: exact CF characterisation of lambda_1(L2)
+==============================================================================
+Exact integer Gauss reduction vs CF enumeration.  'match' = exact
+equality of the integer lambda_1^2, not a correlation.
+
+ bits    lam    eff     N  conv match  semi match  conv relerr(max)
+   20   rand   0.05    60     60/60       60/60           0.000e+00
+   20   rand   0.10    60     60/60       60/60           0.000e+00
+   20   rand   0.25    60     60/60       60/60           0.000e+00
+   20    GLV   0.05    60     60/60       60/60           0.000e+00
+   20    GLV   0.10    60     60/60       60/60           0.000e+00
+   20    GLV   0.25    60     60/60       60/60           0.000e+00
+   24   rand   0.05    60     60/60       60/60           0.000e+00
+   24   rand   0.10    60     60/60       60/60           0.000e+00
+   24   rand   0.25    60     60/60       60/60           0.000e+00
+   24    GLV   0.05    60     60/60       60/60           0.000e+00
+   24    GLV   0.10    60     60/60       60/60           0.000e+00
+   24    GLV   0.25    60     60/60       60/60           0.000e+00
+   32   rand   0.05    60     60/60       60/60           0.000e+00
+   32   rand   0.10    60     60/60       60/60           0.000e+00
+   32   rand   0.25    60     60/60       60/60           0.000e+00
+   32    GLV   0.05    60     60/60       60/60           0.000e+00
+   32    GLV   0.10    60     60/60       60/60           0.000e+00
+   32    GLV   0.25    60     60/60       60/60           0.000e+00
+   64   rand   0.05    60     60/60       60/60           0.000e+00
+   64   rand   0.10    60     60/60       60/60           0.000e+00
+   64   rand   0.25    60     60/60       60/60           0.000e+00
+   64    GLV   0.05    60     60/60       60/60           0.000e+00
+   64    GLV   0.10    60     60/60       60/60           0.000e+00
+   64    GLV   0.25    60     60/60       60/60           0.000e+00
+  128   rand   0.05    60     60/60       60/60           0.000e+00
+  128   rand   0.10    60     60/60       60/60           0.000e+00
+  128   rand   0.25    60     60/60       60/60           0.000e+00
+  128    GLV   0.05    60     60/60       60/60           0.000e+00
+  128    GLV   0.10    60     60/60       60/60           0.000e+00
+  128    GLV   0.25    60     60/60       60/60           0.000e+00
+  256   rand   0.05    60     60/60       60/60           0.000e+00
+  256   rand   0.10    60     60/60       60/60           0.000e+00
+  256   rand   0.25    60     60/60       60/60           0.000e+00
+  256    GLV   0.05    60     60/60       60/60           0.000e+00
+  256    GLV   0.10    60     60/60       60/60           0.000e+00
+  256    GLV   0.25    60     60/60       60/60           0.000e+00
+
+CLAIM 1 (semiconvergents): 2160/2160 exact (100.00%)
+
+==============================================================================
+EXP B -- brute-force control (small n): is the minimiser always a
+         semiconvergent denominator?
+==============================================================================
+  brute-force cases: 600, mismatches: 0
+  => the minimiser is a semiconvergent denominator in 600/600 cases
+
+==============================================================================
+EXP C -- CLAIM 2: accuracy of  nu_hat^2 ~ min_j [ u_j^2 + 1/u_{j+1}^2 ]
+==============================================================================
+ bits    eff    N  median relerr  p90 relerr   pearson  spearman
+   24   0.05   80         0.0274      0.1682    0.9737    0.9633
+   24   0.10   80         0.0310      0.1332    0.9830    0.9754
+   24   0.25   80         0.0109      0.1650    0.9829    0.9743
+   64   0.05   80         0.0161      0.1411    0.9815    0.9537
+   64   0.10   80         0.0172      0.1759    0.9810    0.9668
+   64   0.25   80         0.0216      0.1390    0.9849    0.9537
+  256   0.05   80         0.0173      0.1955    0.9784    0.9660
+  256   0.10   80         0.0171      0.1191    0.9899    0.9863
+  256   0.25   80         0.0196      0.1579    0.9828    0.9662
+
+==============================================================================
+EXP D -- CLAIM 2 predictor: a_straddle vs the falsified scale-free max_a
+==============================================================================
+a_straddle = a_{j*+1} where q_{j*} <= Q < q_{j*+1}.  Small nu_hat should
+mean a LARGE straddling partial quotient, so the spearman is negative.
+
+ bits    eff    N  sp(a_str,nu)  sp(max_a,nu)  sp(q_cf,nu)
+   24   0.05  200       -0.8083       -0.2407       0.2617
+   24   0.10  200       -0.7640       -0.2346       0.3009
+   24   0.25  200       -0.7399       -0.3162       0.2585
+   64   0.05  200       -0.7714       -0.0166       0.1199
+   64   0.10  200       -0.7776       -0.1596       0.1937
+   64   0.25  200       -0.8077       -0.2070       0.1444
+  256   0.05  200       -0.6959       -0.0089      -0.0570
+  256   0.10  200       -0.7955       -0.0771       0.0812
+  256   0.25  200       -0.7098       -0.0808       0.1140
+
+==============================================================================
+EXP E -- CLAIM 3: nu_hat is scale-DEPENDENT, so no scale-free CF
+         invariant of lam/n can predict it
+==============================================================================
+One FIXED (n, lam); only eff = K1*K2/n varies.  max_a and the CF itself
+are constant by construction; j*, a_straddle and nu_hat are not.
+
+n = 15277800985682946259  lam = 11770558119620745977
+  CF length = 36, max_a = 269  (both eff-independent)
+      eff                Q   j*  a_straddle    nu_hat         argmin q
+     0.01       3.9087e+10   17          18    0.3377      10664386619
+     0.02       2.7639e+10   17          18    0.4107      10664386619
+     0.05       1.7480e+10   17          18    0.6165      10664386619
+     0.10       1.2360e+10   17          18    0.8651      10664386619
+     0.25       7.8174e+09   16           4    0.7851       2370352031
+     0.50       5.5277e+09   16           4    0.6679       2370352031
+     0.90       4.1201e+09   16           4    0.6904       2370352031
+
+n = 17349537357672598861  lam = 2066160213265199895
+  CF length = 39, max_a = 78  (both eff-independent)
+      eff                Q   j*  a_straddle    nu_hat         argmin q
+     0.01       4.1653e+10   19           6    0.5385      17155188734
+     0.02       2.9453e+10   19           6    0.6320      17155188734
+     0.05       1.8628e+10   19           6    0.9339      17155188734
+     0.10       1.3172e+10   18           1    0.9778       7146483289
+     0.25       8.3306e+09   17           1    1.0003       7146483289
+     0.50       5.8906e+09   16           2    0.8346       2862222156
+     0.90       4.3906e+09   16           2    0.8251       2862222156
+
+n = 10338417291112704331  lam = 3981674977140926572
+  CF length = 37, max_a = 71  (both eff-independent)
+      eff                Q   j*  a_straddle    nu_hat         argmin q
+     0.01       3.2153e+10   18          28    0.3093       3940282958
+     0.02       2.2736e+10   18          28    0.2653       3940282958
+     0.05       1.4379e+10   18          28    0.3020       3940282958
+     0.10       1.0168e+10   18          28    0.3978       3940282958
+     0.25       6.4307e+09   18          28    0.6154       3940282958
+     0.50       4.5472e+09   18          28    0.8675       3940282958
+     0.90       3.3893e+09   17           1    1.0349       2025944449
+
+
+==============================================================================
+EXP F -- secp256k1: reproduce the four nu_hat values logged 2026-07-29
+==============================================================================
+  lam^2 + lam + 1 = 0 mod n  VERIFIED
+  CF of lam/n: length 140, max partial quotient 312
+
+     eff  nu_hat (this run)  logged 2026-07-29   j*  a_straddle  argmin q bits
+    0.05             0.8709             0.8709   69           5            128
+    0.10             0.6624             0.6624   69           5            128
+    0.25             0.5852             0.5852   69           5            128
+    0.50             0.6851             0.6851   69           5            128
+
+  (CLAIM 1 verified exactly at all four eff on the real secp256k1 lattice)
+  Reminder: conditional on a NON-STANDARD nonce k = k1 + lam*k2 with k1
+  bounded.  This is not an attack on secp256k1.
+
+==============================================================================
+EXP G -- translate the empirical C2 ceiling nu_hat <= 0.645 into an
+         a_straddle cut
+==============================================================================
+   20 bits, eff=0.05:  n=400  P(nu<=0.645)=0.365
+      median a_straddle | nu<=0.645 : 17
+      median a_straddle | nu >0.645 : 3
+      best cut 'a_straddle >= 8' reproduces the nu cut with accuracy 0.815
+   64 bits, eff=0.05:  n=400  P(nu<=0.645)=0.350
+      median a_straddle | nu<=0.645 : 16
+      median a_straddle | nu >0.645 : 3
+      best cut 'a_straddle >= 6' reproduces the nu cut with accuracy 0.787
+  256 bits, eff=0.05:  n=400  P(nu<=0.645)=0.400
+      median a_straddle | nu<=0.645 : 20
+      median a_straddle | nu >0.645 : 3
+      best cut 'a_straddle >= 7' reproduces the nu cut with accuracy 0.820
+
+==============================================================================
+EXP H -- consequence of CLAIM 1: the eff-optimised nu_hat, and why max_a
+         *nearly* worked in June
+==============================================================================
+For a FIXED winning convergent (q_j, delta_j), CLAIM 1 gives
+    nu_hat^2 = (Q*delta_j/n)^2 + (q_j/Q)^2,
+a function of Q alone.  Minimising over Q:
+    Q_opt^2 = n*q_j/delta_j,   nu_hat_min^2 = 2*q_j*delta_j/n.
+With K2 = sqrt(n) and K1 = eff*sqrt(n) we have Q^2 = n/eff, so
+    eff_opt = delta_j / q_j     (feasible iff delta_j <= q_j),
+    nu_hat_min = sqrt(2 * min_j q_j*delta_j / n).
+Since q_j*delta_j/n ~ q_j/q_{j+1} ~ 1/a_{j+1},
+    nu_hat_min ~ sqrt(2 / max_a).
+So max_a DOES govern nu_hat -- but only after optimising eff.  At the
+FIXED eff of every June experiment, the relevant quotient is a_straddle,
+not max_a.  That is the precise sense in which the June invariant was
+the right quantity measured at the wrong scale.
+
+  secp256k1 (real n, lam)
+    max_a = 312   sqrt(2/max_a) = 0.0801
+    argmin j = 123 (q has 220 bits), a_{j+1} = 312
+    UNCONSTRAINED nu_hat_min = 0.0798  at eff_opt = 2.0739e-58  (implied K1 = 7.057e-20)
+    -> INFEASIBLE: K1 < 2, i.e. the k1 nonce part carries <1 bit.
+    FEASIBLE (eff in [0.01, 1]) nu_hat_min = 0.5814  at eff = 0.2126, j = 69
+    exact nu_hat at that eff = 0.5814  (check, integer-K1 rounding aside)
+
+  random 64-bit #1  n=12649061853598738891
+    max_a = 35   sqrt(2/max_a) = 0.2390
+    argmin j = 24 (q has 42 bits), a_{j+1} = 24
+    UNCONSTRAINED nu_hat_min = 0.2837  at eff_opt = 3.1837e-08  (implied K1 = 1.132e+02)
+    FEASIBLE (eff in [0.01, 1]) nu_hat_min = 0.7167  at eff = 0.1100, j = 18
+    exact nu_hat at that eff = 0.7167  (check, integer-K1 rounding aside)
+
+  random 64-bit #2  n=10223672687996809339
+    max_a = 56   sqrt(2/max_a) = 0.1890
+    argmin j = 29 (q has 45 bits), a_{j+1} = 56
+    UNCONSTRAINED nu_hat_min = 0.1861  at eff_opt = 1.7297e-10  (implied K1 = 5.531e-01)
+    -> INFEASIBLE: K1 < 2, i.e. the k1 nonce part carries <1 bit.
+    FEASIBLE (eff in [0.01, 1]) nu_hat_min = 0.4941  at eff = 1.0000, j = 15
+    exact nu_hat at that eff = 0.4941  (check, integer-K1 rounding aside)
+
+  random 64-bit #3  n=12682018198339495361
+    max_a = 72   sqrt(2/max_a) = 0.1667
+    argmin j = 19 (q has 43 bits), a_{j+1} = 51
+    UNCONSTRAINED nu_hat_min = 0.1958  at eff_opt = 1.1225e-08  (implied K1 = 3.997e+01)
+    FEASIBLE (eff in [0.01, 1]) nu_hat_min = 0.3457  at eff = 1.0000, j = 12
+    exact nu_hat at that eff = 0.3457  (check, integer-K1 rounding aside)
+
+  64-bit, N=200:
+    spearman(sqrt(2/max_a), nu_hat_min UNCONSTRAINED) =  0.6215   pearson  0.6396
+    spearman(sqrt(2/max_a), nu_hat_min FEASIBLE eff)  =  0.1968   pearson  0.2147
+  Contrast with EXP D, where sp(max_a, nu_hat) at fixed eff was -0.01 .. -0.32.
