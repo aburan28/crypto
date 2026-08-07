@@ -6796,4 +6796,4 @@ the LLL value 0.955.
 
 ### Commits made
 
-(hash recorded in the follow-up commit below)
+4128a92 autolab 2026-08-07 #3: Thread 25 — second coordinate is nu_hat not mu; product law NU*nu_hat < 0.96 (CV-AUC 0.929)
