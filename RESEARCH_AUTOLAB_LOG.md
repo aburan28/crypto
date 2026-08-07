@@ -6782,4 +6782,4 @@ the same measurement in PSI is now the meaningful one.
 
 ### Commits made
 
-(recorded below after commit)
+a57cbb6 autolab 2026-08-07 #3: Thread 25 — H25 literal clause falsified; product law PSI = NU*nu_hat ~ 1 (AUC 0.945)
