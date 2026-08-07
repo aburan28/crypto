@@ -6672,4 +6672,4 @@ threshold — still not attempted in any run.
 
 ### Commits made
 
-(pending — see next commit in this run)
+ee4170c autolab 2026-08-07 #3: Thread 25 — H25 confirmed eff-controlled (AUC 0.81); nu_hat/step beat mu inside NU band
