@@ -6538,3 +6538,254 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6300).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is still the only live thread; Thread 24
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate and the pair (NU, mu) is the
+>   2-parameter viability test Phase 2 has been missing. If no, the W5
+>   result is a stratification artifact and the closed form should be retired.
+
+**Verdict: H25 CONFIRMED in its size-free form, and the deliverable is
+better than pre-registered.** Raw `mu` misses the 0.8 bar on the pooled band
+(0.6932) for exactly the scale reason W5 flagged; the size-free `nu_hat =
+mu/sqrt(det L2)` clears it (0.8403), and once `eff` is ALSO held fixed —
+removing the scale variation entirely — `mu` clears it comfortably
+(0.86–0.93). Both directions of the conditioning hold, so NU and nu_hat are
+two genuine coordinates. Their logistic boundary collapses to a plain product
+**NU * nu_hat < 0.96**, which a second experiment (Thread 25b) shows is
+size-stable at 12/14/17/20 bits with no refitting.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, sympy 1.14.0. (Fourth run in a row where `cysignals` had to be
+  named explicitly; it is not pulled in by fpylll. Worth a requirements file.)
+- `glv_hnp_phase2_gsprofile_strat.py` — added the pre-registered `--dump-json`
+  flag (+ `seed` in the row dict, + full GS profile in the dump) so the
+  500-instance table survives the run. Re-ran it; **W5/W6 reproduce digit-for-
+  digit** against the Thread 24 entry, so the pipeline is deterministic and the
+  dump is faithful.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_conditional.py` — new (exp A1-A4).
+  Consumes the JSONL. Three confounds are killed explicitly: C1 scale (mu vs
+  nu_hat vs eff as a control column), C2 composition (double conditioning on
+  NU band x eff stratum), C3 direction (the transpose — condition on nu_hat,
+  measure NU). Hand-rolled IRLS logistic + permutation p-values +
+  leave-one-CURVE-out CV (the 5 seeds of a curve are not independent).
+  Output: `glv_hnp_phase2_nu_conditional_output.txt` (114 lines).
+- `secp256k1_cm_audit/glv_hnp_phase2_product_rule.py` — new (exp B1-B5).
+  Cross-size test of the fitted rule at 12/14/17/20 bits, 12 curves x 5 eff
+  strata x 5 seeds each, **dim = 2m = 24 held fixed at every size** so drift is
+  a size effect and not a dimension effect.
+  Output: `glv_hnp_phase2_product_rule_output.txt` (87 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (5.02s). No Rust touched.
+- Bug caught in review before it reached a finding: the first version of the
+  A3 boundary print inverted both the exponent and the constant when solving
+  `b0 + a*x + b*y = 0` for the product form (printed `NU^-1.052 ... = 1.041`
+  instead of `nu_hat*NU^1.052 < 0.9607`). The correct form is now cross-checked
+  against the raw coefficients and against a direct AUC of the combined score.
+
+### Findings
+
+**A1 — H25 as literally written FAILS on raw mu, PASSES on nu_hat.**
+
+```
+band                                     N    rec | AUC mu  AUC nuh  AUC eff  AUC NU  AUC lam*
+NU < 1.040   (nearest-plane SUFFICIENT)  94  92/94 | 0.1603  0.4592  0.9212  0.9837   0.5082
+1.040<=NU<=2.199  (the H25 band)        366  97/366| 0.6932  0.8403  0.7056  0.5656   0.3212
+NU > 2.199   (nearest-plane: nothing)    40   1/40 | 1.0000  1.0000  1.0000  1.0000   0.2564
+
+permutation p inside the band: mu 0.0005 | nu_hat 0.0005 | NU 0.026
+```
+
+The top band is 98% recovery and the bottom band is 1/40, so both are
+degenerate and their AUCs are noise (a single positive drives the 1.0000 row).
+All the information is in the ambiguous band, and there `mu` gets 0.693 while
+`nu_hat` gets 0.840. **The 0.147 gap is precisely the `sqrt(det L2)`
+normalisation**, which is what W5 predicted would matter once sizes are mixed —
+conditioning on a NU band pools across eff strata by construction.
+
+**A2 — the decisive table. Condition on NU *and* eff and mu still separates.**
+Inside a cell neither NU (bracketed) nor eff (fixed) can move.
+
+```
+NU band      eff    N     rec | AUC mu  AUC nuh   AUC NU  AUC step
+1.04-2.20   0.05   24   23/24 | 0.4565  0.4565   0.4783   (1 failure — noise)
+1.04-2.20   0.10   83   26/83 | 0.8819  0.8853   0.5277
+1.04-2.20   0.15   96   21/96 | 0.8889  0.8825   0.3283
+1.04-2.20   0.20   89   18/89 | 0.9276  0.9425   0.4695
+1.04-2.20   0.25   74    9/74 | 0.8615  0.8615   0.6188
+```
+
+`mu` runs **0.86–0.93 in every non-degenerate cell** while NU is 0.33–0.62,
+i.e. uninformative and at eff=0.15 inverted. mu and nu_hat agree to ~0.005
+inside a cell, confirming W5's remark that the normalisation only matters
+across sizes. **H25 clears its 0.8 bar by a wide margin once C2 is handled.**
+
+**A1b — the transpose holds too, so this is not one-directional.**
+
+```
+band                          N    rec  | AUC NU  AUC mu  AUC eff
+nu_hat < 0.6971             165  89/165 | 0.6606  0.5296  0.7757
+0.6971 <= nu_hat < 0.8891   165  53/165 | 0.9442  0.0923  0.9237
+nu_hat >= 0.8891            170  48/170 | 0.9705  0.0167  0.9756
+```
+
+NU separates at 0.66–0.97 inside fixed-nu_hat bands. Each coordinate survives
+conditioning on the other: **two coordinates, confirmed both ways.**
+(The 0.09/0.02 mu column is the C1 residual — at fixed nu_hat, mu is a pure
+proxy for sqrt(det2), i.e. for size, and inverts.)
+
+**A3 — the pair is a strong 2-parameter test, and its boundary is a product.**
+
+```
+model                          loglik     AUC   LOCO-CV AUC
+logNU only                    -244.74  0.7996      0.7564
+log nu_hat only               -293.89  0.6889      0.6648
+log mu only                   -321.61  0.6036      0.5688
+logNU + log nu_hat            -148.97  0.9397      0.9286
+logNU + log nu_hat + log eff  -125.53  0.9559        —
+
+likelihood-ratio, adding log nu_hat to log NU : 2*dLL = 191.56 on 1 df
+likelihood-ratio, adding log NU to log nu_hat : 2*dLL = 289.84 on 1 df
+                                     (chi2_1 = 10.83 at p = 0.001)
+```
+
+The P=1/2 boundary is `-0.3237 - 8.4890 log NU - 8.0657 log nu_hat = 0`, i.e.
+
+```
+    nu_hat * NU^1.052  <  0.9607   =>  recover
+```
+
+The exponent is **1.052, i.e. 1 to within 5%**, so the fitted boundary is just
+the product `NU * nu_hat < 0.96`; the plain product scores AUC 0.9395 against
+the fitted 0.9397, so nothing in the result depends on the fit. In-sample
+accuracy 0.866 (TP 156, FP 33, FN 34, TN 277), and leave-one-CURVE-out CV
+holds at 0.9286 — the gain over NU alone is not overfitting to 20 curves.
+
+**B1/B2/B3 (Thread 25b) — the product rule is size-stable; NU alone is not.**
+Fresh data, 12 curves x 5 strata x 5 seeds at each of 12/14/17/20 bits, dim 24
+fixed throughout.
+
+```
+bits    N     rec  | AUC PR  AUC NU*nuh  AUC NU  AUC nuhat  AUC mu
+  12  300  217/300 | 0.9088     0.9108   0.7960    0.7994   0.4496
+  14  300  159/300 | 0.9200     0.9197   0.8491    0.7196   0.4394
+  17  300   82/300 | 0.9464     0.9438   0.9626    0.5531   0.1487
+  20  300  119/300 | 0.9365     0.9370   0.8569    0.7757   0.4138
+
+best-balanced-accuracy cut, refitted independently per size:
+  PR thr    1.0043  0.8518  0.9542  1.0560   spread 1.24x   (bal acc .85 .84 .89 .86)
+  NU thr    1.1904  1.2184  1.1812  1.5805   spread 1.34x   (bal acc .77 .82 .91 .78)
+
+transfer of the UNREFITTED 17-bit rule PR < 0.9607:
+bits   TP   FP   FN   TN     acc  bal acc  FP rate
+  12  187   16   30   67  0.8467   0.8345   0.1928
+  14  139   31   20  110  0.8300   0.8272   0.2199
+  17   71   22   11  196  0.8900   0.8825   0.1009
+  20   92   19   27  162  0.8467   0.8341   0.1050
+```
+
+**H25b passes both clauses**: AUC(PR) >= 0.90 at all four sizes, threshold
+spread 1.24x against the 2x allowance. A single unrefitted cut carries
+balanced accuracy 0.83–0.88 over a 256x range in n. Note also that AUC(-NU) at
+17 bits reads 0.9626 on this 12-curve subset against 0.7996 on the 20-curve
+set of A3 — **NU's AUC is strongly curve-sample-dependent (0.80 vs 0.96) while
+PR's is not (0.9397 vs 0.9464)**, which is the same instability Thread 24 W4
+saw as the widening bracket.
+
+**B4 — the honest limitation. PR is a better SEPARATOR, not a better
+CERTIFICATE.**
+
+```
+bits  NU<=1 TP  NU<=1 FP | max safe PR  TP there   gain
+  12       104         0 |      0.5440        94  0.90x
+  14        78         0 |      0.6466        84  1.08x
+  17        55         0 |      0.7638        49  0.89x
+  20        29         0 |      0.6314        29  1.00x
+```
+
+`NU <= 1` holds its perfect record (0 FP at every size, 266 TP total) and the
+best zero-FP cut on PR certifies **no more instances than NU <= 1 does**
+(0.89x–1.08x, i.e. a wash). So the two statistics keep their roles: NU <= 1
+remains the sound, theorem-backed sufficient condition, and PR is the
+statistic that ranks the ambiguous band NU alone cannot resolve. Nothing here
+threatens the Thread 23/24 certificate result.
+
+**A4 — the secondary proposal is answered NO. The two-block step is nu_hat
+rebadged.** Thread 24 proposed `step = log2||b*_{m+1}|| - log2||b*_1||` and
+asked whether `step -> 0` predicts the wall better than NU or mu.
+
+```
+Spearman(step, log nu_hat) = -0.9078      Spearman(step, log NU) = +0.1054
+  eff    rec  | AUC(-step)  AUC nuhat        mean step
+ 0.05  99/100 |    0.5960     0.4242          -0.0567
+ 0.10  42/100 |    0.7697     0.7484          -0.1136
+ 0.15  21/100 |    0.8909     0.8813          -0.1430
+ 0.20  19/100 |    0.9295     0.9337          -0.1845
+ 0.25   9/100 |    0.8803     0.8816          -0.2171
+```
+
+The step column tracks nu_hat to within 0.02 at every eff >= 0.15 and the rank
+correlation with log nu_hat is -0.91. It is **not a third coordinate — it is a
+monotone reparametrisation of nu_hat that costs a full LLL reduction to
+compute, where nu_hat costs one 2D Gauss reduction.** Two further corrections
+to the W1b reading: the empirical direction is LARGER step -> recovery (the
+opposite of "step -> 0 at the wall"), and mean step is NEGATIVE and grows more
+negative with eff (-0.057 -> -0.217), so at eff >= 0.05 the two-block
+structure W1b saw at small K1 has already collapsed and inverted. Retire the
+step statistic.
+
+### Next step proposal
+
+**Thread 26 — derive the product, or falsify the derivation.**
+`NU * nu_hat < 0.96` with a fitted exponent of 1.052 and a threshold within
+4% of 1 is too clean to leave empirical. NU is a nearest-plane BDD quantity
+and nu_hat = lambda_1(L2)/sqrt(det L2) is a pure 2D-sublattice invariant, so a
+product of the two being scale-free and O(1) suggests a Minkowski-type
+statement about L0 = (m copies of L2) + the target row. Concretely:
+
+  H26: the LLL-reduced L0 recovers d iff `||e|| < c * lambda_1(L0) /
+       nu_hat` for a size-free c, i.e. the product rule is the statement
+       that the error must fall inside a ball whose radius is the first
+       minimum DEFLATED by the skew of the lambda-block.
+  Falsifier: measure lambda_1(L0) directly (fpylll SVP at dim 24 is cheap)
+       and test whether `||e|| * nu_hat / lambda_1(L0)` has a size-free
+       threshold with AUC >= that of PR (0.909-0.946). If its AUC is below
+       PR's at any of the four sizes, the Minkowski reading is wrong and PR
+       stays a fit.
+
+This is the first hypothesis in the Thread 20 -> 25 chain that predicts a
+quantity nobody has measured yet (lambda_1(L0)), rather than re-slicing the
+existing table, so it is a real test. Cost: one fpylll SVP call per instance
+on the 1200 instances already generated by `glv_hnp_phase2_product_rule.py`,
+~10 min. Add `--dump-json` there too, mirroring the strat script.
+
+Secondary: the exponent 1.052 and threshold 0.9607 are both fitted at 17 bits
+on 20 curves. Refit at each size (B2 already computes the thresholds: 1.0043,
+0.8518, 0.9542, 1.0560) and test whether the residual drift is explained by
+`log n` — if the threshold is genuinely constant the 1.24x spread should be
+pure sampling noise, which a bootstrap over curves would settle in minutes.
+
+Tertiary (carried from Thread 23/24, still unstarted): BKZ-beta sweep against
+NU, to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+Housekeeping: add `secp256k1_cm_audit/requirements.txt` pinning
+`fpylll cysignals sympy` — four consecutive runs have rediscovered that
+`cysignals` must be named explicitly.
+
+### Commits made
+
+(recorded in the follow-up commit below)

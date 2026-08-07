@@ -1,0 +1,114 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE a NU band?
+==============================================================================
+
+500 instances, dim 24, m = 12, 17-bit j=0 GLV curves
+NU bracket from Thread 24 W4: sufficient NU < 1.04, necessary NU > 2.199
+
+------------------------------------------------------------------------------
+EXP A1: AUC within each NU band.  NU is (nearly) constant inside a
+        band, so anything that still separates is a 2nd coordinate.
+------------------------------------------------------------------------------
+band                                              N      rec
+                                                 AUC mu  AUC nuh  AUC eff   AUC NU  AUC lam*  AUC step
+
+NU < 1.040  (nearest-plane SUFFICIENT)           94    92/94
+                                                0.1603   0.4592   0.9212   0.9837    0.5082    0.3587
+
+1.040 <= NU <= 2.199  (AMBIGUOUS — the H25 band)  366   97/366
+                                                0.6932   0.8403   0.7056   0.5656    0.3212    0.1748
+
+NU > 2.199  (nearest-plane says NOTHING recovers)   40     1/40
+                                                1.0000   1.0000   1.0000   1.0000    0.2564    0.0000
+
+H25 verdict target: AUC(-mu) inside the ambiguous band >= 0.8 ?  -> 0.6932
+  permutation p (AUC mu    > 0.5): 0.00050
+  permutation p (AUC nuhat > 0.5): 0.00050
+  permutation p (AUC NU    > 0.5): 0.02599
+
+------------------------------------------------------------------------------
+EXP A1b: the transpose (confound C3).  Condition on nu_hat bands
+         and ask whether NU still separates at fixed geometry.
+------------------------------------------------------------------------------
+band                            N      rec   AUC NU   AUC mu  AUC eff  AUC step
+nu_hat < 0.6971               165   89/165   0.6606   0.5296   0.7757    0.1241
+0.6971 <= nu_hat < 0.8891     165   53/165   0.9442   0.0923   0.9237    0.4611
+nu_hat >= 0.8891              170   48/170   0.9705   0.0167   0.9756    0.4570
+
+------------------------------------------------------------------------------
+EXP A2: double conditioning (confound C2).  Inside each
+        (NU band x eff stratum) cell neither NU nor eff can move.
+------------------------------------------------------------------------------
+NU band        eff    N     rec   AUC mu  AUC nuh   AUC NU  AUC step
+NU<1.04       0.05   75   75/75 (all rec)
+NU<1.04       0.10   17   16/17   0.5938   0.5938   0.8750    0.1875
+NU<1.04       0.15    1     0/1 (none rec)
+NU<1.04       0.20    1     1/1 (all rec)
+NU<1.04       0.25    0     0/0  (empty)
+1.04-2.20     0.05   24   23/24   0.4565   0.4565   0.4783    0.3913
+1.04-2.20     0.10   83   26/83   0.8819   0.8853   0.5277    0.1248
+1.04-2.20     0.15   96   21/96   0.8889   0.8825   0.3283    0.1105
+1.04-2.20     0.20   89   18/89   0.9276   0.9425   0.4695    0.0614
+1.04-2.20     0.25   74    9/74   0.8615   0.8615   0.6188    0.1402
+NU>2.20       0.05    1     1/1 (all rec)
+NU>2.20       0.10    0     0/0  (empty)
+NU>2.20       0.15    3     0/3 (none rec)
+NU>2.20       0.20   10    0/10 (none rec)
+NU>2.20       0.25   26    0/26 (none rec)
+
+------------------------------------------------------------------------------
+EXP A3: logistic fit on (log NU, log nu_hat).  If the two carry
+        independent information both coefficients stay significant
+        and the 2-feature model beats either 1-feature model.
+------------------------------------------------------------------------------
+model                              loglik     AUC   coefficients
+logNU only                        -244.74  0.7996   b0=+0.993  logNU=-4.243
+log nu_hat only                   -293.89  0.6889   b0=-1.452  lognuhat=-3.067
+log mu only                       -321.61  0.6036   b0=-13.180  logmu=+1.071
+logNU + log nu_hat                -148.97  0.9397   b0=-0.324  logNU=-8.489  lognuhat=-8.066
+logNU + log nu_hat + log eff      -125.53  0.9559   b0=-8.128  logNU=-5.364  lognuhat=-9.593  logeff=-3.000
+
+decision boundary of the 2-feature model (P = 1/2):
+  -0.3237 -8.4890*log(NU) -8.0657*log(nu_hat) = 0
+  i.e.  nu_hat * NU^1.052  <  0.9607   => recover
+  AUC of that single combined score: 0.9397
+  rule at P=1/2:  TP 156  FP 33  FN 34  TN 277   accuracy 0.8660
+  exponent is 1.052 ~ 1, so the boundary is essentially the
+  PRODUCT  NU * nu_hat  <  0.961.  AUC of the plain product: 0.9395
+
+leave-one-CURVE-out CV (20 curves; the fit above is in-sample and
+the 5 seeds of a curve are not independent):
+  logNU only                     held-out AUC = 0.7564
+  log nu_hat only                held-out AUC = 0.6648
+  log mu only                    held-out AUC = 0.5688
+  logNU + log nu_hat             held-out AUC = 0.9286
+
+likelihood-ratio, adding log nu_hat to log NU: 2*dLL = 191.56 on 1 df
+likelihood-ratio, adding log NU to log nu_hat: 2*dLL = 289.84 on 1 df
+(chi2_1 critical values: 3.84 at p=0.05, 10.83 at p=0.001)
+
+------------------------------------------------------------------------------
+EXP A4: the W1b two-block step as a predictor in its own right.
+        step = mean log2||b*_i|| over the tail block minus the head
+        block; W1b says step -> 0 exactly as the K1 wall is crossed.
+------------------------------------------------------------------------------
+  eff    N     rec  AUC step  AUC step1   AUC NU  AUC nuh |  mean step
+ 0.05  100  99/100    0.5960     0.6364   0.8687   0.4242 |    -0.0567
+ 0.10  100  42/100    0.7697     0.2266   0.7011   0.7484 |    -0.1136
+ 0.15  100  21/100    0.8909     0.1139   0.3496   0.8813 |    -0.1430
+ 0.20  100  19/100    0.9295     0.0793   0.5595   0.9337 |    -0.1845
+ 0.25  100   9/100    0.8803     0.1062   0.7277   0.8816 |    -0.2171
+
+(the AUC step column scores -step: the empirical direction is
+ LARGER step -> recovery, i.e. the OPPOSITE of what W1b's 'step -> 0
+ at the wall' reading predicts.)
+
+pooled AUC(-(-step)) = 0.6734
+pooled AUC(-step1)   = 0.3286
+Spearman(step, log nu_hat) = -0.9078
+Spearman(step, log NU)     = +0.1054
+Spearman(log mu, log nu_hat) = +0.6863
+
+==============================================================================
+done
+==============================================================================

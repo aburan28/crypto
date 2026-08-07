@@ -1,0 +1,11 @@
+# Python deps for the GLV-HNP Phase 2 lattice experiments.
+#
+# cysignals is a build/runtime dependency of fpylll but is NOT pulled in
+# automatically by `pip install fpylll`; four consecutive autolab runs
+# rediscovered this.  Install with:
+#
+#     pip install -r secp256k1_cm_audit/requirements.txt
+#
+fpylll
+cysignals
+sympy

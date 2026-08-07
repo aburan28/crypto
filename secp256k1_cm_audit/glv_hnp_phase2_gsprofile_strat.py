@@ -18,9 +18,14 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json FILE]
+
+--dump-json writes the per-instance table (one JSON object per row, including
+the full GS profile) so downstream re-analysis does not have to regenerate the
+500 instances.  Consumed by glv_hnp_phase2_nu_conditional.py (Thread 25).
 """
 
+import json
 import math
 import os
 import random
@@ -33,7 +38,16 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
+DUMP_KEYS = ('k', 'prof', 'NU', 'argmax', 'enorm', 'mu', 'l2', 'det2',
+             'nuhat', 'S_K1', 'S_K2', 'K2', 'n', 'K1', 'ok', 'eff', 'effq',
+             'lamstar', 'seed')
+
+
 if __name__ == "__main__":
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        dump_path = sys.argv[sys.argv.index("--dump-json") + 1]
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -59,10 +73,16 @@ if __name__ == "__main__":
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n), 'seed': seed})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if dump_path:
+        with open(dump_path, "w") as fh:
+            for r in rows:
+                fh.write(json.dumps({k: r[k] for k in DUMP_KEYS}) + "\n")
+        print(f"dumped {len(rows)} rows -> {dump_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
