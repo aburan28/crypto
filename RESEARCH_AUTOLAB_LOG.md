@@ -6523,4 +6523,4 @@ the empirical threshold as a function of beta.
 
 ### Commits made
 
-(recorded below after commit)
+a5c49f1 autolab 2026-08-07 #2: Thread 24 — H24 splits; [L0:L2^m]=n exactly; NU_half beats NU; brackets are not size-free
