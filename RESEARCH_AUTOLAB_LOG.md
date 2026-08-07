@@ -6538,3 +6538,228 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6497).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP Phase 2) is the correct pick under protocol
+rule (b): Thread 24 made measurable progress and left a falsifiable successor.
+
+Pre-registered hypothesis, verbatim from the Thread 24 entry:
+
+> H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+> gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+**Environment note.** This clone had neither `sympy` nor `fpylll`. Installed
+via pip; `fpylll` additionally needs `cysignals`, which is NOT pulled in as a
+dependency and whose first install attempt timed out against PyPI. Future runs:
+`pip3 install sympy cysignals fpylll` (cysignals BEFORE or WITH fpylll), and use
+`--timeout 120 --retries 5`. `gp` and `sage` are absent from this image.
+
+### Work done
+
+* Wrote `secp256k1_cm_audit/glv_hnp_phase2_nu_conditioned.py` (X0-X5) — the
+  pre-registered re-analysis, plus `--dump-json` as requested so the table
+  survives the run.
+* Table: 20 17-bit j=0 GLV curves x 5 eff strata x **10** seeds = 1000
+  instances, dim 24, float GS. The first 5 seeds are Thread 24b's `SEEDS`
+  verbatim, so rows 1-500 replicate that run bit-for-bit — **X0b reproduces
+  0.4242 / 0.8687 / 0.3232 / 0.4242 ... 0.8816 / 0.7277 / 0.1612 / 0.8816
+  exactly**, confirming Thread 24's table is reproducible from a clean clone.
+* H25 tested with a 2000-resample bootstrap CI rather than a bare point
+  estimate, since the pre-registered threshold (0.8) is a sharp cut.
+* X4's logistic fit produced a boundary suspiciously close to `NU*nu_hat = 1`.
+  That is a POST-HOC find, so it got its own script and its own out-of-sample
+  test rather than being reported from the fit that produced it:
+  `secp256k1_cm_audit/glv_hnp_phase2_product_law.py` (Y1-Y6), 3 sizes x 1000
+  instances = 3000 total.
+* Fixed a real performance bug found while writing Y5: `auc()` is O(|pos|*|neg|)
+  and the 3000-row bootstrap would not terminate. Added `auc_fast()` (Mann-
+  Whitney rank identity, O(N log N)); verified **exact** agreement with `auc()`
+  including ties over 300 randomised cases (max abs difference 0).
+
+### Findings
+
+**F1 — H25 as stated FAILS; the corrected form passes.** In the pre-registered
+band (N=723 of 1000, 200 recovered):
+
+```
+  AUC(-mu      ) = 0.6737  [0.6212, 0.7247]   <-- H25 FAIL (CI excludes 0.8)
+  AUC(-nu_hat  ) = 0.8162  [0.7756, 0.8543]   <-- passes on the point estimate
+  AUC(-NU      ) = 0.5693  [0.5204, 0.6189]   <-- NU is spent, as designed
+  AUC(-eff     ) = 0.7146  [0.6685, 0.7569]
+  AUC(-lamstar ) = 0.3070  [0.2622, 0.3522]   (control, still inverted)
+  AUC(-n       ) = 0.4162  [0.3695, 0.4633]   (control)
+```
+
+Thread 24 W5 concluded "the operative quantity is lambda_1(L2), and the
+sqrt(det) normalisation only matters across sizes." **That is now falsified.**
+mu and nu_hat have non-overlapping CIs in-band (0.674 vs 0.816); the
+normalisation is load-bearing, not cosmetic. H25 was written with the wrong
+variable, and with the right one it passes.
+
+The band is where the action is: recovery 191/194 below it, 200/723 inside,
+2/83 above — so NU's certificate is doing its job at both ends and answering
+nothing for 72% of instances.
+
+**F2 — both coordinates survive conditioning on the other.** X2/X3, quintiles:
+
+```
+NU quintile        N   rec   | AUC mu  AUC nu_hat  AUC NU
+(-inf,1.047)     200 195/200 | 0.1831     0.6159   0.9723
+[1.047,1.388)    200  74/200 | 0.5145     0.6902   0.7222
+[1.388,1.672)    200  35/200 | 0.7494     0.8343   0.5138
+[1.672,1.964)    200  53/200 | 0.8652     0.9436   0.5672
+[1.964,inf)      200  36/200 | 0.9546     0.9829   0.7732
+
+nu_hat quintile    N   rec   | AUC mu  AUC nu_hat  AUC NU
+(-inf,0.596)     200 161/200 | 0.3192     0.8305   0.7105
+[0.596,0.739)    200  49/200 | 0.1831     0.1885   0.8715
+[0.739,0.873)    200  60/200 | 0.0833     0.6440   0.9590
+[0.873,0.945)    200  89/200 | 0.0146     0.5238   0.9671
+[0.945,inf)      200  34/200 | 0.0482     0.5408   0.9738
+```
+
+nu_hat survives conditioning on NU (0.62-0.98, rising with NU); NU survives
+conditioning on nu_hat (0.71-0.97). Neither is mediated by the other. **mu does
+not survive**: conditioned on nu_hat it is 0.01-0.32, i.e. strongly INVERTED —
+mu's entire marginal signal is the nu_hat it contains. This is the sharpest
+statement of F1.
+
+**F3 (POST-HOC, then tested out of sample) — the product law.** X4 on the 1000
+17-bit rows:
+
+```
+model          weights                          AUC     acc
+NU only        +1.0182 -4.3010                0.8041  0.7870
+nu_hat only    -1.3566 -2.9664                0.6855  0.6590
+both           -0.2332 -8.2056 -7.5446        0.9357  0.8570
+both + eff     -7.9412 -4.8993 -8.8111 -2.9984 0.9525 0.8840
+
+boundary:  NU * nu_hat^0.9194 = 0.9720
+```
+
+Exponent within 8% of 1, constant within 3% of 1. Two free parameters landing
+on (1,1) is exactly what an overfit looks like, so Y1 refits independently at
+three sizes and Y2/Y3 score the parameter-free rule `PI = NU*nu_hat < 1`:
+
+```
+ bits  dim     N       rec        w1        w2    alpha        c      AUC     acc
+   12   16  1000  612/1000   -5.2563   -4.9026   0.9327   0.9289   0.9128  0.8230
+   17   24  1000  393/1000   -8.2056   -7.5446   0.9194   0.9720   0.9357  0.8570
+   20   24  1000  360/1000   -8.3681   -6.7000   0.8007   1.0043   0.9537  0.8820
+
+ bits     N       rec |  AUC(-PI)  AUC(-NU)  AUC(-nuh) |  acc@PI<1   base
+   12  1000  612/1000 |    0.9129    0.8376     0.7487 |    0.8270 0.6120
+   17  1000  393/1000 |    0.9352    0.8041     0.6855 |    0.8420 0.6070
+   20  1000  360/1000 |    0.9522    0.9095     0.7359 |    0.8880 0.6400
+
+transfer (rows = fit size, cols = test size), accuracy
+fit / test       12b       17b       20b
+   12 bits    0.8230    0.8530    0.8830
+   17 bits    0.8270    0.8570    0.8780
+   20 bits    0.8210    0.8530    0.8820
+PI<1 (free)   0.8270    0.8420    0.8880
+```
+
+alpha in [0.80, 0.93] and c in [0.93, 1.00] across a 256x range in n. The
+**unfitted** rule matches the best fitted logistic to <= 0.6 accuracy points at
+every size and beats a 12-bit fit applied at 20 bits. The two degrees of freedom
+were never being used. Pooled over 3000: AUC(-PI) 0.9365 [0.9289, 0.9447] vs
+AUC(-NU) 0.8613 [0.8474, 0.8742] vs AUC(-nu_hat) 0.7341 [0.7158, 0.7529];
+`PI < 1` gives TP 1221 / FP 299 / FN 144 / TN 1336, precision 0.803, recall 0.895.
+
+Unlike NU, PI does **not** degrade with size: AUC 0.913 -> 0.935 -> 0.952 from
+12 to 20 bits, whereas NU went 0.978 -> 0.860 over 12 -> 17 bits in Thread 24.
+The ambiguous bracket also stops widening (PI 3.22x -> 2.58x -> 2.51x).
+
+**F4 — Y4, PI beats both parents under both conditionings.** Not just whichever
+parent dominates a slice: at 17 bits, inside NU quintiles PI scores
+0.82/0.76/0.84/0.94/0.98 where NU scores 0.97/0.72/0.51/0.57/0.77; inside eff
+strata PI scores 0.85/0.92/0.89/0.92/0.84 where nu_hat scores
+0.42/0.74/0.88/0.93/0.86. Same pattern at 12 and 20 bits. PI is the combined
+coordinate, not a mixture artifact.
+
+**F5 — what PI < 1 means.** `PI < 1  <=>  NU < 1/nu_hat = sqrt(det L2)/lambda_1(L2)`.
+`NU <= 1` is the *theorem* for Babai nearest-plane; `1/nu_hat` is therefore the
+factor by which Kannan-LLL empirically **relaxes** the nearest-plane bound, and
+that factor is exactly the skewness of the lambda-block. Measured:
+
+```
+nu_hat over all 3000: min 0.2244  median 0.7369  max 1.0665
+Hermite (4/3)^(1/4) = 1.0746   -> violations: 0        (sanity check passes)
+1/nu_hat: min 0.9377  median 1.3585  90th pct 2.0700  max 4.4560
+
+instances with NU > 1 (nearest-plane gives NO guarantee):
+ bits  N(NU>1)  of those PI<1   recovered    rate |  NU>1 & PI>=1 rate
+   12      664            357         230  0.6443 |             0.1498
+   17      823            256         157  0.6133 |             0.1041
+   20      871            267         194  0.7266 |             0.0613
+```
+
+A 4.3x-11.9x lift in recovery rate among exactly the instances the sound
+certificate cannot call. And `nu_hat` needs **no lattice reduction** — it is a
+Gauss reduction of a 2x2 integer lattice built from `(n, lam, K1, K2)` — so a
+skewed lambda-block can be screened for *before* committing to LLL.
+
+**F6 — the W1b secondary is retired.** `step = log2||b*_m|| - log2||b*_0||`:
+
+```
+  eff     N      rec   step|rec  step|fail  AUC(+step)  headflat
+ 0.05   200  199/200    -0.0026    -0.2378      0.3769    1.2603
+ 0.10   200   94/200     0.2673    -0.3578      0.7381    1.2353
+ 0.15   200   44/200     0.6203    -0.3111      0.8934    1.2349
+ 0.20   200   37/200     0.4875    -0.2632      0.9153    1.2296
+ 0.25   200   19/200     0.2816    -0.2159      0.8569    1.2263
+
+pooled AUC(+step) = 0.6644     Spearman(step, log nu_hat) = -0.8779
+                               Spearman(step, log NU)     = +0.1330
+                               Spearman(step, eff)        = +0.0140
+```
+
+The sign is right (step > 0 on recovery, step < 0 on failure, exactly as W1b
+predicted), but `step` is a rank-0.88 proxy for `-log nu_hat` and it costs a
+full LLL reduction to compute, whereas nu_hat costs a 2x2 Gauss reduction. It
+adds nothing. Separately, **W1b's "the head is m exact copies of lambda_1(L2)"
+does not generalise**: at dim 24 the head's max/min ratio is mean 1.237, max
+1.756 (it was ~1.000 in the 12-bit/dim-16 profiles W1b printed by hand). The
+head is flat-ish, not flat.
+
+### Next step proposal
+
+**Thread 26 — derive the product law, or find where it breaks.**
+`PI = NU*nu_hat < 1` is at present a well-tested empirical rule with a
+suggestive reading (F5) and no derivation. Two concrete sub-tasks, in order:
+
+1. **The obvious falsifier first — decouple nu_hat from the recovery target.**
+   Every instance here draws `lam` as the true GLV eigenvalue, so `nu_hat` and
+   the signature distribution move together. `build_glv_lattice` already takes a
+   `lam_override` (`glv_hnp_common.py:235`) precisely to test representation
+   invariance. Re-run the 17-bit grid with `lam_override = lam + t*n` for
+   `t = 1, 2, 4, 8`: this changes `L2`, hence `nu_hat` and `PI`, while leaving
+   the *signatures and the secret unchanged*. H26: recovery tracks the new PI.
+   If it does, PI is causal and lam-representation is an attacker's free
+   parameter to optimise — which would be a genuinely new attack knob. If
+   recovery is unchanged while PI moves, PI is a correlate of the instance and
+   the law is descriptive only. This is the highest-information experiment
+   available and costs one flag on an existing script.
+2. **Derive `NU < 1/nu_hat`.** The candidate argument: LLL on `L0` finds a basis
+   whose last GS norm is `~ lambda_2(L2)` (Thread 24 W2 confirmed this to <= 4.3%,
+   `lambda_1*lambda_2/det(L2) = 1.0001..1.0429`), and `lambda_2 = det/lambda_1`,
+   so the nearest-plane radius scales as `1/nu_hat` relative to the isotropic
+   case. W2 is the one clause of H24 that HELD; it is the natural starting point.
+   Deliverable: either a proof of the exponent alpha = 1, or an identified extra
+   factor explaining why the 20-bit fit gives 0.80.
+
+Secondary: BKZ-beta sweep against PI rather than NU (unchanged in spirit from
+Threads 23/24, but PI is now the better x-axis). Tertiary: the `both + eff`
+model reaches AUC 0.9525 vs 0.9357 for `both`, so ~1.7 points of signal remain
+outside the product law — worth one look at what eff still carries.
+
+### Commits made
+
+(recorded below after commit)

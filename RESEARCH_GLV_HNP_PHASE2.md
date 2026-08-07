@@ -257,6 +257,59 @@ quirks.
   aware lattice?  If yes, the entire Phase 2 needs a different
   base reduction algorithm.
 
+## 8b. Empirical viability test (Threads 20–25, 2026-07-29 → 2026-08-07)
+
+Risk 1 of §4 asked when the GLV-aware lattice actually recovers `d`.
+The answer measured over 3000 instances at 12/17/20 bits is a
+**two-coordinate** test.  Neither coordinate alone suffices.
+
+| symbol | definition | needs LLL? |
+|---|---|---|
+| `L2` | the λ-block `⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` | no |
+| `μ` | `λ₁(L2)`, exact via Gauss reduction | no |
+| `ν̂` | `μ / √det(L2)` — the *skewness* of the λ-block, `ν̂ ≤ (4/3)^{1/4}` | no |
+| `NU` | `maxᵢ 2·\|⟨e, b*ᵢ⟩\| / ‖b*ᵢ‖²` on the projected lattice `L0` | yes |
+
+* `NU ≤ 1` is a **theorem**: Babai nearest-plane succeeds.  Verified
+  96 TP / 0 FP (Thread 24 W4).
+* `NU` is a *sound certificate* but a *degrading separator* for the
+  stronger Kannan-LLL recovery: pooled AUC 0.861, and inside a fixed
+  bias stratum it can be anti-predictive (AUC 0.416 at eff = 0.15).
+* `NU` and `ν̂` are near-independent (Spearman 0.101 pooled, ≈ 0 at
+  fixed eff), so they are genuinely different coordinates.
+* The empirical viability curve is the **product law**
+
+  ```
+  Π = NU · ν̂ < 1        (equivalently  NU < 1/ν̂ = √det(L2)/λ₁(L2))
+  ```
+
+  i.e. Kannan-LLL relaxes the nearest-plane bound by exactly the
+  λ-block skewness.  Fitting `logit p = w₀ + w₁ log NU + w₂ log ν̂`
+  independently at each size gives exponent `α = w₂/w₁` and constant
+  `c = exp(−w₀/w₁)`:
+
+  | bits | α | c | AUC |
+  |---|---|---|---|
+  | 12 | 0.933 | 0.929 | 0.913 |
+  | 17 | 0.919 | 0.972 | 0.936 |
+  | 20 | 0.801 | 1.004 | 0.954 |
+
+  The unfitted rule `Π < 1` matches the fitted logistic to ≤ 0.6
+  accuracy points at every size and transfers across sizes without
+  refitting (Thread 25b, `glv_hnp_phase2_product_law.py`).
+
+* Practical consequence.  Among the instances where nearest-plane
+  offers **no** guarantee (`NU > 1`), `Π < 1` still picks out a subset
+  recovering at 61–73%, versus 6–15% for `Π ≥ 1`.  `ν̂` is computable
+  from `(n, λ, K1, K2)` alone, so a skewed λ-block can be *screened for
+  before* running any reduction.
+
+* Falsified along the way: `λ* = min(λ, n−λ)/n` (Thread 20, AUC 0.15–0.44,
+  weakly inverted); the claim that `NU ≈ ν̂·√eff` (Thread 24 W6,
+  uncorrelated at fixed eff); raw `μ` as the operative quantity (Thread 25
+  X3 — conditioned on `ν̂`, AUC(`μ`) collapses to 0.01–0.32, so the
+  `√det` normalisation is essential, not cosmetic).
+
 ## 9. References
 
 - Gallant, Lambert, Vanstone, "Faster point multiplication on
