@@ -6648,4 +6648,4 @@ reduction moves the pair the same way it moved NU alone.
 
 ### Commits made
 
-(pending — see push step below)
+fd21f3a autolab 2026-08-07 #3: Thread 25 — raw mu falsified pooled, nu_hat survives; step is a free nu_hat proxy, joint (NU,step) AUC 0.945
