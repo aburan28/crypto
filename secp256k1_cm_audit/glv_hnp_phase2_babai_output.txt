@@ -1,0 +1,68 @@
+==============================================================================
+Thread 23b — exact BDD criterion NU and a Kannan-free Babai attack
+==============================================================================
+
+------------------------------------------------------------------------------
+EXP V1/V2: NU vs observed recovery, and Babai-CVP vs Kannan-LLL
+------------------------------------------------------------------------------
+NU = max_i 2|<e,b*_i>|/||b*_i||^2 on the LLL-reduced L0 (no Kannan row).
+Babai nearest-plane provably returns the planted vector iff NU <= 1.
+
+
+12-bit/2557  (lam* = 0.340, m = 8, n = 2659)
+    K1    eff   mean NU  NU<=1  BABAI  KANNAN  exact
+     2  0.039     0.517    5/5    5/5     5/5    5/5
+     3  0.059     0.828    5/5    5/5     5/5    5/5
+     4  0.078     0.959    3/5    5/5     5/5    3/5
+     6  0.117     1.330    0/5    5/5     5/5    0/5
+     8  0.156     1.332    1/5    5/5     5/5    1/5
+    12  0.235     1.703    0/5    0/5     1/5    0/5
+    16  0.313     1.871    0/5    0/5     0/5    0/5
+    24  0.469     2.627    0/5    0/5     0/5    0/5
+    32  0.626     2.844    0/5    0/5     0/5    0/5
+    48  0.939     4.214    0/5    0/5     0/5    0/5
+    64  1.252     3.726    0/5    0/5     0/5    0/5
+
+12-bit/2677  (lam* = 0.070, m = 10, n = 2647)
+    K1    eff   mean NU  NU<=1  BABAI  KANNAN  exact
+     2  0.039     0.522    5/5    5/5     5/5    5/5
+     3  0.059     0.819    4/5    4/5     5/5    4/5
+     4  0.079     1.032    2/5    2/5     5/5    2/5
+     6  0.118     1.430    0/5    0/5     0/5    0/5
+     8  0.157     1.699    0/5    0/5     0/5    0/5
+    12  0.236     2.035    0/5    0/5     0/5    0/5
+    16  0.314     1.940    0/5    0/5     0/5    0/5
+    24  0.471     3.414    0/5    0/5     0/5    0/5
+    32  0.629     2.937    0/5    0/5     0/5    0/5
+    48  0.943     3.911    0/5    0/5     0/5    0/5
+    64  1.257     4.342    0/5    0/5     0/5    0/5
+
+Babai-CVP vs Kannan-LLL agreement over the K1 grid: 19 agree, 3 differ.
+
+------------------------------------------------------------------------------
+EXP V3: is NU <= 1 a sharp predictor?  (per-seed confusion matrix)
+------------------------------------------------------------------------------
+predictor: NU <= 1   target: Kannan-LLL recovery   N = 110
+  TP   25   FP    0
+  FN   16   TN   69
+  accuracy = 0.855
+  NU | success : min 0.440  median 0.940  max 1.869  (n=41)
+  NU | failure : min 1.188  median 2.652  max 5.526  (n=69)
+
+------------------------------------------------------------------------------
+EXP V4: how sharp?  AUC and the two-sided bracket
+------------------------------------------------------------------------------
+AUC(-NU -> recovery) = 0.9777   (n_pos=41, n_neg=69)
+compare: Thread 20b's fitted nu_hat separator reached AUC 0.935
+  NU <  1.188  => recovery in 33/33 cases (sufficient)
+  NU >  1.869  => failure  in 50/50 cases (necessary)
+  ambiguous band [1.188, 1.869] holds 27/110 instances (24.5%)
+
+The theoretical bound NU <= 1 is SOUND but not tight: it certifies
+25 of the 41 successes with zero false positives, while Kannan-LLL
+in fact recovers up to NU ~ 1.87 — i.e. LLL/Kannan strictly beats
+the nearest-plane guarantee, by a factor of ~1.9 in NU.
+
+==============================================================================
+done
+==============================================================================

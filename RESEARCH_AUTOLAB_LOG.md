@@ -6103,3 +6103,213 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-07 (autolab run)
+
+### Task picked
+
+**Thread 23** — "reformulate the Phase-2 lattice so the target is lambda_1",
+the pre-registered next-step of the 2026-07-29 entry (log line ~6089).
+Priorities 1, 2, 4, 6 are CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is the only live thread; its last run
+(2026-07-29, 9 days ago) made measurable progress, so protocol rule (b)
+applies and its proposed sub-task is the correct pick.
+
+The 2026-07-29 falsifier was stated in advance:
+  (i)  sv/pv must rise above 1 after the reformulation, and
+  (ii) the K1 wall of exp T4 must move OUTWARD on the lam*=0.07 curve.
+  "If the wall stays at K1 ~ 4-6, then the wall is information-theoretic and
+   Phase 2 is at its ceiling."
+
+**Verdict: both clauses fail. The wall is not a lattice-formulation artifact.**
+A useful positive by-product came out of it anyway (exp V1-V4 below).
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, sympy 1.14.0. (Same note as 2026-07-29: `cysignals` is a
+  separate runtime import, `pip install fpylll` alone is not enough.)
+- `secp256k1_cm_audit/glv_hnp_common.py` — new. EC arithmetic, curve search,
+  signature generation and the Phase-2 lattice, extracted VERBATIM from
+  `glv_hnp_phase2_lambda_threshold.py` lines 83-411 so Thread 23 is exactly
+  comparable to Thread 20. Nothing in it is new.
+- `secp256k1_cm_audit/glv_hnp_phase2_projected.py` — new (exp U1-U5).
+  Implements the projected lattice: set S_D = 0, i.e. the d-row keeps its
+  (B_i*S_K1) entries but contributes NO coordinate. Rationale: d is uniform in
+  [0,n) — an UNBOUNDED unknown — yet the old construction charged the target
+  n^2*S_D^2/3 of squared norm for it. d is then recovered algebraically,
+  d = (k1_i + lam*k2_i - A_i) * B_i^{-1} mod n, with a full attacker-side
+  self-check over all m congruences.
+  Output: `glv_hnp_phase2_projected_output.txt` (167 lines).
+- `secp256k1_cm_audit/glv_hnp_phase2_babai.py` — new (exp V1-V4). Drops the
+  Kannan row entirely and solves the BDD directly: exact Gram-Schmidt,
+  Babai nearest-plane, and the exact per-instance criterion
+  `NU = max_i 2|<e, b*_i>| / ||b*_i||^2` (nearest-plane provably returns the
+  planted vector iff NU <= 1).
+  Output: `glv_hnp_phase2_babai_output.txt` (68 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (6.81s). No Rust touched.
+- Refactor check: after moving the U-experiments under a `__main__` guard so
+  `glv_hnp_phase2_babai.py` could import the builders, re-ran
+  `glv_hnp_phase2_projected.py` and diffed — output byte-identical.
+
+### Findings
+
+**U1 — the projection does exactly what it was designed to do, mechanically.**
+dim drops 2m+2 -> 2m+1, LLL emits exactly 1 zero row (the trivial vector
+n*S_D*e_m degenerating), recovery is preserved, and the algebraic d-recovery
+self-verifies on every congruence.
+
+| curve | K1 | lam* | OLD dim | OLD sv/pv | NEW dim | NEW sv/pv | 0-rows |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | 0.4673 | 14 | 0.603 | 13 | 0.843 | 1 |
+| 12-bit/2557 | 8 | 0.3400 | 18 | 0.517 | 17 | 0.532 | 1 |
+| 12-bit/2677 | 8 | 0.0699 | 22 | 0.422 | 21 | 0.813 | 1 |
+
+OLD shortest-vector energy is 1.000 in the d-column on all three (reproducing
+2026-07-29 exp T5 exactly, fresh container). NEW shortest-vector energy splits
+between the k1- and k2-blocks with **zero** Kannan energy.
+
+**U1b — the new lambda_1 is the lambda-block vector, and it is Thread 20b's
+nu_hat.** The NEW shortest vector is supported on exactly ONE coordinate pair
+(i, m+i) — every other coefficient is 0:
+
+```
+p=199   sv k1-coeffs [2,0,0,0,0,0]      k2-coeffs [15,0,0,0,0,0]
+p=2557  sv k1-coeffs [-3,0,...]         k2-coeffs [50,0,...]
+p=2677  sv k1-coeffs [-14,0,...]        k2-coeffs [43,0,...]
+```
+
+That is precisely `mu = lambda_1(L2)`, L2 = <(n*S_K1,0), (-lam*S_K1,S_K2)>,
+i.e. the UNNORMALISED form of the `nu_hat = lambda_1(L2)/sqrt(det L2)`
+separator found in Thread 20b (`glv_hnp_phase2_nuhat_control.py`). So this run
+supplies the structural reason nu_hat was ever a signal: once the trivial
+d-vector is projected away, mu literally IS lambda_1 of the whole lattice.
+It also independently reproduces nu_hat's counter-intuitive NEGATIVE sign —
+2677 has the LARGER mu (5096 vs 2738 at K1=8) and is the curve that fails.
+
+**U2 — falsifier (ii) FAILS. The wall does not move, at all.**
+
+```
+12-bit/2557 (lam*=0.340, m=8)   K1 = 2   3   4   6   8  12  16  24  32  48  64
+  OLD                               5/5 5/5 5/5 5/5 5/5 1/5 0/5 0/5 0/5 0/5 0/5
+  NEW                               5/5 5/5 5/5 5/5 5/5 1/5 0/5 0/5 0/5 0/5 0/5
+12-bit/2677 (lam*=0.070, m=10)
+  OLD                               5/5 5/5 5/5 0/5 0/5 0/5 0/5 0/5 0/5 0/5 0/5
+  NEW                               5/5 5/5 5/5 0/5 0/5 0/5 0/5 0/5 0/5 0/5 0/5
+```
+First-failure K1: OLD 12 / NEW 12, and OLD 6 / NEW 6. Identical.
+
+**U3 — identical again at 17 bits, 300 instances, 3 bias strengths.**
+
+| eff | OLD 5/5 | OLD wins | NEW 5/5 | NEW wins |
+|---|---|---|---|---|
+| 0.05 | 19/20 | 99/100 | 19/20 | 99/100 |
+| 0.15 | 3/20 | 21/100 | 3/20 | 21/100 |
+| 0.25 | 0/20 | 9/100 | 0/20 | 9/100 |
+
+Per-curve at eff=0.15 the two lattices agree on all 20 curves seed-for-seed.
+(Also an exact reproduction of Thread 20 exp T3 in a fresh container.)
+
+**Across U2+U3+U5 the OLD and NEW lattices agreed on 100% of ~700 instances.**
+Structural reason: OLD is a rank-1 *orthogonal* extension of NEW by
+t = n*S_D*e_m, so OLD/(Z.t) = NEW and every OLD vector is a NEW vector plus an
+independent d-coordinate reducible mod n*S_D. The d-column is behaviourally
+inert for LLL. Falsifier (i) is partly met — sv/pv rises from 0.42-0.60 to
+0.53-0.84, and reaches exactly 1.000 in several U5 rows — but it never once
+changes an outcome.
+
+**U5 — the decisive result: more data worsens the SVP margin and improves
+recovery, simultaneously.** mu depends on (n, lam, K1, K2) only, NOT on m;
+verified constant to the digit across m = 4..32. E||pv|| ~ n*sqrt(2m/3+1) grows.
+
+12-bit/2557, K1=8, exact mu = 2738 for every m:
+
+| m | E\|\|pv\|\| | mu/E\|\|pv\|\| | obs sv/pv | OLD | NEW |
+|---|---|---|---|---|---|
+| 4 | 5085 | 0.538 | 0.469 | 0/5 | 0/5 |
+| 6 | 5937 | 0.461 | 0.549 | 3/5 | 3/5 |
+| 8 | 6681 | 0.410 | 0.475 | 5/5 | 5/5 |
+| 12 | 7964 | 0.344 | 0.373 | 5/5 | 5/5 |
+| 16 | 9067 | 0.302 | 0.322 | 5/5 | 5/5 |
+| 24 | 10940 | 0.250 | 0.273 | 5/5 | 5/5 |
+| 32 | 12540 | 0.218 | 0.239 | 5/5 | 5/5 |
+
+The SVP margin falls monotonically 0.538 -> 0.218 while recovery rises
+0/5 -> 5/5 and stays there. **Recovery is therefore definitively not governed
+by an SVP condition**, and no reformulation that improves the SVP margin can
+move the wall. This closes the whole "make the planted vector lambda_1" line
+of attack, and retro-explains 2026-07-29 exp T4b (m=8/12/16/24/32 ->
+0,0,1,0,1) as SVP-margin decay fighting information gain.
+(12-bit/2677 at K1=4 shows the same shape with mu=9323: sv/pv reaches exactly
+1.000 at m=8,12,16 — the planted vector genuinely IS lambda_1 there — with
+recovery 5/5, but recovery is 5/5 at m=6 and m=32 too, where sv/pv < 1.)
+
+**U4 — the Gaussian heuristic over-predicts failure by 3-4x in K1**, as U5
+implies it must. For 2557 (m=8) GH says "fail" from K1=3 onward; observed
+recovery is 5/5 through K1=8. For 2677 (m=10) GH says fail from K1=4;
+observed wall is K1=6.
+
+**V1/V2 (Thread 23b) — the CVP formulation does not move the wall either.**
+Babai nearest-plane on the Kannan-free lattice L0 (dim 2m) vs Kannan-LLL over
+the 22-cell K1 grid: **19 cells agree, 3 differ, and all 3 favour Kannan-LLL**
+(2557 K1=12: 0/5 vs 1/5; 2677 K1=3: 4/5 vs 5/5; 2677 K1=4: 2/5 vs 5/5).
+Babai never beats Kannan-LLL. Both reformulations proposed on 2026-07-29 —
+projection along e_m, and explicit CVP — are now tested and neither helps.
+
+**V3/V4 — positive by-product: NU is a sound per-instance certificate and a
+better separator than nu_hat.** With
+`NU = max_i 2|<e, b*_i>| / ||b*_i||^2` on the LLL-reduced L0:
+
+```
+predictor NU <= 1   target Kannan-LLL recovery   N = 110
+  TP 25   FP  0
+  FN 16   TN 69      accuracy 0.855
+  NU | success : min 0.440  median 0.940  max 1.869  (n=41)
+  NU | failure : min 1.188  median 2.652  max 5.526  (n=69)
+```
+
+* **AUC(-NU -> recovery) = 0.9777**, vs the fitted nu_hat separator's 0.935
+  (2026-07-29). NU is derived, not fitted, and needs no per-bit-size tuning.
+* NU <= 1 has **zero false positives** in 110 instances — it is a sound
+  sufficient certificate, exactly as the nearest-plane theorem requires.
+* Two-sided empirical bracket: NU < 1.188 -> 33/33 recover; NU > 1.869 ->
+  50/50 fail; the ambiguous band is only 24.5% of instances.
+* Kannan-LLL recovers up to NU ~ 1.87, i.e. it **beats the nearest-plane
+  guarantee by a factor of ~1.9 in NU**. That gap is where the remaining
+  unexplained wall lives.
+
+**Two sign bugs worth recording** (both produced a clean-looking 0/5 that
+would have been logged as a negative result if not checked against theory):
+1. the CVP target is `tau_i = +A_i*S_K1`, not `-A_i*S_K1` — from
+   `A_i + B_i*d = k1_i + lam*k2_i (mod n)`;
+2. Babai returns the lattice point NEAREST tau, which is `tau - e`, not
+   `e - tau`. Both `+v` and `-v` are in the lattice; only one is close.
+Guard used: NU <= 1 must imply Babai success. It did not, which is what
+exposed the bugs.
+
+### Next step proposal
+
+**Thread 24 — derive nu_hat from the GS profile and close the ~1.9x gap.**
+NU is now known to be sound but loose. Its value is `max_i` over GS indices;
+the concrete sub-task is to record `argmax_i nu_i` and the full GS profile
+`log ||b*_i||` of L0 over the existing U2 grid, and test:
+
+  H24: the argmax concentrates at the tail indices i ~ 2m, and
+       `||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)` up to a constant.
+
+If true this *derives* the negative sign of nu_hat rather than fitting it
+(small mu => skew L2 => large lambda_2 => large tail GS norms => easier BDD),
+and turns the 2026-07-29 correlation into a closed form. Falsifier: if the
+argmax is spread across i rather than concentrated in the tail, the GS-profile
+explanation fails and nu_hat stays empirical.
+Cost: one pass over the existing U2 grid, no new curve search, ~2 minutes.
+`glv_hnp_phase2_babai.py:gram_schmidt` already returns everything needed.
+
+Secondary (cheap): the bracket [1.188, 1.869] was measured at 12 bits only.
+Re-measure on the 20 17-bit curves already built in U3 to check whether it is
+n-independent; if it is, NU gives a size-free viability test for Phase 2.
+
+Tertiary: BKZ-beta sweep against NU — quantify how far above NU=1.87 blockwise
+reduction pushes the empirical threshold as a function of beta.
+
+### Commits made
