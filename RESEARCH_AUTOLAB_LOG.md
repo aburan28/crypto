@@ -6292,3 +6292,5 @@ as a curve-level scalar (falsified 2026-07-29 T2), |B| as a predictor of LLL suc
 never the obstruction).
 
 ### Commits made
+
+acb71a1 autolab 2026-08-07: Thread 23 — d-free lattice makes planted vector lambda_1 but wall unmoved; wall is not information-theoretic
