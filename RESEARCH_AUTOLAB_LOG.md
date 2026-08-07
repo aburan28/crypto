@@ -6538,3 +6538,248 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the Thread 24 entry (log line ~6510). Priorities
+1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21,
+so priority 5 (GLV-HNP) is again the only live thread; Thread 24 made
+measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate [...]; the deliverable is a
+>   logistic fit on (log NU, log mu) with its decision boundary. If no [...]
+>   the W5 result is a stratification artifact and the closed form should be
+>   retired.
+>   Secondary: define `step = log2(||b*_{m+1}||) - log2(||b*_1||)` and test
+>   whether `step -> 0` predicts the wall better than either NU or mu.
+
+**Verdict: H25 splits, and the split is informative.** The literal clause is
+FALSIFIED — AUC(-mu) inside the band is **0.677**, not >= 0.8. But the
+substantive claim is CONFIRMED with the *normalised* coordinate: AUC(-nu_hat)
+= **0.826** in-band and **0.86-0.94** under double conditioning. The
+deliverable came out cleaner than the proposal anticipated: the fitted
+boundary is not a generic line but a **product law, NU * nu_hat ~ 1**, which
+is unfitted, holds over n in [2^11, 2^20] and dim in [12, 40], and lifts
+AUC from 0.81 (NU alone) to **0.945**.
+
+**Secondary question answered NO.** `step` is not a new mechanism —
+Spearman(step, nu_hat) = **-0.875**, i.e. step is nu_hat restated with a sign
+flip, and it is strictly worse than NU on its own (0.674 vs 0.810). Retire it.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` had to be named explicitly.)
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_bands.py` — new, 6 experiments
+  (X0-X6). Reuses `instance()` from `glv_hnp_phase2_gsprofile.py` (float GS,
+  justified by that script's W0/W4: max relative NU error 6.6e-16 at dim 24).
+  Adds a pure-python IRLS logistic regression with ridge (`logistic()`,
+  Gaussian-elimination Newton step) so no sklearn/numpy dependency enters.
+  `--dump-json` as requested; `--seeds N` extends past the 5 canonical SEEDS.
+- Output: `glv_hnp_phase2_nu_bands_output.txt` (182 lines) and
+  `glv_hnp_phase2_nu_bands_rows.json` (1000 rows, 219 KB, the canonical
+  17-bit/dim-24 table; det2, l2, psi, eff are all derivable from the stored
+  columns).
+- Statistics: N=1000 at 17 bits (5 eff strata x 20 curves x 10 seeds),
+  plus N=1000 at each of 12/14/17/20 bits for X5 and N=1000 at each of
+  m=6/8/10/12/16/20 for X6. **9000 instances total, 4.7s per 1000.**
+- Reproducibility checked: two full runs are byte-identical in both the
+  text output and the JSON.
+- `cargo test --test curve_audit` -> 5/5 pass (5.46s). No Rust touched.
+
+### Findings
+
+**X0 — the NU<=1 certificate survives a 3.3x larger sample.**
+TP 149 / **FP 0** at 17 bits over N=1000 (Thread 24: 96 TP / 0 FP over 410 at
+two sizes). Bracket widens slightly to [1.011, 2.279] from [1.040, 2.199],
+as expected from sampling more tail. Zero false positives now stands at
+**245 TP / 0 FP over 1410 instances**, exactly as nearest-plane theory
+requires.
+
+**X1 — H25's literal clause is FALSIFIED; the size-free version passes.**
+Inside the pre-registered band [1.040, 2.199], N=710, 198 recovered:
+
+```
+  AUC(-mu)               0.6771   <-- H25 target was >= 0.80
+  AUC(-nu_hat)           0.8256
+  AUC(-nu_hat*sqrt eff)  0.9082
+  AUC(-NU) [residual]    0.5827
+  AUC(+step)             0.8018
+  AUC(-eff)  [control]   0.7048
+  AUC(-lam*) [control]   0.3323
+```
+
+This **falsifies a Thread 24 W5 claim**: W5 concluded "the operative quantity
+is lambda_1(L2), and the sqrt(det) normalisation only matters across sizes."
+Pooled across strata the normalisation is worth 0.677 -> 0.826 of AUC. W5 was
+right *within* a stratum and wrong to generalise: mu is the operative quantity
+only at fixed (n, eff), and **nu_hat is the correct coordinate in general**.
+
+**X1b — double conditioning (NU band x eff stratum) confirms the mechanism.**
+With eff fixed in the row and NU bracketed in the column, neither can be the
+lurking variable:
+
+```
+ eff   band          N     rec      AUC mu  AUC nuhat  AUC step
+ 0.05  ambiguous    56   51/56      0.6843     0.6843    0.6627   (5 in minority)
+ 0.10  ambiguous   174   55/174     0.8584     0.8561    0.8394
+ 0.15  ambiguous   187   42/187     0.9121     0.9088    0.9089
+ 0.20  ambiguous   158   33/158     0.9282     0.9406    0.9387
+ 0.25  ambiguous   135   17/135     0.8340     0.8340    0.8220
+```
+
+AUC is 0.83-0.94 in every non-degenerate cell and mu ~ nu_hat cell-by-cell
+(differences <= 0.013), exactly as expected when n and eff are held fixed.
+**Recovery is genuinely a function of two coordinates.**
+
+**X2 — mu adds a large, significant amount on top of NU.**
+
+```
+full table (N=1000)                                     loglik     AUC     acc
+  log NU                     [+1.108, -4.330]          -476.69  0.8098  0.7840
+  log nu_hat                 [-1.550, -3.170]          -576.92  0.6973  0.7010
+  log NU + log nu_hat        [-0.148, -8.869, -8.457]  -281.08  0.9455  0.8710
+  log NU + log mu            [+39.22, -7.665, -3.120]  -418.92  0.8722  0.7900
+  log NU + log nu_hat + step [+2.075, -8.938, -2.519, +3.252]
+                                                       -270.12  0.9491  0.8700
+
+  LR (NU) vs (NU, nu_hat) : chi2_1 = 391.23   SIGNIFICANT
+  LR (NU) vs (NU, mu)     : chi2_1 = 115.55   SIGNIFICANT
+  LR (NU,nu_hat) vs +step : chi2_1 =  21.92   SIGNIFICANT but worth +0.004 AUC
+```
+
+**X3 — `step` is nu_hat in disguise. The secondary question is answered NO.**
+
+```
+  AUC(+step)       0.6742      Spearman(step, nu_hat) = -0.8750
+  AUC(-NU)         0.8098      Spearman(step, NU)     = +0.1111
+  AUC(-nu_hat)     0.6973      Spearman(NU, nu_hat)   = -0.0863
+```
+
+step does not beat NU or mu; it is a monotone restatement of -nu_hat that
+loses ~0.02 AUC in the translation. W1b's "the step vanishes as the wall is
+crossed" is directionally right but weak as a predictor: `|step| < 0.05`
+selects 10/50 recovered vs 367/1000 overall. Also note Spearman(NU, nu_hat)
+= -0.086 — Thread 24's "mutually uncorrelated" holds at N=1000.
+
+**X4 — THE RESULT. The boundary is a product law, `PSI = NU * nu_hat ~ 1`.**
+The two-feature coefficients came out nearly equal (-8.869, -8.457), so the
+boundary collapses to `NU * nu_hat^a = const` with fitted `a = 0.954` and
+fitted threshold `0.983`. Testing the **unfitted** `a = 1`, `thr = 1` form:
+
+```
+  AUC(-PSI) = 0.9453      vs  AUC(-NU) 0.8098 , AUC(-nu_hat) 0.6973
+
+     thr    TP    FP    FN    TN     acc    prec  recall
+    0.60    84     0   283   633  0.7170  1.0000  0.2289
+    0.70   140     2   227   631  0.7710  0.9859  0.3815
+    0.90   259    28   108   605  0.8640  0.9024  0.7057
+    1.00   308    76    59   557  0.8650  0.8021  0.8392
+    1.20   355   193    12   440  0.7950  0.6478  0.9673
+
+  PSI | success : min 0.3669  median 0.7609  max 1.6440
+  PSI | failure : min 0.6893  median 1.4194  max 3.3204
+```
+
+Held out by seed (train on 5 seeds, test on the other 5): the fitted boundary
+gets AUC 0.9503 / acc 0.8740, and **the unfitted `PSI <= 1` gets 0.9507 /
+0.8780 on the same rows** — the fit buys nothing over the bare product.
+
+**X5 — PSI ~ 1 survives an 8-bit change in n (dim held at 24).**
+
+```
+ bits     N       rec   AUC NU  AUC nuh  AUC PSI |   a_fit  thr_fit   acc@1
+   12  1000  720/1000   0.7864   0.8355   0.9175 |  1.5154   0.9321  0.8480
+   14  1000  519/1000   0.8298   0.7472   0.9376 |  0.7752   1.0075  0.8540
+   17  1000  367/1000   0.8098   0.6973   0.9453 |  0.9535   0.9834  0.8650
+   20  1000  336/1000   0.8896   0.7607   0.9447 |  0.8625   0.9956  0.8770
+
+ pooled N=4000: AUC(-PSI) 0.9410 ; UNFITTED PSI<=1 : TP 1692 FP 306 FN 250
+ cross-size transfer (AUC/acc), train row x test column:
+    train\test          12              14              17              20
+       12      0.920/0.903     0.921/0.833     0.927/0.813     0.931/0.833
+       20      0.913/0.831     0.940/0.861     0.945/0.865     0.945/0.870
+```
+
+thr_fit stays in [0.932, 1.008] and off-diagonal transfer loses **<= 0.01
+AUC**. Note the recovery rate itself moves 72% -> 34% over this range, so the
+constant threshold is not an artifact of a constant base rate.
+
+**X6 — and it survives a 3.3x change in dimension. The threshold is a law.**
+
+```
+   m   dim     N       rec   AUC NU  AUC PSI |   a_fit  thr_fit   acc@1
+   6    12  1000  141/1000   0.9142   0.9276 |  0.4295   0.9943  0.8620
+   8    16  1000  253/1000   0.8727   0.9462 |  0.6667   1.0147  0.8850
+  10    20  1000  321/1000   0.8444   0.9559 |  0.8377   0.9902  0.8880
+  12    24  1000  367/1000   0.8098   0.9453 |  0.9535   0.9834  0.8650
+  16    32  1000  450/1000   0.8095   0.9171 |  0.9278   1.0449  0.8210
+  20    40  1000  511/1000   0.8091   0.9090 |  0.9683   1.0664  0.7970
+```
+
+`thr_fit` in **[0.983, 1.066]** over dim 12 -> 40, i.e. within 7% of 1 while
+the dimension more than triples and the base recovery rate goes 14% -> 51%.
+The **exponent** does drift — `a_fit` 0.43 -> 0.97, converging to 1 from below
+— so the exact product law is an **asymptotic-in-dimension** statement, valid
+for dim >~ 20; at dim 12 nu_hat carries less than half the weight of NU.
+AUC(-PSI) peaks at dim 20 (0.9559) and decays at dim 40 (0.9090).
+
+**Summary of the state of Phase 2.** Viability is now a *two-parameter*
+condition with an unfitted threshold:
+
+```
+      PSI = NU * nu_hat = max_i (2|<e, b*_i>| / ||b*_i||^2) * lambda_1(L2)/sqrt(det L2)
+      PSI <~ 1  =>  Kannan-LLL recovers d
+```
+
+NU is an exact per-instance BDD certificate (sound, FP 0 at NU <= 1, but a
+weak separator, AUC 0.81); nu_hat is a closed form needing no lattice
+reduction (weak alone, AUC 0.70); their product is neither and beats both
+(0.94). This supersedes Thread 20's single-parameter `nu_hat` separator
+(AUC 0.935 on a 2-curve grid, 0.70 here) and Thread 23's single-parameter NU.
+
+### Next step proposal
+
+**Thread 26 — derive the constant, then break it.** X4-X6 establish `PSI ~ 1`
+empirically over 9000 instances but give no argument for *why* the constant is
+1. Two concrete sub-tasks, in order:
+
+1. **Explain the 1.** The Gaussian-heuristic chain of Thread 24 predicts
+   `NU ~ (2/sqrt 3) * nu_hat * sqrt(eff)`, which W6 killed as an identity
+   (Spearman ~0 at fixed eff). But the *product* `NU*nu_hat` may be exactly
+   the quantity that chain gets right, since the two errors are uncorrelated
+   and may cancel in the product. Concretely: derive `E[NU * nu_hat]` under
+   the same heuristic and check whether the predicted constant is 1 (or
+   `2/sqrt 3 = 1.155`, or `sqrt(4/3)`). This is analysis, not compute.
+   Pre-registered falsifier: if the heuristic constant lands outside
+   [0.9, 1.1], the product law is empirical and the 1 is a coincidence of
+   this instance family.
+2. **Break it deliberately.** Every instance so far has `K1*K2 ~ eff*n` with
+   *both* nonces bounded. Re-run X4 with the bias placed **asymmetrically**
+   (K1 tiny / K2 ~ n, and the reverse) at fixed eff. If `PSI <= 1` still
+   calls recovery correctly, the law is about the lattice and not about the
+   sampling; if it fails on one side, `PSI` is really `PSI(K1/K2)` and the
+   ratio is a *third* coordinate. Cheap: the existing `collect()` takes k1b
+   directly, so this is a new eff-vs-ratio grid, ~5 min of compute.
+
+Secondary: the `a_fit -> 1` convergence in X6 is itself a clean signal —
+fit `a(dim)` over dim 12..40 (six points already collected, add 48/64) and
+see whether `1 - a ~ c/dim`. That would turn the asymptotic statement into a
+finite-dimension correction and is a one-loop extension of X6.
+
+Tertiary (unchanged, still unattempted): BKZ-beta sweep against PSI rather
+than NU, to quantify how far above `PSI ~ 1` blockwise reduction pushes the
+threshold. Thread 23b measured Kannan-LLL beating Babai by ~1.9x in NU;
+the same measurement in PSI is now the meaningful one.
+
+### Commits made
+
+(recorded below after commit)

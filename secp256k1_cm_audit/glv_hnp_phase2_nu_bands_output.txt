@@ -1,0 +1,182 @@
+==============================================================================
+Thread 25 — condition on NU: is mu a second coordinate?  (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+1000 instances (float GS, dim 24) in 4.7s
+dumped 1000 rows -> glv_hnp_phase2_nu_bands_rows.json (219 KB)
+
+------------------------------------------------------------------------------
+EXP X0: recompute the NU bracket on this table
+------------------------------------------------------------------------------
+NU | success : min 0.574  median 1.083  max 2.279  (n=367)
+NU | failure : min 1.011  median 1.794  max 3.502  (n=633)
+NU <= 1 certificate: TP 149  FP 0
+observed bracket : sufficient NU < 1.011 , necessary NU > 2.279
+pre-registered   : [1.040, 2.199]  (Thread 24 W4, N=300)
+AUC(-NU) overall = 0.8098
+
+------------------------------------------------------------------------------
+EXP X1: THE TEST — AUC inside the ambiguous NU band
+------------------------------------------------------------------------------
+
+band pre-registered [1.040, 2.199] : N=710  recovered 198/710
+  AUC(-mu)               0.6771   <-- H25 target >= 0.80
+  AUC(-nu_hat)           0.8256
+  AUC(-nu_hat*sqrt eff)  0.9082
+  AUC(-NU) [residual]    0.5827   (should be ~0.5 if the band is narrow)
+  AUC(+step)             0.8018
+  AUC(+step_block)       0.8084
+  AUC(-eff)  [control]   0.7048
+  AUC(-lam*) [control]   0.3323
+
+band observed [1.011, 2.279] : N=754  recovered 215/754
+  AUC(-mu)               0.6510   <-- H25 target >= 0.80
+  AUC(-nu_hat)           0.8204
+  AUC(-nu_hat*sqrt eff)  0.9155
+  AUC(-NU) [residual]    0.6186   (should be ~0.5 if the band is narrow)
+  AUC(+step)             0.7948
+  AUC(+step_block)       0.8005
+  AUC(-eff)  [control]   0.7287
+  AUC(-lam*) [control]   0.3438
+
+------------------------------------------------------------------------------
+EXP X1b: DOUBLE conditioning — NU band x eff stratum
+------------------------------------------------------------------------------
+eff is fixed within a row and NU is bracketed within a column, so
+neither can be the lurking variable.
+
+  eff             band     N     rec   AUC mu  AUC nuhat  AUC step
+ 0.05            NU<lo   143 143/143       --         --        --
+ 0.05        ambiguous    56   51/56   0.6843     0.6843    0.6627
+ 0.05            NU>hi     1     1/1       --         --        --
+ 0.10            NU<lo    26   23/26   0.6014     0.6014    0.5072
+ 0.10        ambiguous   174  55/174   0.8584     0.8561    0.8394
+ 0.15            NU<lo     1     0/1       --         --        --
+ 0.15        ambiguous   187  42/187   0.9121     0.9088    0.9089
+ 0.15            NU>hi    12    0/12       --         --        --
+ 0.20            NU<lo     1     1/1       --         --        --
+ 0.20        ambiguous   158  33/158   0.9282     0.9406    0.9387
+ 0.20            NU>hi    41    1/41   1.0000     1.0000    0.9750
+ 0.25        ambiguous   135  17/135   0.8340     0.8340    0.8220
+ 0.25            NU>hi    65    0/65       --         --        --
+
+------------------------------------------------------------------------------
+EXP X2: logistic fit — does mu add anything on top of NU?
+------------------------------------------------------------------------------
+full table:
+  log NU                     w = [+1.1075, -4.3297]  loglik  -476.69  AUC 0.8098  acc 0.7840 (base 0.6330)
+  log nu_hat                 w = [-1.5499, -3.1699]  loglik  -576.92  AUC 0.6973  acc 0.7010 (base 0.6330)
+  log NU + log nu_hat        w = [-0.1484, -8.8688, -8.4567]  loglik  -281.08  AUC 0.9455  acc 0.8710 (base 0.6330)
+  log NU + log mu            w = [+39.2191, -7.6650, -3.1204]  loglik  -418.92  AUC 0.8722  acc 0.7900 (base 0.6330)
+  log NU + log nu_hat + step w = [+2.0746, -8.9380, -2.5187, +3.2518]  loglik  -270.12  AUC 0.9491  acc 0.8700 (base 0.6330)
+
+  LR test  (NU) vs (NU, nu_hat) : chi2_1 =   391.23 -> SIGNIFICANT at p=0.05
+  LR test  (NU) vs (NU, mu)     : chi2_1 =   115.55 -> SIGNIFICANT at p=0.05
+  LR test  (NU,nu_hat) vs +step : chi2_1 =    21.92 -> SIGNIFICANT at p=0.05
+
+ambiguous band only (N=710):
+  log NU                     w = [-0.1586, -1.7113]  loglik  -411.39  AUC 0.5827  acc 0.7211 (base 0.7211)
+  log nu_hat                 w = [-2.9491, -5.2581]  loglik  -293.93  AUC 0.8256  acc 0.8676 (base 0.7211)
+  log NU + log nu_hat        w = [-1.1432, -6.2781, -7.8275]  loglik  -243.97  AUC 0.8938  acc 0.8352 (base 0.7211)
+
+  LR test  (NU) vs (NU, nu_hat) : chi2_1 =   334.85 -> SIGNIFICANT
+
+  decision boundary (p=0.5) inside the band:
+    -1.1432 -6.2781*log NU -7.8275*log nu_hat = 0
+    log nu_hat = -0.1460 -0.8021*log NU
+
+------------------------------------------------------------------------------
+EXP X3: the step statistic on its own
+------------------------------------------------------------------------------
+AUC(+step)        overall = 0.6742
+AUC(+step_block)  overall = 0.6796
+AUC(-NU)          overall = 0.8098
+AUC(-nu_hat)      overall = 0.6973
+
+Spearman(step, NU)     = +0.1111
+Spearman(step, nu_hat) = -0.8750
+Spearman(NU, nu_hat)   = -0.0863
+
+step by recovery status:
+  success  N=367  min -0.7752  median -0.1402  max +3.1563
+  failure  N=633  min -0.8416  median -0.3385  max +1.0570
+
+|step| < 0.05 (profile flat, W1b's 'wall crossed'): 10/50 recovered vs 367/1000 overall
+
+------------------------------------------------------------------------------
+EXP X4: the fitted boundary is a PRODUCT LAW
+------------------------------------------------------------------------------
+The full-table coefficients on (log NU, log nu_hat) came out nearly
+EQUAL, so the boundary collapses to  NU * nu_hat^a = const with
+a ~ 1.  Test the unfitted a = 1 form directly:  PSI = NU * nu_hat.
+
+  fitted exponent  a = w_nuhat / w_NU = 0.9535   (a = 1 is the product law)
+  fitted threshold     = 0.9834   (at a = a_fit)
+  AUC(-PSI)            = 0.9453   vs AUC(-NU) 0.8098, AUC(-nu_hat) 0.6973
+
+     thr    TP    FP    FN    TN     acc    prec  recall
+    0.50    50     0   317   633  0.6830  1.0000  0.1362
+    0.60    84     0   283   633  0.7170  1.0000  0.2289
+    0.70   140     2   227   631  0.7710  0.9859  0.3815
+    0.80   206     6   161   627  0.8330  0.9717  0.5613
+    0.90   259    28   108   605  0.8640  0.9024  0.7057
+    0.95   286    53    81   580  0.8660  0.8437  0.7793
+    1.00   308    76    59   557  0.8650  0.8021  0.8392
+    1.10   338   133    29   500  0.8380  0.7176  0.9210
+    1.20   355   193    12   440  0.7950  0.6478  0.9673
+    1.50   365   355     2   278  0.6430  0.5069  0.9946
+    2.00   367   542     0    91  0.4580  0.4037  1.0000
+
+best accuracy 0.8660 at PSI <= 0.95  (NU-only best was acc 0.7800)
+
+PSI | success : min 0.3669  median 0.7609  max 1.6440
+PSI | failure : min 0.6893  median 1.4194  max 3.3204
+PSI bracket   : sufficient PSI < 0.6893 , necessary PSI > 1.6440  (overlap 2.38x; NU bracket overlap 2.26x)
+
+held-out seeds  (train 500 on seeds [3, 42, 555, 1234, 9999], test 500):
+  fitted exponent a = 0.9189   out-of-sample AUC 0.9503  acc 0.8740
+  UNFITTED  PSI <= 1  on the same held-out rows: AUC 0.9507  acc 0.8780
+
+------------------------------------------------------------------------------
+EXP X5: does PSI ~ 1 survive a change of n?  (dim held at 24)
+------------------------------------------------------------------------------
+If PSI is a law and not a 17-bit fit, the fitted exponent and
+threshold should be stable as n moves over 8 bits.
+
+ bits     N       rec   AUC NU  AUC nuh  AUC PSI |   a_fit  thr_fit   acc@1
+   12  1000  720/1000   0.7864   0.8355   0.9175 |  1.5154   0.9321  0.8480
+   14  1000  519/1000   0.8298   0.7472   0.9376 |  0.7752   1.0075  0.8540
+   17  1000  367/1000   0.8098   0.6973   0.9453 |  0.9535   0.9834  0.8650
+   20  1000  336/1000   0.8896   0.7607   0.9447 |  0.8625   0.9956  0.8770
+
+pooled across sizes (N=4000):
+  AUC(-NU)   0.8434    AUC(-nu_hat) 0.7618    AUC(-PSI)  0.9410
+  UNFITTED PSI <= 1 : TP 1692  FP 306  FN 250  acc 0.8610
+
+  cross-size transfer of the fitted boundary (AUC / acc):
+    train\test                12              14              17              20
+    12               0.920/0.903     0.921/0.833     0.927/0.813     0.931/0.833
+    14               0.909/0.815     0.940/0.869     0.943/0.860     0.944/0.870
+    17               0.916/0.842     0.938/0.853     0.945/0.871     0.945/0.868
+    20               0.913/0.831     0.940/0.861     0.945/0.865     0.945/0.870
+
+------------------------------------------------------------------------------
+EXP X6: is the threshold PSI ~ 1 a LAW or a dim-24 coincidence?
+------------------------------------------------------------------------------
+X5 held dim = 2m = 24 at every n, so it cannot separate 'threshold
+is 1' from 'threshold is f(dim) which happens to be 1 at dim 24'.
+Sweep m at fixed n (17 bits).  If thr_fit drifts with m, PSI <= 1
+is a fit; if it stays at ~1, it is a law.
+
+   m   dim     N       rec   AUC NU  AUC PSI |   a_fit  thr_fit   acc@1
+   6    12  1000  141/1000   0.9142   0.9276 |  0.4295   0.9943  0.8620
+   8    16  1000  253/1000   0.8727   0.9462 |  0.6667   1.0147  0.8850
+  10    20  1000  321/1000   0.8444   0.9559 |  0.8377   0.9902  0.8880
+  12    24  1000  367/1000   0.8098   0.9453 |  0.9535   0.9834  0.8650
+  16    32  1000  450/1000   0.8095   0.9171 |  0.9278   1.0449  0.8210
+  20    40  1000  511/1000   0.8091   0.9090 |  0.9683   1.0664  0.7970
+
+==============================================================================
+done
+==============================================================================
