@@ -1,0 +1,43 @@
+==============================================================================
+Thread 25 — does mu carry signal beyond NU inside the ambiguous band?
+==============================================================================
+
+20 17-bit j=0 GLV curves, 500 instances (same table as Thread 24 W5/W6)
+
+------------------------------------------------------------------------------
+H25: AUC(-mu -> recovery) restricted to the NU ambiguous band
+     band: 1.04 <= NU <= 2.199  (W4 sufficient/necessary bracket)
+------------------------------------------------------------------------------
+band N = 366 of 500   recovered 97   failed 269
+AUC(-mu     -> recovery) = 0.6932   (H25 threshold: 0.80)
+AUC(-nu_hat -> recovery) = 0.8403
+AUC(-NU     -> recovery) = 0.5656   (near 0.5 expected: NU range is compressed by construction)
+
+H25 FALSIFIED: AUC(-mu) = 0.6932 < 0.80
+
+per-eff-stratum breakdown inside the band:
+  eff    N    rec |   AUC mu  AUC nu_hat   AUC NU
+ 0.05   24  23/24 |   0.4565      0.4565   0.4783
+ 0.10   83  26/83 |   0.8819      0.8853   0.5277
+ 0.15   96  21/96 |   0.8889      0.8825   0.3283
+ 0.20   89  18/89 |   0.9276      0.9425   0.4695
+ 0.25   74   9/74 |   0.8615      0.8615   0.6188
+
+------------------------------------------------------------------------------
+Secondary: step = log2||b*_{m+1}|| - log2||b*_1|| as a predictor
+------------------------------------------------------------------------------
+pooled AUC(-step -> recovery)  = 0.3286   (0.5 = uninformative; report as-is, sign not assumed)
+pooled AUC(+step -> recovery)  = 0.6714
+Spearman(step, mu)  = -0.6627
+Spearman(step, NU)  = 0.1351
+
+per-eff-stratum AUC(step) (sign chosen to be >=0.5 if any signal):
+  eff=0.05  N=100  AUC(-step)=0.6364  AUC(+step)=0.3636
+  eff=0.10  N=100  AUC(-step)=0.2266  AUC(+step)=0.7734
+  eff=0.15  N=100  AUC(-step)=0.1139  AUC(+step)=0.8861
+  eff=0.20  N=100  AUC(-step)=0.0793  AUC(+step)=0.9207
+  eff=0.25  N=100  AUC(-step)=0.1062  AUC(+step)=0.8938
+
+==============================================================================
+done
+==============================================================================

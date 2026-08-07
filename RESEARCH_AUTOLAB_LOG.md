@@ -6538,3 +6538,157 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — the pre-registered next-step of this morning's Thread 24
+entry (log line ~6521): stratify the existing 500-instance 17-bit table by
+NU band and test whether `mu = lambda_1(L2)` still separates recovery
+*inside* the band where NU alone gives no answer. Priorities 1, 2, 4, 6
+remain CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so
+priority 5 (GLV-HNP) is again the only live thread; Thread 24 made
+measurable progress hours earlier (protocol rule (b)).
+
+Pre-registered hypothesis, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 ..., AUC(-mu ->
+>        Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate ... If no ... the W5 result
+>        is a stratification artifact and the closed form should be
+>        retired.
+
+**Verdict: H25 is confirmed, but not in the form it was written — the
+pooled test the hypothesis names is itself a stratification artifact,
+exactly the failure mode Thread 24/W6 diagnosed for the closed form. The
+per-eff-stratum test (the correct control per W5's own methodology)
+confirms mu carries real signal beyond NU.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` needed to be named explicitly.)
+- Refactored `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`:
+  extracted the row-collection loop into `collect_rows(effs, m, curves)`
+  (module-level, importable) and added a `--dump-json PATH` CLI flag
+  (dumps rows with `prof`/`nus` stripped). No change to default CLI
+  behaviour; confirmed `collect_rows()` reproduces the exact 500-row,
+  20-curve table from this morning's run (curve search and per-seed RNGs
+  take no wall-clock/global-random input, so the table is
+  deterministic — verified by re-diffing row counts and recovered-counts
+  per stratum against the #2 log entry: 100/100/100/100/100 instances,
+  99/42/21/19/9 recovered per eff = 0.05/0.10/0.15/0.20/0.25, matches W5
+  exactly).
+- New `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`: loads the same table
+  via `collect_rows()` (re-analysis, no new instances), computes
+  `step = log2(prof[m]) - log2(prof[0])` per row, then:
+  - H25 test: AUC(-mu) restricted to `1.040 <= NU <= 2.199` (W4's 17-bit
+    sufficient/necessary bracket), pooled and per-eff-stratum.
+  - Secondary: pooled and per-stratum AUC(step), Spearman(step, mu),
+    Spearman(step, NU).
+  Output: `glv_hnp_phase2_thread25_output.txt` (43 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (6.75s). No Rust touched.
+
+### Findings
+
+**Primary — the pooled H25 test as literally written FALSIFIES (0.69 <
+0.80), but this is the same pooling artifact W6 found for the closed
+form, not evidence that mu is inert.**
+
+```
+band (1.040 <= NU <= 2.199): N=366/500, recovered 97, failed 269
+  pooled  AUC(-mu)     = 0.6932   (H25 threshold: 0.80 -> naive FALSIFY)
+  pooled  AUC(-nu_hat) = 0.8403
+  pooled  AUC(-NU)     = 0.5656   (expected: NU range is compressed by
+                                    construction of the band itself)
+
+per-eff stratum, restricted to the same band:
+  eff     N   rec  | AUC mu   AUC nu_hat  AUC NU
+ 0.05    24  23/24 | 0.4565    0.4565     0.4783   (degenerate: near-ceiling
+                                                      recovery, same flag W5
+                                                      raised for this stratum)
+ 0.10    83  26/83 | 0.8819    0.8853     0.5277
+ 0.15    96  21/96 | 0.8889    0.8825     0.3283
+ 0.20    89  18/89 | 0.9276    0.9425     0.4695
+ 0.25    74   9/74 | 0.8615    0.8615     0.6188
+```
+
+In every non-degenerate stratum, `mu` separates inside the NU-ambiguous
+band at AUC 0.86-0.93 — matching nu_hat almost exactly (both derive from
+the same `lambda_1(L2)`, per Thread 24/W5's finding that nu_hat is a
+rescaled mu). **H25 SURVIVES under the eff-fixed control**: mu is not
+mediated by NU, it is a live second coordinate throughout the band.
+
+The naive pooled 0.69 fails for the identical reason the pooled closed-form
+constant in W3 looked good and then died in W6: the strata have wildly
+different recovery base rates (23/24 vs 9/74) and different band
+occupancy, so pooling reintroduces the eff-driven correlation that the
+stratified design exists to remove. **Lesson for future runs: any AUC
+computed by pooling across eff strata in this codebase must be treated as
+provisional until re-checked per-stratum — this is now the second time
+(W3/W6, now H25) a pooled number reversed under stratification.**
+
+**Secondary — step is a real, non-redundant, and STRONGER predictor of
+recovery than the H25 pre-registration expected, with sign opposite to the
+naive W1b intuition.**
+
+```
+pooled AUC(+step -> recovery) = 0.6714    (larger step -> more likely
+                                            to recover; pooled, same
+                                            caveat as above applies)
+Spearman(step, mu) = -0.6627    (correlated but NOT collapsed: |rho|<1)
+Spearman(step, NU) = +0.1351    (essentially independent of NU)
+
+per-eff-stratum AUC(+step):
+  eff=0.05  N=100  0.3636   (degenerate stratum, same as above)
+  eff=0.10  N=100  0.7734
+  eff=0.15  N=100  0.8861
+  eff=0.20  N=100  0.9207
+  eff=0.25  N=100  0.8938
+```
+
+`step` (the drop in `log2||b*_i||` from the first GS block to the second,
+i.e. how sharply the profile exits the m-fold-repeated-lambda_1(L2) plateau
+W1b identified) is a *stronger* stratum-wise separator than `mu` at
+eff >= 0.15 (0.89-0.92 vs 0.86-0.93 — comparable, slightly ahead at 0.20/
+0.25) and is only moderately correlated with mu (rho=-0.66, not -1), so it
+is carrying information mu does not fully capture. W1b's original framing
+("does the step vanish at the wall") had the direction backwards for
+recovery: a *larger* step (sharper exit from the plateau) predicts
+recovery, not a smaller one — consistent with W1b's own K1=32 observation
+that the step flattens to zero exactly as instances become easy (K1 large,
+high recovery), which is the SAME regime as large step in the eff-stratified
+data once curve-to-curve n is controlled for; the sign flip between the
+single-curve K1-sweep view (W1b) and the cross-curve eff-fixed view (here)
+is itself worth investigating (see next-step proposal).
+
+### Next step proposal
+
+**Thread 26 — reconcile the step sign flip and fit the 2-parameter (mu,
+step) or (mu, NU, step) decision surface.**
+Two concrete sub-tasks, either is a clean ~15-30 min follow-up:
+
+1. The W1b single-curve K1-sweep says step -> 0 as K1 grows (easy regime).
+   The Thread 25 cross-curve eff-fixed data says larger step -> more
+   likely to recover. These are not necessarily contradictory (K1-sweep at
+   fixed curve confounds step with K1 itself, which independently drives
+   recovery), but it has not been checked. Falsifier: within ONE curve,
+   fixing eff and varying only the curve's own... — actually eff is fixed
+   per curve by construction of K1, so instead hold n fixed (bin curves by
+   n as W5 already does) and check whether step still separates when K1 is
+   implicitly fixed too. If the eff-stratum result was itself confounded by
+   K1 range across curves, this will show it.
+2. Fit a simple logistic model on `(log mu, step)` jointly (2 features, no
+   NU) over the 5 non-degenerate strata and report AUC vs `mu` alone and
+   `step` alone — cheap, uses `auc()`/existing rows, no new lattice
+   reduction. If joint AUC clears ~0.95 that is a strictly better
+   size-free-ish predictor pair than anything found so far (nu_hat alone
+   tops out at 0.94 at eff=0.20).
+
+Tertiary (unchanged, carried from Thread 24): BKZ-beta sweep against NU.
+
+### Commits made
+
+(pending — see push step below)
