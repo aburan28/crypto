@@ -1,0 +1,137 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE an NU band?  (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+1600 instances (float GS, dim 24, 8 eff x 20 curves x 10 seeds) in 7.5s
+recovery 618/1600 = 0.386
+
+------------------------------------------------------------------------------
+EXP X0: the NU bracket on this table — does Thread 23's certificate
+        still hold, and how many instances land in the band?
+------------------------------------------------------------------------------
+NU | success : min 0.574  median 1.140  max 2.255   (n=618)
+NU | failure : min 1.001  median 1.676  max 4.067   (n=982)
+NU <= 1 : TP 222  FP 0   (nearest-plane guarantee: FP must be 0)
+observed bracket here: sufficient NU < 1.001 , necessary NU > 2.255
+pre-registered band [1.04, 2.199]
+
+         NU band      N        rec    rate
+     [0.00,0.70)     21      21/21   1.000
+     [0.70,1.04)    226    219/226   0.969
+     [1.04,1.40)    367    149/367   0.406
+     [1.40,1.80)    473     98/473   0.207
+     [1.80,2.20)    366    126/366   0.344
+     [2.20,3.00)    140      5/140   0.036
+      [3.00,inf)      7        0/7   0.000
+
+------------------------------------------------------------------------------
+EXP X1: H25 — AUC of mu (and nu_hat) INSIDE the ambiguous NU band.
+        NU is uninformative here by construction, so any AUC > 0.5
+        is signal NU does not carry.
+------------------------------------------------------------------------------
+band [1.04, 2.199] : N=1206  recovery 373/1206 = 0.309
+
+                 score  AUC in band
+     mu  (H25 primary)       0.6599
+ nu_hat = mu/sqrt(det)       0.8177
+         NU  (control)       0.5562
+       lam*  (control)       0.3381
+                   eff       0.7144
+      nu_hat*sqrt(eff)       0.9068
+  step (larger=better)       0.7984
+
+H25 threshold is AUC(mu) >= 0.8 inside the band.
+  AUC(mu)     = 0.6599  -> FAILS
+  AUC(nu_hat) = 0.8177  -> HOLDS
+
+sub-bands (does NU still trend inside the band?):
+        sub-band      N    rate   AUC mu  AUC nu_hat   AUC NU
+     [1.04,1.40)    367   0.406   0.4843      0.6907   0.7158
+     [1.40,1.80)    473   0.207   0.7131      0.8347   0.5043
+     [1.80,2.20)    366   0.344   0.9434      0.9799   0.5248
+
+------------------------------------------------------------------------------
+EXP X2: 2-parameter logistic fit.  Cross-curve split: 10 curves
+        train / 10 curves test, so the boundary must generalise to
+        curves it has never seen.
+------------------------------------------------------------------------------
+train 800 inst / 10 curves    test 800 inst / 10 curves
+
+               model  test AUC  test acc  band AUC   weights
+             NU only    0.6681    0.6787    0.4422   [+1.579 -9.711]
+         nu_hat only    0.7985    0.5650    0.8942   [-1.175 -1.211]
+             mu only    0.4181    0.6000    0.2043   [-45.741 +3.736]
+         NU + nu_hat    0.7388    0.6800    0.5620   [+1.194 -9.585 -1.501]
+             NU + mu    0.6168    0.6737    0.3615   [-17.669 -9.169 +1.595]
+   NU + nu_hat + eff    0.8164    0.7325    0.6904   [-8.857 -6.695 -2.516 -4.000]
+
+baseline: always-predict-majority accuracy on test = 0.5150
+band test set N = 609, recovery 263/609
+
+------------------------------------------------------------------------------
+EXP X3: the two-block step of W1b.  step = log2||b*_{m+1}|| -
+        log2||b*_1||; W1b saw it vanish as the wall is crossed.
+------------------------------------------------------------------------------
+   eff     N       rec  mean step  AUC step   AUC NU  AUC nu_hat
+ 0.050   200   193/200     -0.003    0.6965   0.8645      0.6295
+ 0.075   200   154/200     -0.034    0.6753   0.7168      0.6510
+ 0.100   200    84/200     -0.058    0.7625   0.6609      0.7555
+ 0.125   200    56/200     -0.079    0.7963   0.5378      0.8150
+ 0.150   200    39/200     -0.102    0.9138   0.3587      0.9101
+ 0.175   200    37/200     -0.133    0.9516   0.4586      0.9585
+ 0.200   200    32/200     -0.125    0.9444   0.5219      0.9501
+ 0.250   200    23/200     -0.167    0.8806   0.6416      0.8992
+
+pooled AUC(step, larger=better) = 0.6892
+pooled AUC(-NU)                 = 0.7614
+pooled AUC(-nu_hat)             = 0.7150
+Spearman(step, log nu_hat)      = -0.8832
+Spearman(step, log NU)          = 0.1389
+Spearman(step, log eff)         = 0.0276
+AUC(step) inside the NU band    = 0.7984
+
+------------------------------------------------------------------------------
+EXP X5: X0 showed the recovery rate is NON-MONOTONE in NU (it dips
+        at [1.4,1.8) then rises at [1.8,2.2)).  Is that a real
+        effect or an eff-mixing artifact?  Condition on eff.
+------------------------------------------------------------------------------
+   eff     N |            T1            T2            T3
+             | rate (NU med) rate (NU med) rate (NU med)
+ 0.050   200 |  1.000 (0.72)  1.000 (0.92)  0.897 (1.17)
+ 0.075   200 |  0.970 (0.93)  0.697 (1.12)  0.647 (1.51)
+ 0.100   200 |  0.712 (1.06)  0.152 (1.34)  0.397 (1.72)
+ 0.125   200 |  0.364 (1.16)  0.121 (1.52)  0.353 (1.90)
+ 0.150   200 |  0.136 (1.33)  0.091 (1.62)  0.353 (1.97)
+ 0.175   200 |  0.121 (1.45)  0.242 (1.80)  0.191 (2.20)
+ 0.200   200 |  0.136 (1.52)  0.227 (1.88)  0.118 (2.19)
+ 0.250   200 |  0.152 (1.69)  0.182 (1.98)  0.015 (2.51)
+
+T1/T2/T3 = NU terciles WITHIN the eff stratum (T1 = smallest NU).
+Monotone-in-NU would give rate(T1) > rate(T2) > rate(T3) in every row.
+strata violating monotonicity: 6/8
+
+------------------------------------------------------------------------------
+EXP X6: if NU enters non-monotonically, the X2 logistic is
+        MISSPECIFIED in log NU.  Does a quadratic NU term rescue
+        the 2-parameter model?
+------------------------------------------------------------------------------
+
+                 model  test AUC  test acc  band AUC
+           nu_hat only    0.7985    0.5650    0.8942
+         NU^2 + nu_hat    0.7811    0.6825    0.6318
+             NU^2 only    0.6680    0.6725    0.4422
+          nu_hat + eff    0.8483    0.7600    0.7669
+   NU^2 + nu_hat + eff    0.8352    0.7362    0.7285
+
+------------------------------------------------------------------------------
+EXP X4: size check — repeat X1 at 14 bits (dim 20).
+------------------------------------------------------------------------------
+20 curves, 1600 instances (dim 20) in 4.4s
+14-bit bracket: sufficient NU < 1.002 , necessary NU > 2.165   (FP at NU<=1: 0)
+  17-bit band [1.040,2.199] N=1158 rec 450/1158  AUC mu 0.7319  AUC nu_hat 0.8353  AUC NU 0.6538
+  own bracket [1.002,2.165] N=1185 rec 470/1185  AUC mu 0.7147  AUC nu_hat 0.8230  AUC NU 0.6553
+
+==============================================================================
+done
+==============================================================================

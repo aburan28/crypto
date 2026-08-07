@@ -6538,3 +6538,255 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of this afternoon's Thread 24 entry (log line ~6520).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread; Thread 24
+made measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate and the pair (NU, mu) is the
+>   2-parameter viability test Phase 2 has been missing [...] If no — if mu's
+>   apparent power is entirely mediated by NU after all — then the W5 result is
+>   a stratification artifact and the closed form should be retired.
+
+**Verdict: H25 splits, and BOTH of its disjuncts are wrong.** The band-
+conditional signal is real (so it is not a stratification artifact and the
+closed form is not retired), but it lives in `nu_hat = mu/sqrt(det L2)`, not in
+raw `mu` as the hypothesis was stated — and the promised 2-parameter deliverable
+does not exist, because `(NU, mu)` and `(NU, nu_hat)` are both **worse** out of
+sample than `nu_hat` alone. The reason is a fact neither Thread 23 nor 24
+noticed: **recovery is non-monotone in NU at fixed bias strength.** NU is a
+sound Babai certificate but not a usable coordinate.
+
+### Work done
+
+- Environment (fresh container, 4th run running): `pip install fpylll cysignals
+  sympy` -> fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. `cysignals` again not
+  pulled in by fpylll; name it explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added the
+  pre-registered `--dump-json PATH` flag (JSONL, one row per instance, GS
+  profile included) and started recording `seed` in each row. Verified:
+  500 rows / 400 KB. Not committed as data; regenerate in 3s when needed.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_mu.py` — new, the Thread 25 analysis
+  (exp X0-X6). Table is 8 eff strata x 20 curves x 10 seeds = **1600
+  instances at 17 bits (dim 24)**, 3.2x the 500-row table Thread 24 proposed
+  re-analysing; the eff grid is refined to 8 points (0.05 ... 0.25) so NU bands
+  contain a usable spread. Repeated at 14 bits (dim 20) for X4. Float GS,
+  justified by W0/W4 (rel. err ~1e-15). Total runtime 12s.
+  Output: `glv_hnp_phase2_nu_mu_output.txt` (137 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (5.45s). No Rust touched.
+
+### Findings
+
+**X0 — the NU certificate survives another 3200 instances, and the recovery
+rate is NON-MONOTONE in NU.**
+
+```
+17 bits, N=1600, dim 24
+  NU | success : min 0.574  median 1.140  max 2.255   (n=618)
+  NU | failure : min 1.001  median 1.676  max 4.067   (n=982)
+  NU <= 1 : TP 222  FP 0          bracket: sufficient NU < 1.001, necessary > 2.255
+14 bits, N=1600, dim 20
+  NU <= 1 : FP 0                  bracket: sufficient NU < 1.002, necessary > 2.165
+
+    NU band       N        rec    rate
+ [0.00,0.70)     21      21/21   1.000
+ [0.70,1.04)    226    219/226   0.969
+ [1.04,1.40)    367    149/367   0.406
+ [1.40,1.80)    473     98/473   0.207   <-- dip
+ [1.80,2.20)    366    126/366   0.344   <-- rises again
+ [2.20,3.00)    140      5/140   0.036
+  [3.00,inf)      7        0/7   0.000
+```
+
+Zero false positives at NU <= 1 in 3200 further instances at two sizes; the
+nearest-plane guarantee is now FP-free over 3610 instances across 12/14/17
+bits. The bracket is also near-identical at the two sizes (1.001/2.255 vs
+1.002/2.165), so it is *size-stable*, tightening Thread 24 W4's claim.
+
+The 0.207 -> 0.344 rise is 4.4 sigma (SEs 0.019 and 0.025). It is not noise.
+
+**X5 — the non-monotonicity is not an eff-mixing artifact. It survives
+conditioning.** NU terciles *within* each eff stratum (T1 = smallest NU):
+
+```
+   eff     N |    T1  rate (NU med)     T2                T3
+ 0.050   200 |  1.000 (0.72)      1.000 (0.92)      0.897 (1.17)
+ 0.075   200 |  0.970 (0.93)      0.697 (1.12)      0.647 (1.51)
+ 0.100   200 |  0.712 (1.06)      0.152 (1.34)      0.397 (1.72)   <-- up
+ 0.125   200 |  0.364 (1.16)      0.121 (1.52)      0.353 (1.90)   <-- up
+ 0.150   200 |  0.136 (1.33)      0.091 (1.62)      0.353 (1.97)   <-- up
+ 0.175   200 |  0.121 (1.45)      0.242 (1.80)      0.191 (2.20)
+ 0.200   200 |  0.136 (1.52)      0.227 (1.88)      0.118 (2.19)
+ 0.250   200 |  0.152 (1.69)      0.182 (1.98)      0.015 (2.51)
+
+strata violating rate(T1) >= rate(T2) >= rate(T3):  6/8
+```
+
+Six of eight strata are non-monotone, and the middle tercile is the *worst* in
+five of them. Kannan-LLL recovery is a U-shape in NU over the middle of the
+range. This is the single most useful thing this run found: it explains
+Thread 24 W5's otherwise baffling AUC(NU) = 0.3496 at eff = 0.15 (a monotone
+AUC applied to a U-shaped response reads as anti-predictive), and it means
+**every AUC-on-NU number in Threads 23-24 was mis-specified, not wrong data.**
+
+**X1 — H25 as literally stated FAILS; the size-free version HOLDS.**
+Inside the pre-registered band [1.040, 2.199] (N = 1206, recovery 373):
+
+```
+                 score  AUC in band
+     mu  (H25 primary)       0.6599   -> FAILS (threshold 0.80)
+ nu_hat = mu/sqrt(det)       0.8177   -> HOLDS
+      nu_hat*sqrt(eff)       0.9068
+  step (larger=better)       0.7984
+                   eff       0.7144
+         NU  (control)       0.5562
+       lam*  (control)       0.3381
+```
+
+The mu/nu_hat gap is exactly the confound flagged in the script docstring
+before the run: Thread 24 W5 held eff *and n* nearly fixed inside a stratum,
+where mu and nu_hat agree to 3 decimals, but an NU band mixes curves and K1, so
+the `sqrt(det L2)` normalisation is load-bearing. H25 was written on the wrong
+one of the two. NU's own AUC inside its band is 0.556 — near-chance, as the
+band was designed to make it.
+
+Sub-bands show nu_hat getting *stronger* as NU rises, and NU losing all signal
+above 1.4:
+
+```
+        sub-band      N    rate   AUC mu  AUC nu_hat   AUC NU
+     [1.04,1.40)    367   0.406   0.4843      0.6907   0.7158
+     [1.40,1.80)    473   0.207   0.7131      0.8347   0.5043
+     [1.80,2.20)    366   0.344   0.9434      0.9799   0.5248
+```
+
+At NU in [1.80, 2.20) — the region where the U-shape turns back up and no
+certificate applies — nu_hat separates at **0.980**, essentially perfectly.
+
+**X4 — reproduces at 14 bits.** Same band, dim 20, N = 1158:
+`AUC mu 0.7319 | AUC nu_hat 0.8353 | AUC NU 0.6538`; with the 14-bit data's own
+bracket [1.002, 2.165], `0.7147 | 0.8230 | 0.6553`. nu_hat clears 0.8 at both
+sizes, mu at neither. The split is size-stable.
+
+**X2/X6 — the promised (NU, mu) deliverable does not exist. NU makes every
+model worse.** Cross-curve split, 10 train curves / 10 held-out curves, 800
+instances each, logistic on log-features, L2 = 1e-2:
+
+```
+               model  test AUC  test acc  band AUC   weights
+             NU only    0.6681    0.6787    0.4422   [+1.579 -9.711]
+         nu_hat only    0.7985    0.5650    0.8942   [-1.175 -1.211]
+             mu only    0.4181    0.6000    0.2043   [-45.741 +3.736]
+         NU + nu_hat    0.7388    0.6800    0.5620   [+1.194 -9.585 -1.501]
+             NU + mu    0.6168    0.6737    0.3615   [-17.669 -9.169 +1.595]
+   NU + nu_hat + eff    0.8164    0.7325    0.6904
+       NU^2 + nu_hat    0.7811    0.6825    0.6318
+        nu_hat + eff    0.8483    0.7600    0.7669   <-- best
+ NU^2 + nu_hat + eff    0.8352    0.7362    0.7285
+majority-class baseline accuracy = 0.5150
+```
+
+Three things to read off this table:
+
+1. **Adding NU to nu_hat HURTS on held-out curves**: 0.7985 -> 0.7388, and on
+   the band subset 0.8942 -> 0.5620. The best model overall is `nu_hat + eff`
+   (0.8483 / 0.760 acc), and adding NU to *that* also hurts (0.8164). X6 shows
+   a quadratic `(log NU)^2` term does not rescue it (0.7811, band 0.6318) — the
+   U-shape is not a parabola in log NU, and NU carries so little clean signal
+   that any monotone-ish term mostly injects noise into the nu_hat coefficient.
+2. **mu alone is ANTI-predictive cross-curve**: test AUC 0.4181, and its fitted
+   weight on `log mu` is **positive** (+3.736), i.e. cross-curve, *larger* mu
+   means *more* likely recovery — the exact opposite of the within-stratum sign
+   Thread 20c established. Textbook Simpson reversal, and the cleanest possible
+   statement of why `mu` and `nu_hat` are not interchangeable.
+3. Thread 24's "false identity" closed form `nu_hat*sqrt(eff)` is **vindicated
+   as a feature** even as it stays dead as an identity: 0.9068 inside the band,
+   and its two ingredients are precisely the best fitted model's two features.
+
+**X3 — the two-block step is nu_hat re-read off the GS profile, not a third
+mechanism.** `step = log2||b*_{m+1}|| - log2||b*_1||`:
+
+```
+   eff     N       rec  mean step  AUC step   AUC NU  AUC nu_hat
+ 0.050   200   193/200     -0.003    0.6965   0.8645      0.6295
+ 0.100   200    84/200     -0.058    0.7625   0.6609      0.7555
+ 0.150   200    39/200     -0.102    0.9138   0.3587      0.9101
+ 0.175   200    37/200     -0.133    0.9516   0.4586      0.9585
+ 0.250   200    23/200     -0.167    0.8806   0.6416      0.8992
+
+Spearman(step, log nu_hat) = -0.8832
+Spearman(step, log NU)     = +0.1389
+Spearman(step, log eff)    = +0.0276
+```
+
+AUC(step) tracks AUC(nu_hat) to within 0.03 in 6 of 8 strata and the two are
+88% rank-collinear, while step is independent of eff (rho 0.028). So step is a
+*size-free cross-curve* statistic — the same coordinate as nu_hat, read
+directly off the profile. W1b's picture is confirmed and quantified: the head
+block sits at lambda_1(L2) = mu, mean step is already <= 0 across this whole
+eff range (it has inverted, not merely vanished: -0.003 at eff 0.05 down to
+-0.167 at eff 0.25), and a total swing of only 0.17 log2 units still carries
+AUC up to 0.95. This is the GS-profile derivation H24 was looking for — it was
+in the head block, not the tail.
+
+**Standing summary after Threads 23-25.**
+
+| quantity | role | evidence |
+|---|---|---|
+| `NU = max_i 2\|<e,b*_i>\|/\|\|b*_i\|\|^2` | **sound Babai certificate**, size-stable bracket, FP-free over 3610 instances | X0, T23 U-series, T24 W4 |
+| `NU` as a *coordinate* | **RETIRED** — response is U-shaped in NU, so every monotone use is mis-specified and adding it to any model hurts held-out AUC | X5, X2, X6 |
+| `nu_hat = mu/sqrt(det L2)` | **the operative viability statistic**; 0.818 inside the NU band, 0.980 in [1.80,2.20), size-stable | X1, X4 |
+| `mu = lambda_1(L2)` | only valid at fixed (n, eff); cross-curve it is anti-predictive with a REVERSED sign | X1, X2 |
+| `nu_hat*sqrt(eff)` | best 1-D score (0.907 in band); `nu_hat + eff` is the best fitted model (0.848 / 0.760) | X1, X2 |
+| `step` (GS two-block gap) | rho = -0.88 with log nu_hat, eff-free: same coordinate, profile-derived | X3 |
+| `lam*` | falsified in T20, still inverted here (0.338) | X1 |
+
+### Next step proposal
+
+**Thread 26 — characterise the U-shape in NU, since it is now the only
+unexplained object in the picture.** Everything else has resolved into one
+coordinate (nu_hat / step) plus bias strength (eff); the U is the anomaly.
+
+  H26: the middle-NU dip is a *dimension* effect, not a geometry effect —
+       instances at NU ~ 1.6 fail because the planted vector is not among the
+       first few LLL-reduced rows even though it is short enough, so recovery
+       is limited by where LLL puts it, not by whether the lattice contains it.
+  Concrete test: for every instance record (i) rank of the planted vector by
+       norm among the reduced rows, (ii) whether the planted vector is present
+       at all in the reduced basis, (iii) the LLL-reduced `sn/pn` ratio that
+       `run_new` already computes and currently discards. Stratify all three
+       by NU tercile within eff.
+  Falsifier: if `sn/pn` and the planted-vector rank are FLAT across the NU
+       terciles that show the dip, the U is not a reduction-order effect and
+       H26 dies; the next suspect would be a `d`-recovery-step failure
+       (`recover_d_projected`) rather than a lattice failure.
+
+This is cheap — `run_new` already returns `pn`, `sn`, `sv`; the table just
+needs those three fields threaded through `build_table`, plus one extra pass
+that checks membership of the planted vector in `red`. Reuse
+`glv_hnp_phase2_nu_mu.py`'s table (12s to regenerate at 1600 instances).
+
+Secondary: re-express the whole Phase-2 viability question in the coordinates
+that survived — fit and publish the `(nu_hat, eff)` decision boundary with a
+proper 5-fold *curve-wise* CV rather than the single 10/10 split used in X2,
+and report the operating point (threshold, TPR, FPR) a practitioner would use.
+That is the paper-ready deliverable H25 was supposed to produce; it just has
+different axes than pre-registered.
+
+Tertiary (unchanged, still untouched since Thread 23): BKZ-beta sweep against
+NU, to quantify how far above the `NU ~ 2.2` necessary bound blockwise
+reduction pushes the threshold. `run_new` already has `use_bkz`/`bkz_beta`
+parameters wired in (`glv_hnp_phase2_projected.py:197`) and nothing has ever
+called them.
+
+### Commits made

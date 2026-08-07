@@ -18,9 +18,14 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
+
+--dump-json writes the raw per-instance table (one JSON object per row,
+including the GS profile) so downstream analyses do not have to regenerate it.
+Thread 25 consumes this file.
 """
 
+import json
 import math
 import os
 import random
@@ -59,10 +64,20 @@ if __name__ == "__main__":
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'seed': seed, 'lamstar': lam_star(lam, n)})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if "--dump-json" in sys.argv:
+        path = sys.argv[sys.argv.index("--dump-json") + 1]
+        keep = ('k', 'prof', 'NU', 'argmax', 'enorm', 'mu', 'l2', 'det2',
+                'nuhat', 'S_K1', 'S_K2', 'K2', 'n', 'K1', 'ok', 'eff',
+                'effq', 'seed', 'lamstar')
+        with open(path, "w") as fh:
+            for r in rows:
+                fh.write(json.dumps({k: r[k] for k in keep}) + "\n")
+        print(f"dumped {len(rows)} rows -> {path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
