@@ -1,0 +1,122 @@
+==============================================================================
+Thread 25 — is mu a second coordinate?  (H25, NU-band conditioning)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+1600 instances (float GS, dim 24) in 6.7s
+dumped 1600 rows -> glv_hnp_phase2_nu_band.json
+
+------------------------------------------------------------------------------
+EXP X1: recovery and AUC inside each NU band  (H25)
+------------------------------------------------------------------------------
+AUC > 0.5 means SMALLER score -> more likely to recover.
+
+  band                  range     N       rec |   AUC mu  AUC nu_hat  AUC eff   AUC NU
+  suff              NU < 1.04   245   240/245 |   0.1296      0.3412   0.8871   0.8850
+ ambig    1.04 <= NU <= 2.199  1201  360/1201 |   0.6785      0.8250   0.7023   0.5718
+   nec             NU > 2.199   154     3/154 |   0.9779      1.0000   0.8985   0.9735
+
+H25 (AUC(-mu) >= 0.80 inside the ambiguous band): FALSIFIED   [AUC = 0.6785, N = 1201]
+
+------------------------------------------------------------------------------
+EXP X2: NU-band x eff-stratum — is mu inside the band just re-reading eff?
+------------------------------------------------------------------------------
+  band    eff     N      rec |   AUC mu  AUC nu_hat   AUC NU
+  suff  0.050   138  138/138 | (degenerate)
+  suff  0.080    66    65/66 |   0.0462      0.0462   0.4923
+  suff  0.100    25    24/25 |   0.6667      0.6667   0.8750
+  suff  0.125    14    12/14 |   0.4375      0.4375   0.8750
+ ambig  0.050    60    54/60 |   0.6698      0.6821   0.5000
+ ambig  0.080   130   78/130 |   0.6975      0.7226   0.4931
+ ambig  0.100   175   57/175 |   0.8560      0.8582   0.5450
+ ambig  0.125   180   40/180 |   0.9041      0.9005   0.3759
+ ambig  0.150   189   42/189 |   0.9042      0.9008   0.4064
+ ambig  0.175   166   38/166 |   0.9228      0.9466   0.4169
+ ambig  0.200   161   30/161 |   0.9134      0.9230   0.5043
+ ambig  0.250   140   21/140 |   0.8541      0.8541   0.5066
+   nec  0.175    34     1/34 |   1.0000      1.0000   1.0000
+   nec  0.200    38     0/38 | (degenerate)
+   nec  0.250    60     0/60 | (degenerate)
+
+------------------------------------------------------------------------------
+EXP X3: the W1b step statistic  step = log2(||b*_{m+1}||/||b*_1||)
+------------------------------------------------------------------------------
+W1b: the head of the profile is m copies of lambda_1(L2) and the
+step to the second block vanishes as the K1 wall is crossed.
+Sign convention: AUC below is for -step, so AUC > 0.5 means a
+SMALLER step goes with recovery (W1b's reading predicts AUC < 0.5).
+
+   eff     N      rec |  step|rec  step|fail |  AUC step  AUC stepmed   AUC mu   AUC NU
+ 0.050   200  194/200 |    0.0197    -0.4791 |    0.2861       0.3024   0.6546   0.8505
+ 0.080   200  143/200 |    0.0738    -0.3353 |    0.4199       0.3807   0.5730   0.7341
+ 0.100   200   81/200 |    0.3832    -0.3570 |    0.2296       0.2556   0.7630   0.6763
+ 0.125   200   52/200 |    0.5859    -0.3237 |    0.1729       0.1905   0.8430   0.5351
+ 0.150   200   42/200 |    0.6794    -0.3136 |    0.1001       0.1071   0.8993   0.4414
+ 0.175   200   39/200 |    0.6139    -0.3188 |    0.0616       0.0548   0.9212   0.5280
+ 0.200   200   31/200 |    0.5086    -0.2359 |    0.0809       0.0792   0.9171   0.6282
+ 0.250   200   21/200 |    0.2481    -0.2291 |    0.1527       0.1192   0.8791   0.6720
+
+pooled (N=1600):  AUC step = 0.3112   AUC stepmed = 0.3192   AUC mu = 0.4519   AUC NU = 0.7769
+inside ambiguous band (N=1201): AUC step = 0.1930   AUC stepmed = 0.1927
+
+------------------------------------------------------------------------------
+EXP X4: two-parameter logistic fit on (log NU, log nu_hat)
+------------------------------------------------------------------------------
+train N=800 (seeds [42, 1234, 9999, 555, 31337])   test N=800 (seeds [8675309, 271828, 1618, 4444, 90210])
+
+  fit: logit P(recover) = -0.3927 + (-7.7270)*log NU + (-7.4617)*log nu_hat
+  boundary:  NU^7.727 * nu_hat^7.462 = 0.6752   (score 0 contour)
+  train: AUC(2-param) = 0.9272   accuracy = 682/800 = 0.853
+         single: AUC(-NU) = 0.7683   AUC(-nu_hat) = 0.7088   AUC(-mu) = 0.4414
+   test: AUC(2-param) = 0.9278   accuracy = 674/800 = 0.843
+         single: AUC(-NU) = 0.7848   AUC(-nu_hat) = 0.7227   AUC(-mu) = 0.4626
+
+  3-param control (+ log eff): test AUC = 0.9430   coeffs -5.0236 / -8.6215 / -3.0084
+
+------------------------------------------------------------------------------
+EXP X5: are the two coordinates independent?  (W6, re-measured)
+------------------------------------------------------------------------------
+   eff     N  rho(NU,mu)  rho(NU,nu_hat)  rho(NU,step)
+ 0.050   200     -0.1030         -0.1045        0.1319
+ 0.080   200     -0.2830         -0.2581        0.2944
+ 0.100   200     -0.2620         -0.2435        0.2318
+ 0.125   200     -0.1552         -0.1641        0.1414
+ 0.150   200     -0.2432         -0.2324        0.2537
+ 0.175   200     -0.0838         -0.0493        0.0516
+ 0.200   200      0.0806          0.1043       -0.0227
+ 0.250   200      0.1648          0.1748       -0.1734
+pooled  1600     -0.5763         -0.0770        0.1167
+
+------------------------------------------------------------------------------
+EXP X6: the interpretable form of the X4 boundary
+------------------------------------------------------------------------------
+X4 returned near-equal coefficients on log NU and log nu_hat, so the
+boundary is (up to the exponent) a PRODUCT criterion NU * nu_hat < c.
+
+  coefficient ratio w_NU / w_nuhat = 1.0356  (1.0 => exact product)
+  implied product threshold c* = 0.9496
+
+  AUC(-NU*nu_hat)   pooled = 0.9272   train = 0.9271   test = 0.9276
+  (compare X4 2-param logistic test AUC = 0.9278 as fitted above)
+
+ threshold c     TP     FP     FN     TN  acc(test)
+      0.8000    151     10    140    499     0.8125
+      0.9000    200     32     91    477     0.8462
+      0.9496    223     55     68    454     0.8462
+      1.0000    244     75     47    434     0.8475
+      1.1000    261    116     30    393     0.8175
+      1.2500    281    186     10    323     0.7550
+
+  Is the W1b step statistic just nu_hat?  W1b's profile reading gives
+  head ~ lambda_1(L2) = mu and second block ~ lambda_2(L2) = det2/mu,
+  hence step = log2(l2/mu) = -2*log2(nu_hat) EXACTLY.  Measured:
+    rho(step, -2*log2 nu_hat) = 0.8812
+    residual step - (-2 log2 nu_hat): mean -0.9698  sd 0.3259  min -1.8517  max +0.0506
+    stepmed version: rho = 0.8829  residual mean -1.0342  sd 0.2967
+
+  does step ADD to the pair?  (log NU, log nu_hat, step): test AUC = 0.9350
+    coeffs -8.1305 / -0.0833 / 4.2129   (2-param test AUC was 0.9278)
+
+==============================================================================
+done
+==============================================================================

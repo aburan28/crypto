@@ -6538,3 +6538,213 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25 — is mu a second coordinate, or is its power mediated by NU?**
+Priority 1 (P-521 LLL) is CLOSED (§10.5, 2026-06-06, log line 1209). Priority 2
+(CHLRS) is at the Sage/Magma wall. Priority 3 (Howe 15-pair) is completed. The
+live thread is the priority-5 GLV-HNP Phase 2 line, and Thread 24 (run #2,
+`942c8a4`) left a pre-registered hypothesis with a stated falsifier and an
+explicit "no new data, ~5 minutes" cost. Executed it, plus the secondary
+(`step`) sub-task from the same entry.
+
+Pre-registration being tested, verbatim from the Thread 24 entry:
+
+> H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+> gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_nu_band.py` (X1-X6), reusing
+  `instance()`/`auc()`/`spearman()` from `glv_hnp_phase2_gsprofile.py` and
+  `run_new()` from `glv_hnp_phase2_projected.py`. Added the `--dump-json`
+  flag the Thread 24 entry asked for.
+- Enlarged the table rather than re-analysing the old 500 rows: 20 curves x
+  **8** eff strata x **10** seeds = **1600** instances at 17 bits, dim 24,
+  in 6.7s (Thread 24's table was 5 x 5 = 500). Float GS, justified by W0/W4.
+  Dumped to `glv_hnp_phase2_nu_band.json` (646 KB, 1600 rows, 20 fields).
+- Environment note for future runs: this container had **neither `sympy`,
+  `fpylll`, nor `cysignals`** installed; `glv_hnp_common.py` needs all three.
+  `pip install sympy fpylll cysignals` (~42 MB, ~30s) is required before any
+  `glv_hnp_*` script runs. Not in any setup script — worth adding.
+- `cargo test --test curve_audit`: **5 passed, 0 failed** (4.33s). No Rust
+  touched; this is a no-regression check only.
+
+### Findings
+
+**X1 — H25 is FALSIFIED as literally stated, and the reason is instructive.**
+
+```
+  band                  range     N       rec |   AUC mu  AUC nu_hat  AUC eff   AUC NU
+  suff              NU < 1.04   245   240/245 |   0.1296      0.3412   0.8871   0.8850
+ ambig    1.04 <= NU <= 2.199  1201  360/1201 |   0.6785      0.8250   0.7023   0.5718
+   nec             NU > 2.199   154     3/154 |   0.9779      1.0000   0.8985   0.9735
+```
+
+AUC(-mu) = 0.679 inside the band, against the pre-registered 0.80. But the
+size-free version clears it: **AUC(-nu_hat) = 0.825**. `mu = lambda_1(L2)` is
+dimensionful and moves with both `n` and `K1`, so pooling across eight eff
+strata mixes scales; `nu_hat = mu/sqrt(det L2)` does not. Thread 24's W5 read
+"nu_hat is just a rescaled mu" from a table where n and eff were near-constant
+within a stratum — that equivalence does **not** survive pooling, and X1 is
+where it breaks.
+
+**X2 — the claim behind H25 holds cleanly once eff is held fixed.** This is
+the decisive table: inside the ambiguous band NU is uninformative *by
+construction*, and the question is whether anything is left.
+
+```
+  band    eff     N      rec |   AUC mu  AUC nu_hat   AUC NU
+ ambig  0.050    60    54/60 |   0.6698      0.6821   0.5000
+ ambig  0.080   130   78/130 |   0.6975      0.7226   0.4931
+ ambig  0.100   175   57/175 |   0.8560      0.8582   0.5450
+ ambig  0.125   180   40/180 |   0.9041      0.9005   0.3759
+ ambig  0.150   189   42/189 |   0.9042      0.9008   0.4064
+ ambig  0.175   166   38/166 |   0.9228      0.9466   0.4169
+ ambig  0.200   161   30/161 |   0.9134      0.9230   0.5043
+ ambig  0.250   140   21/140 |   0.8541      0.8541   0.5066
+```
+
+**AUC(-NU) sits at 0.376-0.545 in every cell — it is exactly as uninformative
+as the band definition promises — while mu/nu_hat run 0.67-0.95 and clear 0.85
+in six of eight cells.** So mu's power is *not* mediated by NU: the pooled
+0.679 of X1 is a Simpson effect from mu's scale-dependence, not a
+stratification artifact in the W5 sense. **The two-mechanism reading of Thread
+24 survives its own falsifier.** The 0.80 bar is met by nu_hat pooled and by
+mu at every eff >= 0.10.
+
+**X6 — the deliverable: the boundary is a PRODUCT, and the constant is 1.**
+The X4 logistic fit on (log NU, log nu_hat), trained on 5 seeds and tested on
+5 held-out seeds, returns near-equal coefficients:
+
+```
+logit P(recover) = -0.3927 + (-7.7270)*log NU + (-7.4617)*log nu_hat
+coefficient ratio w_NU / w_nuhat = 1.0356      (1.0 => exact product)
+implied threshold  c* = 0.9496
+```
+
+Collapsing to the single score `NU * nu_hat` loses essentially nothing:
+
+```
+                              train      test
+  AUC(2-param logistic)      0.9272    0.9278
+  AUC(-NU*nu_hat)            0.9271    0.9276     <- one number, no fit
+  AUC(-NU)      alone        0.7683    0.7848
+  AUC(-nu_hat)  alone        0.7088    0.7227
+  AUC(-mu)      alone        0.4414    0.4626
+```
+
+Held-out confusion at several cut-offs (test N=800):
+
+```
+ threshold c     TP     FP     FN     TN  acc(test)
+      0.8000    151     10    140    499     0.8125
+      0.9000    200     32     91    477     0.8462
+      0.9496    223     55     68    454     0.8462
+      1.0000    244     75     47    434     0.8475   <- c = 1
+      1.1000    261    116     30    393     0.8175
+      1.2500    281    186     10    323     0.7550
+```
+
+**`NU * nu_hat < 1` is the two-parameter viability test Phase 2 has been
+missing.** Accuracy is flat-topped over c in [0.9, 1.0], so the natural
+constant sits at the optimum rather than near it, and the +0.14 AUC over NU
+alone is measured out-of-sample. Caveat, stated plainly: this is a
+**separator, not a certificate** — 75 FP at c=1, 10 FP even at c=0.8. The
+`NU <= 1` nearest-plane guarantee (96 TP / 0 FP, Thread 23b+24 W4) remains the
+only sound one. Product < 1 predicts Kannan-LLL; NU <= 1 proves Babai.
+
+**X3 — W1b's step vanishing is CONFIRMED, with the sign W1b implied.**
+`step = log2(||b*_{m+1}||/||b*_1||)`, AUC quoted for `-step`:
+
+```
+   eff     N      rec |  step|rec  step|fail |  AUC step  AUC stepmed   AUC NU
+ 0.050   200  194/200 |    0.0197    -0.4791 |    0.2861       0.3024   0.8505
+ 0.100   200   81/200 |    0.3832    -0.3570 |    0.2296       0.2556   0.6763
+ 0.150   200   42/200 |    0.6794    -0.3136 |    0.1001       0.1071   0.4414
+ 0.200   200   31/200 |    0.5086    -0.2359 |    0.0809       0.0792   0.6282
+ 0.250   200   21/200 |    0.2481    -0.2291 |    0.1527       0.1192   0.6720
+
+pooled  (N=1600)  AUC step 0.3112   inside ambiguous band  0.1930
+```
+
+AUC(-step) is far below 0.5 everywhere, i.e. **AUC(+step) = 0.69-0.90 pooled
+and 0.807 inside the band** — a larger step goes with recovery, exactly W1b's
+"the step vanishes as the wall is crossed". Note the failure column: failures
+have a *negative* mean step (-0.23 to -0.48) at every eff, so the second block
+is not merely level with the first but shorter.
+
+**X6b — step is nu_hat's better twin, not its equal.** W1b's profile reading
+(head = lambda_1, second block = lambda_2 = det2/mu) predicts the exact
+identity `step = -2*log2(nu_hat)`. Measured over all 1600:
+
+```
+  rho(step, -2*log2 nu_hat) = 0.8812        (not 1.0 -- not an identity)
+  residual  step - (-2 log2 nu_hat):  mean -0.9698  sd 0.3259
+                                      min  -1.8517  max +0.0506
+  stepmed:  rho 0.8829  residual mean -1.0342  sd 0.2967
+```
+
+The residual mean is **-0.97, i.e. one full bit**, and one-sided (max +0.05).
+So `||b*_{m+1}||/||b*_1|| ~ (1/2) * lambda_2/lambda_1`: LLL reaches the second
+block a factor ~2 short of lambda_2, consistently. And step carries real extra
+signal — adding it to the pair moves nearly all the weight off nu_hat:
+
+```
+  (log NU, log nu_hat, step):  test AUC 0.9350   coeffs -8.1305 / -0.0833 / +4.2129
+  (log NU, log nu_hat)      :  test AUC 0.9278
+```
+
+The nu_hat coefficient collapses from -7.46 to **-0.083** once step is
+present. **step supersedes nu_hat**: it is the same coordinate measured on the
+actual reduced basis instead of predicted from the 2D closed form, it is free
+(the LLL run already produced the profile), and it is worth +0.007 AUC.
+
+**X5 — W6's independence claim confirmed on 3.2x the data.**
+
+```
+ rho(NU, nu_hat) per stratum: -0.105 -0.258 -0.244 -0.164 -0.232 -0.049 +0.104 +0.175
+ rho(NU, nu_hat) pooled     : -0.0770
+ rho(NU, mu)     pooled     : -0.5763   <- mu's scale-dependence again
+```
+
+NU and nu_hat are all but uncorrelated pooled and weakly negative within
+strata. Two near-orthogonal coordinates whose product predicts recovery at
+AUC 0.93 is a coherent picture, and it is why neither alone exceeds 0.79.
+
+### Next step proposal
+
+**Thread 26 — does `NU * nu_hat < 1` survive a size change?** Everything above
+is 17-bit / dim 24 / m=12. The constant is only interesting if it is
+size-free, and Thread 24's W4 already showed NU *degrading* as a separator
+from 12 to 17 bits (AUC 0.978 -> 0.860) while its certificate property held.
+Concrete sub-task: re-run `glv_hnp_phase2_nu_band.py` at 12, 17 and 20 bits
+(parameterise the `search_curves` range and `M17`), fit the product threshold
+independently at each size, and report whether c* drifts.
+
+  H26: c* stays within [0.85, 1.15] across 12/17/20 bits, and the held-out
+       AUC of `NU*nu_hat` stays >= 0.90 at every size.
+  Falsifier: c* drifts monotonically with bit length, in which case the
+       product is a 17-bit fit and the size-free object is something else
+       (try `NU * exp(-step/2)`, which X6b says is the same quantity measured
+       better).
+
+Cost: the 1600-instance table is 6.7s, so three sizes is minutes, not hours.
+20 bits at m=12 gives dim 24 unchanged, so float GS stays inside the W4
+validation.
+
+Secondary: replace nu_hat by step in the pair and re-fit as a *two*-parameter
+model `(log NU, step)` — X6b shows nu_hat's weight goes to ~0 when step is
+present, so the honest 2-parameter model is probably (NU, step), not
+(NU, nu_hat). One-line change, should be done as part of Thread 26.
+
+Tertiary (unchanged, carried from Threads 23-24): BKZ-beta sweep against NU,
+to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(to be filled by the commit below)
