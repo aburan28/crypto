@@ -14,6 +14,11 @@ Cargo.lock
 research/ecdlp_autolab/phase21_rho_v3
 research/ecdlp_autolab/phase22_rho_barrett
 
+# GLV-HNP per-instance tables dumped by --dump-json.  Deterministic (fixed
+# SEEDS + seeded d_trial), ~400KB, and regenerated in ~2s by
+# `glv_hnp_phase2_gsprofile_strat.py --dump-json <path>` — cache, not source.
+secp256k1_cm_audit/*_table.jsonl
+
 # Python bytecode cache
 __pycache__/
 *.pyc

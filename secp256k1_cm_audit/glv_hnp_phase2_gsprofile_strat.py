@@ -18,9 +18,14 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
+
+--dump-json writes the per-instance table (one JSON object per row, including
+the full GS profile) so downstream re-analysis does not have to regenerate it.
+Added for Thread 25 per the Thread 24 next-step proposal.
 """
 
+import json
 import math
 import os
 import random
@@ -33,7 +38,56 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
+M17 = 12
+EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
+
+
+def build_table(curves, m, effs, seeds=SEEDS, exact=False):
+    """Generate the per-instance table: one row per (eff, curve, seed).
+
+    Extracted verbatim from the Thread 24b __main__ body so Thread 25 can
+    reuse it without re-deriving the sampling design.
+    """
+    rows = []
+    for eff in effs:
+        for (p, b, n, lam, G) in curves:
+            k2b = math.isqrt(n) + 1
+            k1b = max(2, int(eff * n / k2b))
+            for seed in seeds:
+                d_trial = random.Random(seed + 7777).randint(1, n - 1)
+                r = instance((p, b, n, lam, G), m, d_trial, k1b, seed,
+                             exact=exact)
+                if r is None:
+                    continue
+                rk = run_new((p, b, n, lam, G), m, d_trial, k1b, seed)
+                r.update({'n': n, 'm': m, 'K1': k1b, 'ok': bool(rk['ok']),
+                          'eff': k1b * k2b / n, 'effq': eff,
+                          'lamstar': lam_star(lam, n)})
+                rows.append(r)
+    return rows
+
+
+def dump_json(rows, path):
+    """One JSON object per line.  'nus' is dropped (dim-length, unused
+    downstream); 'prof' is kept because Thread 25 needs the block step."""
+    keep = ('n', 'm', 'K1', 'ok', 'eff', 'effq', 'lamstar', 'k', 'NU',
+            'argmax', 'enorm', 'mu', 'l2', 'det2', 'nuhat', 'S_K1', 'S_K2',
+            'K2', 'prof')
+    with open(path, 'w') as fh:
+        for r in rows:
+            fh.write(json.dumps({k: r[k] for k in keep if k in r}) + "\n")
+
+
+def load_json(path):
+    with open(path) as fh:
+        return [json.loads(ln) for ln in fh if ln.strip()]
+
+
 if __name__ == "__main__":
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        dump_path = sys.argv[sys.argv.index("--dump-json") + 1]
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -41,28 +95,14 @@ if __name__ == "__main__":
     t0 = time.time()
     curves17 = search_curves(1 << 16, 1 << 17, per_bin=2, nbins=10)
     print(f"\n{len(curves17)} 17-bit j=0 GLV curves in {time.time()-t0:.1f}s")
-    M17 = 12
-    EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
 
     t0 = time.time()
-    rows = []
-    for eff in EFFS:
-        for (p, b, n, lam, G) in curves17:
-            k2b = math.isqrt(n) + 1
-            k1b = max(2, int(eff * n / k2b))
-            for seed in SEEDS:
-                d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance((p, b, n, lam, G), M17, d_trial, k1b, seed,
-                             exact=False)
-                if r is None:
-                    continue
-                rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
-                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
-                          'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
-                rows.append(r)
+    rows = build_table(curves17, M17, EFFS)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+    if dump_path:
+        dump_json(rows, dump_path)
+        print(f"table dumped to {dump_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

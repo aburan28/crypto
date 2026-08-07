@@ -6538,3 +6538,246 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the Thread 24 entry (log line ~6520). Priorities
+1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21,
+so priority 5 (GLV-HNP) is again the only live thread; Thread 24 made
+measurable progress hours earlier, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If no — if mu's apparent power is entirely mediated by NU after all —
+>   then the W5 result is a stratification artifact and the closed form
+>   should be retired.
+
+**Verdict: H25 CONFIRMED as stated for the normalised coordinate (nu_hat,
+AUC 0.8403) and FAILS as literally written for the raw mu (0.6932) — and the
+gap between those two numbers is itself the finding: mu is unnormalised and
+pooling across eff strata mixes different K1. With eff also held fixed, mu
+returns to 0.86-0.93. Nothing is a stratification artifact; the closed form
+stays.**
+
+The payoff is larger than the hypothesis asked for. The fitted 2-parameter
+boundary came out with slope -1.05 and intercept -0.04, i.e. it is
+`log NU + log nu_hat = 0` to within the fit error. **The Phase-2 viability
+statistic is the product `P = NU * nu_hat`, threshold ~1, zero free
+parameters, and it is size-STABLE where NU alone is not.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Fourth run in a row where
+  `cysignals` had to be named explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — extended with the
+  `--dump-json PATH` flag Thread 24 asked for. The `__main__` body was lifted
+  verbatim into `build_table(curves, m, effs, seeds, exact)` so Thread 25
+  reuses the sampling design rather than re-deriving it; `dump_json`/
+  `load_json` added. **Refactor verified: rerunning the script gives output
+  byte-identical to the committed `glv_hnp_phase2_gsprofile_strat_output.txt`
+  apart from the timing line.** The dumped table is deterministic (diffed
+  clean across two independent regenerations) and gitignored — 400KB of
+  derived data that rebuilds in 2.1s.
+- `secp256k1_cm_audit/glv_hnp_phase2_conditional.py` — new (exp X1-X6b).
+  NU-band stratification, the strict band x stratum cross-tab, logistic
+  regression by IRLS (pure Python, ridge 1e-3, with Gaussian-elimination
+  Newton steps and likelihood-ratio tests against nested models), the W1b
+  block-step statistic, out-of-sample transfer to 12 bits, and the product-law
+  test. Output: `glv_hnp_phase2_conditional_output.txt` (137 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (4.19s). No Rust touched.
+
+### Findings
+
+**X1 — H25 splits on normalisation, and that is informative.**
+500 instances, 17 bits, dim 24. AUC > 0.5 means smaller score -> recovery.
+
+```
+      band     N      rec |       mu   nu_hat       NU     step      eff     lam*
+   NU<1.04    94    92/94 |   0.1603   0.4592   0.9837   0.5489   0.9212   0.5082
+ 1.04-2.20   366   97/366 |   0.6932   0.8403   0.5656   0.8197   0.7056   0.3212
+   NU>2.20    40     1/40 |   1.0000   1.0000   1.0000   1.0000   1.0000   0.2564
+```
+
+* In the ambiguous band **nu_hat = 0.8403 clears the 0.80 bar; raw mu = 0.6932
+  does not.** `nu_hat = mu/sqrt(det L2)` and `det L2 = n*S_K1*S_K2` varies with
+  K1, so pooling the five eff strata leaves mu on five different scales. The
+  sqrt(det) normalisation is not cosmetic — it is what makes the coordinate
+  comparable across strata. (Thread 23's U1b reading "mu literally IS
+  lambda_1" is unchanged; it is the cross-stratum comparison that needs the
+  normaliser.)
+* **NU carries almost no information inside its own ambiguous band (0.5656)**
+  — exactly what "ambiguous" should mean, and a sanity check on the bracket.
+* The `NU>2.20` row is degenerate: 1 positive out of 40, so every AUC there is
+  1.0000 by construction. It is not evidence of anything.
+* `lam*` stays the inverted control (0.26-0.51), consistent with Threads 20/24.
+
+**X2 — the strict test. Hold the certificate AND the bias fixed; mu survives.**
+
+```
+  eff      N      rec |       mu   nu_hat       NU     step      eff     lam*
+  -- band 1.04-2.20 --
+ 0.05    24    23/24 |   0.4565   0.4565   0.4783   0.4783   0.0217   0.3696
+ 0.10    83    26/83 |   0.8819   0.8853   0.5277   0.8671   0.6046   0.3711
+ 0.15    96    21/96 |   0.8889   0.8825   0.3283   0.8870   0.6737   0.2546
+ 0.20    89    18/89 |   0.9276   0.9425   0.4695   0.9343   0.3572   0.1827
+ 0.25    74     9/74 |   0.8615   0.8615   0.6188   0.8821   0.5504   0.1709
+```
+
+With eff fixed, mu and nu_hat coincide (as they must — within a stratum the
+normaliser is constant) and both sit at **0.86-0.94 in all four
+non-degenerate cells**, while NU sits at **0.33-0.62 and is anti-predictive at
+eff=0.15**. So inside the region where the nearest-plane certificate has
+nothing to say, the lambda-block geometry alone ranks instances at AUC ~0.9.
+H25's substantive claim holds under the strictest available control. The
+eff=0.05 cell is 23/24 recovered and carries no signal for anything.
+
+**X3 — the mediation test. Neither coordinate mediates the other.**
+
+```
+                       model      loglik                       coefficients
+              intercept only    -332.032
+                    ~ log NU    -244.743  b0=+0.993  b_NU=-4.242
+                ~ log nu_hat    -293.887  b0=-1.452  b_nh=-3.066
+       ~ log NU + log nu_hat    -148.965  b0=-0.323  b_NU=-8.479  b_nh=-8.055
+
+LR add log nu_hat to log NU : chi2_1 = 191.555   p = 1.46e-43
+LR add log NU to log nu_hat : chi2_1 = 289.844   p = 5.38e-65
+
+pooled AUC(fitted 2-param score) = 0.9397
+pooled AUC(-log NU)              = 0.7996
+pooled AUC(-log nu_hat)          = 0.6889
+```
+
+Both single-predictor models are rejected against the pair at overwhelming
+significance, and the joint coefficients are ~2x the marginal ones — the
+classic signature of two predictors whose confound cancels rather than
+reinforces. **Thread 24's W6 (Spearman ~0) is confirmed inferentially, not
+just descriptively: NU and nu_hat are two coordinates, not one.**
+
+**X4 — the W1b block step is mostly a re-reading of nu_hat.**
+`step = log2||b*_{m+1}|| - log2||b*_1||`, the height of the two-block jump.
+
+```
+step over all 500: min -0.842  median -0.299  max +3.156
+  step | success : median -0.141 (n=190)
+  step | failure : median -0.338 (n=310)
+Spearman(step, log nu_hat) = -0.8788
+Spearman(step, log NU)     = +0.1351
+~ step alone           loglik -288.544  b_step=+1.749
+~ NU + nu_hat + step   loglik -139.718
+LR add step to the pair: chi2_1 = 18.494   p = 1.70e-05
+```
+
+The -0.879 rank correlation with log nu_hat is the structural prediction of
+W1b coming true: the profile head IS lambda_1(L2), so the step is essentially
+`log(second block / lambda_1)`. It adds a statistically real but small
+increment over the pair (chi2 18.5, vs 191 and 290 for the pair members) and
+is worse alone than NU alone. **Verdict: step is a third-order term, not a
+third coordinate. Not worth carrying.**
+
+**X6 — the boundary is the product law `NU * nu_hat < 1`, with no free
+parameters.**
+
+```
+fitted slope  b_NU/b_nh = 1.0526     (product law => exactly 1)
+fitted cut    NU*nu_hat = 0.9607     (=> the natural constant 1)
+```
+
+Scoring by the raw product recovers essentially all of the fitted model:
+
+```
+                                17 bits (fit)   12 bits (HELD OUT)
+AUC(-NU*nu_hat)                      0.9395           0.9200
+AUC(fitted 2-param, X3 betas)        0.9397           0.9201
+AUC(-NU) alone                       0.7996           0.8434
+AUC(-nu_hat) alone                   0.6889           0.7621
+transferred boundary accuracy          ---     0.8400 (base rate 0.5960)
+```
+
+The 12-bit set is 500 instances on 20 curves at dim 16 that the fit never
+saw — different size, different dimension, different curves. **AUC 0.9200
+transferred, and the 2-parameter fit beats the raw product by 0.0001, i.e.
+the two fitted degrees of freedom buy nothing over the parameter-free
+product.** That is what makes it a candidate law rather than a curve fit.
+
+**X6b — the product is a better RANKER but NOT a tighter CERTIFICATE.**
+
+```
+17 bits: sufficient P < 0.6981   necessary P < 1.6340   ambiguity 2.34x
+12 bits: sufficient P < 0.4845   necessary P < 1.5231   ambiguity 3.14x
+  (Thread 24 W4, NU alone: 17 bits [1.040, 2.199] = 2.11x, 12 bits 1.57x)
+```
+
+The product's bracket is *wider* than NU's at both sizes. This is the honest
+limit of the result: `NU <= 1` remains the only thing with a proof behind it
+(96 TP / 0 FP over 410 instances, Thread 24 W4), and P is an empirical
+ranking statistic. The two are complementary, not competing.
+
+What the product does buy is **stability**, which is exactly what Thread 24
+found NU lacking:
+
+```
+  eff     N      rec |  AUC product   AUC NU  AUC nu_hat
+ 0.05   100   99/100 |       0.8384   0.8687      0.4242
+ 0.10   100   42/100 |       0.9553   0.7011      0.7484
+ 0.15   100   21/100 |       0.8668   0.3496      0.8813
+ 0.20   100   19/100 |       0.9292   0.5595      0.9337
+ 0.25   100    9/100 |       0.8852   0.7277      0.8816
+```
+
+**The product never drops below 0.838 in any stratum; NU bottoms out at 0.350
+and nu_hat at 0.424.** The two coordinates cover each other's blind spots
+precisely — NU is strong at weak bias (eff=0.05) where nu_hat is useless, and
+nu_hat is strong at strong bias (eff>=0.15) where NU collapses. Across sizes
+the product is 0.9395 -> 0.9200 (32x change in n) against NU's 0.978 -> 0.860.
+That size-stability is the Thread 24 defect resolved.
+
+**Interpretation.** Thread 24 ended with "recovery = f(NU, X), X mu-driven and
+independent of NU". Thread 25 identifies f: it is the product, to within the
+resolution of 1000 instances at two sizes. Mechanistically NU measures how far
+the error is from the reduced basis (a BDD/nearest-plane quantity) and nu_hat
+measures how degenerate the lambda-block is before any reduction happens (a
+pure-geometry quantity); their product being the invariant is at least
+dimensionally sensible, since nu_hat is already det-normalised and NU is
+already scale-free. **No proof is claimed. The falsifier is stated below.**
+
+### Next step proposal
+
+**Thread 26 — try to break the product law at a third size.**
+X6's whole claim rests on two sizes. The cheap, decisive test is a third
+point, plus the one stratum where the law is weakest.
+
+  H26: at 22 bits (dim 24, m=12, same 5 eff strata, 20 curves x 5 seeds),
+       AUC(-NU*nu_hat) >= 0.88, and the fitted slope b_NU/b_nh stays in
+       [0.85, 1.20] with the fitted cut in [0.80, 1.20].
+  Falsifier: if the slope leaves that interval or the AUC drops below 0.88,
+       the product is a 12-17 bit coincidence and should be reported as an
+       empirical ranker over that range only, not as a law.
+
+Cost: the 17-bit table is 2.1s for 500 instances; 22 bits is maybe 30-60s.
+This is a one-parameter change to `build_table` and should be run at THREE
+sizes in one script so the slope's size-trend is visible rather than inferred.
+Add 8 bits as a fourth (cheap) point to test the low end.
+
+Secondary: the `NU>2.20` band has 40 instances and 1 recovery. Push the
+necessary-condition side by generating instances *targeted* into P in
+[1.5, 2.5] and asking whether any recover — the 17-bit `necessary P < 1.634`
+bound is set by a single instance and is the weakest number in X6b.
+
+Tertiary (unchanged from Threads 23/24): BKZ-beta sweep against the product,
+to quantify how far blockwise reduction pushes the P ~ 1 threshold. Now more
+attractive than before, since P is the thing that transfers across sizes and
+is therefore the right y-axis for a beta sweep.
+
+Not recommended: the block step (X4). It is 88% rank-correlated with nu_hat
+and adds chi2 18 against the pair's 191/290. Closing it.
+
+### Commits made
+
+(recorded below after commit)

@@ -1,0 +1,131 @@
+==============================================================================
+Thread 25 — is mu a second coordinate, or is it mediated by NU?
+==============================================================================
+
+loaded 500 instances from glv_hnp_phase2_strat_table.jsonl
+
+------------------------------------------------------------------------------
+EXP X1: H25 proper — AUC inside each NU band.
+        AUC > 0.5 means SMALLER score -> more likely to recover.
+------------------------------------------------------------------------------
+      band     N      rec |       mu   nu_hat       NU     step      eff     lam*
+   NU<1.04    94    92/94 |   0.1603   0.4592   0.9837   0.5489   0.9212   0.5082
+ 1.04-2.20   366   97/366 |   0.6932   0.8403   0.5656   0.8197   0.7056   0.3212
+   NU>2.20    40     1/40 |   1.0000   1.0000   1.0000   1.0000   1.0000   0.2564
+
+H25 threshold: AUC(-mu) >= 0.80 inside the 1.04-2.20 band.
+
+------------------------------------------------------------------------------
+EXP X2: the strict test — NU band x eff stratum.  Both the
+        certificate and the bias strength are held fixed.
+------------------------------------------------------------------------------
+  eff      N      rec |       mu   nu_hat       NU     step      eff     lam*
+  -- band NU<1.04 --
+ 0.05    75    75/75 |              (one class only)
+ 0.10    17    16/17 |   0.5938   0.5938   0.8750   0.8750   0.2188   0.7188
+ 0.15     1      0/1 |              (one class only)
+ 0.20     1      1/1 |              (one class only)
+  -- band 1.04-2.20 --
+ 0.05    24    23/24 |   0.4565   0.4565   0.4783   0.4783   0.0217   0.3696
+ 0.10    83    26/83 |   0.8819   0.8853   0.5277   0.8671   0.6046   0.3711
+ 0.15    96    21/96 |   0.8889   0.8825   0.3283   0.8870   0.6737   0.2546
+ 0.20    89    18/89 |   0.9276   0.9425   0.4695   0.9343   0.3572   0.1827
+ 0.25    74     9/74 |   0.8615   0.8615   0.6188   0.8821   0.5504   0.1709
+  -- band NU>2.20 --
+ 0.05     1      1/1 |              (one class only)
+ 0.15     3      0/3 |              (one class only)
+ 0.20    10     0/10 |              (one class only)
+ 0.25    26     0/26 |              (one class only)
+
+------------------------------------------------------------------------------
+EXP X3: mediation test — logistic fit, recovery ~ log NU + log nu_hat
+------------------------------------------------------------------------------
+                       model      loglik                       coefficients
+              intercept only    -332.032
+                    ~ log NU    -244.743  b0=+0.993  b_NU=-4.242
+                ~ log nu_hat    -293.887  b0=-1.452  b_nh=-3.066
+       ~ log NU + log nu_hat    -148.965  b0=-0.323  b_NU=-8.479  b_nh=-8.055
+
+LR add log nu_hat to log NU : chi2_1 =   191.555   p = 1.455e-43
+LR add log NU to log nu_hat : chi2_1 =   289.844   p = 5.377e-65
+Both significant => neither mediates the other => 2 coordinates.
+
+pooled AUC(fitted 2-param score) = 0.9397
+pooled AUC(-log NU)              = 0.7996
+pooled AUC(-log nu_hat)          = 0.6889
+
+decision boundary (p=0.5):  log nu_hat = -0.0401 -1.0526 * log NU
+
+------------------------------------------------------------------------------
+EXP X4: the W1b block step as a predictor in its own right
+------------------------------------------------------------------------------
+step over all 500 instances: min -0.842  median -0.299  max +3.156
+  step | success : median -0.141 (n=190)
+  step | failure : median -0.338 (n=310)
+
+Spearman(step, log nu_hat) = -0.8788
+Spearman(step, log NU)     = +0.1351
+~ step alone           loglik   -288.544  b_step=+1.749
+~ NU + nu_hat + step   loglik   -139.718
+LR add step to the pair: chi2_1 = 18.494   p = 1.704e-05
+
+------------------------------------------------------------------------------
+EXP X5: out-of-sample — fit on 17 bits, score UNSEEN 12-bit data
+------------------------------------------------------------------------------
+20 12-bit curves, 500 instances (dim 16) in 0.7s
+recovered 298/500
+  transferred 2-param score AUC = 0.9201
+  in-sample-free single scores:  mu 0.4276  nu_hat 0.7621  NU 0.8434  step 0.6994  eff 0.8724  lam* 0.4188
+  transferred boundary accuracy (p=0.5 cut) = 0.8400  (base rate 0.5960)
+
+------------------------------------------------------------------------------
+EXP X6: the X3 boundary has slope -1.05, i.e. it is almost exactly
+        log NU + log nu_hat = const.  Test the product law directly.
+------------------------------------------------------------------------------
+fitted slope  b_NU/b_nh = 1.0526   (product law => 1)
+fitted cut    NU*nu_hat = 0.9607   (=> the natural constant 1?)
+
+17 bits (in-sample)   N=500  rec=190
+  AUC(-NU*nu_hat)        = 0.9395
+  product | success : min 0.3669  median 0.7484  max 1.6340
+  product | failure : min 0.6981  median 1.3582  max 2.8424
+       cut      acc     TP     FP     FN     TN
+     0.500   0.6720     26      0    164    310
+     0.750   0.8080     96      2     94    308
+     0.961   0.8640    159     37     31    273
+     1.000   0.8500    162     47     28    263
+     1.250   0.7340    185    128      5    182
+     1.500   0.6260    189    186      1    124
+     2.000   0.4440    190    278      0     32
+
+12 bits (held out)   N=500  rec=298
+  AUC(-NU*nu_hat)        = 0.9200
+  product | success : min 0.1601  median 0.5707  max 1.5231
+  product | failure : min 0.4845  median 1.2210  max 3.4298
+       cut      acc     TP     FP     FN     TN
+     0.500   0.6320    116      2    182    200
+     0.750   0.7740    205     20     93    182
+     0.961   0.8340    271     56     27    146
+     1.000   0.8360    278     62     20    140
+     1.250   0.7800    294    106      4     96
+     1.500   0.7140    297    142      1     60
+     2.000   0.6280    298    186      0     16
+
+------------------------------------------------------------------------------
+EXP X6b: certificate bracket for the product, and the fixed-eff
+         control (the test NU fails and nu_hat passes).
+------------------------------------------------------------------------------
+17 bits: sufficient NU*nu_hat < 0.6981   necessary NU*nu_hat < 1.6340   ambiguity 2.34x
+12 bits: sufficient NU*nu_hat < 0.4845   necessary NU*nu_hat < 1.5231   ambiguity 3.14x
+  (Thread 24 W4, NU alone: 17 bits [1.040, 2.199] = 2.11x, 12 bits [1.188, 1.869] = 1.57x)
+
+  eff     N      rec |  AUC product   AUC NU  AUC nu_hat
+ 0.05   100   99/100 |       0.8384   0.8687      0.4242
+ 0.10   100   42/100 |       0.9553   0.7011      0.7484
+ 0.15   100   21/100 |       0.8668   0.3496      0.8813
+ 0.20   100   19/100 |       0.9292   0.5595      0.9337
+ 0.25   100    9/100 |       0.8852   0.7277      0.8816
+
+==============================================================================
+done
+==============================================================================
