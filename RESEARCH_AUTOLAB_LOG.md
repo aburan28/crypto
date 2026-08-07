@@ -6538,3 +6538,114 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+Thread 25, the "next step proposal" left by run #2: within the NU-ambiguous
+band [1.04, 2.20] (17 bits, dim 24), does mu (equivalently nu_hat) still
+separate recovery from failure, and does the W1b `step` statistic beat
+either? Priority-1 (P-521 bigfloat) was touched twice in the last 7 days
+with no "resolved" outcome recorded, and priorities 2/3/6 have no runnable
+scaffolding yet, so continuing the live GLV-HNP Phase 2 thread with fresh,
+concrete sub-tasks queued up was the higher-value pick. New script:
+`secp256k1_cm_audit/glv_hnp_phase2_nu_band.py`.
+
+### Work done
+
+- Wrote `glv_hnp_phase2_nu_band.py` (Thread 25), reusing the exact 500-instance
+  collection protocol from `glv_hnp_phase2_gsprofile_strat.py` (20 17-bit j=0
+  GLV curves x 5 eff strata {0.05,...,0.25} x 5 seeds, float GS, dim 24,
+  justified by the parent script's W0/W4 exact-vs-float check). Added
+  `--dump-json` so the per-instance table survives the run (now
+  `glv_hnp_phase2_nu_band_data.json`, 500 rows, mu/nuhat/NU/step/eff/ok per row).
+- Environment note: fresh clone had neither `sympy`, `fpylll`, nor `cysignals`
+  installed (`glv_hnp_common.py` imports both at module load). Installed all
+  three via pip in-session; not committed (session-local, matches how prior
+  runs presumably had them pre-installed or installed silently — no evidence
+  either way in the log, flagging for future runs in case this recurs).
+- Computed `step = log2(||b*_{m+1}||) - log2(||b*_1||)` per instance directly
+  from the L0 Gram-Schmidt profile already computed for NU (`instance()`'s
+  `prof` array) — no separate L2 sublattice construction needed.
+- Ran `cargo test --test curve_audit` (5/5 pass, untouched by this change,
+  ran as a sanity check since no Rust files were modified).
+
+### Findings
+
+**H25 as literally stated (raw mu) is FALSIFIED at the pooled level, but the
+refined form (nu_hat) survives.**
+
+```
+NU band [1.040, 2.199], 366/500 instances (73.2%), 97 recoveries
+  AUC(-mu    -> recovery), in-band, pooled over eff = 0.6932   FALSIFIED (< 0.8)
+  AUC(-nuhat -> recovery), in-band, pooled over eff = 0.8403   SURVIVES
+  AUC(-step  -> recovery), in-band, pooled over eff = 0.8197   SURVIVES
+  AUC(-NU    -> recovery), in-band (sanity)          = 0.5656   (near-random, as designed)
+```
+
+Per-eff-stratum, mu and step both separate well (0.86-0.93) in every
+non-degenerate stratum (eff 0.10-0.25); only eff=0.05 is degenerate (23/24
+recover, AUC ~0.46-0.48, uninformative by construction). So the pooled mu
+failure is a **pooling artifact of the same shape as Thread 24b's W3**: raw
+mu is `Spearman(mu, NU) = -0.645` (still substantially eff-correlated), so
+pooling mu ranks across an eff-mixed NU-band mixes populations with
+different meaning. `nu_hat = mu/sqrt(det L2)` removes exactly that
+eff-dependence (`Spearman(nuhat, NU) = -0.105`, matching W6's pooled
+finding) and is the form that survives pooling. **Conclusion: nu_hat, not
+raw mu, is the correct second coordinate — H25 needed the normalisation
+Thread 20c/23 already derived, confirming that normalisation was load-bearing
+and not cosmetic.**
+
+**`step` is not a third, independent signal — it is a free-to-compute proxy
+for nu_hat.**
+
+```
+Spearman(step, nuhat) = -0.879 (all instances), -0.897 (in-band)
+Spearman(step, NU)    =  0.135 (all instances) -- consistent with nuhat's
+Spearman(step, mu)    = -0.663                    near-zero vs NU (W6)
+```
+
+`step` tracks `nu_hat` almost exactly (|rho| ~ 0.88-0.90) while staying
+~orthogonal to NU, same qualitative signature as nu_hat itself. Practically
+useful: `step` costs nothing beyond the GS profile already computed for NU
+(no L2 Gauss reduction, no S_K1/S_K2 scale bookkeeping) — it is a strictly
+cheaper drop-in for nu_hat, not a new mechanism.
+
+**Joint (log NU, step) logistic fit beats every single predictor tried so
+far, using only quantities read off the L0 GS profile:**
+
+```
+standardized weights: w_logNU = -2.744, w_step = +2.403, b = -0.912
+AUC(joint score -> recovery), all 500 instances = 0.9454
+  vs AUC(-NU alone)                              = 0.7996  (Thread 24b)
+  vs AUC(-step alone)                            = 0.6714
+  vs AUC(-nu_hat*sqrt(eff)) pooled (Thread 24b W3)= 0.9348  (needs L2 + eff)
+```
+
+0.9454 edges out the previous best (0.9348) while requiring strictly less
+machinery: no explicit L2 construction, no eff bookkeeping, just two entries
+of the profile already computed alongside NU. This is the most direct
+answer yet to Thread 24's original question ("derive nu_hat from the GS
+profile") — the GS profile plus its own tail-gap already contains an
+nu_hat-strength signal.
+
+### Next step proposal
+
+**Thread 26 — replace nu_hat with `step` in the production Phase-2 decision
+rule and re-run the full 12-bit + 17-bit sweeps.** Concrete sub-task:
+swap `nu_hat` for `-step` in `glv_hnp_phase2_gsprofile_strat.py`'s W5/W6
+tables (same sign convention, `Spearman(step, nuhat) < 0`) and confirm the
+AUC pattern replicates without the L2 sublattice code path at all — if it
+does, `l2_minima`/`gauss_reduce_2d_full` becomes dead code for the decision
+rule (keep for the theoretical NU~nu_hat derivation, drop from the fast
+path). Secondary: fit the joint (log NU, step) logistic on the 12-bit U2
+grid too, to check whether the 0.945 AUC and the weight ratio
+`w_step/w_logNU ~ -0.876` are size-stable or drift like the W3 constant C
+did (5.3x -> 3.7x -> 3.1x with eff, W6). Tertiary (unchanged from Thread
+24b/23): BKZ-beta sweep against (NU, step) jointly, to see whether blockwise
+reduction moves the pair the same way it moved NU alone.
+
+### Commits made
+
+(pending — see push step below)

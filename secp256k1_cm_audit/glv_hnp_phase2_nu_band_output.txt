@@ -1,0 +1,47 @@
+==============================================================================
+Thread 25 — is mu a second coordinate, conditional on NU?
+==============================================================================
+
+500 instances (float GS, dim 24) in 2.2s
+dumped 500 rows to glv_hnp_phase2_nu_band_data.json
+
+------------------------------------------------------------------------------
+H25: within NU band [1.04, 2.199], AUC(-mu -> recovery) >= 0.8 ?
+------------------------------------------------------------------------------
+band population: 366 / 500 instances (73.2%)
+  recoveries in band: 97/366
+  AUC(-mu    -> recovery), in-band  = 0.6932
+  AUC(-nuhat -> recovery), in-band  = 0.8403
+  AUC(step   -> recovery), in-band  = 0.8197  (step>0 predicted to fail per W1b)
+  AUC(-NU    -> recovery), in-band  = 0.5656  (sanity: NU should be near-random here by construction)
+
+  H25 verdict: FALSIFIED (threshold 0.8, observed 0.6932)
+
+------------------------------------------------------------------------------
+Per-eff-stratum in-band AUC(-mu), to check H25 isn't an artifact of pooling across eff
+------------------------------------------------------------------------------
+  eff  N in band     rec   AUC mu  AUC step
+ 0.05         24   23/24   0.4565    0.4783
+ 0.10         83   26/83   0.8819    0.8671
+ 0.15         96   21/96   0.8889    0.8870
+ 0.20         89   18/89   0.9276    0.9343
+ 0.25         74    9/74   0.8615    0.8821
+
+------------------------------------------------------------------------------
+W1b secondary: step = log2||b*_{m+1}|| - log2||b*_1|| vs recovery, ALL instances (not just in-band)
+------------------------------------------------------------------------------
+  AUC(-step -> recovery), all 500 instances = 0.6714
+  AUC(-NU   -> recovery), all instances (Thread 24b) = 0.7996
+  Spearman(step, NU) = 0.1351
+
+------------------------------------------------------------------------------
+Joint logistic fit on (log NU, step) -> recovery
+------------------------------------------------------------------------------
+  standardized weights: w_logNU=-2.744  w_step=2.403  b=-0.912
+  final mean cross-entropy = 0.2810
+  (logNU mean=0.382 sd=0.354 | step mean=-0.093 sd=0.605)
+  AUC(joint logistic score -> recovery) = 0.9454  (oriented so higher score = more likely recovery)
+
+==============================================================================
+done
+==============================================================================
