@@ -6788,4 +6788,4 @@ Housekeeping: add `secp256k1_cm_audit/requirements.txt` pinning
 
 ### Commits made
 
-(recorded in the follow-up commit below)
+3a6c68d autolab 2026-08-07 #3: Thread 25 — H25 confirmed; NU and nu_hat are two coordinates and their product rule is size-stable
