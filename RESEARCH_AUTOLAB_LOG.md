@@ -6103,3 +6103,152 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+
+## 2026-08-07 (autolab run)
+
+### Task picked
+**Thread 23** — the next-step proposed by the 2026-07-29 entry (log line 6089): quotient
+out the trivial vector `n·S_D·e_m` from the Phase-2 GLV lattice and re-measure the K1
+wall. Priorities 1/2/4/6 are CLOSED/BLOCKED/DEAD-END, priority 3 completed 2026-07-21,
+priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so its own proposed
+sub-task is the correct pick under protocol rule (b).
+
+**Outcome: Thread 23's premise is falsified — the trivial vector is not the obstruction,
+and removing it changes nothing. Two claims from the 2026-07-29 entry are corrected below.**
+
+### Work done
+- Environment (fresh container): `pip install fpylll cysignals sympy`. **`apt-get install
+  -y pari-gp` fails** (404 on `libegl-mesa0` from the recommends chain); **use
+  `apt-get install -y --no-install-recommends pari-gp`** — that works. Note for future runs.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_projected.py` (626 lines, 6 experiments
+  T23.1–T23.6). Lattice/signature/curve code copied verbatim from
+  `glv_hnp_phase2_20bit.py:262` (`build_glv_lattice`) so the comparison to 2026-07-26 /
+  2026-07-29 is exact. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_projected_output.txt` (122 lines).
+- Two reformulations implemented:
+  * **PROJECTED** — delete column m from the basis. This is the coordinate projection
+    `π: L → Z^(dim−1)` whose kernel on L is exactly `Z·(n·S_D·e_m)`, so the trivial vector
+    maps to 0 and the dimension drops 2m+2 → 2m+1. `d` is then recovered algebraically
+    from `(k1_i, k2_i)` via `d = (k1_i + λ·k2_i − A_i)·B_i⁻¹ mod n` instead of being read
+    off a lattice coordinate. (fpylll's LLL accepts the rank-deficient (2m+2)×(2m+1)
+    generating set and emits one zero row.)
+  * **S_D sweep** in the original lattice, S_D ∈ {1,…,1024}.
+- `cargo test --test curve_audit` → 5/5 pass (6.79s). ✓
+
+### Findings
+
+**T23.1 — the 2026-07-29 claim "no choice of S_D removes it — both vectors scale linearly
+in S_D" is WRONG.** Only the *d coordinate* of the planted vector scales with S_D; its
+other 2m+1 coordinates are fixed. So sv/pv is a non-trivial, non-monotone function of S_D,
+and S_D ≥ 2 does remove the trivial vector:
+
+| curve | S_D=1 | 2 | 4 | 8 | 16 | 64 | 256 | 1024 |
+|---|---|---|---|---|---|---|---|---|
+| 12-bit/2557 sv/pv | 0.373 | 0.384 | 0.383 | 0.383 | 0.380 | 0.331 | 0.151 | 0.041 |
+| 12-bit/2557 recov | 5/5 | 5/5 | 5/5 | 5/5 | 2/5 | 1/5 | 0/5 | 0/5 |
+| 12-bit/2677 sv/pv | 0.376 | **0.724** | 0.724 | 0.722 | 0.716 | 0.623 | 0.282 | 0.076 |
+| 12-bit/2677 recov | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 | 0/5 | 0/5 |
+
+On the λ*=0.07 curve sv/pv nearly doubles at S_D=2 (0.376 → 0.724) — the trivial vector is
+gone — **and recovery is still 0/5.** Large S_D then hurts (the planted vector's d
+coordinate grows), so the useful window is S_D ∈ [2,8].
+(Note: `recover_original` must divide the d column by S_D; the S_D≠1 numbers are wrong
+without that.)
+
+**T23.2b — S_D>1 and the projection are empirically the same operation.** Energy of the
+shortest vector by block (fraction of ‖sv‖²), m=12:
+
+| curve | mode | S_D | sv/pv | k1 | d | k2 | kan |
+|---|---|---|---|---|---|---|---|
+| 12-bit/2557 | orig | 1 | 0.373 | 0.000 | **1.000** | 0.000 | 0.000 |
+| 12-bit/2557 | orig | 8 | 0.383 | 0.132 | 0.000 | 0.868 | 0.000 |
+| 12-bit/2557 | proj | 1 | 0.384 | 0.132 | 0.000 | 0.868 | 0.000 |
+| 12-bit/2677 | orig | 1 | 0.376 | 0.000 | **1.000** | 0.000 | 0.000 |
+| 12-bit/2677 | orig | 8 | 0.722 | 0.822 | 0.000 | 0.178 | 0.000 |
+| 12-bit/2677 | proj | 1 | 0.724 | 0.822 | 0.000 | 0.178 | 0.000 |
+
+The `orig/S_D=8` and `proj/S_D=1` rows agree to 3 decimals in both norm ratio and energy
+split. **Crucially the replacement shortest vector has kan-energy 0.000** — it lies in the
+homogeneous sublattice `L₀ = {kan = 0}`. So T5's diagnosis (recovery is a coset condition,
+not SVP) survives, but its identification of the competitor as the trivial vector does not:
+kill the trivial vector and an `L₀` vector takes its place at the same ~0.4–0.7 ratio.
+sv/pv never reaches 1 in any formulation tested.
+
+**T23.3 — THE FALSIFIER: the K1 wall does not move. At all.** m=12, 5 seeds:
+
+| 12-bit/2557 (λ*=0.34) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| orig | 5 | 5 | 5 | 5 | 5 | 3 | 1 | 0 | 0 |
+| proj | 5 | 5 | 5 | 5 | 5 | 3 | 1 | 0 | 0 |
+
+| 12-bit/2677 (λ*=0.07) | K1=2 | 3 | 4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| orig | 5 | 5 | 4 | 2 | 0 | 0 | 0 | 0 | 0 |
+| proj | 5 | 5 | 4 | 2 | 0 | 0 | 0 | 0 | 0 |
+| proj+BKZ(20) | – | – | **5** | **3** | 0 | 0 | 0 | 0 | 0 |
+
+Walls: orig K1=12 / proj K1=12 (λ*=0.34); orig K1=4 / proj K1=4 (λ*=0.07). Per-trial
+agreement between the two formulations over 3 curves × 9 K1 × 5 seeds: **134/135**
+(the single disagreement is at an LLL tie). T23.4 (m-sweep at the wall, K1=8, λ*=0.07):
+orig 0,0,0,0,1 and proj 0,0,0,0,1 for m = 8/12/16/24/32 — identical, and consistent with
+2026-07-29's T4b.
+
+**T23.5 — the wall is NOT information-theoretic either.** 6 fresh 17-bit curves, m=12,
+3 seeds, eff = K1·K2/n. orig and proj agree in **all 36 cells**:
+
+| p | n | λ* | first eff with <3/3 |
+|---|---|---|---|
+| 65539 | 65287 | 0.335 | 0.20 |
+| 65557 | 65053 | 0.388 | 0.10 |
+| 65617 | 65119 | 0.358 | 0.10 |
+| 65629 | 66109 | 0.410 | 0.10 |
+| 65647 | 65719 | 0.027 | 0.10 |
+| 65677 | 65899 | 0.318 | 0.25 |
+
+Mean eff wall **0.142** (orig) = **0.142** (proj), against the information-theoretic
+ceiling `eff_max = n^(−1/m) = 0.397`. **Both branches of the 2026-07-29 falsifier are
+therefore refuted**: the wall does not move (so the reformulation is not an improvement),
+*and* the wall is not information-theoretic — there is a factor **2.8** of headroom in eff
+that lattice reduction is failing to convert. Phase 2 is at LLL's ceiling, not at
+information theory's.
+
+**T23.6 — κ, a weak per-instance predictor.** κ = ‖best row with |kan| = S_KANNAN after
+LLL‖ / ‖v_planted‖, over 243 trials (108 success / 135 failure):
+
+| | min | max |
+|---|---|---|
+| κ \| success | 0.4344 | **1.0000** |
+| κ \| failure | 0.4197 | 1.1569 |
+
+AUC = **0.7477** (majority baseline 0.5556); best threshold κ ≥ 0.8731 → accuracy 0.7037;
+the theoretically-motivated rule κ ≥ 1 gives accuracy 0.6831. κ = 1.0000 exactly is the
+"LLL returned the planted vector itself" case. The two informative tails:
+- 13/135 failures have **κ > 1** — the planted vector is shorter than anything LLL found
+  in its coset, i.e. pure reduction-quality failures. These are exactly what BKZ(20)
+  rescues in T23.3 (K1=4: 4→5, K1=6: 2→3).
+- 64/108 successes have κ < 1 — a *shorter* coset representative exists that nonetheless
+  carries the same row-m coefficient d. So κ is not the exact criterion; the exact one is
+  the minimum over coset vectors *with d-coefficient ≠ d*, which is not readable from the
+  reduced basis alone.
+
+### Next step proposal
+**Thread 24 — precondition the λ-blocks, then sweep β.** T23.5 shows a 2.8× eff gap that
+is reduction-limited, and T23.6 shows ≥10% of failures are pure β-quality. Two cheap moves,
+in order:
+1. **Per-index Gauss reduction as preconditioning.** Replace each 2-D block
+   `⟨(n·S_K1, 0), (−λ·S_K1, S_K2)⟩` (cols i and m+i) by its exact Lagrange-reduced basis
+   *before* the global LLL. This is the block that supplies the `L₀` competitor found in
+   T23.2b. Falsifier: if the mean 17-bit eff wall moves above 0.142, preconditioning is
+   real; if it stays at 0.142, the GS profile is invariant under block preconditioning and
+   the lattice shape itself is the ceiling.
+2. **β sweep** on the projected lattice, β ∈ {20, 30, 40, 50}, same 17-bit eff grid.
+   Falsifier: if the wall is flat in β, the remaining 2.8× is not recoverable by stronger
+   reduction at this dimension and Phase 2 should be declared at its ceiling.
+
+Both run on the existing T23.5 grid (a ~3-minute run for (1), longer for (2)).
+
+Secondary (unchanged from 2026-07-29): re-express the 2026-07-26 log's λ/n column in
+λ* = min(λ, n−λ)/n throughout.
+
+### Commits made
