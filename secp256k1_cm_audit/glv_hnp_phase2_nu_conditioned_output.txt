@@ -1,0 +1,143 @@
+glv_hnp_phase2_strat_rows.json absent — rebuilding (deterministic, ~3s)
+==============================================================================
+Thread 25 — is mu a second coordinate, or is it mediated by NU?
+==============================================================================
+
+500 rows from glv_hnp_phase2_strat_rows.json (17 bits, dim 24, m=12), 190 recoveries
+
+------------------------------------------------------------------------------
+EXP X1: the NU bracket on THIS table (the W4 bracket came from the
+        300-instance U2 grid; check it transfers)
+------------------------------------------------------------------------------
+  NU | success : min 0.574  median 1.051   max 2.199  (n=190)
+  NU | failure : min 1.011  median 1.706   max 3.273  (n=310)
+  NU <= 1 : TP 86  FP 0
+  measured bracket : sufficient NU < 1.011 , necessary NU > 2.199
+  pre-registered   : [1.04, 2.199]  (used below)
+  in-band rows: 366 (97 recoveries)
+
+------------------------------------------------------------------------------
+EXP X2: PRE-REGISTERED test — AUC inside the ambiguous NU band,
+        pooled over eff.  Read with X3: eff is NOT controlled here.
+------------------------------------------------------------------------------
+                 NU band     N      rec |      mu  nu_hat     eff    step      NU
+               NU < 1.04    94    92/94 |  0.1603  0.4592  0.9212  0.4511  0.9837
+  1.04-2.20  (ambiguous)   366   97/366 |  0.6932  0.8403  0.7056  0.1803  0.5656
+               NU > 2.20    40     1/40 |  1.0000  1.0000  1.0000  0.0000  1.0000
+
+  AUC > 0.5 means SMALLER score -> more likely to recover.
+
+------------------------------------------------------------------------------
+EXP X3: HONEST test — doubly conditioned on (eff stratum, NU band).
+        Inside a cell both the bias strength and the BDD certificate
+        are fixed, so any AUC left is pure cross-curve geometry.
+------------------------------------------------------------------------------
+  eff                NU band     N      rec |      mu  nu_hat    step     gsa
+ 0.05              NU < 1.04    75    75/75 |      --      --      --      --
+ 0.05 1.04-2.20  (ambiguous)    24    23/24 |  0.4565  0.4565  0.5217  0.3478
+ 0.10              NU < 1.04    17    16/17 |  0.5938  0.5938  0.1250  0.1875
+ 0.10 1.04-2.20  (ambiguous)    83    26/83 |  0.8819  0.8853  0.1329  0.1188
+ 0.15 1.04-2.20  (ambiguous)    96    21/96 |  0.8889  0.8825  0.1130  0.1111
+ 0.20 1.04-2.20  (ambiguous)    89    18/89 |  0.9276  0.9425  0.0657  0.0642
+ 0.20              NU > 2.20    10     0/10 |      --      --      --      --
+ 0.25 1.04-2.20  (ambiguous)    74     9/74 |  0.8615  0.8615  0.1179  0.1453
+ 0.25              NU > 2.20    26     0/26 |      --      --      --      --
+
+  stratified pooling over the ambiguous cells (concordant pairs / all pairs):
+    AUC(-mu      ) = 0.8916   (4943 pairs)
+    AUC(-nuhat   ) = 0.8944   (4943 pairs)
+    AUC(-step    ) = 0.1092   (4943 pairs)
+    AUC(-gsa     ) = 0.1064   (4943 pairs)
+    AUC(-lamstar ) = 0.2616   (4943 pairs)
+
+  same pooling over ALL eff cells (no NU conditioning), for reference:
+    AUC(-mu      ) = 0.8335   (6552 pairs)
+    AUC(-nuhat   ) = 0.8373   (6552 pairs)
+    AUC(-NU      ) = 0.5847   (6552 pairs)
+    AUC(-step    ) = 0.1546   (6552 pairs)
+    AUC(-gsa     ) = 0.1502   (6552 pairs)
+
+------------------------------------------------------------------------------
+EXP X4: is NU redundant given mu?  Spearman inside each eff stratum
+        and inside the ambiguous band.
+------------------------------------------------------------------------------
+                    subset     N  rho(NU,mu)  rho(NU,nuhat)  rho(mu,eff)
+                  eff=0.05   100     -0.1813        -0.1862       0.4541
+                  eff=0.10   100     -0.2941        -0.2756       0.0466
+                  eff=0.15   100     -0.2536        -0.2372      -0.1579
+                  eff=0.20   100     -0.0717        -0.0488       0.0571
+                  eff=0.25   100      0.1544         0.1638      -0.0150
+   ambiguous band (pooled)   366     -0.4557        -0.1113      -0.4956
+
+------------------------------------------------------------------------------
+EXP X5: the 2-parameter viability test.  Grouped 5-fold CV by CURVE,
+        so every test curve is unseen at fit time.
+------------------------------------------------------------------------------
+                       model   CV AUC   in-sample AUC
+                    NU alone   0.7659          0.7996
+                nu_hat alone   0.6394          0.6889
+                   eff alone   0.7961          0.8465
+                 NU + nu_hat   0.9228          0.9397
+                    NU + eff   0.8054          0.8549
+                nu_hat + eff   0.9125          0.9367
+           NU + nu_hat + eff   0.9359          0.9559
+    NU + nu_hat + eff + step   0.9345          0.9600
+
+  full-data coefficients, decision boundary at logit = 0:
+    NU + nu_hat          logit = -0.323  -8.479*logNU  -8.055*lognuhat
+    NU + nu_hat + eff    logit = -8.108  -5.358*logNU  -9.571*lognuhat  -2.992*logeff
+
+------------------------------------------------------------------------------
+EXP X6: SECONDARY — the two-block step at 17 bits / dim 24.
+------------------------------------------------------------------------------
+  eff     N  mean step      sd     min     max |  mean gsa  head/mu
+ 0.05   100    -0.0079  0.8706 -0.7345  3.1563 |  -0.00990   0.9620
+ 0.10   100    -0.0564  0.6549 -0.8416  2.2225 |  -0.01306   0.9690
+ 0.15   100    -0.1081  0.5443 -0.8104  1.5596 |  -0.01486   0.9542
+ 0.20   100    -0.1219  0.4427 -0.8347  1.1334 |  -0.01768   0.9615
+ 0.25   100    -0.1683  0.3700 -0.7849  0.7582 |  -0.01953   0.9695
+
+  full profile range max(log2||b*||) - min : mean 0.833 bits, max 3.156 bits
+  (W1b saw a ~1.6-bit step at 12 bits / dim 16; compare above)
+
+  is step just nu_hat re-measured from the profile?
+    rho(step, log nu_hat) = -0.8788
+    rho(step, log NU)     = +0.1351
+    rho(gsa,  log nu_hat) = -0.9123
+
+------------------------------------------------------------------------------
+EXP X7: the X5 boundary has near-equal coefficients on logNU and
+        lognu_hat, i.e. it is the product rule NU*nu_hat <= t.
+        Test it directly — no fitting, no free parameter.
+------------------------------------------------------------------------------
+                    subset     N       rec  AUC(-prod)
+                    pooled   500   190/500      0.9395
+                  eff=0.05   100    99/100      0.8384
+                  eff=0.10   100    42/100      0.9553
+                  eff=0.15   100    21/100      0.8668
+                  eff=0.20   100    19/100      0.9292
+                  eff=0.25   100     9/100      0.8852
+         ambiguous NU band   366    97/366      0.8858
+
+  stratified over eff cells: AUC(-prod) = 0.9162  (6552 pairs)
+  stratified over ambiguous cells: AUC(-prod) = 0.9027  (4943 pairs)
+
+  threshold sweep on NU*nu_hat (pooled, N=500):
+      t    TP    FP    FN    TN    prec  recall     acc
+  0.400     7     0   183   310   1.000   0.037   0.634
+  0.500    26     0   164   310   1.000   0.137   0.672
+  0.600    46     0   144   310   1.000   0.242   0.712
+  0.700    77     1   113   309   0.987   0.405   0.772
+  0.800   112     4    78   306   0.966   0.589   0.836
+  0.900   140    22    50   288   0.864   0.737   0.856
+  0.962   159    38    31   272   0.807   0.837   0.862
+  1.000   162    47    28   263   0.775   0.853   0.850
+  1.100   175    74    15   236   0.703   0.921   0.822
+  1.250   185   128     5   182   0.591   0.974   0.734
+  1.500   189   186     1   124   0.504   0.995   0.626
+
+  t = 0.962 is the logit=0 crossing of the fitted NU+nu_hat model.
+
+==============================================================================
+done
+==============================================================================

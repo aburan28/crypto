@@ -6538,3 +6538,311 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the Thread 24 entry earlier today (log line
+~6540). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 made measurable progress hours earlier, so protocol rule (b)
+applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If no — if mu's apparent power is entirely mediated by NU after all —
+>        then the W5 result is a stratification artifact and the closed form
+>        should be retired.
+>   Secondary: define step = log2(||b*_{m+1}||) - log2(||b*_1||) and test
+>        whether step -> 0 predicts the wall better than either NU or mu.
+
+**Verdict: H25 CONFIRMED in substance, and the deliverable came out cleaner
+than the hypothesis asked for. The two-parameter viability boundary is the
+product rule `NU * nu_hat ~ 1`** — a single scalar, no free parameter, no fit,
+validated out-of-sample at five bit-lengths. The literal clause on raw `mu`
+misses (0.693 pooled), for a reason that is itself the point: `mu` needs the
+`sqrt(det L2)` normalisation as soon as eff is not held fixed. The secondary
+is **FALSIFIED and explained** — `step` is not a second mechanism, it is
+`nu_hat` re-measured from the GS profile alone (rho = -0.879).
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` had to be named explicitly; it is not pulled in by fpylll.)
+- `glv_hnp_phase2_gsprofile_strat.py` — refactored the 500-row table into
+  `build_rows()` / `dump_rows()` / `load_rows()` and added the `--dump-json`
+  flag Thread 24 asked for. **The regenerated table reproduces the logged
+  W5/W6/W7 numbers digit for digit** (only the wall-clock line differs in the
+  committed output), which is an independent check that the generator is
+  fully seeded.
+- `glv_hnp_phase2_nu_conditioned.py` — new (exp X1-X7). Re-analysis only, no
+  new lattice work. Adds pure-python Newton-Raphson logistic regression with
+  ridge, and grouped 5-fold CV **by curve**, so no test curve is ever seen at
+  fit time. Output: `glv_hnp_phase2_nu_conditioned_output.txt` (143 lines).
+- `glv_hnp_phase2_prodrule_xsize.py` — new (exp Y1-Y3), the out-of-sample
+  check at 12/14/17/20/22 bits, 500 instances each (2500 total, 15.1s).
+  Output: `glv_hnp_phase2_prodrule_xsize_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (6.70s). No Rust touched.
+- `.gitignore`: `secp256k1_cm_audit/*_rows.json`. The dump is 413 KB and
+  rebuilds deterministically in ~3s, so it is not tracked;
+  `glv_hnp_phase2_nu_conditioned.py` rebuilds it automatically if absent.
+
+**Methodological note — why the pre-registered test was not run alone.**
+Conditioning on the NU band does not control eff = K1*K2/n, and mu depends on
+eff through S_K1 = n//K1. A pooled in-band AUC can therefore be bought
+entirely by eff — exactly the failure mode W3 fell into and W5 was built to
+avoid. X2 reports the pre-registered pooled number for the record; X3 repeats
+it doubly conditioned on (eff stratum, NU band), which is the honest version.
+
+### Findings
+
+**X1 — the Thread 24 bracket transfers to this table, and NU <= 1 is still
+exactly sound.**
+
+```
+NU | success : min 0.574  median 1.051  max 2.199  (n=190)
+NU | failure : min 1.011  median 1.706  max 3.273  (n=310)
+NU <= 1 : TP 86  FP 0
+measured bracket : sufficient NU < 1.011 , necessary NU > 2.199
+```
+
+The necessary end lands on 2.199, the same value W4 measured on the disjoint
+300-instance U2 grid. 366 of 500 rows (97 recoveries) sit inside the
+ambiguous band, i.e. **nearest-plane declines to answer for 73% of the table**
+— which is what makes the second coordinate worth having.
+
+**X2 — the PRE-REGISTERED clause on raw mu MISSES (0.693 < 0.8); the
+scale-free nu_hat passes (0.840).**
+
+```
+             NU band     N      rec |      mu  nu_hat     eff    step      NU
+           NU < 1.04    94    92/94 |  0.1603  0.4592  0.9212  0.4511  0.9837
+1.04-2.20 (ambiguous)  366   97/366 |  0.6932  0.8403  0.7056  0.1803  0.5656
+           NU > 2.20    40     1/40 |  1.0000  1.0000  1.0000  0.0000  1.0000
+```
+
+Two readings matter here. First, **NU is nearly uninformative inside its own
+ambiguous band (0.566)** — the band is honestly named, and something else has
+to do the work there. Second, the mu/nu_hat gap (0.693 vs 0.840) is explained
+by X4: inside the band `rho(mu, eff) = -0.496`, so pooling across eff without
+dividing by `sqrt(det L2)` actively dilutes mu. Thread 24 W5 wrote that the
+sqrt(det) normalisation "only matters across sizes"; that is right, and X2 is
+the case where it matters.
+
+**X3 — the HONEST test passes decisively. Doubly conditioned on (eff, NU
+band), the geometry still separates at ~0.89.**
+
+```
+  eff                NU band     N      rec |      mu  nu_hat    step     gsa
+ 0.05 1.04-2.20  (ambiguous)    24    23/24 |  0.4565  0.4565  0.5217  0.3478
+ 0.10 1.04-2.20  (ambiguous)    83    26/83 |  0.8819  0.8853  0.1329  0.1188
+ 0.15 1.04-2.20  (ambiguous)    96    21/96 |  0.8889  0.8825  0.1130  0.1111
+ 0.20 1.04-2.20  (ambiguous)    89    18/89 |  0.9276  0.9425  0.0657  0.0642
+ 0.25 1.04-2.20  (ambiguous)    74     9/74 |  0.8615  0.8615  0.1179  0.1453
+
+stratified pooling over the ambiguous cells (concordant pairs / all pairs):
+  AUC(-mu) 0.8916 | AUC(-nuhat) 0.8944 | AUC(-step) 0.1092
+  AUC(-gsa) 0.1064 | AUC(-lamstar) 0.2616      (4943 pairs)
+same pooling over ALL eff cells (no NU conditioning):
+  AUC(-mu) 0.8335 | AUC(-nuhat) 0.8373 | AUC(-NU) 0.5847  (6552 pairs)
+```
+
+With eff fixed, `mu` and `nu_hat` are interchangeable (0.8916 vs 0.8944) —
+det(L2) ~ n^2/eff is near-constant inside a stratum, so the normalisation is a
+no-op there. The eff=0.05 cell is degenerate (23/24 recover) and carries 24 of
+4943 pairs. **The exact BDD certificate NU, stratified by eff, is 0.585 — barely
+above chance.** mu/nu_hat is not mediated by NU; the W5 result stands.
+
+**X5 — the two-parameter test works, and beats every single coordinate.**
+Grouped 5-fold CV **by curve** (every test curve unseen at fit time):
+
+```
+                       model   CV AUC   in-sample AUC
+                    NU alone   0.7659          0.7996
+                nu_hat alone   0.6394          0.6889
+                   eff alone   0.7961          0.8465
+                 NU + nu_hat   0.9228          0.9397
+                    NU + eff   0.8054          0.8549
+                nu_hat + eff   0.9125          0.9367
+           NU + nu_hat + eff   0.9359          0.9559
+    NU + nu_hat + eff + step   0.9345          0.9600
+```
+
+`NU + nu_hat` = 0.9228 against 0.766 and 0.639 for the parts. Two weak,
+mutually uncorrelated coordinates compose into a strong one — the direct
+consequence of Thread 24's W6 non-identity. Adding `step` on top of the
+three-feature model *lowers* CV AUC (0.9359 -> 0.9345) while raising
+in-sample (0.9559 -> 0.9600): pure overfit, no information.
+
+**The fitted boundary is a product.** The two slopes agree to 5%:
+
+```
+NU + nu_hat        logit = -0.323  -8.479*logNU  -8.055*lognu_hat
+NU + nu_hat + eff  logit = -8.108  -5.358*logNU  -9.571*lognu_hat  -2.992*logeff
+```
+
+`-8.479 logNU - 8.055 log nu_hat ~ -8.27 log(NU*nu_hat)`, and logit = 0 at
+`NU*nu_hat = exp(-0.323/8.27) = 0.962`.
+
+**X7 — the product rule tested directly, no fitting, no free parameter.**
+
+```
+                    subset     N       rec  AUC(-prod)
+                    pooled   500   190/500      0.9395
+                  eff=0.05   100    99/100      0.8384
+                  eff=0.10   100    42/100      0.9553
+                  eff=0.15   100    21/100      0.8668
+                  eff=0.20   100    19/100      0.9292
+                  eff=0.25   100     9/100      0.8852
+         ambiguous NU band   366    97/366      0.8858
+stratified over eff cells       AUC(-prod) = 0.9162  (6552 pairs)
+stratified over ambiguous cells AUC(-prod) = 0.9027  (4943 pairs)
+```
+
+The unfitted scalar `NU*nu_hat` matches the *fitted* two-feature logistic
+(0.9395 pooled vs 0.9228 CV) and beats NU (0.7996), nu_hat (0.6889) and eff
+(0.8465) individually.
+
+```
+threshold sweep on NU*nu_hat (pooled, N=500):
+      t    TP    FP    FN    TN    prec  recall     acc
+  0.600    46     0   144   310   1.000   0.242   0.712
+  0.700    77     1   113   309   0.987   0.405   0.772
+  0.800   112     4    78   306   0.966   0.589   0.836
+  0.962   159    38    31   272   0.807   0.837   0.862
+  1.000   162    47    28   263   0.775   0.853   0.850
+  1.250   185   128     5   182   0.591   0.974   0.734
+```
+
+**Honest limitation: the product does not beat NU <= 1 at the zero-FP end.**
+`prod <= 0.6` gives 46 TP / 0 FP; `NU <= 1` gives 86 TP / 0 FP on the same
+rows. The product is the better *separator*; NU stays the better *certificate*,
+which is as it should be — NU <= 1 is a theorem about nearest-plane and the
+product is an empirical ranking.
+
+**Y1/Y2 — CROSS-SIZE VALIDATION. 2500 fresh instances at 12/14/17/20/22 bits
+(n from 1999 to 2101807), m=12, dim 24 throughout.**
+
+```
+ bits     N       rec |    prod      NU  nu_hat     eff | prod strat  NU strat  nuh strat
+   12   500   362/500 |  0.9259  0.7826  0.8484  0.8492 |     0.8601    0.4856     0.8863
+   14   500   273/500 |  0.9420  0.8096  0.7530  0.8420 |     0.9011    0.5318     0.9119
+   17   500   190/500 |  0.9395  0.7996  0.6889  0.8465 |     0.9162    0.5847     0.8373
+   20   500   170/500 |  0.9506  0.8987  0.7601  0.8866 |     0.9174    0.7040     0.8912
+   22   500   156/500 |  0.9383  0.8036  0.7792  0.9147 |     0.9198    0.4610     0.9093
+```
+
+Pooled AUC(prod) = 0.926-0.951 with **no decay over a 2^10 growth in n**; the
+eff-stratified figure *rises* slightly, 0.860 -> 0.920. NU stratified is
+0.46-0.70, i.e. noisy and near chance at every size. H25b's AUC clause
+(>= 0.85 everywhere) is met with margin.
+
+```
+ bits  rec rate  acc-opt t     acc  J-opt t      J  acc@1.0  max 0-FP t
+   12     0.724      1.186   0.882    0.965  0.709    0.862       0.525
+   14     0.546      0.995   0.862    0.845  0.724    0.860       0.624
+   17     0.380      0.943   0.868    1.028  0.728    0.850       0.698
+   20     0.340      0.906   0.888    1.074  0.769    0.880       0.613
+   22     0.312      0.827   0.866    0.969  0.717    0.828       0.522
+```
+
+The accuracy-optimal cut appears to drift 1.186 -> 0.827, but that is a
+class-balance artifact: the recovery rate falls 0.724 -> 0.312 over the same
+rows, and the accuracy-optimal cut tracks the prior. **Youden's J-optimal cut
+is balance-free and does not drift: 0.965, 0.845, 1.028, 1.074, 0.969 — mean
+0.976, range [0.845, 1.074], no monotone trend**, with J itself flat at
+0.709-0.769. Fixing t = 1.0 outright costs at most 4 accuracy points at any
+size. H25b is confirmed on both clauses.
+
+**Y3 — the soundness control holds at every size.** `NU <= 1` gives
+**455 TP and 0 FP over all 2500 instances** (177/117/86/43/38 at 12/14/17/20/22
+bits). The nearest-plane guarantee is exact, as theory requires. Its recall
+decays 0.489 -> 0.244, though: the sound certificate covers a shrinking share
+of the recoverable instances as n grows, which is precisely the gap the
+product rule fills.
+
+**X6 — SECONDARY FALSIFIED, and explained. `step` is nu_hat in disguise.**
+
+```
+  eff     N  mean step      sd     min     max |  mean gsa  head/mu
+ 0.05   100    -0.0079  0.8706 -0.7345  3.1563 |  -0.00990   0.9620
+ 0.10   100    -0.0564  0.6549 -0.8416  2.2225 |  -0.01306   0.9690
+ 0.15   100    -0.1081  0.5443 -0.8104  1.5596 |  -0.01486   0.9542
+ 0.20   100    -0.1219  0.4427 -0.8347  1.1334 |  -0.01768   0.9615
+ 0.25   100    -0.1683  0.3700 -0.7849  0.7582 |  -0.01953   0.9695
+
+full profile range max - min : mean 0.833 bits, max 3.156 bits
+rho(step, log nu_hat) = -0.8788    rho(step, log NU) = +0.1351
+rho(gsa,  log nu_hat) = -0.9123
+```
+
+Three things at once. (i) **The two-block shape W1b saw at 12 bits / dim 16
+does not survive to dim 24** — mean step is -0.008 to -0.168 against the
+~1.6-bit step W1b reported, and the whole profile spans 0.833 bits on average.
+(ii) The pre-registered direction is *backwards*: AUC(-step) = 0.109 means
+LARGER step predicts recovery, and step -> 0 is the failure side, not the
+wall-crossing signal. (iii) The mechanism is not new: `rho(step, log nu_hat)
+= -0.879` and `rho(gsa, log nu_hat) = -0.912`, while `rho(step, log NU)
+= +0.135 ~ 0`. Since `||b*_1||/mu = 0.954-0.970` (the `head/mu` column), the
+first GS norm *is* lambda_1(L2) to within 5% even though the flat head block
+is gone, so any head-vs-rest contrast is just lambda_1 measured against
+det(L2)^(1/dim) — a self-normalising restatement of nu_hat. That explains both
+the ~0.89 AUC in the flipped direction and the zero CV gain in X5.
+
+**Useful corollary:** `nu_hat` can be read off the LLL Gram-Schmidt profile of
+L0 directly (via the GSA slope, rho = -0.912) without ever constructing L2.
+
+**Summary of the state of the Phase 2 viability question.**
+
+| quantity | what it is | cost | role |
+|---|---|---|---|
+| `NU = max_i 2\|<e,b*_i>\|/\|\|b*_i\|\|^2` | exact nearest-plane certificate | LLL on L0 + GS | **sound**: NU <= 1 => recovery, 455/455, 0 FP at 5 sizes |
+| `nu_hat = lambda_1(L2)/sqrt(det L2)` | 2D lambda-block skew | closed form, no reduction | ranks curves at fixed eff, AUC 0.84-0.91 |
+| `NU * nu_hat` | the product | LLL on L0 | **separator**: AUC 0.93-0.95 pooled, boundary at ~1, size-stable |
+| `step`, `gsa` | GS-profile shape | free given the profile | redundant with nu_hat (rho -0.88/-0.91) |
+| `lam* = min(lam, n-lam)/n` | GLV eigenvalue position | free | falsified (Thread 20), AUC 0.26 |
+
+### Next step proposal
+
+**Thread 26 — is `NU * nu_hat ~ 1` a theorem or a coincidence?** The rule is
+now empirically solid (2500 instances, 5 sizes, unfitted, threshold stable at
+0.976 +- 0.11) and entirely unexplained. The concrete sub-task is to test the
+one derivation that would explain it:
+
+>   H26: NU*nu_hat ~ 1 is the statement that the planted vector leaves the
+>        nearest-plane cylinder exactly when the L2-skew has eaten the
+>        Minkowski slack, i.e. `NU ~ ||e|| / (lambda_1(L0) * sqrt(dim))` and
+>        `lambda_1(L0) ~ lambda_1(L2) * (det L0 / det L2)^(1/dim)`.
+>        Then NU*nu_hat ~ ||e|| / (sqrt(dim) * det(L0)^(1/dim)), which is
+>        dimensionless and eff-free — hence the size stability.
+>   Falsifier: measure `lambda_1(L0)` directly (BKZ-40 or exact SVP at dim 24
+>        is affordable) and check `lambda_1(L0) / (lambda_1(L2) *
+>        (det L0/det L2)^(1/dim))` against 1. If that ratio has >1.3x spread
+>        across the 2500-instance table, the chain is broken and the product
+>        rule stays empirical.
+
+This is the first hypothesis in the thread that would make the boundary a
+statement about L0's geometry rather than a fitted line, and it predicts the
+observed eff-independence rather than assuming it. Cost: one SVP call per row
+on the existing tables, ~10-20 min with fpylll's `SVP.shortest_vector` at
+dim 24.
+
+Secondary: the Y3 recall decay (0.489 -> 0.244 from 12 to 22 bits) says the
+sound certificate is losing coverage as n grows. Extrapolate it — fit
+`recall(NU<=1)` against log2 n over the five sizes and report where it hits
+0.10. If the decay is linear in log n rather than flat, the "NU <= 1" rule is
+asymptotically useless and the product rule is the only usable predictor at
+cryptographic sizes, which is worth stating explicitly in the paper draft.
+
+Tertiary (carried, unchanged from Thread 23/24): BKZ-beta sweep against NU,
+to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(recorded below after commit)

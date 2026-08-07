@@ -18,9 +18,16 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
+
+Thread 25 addendum (2026-08-07 run #3): the row table is now produced by
+build_rows() and can be persisted with --dump-json, so downstream re-analysis
+does not have to pay the ~10 min regeneration cost.  The generation is
+deterministic (search_curves, SEEDS and the d_trial RNG are all seeded), so a
+dump and a fresh run agree row for row.
 """
 
+import json
 import math
 import os
 import random
@@ -33,36 +40,65 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
-if __name__ == "__main__":
-    print("=" * 78)
-    print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
-    print("=" * 78)
+M17 = 12
+EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
 
+
+def build_rows(m=M17, effs=EFFS, verbose=True):
+    """The 5 x 20 x 5 = 500-instance 17-bit table used by W5-W7 and Thread 25."""
     t0 = time.time()
     curves17 = search_curves(1 << 16, 1 << 17, per_bin=2, nbins=10)
-    print(f"\n{len(curves17)} 17-bit j=0 GLV curves in {time.time()-t0:.1f}s")
-    M17 = 12
-    EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
+    if verbose:
+        print(f"\n{len(curves17)} 17-bit j=0 GLV curves in {time.time()-t0:.1f}s")
 
     t0 = time.time()
     rows = []
-    for eff in EFFS:
+    for eff in effs:
         for (p, b, n, lam, G) in curves17:
             k2b = math.isqrt(n) + 1
             k1b = max(2, int(eff * n / k2b))
             for seed in SEEDS:
                 d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance((p, b, n, lam, G), M17, d_trial, k1b, seed,
+                r = instance((p, b, n, lam, G), m, d_trial, k1b, seed,
                              exact=False)
                 if r is None:
                     continue
-                rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                rk = run_new((p, b, n, lam, G), m, d_trial, k1b, seed)
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
-                          'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'eff': k1b * k2b / n, 'effq': eff, 'm': m,
+                          'seed': seed, 'lamstar': lam_star(lam, n)})
                 rows.append(r)
-    print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
-          f"in {time.time()-t0:.1f}s")
+    if verbose:
+        print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
+              f"in {time.time()-t0:.1f}s")
+    return rows
+
+
+def dump_rows(rows, path):
+    """Persist the table.  'nus' is dropped (24 floats/row, only NU is used)."""
+    slim = [{k: v for k, v in r.items() if k != 'nus'} for r in rows]
+    with open(path, 'w') as fh:
+        json.dump(slim, fh)
+    return path
+
+
+def load_rows(path):
+    with open(path) as fh:
+        return json.load(fh)
+
+
+if __name__ == "__main__":
+    print("=" * 78)
+    print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
+    print("=" * 78)
+
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        dump_path = sys.argv[sys.argv.index("--dump-json") + 1]
+
+    rows = build_rows()
+    if dump_path:
+        print(f"table written to {dump_rows(rows, dump_path)}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

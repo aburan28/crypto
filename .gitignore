@@ -18,3 +18,7 @@ research/ecdlp_autolab/phase22_rho_barrett
 __pycache__/
 *.pyc
 *.pyo
+
+# Regenerable instance tables dumped by the GLV-HNP Phase 2 sweeps
+# (deterministic, ~3s to rebuild; ~400 KB each).
+secp256k1_cm_audit/*_rows.json
