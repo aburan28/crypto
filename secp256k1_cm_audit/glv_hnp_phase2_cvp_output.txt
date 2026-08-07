@@ -1,0 +1,108 @@
+==============================================================================
+Thread 23: Phase-2 GLV lattice -- Kannan-SVP vs explicit CVP (BDD)
+==============================================================================
+
+Curves (lam* = min(lam, n-lam)/n, the representation-invariant form):
+  8-bit/199      p=211    n=199    lam=106    lam*=0.4673  m=6
+  12-bit/2557    p=2557   n=2659   lam=1755   lam*=0.3400  m=8
+  12-bit/2677    p=2677   n=2647   lam=185    lam*=0.0699  m=10
+
+------------------------------------------------------------------------------
+EXP C1: is the planted vector the CVP solution?  (m and K1 as in T4)
+------------------------------------------------------------------------------
+e_true  = ||exact error||;  e_found = ||Babai error||;  radius = (1/2)min||b*_i||
+Babai nearest-plane is GUARANTEED correct when e_true < radius; it usually
+succeeds well beyond that, so radius is a sufficient-condition yardstick only.
+
+curve           K1  ctr  dim      e_true     e_found      radius e_true/rad   ok
+8-bit/199        2 False   13       263.0       263.0        99.5      2.643  True
+8-bit/199        2  True   13       246.4       246.4        99.5      2.476  True
+8-bit/199        2 False   13       263.0       263.0        99.5      2.643  True
+8-bit/199        2  True   13       246.4       246.4        99.5      2.476  True
+12-bit/2557      2 False   17      3855.0      3855.0      1329.5      2.900  True
+12-bit/2557      2  True   17      4428.7      4428.7      1329.5      3.331  True
+12-bit/2557      8 False   17      4402.0      3643.2      1329.5      3.311  True
+12-bit/2557      8  True   17      3796.6      3796.6      1329.5      2.856  True
+12-bit/2677      2 False   21      5237.4      5237.4      1323.5      3.957  True
+12-bit/2677      2  True   21      4836.3      4836.3      1323.5      3.654  True
+12-bit/2677      8 False   21      5684.6      6120.4      1323.5      4.295 False
+12-bit/2677      8  True   21      4111.2      4111.2      1323.5      3.106  True
+
+------------------------------------------------------------------------------
+EXP C2: head-to-head K1 sweep -- the exact T4 grid of 2026-07-29
+------------------------------------------------------------------------------
+V0 = Kannan-SVP (historical);  V1 = CVP nearest-plane, uncentered;
+V2 = CVP nearest-plane, centered;  V3 = BKZ(20) + CVP centered;
+V2r = Babai *rounding*, centered (weaker rule, to isolate NP's contribution).
+Each cell = wins out of 5 seeds.
+
+
+  8-bit/199   (lam*=0.4673, m=6, K2=15, dim_cvp=13)
+    K1      2    3    4    6    8   12   16   24   32   48   64
+    V0      5    5    2    2    0    0    0    0    0    0    0
+    V1      5    5    2    2    0    0    0    0    0    0    0
+    V2      5    5    2    1    0    0    0    0    0    0    0
+    V3      5    5    2    1    0    0    0    0    0    0    0
+    V2r     4    4    3    1    0    0    0    0    0    0    0
+    walls (largest K1 with >=3/5): V0=3, V1=3, V2=3, V3=3, V2r=4
+
+  12-bit/2557   (lam*=0.3400, m=8, K2=52, dim_cvp=17)
+    K1      2    3    4    6    8   12   16   24   32   48   64
+    V0      5    5    5    5    5    1    0    0    0    0    0
+    V1      5    5    5    5    5    0    0    0    0    0    0
+    V2      5    5    5    5    5    4    4    0    0    0    0
+    V3      5    5    5    5    5    4    4    0    0    0    0
+    V2r     5    5    5    5    5    3    4    0    0    0    0
+    walls (largest K1 with >=3/5): V0=8, V1=8, V2=16, V3=16, V2r=16
+
+  12-bit/2677   (lam*=0.0699, m=10, K2=52, dim_cvp=21)
+    K1      2    3    4    6    8   12   16   24   32   48   64
+    V0      5    5    5    0    0    0    0    0    0    0    0
+    V1      5    4    2    0    0    0    0    0    0    0    0
+    V2      5    5    5    4    4    4    1    1    0    0    0
+    V3      5    5    5    4    4    4    2    1    0    0    0
+    V2r     5    4    3    1    1    3    0    1    0    0    0
+    walls (largest K1 with >=3/5): V0=4, V1=3, V2=12, V3=12, V2r=12
+
+  K1-wall summary (>=3/5 majority recovery):
+    curve            V0 SVP   V1 CVP   V2 ctr   V3 BKZ    V2/V0
+    8-bit/199             3        3        3        3     1.00
+    12-bit/2557           8        8       16       16     2.00
+    12-bit/2677           4        3       12       12     3.00
+
+------------------------------------------------------------------------------
+EXP C3: does more data rescue the CVP wall?  (analogue of T4b)
+------------------------------------------------------------------------------
+At the first K1 beyond the V2 wall, sweep m.  If recovery stays at 0 the
+wall is information-theoretic; if it climbs, it is a data wall.
+
+  8-bit/199  K1=4 (first beyond V2 wall 3):
+    m         4    6    8   12   16   24   32
+    V2        0    2    4    5    5    5    5
+  12-bit/2557  K1=24 (first beyond V2 wall 16):
+    m         4    6    8   12   16   24   32
+    V2        0    0    0    4    3    3    3
+  12-bit/2677  K1=16 (first beyond V2 wall 12):
+    m         4    6    8   12   16   24   32
+    V2        1    0    0    4    3    5    5
+
+------------------------------------------------------------------------------
+EXP C4: 17-bit generalisation -- fresh curves, V0 vs V2 walls
+------------------------------------------------------------------------------
+  found 6 fresh 17-bit j=0 GLV curves
+
+  K1 grid: [2, 4, 8, 16, 32, 48, 64, 96, 128, 192, 254]  (eff = K1*K2/n; '>=254' means wall not reached)
+
+        p       n    lam*   m |  V0 wall  V2 wall   ratio
+    65539   65287  0.3346  12 |       48       64    1.33
+    65557   65053  0.3877  12 |       16       48    3.00
+    65617   65119  0.3581  12 |       16       32    2.00
+    65629   66109  0.4096  12 |       16       48    3.00
+    65647   65719  0.0273  12 |       16       64    4.00
+    65677   65899  0.3184  12 |       64       64    1.00
+
+  median V2/V0 wall ratio: 3.00  (prediction from det(L): ~4)
+
+==============================================================================
+done
+==============================================================================

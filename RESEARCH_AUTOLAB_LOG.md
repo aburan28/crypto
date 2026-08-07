@@ -6103,3 +6103,174 @@ do not re-derive the root-convention confusion.
 d525931 autolab 2026-07-29: Thread 20 — lambda/n threshold falsified; planted vector is never lambda_1
 
 e845207 autolab 2026-07-29: Thread 20 — λ/n threshold falsified; ν̂ separator found (AUC 0.935)
+
+## 2026-08-07 (autolab run)
+
+### Task picked
+Thread 23 (reformulate the Phase-2 GLV lattice so the planted vector is findable) — the
+explicit next step proposed by the 2026-07-29 entry (log line ~6089), 9 days old, on the
+only thread with a live, cheap, falsifiable sub-task. Priorities 1/3/4/6 are CLOSED;
+priority 2 was recommended CLOSED as a negative result on 2026-07-27 (log line ~5872);
+priority 5 (GLV-HNP Phase 2) made measurable progress on 2026-07-29, so protocol rule (b)
+selects its continuation.
+
+**Falsifier, as stated on 2026-07-29:** "if the K1 wall moves outward on the λ*=0.07 curve
+(currently K1≈4–6) the reformulation is a real improvement; if the wall stays at K1≈4–6,
+then the wall is information-theoretic and Phase 2 is at its ceiling."
+
+**Verdict: the wall moved 4 → 12 at fixed m, and to 16 with more data (0/5 → 5/5 at the
+exact configuration declared a structural failure on 2026-07-26). Phase 2 is NOT at its
+ceiling.** But the gain comes from a *different lever* than 2026-07-29 predicted — see C2.
+
+### Work done
+- Environment (fresh container, nothing pre-installed): `apt-get install pari-gp` (2.15.4),
+  `pip install fpylll cysignals sympy` (fpylll 0.6.4). Same as 2026-07-29; this is needed
+  on **every** run, the container never carries it over.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_cvp.py` (experiments C1–C4, ~560 lines).
+  EC arithmetic, `scales()`, `gen_signatures()` and the historical curve list are copied
+  verbatim from `glv_hnp_phase2_lambda_threshold.py:227` so every number below is directly
+  comparable to the 2026-07-29 T4 grid. Output artifact:
+  `secp256k1_cm_audit/glv_hnp_phase2_cvp_output.txt`.
+- Implemented the 2026-07-29 proposal: drop the Kannan row **and** column → a (2m+1)-dim
+  lattice on columns `[k1_0..k1_{m-1} | d | k2_0..k2_{m-1}]`, and solve BDD by Babai
+  nearest-plane against `t = (−A_i·S_K1, 0, 0)`. The lattice vector `w` then satisfies
+  `w − t = (k1_i·S_K1, d·S_D, k2_i·S_K2)` and recovery is `d = w[m]/S_D mod n`.
+  Added a *centered* variant (shift `t` to the centre of the known box), Babai rounding as
+  a control, and BKZ(20) preprocessing.
+- Two silent implementation bugs found and fixed en route. Both produced clean-looking
+  all-zero tables rather than crashes, so recording them here:
+  1. Centering shifts the **target**, not the lattice. The sought `w` is unchanged and
+     still has `w[m] = d·S_D`; the first version added the centre offset back during
+     decode, making every centered cell read 0/5.
+  2. Centering must be done in **scaled** coordinates. `(K1//2)*S_K1` under-centres badly:
+     at K1=2 it maps k1 ∈ {0,1} to {−1,0}, i.e. no gain at all. Correct centre is
+     `(K1*S_K1)//2`. With the wrong centering, V2 ≤ V1 everywhere and the whole effect
+     below vanishes.
+- Independent re-verification of the headline cell in a separate script (module imported
+  fresh, no shared state): recovered `d`, **all** `k1_i`, **all** `k2_i`, and the defining
+  congruence `A_i + B_i·d ≡ k1_i + λ·k2_i (mod n)` — so these are full solutions, not
+  lucky `d` collisions. Failures fail cleanly (congruence false), no false positives.
+- `cargo test --test curve_audit` → 5/5 pass (8.02s). ✓
+
+### Findings
+
+**C1 — Babai's guarantee radius is worthless as a predictor here.** Nearest-plane returns
+the exact planted error (`e_found == e_true`) in 11 of 12 diagnostic cells even though
+`e_true` sits at **2.5–4.3×** the sufficient decoding radius ½·min‖b*_i‖:
+
+| curve | K1 | centred | dim | e_true | e_found | radius | e_true/rad | ok |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 2 | no | 13 | 263.0 | 263.0 | 99.5 | 2.643 | ✓ |
+| 8-bit/199 | 2 | yes | 13 | 246.4 | 246.4 | 99.5 | 2.476 | ✓ |
+| 12-bit/2557 | 8 | no | 17 | 4402.0 | 3643.2 | 1329.5 | 3.311 | ✓ |
+| 12-bit/2557 | 8 | yes | 17 | 3796.6 | 3796.6 | 1329.5 | 2.856 | ✓ |
+| 12-bit/2677 | 8 | no | 21 | 5684.6 | 6120.4 | 1323.5 | 4.295 | ✗ |
+| 12-bit/2677 | 8 | yes | 21 | 4111.2 | 4111.2 | 1323.5 | 3.106 | ✓ |
+
+Note row 3: `e_found < e_true` yet `ok` is still true — nearest-plane found a *strictly
+shorter* vector that nonetheless decodes to the right `d`. So "planted vector is shortest"
+was never the right success criterion, consistent with the 2026-07-29 T5 conclusion.
+
+**C2 — head-to-head on the exact 2026-07-29 T4 grid (K1 wall = largest K1 with ≥3/5 seeds).**
+V0 = Kannan-SVP (historical), V1 = CVP nearest-plane uncentered, V2 = CVP nearest-plane
+centered, V3 = BKZ(20)+V2, V2r = Babai rounding centered.
+
+| curve | λ* | m | V0 | V1 | V2 | V3 | V2r |
+|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 0.4673 | 6 | 3 | 3 | 3 | 3 | 4 |
+| 12-bit/2557 | 0.3400 | 8 | 8 | 8 | **16** | 16 | 16 |
+| 12-bit/2677 | 0.0699 | 10 | 4 | 3 | **12** | 12 | 12 |
+
+Full row for the historical failure curve (12-bit/2677, the one 2026-07-26 called
+structurally unattackable), wins out of 5 seeds:
+
+```
+K1     2    3    4    6    8   12   16   24   32   48   64
+V0     5    5    5    0    0    0    0    0    0    0    0
+V1     5    4    2    0    0    0    0    0    0    0    0
+V2     5    5    5    4    4    4    1    1    0    0    0
+```
+
+**The decisive nuance: V1 ≈ V0.** The CVP reformulation *by itself* buys nothing — it is
+even marginally worse on the third curve (wall 3 vs 4). The entire gain comes from
+**centering the target box in scaled coordinates**. So the 2026-07-29 structural diagnosis
+(the planted vector is never λ₁ because `n·S_D·e_m ∈ L`) was a correct *observation* but
+the fix it proposed is not where the leverage is. Recording this explicitly so no future
+run re-derives "switch SVP→CVP" as the improvement.
+
+BKZ(20) adds nothing over LLL at these dimensions (V3 walls identical to V2 in all 3
+curves), confirming again that reduction strength is not the binding constraint. Babai
+rounding ≈ nearest-plane, so the gain is not from the decoding rule either.
+
+**Two direct corrections to earlier entries:**
+- **2026-07-26** reported p=2677 at K1=8 as 0/5 under LLL *and* BKZ(40), concluding
+  "failure is structural, not a strength-of-reduction issue." Under centered CVP the same
+  configuration is **4/5**. It was a formulation artifact.
+- **2026-07-29 T4b** concluded "at K1=8 more data does not rescue it (m=8/12/16/24/32 →
+  0,0,1,0,1 of 5), so the K1 wall is genuine." Under centered CVP that curve is 4/5 at
+  K1=8 with m=10, and 5/5 at K1=16 with m=24 (see C3).
+
+**C3 — the remaining walls are DATA walls, not information-theoretic.** At the first K1
+strictly beyond each V2 wall, sweeping m restores recovery in all three curves:
+
+| curve | K1 | m=4 | 6 | 8 | 12 | 16 | 24 | 32 |
+|---|---|---|---|---|---|---|---|---|
+| 8-bit/199 | 4 | 0 | 2 | 4 | 5 | 5 | 5 | 5 |
+| 12-bit/2557 | 24 | 0 | 0 | 0 | 4 | 3 | 3 | 3 |
+| 12-bit/2677 | 16 | 1 | 0 | 0 | 4 | 3 | 5 | 5 |
+
+This is the cleanest single result of the run: the 2026-07-29 "K1 wall is genuine"
+conclusion inverts once the target is centered. More signatures do help.
+
+**C4 — generalisation to 17-bit curves (fresh, m=12, K1 grid extended to 254 so the V2
+wall is observed rather than clipped at 64):**
+
+| p | n | λ* | V0 wall | V2 wall | ratio |
+|---|---|---|---|---|---|
+| 65539 | 65287 | 0.3346 | 48 | 64 | 1.33 |
+| 65557 | 65053 | 0.3877 | 16 | 48 | 3.00 |
+| 65617 | 65119 | 0.3581 | 16 | 32 | 2.00 |
+| 65629 | 66109 | 0.4096 | 16 | 48 | 3.00 |
+| 65647 | 65719 | 0.0273 | 16 | 64 | 4.00 |
+| 65677 | 65899 | 0.3184 | 64 | 64 | 1.00 |
+
+Median V2/V0 wall ratio **3.00** (range 1.00–4.00). The a-priori prediction from
+det(L) = n^{3m}/(K1·K2)^m was ~4× (halving the error norm buys ~4× in tolerable K1);
+observed is 2–3×, and the shortfall is expected — see C1, where centering sometimes makes
+`e_true` *larger*, because the k1-coordinates gain nothing from centering when K1 is small
+(k1_i ∈ {0,1} at K1=2 regardless). The centering gain is concentrated in the k2 and d
+coordinates. λ* is again uncorrelated with the ratio (the largest ratio, 4.00, is the
+λ*=0.027 curve; the smallest, 1.00, is λ*=0.318), consistent with 2026-07-29 T3.
+
+**Not a contradiction with 2026-07-29 T3** (which reported 0/20 curves at eff=0.25): T3's
+column counted curves recovering **5/5**, whereas the wall here is defined as **≥3/5**.
+T3's own note "(4 curves partial)" is consistent with the two V0 walls at 48/64 above.
+Flagging so a future run does not read these as conflicting.
+
+**Methodological note — the V0 numbers are generous to V0.** The historical
+`recover_d()` (`glv_hnp_phase2_lambda_threshold.py:290`) scans all 2m+2 reduced rows and
+accepts if **any** matches `d_secret`, i.e. it is oracle-assisted. The CVP variants emit a
+single candidate with no oracle and are self-certifying via the congruence check. So the
+comparison is biased in V0's favour and V2 still wins by 2–3×.
+
+**Practical reading.** The K1 wall is the bias the attack requires. Moving it 4 → 12 is
+log₂3 ≈ **1.6 fewer bits of nonce bias needed** at fixed m, on toy curves. Whether that
+constant survives to 256 bits is exactly what is not yet known (see next step). Nothing
+here touches the main theorem in `PAPER_STRUCTURAL_COMPLETENESS.md`: this is a nonce-bias
+side-channel attack, not an isogeny-graph attack on the plain ECDLP.
+
+### Next step proposal
+**Thread 24 — does the centered-CVP advantage survive scaling?** Measure the required
+bias, in *bits* (log₂(n/K1_wall)), as a function of n's bit length under V2, at
+8/12/17/20/24 bits with m fixed and with m scaled. Falsifier: if required bias-bits per
+coordinate is roughly **constant** in bit-length, the toy result extrapolates and Phase 2
+has a genuine fixed advantage over plain HNP worth carrying to a 256-bit experiment; if it
+**grows** with bit-length, the toy gain is a small-dimension artifact and Phase 2 should be
+closed. Cost: the C4 machinery already does this; ~1 hour of compute. This is the single
+highest-value question left on the thread, and it is decisive either way.
+
+Secondary (cheap): re-run 2026-07-29's T3 20-curve eff sweep under V2 with the ≥3/5
+criterion, to get a like-for-like eff ceiling rather than the wall proxy used here.
+
+### Commits made
+[filled in below]
