@@ -6686,4 +6686,4 @@ produce, now that the search space is enumerated and small).
 
 ### Commits made
 
-(recorded in next log entry, per protocol)
+af10092 autolab 2026-08-07 #3: Thread 3 CHLRS forward map — ruled out naive r1=-b1,r2=-b2 (12/12 conjugate/twist variants); found richelot_gen's naive-cube-root image collapses to 10 distinct char-polys at p=43; proved bb_dual=r1*r2 invariant (15558/15558, 4 primes)
