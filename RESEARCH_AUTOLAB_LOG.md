@@ -6845,4 +6845,4 @@ threshold.
 
 ### Commits made
 
-(recorded below after commit)
+18b19b0 autolab 2026-08-07 #3: Thread 25 — viability boundary is the product rule NU*nu_hat ~ 1
