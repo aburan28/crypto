@@ -6794,3 +6794,5 @@ Do NOT re-attempt: the GS-profile derivation of nu_hat (Thread 24 W1, dead),
 AUC 0.404 pooled — it is anti-predictive without the sqrt(det) normalisation).
 
 ### Commits made
+
+4fdb9fd autolab 2026-08-07 #3: Thread 25 — H25 holds for nu_hat; NU*nu_hat < 1 is a size-free viability criterion
