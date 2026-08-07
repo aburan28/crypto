@@ -1,0 +1,88 @@
+==============================================================================
+Thread 25b — the lambda_2 law
+==============================================================================
+1800 instances from glv_hnp_phase2_nu_conditioned_table.json  (train 960 / held-out 840 by seed parity)
+
+------------------------------------------------------------------------------
+Y1: exponent sweep for score(alpha) = mu / det(L2)^alpha
+    alpha fitted on TRAIN seeds only; AUC on HELD-OUT seeds.
+------------------------------------------------------------------------------
+  free-fit alpha on train = 0.8945   (nu_hat assumes 0.5)
+
+   alpha  held-out AUC   pooled AUC   note
+  0.3000        0.4943       0.4813   
+  0.4000        0.5660       0.5522   
+  0.5000        0.6896       0.6744   <- nu_hat
+  0.6000        0.7863       0.7714   
+  0.7000        0.8639       0.8496   
+  0.8000        0.9206       0.9080   
+  0.8945        0.9521       0.9399   <- free fit
+  0.9000        0.9518       0.9397   
+  1.0000        0.9600       0.9508   <- 1/lambda_2
+  1.1000        0.9588       0.9513   
+  1.2500        0.9547       0.9502   
+
+------------------------------------------------------------------------------
+Y2: lambda_2(L2) as a standalone score (larger -> recover)
+------------------------------------------------------------------------------
+  pooled    AUC(+lambda_2) = 0.9504   p = 3.58e-212  (N=1800)
+  held-out  AUC(+lambda_2) = 0.9596          (N=840)
+
+   eff      N        rec   AUC +l2   AUC -NU   AUC -mu  AUC -nuhat
+  0.05    300    298/300    0.4245    0.8624    0.4245      0.4245
+  0.10    300    142/300    0.7113    0.6536    0.7012      0.7093
+  0.15    300     64/300    0.9072    0.4338    0.8953      0.8943
+  0.20    300     53/300    0.9371    0.5341    0.9234      0.9371
+  0.25    300     30/300    0.8963    0.6716    0.8796      0.8796
+  0.30    300      5/300    0.8508    0.7912    0.7797      0.8203
+
+------------------------------------------------------------------------------
+Y3: CONTROL — is lambda_2 just n, or just det(L2)?
+    If a trivial size proxy matches it, the law is vacuous.
+------------------------------------------------------------------------------
+           score  pooled AUC   held-out   Spearman vs log lambda_2
+        lambda_2      0.9504     0.9596   +1.0000
+         det(L2)      0.8905     0.8879   +0.7754
+               n      0.5696     0.5663   -0.0242
+              mu      0.3572     0.3682   +0.1582
+              K1      0.8725     0.8703   -0.7843
+          nu_hat      0.6744     0.6896   -0.5705
+
+  n is the curve order; all 20 curves are 17-bit, so n spans only
+  [2^16, 2^17].  A high AUC(n) would mean the effect is size, not
+  geometry.
+
+------------------------------------------------------------------------------
+Y4: two-coordinate model and marginal value of everything else
+------------------------------------------------------------------------------
+                     model     loglik  held-out AUC   coefficients
+                        NU    -784.52        0.8284   +1.134 -4.681
+                        l2    -464.45        0.9596   -114.299 +9.122
+                     nuhat   -1026.39        0.6896   -1.630 -2.880
+                  NU+nuhat    -512.77        0.9409   -0.044 -8.303 -7.252
+                     NU+l2    -416.86        0.9631   -97.730 -3.079 +7.883
+                  NU+l2+mu    -408.85        0.9659   -84.352 -4.487 +7.979 -1.195
+                NU+l2+step    -394.70        0.9677   -75.372 -5.288 +6.166 +2.057
+         NU+l2+mu+step+eff    -355.50        0.9734   -241.653 -5.418 +11.048 +8.404 +4.195 +45.559
+
+  (NU, lambda_2) 50% contour:  lambda_2 = 2.423e+05 * NU^+0.3906
+
+------------------------------------------------------------------------------
+Y5: at which level does each coordinate live?
+    Cells are (curve, eff); mu, lambda_2, det2 are EXACTLY constant
+    within a cell, NU and step vary with the signature seed.
+------------------------------------------------------------------------------
+    quantity  between-cell  within-cell      ICC
+          l2       328.716        0.000   1.0000
+          mu       290.848        0.000   1.0000
+        det2       699.029        0.000   1.0000
+          NU       189.774       53.982   0.7785
+        step       553.889       25.792   0.9555
+
+  35 mixed cells, 1242 pos/neg pairs
+  within-cell pooled AUC(-NU) = 0.6989  <- NU is the seed-level coordinate
+  lambda_2 has no within-cell variation at all <- it is the curve-level coordinate
+
+==============================================================================
+done
+==============================================================================

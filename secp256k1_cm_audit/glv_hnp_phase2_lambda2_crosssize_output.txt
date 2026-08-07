@@ -1,0 +1,68 @@
+==============================================================================
+Thread 25c — cross-size validation of the lambda_2 law
+==============================================================================
+
+=== 12 bits (m=8, dim 16), 20 curves, 1200 instances, 627/1200 recovered, 2.0s
+  AUC(+lambda_2) pooled 0.9203   held-out 0.9211
+  AUC(-NU)       pooled 0.8701
+  AUC(-nu_hat)   pooled 0.7427
+  AUC(-mu)       pooled 0.3612
+  AUC(-n)        pooled 0.4817   [size control]
+  free-fit alpha (train) = 1.0715   [nu_hat: 0.5 | lambda_2 law: 1.0]
+    eff=0.10 192/200  AUC(+l2)=0.4154
+    eff=0.15 118/200  AUC(+l2)=0.8044
+    eff=0.20  74/200  AUC(+l2)=0.8620
+    eff=0.25  32/200  AUC(+l2)=0.7530
+    eff=0.30  11/200  AUC(+l2)=0.6227
+
+=== 14 bits (m=10, dim 20), 20 curves, 1200 instances, 526/1200 recovered, 3.4s
+  AUC(+lambda_2) pooled 0.9386   held-out 0.9312
+  AUC(-NU)       pooled 0.8642
+  AUC(-nu_hat)   pooled 0.7076
+  AUC(-mu)       pooled 0.4437
+  AUC(-n)        pooled 0.5643   [size control]
+  free-fit alpha (train) = 1.0213   [nu_hat: 0.5 | lambda_2 law: 1.0]
+    eff=0.10 160/200  AUC(+l2)=0.6937
+    eff=0.15  81/200  AUC(+l2)=0.9020
+    eff=0.20  52/200  AUC(+l2)=0.9327
+    eff=0.25  23/200  AUC(+l2)=0.8304
+    eff=0.30  10/200  AUC(+l2)=0.7053
+
+=== 17 bits (m=12, dim 24), 20 curves, 1200 instances, 411/1200 recovered, 6.0s
+  AUC(+lambda_2) pooled 0.9450   held-out 0.9412
+  AUC(-NU)       pooled 0.8255
+  AUC(-nu_hat)   pooled 0.6739
+  AUC(-mu)       pooled 0.3595
+  AUC(-n)        pooled 0.4248   [size control]
+  free-fit alpha (train) = 0.8747   [nu_hat: 0.5 | lambda_2 law: 1.0]
+    eff=0.05 199/200  AUC(+l2)=0.4246
+    eff=0.10 102/200  AUC(+l2)=0.6961
+    eff=0.15  44/200  AUC(+l2)=0.8977
+    eff=0.20  39/200  AUC(+l2)=0.9292
+    eff=0.25  22/200  AUC(+l2)=0.8907
+    eff=0.30   5/200  AUC(+l2)=0.8538
+
+=== 20 bits (m=14, dim 28), 20 curves, 1200 instances, 410/1200 recovered, 8.7s
+  AUC(+lambda_2) pooled 0.9508   held-out 0.9422
+  AUC(-NU)       pooled 0.8876
+  AUC(-nu_hat)   pooled 0.7920
+  AUC(-mu)       pooled 0.3751
+  AUC(-n)        pooled 0.4129   [size control]
+  free-fit alpha (train) = 0.8608   [nu_hat: 0.5 | lambda_2 law: 1.0]
+    eff=0.05 193/200  AUC(+l2)=0.7776
+    eff=0.10 105/200  AUC(+l2)=0.8935
+    eff=0.15  51/200  AUC(+l2)=0.9007
+    eff=0.20  35/200  AUC(+l2)=0.9857
+    eff=0.25  19/200  AUC(+l2)=0.9027
+    eff=0.30   7/200  AUC(+l2)=0.8146
+
+==============================================================================
+SUMMARY
+==============================================================================
+ bits   AUC +l2  held-out   AUC -NU  AUC -nuhat   AUC -mu   AUC -n   alpha
+   12    0.9203    0.9211    0.8701      0.7427    0.3612   0.4817  1.0715
+   14    0.9386    0.9312    0.8642      0.7076    0.4437   0.5643  1.0213
+   17    0.9450    0.9412    0.8255      0.6739    0.3595   0.4248  0.8747
+   20    0.9508    0.9422    0.8876      0.7920    0.3751   0.4129  0.8608
+
+done

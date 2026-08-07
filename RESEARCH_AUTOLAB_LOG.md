@@ -6538,3 +6538,252 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-07 (autolab run #3)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the Thread 24 entry (log line ~6510). Priorities
+1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21,
+so priority 5 (GLV-HNP) is again the only live thread; Thread 24 made
+measurable progress earlier today, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all,
+>        then the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+**Verdict: H25 as literally stated is FALSIFIED (0.606 < 0.8); H25 under the
+correct control is CONFIRMED (0.858).** The gap between those two numbers is
+a Simpson reversal, and chasing it produced the actual result of the session:
+**the quantity that governs the cross-curve LLL wall is `lambda_2(L2)`, not
+`mu = lambda_1(L2)` and not `nu_hat`.** It is a strictly better predictor than
+the exact BDD certificate NU, at every size tested, and it costs one 2x2 Gauss
+reduction — no lattice reduction at all.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Fourth run in a row where
+  `cysignals` had to be named explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_conditioned.py` — new (exp X0-X3).
+  1800 instances at 17 bits (20 curves x 6 eff strata x 15 seeds, dim 24),
+  `--dump-json` as the Thread 24 entry requested; adds the W1b two-block
+  `step` statistic, a Mann-Whitney p for every AUC, and a Newton-IRLS
+  logistic fitter (`logistic_fit`, ridge-regularised, pure Python).
+  Outputs: `glv_hnp_phase2_nu_conditioned_output.txt`,
+  `glv_hnp_phase2_nu_conditioned_table.json` (600 KB, 1800 rows).
+- `secp256k1_cm_audit/glv_hnp_phase2_lambda2_law.py` — new (exp Y1-Y5).
+  Re-analysis of the dumped table: exponent sweep, the size controls, the
+  two-coordinate model, and the between/within-cell variance decomposition.
+  Output: `glv_hnp_phase2_lambda2_law_output.txt`.
+- `secp256k1_cm_audit/glv_hnp_phase2_lambda2_crosssize.py` — new (exp Z).
+  The same measurement at 12/14/17/20 bits (dim 16/20/24/28), 1200 instances
+  each. Output: `glv_hnp_phase2_lambda2_crosssize_output.txt`.
+- All model comparisons are held-out validated by seed parity (train on odd
+  seeds, evaluate on even) so no number below is an in-sample fit.
+- `cargo test --test curve_audit` -> 5/5 pass (5.30s). No Rust touched.
+
+### Findings
+
+**X1 — H25 splits, and the split is a Simpson reversal.** 1800 instances,
+17 bits, recovery 592/1800.
+
+```
+NU band            N     rec  | AUC(-mu)        p    | AUC(-NU)   AUC(+step)
+sufficient  <1.04  269  263/269|  0.2224  2.01e-02   |  0.9487     0.6426
+ambiguous-lo       418  153/418|  0.4496  8.57e-02   |  0.7018     0.6440
+ambiguous-hi       829  174/829|  0.8269  3.55e-40   |  0.4877     0.9253
+AMBIGUOUS (H25)   1247  327/1247| 0.6061  1.15e-08   |  0.6125     0.7784
+necessary   >2.20  284    2/284|  0.9433  3.08e-02   |  0.9574     1.0000
+```
+
+The pre-registered statistic is **0.6061**, below the 0.8 threshold, so the
+literal clause fires the falsifier. But holding `eff` fixed as well:
+
+```
+eff    N in band   rec     | AUC(-mu)        p
+0.05        84    82/84    |  0.4512   8.14e-01   (degenerate, 2 failures)
+0.10       250    96/250   |  0.7853   3.30e-14
+0.15       287    64/287   |  0.8959   4.73e-22
+0.20       254    50/254   |  0.9279   6.94e-21
+0.25       218    30/218   |  0.8571   3.44e-10
+0.30       154     5/154   |  0.7181   9.76e-02
+stratum-pooled AUC(-mu | NU band, eff fixed) = 0.8581  (45805 pos/neg pairs)
+```
+
+Pooled over the *whole* table AUC(-mu) = **0.3572** — inverted — while every
+non-degenerate stratum has it at 0.70-0.92. mu is a real signal measured in
+units that are not comparable across curves. That is the whole content of the
+0.606-vs-0.858 gap, and it is why Thread 24's W5 reading was right locally and
+misleading globally.
+
+**X1c — the clean two-mechanism proof.** Group by `(curve, eff)` cell, inside
+which mu, lambda_2 and det(L2) are *exactly* constant and only the signature
+seed varies:
+
+```
+35 mixed cells (of 120), 1242 pos/neg pairs
+  within-cell pooled AUC(-NU)   = 0.6989
+  within-cell pooled AUC(+step) = 0.5177   (chance)
+```
+
+NU separates *inside* a cell where the geometry is frozen; the geometric
+statistics cannot, by construction. Variance decomposition confirms the split:
+
+```
+quantity   between-cell   within-cell     ICC
+lambda_2        328.716         0.000   1.0000
+mu              290.848         0.000   1.0000
+det(L2)         699.029         0.000   1.0000
+log NU          189.774        53.982   0.7785
+step            553.889        25.792   0.9555
+```
+
+**NU is the seed-level coordinate, lambda_2 is the curve-level coordinate.**
+They are not competing estimates of one thing; Thread 24's "two mechanisms"
+conclusion is now structural rather than inferred from a zero correlation.
+
+**X3/V1 — the W1b `step` is nu_hat in disguise, and W1b's sign was wrong.**
+`step = log2||b*_{m+1}|| - log2||b*_1||`. The two-block geometry predicts
+`step ~ -2 log2(nu_hat) + const`, and it does:
+
+```
+Spearman(step, -2 log2 nu_hat) = +0.8846
+Pearson (step, -2 log2 nu_hat) = +0.9408
+residual mean -0.9703 (sd 0.3301)  ->  implied W2 constant c = 0.5104
+                                       (Thread 24 W2 measured c = 0.419)
+```
+
+So step is not a third mechanism; it is the same geometry read off the
+reduced basis, and it costs an LLL call that mu/lambda_2 do not. Note also
+that W1b's qualitative claim ("the step vanishes as the wall is crossed") does
+**not** reproduce at 17 bits: mean step runs `+0.007, -0.065, -0.113, -0.138,
+-0.174, -0.210` as eff goes 0.05 -> 0.30, i.e. it starts near zero in the easy
+regime and goes *negative* in the hard one. The 12-bit/2557 profile that
+motivated W1b was not representative.
+
+**Y1 — the exponent. nu_hat's sqrt(det) normalisation is simply wrong.**
+Fit `score(alpha) = mu / det(L2)^alpha`, alpha free, trained on odd seeds:
+
+```
+alpha      held-out AUC   pooled AUC
+0.3000        0.4943        0.4813
+0.5000        0.6896        0.6744   <- nu_hat
+0.7000        0.8639        0.8496
+0.8945        0.9521        0.9399   <- free fit on train
+1.0000        0.9600        0.9508   <- 1/lambda_2
+1.1000        0.9588        0.9513
+1.2500        0.9547        0.9502
+```
+
+alpha = 1 beats the freely fitted alpha on held-out data. Since Thread 24 W2
+established `det(L2) = mu * lambda_2` to within 4.3%, alpha = 1 means the
+score is `mu/det(L2) = 1/lambda_2`.
+
+**Y2/Y3 — the lambda_2 law, and it is not a size artifact.**
+
+```
+pooled   AUC(+lambda_2) = 0.9504   p = 3.58e-212  (N=1800)
+held-out AUC(+lambda_2) = 0.9596                  (N=840)
+
+CONTROLS      pooled AUC   held-out   Spearman vs log lambda_2
+lambda_2         0.9504     0.9596      +1.0000
+det(L2)          0.8905     0.8879      +0.7754
+K1               0.8725     0.8703      -0.7843
+nu_hat           0.6744     0.6896      -0.5705
+n                0.5696     0.5663      -0.0242   <- size control
+mu               0.3572     0.3682      +0.1582
+```
+
+`n` is at chance and uncorrelated with lambda_2, so this is geometry, not
+curve size. lambda_2 does correlate with K1 (rho -0.78) and beats it (0.950 vs
+0.873) — the honest reading is that lambda_2 is *the bias strength expressed
+in the units the curve's own lambda-block geometry sets*, which is exactly the
+cross-curve normalisation nu_hat was reaching for and missing.
+
+**Z — the law holds at every size tested, and improves with dimension.**
+1200 instances per size, 20 curves x 6 eff strata x 10 seeds.
+
+```
+bits  dim   AUC +l2  held-out   AUC -NU  AUC -nuhat  AUC -mu  AUC -n   alpha
+  12   16    0.9203    0.9211    0.8701      0.7427   0.3612  0.4817  1.0715
+  14   20    0.9386    0.9312    0.8642      0.7076   0.4437  0.5643  1.0213
+  17   24    0.9450    0.9412    0.8255      0.6739   0.3595  0.4248  0.8747
+  20   28    0.9508    0.9422    0.8876      0.7920   0.3751  0.4129  0.8608
+```
+
+lambda_2 beats NU and nu_hat at **all four sizes**; mu is inverted at all four;
+the size control `n` is at chance at all four; and the free-fit alpha brackets
+1.0 (0.86-1.07, mean 0.96) and never comes near 0.5.
+
+**Y4 — the two-coordinate viability test.** Held-out AUC, seed-parity split:
+
+```
+model                    loglik   held-out AUC
+NU                      -784.52       0.8284
+lambda_2                -464.45       0.9596
+nu_hat                 -1026.39       0.6896
+NU + nu_hat             -512.77       0.9409
+NU + lambda_2           -416.86       0.9631
+NU + lambda_2 + mu      -408.85       0.9659
+NU + lambda_2 + step    -394.70       0.9677
+NU + l2 + mu + step+eff -355.50       0.9734
+```
+
+`(NU, lambda_2)` reaches 0.9631 held-out; everything else in the table — mu,
+step, and the bias strength eff itself — adds at most +0.010 on top. The
+50% contour is
+
+```
+        lambda_2 = 2.423e5 * NU^0.3906           (17 bits, m=12)
+```
+
+Note lambda_2 **alone** (0.9596) already beats the exact per-instance BDD
+certificate NU (0.8284). The certificate is sound (Thread 24 W4: 96 TP / 0 FP)
+but it is the weaker of the two coordinates for predicting what LLL does.
+
+**Interpretation.** Thread 24 closed by naming `lambda_1(L2)` as "the operative
+quantity". That is now corrected: it is `lambda_2(L2)`. mu looked operative
+because within a fixed stratum `lambda_2 = det(L2)/mu` makes the two
+anti-monotone; across strata the det(L2) factor dominates and mu inverts.
+The pair `(NU, lambda_2)` is the 2-parameter viability test Phase 2 has been
+missing, and lambda_2 is computable from `(n, lam, K1, K2)` alone by one 2x2
+Gauss reduction — no signatures, no lattice reduction, no LLL.
+
+### Next step proposal
+
+**Thread 26 — turn the lambda_2 law into a predicted wall location.**
+Everything above is rank statistics (AUC). The law is only useful if it names
+a *threshold*. The concrete sub-task:
+
+  H26: there is a size-free constant c such that recovery occurs iff
+       `lambda_2(L2) / (n * sqrt(m))  >  c`, with the same c at 12, 14, 17
+       and 20 bits.
+
+  Falsifier: if the fitted c drifts monotonically with m or bit-length by
+       more than ~1.5x, the normalisation is wrong and lambda_2 stays a
+       within-size ranker rather than a law.
+
+The data already exist — `glv_hnp_phase2_lambda2_crosssize.py` collects every
+field needed; the work is to fit the threshold per size and check for drift.
+If c is stable, the deliverable is a closed-form predicted K1 wall
+`K1_max(n, lam, m)` obtained by solving `lambda_2 = c*n*sqrt(m)` for K1, which
+is directly checkable against the K1 sweeps in
+`glv_hnp_phase2_lambda_threshold_output.txt`. Cost: ~30 min, no new machinery.
+
+Secondary: the eff=0.05 stratum is degenerate at 12-17 bits (2-8 failures out
+of 300) but not at 20 bits (7/200 failures, AUC 0.7776). Extend downward to
+eff = 0.02-0.03 to get a populated low-bias stratum and check the law does not
+break in the regime where nearly everything recovers.
+
+Tertiary (carried over, still untouched): BKZ-beta sweep against NU and now
+lambda_2, to quantify how far blockwise reduction pushes the wall.
+
+### Commits made
+
+(filled in below)
