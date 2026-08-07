@@ -6252,3 +6252,5 @@ Secondary (unchanged from 2026-07-29): re-express the 2026-07-26 log's λ/n colu
 λ* = min(λ, n−λ)/n throughout.
 
 ### Commits made
+
+905898e autolab 2026-08-07: Thread 23 — projecting out the trivial vector is a no-op; K1 wall is reduction-limited, not information-theoretic
