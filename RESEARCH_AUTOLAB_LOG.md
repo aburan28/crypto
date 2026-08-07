@@ -6313,3 +6313,5 @@ Tertiary: BKZ-beta sweep against NU — quantify how far above NU=1.87 blockwise
 reduction pushes the empirical threshold as a function of beta.
 
 ### Commits made
+
+2a6879c autolab 2026-08-07: Thread 23 — d-column projection is inert; recovery is BDD not SVP; NU certificate (AUC 0.978)
