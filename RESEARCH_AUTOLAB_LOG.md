@@ -6786,4 +6786,4 @@ lambda_2, to quantify how far blockwise reduction pushes the wall.
 
 ### Commits made
 
-(filled in below)
+54af40c autolab 2026-08-07 #3: Thread 25 — the lambda_2 law; mu is inverted cross-curve, nu_hat's sqrt(det) exponent is wrong
