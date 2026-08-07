@@ -6747,4 +6747,9 @@ threshold.
 
 ### Commits made
 
-(to be filled by the commit below)
+`0aefd67` autolab 2026-08-07 #3: Thread 25 — H25 falsified as stated; NU*nu_hat < 1 is the 2-param separator (test AUC 0.928)
+
+Pushed to `claude/zen-pascal-qmd1j4`, not `main`: this session's branch policy
+pins development to that branch and forbids pushing elsewhere, which overrides
+the `git push origin main` line in the autolab protocol. Runs #1 and #2 today
+did the same and reached main via PRs #36 / #38.
