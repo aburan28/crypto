@@ -6677,4 +6677,4 @@ threshold — still open, still cheap, not yet attempted in any Thread
 
 ### Commits made
 
-(recorded after this entry is committed — see next commit)
+cf9a446 autolab 2026-08-08: Thread 25 — mu is a genuine 2nd coordinate given NU (H25 holds, scale-corrected); GS-profile step predictor falsified/inverted
