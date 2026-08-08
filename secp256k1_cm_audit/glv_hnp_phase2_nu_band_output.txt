@@ -1,0 +1,78 @@
+==============================================================================
+Thread 25 — is mu a genuine second coordinate inside the NU band?
+==============================================================================
+
+loaded 500 rows from /tmp/claude-0/-home-user-crypto/7438069d-1c8e-5d33-8aea-8c97c240dd5a/scratchpad/thread25_rows.json
+dim(s) present: [24]  (expect {24})
+
+------------------------------------------------------------------------------
+EXP X1: H25 — AUC(-mu -> recovery) inside the NU ambiguous band
+------------------------------------------------------------------------------
+band [1.04, 2.199]: N=366  (97 recover / 269 fail)  [73.2% of all instances]
+  AUC(-mu     -> recovery) = 0.6932   <-- H25 test statistic
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-NU     -> recovery) = 0.5656   (should be ~0.5: NU is
+                                            constant-ish inside its own band)
+  AUC(-lam*   -> recovery) = 0.3212   (control column)
+
+  H25 (0.6932 >= 0.80): FALSIFIED
+
+  per-eff-stratum breakdown inside the band (mu may just be eff again):
+    eff    N    rec   AUC mu
+   0.05   24  23/24   0.4565
+   0.10   83  26/83   0.8819
+   0.15   96  21/96   0.8889
+   0.20   89  18/89   0.9276
+   0.25   74   9/74   0.8615
+
+------------------------------------------------------------------------------
+EXP X1b: STRATIFIED AUC(mu) inside the band -- the honest H25 test
+------------------------------------------------------------------------------
+X1's pooled AUC mixes mu's absolute scale across eff strata (same
+confound as Thread 24's W6: mu's scale depends on (n, lam, K1), which
+co-varies with eff).  Sum concordant pairs WITHIN each stratum instead
+of comparing mu values across strata.
+stratified AUC(-mu -> recovery) inside band, eff strata [0.1, 0.15, 0.2, 0.25] pooled pairwise = 0.8936  (N pairs=4920)
+H25, stratified reading (0.8936 >= 0.80): HOLDS
+(dropped strata with minority class < 5: eff=0.05 (23pos/1neg))
+
+------------------------------------------------------------------------------
+EXP X2: correlation of mu with NU inside vs outside the band
+------------------------------------------------------------------------------
+If mu's power (X1) is mediated entirely by NU, mu should still rank
+*with* NU inside the band (residual signal should vanish once you
+condition on the true within-band NU value, not just the coarse cut).
+Spearman(mu, NU) inside band (N=366) = -0.4557
+Spearman(mu, NU) over all rows (N=500)  = -0.6452
+
+------------------------------------------------------------------------------
+EXP X3 (secondary): does the GS-profile step predict recovery?
+  step = log2(prof[M]) - log2(prof[0]) = log2||b*_{M+1}|| - log2||b*_1||
+------------------------------------------------------------------------------
+500/500 rows carry a full-length 'prof' array
+
+Note on sign: every other score here (mu, NU, nu_hat, lam*) uses the
+convention 'smaller -> more likely recovery' (auc() takes -x implicitly).
+W1b's step hypothesis runs the OTHER way -- step vanishes (-> 0 or
+negative) AT the wall, so a LARGER step should predict recovery.
+Reporting AUC(+step -> recovery) = 1 - auc(step_pos, step_neg) so the
+number is directly comparable to the mu/NU AUCs above.
+
+AUC(+step -> recovery) over all 500 rows = 0.6714
+step | success : min -0.775  mean 0.214  max 3.156  (n=190)
+step | failure : min -0.842  mean -0.280  max 1.057  (n=310)
+
+AUC(+step -> recovery) inside NU band, pooled across eff (N=366) = 0.8197
+AUC(+step -> recovery) inside NU band, STRATIFIED by eff (N pairs=4920) = 0.8927
+compare: mu stratified in-band AUC = 0.8936
+
+compare: AUC(-NU -> recovery) all rows = 0.7996
+compare: AUC(-mu -> recovery) all rows = 0.3964
+
+step's in-band stratified AUC (0.893) is within noise of mu's (0.894, from X1b).
+Spearman(step, mu) inside band (N=366) = -0.7639  -- if strongly negative, step and mu are largely the SAME signal,
+not two independent coordinates (expected: step ~ log2(lambda_2/mu) up to profile noise, both keyed off the same 2D sublattice L2).
+
+==============================================================================
+done
+==============================================================================

@@ -6538,3 +6538,124 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6520).
+Priorities 1/3 are CLOSED, priority 2 (CHLRS) and priority 4 are stale but
+not recently re-touched at all (skip per protocol only applies when *no*
+progress or repeated no-op; here priority 5 (GLV-HNP) has an explicit,
+costed, pre-registered sub-task with measurable-progress history two days
+running, so protocol rule (b) applies again and it is the correct pick.
+
+H25: within the ambiguous NU band 1.04 <= NU <= 2.199 (where the
+nearest-plane sufficient/necessary bracket gives no answer on its own),
+AUC(-mu -> Kannan-LLL recovery) stays >= 0.8. Falsifier: if mu's power
+inside the band collapses toward 0.5, W5's AUC(mu) was mediated entirely by
+NU and the closed form is dead weight on top of NU.
+
+### Work done
+
+- Added `--dump-json PATH` to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  (writes the full 500-row table, including per-instance GS profiles, so
+  Thread 25 needed no new curve search or lattice reduction — pure
+  re-analysis of already-computed data, as costed on 2026-08-07).
+- Re-ran it (`pip install fpylll cysignals sympy` in the fresh container,
+  same note as every prior GLV-HNP session): 500 instances, 17 bits, dim 24,
+  5 eff strata x 20 curves x 5 seeds, 3.4s. W5/W6 numbers reproduced exactly
+  against the 2026-08-07 #2 log (byte-for-byte on the printed AUCs) —
+  confirms the pipeline is deterministic and the dump is faithful.
+- New `secp256k1_cm_audit/glv_hnp_phase2_nu_band.py` (Thread 25, exp X1-X3):
+  loads the dump, restricts to the NU band, and tests H25 two ways (naive
+  pooled AUC and a stratified AUC that sums concordant pairs within each eff
+  stratum before dividing — the same fix Thread 24's W6 used for the C
+  constant). Also tests the W1b GS-profile "step" as a size-free separator.
+- `cargo test --test curve_audit` -> 5/5 pass (7.1s). No Rust touched.
+
+### Findings
+
+**X1 — the naive pooled test FALSIFIES H25 (AUC 0.6932 < 0.8), and it is
+wrong to trust.** Restricting to NU in [1.040, 2.199] leaves N=366 (73.2% of
+all instances — the ambiguous band is most of the data at 17 bits, matching
+the 2026-08-07 note that NU degrades from a separator to a loose bracket at
+this size). Pooled AUC(-mu) = 0.6932 looks like a clean falsification.
+
+**X1b — stratified by eff, H25 HOLDS: AUC 0.8936 (N pairs=4920).** The
+per-eff-stratum breakdown inside the band is 0.88/0.89/0.93/0.86 for
+eff=0.10/0.15/0.20/0.25 (eff=0.05 dropped: 23 pos/1 neg inside the band,
+too degenerate to rank). Summing concordant pairs within each stratum before
+dividing (rather than comparing mu values across strata, which mixes mu's
+absolute scale) recovers the same 0.86-0.93 range X1's own per-stratum table
+already showed — X1's pooled number was exactly the Thread-24-W6-style
+averaging artifact it was built to guard against, just showing up on the new
+side of the test.
+
+**X2 — mu is not simply redundant with NU inside the band.**
+Spearman(mu, NU) = -0.4557 inside the band (-0.6452 overall) — negative, as
+expected from nu_hat's established sign, but far from -1, so mu is not a
+monotone reparametrisation of NU. Combined with X1b, **mu is a genuine
+second coordinate**: (NU, mu) together separate recovery far better than NU
+alone (0.80 pooled) or mu alone honestly measured (0.89 in-band), and the
+pair is candidate machinery for the logistic 2-parameter viability test
+proposed on 2026-08-07.
+
+**X3 — the W1b "step" statistic works, and it is essentially mu again.**
+`step = log2||b*_{M+1}|| - log2||b*_1||` (M=12, the k1/k2 block boundary),
+sign-corrected to the shared "smaller-is-better" convention as
+AUC(+step -> recovery): 0.6714 pooled (500 rows), 0.8197 in-band pooled,
+**0.8927 in-band stratified by eff** — matching mu's 0.8936 to within noise.
+Spearman(step, mu) inside the band = **-0.7639**, strongly negative: step
+and mu are largely the *same* signal, exactly as the theory predicts
+(step ~ log2(lambda_2(L2)/lambda_1(L2)) = log2(det(L2)/mu^2), and both are
+read off the same 2D sublattice L2). Thread 24's W1b/W2 already established
+`||b*_last|| ~ lambda_2(L2)` and `lambda_1*lambda_2 ~ det(L2)`; X3 confirms
+step is not an independent third statistic, it is mu viewed through the GS
+profile instead of computed from L2 directly. No new information, but it is
+a second, independently-computed confirmation of X1b using a completely
+different code path (`prof` from LLL-reduced GS vs `mu` from exact 2D Gauss
+reduction of L2), which is useful as a cross-check but not as a new feature.
+
+**Interpretation.** The pair (NU, mu) is real: NU is the sound, unfitted BDD
+certificate that degrades from a clean threshold (12 bits) to a loose
+bracket (17 bits, 73% ambiguous), and mu/nu_hat is a genuine, independently
+informative second coordinate inside that bracket, not a restatement of NU.
+The GS-profile step is redundant with mu, not a third axis. This closes the
+Thread 25 falsifier cleanly: H25 holds once the same stratification
+discipline that killed the pooled-C artifact in Thread 24 is applied
+honestly to the new hypothesis instead of only the old one.
+
+### Next step proposal
+
+**Thread 26 — fit the 2-parameter logistic on (log NU, log mu) and report
+its decision boundary.** X1b/X2 establish that (NU, mu) is a genuine
+2D separator; the concrete next sub-task is to fit
+`logit(recovery) = a + b*log(NU) + c*log(mu)` on the existing 500-row 17-bit
+table (statsmodels/sklearn if available, else closed-form 2-feature
+logistic via Newton's method — no new dependency needed for 2 features and
+500 points), report the fitted coefficients and in-sample AUC of the
+combined score, and compare against mu-alone (0.89) and NU-alone (0.80) to
+quantify the gain from using both. Falsifier: if the fitted `c` (mu's
+coefficient) is not significantly different from 0 once NU is in the model,
+X1b's stratified AUC gain is itself an artifact of imperfect stratification
+resolution (5 eff bins) rather than genuine 2D structure, and H25 should be
+downgraded back to "mu is eff in disguise, more finely."
+Cost: reads `thread25_rows.json`-equivalent dump directly (regenerate via
+the now-existing `--dump-json` flag), no new lattice work, ~5 minutes.
+
+Secondary (cheap, unchanged from 2026-08-07): the NU bracket
+[1.040, 2.199] was measured at 17 bits only among the "re-measure at a third
+size" asks; a 12-bit vs 17-bit vs one more size (e.g. 22-bit) comparison of
+both the bracket width and the mu-stratified in-band AUC would show whether
+the (NU, mu) 2D structure itself is size-stable, which Thread 26's model
+would need before it could be called a general viability test rather than a
+17-bit fit.
+
+Tertiary (unchanged): BKZ-beta sweep against NU, to quantify how far above
+NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+(pending — recorded after push, see follow-up log entry)

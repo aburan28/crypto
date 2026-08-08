@@ -19,8 +19,13 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
+       python3 glv_hnp_phase2_gsprofile_strat.py --dump-json rows.json
+           (Thread 25) also writes every row (incl. 'prof' GS profiles) to
+           rows.json so later scripts can re-analyse without re-running the
+           17-bit curve search + 500-instance sweep.
 """
 
+import json
 import math
 import os
 import random
@@ -34,6 +39,10 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        dump_path = sys.argv[sys.argv.index("--dump-json") + 1]
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -139,6 +148,11 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    if dump_path:
+        with open(dump_path, "w") as f:
+            json.dump(rows, f)
+        print(f"\ndumped {len(rows)} rows to {dump_path}")
 
     print("\n" + "=" * 78)
     print("done")
