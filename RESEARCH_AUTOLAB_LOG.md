@@ -6672,4 +6672,4 @@ by line rather than trusting a paraphrased "✓ CORRECT" summary.
 
 ### Commits made
 
-(recorded in next commit)
+fbe2128 autolab 2026-08-08: Thread 3 CHLRS — naive-cover Richelot dual is always a simple Jacobian, all 9 branch choices exhausted
