@@ -1,0 +1,41 @@
+==============================================================================
+Thread 25 — does mu separate inside the NU-ambiguous band?
+==============================================================================
+
+500 rows loaded from thread25_rows.json
+NU band [1.04, 2.199]: 366 rows (94 below / sufficient, 40 above / necessary-fail)
+  in-band recoveries: 97/366
+  AUC(-mu             -> recovery), in-band  = 0.6932
+  AUC(-mu*sqrt(eff)   -> recovery), in-band  = 0.8377
+  AUC(-nu_hat         -> recovery), in-band  = 0.8403
+  AUC(-NU             -> recovery), in-band  = 0.5656  (should be ~0.5: NU is flat here by construction)
+
+H25 verdict (raw mu, pooled across eff): FALSIFIED (threshold 0.8, observed 0.6932)
+
+------------------------------------------------------------------------------
+Per-eff-stratum in-band AUC(-mu), to check H25 isn't itself an
+eff-mediated artifact (band membership correlates with eff)
+------------------------------------------------------------------------------
+  eff  N_band     rec   AUC mu
+ 0.05      24   23/24   0.4565
+ 0.10      83   26/83   0.8819
+ 0.15      96   21/96   0.8889
+ 0.20      89   18/89   0.9276
+ 0.25      74    9/74   0.8615
+
+------------------------------------------------------------------------------
+Logistic fit on (log NU, log X) -> recovery, full 500-row table
+------------------------------------------------------------------------------
+  X = mu (raw, not eff-normalized)
+  logit(p) = 35.6215 + -7.1930*log(NU) + -2.8453*log(X)
+  in-sample AUC of fitted (NU, mu) score = 0.8595
+
+  X = nu_hat (eff-normalized)
+  logit(p) = -0.3158 + -8.3223*log(NU) + -7.8974*log(X)
+  in-sample AUC of fitted (NU, nuhat) score = 0.9396
+
+  (pooled single-predictor AUCs from Thread 24 W5: nu_hat*sqrt(eff) 0.9348, NU 0.7996, nu_hat 0.6889, raw mu untested there)
+
+==============================================================================
+done
+==============================================================================

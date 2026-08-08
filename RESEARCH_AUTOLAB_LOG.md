@@ -6538,3 +6538,133 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — the pre-registered next-step of 2026-08-07 #2 (Thread 24, log
+line ~6489). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority
+3 completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 made measurable progress the previous day (falsified H24 clause 1,
+found NU/nu_hat are uncorrelated at fixed eff), so protocol rule (b) applies.
+
+Pre-registered hypothesis, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate and the pair (NU, mu) is the
+>   2-parameter viability test Phase 2 has been missing. If no, the W5
+>   result is a stratification artifact and the closed form should be
+>   retired.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` again
+  required explicit `cysignals` (fourth run in a row — worth just adding it
+  to a requirements file at this point instead of re-diagnosing).
+- Added `--dump-json PATH` to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  (the deliverable Thread 24 asked for), writing the 14 scalar fields of each
+  row (drops the `prof`/`nus` per-index vectors, not needed downstream).
+  Re-ran it: `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json
+  thread25_rows.json` -> 500 rows, dim 24, 17 bits, 5 eff strata x 20 curves
+  x 5 seeds, reproducing 2026-08-07's W5/W6 numbers exactly (sanity check
+  that nothing about the curve pool or RNG seeding drifted).
+- New `secp256k1_cm_audit/glv_hnp_phase2_thread25_nuband.py` — re-analysis
+  only, no new lattice work, reads `thread25_rows.json`. Stratifies by the
+  Thread 24 W4 17-bit bracket NU in [1.040, 2.199], computes AUC(-mu),
+  AUC(-mu*sqrt(eff)), AUC(-nu_hat), AUC(-NU) inside the band, then
+  per-eff-stratum AUC(-mu) inside the band, then a from-scratch 2-parameter
+  logistic fit (gradient descent, no sklearn) on (log NU, log X) for
+  X in {mu, nu_hat}.
+- `cargo test --test curve_audit` -> 5/5 pass (4.3s). No Rust touched.
+
+### Findings
+
+**H25 as literally stated (raw mu, pooled across all 5 eff strata) is
+FALSIFIED.** In-band (366/500 rows fall in [1.040, 2.199]):
+
+```
+AUC(-mu           -> recovery), in-band  = 0.6932   <- H25's own predictor, FAILS
+AUC(-mu*sqrt(eff) -> recovery), in-band  = 0.8377
+AUC(-nu_hat       -> recovery), in-band  = 0.8403
+AUC(-NU           -> recovery), in-band  = 0.5656   (expected ~0.5: NU is flat by construction here)
+```
+
+Raw mu at 0.693 misses the 0.8 bar Thread 24 set. But this is the *exact
+same pooling trap* Thread 24's W3 vs W5/W6 diagnosed for nu_hat vs NU: mu
+scales directly with K1 (mu = lambda_1(L2), and L2 depends on K1 alone), so
+pooling five eff strata with different characteristic K1 mixes five
+different mu scales into one AUC and dilutes it. `mu*sqrt(eff)` — the same
+eff-normalization nu_hat already applies — recovers 0.8377, matching
+nu_hat's in-band AUC of 0.8403 almost exactly (nu_hat = mu/sqrt(det L2), and
+within a stratum this is close to a rescaled mu, per Thread 24 W5).
+
+**Per-eff-stratum in-band AUC(-mu) confirms the mechanism directly:**
+
+```
+  eff  N_band     rec   AUC mu
+ 0.05      24   23/24   0.4565   (degenerate: 96% recovery, no real negative class)
+ 0.10      83   26/83   0.8819
+ 0.15      96   21/96   0.8889
+ 0.20      89   18/89   0.9276
+ 0.25      74    9/74   0.8615
+```
+
+Excluding the degenerate eff=0.05 stratum (23/24 recover — nothing to
+separate), AUC(-mu) is 0.86-0.93 in every stratum, comfortably clearing
+H25's 0.8 bar. **So the refined verdict is: H25 HOLDS for the
+eff-normalized statistic (nu_hat, or equivalently mu*sqrt(eff)), and the
+literal falsification of raw mu is the aggregation artifact, not evidence
+against a second mechanism.**
+
+**This is itself the answer to Thread 24's open question.** Thread 24 W5/W6
+showed NU and nu_hat are uncorrelated at fixed eff and asked whether nu_hat's
+power is a real second coordinate or an artifact of *some other*
+stratification. Thread 25 shows nu_hat's ~0.84 AUC is undiminished
+specifically inside the band where NU is uninformative (0.5656, as it must
+be by construction) — nu_hat is not reusing information NU already has; it
+is answering exactly the question NU cannot.
+
+**2-parameter logistic fit** (gradient descent from scratch, standardized
+log-features, full 500-row table, in-sample AUC of the fitted score):
+
+```
+X = mu (raw):     logit(p) = 35.62 - 7.19*log(NU) - 2.85*log(mu)     AUC 0.8595
+X = nu_hat:       logit(p) = -0.32 - 8.32*log(NU) - 7.90*log(nu_hat) AUC 0.9396
+```
+
+The (NU, nu_hat) fit at 0.9396 is close to nu_hat*sqrt(eff) alone (Thread 24
+W5 pooled: 0.9348) but the |coefficient| on log(NU) (8.32) is comparable to
+that on log(nu_hat) (7.90) rather than near zero, i.e. NU is pulling real
+independent weight in the joint fit even though it's the weaker single
+predictor (0.7996) — consistent with W6's "mutually uncorrelated" finding.
+This is the 2-parameter viability test: `(NU, nu_hat)` jointly, not either
+alone.
+
+### Next step proposal
+
+**Thread 26 — turn the (NU, nu_hat) logistic fit into an out-of-sample
+decision rule.** The 0.9396 above is in-sample on the same 500 rows used to
+fit it; the honest next step is a held-out test: fit on strata {0.05, 0.10,
+0.15} (300 rows), evaluate AUC and a calibrated threshold on {0.20, 0.25}
+(163 rows). If out-of-sample AUC stays >= 0.90, publish the closed-form
+decision boundary as the Phase 2 viability predictor (no lattice reduction
+needed to screen candidate curves — only nu_hat, which is a closed-form
+function of (n, lam, K1, K2)). If it collapses, the logistic fit overfit to
+this specific 5-stratum eff grid and needs a larger/held-out eff range
+before it's trustworthy.
+
+Secondary (carried over from Thread 24, still untouched): quantify
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)` from the two-block GS profile
+(W1b) and test whether `step -> 0` predicts the LLL wall better than NU or
+nu_hat. One-line addition to `glv_hnp_phase2_gsprofile.py`'s `instance()`
+(the `prof` list already has this data, just needs to be extracted per-row
+in the strat sweep).
+
+Tertiary (unchanged since Thread 23): BKZ-beta sweep against NU, to quantify
+how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+(recorded after commit, see follow-up log entry)

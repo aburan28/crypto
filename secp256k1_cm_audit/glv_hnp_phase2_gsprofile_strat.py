@@ -18,9 +18,14 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Thread 25 (2026-08-08): added --dump-json so the row table survives the run
+for downstream re-analysis (NU-band stratification of mu) without redoing
+the lattice work.
+
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
 """
 
+import json
 import math
 import os
 import random
@@ -63,6 +68,14 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if "--dump-json" in sys.argv:
+        out_path = sys.argv[sys.argv.index("--dump-json") + 1]
+        scalar_keys = ("NU", "argmax", "enorm", "mu", "l2", "det2",
+                       "nuhat", "n", "K1", "ok", "eff", "effq", "lamstar", "k")
+        with open(out_path, "w") as f:
+            json.dump([{k: r[k] for k in scalar_keys} for r in rows], f)
+        print(f"dumped {len(rows)} rows to {out_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
