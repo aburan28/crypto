@@ -6671,4 +6671,4 @@ BLOCKED status against the actual thread numbers rather than taking the
 
 ### Commits made
 
-(pending — see push step below)
+255dc58 autolab 2026-08-08: Thread 25 — mu survives as 2nd coordinate inside NU's ambiguous band once eff is held fixed (AUC 0.86-0.93); pooled test was itself eff-confounded
