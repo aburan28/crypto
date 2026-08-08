@@ -6638,4 +6638,4 @@ threshold.
 
 ### Commits made
 
-(recorded in follow-up commit after this entry is written)
+ff6909b autolab 2026-08-08: Thread 25 — H25 falsified for raw mu, holds for nu_hat (AUC 0.84 in NU-ambiguous band); step statistic dead
