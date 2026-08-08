@@ -6538,3 +6538,135 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority-1 (P-521 bigfloat) is CLOSED (§10.5, 2026-06-06) and Priority-4/6
+(cross-curve LLL, B5) are also CLOSED — no work needed there. Priority-2
+(CHLRS Igusa formula / Howe gluing, merged with Priority-3 per the 2026-07-26
+log) was last touched 2026-07-27, 12 days ago (outside the 7-day
+recently-touched window), with a concrete unexecuted next step on record
+("Thread 3: implement `chlrs_forward_map.gp`"). Priority-5 (GLV-HNP Phase 2)
+was touched yesterday with real progress (Thread 24/25), but per the stated
+protocol priority order takes precedence over recency once a thread is
+outside the 7-day window, so picked up Thread 2/3 (CHLRS/Howe) here.
+
+Environment note: this container had no `pari-gp` preinstalled (`gp:
+command not found`). Installed via
+`apt-get install -y --no-install-recommends pari-gp` (plain `apt-get
+install pari-gp` pulls in ~200MB of unrelated recommends — texlive-binaries,
+mupdf-tools — via `pari-doc`; avoid that on future runs).
+
+### Work done
+
+The 2026-07-27 entry's proposed next step (implement the CHLRS forward
+formula in `chlrs_forward_map.gp`) requires literature this repo doesn't
+have local access to; WebSearch did not surface a usable explicit formula
+(Lercier-Ritzenthaler 2012 is a 40-page paper, not a lookup table). Instead
+of stalling on that, went back and pressure-tested the *existing*
+"validated" result the 2026-07-27 next-step was building on: `howe_5pairs_v2.gp`
+Test 1 (p=43, output `a=41,b=5`), which every log entry since 2026-07-26 has
+cited as "✓ CORRECT" / "confirmed fixed" for the Z/3Z Richelot machinery.
+That citation only ever checked *self-consistency* against another script's
+hardcoded output (`howe_richelot_v5.gp`) — it was never checked against a
+real `#E1·#E2` target. It doesn't survive that check.
+
+- `secp256k1_cm_audit/chlrs_naive_cover_split_check.gp` (new): for
+  `D : y²=(x³+b1)(x³+b2)`, compute `#Jac(D)` directly via
+  `hyperellcharpoly` and compare to `#E1·#E2`, `#E1·#E1^tw`, etc.
+  **`#Jac(D) ≠ #E1·#E2` in all 5 tested pairs**, including the p=43
+  "reference" pair: `#Jac(D)=1641` vs. target `1767`.
+- `secp256k1_cm_audit/chlrs_richelot_native_ffelt.gp` (new): independent
+  rewrite of `richelot()` against PARI's native `ffgen`/FFELT arithmetic
+  instead of the hand-rolled `f3mul`/`f3inv` routines, to (a) cross-validate
+  the formula and (b) drop the old script's implicit restriction to
+  `β = d·α` for scalar `d ∈ F_p` (only reachable when `b2/b1` is a perfect
+  cube in `F_p`) in favor of genuine independent cube roots of `-b2` found
+  via `factor(x^3-(-b2))` over the FFELT ring — reaches all 3 non-trivial
+  2-torsion gluings for any `(b1,b2)`, not just the cube-related subset.
+  - Found and fixed a real bug in the first draft: extracting `.pol`
+    coefficients from an FFELT and dividing with plain `/` does *rational*
+    (`t_FRAC`) division instead of division mod `p`, silently corrupting
+    every output. Fixed by wrapping in `Mod(·,pp)` before dividing.
+    (Only affects this new script — `howe_5pairs_v2.gp`'s original
+    `f3inv`-based arithmetic doesn't have this bug.)
+  - After the fix, reproduces the p=43 reference (`a=41,b=5`) exactly, and
+    confirmed invariant under choice of which conjugate root is labelled
+    `α` and which primitive cube root of unity is labelled `z3` — a
+    structural sanity check the formula should satisfy and does.
+  - Swept all 3 genuine `β` branches (not just the scalar one) for 4 pairs
+    at p=1009 and the p=43 reference: **no branch, for any pair, ever hits
+    `#E1·#E2`.**
+- Diagnosed *why*: `#Jac` of the Richelot dual equals `#Jac(D)` up to a
+  full quadratic twist (p=43: `1641` and `2169` are exactly related by
+  negating every odd-degree coefficient of the Frobenius charpoly:
+  `x⁴-6x³+55x²-258x+1849` ↔ `x⁴+6x³+55x²+258x+1849`, confirmed by direct
+  evaluation). So no normalization fix to the Richelot dual construction can
+  ever reach `#E1·#E2` if `D` itself isn't isogenous to `E1×E2` — twisting
+  can't change *which* abelian surface you're looking at, only its sign.
+- Root cause: `D=(x³+b1)(x³+b2)` has an extra order-3 automorphism
+  `(x,y)↦(ζ₃x,y)` (visible because the sextic depends on `x` only via `x³`)
+  that a generic product `E1×E2` does not carry. `D`'s Jacobian is a
+  *different* abelian surface from `E1×E2`, full stop — the naive
+  "sextic = product of the two cubics" construction never was the Howe
+  cover, for any pair, not just the previously-flagged degenerate `(0,3)`
+  case. Partial evidence this splitting is governed by whether `b1·b2` is a
+  QR mod `p` (3 of 4 toy cases fit: splits when QR and is irreducible when
+  non-QR; one QR case, `p=1009,b1=11,b2=33`, did *not* split — so this is
+  an observed correlation, not a proven criterion) via a bielliptic
+  involution `(x,y)↦(m/x, √(b1b2)·y/x³)`, `m³=b1b2` — worth deriving
+  properly but not chased further this session.
+- Updated `RESEARCH_MESTRE_HOWE.md` §5.6 (new) with this finding so future
+  runs don't re-walk into the same false-positive validation.
+
+### Findings
+
+1. **The Z/3Z Richelot-on-naive-cover sub-approach (all of Thread 2 Tests
+   1–5, 2026-07-26/27) is a dead end**, confirmed by a target check that
+   was missing the whole time, not by a new obstruction. This applies to
+   every pair, not just the previously-identified degenerate `(0,3)` case
+   — Tests 2 and 4's "missing inverse map" framing was chasing the wrong
+   bug; the map wasn't almost-right-but-for-branch-choice, it was
+   computing a different curve's isogeny class entirely.
+2. `chlrs_richelot_native_ffelt.gp`'s formula is now independently
+   cross-validated (matches the `f3`-based implementation exactly on the
+   p=43 case) — the Richelot *arithmetic itself* is trustworthy; the bug
+   was upstream, in what curve `D` to feed it.
+3. RESEARCH_MESTRE_HOWE.md's original 2026-0x assessment ("Option
+   A/B/C: multi-week moduli computation required; Option D: accept
+   existence-without-construction") is now empirically reinforced rather
+   than just asserted — the one concrete shortcut anyone tried has been
+   ruled out numerically, not just by literature-reading.
+
+### Next step proposal
+
+**Primary — pivot Thread 2/3 to Option D (RESEARCH_MESTRE_HOWE.md §8):**
+stop looking for a Richelot/product-cover shortcut. The paper's B5 bound
+(cover cost ≥ ECDLP cost) applies to *any* cover; Howe's theorem already
+guarantees existence (verified §8.6 conditions). Constructive recovery is a
+separate, harder deliverable — mark it explicitly out of scope for the
+structural-completeness theorem and stop re-deriving this each cycle.
+
+**Secondary — if constructive recovery is still wanted**, the concrete
+next computational step is the "High value, medium cost" item from
+RESEARCH_MESTRE_HOWE.md §7: implement Igusa invariants `(I_2,I_4,I_6,I_10)`
+from hyperelliptic coefficients directly (~50 lines, classical formulas,
+no moduli theory needed), then compute them for `E1×E2`'s *actual* Howe
+quotient by testing small `p` where `(E1×E2)/Γ_α` can be brute-forced
+combinatorially (enumerate candidate genus-2 curves over `F_p` by
+coefficients, up to the ~p^5 curves at `p≤50`, and check each one's
+Frobenius charpoly against the `#E1·#E2` target directly — no Richelot,
+no moduli machinery, pure brute force at toy size). This sidesteps needing
+the CHLRS paper's explicit formula at all for a first existence-plus-example
+result, at the cost of not scaling past toy primes.
+
+**Tertiary**: derive the bielliptic-involution criterion above properly
+(when does `(x,y)↦(m/x,√(b1b2)y/x³)` exist over `F_p`, and what elliptic
+curves does it actually produce as quotients of `D`) — a clean side result
+even though it doesn't solve Thread 2/3 itself.
+
+### Commits made
+
+(recorded after push — see next log entry / git log)

@@ -185,6 +185,39 @@ Genus2Reconstruction.  Sage's `igusa_clebsch_invariants` only goes
 forward (curve → invariants); the inverse requires the
 Genus2Reconstruction patch.
 
+## 5.6. Naive product-cover ansatz: ruled out (2026-08-08)
+
+Between 2026-07-26 and 2026-07-27 the autolab pursued a shortcut: take
+`D : y² = (x³+b1)(x³+b2)` (the literal product of E1's and E2's defining
+cubics) as a stand-in for the Howe cover, and Richelot-dualize it via the
+classical Z/3Z quadratic splitting `G_i = (x-ζ₃^{i}α)(x-ζ₃^{i}β)` for
+`α³=-b1, β³=-b2`. This looked promising because it reproduced a "reference"
+answer at `p=43` (`a=41, b=5`) that an earlier script had also produced.
+
+**That reference was never checked against a real target and is wrong.**
+`chlrs_naive_cover_split_check.gp` and `chlrs_richelot_native_ffelt.gp`
+(2026-08-08, both cross-validated against each other) show:
+
+- `#Jac(D) ≠ #E1·#E2` for every tested `(b1,b2)` pair, including the p=43
+  "reference" pair (`1641` vs. target `1767`).
+- The Richelot dual of `D` (all 3 non-trivial 2-torsion gluings tried) has
+  the *same* zeta function as `D` up to a full quadratic twist — it can
+  never reach `#E1·#E2` either, because Richelot duality doesn't change
+  which abelian surface you started from, only its twist.
+- Root cause: `D` has an order-3 automorphism `(x,y) ↦ (ζ₃x, y)` (its
+  sextic depends on `x` only through `x³`) that a generic product `E1×E2`
+  does not share. `D`'s Jacobian is therefore a *different* abelian
+  surface from `E1×E2` — some pairs even split over `F_p`, but into a
+  bielliptic-quotient pair unrelated to `(E1,E2)`, not into `E1,E2`
+  themselves.
+
+**Consequence**: the naive "sextic = product of two cubics" ansatz is a
+dead end for constructing the Howe cover. It does not reduce the problem;
+it silently substitutes an unrelated abelian surface. The real forward map
+still requires the moduli computation described in §§1–5 above (Igusa
+invariants of the *quotient* `(E1×E2)/Γ_α`, not of the naive product).
+Options A–D in §8 are unaffected by this; §8's assessment stands.
+
 ## 6. Toy verification
 
 The scaffolding can demonstrate Mestre's Step 2 on a hand-picked
