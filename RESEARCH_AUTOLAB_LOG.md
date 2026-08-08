@@ -6681,4 +6681,4 @@ been dormant since 2026-07-27.
 
 ### Commits made
 
-(recorded after this entry is committed — see follow-up log line)
+a40b27d autolab 2026-08-08: Thread 25 — H25 falsified for mu, holds for nu_hat (AUC 0.84-0.91 in NU-ambiguous band); step falsified
