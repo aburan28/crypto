@@ -1,0 +1,59 @@
+==============================================================================
+Thread 25 — conditioning on NU: is mu a genuine second coordinate?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.1s
+wrote 500 rows to thread25_rows.json
+
+------------------------------------------------------------------------------
+H25: inside the ambiguous NU band [1.04, 2.199], does mu still separate?
+------------------------------------------------------------------------------
+in band: 366/500   outside: 134
+band recovery: 97/366
+  AUC(-mu     -> recovery) = 0.6932
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-NU     -> recovery) = 0.5656  (control: should be ~0.5, NU is constant-ish inside its own band)
+  AUC(-step   -> recovery) = 0.1803
+  AUC(-lam*   -> recovery) = 0.3212  (control)
+
+H25 verdict: FALSIFIED (threshold AUC>=0.8 or <=0.2 for a clean second coordinate; observed 0.6932)
+
+per-eff-stratum, restricted to the band:
+  eff    N     rec |   AUC mu  AUC step
+ 0.05   24   23/24 |   0.4565    0.5217
+ 0.10   83   26/83 |   0.8819    0.1329
+ 0.15   96   21/96 |   0.8889    0.1130
+ 0.20   89   18/89 |   0.9276    0.0657
+ 0.25   74    9/74 |   0.8615    0.1179
+
+------------------------------------------------------------------------------
+Secondary: step = log2||b*_{m+1}|| - log2||b*_1|| as a wall predictor
+------------------------------------------------------------------------------
+Pooled over all rows (5 strata x 20 curves x 5 seeds, N=500):
+  AUC(-step -> recovery) = 0.3286
+  AUC(-mu   -> recovery) = 0.3964
+  AUC(-NU   -> recovery) = 0.7996
+  step | success: mean 0.214  step | failure: mean -0.280
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+
+per-eff-stratum (full table, not just the band):
+  eff    N     rec |  AUC step
+ 0.05  100  99/100 |    0.6364
+ 0.10  100  42/100 |    0.2266
+ 0.15  100  21/100 |    0.1139
+ 0.20  100  19/100 |    0.0793
+ 0.25  100   9/100 |    0.1062
+
+------------------------------------------------------------------------------
+Logistic fit on (log NU, log mu) -> recovery (plain gradient descent)
+------------------------------------------------------------------------------
+score = -7.2212*log(NU) + -2.8618*log(mu) + 35.8262
+training accuracy (0.5 threshold) = 0.7860  (N=500, base rate 0.380)
+AUC(score -> recovery) = 0.8596  (score is POSITIVE-oriented here, so pos/neg swapped vs auc()'s usual '-x' convention)
+compare: AUC(-NU alone) pooled = 0.7996
+
+==============================================================================
+done
+==============================================================================

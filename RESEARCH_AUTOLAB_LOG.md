@@ -6538,3 +6538,151 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — the pre-registered next step from the 2026-08-07 #2 (Thread 24)
+entry: condition on NU and test whether mu is a genuine second coordinate for
+Kannan-LLL recovery, plus the secondary GS-profile "step" statistic from W1b.
+Priority 1 (P-521) has been CLOSED since 2026-06-06 (re-confirmed 2026-07-08,
+2026-07-21) and the static task list in the autolab prompt is stale on this
+point — the log is authoritative per protocol. Priorities 2/3/6 have no open
+sub-task queued; priority 5 (GLV-HNP) made measurable progress yesterday, so
+rule (b) applies and this thread continues.
+
+### Work done
+
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Same instance
+  generation as `glv_hnp_phase2_gsprofile_strat.py` (float GS, 17-bit curves,
+  M=12/dim 24, 5 eff strata x 20 curves x 5 seeds, N=500), plus:
+  - `step = log2(||b*_{m+1}||) - log2(||b*_1||)` per instance (the block-1/
+    block-2 GS-norm jump flagged qualitatively in Thread 24 W1b).
+  - H25 test: AUC(-mu -> recovery) restricted to the NU band [1.040, 2.199]
+    (the 17-bit ambiguous bracket from Thread 24 W4), pooled and per-eff-stratum.
+  - Secondary: AUC(-step -> recovery), pooled and per-stratum, plus
+    Spearman(step, NU) and Spearman(step, mu).
+  - A from-scratch 2-feature logistic regression (plain gradient descent, no
+    numpy/sklearn) on (log NU, log mu) -> recovery, since neither is
+    installed in this container and this is a one-off 500-row fit.
+  - Added `--dump-json` per Thread 24's next-step note; ran with it, table at
+    `secp256k1_cm_audit/thread25_rows.json` (500 rows: n, K1, eff, effq, ok,
+    NU, mu, l2, det2, nuhat, lamstar, step, k, argmax).
+- Environment: `pip install fpylll cysignals sympy` again (fourth run in a
+  row needing this — the container does not persist packages between runs;
+  worth a Dockerfile/requirements.txt if this keeps recurring).
+- `cargo test --test curve_audit` -> 5/5 pass (4.3s). No Rust touched.
+- Output: `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt`.
+
+### Findings
+
+**H25 pooled-band result is a trap, not an answer — Simpson's paradox from
+mixing eff strata inside a shared NU window.**
+
+```
+in band [1.04, 2.20]: 366/500 instances, 97/366 recover
+  AUC(-mu     -> recovery) = 0.6932   <- pooled: looks weak, naive verdict FALSIFIED
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-NU     -> recovery) = 0.5656   (control: NU is ~uninformative inside its own band, as expected)
+  AUC(-step   -> recovery) = 0.1803
+  AUC(-lam*   -> recovery) = 0.3212   (control)
+```
+
+But per-eff-stratum, restricted to the same band, the picture reverses:
+
+```
+  eff    N     rec |   AUC mu  AUC step
+ 0.05   24   23/24 |   0.4565    0.5217   (degenerate: 96% recover, no signal)
+ 0.10   83   26/83 |   0.8819    0.1329
+ 0.15   96   21/96 |   0.8889    0.1130
+ 0.20   89   18/89 |   0.9276    0.0657
+ 0.25   74    9/74 |   0.8615    0.1179
+```
+
+**H25 verdict: HOLDS when eff is held fixed (AUC(-mu) = 0.86-0.93 in every
+non-degenerate stratum, well above the 0.8 bar), FALSIFIED by the naive
+pooled reading.** The pooled AUC 0.693 is an artifact: eff=0.05 instances
+(99% base recovery rate) and eff=0.25 instances (9% base recovery rate) both
+land inside the same NU window but at very different mu scales and very
+different base rates, so pooling scrambles the ranking exactly the way
+Thread 24 W3/W6 warned about for NU vs nu_hat — this is the same trap
+appearing a second time, now inside a conditioning analysis rather than a
+raw predictor comparison. **Any AUC computed by pooling across eff strata in
+this codebase should be treated as provisional until re-checked per-stratum.**
+
+**mu is therefore a genuine second coordinate, not a restatement of NU.**
+Combined with Thread 24 W5/W6 (NU and mu are Spearman-uncorrelated at fixed
+eff, -0.28..+0.16), this closes the loop Thread 25 was opened to check:
+recovery = f(NU, mu) with both terms doing real, independent cross-curve
+work inside the region where NU alone is silent.
+
+**Secondary — step is anti-correlated with mu (Spearman -0.663) and is
+comparably strong, but the sign is OPPOSITE the W1b intuition.**
+
+```
+pooled (N=500): step | success mean +0.214, step | failure mean -0.280
+                AUC(-step -> recovery) = 0.3286  i.e. AUC(+step -> recovery) = 0.6714 pooled
+per-stratum (full table, eff fixed):
+  eff    N     rec | AUC step (as "-step->recovery"; smaller AUC = bigger step predicts recovery)
+ 0.05   100  99/100 |  0.6364   (degenerate)
+ 0.10   100  42/100 |  0.2266   ->  AUC(+step) = 0.7734
+ 0.15   100  21/100 |  0.1139   ->  AUC(+step) = 0.8861
+ 0.20   100  19/100 |  0.0793   ->  AUC(+step) = 0.9207
+ 0.25   100   9/100 |  0.1062   ->  AUC(+step) = 0.8938
+```
+
+W1b's single-instance read (12-bit, K1=32, "flat, no step" = success) had
+suggested step -> 0 marks the wall. The 500-instance 17-bit sweep says the
+opposite: **larger step predicts recovery**, at AUC 0.77-0.92 across
+eff=0.10-0.25 — essentially matching mu's per-stratum power (0.88-0.93,
+same table above), which is expected given Spearman(step, mu) = -0.663: they
+are two views of the same underlying quantity (the block-1 plateau scale
+lambda_1(L2) sets both mu directly and the size of the jump out of it). The
+qualitative K1=32 case was likely past the point where the two-block
+structure itself has degenerated (block 1 and block 2 norms converge), which
+is a different regime from the eff=0.10-0.25 sweep here. **step is a free
+byproduct of GS reduction (no extra lattice work beyond what LLL already
+does) and could stand in for mu when mu is inconvenient to compute
+directly, but the W1b sign guess should be marked wrong going forward.**
+
+**Logistic combination of NU and mu beats NU alone, modestly.**
+
+```
+score = -7.2212*log(NU) - 2.8618*log(mu) + 35.8262
+training accuracy (0.5 cut) = 0.786  (N=500, base rate 0.380)
+AUC(combined score -> recovery) = 0.8596
+AUC(-NU alone)                  = 0.7996   (pooled, matches Thread 24 W5's 0.7996)
+```
+
+Both coefficients are negative as expected (smaller NU and smaller mu both
+favor recovery). The combined-score AUC gain over NU alone (0.86 vs 0.80) is
+real but smaller than the per-stratum band numbers suggest, because this
+fit is pooled across eff and inherits some of the same eff-confound noted
+above — a per-stratum-fit version is the natural follow-up, not yet done.
+
+### Next step proposal
+
+**Thread 26 — per-stratum logistic fit and an eff-free combined statistic.**
+Fit (log NU, log mu) -> recovery *separately within each eff stratum* (5
+small fits, N=100 each) rather than pooled, and check whether the fitted
+coefficients (w_NU, w_mu) are stable across strata. If they are, the ratio
+w_mu/w_NU gives a single combined statistic `NU * mu^(w_mu/w_NU)` that
+should out-AUC either alone at every eff simultaneously, closing Thread 25
+with a deployable 2-parameter viability test instead of five separate
+per-stratum numbers. If the coefficients drift with eff the way C drifted in
+Thread 24 W6, that itself is the finding, and the honest conclusion is
+"NU and mu are both necessary, no eff-free closed combination exists yet."
+
+Secondary: re-run the step statistic at 12-bit dim (where W1b's qualitative
+K1=32 example lives) with the same per-stratum design used here, to check
+whether the sign flip is 17-bit-specific or the original 12-bit read was
+simply anecdotal (N=1 curve, no stratification).
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(pending — see push step)
