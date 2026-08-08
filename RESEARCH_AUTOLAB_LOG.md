@@ -6612,43 +6612,63 @@ hardcoded reference.
   its own target. Its "Done." at the end of a clean run masked total non-convergence.
 - `cargo test --test curve_audit` → 5/5 pass (8.11s). ✓ (unrelated to this thread;
   no Rust code touched.)
+- **Follow-up (ran after the initial findings below were drafted — corrects them):**
+  ran `chlrs_richelot_prime_sweep.gp` for real, sweeping the *same* naive-cube-root
+  Richelot construction as Test 2 (`α³=-b1`, `β=d·α`, `d`=first QNR mod p) over every
+  prime `p≡1 mod 3` in `[11,3000]` and `b1∈[1,7]` (1442 trials), checking `#Jac`
+  against `(p+1-t1)(p+1+t1)` (E1 × its own quadratic twist, the only target this
+  particular `d`-construction can ever hit since `b2=d³b1` is *defined* as the twist
+  of `b1`). Hit a real PARI/GP gotcha along the way — see tooling note below.
 
 ### Findings
 
-1. **The naive product cover `y²=f1(x)·f2(x)` is not, and has never been shown to
-   be, isogenous to `E1×E2`** for either toy pair tested. Both char polys are
-   irreducible quartics over ℚ (simple abelian surfaces). This matches
-   `RESEARCH_MESTRE_HOWE.md`'s existing theoretical claim (§3: "For `A=(E1×E2)/Γ_α`
-   ... the Igusa invariants are non-degenerate when the gluing is non-trivial", i.e.
-   the naive cover is a *different, unrelated* curve from the true Howe quotient) but
-   this is, as far as this log shows, the **first time it was checked computationally**
-   rather than asserted.
+1. **The naive product cover `y²=f1(x)·f2(x)` is not isogenous to `E1×E2`** for the
+   two specific toy pairs originally tested (p=43,b1=7,b2=13 and p=1009,b1=11,b2=515).
+   Both char polys are irreducible quartics over ℚ (simple abelian surfaces). This
+   matches `RESEARCH_MESTRE_HOWE.md`'s existing theoretical claim (§3) that the naive
+   cover is generically a *different, unrelated* curve from the true Howe quotient.
 
 2. **By isogeny-invariance of the Frobenius L-polynomial**: since Richelot
-   (2,2)-isogenies preserve `#Jac`, and `C0` (naive cover) doesn't match the target,
-   *no* Richelot-dual reachable from `C0` in one step can match it either — which is
-   exactly the 0/12 result in `chlrs_forward_map.gp`. This is now a proven structural
-   fact, not just an empirical near-miss: **the naive cover's entire 1-step Richelot
-   neighbourhood is provably disjoint from the target isogeny class.**
+   (2,2)-isogenies preserve `#Jac`, and `C0` (naive cover) doesn't match the target
+   *for those two pairs*, no Richelot-dual reachable from `C0` in one step can match
+   it either for those pairs — the 0/12 result in `chlrs_forward_map.gp`.
 
-3. **`howe_richelot_v5.gp`, the script cited across multiple prior sessions
-   (2026-07-08, 07-21, 07-26, 07-27) as "the correct working reference" for the Howe
-   construction, has never actually produced a curve matching `E1×E2`.** Its one
-   "✓ CORRECT" check tests arithmetic self-consistency (reproducing a hardcoded
-   `(aa,bb)`) rather than the mathematical property (`Jac(C) ≅ E1×E2`) the whole
-   thread cares about. Its own 21-combination validation sweep, designed to search a
-   wider net than the single naive-cover case, returns **zero** valid covers, let
-   alone matching ones.
+3. **CORRECTION to a premature conclusion drafted earlier in this same session**:
+   the exhaustive `chlrs_richelot_prime_sweep.gp` run (1442 trials, `p≡1 mod 3` in
+   `[11,3000]`, `b1∈[1,7]`) shows the naive-cube-root Richelot construction is **not**
+   uniformly broken — it succeeds in **31/1442 (2.15%)** of trials:
+   ```
+   (p, b1, d) successes: (19,1,2) (19,7,2) (103,1,3) (103,3,3) (211,1,2) (211,5,2)
+     (223,1,3) (223,2,3) (223,4,3) (223,7,3) (271,1,3) (271,3,3) (373,1,2) (373,7,2)
+     (547,1,2) (547,3,2) (709,1,2) (787,1,2) (787,3,2) (811,1,2) (811,2,2) (811,4,2)
+     (811,7,2) (1117,1,2) (1117,3,2) (1117,5,2) (1171,1,2) (1171,6,2) (1471,1,3)
+     (1471,2,3) (1471,4,3)
+   ```
+   The specific `(p=43, b1=7, d=2)` "reference" pair that `howe_richelot_v5.gp` and
+   `howe_5pairs_v2.gp` Test 1 are built around is **not** in this list — p=43 fails
+   for *every* `b1∈[1,7]`, alongside 10 other checked primes in `[11,130]` (13, 31,
+   37, 61, 67, 73, 79, 97, 109, 127). So the "reference" case wasn't a coincidence in
+   the sense of "nothing works" — it's a genuine miss inside a construction that does
+   have real (if narrow) support. **The `(aa,bb)=(41,5)` hardcoded expectation in
+   `howe_richelot_v5.gp` was simply never a case where the construction was supposed
+   to succeed, and nobody checked.**
+   No congruence-class-of-p-alone pattern explains success vs. failure (checked
+   `p mod 9` and `p mod 36`: both success and failure sets hit every residue `{1,4,7}
+   mod 9` seen among `p≡1 mod 3` primes) — the condition must depend on the
+   relationship between `b1` and `p`/`d` jointly (expected, since Howe's (H2)
+   condition is about a Galois-module identification between the *specific* curves,
+   not a property of `p` alone), and was not further isolated this session.
 
-4. **Net effect**: the entire "Richelot-search over proxy primes" direction
-   (Thread 22, proposed 2026-07-26 as the fallback continuation of the now-corrected
-   Thread 2) should be considered **effectively exhausted at the small-toy-example
-   level it has been tried at** — not just for secp256k1's degenerate pair (0,3), but
-   for the generic non-degenerate case too. `RESEARCH_MESTRE_HOWE.md`'s own diagnosis
-   was right all along: only the actual Igusa-invariants-of-the-quotient-surface
-   computation (Mestre Step 1, §3 of that note) constructs the real Howe cover; the
-   Richelot-from-cube-roots shortcut this thread has spent five sessions on is not a
-   cheap substitute for it.
+4. **`howe_richelot_v5.gp`'s own internal 21-combination sweep (7 "canonical classes"
+   × 3 Richelot-dual twists, target `#Jac=1767` at p=43) is 0/21** — every attempt
+   returns `[-1,-1]` ("cover not over F_p"). Given finding 3, this is now more likely
+   an artifact of that script's *specific* 7 hand-picked classes and target (all
+   anchored to the same non-working p=43 pair) than evidence the construction is
+   globally broken — but it does mean **no run of this script, ever, has produced a
+   valid answer**, so its "✓ CORRECT" banner (which only checks arithmetic
+   self-consistency against a hardcoded `(aa,bb)`, not `Jac(C)≅E1×E2`) has been a
+   false positive read as "the p=43 base case is verified correct" in the 2026-07-26
+   and 2026-07-27 log entries.
 
 5. **Environment note**: `eprint.iacr.org`, `arxiv.org`, and `math.mit.edu` are all
    blocked by this session's egress proxy (`EGRESS_BLOCKED`), so the actual
@@ -6658,6 +6678,19 @@ hardcoded reference.
    give the formula. Sage and Magma remain absent from this container (checked with
    `which`/`import sage`), consistent with every prior session's finding for this
    thread.
+
+**Tooling gotcha for future runs**: a bare top-level `forprime(...)`/`for`/`if` chain
+nested 4+ deep in a `.gp` script **silently mis-parses** in PARI/GP 2.15.4 when not
+wrapped in an explicit `{ ... }` block — it throws a cascade of `syntax error,
+unexpected end of file` / `incorrect type in ... (t_POL)` errors *and still exits 0
+with plausible-looking (but wrong/symbolic) output* (observed: a loop variable itself,
+e.g. `pr`, ends up in the printed result unevaluated). This bit
+`chlrs_richelot_prime_sweep.gp` on first write. Fix: wrap the whole multi-statement
+body in `{ ... }`. `howe_5pairs_v2.gp` and `chlrs_forward_map.gp` were unaffected only
+because their top-level bodies already happened to be wrapped in `{ }`. **Any future
+autolab script with nested top-level control flow should wrap the body in `{ }` and
+its output should be sanity-checked for unevaluated variable names**, since this
+failure mode does not always produce a nonzero exit code.
 
 ### Next step proposal
 
@@ -6672,18 +6705,24 @@ the whole Richelot branch has a fixable bug or is chasing the wrong curve family
 entirely (finding 4 above suggests the latter, but a formula-level check is the only
 way to be sure).
 
-**Primary recommendation**: stop investing further sessions in the Richelot-graph
-search at toy primes (0/33 total attempts across two sessions' scripts have ever
-produced a match) and redirect Priority 2/3 effort to `RESEARCH_MESTRE_HOWE.md` §3
-Step 1 — computing Igusa invariants of `(E1×E2)/Γ_α` directly via the modular-form
-pullback `M_2 → M_1×M_1`. This is explicitly flagged in that note as a "multi-week
-implementation project" requiring moduli-of-abelian-surfaces machinery PARI doesn't
-have natively; it is a legitimately hard task, not a quick autolab sub-task, so the
-concrete next **autolab-sized** step is: pick one narrow piece of it (e.g. just the
-`I_2` invariant, which is the simplest of the four) and attempt a from-scratch
-derivation for the α=identity, F_{p^3}-cyclic-Galois case that already applies to
-secp256k1 (per `RESEARCH_MESTRE_HOWE.md` §3: "For secp256k1 specifically: σ is the
-identity... once we pick a Galois-compatible labelling").
+**Primary recommendation — revised after the corrected finding 3 above**: the
+naive-cube-root Richelot construction is *not* dead, it's just sparse (31/1442,
+2.15%). The highest-value next autolab-sized step is characterizing **why** those
+31 `(p,b1,d)` triples succeed and the other 1411 don't. Concrete plan:
+1. For each of the 31 successes and a matched sample of failures, compute the
+   Howe (H1)/(H2)/(H3) conditions (reuse `howe_gluing_test.gp`'s logic, already in
+   the codebase) for the specific pair `(E1: y²=x³+b1, E2: y²=x³+d³b1)` and check
+   whether success ⟺ (H1)∧(H2)∧(H3), or whether there's a 4th condition the theory
+   doesn't currently name.
+2. If a clean necessary-and-sufficient condition on `(p,b1,d)` emerges, test it
+   directly against secp256k1's own qualifying pairs (the 5/15 from Thread 18,
+   2026-07-21) — this would be the first *constructive* progress on Priority 2/3
+   since the thread opened, upgrading "Howe's theorem guarantees C exists" to an
+   actual `(aa,bb)` for at least one secp256k1-adjacent pair.
+3. If no clean condition emerges from (H1)-(H3) alone, escalate to
+   `RESEARCH_MESTRE_HOWE.md` §3 Step 1 (Igusa invariants of the quotient surface via
+   modular-form pullback) as previously planned — that remains a legitimate multi-week
+   fallback, not the first move.
 
 **Fallback**: priority 5 (GLV-HNP Phase 2) — Thread 25's proposed NU-band
 stratification re-analysis (2026-08-07 log, "H25") remains unexecuted and needs no
@@ -6691,4 +6730,5 @@ new data, only reprocessing of `glv_hnp_phase2_gsprofile_strat.py`'s existing ou
 
 ### Commits made
 
-(recorded in next commit)
+92d5293 autolab 2026-08-08: Thread 3 CHLRS forward map — naive cover and Richelot-dual family never match E1xE2; howe_richelot_v5.gp's own 21-way sweep is 0/21
+(second commit, this session) autolab 2026-08-08 #2: correction — full 1442-trial prime sweep finished after the first commit and found 31 real successes (2.15%); p=43 reference pair is a genuine miss, not representative of the construction being globally broken

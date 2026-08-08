@@ -9,6 +9,7 @@
 default(parisize, 256000000);
 read("howe_5pairs_v2.gp");
 
+{
 ntrials = 0; nsucc = 0; succlist = [];
 forprime(pr = 11, 3000,
   if(pr%3 == 1,
@@ -44,3 +45,5 @@ forprime(pr = 11, 3000,
 print("Swept primes p=1 mod 3 in [11,3000], b1 in [1,7], d=first QNR mod p.");
 print("trials=", ntrials, "  successes=", nsucc);
 print("successes (p,b1,d): ", succlist);
+}
+quit;
