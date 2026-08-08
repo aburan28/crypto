@@ -6538,3 +6538,161 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa forward map / Thread 3). Priority order per protocol: P-521
+(Priority 1) has been CLOSED since 2026-06-06 — no recent work AND fully resolved, so
+skipped. CHLRS (Priority 2) was last touched 2026-07-27 (12 days ago, outside the 7-day
+window) with a clear unexecuted next-step ("implement the forward map given (trace E1,
+trace E2)"), so per rule (a) ("no recent work") it is the first eligible thread ahead of
+continuing Thread 25 (GLV-HNP Phase 2, worked yesterday). Priorities 3, 4, 6 are CLOSED;
+Priority 5 (GLV-HNP) is mid-thread but lower in priority order than an idle Priority 2.
+
+Goal (from 2026-07-27 proposal): implement the CHLRS/Lercier-Ritzenthaler forward Igusa
+map from (E1, E2) to the Howe-glued cover. Fallback used instead: this literature route
+was checked first this session (see below) and found to not exist as a directly portable
+closed-form; pivoted to closing out the concrete open items the 2026-06-03 log had already
+identified as blocking (see "What remains open" at RESEARCH_AUTOLAB_LOG.md:1122).
+
+### Work done
+
+1. **WebSearch for the "CHLRS" formula.** Searched for "Cardona Howe Lercier Ritzenthaler
+   Streng" and "Lercier Ritzenthaler explicit Igusa Clebsch invariants Howe gluing". No
+   paper matches that exact author quintuple for this exact construction — Lercier &
+   Ritzenthaler 2012 ("Hyperelliptic curves and their invariants") covers invariant theory
+   generally, not the boundary-gluing map; Kılıçer-Labrande-Lercier-Ritzenthaler-Sijsling-
+   Streng 2018 is genus 3 (plane quartics), not genus 2. **"CHLRS" as a named closed-form
+   forward map does not appear to exist in the literature under that acronym** — the repo's
+   own prior sessions coined it as shorthand for "the thing we still need," not a citation.
+   This item should stop being treated as "look up paper §4-5" and be treated as "derive it
+   ourselves" (which is what 2026-06-03's kernel-enumeration proposal already was).
+
+2. **Re-verified `howe_5pairs_v2.gp` Test 1 (p=43 reference case) against the actual
+   isogeny-order criterion, not just coefficient equality.** The 2026-07-27 log claimed
+   Test 1 "✓ CORRECT... Matches `howe_richelot_v5.gp`'s expected output exactly" and treated
+   `richelot()` as validated. Re-running `howe_5pairs_v2.gp` directly and reading its own
+   printed output shows the coefficient match (a=41, b=5) is real, but the accompanying
+   Jacobian-order check FAILS: `#Jac(x^6+41x^3+5 / F_43) = 2169`, target `#E1*#E2 =
+   31*57 = 1767`. **This has always failed — it was mislabeled "CORRECT" because the
+   original comparison was only ever against `howe_richelot_v5.gp`'s own unvalidated
+   self-reported output, never against an independent #Jac check.** Isogenous abelian
+   varieties over F_p share the same Frobenius characteristic polynomial (hence the same
+   `#Jac(F_p)`), so a genuine Howe cover of (E1,E2) must hit exactly 1767; it does not.
+   This corrects the record and explains why Test 2 (p=1009) failed for the same
+   underlying reason, not a "wrong (r1,r2) parameterization" as 2026-07-27 concluded.
+
+3. **Extended the falsification: tried all 3 Galois-equivariant gluing choices, not just
+   1.** `secp256k1_cm_audit/howe_forward_search.gp` (new) tests beta = d*z3^k*alpha for
+   k=0,1,2 (the only Galois-equivariant bijections between the two 3-element 2-torsion
+   Galois orbits, since Frobenius acts as a 3-cycle on each). Ran this on the p=43
+   reference pair, the p=1009 pair, and a 30-prime scan (p in [200,1039], p≡1 mod 3,
+   p≡3 mod 4, non-square-cube twist). **0/32 primes have any k∈{0,1,2} match the target
+   #Jac.** The bug is not the choice of k; `richelot()` fed straight from elliptic-curve
+   2-torsion roots is structurally the wrong map, confirming the diagnosis
+   `RESEARCH_AUTOLAB_LOG.md:1112-1116` reached back on 2026-06-03 (`richelot()` computes
+   Richelot duals BETWEEN SMOOTH genus-2 Jacobians in the same (2,2)-isogeny orbit, not
+   the boundary-gluing map FROM a split ppav E1×E2). That 2026-06-03 finding was correct
+   and had simply been forgotten/re-litigated by later sessions (2026-07-21, 2026-07-27)
+   that re-ran the same broken construction without re-deriving the #Jac check.
+
+4. **Brute-force sanity check of the "7 canonical classes" table (2026-06-03,
+   `RESEARCH_AUTOLAB_LOG.md:1122`).** Swept the full x^6+a·x^3+b family mod 43 (43×43,
+   squarefree only) and computed `#Jac(F_p)` for each. 28/1806 hit the target 1767,
+   including all 7 previously-tabulated canonical classes (a,b) ∈ {(1,2),(2,8),(3,42),
+   (4,32),(6,39),(8,42),(16,39)} — an independent confirmation that table is still
+   internally consistent. (The other 21 matches are unrelated curves that coincidentally
+   share `#Jac(F_p)=P(1)` for a different char poly P — `#Jac(F_p)` alone cannot
+   distinguish the 7 classes from each other, as already noted 2026-06-03, since all 7
+   share the identical char poly T^4-83T^2+1849.)
+
+5. **Fixed the two known PARI 2.15.4 bugs in `howe_22_kernel.gp`** (flagged but never
+   fixed since 2026-06-09, `RESEARCH_AUTOLAB_LOG.md:1455`): multiline `for`-loop /
+   array-literal bodies outside a single `{...}` block get parsed line-by-line by `gp`
+   script mode, silently turning loop variables into free polynomial indeterminates
+   (confirmed exact failure mode: `error("no cube root for r=22*aa^22+...")` — `aa` had
+   become a symbol, not the loop's integer). Fix: every multi-statement block now lives
+   inside exactly one non-nested `{...}` (gp 2.15.4 errors on nested braces — "sorry,
+   embedded braces (in parser) is not yet implemented"), and the 15 perfect matchings of
+   {1..6} are hardcoded as a single-line literal instead of a buggy generator (which
+   returned 30, double-counting each matching). New script:
+   `secp256k1_cm_audit/howe_22_kernel_v2.gp`.
+6. Ran the fixed script: exhaustive 15-pairing "does this class's 6 Weierstrass points
+   degenerate-Richelot back to a product with traces {+13,-13}" search across all 7
+   canonical classes (105 (class, pairing) combinations). **Result: 0/105 hit
+   {+13,-13}.** Exactly 3 of the 15 pairings per class degenerate to *some* product (the
+   `{W1,W3,W5}` / `{W2,W4,W6}`-style alignments), landing consistently on trace pairs
+   {13,5} or {-13,-5} (classes 2/5/6 → {13,5}; classes 1/3/4/7 → {-13,-5}) — a
+   structurally real but *different* elliptic pair, not (E1,E2). The other 12/15
+   pairings per class are never degenerate at all (non-F_43 constant terms).
+7. `cargo test --test curve_audit` → 5/5 pass (6.54s), unaffected (no Rust changes this
+   session).
+
+### Findings
+
+**F1. The literature name "CHLRS" is a red herring.** No such named forward formula
+exists; the repo has been citing a paper that isn't there since at least 2026-07-21. Stop
+proposing "look up CHLRS §4-5" as a next step — it has been tried (WebSearch, this
+session) and the correct framing is "derive/compute it," matching 2026-06-03's original
+kernel-enumeration plan.
+
+**F2. The `richelot()`-from-elliptic-roots approach (howe_5pairs.gp, howe_5pairs_v2.gp,
+Tests 1/2/4) has never actually produced a correct Howe cover, including its own p=43
+"reference" case.** Every session since 2026-06-09 that cited Test 1 as validated
+(2026-07-21, 2026-07-27, and this session's own initial re-read before checking) was
+relying on a coefficient match against an unvalidated prior script, not an independent
+#Jac check. This is now corrected in the log. Recommend: do not resurrect
+`howe_5pairs*.gp`'s `richelot()` for the forward-map task; it answers a different
+question (Richelot duals within the smooth locus).
+
+**F3. The `{W1,W3,W5}`/`{W2,W4,W6}`-degenerate-pairing test (howe_22_kernel*.gp) also
+does not reach (E1,E2), even after both PARI bugs are fixed.** All 7 canonical classes
+degenerate (via exactly 3/15 pairings each) to a *different*, consistent pair of curves
+(traces {±13,∓5}, i.e. one factor matches E1/E2's trace magnitude and the other doesn't).
+This is a clean negative result, not a bug — it says the 7 canonical classes are
+(2,2)-isogenous to *something* reachable by a simple "group the 6 Weierstrass points into
+two aligned triples" degeneration, but that something is not E1×E2. The genuine Howe
+gluing (E1×E2 → smooth C) requires enumerating the isotropic subgroups of the FULL
+`E1[2]×E2[2]` (as 2026-06-03 originally proposed, option 1) — not a degeneration of an
+already-smooth class's own 6 roots. These are different objects: one lives at the
+boundary of A_2 approached FROM the product side, the other approaches the product as a
+degenerate LIMIT of the smooth Richelot graph. `howe_22_kernel_v2.gp` establishes the
+latter path is a dead end for finding E1×E2 specifically (it finds neighboring products,
+just not the target one).
+
+**F4. Both new/fixed scripts are reusable infrastructure**, independent of whether the
+overall thread is later dropped: `howe_forward_search.gp`'s 30-prime scan pattern is a
+fast falsifier for any future "guess a gluing map" hypothesis (30 primes, ~15s), and
+`howe_22_kernel_v2.gp` is the first bug-free implementation of the 15-pairing enumeration
+that was blocked for 2 months (since 2026-06-09).
+
+### Next step proposal
+
+**Thread 3 continuation — direct isotropic-subgroup enumeration on E1[2]×E2[2] (the
+2026-06-03 option 1, still never executed).** Concretely: E1[2]\{O} = {P1,P2,P3} (Galois
+orbit in F_{43^3}), E2[2]\{O} = {Q1,Q2,Q3} (Galois orbit in F_{43^3}, both under the SAME
+Frobenius 3-cycle direction — verify this first, since the direction determines which of
+P1,P2,P3 corresponds to which of Q1,Q2,Q3 under Galois-equivariance, sharpening
+`howe_forward_search.gp`'s k=0,1,2 search to whichever k's are actually Galois-compatible
+mid-computation rather than trying all 3 blind). For each of the 3 nontrivial
+Galois-stable maximal isotropic subgroups Γ_α ⊂ E1[2]×E2[2] (graphs of the 3
+Weil-pairing-preserving isomorphisms E1[2]≅E2[2]), compute the quotient (E1×E2)/Γ_α as an
+abelian surface via its theta-null / 2-torsion structure directly (not via Richelot on an
+already-smooth sextic — F3 shows that path doesn't reach this object), then match its
+Igusa invariants against the 7-class table. This is genuinely the "multi-week" item
+`RESEARCH_MESTRE_HOWE.md` §3 flagged; if it stays intractable in PARI without a
+theta-function library, the concrete fallback is to try SageMath's
+`magma_free`-style `HyperellipticCurveFromInvariants` or the genus2reduction package if
+available in this container (untested — worth a 5-minute `pip install`/`sage` check before
+the next multi-hour attempt).
+
+**Cheaper fallback if Thread 3 stalls again**: Thread 25 (GLV-HNP Phase 2) from
+2026-08-07 is still open with a concrete, cheap next step (stratify the 500-instance
+17-bit table by NU band, test H25: AUC(-mu -> recovery | 1.04<=NU<=2.20) >= 0.8) — no new
+data collection needed, ~5 minutes, `--dump-json` flag still to be added.
+
+### Commits made
+
+(recorded in next commit)
