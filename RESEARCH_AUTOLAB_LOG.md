@@ -6657,4 +6657,4 @@ Thread 20-25 scripts exercise yet — likely why it keeps getting deferred.
 
 ### Commits made
 
-(pending — see push step)
+d01f18e autolab 2026-08-08: Thread 25 — (NU,mu) falsified as viability test, (eff,nu_hat) confirmed
