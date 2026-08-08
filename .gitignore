@@ -18,3 +18,7 @@ research/ecdlp_autolab/phase22_rho_barrett
 __pycache__/
 *.pyc
 *.pyo
+
+# GLV-HNP Phase 2 --dump-json cache (regenerable in ~2s from
+# glv_hnp_phase2_gsprofile_strat.py; not source data)
+secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_rows.json

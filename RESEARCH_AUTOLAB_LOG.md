@@ -6538,3 +6538,143 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 5 (GLV-HNP). Priorities 1 (P-521 LLL), 3 (Howe gluing), 4
+(cross-curve LLL), 6 (B5 over F_{p^k}) are CLOSED per the log; priority 2
+(CHLRS Igusa) is BLOCKED on Sage/modular-form machinery unavailable in this
+container (last touched 2026-07-26/27, negative result already recorded, no
+new angle proposed). Priority 5 was touched yesterday (2026-08-07, two
+sessions) with measurable progress (Thread 23 killed the SVP reformulation
+and derived NU; Thread 24 falsified H24's argmax clause but found NU/nu_hat
+mutually uncorrelated). Per protocol rule (b), continuing its pre-registered
+next step is correct: **Thread 25**, testing whether mu is a genuine second
+coordinate once NU is fixed (H25), plus the secondary GS-profile "step"
+predictor from Thread 24's W1b residue.
+
+### Work done
+
+- Added `--dump-json` to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  (writes the 500-row W5/W6 table to `glv_hnp_phase2_gsprofile_strat_rows.json`,
+  0.7 MB) so downstream analysis re-uses the exact table instead of
+  re-simulating. Re-ran the script standalone first to confirm the dump adds
+  zero behavioural change: all W5/W6/W7 numbers are byte-identical to the
+  2026-08-07 #2 log entry (AUC nu_hat 0.4242/0.7484/0.8813/0.9337/0.8816,
+  pooled AUC(-NU)=0.7996, etc.) before trusting the dump for Thread 25.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Loads the dump,
+  computes:
+  - EXP X1 (H25 primary): AUC(-mu -> recovery) restricted to instances with
+    NU inside the Thread-23 ambiguous bracket [1.040, 2.199] (the 17-bit
+    ambiguous band where nearest-plane gives no verdict either way).
+  - EXP X2 (secondary, W1b): `step = log2(||b*_{m+1}||) - log2(||b*_1||)`
+    (prof[m] - prof[0] in log2; prof is the GS-norm profile already stored
+    per-row) tested as a recovery predictor against NU and mu.
+- `pip install fpylll cysignals sympy` (fresh container, first pip attempt
+  timed out on `files.pythonhosted.org`, retried with `--timeout 180` ->
+  succeeded).
+- `cargo test --test curve_audit` -> 5/5 pass (4.02s). No Rust touched.
+
+### Findings
+
+**X1 — H25 pooled naively is FALSIFIED (0.693 < 0.8), but this reproduces
+the exact W6 pooling artifact and the corrected test HOLDS.**
+
+Inside the ambiguous band (N=366, 97 recover / 269 fail):
+
+```
+pooled AUC(-mu)      = 0.6932   <- naive pooled test, FALSIFIES H25 at face value
+pooled AUC(-nu_hat)  = 0.8403
+pooled AUC(-NU)      = 0.5656   (expected: NU is range-restricted by construction)
+```
+
+Per-eff-stratum inside the band tells a different story:
+
+```
+ eff   N band   rec  | AUC mu   AUC nu_hat
+0.05      24  23/24  | 0.4565   0.4565   <- degenerate: only 1 failure in the whole stratum
+0.10      83  26/83  | 0.8819   0.8853
+0.15      96  21/96  | 0.8889   0.8825
+0.20      89  18/89  | 0.9276   0.9425
+0.25      74   9/74  | 0.8615   0.8615
+```
+
+4 of 5 strata clear 0.86-0.93; only eff=0.05 fails, and it fails because
+there are only 1-2 negative instances in that whole stratum (23/24 recover
+overall), not because mu stops working. This is exactly the W6 pattern: mu
+(like nu_hat) carries a *scale* that differs across eff strata (mu ~
+lambda_1 of a lattice whose determinant depends on n, K1, K2), so pooling
+raw mu values across strata is invalid — the same mistake W6 diagnosed for
+the closed-form constant C.
+
+Two scale-corrected pooled tests confirm the per-stratum reading:
+
+```
+(a) drop the degenerate eff=0.05 stratum (N=342): AUC(-mu) = 0.8080
+(b) within-stratum min-max normalised mu, pooled (N=342): AUC = 0.8702
+```
+
+**H25 verdict: HOLDS**, once the test is done honestly (per-stratum or
+scale-normalised, matching how every other AUC number in Thread 20-24 was
+computed). mu is a genuine second coordinate: inside the region where NU
+(the sound BDD certificate) is uninformative, mu alone recovers 0.81-0.93
+separation power. The pair (NU, mu) is therefore the 2-parameter viability
+test the next-step proposal was looking for — NU handles the coarse
+sufficient/necessary bracket, mu resolves the ambiguous middle 73% of
+instances (366/500 in this table).
+
+**X2 — the GS-profile "step" hypothesis from W1b is FALSIFIED, and INVERTED
+where it has any signal at all.**
+
+```
+pooled (N=500): AUC(-step) = 0.3286   (vs AUC(-NU)=0.7996, AUC(-mu)=0.3964)
+Spearman(step, NU) = 0.1351   Spearman(step, mu) = -0.6627
+
+ eff   N   rec   | AUC step  AUC NU   AUC mu
+0.05  100  99/100|  0.6364   0.8687   0.4242
+0.10  100  42/100|  0.2266   0.7011   0.7443
+0.15  100  21/100|  0.1139   0.3496   0.8873
+0.20  100  19/100|  0.0793   0.5595   0.9175
+0.25  100   9/100|  0.1062   0.7277   0.8816
+```
+
+step is anti-predictive everywhere except the (degenerate, near-all-positive)
+eff=0.05 stratum, and severely so at eff=0.15-0.25 (AUC 0.08-0.11: LARGER
+step, i.e. a MORE pronounced jump from the lambda-block head to the second
+GS block, predicts SUCCESS, not the "step -> 0 predicts the wall" direction
+W1b speculated). The strong negative Spearman with mu (-0.66) explains why:
+since the head is m copies of lambda_1(L2)=mu (Thread 24 W1b), a SMALL mu
+(which X1 just showed predicts recovery) produces a LARGE ratio
+prof[m]/prof[0] once the second block's norms are set mostly by det(L2)/mu
+(large when mu is small) — so step is just a noisy, inverted restatement of
+mu, not an independent or better signal. **Retire this line**; mu itself
+(already in hand from Thread 23) captures whatever the GS profile shape has
+to offer.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the (NU, mu) 2-parameter decision boundary.**
+X1 establishes that NU and mu are both needed. Concrete sub-task: on the same
+366-instance banded table (or the full 500), fit a logistic regression on
+(log NU, log mu) [or per-stratum-normalised mu to avoid the W6/X1 scale
+trap], report the decision boundary and its cross-validated AUC vs each
+predictor alone. Falsifier: if the 2-parameter fit's held-out AUC does not
+exceed max(AUC(NU), AUC(mu)) by a material margin (>0.03), the two predictors
+are redundant in practice even though individually decorrelated, and the
+"2-parameter viability test" framing should be dropped in favour of picking
+whichever single predictor is cheaper to compute (nu_hat, since it needs no
+lattice reduction).
+Cost: reuses `glv_hnp_phase2_gsprofile_strat_rows.json`, no new simulation,
+~5-10 minutes (simple logistic fit + k-fold, no new dependency — can be
+implemented by hand with gradient descent to avoid needing sklearn).
+
+Secondary (untouched, carried from Thread 24): BKZ-beta sweep against NU to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — still open, still cheap, not yet attempted in any Thread
+20-25 session.
+
+### Commits made
+
+(recorded after this entry is committed — see next commit)
