@@ -3,7 +3,7 @@ Thread 24b — cross-curve test of the closed-form separator (eff fixed)
 ==============================================================================
 
 20 17-bit j=0 GLV curves in 0.0s
-500 instances (float GS, dim 24) in 3.0s
+500 instances (float GS, dim 24) in 2.8s
 
 ------------------------------------------------------------------------------
 EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only
@@ -61,6 +61,8 @@ stratum eff = 0.10  (42 of the minority class)
    66301  0.2976   0.9619    1.2527    1/5
    65719  0.0273   0.9643    1.2763    2/5
    65647  0.2253   0.9848    1.1211    2/5
+
+dumped 500 rows to glv_hnp_phase2_gsprofile_strat_rows.json
 
 ==============================================================================
 done

@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -34,6 +35,12 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        i = sys.argv.index("--dump-json")
+        dump_path = (sys.argv[i + 1] if i + 1 < len(sys.argv)
+                     else "glv_hnp_phase2_gsprofile_strat_rows.json")
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -57,9 +64,11 @@ if __name__ == "__main__":
                 if r is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                step = (math.log2(r['prof'][M17]) - math.log2(r['prof'][0])
+                        if r['prof'][0] > 0 and r['prof'][M17] > 0 else float('nan'))
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n), 'step': step})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
@@ -139,6 +148,13 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    if dump_path:
+        keep = ('n', 'K1', 'ok', 'eff', 'effq', 'lamstar', 'nuhat', 'NU',
+                'mu', 'l2', 'det2', 'k', 'argmax', 'step')
+        with open(dump_path, "w") as f:
+            json.dump([{k: r[k] for k in keep} for r in rows], f)
+        print(f"\ndumped {len(rows)} rows to {dump_path}")
 
     print("\n" + "=" * 78)
     print("done")

@@ -1,0 +1,60 @@
+==============================================================================
+Thread 25 — is mu a genuine second coordinate once NU is fixed?
+==============================================================================
+
+loaded 500 instances from /home/user/crypto/secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_rows.json
+
+------------------------------------------------------------------------------
+H25 (literal, pooled): band [1.04,2.199]  N=366  pos=97  neg=269
+------------------------------------------------------------------------------
+AUC(-mu -> recovery) in band     = 0.6932
+AUC(-nu_hat -> recovery) in band = 0.8403
+AUC(-NU -> recovery) in band     = 0.5656  (sanity: near 0.5 expected, NU is the stratifying var)
+H25 literal verdict (AUC(-mu) >= 0.8): FALSIFIED  (0.6932)
+
+band composition and AUC(-mu), AUC(-nu_hat) PER eff stratum (controls for eff too):
+  eff    N  pos  neg   AUC mu  AUC nu_hat
+ 0.05   24   23    1   0.4565      0.4565
+ 0.10   83   26   57   0.8819      0.8853
+ 0.15   96   21   75   0.8889      0.8825
+ 0.20   89   18   71   0.9276      0.9425
+ 0.25   74    9   65   0.8615      0.8615
+
+Spearman(mu, NU) within band = -0.4557
+
+------------------------------------------------------------------------------
+EXP T1: parameter-free combination NU * nu_hat
+------------------------------------------------------------------------------
+pooled AUC(-NU*nu_hat -> recovery) = 0.9395   (no fitted constant, unlike nu_hat*sqrt(eff)'s C~6.29)
+  eff=0.05  AUC(-NU*nu_hat) = 0.8384
+  eff=0.10  AUC(-NU*nu_hat) = 0.9553
+  eff=0.15  AUC(-NU*nu_hat) = 0.8668
+  eff=0.20  AUC(-NU*nu_hat) = 0.9292
+  eff=0.25  AUC(-NU*nu_hat) = 0.8852
+
+zero-FP certificate: NU*nu_hat <= 0.6926  =>  TP=76 FP=0  (of 190 positives)
+
+------------------------------------------------------------------------------
+EXP T2: 2-feature logistic fit on (log NU, log nu_hat)
+------------------------------------------------------------------------------
+standardized coefficients: b0=-1.1218  b1(log NU)=-2.9992  b2(log nu_hat)=-2.3354   N=500
+pooled AUC of fitted logistic score = 0.9397
+unstandardized: logit(P) = -0.3233 + -8.4799*log(NU) + -8.0565*log(nu_hat)
+(b1 ~ b2 in magnitude => log NU + log nu_hat, i.e. the product NU*nu_hat, is close to the fitted optimum with no fitting at all)
+
+------------------------------------------------------------------------------
+EXP T3 (secondary, W1b follow-up): GS-profile step statistic
+  step = log2(||b*_{m+1}||) - log2(||b*_1||)
+------------------------------------------------------------------------------
+pooled AUC(step -> recovery), bigger step = more likely recovery: 0.6714
+  eff=0.05  AUC(step) = 0.3636  step mean pos=-0.006 neg=-0.238
+  eff=0.10  AUC(step) = 0.7734  step mean pos=0.361 neg=-0.359
+  eff=0.15  AUC(step) = 0.8861  step mean pos=0.658 neg=-0.312
+  eff=0.20  AUC(step) = 0.9207  step mean pos=0.476 neg=-0.262
+  eff=0.25  AUC(step) = 0.8938  step mean pos=0.355 neg=-0.220
+
+Direction: LARGER step predicts recovery (consistent with W1b: step -> 0 as the K1 wall is crossed, and crossing the wall is already failure-correlated).  The secondary hypothesis as literally posed ('step -> 0 predicts the wall') is directionally confirmed but is not a new independent axis: within-stratum AUC (0.77-0.92) is on par with mu/nu_hat, not better.
+
+==============================================================================
+done
+==============================================================================
