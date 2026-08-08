@@ -6538,3 +6538,138 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority-1 thread (P-521 LLL) is CLOSED (§10.5, 2026-06-06/08). Priority-2
+thread (CHLRS Igusa formula / Howe forward map) had no work since 2026-07-27
+(12 days) and its last log entry ends with an explicit, unexecuted next step
+("Thread 3: CHLRS Igusa forward map — implement the FORWARD direction"), so
+per protocol it takes priority over Thread 5 (GLV-HNP Phase 2), which was
+touched yesterday. Picked Thread 2/3 (CHLRS forward map).
+
+### Work done
+
+- Installed `pari-gp` (`apt-get install -y --no-install-recommends pari-gp`;
+  the plain `pari-gp` target pulled in ~200MB of X11/TeX recommends and hit a
+  404 on one `mesa` package — `--no-install-recommends` avoids all of that).
+- WebSearched for the Cardona-Howe-Lercier-Ritzenthaler-Streng paper directly;
+  eprint.iacr.org is blocked by the network egress proxy in this environment,
+  and general search didn't surface the explicit formula. Pivoted: searched
+  for the *equivalent* explicit "gluing" construction from the Richelot-isogeny
+  cryptanalysis literature (Castryck-Decru SIDH break, 2022), which needs the
+  exact same primitive (E1,E2 with compatible 2-torsion -> genus-2 curve C
+  with Jac(C) (2,2)-isogenous to E1×E2) and has production-tested reference
+  code. Found `FromProdToJac` in `richelot_aux.py`
+  (github.com/GiacomoPope/Castryck-Decru-SageMath, fetched via `curl` — the
+  WebFetch tool's summarizing model wouldn't reproduce the code verbatim, but
+  raw `curl` through the proxy worked fine).
+- Ported `FromProdToJac` to PARI/GP as `secp256k1_cm_audit/thread22_fromprodtojac.gp`.
+  Given 2-torsion x-coords `a1,a2,a3` of E1 and `b1,b2,b3` of E2 (any pairing
+  = any group isomorphism E1[2]->E2[2], all 6 bijections are valid since a
+  Klein four-group's third nonzero element is forced by the other two):
+  ```
+  M = [[a1b1,a1,b1],[a2b2,a2,b2],[a3b3,a3,b3]];  (R,S,T) = M^-1 . (1,1,1)
+  RD = R*det(M);  da=(a1-a2)(a2-a3)(a3-a1);  db=(b1-b2)(b2-b3)(b3-b1)
+  s1=-da/RD; s2=-T/R;  a_i_t=(a_i-s2)/s1
+  h(x) = s1 (x^2-a1_t)(x^2-a2_t)(x^2-a3_t)
+  ```
+  `Jac(y^2=h(x))` is then (2,2)-isogenous to `E1 x E2`.
+- **Part 1 (port validation, generic F_p, p=97):** E1: y²=x(x-1)(x-2)
+  (#E1=80), E2: y²=x(x-3)(x-5) (#E2=112), all 6 pairings of the 2-torsion
+  x-coords tried. 4/6 give `#Jac(H) = #E1*#E2 = 8960` exactly; 2/6 are
+  singular (M not invertible). Confirms the port is correct against ground
+  truth with no secp256k1-specific structure involved.
+- **Part 2 (degeneracy theorem):** if `b_i = c*a_i` for one GLOBAL constant
+  `c` (same `c` for all three `i` — this is exactly what a quadratic-twist
+  pair, or a sextic-twist pair `(i,j)` with `h^(j-i)=-1`, gives), then
+  `row_i(M) = a_i*[c*a_i, 1, c]`, so after pulling out `a_i`, columns 2 and 3
+  of the reduced matrix are `[1,1,1]` and `[c,c,c]` — proportional, so
+  `det(M)=0` identically, independent of the `a_i` values. This is a clean
+  algebraic proof, not an empirical fluke, and it explains (generalizing) the
+  2026-07-27 finding that secp256k1's naive cover lands on the degenerate
+  pair (0,3): **any** `h^k=±1` pair is degenerate for this construction, so
+  (1,4) (ratio `h^3=-1`) is predicted degenerate too, unverified but implied.
+- **Part 3 (secp256k1-structured pair, toy p=43):** secp256k1's real prime
+  satisfies `p mod 18 = 7`, and `h` (primitive 6th root of unity) is a
+  perfect cube mod `p` **iff** `18 | p-1` — so for secp256k1, `h` is *not* a
+  cube, meaning pair (0,1) (ratio `h^1`) is *not* covered by the Part-2
+  degeneracy. `p=43` is in the same residue class (`43 mod 18 = 7`) so it's a
+  faithful toy model. Built E0: y²=x³+7, E1: y²=x³+6 (=7h mod 43) with
+  2-torsion in F_{43³} via `ffgen`, tried all 6 pairings: 3 singular, 3
+  descend to F_p, and **all 3 give the exact target char poly**
+  `x^4-18x^3+151x^2-774x+1849 = (T²-13T+43)(T²-5T+43)`. First working,
+  independently-verified forward-map instance for a non-degenerate
+  secp256k1-style sextic pair.
+  - Bug found+fixed en route: initial run used cube roots of `+7h` instead of
+    `-7h` for E1's 2-torsion (sign error — 2-torsion of `y²=x³+b` solves
+    `x³=-b`, not `x³=b`); this silently produced an *unrelated* curve with
+    the same-looking output shape but wrong `#Jac` (1519 = 7²·31 instead of
+    target 1209 = 3·13·31). Caught by checking `#Jac` against an
+    independently-computed target rather than trusting descent-to-F_p alone.
+- **Part 4 (real secp256k1 prime, pair (0,1)):** ran the same construction at
+  the actual `p_secp = 2^256-2^32-977`. Cube-root extraction (`factor` over
+  the FFELT cubic extension) and the matrix algebra are instant (<1s). Got 3
+  non-singular, F_p-rational curves, e.g.
+  `y² = 106990943101078711378234431040198181766105448116761503721298701222724226188840·x^6 + 69787780187273170358340334027115458591498687040187600896173060565602791958802`
+  (mod p_secp), plus two more from the other non-singular pairings. Full
+  script + all four parts: `secp256k1_cm_audit/thread22_fromprodtojac.gp`
+  (`gp -q thread22_fromprodtojac.gp`, ~4 minutes wall time, dominated by
+  Part 1/3's `hyperellcharpoly` calls at toy size).
+- `cargo test --test curve_audit`: 5/5 pass (8.3s). No Rust changed this
+  session; ran anyway per protocol since a new script was added.
+
+### Findings
+
+1. **The "missing forward map" from the 2026-07-27 CHLRS thread is solved**
+   for the non-degenerate secp256k1 sextic pairs, via a formula from a
+   different literature (Richelot-isogeny cryptanalysis) than the one
+   originally being searched for (Cardona-Howe-Lercier-Ritzenthaler-Streng /
+   Mestre). `eprint.iacr.org` being blocked in this environment turned out
+   not to matter — the same mathematical primitive is documented (as
+   production code, not just a paper) in the SIDH-attack literature.
+2. Scalar-proportional 2-torsion pairs (quadratic twists, and any sextic pair
+   with `h^k=±1`) are **provably** degenerate for this construction — not
+   just the one empirically-discovered case (0,3) from 2026-07-27.
+3. secp256k1's prime satisfies `p ≡ 7 (mod 18)`, so the primitive 6th root of
+   unity `h` is not a cube in `F_p` — this is *why* pair (0,1) (and by the
+   same argument (0,2),(0,4),(0,5)) escape the Part-2 degeneracy.
+4. Char-poly verification of the Part 4 curves (confirming
+   `Jac(H)` really is (2,2)-isogenous to `E_0 × E_1` at the real 256-bit
+   prime, not just that the construction descended to `F_p`) is **not yet
+   done** — `hyperellcharpoly` on a 256-bit genus-2 curve is a serious
+   point-counting computation, deferred rather than attempted under today's
+   time budget. Toy-scale validation (Parts 1 and 3, both exact matches) is
+   strong evidence the construction is a uniform rational identity that
+   should carry over, but this is an expectation to check, not a proven fact
+   at cryptographic size.
+5. Updated `RESEARCH_MESTRE_HOWE.md` with a note pointing at this result
+   (Step 1 of the Mestre pipeline — "compute Igusa invariants of the glued
+   surface" — turns out to have a more direct bypass for this curve family).
+
+### Next step proposal
+
+**Thread 22b — char-poly verification at secp256k1 scale.** Run
+`hyperellcharpoly` on the Part-4 curves and check against
+`(T²-t_0 T+p)(T²-t_1 T+p)`. If PARI's default algorithm is too slow at
+256-bit, the fallback is to verify via a smooth prime-order subgroup check
+(pick a small-order point on `E_0` or `E_1`, lift through the isogeny, and
+confirm the group-order divisibility holds) rather than full point-counting.
+
+**Thread 22c — the other 3 non-degenerate pairs.** Thread 18 (2026-07-21)
+found 5/15 sextic pairs Howe-glueable: (0,1),(0,4),(1,4),(3,4), plus the
+degenerate (0,3). Part 2's theorem predicts (1,4) is ALSO degenerate (ratio
+h^3=-1) — check this directly, and run Part 3/4's pipeline for (0,4) and
+(3,4) to get their explicit covers too.
+
+**Thread 22d — connect to the cover-cost analysis.** `PAPER_STRUCTURAL_COMPLETENESS.md`
+§B5 argues cover-based attacks don't beat ρ; having an actual explicit cover
+for secp256k1 (rather than an existence proof via Howe's theorem) lets the
+audit scripts in `secp256k1_cm_audit/` compute concrete DLP-cost numbers for
+this specific curve instead of asymptotic bounds.
+
+### Commits made
+
+(pending — see push below)

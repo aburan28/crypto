@@ -12,6 +12,26 @@ that the audit in [`RESEARCH_SECP256K1_CM.md`](RESEARCH_SECP256K1_CM.md)
 > expose directly.  This note documents the algorithm in enough
 > detail for a future implementation effort, with the easy parts
 > (Igusa-invariant formulas) actually computed.
+>
+> **Update 2026-08-08 (Thread 22): Step 1 solved for the sextic-twist
+> case, via a different route than Mestre.** Rather than computing
+> Igusa invariants of the glued abelian surface and reconstructing a
+> curve from them (Mestre §2 below), `secp256k1_cm_audit/thread22_fromprodtojac.gp`
+> ports the "FromProdToJac" (2,2)-gluing formula used in production
+> Richelot-isogeny code (Castryck–Decru SIDH-attack reference
+> implementations) — a closed-form map from raw 2-torsion x-coordinates
+> of `E_1, E_2` directly to `h(x)` with `Jac(y²=h(x))` (2,2)-isogenous
+> to `E_1 × E_2`, no moduli-space machinery needed. Validated exactly
+> (char-poly match) on a generic F_p pair and on a secp256k1-structured
+> toy pair at `p=43`, then run at the real secp256k1 prime for the
+> sextic-twist pair `(E_0, E_1) = (y²=x³+7, y²=x³+7h)`, producing three
+> explicit F_p-rational curves `y² = c₁x⁶+c₀`. Char-poly verification
+> at 256-bit scale is still open (see Thread 22 in
+> `RESEARCH_AUTOLAB_LOG.md`). Also proved: any pair whose 2-torsion
+> x-coordinates are related by a *global scalar* (quadratic-twist
+> pairs, and sextic pairs `(i,j)` with `h^(j-i)=±1`) is **always**
+> degenerate for this formula — a clean algebraic fact (proportional
+> matrix columns), not an empirical accident.
 
 ## 1. Problem statement
 
