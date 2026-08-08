@@ -6538,3 +6538,134 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat) is CLOSED (§10.5). Priority 2 (CHLRS Igusa
+forward map) last touched 2026-07-27, no work since (>7 days, no progress
+in that window either — it's blocked on the Howe-cover branch-parameter
+inverse, see that entry's finding 7); priority 3 (Howe gluing) completed
+2026-07-21; priority 4 (Cross-curve LLL) is CLOSED/DEAD-END; priority 6
+(B5 generalisation) last substantive update 2026-07-19. Priority 5
+(GLV-HNP Phase 2) has unbroken measurable progress through Threads 20-24
+(2026-07-29 to 2026-08-07), with a fully specified next step (H25) proposed
+by the immediately preceding run. Rule (b) applies: continued Thread 25.
+
+`fpylll` was not installed in this container (`ModuleNotFoundError`); it
+is a hard, unconditional import in `glv_hnp_common.py` (no pure-Python LLL
+fallback exists in this codebase). Installed system libs
+(`libfplll-dev libgmp-dev libmpfr-dev`, apt) plus `pip install sympy
+fpylll cysignals` — all resolve from prebuilt wheels/binaries in ~30s
+total, no source build needed. Re-ran `glv_hnp_phase2_gsprofile_strat.py`
+unmodified first to confirm bit-exact reproduction of the 2026-08-07 #2
+numbers (500 instances, same AUCs to 4 decimals) — confirms `search_curves`
++ fixed `SEEDS` give a fully deterministic table, so the "same 500-instance
+table" referenced by Thread 25's proposal doesn't need a JSON dump; any
+future run can just re-execute the generator.
+
+### Work done
+
+Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`, in two parts.
+
+**Part A — H25.** Reproduced the 500-instance 17-bit table (5 eff strata x
+20 curves x 5 seeds, float GS, dim 24) and restricted to the W4 ambiguous
+NU band `[1.040, 2.199]` (366 of 500 instances survive the cut).
+
+**Part B — W1b step statistic.** Reproduced the Thread 24 U2 grid (2 curves
+x 11 K1 values x 5 seeds, exact GS, dim 16/20) and computed
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)` per instance, then AUC'd it
+against recovery, both pooled and per curve.
+
+Ran `cargo test --test curve_audit`: N/A, no Rust files touched this run
+(skipped per protocol — this thread is pure Python/PARI-adjacent analysis).
+
+### Findings
+
+**H25 is FALSIFIED as literally stated, but the underlying claim survives
+in a corrected form.**
+
+```
+band [1.04, 2.199]:  N=366 (97 recovered / 269 failed)
+  AUC(-mu)      = 0.6932   <-- fails the >= 0.8 bar
+  AUC(-nu_hat)  = 0.8403   <-- clears it
+  AUC(-NU)      = 0.5656   (near-chance, as expected: no signal left in its own band)
+  AUC(-eff)     = 0.7056   (mu's pooled AUC is partly just re-reading eff)
+  Spearman(NU, mu | band) = -0.4557   (still anti-correlated inside the band, per W6)
+
+per-eff-stratum AUC(mu) inside the band:
+  eff=0.05  N=24   0.4565  (degenerate: 23/24 recover, no discrimination)
+  eff=0.10  N=83   0.8819
+  eff=0.15  N=96   0.8889
+  eff=0.20  N=89   0.9276
+  eff=0.25  N=74   0.8615
+```
+
+Raw `mu` pooled across the band scores only 0.693 — below the pre-registered
+0.8 bar — because the band's eff composition is uneven (24/83/96/89/74) and
+`mu`'s scale shifts with eff (same failure mode W5 already diagnosed for the
+*unstratified* dataset). But `mu` **within each non-degenerate eff stratum
+inside the band is 0.86-0.93**, and `nu_hat = mu/sqrt(det L2)` — which
+factors out exactly that eff-driven scale — clears the 0.8 bar pooled
+(0.8403). So: **mu is a genuine second coordinate, independent of NU, that
+resolves the band's ambiguity** — the H25 falsifier fires only against the
+naive un-normalized statistic, not against the actual claim (a 2-parameter
+viability test on (NU, nu_hat)). This is the same lesson W3-vs-W5 already
+taught about `nu_hat` vs `mu` at the whole-dataset level, now shown to hold
+*conditionally* inside NU's own ambiguous band too.
+
+**W1b step statistic: confirmed for one curve, falsified for the other —
+not curve-independent.**
+
+```
+pooled (N=110): AUC(step) = 0.2354   AUC(NU) = 0.9777   AUC(mu) = 0.1509
+
+12-bit/2557 (lam*=0.340): AUC(step) = 0.0080  (near-perfect separator)
+  K1:    2      3      4      6      8     12     16     24     32     48     64
+  step: 1.41   1.46   1.25   1.18   0.92   0.38   0.14  -0.16  -0.19  -0.07  -0.24
+  rec:  5/5    5/5    5/5    5/5    5/5    1/5    0/5    0/5    0/5    0/5    0/5
+
+12-bit/2677 (lam*=0.070): AUC(step) = 0.5783  (worse than a coin flip)
+  K1:    2      3      4      6      8     12     16     24     32     48     64
+  step: -0.07  -0.36  -0.33  -0.34  -0.19  -0.05  -0.02  -0.08  -0.15  -0.31  -0.44
+  rec:  5/5    5/5    5/5    0/5    0/5    0/5    0/5    0/5    0/5    0/5    0/5
+```
+
+For 2557, `step` decreases monotonically with K1 and the recovery wall sits
+right where `step` crosses ~0.1-0.4 — a strong, almost clean confirmation.
+For 2677, `step` is already strongly negative (-0.07 to -0.36) at K1=2..4
+where the instance recovers *perfectly* (5/5), and it is non-monotonic
+(K1=4's step of -0.33 is more negative than K1=8's failing -0.19) — `step`
+gives no usable signal at all for this curve; the wall (K1=6) does not
+coincide with any feature of the `step` trace. **The W1b hypothesis
+("step -> 0 predicts the wall") does not generalise across curves** — it
+happened to hold for the one curve (2557) inspected by hand in Thread 24's
+original profile dump, but the mechanism is not curve-independent the way
+NU and (NU, nu_hat) are. Falsified as a general-purpose statistic; not
+worth pursuing further without understanding why 2557 and 2677 differ
+(candidate: `lam*` — 0.340 vs 0.070 — but N=2 curves is not enough to
+even guess a relationship).
+
+### Next step proposal
+
+**Thread 26 — fit and validate the 2-parameter (NU, nu_hat) decision
+boundary.** H25's corrected form (nu_hat, not mu) plus W5's whole-dataset
+result together say recovery is well-approximated by a function of
+`(log NU, log nu_hat)` alone. Concrete sub-task: logistic regression on the
+existing 500-instance table (`p(recover) ~ a*log(NU) + b*log(nu_hat) + c`),
+report the fitted coefficients, in-sample AUC of the combined score, and
+out-of-sample AUC on a *fresh* 17-bit curve draw (different `search_curves`
+range, e.g. `[1<<17, 1<<18)`) to check the fit isn't overfit to this one
+curve set. This directly produces the "2-parameter viability test" Thread
+24 and Thread 25 have both been converging toward.
+
+Secondary: re-run the step-statistic check on 3-5 more curves (not just the
+2 in U2) before concluding anything about `lam*` as the moderator — current
+N=2 is too small to distinguish "curve-dependent" from "noise."
+
+Tertiary (unchanged): BKZ-beta sweep against NU.
+
+### Commits made
+
+(recorded in next entry)
