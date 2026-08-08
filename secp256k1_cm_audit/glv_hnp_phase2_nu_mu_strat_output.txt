@@ -1,0 +1,60 @@
+==============================================================================
+Thread 25 — mu inside the ambiguous NU band (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves, 500 instances (float GS, dim 24) in 2.5s
+ambiguous band (Thread 24 W4 bracket): 1.04 <= NU <= 2.199
+
+split: below 94 (rec 92/94), band 366 (rec 97/366), above 40 (rec 1/40)
+
+------------------------------------------------------------------------------
+EXP X1: AUC(-mu) and AUC(-nu_hat) INSIDE the ambiguous band
+------------------------------------------------------------------------------
+N=366  pos=97  neg=269
+  AUC(-mu     -> recovery) = 0.6932
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-NU     -> recovery) = 0.5656   (should be ~0.5: NU is
+                                           uninformative BY
+                                           CONSTRUCTION in-band)
+  AUC(-eff    -> recovery) = 0.7056
+
+H25 (AUC(-mu) >= 0.8 in-band): FALSIFIED (0.6932)
+
+per-eff-stratum, restricted to the ambiguous band:
+  eff    N     rec |   AUC mu  AUC nu_hat
+ 0.05   24   23/24 |   0.4565      0.4565
+ 0.10   83   26/83 |   0.8819      0.8853
+ 0.15   96   21/96 |   0.8889      0.8825
+ 0.20   89   18/89 |   0.9276      0.9425
+ 0.25   74    9/74 |   0.8615      0.8615
+
+------------------------------------------------------------------------------
+EXP X2: is mu's in-band power mediated by eff, or independent of it?
+Spearman(mu, eff) and partial check: AUC(-mu) computed only WITHIN
+each eff stratum (X1 table above) vs pooled across strata (H25).
+------------------------------------------------------------------------------
+Spearman(mu, eff) over the band, N=366 = -0.4956
+If the per-stratum AUCs above are all high AND close to the pooled
+H25 figure, mu separates WITHIN fixed eff too -- not just via eff.
+
+------------------------------------------------------------------------------
+EXP X3: 2-feature logistic fit on (log NU, log mu), in-band only
+------------------------------------------------------------------------------
+fit: logit(p) = -1.262 + -0.900*z(log NU) + -1.146*z(log mu)
+     [z(x) = (x - 0.467) / 0.203 for log NU, (x - 11.730) / 0.347 for log mu]
+in-sample AUC of the fitted 2-feature model (in-band) = 0.7673
+(in-sample only -- this is a descriptive fit of the band, not
+ a held-out test; compare to the single-feature AUC(-mu) above)
+
+------------------------------------------------------------------------------
+EXP X4 (secondary): does the GS-profile step at the K1 wall predict
+        recovery inside the band better than NU or mu?
+        step = log2(||b*_{m+1}||) - log2(||b*_1||)
+------------------------------------------------------------------------------
+rows with a usable step value: 500/500
+in-band (N=366): AUC(-step) = 0.1803   AUC(-mu) = 0.6932   AUC(-NU) = 0.5656
+step | success: mean 0.585   step | failure: mean -0.289
+
+==============================================================================
+done
+==============================================================================

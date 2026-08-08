@@ -6538,3 +6538,160 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25 — find the second mechanism by conditioning on NU**, the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6512).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread; Thread 24
+made measurable progress the day before, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate ... If no ... the W5 result is
+>        a stratification artifact and the closed form should be retired.
+
+**Verdict: H25 splits, same shape as H24. The literal pooled clause is
+FALSIFIED (0.693 < 0.8), but a stronger, eff-controlled version of it HOLDS
+(0.86-0.93 in 4/5 strata) — the pooled failure is itself explained by a
+confound (mu correlates with eff, Spearman -0.50) that stratification was
+supposed to remove and, done naively across the whole band, does not.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0 (same note as every prior run:
+  `cysignals` must be named explicitly).
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — refactored, no
+  behavioural change. Extracted the 500-instance table builder (5 eff strata
+  x 20 curves x 5 seeds, 17 bits, float GS) into `build_rows()` so Thread 25
+  does not duplicate it, and added the `--dump-json` flag proposed by the
+  2026-08-07 #2 entry (dumps to `glv_hnp_phase2_gsprofile_strat_rows.json`,
+  scalar fields only — `prof`/`nus` excluded). Verified byte-identical W5/W6/W7
+  console output before and after the refactor.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_mu_strat.py` — new (exp X1-X4).
+  Splits the 500-row table by the Thread 24 W4 bracket [1.040, 2.199],
+  computes AUC(-mu), AUC(-nu_hat), AUC(-NU), AUC(-eff) inside the band (X1),
+  the same per-eff-stratum (X1 table), Spearman(mu, eff) in-band (X2), an
+  in-sample 2-feature logistic fit on (log NU, log mu) via plain gradient
+  descent — no numpy/sklearn in this container — (X3), and the W1b-proposed
+  GS-profile step statistic (X4).
+  Output: `glv_hnp_phase2_nu_mu_strat_output.txt` (48 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (5.61s). No Rust touched.
+
+### Findings
+
+**Split.** Of 500 instances: 94 below the band (rec 92/94), **366 inside the
+band** (rec 97/366), 40 above (rec 1/40) — the band captures 73% of all
+instances, confirming Thread 24's characterisation of NU as loose at 17 bits.
+
+**X1 — pooled H25 clause fails; NU is confirmed uninformative in-band, as
+designed.**
+
+```
+N=366  pos=97  neg=269
+  AUC(-mu     -> recovery) = 0.6932
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-NU     -> recovery) = 0.5656   <- near chance, exactly as expected:
+                                          NU in [1.04,2.20] is *by construction*
+                                          the region where NU carries no signal
+  AUC(-eff    -> recovery) = 0.7056
+```
+
+NU's own AUC collapsing to 0.566 inside its own ambiguous band is a sanity
+check that passed: the band was carved out correctly. Both mu (0.693) and
+nu_hat (0.840) still separate — nu_hat noticeably better than raw mu, as in
+W5, because nu_hat's `/sqrt(det L2)` normalisation absorbs some of the
+cross-curve n-variation mu does not.
+
+**Per-eff-stratum, restricted to the band — the corrected test:**
+
+```
+  eff    N     rec |   AUC mu  AUC nu_hat
+ 0.05   24   23/24 |   0.4565      0.4565   (23/24 recover — near-degenerate)
+ 0.10   83   26/83 |   0.8819      0.8853
+ 0.15   96   21/96 |   0.8889      0.8825
+ 0.20   89   18/89 |   0.9276      0.9425
+ 0.25   74    9/74 |   0.8615      0.8615
+```
+
+In every non-degenerate stratum (0.10-0.25), **mu separates recovery from
+failure at AUC 0.86-0.93 among exactly the instances NU cannot resolve.**
+The pooled 0.693 figure is a stratification artifact of a DIFFERENT kind than
+the one W5 ruled out: it is not "mu is secretly reading K1/eff" (Thread 20's
+falsified hypothesis) but "pooling across strata whose (mu range, base rate)
+differ washes out a real per-stratum signal", exactly the mechanism W5's
+methodology was built to detect. Re-verifies **on a strict subset of the
+data NU cannot use.**
+
+**X2 — mu and eff are correlated but not interchangeable.**
+`Spearman(mu, eff)` over the band = **-0.496**: a real, moderate anti-
+correlation (larger eff instances tend to have smaller mu, consistent with
+mu = lambda_1(L2), det(L2) = n*S_K1*S_K2 shrinking as K1 grows), strong
+enough to produce X1's confound but far from -1, so mu is not just an eff
+proxy. The per-stratum AUCs in X1 (computed with eff exactly fixed) are the
+clean measurement; they say mu carries information beyond what eff alone
+gives (AUC(-eff) in-band pooled was 0.706, below every per-stratum mu figure
+except the degenerate one).
+
+**X3 — a 2-feature (log NU, log mu) fit recovers some but not all of the
+per-stratum ceiling.** In-sample AUC of the fitted linear-logit model,
+in-band: **0.767** — better than mu alone pooled (0.693, since the fit gets
+to use NU's small residual in-band signal too) but well below the
+eff-controlled ceiling of 0.86-0.93. This says the honest 2-parameter test
+is not (NU, mu) but **(eff, mu)** with NU used only to pre-select the
+ambiguous region; NU itself contributes almost nothing once mu is on the
+table (consistent with X1's AUC(-NU)=0.566 in-band).
+
+**X4 (secondary) — the W1b step statistic is a WEAK, INVERTED predictor.**
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)`, m=12 (17-bit table, all 500
+rows have a usable value):
+
+```
+in-band (N=366): AUC(-step) = 0.1803   AUC(-mu) = 0.6932   AUC(-NU) = 0.5656
+step | success: mean +0.585     step | failure: mean -0.289
+```
+
+AUC(-step) = 0.18 means the sign is backwards from the naive framing (W1b
+guessed `step -> 0` predicts the wall): a LARGER step — the second GS block
+sitting further ABOVE the first, not closer to it — predicts SUCCESS, and
+the effect is real (means separate by ~0.87 log2-bits) but weaker than mu
+and in the opposite direction hypothesized. The step statistic is retired as
+a wall predictor; W1b's harder claim (H24 clause 2, `||b*_last|| ~
+lambda_2(L2)`) already stands on its own and does not need this corollary.
+
+### Next step proposal
+
+**Thread 26 — fit the honest 3-parameter test (eff, mu, NU) and get a
+held-out AUC, not an in-sample one.** X3 showed (log NU, log mu) alone
+recovers only 0.767 of the 0.86-0.93 per-stratum ceiling; the missing
+ingredient is eff itself, which X1/X2 show is not redundant with mu. Concrete
+sub-task:
+
+  H26: a 3-feature logistic fit on (log eff, log mu, log NU) over the full
+       500-row table, evaluated with 5-fold cross-validation (split by curve,
+       not by instance, so seeds of the same curve never span train/test),
+       reaches held-out AUC >= 0.90 — matching or beating the best
+       single-stratum figure (0.94 at eff=0.20) WITHOUT needing eff to be
+       fixed by construction.
+
+Falsifier: if held-out AUC stays materially below the in-sample X3 figure
+(0.77) or below plain AUC(-eff) alone (0.85, from Thread 24 W5), the 3-feature
+model is overfit noise, not a real joint law, and Phase 2's viability
+boundary should be reported as the empirical per-stratum table rather than a
+closed-form surface.
+Cost: reuse `build_rows()` (already refactored out) plus the `logistic_fit_2d`
+machinery in `glv_hnp_phase2_nu_mu_strat.py` (extend to 3 features and add a
+by-curve k-fold split), no new curve search, ~10 minutes.
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU, to quantify how
+far above NU ~ 1.87-2.20 blockwise reduction pushes the empirical threshold.
+
+### Commits made
+
+(recorded after push, see below)

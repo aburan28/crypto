@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -33,36 +34,52 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
+EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
+M17 = 12
+
+
+def build_rows(effs=EFFS, m17=M17):
+    """The 500-instance 17-bit table (5 eff strata x 20 curves x 5 seeds),
+    shared by Thread 24b (W5-W7) and Thread 25.  Each row is the `instance()`
+    dict plus n/K1/ok/eff/effq/lamstar."""
+    curves17 = search_curves(1 << 16, 1 << 17, per_bin=2, nbins=10)
+    rows = []
+    for eff in effs:
+        for (p, b, n, lam, G) in curves17:
+            k2b = math.isqrt(n) + 1
+            k1b = max(2, int(eff * n / k2b))
+            for seed in SEEDS:
+                d_trial = random.Random(seed + 7777).randint(1, n - 1)
+                r = instance((p, b, n, lam, G), m17, d_trial, k1b, seed,
+                             exact=False)
+                if r is None:
+                    continue
+                rk = run_new((p, b, n, lam, G), m17, d_trial, k1b, seed)
+                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
+                          'eff': k1b * k2b / n, 'effq': eff,
+                          'lamstar': lam_star(lam, n)})
+                rows.append(r)
+    return rows, curves17
+
+
 if __name__ == "__main__":
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
 
     t0 = time.time()
-    curves17 = search_curves(1 << 16, 1 << 17, per_bin=2, nbins=10)
-    print(f"\n{len(curves17)} 17-bit j=0 GLV curves in {time.time()-t0:.1f}s")
-    M17 = 12
-    EFFS = (0.05, 0.10, 0.15, 0.20, 0.25)
+    rows, curves17 = build_rows()
+    print(f"\n{len(curves17)} 17-bit j=0 GLV curves, {len(rows)} instances "
+          f"(float GS, dim {rows[0]['k']}) in {time.time()-t0:.1f}s")
 
-    t0 = time.time()
-    rows = []
-    for eff in EFFS:
-        for (p, b, n, lam, G) in curves17:
-            k2b = math.isqrt(n) + 1
-            k1b = max(2, int(eff * n / k2b))
-            for seed in SEEDS:
-                d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance((p, b, n, lam, G), M17, d_trial, k1b, seed,
-                             exact=False)
-                if r is None:
-                    continue
-                rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
-                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
-                          'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
-                rows.append(r)
-    print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
-          f"in {time.time()-t0:.1f}s")
+    if "--dump-json" in sys.argv:
+        out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "glv_hnp_phase2_gsprofile_strat_rows.json")
+        dump = [{k: r[k] for k in r if k not in ('prof', 'nus')}
+                for r in rows]
+        with open(out, "w") as f:
+            json.dump(dump, f)
+        print(f"dumped {len(dump)} rows to {out}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
