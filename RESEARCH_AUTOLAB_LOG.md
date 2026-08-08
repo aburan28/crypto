@@ -6538,3 +6538,157 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa formula / Howe gluing), continuing **Thread 3 (CHLRS Igusa
+forward map)** proposed by the 2026-07-27 entry (line 5976) and never picked up since
+(the 2026-07-29 run went to priority 5 instead, citing priority 2 as "BLOCKED" without
+re-reading the 07-27 entry's concrete next step).
+
+Priority order re-derived from a full-log grep this run: P-521 (1) CLOSED since
+2026-06-06 (§10.5); Howe sextic-twist H1+H2+H3 pairing (3) CLOSED 2026-07-21 (5/15
+pairs qualify); cross-curve LLL (4) DEAD END 2026-07-08 (structural obstruction);
+GLV-HNP Phase 2 (5) had heavy, very recent progress (2026-08-07 x2, Threads 23-25) —
+not stale, but it's priority 5 and priority 2 was 12 days idle with an explicit
+unexecuted next step, so priority 2 wins under the stated ordering. B5 (6) last
+touched 2026-07-15ish, not re-examined this run.
+
+Goal restated from 07-27: implement the CHLRS/Howe **forward** map — given
+`E1: y²=x³+b1`, `E2: y²=x³+d³·b1` (d non-cube, non-square), construct the genus-2
+Howe cover directly, rather than reverse-engineering branch parameters from a
+hardcoded reference.
+
+### Work done
+
+- Installed `pari-gp` 2.15.4 (fresh container, as in every prior session).
+- **WebSearch for the actual CHLRS paper**: `eprint.iacr.org`, `arxiv.org`, and
+  `math.mit.edu` are all **blocked by this environment's egress proxy**
+  (`EGRESS_BLOCKED` on all three WebFetch attempts). Only WebSearch snippet text was
+  available, not full paper text. Identified the correct primary reference is not
+  actually "CHLRS" but **Howe–Leprévost–Poonen, "Large torsion subgroups of split
+  Jacobians of curves of genus two or three"** (Forum Math. 12 (2000), 315–364,
+  `arxiv:math/9809210`) — this is presumably what the codebase's `howe_richelot_v5.gp`
+  already implements. Could not fetch the PDF to check the explicit gluing formula
+  against the code (BLOCKED, see Next step proposal).
+- Wrote `secp256k1_cm_audit/chlrs_forward_map.gp`: reuses `howe_5pairs_v2.gp`'s
+  `richelot()` verbatim and sweeps all 12 branch-labelling combinations (2 signs of
+  `rr=α³`, 2 choices of the primitive cube root `z3`, 3 relative twists
+  `β=d·z3^k·α`) for the p=1009 pair from the 07-27 Test 2 (b1=11, d=11, the case that
+  failed). Hypothesis: the 07-27 mismatch was a root/labelling ambiguity.
+- Ran it: **0/12 combinations match** target `#Jac = (p+1-t1)(p+1-t2) = 1018251`.
+  All 12 collapse into exactly 2 distinct output curves (`{aa,bb}` pairs), confirmed
+  by inspection — the 3-fold `z3^k` twist is a proven no-op (relabels G1,G2,G3
+  cyclically, same output curve up to the trivial `x→z3·x` automorphism of
+  `x⁶+aa·x³+bb`), and the 2-fold sign flip is *also* a no-op on `#Jac` (both signs
+  give `#Jac=1106283`). Root-choice hypothesis **falsified** — reused
+  `check_jac()`/`hyperellcharpoly` from `howe_5pairs_v2.gp`, no new machinery needed.
+- Followed up with `secp256k1_cm_audit/chlrs_naive_cover_check.gp`: a more basic
+  sanity check than anything run in this thread before — does the **naive cover
+  itself**, `C0: y²=(x³+b1)(x³+b2)` (zero Richelot steps, no branch-labelling
+  ambiguity possible), have `Jac(C0) ≅ E1×E2`? Tested both the p=43 "reference" pair
+  (b1=7,b2=13) and the p=1009 pair (b1=11,b2=515).
+- **Result: NO, at both p=43 and p=1009.** `charpoly(C0)` is *irreducible over ℚ* in
+  both cases (Jac(C0) is a **simple** abelian surface, not split at all) — p=43:
+  `#Jac(C0)=1641` vs target `1767`; p=1009: `#Jac(C0)=936603` vs target `1018251`.
+- This forced a re-check of the supposedly "✓ CORRECT" p=43 reference case in
+  `howe_5pairs_v2.gp` Test 1 and its source `howe_richelot_v5.gp`. Recomputed by hand:
+  `richelot([0,3,0],[0,0,2],...)` → `(aa,bb)=(41,5)`, `charpoly = x⁴+6x³+55x²+258x+1849`
+  (irreducible over ℚ), `#Jac=2169` vs target `(43+1-13)(43+1+13)=1767`. **Mismatch.**
+  `howe_5pairs_v2.gp`'s own `check_jac()` call for Test 1 computes and prints this
+  exact mismatch (`match=0`), but the test's pass/fail banner (`"✓ CORRECT"`) checks
+  only that `(aa,bb)` reproduces `howe_richelot_v5.gp`'s hardcoded output — i.e. it
+  verifies **arithmetic self-consistency of the Richelot formula**, not that the
+  resulting curve actually splits as `E1×E2`. This false-positive banner has been
+  read as "the p=43 base case is verified correct" in at least the 2026-07-26 and
+  2026-07-27 log entries.
+- Ran `howe_richelot_v5.gp`'s own designed validation sweep (7 "canonical classes" ×
+  3 Richelot-dual twists `σ_0,σ_1,σ_2` = 21 total attempts, target
+  `T⁴-83T²+1849`, i.e. `#Jac=1767`): **21/21 return `[-1,-1]`** ("cover not over
+  F_p" — the `Q0r,Q3r,Q6r` consistency check in `richelot_gen` fails for every single
+  attempt). The script has *never*, in any run, produced a valid `(aa,bb)` matching
+  its own target. Its "Done." at the end of a clean run masked total non-convergence.
+- `cargo test --test curve_audit` → 5/5 pass (8.11s). ✓ (unrelated to this thread;
+  no Rust code touched.)
+
+### Findings
+
+1. **The naive product cover `y²=f1(x)·f2(x)` is not, and has never been shown to
+   be, isogenous to `E1×E2`** for either toy pair tested. Both char polys are
+   irreducible quartics over ℚ (simple abelian surfaces). This matches
+   `RESEARCH_MESTRE_HOWE.md`'s existing theoretical claim (§3: "For `A=(E1×E2)/Γ_α`
+   ... the Igusa invariants are non-degenerate when the gluing is non-trivial", i.e.
+   the naive cover is a *different, unrelated* curve from the true Howe quotient) but
+   this is, as far as this log shows, the **first time it was checked computationally**
+   rather than asserted.
+
+2. **By isogeny-invariance of the Frobenius L-polynomial**: since Richelot
+   (2,2)-isogenies preserve `#Jac`, and `C0` (naive cover) doesn't match the target,
+   *no* Richelot-dual reachable from `C0` in one step can match it either — which is
+   exactly the 0/12 result in `chlrs_forward_map.gp`. This is now a proven structural
+   fact, not just an empirical near-miss: **the naive cover's entire 1-step Richelot
+   neighbourhood is provably disjoint from the target isogeny class.**
+
+3. **`howe_richelot_v5.gp`, the script cited across multiple prior sessions
+   (2026-07-08, 07-21, 07-26, 07-27) as "the correct working reference" for the Howe
+   construction, has never actually produced a curve matching `E1×E2`.** Its one
+   "✓ CORRECT" check tests arithmetic self-consistency (reproducing a hardcoded
+   `(aa,bb)`) rather than the mathematical property (`Jac(C) ≅ E1×E2`) the whole
+   thread cares about. Its own 21-combination validation sweep, designed to search a
+   wider net than the single naive-cover case, returns **zero** valid covers, let
+   alone matching ones.
+
+4. **Net effect**: the entire "Richelot-search over proxy primes" direction
+   (Thread 22, proposed 2026-07-26 as the fallback continuation of the now-corrected
+   Thread 2) should be considered **effectively exhausted at the small-toy-example
+   level it has been tried at** — not just for secp256k1's degenerate pair (0,3), but
+   for the generic non-degenerate case too. `RESEARCH_MESTRE_HOWE.md`'s own diagnosis
+   was right all along: only the actual Igusa-invariants-of-the-quotient-surface
+   computation (Mestre Step 1, §3 of that note) constructs the real Howe cover; the
+   Richelot-from-cube-roots shortcut this thread has spent five sessions on is not a
+   cheap substitute for it.
+
+5. **Environment note**: `eprint.iacr.org`, `arxiv.org`, and `math.mit.edu` are all
+   blocked by this session's egress proxy (`EGRESS_BLOCKED`), so the actual
+   Howe–Leprévost–Poonen paper text (needed to check whether `richelot_gen` even
+   implements the published formula correctly, vs. having an independent bug) could
+   not be fetched this run — only WebSearch snippets, which name the paper but don't
+   give the formula. Sage and Magma remain absent from this container (checked with
+   `which`/`import sage`), consistent with every prior session's finding for this
+   thread.
+
+### Next step proposal
+
+**BLOCKED (paywalled/inaccessible source) for continuing the Richelot-formula-check
+angle**: verifying whether `richelot_gen` in `howe_richelot_v5.gp` is a faithful
+implementation of Howe–Leprévost–Poonen's published gluing formula, or has an
+independent bug, requires the actual paper text (arxiv/eprint blocked this run). A
+future run with different network access should fetch `arxiv:math/9809210` §3-4
+directly and line-check `richelot_gen`'s `H_i` numerator formulas against it — this
+is a bounded, mechanical task once the source is reachable, and would settle whether
+the whole Richelot branch has a fixable bug or is chasing the wrong curve family
+entirely (finding 4 above suggests the latter, but a formula-level check is the only
+way to be sure).
+
+**Primary recommendation**: stop investing further sessions in the Richelot-graph
+search at toy primes (0/33 total attempts across two sessions' scripts have ever
+produced a match) and redirect Priority 2/3 effort to `RESEARCH_MESTRE_HOWE.md` §3
+Step 1 — computing Igusa invariants of `(E1×E2)/Γ_α` directly via the modular-form
+pullback `M_2 → M_1×M_1`. This is explicitly flagged in that note as a "multi-week
+implementation project" requiring moduli-of-abelian-surfaces machinery PARI doesn't
+have natively; it is a legitimately hard task, not a quick autolab sub-task, so the
+concrete next **autolab-sized** step is: pick one narrow piece of it (e.g. just the
+`I_2` invariant, which is the simplest of the four) and attempt a from-scratch
+derivation for the α=identity, F_{p^3}-cyclic-Galois case that already applies to
+secp256k1 (per `RESEARCH_MESTRE_HOWE.md` §3: "For secp256k1 specifically: σ is the
+identity... once we pick a Galois-compatible labelling").
+
+**Fallback**: priority 5 (GLV-HNP Phase 2) — Thread 25's proposed NU-band
+stratification re-analysis (2026-08-07 log, "H25") remains unexecuted and needs no
+new data, only reprocessing of `glv_hnp_phase2_gsprofile_strat.py`'s existing output.
+
+### Commits made
+
+(recorded in next commit)
