@@ -6668,4 +6668,4 @@ Tertiary (unchanged): BKZ-beta sweep against NU.
 
 ### Commits made
 
-(recorded in next entry)
+c019206 autolab 2026-08-08: Thread 25 — H25 falsified for raw mu, holds for nu_hat (AUC 0.84); step statistic not curve-independent
