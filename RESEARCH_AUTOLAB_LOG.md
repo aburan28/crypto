@@ -6694,4 +6694,4 @@ far above NU ~ 1.87-2.20 blockwise reduction pushes the empirical threshold.
 
 ### Commits made
 
-(recorded after push, see below)
+f80325f autolab 2026-08-08: Thread 25 — mu separates recovery within eff-fixed strata inside NU's ambiguous band (AUC 0.86-0.93); pooled test is a stratification confound
