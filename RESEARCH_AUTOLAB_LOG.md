@@ -6538,3 +6538,138 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Priority 2 — Thread 2/3 (CHLRS Igusa formula / Howe forward map).** Priority
+1 (P-521 LLL) is CLOSED (§10.5, 2026-06-06). Priority 3 (Howe sextic twists)
+substantially resolved. Priority 4 (cross-curve LLL) CLOSED/DEAD-END. Priority
+6 (B5 over F_{p^k}) CLOSED (2026-07-07). Priority 5 (GLV-HNP) had two sessions
+of measurable progress yesterday (2026-08-07, Threads 23-24), so per protocol
+rule (a) the next open thread with no recent work takes priority: Thread 3
+(CHLRS forward map), last touched 2026-07-27 (12 days ago), proposed exactly
+this next step: "implement the CHLRS forward map... Script target:
+`secp256k1_cm_audit/chlrs_forward_map.gp`."
+
+Environment note: **`gp` (PARI/GP) was not installed in this fresh container**
+— every prior session's log implicitly assumed it. Installed via
+`apt-get install --no-install-recommends pari-gp` (2.15.4-2.1build1, skips the
+206 MB of elldata/seadata/texlive recommends). Future autolab runs should
+expect a fresh container each time and may need to repeat this.
+
+### Work done
+
+- Before committing to the "port the full CHLRS Igusa-Clebsch machinery"
+  route (assessed in 2026-05-29/07-21 logs as multi-week, beyond PARI stdlib),
+  checked a cheaper hypothesis first: 2026-07-27's Test 2
+  (`howe_5pairs_v2.gp`) built the Richelot input as one specific relative
+  cube-root twist `beta = d*alpha` and never tried the other two
+  (`beta = d*z3*alpha`, `beta = d*z3^2*alpha`), nor varied alpha's own branch.
+  Wrote `secp256k1_cm_audit/chlrs_forward_map.gp`: reuses the exact
+  `richelot()` F_{p^3} implementation from `howe_5pairs_v2.gp` (sanity-checked
+  against the p=43 reference (a,b)=(41,5) first — MATCH), then sweeps all 3
+  relative twists `j=0,1,2` and all 3 alpha-branches `k=0,1,2` (9 combinations)
+  for the p=1009 case (E1: y²=x³+11, E2: y²=x³+515, d=11, t1=43, t2=-43),
+  checking `#Jac` against both `T_same=(p+1-t1)(p+1-t2)=1018251` and
+  `T_twist=(p+1-t1)(p+1+t2)=935089`.
+- Result: **the 3x3 branch space collapses to a single output.** All 3
+  alpha-branches k=0,1,2 give the identical (a,b)=(210,620); the 3 relative
+  twists j=0,1,2 give 3 different (a,b) (210/516/949, b=620 fixed) but the
+  **same #Jac=1106283** in every case. None match either target. The "wrong
+  cube-root branch" hypothesis is cleanly falsified — there is no branch
+  choice left to try within this construction.
+- Follow-up: factored the resulting Weil polynomial to see what the naive
+  cover's Richelot dual actually *is*, since it is provably not E1×E2 or its
+  twist:
+  ```
+  p=1009: P(T) = T^4 + 84T^3 + 3361T^2 + 84756T + 1018081
+          factor(P) over Z: IRREDUCIBLE (single factor, multiplicity 1)
+          => Jac is a SIMPLE abelian surface, not a product of elliptic curves.
+  ```
+- Went back and re-checked the p=43 "reference" case that has anchored this
+  whole Richelot-arithmetic thread since 2026-07-27. Ran
+  `howe_5pairs_v2.gp` directly (now that `gp` is installed) instead of relying
+  on the log's paraphrase:
+  ```
+  Test 1: Richelot(sv=[0,3,0],qv=[0,0,2]): a=41 b=5   ✓ CORRECT  (arithmetic match)
+    Frobenius poly: x^4 + 6*x^3 + 55*x^2 + 258*x + 1849
+    #Jac=2169  target=1767  match=0
+  ```
+  `howe_5pairs_v2.gp`'s own `check_jac()` **already printed `match=0` for
+  Test 1** — this was in the raw script output all along. The 2026-07-27 log
+  entry's "✓ CORRECT" / "reproduces the p=43 reference answer exactly"
+  referred only to the Richelot **arithmetic** matching `howe_richelot_v5.gp`'s
+  independently-verified (a,b) output for the same (sv,qv) input — a
+  code-correctness regression check, not a Howe-gluing correctness check. The
+  Jacobian-order mismatch was present in the output from the start and was
+  not flagged. (Separately: the p=43 `target=1767` computed by
+  `check_jac(...,t_expected=13,...)` is `(p+1-13)(p+1+13)`, a single-trace
+  E2×E2^twist formula — coincidentally equal to the correct `T_same` value
+  here only because t1=13=-t2 for this specific toy pair.)
+- Factored the p=43 Weil poly too: `x^4+6x^3+55x^2+258x+1849` is also
+  **irreducible over Z** — same simple-Jacobian outcome as p=1009.
+- `cargo test --test curve_audit`: 5/5 pass (no Rust touched; ran anyway per
+  protocol). No other test suites affected.
+
+### Findings
+
+**The naive-cover Richelot construction (`(x³+b1)(x³+b2)` dualized via
+Z/3Z Richelot) has never once produced a split Jacobian ~ E1×E2, in either
+the p=43 "reference" case or the p=1009 case, and exhausting all 9 cube-root
+branch choices at p=1009 doesn't fix it.** In both tested cases the resulting
+genus-2 curve's Weil polynomial is irreducible over Z, i.e. its Jacobian is a
+**simple** abelian surface — not isogenous over F_p to any product of
+elliptic curves, let alone the intended E1×E2. This retroactively explains
+why Thread 2/3's various parameterization attempts (2026-07-26/27) kept
+failing: the failure isn't a wrong choice of branch, non-square, or twist
+sign — it is that `richelot()` applied directly to the degree-6 factorization
+`(x³+b1)(x³+b2)` is dualizing the WRONG input curve. Howe's gluing construction
+requires the sextic's 3 quadratic factors `G_i` to encode a specific
+**anti-isometric correspondence** Γ between torsion subgroups of E1 and E2 (a
+genuine gluing datum), not merely "the 6 roots of x³=-b1 and x³=-b2 paired by
+common Z/3-index." The naive pairing used in `howe_5pairs_v2.gp` (and now
+`chlrs_forward_map.gp`) is not that correspondence — it's essentially just
+computing SOME degree-2 (2,2)-isogenous dual of the disjoint union of two
+elliptic curves' 3-division polynomials, which generically lands on a simple
+abelian surface, matching what happens for a "generic" (non-split) gluing
+datum.
+
+### Next step proposal
+
+**Thread 3, redirected: find the actual Howe gluing datum, not more Richelot
+branches.** The relative-twist and alpha-branch space is now proven exhausted
+and dead for the naive construction — do not re-try it. Two concrete
+directions, in cost order:
+
+1. **(cheap, ~30 min) Diagnostic: parameter-sweep b1,b2 pairs of KNOWN split
+   type.** Before assuming the full CHLRS machinery is needed, construct a
+   Howe cover for a pair of elliptic curves known by explicit construction
+   to have a split Jacobian product cover (e.g. via 2-torsion gluing,
+   Howe's original ℓ=2 construction, which is simpler than the ℓ=3/CM-j=0
+   variant this thread has been using) and confirm the SAME `richelot()`
+   code, fed the RIGHT gluing datum, does produce a reducible Weil
+   polynomial. This validates the `richelot()`/`check_jac()` pipeline itself
+   against a case with a known-good answer, which — per this session's
+   finding — has never actually been done for this codebase's Z/3Z variant.
+   If even a textbook 2-torsion gluing case fails to split, the bug is in
+   `richelot()`/`hyperellcharpoly` usage, not the parameterization.
+2. **(expensive, multi-week per 2026-05-29 assessment, unchanged) Full CHLRS
+   Igusa-Clebsch inversion**, or **(b) Mestre's algorithm**: given the
+   correct Igusa-Clebsch invariants (computable from j-invariants of E1, E2
+   and the gluing data via the classical Igusa-Clebsch-to-genus-2 map),
+   construct the curve directly via Mestre's algorithm. Checked this session:
+   the installed PARI/GP 2.15.4 has no `hyperellfromigusa`/Mestre builtin
+   (`not a function in function call`) — Mestre's construction would need to
+   be hand-implemented in `.gp`, consistent with the multi-week estimate.
+
+Also worth doing regardless of direction chosen: audit `howe_5pairs_v2.gp`,
+`chlrs_igusa_formula.gp`, and any other script in this thread for the same
+"arithmetic match without an order-match check" blind spot found here —
+re-run each with its `check_jac`/order-check output actually inspected line
+by line rather than trusting a paraphrased "✓ CORRECT" summary.
+
+### Commits made
+
+(recorded in next commit)
