@@ -6538,3 +6538,158 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6292). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live
+thread; Thread 24 made measurable progress yesterday (H24 split-verdict,
+new NU/nu_hat decorrelation result), so protocol rule (b) applies and its
+proposed sub-task is the correct pick. Went with the primary sub-task
+(H25) plus the secondary (`step` statistic); skipped the tertiary
+(BKZ-beta sweep) as lower priority per the log's own ordering.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all
+>        [...] the W5 result is a stratification artifact and the closed
+>        form should be retired.
+
+**Verdict: H25 as stated is FALSIFIED for raw mu (in-band AUC 0.693, not
+0.8), but the refined form using nu_hat instead of mu HOLDS (in-band AUC
+0.840, rising to 0.985 in the hardest sub-band). mu's power in W5 was
+partly — not entirely — mediated by NU; the eff-normalisation that turns mu
+into nu_hat is exactly the part that survives conditioning.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` as in
+  every prior GLV-HNP session.
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — refactored the
+  inline `__main__` data-collection loop into `collect_rows(effs, m,
+  exact)`, so Thread 25 (and future threads) can reuse the exact same
+  500-instance 17-bit table without copy-pasting the loop. Behaviour is
+  unchanged: re-ran and the W5/W6/W7 tables are byte-identical to the
+  2026-08-07 #2 log (same SEEDS, same `search_curves` are deterministic).
+  Added a `--dump-json` CLI flag (per the pre-registered plan) that writes
+  `glv_hnp_phase2_gsprofile_strat_rows.json` (500 rows, all fields
+  including `NU`, `mu`, `nuhat`, `prof`) so downstream analysis needs no
+  new lattice work.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Loads the JSON
+  table (`--from-json`) or rebuilds it, computes `step =
+  log2(prof[m]) - log2(prof[0])` (the W1b two-block step, m=12, dim=24),
+  and runs three experiments (X1/X2/X3) below. No new curve search, no new
+  LLL calls — pure re-analysis, ~3s wall-clock either way.
+  Output: `glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (5.16s). No Rust touched.
+
+### Findings
+
+**X1 — the direct H25 test.** In-band (N=366 of 500, NU in [1.04, 2.199]):
+
+```
+AUC(-mu     -> recovery) in-band = 0.6932   (bootstrap 5th pct >= 0.6316)
+AUC(-nu_hat -> recovery) in-band = 0.8403
+AUC(-step   -> recovery) in-band = 0.1803   (i.e. LARGER step predicts recovery)
+AUC(-NU     -> recovery) in-band = 0.5656   (sanity: NU is ~flat inside its own band, as expected)
+```
+
+Raw mu's bootstrap 5th-percentile is 0.632 — reliably above the 0.5 null,
+so mu is not *purely* a stratification artifact — but it misses the
+pre-registered >= 0.8 bar. nu_hat clears it comfortably. Since
+`nu_hat = mu / sqrt(det L2)` and `det L2 = n*S_K1*S_K2` varies across the
+20 curves and 5 eff strata pooled into the band, the size-normalisation is
+doing real cross-curve work that raw mu cannot: **mu is not the second
+coordinate; nu_hat is.**
+
+**X2 — mu's (and nu_hat's) power is NOT uniform across the band; both are
+strongly gated by the local NU level.**
+
+```
+  NU range        N    rec |  AUC mu   AUC nu_hat   AUC step
+[1.04, 1.40)    102  35/102 |  0.4921     0.7147      0.3232
+[1.40, 1.80)    139  31/139 |  0.7982     0.8631      0.1490
+[1.80, 2.20)    125  31/125 |  0.9369     0.9852      0.0103
+```
+
+Both predictors are near-useless just above the sufficient-certificate edge
+(NU in [1.04,1.4): mu is coin-flip, nu_hat only 0.71) and become almost
+perfect near the necessary-certificate edge (NU in [1.8,2.2): nu_hat
+0.985). This mirrors the eff=0.05 degeneracy in W5 (AUC 0.42, "easiest"
+stratum): when NU alone is already decisive at one edge of a regime, the
+second coordinate has nothing left to explain; it earns its keep exactly
+where NU is most ambiguous, but only in the *harder* half of that
+ambiguity.
+
+**X3 — mu is a false global predictor; the eff-pooling reverses its sign.**
+Pooled without stratifying by eff or NU:
+
+```
+AUC(-NU      -> recovery) global = 0.7996
+AUC(-mu      -> recovery) global = 0.3964   <- INVERTED (below 0.5)
+AUC(-step    -> recovery) global = 0.3286   <- INVERTED
+AUC(-nu_hat  -> recovery) global = 0.6889
+```
+
+Raw mu pooled globally is anti-predictive (0.396), even though it scores
+0.42-0.94 *within* every individual eff stratum (W5) and 0.49-0.94 within
+every NU sub-band (X2) — a clean three-way Simpson's-paradox instance: mu
+tends to be numerically larger for curves assigned to easier (low-eff,
+low-NU) strata by construction of the sweep, so pooling without
+conditioning inverts its sign. nu_hat (eff/size-normalised) does not
+invert (0.689 pooled, consistent in direction with every stratified
+reading). This is a second, independent reason to prefer nu_hat over raw
+mu as the reported quantity going forward — not just better AUC in-band,
+but sign-stable under pooling.
+
+**Secondary — the `step` statistic is redundant with mu, not a new axis.**
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)` is strongly and monotonically
+INVERTED as a predictor (0.18 in-band, 0.01 at the hardest sub-band, 0.33
+global) — i.e. bigger step predicts *harder* recovery, opposite to what
+W1b's "step -> 0 at the wall" framing suggested testing. Reason:
+`Spearman(step, mu) = Spearman(step, log mu) = -0.663`. Since `b*_1 ~
+lambda_1(L2) = mu` (always, per W1b) and `b*_{m+1}` sits near `lambda_2(L2)
+= det(L2)/mu`, `step ~ log(lambda_2) - log(lambda_1) ~ log(det) -
+2*log(mu)` — step is just `-2*log(mu)` up to the (roughly constant within
+a curve family) `log(det)` term. It carries no information mu doesn't
+already have, and its weaker AUC (0.18 vs mu's 0.69, both inverted the
+same direction) is consistent with it being a noisier reparametrisation,
+not a sharper one.
+
+### Next step proposal
+
+**Thread 26 — fit the two-coordinate decision rule (NU, nu_hat) and
+measure its cross-validated separation vs NU alone.** X1/X2 establish that
+`recovery = f(NU, nu_hat)` with nu_hat contributing real information beyond
+NU, concentrated in the NU in [1.4, 2.2) sub-range. Concrete sub-task:
+logistic regression (or a simple 2D grid decision boundary) on
+`(log NU, log nu_hat)` fit on the existing 500-row JSON table with a
+50/50 curve-level train/test split (split by `n`, not by instance, since
+seeds of the same curve are correlated — the current 500 rows are only 20
+distinct curves x 5 eff x 5 seeds), and report held-out AUC of the fitted
+rule vs held-out AUC of NU alone. If held-out AUC(NU, nu_hat) clears
+held-out AUC(NU alone) by a similar margin to the in-sample X1 gap
+(0.840 vs 0.800 pooled — modest but real), Phase 2 has a validated
+2-parameter viability test. If the gap collapses under held-out
+evaluation, X1/X2 were overfit to the 20-curve pool and more curves are
+needed before the second coordinate can be trusted.
+
+Secondary: `glv_hnp_phase2_gsprofile_strat_rows.json` now exists and is
+regenerable byte-for-byte (`collect_rows()` is deterministic in SEEDS and
+`search_curves`); future threads should load it via `--from-json` rather
+than re-running the ~3s collection, and extend it in place if new eff
+strata or curve counts are added.
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(recorded after this entry is committed)
