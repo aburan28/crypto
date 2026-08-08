@@ -6663,4 +6663,4 @@ log so future sessions don't need to rediscover it.
 
 ### Commits made
 
-(recorded after push, see next log entry if amended)
+af4f040 autolab 2026-08-08: Thread 3 — explicit forward Howe-gluing formula found, implemented, verified; generic j=0 pairs work, secp256k1 sextic-twist pairs all degenerate
