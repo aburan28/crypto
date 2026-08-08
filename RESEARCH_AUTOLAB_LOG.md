@@ -6667,4 +6667,4 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(recorded after commit, see follow-up log entry)
+3672b6d autolab 2026-08-08: Thread 25 — H25 holds for eff-normalized nu_hat, falsified for raw mu (aggregation artifact)
