@@ -6709,4 +6709,4 @@ never been touched and is the fallback.
 
 ### Commits made
 
-(recorded in the follow-up log-hash entry, per repo convention)
+40d1cc9 autolab 2026-08-08: Priority 2/3 (CHLRS Howe gluing) already CLOSED since 2026-06-13 — Thread 2 (07-21..07-27) was redundant; exhaustive Z/3Z-family negative confirmation added
