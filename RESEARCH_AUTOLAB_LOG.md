@@ -6672,4 +6672,4 @@ this specific curve instead of asymptotic bounds.
 
 ### Commits made
 
-(pending — see push below)
+0d474bc autolab 2026-08-08: Thread 22 — FromProdToJac gluing formula solves CHLRS forward map for non-degenerate secp256k1 sextic pairs
