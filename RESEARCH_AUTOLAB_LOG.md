@@ -6612,8 +6612,16 @@ Also launched (background, `/tmp/.../scratchpad/grid1009b.gp`) the same
 search scaled to the actual p=1009/(d=11) pair Thread 2's Test 2 used
 (1,018,081 (s,q) pairs at one rr, with a cheap O(p) trace pre-filter before
 the expensive `hyperellcharpoly` call) — confirms/extends the same
-negative result at cryptographically-relevant-shape scale. Did not block
-this entry on it finishing; report next session if it's still informative.
+negative result at cryptographically-relevant-shape scale.
+
+**Update (same session, job completed after the commit below): 839.3s
+runtime, 1,016,064/1,018,081 (s,q) pairs gave an F_p-rational Richelot
+dual, and of those, 0 (zero) passed even the cheap necessary a1=t1+t2=0
+trace filter** — let alone the full Jacobian-order match. This is a
+strictly stronger negative result than the p=43 run: not one candidate in
+the entire (s,q) grid at this rr even has the right point-count trace,
+consistent with (and independently reinforcing) the F_{p^3}-obstruction
+resolution — there is no F_p-rational split anywhere in this family to find.
 
 **5. Went back through the FULL log (not just the tail) to find out why
 Thread 2 was reinventing this.** Found the actual resolution:
