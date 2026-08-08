@@ -6658,4 +6658,4 @@ NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(pending — recorded after push, see follow-up log entry)
+3f18d94 autolab 2026-08-08: Thread 25 — mu is a genuine 2nd coordinate inside the NU band (stratified AUC 0.894, pooled test was an artifact)
