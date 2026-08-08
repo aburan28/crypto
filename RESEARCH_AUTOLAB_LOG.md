@@ -6538,3 +6538,138 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 entry (Thread 24). Priorities
+1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END (P-521 §10.5 closed 2026-06-06;
+CHLRS blocked on the cubic-residue obstruction 2026-07-26/27; cross-curve LLL
+closed 2026-06-14; B5 closed 2026-07-07) and priority 3 (Howe sextic twists)
+completed 2026-07-21, so priority 5 (GLV-HNP Phase 2) is again the only live
+thread. Thread 24 made measurable progress the previous day (H24 partial
+falsification, W5/W6 control result), so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU, W5 is a
+>        stratification artifact and the closed form should be retired.
+
+**Verdict: H25 CONFIRMED, with a methodological catch that is itself the
+main finding.** The naive test (pool the whole NU-band, one AUC) falsifies
+H25 (0.693 < 0.80) — but this is the *same* pooling artifact W5/W6 already
+diagnosed for the unconditional case: raw mu is confounded with eff even
+inside the band, because larger eff (K1) directly inflates the L2 lattice
+scale. Re-run the identical test holding eff fixed (as W5's protocol already
+required) and it passes: AUC(-mu) = 0.808, AUC(-nu_hat) = 0.896, N=342.
+
+### Work done
+
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_stratnu.py` — new (~150
+  lines). Re-rolls the exact 500-instance, 5-stratum, 17-bit table from
+  `glv_hnp_phase2_gsprofile_strat.py` (same `search_curves`, same `EFFS`,
+  same `SEEDS`) via the shared `instance()` helper, adds `--dump-json` (the
+  2026-08-07 #2 next-step item) so the row table survives the run instead of
+  living only in a stdout table, and adds the NU-band stratified AUC test.
+  Output: `glv_hnp_phase2_gsprofile_stratnu_output.txt` (56 lines), rows
+  dumped to `glv_hnp_phase2_gsprofile_stratnu_rows.json` (500 rows, `prof`/
+  `nus` arrays dropped from the dump to keep it small).
+- Also computed the W4 bracket's secondary item: `step = log2||b*_m|| -
+  log2||b*_1||` (0-indexed: first entry of the second GS block minus first
+  entry of the head) as a cheap alternative separator.
+- `cargo test --test curve_audit`: 5/5 pass (5.47s). No Rust touched.
+- `pip install fpylll cysignals sympy` in the fresh container (fourth run in
+  a row `cysignals` needed naming explicitly; not pulled in transitively by
+  `fpylll`).
+
+### Findings
+
+**H25 — naive pool over the ambiguous band [1.040, 2.199] (17 bits, N=366,
+97 recover / 269 fail):**
+
+```
+AUC(-mu)     = 0.6932   <- fails the >=0.80 bar
+AUC(-nu_hat) = 0.8403
+AUC(-NU)     = 0.5656   (expected ~noise: NU is constrained to a narrow range by construction)
+```
+
+**H25 — eff-conditioned re-test (the fair one; per-eff AUC(-mu) inside the band):**
+
+```
+ eff  band N     rec  AUC(-mu)  AUC(-nu_hat)
+0.05      24   23/24    0.4565       0.4565   <- degenerate: only 1 failure in stratum
+0.10      83   26/83    0.8819       0.8853
+0.15      96   21/96    0.8889       0.8825
+0.20      89   18/89    0.9276       0.9425
+0.25      74    9/74    0.8615       0.8615
+
+pooled over the 4 non-degenerate strata: N=342, rec=74/342
+  AUC(-mu)     = 0.8080   -> H25 CONFIRMED (>= 0.80 threshold)
+  AUC(-nu_hat) = 0.8964
+```
+
+Every non-degenerate stratum individually clears 0.86-0.93 — the eff=0.05
+stratum is not a counterexample, it is underpowered (23/24 recover, only 1
+negative instance, AUC is noise on N=1 minority class).
+
+**Interpretation.** (NU, mu) is a genuine 2-parameter viability test, not one
+parameter measured twice. NU is the exact size-free BDD certificate (sound,
+zero false positives, but only separates the outer 75% of instances at 17
+bits per the 2026-08-07 #2 W4 result). Inside NU's ambiguous middle, mu
+(equivalently nu_hat = mu/sqrt(det L2)) recovers most of the missing
+discriminating power (AUC ~0.81-0.90) — confirming W5's finding was not an
+artifact of eff varying alongside NU-band membership, it is real structure
+NU cannot see. The practical rule for Phase 2 viability: **reject if NU >
+2.2; accept if NU < 1.04; otherwise fall back to mu (smaller is better),
+correcting for the current bias-strength regime.** A single closed-form
+logistic on (log NU, log mu, eff) — the deliverable Thread 25 originally
+asked for — is now well-motivated; this run stopped short of fitting it (see
+next step).
+
+**Secondary — step = log2||b*_m|| - log2||b*_1||, pooled over all 500 (not
+eff-conditioned):**
+
+```
+AUC(-step) = 0.3286   (i.e. AUC(+step) = 0.6714: LARGER step predicts recovery)
+AUC(-NU)   = 0.7996
+AUC(-mu)   = 0.3964   (same anti-predictive pooled sign as step — both confounded with eff, as W6 already showed for raw mu)
+Spearman(step, mu) = -0.6627   (strong: small mu -> big step, consistent with mu=lambda_1(L2) small -> lambda_2(L2) large -> second GS block sits higher)
+Spearman(step, NU) = 0.1351    (weak: step carries little of NU's signal)
+```
+
+step is not an independent third statistic — it is a (noisy, pooling-
+confounded) restatement of mu via the -0.66 correlation, not a new signal.
+Did not re-run step eff-conditioned; low priority given mu itself already
+does this job and is the more interpretable quantity (an actual lattice
+minimum, not a derived profile gap).
+
+### Next step proposal
+
+**Thread 26 — fit the (log NU, log mu, eff) logistic and re-test on 12-bit
+data as an out-of-sample check.** Concrete sub-tasks:
+1. Fit `P(recover) = sigmoid(a*log(NU) + b*log(mu) + c*log(eff) + d)` on the
+   500-row 2026-08-08 dump (`glv_hnp_phase2_gsprofile_stratnu_rows.json`);
+   report AUC of the fitted score against the same 500 rows (in-sample) and
+   against the existing 12-bit U2/U3 grid (out-of-sample, different bit
+   size — the real test of whether this is a fitted curve-fit or a
+   transferable rule).
+2. Falsifier: if out-of-sample AUC on the 12-bit grid drops materially below
+   the in-sample 17-bit AUC (~0.85-0.90 combining NU+mu per W4/H25), the
+   2-parameter rule doesn't generalize across bit sizes and needs an
+   explicit size term beyond `eff`.
+3. Cost: no new lattice computation — the 12-bit rows already exist in
+   `glv_hnp_phase2_babai.py`'s U2/U3 outputs (or a 5-minute re-roll with
+   `instance()` at m=8 curves). Logistic fit itself is a ~30-line addition
+   with no new dependency (closed-form 2-parameter logistic regression by
+   gradient descent, or `scipy.optimize` if available).
+
+Tertiary (unchanged, still open): BKZ-beta sweep against NU to quantify how
+far above NU~1.87-2.20 blockwise reduction pushes the viability threshold.
+
+### Commits made
+
+(recorded after push — see next log entry)

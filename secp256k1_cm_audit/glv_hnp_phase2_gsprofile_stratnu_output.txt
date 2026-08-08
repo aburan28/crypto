@@ -1,0 +1,50 @@
+==============================================================================
+Thread 25 -- does mu separate INSIDE the ambiguous NU band?
+==============================================================================
+
+20 17-bit j=0 GLV curves, 500 instances (dim 24) in 2.3s
+dumped 500 rows -> glv_hnp_phase2_gsprofile_stratnu_rows.json
+
+------------------------------------------------------------------------------
+H25: AUC(-mu -> recovery) INSIDE the ambiguous NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+band N = 366  (recover 97 / fail 269)
+  AUC(-mu)     = 0.6932   (H25 threshold: >= 0.80)
+  AUC(-nu_hat) = 0.8403
+  AUC(-NU)     = 0.5656   (near 0.5 expected: NU is ~constant in-band)
+  AUC(-step)   = 0.1803
+
+  H25 verdict (naive pool over the whole band): FALSIFIED (AUC(-mu) = 0.6932 vs threshold 0.80)
+  NOTE: W5/W6 already showed raw mu is confounded with eff pooled; see the eff-conditioned re-test below before trusting this.
+
+------------------------------------------------------------------------------
+Per-eff-stratum breakdown of the band -- W5/W6 already showed mu is
+confounded with eff pooled, so pool-then-AUC over the whole band is
+not a fair test; the honest test holds eff fixed WITHIN the band too.
+------------------------------------------------------------------------------
+  eff  band N     rec  AUC(-mu)  AUC(-nuhat)
+ 0.05      24   23/24    0.4565       0.4565  (degenerate: <2 in minority class)
+ 0.10      83   26/83    0.8819       0.8853
+ 0.15      96   21/96    0.8889       0.8825
+ 0.20      89   18/89    0.9276       0.9425
+ 0.25      74    9/74    0.8615       0.8615
+
+band, non-degenerate strata only (eff in [0.1, 0.15, 0.2, 0.25]): N=342 rec=74/342
+  AUC(-mu)     = 0.8080   (H25 threshold: >= 0.80)
+  AUC(-nu_hat) = 0.8964
+  H25 verdict (eff-conditioned): CONFIRMED
+
+------------------------------------------------------------------------------
+SECONDARY: step = log2||b*_m|| - log2||b*_1|| (0-indexed: second block first entry minus head first entry)
+------------------------------------------------------------------------------
+pooled (N=500):
+  AUC(-step)   = 0.3286
+  AUC(-NU)     = 0.7996
+  AUC(-mu)     = 0.3964
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+  step range: min -0.842  max 3.156  mean -0.093
+
+==============================================================================
+done
+==============================================================================
