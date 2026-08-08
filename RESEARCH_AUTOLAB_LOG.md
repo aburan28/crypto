@@ -6663,4 +6663,4 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(recorded after push; see next log line)
+90efdd6 autolab 2026-08-08: Thread 25 — H25 holds when eff-stratified (AUC(mu) 0.86-0.93 in-band); step secondary falsified as redundant with mu
