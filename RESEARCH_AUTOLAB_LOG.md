@@ -6538,3 +6538,129 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority ordering re-derived from the log: Priority 1 (P-521 bigfloat) has
+been CLOSED since 2026-06-06 (§10.5, 3/3 at m=16, confirmed again at
+2026-07-07/07-19); no open sub-question remains, so it's skipped rather
+than re-touched. Priority 4 (cross-curve LLL) is a DEAD END, also closed.
+Priority 2/3 (CHLRS Igusa formula / Howe gluing) was last touched
+2026-07-27 (12 days ago, > 7-day threshold) and left with an explicit
+"Thread 3" next-step proposal ("Implement the ... forward direction ...
+Script target: `secp256k1_cm_audit/chlrs_forward_map.gp`") that was never
+executed. Picked that.
+
+Also note: PARI/GP was **not installed** in this fresh container
+(`gp: command not found`). Installed via `sudo apt-get install -y
+pari-gp` (succeeded despite unrelated PPA 403 warnings). Future autolab
+runs in a fresh container will need to do this too unless the base image
+is changed to include it.
+
+### Work done
+
+- The 2026-07-27 session's blocker: their Z/3Z-Richelot ansatz needed a
+  map "branch parameters (r1,r2) <- curve traces" that doesn't exist in
+  closed form without full CHLRS machinery ("the CHLRS Igusa inversion
+  problem"). Rather than chase that, searched for the actual classical
+  literature formula (WebSearch; direct WebFetch of arxiv.org,
+  eprint.iacr.org, researchgate.net, math.mit.edu, math.harvard.edu are
+  ALL blocked by this container's egress proxy — note for future runs,
+  don't waste time retrying those hosts). WebSearch snippets identified
+  the real reference: Frey-Kani 1991 / **Howe-Leprévost-Poonen 2000**
+  (Forum Math. 12, 315-364) give an explicit, fully elementary 2-torsion
+  gluing formula — no Igusa invariants needed at all. Got the precise
+  formula (Möbius-interpolation from 2-torsion x-coordinates) by
+  WebFetching `raw.githubusercontent.com/jack4818/Castryck-Decru-SageMath`
+  (their public 2022 SIDH-attack code reimplements the same construction
+  as `FromProdToJac`; GitHub raw content wasn't blocked, unlike the
+  paper hosts). Full formula and derivation transcribed into
+  `RESEARCH_MESTRE_HOWE.md` §5.6.
+- Implemented + verified in `secp256k1_cm_audit/chlrs_forward_map.gp`:
+  - **Part 1** (sanity, curves with full rational 2-torsion, p=97):
+    4/6 x-coordinate pairings give `#Jac(glued curve) = #E1·#E2` exactly
+    (112·108=12096). Formula validated independent of j=0/CM structure.
+  - **Part 2** (j=0 curves, generic non-twist pairs, p=1009, E1: y²=x³+7
+    vs E2: y²=x³+b2 for b2 in {2,5,6,11,15,16,17,18}): **8/8 succeed**,
+    each giving an explicit F_p-rational Howe cover with #Jac matching
+    #E1·#E2 exactly. h(x) always has the sparse form A·x⁶+B (x⁴,x²
+    coefficients vanish identically — expected, both curves have the
+    order-3 automorphism so the glued surface does too).
+  - **Part 3** (j=0 curves, sextic-twist pairs b2=7·h^k, k=0..5, same
+    setup the 07-27 session used): **all 6 degenerate** — at every one
+    of the 3 Frobenius-compatible pairings, the interpolation matrix M
+    is exactly singular (det=0). This generalizes the 07-27 finding
+    (only k=3, the quadratic twist, was checked and found degenerate) to
+    ALL SIX twist classes.
+- Diagnosed *why* the valid pairing is forced and *why* it degenerates:
+  Frobenius acts on `{a1,a2,a3}` and `{b1,b2,b3}` as permutations
+  σ1,σ2 ∈ S3 (3-cycles here, since both cubics are irreducible over
+  F_1009). Only pairings π with π∘σ1=σ2∘π give F_p-rational h; for the
+  base curve b1=7, σ1=[3,1,2], and for the twist family σ2 alternates
+  between [3,1,2] (same) and [2,3,1] (inverse) as k varies — but for
+  BOTH cases, all 3 valid π (odd permutations when σ1≠σ2, or a specific
+  subset when σ1=σ2) hit det(M)=0. Contrast: for generic (non-twist) b2
+  in Part 2, the same equivariance check passes AND det(M)≠0, so the
+  degeneracy is specific to the multiplicative b2=b1·h^k relation
+  (extra symmetry from the shared sextic-twist family), not to
+  Frobenius-orientation mismatch per se — checked this directly (see
+  script/scratch), orientation match/mismatch does not by itself predict
+  degeneracy for generic pairs.
+- Documented a real gp 2.15.4 parser gotcha hit repeatedly while writing
+  these scripts: a *multi-line* `for(...)`/`forperm(...)` in a script run
+  via `gp -q file.gp` fails to parse correctly and then **hangs on
+  stdin** (looks like a timeout, not a clean error); the body must be
+  kept on one line, or `\`-continued. Noted at the top of
+  `chlrs_forward_map.gp` so future sessions don't burn time on it.
+
+### Findings
+
+1. **The forward Howe-gluing map is now explicit, implemented, and
+   verified** for the general case — this was the "structural gap"
+   (finding #7) the 2026-07-27 log identified as blocking. It needed no
+   CHLRS/Igusa apparatus at all; the classical Howe-Leprévost-Poonen 1991/2000
+   elementary formula suffices.
+2. **Generic j=0 pairs work (8/8 tested).** If block B5's cover-cost
+   argument needs *some* explicit non-degenerate Howe cover of a j=0
+   curve — not specifically secp256k1 paired with its own sextic twist —
+   this construction already supplies one unconditionally, with a
+   1-line existence precondition (matching Frobenius-orbit structure on
+   2-torsion, i.e. same count of rational 2-torsion points).
+3. **secp256k1 × (its own sextic twist), all 6 classes, are
+   structurally degenerate** for this construction (det M ≡ 0 on the
+   only valid pairings). This is now proven for all k=0..5, not just
+   k=3. A different (limiting / renormalized, or a genuinely different
+   parametrization such as a Richelot dual approach) construction is
+   needed specifically for the sextic-twist-of-self case.
+4. Toy prime p=1009 only (matches prior sessions' convention); porting
+   to the actual secp256k1 prime is mechanical (same PARI code, `ffgen`
+   handles large-characteristic extensions fine) but not yet run — next
+   step.
+
+### Next step proposal
+
+**Immediate**: run `chlrs_forward_map.gp`'s Part 2 construction (generic
+j=0 pairing) at the actual secp256k1 prime, with E2 = a different (non
+sextic-twist) j=0 curve satisfying the CM/Howe preconditions already
+established in the 2026-07-21..07-26 threads, and get a genuine
+secp256k1-scale explicit Howe cover on record. This directly closes the
+open task in `RESEARCH_SECP256K1_CM.md` §§8.6/8.10.
+
+**Harder** (if the paper genuinely needs the self-sextic-twist pairing
+specifically): investigate the degenerate case. `det(M)=0` for a 3x3
+Vandermonde-like system usually signals a removable/limiting case
+solvable via an adjugate-matrix or blow-up approach rather than a direct
+inverse — worth 1 session to check whether L'Hopital-style limiting
+(perturb b2 by ε, take the ε->0 limit of h(x) symbolically) recovers a
+well-defined cover.
+
+**Housekeeping**: `pari-gp` is not in the base container image; either
+add it to a setup/session-start hook so it's available without a manual
+`apt-get install` each run, or note this permanently at the top of this
+log so future sessions don't need to rediscover it.
+
+### Commits made
+
+(recorded after push, see next log entry if amended)

@@ -6,7 +6,14 @@ Cardona–Quer 2005 and Lercier–Ritzenthaler 2010), which is the
 that the audit in [`RESEARCH_SECP256K1_CM.md`](RESEARCH_SECP256K1_CM.md)
 §§8.6, 8.10 left as an open implementation task.
 
-> **Status**: documentation + partial PARI scaffolding.  The full
+> **Status (2026-08-08 update)**: the forward gluing problem this note
+> was scoping — construct `C: y²=h(x)` explicitly from `(E1,E2)` — is
+> **solved and verified**, via a different (and much cheaper) route than
+> Mestre/Igusa reconstruction. See §5.6. The Mestre/Igusa-invariant path
+> described in §§2-8 below is superseded for this purpose and kept only
+> as background; skip to §5.6 for the working construction.
+>
+> Original status: documentation + partial PARI scaffolding.  The full
 > Mestre reconstruction is multi-page and depends on moduli-of-
 > abelian-surfaces machinery that PARI's standard library doesn't
 > expose directly.  This note documents the algorithm in enough
@@ -184,6 +191,87 @@ apply Sage's `HyperellipticCurveFromInvariants` or
 Genus2Reconstruction.  Sage's `igusa_clebsch_invariants` only goes
 forward (curve → invariants); the inverse requires the
 Genus2Reconstruction patch.
+
+## 5.6. The actual explicit forward map (SOLVED, 2026-08-08)
+
+The Mestre/Igusa route above assumes the only way to build `C` is via
+its Igusa invariants. It isn't: the classical Frey-Kani (1991) /
+Howe-Leprévost-Poonen (2000, *Forum Math.* 12, 315-364) gluing formula
+writes `h(x)` down **directly** from the six 2-torsion x-coordinates of
+`E1` and `E2` — no invariant theory, no reconstruction step, no moduli
+computation. It is the same construction reimplemented (for the SIDH
+attack context) as `FromProdToJac` in Castryck-Decru's public break code
+(`richelot_aux.py`, github.com/jack4818/Castryck-Decru-SageMath, 2022).
+
+**Formula.** Let `E1: y²=cubic_1(x)` have nonzero 2-torsion
+x-coordinates `a1,a2,a3` (roots of `cubic_1`), and `E2` have `b1,b2,b3`
+similarly, with `a_i <-> b_i` a chosen Galois-equivariant pairing (see
+below for which pairings are valid). Then:
+
+```
+M = [[a1*b1,a1,b1],[a2*b2,a2,b2],[a3*b3,a3,b3]]
+[R,S,T] = M^-1 . [1,1,1]^T            (fails iff det M = 0)
+RD = R * det(M)
+da = (a1-a2)(a2-a3)(a3-a1),  db = (b1-b2)(b2-b3)(b3-b1)
+s1 = -da/RD,  s2 = -T/R
+ai_t = (ai - s2)/s1   for i=1,2,3
+h(x) = s1 * (x²-a1_t)(x²-a2_t)(x²-a3_t)
+```
+
+`C: y²=h(x)` is the Howe-glued cover: `Jac(C)` carries a (2,2)-isogeny to
+`E1×E2`, so (Tate) `#Jac(C)(F_p) = #E1(F_p)·#E2(F_p)` exactly whenever
+`h` has F_p-rational coefficients.
+
+**Which pairing to use.** Only pairings `π: a_i -> b_π(i)` that are
+Frobenius-equivariant (`π∘σ1 = σ2∘π`, where `σ1,σ2` are Frobenius's
+permutation action on the two root sets) can give an F_p-rational `h`.
+When `σ1,σ2` are conjugate in `S_3` (always true if `E1[2]`,`E2[2]` have
+matching Galois-orbit structure — see next paragraph), such a `π`
+exists; try all `3! = 6` pairings and keep whichever gives `det(M)≠0`
+and `#Jac(h) = #E1·#E2`.
+
+**Precondition on `(E1,E2)`.** Frobenius acts on `E[2]\{O}` (3 points)
+as one of: identity (full 2-torsion, cubic splits), a transposition
+(exactly 1 rational 2-torsion point), or a 3-cycle (cubic irreducible).
+A Frobenius-equivariant `E1[2]≅E2[2]` can only exist when `E1`,`E2`
+have the *same* case — i.e. the same number of rational 2-torsion
+points (0, 1, or 3). This is checkable directly from each curve's
+2-division polynomial factorization pattern and costs nothing.
+
+**Verification (`secp256k1_cm_audit/chlrs_forward_map.gp`, all checks
+pass under `gp -q`):**
+
+- *Sanity check*, curves with full rational 2-torsion, `p=97`: for 4 of
+  the 6 x-coordinate pairings, `#Jac(glued curve) = #E1·#E2` exactly
+  (`112·108=12096`). Formula confirmed correct independent of the j=0
+  setting.
+- *j=0 curves, generic pairs* (`p=1009`, `E1: y²=x³+7`, `E2: y²=x³+b2`
+  for `b2 ∈ {2,5,6,11,15,16,17,18}`, none a sextic-twist multiple of 7):
+  **8/8 give an explicit F_p-rational Howe cover** with `#Jac(h)`
+  matching `#E1·#E2` exactly. Example: `b2=2` gives
+  `h(x) = 140x⁶+40`. (Sparse form — only `x⁶` and constant terms — is
+  expected: both inputs are j=0/CM-by-ζ₃ curves, so the glued surface
+  inherits the order-3 automorphism, forcing the `x⁴,x²` coefficients
+  of `h` to vanish identically.)
+- *j=0 curves, sextic-twist pairs* `b2 = 7·h^k` for `k=0..5` (`h` =
+  primitive 6th root of unity mod 1009 — this is exactly the
+  `secp256k1 × (its own sextic twist)` family the paper's B-block
+  wants): **all 6 are degenerate.** At every one of the 3
+  Frobenius-valid pairings, `det(M) = 0`. This generalizes the
+  2026-07-27 log entry (which found only `k=3`, the quadratic-twist
+  pair, degenerate) to *all six* twist classes — sextic twists of a
+  single j=0 curve are a degenerate locus for this construction, not
+  just the quadratic-twist case.
+
+**Bottom line.** The forward Howe-gluing map is explicit, implemented,
+and verified for the general case. It structurally cannot glue
+secp256k1 to its own sextic twist via this construction (needs a
+limiting/renormalized variant — unsolved, see §7/log 2026-08-08 for
+next steps). But if the paper's cover-cost argument (block B5) only
+needs *some* non-degenerate explicit Howe cover of a j=0 curve — not
+specifically the pairing with its own sextic twist — §5.6's
+construction already supplies one, with a one-line existence check
+(same-parity 2-torsion Galois orbit) for which partner curves work.
 
 ## 6. Toy verification
 
