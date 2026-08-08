@@ -6695,4 +6695,4 @@ data collection needed, ~5 minutes, `--dump-json` flag still to be added.
 
 ### Commits made
 
-(recorded in next commit)
+bf78b2b autolab 2026-08-08: Thread 3 — richelot()-from-elliptic-roots falsified via #Jac check; 15-pairing degeneration also falsified; both PARI bugs in howe_22_kernel.gp fixed
