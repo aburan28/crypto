@@ -6,12 +6,40 @@ Cardona–Quer 2005 and Lercier–Ritzenthaler 2010), which is the
 that the audit in [`RESEARCH_SECP256K1_CM.md`](RESEARCH_SECP256K1_CM.md)
 §§8.6, 8.10 left as an open implementation task.
 
-> **Status**: documentation + partial PARI scaffolding.  The full
-> Mestre reconstruction is multi-page and depends on moduli-of-
-> abelian-surfaces machinery that PARI's standard library doesn't
-> expose directly.  This note documents the algorithm in enough
-> detail for a future implementation effort, with the easy parts
-> (Igusa-invariant formulas) actually computed.
+> **Status (updated 2026-08-08): superseded for the load-bearing question.**
+> The full Mestre reconstruction described below is still not
+> implemented, but it turned out **not to be needed**: the
+> naive cover `C: y^2=(x^3+7)(x^3+13)` (p=43 toy) / `y^2=(x^3+7)(x^3+7u^k)`
+> (secp256k1) already **is** the Howe-glued curve, and
+> `Jac(C)` splits as `E_1 x E_2` -- just over `F_{p^3}`, not `F_p`.
+> This was proven numerically on 2026-06-11 (toy) and 2026-06-12
+> (secp256k1) via Newton-power-sum splitting checks, and is now
+> Proposition `prop:fp3obs` in `paper/structural_completeness.tex`
+> §"The Howe-gluing structural fact" (commits `eddc591`, `8352a7f`,
+> `181f925`). See `secp256k1_cm_audit/fp3_obstruction_secp256k1.gp`
+> and `RESEARCH_AUTOLAB_LOG.md` 2026-06-11/06-12/06-13 for the
+> derivation. The Mestre machinery below would only be needed to find
+> an *F_p-rational* cover for a Howe-glueable pair whose 2-torsion
+> patterns already agree over `F_p` (e.g. pair (2,5) in the 15-pair
+> table, §"secp256k1 sextic twists" of the paper) -- a different,
+> lower-priority question from the one this note was originally
+> written for.
+>
+> **2026-08-08 addendum**: a *separate*, later research thread
+> (`RESEARCH_AUTOLAB_LOG.md` Thread 2, 2026-07-21 through 07-27)
+> re-opened this question from scratch via a different construction
+> (a "Z/3Z Richelot" transform restricted to curves of the form
+> `y^2=(x^3-r1)(x^3-r2)`) without finding the resolution above, and
+> concluded (correctly, but redundantly) that its own restricted
+> family cannot reach the Howe cover either. `secp256k1_cm_audit/
+> howe_z3_family_exhaustive.gp` gives an exhaustive confirmation of
+> that negative result and explains it: since the true Howe cover
+> only splits over `F_{p^3}` (per the Proposition above), no purely
+> `F_p`-rational search within *any* Richelot-type family from a
+> smooth starting curve could ever find an `F_p`-rational split --
+> the obstruction is at the level of the field of definition, not the
+> choice of construction. **Do not re-open this thread a third time**
+> without first reading the Proposition in the paper.
 
 ## 1. Problem statement
 

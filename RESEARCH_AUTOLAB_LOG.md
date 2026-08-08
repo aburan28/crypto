@@ -6538,3 +6538,175 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Triage per protocol: priority 1 (P-521 bigfloat) CLOSED since §10.5
+(2026-06-06). Priority 2 (CHLRS Igusa formula / Howe gluing) last touched
+2026-07-27 (Thread 2), 12 days ago with no follow-up — by the "no recent
+work" rule this is the next candidate, so I picked up Thread 3 (CHLRS Igusa
+forward map), proposed in the 2026-07-27 entry as: implement the CHLRS/
+Lercier-Ritzenthaler explicit Igusa-invariant gluing formula in
+`secp256k1_cm_audit/chlrs_forward_map.gp`.
+
+**This triage was wrong, and finding out why is the actual content of this
+session** (see Findings). Priority 2 was not "12 days stale" — it was
+**closed 7 weeks ago**, on 2026-06-13, and integrated into
+`paper/structural_completeness.tex` as Proposition `prop:fp3obs`. Thread 2
+(2026-07-21 through 07-27) was an unwitting redundant re-derivation, because
+the daily triage only searches recent log tail / keyword hits near the top
+of file, not the full history. This entry documents the redundancy, adds an
+exhaustive computational confirmation of Thread 2's (correct but
+incompletely-explained) negative result, and flags the triage bug so it
+doesn't happen a third time.
+
+### Work done
+
+**1. `gp` was not installed in this container.** Installed via
+`apt-get install --no-install-recommends pari-gp` (the plain `apt-get
+install pari-gp` pulls in `pari-doc`/`texlive`/X11 as recommends and can
+fail on an unrelated 404; `--no-install-recommends` avoids that entirely).
+Re-ran `secp256k1_cm_audit/howe_5pairs_v2.gp` to confirm it reproduces the
+2026-07-27 log's numbers exactly (Test 2 mismatch: Richelot gives a=210,
+b=620, #Jac=1106283 ≠ target 1018251).
+
+**2. Re-derived ground truth for Test 1 (p=43) instead of trusting the
+"✓ CORRECT" line.** `howe_5pairs_v2.gp` Test 1 prints "✓ CORRECT" for
+Richelot(sv=[0,3,0],qv=[0,0,2]) → (a,b)=(41,5) — but that check is *only*
+`res[1]==41 && res[2]==5`, i.e. self-consistency against a value hard-coded
+from `howe_richelot_v5.gp`, not a check against the true target. The line
+directly below it in the same output block already says
+`#Jac=2169  target=1767  match=0` — a fail that no prior log entry flagged.
+Verified independently with `ellcard`: E1=y²=x³+7 has order 31 (t=13), E2=
+y²=x³+13 has order 57 (t=−13), true target = 31·57 = **1767**; the curve
+y²=x⁶+41x³+5 has #Jac=2169 ≠ 1767 (PARI's own `hyperellcharpoly`, not a
+hand computation).
+
+**3. GP syntax pitfall found and worked around**: a `for(i=a,b,\n  ...\n)`
+whose *own* line ends right after the loop-bounds comma (body starting on
+the next line) throws `syntax error, unexpected end of file` in PARI/GP
+2.15.4, even though braces/parens are balanced project-wide — and, worse,
+this failure mode does not exit but appears to leave `gp` in a state that
+hangs on EOF until an external `timeout` kills it (repro'd down to a
+5-line nested-for minimal case). Fix: keep each `for(...)`'s opening line
+non-empty after the last argument — i.e. `for(i=a,b, body_start...` on one
+line — never `for(i=a,b,` alone. Wasted ~15 minutes chasing this before
+isolating it; worth remembering for every future PARI script in this repo.
+
+**4. Wrote `secp256k1_cm_audit/howe_z3_family_exhaustive.gp`**: exhaustively
+searches the ENTIRE (s,q) ∈ F_p×F_p grid Thread 2 only sampled one point of
+(sv=[0,s,0], qv=[0,0,q], scalar multiples of one F_{p³} generator), across 8
+representative `rr` values spanning both non-cube classes of F_43*, checking
+the true Jacobian order (via `hyperellcharpoly`, not a hard-coded reference)
+against target 1767. Runtime 2.7s for 14792 (rr,s,q) triples.
+
+**Result: 0/14112 F_p-rational hits match target 1767.** The restricted
+2-parameter "Z/3Z scalar-multiple" slice used throughout Thread 2 cannot
+reach the Howe cover of (E1,E2), for any point in its domain, at any of the
+8 rr representatives. This is a clean, exhaustive version of what Thread 2
+suspected from one failing data point (p=1009, Test 2).
+
+Also launched (background, `/tmp/.../scratchpad/grid1009b.gp`) the same
+search scaled to the actual p=1009/(d=11) pair Thread 2's Test 2 used
+(1,018,081 (s,q) pairs at one rr, with a cheap O(p) trace pre-filter before
+the expensive `hyperellcharpoly` call) — confirms/extends the same
+negative result at cryptographically-relevant-shape scale. Did not block
+this entry on it finishing; report next session if it's still informative.
+
+**5. Went back through the FULL log (not just the tail) to find out why
+Thread 2 was reinventing this.** Found the actual resolution:
+
+- **2026-06-08/06-09**: earlier session already diagnosed *why* Richelot
+  from any smooth Z/3Z-symmetric sextic fails: "the standard Richelot maps
+  between smooth Jacobians in the interior of A_2 and cannot reach the
+  boundary [E1×E2] directly" (line ~1183). Also ran the full 15-pair Howe
+  (H1)(H2)(H3) table for secp256k1's 6 sextic twists — **5/15 pairs
+  glueable**: (0,2),(0,3),(0,5),(1,4),(2,3) — this is Priority 3, and it
+  was fully answered here too (commit `3eaf753`), independent of Thread 2's
+  later (0,1)/(0,3)/(0,4)/(0,5) framing which never referenced this table.
+- **2026-06-11**: found the actual Howe-glued curve for the p=43 toy is the
+  *naive* cover `C: y²=(x³+7)(x³+13) = x⁶+20x³+5` — NOT a Z/3Z-canonical
+  class at all (a=20 was outside the a∈{1,2,3,4,6,8,16} search set every
+  earlier session had used). Verified via Newton power sums that
+  `Jac(C)(F_{43³}) ≅ E1×E2(F_{43³})` exactly (p_3=0 check, and direct
+  |E1|·|E2| vs L-polynomial match at F_{43³}), while confirming `Jac(C)`
+  is *not* split over F_43 or F_{43²}. Commit `eddc591`.
+- **2026-06-12**: repeated the argument at the real secp256k1 prime —
+  `secp256k1_cm_audit/fp3_obstruction_secp256k1.gp` confirms `|E(F_p)|` and
+  `|E(F_{p²})|` are odd (no 2-torsion) but `|E(F_{p³})|` is divisible by 4
+  (full 2-torsion first appears at the cubic extension) — the same
+  structural pattern as p=43. Commit `8352a7f`.
+- **2026-06-13**: integrated as **Proposition `prop:fp3obs`** ("the
+  F_{p^3} obstruction") in `paper/structural_completeness.tex`, §"The
+  Howe-gluing structural fact", with the Gaudry-index-calculus cost bound
+  `O(sqrt(|Jac(C)(F_{p^3})|))` making any Howe-cover attack strictly worse
+  than BSGS on secp256k1 itself. Commit `181f925`.
+
+**So Priority 2 (and Priority 3) have been CLOSED and PUBLISHED since
+2026-06-13** — the naive cover is the right cover, it's just that its
+splitting field is F_{p^3}, not F_p; no amount of searching *within F_p*
+(Thread 2's Z/3Z scalar family, or today's exhaustive version of the same
+search) can find an F_p-rational split, because there isn't one. Today's
+grid search independently reconfirms this from a completely different
+angle (exhaustive F_p search failure) without assuming the F_{p^3}
+resolution — the two lines of evidence corroborate each other.
+
+**6. Updated `RESEARCH_MESTRE_HOWE.md`**: its "Status" header still framed
+the Howe cover as an open multi-week Mestre-implementation project — true
+of the original problem statement (find the Igusa invariants of
+`(E1×E2)/Γ_α` in general) but **stale** for the load-bearing
+cryptographic question, which was resolved via the much simpler F_{p^3}
+argument above. Added a dated addendum pointing to the Proposition and to
+`howe_z3_family_exhaustive.gp`, with an explicit "do not re-open a third
+time" note.
+
+### Findings
+
+1. **Priority 2 and Priority 3 are CLOSED, not open** — resolved
+   2026-06-09 (15-pair table) and 2026-06-13 (F_{p^3} obstruction,
+   Proposition in the paper). Confirmed by direct inspection of
+   `paper/structural_completeness.tex` §"The Howe-gluing structural fact"
+   (search `prop:fp3obs`).
+2. **Thread 2 (2026-07-21 – 07-27) was ~4 sessions of redundant work** on
+   an already-solved problem, via a different (and, per this session's
+   exhaustive check, unsalvageable) construction. Root cause: the daily
+   protocol's "check if last touched within 7 days" triage only looked at
+   recent entries, never searched the ~5000-line backlog for a prior
+   CLOSED/RESOLVED marker on the same named priority.
+3. `howe_5pairs_v2.gp` Test 1's "✓ CORRECT" was a self-consistency check
+   against a hard-coded value, not a check against the real target — the
+   real mismatch (#Jac=2169 vs target 1767) was printed in its own output
+   the whole time and never flagged.
+4. Exhaustive confirmation: the Z/3Z scalar-multiple Richelot family
+   (`sv=[0,s,0], qv=[0,0,q]`) reaches 0/14112 matches to the true target
+   across the full (s,q,rr) grid at p=43 — not just the 1-3 points Thread
+   2 happened to try.
+5. New PARI/GP 2.15.4 parser gotcha (multi-line `for(...,` with the body
+   starting on the next line can hang the interpreter on EOF rather than
+   erroring cleanly) — documented in `howe_z3_family_exhaustive.gp`'s
+   header and above, for whichever thread writes the next PARI script.
+
+### Next step proposal
+
+**Fix the protocol, not just the symptom.** Recommend Step 2 of the daily
+protocol be amended: before selecting a priority thread based on "not
+touched in 7 days," grep the *entire* `RESEARCH_AUTOLAB_LOG.md` (not just
+the tail) for that priority's keywords and for "CLOSED"/"RESOLVED", and
+also grep the paper `.tex` files for a matching Proposition/Theorem. A
+thread can go quiet not because it's stalled but because it's finished.
+
+**Concrete correction for tomorrow**: with Priorities 1–4 now confirmed
+CLOSED (1: §10.5, 2026-06-06; 2: prop:fp3obs, 2026-06-13; 3: 15-pair table,
+2026-06-09; 4: 384-bit 3-of-3, structural dead-end per 2026-07-08 log),
+the correct next task by protocol is **Priority 5, continuing Thread 25**
+(H25: does mu still separate Kannan-LLL recovery inside the NU-ambiguous
+band 1.04 ≤ NU ≤ 2.20?) exactly as proposed in yesterday's (2026-08-07 #2)
+entry — this session's mis-triage should not block that. If Thread 25 is
+also judged "stalled," Priority 6 (B5 cover-cost analysis over F_{p^k}) has
+never been touched and is the fallback.
+
+### Commits made
+
+(recorded in the follow-up log-hash entry, per repo convention)
