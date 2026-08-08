@@ -6692,4 +6692,4 @@ threshold.
 
 ### Commits made
 
-(recorded after this entry is committed)
+b62b879 autolab 2026-08-08: Thread 25 — H25 (raw mu) falsified in-band, nu_hat survives conditioning on NU (AUC 0.840, up to 0.985)
