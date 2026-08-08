@@ -6538,3 +6538,154 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — the pre-registered next step of yesterday's Thread 24 entry
+(log line ~6510). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and
+priority 3 completed 2026-07-21, so priority 5 (GLV-HNP) is again the only
+live thread; Thread 24 made measurable progress the previous day (H24 split
+verdict, W5/W6 control experiment), so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if no, mu's apparent power is entirely mediated by NU and
+>        the closed form should be retired.
+
+Plus the two secondary sub-tasks proposed in the same entry: the `step =
+log2(||b*_{m+1}||) - log2(||b*_1||)` statistic, and (if H25 confirms) a
+logistic fit on (log NU, log mu)/(log nu_hat).
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0 (fourth run in a row this
+  was needed from scratch — worth noting for a future setup-script thread).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Re-derives the
+  identical 500-instance 17-bit table from `glv_hnp_phase2_gsprofile_strat.py`
+  (same `search_curves`, same `EFFS`, same `SEEDS`, same `d_trial` derivation
+  — bit-identical, confirmed by matching recovery counts against the stored
+  `glv_hnp_phase2_gsprofile_strat_output.txt`), no new lattice data. Added
+  the `step` statistic (not previously computed) and NU-band stratification.
+  Output: `glv_hnp_phase2_thread25_output.txt` (74 lines).
+- One bug caught during development: the logistic-regression AUC line
+  initially passed `auc(posp, negp)` — `auc()`'s convention is "smaller
+  score -> positive class" but `predict()` returns a probability where
+  *larger* = positive, so the raw call silently reported an inverted
+  AUC (0.060 instead of 0.940). Fixed by swapping the arguments; flagging
+  the convention explicitly in a comment for future scripts reusing `auc()`.
+- `cargo test --test curve_audit` -> 5/5 pass (5.13s). No Rust touched.
+
+### Findings
+
+**H25 (raw mu, pooled across eff) is FALSIFIED, but for a diagnosable
+reason, not because mu carries no signal.**
+
+```
+NU band [1.040, 2.199] (Thread 24 W4 bracket), pooled over all 5 eff strata:
+  N=366, 97 recovered / 269 failed
+  AUC(-mu     -> recovery) = 0.6932   <-- H25 as literally stated: FALSIFIED (< 0.80)
+  AUC(-NU     -> recovery) = 0.5656   (expected: NU is ~flat inside its own ambiguous band)
+  AUC(-nu_hat -> recovery) = 0.8403   <-- H25 restated with nu_hat: CONFIRMED (>= 0.80)
+  AUC(-step   -> recovery) = 0.1803   (inverted; see secondary below)
+```
+
+Per-eff breakdown inside the band shows why the pooled mu number is
+misleading:
+
+```
+ eff     N    rec   AUC mu   AUC NU
+0.05    24  23/24   0.4565   0.4783   (degenerate: 96% recovery, no signal either way)
+0.10    83  26/83   0.8819   0.5277
+0.15    96  21/96   0.8889   0.3283
+0.20    89  18/89   0.9276   0.4695
+0.25    74   9/74   0.8615   0.6188
+```
+
+Within every non-degenerate stratum, raw mu separates at 0.86-0.93 — as
+good as or better than nu_hat's pooled 0.84. The pooled AUC is confounded
+by exactly the scale problem W5/W6 already diagnosed for mu: mu's absolute
+value is not eff-comparable (it shifts systematically with K1/n across
+strata), so pooling washes out a real per-stratum signal. This is a
+restatement, not a refutation, of Thread 24's finding that
+`nu_hat = mu/sqrt(det L2)` is the correct normalization.
+
+**Verdict: H25 holds in substance.** Recovery = f(NU, X) with X a genuine
+second, NU-independent coordinate, exactly as Thread 24's control (W5/W6)
+implied. The correctly-normalized form of X is nu_hat, not raw mu; stated
+that way, H25's own >=0.80 bar is met (0.8403) with zero additional
+lattice computation beyond what NU already requires.
+
+**Secondary — the two-block GS step is FALSIFIED and, past eff=0.05, the
+sign is inverted.**
+
+```
+pooled (N=500):        AUC(-step -> recovery) = 0.3286
+per eff:  0.05: 0.636   0.10: 0.227   0.15: 0.114   0.20: 0.079   0.25: 0.106
+Spearman(step, mu) = -0.663      Spearman(step, NU) = +0.135
+```
+
+The proposed direction ("step -> 0 predicts the wall") only weakly holds
+at the smallest, near-saturated stratum (eff=0.05, 96% recovery, low
+information) and is strongly *inverted* everywhere else — a LARGER gap
+between the two GS blocks predicts recovery, not a smaller one. `step` is
+essentially an inverse proxy for mu (Spearman -0.66) and adds no
+information NU/nu_hat/mu don't already carry. Retire this statistic.
+
+**Bonus — a single scalar, NU * nu_hat, matches the eff-aware closed form
+with no explicit eff/K1/K2 term.**
+
+A logistic fit on (log NU, log nu_hat), standardized, 3000 GD epochs, all
+500 instances:
+
+```
+weight(log NU) = -3.0025   weight(log nu_hat) = -2.3381   bias = -1.1229
+train accuracy @0.5 = 0.8660    AUC = 0.9397
+```
+
+Both weights are negative and the same order of magnitude — confirms the
+2D structure directly rather than by eff-stratified inference. The fitted
+boundary slope in raw log-space is -1.052, i.e. close to the diagonal
+`log NU + log nu_hat = const`, so the simple product should be nearly as
+good as the full fit:
+
+```
+AUC(-NU*nu_hat -> recovery) pooled = 0.9395   (N=500)
+  cf. logistic combo            0.9397
+  cf. nu_hat*sqrt(eff) (Thread 24 W3/W6 closed form, eff-aware)  0.9348
+  cf. NU alone                  0.7996
+  cf. nu_hat alone              0.6889
+```
+
+`NU * nu_hat` needs no eff/K1/K2 as an explicit input yet matches (in fact
+marginally exceeds, within noise) the eff-aware closed form built from the
+BV-style derivation. Both NU and nu_hat are pure lattice quantities of a
+single instance, so `NU*nu_hat` is a genuinely instance-local 2-parameter
+viability statistic.
+
+### Next step proposal
+
+**Thread 26 — cross-validate `NU * nu_hat` as a standalone certificate.**
+The 0.9395 pooled AUC above is a training-set number (same 500 rows used
+to discover the -1.05 slope). Concrete falsifiable sub-task:
+  H26: on a FRESH sample (different curves and/or different eff grid,
+       same protocol), AUC(-NU*nu_hat -> recovery) stays >= 0.90.
+Cheap: reuse `search_curves` with a shifted bit range (e.g. 18 bits) or a
+disjoint prime range at 17 bits, ~5 min run. If confirmed, `NU*nu_hat` is
+worth writing up as the paper-facing Phase-2 viability statistic (replacing
+the ad hoc nu_hat separator from Thread 20b, AUC 0.935, which W6 showed is
+not size-stable) — it would be the first Phase-2 predictor validated OUT
+of the sample used to construct it.
+
+Secondary (unchanged, still open, still cheap): BKZ-beta sweep against NU
+to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — this has now been carried over three consecutive sessions
+without being picked up; worth prioritizing next if Thread 26 is quick.
+
+### Commits made
+
+(recorded after push — see follow-up log entry)

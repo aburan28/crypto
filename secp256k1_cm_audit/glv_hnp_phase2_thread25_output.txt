@@ -1,0 +1,74 @@
+==============================================================================
+Thread 25 — is mu a second, NU-independent coordinate?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.4s
+
+------------------------------------------------------------------------------
+EXP H25: stratify by NU band [1.04, 2.199] (pooled over all eff)
+------------------------------------------------------------------------------
+  NU < lo (sufficient)         N=  94  recovered 92/94
+  lo <= NU <= hi (ambiguous)   N= 366  recovered 97/366
+  NU > hi (necessary-fail)     N=  40  recovered 1/40
+
+Inside the ambiguous band: N=366, 97 recovered / 269 failed
+  AUC(-mu     -> recovery) = 0.6932   (H25 predicts >= 0.80)
+  AUC(-NU     -> recovery) = 0.5656   (expect ~0.5: this is the band where NU carries no signal)
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-step   -> recovery) = 0.1803   (step -> 0 predicts the wall?)
+
+H25 verdict: FALSIFIED  (AUC(-mu) = 0.6932 vs threshold 0.80)
+
+per-eff breakdown inside the band:
+  eff     N     rec   AUC mu   AUC NU
+ 0.05    24   23/24   0.4565   0.4783
+ 0.10    83   26/83   0.8819   0.5277
+ 0.15    96   21/96   0.8889   0.3283
+ 0.20    89   18/89   0.9276   0.4695
+ 0.25    74    9/74   0.8615   0.6188
+
+------------------------------------------------------------------------------
+EXP H25-secondary: does the two-block GS step predict recovery?
+------------------------------------------------------------------------------
+pooled (N=500, all eff):
+  AUC(-step   -> recovery) = 0.3286
+  AUC(-NU     -> recovery) = 0.7996
+  AUC(-mu     -> recovery) = 0.3964
+  Spearman(step, NU)  = 0.1351
+  Spearman(step, mu)  = -0.6627
+
+per-eff AUC(-step -> recovery):
+  eff=0.05  AUC(-step) = 0.6364  (N=100)
+  eff=0.10  AUC(-step) = 0.2266  (N=100)
+  eff=0.15  AUC(-step) = 0.1139  (N=100)
+  eff=0.20  AUC(-step) = 0.0793  (N=100)
+  eff=0.25  AUC(-step) = 0.1062  (N=100)
+
+------------------------------------------------------------------------------
+EXP H25-logistic: 2-parameter separator on (log NU, log nu_hat)
+------------------------------------------------------------------------------
+mu is confounded across eff strata (per-eff AUC 0.86-0.93 but
+pooled AUC 0.69); nu_hat = mu/sqrt(det L2) is the eff-comparable
+normalization and clears H25's 0.80 bar in-band (0.8403). Fit
+logistic regression on all 500 instances (not just the band) to
+get an explicit 2D decision boundary.
+
+fit on standardized (log NU, log nu_hat), N=500, 3000 GD epochs:
+  weight(log NU)     = -3.0025  (standardized units)
+  weight(log nu_hat) = -2.3381  (standardized units)
+  bias               = -1.1229
+  train accuracy @0.5 = 0.8660   AUC = 0.9397
+  (raw-scale slope: d(log nu_hat)/d(log NU) along boundary = -1.052)
+  both weights negative and same order of magnitude -> neither NU nor nu_hat dominates; genuinely 2D.
+
+The fitted boundary slope (~-1.05) suggests the simple product
+NU * nu_hat is itself close to the optimal linear combination:
+  AUC(-NU*nu_hat -> recovery) pooled = 0.9395   (N=500; cf. logistic 0.9397, nu_hat*sqrt(eff) closed form 0.9348)
+  NU*nu_hat needs NO explicit eff/K1/K2 term and matches the
+  eff-aware closed form -- eff's contribution is implicit in the
+  product of the two lattice-computed quantities.
+
+==============================================================================
+done
+==============================================================================
