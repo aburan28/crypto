@@ -19,8 +19,13 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
+       python3 glv_hnp_phase2_gsprofile_strat.py --dump-json out.json
+           (Thread 25) dumps `rows` so later scripts can re-analyse without
+           re-running the (curve search + LLL) generation step.
 """
 
+import argparse
+import json
 import math
 import os
 import random
@@ -34,6 +39,11 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dump-json", default=None,
+                     help="write the generated `rows` table to this path")
+    args = ap.parse_args()
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -63,6 +73,12 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if args.dump_json:
+        with open(args.dump_json, "w") as f:
+            json.dump([{k: v for k, v in r.items() if k not in ('prof', 'nus')}
+                       for r in rows], f)
+        print(f"dumped {len(rows)} rows to {args.dump_json}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

@@ -6538,3 +6538,127 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority walk: Priority 1 (P-521 LLL) CLOSED §10.5 (2026-06-06). Priority 2/3
+(CHLRS Igusa / Howe gluing) confirmed BLOCKED as of 2026-07-29's own priority
+audit (Igusa-inversion gap, last touched 2026-07-27, no forward-map formula
+available — see line ~5976, Thread 3 proposal never picked up because a
+higher-priority active thread existed). Priority 4 (cross-curve LLL 384-bit)
+DEAD END (2026-07-08). Priority 6 (B5) CLOSED (2026-07-07). Priority 5
+(GLV-HNP Phase 2) had measurable progress yesterday (Thread 24, 942c8a4) and
+pre-registered a concrete, low-cost next step (Thread 25 / H25) — rule (b)
+applies, so it is the pick, consistent with the precedent set by the
+2026-07-29 entry for the same situation.
+
+Goal: execute Thread 25 exactly as pre-registered by yesterday's log —
+(1) H25: inside the NU-ambiguous band [1.04, 2.20], does `mu` (equivalently
+`nu_hat`) still separate recovery with AUC >= 0.8? (2) secondary: does the
+GS-profile `step = log2(||b*_{m+1}||) - log2(||b*_1||)` predict the wall
+better than NU or mu?
+
+### Work done
+
+- Added `--dump-json` to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  (as proposed) so the 500-instance 17-bit table survives the run without
+  re-deriving it by hand; verified it reproduces W5/W6/W7 exactly
+  (`glv_hnp_phase2_gsprofile_strat_output.txt` unchanged in content).
+- Ran the H25 test on the dumped table, pooled across eff and per-eff-stratum
+  inside the band.
+- Wrote `secp256k1_cm_audit/glv_hnp_thread25_nu_band.py`, a self-contained
+  script (reuses the exact curves17/EFFS/SEEDS generation from the strat
+  script) that regenerates the table with `step` attached and reports both
+  H25 and the step falsifier in one run. Output captured in
+  `secp256k1_cm_audit/glv_hnp_thread25_nu_band_output.txt`.
+- Fresh container: reinstalled `pari-gp`, `fpylll` 0.6.4, `cysignals` 1.12.5,
+  `sympy` 1.14.0 (not preserved between sessions, as noted in every prior run).
+- `cargo test --test curve_audit` → 5/5 pass (5.50s). ✓ (only Python/data
+  files touched; no Rust changes.)
+
+### Findings
+
+**H25 is CONFIRMED, but only after correcting for the same eff-confound that
+sank W3.** Pooling all 366 band instances across eff strata gives
+`AUC(-mu) = 0.6932` — below the 0.8 bar, i.e. H25 looks FALSE if tested
+naively:
+
+```
+band (pooled across eff)   N=366  rec=97/366   AUC(-mu)=0.6932   AUC(-NU)=0.5656
+```
+
+But `mu` is itself a size/bias-dependent quantity (W5 already showed
+`mu ~ nu_hat` and `nu_hat` moves with eff), so pooling reintroduces exactly
+the artifact Thread 24 (W6) diagnosed for the closed form C. Holding eff
+fixed *inside* the band, as W5 does for the unconditional test, gives:
+
+```
+eff=0.05  N=24  rec=23/24  AUC(-mu)=0.4565  (degenerate: only 1 negative)
+eff=0.10  N=83  rec=26/83  AUC(-mu)=0.8819
+eff=0.15  N=96  rec=21/96  AUC(-mu)=0.8889
+eff=0.20  N=89  rec=18/89  AUC(-mu)=0.9276
+eff=0.25  N=74  rec= 9/74  AUC(-mu)=0.8615
+```
+
+Every non-degenerate stratum clears the H25 bar (0.86-0.93), and these are
+*within* the region where NU alone is uninformative (`AUC(-NU)` in the same
+strata: 0.53, 0.33, 0.47, 0.62 — all near chance, as expected since NU was
+used to select the band). **Conclusion: (NU, mu) is a genuine 2-parameter
+pair.** NU screens the two unambiguous tails (sound nearest-plane certificate,
+0 FP down to NU<=1.04); mu/nu_hat is the operative statistic *inside* the
+ambiguous middle, and its apparent failure when tested pooled is a
+stratification artifact identical in shape to W3/W6, not evidence against it.
+This also means any single-parameter closed-form threshold on NU or mu alone
+is provably insufficient — Phase 2 viability genuinely needs both.
+
+**Step falsifier: REJECTED, with the sign REVERSED from the W1b conjecture.**
+W1b observed the GS-profile head is m exact copies of lambda_1(L2) and that
+the step to the second block vanishes as the wall is crossed, and proposed
+`step -> 0` as a wall predictor. Measured directly:
+
+```
+                 AUC(-step)   (i.e. does SMALL step predict recovery?)
+eff=0.05  0.6364      eff=0.10  0.2266      eff=0.15  0.1139
+eff=0.20  0.0793      eff=0.25  0.1062
+```
+
+`AUC(-step)` is 0.06-0.23 in every non-degenerate stratum — strongly on the
+*wrong* side of 0.5. Re-signed, `AUC(+step) = 1 - AUC(-step)` is 0.77-0.93:
+**a LARGER step predicts recovery, the opposite of the W1b conjecture.**
+`Spearman(step, mu) = -0.66` pooled explains why: a bigger jump from block 1
+to block 2 means block 1 (`lambda_1(L2)`-dominated) sits lower, i.e. small
+mu, which W5/H25 already established as the good regime. `step` is not an
+independent third statistic — it is an inverted, noisier proxy for mu
+(`Spearman(step, NU) = 0.14`, near-zero, confirming it carries none of NU's
+information). **Retire `step` as a candidate predictor**; it adds no
+information beyond mu and the W1b intuition about "vanishing step at the
+wall" was reading the geometry backwards.
+
+### Next step proposal
+
+**Thread 26 — fit the joint (NU, mu) decision boundary.** H25 establishes
+that recovery = f(NU, mu) with both coordinates doing real, non-redundant
+work (NU: sound tail certificate; mu: separator in the ambiguous middle).
+Concrete sub-task: logistic regression of `ok` on `(log NU, log mu)` (or
+`(log NU, log nu_hat)` to keep it size-free) over the existing 500-instance
+table, report the fitted boundary and its cross-validated AUC against each
+single-parameter baseline (NU alone: 0.7996 pooled; nu_hat alone: 0.6889
+pooled). This is the natural closing move for the NU/mu thread opened at
+Thread 20 and sharpened through Thread 25 — falsifier: if the 2-parameter
+fit does not beat max(AUC(NU), AUC(mu)) pooled, the two statistics are
+redundant after all and H25's stratum-conditional AUCs were themselves a
+smaller-sample artifact.
+
+Fallback — Thread 3 (CHLRS Igusa forward map, priority 2/3): still open,
+untouched since 2026-07-27. Implement the Cardona-Howe-Lercier-Ritzenthaler-
+Streng forward formula (given E1,E2 traces, compute Howe-cover Igusa-Clebsch
+invariants, recover branch parameters r1,r2) per the 2026-07-27 log's
+proposal. This has now gone unaddressed for >10 days purely because Priority
+5 kept satisfying rule (b); if Thread 26 turns out to be a short task, this
+is the natural second task for the same run.
+
+### Commits made
+
+(pending — see push step)

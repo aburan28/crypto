@@ -1,0 +1,31 @@
+==============================================================================
+Thread 25 — H25 (mu inside the NU-ambiguous band) + step falsifier
+==============================================================================
+500 instances (dim 24, m=12) in 2.3s
+
+H25 test, band NU in [1.04,2.199]:
+------------------------------------------------------------------------------
+  pooled across eff (naive, confounded like W3):
+  band         N= 366 rec= 97/366 AUC(-step)= 0.1803 AUC(-mu)= 0.6932 AUC(-NU)= 0.5656
+
+  per-eff inside band (honest, eff held fixed):
+  eff=0.05     N=  24 rec= 23/24  AUC(-step)= 0.5217 AUC(-mu)= 0.4565 AUC(-NU)= 0.4783
+  eff=0.10     N=  83 rec= 26/83  AUC(-step)= 0.1329 AUC(-mu)= 0.8819 AUC(-NU)= 0.5277
+  eff=0.15     N=  96 rec= 21/96  AUC(-step)= 0.1130 AUC(-mu)= 0.8889 AUC(-NU)= 0.3283
+  eff=0.20     N=  89 rec= 18/89  AUC(-step)= 0.0657 AUC(-mu)= 0.9276 AUC(-NU)= 0.4695
+  eff=0.25     N=  74 rec=  9/74  AUC(-step)= 0.1179 AUC(-mu)= 0.8615 AUC(-NU)= 0.6188
+
+Step falsifier, unconditional per-eff stratum (mirrors W5, adds step):
+------------------------------------------------------------------------------
+  eff=0.05     N= 100 rec= 99/100 AUC(-step)= 0.6364 AUC(-mu)= 0.4242 AUC(-NU)= 0.8687
+  eff=0.10     N= 100 rec= 42/100 AUC(-step)= 0.2266 AUC(-mu)= 0.7443 AUC(-NU)= 0.7011
+  eff=0.15     N= 100 rec= 21/100 AUC(-step)= 0.1139 AUC(-mu)= 0.8873 AUC(-NU)= 0.3496
+  eff=0.20     N= 100 rec= 19/100 AUC(-step)= 0.0793 AUC(-mu)= 0.9175 AUC(-NU)= 0.5595
+  eff=0.25     N= 100 rec=  9/100 AUC(-step)= 0.1062 AUC(-mu)= 0.8816 AUC(-NU)= 0.7277
+
+Spearman(step, NU) pooled = 0.1351
+Spearman(step, mu) pooled = -0.6627
+
+==============================================================================
+done
+==============================================================================
