@@ -6685,4 +6685,4 @@ threshold.
 
 ### Commits made
 
-(pending — see push step)
+dfeaca4 autolab 2026-08-08: Thread 25 — mu is a genuine 2nd coordinate at fixed eff (AUC 0.86-0.93 in-band); step statistic sign-flips W1b's guess
