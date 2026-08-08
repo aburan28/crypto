@@ -6669,4 +6669,4 @@ even though it doesn't solve Thread 2/3 itself.
 
 ### Commits made
 
-(recorded after push — see next log entry / git log)
+1b7db83 autolab 2026-08-08: Thread 2/3 CHLRS — naive product-cover ansatz ruled out; #Jac(D) never equals #E1*#E2
