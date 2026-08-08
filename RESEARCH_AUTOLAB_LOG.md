@@ -6731,4 +6731,4 @@ new data, only reprocessing of `glv_hnp_phase2_gsprofile_strat.py`'s existing ou
 ### Commits made
 
 92d5293 autolab 2026-08-08: Thread 3 CHLRS forward map — naive cover and Richelot-dual family never match E1xE2; howe_richelot_v5.gp's own 21-way sweep is 0/21
-(second commit, this session) autolab 2026-08-08 #2: correction — full 1442-trial prime sweep finished after the first commit and found 31 real successes (2.15%); p=43 reference pair is a genuine miss, not representative of the construction being globally broken
+4c6ec2a autolab 2026-08-08 #2: correction — full 1442-trial prime sweep finished after the first commit and found 31 real successes (2.15%); p=43 reference pair is a genuine miss, not representative of the construction being globally broken
