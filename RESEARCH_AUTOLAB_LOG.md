@@ -6661,4 +6661,4 @@ is the natural second task for the same run.
 
 ### Commits made
 
-(pending — see push step)
+3109477 autolab 2026-08-08: Thread 25 — H25 confirmed per-eff (mu separates inside NU-ambiguous band); step falsifier rejected, sign reversed
