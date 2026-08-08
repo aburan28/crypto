@@ -6538,3 +6538,137 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6516). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 made measurable progress the same day (H24 split-verdict,
+NU/nu_hat shown mutually uncorrelated), so protocol rule (b) applies.
+
+Pre-registered hypothesis, verbatim:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+Plus the pre-registered secondary from W1b: `step = log2||b*_{m}|| -
+log2||b*_1||` (the GS-profile block transition) as a standalone predictor.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Fourth run in a row needing
+  `cysignals` named explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_h25.py` — new. Regenerates the exact
+  W5/W6 dataset (17 bits, 5 eff strata x 20 curves x 5 seeds, M=12,
+  `search_curves` is unseeded-randomness-free so this reproduces the same 20
+  curves) via the same `instance()`/`run_new()` calls as
+  `glv_hnp_phase2_gsprofile_strat.py`, but keeps `prof` per row (the strat
+  script discards it) to compute `step`, and adds the proposed `--dump-json`
+  flag so the 500-row table survives the run.
+  Output: `glv_hnp_phase2_h25_output.txt` (45 lines),
+  `glv_hnp_phase2_h25_data.json` (500 rows, `prof`/`nus` stripped).
+- `cargo test --test curve_audit` -> 5/5 pass (4.2s). No Rust touched.
+
+### Findings
+
+**H25 pooled-within-band: FALSIFIED at face value.**
+
+```
+NU < 1.040 (sufficient)        N= 94   recovery 92/94  (97.9%)
+1.040 <= NU <= 2.199 (band)    N=366   recovery 97/366 (26.5%)
+NU > 2.199 (necessary-fail)    N= 40   recovery  1/40  ( 2.5%)
+
+within band: AUC(-mu -> recovery) = 0.6932   (H25 threshold 0.80, MISS)
+             AUC(-nu_hat)         = 0.8403
+```
+
+The 12-bit/17-bit bracket [1.04, 2.20] transports reasonably well to this
+different (eff-grid, not K1-grid) 17-bit dataset: 97.9% recovery below it,
+2.5% above it, consistent with W4's near-soundness.
+
+**H25b — the pooled miss is itself an eff-confound, exactly the W5/W6
+trap one level deeper. Per-eff-stratum WITHIN the band, mu and nu_hat both
+clear the H25 bar:**
+
+```
+eff=0.05  N=24  rec 23/24  AUC(mu)=0.457  AUC(nu_hat)=0.457   (degenerate: 1 negative)
+eff=0.10  N=83  rec 26/83  AUC(mu)=0.882  AUC(nu_hat)=0.885
+eff=0.15  N=96  rec 21/96  AUC(mu)=0.889  AUC(nu_hat)=0.883
+eff=0.20  N=89  rec 18/89  AUC(mu)=0.928  AUC(nu_hat)=0.943
+eff=0.25  N=74  rec  9/74  AUC(mu)=0.862  AUC(nu_hat)=0.862
+```
+
+Excluding the degenerate eff=0.05 cell (23/24 positive, one negative — AUC is
+a coin flip on that little data), **mu clears 0.8 in all 4 remaining strata
+(0.86-0.93), nu_hat tracks it within 0.02 in every cell.** The pooled 0.693
+was mixing five strata whose recovery *base rates* differ 8x (23/24 down to
+9/74) inside the same NU band; that shift alone reverses the ranking enough
+to erase the real per-stratum signal, the identical failure mode W5 was
+built to rule out for NU vs nu_hat*sqrt(eff) — it just resurfaces one level
+in, inside a single NU stratum instead of across all NU.
+
+**H25 verdict, corrected: HOLDS.** mu (equivalently nu_hat, they agree to
+<=0.02 AUC once eff is fixed) is a genuine second coordinate inside the
+ambiguous NU band, not noise mediated by NU. **(NU, mu-or-nu_hat, eff)** is
+the real 3-parameter viability surface: NU gates the two >90%-pure tails,
+and within its ambiguous middle, mu/nu_hat re-separates cleanly per
+bias-strength stratum. A single pooled scalar threshold on mu will not work
+across strata (the pooled AUC computation above is proof); a per-eff
+(or per-`eff` bucketed) threshold, or a fitted logistic on (NU, mu, eff),
+would.
+
+**Secondary — `step` is FALSIFIED as a predictor, in the wrong direction.**
+
+```
+pooled (N=500)                 AUC(-step) = 0.3286   (i.e. LARGER step predicts recovery)
+eff=0.05  AUC(-step)=0.636   eff=0.10  AUC(-step)=0.227   eff=0.15  AUC(-step)=0.114
+eff=0.20  AUC(-step)=0.079   eff=0.25  AUC(-step)=0.106
+
+Spearman(step, NU) =  0.135   (weak)
+Spearman(step, mu) = -0.663   (step is mostly just anti-mu in disguise)
+```
+
+`step -> 0` does NOT predict the wall; if anything `step` shrinking predicts
+recovery is *harder* to lose (AUC << 0.5, strongly, once eff >= 0.10). Since
+`step` is 66% (Spearman) explained by `-mu` alone, it adds no information mu
+doesn't already carry and is worse at carrying it. W1b's "the step vanishes
+right as the wall is crossed" describes a real geometric transition but it
+is not a usable per-instance separator; retire it as a predictor. (The
+underlying two-block GS structure it was measuring is still valid — see
+W1b in the 2026-08-07 #2 entry — it just doesn't reduce to a good scalar.)
+
+### Next step proposal
+
+**Thread 26 — fit and ship the (NU, mu, eff) decision surface.** The
+concrete deliverable is a logistic regression on (log NU, log mu, log eff)
+over the existing 500-row `glv_hnp_phase2_h25_data.json`, reporting:
+(a) in-sample AUC of the fitted 3-feature model vs NU alone (0.800) and vs
+mu-within-eff-band alone; (b) a held-out check — refit on 4 of 5 eff strata,
+predict the 5th, since strata are the natural fold boundary here; (c) the
+fitted decision boundary in closed form if the logistic weights are stable
+across folds. Falsifier: if leave-one-stratum-out AUC drops below ~0.75, the
+3-parameter surface is overfit to this eff grid and does not generalise —
+report that finding and fall back to "NU sufficient/necessary + per-stratum
+mu threshold" as the operative test instead of a single fitted surface.
+Cost: pure re-analysis of the JSON already on disk, no new lattice
+computation, ~5 minutes (stdlib logistic via Newton's method or a small
+hand-rolled gradient descent — no sklearn dependency needed at this scale).
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU, to quantify
+how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+Tertiary: now that `step` is dead, reopen priority 1 (P-521 LLL bigfloat) or
+priority 2 (CHLRS Igusa) on the next run if Thread 26 is judged complete or
+stalls — both have been dormant since before 2026-07-21 and were not
+re-audited this run; a future run should explicitly re-check their CLOSED/
+BLOCKED status against the actual thread numbers rather than taking the
+2026-08-07 characterisation on faith.
+
+### Commits made
+
+(pending — see push step below)

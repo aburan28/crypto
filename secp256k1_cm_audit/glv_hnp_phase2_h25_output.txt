@@ -1,0 +1,55 @@
+==============================================================================
+Thread 25 — does mu survive as a 2nd coordinate once NU is fixed?
+==============================================================================
+500 instances (float GS, dim 24) in 2.0s
+wrote 500 rows to glv_hnp_phase2_h25_data.json
+
+------------------------------------------------------------------------------
+EXP H25: stratify by NU band. Ambiguous band = [1.04, 2.199]
+------------------------------------------------------------------------------
+NU < lo (sufficient)         N=  94  recovery 92/94 (97.9%)
+lo <= NU <= hi (ambiguous)   N= 366  recovery 97/366 (26.5%)
+NU > hi (necessary-fail)     N=  40  recovery 1/40 (2.5%)
+
+Sanity: bracket transported from the 12-bit/17-bit run (different lattice/dataset instantiation than W4 -- NU should
+still be near-sound at the edges, but is not guaranteed to be identical since W4 used the 22-cell K1 grid, not this eff grid).
+
+Within ambiguous band (N=366, 97 recover / 269 fail):
+  AUC(-mu     -> recovery) = 0.6932   (H25 predicts >= 0.80)
+  AUC(-step   -> recovery) = 0.1803
+  AUC(-nu_hat -> recovery) = 0.8403
+
+H25 verdict: FALSIFIED (AUC(-mu) = 0.6932 < 0.80)
+
+------------------------------------------------------------------------------
+EXP H25b: same test, but per-eff-stratum WITHIN the band -- guards
+against band membership itself being confounded with eff
+------------------------------------------------------------------------------
+  eff=0.05  N=  24  rec 23/24  AUC(-mu)=0.4565  AUC(-nu_hat)=0.4565
+  eff=0.10  N=  83  rec 26/83  AUC(-mu)=0.8819  AUC(-nu_hat)=0.8853
+  eff=0.15  N=  96  rec 21/96  AUC(-mu)=0.8889  AUC(-nu_hat)=0.8825
+  eff=0.20  N=  89  rec 18/89  AUC(-mu)=0.9276  AUC(-nu_hat)=0.9425
+  eff=0.25  N=  74  rec 9/74  AUC(-mu)=0.8615  AUC(-nu_hat)=0.8615
+
+------------------------------------------------------------------------------
+EXP H25-secondary: step = log2||b*_{m}|| - log2||b*_1|| as a
+standalone predictor, pooled over all strata
+------------------------------------------------------------------------------
+pooled (N=500):
+  AUC(-step -> recovery) = 0.3286
+  AUC(-NU   -> recovery) = 0.7996
+  AUC(-mu   -> recovery) = 0.3964
+
+per-eff-stratum AUC(-step):
+  eff=0.05  N= 100  AUC(-step) = 0.6364
+  eff=0.10  N= 100  AUC(-step) = 0.2266
+  eff=0.15  N= 100  AUC(-step) = 0.1139
+  eff=0.20  N= 100  AUC(-step) = 0.0793
+  eff=0.25  N= 100  AUC(-step) = 0.1062
+
+Spearman(step, NU) pooled: 0.1351
+Spearman(step, mu) pooled: -0.6627
+
+==============================================================================
+done
+==============================================================================
