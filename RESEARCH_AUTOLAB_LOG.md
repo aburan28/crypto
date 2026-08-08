@@ -6538,3 +6538,104 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 LLL) is CLOSED (§10.5, confirmed 3/3 at m=16 since
+2026-06-06, re-confirmed multiple times through 2026-07-08). Priorities 2, 4,
+6 remain CLOSED/BLOCKED/DEAD-END (CHLRS needs Sage, no update; Howe 15-pair
+complete 2026-07-21; B5 dead-end). Priority 3 complete. Priority 5 (GLV-HNP)
+is the only live thread; its last run (2026-08-07 #2, yesterday) made
+measurable progress (falsified H24's argmax clause, found NU and nu_hat
+uncorrelated at fixed eff — W6), so protocol rule (b) applies: continue
+Thread 25, the pre-registered next step.
+
+**Thread 25 — does mu (or its normalised form nu_hat) separate recovery
+*inside* the NU-ambiguous band, independent of NU itself?**
+
+### Work done
+
+- Fresh container: `pip install fpylll cysignals sympy` (same recurring note
+  as every session touching this thread — these are session-local, not
+  vendored).
+- `secp256k1_cm_audit/glv_hnp_phase2_nuband.py` — new. Regenerates the exact
+  500-instance table from `glv_hnp_phase2_gsprofile_strat.py` (20 17-bit
+  j=0 GLV curves x 5 eff strata x 5 seeds, dim 24, float GS — justified by
+  W0/W4 of `glv_hnp_phase2_gsprofile.py`) and adds a `step` column:
+  `step = log2(prof[m]) - log2(prof[0])`, m = dim/2 = 12, per the W1b
+  follow-up proposal. Supports `--dump-json` (writes
+  `glv_hnp_phase2_nuband_table.json`) so later analysis passes can reload
+  the table with `--from-json` instead of regenerating (2.5s to regenerate,
+  so this is a convenience, not a necessity).
+- `cargo test --test curve_audit` -> 5/5 pass (5.02s). No Rust touched.
+
+### Findings
+
+**X1 — H25 as literally stated is FALSIFIED for raw mu, but a refined
+positive result replaces it.** Restricting to the NU-ambiguous band
+`1.04 <= NU <= 2.20` (N=367, rec=98/367):
+
+```
+AUC(-mu     -> recovery | band) = 0.6962   <- H25's target; FALSIFIED (< 0.8)
+AUC(-nu_hat -> recovery | band) = 0.8419   <- eff-normalised mu; HOLDS (>= 0.8)
+AUC(-step   -> recovery | band) = 0.1784   <- inverted, see X3
+AUC(-NU     -> recovery | band) = 0.5599   <- sanity: NU has ~no power on its own band
+```
+
+Raw mu does not survive as the second coordinate — it fails the
+pre-registered 0.8 threshold. But `nu_hat = mu/sqrt(det L2)` (Thread 20b's
+original eff-normalised statistic) clears the bar at 0.84 *restricted to
+exactly the region where NU gives no answer*, and the sanity check confirms
+this isn't NU leaking back in (NU restricted to its own band is
+near-chance, 0.56, as it must be by construction). **The corrected
+statement of the finding: (NU, nu_hat) — not (NU, mu) — is the 2-parameter
+pair.** Scale matters: mu alone conflates curve size and eff; nu_hat
+divides that out, which is exactly why Thread 20b needed the normalisation
+in the first place.
+
+**X2 — pooled sanity, context for X1.** N=500, rec=190/500.
+`AUC(-mu) pooled = 0.3964` — INVERTED, because mu's scale grows with eff/K1
+across strata while recovery falls, so naive pooling of raw mu is actively
+misleading (consistent with W5's per-stratum values 0.42/0.74/0.89/0.92/0.88
+all being *positive* but the un-stratified pool flipping sign). `AUC(-NU)
+pooled = 0.7996` matches the 2026-08-07 #2 entry exactly (same table).
+`AUC(-step) pooled = 0.3286` — also inverted, see X3.
+
+**X3 — the step statistic is dead: it is not new information, it is mu
+with the sign and a data-processing loss.** `Spearman(step, mu)` is
+-0.79 to -0.90 in every eff stratum (X3 table), i.e. step is close to a
+monotone decreasing function of mu, and `AUC(-step)` tracks `1 - AUC(-mu)`
+per stratum (e.g. eff=0.10: AUC(-mu)=0.7443, AUC(-step)=0.2266,
+1-0.7443=0.2557 — close). `Spearman(step, NU)` is weak and sign-unstable
+(+0.12 to +0.29, one stratum -0.21) — step carries no NU-independent signal
+either. **The W1b-motivated secondary hypothesis is falsified**: the
+head-to-second-block jump is just a relabelling of lambda_1(L2), not a new
+observable. Kill this direction; do not pursue further.
+
+### Next step proposal
+
+**Thread 26 — build and validate the two-stage (NU, nu_hat) viability
+test.** X1 shows nu_hat does real work exactly where NU alone cannot decide.
+Concrete sub-task: fit the two-stage rule — (1) `NU <= 1` => certified
+success (0 FP over 506 instances across Thread 23b + this run's data), (2)
+else rank/threshold on `nu_hat*sqrt(eff)` (pooled AUC 0.9348 per the
+2026-08-07 #2 entry) — and measure its accuracy against NU alone (0.7996
+pooled) and against nu_hat*sqrt(eff) alone. Critically, do this with a
+**held-out curve split** (e.g. 15 curves train / 5 curves test, not the same
+20 curves used to fit any threshold) since every AUC in this and the prior
+session was computed in-sample; W7 already showed nu_hat is not a clean
+threshold (n=66463 nu_hat=0.7089 recovers 5/5, n=66037 nu_hat=0.7057
+recovers 0/5), so an honest out-of-sample number is overdue before calling
+this a "2-parameter viability test." Cost: reuse
+`glv_hnp_phase2_nuband_table.json` (already dumped this run), no new
+lattice computation, ~10 minutes.
+
+Tertiary (unchanged, still not started): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(recorded in follow-up commit after this entry is written)
