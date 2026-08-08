@@ -6688,4 +6688,4 @@ without being picked up; worth prioritizing next if Thread 26 is quick.
 
 ### Commits made
 
-(recorded after push — see follow-up log entry)
+65ac0f6 autolab 2026-08-08: Thread 25 — nu_hat (not raw mu) clears H25's in-band AUC bar; NU*nu_hat matches eff-aware closed form
