@@ -6691,3 +6691,5 @@ to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
 threshold. Still not attempted.
 
 ### Commits made
+
+0b7e48e autolab 2026-08-08: Thread 25 — H25 falsified pooled, holds eff-controlled; NU*nu_hat parameter-free separator (AUC 0.9395)
