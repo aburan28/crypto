@@ -1,0 +1,42 @@
+==============================================================================
+Thread 25 — does mu separate inside the NU ambiguous band, and does the block-step predict the wall?
+==============================================================================
+
+20 17-bit j=0 GLV curves; 500 instances (dim 24, float GS) in 2.4s
+raw table dumped to glv_hnp_thread25_rows.json (500 rows, prof/nus arrays excluded)
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside vs outside the ambiguous NU band [1.04, 2.20]  (17-bit bracket, Thread 24 W4)
+------------------------------------------------------------------------------
+band [1.04,2.2]: N=367  (below: 94, above: 39)
+  below-band recovery rate: 92/94
+  above-band recovery rate: 0/39
+ALL: N=500  rec 190/500  AUC(-mu)=0.3964  AUC(-NU)=0.7996  AUC(-step)=0.3286
+IN-BAND: N=367  rec 98/367  AUC(-mu)=0.6962  AUC(-NU)=0.5599  AUC(-step)=0.1784
+BELOW-BAND: N=94  rec 92/94  AUC(-mu)=0.1603  AUC(-NU)=0.9837  AUC(-step)=0.4511
+ABOVE-BAND: N=39  0/39 recovered (degenerate, no AUC)
+
+H25 verdict: AUC(-mu) in-band = 0.6962  (FALSIFIED, threshold was >= 0.8000)
+
+------------------------------------------------------------------------------
+EXP: per-eff-stratum AUC for mu, NU, step (matches W5 layout)
+------------------------------------------------------------------------------
+  eff     N     rec |   AUC mu   AUC NU  AUC step
+ 0.05   100  99/100 |   0.4242   0.8687    0.6364
+ 0.10   100  42/100 |   0.7443   0.7011    0.2266
+ 0.15   100  21/100 |   0.8873   0.3496    0.1139
+ 0.20   100  19/100 |   0.9175   0.5595    0.0793
+ 0.25   100   9/100 |   0.8816   0.7277    0.1062
+
+------------------------------------------------------------------------------
+EXP: step vs NU correlation (is step just re-reading NU?)
+------------------------------------------------------------------------------
+eff=0.05  Spearman(step,NU)=+0.1653  Spearman(step,mu)=-0.7854
+eff=0.10  Spearman(step,NU)=+0.1967  Spearman(step,mu)=-0.8760
+eff=0.15  Spearman(step,NU)=+0.2939  Spearman(step,mu)=-0.8845
+eff=0.20  Spearman(step,NU)=+0.1175  Spearman(step,mu)=-0.8995
+eff=0.25  Spearman(step,NU)=-0.2100  Spearman(step,mu)=-0.8946
+
+==============================================================================
+done
+==============================================================================

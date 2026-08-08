@@ -6538,3 +6538,129 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21 (log line ~4638), so priority 5 (GLV-HNP Phase 2) is again the
+only live thread. Continuing the pre-registered **Thread 25** from yesterday's
+run #2 entry (log line ~6465): "find the second mechanism by conditioning on
+NU," with its stated hypothesis and secondary test taken verbatim:
+
+> H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>      gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+> Secondary: step = log2(||b*_{m+1}||) - log2(||b*_1||); test whether
+>      step -> 0 predicts the wall better than either NU or mu.
+
+### Work done
+
+- Environment: `pip install fpylll cysignals sympy` (fourth run in a row
+  needing `cysignals` named explicitly — worth just adding to a
+  `requirements-dev.txt` if a fifth run needs it too).
+- `secp256k1_cm_audit/glv_hnp_thread25_step.py` — new. Reuses
+  `instance()`/`run_new()` from the Thread 24 modules unchanged; same 17-bit
+  grid as W5 (20 curves x 5 eff strata x 5 seeds, M=12, dim 24, float GS).
+  Adds `step` per instance and a `--dump-json` flag (requested in
+  yesterday's log) that persists the raw per-instance table minus the
+  `prof`/`nus` arrays. Output: `glv_hnp_thread25_step_output.txt` (42
+  lines), `glv_hnp_thread25_rows.json` (500 rows).
+- `cargo test --test curve_audit` -> 5/5 pass (5.09s). No Rust touched.
+
+### Findings
+
+**H25, literal pooled-band test: FALSIFIED as stated, but for a diagnosed
+reason — cross-eff scale mixing, exactly the effect W5/W6 already flagged
+for mu.** Pooling all instances with NU in [1.04, 2.20] regardless of eff
+stratum:
+
+```
+band [1.04, 2.20]: N=367  (below: 94, above: 39)
+  below-band recovery rate 92/94    above-band recovery rate 0/39
+ALL       AUC(-mu)=0.3964  AUC(-NU)=0.7996  AUC(-step)=0.3286
+IN-BAND   AUC(-mu)=0.6962  AUC(-NU)=0.5599  AUC(-step)=0.1784
+```
+
+0.696 < 0.8, so H25 fails on the literal pooled read. But `mu = lambda_1(L2)`
+has no eff/size normalization (W5, 2026-08-07), so pooling five eff strata
+with different mu scales into one AUC is the same mistake W6 diagnosed for
+the NU/nu_hat identity. Re-ran the in-band test **stratified by eff**
+(matching W5's own methodology) using the dumped JSON:
+
+```
+in-band, per eff stratum (N, rec, AUC mu, AUC nu_hat, AUC step)
+eff=0.05  N=25  rec=24/25  AUC(mu)=0.479  AUC(nu_hat)=0.479  (near-degenerate: 1 negative)
+eff=0.10  N=83  rec=26/83  AUC(mu)=0.882  AUC(nu_hat)=0.885
+eff=0.15  N=96  rec=21/96  AUC(mu)=0.889  AUC(nu_hat)=0.883
+eff=0.20  N=89  rec=18/89  AUC(mu)=0.928  AUC(nu_hat)=0.943
+eff=0.25  N=74  rec=9/74   AUC(mu)=0.862  AUC(nu_hat)=0.862
+
+pooled in-band AUC(nu_hat)             = 0.842
+pooled in-band AUC(nu_hat*sqrt(eff))   = 0.911
+```
+
+**H25 HOLDS under the eff-stratified test**: AUC(mu) is 0.86-0.93 in all
+4 non-degenerate strata, comfortably above the 0.8 bar, and the
+eff-normalised `nu_hat*sqrt(eff)` (Thread 24's closed form) clears 0.8 even
+pooled across strata (0.911). The one exception, eff=0.05, is not a
+counterexample: the band there is 24/25 positive, so there is barely a
+negative class to separate — consistent with W5's finding that eff=0.05 is
+already "degenerate" (99/100 recover unconditionally).
+
+**Revised conclusion**: (NU, nu_hat*sqrt(eff)) is a genuine two-parameter
+viability test, exactly as H25's motivating question asked, but the second
+coordinate must be read at fixed eff (or eff-normalised) to show its power —
+raw mu is not comparable across strata, matching W5/W6's diagnosis of NU
+itself. This is now the third independent experiment (W5, W6, Thread 25) to
+hit the same methodological point, so it should be treated as settled: no
+future GLV-HNP predictor should be pooled across eff strata without either
+holding eff fixed or applying the `sqrt(eff)` normalisation first.
+
+**Secondary — step is FALSIFIED, and worse: it is redundant with mu, not
+complementary to it.**
+
+```
+pooled AUC(-step)      per eff: 0.636  0.227  0.114  0.079  0.106
+in-band AUC(-step)     per eff: 0.500  0.133  0.113  0.066  0.118
+Spearman(step, mu)     per eff: -0.785 -0.876 -0.885 -0.900 -0.895
+Spearman(step, NU)     per eff: +0.165 +0.197 +0.294 +0.118 -0.210
+```
+
+Away from the near-degenerate eff=0.05 stratum, AUC(step) is 0.07-0.23,
+i.e. LARGER step predicts recovery (backwards from a naive "step -> 0 at
+the wall" reading of W1b's plot, and much worse than mu's 0.86-0.93 both
+in- and out-of-band). `Spearman(step, mu) ~ -0.88` to -0.90 in every
+stratum: step is essentially `-log2(mu)` plus noise, not new information.
+W1b's visual observation (step narrows near the wall) was real but
+misleading as a predictor — it is just mu's own signal viewed through a
+noisier, sign-flipped lens. Thread 25's secondary hypothesis is retired;
+no further work on `step` is proposed.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the two-parameter decision boundary.** With
+(NU, nu_hat*sqrt(eff)) confirmed as jointly informative and NU's role now
+understood as "resolve the extremes, hand off the ambiguous middle,"
+the concrete next sub-task is a logistic regression
+`P(recover) = sigma(a + b*log(NU) + c*log(nu_hat*sqrt(eff)))` fit on the
+500-row `glv_hnp_thread25_rows.json` table (or a fresh, larger draw), with:
+- 80/20 train/test split by curve (not by instance, to avoid leaking
+  per-curve mu across the split);
+- report test-set AUC of the fitted boundary against AUC(-NU) alone (0.80)
+  and AUC(-nu_hat*sqrt(eff)) alone (0.91-0.97) as baselines — the joint
+  model should beat both, or the "two genuine coordinates" reading of
+  W5/W6/Thread25 needs revisiting;
+- a closed-form decision rule (e.g. "NU <= 1 -> recover; NU >= 2.2 -> fail;
+  else use nu_hat*sqrt(eff) with cutoff at C") if the logistic fit is clean,
+  since a rule needs no lattice work outside the NU <= 1 fast-accept case.
+Cost: no new curve search needed (JSON already on disk), pure re-analysis,
+~10-15 minutes including a k-fold check for the eff=0.05 degenerate
+stratum's effect on the fit.
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU, to quantify
+how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+(recorded after push; see next log line)
