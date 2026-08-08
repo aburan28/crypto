@@ -6538,3 +6538,147 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6512). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 made measurable progress the day before, so protocol rule (b)
+applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Secondary: step = log2||b*_{m+1}|| - log2||b*_1|| predicts the wall
+>        better than either NU or mu.
+
+**Verdict: H25 as literally stated is FALSIFIED (raw mu), but the corrected
+statistic — nu_hat, the normalised form Thread 20b already defined —
+HOLDS with AUC 0.84-0.91 inside the same band. The secondary `step`
+hypothesis is FALSIFIED outright: sign is not even stable across eff
+strata.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` had to be named explicitly.)
+- Edited `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`:
+  - Added `--dump-json` flag (writes all 500 rows minus the raw `prof`/`nus`
+    arrays, plus `prof_head`/`prof_mid`/`prof_tail`, to
+    `glv_hnp_phase2_gsprofile_strat_rows.json`) so future runs can re-analyse
+    without re-running the lattice sweep, as proposed 2026-08-07 #2.
+  - Added `step` field per row: `log2(prof[m]) - log2(prof[0])`, `m = k//2`,
+    computed from the existing GS profile — no new lattice work.
+  - Added EXP W8 (H25: AUC(-mu) inside the NU-ambiguous band) and EXP W9
+    (does `step` predict the wall).
+  - No changes to `glv_hnp_phase2_gsprofile.py`, `glv_hnp_common.py`, or any
+    Rust file.
+- Ran `glv_hnp_phase2_gsprofile_strat.py --dump-json` (reuses the same
+  17-bit, 5-stratum, 20-curves x 5-seeds design as Thread 24's W5/W6 —
+  500 instances, dim 24). Output:
+  `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_output.txt`.
+- Follow-up analysis directly against the JSON dump (no script change,
+  reported inline below) to check whether the eff-weighted form
+  `nu_hat*sqrt(eff)` — not raw nu_hat — is the right in-band statistic, and
+  to sanity-check NU's behaviour *outside* the ambiguous band.
+- `cargo test --test curve_audit` -> 5/5 pass (5.50s). No Rust touched.
+
+### Findings
+
+**W8 — H25 falsified for mu, holds for nu_hat.**
+
+```
+band [1.040, 2.199]  (NU ambiguous):  N=366  rec=97/366
+  AUC(-mu     -> recovery) inside band = 0.6932   (H25 threshold: >= 0.8 — FAILS)
+  AUC(-nu_hat -> recovery) inside band = 0.8403   (>= 0.8 — HOLDS)
+```
+
+Raw `mu = lambda_1(L2)` is unnormalised and the band pools instances across
+5 different `eff` strata (hence different n, K1, K2, det(L2)) — exactly the
+scale confound `nu_hat = mu/sqrt(det L2)` was built to remove (Thread 20b).
+Once normalised, the same quantity clears the pre-registered bar.
+
+**Follow-up — the eff-weighted form is even better, and NU is near-perfect
+outside the band (not reported by the pre-registered test, done ad hoc
+against the JSON dump):**
+
+```
+inside band  (N=366, rec=97):  AUC(-nu_hat*sqrt(eff)) = 0.9102
+                                AUC(-nu_hat alone)     = 0.8403
+                                AUC(-NU alone)         = 0.5656  (chance, as expected —
+                                                                   this IS the band where NU
+                                                                   is by construction ambiguous)
+outside band (N=134, rec=93):  AUC(-NU alone)          = 0.9987  (near-perfect)
+```
+
+**Interpretation: NU and nu_hat*sqrt(eff) are complementary, not competing,
+and compose into a simple cascade.** NU (the exact BDD certificate, free —
+no fitting) is a near-perfect ranker once outside [1.04, 2.20] (consistent
+with the W4 "sufficient/necessary" bracket already in the log: 96 TP / 0 FP
+at NU<=1). Inside that band, NU carries ~0 information (0.566, indistinguishable
+from chance) but nu_hat*sqrt(eff) recovers essentially all of its pooled,
+unconditional power (0.910 in-band vs 0.935 pooled overall) — i.e. nu_hat's
+predictive power is NOT mediated through NU (confirming Thread 24's W6
+decorrelation result) and is undiminished by restricting to exactly the
+region where it is needed. This is the 2-parameter viability test Thread 24
+called for — the pair is **(NU, nu_hat*sqrt(eff))**, not (NU, mu) as
+originally proposed.
+
+**W9 — step is falsified as a wall predictor; sign is not even stable.**
+
+```
+pooled: AUC(-step -> recovery) = 0.3286   (worse than chance, i.e. INVERTED)
+  eff     AUC step
+ 0.05       0.6364
+ 0.10       0.2266
+ 0.15       0.1139
+ 0.20       0.0793
+ 0.25       0.1062
+Spearman(step, NU)      pooled =  0.1351  (near zero)
+Spearman(step, log mu)  pooled = -0.6627  (strong negative)
+```
+
+`step` is strongly anti-correlated with `log(mu)` (expected: a bigger
+lambda_1(L2) head pushes the *ratio* to the second block down, mechanically
+shrinking `step`), so it inherits mu's problems from W8 without adding
+anything, and even flips sign as eff moves through 0.05 -> 0.25. W1b's
+"the step vanishes right at the wall" observation was a 2-curve, K1-monotone
+artifact (same flaw W5/W6 already diagnosed for `NU ~ C*nu_hat*sqrt(eff)` in
+Thread 24) and does not survive the eff-fixed cross-curve control. Retire
+`step` as a candidate statistic.
+
+### Next step proposal
+
+**Thread 26 — validate the (NU, nu_hat*sqrt(eff)) cascade out-of-sample and
+turn it into an explicit decision rule.**
+The concrete deliverable: a two-stage classifier —
+  1. if NU <= ~1.04 predict RECOVER, if NU >= ~2.20 predict FAIL (certificate
+     region, near-zero error per W4/W8);
+  2. else predict RECOVER iff `nu_hat*sqrt(eff) <= t` for a threshold t fit
+     on this 17-bit/500-instance table (in-band AUC 0.910 says a clean cut
+     should exist).
+Fit t on this table, then test the SAME cascade with NO refitting on: (a)
+the existing 12-bit/22-cell table from Thread 23b/24 (out-of-size
+validation — the pooled fitted-C spread across bit sizes in Thread 24's W6
+is the risk here), and (b) a fresh 21-bit table (one step past what's been
+tested). Report false-positive/false-negative counts at each size. If the
+threshold t transfers cleanly, this closes out the "empirical, not yet a
+threshold" gap Thread 24's W7 flagged for nu_hat.
+Cost: reuses `glv_hnp_phase2_gsprofile_strat.py` (add a `--bits` CLI arg to
+retarget bit length) and the `--dump-json` output for the 12-bit table
+already on disk from Thread 24. ~15-20 minutes including one new 21-bit sweep.
+
+Fallback if that stalls: revisit Thread 22 (Richelot search over small
+proxy primes for the Howe cover forward map, from the 2026-07-26 #2 entry)
+— unlike Thread 25/26 it does not depend on GLV-HNP infrastructure and has
+been dormant since 2026-07-27.
+
+### Commits made
+
+(recorded after this entry is committed — see follow-up log line)
