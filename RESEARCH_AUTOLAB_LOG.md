@@ -6538,3 +6538,123 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priorities 1 (P-521 bigfloat), 2 (CHLRS Igusa), 4 (cross-curve LLL 3-of-3),
+6 (B5 over F_{p^k}) remain CLOSED/BLOCKED/DEAD-END per prior runs; priority 3
+(Howe gluing) completed 2026-07-21. Priority 5 (GLV-HNP) made measurable
+progress yesterday (Thread 24, commit 942c8a4) and left a pre-registered
+next step, so protocol rule (b) applies again: **Thread 25**, verbatim from
+the 2026-08-07 #2 log entry —
+
+> H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>      gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+> Falsifier: if mu's apparent power is entirely mediated by NU, AUC inside
+>      the band collapses toward 0.5 and the W5 result is a stratification
+>      artifact.
+
+Plus the pre-registered secondary: does `step = log2||b*_{m+1}|| -
+log2||b*_1||` (the point where the GS-profile head, W1b) predict recovery
+better than NU or mu.
+
+### Work done
+
+- Env (fresh container, third run in a row this was needed): `pip install
+  fpylll cysignals sympy` -> fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0.
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_stratify.py` — new. Regenerates the
+  24b dataset (5 eff strata x 20 17-bit j=0 GLV curves x 5 seeds, dim 24,
+  float GS per W0) because the 24b run did not persist rows, adds the
+  `--dump-json` flag the 2026-08-07 entry asked for, stratifies by the
+  Thread-24-W4 NU bracket [1.040, 2.199], and computes `step` per instance.
+  Output: `glv_hnp_phase2_nu_stratify_output.txt` +
+  `glv_hnp_phase2_nu_stratify_output.json` (500 rows).
+- Reproducibility check: curve search and `d_trial` are seeded
+  deterministically (`search_curves`, `seed+7777`), so this run's per-stratum
+  recovery counts (99/100, 42/100, 21/100, 19/100, 9/100 = 190/500) match
+  Thread 24 W5 exactly — confirms the two runs are the same population.
+- `cargo test --test curve_audit` -> 5/5 pass (5.6s). No Rust touched.
+
+### Findings
+
+**H25 is FALSIFIED as stated.** Pooled over the whole NU-ambiguous band:
+
+```
+below band (NU <  1.040):  N=94   rec=92/94   AUC(-mu)=0.1603  AUC(-nu_hat)=0.4592
+in band    (1.040-2.199):  N=366  rec=97/366  AUC(-mu)=0.6932  AUC(-nu_hat)=0.8403
+above band (NU >  2.199):  N=40   rec=1/40    AUC(-mu)=1.0000  AUC(-nu_hat)=1.0000  (degenerate, 1 positive)
+```
+
+`AUC(-mu)` inside the band is 0.693, well under the 0.8 bar — mu alone does
+not rescue the ambiguous band. `nu_hat = mu/sqrt(det L2)` does better
+(0.840) but the pre-registered test was on `mu`, so H25 fails as written.
+
+**But the band mixes eff strata, and that mixing is the whole effect.**
+Re-stratifying the in-band rows by `effq` (recovering the original 24-b
+conditioning) reproduces Thread 24 W5's per-stratum numbers almost exactly,
+and `mu`/`nu_hat` are indistinguishable within a stratum:
+
+```
+eff=0.05  N=24  rec=23/24  AUC(-nu_hat)=0.4565  AUC(-mu)=0.4565  (degenerate)
+eff=0.10  N=83  rec=26/83  AUC(-nu_hat)=0.8853  AUC(-mu)=0.8819
+eff=0.15  N=96  rec=21/96  AUC(-nu_hat)=0.8825  AUC(-mu)=0.8889
+eff=0.20  N=89  rec=18/89  AUC(-nu_hat)=0.9425  AUC(-mu)=0.9276
+eff=0.25  N=74  rec=9/74   AUC(-nu_hat)=0.8615  AUC(-mu)=0.8615
+```
+
+So the drop from ~0.88-0.94 (fixed eff, W5) to 0.693-0.840 (pooled across
+eff, this run) is entirely a stratification artifact of a different kind
+than the falsifier anticipated: **NU is not the right conditioning
+variable for mu.** Confirming that: `AUC(-NU)` *inside its own defining
+band* is 0.5656 — barely better than a coin flip, which is exactly what a
+correctly-drawn ambiguous band should show, but it also means NU carries
+close to zero residual information there for anything else to be
+"mediated by." mu/nu_hat's power is mediated by `eff`, not by NU.
+
+**Conclusion: the 2-parameter viability test is (eff, nu_hat), not (NU,
+mu), and this was already sitting in Thread 24 W3/W5** — pooled
+`AUC(-nu_hat*sqrt(eff))` = 0.9695 at 17 bits, vs 0.860 for NU alone. Thread
+25's contribution is ruling out the (NU, mu) pairing specifically: NU adds
+negligible value once eff and nu_hat are known, because NU's own
+ambiguous band is uninformative and mu's informativeness lives entirely in
+the eff-conditional structure NU does not capture.
+
+**Secondary — step is FALSIFIED, and inverted.** `step` was hypothesized
+to shrink to 0 as recovery becomes easy (vanishing head/tail boundary as
+K1 grows, W1b). It does not predict recovery:
+
+```
+pooled  AUC(-step) = 0.3286   (worse than a coin flip, and the WRONG side of it)
+in-band AUC(-step) = 0.1803
+Spearman(step, mu) = -0.6627   Spearman(step, NU) = 0.1351
+```
+
+`step` is strongly anti-correlated with `mu` (larger mu -> smaller step,
+consistent with W1b's flattening-at-large-K1 picture) but that anticorrelation
+overshoots: `step` ends up predicting recovery in the OPPOSITE direction
+convention would suggest (AUC well below 0.5), so it is a worse score than
+either mu or NU and should be dropped, not refined.
+
+### Next step proposal
+
+**Thread 26 — replace the (NU, mu) framing with (eff, nu_hat) and quantify
+the residual error.** Concrete sub-task: fit a single logistic/threshold
+rule on `nu_hat*sqrt(eff)` against the full 500-row 24b/25 dataset (already
+on disk as `glv_hnp_phase2_nu_stratify_output.json`), report the
+false-positive / false-negative counts at the natural cut, and check
+whether adding NU as a *third* feature (not a replacement) buys anything
+over the 2-parameter rule — i.e. is there ANY residual signal in NU once
+`nu_hat*sqrt(eff)` is controlled for, or is NU now fully subsumed. This is
+pure re-analysis of existing data, no new curve/lattice work, ~5 minutes.
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU, quantify how
+far above NU ~ 1.87-2.20 blockwise reduction pushes the empirical
+threshold as a function of beta. Nobody has picked this up in 3 runs; it
+needs an actual BKZ call via fpylll (`BKZ.reduction`), which none of the
+Thread 20-25 scripts exercise yet — likely why it keeps getting deferred.
+
+### Commits made
+
+(pending — see push step)

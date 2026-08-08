@@ -1,0 +1,32 @@
+==============================================================================
+Thread 25 — does mu separate recovery INSIDE the NU-ambiguous band?
+==============================================================================
+20 17-bit j=0 GLV curves in 0.0s
+500 instances in 2.3s
+
+dumped 500 rows -> glv_hnp_phase2_nu_stratify_output.json
+
+------------------------------------------------------------------------------
+H25: stratify by NU. Ambiguous band = [1.04, 2.199] (Thread 24 W4)
+------------------------------------------------------------------------------
+below band (NU < 1.04): 94  [92 recovered]
+in band                : 366  [97 recovered]
+above band (NU > 2.199): 40  [1 recovered]
+   BELOW: N=94   rec=92/94  AUC(-mu)=0.1603  AUC(-nu_hat)=0.4592  AUC(-step)=0.4511
+ IN-BAND: N=366  rec=97/366  AUC(-mu)=0.6932  AUC(-nu_hat)=0.8403  AUC(-step)=0.1803
+   ABOVE: N=40   rec=1/40  AUC(-mu)=1.0000  AUC(-nu_hat)=1.0000  AUC(-step)=0.0000
+
+AUC(-mu) inside band = 0.6932  -> H25 FALSIFIED
+
+------------------------------------------------------------------------------
+Secondary: does the block-step statistic beat NU / mu?
+------------------------------------------------------------------------------
+pooled AUC(-step) = 0.3286
+pooled AUC(-mu)   = 0.3964
+pooled AUC(-NU)   = 0.7996
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+
+==============================================================================
+done
+==============================================================================
