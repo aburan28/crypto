@@ -6672,4 +6672,4 @@ far above NU~1.87-2.20 blockwise reduction pushes the viability threshold.
 
 ### Commits made
 
-(recorded after push — see next log entry)
+8580271 autolab 2026-08-08: Thread 25 — H25 confirmed (mu separates inside the ambiguous NU band, eff-conditioned AUC 0.81-0.90)
