@@ -6726,4 +6726,4 @@ research question, but sizable (~200-400 lines).
 
 ### Commits made
 
-(recorded after this entry is committed — see next log line)
+`ada50ed` autolab 2026-08-09: Mestre reconstruction — both directions ported from Sage, round-trip validated
