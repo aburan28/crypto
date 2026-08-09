@@ -6673,4 +6673,4 @@ empirical threshold as a function of beta. Still not started.
 
 ### Commits made
 
-(recorded after push, see follow-up log line)
+7dd3df1 autolab 2026-08-09: Thread 25 — mu falsified in ambiguous NU band, nu_hat survives (AUC 0.840)
