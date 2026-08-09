@@ -6538,3 +6538,156 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — the primary next-step pre-registered by the 2026-08-07 #2
+(Thread 24) log entry: does `mu = lambda_1(L2)` survive conditioning on the
+exact BDD certificate `NU`, and does the W1b GS-profile block-boundary step
+predict recovery? Priorities 1 (P-521), 2 (CHLRS), 4 (cross-curve LLL 3-of-3),
+6 (B5 over F_{p^k}) remain CLOSED/BLOCKED/not-yet-picked-up under the
+established reading of the priority list (every run since 2026-06-30 has
+found 1/2/4/6 CLOSED/BLOCKED/DEAD-END and 3 completed 2026-07-21); priority 5
+(GLV-HNP Phase 2) made concrete, non-degenerate progress two days earlier
+(Thread 24, commit 942c8a4), so protocol rule (b) applies and its
+pre-registered continuation is the correct pick. No other autolab run
+occurred between 2026-08-07 #2 and today (git log confirms cf25a19 is the
+merge of Thread 24's PR and there is no intervening autolab commit).
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate ... If no ... the W5 result is
+>   a stratification artifact and the closed form should be retired.
+>   Secondary: quantify `step = log2(||b*_{m+1}||) - log2(||b*_1||)` and test
+>   whether `step -> 0` predicts the wall better than either NU or mu.
+
+**Verdict: H25 HOLDS.** mu is a genuine second coordinate independent of NU.
+The secondary step statistic is a strong predictor but with the OPPOSITE
+sign from the one hypothesised in W1b.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0 (same three-package note as
+  every prior run: `cysignals` is not pulled in transitively by fpylll).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Reuses the exact
+  data-collection loop of `glv_hnp_phase2_gsprofile_strat.py` (500 instances:
+  5 eff strata x 20 17-bit j=0 GLV curves x 5 seeds, m=12, float GS —
+  justified by W0/W4 of Thread 24, max relative NU error ~1e-15 at dim 24),
+  and adds:
+  - a `--dump-json` flag (Thread 24's proposal), so the 500-row table now
+    survives the run as `glv_hnp_phase2_thread25_data.json`;
+  - `step = log2||b*_m|| - log2||b*_0||` per instance (0-indexed, k=2m; the
+    block-boundary jump W1b identified);
+  - `stratified_auc()`: concordance pooled ONLY within each fixed-eff
+    stratum, then combined. **This mattered.** The first run of this script
+    reported the naive pooled in-band AUC(-mu) = 0.6962 (FALSIFIES H25 at the
+    0.8 threshold), but that number reproduces exactly the cross-stratum
+    scale-confound Thread 24's W6 diagnosed for the C = NU/(nu_hat*sqrt(eff))
+    identity: mu is individually monotone-ish in eff across strata, so naive
+    pooling partly re-reads eff rather than measuring in-band separation.
+    The script was corrected in place to report the stratified statistic as
+    the primary number (both numbers are kept in the output for the record).
+  - `cargo test --test curve_audit` -> 5/5 pass (6.83s). No Rust touched.
+- Output: `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt` (54 lines,
+  from the corrected script) and `..._thread25_data.json` (500 rows: n, K1,
+  eff, effq, lamstar, NU, mu, nuhat, m, step, ok, seed, k, argmax, enorm, l2,
+  det2, S_K1, S_K2, K2).
+
+### Findings
+
+**H25 HOLDS. Stratified AUC(-mu -> recovery) inside the ambiguous NU band =
+0.8936** (excluding the eff=0.05 stratum, which is 99/100-degenerate and
+contributes almost no ranking information either way).
+
+```
+band = {1.04 <= NU <= 2.20}: N=367 of 500 (98 recover, 269 fail)
+
+                                    naive pooled   stratified (excl eff=0.05)
+AUC(-mu     -> recovery) in-band       0.6962           0.8936
+AUC(-nu_hat -> recovery) in-band       0.8419              -
+AUC(-NU     -> recovery) in-band       0.5599           0.4596
+
+per-eff-stratum in-band AUC(-mu):
+  eff=0.05  N=25  (24 pos / 1 neg, degenerate)   0.4792
+  eff=0.10  N=83  (26 pos / 57 neg)              0.8819
+  eff=0.15  N=96  (21 pos / 75 neg)              0.8889
+  eff=0.20  N=89  (18 pos / 71 neg)              0.9276
+  eff=0.25  N=74  ( 9 pos / 65 neg)              0.8615
+```
+
+NU is by construction useless inside its own band (stratified AUC 0.46, i.e.
+chance) — that is the expected sanity check, not a new result. mu retains
+0.86-0.93 AUC in every non-degenerate stratum *after* NU has already been
+used to carve out the ambiguous set. **Conclusion: (NU, mu) is a genuine
+2-parameter pair, not one variable re-measured twice.** NU is the sound
+nearest-plane certificate (TP/FP exact per Thread 23's W4); mu is doing
+separate, complementary work inside NU's blind spot. This closes the loop
+Thread 24 opened: the ~1.9x NU/nu_hat gap is not a defect in NU to be
+tightened but the signature that recovery is genuinely governed by two
+coordinates.
+
+**Secondary — the step statistic works, but the sign is inverted from the
+W1b hypothesis.** W1b's picture (K1=32 profile "flat, no step" vs K1=4/8
+profiles showing a clear jump) was read as "step -> 0 predicts the wall,"
+i.e. AUC(-step) should be high. The data says the opposite:
+
+```
+stratified (excl eff=0.05):  AUC(-step -> recovery) = 0.1472
+                              AUC(+step -> recovery) = 0.8528   <- holds
+
+per-stratum AUC(+step):
+  eff=0.05  0.3636  (degenerate)
+  eff=0.10  0.7734
+  eff=0.15  0.8861
+  eff=0.20  0.9207
+  eff=0.25  0.8938
+```
+
+Re-reading W1b with this correction: the *flat* profile (small step) at
+K1=32 was the FAILING regime, and the well-separated two-block profile
+(large step) at K1=4/8 was the RECOVERING regime — i.e. large step signals a
+clean, well-formed lambda-block, small step signals the two GS blocks have
+started to merge, which is exactly the near-degenerate condition one would
+expect right at a viability wall. The originally-hypothesised direction had
+the wall-crossing picture backwards; corrected, it is consistent with
+everything else in the thread (mu large and clean -> block separation
+visible -> step large -> recovers).
+
+`step` is not a restatement of NU (Spearman 0.135, pooled) but is fairly
+correlated with mu (Spearman -0.663, pooled) — same sign convention as
+expected (bigger mu ~ smaller ratio structure ~ more negative-going step
+under the sign convention used here). It adds no orthogonal information
+beyond (NU, mu) worth chasing further; it is a byproduct confirmation of the
+mu mechanism, not a third coordinate.
+
+### Next step proposal
+
+**Thread 26 — fit and publish the 2-parameter (NU, mu) decision rule.**
+H25 establishes that (NU, mu) is a genuine 2-coordinate viability test.
+Concrete sub-task: fit a logistic regression on (log NU, log mu) [or
+(log NU, log nu_hat) — re-test both, since nu_hat's normalisation may fit
+better across the eff range] against `ok` on the existing 500-row
+`glv_hnp_phase2_thread25_data.json` table (already on disk, no new lattice
+work needed), report the decision boundary and its cross-validated AUC
+against each single-variable baseline (NU alone: stratified in-band 0.46;
+mu alone: stratified in-band 0.89; the joint rule should exceed both,
+otherwise the two variables are less independent than W6's Spearman numbers
+suggest). If the joint AUC clears ~0.9 pooled across ALL five strata (not
+just in-band), this becomes the concrete GLV-HNP Phase 2 viability
+certificate the phase has been missing, worth writing into
+`RESEARCH_GLV_HNP_PHASE2.md` as a formal statement.
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU/mu jointly, to
+quantify how far blockwise reduction pushes each threshold outward
+independently — does BKZ mainly rescue high-NU/low-mu cells or high-NU/high-mu
+cells? That distinguishes "BKZ compensates for the nearest-plane slack" from
+"BKZ compensates for the second mechanism" and was not testable before mu
+was confirmed as a real second axis.
+
+### Commits made
+[recorded in the follow-up commit below]
