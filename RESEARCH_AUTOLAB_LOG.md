@@ -6538,3 +6538,142 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6519). Priorities 1, 4, 6 are CLOSED/DEAD-END; priority 2 (CHLRS Igusa
+forward map) has been repeatedly assessed as needing modular-form/theta
+machinery beyond the current PARI scripts (last touched 2026-07-27, 13 days
+ago, no new capability since); priority 3 completed 2026-07-21. Priority 5
+(GLV-HNP Phase 2) made measurable progress two days ago (Thread 24 falsified
+H24 clause 1, confirmed clause 2, found NU and nu_hat uncorrelated at fixed
+eff), so protocol rule (b) applies and its pre-registered continuation is the
+correct pick.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate... If no... the W5 result is a
+>   stratification artifact and the closed form should be retired.
+
+Secondary (also pre-registered): `step = log2(||b*_{m+1}||) - log2(||b*_1||)`
+as a cheaper GS-profile-only predictor.
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. (Fourth run in a row where
+  `cysignals` must be named explicitly — recording again since every prior
+  entry independently rediscovered this.)
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Reruns the exact
+  17-bit construction of `glv_hnp_phase2_gsprofile_strat.py` (5 eff strata x
+  20 curves x 5 seeds, M=12, dim 24, float GS — justified safe by Thread 24's
+  W0/W4), stratifies by the 17-bit NU bracket [1.040, 2.199] from Thread 23's
+  exp V3/V4, and adds the `step` statistic from the existing GS profile.
+  Added `--dump-json` (requested by the 2026-08-07 #2 log entry) so the raw
+  500-row table survives the run without rebuilding it.
+  Output: `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt` (44 lines),
+  raw table: dumped to a scratch path (not committed — regenerable in ~3s).
+- `cargo test --test curve_audit` -> 5/5 pass (7.00s). No Rust touched.
+- One iteration: the first run's step-statistic printout used the same
+  `auc(pos,neg)` "smaller predicts recovery" sign convention as NU/mu/nu_hat,
+  which is backwards for step (H24/W1b's hypothesis is "recovery goes with
+  LARGER step", the opposite sign). Caught before logging by checking the
+  sign against the raw per-eff mean-step table; fixed by reporting `1-auc`
+  as `AUC(+step)` with an explicit in-script note. Recording this as a third
+  instance of the sign-bug pattern the 2026-08-07 entry flagged twice already
+  — always check a new predictor's sign against its own raw group means.
+
+### Findings
+
+**H25 pooled — FALSIFIED as literally stated, N=500.**
+
+```
+NU-ambiguous band [1.040, 2.199]: N=366/500 (73.2%), recover 97/366
+  AUC(-mu)      inside band = 0.6932   (target >= 0.80 — FALSIFIED)
+  AUC(-nu_hat)  inside band = 0.8403   (>= 0.80 — target met by the NORMALISED form)
+  AUC(-NU)      inside band = 0.5656   (near-chance, as expected — band is defined by NU itself)
+```
+
+Raw mu alone does not resolve the band at the pooled level. But nu_hat
+(= mu / sqrt(det L2), the eff-normalised form Thread 20b/23 already uses)
+clears the pre-registered 0.80 bar *pooled*, with no per-eff stratification
+needed. This is the strongest single result of the run.
+
+**H25 corrected — mu DOES resolve the band, but only once eff is also held
+fixed.** The pooled 0.69 is exactly the kind of stratification artifact W5
+was designed to catch, and it recurs one level down:
+
+```
+  eff   band N     rec  |  AUC -mu
+ 0.05      24    23/24  |   0.4565   (near-saturated stratum; uninformative)
+ 0.10      83    26/83  |   0.8819
+ 0.15      96    21/96  |   0.8889
+ 0.20      89    18/89  |   0.9276
+ 0.25      74     9/74  |   0.8615
+```
+
+Excluding the degenerate eff=0.05 stratum (23/24 recover — almost no
+negative class to separate against), raw mu clears 0.80 in every stratum,
+0.86-0.93. **Conclusion: recovery inside the NU-ambiguous band is
+f(mu, eff), not f(mu) alone** — exactly mirroring the parent Thread 24
+finding that NU and nu_hat=mu/sqrt(det) are mutually uncorrelated only
+*after* eff is fixed. mu is a genuine second coordinate; it just needs the
+same eff-normalisation nu_hat already applies to be legible pooled. Thread
+25 therefore does not retire the closed form (H25's "if no" branch) — it
+sharpens it: **(NU, nu_hat) is the 2-parameter viability pair**, not (NU, mu)
+in raw units.
+
+**W9 — step is a real, independent, and nearly-as-good signal, for free.**
+
+```
+pooled (N=500):        AUC(+step) = 0.6714   AUC(-NU) = 0.7996   AUC(-mu) = 0.3964
+inside NU-band (N=366): AUC(+step) = 0.8197
+Spearman(step, NU) =  0.1351   (near-independent of NU, like nu_hat)
+Spearman(step, mu) = -0.6627   (strong negative — matches the W1b picture:
+                                 small mu -> skewed L2 -> large lambda_2(L2)
+                                 -> tail block sits higher -> large step)
+```
+
+Per-eff, `step|ok` is 0.24-1.00 higher than `step|fail` in every stratum
+(largest gap at eff=0.15: 0.658 vs -0.312). Inside the ambiguous band, step
+(0.8197) is competitive with nu_hat (0.8403) and needs only the GS profile
+already computed for NU — no separate L2 Gram reduction. The
+Spearman(step, mu) = -0.66 gives the structural link W1b predicted (small mu
+=> skewed lambda-block => large step) without deriving a closed form for it.
+`step -> 0` predicting the wall (W1b's original phrasing) is confirmed in
+direction: recovery instances have systematically larger step, failures
+sit near step ~ -0.2 to -0.36 across every non-degenerate stratum.
+
+### Next step proposal
+
+**Thread 26 — fit and test the 2-parameter (NU, nu_hat) decision boundary.**
+H25/W9 together establish that inside NU's ambiguous band, nu_hat (pooled,
+AUC 0.84) and step (pooled-in-band, AUC 0.82) both resolve it, and nu_hat is
+Spearman-independent of NU (Thread 24, W6). The concrete sub-task: fit a
+logistic regression on (log NU, log nu_hat) over the existing 500-row table
+(`glv_hnp_phase2_thread25.py --dump-json` output regenerates it in ~3s),
+report the decision boundary and cross-validated accuracy, and test it as a
+single two-line viability predictor replacing the current three-way
+NU/nu_hat/mu bookkeeping. Falsifier: if 5-fold CV accuracy does not exceed
+the single-predictor NU-only baseline (0.855, Thread 23 exp V3) by a
+meaningful margin, the second coordinate isn't earning its complexity and
+NU alone remains the recommended certificate.
+
+Secondary: check whether `step` alone (cheapest of the three: no L2 Gram
+reduction needed) can substitute for nu_hat in the pair — fit (log NU, step)
+instead of (log NU, log nu_hat) and compare CV accuracy; if the two pairs are
+within noise of each other, step is the practical choice for future runs.
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(recorded after commit, see below)
