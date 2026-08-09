@@ -6665,4 +6665,4 @@ runs don't rediscover the missing-import trail by hand.
 
 ### Commits made
 
-(filled in below)
+cdbf50b autolab 2026-08-09: Thread 25 — H25 falsified pooled but confirmed via nu_hat; step statistic rejected
