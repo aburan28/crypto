@@ -6660,4 +6660,4 @@ threshold — orthogonal to Thread 26 and can run independently.
 
 ### Commits made
 
-(recorded in the follow-up commit that adds this entry's hash below)
+12e797d autolab 2026-08-09: Thread 25 — H25 falsified for raw mu, holds for nu_hat inside NU-ambiguous band
