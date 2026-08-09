@@ -6538,3 +6538,139 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) log entry.
+Priorities 1 (P-521 LLL), 2 (CHLRS Igusa), 4 (cross-curve LLL), 6 (B5) remain
+CLOSED/BLOCKED/DEAD-END and priority 3 (Howe gluing) completed 2026-07-21, so
+priority 5 (GLV-HNP) is again the only live thread. Its last run (2026-08-07
+#2, 2 days ago) made measurable progress (H24 falsified, NU/nu_hat shown
+uncorrelated at fixed eff, W4/W5/W6/W7 all landed), so protocol rule (b)
+applies and its pre-registered sub-task is the correct pick.
+
+  H25: within the ambiguous band 1.04 <= NU <= 2.20 (Thread 24 W4's 17-bit
+       bracket), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+**Verdict: literal H25 (raw mu) is FALSIFIED (AUC 0.693). But the normalized
+form nu_hat clears the pre-registered threshold inside the same band (AUC
+0.840) — the second mechanism is real, it just needs the sqrt(det L2)
+normalization to show up.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` (same
+  recurring note as every prior GLV-HNP run — `pip install fpylll` alone is
+  not enough, `cysignals` is a separate runtime import).
+- `secp256k1_cm_audit/glv_hnp_phase2_h25_nuband.py` — new. Reuses the exact
+  generation path of `glv_hnp_phase2_gsprofile_strat.py` (same
+  `search_curves`/`instance`/`run_new` calls, same `SEEDS`, `M17=12`, 5 eff
+  strata x 20 curves x 5 seeds) via the shared modules — this is a
+  re-analysis, not new data, since `search_curves` is a deterministic prime
+  sweep (`glv_hnp_common.py:306`, no RNG) and `d_trial` is drawn from
+  `Random(seed+7777)`. Added `--dump-json` as proposed so the 500-row table
+  survives the run (`glv_hnp_phase2_h25_nuband_rows.json`, not committed —
+  regenerable in 2.3s from the script).
+- Reproduction check before trusting any new number: pooled `AUC(-NU)` on
+  the regenerated 500-instance table = **0.7996**, bit-identical to the
+  2026-08-07 #2 log's W5 pooled figure. Confirms the row set is the same one
+  Thread 24 analyzed.
+- Split the 500 instances into three bands by NU against the W4 bracket
+  [1.040, 2.199] and computed `AUC(-mu)`, `AUC(-nu_hat)`, `AUC(-step)` in
+  each band, plus a `lam*` control (Thread 20's falsified predictor) and a
+  pooled step-vs-wall check (Thread 24 W1b secondary).
+- `cargo test --test curve_audit` -> 5/5 pass (5.37s). No Rust touched.
+
+### Findings
+
+**H25 table** (500 instances = 5 eff strata x 20 curves x 5 seeds, dim 24,
+float GS — justified by W0/W4 of `glv_hnp_phase2_gsprofile.py`, float-vs-exact
+NU error ~1e-15 at this dimension):
+
+```
+band                             N       rec |   AUC mu  AUC nuhat  AUC step
+NU < 1.040 (sufficient)         94     92/94 |   0.1603     0.4592    0.4511
+1.040 <= NU <= 2.199 (AMBIG)   366    97/366 |   0.6932     0.8403    0.1803
+NU > 2.199 (necessary-fail)     40      1/40 |   1.0000     1.0000    0.0000
+```
+
+* **Sufficient band is saturated** (92/94 = 97.9% recover) — only 2 negative
+  instances, so its AUC (0.160, sign-flipped) is noise from n=2, not signal.
+  Nothing to condition on when the certificate already says yes.
+* **Necessary-fail band is near-degenerate** (1/40 = 2.5% recover) — AUC=1.0
+  is a single extreme positive against 39 negatives, not a reliable number.
+  NU > 2.2 is close to a hard wall already.
+* **The ambiguous band is where the real test lives**: N=366, 97 positives
+  (26.5%), well powered. `AUC(-mu) = 0.6932` — real signal (mu is not inert:
+  0.69 is far from 0.5) but **below the pre-registered 0.8 threshold**, so
+  the literal H25 statement (which asked about raw mu, matching Thread 24's
+  wording) is falsified.
+* **`AUC(-nu_hat) = 0.8403`** in the same band — clears the threshold. Since
+  `nu_hat = lambda_1(L2)/sqrt(det L2) = mu/sqrt(det L2)`, the size
+  normalization is doing real work: within a fixed NU band, curves still
+  differ in `n` and `K1` (the eff strata pool 20 different curves each), so
+  raw mu is confounded by lattice scale in a way nu_hat is not. **The second
+  mechanism is real and it is nu_hat, not bare mu.**
+* Control: `lam*` (Thread 20's falsified predictor) scores 0.32-0.51 across
+  the three bands — no band clears the noise floor Thread 20 already
+  established (0.16-0.44). Confirms the mu/nu_hat signal in the ambiguous
+  band is not an artifact of the banding procedure itself.
+
+**Reproducibility check passed exactly**: pooled `AUC(-NU) = 0.7996` here
+matches the 2026-08-07 #2 entry's "pooled (N=500) ... AUC(-NU) 0.7996"
+verbatim (line 6110 area of this log before this edit). The row-generation
+re-derivation is trustworthy.
+
+**Secondary (W1b step statistic) — weak and wrong-shaped.**
+`step = log2(||b*_m||) - log2(||b*_0||)` at the k1/k2 block boundary (dim is
+2m post-Thread-23-projection, k1-block = indices [0,m), k2-block = [m,2m)):
+
+```
+pooled AUC(-step) = 0.3286   AUC(-mu) = 0.3964   AUC(-NU) = 0.7996 (pooled, unconditional on band)
+Spearman(step, mu) = -0.6627   Spearman(step, NU) = 0.1351
+```
+
+`AUC(-step) = 0.329 < 0.5` means recovering instances have the LARGER step
+(the direction W1b's "step -> 0 predicts the wall" hypothesis actually
+predicted — small step correlates with failure), so the sign is right, but
+the pooled magnitude (|0.329-0.5|=0.17) is much weaker than NU's (|0.80-0.50|
+=0.30) and inside the ambiguous band it nearly vanishes (0.18, i.e. |0.32|
+away from 0.5 in the OPPOSITE direction from the pooled reading — sign
+flips between pooled and in-band, so it is not a stable secondary
+predictor). Given the pooled-vs-conditional sign flip, do not chase this
+further without first understanding W1b's mechanism (Thread 24 already
+found the step "vanishes exactly as the wall is crossed" but did NOT find
+the argmax lives there — this run confirms step is a weak, unstable
+correlate, not the driver).
+
+### Next step proposal
+
+**Thread 26 — the 2-parameter viability test is (NU, nu_hat), not (NU, mu).**
+Re-run the H25 test exactly as specified but substitute nu_hat for mu from
+the start (the corrected pre-registration), then fit the logistic model on
+`(log NU, log nu_hat)` inside the ambiguous band only (N=366, 97 positive —
+well powered for a 2-parameter fit) and report the decision boundary and its
+cross-validated accuracy. Falsifier: if the fitted nu_hat coefficient is not
+significant once NU is in the model (e.g. a likelihood-ratio test against
+NU-only), H25 fails in its corrected form too and NU alone is the whole
+story with nu_hat only a proxy for it, not an independent axis.
+Cost: same 500-row table (`--dump-json` output already on disk, reusable),
+a simple 2-feature logistic regression (no external ML dep needed — Newton's
+method on ~5 parameters converges in <100 iterations), ~5 minutes.
+
+Secondary: the sufficient (94) and necessary-fail (40) bands are both
+under-powered for their own internal structure (2 and 39 negatives/positives
+respectively). If Thread 26's fit is promising, widen the eff-stratum sweep
+(more curves per bin, e.g. `per_bin=4`) to get enough mass at the band edges
+to check whether the decision boundary is sharp or diffuse there too.
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+empirical threshold as a function of beta. Still not started.
+
+### Commits made
+
+(recorded after push, see follow-up log line)

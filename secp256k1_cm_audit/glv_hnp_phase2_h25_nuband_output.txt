@@ -1,0 +1,35 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE the NU ambiguous band?
+==============================================================================
+500 instances (float GS, dim 24) in 2.3s
+wrote 500 rows to glv_hnp_phase2_h25_nuband_rows.json
+
+------------------------------------------------------------------------------
+EXP H25: stratify by NU band, AUC(-mu -> recovery) inside each band
+------------------------------------------------------------------------------
+band = [1.04, 2.199] (Thread 24 W4, 17-bit dim-24 bracket)
+
+band                             N       rec |   AUC mu  AUC nuhat  AUC step
+NU < lo (sufficient)            94     92/94 |   0.1603     0.4592    0.4511
+lo <= NU <= hi (AMBIGUOUS)     366    97/366 |   0.6932     0.8403    0.1803
+NU > hi (necessary-fail)        40      1/40 |   1.0000     1.0000    0.0000
+
+H25 FALSIFIED: AUC(-mu) = 0.6932 inside the ambiguous band, below threshold. mu's W5 power looks mediated by NU.
+
+------------------------------------------------------------------------------
+Control: same three-band split, but with lam* (Thread 20's falsified predictor)
+------------------------------------------------------------------------------
+NU < lo (sufficient)         AUC(-lam*) = 0.5082
+lo <= NU <= hi (AMBIGUOUS)   AUC(-lam*) = 0.3212
+NU > hi (necessary-fail)     AUC(-lam*) = 0.2564
+
+------------------------------------------------------------------------------
+EXP H25-secondary: does step -> 0 predict the wall pooled (all instances, not just the ambiguous band)?
+------------------------------------------------------------------------------
+pooled AUC(-step) = 0.3286   AUC(-mu) = 0.3964   AUC(-NU) = 0.7996
+Spearman(step, mu)   = -0.6627
+Spearman(step, NU)   = 0.1351
+
+==============================================================================
+done
+==============================================================================
