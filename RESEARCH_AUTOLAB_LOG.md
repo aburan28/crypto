@@ -6692,4 +6692,4 @@ NU's ambiguous band — same experiment, better statistic to condition on.
 
 ### Commits made
 
-(recorded after commit, see push step)
+f962e77 autolab 2026-08-09: Thread 25 — H25 pooled test fails but per-stratum mu/nu_hat AUC 0.86-0.94
