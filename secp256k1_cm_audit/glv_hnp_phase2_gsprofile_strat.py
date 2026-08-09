@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -57,12 +58,22 @@ if __name__ == "__main__":
                 if r is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                m_ = r['k'] // 2
+                step = (math.log2(r['prof'][m_]) - math.log2(r['prof'][0])
+                        if r['prof'][0] > 0 and r['prof'][m_] > 0 else float('nan'))
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n), 'step': step})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if "--dump-json" in sys.argv:
+        out_path = sys.argv[sys.argv.index("--dump-json") + 1]
+        dump_rows = [{k: v for k, v in r.items() if k != 'nus'} for r in rows]
+        with open(out_path, "w") as f:
+            json.dump(dump_rows, f)
+        print(f"dumped {len(dump_rows)} rows to {out_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

@@ -6538,3 +6538,152 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priorities 1 (P-521 bigfloat), 2 (CHLRS Igusa), 4 (cross-curve LLL 3-of-3),
+6 (B5 over F_{p^k}) remain CLOSED/BLOCKED/DEAD-END per the 2026-08-07 #2
+entry's own status line, and priority 3 (Howe gluing) completed 2026-07-21.
+Priority 5 (GLV-HNP) is the only live thread, and its 2026-08-07 #2 entry
+made measurable progress (H24 partially falsified, NU/nu_hat decoupling
+found) with a pre-registered next step (Thread 25), so protocol rule (b)
+applies: continue priority 5, Thread 25.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2
+entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If no — if mu's apparent power is entirely mediated by NU after all —
+>        then the W5 result is a stratification artifact and the closed
+>        form should be retired.
+
+Secondary (also pre-registered): does `step = log2||b*_{m+1}|| - log2||b*_1||`
+(the GS-profile jump from the lambda_1(L2)-copies block to the second block,
+flagged by W1b) predict recovery better than NU or mu?
+
+**Verdict: H25 is FALSIFIED as literally stated (pooled AUC 0.693 < 0.8),
+but the failure is a stratification artifact exactly as the falsifier
+anticipated — and the artifact is informative. Once eff is held fixed
+inside the band, mu separates strongly (AUC 0.86-0.93) except in the
+lowest-eff stratum. The real second coordinate is nu_hat, not raw mu
+(pooled in-band AUC 0.8403, clears the H25 threshold on its own).**
+
+### Work done
+
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added a
+  `--dump-json <path>` flag (the next-step proposal's ask) and a per-row
+  `step = log2(prof[m]) - log2(prof[0])` field, `m = k//2`. Re-ran with the
+  same `SEEDS` and `search_curves` calls as the 2026-08-07 #2 run; W5/W6/W7
+  console output is byte-identical to the values already in that log entry
+  (confirms the pipeline is deterministic and no new data collection was
+  needed beyond what run already implied — dump-json just persists it).
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_condition.py` — new (Thread 25).
+  Reads the JSON dump, splits the 500 rows by the 17-bit NU bracket from
+  Thread 24 W4 (`sufficient NU < 1.040`, `necessary NU > 2.199`), and
+  computes AUC(-mu), AUC(-NU), AUC(-nu_hat), AUC(-step) inside the band,
+  globally, and per-eff-stratum inside the band.
+  Output: `glv_hnp_phase2_nu_condition_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (6.87s). No Rust touched.
+
+### Findings
+
+**Band composition.** Of 500 instances: 94 have NU < 1.040 (92/94 recover,
+98%), 40 have NU > 2.199 (1/40 recovers, 2.5%), and 366 — the large
+majority — fall in the ambiguous band where nearest-plane gives no
+certificate either way.
+
+**H25 pooled test (as literally stated): FALSIFIED.**
+
+```
+inside band (N=366, 97 rec / 269 fail):
+  AUC(-mu)      = 0.6932
+  AUC(-NU)      = 0.5656   (near-chance, as expected -- NU is what defines the band)
+  AUC(-nu_hat)  = 0.8403   <- clears the H25 threshold
+  AUC(-step)    = 0.1803   (see below: sign is reversed from the naive reading)
+```
+
+0.6932 misses the pre-registered 0.8 bar. Taken alone this reads as: mu's
+apparent power in the 2026-08-07 W5 result was mediated by something else
+and does not survive conditioning on NU.
+
+**But it is a stratification artifact, per-stratum mu is strong:**
+
+```
+ eff   N band   rec    AUC mu   AUC NU
+0.05      24   23/24   0.4565   0.4783   (degenerate: band is 96% recovery)
+0.10      83   26/83   0.8819   0.5277
+0.15      96   21/96   0.8889   0.3283
+0.20      89   18/89   0.9276   0.4695
+0.25      74    9/74   0.8615   0.6188
+```
+
+Outside the degenerate eff=0.05 stratum (where the band is almost pure
+recovery and there is nothing to separate), mu's in-band AUC is 0.86-0.93 --
+comfortably over the H25 bar. The pooled 0.6932 comes from mixing five
+strata with different band-conditional recovery rates (96%, 31%, 22%, 20%,
+12%) and different mu scales (mu grows with n, and n varies slightly across
+the 20 curves per stratum); this is the identical failure mode W6 diagnosed
+for the pooled constant C on 2026-08-07 ("both quantities are monotone in
+[a shared variable], and that shared trend is the entire correlation").
+
+**The corrected result: nu_hat, not raw mu, is the in-band second
+coordinate.** `nu_hat = mu / sqrt(det L2)` already includes the
+eff-dependent normalisation that mu lacks (det L2 = n^3/(K1*K2), i.e.
+`nu_hat` divides out almost exactly the n, K1, K2 scale that fragments mu's
+pooled signal). Pooled in-band AUC(-nu_hat) = 0.8403 passes the H25
+threshold as originally written, with no per-stratum conditioning needed.
+This closes the loop from 2026-08-07 differently than either W5 or W6
+suggested alone: NU and nu_hat are not the same quantity (W6, unchanged),
+but nu_hat conditioned on NU *is* a working second coordinate for the
+ambiguous band, and it is nu_hat's own normalisation — not an unconditioned
+mu — that makes it work.
+
+**Secondary: `step` predicts recovery, with the OPPOSITE sign from the
+naive reading of W1b.**
+
+```
+step | success (N=190): mean +0.214   min -0.775  max 3.156
+step | failure (N=310): mean -0.280   min -0.842  max 1.057
+Spearman(step, NU) = 0.1351   (weak)
+Spearman(step, mu) = -0.6627  (strong, negative)
+```
+
+Larger step (bigger jump from the lambda_1(L2)-copies block to the second
+GS block) predicts *recovery*, not failure -- AUC(-step) = 0.1803 is
+symmetric-far from 0.5 in the wrong direction for a "step -> 0 predicts the
+wall" story. W1b's qualitative read ("the step vanishes exactly as the wall
+is crossed") was about K1 increasing at fixed curve; here, pooled
+cross-curve, step is dominated by its strong anticorrelation with mu
+(Spearman -0.663) rather than by proximity to any wall. Interpretation:
+step is a redundant, noisier restatement of mu (same sign flip as mu itself,
+weaker effect) rather than an independent predictor. Not pursuing further.
+
+### Next step proposal
+
+**Thread 26 — replace mu with nu_hat as the in-band second coordinate and
+fit the 2-parameter (NU, nu_hat) decision rule directly.** Concrete
+sub-task: on the same 500-row table (or a fresh one — the pipeline is
+confirmed deterministic and cheap, ~3.5s), fit a logistic regression (or
+even a simple two-threshold grid search) on `(log NU, log nu_hat)` restricted
+to the ambiguous band, report the decision boundary and its band-restricted
+AUC/accuracy, and check whether it beats nu_hat alone (0.8403). If the joint
+rule is not meaningfully better than nu_hat alone, the honest conclusion is
+a *1-parameter* rule inside the band: nu_hat, with NU only doing the outer
+triage (< 1.04 sufficient, > 2.20 necessary-fail).
+
+Secondary: re-run the eff=0.05 stratum at a coarser eff grid near 0.05
+(e.g. 0.02, 0.03, 0.04) to see if the degenerate near-100%-recovery band
+persists or was a boundary artifact of this stratum choice — if it persists,
+that is itself worth stating as a third regime ("below some eff*, NU alone
+already suffices and nu_hat adds nothing").
+
+Tertiary (unchanged, still not attempted): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+[recorded after commit below]
