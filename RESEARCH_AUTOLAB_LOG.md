@@ -6538,3 +6538,139 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6402: H25).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread. Its last
+run was 2 days ago and made measurable progress (Thread 24: H24 clause 1
+falsified, W5/W6 established NU and nu_hat*sqrt(eff) are uncorrelated at
+fixed eff yet both predict recovery), so protocol rule (b) applies: continue
+the pre-registered sub-task rather than fall back to priority 2.
+
+H25 (verbatim): within the ambiguous band 1.04 <= NU <= 2.20 (where
+nearest-plane gives no answer), does AUC(-mu -> Kannan-LLL recovery) stay
+>= 0.8? Secondary: does `step = log2||b*_{m+1}|| - log2||b*_1||` (the
+W1b GS-profile jump) predict the wall better than either NU or mu?
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0. Same note as 2026-07-29/
+  2026-08-07: `pip install fpylll` alone is insufficient, `cysignals` is a
+  separate runtime import.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Rebuilds the same
+  500-instance 17-bit grid as `glv_hnp_phase2_gsprofile_strat.py` (20 curves
+  x 5 seeds x 5 eff strata in {0.05,0.10,0.15,0.20,0.25}, dim 24, float GS —
+  justified by Thread 24 W0/W4, max relative NU error ~1e-15 at this dim),
+  adds the `step` statistic, the two-sided-band analysis, and a
+  `--dump-json` flag (the secondary ask from the 2026-08-07 #2 entry) so the
+  raw table survives the run. Output: `glv_hnp_phase2_thread25_output.txt`,
+  data: `glv_hnp_phase2_thread25_dump.json` (500 rows, `prof`/`nus` arrays
+  stripped to keep it small).
+- `cargo test --test curve_audit` -> 5/5 pass (5.63s). No Rust touched.
+
+### Findings
+
+**Pooled sanity check reproduces Thread 24 W6 exactly**: pooled AUC(-NU) =
+0.7996, pooled AUC(-nu_hat) = 0.6889 — matches the 2026-08-07 #2 entry's
+`pooled (N=500)` line to 4 decimals on a *freshly re-searched* curve set, so
+the pipeline is reproducible end-to-end, not an artifact of one curve draw.
+
+**Bracket boundary check — the empirical two-sided bracket does not
+generalize exactly to a fresh curve draw.** Using the literal Thread 24 W4
+cutoffs [1.040, 2.199] on this run's fresh 500 instances:
+
+```
+NU <  1.040 : N=94   recovered 92/94   (2 counterexamples)
+NU >  2.199 : N=40   recovered  1/40   (1 counterexample)
+NU <= 1.0   : N=86   recovered 86/86   (0 counterexamples — theorem-level bound)
+```
+
+The *theorem*-level certificate (NU <= 1.0, guaranteed by nearest-plane)
+still holds exactly. The [1.040, 2.199] cutoffs are sample extrema from one
+110-instance 12-bit run (Thread 23b), not universal constants — treat them
+as "empirically the ambiguous zone is roughly here," not as a hard
+threshold. Recorded so future runs don't over-fit to them.
+
+**H25 result — mu separates well but only WITHIN an eff stratum; pooling
+across eff inside the band dilutes it, and nu_hat (mu's sqrt(eff)-normalised
+form) recovers most of the loss:**
+
+```
+band NU in [1.040, 2.199]: N=366, recovered 97/366
+  pooled AUC(-mu)     = 0.6932   (below the H25 >= 0.8 bar)
+  pooled AUC(-nu_hat) = 0.8403   (>= 0.8, PASSES)
+  pooled AUC(-NU)     = 0.5656   (near chance, as expected: NU is
+                                   near-constant by construction inside its
+                                   own band)
+  pooled AUC(-step)   = 0.1803   (strongly INVERTED, see below)
+  pooled AUC(-eff)    = 0.7056   (band membership itself correlates with eff)
+
+per-eff-stratum AUC(-mu) inside the band (eff held exactly fixed):
+  eff=0.05  N=24  (23/24 rec, near-degenerate)   AUC 0.4565
+  eff=0.10  N=83  (26/83 rec)                    AUC 0.8819
+  eff=0.15  N=96  (21/96 rec)                    AUC 0.8889
+  eff=0.20  N=89  (18/89 rec)                    AUC 0.9276
+  eff=0.25  N=74  ( 9/74 rec)                    AUC 0.8615
+```
+
+In every non-degenerate eff stratum, mu clears the H25 >= 0.8 bar
+comfortably (0.86–0.93) — this replicates Thread 24 W5's finding inside the
+band specifically, not just across the whole grid. The pooled-across-strata
+AUC(-mu) = 0.69 is a Simpson's-paradox effect: mu's *absolute scale* shifts
+systematically with eff (bigger K1*K2 needs smaller mu to still recover), so
+ranking raw mu across strata scrambles the within-stratum order. nu_hat's
+`sqrt(eff)` normalisation (Thread 24 W3) is exactly the correction for this,
+and it shows: pooled in-band AUC(-nu_hat) = 0.84 sits close to the
+per-stratum mu numbers instead of the diluted pooled-mu number.
+
+**Verdict on H25: SURVIVES, in the nu_hat-normalised form.** mu (equivalently
+nu_hat) is a genuine second coordinate, independent of NU, that resolves
+most of the ambiguous band — but only after the same eff-normalisation
+Thread 24 W3 derived. Un-normalised mu is not eff-free and looks weaker than
+it is when strata are pooled. This sharpens Thread 24's "two mutually
+uncorrelated quantities" framing: it is (NU, nu_hat), not (NU, mu), that is
+the right 2-parameter pair — nu_hat was already the correct normalisation,
+W5/W6 just hadn't been re-tested band-conditioned until now.
+
+**Secondary — step is FALSIFIED as stated, and turns out to be a
+(anti-correlated) proxy for mu, not an independent signal.** The hypothesis
+was "step -> 0 predicts the wall" (smaller step = closer to the wall). The
+data says the opposite: pooled AUC(-step) = 0.33 (i.e. AUC(+step) = 0.67 —
+*larger* step predicts recovery), and inside the band it is even more
+inverted (AUC(-step) = 0.18). `Spearman(step, mu) = -0.66`: step is largely
+just recoding mu with the wrong sign relative to the naive guess, not a new
+axis. No further work on step is warranted — the original W1b motivation
+(head = m copies of lambda_1(L2), step marks the transition) was directionally
+right about where the profile bends, but the bend size is not the load-bearing
+quantity; mu already is.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the (NU, nu_hat) 2-parameter decision
+boundary.** H25 confirms (NU, nu_hat) is the right pair. Concrete sub-task:
+logistic regression `P(recover) ~ a*log(NU) + b*log(nu_hat) + c` on the
+existing 500-row dump (`glv_hnp_phase2_thread25_dump.json`, now checked in),
+held out by curve (not by instance, to avoid leaking curve-level nu_hat
+across train/test), and report AUC of the fitted score vs AUC(-NU) alone
+(0.80) and AUC(-nu_hat) alone (0.69) as baselines to beat. Falsifier: if the
+2-parameter fit does not beat max(AUC(-NU), AUC(-nu_hat*sqrt(eff))) = 0.9922
+(Thread 24 W3, the un-band-conditioned closed form) by a meaningful margin
+on held-out curves, the closed form from W3 was already capturing what the
+2-parameter fit would add and Phase 2's separator work is essentially done;
+write up the final (NU, nu_hat*sqrt(eff)) viability test as the Phase-2
+deliverable instead of continuing to search for a third coordinate.
+
+Secondary (cheap, ~2 min): re-run the bracket-boundary check above on a
+larger N (multiple fresh 500-instance draws) to get an honest confidence
+interval on the "necessary"/"sufficient" NU cutoffs instead of single-sample
+extrema, since this run already showed they don't reproduce exactly.
+
+### Commits made
+
+(recorded after commit, see next log entry)
