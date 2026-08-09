@@ -6676,4 +6676,4 @@ threshold.
 
 ### Commits made
 
-(recorded after commit, see below)
+6e4638e autolab 2026-08-09: Thread 25 — H25 falsified pooled, confirmed per-eff; nu_hat resolves NU-ambiguous band (AUC 0.84)
