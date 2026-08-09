@@ -6673,4 +6673,4 @@ extrema, since this run already showed they don't reproduce exactly.
 
 ### Commits made
 
-(recorded after commit, see next log entry)
+521f463 autolab 2026-08-09: Thread 25 — H25 survives via nu_hat normalization; step falsified
