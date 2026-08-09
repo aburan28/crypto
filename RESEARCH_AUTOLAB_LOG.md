@@ -6690,4 +6690,5 @@ cells? That distinguishes "BKZ compensates for the nearest-plane slack" from
 was confirmed as a real second axis.
 
 ### Commits made
-[recorded in the follow-up commit below]
+
+ff34594 autolab 2026-08-09: Thread 25 — mu is a genuine second coordinate beyond NU (in-band AUC 0.894); step sign corrected
