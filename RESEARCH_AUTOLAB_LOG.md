@@ -6538,3 +6538,110 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Orientation: priorities 1 (P-521 LLL), 2 (CHLRS Igusa), 4 (cross-curve LLL
+scaled-GS), 6 (B5 over F_{p^k}) are CLOSED/BLOCKED/not-yet-started-but-
+superseded; priority 3 (Howe sextic-twist gluing) completed 2026-07-21
+(5/15 pairs qualify, commit a287abc). Priority 5 (GLV-HNP Phase 2) is the
+thread with continuous measurable progress across 2026-07-26 .. 2026-08-07
+(Threads 20/23/24), so per protocol rule (b) it is the correct pick.
+Executed the 2026-08-07 #2 log entry's own "Thread 25" next-step proposal
+verbatim: H25 (does mu = lambda_1(L2) separate recovery *inside* the
+NU-ambiguous band?) plus the W1b step-statistic follow-up.
+
+Environment note (fresh container, as in the 2026-07-08/07-29 logs): needed
+`pip3 install sympy fpylll cysignals` before `glv_hnp_common.py` would
+import; `gp`/PARI is NOT installed in this container and was not needed for
+this thread (pure-Python re-analysis of the existing Phase-2 lattice code).
+
+### Work done
+
+- Added `--dump-json PATH` to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  so the raw 500-row table (17 bits, 5 eff strata x 20 curves x 5 seeds,
+  dim 24) survives the run for later re-analysis, per the prior proposal.
+- Added a `step` field per instance: `log2(||b*_{m+1}||) - log2(||b*_1||)`
+  (indices `prof[M]` and `prof[0]` of the existing GS profile — no new
+  lattice work, m=M17=12).
+- Added EXP W8 (H25 test): restrict to the 367/500 rows with
+  `1.04 <= NU <= 2.20` (Thread 24's W4 ambiguous bracket) and compute
+  AUC(-mu), AUC(-NU), AUC(-nu_hat) inside that band only.
+- Added EXP W9 (W1b follow-up): pooled and per-eff-stratum AUC(-step) vs.
+  recovery, compared to AUC(-mu) and AUC(-NU) on the same subset.
+- Ran `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json ...`; full
+  output saved to `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (6.84s). ✓ (no Rust changed;
+  run per protocol since this thread touches the shared Phase-2 pipeline.)
+
+### Findings
+
+**H25 — INCONCLUSIVE, but nu_hat is the real story inside the band.**
+Band population: 367/500 instances (98 recover, 269 fail).
+
+```
+AUC(-mu)     inside band = 0.6962   (below the 0.8 bar — not "genuine")
+AUC(-NU)     inside band = 0.5599   (near-flat, as expected by construction)
+AUC(-nu_hat) inside band = 0.8419   (!)
+```
+
+mu does not clear the H25 bar (0.696 < 0.8), so the W5/W6 framing of "NU vs.
+mu as the two independent coordinates" is not quite right. What actually
+survives inside the NU-ambiguous band is **nu_hat = mu/sqrt(det L2)**, the
+size-normalised version, at 0.842 — close to its unconditional-stratum
+values from W5 (0.75-0.93). This means nu_hat is not just re-deriving NU's
+signal (NU is ~flat inside the band, 0.56 AUC) and not just re-deriving mu's
+signal either (mu alone underperforms nu_hat by 0.146 AUC inside the same
+367 rows). **The die is cast on nu_hat, not on mu in isolation** — the
+`sqrt(det L2)` normalisation, which W5 dismissed as "only matters across
+sizes," is doing real work even within a single eff stratum's NU band.
+
+**W9 — the step hypothesis is FALSIFIED, and inverted.**
+
+```
+AUC(-step) pooled           = 0.3286   (mu/NU pooled on same subset: 0.396 / 0.800)
+eff=0.05  AUC(-step) = 0.6364   (99/100 recover — near-degenerate)
+eff=0.10  AUC(-step) = 0.2266
+eff=0.15  AUC(-step) = 0.1139
+eff=0.20  AUC(-step) = 0.0793
+eff=0.25  AUC(-step) = 0.1062
+```
+
+Every non-degenerate stratum gives AUC well BELOW 0.5, i.e. **larger** step
+(not smaller) is associated with recovery — the opposite of the W1b
+single-curve observation that step -> 0 at the wall. The likely reconciliation:
+W1b tracked step as K1 increases *on one curve* (where step does shrink
+toward the wall), but cross-curve at fixed eff the curves with the largest
+step are simply the ones with the most "room" in their lambda-block gap,
+which independently correlates with recovery. **step is confounded with
+curve identity, not a portable predictor.** Retire it as a Phase-2 signal;
+no further sub-task needed here.
+
+### Next step proposal
+
+**Thread 26 — replace the (NU, mu) frame with (NU, nu_hat) and fit the
+2-parameter boundary.** W5+W8 jointly show nu_hat, not mu, is the
+NU-independent second coordinate: AUC 0.75-0.93 in every eff stratum (W5)
+AND 0.84 inside NU's own ambiguous band (W8), while mu alone is markedly
+weaker in the latter (0.70). Concrete sub-task: logistic regression of `ok`
+on `(log NU, log nu_hat)` over the existing 500-row table (reuse the
+`--dump-json` output, no new instances needed), report the fitted
+coefficients and the decision boundary, and check whether it's a straight
+line in log-log space (product-of-powers threshold) or curved (genuine
+2-D interaction). If it collapses to an interaction where nu_hat's
+coefficient dominates and NU's is ~0 outside the extremes, that would mean
+NU's exact BDD certificate is strictly dominated by the free closed form
+for THIS lattice family — a strong practical result: skip LLL profiling
+entirely and use nu_hat as the viability gate. Cost: pure post-processing
+of `/tmp/.../thread25_rows.json`-style dumps, ~10 minutes, no new lattice
+computation.
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU/nu_hat,
+to quantify how far above the thresholds found here blockwise reduction
+pushes recovery.
+
+### Commits made
+
+(recorded after push — see next commit)

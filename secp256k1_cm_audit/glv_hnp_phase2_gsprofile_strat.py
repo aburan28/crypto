@@ -18,9 +18,20 @@ W6  is C = NU/(nu_hat*sqrt(eff)) stable across strata, i.e. does the closed
 Gram-Schmidt is float here, justified by W0/W4 of the parent script
 (max relative NU error vs exact Fractions ~1e-15 at dim 20 and dim 24).
 
-Run: python3 glv_hnp_phase2_gsprofile_strat.py
+Thread 25 (2026-08-09): W5/W6 (above) show NU and mu = lambda_1(L2) are
+uncorrelated predictors of recovery (Spearman ~0, opposite-signed across
+strata).  H25: within the NU band [1.04, 2.20] where the exact nearest-plane
+certificate NU is ambiguous (Thread 24's W4 bracket), does mu still separate
+recovery from failure?  W8 below tests this directly.  W9 tests the W1b
+follow-up: does the GS-profile "step" from the first lambda-block to the
+second (log2 ||b*_{m+1}|| - log2 ||b*_1||) predict recovery, and does it beat
+NU or mu.
+
+Run: python3 glv_hnp_phase2_gsprofile_strat.py [--dump-json PATH]
 """
 
+import argparse
+import json
 import math
 import os
 import random
@@ -34,6 +45,11 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dump-json", default=None,
+                     help="write the raw per-instance row table to this path")
+    args = ap.parse_args()
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -57,12 +73,21 @@ if __name__ == "__main__":
                 if r is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                step = (math.log2(r['prof'][M17]) - math.log2(r['prof'][0])
+                        if r['prof'][M17] > 0 and r['prof'][0] > 0 else float('nan'))
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n), 'step': step})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if args.dump_json:
+        dump_rows = [{k: v for k, v in r.items() if k not in ('nus',)}
+                     for r in rows]
+        with open(args.dump_json, "w") as f:
+            json.dump(dump_rows, f)
+        print(f"dumped {len(dump_rows)} rows to {args.dump_json}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
@@ -139,6 +164,56 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    print("\n" + "-" * 78)
+    print("EXP W8 (Thread 25, H25): does mu separate INSIDE the ambiguous NU band?")
+    print("-" * 78)
+    print("H25: within 1.04 <= NU <= 2.20 (Thread 24's W4 bracket, where the exact")
+    print("nearest-plane certificate gives no answer either way), AUC(-mu) >= 0.8")
+    print("would make mu a genuine second coordinate, independent of NU.\n")
+    NU_LO, NU_HI = 1.04, 2.20
+    band = [r for r in rows if NU_LO <= r['NU'] <= NU_HI]
+    band_pos = [r for r in band if r['ok']]
+    band_neg = [r for r in band if not r['ok']]
+    print(f"band population: {len(band)}/{len(rows)} instances "
+          f"({len(band_pos)} recover, {len(band_neg)} fail)")
+    if band_pos and band_neg:
+        a_mu_band = auc([r['mu'] for r in band_pos], [r['mu'] for r in band_neg])
+        a_nu_band = auc([r['NU'] for r in band_pos], [r['NU'] for r in band_neg])
+        a_nh_band = auc([r['nuhat'] for r in band_pos], [r['nuhat'] for r in band_neg])
+        print(f"  AUC(-mu)     inside band = {a_mu_band:.4f}")
+        print(f"  AUC(-NU)     inside band = {a_nu_band:.4f}  (sanity: NU is near-")
+        print(f"                              constant inside its own band by construction)")
+        print(f"  AUC(-nu_hat) inside band = {a_nh_band:.4f}")
+        verdict = "CONFIRMED" if a_mu_band >= 0.8 else (
+            "FALSIFIED" if a_mu_band <= 0.6 else "INCONCLUSIVE")
+        print(f"\nH25 verdict: {verdict} (threshold 0.8, band N={len(band)})")
+    else:
+        print("  band is degenerate (all-pos or all-neg) — H25 untestable on this table")
+
+    print("\n" + "-" * 78)
+    print("EXP W9 (Thread 25, W1b follow-up): does the lambda-block step predict")
+    print("        the wall better than NU or mu?")
+    print("-" * 78)
+    print("step = log2(||b*_{m+1}||) - log2(||b*_1||); W1b showed step -> 0 exactly")
+    print("as the K1 wall is crossed on individual curves; this tests it cross-curve.\n")
+    step_pos = [r for r in rows if r['ok'] and not math.isnan(r['step'])]
+    step_neg = [r for r in rows if not r['ok'] and not math.isnan(r['step'])]
+    if step_pos and step_neg:
+        a_step = auc([r['step'] for r in step_pos], [r['step'] for r in step_neg])
+        a_mu_all = auc([r['mu'] for r in step_pos], [r['mu'] for r in step_neg])
+        a_nu_all = auc([r['NU'] for r in step_pos], [r['NU'] for r in step_neg])
+        print(f"  AUC(-step) pooled  = {a_step:.4f}")
+        print(f"  AUC(-mu)   pooled  = {a_mu_all:.4f}  (same subset, for comparison)")
+        print(f"  AUC(-NU)   pooled  = {a_nu_all:.4f}  (same subset, for comparison)")
+        for eff in EFFS:
+            sub_pos = [r for r in step_pos if r['effq'] == eff]
+            sub_neg = [r for r in step_neg if r['effq'] == eff]
+            if sub_pos and sub_neg:
+                print(f"  eff={eff:.2f}  AUC(-step) = "
+                      f"{auc([r['step'] for r in sub_pos], [r['step'] for r in sub_neg]):.4f}")
+    else:
+        print("  degenerate — step untestable")
 
     print("\n" + "=" * 78)
     print("done")
