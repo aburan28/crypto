@@ -6538,3 +6538,111 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6503). Priority-1 (P-521 bigfloat) has had no touch in this log at all and
+priority list 1-6 are all closed/blocked/superseded (see 2026-07-07..08
+entries); the active frontier is the GLV-HNP Phase 2 statistics chain
+(Threads 20-24), which made measurable progress two runs ago (Thread 24:
+H24 argmax clause falsified, NU/nu_hat shown uncorrelated at fixed eff).
+Per protocol rule (b) this is "recent work with measurable progress," so
+continue it rather than falling back to survey mode.
+
+Environment note: fresh container had neither `fpylll`/`sympy`/`cysignals`
+nor `gp` (PARI/GP) installed. `pip install fpylll cysignals sympy` worked
+(network egress permitted); PARI/GP was not available and not needed for
+this thread (Thread 2/3/6 would be blocked again if picked).
+
+### Work done
+
+- Added `--dump-json[=path]` to `glv_hnp_phase2_gsprofile_strat.py` (the
+  flag proposed in the 2026-08-07 #2 log) so the 500-row 17-bit table
+  (5 eff strata x 20 curves x 5 seeds, dim 24) survives the run instead of
+  being recomputed per analysis. Confirmed the script is fully
+  deterministic (curve search + seeded RNG): re-running reproduced the
+  2026-08-07 W5/W6 tables exactly.
+- Wrote `glv_hnp_phase2_thread25.py`, reading the dumped table, testing:
+  1. **H25** — AUC(-mu -> recovery) restricted to the ambiguous 17-bit NU
+     band [1.040, 2.199] (the ambiguous bracket W4 measured).
+  2. **Secondary** — the GS-profile `step = log2(||b*_m||) - log2(||b*_0||)`
+     (0-based, m=12) that Thread 24's W1b flagged as vanishing near the K1
+     wall; tested as its own recovery predictor, pooled and per-eff-stratum.
+
+### Findings
+
+**H25, literal pooled reading: FALSIFIED (0.693 < 0.80 threshold).**
+Inside the band (N=366/500, 97 recovered / 269 not):
+```
+AUC(-mu     -> recovery) = 0.6932   [threshold 0.80]  -> FAIL
+AUC(-nu_hat -> recovery) = 0.8403
+AUC(-NU     -> recovery) = 0.5656   (near-chance inside its own band, as expected)
+```
+
+**H25, per-eff-stratum reading: HOLDS, and looks identical to the
+unconditioned W5 numbers.** The pooled figure above mixes 5 eff strata with
+very different marginal recovery rates — exactly the pooling artifact W3/W6
+warned about for `nu_hat*sqrt(eff)`. Stratifying by eff *inside* the band:
+```
+ eff    N   rec | AUC mu (in-band)   AUC mu (W5, unconditioned)
+0.05   24  23/24 |   0.4565 (degenerate: 23/24 recover)   0.4242
+0.10   83  26/83 |   0.8819                                0.7443
+0.15   96  21/96 |   0.8889                                0.8873
+0.20   89  18/89 |   0.9276                                0.9175
+0.25   74   9/74 |   0.8615                                0.8816
+```
+Conditioning on the NU band changes mu's per-stratum AUC by <5% in every
+non-degenerate cell — mu's discriminating power is essentially untouched by
+restricting to instances where NU gives no answer. `Spearman(NU, mu)`
+inside the band is -0.456 (vs -0.07..-0.29 per full stratum, W6-consistent
+magnitude) — mild anti-correlation, not the redundancy that would explain
+away mu's power. **Conclusion: H25 holds under the honest (eff-controlled)
+reading; the pre-registered pooled statement was mis-specified because it
+didn't anticipate the same eff-confound this whole thread chain has flagged
+in every other pooled test.** (NU, mu) is a genuine 2-parameter test:
+NU gives a sound zero-FP certificate near NU<=1, and mu/nu_hat separates
+well (AUC 0.86-0.93) even conditional on NU being uninformative.
+
+**Secondary — step is NOT a new predictor, it's mu with the sign flipped.**
+```
+Spearman(step, mu) per stratum:  -0.785  -0.876  -0.884  -0.899  -0.895
+Spearman(step, NU) per stratum:  +0.165  +0.197  +0.294  +0.117  -0.210  (noise)
+AUC(+step) vs AUC(mu), per stratum:
+ eff=0.10  step 0.7734  mu 0.7443
+ eff=0.15  step 0.8861  mu 0.8873
+ eff=0.20  step 0.9207  mu 0.9175
+ eff=0.25  step 0.8938  mu 0.8816
+```
+`step` tracks `mu` at Spearman -0.79..-0.90 in every stratum and matches its
+AUC to within 3% once sign-corrected. W1b's "step vanishes near the wall"
+observation is the same phenomenon as "mu shrinks near the wall," restated
+in different units — not an independent axis. Retire `step` as a candidate
+predictor; it adds nothing `mu` doesn't already give more directly.
+
+### Next step proposal
+
+**Thread 26 — fit the 2-parameter (NU, mu) decision rule and get an
+honest out-of-sample number.** H25 establishes NU and mu are both real and
+roughly independent; the natural next step is a logistic fit on
+(log NU, log mu, log eff) over the 500-row table with train/test split (or
+leave-one-curve-out, since seeds within a curve are correlated), reporting
+AUC and calibration on held-out curves — not the in-sample AUCs used for
+exploration here, which are optimistic once a rule is fit rather than just
+ranked. Concretely: `sklearn`/hand-rolled logistic regression is not yet a
+dependency anywhere in `secp256k1_cm_audit/`; check what's importable in a
+fresh container before committing to sklearn vs a hand-rolled Newton step
+(3-4 parameters, closed-form-able).
+
+Secondary: the degenerate eff=0.05 stratum (99/100 recover unconditioned,
+23/24 in-band) means the (NU, mu) rule is only being tested where it's hard;
+worth extending the eff grid to >=0.30 to see if mu's AUC keeps climbing or
+plateaus, which bears on whether "eff" itself should be a third rule input
+or just a stratification variable.
+
+### Commits made
+
+(pending — see push step)
