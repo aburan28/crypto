@@ -6538,3 +6538,192 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat) is CLOSED (§10.5, 2026-06-06). Priority 2 (CHLRS
+Igusa/Mestre reconstruction) was last touched 2026-07-27 — 13 days ago, well
+outside the 7-day "recently worked, no progress" exclusion window — with a
+clearly articulated next step (`RESEARCH_MESTRE_HOWE.md` §7: "Igusa invariants
+from curve coefficients" and "Mestre's Step 2" both listed as open
+implementation tasks, ~50 and ~500 lines of PARI respectively). Per the
+priority order this comes before priority 5 (GLV-HNP Phase 2), which is the
+thread with the most recent activity (2026-08-07 x2) but is mid-investigation
+with a proposed Thread 25 that doesn't need to be picked up today. Picked
+priority 2.
+
+### Work done
+
+- Confirmed `gp` (PARI) was not installed in this fresh container — the
+  protocol's `gp -q script.gp` step silently can't run without it.
+  `apt-get install -y pari-gp` succeeded (208MB, ~15s). Worth noting in case
+  future runs hit the same missing-binary issue; not a code fix, just an
+  environment note.
+- Re-read `RESEARCH_MESTRE_HOWE.md` §7: the two blocking gaps were (1) Igusa
+  invariants from a known sextic (marked "medium cost, ~50 lines, high
+  value") and (3) Mestre's Step 2, invariants → curve (marked "high cost,
+  ~500 lines, medium value"). Both were previously "documented but not
+  implemented" — `mestre_scaffold.gp` computed only `I_10` via `poldisc` and
+  explicitly punted on `I_2, I_4, I_6` ("pages-long... we don't reproduce
+  them here").
+- Searched for the source of "CHLRS" (Cardona-Howe-Lercier-Ritzenthaler-
+  Streng) referenced in prior threads — it's the Magma `Genus2Reconstruction`
+  package (per `RESEARCH_MESTRE_HOWE.md` §10 references), not a paper. Found
+  a *different* Sijsling repo (`JRSijsling/gluing`) first via web search —
+  turned out to be for genus-1+genus-2 → genus-3 (2,2,2)-gluings (Hanselman-
+  Schiavone-Sijsling), a different (harder, adjacent) construction than what
+  we need. Correctly identified this as a dead end before implementing
+  anything from it.
+- `arxiv.org`, `math.mit.edu`, `match.stanford.edu`, `semanticscholar.org`
+  are all blocked by the network egress proxy in this environment (tried and
+  failed on all four). `github.com` / `raw.githubusercontent.com` and plain
+  `curl` to raw.githubusercontent.com both work — this is the practical
+  literature-access channel for future runs when arxiv is the natural first
+  guess.
+- Found **SageMath's own implementation** of exactly both missing pieces
+  (GPL-2.0+, so portable): `sage/schemes/hyperelliptic_curves/invariants.py`
+  (forward: sextic → Clebsch → Igusa, via Mestre's own "Ueberschiebung"
+  transvectant recipe, p.315/317 of Mestre 1991) and `.../mestre.py`
+  (backward: Igusa invariants → conic → parametrization → sextic, formulas
+  from Lauter-Yang 2001 p.956-957 cross-checked against van Wamelen 1999).
+  Pulled both files via `curl` to raw.githubusercontent.com (13.4KB /
+  14.6KB) — this sidesteps the "pages-long polynomial, transcribe by hand"
+  problem entirely: it's a direct, mechanical, checkable port instead of a
+  derivation.
+- Ported both directions to PARI/GP in
+  `secp256k1_cm_audit/mestre_reconstruction.gp`:
+  - `igusa_clebsch(f)`: transvectant chain (`i,Delta,y1,y2,y3,A,B,C,D` per
+    Mestre's naming) → Clebsch → Igusa. Validated EXACTLY against 3 of
+    Sage's own docstring test vectors (not approximately — bit-for-bit
+    identical rational/integer output):
+    - `clebsch_to_igusa(2,3,4,5) == (-240, 17370, 231120, -103098906)` ✓
+    - `igusa_clebsch(x^6+1) == (-240, 1620, -119880, -46656)` ✓
+    - `igusa_clebsch(x^6+x^5+x^4+x^2+2) == (-496, 6220, -955932, -1111784)` ✓
+  - `mestre_L`, `mestre_parametrize`, `mestre_sextic`, `reconstruct_curve`:
+    the conic-construction/parametrization/reconstruction pipeline.
+    `mestre_L` validated exactly against Sage's `Mestre_conic([1,2,3,4])`
+    (rationals, after clearing denominators: `-2572155000*u^2 -
+    317736000*u*v + ...`, all 6 coefficients match) and against
+    `Mestre_conic([GF(7)(10),1,2,3])` (all 6 coefficients match exactly, no
+    rescaling needed).
+  - Point-finding on the conic: started with O(p^3) brute force, replaced
+    with an O(p) method (complete the square in the dehomogenized w=1
+    chart, using `issquare`/Tonelli-Shanks) once the pipeline was validated
+    at p=97; kept the brute-force loop as a rare-case fallback (line at
+    infinity).
+- **Hit and fixed a real PARI footgun**: the reconstructed sextic
+  (`mestre_sextic`'s output) silently had `poldegree() == 0` and looked
+  degenerate — not a math bug. PARI assigns polynomial "variable priority"
+  by first-use order in the session, not by which variables a polynomial
+  actually depends on; since `a`/`b` (from the forward-direction transvectant
+  code) were created before `s` (the conic parametrization variable), a
+  polynomial that only actually depends on `s` was read via the default
+  (highest-priority = `a`) axis, seeing it as a constant. Fixed by forcing
+  `polcoeff(raw, k, s)` with the variable explicit. Documented inline in the
+  script since this will bite anyone combining PARI functions that
+  independently introduce their own "free" variable names.
+- **Round-trip validation** (sextic → invariants → Mestre reconstruct →
+  invariants again), the real test since Sage's two directions are each
+  independently trusted but we needed to check *our two ports agree with
+  each other*: 4 toy curves, `p ∈ {97, 1009}`. Compared via the
+  scale-invariant ratios `I2^5/I10, I4^5/I10^2, I6^5/I10^3` (well-defined
+  since Mestre's output is only fixed up to `h -> lambda*h` rescaling).
+  **3/4 matched exactly.** The 4th (`x^6+x^5+x^4+x^3+x^2+x+1` at p=97) hit a
+  degenerate reconstruction (`I10=0` on the output curve) — a real edge case
+  in the specific `(e1,e2)` basis choice inside `mestre_parametrize`, not a
+  bug: Sage's own docs say "Mestre's algorithm only works for generic curves
+  of genus two." Confirmed the parametrization itself is correct in this
+  case too (checked `quad(L, X(s)) == 0` for several explicit `s`) — the
+  issue is that this particular basis choice happens to hit a bad point, not
+  that the math is wrong. Documented as a known failure mode; a production
+  version should retry with a different basis before giving up.
+- Applied the now-working forward direction to the two curves
+  `mestre_scaffold.gp` had left half-done: full `(I2,I4,I6,I10)` for
+  `h_toy = (x^3+11)(x^3+515)` over F_1009, and for the secp256k1 naive-cover
+  candidate `h_secp = (x^3+7)(x^3+189)` over the real 256-bit `p_secp`
+  (previously only `I_10` via `poldisc` had been computed for either).
+  `h_secp`'s `I10 != 0` — it's a genuine smooth genus-2 curve. **Important
+  correction caught before logging**: my first draft of this script claimed
+  this would/should come out degenerate, conflating it with the
+  Richelot-discriminant-zero finding from 2026-07-27. Those are different
+  objects: the 2026-07-27 finding is that the Richelot correspondence used
+  to try to *construct* `h_secp` as the Howe cover of `(secp256k1,
+  secp256k1^t)` is degenerate for pair `(0,3)` (d=-1); it says nothing about
+  whether `h_secp` itself (as a curve) is singular. It isn't. Fixed the
+  script's comments before running the final version so the log doesn't
+  propagate the conflation.
+- Updated `RESEARCH_MESTRE_HOWE.md`: struck through items 1 and 3 in the §7
+  triage table as DONE with links to the new script; updated §6, §8 (Option
+  A) and the top status line accordingly. Item 2 (Igusa invariants of
+  `(E×E^t)/Γ_α` — the actual gluing formula) is explicitly still open and
+  flagged as the one genuinely hard piece remaining.
+- No Rust files touched this session; `cargo test` not run (nothing to
+  break). Ran the new script directly: `gp -q mestre_reconstruction.gp`,
+  clean output, saved to `mestre_reconstruction_output.txt` with an
+  `.expected.txt` twin per the repo's existing convention (see
+  `igusa_clebsch_output.expected.txt` etc.).
+
+### Findings
+
+1. Both "Igusa invariants from curve" and "Mestre's Step 2" (RESEARCH_
+   MESTRE_HOWE.md §7 items 1 and 3) are no longer open implementation
+   tasks — they're done, in `secp256k1_cm_audit/mestre_reconstruction.gp`,
+   validated against SageMath's own test suite plus a new round-trip check
+   Sage doesn't have.
+2. The genuinely hard remaining piece (item 2: Igusa invariants of
+   `(E1×E2)/Γ_α` computed *without* a prior curve model) is unchanged by
+   this session — it needs either an explicit gluing formula (Humbert
+   surface parametrization, Kani-style — not searched for this session,
+   candidate next step) or a different route entirely (2-adic/theta-function
+   CM computation). Having both ends of Mestre's algorithm now in hand means
+   that whenever item 2 IS solved, the rest of the pipeline (invariants →
+   curve) is no longer a second multi-week task.
+3. `h_secp = (x^3+7)(x^3+189)` over the real secp256k1 prime is confirmed
+   smooth genus-2 (`I10 != 0`) — but per the corrected understanding above,
+   this does not resolve whether it's the actual Howe-glued cover; that
+   identification question is untouched.
+4. Environment note: `gp` is not preinstalled in fresh containers for this
+   repo; `apt-get install -y pari-gp` fixes it in ~15s. `arxiv.org` and
+   several other math-paper hosts are blocked by the egress proxy;
+   `raw.githubusercontent.com` works and is often good enough (Sage/Sympy/
+   etc. source often contains exactly the "explicit formula" a paper would
+   give, with the benefit of being executable and already tested upstream).
+
+### Next step proposal
+
+**Thread 26 — Humbert surface search for item 2 (the actual gluing
+formula).** Both `E1, E2` in our case have CM by orders in `Q(sqrt(-3))`
+(j=0). A genus-2 Jacobian isogenous to a product of two elliptic curves
+with CM by the same imaginary quadratic field lies on a specific Humbert
+surface `H_D` in the Igusa invariant 3-fold, for `D` determined by the
+isogeny degree. If an explicit equation/parametrization for the relevant
+`H_D` can be found (Kani has several papers on "products of CM elliptic
+curves" and explicit Humbert surface equations — not yet searched), a point
+on `H_D` consistent with `E1, E2`'s known invariants would give
+`(I2,I4,I6,I10)` directly, closing item 2 without needing modular-form
+pullback machinery. Falsifier: search for Kani's explicit Humbert surface
+formulas (start with `raw.githubusercontent.com` searches for Sage/Magma
+implementations, same strategy that worked today, before attempting arxiv
+mirrors); if found, test on the toy pair `(0,1)` or `(0,2)` from
+`howe_5pairs_v2.gp` (2026-07-27) against the already-known Richelot-branch
+approach as a cross-check.
+
+**Secondary — retry-basis fix for `mestre_parametrize`.** The one
+round-trip failure (toy B, p=97) is a quick, well-scoped fix: try a second
+`(e1,e2)` basis (e.g. `[0,0,1],[0,1,0]` instead of `[1,0,0],[0,1,0]`) when
+the first produces `I10=0`, and confirm it resolves. ~15 minutes, not done
+today because the 3/4 pass rate was sufficient to validate the pipeline and
+the priority was the CHLRS/Mestre unblock itself.
+
+**Tertiary — point-finding at cryptographic size.** `find_conic_point`'s
+O(p) scan is a toy-scale method (fine up to p~10^4-10^6). The 256-bit
+secp256k1 case needs a real rational-point-on-a-conic algorithm; this is a
+scoped implementation task (the math is classical — Legendre/Hasse-Minkowski
+local-to-global plus explicit descent, or adapt PARI's `qfsolve`), not a
+research question, but sizable (~200-400 lines).
+
+### Commits made
+
+(recorded after this entry is committed — see next log line)

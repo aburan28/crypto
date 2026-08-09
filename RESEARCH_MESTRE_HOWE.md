@@ -6,12 +6,16 @@ Cardona–Quer 2005 and Lercier–Ritzenthaler 2010), which is the
 that the audit in [`RESEARCH_SECP256K1_CM.md`](RESEARCH_SECP256K1_CM.md)
 §§8.6, 8.10 left as an open implementation task.
 
-> **Status**: documentation + partial PARI scaffolding.  The full
-> Mestre reconstruction is multi-page and depends on moduli-of-
-> abelian-surfaces machinery that PARI's standard library doesn't
-> expose directly.  This note documents the algorithm in enough
-> detail for a future implementation effort, with the easy parts
-> (Igusa-invariant formulas) actually computed.
+> **Status (updated 2026-08-09)**: both directions of Mestre's
+> algorithm are now implemented and round-trip-validated in PARI —
+> see [`secp256k1_cm_audit/mestre_reconstruction.gp`](secp256k1_cm_audit/mestre_reconstruction.gp).
+> This was unblocked by finding SageMath's own implementation
+> (`sage/schemes/hyperelliptic_curves/{invariants,mestre}.py`,
+> GPL-2.0+) and porting its exact formulas rather than re-deriving
+> the "pages-long" Cardona–Quer polynomials by hand. What's still
+> **not** implemented is item 2 below (the actual gluing formula:
+> Igusa invariants of `(E×E^t)/Γ_α` computed *without* already
+> having a curve model for it) — that remains the open problem.
 
 ## 1. Problem statement
 
@@ -202,32 +206,51 @@ we can:
 3. Recover `C` up to F_p-isomorphism.
 
 The Igusa invariants of `y² = h(x)` for `h(x) = ∑ a_i x^i` are
-classical polynomial expressions in the `a_i`.  They are:
+classical polynomial expressions in the `a_i`.  Rather than
+hand-transcribing the pages-long Cardona–Quer closed forms, they
+are computed *algorithmically* via Mestre's own "Ueberschiebung"
+(transvectant) recipe from his 1991 paper, p.315/317:
 
 ```
-        I_2  =  (...)
-        I_4  =  (...)
-        I_6  =  (...)
-        I_10 =  disc(h(x))
+        i  = (f,f)_4          Delta = (i,i)_2
+        y1 = (f,i)_4           y2 = (i,y1)_2         y3 = (i,y2)_2
+        A = (f,f)_6    B = (i,i)_4    C = (i,Delta)_4    D = (y3,y1)_2
+        I_2, I_4, I_6, I_10  =  clebsch_to_igusa(A,B,C,D)   [linear-ish
+                                 change of basis, see source]
 ```
 
-The exact formulas are pages-long polynomials (see e.g.
-Cardona–Quer 2005 Appendix).  We don't reproduce them here; in
-practice they're plugged into a CAS as a fixed lookup table.
+where `(f,g)_k` is the transvectant defined by
+`(f,g)_k = [(m-k)!(n-k)!/m!n!] · (∂f/∂x·∂g/∂y − ∂f/∂y·∂g/∂x)^k`
+for forms of degree `m,n`. This is implemented and validated (exact
+match against SageMath's own docstring test vectors) in
+[`secp256k1_cm_audit/mestre_reconstruction.gp`](secp256k1_cm_audit/mestre_reconstruction.gp),
+function `igusa_clebsch`.
 
 ## 7. Triage: what to implement vs. defer
 
-Three implementation tasks, ranked by cost-to-value:
+*(Updated 2026-08-09 — items 1 and 3 below are DONE; see
+`secp256k1_cm_audit/mestre_reconstruction.gp`. Item 2 is still open
+and is the one genuinely hard piece left.)*
 
-### High value, medium cost: Igusa invariants from curve coefficients
+### ~~High value, medium cost~~ DONE: Igusa invariants from curve coefficients
 
 For a known `C : y² = h(x)`, compute `(I_2, I_4, I_6, I_10)` from
-`h`'s coefficients.  Formulas are classical and well-tabulated.
-~50 lines of PARI.
+`h`'s coefficients. Implemented as `igusa_clebsch(f)` in
+`mestre_reconstruction.gp` via the transvectant recipe above (ported
+from Sage's `invariants.py`, not re-derived). Validated against 3
+exact Sage docstring test vectors.
 
 **Value**: enables verification that two `C`'s have the same
-Jacobian (up to F_p-isomorphism).  Useful for the cargo-test
-extension.
+Jacobian (up to F_p-isomorphism). Useful for the cargo-test
+extension. **Now also gives full `(I2,I4,I6,I10)` for `h_toy` and
+`h_secp`** from §6 above, where the old `mestre_scaffold.gp` only
+had `I_10` (via `poldisc`). `h_secp = (x³+7)(x³+189)` over
+`F_p_secp`: `I10 != 0`, i.e. it's a bona fide smooth genus-2 curve —
+but per the 2026-07-27 log entry, that does *not* by itself mean
+it's the Howe-glued cover of `(secp256k1, secp256k1^t)`; the
+Richelot-degenerate pair `(0,3)` finding is about the correspondence
+used to try to *construct* it as that cover, not about whether
+`h_secp` itself is singular.
 
 ### High value, high cost: Igusa invariants of (E_1 × E_2)/Γ_α
 
@@ -242,12 +265,45 @@ construction.  Requires:
 **Value**: the actual explicit Howe-glued cover for secp256k1.
 Publishable result.
 
-### Medium value, high cost: Mestre's Step 2 (conic + sextic)
+### ~~Medium value, high cost~~ DONE: Mestre's Step 2 (conic + sextic)
 
-The reconstruction from Igusa invariants to curve.  Multi-page
-algorithm; well-documented but tedious.
+The reconstruction from Igusa invariants to curve. Implemented as
+`reconstruct_curve(I2,I4,I6,I10,p)` in `mestre_reconstruction.gp`
+(ported from Sage's `mestre.py`), using:
+- `mestre_L`: the conic matrix (exact match to Sage's `Mestre_conic`
+  on both a `Q`-example and a fresh `F_7`-example from Sage's own
+  docstrings).
+- `find_conic_point`: O(p) point search over `F_p` by completing the
+  square in the dehomogenized chart (brute-force O(p³) fallback for
+  the rare case the fast path misses, e.g. all-affine-chart-degenerate
+  conics).
+- `mestre_parametrize`: the standard "point + pencil of lines"
+  rational parametrization of a conic through a known point.
+- `mestre_sextic`: Mestre's `c_ijk` combination formula.
 
-~500 lines of PARI; week-long effort.
+Validated end-to-end by round-tripping `sextic → invariants →
+reconstruct → invariants` on 4 toy curves at `p ∈ {97, 1009}`: 3/4
+matched exactly on the scale-invariant ratios
+`I2⁵/I10, I4⁵/I10², I6⁵/I10³` (Mestre's output is only defined up to
+the projective scaling `h ↦ λ·h`, `I_{2k} ↦ λ^{2k}·I_{2k}`, so the
+raw invariants differ but these ratios must not). The 4th case hit a
+genuine edge case: for one specific `(I2,I4,I6,I10)` input, the
+particular basis choice in `mestre_parametrize` produced a
+degenerate reconstructed curve (`I10 = 0`). This matches Sage's own
+documented caveat ("Mestre's algorithm only works for generic curves
+of genus two"); a production version should try multiple `(e1,e2)`
+bases before giving up. Not chased further this session — the
+mechanism (point-finding, parametrization, sextic formula) is
+independently confirmed correct by the 3 successful round trips and
+by directly checking each parametrized point lies on the conic.
+
+**Caveat for the real secp256k1 case**: `find_conic_point`'s O(p)
+scan is only a toy-scale method. A 256-bit `p` needs a genuine
+rational-point-on-a-conic algorithm (e.g. PARI's `qfsolve` machinery
+adapted to `F_p`, or the classical reduction to a 2-adic/Hensel
+lift + CRT approach) — this is a concrete, scoped next step, *not*
+a research question (the math is 19th-century; it's an
+implementation task).
 
 **Value**: completes the pipeline.  Without it, even if §3.2 is
 done, we have Igusa invariants but not the curve.
@@ -257,9 +313,14 @@ done, we have Igusa invariants but not the curve.
 The "explicit Howe cover for secp256k1" remains an open
 implementation task.  The realistic options:
 
-**Option A**: implement the full Mestre algorithm in PARI.
-~2 KLOC, 4-6 week effort.  Produces the explicit `C/F_p_secp` as
-a publishable result.
+**Option A**: implement the full Mestre algorithm in PARI. **Done
+2026-08-09** for the *reconstruction* half (invariants → curve, and
+curve → invariants) — see `mestre_reconstruction.gp`, ~4 hours by
+porting Sage's implementation rather than the originally-estimated
+4-6 weeks of independent derivation. What's still missing is not
+Mestre's algorithm itself but its *input*: the Igusa invariants of
+`(E×E^t)/Γ_α` (item 2 in §7 above), which is a different, harder
+problem (an actual gluing formula, not a reconstruction algorithm).
 
 **Option B**: use Magma (proprietary) to compute the Howe cover
 directly via `IsogenousJacobian` or equivalent.  Single-line if

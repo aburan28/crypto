@@ -1,0 +1,68 @@
+[0;31m  ***   Warning: new stack size = 256000000 (244.141 Mbytes).[0m
+================================================================
+Sage docstring test vectors (forward and backward, exact match)
+================================================================
+
+clebsch_to_igusa(2,3,4,5)                  = [-240, 17370, 231120, -103098906]
+  expected                                 = [-240, 17370, 231120, -103098906]
+igusa_clebsch(x^6+1)                       = [-240, 1620, -119880, -46656]
+  expected                                 = [-240, 1620, -119880, -46656]
+igusa_clebsch(x^6+x^5+x^4+x^2+2)           = [-496, 6220, -955932, -1111784]
+  expected                                 = [-496, 6220, -955932, -1111784]
+
+================================================================
+Mestre round-trip validation (new -- not in Sage's own test suite)
+================================================================
+
+---- toy A (p=97) ----
+h0(x) = x^6 + 3*x^5 + 5*x^4 + 7*x^3 + 11*x^2 + 13*x + 17
+disc(h0) mod p = 57
+Igusa-Clebsch(h0)  = [95, 94, 89, 57]
+Reconstructed h1(s) = 26*s^6 + 85*s^5 + 87*s^4 + 66*s^3 + 75*s^2 + 77*s + 79
+Igusa-Clebsch(h1)  = [6, 70, 22, 20]
+Scale-invariant ratios match: 1
+
+---- toy B (p=97) ----
+h0(x) = x^6 + x^5 + x^4 + x^3 + x^2 + x + 1
+disc(h0) mod p = 71
+Igusa-Clebsch(h0)  = [81, 12, 96, 71]
+Reconstructed h1(s) = 4*s^6 + 28*s^5 + 17*s^4 + 48*s^3 + 42*s^2 + 39*s + 48
+Igusa-Clebsch(h1)  = [0, 0, 0, 0]
+  Reconstructed curve is DEGENERATE (I10=0) for this basis choice
+  in mestre_parametrize -- documented failure mode, see log.
+
+---- toy C, larger p (p=1009) ----
+h0(x) = x^6 - 2*x^3 + 4*x - 1
+disc(h0) mod p = 330
+Igusa-Clebsch(h0)  = [264, 324, 1002, 330]
+Reconstructed h1(s) = 800*s^6 + 721*s^5 + 747*s^4 + 473*s^3 + 535*s^2 + 222*s + 20
+Igusa-Clebsch(h1)  = [746, 25, 363, 129]
+Scale-invariant ratios match: 1
+
+---- toy A, larger p (p=1009) ----
+h0(x) = x^6 + 3*x^5 + 5*x^4 + 7*x^3 + 11*x^2 + 13*x + 17
+disc(h0) mod p = 901
+Igusa-Clebsch(h0)  = [930, 473, 402, 901]
+Reconstructed h1(s) = 458*s^6 + 9*s^5 + 888*s^4 + 775*s^3 + 777*s^2 + 850*s + 598
+Igusa-Clebsch(h1)  = [891, 320, 63, 187]
+Scale-invariant ratios match: 1
+
+SUMMARY: 4 trials, 3 matched exactly.
+
+================================================================
+Full Igusa-Clebsch invariants for mestre_scaffold.gp's curves
+================================================================
+
+h_toy = (x^3+11)(x^3+515) over F_1009
+  (I2,I4,I6,I10) = [783, 971, 763, 253]
+
+h_secp = (x^3+7)(x^3+189) over F_p_secp: this is a perfectly smooth
+genus-2 curve in its own right (I10 below is nonzero, confirming
+mestre_scaffold.gp's earlier poldisc check). The degeneracy found in
+RESEARCH_AUTOLAB_LOG.md 2026-07-27 is about a DIFFERENT object: the
+Richelot correspondence used to try to construct h_secp AS the
+Howe-glued cover of E1 x E2 has vanishing discriminant for the pair
+(0,3) (d=-1). h_secp existing and being smooth does not by itself
+mean it IS that Howe cover -- that identification is still open.
+  (I2,I4,I6,I10) = [115792089237316195423570985008687907853269984665640564039457584007908834584639, 19302628212, 115792089237316195423570985008687907853269984665640564039457583371239473329943, 46374105383717408990784]
+  I10 != 0 (h_secp is smooth genus 2, as independently known): 1
