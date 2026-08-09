@@ -6538,3 +6538,156 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat) is CLOSED (§10.5, confirmed 3/3 at m=16, 1/1 at
+m=32, since 2026-06-06; re-confirmed as CLOSED in every log entry since,
+most recently 2026-08-07). Priority 2 (CHLRS Igusa formula / Howe gluing
+forward map, Thread 2/3) was last touched 2026-07-27 — 13 days ago, past the
+7-day recency window — with the concrete next-step "Thread 3: implement the
+CHLRS forward map, port the explicit polynomial to PARI" left unexecuted.
+Picked Priority 2 / Thread 3.
+
+### Work done
+
+**Part A — literature search for the actual CHLRS formula.**
+WebSearch for "Cardona-Howe-Lercier-Ritzenthaler-Streng" / "Genus2Reconstruction"
+turned up not the paper the task description assumed exists, but the actual
+current literature on this exact problem:
+
+- Hanselman, Schiavone, Sijsling, *Gluing curves of genus 1 and 2 along their
+  2-torsion*, arXiv:2005.03587 (2020) — gives existence criteria + a
+  construction algorithm for exactly the (E1,E2) → genus-2 Howe gluing this
+  thread needs.
+- Saengrungkongka, Walsh et al., *Gluing Genus 1 and Genus 2 Curves Along
+  ℓ-torsion*, arXiv:2502.09753 (2025) — extends to ℓ up to 13, "improves the
+  numerical gluing algorithm."
+- Reference implementation: `github.com/JRSijsling/gluing` (Magma).
+
+Direct PDF fetch was blocked by the network egress proxy for every academic
+domain tried (arxiv.org, ar5iv.org, semanticscholar.org, math.mit.edu,
+app.icerm.brown.edu all returned `EGRESS_BLOCKED`); only github.com was
+reachable. From the WebSearch snippets and the `JRSijsling/gluing` README
+(fetched successfully):
+
+  > "gluing curves along their torsion, both by geometric methods (upcoming)
+  > and by analytic methods (fully implemented)"
+  > [the algorithm is] "based on interpolation methods involving numerical
+  > results over ℂ that are proved to be correct over general fields a
+  > posteriori"
+
+**Finding: no portable closed-form polynomial exists.** The state-of-the-art
+(2020, extended 2025) method is complex-analytic: lift to characteristic 0,
+compute periods/theta constants numerically, glue analytically, algebraically
+recognize the resulting invariants, then reduce mod p. The purely algebraic
+("geometric") variant — the kind of thing that would port cleanly to PARI/GP
+over F_p directly — is explicitly listed as *not yet implemented* even in the
+reference Magma package. This closes out the task description's literal
+instruction ("port the explicit polynomial to PARI"): the polynomial the
+instruction assumes exists has not been published. Anyone re-attempting this
+thread should stop searching for a CHLRS closed form and instead scope a
+CM-period implementation (feasible in principle for j=0 curves specifically,
+since Aut(E)=Z/6Z and the CM field is Q(√-3), the smallest possible — see
+Next step below).
+
+**Part B — re-examined the codebase's own Z/3Z-Richelot attempt.**
+Given no external closed form exists, re-tested the project's existing
+from-scratch approach (`howe_5pairs_v2.gp`, `howe_richelot_v5.gp`), which
+sidesteps the general CHLRS machinery by using the fact that j=0 curves'
+2-torsion x-coordinates are literal cube roots (arithmetic in F_{p^3}).
+2026-07-27's log left an open question: the naive root-pairing β=d·α
+(d=cube root of b2/b1) gives the WRONG Jacobian order (#Jac=1106283 vs
+target=1018251 at p=1009); hypothesis was that the pairing needs to be one
+of 3 Galois-equivariant rotations β=ζ3^i·d·α.
+
+Wrote `secp256k1_cm_audit/howe_richelot_rotation_fix.gp`, testing all 3
+rotations at both p=1009 (b1=11,b2=515) and p=43 (b1=7,b2=13, the
+"reference" case). Ran with `gp -q` (pari-gp 2.15.4 installed via apt for
+this session — was not preinstalled).
+
+### Findings
+
+1. **Rotation hypothesis falsified.** All 3 rotations give different (a,b)
+   pairs but the *same* #Jac in both test cases:
+   ```
+   p=1009 (b1=11,b2=515): rotations give (210,620),(516,620),(949,620)
+                            all with #Jac=1106283, target=1018251. No match.
+   p=43   (b1=7, b2=13):  rotations give (41,5),(39,5),(8,5)
+                            all with #Jac=2169, target=1767. No match.
+   ```
+   Rotating the root-pairing changes the output curve but not its isogeny
+   class — the mismatch is not an orientation bug.
+
+2. **The "known-good" p=43 reference case was never actually verified against
+   the Jacobian target, and it fails when checked.** Every log entry since
+   the Z/3Z-Richelot arithmetic was fixed (2026-07-27 onward) cites
+   `richelot(sv=[0,3,0],qv=[0,0,2]) → a=41,b=5` as "✓ CORRECT" / the
+   validated reference answer. Re-running `howe_5pairs_v2.gp`'s own
+   `check_jac` on this exact output shows:
+   ```
+   Frobenius poly: x^4 + 6*x^3 + 55*x^2 + 258*x + 1849
+   #Jac=2169  target=1767  match=0
+   ```
+   The Weil polynomial is internally self-consistent (c1=c3·p=258 ✓,
+   c0=p²=1849 ✓) so it's a *bona fide* genus-2 Frobenius poly — it's just
+   not the target one. Confirmed independently: target factors as
+   (T²-13T+43)(T²+13T+43) = T⁴-83T²+1849; the actual output is
+   T⁴+6T³+55T²+258T+1849. These share only the constant term. **"✓ CORRECT"**
+   in prior logs meant only "reproduces a hardcoded literal from an earlier
+   script," never "passes the Jacobian-order check" — that check exists in
+   the same file and was apparently never read.
+
+3. **`howe_richelot_v5.gp`'s full canonical-class sweep has never produced a
+   single non-degenerate result.** Ran the full script (previously only
+   referenced in logs, not executed this session): `do_class` sweeps 7
+   canonical (aa,bb) classes × 3 rotations = 21 richelot_gen calls. **All 21
+   return `[-1, -1]`** (the "not defined over F_p" / Δ=0 sentinel). The only
+   output this file ever prints that "looks like a result" is the top-level
+   sanity check (`Naive cover sigma_0: a=41 b=5`), which is outside the
+   do_class loop, checked against nothing but a hardcoded literal, and (per
+   finding 2) fails the actual Jacobian target when that check is applied.
+
+   **Net assessment: no version of the Z/3Z-Richelot forward map (v2 through
+   v5, plus this session's rotation variant) has ever produced an F_p curve
+   verified to have Jac ≅ E1×E2 (or E×E^t) for secp256k1 or any toy prime.**
+   This corrects the optimistic framing of the 2026-07-27 entry ("Z/3Z
+   Richelot arithmetic confirmed fixed... reproduces the p=43 reference
+   answer exactly") — the arithmetic reproduces a literal; it has not been
+   shown to reproduce anything mathematically meaningful.
+
+### Next step proposal
+
+**Immediate (cheap, ~30 min, same p=43 toy):** the (sv,qv)=(α+β,α·β)
+construction pairs "cube root of b1" with "cube root of b2" directly — but
+Richelot correspondence acts on a single sextic's 6 roots split into 3 pairs,
+and there's no reason the *correct* Howe pairing is "root i of cubic 1 with
+root i of cubic 2" rather than some other pairing of the 6 roots of
+(x³+b1)(x³+b2). Brute-force it: enumerate all pairings of the 6 roots of
+(x³-7)(x³-13) mod 43 into 3 unordered pairs compatible with the Z/3Z
+symmetry, run `richelot_gen` on each, and check `charpoly_jac` against the
+known target T⁴-83T²+1849. This is a handful of `gp` evaluations at p=43;
+either it finds the right pairing (unblocking the whole thread) or it proves
+the degree-6-product-curve's Richelot dual is never the Howe cover, which
+would mean the Z/3Z-Richelot approach needs to start from a different
+sextic entirely (falsifying the whole thread's premise, per protocol — "if a
+thread hits a wall, document it and propose a smaller next step").
+
+**Medium-term:** since Part A shows the general CHLRS/period method is
+real but requires CM-analytic lifting, and secp256k1's j=0 curves have the
+smallest possible CM field (Q(√-3), class number 1), a from-scratch
+period computation may actually be tractable here specifically (not for
+general (E1,E2) — only for this CM-73/CM-3 special case). Scope: compute
+periods of y²=x³+1 over C via AGM/theta constants (standard, ~50 lines),
+apply the known analytic gluing formula for two elliptic tori glued along
+2-torsion (classical, predates CHLRS — this is literally a degree-2 isogeny
+of complex tori, textbook Igusa/Rosenhain theta relations), recognize the
+resulting algebraic numbers over Q(√-3), reduce mod p_secp. This is a
+multi-session effort; flag as the candidate follow-up if the brute-force
+pairing check above also fails.
+
+### Commits made
+
+(recorded after push — see next log entry)
