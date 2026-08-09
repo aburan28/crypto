@@ -6657,4 +6657,4 @@ being systematically unmeasurable with this instance count.
 
 ### Commits made
 
-(recorded in the next log entry, per repo convention)
+cb6d9f6 autolab 2026-08-09: Thread 25 — H25 falsified pooled but holds per-stratum; (NU, nu_hat) is the pair, not (NU, mu)
