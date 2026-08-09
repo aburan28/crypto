@@ -6538,3 +6538,114 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 LLL) is CLOSED since 2026-06-06 (§10.5, m=32 tested);
+priority 4 (cross-curve LLL 384-bit) is CLOSED since 2026-06-14 (3/3 at
+256/384 bits); priority 2 (CHLRS Igusa) is BLOCKED pending the CHLRS forward
+map (last touched 2026-07-27, no runnable next step queued); priority 3
+(Howe gluing) is gated on priority 2; priority 6 (B5 over F_{p^k}) has no
+log history at all. Priority 5 (GLV-HNP Phase 2) was touched 2 days ago
+(2026-08-07 #2) with measurable progress (W1-W7) and a concrete
+pre-registered next step (Thread 25), so protocol rule (b) applies again.
+
+**Thread 25** — the pre-registered next step from the 2026-08-07 #2 entry:
+does `mu = lambda_1(L2)` separate Kannan-LLL recovery *inside* the ambiguous
+NU band [1.04, 2.20], where the exact BDD certificate NU gives no answer?
+
+  H25: within 1.04 <= NU <= 2.20, AUC(-mu -> recovery) >= 0.8.
+  Falsifier: AUC(-mu) drops toward 0.5 inside the band (mu's W5 power was
+  entirely mediated by NU / an eff-stratification artifact).
+
+### Work done
+
+- Fresh container: `pip install fpylll cysignals sympy` -> fpylll 0.6.4,
+  cysignals 1.12.5, sympy 1.14.0 (needed every run; not a fpylll dependency).
+- New `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`. Regenerates the exact
+  17-bit / 500-instance grid from `glv_hnp_phase2_gsprofile_strat.py`
+  (same `search_curves`, same 5 EFFS x 20 curves x 5 SEEDS, M17=12,
+  float GS — justified by W0/W4, rel. error ~1e-15) since that script never
+  persisted per-row data. Dumps `glv_hnp_phase2_thread25_rows.json`
+  (500 rows, all scored fields) so future threads can re-analyze without a
+  rerun. Also computes the W1b-proposed `step = log2(||b*_{m+1}||) -
+  log2(||b*_1||)` per instance and a 2-feature logistic fit
+  (`logistic_fit_2d`, plain gradient descent — no numpy/sklearn in this
+  container).
+- `cargo test --test curve_audit` -> 5/5 pass (4.6s). No Rust touched.
+
+### Findings
+
+**Band split** (500 instances, NU bracket from W4): below band (NU<1.04)
+N=94, 92/94 recover; **in band** N=366, 97/366 recover; above band
+(NU>2.20) N=40, 1/40 recovers. 73% of all instances land in the ambiguous
+band, so a working second coordinate matters for most of the grid.
+
+**H25 (raw mu) is FALSIFIED.** AUC(-mu -> recovery) inside the band = 0.6932,
+well under the 0.8 bar.
+
+**H25' (nu_hat = mu/sqrt(det L2), CONFIRMED.** Swapping raw mu for the
+size-normalized nu_hat clears the bar: AUC(-nu_hat -> recovery) = 0.8403
+inside the band, vs AUC(-NU) = 0.5656 (NU is by construction uninformative
+once you condition on being inside its own ambiguous range — the intended
+sanity check). So W5's finding that mu tracks recovery cross-curve was real,
+but only survives inside a fixed-NU-band, mixed-n slice when properly
+normalized by sqrt(det L2) — raw mu conflates curve scale with the geometric
+signal. This resolves the open question from the 2026-08-07 #2 entry: mu's
+power is NOT entirely mediated by NU, but it also is not raw mu — it is the
+already-defined nu_hat.
+
+**Unplanned result — `step` is a strong signal, inverted.**
+AUC(-step -> recovery) = 0.1803, i.e. AUC(+step -> recovery) = 0.8197: LARGE
+step (bigger jump from the lambda_1(L2)-flat head block to the tail block,
+cf. W1b) predicts recovery, not small step. This was not anticipated by W1b
+(which only used `step -> 0` as a wall indicator) and is comparable in
+strength to nu_hat.
+
+**2-parameter logistic fits** (plain gradient descent, 20k iters, standardized
+features, train-accuracy only — no held-out split done this run):
+```
+in-band (N=366):  logit(rec) = -1.70 -5.14*log(NU) -7.53*log(nu_hat)     acc=0.852
+pooled  (N=500):  logit(rec) = -0.32 -8.49*log(NU) -8.07*log(nu_hat)     acc=0.866
+in-band (N=366):  logit(rec) =  1.34 +5.56*(-log NU) +4.02*step          acc=0.869
+```
+Both coefficient signs on log(NU) and log(nu_hat) are negative as expected
+(smaller NU, smaller nu_hat => more likely to recover). The step-based fit
+edges out the nu_hat-based fit at the same N (0.869 vs 0.852), on training
+accuracy only.
+
+**Cross-check (sanity):** mu alone separates cleanly outside the band —
+AUC=1.000 above the band (N=40, only 1 positive, so this is a weak check)
+and AUC=0.160 below the band (N=94, inverted: recovery is so common there,
+92/94, that the 2 failures happen to have small mu). Neither is a
+meaningful test; they just confirm mu is not pathological outside the
+region H25 asks about.
+
+### Next step proposal
+
+**Thread 26 — validate the step signal is not a NU-band restatement, and
+build a held-out-accuracy version of the (NU, nu_hat) and (NU, step)
+classifiers.** Concrete sub-tasks, in order of cost:
+
+1. (~2 min, no new data) Split the existing 500-row
+   `glv_hnp_phase2_thread25_rows.json` into train/test (e.g. by seed) and
+   report held-out accuracy for both 2-feature fits above — the in-sample
+   0.85-0.87 numbers are not yet validated out-of-sample.
+2. (~5 min, no new data) Check whether `step` is just `log(nu_hat)` in
+   disguise: Spearman(step, log nu_hat) within the band. If |rho| is high,
+   the two "different" signals collapse into one and the step result is not
+   independent information — this needs settling before either is promoted
+   in the research notes.
+3. (new data, ~5 min) Re-run at 12 bits (reusing the U2 grid infrastructure
+   from `glv_hnp_phase2_gsprofile.py`) to check the H25'/step results are
+   n-stable the way the NU bracket itself was checked at two sizes in W4.
+
+Tertiary (unchanged, still not started): BKZ-beta sweep against NU; CHLRS
+forward map (priority 2); B5 over F_{p^k} extensions (priority 6, never
+started — candidate for next fallback if priority 5 saturates).
+
+### Commits made
+
+(recorded after this entry is committed — see follow-up commit)
