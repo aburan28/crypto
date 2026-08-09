@@ -6644,4 +6644,4 @@ pushes recovery.
 
 ### Commits made
 
-(recorded after push — see next commit)
+aced611 autolab 2026-08-09: Thread 25 — H25 inconclusive for mu, nu_hat survives inside NU band (AUC 0.842); step statistic falsified
