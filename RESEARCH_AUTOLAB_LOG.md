@@ -6693,4 +6693,4 @@ is quick.
 
 ### Commits made
 
-(recorded in the following commit)
+4161aa9 autolab 2026-08-09: Thread 2/3 CHLRS forward map — exhaustive 15-partition search proves naive-cover Richelot-dual can never hit target Jacobian; WebFetch confirmed blocked, mark BLOCKED
