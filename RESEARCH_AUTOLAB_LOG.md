@@ -6676,4 +6676,8 @@ quantify how far above the wall blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(recorded in the next log entry, per repo convention of committing after the log write)
+aebfcbb autolab 2026-08-09: Thread 25 — H25(mu) falsified, H25'(nu_hat) holds in-band (AUC 0.84); step statistic strong with sign flip (AUC 0.82 in-band)
+
+Note on push target: this container's git harness pins this session to branch
+`claude/festive-albattani-0lgd8t`, not `main` as the autolab protocol
+specifies. Pushed there instead; see PR for merge to main.
