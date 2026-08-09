@@ -6689,4 +6689,4 @@ transient/session-specific rather than a standing policy.
 
 ### Commits made
 
-(recorded in next log entry after push)
+a8b0e8f autolab 2026-08-08: Thread 2/3 CHLRS — richelot_gen output-transform bug found and fixed; p=43 F_p obstruction claim reopened; p=1009 divergence confirmed structural
