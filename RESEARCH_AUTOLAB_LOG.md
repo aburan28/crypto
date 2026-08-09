@@ -6666,4 +6666,4 @@ non-square cube root of h and never checked the Jacobian order at all,
 similar to the Test-1 bug found today).
 
 ### Commits made
-(recorded in next commit)
+5fa3e97 autolab 2026-08-09: Thread 3 CHLRS forward map — verified end-to-end Howe cover at p=43 (924 matches); pair (0,3) not blocked, resolved via correct cube-root branch of d=-1
