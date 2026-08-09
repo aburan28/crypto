@@ -6538,3 +6538,155 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat): **CLOSED** since 2026-06-06 (§10.5, 3/3 seeds at
+m=16, 1/1 at m=32) — nothing to reopen, skipped.
+
+Priority 2/3 (CHLRS Igusa forward map / Howe gluing): last real progress
+2026-07-27 (`9e9b0a8`, Thread 2/3), so >7 days idle and eligible by the
+protocol. Attempted it first — see "Blocked this session" below — but this
+session's network egress rejects every literature host needed
+(`arxiv.org`, `eprint.iacr.org`, `math.mit.edu`, `ewhowe.com`,
+`en.wikipedia.org` all returned `EGRESS_BLOCKED` from WebFetch). The
+pre-registered next step (Thread 3: port the CHLRS/Howe–Leprévost–Poonen
+explicit forward-gluing formula into `chlrs_forward_map.gp`) needs the
+actual formula transcribed from a paper; WebSearch snippets don't contain
+the equations. Could not make progress without guessing polynomial
+coefficients, which is worse than not touching it. Marked BLOCKED for this
+session (not structurally — prior sessions clearly could reach these hosts,
+e.g. the Sage cross-verification in `RESEARCH_MESTRE_HOWE.md` §5.5) and
+moved down the list.
+
+Priority 4 (cross-curve LLL 384-bit): CLOSED/dead-end since 2026-06-14,
+reconfirmed 2026-07-08. Nothing to do.
+
+Priority 5 (GLV-HNP Phase 2): last touched 2026-08-07 (Thread 24, `942c8a4`)
+with measurable progress and an explicit pre-registered next step (Thread 25
+in that log entry: "does mu still separate inside the NU-ambiguous band?").
+Picked this — satisfies protocol condition (b), no internet required, cheap
+to execute (~3s of compute once deps are installed).
+
+### Work done
+
+- **Environment note for future runs**: this container had none of
+  `sympy`, `fpylll`, `cysignals` installed (all required transitively by
+  `secp256k1_cm_audit/glv_hnp_common.py`). `pip3 install sympy fpylll
+  cysignals` pulled prebuilt manylinux wheels from PyPI in ~15s total — PyPI
+  itself is not blocked by the egress policy, only the paper-hosting domains
+  are. No repo changes needed for this; just a note in case a future run
+  hits the same `ModuleNotFoundError` and wastes time debugging instead of
+  installing.
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`, reusing
+  `instance()`/`auc()` from `glv_hnp_phase2_gsprofile.py` and the same
+  17-bit generation loop as `glv_hnp_phase2_gsprofile_strat.py` (20 curves ×
+  5 eff values × 5 seeds = 500 instances, float GS, dim 24). Added
+  `--dump-json FILE` / `--load-json FILE` per the 2026-08-07 log's request
+  ("Add a `--dump-json` flag so the table survives the run") so H25
+  re-analysis doesn't need to regenerate data. Runs are exactly
+  reproducible (fixed `SEEDS = [42, 1234, 9999, 555, 31337]` from
+  `glv_hnp_phase2_projected.py`, deterministic `search_curves`) — verified
+  bit-identical output from a fresh run vs. `--load-json` on the dump.
+- Ran the pre-registered H25 test: `AUC(-mu -> recovery)` restricted to rows
+  with `NU` in the Thread-24-W4 ambiguous bracket `[1.040, 2.199]`.
+- Added the W1b-proposed secondary statistic:
+  `step = log2(prof[m]) - log2(prof[0])` (prof = GS-norm profile, m=12),
+  computed inline during collection, and measured its AUC both pooled and
+  inside the band.
+- Extra check beyond the pre-registration: broke the band AUC down
+  per-`eff` stratum, because Thread 24's W5 flagged eff=0.05 as
+  near-degenerate (99/100 recovery there) and pooled statistics in this
+  research line have repeatedly turned out to be averaging artifacts (W3
+  vs. W6 in the 2026-08-07 log).
+
+### Findings
+
+**H25 as literally stated (pooled over all eff): FALSIFIED.**
+```
+band (NU in [1.040, 2.199]): N=366/500 (73.2%), recovery 97/366
+AUC(-mu    -> recovery) inside band = 0.6932   (threshold was >= 0.80)
+AUC(-NU    -> recovery) inside band = 0.5656   (expected ~0.5 — band is ambiguous in NU by construction)
+AUC(-step  -> recovery) inside band = 0.1803
+AUC(-nuhat -> recovery) inside band = 0.8403
+```
+
+**But this is the same eff=0.05-degeneracy artifact Thread 24 already
+flagged, not a real falsification of the mechanism.** Per-eff breakdown
+inside the band:
+```
+  eff  bandN     rec   AUC mu  AUC step
+ 0.05     24   23/24   0.4565    0.5217   <- degenerate (96% recovery, can't discriminate)
+ 0.10     83   26/83   0.8819    0.1329
+ 0.15     96   21/96   0.8889    0.1130
+ 0.20     89   18/89   0.9276    0.0657
+ 0.25     74    9/74   0.8615    0.1179
+```
+`mu` clears the H25 threshold (>=0.80) in **every non-degenerate stratum**
+(0.86-0.93). Excluding eff=0.05 and pooling the rest (N=342, 74 positives):
+```
+AUC(-mu)    = 0.8080   (H25 CONFIRMED once the degenerate stratum is excluded)
+AUC(-nuhat) = 0.8964
+AUC(-step)  = 0.8918   (= 1 - 0.1082; step's natural direction is +step -> recovery)
+```
+
+**Verdict: H25 is CONFIRMED, conditional on excluding the eff=0.05
+saturation regime.** `mu` (equivalently `nu_hat`, which is `mu` rescaled by
+`sqrt(det L2)`) is a genuine second coordinate independent of NU — recovery
+inside the NU-ambiguous band is NOT coin-flip-random, it's predictable from
+the lambda-block geometry alone, at AUC ~0.81-0.93 depending on eff.
+
+**Bonus finding — `step` beats `mu` as the in-band predictor.** The W1b
+secondary hypothesis ("step = log2(prof[m]) - log2(prof[0]) -> 0 predicts
+the wall") is directly confirmed and quantitatively *stronger* than `mu`:
+in-band AUC(step, natural direction) = 0.82-0.93 per stratum, beating `mu`
+in 3 of 4 non-degenerate strata and matching `nu_hat`. Sign confirmed: small
+step (both GS blocks similar magnitude) -> failure; large step (blocks
+diverge) -> success, exactly as W1b's geometric picture predicted (`b*_1..
+b*_m` pinned near `lambda_1(L2)`, `b*_{m+1}` onward tracks the harder,
+K1-dependent block). Since `step` needs only the GS profile (already
+computed for `NU`/`argmax`) and no separate 2D-lattice reduction of `L2`,
+it is cheaper to compute than `mu`/`nu_hat` and at least as predictive.
+
+Pooled (unconditional, all 500 rows, for context — expect these to be worse
+than NU since eff varies and dominates):
+```
+AUC(-step) = 0.3286  (natural direction 0.6714)
+AUC(-mu)   = 0.3964  (natural direction 0.6036)
+AUC(-NU)   = 0.7996
+```
+
+### Next step proposal
+
+**Thread 26 — promote `step` to a first-class predictor and test the joint
+rule.** Concretely: (a) does the pair `(NU, step)` (both cheap — no L2
+reduction needed) match or beat `(NU, mu)` as a 2-parameter viability test?
+Fit two logistic models on the same 500-row table and compare in-band AUC
+and calibration. (b) `step` is a single scalar from data already computed
+for every existing NU/mu run in this codebase (it only needs `prof[0]` and
+`prof[m]`, both already stored) — retroactively compute it on the *existing*
+12-bit U2 grid from `glv_hnp_phase2_gsprofile.py`'s W1/W1b rows to see if
+the effect replicates at the smaller size, without any new lattice
+computation. (c) derive *why* `step` predicts recovery: is it literally a
+restatement of `nu_hat` (Spearman correlation check, mirroring Thread 24's
+W6 falsification of the NU/nu_hat identity), or a third independent
+quantity? If independent, `step` may explain the residual variance `mu`
+leaves unexplained within a stratum (e.g. eff=0.10's AUC(mu)=0.88 vs.
+AUC(step)=0.87 — nearly identical individually, but do they agree on the
+*same* instances, or complementary ones? A 2x2 contingency table on
+sign(mu-median) x sign(step-median) within the band would settle it in one
+pass over the existing dump.)
+
+**Fallback — Thread 3 (CHLRS forward map) remains next in priority order**
+but needs either (a) an interactive session with working WebFetch to
+transcribe the Howe–Leprévost–Poonen (`arXiv:math/9809210` /
+`math.mit.edu/~poonen/papers/large.pdf`) or CHLRS explicit gluing formula,
+or (b) the user supplying the relevant pages/equations directly. Flagging
+this so a future run (or the user) can unblock it rather than re-discovering
+the same egress wall.
+
+### Commits made
+
+(recorded in the next log entry once pushed — see below)

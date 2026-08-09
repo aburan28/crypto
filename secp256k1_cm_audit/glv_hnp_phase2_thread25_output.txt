@@ -1,0 +1,39 @@
+==============================================================================
+Thread 25 — second-mechanism test: does mu separate inside the
+NU-ambiguous band?  (H25)
+==============================================================================
+20 17-bit j=0 GLV curves
+500 instances (float GS, dim 24) in 2.3s
+
+------------------------------------------------------------------------------
+H25: AUC(-mu -> recovery) inside NU in [1.04, 2.199]
+------------------------------------------------------------------------------
+band N = 366 / 500 total (73.2%)
+band recovery: 97/366
+AUC(-mu    -> recovery) inside band = 0.6932   (H25 threshold: >= 0.80)
+AUC(-NU    -> recovery) inside band = 0.5656   (expect ~0.5: band is defined to be ambiguous in NU)
+AUC(-step  -> recovery) inside band = 0.1803
+AUC(-nuhat -> recovery) inside band = 0.8403
+
+H25 verdict: FALSIFIED  (AUC=0.6932)
+
+------------------------------------------------------------------------------
+Pooled (unconditional) comparison: is step a better global predictor than NU or mu?
+------------------------------------------------------------------------------
+AUC(-step -> recovery), all rows   = 0.3286
+AUC(-mu   -> recovery), all rows   = 0.3964
+AUC(-NU   -> recovery), all rows   = 0.7996
+
+------------------------------------------------------------------------------
+Per-eff-stratum breakdown of the band test (does H25 hold at every bias strength, or only pooled?)
+------------------------------------------------------------------------------
+  eff  bandN     rec   AUC mu  AUC step
+ 0.05     24   23/24   0.4565    0.5217
+ 0.10     83   26/83   0.8819    0.1329
+ 0.15     96   21/96   0.8889    0.1130
+ 0.20     89   18/89   0.9276    0.0657
+ 0.25     74    9/74   0.8615    0.1179
+
+==============================================================================
+done
+==============================================================================
