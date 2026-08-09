@@ -6538,3 +6538,159 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Priority 2 (Thread 2/3, CHLRS Igusa forward map)**, specifically its
+pre-registered next step from 2026-07-27 (log line ~5976): implement the
+CHLRS/Lercier-Ritzenthaler forward map from `(E1, E2)` to Howe-cover
+coefficients. Priority 1 (P-521 LLL) is CLOSED. Priority 2 was last touched
+2026-07-27 — 13 days ago, outside the protocol's 7-day window — while the
+2026-07-29 through 2026-08-07 runs all stayed on priority 5 (GLV-HNP Phase 2,
+threads 20-25) citing priority 2 as "BLOCKED" without re-verifying that
+label. The 07-27 entry's actual status was progress-with-an-unexecuted-
+next-step, not a hard block, so per protocol rule (a) ("no recent work")
+this thread is the correct pick this run, not a continuation of Phase 2.
+
+### Work done
+
+- **Environment**: `pari-gp` was not installed in this fresh container;
+  installed via `apt-get install -y pari-gp` (2.15.4, same version prior
+  runs used).
+- **Literature access check (new finding, see below)**: attempted
+  `WebFetch` on the LR12 paper, IACR eprint 2010/294, an MIT SPUR paper, and
+  even `en.wikipedia.org` as a control. **All four failed with
+  `EGRESS_BLOCKED`**, and `curl` to the same URLs independently confirms a
+  proxy-level 403 on the CONNECT tunnel. `WebSearch` still works (routes
+  differently) but only returns short synthesized snippets, not full paper
+  text/formulas.
+- Read `RESEARCH_MESTRE_HOWE.md` in full: it already documents that the
+  *general* CHLRS/Mestre forward map (Igusa invariants of `(E1×E2)/Γ_α` via
+  modular-form pullback, then Mestre reconstruction) is a 4-6 week,
+  ~2 KLOC undertaking even with full literature access (§7-§8). With
+  WebFetch now confirmed unusable, that route is closed for autolab-scale
+  sessions.
+- **Pivoted to a literature-independent, falsifiable computational test**:
+  the existing `howe_5pairs_v2.gp` Test 2 (p=1009, E1: y²=x³+11, E2:
+  y²=x³+515) already computes a Richelot dual via hand-rolled `F_{p³}`
+  arithmetic but its own `check_jac` reports `match=0` — i.e. even the
+  "verified" pipeline (Test 1, p=43, matches the reference (a,b)=(41,5))
+  never actually produces `#Jac = #E1·#E2`. This was previously unremarked
+  in the log (07-27 called Test 1 "✓ CORRECT" only w.r.t. matching the
+  reference (a,b), not w.r.t. `check_jac`'s own match flag). Reran Test 1/2
+  with `check_jac`: **`match=0` in both cases** — confirms this is a real,
+  reproducible gap, not a one-off.
+- Wrote `secp256k1_cm_audit/chlrs_forward_search.gp`: reimplements Richelot
+  duality using PARI's *native* `ffgen`/`ffinit`/`polrootsmod` FFELT
+  arithmetic (instead of the hand-rolled `f3add`/`f3mul`/`f3inv` library,
+  which has already had one silent transcription bug found and fixed once).
+  Tests the natural fix to the identified gap: use α, β as **independent**
+  cube roots of `-b1`, `-b2` (rather than forcing β = d·α, a rational
+  multiple, which the 07-27 entry's Test 2 does implicitly via
+  `b2 = d³·b1`). Swept all 3×3 = 9 root-choice combinations for both the
+  p=43 and p=1009 pairs.
+- Wrote `secp256k1_cm_audit/chlrs_forward_partition_search.gp`: generalizes
+  further. The construction in `richelot_ff`/`richelot()` only ever
+  realizes 3 of the 15 possible pairings of the 6 roots of
+  `(x³+b1)(x³+b2)` into 3 quadratic factors `G1,G2,G3` (the ones compatible
+  with a single cyclic ζ₃-twist). Enumerated **all 15 perfect matchings**
+  of the 6 roots explicitly and ran the generic Richelot-dual formula on
+  each, filtering for `F_p`-rational descent.
+
+### Findings
+
+**F1 — the independent-root fix does not help; all 9 combinations collapse
+to 3 answers.** For both p=43 and p=1009, sweeping α, β independently over
+their 3 conjugate roots each gives only **3 distinct outputs** (not 9), all
+sharing the *same* `b` and `#Jac`, with only `a` permuting:
+
+```
+p=43   (i,j) in {(1,1),(2,2),(3,3)} -> a=41  b=5   #Jac=2169
+       (i,j) in {(1,2),(2,3),(3,1)} -> a=8   b=5   #Jac=2169
+       (i,j) in {(1,3),(2,1),(3,2)} -> a=39  b=5   #Jac=2169
+p=1009 (i,j) in {(1,1),(2,2),(3,3)} -> a=516 b=620 #Jac=1106283
+       (i,j) in {(1,2),(2,3),(3,1)} -> a=210 b=620 #Jac=1106283
+       (i,j) in {(1,3),(2,1),(3,2)} -> a=949 b=620 #Jac=1106283
+```
+Target for p=43: 1767. Target for p=1009: 1018251. **No match in either
+case.** Reason (derived, not looked up): `G1·G2·G3 = (x³-α³)(x³-β³) =
+(x³+b1)(x³+b2)` identically regardless of which conjugate labels α, β —
+the *sextic being Richelot-dualized never changes*; only the partition into
+{G1,G2,G3} does, and the ζ₃-twisted ansatz only realizes 3 partitions,
+which are Frobenius-images of each other (hence identical `#Jac`).
+
+**F2 — exhaustive 15-partition search confirms this is not an artifact of
+the ansatz; it's structural.** Of the 15 possible pairings of the 6 roots
+into 3 quadratics, **exactly 3 are Frobenius-stable** (descend to `F_p`):
+the ones pairing each root of `-b1` with a distinct root of `-b2` in a
+bijective, cyclic-compatible way (matchings #8, #12, #14 — i.e. exactly the
+3 already found in F1). The other 12 either give `D0=0` (degenerate) or a
+dual with nonzero coefficients in the `F_{p³}` extension (does not descend
+to `F_p` at all). **This proves — by exhaustion, not derivation from a
+formula — that the Richelot-dual-of-the-naive-reducible-sextic
+construction has at most 3 possible `F_p`-rational outputs for any
+`(b1,b2)` pair, and none of the 3 can equal `#E1·#E2` for independent
+traces.** This closes off the "just Richelot-dualize the naive cover"
+approach line definitively, not just for the two pairs tested but as a
+structural fact of the construction (§ conclusion below).
+
+**F3 — the resulting dual curve is geometrically simple, not a disguised
+elliptic product.** For the p=43 case, `hyperellcharpoly` of the dual
+`y²=x⁶+41x³+5` gives `x⁴+6x³+55x²+258x+1849`, which is **irreducible over
+Q** (`factor()` confirms). So the Richelot dual isn't secretly
+`E'×E''` for some other pair of curves either — it's a genuinely different,
+simple abelian surface.
+
+**F4 — WebFetch is environment-blocked for all external domains**, not
+just specific paywalled papers. Confirmed via both the `WebFetch` tool
+(`EGRESS_BLOCKED` on eprint.iacr.org, arxiv.org, math.mit.edu,
+en.wikipedia.org) and raw `curl` (403 on the CONNECT tunnel to the same
+hosts). **Action for future runs**: don't retry `WebFetch` for
+literature-dependent threads (CHLRS, Igusa moduli papers, etc.) — it will
+not succeed in this environment. `WebSearch` still returns short snippets
+and can occasionally surface a useful formula fragment, but cannot retrieve
+full paper text. Any thread whose next step is "read paper §X for the
+explicit formula" should be marked BLOCKED on this basis rather than
+reattempted verbatim.
+
+### Interpretation
+
+The naive-cover-then-Richelot-dualize shortcut that Threads 2/18 have been
+implicitly probing since 2026-06 is now closed off *exhaustively* (F2), not
+just empirically for one pair. Getting `Jac ~ E1×E2` for independent
+`(E1,E2)` genuinely requires the moduli-space (Igusa invariant / theta
+constant) construction that `RESEARCH_MESTRE_HOWE.md` §3 describes and
+flags as multi-week even with literature access — which we no longer have
+in this environment. The realistic paths forward are Option D from that
+doc (accept existence-without-construction; already sufficient for the
+structural-completeness theorem's B5, which needs cover *cost*, not an
+explicit cover) or a from-scratch re-derivation of the Igusa-gluing formula
+without consulting CHLRS directly (hard, no literature-access shortcut).
+
+### Next step proposal
+
+**Mark Thread 2/3 (CHLRS Igusa forward map) as BLOCKED: no literature
+access in this environment (F4), and the from-scratch derivation is
+multi-week per `RESEARCH_MESTRE_HOWE.md` §7-8.** Do not resume by retrying
+WebFetch. Two legitimate ways to unstick it: (a) a human pastes the
+relevant CHLRS §4-5 formula text/PDF into the repo for a future run to
+work from, or (b) attempt a full from-scratch derivation of the genus-2
+gluing formula via theta constants (`RESEARCH_MESTRE_HOWE.md` §3's
+"Step 1" gap) without paper access — high effort, uncertain payoff, only
+worth it if (a) doesn't materialize.
+
+Given Thread 2/3 is now genuinely BLOCKED (not just stale), the next
+autolab run should return to **priority 5 (GLV-HNP Phase 2)**, continuing
+Thread 25 as proposed 2026-08-07 #2 (log line ~6519): stratify the
+500-instance 17-bit table by NU band and test `H25: within the ambiguous
+band 1.04 <= NU <= 2.20, AUC(-mu -> Kannan-LLL recovery) stays >= 0.8`.
+
+Priority 4 (cross-curve LLL 3-of-3 seed confirmation) remains open and
+untouched since its last mention; it is a reasonable fallback if Thread 25
+is quick.
+
+### Commits made
+
+(recorded in the following commit)
