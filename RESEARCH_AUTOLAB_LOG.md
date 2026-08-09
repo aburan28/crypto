@@ -6645,4 +6645,4 @@ or just a stratification variable.
 
 ### Commits made
 
-(pending — see push step)
+9090d11 autolab 2026-08-09: Thread 25 — H25 holds eff-conditioned (mu independent of NU); step statistic is mu in disguise
