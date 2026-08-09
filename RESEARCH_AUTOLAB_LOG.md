@@ -6538,3 +6538,142 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "does mu survive as a 2nd coordinate once NU is fixed?", the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6488, primary
+sub-task of the Thread 24 write-up). Priorities 1, 2, 4, 6 remain
+CLOSED/BLOCKED/DEAD-END (verified this run: priority 1 §10.5 closed 2026-06-06
+at m=32; priority 2 last touched 2026-07-27, stuck on the CHLRS forward-map /
+Mestre-theta requirement; priority 4 CLOSED; priority 6 DEAD-END/generalised
+via Decru-Kunzweiler) and priority 3 completed 2026-07-21, so priority 5
+(GLV-HNP Phase 2) is again the only live thread. Its last run (2026-08-07 #2,
+2 days ago) made measurable progress (H24 split verdict, W1-W7), so protocol
+rule (b) applies.
+
+H25, verbatim from the 2026-08-07 #2 entry:
+  within the ambiguous NU band [1.04, 2.20] (17-bit bracket, where
+  nearest-plane's own certificate gives no answer), does
+  AUC(-mu -> Kannan-LLL recovery) stay >= 0.8?
+Falsifier: if AUC drops to ~0.5 in-band, mu's apparent cross-curve power (W5)
+was entirely mediated by NU/eff and the closed form should be retired.
+
+Secondary (also pre-registered): does `step = log2(||b*_{m+1}||) -
+log2(||b*_1||)` (the point where the GS profile transitions out of the m
+copies of lambda_1(L2), Thread 24 W1b) predict the wall better than NU or mu?
+
+**Verdict: H25 as literally stated (raw mu) is FALSIFIED. But the refined
+form — nu_hat, mu's size-normalisation — HOLDS in-band (AUC 0.840). The
+secondary experiment is the real result: `step` is a strong predictor with
+the OPPOSITE sign convention to every other statistic in this thread, and it
+is the only score that stays near-perfect (AUC 1.00, reversed) in the region
+above the NU band where NU itself is saturated.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0 (fourth run in a row needing
+  `cysignals` named explicitly — worth a `requirements.txt` in
+  `secp256k1_cm_audit/` so future runs stop re-discovering this; not done
+  this run, flagged as a process improvement below).
+- `secp256k1_cm_audit/glv_hnp_phase2_nu_band.py` — new. Reuses the exact
+  data-collection loop of `glv_hnp_phase2_gsprofile_strat.py` verbatim (5 eff
+  strata x 20 17-bit curves x 5 seeds, dim 24, float GS — justified by W0/W4
+  of the parent script) so this is a re-analysis of the SAME population, not
+  a new experiment. Adds `--dump-json`/`--load-json` (the 2026-08-07 next-step
+  ask) and the `step` statistic (`prof[m] / prof[0]` in log2). Stratifies by
+  the fixed NU band instead of by eff.
+  Output: `glv_hnp_phase2_nu_band_output.txt` (43 lines); data dumped to
+  `glv_hnp_phase2_nu_band_data.json` (500 rows) so a future run can re-slice
+  without recomputing lattices.
+- `cargo test --test curve_audit` -> 5/5 pass (5.51s). No Rust touched.
+
+### Findings
+
+**Population: 500 instances, 17-bit curves, dim 24, m=12** (same as Thread 24
+W5/W6). NU band [1.04, 2.199] taken verbatim from the 2026-08-07 #2 bracket.
+
+```
+                          N    rec/fail  | AUC -mu  AUC -nu_hat  AUC -NU  AUC -step
+IN-BAND   [1.04,2.20]   366   97 / 269   |  0.6932    0.8403     0.5656    0.1803
+BELOW     NU<1.04        94   92 / 2     |  0.1603    0.4592     0.9837    0.4511
+ABOVE     NU>2.20         40    1 / 39   |  1.0000    1.0000     1.0000    0.0000
+pooled (no NU cond.)     500   190/310   |  0.3964    0.6889     0.7996    0.3286
+```
+
+(AUC convention throughout this thread: >0.5 means SMALLER score -> more
+likely to recover. `step` is reported in that convention too, so its true
+predictive power is `1 - AUC` — see below.)
+
+**H25 (raw mu) is FALSIFIED.** AUC(-mu) in-band = 0.6932 < 0.8. Confirms the
+falsifier: raw mu conflates det(L2) scale across the pooled n/eff population,
+exactly as W5/W6 warned. Retiring raw mu as a cross-curve predictor once NU
+is already known — consistent with the whole thread's arc (Thread 20 killed
+lam*, Thread 24 killed the NU~nu_hat identity, this kills raw mu).
+
+**H25' (nu_hat, the size-normalised form) HOLDS.** AUC(-nu_hat) in-band =
+0.8403 >= 0.8. This is the substantive positive result: nu_hat is not merely
+"a cheaper proxy for NU" (Thread 24's framing) — it carries information NU
+does not have, even after NU is pinned to a narrow band. NU and nu_hat
+jointly are therefore a genuine 2-parameter viability test inside the
+ambiguous region, which is exactly the outcome the "if yes" branch of the
+2026-08-07 #2 proposal called for (substitute nu_hat for mu).
+
+**Secondary — `step` is the standout, with a sign flip.** AUC(-step) = 0.1803
+in-band means step ITSELF (not its negation) separates well: recovering
+instances have LARGER step. Un-negated AUC(step) = 1 - 0.1803 = 0.8197
+in-band, and literally 1.0000 above the band (39/39 failures all have
+step <= every recovering instance's step, trivially since there is only 1
+recovery there — but see caveat below). This matches Thread 24 W1b's
+qualitative read exactly: the GS profile's transition point vanishing IS the
+wall, and it is directly measurable per-instance with no lattice-minima
+computation (`prof` already comes out of the LLL basis for free — cheaper
+than nu_hat, which needs the 2D Gauss reduction of L2).
+Caveat on the ABOVE-band row: N=40 with only 1 success, so AUC(step)=1.0 there
+is a single-positive-vs-39-negatives statistic and should not be over-read;
+the IN-BAND row (97 vs 269, AUC 0.82) is the reliable measurement.
+`step` is weak below the band (AUC(step) = 1-0.4511 = 0.549) because almost
+everything already recovers there (92/94) — nothing left to separate.
+
+**Combined picture:** NU alone separates the extremes (below/above band) near
+perfectly (0.98 / 1.00) but is uninformative exactly in the band that
+contains the largest chunk of the population (366/500 rows, 73%). Inside
+that band, nu_hat (0.84) and step (0.82) are both strong and were not
+previously compared head-to-head. Whether they are two views of the same
+mechanism or genuinely independent (as NU and nu_hat turned out to be in
+Thread 24 W6) is now the open question — this run did not compute
+Spearman(nu_hat, step) in-band, which is the cheapest next step.
+
+### Next step proposal
+
+**Thread 26 — is `step` just nu_hat in disguise, or a third independent axis?**
+Thread 24's W6 lesson was that two predictors can each look good marginally
+and still be uncorrelated (NU vs nu_hat). Repeat that check for (nu_hat, step)
+restricted to the in-band population (N=366, already dumped in
+`glv_hnp_phase2_nu_band_data.json` — this is a pure re-analysis, no new
+lattice computation):
+  - Spearman(nu_hat, step) in-band.
+  - If |rho| is small (<0.3, Thread 24's W6 threshold for "uncorrelated"):
+    fit a 2-variable logistic model on (log nu_hat, step) restricted to the
+    band and report its in-band AUC / decision boundary — this would be the
+    first genuine multi-feature viability classifier to come out of the
+    thread, superior to any single statistic.
+  - If |rho| is large: step is nu_hat's proxy, and step should be preferred
+    everywhere (no lattice-minima computation needed) — retire nu_hat.
+Cost: ~5 minutes, JSON already on disk, no new curve search or LLL calls.
+
+Secondary (unchanged housekeeping ask, not yet done): add a
+`secp256k1_cm_audit/requirements.txt` with `fpylll cysignals sympy` pinned to
+the versions used across the last 4 runs (0.6.4 / 1.12.5 / 1.14.0), so future
+autolab runs stop re-discovering that `pip install fpylll` alone omits
+`cysignals`.
+
+Tertiary (unchanged from Thread 23/24): BKZ-beta sweep against NU/step, to
+quantify how far above the wall blockwise reduction pushes the threshold.
+
+### Commits made
+
+(recorded in the next log entry, per repo convention of committing after the log write)

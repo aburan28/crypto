@@ -1,0 +1,45 @@
+==============================================================================
+Thread 25 -- does mu survive as a 2nd coordinate once NU is fixed?
+==============================================================================
+
+collected 500 instances (float GS, 17-bit, dim 24) in 2.2s
+dumped to secp256k1_cm_audit/glv_hnp_phase2_nu_band_data.json
+
+------------------------------------------------------------------------------
+H25: within the ambiguous NU band [1.04, 2.199], does AUC(-mu) stay >= 0.8?
+------------------------------------------------------------------------------
+
+IN-BAND: N=366  (97 recover / 269 fail)
+  AUC(-mu)     = 0.6932
+  AUC(-nu_hat) = 0.8403
+  AUC(-NU)     = 0.5656   (should be ~0.5: NU is constant-ish in-band)
+  AUC(-step)   = 0.1803
+
+BELOW BAND (NU < 1.04, mostly recovers): N=94  (92 recover / 2 fail)
+  AUC(-mu)     = 0.1603
+  AUC(-nu_hat) = 0.4592
+  AUC(-NU)     = 0.9837   (should be ~0.5: NU is constant-ish in-band)
+  AUC(-step)   = 0.4511
+
+ABOVE BAND (NU > 2.20, mostly fails): N=40  (1 recover / 39 fail)
+  AUC(-mu)     = 1.0000
+  AUC(-nu_hat) = 1.0000
+  AUC(-NU)     = 1.0000   (should be ~0.5: NU is constant-ish in-band)
+  AUC(-step)   = 0.0000
+
+------------------------------------------------------------------------------
+Pooled (no NU conditioning) for reference:
+------------------------------------------------------------------------------
+  AUC(-mu)     = 0.3964
+  AUC(-nu_hat) = 0.6889
+  AUC(-NU)     = 0.7996
+  AUC(-step)   = 0.3286
+
+------------------------------------------------------------------------------
+Verdict
+------------------------------------------------------------------------------
+H25 FALSIFIED: AUC(-mu) = 0.6932 < 0.8 in-band. mu's apparent power was mediated by NU/eff after all.
+
+==============================================================================
+done
+==============================================================================
