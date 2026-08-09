@@ -6668,4 +6668,4 @@ coefficients -- grid search is simpler and sufficient at this precision).
 
 ### Commits made
 
-(recorded in next commit)
+4a8bd1d autolab 2026-08-09: Thread 25 — H25 (raw mu) falsified; nu_hat*sqrt(eff) is the independent second coordinate (AUC 0.91 in NU band); step statistic falsified
