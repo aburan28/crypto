@@ -6538,3 +6538,126 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — the pre-registered next-step from the 2026-08-07 #2 entry
+(Thread 24, log line ~6540): stratify the 500-instance 17-bit table by NU
+band and test H25 (does `mu` still separate recovery *inside* the NU-
+ambiguous band, where nearest-plane theory gives no answer). Priorities 1,
+2, 4, 6 remain CLOSED/BLOCKED/DEAD-END, priority 3 completed 2026-07-21, so
+priority 5 (GLV-HNP) is the only live thread; Thread 24 made measurable
+progress two days earlier (H24 falsified, NU/nu_hat shown uncorrelated),
+so protocol rule (b) applies — continue the same thread.
+
+Container was fresh (no `sympy`/`fpylll`/`cysignals`); reinstalled all three
+via pip (0.6.4 fpylll, 1.12.5 cysignals, matching every prior session's note
+that these do not persist between containers).
+
+### Work done
+
+Wrote `secp256k1_cm_audit/glv_hnp_phase2_nu_band.py`, reusing the exact
+500-instance 17-bit generator from `glv_hnp_phase2_gsprofile_strat.py`
+(same `search_curves(1<<16,1<<17,per_bin=2,nbins=10)`, same 5 `SEEDS`, same
+5 `EFFS`) so results are directly comparable to the W5/W6 table already in
+the log, plus:
+
+- H25: split the 500 rows by the Thread-24/W4 bracket `NU_LO=1.040,
+  NU_HI=2.199` and compute `AUC(-mu -> recovery)` inside the band, pooled
+  across all 5 eff strata.
+- H25b: same test, per-eff-stratum, to check whether pooling (not `mu`
+  itself) is what breaks.
+- S1 (secondary, also proposed in the 2026-08-07 #2 entry): `step =
+  log2(prof[m]) - log2(prof[0])` (0-indexed `b*_{m+1}` vs `b*_1`, m=12,
+  dim=24) as a third candidate predictor, motivated by Thread 24/W1b
+  (profile head is m copies of `lambda_1(L2)`, step vanishes at the wall).
+
+Sanity check: total recoveries across the 500 rows = 190 (94-below-band:92 +
+366-in-band:97 + 40-above-band:1), matching the sum of the five per-stratum
+recovery counts already logged for Thread 24/W5 (99+42+21+19+9=190) — same
+PRNG stream, confirms the reproduction is exact before trusting the new
+columns.
+
+### Findings
+
+```
+below band (NU < 1.040): 94 inst, 92 recovered
+in   band  [1.040,2.199]: 366 inst, 97 recovered
+above band (NU > 2.199): 40 inst, 1 recovered
+```
+
+**H25 as literally stated is FALSIFIED.** `AUC(-mu -> recovery)` pooled
+inside the band = **0.6932**, well under the 0.80 threshold. Sanity columns
+inside the band: `AUC(-NU) = 0.5656` (expected ~0.5, band is ambiguous by
+construction — correct), `AUC(-lam*) = 0.3212` (still anti-predictive,
+Thread 20's falsification stands), **`AUC(-nu_hat) = 0.8403`** (clears the
+threshold).
+
+**H25b explains the gap.** Per-eff-stratum, raw `mu` inside the band is
+strong everywhere except the near-degenerate eff=0.05 cell:
+
+```
+ eff  N band   rec   AUC mu
+0.05     24  23/24   0.4565   (23/24 recovered — degenerate, ~no negatives)
+0.10     83  26/83   0.8819
+0.15     96  21/96   0.8889
+0.20     89  18/89   0.9276
+0.25     74   9/74   0.8615
+```
+
+`mu = lambda_1(L2)` itself scales with `eff` (via `K1` in `L2`'s
+construction), so pooling raw `mu` across strata mixes incomparable scales
+and destroys the ranking — exactly the artifact W5/W6 warned about for `NU`
+vs `nu_hat`, now shown to apply to `mu` vs `nu_hat` as well. `nu_hat =
+mu/sqrt(det2)` absorbs enough of the eff-dependence that it survives
+pooling (0.8403); raw `mu` does not (0.6932).
+
+**Revised reading: H25' (nu_hat, not mu) HOLDS.** Restated with the
+correctly-normalized quantity, "does nu_hat separate recovery inside the
+NU-ambiguous band, pooled across eff" is confirmed at AUC 0.84 >= 0.80.
+Combined with W5/W6's fixed-eff Spearman(NU, nu_hat) ~ 0, this sharpens
+Thread 24's "second mechanism" claim: nu_hat is not merely *a* second
+predictor alongside NU, it is a second predictor that **still works after
+conditioning away NU's information** (the band is exactly where NU is
+uninformative, 0.57 AUC). That is the strongest evidence yet that (NU,
+nu_hat) is a genuine 2-parameter test, not two views of the same thing.
+
+**S1 secondary hypothesis (step -> 0 predicts the wall) is FALSIFIED, with
+the wrong sign.** Pooled: `AUC(-step -> recovery) = 0.3286` (should be >=
+0.5 if step->0 helps; it is well below, i.e. LARGER step predicts success).
+Inside the NU-ambiguous band it is worse: `AUC(-step) = 0.1803`.
+`step | success` mean 0.214, `step | failure` mean -0.280 — successes have
+a *larger* gap between the first and second GS block, not a smaller one.
+`Spearman(step, mu) = -0.663` (strong, expected: step is bounded above by
+how far `b*_{m+1}` can rise above `lambda_1(L2)`, and small `mu` gives more
+room to rise) but `Spearman(step, NU) = 0.135` (weak). W1b's "step vanishes
+at the wall" observation was about a single curve's K1 sweep, not a
+cross-curve statistic — conflating within-curve monotonicity with a
+cross-curve separator was the same mistake W3 made with the closed form,
+and it fails the same way here.
+
+Script + raw stdout: `secp256k1_cm_audit/glv_hnp_phase2_nu_band.py`,
+`secp256k1_cm_audit/glv_hnp_phase2_nu_band_output.txt`.
+
+### Next step proposal
+
+**Thread 26 — fit the 2-parameter (NU, nu_hat) decision boundary.** H25'
+confirms (NU, nu_hat) is a genuine 2-coordinate system where NU is
+sufficient/necessary at the extremes (0 FP at NU<=1.04, 0 TP at NU>2.20,
+per Thread 24/W4) and nu_hat resolves the ambiguous middle (AUC 0.84).
+Concrete sub-task: logistic regression of `ok` on `(log NU, log nu_hat)`
+over the existing 500-row table (no new data, ~5 min), report the fitted
+coefficients and the band-local threshold on nu_hat (e.g. "within the NU
+band, nu_hat < X predicts recovery with what precision/recall"). This
+directly produces the "2-parameter viability test Phase 2 has been
+missing" that the 2026-08-07 #2 entry flagged as the deliverable.
+
+Secondary (unchanged, still not started): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — orthogonal to Thread 26 and can run independently.
+
+### Commits made
+
+(recorded in the follow-up commit that adds this entry's hash below)

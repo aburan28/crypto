@@ -1,0 +1,49 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE the NU-ambiguous band?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 1.8s
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside the ambiguous NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+below band (NU < 1.04): 94  (92 recovered)
+in   band  [1.04,2.199]: 366  (97 recovered)
+above band (NU > 2.199): 40  (1 recovered)
+
+AUC(-mu -> recovery) within band, N=366: 0.6932   (H25 threshold: >= 0.80)
+H25 FALSIFIED
+AUC(-NU -> recovery) within band (sanity, should be ~0.5): 0.5656
+AUC(-nu_hat -> recovery) within band: 0.8403
+AUC(-lam*   -> recovery) within band (control): 0.3212
+
+------------------------------------------------------------------------------
+EXP H25b: same test, per-eff-stratum (does mu need eff pooled in?)
+------------------------------------------------------------------------------
+  eff  N band     rec   AUC mu
+ 0.05      24   23/24   0.4565
+ 0.10      83   26/83   0.8819
+ 0.15      96   21/96   0.8889
+ 0.20      89   18/89   0.9276
+ 0.25      74    9/74   0.8615
+
+------------------------------------------------------------------------------
+EXP S1 (secondary): does step = log2||b*_{m+1}|| - log2||b*_1||
+        predict recovery better than NU or mu, pooled?
+------------------------------------------------------------------------------
+N valid = 500/500
+AUC(-step -> recovery), pooled = 0.3286
+AUC(-NU   -> recovery), pooled = 0.7996   (reference)
+AUC(-mu   -> recovery), pooled = 0.3964   (reference)
+step | success: mean 0.214  median -0.141
+step | failure: mean -0.280  median -0.338
+Spearman(step, NU)  = 0.1351
+Spearman(step, mu)  = -0.6627
+
+EXP S1b: AUC(-step) within the NU-ambiguous band
+N=366  AUC(-step -> recovery) = 0.1803
+
+==============================================================================
+done
+==============================================================================
