@@ -1,0 +1,49 @@
+==============================================================================
+Thread 25 — does mu separate inside the ambiguous NU band? (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.0s
+dumped 500 rows to glv_hnp_phase2_thread25_rows.json
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) restricted to the ambiguous NU band
+------------------------------------------------------------------------------
+pre-registered band (2026-08-07, N=500): NU in [1.04, 2.2]
+this run's band population: N=367  pos=98  neg=269
+  AUC(-mu     -> recovery) in-band = 0.6962
+  AUC(-nu_hat -> recovery) in-band = 0.8419
+  AUC(-NU     -> recovery) in-band = 0.5599  (sanity: should be ~0.5, NU is the stratifier)
+
+H25 (AUC(-mu) >= 0.8 in-band): FALSIFIED  (observed 0.6962)
+
+is nu_hat's in-band AUC (0.84 pooled) a real cross-eff effect or a W6-style averaging artifact? per-stratum, in-band:
+  eff     N     rec |  AUC -mu AUC -nu_hat
+ 0.05    25   24/25 |   0.4792      0.4792
+ 0.10    83   26/83 |   0.8819      0.8853
+ 0.15    96   21/96 |   0.8889      0.8825
+ 0.20    89   18/89 |   0.9276      0.9425
+ 0.25    74    9/74 |   0.8615      0.8615
+
+this run's own bracket: sufficient NU < 1.011, necessary NU > 2.199
+own-bracket band: N=372 pos=101 neg=271  AUC(-mu) = 0.6900
+
+------------------------------------------------------------------------------
+EXP H25b (secondary): step = log2||b*_{m+1}|| - log2||b*_1|| as a wall predictor
+------------------------------------------------------------------------------
+valid rows: 500/500
+AUC(-step -> recovery), pooled = 0.3286  (step measures HOW FAR the second block has risen above the lambda_1(L2) plateau; larger step -> harder instance, so score sign matches NU/mu convention: -step)
+AUC(+step -> recovery), pooled = 0.6714
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+
+  eff     N     rec |  AUC -step  AUC -mu  AUC -NU
+ 0.05   100  99/100 |     0.6364   0.4242   0.8687
+ 0.10   100  42/100 |     0.2266   0.7443   0.7011
+ 0.15   100  21/100 |     0.1139   0.8873   0.3496
+ 0.20   100  19/100 |     0.0793   0.9175   0.5595
+ 0.25   100   9/100 |     0.1062   0.8816   0.7277
+
+==============================================================================
+done
+==============================================================================

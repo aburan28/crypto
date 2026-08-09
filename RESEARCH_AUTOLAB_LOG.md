@@ -6538,3 +6538,123 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6512). Priorities 1, 3, 4, 6 are CLOSED/DEAD-END, priority 2 (CHLRS Igusa)
+is CLOSED-negative (2026-07-26/27, cubic-residue obstruction), so priority 5
+(GLV-HNP) remains the only thread with unresolved open sub-questions and had
+measurable progress two days prior — protocol rule (b) applies.
+
+Pre-registered hypothesis, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+
+### Work done
+
+- `pip install fpylll cysignals sympy` (fourth run in a row needing this;
+  container has no persistent venv). fpylll 0.6.4, sympy 1.14.0.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Re-collects the same
+  500-instance table as the 2026-08-07 W5 run (20 17-bit j=0 GLV curves x 5
+  eff-strata x 5 seeds, dim 24, float GS), since that run did not persist its
+  rows. Adds `--dump-json` (writes `glv_hnp_phase2_thread25_rows.json`, 500
+  rows) so future threads can re-analyze without re-running lattice work.
+  Adds the `step = log2||b*_{m+1}|| - log2||b*_1||` statistic from W1b.
+  Runtime: 2.4s total (curve search + 500 instances + LLL).
+- `cargo test --test curve_audit` -> 5/5 pass (4.4s). No Rust touched.
+
+### Findings
+
+**H25 as literally worded: FALSIFIED.** Pooled over the pre-registered band
+NU in [1.04, 2.20] (N=367 this run, curves differ from 2026-08-07 since
+`search_curves` is unseeded):
+
+```
+AUC(-mu     -> recovery) in-band = 0.6962   (< 0.8 threshold: FALSIFIED)
+AUC(-nu_hat -> recovery) in-band = 0.8419
+AUC(-NU     -> recovery) in-band = 0.5599   (sanity check: NU is the
+                                              stratifier, should be ~chance)
+```
+
+Re-deriving the band from this run's own success/failure extremes (sufficient
+NU < 1.011, necessary NU > 2.199) gives the same answer: AUC(-mu) = 0.6900,
+N=372. Not a band-selection artifact.
+
+**But the pooled number hides a real, strong, per-stratum effect — this is
+the opposite failure mode from W6.** Breaking the in-band population down by
+eff (which the band restriction does NOT control for, since NU already
+folds in eff):
+
+```
+  eff     N     rec |  AUC -mu  AUC -nu_hat
+ 0.05    25   24/25 |   0.4792      0.4792   (degenerate: 96% recovery)
+ 0.10    83   26/83 |   0.8819      0.8853
+ 0.15    96   21/96 |   0.8889      0.8825
+ 0.20    89   18/89 |   0.9276      0.9425
+ 0.25    74    9/74 |   0.8615      0.8615
+```
+
+Every non-degenerate stratum shows AUC 0.86-0.94 for BOTH mu and nu_hat —
+unlike W6's closed-form C, this is NOT an artifact that vanishes under
+control; it is genuinely strong in-stratum separation. The discrepancy is
+that **raw mu's pooled AUC (0.696) is depressed by a cross-stratum scale
+shift** (lambda_1(L2) grows with K1, hence with eff, independent of
+recovery), while **nu_hat's sqrt(det L2) normalization removes that shift**,
+so its pooled AUC (0.842) closely tracks its true in-stratum power. Thread
+20c's original normalization choice is vindicated for exactly the reason it
+was introduced, and mu alone (unnormalized) is not usable pooled across
+sizes/eff even though it is locally an excellent separator.
+
+**Revised H25': the 2-parameter pair is (NU, nu_hat), not (NU, mu).** Given
+NU (nearest-plane sound/necessary bracket) plus nu_hat evaluated within an
+eff-homogeneous slice, separation is 0.86-0.94 AUC — strong enough to support
+the logistic-fit deliverable Thread 24 proposed, provided eff (or a proxy for
+it, e.g. n and K1 separately) is included as a covariate rather than
+marginalized out.
+
+**H25b (secondary) — step statistic: DEAD END, retire it.**
+
+```
+AUC(-step -> recovery), pooled = 0.3286   (i.e. AUC(+step) = 0.6714 —
+                                            direction opposite the W1b guess)
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+
+  eff     N     rec |  AUC -step
+ 0.05   100  99/100 |     0.6364
+ 0.10   100  42/100 |     0.2266
+ 0.15   100  21/100 |     0.1139
+ 0.20   100  19/100 |     0.0793
+ 0.25   100   9/100 |     0.1062
+```
+
+The pre-registered guess ("step -> 0 predicts the wall") holds only in the
+eff=0.05 stratum and inverts hard everywhere else — not merely noisy, sign-
+flipping. Spearman(step, mu) = -0.66 shows step is mostly a noisier, inverted
+restatement of mu (large mu => second GS block starts closer to the head =>
+small step), so it carries no information mu doesn't already have, and what
+it does carry is directionally unstable across strata. No further work on
+`step` is warranted.
+
+### Next step proposal
+
+**Thread 26 — logistic fit on (log NU, log nu_hat, log eff) with decision
+boundary**, using `glv_hnp_phase2_thread25_rows.json` (no new lattice data
+needed — everything required is a column already in the 500-row dump).
+Concrete falsifier: fit `P(recovery) = sigma(a*logNU + b*log(nu_hat) + c*log(eff) + d)` by simple gradient descent (no sklearn dependency needed — the codebase does not have it installed and none of the prior threads relied on it), report in-sample AUC and compare against AUC(-NU) alone (0.86, W4) and AUC(-nu_hat) alone within-stratum (0.84-0.94, this entry). H26: joint AUC >= 0.95, i.e. materially better than either univariate score, confirming eff is a genuine third covariate rather than redundant with nu_hat's normalization.
+
+Secondary: the eff=0.05 stratum saturates at 96-99% recovery in every
+predictor here (W5 and this entry) — it may be uninformative by construction
+(nearly everything recovers) rather than a real "predictors agree" case.
+Worth checking whether a *lower* eff (0.02-0.03) still separates, to confirm
+the (NU, nu_hat) pair degrades gracefully rather than the low-eff regime
+being systematically unmeasurable with this instance count.
+
+### Commits made
+
+(recorded in the next log entry, per repo convention)
