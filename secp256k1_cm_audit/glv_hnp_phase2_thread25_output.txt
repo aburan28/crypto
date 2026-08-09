@@ -1,0 +1,37 @@
+==============================================================================
+Thread 25 - conditioning on NU: does mu (and the GS step) carry
+independent separating power inside the ambiguous NU band?
+==============================================================================
+
+20 17-bit j=0 GLV curves; 500 instances (float GS, dim 24) in 2.8s
+wrote 500 rows to thread25_rows.json
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside the ambiguous NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+band population: 366 / 500 instances (97 recovered, 269 failed)
+  AUC(-mu)      = 0.6932   (H25 threshold: >= 0.80)
+  AUC(-nu_hat)  = 0.8403
+  AUC(-NU)      = 0.5656   (sanity: should be ~0.5, band is where NU is uninformative by construction)
+  AUC(step)     = 0.1803   (step -> smaller predicts recovery if this direction is right)
+
+H25 verdict: FALSIFIED (AUC(-mu) = 0.6932)
+
+------------------------------------------------------------------------------
+EXP secondary: step = log2(prof[m]) - log2(prof[0]) as a
+standalone separator, pooled and per eff-stratum
+------------------------------------------------------------------------------
+  eff     N     rec |  AUC step   AUC mu   AUC NU
+ 0.05   100  99/100 |    0.6364   0.4242   0.8687
+ 0.10   100  42/100 |    0.2266   0.7443   0.7011
+ 0.15   100  21/100 |    0.1139   0.8873   0.3496
+ 0.20   100  19/100 |    0.0793   0.9175   0.5595
+ 0.25   100   9/100 |    0.1062   0.8816   0.7277
+
+pooled (N=500): AUC(step -> recovery) = 0.3286
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+
+==============================================================================
+done
+==============================================================================

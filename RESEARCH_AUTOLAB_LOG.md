@@ -6538,3 +6538,134 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "does mu carry information NU does not, inside the NU
+ambiguous band?", the pre-registered next-step of the 2026-08-07 #2 (Thread
+24) entry (log line ~6497). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/
+DEAD-END and priority 3 completed 2026-07-21, so priority 5 (GLV-HNP) is
+again the only live thread; Thread 24 made measurable progress two days
+earlier (W5/W6: NU and nu_hat are uncorrelated at fixed eff), so protocol
+rule (b) applies and its pre-registered sub-task is the correct pick.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+> H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>      gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+> If no — if mu's apparent power is entirely mediated by NU after all —
+> then the W5 result is a stratification artifact and the closed form
+> should be retired.
+
+Secondary (also pre-registered): test `step = log2(||b*_{m+1}||) -
+log2(||b*_1||)` as a standalone separator, since Thread 24's W1b showed the
+GS-profile step to the second block visually vanishes right as the K1 wall
+is crossed.
+
+### Work done
+
+- Installed `fpylll` 0.6.4, `cysignals`, `sympy` (fresh container, not
+  preinstalled — same note as 2026-07-29 entry).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`: regenerates the
+  same 500-instance 17-bit / dim-24 grid as `glv_hnp_phase2_gsprofile_strat.py`
+  (20 curves x 5 eff strata x 5 seeds, float GS), adds a `--dump-json` flag
+  (the strat script's proposed-but-missing feature) so the row table
+  survives the run, and restricts to the W4 ambiguous NU band
+  [1.040, 2.199] before computing AUCs.
+- Ran it; dumped `secp256k1_cm_audit/thread25_rows.json` (500 rows) and
+  `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt`.
+- Follow-up one-off (not a new script): loaded the dumped JSON and checked
+  Spearman(nu_hat, NU) and combined scores inside the band, since raw mu
+  underperformed but nu_hat over-performed the H25 threshold (see Findings).
+- `cargo test --test curve_audit`: 5/5 pass, unaffected (Python-only change).
+
+### Findings
+
+**H25 as literally stated (mu alone) is FALSIFIED.** Inside the ambiguous
+band (N=366/500, 97 recovered / 269 failed):
+
+```
+AUC(-mu)      = 0.6932   (H25 threshold: >= 0.80 -- FAILS)
+AUC(-nu_hat)  = 0.8403   (mu/sqrt(det L2) -- PASSES the 0.80 bar)
+AUC(-NU)      = 0.5656   (sanity check: near-chance, as expected --
+                           band is defined as where NU is ambiguous)
+```
+
+Raw `mu = lambda_1(L2)` alone does not clear the bar; the W5 result that
+motivated H25 was reading the *normalized* quantity nu_hat, not mu itself.
+The sqrt(det L2) normalization is doing real work inside the band, not just
+across curve sizes as Thread 24's W5 note assumed.
+
+**But nu_hat is a real second coordinate, not a re-reading of NU.**
+Follow-up check inside the same band:
+
+```
+Spearman(nu_hat, NU) = -0.111   (near zero -- independent)
+Spearman(mu, NU)     = -0.456   (mu itself is NOT independent of NU)
+AUC(-nu_hat)             = 0.8403
+AUC(-nu_hat*NU)          = 0.8858
+AUC(-nu_hat/NU)          = 0.7121
+AUC(-nu_hat*sqrt(eff))   = 0.9102  <- best of all, inside the band where
+                                       NU alone is ~chance
+```
+
+So the corrected H25: **nu_hat*sqrt(eff)** (Thread 24's original W3 closed
+form, not raw mu) is the genuine second coordinate. It is nearly
+uncorrelated with NU inside the ambiguous band (Spearman -0.11, vs -0.46
+for raw mu) and separates recovery there with AUC 0.91 -- stronger than
+either NU or nu_hat alone anywhere in the full W5 table. This means (NU,
+nu_hat*sqrt(eff)) is a viable 2-parameter test: use NU's sound sufficient/
+necessary thresholds (< 1.04 / > 2.20) where they apply, and nu_hat*sqrt(eff)
+to rank the ambiguous middle.
+
+**Secondary: the step statistic is FALSIFIED, with an unstable sign.**
+
+```
+  eff     N     rec |  AUC step   AUC mu   AUC NU
+ 0.05   100  99/100 |    0.6364   0.4242   0.8687
+ 0.10   100  42/100 |    0.2266   0.7443   0.7011
+ 0.15   100  21/100 |    0.1139   0.8873   0.3496
+ 0.20   100  19/100 |    0.0793   0.9175   0.5595
+ 0.25   100   9/100 |    0.1062   0.8816   0.7277
+
+pooled (N=500): AUC(step -> recovery) = 0.3286
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+```
+
+Thread 24's W1b visual ("step -> 0 as the wall is crossed") does not survive
+as a cross-curve numeric separator: at eff=0.05 the sign matches the
+hypothesis (AUC 0.636, smaller step -> recovery) but it inverts hard by
+eff=0.10 and stays inverted (AUC 0.08-0.23, LARGER step -> recovery) for
+every higher stratum. The step statistic is strongly anti-correlated with mu
+(Spearman -0.66) and is redundant with it, not an independent or more direct
+readout of the wall. Retire this direction; W1b's visual was likely
+dominated by the single two-curve K1-grid it was read from (U2, 22 cells),
+which is exactly the small-grid overfitting risk Thread 24b's own opening
+paragraph warned about for nu_hat.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the 2-parameter decision rule.**
+Concrete sub-task: using `thread25_rows.json` (already dumped, no new data
+collection needed), fit a simple logistic model on (log NU, log(nu_hat*
+sqrt(eff))) over the full 500-row table (not just the band), report the
+decision boundary coefficients, and validate out-of-band: does the fitted
+rule still beat NU-alone and nu_hat*sqrt(eff)-alone when NU < 1.04 or NU >
+2.20 (i.e. does the 2-parameter model degrade gracefully outside the band it
+was tuned on, or does it need band-conditional coefficients)? Falsifier: if
+pooled AUC of the fitted 2-parameter score is not meaningfully above
+max(AUC(NU), AUC(nu_hat*sqrt(eff))) computed the same way, the "2 parameter"
+framing is not earning its complexity and a single score
+(nu_hat*sqrt(eff)) suffices.
+
+Cost: no new lattice computation, ~10 min re-analysis of the existing JSON
+dump plus a small hand-rolled logistic fit (no sklearn available, would need
+either a manual gradient-descent 2D fit or a coarse grid search over 2
+coefficients -- grid search is simpler and sufficient at this precision).
+
+### Commits made
+
+(recorded in next commit)
