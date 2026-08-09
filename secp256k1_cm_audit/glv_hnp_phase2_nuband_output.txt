@@ -1,0 +1,59 @@
+==============================================================================
+Thread 25 — condition on NU: is mu a genuine second coordinate?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+dumped 500 rows to glv_hnp_phase2_nuband_output.json
+
+------------------------------------------------------------------------------
+H25: within NU band [1.04, 2.199] (ambiguous, no nearest-
+     plane answer), does mu still separate recovery?
+------------------------------------------------------------------------------
+band size: 366 / 500 total (97 recover, 269 fail)
+  AUC(-mu     -> recovery | NU in band) = 0.6932
+  AUC(-nu_hat -> recovery | NU in band) = 0.8403
+  AUC(-NU     -> recovery | NU in band) = 0.5656   (sanity: NU restricted to its own ambiguous range)
+  AUC(-step   -> recovery | NU in band) = 0.1803
+
+  H25 verdict: FALSIFIED  (threshold 0.8, got 0.6932)
+
+------------------------------------------------------------------------------
+Spearman(NU, mu) and Spearman(NU, log mu) — is mu just NU in
+disguise, globally and within-band?
+------------------------------------------------------------------------------
+  global:      Spearman(NU, mu)     = -0.6452
+  within band: Spearman(NU, mu)     = -0.4557
+
+------------------------------------------------------------------------------
+Per-eff-stratum AUC(-mu) restricted to the NU ambiguous band
+------------------------------------------------------------------------------
+  eff  band N     rec   AUC mu  AUC step
+ 0.05      24   23/24   0.4565    0.5217
+ 0.10      83   26/83   0.8819    0.1329
+ 0.15      96   21/96   0.8889    0.1130
+ 0.20      89   18/89   0.9276    0.0657
+ 0.25      74    9/74   0.8615    0.1179
+
+------------------------------------------------------------------------------
+Secondary: step = log2||b*_{m+1}|| - log2||b*_1|| over ALL rows
+(not just the band) -- does step -> 0 predict the K1 wall?
+------------------------------------------------------------------------------
+  AUC(-step -> recovery), pooled N=500: 0.3286
+  AUC(-NU   -> recovery), pooled:               0.7996
+  AUC(-mu   -> recovery), pooled:                0.3964
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+
+------------------------------------------------------------------------------
+Logistic fit on (log NU, log mu) over the FULL 17-bit table
+(deliverable requested by the 2026-08-07 #2 log entry)
+------------------------------------------------------------------------------
+  standardized weights: w0=-0.7755 w_logNU=-2.5540 w_logmu=-1.1475
+  feature means/stds: logNU ~ N(0.3821,0.3537)  logmu ~ N(11.8254,0.4010)
+  training accuracy @ 0.5 threshold: 0.7860  (N=500)
+  AUC of fitted (log NU, log mu) score: 0.8596  (cf. AUC(-NU) pooled = 0.7996, AUC(-mu) pooled = 0.3964)
+
+==============================================================================
+done
+==============================================================================

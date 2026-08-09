@@ -6538,3 +6538,136 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6491).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP Phase 2) is again the only live thread;
+2026-08-07 #2 made measurable progress (Thread 24: NU and nu_hat shown
+mutually uncorrelated, W5 established mu separates within an eff-stratum),
+so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate... If no... the closed form
+>        should be retired.
+
+**Verdict: H25 as literally stated is FALSIFIED (pooled-band AUC(mu) =
+0.693), but the reason why reveals a cleaner result: nu_hat — not raw mu —
+is the real second coordinate, and a 2D (log NU, log nu_hat) logistic model
+reaches held-out AUC 0.941, far above either 1D predictor.**
+
+### Work done
+
+- `secp256k1_cm_audit/glv_hnp_phase2_nuband.py` — new. Reuses the exact
+  17-bit / M=12 / 5-strata / 5-seed instance generator from
+  `glv_hnp_phase2_gsprofile_strat.py` (same `search_curves`, `instance`,
+  `run_new`) so the 500-row table is apples-to-apples with the 2026-08-07 #2
+  entry. Adds `--dump-json` (requested by that entry) and a `step =
+  log2||b*_{m+1}|| - log2||b*_1||` column (W1b follow-up). Output:
+  `glv_hnp_phase2_nuband_output.txt` + `glv_hnp_phase2_nuband_output.json`
+  (500 rows, machine-readable, survives future runs).
+- Ran the script (float GS per W0's justification, 2.3s for 500 instances).
+- Follow-up ad hoc analysis (not a separate file — two short inline scripts)
+  comparing a (log NU, log nu_hat) logistic fit against (log NU, log mu),
+  plus a 50/50 train/test split to check the 2D fit isn't just overfitting
+  3 parameters on N=500 (it has ample headroom not to, but the log entry
+  this continues emphasized checking claims rather than asserting them).
+- `cargo test --test curve_audit` -> 5/5 pass (5.43s). No Rust touched.
+
+### Findings
+
+**H25 literal test: FALSIFIED.** In the NU-ambiguous band (1.04, 2.199]
+(N=366/500, 97 recover / 269 fail), `AUC(-mu -> recovery) = 0.6932`, well
+under the 0.8 bar. `AUC(-nu_hat -> recovery) = 0.8403` in the same band
+*does* clear the bar — nu_hat, not mu, is doing the within-band work.
+
+**Root cause: mu is confounded by eff the same way the pooled AUC was
+(Simpson's-paradox pattern, same shape as 2026-08-07 #2's W5).**
+`Spearman(NU, mu)` = -0.6452 globally, -0.4557 within the band — substantial,
+not the ~0 correlation nu_hat has with NU. Splitting the band by eff-stratum
+*and* NU-band jointly, mu's power reappears:
+
+```
+ eff  band N   rec   AUC mu  AUC step
+0.05      24  23/24   0.4565  (degenerate: 23/24 recover)
+0.10      83  26/83   0.8819
+0.15      96  21/96   0.8889
+0.20      89  18/89   0.9276
+0.25      74   9/74   0.8615
+```
+
+mu separates at 0.86-0.93 in every non-degenerate eff-stratum-within-band
+cell — consistent with 2026-08-07 #2's W5 (0.75-0.93 per full eff stratum).
+Pooling across eff strata within the NU band cancels this because mu (unlike
+nu_hat) is not eff-normalized: larger eff -> smaller mu on average (that is
+exactly what nu_hat's `/sqrt(det L2)` normalization removes), so pooling mu
+across strata scrambles the ranking. **mu's within-eff-stratum signal is
+real (confirmed again); mu's raw, unnormalized form is not a usable
+cross-eff predictor even restricted to the NU band.**
+
+**The cleaner statement of H25 (nu_hat instead of mu) holds strongly.**
+`nu_hat` is close to independent of NU (`Spearman(NU, nu_hat) = -0.1054`
+pooled, vs mu's -0.6452), so unlike mu it does not need an eff-stratum split
+to show power:
+
+```
+2D logistic fit, standardized (log NU, log X), trained on ALL 500 rows:
+  X = nu_hat:  weights w_logNU=-3.00 w_logX=-2.34   fitted-score AUC = 0.9397
+  X = mu:      weights w_logNU=-2.55 w_logX=-1.15   fitted-score AUC = 0.8596
+  (both beat AUC(-NU) alone = 0.7996; AUC(-nu_hat) alone pooled = 0.6889,
+   AUC(-mu) alone pooled = 0.3964 -- INVERTED, same eff-confound)
+
+50/50 train/test split (seed 12345), AUC on the held-out half:
+  (log NU, log nu_hat):  0.9408
+  (log NU, log mu):      0.8212
+```
+
+Both weights are comparable in magnitude and same sign in both fits — NU and
+the second feature contribute roughly equally, confirming these are two real
+coordinates, not one dominating. The (NU, nu_hat) pair generalizes better
+than (NU, mu) out of sample and needs no stratification, so it is the
+2-parameter viability test H25 asked for, using nu_hat rather than mu as the
+second coordinate.
+
+**Secondary (W1b step statistic): FALSIFIED, and inverted.**
+`step = log2||b*_{m+1}|| - log2||b*_1||` (the log-gap out of the m-fold-
+repeated lambda_1(L2) head block) is a poor predictor and runs the wrong
+direction: `AUC(-step) = 0.3286` pooled, `0.1803` within the NU band — i.e.
+*larger* step (bigger gap out of the head block) correlates with recovery,
+opposite the "step -> 0 predicts the wall" framing in the W1b proposal.
+`Spearman(step, mu) = -0.6627` (step is essentially anti-mu; larger step
+means the head block ended at a smaller lambda_1, so this is not new
+information) and `Spearman(step, NU) = 0.1351` (near-independent of NU, like
+nu_hat, but useless as a predictor on its own). Retire this statistic.
+
+### Next step proposal
+
+**Thread 26 — verify the (NU, nu_hat) 2D viability test out-of-distribution.**
+The fit above was trained and tested on the same 17-bit / M=12 generator
+family (5 eff strata x 20 curves x 5 seeds). Concrete falsifier: refit on
+17-bit data, then evaluate (without refitting) on the existing 12-bit table
+from `glv_hnp_phase2_gsprofile_strat_output.txt` and on a fresh 22-bit
+generation. If held-out AUC stays >= 0.85 across both bit lengths with the
+*same* fitted weights, (NU, nu_hat) is a size-stable 2-parameter certificate
+and is ready to write into `RESEARCH_GLV_HNP_PHASE2.md` as the Phase 2
+viability criterion. If it degrades the way raw mu's single-predictor AUC
+degraded 12-bit -> 17-bit (Thread 24's W4: 0.978 -> 0.860), that says the
+*ranking* signal nu_hat carries is itself only locally eff-stable and the
+logistic weights need to be refit per size rather than reused, which is
+itself worth recording since it bears on whether Phase 2 has a clean
+closed-form viability test or only a locally-fit one.
+
+Secondary (unchanged, still not executed): BKZ-beta sweep against NU/the
+2D score, to quantify how far above the current bracket blockwise reduction
+pushes the threshold.
+
+### Commits made
+
+(recorded after commit, see below)
