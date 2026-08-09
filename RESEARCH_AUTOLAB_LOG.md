@@ -6538,3 +6538,172 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6462). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 made measurable progress two days earlier with a concrete
+pre-registered sub-task, so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all,
+>        the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+**Verdict: H25 as literally stated is FALSIFIED (pooled band AUC = 0.696),
+but the failure is itself a Simpson's-paradox confound between NU and eff,
+not evidence that mu is inert. Once eff is held fixed inside the band, mu
+recovers its full separating power (AUC 0.86-0.93) — matching, and in one
+stratum exceeding, its unconditional per-stratum AUC from Thread 24's W5.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  same versions as 2026-08-07 (fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0).
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added a
+  `--dump-json[=path]` CLI flag (rows were previously only ever printed, so
+  Thread 24's proposed "no new data, re-analysis of rows" was not actually
+  possible without rerunning). Also added `step = log2(prof[m]) -
+  log2(prof[0])` per row (Thread 24's secondary proposal — the head-block ->
+  tail-block GS-norm jump from W1b), computed from the `prof` field
+  `instance()` already returns.
+- Reran the script: `python3 glv_hnp_phase2_gsprofile_strat.py
+  --dump-json=glv_hnp_phase2_gsprofile_strat_dump.json`. All W5/W6/W7 numbers
+  reproduced byte-for-byte against the 2026-08-07 #2 log entry (500 rows, 17
+  bits, dim 24, 5 eff strata x 20 curves x 5 seeds) — confirms the run is
+  deterministic given `SEEDS` and `search_curves`, and the dump is a faithful
+  snapshot for future re-analysis.
+  Output: `glv_hnp_phase2_gsprofile_strat_output.txt`,
+  `glv_hnp_phase2_gsprofile_strat_dump.json` (500 rows).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Pure re-analysis of
+  the dump: band-restricted AUCs, per-eff-stratum band AUCs (the confound
+  check), pooled `step` AUC, and a from-scratch logistic-regression fit
+  (gradient descent, no numpy/sklearn dependency) gated on H25 actually
+  holding.
+  Output: `glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (4.45s). No Rust touched.
+
+### Findings
+
+**Primary result — H25 pooled: FALSIFIED.**
+
+```
+band 1.04 <= NU <= 2.20 :  N=367  recoveries=98
+  AUC(-mu)      = 0.6962   (< 0.8 threshold: falsified)
+  AUC(-nu_hat)  = 0.8419   (nu_hat itself clears 0.8 in the band)
+  AUC(-eff)     = 0.7086
+  AUC(+step)    = 0.8216
+```
+
+**But the pooled failure is a sign-reversing confound, not a null result.**
+NU and eff are strongly rank-correlated pooled across the dump (Spearman
+`(effq, NU) = 0.742`), and mu is strongly *anti*-correlated with eff
+(Spearman `(effq, mu) = -0.672`):
+
+```
+  eff   mean NU   mean mu   recovery rate
+ 0.05     0.949  232175.5           0.990
+ 0.10     1.349  159924.1           0.420
+ 0.15     1.609  132316.7           0.210
+ 0.20     1.823  114060.5           0.190
+ 0.25     2.041  102502.5           0.090
+```
+
+Pooling the NU band mixes strata where mu is large AND recovery is common
+(eff=0.05, mu~232k, 99% recovery) with strata where mu is small AND recovery
+is rare (eff=0.25, mu~103k, 9% recovery). That correlation runs the WRONG
+way for mu's true within-stratum direction (smaller mu -> easier recovery),
+so pooling doesn't just wash out the signal, it **flips its sign**: pooled
+over ALL 500 rows (not just the band), `AUC(-mu) = 0.3964` — below 0.5,
+i.e. inverted — while every individual eff stratum in Thread 24's W5 showed
+mu in the 0.74-0.92 range, correctly signed. This is the same mechanism W6
+diagnosed for the closed-form constant C (drifts 7.40 -> 5.52 with eff), now
+shown to be sharp enough to reverse a raw AUC sign when a second confounded
+variable (NU) is used as the sole conditioning axis.
+
+**Corrected test — hold eff fixed AND restrict to the NU band: H25 HOLDS.**
+
+```
+  eff   N_band   rec | AUC(-mu | band)   AUC(-mu | full stratum, Thread24 W5)
+ 0.05       25    24 |     0.4792 *              0.4242   (both degenerate: 99%/100% rec)
+ 0.10       83    26 |     0.8819                0.7443
+ 0.15       96    21 |     0.8889                0.8873
+ 0.20       89    18 |     0.9276                0.9175
+ 0.25       74     9 |     0.8615                0.8816
+```
+
+Every non-degenerate stratum clears the H25 threshold (0.86-0.93), and at
+eff=0.10 the band restriction actually *sharpens* mu's separation (0.744 ->
+0.882) — the NU-ambiguous subset is exactly where mu's information is least
+redundant with NU's. **mu is a genuine second coordinate, not noise, and
+Thread 24's W5 result was not a stratification artifact.** What was wrong
+was Thread 25's own literal instruction: "condition on NU alone" quietly
+reintroduces the eff confound that W5 was designed to remove, because NU
+absorbs eff (Spearman 0.74) while mu does the opposite. The corrected
+2-parameter viability test is **(eff, mu)**, not **(NU, mu)** — NU is not an
+eff-free axis and cannot be substituted for eff as a conditioning variable.
+Because the corrected test still needs eff (not NU) as one of its two axes,
+and eff is already Thread 20/24's known viability parameter, no new
+logistic-boundary fit is added here (the gated fit code path in
+`glv_hnp_phase2_thread25.py` was not triggered — see script for the
+ready-to-run branch if a future thread wants NU included as a third feature).
+
+**Secondary — step does not beat NU, and is mu in disguise.**
+
+```
+pooled (N=500):
+  AUC(+step -> recovery) = 0.6714
+  AUC(-NU   -> recovery) = 0.7996
+  AUC(-mu   -> recovery) = 0.3964   (confounded, see above)
+  Spearman(step, NU)     = 0.1351
+  Spearman(step, mu)     = -0.6627
+```
+
+`step` is only weakly rank-correlated with NU (0.135) but strongly
+anti-correlated with mu (-0.663), which is exactly the relation W2 already
+derived analytically: `step ~ log2(lambda_2(L2)) - log2(lambda_1(L2)) =
+log2(det(L2)/mu^2)` up to the W2 constant, so step is a (noisier,
+lower-AUC) restatement of mu, not new information. It inherits mu's pooled
+confound and does not clear NU pooled (0.671 < 0.800). Thread 24's secondary
+proposal is closed: no further use for `step` over mu directly.
+
+### Next step proposal
+
+**Thread 26 — three-feature viability surface (eff, mu, NU) with a real
+logistic fit.** Threads 20-25 have now established two independent, correctly
+signed predictors of Kannan-LLL Phase-2 recovery — eff (or mu, its
+size-adjusted proxy) and NU (the sound BDD certificate, orthogonal to mu at
+fixed eff per Thread 24's W6) — but no thread has yet fit a joint
+decision surface using both simultaneously without a confound. Concrete
+sub-task: reuse `glv_hnp_phase2_gsprofile_strat_dump.json` (already on disk,
+500 rows, no new lattice computation) and fit logistic regression on
+`(log(eff), log(NU))` -> recovery (the code in `glv_hnp_phase2_thread25.py`
+already implements gradient-descent logistic regression and needs only its
+feature columns swapped from `(NU, mu)` to `(eff, NU)`). Report train
+accuracy and compare to single-feature AUCs (eff alone 0.847, NU alone
+0.800 pooled) — H26: joint accuracy clears both single-feature AUCs by a
+non-trivial margin (say +0.03), confirming eff and NU jointly are the
+long-sought 2-parameter Phase-2 viability test. Falsifier: if joint accuracy
+does not beat max(single-feature accuracy) by a real margin, the two
+predictors' information overlaps more than W6's Spearman-orthogonality test
+suggested and no closed-form 2-parameter test exists — Phase 2 viability
+would then need the full lattice run per curve, with no shortcut.
+Cost: reuses the existing dump, no new curve search or GS computation,
+~5 minutes.
+
+Secondary (unchanged from Thread 24, still open): BKZ-beta sweep against NU
+— quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+empirical recovery threshold as a function of beta. Still cheap, still not
+attempted in any thread so far.
+
+### Commits made
+
+(recorded after this entry is committed — see next commit)
