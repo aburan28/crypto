@@ -6683,4 +6683,4 @@ dim 12) and see whether the wall reappears.
 
 ### Commits made
 
-[recorded in the following commit]
+4c66c31 autolab 2026-08-09: Thread 25 — mu separates inside NU band only after eff-conditioning; pooled mu is inverted (0.396)
