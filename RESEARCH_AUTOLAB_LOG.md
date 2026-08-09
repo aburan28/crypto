@@ -6640,4 +6640,4 @@ tertiary).
 
 ### Commits made
 
-(recorded in next commit)
+0324334 autolab 2026-08-09: Thread 25 — H25 holds for nu_hat not raw mu; W1b step statistic falsified
