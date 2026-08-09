@@ -1,0 +1,58 @@
+==============================================================================
+Thread 25 -- does mu separate INSIDE the NU-ambiguous band?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.9s
+
+------------------------------------------------------------------------------
+W4 bracket (from the 2026-08-07 #2 log entry, re-derived here as a sanity check)
+------------------------------------------------------------------------------
+N=500  rec=190/500
+sufficient NU < 1.011  (min over 310 failures)
+necessary  NU > 2.199  (max over 190 successes)
+ambiguous band: 1.011 <= NU <= 2.199
+
+partition: below-band 89 (rec 89/89), in-band 372 (rec 101/372), above-band 39 (rec 0/39)
+
+------------------------------------------------------------------------------
+EXP T25a: H25 -- AUC(-mu -> recovery) INSIDE the ambiguous band
+------------------------------------------------------------------------------
+in-band N=372  rec=101/372
+AUC(-mu     -> recovery) = 0.6900   <-- H25 test statistic
+AUC(-nu_hat -> recovery) = 0.8426
+AUC(-NU     -> recovery) = 0.5688   (expected ~0.5: theory abstains here by construction of the band)
+
+H25 threshold 0.8: PARTIAL  (observed 0.6900)
+
+per-stratum breakdown inside the band:
+  eff     N     rec   AUC mu
+ 0.05    26   25/26   0.5000
+ 0.10    86   28/86   0.8805
+ 0.15    97   21/97   0.8891
+ 0.20    89   18/89   0.9276
+ 0.25    74    9/74   0.8615
+
+------------------------------------------------------------------------------
+EXP T25b: pooled AUC comparison, mu vs NU vs nu_hat*sqrt(eff), ALL instances
+------------------------------------------------------------------------------
+AUC(-mu)                = 0.3964
+AUC(-NU)                = 0.7996
+AUC(-nu_hat*sqrt(eff))  = 0.9348
+
+------------------------------------------------------------------------------
+EXP T25c (secondary): does the GS-profile step predict the wall?
+step = log2||b*_{m+1}|| - log2||b*_1||   (0 == flat profile, no step)
+------------------------------------------------------------------------------
+N=500 (dropped 0 degenerate profiles)
+step | success : mean 0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+AUC(-step -> recovery) = 0.3286   (compare AUC(-NU)=0.7996, AUC(-mu)=0.3964)
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+
+in-band AUC(-step -> recovery) = 0.1770  (N=372)
+
+==============================================================================
+done
+==============================================================================
