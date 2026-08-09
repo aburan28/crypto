@@ -6538,3 +6538,131 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6494). Priorities 1 (P-521 LLL), 2 (CHLRS Igusa), 4 (cross-curve LLL) and 6
+(B5) remain CLOSED/BLOCKED/DEAD-END and priority 3 (Howe gluing) completed
+2026-07-21, so priority 5 (GLV-HNP Phase 2) is again the only live thread;
+2026-08-07 #2 made measurable progress hours before the 7-day window, so
+protocol rule (b) applies (continue the live thread rather than fall back).
+
+Pre-registered hypothesis, verbatim from the 2026-08-07 #2 entry:
+
+  H25: within the ambiguous NU band 1.04 <= NU <= 2.20 (ex-Thread 24 W4,
+       17-bit re-measure), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+  Falsifier: AUC(-mu) inside the band collapses to ~0.5, meaning mu's
+       apparent per-stratum power (W5, AUC 0.75-0.93) was mediated by NU
+       and the stratified result was a stratification artifact.
+
+Secondary (pre-registered): step = log2(||b*_{m+1}||) - log2(||b*_1||), the
+GS-profile jump from the head block (m copies of lambda_1(L2), per W1b) to
+the tail block; test whether `step -> 0` predicts recovery better than NU
+or mu.
+
+Environment note: fresh clone had neither `sympy`, `fpylll` nor `cysignals`
+installed (`glv_hnp_common.py` imports both). `pip install sympy fpylll
+cysignals` pulled prebuilt manylinux wheels with no compilation needed —
+not persisted anywhere, so every future autolab run on a fresh container
+will need this again unless a requirements file is added (see next-step).
+
+### Work done
+
+Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`, regenerating the
+identical grid `glv_hnp_phase2_gsprofile_strat.py` used (20 17-bit j=0 GLV
+curves x 5 eff strata {0.05,0.10,0.15,0.20,0.25} x 5 seeds, dim 24, float
+GS) plus a `--dump-json` flag (per the 2026-08-07 #2 proposal) so the
+500-row table survives the run — dumped to
+`glv_hnp_phase2_thread25_rows.json` (n, K1, eff, ok, NU, mu, nuhat, lamstar,
+step, argmax, k per row).
+
+Computed, pooled over the ambiguous NU band and per-stratum inside it:
+AUC(-mu), AUC(-nu_hat), AUC(-lam* control), AUC(-NU sanity check). Computed
+the secondary `step` statistic for all 500 rows and its AUC / Spearman
+correlation against NU and mu.
+
+`cargo test --test curve_audit` not run: no Rust files touched.
+
+### Findings
+
+**H25 literal form: FALSIFIED pooled, but the per-stratum claim it was built
+on replicates exactly.**
+
+```
+band = {r : 1.04 <= NU(r) <= 2.199}, N=366, rec=97/366
+
+  AUC(-mu     -> recovery) = 0.6932   <- pooled H25 target (>=0.8?)  FALSIFIED
+  AUC(-nu_hat -> recovery) = 0.8403   <- CONFIRMED at >=0.8
+  AUC(-lam*   -> recovery) = 0.3212   (control, inverted as expected)
+  AUC(-NU     -> recovery) = 0.5656   (NU is ~coin-flip inside its own band, as it must be)
+
+per-stratum AUC(-mu) inside the band:
+  eff=0.05  N=24  rec=23/24  AUC=0.4565  (degenerate, 1 negative — noise)
+  eff=0.10  N=83  rec=26/83  AUC=0.8819
+  eff=0.15  N=96  rec=21/96  AUC=0.8889
+  eff=0.20  N=89  rec=18/89  AUC=0.9276
+  eff=0.25  N=74  rec= 9/74  AUC=0.8615
+```
+
+Reading: pooling raw `mu` across eff strata inside the band destroys the
+signal (0.69) because `mu`'s natural scale shifts with eff (W5 already
+showed `mu` tracks `nu_hat` "to 3 decimal places" *within* a stratum, not
+across). The correctly eff-normalized statistic, `nu_hat = mu/sqrt(det L2)`,
+recovers H25's claim pooled (0.84) with no per-stratum conditioning needed.
+**Corrected H25': `nu_hat`, not raw `mu`, is the scale-stable second
+coordinate inside the NU-ambiguous band.** CONFIRMED. The four
+per-stratum `mu` numbers (0.86-0.93, ex the degenerate eff=0.05 cell) are
+the real result and match W5 (0.75-0.93) inside 0.06 in every non-degenerate
+cell — this is a clean replication, not a new finding, but it rules out the
+falsifier (mu's power was NOT purely an NU-mediation artifact: NU is itself
+coin-flip inside the band by construction, so mu/nu_hat's per-stratum AUC
+0.86-0.93 there is genuinely independent information).
+
+**Secondary: `step` is REJECTED as a wall predictor — worse than both NU and
+mu, and not independent of mu.**
+
+```
+pooled (N=500):
+  AUC(-step -> recovery) = 0.3286   (inverted: LARGER step -> more recovery)
+  AUC(-NU   -> recovery) = 0.7996   (matches W5's pooled value exactly)
+  AUC(-mu   -> recovery) = 0.3964   (also inverted pooled — expected, W5 pattern)
+  Spearman(step, NU) = 0.1351       (near-independent of NU)
+  Spearman(step, mu) = -0.6627      (step is largely mu in disguise, wrong sign)
+
+per-stratum AUC(-step): eff=0.05 0.636 | 0.10 0.227 | 0.15 0.114 | 0.20 0.079 | 0.25 0.106
+```
+
+`step` is strongly anti-correlated with `mu` (larger head-to-tail jump <=>
+smaller lambda_1(L2), which is the expected geometric relationship — a
+bigger relative jump means the head block is tighter) but its AUC is far
+below both `mu` and `NU` in every stratum and gets *worse* as eff grows,
+the opposite of a useful separator. The W1b-motivated block-boundary jump
+does not carry the signal on its own; whatever `mu` captures is not
+reducible to "distance between the two GS blocks" in this simple form.
+
+### Next step proposal
+
+**Thread 26 — fit the 2-parameter logistic on (log NU, log nu_hat), the
+deliverable the 2026-08-07 #2 entry originally asked for.** Corrected H25'
+confirms nu_hat is a real second coordinate inside the NU-ambiguous band, so
+the pair (NU, nu_hat) is at last a validated 2D viability test for Phase 2.
+Concrete sub-task: fit `logit(P[recovery]) = a + b*log(NU) + c*log(nu_hat)`
+on the existing 500-row table (now saved as
+`glv_hnp_phase2_thread25_rows.json`, no new lattice work needed), report the
+decision boundary and 5-fold CV accuracy, and check whether adding `eff` as
+a third term is redundant with `nu_hat` (it should be, since nu_hat already
+absorbs det(L2) ~ K1*K2). Falsifier: if `eff`'s coefficient survives at
+p<0.05 after `nu_hat` is in the model, `nu_hat` is not the full size
+normalization and there's a third factor.
+
+Housekeeping (cheap, do first): add a `secp256k1_cm_audit/requirements.txt`
+pinning `sympy`, `fpylll`, `cysignals` so future fresh-container autolab
+runs don't rediscover the missing-import trail by hand.
+
+### Commits made
+
+(filled in below)

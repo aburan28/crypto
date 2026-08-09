@@ -1,0 +1,46 @@
+==============================================================================
+Thread 25 — is mu a second coordinate, conditional on NU? (H25)
+==============================================================================
+
+500 instances (float GS, dim 24) in 2.0s
+dumped 500 rows to glv_hnp_phase2_thread25_rows.json
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside the ambiguous NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+band population: N=366  rec=97/366  (pooled over all strata; NU is fixed-ish, mu is free)
+  AUC(-mu     -> recovery) = 0.6932   <- H25 target (>=0.8?)
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(-lam*   -> recovery) = 0.3212   (control)
+  AUC(-NU     -> recovery) = 0.5656   (should be ~0.5, NU is fixed by construction)
+
+H25: FALSIFIED  (AUC(-mu)=0.6932 vs threshold 0.8)
+
+per-stratum breakdown inside the band (does mu still separate when eff is ALSO controlled?):
+  eff    N     rec   AUC mu
+ 0.05   24   23/24   0.4565
+ 0.10   83   26/83   0.8819
+ 0.15   96   21/96   0.8889
+ 0.20   89   18/89   0.9276
+ 0.25   74    9/74   0.8615
+
+------------------------------------------------------------------------------
+EXP secondary: step = log2||b*_{m+1}|| - log2||b*_1|| vs NU, mu
+------------------------------------------------------------------------------
+pooled over all 5 strata (N=500):
+  AUC(-step -> recovery) = 0.3286
+  AUC(-NU   -> recovery) = 0.7996
+  AUC(-mu   -> recovery) = 0.3964
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+
+per-stratum AUC(-step):
+  eff=0.05  AUC(-step) = 0.6364
+  eff=0.10  AUC(-step) = 0.2266
+  eff=0.15  AUC(-step) = 0.1139
+  eff=0.20  AUC(-step) = 0.0793
+  eff=0.25  AUC(-step) = 0.1062
+
+==============================================================================
+done
+==============================================================================
