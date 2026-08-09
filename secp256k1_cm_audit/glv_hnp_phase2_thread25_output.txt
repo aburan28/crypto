@@ -1,0 +1,55 @@
+==============================================================================
+Thread 25 — does mu survive conditioning on NU?  (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.4s
+dumped 500 rows to glv_hnp_phase2_thread25_rows.json
+
+------------------------------------------------------------------------------
+EXP H25a: recompute the pooled NU ambiguous band on THIS run
+------------------------------------------------------------------------------
+pooled (N=500): sufficient NU < 1.0105 , necessary NU > 2.1992
+(compare 2026-08-07 log: sufficient 1.040, necessary 2.199 -- this run redraws 500 fresh instances so the band will differ slightly by sampling noise)
+
+band population: 372/500  (101 recover, 271 fail)
+
+WITHIN the ambiguous band, does NU itself still separate?
+  AUC(-NU     -> recovery | in band) = 0.5688  (should be ~0.5 by construction -- band is where NU fails)
+  AUC(-mu     -> recovery | in band) = 0.6900
+  AUC(-nu_hat -> recovery | in band) = 0.8426
+
+H25 verdict: AUC(-mu | in band) = 0.6900  < 0.8 -> H25 FAILS
+
+------------------------------------------------------------------------------
+EXP H25b: per-eff-stratum band test (does band population even
+          exist inside single strata, or only pooled?)
+------------------------------------------------------------------------------
+  eff  band N     rec |  AUC mu|band  AUC NU|band
+ 0.05      26   25/26 |       0.5000       0.4800
+ 0.10      86   28/86 |       0.8805       0.5517
+ 0.15      97   21/97 |       0.8891       0.3239
+ 0.20      89   18/89 |       0.9276       0.4695
+ 0.25      74    9/74 |       0.8615       0.6188
+
+------------------------------------------------------------------------------
+EXP H25c (secondary): does the head/tail GS step predict better
+          than NU or mu?  step = log2||b*_{m+1}|| - log2||b*_1||
+------------------------------------------------------------------------------
+valid step values: 500/500
+step | success : mean 0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+AUC(-step -> recovery) = 0.3286   AUC(+step -> recovery) = 0.6714
+best-direction AUC(step) = 0.6714   vs pooled AUC(NU) = 0.7996   vs pooled AUC(mu) = 0.3964
+
+per-eff-stratum step AUC (best direction):
+  eff     N  AUC step
+ 0.05   100    0.6364
+ 0.10   100    0.7734
+ 0.15   100    0.8861
+ 0.20   100    0.9207
+ 0.25   100    0.8938
+
+==============================================================================
+done
+==============================================================================

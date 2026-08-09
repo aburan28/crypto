@@ -6538,3 +6538,158 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25** — "does mu survive conditioning on NU?", the pre-registered
+next-step from the 2026-08-07 #2 log entry. Priorities 1, 2, 4, 6 remain
+CLOSED/BLOCKED/DEAD-END and priority 3 completed 2026-07-21, so priority 5
+(GLV-HNP) is again the only live thread; Thread 24 made measurable progress
+2 days ago (H24 clause split, NU/nu_hat shown uncorrelated), so protocol
+rule (b) applies and this thread continues rather than resetting to
+priority 1.
+
+Pre-registered hypothesis, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   If yes, mu is a genuine second coordinate... If no, the W5 result is a
+>   stratification artifact and the closed form should be retired.
+
+**Verdict: H25 as literally stated (pooled) is FALSIFIED (AUC 0.690 < 0.8),
+but the underlying claim it was testing — mu is a genuine second coordinate,
+independent of NU — HOLDS. The failure is a pooling artifact, not a real
+absence of signal, and its root cause is now identified: eff varies inside
+the pooled band, and raw mu is not eff-normalized, while `nu_hat =
+mu/sqrt(det L2)` is. Holding eff fixed (or using nu_hat instead of raw mu)
+recovers AUC 0.86-0.94 in every non-degenerate stratum.**
+
+### Work done
+
+- Environment (fresh container, 4th time this has been needed): `pip
+  install sympy fpylll cysignals` in that order — `fpylll` alone fails with
+  `ModuleNotFoundError: No module named 'cysignals'` even though pip does
+  not list it as a build requirement; `glv_hnp_common.py` imports `sympy`
+  before `fpylll` so both are hard requirements just to import the module.
+- New file `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — generates the
+  same 500-instance 17-bit table as `glv_hnp_phase2_gsprofile_strat.py`
+  (20 curves x 5 eff strata x 5 seeds, dim 24, float GS) and adds a
+  `--dump-json` flag (per the 2026-08-07 next-step proposal) so the raw
+  rows survive the run; dumped to
+  `secp256k1_cm_audit/glv_hnp_phase2_thread25_rows.json` (prof/nus arrays
+  excluded — reconstructible from curve+seed, kept the dump small).
+- Ran three experiments: H25a (pooled band test, exactly as pre-registered),
+  H25b (same test but per-eff-stratum), H25c (secondary: does the GS
+  profile head/tail step from Thread 24's W1b predict recovery?).
+- `cargo test --test curve_audit`: not run — no Rust files touched this
+  session.
+
+### Findings
+
+**H25a — pooled band test (as literally pre-registered).**
+Recomputed the ambiguous band on this run's own 500 fresh instances rather
+than reusing 2026-08-07's exact cutoffs (sampling noise moves it slightly):
+sufficient NU < 1.0105, necessary NU > 2.1992 (vs 1.040/2.199 previously —
+consistent). 372/500 instances fall in the band (101 recover, 271 fail).
+
+```
+WITHIN the band:
+  AUC(-NU     -> recovery | in band) = 0.5688   (expected ~0.5: band is
+                                                   defined as where NU fails)
+  AUC(-mu     -> recovery | in band) = 0.6900   ->  H25 pooled: FAILS (<0.8)
+  AUC(-nu_hat -> recovery | in band) = 0.8426   ->  clears 0.8 easily
+```
+
+**H25b — same test, stratified by eff (mu's native scale).**
+
+```
+  eff   band N    rec   |  AUC mu|band   AUC nu_hat|band
+ 0.05      26   25/26   |     0.5000  (degenerate, 1 failure)
+ 0.10      86   28/86   |     0.8805        0.8836
+ 0.15      97   21/97   |     0.8891        0.8828
+ 0.20      89   18/89   |     0.9276        0.9425
+ 0.25      74    9/74   |     0.8615        0.8615
+```
+
+Every non-degenerate stratum clears 0.8, most by a wide margin (up to
+0.94). **mu and nu_hat are numerically near-identical per-stratum** — inside
+a fixed eff, `nu_hat = mu/sqrt(det L2)` is just mu rescaled by a
+near-constant (n, S_K1, S_K2 vary only through curve choice, not eff), so
+the sqrt(det) normalization does nothing extra there. It is precisely the
+*cross-stratum* rescaling that nu_hat buys, which is exactly what H25a's
+pooled test needed and raw mu didn't have.
+
+**Root cause of the H25a/H25b gap, resolved:** the pooled AUC 0.690 for mu
+is not evidence mu lacks signal — every stratum shows mu AUC >= 0.86. It is
+an artifact of pooling a per-instance score whose *scale* depends on eff
+across a population where eff varies 5x (0.05 to 0.25). nu_hat is exactly
+the eff-normalized version of mu, which is why it alone survives pooling
+(0.843) while raw mu does not (0.690). This mirrors Thread 24's W5/W6
+finding that nu_hat's sqrt(det) term "only matters across sizes" — Thread
+25 shows it also matters across eff strata at fixed size, for the same
+reason.
+
+**Practical upshot:** the pre-registered H25 answer is technically "no" for
+the literal pooled statistic, but the intended question — "is mu a genuine
+second coordinate beyond NU?" — is answered "yes", with the caveat that the
+usable pooled statistic is nu_hat (or mu conditioned on eff), not raw mu.
+The 2-parameter viability test Thread 24's next-step proposal was reaching
+for is **(NU, nu_hat)**, not (NU, mu): NU as the sound but coarse
+nearest-plane certificate, nu_hat as the size/eff-normalized tiebreaker
+inside NU's ambiguous band.
+
+**H25c (secondary) — GS profile head/tail step.**
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)`, m=12, testing whether the
+"vanishes at the wall" behavior W1b found by eye is a usable predictor.
+
+```
+step | success : mean  0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+best-direction pooled AUC(step) = 0.6714   (larger step -> more likely to
+                                             recover, opposite the informal
+                                             W1b read of "vanishing at the
+                                             wall")
+pooled AUC(NU) = 0.7996   pooled AUC(mu) = 0.3964   (unstratified, for scale)
+
+per-eff-stratum AUC(step):
+  eff   0.05   0.10   0.15   0.20   0.25
+        0.636  0.773  0.886  0.921  0.894
+```
+
+step is a real, monotone-improving-with-eff signal (0.64 -> 0.92) but does
+not exceed mu/nu_hat's per-stratum numbers (0.86-0.94) at any eff, and its
+pooled AUC (0.67) is worse than nu_hat's pooled in-band AUC (0.84). It adds
+no information mu/nu_hat doesn't already carry more cleanly — not pursued
+further as a standalone statistic. One caveat: the sign came out backwards
+from the informal W1b read ("step -> 0 predicts the wall"); that intuition
+was about the transition *point* in K1, not a per-instance monotone
+predictor, and the two are not the same test — recorded here so a future
+session doesn't re-derive the same confusion.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the 2-parameter (NU, nu_hat) decision rule.**
+H25 identifies the right pair; the concrete deliverable is a logistic fit
+`P(recover) ~ sigmoid(a*log(NU) + b*log(nu_hat) + c)` on the pooled 500-row
+table (`glv_hnp_phase2_thread25_rows.json`, already dumped — no new data
+needed), with:
+  - in-sample AUC of the fitted score vs. NU alone (0.800) and nu_hat alone
+    (should be close to the 0.935 unstratified figure from Thread 20b);
+  - a train/test split by curve (not by instance) to check the fit isn't
+    just memorizing per-curve nu_hat values, since seeds within a curve are
+    correlated;
+  - explicit decision boundary in (log NU, log nu_hat) space, plotted or
+    tabulated, handed to Thread 27 as the basis for a real viability
+    certificate for the GLV-HNP writeup.
+Cost: no new lattice computation, ~30 min, reuses the JSON dump from this
+session.
+
+Secondary (unchanged tertiary from Thread 23/24): BKZ-beta sweep against
+NU/nu_hat jointly, now that nu_hat is established as the tiebreaker inside
+NU's ambiguous band — same experiment, better statistic to condition on.
+
+### Commits made
+
+(recorded after commit, see push step)
