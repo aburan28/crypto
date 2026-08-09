@@ -6686,4 +6686,4 @@ threshold.
 
 ### Commits made
 
-[recorded after commit below]
+ee83cd1 autolab 2026-08-09: Thread 25 — H25 falsified pooled, holds via nu_hat in-band (AUC 0.840)
