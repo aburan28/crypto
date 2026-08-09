@@ -6648,4 +6648,4 @@ started — candidate for next fallback if priority 5 saturates).
 
 ### Commits made
 
-(recorded after this entry is committed — see follow-up commit)
+dfbaa8f autolab 2026-08-09: Thread 25 — H25 falsified for raw mu, confirmed for nu_hat (AUC 0.840 in-band); step signal found
