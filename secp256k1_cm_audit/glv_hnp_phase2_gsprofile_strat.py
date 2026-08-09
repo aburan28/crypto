@@ -21,6 +21,8 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import argparse
+import json
 import math
 import os
 import random
@@ -34,6 +36,14 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dump-json", default=None,
+                     help="write the raw per-instance rows (incl. the "
+                          "per-index GS profile 'prof' and nu-list 'nus') "
+                          "to this path so later runs can re-analyze "
+                          "without regenerating the 500 instances")
+    args = ap.parse_args()
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -63,6 +73,11 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if args.dump_json:
+        with open(args.dump_json, "w") as f:
+            json.dump(rows, f)
+        print(f"wrote {len(rows)} rows to {args.dump_json}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
@@ -139,6 +154,51 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    print("\n" + "-" * 78)
+    print("Thread 25 — H25: does mu separate INSIDE the NU-ambiguous band?")
+    print("-" * 78)
+    print("Band from the 2026-08-07 log (W4, 17 bits): sufficient NU < 1.040,")
+    print("necessary NU > 2.199 -> nearest-plane gives no answer in between.")
+    NU_LO, NU_HI = 1.040, 2.199
+    band = [r for r in rows if NU_LO <= r['NU'] <= NU_HI]
+    pos_b = [r for r in band if r['ok']]
+    neg_b = [r for r in band if not r['ok']]
+    print(f"band size: {len(band)} / {len(rows)}  "
+          f"({len(pos_b)} recovered, {len(neg_b)} not)")
+    if pos_b and neg_b:
+        a_mu_band = auc([r['mu'] for r in pos_b], [r['mu'] for r in neg_b])
+        a_nh_band = auc([r['nuhat'] for r in pos_b], [r['nuhat'] for r in neg_b])
+        print(f"  AUC(-mu     -> recovery | band) = {a_mu_band:.4f}")
+        print(f"  AUC(-nu_hat -> recovery | band) = {a_nh_band:.4f}")
+        verdict = "H25 HOLDS" if a_mu_band >= 0.8 else "H25 FAILS"
+        print(f"  {verdict}: threshold is AUC >= 0.8000")
+    else:
+        print("  degenerate: band is all-positive or all-negative, no AUC defined")
+
+    print("\n" + "-" * 78)
+    print("Thread 25 secondary — W1b step statistic: does step -> 0 predict")
+    print("the wall better than NU or mu?")
+    print("-" * 78)
+    print("step := log2(||b*_{m+1}||) - log2(||b*_1||) = log2(prof[M]) - log2(prof[0])")
+    step_rows = [r for r in rows if r['prof'][0] > 0 and r['prof'][M17] > 0]
+    for r in step_rows:
+        r['step'] = math.log2(r['prof'][M17]) - math.log2(r['prof'][0])
+    pos_s = [r for r in step_rows if r['ok']]
+    neg_s = [r for r in step_rows if not r['ok']]
+    if pos_s and neg_s:
+        a_step = auc([r['step'] for r in pos_s], [r['step'] for r in neg_s])
+        a_nu_s = auc([r['NU'] for r in pos_s], [r['NU'] for r in neg_s])
+        a_mu_s = auc([r['mu'] for r in pos_s], [r['mu'] for r in neg_s])
+        print(f"  N = {len(step_rows)} ({len(pos_s)} recovered)")
+        print(f"  AUC(-step -> recovery) = {a_step:.4f}   "
+              f"(step -> 0 predicts recovery if this is >> 0.5)")
+        print(f"  AUC(-NU   -> recovery) = {a_nu_s:.4f}  (same pool, for comparison)")
+        print(f"  AUC(-mu   -> recovery) = {a_mu_s:.4f}  (same pool, for comparison)")
+        print(f"  Spearman(step, NU)     = {spearman([r['step'] for r in step_rows], [r['NU'] for r in step_rows]):.4f}")
+        print(f"  Spearman(step, mu)     = {spearman([r['step'] for r in step_rows], [r['mu'] for r in step_rows]):.4f}")
+    else:
+        print("  degenerate pool, skipped")
 
     print("\n" + "=" * 78)
     print("done")

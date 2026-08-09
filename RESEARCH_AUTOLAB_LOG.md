@@ -6538,3 +6538,106 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+**Thread 25**, the pre-registered next-step of the 2026-08-07 #2 entry
+(log line ~6461): stratify the existing 500-instance 17-bit table by NU band
+and test H25 (does mu separate cases *inside* the NU-ambiguous band where
+nearest-plane gives no answer). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/
+DEAD-END, priority 3 completed 2026-07-21, so priority 5 (GLV-HNP) is again
+the only live thread; the 2026-08-07 run made measurable progress two days
+earlier, so protocol rule (b) applies and its proposed sub-task is the
+correct pick. Also executed the secondary sub-task from the same entry (the
+W1b GS-profile "step" statistic).
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0.
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added a
+  `--dump-json` flag (as the 08-07 entry requested) that serializes the full
+  500-row table, including the per-index GS profile (`prof`) and nu-list
+  (`nus`) arrays, so later runs can re-analyze without regenerating the
+  instances. Appended two new analysis blocks at the end of `__main__`:
+  - **H25 band test**: restrict to `1.040 <= NU <= 2.199` (the sufficient/
+    necessary bracket from the 2026-08-07 #2 W4 result) and compute
+    `AUC(-mu -> recovery)` and `AUC(-nu_hat -> recovery)` inside that band.
+  - **W1b step test**: `step := log2(||b*_{m+1}||) - log2(||b*_1||)` computed
+    per-instance from `prof`, then `AUC(-step -> recovery)` plus Spearman
+    correlations against NU and mu.
+- Ran `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json
+  glv_hnp_phase2_gsprofile_strat_rows.json` (3.5s total, deterministic —
+  the W5/W6/W7 numbers reproduce the 2026-08-07 #2 entry exactly, confirming
+  the fixed `SEEDS` give a stable 500-instance pool). Committed the JSON dump
+  (650KB) alongside the script and refreshed
+  `glv_hnp_phase2_gsprofile_strat_output.txt` with the full new output.
+
+### Findings
+
+**H25 result — mixed. Raw mu FAILS the 0.8 bar; nu_hat (mu/sqrt(det L2))
+PASSES it.**
+
+```
+band := {1.040 <= NU <= 2.199}     366 / 500 instances (97 recovered, 269 not)
+  AUC(-mu     -> recovery | band) = 0.6932   <  0.8  -> H25 FAILS for raw mu
+  AUC(-nu_hat -> recovery | band) = 0.8403   >= 0.8  -> H25 HOLDS for nu_hat
+```
+
+This refines, rather than confirms, the 2026-08-07 #2 W5 interpretation
+("nu_hat is just a rescaled mu ... the sqrt(det) normalisation only matters
+across sizes"). That claim is now falsifiable and this measures it: pooled
+across all 5 eff strata (which change det(L2) via K1), raw mu's separating
+power drops to 0.693 while the normalized nu_hat holds at 0.840. The
+normalization is not cosmetic — it is what keeps the statistic informative
+once curves/K1 vary. **nu_hat, not mu, is the genuine second coordinate**:
+recovery = f(NU, nu_hat) with nu_hat carrying real information inside the
+band where NU alone is uninformative by construction.
+
+**W1b step statistic — FALSIFIED, wrong sign.**
+
+```
+N = 500 (190 recovered)
+  AUC(-step -> recovery) = 0.3286   (predicted >> 0.5; observed << 0.5)
+  AUC(-NU   -> recovery) = 0.7996   (same pool, for comparison)
+  AUC(-mu   -> recovery) = 0.3964   (same pool, for comparison)
+  Spearman(step, NU)     = 0.1351
+  Spearman(step, mu)     = -0.6627
+```
+
+The "step vanishes as the wall is crossed" reading from W1b (2026-08-07 #2)
+does not predict recovery in the hypothesized direction — if anything a
+*larger* step is mildly associated with recovery (AUC < 0.5), the opposite
+of "step -> 0 signals the favorable side of the wall". `step` is strongly
+anti-correlated with `mu` (Spearman -0.663, expected: larger lambda_1(L2)
+compresses the head of the GS profile) but nearly uncorrelated with `NU`
+(0.135), so it adds no discriminating information beyond what mu already
+gave, and mu itself only weakly separates when pooled (0.396). This
+sub-thread is dead; no further step-statistic work is proposed.
+
+### Next step proposal
+
+**Thread 26 — 2-parameter decision boundary on (log NU, log nu_hat).**
+H25 confirms nu_hat is a genuine second coordinate independent of NU (W6 of
+2026-08-07 #2 already showed Spearman(nu_hat*sqrt(eff), NU) ~ 0 to slightly
+negative). The concrete next step is a logistic fit of `ok` on
+`(log(NU), log(nu_hat))` using the 500-row dump committed today
+(`glv_hnp_phase2_gsprofile_strat_rows.json`, no new lattice computation
+needed), then compare the combined classifier's AUC against NU alone (0.800
+pooled) and nu_hat*sqrt(eff) alone (0.935 pooled) to see whether the joint
+boundary beats both univariate scores or whether nu_hat*sqrt(eff) already
+captures everything NU adds. Falsifier: if the fitted logistic weight on
+`log(NU)` is not significantly different from 0 once `log(nu_hat)` is in the
+model, NU contributes nothing beyond nu_hat and Thread 24's "two mechanisms"
+reading should be revised to "nu_hat is the whole story, NU is a sound but
+redundant certificate."
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU/nu_hat to
+quantify how far blockwise reduction pushes the threshold (Thread 23/24
+tertiary).
+
+### Commits made
+
+(recorded in next commit)
