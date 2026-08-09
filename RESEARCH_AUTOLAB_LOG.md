@@ -6690,4 +6690,4 @@ pairing check above also fails.
 
 ### Commits made
 
-(recorded after push — see next log entry)
+f5bdbe5 autolab 2026-08-09: Thread 3 CHLRS forward map — no closed-form exists (state of art is CM-analytic, arXiv:2005.03587/2502.09753); Z/3Z Richelot rotation hypothesis falsified; prior 'CORRECT' p=43 reference case fails its own Jacobian-order check
