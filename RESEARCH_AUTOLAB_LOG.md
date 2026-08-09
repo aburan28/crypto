@@ -6670,4 +6670,4 @@ pushes the threshold.
 
 ### Commits made
 
-(recorded after commit, see below)
+5f0b730 autolab 2026-08-09: Thread 25 — mu confounded by eff, nu_hat clean; (NU,nu_hat) 2D fit AUC 0.94
