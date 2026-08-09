@@ -6706,4 +6706,4 @@ attempted in any thread so far.
 
 ### Commits made
 
-(recorded after this entry is committed — see next commit)
+216129d autolab 2026-08-09: Thread 25 — H25 pooled falsified (NU/eff confound), holds once eff fixed (AUC 0.86-0.93)
