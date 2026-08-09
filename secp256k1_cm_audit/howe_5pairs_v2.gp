@@ -185,9 +185,18 @@ print("  and the (2,2)-isogeny is non-trivial. But x^6-b^2 = (x^3+b)(x^3-b)");
 print("  might have trivial Richelot (mapping to product of degree-1 factors).");
 print("");
 print("  For secp256k1 pair (0,3): b=7, h^3=-1, so the cover is y^2=x^6-49.");
-print("  BLOCKED: This degenerate case needs the THETA FUNCTION or MESTRE approach");
-print("  to find the correct non-trivial (2,2)-isogeny.");
-print("  See RESEARCH_MESTRE_HOWE.md for alternative reconstruction algorithms.");
+print("  UPDATE (2026-08-09, chlrs_pair03_resolved.gp): the degeneracy above is");
+print("  specific to the literal branch d=-1. -1 has THREE cube roots in F_p");
+print("  when p==1 mod 6 (true for p_secp): {-1, -1*z3, -1*z3^2}. Only d=-1");
+print("  gives sv=(1+d)*alpha=0. The other two branches give sv!=0 and a");
+print("  non-degenerate, smooth Richelot dual y^2=x^6+aa*x^3+bb (both branches");
+print("  give the SAME curve up to aa->-aa). Validated: (a) the identical");
+print("  branch-selection trick at p=43 toy scale reproduces the correct");
+print("  #Jac = #E*#E^twist target (chlrs_forward_map_sweep.gp); (b) at the");
+print("  real secp256k1 prime the non-degenerate branch gives a smooth curve");
+print("  (disc!=0) -- #Jac could not be checked directly, hyperellcharpoly");
+print("  overflows at 256-bit p. Pair (0,3) is NOT blocked; see");
+print("  chlrs_pair03_resolved.gp for the explicit (aa,bb).");
 print("");
 
 \\ ================================================================

@@ -6538,3 +6538,132 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+Priority-1 thread (P-521 bigfloat) is CLOSED (§10.5, confirmed 2026-06-06 and
+reconfirmed as recently as the 2026-08-07 #2 entry's W0: "float GS is safe at
+these dimensions; no bigfloat needed"). Priority 4 (cross-curve LLL 384-bit)
+is also closed/DEAD-END (2026-06-14, reconfirmed 2026-07-08). Priority 5
+(GLV-HNP Phase 2) has been worked in every session since 2026-07-26 (Threads
+20-24) and is within the 7-day recency window. Per the run protocol, the next
+priority thread with no work in >7 days is **Priority 2/3 (CHLRS Igusa
+formula / Howe gluing on j=0 sextic twists)** — last touched 2026-07-27
+(commit 9e9b0a8), 13 days ago. Picked up exactly where that session's "Next
+step proposal" (Thread 3, CHLRS forward map) left off.
+
+### Work done
+- Installed PARI/GP 2.15.4 (fresh container, no memory of prior installs).
+- Re-ran `howe_5pairs_v2.gp` and `howe_richelot_v5.gp` to re-establish state.
+  **Caught a latent bug in the verification chain**: `howe_5pairs_v2.gp`
+  Test 1 (p=43) prints "✓ CORRECT" based only on matching hardcoded constants
+  (a=41,b=5) copied from `howe_richelot_v5.gp`'s own self-consistency check —
+  neither script had ever verified `#Jac(cover) == #E1*#E2` for that example.
+  Ran the actual check: `hyperellcharpoly` on `y^2=x^6+41x^3+5` over F_43
+  gives #Jac=2169, but `(p+1-t1)(p+1-t2)=1767` (using ACTUAL traces t1=13,
+  t2=-13 of E1:y²=x³+7 and E2:y²=x³+13 — the `13` previously passed to
+  `check_jac()` as "t_expected" was E2's *b*-coefficient, not its trace,
+  which coincidentally also equals 13, masking the bug). **No end-to-end
+  verified Howe cover has existed in this codebase before today.**
+- Wrote `chlrs_forward_map_sweep.gp`: brute-forces the CHLRS forward map at
+  p=43 by trying every (b1,d) pair and all 3 cube-root branches of beta
+  (beta = d*alpha, d*alpha*z3, d*alpha*z3^2), checking the Richelot dual's
+  `#Jac` against all 4 sign combinations of `(p+1∓t1)(p+1∓t2)`.
+  **Result: 924/4914 (b1,d,branch) triples give a genuine #Jac match.**
+  This is the first empirically *verified* forward-map construction in the
+  project (previous sessions only round-tripped `(aa,bb)->r1,r2->(aa,bb)'`
+  and got degenerate `[-1,-1]` for all 7 canonical classes — see
+  `howe_richelot_v5.gp`'s `do_class` output, still reproduces 7x `[-1,-1]`).
+- Diagnosed the earlier "pair (0,3) BLOCKED" claim (2026-07-27 log, Test 3):
+  it only tested the literal branch `d=-1`. Since `p_secp ≡ 1 mod 6`, `-1`
+  has **three** cube roots in F_p: `{-1, -z3, -z3^2}` (z3 = primitive cube
+  root of unity). Only `d=-1` gives `sv=(1+d)*alpha=0` (degenerate,
+  Delta=0). Confirmed at p=43 via the sweep above (`b1=1,b2=42,d=7`: d=7 is
+  a cube root of -1 other than -1 itself, branches 0/2 give a NON-degenerate
+  cover with verified `#Jac=1872=(p+1-8)(p+1+8)`, matching E×E^twist).
+- Wrote `chlrs_pair03_resolved.gp` and ran it directly on the real
+  secp256k1 prime for the actual pair (0,3): `b1=7, b2=p-7`.
+  - Confirmed `t2=-t1` (E3 is the quadratic twist of E0, as expected).
+  - Confirmed `-1` is a perfect cube in F_p_secp: `(-1)^((p-1)/3) mod p = 1`.
+  - Computed the two non-degenerate branches `d=-z3, d=-z3^2` explicitly.
+    Both give a **smooth** curve (`disc(y^2=x^6+aa*x^3+bb) != 0`), and both
+    branches give the **same curve** up to `aa -> -aa` (bb identical) —
+    i.e. exactly one genuine cover, not two.
+  - Explicit output:
+    `aa = 48666416120362763711287057542716097040903955689347628416944087457506926685827`
+    `bb = 115792089237316195423570985008687907853269984665640564039457584007908834671614`
+    (`bb ≡ -42 mod p_secp`).
+  - **Verification gap**: `hyperellcharpoly` overflows at 256-bit p
+    ("overflow in t_INT-->ulong assignment") — PARI's genus-2 point-counting
+    is not built for cryptographic-size p. Could not numerically confirm
+    `#Jac == #E0*#E3` at secp256k1 scale directly.
+- Updated `howe_5pairs_v2.gp` Test 3 in place with a dated note pointing to
+  this resolution instead of leaving the stale "BLOCKED" text uncorrected.
+- `cargo test --test curve_audit`: 5/5 pass (5.88s). No Rust files touched
+  this session; ran per protocol to confirm no regression from .gp changes
+  (there shouldn't be any — sanity check only).
+
+### Findings
+
+1. **The project's only "known-good" Howe-cover reference (p=43, a=41,b=5)
+   was never actually verified against a target Jacobian order.** It passed
+   a self-consistency check (same constants as a prior script run) that was
+   mistaken for a correctness check. This likely explains why the "forward
+   map" problem looked harder than it is: the presumed-working baseline
+   wasn't actually confirmed working.
+2. **The naive forward map (`r1=-b1, r2=-b2` fed directly to Z/3Z Richelot
+   via `alpha=cbrt(-b1,)`, `beta=d*alpha`) DOES work** — 924 verified
+   matches at p=43 — provided the correct one of the 3 cube-root branches
+   for beta is selected. No CHLRS Igusa-inversion machinery was needed for
+   this; the earlier "missing inverse map" conclusion (2026-07-27 Finding 3)
+   was premature — the branch ambiguity is 3-way, not open-ended.
+3. **Pair (0,3) is not blocked.** The 2026-07-27 "degenerate" conclusion
+   only holds for one of three cube-root branches of d=-1. The other two
+   give a valid, smooth, non-trivial cover (verified end-to-end at p=43
+   toy scale; verified smooth, with explicit (aa,bb), at real secp256k1
+   scale — Jacobian-order match not yet confirmed at that scale due to
+   tooling limits).
+4. **Branch-selection rule still not fully characterized.** The sweep found
+   *some* branch works for ~19% of (b1,d,branch) triples at p=43, but many
+   matches come from degenerate/isomorphic (b1,b2) pairs (e.g. b2 a twist of
+   b1) where all 3 branches trivially match. Distinguishing "genuinely
+   distinct, non-isomorphic (E1,E2) pairs" from these was not done — see
+   next step.
+
+### Next step proposal
+
+**Thread 4 — verify #Jac at secp256k1 scale without hyperellcharpoly.**
+PARI's `hyperellcharpoly` can't handle 256-bit p. Options, cheapest first:
+(a) Point-count Jac(C) via `#Jac(C) mod small_primes` using
+    `hyperellpadicfrobenius` or a manual zeta-function approach bounded by
+    Weil bounds — likely still too slow/unsupported in stock PARI.
+(b) Verify the *isogeny*, not the order: check that the 2-torsion of the
+    constructed curve C is Galois-isomorphic to E0[2] x E3[2] as claimed by
+    Howe's theorem hypothesis — a symbolic/structural check instead of a
+    numeric #Jac computation, doable in PARI via 2-torsion polynomial
+    factorization patterns.
+(c) Cross-check against `paper/eprint_combined.tex` / `RESEARCH_MESTRE_HOWE.md`
+    §8.6 which already verified the abstract Howe conditions (H1)+(H2)+(H3)
+    hold for this pair — if (c) already holds, the remaining risk is purely
+    "did the Richelot arithmetic implement the right isomorphism," which (b)
+    would settle more cheaply than (a).
+
+**Thread 5 (secondary) — extend the p=43 sweep's clean branch-selection rule.**
+Filter `chlrs_forward_map_sweep.gp`'s matches to only genuinely distinct,
+non-isomorphic (b1,b2) pairs (b2 not a 6th-power multiple of b1) and check
+whether exactly 1-of-3 branches match in that regime (as seen for pair
+(1,42)). If so, characterize the rule (e.g. by a Kronecker-symbol condition
+on d) — this is the actual "forward map formula" the project has been
+seeking since 2026-07-21, and may be derivable empirically without ever
+implementing the full CHLRS multi-page Igusa-invariant machinery.
+
+**Tertiary — apply the same branch-fix to the other 4 H-qualifying pairs**
+((0,1),(0,2),(0,4),(0,5)) using the general `d = cbrt(h^k)` construction from
+`howe_5pairs_v2.gp` Test 4, now knowing to sweep all 3 branches rather than
+stopping at the first (which Test 4 did not do — it picked the first
+non-square cube root of h and never checked the Jacobian order at all,
+similar to the Test-1 bug found today).
+
+### Commits made
+(recorded in next commit)
