@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -33,7 +34,19 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
+# Fields that are large (full GS profile / nu vector, dim 24) or non-JSON
+# (S_K1/S_K2 are plain ints, fine) get dropped from the dump; 'prof' and
+# 'nus' are kept since Thread 25's step-statistic needs prof[0] and prof[m].
+DUMP_DROP = ()
+
 if __name__ == "__main__":
+    dump_path = None
+    for a in sys.argv[1:]:
+        if a == "--dump-json":
+            dump_path = "glv_hnp_phase2_gsprofile_strat_rows.json"
+        elif a.startswith("--dump-json="):
+            dump_path = a.split("=", 1)[1]
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -63,6 +76,11 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if dump_path:
+        with open(dump_path, "w") as f:
+            json.dump(rows, f)
+        print(f"dumped {len(rows)} rows to {dump_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

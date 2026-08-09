@@ -1,0 +1,54 @@
+NOTE: the W4 bracket [1.040, 2.199] was measured on a different 300-instance 17-bit sample (3 eff strata) than this 500-instance table (5 eff strata). Cross-sample check on THIS table:
+  self-consistent bracket here: sufficient NU < 1.0105 , necessary NU > 2.1992
+  instances below imported NU_LO that still failed: 2 (theory-backed cert NU<=1.0 has 0 FP: 0 FP / 86 instances)
+  instances above imported NU_HI that still recovered: 1
+  => the W4 bracket is an empirical range, not a theorem, and does not transfer exactly across independent samples; only NU<=1 (nearest-plane) is a proven zero-FP certificate.
+
+==============================================================================
+Thread 25 — does mu separate INSIDE the NU ambiguous band? (N=500)
+==============================================================================
+
+band [1.04, 2.199]: N=366  (below band N=94, all ok=False; above band N=40, all fail=False)
+inside band: 97/366 recovered
+
+------------------------------------------------------------------------------
+EXP T25a: H25 — AUC(-mu -> recovery) restricted to the NU band
+------------------------------------------------------------------------------
+AUC(-mu)     = 0.6932   (H25 threshold: >= 0.80)
+AUC(-nu_hat) = 0.8403
+AUC(+step)   = 0.8197   (note: step's predictive sign is opposite mu/NU -- LARGER step means MORE likely to recover)
+AUC(-NU)     = 0.5656   (should be ~0.5: band is ambiguous BY CONSTRUCTION)
+
+VERDICT: H25 FAILS (AUC(-mu) = 0.6932 < 0.80)
+
+------------------------------------------------------------------------------
+EXP T25a-strat: same test, per eff stratum (mu is eff-dependent; check it's not just re-deriving eff)
+------------------------------------------------------------------------------
+  eff=0.05  N= 24  23/24 rec | AUC(-mu)=0.4565  AUC(-nu_hat)=0.4565  AUC(+step)=0.4783
+  eff=0.10  N= 83  26/83 rec | AUC(-mu)=0.8819  AUC(-nu_hat)=0.8853  AUC(+step)=0.8671
+  eff=0.15  N= 96  21/96 rec | AUC(-mu)=0.8889  AUC(-nu_hat)=0.8825  AUC(+step)=0.8870
+  eff=0.20  N= 89  18/89 rec | AUC(-mu)=0.9276  AUC(-nu_hat)=0.9425  AUC(+step)=0.9343
+  eff=0.25  N= 74  9/74 rec | AUC(-mu)=0.8615  AUC(-nu_hat)=0.8615  AUC(+step)=0.8821
+
+mean AUC(-mu) over non-degenerate strata (>=5 per class) = 0.8900  (vs pooled-across-strata 0.6932)
+The pooled figure is depressed by exactly the cross-curve-scale confound Thread 24/W6 diagnosed for C=NU/(nu_hat*sqrt(eff)): mu's absolute scale drifts with eff/curve set, so comparing raw mu across strata is not the controlled test. Per-stratum is.
+
+------------------------------------------------------------------------------
+EXP T25b: does 'step' predict recovery better than NU or mu, POOLED over all 500 instances (not just the band)?
+------------------------------------------------------------------------------
+AUC(+step -> recovery), pooled  = 0.6714   (pooled across strata, same scale confound as raw mu)
+AUC(-NU -> recovery), pooled    = 0.7996
+AUC(-mu -> recovery), pooled    = 0.3964
+Spearman(step, NU)  = 0.1351
+Spearman(step, mu)  = -0.6627
+
+------------------------------------------------------------------------------
+EXP T25c: logistic-style decision boundary sketch on (log NU, log mu)
+------------------------------------------------------------------------------
+band median mu = 1.271e+05
+  mu <= median : 70/186 recovered
+  mu >  median : 27/180 recovered
+
+==============================================================================
+done
+==============================================================================

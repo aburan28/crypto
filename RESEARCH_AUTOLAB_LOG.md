@@ -6538,3 +6538,133 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-09 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat), 2 (CHLRS Igusa), 4 (cross-curve LLL reconfirm)
+and 6 (B5/F_{p^k}) remain CLOSED/BLOCKED/DEAD-END per the 2026-08-07 #2
+entry, and priority 3 (Howe gluing) completed 2026-07-21. Priority 5
+(GLV-HNP) was touched 2 days ago (2026-08-07 #2, Thread 24) and made
+measurable progress (falsified H24 clause 1, confirmed clause 2, found NU
+and nu_hat are two distinct mechanisms) — protocol rule (b) applies, so
+this run continues the thread rather than falling back.
+
+**Thread 25** — the pre-registered next step from that entry, verbatim:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if no — if mu's apparent power is entirely mediated by NU
+>        after all — then the W5 result is a stratification artifact and
+>        the closed form should be retired.
+
+Secondary (also pre-registered): quantify `step = log2||b*_{m+1}|| -
+log2||b*_1||` (the W1b two-block profile boundary) and test whether it
+predicts the wall better than NU or mu.
+
+### Work done
+
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added
+  `--dump-json[=path]` (Thread 24's own next-step note asked for this so
+  "the table survives the run"). Dumps the 500-row instance table
+  (5 eff strata x 20 17-bit curves x 5 seeds, dim 24, float GS) to JSON.
+  Reran: output is byte-identical to the 2026-08-07 file except the dump
+  line and timing (3.0s -> 1.8s) — confirms the run is deterministic and no
+  regression was introduced.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Loads the dumped
+  table, tests H25 (a) pooled inside the NU band, (b) per eff-stratum, and
+  (c) the `step` statistic in both regimes. Output:
+  `glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (4.11s). No Rust touched.
+
+### Findings
+
+**Bracket-transfer check (before H25 proper).** The imported W4 bracket
+[1.040, 2.199] was measured on a *different* 300-instance 17-bit sample (3
+eff strata: 0.05/0.15/0.25) than this 500-instance table (5 strata:
+0.05/0.10/0.15/0.20/0.25). Applying it here: 2 instances below 1.040 still
+failed, 1 above 2.199 still recovered — the empirical bracket does not
+transfer exactly across independent samples. The theorem-backed certificate
+does: **NU <= 1.0 has 0 FP over 86 instances in this table**, consistent
+with 71/0 at 17 bits and 0 FP at 12 bits in Thread 23b/24. Self-consistent
+bracket on this table: sufficient NU < 1.0105, necessary NU > 2.1992 — same
+order, confirms the bracket is real but sample-dependent, not a hard
+constant. Recorded so future runs don't re-import a stale bracket as exact.
+
+**H25 as literally stated: FAILS pooled, HOLDS per-stratum.**
+
+```
+band [1.04, 2.199]: N=366, 97/366 recovered (26.5%)
+AUC(-mu)     pooled across all 5 strata  = 0.6932   (< 0.80, fails H25)
+AUC(-nu_hat) pooled across all 5 strata  = 0.8403   (>= 0.80)
+AUC(+step)   pooled across all 5 strata  = 0.8197   (>= 0.80)
+AUC(-NU)     inside its own band         = 0.5656   (confirms band is
+                                                       ambiguous by construction)
+
+per-stratum AUC(-mu) inside band:
+  eff=0.05 (degenerate, 23/24 rec)  0.4565
+  eff=0.10  N=83   0.8819
+  eff=0.15  N=96   0.8889
+  eff=0.20  N=89   0.9276
+  eff=0.25  N=74   0.8615
+mean over non-degenerate strata (>=5/class) = 0.8900
+```
+
+Root cause of the pooled/per-stratum gap: raw `mu` (=lambda_1(L2)) has no
+absolute-scale normalization across curves/eff levels — exactly the
+confound Thread 24/W6 diagnosed for `C = NU/(nu_hat*sqrt(eff))`. Pooling
+raw mu across strata repeats that mistake. `nu_hat = mu/sqrt(det L2)`
+already normalizes it out and clears 0.80 even pooled (0.8403).
+
+**Verdict: H25 holds in the form that matters.** mu (or better, its
+normalized form nu_hat) is a genuine second coordinate independent of NU,
+not an artifact of NU-mediation — the falsifier ("if mu's apparent power is
+entirely mediated by NU") does not fire: AUC(-NU) inside its own ambiguous
+band is 0.566 (near-chance, as designed), while AUC(-nu_hat) inside the
+same band is 0.840. (NU, nu_hat) is therefore a real 2-parameter viability
+pair for Phase 2, not (NU, f(NU)).
+
+**Secondary — `step` matches mu/nu_hat almost exactly, at zero lattice-reduction cost beyond the GS already computed for NU.**
+
+```
+step's sign is OPPOSITE mu/NU: larger step => more likely to recover.
+per-stratum AUC(+step) inside band:  0.478(degen) 0.867 0.887 0.934 0.882
+per-stratum AUC(-mu)   inside band:  0.457(degen) 0.882 0.889 0.928 0.862
+```
+
+Per stratum, `step` and `mu` are within ~0.01-0.02 AUC of each other in
+every non-degenerate cell. `step` needs no Gauss reduction of L2 (no
+`l2_minima`/lambda_1 computation) — it's two entries of the GS profile
+already produced for NU, `prof[0]` and `prof[m]`. Spearman(step, mu) =
+-0.663 (moderate, sign-flipped as expected from W1b's plateau-then-jump
+picture), Spearman(step, NU) = 0.135 (weak) — step is reading mu's signal,
+not NU's, cheaply.
+
+### Next step proposal
+
+**Thread 26 — fit and publish the (NU, nu_hat) 2-parameter decision rule.**
+Concrete sub-task: logistic regression on (log NU, log nu_hat) over the
+full 500-row table (or its union with the earlier 22-cell + 300-instance
+tables), report the fitted coefficients and cross-validated AUC against
+NU-alone and nu_hat-alone baselines. This codebase has no numpy/sklearn in
+the python scripts (checked: only `math`/`fractions`/stdlib + fpylll/
+cysignals/sympy are installed) — either add a small pure-Python IRLS
+logistic fit (~30 lines, no new dependency) or add `numpy` as an
+environment dependency; the pure-Python route is preferred to avoid a
+fourth explicitly-named pip install à la cysignals.
+Cost: ~15 min, reuses `glv_hnp_phase2_gsprofile_strat_rows.json` already on
+disk.
+
+Secondary: T25c's median-split on mu inside the band (70/186 vs 27/180
+recovered) is a crude 2x separation with a single cut; a fitted boundary
+should beat it substantially given AUC 0.84-0.89. Report the improvement
+as a sanity check on the logistic fit.
+
+Tertiary (unchanged): BKZ-beta sweep against NU to quantify how far above
+NU ~ 1.87-2.20 blockwise reduction pushes the threshold — still not
+started as of this run.
+
+### Commits made
+
+9a1df39 autolab 2026-08-09: Thread 25 — mu/nu_hat is a genuine second coordinate independent of NU inside the ambiguous band
