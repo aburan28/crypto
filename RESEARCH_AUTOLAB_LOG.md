@@ -6538,3 +6538,155 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-08 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa formula / Howe forward map), continued from 2026-07-27
+(line ~5988), whose proposed next step was "Thread 3: implement the CHLRS §4-5
+forward formula, target `chlrs_forward_map.gp`". Picked by walking the
+priority list top-down: Priority 1 (P-521) is CLOSED (2026-05-29). Priority 2
+had not been touched in 12 days and had an open, concrete next-step, so it
+qualified under protocol rule (a).
+
+**Process note for future runs**: the 2026-08-07 #2 entry's own status line
+("Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END") had already flagged
+Priority 2 as blocked, which in hindsight should have sent this run straight
+to Priority 5 instead. That status line refers back to the 2026-06-11 finding
+(line 1578) that the Howe-glued cover for the F_43 toy pair "exists but the
+isogeny is only over F_{43^3}", i.e. not achievable over F_p. This run
+re-opens that specific claim — see Findings below — so the BLOCKED status
+was itself stale. Net effect: this run's pick was accidentally still
+defensible, but future runs should treat "BLOCKED" tags as claims to
+re-verify, not just skip, when a claimed obstruction is doing a lot of work
+and no falsifier script survives in the repo.
+
+### Work done
+
+- **Literature access check**: `arxiv.org`, `eprint.iacr.org`, and
+  `math.mit.edu` are all `EGRESS_BLOCKED` in this environment (confirmed via
+  WebFetch on all three). The CHLRS/Lercier-Ritzenthaler paper and the
+  Howe-Leprevost-Poonen paper cannot be fetched directly this session or
+  (presumably) any session running under the same network policy. Pivoted
+  from "read the formula" to "re-audit the existing empirical machinery
+  against ground-truth Frobenius data", which needs no literature.
+- **Infrastructure**: `gp` (PARI/GP) was **not installed** in this fresh
+  container — every `gp -q script.gp` in the protocol would have failed
+  silently as "command not found" if not caught. Installed via
+  `sudo apt-get install -y pari-gp` (succeeds; ~208MB, pulls in `pari-elldata`,
+  `pari-seadata`, TeX Live as transitive deps). This does not appear to
+  persist across containers — future runs should expect to reinstall and
+  budget ~1-2 min for it, or this should move into a session-start hook.
+- **Re-audited `howe_richelot_v5.gp` / `howe_5pairs_v2.gp`'s "Test 1" claim.**
+  The 2026-07-27 log (line 5901) called `richelot_gen([0,3,0],[0,0,2])` →
+  `a=41,b=5` "✓ CORRECT" for p=43, b1=7, b2=13. That check only compared two
+  independently-written scripts' outputs to each other — **neither script
+  had ever compared the result to the actual target Frobenius polynomial.**
+  Direct check: `hyperellcharpoly(x^6+41*x^3+5) mod 43` evaluated at 1 gives
+  `#Jac=2169`, but the true target `#E1(F_43)*#E2(F_43) = 31*57 = 1767`.
+  Mismatch. Cross-validated the harness itself first (brute-force point count
+  of `x^6+41x^3+5` over F_43 gives `a1=-6`, matching the `x^3` coefficient
+  sign convention in `hyperellcharpoly`'s output) so this isn't a tooling bug
+  on my end.
+- **Ran `howe_richelot_v5.gp`'s full 7-canonical-class sweep** (`do_class`,
+  lines 111-117 of that file): every single class returns `sigma_0/1/2 =
+  (-1,-1)` (the F_p-rationality check inside `richelot_gen` fails for all 7
+  classes, all 3 Galois branches). The ONLY nonzero output in the entire
+  script is the hardcoded `res_check` sanity call — and that one is wrong,
+  per above. **The whole 7-class sweep from this script has never produced a
+  single valid output.**
+- **Found the actual bug** (not just a false-validation problem): brute-force
+  search over sign/order variants of `richelot_gen`'s raw `(aa,bb)` output at
+  p=43 shows the correct sextic is obtained via the transform
+  `(aa,bb) -> (bb,-aa)`, i.e. `y^2=x^6+bb_raw*x^3-aa_raw`, not
+  `y^2=x^6+aa_raw*x^3+bb_raw` as used everywhere in the log to date. With the
+  fix: `richelot_gen([0,3,0],[0,0,2])` raw `(41,5)` -> transformed `(5,2)`,
+  and `hyperellcharpoly(x^6+5x^3+2) = x^4-83x^2+1849` **exactly** equals the
+  target `(x^2-13x+43)(x^2+13x+43)`. Verified via the FULL characteristic
+  polynomial (all 4 coefficients), not just the order at T=1, to rule out a
+  small-p coincidence (order-only matches are cheap at p=43 — see next
+  bullet).
+- **This re-opens the 2026-06-11 "F_{p^3}-only" obstruction claim** (line
+  1578): the corrected Richelot dual of the p=43 toy pair (b1=7,b2=13) *is*
+  a curve entirely over F_p whose Jacobian matches E1×E2's Frobenius exactly.
+  (The *direct product* `y^2=(x^3+7)(x^3+13)=x^6+20x^3+5` still does NOT
+  match — confirmed again this session, charpoly `x^4-6x^3+55x^2-258x+1849`
+  ≠ target — so the June finding about the naive product curve stands; what's
+  wrong is the broader claim that no F_p cover exists at all.)
+- **Brute-forced all 43×43 = 1849 candidate (r1,r2) pairs** at p=43 (not just
+  -b1,-b2) checking every cube-root branch (up to 9 per pair) against the
+  target order: 81 raw matches / 25 distinct (r1,r2) pairs, including
+  (r1,r2)=(-b1,-b2)=(36,30) as expected. Spot-checked two of these pairs
+  against the FULL target charpoly (not just order): (36,30) gives exact
+  match on 3/9 branches; (7,34) — a pair with no obvious algebraic relation
+  to (b1,b2) — ALSO gives exact full-charpoly match on 3/9 branches. This
+  means order-only matching at p=43 is not safely diagnostic by itself (two
+  unrelated-looking (r1,r2) choices both land on genuinely isogenous covers,
+  presumably because secp256k1-style j=0 curves have very few distinct trace
+  values at this size), but the full-charpoly check is trustworthy and both
+  (36,30) and its relatives pass it.
+- **Re-tested p=1009 (Test 2, the case flagged as a mismatch on 2026-07-27)
+  with the (aa,bb)->(bb,-aa) fix applied and a clean, b1-decoupled field
+  basis** (rr=2, a generic cubic non-residue, instead of rr=-b1 as used in
+  the original script — to rule out a basis-artifact). r1=-b1=-11, r2=-b2=-515
+  (d=11 quadratic twist), all 9 cube-root branches, full charpoly comparison:
+  **zero matches.** Only 3 distinct covers occur across all 9 branches
+  (`(620,60)`, `(620,799)`, `(620,493)`), none equal to the target
+  `x^4+169x^2+1018081`. So the p=43 vs p=1009 divergence is real and
+  survives both the output-transform fix and the basis-artifact check — it
+  is not an implementation bug in `richelot_gen`.
+
+### Findings
+
+1. **Bug (fixed, verified)**: `richelot_gen`/`richelot`'s raw `(aa,bb)`
+   output must be transformed as `(aa,bb) -> (bb,-aa)` before use as the
+   sextic's coefficients. This has been silently wrong in every script in
+   `secp256k1_cm_audit/` that calls this function (`howe_richelot_v2` through
+   `v5`, `howe_5pairs.gp`, `howe_5pairs_v2.gp`). New script
+   `chlrs_richelot_output_fix.gp` documents and applies the fix, with a
+   `verify_pair()` helper that checks the FULL Frobenius charpoly (not just
+   group order) against ground truth from `ellcard`.
+2. **The one case the whole multi-week Thread 2/3 investigation treated as
+   "validated"** (p=43 naive-twist pair) was never actually checked against
+   ground truth before this session, and was in fact wrong under the old
+   (unfixed) convention. It is right under the fix.
+3. **The 2026-06-11 "isogeny only exists over F_{43^3}" conclusion (line
+   1578) is not correct as stated** — a fully F_p-rational Richelot dual
+   exists and matches E1×E2's Frobenius exactly for the same toy pair that
+   finding was based on. Priority 2 should be un-blocked pending the
+   remaining open question below, not treated as closed.
+4. **r1=-b1, r2=-b2 (the "naive branch input" guess) works at p=43 but fails
+   at p=1009**, confirmed via full charpoly with a basis-artifact control.
+   The forward map `(b1,b2) -> (r1,r2)` is genuinely prime-dependent, not
+   simply `-b1,-b2` in general. This is now the precise open question, not
+   "is the whole approach broken" (it isn't) or "is there an F_p obstruction"
+   (there isn't, at least at p=43).
+5. Order-only matching (`#Jac(cover) == #E1*#E2`) is not a safe validation
+   criterion at small p — distinct, algebraically unrelated (r1,r2) pairs can
+   coincidentally produce the same group order. Full charpoly comparison is
+   required and is now the standard in `chlrs_richelot_output_fix.gp`.
+
+### Next step proposal
+
+**Characterize when r1=-b1,r2=-b2 works.** Run `verify_pair` (in
+`chlrs_richelot_output_fix.gp`) across a small ladder of primes
+(43, 67, 79, 97, 127, ...) with matched quadratic-twist pairs, recording
+pass/fail. Candidate explanatory variables to check against the pass/fail
+label: p mod 12 class (twist-class structure), whether d (the twist
+multiplier) is itself special mod 3 or mod the cube-root subgroup index,
+and the specific canonical class index (of the 7 F_43 classes / analogous
+classes at larger p) that (r1,r2) falls into. If a clean congruence
+condition emerges, that IS the missing forward-map formula (or the
+precise obstruction to it) that CHLRS/Lercier-Ritzenthaler would have
+supplied, derived empirically instead of from the (currently unreachable)
+literature. Budget: this is a tight, well-defined next session, not a
+multi-week reopen — reuse `verify_pair` directly, no new machinery needed.
+
+Fallback if that characterization stalls: retry literature access next
+session in case the egress block on arxiv.org/eprint.iacr.org is
+transient/session-specific rather than a standing policy.
+
+### Commits made
+
+(recorded in next log entry after push)
