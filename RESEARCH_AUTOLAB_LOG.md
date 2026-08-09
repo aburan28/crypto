@@ -6689,4 +6689,4 @@ the same egress wall.
 
 ### Commits made
 
-(recorded in the next log entry once pushed — see below)
+7684201 autolab 2026-08-09: Thread 25 — H25 confirmed conditional on eff; step beats mu in-band
