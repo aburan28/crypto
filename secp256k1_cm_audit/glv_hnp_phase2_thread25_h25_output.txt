@@ -1,0 +1,40 @@
+collected 500 instances in 2.4s
+dumped 500 rows to glv_hnp_phase2_thread25_h25_output.json
+==============================================================================
+Thread 25 — H25: does mu separate inside the NU-ambiguous band?
+==============================================================================
+
+20 17-bit j=0 GLV curves, 500 instances (float GS, dim 24)
+
+------------------------------------------------------------------------------
+H25: ambiguous band 1.04 <= NU <= 2.199  (N=366, 97 recover / 269 fail)
+------------------------------------------------------------------------------
+  AUC(-mu)     = 0.6932   (H25 threshold: >= 0.80)
+  AUC(-nu_hat) = 0.8403
+  AUC(-NU)     = 0.5656   (expect ~0.5: no info left inside its own ambiguous band, by construction)
+  AUC(-step)   = 0.1803
+
+  H25 verdict: FALSIFIED (AUC(-mu) = 0.6932 < 0.80)
+
+------------------------------------------------------------------------------
+Per-eff-stratum breakdown of the band (does mu's power inside the band come from one eff value or hold across all?)
+------------------------------------------------------------------------------
+  eff  N_band     rec   AUC -mu  AUC -step
+ 0.05      24   23/24    0.4565     0.5217
+ 0.10      83   26/83    0.8819     0.1329
+ 0.15      96   21/96    0.8889     0.1130
+ 0.20      89   18/89    0.9276     0.0657
+ 0.25      74    9/74    0.8615     0.1179
+
+------------------------------------------------------------------------------
+Secondary: step statistic vs NU/mu over the FULL population (all strata, not just the band)
+------------------------------------------------------------------------------
+  AUC(-step) pooled = 0.3286
+  AUC(-mu)   pooled = 0.3964
+  AUC(-NU)   pooled = 0.7996
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+
+==============================================================================
+done
+==============================================================================

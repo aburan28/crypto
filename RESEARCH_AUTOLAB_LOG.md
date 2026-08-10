@@ -6538,3 +6538,142 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Protocol order: priority 1 (P-521 LLL) is long CLOSED (§10.5, 2026-06-06);
+priorities 3, 4, 6 CLOSED; priority 2 (CHLRS Igusa forward map) is the
+oldest untouched open thread (last touched 2026-07-27, >7 days ago) and was
+picked first — see "CHLRS attempt" below, which hit a hard, non-math wall.
+Pivoted to priority 5 (GLV-HNP Phase 2), executing **Thread 25 / H25**, the
+pre-registered next step from the 2026-08-07 #2 entry.
+
+**CHLRS attempt (BLOCKED — network, not math):** the 2026-07-27 log's
+concrete next step was `secp256k1_cm_audit/chlrs_forward_map.gp`, porting
+the Cardona-Howe-Lercier-Ritzenthaler-Streng / Howe-Leprevost-Poonen
+explicit gluing formula. WebSearch located the right references (Howe,
+Leprévost, Poonen, "Large torsion subgroups of split Jacobians", Forum
+Math. 12 (2000) 315-364, arXiv:math/9809210; also Hanselman-Schiavone-
+Sijsling arXiv:2005.03587 for the adjacent genus-1+genus-2 case) but
+WebFetch returned `EGRESS_BLOCKED` for every source tried: `arxiv.org`,
+`ar5iv.labs.arxiv.org`, `math.mit.edu`, `ewhowe.com`, `semanticscholar.org`,
+`our.oakland.edu`. `raw.githubusercontent.com` fetched fine in the same
+session, so this is a domain-level block on academic-paper hosts in this
+session's network policy, not a general egress failure — distinct from the
+prior "no Sage/Magma" blocks. Without the explicit polynomial, porting to
+PARI is not possible from memory (confirmed in `RESEARCH_MESTRE_HOWE.md`
+§3: "the exact formula is several pages"). **Marking BLOCKED: paper access
+blocked by this session's WebFetch egress policy.** Retry next time WebFetch
+is available for one of the above domains, or try an institutional mirror
+not on the above list.
+
+### Work done
+
+**H25** (pre-registered 2026-08-07 #2): within the NU-ambiguous band
+`1.04 <= NU <= 2.199` (W4's 17-bit bracket, where the sound nearest-plane
+certificate gives no answer), does `mu = lambda_1(L2)` still separate
+Kannan-LLL recovery, `AUC(-mu) >= 0.80`?
+
+Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25_h25.py`, reusing the exact
+instance-generation loop of `glv_hnp_phase2_gsprofile_strat.py` (20 17-bit
+j=0 GLV curves, 5 eff strata x 5 seeds, dim 24, float GS) plus `--dump-json`
+so the 500-row table survives the run (`glv_hnp_phase2_thread25_h25_output.json`).
+Runtime: 2.4s for data collection (curve search is deterministic —
+`search_curves` has no unseeded randomness — so the population is byte-for-
+byte the 2026-08-07 W5/W6 dataset; confirmed via the pooled AUC(-NU) = 0.7996
+match to 4 decimal places against that entry).
+
+Added a secondary statistic per the log's W1b follow-up: `step =
+log2(prof[m]) - log2(prof[0])`, the gap (in bits) between the first GS norm
+and the first norm of the "second block" (`prof[m]`, m=12, dim=24) — cheap
+to compute (no L2 sublattice reduction needed), testing whether the
+head-plateau-to-second-block transition predicts recovery independent of
+NU/mu.
+
+Ran `cargo test --test curve_audit` (unrelated to this Python-only change):
+5/5 pass, confirms no regression.
+
+### Findings
+
+**H25 as literally stated: FALSIFIED at the pooled level.**
+
+```
+band 1.04 <= NU <= 2.199  (N=366, 97 recover / 269 fail)
+  AUC(-mu)     = 0.6932   (< 0.80 threshold)
+  AUC(-nu_hat) = 0.8403
+  AUC(-NU)     = 0.5656   (near 0.5, as expected: no signal left inside
+                            its own ambiguous band, by construction)
+  AUC(-step)   = 0.1803   (see sign note below)
+```
+
+**But the W5/W6 pattern replicates exactly inside the band: mu's power is
+mediated by eff, not by NU.** Breaking the band down by eff stratum:
+
+```
+  eff  N_band     rec   AUC(-mu)  AUC(-step)
+ 0.05      24   23/24    0.4565     0.5217    (degenerate: 96% positive)
+ 0.10      83   26/83    0.8819     0.1329
+ 0.15      96   21/96    0.8889     0.1130
+ 0.20      89   18/89    0.9276     0.0657
+ 0.25      74    9/74    0.8615     0.1179
+```
+
+At every non-degenerate eff stratum inside the ambiguous NU band,
+`AUC(-mu)` is 0.86-0.93 — comfortably clears the 0.80 bar. The pooled 0.69
+is a **Simpson's-paradox averaging artifact**: mu's absolute scale shifts
+with eff (same mechanism W5/W6 already diagnosed for the un-stratified
+population), so pooling across eff strata *inside* the NU band cancels a
+real per-stratum signal, exactly as pooling across curve sizes did to `NU`
+vs `nu_hat*sqrt(eff)` in W3/W6. **Corrected H25: mu is a genuine second
+coordinate conditional on eff, independent of NU** — the literal single-band
+AUC test was underspecified; a 2-parameter test needs both bands fixed, not
+one.
+
+**Secondary — step is informative but sign-flipped from the naive guess.**
+`AUC(-step) = 0.18` inside the band means the RAW correlation is
+`AUC(+step) = 0.82`: **larger step (bigger gap between the head plateau and
+the second GS block) predicts recovery; step -> 0 predicts the wall
+(failure)** — this is directionally consistent with the original W1b
+observation ("the step... vanishes exactly as the wall is crossed") once
+read as failure-predicting, not recovery-predicting. `step` needs no L2
+reduction (2 GS norms vs. a Gauss-reduced 2D sublattice for mu), so at
+`AUC(+step)=0.82` inside the band it is a cheaper near-substitute for mu,
+though not as strong as `nu_hat` (0.84) inside the band.
+
+```
+pooled (N=500, all strata): AUC(-step) = 0.3286 -> AUC(+step) = 0.6714
+Spearman(step, NU) =  0.1351   (step is ~independent of NU)
+Spearman(step, mu) = -0.6627   (step and mu are substantially anti-correlated,
+                                 consistent with step encoding the SAME
+                                 second mechanism as mu, inverted)
+```
+
+### Next step proposal
+
+**Thread 26 — the real 2-parameter test.** Re-run H25 as a genuine 2D
+grid: fix BOTH an NU band AND an eff stratum, and confirm `AUC(-mu) >= 0.8`
+holds in every cell (the per-stratum table above already suggests yes for
+eff in [0.10, 0.25]; extend to the 12-bit population and to finer NU
+sub-bands to see if the bound tightens below 0.86). Deliverable: a logistic
+fit on `(NU, mu, eff)` — three coordinates, not two — with cross-validated
+AUC, replacing the flat "0.80 in one band" test the 2026-08-07 log
+proposed.
+
+**Secondary**: `step` is nearly free to compute (no 2D lattice reduction)
+and anti-correlates with mu at -0.66 — investigate whether `step` alone,
+properly signed and eff-normalized (`step * sqrt(eff)` or similar, mirroring
+the `nu_hat*sqrt(eff)` construction from W3), matches or beats `nu_hat`
+inside the band. If so it's a strictly cheaper viability statistic (no
+Gauss-reduction of L2 required at all, just two entries of the GS profile
+LLL already computes).
+
+**CHLRS (priority 2)**: retry `chlrs_forward_map.gp` next time WebFetch can
+reach `arxiv.org` or `ewhowe.com`; the reference (Howe-Leprévost-Poonen,
+Forum Math. 12 (2000)) is now pinned precisely, so the next attempt does not
+need to re-search.
+
+### Commits made
+
+(recorded in follow-up commit after this entry is pushed)
