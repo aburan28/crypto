@@ -6669,4 +6669,4 @@ until a human confirms Sage/Magma or full WebFetch will be provisioned.
 
 ### Commits made
 
-(recorded after push — see follow-up log entry)
+7be0498 autolab 2026-08-10: Thread 25 — H25 falsified for raw mu, holds for nu_hat inside NU's blind band; step statistic retired; CHLRS blocked (no WebFetch/Sage)
