@@ -6695,4 +6695,4 @@ confirmed inverted); do not reintroduce it without a new mechanism proposal.
 
 ### Commits made
 
-(recorded in the next commit)
+503a13f autolab 2026-08-10: Thread 25 — H25 falsified for raw mu (scale artifact), confirmed for nuhat; joint (NU,nuhat) fit overfits on 20 curves
