@@ -6675,4 +6675,4 @@ threshold.
 
 ### Commits made
 
-(pending — recorded in a follow-up commit after push, per established pattern)
+7cac3c3 autolab 2026-08-10: Thread 25 — mu is a genuine second coordinate inside the NU-ambiguous band (per-stratum AUC 0.86-0.93); step statistic found, backwards from prediction but useful (AUC 0.82 in-band)
