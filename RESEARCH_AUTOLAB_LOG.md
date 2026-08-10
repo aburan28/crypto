@@ -6686,4 +6686,4 @@ threshold.
 
 ### Commits made
 
-(pending — see push below)
+5634e9b autolab 2026-08-10: Thread 25 — mu is a genuine 2nd coordinate per-eff-stratum (AUC 0.86-0.93); pooled-in-band H25 test was underpowered by the same eff-confound as W6
