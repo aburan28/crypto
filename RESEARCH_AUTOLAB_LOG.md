@@ -6697,4 +6697,4 @@ access to PyPI.
 
 ### Commits made
 
-(filled in below)
+0a99a16 autolab 2026-08-10: Thread 25 — H25 pooled test falsified but holds per-eff-stratum; joint (log NU, log mu) logistic beats NU alone (AUC 0.86 vs 0.80)
