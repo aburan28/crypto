@@ -6538,3 +6538,116 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 (Howe
+sextic twists) completed 2026-07-21, so priority 5 (GLV-HNP Phase 2) is again
+the only live thread. Picked up **Thread 25**, the pre-registered next-step
+from the 2026-08-07 #2 log entry (line ~6512): does `mu = lambda_1(L2)`
+carry real information beyond NU inside the ambiguous NU band, or was W5's
+apparent mu power entirely mediated by NU/eff? Secondary: quantify W1b's
+`step` statistic (GS-profile block-transition height) as a wall predictor.
+
+### Work done
+
+- `pip install fpylll cysignals sympy` (fourth run in a row `cysignals` had
+  to be named explicitly).
+- New `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` (H25 test + `step`
+  secondary), reusing the deterministic 500-instance generator from
+  `glv_hnp_phase2_gsprofile_strat.py` (20 curves x 5 eff-strata x 5 seeds,
+  17 bits, dim 24, float GS — justified by W0/W4). Added `--dump-json` per
+  the 2026-08-07 next-step note; dumped to
+  `glv_hnp_phase2_thread25_rows.json` (prof/nus arrays stripped to keep it
+  small).
+- Ran it: `glv_hnp_phase2_thread25_output.txt` (50 lines, 2.8s).
+- `cargo test --test curve_audit` -> 5/5 pass (5.4s). No Rust touched.
+
+### Findings
+
+**H25 as literally worded (pool the whole NU band, ignore eff) FAILS.**
+Band `1.04 <= NU <= 2.199`: 366/500 instances (73.2%), 97 recoveries.
+`AUC(-mu -> recovery) = 0.6932` — well under the 0.80 bar.
+
+**But this pooled test is confounded by eff, exactly the artifact W3/W6
+diagnosed for the NU/nu_hat identity.** Re-run the *same* band, split by eff
+(the honest discipline from W5):
+
+```
+eff=0.05  N= 24  rec 23/24  AUC(-mu)=0.4565   (degenerate: 1 failure)
+eff=0.10  N= 83  rec 26/83  AUC(-mu)=0.8819
+eff=0.15  N= 96  rec 21/96  AUC(-mu)=0.8889
+eff=0.20  N= 89  rec 18/89  AUC(-mu)=0.9276
+eff=0.25  N= 74  rec  9/74  AUC(-mu)=0.8615
+```
+
+In every non-degenerate eff stratum inside the ambiguous NU band, mu clears
+the H25 bar (0.86-0.93) — matching W5's un-restricted-to-the-band numbers
+(0.74-0.93) almost exactly. **mu is real conditional information on top of
+NU, not a stratification artifact — but only once eff is held fixed.**
+
+**Diagnosis of why the pooled band test fails: NU sub-bands show mu's sign
+flips along the NU axis, driven by eff.**
+
+```
+NU in [0.50,1.04)  N= 94  rec 92/94  AUC(-mu)=0.1603   (INVERTED)
+NU in [1.04,1.40)  N=102  rec 35/102 AUC(-mu)=0.4921
+NU in [1.40,1.80)  N=139  rec 31/139 AUC(-mu)=0.7982
+NU in [1.80,2.20)  N=125  rec 31/125 AUC(-mu)=0.9369
+NU in [2.20,3.50)  N= 40  rec  1/40  AUC(-mu)=1.0000
+```
+
+AUC(-mu) rises monotonically with the NU sub-band (0.16 -> 1.00). Different
+NU sub-bands are populated by different eff mixes (NU grows with eff, W3),
+so a coarse single-band pooled test averages mu's *good* within-stratum
+separator with mu's low-eff-stratum near-degenerate noise and reads as
+mediocre. **Conclusion: H25 is confirmed once tested the way W5 was tested
+(eff fixed); the literal pooled-band phrasing of H25 was itself
+under-specified and is retracted in favor of the eff-conditional form.**
+
+**SECONDARY — the `step` statistic is FALSIFIED, and with the wrong sign.**
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)`, m=12, dim 24.
+
+```
+pooled (N=500):  AUC(-step) = 0.3286   AUC(-mu) = 0.3964   AUC(-NU) = 0.7996
+Spearman(step, NU) = 0.1351      Spearman(step, mu) = -0.6627
+
+per-eff (honest, eff fixed):
+  eff=0.05  AUC(-step)=0.6364  (degenerate, 99/100 recover)
+  eff=0.10  AUC(-step)=0.2266
+  eff=0.15  AUC(-step)=0.1139
+  eff=0.20  AUC(-step)=0.0793
+  eff=0.25  AUC(-step)=0.1062
+```
+
+AUC(-step) is well below 0.5 in every non-degenerate stratum, i.e. **larger**
+`step` correlates with recovery, the opposite of the W1b conjecture ("step
+-> 0 predicts the wall"). `step` is strongly anti-correlated with mu
+(Spearman -0.66) and nearly uncorrelated with NU (0.14) — it is not a new
+axis, it is close to `-mu` read off a single extra GS coordinate, and a
+noisier one at that (compare `AUC(-mu)=0.40` pooled, similarly inverted and
+weak). Drop `step`; it adds nothing over mu.
+
+### Next step proposal
+
+**Thread 26 — build and validate the (NU, mu) 2-parameter classifier.**
+H25 (corrected form) licenses treating recovery as `f(NU, mu | eff)`. Fit a
+logistic model on `(log NU, log mu, log eff)` over the existing 500-instance
+table (`glv_hnp_phase2_thread25_rows.json`, already dumped), with a proper
+train/held-out-curve split (split by `n`, not by row, so the same curve
+never appears in both halves — the current AUCs are in-sample over curves).
+Report: held-out AUC of the 2-parameter model vs. NU alone vs. mu alone, and
+whether the fitted eff-exponent matches the sqrt(eff) of the (falsified) W3
+closed form or something else. This is the concrete deliverable the last
+three Thread-24/25 entries have been converging toward and closes out the
+"is there a clean 2-parameter certificate" question one way or the other.
+Cost: no new lattice data, pure re-analysis of the dumped JSON, ~20 min.
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU from Thread 23,
+to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — orthogonal to Thread 26 and still not started.
+
+### Commits made
+(recorded in the next commit)

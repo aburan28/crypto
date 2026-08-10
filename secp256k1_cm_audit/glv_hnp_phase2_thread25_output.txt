@@ -1,0 +1,50 @@
+==============================================================================
+Thread 25 — is mu a 2nd coordinate, or is it mediated by NU?  (H25)
+==============================================================================
+[dumped 500 rows -> glv_hnp_phase2_thread25_rows.json]
+
+500 instances (float GS, dim 24) in 2.4s
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside the ambiguous NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+band population: 366/500 instances (73.2%)
+  rec 97/366   AUC(-mu) = 0.6932 (n+=97, n-=269)   AUC(-nu_hat) = 0.8403   AUC(-NU, sanity) = 0.5656
+  H25 threshold 0.80: FAIL
+
+Within-band AUC(-mu), split by eff stratum (band population only):
+  eff=0.05  N= 24  rec 23/24  AUC(-mu)=0.4565
+  eff=0.10  N= 83  rec 26/83  AUC(-mu)=0.8819
+  eff=0.15  N= 96  rec 21/96  AUC(-mu)=0.8889
+  eff=0.20  N= 89  rec 18/89  AUC(-mu)=0.9276
+  eff=0.25  N= 74  rec 9/74  AUC(-mu)=0.8615
+
+NU sub-bands (finer than the single H25 band):
+  NU in [0.50,1.04)  N= 94  rec 92/94  AUC(-mu)=0.1603
+  NU in [1.04,1.40)  N=102  rec 35/102  AUC(-mu)=0.4921
+  NU in [1.40,1.80)  N=139  rec 31/139  AUC(-mu)=0.7982
+  NU in [1.80,2.20)  N=125  rec 31/125  AUC(-mu)=0.9369
+  NU in [2.20,3.50)  N= 40  rec 1/40  AUC(-mu)=1.0000
+
+------------------------------------------------------------------------------
+SECONDARY: does 'step' (block-transition height) beat NU/mu?
+------------------------------------------------------------------------------
+step = log2(||b*_{m+1}||) - log2(||b*_1||)   (0 at the K1 wall,
+       per W1b the head sits flat at log2 lambda_1(L2) until the
+       wall is crossed, so step should fall as K1 grows)
+
+pooled (N=500):
+  AUC(-step) = 0.3286   AUC(-mu) = 0.3964   AUC(-NU) = 0.7996
+  Spearman(step, NU) = 0.1351
+  Spearman(step, mu) = -0.6627
+
+per-eff-stratum AUC(-step -> recovery), eff held fixed (honest test, same discipline as W5):
+  eff=0.05  N=100  rec 99/100  AUC(-step)=0.6364
+  eff=0.10  N=100  rec 42/100  AUC(-step)=0.2266
+  eff=0.15  N=100  rec 21/100  AUC(-step)=0.1139
+  eff=0.20  N=100  rec 19/100  AUC(-step)=0.0793
+  eff=0.25  N=100  rec 9/100  AUC(-step)=0.1062
+
+==============================================================================
+done
+==============================================================================
