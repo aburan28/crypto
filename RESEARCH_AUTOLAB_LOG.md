@@ -6688,4 +6688,4 @@ does alone) — lower priority than Thread 26 since step alone already fails.
 
 ### Commits made
 
-(recorded after push, see next log entry)
+032bd27 autolab 2026-08-10: Thread 25 — mu's power inside the NU band is real but eff-confounded; nu_hat (not raw mu) is the size-free second coordinate
