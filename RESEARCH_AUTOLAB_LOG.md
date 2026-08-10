@@ -6538,3 +6538,141 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Priority 2 (CHLRS Igusa forward map / Thread 3). Priority 1 (P-521) CLOSED
+2026-06-06, Priority 3 (Howe sextic twists) completed 2026-07-21, Priority 4
+(cross-curve LLL) DEAD-END 2026-06-2x, Priority 6 (B5 over F_{p^k}) CLOSED
+2026-05-27. Priority 2 was last touched 2026-07-27 (14 days ago, outside the
+7-day window) and left an explicit, unexecuted next step: "implement the
+CHLRS/Lercier-Ritzenthaler explicit forward Igusa formula" (proposed as
+Thread 3). Priority 5 (GLV-HNP Phase 2) was touched more recently
+(2026-08-07, 3 days ago) with real progress, but priority order puts
+Priority 2 first once it clears the 7-day/no-progress bar, so it is the pick.
+
+### Work done
+
+1. **Attempted literature lookup for the CHLRS/Lercier-Ritzenthaler formula
+   via WebSearch + WebFetch** (never previously tried in this thread — prior
+   sessions only did numerical PARI experiments). WebSearch found candidate
+   sources (arXiv:1111.4152 Lercier-Ritzenthaler; Howe 1996 via ScienceDirect;
+   Frey-Kani 1991; eprint.iacr.org/2011/604; Shaska risat.org/oakland.edu
+   papers). **WebFetch failed on every one**: `arxiv.org`, `eprint.iacr.org`,
+   `math.mit.edu`, `www.risat.org`, `our.oakland.edu`, `en.wikipedia.org` all
+   returned `EGRESS_BLOCKED` from the sandbox's network egress proxy. Checked
+   `/root/.ccr/README.md` / proxy status — this is a blanket org policy
+   block on WebFetch's target domains, not a per-tool misconfiguration.
+   **This is the actual blocker for Thread 3 as originally scoped**: the
+   explicit formula cannot be derived without reading the source paper, and
+   the source paper cannot be fetched in this sandbox. WebSearch snippets
+   give paraphrased fragments (e.g. "Jacobi gives a general form
+   Y²=X⁶-s₁X⁴+s₂X²-1") but not the multi-page gluing formula needed.
+
+2. **Reimplemented the Z/3Z-symmetric Richelot-dual construction using
+   PARI's native `ffgen()` finite-field type**, replacing the hand-rolled
+   `f3add/f3mul/f3inv` F_{p³} arithmetic in `howe_5pairs_v2.gp` (itself a
+   bugfix for a "used global p" bug in `howe_5pairs.gp`, per the 2026-07-27
+   entry). New script `howe_richelot_ffgen.gp` is ~35 lines vs ~90 lines of
+   hand-rolled field arithmetic, eliminates that entire bug class, and
+   reproduces the known-good p=43 result exactly: `(aa,bb)=(41,5)`. This is
+   a lower-risk foundation for any future Richelot experiment in this repo.
+
+3. **Direct naive-cover-vs-target check via `hyperellcharpoly`** for all 5
+   non-degenerate secp256k1-type sextic-twist pairs (0,k), k=1..5, at toy
+   primes — a check not previously done this way (prior sessions checked the
+   *degenerate* pair (0,3) via Igusa invariants only; the non-degenerate
+   pairs were only tested via the guessed-(sv,qv) Richelot-dual route in
+   `howe_5pairs_v2.gp` Test 2/4, which failed for unrelated reasons).
+   New script `naive_cover_vs_target_toy.gp`.
+
+4. **Discovered a toy-prime pitfall while building (3)**: p=1009, used
+   throughout all prior CHLRS toy-prime work (`chlrs_igusa_formula.gp`,
+   `chlrs_rosenhain_diagnostic.gp`, `chlrs_fp3_rosenhain.gp`,
+   `chlrs_cubic_residue_proof.gp`, `howe_5pairs_v2.gp`), satisfies
+   `36 | (p-1)`. Since `(F_p*)^6` has order `(p-1)/6` and the order-6
+   root-of-unity subgroup `μ₆` has order 6, `36 | (p-1) ⟹ μ₆ ⊆ (F_p*)^6`,
+   so multiplying a sextic-twist coefficient by powers of an order-6 root
+   of unity `h` (`h^6=1`) does **not** walk through 6 distinct twist
+   classes at p=1009 — verified empirically: `t1=t2=43` for all 5 "twists"
+   of b1=11. **This only affects ad-hoc toy-prime twist tests that multiply
+   by h directly** — it does NOT affect `sextic_twist_howe_check.gp`'s
+   6-trace computation, which uses the real secp256k1 prime (1008 mod 36 ≠
+   0, confirmed 6 genuinely distinct traces there) and an algebraic
+   CM-decomposition formula, not h-multiplication at a toy prime. Re-ran the
+   check at p=1021 (`1020 mod 36 = 12 ≠ 0`): 6 genuinely distinct traces
+   confirmed, and naive-cover Jacobian still fails to match target for all
+   5 non-degenerate pairs — consistent with, and now more robustly
+   confirming, the long-standing finding that the naive cover is wrong.
+
+5. **Confirmed `hyperellcharpoly` (PARI's genus-2 point-counting) overflows
+   at the real 256-bit secp256k1 prime**: `error("overflow in t_INT-->ulong
+   assignment.")`. New script `hyperellcharpoly_scale_limit.gp` documents
+   this. This confirms there is no point-counting shortcut for verifying a
+   Howe-cover candidate against the real curve — Igusa-invariant matching
+   (as `chlrs_igusa_formula.gp` already does) is the *only* feasible
+   verification route at secp256k1 scale, not an arbitrary implementation
+   choice made in prior sessions.
+
+6. **gp 2.15.4 syntax quirk documented**: when reading a script from a file
+   (`gp -q file.gp`), this build parses line-by-line and throws
+   `"unexpected end of file"` if a `for(...)` or `iferr(...)` body spans
+   multiple lines — even though the parens are balanced across lines. Every
+   control-flow body must be on one line. Cost ~10 minutes to discover; now
+   documented in `howe_richelot_ffgen.gp`'s header comment for future
+   scripts. Also: every script needs a trailing `quit;` or `gp -q file.gp`
+   hangs waiting for interactive input (exit code 124 under `timeout`).
+
+7. Ran `cargo test --test curve_audit`: 5/5 pass (5.66s). ✓ (pari-gp was not
+   preinstalled in this fresh container; installed via `apt-get install -y
+   pari-gp`, same as 2026-07-26/29 sessions — this remains a per-run cost
+   worth noting for anyone tightening the container image.)
+
+### Findings
+
+**Thread 3 (CHLRS forward-map literal port) is BLOCKED on literature
+access, not on compute or math difficulty.** The sandbox's network egress
+proxy blocks `arxiv.org`, `eprint.iacr.org`, `math.mit.edu`, and every other
+domain tried via WebFetch. WebSearch alone returns only paraphrased
+snippets, insufficient to safely reconstruct a multi-page algebraic
+formula (RESEARCH_MESTRE_HOWE.md §7 already estimated this at "~1000+
+lines of PARI; multi-week effort" even with paper access). Recommend a
+human supply the source text directly into the repo (e.g.
+`paper/references/lercier_ritzenthaler_2011.txt` or similar) — future
+autolab runs cannot make progress on the literal-port sub-task without it.
+
+**Secondary, concrete progress not requiring the blocked literature:**
+- New validated tool (`howe_richelot_ffgen.gp`) reduces future F_{p³}
+  arithmetic bug risk.
+- New evidence (`naive_cover_vs_target_toy.gp` at both p=1009 and the
+  corrected p=1021) that the naive-cover failure for non-degenerate pairs
+  is robust across toy primes, not an artifact of one prime's arithmetic.
+- Hard scale limit on `hyperellcharpoly` confirmed and documented
+  (`hyperellcharpoly_scale_limit.gp`), closing off a hypothetical shortcut
+  before anyone spends time on it.
+
+### Next step proposal
+
+**If literature becomes available**: resume Thread 3 as originally scoped
+— port the CHLRS/Lercier-Ritzenthaler explicit gluing formula to PARI,
+verify against the p=43 and p=1009/1021 toy cases using
+`howe_richelot_ffgen.gp` and `naive_cover_vs_target_toy.gp` as the
+verification harness (both already wired up and passing sanity checks).
+
+**If literature remains unavailable (expected default)**: mark Thread 3
+BLOCKED (needs human-provided source text) and defer Priority 2 again.
+Since Priority 5 (GLV-HNP Phase 2) had measurable progress 2026-08-07 with
+an explicit next step (Thread 25 — stratify by NU band, test H25: does
+`-mu` separate recovery within the ambiguous NU band 1.04-2.20?), that
+should be the next autolab pick per rule (b) once Priority 2 is
+(re-)deferred.
+
+**Tooling housekeeping**: consider preinstalling `pari-gp` in the base
+container image — every session since 2026-07-26 that needed PARI has paid
+the `apt-get install` cost fresh.
+
+### Commits made
+
+(recorded in the next commit)
