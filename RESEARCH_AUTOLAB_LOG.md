@@ -6656,4 +6656,4 @@ formula.
 
 ### Commits made
 
-(recorded in next log entry, per repo convention)
+e9fd02e autolab 2026-08-10: Thread 3 — Mestre Step 2 (invariants→curve) implemented over Q via qfsolve/qfparam
