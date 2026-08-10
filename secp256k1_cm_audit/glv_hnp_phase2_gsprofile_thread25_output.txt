@@ -1,0 +1,70 @@
+==============================================================================
+Thread 25 — does mu separate INSIDE the NU-ambiguous band? (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+
+------------------------------------------------------------------------------
+H25: stratify by NU band [1.04, 2.199] (the ambiguous zone from W4)
+------------------------------------------------------------------------------
+below band  (NU < 1.04): N=  94  rec=92/94  (NU already predicts recovery here)
+ABOVE band  (NU > 2.199): N=  40  rec=1/40  (NU already predicts failure here)
+INSIDE band (1.04 <= NU <= 2.199): N= 366  rec=97/366  <- nearest-plane theory gives no verdict here
+
+inside band: 97 recovered / 269 failed
+  AUC(-mu    -> recovery) = 0.6932   <- H25 target (need >= 0.8)
+  AUC(-nuhat -> recovery) = 0.8403
+  AUC(-NU    -> recovery) = 0.5656   (near 0.5 expected: NU is uninformative here BY CONSTRUCTION)
+  AUC(-step  -> recovery) = 0.2203
+  AUC(-lam*  -> recovery) = 0.3212   (control, Thread 20 falsified)
+
+H25 verdict: FALSIFIED (AUC(-mu) = 0.6932 vs threshold 0.8)
+
+------------------------------------------------------------------------------
+Cross-check: does mu separate INSIDE each eff stratum intersected
+with the band? (rules out eff itself being smuggled back in)
+------------------------------------------------------------------------------
+  eff  N in band     rec |   AUC mu   AUC NU  AUC step
+ 0.05         24   23/24 |   0.4565   0.4783    0.3913
+ 0.10         83   26/83 |   0.8819   0.5277    0.2139
+ 0.15         96   21/96 |   0.8889   0.3283    0.1975
+ 0.20         89   18/89 |   0.9276   0.4695    0.1354
+ 0.25         74    9/74 |   0.8615   0.6188    0.1846
+
+------------------------------------------------------------------------------
+Secondary: does `step` (jump from head block to tail block) predict
+recovery pooled over all strata, unconditionally?
+------------------------------------------------------------------------------
+AUC(-step -> recovery), pooled (N=500) = 0.3743
+AUC(-mu   -> recovery), pooled = 0.3964
+AUC(-NU   -> recovery), pooled = 0.7996
+Spearman(step, NU) pooled = 0.1674
+Spearman(step, mu) pooled = -0.5284
+
+------------------------------------------------------------------------------
+Joint fit: logistic regression on (log NU, log nuhat), pooled over
+all 500 instances. Deliverable requested by the 2026-08-07 #2 log
+entry if a second coordinate survives H25.
+------------------------------------------------------------------------------
+standardized coefficients: w(log NU)=-3.0025  w(log nuhat)=-2.3381  bias=-1.1229
+(both should be negative: larger NU or larger nuhat -> less likely to recover)
+AUC(joint logistic score -> recovery) = 0.9397  (N=500)
+  vs AUC(-NU alone)    pooled = 0.7996
+  vs AUC(-nuhat alone) pooled = 0.6889
+
+decision boundary in standardized space: z(log NU) = -1.2842 * z(log nuhat) + const
+(a nonzero, non-infinite slope means the boundary is genuinely 2D, not axis-aligned on either variable alone)
+
+------------------------------------------------------------------------------
+Held-out check: fit on 10 curves, evaluate joint AUC on the other 10
+(curve-level split, not instance-level, so no leakage via seeds)
+------------------------------------------------------------------------------
+trained on 10 curves (N=250): w(log NU)=-3.4549  w(log nuhat)=-0.3843
+held-out on 10 unseen curves (N=250): AUC(joint) = 0.8029
+  vs held-out AUC(-NU alone)    = 0.7212
+  vs held-out AUC(-nuhat alone) = 0.7702
+
+==============================================================================
+done
+==============================================================================

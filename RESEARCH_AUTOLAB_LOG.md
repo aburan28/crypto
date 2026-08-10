@@ -6538,3 +6538,161 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6512). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread.
+Its last run was 3 days ago and produced a concrete falsification (H24), which
+counts as measurable progress under protocol rule (b), so its pre-registered
+sub-task is the correct pick.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: ... if mu's apparent power is entirely mediated by NU after
+>        all, the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+Secondary pre-registered task: quantify `step = log2||b*_m|| - log2||b*_{m-1}||`
+(head-to-tail GS-block jump) as a wall predictor (W1b of Thread 24).
+
+### Work done
+
+Environment: fresh container needed `pip install sympy fpylll cysignals`
+(same as every prior run — `glv_hnp_common.py` imports both unconditionally).
+
+Wrote `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_thread25.py`. Re-collects
+the same population as `glv_hnp_phase2_gsprofile_strat.py` (float GS,
+`search_curves(2**16, 2**17, per_bin=2, nbins=10)`, M=12/dim 24, EFFS =
+0.05..0.25, the 5 SEEDS from `glv_hnp_phase2_projected`) — 500 fresh
+instances, not a replay — then:
+
+1. Splits the 500 rows by the W4 17-bit NU bracket [1.040, 2.199] and tests
+   AUC(-mu), AUC(-nuhat), AUC(-NU), AUC(-step), AUC(-lam*) *inside* the band.
+2. Cross-checks AUC(-mu)/AUC(-NU)/AUC(-step) inside the band, further split
+   by eff stratum, to catch stratification artifacts.
+3. Fits a 2-parameter logistic regression on standardized (log NU, log nuhat)
+   pooled over all 500 rows (gradient descent, no external deps) — the
+   deliverable requested if H25 survives.
+4. Curve-level holdout: fit on 10 curves, evaluate AUC on the other 10, to
+   check whether the pooled joint fit generalizes to *unseen curves* rather
+   than just unseen (curve, seed, eff) combinations.
+
+Caught and fixed one bug before trusting results: the first two "vs AUC(-NU
+alone)"/"vs AUC(-nuhat alone)" print lines double-negated the standardized
+scores (0.2004 / 0.3111 — visibly wrong, since flipping AUC and 1-AUC should
+land near 0.80/0.69 given the codebase's `auc(pos, neg)` convention already
+expects raw, non-negated values). Fixed; corrected values (0.7996 / 0.6889)
+match the independently-computed pooled AUCs in the "Secondary" section and
+match Thread 24's own W6 pooled figures (`nu_hat alone` = 0.6889) exactly —
+cross-check passes.
+
+Ran `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_thread25.py`; full output in
+`secp256k1_cm_audit/glv_hnp_phase2_gsprofile_thread25_output.txt`.
+
+### Findings
+
+**H25 (raw mu, pooled across the band): FALSIFIED as literally stated, but
+it's a scale artifact, not a mediation result.**
+
+```
+NU band split (500 instances, 17 bits, dim 24):
+  NU <  1.040 (below band): N= 94  rec=92/94   (NU alone already predicts recovery)
+  NU >  2.199 (above band): N= 40  rec= 1/40   (NU alone already predicts failure)
+  1.040 <= NU <= 2.199    : N=366  rec=97/366  <- the ambiguous zone
+
+inside band (97 pos / 269 neg):
+  AUC(-mu)     = 0.6932   <- fails the >=0.8 bar
+  AUC(-nuhat)  = 0.8403   <- clears it (nuhat = mu / sqrt(det L2))
+  AUC(-NU)     = 0.5656   (near-chance, as expected: NU is ~constant-info by
+                            construction inside its own ambiguous band)
+  AUC(-step)   = 0.2203   (INVERTED vs the wall-vanishing hypothesis)
+  AUC(-lam*)   = 0.3212   (control; still inverted, consistent with Thread 20)
+```
+
+Raw `mu` fails pooled-across-band because `det(L2) = n*S_K1*S_K2` still
+varies with eff *inside* the band (the band is cut on NU, not on eff), so
+pooling raw mu re-introduces exactly the scale confound W5 solved by holding
+eff fixed. Splitting the same "inside band" set by eff stratum instead:
+
+```
+  eff   N in band   rec    |  AUC mu   AUC NU   AUC step
+ 0.05      24      23/24   |  0.4565   0.4783   0.3913   (ceiling: 96% already recover)
+ 0.10      83      26/83   |  0.8819   0.5277   0.2139
+ 0.15      96      21/96   |  0.8889   0.3283   0.1975
+ 0.20      89      18/89   |  0.9276   0.4695   0.1354
+ 0.25      74       9/74   |  0.8615   0.6188   0.1846
+```
+
+Raw mu clears 0.86-0.93 in every non-degenerate stratum, matching Thread 24's
+W5 (0.75-0.93). **Only the eff=0.05 stratum is flat, and it's a ceiling
+effect (23/24 already recover), not evidence against mu.** Net: mu genuinely
+carries information NU does not have, confirming Thread 24's W5/W6 read —
+the literal H25 threshold was set against the wrong (unnormalized, wrongly
+pooled) statistic.
+
+**Secondary (step) is not just null, it's inverted.** `step` was hypothesized
+to trend toward 0 as the wall is approached (favorable geometry); observed
+sign is the opposite: AUC(-step) = 0.22 inside the band and 0.37 pooled over
+all 500 (i.e. LARGER step correlates with recovery). Spearman(step, mu)
+pooled = -0.53 — step is really just an (imperfect, inverted-sign) proxy for
+`mu` itself, carrying no information step's own hypothesis needed. **Kill
+the wall-vanishing-step hypothesis**; W1b's "step vanishes at the wall" was
+a K1-sweep-on-2-fixed-curves artifact, not a cross-curve regularity.
+
+**Joint (log NU, log nuhat) logistic fit — real 2D structure, but in-sample
+AUC is an overfit estimate.**
+
+```
+pooled fit (N=500, standardized log NU / log nuhat):
+  w(log NU) = -3.0025   w(log nuhat) = -2.3381   bias = -1.1229
+  AUC(joint)        = 0.9397
+  AUC(-NU alone)    = 0.7996
+  AUC(-nuhat alone) = 0.6889
+  decision boundary slope z(logNU) = -1.28 * z(lognuhat) + c  (genuinely 2D,
+    not axis-aligned on either coordinate)
+
+curve-level holdout (train 10 curves / test the other 10, N=250 each):
+  trained weights: w(log NU) = -3.4549   w(log nuhat) = -0.3843   (unstable —
+    nuhat's weight collapses to near 0 on this half)
+  held-out AUC(joint)        = 0.8029
+  held-out AUC(-NU alone)    = 0.7212
+  held-out AUC(-nuhat alone) = 0.7702
+```
+
+The in-sample joint AUC (0.94) overstates true generalization by ~0.14 AUC.
+Under an honest curve-level split the joint score beats nuhat-alone by only
+~0.03 AUC and the fitted weight on nuhat is unstable (-2.34 pooled vs -0.38
+on the 10-curve training half) — 20 curves is not enough to pin down a stable
+2-parameter boundary; the apparent 2D structure in the pooled fit is partly
+real (holdout joint > holdout NU-alone by 0.08) and partly an artifact of
+fitting and evaluating on overlapping curves.
+
+### Next step proposal
+
+**Thread 26 — scale the curve pool before trusting the 2-parameter fit.**
+Re-run the curve-level holdout with ~60-100 17-bit curves (5-10x the current
+20) instead of 20, same eff/seed grid, and report the SAME three numbers
+(held-out AUC joint / NU-alone / nuhat-alone) plus the stability of
+`w(log nuhat)` across >=4 independent train/test curve splits (not just one).
+Falsifier: if `w(log nuhat)` keeps flipping sign or collapsing toward 0
+across splits even at 60-100 curves, the joint fit is not learnable from
+this feature pair and Thread 24/25's "mu is a genuine second coordinate"
+conclusion should be downgraded to "true in a per-eff-stratum, per-curve-pool
+sense, but not yet a portable 2-parameter certificate."
+Cost: `search_curves` at ~1e5 candidates for 60-100 curves is the dominant
+cost; current call found 20 curves in <0.1s so this should stay well under a
+minute, plus the same ~2-3s instance-generation cost scaled 3-5x.
+
+Secondary: retire the `step` diagnostic from future threads (dead end,
+confirmed inverted); do not reintroduce it without a new mechanism proposal.
+
+### Commits made
+
+(recorded in the next commit)
