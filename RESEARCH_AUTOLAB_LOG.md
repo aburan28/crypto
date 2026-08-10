@@ -6670,4 +6670,4 @@ next or explicitly deprioritizing it in favor of Thread 26.
 
 ### Commits made
 
-(pending — see push step)
+64509fd autolab 2026-08-10: Thread 25 — H25 falsified as stated; mu is NU-independent under joint (NU-band, eff) control
