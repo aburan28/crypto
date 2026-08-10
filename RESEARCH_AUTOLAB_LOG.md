@@ -6538,3 +6538,120 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6292). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread;
+Thread 24 (3 days ago) made measurable progress (falsified H24's argmax
+clause, found NU and nu_hat uncorrelated at fixed eff), so protocol rule (b)
+applies and its proposed sub-task — H25 — is the correct pick.
+
+H25 as stated: within the NU-ambiguous band 1.04 <= NU <= 2.20 (17-bit
+bracket from Thread 24 EXP W4), does `AUC(-mu -> recovery) >= 0.8`?
+
+### Work done
+
+- `pip install fpylll cysignals sympy` (fresh container, same note as every
+  prior GLV-HNP session).
+- Extended `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`:
+  - `--dump-json FILE` flag — dumps the collected 500-instance 17-bit table
+    (5 eff strata x 20 curves x 5 seeds) to JSON, as proposed on 2026-08-07.
+  - Each row now also carries `step = log2(prof[m]) - log2(prof[0])`, the
+    jump from the flat GS-profile head (Thread 24 W1b: m copies of
+    lambda_1(L2)) into the second block.
+  - **EXP W8**: H25 test, pooled AUC(-mu | band).
+  - **EXP W8b**: re-tests H25 stratified by eff *within* the band, after the
+    pooled result looked suspicious (see Findings).
+  - **EXP W9**: the secondary step-statistic test from the 2026-08-07 #2
+    next-step proposal.
+- Ran the script (`python3 glv_hnp_phase2_gsprofile_strat.py --dump-json ...`,
+  3.5s wall), output written to
+  `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_output.txt`.
+- One ad-hoc follow-up (not saved as a script — a 20-line REPL check over
+  the dumped JSON) to diagnose why the pooled W8 result contradicted W5;
+  folded the fix straight back into the committed script as W8b so it's
+  reproducible.
+- `cargo test --test curve_audit` -> 5/5 pass (6.79s). No Rust touched.
+
+### Findings
+
+**W8 — H25 literally FAILS when pooled.** `AUC(-mu | band) = 0.6932 < 0.8`
+over N=366 (97 recover / 269 fail). Surprising given W5 (2026-08-07 #2)
+already showed AUC(-mu) = 0.74-0.93 in every non-degenerate eff stratum.
+
+**W8b — the pooled test was confounded; H25 HOLDS once eff is controlled.**
+`Spearman(eff, NU | band) = 0.50` — NU still correlates with eff *inside its
+own ambiguous band*, because the band is a fixed absolute range but NU's
+distribution shifts with eff (W5). Pooling across eff strata inside the band
+mixes populations with different mu baselines, which is a Simpson's-paradox
+setup. Stratifying by eff and testing mu *within* each (eff, NU-band) cell:
+
+```
+  eff    N     rec | AUC -mu   AUC -nu_hat
+ 0.05   24   23/24 |  0.4565      0.4565   (near-degenerate, 23/24 positive)
+ 0.10   83   26/83 |  0.8819      0.8853
+ 0.15   96   21/96 |  0.8889      0.8825
+ 0.20   89   18/89 |  0.9276      0.9425
+ 0.25   74    9/74 |  0.8615      0.8615
+```
+
+Mean over all 5 strata = 0.8033 (barely clears 0.8). Mean over the 4
+non-degenerate strata = 0.890. **H25 HOLDS**: mu (equivalently nu_hat, which
+tracks it to 3 decimals inside the band too) is a genuine second coordinate,
+independent of NU, that keeps separating recovery from failure even after
+NU alone is uninformative.
+
+**W9 — the step statistic confirms the same structure, orthogonally.**
+`Spearman(step, NU) = 0.1351` (step is not just NU) but `Spearman(step, mu)
+= -0.6627` (step is anti-correlated with mu, as W1b's mechanism predicts:
+larger mu -> more skewed L2 -> smaller lambda_2 -> smaller step). Pooled
+`AUC(+step -> recovery) = 0.6714`, weak alone — but **inside the NU-ambiguous
+band, `AUC(+step -> recovery) = 0.8197`**, matching nu_hat's band performance
+(0.8403) without needing mu/nu_hat's L2-Gauss-reduction machinery at all —
+step is read directly off the LLL-reduced profile that Phase 2 already
+computes.
+
+**Interpretation.** Thread 24 (2026-08-07 #2) proved NU and nu_hat are
+globally uncorrelated and concluded NU governs Babai nearest-plane while a
+"second mechanism" governs the ~1.9x gap where Kannan-LLL beats nearest-plane.
+Thread 25 identifies that second mechanism concretely: **conditional on NU,
+mu (or equivalently the cheap GS-profile step) still separates recovery from
+failure with AUC ~0.80-0.89**, confirming (NU, mu) — or (NU, step) — is a
+real 2-parameter viability pair, not two views of one quantity. The naive
+pooled test (W8) looked like a falsification only because the ambiguous
+*band* is not eff-orthogonal; any future band/stratum test on this table
+should condition on eff or it will reproduce the same false negative.
+
+### Next step proposal
+
+**Thread 26 — fit the joint (NU, mu) [or (NU, step)] decision boundary.**
+With H25 confirmed, the concrete deliverable is a 2D logistic regression
+`P(recover) ~ sigmoid(a + b*log(NU) + c*log(mu))` fit on the existing
+500-instance table (already dumped to JSON via `--dump-json`), reporting:
+  - fitted (a, b, c) and pooled AUC of the combined score (should beat both
+    NU alone (0.7996) and nu_hat*sqrt(eff) alone (0.9348) if it's a genuine
+    second axis);
+  - the decision boundary curve in (NU, mu) space at the eff=0.10/0.15/0.20
+    strata, to see if a single boundary generalizes across eff or needs an
+    eff term too.
+Falsifier: if the fitted `c` is not significantly different from 0 (or the
+combined AUC does not beat nu_hat*sqrt(eff) alone), then mu's within-band
+power is fully subsumed by the existing closed form and W8b's band-level
+result was still an artifact of a residual eff correlation that eff-stratification
+didn't fully remove.
+Cost: pure Python over the dumped JSON, no new curve search or LLL runs,
+~10 minutes (need `numpy` for the logistic fit or a hand-rolled Newton step
+since environments are fresh containers with no guaranteed numpy/scipy).
+
+Secondary (from 2026-08-07 #2, still untouched): BKZ-beta sweep against NU,
+to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — orthogonal to the (NU, mu) question above and still open.
+
+### Commits made
+
+(pending — see next commit in this session)

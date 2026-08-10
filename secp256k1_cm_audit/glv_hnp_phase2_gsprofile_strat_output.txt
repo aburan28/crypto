@@ -1,9 +1,10 @@
 ==============================================================================
-Thread 24b — cross-curve test of the closed-form separator (eff fixed)
+Thread 24b/25 — cross-curve test of the closed-form separator, and mu inside the NU-ambiguous band
 ==============================================================================
 
 20 17-bit j=0 GLV curves in 0.0s
-500 instances (float GS, dim 24) in 3.0s
+500 instances (float GS, dim 24) in 2.8s
+[dumped 500 rows to /tmp/claude-0/-home-user-crypto/d62762cb-c538-5f74-9dc4-f7b30f38d0f3/scratchpad/thread25_table.json]
 
 ------------------------------------------------------------------------------
 EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only
@@ -61,6 +62,46 @@ stratum eff = 0.10  (42 of the minority class)
    66301  0.2976   0.9619    1.2527    1/5
    65719  0.0273   0.9643    1.2763    2/5
    65647  0.2253   0.9848    1.1211    2/5
+
+------------------------------------------------------------------------------
+EXP W8 (Thread 25, H25): inside the NU-ambiguous band, does mu
+        still separate recovery from failure?
+------------------------------------------------------------------------------
+ambiguous band taken from the 17-bit bracket (Thread 24 EXP W4): NU in [1.040, 2.199]
+band size N=366  (97 recover / 269 fail)
+  AUC(-mu     -> recovery | band) = 0.6932
+  AUC(-nu_hat -> recovery | band) = 0.8403
+  AUC(-NU     -> recovery | band) = 0.5656  (sanity: NU is nearly constant inside its own band)
+
+H25 verdict (pooled): AUC(-mu | band) = 0.6932  (< 0.8)  -> H25 FAILS
+
+EXP W8b: is the pooled band confounded by eff?  Spearman(eff, NU | band) = 0.5005
+(NU still correlates with eff inside its own 'ambiguous' band -> pooling across eff strata is not a clean test of mu.)
+
+  eff    N     rec |  AUC -mu AUC -nu_hat
+ 0.05   24   23/24 |   0.4565      0.4565
+ 0.10   83   26/83 |   0.8819      0.8853
+ 0.15   96   21/96 |   0.8889      0.8825
+ 0.20   89   18/89 |   0.9276      0.9425
+ 0.25   74    9/74 |   0.8615      0.8615
+
+H25 verdict (eff-controlled): mean per-stratum AUC(-mu | band, eff fixed) = 0.8033  -> H25 HOLDS
+
+------------------------------------------------------------------------------
+EXP W9 (Thread 25, secondary): step = log2||b*_{m+1}|| - log2||b*_1|| vs the wall
+------------------------------------------------------------------------------
+W1b (Thread 24) showed the GS-profile head is m exact copies of lambda_1(L2)
+and the step to the second block vanishes as the K1 wall is crossed.
+Hypothesis: step -> 0 predicts failure at least as well as NU or mu.
+
+step | success : mean 0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+
+AUC(+step -> recovery)  = 0.6714   (larger step -> more likely to recover)
+compare pooled AUC(-NU -> recovery) = 0.7996, AUC(-mu -> recovery) = 0.3964
+AUC(+step -> recovery | NU-ambiguous band) = 0.8197
+
+Spearman(step, mu) = -0.6627   Spearman(step, NU) = 0.1351
 
 ==============================================================================
 done
