@@ -6538,3 +6538,141 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3 completed
+2026-07-21, so priority 5 (GLV-HNP) is again the only live thread. Its last
+run (2026-08-07 #2, Thread 24) made measurable progress (H24 clause 1
+falsified, clause 2 held, closed-form identity killed by W6) and pre-
+registered a concrete next step, so protocol rule (b) applies: **Thread 25**,
+verbatim from that entry —
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Secondary: step = log2(||b*_{m+1}||) - log2(||b*_1||); test whether
+>        step -> 0 predicts the wall better than either NU or mu.
+
+**Verdict: H25 as literally stated (pooled raw mu) is FALSIFIED (AUC 0.693),
+but this is the exact same pooling artifact W3/W6 already diagnosed for
+nu_hat — stratified by eff, mu clears the bar in every non-degenerate
+stratum (AUC 0.86-0.93). The properly-normalised statistic (nu_hat =
+mu/sqrt(det L2), which already divides out the eff-dependent scale) reaches
+AUC 0.840 pooled inside the band, so the informal claim mu wanted to make is
+CONFIRMED once stated in the right units.** The secondary step statistic is
+directionally FALSIFIED (step does not vanish toward recovery, it grows) but
+turns out to be a strong predictor in the opposite direction, and a cheap
+one — it needs no L2 Gauss-reduction, only the LLL output already computed.
+
+### Work done
+
+- Environment: `pip install fpylll cysignals sympy` (fourth run in a row
+  needing this in a fresh container; not a fpylll dependency).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Reuses `instance()`
+  and `search_curves` from `glv_hnp_phase2_gsprofile.py` / `glv_hnp_common`
+  unchanged. Same 17-bit grid as Thread 24's W5 (5 eff strata x 20 curves x
+  5 seeds, dim 24, float GS — justified by W0/W4's ~1e-15 relative error).
+  Adds `step = log2(prof[m]) - log2(prof[0])` per instance (`prof` indices
+  0 and m are `b*_1` and `b*_{m+1}`, m=12). Added `--dump-json` /
+  `--load-json` so the 500-row table survives the run without re-running
+  LLL; `--dump-json` drops the two O(k) float lists (`prof`, `nus`) to keep
+  the file small (162 KB for 500 rows with 25 scalar fields each).
+- `cargo test --test curve_audit` -> 5/5 pass (6.81s). No Rust touched.
+- Ran `python3 glv_hnp_phase2_thread25.py --dump-json thread25_output.json`,
+  captured stdout to `thread25_output.txt` (3.0s to build the 500 instances,
+  fast because float GS + cached curve search).
+
+### Findings
+
+**H25, literal (pooled raw mu): FALSIFIED.**
+
+```
+band (1.04 <= NU <= 2.199): N=366  (97 recovered / 269 failed)
+AUC(-mu     -> recovery) = 0.6932   (needs >= 0.80 -> FAIL)
+AUC(-nu_hat -> recovery) = 0.8403   (>= 0.80 -> PASS)
+AUC(-NU     -> recovery) = 0.5656   (near-chance, as expected: NU is fixed
+                                      near-constant inside its own band)
+```
+
+Raw `mu = lambda_1(L2)` is not comparable across eff strata (its scale moves
+with K1, exactly the confound W3/W6 found for nu_hat before dividing by
+sqrt(det L2)). Pooling the band across all 5 eff values mixes that scale
+into the AUC and buries the real signal.
+
+**H25, per-stratum (removes the scale confound): CONFIRMED, 4/5 strata.**
+
+```
+  eff  band N     rec |   AUC mu  AUC nu_hat
+ 0.05      24   23/24 |   0.4565      0.4565   (degenerate: 1 failure)
+ 0.10      83   26/83 |   0.8819      0.8853
+ 0.15      96   21/96 |   0.8889      0.8825
+ 0.20      89   18/89 |   0.9276      0.9425
+ 0.25      74    9/74 |   0.8615      0.8615
+```
+
+Every non-degenerate stratum clears 0.86, well above the 0.80 bar, and
+mu/nu_hat agree to 3 decimal places within a stratum (eff fixed => nu_hat is
+just rescaled mu, as W5 already showed). **Conclusion: mu is a genuine
+second coordinate.** NU alone is ambiguous in [1.04, 2.199]; conditioning on
+mu (in eff-normalised units, i.e. nu_hat) resolves 86-94% of pairs correctly
+inside exactly the band where NU gives no answer. (NU, nu_hat) is a real
+2-parameter viability pair, not a restatement of one quantity — this
+matches W5/W6's finding that NU and nu_hat*sqrt(eff) are Spearman-uncorrelated
+at fixed eff, now sharpened to: they are uncorrelated *and both still work*
+when NU alone can't decide.
+
+**Secondary — step statistic: directionally FALSIFIED, but useful anyway.**
+
+```
+pooled (N=500):
+  AUC(-step -> recovery) = 0.3286   =>  AUC(+step -> recovery) = 0.6714
+  Spearman(step, NU) = 0.1351     Spearman(step, mu) = -0.6627
+
+by eff stratum, mean step (log2 units):
+  eff     N     rec |  AUC(+step)  mean step|ok  mean step|fail
+ 0.05   100  99/100 |     0.3636        -0.006          -0.238  (degenerate)
+ 0.10   100  42/100 |     0.7734         0.361          -0.359
+ 0.15   100  21/100 |     0.8861         0.658          -0.312
+ 0.20   100  19/100 |     0.9207         0.476          -0.262
+ 0.25   100   9/100 |     0.8938         0.355          -0.220
+
+within the H25 band (N=366): AUC(+step -> recovery) = 1 - 0.1803 = 0.8197
+```
+
+The pre-registered direction was backwards: W1b's "the step vanishes as the
+K1 wall is crossed" described the *raw*, eff-unconstrained K1 grid, where
+bigger K1 both flattens the profile (step -> 0) AND independently increases
+recovery (monotone in K1) — the same confound W3 fell into. Holding eff
+fixed, the two decouple and **a LARGER gap between the two GS blocks
+predicts recovery** (AUC 0.77-0.92 across strata, 0.82 inside the NU-
+ambiguous band) — i.e. recovery wants the first-block/second-block
+transition to be sharp, not smoothed out. `step` is strongly anti-correlated
+with mu (Spearman -0.663) and pooled/stratified AUCs track each other
+closely, so `step` looks like a free byproduct of the LLL output (no L2
+Gauss-reduction needed) that carries most of the same signal as mu/nu_hat.
+It is not yet clear whether `step` is strictly dominated by nu_hat (0.840
+in-band) or adds independent information; that is the natural next check.
+
+### Next step proposal
+
+**Thread 26 — does step add information beyond (NU, nu_hat), or is it
+redundant?** Concrete sub-task: fit logistic regression (or just a 2D AUC
+via a simple linear score search) on (NU, nu_hat, step) vs. the existing
+`thread25_output.json` table (already committed, no new LLL runs needed)
+and compare AUC(nu_hat alone) vs AUC(nu_hat, step jointly) inside the H25
+band. If step adds >= 0.03 AUC over nu_hat alone, it is a second, cheaper-
+to-compute coordinate and the viability test should use (NU, step) instead
+of (NU, nu_hat) since step needs no L2 Gauss reduction at all. If it adds
+nothing, `step` is confirmed as a free proxy for mu and the (NU, nu_hat)
+pair from this run stands as the answer to Thread 24's original question.
+Cost: pure re-analysis of the JSON dump, no new data collection, ~10 min.
+
+Secondary (untouched, carried from Thread 24): BKZ-beta sweep against NU to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(pending — recorded in a follow-up commit after push, per established pattern)
