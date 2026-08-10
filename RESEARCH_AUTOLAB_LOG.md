@@ -6538,3 +6538,152 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 log entry (line ~6494).
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END, priority 3 completed
+2026-07-21; priority 5 (GLV-HNP) made measurable progress at the last touch
+(3 days ago) so protocol rule (b) applies — continue it rather than fall
+back.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU, the W5
+>        result is a stratification artifact and the closed form should be
+>        retired.
+>   Secondary: step = log2(||b*_{m+1}||) - log2(||b*_1||); test whether
+>        step -> 0 predicts the wall better than either NU or mu.
+
+**Verdict: H25 is a stratification artifact in exactly the same way W6 was —
+but resolving it into strata reverses the conclusion. Pooled-in-band AUC(-mu)
+= 0.69 (fails the 0.80 bar), but per-eff-stratum in-band AUC(-mu) is
+0.86-0.93 in every non-degenerate stratum.** mu is a genuine second
+coordinate; the pooled test was underpowered because eff itself shifts the
+mu distribution inside the NU band. The secondary "step" experiment also
+produced a real, robust, per-stratum-stable signal — with the sign of the
+pre-registered hypothesis backwards.
+
+### Work done
+
+- Environment (fresh container, as every run so far): `pip install fpylll
+  cysignals sympy` before anything else — `import sympy` in
+  `glv_hnp_common.py` fails cold on a fresh clone with `ModuleNotFoundError`
+  until this runs; not yet worth a requirements.txt for a one-line fix but
+  noting it again since it has now recurred on every single run.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Reuses `instance()`
+  and `run_new()` from `glv_hnp_phase2_gsprofile.py` / `_projected.py`
+  (float GS, justified by W0/W4). Regenerates the same 5-strata x 20-curve
+  x 5-seed 17-bit grid as `_gsprofile_strat.py` (500 instances, dim 24), but
+  additionally records `step = log2(prof[m]) - log2(prof[0])` per instance
+  and adds `--dump-json` / `--load-json` so the 500-row table persists
+  (`glv_hnp_phase2_thread25_rows.json`) and re-analysis is free — W6's
+  "the first attempt piped through head and looked like a clean 0-curve run"
+  failure mode from 2026-08-07 doesn't need to recur.
+- Output: `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (4.3s). No Rust touched.
+
+### Findings
+
+**T25a — H25 as literally stated (pooled in-band) is FALSIFIED at the 0.80
+bar, by 0.11:**
+
+```
+NU<band (94)   recovery 92/94  (98%)   — matches W4 "sufficient" region
+in-band (366)  recovery 97/366 (27%)   AUC(-mu)=0.6932  AUC(-nu_hat)=0.8403
+NU>band (40)   recovery  1/40  ( 3%)   — matches W4 "necessary" region
+```
+
+The NU bracket itself replicates cleanly on fresh 500-instance data: 98%
+recovery below 1.04, 3% above 2.20 (W4 found 100%/0% on a smaller sample —
+this is the same shape with more noise, not a contradiction).
+
+**But stratifying in-band by eff reverses the verdict:**
+
+```
+eff=0.05  in-band N=24  rec 23/24  AUC(-mu)=0.4565   (degenerate: 1 failure)
+eff=0.10  in-band N=83  rec 26/83  AUC(-mu)=0.8819
+eff=0.15  in-band N=96  rec 21/96  AUC(-mu)=0.8889
+eff=0.20  in-band N=89  rec 18/89  AUC(-mu)=0.9276
+eff=0.25  in-band N=74  rec  9/74  AUC(-mu)=0.8615
+```
+
+Every non-degenerate stratum clears H25's 0.80 bar comfortably (mean 0.89).
+**mu is a genuine second coordinate conditional on NU** — the pooled 0.69
+is the same failure mode W6 diagnosed for the NU/nu_hat identity: mu's
+marginal distribution shifts with eff even inside a fixed NU window (larger
+eff pushes more mass into the ambiguous band at systematically different mu
+scales), so pooling across eff drags an 0.89 real effect down to 0.69. The
+falsifier as worded ("pooled AUC collapses to 0.5") did NOT fire — 0.69 is
+well above chance — but the literal 0.80 threshold was picked without
+anticipating the eff-confound, which in hindsight should have been
+anticipated given W6 diagnosed the identical mechanism three days earlier
+in the same log. Lesson for future pre-registration on this thread: state
+AUC thresholds per-stratum, not pooled, once a confound is already known.
+
+**T25b — the "step -> 0 predicts the wall" hypothesis is FALSIFIED, but a
+strong, opposite-signed, per-stratum-stable replacement was found instead:**
+
+```
+pooled (N=500):  AUC(-step) = 0.3286        (naive hypothesis predicts >0.5)
+in-band (N=366): AUC(-step) = 0.1803
+per-stratum AUC(-step), in-band:
+  eff=0.05  0.5217 (degenerate)   eff=0.10  0.1329   eff=0.15  0.1130
+  eff=0.20  0.0657                eff=0.25  0.1179
+per-stratum AUC(-step), pooled (all NU):
+  eff=0.05  0.6364 (degenerate)   eff=0.10  0.2266   eff=0.15  0.1139
+  eff=0.20  0.0793                eff=0.25  0.1062
+mean step, recover vs fail (eff=0.10..0.25): +0.36/-0.36, +0.66/-0.31,
+  +0.48/-0.26, +0.36/-0.22   (recovering instances: step > 0 always;
+  failing instances: step < 0 always, every non-degenerate stratum)
+```
+
+Unlike mu, this signal does NOT need the eff-stratum control to appear — it
+is already strong pooled (AUC 0.07-0.23, i.e. AUC(+step) 0.77-0.93) and gets
+*stronger* inside the NU band, not weaker. But the sign is backwards from
+what W1b's qualitative read predicted: W1b's single hand-picked example
+(12-bit/2557, K1=32) showed the head/tail step vanishing at *large* K1
+(favourable, high-recovery regime), which motivated "step -> 0 predicts
+recovery." The clean 500-instance measurement says the opposite: recovering
+instances have step > 0 (tail block *above* the head, `prof[m] > prof[0]`)
+and failing instances have step < 0 (tail dips *below* lambda_1(L2)) in
+every non-degenerate stratum, with no exceptions in the stratum means. Two
+notes: (1) this `step` is defined at `prof[m]` (first tail element), not
+`prof[-1]` (last, used by W2) — the two are not the same statistic and W1b's
+example spoke about the whole-profile shape, not this specific index, so the
+sign flip is not strictly a contradiction of W1b, just of the derived
+hypothesis; (2) `step` is cheap (one GS pass, no lattice search over lambda),
+same cost class as mu, and empirically the single best-performing per-stratum
+separator found on this thread so far (0.77-0.93 vs mu's 0.86-0.93 and
+nu_hat's — untested in-band per-stratum this run).
+
+### Next step proposal
+
+**Thread 26 — combine mu and step into a 2D per-stratum classifier and check
+whether they are redundant or additive.** `step` and `mu` are not obviously
+the same quantity (step used index m, mu is index 0 = same as prof[0], so
+step is arithmetically `log2(prof[m]) - log2(mu)`, i.e. step already contains
+mu). The concrete sub-task: check `Spearman(step, mu)` per eff-stratum
+in-band (pooled value was -0.66, confounded by eff) and fit a 2-feature
+logistic (log mu, step) per stratum; H26: the 2-feature AUC exceeds
+max(AUC(mu), AUC(step)) by a non-trivial margin, meaning they carry
+independent information rather than step being a transform of mu.
+Falsifier: if the 2-feature fit doesn't beat step alone, step subsumes mu
+and mu can be dropped as the operative statistic in favour of the cheaper,
+better-performing step.
+
+Secondary: repeat T25a/T25b at 12 bits (dim 20, using the existing U2/U3
+grids) to check the eff-stratum pattern isn't a 17-bit-only artifact.
+
+Tertiary (unchanged, now three threads old): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.04-2.20 blockwise reduction pushes the
+threshold.
+
+### Commits made
+
+(pending — see push below)

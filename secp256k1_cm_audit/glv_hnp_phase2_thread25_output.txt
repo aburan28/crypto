@@ -1,0 +1,41 @@
+==============================================================================
+Thread 25 — conditioning on NU: is mu a second coordinate?
+==============================================================================
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.0s
+dumped 500 rows to secp256k1_cm_audit/glv_hnp_phase2_thread25_rows.json
+
+==============================================================================
+EXP T25a: H25 — does mu separate INSIDE the ambiguous NU band (1.04, 2.199)?
+==============================================================================
+rows total 500  |  NU<band 94  in-band 366  NU>band 40
+  NU<band: recovery rate 92/94 (expect ~all recover; nearest-plane sufficient region)
+  NU>band: recovery rate 1/40 (expect ~none; nearest-plane necessary region)
+  in-band  N= 366  rec 97/366   AUC(-mu) 0.6932  AUC(-nu_hat) 0.8403  AUC(-NU) 0.5656  AUC(-step) 0.1803
+  NU<band  N=  94  rec 92/94    AUC(-mu) 0.1603  AUC(-nu_hat) 0.4592  AUC(-NU) 0.9837  AUC(-step) 0.4511
+  NU>band  N=  40  rec 1/40    AUC(-mu) 1.0000  AUC(-nu_hat) 1.0000  AUC(-NU) 1.0000  AUC(-step) 0.0000
+   pooled  N= 500  rec 190/500   AUC(-mu) 0.3964  AUC(-nu_hat) 0.6889  AUC(-NU) 0.7996  AUC(-step) 0.3286
+
+Verdict: H25 holds iff in-band AUC(-mu) >= 0.80.
+
+------------------------------------------------------------------------------
+EXP T25a-control: within-band AUC(-mu) per eff stratum (is it just re-reading eff again?)
+------------------------------------------------------------------------------
+  eff=0.05  in-band N=24  rec 23/24  AUC(-mu) 0.4565
+  eff=0.10  in-band N=83  rec 26/83  AUC(-mu) 0.8819
+  eff=0.15  in-band N=96  rec 21/96  AUC(-mu) 0.8889
+  eff=0.20  in-band N=89  rec 18/89  AUC(-mu) 0.9276
+  eff=0.25  in-band N=74  rec 9/74  AUC(-mu) 0.8615
+
+==============================================================================
+EXP T25b: does the GS-profile step predict recovery?
+ step = log2||b*_m|| - log2||b*_0||  (0 at the exact wall, by W1b)
+==============================================================================
+pooled (N=500): AUC(-step -> recovery) = 0.3286
+pooled: Spearman(step, NU) = 0.1351
+pooled: Spearman(step, mu) = -0.6627
+in-band (N=366): AUC(-step -> recovery) = 0.1803
+
+==============================================================================
+done
+==============================================================================
