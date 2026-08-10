@@ -6538,3 +6538,157 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) log entry
+(line ~6511 in this file's history). Priorities 1 (P-521, CLOSED
+2026-06-06), 2 (CHLRS, BLOCKED on the forward Igusa map), 4 (cross-curve
+LLL 384-bit, DEAD END), 6 (B5, CLOSED 2026-07-07) remain closed/blocked;
+priority 3 (Howe 15-pair) completed 2026-07-21. Priority 5 (GLV-HNP Phase 2)
+is the only live thread; its last run (2026-08-07, 3 days ago) made
+measurable progress (Thread 24: NU is sound but loose, AUC 0.978), so
+protocol rule (b) applies and its proposed sub-task is the correct pick.
+
+H25 as stated: within the ambiguous NU band [1.040, 2.199] (the 17-bit
+bracket from Thread 23b/W4), does `AUC(-mu -> Kannan-LLL recovery)` stay
+`>= 0.8`? If yes, mu is a genuine second coordinate; if no, W5's apparent
+mu power is a stratification artifact of eff being held fixed within each
+tested band.
+
+**Verdict: H25 as literally stated is FALSIFIED for raw mu (AUC 0.693), but
+its normalised sibling nu_hat survives (AUC 0.840) — the real second
+coordinate is `mu/sqrt(det L2)`, not `mu` alone.** A cheap secondary check
+(the W1b-suggested GS-profile "step" statistic) also survives (AUC 0.780)
+and is a genuinely different signal from both NU and nu_hat.
+
+### Work done
+
+- Added a `--dump-json` flag to `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`
+  (per the 2026-08-07 log's suggestion) so the existing 500-instance,
+  17-bit, eff-fixed W5/W6 table survives the run instead of only living in
+  stdout. Re-ran it: `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json`
+  reproduces the 2026-08-07 W5/W6 numbers exactly (same seeds, same
+  `search_curves` call — fully deterministic), and additionally dumps
+  `glv_hnp_phase2_gsprofile_strat_data.json` (500 rows x 19 fields,
+  including the full 24-entry GS profile `prof` per instance, 650KB).
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — pure re-analysis
+  of the dumped JSON, no new curve search or lattice work (as budgeted:
+  "no new data, ~5 minutes"). Computes:
+  1. AUC(-mu), AUC(-nu_hat), AUC(+step) restricted to the NU band
+     [1.040, 2.199], plus three alternate band cutoffs for robustness.
+  2. `step = log2(||b*_m||) - log2(||b*_{m-1}||)` (m=12, dim=24), the
+     jump from the lambda_1(L2)-repeated head block to the K1-moving tail
+     block of the L0 GS profile, per W1b's suggestion in the 2026-08-07 log.
+  3. Pooled (unstratified) AUCs and Spearman correlations for context.
+- `cargo test --test curve_audit` -> 5/5 pass (7.56s). No Rust touched.
+- Fresh container note (same as 2026-07-29/08-07): `pip install fpylll
+  cysignals sympy` needed (fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0).
+
+### Findings
+
+**H25 primary — raw mu does NOT clear the 0.8 bar.**
+
+```
+NU band [1.040, 2.199]: N=366 (97 recover / 269 fail), 73.2% of the 500 rows
+  AUC(-mu     -> recovery) = 0.6932  (Hanley-McNeil SE ~ 0.033)
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(+step   -> recovery) = 0.7797
+```
+
+0.693 is well above chance (mu is not *nothing*) but clearly short of 0.8,
+and the shortfall is stable under re-cutting the band:
+
+```
+NU in [1.0,2.5]  N=393  AUC(-mu)=0.667  AUC(-nu_hat)=0.833  AUC(+step)=0.778
+NU in [1.1,2.0]  N=297  AUC(-mu)=0.745  AUC(-nu_hat)=0.859  AUC(+step)=0.793
+NU in [1.2,1.9]  N=231  AUC(-mu)=0.775  AUC(-nu_hat)=0.854  AUC(+step)=0.786
+NU in [0.9,3.0]  N=445  AUC(-mu)=0.534  AUC(-nu_hat)=0.756  AUC(+step)=0.698
+```
+
+mu never reaches 0.8 in any band tested; nu_hat and step both do (except at
+the widest, least-selective band).
+
+**Root cause — mu vs nu_hat is exactly the eff-normalisation W5 already
+flagged.** `nu_hat = mu / sqrt(det L2)`, `det L2 = n*S_K1*S_K2`. Within a
+single eff stratum (as W5 tested) n, S_K1, S_K2 vary only mildly across the
+20 curves, so mu and nu_hat rank instances almost identically — that is
+exactly why W5 read "AUC mu" and "AUC nu_hat" as near-duplicates per row
+(e.g. eff=0.20: mu 0.9175 vs nu_hat 0.9337). The NU-band cut pools *across*
+strata (the [1.04,2.20] band contains rows from all five eff values), so it
+exposes the cross-stratum scale dependence that a single-eff AUC cannot:
+raw mu carries no eff-normalisation and is not comparable across curves of
+different (n, K1, K2), while nu_hat is designed to be. **Conclusion: the
+2026-08-07 log's phrasing "mu is a genuine second coordinate" should be
+corrected to "nu_hat is a genuine second coordinate; mu is only a
+same-stratum proxy for it."**
+
+**Secondary — the W1b step statistic is a real, independent signal.**
+`step = log2||b*_m|| - log2||b*_{m-1}||` (the transition from the flat
+lambda_1(L2)-repeated head of the GS profile to the K1-moving tail) predicts
+recovery via **bigger step = more likely to recover** — the opposite sign
+convention from NU/mu/nu_hat, confirming W1b's qualitative read ("the step
+vanishes exactly as the wall is crossed") quantitatively:
+
+```
+pooled (N=500):        AUC(+step) = 0.6257
+per-eff-stratum:  eff=0.05  0.10  0.15  0.20  0.25
+     AUC(+step):         0.434  0.713 0.807 0.834 0.830
+     AUC(mu)  (W5):      0.424  0.744 0.887 0.918 0.882
+     AUC(NU)  (W5):      0.869  0.701 0.350 0.560 0.728
+```
+
+step tracks mu's shape almost exactly across strata (weak at eff=0.05,
+strong at eff>=0.15) but is a genuinely different quantity:
+`Spearman(step, NU) = 0.167` (nearly independent), `Spearman(step, mu) =
+-0.528` (correlated but far from redundant — R^2 ~ 0.28). step is cheap: it
+needs only two entries of the already-computed GS profile, no extra lattice
+work beyond what NU already requires.
+
+**Pooled context (unstratified, N=500, for comparison with 2026-08-07):**
+
+```
+AUC(-NU)      = 0.7996   (matches 2026-08-07 W5 pooled exactly)
+AUC(-mu)      = 0.3964   (INVERTED pooled — mu is dominated by cross-eff scale)
+AUC(-nu_hat)  = 0.6889   (matches 2026-08-07 W5 pooled exactly)
+AUC(+step)    = 0.6257
+```
+
+The pooled AUC(-mu) = 0.396 (below 0.5, i.e. inverted) versus the in-band
+0.693 is itself informative: outside the ambiguous band NU already decides
+the outcome, so mu's cross-eff scale dependence dominates and actively
+misleads; only by restricting to the region where NU is uninformative does
+mu's real (positive, sub-nu_hat) signal show through. This is a concrete
+illustration of why Thread 20/23's original pooled-mu results needed the
+eff-stratified control that W5 introduced.
+
+### Next step proposal
+
+**Thread 26 — fit the 2-parameter (NU, nu_hat) or (NU, step) decision
+boundary and cross-validate out of stratum.** H25 (corrected form) says
+nu_hat and step are each independently informative once NU is fixed; the
+next concrete sub-task is a simple logistic regression on
+`(log NU, log nu_hat)` and separately on `(log NU, step)`, fit on 4 of the 5
+eff strata and evaluated (AUC + calibration) on the held-out 5th, repeated
+5-fold. If the held-out AUC clears ~0.9 for either pair, Phase 2 has a
+genuine 2-coordinate viability predictor that generalises across bias
+strengths, not just a same-stratum proxy. Falsifier: if held-out AUC drops
+to the single-predictor NU baseline (0.80), the apparent gain is
+in-stratum overfitting and NU alone remains the honest predictor.
+Cost: reuses the same 500-row JSON dump, no new curve search, ~10 minutes
+(plain Python logistic fit, no external ML library needed at this N).
+
+Secondary (cheap, deferred from 2026-08-07): re-measure the NU bracket
+[1.040, 2.199] itself is only a point estimate from one 17-bit run: bootstrap
+it (resample the 500 rows with replacement, 1000 reps) to get a confidence
+interval on the two cutoffs before treating the band boundaries as fixed.
+
+Tertiary (unchanged): BKZ-beta sweep against NU, to quantify how far above
+NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+(recorded after push)

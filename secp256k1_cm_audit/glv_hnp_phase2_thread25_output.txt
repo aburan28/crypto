@@ -1,0 +1,47 @@
+==============================================================================
+Thread 25 — mu vs NU inside the ambiguous band; GS-profile step
+loaded 500 instances from glv_hnp_phase2_gsprofile_strat_data.json
+==============================================================================
+
+------------------------------------------------------------------------------
+H25 primary: within NU in (1.04, 2.199), does mu still separate?
+------------------------------------------------------------------------------
+band N = 366 (97 recover / 269 fail) out of 500 total (73.2%)
+  AUC(-mu     -> recovery) = 0.6932  (SE~0.033)
+  AUC(-nu_hat -> recovery) = 0.8403
+  AUC(+step   -> recovery) = 0.7797   (step = log2||b*_m|| - log2||b*_{m-1}||; W1b's finding is that step -> 0 as the wall is crossed, so recovery should correlate with a BIGGER step, not smaller)
+
+  H25 verdict: mu DOES NOT SURVIVE inside the ambiguous band (threshold 0.8, got 0.6932).
+  Side finding: nu_hat (mu normalised by sqrt(det L2)) SURVIVES the same band test (0.8403), unlike raw mu.
+
+------------------------------------------------------------------------------
+Same test at coarser bands, for robustness to the exact cutoff
+------------------------------------------------------------------------------
+  NU in [1.0,2.5]  N=393  AUC(-mu)=0.6670  AUC(-nu_hat)=0.8326  AUC(+step)=0.7780
+  NU in [1.1,2.0]  N=297  AUC(-mu)=0.7451  AUC(-nu_hat)=0.8589  AUC(+step)=0.7934
+  NU in [1.2,1.9]  N=231  AUC(-mu)=0.7751  AUC(-nu_hat)=0.8544  AUC(+step)=0.7861
+  NU in [0.9,3.0]  N=445  AUC(-mu)=0.5341  AUC(-nu_hat)=0.7562  AUC(+step)=0.6984
+
+------------------------------------------------------------------------------
+Pooled (all 500 instances): step vs NU vs mu vs nu_hat
+------------------------------------------------------------------------------
+  AUC(-NU)      = 0.7996
+  AUC(-mu)      = 0.3964
+  AUC(-nu_hat)  = 0.6889
+  AUC(+step)    = 0.6257
+  Spearman(step, NU)  = 0.1674
+  Spearman(step, mu)  = -0.5284
+
+------------------------------------------------------------------------------
+Per-stratum (eff fixed) AUC(+step), for comparison with the W5 table
+------------------------------------------------------------------------------
+  eff     N     rec | AUC +step   AUC mu   AUC NU
+ 0.05   100  99/100 |    0.4343   0.4242   0.8687
+ 0.10   100  42/100 |    0.7131   0.7443   0.7011
+ 0.15   100  21/100 |    0.8071   0.8873   0.3496
+ 0.20   100  19/100 |    0.8343   0.9175   0.5595
+ 0.25   100   9/100 |    0.8303   0.8816   0.7277
+
+==============================================================================
+done
+==============================================================================
