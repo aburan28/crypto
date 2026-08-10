@@ -6675,4 +6675,4 @@ reduction pushes the threshold.
 
 ### Commits made
 
-(recorded after push — see follow-up log line)
+d745722 autolab 2026-08-10: Thread 25 — mu separates inside NU-ambiguous band per-stratum (AUC 0.86-0.93), not pooled; joint (NU,mu) logistic beats NU alone (0.86 vs 0.80)
