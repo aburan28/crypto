@@ -6665,4 +6665,4 @@ quick.
 
 ### Commits made
 
-(pending — recorded in follow-up commit after this entry is pushed)
+9c45002 autolab 2026-08-10: Thread 25 — mu survives NU-conditioning once eff-stratified (AUC 0.86-0.94); vanishing-step hypothesis falsified
