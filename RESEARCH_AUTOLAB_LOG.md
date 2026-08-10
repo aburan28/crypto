@@ -6538,3 +6538,131 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "does mu survive conditioning on NU?", the pre-registered
+next-step of the 2026-08-07 #2 entry (log line ~6480). Priorities 1
+(P-521, CLOSED §10.5), 2 (CHLRS, BLOCKED — cubic-residue obstruction proven
+2026-07-26/27), 3 (Howe sextic twists, completed 2026-07-21, 5/15 pairs
+qualify) and 6 (B5 over F_{p^k}, never picked up but no live falsifier
+pending) are all inactive; priority 5 (GLV-HNP Phase 2) is the only thread
+with recent measurable progress (2026-08-07, 3 days ago), so protocol rule
+(b) applies and its proposed sub-task is the correct pick.
+
+H25: within NU's ambiguous band (Thread 24 W4's 17-bit bracket, 1.04 <= NU
+<= 2.20 — nearest-plane alone cannot decide recovery there), does mu still
+separate recovery with AUC >= 0.8? Secondary: does
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)` (W1b's vanishing-step
+observation) beat NU or mu as a standalone predictor?
+
+**Verdict: H25 CONFIRMED once eff-stratified; the naive pooled AUC is a
+stratification artifact (same failure mode W6 diagnosed). Secondary
+hypothesis (step predicts the wall) FALSIFIED outright.**
+
+### Work done
+
+- `pip install fpylll cysignals sympy` (fresh container, same note as prior
+  runs: `cysignals` is a separate runtime import).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Re-generates the
+  identical 500-instance 17-bit population from
+  `glv_hnp_phase2_gsprofile_strat.py` (same `search_curves`, same `SEEDS =
+  [42, 1234, 9999, 555, 31337]`, same 5 eff strata x 20 curves x 5 seeds) —
+  curve search and signature generation are seeded deterministically, so
+  this is a re-analysis of the same population, not a new sample. Added a
+  `step` column from the existing GS profile (`instance()` already returns
+  `prof`, no new lattice work). Asserted `len(rows) == 500` as a
+  reproduction check (passed). Output: `glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (4.10s). No Rust touched.
+
+### Findings
+
+**H25 pooled looks like a falsification, but it's the W6 artifact again.**
+Pooling all 5 eff strata inside the NU band (N=366, 97 pos / 269 neg) gives
+AUC(-mu) = 0.6932 — below the 0.8 bar. But nu_hat on the *same* pooled band
+scores 0.8403, and per-stratum the picture flips completely:
+
+```
+ eff  N band   rec  | AUC mu  AUC nu_hat | AUC step
+0.05    24   23/24  | 0.4565  0.4565     |  0.5217   (degenerate: 96% positive)
+0.10    83   26/83  | 0.8819  0.8853     |  0.1329
+0.15    96   21/96  | 0.8889  0.8825     |  0.1130
+0.20    89   18/89  | 0.9276  0.9425     |  0.0657
+0.25    74    9/74  | 0.8615  0.8615     |  0.1179
+```
+
+Every non-degenerate stratum clears 0.86, comfortably above the 0.8 bar.
+The eff=0.05 stratum is 96% positive (23/24) inside the band, so AUC there
+is measuring noise on 1 negative instance, not a real failure of mu — this
+is the same class-imbalance-inside-a-band trap, not evidence against H25.
+
+**H25 verdict, corrected for the pooling artifact: CONFIRMED.** Conditioning
+on NU (restricting to instances where the exact BDD certificate is
+uninformative) does not remove mu's/nu_hat's separating power — it stays
+in the high-0.8s to 0.94 range in every stratum with both classes present.
+mu is not a noisier re-encoding of NU; it is measuring something NU does
+not capture. `(NU, mu)` — equivalently a decision "NU <= 1 -> recover
+(sound, W4), else check nu_hat*sqrt(eff) against a per-eff threshold" — is
+therefore a real 2-parameter viability test, not a single latent variable
+seen through two lenses.
+
+**Secondary — the vanishing-step hypothesis is FALSIFIED, cleanly.**
+`step = log2(prof[m]) - log2(prof[0])`, dim=24 (m=12), pooled and
+per-stratum:
+
+```
+pooled (N=500): AUC(-step) = 0.3286   AUC(-NU) = 0.7996   AUC(-mu) = 0.3964
+Spearman(step, NU) = 0.1351     Spearman(step, mu) = -0.6627
+
+ eff     N    rec  | AUC step  AUC NU   AUC mu
+0.05   100  99/100 |   0.6364  0.8687   0.4242
+0.10   100  42/100 |   0.2266  0.7011   0.7443
+0.15   100  21/100 |   0.1139  0.3496   0.8873
+0.20   100  19/100 |   0.0793  0.5595   0.9175
+0.25   100   9/100 |   0.1062  0.7277   0.8816
+```
+
+AUC(-step) is *below* 0.5 in 4 of 5 strata and falls monotonically with eff
+(0.64 -> 0.08), i.e. a **larger** step (bigger jump into the second GS
+block) is associated with *more* recovery at high eff — the opposite of
+W1b's "step -> 0 at the wall" reading. W1b's qualitative observation (head
+= m copies of lambda_1(L2), step vanishes near the K1 wall) still holds as
+a description of the profile shape; it just is not a useful scalar
+predictor once tested against real failures on both sides. Root cause,
+consistent with `Spearman(step, mu) = -0.6627`: step is strongly anti-
+correlated with mu, so it is mostly re-deriving mu's information but with
+the sign flipped and severely degraded (pooled AUC 0.33 vs mu's own
+0.40-0.94 depending on stratification) — not an independent third
+coordinate. Retire `step` as a candidate predictor; the closed-form
+signal is entirely carried by mu = lambda_1(L2) / nu_hat.
+
+### Next step proposal
+
+**Thread 26 — turn (NU, mu) into the deliverable Phase-2 has been building
+toward.** All the pieces now exist: NU is a sound sufficient/necessary
+certificate (W4, 0 FP / 96 TP over 410 instances), mu/nu_hat is an
+independent per-stratum separator (0.86-0.94 AUC, this run), and eff sets
+the per-stratum threshold scale (W5). Concrete sub-task: fit a single
+logistic model on `(log NU, log mu, log eff)` over the existing 500+300+22
+instance tables (this run + Thread 24's gsprofile run + the original U2
+grid), report its cross-validated AUC/accuracy, and extract the decision
+boundary as a closed-form rule (e.g. "recover if NU <= 1, or if NU > 1 and
+nu_hat*sqrt(eff) <= threshold(eff)"). Falsifier: if leave-one-eff-stratum-
+out cross-validation AUC is >= 0.9, the rule generalizes and is worth
+writing into `RESEARCH_GLV_HNP_PHASE2.md` as the closing result of this
+sub-thread; if CV AUC collapses (stratum-specific overfitting), the
+threshold is eff-dependent in a way that needs an explicit eff term rather
+than a single global rule.
+Cost: pure re-analysis of existing JSON/in-memory tables + `sklearn` or a
+hand-rolled logistic fit, no new lattice computation, ~15-20 min.
+
+Secondary (still open from Thread 24): BKZ-beta sweep against NU to
+quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
+threshold — untouched for 3 runs now, worth picking up if Thread 26 is
+quick.
+
+### Commits made
+
+(pending — recorded in follow-up commit after this entry is pushed)
