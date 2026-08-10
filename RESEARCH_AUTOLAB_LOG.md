@@ -6691,4 +6691,4 @@ NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-(recorded after push)
+ac97481 autolab 2026-08-10: Thread 25 — H25 falsified for raw mu (AUC 0.693), survives for nu_hat (0.840) and GS-profile step (0.780)
