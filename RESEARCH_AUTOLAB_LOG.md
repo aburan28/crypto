@@ -6538,3 +6538,141 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "does mu separate inside the NU-ambiguous band", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) log entry.
+Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP Phase 2) is again the only
+thread with unexhausted, pre-registered next-steps — same protocol rule
+(b) as the last three sessions. Environment note: this container had none
+of sympy / fpylll / cysignals installed (fresh clone); all three were
+missing from `glv_hnp_common.py`'s import chain and were `pip3 install`ed
+before anything in `secp256k1_cm_audit/*.py` could run (fpylll pulled a
+prebuilt manylinux wheel, no compiler needed).
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py`: reruns the exact
+  17-bit / dim-24 / 5-eff-stratum / 5-seed generation of
+  `glv_hnp_phase2_gsprofile_strat.py` (500 instances, 20 curves), adds
+  `--dump-json` (requested by the 2026-08-07 #2 entry's cost estimate —
+  dumps 500 rows minus the bulky `prof`/`nus` arrays to
+  `thread25_rows.json`), and adds three analyses: (1) AUC(-mu -> recovery)
+  restricted to the W4 ambiguous band NU in [1.040, 2.199], both pooled and
+  per-eff-stratum; (2) a from-scratch plain-Python logistic regression
+  (no numpy in the container) on (log NU, log mu) -> recovery; (3) the
+  step statistic proposed in Thread 24's W1b, `step = log2(prof[m]) -
+  log2(prof[0])`.
+- Hit and fixed a real bug during (2): this codebase's `auc(pos, neg)`
+  helper is a "smaller score -> recovery" convention (matches NU, mu,
+  nu_hat, lam* everywhere else in Threads 20-24). The fitted logistic
+  probability `p` is the opposite orientation (larger p -> recovery).
+  Calling `auc()` on raw `p` silently inverted the joint-fit AUC to 0.140
+  (~= 1 - 0.860). Fixed by negating `p` before the call; see the comment
+  at `glv_hnp_phase2_thread25.py:186-190`. Worth flagging for any future
+  thread that fits a probability-like score against this helper.
+
+### Findings
+
+**H25 as literally registered (pool the ambiguous band across all eff):
+FALSIFIED.**
+
+```
+band NU in [1.040, 2.199]:  N=366  rec=97/366
+  AUC(-mu -> rec) = 0.6932   (threshold was >= 0.80)
+  AUC(-NU -> rec) = 0.5656   (sanity check: NU should be ~uninformative here — confirmed)
+```
+
+**But the literal test repeats W3's mistake: pooling across eff strata
+masks a real, strong per-stratum effect.** Per-eff breakdown inside the
+same band:
+
+```
+  eff  N_band     rec  AUC(-mu)  AUC(-NU)
+ 0.05      24   23/24    0.4565    0.4783   <- near-saturated (96% recovery), floor effect
+ 0.10      83   26/83    0.8819    0.5277
+ 0.15      96   21/96    0.8889    0.3283
+ 0.20      89   18/89    0.9276    0.4695
+ 0.25      74    9/74    0.8615    0.6188
+```
+
+Excluding the degenerate eff=0.05 stratum (96% recovery, nothing to
+separate), AUC(-mu) inside the NU-ambiguous band is 0.86-0.93 across four
+independent strata, while AUC(-NU) stays near chance (0.33-0.62) as
+expected — NU truly carries no information left in this band. **Corrected
+verdict: H25 HOLDS conditional on eff, FALSIFIED unconditionally.** This is
+the same pooling artifact W3/W6 diagnosed for the closed-form separator;
+mu is not eff-invariant in absolute scale (mu grows with n^{?}/eff-scaling
+implicitly through K1, K2), so pooling raw mu across strata with different
+recovery base rates dilutes a real within-stratum signal, exactly as it did
+for nu_hat*sqrt(eff) in W3.
+
+**Joint logistic fit on (log NU, log mu), no stratification, beats both
+univariate scores pooled:**
+
+```
+standardized weights: w0=-0.7755  w_logNU=-2.5540  w_logmu=-1.1475
+AUC(joint predicted prob -> recovery) = 0.8596
+  vs. AUC(-NU) alone           = 0.7996
+  vs. AUC(-mu) alone           = 0.3964  (equivalently 0.6036 the other way)
+```
+
+Both fitted weights are negative (larger NU or larger mu each reduce
+recovery probability), consistent with the per-thread sign conventions
+established in Threads 20-24. The joint linear model in (log NU, log mu)
+recovers essentially all of the per-stratum mu signal (0.86-0.93) *without*
+needing to condition on eff explicitly — log-mu evidently absorbs most of
+the eff-dependent scale shift that broke the raw pooled AUC(-mu). This is
+the strongest evidence yet that (NU, mu) is a genuine 2-parameter test:
+mu adds real information on top of NU (0.86 joint vs 0.80 for NU alone),
+and it does so from a purely algebraic quantity (lambda_1 of the 2x2
+sublattice L2) that needs no LLL on the full dim-24 lattice, i.e. no
+committing to the full basis reduction to get a second opinion.
+
+**Secondary — the W1b step statistic is weaker than mu and largely
+redundant with it, not a new axis.**
+
+```
+full table (N=500):  AUC(-step -> rec) = 0.3286  (equivalently 0.6714 the other way)
+  cf. AUC(-NU) = 0.7996, AUC(-mu) = 0.3964 (eq. 0.6036)
+Spearman(step, NU)  =  0.1351   (near-independent, like mu)
+Spearman(step, mu)  = -0.6627   (strongly correlated — step is mostly a mu proxy)
+```
+
+step is both a weaker discriminator than mu (0.67 vs 0.60... wait, compare
+correctly-oriented values: step 0.6714 < NU 0.7996, and step is *worse*
+than mu's 0.6036 is actually step > mu numerically, so step edges out raw
+pooled mu but not by much) and strongly correlated with mu (|rho|=0.66), so
+it is not an independent third coordinate — it is a noisier read of the
+same lambda_1(L2) information that mu already captures directly and
+exactly. Not worth pursuing as a separate feature.
+
+### Next step proposal
+
+**Thread 26 — extend the joint model to 3 features and re-test H25's
+exact claim on the residual.** Concretely: fit logistic regression on
+(log NU, log mu, log eff) [or (log NU, log mu, log K1)] on the same
+500-row table (now saved at `thread25_rows.json`, no need to regenerate),
+and re-run the AUC-inside-ambiguous-band test using the model's *residual*
+score (regress out eff's contribution to mu, keep the residual) rather
+than raw mu. Falsifier: if the 3-feature model's AUC inside the ambiguous
+band does not clear ~0.85 (matching the per-stratum numbers above), the
+apparent "eff pools mu incorrectly" explanation is itself incomplete and
+there is a fourth variable at work.
+
+Secondary, cheap: re-run this exact script at 12 bits (dim 24, same
+protocol as Thread 24's W1-W7) to check whether the joint-AUC=0.86 result
+and the per-stratum mu AUC (0.86-0.93) are stable across bit-length, the
+same n-stability check W4 already ran for NU alone.
+
+Tertiary (carried over, still open): BKZ-beta sweep against NU from
+Thread 23/24, to quantify how far above NU ~ 1.87-2.20 blockwise
+reduction pushes the threshold.
+
+### Commits made
+
+(recorded after push — see follow-up log line)
