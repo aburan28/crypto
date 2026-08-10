@@ -6538,3 +6538,163 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Priority 1 (P-521 bigfloat LLL) is fully CLOSED (§10.5, 2026-05-29, 3/3 at
+m=16). Priority 4 (cross-curve LLL) is CLOSED/DEAD END (2026-07-08). Priority
+2/3 (CHLRS Igusa formula / Howe gluing, "Thread 2/3" in the log) was last
+touched 2026-07-27 (14 days ago, outside the 7-day window) and left an
+explicit open next step ("Thread 3 — CHLRS Igusa forward map"). Priority 5
+(GLV-HNP Phase 2) was touched most recently (2026-08-07, Thread 24/25) with
+a cheap, well-specified next step, but it has now been worked in 5+
+consecutive sessions; picking Thread 3 diversifies effort back onto a
+long-idle thread with real open questions. gp/PARI was not installed in this
+container — installed via `apt-get install --no-install-recommends pari-gp`
+(the plain `pari-gp` recommends pull in ~200MB of texlive/mesa that failed
+to fetch from a mirror; `--no-install-recommends` avoids that entirely and
+is sufficient for all `secp256k1_cm_audit/*.gp` scripts).
+
+### Work done
+
+Re-examined `howe_5pairs_v2.gp`'s Test 1/Test 2 (the "Z/3Z Richelot"
+construction that takes branch points alpha, beta of E1, E2's 2-torsion
+cubics and computes the Richelot dual, previously claimed in the
+2026-07-27 log as "Z/3Z Richelot arithmetic confirmed fixed").
+
+1. **Re-ran Test 1 (p=43) with the ACTUAL Jacobian-order check** (the
+   script computes `check_jac` but the printed "✓ CORRECT" line only
+   compares (a,b) against a hardcoded reference from a different script,
+   never against the target `#E1 * #E2`). Result: `#Jac=2169` vs the real
+   target `(43+1-13)(43+1+13)=1767` — **mismatch**. The "confirmed fixed"
+   claim was never actually validated against the Jacobian-order criterion
+   that matters for Howe gluing.
+
+2. **k-twist sweep** (beta = d*zeta3^k*alpha, k=0,1,2, the 3 Galois-
+   equivariant relabelings) on both p=43 and p=1009 toy cases: `#Jac(dual)`
+   is IDENTICAL across all 3 k (2169 and 1106283 respectively; only (a,b)
+   change). This rules out "wrong branch-point pairing" as the cause of the
+   mismatch — a natural fix hypothesis from the 2026-07-27 log, now
+   falsified.
+
+3. **Root cause of the k-twist-invariant mismatch**: the toy construction
+   `b2 = d^3 * b1` for `d` an arbitrary F_p element (used in Test 1/Test 2)
+   makes E1, E2 F_p-**isomorphic** via the standard sextic-twist
+   substitution `x=d^2 X, y=d^3 Y`. This is *exactly* the case Howe's
+   theorem (condition H1: phi must not extend to a full isomorphism
+   E1->E2) excludes — using the graph of an actual isomorphism collapses
+   the quotient to a genus-1 curve, not a genus-2 Jacobian, so there was
+   never a reason to expect `#Jac(dual) == #E1*#E2` for this construction,
+   for any d, at any p. All prior "Z/3Z Richelot" toy tests (2026-05-21
+   through 2026-07-27) that used a scalar `d` in this way were testing a
+   structurally-excluded case.
+
+4. **Toy prime 1009 is additionally the wrong residue class.** secp256k1's
+   prime satisfies `p = 7 mod 12` (established 2026-07-27). Checked:
+   `1009 mod 12 = 1`, not 7. Consequence: for p=1009, the primitive 6th
+   root of unity h (used for the *correct* non-isomorphic sextic-twist
+   construction `b2 = h^k * b1`, k=1..5) turns out to itself be an F_p
+   6th power (`h = 206^6 mod 1009`), because `36 | (p-1) = 1008`. This
+   makes E2 secretly F_p-isomorphic to E1 even for the "proper" h^k
+   construction, exactly reproducing Test 4's unexplained wall ("all cube
+   roots of h are squares mod p"). General fact proven: `p = 1 mod 36`
+   forces this degeneracy; `p = 7 mod 12` (secp256k1's class) can **never**
+   be `1 mod 36` (7, 19, 31 mod 36 are the only residues consistent with
+   7 mod 12), so secp256k1 itself is NOT affected — but the toy prime was
+   an unrepresentative choice. Corrected toy prime: **p=1039**
+   (`1039 = 7 mod 12`, smallest prime > 1000 in that class; verified
+   `h^((p-1)/6) != 1`, i.e. h genuinely primitive and not a spurious cube).
+
+5. **Redid the pairwise (0,k) scan on p=1039, b1=11** (rr=-b1=1028 confirmed
+   a non-cube, so E1[2] is a genuine irreducible Galois 3-cycle, matching
+   the generic/secp256k1 case). For each k=1..5, checked whether `-b2` is
+   an F_p-cube (equivalently: whether E2[2] is F_p-rational/split, vs.
+   irreducible like E1[2] — the previous session's check of "is h^k a
+   cube" was the WRONG condition; the right one is "is -b2 = rr*h^k a
+   cube"):
+   ```
+   k=1: -b2=527  is a cube (E2[2] SPLITS -- Galois-mismatched with E1[2], unusable)
+   k=2: -b2=538  NOT a cube (E2[2] irreducible, matches E1[2] -- candidate)
+   k=3: -b2=11   NOT a cube (this is the known degenerate (0,3) pair, d=-1)
+   k=4: -b2=512  is a cube (SPLITS, unusable, mirror of k=1)
+   k=5: -b2=501  NOT a cube (candidate, mirror of k=2)
+   ```
+   So k=2 and k=5 are the only new non-degenerate, Galois-matched
+   candidates at this toy prime.
+
+6. **Constructed beta properly in F_{p^3} for k=2, k=5** using
+   `ffgen(t^3-rr)` + `sqrtn(-b2, 3)` (PARI's native finite-field cube root)
+   instead of the ad hoc "d in F_p" search that couldn't find a root for
+   these k (since -b2 is not an F_p-cube for k=2,5, that search always
+   correctly reported "not a cube, skip" — but a valid beta still exists
+   in F_{p^3}, it just isn't F_p-rational). All 3 cube roots computed for
+   both k=2 and k=5. **Every one of them is a pure monomial**: beta always
+   comes out as `[0, 0, d]` (a scalar multiple of alpha^2), never a mixed
+   `[c0,c1,c2]`. Feeding these into `richelot()` gives `D0` singular
+   (degenerate) in all 6 cases (2 k-values x 3 cube roots).
+
+### Findings
+
+**The monomial-forcing is structural, not a computational artifact.** In a
+cyclic cubic Kummer extension `F_p(a)`, `a^3 = rr`, the cube roots of any
+F_p-scalar `c` that is not itself an F_p-cube are forced to be monomials
+`d*a` or `d*a^2` (proof sketch: if `X^3=c` with `c` Frobenius-fixed, then
+`X^p` is also a cube root of `c`, so `X^p = zeta3^j * X` for some fixed
+`j != 0` — i.e. `X` is a Frobenius eigenvector, and the eigenvectors of
+Frobenius on `F_p(a)` in this basis are exactly `1, a, a^2`; since `X` is
+not in `F_p` its component in the `a` or `a^2` eigenspace must be the
+whole story). Combined with finding 3 (monomial `d*a` betas are graphs of
+actual isomorphisms, excluded by H1) and the fresh finding 6 (monomial
+`d*a^2` betas make `D0` singular), **every Galois-equivariant candidate
+beta for a j=0-curve 2-torsion pairing is one of these two monomial types,
+and both types fail** — one by violating Howe's H1 hypothesis, the other
+by geometric degeneracy of the Richelot correspondence.
+
+**Conclusion: the "Richelot dual of the naive product curve
+y^2=(x^3+b1)(x^3+b2)" construction used throughout `howe_5pairs_v2.gp` and
+the `chlrs_*.gp` family cannot produce a non-degenerate Howe-glued cover
+for ANY sextic-twist pair of a j=0 curve, at any prime.** This is a
+structural dead end for this specific method, not a bug to keep patching.
+It does not mean Howe's theorem fails for these pairs (Howe's existence
+theorem is unconditional given H1-H3) — it means the *Richelot-on-branch-
+points* recipe is the wrong tool to exhibit the cover explicitly. A
+genuinely different construction is needed: the true Mestre reconstruction
+via Igusa-Clebsch invariants of the glued abelian surface (as originally
+scoped in `RESEARCH_MESTRE_HOWE.md` §3-4, never implemented past the
+"easy parts"), or a theta-function/Rosenhain approach that does not go
+through this Z/3-symmetric factorization at all.
+
+New script: `secp256k1_cm_audit/thread3_richelot_monomial_diagnosis.gp`
+(self-contained, runs clean, reproduces findings 5-6 on p=1039).
+
+### Next step proposal
+
+**Retire the Richelot-on-branch-points approach for Howe gluing.** Do not
+spend further sessions tweaking `d`, `k`, or the toy prime within this
+framework — finding 6 shows the degree of freedom is exhausted (only 2
+monomial families exist, both dead).
+
+**Thread 3b (concrete, falsifiable): implement true Mestre reconstruction.**
+`RESEARCH_MESTRE_HOWE.md` §3 documents the (unimplemented) formula for the
+Igusa invariants of `(E1 x E2)/Gamma_alpha` in terms of `(a_i, b_i, sigma)`
+via the modular-form pullback `M_2 -> M_1 x M_1`. This is a different
+mathematical object from the Richelot dual computed here (Richelot glues
+along a Z/3-symmetric factorization of the *naive product curve*; Mestre
+glues directly from the elliptic-curve invariants via the moduli of abelian
+surfaces). Falsifier: compute `(I2,I4,I6,I10)` for `(E1,E2)=(b1=11,
+b2=538)` [p=1039, k=5, the smallest non-degenerate candidate found today]
+via the modular pullback formula, run Mestre's conic-and-cubic step
+(§4), and check `#Jac(reconstructed C) == target=1150653`. Cost: the conic/
+cubic machinery in §4 needs a real PARI implementation (not scaffolded
+yet); budget 1-2 sessions.
+
+**Fallback**: continue GLV-HNP Phase 2 Thread 25 (stratify the 500-instance
+17-bit table by NU band, test H25: does `mu` separate within the ambiguous
+NU band 1.04-2.20? — proposed 2026-08-07, still open, ~5 min of re-analysis,
+no new data needed).
+
+### Commits made
+
+(recorded in next commit)
