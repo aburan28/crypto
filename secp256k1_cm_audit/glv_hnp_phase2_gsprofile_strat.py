@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -34,6 +35,14 @@ from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
 if __name__ == "__main__":
+    dump_path = None
+    if "--dump-json" in sys.argv:
+        i = sys.argv.index("--dump-json")
+        dump_path = (sys.argv[i + 1] if i + 1 < len(sys.argv)
+                     and not sys.argv[i + 1].startswith("--")
+                     else os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "glv_hnp_phase2_gsprofile_strat_dump.json"))
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -63,6 +72,11 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if dump_path:
+        with open(dump_path, "w") as f:
+            json.dump(rows, f)
+        print(f"dumped {len(rows)} rows to {dump_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")

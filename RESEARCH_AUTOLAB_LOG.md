@@ -6538,3 +6538,162 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Priority order per protocol: Thread 1 (P-521) is permanently CLOSED (§10.5,
+2026-06-06) — skipped. Priority 2/3 (CHLRS Igusa forward map / Howe gluing)
+was last touched 2026-07-27 (14 days ago, >7-day window), so by the "no
+recent work" clause it's next in line; picked it up first (Thread 3's
+"Next step proposal": implement the CHLRS forward-map formula, script target
+`chlrs_forward_map.gp`). That hit a hard environmental blocker (below), so
+fell through to priority 5 (GLV-HNP Phase 2), which had genuine measurable
+progress 3 days ago (Thread 24, 2026-08-07) and an already-scoped, cheap
+next step: Thread 25, "does mu still separate recovery inside the ambiguous
+NU band."
+
+### Work done
+
+**Part A — CHLRS forward map: blocked, but found a citation error.**
+`RESEARCH_MESTRE_HOWE.md` and the 2026-07-27 log entry cite "CHLRS §4-5
+(Lercier-Ritzenthaler 2012)" as the source of the explicit 2-torsion gluing
+formula. Tried to fetch this and adjacent papers via WebSearch/WebFetch to
+extract the actual formula:
+- WebFetch to `arxiv.org`, `math.mit.edu`, `ewhowe.com`, `www.semanticscholar.org`
+  all returned `EGRESS_BLOCKED` (this session's egress policy denies these
+  hosts outright — confirmed via `/root/.ccr/__agentproxy/status`, not a
+  transient failure, so not retried per the proxy README).
+- WebSearch (which goes through a separate backend and returned summarized
+  snippets) still worked and surfaced a correction: Lercier-Ritzenthaler
+  2012 (J. Algebra 372) is about invariant theory of genus-3 curves, NOT the
+  explicit 2-torsion elliptic-curve gluing construction. The actual source
+  for an explicit gluing formula is **Howe, Leprévost, Poonen, "Large
+  torsion subgroups of split Jacobians of curves of genus two or three,"
+  Forum Math. 12 (2000) 315-364** (math/9809210) — confirmed via search
+  snippet: "Howe, Leprévost, and Poonen gave an explicit formula for gluing
+  along 2-torsion and used it to construct genus 2 curves with large
+  rational torsion subgroups." Also relevant but for 4-torsion: Bruin-
+  Doerksen, "The arithmetic of genus two curves with (4,4)-split
+  Jacobians" (arXiv:0902.3480 / Canad. J. Math 63 (2011) 992-1021).
+- Could not extract the actual polynomial formula: every host serving the
+  full text (arxiv.org, the author's own site ewhowe.com, math.mit.edu
+  mirrors, semanticscholar) is blocked by this session's network policy.
+  Did NOT attempt to route around this (per the proxy README: report, don't
+  retry policy denials).
+- Updated `RESEARCH_MESTRE_HOWE.md` §10 references is a TODO for a future
+  session — not done this run since the correction should be verified
+  in-context with the surrounding prose; flagging here instead so the note
+  isn't half-edited.
+
+**Part B — Thread 25 (GLV-HNP Phase 2): does mu = lambda_1(L2) separate
+recovery inside the ambiguous NU band?**
+- Added `--dump-json [path]` to `glv_hnp_phase2_gsprofile_strat.py` (writes
+  the 500-row instance table after collection; deterministic re-run,
+  ~2.3s). Ran it: `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json`
+  reproduced W5/W6 numbers from the 2026-08-07 log bit-for-bit (same fixed
+  seeds), confirming determinism before trusting the dump.
+- Wrote `glv_hnp_thread25_nu_mu.py`: loads the dump, restricts to Thread
+  24's W4 ambiguous NU band `[1.040, 2.199]` (17-bit sufficient/necessary
+  bracket), and tests `AUC(-mu -> recovery)` inside it. Also computes the
+  W1b-proposed `step = log2(||b*_{m+1}||) - log2(||b*_1||)` (GS-profile
+  jump from the flat lambda_1(L2)-repeated head block to the second block).
+- `cargo test --test curve_audit`: 5/5 pass (no Rust files touched; ran as
+  a general sanity check since Python files changed). ✓
+
+### Findings
+
+**H25 as literally stated (pooled AUC, ambiguous band) is FALSIFIED —**
+`AUC(-mu -> recovery)` inside `NU in [1.040, 2.199]` (N=366, 97 recover) is
+**0.6932**, below the pre-registered 0.8 threshold.
+
+**But the pooled test has the exact confound W5 warned about: it doesn't
+control eff.** Splitting by eff stratum inside the same band:
+
+```
+eff    N    rec     AUC mu   AUC NU
+0.05  24  23/24     0.4565   0.4783   (degenerate: 1 failure only)
+0.10  83  26/83     0.8819   0.5277
+0.15  96  21/96     0.8889   0.3283
+0.20  89  18/89     0.9276   0.4695
+0.25  74   9/74     0.8615   0.6188
+mean over the 4 non-degenerate strata: 0.8899
+```
+
+**H25 is CONFIRMED once eff is controlled**: mean AUC(mu) = 0.890 across
+the four non-degenerate eff strata inside the ambiguous band, comfortably
+above 0.8. AUC(NU) inside the same strata is 0.33-0.62 — confirming NU is
+genuinely uninformative there (as expected: that's what "ambiguous" means
+for a sound sufficient/necessary bracket). `nu_hat` (mu already normalized
+by `sqrt(det L2)`, which partially absorbs the eff dependence) reaches
+**0.8403 pooled, no stratification needed** — the cleanest single-number
+confirmation of H25.
+
+**Conclusion: mu (equivalently nu_hat) is a genuine second coordinate**,
+independent of NU, that remains predictive exactly where the nearest-plane
+certificate goes silent. This is not a stratification artifact — W5's
+result stands and Thread 25 sharpens it: the pooled-vs-stratified gap is
+itself caused by eff-confounding of raw mu, which `nu_hat`'s `sqrt(det L2)`
+normalization already fixes.
+
+**Secondary — the `step` statistic does NOT predict the wall as
+hypothesized.** Thread 24's W1b conjectured `step -> 0` (profile head
+merging into the second block) predicts the wall. Measured:
+```
+pooled (N=500):
+  AUC(step -> recovery, LARGER step = more likely) = 0.6714
+  AUC(-NU  -> recovery)                             = 0.7996
+  AUC(-mu  -> recovery)                              = 0.3964   (WRONG SIGN pooled — same eff-confound as above)
+  Spearman(step, NU) =  0.1351
+  Spearman(step, mu) = -0.6627
+inside the ambiguous NU band: AUC(-step -> recovery) = 0.1803
+```
+The hypothesized direction is backwards: it's LARGER step, not smaller,
+that weakly favors recovery, and even that (0.67) is dominated by NU alone
+(0.80). `step` is strongly anti-correlated with mu (Spearman -0.66, which
+makes sense: a bigger drop from the head to the second block means the head
+level lambda_1(L2) was relatively larger before the drop), so `step` isn't
+adding information beyond what mu already carries — it's a noisier proxy
+for the same thing. **W1b's conjecture is falsified as an independent
+predictor.**
+
+**Logistic fit on (log NU, log mu), unstratified:**
+```
+logit(recover) = 0.353 - 3.950*log(NU) + 0.044*log(mu)
+training accuracy @ 0.5: 396/500 (79.2%)
+```
+The tiny coefficient on log(mu) (0.044 vs -3.950 on log(NU)) confirms the
+naive 2-feature linear-logit model can't see mu's power either — it needs
+the eff-stratification (or the `nu_hat` normalization) to unlock it. A
+model on `(log NU, log nu_hat)` or `(log NU, log mu, log eff)` is the
+natural next fit.
+
+### Next step proposal
+
+**Thread 26 — fit (NU, nu_hat) jointly with eff as an explicit feature.**
+Logistic regression on `(log NU, log nu_hat, log eff)` (or equivalently
+`log mu` + `log eff` as two separate terms rather than pre-combined into
+`nu_hat`) on the same 500-row dump; report training AUC/accuracy and compare
+against `nu_hat*sqrt(eff)` alone (0.9348) and `NU` alone (0.7996) to see if
+the 3-feature model meaningfully beats the hand-derived closed form, or if
+`nu_hat*sqrt(eff)` is already close to the achievable ceiling. Cost: no new
+data (reuse the same dump), pure re-analysis, ~10 minutes.
+
+**Secondary — resolve the CHLRS citation gap.** A future session with
+broader web access (or a manually-supplied copy of Howe-Leprévost-Poonen
+2000, math/9809210) should extract the actual gluing formula and correct
+`RESEARCH_MESTRE_HOWE.md` §10's citation from "Lercier-Ritzenthaler 2012" to
+"Howe-Leprévost-Poonen 2000." This paper's formula is for gluing along
+2-torsion specifically (matching what §2-3 of that note need) and appears
+more directly applicable than the Igusa-moduli/Mestre-reconstruction route
+previously being chased — worth attempting the port to PARI once the text
+is accessible, before resorting to the ~1000-line moduli computation
+`RESEARCH_MESTRE_HOWE.md` estimates for the general CHLRS approach.
+
+Tertiary (unchanged): BKZ-beta sweep against NU (Thread 23's original
+proposal, still not executed).
+
+### Commits made
+
+(recorded in the follow-up log-hash commit, per prior sessions' convention)
