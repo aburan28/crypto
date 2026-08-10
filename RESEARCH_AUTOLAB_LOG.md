@@ -6654,4 +6654,4 @@ threshold — orthogonal to the (NU, mu) question above and still open.
 
 ### Commits made
 
-(pending — see next commit in this session)
+e07bb53 autolab 2026-08-10: Thread 25 — H25 confirmed (mu is a real second coordinate beyond NU, AUC 0.80-0.89 within-band once eff is controlled)
