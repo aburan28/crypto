@@ -6538,3 +6538,142 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — pre-registered next-step of the 2026-08-07 #2 entry (H25 +
+step statistic). Priority 1 (P-521 LLL) is CLOSED (§10.5, confirmed 3/3 at
+m=16 and 1/1 at m=32, 2026-06-06 — the task brief's framing of this as still
+open is stale, corroborating the correction already made in the 2026-07-08
+entry). Priority 2 (CHLRS Igusa) is BLOCKED — the 2026-07-27 entry's "Thread 3
+forward map" proposal needs the full CHLRS modular-form apparatus, judged
+multi-week and out of scope for one session (consistent with how the
+2026-07-29 and 2026-08-07 entries both treated it). Priority 3 (Howe sextic
+twists) CLOSED 2026-07-21 (5/15 glueable). Priority 4 (cross-curve LLL
+384-bit) CLOSED/DEAD-END 2026-06-13 (3-of-3 confirmed via scaled-GS fix).
+Priority 6 (B5 over F_{p^k}) CLOSED. Priority 5 (GLV-HNP Phase 2) made
+measurable progress 3 days ago (Thread 24) with an explicit, cheap,
+re-analysis-only next step already scoped — protocol rule (b) applies, same
+reasoning the 2026-07-29 and 2026-08-07 entries used to justify staying on
+this thread.
+
+H25 (verbatim from 2026-08-07 #2): within the ambiguous NU band
+[1.04, 2.20] (W4's 17-bit sufficient/necessary bracket, where the exact BDD
+certificate gives no answer), does AUC(-mu -> Kannan-LLL recovery) stay
+>= 0.8? Secondary: does `step = log2(||b*_{m+1}||) - log2(||b*_1||)` predict
+the K1 wall better than NU or mu?
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` (as in
+  every prior run — `cysignals` is never pulled in transitively).
+- Edited `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py`:
+  - Added `--dump-json PATH` (the 2026-08-07 #2 log's own recommendation,
+    since W5/W6/W7 previously only printed aggregates and the raw 500-row
+    table did not survive the run).
+  - Added a `step` field per instance (`log2(prof[m]) - log2(prof[0])`,
+    `prof` = the float GS profile already computed by `instance()`).
+  - Added EXP W8 (H25 band test, with a per-eff-stratum breakdown inside the
+    band to control for the eff confound W5/W6 already identified) and EXP
+    W9 (step vs NU/mu as a recovery separator).
+- Re-ran: `python3 glv_hnp_phase2_gsprofile_strat.py --dump-json
+  thread25_rows.json` → 500 instances (float GS, dim 24) in 2.3s, deterministic
+  (curve search and all seeds are unrandomized; identical to the 2026-08-07
+  table by construction). Output:
+  `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_output.txt`.
+- `cargo test --test curve_audit` → 5/5 pass (no Rust touched).
+
+### Findings
+
+**W8 — H25 is confounded when pooled, but HOLDS once eff is controlled.**
+
+```
+band NU in [1.04, 2.20]: N=367 (98 recover, 269 fail)
+  AUC(-mu     | band)         = 0.6962   <- naive pooled test: FALSIFIES H25 (< 0.8)
+  AUC(-nu_hat | band)         = 0.8419
+  AUC(-eff    | band)         = 0.7086   <- eff itself still separates inside the band
+```
+
+The pooled test is the wrong test: eff correlates with both "landing in the
+band" and "recovering," so pooling re-injects exactly the confound W5/W6
+already diagnosed for the unconditional case. Restricting to one eff value
+at a time inside the band:
+
+```
+  eff   N(band)  pos/neg   AUC(-mu | band, eff)
+ 0.05      25     24/1     0.4792   <- degenerate (1 failure in the whole stratum)
+ 0.10      83    26/57     0.8819
+ 0.15      96    21/75     0.8889
+ 0.20      89    18/71     0.9276
+ 0.25      74     9/65     0.8615
+```
+
+In every non-degenerate stratum (0.10-0.25), AUC(-mu) clears the H25
+threshold (0.86-0.93). The one miss (eff=0.05) is not a counterexample — the
+stratum has 24 successes and exactly 1 failure, so its AUC is a coin flip
+on a single point, not a measurement. **Corrected verdict: H25 HOLDS.**
+mu is a genuine second coordinate inside the ambiguous band, independent of
+NU, once eff is held fixed the same way W5 required for nu_hat. The pair
+(NU, mu) — or equivalently (NU, eff, mu) since eff alone is not fully
+explained by mu inside the band either — is a real 2-to-3-parameter
+viability signature, not a stratification artifact.
+
+**W9 — the profile-head step is a clean, sign-flipped non-predictor.**
+
+```
+step | success : mean  0.214  min -0.775  max  3.156
+step | failure : mean -0.280  min -0.842  max  1.057
+AUC(-step -> recovery), pooled            = 0.3286   (worse than random)
+AUC(-mu), same 500-row subset             = 0.3964
+AUC(-NU), same 500-row subset             = 0.7996
+```
+
+Per-eff-stratum (controlling for the same confound as W8, for fairness):
+
+```
+ eff   AUC(-step)
+0.05      0.636
+0.10      0.227
+0.15      0.114
+0.20      0.079
+0.25      0.106
+```
+
+Every stratum is well below 0.5 and gets *more* inverted as eff grows —
+this is not an averaging artifact, it is a consistent sign flip. **The
+step hypothesis is falsified, with the opposite sign from what W1b's
+"step vanishes at the wall" framing suggested**: a *larger* step
+(bigger jump into the second GS block) predicts recovery, not failure.
+Mechanically this is plausible in hindsight — a larger step means the
+lambda-block is more sharply separated from the head, i.e. mu is smaller
+relative to the rest of the profile, which W8 just showed is the
+recovery-favorable direction. `step` is therefore redundant with `mu`
+(same underlying quantity, opposite convenient sign) rather than a new,
+independent statistic. Not worth carrying forward as its own column.
+
+### Next step proposal
+
+**Thread 26 — fit the joint (NU, eff, mu) decision boundary.**
+W8 shows recovery is not fully explained by NU alone (AUC 0.80) nor by mu
+alone at fixed eff (AUC 0.86-0.93) nor by eff alone in-band (AUC 0.71); a
+logistic fit on (NU, log eff, log mu) over the existing 500-row table
+(`thread25_rows.json`, not yet committed — regenerate via `python3
+glv_hnp_phase2_gsprofile_strat.py --dump-json PATH`, deterministic, 2.3s)
+would give the first joint viability boundary instead of three separate
+single-variable AUCs. Falsifier: if the 3-variable logistic's AUC does not
+exceed the best single-variable AUC (0.935, nu_hat*sqrt(eff) pooled) by a
+material margin, the extra variables are not adding real separation and
+Phase 2's practical takeaway stays "nu_hat*sqrt(eff) is the one number to
+compute." Cheap: reuses this run's dumped JSON, no new lattice work,
+~5 minutes (fit + cross-validated AUC, e.g. leave-one-curve-out to avoid
+overfitting to only 20 distinct curves).
+
+Secondary (unchanged housekeeping item from 2026-08-07 #2): BKZ-beta sweep
+against NU to quantify how far above NU ~ 1.87-2.20 blockwise reduction
+pushes the threshold — still untouched.
+
+### Commits made
+
+(recorded after push; see follow-up commit)

@@ -3,7 +3,8 @@ Thread 24b — cross-curve test of the closed-form separator (eff fixed)
 ==============================================================================
 
 20 17-bit j=0 GLV curves in 0.0s
-500 instances (float GS, dim 24) in 3.0s
+500 instances (float GS, dim 24) in 2.3s
+dumped 500 rows to /tmp/claude-0/-home-user-crypto/895cff31-184f-58fa-b8d6-6f3db5250a09/scratchpad/thread25_rows.json
 
 ------------------------------------------------------------------------------
 EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only
@@ -61,6 +62,33 @@ stratum eff = 0.10  (42 of the minority class)
    66301  0.2976   0.9619    1.2527    1/5
    65719  0.0273   0.9643    1.2763    2/5
    65647  0.2253   0.9848    1.1211    2/5
+
+------------------------------------------------------------------------------
+EXP W8 (Thread 25, H25): condition on NU — does mu still separate
+        *inside* the ambiguous band where NU gives no answer?
+------------------------------------------------------------------------------
+band NU in [1.04, 2.2]: N=367  (98 recover, 269 fail)
+  AUC(-mu     -> recovery | band) = 0.6962
+  AUC(-nu_hat -> recovery | band) = 0.8419
+  AUC(-eff    -> recovery | band) = 0.7086  (control: is mu just re-reading eff?)
+  H25 FALSIFIED (threshold 0.8)
+
+  per-eff-stratum, restricted to the band:
+    eff=0.05  N= 25  AUC(-mu|band,eff)=0.4792
+    eff=0.10  N= 83  AUC(-mu|band,eff)=0.8819
+    eff=0.15  N= 96  AUC(-mu|band,eff)=0.8889
+    eff=0.20  N= 89  AUC(-mu|band,eff)=0.9276
+    eff=0.25  N= 74  AUC(-mu|band,eff)=0.8615
+
+------------------------------------------------------------------------------
+EXP W9 (Thread 25): the profile-head step,
+        step = log2(||b*_{m+1}||) - log2(||b*_1||)
+------------------------------------------------------------------------------
+N with finite step = 500/500
+  step | success : mean  0.2140  min -0.7752  max  3.1563
+  step | failure : mean -0.2804  min -0.8416  max  1.0570
+  AUC(-step -> recovery) = 0.3286   [AUC(-NU) = 0.7996, AUC(-mu) = 0.3964 on same subset]
+  step does NOT beat the incumbents
 
 ==============================================================================
 done
