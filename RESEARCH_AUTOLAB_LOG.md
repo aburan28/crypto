@@ -6657,4 +6657,4 @@ quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
 threshold — still not started.
 
 ### Commits made
-(recorded in next commit — see git log for this session's hash)
+b574f12 autolab 2026-08-10: Thread 25 — mu separates inside NU band per-stratum; step redundant with mu
