@@ -6704,4 +6704,4 @@ several sessions.
 
 ### Commits made
 
-(pending — filled in after commit)
+ef5c6a5 autolab 2026-08-10: Thread 25 — mu falsified pooled, nu_hat holds in-band (0.840); joint (NU,nu_hat) logistic AUC 0.940
