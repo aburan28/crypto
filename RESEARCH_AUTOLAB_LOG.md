@@ -6538,3 +6538,135 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Walked the priority list top-down. Priority 1 (P-521 LLL): CLOSED (§10.5,
+reconfirmed 2026-06-06/2026-07-21) — nothing left to pick up. Priority 2
+(CHLRS Igusa formula, Thread 3 forward map, proposed 2026-07-27, 14 days
+stale): investigated, hit a double blocker this session (see Findings) and
+was set aside — see BLOCKED note below. Priority 3 (Howe sextic twists):
+CLOSED, 5/15 pairs qualify (2026-07-08/07-21). Priority 4 (cross-curve LLL
+384-bit): CLOSED / DEAD END (2026-06-14). Priority 5 (GLV-HNP Phase 2):
+last touched 2026-08-07 (3 days ago) with measurable progress and an
+explicit, cheap, no-new-data next step (Thread 25, H25) — picked this one.
+
+### Work done
+
+**Priority 2 (CHLRS) — BLOCKED this session, both routes closed:**
+- `WebFetch` is unavailable in this container: every domain tested
+  (arxiv.org, math.mit.edu, en.wikipedia.org, example.com) returns
+  `EGRESS_BLOCKED`. `WebSearch` still works and returns snippet text, but
+  full paper PDFs (the actual CHLRS/Ritzenthaler-Romagny gluing formulas)
+  are not reachable this way.
+- `sage` is not installed in this container (`sage: command not found`).
+  `RESEARCH_MESTRE_HOWE.md` §5.5 already did the one useful Sage
+  cross-check (Igusa normalization ratios 2^5 / 2^20 vs our PARI
+  transvectants) on a *different* machine (`brew install sage`, noted
+  2026-0x, predates the autolab log); it is not reproducible here.
+- WebSearch did confirm bibliography: "CHLRS" = the Magma
+  `Genus2Reconstruction` package authors (Cardona, Howe, Lercier,
+  Ritzenthaler, Streng) per `RESEARCH_MESTRE_HOWE.md` §10 — not a single
+  paper. Also found `Gélin–Howe–Ritzenthaler` (Hayashida's formula, but for
+  `A = E×E` same-curve CM squares, not our `E1 ≠ E2` twist-pair case) and
+  Ritzenthaler–Romagny "Gluing curves of genus 1 and 2 along their
+  2-torsion" (arXiv:2005.03587) as the more relevant reference — but could
+  not fetch its content to extract the explicit formula.
+- Declined to hand-derive the classical transvectant/Igusa normalization
+  constants from memory without a way to verify them (Sage/Magma both
+  unavailable) — a wrong "confirmed" constant in the log is worse than an
+  honest blocker, per prior threads' repeated false starts on this exact
+  question (Rosenhain cross-ratio wrong, Z/3Z Richelot missing inverse map).
+- **BLOCKED: needs either WebFetch/arXiv access (to read
+  arXiv:2005.03587 or the CHLRS/Magma package source) or a Sage/Magma
+  install in-container.** Neither is available today. Re-attempt when
+  either becomes available; until then this thread should keep getting
+  skipped by future autolab runs (checking WebFetch/Sage availability
+  first, cheaply, before committing a session to it).
+
+**Priority 5 (GLV-HNP Phase 2) — Thread 25 executed as proposed:**
+- Environment: `fpylll`/`sympy`/`cysignals` were not preinstalled in this
+  fresh container (same issue noted 2026-08-07); `pip install fpylll
+  cysignals sympy` resolved it (order matters: `cysignals` must be
+  importable before `fpylll` loads its Cython extension).
+- Reran `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` unmodified
+  first: reproduced the 2026-08-07 W5/W6 tables bit-for-bit (deterministic
+  seeds), 500 instances in 2.0s.
+- Added `--dump-json PATH` (dumps the 500 raw per-instance rows) and a
+  `step = log2(prof[m]) - log2(prof[0])` field (m=12; the W1b GS-profile
+  head-to-tail jump), then added two new analysis blocks: EXP H25
+  (stratify by NU band instead of eff band) and EXP W1b-quant (step as a
+  standalone predictor). No new lattice reductions needed beyond the
+  existing 500-instance run — matches the "no new data" cost estimate.
+
+### Findings
+
+**H25, as pre-registered (raw `mu`), is FALSIFIED pooled; a refined version
+(`nu_hat`) SURVIVES.**
+
+Band = the ambiguous NU zone from Thread 24's W4 bracket, `1.040 <= NU <=
+2.199` (N=366 of 500, 97 recovered / 269 failed):
+
+```
+  AUC(-mu     -> recovery | NU in band) = 0.6932   (pre-registered test: FAILS >= 0.8)
+  AUC(-nu_hat -> recovery | NU in band) = 0.8403   (PASSES >= 0.8)
+  AUC(-NU     -> recovery | NU in band) = 0.5656   (sanity check: NU is ~noise inside its own band, as expected)
+  AUC(-step   -> recovery | NU in band) = 0.1803   (see W1b-quant below; wrong sign, weak)
+```
+
+Per-eff-stratum, conditioned on the NU band, raw `mu` DOES clear 0.8 in
+4 of 5 strata:
+
+```
+  eff     N     rec |   AUC mu  AUC step
+ 0.05    24   23/24 |   0.4565    0.5217   (degenerate: 23/24 recovered)
+ 0.10    83   26/83 |   0.8819    0.1329
+ 0.15    96   21/96 |   0.8889    0.1130
+ 0.20    89   18/89 |   0.9276    0.0657
+ 0.25    74    9/74 |   0.8615    0.1179
+```
+
+**Interpretation.** `mu = lambda_1(L2)` depends on `K1` (via `S_K1`), which
+differs by construction across `eff` strata, so pooling `mu` across strata
+mixes incommensurable scales and its pooled AUC collapses to 0.69 even
+though it discriminates cleanly (0.86-0.93) *within* any single stratum.
+`nu_hat = mu/sqrt(det L2)` already carries the size-normalization that
+removes this artifact (consistent with W5's note that "the sqrt(det)
+normalisation only matters across sizes") — and it is `nu_hat`, not raw
+`mu`, that is the genuine second coordinate inside NU's blind band: 0.84
+pooled, no stratification needed. **H25 should be re-read with `nu_hat` in
+place of `mu`.** The pair `(NU, nu_hat)` — not `(NU, mu)` — is the
+2-parameter viability signal.
+
+**W1b-quant: the "step vanishes at the wall" hypothesis is not a useful
+independent predictor.** Pooled over all 500 instances, larger step mildly
+favors recovery (`AUC(step -> recovery) = 0.6714`, i.e. recovered instances
+have higher step: mean 0.214 vs -0.280 for failures) — the OPPOSITE
+direction from the "step -> 0 at the wall" framing in the 2026-08-07 log.
+Conditioned on the NU band, step is noise-to-anti-signal per stratum
+(0.06-0.52, only 0.10 stratum flips positive at 0.52). `step` is not
+carrying information beyond `NU`/`nu_hat` (`Spearman(step, NU) = 0.135`,
+essentially uncorrelated). Retire this as a candidate predictor.
+
+### Next step proposal
+
+**Thread 26 — build the logistic (NU, nu_hat) decision boundary.** With
+`nu_hat` confirmed as the genuine second coordinate (not `mu`), fit
+`P(recovery) ~ logistic(a*log NU + b*log nu_hat + c)` on the existing
+500-row table (now dumped to JSON via `--dump-json`, no refit of the data
+collection needed) and report the decision boundary plus leave-one-curve-out
+cross-validated AUC. This is the deliverable Thread 25's proposal called
+for and is now unblocked.
+
+**Priority 2 (CHLRS) retry condition**: before spending a session on this
+again, check `sage --version` and do one `WebFetch` test call first (~10s);
+only commit to the thread if at least one of the two is available. If both
+remain unavailable across several consecutive runs, consider this thread
+permanently BLOCKED-pending-environment and drop it from the priority list
+until a human confirms Sage/Magma or full WebFetch will be provisioned.
+
+### Commits made
+
+(recorded after push — see follow-up log entry)
