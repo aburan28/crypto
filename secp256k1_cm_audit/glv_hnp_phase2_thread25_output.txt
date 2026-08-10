@@ -1,0 +1,58 @@
+==============================================================================
+Thread 25 — conditioning on NU: is mu a genuine second coordinate?
+==============================================================================
+
+loaded 500 instances
+
+------------------------------------------------------------------------------
+EXP H25: AUC(-mu -> recovery) inside vs outside the NU band [1.04, 2.199]
+------------------------------------------------------------------------------
+in-band: 366/500 instances (97/366 recover)
+out-of-band: 134/500 instances (93/134 recover, should be near-deterministic by construction of the bracket)
+  IN-BAND : AUC(-mu -> recovery) = 0.6932  (N=366, 97 pos / 269 neg)
+  OUT-BAND: AUC(-mu -> recovery) = 0.0494  (N=134, 93 pos / 41 neg)
+  ALL     : AUC(-mu -> recovery) = 0.3964  (N=500, 190 pos / 310 neg)
+
+H25 target: AUC(-mu) in-band >= 0.80.  Observed: 0.6932  => FALSIFIED
+
+in-band AUC(-mu), stratified by effq (checks eff isn't leaking back in through the band selection):
+  eff=0.05  N= 24  AUC(-mu) = 0.4565
+  eff=0.10  N= 83  AUC(-mu) = 0.8819
+  eff=0.15  N= 96  AUC(-mu) = 0.8889
+  eff=0.20  N= 89  AUC(-mu) = 0.9276
+  eff=0.25  N= 74  AUC(-mu) = 0.8615
+
+------------------------------------------------------------------------------
+EXP secondary: step = mean_i[log2||b*_{m+i}|| - log2||b*_i||] as a third predictor
+------------------------------------------------------------------------------
+AUC(step -> recovery), LARGER step -> success = 0.6734  (pooled, all 500)
+step | success: mean 0.1714  min -0.6740  max 2.9786
+step | failure: mean -0.3356  min -0.7730  max 0.9730
+in-band only (where NU gives no verdict):
+  AUC(step -> recovery) in-band = 0.8252  (N=366, no eff-stratification needed)
+Spearman(step, NU)        = 0.1053
+Spearman(step, log mu)    = -0.6671
+
+------------------------------------------------------------------------------
+EXP: logistic fit on (log NU, log mu) -> recovery, full pooled set
+------------------------------------------------------------------------------
+standardised weights: w(logNU)=-2.5540  w(logmu)=-1.1475  b=-0.7755  train accuracy=0.7860
+(feature standardisation: logNU ~ N(0.382,0.354), logmu ~ N(11.825,0.401))
+logNU-only  train accuracy = 0.7800
+logmu-only  train accuracy = 0.7560
+joint (logNU,logmu) train accuracy = 0.7860
+
+step-only   train accuracy = 0.7040
+joint (logNU,step) train accuracy = 0.8820  weights: w(logNU)=-3.1874  w(step)=2.8380
+
+------------------------------------------------------------------------------
+EXP: does the pooled in-band H25 test reintroduce the eff-confound?
+------------------------------------------------------------------------------
+in-band-within-stratum, EXCLUDING the degenerate eff=0.05 stratum (24 obs, only 3 negatives):
+  N=342  AUC(-mu -> recovery) = 0.8080
+  vs pooled-including-eff=0.05: see H25 block above (0.69)
+  vs raw per-stratum range: 0.86-0.93 (eff 0.10-0.25)
+
+==============================================================================
+done
+==============================================================================

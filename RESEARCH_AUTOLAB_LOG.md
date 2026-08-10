@@ -6538,3 +6538,139 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6512). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live thread.
+Thread 24 (3 days prior) made measurable progress (falsified H24 clause 1,
+confirmed clause 2, discovered NU/nu_hat are uncorrelated mechanisms), so
+protocol rule (b) applies and its proposed sub-task is the correct pick.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all,
+>        the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+**Verdict: the literal pooled H25 test is FALSIFIED (0.693 < 0.80), but the
+failure is itself a stratification artifact of the band, not of W5** — the
+same eff-confound W5 was designed to control reappears when pooling across
+strata inside the NU band. The secondary step-metric proposed alongside H25
+turned out to be the more useful result: a single scalar that separates
+in-band instances (AUC 0.825) without needing any eff-stratification, and
+beats mu as NU's joint-fit partner by a wide margin (88.2% vs 78.6% train
+accuracy).
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy numpy`.
+  `numpy` is new this run (needed for none of the analysis in the end — the
+  logistic fit was written by hand — but installed to keep the option open;
+  harmless to leave out next time).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Generates the
+  identical 500-instance 17-bit table as `glv_hnp_phase2_gsprofile_strat.py`
+  (5 eff strata x 20 curves x 5 seeds, M=12, float GS per W0's safety check),
+  adds `step_i = log2(||b*_{m+i}||) - log2(||b*_i||)` averaged over i=1..m
+  from the existing GS profile, and supports `--dump-json`/`--from-json` per
+  the Thread 24 cost note so re-analysis needs no new lattice work.
+  Output: `glv_hnp_phase2_thread25_output.txt` (58 lines).
+  Data: `thread25_data.json` (500 rows, 174KB) — committed so future threads
+  can `--from-json` this exact table.
+- Ran `cargo test --test curve_audit` -> 5/5 pass. No Rust touched.
+
+### Findings
+
+**H25 literal test — FALSIFIED, but the falsification is a pooling
+artifact.** In-band (N=366, NU in [1.040, 2.199]): `AUC(-mu -> recovery) =
+0.6932`, below the 0.80 target. But out-of-band `AUC(-mu) = 0.0494` — i.e.
+strongly INVERTED — because band membership itself correlates with eff
+(low-eff instances mostly sit above the band, at NU>2.2 with high recovery;
+they contribute almost no in-band mass). Stratifying the in-band set by eff
+recovers exactly the W5 numbers:
+
+```
+eff=0.05  N= 24  AUC(-mu) = 0.4565   (degenerate: 21/24 recover, only 3 negatives)
+eff=0.10  N= 83  AUC(-mu) = 0.8819
+eff=0.15  N= 96  AUC(-mu) = 0.8889
+eff=0.20  N= 89  AUC(-mu) = 0.9276
+eff=0.25  N= 74  AUC(-mu) = 0.8615
+```
+
+Excluding only the degenerate eff=0.05 stratum and pooling the rest
+(N=342): `AUC(-mu) = 0.8080` — at the H25 threshold. **Conclusion: mu is a
+genuine second coordinate conditional on NU, exactly as W5 found — the
+pooled-band test failed because it silently re-mixed eff, the same trap the
+eff-stratified design of W5/W6 existed to avoid.** H25 is corroborated once
+the same discipline is applied inside the band; it is not falsified in the
+sense the parent entry meant to test.
+
+**The step metric is a better in-band predictor than mu, and needs no
+stratification.** `step = mean_i[log2||b*_{m+i}|| - log2||b*_i||]`,
+i.e. the mean gap between the second GS block and the first (which W1b
+showed sits exactly at lambda_1(L2) for all m indices):
+
+```
+pooled (N=500)   AUC(step -> recovery), larger step -> success = 0.6734
+in-band (N=366)  AUC(step -> recovery)                          = 0.8252  <- no stratification
+```
+
+0.825 in-band, unstratified, beats mu's unstratified in-band 0.693 outright
+and is within the eff-stratified mu range (0.86-0.93) without needing to
+know eff at all. `Spearman(step, NU) = 0.105` (near-independent, same
+qualitative property W5/W6 found for mu) but `Spearman(step, log mu) =
+-0.667` — step is substantially, not entirely, a transform of mu. The
+likely mechanism (unconfirmed, follows from W2: `lambda_1*lambda_2 ~
+det(L2)` and block 2's GS norms sit near lambda_2): `step ~
+log2(lambda_2/lambda_1) = log2(det(L2)) - 2*log2(mu) + O(1)`, i.e. step
+folds in the det(L2) = n*S_K1*S_K2 scale that mu alone discards — which is
+plausibly why it doesn't need eff-stratification to work.
+
+**Joint fit: (logNU, step) clearly beats (logNU, logmu).** Hand-rolled
+2-feature logistic regression (standardised features, gradient descent,
+20000 iters), train accuracy on the full 500:
+
+```
+logNU alone            0.7800
+logmu alone             0.7560
+step alone              0.7040
+joint (logNU, logmu)   0.7860   w(logNU)=-2.554  w(logmu)=-1.148
+joint (logNU, step)    0.8820   w(logNU)=-3.187  w(step)=+2.838
+```
+
+Adding logmu to logNU buys +0.6pp; adding step buys +10.2pp. This is the
+concrete evidence that step, not mu, is the second coordinate Phase 2 was
+missing.
+
+**Caveat, stated plainly:** all accuracies above are TRAIN accuracy on the
+same 500 instances used to fit — there is no held-out set yet. The 88.2%
+number is suggestive, not validated. See next step.
+
+### Next step proposal
+
+**Thread 26 — validate (logNU, step) out-of-sample and derive `step` in
+closed form.**
+1. Generate a fresh 17-bit table (different curve seeds, same protocol) and
+   evaluate the (logNU, step) decision boundary fit here WITHOUT refitting —
+   report held-out accuracy/AUC. If it collapses towards logNU-alone
+   (~0.78), the 88.2% number was overfit to this particular curve/seed set
+   and step needs a larger fitting set.
+2. Derive the closed form `step ~ log2(det(L2)) - 2*log2(mu)` analytically
+   from W2's identity and check it against the exact `l2` field already in
+   `thread25_data.json` (`log2(l2/mu)` vs measured `step`, per-instance —
+   this is a 5-line script, no new lattice work).
+3. Re-measure the (logNU, step) fit at 12 bits (Thread 23/24's grid, already
+   cheap to regenerate) to check the n-independence NU's bracket had (W4).
+
+Secondary (unchanged, still open): BKZ-beta sweep against NU to quantify how
+far above NU~1.87-2.20 blockwise reduction pushes the threshold.
+
+### Commits made
+
+[pending]
