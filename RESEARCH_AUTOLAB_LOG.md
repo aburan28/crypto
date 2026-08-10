@@ -6697,4 +6697,4 @@ no new data needed).
 
 ### Commits made
 
-(recorded in next commit)
+b24dea8 autolab 2026-08-10: Thread 3 CHLRS — Richelot-on-branch-points structurally dead (monomial-forced); toy prime 1009 was wrong residue class
