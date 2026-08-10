@@ -242,15 +242,47 @@ construction.  Requires:
 **Value**: the actual explicit Howe-glued cover for secp256k1.
 Publishable result.
 
-### Medium value, high cost: Mestre's Step 2 (conic + sextic)
+### DONE (2026-08-10): Mestre's Step 2 (conic + sextic)
 
-The reconstruction from Igusa invariants to curve.  Multi-page
-algorithm; well-documented but tedious.
+**Status: implemented and tested over Q.** See
+[`secp256k1_cm_audit/mestre_reconstruction.gp`](secp256k1_cm_audit/mestre_reconstruction.gp).
+The explicit formulas (Mestre_conic's x,y,z and the ten c_ijk
+coefficients) were fetched verbatim from SageMath's
+`sage/schemes/hyperelliptic_curves/mestre.py` (raw.githubusercontent.com
+is reachable from this environment; arxiv.org and eprint.iacr.org are
+not — see the script header). Rational-point-finding on Mestre's
+conic and its parametrization are NOT hand-rolled: PARI's `qfsolve`
++ `qfparam` do this natively for ternary quadratic forms over Q.
 
-~500 lines of PARI; week-long effort.
+Verification (all in the script, machine-checked):
+1. `Mestre_xyz`/`Mestre_L` reproduce Sage's own docstring ground
+   truth exactly (up to the expected overall scalar) for two
+   independent invariant quadruples, `[1,2,3,4]` and `[5,6,7,8]`.
+2. Full round-trip: took `h_orig = x^6+2x^5+3x^4+5x^3+7x^2+11x+13`
+   (the existing `igusa_clebsch_complete.gp` Test 2 curve), computed
+   its Igusa quadruple, ran it through `Mestre_reconstruct`, and
+   confirmed the reconstructed curve's own Igusa quadruple is
+   `(λ²I2, λ⁴I4, λ⁶I6, λ¹⁰I10)` of the original for a single
+   consistent λ — i.e. genuinely Q̄-isomorphic to `h_orig`.
 
-**Value**: completes the pipeline.  Without it, even if §3.2 is
-done, we have Igusa invariants but not the curve.
+**Remaining gap, narrower than before:** `qfsolve` requires an
+integer/rational matrix (confirmed by direct test — it rejects a
+`Mod(·,p)` matrix outright), so this pipeline does not run over
+`F_p_secp` as-is. Point-finding on a ternary conic over a finite
+field needs a different, constructive algorithm (diagonalize by
+completing the square mod p, then extract an isotropic vector —
+always possible for p odd, since every ternary quadratic form over
+a finite field is isotropic; this is a different proof technique
+than the Q-only Hasse-Minkowski/`qfsolve` route). That is a
+well-scoped follow-up, not a rewrite.
+
+**Value delivered**: the pipeline (I2,I4,I6,I10) → curve is now a
+complete, tested capability of this codebase, ONLY over Q for now.
+It does not by itself produce the secp256k1 Howe cover, because gap
+#2 below (the actual invariants of the glued surface) is still open
+— but it removes Step 2 as a blocker once gap #2 is solved, and it
+is immediately useful over Q as a standalone verification tool
+(e.g. checking whether two sextics are Q̄-isomorphic).
 
 ## 8. Realistic path forward
 

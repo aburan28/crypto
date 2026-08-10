@@ -6538,3 +6538,122 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+Priority 1 (P-521 bigfloat) is CLOSED (§10.5, since 2026-06-06) — no work needed.
+Priority 2 (CHLRS Igusa formula / Howe gluing) was last touched 2026-07-27
+(`9e9b0a8`), 14 days ago — outside the 7-day recency window and with an explicit
+unexecuted proposal on the table ("Thread 3 — CHLRS Igusa forward map"), so per
+the protocol this is the correct pick. Priorities 3/4/5/6 are more recently
+touched (priority 5's GLV-HNP-Phase-2 threads 20-24 ran 2026-07-29 through
+2026-08-07).
+
+Goal: implement the piece Thread 3 (2026-07-27 log) and `mestre_scaffold.gp`
+both flagged as missing — Mestre's Step 2, reconstructing a genus-2 curve from
+given Igusa-Clebsch invariants (I2,I4,I6,I10) — since `RESEARCH_MESTRE_HOWE.md`
+§7 rated this "~500 lines of PARI; week-long effort" and it was blocking the
+CHLRS forward-map pipeline even after Step 1's pieces are eventually solved.
+
+### Work done
+- `WebFetch` to `arxiv.org`, `eprint.iacr.org`, and `math.mit.edu` are all
+  **blocked by this environment's egress proxy** (`EGRESS_BLOCKED`, org policy
+  denial, not a paywall). `raw.githubusercontent.com` is NOT blocked.
+- Located the explicit formulas by fetching SageMath's actual implementation
+  (`sage/schemes/hyperelliptic_curves/mestre.py`, verbatim) instead of the
+  CHLRS/Lauter-Yang paper text directly — same formulas (Sage cites Lauter-Yang
+  2001 p.956-957, cross-referenced against Mestre 1991), but readable through
+  this environment's egress policy.
+- Ported `Mestre_conic` (I2,I4,I6,I10 → x,y,z → symmetric 3×3 Gram matrix) and
+  the reconstruction step (10 c_ijk rational functions of x,y,z; sextic
+  assembly from a conic parametrization) to PARI/GP:
+  `secp256k1_cm_audit/mestre_reconstruction.gp`.
+- Realized PARI's `qfsolve`/`qfparam` (ternary quadratic form rational-point
+  search + parametrization, native Hasse-Minkowski implementation) are exactly
+  the "find a rational point on the conic, then parametrize it" steps Sage's
+  `MConic.has_rational_point()`/`.parametrization()` perform — no need to
+  hand-roll conic arithmetic.
+- Verified `qfsolve` requires an integer/rational matrix: `qfsolve([1,2,3;2,5,6;
+  3,6,1]*Mod(1,17))` raises `"incorrect type in qfsolve [integer matrix]
+  (t_MAT)"`. Confirms the Q-only route does not extend to F_p_secp for free.
+- Ran `cargo test --test curve_audit` → 5/5 pass (6.30s). ✓
+- Updated `RESEARCH_MESTRE_HOWE.md` §7 to mark the Step-2 gap DONE and
+  document the narrower remaining F_p gap.
+
+### Findings
+
+**Ground-truth verification (exact, no round-off — everything over Q).**
+Two independent test vectors from Sage's own docstrings:
+```
+I=[1,2,3,4]: x,y,z = [328/225, -26224/3375, 2779456576/253125]
+  L port vs Sage's stated conic coefficients: all 6 ratios = 56953125 (one
+  constant, as expected since a conic is scale-invariant)
+I=[5,6,7,8]: x,y,z = [232/1125, -1072/16875, 14695616/2109375]  -- EXACT match
+  to Sage's stated x,y,z (not just proportional)
+  L port vs Sage's stated conic coefficients: all 6 ratios = 2373046875
+```
+
+**Full round-trip (I2,I4,I6,I10) → curve → (I2,I4,I6,I10), on
+`h_orig = x^6+2x^5+3x^4+5x^3+7x^2+11x+13`** (the existing
+`igusa_clebsch_complete.gp` Test-2 curve):
+```
+Igusa quadruple of h_orig:            [-2426, 171832, -125991856, -3671822836]
+Igusa quadruple of reconstructed curve: [huge rational -- no reduction step]
+lambda^2 = I2_rec/I2_orig
+I4 scales as lambda^4?  1
+I6 scales as lambda^6?  1
+I10 scales as lambda^10? 1
+```
+All three scaling checks pass with one consistent λ, which is exactly the
+correctness criterion (Igusa-Clebsch invariants are only defined up to the
+weighted scaling (λ²,λ⁴,λ⁶,λ¹⁰) — this is not a coincidence, it's the
+verification that the two curves are Q̄-isomorphic). Confirmed against a
+second known-scaling example too: Sage's docstring example
+`HyperellipticCurve_from_invariants([GF(13)(1),3,7,5])` returns a curve with
+invariants `(4,9,6,11)`, and by hand `4=2²·1, 9=2⁴·... ` — checked
+`λ=2 mod 13` satisfies all four scaling relations mod 13, confirming the
+weighted-scaling convention is exactly what both Sage and my port use.
+
+**Mestre Step 2 is now closed** as an implementation gap
+(`RESEARCH_MESTRE_HOWE.md` §7 previously rated it "~500 lines of PARI;
+week-long effort" — in the end PARI's `qfsolve`+`qfparam` primitives made it
+~130 lines, most of which is the c_ijk formula transcription, not new
+mathematics).
+
+**What this does NOT unblock:** the actual secp256k1 Howe cover still needs
+gap #2 (Igusa invariants of the glued surface `(E×E^t)/Γ_α`, not the naive
+product `y²=(x³+7)(x³+189)` that `igusa_clebsch_complete.gp` already computes
+invariants for). Feeding the naive-cover quadruple into `Mestre_reconstruct`
+would just reconstruct (a twist of) the naive cover itself — not attempted,
+since the 2026-07-26/27 log entries already established the naive cover is
+the degenerate pair (0,3) and is not the object of interest.
+
+### Next step proposal
+
+**Immediate (cheap, same script):** extend `mestre_reconstruction.gp` with
+finite-field point-finding on Mestre's conic. Algorithm: diagonalize the
+symmetric 3×3 Gram matrix mod p by completing the square (standard, ~20 lines),
+reducing to `a*u^2+b*v^2+c*w^2=0 mod p`; fix `u=1`, solve `b*v^2 = -a-c*w^2`
+by scanning `w` (or directly via `issquare`/Tonelli-Shanks, since p_secp ≡ 3
+mod 4 makes square roots a single exponentiation) — guaranteed solvable since
+ternary quadratic forms over finite fields (p odd) are always isotropic. This
+would make the whole Mestre pipeline run over F_p_secp, which is useful
+regardless of gap #2 (e.g. for sanity-checking any future candidate quadruple
+for the Howe cover, or for exploring nearby points in the moduli space).
+
+**Priority 2's real next step (harder, unchanged from 2026-07-27's Thread 3):**
+gap #2, the actual moduli computation for `(E×E^t)/Γ_α`. The 2026-07-27 log's
+Test 4/5 findings (cube roots of h are all QR mod 1009; naive cover =
+degenerate pair (0,3)) are still the most recent progress on this. A concrete
+falsifiable next attempt: for the small toy prime p=1009 pair (0,1) (found
+non-degenerate in the 2026-07-21 Howe-condition table), brute-force search
+over small (r1,r2) pairs for a sextic `y²=(x³-r1)(x³-r2)` whose
+`hyperellcharpoly` matches `P_{E_0}·P_{E_1}` exactly — small enough search
+space (p=1009) to brute force in minutes, and a positive hit would pin down
+the r1(trace,p)/r2(trace,p) map empirically even without the general CHLRS
+formula.
+
+### Commits made
+
+(recorded in next log entry, per repo convention)
