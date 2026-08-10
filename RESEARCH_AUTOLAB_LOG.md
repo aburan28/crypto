@@ -6676,4 +6676,4 @@ need to re-search.
 
 ### Commits made
 
-(recorded in follow-up commit after this entry is pushed)
+35e9ec9 autolab 2026-08-10: Thread 25 — H25 falsified pooled but confirmed per-eff (AUC 0.86-0.93); CHLRS blocked on WebFetch egress
