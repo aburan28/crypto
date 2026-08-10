@@ -6682,4 +6682,4 @@ alpha=0.5 is actually optimal for pooled AUC, or just close to it.
 
 ### Commits made
 
-(recorded after push)
+9ee62ea autolab 2026-08-10: Thread 25 — H25 falsified pooled, holds per-eff-stratum; (NU,nu_hat) is the real 2-param test
