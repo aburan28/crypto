@@ -6538,3 +6538,170 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry (log line
+~6519). Priorities 1, 2, 4, 6 remain CLOSED/BLOCKED/DEAD-END and priority 3
+completed 2026-07-21, so priority 5 (GLV-HNP) is again the only live
+thread; its last run (2026-08-07, 3 days ago) made measurable progress
+(H24 falsified with a useful by-product: NU and nu_hat are mutually
+uncorrelated predictors), so protocol rule (b) applies.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if mu's apparent power is entirely mediated by NU after all,
+>        the W5 result is a stratification artifact and the closed form
+>        should be retired.
+
+**Verdict: H25 as literally stated (raw mu, pooled across eff) is
+FALSIFIED (AUC 0.693, below the 0.8 bar) — but the corrected hypothesis (nu_hat,
+which already absorbs the eff-scale that confounds raw mu) HOLDS (AUC
+0.840 in-band), and a joint logistic fit on (log NU, log nu_hat) beats
+both single-variable scores substantially (AUC 0.940 full table, 0.883
+in-band). (NU, nu_hat) is a genuine 2-parameter viability pair.**
+
+### Work done
+
+- Environment (fresh container): `pip install fpylll cysignals sympy` ->
+  fpylll 0.6.4, cysignals 1.12.5, sympy 1.14.0 (same three packages every
+  run needs explicitly, per the recurring note in this log).
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new (exp X1-X3).
+  Regenerates the same 500-instance table as
+  `glv_hnp_phase2_gsprofile_strat.py` (17-bit j=0 GLV curves, m=12, 5 eff
+  strata x 20 curves x 5 seeds, float GS — safe per Thread 24's W0/W4,
+  <=6.6e-16 relative error vs exact Fractions at dim 24) and adds:
+  - X1: AUC(-mu) and AUC(-nu_hat) restricted to the NU-ambiguous band
+    [1.040, 2.199] (W4's 17-bit bracket).
+  - X2: `step = log2||b*_{m+1}|| - log2||b*_1||` (the GS-profile
+    two-block-transition statistic W1b flagged), tested as a standalone
+    predictor.
+  - X3: a from-scratch logistic regression (gradient descent, no numpy/
+    sklearn — this environment does not have them and the problem is
+    2-parameter) on standardized (log NU, log nu_hat), trained on the
+    full 500 rows.
+  - `--dump-json` flag added per the 2026-08-07 #2 next-step proposal, so
+    the 500-row table survives the run: `glv_hnp_phase2_thread25_table.json`
+    (178KB, per-instance NU/mu/nu_hat/step/eff/ok, GS profile arrays
+    dropped to keep it small).
+  Output: `glv_hnp_phase2_thread25_output.txt` (73 lines).
+- `cargo test --test curve_audit` -> 5/5 pass (5.52s). No Rust touched.
+
+### Findings
+
+**X1 — H25 is falsified for raw mu, holds for nu_hat.**
+
+```
+band [1.040, 2.199]: N=366  pos=97  neg=269
+  AUC(-mu     -> recovery) in-band = 0.6932   (H25 threshold 0.8: FAILS)
+  AUC(-nu_hat -> recovery) in-band = 0.8403   (H25 threshold 0.8: HOLDS)
+  AUC(-NU     -> recovery) in-band = 0.5656   (expected ~0.5: band is where
+                                                NU alone can't decide)
+
+whole-table (unconditioned) AUCs, for contrast:
+  AUC(-mu)     = 0.3964   (INVERTED -- see below)
+  AUC(-nu_hat) = 0.6889
+  AUC(-NU)     = 0.7996
+```
+
+Raw mu is not usable pooled: it is confounded with the eff stratum (larger
+eff -> larger K1 -> different mu scale), enough to flip its pooled AUC
+below 0.5 even though W5 already showed 0.75-0.93 *within* each stratum.
+`nu_hat = mu/sqrt(det L2)` is exactly the eff-normalization that fixes
+this — it clears the 0.8 bar in-band without needing manual stratification.
+**Correction to the 2026-08-07 next-step proposal: the second coordinate is
+nu_hat, not raw mu; mu only works when eff is held fixed by hand.**
+Per-stratum band AUC(-mu) confirms this directly:
+
+```
+  eff     N  pos  neg   AUC mu
+ 0.05    24   23    1   0.4565   (degenerate: 23/24 positive)
+ 0.10    83   26   57   0.8819
+ 0.15    96   21   75   0.8889
+ 0.20    89   18   71   0.9276
+ 0.25    74    9   65   0.8615
+```
+
+Outside the degenerate eff=0.05 stratum (nearly all-recover, no
+discrimination possible), mu recovers 0.86-0.93 in-band, consistent with W5.
+
+**X2 — the step statistic is redundant with nu_hat, not a new axis.**
+
+```
+pooled: AUC(+step -> recovery) = 0.6714   (worse than nu_hat's 0.689, NU's 0.800)
+Spearman(step, nu_hat) = -0.8788   Spearman(step, mu) = -0.6627
+Spearman(step, NU)     =  0.1351
+```
+
+step tracks nu_hat almost one-to-one (|rho|=0.88) and underperforms both NU
+and nu_hat as a standalone predictor. W1b's "step -> 0 at the wall" is real
+but it is the *same* lambda_1(L2) signal nu_hat already reads directly,
+through a noisier and non-monotone transformation (it also inherits the
+mu/eff confound: AUC by stratum rises 0.36 -> 0.92 across eff, same shape
+as X1's per-stratum mu table). **Retire step as a separate predictor
+candidate** — it adds no information nu_hat doesn't already carry, and is
+strictly worse.
+
+**X3 — the pre-registered deliverable: a logistic fit on (log NU, log
+nu_hat) is a real, joint 2-parameter improvement over either alone.**
+
+```
+standardized logit = -1.123 - 3.002*z(log NU) - 2.338*z(log nu_hat)
+  z(log NU)     mean=0.3821 sd=0.3537 (of log NU over the 500 rows)
+  z(log nu_hat) mean=-0.3031 sd=0.2899
+
+training AUC (joint, full table)        = 0.9397
+  vs AUC(-NU) alone (full table)        = 0.7996
+  vs AUC(-nu_hat) alone (full table)    = 0.6889
+joint-score AUC INSIDE the NU-ambiguous band = 0.8834
+  vs AUC(-nu_hat) alone in-band              = 0.8403
+```
+
+Both standardized weights are negative and of comparable magnitude (-3.00,
+-2.34): neither variable dominates, and Thread 24's W6 finding (NU and
+nu_hat*sqrt(eff) are mutually uncorrelated, Spearman ~0 to -0.28 within
+strata) is exactly why combining them buys so much — 0.940 vs 0.800/0.689
+for the best single variable is a large, non-marginal gain for two inputs
+that are almost independent. This is the concrete answer to the 2026-08-07
+open question: **the pair (NU, nu_hat) is the 2-parameter viability test**,
+fit here in closed form with no further lattice work beyond what NU/nu_hat
+already require.
+
+This is a training-set AUC (no held-out split — 500 rows, 20 curves x 5
+strata x 5 seeds, most of the "N" is repeated seeds on 20 curves, so a
+proper generalization check needs a curve-level held-out split, not an
+instance-level one, since seeds on the same curve are correlated).
+
+### Next step proposal
+
+**Thread 26 — validate the (NU, nu_hat) logistic boundary out-of-sample by
+curve, and extend to 12-bit / cross-size.** Concrete sub-tasks, cheapest
+first:
+1. Re-fit X3 with a curve-level train/test split (e.g. 15 of the 20
+   17-bit curves for fitting, 5 held out) to get a real generalization
+   number instead of the training AUC reported here — the 500 rows are
+   not independent draws (5 seeds x 5 eff values share only 20 underlying
+   curves), so 0.9397 is optimistic.
+2. Apply the same fitted (or refit) boundary to the existing 12-bit U2 grid
+   (22 cells, `glv_hnp_phase2_gsprofile.py`) and to a fresh 25-bit sweep,
+   to check whether the standardized weights (-3.00, -2.34) or the raw
+   decision boundary is n-stable, the way the NU bracket itself was shown
+   to be roughly n-stable in W4.
+3. Once a validated boundary exists, wire it into
+   `secp256k1_cm_audit/glv_hnp_phase2_20bit.py` (or a new toy driver) as a
+   pre-flight viability check before running LLL, and cross-reference it
+   against priority-5's original toy-curve-recovery goal
+   (`RESEARCH_GLV_HNP_PHASE2.md`).
+Cost: (1) and (2) are both re-analysis of data already collected by this
+run's `--dump-json` table plus the existing 12-bit U2 grid; no new lattice
+computation needed for (1)-(2). (3) is the first Phase-2 code change in
+several sessions.
+
+### Commits made
+
+(pending — filled in after commit)

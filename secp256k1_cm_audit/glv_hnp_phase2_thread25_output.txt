@@ -1,0 +1,73 @@
+==============================================================================
+Thread 25 — conditioning on NU: is mu a genuine second coordinate?
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+table dumped to glv_hnp_phase2_thread25_table.json (178407 bytes)
+
+------------------------------------------------------------------------------
+EXP X1 (H25): AUC(-mu -> recovery) INSIDE the ambiguous NU band
+------------------------------------------------------------------------------
+band [1.04, 2.199]: N=366  pos=97  neg=269
+  AUC(-mu     -> recovery) INSIDE band = 0.6932
+  AUC(-nu_hat -> recovery) INSIDE band = 0.8403
+  AUC(-NU     -> recovery) INSIDE band = 0.5656  [should be ~0.5: band is where NU alone can't decide]
+
+  H25 threshold 0.8: mu FAILS (0.6932)
+
+for comparison, whole-table AUCs (unconditioned):
+  AUC(-mu)     = 0.3964
+  AUC(-nu_hat) = 0.6889
+  AUC(-NU)     = 0.7996
+
+band AUC(-mu) by eff stratum (band may be thin per-stratum):
+  eff     N  pos  neg   AUC mu
+ 0.05    24   23    1   0.4565
+ 0.10    83   26   57   0.8819
+ 0.15    96   21   75   0.8889
+ 0.20    89   18   71   0.9276
+ 0.25    74    9   65   0.8615
+
+------------------------------------------------------------------------------
+EXP X2: does step = log2||b*_{m+1}|| - log2||b*_1|| predict the wall?
+------------------------------------------------------------------------------
+N valid = 500 (of 500)
+  AUC(-step -> recovery) = 0.3286
+  AUC(+step -> recovery) = 0.6714  [step measured to vanish AT the wall, so large step = healthy]
+  step | success: mean 0.214  median -0.141
+  step | failure: mean -0.280  median -0.338
+  Spearman(step, NU)     = 0.1351
+  Spearman(step, mu)     = -0.6627
+  Spearman(step, nu_hat) = -0.8788
+
+  step vs NU (0.860) vs mu (0.3964) pooled AUC comparison: step=0.6714
+
+step by eff stratum:
+  eff     N AUC(+step)
+ 0.05   100     0.3636
+ 0.10   100     0.7734
+ 0.15   100     0.8861
+ 0.20   100     0.9207
+ 0.25   100     0.8938
+
+------------------------------------------------------------------------------
+EXP X3: logistic decision boundary on (log NU, log nu_hat)
+------------------------------------------------------------------------------
+X1 found nu_hat (AUC 0.840 in-band) succeeds where raw mu (0.693)
+needs per-stratum conditioning, so nu_hat -- not mu -- is the
+second coordinate. Fit w0 + w1*logNU + w2*log(nu_hat) by gradient
+descent on the FULL 500-row table (logistic regression, no deps).
+
+standardized fit: logit = -1.123 + -3.002*z(logNU) + -2.338*z(log nu_hat)
+  z(logNU)     mean=0.3821 sd=0.3537
+  z(lognu_hat) mean=-0.3031 sd=0.2899
+training AUC (joint, full table) = 0.9397
+  vs AUC(-NU) alone (full table)     = 0.7996
+  vs AUC(-nu_hat) alone (full table) = 0.6889
+
+joint-score AUC INSIDE the NU-ambiguous band = 0.8834  (nu_hat alone in-band: 0.8403)
+
+==============================================================================
+done
+==============================================================================
