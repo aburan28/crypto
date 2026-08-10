@@ -6650,4 +6650,4 @@ to quantify how far above NU ~ 1.87-2.20 blockwise reduction pushes the
 threshold — orthogonal to Thread 26 and still not started.
 
 ### Commits made
-(recorded in the next commit)
+62970c8 autolab 2026-08-10: Thread 25 — mu is real conditional info beyond NU (eff-fixed), pooled-band test was confounded; step statistic falsified
