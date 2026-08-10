@@ -6676,4 +6676,4 @@ pushes the threshold — still untouched.
 
 ### Commits made
 
-(recorded after push; see follow-up commit)
+9ac5f71 autolab 2026-08-10: Thread 25 — H25 holds once eff is controlled (AUC 0.86-0.93); step statistic falsified with inverted sign
