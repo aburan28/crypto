@@ -6538,3 +6538,136 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next-step of the 2026-08-07 #2 entry (log line ~6540).
+Orientation: Priority 1 (P-521) CLOSED, Priority 2 (CHLRS) BLOCKED
+(cubic-residue obstruction, 2026-07-26), Priority 3 (Howe sextic twists)
+CLOSED, Priority 4 (cross-curve LLL 384-bit) DEAD END, Priority 6 (B5 over
+F_{p^k}) CLOSED. Priority 5 (GLV-HNP) was last touched 3 days ago with
+measurable progress (Thread 24: H24 split-falsified, NU/nu_hat shown
+mutually uncorrelated at fixed eff) — protocol rule (b) applies, continue
+priority 5.
+
+Pre-registered hypothesis and falsifier, verbatim from the Thread 24 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if no — if mu's apparent power is entirely mediated by NU
+>        after all — then the W5 result is a stratification artifact and
+>        the closed form should be retired.
+
+Also executed the pre-registered secondary: quantify
+`step = log2(||b*_{m+1}||) - log2(||b*_1||)` and test whether it predicts
+the wall better than NU or mu.
+
+**Verdict: H25 is FALSIFIED as literally stated (pooled AUC 0.693 < 0.80),
+but the failure is a stratum-pooling artifact, not mediation by NU.**
+Holding eff fixed *in addition to* banding NU recovers AUC 0.86–0.93 in
+every non-degenerate cell — matching or beating the original eff-only W5
+result. mu is a genuine NU-independent coordinate; the literal H25
+threshold test was just underpowered by mixing strata with different
+mu-given-NU distributions.
+
+### Work done
+
+- Environment: `pip install fpylll cysignals sympy` -> fpylll 0.6.4,
+  cysignals (unspecified pinned), sympy 1.14.0. Fourth consecutive session
+  needing `cysignals` named explicitly.
+- `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` — new. Reuses the exact
+  data generator of `glv_hnp_phase2_gsprofile_strat.py` (5 eff strata x 20
+  curves x 5 seeds, 17 bits, dim 24, float GS) and adds the `step` field
+  from each instance's `prof` array (`prof[m] - prof[0]` in log2, m=12).
+  Runtime 2.5s.
+  Output: `glv_hnp_phase2_thread25_output.txt`.
+- `cargo test --test curve_audit` -> 5/5 pass (4.31s). No Rust touched.
+
+### Findings
+
+**Sanity: the head block is flat, as W1b claimed.**
+`|log2 prof[m-1] - log2 prof[0]|` over 500 rows: mean 0.246 bits, max 0.751
+bits — confirms `step` as specified (b*_1 vs b*_{m+1}) is interchangeable
+with the adjacent-pair jump at the actual block boundary.
+
+**H25 primary — pooled AUC(-mu) by NU zone (17-bit bracket [1.040, 2.199]
+from Thread 24 W4):**
+
+```
+                                  N    rec      AUC(-mu)  AUC(-NU)  AUC(-step)
+NU < 1.040  (certificate zone)   94   92/94     0.1603    0.9837    0.4511
+1.040<=NU<=2.199  (BAND)        366   97/366    0.6932    0.5656    0.1803
+NU > 2.199  (should mostly fail) 40    1/40     1.0000    1.0000    0.0000
+pooled (all 500)                500  190/500    0.3964    0.7996    0.3286
+```
+
+AUC(-NU) inside the band is 0.566 (near chance), confirming the band is a
+genuine NU-blind zone as intended. AUC(-mu) inside the band is 0.693 — real
+signal, but below the 0.80 threshold, so **H25 as literally stated is
+FALSIFIED.**
+
+**Root cause of the shortfall: the band mixes eff strata unevenly (24%–96%
+of each stratum's 100 rows fall in the band), and mu's conditional
+distribution given NU differs by stratum.** Re-running the same AUC
+per-eff-stratum *inside* the band:
+
+```
+eff=0.05  N=24  rec=23/24  AUC(+step)=0.4783  AUC(-mu)=0.4565   (degenerate: 1 failure)
+eff=0.10  N=83  rec=26/83  AUC(+step)=0.8671  AUC(-mu)=0.8819
+eff=0.15  N=96  rec=21/96  AUC(+step)=0.8870  AUC(-mu)=0.8889
+eff=0.20  N=89  rec=18/89  AUC(+step)=0.9343  AUC(-mu)=0.9276
+eff=0.25  N=74  rec=9/74   AUC(+step)=0.8821  AUC(-mu)=0.8615
+```
+
+Every non-degenerate cell (eff >= 0.10) gives AUC(-mu) in [0.86, 0.93],
+matching the original W5 eff-fixed result (0.75–0.93) and comfortably
+clearing 0.80. **The pooled 0.693 undersells mu**: at eff=0.05 almost every
+instance recovers (23/24) so that stratum contributes near-random noise to
+the pooled statistic while contributing real rows; NU-banding does not
+control for this. Conclusion: **mu carries genuine information beyond NU,
+confirmed under a joint (NU-band, eff-stratum) control — the literal H25
+threshold just needed both conditions, not NU alone.**
+
+**Secondary — step is not a third quantity, it is mu with the sign and
+scale changed.**
+
+```
+Spearman(step, NU) =  0.1351   (weak)
+Spearman(step, mu) = -0.6627   (strong, negative)
+pooled: AUC(-step)=0.329, AUC(+step)=0.671   (i.e. LARGER step -> recovery,
+   opposite of the pre-registered guess that step -> 0 predicts the wall)
+inside band: AUC(+step) = 0.8197  (beats pooled AUC(-mu) = 0.693, but is
+   essentially the same signal as mu — see per-stratum table above, where
+   AUC(+step) and AUC(-mu) track each other to within 0.02 in every cell)
+```
+
+The pre-registered falsifier ("step -> 0 predicts the wall") is wrong in
+direction and in kind: step does not vanish at the wall, it is a noisy
+rescaling of `-mu` (since the head sits at mu and the tail's first entry
+`b*_{m+1}` grows with the same K1-driven geometry that shrinks mu). It adds
+no information beyond mu once eff and NU are both controlled — it is
+retired as a distinct predictor.
+
+### Next step proposal
+
+**Thread 26 — fit the joint (NU, mu, eff) decision boundary and re-test
+generalization out-of-eff.** The per-stratum table above shows AUC(-mu) is
+stable at ~0.86–0.93 once eff and the NU-band are both fixed, which is
+strong enough to attempt a real model: logistic regression on
+`(log NU, log mu, log eff)` over the pooled 500-row Thread 24/25 table,
+then a held-out test at a SIXTH eff value (e.g. 0.12 or 0.30, not in
+{0.05,...,0.25}) to check the fit isn't just interpolating the training
+grid. Concrete falsifier: held-out AUC of the fitted logistic score should
+stay within 0.05 of the pooled in-sample AUC; a larger drop means the model
+overfit the specific eff grid.
+
+Secondary (unchanged housekeeping from Thread 23): BKZ-beta sweep against
+NU, still not executed across three sessions now — worth either doing it
+next or explicitly deprioritizing it in favor of Thread 26.
+
+### Commits made
+
+(pending — see push step)

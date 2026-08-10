@@ -1,0 +1,65 @@
+==============================================================================
+Thread 25 -- conditioning on NU: is mu a second coordinate? (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.0s
+
+------------------------------------------------------------------------------
+SANITY: is the head really flat?  prof[0] vs prof[m-1] (last head)
+------------------------------------------------------------------------------
+|log2 prof[m-1] - log2 prof[0]| over 500 rows: mean 0.2458 bits, max 0.7514 bits
+(near 0 confirms the head is a flat block, so step as specified
+ -- b*_1 vs b*_{m+1} -- is interchangeable with the adjacent-pair
+ step b*_m vs b*_{m+1} used informally in the Thread 24 log.)
+
+------------------------------------------------------------------------------
+H25 PRIMARY: AUC(-mu -> recovery) inside vs outside the NU band
+band = [1.04, 2.199]  (Thread 24 W4, 17-bit bracket)
+------------------------------------------------------------------------------
+NU < 1.040 (certificate zone) N=94   rec=92/94    AUC(-mu)=0.1603  AUC(-NU)=0.9837  AUC(-step)=0.4511
+1.040 <= NU <= 2.199 (BAND)  N=366  rec=97/366   AUC(-mu)=0.6932  AUC(-NU)=0.5656  AUC(-step)=0.1803
+NU > 2.199 (should mostly fail) N=40   rec=1/40    AUC(-mu)=1.0000  AUC(-NU)=1.0000  AUC(-step)=0.0000
+pooled (all 500)             N=500  rec=190/500   AUC(-mu)=0.3964  AUC(-NU)=0.7996  AUC(-step)=0.3286
+
+band composition by eff stratum (does the band just re-select
+one eff value, making this equivalent to the W5 test?):
+  eff=0.05: 24/100 of that stratum falls in the band
+  eff=0.10: 83/100 of that stratum falls in the band
+  eff=0.15: 96/100 of that stratum falls in the band
+  eff=0.20: 89/100 of that stratum falls in the band
+  eff=0.25: 74/100 of that stratum falls in the band
+
+band composition by curve (n) -- top 5 by count:
+  n=65287: 24 instances in band
+  n=66751: 21 instances in band
+  n=65899: 21 instances in band
+  n=66457: 20 instances in band
+  n=67939: 20 instances in band
+
+H25 verdict: AUC(-mu) in band = 0.6932 (threshold 0.80) -> H25 FALSIFIED
+
+------------------------------------------------------------------------------
+SECONDARY: does step = log2||b*_{m+1}|| - log2||b*_1|| predict the
+wall better than NU or mu?  (sign unknown a priori -- report both)
+------------------------------------------------------------------------------
+AUC(-step -> recovery), pooled N=500: 0.3286   (>0.5 => smaller/more-negative step => more likely to recover)
+AUC(+step -> recovery), pooled: 0.6714
+step | success: mean 0.214  min -0.775  max 3.156
+step | failure: mean -0.280  min -0.842  max 1.057
+Spearman(step, NU)  = 0.1351
+Spearman(step, mu)  = -0.6627
+
+inside the H25 band: AUC(-step -> recovery) = 0.1803   AUC(+step -> recovery) = 0.8197   N=366
+
+robustness: is AUC(+step) inside the band an eff-stratum mix
+artifact, or does it hold within each eff stratum separately?
+  eff=0.05  N=24   rec=23/24   AUC(+step)=0.4783  AUC(-mu)=0.4565
+  eff=0.10  N=83   rec=26/83   AUC(+step)=0.8671  AUC(-mu)=0.8819
+  eff=0.15  N=96   rec=21/96   AUC(+step)=0.8870  AUC(-mu)=0.8889
+  eff=0.20  N=89   rec=18/89   AUC(+step)=0.9343  AUC(-mu)=0.9276
+  eff=0.25  N=74   rec=9/74   AUC(+step)=0.8821  AUC(-mu)=0.8615
+
+==============================================================================
+done
+==============================================================================
