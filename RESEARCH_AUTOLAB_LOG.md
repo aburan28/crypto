@@ -6655,4 +6655,4 @@ pushes the threshold — still untouched.
 
 ### Commits made
 
-(recorded after this entry is committed — see next commit)
+7ca8e69 autolab 2026-08-10: Thread 25 — H25 falsified pooled, holds per-eff (0.86-0.93); step statistic (W9) dropped
