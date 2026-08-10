@@ -6696,4 +6696,4 @@ proposal, still not executed).
 
 ### Commits made
 
-(recorded in the follow-up log-hash commit, per prior sessions' convention)
+f07c4b3 autolab 2026-08-10: Thread 25 — mu separates recovery inside ambiguous NU band once eff is controlled (AUC 0.89); step statistic falsified
