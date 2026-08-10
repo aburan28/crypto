@@ -6538,3 +6538,163 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Orientation first. Priority 1 (P-521 bigfloat) is fully **CLOSED** since
+2026-06-06 (`RESEARCH_LLL_GS_ANALYSIS.md` §10.5, 3/3 at m=16, 1/1 at m=32) —
+last touched 2026-06-06, not within 7 days, but there is no open
+sub-question left to pick up (confirmed by re-reading the log; nothing new
+to try). Priority 2/3 (CHLRS Igusa forward map) was last touched 2026-07-27
+(Thread 2/3), stalled with a concrete but high-effort next step (implement
+the CHLRS forward-map polynomial) and no attempt since. Priority 5 (GLV-HNP
+Phase 2), by contrast, has three consecutive sessions (2026-07-29, 08-07,
+08-07 #2) of measurable progress and ended last time with a cheap (~5 min),
+fully pre-registered, ready-to-run hypothesis test (H25) plus a secondary
+statistic (`step`) — both explicitly scoped in the prior log entry's "Next
+step proposal". Per the protocol's case (b) ("recent work made measurable
+progress and you can continue"), picked up Thread 25 rather than starting
+the more expensive, murkier CHLRS forward-map implementation cold. CHLRS
+forward map is the natural pick for tomorrow's run if Thread 25 (or its
+follow-ons) run dry.
+
+### Work done
+
+- Wrote `secp256k1_cm_audit/glv_hnp_phase2_thread25.py` (new), reusing
+  `glv_hnp_phase2_gsprofile.py::instance()` and the same 17-bit / 20-curve /
+  5-seed / 5-eff-stratum sweep as `glv_hnp_phase2_gsprofile_strat.py`
+  (float GS, justified by prior W0: max rel. error ~1e-15 at this dimension).
+  Added:
+  - H25 test: AUC(-mu -> recovery) restricted to the ambiguous NU band
+    `[1.040, 2.199]` (the exact 17-bit bracket from the 2026-08-07 #2 entry's
+    W4), both pooled and broken out per eff stratum.
+  - Secondary `step = log2(prof[m]) - log2(prof[0])` (prof is the float GS
+    norm profile, m=12, dim=2m=24), same AUC treatment.
+  - A dependency-free 2-feature logistic regression (`logistic_fit_2d`,
+    plain gradient descent, no numpy) on `(log NU, log mu)` over the full
+    500-instance pool, to check whether a *joint* model recovers what the
+    single-band test misses.
+  - Environment: `pip install fpylll cysignals sympy` was needed again
+    (fourth run in a row on a fresh container — this dependency is not
+    committed anywhere; worth a `requirements.txt` in `secp256k1_cm_audit/`
+    if a fifth run hits it).
+  - Output: `secp256k1_cm_audit/glv_hnp_phase2_thread25_output.txt`.
+  - `cargo test --test curve_audit` → 5/5 pass (5.55s). No Rust touched.
+
+### Findings
+
+**H25 (literal, pooled-across-eff form): FALSIFIED.** Restricting to the
+ambiguous NU band (366/500 instances, 97 recovered):
+
+```
+AUC(-mu -> recovery)      within band = 0.6932   (< 0.8 threshold)
+AUC(-nu_hat -> recovery)  within band = 0.8403
+AUC(-NU -> recovery)      within band = 0.5656   (expected ~0.5, confirms band is unbiased by construction)
+AUC(-step -> recovery)    within band = 0.1803
+```
+
+mu alone, pooled across all five eff strata, does not clear the 0.8 bar
+inside the band.
+
+**But the pooled test is itself confounded by eff — same failure mode W3
+had.** Breaking the band down by eff stratum:
+
+```
+  eff  band N     rec   AUC mu  AUC step
+ 0.05      24   23/24   0.4565    0.5217   (degenerate: only 1 failure)
+ 0.10      83   26/83   0.8819    0.1329
+ 0.15      96   21/96   0.8889    0.1130
+ 0.20      89   18/89   0.9276    0.0657
+ 0.25      74    9/74   0.8615    0.1179
+```
+
+Excluding the near-degenerate eff=0.05 cell (1 failure, AUC undefined-ish),
+**mu clears 0.8 in every single eff stratum inside the ambiguous band**
+(0.86–0.93). So **H25 holds conditionally on eff**: mu is a genuine second
+coordinate, the pooled-across-strata test was the wrong test (mu's absolute
+scale shifts with eff/K1 — the exact issue the W3→W6 arc already diagnosed
+for the closed form, now shown to also confound the *within-band* AUC).
+Refined H25 for next time: stratify by eff (or normalize mu within-stratum)
+before pooling, not just NU-band-restrict.
+
+**`step` is anti-correlated with the hypothesized direction in `auc()`'s
+sign convention, but that is exactly what W1b predicted once the sign is
+unwound.** W1b: at fixed curve, `step -> 0` as K1 (hence eff) grows, and
+larger K1/eff is *harder* (W5: recovery drops 99%→9% from eff=0.05→0.25).
+So the correct-sign hypothesis is `step` **large** ⇒ recovery, `step`
+**small/negative** ⇒ failure — i.e. `AUC(+step -> recovery)`, not
+`AUC(-step -> recovery)` as the prior entry's phrasing ("test whether
+step→0 predicts the wall") ambiguously suggested. Flipping the printed
+numbers (`1 - x`):
+
+```
+AUC(+step -> recovery), within band, per stratum: 0.4783 0.8671 0.8870 0.9343 0.8821
+AUC(+step -> recovery), pooled (N=500):            0.6714   (vs AUC(-NU) pooled 0.7996)
+```
+
+`step` (correctly signed) is a within-stratum separator essentially as
+strong as `mu` (0.87–0.93 vs 0.86–0.93, stratum for stratum) — consistent
+with `step ≈ log2(sqrt(lambda_2/lambda_1)) = 0.5·log2(det L2 / mu²)`
+(from W1b's profile shape + W2's `lambda_1·lambda_2 ≈ det L2`), i.e. `step`
+and `mu` are two views of the same lambda-block geometry, not independent
+signals. `Spearman(step, NU)` pooled = 0.135 — step and NU are close to
+uncorrelated, same qualitative relationship W6 found between `mu` and `NU`.
+
+**A joint (log NU, log mu) logistic model beats NU alone, no eff term
+needed.** Fit over all 500 instances (standardised features, plain gradient
+descent, no external solver):
+
+```
+weights: w0=-0.776  w_logNU=-2.554  w_logmu=-1.148   (both negative: smaller NU, smaller mu -> recovery)
+AUC(fitted p) = 0.8596   vs   AUC(-NU alone) = 0.7996   AUC(-mu alone, pooled) = 0.3964
+```
+
+This is the cleanest positive result of the day: log-mu's *coefficient
+survives* in a model that already has log-NU, and the combined AUC (0.86)
+beats NU alone (0.80) by a comfortable margin — without needing to bin by
+eff at all. (Note `AUC(-mu alone, pooled)` = 0.40, i.e. mu pooled naively
+*without* log-space + NU has the wrong sign entirely; log-space + joint
+fitting is what rescues it, matching the eff-confounding story above.)
+
+### Next step proposal
+
+**Thread 25b — replace the ad hoc NU-band+mu test with the logistic
+decision boundary.** The (log NU, log mu) fit above (AUC 0.86) is the
+correct form of the "2-parameter viability test" the prior entry
+anticipated; H25's literal pooled-AUC framing was the wrong instrument, not
+the underlying claim. Concrete next step: hold out a fresh batch of curves
+(the 20 curves already used were also used for every prior sweep — no
+train/test split has ever been done in this thread), refit on 15 curves,
+evaluate AUC on the 5 held out. If AUC survives the split (>~0.8), this is
+a defensible predictive claim to write up; if it collapses, the fit is
+overfit to this specific 20-curve, 5-seed sample and needs more curves
+before it means anything.
+
+Secondary (cheap, ~10 min): add `step` as a third feature to the logistic
+fit (`log NU, log mu, step`) — given step and mu are near-duplicates
+stratum-for-stratum but not identical (Spearman step-vs-NU 0.135, mu-vs-NU
+per W6 ranged -0.28..+0.16), a 3-feature fit may separate further or may
+show `step` is redundant once `mu` is in the model (multicollinearity
+check: fit `step` alone as a regression target on `log mu` and read R²
+before adding it).
+
+Tertiary (unchanged, still not attempted): BKZ-beta sweep against NU, to
+quantify how far above NU ~ 1.87–2.20 blockwise reduction pushes the
+threshold. `fpylll.BKZ` is already imported and used elsewhere in this
+directory (`glv_hnp_bkz_c1.py`, `glv_hnp_bkz_ceiling.py`) so no new
+dependency is needed; this is the most expensive of the three (each BKZ-β
+call is seconds, not ms) and was deprioritized today in favor of finishing
+the H25/step analysis in full.
+
+Housekeeping: consider adding `secp256k1_cm_audit/requirements.txt`
+(`fpylll`, `cysignals`, `sympy`) — every autolab run on a fresh container
+has had to `pip install` these from scratch (now 4 occurrences across the
+log); a committed requirements file removes a repeated ~30s tax and a
+possible silent-failure point if the fresh container ever lacks network
+access to PyPI.
+
+### Commits made
+
+(filled in below)

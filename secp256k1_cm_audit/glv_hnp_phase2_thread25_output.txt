@@ -1,0 +1,47 @@
+==============================================================================
+Thread 25 — is mu a second coordinate beyond NU? (H25)
+==============================================================================
+
+20 17-bit j=0 GLV curves in 0.0s
+500 instances (float GS, dim 24) in 2.3s
+
+------------------------------------------------------------------------------
+H25: within the ambiguous NU band [1.040, 2.199], does mu still separate?
+------------------------------------------------------------------------------
+band size: 366/500  (97 recovered, 269 not)
+AUC(-mu -> recovery)      within band = 0.6932
+AUC(-nu_hat -> recovery)  within band = 0.8403
+AUC(-NU -> recovery)      within band = 0.5656  (expected ~0.5: NU is the stratifying variable)
+AUC(-step -> recovery)    within band = 0.1803
+
+H25 verdict: FALSIFIED (threshold 0.8, observed 0.6932)
+
+------------------------------------------------------------------------------
+H25 per-eff-stratum breakdown (band membership varies by stratum)
+------------------------------------------------------------------------------
+  eff  band N     rec   AUC mu  AUC step
+ 0.05      24   23/24   0.4565    0.5217
+ 0.10      83   26/83   0.8819    0.1329
+ 0.15      96   21/96   0.8889    0.1130
+ 0.20      89   18/89   0.9276    0.0657
+ 0.25      74    9/74   0.8615    0.1179
+
+------------------------------------------------------------------------------
+Secondary: step = log2(||b*_{m+1}||) - log2(||b*_1||), pooled
+------------------------------------------------------------------------------
+AUC(-step -> recovery) pooled (N=500) = 0.3286
+AUC(-NU   -> recovery) pooled                 = 0.7996
+AUC(-mu   -> recovery) pooled                 = 0.3964
+Spearman(step, NU) pooled = 0.1351
+step | success : mean 0.214  min -0.775  max 3.156
+step | failure : mean -0.280  min -0.842  max 1.057
+
+------------------------------------------------------------------------------
+2-parameter logistic fit on (log NU, log mu), full 500-instance set
+------------------------------------------------------------------------------
+weights (standardised): w0=-0.776 w_logNU=-2.554 w_logmu=-1.148
+AUC of fitted p(recovery) = 0.8596  (vs AUC(-NU) alone = 0.7996, AUC(-mu) alone = 0.3964)
+
+==============================================================================
+done
+==============================================================================
