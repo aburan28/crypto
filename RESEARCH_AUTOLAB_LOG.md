@@ -6538,3 +6538,121 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+Thread 25, the pre-registered next-step of the 2026-08-07 #2 (Thread 24) entry:
+H25 (does mu = lambda_1(L2) still separate recovery *inside* the NU-ambiguous
+band 1.04 <= NU <= 2.199?) plus the secondary W1b-motivated step statistic.
+Priorities 1 (P-521, CLOSED §10.5), 3 (Howe gluing, CLOSED 2026-07-21), 4
+(cross-curve LLL, CLOSED 2026-06-14) and 6 (B5, CLOSED, extended through
+Thread 17) remain closed; priority 2 (CHLRS Igusa) is BLOCKED pending
+Sage/Mestre-theta tooling not present in this container. Priority 5
+(GLV-HNP Phase 2) is the only live thread, and 2026-08-07 #2 made measurable
+progress (falsified H24, found NU/nu_hat uncorrelated at fixed eff, proposed
+Thread 25), so per the protocol it is continued rather than skipped.
+
+### Work done
+
+- Installed missing Python deps in this fresh container: `sympy`, `fpylll`,
+  `cysignals` (all via plain `pip install`, no system packages needed —
+  fpylll ships a manylinux wheel here).
+- Extended `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` with:
+  - `--dump-json` flag (writes the 500-row 17-bit table, minus the raw
+    per-index `nus` array, to `glv_hnp_phase2_gsprofile_strat_table.json`)
+    as proposed in the prior entry, so future runs can re-analyze without
+    re-running the lattice sweep.
+  - **EXP W8** (H25): restrict to the NU band `[1.040, 2.199]` from the
+    2026-08-07 W4 bracket, compute `AUC(-mu -> recovery)` pooled and per
+    `eff` stratum inside the band.
+  - **EXP W9** (secondary): `step = log2(||b*_{m+1}||) - log2(||b*_1||)`
+    (`b*_1 = prof[0]`, `m = k//2 = 12`), AUC against recovery, Spearman vs
+    NU and vs mu.
+- Ran the extended script (`python3 glv_hnp_phase2_gsprofile_strat.py
+  --dump-json`); full output at
+  `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_output.txt`. W5/W6
+  numbers reproduced bit-for-bit against the 2026-08-07 #2 log entry
+  (pooled `AUC(-nu_hat*sqrt(eff)) = 0.9348`, `mean C` column identical),
+  confirming the harness is deterministic across containers.
+
+### Findings
+
+**W8 — H25 is FALSIFIED as literally stated, but holds conditional on eff.**
+
+```
+band [1.040, 2.199]: 366/500 instances (97 recover, 269 fail)
+AUC(-mu     -> recovery) inside band, pooled = 0.6932   (H25 needs >= 0.8: FAILS)
+AUC(-nu_hat -> recovery) inside band, pooled = 0.8403
+
+per-eff breakdown inside the band:
+  eff     N     rec   AUC mu
+ 0.05    24   23/24   0.4565   (near-degenerate: 23/24 recover)
+ 0.10    83   26/83   0.8819
+ 0.15    96   21/96   0.8889
+ 0.20    89   18/89   0.9276
+ 0.25    74    9/74   0.8615
+```
+
+Pooling across eff strata inside the band reproduces exactly the W5/W6
+pathology from 2026-08-07: eff is a confound that band-membership does not
+remove (the eff=0.05 stratum contributes only 24/500 points to the band and
+is itself 23/24 positive, dragging the pooled AUC down to 0.69). Restricted
+to the four non-degenerate strata, mu clears the H25 threshold in every one
+(0.86-0.93), matching W5's original per-stratum numbers (0.74-0.93) almost
+exactly. **Conclusion: mu is a genuine second coordinate conditional on eff,
+confirming W5/W6's interpretation — but H25's pooled formulation was not the
+right test, because the NU band itself is not eff-homogeneous.** The
+2-parameter (NU, mu) test proposed in the 2026-08-07 log is really a
+3-parameter (NU, mu, eff) test; eff cannot be marginalized out post hoc by
+restricting to an NU band.
+
+**W9 — the step statistic does NOT predict the wall; it is dominated by mu
+with the wrong sign for the hypothesis.**
+
+```
+valid step values: 500/500
+AUC(-step -> recovery) pooled = 0.3286   (worse than random-in-reverse: larger
+                                           step -> MORE likely to recover)
+AUC(-NU   -> recovery) pooled (same subset) = 0.7996
+AUC(-mu   -> recovery) pooled (same subset) = 0.3964
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+step summary: mean -0.093  min -0.842  max 3.156
+```
+
+`step -> 0` does not predict the wall; if anything larger `step` mildly
+*favors* recovery (AUC 0.33 means positives have larger step, since `auc(pos,
+neg)` scores concordance of pos < neg). Spearman(step, mu) = -0.66 is the
+dominant relationship — step is mostly just an inverse readout of mu (a
+larger lambda_1(L2) squeezes the first-block GS norms down relative to the
+second-block ones, shrinking the gap), not an independent quantity, and its
+weak/negative correlation with NU (0.14) confirms it does not track the
+nearest-plane wall at all. **W1b's "step -> 0 at the wall" reading was
+visual/anecdotal on 2 curves and does not survive the 500-instance
+cross-curve test.** Dropped as a candidate statistic.
+
+### Next step proposal
+
+**Thread 26 — fit the 3-parameter model (log NU, log mu, log eff) directly**
+instead of trying to remove eff by conditioning on an NU band. W8 shows the
+per-stratum AUCs for mu (0.86-0.93, four non-degenerate eff strata) are
+already stable and high; the concrete sub-task is a logistic regression (no
+external ML dependency needed — 3-parameter Newton IRLS is ~20 lines) on the
+existing 500-row table (now dumped to `glv_hnp_phase2_gsprofile_strat_table.json`,
+reusable without re-running the lattice sweep) predicting `ok` from
+`(log NU, log mu, log eff)`, compared against the NU-only and
+`nu_hat*sqrt(eff)`-only baselines (AUC 0.7996 / 0.9348 respectively, this
+table). Falsifier: if the 3-parameter fit's cross-validated AUC does not
+clear ~0.95, mu adds nothing beyond what `nu_hat*sqrt(eff)` (W5/W6) already
+captures and Thread 23-25's mu/NU decomposition should be retired in favor
+of the closed form.
+
+Secondary (unchanged): BKZ-beta sweep against NU (Thread 23/24's tertiary
+proposal), to quantify how far above NU ~ 1.87-2.20 blockwise reduction
+pushes the threshold — still untouched.
+
+### Commits made
+
+(recorded after this entry is committed — see next commit)

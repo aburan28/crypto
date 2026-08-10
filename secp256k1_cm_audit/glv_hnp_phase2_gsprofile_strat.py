@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -32,6 +33,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
+
+DUMP_JSON = "--dump-json" in sys.argv
 
 if __name__ == "__main__":
     print("=" * 78)
@@ -63,6 +66,14 @@ if __name__ == "__main__":
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if DUMP_JSON:
+        dump_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "glv_hnp_phase2_gsprofile_strat_table.json")
+        with open(dump_path, "w") as f:
+            json.dump([{k: v for k, v in r.items() if k != 'nus'}
+                       for r in rows], f)
+        print(f"dumped {len(rows)} rows to {dump_path}")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
@@ -139,6 +150,72 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    print("\n" + "-" * 78)
+    print("EXP W8 (Thread 25, H25): does mu separate INSIDE the NU-ambiguous band?")
+    print("-" * 78)
+    print("17-bit bracket (2026-08-07 log, W4): sufficient NU < 1.040, "
+          "necessary NU > 2.199.")
+    band_lo, band_hi = 1.040, 2.199
+    band = [r for r in rows if band_lo <= r['NU'] <= band_hi]
+    pos_b = [r for r in band if r['ok']]
+    neg_b = [r for r in band if not r['ok']]
+    print(f"band [{band_lo}, {band_hi}]: {len(band)}/{len(rows)} instances "
+          f"({len(pos_b)} recover, {len(neg_b)} fail)")
+    if pos_b and neg_b:
+        auc_mu_band = auc([r['mu'] for r in pos_b], [r['mu'] for r in neg_b])
+        auc_nh_band = auc([r['nuhat'] for r in pos_b], [r['nuhat'] for r in neg_b])
+        print(f"AUC(-mu     -> recovery) inside band = {auc_mu_band:.4f}")
+        print(f"AUC(-nu_hat -> recovery) inside band = {auc_nh_band:.4f}")
+        print(f"H25 predicts AUC(-mu) >= 0.8 inside the band: "
+              f"{'HOLDS' if auc_mu_band >= 0.8 else 'FALSIFIED'}")
+    else:
+        print("degenerate: one class empty inside the band, no AUC defined")
+
+    print("\nper-eff breakdown inside the band:")
+    print(f"{'eff':>5} {'N':>5} {'rec':>7} {'AUC mu':>8}")
+    for eff in EFFS:
+        subb = [r for r in band if r['effq'] == eff]
+        posb = [r for r in subb if r['ok']]
+        negb = [r for r in subb if not r['ok']]
+        if not subb:
+            continue
+        if posb and negb:
+            print(f"{eff:>5.2f} {len(subb):>5} "
+                  f"{str(len(posb))+'/'+str(len(subb)):>7} "
+                  f"{auc([r['mu'] for r in posb], [r['mu'] for r in negb]):>8.4f}")
+        else:
+            print(f"{eff:>5.2f} {len(subb):>5} "
+                  f"{str(len(posb))+'/'+str(len(subb)):>7} {'(degenerate)':>8}")
+
+    print("\n" + "-" * 78)
+    print("EXP W9 (Thread 25, secondary): does the GS-profile step to the")
+    print("second block predict the wall better than NU or mu?")
+    print("-" * 78)
+    print("step = log2(||b*_{m+1}||) - log2(||b*_1||)   (b*_1 = prof[0])")
+    for r in rows:
+        m = r['k'] // 2
+        b1, bm1 = r['prof'][0], r['prof'][m]
+        r['step'] = (math.log2(bm1) - math.log2(b1)
+                     if b1 > 0 and bm1 > 0 else float('nan'))
+    valid = [r for r in rows if not math.isnan(r['step'])]
+    pos_s = [r for r in valid if r['ok']]
+    neg_s = [r for r in valid if not r['ok']]
+    print(f"valid step values: {len(valid)}/{len(rows)}")
+    if pos_s and neg_s:
+        auc_step = auc([r['step'] for r in pos_s], [r['step'] for r in neg_s])
+        auc_NU_v = auc([r['NU'] for r in pos_s], [r['NU'] for r in neg_s])
+        auc_mu_v = auc([r['mu'] for r in pos_s], [r['mu'] for r in neg_s])
+        print(f"AUC(-step -> recovery) pooled = {auc_step:.4f}")
+        print(f"AUC(-NU   -> recovery) pooled (same subset) = {auc_NU_v:.4f}")
+        print(f"AUC(-mu   -> recovery) pooled (same subset) = {auc_mu_v:.4f}")
+        print(f"Spearman(step, NU) = {spearman([r['step'] for r in valid], [r['NU'] for r in valid]):.4f}")
+        print(f"Spearman(step, mu) = {spearman([r['step'] for r in valid], [r['mu'] for r in valid]):.4f}")
+        print(f"step summary: mean {sum(r['step'] for r in valid)/len(valid):.3f} "
+              f"min {min(r['step'] for r in valid):.3f} "
+              f"max {max(r['step'] for r in valid):.3f}")
+    else:
+        print("degenerate: one class empty, no AUC defined")
 
     print("\n" + "=" * 78)
     print("done")

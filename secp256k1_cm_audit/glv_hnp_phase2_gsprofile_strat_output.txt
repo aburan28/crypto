@@ -3,7 +3,8 @@ Thread 24b — cross-curve test of the closed-form separator (eff fixed)
 ==============================================================================
 
 20 17-bit j=0 GLV curves in 0.0s
-500 instances (float GS, dim 24) in 3.0s
+500 instances (float GS, dim 24) in 2.3s
+dumped 500 rows to /home/user/crypto/secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat_table.json
 
 ------------------------------------------------------------------------------
 EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only
@@ -61,6 +62,36 @@ stratum eff = 0.10  (42 of the minority class)
    66301  0.2976   0.9619    1.2527    1/5
    65719  0.0273   0.9643    1.2763    2/5
    65647  0.2253   0.9848    1.1211    2/5
+
+------------------------------------------------------------------------------
+EXP W8 (Thread 25, H25): does mu separate INSIDE the NU-ambiguous band?
+------------------------------------------------------------------------------
+17-bit bracket (2026-08-07 log, W4): sufficient NU < 1.040, necessary NU > 2.199.
+band [1.04, 2.199]: 366/500 instances (97 recover, 269 fail)
+AUC(-mu     -> recovery) inside band = 0.6932
+AUC(-nu_hat -> recovery) inside band = 0.8403
+H25 predicts AUC(-mu) >= 0.8 inside the band: FALSIFIED
+
+per-eff breakdown inside the band:
+  eff     N     rec   AUC mu
+ 0.05    24   23/24   0.4565
+ 0.10    83   26/83   0.8819
+ 0.15    96   21/96   0.8889
+ 0.20    89   18/89   0.9276
+ 0.25    74    9/74   0.8615
+
+------------------------------------------------------------------------------
+EXP W9 (Thread 25, secondary): does the GS-profile step to the
+second block predict the wall better than NU or mu?
+------------------------------------------------------------------------------
+step = log2(||b*_{m+1}||) - log2(||b*_1||)   (b*_1 = prof[0])
+valid step values: 500/500
+AUC(-step -> recovery) pooled = 0.3286
+AUC(-NU   -> recovery) pooled (same subset) = 0.7996
+AUC(-mu   -> recovery) pooled (same subset) = 0.3964
+Spearman(step, NU) = 0.1351
+Spearman(step, mu) = -0.6627
+step summary: mean -0.093 min -0.842 max 3.156
 
 ==============================================================================
 done
