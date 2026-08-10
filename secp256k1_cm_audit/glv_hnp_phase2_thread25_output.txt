@@ -1,0 +1,40 @@
+==============================================================================
+Thread 25 — mu inside the NU band; W1b step vs. the wall
+==============================================================================
+
+500 rows loaded from glv_hnp_phase2_thread25_rows.json
+
+------------------------------------------------------------------------------
+H25: AUC(-mu -> recovery) WITHIN the NU ambiguous band [1.04, 2.199]
+------------------------------------------------------------------------------
+band population: 366 / 500 instances (97/366 recover)
+  eff=0.05  N= 24  23/24 rec  AUC(-mu)=0.4565  AUC(-nu_hat)=0.4565
+  eff=0.10  N= 83  26/83 rec  AUC(-mu)=0.8819  AUC(-nu_hat)=0.8853
+  eff=0.15  N= 96  21/96 rec  AUC(-mu)=0.8889  AUC(-nu_hat)=0.8825
+  eff=0.20  N= 89  18/89 rec  AUC(-mu)=0.9276  AUC(-nu_hat)=0.9425
+  eff=0.25  N= 74  9/74 rec  AUC(-mu)=0.8615  AUC(-nu_hat)=0.8615
+
+pooled over band (N=366): AUC(-mu)=0.6932  AUC(-nu_hat)=0.8403
+H25 (AUC(-mu) >= 0.8 inside band): FALSIFIED (0.6932 < 0.80)
+
+------------------------------------------------------------------------------
+Secondary: W1b step = log2||b*_{m+1}|| - log2||b*_1|| vs. the wall
+------------------------------------------------------------------------------
+500/500 rows have a finite step value
+NOTE: unlike NU/mu/nu_hat, the wall hypothesis predicts step is
+small NEAR failure and large near recovery -- opposite sign. The
+'AUC(+step)' column flips convention so >0.5 also means 'more
+signal', matching the other columns.
+  eff     N     rec | AUC(-step) AUC(+step)   AUC NU   AUC mu
+ 0.05   100  99/100 |     0.6364     0.3636   0.8687   0.4242
+ 0.10   100  42/100 |     0.2266     0.7734   0.7011   0.7443
+ 0.15   100  21/100 |     0.1139     0.8861   0.3496   0.8873
+ 0.20   100  19/100 |     0.0793     0.9207   0.5595   0.9175
+ 0.25   100   9/100 |     0.1062     0.8938   0.7277   0.8816
+
+pooled AUC(-step) = 0.3286  ->  AUC(+step) = 0.6714  (recall pooled AUC(-NU) = 0.7996)
+Spearman(step, NU) = 0.1351   Spearman(step, mu) = -0.6627
+
+==============================================================================
+done
+==============================================================================

@@ -21,6 +21,7 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import json
 import math
 import os
 import random
@@ -32,6 +33,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
+
+DUMP_JSON = None
+if '--dump-json' in sys.argv:
+    DUMP_JSON = sys.argv[sys.argv.index('--dump-json') + 1]
 
 if __name__ == "__main__":
     print("=" * 78)
@@ -57,12 +62,23 @@ if __name__ == "__main__":
                 if r is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                # W1b: profile head is m copies of lambda_1(L2); step is the
+                # log-jump from the head block to the second block (Thread 25
+                # secondary hypothesis — does step -> 0 predict the wall?).
+                step = (math.log2(r['prof'][M17]) - math.log2(r['prof'][0])
+                        if r['prof'][0] > 0 and r['prof'][M17] > 0 else float('nan'))
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n), 'step': step})
+                del r['prof']
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
+
+    if DUMP_JSON:
+        with open(DUMP_JSON, 'w') as f:
+            json.dump(rows, f)
+        print(f"\n[dumped {len(rows)} rows to {DUMP_JSON}]")
 
     print("\n" + "-" * 78)
     print("EXP W5: AUC within each eff stratum — eff is CONSTANT, so the only")
