@@ -6538,3 +6538,148 @@ how far above NU ~ 1.87-2.20 blockwise reduction pushes the threshold.
 ### Commits made
 
 942c8a4 autolab 2026-08-07 #2: Thread 24 — H24 argmax clause falsified; NU and nu_hat are uncorrelated at fixed eff
+
+## 2026-08-10 (autolab run)
+
+### Task picked
+
+**Thread 25** — "find the second mechanism by conditioning on NU", the
+pre-registered next step of the 2026-08-07 #2 log entry (line ~6494).
+Priorities 1, 2, 3, 4, 6 remain CLOSED/BLOCKED/DEAD-END; priority 5
+(GLV-HNP Phase 2) made measurable progress three days ago (Thread 24: H24
+argmax clause falsified, NU/nu_hat shown mutually uncorrelated at fixed
+eff — a real result, not a stall), so protocol rule (b) applies and the
+thread continues rather than falling through the priority list.
+
+Pre-registered hypothesis and falsifier, verbatim from the 2026-08-07 #2 entry:
+
+>   H25: within the ambiguous band 1.04 <= NU <= 2.20 (where nearest-plane
+>        gives no answer), AUC(-mu -> Kannan-LLL recovery) stays >= 0.8.
+>   Falsifier: if no — if mu's apparent power is entirely mediated by NU
+>        after all — then the W5 result is a stratification artifact and
+>        the closed form should be retired.
+>
+>   Secondary: define `step = log2(||b*_{m+1}||) - log2(||b*_1||)` and test
+>        whether `step -> 0` predicts the wall better than either NU or mu.
+
+**Verdict: H25 as literally stated is FALSIFIED on the pooled band, but the
+failure mode is itself the finding — it is the same Simpson's-paradox scale
+drift W6 found in NU, and nu_hat's normalization (already known from W5) is
+exactly what repairs it. The secondary `step` statistic is a dead end,
+worse than either NU or mu and anti-correlated with mu (Spearman -0.66).**
+
+### Work done
+
+- Environment (fresh container, as every prior run): `pip install fpylll
+  cysignals sympy` -> same versions as 2026-08-07 (fpylll 0.6.4, cysignals
+  1.12.5, sympy 1.14.0).
+- `secp256k1_cm_audit/glv_hnp_phase2_gsprofile_strat.py` — added
+  `--dump-json PATH` (argparse), as proposed in the prior entry so the
+  500-row table survives the run instead of only being printed. Also
+  records `prof0`/`profm` (GS-profile norms at the head and at the
+  head/tail-block boundary index `m`) per row, needed for the `step` check.
+  Re-ran with the same seeds; W5/W6/W7 numbers reproduce byte-for-byte
+  against the 2026-08-07 #2 log entry (deterministic seeding confirmed).
+- `secp256k1_cm_audit/thread25_analysis.py` — new. Reads
+  `thread25_rows.json` (500 rows, 17-bit, dim 24, 5 eff strata x 20 curves
+  x 5 seeds), computes the NU-band stratification and the `step` statistic.
+- `cargo test --test curve_audit` -> 5/5 pass (5.47s). No Rust touched.
+
+### Findings
+
+**Band composition.** Using the Thread 24 W4 17-bit bracket [1.040, 2.199]:
+`below bracket` 94/500 (92/94 recover = 97.9%), `above bracket` 40/500
+(1/40 recovers = 2.5%), `in band` 366/500 (97/366 recover = 26.5%). The
+band is genuinely ambiguous and is 73% of the data — NU alone is nearly
+useless for most instances at this size, which is why a second coordinate
+matters.
+
+**H25 literal test — FALSIFIED.** Pooled over the whole in-band set:
+
+```
+AUC(-mu     -> recovery), in-band  = 0.6932   (< 0.8 threshold: FALSIFIED)
+AUC(-nu_hat -> recovery), in-band  = 0.8403   (>= 0.8 threshold: HOLDS)
+AUC(-NU     -> recovery), in-band  = 0.5656   (near-null, as expected: NU defines the band)
+AUC(-step   -> recovery), in-band  = 0.1803   (inverted and weak)
+AUC(-lam*   -> recovery), in-band  = 0.3212   (control, inverted per Thread 20)
+```
+
+**But mu is not mediated by NU — it is mediated by eff, exactly like W6.**
+Splitting the same in-band set by eff stratum:
+
+```
+eff=0.05  N=24   rec=23/24  (near-degenerate)  AUC(mu)=0.4565  AUC(NU)=0.4783
+eff=0.10  N=83   rec=26/83                     AUC(mu)=0.8819  AUC(NU)=0.5277
+eff=0.15  N=96   rec=21/96                     AUC(mu)=0.8889  AUC(NU)=0.3283
+eff=0.20  N=89   rec=18/89                     AUC(mu)=0.9276  AUC(NU)=0.4695
+eff=0.25  N=74   rec=9/74                      AUC(mu)=0.8615  AUC(NU)=0.6188
+```
+
+mu clears H25's 0.8 bar in every non-degenerate stratum (4/5) *inside the
+band*, with NU staying near-null throughout (confirming the band is honest —
+NU truly carries no more signal once you're inside it). The pooled failure
+is pure Simpson's paradox: mu's absolute scale drifts with eff (same
+mechanism as W6's `C = NU/(nu_hat*sqrt(eff))` drifting 7.4 -> 5.5 across
+strata), so pooling raw mu across strata cancels its within-stratum power.
+
+**nu_hat repairs the pooling exactly because it is mu rescaled by
+sqrt(det L2), which is eff-dependent.** Per-stratum, nu_hat and mu are
+near-identical (as W5 already noted — within a stratum n and eff are fixed,
+so nu_hat is just a rescaled mu):
+
+```
+eff=0.05  AUC(nu_hat)=0.4565  AUC(mu)=0.4565   (identical: degenerate stratum)
+eff=0.10  AUC(nu_hat)=0.8853  AUC(mu)=0.8819
+eff=0.15  AUC(nu_hat)=0.8825  AUC(mu)=0.8889
+eff=0.20  AUC(nu_hat)=0.9425  AUC(mu)=0.9276
+eff=0.25  AUC(nu_hat)=0.8615  AUC(mu)=0.8615
+```
+
+but only nu_hat's pooled AUC (0.8403) clears the H25 bar, because its
+normalization by sqrt(det L2) is precisely the eff-dependent rescaling that
+makes strata comparable. **Refined conclusion: the correct 2-parameter
+viability test for Phase 2 is (NU, nu_hat), not (NU, mu).** NU screens the
+two tails (below 1.04 -> recover, above 2.20 -> fail) and nu_hat ranks the
+73% of instances the band leaves undecided, with no re-fitting needed.
+
+Sanity check of a hard 2-parameter rule (NU tails + in-band nu_hat
+median-split as tiebreaker): nu_hat <= median (0.7731) catches 79/97
+in-band recoveries at a 109/269 (41%) false-positive cost — directionally
+correct but not clean; a logistic fit on (log NU, log nu_hat) is the right
+next step, not a hard threshold.
+
+**Secondary — `step` is a dead end.** `step = log2(profm) - log2(prof0)`,
+the head/tail GS-profile jump flagged in Thread 24 W1b, does NOT predict
+recovery: pooled AUC(-step) = 0.329 (worse than random, i.e. *larger* step
+predicts recovery, backwards from the W1b intuition that step -> 0 at the
+wall), and in-band AUC(-step) = 0.180 (same inverted sign, stronger).
+`Spearman(step, mu) = -0.663` — step is just an anti-correlated, noisier
+proxy for mu, not new information. W1b's "the step vanishes right as the
+wall is crossed" description was about a single hand-picked example
+(2557, K1=32); it does not generalize across the 500-instance grid.
+
+### Next step proposal
+
+**Thread 26 — fit and validate the (NU, nu_hat) 2-parameter rule.**
+Fit a logistic regression on (log NU, log nu_hat) over the 500-row 17-bit
+table (`thread25_rows.json`), report the decision boundary and its
+in-sample AUC (expect > 0.94, since nu_hat*sqrt(eff) alone pooled already
+reaches 0.935 per W3). Then validate out-of-sample: re-run
+`glv_hnp_phase2_gsprofile_strat.py --dump-json` at a *different* bit length
+(e.g. 20-bit, dim still tractable) with the SAME fitted coefficients frozen,
+and check the AUC holds without refitting. If it does, this is the
+deliverable Phase 2 has been missing — a closed-form, no-lattice-work
+viability predictor with a validated decision rule. If the coefficients
+don't transfer, that itself is worth recording (means nu_hat's exponent on
+`eff` isn't exactly 1/2, contradicting the W3 closed form).
+Cost: reuse `thread25_rows.json`+ one fresh 20-bit run, ~5-10 minutes
+(20-bit curve search is not yet benchmarked here; may need `search_curves`
+range/per_bin tuning if it's slow).
+
+Secondary (cheap, if time remains): re-derive nu_hat's exponent on eff
+empirically instead of assuming sqrt — fit `nu_hat * eff^alpha` and see if
+alpha=0.5 is actually optimal for pooled AUC, or just close to it.
+
+### Commits made
+
+(recorded after push)

@@ -21,6 +21,8 @@ Gram-Schmidt is float here, justified by W0/W4 of the parent script
 Run: python3 glv_hnp_phase2_gsprofile_strat.py
 """
 
+import argparse
+import json
 import math
 import os
 import random
@@ -33,7 +35,18 @@ from glv_hnp_common import lam_star, search_curves
 from glv_hnp_phase2_projected import SEEDS, run_new
 from glv_hnp_phase2_gsprofile import instance, auc, spearman
 
+# Fields kept in --dump-json.  'prof0'/'profm' are the head/tail-boundary GS
+# norms (see Thread 24 W1b: prof[0..m-1] ~ m copies of lambda_1(L2), and the
+# step to the tail block is the Thread 25 secondary hypothesis).
+DUMP_FIELDS = ('n', 'K1', 'eff', 'effq', 'ok', 'NU', 'mu', 'nuhat',
+               'lamstar', 'l2', 'det2', 'argmax', 'k', 'prof0', 'profm')
+
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dump-json", default=None,
+                     help="write the per-instance row table to this path")
+    args = ap.parse_args()
+
     print("=" * 78)
     print("Thread 24b — cross-curve test of the closed-form separator (eff fixed)")
     print("=" * 78)
@@ -57,9 +70,11 @@ if __name__ == "__main__":
                 if r is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                m_idx = r['k'] // 2
                 r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
                           'eff': k1b * k2b / n, 'effq': eff,
-                          'lamstar': lam_star(lam, n)})
+                          'lamstar': lam_star(lam, n),
+                          'prof0': r['prof'][0], 'profm': r['prof'][m_idx]})
                 rows.append(r)
     print(f"{len(rows)} instances (float GS, dim {rows[0]['k']}) "
           f"in {time.time()-t0:.1f}s")
@@ -139,6 +154,11 @@ if __name__ == "__main__":
         print(f"{n:>8} {g[0]['lamstar']:>7.4f} {g[0]['nuhat']:>8.4f} "
               f"{sum(x['NU'] for x in g)/len(g):>9.4f} "
               f"{str(sum(1 for x in g if x['ok']))+'/'+str(len(g)):>6}")
+
+    if args.dump_json:
+        with open(args.dump_json, "w") as f:
+            json.dump([{k: r[k] for k in DUMP_FIELDS} for r in rows], f)
+        print(f"\ndumped {len(rows)} rows to {args.dump_json}")
 
     print("\n" + "=" * 78)
     print("done")

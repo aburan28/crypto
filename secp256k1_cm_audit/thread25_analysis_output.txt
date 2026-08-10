@@ -1,0 +1,53 @@
+==============================================================================
+Thread 25 — is mu a genuine second coordinate inside the NU band?
+==============================================================================
+
+N=500 total: below bracket 94, in band [1.04,2.199] 366, above 40
+below-bracket recovery rate: 92/94
+above-bracket recovery rate: 1/40
+in-band recovery rate:       97/366
+
+in-band: 97 recovered, 269 failed
+AUC(-mu     -> recovery), in-band  = 0.6932
+AUC(-nu_hat -> recovery), in-band  = 0.8403
+AUC(-NU     -> recovery), in-band  = 0.5656  (expect ~0.5: NU is what defines the band)
+AUC(-step   -> recovery), in-band  = 0.1803
+AUC(-lam*   -> recovery), in-band  = 0.3212  (control)
+
+H25 verdict: AUC(mu) < 0.8 -- FALSIFIED
+
+------------------------------------------------------------------------------
+in-band AUC(mu), split by eff stratum (mu's power might be eff-driven)
+------------------------------------------------------------------------------
+eff=0.05  N= 24  rec=23/24  AUC(mu)=0.4565  AUC(NU)=0.4783
+eff=0.10  N= 83  rec=26/83  AUC(mu)=0.8819  AUC(NU)=0.5277
+eff=0.15  N= 96  rec=21/96  AUC(mu)=0.8889  AUC(NU)=0.3283
+eff=0.20  N= 89  rec=18/89  AUC(mu)=0.9276  AUC(NU)=0.4695
+eff=0.25  N= 74  rec=9/74  AUC(mu)=0.8615  AUC(NU)=0.6188
+
+------------------------------------------------------------------------------
+secondary: does 'step' (head/tail GS jump) predict recovery overall?
+------------------------------------------------------------------------------
+AUC(-step -> recovery), pooled N=500: 0.3286
+AUC(-NU   -> recovery), pooled: 0.7996
+AUC(-mu   -> recovery), pooled: 0.3964
+Spearman(step, NU) pooled = 0.1351
+Spearman(step, mu) pooled = -0.6627
+
+==============================================================================
+done
+==============================================================================
+
+------------------------------------------------------------------------------
+follow-up: is nu_hat's in-band AUC eff-stable? (does normalization fix Simpson's-paradox pooling)
+------------------------------------------------------------------------------
+eff=0.05  N= 24  rec=23/24  AUC(nu_hat)=0.4565  AUC(mu)=0.4565
+eff=0.10  N= 83  rec=26/83  AUC(nu_hat)=0.8853  AUC(mu)=0.8819
+eff=0.15  N= 96  rec=21/96  AUC(nu_hat)=0.8825  AUC(mu)=0.8889
+eff=0.20  N= 89  rec=18/89  AUC(nu_hat)=0.9425  AUC(mu)=0.9276
+eff=0.25  N= 74  rec=9/74  AUC(nu_hat)=0.8615  AUC(mu)=0.8615
+
+2-parameter rule sanity: NU<1.04 -> predict recover; NU>2.20 -> predict fail;
+in band, use nu_hat median-split as tiebreaker
+median nu_hat in band = 0.7731
+nu_hat<=median: 79 recovered, 109 failed  |  nu_hat>median: 18 recovered, 160 failed
