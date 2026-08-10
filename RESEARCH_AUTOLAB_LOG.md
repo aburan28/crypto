@@ -6673,4 +6673,4 @@ far above NU~1.87-2.20 blockwise reduction pushes the threshold.
 
 ### Commits made
 
-[pending]
+6852bc4 autolab 2026-08-10: Thread 25 — H25 pooled test falsified by band/eff confound; step metric beats mu (AUC 0.825 in-band, unstratified)
