@@ -684,7 +684,36 @@ src/
 ├── ct_bignum.rs               — Constant-time big-integer experiments
 ├── ecc_safety.rs              — ECC parameter-safety auditor
 └── utils/                     — Modular arithmetic, encoding, randomness
+
+gpu/ecc/                       — CUDA kernels: 256-bit field, EC points, batched Pollard rho
+hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
+hdl/ecc/                       — VHDL: pipelined secp256k1 modular multiplier + point adder
 ```
+
+### Hardware acceleration
+
+Two hardware back-ends for the same ECDLP workload, each verified against
+the pure-Python oracle in `gpu/ecc/ecref.py`:
+
+```bash
+# CUDA kernels — arithmetic verified on the CPU, no GPU required
+cd gpu/ecc && make test
+
+# static instruction-count and occupancy analysis for Hopper / Blackwell
+cd gpu/ecc && ./ptx_stats.sh --setup && ./ptx_stats.sh
+
+# on a machine with a GPU
+cd gpu/ecc && make bench && ./bench selftest && ./bench rho
+
+# FPGA datapath — GHDL simulation of the multiplier and the point adder
+cd hdl/ecc && make
+```
+
+`gpu/ecc/` covers batch scalar multiplication and a distinguished-point
+r-adding rho walk with the negation map and fruitless-cycle escape.
+`hdl/ecc/` implements the same walk's datapath: a 256-bit modular
+multiplier at one multiply per clock, and a point adder that interleaves
+independent walks to keep it saturated at three clocks per addition.
 
 ---
 
@@ -696,6 +725,11 @@ src/
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
+- [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
+- [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.
+- [`hdl/ecc/README.md`](./hdl/ecc/README.md) — FPGA secp256k1 datapath.
+- [`docs/ecc_fpga_cost_model.md`](./docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
+- [`docs/sha1_fpga_cost_model.md`](./docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
 
 ---
 
