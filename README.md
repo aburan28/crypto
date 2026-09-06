@@ -685,7 +685,8 @@ src/
 ├── ecc_safety.rs              — ECC parameter-safety auditor
 └── utils/                     — Modular arithmetic, encoding, randomness
 
-gpu/ecc/                       — CUDA kernels: 256-bit field, EC points, batched Pollard rho
+gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho
+gpu/ecc2k/                     — CUDA kernels: F(2^m) Koblitz curves, Frobenius-class rho (ECC2K-95)
 hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
 hdl/ecc/                       — VHDL: pipelined secp256k1 modular multiplier + point adder
 ```
@@ -705,6 +706,9 @@ cd gpu/ecc && ./ptx_stats.sh --setup && ./ptx_stats.sh
 # on a machine with a GPU
 cd gpu/ecc && make bench && ./bench selftest && ./bench rho
 
+# Koblitz curves over F(2^m): ECC2K-95 plus two solvable toy curves
+cd gpu/ecc2k && make test
+
 # FPGA datapath — GHDL simulation of the multiplier and the point adder
 cd hdl/ecc && make
 ```
@@ -714,6 +718,12 @@ r-adding rho walk with the negation map and fruitless-cycle escape.
 `hdl/ecc/` implements the same walk's datapath: a 256-bit modular
 multiplier at one multiply per clock, and a point adder that interleaves
 independent walks to keep it saturated at three clocks per addition.
+
+`gpu/ecc2k/` targets Koblitz curves over F(2^m), where the Frobenius map is
+a free endomorphism: walking on the classes {±τ^i P} shortens the search by
+√(2m), which is 13.9× for the 97-bit field of ECC2K-95. Measured over 24
+solves on a toy curve, the class walk lands within 1% of its predicted step
+count and at 0.21× a negation-only walk.
 
 ---
 
@@ -727,6 +737,7 @@ independent walks to keep it saturated at three clocks per addition.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
 - [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
 - [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.
+- [`gpu/ecc2k/README.md`](./gpu/ecc2k/README.md) — Koblitz / ECC2K-95 kernels and the Frobenius-class walk.
 - [`hdl/ecc/README.md`](./hdl/ecc/README.md) — FPGA secp256k1 datapath.
 - [`docs/ecc_fpga_cost_model.md`](./docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
 - [`docs/sha1_fpga_cost_model.md`](./docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
