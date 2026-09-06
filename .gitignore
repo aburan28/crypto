@@ -18,3 +18,16 @@ research/ecdlp_autolab/phase22_rho_barrett
 __pycache__/
 *.pyc
 *.pyo
+
+# gpu/ecc generated headers, test binaries and CUDA bench binary
+gpu/ecc/curve_*.h
+gpu/ecc/vec_*.h
+gpu/ecc/test_secp_fast
+gpu/ecc/test_secp_mont
+gpu/ecc/test_toy_mont
+gpu/ecc/bench
+
+# GHDL analysis artifacts
+hdl/**/*.o
+hdl/**/*.cf
+hdl/**/e~*
