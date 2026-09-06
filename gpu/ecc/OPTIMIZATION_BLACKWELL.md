@@ -44,7 +44,7 @@ having: the arithmetic argument for very large W is weak, so occupancy wins.
 
 ## 2. Why 32-bit limbs
 
-Measured, with `clang++ --cuda-gpu-arch=sm_90 -O3` (see `make ptx-stats`):
+Measured, with `clang++ --cuda-gpu-arch=sm_90 -O3` (see `./ptx_stats.sh`):
 
 | Field multiply | PTX instructions |
 |---|---|
@@ -75,26 +75,48 @@ There is no 64-bit integer multiplier to address.
 
 ## 3. Occupancy is the binding constraint
 
-Measured with `ptxas -arch=sm_100 -O3 -v` on `k_rho_walk_lowmem<8>`, block
-size 128:
+Measured with `./ptx_stats.sh`, `k_rho_walk_lowmem<8>`, block size 128:
 
-| `RHO_MIN_BLOCKS` | Registers/thread | Local stack/thread | Resident threads/SM | Occupancy |
+| Arch | `RHO_MIN_BLOCKS` | Registers | Stack | Resident threads/SM |
 |---|---|---|---|---|
-| unset | 226 | 792 B | 256 | 12.5% |
-| 2 | 226 | 792 B | 256 | 12.5% |
-| 3 | 168 | 840 B | 384 | 18.8% |
-| 4 | 128 | 984 B | 512 | 25.0% |
+| sm_90 | unset | 226 | 792 B | 256 |
+| sm_90 | 3 | 168 | 840 B | 384 |
+| sm_90 | 4 | 128 | 984 B | 512 |
+| sm_100 | unset | 226 | 792 B | 256 |
+| sm_100 | 3 | 168 | 840 B | 384 |
+| sm_100 | 4 | 128 | 984 B | 512 |
+| sm_120 | unset | **255** | 816 B | 256 |
+| sm_120 | 3 | 168 | 1072 B | 384 |
+| sm_120 | 4 | 128 | 1312 B | 512 |
 
-Registers per thread are identical on `sm_90` and `sm_100` — the register
-file is 64K 32-bit registers per SM on both, and ptxas makes the same
-allocation. Blackwell does not change this arithmetic.
+Two things fall out of this.
 
-Left free, ptxas spends everything on registers and lands at 12.5%
-occupancy, which is far too low to hide the ~4-cycle dependent-issue latency
-of the multiply chains. Forcing four blocks per SM doubles occupancy for
-192 extra bytes of stack. **Expected**: `RHO_MIN_BLOCKS=4` is the better
-operating point on both Hopper and Blackwell; verify with `./bench rho`
-against the default.
+**Hopper and datacenter Blackwell are identical.** Every kernel gets the
+same register allocation and the same frame on `sm_90` and `sm_100`. The
+register file is 64K 32-bit registers per SM on both and ptxas makes the
+same decisions. Nothing about datacenter Blackwell changes this arithmetic,
+so a kernel tuned on H100 transfers to B200 unchanged.
+
+**Consumer Blackwell does not.** On `sm_120`, ptxas left to itself goes to
+the 255-register ceiling on *every* rho kernel, and its spill frames are
+consistently larger — 1312 B against 984 B at four blocks per SM. Whatever
+the reason (a different spill-cost model, or different scheduling
+pressure), the practical consequence is direct: **`sm_120` needs the
+launch-bounds constraint more than `sm_100` does, not less.** Anyone
+developing on an RTX 50-series card and deploying to B200 should tune
+`RHO_MIN_BLOCKS` separately for the two.
+
+A caveat on the last column: it assumes 2048 threads per SM, which holds
+for `sm_90` and `sm_100`. Consumer parts have capped SM occupancy at 1536
+threads since Ada, so on `sm_120` the same register count buys a higher
+*fraction* of a smaller maximum. `./bench` prints the real limit at
+startup; trust that over any table.
+
+Left free, ptxas spends everything on registers and lands at 256 resident
+threads, which is far too few to hide the dependent-issue latency of the
+multiply chains. Forcing four blocks per SM doubles residency for a couple
+of hundred bytes of stack. **Expected**: `RHO_MIN_BLOCKS=4` is the better
+operating point everywhere; verify with `./bench rho` against the default.
 
 Two source-level changes already cut the stack by 4-5x, and both are
 measured:

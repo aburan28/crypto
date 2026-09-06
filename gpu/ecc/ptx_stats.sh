@@ -124,4 +124,6 @@ for mb in 0 3 4; do
   done
 done
 echo
-echo "(occupancy assumes 2048 threads/SM and 64K registers/SM)"
+echo "(threads/SM assumes 64K registers/SM; the percentage assumes a 2048-thread"
+echo " SM limit, which holds for sm_90/sm_100.  Consumer parts (sm_120) cap at"
+echo " 1536, so scale those accordingly -- ./bench prints the real limit.)"

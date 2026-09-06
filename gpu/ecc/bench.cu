@@ -316,12 +316,14 @@ static void bench_rho(RhoOpts o) {
     h.prm.max_steps = 100u << 20;
     h.prm.table_seed = 2024;
     h.P = Curve::generator();
+    /* A 48-bit secret.  On a toy curve --solve finds it; on secp256k1 the
+     * search space is 2^128 and it never will -- the run still measures
+     * throughput, which is the point of the benchmark. */
     uint32_t sk[8] = {0xdeadbeefu, 0x1234u, 0, 0, 0, 0, 0, 0};
-    if (o.solve) {
-        /* pick a secret inside the group so the solve is meaningful */
-        for (int l = 2; l < 8; l++) sk[l] = 0;
-    }
     h.Q = Curve::to_affine(Curve::scalar_mul(h.P, sk, 0));
+    if (o.solve && ModN::bits() > 96)
+        printf("  note: --solve on a %d-bit group will not terminate; "
+               "measuring throughput only\n", ModN::bits());
     h.build_table();
 
     uint32_t T = o.threads, W = o.w, nw = T * W;
