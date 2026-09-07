@@ -287,3 +287,169 @@ def basisImages(onb, pbPoly, m, rng):
                 v |= 1 << row
         gammaToPb.append(v)
     return w, zToOnb, gammaToPb
+
+
+def findNormalBasis(pb, m, rng, tries=400):
+    """Find a normal element of GF(2^m) in polynomial-basis representation and
+    return (beta, rowsPbToNb, colsNbToPb).
+
+    rowsPbToNb[i] is the bitmask of polynomial-basis coordinates whose parity
+    gives normal-basis coordinate i, so the normal-basis weight of x is the
+    popcount of applying those rows.  Among candidates the sparsest matrix
+    wins, since that is what the generated linear map costs."""
+    best = None
+    for _ in range(tries):
+        beta = rng.getrandbits(m)
+        if beta == 0:
+            continue
+        conj = []
+        cur = beta
+        for _ in range(m):
+            conj.append(cur)
+            cur = pb.sqr(cur)
+        inv = invertGf2Columns(conj, m)
+        if inv is None:
+            continue
+        ones = 0
+        for r in inv:
+            ones += bin(r).count('1')
+        if best is None or ones < best[0]:
+            best = (ones, beta, inv, conj)
+    if best is None:
+        raise RuntimeError("no normal element found for m=%d" % m)
+    return best[1], best[2], best[3]
+
+
+def invertGf2Columns(cols, m):
+    """Invert the m x m GF(2) matrix whose columns are `cols`; return its rows."""
+    left = [0] * m
+    right = [0] * m
+    for i in range(m):
+        r = 0
+        for j in range(m):
+            if (cols[j] >> i) & 1:
+                r |= 1 << j
+        left[i] = r
+        right[i] = 1 << i
+    row = 0
+    for col in range(m):
+        piv = -1
+        for r in range(row, m):
+            if (left[r] >> col) & 1:
+                piv = r
+                break
+        if piv < 0:
+            return None
+        left[row], left[piv] = left[piv], left[row]
+        right[row], right[piv] = right[piv], right[row]
+        for r in range(m):
+            if r != row and ((left[r] >> col) & 1):
+                left[r] ^= left[row]
+                right[r] ^= right[row]
+        row += 1
+    out = [0] * m
+    for r in range(m):
+        col = (left[r] & -left[r]).bit_length() - 1
+        out[col] = right[r]
+    return out
+
+
+class CurvePb:
+    """y^2 + xy = x^3 + 1 over a polynomial-basis GF(2^m)."""
+
+    def __init__(self, pb):
+        self.f = pb
+
+    def onCurve(self, p):
+        if p is None:
+            return True
+        x, y = p
+        f = self.f
+        return f.mul(y, y) ^ f.mul(x, y) == f.mul(f.mul(x, x), x) ^ 1
+
+    def neg(self, p):
+        return None if p is None else (p[0], p[0] ^ p[1])
+
+    def dbl(self, p):
+        if p is None or p[0] == 0:
+            return None
+        f = self.f
+        x, y = p
+        lam = x ^ f.mul(y, f.inv(x))
+        x3 = f.mul(lam, lam) ^ lam
+        y3 = f.mul(x, x) ^ f.mul(lam ^ 1, x3)
+        return (x3, y3)
+
+    def add(self, p, q):
+        if p is None:
+            return q
+        if q is None:
+            return p
+        f = self.f
+        x1, y1 = p
+        x2, y2 = q
+        if x1 == x2:
+            return self.dbl(p) if y1 == y2 else None
+        d = x1 ^ x2
+        lam = f.mul(y1 ^ y2, f.inv(d))
+        x3 = f.mul(lam, lam) ^ lam ^ d
+        y3 = f.mul(lam, x1 ^ x3) ^ x3 ^ y1
+        return (x3, y3)
+
+    def mul(self, p, k):
+        r = None
+        b = p
+        while k:
+            if k & 1:
+                r = self.add(r, b)
+            b = self.dbl(b)
+            k >>= 1
+        return r
+
+    def frob(self, p, j=1):
+        if p is None:
+            return None
+        x, y = p
+        for _ in range(j):
+            x, y = self.f.sqr(x), self.f.sqr(y)
+        return (x, y)
+
+    def halfTrace(self, a):
+        acc = a
+        t = a
+        for _ in range((self.f.m - 1) // 2):
+            t = self.f.sqr(self.f.sqr(t))
+            acc ^= t
+        return acc
+
+    def trace(self, a):
+        t = a
+        acc = a
+        for _ in range(self.f.m - 1):
+            t = self.f.sqr(t)
+            acc ^= t
+        return acc & 1
+
+    def pointFromX(self, x):
+        if x == 0:
+            return None
+        f = self.f
+        c = x ^ f.inv(f.mul(x, x))
+        if self.trace(c):
+            return None
+        z = self.halfTrace(c)
+        p = (x, f.mul(x, z))
+        assert self.onCurve(p)
+        return p
+
+    def randomPointOfOrder(self, ell, cofactor, rng):
+        while True:
+            x = rng.getrandbits(self.f.m)
+            p = self.pointFromX(x)
+            if p is None:
+                continue
+            p = self.mul(p, cofactor)
+            if p is None:
+                continue
+            assert self.mul(p, ell) is None
+            return p

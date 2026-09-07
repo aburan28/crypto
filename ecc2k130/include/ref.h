@@ -15,8 +15,11 @@
 
 typedef unsigned long long u64;
 
+// Scalar field in the permuted type-II optimal normal basis: an element is the
+// symmetric vector over Z/n it stands for, and multiplication is the cyclic
+// convolution that defines the basis.
 template <class Cfg>
-struct Ref {
+struct ScalarOnb {
     static const int M = Cfg::M;
     static const int NRING = Cfg::NRING;
     static const int NL = 3;                    // limbs for m-bit coordinates
@@ -154,7 +157,155 @@ struct Ref {
     }
     static int trace(const Elem &a) { return weight(a) & 1; }
 
-    // ---- polynomial-basis interoperability -----------------------------
+};
+
+// Scalar field in a polynomial basis F_2[z]/(F).  The weight is taken in a
+// normal basis through the generated row masks, so it stays invariant under
+// squaring and the walk still runs on orbits.
+template <class Cfg>
+struct ScalarPb {
+    static const int M = Cfg::M;
+    static const int NL = 3;
+
+    struct Elem {
+        u64 v[NL];
+        bool operator==(const Elem &o) const {
+            for (int i = 0; i < NL; ++i)
+                if (v[i] != o.v[i]) return false;
+            return true;
+        }
+        bool operator!=(const Elem &o) const { return !(*this == o); }
+    };
+
+    static Elem zero() { Elem e; memset(e.v, 0, sizeof e.v); return e; }
+    static bool isZero(const Elem &a) {
+        for (int i = 0; i < NL; ++i)
+            if (a.v[i]) return false;
+        return true;
+    }
+    static Elem one() { Elem e = zero(); e.v[0] = 1; return e; }
+    static Elem add(const Elem &a, const Elem &b) {
+        Elem r;
+        for (int i = 0; i < NL; ++i) r.v[i] = a.v[i] ^ b.v[i];
+        return r;
+    }
+    static int bit(const Elem &a, int i) { return (int)((a.v[i >> 6] >> (i & 63)) & 1); }
+    static void setBit(Elem &a, int i) { a.v[i >> 6] |= 1ull << (i & 63); }
+    static Elem fromLimbs(const unsigned long long *p) {
+        Elem e;
+        for (int i = 0; i < NL; ++i) e.v[i] = p[i];
+        return e;
+    }
+
+    static void shiftUp(Elem &a) {
+        a.v[2] = (a.v[2] << 1) | (a.v[1] >> 63);
+        a.v[1] = (a.v[1] << 1) | (a.v[0] >> 63);
+        a.v[0] <<= 1;
+    }
+    static void reduceTop(Elem &a) {
+        // clear any bit at or above z^M, folding it back through the taps
+        for (int j = 3 * 64 - 1; j >= M; --j) {
+            if (!bit(a, j)) continue;
+            a.v[j >> 6] ^= 1ull << (j & 63);
+            const int lo = j - M;
+            setBitXor(a, lo);
+            for (int t = 0; t < 3; ++t) {
+                const int tap = Cfg::PB_TAPS[t];
+                if (tap > 0) setBitXor(a, lo + tap);
+            }
+        }
+    }
+    static void setBitXor(Elem &a, int i) { a.v[i >> 6] ^= 1ull << (i & 63); }
+
+    static Elem mul(const Elem &a, const Elem &b) {
+        Elem r = zero();
+        Elem t = a;
+        for (int i = 0; i < M; ++i) {
+            if (bit(b, i)) r = add(r, t);
+            shiftUp(t);
+            reduceTop(t);
+        }
+        return r;
+    }
+    static Elem sqr(const Elem &a) { return mul(a, a); }
+    static Elem sigma(const Elem &a, int k) {
+        Elem r = a;
+        k %= M;
+        for (int i = 0; i < k; ++i) r = sqr(r);
+        return r;
+    }
+    static Elem pow(const Elem &a, u64 e) {
+        Elem r = one(), b = a;
+        while (e) {
+            if (e & 1) r = mul(r, b);
+            b = mul(b, b);
+            e >>= 1;
+        }
+        return r;
+    }
+    static Elem inv(const Elem &a) {
+        // a^(2^m - 2)
+        Elem acc = a;
+        int k = 1;
+        const int e = M - 1;
+        int hb = 0;
+        while ((1 << (hb + 1)) <= e) ++hb;
+        for (int b = hb - 1; b >= 0; --b) {
+            acc = mul(sigma(acc, k), acc);
+            k <<= 1;
+            if ((e >> b) & 1) {
+                acc = mul(sqr(acc), a);
+                k += 1;
+            }
+        }
+        return sqr(acc);
+    }
+    // weight of the normal-basis coordinates, which squaring only rotates
+    static int weight(const Elem &a) {
+        int w = 0;
+        for (int i = 0; i < M; ++i) {
+            u64 acc = 0;
+            for (int l = 0; l < NL; ++l) acc ^= a.v[l] & Cfg::NB_ROWS[i][l];
+            w += (__builtin_popcountll(acc) & 1);
+        }
+        return w;
+    }
+    static int trace(const Elem &a) {
+        Elem t = a, acc = a;
+        for (int i = 1; i < M; ++i) {
+            t = sqr(t);
+            acc = add(acc, t);
+        }
+        return (int)(acc.v[0] & 1) ^ 0;
+    }
+};
+
+
+// Curve arithmetic and the walk, over whichever scalar field the curve config
+// selects.  This shares no code with the generated bitsliced routines, so it
+// serves as the independent oracle for them, recomputes walks when the server
+// resolves a collision, and verifies a recovered discrete logarithm.
+template <class Cfg, class SF>
+struct RefT {
+    static const int M = Cfg::M;
+    static const int NL = 3;
+    typedef typename SF::Elem Elem;
+
+    static Elem zero() { return SF::zero(); }
+    static Elem one() { return SF::one(); }
+    static bool isZero(const Elem &a) { return SF::isZero(a); }
+    static Elem add(const Elem &a, const Elem &b) { return SF::add(a, b); }
+    static Elem mul(const Elem &a, const Elem &b) { return SF::mul(a, b); }
+    static Elem sqr(const Elem &a) { return SF::sqr(a); }
+    static Elem inv(const Elem &a) { return SF::inv(a); }
+    static Elem sigma(const Elem &a, int k) { return SF::sigma(a, k); }
+    static Elem pow(const Elem &a, u64 e) { return SF::pow(a, e); }
+    static int bit(const Elem &a, int i) { return SF::bit(a, i); }
+    static void setBit(Elem &a, int i) { SF::setBit(a, i); }
+    static int weight(const Elem &a) { return SF::weight(a); }
+    static int trace(const Elem &a) { return SF::trace(a); }
+    static Elem fromLimbs(const unsigned long long *p) { return SF::fromLimbs(p); }
+    // ---- polynomial-basis interoperability (normal-basis curves only) --
     static Elem fromPolyBasis(const unsigned long long *pb, const unsigned long long ztab[][3]) {
         Elem r = zero();
         for (int i = 0; i < M; ++i) {
@@ -203,6 +354,21 @@ struct Ref {
         const Elem y3 = add(add(mul(lam, add(a.x, x3)), x3), a.y);
         return make(x3, y3);
     }
+    // Affine addition with no special cases, matching the device formula
+    // exactly.  The start-point construction uses this so that a re-walk
+    // reproduces the client bit for bit even in the degenerate case where the
+    // two summands share an abscissa: the client cannot represent the point at
+    // infinity and does not branch, so neither does this.  On the real curves
+    // that case has probability about 2^-m and never arises; on a toy field it
+    // does, and the two must still agree.
+    static Point addPtRaw(const Point &a, const Point &b) {
+        const Elem d = add(a.x, b.x);
+        const Elem lam = mul(add(a.y, b.y), inv(d));
+        const Elem x3 = add(add(mul(lam, lam), lam), d);
+        const Elem y3 = add(add(mul(lam, add(a.x, x3)), x3), a.y);
+        return make(x3, y3);
+    }
+
     static Point frob(const Point &p, int k) {
         if (p.inf) return p;
         return make(sigma(p.x, k), sigma(p.y, k));
@@ -250,7 +416,12 @@ struct Ref {
     }
 
     // start point Q + sum c_i sigma^i(P), matching the device derivation
-    static Point startPoint(u64 seed, const Point &basis, const Point &target, U192 *alphaOut, const U192 &ell, const U192 *spow) {
+    // The tracked scalar alpha satisfies start = [alpha] P + Q only while every
+    // addition is non-degenerate.  On the real curves two summands share an
+    // abscissa with probability about 2^-m, so this never fires; on a toy field
+    // it does, and `degenerate` reports it.
+    static Point startPoint(u64 seed, const Point &basis, const Point &target, U192 *alphaOut,
+                            const U192 &ell, const U192 *spow, bool *degenerate = 0) {
         const u64 c0 = eccPrfHost(seed, 0);
         const u64 c1 = eccPrfHost(seed, 1);
         Point r = target;
@@ -258,7 +429,9 @@ struct Ref {
         for (int i = 0; i < 128; ++i) {
             const u64 b = (i < 64) ? (c0 >> i) : (c1 >> (i - 64));
             if (b & 1) {
-                r = addPt(r, frob(basis, i % M));
+                const Point s = frob(basis, i % M);
+                if (degenerate && r.x == s.x) *degenerate = true;
+                r = addPtRaw(r, s);
                 alpha = mod_add(alpha, spow[i % M], ell);
             }
         }
@@ -273,3 +446,7 @@ struct Ref {
         return z ^ (z >> 31);
     }
 };
+
+
+template <class Cfg>
+using Ref = RefT<Cfg, typename Cfg::Scalar>;

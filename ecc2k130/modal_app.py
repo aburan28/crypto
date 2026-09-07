@@ -3,8 +3,12 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::validate
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::bench
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::autotune
-    ECC_GPU=H100 modal run modal_app.py::search --hours 4
-    ECC_GPU=H100 modal run modal_app.py::fanout --count 8 --hours 4
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
+
+Curve 97 is ECC2K-95, a 2^44 iteration problem: feasible in GPU-hours, and its
+answer has been public since Harley's group solved it in 1998, so a recovered
+logarithm can be checked rather than merely believed.
 
 The GPU comes from the ECC_GPU environment variable, which is read when this
 file is imported and baked into the function definitions.  That works on every
@@ -233,12 +237,52 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="17,33",
     return report
 
 
+# Expected rho iterations, and the weight cutoff that makes walks short enough
+# that most of them actually report within the run.
+CURVE_FACTS = {
+    # curve: (field size m, log2 of expected iterations)
+    131: (131, 60.9),
+    97: (97, 44.0),
+    83: (83, 37.1),
+    41: (41, 16.6),
+    23: (23, 8.1),
+}
+
+
+def recommendedWeight(curve, walks):
+    """Pick the distinguished-point cutoff for a given amount of parallelism.
+
+    A walk reports after about 1/theta steps, and each of `walks` parallel walks
+    only gets total/walks steps, so the cutoff has to satisfy 1/theta well below
+    that or most walks never report at all.  Aim for a quarter of the budget."""
+    import math
+    if curve not in CURVE_FACTS:
+        return -1
+    m, logIters = CURVE_FACTS[curve]
+    budget = (2.0 ** logIters) / max(1.0, float(walks))
+    target = max(64.0, budget / 4.0)
+    total = 0
+    for k in range(0, m + 1):
+        c = 1
+        for i in range(k):
+            c = c * (m - i) // (i + 1)
+        total += c
+        p = float(total) / (2.0 ** m)
+        if p > 0 and 1.0 / p <= target:
+            return k
+    return m
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
-def runSearch(hours=1.0, curve=131, batch=32, threads=128, leaf=17, dpWeight=-1,
-              runId=1, steps=256, workers=0, rebuild=True):
+def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
+              runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are (seed, hash); a collision is resolved by recomputing both
-    walks from their seeds."""
+    walks from their seeds.
+
+    curve=97 is ECC2K-95, which Harley's group solved in 1998 after about
+    2.16e13 iterations; the published answer is baked into the generated header
+    so a recovered logarithm can be checked against it."""
     if rebuild:
         ok, log = buildFor(batch, threads, leaf)
         if not ok:
@@ -248,12 +292,23 @@ def runSearch(hours=1.0, curve=131, batch=32, threads=128, leaf=17, dpWeight=-1,
     dpFile = f"/data/dp/curve{curve}-run{runId}.txt"
     rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0")
     rate = parseRate(out) or 1.0
+    # The number of reports comes out at roughly four times the number of
+    # parallel walks, because each walk has only total/walks steps to spend and
+    # the cutoff is set so it reports a few times within that.  So the walk
+    # count, not the GPU, decides how much storage the run needs: cap it.
+    workerThreads = workers
+    if not workerThreads and walksTarget:
+        perThread = batch * 32
+        workerThreads = max(1024, int(walksTarget) // perThread)
+    walks = workerThreads * batch * 32
+    if dpWeight < 0:
+        dpWeight = recommendedWeight(curve, walks)
+    print(f"{walks} parallel walks, distinguished-point weight {dpWeight}, "
+          f"expecting roughly {4 * walks / 1e6:.1f}M reports")
     cmd = (f"./ecc2k130 --curve {curve} --steps {steps} --run-id {runId} "
-           f"--dp-file {dpFile} --verify 4 --launches 0")
+           f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads}")
     if dpWeight >= 0:
         cmd += f" --dp-weight {dpWeight}"
-    if workers:
-        cmd += f" --threads {workers}"
     deadline = time.time() + hours * HOUR
     print(f"{name}: collecting into {dpFile} for {hours} h at ~{rate:.2f} M it/s")
     proc = subprocess.Popen(cmd, shell=True, cwd=REMOTE, stdout=subprocess.PIPE,
@@ -341,22 +396,25 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
 
 
 @app.local_entrypoint()
-def search(gpu: str = "", hours: float = 1.0, curve: int = 131, batch: int = 32,
-           threads: int = 128, leaf: int = 17, dpWeight: int = -1, runId: int = 1):
+def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
+           threads: int = 128, leaf: int = 17, dpWeight: int = -1, runId: int = 1,
+           walks: int = 4000000):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dpWeight,
-                                     runId=runId)
+                                     runId=runId, walksTarget=walks)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
-def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 131,
-           batch: int = 32, threads: int = 128, leaf: int = 17, dpWeight: int = -1):
+def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
+           batch: int = 8, threads: int = 128, leaf: int = 17, dpWeight: int = -1,
+           walks: int = 4000000):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dpWeight, runId=i + 1) for i in range(count)]
+                      dpWeight=dpWeight, runId=i + 1, walksTarget=walks)
+             for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
     print(json.dumps(mergeCorpus.remote(curve=curve), indent=2))

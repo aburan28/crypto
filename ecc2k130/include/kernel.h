@@ -55,7 +55,7 @@ ECC_HD unsigned eccAtomicInc(unsigned *p) {
 template <class Cfg, class W>
 struct Kernel {
     typedef Walk<Cfg, W> WK;
-    typedef FieldBs<Cfg, W> F;
+    typedef typename Cfg::template Field<W> F;
     static const int M = Cfg::M;
     static const int LANES = WordTraits<W>::LANES;
     static const int HWBITS = Cfg::HWBITS;

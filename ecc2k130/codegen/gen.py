@@ -33,11 +33,31 @@ CHALLENGE_POLY = (1 << 131) | (1 << 13) | (1 << 2) | (1 << 1) | 1
 CHALLENGE_TAPS = (13, 2, 1)
 CHALLENGE_ELL = 680564733841876926932320129493409985129
 
+# ECC2K-95, solved by Harley's group in May 1998.  GF(2^97) has no type-II
+# optimal normal basis (2m+1 = 195 is composite), so this curve uses the
+# polynomial-basis backend with the weight taken through one linear map into a
+# normal basis -- the same arrangement Harley's client used.
+ECC2K95 = {
+    'm': 97,
+    'poly': (1 << 97) | (1 << 6) | 1,
+    'taps': (6, -1, -1),
+    'px': 0x08A84FB02034F7771DC940097,
+    'py': 0x1D2F10A471D48A720F18F6339,
+    'qx': 0x0E0BC08AC5818F303E2B05E90,
+    'qy': 0x134C028FC3393124D673E6F8E,
+    'ell': 39614081257132074233778707191,
+    'knownK': 37837308472231540269443981458,
+}
+
 CURVES = [
-    {'m': 131, 'challenge': True, 'dpWeight': 34, 'instances': 0},
-    {'m': 83, 'challenge': False, 'dpWeight': 0, 'instances': 2},
-    {'m': 41, 'challenge': False, 'dpWeight': 0, 'instances': 16},
-    {'m': 23, 'challenge': False, 'dpWeight': 0, 'instances': 16},
+    {'m': 131, 'basis': 'onb', 'challenge': True, 'dpWeight': 34, 'instances': 0},
+    {'m': 83, 'basis': 'onb', 'challenge': False, 'dpWeight': 0, 'instances': 2},
+    {'m': 41, 'basis': 'onb', 'challenge': False, 'dpWeight': 0, 'instances': 16},
+    {'m': 23, 'basis': 'onb', 'challenge': False, 'dpWeight': 0, 'instances': 16},
+    {'m': 97, 'basis': 'pb', 'challenge': True, 'dpWeight': 0, 'instances': 0},
+    {'m': 41, 'basis': 'pb', 'challenge': False, 'dpWeight': 0, 'instances': 8},
+    {'m': 19, 'basis': 'pb', 'challenge': False, 'dpWeight': 0, 'instances': 8},
+    {'m': 13, 'basis': 'pb', 'challenge': False, 'dpWeight': 0, 'instances': 8},
 ]
 
 
@@ -385,16 +405,242 @@ def generate(cfg, leaf, outDir, verbose):
     return stats
 
 
+def generatePb(cfg, leaf, outDir, verbose):
+    """Emit a polynomial-basis field: arithmetic in F_2[z]/(F), orbit weight
+    through one linear map into a normal basis."""
+    m = cfg['m']
+    rng = random.Random(0x9B00 + m)
+    challenge = cfg['challenge']
+    if challenge:
+        poly, taps = ECC2K95['poly'], ECC2K95['taps']
+        ell = ECC2K95['ell']
+        if m != 97 or curves.curveOrder(m) != 4 * ell:
+            raise RuntimeError('ECC2K-95 order mismatch')
+    else:
+        poly, taps = curves.findIrreduciblePoly(m)
+        ell = curves.curveOrder(m) // 4
+        if not curves.isPrimeBig(ell):
+            raise RuntimeError('ell not prime for m=%d' % m)
+    pb = field.Pb(m, poly)
+    if not pb.isIrreducible():
+        raise RuntimeError('reduction polynomial is not irreducible')
+    curve = curves.CurvePb(pb)
+
+    if challenge:
+        basePoint = (ECC2K95['px'], ECC2K95['py'])
+        target = (ECC2K95['qx'], ECC2K95['qy'])
+        if not curve.onCurve(basePoint) or not curve.onCurve(target):
+            raise RuntimeError('challenge point is not on the curve')
+        if curve.mul(basePoint, ell) is not None or curve.mul(target, ell) is not None:
+            raise RuntimeError('challenge point does not have order ell')
+        if curve.mul(basePoint, ECC2K95['knownK']) != target:
+            raise RuntimeError('published ECC2K-95 solution does not check out')
+        instances = []
+        knownK = ECC2K95['knownK']
+    else:
+        basePoint = curve.randomPointOfOrder(ell, 4, rng)
+        target = curve.mul(basePoint, rng.randrange(1, ell))
+        instances = []
+        for _ in range(cfg['instances']):
+            p = curve.randomPointOfOrder(ell, 4, rng)
+            k = rng.randrange(1, ell)
+            instances.append((p, curve.mul(p, k), k))
+        knownK = None
+
+    s = curves.frobeniusEigenvalue(curve, basePoint, ell)
+    if pow(s, m, ell) != 1 or (s * s + s + 2) % ell != 0:
+        raise RuntimeError('bad Frobenius eigenvalue')
+
+    beta, nbRows, conj = curves.findNormalBasis(pb, m, rng, tries=300)
+    # the weight in this basis must be invariant under squaring
+    for _ in range(50):
+        x = rng.getrandbits(m)
+        a = 0
+        b = 0
+        sx = pb.sqr(x)
+        for i in range(m):
+            a |= (bin(nbRows[i] & x).count('1') & 1) << i
+            b |= (bin(nbRows[i] & sx).count('1') & 1) << i
+        if bin(a).count('1') != bin(b).count('1'):
+            raise RuntimeError('normal-basis weight is not squaring invariant')
+        if (((a << 1) | (a >> (m - 1))) & ((1 << m) - 1)) != b:
+            raise RuntimeError('squaring is not a rotation of normal-basis coordinates')
+
+    tapsPos = tuple(t for t in taps if t is not None and t > 0)
+    dpW = cfg['dpWeight'] if cfg['dpWeight'] else dpWeightFor(m, ell)
+    nBits = 1
+    while (1 << nBits) <= m:
+        nBits += 1
+    chain = sizeChain(m, leaf)
+
+    progs = {}
+    pl = ir.Prog()
+    al = [pl.addInput('a', i) for i in range(chain[-1])]
+    bl = [pl.addInput('b', i) for i in range(chain[-1])]
+    bestLeaf = None
+    for cut in (4, 6, 8, 12, 16, 24, 33):
+        if cut > chain[-1]:
+            continue
+        p = ir.Prog()
+        aa = [p.addInput('a', i) for i in range(chain[-1])]
+        bb = [p.addInput('b', i) for i in range(chain[-1])]
+        r = build.polyMulIr(p, aa, bb, cut)
+        p.fuseLop3(r)
+        if bestLeaf is None or p.instrCount(r) < bestLeaf[0]:
+            bestLeaf = (p.instrCount(r), cut, p, r)
+    progs['mulLeaf'] = (bestLeaf[2], bestLeaf[3], ['a', 'b'], chain[-1])
+
+    pr = ir.Prog()
+    hh = [pr.addInput('h', i) for i in range(2 * m - 1)]
+    rr = build.pbReduceIr(pr, hh, m, tapsPos)
+    pr.fuseLop3(rr)
+    progs['reduce'] = (pr, rr, ['h'], 2 * m - 1)
+
+    ps = ir.Prog()
+    aa = [ps.addInput('a', i) for i in range(m)]
+    ss = build.pbSqrIr(ps, aa, m, tapsPos)
+    ps.fuseLop3(ss)
+    progs['sqr'] = (ps, ss, ['a'], m)
+
+    bestHam = None
+    for blk in (1, 4, 6):
+        p = ir.Prog()
+        xx = [p.addInput('x', i) for i in range(m)]
+        hb = build.pbHammingIr(p, xx, nbRows, blk, nBits)
+        p.fuseLop3(hb)
+        if bestHam is None or p.instrCount(hb) < bestHam[0]:
+            bestHam = (p.instrCount(hb), p, hb)
+    progs['hamming'] = (bestHam[1], bestHam[2], ['x'], m)
+
+    verifyPbMul(m, tapsPos, pb, rng, bestLeaf[1])
+
+    lines = []
+    ap = lines.append
+    ap('// AUTO-GENERATED by codegen/gen.py -- do not edit by hand.')
+    ap('// Field GF(2^%d) = F_2[z]/(F), polynomial basis.' % m)
+    ap('// The orbit weight is taken in a normal basis reached by one linear map,')
+    ap('// which is how Harley solved ECC2K-95 in 1998.')
+    ap('#pragma once')
+    ap('')
+    ap('namespace eccP%d {' % m)
+    ap('')
+    ap('static const int M = %d;' % m)
+    ap('static const int NRING = 0;   // no cyclic ring: this is a polynomial basis')
+    ap('static const int PRODLEN = %d;' % (2 * m - 1))
+    ap('static const int LEAF = %d;' % chain[-1])
+    ap('static const int HWBITS = %d;' % nBits)
+    ap('static const int DP_WEIGHT = %d;' % dpW)
+    ap('static const int PB_TAPS[3] = {%d, %d, %d};' % (taps[0], taps[1], taps[2]))
+    ap('static const char *ELL_DEC = "%d";' % ell)
+    ap('static const char *S_DEC = "%d";' % s)
+    ap('static const int SIZE_CHAIN[%d] = {%s};' % (len(chain), ', '.join(str(v) for v in chain)))
+    ap('static const int SIZE_CHAIN_LEN = %d;' % len(chain))
+    ap('')
+    ap('static const unsigned long long PX[3] = %s;' % limbLiteral(basePoint[0]))
+    ap('static const unsigned long long PY[3] = %s;' % limbLiteral(basePoint[1]))
+    ap('static const unsigned long long QX[3] = %s;' % limbLiteral(target[0]))
+    ap('static const unsigned long long QY[3] = %s;' % limbLiteral(target[1]))
+    ap('static const char *KNOWN_K = %s;' % (('"%d"' % knownK) if knownK else '0'))
+    ap('')
+    ap('// rows of the polynomial-basis to normal-basis map, for the host reference')
+    ap('static const unsigned long long NB_ROWS[%d][3] = {' % m)
+    for i in range(m):
+        ap('    %s,' % limbLiteral(nbRows[i]))
+    ap('};')
+    ap('')
+    ap('static const int NUM_INSTANCES = %d;' % len(instances))
+    if instances:
+        for name, idx in (('INSTANCE_PX', (0, 0)), ('INSTANCE_PY', (0, 1)),
+                          ('INSTANCE_QX', (1, 0)), ('INSTANCE_QY', (1, 1))):
+            ap('static const unsigned long long %s[%d][3] = {' % (name, len(instances)))
+            for inst in instances:
+                ap('    %s,' % limbLiteral(inst[idx[0]][idx[1]]))
+            ap('};')
+        ap('static const char *INSTANCE_K[%d] = {' % len(instances))
+        for inst in instances:
+            ap('    "%d",' % inst[2])
+        ap('};')
+    else:
+        ap('static const unsigned long long (*INSTANCE_PX)[3] = 0;')
+        ap('static const unsigned long long (*INSTANCE_PY)[3] = 0;')
+        ap('static const unsigned long long (*INSTANCE_QX)[3] = 0;')
+        ap('static const unsigned long long (*INSTANCE_QY)[3] = 0;')
+        ap('static const char **INSTANCE_K = 0;')
+    ap('')
+
+    stats = {}
+    for name in ('mulLeaf', 'reduce', 'sqr', 'hamming'):
+        prog, roots, inputs, outLen = progs[name]
+        body, slots = emitFunction(name, prog, roots, inputs, outLen)
+        stats[name] = (prog.instrCount(roots), prog.bitOpCount(roots), slots)
+        ap('// %s: %d instructions (%d two-input bit operations), %d locals'
+           % (name, stats[name][0], stats[name][1], slots))
+        lines.extend(body)
+        ap('')
+    ap('}  // namespace eccP%d' % m)
+
+    path = '%s/eccP%d.h' % (outDir, m)
+    fh = open(path, 'w')
+    fh.write('\n'.join(lines) + '\n')
+    fh.close()
+
+    if verbose:
+        import math as _m
+        print('m=%3d  polynomial basis  ell=%.1f bits  dpWeight=%d  taps=%s' %
+              (m, _m.log2(ell), dpW, str(tapsPos)))
+        for name in ('mulLeaf', 'reduce', 'sqr', 'hamming'):
+            print('        %-9s %6d instr %6d bitops %4d locals' %
+                  (name, stats[name][0], stats[name][1], stats[name][2]))
+    return stats
+
+
+def verifyPbMul(m, tapsPos, pb, rng, cut):
+    prog = ir.Prog()
+    a = [prog.addInput('a', i) for i in range(m)]
+    b = [prog.addInput('b', i) for i in range(m)]
+    r = build.pbMulIr(prog, a, b, m, tapsPos, cut)
+    xs = []
+    ys = []
+    for _ in range(64):
+        xs.append(rng.getrandbits(m))
+        ys.append(rng.getrandbits(m))
+    vals = {}
+    for i in range(m):
+        wa = 0
+        wb = 0
+        for lane in range(64):
+            if (xs[lane] >> i) & 1:
+                wa |= 1 << lane
+            if (ys[lane] >> i) & 1:
+                wb |= 1 << lane
+        vals[('a', i)] = wa
+        vals[('b', i)] = wb
+    out = prog.evaluate(vals, r)
+    for lane in range(64):
+        got = 0
+        for i in range(m):
+            if (out[i] >> lane) & 1:
+                got |= 1 << i
+        if got != pb.mul(xs[lane], ys[lane]):
+            raise RuntimeError('polynomial-basis multiplication mismatch, m=%d' % m)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='../generated')
     ap.add_argument('--leaf', type=int, default=17)
     ap.add_argument('--only', type=int, default=0)
+    ap.add_argument('--basis', default='')
     args = ap.parse_args()
     for cfg in CURVES:
         if args.only and cfg['m'] != args.only:
             continue
-        generate(cfg, args.leaf, args.out, True)
+        if args.basis and cfg.get('basis', 'onb') != args.basis:
+            continue
+        if cfg.get('basis', 'onb') == 'pb':
+            generatePb(cfg, args.leaf, args.out, True)
+        else:
+            generate(cfg, args.leaf, args.out, True)
     return 0
 
 

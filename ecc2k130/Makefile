@@ -35,9 +35,11 @@ ARCH    ?= -gencode arch=compute_80,code=sm_80 \
 CLANGARCH ?= sm_90
 SMARCH  ?= sm_90
 
-HDRS = include/bitslice.h include/fieldbs.h include/walk.h include/kernel.h \
-       include/ref.h include/solver.h include/bigmod.h include/curveparams.h
-GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h
+HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
+       include/kernel.h include/ref.h include/solver.h include/bigmod.h \
+       include/curveparams.h
+GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
+       generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
 DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS)
 
@@ -61,14 +63,27 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 test: ecc2k130-cpu
 	./ecc2k130-cpu --test
 
-# End-to-end: recover planted discrete logarithms on the small curves.
+# End-to-end: recover planted discrete logarithms on the small curves, through
+# both field backends.
 break-small: ecc2k130-cpu
-	@for i in 0 1 2 3 4 5 6 7; do \
+	@echo "-- normal basis --"
+	@for i in 0 1 2 3; do \
 	    ./ecc2k130-cpu --curve 23 --instance $$i --threads 1 --steps 32 --verify 2 | grep -E "planted|MISMATCH"; \
 	done
 	@for i in 0 1 2 3; do \
 	    ./ecc2k130-cpu --curve 41 --instance $$i --threads 4 --steps 64 --verify 2 | grep -E "planted|MISMATCH"; \
 	done
+	@echo "-- polynomial basis --"
+	@for i in 0 1 2 3; do \
+	    ./ecc2k130-cpu --curve 19 --instance $$i --threads 1 --steps 16 --verify 2 | grep -E "planted|MISMATCH"; \
+	done
+	@for i in 0 1 2 3; do \
+	    ./ecc2k130-cpu --curve 41 --poly-basis --instance $$i --threads 4 --steps 32 --verify 2 | grep -E "planted|MISMATCH"; \
+	done
+
+# Throughput on ECC2K-95's curve.
+bench95: ecc2k130-cpu
+	./ecc2k130-cpu --curve 97 --bench --steps 32 --launches 8 --verify 0
 
 bench: ecc2k130-cpu
 	./ecc2k130-cpu --curve 131 --bench --steps 32 --launches 8 --verify 0
@@ -98,4 +113,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate cpu gpu test break-small bench ptx check-cuda modal clean
+.PHONY: all generate cpu gpu test break-small bench bench95 ptx check-cuda modal clean

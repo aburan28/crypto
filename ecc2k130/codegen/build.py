@@ -200,3 +200,83 @@ def leqConstIr(prog, bits, limit, ones):
         else:
             le = prog.andOp(le, nb)
     return le
+
+
+# ---------------------------------------------------------------------------
+# polynomial basis
+#
+# Fields with no type-II optimal normal basis (2m+1 composite, e.g. m = 97 for
+# ECC2K-95) are handled the way Harley's 1998 client was: all arithmetic in a
+# polynomial basis F_2[z]/(F), with the orbit-invariant weight taken in a normal
+# basis reached by one linear map.  Reduction modulo a trinomial or pentanomial
+# is a handful of XORs, so a multiplication here is just Karatsuba plus that.
+# ---------------------------------------------------------------------------
+def pbReduceIr(prog, h, m, taps):
+    """Reduce 2m-1 coefficients modulo z^m + sum z^taps + 1, in place."""
+    c = list(h) + [None] * max(0, (2 * m - 1) - len(h))
+    for j in range(len(c) - 1, m - 1, -1):
+        v = c[j]
+        if v is None:
+            continue
+        c[j] = None
+        c[j - m] = prog.xor(c[j - m], v)
+        for t in taps:
+            if t is None or t < 0:
+                continue
+            # j - m + t < j because t < m, so the contribution lands strictly
+            # lower and this single downward pass is enough
+            c[j - m + t] = prog.xor(c[j - m + t], v)
+    return c[:m]
+
+
+def pbMulIr(prog, a, b, m, taps, cutoff):
+    return pbReduceIr(prog, polyMulIr(prog, a, b, cutoff), m, taps)
+
+
+def pbSqrIr(prog, a, m, taps):
+    wide = [None] * (2 * m - 1)
+    for i in range(m):
+        wide[2 * i] = a[i]
+    return pbReduceIr(prog, wide, m, taps)
+
+
+def linearMapIr(prog, x, rows, block):
+    """Apply a GF(2) matrix given as `rows` (each an input bitmask).
+
+    Uses the four-Russians decomposition: every block of `block` inputs gets
+    its 2^block - block - 1 non-trivial sums precomputed once, and each output
+    then XORs one value per block.  That turns an m x m dense matrix from about
+    m^2/2 XORs into roughly m^2/block."""
+    n = len(x)
+    nb = (n + block - 1) // block
+    tables = []
+    for b in range(nb):
+        lo = b * block
+        hi = min(n, lo + block)
+        width = hi - lo
+        tab = [None] * (1 << width)
+        for mask in range(1, 1 << width):
+            low = mask & (mask - 1)
+            if low == 0:
+                bit = mask.bit_length() - 1
+                tab[mask] = x[lo + bit]
+            else:
+                high = mask ^ low
+                tab[mask] = prog.xor(tab[low], tab[high])
+        tables.append((lo, width, tab))
+    out = []
+    for row in rows:
+        parts = []
+        for lo, width, tab in tables:
+            sel = (row >> lo) & ((1 << width) - 1)
+            if sel:
+                parts.append(tab[sel])
+        out.append(prog.xorList(parts))
+    return out
+
+
+def pbHammingIr(prog, x, rows, block, nBits):
+    """Normal-basis weight of a polynomial-basis element: one linear map into
+    normal-basis coordinates, then the carry-save adder tree."""
+    nb = linearMapIr(prog, x, rows, block)
+    return hammingIr(prog, nb, nBits)
