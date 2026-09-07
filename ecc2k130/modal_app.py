@@ -74,6 +74,19 @@ GENCODE = " ".join(
 REMOTE = "/root/ecc2k130"
 LOCAL = pathlib.Path(__file__).parent
 
+# What the image already contains.  A request for exactly this on a matching
+# architecture needs no rebuild, and the default ::bench is exactly this -- it
+# was spending minutes recompiling a binary it already had, in silence.
+BAKED = {"batch": 32, "threads": 128, "leaf": 0, "minBlocks": 2}
+
+# Cleared the first time buildFor actually builds.  `make -B gpu` replaces
+# ./ecc2k130 in place, so once anything has rebuilt, the image's baked binary is
+# gone and a later request for BAKED has to build it again.  Without this a
+# sweep that rebuilt for one point and then reached BAKED would time the
+# previous point's binary and report it under BAKED's knobs -- the same trap the
+# generator comment in buildFor warns about, one level up.
+bakedIntact = [True]
+
 image = (
     modal.Image.from_registry(
         f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
@@ -87,10 +100,15 @@ image = (
         ignore=["ecc2k130-cpu", "ecc2k130", "build/*", "__pycache__", "*.pyc"],
     )
     .run_commands(
+        # Regenerate before building so the baked binary's leaf is known to be
+        # BAKED["leaf"] rather than whatever headers the local checkout held.
+        f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
+        f"--leaf {BAKED['leaf']}",
         # x86-64-v3 keeps the host binary runnable on any Modal machine; the
         # GPU client picks its own word width on the device.
         f"cd {REMOTE} && make cpu MARCH=x86-64-v3",
-        f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH=32 THREADS=128 MINBLOCKS=2',
+        f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
+        f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]}',
     )
 )
 
@@ -124,6 +142,27 @@ def sh(cmd, cwd=REMOTE, timeout=None):
     return r.returncode, r.stdout + r.stderr
 
 
+def shStream(cmd, cwd=REMOTE, timeout=None, prefix=""):
+    """Run a command, echoing each line as it arrives and returning them too.
+
+    Modal forwards a container's stdout to the caller's terminal live, but only
+    if something writes to it.  Capturing the whole of a multi-minute compile and
+    printing it at the end looks identical to a hang, which is what running
+    ::bench used to look like."""
+    p = subprocess.Popen(cmd, shell=True, cwd=cwd, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, text=True, bufsize=1)
+    lines = []
+    try:
+        for line in p.stdout:
+            lines.append(line)
+            print(prefix + line.rstrip(), flush=True)
+        p.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        return 1, "".join(lines) + "\ntimeout"
+    return p.returncode, "".join(lines)
+
+
 def computeCapability():
     rc, out = sh("nvidia-smi --query-gpu=compute_cap --format=csv,noheader")
     if rc != 0 or not out.strip():
@@ -150,14 +189,25 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     # compile whatever headers the container already holds, which during an
     # autotune sweep is the previous point's leaf -- so the sweep would score
     # that build twice and label one of them the register-budget choice.
+    want = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": minBlocks}
+    if want == BAKED and arch in BAKED_ARCHES and bakedIntact[0]:
+        print(f"sm_{arch}: batch {batch}, threads {threads}, leaf {leaf}, "
+              f"minBlocks {minBlocks} is what the image already holds; not rebuilding",
+              flush=True)
+        return True, "baked into the image"
+    print(f"building for sm_{arch}: batch {batch}, threads {threads}, leaf {leaf}, "
+          f"minBlocks {minBlocks} -- ptxas takes a few minutes on this kernel",
+          flush=True)
+    bakedIntact[0] = False
     rc, out = sh(f"cd codegen && python3 gen.py --out ../generated --leaf {leaf}")
     if rc != 0:
         return False, out
     gencode = f"-gencode arch=compute_{arch},code=sm_{arch}"
-    rc, out = sh(
+    rc, out = shStream(
         f'make -B gpu ARCH="{gencode}" BATCH={batch} THREADS={threads} '
         f"MINBLOCKS={minBlocks}",
         timeout=1800,
+        prefix="  build| ",
     )
     return rc == 0, out
 
