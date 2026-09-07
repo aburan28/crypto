@@ -377,6 +377,39 @@ The image builds a fat binary for sm_80 through sm_120 with nvcc, which takes
 about three and a half minutes and is cached thereafter. `autotune` rebuilds
 for the local compute capability alone, which takes seconds.
 
+## Running it
+
+`run.sh` wraps the Modal entry points. A container has a finite life, so a real
+search is a loop: each pass runs for `HOURS`, is stopped with SIGTERM so the
+client checkpoints, and the next pass resumes from that checkpoint.
+
+```
+./run.sh validate                      # prove the GPU engine before spending anything
+./run.sh bench                         # throughput on the challenge curve
+CURVE=97 HOURS=4 PASSES=6 ./run.sh search
+COUNT=8 ./run.sh fanout                # the same across eight GPUs
+./run.sh merge                         # scan the corpus for collisions
+```
+
+Every pass is launched from the same variables, because resume only works when
+the shape matches: the checkpoint header records curve, run id, worker count and
+batch, and changing one between passes makes the client refuse the checkpoint
+and start over. Run `validate` first -- it recovers planted discrete logarithms
+on the GPU itself, so a broken kernel fails in a minute rather than quietly
+burning a day of credits.
+
+The searcher reports every 60 seconds:
+
+```
+[1h04m] 842.1 M it/s  3.24T iters (18.412% of 2^44.0)  14.80M dp  14.79M distinct  corpus 473.6 MB  2h56m left
+```
+
+Rate, iterations against the expected total for the curve, points reported
+against distinct orbits stored (the gap is walks that re-reported), corpus size
+on disk and time left in the pass. Anything that is not a progress line -- a
+collision, a verification failure, a checkpoint that could not be written -- is
+printed as it happens.
+
 ## Persistence
 
 A rho search is long enough that a run will be interrupted -- a spot instance
