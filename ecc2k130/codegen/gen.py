@@ -79,6 +79,40 @@ def sizeChain(m, leaf):
     return out
 
 
+def chooseLeaf(m, budget):
+    """Largest halving-chain size whose straight-line multiply still fits in
+    `budget` simultaneously live values.
+
+    The leaf is where generated code stops and the C++ Karatsuba recursion
+    begins, and the recursion is expensive in a way the leaf is not: it hands
+    each level arrays -- four of length H and three of 2H-1 -- and a
+    pointer-indexed array is something ptxas puts in local memory.  Three levels
+    of it at m=131 moved 4020 words to and from local memory to perform 2011 bit
+    operations.  So the leaf wants to be as large as it can be.
+
+    What stops it is the register file.  Past the budget the compiler spills,
+    and a spilled value costs two memory instructions every time it is touched,
+    which is the same trade the recursion was already making.  So take the
+    largest size that still fits: at m=131 that is 66 words, 254 live against
+    255 registers, which is one level of recursion instead of three and a leaf
+    that spills 284 bytes rather than a multiply that moved 16 kilobytes."""
+    sizes = [m]
+    while sizes[-1] > 4:
+        sizes.append((sizes[-1] + 1) // 2)
+    best = sizes[-1]
+    for n in sizes:
+        if n <= best:
+            continue
+        p = ir.Prog()
+        a = [p.addInput('a', i) for i in range(n)]
+        b = [p.addInput('b', i) for i in range(n)]
+        r = build.polyMulIr(p, a, b, min(12, n))
+        p.fuseLop3(r)
+        if p.peakLive(r) <= budget:
+            best = n
+    return best
+
+
 def dpWeightFor(m, ell):
     """Pick the weight cutoff so a walk runs about sqrt(iterations) steps,
     which keeps the distinguished-point count near the collision count."""
@@ -381,9 +415,11 @@ def generate(cfg, leaf, outDir, verbose):
     for name in ('multPrep', 'toOnb', 'mulLeaf', 'hamming'):
         prog, roots, inputs, outLen = progs[name]
         body, slots = emitFunction(name, prog, roots, inputs, outLen)
-        stats[name] = (prog.instrCount(roots), prog.bitOpCount(roots), slots)
-        ap('// %s: %d instructions (%d two-input bit operations), %d locals'
-           % (name, stats[name][0], stats[name][1], slots))
+        stats[name] = (prog.instrCount(roots), prog.bitOpCount(roots), slots,
+                       prog.peakLive(roots))
+        ap('// %s: %d instructions (%d two-input bit operations), %d locals, '
+           '%d live at the peak'
+           % (name, stats[name][0], stats[name][1], slots, stats[name][3]))
         lines.extend(body)
         ap('')
     ap('}  // namespace eccF%d' % m)
@@ -397,8 +433,8 @@ def generate(cfg, leaf, outDir, verbose):
         print('m=%3d  n=%3d  ell=%.1f bits  dpWeight=%d  chain=%s' %
               (m, onb.n, __import__('math').log2(ell), dpW, chain))
         for name in ('multPrep', 'toOnb', 'mulLeaf', 'hamming'):
-            print('        %-9s %6d instr %6d bitops %4d locals' %
-                  (name, stats[name][0], stats[name][1], stats[name][2]))
+            print('        %-9s %6d instr %6d bitops %4d locals %4d peak live' %
+                  (name, stats[name][0], stats[name][1], stats[name][2], stats[name][3]))
         total = stats['multPrep'][0] * 2 + stats['toOnb'][0]
         print('        conversions per multiplication: %d instructions, leaf cutoff %d'
               % (total, progs['_leafCut']))
@@ -572,9 +608,11 @@ def generatePb(cfg, leaf, outDir, verbose):
     for name in ('mulLeaf', 'reduce', 'sqr', 'hamming'):
         prog, roots, inputs, outLen = progs[name]
         body, slots = emitFunction(name, prog, roots, inputs, outLen)
-        stats[name] = (prog.instrCount(roots), prog.bitOpCount(roots), slots)
-        ap('// %s: %d instructions (%d two-input bit operations), %d locals'
-           % (name, stats[name][0], stats[name][1], slots))
+        stats[name] = (prog.instrCount(roots), prog.bitOpCount(roots), slots,
+                       prog.peakLive(roots))
+        ap('// %s: %d instructions (%d two-input bit operations), %d locals, '
+           '%d live at the peak'
+           % (name, stats[name][0], stats[name][1], slots, stats[name][3]))
         lines.extend(body)
         ap('')
     ap('}  // namespace eccP%d' % m)
@@ -589,8 +627,8 @@ def generatePb(cfg, leaf, outDir, verbose):
         print('m=%3d  polynomial basis  ell=%.1f bits  dpWeight=%d  taps=%s' %
               (m, _m.log2(ell), dpW, str(tapsPos)))
         for name in ('mulLeaf', 'reduce', 'sqr', 'hamming'):
-            print('        %-9s %6d instr %6d bitops %4d locals' %
-                  (name, stats[name][0], stats[name][1], stats[name][2]))
+            print('        %-9s %6d instr %6d bitops %4d locals %4d peak live' %
+                  (name, stats[name][0], stats[name][1], stats[name][2], stats[name][3]))
     return stats
 
 
@@ -628,19 +666,28 @@ def verifyPbMul(m, tapsPos, pb, rng, cut):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='../generated')
-    ap.add_argument('--leaf', type=int, default=17)
+    ap.add_argument('--leaf', type=int, default=0,
+                    help='generated-leaf size; 0 picks the largest that fits --regs')
+    ap.add_argument('--regs', type=int, default=255,
+                    help='live values a leaf may use before the compiler spills')
     ap.add_argument('--only', type=int, default=0)
     ap.add_argument('--basis', default='')
     args = ap.parse_args()
+
+    def leafFor(cfg):
+        if args.leaf:
+            return args.leaf
+        return chooseLeaf(cfg['m'], args.regs)
+
     for cfg in CURVES:
         if args.only and cfg['m'] != args.only:
             continue
         if args.basis and cfg.get('basis', 'onb') != args.basis:
             continue
         if cfg.get('basis', 'onb') == 'pb':
-            generatePb(cfg, args.leaf, args.out, True)
+            generatePb(cfg, leafFor(cfg), args.out, True)
         else:
-            generate(cfg, args.leaf, args.out, True)
+            generate(cfg, leafFor(cfg), args.out, True)
     return 0
 
 

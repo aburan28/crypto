@@ -114,6 +114,12 @@ def gpuName():
 def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     """Rebuild the client for one architecture and one set of knobs."""
     arch = arch or computeCapability()
+    # leaf 0 means "let the generator choose by register budget", which is what
+    # gen.py does with no --leaf: the largest halving-chain size whose
+    # straight-line multiply still fits 255 live values.  On a 255-register GPU
+    # that is 66 words at m=131; it is emphatically not the right answer for the
+    # 16-register host, so the CPU reference build and the device build do not
+    # want the same leaf, and only a GPU settles which one this is.
     if leaf:
         rc, out = sh(f"cd codegen && python3 gen.py --out ../generated --leaf {leaf}")
         if rc != 0:
@@ -192,7 +198,7 @@ def runValidate():
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=1 * HOUR)
-def runBench(batch=32, threads=128, leaf=17, minBlocks=2, steps=64, launches=20,
+def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
              workers=0, rebuild=True):
     """Throughput on the challenge curve."""
     info = {"gpu": gpuName(), "cc": computeCapability(), "batch": batch,
@@ -212,7 +218,7 @@ def runBench(batch=32, threads=128, leaf=17, minBlocks=2, steps=64, launches=20,
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR, volumes={"/data": volume})
-def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="17,33",
+def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33,66",
                 minBlocksList="2,4,8", steps=64, launches=12):
     """Sweep the build-time knobs on the real device and report the best.
 
@@ -365,7 +371,7 @@ def humanBytes(n):
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
-def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
+def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
               checkpointEvery=300, resume=True, loadMax=50000000):
     """Collect distinguished points into the volume until the time budget runs
@@ -559,7 +565,7 @@ def validate(gpu: str = ""):
 
 
 @app.local_entrypoint()
-def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 17,
+def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
           minBlocks: int = 2, steps: int = 64, launches: int = 20):
     r = onGpu(runBench, gpu).remote(batch=batch, threads=threads, leaf=leaf,
                                     minBlocks=minBlocks, steps=steps, launches=launches)
@@ -570,7 +576,7 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 17,
 
 @app.local_entrypoint()
 def autotune(gpu: str = "", batches: str = "8,16,32,64",
-             threadCounts: str = "64,128,256", leaves: str = "17,33",
+             threadCounts: str = "64,128,256", leaves: str = "0,17,33,66",
              minBlocksList: str = "2,4,8"):
     r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=threadCounts,
                                        leaves=leaves, minBlocksList=minBlocksList)
@@ -579,7 +585,7 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
 
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
-           threads: int = 128, leaf: int = 17, dpWeight: int = -1, runId: int = 1,
+           threads: int = 128, leaf: int = 0, dpWeight: int = -1, runId: int = 1,
            walks: int = 4000000, loadMax: int = 50000000):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dpWeight,
@@ -589,7 +595,7 @@ def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
-           batch: int = 8, threads: int = 128, leaf: int = 17, dpWeight: int = -1,
+           batch: int = 8, threads: int = 128, leaf: int = 0, dpWeight: int = -1,
            walks: int = 4000000, loadMax: int = 50000000):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
