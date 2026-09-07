@@ -8,8 +8,9 @@
 #                     but no GPU) -- register, spill and code-size numbers
 #
 # Build-time knobs:
-#   BATCH    walks batched into one field inversion per thread (default 16)
-#   THREADS  CUDA block size (default 128)
+#   BATCH      walks batched into one field inversion per thread (default 32)
+#   THREADS    CUDA block size (default 128)
+#   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
 #   ARCH     CUDA architectures
 
 NVCC    ?= nvcc
@@ -19,6 +20,7 @@ PTXAS   ?= ptxas
 CUDAPATH ?= /usr/local/cuda
 BATCH   ?= 32
 THREADS ?= 128
+MINBLOCKS ?= 2
 # The CPU build picks the widest word the target supports (AVX-512 -> 512 lanes,
 # AVX2 -> 256, otherwise 64).  Use a portable baseline when the build machine
 # and the run machine may differ.
@@ -37,7 +39,7 @@ HDRS = include/bitslice.h include/fieldbs.h include/walk.h include/kernel.h \
        include/ref.h include/solver.h include/bigmod.h include/curveparams.h
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h
 
-DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS)
+DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS)
 
 all: cpu
 

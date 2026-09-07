@@ -185,6 +185,25 @@ which hold several 131-word intermediates at once. The per-thread stack frame
 is the number to watch on real hardware: it is local memory, so occupancy
 depends on how much of it stays in L1.
 
+### Occupancy versus spilling
+
+A block-size bound alone lets ptxas give every thread all 255 registers, which
+caps an SM at about 256 threads. Asking for more resident blocks
+(`MINBLOCKS`) buys warps by taking registers away:
+
+| blocks/SM asked | registers | spill stores | spill loads | warps/SM |
+|---|---|---|---|---|
+| 1 | 255 | 5436 | 7256 | 4 |
+| 2 (default) | 255 | 5436 | 7256 | 8 |
+| 4 | 128 | 7520 | 9648 | 16 |
+| 6 | 80 | 9540 | 12096 | 24 |
+| 8 | 64 | 10356 | 12960 | 32 |
+
+Two is free: 128 threads at 255 registers each is 65280 of the 65536 an SM has,
+so occupancy doubles without a single extra spill, and that is now the default.
+Past that the trade is real and only a device can settle it, which is what
+`autotune` sweeps.
+
 ## Findings that update the implementation guide
 
 **LOP3 fusion is worth 1.65x, and it changes the Karatsuba tradeoff.** A
@@ -242,13 +261,18 @@ the original design faced.
 Ampere through Blackwell) and exposes five entry points:
 
 ```
-modal run modal_app.py::validate --gpu H100        # correctness, on the device
-modal run modal_app.py::bench --gpu B200           # throughput
-modal run modal_app.py::autotune --gpu RTX-PRO-6000
-modal run modal_app.py::search --gpu H100 --hours 4
-modal run modal_app.py::fanout --gpu H100 --count 8 --hours 4
-modal run modal_app.py::merge                      # collisions across all runs
+export ECC_GPU=RTX-PRO-6000
+modal run modal_app.py::validate      # correctness, on the device
+modal run modal_app.py::bench         # throughput
+modal run modal_app.py::autotune      # sweep the build knobs on real hardware
+modal run modal_app.py::search --hours 4
+modal run modal_app.py::fanout --count 8 --hours 4
+modal run modal_app.py::merge         # collisions across every run
 ```
+
+The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
+function definitions, which works on every Modal version. Clients from 0.72
+also accept `--gpu` on the entry points to override it per call.
 
 `validate` runs the whole test suite on the GPU machine and then recovers
 planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
@@ -263,6 +287,10 @@ collisions.
 `RTX-PRO-6000` is the interesting target: it is the GB202 part the guide
 identifies as the best value for this workload, since none of a datacenter
 GPU's tensor silicon is reachable from binary-field arithmetic.
+
+The image builds a fat binary for sm_80 through sm_120 with nvcc, which takes
+about three and a half minutes and is cached thereafter. `autotune` rebuilds
+for the local compute capability alone, which takes seconds.
 
 ## Build
 
