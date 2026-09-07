@@ -133,7 +133,7 @@ Measured statically (`./ptx_stats2k.sh`, clang for sm_90):
 |---|---|---|
 | F(2^97) multiply | 405 | 9 carry-less 32×32 products, Karatsuba twice |
 | F(2^97) squaring | 79 | 0.20 of a multiply — bit spreading, no multiplier |
-| secp256k1 multiply | 468 | for comparison, from `gpu/ecc` |
+| secp256k1 multiply | 472 | for comparison, from `gpu/ecc`; 210 with its inline-PTX carry chains |
 
 **A 97-bit binary field multiply costs about as much as a 256-bit prime
 field multiply.** That is the single most important fact about binary-field

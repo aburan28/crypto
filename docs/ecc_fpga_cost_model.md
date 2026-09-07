@@ -102,26 +102,26 @@ At the 500 MHz the deeper pipeline should reach: 1.7 G steps/s.
 
     steps/s = SMs x clock x IPC_int / (instructions_per_mul x 10.2)
 
-**Measured** (static, `gpu/ecc/ptx_stats.sh`): one modular multiply is 328
-PTX instructions with hand-written carry chains, 468 without. SASS will be
+**Measured** (static, `gpu/ecc/ptx_stats.sh`): one modular multiply is 210
+PTX instructions with hand-written carry chains, 472 without. SASS will be
 somewhat fewer after ptxas scheduling; that has not been measured, because
 disassembling requires `nvdisasm`, which was not available.
 
-**Measured** (`ptxas -arch=sm_100`): the walk kernel uses 226 registers per
+**Measured** (`ptxas -arch=sm_100`): the walk kernel uses 224 registers per
 thread by default, giving 12.5% occupancy at 128-thread blocks, or 128
 registers and 25% occupancy when constrained. Occupancy this low means the
 integer pipes will not be saturated, so an instruction-issue bound is
 optimistic.
 
-An SM retires at most 4 instructions per clock. Taking 250 SASS
+An SM retires at most 4 instructions per clock. Taking 160 SASS
 instructions per multiply as an **estimate**, one multiply costs at least
-62 SM-clocks, so:
+40 SM-clocks, so:
 
-    steps/s ≈ SMs x clock / (62 x 10.2) = SMs x clock / 632
+    steps/s ≈ SMs x clock / (40 x 10.2) = SMs x clock / 408
 
 Fill in the SM count and clock of the specific part — `./bench` prints both
 — rather than trusting a number here. For a 132-SM part at 1.7 GHz this
-gives roughly 0.35 G steps/s, in the same order of magnitude as one VU47P.
+gives roughly 0.55 G steps/s, in the same order of magnitude as one VU47P.
 **This is an estimate built on an estimate and should be replaced by
 `./bench rho` output as soon as a GPU is available.**
 
@@ -132,7 +132,7 @@ gives roughly 0.35 G steps/s, in the same order of magnitude as one VU47P.
 | Primitive | 80 rounds of 32-bit add/rotate/bool | 256-bit modular multiply |
 | FPGA binding resource | LUTs | DSPs |
 | Work per unit of silicon | very high (bit-level ops map perfectly to LUTs) | moderate (multipliers are what DSPs are for, but GPUs have many too) |
-| FPGA advantage | >10x, robust | roughly 2-3x, fragile — estimated |
+| FPGA advantage | >10x, robust | roughly 2x, fragile — estimated |
 
 The SHA-1 result comes from bit-level operations that a LUT fabric does
 essentially for free and a GPU emulates with general-purpose instructions.
@@ -160,7 +160,8 @@ recommendation in the SHA-1 document, and the reversal is the finding.
   and is nearly free — a genuine, if small, structural FPGA advantage,
   because it lowers the fruitless-cycle rate for nothing.
 - **A curve that is not secp256k1**: the special reduction is worth roughly
-  30% here. On a generic prime both platforms fall back to Montgomery
+  40% here (210 PTX instructions against Montgomery CIOS's 352). On a
+  generic prime both platforms fall back to Montgomery
   multiplication, and the FPGA loses slightly more, since its reduction
   stages are hard-wired to 2^256 = 2^32 + 977.
 
