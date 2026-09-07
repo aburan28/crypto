@@ -79,6 +79,13 @@ check-cli:
 test-decomp:
 	cd codegen && python3 testdecomp.py
 
+# Drive the whole campaign shape on a curve that finishes in seconds: several
+# workers with disjoint seed spaces, one resumed from its checkpoint, and a
+# collision that only the merge can see because no single worker holds both
+# halves.  Those are the parts a long run only reaches at the very end.
+rehearse: ecc2k130-cpu
+	./rehearse.sh
+
 test: check-cli ecc2k130-cpu
 	./ecc2k130-cpu --test
 
@@ -138,4 +145,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate check-cli test-decomp cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli test-decomp rehearse cpu gpu test break-small bench bench95 ptx check-cuda modal clean

@@ -403,8 +403,22 @@ client checkpoints, and the next pass resumes from that checkpoint.
 ./run.sh bench                         # throughput on the challenge curve
 CURVE=97 HOURS=4 PASSES=6 ./run.sh search
 COUNT=8 ./run.sh fanout                # the same across eight GPUs
-./run.sh merge                         # scan the corpus for collisions
+./run.sh merge                         # find a collision and recover the logarithm
 ```
+
+`merge` scans every corpus for a repeated orbit and, when it finds one, hands
+the whole set back to the client with `--load` so the pair is rewalked from
+its seeds and solved. A campaign that ended with a collision count and no `k`
+would not have finished. That path needs no GPU -- rewalking two walks is
+cheap -- and it is the one place the `--load-max` cap must be off, since the
+colliding pair is exactly what a cap might drop.
+
+`make rehearse` drives the whole shape on a curve that finishes in seconds:
+several workers with disjoint seed spaces, one stopped and resumed from its
+checkpoint, and a collision only the merge can see because no single worker
+holds both halves. The useful budget is a narrow window -- too much work per
+worker and one solves alone, exercising nothing -- so it tries several and
+says which it used.
 
 `CURVE=131` collects on ECC2K-130 itself. That run does not finish: 2^60.9
 iterations is decades of GPU time, so treat it as collection, not as a solve.
