@@ -214,10 +214,10 @@ pub use koblitz_groebner::{
 };
 pub use koblitz_index_calculus::{
     build_frobenius_factor_base, factor_x_n_minus_1, find_irreducible, frobenius_eigenvalue,
-    enumerate_decompose, groebner_decompose, is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_point_count,
+    enumerate_decompose, groebner_decompose, is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp, koblitz_point_count,
     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
     point_key, points_with_x, span_f2, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve,
-    KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup,
+    KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup, SatDecompositionStats,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,

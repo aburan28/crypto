@@ -1,6 +1,7 @@
-//! The algebraic decomposition oracle behind the Koblitz-curve index
-//! calculus: Semaev's `S₃` Weil-restricted to a Boolean system over the
-//! Frobenius-invariant factor base, solved by matrix-F4.
+//! The decomposition oracle behind the Koblitz-curve index calculus:
+//! Semaev's `S₃` Weil-restricted to a Boolean system over the
+//! Frobenius-invariant factor base, solved three ways — matrix-F4, CDCL
+//! SAT, and exhaustive search as the reference.
 //!
 //! ```bash
 //! cargo run --release --example koblitz_semaev_groebner_demo
@@ -12,7 +13,8 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, enumerate_decompose, groebner_decompose,
-    koblitz_index_calculus_dlp, DecompositionStrategy, KoblitzCurve, KoblitzIcOptions,
+    koblitz_index_calculus_dlp, sat_decompose, DecompositionStrategy, KoblitzCurve,
+    KoblitzIcOptions,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -49,7 +51,8 @@ fn main() {
     println!("unknowns (2 summands × ℓ)   : {}", sys.n_vars);
     println!("equations (Weil restriction): {}", sys.equations.len());
     println!(
-        "degree of the system        : {max_deg}  (squaring is F_2-linear, so S₃ stays quadratic)"
+        "degree of the system        : {max_deg}  (m = 2; squaring is F_2-linear.  \
+         The chained m ≥ 3 system is cubic.)"
     );
     println!();
     for d in 2..=4u32 {
@@ -63,11 +66,11 @@ fn main() {
     }
 
     println!();
-    println!("=== Decomposition: algebra vs exhaustive search ===");
+    println!("=== Decomposition: three oracles on the same system ===");
     println!();
     println!(
-        "{:>5}  {:>12}  {:>12}  {:>10}",
-        "[k]G", "search", "matrix-F4", "verdict"
+        "{:>5}  {:>12}  {:>12}  {:>12}  {:>12}",
+        "[k]G", "search", "matrix-F4", "SAT", "verdict"
     );
     for k in [3u32, 17, 53, 101] {
         let target = kc.mul(&g, &BigUint::from(k));
@@ -86,15 +89,23 @@ fn main() {
             20_000,
         );
         let t_alg = t.elapsed();
+        let t = Instant::now();
+        let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+        let t_sat = t.elapsed();
+        assert_eq!(sat_stats.spurious, 0);
+        let all = [by_search.is_some(), by_algebra.is_some(), by_sat.is_some()];
         println!(
-            "{:>5}  {:>12.2?}  {:>12.2?}  {:>10}",
+            "{:>5}  {:>12.2?}  {:>12.2?}  {:>12.2?}  {:>12}",
             k,
             t_search,
             t_alg,
-            match (by_search.is_some(), by_algebra.is_some()) {
-                (true, true) => "both: yes",
-                (false, false) => "both: no",
-                _ => "DISAGREE",
+            t_sat,
+            if all.iter().all(|v| *v) {
+                "all: yes"
+            } else if all.iter().all(|v| !*v) {
+                "all: no"
+            } else {
+                "DISAGREE"
             }
         );
     }
@@ -111,13 +122,15 @@ fn main() {
     let sg = small.generator().clone();
     let mut certified = 0;
     let mut splits = 0;
+    let mut sat_refuted = 0;
     for k in 1..29u32 {
+        let target = small.mul(&sg, &BigUint::from(k));
         let (out, stats) = groebner_decompose(
             &small,
             &small_fb,
             &small_idx,
             &small_st,
-            &small.mul(&sg, &BigUint::from(k)),
+            &target,
             2,
             SolverEngine::default(),
             20_000,
@@ -125,6 +138,10 @@ fn main() {
         assert!(out.is_none());
         certified += usize::from(stats.infeasible_branches > 0);
         splits += stats.splits;
+        let (sat_out, sat_stats) =
+            sat_decompose(&small, &small_fb, &small_idx, &small_st, &target, 2, 64);
+        assert!(sat_out.is_none());
+        sat_refuted += usize::from(sat_stats.refuted);
     }
     println!(
         "K_0 / F_2^7, |F| = {}: none of the {} targets decomposes.",
@@ -132,16 +149,18 @@ fn main() {
         28
     );
     println!("  refuted by an F4 certificate : {certified}/28");
-    println!("  branches searched            : {splits}");
+    println!("  refuted by SAT (UNSAT)       : {sat_refuted}/28");
+    println!("  F4 branches searched         : {splits}");
 
     println!();
-    println!("=== End to end, both oracles ===");
+    println!("=== End to end, all three oracles ===");
     println!();
     let d = BigUint::from(53u32);
     let q = kc.mul(&g, &d);
     for (label, strategy) in [
         ("matrix-F4 (Semaev)", DecompositionStrategy::Groebner),
-        ("exhaustive search  ", DecompositionStrategy::Enumerate),
+        ("CDCL SAT (Semaev) ", DecompositionStrategy::Sat),
+        ("exhaustive search ", DecompositionStrategy::Enumerate),
     ] {
         let opts = KoblitzIcOptions {
             strategy,
@@ -150,16 +169,16 @@ fn main() {
         let t = Instant::now();
         let rep = koblitz_index_calculus_dlp(&kc, &q, &opts).unwrap();
         println!(
-            "{label}  log = {:>4}  relations = {:>2}  reductions = {:>4}  refutations = {:>3}  {:>9.2?}",
+            "{label}  log = {:>4}  relations = {:>2}  F4 reductions = {:>4}  SAT calls = {:>4}  {:>9.2?}",
             rep.log.as_ref().map(|v| v.to_string()).unwrap_or_else(|| "—".into()),
             rep.relations,
             rep.reductions,
-            rep.infeasible_branches,
+            rep.sat_calls,
             t.elapsed()
         );
     }
     println!();
-    println!("Same logarithm from both oracles.  At these sizes exhaustive search");
+    println!("Same logarithm from all three oracles.  At these sizes exhaustive search");
     println!("is still faster in wall-clock terms — |F| is a few dozen points, so");
     println!("|F|^(m−1) is nothing, while the Macaulay matrix has thousands of");
     println!("columns.  What the algebra buys is the scaling: its cost follows the");

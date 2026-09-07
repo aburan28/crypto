@@ -116,15 +116,17 @@ Not real:
   materialised and `#E` is factored by trial division.
 - **the Gröbner engine's constants** — see below.
 
-## The decomposition oracle: Semaev + matrix-F4
+## The decomposition oracle: Semaev, solved three ways
 
-The question `is R = P_1 + … + P_m with all P_i ∈ F?` is answered two
-ways, and the tests assert the two always agree:
+The question `is R = P_1 + … + P_m with all P_i ∈ F?` is answered three
+ways, and the tests assert all three always agree:
 
 - `DecompositionStrategy::Enumerate` — ordered-tuple search over the
   materialised factor base, `|F|^{m−1}` group operations per target.
 - `DecompositionStrategy::Groebner` (default) — the real algorithm's
   oracle, in `koblitz_groebner.rs`.
+- `DecompositionStrategy::Sat` — the same system as CNF, solved by the
+  repo's CDCL solver (see "A third oracle" below).
 
 The algebraic path, for `m = 2`:
 
@@ -132,14 +134,18 @@ The algebraic path, for `m = 2`:
    is the vanishing condition for `±P₁ ± P₂ ± R = O`.
 2. Write `x_i = Σ_t u_{i,t} b_t` over an `F_2`-basis of the invariant
    subspace `V`.  Restricting the unknowns to `V` is what makes the
-   system solvable — and it keeps the system **quadratic**, because
+   system solvable — and it keeps the degree low: **quadratic** for
+   `m = 2`, because
    squaring is `F_2`-linear in characteristic 2 (and in the Boolean
    quotient `p² = p`, so a symbolic square is a permutation of
    coordinates), while `x₁x₂` is bilinear.
 3. Weil-restrict: one `F_{2^n}`-equation becomes `n` Boolean equations
    in `m·ℓ` unknowns.  For `m ≥ 3`, `S₃` is *chained* rather than
    resolved (`S_k` has degree `2^{k−2}` per variable) — `m` summands
-   become `m−1` links over `m−2` intermediate field unknowns.
+   become `m−1` links over `m−2` intermediate field unknowns, and since
+   those intermediates are unknown too the term `x₁x₂·e` makes the
+   chained system **cubic** rather than quadratic.  That is why `m ≥ 3`
+   costs so much more in every engine.
 4. Solve by matrix-F4 with splitting: reduce the Macaulay matrix at
    degree `2, 3, …`; a reduction yielding the constant `1` refutes the
    branch; rows collapsed to `v_i (+1)` are propagated; where the
@@ -170,6 +176,41 @@ on the same end-to-end DLP:
 Buchberger chokes on the dense 12-variable system (~8 s for a single
 basis); F4's one linear-algebra pass over all products at bounded degree
 is the fix, and it is also what the real algorithm uses.
+
+### A third oracle: SAT
+
+`DecompositionStrategy::Sat` hands the *same* system to the repo's CDCL
+solver (`cryptanalysis::sat`) through
+`semaev_sat::encode_boolean_system`: one Tseitin auxiliary per monomial
+of degree ≥ 2, one parity constraint per equation, and a blocking clause
+per rejected model so roots can be enumerated.  A final UNSAT is a
+refutation in exactly the sense the F4 constant-`1` row is.
+
+This is the Soos–Nohl–Castelluccia comparison the `semaev_sat` module was
+written for, now runnable on identical inputs: clause learning and degree
+growth blow up on different systems.  Measured over 24 targets:
+
+| instance | search | SAT | verdict |
+|---|---|---|---|
+| `K_0/F_2^9`, m=2 | 0.58 ms | 79 ms | 24/24 agree |
+| `K_1/F_2^9`, m=2 | 0.46 ms | 30 ms | 24/24 agree |
+| `K_0/F_2^7`, m=2 | 0.10 ms | 4.5 ms | 24/24 refuted (UNSAT) |
+| `K_0/F_2^9`, m=3 | 0.58 ms | 3.44 s | 24/24 agree |
+
+Zero spurious models in every run — each model is re-checked against the
+original equations before it is used, and the lifted points are
+re-checked in the group.
+
+The `m = 3` row is the interesting one: the chained system is cubic, and
+SAT pays for that much as F4 does.
+
+Fixing the encoder was part of this: the chain-auxiliary count for wide
+parity constraints was `⌈(w+1)/2⌉ − 2`, which under-allocates from
+`w = 6` on and panicked with "ran out of XOR-chain auxiliaries".  The
+fold consumes three literals per auxiliary, so the count is `⌊w/3⌋`;
+`xor_parity_encoding_is_exact_at_every_width` pins it by counting models
+at every width up to 8.  That bug was in the merged `semaev_sat`, not in
+new code.
 
 ### Where the algebra wins, and where it does not
 
@@ -232,10 +273,13 @@ cargo test --release --lib cryptanalysis::koblitz_index_calculus
   checked against brute-forced logs.
 - `solves_the_dlp_on_k0_over_f512`, `solves_the_dlp_on_k1_over_f512`
   (algebraic oracle), `solves_the_dlp_by_enumeration_too`.
-- `both_oracles_answer_every_target_identically` — 39 targets, same
-  verdict from search and algebra, and every algebraic decomposition
-  re-checked in the group.
 - `the_two_algebraic_engines_agree` — matrix-F4 vs Buchberger.
+- `all_three_oracles_answer_every_target_identically` — search, Gröbner
+  and SAT on 39 targets.
+- `sat_refutes_undecomposable_targets`, `sat_handles_the_cubic_chained_system`,
+  `solves_the_dlp_with_the_sat_oracle`.
+- In `semaev_sat`: `xor_parity_encoding_is_exact_at_every_width`
+  (regression), `cubic_monomials_are_encoded`, `contradictory_system_is_unsat`.
 - `undecomposable_targets_are_rejected_algebraically` — 28 refutations
   with no branch searched.
 - `speedup_model_tracks_the_predicted_factors`.
