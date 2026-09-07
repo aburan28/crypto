@@ -26,6 +26,7 @@ stopped and resumed and several containers can contribute to one corpus.
 import json
 import os
 import pathlib
+import re
 import signal
 import struct
 import subprocess
@@ -307,6 +308,50 @@ def corpusCount(path):
     return os.path.getsize(path) // DP_RECORD.size
 
 
+# The client prints a progress line every couple of seconds:
+#   "     12.0 s     842.135 M it/s   1234567 iterations    890 dp    889 stored"
+PROGRESS_RE = re.compile(
+    r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored")
+
+
+def parseProgress(line):
+    """Pull the numbers out of one client progress line, or None."""
+    m = PROGRESS_RE.search(line)
+    if not m:
+        return None
+    return {"seconds": float(m.group(1)), "rate": float(m.group(2)),
+            "iters": int(m.group(3)), "dp": int(m.group(4)), "stored": int(m.group(5))}
+
+
+def humanRate(r):
+    """M it/s spans four orders of magnitude between a debug run on a CPU and a
+    real one on a GPU, so let the small end keep its digits."""
+    return ("%.3f" % r) if r < 10 else ("%.1f" % r)
+
+
+def humanCount(n):
+    """Counts here run to the trillions, where digits stop being readable."""
+    for scale, suffix in ((1e12, "T"), (1e9, "G"), (1e6, "M"), (1e3, "k")):
+        if n >= scale:
+            return "%.2f%s" % (n / scale, suffix)
+    return str(int(n))
+
+
+def humanTime(sec):
+    if sec < 0:
+        return "0s"
+    if sec < 3600:
+        return "%dm%02ds" % (sec // 60, sec % 60)
+    return "%dh%02dm" % (sec // 3600, (sec % 3600) // 60)
+
+
+def humanBytes(n):
+    for scale, suffix in ((1 << 30, "GB"), (1 << 20, "MB"), (1 << 10, "kB")):
+        if n >= scale:
+            return "%.1f %s" % (float(n) / scale, suffix)
+    return "%d B" % n
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
@@ -374,8 +419,17 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
                             stderr=subprocess.STDOUT, text=True)
     lines = []
     solved = None
-    lastCommit = time.time()
+    started = time.time()
+    lastCommit = started
+    lastReport = started
+    last = None
     stopped = ""
+    # A container's output is the only window into a run that will outlive the
+    # terminal that started it, so summarise on a fixed clock rather than
+    # relaying the client's own line every two seconds.
+    expected = 2.0 ** CURVE_FACTS[curve][1] if curve in CURVE_FACTS else 0.0
+    print(f"progress every 60 s; corpus {dpFile}"
+          + (f", checkpoint {ckFile}" if resume else ""), flush=True)
     try:
         while proc.poll() is None:
             line = proc.stdout.readline()
@@ -384,13 +438,37 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
             lines.append(line.rstrip())
             if "k = " in line:
                 solved = line.strip()
+            prog = parseProgress(line)
+            if prog:
+                last = prog
+            # Anything that is not a progress line is an event -- a collision, a
+            # verification failure, a checkpoint warning -- and is worth showing
+            # as it happens rather than only in the tail at the end.
+            elif line.strip():
+                print("  " + line.rstrip(), flush=True)
+            now = time.time()
+            if now - lastReport >= 60:
+                lastReport = now
+                if last:
+                    frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
+                                                     CURVE_FACTS[curve][1])) if expected else ""
+                    print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
+                          "corpus %s  %s left"
+                          % (humanTime(now - started), humanRate(last["rate"]),
+                             humanCount(last["iters"]), frac,
+                             humanCount(last["dp"]), humanCount(last["stored"]),
+                             humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
+                             humanTime(deadline - now)), flush=True)
+                else:
+                    print("[%s] no progress line yet (still starting up?)"
+                          % humanTime(now - started), flush=True)
             # Commit on a clock, not on a line count: the client's output rate
             # depends on the launch size, so counting lines would space the
             # commits arbitrarily far apart on a quiet run.
-            if time.time() - lastCommit > 60:
+            if now - lastCommit > 60:
                 volume.commit()
-                lastCommit = time.time()
-            if time.time() > deadline:
+                lastCommit = now
+            if now > deadline:
                 stopped = "deadline"
                 break
     finally:
@@ -417,6 +495,9 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
+            "iterations": last["iters"] if last else 0,
+            "rate": last["rate"] if last else 0.0,
+            "elapsed": round(time.time() - started, 1),
             "stopped": stopped, "solved": solved, "tail": lines[-25:]}
 
 
