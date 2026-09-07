@@ -73,6 +73,12 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 check-cli:
 	python3 codegen/checkcli.py modal_app.py
 
+# SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
+# `test` because it needs solvers the rest of the repo does not:
+#   pip install python-sat pycryptosat
+test-decomp:
+	cd codegen && python3 testdecomp.py
+
 test: check-cli ecc2k130-cpu
 	./ecc2k130-cpu --test
 
@@ -132,4 +138,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate check-cli cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli test-decomp cpu gpu test break-small bench bench95 ptx check-cuda modal clean
