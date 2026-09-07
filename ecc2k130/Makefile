@@ -89,7 +89,13 @@ bench: ecc2k130-cpu
 	./ecc2k130-cpu --curve 131 --bench --steps 32 --launches 8 --verify 0
 
 # Type-check the whole CUDA translation unit, host and device, with clang.
-# Needs no GPU and no nvcc, only a CUDA include tree at CUDAPATH.
+# Needs no GPU and no nvcc, only a CUDA include tree at CUDAPATH.  On a machine
+# with no toolkit installed, pip supplies one:
+#   pip install nvidia-cuda-runtime-cu12 nvidia-cuda-nvcc-cu12 \
+#               nvidia-curand-cu12 nvidia-cuda-cccl-cu12
+# then point CUDAPATH at a directory holding those include trees merged into
+# include/, and PTXAS at nvidia/cuda_nvcc/bin/ptxas.  CLANGARCH must be an
+# architecture the local clang knows: clang 18 stops at sm_90.
 check-cuda: src/main.cu $(HDRS) $(GEN)
 	printf '#include <cuda_runtime.h>\nextern "C" cudaError_t cudaConfigureCall(dim3, dim3, size_t, cudaStream_t);\n' > build/cudashim.h
 	$(CLANG) -x cuda --cuda-host-only --cuda-path=$(CUDAPATH) -nocudalib \

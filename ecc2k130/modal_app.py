@@ -26,6 +26,8 @@ stopped and resumed and several containers can contribute to one corpus.
 import json
 import os
 import pathlib
+import signal
+import struct
 import subprocess
 import time
 
@@ -287,12 +289,43 @@ def recommendedWeight(curve, walks):
     return m
 
 
+DP_RECORD = struct.Struct("<Q3Q")  # seed, then the canonical orbit hash
+
+
+def corpusFiles(curve, root="/data/dp"):
+    """Every distinguished-point file in the volume for one curve."""
+    if not os.path.isdir(root):
+        return []
+    return [os.path.join(root, fn) for fn in sorted(os.listdir(root))
+            if fn.startswith(f"curve{curve}-") and fn.endswith(".bin")]
+
+
+def corpusCount(path):
+    """Records in a corpus file.  Fixed-width, so this is a stat, not a scan."""
+    if not os.path.exists(path):
+        return 0
+    return os.path.getsize(path) // DP_RECORD.size
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
-              runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000):
+              runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
+              checkpointEvery=300, resume=True):
     """Collect distinguished points into the volume until the time budget runs
-    out.  Records are (seed, hash); a collision is resolved by recomputing both
-    walks from their seeds.
+    out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
+    resolved by recomputing both walks from their seeds.
+
+    Nothing here is throwaway.  The container dies at the deadline, but the run
+    does not: the client checkpoints its live walks to the volume, reloads the
+    corpus at startup so old points still collide with new ones, and is stopped
+    with SIGTERM rather than killed so it writes a final checkpoint first.  At
+    any instant about a quarter of a run's iterations sit in walks that have not
+    yet reported, so a hard kill would throw away 25% of the work done.
+
+    Resuming needs the same shape it saved: curve, runId, worker thread count
+    and the build-time batch size all appear in the checkpoint header, and a
+    mismatch makes the client start fresh rather than misread the file.  So pass
+    the same batch/workers/walksTarget you passed the first time.
 
     curve=97 is ECC2K-95, which Harley's group solved in 1998 after about
     2.16e13 iterations; the published answer is baked into the generated header
@@ -303,7 +336,9 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
             return {"error": log[-2000:]}
     name = gpuName()
     os.makedirs("/data/dp", exist_ok=True)
-    dpFile = f"/data/dp/curve{curve}-run{runId}.txt"
+    os.makedirs("/data/ckpt", exist_ok=True)
+    dpFile = f"/data/dp/curve{curve}-run{runId}.bin"
+    ckFile = f"/data/ckpt/curve{curve}-run{runId}.ck"
     rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0")
     rate = parseRate(out) or 1.0
     # The number of reports comes out at roughly four times the number of
@@ -320,67 +355,102 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
     print(f"{walks} parallel walks, distinguished-point weight {dpWeight}, "
           f"expecting roughly {4 * walks / 1e6:.1f}M reports")
     cmd = (f"./ecc2k130 --curve {curve} --steps {steps} --run-id {runId} "
-           f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads}")
+           f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads} "
+           f"--checkpoint-every {int(checkpointEvery)}")
+    if resume:
+        cmd += f" --checkpoint {ckFile}"
     if dpWeight >= 0:
         cmd += f" --dp-weight {dpWeight}"
+    # Every other worker's corpus counts too: a collision between this run and a
+    # sibling's is just as good as one within a single run, and finding it here
+    # beats waiting for an offline merge.  The client's own dp file reloads
+    # itself, so it is not named twice.
+    for other in sorted(corpusFiles(curve)):
+        if other != dpFile:
+            cmd += f" --load {other}"
     deadline = time.time() + hours * HOUR
     print(f"{name}: collecting into {dpFile} for {hours} h at ~{rate:.2f} M it/s")
     proc = subprocess.Popen(cmd, shell=True, cwd=REMOTE, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True)
     lines = []
     solved = None
+    lastCommit = time.time()
+    stopped = ""
     try:
         while proc.poll() is None:
             line = proc.stdout.readline()
-            if line:
-                lines.append(line.rstrip())
-                if "k = " in line:
-                    solved = line.strip()
-                if len(lines) % 20 == 0:
-                    volume.commit()
+            if not line:
+                break
+            lines.append(line.rstrip())
+            if "k = " in line:
+                solved = line.strip()
+            # Commit on a clock, not on a line count: the client's output rate
+            # depends on the launch size, so counting lines would space the
+            # commits arbitrarily far apart on a quiet run.
+            if time.time() - lastCommit > 60:
+                volume.commit()
+                lastCommit = time.time()
             if time.time() > deadline:
-                proc.terminate()
+                stopped = "deadline"
                 break
     finally:
-        try:
-            proc.wait(timeout=30)
-        except Exception:
-            proc.kill()
+        if proc.poll() is None:
+            # SIGTERM, not kill: the client finishes the launch in flight, then
+            # writes its checkpoint and flushes the corpus.  Draining stdout
+            # while it does keeps the pipe from filling and wedging the exit.
+            proc.send_signal(signal.SIGTERM)
+            graceful = time.time() + 600
+            while proc.poll() is None and time.time() < graceful:
+                line = proc.stdout.readline()
+                if not line:
+                    break
+                lines.append(line.rstrip())
+            try:
+                proc.wait(timeout=max(1, graceful - time.time()))
+            except Exception:
+                stopped = "killed before it could checkpoint"
+                proc.kill()
+                proc.wait(timeout=60)
+    # Commit last, so the checkpoint the client just wrote is part of the
+    # snapshot rather than the one before it.
     volume.commit()
-    count = 0
-    if os.path.exists(dpFile):
-        with open(dpFile) as fh:
-            count = sum(1 for _ in fh)
-    return {"gpu": name, "distinguishedPoints": count, "file": dpFile,
-            "solved": solved, "tail": lines[-25:]}
+    return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "checkpoint": ckFile if os.path.exists(ckFile) else None,
+            "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
+            "stopped": stopped, "solved": solved, "tail": lines[-25:]}
 
 
 @app.function(image=image, timeout=2 * HOUR, volumes={"/data": volume})
 def mergeCorpus(curve=131):
     """Merge every distinguished-point file in the volume and report duplicate
-    hashes, which are the candidate collisions."""
-    import collections
+    hashes, which are the candidate collisions.
+
+    Records are the client's 32-byte binary format, so a partial trailing record
+    (a container that died mid-write) is ignored rather than misparsed."""
     seen = {}
     dup = []
     total = 0
-    root = "/data/dp"
-    if not os.path.isdir(root):
+    short = 0
+    files = corpusFiles(curve)
+    if not files:
         return {"error": "no distinguished points yet"}
-    for fn in sorted(os.listdir(root)):
-        if not fn.startswith(f"curve{curve}-"):
-            continue
-        with open(os.path.join(root, fn)) as fh:
-            for line in fh:
-                parts = line.split()
-                if len(parts) != 2:
-                    continue
+    for path in files:
+        with open(path, "rb") as fh:
+            while True:
+                rec = fh.read(DP_RECORD.size)
+                if len(rec) < DP_RECORD.size:
+                    short += len(rec)
+                    break
+                seed, h0, h1, h2 = DP_RECORD.unpack(rec)
                 total += 1
-                seed, h = parts
+                h = (h0, h1, h2)
                 if h in seen and seen[h] != seed:
-                    dup.append((seen[h], seed, h))
+                    dup.append(("%016x" % seen[h], "%016x" % seed,
+                                "%016x%016x%016x" % (h2, h1, h0)))
                 else:
                     seen[h] = seed
-    return {"records": total, "distinct": len(seen), "collisions": dup[:50],
+    return {"files": len(files), "records": total, "distinct": len(seen),
+            "truncatedBytes": short, "collisions": dup[:50],
             "collisionCount": len(dup)}
 
 

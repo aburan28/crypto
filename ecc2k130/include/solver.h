@@ -156,6 +156,22 @@ struct Solver {
         return k;
     }
 
+    // Insert an already-canonical key, as reloaded from a corpus file.
+    bool insertKey(const Key &key, u64 seed, unsigned long long iters, Entry *other) {
+        auto it = store.find(key);
+        if (it != store.end()) {
+            if (it->second.seed == seed) { ++duplicates; return false; }
+            *other = it->second;
+            return true;
+        }
+        Entry e;
+        e.seed = seed;
+        e.iters = iters;
+        store.emplace(key, e);
+        ++inserted;
+        return false;
+    }
+
     // Returns true and fills `other` when this point collides with a stored one.
     bool insert(const DpRecord &rec, Entry *other) {
         const Elem x = R::fromLimbs(rec.x);
