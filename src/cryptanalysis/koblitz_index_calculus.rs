@@ -266,6 +266,74 @@ pub fn find_irreducible(n: u32) -> Option<IrreduciblePoly> {
     None
 }
 
+/// **Sparse irreducible search**: the smallest-mask irreducible
+/// polynomial of degree `n` over `F_2` among those with at most four
+/// terms below `z^n` — i.e. trinomials and pentanomials.
+///
+/// [`find_irreducible`] scans all `2^n` masks, which is fine to `n ≈ 24`
+/// and hopeless beyond.  For every degree in range the smallest
+/// irreducible polynomial *is* sparse, so this returns the same answer
+/// far faster (a test pins the agreement for `n ≤ 20`), and it is what
+/// the measurement harness uses to reach `n = 63`.
+pub fn find_irreducible_sparse(n: u32) -> Option<IrreduciblePoly> {
+    if n == 0 || n >= 64 {
+        return None;
+    }
+    if n == 1 {
+        return Some(IrreduciblePoly {
+            degree: 1,
+            low_terms: vec![0],
+        });
+    }
+    // An irreducible polynomial of degree ≥ 1 has a non-zero constant
+    // term, so bit 0 is always set; try 0, 1, 2 further bits below n.
+    let mut candidates: Vec<u64> = Vec::new();
+    candidates.push(1);
+    for i in 1..n {
+        candidates.push(1 | (1 << i));
+        for j in (i + 1)..n {
+            candidates.push(1 | (1 << i) | (1 << j));
+            for k in (j + 1)..n {
+                candidates.push(1 | (1 << i) | (1 << j) | (1 << k));
+            }
+        }
+    }
+    candidates.sort_unstable();
+    let hi = 1u64 << n;
+    for low in candidates {
+        if is_irreducible_f2(hi | low) {
+            return Some(IrreduciblePoly {
+                degree: n,
+                low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
+            });
+        }
+    }
+    None
+}
+
+/// The `index`-th Frobenius-invariant subspace of `F_{2^n}`, as an
+/// `F_2`-basis — the factor base's `x`-coordinate support, without
+/// building the curve, counting its points, or materialising `F`.
+///
+/// Point counting and factoring cap [`KoblitzCurve::new`] at
+/// [`MAX_N`]; the *system* the decomposition oracles solve needs only
+/// the field and this subspace, so it can be measured much further out.
+/// Returns `None` when `x^n − 1` has no `index`-th non-trivial factor.
+pub fn invariant_subspace_basis(
+    n: u32,
+    index: usize,
+) -> Option<(IrreduciblePoly, Vec<F2mElement>)> {
+    let irr = find_irreducible_sparse(n)?;
+    let f_j = *factor_x_n_minus_1(n).get(index)?;
+    let ell = 63 - f_j.leading_zeros();
+    let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
+    let basis = linearised_kernel_basis(&exps, n, &irr);
+    if basis.len() != ell as usize {
+        return None;
+    }
+    Some((irr, basis))
+}
+
 /// Multiplicative order of `2` modulo odd `n` — the degree `ℓ` of every
 /// non-trivial irreducible factor of `x^n − 1` over `F_2`.
 pub fn order_of_2_mod_n(n: u32) -> Option<u32> {

@@ -132,6 +132,7 @@ pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
 pub mod j0_twists;
+pub mod koblitz_bench;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod lattice;
@@ -207,14 +208,20 @@ pub use ec_index_calculus::{
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
 };
+pub use koblitz_bench::{
+    bench_instance, ffd_summary, format_ffd_table, format_oracle_table, format_system_table,
+    max_m_within_budget, n_vars_for, profile_system, subspace_ladder, sweep_ffd, sweep_systems,
+    FfdSummary, InstanceBench, OracleRun, SystemProfile,
+};
 pub use koblitz_groebner::{
-    build_decomposition_system, matrix_f4_f2, solve_boolean_system, solve_boolean_system_filtered,
-    sym_semaev_s3, DecompositionSystem, FieldStructure, SolveOptions, SolveStats, SolverEngine,
-    SymElement,
+    build_decomposition_system, first_fall_degree, macaulay_profile, matrix_f4_f2,
+    solve_boolean_system, solve_boolean_system_filtered, sym_semaev_s3, DecompositionSystem,
+    FieldStructure, MacaulayProfile, SolveOptions, SolveStats, SolverEngine, SymElement,
 };
 pub use koblitz_index_calculus::{
     build_frobenius_factor_base, factor_x_n_minus_1, find_irreducible, frobenius_eigenvalue,
-    enumerate_decompose, groebner_decompose, is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp, koblitz_point_count,
+    enumerate_decompose, find_irreducible_sparse, groebner_decompose, invariant_subspace_basis,
+    is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp, koblitz_point_count,
     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
     point_key, points_with_x, span_f2, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve,
     KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup, SatDecompositionStats,

@@ -1,7 +1,10 @@
 # Index calculus on Koblitz curves with Frobenius-invariant factor bases
 
 **Modules:** `src/cryptanalysis/koblitz_index_calculus.rs`,
-`src/cryptanalysis/koblitz_groebner.rs`
+`src/cryptanalysis/koblitz_groebner.rs`, `src/cryptanalysis/koblitz_bench.rs`
+**Scaling target:** `RESEARCH_KOBLITZ_SCALING_TARGET.md` — the scoped,
+measurable follow-on thread (primary metric, correctness gate, five
+pre-registered hypotheses)
 **Demos:**   `cargo run --release --example koblitz_index_calculus_demo`,
 `cargo run --release --example koblitz_semaev_groebner_demo`
 **Paper:**  S. D. Galbraith, R. Granger, S.-P. Merz, C. Petit,
@@ -237,6 +240,22 @@ so the honest statement is: the algebraic oracle is implemented, correct,
 and cross-checked, and it is the one that scales — cost governed by the
 degree of regularity rather than by `|F|` — but at `n ≤ 24` the brute
 oracle is faster and remains available.
+
+## Where this goes next
+
+`RESEARCH_KOBLITZ_SCALING_TARGET.md` turns the open end of this work
+into a measurable thread.  The short version: every oracle here works at
+`m = 2` and `m = 3`, a useful attack needs `m ≈ n/ℓ`, and what stops us
+is not the algebra but the chaining representation —
+
+```
+    unknowns(n, ℓ, m) = m·ℓ + (m − 2)·n
+```
+
+which at `n = 63, ℓ = 6` wants 633 unknowns against a 64-variable
+budget.  The first fall degree, measured over 16 target draws per
+instance across the whole ladder to `n = 63`, never exceeds 3 — so the
+systems themselves stay benign; it is the variable count that bites.
 
 ## Open problems from the talk (unimplemented)
 
