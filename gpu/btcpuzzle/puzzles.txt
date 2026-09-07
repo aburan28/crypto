@@ -1,0 +1,43 @@
+# Bitcoin puzzle registry for gpu/btcpuzzle.
+#
+# FORMAT   <n>  <pubkey-hex | ->  [<known-private-key-hex>]
+#          '#' starts a comment.
+#
+# Puzzle #n has its private key somewhere in [2^(n-1), 2^n).  That interval
+# is the whole reason these are tractable: Pollard kangaroo solves an
+# interval discrete log in about 2*sqrt(W) group operations, so puzzle #n
+# costs roughly 2^(n/2) rather than the 2^128 a full-group search would.
+#
+# A puzzle is only attackable this way if its PUBLIC KEY is known.  That is
+# true exactly for the puzzles whose outputs have been spent from, since a
+# spend reveals the key.  Where only the address is known, the public key is
+# behind HASH160 and the search reverts to brute force over the whole
+# interval -- 2^n rather than 2^(n/2) -- which is out of reach for every
+# unsolved puzzle.  This tool therefore does interval ECDLP only; it has no
+# address scanner, and adding one would not help.
+#
+# The public keys are public record but are NOT shipped here: this file was
+# written without a trustworthy offline source for them, and a wrong key
+# would fail silently by searching for something that does not exist.  Add
+# them yourself, one per line.  Every entry is validated on load -- the key
+# must decompress to a curve point, and any private key you supply must lie
+# in [2^(n-1), 2^n) AND generate the stated public key -- so a bad paste is
+# reported rather than trusted.
+#
+# Solve a target directly without touching this file:
+#     ./bench solve --bits <n> --pubkey <hex>
+#
+# Example of what a filled-in line looks like (this one is SYNTHETIC: the
+# key was generated here, it is not the Bitcoin puzzle's key):
+#     40 03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4 8000000000
+#
+# ---------------------------------------------------------------------------
+# Synthetic regression targets.  Generated locally, self-consistent, and used
+# by `make test` to check the solver end to end.  They are NOT puzzle keys.
+# ---------------------------------------------------------------------------
+20 021d185259270c0632c496b9f16fec0be2e8b9036e9890d770585980866d8652f2 ccf7f
+28 02b509bbdf7e82fdeaa4721b0cac55bc3a43a3c439cc09f972b2f6a3e3a6c8ed27 d224fd7
+32 03c6ce506bac4079747150f7d13ee5c4b28df1b6ee33d53a5dacc8a6001148e609 9094b565
+36 023ad253ff29bd126beea90b5054803e031e7a2396edd35416fb3a32136c760cdc 8b004fdc2
+40 0340699679ef3c46cd96b6bddb26fb4d950171c9f31ac3f8299fe5b33140fe0fe1 e8bec41e8f
+44 0392bfd3bc8c5be505da88f0be6776281a80d575a4cdbc14e40344c2910ca9b72a c60459fd22d

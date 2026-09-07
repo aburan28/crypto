@@ -687,6 +687,7 @@ src/
 
 gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho
 gpu/ecc2k/                     — CUDA kernels: F(2^m) Koblitz curves, Frobenius-class rho (ECC2K-95)
+gpu/btcpuzzle/                 — CUDA kernels: Pollard kangaroo for interval ECDLP (Bitcoin puzzle series)
 hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
 hdl/ecc/                       — VHDL: pipelined secp256k1 modular multiplier + point adder
 ```
@@ -709,6 +710,9 @@ cd gpu/ecc && make bench && ./bench selftest && ./bench rho
 # Koblitz curves over F(2^m): ECC2K-95 plus two solvable toy curves
 cd gpu/ecc2k && make test
 
+# Interval ECDLP: Pollard kangaroo, solves planted keys end to end
+cd gpu/btcpuzzle && make test
+
 # FPGA datapath — GHDL simulation of the multiplier and the point adder
 cd hdl/ecc && make
 ```
@@ -725,6 +729,12 @@ a free endomorphism: walking on the classes {±τ^i P} shortens the search by
 solves on a toy curve, the class walk lands within 1% of its predicted step
 count and at 0.21× a negation-only walk.
 
+`gpu/btcpuzzle/` solves the *interval* discrete log — the key is known to lie
+in a range — with Pollard kangaroo, which costs about 2√W for a range of
+width W instead of the 2^128 a full-group search would. That is the shape of
+the Bitcoin puzzle challenges, and of biased-nonce and small-range key
+problems generally.
+
 ---
 
 ## Documentation
@@ -738,6 +748,7 @@ count and at 0.21× a negation-only walk.
 - [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
 - [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.
 - [`gpu/ecc2k/README.md`](./gpu/ecc2k/README.md) — Koblitz / ECC2K-95 kernels and the Frobenius-class walk.
+- [`gpu/btcpuzzle/README.md`](./gpu/btcpuzzle/README.md) — Pollard kangaroo for interval ECDLP.
 - [`hdl/ecc/README.md`](./hdl/ecc/README.md) — FPGA secp256k1 datapath.
 - [`docs/ecc_fpga_cost_model.md`](./docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
 - [`docs/sha1_fpga_cost_model.md`](./docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
