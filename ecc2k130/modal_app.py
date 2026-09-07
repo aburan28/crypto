@@ -341,7 +341,7 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
 
 @app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
 def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
-               minBlocksList="1,2,3,4", leaves="0,9,17,33,66", arch="", top=6):
+               minBlocksList="1,2,3,4", leaves="0,17,33,66,131", arch="", top=6):
     """Search the build space offline, on a CPU container, and return a shortlist.
 
     ptxas is deterministic and needs no device, so registers, spill traffic and
@@ -760,7 +760,7 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
 
 @app.local_entrypoint()
 def autolab(batches: str = "4,8,16,32", thread_counts: str = "64,128,256",
-            min_blocks_list: str = "1,2,3,4", leaves: str = "0,9,17,33,66",
+            min_blocks_list: str = "1,2,3,4", leaves: str = "0,17,33,66,131",
             arch: str = "", top: int = 6):
     """Offline build-space search.  No GPU is rented; ptxas does not need one."""
     r = runAutolab.remote(batches=batches, threadCounts=thread_counts,
@@ -773,7 +773,7 @@ def autolab(batches: str = "4,8,16,32", thread_counts: str = "64,128,256",
 @app.local_entrypoint()
 def campaign(gpu: str = "", batches: str = "4,8,16,32",
              thread_counts: str = "64,128,256", min_blocks_list: str = "1,2,3,4",
-             leaves: str = "0,9,17,33,66", top: int = 6, arch: str = ""):
+             leaves: str = "0,17,33,66,131", top: int = 6, arch: str = ""):
     """Offline search, then measure its Pareto front on the card.
 
     The two halves are the point: the CPU container maps the whole space for

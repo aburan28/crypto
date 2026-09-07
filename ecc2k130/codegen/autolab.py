@@ -209,24 +209,57 @@ def bindingBound(r):
     return r['minBlocks'] * r['threads'] > REGS_PER_SM // 255
 
 
-def planConfigs(leaves, batches, threadList, minBlocks, prune):
-    """The builds to compile, with the ones that cannot differ left out.
+def planConfigs(leaves, batches, threadList, minBlocks, prune, cross):
+    """The builds to compile.
 
-    A launch bound below about 257 total threads does not constrain the
-    allocator, so every minBlocks at that block size compiles to the same
-    binary.  Compiling all of them costs 23 seconds each to rediscover that.
-    Keep the smallest as the baseline for that block size and drop the rest."""
+    The metrics are separable, and measurably so: across a full sweep the
+    instruction and local-op counts depend only on the leaf, while registers and
+    spill depend only on threads and minBlocks.  Neither ever moved with the
+    other axis.  So the cross product measures the same two curves over and over
+    -- vary one axis at a time around a base point instead and the search falls
+    from |leaf|*|batch|*|threads|*|minBlocks| builds to roughly their sum.  That
+    is what makes an expensive point like a fully straight-line leaf, which
+    takes ptxas minutes on its own, affordable to include at all.
+
+    `cross` restores the full product for when that assumption is worth
+    rechecking, which is any time the kernel's structure changes.
+
+    Pruning drops a launch bound that cannot bind: below about 257 total threads
+    the allocator keeps its 255 registers and every minBlocks compiles to the
+    same binary, so only the smallest is kept."""
     out = []
+
+    def add(leaf, batch, threads, mb):
+        if (leaf, batch, threads, mb) not in out:
+            out.append((leaf, batch, threads, mb))
+
+    def occupancyPoints(leaf, batch):
+        for threads in threadList:
+            seenLoose = False
+            for mb in minBlocks:
+                if prune and not bindingBound({'minBlocks': mb, 'threads': threads}):
+                    if seenLoose:
+                        continue
+                    seenLoose = True
+                add(leaf, batch, threads, mb)
+
+    if cross:
+        for leaf in leaves:
+            for batch in batches:
+                occupancyPoints(leaf, batch)
+        return out
+
+    # Sorting by leaf below keeps the generator from being re-run: it is the one
+    # per-configuration step that is not a compile.
+
+    baseLeaf, baseBatch = leaves[0], batches[0]
+    baseThreads, baseMb = threadList[0], minBlocks[0]
+    occupancyPoints(baseLeaf, baseBatch)
     for leaf in leaves:
-        for batch in batches:
-            for threads in threadList:
-                seenLoose = False
-                for mb in minBlocks:
-                    if prune and not bindingBound({'minBlocks': mb, 'threads': threads}):
-                        if seenLoose:
-                            continue
-                        seenLoose = True
-                    out.append((leaf, batch, threads, mb))
+        add(leaf, baseBatch, baseThreads, baseMb)
+    for batch in batches:
+        add(baseLeaf, batch, baseThreads, baseMb)
+    out.sort(key=lambda c: leaves.index(c[0]))
     return out
 
 
@@ -356,7 +389,7 @@ def main():
     ap.add_argument('--batch', default='4,8,16,32')
     ap.add_argument('--threads', default='64,128,256')
     ap.add_argument('--min-blocks', default='1,2,3,4')
-    ap.add_argument('--leaf', default='0,9,17,33,66',
+    ap.add_argument('--leaf', default='0,17,33,66,131',
                     help='generated leaf sizes; 0 means the register-budget choice')
     ap.add_argument('--regs', type=int, default=255)
     ap.add_argument('--arch', default='120')
@@ -367,6 +400,9 @@ def main():
                     help='auto picks nvcc when --cuda-path has one')
     ap.add_argument('--out', default='autolab.json')
     ap.add_argument('--top', type=int, default=6)
+    ap.add_argument('--cross', action='store_true',
+                    help='compile the full cross product rather than varying one '
+                         'axis at a time; worth doing when the kernel changes shape')
     ap.add_argument('--no-prune', action='store_true',
                     help='compile every combination, including the ones whose '
                          'launch bound cannot bind and so cannot differ')
@@ -399,12 +435,15 @@ def main():
         else:
             print('%s came from a different build of this tool; recompiling' % args.out)
 
-    plan = planConfigs(leaves, batches, threadList, minBlocks, not args.no_prune)
+    plan = planConfigs(leaves, batches, threadList, minBlocks,
+                       not args.no_prune, args.cross)
     total = len(plan)
     full = len(leaves) * len(batches) * len(threadList) * len(minBlocks)
     if total < full:
-        print('%d builds (%d of the %d in the cross product cannot differ from one '
-              'already in it)' % (total, full - total, full))
+        print('%d builds instead of the %d in the cross product: the launch bound '
+              'does not bind below %d total threads, and leaf and occupancy move '
+              'different metrics (--cross to check that)'
+              % (total, full, REGS_PER_SM // 255 + 1))
     print('%d configurations, about %.0f min at 23 s each' % (total, total * 23 / 60.0))
     rows = []
     n = 0

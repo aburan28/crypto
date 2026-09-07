@@ -486,11 +486,32 @@ only the survivors on a card:
 ECC_GPU=RTX-PRO-6000 modal run modal_app.py::campaign
 ```
 
-The search skips combinations it can prove cannot differ. A launch bound below
-about 257 total threads does not constrain the allocator, so every `minBlocks`
-at that block size compiles to the same binary; keeping one baseline per block
-size and dropping the rest cuts a leaf-and-batch sweep by a third at no cost to
-the front.
+The search does not walk a cross product. The metrics are separable, and
+measurably so: across a full sweep the instruction and local-op counts moved
+only with the leaf, while registers and spill moved only with threads and
+`minBlocks` -- neither ever tracked the other axis. So it varies one axis at a
+time around a base point, which takes the default sweep from 240 builds to 15
+and is what makes a fully straight-line leaf, minutes of ptxas on its own,
+affordable to include at all. `--cross` restores the full product, worth doing
+whenever the kernel changes shape. It also drops a launch bound that cannot
+bind: below about 257 total threads the allocator keeps its 255 registers and
+every `minBlocks` compiles to the same binary.
+
+The leaf is the axis that trades instructions against local memory, and the
+offline proxy cannot settle it:
+
+| leaf | instructions | local ops |
+|---|---|---|
+| 17 | 21525 (+3.6%) | 9178 (+29.7%) |
+| 33 | 19814 (-4.7%) | 7708 (+8.9%) |
+| 66 (shipped) | 20786 | 7076 |
+| 131 (no recursion) | 24503 (+17.9%) | 5158 (-27.1%) |
+
+A fully straight-line multiply removes the Karatsuba recursion, and with it a
+quarter of the local-memory traffic, for eighteen percent more instructions.
+Local memory is DRAM-backed and instructions are ALU, so those are not the same
+currency -- which is exactly why both ends sit on the Pareto front and go to the
+card rather than being ranked here.
 
 One axis is deliberately absent. `ptxas --maxrregcount` was measured against
 `__launch_bounds__` at 255, 168, 128, 80 and 64 registers and gave
