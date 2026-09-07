@@ -232,6 +232,10 @@ struct KangarooHost {
     std::unordered_map<std::string, kg_dp> seen;
     unsigned long long same_herd_collisions = 0;
 
+    /* Mean jump size is 2^(w_bits/2 + mean_shift - 1).  Zero gives the
+     * classical sqrt(W)/2; see README for the measured sweep. */
+    int mean_shift = 0;
+
     /* Jump scalars are pseudorandom with mean sqrt(W)/2, the two-herd
      * optimum.  Powers of two would also work but give the reachable
      * position sets an arithmetic structure worth avoiding. */
@@ -239,7 +243,7 @@ struct KangarooHost {
         uint32_t nj = 1u << prm.njump_bits;
         jumps.resize(nj);
         /* mean = 2^(w_bits/2 - 1); draw uniformly from [1, 2*mean] */
-        int mean_bits = (int)prm.w_bits / 2;    /* 2*mean = 2^mean_bits */
+        int mean_bits = (int)prm.w_bits / 2 + mean_shift; /* 2*mean = 2^mean_bits */
         if (mean_bits < 1) mean_bits = 1;
         affine_pt G = Curve::generator();
         uint64_t s = 0x5DEECE66Dull ^ ((uint64_t)prm.seed << 16) ^ prm.njump_bits;

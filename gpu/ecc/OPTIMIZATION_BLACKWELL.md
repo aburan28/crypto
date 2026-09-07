@@ -60,12 +60,53 @@ PTX). Writing the carry chain by hand removes 30% of the instructions. That
 is the single largest code-level win available, and it is available on every
 architecture, not just Blackwell.
 
-Compile with `-DFP_PTX=1` to switch it on. It is off by default because the
-inline assembly cannot be exercised by the CPU test harness — the host
-compiles the portable path — so it must be validated on the device with
-`./bench selftest` before being trusted. nvcc's NVVM may already generate
+Compile with `-DFP_PTX=1` to switch it on. It is off by default because
+the assembly has never been executed: this was written without a GPU.
+
+Validating it is one command, though, and the reason is worth stating.
+All three asm blocks are guarded `#if FP_PTX && defined(__CUDA_ARCH__)`,
+so the host **always** compiles the portable path. `./bench selftest` built
+with `-DFP_PTX=1` therefore compares device-assembly results against
+host-portable results over full rho walk state — which is exactly the
+differential test the assembly needs. If that passes, turn `FP_PTX` on and
+take the 30%; it is the largest single win available in this code. nvcc's NVVM may already generate
 better carry code than clang does here; measure both before assuming the
 30% transfers.
+
+### The multiply is carry-bound, not multiply-bound
+
+Worth knowing before optimising the wrong thing. Per squaring on the
+special-reduction path, the emitted opcode mix is:
+
+| opcode | count |
+|---|---|
+| add | 177 |
+| and | 104 |
+| shr | 103 |
+| mul | 46 |
+| everything else | 9 |
+
+Only 46 of 439 instructions are multiplies. The rest is carry emulation —
+the portable path builds a 64-bit accumulator out of 32-bit shifts and
+masks. That is why the inline-PTX carry chains are worth 30% while
+reducing the multiply count is worth almost nothing.
+
+Two consequences, both measured:
+
+**A dedicated squaring routine is not worth writing.** A square needs only
+the 28 off-diagonal products plus 8 diagonal ones, 36 against the
+schoolbook's 64, which suggests a 44% saving. It does not materialise:
+clang's common-subexpression elimination already collapses `a_i*a_j` and
+`a_j*a_i` in `mul(a, a)`, so both forms emit exactly 46 multiplies. A
+hand-written `mp_sqr_full` measured 427 instructions against 439 — 2.7% —
+and on the inline-PTX path it was **23.5% worse** (405 against 328),
+because `mul(a,a)` there uses the efficient asm carry chains while a
+portable squaring routine does not. It was implemented, measured, and
+reverted.
+
+**Any further multiply-side work has to be written in the same idiom as
+the carry chains it sits next to**, or it loses more on carries than it
+gains on multiplies.
 
 32-bit limbs are right for every NVIDIA architecture through Blackwell for
 a structural reason: the integer datapath is 32-bit, `IMAD.WIDE.U32` is the

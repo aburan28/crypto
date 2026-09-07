@@ -27,8 +27,12 @@ test_kangaroo: test_kangaroo.cpp $(HDRS) ../ecc/curve_secp256k1.h
 test: test_kangaroo
 	./test_kangaroo
 
+# Slow: 120 solves per configuration.  Not part of `make test`.
+tune_kangaroo: tune_kangaroo.cpp $(HDRS) ../ecc/curve_secp256k1.h
+	$(CXX) $(CXXFLAGS) -o $@ $<
+
 bench: kangaroo.cu kernels_kangaroo.cuh $(HDRS) ../ecc/curve_secp256k1.h
 	$(NVCC) $(NVCCFLAGS) -o $@ $<
 
 clean:
-	rm -f test_kangaroo bench
+	rm -f test_kangaroo tune_kangaroo bench

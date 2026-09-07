@@ -97,29 +97,42 @@ make bench ARCH=sm_100
 is Pollard's analysis of the classic lambda method, published parallel
 implementations land near 2.1.
 
+Kangaroo run lengths are close to exponentially distributed, so a mean over
+a handful of solves is nearly meaningless — at 20 trials the standard error
+is over 20% of the mean. `tune_kangaroo` reports the standard error
+alongside the mean; on a 2^31 interval with 120 trials per configuration:
+
 ```
-reseed_on_dp = 0
-  28-bit key: mean     32137 steps over 24 solves = 3.92 * sqrt(W)
-  32-bit key: mean    137144 steps over 16 solves = 4.19 * sqrt(W)
-  36-bit key: mean    331076 steps over  8 solves = 2.53 * sqrt(W)
-reseed_on_dp = 1
-  28-bit key: mean     21160 steps over 24 solves = 2.58 * sqrt(W)
-  32-bit key: mean    111846 steps over 16 solves = 3.41 * sqrt(W)
-  36-bit key: mean    480140 steps over  8 solves = 3.66 * sqrt(W)
+configuration                        mean  std err   median
+apparent best (2^5, shift-2)         2.83     0.14     2.66
+apparent worst (2^7, shift+0)        3.17     0.16     2.91
+current default (2^6, shift+0)       2.79     0.13     2.65
 ```
 
-So roughly 3·√W, in line with the classic lambda method and about 50% above
-the best published implementations. The trial-to-trial variance is large —
-kangaroo run lengths are close to exponentially distributed — which is why
-these are means over many solves rather than single runs.
+So **C ≈ 2.8 ± 0.14**, between the idealised bound and the classic lambda
+figure, and about a third above the best published implementations.
 
-**Whether to restart a kangaroo when it reports a distinguished point is a
-genuine trade-off, and the measurement does not settle it.** Restarting
-unmerges kangaroos that have collided within their own herd; not restarting
-keeps the distance a kangaroo has built up. Across these sizes the two are
-within the noise of each other, which makes sense: with a 64-entry jump
-table, same-herd merges are rare. `--variant` and the `reseed_on_dp`
-parameter leave both available; the solver defaults to restarting.
+### Two things that were tried and did not work
+
+**Tuning the jump parameters buys nothing.** A sweep over four jump-table
+sizes and five mean-jump scales produced constants from 2.50 to 3.95, which
+looks like a 36% win sitting there for the taking. It is not: at 20 trials
+per cell that spread is entirely sampling noise, and re-running the apparent
+best and the current default at 120 trials each puts them within half a
+standard error of one another. The defaults are already on a flat optimum.
+The `mean_shift` knob is kept so the measurement can be repeated at other
+interval sizes, not because any setting of it is known to help.
+
+This is the trap the table above exists to prevent: with twenty cells and a
+20%-noisy statistic, the minimum of a grid search is a lucky draw, not a
+tuning result.
+
+**Restarting a kangaroo at a distinguished point is also a wash.**
+Restarting unmerges kangaroos that collided within their own herd; not
+restarting keeps the distance a kangaroo has built up. Across these sizes
+the two are within noise, which is what a 64-entry jump table predicts —
+same-herd merges are rare. Both are available; the solver defaults to
+restarting.
 
 ## Occupancy: measured
 
@@ -182,6 +195,7 @@ used by `make test` as regression targets. They are not puzzle keys.
 | `test_kangaroo.cpp` | CPU verification, including end-to-end solves |
 | `puzzles.txt` | The registry |
 | `ptx_stats_kangaroo.sh` | Static instruction and occupancy analysis, no GPU needed |
+| `tune_kangaroo.cpp` | Measures the constant with its standard error; slow, so not part of `make test` |
 
 ## Scope
 
