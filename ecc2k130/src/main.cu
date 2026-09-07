@@ -638,6 +638,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     std::vector<DpRecord> recs;
     u64 iterBase = 0;
     u64 totalDp = 0, lost = 0, verified = 0, verifyBudget = (u64)(o.verify < 0 ? 0 : o.verify);
+    bool warnedLost = false;
 
     // Reload every corpus file first, so a collision against work done by an
     // earlier run or another worker is found the moment it happens rather than
@@ -819,9 +820,21 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         if (now - lastPrint > 2.0 || (o.launches && launch + 1 == o.launches)) {
             const double el = now - t0;
             const double it = (double)iterBase * (double)eng.walksPerLaunch();
-            printf("  %8.1f s  %10.3f M it/s  %10llu iterations  %8llu dp  %8llu stored\n",
+            printf("  %8.1f s  %10.3f M it/s  %10llu iterations  %8llu dp  %8llu stored"
+                   "  %8llu dropped\n",
                    el, it / el / 1e6, (unsigned long long)it, (unsigned long long)totalDp,
-                   (unsigned long long)sol.inserted);
+                   (unsigned long long)sol.inserted, (unsigned long long)lost);
+            // A drop is a distinguished point the device found and the host
+            // never saw: real work, computed and thrown away.  It means the
+            // report buffer is too small for the cutoff, which is a setting,
+            // not bad luck -- so say so once rather than leaving it to the
+            // summary line hours later, by which time the run is already lost.
+            if (lost && !warnedLost && lost * 10 > totalDp) {
+                printf("  warning: dropping %.1f%% of reports; --dp-cap %u is too small "
+                       "for this dp weight, raise it or raise --dp-weight\n",
+                       100.0 * (double)lost / (double)(totalDp + lost), o.dpCap);
+                warnedLost = true;
+            }
             fflush(stdout);
             lastPrint = now;
         }

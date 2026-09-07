@@ -577,7 +577,7 @@ def generatePb(cfg, leaf, outDir, verbose):
     ap('static const unsigned long long PY[3] = %s;' % limbLiteral(basePoint[1]))
     ap('static const unsigned long long QX[3] = %s;' % limbLiteral(target[0]))
     ap('static const unsigned long long QY[3] = %s;' % limbLiteral(target[1]))
-    ap('static const char *KNOWN_K = %s;' % (('"%d"' % knownK) if knownK else '0'))
+    ap('[[maybe_unused]] static const char *KNOWN_K = %s;' % (('"%d"' % knownK) if knownK else '0'))
     ap('')
     ap('// rows of the polynomial-basis to normal-basis map, for the host reference')
     ap('static const unsigned long long NB_ROWS[%d][3] = {' % m)
