@@ -526,11 +526,16 @@ above for the supported path.
 
 ## What is not done
 
-* No GPU run from here. Throughput on real hardware is unmeasured; the Modal
-  app is the way to get it. The §6 layout question — one thread per bitsliced
-  multiply versus 32 threads cooperating — is only partly answered: the register
-  data says the leaf fits comfortably, but the 16.4 KB per-thread stack frame
-  means occupancy needs measurement.
+* Throughput on real hardware is unmeasured. The client has now run on an
+  RTX PRO 6000 Blackwell (sm_120): the whole validation suite passes there and
+  every planted discrete logarithm is recovered on the device itself, through
+  both backends. What has not been measured is how fast it walks. `bench` is
+  the number that settles that, and `autotune` decides the build knobs —
+  including whether the register-budget leaf, which is chosen from static ptxas
+  analysis and measures *worse* on the host, is right on a GPU. The §6 layout
+  question — one thread per bitsliced multiply versus 32 threads cooperating —
+  is likewise only partly answered: the register data says the leaf fits, but
+  the 16 KB per-thread stack frame means occupancy needs measurement.
 * The multiplier is optimal only within the Karatsuba family. Toom-3 over
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the
