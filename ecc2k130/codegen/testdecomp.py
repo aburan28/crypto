@@ -162,6 +162,31 @@ def checkS3(report):
         report('S_3 rejects random third coordinates, m=%d' % m, accepted == 0)
 
 
+def checkFactorBase(report):
+    """The orbit count is the number of relations a run needs, so it has to be
+    right.  Weight and being an x-coordinate are both preserved by the
+    Frobenius, so every orbit lies wholly inside the factor base or wholly
+    outside; check that, and that the orbits partition it."""
+    import indexcalc
+    from math import comb
+    for m, w in ((11, 3), (23, 2)):
+        onb = field.Onb(m)
+        cur = curves.Curve(onb)
+        base, orbits = indexcalc.factorBase(onb, cur, w)
+        total = 0
+        wholly = True
+        for c in orbits:
+            for d in orbits[c]:
+                total += 1
+                if d not in base or bin(d).count('1') != bin(c).count('1'):
+                    wholly = False
+        report('m=%d w=%d orbits partition the factor base (%d pts, %d orbits)'
+               % (m, w, len(base), len(orbits)), total == len(base) and wholly)
+        cand = sum(comb(m, k) for k in range(w + 1))
+        report('m=%d w=%d factor base is a subset of the weight<=w candidates'
+               % (m, w), len(base) <= cand)
+
+
 def checkEndToEnd(report):
     """A target built from factor base points must decompose back to them."""
     import indexcalc
@@ -184,6 +209,7 @@ def main():
     checkAtMost(report)
     checkLexLeq(report)
     checkS3(report)
+    checkFactorBase(report)
     checkEndToEnd(report)
     if fails:
         print('%d failure(s)' % len(fails))

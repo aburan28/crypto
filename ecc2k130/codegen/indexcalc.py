@@ -131,10 +131,12 @@ def liftAndCheck(onb, curve, coords, target):
         pts.append(p)
     k = len(pts)
     for mask in range(1 << k):
+        # None is the point at infinity throughout, which is also the identity
+        # curve.add expects, so the accumulator needs no separate empty state
         acc = None
         for i in range(k):
             q = curve.neg(pts[i]) if (mask >> i) & 1 else pts[i]
-            acc = q if acc is None else curve.add(acc, q)
+            acc = curve.add(acc, q)
         if acc is not None and acc == target:
             signs = []
             for i in range(k):
@@ -172,7 +174,7 @@ def runTrials(m, points, weight, trials, seed, leaf, verbose, maxConflicts=0, ti
         chosen = [base[keys[rng.randrange(len(keys))]] for _ in range(points)]
         target = None
         for p in chosen:
-            target = p if target is None else curve.add(target, p)
+            target = curve.add(target, p)
         if target is None:
             continue
         c = cnfmod.Cnf()
