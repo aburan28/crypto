@@ -153,7 +153,15 @@ Worth singling out:
   deliberately: it buys descent time, and descent is 11 ms against a
   4-minute solve.
 - **Symmetry breaking.**  Nothing yet forbids permutations of
-  `(X₁, X₂, X₃)`, so every solution is found `3!` times over.
+  `(X₁, X₂, X₃)`, so the search explores every solution in all `3!`
+  orderings.
+- **UNSAT is out of reach.**  Every result above is a *satisfiable*
+  instance, where the search can stop at the first witness.  Refuting a
+  `-U` corpus instance means exhausting the space, and the solver does
+  not currently finish one in reasonable time at any corpus size — so
+  `corpus_round_trips_through_the_solver` asserts only the SAT
+  direction.  Symmetry breaking and an incremental Gauss matrix are
+  both prerequisites for changing that.
 
 ## References
 
