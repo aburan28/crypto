@@ -211,6 +211,48 @@ class Prog:
         return self
 
     # ---- emission -----------------------------------------------------
+    def emitCnf(self, roots, inputLits, cnf):
+        """Tseitin-encode this DAG into `cnf`; the SAT back end of emit().
+
+        `inputLits` maps (arrayName, position) to a literal.  Returns one
+        literal per root, with a None root -- the IR's constant zero -- mapping
+        to cnf.false.  Constant folding happens in Cnf, so a circuit that is
+        partly evaluated (one operand of a multiply already known, which is the
+        common case once the target point is substituted in) shrinks here
+        rather than being handed to the solver as tautologies."""
+        rc = self.refCounts(roots)
+        lit = {}
+        for i in range(len(self.ops)):
+            if self.inputRef[i] is not None:
+                lit[i] = inputLits[self.inputRef[i]]
+                continue
+            if self.ops[i] is None or rc[i] == 0:
+                continue
+            op, args = self.ops[i]
+            a = lit[args[0]]
+            if op == OP_NOT:
+                lit[i] = -a
+                continue
+            b = lit[args[1]]
+            if op == OP_XOR:
+                lit[i] = cnf.xorLit(a, b)
+            elif op == OP_AND:
+                lit[i] = cnf.andLit(a, b)
+            elif op == OP_OR:
+                lit[i] = cnf.orLit(a, b)
+            elif op == OP_XOR3:
+                lit[i] = cnf.xorLit(cnf.xorLit(a, b), lit[args[2]])
+            elif op == OP_XORAND:
+                lit[i] = cnf.xorLit(a, cnf.andLit(b, lit[args[2]]))
+            elif op == OP_MAJ:
+                lit[i] = cnf.majLit(a, b, lit[args[2]])
+            else:
+                raise ValueError('no CNF rule for op %s' % op)
+        out = []
+        for r in roots:
+            out.append(cnf.false if r is None else lit[r])
+        return out
+
     def emit(self, roots, outName, indent='    ', wordType='W'):
         """Return a list of C source lines computing roots into outName[k]."""
         rc = self.refCounts(roots)

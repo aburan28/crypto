@@ -524,6 +524,61 @@ The CUDA targets (`make gpu`, `make ptx`, `make check-cuda`) need a CUDA
 toolchain, which is no longer published for macOS — see the Modal section
 above for the supported path.
 
+## Index calculus: SAT point decomposition
+
+An experiment, not a second attack. Index calculus does not beat rho on a
+curve anyone cares about, and nothing here changes that -- the growth measured
+below is the reason. What was missing from the public record is a measured
+curve for a Frobenius-reduced factor base on a Koblitz curve, and this produces
+one. Needs `pip install python-sat pycryptosat`; `make test-decomp` checks it.
+
+```
+cd codegen && python3 indexcalc.py --m 11 --points 3 --weight 3 --trials 5
+```
+
+**Factor base.** The Koblitz saving is that factor base columns are Frobenius
+orbits, so a run needs |F|/m relations rather than |F|. The usual construction
+takes the points whose x lies in a Frobenius-stable subspace -- but in a normal
+basis the Frobenius is a coordinate permutation, so a stable subspace is an
+F_2[t]/(t^m-1) submodule, which is to say a binary cyclic code of length m. Its
+available dimensions are the degrees of the divisors of t^m-1, and at m=131 and
+m=163 two is primitive mod m, t^m-1 = (t-1)(irreducible), and **the only stable
+subspaces are the trivial ones**. The construction is unavailable at exactly
+the interesting sizes; m=127 (ord 7) and m=233 (ord 29) are the lucky cases.
+
+So use `{P : HW(x(P)) <= w}` in the normal basis instead. Weight is invariant
+under a coordinate permutation, so this is Frobenius stable for every m. It is
+not a low-degree algebraic condition, so a Groebner descent cannot use it -- but
+a solver that does not need linearity can, and a cardinality constraint costs
+O(mw) clauses. It is also the predicate the walk kernel already computes.
+
+**Decomposition.** Chain Semaev's third summation polynomial rather than
+resolving the (k+1)-th, whose degree is 2^(k-1) per variable: introduce the
+intermediate sums and constrain each link with `S_3(u,v,w) = (uv+uw+vw)^2 +
+uvw + b`. Squaring is sigma^1, a permutation of coordinates, so the square
+costs nothing -- in a polynomial basis it would be m^2 XORs per link.
+
+**Encoding.** `Prog.emitCnf` is `Prog.emit` with clauses instead of C, so a
+multiplication costs the generated Karatsuba circuit's bit operations rather
+than the m^3 AND terms its definition would need: 15588 gates at m=131 against
+2.2 million. The circuit is XOR-dominated, so XOR clauses go to the solver
+natively. Applying sigma to a decomposition of R gives a decomposition of
+sigma(R), and the relation it yields is lambda times the original, so there is
+no Frobenius symmetry to break inside one instance -- what is breakable is the
+k! orderings of the same multiset of points.
+
+**Measured.** Median over solved instances, k=3 points, w=3, CryptoMiniSat:
+
+| m | gates | orbits | median solve |
+|---|---|---|---|
+| 9  | 1587 | 7  | 0.11 s |
+| 11 | 2311 | 9  | 2.64 s |
+| 23 | 8029 | 52 | none finished; one instance ran 25 min without returning |
+
+Roughly 2^2.3 per bit of field over that range. Three points is not a fit, and
+the encoding has not been tuned, but the shape is already clear enough to say
+what the instrument is for: finding where the curve bends, if it does.
+
 ## What is not done
 
 * Throughput on real hardware is unmeasured. The client has now run on an
