@@ -614,7 +614,7 @@ def mergeCorpus(curve=131):
 
 
 @app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
-def solveCorpus(curve=131):
+def solveCorpus(curve=131, loadMax=0):
     """Recover the logarithm from a collision spanning several corpora.
 
     mergeCorpus reports that two seeds reached the same orbit; it does not say
@@ -625,17 +625,32 @@ def solveCorpus(curve=131):
     walks is cheap -- so this runs the host build and the whole thing costs a
     container without a card.
 
-    The one thing that must not be inherited from the search is --load-max: the
-    cap exists to keep a long collection run inside memory, and here the point
-    is to hold the entire corpus at once, because the colliding pair is exactly
-    what a cap might drop."""
+    --load-max defaults to off here, which is the opposite of the search, and
+    the reason is that the two runs want opposite things.  The cap keeps a long
+    collection run inside memory; this wants the whole corpus resident at once,
+    because the colliding pair is exactly what a cap might drop.  Which risk
+    matters depends on whether the run can finish: a complete ECC2K-95 corpus
+    is about 17M points, near 1 GB resident, so uncapped is free.  An ECC2K-130
+    collection run does not finish and grows by roughly that much every pass,
+    so there uncapped eventually means out of memory -- hence the parameter,
+    and hence reporting the size before asking for it rather than after."""
     files = corpusFiles(curve)
     if not files:
         return {"error": "no distinguished points yet"}
+    records = 0
+    for f in files:
+        records += corpusCount(f)
+    resident = records * 64          # key, entry and table overhead, roughly
     cmd = ("./ecc2k130-cpu --curve %d --threads 1 --steps 1 --launches 1 "
            "--verify 0 --run-id 65535" % curve)
+    if loadMax:
+        cmd += " --load-max %d" % int(loadMax)
     for f in files:
         cmd += " --load %s" % f
+    print("solving from %d file(s), %s points, roughly %s resident%s"
+          % (len(files), humanCount(records), humanBytes(resident),
+             "" if not loadMax else " (capped at %s)" % humanCount(loadMax)),
+          flush=True)
     rc, out = sh(cmd, timeout=4 * HOUR - 60)
     k = None
     verified = False
@@ -648,7 +663,8 @@ def solveCorpus(curve=131):
             verified = True
         if "matches the published solution:" in t:
             matches = t.split(":")[-1].strip()
-    return {"files": len(files), "k": k, "verified": verified,
+    return {"files": len(files), "records": records,
+            "residentBytes": resident, "k": k, "verified": verified,
             "matchesPublished": matches, "tail": out.strip()[-1500:]}
 
 
@@ -703,10 +719,10 @@ def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
 
 
 @app.local_entrypoint()
-def merge(curve: int = 131, solve: bool = True):
+def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
     """Scan the corpora for collisions, and recover k when one is there."""
     r = mergeCorpus.remote(curve=curve)
     print(json.dumps(r, indent=2))
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
-        print(json.dumps(solveCorpus.remote(curve=curve), indent=2))
+        print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
