@@ -362,8 +362,10 @@ planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
 same thing the CPU run does. `autotune` rebuilds for the local compute
 capability only and sweeps batch size, block size and Karatsuba leaf, writing
 the ranking to a Modal Volume. `search` collects distinguished points into that
-same volume, so runs are resumable and several containers contribute to one
-corpus; each gets its own run id, which keeps their seed spaces disjoint.
+same volume, checkpointing its live walks alongside them, so a stopped run
+resumes where it left off and several containers contribute to one corpus; each
+gets its own run id, which keeps their seed spaces disjoint, and each loads its
+siblings' corpora so a cross-container collision is caught as it happens.
 `merge` scans the corpus for repeated hashes, which are the candidate
 collisions.
 
@@ -374,6 +376,51 @@ GPU's tensor silicon is reachable from binary-field arithmetic.
 The image builds a fat binary for sm_80 through sm_120 with nvcc, which takes
 about three and a half minutes and is cached thereafter. `autotune` rebuilds
 for the local compute capability alone, which takes seconds.
+
+## Persistence
+
+A rho search is long enough that a run will be interrupted -- a spot instance
+goes away, a time budget expires, a container is recycled -- so nothing the
+client computes is allowed to exist only in memory.
+
+At any instant the walks in flight hold about a quarter of everything the run
+has computed. A walk reports after roughly 1/theta steps and the cutoff is set
+so a walk reports a few times within the steps it gets, which puts the mean
+unreported prefix at a quarter of the run. Killing a client without warning
+therefore throws away 25% of the work, and that fraction does not shrink as the
+run gets longer.
+
+Three things are saved.
+
+**The corpus.** `--dp-file F` appends 32-byte records of (seed, canonical orbit
+hash): fixed width, so a file can be counted with a stat, appended to by several
+writers and truncated by a dying container without becoming unparseable. A
+short trailing record is ignored rather than misread.
+
+**Old points as live state.** `--load F` reads a corpus back into the store at
+startup, so a collision between today's walk and one from last week is found the
+moment the new point arrives, not by an offline merge. Reload collisions are
+solved immediately. Paths are canonicalised and deduplicated, so naming the same
+corpus twice costs nothing.
+
+**The walks themselves.** `--checkpoint F` writes every live walk -- point,
+seed and step counter -- every `--checkpoint-every` seconds (default 300) and
+again on exit, to a temporary file that is then renamed, so an interrupted write
+leaves the previous checkpoint intact rather than a half-written one. The header
+records m, thread count, batch size, lane width and run id; a client that does
+not match refuses the file and starts fresh instead of misreading it. Cost is
+about 49 bytes per walk, so 195 MB for the four million walks the Modal search
+uses by default.
+
+`SIGINT` and `SIGTERM` stop the client between launches rather than killing it:
+it finishes the launch in flight, drains the reports, checkpoints and exits 0.
+The Modal driver signals rather than terminates for exactly this reason, waits
+for the client to finish writing, and only then commits the volume, so the
+snapshot contains the checkpoint just written rather than the one before it.
+
+Resuming needs the same shape it saved, so pass the same curve, run id, worker
+count and build-time batch size; the header check turns a mismatch into a fresh
+start rather than corruption.
 
 ## Build
 
@@ -395,7 +442,7 @@ and `--leaf` to the generator (Karatsuba leaf size).
 ```
 ./ecc2k130-cpu --curve 131 --bench
 ./ecc2k130-cpu --curve 41 --instance 3      # recover a planted discrete log
-./ecc2k130 --curve 131 --dp-file dps.txt    # collect distinguished points
+./ecc2k130 --curve 131 --dp-file dps.bin --checkpoint state.ck   # collect
 ```
 
 ## What is not done
@@ -409,9 +456,8 @@ and `--leaf` to the generator (Karatsuba leaf size).
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the
   guide's 128+3 decomposition found nothing better than 8859 instructions.
-* No server. Distinguished points can be written to a file and reloaded, but
-  there is no UDP protocol, no hash-routed sharding, and no multi-machine
-  merging.
+* No server. Corpora are files that can be reloaded and merged, but there is no
+  UDP protocol, no hash-routed sharding, and no live multi-machine merging.
 * The start-point PRF is a mixing function rather than AES. Any client that
   wants to interoperate with a different implementation must agree on it.
-* Checkpointing and multi-GPU are not implemented.
+* Multi-GPU is not implemented: one process drives one device.

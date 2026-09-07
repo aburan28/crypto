@@ -4,11 +4,13 @@
 // Build as CUDA (nvcc/clang) or as plain C++ with -DECC_NO_CUDA; the walk code
 // is identical in both cases, only the word width differs (32 bits on the
 // device, 64 on the host).
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -36,6 +38,20 @@ typedef unsigned int DeviceWord;
 
 
 
+// Set by SIGINT/SIGTERM so a run stopped by its deadline still checkpoints.
+// Without it every timed run throws away the walks in flight, which for this
+// workload is about a quarter of the whole computation.
+static volatile sig_atomic_t gStop = 0;
+static void onStop(int) { gStop = 1; }
+
+// A corpus record: the seed that produced the point, and the canonical
+// representative of its orbit, which is the collision key.  Fixed 32 bytes so
+// the file can be appended to, reloaded and merged without parsing.
+struct DpFileRecord {
+    unsigned long long seed;
+    unsigned long long canon[3];
+};
+
 static double nowSeconds() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -60,7 +76,45 @@ struct Options {
     int device = 0;
     int verify = 8;
     std::string dpFile;
+    std::vector<std::string> loadFiles;
+    std::string ckptFile;
+    double ckptSeconds = 300.0;
 };
+
+
+// Checkpoint layout: a header naming the configuration the state belongs to,
+// then the raw walk arrays.  A checkpoint is only loadable back into the same
+// curve, thread count, batch and lane width, so a resumed run continues exactly
+// the walks it left off rather than silently starting new ones.
+struct CkptHeader {
+    char magic[8];
+    unsigned version;
+    unsigned m;
+    unsigned threads;
+    unsigned batch;
+    unsigned lanes;
+    unsigned runId;
+    unsigned long long iterBase;
+};
+
+static bool ckptHeaderMatches(const CkptHeader &h, int m, int threads, int batch, int lanes,
+                              unsigned runId) {
+    return memcmp(h.magic, "ECC2K130", 8) == 0 && h.version == 1u && h.m == (unsigned)m &&
+           h.threads == (unsigned)threads && h.batch == (unsigned)batch &&
+           h.lanes == (unsigned)lanes && h.runId == runId;
+}
+
+// Refuse a checkpoint whose payload is not exactly the size this configuration
+// writes, and leave the file positioned after the header if it is.  A file cut
+// short by a container that died mid-write has a perfectly good header, and
+// reading it would leave half the walks restored and half still at their start
+// points -- a state no run ever occupied.  Starting fresh is better than that.
+static bool ckptPayloadIsWhole(FILE *f, size_t payload) {
+    if (fseek(f, 0, SEEK_END) != 0) return false;
+    const long total = ftell(f);
+    if (total < 0 || (unsigned long)total != sizeof(CkptHeader) + payload) return false;
+    return fseek(f, (long)sizeof(CkptHeader), SEEK_SET) == 0;
+}
 
 // ---------------------------------------------------------------------------
 // host backend
@@ -146,6 +200,53 @@ struct HostEngine {
         dpCount = 0;
         return n;
     }
+
+    bool save(const char *path, u64 iterBase, unsigned runId) const {
+        const std::string tmp = std::string(path) + ".tmp";
+        FILE *f = fopen(tmp.c_str(), "wb");
+        if (!f) return false;
+        CkptHeader h;
+        memcpy(h.magic, "ECC2K130", 8);
+        h.version = 1u;
+        h.m = (unsigned)M;
+        h.threads = (unsigned)P.threads;
+        h.batch = (unsigned)BATCH;
+        h.lanes = (unsigned)LANES;
+        h.runId = runId;
+        h.iterBase = iterBase;
+        bool ok = fwrite(&h, sizeof h, 1, f) == 1;
+        ok = ok && fwrite(x.data(), sizeof(W), x.size(), f) == x.size();
+        ok = ok && fwrite(y.data(), sizeof(W), y.size(), f) == y.size();
+        ok = ok && fwrite(dead.data(), sizeof(W), dead.size(), f) == dead.size();
+        ok = ok && fwrite(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
+        ok = ok && fwrite(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
+        ok = ok && fflush(f) == 0;
+        fclose(f);
+        if (!ok) { remove(tmp.c_str()); return false; }
+        // rename last so a checkpoint is either the old one or the new one,
+        // never a half-written file
+        return rename(tmp.c_str(), path) == 0;
+    }
+
+    bool restore(const char *path, u64 *iterBase, unsigned runId) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return false;
+        CkptHeader h;
+        const size_t payload = (x.size() + y.size() + dead.size()) * sizeof(W) +
+                               (seed.size() + startIter.size()) * sizeof(u64);
+        bool ok = fread(&h, sizeof h, 1, f) == 1 &&
+                  ckptHeaderMatches(h, M, P.threads, BATCH, LANES, runId) &&
+                  ckptPayloadIsWhole(f, payload);
+        ok = ok && fread(x.data(), sizeof(W), x.size(), f) == x.size();
+        ok = ok && fread(y.data(), sizeof(W), y.size(), f) == y.size();
+        ok = ok && fread(dead.data(), sizeof(W), dead.size(), f) == dead.size();
+        ok = ok && fread(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
+        ok = ok && fread(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
+        fclose(f);
+        if (ok) *iterBase = h.iterBase;
+        return ok;
+    }
+
     const char *name() const { return "cpu"; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
@@ -228,6 +329,81 @@ struct CudaEngine {
         if (n) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
         return n;
     }
+
+    size_t fieldCount() const { return (size_t)P.threads * BATCH * M; }
+    size_t slotCount() const { return (size_t)P.threads * BATCH; }
+    size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
+
+    bool save(const char *path, u64 iterBase, unsigned runId) const {
+        CUDA_CHECK(cudaDeviceSynchronize());
+        const std::string tmp = std::string(path) + ".tmp";
+        FILE *f = fopen(tmp.c_str(), "wb");
+        if (!f) return false;
+        CkptHeader h;
+        memcpy(h.magic, "ECC2K130", 8);
+        h.version = 1u;
+        h.m = (unsigned)M;
+        h.threads = (unsigned)P.threads;
+        h.batch = (unsigned)BATCH;
+        h.lanes = (unsigned)LANES;
+        h.runId = runId;
+        h.iterBase = iterBase;
+        bool ok = fwrite(&h, sizeof h, 1, f) == 1;
+        std::vector<W> fbuf(fieldCount());
+        std::vector<W> sbuf(slotCount());
+        std::vector<u64> lbuf(laneCount());
+        const W *fields[2] = {P.x, P.y};
+        for (int i = 0; i < 2 && ok; ++i) {
+            CUDA_CHECK(cudaMemcpy(fbuf.data(), fields[i], fbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
+            ok = fwrite(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
+        }
+        if (ok) {
+            CUDA_CHECK(cudaMemcpy(sbuf.data(), P.dead, sbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
+            ok = fwrite(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
+        }
+        const u64 *lanes[2] = {P.seed, P.startIter};
+        for (int i = 0; i < 2 && ok; ++i) {
+            CUDA_CHECK(cudaMemcpy(lbuf.data(), lanes[i], lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
+            ok = fwrite(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
+        }
+        ok = ok && fflush(f) == 0;
+        fclose(f);
+        if (!ok) { remove(tmp.c_str()); return false; }
+        return rename(tmp.c_str(), path) == 0;
+    }
+
+    bool restore(const char *path, u64 *iterBase, unsigned runId) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return false;
+        CkptHeader h;
+        const size_t payload = (2 * fieldCount() + slotCount()) * sizeof(W) +
+                               2 * laneCount() * sizeof(u64);
+        bool ok = fread(&h, sizeof h, 1, f) == 1 &&
+                  ckptHeaderMatches(h, M, P.threads, BATCH, LANES, runId) &&
+                  ckptPayloadIsWhole(f, payload);
+        if (!ok) { fclose(f); return false; }
+        std::vector<W> fbuf(fieldCount());
+        std::vector<W> sbuf(slotCount());
+        std::vector<u64> lbuf(laneCount());
+        W *fields[2] = {P.x, P.y};
+        for (int i = 0; i < 2 && ok; ++i) {
+            ok = fread(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
+            if (ok) CUDA_CHECK(cudaMemcpy(fields[i], fbuf.data(), fbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
+        }
+        if (ok) {
+            ok = fread(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
+            if (ok) CUDA_CHECK(cudaMemcpy(P.dead, sbuf.data(), sbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
+        }
+        u64 *lanes[2] = {P.seed, P.startIter};
+        for (int i = 0; i < 2 && ok; ++i) {
+            ok = ok && fread(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
+            if (ok) CUDA_CHECK(cudaMemcpy(lanes[i], lbuf.data(), lbuf.size() * sizeof(u64), cudaMemcpyHostToDevice));
+        }
+        fclose(f);
+        if (ok) *iterBase = h.iterBase;
+        return ok;
+    }
+
     const char *name() const { return "cuda"; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
@@ -460,9 +636,73 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     std::vector<DpRecord> recs;
     u64 iterBase = 0;
     u64 totalDp = 0, lost = 0, verified = 0, verifyBudget = (u64)(o.verify < 0 ? 0 : o.verify);
+
+    // Reload every corpus file first, so a collision against work done by an
+    // earlier run or another worker is found the moment it happens rather than
+    // only by an offline merge.
+    size_t reloaded = 0;
+    std::vector<std::string> corpus = o.loadFiles;
+    if (!o.dpFile.empty()) corpus.push_back(o.dpFile);
+
+    // The dp file is normally also named by --load, and two --load flags can
+    // reach one corpus through different paths.  Reading a file twice costs
+    // time and reports a misleading count; the second pass is all duplicates.
+    for (size_t ci = 0; ci < corpus.size(); ++ci) {
+        char *real = realpath(corpus[ci].c_str(), 0);
+        if (!real) continue;
+        corpus[ci] = real;
+        free(real);
+    }
+    std::sort(corpus.begin(), corpus.end());
+    corpus.erase(std::unique(corpus.begin(), corpus.end()), corpus.end());
+    for (size_t ci = 0; ci < corpus.size(); ++ci) {
+        FILE *in = fopen(corpus[ci].c_str(), "rb");
+        if (!in) continue;
+        DpFileRecord fr;
+        while (fread(&fr, sizeof fr, 1, in) == 1) {
+            typename Solver<Cfg>::Key key;
+            key.v[0] = fr.canon[0];
+            key.v[1] = fr.canon[1];
+            key.v[2] = fr.canon[2];
+            typename Solver<Cfg>::Entry other;
+            ++reloaded;
+            if (!sol.insertKey(key, fr.seed, 0, &other)) continue;
+            printf("collision found while reloading %s: seeds %016llx and %016llx\n",
+                   corpus[ci].c_str(), (unsigned long long)fr.seed,
+                   (unsigned long long)other.seed);
+            const typename Solver<Cfg>::WalkResult A = sol.rewalk(fr.seed);
+            const typename Solver<Cfg>::WalkResult B = sol.rewalk(other.seed);
+            U192 k;
+            std::string why;
+            if (sol.solve(A, B, &k, &why)) {
+                printf("  k = %s\n  verified [k]P == Q\n", u192_to_dec(k).c_str());
+                if (knownK) printf("  matches the published solution: %s\n",
+                                   u192_eq(k, *knownK) ? "yes" : "NO");
+                fclose(in);
+                return (knownK && !u192_eq(k, *knownK)) ? 4 : 0;
+            }
+            printf("  unusable (%s)\n", why.c_str());
+        }
+        fclose(in);
+    }
+    if (reloaded)
+        printf("reloaded %zu points from %zu file(s), %zu distinct orbits\n",
+               reloaded, corpus.size(), sol.inserted);
+
+    // Resume the walks themselves.  Without this a restart abandons every walk
+    // in flight, which at the usual cutoff is about a quarter of the whole run.
+    if (!o.ckptFile.empty()) {
+        if (eng.restore(o.ckptFile.c_str(), &iterBase, o.runId))
+            printf("resumed from %s at iteration %llu\n", o.ckptFile.c_str(),
+                   (unsigned long long)iterBase);
+        else
+            printf("no usable checkpoint at %s, starting fresh\n", o.ckptFile.c_str());
+    }
+
     const double t0 = nowSeconds();
     double lastPrint = t0;
-    FILE *dpOut = o.dpFile.empty() ? NULL : fopen(o.dpFile.c_str(), "a");
+    double lastCkpt = t0;
+    FILE *dpOut = o.dpFile.empty() ? NULL : fopen(o.dpFile.c_str(), "ab");
     for (long launch = 0; o.launches == 0 || launch < o.launches; ++launch) {
         eng.launch(iterBase);
         const unsigned n = eng.fetch(recs);
@@ -487,8 +727,12 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             }
             if (dpOut) {
                 const typename R::Elem cx = R::canonical(R::fromLimbs(rec.x));
-                fprintf(dpOut, "%016llx %016llx\n", (unsigned long long)rec.seed,
-                        (unsigned long long)R::hashPoint(cx));
+                DpFileRecord fr;
+                fr.seed = rec.seed;
+                fr.canon[0] = cx.v[0];
+                fr.canon[1] = cx.v[1];
+                fr.canon[2] = cx.v[2];
+                fwrite(&fr, sizeof fr, 1, dpOut);
             }
             typename Solver<Cfg>::Entry other;
             if (!sol.insert(rec, &other)) continue;
@@ -513,10 +757,27 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             printf("  solved after %llu iterations of %llu walks in %.2f s (%llu distinguished points)\n",
                    (unsigned long long)iterBase, (unsigned long long)eng.walksPerLaunch(), el,
                    (unsigned long long)totalDp);
-            if (dpOut) fclose(dpOut);
+            if (dpOut) { fflush(dpOut); fclose(dpOut); }
+            if (!o.ckptFile.empty()) eng.save(o.ckptFile.c_str(), iterBase, o.runId);
             return (knownK && !u192_eq(k, *knownK)) ? 4 : 0;
         }
         const double now = nowSeconds();
+        // Flush reports and checkpoint on a timer, and always on the way out,
+        // so a container stopped by its deadline loses seconds of work rather
+        // than hours of it.
+        const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
+        if (dpOut && (leaving || now - lastCkpt > o.ckptSeconds)) fflush(dpOut);
+        if (!o.ckptFile.empty() && (leaving || now - lastCkpt > o.ckptSeconds)) {
+            if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId))
+                printf("warning: could not write checkpoint %s\n", o.ckptFile.c_str());
+            lastCkpt = now;
+        }
+        if (gStop) {
+            printf("stopping: %llu iterations of %llu walks, %llu points reported\n",
+                   (unsigned long long)iterBase, (unsigned long long)eng.walksPerLaunch(),
+                   (unsigned long long)totalDp);
+            break;
+        }
         if (now - lastPrint > 2.0 || (o.launches && launch + 1 == o.launches)) {
             const double el = now - t0;
             const double it = (double)iterBase * (double)eng.walksPerLaunch();
@@ -600,7 +861,10 @@ static void usage() {
         "  --max-iters N    restart a walk that has run N steps without a report\n"
         "  --run-id R       16-bit salt making seeds unique across processes\n"
         "  --verify N       recompute the first N reported points with the reference\n"
-        "  --dp-file F      append (seed, hash) records to F\n"
+        "  --dp-file F      append distinguished points to F (binary, 32 bytes each)\n"
+        "  --load F         preload a corpus file so collisions with earlier runs count\n"
+        "  --checkpoint F   save and resume walk state through F\n"
+        "  --checkpoint-every S   seconds between checkpoints (default 300)\n"
         "  --bench          throughput only, no distinguished-point handling\n"
         "  --test           run the validation suite and exit\n"
         "  --device D       CUDA device index\n"
@@ -611,6 +875,8 @@ static void usage() {
 
 int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IOLBF, 0);   // stream progress when piped to a file
+    signal(SIGINT, onStop);
+    signal(SIGTERM, onStop);
     Options o;
     for (int i = 1; i < argc; ++i) {
         const std::string a = argv[i];
@@ -626,6 +892,9 @@ int main(int argc, char **argv) {
         else if (a == "--verify" && nx) o.verify = atoi(argv[++i]);
         else if (a == "--dp-cap" && nx) o.dpCap = (unsigned)atoi(argv[++i]);
         else if (a == "--dp-file" && nx) o.dpFile = argv[++i];
+        else if (a == "--load" && nx) o.loadFiles.push_back(argv[++i]);
+        else if (a == "--checkpoint" && nx) o.ckptFile = argv[++i];
+        else if (a == "--checkpoint-every" && nx) o.ckptSeconds = atof(argv[++i]);
         else if (a == "--device" && nx) o.device = atoi(argv[++i]);
         else if (a == "--bench") o.bench = true;
         else if (a == "--poly-basis") o.polyBasis = true;
