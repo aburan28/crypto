@@ -92,6 +92,15 @@ therefore compares device-assembly results against host-portable results
 over full rho walk state, which is the differential test that closes items
 1–3 at once.
 
+If you have no GPU to hand, `modal_app.py` rents one and runs exactly that:
+
+```bash
+ECC_GPU=H100 modal run modal_app.py::selftest
+```
+
+It builds both configurations, checks each against the host reference, and
+exits non-zero if either disagrees. It has not itself been run.
+
 If that passes, turn `FP_PTX` on and take the 55%. It is by a wide margin
 the largest win available in this code. nvcc's NVVM may already generate
 better carry code than clang does here; measure both before assuming the

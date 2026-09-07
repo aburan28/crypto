@@ -30,6 +30,7 @@ though — see "How this is tested" below.
 | `test_cpu.cpp` | Verification harness — compiles the `.cuh` headers with g++ |
 | `ptx_stats.sh` | Static instruction/occupancy analysis with no GPU present |
 | `ptx_asm_check.py` | Interprets the `FP_PTX` inline assembly and checks it against the portable path |
+| `modal_app.py` | Runs `bench` on a rented GPU via Modal — the selftest, throughput, and the launch-bounds sweep |
 
 ## Build and test
 
@@ -62,6 +63,29 @@ the results against the same host code the CPU suites verify, including the
 full rho walk state after 64 batched iterations. Built with `-DFP_PTX=1`
 that is also the differential test the assembly ultimately needs, and the
 only one that closes the gap the script leaves open.
+
+### Without a GPU of your own
+
+`modal_app.py` rents one:
+
+```bash
+pip install modal && modal setup
+ECC_GPU=H100 modal run modal_app.py::selftest   # both configurations vs the host
+ECC_GPU=H100 modal run modal_app.py::bench      # does the 55% become throughput?
+ECC_GPU=H100 modal run modal_app.py::tune       # sweep RHO_MIN_BLOCKS
+```
+
+`selftest` is the one that matters: it builds `FP_PTX=0` and `FP_PTX=1`,
+runs each against the host reference, and exits non-zero if either
+disagrees. A green run is what licenses turning `FP_PTX` on by default for
+that architecture. `ECC_GPU` accepts any Modal type — `T4`, `L4`, `L40S`,
+`A100`, `H100`, `H200`, `B200`, `RTX-PRO-6000` — and the build targets the
+matching `sm_`, so Hopper and both Blackwell variants can each be checked.
+
+**This has not been run.** It is written against the same Modal conventions
+as `ecc2k130/modal_app.py`, which has, but no Modal credentials existed in
+the environment where it was written, so treat the first run as a shakedown
+of the harness as much as of the kernels.
 
 ## How this is tested
 
