@@ -65,8 +65,9 @@ def archesFor(gpu):
     return (arch,) if arch else ALL_ARCHES
 
 
+BAKED_ARCHES = archesFor(DEFAULT_GPU)
 GENCODE = " ".join(
-    "-gencode arch=compute_%s,code=sm_%s" % (a, a) for a in archesFor(DEFAULT_GPU)
+    "-gencode arch=compute_%s,code=sm_%s" % (a, a) for a in BAKED_ARCHES
 )
 REMOTE = "/root/ecc2k130"
 LOCAL = pathlib.Path(__file__).parent
@@ -184,7 +185,21 @@ def parseRate(text):
 def runValidate():
     """Field arithmetic, orbit invariants, solver, and end-to-end discrete
     logarithms recovered on the GPU itself."""
-    out = ["device: " + gpuName(), "compute capability: " + computeCapability(), ""]
+    cc = computeCapability()
+    out = ["device: " + gpuName(), "compute capability: " + cc, ""]
+    # Every other entry point rebuilds for the local device; this one runs the
+    # binary baked into the image, so it is the only one a trimmed gencode list
+    # can strand.  That happens when --gpu overrides ECC_GPU, since the image
+    # was built from ECC_GPU at import and cannot know about the override.  The
+    # failure would otherwise be "no kernel image is available for execution on
+    # the device", which says nothing about why.
+    if cc not in BAKED_ARCHES:
+        out.append("image was built for sm_%s but this device is sm_%s "
+                   "(ECC_GPU=%s); rebuilding for it"
+                   % ("/sm_".join(BAKED_ARCHES), cc, DEFAULT_GPU))
+        ok, log = buildFor(32, 128, 0, arch=cc, minBlocks=2)
+        if not ok:
+            return "\n".join(out + ["rebuild failed", log[-2000:]])
     rc, t = sh("./ecc2k130-cpu --test")
     out.append(t.strip())
     if rc != 0:

@@ -829,7 +829,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             // report buffer is too small for the cutoff, which is a setting,
             // not bad luck -- so say so once rather than leaving it to the
             // summary line hours later, by which time the run is already lost.
-            if (lost && !warnedLost && lost * 10 > totalDp) {
+            if (lost && !warnedLost && lost * 10 > totalDp + lost) {
                 printf("  warning: dropping %.1f%% of reports; --dp-cap %u is too small "
                        "for this dp weight, raise it or raise --dp-weight\n",
                        100.0 * (double)lost / (double)(totalDp + lost), o.dpCap);
