@@ -48,30 +48,92 @@ Measured, with `clang++ --cuda-gpu-arch=sm_90 -O3` (see `./ptx_stats.sh`):
 
 | Field multiply | PTX instructions |
 |---|---|
-| secp256k1 special reduction, portable C++ | 468 |
-| secp256k1 special reduction, inline-PTX carry chains | 328 |
+| secp256k1 special reduction, portable C++ | 472 |
+| secp256k1 special reduction, inline-PTX carry chains | **210** |
 | Montgomery CIOS, portable C++ | 475 |
 | Montgomery CIOS, inline-PTX carry chains | 352 |
+
+The secp256k1 figure was 328 before the reduction and the product rows
+were rewritten; see "Where a multiply actually goes" below.
 
 The portable path emits no `mad.lo.cc`/`madc.hi.cc` at all: clang's NVPTX
 back end decomposes the `uint64_t` accumulator into `mul.lo`/`mul.hi` pairs
 plus explicit carry material (8 `selp` per multiply survive into the final
-PTX). Writing the carry chain by hand removes 30% of the instructions. That
+PTX). Writing the carry chain by hand removes 55% of the instructions. That
 is the single largest code-level win available, and it is available on every
 architecture, not just Blackwell.
 
 Compile with `-DFP_PTX=1` to switch it on. It is off by default because
-the assembly has never been executed: this was written without a GPU.
+the assembly has never been executed: this was written without a GPU. It
+does assemble — `ptxas -arch=sm_90/sm_100/sm_120` accepts every block —
+but that only rules out syntax and register-constraint errors, not wrong
+arithmetic.
 
 Validating it is one command, though, and the reason is worth stating.
-All three asm blocks are guarded `#if FP_PTX && defined(__CUDA_ARCH__)`,
+Every asm block is guarded `#if FP_PTX && defined(__CUDA_ARCH__)`,
 so the host **always** compiles the portable path. `./bench selftest` built
 with `-DFP_PTX=1` therefore compares device-assembly results against
 host-portable results over full rho walk state — which is exactly the
-differential test the assembly needs. If that passes, turn `FP_PTX` on and
-take the 30%; it is the largest single win available in this code. nvcc's NVVM may already generate
+differential test the assembly needs, and it now covers seven asm blocks
+(`mp_add`, `mp_sub`, `mp_mac_row`, `mp_mul_row0`, `mp_mac_row9`,
+`mp_add_shift32`, `mp_add_small`).
+
+If that passes, turn `FP_PTX` on and take the 55%. It is by a wide margin
+the largest win available in this code, and the only thing standing
+between it and the default is one run on any CUDA device. nvcc's NVVM may already generate
 better carry code than clang does here; measure both before assuming the
-30% transfers.
+55% transfers.
+
+### Where a multiply actually goes
+
+Splitting a field multiply into its two halves shows where the time goes,
+and both halves turned out to have slack:
+
+| | portable | inline PTX, was | inline PTX, now |
+|---|---|---|---|
+| 512-bit product | 236 | 171 | **137** |
+| secp256k1 reduction | 146 | 130 | **77** |
+| full multiply | 472 | 328 | **210** |
+
+**The reduction had no carry chains at all.** It barely moved when
+`FP_PTX` was switched on (142 to 130) and so grew to 40% of the whole
+multiply. Two changes fixed that:
+
+- **Fold 1** (`T = lo + hi*977 + hi<<32`) now uses the same
+  multiply-accumulate row primitive as the product, plus a new
+  `mp_add_shift32` for the shifted add.
+- **Folds 2 and 3** were a multiply interleaved into a carry loop. Because
+  `hi2 * (2^32 + 977)` is only three limbs, each fold is really one
+  straight carry chain over the low half, which is what `mp_add_small`
+  now does.
+
+**The product was zeroing an accumulator it never needed.** Schoolbook
+rows were written as `t[0..9] += a * b[i]` over an 18-limb accumulator
+zeroed up front — 18 `mov`s, plus two carry-propagation instructions per
+row spent adding into limbs that were still zero. But a row can never
+carry past its ninth limb: the most it can produce is
+`(2^256 - 1) + (2^256 - 1)(2^32 - 1) = (2^256 - 1) * 2^32 < 2^288`. So the
+row can *write* its top limb instead of accumulating into it
+(`mp_mac_row9`), and the first row, which has nothing to add onto, is
+plain `mul.lo` in its low half (`mp_mul_row0`). Each row then defines the
+limb the next row's carry-out overwrites, the accumulator needs no
+initialisation, and it is 16 limbs rather than 18.
+
+`mp_mac_row` stays as it was for CIOS Montgomery multiplication, where the
+accumulator genuinely is nine limbs wide at row entry.
+
+Together: reduction 130 to 77 (−41%), product 171 to 137 (−20%), full
+multiply 328 to 210 (−36%), and against the portable path the multiply is
+now **55% fewer instructions**.
+
+The portable path costs 0.9% more than it did (468 to 472), all of it in
+the reduction, whose restructured folds suit a carry-flag machine rather
+than a 64-bit accumulator. The row rewrite left it untouched at 236,
+because clang was already eliminating the accumulator zeroing on its own
+— which is exactly why that win shows up only where the carry chains are
+hand-written. The regression is the right trade, the portable path being
+the correctness reference and the fallback rather than the throughput
+path, but it is a regression and worth knowing.
 
 ### The multiply is carry-bound, not multiply-bound
 
@@ -80,15 +142,15 @@ special-reduction path, the emitted opcode mix is:
 
 | opcode | count |
 |---|---|
-| add | 177 |
-| and | 104 |
-| shr | 103 |
+| add | 178 |
+| shr | 102 |
+| and | 100 |
 | mul | 46 |
-| everything else | 9 |
+| everything else (`selp`, `cvt`, `setp`) | 18 |
 
-Only 46 of 439 instructions are multiplies. The rest is carry emulation —
+Only 46 of 444 instructions are multiplies. The rest is carry emulation —
 the portable path builds a 64-bit accumulator out of 32-bit shifts and
-masks. That is why the inline-PTX carry chains are worth 30% while
+masks. That is why the inline-PTX carry chains are worth 55% while
 reducing the multiply count is worth almost nothing.
 
 Two consequences, both measured:
@@ -98,8 +160,9 @@ the 28 off-diagonal products plus 8 diagonal ones, 36 against the
 schoolbook's 64, which suggests a 44% saving. It does not materialise:
 clang's common-subexpression elimination already collapses `a_i*a_j` and
 `a_j*a_i` in `mul(a, a)`, so both forms emit exactly 46 multiplies. A
-hand-written `mp_sqr_full` measured 427 instructions against 439 — 2.7% —
-and on the inline-PTX path it was **23.5% worse** (405 against 328),
+hand-written `mp_sqr_full` measured 427 instructions against the 439 the
+portable path then cost — 2.7% — and on the inline-PTX path it was
+**23.5% worse** (405 against that path's 328 at the time),
 because `mul(a,a)` there uses the efficient asm carry chains while a
 portable squaring routine does not. It was implemented, measured, and
 reverted.
@@ -107,6 +170,29 @@ reverted.
 **Any further multiply-side work has to be written in the same idiom as
 the carry chains it sits next to**, or it loses more on carries than it
 gains on multiplies.
+
+### What is left
+
+The 512-bit product is now 137 instructions against a hard floor of 128 —
+schoolbook needs 64 `IMAD.WIDE`-equivalent products, two PTX instructions
+each — so there is nothing left there short of Karatsuba, which trades 16
+of those products for several extra 128-bit adds and would very likely
+lose on a carry-bound multiply.
+
+The reduction's remaining 77 splits roughly as fold 1 (27), folds 2 and 3
+(28) and the final conditional subtraction (~20). **That conditional
+subtraction is the last structural win, and it is not a free one.** The
+value entering it is already below 2^256 and congruent to the right
+residue, so dropping it and carrying field elements in `[0, 2^256)`
+instead of `[0, p)` is arithmetically sound — the reduction accepts any
+512-bit input, so unreduced values feed straight back in. What it breaks
+is uniqueness of representation: `eq`, `is_zero`, distinguished-point
+detection and the negation map's canonical-x comparison all assume the
+canonical form. Only `2^32 + 977` of the `2^256` representable values are
+non-canonical, so a walk would disagree with the reference roughly once in
+`2^224` steps — which is precisely what makes it dangerous to adopt
+without a canonicalising step at every decision point. Worth about 10% of
+a multiply; not taken.
 
 32-bit limbs are right for every NVIDIA architecture through Blackwell for
 a structural reason: the integer datapath is 32-bit, `IMAD.WIDE.U32` is the
@@ -120,27 +206,30 @@ Measured with `./ptx_stats.sh`, `k_rho_walk_lowmem<8>`, block size 128:
 
 | Arch | `RHO_MIN_BLOCKS` | Registers | Stack | Resident threads/SM |
 |---|---|---|---|---|
-| sm_90 | unset | 226 | 792 B | 256 |
-| sm_90 | 3 | 168 | 840 B | 384 |
-| sm_90 | 4 | 128 | 984 B | 512 |
-| sm_100 | unset | 226 | 792 B | 256 |
-| sm_100 | 3 | 168 | 840 B | 384 |
-| sm_100 | 4 | 128 | 984 B | 512 |
-| sm_120 | unset | **255** | 816 B | 256 |
+| sm_90 | unset | 224 | 792 B | 256 |
+| sm_90 | 3 | 168 | 816 B | 384 |
+| sm_90 | 4 | 128 | 968 B | 512 |
+| sm_100 | unset | 224 | 792 B | 256 |
+| sm_100 | 3 | 168 | 816 B | 384 |
+| sm_100 | 4 | 128 | 968 B | 512 |
+| sm_120 | unset | **255** | 800 B | 256 |
 | sm_120 | 3 | 168 | 1072 B | 384 |
-| sm_120 | 4 | 128 | 1312 B | 512 |
+| sm_120 | 4 | 128 | 1248 B | 512 |
 
 Two things fall out of this.
 
-**Hopper and datacenter Blackwell are identical.** Every kernel gets the
-same register allocation and the same frame on `sm_90` and `sm_100`. The
-register file is 64K 32-bit registers per SM on both and ptxas makes the
-same decisions. Nothing about datacenter Blackwell changes this arithmetic,
-so a kernel tuned on H100 transfers to B200 unchanged.
+**Hopper and datacenter Blackwell are effectively identical.** Across all
+ten kernels at three launch-bound settings, `sm_90` and `sm_100` agree on
+23 of 30 register allocations and on every stack frame; the seven that
+differ do so by at most 6 registers and none of them changes the resulting
+occupancy. The register file is 64K 32-bit registers per SM on both and
+ptxas makes essentially the same decisions. Nothing about datacenter
+Blackwell changes this arithmetic, so a kernel tuned on H100 transfers to
+B200 unchanged.
 
 **Consumer Blackwell does not.** On `sm_120`, ptxas left to itself goes to
 the 255-register ceiling on *every* rho kernel, and its spill frames are
-consistently larger — 1312 B against 984 B at four blocks per SM. Whatever
+consistently larger — 1248 B against 968 B at four blocks per SM. Whatever
 the reason (a different spill-cost model, or different scheduling
 pressure), the practical consequence is direct: **`sm_120` needs the
 launch-bounds constraint more than `sm_100` does, not less.** Anyone
