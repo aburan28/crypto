@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 
 #include <algorithm>
@@ -77,6 +78,7 @@ struct Options {
     int verify = 8;
     std::string dpFile;
     std::vector<std::string> loadFiles;
+    unsigned long long loadMax = 0;
     std::string ckptFile;
     double ckptSeconds = 300.0;
 };
@@ -655,11 +657,29 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     }
     std::sort(corpus.begin(), corpus.end());
     corpus.erase(std::unique(corpus.begin(), corpus.end()), corpus.end());
+
+    // Newest first, so that a --load-max cap keeps the most recent work rather
+    // than whichever file sorts first by name.  A store entry costs far more
+    // than the 32 bytes it occupies on disk, so an unbounded reload is what
+    // ends a long collection run: the corpus grows every pass, and without a
+    // cap each pass tries to hold every point every earlier pass ever wrote.
+    // What the cap gives up is finding a collision in process; the corpus is
+    // still complete on disk, and the offline merge still finds it there.
+    std::sort(corpus.begin(), corpus.end(),
+              [](const std::string &a, const std::string &b) {
+                  struct stat sa, sb;
+                  const bool oa = stat(a.c_str(), &sa) == 0, ob = stat(b.c_str(), &sb) == 0;
+                  if (!oa || !ob) return oa > ob;
+                  return sa.st_mtime > sb.st_mtime;
+              });
+    size_t skippedFiles = 0;
     for (size_t ci = 0; ci < corpus.size(); ++ci) {
+        if (o.loadMax && reloaded >= o.loadMax) { skippedFiles = corpus.size() - ci; break; }
         FILE *in = fopen(corpus[ci].c_str(), "rb");
         if (!in) continue;
         DpFileRecord fr;
         while (fread(&fr, sizeof fr, 1, in) == 1) {
+            if (o.loadMax && reloaded >= o.loadMax) break;
             typename Solver<Cfg>::Key key;
             key.v[0] = fr.canon[0];
             key.v[1] = fr.canon[1];
@@ -685,9 +705,14 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         }
         fclose(in);
     }
-    if (reloaded)
+    if (reloaded) {
         printf("reloaded %zu points from %zu file(s), %zu distinct orbits\n",
-               reloaded, corpus.size(), sol.inserted);
+               reloaded, corpus.size() - skippedFiles, sol.inserted);
+        if (o.loadMax && reloaded >= o.loadMax)
+            printf("  stopped at the --load-max %llu cap; %zu file(s) not read, "
+                   "their collisions are left to the offline merge\n",
+                   (unsigned long long)o.loadMax, skippedFiles);
+    }
 
     // Resume the walks themselves.  Without this a restart abandons every walk
     // in flight, which at the usual cutoff is about a quarter of the whole run.
@@ -863,6 +888,7 @@ static void usage() {
         "  --verify N       recompute the first N reported points with the reference\n"
         "  --dp-file F      append distinguished points to F (binary, 32 bytes each)\n"
         "  --load F         preload a corpus file so collisions with earlier runs count\n"
+        "  --load-max N     stop reloading after N points (0 = no limit), newest file first\n"
         "  --checkpoint F   save and resume walk state through F\n"
         "  --checkpoint-every S   seconds between checkpoints (default 300)\n"
         "  --bench          throughput only, no distinguished-point handling\n"
@@ -893,6 +919,7 @@ int main(int argc, char **argv) {
         else if (a == "--dp-cap" && nx) o.dpCap = (unsigned)atoi(argv[++i]);
         else if (a == "--dp-file" && nx) o.dpFile = argv[++i];
         else if (a == "--load" && nx) o.loadFiles.push_back(argv[++i]);
+        else if (a == "--load-max" && nx) o.loadMax = strtoull(argv[++i], 0, 10);
         else if (a == "--checkpoint" && nx) o.ckptFile = argv[++i];
         else if (a == "--checkpoint-every" && nx) o.ckptSeconds = atof(argv[++i]);
         else if (a == "--device" && nx) o.device = atoi(argv[++i]);

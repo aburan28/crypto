@@ -391,6 +391,24 @@ COUNT=8 ./run.sh fanout                # the same across eight GPUs
 ./run.sh merge                         # scan the corpus for collisions
 ```
 
+`CURVE=131` collects on ECC2K-130 itself. That run does not finish: 2^60.9
+iterations is decades of GPU time, so treat it as collection, not as a solve.
+Two things follow from a run that never ends, and both are handled rather than
+left to bite:
+
+* The distinguished-point cutoff cannot be sized against the whole expected run,
+  or no walk ever reaches it. At the full-run choice for m=131 a four-hour pass
+  on a fast GPU reports about **two hundred points in total**. The cutoff is
+  therefore sized from the iterations the pass will actually do, measured by the
+  bench it already runs, which puts it back at a few reports per walk -- roughly
+  30M points and a gigabyte of corpus per pass. `DPW` overrides it.
+* The corpus outgrows memory. Every pass reloads it to catch collisions in
+  process, and a store entry costs far more than the 32 bytes it occupies on
+  disk, so an uncapped reload is what eventually ends a long collection run.
+  `LOADMAX` (default 50M points) caps it, newest file first. What that gives up
+  is finding a collision in process; the corpus is still complete on disk and
+  `./run.sh merge` still finds it there.
+
 Every pass is launched from the same variables, because resume only works when
 the shape matches: the checkpoint header records curve, run id, worker count and
 batch, and changing one between passes makes the client refuse the checkpoint

@@ -266,17 +266,29 @@ CURVE_FACTS = {
 }
 
 
-def recommendedWeight(curve, walks):
+def recommendedWeight(curve, walks, plannedIters=0):
     """Pick the distinguished-point cutoff for a given amount of parallelism.
 
     A walk reports after about 1/theta steps, and each of `walks` parallel walks
-    only gets total/walks steps, so the cutoff has to satisfy 1/theta well below
-    that or most walks never report at all.  Aim for a quarter of the budget."""
-    import math
+    only gets budget/walks steps, so the cutoff has to satisfy 1/theta well below
+    that or most walks never report at all.  Aim for a quarter of the budget.
+
+    The budget is the whole expected run only when the run can actually finish.
+    ECC2K-130 needs 2^60.9 iterations -- decades of GPU time -- so sizing its
+    cutoff against that yields a weight no walk reaches in any session anyone
+    will ever run: at the full-run choice a four-hour pass on a fast GPU reports
+    about two hundred points in total.  Pass plannedIters and the cutoff is
+    sized for the run being done instead, which stores more points per useful
+    iteration but is the difference between collecting a corpus and collecting
+    nothing.  Storing more is never wrong -- collision probability depends on
+    iterations walked, not on how often walks report -- it only costs disk."""
     if curve not in CURVE_FACTS:
         return -1
     m, logIters = CURVE_FACTS[curve]
-    budget = (2.0 ** logIters) / max(1.0, float(walks))
+    budget = 2.0 ** logIters
+    if plannedIters > 0:
+        budget = min(budget, float(plannedIters))
+    budget /= max(1.0, float(walks))
     target = max(64.0, budget / 4.0)
     total = 0
     for k in range(0, m + 1):
@@ -355,7 +367,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True):
+              checkpointEvery=300, resume=True, loadMax=50000000):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -395,13 +407,16 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
         perThread = batch * 32
         workerThreads = max(1024, int(walksTarget) // perThread)
     walks = workerThreads * batch * 32
+    # The bench above measured this GPU, so the length of the pass about to run
+    # is known rather than guessed; size the cutoff against that.
+    plannedIters = rate * 1e6 * hours * HOUR
     if dpWeight < 0:
-        dpWeight = recommendedWeight(curve, walks)
+        dpWeight = recommendedWeight(curve, walks, plannedIters)
     print(f"{walks} parallel walks, distinguished-point weight {dpWeight}, "
-          f"expecting roughly {4 * walks / 1e6:.1f}M reports")
+          f"{plannedIters:.3g} iterations planned this pass")
     cmd = (f"./ecc2k130 --curve {curve} --steps {steps} --run-id {runId} "
            f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads} "
-           f"--checkpoint-every {int(checkpointEvery)}")
+           f"--checkpoint-every {int(checkpointEvery)} --load-max {int(loadMax)}")
     if resume:
         cmd += f" --checkpoint {ckFile}"
     if dpWeight >= 0:
@@ -409,7 +424,9 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=17, dpWeight=-1,
     # Every other worker's corpus counts too: a collision between this run and a
     # sibling's is just as good as one within a single run, and finding it here
     # beats waiting for an offline merge.  The client's own dp file reloads
-    # itself, so it is not named twice.
+    # itself, so it is not named twice.  It reads newest-first and stops at
+    # loadMax, because a collection run that never finishes -- ECC2K-130 is
+    # decades of GPU time -- grows a corpus no container can hold in memory.
     for other in sorted(corpusFiles(curve)):
         if other != dpFile:
             cmd += f" --load {other}"
@@ -563,22 +580,22 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 17, dpWeight: int = -1, runId: int = 1,
-           walks: int = 4000000):
+           walks: int = 4000000, loadMax: int = 50000000):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dpWeight,
-                                     runId=runId, walksTarget=walks)
+                                     runId=runId, walksTarget=walks, loadMax=loadMax)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 17, dpWeight: int = -1,
-           walks: int = 4000000):
+           walks: int = 4000000, loadMax: int = 50000000):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dpWeight, runId=i + 1, walksTarget=walks)
+                      dpWeight=dpWeight, runId=i + 1, walksTarget=walks, loadMax=loadMax)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
