@@ -120,10 +120,9 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     # that is 66 words at m=131; it is emphatically not the right answer for the
     # 16-register host, so the CPU reference build and the device build do not
     # want the same leaf, and only a GPU settles which one this is.
-    if leaf:
-        rc, out = sh(f"cd codegen && python3 gen.py --out ../generated --leaf {leaf}")
-        if rc != 0:
-            return False, out
+    rc, out = sh(f"cd codegen && python3 gen.py --out ../generated --leaf {leaf}")
+    if rc != 0:
+        return False, out
     gencode = f"-gencode arch=compute_{arch},code=sm_{arch}"
     rc, out = sh(
         f'make -B gpu ARCH="{gencode}" BATCH={batch} THREADS={threads} '
