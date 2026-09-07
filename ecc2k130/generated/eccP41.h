@@ -22,7 +22,7 @@ static const unsigned long long PX[3] = {0x000000704815566aull, 0x00000000000000
 static const unsigned long long PY[3] = {0x0000012d6b317668ull, 0x0000000000000000ull, 0x0000000000000000ull};
 static const unsigned long long QX[3] = {0x000001353f36af60ull, 0x0000000000000000ull, 0x0000000000000000ull};
 static const unsigned long long QY[3] = {0x00000049c671bbc0ull, 0x0000000000000000ull, 0x0000000000000000ull};
-static const char *KNOWN_K = 0;
+[[maybe_unused]] static const char *KNOWN_K = 0;
 
 // rows of the polynomial-basis to normal-basis map, for the host reference
 static const unsigned long long NB_ROWS[41][3] = {

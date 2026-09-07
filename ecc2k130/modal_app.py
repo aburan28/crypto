@@ -35,11 +35,39 @@ import time
 import modal
 
 CUDA_VERSION = "12.8.1"
-# sm_120 is the Blackwell workstation part (RTX PRO 6000), sm_100 is B200,
-# sm_90 is H100/H200, sm_89 is L40S, sm_80 is A100.  Every architecture adds a
-# full ptxas pass to the image build, so trim this list if build time matters.
+
+# Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
+# H200, B200 and B300; append ":n" for several of them.
+DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
+
+# Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
+# part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
+# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4.
+GPU_ARCH = {
+    "T4": "75", "L4": "89", "L40S": "89", "A10": "86", "A10G": "86",
+    "A100": "80", "A100-80GB": "80", "H100": "90", "H200": "90",
+    "B200": "100", "B300": "100", "RTX-PRO-6000": "120",
+}
+ALL_ARCHES = ("80", "89", "90", "100", "120")
+
+
+def archesFor(gpu):
+    """Architectures to bake into the image.
+
+    Every architecture is a separate full ptxas pass over a kernel that takes
+    minutes to compile, so a fat binary covering five of them costs about four
+    minutes on every image rebuild -- and add_local_dir invalidates the layer on
+    any source change, so that is every iteration.  Build only what the chosen
+    GPU can run.  An unrecognised name falls back to the full set rather than
+    guessing, since a missing architecture is a runtime failure, not a slow
+    build."""
+    arch = GPU_ARCH.get(gpu.split(":")[0].strip())
+    return (arch,) if arch else ALL_ARCHES
+
+
+BAKED_ARCHES = archesFor(DEFAULT_GPU)
 GENCODE = " ".join(
-    "-gencode arch=compute_%s,code=sm_%s" % (a, a) for a in ("80", "89", "90", "100", "120")
+    "-gencode arch=compute_%s,code=sm_%s" % (a, a) for a in BAKED_ARCHES
 )
 REMOTE = "/root/ecc2k130"
 LOCAL = pathlib.Path(__file__).parent
@@ -68,11 +96,6 @@ volume = modal.Volume.from_name("ecc2k130", create_if_missing=True)
 app = modal.App("ecc2k130")
 
 HOUR = 60 * 60
-
-# Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
-# H200, B200 and B300; append ":n" for several of them.
-DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
-
 
 def onGpu(fn, gpu):
     """Point a function at a GPU type.
@@ -162,7 +185,21 @@ def parseRate(text):
 def runValidate():
     """Field arithmetic, orbit invariants, solver, and end-to-end discrete
     logarithms recovered on the GPU itself."""
-    out = ["device: " + gpuName(), "compute capability: " + computeCapability(), ""]
+    cc = computeCapability()
+    out = ["device: " + gpuName(), "compute capability: " + cc, ""]
+    # Every other entry point rebuilds for the local device; this one runs the
+    # binary baked into the image, so it is the only one a trimmed gencode list
+    # can strand.  That happens when --gpu overrides ECC_GPU, since the image
+    # was built from ECC_GPU at import and cannot know about the override.  The
+    # failure would otherwise be "no kernel image is available for execution on
+    # the device", which says nothing about why.
+    if cc not in BAKED_ARCHES:
+        out.append("image was built for sm_%s but this device is sm_%s "
+                   "(ECC_GPU=%s); rebuilding for it"
+                   % ("/sm_".join(BAKED_ARCHES), cc, DEFAULT_GPU))
+        ok, log = buildFor(32, 128, 0, arch=cc, minBlocks=2)
+        if not ok:
+            return "\n".join(out + ["rebuild failed", log[-2000:]])
     rc, t = sh("./ecc2k130-cpu --test")
     out.append(t.strip())
     if rc != 0:
@@ -191,8 +228,19 @@ def runValidate():
 
     # ECC2K-95 itself: no collision in a short run, but the reports have to be
     # reproducible from their seeds, which is what the server depends on.
-    rc, t = sh("./ecc2k130 --curve 97 --dp-weight 36 --threads 4096 --steps 16 "
-               "--launches 4 --dp-cap 262144 --verify 16", timeout=1800)
+    #
+    # dp weight 36 is theta = 1/139 at m=97, far looser than any real search
+    # would use: the point is to make a short run report at all, so there is
+    # something to recompute.  Size the run to that.  4096 threads for 4
+    # launches walked 268M iterations to verify 16 reports and took ten minutes
+    # -- most of a validate run -- while overrunning the report buffer, so the
+    # gate people are told to run first was the slowest thing here.  512 threads
+    # for 2 launches still produces about 120k reports from half a million
+    # parallel walks, stays inside --dp-cap, and takes well under a minute.
+    # Staying inside the cap matters beyond speed: it means a "dropped" count in
+    # validate output is a real signal rather than the expected state.
+    rc, t = sh("./ecc2k130 --curve 97 --dp-weight 36 --threads 512 --steps 16 "
+               "--launches 2 --dp-cap 262144 --verify 16", timeout=1800)
     out.append("\n--- ECC2K-95 reporting path ---")
     out.append("\n".join(t.strip().splitlines()[-3:]))
     if "MISMATCH" in t:
@@ -333,7 +381,8 @@ def corpusCount(path):
 # The client prints a progress line every couple of seconds:
 #   "     12.0 s     842.135 M it/s   1234567 iterations    890 dp    889 stored"
 PROGRESS_RE = re.compile(
-    r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored")
+    r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
+    r"(?:\s+(\d+)\s+dropped)?")
 
 
 def parseProgress(line):
@@ -342,7 +391,8 @@ def parseProgress(line):
     if not m:
         return None
     return {"seconds": float(m.group(1)), "rate": float(m.group(2)),
-            "iters": int(m.group(3)), "dp": int(m.group(4)), "stored": int(m.group(5))}
+            "iters": int(m.group(3)), "dp": int(m.group(4)), "stored": int(m.group(5)),
+            "dropped": int(m.group(6)) if m.group(6) else 0}
 
 
 def humanRate(r):
@@ -479,13 +529,14 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                 if last:
                     frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
                                                      CURVE_FACTS[curve][1])) if expected else ""
+                    drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
                     print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
-                          "corpus %s  %s left"
+                          "corpus %s  %s left%s"
                           % (humanTime(now - started), humanRate(last["rate"]),
                              humanCount(last["iters"]), frac,
                              humanCount(last["dp"]), humanCount(last["stored"]),
                              humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
-                             humanTime(deadline - now)), flush=True)
+                             humanTime(deadline - now), drop), flush=True)
                 else:
                     print("[%s] no progress line yet (still starting up?)"
                           % humanTime(now - started), flush=True)
