@@ -18,13 +18,19 @@ CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra -Wno-unused-parameter -Wno-unknown-prag
 # sm_90 = Hopper, sm_80 = Ampere.
 ARCH    ?= sm_90
 NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
+# FP_PTX=1 selects the hand-written carry chains in fp256.cuh.  Off by
+# default: see OPTIMIZATION_BLACKWELL.md section 2 for what has and has not
+# been verified about them.  MIN_BLOCKS sets __launch_bounds__ min-blocks
+# on the rho kernels (0 = unset).
+FP_PTX     ?= 0
+MIN_BLOCKS ?= 0
 
 GEN := curve_secp256k1.h curve_toy40.h \
        vec_secp256k1_mont.h vec_secp256k1_fast.h vec_toy40_mont.h
 
 TESTS := test_secp_fast test_secp_mont test_toy_mont
 
-.PHONY: all test bench clean gen
+.PHONY: all test bench clean gen ptxcheck
 all: test
 
 gen: $(GEN)
@@ -58,12 +64,19 @@ test_toy_mont: test_cpu.cpp $(HDRS) curve_toy40.h vec_toy40_mont.h
 	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy40.h"' \
 	  -DGPU_ECC_VECTORS_HEADER='"vec_toy40_mont.h"' -DFP_FAST=0 -o $@ $<
 
-test: $(TESTS)
+test: $(TESTS) ptxcheck
 	@rc=0; for t in $(TESTS); do \
 	  echo "=== ./$$t ==="; ./$$t || rc=1; done; exit $$rc
 
+# Differentially test the FP_PTX inline assembly against the portable path
+# by interpreting it.  Needs no GPU; does not replace ./bench selftest.
+ptxcheck: fp256.cuh ptx_asm_check.py
+	@echo "=== ptx_asm_check ==="
+	@python3 ptx_asm_check.py
+
 bench: bench.cu $(HDRS) kernels.cuh curve_secp256k1.h
-	$(NVCC) $(NVCCFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -o $@ $<
+	$(NVCC) $(NVCCFLAGS) -DFP_PTX=$(FP_PTX) -DRHO_MIN_BLOCKS=$(MIN_BLOCKS) \
+	  -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -o $@ $<
 
 clean:
 	rm -f $(GEN) $(TESTS) bench

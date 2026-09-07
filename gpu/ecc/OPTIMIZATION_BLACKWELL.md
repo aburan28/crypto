@@ -64,23 +64,45 @@ is the single largest code-level win available, and it is available on every
 architecture, not just Blackwell.
 
 Compile with `-DFP_PTX=1` to switch it on. It is off by default because
-the assembly has never been executed: this was written without a GPU. It
-does assemble — `ptxas -arch=sm_90/sm_100/sm_120` accepts every block —
-but that only rules out syntax and register-constraint errors, not wrong
-arithmetic.
+the assembly has never been executed on a device: this was written without
+a GPU.
 
-Validating it is one command, though, and the reason is worth stating.
-Every asm block is guarded `#if FP_PTX && defined(__CUDA_ARCH__)`,
-so the host **always** compiles the portable path. `./bench selftest` built
-with `-DFP_PTX=1` therefore compares device-assembly results against
-host-portable results over full rho walk state — which is exactly the
-differential test the assembly needs, and it now covers seven asm blocks
-(`mp_add`, `mp_sub`, `mp_mac_row`, `mp_mul_row0`, `mp_mac_row9`,
-`mp_add_shift32`, `mp_add_small`).
+Three things have been checked, and it is worth being precise about which:
+
+1. **It assembles.** `ptxas -arch=sm_90/sm_100/sm_120` accepts every block.
+   That rules out syntax and register-constraint errors, nothing more.
+2. **The arithmetic is right.** `make ptxcheck` (`./ptx_asm_check.py`)
+   parses the real `asm(...)` blocks out of `fp256.cuh` — template and both
+   operand lists — binds `%N` to the C expressions the constraints name,
+   interprets the instructions under the documented PTX extended-precision
+   semantics, and compares against the portable branch of the same
+   function over 20 000 randomised and boundary inputs per block. All seven
+   agree. It also refuses to let an output be read before it is written,
+   and fails if an asm block is added without a case. Mutation-tested:
+   swapping two source operands, dropping a `.cc` mid-chain, moving a
+   destination limb, and reading a write-only output are each caught.
+3. **What is still unchecked**: how the compiler allocates registers to
+   those operands, real ptxas scheduling and SASS behaviour, and the PTX
+   semantics themselves, which item 2 assumes rather than establishes.
+
+So the remaining gap is one command on any CUDA device. Every asm block is
+guarded `#if FP_PTX && defined(__CUDA_ARCH__)`, so the host **always**
+compiles the portable path; `./bench selftest` built with `-DFP_PTX=1`
+therefore compares device-assembly results against host-portable results
+over full rho walk state, which is the differential test that closes items
+1–3 at once.
+
+If you have no GPU to hand, `modal_app.py` rents one and runs exactly that:
+
+```bash
+ECC_GPU=H100 modal run modal_app.py::selftest
+```
+
+It builds both configurations, checks each against the host reference, and
+exits non-zero if either disagrees. It has not itself been run.
 
 If that passes, turn `FP_PTX` on and take the 55%. It is by a wide margin
-the largest win available in this code, and the only thing standing
-between it and the default is one run on any CUDA device. nvcc's NVVM may already generate
+the largest win available in this code. nvcc's NVVM may already generate
 better carry code than clang does here; measure both before assuming the
 55% transfers.
 
@@ -390,6 +412,16 @@ ptxas -arch=sm_100 -O3 -v inst_100.ptx -o /dev/null
 `ptxas` from the CUDA 12.9 wheel accepts `sm_100`, `sm_103` and `sm_120`,
 so register and occupancy figures for Blackwell are obtainable without the
 hardware. Instruction *scheduling* is not — for that you need a device.
+
+The inline assembly's arithmetic is checkable without one too:
+
+```bash
+make ptxcheck          # or: ./ptx_asm_check.py --trials 100000
+```
+
+It reads the `asm(...)` blocks out of `fp256.cuh` and interprets them
+against the portable branch of each function. See section 2 for what that
+does and does not establish.
 
 ## 6. First things to do on real hardware
 
