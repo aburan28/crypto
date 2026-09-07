@@ -36,17 +36,26 @@
 //!     S₃(x₁, x₂, e₁) = S₃(e₁, x₃, e₂) = … = S₃(e_{m−2}, x_m, x(R)) = 0.
 //! ```
 //!
-//! ## Why the system is quadratic
+//! ## Why the system stays low-degree
 //!
 //! Writing `x_i = Σ_t u_{i,t} · b_t` over an `F_2`-basis `b_t` of `V`
 //! makes each `x_i` **linear** in the Boolean unknowns.  Squaring is
 //! `F_2`-linear in characteristic 2 — and in the Boolean quotient
 //! `v² = v` a polynomial satisfies `p² = p`, so a symbolic square costs
 //! a permutation of coordinates and nothing else — while `x₁x₂` is
-//! bilinear.  So every term of `S₃` is of degree ≤ 2 and the Weil
-//! restriction is a quadratic Boolean system: `n` equations in `m·ℓ`
-//! (plus `(m−2)·n` chaining) unknowns.  That is the shape Faugère et
-//! al. analyse, and the reason a Gröbner solve is the right tool.
+//! bilinear.
+//!
+//! For `m = 2` the third argument of `S₃` is the *known* `x(R)`, so
+//! every term has degree ≤ 2: the Weil restriction is a **quadratic**
+//! system of `n` equations in `2ℓ` unknowns — the shape Faugère et al.
+//! analyse.  For `m ≥ 3` the chain's intermediate points are unknowns
+//! too, and the term `x₁x₂·e` makes the system **cubic** in
+//! `m·ℓ + (m−2)·n` unknowns.  Degree 3 is why the `m ≥ 3` instances
+//! cost so much more here, in both engines.
+//!
+//! Restricting the unknowns to `V` is what keeps the degree this low at
+//! all, and it is the property the linearised-polynomial factor base
+//! has and a weight-bounded one does not.
 //!
 //! ## What the Gröbner step buys
 //!
@@ -1005,10 +1014,10 @@ mod tests {
         assert_eq!(sys.summand_x(basis, point, 1, kc.n), x2);
     }
 
-    /// The system is quadratic — that is the whole point of restricting
-    /// the unknowns to an `F_2`-subspace.
+    /// Degree: quadratic for `m = 2`, cubic once the chain introduces
+    /// intermediate unknowns.
     #[test]
-    fn system_is_quadratic() {
+    fn system_degree_is_two_for_m2_and_three_when_chained() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base(&kc, 0)
             .unwrap();
@@ -1026,6 +1035,22 @@ mod tests {
         assert_eq!(deg, 2);
         assert_eq!(sys.n_vars, 2 * fb.subspace_basis.len());
         assert_eq!(sys.equations.len(), kc.n as usize);
+
+        // m = 3: one chaining unknown per link, and the term x₁x₂·e
+        // pushes the degree to 3.
+        let chained =
+            build_decomposition_system(&fb.subspace_basis, &fe(11, kc.n), &kc.curve.b, 3, &st)
+                .unwrap();
+        let deg3 = chained
+            .equations
+            .iter()
+            .flat_map(|e| e.terms.iter())
+            .map(|t| t.mask.count_ones())
+            .max()
+            .unwrap();
+        assert_eq!(deg3, 3);
+        assert_eq!(chained.n_vars, 3 * fb.subspace_basis.len() + kc.n as usize);
+        assert_eq!(chained.equations.len(), 2 * kc.n as usize);
     }
 
     /// The splitting solver finds exactly the roots, and closes

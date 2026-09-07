@@ -77,7 +77,7 @@
 //!   faster one.**  "Is `R` a sum of `m` factor-base points?" is
 //!   answered either by
 //!   [`DecompositionStrategy::Groebner`] — Semaev's `S₃` Weil-restricted
-//!   to a quadratic Boolean system over the invariant subspace and
+//!   to a low-degree Boolean system over the invariant subspace and
 //!   solved with matrix-F4 (see
 //!   [`crate::cryptanalysis::koblitz_groebner`]), which is the real
 //!   algorithm's oracle — or by
@@ -128,6 +128,8 @@ use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, solve_boolean_system_filtered, FieldStructure, SolveOptions,
     SolveStats, SolverEngine,
 };
+use crate::cryptanalysis::sat::SolveResult;
+use crate::cryptanalysis::semaev_sat::encode_boolean_system;
 use crate::utils::mod_inverse;
 
 /// Largest extension degree this module will build a curve for.  The
@@ -834,7 +836,7 @@ fn decompose(
 /// factor-base points?".
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DecompositionStrategy {
-    /// Weil-restrict the Semaev condition `S₃ = 0` to a quadratic
+    /// Weil-restrict the Semaev condition `S₃ = 0` to a low-degree
     /// Boolean system over the factor-base subspace and solve it with a
     /// Gröbner basis — the step that makes the real algorithm
     /// sub-exponential.  See
@@ -845,6 +847,13 @@ pub enum DecompositionStrategy {
     /// not a decomposition exists; kept as the reference oracle the
     /// algebraic one is tested against.
     Enumerate,
+    /// The same Semaev system, handed to the CDCL SAT solver instead of
+    /// a Gröbner engine
+    /// ([`crate::cryptanalysis::semaev_sat::encode_boolean_system`]).
+    /// Clause learning rather than degree growth: the two blow up on
+    /// different systems, which is the comparison Soos–Nohl–Castelluccia
+    /// opened and this module lets you measure.
+    Sat,
 }
 
 /// Lift a tuple of candidate `x`-coordinates to factor-base points
@@ -959,6 +968,95 @@ pub fn groebner_decompose(
     (found, stats)
 }
 
+/// What a SAT decomposition attempt cost and concluded.
+#[derive(Clone, Debug, Default)]
+pub struct SatDecompositionStats {
+    /// CDCL solve calls (one per model examined, plus the final one).
+    pub solver_calls: usize,
+    /// Roots the solver produced, including any that failed to lift.
+    pub models: usize,
+    /// The search ended in UNSAT, so "no decomposition" is *proven* —
+    /// the SAT analogue of the Gröbner infeasibility certificate.
+    pub refuted: bool,
+    /// The model cap or the solver's conflict budget was hit, so a
+    /// `None` result is inconclusive rather than a refutation.
+    pub exhausted: bool,
+    /// Models that did not satisfy the original system — always zero
+    /// unless the CNF encoding is wrong.
+    pub spurious: usize,
+}
+
+/// **SAT decomposition**: the same Semaev system as
+/// [`groebner_decompose`], solved by CDCL.
+///
+/// Models are enumerated by blocking clause: each root that fails to
+/// lift to a genuine point decomposition is excluded and the instance
+/// re-solved, so a final UNSAT proves no decomposition exists.  Every
+/// model is checked against the original equations before use, and the
+/// lifted points are re-checked in the group, so neither an encoding
+/// bug nor a sign ambiguity can produce a false relation.
+pub fn sat_decompose(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    max_models: usize,
+) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    let mut stats = SatDecompositionStats::default();
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return (None, stats),
+    };
+    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+        Some(sys) => sys,
+        None => return (None, stats),
+    };
+
+    let mut blocked: Vec<u64> = Vec::new();
+    loop {
+        let mut enc = encode_boolean_system(sys.n_vars, &sys.equations, &blocked);
+        stats.solver_calls += 1;
+        if enc.trivially_unsat {
+            stats.refuted = true;
+            return (None, stats);
+        }
+        match enc.solver.solve() {
+            SolveResult::Unsat => {
+                stats.refuted = true;
+                return (None, stats);
+            }
+            SolveResult::Unknown => {
+                stats.exhausted = true;
+                return (None, stats);
+            }
+            SolveResult::Sat => {
+                let root = enc.model_assignment();
+                if !sys.equations.iter().all(|e| e.eval(root) == 0) {
+                    // Cannot happen with a correct encoding; block it
+                    // rather than loop, and report it.
+                    stats.spurious += 1;
+                    blocked.push(root);
+                    continue;
+                }
+                stats.models += 1;
+                let xs: Vec<F2mElement> = (0..m)
+                    .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
+                    .collect();
+                if let Some(idxs) = lift_candidate(kc, fb, index_of, &xs, target) {
+                    return (Some(idxs), stats);
+                }
+                blocked.push(root);
+                if blocked.len() >= max_models {
+                    stats.exhausted = true;
+                    return (None, stats);
+                }
+            }
+        }
+    }
+}
+
 /// Turn a decomposition into a relation row over the orbit unknowns.
 ///
 /// With `x_o := log_G ([h]·rep_o)` and `P_i = π^{k_i}(rep_{o_i})`,
@@ -1019,6 +1117,9 @@ pub struct KoblitzIcOptions {
     /// may spend before it gives up.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub node_budget: usize,
+    /// Models one [`DecompositionStrategy::Sat`] decomposition may
+    /// examine before giving up.
+    pub max_models: usize,
 }
 
 impl Default for KoblitzIcOptions {
@@ -1032,6 +1133,7 @@ impl Default for KoblitzIcOptions {
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
             node_budget: 4096,
+            max_models: 64,
         }
     }
 }
@@ -1058,6 +1160,10 @@ pub struct KoblitzIcReport {
     /// Decomposition branches closed by a basis reducing to `{1}` —
     /// targets rejected algebraically instead of by search.
     pub infeasible_branches: usize,
+    /// CDCL solve calls across every decomposition attempt.
+    pub sat_calls: usize,
+    /// Targets the SAT oracle refuted outright (UNSAT).
+    pub sat_refutations: usize,
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -1086,6 +1192,8 @@ pub fn koblitz_index_calculus_dlp(
         log: None,
         reductions: 0,
         infeasible_branches: 0,
+        sat_calls: 0,
+        sat_refutations: 0,
     };
     if fb.points.is_empty() {
         return Some(report);
@@ -1129,6 +1237,13 @@ pub fn koblitz_index_calculus_dlp(
                 );
                 report.reductions += stats.reductions;
                 report.infeasible_branches += stats.infeasible_branches;
+                idxs
+            }
+            DecompositionStrategy::Sat => {
+                let (idxs, stats) =
+                    sat_decompose(kc, &fb, &index_of, &field, &target, opts.m, opts.max_models);
+                report.sat_calls += stats.solver_calls;
+                report.sat_refutations += usize::from(stats.refuted);
                 idxs
             }
         };
@@ -1404,10 +1519,10 @@ mod tests {
     }
 
     #[test]
-    fn both_oracles_answer_every_target_identically() {
-        // The algebraic oracle must agree with exhaustive search on
-        // *both* answers: same decomposability verdict, and whatever it
-        // returns must be a genuine decomposition.
+    fn all_three_oracles_answer_every_target_identically() {
+        // Exhaustive search, Gröbner and SAT must agree on *both*
+        // answers: the same decomposability verdict, and whatever they
+        // return must be a genuine decomposition.
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
         let index_of = fb.index_map();
@@ -1430,11 +1545,26 @@ mod tests {
                 20_000,
             );
             assert!(!stats.exhausted, "budget should suffice at n = 9");
+            let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+            assert!(!sat_stats.exhausted, "model cap should suffice at n = 9");
+            assert_eq!(sat_stats.spurious, 0, "the CNF encoding must be exact");
             assert_eq!(
                 by_search.is_some(),
                 by_algebra.is_some(),
-                "oracles disagree on [{k}]G"
+                "search and Gröbner disagree on [{k}]G"
             );
+            assert_eq!(
+                by_search.is_some(),
+                by_sat.is_some(),
+                "search and SAT disagree on [{k}]G"
+            );
+            if let Some(idxs) = by_sat {
+                let mut acc = BinaryPoint::Infinity;
+                for i in &idxs {
+                    acc = kc.add(&acc, &fb.points[*i]);
+                }
+                assert_eq!(acc, target, "SAT decomposition of [{k}]G is wrong");
+            }
             if let Some(idxs) = by_algebra {
                 decomposable += 1;
                 // Whatever it returned must actually sum to the target.
@@ -1560,6 +1690,69 @@ mod tests {
             certified += 1;
         }
         assert_eq!(certified, 28);
+    }
+
+    #[test]
+    fn sat_refutes_undecomposable_targets() {
+        // The SAT analogue of the Gröbner certificate: on the
+        // degenerate `K_0 / F_2^7` factor base nothing decomposes, and
+        // every instance comes back UNSAT rather than merely unsolved.
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        for k in 1..29u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let (out, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+            assert!(out.is_none(), "[{k}]G must not decompose");
+            assert!(stats.refuted, "[{k}]G should be refuted by UNSAT");
+            assert!(!stats.exhausted);
+            assert_eq!(stats.spurious, 0);
+        }
+    }
+
+    #[test]
+    fn sat_handles_the_cubic_chained_system() {
+        // With m ≥ 3 the chained S₃ is cubic, so the encoding needs
+        // Tseitin auxiliaries above degree 2.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        for k in [5u32, 29] {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let by_search = enumerate_decompose(&kc, &fb, &index_of, &target, 3);
+            let (by_sat, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 3, 64);
+            assert_eq!(stats.spurious, 0);
+            assert_eq!(by_search.is_some(), by_sat.is_some(), "3-point, [{k}]G");
+            if let Some(idxs) = by_sat {
+                let mut acc = BinaryPoint::Infinity;
+                for i in &idxs {
+                    acc = kc.add(&acc, &fb.points[*i]);
+                }
+                assert_eq!(acc, target);
+            }
+        }
+    }
+
+    #[test]
+    fn solves_the_dlp_with_the_sat_oracle() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let g = kc.generator().clone();
+        let d = BigUint::from(53u32);
+        let q = kc.mul(&g, &d);
+        let opts = KoblitzIcOptions {
+            strategy: DecompositionStrategy::Sat,
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp(&kc, &q, &opts).unwrap();
+        assert_eq!(report.log, Some(d));
+        assert!(report.sat_calls > 0, "the SAT path must have run");
+        assert_eq!(report.reductions, 0, "no Gröbner work on this path");
     }
 
     #[test]

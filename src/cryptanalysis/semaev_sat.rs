@@ -77,6 +77,7 @@ use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
 use crate::cryptanalysis::ffd_harness::{
     monomial_index, quad_monomial_index, weil_descend_s3, F2BoolPoly,
 };
+use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly as BoolPoly;
 use crate::cryptanalysis::sat::{Lit, SolveResult, Solver};
 
 // ── Encoding ────────────────────────────────────────────────────────
@@ -147,17 +148,16 @@ pub fn encode_equations(n: u32, equations: Vec<F2BoolPoly>) -> SemaevSatEncoding
     // assign one extra variable per "fold" of a 5+ -wide XOR.
     let mut xor_chain_aux: Vec<Vec<u32>> = Vec::with_capacity(equations.len());
     for eq in &equations {
-        let lit_count = count_xor_terms(eq, num_bit_vars, &aux_quad_var);
+        // `count_xor_terms` counts the constant, which is a parity
+        // flip rather than a literal.
+        let lit_count =
+            count_xor_terms(eq, num_bit_vars, &aux_quad_var) - usize::from(eq.coeffs[0]);
         // Number of intermediate XOR gates for an n-input XOR encoded
         // as a chain of width-2 (3-clause) XOR gates: max(0, n - 1).
         // But to keep clauses short we collapse in groups of up to 3
         // inputs per XOR gate, so we use ⌈(n - 1) / 2⌉ aux vars.
         // For widths ≤ 4 we use the direct encoding and need no aux.
-        let aux_needed = if lit_count <= 4 {
-            0
-        } else {
-            ((lit_count + 1) / 2).saturating_sub(2)
-        };
+        let aux_needed = xor_chain_aux_needed(lit_count);
         let chain: Vec<u32> = (0..aux_needed)
             .map(|_| {
                 let v = next;
@@ -212,9 +212,7 @@ pub fn decode_x1_x2(enc: &SemaevSatEncoding) -> (F2mElement, F2mElement) {
     let model = enc.solver.model();
     let n = enc.n;
     let bits_x1: Vec<u32> = (0..n).filter(|i| model[*i as usize]).collect();
-    let bits_x2: Vec<u32> = (0..n)
-        .filter(|i| model[(n + *i) as usize])
-        .collect();
+    let bits_x2: Vec<u32> = (0..n).filter(|i| model[(n + *i) as usize]).collect();
     (
         F2mElement::from_bit_positions(&bits_x1, n),
         F2mElement::from_bit_positions(&bits_x2, n),
@@ -222,6 +220,23 @@ pub fn decode_x1_x2(enc: &SemaevSatEncoding) -> (F2mElement, F2mElement) {
 }
 
 // ── XOR encoding helpers ────────────────────────────────────────────
+
+/// Intermediate XOR gates needed to encode a parity constraint over
+/// `effective_lits` literals (the constant term is a parity flip, not a
+/// literal, so it does not count).
+///
+/// Widths `≤ 4` use the direct `2^{w−1}`-clause expansion and need
+/// none.  Wider sums are folded by [`encode_xor_eq_zero`] three
+/// literals at a time, each fold consuming one auxiliary, and the
+/// trailing one or two literals are closed by a direct expansion — so
+/// the count is `⌊w / 3⌋`.
+fn xor_chain_aux_needed(effective_lits: usize) -> usize {
+    if effective_lits <= 4 {
+        0
+    } else {
+        effective_lits / 3
+    }
+}
 
 fn count_xor_terms(
     eq: &F2BoolPoly,
@@ -348,9 +363,7 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) -> bool 
                 // Start chain: y = a XOR b.  If more remain, create aux.
                 let c = iter.next();
                 if let Some(c_lit) = c {
-                    let aux = chain_iter
-                        .next()
-                        .expect("ran out of XOR-chain auxiliaries");
+                    let aux = chain_iter.next().expect("ran out of XOR-chain auxiliaries");
                     encode_xor3_eq_aux(solver, a, b_lit, c_lit, aux as Lit);
                     current_aux = Some(aux as Lit);
                 } else {
@@ -367,9 +380,7 @@ fn encode_xor_eq_zero(solver: &mut Solver, lits: &[Lit], chain: &[u32]) -> bool 
             (Some(prev), Some(b_lit)) => {
                 let c = iter.next();
                 if let Some(c_lit) = c {
-                    let aux = chain_iter
-                        .next()
-                        .expect("ran out of XOR-chain auxiliaries");
+                    let aux = chain_iter.next().expect("ran out of XOR-chain auxiliaries");
                     // y_new = prev XOR a XOR b XOR c.
                     // Decompose: tmp = prev XOR a XOR b, then aux = tmp XOR c.
                     // Encode in two stages — but we only have one aux.
@@ -442,9 +453,239 @@ fn encode_xor4_eq_aux(solver: &mut Solver, a: Lit, b: Lit, c: Lit, d: Lit, aux: 
 
 // ── Tests ───────────────────────────────────────────────────────────
 
+// ── Generic sparse Boolean systems ─────────────────────────────────
+//
+// The encoder above is tied to the `ffd_harness` representation: a
+// dense coefficient vector over the monomials of degree ≤ 2 in exactly
+// `2n` variables — the shape of a full-field Weil descent of `S₃`.
+// Index calculus over a *restricted* factor base produces a different
+// shape: sparse polynomials over `m·ℓ` subspace coordinates (plus
+// chaining unknowns), and for `m ≥ 3` of degree 3 rather than 2.  The
+// encoder below takes that representation, so the same CDCL solver can
+// answer the same decomposition question the Gröbner engine does.
+
+/// A SAT encoding of an arbitrary sparse Boolean polynomial system.
+pub struct BoolSystemSatEncoding {
+    /// Number of problem variables (SAT variables `1 ..= n_vars`).
+    pub n_vars: usize,
+    /// Tseitin auxiliary for each monomial of degree ≥ 2, keyed by the
+    /// monomial's variable mask.
+    pub monomial_var: std::collections::BTreeMap<u64, u32>,
+    /// The CDCL solver with every clause installed.
+    pub solver: Solver,
+    /// Set when encoding produced the empty clause (`1 = 0`), i.e. the
+    /// system is unsatisfiable before search even starts.
+    pub trivially_unsat: bool,
+}
+
+impl BoolSystemSatEncoding {
+    /// Decode the current model into a bitmask over the problem
+    /// variables, in the same layout the Gröbner solver returns.
+    pub fn model_assignment(&self) -> u64 {
+        let model = self.solver.model();
+        let mut out = 0u64;
+        for i in 0..self.n_vars {
+            if model[i] {
+                out |= 1 << i;
+            }
+        }
+        out
+    }
+}
+
+/// **Encode a sparse Boolean system** into CNF.
+///
+/// Each monomial of degree `k ≥ 2` gets one Tseitin auxiliary
+/// `z = v_{i_1} ∧ … ∧ v_{i_k}` (`k + 1` clauses); each equation becomes
+/// one parity constraint over its monomials' literals, with the
+/// constant term flipping the target parity.  Assignments in `blocked`
+/// are excluded by a blocking clause each, so the caller can enumerate
+/// models by re-encoding with the ones it has already rejected.
+///
+/// Unlike [`encode_equations`], this places no restriction on the
+/// degree or on the number of variables.
+pub fn encode_boolean_system(
+    n_vars: usize,
+    equations: &[BoolPoly],
+    blocked: &[u64],
+) -> BoolSystemSatEncoding {
+    assert!(n_vars <= 64, "problem variables are packed into a u64");
+
+    // One auxiliary per distinct monomial of degree ≥ 2.
+    let mut monomial_var: std::collections::BTreeMap<u64, u32> = std::collections::BTreeMap::new();
+    for eq in equations {
+        for t in &eq.terms {
+            if t.mask.count_ones() >= 2 {
+                monomial_var.insert(t.mask, 0);
+            }
+        }
+    }
+    let mut next = n_vars as u32 + 1; // DIMACS variables are 1-indexed
+    for v in monomial_var.values_mut() {
+        *v = next;
+        next += 1;
+    }
+
+    // Chaining auxiliaries for the wide parity constraints.
+    let mut xor_chain_aux: Vec<Vec<u32>> = Vec::with_capacity(equations.len());
+    for eq in equations {
+        let effective = eq.terms.iter().filter(|t| t.mask != 0).count();
+        let chain: Vec<u32> = (0..xor_chain_aux_needed(effective))
+            .map(|_| {
+                let v = next;
+                next += 1;
+                v
+            })
+            .collect();
+        xor_chain_aux.push(chain);
+    }
+
+    let mut solver = Solver::new(next - 1);
+    let mut trivially_unsat = false;
+
+    // z ↔ v_{i_1} ∧ … ∧ v_{i_k}.
+    for (&mask, &z) in monomial_var.iter() {
+        let vars: Vec<Lit> = (0..n_vars)
+            .filter(|i| (mask >> i) & 1 == 1)
+            .map(|i| (i + 1) as Lit)
+            .collect();
+        let mut big = vars.iter().map(|v| -v).collect::<Vec<Lit>>();
+        big.push(z as Lit);
+        solver.add_clause(big);
+        for v in vars {
+            solver.add_clause(vec![v, -(z as Lit)]);
+        }
+    }
+
+    // One parity constraint per equation.
+    for (eq, chain) in equations.iter().zip(xor_chain_aux.iter()) {
+        let mut lits: Vec<Lit> = Vec::with_capacity(eq.terms.len());
+        let mut has_constant = false;
+        for t in &eq.terms {
+            match t.mask.count_ones() {
+                0 => has_constant = true,
+                1 => lits.push((t.mask.trailing_zeros() + 1) as Lit),
+                _ => lits.push(monomial_var[&t.mask] as Lit),
+            }
+        }
+        if has_constant {
+            lits.insert(0, 0); // parity-flip sentinel
+        }
+        if lits.is_empty() {
+            continue; // 0 = 0
+        }
+        if encode_xor_eq_zero(&mut solver, &lits, chain) {
+            trivially_unsat = true;
+        }
+    }
+
+    // Exclude assignments the caller has already seen and rejected.
+    for &a in blocked {
+        let clause: Vec<Lit> = (0..n_vars)
+            .map(|i| {
+                let lit = (i + 1) as Lit;
+                if (a >> i) & 1 == 1 {
+                    -lit
+                } else {
+                    lit
+                }
+            })
+            .collect();
+        if !clause.is_empty() {
+            solver.add_clause(clause);
+        }
+    }
+
+    BoolSystemSatEncoding {
+        n_vars,
+        monomial_var,
+        solver,
+        trivially_unsat,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cryptanalysis::pq_groebner_f2::F2BoolMono;
+
+    /// Parity constraints must be encoded exactly at every width.
+    ///
+    /// Regression test: the chain-auxiliary count used to be
+    /// `⌈(w+1)/2⌉ − 2`, which under-allocates from `w = 6` on — the
+    /// encoder then panicked with "ran out of XOR-chain auxiliaries".
+    /// The fold consumes three literals per auxiliary, so the count is
+    /// `⌊w/3⌋`.
+    #[test]
+    fn xor_parity_encoding_is_exact_at_every_width() {
+        for w in 1..=12usize {
+            for constant in [false, true] {
+                let mut monos: Vec<F2BoolMono> =
+                    (0..w).map(|i| F2BoolMono::var(i as u32)).collect();
+                if constant {
+                    monos.push(F2BoolMono::one());
+                }
+                let eq = BoolPoly::from_monos(monos, w);
+
+                let mut enc = encode_boolean_system(w, std::slice::from_ref(&eq), &[]);
+                assert!(!enc.trivially_unsat, "w = {w}, constant = {constant}");
+                assert_eq!(
+                    enc.solver.solve(),
+                    SolveResult::Sat,
+                    "w = {w}, constant = {constant}"
+                );
+                assert_eq!(eq.eval(enc.model_assignment()), 0);
+
+                // Small widths: enumerate every model and count them.
+                // A w-input parity constraint has exactly 2^{w−1}.
+                if w <= 8 {
+                    let mut blocked: Vec<u64> = Vec::new();
+                    loop {
+                        let mut e = encode_boolean_system(w, std::slice::from_ref(&eq), &blocked);
+                        match e.solver.solve() {
+                            SolveResult::Sat => {
+                                let m = e.model_assignment();
+                                assert_eq!(eq.eval(m), 0, "model violates the equation");
+                                blocked.push(m);
+                            }
+                            SolveResult::Unsat => break,
+                            SolveResult::Unknown => panic!("budget exhausted at w = {w}"),
+                        }
+                    }
+                    assert_eq!(
+                        blocked.len(),
+                        1usize << (w - 1),
+                        "w = {w}, constant = {constant}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// Higher-degree monomials get Tseitin auxiliaries too — the
+    /// `m ≥ 3` chained Semaev systems are cubic, not quadratic.
+    #[test]
+    fn cubic_monomials_are_encoded() {
+        // v0·v1·v2 + 1 = 0  ⇒  all three must be true.
+        let eq = BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b111), F2BoolMono::one()], 3);
+        let mut enc = encode_boolean_system(3, std::slice::from_ref(&eq), &[]);
+        assert_eq!(
+            enc.monomial_var.len(),
+            1,
+            "one auxiliary for the cubic term"
+        );
+        assert_eq!(enc.solver.solve(), SolveResult::Sat);
+        assert_eq!(enc.model_assignment(), 0b111);
+    }
+
+    /// An unsatisfiable system is reported as UNSAT, not as a model.
+    #[test]
+    fn contradictory_system_is_unsat() {
+        let p = BoolPoly::from_monos(vec![F2BoolMono::var(0)], 2);
+        let q = BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], 2);
+        let mut enc = encode_boolean_system(2, &[p, q], &[]);
+        assert!(enc.trivially_unsat || enc.solver.solve() == SolveResult::Unsat);
+    }
 
     fn irr_for(n: u32) -> IrreduciblePoly {
         match n {
