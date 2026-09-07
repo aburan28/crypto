@@ -187,13 +187,15 @@ def parseMetrics(src, log, threads):
 def dominates(a, b):
     """a dominates b: at least as good everywhere, strictly better somewhere.
 
-    Better means more warps resident, fewer instructions, less traffic."""
+    Better means fewer instructions and less local-memory traffic resident on an
+    SM -- traffic per thread times the threads that carry it.  Occupancy is not
+    a good in itself here; see the ladder above heuristicCost."""
     aTraffic = a['spillBytes'] + a['walkLocalOps'] * 4
     bTraffic = b['spillBytes'] + b['walkLocalOps'] * 4
-    ge = (a['warpsPerSM'] >= b['warpsPerSM'] and
-          a['walkInstrs'] <= b['walkInstrs'] and aTraffic <= bTraffic)
-    gt = (a['warpsPerSM'] > b['warpsPerSM'] or
-          a['walkInstrs'] < b['walkInstrs'] or aTraffic < bTraffic)
+    ge = (a['warpsPerSM'] * aTraffic <= b['warpsPerSM'] * bTraffic and
+          a['walkInstrs'] <= b['walkInstrs'])
+    gt = (a['warpsPerSM'] * aTraffic < b['warpsPerSM'] * bTraffic or
+          a['walkInstrs'] < b['walkInstrs'])
     return ge and gt
 
 
@@ -288,19 +290,44 @@ def paretoFront(rows):
     return out
 
 
+# Measured on an RTX PRO 6000 Blackwell (sm_120), batch 32, leaf 0, by
+# ::autotune over the occupancy ladder this tool had put on its Pareto front:
+#
+#   threads/minBlocks  regs  warps/SM  spillB   M it/s
+#   128/2               255         8   12664    607.2
+#   256/2               128        16   17168    314.5
+#   256/3                80        24   21636    233.8
+#   256/4                64        32   23444    209.5
+#
+# Four times the resident warps cost 2.9x the throughput, monotonically.  The
+# first version of this cost divided work by warpsPerSM, on the assumption that
+# occupancy hides latency, and therefore ranked the ladder exactly upside down.
+# It does not hide latency here because every resident thread carries its own
+# multi-kilobyte spill frame: going from 8 to 32 warps takes the local-memory
+# footprint resident on an SM from 3.2 MB to 24 MB, far past any cache, so the
+# added warps compete for DRAM rather than covering for each other.
+MEASURED_LADDER = ((8, 607.2), (16, 314.5), (24, 233.8), (32, 209.5))
+
+
 def heuristicCost(r):
-    """Work a warp must issue, divided by the warps available to hide it.
+    """Per-SM work, which is per-thread work times the threads resident.
 
     A proxy, and named one: it weights a spilled word at four instructions and
-    assumes latency hiding scales with occupancy.  Its job is to order a
-    shortlist, not to predict a time.
+    assumes the kernel is limited by local-memory traffic, which is what the
+    measurement above says it is.  It reproduces the measured ordering of the
+    occupancy ladder but not the size of the gaps -- it is for ranking a
+    shortlist, never for predicting a rate.
 
     It counts the call closure rather than the entry function.  An earlier
     version counted only the entry and could not tell a 17-word multiplier leaf
     from the register-budget default, because the multiplier is __noinline__ and
-    every instruction that differs between them lives in the callee."""
-    work = r['walkInstrs'] + r['spillBytes'] / 4.0 + r['walkLocalOps']
-    return work / max(1, r['warpsPerSM'])
+    every instruction that differs between them lives in the callee.
+
+    Calibrated against four points on one GPU with one kernel.  Re-check it with
+    ::autotune whenever the kernel's spill behaviour changes; if the kernel ever
+    stops spilling, the occupancy term should go back the other way."""
+    perThread = r['walkInstrs'] + r['spillBytes'] / 4.0 + r['walkLocalOps']
+    return perThread * r['warpsPerSM'] / 1000.0
 
 
 SELFTEST_PTX = """//

@@ -541,10 +541,31 @@ buys them by spilling to local memory -- already the dominant cost in this
 kernel. Where that trade turns is a curve; the optimum on the curve is not
 something static analysis settles.
 
-Treat its ranking as a shortlist and never as a result. The register-budget
-leaf in this repo is a live example of why: every static metric preferred it,
-and the only hardware available measured it slower, for a reason -- register
-file size -- that does not apply to the target.
+Treat its ranking as a shortlist and never as a result. It has been wrong once
+already, and expensively: the first cost function divided work by resident
+warps, on the standard assumption that occupancy hides latency, and so ranked
+the occupancy ladder upside down. Measured on an RTX PRO 6000:
+
+| threads/minBlocks | registers | warps/SM | spill | measured |
+|---|---|---|---|---|
+| 128/2 | 255 | 8 | 12664 B | **607.2 M it/s** |
+| 256/2 | 128 | 16 | 17168 B | 314.5 M it/s |
+| 256/3 | 80 | 24 | 21636 B | 233.8 M it/s |
+| 256/4 | 64 | 32 | 23444 B | 209.5 M it/s |
+
+Four times the resident warps costs 2.9x the throughput, monotonically.
+Occupancy does not hide latency here because every resident thread carries its
+own multi-kilobyte spill frame: 8 warps to 32 takes the local-memory footprint
+resident on an SM from 3.2 MB to 24 MB, far past any cache, so the added warps
+compete for DRAM instead of covering for each other. The cost function now
+multiplies by occupancy rather than dividing, and reproduces that ordering --
+though not the size of the gaps. It is calibrated against four points on one
+GPU with one kernel, and should be rechecked with `::autotune` whenever the
+kernel's spill behaviour changes.
+
+The practical consequence is that `THREADS=128, MINBLOCKS=2` is already at the
+255-register ceiling and the occupancy axis is spent. What is left is the leaf,
+the batch, and the multiplier's gate count.
 
 Three things it took a wrong answer to get right, none of which failed loudly.
 
