@@ -99,6 +99,15 @@ inversion is shared across a whole batch of walks by Montgomery's trick,
 which is what makes affine coordinates cheaper than projective ones here —
 the same reason the CUDA kernels batch.
 
+## Running it on real hardware
+
+[`aws/`](./aws/) has scripts to synthesise this on an AWS build instance and
+bring back utilisation and timing, which is what turns the estimates in the
+cost model into measurements. They have not been run — there was no AWS CLI
+or Vivado in the environment where they were written — and they synthesise
+only; producing a loadable FPGA image needs an AWS shell wrapper this
+datapath does not have. See [`aws/README.md`](./aws/README.md).
+
 ## What is not here
 
 - **The rho sequencer**: walk state storage, the r-adding jump table in

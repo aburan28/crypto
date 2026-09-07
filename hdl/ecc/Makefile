@@ -1,6 +1,6 @@
 # hdl/ecc -- analyse, elaborate and run the self-checking testbenches.
 #
-#   make            run every testbench
+#   make / make test   run every testbench
 #   make vectors    regenerate vectors_secp256k1.txt from the Python oracle
 #   make clean
 #
@@ -15,8 +15,8 @@ SRC := fp_pkg.vhd fp_mul_secp256k1.vhd ec_add_pipe.vhd
 TBS := fp_mul_tb ec_add_tb
 VEC := vectors_secp256k1.txt
 
-.PHONY: all vectors clean
-all: $(VEC)
+.PHONY: all test vectors clean
+all test: $(VEC)
 	$(GHDL) -a $(STD) $(SRC) fp_mul_tb.vhd ec_add_tb.vhd
 	@rc=0; for tb in $(TBS); do \
 	  $(GHDL) -e $(STD) $$tb && \

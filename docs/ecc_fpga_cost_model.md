@@ -168,6 +168,8 @@ recommendation in the SHA-1 document, and the reversal is the finding.
 
 ```bash
 cd hdl/ecc && make          # GHDL: multiplier and point-adder testbenches
+cd hdl/ecc/aws && ./run_aws_synthesis.sh --dry-run ...   # Vivado on AWS: replaces
+                            # the DSP and clock estimates above with measurements
 cd gpu/ecc  && make test    # CPU verification of the CUDA headers
 cd gpu/ecc  && ./ptx_stats.sh   # static instruction / occupancy figures
 cd gpu/ecc  && make bench && ./bench selftest && ./bench rho   # needs a GPU
