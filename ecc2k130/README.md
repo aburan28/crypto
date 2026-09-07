@@ -485,6 +485,16 @@ occupancy against instructions against traffic, and a ready-to-run `autotune`
 command for those few configurations. Six builds measured on a real card beats
 a hundred and forty-four.
 
+The command names the front's rows, not the distinct values in them:
+
+```
+modal run modal_app.py::autotune --configs 0:8:256:4,0:8:256:3,0:8:64:1
+```
+
+Each entry is `leaf:batch:threads:minBlocks`. Crossing the values back out
+would measure two or three times as many builds as the front has points, which
+gives away the reason for searching offline in the first place.
+
 The tension it maps is occupancy against spilling. Asking ptxas for more
 resident blocks makes it use fewer registers per thread, and past a point it
 buys them by spilling to local memory -- already the dominant cost in this

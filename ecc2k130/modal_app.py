@@ -270,74 +270,72 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
     return info
 
 
+def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs):
+    """The (leaf, batch, threads, minBlocks) builds to measure.
+
+    `configs` names them one per entry as leaf:batch:threads:minBlocks, which is
+    what autolab.py emits.  Its Pareto front is a handful of points, and
+    expanding the distinct values of those points back into a cross product
+    measures two or three times as many builds as the front has rows.  Without
+    it the four lists are crossed, as before."""
+    if configs.strip():
+        out = []
+        for entry in configs.split(","):
+            if not entry.strip():
+                continue
+            leaf, batch, threads, mb = (int(x) for x in entry.split(":"))
+            out.append((leaf, batch, threads, mb))
+        return out
+    ints = lambda t: [int(x) for x in t.split(",") if x]
+    return [(leaf, batch, threads, mb)
+            for leaf in ints(leaves)
+            for threads in ints(threadCounts)
+            for batch in ints(batches)
+            for mb in ints(minBlocksList)]
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR, volumes={"/data": volume})
 def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33,66",
-                minBlocksList="2,4,8", steps=64, launches=12):
+                minBlocksList="2,4,8", steps=64, launches=12, configs=""):
     """Sweep the build-time knobs on the real device and report the best.
 
     minBlocks is the interesting one: asking ptxas for more resident blocks per
     SM trades registers for occupancy.  Offline, 2 is free (255 registers, no
     extra spills) while 8 cuts registers to 64 and nearly doubles spill traffic,
-    so which side wins is exactly what this measures."""
+    so which side wins is exactly what this measures.
+
+    Pass `configs` to measure an explicit list of builds -- ::autolab prints one
+    -- instead of the cross product of the four lists."""
     results = []
     arch = computeCapability()
     name = gpuName()
-    for leaf in [int(x) for x in leaves.split(",") if x]:
-        for threads in [int(x) for x in threadCounts.split(",") if x]:
-            for batch in [int(x) for x in batches.split(",") if x]:
-                for mb in [int(x) for x in minBlocksList.split(",") if x]:
-                    t0 = time.time()
-                    ok, log = buildFor(batch, threads, leaf, arch, mb)
-                    cfg = {"batch": batch, "threads": threads, "leaf": leaf,
-                           "minBlocks": mb}
-                    if not ok:
-                        results.append(dict(cfg, rate=0.0, error=log[-400:]))
-                        continue
-                    rc, out = sh(
-                        f"./ecc2k130 --curve 131 --bench --steps {steps} "
-                        f"--launches {launches} --verify 0",
-                        timeout=1800,
-                    )
-                    rate = parseRate(out)
-                    results.append(dict(cfg, rate=rate,
-                                        buildSeconds=round(time.time() - t0, 1)))
-                    print(f"leaf {leaf} threads {threads} batch {batch} "
-                          f"minBlocks {mb}: {rate:.3f} M it/s")
+    plan = autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs)
+    print(f"{len(plan)} builds to measure on {name} (sm_{arch})")
+    for leaf, batch, threads, mb in plan:
+        t0 = time.time()
+        ok, log = buildFor(batch, threads, leaf, arch, mb)
+        cfg = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": mb}
+        if not ok:
+            results.append(dict(cfg, rate=0.0, error=log[-400:]))
+            continue
+        rc, out = sh(
+            f"./ecc2k130 --curve 131 --bench --steps {steps} "
+            f"--launches {launches} --verify 0",
+            timeout=1800,
+        )
+        rate = parseRate(out)
+        results.append(dict(cfg, rate=rate, buildSeconds=round(time.time() - t0, 1)))
+        print(f"leaf {leaf} threads {threads} batch {batch} "
+              f"minBlocks {mb}: {rate:.3f} M it/s")
     results.sort(key=lambda r: -r.get("rate", 0.0))
-    report = {"gpu": name, "cc": arch, "results": results, "best": results[0] if results else None}
+    report = {"gpu": name, "cc": arch, "results": results,
+              "best": results[0] if results else None}
     os.makedirs("/data/autotune", exist_ok=True)
     path = f"/data/autotune/{name.replace(' ', '_')}.json"
     with open(path, "w") as fh:
         json.dump(report, fh, indent=2)
     volume.commit()
     return report
-
-
-@app.function(image=image, timeout=2 * HOUR, volumes={"/data": volume})
-def runAutolab(batches="8", threadCounts="64,128,256", minBlocksList="1,2,3,4",
-               leaves="0,17", arch="", top=6):
-    """Search the build space offline, on a CPU container, and print a shortlist.
-
-    ptxas is deterministic and needs no device, so registers, spill traffic and
-    the occupancy that follows from them are all measurable without renting a
-    GPU -- and this image already carries nvcc and ptxas for the real build.
-    What it cannot measure is time, so it produces the few configurations worth
-    running through ::autotune rather than a verdict.
-
-    The metric cache lives in the volume keyed by architecture, so a second run
-    only compiles what the first one did not."""
-    arch = arch or (BAKED_ARCHES[0] if len(BAKED_ARCHES) == 1 else "90")
-    os.makedirs("/data/autolab", exist_ok=True)
-    out = f"/data/autolab/sm{arch}.json"
-    rc, log = sh(
-        f"python3 autolab.py --compiler nvcc --cuda-path=/usr/local/cuda "
-        f"--ptxas=/usr/local/cuda/bin/ptxas --arch={arch} --batch {batches} --threads {threadCounts} "
-        f"--min-blocks {minBlocksList} --leaf {leaves} --top {top} --out {out}",
-        cwd=f"{REMOTE}/codegen",
-        timeout=2 * HOUR - 300,
-    )
-    volume.commit()
-    return {"arch": arch, "returncode": rc, "cache": out, "log": log}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -715,9 +713,12 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 @app.local_entrypoint()
 def autotune(gpu: str = "", batches: str = "8,16,32,64",
              thread_counts: str = "64,128,256", leaves: str = "0,17,33,66",
-             min_blocks_list: str = "2,4,8"):
+             min_blocks_list: str = "2,4,8", configs: str = ""):
+    """--configs takes leaf:batch:threads:minBlocks entries, as ::autolab
+    prints them, and measures exactly those instead of a cross product."""
     r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=thread_counts,
-                                       leaves=leaves, minBlocksList=min_blocks_list)
+                                       leaves=leaves, minBlocksList=min_blocks_list,
+                                       configs=configs)
     print(json.dumps(r, indent=2))
 
 

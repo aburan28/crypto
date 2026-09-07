@@ -436,13 +436,15 @@ def main():
                  r['registers'], r['warpsPerSM'], r['walkInstrs'],
                  r['spillBytes'], r['cost']))
 
+    # Name the front's rows, not the distinct values in them.  Crossing the
+    # values back out measures two or three times as many builds as the front
+    # has points, which gives away the whole reason for searching offline first.
     short = front[:args.top]
-    print('\nMeasure these on a GPU -- the ranking above is a proxy, not a result:')
-    print('  modal run modal_app.py::autotune \\')
-    print('      --batches %s \\' % ','.join(sorted(set(str(r['batch']) for r in short))))
-    print('      --thread-counts %s \\' % ','.join(sorted(set(str(r['threads']) for r in short))))
-    print('      --min-blocks-list %s \\' % ','.join(sorted(set(str(r['minBlocks']) for r in short))))
-    print('      --leaves %s' % ','.join(sorted(set(str(r['leaf']) for r in short))))
+    plan = ','.join('%d:%d:%d:%d' % (r['leaf'], r['batch'], r['threads'], r['minBlocks'])
+                    for r in short)
+    print('\nMeasure these %d builds on a GPU -- the ranking above is a proxy, '
+          'not a result:' % len(short))
+    print('  modal run modal_app.py::autotune --configs %s' % plan)
     return 0
 
 
