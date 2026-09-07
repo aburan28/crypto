@@ -120,12 +120,12 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     # that is 66 words at m=131; it is emphatically not the right answer for the
     # 16-register host, so the CPU reference build and the device build do not
     # want the same leaf, and only a GPU settles which one this is.
-    # Regenerate unconditionally.  Skipping it for leaf 0 would compile whatever
-    # headers the container happens to hold, which during an autotune sweep is
-    # the previous point's leaf -- so the sweep would score that build twice and
-    # label one of them the register-budget choice.
-    leafArg = f" --leaf {leaf}" if leaf else ""
-    rc, out = sh(f"cd codegen && python3 gen.py --out ../generated{leafArg}")
+    # Regenerate unconditionally, passing leaf 0 straight through: gen.py reads
+    # 0 as "choose by register budget".  Skipping the generator instead would
+    # compile whatever headers the container already holds, which during an
+    # autotune sweep is the previous point's leaf -- so the sweep would score
+    # that build twice and label one of them the register-budget choice.
+    rc, out = sh(f"cd codegen && python3 gen.py --out ../generated --leaf {leaf}")
     if rc != 0:
         return False, out
     gencode = f"-gencode arch=compute_{arch},code=sm_{arch}"
