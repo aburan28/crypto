@@ -457,6 +457,93 @@ on disk and time left in the pass. Anything that is not a progress line -- a
 collision, a verification failure, a checkpoint that could not be written -- is
 printed as it happens.
 
+## Searching the build space offline
+
+`make autolab` sweeps leaf size, block size, batch and the occupancy target,
+compiles each, and reports what it can see without a GPU: registers, spill
+traffic, stack frame, instruction mix, and the occupancy that follows from them.
+It needs no card, because ptxas is deterministic.
+
+Two ways to get the PTX. With a CUDA toolkit installed it uses `nvcc -ptx` for
+the target architecture directly. Without one it falls back to clang against a
+CUDA include tree -- the same pip-supplied toolchain as `check-cuda` -- and,
+because clang 18 will not emit sm_120, compiles for sm_90 and rewrites the PTX
+header before ptxas sees it. That is sound for this kernel, which uses no
+architecture-specific instructions, and unsound in general. There is also no
+need to install anything locally:
+
+```
+modal run modal_app.py::autolab
+```
+
+runs it in a CPU container that already has nvcc, and caches its metrics in the
+volume so a second run only compiles what the first one did not.
+
+To do both halves in one call -- map the space on a CPU container, then measure
+only the survivors on a card:
+
+```
+ECC_GPU=RTX-PRO-6000 modal run modal_app.py::campaign
+```
+
+The search skips combinations it can prove cannot differ. A launch bound below
+about 257 total threads does not constrain the allocator, so every `minBlocks`
+at that block size compiles to the same binary; keeping one baseline per block
+size and dropping the rest cuts a leaf-and-batch sweep by a third at no cost to
+the front.
+
+One axis is deliberately absent. `ptxas --maxrregcount` was measured against
+`__launch_bounds__` at 255, 168, 128, 80 and 64 registers and gave
+byte-identical spill counts at every one -- it is the same lever under a
+different name, not a second dimension, and the kernel always carries launch
+bounds, which take precedence over the flag anyway.
+
+It does not pick a winner, because the thing that decides one is wall-clock and
+that is exactly what it cannot measure. What it produces is the Pareto front on
+occupancy against instructions against traffic, and a ready-to-run `autotune`
+command for those few configurations. Six builds measured on a real card beats
+a hundred and forty-four.
+
+The command names the front's rows, not the distinct values in them:
+
+```
+modal run modal_app.py::autotune --configs 0:8:256:4,0:8:256:3,0:8:64:1
+```
+
+Each entry is `leaf:batch:threads:minBlocks`. Crossing the values back out
+would measure two or three times as many builds as the front has points, which
+gives away the reason for searching offline in the first place.
+
+The tension it maps is occupancy against spilling. Asking ptxas for more
+resident blocks makes it use fewer registers per thread, and past a point it
+buys them by spilling to local memory -- already the dominant cost in this
+kernel. Where that trade turns is a curve; the optimum on the curve is not
+something static analysis settles.
+
+Treat its ranking as a shortlist and never as a result. The register-budget
+leaf in this repo is a live example of why: every static metric preferred it,
+and the only hardware available measured it slower, for a reason -- register
+file size -- that does not apply to the target.
+
+Three things it took a wrong answer to get right, none of which failed loudly.
+
+It counts the call closure of the walk kernel, not the entry function: the
+multiplier is `__noinline__`, so an entry-only count reported the same
+instruction total for every leaf size and was blind to the one knob most worth
+turning. It counts statements rather than indented lines, because PTX writes a
+call's arguments one per line, and counting those charges a build in proportion
+to how many calls it makes -- again the thing being compared. And it collapses
+builds that compiled to the same thing: occupancy here is register-limited -- an
+SM has 65536 registers, so resident warps are 2048/registers and the block size
+does not enter -- which means `__launch_bounds__` does not bind at all until
+`minBlocks * threads` passes about 257. Below that every `minBlocks` produces an
+identical binary, and a Pareto front that does not notice fills with copies of
+one configuration.
+
+All three are now pinned by a fixture test over a small hand-written PTX module,
+run by `make check-cli`, so the extraction cannot drift back to plausible wrong
+numbers unnoticed.
+
 ## Persistence
 
 A rho search is long enough that a run will be interrupted -- a spot instance
