@@ -141,6 +141,9 @@ pub struct SolverStats {
     /// Literals implied by a parity row.
     pub xor_propagations: u64,
     pub xor_conflicts: u64,
+    /// Times a row had to choose a new pivot, the only work the
+    /// incremental matrix does beyond a popcount per row.
+    pub xor_repivots: u64,
     pub learnt_clauses: u64,
 }
 
@@ -326,8 +329,30 @@ pub struct Solver {
     xor_reason: Vec<Vec<Lit>>,
     /// Reason clause for a parity conflict, likewise reused.
     xor_conflict: Vec<Lit>,
-    /// Working rows for the Gauss-Jordan pass, reused across calls.
-    xor_scratch: Vec<XorRow>,
+    /// **Live Gauss-Jordan matrix**: row-reduced linear combinations of
+    /// `xors`, carried across propagations instead of re-eliminated
+    /// from scratch each time.  Row operations are algebraically valid
+    /// whatever the trail says, so they are never undone — not on
+    /// propagation, not on backjump.
+    ///
+    /// The invariant that makes per-row reasoning *complete*:
+    ///
+    /// > every row has a **pivot** variable that is unassigned and
+    /// > occurs in no other row.
+    ///
+    /// Restricted to the unassigned columns the matrix is then `[I | B]`
+    /// after permutation, so any sum of `k` rows still contains all `k`
+    /// of their distinct pivots.  A combination can therefore be unit
+    /// only for `k = 1`, and inconsistent only if some single row is
+    /// fully assigned — which is exactly what a per-row check finds.
+    /// Nothing is missed by not re-eliminating.
+    ///
+    /// Backjumping only *unassigns* variables, which cannot break the
+    /// invariant, so it costs no work there either.
+    matrix: Vec<XorRow>,
+    /// `pivot[i]` is row `i`'s basic variable; `None` once the row has
+    /// no unassigned variable left.
+    pivot: Vec<Option<u32>>,
     /// `analyze` scratch: which variables have been resolved on.  Only
     /// the entries in `seen_stack` are dirty, so clearing is O(touched)
     /// rather than O(variables).
@@ -427,7 +452,8 @@ impl Solver {
             xor_epoch: u64::MAX,
             xor_reason: vec![Vec::new(); n],
             xor_conflict: Vec::new(),
-            xor_scratch: Vec::new(),
+            matrix: Vec::new(),
+            pivot: Vec::new(),
             seen: vec![false; n],
             seen_stack: Vec::new(),
             reason_buf: Vec::new(),
@@ -469,6 +495,7 @@ impl Solver {
             return true;
         }
         self.xors.push(XorRow { mask, rhs });
+        self.matrix.clear(); // rebuilt on the next pass
         self.xor_epoch = u64::MAX; // force a pass on the next propagate
         true
     }
@@ -504,6 +531,23 @@ impl Solver {
         }
         self.order
             .rebuild(self.n_vars, &self.activity, &self.branch_priority);
+    }
+
+    /// Propagate to fixpoint at the current level without deciding.
+    /// Returns `true` on conflict.  Test hook for checking what the
+    /// parity engine derives, with no search on top.
+    #[cfg(test)]
+    pub(crate) fn propagate_to_fixpoint_for_test(&mut self) -> bool {
+        if self.is_unsat {
+            return true;
+        }
+        self.propagate().is_some()
+    }
+
+    /// Current value of a variable (1-indexed), if assigned.
+    #[cfg(test)]
+    pub(crate) fn value_of_for_test(&self, v: u32) -> Option<bool> {
+        self.assignment[(v - 1) as usize]
     }
 
     /// Verify a model against the installed XOR rows.  The CNF part is
@@ -634,100 +678,145 @@ impl Solver {
     fn propagate_xors(&mut self) -> XorStep {
         self.stats.xor_passes += 1;
         let words = bs_words(self.n_vars);
-        // Reuse the scratch rows: cloning 52 bitmasks per propagation
-        // was itself a measurable share of the solve.
-        let mut rows = std::mem::take(&mut self.xor_scratch);
-        rows.clear();
-        rows.extend_from_slice(&self.xors);
+        if self.matrix.len() != self.xors.len() {
+            self.rebuild_matrix();
+        }
 
-        // Forward elimination.  Processing rows in order and clearing
-        // each chosen pivot from *every* other row keeps the invariant
-        // that a pivot lives in exactly one row, so a single pass
-        // suffices.  Any pivot already claimed by an earlier row has
-        // been eliminated from this one by the time we reach it.
-        let mut src_mask: Vec<u64> = vec![0; words];
-        for i in 0..rows.len() {
-            let pivot = match self.lowest_unassigned(&rows[i].mask) {
-                Some(p) => p,
-                None => continue, // fully assigned: checked below
+        // ── Phase 1: restore the pivot invariant ────────────────────
+        //
+        // Only rows whose pivot has since been assigned are touched, so
+        // the usual cost is `O(broken rows × rows × words)` rather than
+        // the `O(rows² × words)` of re-eliminating from scratch.
+        let mut step = XorStep::Fixpoint;
+        let mut src = XorRow {
+            mask: vec![0; words],
+            rhs: false,
+        };
+        for i in 0..self.matrix.len() {
+            let intact = match self.pivot[i] {
+                Some(p) => self.assignment[p as usize].is_none(),
+                None => false,
             };
-            let src_rhs = rows[i].rhs;
-            src_mask.copy_from_slice(&rows[i].mask);
-            for j in 0..rows.len() {
-                if j == i || !bs_get(&rows[j].mask, pivot) {
-                    continue;
+            if intact {
+                continue;
+            }
+            self.stats.xor_repivots += 1;
+
+            match self.lowest_unassigned(&self.matrix[i].mask) {
+                None => {
+                    // No unassigned variable left: the row is decided.
+                    self.pivot[i] = None;
+                    if self.row_residual(i) {
+                        let mut buf = std::mem::take(&mut self.xor_conflict);
+                        let mask = std::mem::take(&mut self.matrix[i].mask);
+                        self.write_xor_reason(&mask, None, &mut buf);
+                        self.matrix[i].mask = mask;
+                        self.xor_conflict = buf;
+                        self.stats.xor_conflicts += 1;
+                        return XorStep::Conflict;
+                    }
                 }
-                rows[j].rhs ^= src_rhs;
-                for w in 0..words {
-                    rows[j].mask[w] ^= src_mask[w];
+                Some(p) => {
+                    self.pivot[i] = Some(p);
+                    // Clear `p` from every other row, so it lives in
+                    // this one alone.
+                    src.rhs = self.matrix[i].rhs;
+                    src.mask.copy_from_slice(&self.matrix[i].mask);
+                    for j in 0..self.matrix.len() {
+                        if j == i || !bs_get(&self.matrix[j].mask, p) {
+                            continue;
+                        }
+                        self.matrix[j].rhs ^= src.rhs;
+                        for w in 0..words {
+                            self.matrix[j].mask[w] ^= src.mask[w];
+                        }
+                    }
                 }
             }
         }
 
-        // Read off conflicts and unit implications.  Walk the set bits
-        // of each mask rather than every variable: the masks are sparse
-        // relative to the variable count, and scanning `0..n_vars` per
-        // row cost 52 × 767 word tests on every pass.
+        // ── Phase 2: read off unit implications ─────────────────────
+        //
+        // With the invariant restored, a row implies something exactly
+        // when its pivot is its *only* unassigned variable — so this is
+        // a popcount, and no further elimination is needed.
         let mut propagated = false;
-        let mut step = XorStep::Fixpoint;
-        'rows: for idx in 0..rows.len() {
-            let row = &rows[idx];
-            let mut unassigned: Option<u32> = None;
-            let mut parity = row.rhs;
+        'rows: for i in 0..self.matrix.len() {
+            let p = match self.pivot[i] {
+                Some(p) => p,
+                None => continue, // decided in phase 1
+            };
+            let mut parity = self.matrix[i].rhs;
+            let mut lone = true;
             for w in 0..words {
-                let m = row.mask[w];
+                let m = self.matrix[i].mask[w];
                 if m == 0 {
                     continue;
                 }
                 let free = m & !self.assigned_w[w];
-                if free != 0 {
-                    if unassigned.is_some() || free.count_ones() > 1 {
-                        continue 'rows; // under-determined
-                    }
-                    unassigned = Some((w * 64) as u32 + free.trailing_zeros());
+                if free.count_ones() > 1 || (free != 0 && free.trailing_zeros() + (w * 64) as u32 != p)
+                {
+                    lone = false;
+                    break;
                 }
                 parity ^= ((m & self.assigned_w[w] & self.value_w[w]).count_ones() & 1) == 1;
             }
-            match unassigned {
-                None => {
-                    // Fully assigned.  `parity` is the residual: it must
-                    // be 0, or the row is violated.
-                    if parity {
-                        let mut buf = std::mem::take(&mut self.xor_conflict);
-                        self.write_xor_reason(&rows[idx].mask, None, &mut buf);
-                        self.xor_conflict = buf;
-                        self.stats.xor_conflicts += 1;
-                        step = XorStep::Conflict;
-                        break 'rows;
-                    }
-                }
-                Some(x) => {
-                    // The row forces `x = parity`.
-                    let lit = if parity { (x + 1) as Lit } else { -((x + 1) as Lit) };
-                    if self.lit_value(lit) == Some(true) {
-                        continue; // already implied
-                    }
-                    let mut buf = std::mem::take(&mut self.xor_reason[x as usize]);
-                    self.write_xor_reason(&rows[idx].mask, Some(lit), &mut buf);
-                    self.xor_reason[x as usize] = buf;
-                    self.stats.xor_propagations += 1;
-                    if self.enqueue(lit, Reason::XorPropagated).is_err() {
-                        // Cannot happen: `lit` was unassigned above.
-                        std::mem::swap(&mut self.xor_conflict, &mut self.xor_reason[x as usize]);
-                        step = XorStep::Conflict;
-                        break 'rows;
-                    }
-                    propagated = true;
-                }
+            if !lone {
+                continue 'rows;
             }
+
+            let lit = if parity { (p + 1) as Lit } else { -((p + 1) as Lit) };
+            let mut buf = std::mem::take(&mut self.xor_reason[p as usize]);
+            let mask = std::mem::take(&mut self.matrix[i].mask);
+            self.write_xor_reason(&mask, Some(lit), &mut buf);
+            self.matrix[i].mask = mask;
+            self.xor_reason[p as usize] = buf;
+            self.stats.xor_propagations += 1;
+            if self.enqueue(lit, Reason::XorPropagated).is_err() {
+                // Unreachable while the invariant holds — the pivot was
+                // unassigned — but treat it as a conflict rather than
+                // silently dropping an implication.
+                std::mem::swap(&mut self.xor_conflict, &mut self.xor_reason[p as usize]);
+                self.stats.xor_conflicts += 1;
+                return XorStep::Conflict;
+            }
+            propagated = true;
         }
 
-        self.xor_scratch = rows; // hand the buffers back for next time
         match step {
             XorStep::Conflict => XorStep::Conflict,
-            _ if propagated => XorStep::Propagated,
+            _ if propagated => {
+                step = XorStep::Propagated;
+                step
+            }
             _ => XorStep::Fixpoint,
         }
+    }
+
+    /// Reset the working matrix to the original rows, dropping every
+    /// pivot assignment.  The next pass re-eliminates from scratch.
+    ///
+    /// Row operations are never undone, so the matrix accumulates
+    /// fill-in over a long solve: rows drift denser, which lengthens
+    /// the reason clauses read off them.  Rebuilding at restarts, where
+    /// the trail is empty anyway, bounds that drift.
+    fn rebuild_matrix(&mut self) {
+        self.matrix.clear();
+        self.matrix.extend_from_slice(&self.xors);
+        self.pivot.clear();
+        self.pivot.resize(self.matrix.len(), None);
+    }
+
+    /// `rhs ⊕ parity(assigned-true variables of the row)` — zero when a
+    /// fully assigned row is satisfied.
+    fn row_residual(&self, i: usize) -> bool {
+        let mut parity = self.matrix[i].rhs;
+        for (w, &m) in self.matrix[i].mask.iter().enumerate() {
+            if m != 0 {
+                parity ^= ((m & self.assigned_w[w] & self.value_w[w]).count_ones() & 1) == 1;
+            }
+        }
+        parity
     }
 
     /// Lowest-numbered unassigned variable in `mask`, if any.
@@ -1122,6 +1211,12 @@ impl Solver {
                     self.backjump(0);
                     self.stats.restarts += 1;
                     self.conflicts_since_restart = 0;
+                    // Level 0: a good moment to shed accumulated
+                    // fill-in in the parity matrix.
+                    if !self.xors.is_empty() {
+                        self.rebuild_matrix();
+                        self.xor_epoch = u64::MAX;
+                    }
                     let learnt_now = self.clauses.len() - self.n_orig_clauses;
                     if learnt_now > self.max_learnts {
                         self.reduce_db();
@@ -1429,6 +1524,151 @@ mod tests {
         let m = s.model();
         assert_eq!((m[0], m[1], m[2]), (true, true, true));
         assert!(s.check_xors(&m));
+    }
+
+    /// **The incremental matrix must lose nothing.**
+    ///
+    /// The whole design rests on one claim: with every row carrying an
+    /// unassigned pivot that occurs in no other row, a per-row check
+    /// finds every implication that re-running Gaussian elimination
+    /// would.  This tests that claim directly rather than trusting the
+    /// argument — for random systems under random partial assignments,
+    /// the solver's implications are compared against an oracle that
+    /// eliminates from scratch every time.
+    ///
+    /// A silent incompleteness here would show up as a missed
+    /// propagation, not a crash, so it is worth checking explicitly.
+    #[test]
+    fn incremental_matrix_matches_full_elimination() {
+        let n_vars = 12u32;
+        let mut state = 0xD1B5_4A32_D192_ED03u64;
+        let mut next = || {
+            state ^= state >> 12;
+            state ^= state << 25;
+            state ^= state >> 27;
+            state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+        };
+
+        /// Oracle: full Gauss-Jordan from scratch, returning every
+        /// variable the system forces under `fixed`, with its value.
+        fn oracle(
+            rows: &[(Vec<u32>, bool)],
+            fixed: &[Option<bool>],
+            n_vars: u32,
+        ) -> Option<Vec<(u32, bool)>> {
+            // Dense F2 elimination over the unassigned columns.
+            let mut m: Vec<(Vec<bool>, bool)> = rows
+                .iter()
+                .map(|(vars, rhs)| {
+                    let mut row = vec![false; n_vars as usize];
+                    let mut r = *rhs;
+                    for &v in vars {
+                        let idx = (v - 1) as usize;
+                        match fixed[idx] {
+                            Some(true) => r = !r,
+                            Some(false) => {}
+                            None => row[idx] ^= true,
+                        }
+                    }
+                    (row, r)
+                })
+                .collect();
+            // Row-reduce.
+            let mut pivot_row = 0usize;
+            for col in 0..n_vars as usize {
+                let Some(sel) = (pivot_row..m.len()).find(|&r| m[r].0[col]) else {
+                    continue;
+                };
+                m.swap(pivot_row, sel);
+                for r in 0..m.len() {
+                    if r != pivot_row && m[r].0[col] {
+                        let (src, rhs) = (m[pivot_row].0.clone(), m[pivot_row].1);
+                        for c in 0..n_vars as usize {
+                            m[r].0[c] ^= src[c];
+                        }
+                        m[r].1 ^= rhs;
+                    }
+                }
+                pivot_row += 1;
+            }
+            let mut implied = Vec::new();
+            for (row, rhs) in &m {
+                let set: Vec<usize> = (0..n_vars as usize).filter(|&c| row[c]).collect();
+                match set.len() {
+                    0 => {
+                        if *rhs {
+                            return None; // inconsistent
+                        }
+                    }
+                    1 => implied.push((set[0] as u32 + 1, *rhs)),
+                    _ => {}
+                }
+            }
+            implied.sort();
+            Some(implied)
+        }
+
+        for trial in 0..300 {
+            let n_rows = 2 + (next() % 6) as usize;
+            let rows: Vec<(Vec<u32>, bool)> = (0..n_rows)
+                .map(|_| {
+                    let mut vars: Vec<u32> = (1..=n_vars).filter(|_| next() % 3 != 0).collect();
+                    if vars.is_empty() {
+                        vars.push(1);
+                    }
+                    (vars, next() % 2 == 0)
+                })
+                .collect();
+
+            // A random partial assignment, installed as unit clauses so
+            // the solver reaches it by propagation at level 0.
+            let mut fixed: Vec<Option<bool>> = vec![None; n_vars as usize];
+            let mut units: Vec<Lit> = Vec::new();
+            for v in 1..=n_vars {
+                if next() % 3 == 0 {
+                    let val = next() % 2 == 0;
+                    fixed[(v - 1) as usize] = Some(val);
+                    units.push(if val { v as Lit } else { -(v as Lit) });
+                }
+            }
+
+            let want = oracle(&rows, &fixed, n_vars);
+
+            let mut s = Solver::new(n_vars);
+            let mut trivial_unsat = false;
+            for (vars, rhs) in &rows {
+                if !s.add_xor(vars, *rhs) {
+                    trivial_unsat = true;
+                }
+            }
+            for u in &units {
+                if !s.add_clause(vec![*u]) {
+                    trivial_unsat = true;
+                }
+            }
+            // Drive propagation to fixpoint at level 0 without deciding.
+            let conflicted = trivial_unsat || s.propagate_to_fixpoint_for_test();
+
+            match want {
+                None => assert!(
+                    conflicted,
+                    "trial {trial}: elimination says inconsistent, solver did not notice"
+                ),
+                Some(implied) => {
+                    assert!(
+                        !conflicted,
+                        "trial {trial}: solver reported a conflict where none exists"
+                    );
+                    for (v, val) in implied {
+                        assert_eq!(
+                            s.value_of_for_test(v),
+                            Some(val),
+                            "trial {trial}: variable {v} should have been forced to {val}"
+                        );
+                    }
+                }
+            }
+        }
     }
 
     /// **Differential test against brute force.**  Random dense parity

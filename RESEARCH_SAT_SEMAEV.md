@@ -72,8 +72,8 @@ multiplication.
 ## Making it fast
 
 The first working version decided one `n = 19` instance in **231 s**.
-The whole eleven-instance `n19l6` family now takes **50.4 s**, median
-**4.7 s** — about **50× per instance**.  Five changes, in the order
+The whole eleven-instance `n19l6` family now takes **22.8 s**, median
+**2.0 s** — about **115× per instance**.  Six changes, in the order
 they mattered:
 
 ### 1. Branch only on the free variables
@@ -117,7 +117,37 @@ rewritten in place (`Reason::XorPropagated`), and learnt clauses are
 periodically forgotten (`Solver::reduce_db`, detaching from the watch
 lists so every stored index stays valid).
 
-### 5. Data-structure work
+### 5. An incremental Gauss-Jordan matrix
+
+The elimination pass used to be redone from scratch at every
+propagation fixpoint, `O(rows² × words)` a time.  It is now carried
+across propagations, and only rows whose pivot has since been assigned
+are re-pivoted.
+
+What makes per-row reasoning safe is one invariant:
+
+> every row has a **pivot** variable that is unassigned and occurs in
+> no other row.
+
+Restricted to the unassigned columns the matrix is then `[I | B]` after
+permutation, so a sum of `k` rows still contains all `k` of their
+distinct pivots.  A combination can be unit only for `k = 1`, and
+inconsistent only if a single row is already fully assigned — exactly
+what a per-row check finds.  Nothing is lost by not re-eliminating.
+
+Two consequences fall out.  Row operations are algebraically valid
+whatever the trail says, so they are never undone; and backjumping only
+*unassigns* variables, which cannot break the invariant, so it costs no
+work at all.  The matrix is rebuilt from the original rows at restarts,
+which bounds the fill-in that row operations accumulate.
+
+Worth **2.4×** at `n = 19` and growing with the instance — the removed
+cost is quadratic in the row count.  `incremental_matrix_matches_full_elimination`
+checks the completeness claim directly against a from-scratch
+elimination oracle, over 300 random systems under random partial
+assignments, rather than trusting the argument.
+
+### 6. Data-structure work
 
 A position-tracked activity heap instead of a linear scan over every
 variable per decision; `analyze` scratch reused rather than reallocated
@@ -132,21 +162,33 @@ read-off is `mask & !assigned` plus a popcount — `O(words)` instead of
 times swing by an order of magnitude on search-trajectory luck, so a
 single instance measures nothing.  (An early single-instance reading
 suggested symmetry breaking *hurt*; across ten instances it is a clean
-4.8× win.  Worth remembering before drawing a conclusion from one
+3× win.  Worth remembering before drawing a conclusion from one
 number.)
 
 | family | symmetry | instances | total | median | conflicts |
 |---|---|---:|---:|---:|---:|
-| `n15l5` | off | 10 | 6.4 s | 363 ms | 79 368 |
-| `n15l5` | on | 10 | 2.3 s | 288 ms | 33 119 |
-| `n17l6` | off | 10 | 108.7 s | 5.4 s | 448 043 |
-| `n17l6` | on | 10 | 24.4 s | 2.5 s | 197 862 |
-| `n19l6` | off | 11 | 439.2 s | 21.5 s | 1 192 475 |
-| `n19l6` | on | 11 | 50.4 s | 4.7 s | 315 352 |
+| `n15l5` | off | 10 | 5.5 s | 582 ms | 93 593 |
+| `n15l5` | on | 10 | 1.8 s | 192 ms | 33 974 |
+| `n17l6` | off | 10 | 67.0 s | 6.0 s | 467 663 |
+| `n17l6` | on | 10 | 13.9 s | 1.4 s | 156 612 |
+| `n19l6` | off | 11 | 209.8 s | 8.5 s | 1 012 122 |
+| `n19l6` | on | 11 | 22.8 s | 2.0 s | 253 496 |
 
 `n19l6` has eleven satisfiable instances rather than ten because one
 upstream `-U` instance is misannotated; the corpus records that, so it
 falls into the SAT set automatically.
+
+### Where the time went
+
+Median solve on an `n = 19` instance, one change at a time:
+
+| after | median | vs. previous |
+|---|---:|---:|
+| first working version | 231 s | — |
+| free-variable branching, heaps, reused scratch | ~21 s | 11× |
+| learnt-clause minimization | — | folded in below |
+| symmetry breaking | 4.7 s | 4.5× |
+| incremental Gauss matrix | **2.0 s** | 2.4× |
 
 Encoding size, `n = 19, l = 6`, symmetry breaking off:
 
@@ -217,19 +259,27 @@ Worth singling out:
   generator planted.
 - `s4_encoding_size_matches_upstream_generator` — the clause-exact
   agreement described above.
+- `incremental_matrix_matches_full_elimination` — 300 random parity
+  systems under random partial assignments; every implication the
+  incremental matrix derives is compared against an oracle that
+  re-eliminates from scratch.  This is the test that guards the
+  completeness argument above, and it is worth having: a gap there
+  would surface as a missed propagation, not a crash.
 - `corpus_labels_match_exhaustive_search` (ignored) — re-derives the
   mislabelling audit in Rust.
 
 ## What's still open
 
-- **The Gauss-Jordan pass is still rebuilt from scratch** at every
-  propagation fixpoint, `O(rows² × words)` a time.  The parity analogue
-  of two-watched-literals — an incremental matrix carrying two watched
-  *unassigned* variables per row, which is what CryptoMiniSat actually
-  does — would avoid re-eliminating altogether.  This is the clear next
-  optimisation and probably still worth a large constant factor: `n = 19`
-  encodes in 13 ms and solves in seconds, so the time is all in search
-  and propagation.
+- **Re-pivoting is still eager.**  When a pivot is assigned the row
+  immediately looks for a replacement, where CryptoMiniSat watches two
+  unassigned variables per row and only acts when *both* are gone.
+  Watching would cut the remaining per-pass `O(rows)` scan to work
+  proportional to the rows actually touched.
+- **Fill-in is only bounded at restarts.**  Row operations make the
+  matrix denser over time, which lengthens the reason clauses read off
+  it.  Choosing pivots to minimise fill-in (the Markowitz rule from
+  sparse LU) would keep rows shorter than picking the lowest-numbered
+  unassigned variable does.
 - **`S₄` is specialised to `b = 1`** — the Koblitz curve
   `y² + xy = x³ + x² + 1`.  `S₄` does not depend on `a₂`, but it does
   depend on `b`, and the `b`-powers are folded into the twelve
