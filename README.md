@@ -375,6 +375,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
 | `cryptanalysis::ec_index_calculus`           | Semaev S₃ index calculus on prime-field curves          |
 | `cryptanalysis::ec_index_calculus_j0`        | ζ-orbit-reduced IC on j=0 curves + Eisenstein-smooth FB |
+| `cryptanalysis::koblitz_index_calculus`      | Frobenius-invariant-factor-base IC on Koblitz curves (GGMP) |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
