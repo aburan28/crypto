@@ -613,6 +613,45 @@ def mergeCorpus(curve=131):
             "collisionCount": len(dup)}
 
 
+@app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
+def solveCorpus(curve=131):
+    """Recover the logarithm from a collision spanning several corpora.
+
+    mergeCorpus reports that two seeds reached the same orbit; it does not say
+    what k is, and a campaign that ends with collisionCount 1 and no answer has
+    not finished.  The client already knows how: --load rebuilds the store from
+    the corpora, and a collision found during that reload is rewalked from both
+    seeds and solved on the spot.  Nothing here needs a GPU -- rewalking two
+    walks is cheap -- so this runs the host build and the whole thing costs a
+    container without a card.
+
+    The one thing that must not be inherited from the search is --load-max: the
+    cap exists to keep a long collection run inside memory, and here the point
+    is to hold the entire corpus at once, because the colliding pair is exactly
+    what a cap might drop."""
+    files = corpusFiles(curve)
+    if not files:
+        return {"error": "no distinguished points yet"}
+    cmd = ("./ecc2k130-cpu --curve %d --threads 1 --steps 1 --launches 1 "
+           "--verify 0 --run-id 65535" % curve)
+    for f in files:
+        cmd += " --load %s" % f
+    rc, out = sh(cmd, timeout=4 * HOUR - 60)
+    k = None
+    verified = False
+    matches = None
+    for line in out.splitlines():
+        t = line.strip()
+        if t.startswith("k = "):
+            k = t[4:].strip()
+        if "verified [k]P == Q" in t:
+            verified = True
+        if "matches the published solution:" in t:
+            matches = t.split(":")[-1].strip()
+    return {"files": len(files), "k": k, "verified": verified,
+            "matchesPublished": matches, "tail": out.strip()[-1500:]}
+
+
 # ---------------------------------------------------------------------------
 @app.local_entrypoint()
 def validate(gpu: str = ""):
@@ -664,5 +703,10 @@ def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
 
 
 @app.local_entrypoint()
-def merge(curve: int = 131):
-    print(json.dumps(mergeCorpus.remote(curve=curve), indent=2))
+def merge(curve: int = 131, solve: bool = True):
+    """Scan the corpora for collisions, and recover k when one is there."""
+    r = mergeCorpus.remote(curve=curve)
+    print(json.dumps(r, indent=2))
+    if solve and r.get("collisionCount"):
+        print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
+        print(json.dumps(solveCorpus.remote(curve=curve), indent=2))
