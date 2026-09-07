@@ -4,6 +4,7 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::bench
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::autolab    # no GPU, picks candidates
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::autotune   # measures them
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::campaign   # both, in one call
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
 
@@ -336,6 +337,41 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
         json.dump(report, fh, indent=2)
     volume.commit()
     return report
+
+
+@app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
+def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
+               minBlocksList="1,2,3,4", leaves="0,9,17,33,66", arch="", top=6):
+    """Search the build space offline, on a CPU container, and return a shortlist.
+
+    ptxas is deterministic and needs no device, so registers, spill traffic and
+    the occupancy that follows from them are all measurable without renting a
+    GPU -- and this image already carries nvcc and ptxas for the real build.
+    What it cannot measure is time, so it produces the few configurations worth
+    running through ::autotune rather than a verdict.
+
+    The metric cache lives in the volume keyed by architecture, so a second run
+    only compiles what the first one did not."""
+    arch = arch or (BAKED_ARCHES[0] if len(BAKED_ARCHES) == 1 else "90")
+    os.makedirs("/data/autolab", exist_ok=True)
+    out = f"/data/autolab/sm{arch}.json"
+    rc, log = sh(
+        f"python3 autolab.py --compiler nvcc --cuda-path=/usr/local/cuda "
+        f"--ptxas=/usr/local/cuda/bin/ptxas --arch={arch} --batch {batches} "
+        f"--threads {threadCounts} --min-blocks {minBlocksList} --leaf {leaves} "
+        f"--top {top} --out {out}",
+        cwd=f"{REMOTE}/codegen",
+        timeout=4 * HOUR - 600,
+    )
+    volume.commit()
+    # The front is the product, so read it back rather than scraping the log.
+    front, configs = [], ""
+    if os.path.exists(out):
+        with open(out) as fh:
+            saved = json.load(fh)
+        front, configs = saved.get("front", []), saved.get("configs", "")
+    return {"arch": arch, "returncode": rc, "cache": out, "front": front,
+            "configs": configs, "log": log}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -723,8 +759,8 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
 
 
 @app.local_entrypoint()
-def autolab(batches: str = "8", thread_counts: str = "64,128,256",
-            min_blocks_list: str = "1,2,3,4", leaves: str = "0,17",
+def autolab(batches: str = "4,8,16,32", thread_counts: str = "64,128,256",
+            min_blocks_list: str = "1,2,3,4", leaves: str = "0,9,17,33,66",
             arch: str = "", top: int = 6):
     """Offline build-space search.  No GPU is rented; ptxas does not need one."""
     r = runAutolab.remote(batches=batches, threadCounts=thread_counts,
@@ -732,6 +768,29 @@ def autolab(batches: str = "8", thread_counts: str = "64,128,256",
                           arch=arch, top=top)
     print(r["log"])
     print("cache: %s (in the ecc2k130 volume)" % r["cache"])
+
+
+@app.local_entrypoint()
+def campaign(gpu: str = "", batches: str = "4,8,16,32",
+             thread_counts: str = "64,128,256", min_blocks_list: str = "1,2,3,4",
+             leaves: str = "0,9,17,33,66", top: int = 6, arch: str = ""):
+    """Offline search, then measure its Pareto front on the card.
+
+    The two halves are the point: the CPU container maps the whole space for
+    the price of compile time, and the GPU only ever runs the handful of builds
+    that survived.  Nothing here decides a winner offline -- the ranking that
+    comes out of the search is a proxy, and the rates that come out of the
+    measurement are the result."""
+    r = runAutolab.remote(batches=batches, threadCounts=thread_counts,
+                          minBlocksList=min_blocks_list, leaves=leaves,
+                          arch=arch, top=top)
+    print(r["log"])
+    if not r["configs"]:
+        print("the offline search produced no front; not renting a GPU")
+        return
+    print("measuring %d builds on a GPU: %s\n" % (len(r["front"]), r["configs"]))
+    m = onGpu(runAutotune, gpu).remote(configs=r["configs"])
+    print(json.dumps(m, indent=2))
 
 
 @app.local_entrypoint()

@@ -30,6 +30,12 @@ uses no architecture-specific instructions, and unsound in general.  Prefer nvcc
 where it exists; `modal run modal_app.py::autolab` runs it in a CPU container
 that has one.
 
+One axis deliberately absent: ptxas --maxrregcount.  It was measured against
+__launch_bounds__ at 255, 168, 128, 80 and 64 registers and produced
+byte-identical spill counts at every one, so it is the same lever reached by a
+different spelling, not a second dimension.  The kernel always carries launch
+bounds, which take precedence over the flag anyway.
+
 No type hints, camelCase identifiers, no itertools (project convention).
 """
 
@@ -203,6 +209,27 @@ def bindingBound(r):
     return r['minBlocks'] * r['threads'] > REGS_PER_SM // 255
 
 
+def planConfigs(leaves, batches, threadList, minBlocks, prune):
+    """The builds to compile, with the ones that cannot differ left out.
+
+    A launch bound below about 257 total threads does not constrain the
+    allocator, so every minBlocks at that block size compiles to the same
+    binary.  Compiling all of them costs 23 seconds each to rediscover that.
+    Keep the smallest as the baseline for that block size and drop the rest."""
+    out = []
+    for leaf in leaves:
+        for batch in batches:
+            for threads in threadList:
+                seenLoose = False
+                for mb in minBlocks:
+                    if prune and not bindingBound({'minBlocks': mb, 'threads': threads}):
+                        if seenLoose:
+                            continue
+                        seenLoose = True
+                    out.append((leaf, batch, threads, mb))
+    return out
+
+
 def dedupe(rows):
     """Collapse configurations that compiled to the same thing."""
     seen = {}
@@ -326,10 +353,10 @@ def selfTest():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--batch', default='8,32')
+    ap.add_argument('--batch', default='4,8,16,32')
     ap.add_argument('--threads', default='64,128,256')
     ap.add_argument('--min-blocks', default='1,2,3,4')
-    ap.add_argument('--leaf', default='0,17',
+    ap.add_argument('--leaf', default='0,9,17,33,66',
                     help='generated leaf sizes; 0 means the register-budget choice')
     ap.add_argument('--regs', type=int, default=255)
     ap.add_argument('--arch', default='120')
@@ -340,6 +367,9 @@ def main():
                     help='auto picks nvcc when --cuda-path has one')
     ap.add_argument('--out', default='autolab.json')
     ap.add_argument('--top', type=int, default=6)
+    ap.add_argument('--no-prune', action='store_true',
+                    help='compile every combination, including the ones whose '
+                         'launch bound cannot bind and so cannot differ')
     ap.add_argument('--self-test', action='store_true',
                     help='check the PTX extraction against a fixture and exit')
     args = ap.parse_args()
@@ -369,50 +399,52 @@ def main():
         else:
             print('%s came from a different build of this tool; recompiling' % args.out)
 
-    total = len(batches) * len(threadList) * len(minBlocks) * len(leaves)
+    plan = planConfigs(leaves, batches, threadList, minBlocks, not args.no_prune)
+    total = len(plan)
+    full = len(leaves) * len(batches) * len(threadList) * len(minBlocks)
+    if total < full:
+        print('%d builds (%d of the %d in the cross product cannot differ from one '
+              'already in it)' % (total, full - total, full))
     print('%d configurations, about %.0f min at 23 s each' % (total, total * 23 / 60.0))
     rows = []
     n = 0
     curLeaf = None
-    for leaf in leaves:
+    for leaf, batch, threads, mb in plan:
         if leaf != curLeaf:
             ok, out = regenerate(leaf, args.regs, args.cuda_path)
             if not ok:
                 print('generator failed for leaf %d: %s' % (leaf, out[-300:]))
                 continue
             curLeaf = leaf
-        for batch in batches:
-            for threads in threadList:
-                for mb in minBlocks:
-                    n += 1
-                    key = '%d/%d/%d/%d' % (leaf, batch, threads, mb)
-                    if key in cache:
-                        rows.append(cache[key])
-                        print('[%d/%d] %-16s cached' % (n, total, key), flush=True)
-                        continue
-                    t0 = time.time()
-                    got, err = compile(batch, threads, mb, args.arch, args.cuda_path,
-                                       args.ptxas, args.clang, compiler)
-                    if err:
-                        print('[%d/%d] %-16s FAILED %s' % (n, total, key, err[:80]), flush=True)
-                        continue
-                    met = parseMetrics(got[0], got[1], threads)
-                    if met is None:
-                        print('[%d/%d] %-16s no walk kernel in the log' % (n, total, key), flush=True)
-                        continue
-                    met.update({'leaf': leaf, 'batch': batch, 'threads': threads,
-                                'minBlocks': mb, 'seconds': round(time.time() - t0, 1)})
-                    met['cost'] = round(heuristicCost(met), 1)
-                    rows.append(met)
-                    cache[key] = met
-                    json.dump({'schema': CACHE_SCHEMA, 'compiler': compiler,
-                               'arch': args.arch, 'rows': cache},
-                              open(args.out, 'w'), indent=1)
-                    print('[%d/%d] %-16s regs %3d  warps/SM %2d  instrs %6d  '
-                          'spill %5dB  local %5d  cost %7.1f'
-                          % (n, total, key, met['registers'], met['warpsPerSM'],
-                             met['walkInstrs'], met['spillBytes'],
-                             met['walkLocalOps'], met['cost']), flush=True)
+        n += 1
+        key = '%d/%d/%d/%d' % (leaf, batch, threads, mb)
+        if key in cache:
+            rows.append(cache[key])
+            print('[%d/%d] %-16s cached' % (n, total, key), flush=True)
+            continue
+        t0 = time.time()
+        got, err = compile(batch, threads, mb, args.arch, args.cuda_path,
+                           args.ptxas, args.clang, compiler)
+        if err:
+            print('[%d/%d] %-16s FAILED %s' % (n, total, key, err[:80]), flush=True)
+            continue
+        met = parseMetrics(got[0], got[1], threads)
+        if met is None:
+            print('[%d/%d] %-16s no walk kernel in the log' % (n, total, key), flush=True)
+            continue
+        met.update({'leaf': leaf, 'batch': batch, 'threads': threads,
+                    'minBlocks': mb, 'seconds': round(time.time() - t0, 1)})
+        met['cost'] = round(heuristicCost(met), 1)
+        rows.append(met)
+        cache[key] = met
+        json.dump({'schema': CACHE_SCHEMA, 'compiler': compiler,
+                   'arch': args.arch, 'rows': cache},
+                  open(args.out, 'w'), indent=1)
+        print('[%d/%d] %-16s regs %3d  warps/SM %2d  instrs %6d  '
+              'spill %5dB  local %5d  cost %7.1f'
+              % (n, total, key, met['registers'], met['warpsPerSM'],
+                 met['walkInstrs'], met['spillBytes'],
+                 met['walkLocalOps'], met['cost']), flush=True)
 
     if not rows:
         print('nothing measured')
@@ -442,6 +474,11 @@ def main():
     short = front[:args.top]
     plan = ','.join('%d:%d:%d:%d' % (r['leaf'], r['batch'], r['threads'], r['minBlocks'])
                     for r in short)
+    # The front is the product, so write it where a caller can pick it up
+    # rather than making them scrape it back out of this output.
+    json.dump({'schema': CACHE_SCHEMA, 'compiler': compiler, 'arch': args.arch,
+               'rows': cache, 'front': short, 'configs': plan},
+              open(args.out, 'w'), indent=1)
     print('\nMeasure these %d builds on a GPU -- the ranking above is a proxy, '
           'not a result:' % len(short))
     print('  modal run modal_app.py::autotune --configs %s' % plan)

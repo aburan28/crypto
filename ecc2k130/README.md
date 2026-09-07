@@ -479,6 +479,25 @@ modal run modal_app.py::autolab
 runs it in a CPU container that already has nvcc, and caches its metrics in the
 volume so a second run only compiles what the first one did not.
 
+To do both halves in one call -- map the space on a CPU container, then measure
+only the survivors on a card:
+
+```
+ECC_GPU=RTX-PRO-6000 modal run modal_app.py::campaign
+```
+
+The search skips combinations it can prove cannot differ. A launch bound below
+about 257 total threads does not constrain the allocator, so every `minBlocks`
+at that block size compiles to the same binary; keeping one baseline per block
+size and dropping the rest cuts a leaf-and-batch sweep by a third at no cost to
+the front.
+
+One axis is deliberately absent. `ptxas --maxrregcount` was measured against
+`__launch_bounds__` at 255, 168, 128, 80 and 64 registers and gave
+byte-identical spill counts at every one -- it is the same lever under a
+different name, not a second dimension, and the kernel always carries launch
+bounds, which take precedence over the flag anyway.
+
 It does not pick a winner, because the thing that decides one is wall-clock and
 that is exactly what it cannot measure. What it produces is the Pareto front on
 occupancy against instructions against traffic, and a ready-to-run `autotune`
