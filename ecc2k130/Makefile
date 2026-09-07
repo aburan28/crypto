@@ -72,6 +72,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 # catches is otherwise invisible until someone runs that entry point.
 check-cli:
 	python3 codegen/checkcli.py modal_app.py
+	python3 codegen/autolab.py --self-test
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
@@ -89,10 +90,12 @@ rehearse: ecc2k130-cpu
 # Offline search over the build space against ptxas output, which needs no GPU.
 # It ranks nothing it can measure the speed of -- it produces the few
 # configurations worth spending GPU time on, for `modal run
-# modal_app.py::autotune` to actually measure.  Same toolchain as check-cuda.
+# modal_app.py::autotune` to actually measure.  Uses nvcc when CUDAPATH has one
+# and the check-cuda clang route when it does not; `modal run
+# modal_app.py::autolab` runs the same search in a CPU container that has nvcc.
 autolab:
 	cd codegen && python3 autolab.py --cuda-path=$(CUDAPATH) --ptxas=$(PTXAS) \
-	    --arch=$(patsubst sm_%,%,$(SMARCH))
+	    --clang=$(CLANG) --arch=$(patsubst sm_%,%,$(SMARCH))
 
 test: check-cli ecc2k130-cpu
 	./ecc2k130-cpu --test

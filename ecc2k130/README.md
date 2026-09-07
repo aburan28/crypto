@@ -460,10 +460,24 @@ printed as it happens.
 ## Searching the build space offline
 
 `make autolab` sweeps leaf size, block size, batch and the occupancy target,
-compiles each with clang and ptxas, and reports what it can see without a GPU:
-registers, spill traffic, stack frame, instruction mix, and the occupancy that
-follows from them. It needs no card -- ptxas is deterministic -- and the same
-pip-supplied toolchain as `check-cuda`.
+compiles each, and reports what it can see without a GPU: registers, spill
+traffic, stack frame, instruction mix, and the occupancy that follows from them.
+It needs no card, because ptxas is deterministic.
+
+Two ways to get the PTX. With a CUDA toolkit installed it uses `nvcc -ptx` for
+the target architecture directly. Without one it falls back to clang against a
+CUDA include tree -- the same pip-supplied toolchain as `check-cuda` -- and,
+because clang 18 will not emit sm_120, compiles for sm_90 and rewrites the PTX
+header before ptxas sees it. That is sound for this kernel, which uses no
+architecture-specific instructions, and unsound in general. There is also no
+need to install anything locally:
+
+```
+modal run modal_app.py::autolab
+```
+
+runs it in a CPU container that already has nvcc, and caches its metrics in the
+volume so a second run only compiles what the first one did not.
 
 It does not pick a winner, because the thing that decides one is wall-clock and
 that is exactly what it cannot measure. What it produces is the Pareto front on
@@ -481,6 +495,25 @@ Treat its ranking as a shortlist and never as a result. The register-budget
 leaf in this repo is a live example of why: every static metric preferred it,
 and the only hardware available measured it slower, for a reason -- register
 file size -- that does not apply to the target.
+
+Three things it took a wrong answer to get right, none of which failed loudly.
+
+It counts the call closure of the walk kernel, not the entry function: the
+multiplier is `__noinline__`, so an entry-only count reported the same
+instruction total for every leaf size and was blind to the one knob most worth
+turning. It counts statements rather than indented lines, because PTX writes a
+call's arguments one per line, and counting those charges a build in proportion
+to how many calls it makes -- again the thing being compared. And it collapses
+builds that compiled to the same thing: occupancy here is register-limited -- an
+SM has 65536 registers, so resident warps are 2048/registers and the block size
+does not enter -- which means `__launch_bounds__` does not bind at all until
+`minBlocks * threads` passes about 257. Below that every `minBlocks` produces an
+identical binary, and a Pareto front that does not notice fills with copies of
+one configuration.
+
+All three are now pinned by a fixture test over a small hand-written PTX module,
+run by `make check-cli`, so the extraction cannot drift back to plausible wrong
+numbers unnoticed.
 
 ## Persistence
 
