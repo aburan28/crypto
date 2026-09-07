@@ -159,8 +159,12 @@ def runValidate():
     ok = True
     # A small curve reaches a collision almost immediately, so keep the walk
     # count modest: a million walks would overrun the report buffer on the
-    # first launch and throw most of the points away.
-    for curve, instances, threads, steps in (("23", 4, 256, 8), ("41", 4, 2048, 32)):
+    # first launch and throw most of the points away.  Curves 19 and 13 have no
+    # normal basis, so they exercise the polynomial-basis backend that ECC2K-95
+    # depends on; curve 41 is solved through both backends.
+    for curve, instances, threads, steps in (("23", 4, 256, 8), ("19", 4, 256, 8),
+                                             ("13", 2, 128, 4), ("41", 4, 2048, 32),
+                                             ("41 --poly-basis", 4, 2048, 32)):
         for i in range(instances):
             rc, t = sh(
                 f"./ecc2k130 --curve {curve} --instance {i} --threads {threads} "
@@ -171,6 +175,16 @@ def runValidate():
             ok = ok and good
             out.append(f"curve {curve} instance {i}: " + ("; ".join(line) if line else t.strip()[-200:]))
     out.append("GPU END TO END: " + ("all instances solved" if ok else "FAILED"))
+
+    # ECC2K-95 itself: no collision in a short run, but the reports have to be
+    # reproducible from their seeds, which is what the server depends on.
+    rc, t = sh("./ecc2k130 --curve 97 --dp-weight 36 --threads 4096 --steps 16 "
+               "--launches 4 --dp-cap 262144 --verify 16", timeout=1800)
+    out.append("\n--- ECC2K-95 reporting path ---")
+    out.append("\n".join(t.strip().splitlines()[-3:]))
+    if "MISMATCH" in t:
+        out.append("ECC2K-95 REPORTS DID NOT REPRODUCE")
+        ok = False
     return "\n".join(out)
 
 
