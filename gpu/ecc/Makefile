@@ -24,7 +24,7 @@ GEN := curve_secp256k1.h curve_toy40.h \
 
 TESTS := test_secp_fast test_secp_mont test_toy_mont
 
-.PHONY: all test bench clean gen
+.PHONY: all test bench clean gen ptxcheck
 all: test
 
 gen: $(GEN)
@@ -58,9 +58,15 @@ test_toy_mont: test_cpu.cpp $(HDRS) curve_toy40.h vec_toy40_mont.h
 	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy40.h"' \
 	  -DGPU_ECC_VECTORS_HEADER='"vec_toy40_mont.h"' -DFP_FAST=0 -o $@ $<
 
-test: $(TESTS)
+test: $(TESTS) ptxcheck
 	@rc=0; for t in $(TESTS); do \
 	  echo "=== ./$$t ==="; ./$$t || rc=1; done; exit $$rc
+
+# Differentially test the FP_PTX inline assembly against the portable path
+# by interpreting it.  Needs no GPU; does not replace ./bench selftest.
+ptxcheck: fp256.cuh ptx_asm_check.py
+	@echo "=== ptx_asm_check ==="
+	@python3 ptx_asm_check.py
 
 bench: bench.cu $(HDRS) kernels.cuh curve_secp256k1.h
 	$(NVCC) $(NVCCFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -o $@ $<

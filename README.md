@@ -702,6 +702,8 @@ the pure-Python oracle in `gpu/ecc/ecref.py`:
 
 ```bash
 # CUDA kernels — arithmetic verified on the CPU, no GPU required
+# (also interprets the FP_PTX inline assembly and checks it against the
+#  portable path, which the host would otherwise never execute)
 cd gpu/ecc && make test
 
 # static instruction-count and occupancy analysis for Hopper / Blackwell

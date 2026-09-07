@@ -29,11 +29,13 @@ though — see "How this is tested" below.
 | `bench.cu` | Device driver: self-test against the host, microbenchmarks, rho runner |
 | `test_cpu.cpp` | Verification harness — compiles the `.cuh` headers with g++ |
 | `ptx_stats.sh` | Static instruction/occupancy analysis with no GPU present |
+| `ptx_asm_check.py` | Interprets the `FP_PTX` inline assembly and checks it against the portable path |
 
 ## Build and test
 
 ```bash
-make test          # generate headers, build and run three CPU test suites
+make test          # three CPU test suites, plus the inline-asm check
+make ptxcheck      # just the inline-asm check
 make bench         # CUDA benchmark binary (needs nvcc)
 make bench ARCH=sm_100    # datacenter Blackwell; sm_120 for RTX 50-series
 ```
@@ -47,9 +49,19 @@ configurations:
 | `test_secp_mont` | secp256k1 | Montgomery | the generic path on the same curve |
 | `test_toy_mont` | 40-bit toy, a ≠ 0 | Montgomery | generic doubling, and an end-to-end DLP solve |
 
+`make test` also runs `ptx_asm_check.py`, which covers the one thing the
+C++ suites structurally cannot: the `FP_PTX` inline assembly is guarded on
+`__CUDA_ARCH__`, so the host never executes it. The script parses those
+`asm(...)` blocks out of `fp256.cuh`, interprets them, and checks all seven
+against the portable branch of the same function. It establishes that the
+carry chains and operand numbering are right; it says nothing about
+register allocation or real device behaviour.
+
 On a GPU, start with `./bench selftest`: it runs every kernel and compares
 the results against the same host code the CPU suites verify, including the
-full rho walk state after 64 batched iterations.
+full rho walk state after 64 batched iterations. Built with `-DFP_PTX=1`
+that is also the differential test the assembly ultimately needs, and the
+only one that closes the gap the script leaves open.
 
 ## How this is tested
 
