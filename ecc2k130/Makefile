@@ -86,6 +86,14 @@ test-decomp:
 rehearse: ecc2k130-cpu
 	./rehearse.sh
 
+# Offline search over the build space against ptxas output, which needs no GPU.
+# It ranks nothing it can measure the speed of -- it produces the few
+# configurations worth spending GPU time on, for `modal run
+# modal_app.py::autotune` to actually measure.  Same toolchain as check-cuda.
+autolab:
+	cd codegen && python3 autolab.py --cuda-path=$(CUDAPATH) --ptxas=$(PTXAS) \
+	    --arch=$(patsubst sm_%,%,$(SMARCH))
+
 test: check-cli ecc2k130-cpu
 	./ecc2k130-cpu --test
 
@@ -145,4 +153,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate check-cli test-decomp rehearse cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean

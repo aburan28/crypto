@@ -457,6 +457,31 @@ on disk and time left in the pass. Anything that is not a progress line -- a
 collision, a verification failure, a checkpoint that could not be written -- is
 printed as it happens.
 
+## Searching the build space offline
+
+`make autolab` sweeps leaf size, block size, batch and the occupancy target,
+compiles each with clang and ptxas, and reports what it can see without a GPU:
+registers, spill traffic, stack frame, instruction mix, and the occupancy that
+follows from them. It needs no card -- ptxas is deterministic -- and the same
+pip-supplied toolchain as `check-cuda`.
+
+It does not pick a winner, because the thing that decides one is wall-clock and
+that is exactly what it cannot measure. What it produces is the Pareto front on
+occupancy against instructions against traffic, and a ready-to-run `autotune`
+command for those few configurations. Six builds measured on a real card beats
+a hundred and forty-four.
+
+The tension it maps is occupancy against spilling. Asking ptxas for more
+resident blocks makes it use fewer registers per thread, and past a point it
+buys them by spilling to local memory -- already the dominant cost in this
+kernel. Where that trade turns is a curve; the optimum on the curve is not
+something static analysis settles.
+
+Treat its ranking as a shortlist and never as a result. The register-budget
+leaf in this repo is a live example of why: every static metric preferred it,
+and the only hardware available measured it slower, for a reason -- register
+file size -- that does not apply to the target.
+
 ## Persistence
 
 A rho search is long enough that a run will be interrupted -- a spot instance
