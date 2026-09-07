@@ -24,7 +24,12 @@ def entryPointParams(path):
             continue
         for dec in node.decorator_list:
             if isinstance(dec, ast.Call) and getattr(dec.func, 'attr', '') == 'local_entrypoint':
-                for arg in node.args.args:
+                # Every kind of named parameter, not just positional-or-keyword:
+                # a keyword-only one is exactly where somebody would add the
+                # next flag, and missing it would make this check useless in
+                # the one case it exists for.
+                a = node.args
+                for arg in list(getattr(a, 'posonlyargs', [])) + list(a.args) + list(a.kwonlyargs):
                     yield node.name, arg.arg
 
 
