@@ -79,6 +79,32 @@ def sizeChain(m, leaf):
     return out
 
 
+LEAF_CUTS = (4, 6, 8, 12, 16, 24, 33, 66)
+
+
+def bestPolyMul(n, cuts=LEAF_CUTS):
+    """The straight-line n-word multiply that will actually be emitted: the
+    cutoff giving the fewest instructions after LOP3 fusion.
+
+    chooseLeaf and the emitters must agree on this.  Scoring the register
+    budget against one cutoff and then shipping another means the budget was
+    measured on a DAG that never runs, and a size can be accepted or rejected
+    against a peak it does not have."""
+    best = None
+    for cut in cuts:
+        if cut > n:
+            continue
+        p = ir.Prog()
+        a = [p.addInput('a', i) for i in range(n)]
+        b = [p.addInput('b', i) for i in range(n)]
+        r = build.polyMulIr(p, a, b, cut)
+        p.fuseLop3(r)
+        c = p.instrCount(r)
+        if best is None or c < best[0]:
+            best = (c, cut, p, r)
+    return best
+
+
 def chooseLeaf(m, budget):
     """Largest halving-chain size whose straight-line multiply still fits in
     `budget` simultaneously live values.
@@ -103,11 +129,7 @@ def chooseLeaf(m, budget):
     for n in sizes:
         if n <= best:
             continue
-        p = ir.Prog()
-        a = [p.addInput('a', i) for i in range(n)]
-        b = [p.addInput('b', i) for i in range(n)]
-        r = build.polyMulIr(p, a, b, min(12, n))
-        p.fuseLop3(r)
+        _, _, p, r = bestPolyMul(n)
         if p.peakLive(r) <= budget:
             best = n
     return best
@@ -165,18 +187,7 @@ def buildProgs(m, leaf, rng, onb):
 
     chain = sizeChain(m, leaf)
     lsz = chain[-1]
-    bestLeaf = None
-    for cut in (4, 6, 8, 12, 16, 24, 33, 66):
-        if cut > lsz:
-            continue
-        p = ir.Prog()
-        al = [p.addInput('a', i) for i in range(lsz)]
-        bl = [p.addInput('b', i) for i in range(lsz)]
-        r = build.polyMulIr(p, al, bl, cut)
-        p.fuseLop3(r)
-        n = p.instrCount(r)
-        if bestLeaf is None or n < bestLeaf[0]:
-            bestLeaf = (n, cut, p, r)
+    bestLeaf = bestPolyMul(lsz)
     progs['mulLeaf'] = (bestLeaf[2], bestLeaf[3], ['a', 'b'], lsz)
     progs['_leafCut'] = bestLeaf[1]
 
@@ -513,17 +524,7 @@ def generatePb(cfg, leaf, outDir, verbose):
     pl = ir.Prog()
     al = [pl.addInput('a', i) for i in range(chain[-1])]
     bl = [pl.addInput('b', i) for i in range(chain[-1])]
-    bestLeaf = None
-    for cut in (4, 6, 8, 12, 16, 24, 33):
-        if cut > chain[-1]:
-            continue
-        p = ir.Prog()
-        aa = [p.addInput('a', i) for i in range(chain[-1])]
-        bb = [p.addInput('b', i) for i in range(chain[-1])]
-        r = build.polyMulIr(p, aa, bb, cut)
-        p.fuseLop3(r)
-        if bestLeaf is None or p.instrCount(r) < bestLeaf[0]:
-            bestLeaf = (p.instrCount(r), cut, p, r)
+    bestLeaf = bestPolyMul(chain[-1])
     progs['mulLeaf'] = (bestLeaf[2], bestLeaf[3], ['a', 'b'], chain[-1])
 
     pr = ir.Prog()
