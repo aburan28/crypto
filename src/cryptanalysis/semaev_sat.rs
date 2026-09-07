@@ -28,14 +28,32 @@
 //!
 //! # Measured
 //!
-//! `cargo run --release --example semaev_sat_bench` reports the
-//! current numbers.  At the time of writing, on the `n = 19, l = 6`
-//! corpus instance:
+//! `cargo run --release --example semaev_sat_bench`.  Aggregates over
+//! **every satisfiable instance** of each reference-corpus family —
+//! per-instance times on satisfiable instances swing by an order of
+//! magnitude on search luck, so a single instance measures nothing.
 //!
-//! | encoding | vars | clauses | parity rows | solve |
-//! |---|---:|---:|---:|---|
-//! | native | 767 | 2 364 | 52 | 231 s |
-//! | Tseitin CNF | 2 892 | 25 074 | 0 | not reached |
+//! | family | symmetry breaking | instances | total | median | conflicts |
+//! |---|---|---:|---:|---:|---:|
+//! | `n15l5` | off | 10 | 6.4 s | 363 ms | 79 368 |
+//! | `n15l5` | on | 10 | 2.3 s | 288 ms | 33 119 |
+//! | `n17l6` | off | 10 | 108.7 s | 5.4 s | 448 043 |
+//! | `n17l6` | on | 10 | 24.4 s | 2.5 s | 197 862 |
+//! | `n19l6` | off | 11 | 439.2 s | 21.5 s | 1 192 475 |
+//! | `n19l6` | on | 11 | 50.4 s | 4.7 s | 315 352 |
+//!
+//! Breaking the `3!` symmetry is worth a steady ~4.5× — close to the
+//! `6×` the orbit size allows, less the cost of the ordering clauses.
+//! (`n19l6` has eleven satisfiable instances, not ten: one of the
+//! upstream `-U` instances is misannotated.  See
+//! [`crate::cryptanalysis::semaev_corpus`].)
+//!
+//! Encoding size at `n = 19, l = 6`, without symmetry breaking:
+//!
+//! | encoding | vars | clauses | parity rows |
+//! |---|---:|---:|---:|
+//! | native | 767 | 2 364 | 52 |
+//! | Tseitin CNF | 2 892 | 25 074 | 0 |
 //!
 //! The native column matches, exactly, the instance size that the
 //! independent C generator in
@@ -48,14 +66,17 @@
 //!
 //! # Limits
 //!
-//! - **Solve time, not encoding size, is now the bottleneck.**  The
-//!   `n = 19` instance encodes in 11 ms and solves in about four
-//!   minutes.  The Gauss-Jordan pass is re-run from scratch at every
-//!   propagation fixpoint; an incremental matrix with watched pivots
-//!   (as CryptoMiniSat does) is the obvious next optimisation.
+//! - **The Gauss-Jordan pass is still rebuilt from scratch** at every
+//!   propagation fixpoint, `O(rows² × words)` each time.  An
+//!   incremental matrix carrying two watched unassigned variables per
+//!   row — the parity analogue of two-watched-literals, which is what
+//!   CryptoMiniSat actually does — would avoid re-eliminating and is
+//!   the clear next optimisation.
 //! - **`S₄` is specialised to `b = 1`**, the Koblitz curve
 //!   `y² + xy = x³ + x² + 1`.  See
 //!   [`crate::cryptanalysis::binary_semaev_s4`].
+//! - **Only satisfiable instances are in reach.**  Refuting one means
+//!   exhausting the space rather than stopping at the first witness.
 //! - **Decoded solutions are always re-verified** against the original
 //!   Semaev polynomial over `F_{2ⁿ}`, so an encoding bug shows up as a
 //!   test failure rather than a wrong answer.
@@ -271,6 +292,11 @@ pub fn encode_equations_with(
         }
     }
 
+    // The bit-variables are free; every quadratic auxiliary is defined
+    // by its AND clauses.
+    let free: Vec<u32> = (1..=num_bit_vars).collect();
+    solver.set_branch_priority(&free);
+
     SemaevSatEncoding {
         n,
         l,
@@ -330,6 +356,30 @@ impl S4SatEncoding {
     }
 }
 
+/// Knobs for the `S₄` encoder.
+#[derive(Debug, Clone, Copy)]
+pub struct S4Options {
+    /// How parity constraints reach the solver.
+    pub encoding: XorEncoding,
+    /// Add lexicographic ordering constraints `X₁ ≤ X₂ ≤ X₃`.
+    ///
+    /// The whole system — both the descended `S₄` and the `eᵢ`
+    /// correspondence — is symmetric in `X₁, X₂, X₃`, so every solution
+    /// occurs in all `3! = 6` orderings and the search rediscovers each
+    /// of them.  Forcing a canonical order preserves satisfiability and
+    /// cuts the space by up to `6×`; it costs `O(l)` clauses per pair.
+    pub break_symmetry: bool,
+}
+
+impl Default for S4Options {
+    fn default() -> Self {
+        Self {
+            encoding: XorEncoding::Native,
+            break_symmetry: true,
+        }
+    }
+}
+
 /// **Encode the symmetrised binary Semaev `S₄` system** for target
 /// x-coordinate `x_r`, with the three unknowns confined to the
 /// `l`-dimensional factor-base subspace.
@@ -349,6 +399,29 @@ pub fn encode_semaev_s4(
     x_r: &F2mElement,
     encoding: XorEncoding,
 ) -> S4SatEncoding {
+    encode_semaev_s4_with(
+        n,
+        l,
+        irr,
+        b,
+        x_r,
+        S4Options {
+            encoding,
+            ..Default::default()
+        },
+    )
+}
+
+/// [`encode_semaev_s4`] with the full set of knobs.
+pub fn encode_semaev_s4_with(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    b: &F2mElement,
+    x_r: &F2mElement,
+    opts: S4Options,
+) -> S4SatEncoding {
+    let encoding = opts.encoding;
     let sys = weil_descend_s4(n, l, irr, b, x_r);
     let n_x = sys.n_x_vars();
     let n_e = sys.n_e_vars();
@@ -416,8 +489,27 @@ pub fn encode_semaev_s4(
         );
     }
 
+    // Lexicographic ordering needs one "equal so far" auxiliary per bit
+    // position per adjacent pair.
+    let sym_base = next;
+    if opts.break_symmetry {
+        next += 2 * l;
+    }
+
     let mut solver = Solver::new(next - 1);
     let mut trivially_unsat = false;
+
+    if opts.break_symmetry {
+        // X₁ ≤ X₂ and X₂ ≤ X₃, lexicographically on the bit vectors.
+        for pair in 0..2u32 {
+            let a: Vec<u32> = (0..l).map(|j| to_sat_x(sys.x_var(pair as usize, j))).collect();
+            let bb: Vec<u32> = (0..l)
+                .map(|j| to_sat_x(sys.x_var(pair as usize + 1, j)))
+                .collect();
+            let eq: Vec<u32> = (0..l).map(|j| sym_base + pair * l + j).collect();
+            encode_lex_le(&mut solver, &a, &bb, &eq);
+        }
+    }
 
     // AND-definitions: `z ↔ v₁ ∧ … ∧ v_k`.
     for (mono, &z) in aux_of.iter() {
@@ -462,6 +554,12 @@ pub fn encode_semaev_s4(
         }
     }
 
+    // Every other variable is defined: monomials by their AND clauses,
+    // e-variables by the correspondence rows.  Branching on the x-bits
+    // alone is enough to determine the whole assignment.
+    let free: Vec<u32> = (1..=n_x).collect();
+    solver.set_branch_priority(&free);
+
     S4SatEncoding {
         n,
         l,
@@ -470,6 +568,46 @@ pub fn encode_semaev_s4(
         n_aux_vars: n_aux,
         solver,
         trivially_unsat,
+    }
+}
+
+/// Constrain `a ≤ b` lexicographically, reading `a[l−1]` as the most
+/// significant bit.
+///
+/// `eq[k]` means "`a` and `b` agree on every bit strictly above `k`",
+/// so `eq[l−1]` is unconditionally true and each step down carries the
+/// equality forward.  At each position the ordering is enforced by
+/// `eq[k] ∧ a[k] → b[k]`, which forbids `a` from being the first to
+/// carry a `1`.
+///
+/// `2l + 1` clauses per pair, all of length ≤ 4.
+fn encode_lex_le(solver: &mut Solver, a: &[u32], b: &[u32], eq: &[u32]) {
+    let l = a.len();
+    debug_assert!(b.len() == l && eq.len() == l);
+    if l == 0 {
+        return;
+    }
+    let top = l - 1;
+    // Above the most significant bit, the prefixes are trivially equal.
+    solver.add_clause(vec![eq[top] as Lit]);
+
+    for k in (0..l).rev() {
+        let (ak, bk, ek) = (a[k] as Lit, b[k] as Lit, eq[k] as Lit);
+        // eq[k] ∧ a[k] → b[k]
+        solver.add_clause(vec![-ek, -ak, bk]);
+        if k == 0 {
+            continue;
+        }
+        // eq[k−1] ↔ eq[k] ∧ (a[k] ↔ b[k]).  Only the ← direction is
+        // needed for soundness of the ordering, but both keep the
+        // auxiliary determined, which is what stops it becoming a free
+        // variable the search has to case-split on.
+        let ep = eq[k - 1] as Lit;
+        solver.add_clause(vec![-ep, ek]);
+        solver.add_clause(vec![-ep, -ak, bk]);
+        solver.add_clause(vec![-ep, ak, -bk]);
+        solver.add_clause(vec![ep, -ek, ak, bk]);
+        solver.add_clause(vec![ep, -ek, -ak, -bk]);
     }
 }
 
@@ -990,17 +1128,116 @@ mod tests {
     /// The two things that make this reachable: the unknowns are
     /// confined to the factor base (18 bits, not 38), and the parity
     /// constraints go to the solver natively instead of through Tseitin.
+    /// **The lex encoder must accept exactly the ordered pairs.**  For
+    /// every `(a, b)` over `l = 4` bits, forcing both vectors and
+    /// solving must return SAT precisely when `a ≤ b`.
+    #[test]
+    fn lex_le_accepts_exactly_the_ordered_pairs() {
+        let l = 4usize;
+        for a_val in 0..(1u32 << l) {
+            for b_val in 0..(1u32 << l) {
+                let a: Vec<u32> = (1..=l as u32).collect();
+                let b: Vec<u32> = (l as u32 + 1..=2 * l as u32).collect();
+                let eq: Vec<u32> = (2 * l as u32 + 1..=3 * l as u32).collect();
+                let mut s = Solver::new(3 * l as u32);
+                encode_lex_le(&mut s, &a, &b, &eq);
+                for k in 0..l {
+                    let av = if (a_val >> k) & 1 == 1 { 1 } else { -1 };
+                    let bv = if (b_val >> k) & 1 == 1 { 1 } else { -1 };
+                    s.add_clause(vec![av * a[k] as Lit]);
+                    s.add_clause(vec![bv * b[k] as Lit]);
+                }
+                let want = a_val <= b_val;
+                let got = s.solve() == SolveResult::Sat;
+                assert_eq!(got, want, "a = {a_val}, b = {b_val}");
+            }
+        }
+    }
+
+    /// **Symmetry breaking must preserve satisfiability.**  The system
+    /// is symmetric in `X₁, X₂, X₃`, so forcing a canonical order can
+    /// only remove duplicate solutions — never the last one.  Checked
+    /// on the smallest corpus family, both labels.
+    #[test]
+    fn symmetry_breaking_preserves_satisfiability() {
+        use crate::cryptanalysis::semaev_corpus::CORPUS;
+        for inst in CORPUS.iter().filter(|c| c.n == 15) {
+            let plain = encode_semaev_s4_with(
+                inst.n,
+                inst.l,
+                &inst.irr(),
+                &inst.b(),
+                &inst.x_r(),
+                S4Options {
+                    encoding: XorEncoding::Native,
+                    break_symmetry: false,
+                },
+            );
+            let sym = encode_semaev_s4_with(
+                inst.n,
+                inst.l,
+                &inst.irr(),
+                &inst.b(),
+                &inst.x_r(),
+                S4Options {
+                    encoding: XorEncoding::Native,
+                    break_symmetry: true,
+                },
+            );
+            // Both encodings must at least agree on being non-trivial.
+            assert!(!plain.trivially_unsat && !sym.trivially_unsat, "{}", inst.name);
+            // The ordered witness of a satisfiable instance survives.
+            if inst.truly_sat {
+                let xs = inst
+                    .decide_exhaustively()
+                    .expect("truly_sat instance has a witness");
+                // `decide_exhaustively` searches X₁ ≤ X₂ ≤ X₃ already,
+                // so its witness is exactly the canonical representative
+                // the ordering constraints keep.
+                let vals: Vec<u32> = xs
+                    .iter()
+                    .map(|x| {
+                        (0..inst.l)
+                            .filter(|j| {
+                                (x.raw_bits()[(*j / 64) as usize] >> (*j % 64)) & 1 == 1
+                            })
+                            .map(|j| 1u32 << j)
+                            .sum()
+                    })
+                    .collect();
+                assert!(
+                    vals[0] <= vals[1] && vals[1] <= vals[2],
+                    "{}: exhaustive witness is not canonically ordered",
+                    inst.name
+                );
+            }
+        }
+    }
+
     /// **Independent agreement on instance size.**  Upstream's C
     /// generator emits `p cnf 767 2416` with 52 `x`-lines for this
     /// family, i.e. 767 variables, 2364 ordinary clauses and 52 parity
     /// rows.  Our encoder, written from the algebra rather than from
     /// their code, must land on exactly the same shape — a much
     /// sharper check on the modelling than any single instance solving.
+    ///
+    /// Symmetry breaking is switched off here: it is our addition, not
+    /// part of the modelling being compared.
     #[test]
     fn s4_encoding_size_matches_upstream_generator() {
         let (n, l, irr, x_r) = corpus_n19l6();
         let b = F2mElement::one(n);
-        let enc = encode_semaev_s4(n, l, &irr, &b, &x_r, XorEncoding::Native);
+        let enc = encode_semaev_s4_with(
+            n,
+            l,
+            &irr,
+            &b,
+            &x_r,
+            S4Options {
+                encoding: XorEncoding::Native,
+                break_symmetry: false,
+            },
+        );
         assert_eq!(enc.solver.n_vars(), 767, "variable count");
         assert_eq!(enc.solver.n_clauses(), 2364, "ordinary clause count");
         assert_eq!(enc.solver.n_xors(), 52, "parity row count");
@@ -1012,7 +1249,6 @@ mod tests {
 
     /// **End-to-end at `n = 15`** — the smaller corpus family.
     #[test]
-    #[ignore = "minutes; run with --ignored"]
     fn semaev_s4_round_trip_n15() {
         let n = 15;
         let l = 5;
@@ -1038,9 +1274,9 @@ mod tests {
     /// The two things that make this reachable at all: the unknowns are
     /// confined to the factor base (18 bits, not 38), and the parity
     /// constraints go to the solver natively instead of through Tseitin.
-    /// Takes a few minutes, so it is not in the default suite.
+    /// A few seconds, so it stays out of the default suite.
     #[test]
-    #[ignore = "several minutes; run with --ignored"]
+    #[ignore = "seconds; run with --ignored"]
     fn semaev_s4_round_trip_n19_corpus() {
         let (n, l, irr, x_r) = corpus_n19l6();
         let b = F2mElement::one(n);

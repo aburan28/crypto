@@ -11,12 +11,13 @@ research-direction map.  Rebuilt against the prior art reviewed in
 
 ## Where this got to
 
-The pipeline used to stall at `n = 4`–`5`.  It now decides the
-`n = 19, l = 6` symmetrised-`S₄` instance from the reference corpus,
-end to end, and verifies the decoded decomposition against the
-original polynomial over `F_{2¹⁹}`.
+The pipeline used to stall at `n = 4`–`5`.  It now decides every
+satisfiable `n = 19, l = 6` instance in the reference corpus — eleven
+of them, in 50 s total — verifying each decoded decomposition against
+the original polynomial over `F_{2¹⁹}`.
 
-Three changes did it, and they are independent of each other.
+Three modelling changes made it possible; five further changes made it
+about 50× faster (see [Making it fast](#making-it-fast)).
 
 ### 1. Confine the unknowns to a factor base
 
@@ -68,27 +69,98 @@ ANF over Boolean variables where `a² = a`.  Of the twelve terms of the
 descended `f₃` — including `e₁⁴, e₂⁴, e₃⁴, e₃³` — only four need a real
 multiplication.
 
+## Making it fast
+
+The first working version decided one `n = 19` instance in **231 s**.
+The whole eleven-instance `n19l6` family now takes **50.4 s**, median
+**4.7 s** — about **50× per instance**.  Five changes, in the order
+they mattered:
+
+### 1. Branch only on the free variables
+
+The single largest win, and not a solver micro-optimisation but a
+modelling one.  Of the 767 variables in an `n = 19` instance, only the
+**18 x-bits are free**: every monomial auxiliary is an AND of others,
+and every `e`-variable is fixed by a correspondence row.  Deciding one
+of those is case-splitting on something propagation already knew.
+
+`Solver::set_branch_priority` orders the branching heap by
+`(priority class, activity)`, so the free variables are exhausted
+before any other is ever chosen.  The search tree goes from `2^767` to
+`2^18`.  It is an *order*, not a restriction — name an incomplete set
+and you get a slower solve, not a wrong answer.
+
+### 2. Learnt-clause minimization
+
+Ordinary CDCL hygiene that turns out to matter far more here than
+usual.  A parity row's reason clause names *every* assigned variable of
+its combined mask, and Gauss-Jordan makes those masks dense — so
+unminimized learnt clauses ran to hundreds of literals and then had to
+be walked on every propagation.  Local (self-subsuming) minimization
+cut `n15l5` from 1.1 s to 95 ms on the instance it was first measured
+on.
+
+### 3. Symmetry breaking
+
+Nothing forbade permutations of `(X₁, X₂, X₃)`, so the search
+rediscovered every solution `3! = 6` times.  `S4Options::break_symmetry`
+adds lexicographic `X₁ ≤ X₂ ≤ X₃` constraints — `2l + 1` clauses per
+adjacent pair, using an "equal so far" auxiliary per bit position.
+Worth a steady ~4.5× across all three families.
+
+### 4. No more clause-database growth from parity reasoning
+
+Every parity implication used to push a reason clause onto the clause
+database and never reclaim it — millions of clauses of hundreds of
+literals over a long solve.  Reasons now live in a per-variable buffer
+rewritten in place (`Reason::XorPropagated`), and learnt clauses are
+periodically forgotten (`Solver::reduce_db`, detaching from the watch
+lists so every stored index stays valid).
+
+### 5. Data-structure work
+
+A position-tracked activity heap instead of a linear scan over every
+variable per decision; `analyze` scratch reused rather than reallocated
+per conflict; a bitset mirror of the assignment so a parity row's
+read-off is `mask & !assigned` plus a popcount — `O(words)` instead of
+`O(set bits)` with a two-byte lookup each.
+
 ## Measured
 
-`cargo run --release --example semaev_sat_bench`:
+`cargo run --release --example semaev_sat_bench`.  Aggregates over
+**every satisfiable instance** of each corpus family: per-instance
+times swing by an order of magnitude on search-trajectory luck, so a
+single instance measures nothing.  (An early single-instance reading
+suggested symmetry breaking *hurt*; across ten instances it is a clean
+4.8× win.  Worth remembering before drawing a conclusion from one
+number.)
 
-| system | params | parity | vars | clauses | rows | solve |
-|---|---|---|---:|---:|---:|---|
-| `S₃` | `n=5, l=5` | Tseitin | 66 | 452 | 0 | 299 µs |
-| `S₃` | `n=5, l=5` | native | 32 | 66 | 5 | 82 µs |
-| `S₃` | `n=7, l=7` | Tseitin | 163 | 1 246 | 0 | 4.2 ms |
-| `S₃` | `n=7, l=7` | native | 63 | 147 | 7 | 451 µs |
-| `S₃` | `n=12, l=6` | Tseitin | 128 | 1 001 | 0 | 619 µs |
-| `S₃` | `n=12, l=6` | native | 48 | 108 | 12 | 116 µs |
-| `S₄` | `n=19, l=6` | Tseitin | 2 892 | 25 074 | 0 | not reached |
-| `S₄` | `n=19, l=6` | native | 767 | 2 364 | 52 | 231 s |
+| family | symmetry | instances | total | median | conflicts |
+|---|---|---:|---:|---:|---:|
+| `n15l5` | off | 10 | 6.4 s | 363 ms | 79 368 |
+| `n15l5` | on | 10 | 2.3 s | 288 ms | 33 119 |
+| `n17l6` | off | 10 | 108.7 s | 5.4 s | 448 043 |
+| `n17l6` | on | 10 | 24.4 s | 2.5 s | 197 862 |
+| `n19l6` | off | 11 | 439.2 s | 21.5 s | 1 192 475 |
+| `n19l6` | on | 11 | 50.4 s | 4.7 s | 315 352 |
 
-Tseitin expansion costs **10.6×** the clauses at `n = 19`.
+`n19l6` has eleven satisfiable instances rather than ten because one
+upstream `-U` instance is misannotated; the corpus records that, so it
+falls into the SAT set automatically.
+
+Encoding size, `n = 19, l = 6`, symmetry breaking off:
+
+| encoding | vars | clauses | parity rows |
+|---|---:|---:|---:|
+| native | 767 | 2 364 | 52 |
+| Tseitin CNF | 2 892 | 25 074 | 0 |
+
+Tseitin expansion costs **10.6×** the clauses.
 
 ### Independent agreement on instance size
 
-The `n = 19` native row — 767 variables, 2 364 ordinary clauses, 52
-parity rows — is *exactly* what the unrelated C generator in
+The native row — 767 variables, 2 364 ordinary clauses, 52 parity rows
+— is *exactly* what the unrelated C generator in
 `mtrimoska/EC-Index-Calculus-Benchmarks` emits for the same family
 (`p cnf 767 2416` with 52 `x`-lines; 2416 − 52 = 2364).  Two
 implementations written from the algebra rather than from each other,
@@ -112,35 +184,52 @@ outcome, not a certificate.  The table records `labelled_sat` and
 ## Tests
 
 ```bash
-cargo test --release --lib cryptanalysis::sat            # XOR engine
+cargo test --release --lib cryptanalysis::sat            # solver + XOR engine
 cargo test --release --lib cryptanalysis::binary_semaev_s4
 cargo test --release --lib cryptanalysis::semaev_sat
 cargo test --release --lib cryptanalysis::semaev_corpus
-# the slow ones: n=15 and n=19 solves, and the exhaustive corpus audit
+# still slow: n=19 solve, and the exhaustive corpus audit
 cargo test --release --lib cryptanalysis::semaev -- --ignored
 ```
+
+The `n = 15` round trip and the corpus round trip used to take minutes
+and were `#[ignore]`d; the whole default suite for these modules now
+runs in under half a second.
 
 Worth singling out:
 
 - `xor_engine_agrees_with_brute_force` — 200 random dense parity
   systems, decided both by the solver and exhaustively; every verdict
   and every model checked.
+- `aggressive_clause_reduction_preserves_answers` — 60 mixed CNF+parity
+  instances solved twice, once with a forgetting budget of 2 and once
+  with a budget that never forgets; the verdicts must match and the
+  model from the forgetting run must still satisfy everything.
+- `lex_le_accepts_exactly_the_ordered_pairs` — the symmetry-breaking
+  encoder over all 256 four-bit pairs.
+- `symmetry_breaking_preserves_satisfiability` — the constraint may
+  only remove duplicate solutions, never the last one.
 - `subspace_descent_matches_field_evaluation` — the descended
   equations, evaluated at subspace points, against `S₃` computed
   directly over `F_{2ⁿ}`.
-- `symmetrised_s4_vanishes_on_corpus_planted_solution` — our twelve-term
-  transcription against decompositions an independent generator
-  planted.
+- `symmetrised_s4_vanishes_on_corpus_planted_solution` — our
+  twelve-term transcription against decompositions an independent
+  generator planted.
+- `s4_encoding_size_matches_upstream_generator` — the clause-exact
+  agreement described above.
 - `corpus_labels_match_exhaustive_search` (ignored) — re-derives the
   mislabelling audit in Rust.
 
 ## What's still open
 
-- **Solve time is now the bottleneck, not encoding size.**  `n = 19`
-  encodes in 11 ms and solves in ~4 minutes.  The Gauss-Jordan pass is
-  rebuilt from scratch at every propagation fixpoint; an incremental
-  matrix with watched pivots (CryptoMiniSat's actual design) is the
-  obvious next step and should be worth a large constant factor.
+- **The Gauss-Jordan pass is still rebuilt from scratch** at every
+  propagation fixpoint, `O(rows² × words)` a time.  The parity analogue
+  of two-watched-literals — an incremental matrix carrying two watched
+  *unassigned* variables per row, which is what CryptoMiniSat actually
+  does — would avoid re-eliminating altogether.  This is the clear next
+  optimisation and probably still worth a large constant factor: `n = 19`
+  encodes in 13 ms and solves in seconds, so the time is all in search
+  and propagation.
 - **`S₄` is specialised to `b = 1`** — the Koblitz curve
   `y² + xy = x³ + x² + 1`.  `S₄` does not depend on `a₂`, but it does
   depend on `b`, and the `b`-powers are folded into the twelve
@@ -152,16 +241,13 @@ Worth singling out:
   uses) would be far denser and make relocation a shift.  Deferred
   deliberately: it buys descent time, and descent is 11 ms against a
   4-minute solve.
-- **Symmetry breaking.**  Nothing yet forbids permutations of
-  `(X₁, X₂, X₃)`, so the search explores every solution in all `3!`
-  orderings.
-- **UNSAT is out of reach.**  Every result above is a *satisfiable*
-  instance, where the search can stop at the first witness.  Refuting a
-  `-U` corpus instance means exhausting the space, and the solver does
-  not currently finish one in reasonable time at any corpus size — so
+- **UNSAT is still out of reach.**  Every result above is a
+  *satisfiable* instance, where the search stops at the first witness.
+  Refuting a `-U` instance means exhausting the space, which the solver
+  does not finish in reasonable time at any corpus size — so
   `corpus_round_trips_through_the_solver` asserts only the SAT
-  direction.  Symmetry breaking and an incremental Gauss matrix are
-  both prerequisites for changing that.
+  direction.  Symmetry breaking is now in place, which was one of the
+  two prerequisites; the incremental Gauss matrix is the other.
 
 ## References
 

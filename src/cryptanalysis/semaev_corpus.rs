@@ -832,7 +832,6 @@ mod tests {
     /// solution is also found in all `3!` orderings, and the Gauss-
     /// Jordan pass is rebuilt from scratch at each fixpoint.
     #[test]
-    #[ignore = "runs the full solver; run with --ignored"]
     fn corpus_round_trips_through_the_solver() {
         use crate::cryptanalysis::sat::SolveResult;
         use crate::cryptanalysis::semaev_sat::{encode_semaev_s4, XorEncoding};
