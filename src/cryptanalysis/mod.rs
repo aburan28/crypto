@@ -132,6 +132,7 @@ pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
 pub mod j0_twists;
+pub mod koblitz_index_calculus;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod mazur_tate_sigma;
@@ -204,6 +205,12 @@ pub use ec_index_calculus::{
 };
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
+};
+pub use koblitz_index_calculus::{
+    build_frobenius_factor_base, factor_x_n_minus_1, find_irreducible, frobenius_eigenvalue,
+    is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_point_count, koblitz_speedup_model,
+    linearised_kernel, order_of_2_mod_n, points_with_x, FrobeniusFactorBase, KoblitzCurve,
+    KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,
