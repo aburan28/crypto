@@ -26,6 +26,8 @@ THREADS=${THREADS:-128}
 LEAF=${LEAF:-17}
 WALKS=${WALKS:-4000000}
 RUNID=${RUNID:-1}
+DPW=${DPW:--1}           # -1 = size the cutoff from the measured rate
+LOADMAX=${LOADMAX:-50000000}  # cap the startup corpus reload; 0 = no limit
 COUNT=${COUNT:-4}           # fanout width
 
 export ECC_GPU="$GPU"
@@ -43,6 +45,7 @@ esac
 command -v modal >/dev/null || { echo "modal CLI not found: pip install -U modal" >&2; exit 1; }
 
 shape="--curve $CURVE --batch $BATCH --threads $THREADS --leaf $LEAF --walks $WALKS"
+shape="$shape --dp-weight $DPW --load-max $LOADMAX"
 
 case "$cmd" in
 
