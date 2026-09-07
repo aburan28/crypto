@@ -14,7 +14,6 @@
 
 #include "../include/curveparams.h"
 #include "../include/kernel.h"
-#include "../include/ref.h"
 #include "../include/solver.h"
 
 #ifndef ECC_NO_CUDA
@@ -55,6 +54,7 @@ struct Options {
     u64 maxIters = 0;
     bool bench = false;
     bool test = false;
+    bool polyBasis = false;
     bool selfCheck = false;
     unsigned dpCap = 1u << 16;
     int device = 0;
@@ -284,7 +284,7 @@ template <class Cfg>
 static void testField(Rng &rng) {
     typedef Ref<Cfg> R;
     typedef ECC_HOST_WORD W;
-    typedef FieldBs<Cfg, W> F;
+    typedef typename Cfg::template Field<W> F;
     const int M = Cfg::M;
     const int LANES = WordTraits<W>::LANES;
     std::vector<typename R::Elem> a(LANES), b(LANES);
@@ -360,7 +360,7 @@ template <class Cfg>
 static void testStartPoint(Rng &rng, Solver<Cfg> &sol) {
     typedef Ref<Cfg> R;
     typedef ECC_HOST_WORD W;
-    typedef FieldBs<Cfg, W> F;
+    typedef typename Cfg::template Field<W> F;
     typedef Walk<Cfg, W> WK;
     const int M = Cfg::M;
     const int LANES = WordTraits<W>::LANES;
@@ -373,20 +373,35 @@ static void testStartPoint(Rng &rng, Solver<Cfg> &sol) {
     K.qx = sol.target.x.v;
     K.qy = sol.target.y.v;
     WK::startPoint(seeds.data(), K, x.data(), y.data());
+    // The reference is the slow path here, so a handful of lanes is plenty.
+    const int CHECK = LANES < 16 ? LANES : 16;
     bool ok = true, okAlpha = true;
-    for (int l = 0; l < LANES; ++l) {
+    int skipped = 0;
+    for (int l = 0; l < CHECK; ++l) {
         typename R::Elem gx, gy;
         F::getLane(x.data(), l, gx.v);
         F::getLane(y.data(), l, gy.v);
         U192 alpha;
-        const typename R::Point want = R::startPoint(seeds[l], sol.basis, sol.target, &alpha, sol.ell, sol.spow);
+        bool degenerate = false;
+        const typename R::Point want =
+            R::startPoint(seeds[l], sol.basis, sol.target, &alpha, sol.ell, sol.spow, &degenerate);
         if (!(gx == want.x) || !(gy == want.y)) ok = false;
-        // the tracked scalar must satisfy start = [alpha] P + Q
+        // start = [alpha] P + Q.  The client adds without special cases, so
+        // this identity only holds while no two summands share an abscissa.
+        // That needs a birthday collision among a few hundred points, so it
+        // never happens on the challenge curves and does on a toy field.
+        if (degenerate) {
+            ++skipped;
+            continue;
+        }
         const typename R::Point chk = R::addPt(R::scalarMul(sol.basis, alpha), sol.target);
         if (!R::eq(chk, want)) okAlpha = false;
     }
     report("bitsliced start point matches reference", ok);
     report("tracked start scalar reproduces the point", okAlpha);
+    if (skipped)
+        printf("  %-46s %d of %d lanes (degenerate addition on a toy field)\n",
+               "  ... not applicable for", skipped, CHECK);
 }
 
 template <class Cfg>
@@ -545,6 +560,11 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     if (o.test) {
         printf("GF(2^%d), n = %d, l = %s\n", Cfg::M, Cfg::NRING, ellDec);
         report("published parameters are consistent", true);
+        if (haveK) {
+            // ECC2K-95: Harley's group published this in 1998
+            report("published challenge solution satisfies [k]P == Q",
+                   Ref<Cfg>::eq(Ref<Cfg>::scalarMul(sol.basis, knownK), sol.target));
+        }
         Rng rng(0x1234567 + Cfg::M);
         testField<Cfg>(rng);
         testOrbit<Cfg>(rng, sol.ell);
@@ -570,7 +590,8 @@ static void usage() {
     printf(
         "ecc2k130 - Pollard rho client for the Certicom ECC2K-130 challenge\n"
         "\n"
-        "  --curve M        131 (the challenge), or 83 / 41 / 23 test curves\n"
+        "  --curve M        131 (ECC2K-130) or 97 (ECC2K-95); 83/41/23/19/13 are tests\n"
+        "  --poly-basis     for curve 41, use the polynomial-basis backend\n"
         "  --instance I     use planted test instance I (small curves only)\n"
         "  --threads T      worker threads (device: total threads)\n"
         "  --steps S        iterations per launch (default 64)\n"
@@ -589,6 +610,7 @@ static void usage() {
 }
 
 int main(int argc, char **argv) {
+    setvbuf(stdout, NULL, _IOLBF, 0);   // stream progress when piped to a file
     Options o;
     for (int i = 1; i < argc; ++i) {
         const std::string a = argv[i];
@@ -606,6 +628,7 @@ int main(int argc, char **argv) {
         else if (a == "--dp-file" && nx) o.dpFile = argv[++i];
         else if (a == "--device" && nx) o.device = atoi(argv[++i]);
         else if (a == "--bench") o.bench = true;
+        else if (a == "--poly-basis") o.polyBasis = true;
         else if (a == "--test") o.test = true;
         else if (a == "--help" || a == "-h") { usage(); return 0; }
         else { printf("unknown option %s\n", a.c_str()); usage(); return 1; }
@@ -641,6 +664,14 @@ int main(int argc, char **argv) {
                                eccF83::ELL_DEC, eccF83::S_DEC, eccF83::DP_WEIGHT, NULL);
         rc |= runCurve<CfgF131>(o, eccF131::PX, eccF131::PY, eccF131::QX, eccF131::QY,
                                 eccF131::ELL_DEC, eccF131::S_DEC, eccF131::DP_WEIGHT, NULL);
+        rc |= runCurve<CfgP13>(o, eccP13::PX, eccP13::PY, eccP13::QX, eccP13::QY,
+                               eccP13::ELL_DEC, eccP13::S_DEC, eccP13::DP_WEIGHT, NULL);
+        rc |= runCurve<CfgP19>(o, eccP19::PX, eccP19::PY, eccP19::QX, eccP19::QY,
+                               eccP19::ELL_DEC, eccP19::S_DEC, eccP19::DP_WEIGHT, NULL);
+        rc |= runCurve<CfgP41>(o, eccP41::PX, eccP41::PY, eccP41::QX, eccP41::QY,
+                               eccP41::ELL_DEC, eccP41::S_DEC, eccP41::DP_WEIGHT, NULL);
+        rc |= runCurve<CfgP97>(o, eccP97::PX, eccP97::PY, eccP97::QX, eccP97::QY,
+                               eccP97::ELL_DEC, eccP97::S_DEC, eccP97::DP_WEIGHT, eccP97::KNOWN_K);
         printf("%s (%d failures)\n", gFail ? "VALIDATION FAILED" : "all checks passed", gFail);
         return (rc || gFail) ? 1 : 0;
     }
@@ -664,8 +695,12 @@ int main(int argc, char **argv) {
 
     if (o.curve == 131) ECC_DISPATCH(eccF131, CfgF131);
     if (o.curve == 83) ECC_DISPATCH(eccF83, CfgF83);
-    if (o.curve == 41) ECC_DISPATCH(eccF41, CfgF41);
+    if (o.curve == 41 && !o.polyBasis) ECC_DISPATCH(eccF41, CfgF41);
     if (o.curve == 23) ECC_DISPATCH(eccF23, CfgF23);
+    if (o.curve == 97) ECC_DISPATCH(eccP97, CfgP97);
+    if (o.curve == 41 && o.polyBasis) ECC_DISPATCH(eccP41, CfgP41);
+    if (o.curve == 19) ECC_DISPATCH(eccP19, CfgP19);
+    if (o.curve == 13) ECC_DISPATCH(eccP13, CfgP13);
     printf("unsupported curve %d\n", o.curve);
     return 1;
 }

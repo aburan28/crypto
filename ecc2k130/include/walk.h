@@ -21,6 +21,7 @@
 #pragma once
 
 #include "fieldbs.h"
+#include "fieldpb.h"
 
 struct DpRecord {
     unsigned long long seed;
@@ -52,7 +53,7 @@ struct CurveConsts {
 
 template <class Cfg, class W>
 struct Walk {
-    typedef FieldBs<Cfg, W> F;
+    typedef typename Cfg::template Field<W> F;
     static const int M = Cfg::M;
     static const int HWBITS = Cfg::HWBITS;
     static const int LANES = WordTraits<W>::LANES;

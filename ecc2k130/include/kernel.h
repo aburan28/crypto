@@ -55,7 +55,7 @@ ECC_HD unsigned eccAtomicInc(unsigned *p) {
 template <class Cfg, class W>
 struct Kernel {
     typedef Walk<Cfg, W> WK;
-    typedef FieldBs<Cfg, W> F;
+    typedef typename Cfg::template Field<W> F;
     static const int M = Cfg::M;
     static const int LANES = WordTraits<W>::LANES;
     static const int HWBITS = Cfg::HWBITS;
@@ -225,20 +225,31 @@ struct Kernel {
 #ifndef ECC_THREADS
 #define ECC_THREADS 128
 #endif
+// Occupancy knob.  With only a block-size bound, ptxas gives every thread the
+// full 255 registers, which caps the machine at about 256 threads per SM.
+// Asking for more resident blocks trades registers for occupancy; which side
+// wins is a measurement, so it is a build parameter.
+// 2 is free at 128 threads: 128 * 255 * 2 = 65280 registers, just inside the
+// 65536 an SM has, so occupancy doubles without costing a single spill.  Going
+// further trades registers for warps and has to be measured.
+#ifndef ECC_MINBLOCKS
+#define ECC_MINBLOCKS 2
+#endif
+#define ECC_BOUNDS __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 template <class Cfg, class W>
-__global__ void __launch_bounds__(ECC_THREADS) eccWalkKernel(WalkParams<W> P) {
+__global__ void ECC_BOUNDS eccWalkKernel(WalkParams<W> P) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= P.threads) return;
     Kernel<Cfg, W>::run(tid, P);
 }
 template <class Cfg, class W>
-__global__ void __launch_bounds__(ECC_THREADS) eccInitKernel(WalkParams<W> P) {
+__global__ void ECC_BOUNDS eccInitKernel(WalkParams<W> P) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= P.threads) return;
     Kernel<Cfg, W>::init(tid, P);
 }
 template <class Cfg, class W>
-__global__ void __launch_bounds__(ECC_THREADS) eccReseedKernel(WalkParams<W> P) {
+__global__ void ECC_BOUNDS eccReseedKernel(WalkParams<W> P) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= P.threads) return;
     Kernel<Cfg, W>::reseed(tid, P);

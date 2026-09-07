@@ -1,8 +1,19 @@
-# ECC2K-130
+# ECC2K-130 and ECC2K-95
 
-A GPU-oriented client for the Certicom ECC2K-130 challenge: Pollard rho with the
-Frobenius-based iteration function of Bailey et al., bitsliced over the permuted
-type-II optimal normal basis of `GF(2^131)`.
+A GPU-oriented client for the Certicom binary-curve challenges: Pollard rho with
+a Frobenius-based iteration function, bitsliced, with the field arithmetic
+emitted by a code generator.
+
+Two targets are configured:
+
+* **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations. Uses the
+  permuted type-II optimal normal basis of Bailey et al.
+* **ECC2K-95**, solved by Harley's group in 1998, `GF(2^97)`, about `2^44`
+  iterations. `2*97+1 = 195` is composite so that field has no type-II optimal
+  normal basis; this one runs on a polynomial-basis backend with the
+  orbit-invariant weight taken through a single linear map into a normal basis,
+  which is the arrangement Harley's own client used. Its answer is public, so a
+  recovered logarithm can be checked rather than merely believed.
 
 The whole arithmetic layer is produced by a code generator that verifies every
 routine it emits against an independent model of the field. The same source
@@ -18,6 +29,7 @@ code that would run on a GPU is what the test suite exercises.
 | CPU client | measured, 12.6 M iterations/s per core |
 | CUDA client | host and device both compile; **never run on a GPU here** |
 | Modal integration | validate, benchmark, autotune, search, fan out |
+| ECC2K-95 instance | parameters recovered and independently verified |
 
 No GPU was available while this was written, so the CUDA path is verified by
 compiling it — host and device halves, plus `ptxas` register allocation — and
@@ -26,17 +38,39 @@ that gap: it builds the client on a Modal GPU, runs the same validation there,
 recovers discrete logarithms on the device, and autotunes the build knobs
 against real hardware.
 
-## The problem
+## The problems
 
-Solve `Q = [k]P` on the Koblitz curve `y^2 + xy = x^3 + 1` over `F_{2^131}`,
-where `|E| = 4l` and
+Solve `Q = [k]P` on the Koblitz curve `y^2 + xy = x^3 + 1`.
+
+**ECC2K-130**, over `F_{2^131}`, `|E| = 4l`:
 
 ```
 l = 680564733841876926932320129493409985129        (129-bit prime)
 ```
 
 Expected work is `2^60.9` iterations, producing about `2^35.6` distinguished
-points.
+points. Open since 1997.
+
+**ECC2K-95**, over `F_{2^97} = F_2[t]/(t^97 + t^6 + 1)`, `|E| = 4l`:
+
+```
+l = 39614081257132074233778707191                  (95-bit prime)
+XP = 08A84FB02034F7771DC940097   YP = 1D2F10A471D48A720F18F6339
+XQ = 0E0BC08AC5818F303E2B05E90   YQ = 134C028FC3393124D673E6F8E
+```
+
+Expected work is `2^44` iterations; Harley's group measured 2.16e13 in 1998,
+against the `1.79e13` this repository predicts from `sqrt(pi*l/(4m))`. The
+parameters were recovered from Harley's surviving client source and are checked
+by the generator every time it runs: both points lie on the curve, both have
+order `l`, and the published answer
+
+```
+k = 37837308472231540269443981458
+```
+
+satisfies `[k]P = Q`. That makes it a real end-to-end test of the whole pipeline
+at a scale of a few GPU-hours rather than a few GPU-centuries.
 
 ## Design
 
@@ -47,6 +81,28 @@ and the host picks the widest it has: AVX-512 gives 512 lanes and, through
 `vpternlogd`, the same single-instruction three-input logic that `LOP3.LUT`
 gives on the GPU. The arithmetic source is identical for all three widths;
 only `bitslice.h` changes.
+
+### Two field backends
+
+`fieldbs.h` implements the permuted type-II optimal normal basis, where squaring
+is an index permutation and the orbit weight is immediate. It needs `2m+1`
+prime, which holds for `m = 131` but not for `m = 97` or `m = 109`.
+
+`fieldpb.h` implements a polynomial basis `F_2[z]/(F)` for the fields that have
+no such basis. A multiplication is the same Karatsuba tree followed by reduction
+modulo a trinomial, and squaring costs 51 instructions rather than nothing. The
+weight, which has to stay invariant under Frobenius for the walk to run on
+orbits, comes from one generated linear map into a normal basis; the generator
+picks the sparsest normal element it finds and checks that squaring really does
+rotate the resulting coordinates.
+
+Which backend a curve uses is a property of its config, so the walk, the kernel,
+the solver and the reference are all written once:
+
+| | multiply | square | weight |
+|---|---|---|---|
+| `GF(2^131)` normal basis | 8859 | free | 268 |
+| `GF(2^97)` polynomial basis | 5627 | 51 | 1716 |
 
 ### Field representation
 
@@ -139,6 +195,33 @@ the challenge curve itself, run with a deliberately loose cutoff of 34 -> 50 so
 that points actually appear, 3.1 M iterations produced 12368 reports, 25 of
 which were recomputed and matched exactly.
 
+### ECC2K-95
+
+The generator refuses to emit the curve unless the recovered parameters check
+out: both points on the curve, both of order `l`, and the published answer
+satisfying `[k]P = Q`. The validation suite repeats the last of those against
+the reference implementation.
+
+Cost, measured per iteration rather than guessed:
+
+| | GF(2^131), normal basis | GF(2^97), polynomial basis |
+|---|---|---|
+| multiply | 8859 | 5627 |
+| square | free | 51 |
+| weight | 268 | 1716 |
+| whole iteration | about 60000 | about 32000 |
+
+So ECC2K-95 runs about 1.9x faster per iteration than ECC2K-130 and needs
+`2^44` of them instead of `2^60.9`, which is the difference between GPU-hours
+and GPU-centuries.
+
+One operational point matters more than the arithmetic. The number of reported
+points comes out at roughly four times the number of parallel walks, because
+each walk only gets `total/walks` steps and the cutoff has to be loose enough
+that it reports within them. Filling a large GPU with 50M walks would therefore
+demand 200M reports; the Modal search sizes the walk count first and picks the
+weight cutoff from it, defaulting to 4M walks and about 16M reports.
+
 ### End-to-end
 
 `make break-small` recovers planted discrete logarithms through the complete
@@ -184,6 +267,25 @@ spills. The remaining spills are in the Karatsuba glue and the kernel body,
 which hold several 131-word intermediates at once. The per-thread stack frame
 is the number to watch on real hardware: it is local memory, so occupancy
 depends on how much of it stays in L1.
+
+### Occupancy versus spilling
+
+A block-size bound alone lets ptxas give every thread all 255 registers, which
+caps an SM at about 256 threads. Asking for more resident blocks
+(`MINBLOCKS`) buys warps by taking registers away:
+
+| blocks/SM asked | registers | spill stores | spill loads | warps/SM |
+|---|---|---|---|---|
+| 1 | 255 | 5436 | 7256 | 4 |
+| 2 (default) | 255 | 5436 | 7256 | 8 |
+| 4 | 128 | 7520 | 9648 | 16 |
+| 6 | 80 | 9540 | 12096 | 24 |
+| 8 | 64 | 10356 | 12960 | 32 |
+
+Two is free: 128 threads at 255 registers each is 65280 of the 65536 an SM has,
+so occupancy doubles without a single extra spill, and that is now the default.
+Past that the trade is real and only a device can settle it, which is what
+`autotune` sweeps.
 
 ## Findings that update the implementation guide
 
@@ -242,13 +344,18 @@ the original design faced.
 Ampere through Blackwell) and exposes five entry points:
 
 ```
-modal run modal_app.py::validate --gpu H100        # correctness, on the device
-modal run modal_app.py::bench --gpu B200           # throughput
-modal run modal_app.py::autotune --gpu RTX-PRO-6000
-modal run modal_app.py::search --gpu H100 --hours 4
-modal run modal_app.py::fanout --gpu H100 --count 8 --hours 4
-modal run modal_app.py::merge                      # collisions across all runs
+export ECC_GPU=RTX-PRO-6000
+modal run modal_app.py::validate      # correctness, on the device
+modal run modal_app.py::bench         # throughput
+modal run modal_app.py::autotune      # sweep the build knobs on real hardware
+modal run modal_app.py::search --hours 4
+modal run modal_app.py::fanout --count 8 --hours 4
+modal run modal_app.py::merge         # collisions across every run
 ```
+
+The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
+function definitions, which works on every Modal version. Clients from 0.72
+also accept `--gpu` on the entry points to override it per call.
 
 `validate` runs the whole test suite on the GPU machine and then recovers
 planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
@@ -263,6 +370,10 @@ collisions.
 `RTX-PRO-6000` is the interesting target: it is the GB202 part the guide
 identifies as the best value for this workload, since none of a datacenter
 GPU's tensor silicon is reachable from binary-field arithmetic.
+
+The image builds a fat binary for sm_80 through sm_120 with nvcc, which takes
+about three and a half minutes and is cached thereafter. `autotune` rebuilds
+for the local compute capability alone, which takes seconds.
 
 ## Build
 

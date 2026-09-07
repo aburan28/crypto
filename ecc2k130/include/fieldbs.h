@@ -111,13 +111,13 @@ struct FieldBs {
 
     // ---- sigma (Frobenius) -------------------------------------------
     // The coefficient of gamma_{i+1} moves to gamma_{fold(2^k (i+1))}.
-    static constexpr int pow2Mod(int k) {
+    static ECC_CONST int pow2Mod(int k) {
         int e = 1;
         for (int j = 0; j < k; ++j) e = (2 * e) % NRING;
         return e;
     }
-    static constexpr int foldIdx(int t) { return t <= M ? t : NRING - t; }
-    static constexpr int sigmaDest(int i, int e) {
+    static ECC_CONST int foldIdx(int t) { return t <= M ? t : NRING - t; }
+    static ECC_CONST int sigmaDest(int i, int e) {
         return foldIdx((int)(((long long)(i + 1) * (long long)e) % (long long)NRING)) - 1;
     }
 

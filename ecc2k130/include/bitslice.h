@@ -24,10 +24,13 @@
 // ~285000 a fully inlined batch expands to, which no instruction cache can hold
 // and which ptxas takes many minutes to register-allocate.
 #define ECC_BIG __host__ __device__ __noinline__
+// constexpr helpers evaluated at code-generation time, callable from both sides
+#define ECC_CONST __host__ __device__ constexpr
 #else
 #define ECC_HD inline
 #define ECC_DEV inline
 #define ECC_BIG inline
+#define ECC_CONST constexpr
 #endif
 
 #define ECC_ZERO ((W)0)
