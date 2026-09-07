@@ -73,18 +73,25 @@
 //!
 //! ## Honest scope
 //!
-//! - **The decomposition step is enumeration, not Gröbner.**  In the
-//!   real algorithm, "is `R` a sum of `m` factor-base points?" is
-//!   answered by solving a Semaev/Weil-restriction polynomial system
-//!   with `F4`/`F5`; that is what makes the algorithm sub-exponential
-//!   in the first place, and what the paper's `m!` and `n` savings act
-//!   on.  Here the same question is answered by a table-driven search
-//!   over ordered tuples of factor-base points, which is correct but
-//!   exponential in `m`.  Everything *around* the decomposition — the
-//!   invariant factor base, orbit collapse, `λ^k` relation rewriting,
-//!   the shrunken linear system — is the real thing, and the
-//!   cost model in [`koblitz_speedup_model`] reports what the Gröbner
-//!   version would save.
+//! - **Two decomposition oracles, and the algebraic one is not yet the
+//!   faster one.**  "Is `R` a sum of `m` factor-base points?" is
+//!   answered either by
+//!   [`DecompositionStrategy::Groebner`] — Semaev's `S₃` Weil-restricted
+//!   to a quadratic Boolean system over the invariant subspace and
+//!   solved with matrix-F4 (see
+//!   [`crate::cryptanalysis::koblitz_groebner`]), which is the real
+//!   algorithm's oracle — or by
+//!   [`DecompositionStrategy::Enumerate`], a table-driven search over
+//!   ordered tuples costing `|F|^{m−1}` group operations.  They are
+//!   cross-checked against each other in the tests and always agree.
+//!   At the sizes this module can reach the search is still 10–100×
+//!   *faster* in wall-clock terms: `|F|` is a few dozen points, so
+//!   `|F|^{m−1}` is nothing, while the Macaulay matrix already has
+//!   thousands of columns.  The algebra earns its place on scaling
+//!   rather than on these numbers — its cost tracks the degree of
+//!   regularity of the system instead of `|F|`, and it *refutes* an
+//!   undecomposable target with a certificate (the reduction yields the
+//!   constant `1`) instead of merely failing to find one.
 //! - **Toy parameters only.**  `n ≤ 24` or so: the factor base is
 //!   materialised (`2^ℓ` elements) and the group order is found by
 //!   trial division.  This does not threaten sect163k1 or any other
@@ -117,6 +124,10 @@ use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::koblitz_groebner::{
+    build_decomposition_system, solve_boolean_system_filtered, FieldStructure, SolveOptions,
+    SolveStats, SolverEngine,
+};
 use crate::utils::mod_inverse;
 
 /// Largest extension degree this module will build a curve for.  The
@@ -568,6 +579,10 @@ pub struct FrobeniusFactorBase {
     /// The `2^ℓ` roots of `F_j` in `F_{2^n}` — an `F_2`-subspace closed
     /// under squaring.
     pub subspace: Vec<F2mElement>,
+    /// An `F_2`-basis of that subspace, `ℓ` elements.  The Gröbner
+    /// decomposition writes its unknowns in this basis, which is what
+    /// keeps the Semaev system quadratic.
+    pub subspace_basis: Vec<F2mElement>,
     /// The factor base itself: every point whose abscissa is a root.
     pub points: Vec<BinaryPoint>,
     /// `π`-orbits, as lists of indices into `points`.  Orbit `o` is
@@ -583,16 +598,25 @@ impl FrobeniusFactorBase {
     pub fn unknowns(&self) -> usize {
         self.orbits.len()
     }
+
+    /// Lookup table from point identity to factor-base index, as both
+    /// decomposition oracles need.
+    pub fn index_map(&self) -> HashMap<(BigUint, BigUint), usize> {
+        self.points
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (point_key(p), i))
+            .collect()
+    }
 }
 
-/// Kernel of the linearised polynomial `F(X) = Σ_{k ∈ exps} X^{2^k}`
-/// acting `F_2`-linearly on `F_{2^n}`, returned as an explicit list of
-/// its `2^dim` elements.
+/// An `F_2`-**basis** of the kernel of the linearised polynomial
+/// `F(X) = Σ_{k ∈ exps} X^{2^k}` acting `F_2`-linearly on `F_{2^n}`.
 ///
 /// The map is written as an `n × n` matrix over `F_2` in the polynomial
 /// basis `1, z, …, z^{n−1}`; the kernel basis is read off by row
 /// reducing `[image | preimage]`.
-pub fn linearised_kernel(exps: &[u32], n: u32, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+pub fn linearised_kernel_basis(exps: &[u32], n: u32, irr: &IrreduciblePoly) -> Vec<F2mElement> {
     // Column i = F(z^i), packed into the low n bits of a u64.
     let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
     for i in 0..n {
@@ -625,17 +649,29 @@ pub fn linearised_kernel(exps: &[u32], n: u32, irr: &IrreduciblePoly) -> Vec<F2m
         }
     }
 
-    // Span the kernel basis.
-    let dim = kernel_basis.len();
-    let mut out = Vec::with_capacity(1usize << dim);
-    for mask in 0..(1u64 << dim) {
-        let mut v = 0u64;
-        for (b, base) in kernel_basis.iter().enumerate() {
+    kernel_basis
+        .into_iter()
+        .map(|v| F2mElement::from_biguint(&BigUint::from(v), n))
+        .collect()
+}
+
+/// The kernel itself: every `F_2`-combination of
+/// [`linearised_kernel_basis`], `2^dim` elements.
+pub fn linearised_kernel(exps: &[u32], n: u32, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+    span_f2(&linearised_kernel_basis(exps, n, irr), n)
+}
+
+/// All `2^{|basis|}` `F_2`-combinations of `basis`.
+pub fn span_f2(basis: &[F2mElement], n: u32) -> Vec<F2mElement> {
+    let mut out = Vec::with_capacity(1usize << basis.len());
+    for mask in 0..(1u64 << basis.len()) {
+        let mut acc = F2mElement::zero(n);
+        for (b, base) in basis.iter().enumerate() {
             if (mask >> b) & 1 == 1 {
-                v ^= base;
+                acc = acc.add(base);
             }
         }
-        out.push(F2mElement::from_biguint(&BigUint::from(v), n));
+        out.push(acc);
     }
     out
 }
@@ -653,7 +689,8 @@ pub fn build_frobenius_factor_base(kc: &KoblitzCurve, index: usize) -> Option<Fr
     let ell = poly_deg(f_j)?;
     let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
 
-    let subspace = linearised_kernel(&exps, kc.n, &kc.curve.irreducible);
+    let subspace_basis = linearised_kernel_basis(&exps, kc.n, &kc.curve.irreducible);
+    let subspace = span_f2(&subspace_basis, kc.n);
     if subspace.len() != (1usize << ell) {
         // Kernel dimension must equal deg f_j; anything else means the
         // factor did not divide x^n − 1 after all.
@@ -701,14 +738,16 @@ pub fn build_frobenius_factor_base(kc: &KoblitzCurve, index: usize) -> Option<Fr
         f_j,
         linearised_exponents: exps,
         subspace,
+        subspace_basis,
         points,
         orbits,
         orbit_of,
     })
 }
 
-/// Hashable identity of a point.
-fn point_key(p: &BinaryPoint) -> (BigUint, BigUint) {
+/// Hashable identity of a point — the key of
+/// [`FrobeniusFactorBase::index_map`].
+pub fn point_key(p: &BinaryPoint) -> (BigUint, BigUint) {
     match p {
         BinaryPoint::Infinity => (BigUint::zero(), BigUint::zero()),
         BinaryPoint::Affine { x, y } => {
@@ -745,6 +784,22 @@ pub struct KoblitzRelation {
 /// times — the enumeration analogue of the paper's trick of spreading
 /// the summands over `F_1, π(F_1), …, π^{m−1}(F_1)` and rewriting
 /// everything back into `F_1`.
+/// **Exhaustive decomposition** (the reference oracle): search ordered
+/// tuples of factor-base points for `R = P_1 + … + P_m`.
+///
+/// Costs `|F|^{m−1}` group operations per target whether or not a
+/// decomposition exists.  [`groebner_decompose`] answers the same
+/// question algebraically; the two are cross-checked in the tests.
+pub fn enumerate_decompose(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    target: &BinaryPoint,
+    m: usize,
+) -> Option<Vec<usize>> {
+    decompose(kc, fb, index_of, target, m, 0)
+}
+
 fn decompose(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -773,6 +828,135 @@ fn decompose(
         }
     }
     None
+}
+
+/// How the decomposition oracle answers "is `R` a sum of `m`
+/// factor-base points?".
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DecompositionStrategy {
+    /// Weil-restrict the Semaev condition `S₃ = 0` to a quadratic
+    /// Boolean system over the factor-base subspace and solve it with a
+    /// Gröbner basis — the step that makes the real algorithm
+    /// sub-exponential.  See
+    /// [`crate::cryptanalysis::koblitz_groebner`].
+    Groebner,
+    /// Exhaustive ordered-tuple search over the materialised factor
+    /// base.  Costs `|F|^{m−1}` group operations per target whether or
+    /// not a decomposition exists; kept as the reference oracle the
+    /// algebraic one is tested against.
+    Enumerate,
+}
+
+/// Lift a tuple of candidate `x`-coordinates to factor-base points
+/// whose sum really is `target`.
+///
+/// `S₃ = 0` constrains abscissae only, so it pins the summands down to
+/// sign: each `x` admits up to two points `(x, y)` and `(x, x+y)`, both
+/// of which lie in the (negation-closed) factor base.  This walks the
+/// `≤ 2^m` sign choices and returns the first that closes the group
+/// identity, so a spurious root of the polynomial system can never
+/// become a relation.
+fn lift_candidate(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    xs: &[F2mElement],
+    target: &BinaryPoint,
+) -> Option<Vec<usize>> {
+    fn walk(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        index_of: &HashMap<(BigUint, BigUint), usize>,
+        xs: &[F2mElement],
+        depth: usize,
+        acc: &BinaryPoint,
+        chosen: &mut Vec<usize>,
+        target: &BinaryPoint,
+    ) -> bool {
+        if depth == xs.len() {
+            return acc == target;
+        }
+        for p in points_with_x(&kc.curve, &xs[depth]) {
+            let idx = match index_of.get(&point_key(&p)) {
+                Some(i) => *i,
+                None => continue,
+            };
+            chosen.push(idx);
+            let next = kc.add(acc, &fb.points[idx]);
+            if walk(kc, fb, index_of, xs, depth + 1, &next, chosen, target) {
+                return true;
+            }
+            chosen.pop();
+        }
+        false
+    }
+
+    let mut chosen = Vec::with_capacity(xs.len());
+    if walk(
+        kc,
+        fb,
+        index_of,
+        xs,
+        0,
+        &BinaryPoint::Infinity,
+        &mut chosen,
+        target,
+    ) {
+        chosen.sort_unstable();
+        Some(chosen)
+    } else {
+        None
+    }
+}
+
+/// **Algebraic decomposition**: solve the Semaev system for
+/// `R = P_1 + … + P_m` over the factor base.
+///
+/// Returns the factor-base indices of a decomposition, plus the solver
+/// statistics, or `None` when the system has no root that lifts.  A
+/// `None` from a completed solve is a *proof* that no decomposition
+/// exists over this factor base; a `None` with `stats.exhausted` set
+/// only means the node budget ran out.
+pub fn groebner_decompose(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return (None, SolveStats::default()),
+    };
+    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+        Some(sys) => sys,
+        None => return (None, SolveStats::default()),
+    };
+    // A root of S₃ fixes the summands only up to sign, so some roots do
+    // not lift.  Lift each as it is found and stop at the first that
+    // closes the group identity.
+    let opts = SolveOptions {
+        engine,
+        max_solutions: usize::MAX,
+        node_budget,
+    };
+    let mut found: Option<Vec<usize>> = None;
+    let (_, stats) = solve_boolean_system_filtered(&sys.equations, sys.n_vars, &opts, |root| {
+        let xs: Vec<F2mElement> = (0..m)
+            .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
+            .collect();
+        match lift_candidate(kc, fb, index_of, &xs, target) {
+            Some(idxs) => {
+                found = Some(idxs);
+                true
+            }
+            None => false,
+        }
+    });
+    (found, stats)
 }
 
 /// Turn a decomposition into a relation row over the orbit unknowns.
@@ -826,6 +1010,15 @@ pub struct KoblitzIcOptions {
     pub max_trials: usize,
     /// Seed for the `(a, b)` sampler, so runs are reproducible.
     pub seed: u64,
+    /// How to answer the decomposition question.
+    pub strategy: DecompositionStrategy,
+    /// Which algebraic engine reduces the Semaev system.  Ignored by
+    /// [`DecompositionStrategy::Enumerate`].
+    pub engine: SolverEngine,
+    /// Splitting nodes (Gröbner-basis computations) one decomposition
+    /// may spend before it gives up.  Ignored by
+    /// [`DecompositionStrategy::Enumerate`].
+    pub node_budget: usize,
 }
 
 impl Default for KoblitzIcOptions {
@@ -836,6 +1029,9 @@ impl Default for KoblitzIcOptions {
             extra_relations: 4,
             max_trials: 20_000,
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
+            strategy: DecompositionStrategy::Groebner,
+            engine: SolverEngine::default(),
+            node_budget: 4096,
         }
     }
 }
@@ -856,6 +1052,12 @@ pub struct KoblitzIcReport {
     pub trials: usize,
     /// Recovered discrete logarithm, if the run succeeded.
     pub log: Option<BigUint>,
+    /// Algebraic reductions (F4 passes or Gröbner bases) computed
+    /// across every decomposition attempt.
+    pub reductions: usize,
+    /// Decomposition branches closed by a basis reducing to `{1}` —
+    /// targets rejected algebraically instead of by search.
+    pub infeasible_branches: usize,
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -873,10 +1075,7 @@ pub fn koblitz_index_calculus_dlp(
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
 
-    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
-    for (i, p) in fb.points.iter().enumerate() {
-        index_of.insert(point_key(p), i);
-    }
+    let index_of = fb.index_map();
 
     let mut report = KoblitzIcReport {
         factor_base_size: fb.points.len(),
@@ -885,11 +1084,14 @@ pub fn koblitz_index_calculus_dlp(
         relations: 0,
         trials: 0,
         log: None,
+        reductions: 0,
+        infeasible_branches: 0,
     };
     if fb.points.is_empty() {
         return Some(report);
     }
 
+    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let wanted = fb.orbits.len() + opts.extra_relations;
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
     let mut rng = StdRng::seed_from_u64(opts.seed);
@@ -912,7 +1114,25 @@ pub fn koblitz_index_calculus_dlp(
             continue;
         }
 
-        if let Some(idxs) = decompose(kc, &fb, &index_of, &target, opts.m, 0) {
+        let found = match opts.strategy {
+            DecompositionStrategy::Enumerate => decompose(kc, &fb, &index_of, &target, opts.m, 0),
+            DecompositionStrategy::Groebner => {
+                let (idxs, stats) = groebner_decompose(
+                    kc,
+                    &fb,
+                    &index_of,
+                    &field,
+                    &target,
+                    opts.m,
+                    opts.engine,
+                    opts.node_budget,
+                );
+                report.reductions += stats.reductions;
+                report.infeasible_branches += stats.infeasible_branches;
+                idxs
+            }
+        };
+        if let Some(idxs) = found {
             relations.push(relation_from_decomposition(kc, &fb, &idxs, &a, &b));
         }
     }
@@ -1181,6 +1401,182 @@ mod tests {
             rhs = (rhs + coeff * x_o) % r;
         }
         assert_eq!(lhs, rhs);
+    }
+
+    #[test]
+    fn both_oracles_answer_every_target_identically() {
+        // The algebraic oracle must agree with exhaustive search on
+        // *both* answers: same decomposability verdict, and whatever it
+        // returns must be a genuine decomposition.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        let mut agreed = 0;
+        let mut decomposable = 0;
+        for k in 1..40u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let by_search = enumerate_decompose(&kc, &fb, &index_of, &target, 2);
+            let (by_algebra, stats) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::default(),
+                20_000,
+            );
+            assert!(!stats.exhausted, "budget should suffice at n = 9");
+            assert_eq!(
+                by_search.is_some(),
+                by_algebra.is_some(),
+                "oracles disagree on [{k}]G"
+            );
+            if let Some(idxs) = by_algebra {
+                decomposable += 1;
+                // Whatever it returned must actually sum to the target.
+                let mut acc = BinaryPoint::Infinity;
+                for i in &idxs {
+                    acc = kc.add(&acc, &fb.points[*i]);
+                }
+                assert_eq!(acc, target, "algebraic decomposition of [{k}]G is wrong");
+            }
+            agreed += 1;
+        }
+        assert_eq!(agreed, 39);
+        assert!(decomposable > 0, "some targets must decompose");
+    }
+
+    #[test]
+    fn chained_s3_handles_three_summands() {
+        // m ≥ 3 chains S₃ over intermediate field unknowns instead of
+        // resolving S_{m+1}; check the chain against exhaustive search.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        for k in [5u32, 29, 88] {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let by_search = enumerate_decompose(&kc, &fb, &index_of, &target, 3);
+            let (by_algebra, _) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                3,
+                SolverEngine::default(),
+                50_000,
+            );
+            assert_eq!(by_search.is_some(), by_algebra.is_some(), "3-point, [{k}]G");
+            if let Some(idxs) = by_algebra {
+                assert_eq!(idxs.len(), 3);
+                let mut acc = BinaryPoint::Infinity;
+                for i in &idxs {
+                    acc = kc.add(&acc, &fb.points[*i]);
+                }
+                assert_eq!(acc, target);
+            }
+        }
+    }
+
+    #[test]
+    fn the_two_algebraic_engines_agree() {
+        // Matrix-F4 and textbook Buchberger must reach the same verdict;
+        // only the cost differs.
+        let kc = KoblitzCurve::new(1, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        for k in 1..6u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let (f4, _) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                20_000,
+            );
+            let (bb, _) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::Buchberger,
+                20_000,
+            );
+            assert_eq!(f4.is_some(), bb.is_some(), "engines disagree on [{k}]G");
+        }
+    }
+
+    #[test]
+    fn undecomposable_targets_are_rejected_algebraically() {
+        // The point of the Gröbner step: a target with no decomposition
+        // is *refuted* by the algebra — the reduction produces the
+        // constant 1 — rather than by searching the factor base.
+        //
+        // `K_0 / F_2^7` is the clean case: its invariant subspace has 8
+        // elements but only one of them is the abscissa of a curve
+        // point, so no target decomposes at all.
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        assert_eq!(fb.points.len(), 1, "the degenerate factor base");
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+
+        let mut certified = 0;
+        for k in 1..29u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            assert!(enumerate_decompose(&kc, &fb, &index_of, &target, 2).is_none());
+            let (out, stats) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::default(),
+                20_000,
+            );
+            assert!(out.is_none(), "[{k}]G must not decompose");
+            assert!(
+                stats.infeasible_branches > 0,
+                "[{k}]G should be closed by an infeasibility certificate"
+            );
+            assert_eq!(stats.splits, 0, "no search should have been needed");
+            certified += 1;
+        }
+        assert_eq!(certified, 28);
+    }
+
+    #[test]
+    fn solves_the_dlp_by_enumeration_too() {
+        // The reference oracle drives the same solver to the same log.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let g = kc.generator().clone();
+        let d = BigUint::from(53u32);
+        let q = kc.mul(&g, &d);
+        let opts = KoblitzIcOptions {
+            strategy: DecompositionStrategy::Enumerate,
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp(&kc, &q, &opts).unwrap();
+        assert_eq!(report.log, Some(d));
+        // No algebra ran on this path.
+        assert_eq!(report.reductions, 0);
     }
 
     #[test]

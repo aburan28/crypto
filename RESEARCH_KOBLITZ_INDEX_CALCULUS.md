@@ -1,7 +1,9 @@
 # Index calculus on Koblitz curves with Frobenius-invariant factor bases
 
-**Module:** `src/cryptanalysis/koblitz_index_calculus.rs`
-**Demo:**   `cargo run --release --example koblitz_index_calculus_demo`
+**Modules:** `src/cryptanalysis/koblitz_index_calculus.rs`,
+`src/cryptanalysis/koblitz_groebner.rs`
+**Demos:**   `cargo run --release --example koblitz_index_calculus_demo`,
+`cargo run --release --example koblitz_semaev_groebner_demo`
 **Paper:**  S. D. Galbraith, R. Granger, S.-P. Merz, C. Petit,
 *On index calculus algorithms for subfield curves*, SAC 2020
 (ePrint 2020/1315).
@@ -98,6 +100,8 @@ the sizes anyone deploys.
 
 Real:
 
+- the Semaev/Weil-restriction decomposition oracle solved by matrix-F4,
+  cross-checked target by target against exhaustive search;
 - the invariant factor base from linearised polynomials, verified
   `π(F) = F` point by point;
 - the orbit decomposition and the `λ^k` relation rewriting, verified
@@ -108,25 +112,99 @@ Real:
 
 Not real:
 
-- **the decomposition oracle.**  GGMP answer "is `R` a sum of `m`
-  factor-base points?" by solving a Semaev/Weil-restriction polynomial
-  system with F4/F5 — that is what makes the algorithm sub-exponential,
-  and what the `m!` saving acts on.  Here the same question is answered
-  by an ordered-tuple search over the materialised factor base, which
-  is correct but exponential in `m`.  Wiring `groebner_f4` /
-  `binary_semaev` into `decompose()` is the obvious next step, and is
-  also the paper's own open problem ("how to exploit the block and
-  homogeneous structure of the polynomial systems arising from
-  Frobenius invariant factor bases").
 - **anything at deployed sizes.**  `n ≤ 24`: the factor base is
   materialised and `#E` is factored by trial division.
+- **the Gröbner engine's constants** — see below.
+
+## The decomposition oracle: Semaev + matrix-F4
+
+The question `is R = P_1 + … + P_m with all P_i ∈ F?` is answered two
+ways, and the tests assert the two always agree:
+
+- `DecompositionStrategy::Enumerate` — ordered-tuple search over the
+  materialised factor base, `|F|^{m−1}` group operations per target.
+- `DecompositionStrategy::Groebner` (default) — the real algorithm's
+  oracle, in `koblitz_groebner.rs`.
+
+The algebraic path, for `m = 2`:
+
+1. `S₃(x₁, x₂, x(R)) = (x₁+x₂)²x(R)² + x₁x₂x(R) + (x₁x₂)² + b = 0`
+   is the vanishing condition for `±P₁ ± P₂ ± R = O`.
+2. Write `x_i = Σ_t u_{i,t} b_t` over an `F_2`-basis of the invariant
+   subspace `V`.  Restricting the unknowns to `V` is what makes the
+   system solvable — and it keeps the system **quadratic**, because
+   squaring is `F_2`-linear in characteristic 2 (and in the Boolean
+   quotient `p² = p`, so a symbolic square is a permutation of
+   coordinates), while `x₁x₂` is bilinear.
+3. Weil-restrict: one `F_{2^n}`-equation becomes `n` Boolean equations
+   in `m·ℓ` unknowns.  For `m ≥ 3`, `S₃` is *chained* rather than
+   resolved (`S_k` has degree `2^{k−2}` per variable) — `m` summands
+   become `m−1` links over `m−2` intermediate field unknowns.
+4. Solve by matrix-F4 with splitting: reduce the Macaulay matrix at
+   degree `2, 3, …`; a reduction yielding the constant `1` refutes the
+   branch; rows collapsed to `v_i (+1)` are propagated; where the
+   algebra stalls, split on the lowest free variable.  Roots are lifted
+   back to points — `S₃` fixes the summands only up to sign — and the
+   group identity re-checked, so no spurious relation can escape.
+
+For `K_0 / F_2^9`: 12 unknowns, 9 equations, degree 2.
+
+```
+  matrix-F4 at degree 2:    8 reduced rows in  33.02µs
+  matrix-F4 at degree 3:  104 reduced rows in 311.54µs
+  matrix-F4 at degree 4:  584 reduced rows in   4.03ms
+```
+
+### Two engines
+
+`SolverEngine::Buchberger` runs the repo's textbook Gröbner engine
+(`pq_groebner_f2`) at every node; `SolverEngine::MatrixF4` (default) runs
+the Macaulay linear algebra this module adds.  Same verdicts, measured
+on the same end-to-end DLP:
+
+| engine | time to solve `Q = [53]G` on `K_0 / F_2^9` |
+|--------|--------------------------------------------|
+| matrix-F4 | 21.5 ms |
+| Buchberger | 85.5 s |
+
+Buchberger chokes on the dense 12-variable system (~8 s for a single
+basis); F4's one linear-algebra pass over all products at bounded degree
+is the fix, and it is also what the real algorithm uses.
+
+### Where the algebra wins, and where it does not
+
+It refutes.  On `K_0 / F_2^7` the invariant subspace has 8 elements but
+only one is the abscissa of a curve point, so **no** target decomposes.
+All 28 targets are closed by an F4 infeasibility certificate, with zero
+branches searched — an answer exhaustive search cannot give in kind, only
+by exhausting the space.
+
+It does not, yet, win on wall-clock:
+
+```
+ [k]G        search     matrix-F4     verdict
+    3       19.10µs        1.86ms   both: yes
+   17       42.12µs        1.53ms   both: yes
+   53       17.64µs        2.08ms   both: yes
+  101       62.04µs        2.21ms   both: yes
+```
+
+At `|F| = 55` the search is `55` point additions and the Macaulay matrix
+already has 2325 columns.  The crossover is past what this module can
+materialise a factor base for (`|F| = 2^ℓ` points in memory, `ℓ = ord_n(2)`),
+so the honest statement is: the algebraic oracle is implemented, correct,
+and cross-checked, and it is the one that scales — cost governed by the
+degree of regularity rather than by `|F|` — but at `n ≤ 24` the brute
+oracle is faster and remains available.
 
 ## Open problems from the talk (unimplemented)
 
 - Couveignes–Lercier invariant factor bases via isogenies between
   algebraic tori and elliptic curves — a second, denser family.
 - Exploiting the block/homogeneous structure of the resulting
-  polynomial systems in the Gröbner step.
+  polynomial systems in the Gröbner step.  The systems are now actually
+  built (`koblitz_groebner`), so this is measurable rather than
+  hypothetical: the `m ≥ 3` chained systems are where it would pay.
 - Precise complexity estimates across characteristics.
 - Multiple invariant factor bases: a single one need not yield `n`
   *independent* relations, so the paper takes several.  The module
@@ -152,8 +230,27 @@ cargo test --release --lib cryptanalysis::koblitz_index_calculus
 - `subspace_is_closed_under_squaring`.
 - `relation_rows_are_consistent_with_the_orbit_logs` — a relation row
   checked against brute-forced logs.
-- `solves_the_dlp_on_k0_over_f512`, `solves_the_dlp_on_k1_over_f512`.
+- `solves_the_dlp_on_k0_over_f512`, `solves_the_dlp_on_k1_over_f512`
+  (algebraic oracle), `solves_the_dlp_by_enumeration_too`.
+- `both_oracles_answer_every_target_identically` — 39 targets, same
+  verdict from search and algebra, and every algebraic decomposition
+  re-checked in the group.
+- `the_two_algebraic_engines_agree` — matrix-F4 vs Buchberger.
+- `undecomposable_targets_are_rejected_algebraically` — 28 refutations
+  with no branch searched.
 - `speedup_model_tracks_the_predicted_factors`.
+
+In `koblitz_groebner`:
+
+- `symbolic_mul_matches_field_mul`, `symbolic_square_matches_mul_by_self`,
+  `structure_constants_match_the_curve_field` — the Weil-restriction
+  arithmetic against the field's own.
+- `symbolic_s3_matches_scalar_s3` — the symbolic `S₃` against the scalar
+  one from `binary_semaev`.
+- `known_decomposition_is_a_root_of_the_system`, `system_is_quadratic`.
+- `splitting_solver_agrees_with_exhaustive_evaluation` — the solver's
+  roots against every point of `{0,1}^12`.
+- `infeasible_system_is_closed_by_the_basis`.
 
 ## References
 
@@ -168,3 +265,11 @@ cargo test --release --lib cryptanalysis::koblitz_index_calculus
   (2000).
 - N. Koblitz, *CM-curves with good cryptographic properties*, CRYPTO
   1991.
+- J.-C. Faugère, L. Perret, C. Petit, G. Renault, *Improving the
+  complexity of index calculus algorithms in elliptic curves over binary
+  fields*, EUROCRYPT 2012 — the Weil-restriction-to-Boolean-system
+  analysis the decomposition oracle implements.
+- J.-C. Faugère, *A new efficient algorithm for computing Gröbner bases
+  (F4)*, J. Pure Appl. Algebra 139 (1999).
+- G. Bard, *Algebraic Cryptanalysis*, Springer 2009, ch. 13 — the
+  Boolean-ring representation.
