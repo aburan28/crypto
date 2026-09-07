@@ -67,7 +67,13 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -lineinfo -Xcompiler -O3 \
 	    -Xcompiler -fopenmp src/main.cu -o $@ -lgomp
 
-test: ecc2k130-cpu
+# Modal entry-point parameters must survive the trip through click; see
+# codegen/checkcli.py.  Cheap, needs nothing installed, and the failure it
+# catches is otherwise invisible until someone runs that entry point.
+check-cli:
+	python3 codegen/checkcli.py modal_app.py
+
+test: check-cli ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -126,4 +132,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli cpu gpu test break-small bench bench95 ptx check-cuda modal clean
