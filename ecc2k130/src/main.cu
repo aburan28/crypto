@@ -677,6 +677,19 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         if (o.loadMax && reloaded >= o.loadMax) { skippedFiles = corpus.size() - ci; break; }
         FILE *in = fopen(corpus[ci].c_str(), "rb");
         if (!in) continue;
+        // A single --dp-file is append-only across passes, so the newest
+        // records sit at the end.  When the remaining cap is smaller than
+        // the file, start there rather than keeping the oldest prefix.
+        if (o.loadMax && reloaded < o.loadMax && fseek(in, 0, SEEK_END) == 0) {
+            const long sz = ftell(in);
+            unsigned long long skip = 0;
+            if (sz > 0) {
+                const unsigned long long nrec = (unsigned long long)sz / sizeof(DpFileRecord);
+                const unsigned long long remain = o.loadMax - (unsigned long long)reloaded;
+                if (nrec > remain) skip = nrec - remain;
+            }
+            if (fseek(in, (long)(skip * sizeof(DpFileRecord)), SEEK_SET) != 0) rewind(in);
+        }
         DpFileRecord fr;
         while (fread(&fr, sizeof fr, 1, in) == 1) {
             if (o.loadMax && reloaded >= o.loadMax) break;

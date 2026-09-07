@@ -93,7 +93,7 @@ static const char *INSTANCE_K[8] = {
     "512",
 };
 
-// mulLeaf: 166 instructions (276 two-input bit operations), 42 locals
+// mulLeaf: 166 instructions (276 two-input bit operations), 42 locals, 42 live at the peak
 template <class W> ECC_BIG void mulLeaf(const W *a, const W *b, W *o) {
     W t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35, t36, t37, t38, t39, t40, t41;
     t0 = a[0] ^ a[7];
@@ -289,7 +289,7 @@ template <class W> ECC_BIG void mulLeaf(const W *a, const W *b, W *o) {
     o[18] = t28;
 }
 
-// reduce: 26 instructions (48 two-input bit operations), 6 locals
+// reduce: 26 instructions (48 two-input bit operations), 6 locals, 14 live at the peak
 template <class W> ECC_BIG void reduce(const W *h, W *o) {
     W t0, t1, t2, t3, t4, t5;
     t0 = h[15] ^ h[24];
@@ -333,7 +333,7 @@ template <class W> ECC_BIG void reduce(const W *h, W *o) {
     o[1] = t3;
 }
 
-// sqr: 16 instructions (24 two-input bit operations), 3 locals
+// sqr: 16 instructions (24 two-input bit operations), 3 locals, 13 live at the peak
 template <class W> ECC_BIG void sqr(const W *a, W *o) {
     W t0, t1, t2;
     t0 = a[7] ^ a[12];
@@ -367,7 +367,7 @@ template <class W> ECC_BIG void sqr(const W *a, W *o) {
     o[1] = t0;
 }
 
-// hamming: 51 instructions (103 two-input bit operations), 15 locals
+// hamming: 51 instructions (103 two-input bit operations), 15 locals, 15 live at the peak
 template <class W> ECC_BIG void hamming(const W *x, W *o) {
     W t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14;
     t0 = x[0] ^ x[1];

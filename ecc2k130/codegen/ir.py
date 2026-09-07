@@ -126,6 +126,35 @@ class Prog:
                 out.append(i)
         return out
 
+    def peakLive(self, roots):
+        """High-water mark of simultaneously live values, in the order emit()
+        will use.  This is what decides whether a routine fits the register
+        file: past it the compiler starts spilling, and a spilled value costs
+        two memory instructions every time it is touched."""
+        rc = self.refCounts(roots)
+        order = [i for i in range(len(self.ops)) if self.ops[i] is not None and rc[i] > 0]
+        inOrder = set(order)
+        rootSet = set(r for r in roots if r is not None)
+        uses = {}
+        for i in order:
+            for a in self.ops[i][1]:
+                if self.inputRef[a] is None and a in inOrder:
+                    uses[a] = uses.get(a, 0) + 1
+        for a in rootSet:
+            if self.inputRef[a] is None:
+                uses[a] = uses.get(a, 0) + 1
+        live, peak = set(), 0
+        for i in order:
+            for a in self.ops[i][1]:
+                if a in live:
+                    uses[a] -= 1
+                    if uses[a] == 0:
+                        live.discard(a)
+            live.add(i)
+            if len(live) > peak:
+                peak = len(live)
+        return peak
+
     def opCount(self, roots):
         rc = self.refCounts(roots)
         n = 0

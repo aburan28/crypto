@@ -45,8 +45,15 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
 
 all: cpu
 
+# The generated leaf is sized to a register file: the largest halving-chain
+# multiply whose peak liveness still fits REGS live values.  255 is a GPU's
+# register budget and gives a 66-word leaf at m=131; a host has 16 general
+# registers, so REGS=32 is the number to regenerate with when tuning the CPU
+# reference build, and the two targets genuinely do not want the same leaf.
+REGS ?= 255
+
 generate:
-	cd codegen && python3 gen.py --out ../generated
+	cd codegen && python3 gen.py --out ../generated --regs $(REGS)
 
 cpu: ecc2k130-cpu
 
