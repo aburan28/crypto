@@ -621,9 +621,9 @@ def validate(gpu: str = ""):
 
 @app.local_entrypoint()
 def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
-          minBlocks: int = 2, steps: int = 64, launches: int = 20):
+          min_blocks: int = 2, steps: int = 64, launches: int = 20):
     r = onGpu(runBench, gpu).remote(batch=batch, threads=threads, leaf=leaf,
-                                    minBlocks=minBlocks, steps=steps, launches=launches)
+                                    minBlocks=min_blocks, steps=steps, launches=launches)
     print(json.dumps({k: v for k, v in r.items() if k != "raw"}, indent=2))
     if "raw" in r:
         print(r["raw"])
@@ -631,32 +631,32 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 
 @app.local_entrypoint()
 def autotune(gpu: str = "", batches: str = "8,16,32,64",
-             threadCounts: str = "64,128,256", leaves: str = "0,17,33,66",
-             minBlocksList: str = "2,4,8"):
-    r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=threadCounts,
-                                       leaves=leaves, minBlocksList=minBlocksList)
+             thread_counts: str = "64,128,256", leaves: str = "0,17,33,66",
+             min_blocks_list: str = "2,4,8"):
+    r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=thread_counts,
+                                       leaves=leaves, minBlocksList=min_blocks_list)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
-           threads: int = 128, leaf: int = 0, dpWeight: int = -1, runId: int = 1,
-           walks: int = 4000000, loadMax: int = 50000000):
+           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
+           walks: int = 4000000, load_max: int = 50000000):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
-                                     threads=threads, leaf=leaf, dpWeight=dpWeight,
-                                     runId=runId, walksTarget=walks, loadMax=loadMax)
+                                     threads=threads, leaf=leaf, dpWeight=dp_weight,
+                                     runId=run_id, walksTarget=walks, loadMax=load_max)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
-           batch: int = 8, threads: int = 128, leaf: int = 0, dpWeight: int = -1,
-           walks: int = 4000000, loadMax: int = 50000000):
+           batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
+           walks: int = 4000000, load_max: int = 50000000):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dpWeight, runId=i + 1, walksTarget=walks, loadMax=loadMax)
+                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))

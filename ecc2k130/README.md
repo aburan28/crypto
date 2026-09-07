@@ -244,6 +244,21 @@ Four threads reach 40 M iterations/s. For comparison, the 2009 hand-written
 qhasm implementation reached 533 cycles/iteration on a Core 2 with 128-bit
 vectors.
 
+On Apple Silicon (M4 Pro, 10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained,
+`--steps 8192 --launches 8`):
+
+| threads | BATCH=32 | BATCH=64 | BATCH=96 |
+|---|---|---|---|
+| 4  |  ~10 M  |  ~10 M  |  ~10 M  |
+| 8  |  ~19 M  |  ~19 M  |  ~19 M  |
+| 14 |  ~33 M  |  ~34 M  |  ~34 M  |
+
+The 64-bit lane path autovectorizes into NEON 64-bit pairs under `-O3`, which
+is worth about 25% on this hardware. Throughput peaks near the DRAM ceiling
+(roughly 270 GB/s on M4 Pro, 8 MB/iteration at 14 threads x BATCH=64). The
+default `BATCH=32` is near-optimal; `OMP_PROC_BIND=close OMP_PLACES=cores`
+recovers another ~5% on the host OpenMP runtime.
+
 The batch size matters more than cache pressure would suggest: going from 4 to
 32 walks per inversion is worth 60% because it drives the amortised inversion
 from 25% of the multiplication budget down to 3%.
@@ -496,13 +511,31 @@ and `--leaf` to the generator (Karatsuba leaf size).
 ./ecc2k130 --curve 131 --dp-file dps.bin --checkpoint state.ck   # collect
 ```
 
+### Building on macOS
+
+`make cpu` defaults to `CXX=g++`, but on macOS that resolves to Apple's
+clang, which has no `-fopenmp`. Use the Homebrew toolchain:
+
+```
+make cpu CXX="/opt/homebrew/bin/g++-16 -isysroot $(xcrun --show-sdk-path)"
+```
+
+The CUDA targets (`make gpu`, `make ptx`, `make check-cuda`) need a CUDA
+toolchain, which is no longer published for macOS — see the Modal section
+above for the supported path.
+
 ## What is not done
 
-* No GPU run from here. Throughput on real hardware is unmeasured; the Modal
-  app is the way to get it. The §6 layout question — one thread per bitsliced
-  multiply versus 32 threads cooperating — is only partly answered: the register
-  data says the leaf fits comfortably, but the 16.4 KB per-thread stack frame
-  means occupancy needs measurement.
+* Throughput on real hardware is unmeasured. The client has now run on an
+  RTX PRO 6000 Blackwell (sm_120): the whole validation suite passes there and
+  every planted discrete logarithm is recovered on the device itself, through
+  both backends. What has not been measured is how fast it walks. `bench` is
+  the number that settles that, and `autotune` decides the build knobs —
+  including whether the register-budget leaf, which is chosen from static ptxas
+  analysis and measures *worse* on the host, is right on a GPU. The §6 layout
+  question — one thread per bitsliced multiply versus 32 threads cooperating —
+  is likewise only partly answered: the register data says the leaf fits, but
+  the 16 KB per-thread stack frame means occupancy needs measurement.
 * The multiplier is optimal only within the Karatsuba family. Toom-3 over
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the
