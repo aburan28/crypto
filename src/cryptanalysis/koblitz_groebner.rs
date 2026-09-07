@@ -497,7 +497,38 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
     if polys.is_empty() {
         return Some(Vec::new());
     }
-    // Rows: p · m for every monomial m with deg(p·m) ≤ degree.
+    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    if matrix.is_empty() {
+        return Some(Vec::new());
+    }
+    let rank = rref_f2(&mut matrix, cols.len());
+
+    let n_vars_out = polys[0].n_vars;
+    let words = cols.len().div_ceil(64);
+    let _ = words;
+    let mut out = Vec::with_capacity(rank);
+    for row in matrix.iter().take(rank) {
+        let monos: Vec<F2BoolMono> = (0..cols.len())
+            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
+            .map(|c| F2BoolMono::from_mask(cols[c]))
+            .collect();
+        if !monos.is_empty() {
+            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+        }
+    }
+    Some(out)
+}
+
+/// Build the Macaulay matrix: every product `p · m` with
+/// `deg(p·m) ≤ degree`, as bit-rows over the monomials that occur.
+///
+/// Returns the column monomials (DegRevLex descending) and the rows.
+/// `None` if the matrix would exceed the size limits.
+fn build_macaulay(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
     for p in polys {
         let pdeg = p
@@ -536,10 +567,9 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
         }
     }
     if rows_monos.is_empty() {
-        return Some(Vec::new());
+        return Some((Vec::new(), Vec::new()));
     }
 
-    // Columns: the monomials that actually occur, DegRevLex descending.
     let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
     cols.sort_unstable();
     cols.dedup();
@@ -551,7 +581,7 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
 
     let words = cols.len().div_ceil(64);
-    let mut matrix: Vec<Vec<u64>> = rows_monos
+    let matrix: Vec<Vec<u64>> = rows_monos
         .iter()
         .map(|monos| {
             let mut row = vec![0u64; words];
@@ -562,10 +592,15 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
             row
         })
         .collect();
+    Some((cols, matrix))
+}
 
-    // Reduced row echelon form over F_2.
+/// Reduced row echelon form over `F_2`; returns the rank, with the
+/// pivot rows moved to the front of `matrix`.
+fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
-    for c in 0..cols.len() {
+    for c in 0..n_cols {
         let (w, bit) = (c / 64, 1u64 << (c % 64));
         let piv = (pivot_row..matrix.len()).find(|&r| matrix[r][w] & bit != 0);
         let piv = match piv {
@@ -585,19 +620,85 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
             break;
         }
     }
+    pivot_row
+}
 
-    let n_vars_out = polys[0].n_vars;
-    let mut out = Vec::with_capacity(pivot_row);
-    for row in matrix.iter().take(pivot_row) {
-        let monos: Vec<F2BoolMono> = (0..cols.len())
-            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-            .map(|c| F2BoolMono::from_mask(cols[c]))
-            .collect();
-        if !monos.is_empty() {
-            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
-        }
+// ── Macaulay profile / first fall degree ───────────────────────────
+
+/// Rank measurement of one Macaulay matrix.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MacaulayProfile {
+    /// Degree the matrix was built at.
+    pub degree: u32,
+    /// Rows actually constructed.
+    pub rows: usize,
+    /// Distinct monomials occurring, i.e. columns.
+    pub cols: usize,
+    /// Rank over `F_2`.
+    pub rank: usize,
+}
+
+impl MacaulayProfile {
+    /// `rows − rank`: the number of independent syzygies among the
+    /// Macaulay-shifted equations at this degree.
+    pub fn syzygies(&self) -> usize {
+        self.rows.saturating_sub(self.rank)
     }
-    Some(out)
+}
+
+/// Rank profile of the Macaulay matrix of `polys` at one degree.
+pub fn macaulay_profile(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<MacaulayProfile> {
+    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    let rows = matrix.len();
+    let rank = if matrix.is_empty() {
+        0
+    } else {
+        rref_f2(&mut matrix, cols.len())
+    };
+    Some(MacaulayProfile {
+        degree,
+        rows,
+        cols: cols.len(),
+        rank,
+    })
+}
+
+/// **First fall degree** of `polys`: the smallest `D ≥ 2` whose Macaulay
+/// matrix has `rank < rows` *and* `rank < cols` — a non-trivial syzygy
+/// appears and the system has not saturated.
+///
+/// This is the same operational definition
+/// [`crate::cryptanalysis::ffd_harness`] uses for the full-field
+/// Weil descent of `S₃`, so the numbers are directly comparable: that
+/// harness measures the `2n`-variable system, this one the system
+/// restricted to a Frobenius-invariant subspace, which is the version
+/// the subfield-curve attack actually solves.
+///
+/// Returns the fall degree (if any up to `d_max`) and the per-degree
+/// profiles.  A profile is omitted for degrees whose matrix exceeded
+/// the size limits.
+pub fn first_fall_degree(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_max: u32,
+) -> (Option<u32>, Vec<MacaulayProfile>) {
+    let mut fall = None;
+    let mut profiles = Vec::new();
+    for d in 2..=d_max {
+        let prof = match macaulay_profile(polys, n_vars, d) {
+            Some(p) => p,
+            None => break,
+        };
+        if fall.is_none() && prof.rank < prof.rows && prof.rank < prof.cols {
+            fall = Some(d);
+        }
+        profiles.push(prof);
+    }
+    (fall, profiles)
 }
 
 // ── Gröbner solve with splitting ───────────────────────────────────
