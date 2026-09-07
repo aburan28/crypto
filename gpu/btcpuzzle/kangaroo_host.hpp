@@ -291,7 +291,7 @@ struct KangarooHost {
     }
 
     /* Mean number of group operations a solve is expected to take. */
-    double expected_steps() const { return 2.0 * ldexp(1.0, (int)prm.w_bits / 2); }
+    double expected_steps() const { return 2.0 * exp2(prm.w_bits / 2.0); }
 
     static std::string key_of(const kg_dp &d) {
         return std::string((const char *)d.x, sizeof(d.x));
