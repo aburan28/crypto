@@ -122,6 +122,50 @@ pub struct Solver {
     /// Set when `add_clause` detects UNSAT (empty clause or
     /// conflict-on-unit).  `solve()` short-circuits to UNSAT when set.
     is_unsat: bool,
+    /// Native XOR (parity) constraints, held *outside* the CNF.  Each
+    /// row is `(variable-set bitmask, right-hand side)`, meaning
+    /// `⊕_{v ∈ mask} x_v = rhs`.  See [`Solver::add_xor`].
+    xors: Vec<XorRow>,
+    /// Bumped on every assignment and every backjump.  Lets
+    /// [`Solver::propagate`] skip the Gauss-Jordan pass when nothing
+    /// has moved since the last one.
+    epoch: u64,
+    /// `epoch` as of the last completed Gauss-Jordan pass.
+    xor_epoch: u64,
+}
+
+/// One parity constraint: `⊕_{v ∈ mask} x_v = rhs`, with `mask` a
+/// bitmask over 0-indexed variables.
+#[derive(Clone, Debug)]
+struct XorRow {
+    mask: Vec<u64>,
+    rhs: bool,
+}
+
+/// Outcome of one Gauss-Jordan pass over the XOR rows.
+enum XorStep {
+    /// Nothing new could be derived.
+    Fixpoint,
+    /// At least one literal was enqueued; re-run clause propagation.
+    Propagated,
+    /// A row is inconsistent; the payload is the index of a freshly
+    /// installed conflict clause, falsified by the current trail.
+    Conflict(usize),
+}
+
+#[inline]
+fn bs_words(n_vars: u32) -> usize {
+    (n_vars as usize + 63) / 64
+}
+
+#[inline]
+fn bs_get(mask: &[u64], v: u32) -> bool {
+    (mask[v as usize / 64] >> (v % 64)) & 1 == 1
+}
+
+#[inline]
+fn bs_flip(mask: &mut [u64], v: u32) {
+    mask[v as usize / 64] ^= 1u64 << (v % 64);
 }
 
 #[inline]
@@ -158,7 +202,63 @@ impl Solver {
             conflicts: 0,
             conflict_budget: u64::MAX,
             is_unsat: false,
+            xors: Vec::new(),
+            epoch: 0,
+            xor_epoch: u64::MAX,
         }
+    }
+
+    /// **Add a native XOR (parity) constraint** `x_{v₁} ⊕ … ⊕ x_{v_k}
+    /// = rhs`, with variables given 1-indexed exactly as in
+    /// [`Solver::add_clause`].  Returns `false` if the constraint is
+    /// trivially unsatisfiable (`0 = 1`).
+    ///
+    /// XOR rows are held outside the CNF and reasoned about by
+    /// Gauss-Jordan elimination in [`Solver::propagate`], rather than
+    /// being Tseitin-expanded into clauses.  This is the difference
+    /// between polynomial-time and exponential-time handling of a
+    /// dense parity constraint: resolution needs exponentially many
+    /// steps to refute one (Urquhart 1987), which is why a plain CDCL
+    /// stalls on Weil-descended Semaev systems.
+    ///
+    /// Duplicated variables cancel (`x ⊕ x = 0`), so the caller need
+    /// not deduplicate.
+    pub fn add_xor(&mut self, vars: &[u32], rhs: bool) -> bool {
+        let mut mask = vec![0u64; bs_words(self.n_vars)];
+        for &v in vars {
+            debug_assert!(v >= 1 && v <= self.n_vars, "xor var {v} out of range");
+            bs_flip(&mut mask, v - 1); // duplicates cancel
+        }
+        if mask.iter().all(|w| *w == 0) {
+            // Empty parity: `0 = rhs`.  Satisfiable iff rhs is false.
+            if rhs {
+                self.is_unsat = true;
+                return false;
+            }
+            return true;
+        }
+        self.xors.push(XorRow { mask, rhs });
+        self.xor_epoch = u64::MAX; // force a pass on the next propagate
+        true
+    }
+
+    /// Number of native XOR constraints installed.
+    pub fn n_xors(&self) -> usize {
+        self.xors.len()
+    }
+
+    /// Verify a model against the installed XOR rows.  The CNF part is
+    /// checked separately by [`check_model`].
+    pub fn check_xors(&self, model: &[bool]) -> bool {
+        self.xors.iter().all(|row| {
+            let mut parity = false;
+            for v in 0..self.n_vars {
+                if bs_get(&row.mask, v) && model[v as usize] {
+                    parity = !parity;
+                }
+            }
+            parity == row.rhs
+        })
     }
 
     /// Add a clause `lits` (DIMACS literal encoding). Returns false if
@@ -222,13 +322,175 @@ impl Solver {
                 self.reason[v] = r;
                 self.saved_phase[v] = !is_neg(lit);
                 self.trail.push(lit);
+                self.epoch += 1;
                 Ok(())
             }
         }
     }
 
-    /// Unit propagation. Returns `Some(clause_idx)` on conflict.
+    /// Propagate to fixpoint over *both* reasoning engines: watched-
+    /// literal unit propagation over the CNF, and Gauss-Jordan
+    /// elimination over the native XOR rows.  Each engine can feed the
+    /// other, so we alternate until neither derives anything new.
+    ///
+    /// Returns `Some(clause_idx)` on conflict.  For an XOR conflict the
+    /// index points at a freshly installed clause that is falsified by
+    /// the current trail, so `analyze()` and `backjump()` handle it with
+    /// no special-casing.
     fn propagate(&mut self) -> Option<usize> {
+        loop {
+            if let Some(c) = self.propagate_clauses() {
+                return Some(c);
+            }
+            if self.xors.is_empty() || self.epoch == self.xor_epoch {
+                // Nothing has moved since the last Gauss-Jordan pass.
+                return None;
+            }
+            self.xor_epoch = self.epoch;
+            match self.propagate_xors() {
+                XorStep::Conflict(idx) => return Some(idx),
+                XorStep::Propagated => continue,
+                XorStep::Fixpoint => return None,
+            }
+        }
+    }
+
+    /// One Gauss-Jordan pass over the XOR rows under the current trail.
+    ///
+    /// Each row carries the *full* variable set of its combination, and
+    /// its right-hand side is the combination's original rhs; the value
+    /// implied by the current assignment is therefore
+    /// `rhs ⊕ parity(mask ∩ assigned-true)`.  Because both mask and rhs
+    /// XOR when two rows are combined, that relation survives
+    /// elimination — which is what lets us read a reason clause straight
+    /// off a reduced row.
+    fn propagate_xors(&mut self) -> XorStep {
+        let words = bs_words(self.n_vars);
+        let mut rows = self.xors.clone();
+
+        // Forward elimination.  Processing rows in order and clearing
+        // each chosen pivot from *every* other row keeps the invariant
+        // that a pivot lives in exactly one row, so a single pass
+        // suffices.  Any pivot already claimed by an earlier row has
+        // been eliminated from this one by the time we reach it.
+        for i in 0..rows.len() {
+            let pivot = match self.lowest_unassigned(&rows[i].mask) {
+                Some(p) => p,
+                None => continue, // fully assigned: checked below
+            };
+            let (src_rhs, src_mask) = (rows[i].rhs, rows[i].mask.clone());
+            for j in 0..rows.len() {
+                if j == i || !bs_get(&rows[j].mask, pivot) {
+                    continue;
+                }
+                rows[j].rhs ^= src_rhs;
+                for w in 0..words {
+                    rows[j].mask[w] ^= src_mask[w];
+                }
+            }
+        }
+
+        // Read off conflicts and unit implications.
+        let mut propagated = false;
+        for row in &rows {
+            let mut unassigned: Option<u32> = None;
+            let mut extra_unassigned = false;
+            let mut parity = row.rhs;
+            for v in 0..self.n_vars {
+                if !bs_get(&row.mask, v) {
+                    continue;
+                }
+                match self.assignment[v as usize] {
+                    Some(true) => parity ^= true,
+                    Some(false) => {}
+                    None => {
+                        if unassigned.is_some() {
+                            extra_unassigned = true;
+                            break;
+                        }
+                        unassigned = Some(v);
+                    }
+                }
+            }
+            if extra_unassigned {
+                continue; // under-determined; nothing to derive yet
+            }
+            match unassigned {
+                None => {
+                    // Fully assigned.  `parity` is the residual: it must
+                    // be 0, or the row is violated.
+                    if parity {
+                        let clause = self.xor_reason_clause(&row.mask, None);
+                        let idx = self.clauses.len();
+                        self.clauses.push(clause);
+                        return XorStep::Conflict(idx);
+                    }
+                }
+                Some(x) => {
+                    // The row forces `x = parity`.
+                    let lit = if parity { (x + 1) as Lit } else { -((x + 1) as Lit) };
+                    if self.lit_value(lit) == Some(true) {
+                        continue; // already implied
+                    }
+                    let clause = self.xor_reason_clause(&row.mask, Some(lit));
+                    let idx = self.clauses.len();
+                    self.clauses.push(clause);
+                    if self.enqueue(lit, Reason::Propagated(idx)).is_err() {
+                        return XorStep::Conflict(idx);
+                    }
+                    propagated = true;
+                }
+            }
+        }
+
+        if propagated {
+            XorStep::Propagated
+        } else {
+            XorStep::Fixpoint
+        }
+    }
+
+    /// Lowest-numbered unassigned variable in `mask`, if any.
+    fn lowest_unassigned(&self, mask: &[u64]) -> Option<u32> {
+        for (w, &word) in mask.iter().enumerate() {
+            let mut bits = word;
+            while bits != 0 {
+                let b = bits.trailing_zeros();
+                bits &= bits - 1;
+                let v = (w * 64) as u32 + b;
+                if v < self.n_vars && self.assignment[v as usize].is_none() {
+                    return Some(v);
+                }
+            }
+        }
+        None
+    }
+
+    /// Build the clause witnessing what a reduced XOR row implies:
+    /// every assigned variable of the row appears negated-as-assigned,
+    /// so the clause is false under the current trail except for
+    /// `implied` (absent for a conflict clause, which is wholly false).
+    fn xor_reason_clause(&self, mask: &[u64], implied: Option<Lit>) -> Vec<Lit> {
+        let mut clause = Vec::new();
+        if let Some(l) = implied {
+            clause.push(l);
+        }
+        let implied_var = implied.map(var_of);
+        for v in 0..self.n_vars {
+            if !bs_get(mask, v) || Some(v) == implied_var {
+                continue;
+            }
+            match self.assignment[v as usize] {
+                Some(true) => clause.push(-((v + 1) as Lit)),
+                Some(false) => clause.push((v + 1) as Lit),
+                None => debug_assert!(false, "reason clause over an unassigned variable"),
+            }
+        }
+        clause
+    }
+
+    /// Unit propagation over the CNF. Returns `Some(clause_idx)` on conflict.
+    fn propagate_clauses(&mut self) -> Option<usize> {
         while self.qhead < self.trail.len() {
             let lit = self.trail[self.qhead];
             self.qhead += 1;
@@ -397,6 +659,7 @@ impl Solver {
         }
         self.trail_lim.truncate(level);
         self.qhead = target;
+        self.epoch += 1;
     }
 
     /// Pick an unassigned variable with the highest activity. Returns
@@ -590,6 +853,80 @@ pub fn parse_dimacs(input: &str) -> Result<Solver, String> {
     Ok(solver)
 }
 
+/// Parse an **extended DIMACS** string in which lines beginning with
+/// `x` are XOR (parity) constraints, as emitted by CryptoMiniSat and by
+/// the `EC-Index-Calculus-Benchmarks` generator.
+///
+/// The convention is that `x 1 2 3 0` means `x₁ ⊕ x₂ ⊕ x₃ = 1`, and
+/// each negated literal flips the right-hand side, so
+/// `x -1 2 3 0` means `x₁ ⊕ x₂ ⊕ x₃ = 0`.  Ordinary clause lines are
+/// parsed exactly as in [`parse_dimacs`].
+///
+/// XOR rows go to [`Solver::add_xor`] rather than being Tseitin-
+/// expanded, so the returned solver reasons about them by Gaussian
+/// elimination.
+pub fn parse_dimacs_xor(input: &str) -> Result<Solver, String> {
+    let mut n_vars: Option<u32> = None;
+    let mut clauses: Vec<Vec<Lit>> = Vec::new();
+    let mut xors: Vec<(Vec<u32>, bool)> = Vec::new();
+
+    for (lineno, line) in input.lines().enumerate() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('c') {
+            continue;
+        }
+        if line.starts_with("p ") {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() < 3 || parts[1] != "cnf" {
+                return Err(format!("line {}: bad header `{line}`", lineno + 1));
+            }
+            n_vars = Some(
+                parts[2]
+                    .parse()
+                    .map_err(|e| format!("line {}: {e}", lineno + 1))?,
+            );
+            continue;
+        }
+        let is_xor = line.starts_with('x');
+        let payload = if is_xor { &line[1..] } else { line };
+        let mut lits: Vec<Lit> = Vec::new();
+        for tok in payload.split_whitespace() {
+            let l: Lit = tok
+                .parse()
+                .map_err(|_| format!("line {}: bad literal `{tok}`", lineno + 1))?;
+            if l == 0 {
+                break;
+            }
+            lits.push(l);
+        }
+        if lits.is_empty() {
+            continue;
+        }
+        if is_xor {
+            // rhs starts true and flips once per negated literal.
+            let negations = lits.iter().filter(|l| **l < 0).count();
+            let rhs = negations % 2 == 0;
+            xors.push((lits.iter().map(|l| l.unsigned_abs()).collect(), rhs));
+        } else {
+            clauses.push(lits);
+        }
+    }
+
+    let n = n_vars.ok_or("missing `p cnf` header")?;
+    let mut solver = Solver::new(n);
+    for c in clauses {
+        if !solver.add_clause(c) {
+            break;
+        }
+    }
+    for (vars, rhs) in xors {
+        if !solver.add_xor(&vars, rhs) {
+            break;
+        }
+    }
+    Ok(solver)
+}
+
 /// Emit a DIMACS string for a solver's *original* clauses.
 pub fn to_dimacs(solver: &Solver) -> String {
     let mut s = format!("p cnf {} {}\n", solver.n_vars, solver.n_orig_clauses);
@@ -625,6 +962,153 @@ pub fn check_model(clauses: &[Vec<Lit>], model: &[bool]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ── native XOR reasoning ────────────────────────────────────────
+
+    /// `x₁ ⊕ x₂ = 1` and `x₂ ⊕ x₃ = 1` and `x₁ ⊕ x₃ = 1` is the odd-
+    /// cycle parity contradiction: summing all three rows gives `0 = 1`.
+    /// Gaussian elimination must see it; resolution would have to search.
+    #[test]
+    fn xor_odd_cycle_is_unsat() {
+        let mut s = Solver::new(3);
+        assert!(s.add_xor(&[1, 2], true));
+        assert!(s.add_xor(&[2, 3], true));
+        assert!(s.add_xor(&[1, 3], true));
+        assert_eq!(s.solve(), SolveResult::Unsat);
+    }
+
+    /// A triangular XOR system with a unique solution, derivable by
+    /// propagation alone (no decisions needed).
+    #[test]
+    fn xor_system_propagates_to_unique_solution() {
+        let mut s = Solver::new(3);
+        s.add_xor(&[1], true); //           x₁ = 1
+        s.add_xor(&[1, 2], false); //  x₁ ⊕ x₂ = 0  → x₂ = 1
+        s.add_xor(&[2, 3], true); //   x₂ ⊕ x₃ = 1  → x₃ = 0
+        assert_eq!(s.solve(), SolveResult::Sat);
+        let m = s.model();
+        assert_eq!((m[0], m[1], m[2]), (true, true, false));
+        assert!(s.check_xors(&m));
+    }
+
+    /// Duplicated variables inside one row must cancel: `x ⊕ x ⊕ y = 1`
+    /// is just `y = 1`.
+    #[test]
+    fn xor_duplicate_vars_cancel() {
+        let mut s = Solver::new(2);
+        assert!(s.add_xor(&[1, 1, 2], true));
+        assert_eq!(s.solve(), SolveResult::Sat);
+        assert!(s.model()[1], "y must be forced true");
+    }
+
+    /// `x ⊕ x = 1` reduces to `0 = 1` and is rejected at add time.
+    #[test]
+    fn xor_empty_row_with_true_rhs_is_unsat() {
+        let mut s = Solver::new(2);
+        assert!(!s.add_xor(&[1, 1], true));
+        assert_eq!(s.solve(), SolveResult::Unsat);
+    }
+
+    /// XOR rows and CNF clauses must constrain each other: the parity
+    /// rows admit two solutions, and the clause rules one out.
+    #[test]
+    fn xor_and_cnf_interact() {
+        let mut s = Solver::new(3);
+        s.add_xor(&[1, 2], false); // x₁ = x₂
+        s.add_xor(&[2, 3], false); // x₂ = x₃
+        s.add_clause(vec![1]); //     x₁ = 1  ⇒ all true
+        assert_eq!(s.solve(), SolveResult::Sat);
+        let m = s.model();
+        assert_eq!((m[0], m[1], m[2]), (true, true, true));
+        assert!(s.check_xors(&m));
+    }
+
+    /// **Differential test against brute force.**  Random dense parity
+    /// systems, decided exhaustively and by the solver; every verdict
+    /// must agree, and every SAT model must satisfy every row.
+    #[test]
+    fn xor_engine_agrees_with_brute_force() {
+        let n_vars = 9u32;
+        let mut state = 0x2545_F491_4F6C_DD1Du64; // xorshift64*
+        let mut next = || {
+            state ^= state >> 12;
+            state ^= state << 25;
+            state ^= state >> 27;
+            state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+        };
+
+        for trial in 0..200 {
+            let n_rows = 3 + (next() % 6) as usize;
+            let mut rows: Vec<(Vec<u32>, bool)> = Vec::new();
+            for _ in 0..n_rows {
+                let mut vars: Vec<u32> = Vec::new();
+                for v in 1..=n_vars {
+                    if next() % 2 == 0 {
+                        vars.push(v);
+                    }
+                }
+                if vars.is_empty() {
+                    vars.push(1 + (next() % n_vars as u64) as u32);
+                }
+                rows.push((vars, next() % 2 == 0));
+            }
+
+            // Ground truth by exhaustive search.
+            let mut brute_sat = false;
+            for a in 0..(1u32 << n_vars) {
+                if rows.iter().all(|(vars, rhs)| {
+                    let parity = vars.iter().filter(|v| (a >> (**v - 1)) & 1 == 1).count() % 2 == 1;
+                    parity == *rhs
+                }) {
+                    brute_sat = true;
+                    break;
+                }
+            }
+
+            let mut s = Solver::new(n_vars);
+            let mut trivially_unsat = false;
+            for (vars, rhs) in &rows {
+                if !s.add_xor(vars, *rhs) {
+                    trivially_unsat = true;
+                }
+            }
+            let res = s.solve();
+
+            if brute_sat {
+                assert_eq!(res, SolveResult::Sat, "trial {trial}: solver missed a model");
+                let m = s.model();
+                assert!(s.check_xors(&m), "trial {trial}: model violates a row");
+            } else {
+                assert_eq!(res, SolveResult::Unsat, "trial {trial}: solver invented a model");
+                let _ = trivially_unsat;
+            }
+        }
+    }
+
+    /// The extended-DIMACS reader must apply CryptoMiniSat's parity
+    /// convention: bare literals mean `= 1`, one negation flips to `= 0`.
+    #[test]
+    fn parse_dimacs_xor_reads_parity_convention() {
+        // x₁ ⊕ x₂ ⊕ x₃ = 1 (no negations), x₁ ⊕ x₂ = 0 (one negation),
+        // plus the unit clause x₃.  Together these force x₃ = 1 and
+        // x₁ = x₂.
+        let src = "p cnf 3 3\nx 1 2 3 0\nx -1 2 0\n3 0\n";
+        let mut s = parse_dimacs_xor(src).expect("parse");
+        assert_eq!(s.n_xors(), 2);
+        assert_eq!(s.solve(), SolveResult::Sat);
+        let m = s.model();
+        assert!(s.check_xors(&m));
+        assert!(m[2], "the unit clause forces x₃ true");
+        assert!(m[0] ^ m[1] ^ m[2], "first row must have odd parity");
+        assert!(!(m[0] ^ m[1]), "second row must have even parity");
+
+        // Flipping the unit clause to ¬x₃ makes the same system UNSAT.
+        let src_bad = "p cnf 3 3\nx 1 2 3 0\nx -1 2 0\n-3 0\n";
+        assert_eq!(
+            parse_dimacs_xor(src_bad).expect("parse").solve(),
+            SolveResult::Unsat
+        );
+    }
 
     /// A small known-SAT instance.
     #[test]
