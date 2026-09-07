@@ -244,6 +244,21 @@ Four threads reach 40 M iterations/s. For comparison, the 2009 hand-written
 qhasm implementation reached 533 cycles/iteration on a Core 2 with 128-bit
 vectors.
 
+On Apple Silicon (M4 Pro, 10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained,
+`--steps 8192 --launches 8`):
+
+| threads | BATCH=32 | BATCH=64 | BATCH=96 |
+|---|---|---|---|
+| 4  |  ~10 M  |  ~10 M  |  ~10 M  |
+| 8  |  ~19 M  |  ~19 M  |  ~19 M  |
+| 14 |  ~33 M  |  ~34 M  |  ~34 M  |
+
+The 64-bit lane path autovectorizes into NEON 64-bit pairs under `-O3`, which
+is worth about 25% on this hardware. Throughput peaks near the DRAM ceiling
+(roughly 270 GB/s on M4 Pro, 8 MB/iteration at 14 threads x BATCH=64). The
+default `BATCH=32` is near-optimal; `OMP_PROC_BIND=close OMP_PLACES=cores`
+recovers another ~5% on the host OpenMP runtime.
+
 The batch size matters more than cache pressure would suggest: going from 4 to
 32 walks per inversion is worth 60% because it drives the amortised inversion
 from 25% of the multiplication budget down to 3%.
@@ -495,6 +510,19 @@ and `--leaf` to the generator (Karatsuba leaf size).
 ./ecc2k130-cpu --curve 41 --instance 3      # recover a planted discrete log
 ./ecc2k130 --curve 131 --dp-file dps.bin --checkpoint state.ck   # collect
 ```
+
+### Building on macOS
+
+`make cpu` defaults to `CXX=g++`, but on macOS that resolves to Apple's
+clang, which has no `-fopenmp`. Use the Homebrew toolchain:
+
+```
+make cpu CXX="/opt/homebrew/bin/g++-16 -isysroot $(xcrun --show-sdk-path)"
+```
+
+The CUDA targets (`make gpu`, `make ptx`, `make check-cuda`) need a CUDA
+toolchain, which is no longer published for macOS — see the Modal section
+above for the supported path.
 
 ## What is not done
 
