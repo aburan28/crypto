@@ -69,7 +69,11 @@ only one that closes the gap the script leaves open.
 `modal_app.py` rents one:
 
 ```bash
-pip install modal && modal setup
+pip install modal
+modal setup                       # interactive; opens a browser
+# or, headless (CI, a container, an agent session):
+export MODAL_TOKEN_ID=...  MODAL_TOKEN_SECRET=...   # modal.com/settings/tokens
+
 ECC_GPU=H100 modal run modal_app.py::selftest   # both configurations vs the host
 ECC_GPU=H100 modal run modal_app.py::bench      # does the 55% become throughput?
 ECC_GPU=H100 modal run modal_app.py::tune       # sweep RHO_MIN_BLOCKS
@@ -82,10 +86,15 @@ that architecture. `ECC_GPU` accepts any Modal type — `T4`, `L4`, `L40S`,
 `A100`, `H100`, `H200`, `B200`, `RTX-PRO-6000` — and the build targets the
 matching `sm_`, so Hopper and both Blackwell variants can each be checked.
 
-**This has not been run.** It is written against the same Modal conventions
-as `ecc2k130/modal_app.py`, which has, but no Modal credentials existed in
-the environment where it was written, so treat the first run as a shakedown
-of the harness as much as of the kernels.
+**This has not been run against a GPU** — no Modal credentials were
+available where it was written. The app definition itself has been checked:
+it imports cleanly under `modal` 1.5.5, the image chain and all three
+functions construct, `selftest`/`bench`/`tune` register as entry points,
+and the `make` lines it issues were verified with `make -n`. So the first
+authenticated run is a shakedown of the kernels more than of the harness —
+but it is still a first run, and the image build (which compiles the CPU
+suites and `ptxcheck` before any GPU is touched) is where a surprise would
+surface.
 
 ## How this is tested
 
