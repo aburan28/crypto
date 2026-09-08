@@ -8,6 +8,11 @@
 **Provenance:** The "Hybrid SAT / algebraic" entry in the ECDLP
 research-direction map.  Rebuilt against the prior art reviewed in
 [`RESEARCH_TRIMOSKA_BENCHMARKS.md`](./RESEARCH_TRIMOSKA_BENCHMARKS.md).
+**Sequel:** this document ends on a negative result about *solvers*.
+What the measurement pointed at instead —
+[`RESEARCH_SEMAEV_DECOMPOSITION.md`](./RESEARCH_SEMAEV_DECOMPOSITION.md),
+a decomposition oracle ~1 000× faster than the baseline below, and why
+that still does not rescue the attack.
 
 ## Where this got to
 
@@ -365,6 +370,32 @@ polynomials where the extra structure might bind earlier; or dropping
 SAT for a Gröbner-basis route, whose whole premise is exploiting the
 algebra rather than searching around it.
 
+### What was done instead
+
+The brute-force column above is the real target: an index-calculus run
+is a decomposition oracle called over and over, and every
+implementation here was answering it by walking `2^{3l}/3!` triples at
+~8 µs each.  Both halves of that turned out to be attackable, and
+[`RESEARCH_SEMAEV_DECOMPOSITION.md`](./RESEARCH_SEMAEV_DECOMPOSITION.md)
+does it: `S₄` is a quartic in its last argument, so loop over *pairs*
+and solve for the third point, keeping only roots inside the
+factor-base subspace via `gcd(q, L_V mod q)` where `L_V` is the
+linearized subspace polynomial.  With a one-word field on top, the
+`l = 8` rejection above goes
+
+```text
+  1 472 s  (SAT)  →  27.8 s  (brute force)  →  0.030 s
+```
+
+and `l = 12` — 11.5 billion triples — becomes 15 seconds.
+
+It does not rescue the attack either, and the reason is worth stating
+because it also explains this document: relation collection costs
+`2^l · 3!·2^{n−3l} · Θ(2^{2l}) = Θ(2^n)` *independent of `l`*, so any
+oracle that enumerates the factor base sits at `2^n` against `2^{n/2}`
+for Pollard rho, however fast its inner loop.  A CDCL solver on this
+encoding is such an enumerator, just a slower one.
+
 ## Reference corpus
 
 `semaev_corpus.rs` carries the parameters of all 60 upstream instances
@@ -454,7 +485,9 @@ as a benchmark.
 - **The route does not scale.**  The solver never prunes the candidate
   space, and its deficit against direct enumeration widens from 5× at
   `l = 5` to 62× at `l = 8`.  See [Does it scale?](#does-it-scale-no).
-  Further solver optimisation is not worth doing.
+  Further solver optimisation is not worth doing — and the enumeration
+  it loses to is now itself ~1 000× faster, see
+  [`RESEARCH_SEMAEV_DECOMPOSITION.md`](./RESEARCH_SEMAEV_DECOMPOSITION.md).
 
 ## References
 
