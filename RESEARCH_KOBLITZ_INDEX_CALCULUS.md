@@ -241,6 +241,70 @@ and cross-checked, and it is the one that scales — cost governed by the
 degree of regularity rather than by `|F|` — but at `n ≤ 24` the brute
 oracle is faster and remains available.
 
+## Which invariant factor bases exist at all
+
+A Frobenius-stable `F_2`-subspace of `F_{2^n}` is an
+`F_2[x]/(x^n − 1)`-submodule — a binary cyclic code of length `n` — so
+it is a divisor of `x^n − 1`, and the irreducible factors correspond one
+for one with the 2-cyclotomic cosets mod `n`.  That is a **complete
+classification**: the achievable dimensions are exactly the subset sums
+of the coset sizes (`available_subspace_dimensions`).
+
+```
+   n  cosets  coset sizes                 available dimensions
+   7       3  [1, 3, 3]                   0,1,3,4,6,7
+   9       3  [1, 2, 6]                   0,1,2,3,6,7,8,9
+  15       5  [1, 2, 4, 4, 4]             0,1,2,3,4,5,6,7,8, …
+  31       7  [1, 5, 5, 5, 5, 5, 5]       0,1,5,6,10,11,15,16,20, …
+ 127      19  [1, 7 × 18]                 0,1,7,8,14,15,21,22,28, …
+ 131       2  [1, 130]                    0,1,130,131
+ 163       2  [1, 162]                    0,1,162,163
+```
+
+The last two rows are the point: where `2` is primitive mod `n` there
+are only two cosets, so the construction is **empty exactly at the sizes
+that matter**.  That was asserted in this repo before; it is now
+computed and tested.
+
+### Divisor bases: sizing the base to the instance
+
+`build_frobenius_factor_base` uses one irreducible factor, so its
+dimension is stuck at `ord_n(2)`.
+`build_frobenius_factor_base_from_divisor` takes any *product* of
+factors, so `|F| ≈ 2^dim` is tunable across the whole classification.
+
+This matters more than it sounds.  The summand count a decomposition
+needs is `m ≈ n/dim`, and `m ≥ 3` is what forces the chained system and
+its `(m − 2)·n` extra unknowns.  A big enough invariant subspace buys
+`m = 2` — **no chaining, a quadratic system, `≈ 2·dim ≈ n` unknowns**.
+Measured on toy curves:
+
+| curve | dim | \|F\| | orbits | m | vars | search | F4 | SAT |
+|:------|----:|------:|-------:|--:|-----:|-------:|---:|----:|
+| K_1/2^7 | 3 | 15 | 3 | 2 | 6 | 11 µs | 198 µs | 144 µs |
+| K_1/2^7 | 6 | 71 | 11 | 2 | 12 | 4.7 µs | 1.4 ms | 448 µs |
+| K_0/2^9 | 8 | 253 | 29 | 2 | 16 | 8.1 µs | 3.9 ms | 5.3 ms |
+| K_1/2^15 | 10 | 1057 | 73 | 2 | 20 | 64 µs | 17 ms | 32 ms |
+
+### The cofactor class decides which `m` can work
+
+A separate constraint, and not a size one.  `x = 0` lies in every
+invariant subspace, so the 2-torsion point is always in `F`; more
+generally the base can sit entirely off `⟨G⟩`.  A target `R ∈ ⟨G⟩` has
+`[r]R = O`, so a decomposition needs the summands' `h`-torsion classes to
+cancel.  On `K_1 / F_2^7` (cofactor 2) **no** factor-base point is in
+`⟨G⟩`, so odd `m` decomposes *nothing* — at any `|F|`:
+
+```
+dim 3, |F| = 15   m=2: 11/11   m=3: 0/11   m=4: 11/11
+dim 6, |F| = 71   m=2: 11/11   m=3: 0/11   m=4: 11/11
+```
+
+`FrobeniusFactorBase::admissible_summand_counts` computes this up front
+from one scalar multiplication per point, instead of searching for
+decompositions that cannot exist.  It was found by a test written to
+assert the opposite.
+
 ## Where this goes next
 
 `RESEARCH_KOBLITZ_SCALING_TARGET.md` turns the open end of this work

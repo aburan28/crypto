@@ -379,6 +379,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::koblitz_groebner`            | Semaev S₃ Weil restriction + matrix-F4 decomposition oracle |
 | `cryptanalysis::semaev_sat`                  | CNF encoding of Semaev systems for the CDCL solver (3rd oracle) |
 | `cryptanalysis::koblitz_bench`               | Scaling harness: system profiles, first fall degree, oracle cost |
+| `cryptanalysis::koblitz_index_calculus`      | …also: cyclotomic classification of invariant factor bases |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |

@@ -83,7 +83,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 check-cli:
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/autolab.py --self-test
-	python3 -m unittest discover -s codegen -p 'testbenchreport.py'
+	python3 -m unittest discover -s codegen -p 'test*report.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is

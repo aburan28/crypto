@@ -44,6 +44,7 @@ REMOTE = "/root/ecc2k130"
 helperRoot = pathlib.Path(__file__).parent if modal.is_local() else pathlib.Path(REMOTE)
 sys.path.insert(0, str(helperRoot))
 from codegen.benchreport import benchResult, bestResult, parseRate, reportsVerified, summarizeSamples
+from codegen.profilereport import NCU_BINARY, NCU_PACKAGE, profilerVersionError, profileResult
 
 CUDA_VERSION = os.environ.get("ECC_CUDA_VERSION", "12.8.1")
 if not re.fullmatch(r'\d+\.\d+\.\d+', CUDA_VERSION):
@@ -129,12 +130,7 @@ image = (
 # profiler wants it, so putting it in the main image would slow every bench and
 # search rebuild for a tool most runs never invoke.  It layers on top, so the
 # baked binary and the source are already present.
-# Ubuntu's nsight-compute package is 2022.4, which predates Blackwell entirely
-# and fails on sm_120 with "Failed to prepare kernel for profiling / Unknown
-# Error on device 0" -- the profiler does not know the architecture, which does
-# not read as a version problem at all.  The CUDA repository the base image
-# already carries has one that does, installed under /opt/nvidia/nsight-compute.
-profileImage = image.apt_install(f"cuda-nsight-compute-12-{CUDA_VERSION.split('.')[1]}")
+profileImage = image.apt_install(NCU_PACKAGE).run_commands(f"{NCU_BINARY} --version")
 
 volume = modal.Volume.from_name("ecc2k130", create_if_missing=True)
 app = modal.App("ecc2k130")
@@ -489,13 +485,9 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
                smemSpill=False, globalCg=False, preferL1=False):
     """Profile the walk kernel with Nsight Compute, or say precisely why not.
 
-    Whether this works at all is a property of the host, not of this code.
-    NVIDIA has restricted the GPU performance counters to administrators since
-    driver 418.43, and a container gets at them only if the host loaded the
-    driver with NVreg_RestrictProfilingToAdminUsers=0 or the container was given
-    CAP_SYS_ADMIN.  Neither is ours to set on Modal.  So this runs ncu and, if
-    the counters are refused, reports that as the answer rather than as an
-    error -- the run is still informative, because it settles the question.
+    Both a compatible profiler and host counter access are required. Check the
+    selected binary before launching; distinguish explicit counter denials
+    from generic profiling failures and preserve the complete diagnostic.
 
     `steps` and `launches` default low: ncu serialises and replays each kernel
     to collect counters, so a profiled launch is orders of magnitude slower than
@@ -503,19 +495,16 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     is identical."""
     arch = computeCapability()
     name = gpuName()
-    # The CUDA repository installs outside PATH, under a versioned directory.
-    rc, found = sh("ls -d /opt/nvidia/nsight-compute/*/ncu 2>/dev/null | sort | tail -1")
-    ncu = found.strip() or "ncu"
-    rc, ver = sh("%s --version" % ncu)
+    rc, ver = sh(f"{NCU_BINARY} --version")
+    print(f"profiler: {NCU_BINARY}\n{ver.strip()}", flush=True)
     if rc != 0:
         return {"gpu": name, "available": False,
-                "why": "no usable ncu: neither /opt/nvidia/nsight-compute nor PATH",
-                "log": ver[-2000:]}
-    ncuVersion = ""
-    for line in ver.splitlines():
-        if "Version" in line:
-            ncuVersion = line.strip()
-            break
+                "why": "the pinned Nsight Compute binary could not run",
+                "returncode": rc, "log": ver, "profilerBinary": NCU_BINARY}
+    versionError = profilerVersionError(ver)
+    if versionError:
+        return {"gpu": name, "available": False, "kind": "unsupported_profiler",
+                "why": versionError, "log": ver, "profilerBinary": NCU_BINARY}
 
     ok, log = buildFor(batch, threads, leaf, arch, minBlocks,
                        streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
@@ -538,54 +527,21 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     if preferL1:
         runFlags += " --prefer-l1"
     identity = benchmarkIdentity()
-    rc, out = shStream(
-        f"{ncu} --target-processes all --kernel-name eccWalkKernel "
+    command = (
+        f"{NCU_BINARY} --target-processes all --kernel-name eccWalkKernel "
         f"--launch-count 1 {what} "
         f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
-        f"--verify 0{runFlags}",
-        timeout=1 * HOUR,
-        prefix="  ncu| ",
+        f"--verify 0{runFlags}"
     )
+    rc, out = shStream(command, timeout=1 * HOUR, prefix="  ncu| ")
 
-    denied = ("ERR_NVGPU_DEBUG_PERF_COUNTER_ACCESS_DENIED" in out
-              or "The user does not have permission" in out
-              or "insufficient permissions" in out.lower())
-    if denied:
-        return {
-            "gpu": name, "available": False,
-            "why": ("the GPU performance counters are restricted to "
-                    "administrators on this host, which is a driver and "
-                    "container-capability setting Modal controls, not this app"),
-            "remedy": ("ask Modal whether profiling can be enabled for this GPU "
-                       "class.  Failing that, the multiplier's share can be "
-                       "measured without any counters by adding K extra "
-                       "multiplications by a runtime-supplied identity to each "
-                       "step and fitting the slope of rate against K -- the "
-                       "marginal cost of one multiply, straight off the card"),
-            "log": out[-4000:],
-        }
-    # Anything else that went wrong still has to say what.  The first version of
-    # this returned no "why" outside the permission case, so a real failure --
-    # a profiler too old for the architecture -- printed "did not run: None",
-    # which is worse than no diagnosis because it looks like a client bug.
-    why = ""
-    if rc != 0:
-        tooOld = ("Failed to prepare kernel for profiling" in out
-                  or "Unknown Error on device" in out)
-        if tooOld:
-            why = ("ncu could not prepare the kernel, which is what an Nsight "
-                   "Compute older than the device's architecture looks like.  "
-                   "This profiler reports %r and the device is sm_%s"
-                   % (ncuVersion or "an unknown version", arch))
-        else:
-            why = "ncu exited %d; the tail of its output is below" % rc
-    return {"gpu": name, "cc": arch, "available": rc == 0, "why": why,
-            "ncuVersion": ncuVersion,
-            "batch": batch, "threads": threads, "leaf": leaf,
-            "minBlocks": minBlocks, "workers": workers, "identity": identity,
-            "streamKarat": streamKarat, "smemSpill": smemSpill,
-            "globalCg": globalCg, "preferL1": preferL1,
-            "report": out[-4000:] if rc else out}
+    result = profileResult(rc, out)
+    result.update(gpu=name, cc=arch, batch=batch, threads=threads, leaf=leaf,
+                  minBlocks=minBlocks, workers=workers, identity=identity,
+                  streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg,
+                  preferL1=preferL1, profilerBinary=NCU_BINARY, profilerVersion=ver,
+                  command=command)
+    return result
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -1050,22 +1006,18 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
             smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
     """Nsight Compute on the walk kernel.
 
-    Whether the counters are readable is a host setting rather than anything
-    this app controls, so a refusal is itself the answer worth having."""
+    Print actionable diagnostics and exit nonzero when profiling is unavailable."""
     r = onGpu(runProfile, gpu).remote(batch=batch, threads=threads, leaf=leaf,
                                       minBlocks=min_blocks, steps=steps,
                                       section=section, metrics=metrics, workers=workers,
                                       streamKarat=stream_karat, smemSpill=smem_spill,
                                       globalCg=global_cg, preferL1=prefer_l1)
     if not r.get("available"):
-        print("Nsight Compute did not run: %s"
-              % (r.get("why") or "no reason recorded, which is itself a bug"))
-        if r.get("ncuVersion"):
-            print("  profiler: %s" % r["ncuVersion"])
+        print("Nsight Compute did not run: %s" % r.get("why"))
         if r.get("remedy"):
             print("  %s" % r["remedy"])
-        print(r.get("log", "")[-2000:])
-        return
+        print(r.get("log", ""))
+        raise SystemExit(1)
     print(json.dumps({k: v for k, v in r.items() if k != 'report'}, indent=2))
     print(r["report"])
 

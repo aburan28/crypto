@@ -308,7 +308,33 @@ pub fn weil_descend_s3(
     b: &F2mElement,
     x3: &F2mElement,
 ) -> Vec<F2BoolPoly> {
-    let num_vars = 2 * n;
+    weil_descend_s3_subspace(n, n, irr, b, x3)
+}
+
+/// Weil-descend `S₃(X₁, X₂, x₃) = 0` with each `Xᵢ` **confined to the
+/// `l`-dimensional `F_2`-subspace** `V = ⟨1, z, …, z^{l−1}⟩ ⊆ F_{2ⁿ}`,
+/// giving `n` equations in `2l` bit-variables.
+///
+/// This is the ingredient that makes the system an *index calculus*
+/// instance rather than "solve Semaev over the whole field".  The
+/// factor base in Gaudry- and Diem-style descent is exactly such a
+/// subspace, with `l ≈ n/m` for an `m`-point decomposition, and the
+/// regime change matters more than the variable count: with `l = n/2`
+/// the system is `n` equations in `n` unknowns instead of `n` equations
+/// in `2n`, so a solution is essentially determined rather than one of
+/// `2ⁿ`, and unit propagation has something to bite on.
+///
+/// `l = n` recovers the unrestricted descent, which is what
+/// [`weil_descend_s3`] calls.
+pub fn weil_descend_s3_subspace(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    b: &F2mElement,
+    x3: &F2mElement,
+) -> Vec<F2BoolPoly> {
+    assert!(l >= 1 && l <= n, "subspace dimension l must lie in 1..=n");
+    let num_vars = 2 * l;
     // We evaluate the Semaev polynomial in a *symbolic* (F_2-polynomial)
     // way: substitute X₁ and X₂ as formal sums and track coefficients
     // monomial-by-monomial.  Since binary_semaev_s3 only does add,
@@ -329,8 +355,8 @@ pub fn weil_descend_s3(
 
     // Symbolic X₁, X₂ as length-n vectors of F2BoolPoly (each entry is
     // a linear polynomial in bits — exactly one bit per coordinate).
-    let x1_sym = symbolic_variable(num_vars, 0, n);
-    let x2_sym = symbolic_variable(num_vars, n, n);
+    let x1_sym = symbolic_variable(num_vars, 0, n, l);
+    let x2_sym = symbolic_variable(num_vars, l, n, l);
 
     // Constants x₃ and b as length-n vectors of *constant* F2BoolPoly.
     let x3_sym = constant_f2m(num_vars, x3, n);
@@ -371,12 +397,14 @@ pub fn weil_descend_s3(
 
 // ── Helpers: symbolic F_{2^n} arithmetic with F2BoolPoly coefficients
 
-/// `X = Σ_{i=0..n} xᵢ zⁱ` where `xᵢ` is the `(offset + i)`-th bit-
+/// `X = Σ_{i=0..l} xᵢ zⁱ` where `xᵢ` is the `(offset + i)`-th bit-
 /// variable.  Returns the length-`n` coefficient vector of `X` in
-/// `F_2[bits][z] / m(z)`.
-fn symbolic_variable(num_vars: u32, offset: u32, n: u32) -> Vec<F2BoolPoly> {
+/// `F_2[bits][z] / m(z)` — coordinates `l..n` are identically zero,
+/// which is precisely the statement that `X` lies in the subspace
+/// `⟨1, z, …, z^{l−1}⟩`.
+fn symbolic_variable(num_vars: u32, offset: u32, n: u32, l: u32) -> Vec<F2BoolPoly> {
     let mut out = vec![F2BoolPoly::zero(num_vars); n as usize];
-    for i in 0..n as usize {
+    for i in 0..l as usize {
         out[i].coeffs[1 + offset as usize + i] = true;
     }
     out
@@ -1046,6 +1074,75 @@ mod tests {
     ///   non-trivial system);
     /// - the rank at D = 4 saturates at the column count (the system
     ///   "fell" — every monomial of degree ≤ 4 was reduced).
+    /// **The factor-base descent must agree with field arithmetic.**
+    /// Pick `X₁, X₂` inside the `l`-dimensional subspace, evaluate the
+    /// descended equations at their bits, and compare against the bits
+    /// of `S₃(X₁, X₂, x₃)` computed directly over `F_{2ⁿ}`.
+    #[test]
+    fn subspace_descent_matches_field_evaluation() {
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+
+        let n = 12u32;
+        let l = 5u32;
+        let irr = IrreduciblePoly {
+            degree: n,
+            low_terms: vec![0, 1, 2, 3],
+        };
+        let x3 = F2mElement::from_bit_positions(&[0, 4, 7], n);
+        let b = F2mElement::from_bit_positions(&[1, 3], n);
+        let eqs = weil_descend_s3_subspace(n, l, &irr, &b, &x3);
+        assert_eq!(eqs.len(), n as usize);
+
+        // Every equation lives in 2l bit-variables, not 2n.
+        let num_vars = 2 * l;
+        assert_eq!(
+            eqs[0].coeffs.len(),
+            num_monomials_upto_degree(num_vars, 2) as usize
+        );
+
+        // Evaluate an F2BoolPoly at a Boolean assignment.
+        let eval = |p: &F2BoolPoly, a: &[bool]| -> bool {
+            let mut acc = p.coeffs[0];
+            for i in 0..num_vars as usize {
+                if p.coeffs[1 + i] && a[i] {
+                    acc ^= true;
+                }
+            }
+            for i in 0..num_vars {
+                for j in (i + 1)..num_vars {
+                    let idx = quad_monomial_index(i, j, num_vars);
+                    if p.coeffs[idx] && a[i as usize] && a[j as usize] {
+                        acc ^= true;
+                    }
+                }
+            }
+            acc
+        };
+
+        for (v1, v2) in [(0b00000u32, 0b00000u32), (0b10110, 0b01101), (0b11111, 0b00001)] {
+            let bits = |v: u32| -> Vec<u32> { (0..l).filter(|k| (v >> k) & 1 == 1).collect() };
+            let x1 = F2mElement::from_bit_positions(&bits(v1), n);
+            let x2 = F2mElement::from_bit_positions(&bits(v2), n);
+
+            let mut assign = vec![false; num_vars as usize];
+            for k in 0..l as usize {
+                assign[k] = (v1 >> k) & 1 == 1;
+                assign[l as usize + k] = (v2 >> k) & 1 == 1;
+            }
+
+            let want = binary_semaev_s3(&x1, &x2, &x3, &b, &irr);
+            let raw = want.raw_bits();
+            for k in 0..n as usize {
+                let want_bit = (raw[k / 64] >> (k % 64)) & 1 == 1;
+                assert_eq!(
+                    eval(&eqs[k], &assign),
+                    want_bit,
+                    "coefficient {k} at (X1={v1:#b}, X2={v2:#b})"
+                );
+            }
+        }
+    }
+
     #[test]
     fn ffd_pipeline_runs_at_n_4() {
         let irr = choose_irreducible(4);
