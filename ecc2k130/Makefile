@@ -74,6 +74,15 @@ check-cli:
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/autolab.py --self-test
 
+# The iteration exploits an automorphism group of order 2m, and the usual price
+# for that is fruitless cycles.  This iteration cannot have them -- it is
+# equivariant, so it needs no canonical representative and has nothing for a
+# sign to feed back through -- but the arithmetic coincidence that would still
+# produce one is checkable, so check it, for every curve, on every change to the
+# step schedule.
+check-cycles:
+	cd codegen && python3 cycles.py --max-length 8
+
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
 #   pip install python-sat pycryptosat
@@ -97,7 +106,7 @@ autolab:
 	cd codegen && python3 autolab.py --cuda-path=$(CUDAPATH) --ptxas=$(PTXAS) \
 	    --clang=$(CLANG) --arch=$(patsubst sm_%,%,$(SMARCH))
 
-test: check-cli ecc2k130-cpu
+test: check-cli check-cycles ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -156,4 +165,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate check-cli test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
