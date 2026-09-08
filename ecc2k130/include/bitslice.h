@@ -33,6 +33,18 @@
 #define ECC_CONST constexpr
 #endif
 
+// How far to unroll a loop that spans a whole field element.  Fully unrolling
+// one asks the register allocator to keep all M values live at once and it
+// spills them, which for the walk kernel cost more than every other spill
+// source combined.  A #pragma does not macro-expand its argument, so the factor
+// has to go through _Pragma, which does.
+#ifndef ECC_WIDE_UNROLL
+#define ECC_WIDE_UNROLL 16
+#endif
+#define ECC_STRINGIFY_(x) #x
+#define ECC_STRINGIFY(x) ECC_STRINGIFY_(x)
+#define ECC_WIDE_UNROLL_PRAGMA _Pragma(ECC_STRINGIFY(unroll ECC_WIDE_UNROLL))
+
 #define ECC_ZERO ((W)0)
 
 #define ECC_LUT_XOR3 0x96

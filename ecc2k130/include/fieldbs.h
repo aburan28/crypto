@@ -77,34 +77,34 @@ struct FieldBs {
     static const int LANES = WordTraits<W>::LANES;
 
     static ECC_HD void setZero(W *r) {
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) r[i] = ECC_ZERO;
     }
 
     static ECC_HD void copy(W *r, const W *a) {
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) r[i] = a[i];
     }
 
     static ECC_HD void add(const W *a, const W *b, W *r) {
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) r[i] = a[i] ^ b[i];
     }
 
     static ECC_HD void addTo(W *r, const W *a) {
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) r[i] ^= a[i];
     }
 
     // 1 = sum of all basis elements
     static ECC_HD void setOne(W *r) {
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) r[i] = ~ECC_ZERO;
     }
 
     static ECC_HD bool isZeroLane(const W *a, int lane) {
         W acc = ECC_ZERO;
-#pragma unroll
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) acc |= a[i];
         return laneBit(acc, lane) == 0;
     }

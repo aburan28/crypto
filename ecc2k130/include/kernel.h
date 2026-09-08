@@ -17,16 +17,6 @@
 // costs 9820 bytes of spill traffic in the walk kernel against 4784 at any
 // factor of 16 or more, measured with ptxas at batch 32, threads 128,
 // minBlocks 2.  16 is the smallest factor that reaches that plateau.
-// A #pragma does not macro-expand its arguments, so `#pragma unroll
-// ECC_WIDE_UNROLL` reaches nvcc as an undefined identifier and fails the build.
-// _Pragma does expand, after stringification, so route it through that.
-#ifndef ECC_WIDE_UNROLL
-#define ECC_WIDE_UNROLL 16
-#endif
-#define ECC_STRINGIFY_(x) #x
-#define ECC_STRINGIFY(x) ECC_STRINGIFY_(x)
-#define ECC_WIDE_UNROLL_PRAGMA _Pragma(ECC_STRINGIFY(unroll ECC_WIDE_UNROLL))
-
 #ifndef ECC_BATCH
 #define ECC_BATCH 16
 #endif
