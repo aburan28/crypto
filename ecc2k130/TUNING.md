@@ -113,7 +113,22 @@ The existing Modal profiler also accepts candidate settings:
 ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile --stream-karat
 ```
 
-It preserves the upstream diagnostic when the host denies counter access.
+The profiler image pins NVIDIA's `nsight-compute-2025.3.1=2025.3.1.4-1`
+package and calls `/opt/nvidia/nsight-compute/2025.3.1/ncu` explicitly. The
+unversioned Ubuntu `nsight-compute` package installs 2022.4.1, which predates
+Blackwell and produced `Failed to prepare kernel for profiling` on the RTX PRO
+6000. Updating CUDA alone does not select the right Nsight package.
+
+The app prints and checks the profiler version before building or launching
+the target. Every failed profile includes a reason and full diagnostic output,
+and the local CLI exits nonzero. Explicit counter-access denials are identified
+separately; `Unknown Error on device 0` does not prove a permissions problem.
+An exit of zero without a profiled-kernel marker also fails. Successful results
+include the profiler version, binary path and command alongside build identity.
+
+NVIDIA's [release notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html)
+document Blackwell support and subsequent improvements; the versioned package
+is published in [NVIDIA's Ubuntu 24.04 repository](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/).
 
 On a GPU machine with Nsight Compute and access to performance counters:
 
