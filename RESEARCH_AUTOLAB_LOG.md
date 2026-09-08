@@ -6669,3 +6669,96 @@ Tertiary (unchanged): BKZ-beta sweep against NU.
 ### Commits made
 
 c019206 autolab 2026-08-08: Thread 25 — H25 falsified for raw mu, holds for nu_hat (AUC 0.84); step statistic not curve-independent
+
+---
+
+## 2026-09-08 (autolab run)
+
+### Task picked
+
+Thread: Koblitz index-calculus scaling (`RESEARCH_KOBLITZ_SCALING_TARGET.md`,
+merged in #61). Its own ranked list put **H2** first — "the 64-variable cap,
+not the algebra, is what stops the sweep" — on the grounds that it was the
+cheapest experiment and either unlocks two rungs of the ladder or tells us
+the algebra was the real limit.
+
+### Work done
+
+- Scoped the H2 refactor before starting it: `F2BoolMono`'s `u64` mask is
+  used by ten modules (`pq_groebner_f2`, `pq_xl`, `pq_descent`,
+  `ffd_harness`, `semaev_sat`, three `descent_*`, `pc_degree_harness`,
+  `koblitz_groebner`) with 23 raw `.mask` sites outside its home module.
+  Not a local change.
+- Ran the cheaper decisive test first: solve cost against variable count on
+  systems that already fit, built without a curve via `profile_system`
+  (`build_decomposition_system` needs only the field and the invariant
+  subspace, so this reaches `n = 63`).
+- Measured find-vs-refute cost separately on curve instances where
+  `enumerate_decompose` classifies each target.
+- Upgraded the harness: `OracleRun` now reports `median_found_ms` and
+  `median_refuted_ms` alongside the overall median; `median()` returns
+  `NaN` rather than `0.0` for an empty class (zero milliseconds is a
+  measurement claim, absence is not); `SystemProfile::eq_var_ratio()`.
+- Added `K_1/F_2^15` at `m = 3` to the standard sweep so the baseline
+  covers the refuting regime, not only the finding one.
+
+### Findings
+
+**H2 is FALSIFIED.** Solve cost saturates at **27 unknowns**, less than
+half the 64 cap:
+
+```
+instance          vars  eqs  eq/var  class     search       F4        SAT
+K_0/F_2^9  m=3      27   18    0.67  found    0.02 ms    27 ms     131 ms
+K_0/F_2^9  m=3      27   18    0.67  refuted        —   6.2 s*     361 s
+K_1/F_2^15 m=3      27   30    1.11  refuted  3.97 ms    75 ms    25.3 s
+K_1/F_2^15 m=2       8   15    1.88  refuted  0.21 ms  0.23 ms     1.3 ms
+```
+
+`*` node budget exhausted — F4 gave up rather than finishing.
+
+Widening the mask would let `n = 31, m = 4` (82 unknowns) and
+`n = 63, m = 3` (81) be *built*; nothing suggests they could be *solved*,
+at 3× the variable count where SAT already needs minutes. The refactor is
+not worth its blast radius. The primary metric survives but its
+justification changes: unknowns matter because cost explodes in them, not
+because of a cap.
+
+**The real structure is an asymmetry the old harness averaged away.**
+Finding one root among many is cheap; proving no root exists is not. At
+identical variable counts the two regimes differ by 340×, and the two
+oracles differ by 340× *on the refutation* (F4 75 ms, SAT 25.3 s) while
+being within 5× on the find. Recorded as **H2′**. The old single median
+per oracle is what hid this, so the harness now refuses to compute it.
+
+**H4 supported and sharpened.** F4 beats SAT on chained instances, and the
+margin is almost entirely refutation. The CDCL solver has no XOR-constraint
+Gaussian elimination — `semaev_sat`'s own header flags this — and these
+systems are XOR-dominated, which is the obvious suspect.
+
+**Candidate predictor.** The two 27-variable instances differ in
+equations-per-unknown (0.67 vs 1.11) and in refutation cost by ~5× for F4.
+`eq_var_ratio()` is now recorded so this can be tested properly rather than
+eyeballed on N = 2.
+
+### Next step proposal
+
+The ranked list in the target doc has been reordered. New #1 is **cut
+refutation cost**, which is where the time actually goes:
+
+1. XOR-native propagation in `cryptanalysis::sat` (helps every
+   `semaev_sat` user, not just this thread).
+2. F4 refutations that finish instead of exhausting the node budget.
+
+New #2 is **raise the decomposition probability so refutations are rare** —
+a relation search that refutes most targets pays the expensive case almost
+every time, and `|F|^m / m!` against `r` is the knob. This may matter more
+than making refutation faster.
+
+Widening the monomial type drops to #6, struck out, revisit only if
+refutation cost falls by orders of magnitude first.
+
+### Commits made
+
+(see PR — harness split by verdict class, H2 falsified in the target doc,
+next steps reordered)

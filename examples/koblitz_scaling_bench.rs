@@ -31,8 +31,11 @@ fn main() {
         (0, 9, 2),
         (1, 9, 2),
         (0, 9, 3),
+        // K_1/F_2^15 at m = 3 mostly refutes, so the sweep covers both
+        // regimes: finding a decomposition and proving there is none.
+        (1, 15, 3),
     ] {
-        if let Some(b) = bench_instance(a, n, 0, m, 8, 0xB0B, 20_000, 64) {
+        if let Some(b) = bench_instance(a, n, 0, m, 8, 0xB0B, 20_000, 8) {
             oracles.push(b);
         }
     }

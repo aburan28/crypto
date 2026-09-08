@@ -120,23 +120,32 @@ restriction that makes the system solvable at all.
 
 ### Oracle cost (8 targets each, `n ≤ 24` so a curve exists)
 
-| curve | n | ℓ | m | \|F\| | vars | oracle | found | refuted | median ms |
-|:------|--:|--:|--:|------:|-----:|:-------|------:|--------:|----------:|
-| K_0 | 7 | 3 | 2 | 1 | 6 | search | 0 | 8 | 0.004 |
-| K_0 | 7 | 3 | 2 | 1 | 6 | matrix-f4 | 0 | 8 | 0.067 |
-| K_0 | 7 | 3 | 2 | 1 | 6 | sat | 0 | 8 | 0.131 |
-| K_1 | 9 | 6 | 2 | 73 | 12 | search | 8 | 0 | 0.017 |
-| K_1 | 9 | 6 | 2 | 73 | 12 | matrix-f4 | 8 | 0 | 1.702 |
-| K_1 | 9 | 6 | 2 | 73 | 12 | sat | 8 | 0 | 0.721 |
-| K_0 | 9 | 6 | 3 | 55 | 27 | search | 8 | 0 | 0.016 |
-| K_0 | 9 | 6 | 3 | 55 | 27 | matrix-f4 | 8 | 0 | 26.277 |
-| K_0 | 9 | 6 | 3 | 55 | 27 | sat | 8 | 0 | 136.272 |
+Medians are split by verdict class; `—` means the class was empty.
+
+| curve | n | ℓ | m | \|F\| | vars | oracle | found | refuted | med found | med refuted |
+|:------|--:|--:|--:|------:|-----:|:-------|------:|--------:|----------:|------------:|
+| K_0 | 7 | 3 | 2 | 1 | 6 | search | 0 | 8 | — | 0.005 ms |
+| K_0 | 7 | 3 | 2 | 1 | 6 | matrix-f4 | 0 | 8 | — | 0.072 ms |
+| K_0 | 7 | 3 | 2 | 1 | 6 | sat | 0 | 8 | — | 0.160 ms |
+| K_1 | 9 | 6 | 2 | 73 | 12 | search | 8 | 0 | 0.018 ms | — |
+| K_1 | 9 | 6 | 2 | 73 | 12 | matrix-f4 | 8 | 0 | 1.642 ms | — |
+| K_1 | 9 | 6 | 2 | 73 | 12 | sat | 8 | 0 | 0.731 ms | — |
+| K_0 | 9 | 6 | 3 | 55 | 27 | search | 8 | 0 | 0.015 ms | — |
+| K_0 | 9 | 6 | 3 | 55 | 27 | matrix-f4 | 8 | 0 | 27.00 ms | — |
+| K_0 | 9 | 6 | 3 | 55 | 27 | sat | 8 | 0 | 131.4 ms | — |
+| K_1 | 15 | 4 | 3 | 31 | 27 | search | 0 | 8 | — | 3.97 ms |
+| K_1 | 15 | 4 | 3 | 31 | 27 | matrix-f4 | 0 | 8 | — | 74.91 ms |
+| K_1 | 15 | 4 | 3 | 31 | 27 | sat | 0 | 8 | — | **25 345 ms** |
 
 Search wins everywhere reachable, by two to four orders of magnitude.
 That is expected and is not the thing to fix: search costs `|F|^{m−1}`
 and cannot reach useful `m` either.  The point of the algebra is that
 its cost tracks the system, not `|F|` — which only starts to matter at
 an `m` nobody can currently run.
+
+The last three rows are the ones that changed the plan: same variable
+count as the rows above them, no decomposition to find, and SAT goes
+from 131 ms to 25 seconds.
 
 ---
 
@@ -158,16 +167,42 @@ publishable-shaped empirical statement about subspace-restricted Semaev
 systems; the existing literature measures the full-field case.
 
 **H2 — the 64-variable cap, not the algebra, is what stops the sweep.**
-Boolean monomials are `u64` masks
-(`koblitz_groebner::MAX_VARS`), so `n = 31, m = 4` (82 unknowns) and
-`n = 63, m = 3` (81) are refused before any solving happens.
-*Falsifier:* with the mask widened, those instances still exceed the
-time budget.
-*Bar:* H2 is confirmed if `n = 31, m = 4` solves with median < 60 s and
-`disagreements == 0`. This is the cheapest experiment in the list and
-should be run first — it is an engineering change (widen the monomial
-type), not a research question, and it either unlocks two rungs of the
-ladder or tells us the algebra was the real limit all along.
+**FALSIFIED, 2026-09-08.** The cap is real (`koblitz_groebner::MAX_VARS`,
+a `u64` monomial mask) but it is not what binds. Solve cost saturates at
+**27 unknowns**, less than half the cap:
+
+| instance | vars | eqs | eq/var | class | search | F4 | SAT |
+|:---------|-----:|----:|-------:|:------|-------:|---:|----:|
+| K_0/F_2^9, m=3 | 27 | 18 | 0.67 | found | 0.02 ms | 27 ms | 131 ms |
+| K_0/F_2^9, m=3 | 27 | 18 | 0.67 | refuted (raw `x_R`) | — | 6.2 s* | **361 s** |
+| K_1/F_2^15, m=3 | 27 | 30 | 1.11 | refuted | 3.97 ms | 75 ms | **25.3 s** |
+| K_1/F_2^15, m=2 | 8 | 15 | 1.88 | refuted | 0.21 ms | 0.23 ms | 1.3 ms |
+
+`*` node budget exhausted — F4 did not finish, it gave up.
+
+Widening the mask would let `n = 31, m = 4` (82 unknowns) and
+`n = 63, m = 3` (81) be *built*. Nothing suggests they could be
+*solved*: they are 3× the variable count at which SAT already needs
+minutes. **Do not spend the refactor** — it touches `F2BoolMono`, shared
+by ten modules, to buy instances that will not finish.
+
+The primary metric stands, but its justification changes: driving
+`unknowns` down matters because solve cost explodes in it, not because
+of an arbitrary cap.
+
+**H2′ (replacement) — refutation is the expensive case, and it is where
+the oracles differ.**
+Finding one root among many is cheap; proving no root exists is not.
+At the same 27 unknowns, `K_0/F_2^9` (all targets decompose) costs F4
+27 ms, while `K_1/F_2^15` (no target decomposes) costs SAT 25 s — a
+340× spread between the two regimes on the same variable count, and a
+**340× spread between F4 and SAT on the refutation**.
+*Falsifier:* an instance where refutation is not the dominant cost, or
+where the two oracles' refutation costs are within 2× of each other.
+*Bar:* report `median_found_ms` and `median_refuted_ms` separately —
+`OracleRun` now does — for every instance. A single median over both
+regimes is a number that describes neither, and it is what hid this
+result until 2026-09-08.
 
 **H3 — `S₄` links cut the chaining term roughly in half.**
 `S₃` chaining spends one intermediate per extra summand: `m − 2` of
@@ -184,8 +219,12 @@ Note the trade: `S₄` raises the system degree, which raises the
 Macaulay column count — measure both, do not assume.
 
 **H4 — F4 beats SAT on chained instances.**
-At `n = 9, m = 3`: F4 26 ms, SAT 136 ms. At `m = 2` they are within 3×
-of each other in both directions.
+**Supported and sharpened, 2026-09-08.** The gap is concentrated in
+refutations: on finds at `n = 9, m = 3` it is 27 ms vs 131 ms (5×), on
+refutations at `n = 15, m = 3` it is 75 ms vs 25.3 s (**340×**). The
+CDCL solver has no XOR-constraint Gaussian elimination (`semaev_sat`'s
+own header says so) and these systems are XOR-dominated, which is the
+obvious suspect.
 *Falsifier:* SAT wins at any larger `m` or `n`.
 *Bar:* three instances at `m ≥ 3` with a consistent winner. If SAT wins
 as `m` grows, that inverts which engine deserves the optimisation
@@ -207,28 +246,37 @@ what H2 and H3 are trying to make reachable.
 
 ## Ranked next steps
 
-1. **Widen the monomial type** (H2). `u64` → `u128` or a small bitset in
-   `pq_groebner_f2::F2BoolMono`, and raise `MAX_VARS`. Touches the
-   Gröbner engine, the SAT encoder's blocking clauses, and
-   `SystemProfile`. Unlocks `n = 31, m = 4` and `n = 63, m = 3`.
-   Cheapest, most mechanical, biggest immediate reach.
-2. **Symbolic `S₄` links** (H3). New `sym_semaev_s4` in
-   `koblitz_groebner`, a `LinkKind` knob on
-   `build_decomposition_system`, cross-checked against
-   `enumerate_decompose` exactly as the `S₃` path already is.
-3. **Sparse Macaulay reduction.** `matrix_f4_f2` builds a dense
-   bit-matrix and is capped at `MAX_F4_ROWS`/`MAX_F4_COLS`. The `m = 3`
-   systems already reach 6022 columns at `D = 3`. Sparse elimination
-   (or Wiedemann — `pq_wiedemann` exists) would raise the ceiling.
-4. **Native XOR clauses in the CDCL solver** (helps H4). `semaev_sat`'s
-   own header notes the solver lacks XOR-constraint Gaussian
-   elimination, which is exactly what CryptoMiniSat exploits on these
-   systems; the encoding is XOR-dominated.
-5. **Extend the ladder past `n = 63`.** `is_irreducible_f2` and
-   `linearised_kernel_basis` are `u64`-bound; `n = 127` (ℓ = 7) is the
-   first rung that resembles a deployed curve.
+Reordered 2026-09-08 after H2 was falsified. Widening the monomial type
+was #1; it is now struck out, because the instances it unlocks cannot be
+solved anyway.
 
----
+1. **Cut refutation cost** (H2′, H4). This is where the time goes and
+   where the two oracles differ by 340×. Two concrete moves:
+   - **XOR-native propagation in the CDCL solver.** The encoding is
+     XOR-dominated and the solver reasons about parity constraints only
+     through their CNF expansion. This is the single change most likely
+     to move SAT's refutation numbers, and it helps every other
+     `semaev_sat` user too.
+   - **Make F4's refutations cheaper**, since it already wins: the
+     `n = 9, m = 3` raw-target case exhausted the node budget rather
+     than returning, so splitting is doing work the algebra should.
+2. **Raise the decomposition probability so refutations are rare.**
+   A relation search that refutes most targets is paying the expensive
+   case almost every time. `|F|^m / m!` against `r` is the knob;
+   `subspace_ladder` plus `bench_instance` can map where it sits. This
+   may matter more than making refutation faster.
+3. **Symbolic `S₄` links** (H3). Still worth doing — it cuts the
+   variable count, and after H2 we know variables are expensive for
+   real reasons rather than for a cap.
+4. **Sparse Macaulay reduction.** `matrix_f4_f2` is dense and capped at
+   `MAX_F4_ROWS`/`MAX_F4_COLS`; the `m = 3` systems already reach 6022
+   columns at `D = 3`.
+5. **Extend the ladder past `n = 63`** for *structure only* — the FFD
+   measurement is cheap and `n = 127` (ℓ = 7) is the first rung that
+   resembles a deployed curve. Do not expect to solve there.
+6. ~~**Widen the monomial type.**~~ Falsified as a priority by H2: it
+   buys instances that will not finish. Revisit only if refutation cost
+   comes down by orders of magnitude first.
 
 ## How to run
 

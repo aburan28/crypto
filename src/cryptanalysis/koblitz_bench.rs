@@ -113,6 +113,19 @@ pub struct SystemProfile {
     pub elapsed_ms: f64,
 }
 
+impl SystemProfile {
+    /// Equations per unknown.  Below 1 the system is underdetermined
+    /// and a refutation has to rule out a large solution space; the
+    /// measured refutation blow-ups sit at the low end of this ratio.
+    pub fn eq_var_ratio(&self) -> f64 {
+        if self.n_vars == 0 {
+            0.0
+        } else {
+            self.n_eqs as f64 / self.n_vars as f64
+        }
+    }
+}
+
 /// **Profile the decomposition system** for extension degree `n`, the
 /// `factor_index`-th invariant subspace, and `m` summands.
 ///
@@ -310,8 +323,19 @@ pub struct OracleRun {
     /// Targets where the oracle ran out of budget — neither a
     /// decomposition nor a refutation.
     pub inconclusive: usize,
-    /// Median milliseconds per target.
+    /// Median milliseconds per target, over all targets.
     pub median_ms: f64,
+    /// Median milliseconds over the targets that *did* decompose.
+    ///
+    /// Kept separate from [`Self::median_refuted_ms`] because the two
+    /// regimes differ by orders of magnitude and averaging them hides
+    /// it: finding one root among many is easy, proving there is no
+    /// root is not.  A single median over both is a number that
+    /// describes neither.
+    pub median_found_ms: f64,
+    /// Median milliseconds over the targets that did not decompose —
+    /// the refutation cost.
+    pub median_refuted_ms: f64,
     /// Total milliseconds over all targets.
     pub total_ms: f64,
 }
@@ -342,9 +366,14 @@ pub struct InstanceBench {
     pub disagreements: usize,
 }
 
+/// Median, or `NaN` when there is nothing to take a median of.
+///
+/// Deliberately not `0.0`: an empty class means the oracle never hit
+/// that case, and reporting it as zero milliseconds would be a
+/// measurement claim that is false.  `NaN` serialises to `null`.
 fn median(mut xs: Vec<f64>) -> f64 {
     if xs.is_empty() {
-        return 0.0;
+        return f64::NAN;
     }
     xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mid = xs.len() / 2;
@@ -393,19 +422,24 @@ pub fn bench_instance(
         .map(|_| kc.mul(&g, &BigUint::from(rng.gen_range(1..r_u64))))
         .collect();
 
-    let mut search = (0usize, 0usize, 0usize, Vec::new());
-    let mut f4 = (0usize, 0usize, 0usize, Vec::new());
-    let mut sat = (0usize, 0usize, 0usize, Vec::new());
+    // (decomposed, refuted, inconclusive, all_ms, found_ms, refuted_ms)
+    type Acc = (usize, usize, usize, Vec<f64>, Vec<f64>, Vec<f64>);
+    let mut search: Acc = (0, 0, 0, Vec::new(), Vec::new(), Vec::new());
+    let mut f4: Acc = (0, 0, 0, Vec::new(), Vec::new(), Vec::new());
+    let mut sat: Acc = (0, 0, 0, Vec::new(), Vec::new(), Vec::new());
     let mut disagreements = 0usize;
 
     for target in &points {
         let t = Instant::now();
         let by_search = enumerate_decompose(&kc, &fb, &index_of, target, m);
-        search.3.push(t.elapsed().as_secs_f64() * 1e3);
+        let ms = t.elapsed().as_secs_f64() * 1e3;
+        search.3.push(ms);
         if by_search.is_some() {
             search.0 += 1;
+            search.4.push(ms);
         } else {
             search.1 += 1;
+            search.5.push(ms);
         }
 
         let t = Instant::now();
@@ -419,19 +453,33 @@ pub fn bench_instance(
             SolverEngine::default(),
             node_budget,
         );
-        f4.3.push(t.elapsed().as_secs_f64() * 1e3);
+        let ms = t.elapsed().as_secs_f64() * 1e3;
+        f4.3.push(ms);
         match (&by_f4, f4_stats.exhausted) {
-            (Some(_), _) => f4.0 += 1,
-            (None, false) => f4.1 += 1,
+            (Some(_), _) => {
+                f4.0 += 1;
+                f4.4.push(ms);
+            }
+            (None, false) => {
+                f4.1 += 1;
+                f4.5.push(ms);
+            }
             (None, true) => f4.2 += 1,
         }
 
         let t = Instant::now();
         let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, target, m, max_models);
-        sat.3.push(t.elapsed().as_secs_f64() * 1e3);
+        let ms = t.elapsed().as_secs_f64() * 1e3;
+        sat.3.push(ms);
         match (&by_sat, sat_stats.refuted) {
-            (Some(_), _) => sat.0 += 1,
-            (None, true) => sat.1 += 1,
+            (Some(_), _) => {
+                sat.0 += 1;
+                sat.4.push(ms);
+            }
+            (None, true) => {
+                sat.1 += 1;
+                sat.5.push(ms);
+            }
             (None, false) => sat.2 += 1,
         }
 
@@ -452,14 +500,17 @@ pub fn bench_instance(
         }
     }
 
-    let pack = |name: &'static str, v: (usize, usize, usize, Vec<f64>)| OracleRun {
-        oracle: name,
-        decomposed: v.0,
-        refuted: v.1,
-        inconclusive: v.2,
-        median_ms: median(v.3.clone()),
-        total_ms: v.3.iter().sum(),
-    };
+    let pack =
+        |name: &'static str, v: (usize, usize, usize, Vec<f64>, Vec<f64>, Vec<f64>)| OracleRun {
+            oracle: name,
+            decomposed: v.0,
+            refuted: v.1,
+            inconclusive: v.2,
+            median_ms: median(v.3.clone()),
+            median_found_ms: median(v.4.clone()),
+            median_refuted_ms: median(v.5.clone()),
+            total_ms: v.3.iter().sum(),
+        };
 
     Some(InstanceBench {
         a,
@@ -517,15 +568,15 @@ pub fn format_system_table(profiles: &[SystemProfile]) -> String {
 pub fn format_oracle_table(benches: &[InstanceBench]) -> String {
     let mut out = String::new();
     out.push_str(
-        "| curve | n | ℓ | m | \\|F\\| | vars | oracle | found | refuted | inconc | median ms |\n",
+        "| curve | n | ℓ | m | \\|F\\| | vars | oracle | found | refuted | inconc | median ms | med found | med refuted |\n",
     );
     out.push_str(
-        "|:------|--:|--:|--:|------:|-----:|:-------|------:|--------:|-------:|----------:|\n",
+        "|:------|--:|--:|--:|------:|-----:|:-------|------:|--------:|-------:|----------:|----------:|------------:|\n",
     );
     for b in benches {
         for r in &b.runs {
             out.push_str(&format!(
-                "| K_{} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {:.3} |\n",
+                "| K_{} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {:.3} | {:.3} | {:.3} |\n",
                 b.a,
                 b.n,
                 b.ell,
@@ -536,7 +587,9 @@ pub fn format_oracle_table(benches: &[InstanceBench]) -> String {
                 r.decomposed,
                 r.refuted,
                 r.inconclusive,
-                r.median_ms
+                r.median_ms,
+                r.median_found_ms,
+                r.median_refuted_ms
             ));
         }
     }
@@ -552,6 +605,7 @@ pub fn to_json(profiles: &[SystemProfile], benches: &[InstanceBench]) -> String 
             serde_json::json!({
                 "n": p.n, "ell": p.ell, "m": p.m,
                 "n_vars": p.n_vars, "n_eqs": p.n_eqs, "degree": p.degree,
+                "eq_var_ratio": p.eq_var_ratio(),
                 "fall_degree": p.fall_degree,
                 "macaulay": p.macaulay.iter().map(|q| serde_json::json!({
                     "degree": q.degree, "rows": q.rows, "cols": q.cols,
@@ -571,7 +625,10 @@ pub fn to_json(profiles: &[SystemProfile], benches: &[InstanceBench]) -> String 
                 "runs": b.runs.iter().map(|r| serde_json::json!({
                     "oracle": r.oracle, "decomposed": r.decomposed,
                     "refuted": r.refuted, "inconclusive": r.inconclusive,
-                    "median_ms": r.median_ms, "total_ms": r.total_ms,
+                    "median_ms": r.median_ms,
+                    "median_found_ms": r.median_found_ms,
+                    "median_refuted_ms": r.median_refuted_ms,
+                    "total_ms": r.total_ms,
                 })).collect::<Vec<_>>(),
             })
         })
@@ -685,6 +742,51 @@ mod tests {
         );
         // …and the summary still describes the same system.
         assert_eq!((s.ell, s.n_vars, s.n_eqs, s.degree), (6, 12, 9, 2));
+    }
+
+    #[test]
+    fn find_and_refute_costs_are_reported_separately() {
+        // The two regimes differ by orders of magnitude, so the harness
+        // must not average them into one number.  K_0/F_2^7 refutes
+        // every target (its factor base is a single point); K_0/F_2^9
+        // decomposes every target.
+        let refuting = bench_instance(0, 7, 0, 2, 4, 1, 20_000, 64).unwrap();
+        for r in &refuting.runs {
+            assert_eq!(r.decomposed, 0);
+            assert!(
+                r.median_refuted_ms > 0.0,
+                "{} has no refute median",
+                r.oracle
+            );
+            assert!(
+                r.median_found_ms.is_nan(),
+                "{} invented a find median",
+                r.oracle
+            );
+        }
+        let finding = bench_instance(0, 9, 0, 2, 4, 1, 20_000, 64).unwrap();
+        for r in &finding.runs {
+            assert_eq!(r.refuted, 0);
+            assert!(r.median_found_ms > 0.0, "{} has no find median", r.oracle);
+            assert!(
+                r.median_refuted_ms.is_nan(),
+                "{} invented a refute median",
+                r.oracle
+            );
+        }
+    }
+
+    #[test]
+    fn eq_var_ratio_flags_the_underdetermined_systems() {
+        // n = 9, m = 3 is the worst measured refutation instance and is
+        // the underdetermined one: 18 equations in 27 unknowns.
+        let hard = profile_system(9, 0, 3, 2, 1).unwrap();
+        assert!(hard.eq_var_ratio() < 1.0, "{}", hard.eq_var_ratio());
+        // n = 15, m = 3 has the same variable count but more equations,
+        // and refutes ~400x faster.
+        let easier = profile_system(15, 0, 3, 2, 1).unwrap();
+        assert_eq!(hard.n_vars, easier.n_vars);
+        assert!(easier.eq_var_ratio() > 1.0, "{}", easier.eq_var_ratio());
     }
 
     #[test]
