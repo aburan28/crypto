@@ -12,6 +12,15 @@
 
 #include "walk.h"
 
+// How far to unroll a loop that is M words wide.  Fully unrolling one asks
+// ptxas to keep all 131 values live at once and it spills them: full unroll
+// costs 9820 bytes of spill traffic in the walk kernel against 4784 at any
+// factor of 16 or more, measured with ptxas at batch 32, threads 128,
+// minBlocks 2.  16 is the smallest factor that reaches that plateau.
+#ifndef ECC_WIDE_UNROLL
+#define ECC_WIDE_UNROLL 16
+#endif
+
 #ifndef ECC_BATCH
 #define ECC_BATCH 16
 #endif
@@ -69,11 +78,11 @@ struct Kernel {
     }
 
     static ECC_HD void load(const W *src, int slot, int tid, int threads, W *dst) {
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
         for (int i = 0; i < M; ++i) dst[i] = src[fieldIndex(slot, i, tid, threads)];
     }
     static ECC_HD void store(W *dst, int slot, int tid, int threads, const W *src) {
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
         for (int i = 0; i < M; ++i) dst[fieldIndex(slot, i, tid, threads)] = src[i];
     }
 
@@ -96,12 +105,25 @@ struct Kernel {
         }
     }
 
+    // Lanes that have walked longer than maxIters without reporting.  Cold: it
+    // runs once every ECC_GUARD_PERIOD steps, and inlining a 32-iteration loop
+    // of global loads into the hot body costs registers on every step.
+    static ECC_BIG W overdueLanes(int tid, int slot, const WalkParams<W> &P,
+                                  unsigned long long now) {
+        W dp = ECC_ZERO;
+        for (int lane = 0; lane < LANES; ++lane) {
+            const size_t li = laneIndex(slot, lane, tid, P.threads);
+            if (now - P.startIter[li] >= P.maxIters) dp |= laneMask<W>(lane);
+        }
+        return dp;
+    }
+
     // Report every lane flagged in `mask` and mark it for restart.  Restarting
     // is deferred to the reseed kernel: computing a fresh start point needs 128
     // point additions, and keeping that call chain out of the hot kernel is
     // worth 5.8 KB of per-thread stack frame.  A marked lane keeps walking, but
     // its reports are suppressed until it is revived.
-    static ECC_HD void handleDistinguished(int tid, int slot, W mask, const WalkParams<W> &P,
+    static ECC_BIG void handleDistinguished(int tid, int slot, W mask, const WalkParams<W> &P,
                                            unsigned long long now, const W *x, const W *y) {
         for (int lane = 0; lane < LANES; ++lane) {
             if (!laneBit(mask, lane)) continue;
@@ -160,12 +182,7 @@ struct Kernel {
                 const size_t di = (size_t)slot * (size_t)P.threads + (size_t)tid;
                 WK::hamming(x, hb);
                 W dp = WK::dpMask(hb, P.dpWeight);
-                if (guard) {
-                    for (int lane = 0; lane < LANES; ++lane) {
-                        const size_t li = laneIndex(slot, lane, tid, P.threads);
-                        if (now - P.startIter[li] >= P.maxIters) dp |= laneMask<W>(lane);
-                    }
-                }
+                if (guard) dp |= overdueLanes(tid, slot, P, now);
                 const W alreadyDead = P.dead[di];
                 dp &= ~alreadyDead;
                 if (dp != ECC_ZERO) {
@@ -208,11 +225,11 @@ struct Kernel {
                 }
                 F::mul(e, ii, lam);
                 F::sqr(lam, t);
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
                 for (int i = 0; i < M; ++i) t[i] = ECC_XOR3(t[i], lam[i], d[i]);   // x3
                 F::add(x, t, u);
                 F::mul(lam, u, e);
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
                 for (int i = 0; i < M; ++i) y[i] = ECC_XOR3(e[i], t[i], y[i]);
                 store(P.x, slot, tid, P.threads, t);
                 store(P.y, slot, tid, P.threads, y);
