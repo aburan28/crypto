@@ -376,24 +376,42 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
     return info
 
 
-def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs):
-    """The (leaf, batch, threads, minBlocks) builds to measure.
+def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
+                    knobs=(False, False, False)):
+    """The (leaf, batch, threads, minBlocks, streamKarat, smemSpill, globalCg)
+    builds to measure.
 
-    `configs` names them one per entry as leaf:batch:threads:minBlocks, which is
-    what autolab.py emits.  Its Pareto front is a handful of points, and
-    expanding the distinct values of those points back into a cross product
-    measures two or three times as many builds as the front has rows.  Without
-    it the four lists are crossed, as before."""
+    `configs` names them one per entry, which is what autolab.py emits.  Its
+    Pareto front is a handful of points, and expanding the distinct values of
+    those points back into a cross product measures two or three times as many
+    builds as the front has rows.  Without it the four lists are crossed, as
+    before.
+
+    An entry is leaf:batch:threads:minBlocks, optionally followed by the three
+    knobs as 0/1.  They are per-entry rather than per-run because that is how
+    autolab searches them: its shortlist can hold a streamKarat build and a
+    plain one side by side, and a run-level flag would force them into separate
+    sweeps whose rates are then not directly comparable.  The four-field form
+    still parses and takes `knobs`, which is what the run-level flags supply, so
+    a shortlist emitted before the knobs existed means exactly what it did."""
     if configs.strip():
         out = []
         for entry in configs.split(","):
             if not entry.strip():
                 continue
-            leaf, batch, threads, mb = (int(x) for x in entry.split(":"))
-            out.append((leaf, batch, threads, mb))
+            parts = [int(x) for x in entry.split(":")]
+            if len(parts) == 4:
+                parts += [int(bool(k)) for k in knobs]
+            if len(parts) != 7:
+                raise ValueError(
+                    "config %r has %d fields; expected leaf:batch:threads:"
+                    "minBlocks with the three knobs optional" % (entry, len(parts)))
+            leaf, batch, threads, mb, sk, ss, cg = parts
+            out.append((leaf, batch, threads, mb, bool(sk), bool(ss), bool(cg)))
         return out
     ints = lambda t: [int(x) for x in t.split(",") if x]
-    return [(leaf, batch, threads, mb)
+    sk, ss, cg = (bool(k) for k in knobs)
+    return [(leaf, batch, threads, mb, sk, ss, cg)
             for leaf in ints(leaves)
             for threads in ints(threadCounts)
             for batch in ints(batches)
@@ -409,16 +427,17 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
     results = []
     arch = computeCapability()
     name = gpuName()
-    plan = autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs)
+    plan = autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
+                           (streamKarat, smemSpill, globalCg))
     print(f"{len(plan)} builds to measure on {name} (sm_{arch})")
-    for leaf, batch, threads, mb in plan:
+    for leaf, batch, threads, mb, sk, ss, cg in plan:
         t0 = time.time()
         ok, log = buildFor(batch, threads, leaf, arch, mb,
-                           streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
+                           streamKarat=sk, smemSpill=ss, globalCg=cg)
         cfg = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=mb,
                    workers=workers, repeats=repeats, steps=steps, launches=launches,
-                   streamKarat=streamKarat, smemSpill=smemSpill,
-                   globalCg=globalCg, preferL1=preferL1,
+                   streamKarat=sk, smemSpill=ss,
+                   globalCg=cg, preferL1=preferL1,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
             results.append(dict(cfg, valid=False, rate=0.0, error=log))
@@ -426,8 +445,10 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
         cfg['identity'] = benchmarkIdentity()
         cfg.update(measureBench(steps, launches, workers, preferL1, repeats))
         results.append(cfg)
+        knobLabel = ' '.join(n for n, on in (('streamKarat', sk), ('smemSpill', ss),
+                                             ('globalCg', cg)) if on) or 'no knobs'
         print(f"leaf {leaf} threads {threads} batch {batch} "
-              f"minBlocks {mb}: {cfg['rate']:.3f} M it/s median")
+              f"minBlocks {mb} [{knobLabel}]: {cfg['rate']:.3f} M it/s median")
     results.sort(key=lambda r: -r.get("rate", 0.0))
     report = {"gpu": name, "cc": arch, "results": results,
               "best": bestResult(results)}
@@ -446,7 +467,8 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
 
 @app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
 def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
-               minBlocksList="1,2,3,4", leaves="0,17,33,66,131", arch="", top=6):
+               minBlocksList="1,2,3,4", leaves="0,17,33,66,131", arch="", top=6,
+               knobs="streamKarat,smemSpill,globalCg"):
     """Search the build space offline, on a CPU container, and return a shortlist.
 
     ptxas is deterministic and needs no device, so registers, spill traffic and
@@ -464,7 +486,7 @@ def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
         f"python3 autolab.py --compiler nvcc --cuda-path=/usr/local/cuda "
         f"--ptxas=/usr/local/cuda/bin/ptxas --arch={arch} --batch {batches} "
         f"--threads {threadCounts} --min-blocks {minBlocksList} --leaf {leaves} "
-        f"--top {top} --out {out}",
+        f"--knobs {knobs or 'none'} --top {top} --out {out}",
         cwd=f"{REMOTE}/codegen",
         timeout=4 * HOUR - 600,
     )

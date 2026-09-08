@@ -34,10 +34,30 @@ older cost function in autolab.py did.  Weighting a local operation at twelve
 instructions instead says leaf 33 is 15% slower, and the card measured 719.2
 against 844.3.  Predicted within 1.1%.
 
-The batch axis went the other way and is worth recording as a limit: measured
-844.3, 857.0 and 864.5 at batch 16, 32 and 64, a 2.4% spread that the model gets
-the wrong way round.  Its absolute error there is under 5%, but 2.4% is well
-inside the residual, so it cannot rank those three and does not pretend to.
+The batch axis went the other way, and a second leaf confirmed it is systematic
+rather than noise:
+
+    batch       leaf 0    leaf 33   leaf 0 ahead by
+    16           844.3      719.2       17.4%
+    32           857.0      748.1       14.6%
+    64           864.5      772.8       11.9%
+
+Batch 16 to 64 is worth +2.4% at leaf 0 and +7.5% at leaf 33, and the model
+predicts both of those negative.  The counting says a step performs 5B - 3
+multiplications over B slots, which is (5 - 3/B)/32 per walk-iteration and
+therefore rises with B; the one inversion it amortises away is too small to
+cancel that.  So the model has a mechanism that says larger batches cost
+slightly more, and the card says they are worth several percent.
+
+Something real is missing and it is not yet known what.  Candidates that have
+not been eliminated: independent slots giving the scheduler more to overlap,
+which no static count can see; or the entry body being charged once per slot
+when part of it runs once per step.  Recording the disagreement is the point --
+guessing a mechanism to make the residual smaller would be fitting noise, and
+the tool exists because three earlier predictions did exactly that.
+
+What the model can do is rank leaves, which is what it was asked and where it
+was right to 1.1% on a 15% gap.  What it cannot do is rank batches.
 
 The cost model itself is deliberately small: a walk iteration costs some
 arithmetic and some local traffic, and the two are weighted against each other
@@ -71,6 +91,8 @@ MEASURED = (
     ("batch 16", 16, 0, 844.3),
     ("batch 64", 64, 0, 864.5),
     ("leaf 33 at batch 16", 16, 33, 719.2),
+    ("leaf 33 at batch 32", 32, 33, 748.1),
+    ("leaf 33 at batch 64", 64, 33, 772.8),
 )
 
 
@@ -113,8 +135,15 @@ def dynamicPerIteration(ptxPath, batch, lanes=32):
 
     A step advances batch * lanes walks by one iteration, so dividing by that is
     what makes the number comparable across batch sizes."""
-    src = open(ptxPath).read()
-    parts = autolab.splitFunctions(src)
+    return dynamicFromParts(autolab.splitFunctions(open(ptxPath).read()), batch, lanes)
+
+
+def dynamicFromParts(parts, batch, lanes=32):
+    """As dynamicPerIteration, from PTX a caller has already split.
+
+    autolab.py builds the PTX and splits it anyway; making it re-read and
+    re-split a file it is holding in memory just to get a cost was the only
+    thing keeping the two tools on different cost models."""
     walk = findFunction(parts, "_Z13eccWalkKernel")
     if walk is None:
         return None
@@ -172,6 +201,30 @@ def fitWeight(points):
             best = (err, w, c)
         w += 0.05
     return best[1], best[2]
+
+
+def fittedWeight(historyPath=None):
+    """The local-operation weight the measured history supports, or None.
+
+    None means the history is too thin to fit -- and a caller that cannot get a
+    weight should say so and fall back, not invent one.  Three points is the
+    floor because a two-point fit through a two-parameter model is not a fit,
+    which is exactly how an earlier version of this came to predict 1030 M it/s
+    against a measured 857."""
+    if historyPath is None:
+        historyPath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "perfhistory.json")
+    if not os.path.exists(historyPath):
+        return None
+    hist = json.load(open(historyPath))
+    points = []
+    for label, _batch, _leaf, rate in MEASURED:
+        h = hist.get(label)
+        if h is not None:
+            points.append((h["instrs"], h["local"], rate))
+    if len(points) < 3:
+        return None
+    return fitWeight(points)[0]
 
 
 def main():

@@ -240,7 +240,15 @@ ECC_WIDE_UNROLL_PRAGMA
 #ifndef ECC_SMEM_SPILL
 #define ECC_SMEM_SPILL 0
 #endif
-#if ECC_SMEM_SPILL && (!defined(__CUDACC_VER_MAJOR__) || __CUDACC_VER_MAJOR__ < 13)
+// enable_smem_spilling is consumed by ptxas, not by the frontend, so the
+// version that matters is the assembler's -- which the frontend cannot see.
+// nvcc bundles its own, so gating on __CUDACC_VER_MAJOR__ is the right proxy
+// there and 13 is the documented floor.  clang does not bundle one: autolab
+// pairs it with whichever ptxas it was pointed at, and ptxas 12.9 was measured
+// to accept the pragma and report the smem it moved the frame into.  Treating
+// "not nvcc" as "too old" only blocked the offline search from seeing the knob
+// at all, so let that path through and leave the nvcc floor exactly where it was.
+#if ECC_SMEM_SPILL && defined(__CUDACC_VER_MAJOR__) && __CUDACC_VER_MAJOR__ < 13
 #error "ECC_SMEM_SPILL requires nvcc from CUDA 13 or newer"
 #endif
 #ifndef ECC_THREADS
