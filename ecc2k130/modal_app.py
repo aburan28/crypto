@@ -5,6 +5,7 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::autolab    # no GPU, picks candidates
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::autotune   # measures them
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::campaign   # both, in one call
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile    # Nsight Compute
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
 
@@ -111,6 +112,12 @@ image = (
         f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]}',
     )
 )
+
+# Nsight Compute lives in its own image.  It is about two gigabytes and only the
+# profiler wants it, so putting it in the main image would slow every bench and
+# search rebuild for a tool most runs never invoke.  It layers on top, so the
+# baked binary and the source are already present.
+profileImage = image.apt_install("nsight-compute")
 
 volume = modal.Volume.from_name("ecc2k130", create_if_missing=True)
 app = modal.App("ecc2k130")
@@ -422,6 +429,77 @@ def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
         front, configs = saved.get("front", []), saved.get("configs", "")
     return {"arch": arch, "returncode": rc, "cache": out, "front": front,
             "configs": configs, "log": log}
+
+
+@app.function(image=profileImage, gpu=DEFAULT_GPU, timeout=2 * HOUR)
+def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
+               section="", metrics=""):
+    """Profile the walk kernel with Nsight Compute, or say precisely why not.
+
+    Whether this works at all is a property of the host, not of this code.
+    NVIDIA has restricted the GPU performance counters to administrators since
+    driver 418.43, and a container gets at them only if the host loaded the
+    driver with NVreg_RestrictProfilingToAdminUsers=0 or the container was given
+    CAP_SYS_ADMIN.  Neither is ours to set on Modal.  So this runs ncu and, if
+    the counters are refused, reports that as the answer rather than as an
+    error -- the run is still informative, because it settles the question.
+
+    `steps` and `launches` default low: ncu serialises and replays each kernel
+    to collect counters, so a profiled launch is orders of magnitude slower than
+    a real one.  Four steps is plenty to characterise a kernel whose every step
+    is identical."""
+    arch = computeCapability()
+    name = gpuName()
+    rc, ver = sh("ncu --version")
+    if rc != 0:
+        return {"gpu": name, "available": False,
+                "why": "ncu is not on PATH in this image", "log": ver[-2000:]}
+
+    ok, log = buildFor(batch, threads, leaf, arch, minBlocks)
+    if not ok:
+        return {"gpu": name, "available": False, "why": "build failed",
+                "log": log[-2000:]}
+
+    what = ""
+    if metrics:
+        what = "--metrics %s" % metrics
+    elif section:
+        what = "--section %s" % section
+    else:
+        # Enough to answer where the walk kernel's time goes without asking for
+        # the full set, which replays the kernel many more times.
+        what = ("--section SpeedOfLight --section MemoryWorkloadAnalysis "
+                "--section LaunchStats --section Occupancy "
+                "--section WarpStateStats")
+    rc, out = shStream(
+        f"ncu --target-processes all --kernel-name eccWalkKernel "
+        f"--launch-count 1 {what} "
+        f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
+        f"--verify 0",
+        timeout=1 * HOUR,
+        prefix="  ncu| ",
+    )
+
+    denied = ("ERR_NVGPU_DEBUG_PERF_COUNTER_ACCESS_DENIED" in out
+              or "The user does not have permission" in out
+              or "insufficient permissions" in out.lower())
+    if denied:
+        return {
+            "gpu": name, "available": False,
+            "why": ("the GPU performance counters are restricted to "
+                    "administrators on this host, which is a driver and "
+                    "container-capability setting Modal controls, not this app"),
+            "remedy": ("ask Modal whether profiling can be enabled for this GPU "
+                       "class.  Failing that, the multiplier's share can be "
+                       "measured without any counters by adding K extra "
+                       "multiplications by a runtime-supplied identity to each "
+                       "step and fitting the slope of rate against K -- the "
+                       "marginal cost of one multiply, straight off the card"),
+            "log": out[-4000:],
+        }
+    return {"gpu": name, "cc": arch, "available": rc == 0,
+            "batch": batch, "threads": threads, "leaf": leaf,
+            "minBlocks": minBlocks, "report": out[-2000:] if rc else out}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -841,6 +919,26 @@ def campaign(gpu: str = "", batches: str = "4,8,16,32",
     print("measuring %d builds on a GPU: %s\n" % (len(r["front"]), r["configs"]))
     m = onGpu(runAutotune, gpu).remote(configs=r["configs"])
     print(json.dumps(m, indent=2))
+
+
+@app.local_entrypoint()
+def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
+            min_blocks: int = 2, steps: int = 4, section: str = "",
+            metrics: str = ""):
+    """Nsight Compute on the walk kernel.
+
+    Whether the counters are readable is a host setting rather than anything
+    this app controls, so a refusal is itself the answer worth having."""
+    r = onGpu(runProfile, gpu).remote(batch=batch, threads=threads, leaf=leaf,
+                                      minBlocks=min_blocks, steps=steps,
+                                      section=section, metrics=metrics)
+    if not r.get("available"):
+        print("Nsight Compute did not run: %s" % r.get("why"))
+        if r.get("remedy"):
+            print("  %s" % r["remedy"])
+        print(r.get("log", "")[-2000:])
+        return
+    print(r["report"])
 
 
 @app.local_entrypoint()
