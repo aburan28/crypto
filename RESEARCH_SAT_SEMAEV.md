@@ -311,6 +311,60 @@ there is a crossover worth finding.  Measuring `l = 7, 8, 9` decides
 it, and that measurement is worth more than any remaining
 micro-optimisation.
 
+## Does it scale?  No.
+
+The rejection numbers above raise one question that decides whether any
+of this is worth pursuing: `conflicts/triple = 1` at `l = 5, 6` means
+the solver walks the candidate space, but enumeration only becomes
+hopeless around `l = 12`.  If propagation starts *pruning* as the
+factor base grows, there is a crossover worth finding.
+
+`cargo run --release --example semaev_scaling` walks the ladder with
+`n ≈ 3l`, so the decomposition probability stays near `1/3!`
+throughout.  Each modulus is checked irreducible by Rabin's test at
+startup rather than trusted from a table.
+
+| `n` | `l` | triples | conflicts | confl/triple | SAT reject | brute force | ratio |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 15 | 5 | 5 984 | 5 781 | 0.97 | 0.2 s | 0.04 s | 5× |
+| 19 | 6 | 45 760 | 45 808 | 1.00 | 3.0 s | 0.36 s | 8× |
+| 21 | 7 | 357 760 | 363 293 | 1.02 | 51.0 s | 2.86 s | 18× |
+| 24 | 8 | 2 829 056 | 2 877 905 | 1.02 | 1 472 s | 23.9 s | **62×** |
+
+**The ratio does not fall.**  Across a 470× growth in the candidate
+space it holds at ~1 and if anything drifts upward.  The solver never
+prunes: it examines every triple, one conflict each, all the way out.
+
+It is worse than that.  Cost per conflict grows too — 35 µs, 65 µs,
+140 µs, 512 µs across the four rungs — because the instances get bigger
+while the work per triple stays the same.  Brute force meanwhile is
+flat at 7.5–8.4 µs per triple.  So the SAT route is not merely a
+constant factor behind; **the gap widens with `l`**, from 5× to 62×,
+and would keep widening.
+
+### What that settles
+
+For this encoding, SAT is a strictly worse way to enumerate the factor
+base than evaluating the polynomial directly.  No amount of solver
+engineering changes that: the flat clause arena still on the table
+would be worth maybe 2×, against a deficit that grows without bound.
+
+That is not a defect in the encoding — it reproduces an independent
+implementation's instance size to the clause (see below) — but in what
+the encoding gives a CDCL to work with.  The descended `S₄` constraints
+only bite once all three x-coordinates are nearly determined, so there
+is no partial assignment for propagation to refute early, and a
+conflict per leaf is exactly what a search with no prunable structure
+looks like.
+
+Anyone hoping for more from this route needs a model that constrains
+partial triples, not a faster solver.  Candidates worth a look, none of
+them small: a descent that keeps more equations than unknowns so
+subsets of the `Xᵢ` are already over-determined; higher summation
+polynomials where the extra structure might bind earlier; or dropping
+SAT for a Gröbner-basis route, whose whole premise is exploiting the
+algebra rather than searching around it.
+
 ## Reference corpus
 
 `semaev_corpus.rs` carries the parameters of all 60 upstream instances
@@ -378,13 +432,11 @@ as a benchmark.
 ## What's still open
 
 - **Clauses are `Vec<Vec<Lit>>`.**  Every clause is a separate heap
-  allocation, so each visit is a pointer chase — measured at ~22 ns per
-  clause visit before blockers.  A flat arena (`Vec<Lit>` with offsets
-  as clause references, MiniSat's `ClauseAllocator`) would make
-  propagation and analysis contiguous, and those are now 78% of the
-  time between them.  It is the largest remaining item and also the
-  most invasive: every clause access, `reduce_db`, and the
-  learnt-clause bookkeeping change together.
+  allocation, so each visit is a pointer chase — ~22 ns per clause
+  visit before blockers.  A flat arena would make propagation and
+  analysis contiguous, and those are 78% of the time between them.
+  Worth roughly 2× — which the scaling result above says is not worth
+  having, so this is recorded rather than recommended.
 - **Re-pivoting is eager**, and **fill-in is bounded only at restarts** —
   both real, both inside the 20% the parity engine now costs, so
   neither is worth doing before the arena.
@@ -399,11 +451,10 @@ as a benchmark.
   uses) would be far denser and make relocation a shift.  Deferred
   deliberately: it buys descent time, and descent is 11 ms against a
   4-minute solve.
-- **The solver does not prune the candidate space** — one conflict per
-  triple, and 7× slower than evaluating the polynomial directly.  See
-  [Rejection](#rejection-and-the-baseline-it-has-to-beat).  Whether
-  that changes as `l` grows is the question that decides whether this
-  route is worth pursuing further.
+- **The route does not scale.**  The solver never prunes the candidate
+  space, and its deficit against direct enumeration widens from 5× at
+  `l = 5` to 62× at `l = 8`.  See [Does it scale?](#does-it-scale-no).
+  Further solver optimisation is not worth doing.
 
 ## References
 
