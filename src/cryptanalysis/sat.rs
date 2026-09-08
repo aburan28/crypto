@@ -482,10 +482,7 @@ impl Solver {
 
     /// Get the satisfying assignment after a successful `solve()`.
     pub fn model(&self) -> Vec<bool> {
-        self.assignment
-            .iter()
-            .map(|a| a.unwrap_or(false))
-            .collect()
+        self.assignment.iter().map(|a| a.unwrap_or(false)).collect()
     }
 
     /// Number of variables.
@@ -494,6 +491,15 @@ impl Solver {
     }
 
     /// Total number of (original + learnt) clauses.
+    /// Conflicts encountered by the most recent [`Self::solve`].
+    ///
+    /// A machine-independent measure of search effort: unlike wall
+    /// clock it is comparable across runs and machines, which is what
+    /// a benchmark wants when comparing encodings.
+    pub fn conflicts(&self) -> u64 {
+        self.conflicts
+    }
+
     pub fn n_clauses(&self) -> usize {
         self.clauses.len()
     }

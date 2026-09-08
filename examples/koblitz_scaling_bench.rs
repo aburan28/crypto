@@ -35,7 +35,7 @@ fn main() {
         // regimes: finding a decomposition and proving there is none.
         (1, 15, 3),
     ] {
-        if let Some(b) = bench_instance(a, n, 0, m, 8, 0xB0B, 20_000, 8) {
+        if let Some(b) = bench_instance(a, n, 0, m, 8, 0xB0B, 20_000, 8, Some(2)) {
             oracles.push(b);
         }
     }
