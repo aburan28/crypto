@@ -15,9 +15,9 @@
 //   pass 2  one inversion for the whole batch, then the affine additions
 //
 // Pass 2 recomputes sigma^j(x) and sigma^j(y) from the three stored weight bits
-// rather than reading stored denominators back: on current hardware this loop
-// is close to memory bound, so trading 786 instructions for 1048 bytes of
-// traffic per slot is worth it.
+// rather than reading stored denominators back. This trades 786 instructions
+// for 1048 bytes of traffic per slot; profile the memory hierarchy to assess
+// that trade on the target GPU.
 #pragma once
 
 #include "fieldbs.h"

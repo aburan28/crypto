@@ -17,9 +17,17 @@
 
 #include "bitslice.h"
 
+// Experimental schedule: retain only one subproduct at a time. Keep the
+// original schedule as the control until actual GPU timings select a winner.
+#ifndef ECC_STREAM_KARAT
+#define ECC_STREAM_KARAT 0
+#endif
+
 // ---------------------------------------------------------------------------
 // Karatsuba recursion.  N is the operand length in words; the result has
 // 2N-1 words.  Operand halves are ceil(N/2), the upper half zero padded.
+// The result must not alias either input; both field backends use a separate
+// polynomial-product buffer, so their public multiplication still permits aliasing.
 // ---------------------------------------------------------------------------
 template <class Cfg, class W, int N>
 struct Karat {
@@ -27,6 +35,40 @@ struct Karat {
     static const int SUB = 2 * H - 1;
 
     static ECC_HD void mul(const W *a, const W *b, W *r) {
+#if ECC_STREAM_KARAT
+        W ah[H], bh[H], p[SUB];
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < 2 * N - 1; ++i) r[i] = ECC_ZERO;
+        // p0 contributes at offsets zero and H. Consume it before computing
+        // p1, so p0/p1/pm and four operand halves never coexist.
+        Karat<Cfg, W, H>::mul(a, b, p);
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < SUB; ++i) {
+            r[i] ^= p[i];
+            if (H + i < 2 * N - 1) r[H + i] ^= p[i];
+        }
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < H; ++i) {
+            ah[i] = (H + i < N) ? a[H + i] : ECC_ZERO;
+            bh[i] = (H + i < N) ? b[H + i] : ECC_ZERO;
+        }
+        Karat<Cfg, W, H>::mul(ah, bh, p);
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < SUB; ++i) {
+            if (H + i < 2 * N - 1) r[H + i] ^= p[i];
+            if (2 * H + i < 2 * N - 1) r[2 * H + i] ^= p[i];
+        }
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < H; ++i) {
+            ah[i] ^= a[i];
+            bh[i] ^= b[i];
+        }
+        Karat<Cfg, W, H>::mul(ah, bh, p);
+ECC_WIDE_UNROLL_PRAGMA
+        for (int i = 0; i < SUB; ++i) {
+            if (H + i < 2 * N - 1) r[H + i] ^= p[i];
+        }
+#else
         W am[H], bm[H];
         W a1[H], b1[H];
 #pragma unroll
@@ -56,6 +98,7 @@ struct Karat {
         for (int i = 0; i < SUB; ++i) {
             if (2 * H + i < 2 * N - 1) r[2 * H + i] ^= p1[i];
         }
+#endif
     }
 };
 
