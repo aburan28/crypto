@@ -12,6 +12,15 @@
 
 #include "walk.h"
 
+// How far to unroll a loop that is M words wide.  Fully unrolling one asks
+// ptxas to keep all 131 values live at once and it spills them: full unroll
+// costs 9820 bytes of spill traffic in the walk kernel against 4784 at any
+// factor of 16 or more, measured with ptxas at batch 32, threads 128,
+// minBlocks 2.  16 is the smallest factor that reaches that plateau.
+#ifndef ECC_WIDE_UNROLL
+#define ECC_WIDE_UNROLL 16
+#endif
+
 #ifndef ECC_BATCH
 #define ECC_BATCH 16
 #endif
@@ -69,11 +78,11 @@ struct Kernel {
     }
 
     static ECC_HD void load(const W *src, int slot, int tid, int threads, W *dst) {
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
         for (int i = 0; i < M; ++i) dst[i] = src[fieldIndex(slot, i, tid, threads)];
     }
     static ECC_HD void store(W *dst, int slot, int tid, int threads, const W *src) {
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
         for (int i = 0; i < M; ++i) dst[fieldIndex(slot, i, tid, threads)] = src[i];
     }
 
@@ -216,11 +225,11 @@ struct Kernel {
                 }
                 F::mul(e, ii, lam);
                 F::sqr(lam, t);
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
                 for (int i = 0; i < M; ++i) t[i] = ECC_XOR3(t[i], lam[i], d[i]);   // x3
                 F::add(x, t, u);
                 F::mul(lam, u, e);
-#pragma unroll
+#pragma unroll ECC_WIDE_UNROLL
                 for (int i = 0; i < M; ++i) y[i] = ECC_XOR3(e[i], t[i], y[i]);
                 store(P.x, slot, tid, P.threads, t);
                 store(P.y, slot, tid, P.threads, y);
