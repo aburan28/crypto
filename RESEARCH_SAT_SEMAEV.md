@@ -72,8 +72,8 @@ multiplication.
 ## Making it fast
 
 The first working version decided one `n = 19` instance in **231 s**.
-The whole eleven-instance `n19l6` family now takes **22.8 s**, median
-**2.0 s** — about **115× per instance**.  Six changes, in the order
+The whole eleven-instance `n19l6` family now takes **17.8 s**, median
+**1.8 s** — about **128× per instance**.  Seven changes, in the order
 they mattered:
 
 ### 1. Branch only on the free variables
@@ -147,12 +147,55 @@ checks the completeness claim directly against a from-scratch
 elimination oracle, over 300 random systems under random partial
 assignments, rather than trusting the argument.
 
-### 6. Data-structure work
+### 6. Profiling, and being wrong about where the time was
+
+At this point the plan was to keep optimising the parity engine:
+watched-variable re-pivoting, then Markowitz pivot selection to limit
+fill-in.  Both were wrong.  Timing the phases directly — `Instant::now`
+costs ~25 ns against tens of µs per conflict, so it is cheaper than
+guessing — gave:
+
+| phase | share |
+|---|---:|
+| clause propagation | 48% |
+| conflict analysis | 35% |
+| **parity propagation** | **15%** |
+| clause forgetting | 0.1% |
+
+The parity engine was 15% of the time.  Both planned optimisations
+would have been capped at that, and one of them — fill-in — turned out
+not to be a problem at all: parity reason clauses averaged **15
+literals**, not the hundreds the theory allowed for.  Rebuilding the
+matrix at restarts was already keeping rows sparse.
+
+`cargo run --release --example semaev_profile` reports this breakdown.
+What it redirected the work to:
+
+- **Blocker literals in the watch lists.**  Each watch entry carries
+  one of the clause's other literals; if it is already true the clause
+  is satisfied and is never dereferenced.  That matters because every
+  clause is its own heap allocation, so touching one is a cache miss.
+  Clause propagation 38.1 → 28.3 µs/conflict.
+- **In-place watch-list compaction.**  Propagation was building a fresh
+  vector for each watch list it walked — one heap allocation per
+  propagated literal, millions per solve.  Read and write cursors over
+  the same vector instead.  28.3 → 19.4 µs/conflict.
+- **Recursive clause minimization** (§2 above was only the local
+  check).  Learnt clauses 192 → 90 literals.
+
+A useful check on the whole design fell out of the same instrumentation:
+the deepest decision level on an `n = 19` instance is **18**, exactly
+the number of free x-bits.  Free-variable branching is doing precisely
+what it was meant to.
+
+### 7. Data-structure work
 
 A position-tracked activity heap instead of a linear scan over every
-variable per decision; `analyze` scratch reused rather than reallocated
-per conflict; a bitset mirror of the assignment so a parity row's
-read-off is `mask & !assigned` plus a popcount — `O(words)` instead of
+variable per decision; `analyze` scratch and the learnt-clause
+accumulator reused rather than reallocated per conflict; reason clauses
+read in place instead of copied at each resolution step; a bitset
+mirror of the assignment so a parity row's read-off is
+`mask & !assigned` plus a popcount — `O(words)` instead of
 `O(set bits)` with a two-byte lookup each.
 
 ## Measured
@@ -167,12 +210,12 @@ number.)
 
 | family | symmetry | instances | total | median | conflicts |
 |---|---|---:|---:|---:|---:|
-| `n15l5` | off | 10 | 5.5 s | 582 ms | 93 593 |
-| `n15l5` | on | 10 | 1.8 s | 192 ms | 33 974 |
-| `n17l6` | off | 10 | 67.0 s | 6.0 s | 467 663 |
-| `n17l6` | on | 10 | 13.9 s | 1.4 s | 156 612 |
-| `n19l6` | off | 11 | 209.8 s | 8.5 s | 1 012 122 |
-| `n19l6` | on | 11 | 22.8 s | 2.0 s | 253 496 |
+| `n15l5` | off | 10 | 5.1 s | 460 ms | 129 493 |
+| `n15l5` | on | 10 | 1.3 s | 180 ms | 33 148 |
+| `n17l6` | off | 10 | 27.1 s | 3.0 s | 431 921 |
+| `n17l6` | on | 10 | 8.4 s | 663 ms | 146 310 |
+| `n19l6` | off | 11 | 74.2 s | 5.3 s | 987 666 |
+| `n19l6` | on | 11 | 17.8 s | 1.8 s | 311 671 |
 
 `n19l6` has eleven satisfiable instances rather than ten because one
 upstream `-U` instance is misannotated; the corpus records that, so it
@@ -186,9 +229,19 @@ Median solve on an `n = 19` instance, one change at a time:
 |---|---:|---:|
 | first working version | 231 s | — |
 | free-variable branching, heaps, reused scratch | ~21 s | 11× |
-| learnt-clause minimization | — | folded in below |
 | symmetry breaking | 4.7 s | 4.5× |
-| incremental Gauss matrix | **2.0 s** | 2.4× |
+| incremental Gauss matrix | 2.0 s | 2.4× |
+| profile-directed solver work | **1.8 s** | 1.1× |
+
+The last row understates it: at the family level `n17l6` went from
+24.4 s to 8.4 s and its median from 2.5 s to 663 ms.  Single-instance
+medians on satisfiable problems are noisy enough that the totals are
+the more honest read.
+
+Per-conflict cost over the same work went 78.9 µs → 57.9 µs, and the
+phase split is now clause propagation 33%, conflict analysis 45%,
+parity 20% — balanced enough that the next real gain needs a flat
+clause arena rather than another targeted fix.
 
 Encoding size, `n = 19, l = 6`, symmetry breaking off:
 
@@ -270,16 +323,17 @@ Worth singling out:
 
 ## What's still open
 
-- **Re-pivoting is still eager.**  When a pivot is assigned the row
-  immediately looks for a replacement, where CryptoMiniSat watches two
-  unassigned variables per row and only acts when *both* are gone.
-  Watching would cut the remaining per-pass `O(rows)` scan to work
-  proportional to the rows actually touched.
-- **Fill-in is only bounded at restarts.**  Row operations make the
-  matrix denser over time, which lengthens the reason clauses read off
-  it.  Choosing pivots to minimise fill-in (the Markowitz rule from
-  sparse LU) would keep rows shorter than picking the lowest-numbered
-  unassigned variable does.
+- **Clauses are `Vec<Vec<Lit>>`.**  Every clause is a separate heap
+  allocation, so each visit is a pointer chase — measured at ~22 ns per
+  clause visit before blockers.  A flat arena (`Vec<Lit>` with offsets
+  as clause references, MiniSat's `ClauseAllocator`) would make
+  propagation and analysis contiguous, and those are now 78% of the
+  time between them.  It is the largest remaining item and also the
+  most invasive: every clause access, `reduce_db`, and the
+  learnt-clause bookkeeping change together.
+- **Re-pivoting is eager**, and **fill-in is bounded only at restarts** —
+  both real, both inside the 20% the parity engine now costs, so
+  neither is worth doing before the arena.
 - **`S₄` is specialised to `b = 1`** — the Koblitz curve
   `y² + xy = x³ + x² + 1`.  `S₄` does not depend on `a₂`, but it does
   depend on `b`, and the `b`-powers are folded into the twelve

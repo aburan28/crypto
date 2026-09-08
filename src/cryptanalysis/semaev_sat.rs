@@ -35,17 +35,18 @@
 //!
 //! | family | symmetry breaking | instances | total | median | conflicts |
 //! |---|---|---:|---:|---:|---:|
-//! | `n15l5` | off | 10 | 5.5 s | 582 ms | 93 593 |
-//! | `n15l5` | on | 10 | 1.8 s | 192 ms | 33 974 |
-//! | `n17l6` | off | 10 | 67.0 s | 6.0 s | 467 663 |
-//! | `n17l6` | on | 10 | 13.9 s | 1.4 s | 156 612 |
-//! | `n19l6` | off | 11 | 209.8 s | 8.5 s | 1 012 122 |
-//! | `n19l6` | on | 11 | 22.8 s | 2.0 s | 253 496 |
+//! | `n15l5` | off | 10 | 5.1 s | 460 ms | 129 493 |
+//! | `n15l5` | on | 10 | 1.3 s | 180 ms | 33 148 |
+//! | `n17l6` | off | 10 | 27.1 s | 3.0 s | 431 921 |
+//! | `n17l6` | on | 10 | 8.4 s | 663 ms | 146 310 |
+//! | `n19l6` | off | 11 | 74.2 s | 5.3 s | 987 666 |
+//! | `n19l6` | on | 11 | 17.8 s | 1.8 s | 311 671 |
 //!
 //! Breaking the `3!` symmetry is worth a steady 3–5× — not far off the
 //! `6×` the orbit size allows, less the cost of the ordering clauses.
 //! The first working version needed 231 s for one `n = 19` instance;
-//! the median is now 2.0 s.
+//! the median is now 1.8 s.  `cargo run --release --example
+//! semaev_profile` breaks a solve down by phase.
 //! (`n19l6` has eleven satisfiable instances, not ten: one of the
 //! upstream `-U` instances is misannotated.  See
 //! [`crate::cryptanalysis::semaev_corpus`].)
@@ -68,11 +69,10 @@
 //!
 //! # Limits
 //!
-//! - **Re-pivoting is eager.**  The Gauss-Jordan matrix is now carried
-//!   across propagations (see [`Solver::add_xor`]), but a row whose
-//!   pivot is assigned looks for a replacement immediately, where
-//!   CryptoMiniSat watches two unassigned variables per row and acts
-//!   only when both are gone.
+//! - **Clauses are `Vec<Vec<Lit>>`**, so every clause visit is a
+//!   pointer chase.  Propagation and conflict analysis are ~78% of the
+//!   time between them; a flat clause arena is the largest remaining
+//!   item.  The parity engine is now only ~20%.
 //! - **`S₄` is specialised to `b = 1`**, the Koblitz curve
 //!   `y² + xy = x³ + x² + 1`.  See
 //!   [`crate::cryptanalysis::binary_semaev_s4`].

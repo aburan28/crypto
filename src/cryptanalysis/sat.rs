@@ -94,6 +94,25 @@ fn is_neg(lit: Lit) -> bool {
     lit < 0
 }
 
+/// A watch-list entry: the clause, plus one of its other literals.
+///
+/// The **blocker** is checked first.  If it is already true the clause
+/// is satisfied and can be skipped without dereferencing it at all —
+/// which is the point, since every clause is its own heap allocation
+/// and touching one is a cache miss.
+#[derive(Debug, Clone, Copy)]
+struct Watcher {
+    cref: usize,
+    blocker: Lit,
+}
+
+/// Decision levels bucketed into 32 bits, so "could this literal's
+/// reason stay inside the clause's levels?" is one AND.
+#[inline]
+fn abstract_level(level: i32) -> u32 {
+    1u32 << (level & 31)
+}
+
 /// Outcome of solving.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SolveResult {
@@ -145,6 +164,38 @@ pub struct SolverStats {
     /// incremental matrix does beyond a popcount per row.
     pub xor_repivots: u64,
     pub learnt_clauses: u64,
+
+    // ── work counters ───────────────────────────────────────────────
+    // Proxies for where the time goes.  Timing each call would cost
+    // more than the calls do; counting the operations does not.
+    /// Row-into-row XORs performed by re-pivoting, each `O(words)`.
+    pub xor_row_ops: u64,
+    /// Rows examined in the parity read-off, each `O(words)`.
+    pub xor_row_scans: u64,
+    /// Literals written into parity reason clauses.
+    pub xor_reason_lits: u64,
+    /// Clauses examined by watched-literal propagation.
+    pub clause_visits: u64,
+    /// Literals scanned while looking for a replacement watch.
+    pub clause_lit_visits: u64,
+    /// Literals walked across reason clauses during conflict analysis.
+    pub analyze_lit_visits: u64,
+    /// Literals in learnt clauses, before and after minimization.
+    pub learnt_lits_raw: u64,
+    pub learnt_lits_kept: u64,
+    // ── phase timings, in nanoseconds ───────────────────────────────
+    // `Instant::now` costs ~25 ns against ~80 µs per conflict, so
+    // timing the phases directly is cheaper than guessing at them.
+    pub ns_propagate_clauses: u64,
+    pub ns_propagate_xors: u64,
+    pub ns_analyze: u64,
+    pub ns_minimize: u64,
+    pub ns_reduce_db: u64,
+    /// Summed decision level at conflict, and the deepest level seen.
+    /// If the free-variable set really determines everything, the level
+    /// should never exceed the number of free variables.
+    pub conflict_level_sum: u64,
+    pub max_level: u64,
 }
 
 /// Max-heap of variables by VSIDS activity, with position tracking so a
@@ -303,7 +354,7 @@ pub struct Solver {
     /// Two-watched-literal scheme: for each literal (encoded as
     /// `2*var + neg` so we can index a `Vec`), a list of clause
     /// indices watching it.
-    watches: Vec<Vec<usize>>,
+    watches: Vec<Vec<Watcher>>,
     /// Counter of conflicts since the last restart.
     conflicts_since_restart: u64,
     /// Total conflicts across the whole solve.
@@ -358,8 +409,12 @@ pub struct Solver {
     /// rather than O(variables).
     seen: Vec<bool>,
     seen_stack: Vec<u32>,
-    /// `analyze` scratch for the current reason clause.
-    reason_buf: Vec<Lit>,
+    /// Scratch stack for recursive clause minimization.
+    redundant_stack: Vec<Lit>,
+    /// Accumulator for the learnt clause, reused across conflicts.  It
+    /// grows to a few hundred literals before minimization, so letting
+    /// it reallocate per conflict was pure waste.
+    learnt_buf: Vec<Lit>,
     /// Branching order by activity.
     order: VarHeap,
     /// Variables to branch on before any others.  See
@@ -456,7 +511,8 @@ impl Solver {
             pivot: Vec::new(),
             seen: vec![false; n],
             seen_stack: Vec::new(),
-            reason_buf: Vec::new(),
+            redundant_stack: Vec::new(),
+            learnt_buf: Vec::new(),
             order: VarHeap::new(n_vars),
             branch_priority: vec![false; n],
             detached: Vec::new(),
@@ -597,8 +653,15 @@ impl Solver {
             }
             _ => {
                 let idx = self.clauses.len();
-                self.watches[watch_index(lits[0])].push(idx);
-                self.watches[watch_index(lits[1])].push(idx);
+                let (l0, l1) = (lits[0], lits[1]);
+                self.watches[watch_index(l0)].push(Watcher {
+                    cref: idx,
+                    blocker: l1,
+                });
+                self.watches[watch_index(l1)].push(Watcher {
+                    cref: idx,
+                    blocker: l0,
+                });
                 self.clauses.push(lits);
                 self.n_orig_clauses = self.clauses.len();
                 true
@@ -650,7 +713,10 @@ impl Solver {
     /// no special-casing.
     fn propagate(&mut self) -> Option<Conflict> {
         loop {
-            if let Some(c) = self.propagate_clauses() {
+            let t = std::time::Instant::now();
+            let cnf = self.propagate_clauses();
+            self.stats.ns_propagate_clauses += t.elapsed().as_nanos() as u64;
+            if let Some(c) = cnf {
                 return Some(Conflict::Clause(c));
             }
             if self.xors.is_empty() || self.epoch == self.xor_epoch {
@@ -658,7 +724,10 @@ impl Solver {
                 return None;
             }
             self.xor_epoch = self.epoch;
-            match self.propagate_xors() {
+            let t = std::time::Instant::now();
+            let step = self.propagate_xors();
+            self.stats.ns_propagate_xors += t.elapsed().as_nanos() as u64;
+            match step {
                 XorStep::Conflict => return Some(Conflict::Xor),
                 XorStep::Propagated => continue,
                 XorStep::Fixpoint => return None,
@@ -726,6 +795,7 @@ impl Solver {
                         if j == i || !bs_get(&self.matrix[j].mask, p) {
                             continue;
                         }
+                        self.stats.xor_row_ops += 1;
                         self.matrix[j].rhs ^= src.rhs;
                         for w in 0..words {
                             self.matrix[j].mask[w] ^= src.mask[w];
@@ -746,6 +816,7 @@ impl Solver {
                 Some(p) => p,
                 None => continue, // decided in phase 1
             };
+            self.stats.xor_row_scans += 1;
             let mut parity = self.matrix[i].rhs;
             let mut lone = true;
             for w in 0..words {
@@ -770,6 +841,7 @@ impl Solver {
             let mask = std::mem::take(&mut self.matrix[i].mask);
             self.write_xor_reason(&mask, Some(lit), &mut buf);
             self.matrix[i].mask = mask;
+            self.stats.xor_reason_lits += buf.len() as u64;
             self.xor_reason[p as usize] = buf;
             self.stats.xor_propagations += 1;
             if self.enqueue(lit, Reason::XorPropagated).is_err() {
@@ -862,76 +934,163 @@ impl Solver {
         while self.qhead < self.trail.len() {
             let lit = self.trail[self.qhead];
             self.qhead += 1;
-            // Iterate clauses watching `¬lit` (the watcher becomes
-            // false when `lit` is set true).
+            // Clauses watching `¬lit` — that watcher has just become
+            // false, so each needs a replacement or is unit.
             let wi = watch_index(-lit);
-            let mut i = 0usize;
-            // Move all watchers out so we can mutate `self`.
-            let watchers = std::mem::take(&mut self.watches[wi]);
-            let mut new_watchers: Vec<usize> = Vec::with_capacity(watchers.len());
-            'outer: while i < watchers.len() {
-                let cidx = watchers[i];
+            // Compact the watch list in place with a read and a write
+            // cursor.  Building a fresh vector here meant one heap
+            // allocation per propagated literal, which at ~280
+            // propagations a conflict is millions per solve.
+            let mut ws = std::mem::take(&mut self.watches[wi]);
+            let (mut i, mut j) = (0usize, 0usize);
+            let mut conflict: Option<usize> = None;
+
+            while i < ws.len() {
+                let w = ws[i];
                 i += 1;
-                // Ensure clause[0] is the false watcher (the one we're
-                // looking to replace).  The watch entry tells us the
-                // false watcher is one of clause[0]/clause[1]; swap so
-                // it's at index 0.
-                {
-                    let clause = &mut self.clauses[cidx];
-                    if clause[0] != -lit {
-                        clause.swap(0, 1);
-                    }
+                // Blocker: if this literal is already true the clause is
+                // satisfied and is never dereferenced.
+                if self.lit_value(w.blocker) == Some(true) {
+                    ws[j] = w;
+                    j += 1;
+                    continue;
                 }
-                // Read the "other" watcher value (no clause borrow held).
+                let cidx = w.cref;
+                self.stats.clause_visits += 1;
+
+                // Canonical layout: the false watcher sits at [0].
+                if self.clauses[cidx][0] != -lit {
+                    self.clauses[cidx].swap(0, 1);
+                }
                 let other = self.clauses[cidx][1];
                 let other_value = self.lit_value(other);
                 if other_value == Some(true) {
-                    new_watchers.push(cidx);
+                    ws[j] = Watcher {
+                        cref: cidx,
+                        blocker: other,
+                    };
+                    j += 1;
                     continue;
                 }
-                // Find a new watch — scan positions 2..len under
-                // narrow re-borrow per iteration.
+
+                // Look for a literal that is not false to watch instead.
                 let clen = self.clauses[cidx].len();
-                let mut found_new_watch = false;
+                let mut moved = false;
                 for k in 2..clen {
+                    self.stats.clause_lit_visits += 1;
                     let l = self.clauses[cidx][k];
                     if self.lit_value(l) != Some(false) {
-                        // Use `l` as the new watch.
                         self.clauses[cidx].swap(0, k);
-                        self.watches[watch_index(l)].push(cidx);
-                        found_new_watch = true;
+                        // `l` is not false and `¬lit` is, so this never
+                        // writes back into the list being compacted.
+                        self.watches[watch_index(l)].push(Watcher {
+                            cref: cidx,
+                            blocker: other,
+                        });
+                        moved = true;
                         break;
                     }
                 }
-                if found_new_watch {
-                    continue 'outer;
+                if moved {
+                    continue; // the watch now lives elsewhere
                 }
-                // No new watch: clause is unit or conflict. Restore
-                // the canonical layout (false-watcher at [0]).
+
+                // No replacement: the clause is unit in `other`, or
+                // falsified.
                 self.clauses[cidx][0] = -lit;
-                new_watchers.push(cidx);
+                ws[j] = Watcher {
+                    cref: cidx,
+                    blocker: other,
+                };
+                j += 1;
                 match other_value {
                     None => {
-                        // Unit propagate `other`.
                         if self.enqueue(other, Reason::Propagated(cidx)).is_err() {
-                            // Shouldn't happen given other was None.
-                            self.watches[wi].extend(new_watchers);
-                            self.watches[wi].extend_from_slice(&watchers[i..]);
-                            return Some(cidx);
+                            conflict = Some(cidx);
+                            break;
                         }
                     }
                     Some(false) => {
-                        // Conflict: all literals are false.
-                        self.watches[wi].extend(new_watchers);
-                        self.watches[wi].extend_from_slice(&watchers[i..]);
-                        return Some(cidx);
+                        conflict = Some(cidx);
+                        break;
                     }
-                    Some(true) => unreachable!(),
+                    Some(true) => unreachable!("handled above"),
                 }
             }
-            self.watches[wi] = new_watchers;
+
+            // Keep whatever the loop did not reach.
+            while i < ws.len() {
+                ws[j] = ws[i];
+                i += 1;
+                j += 1;
+            }
+            ws.truncate(j);
+            self.watches[wi] = ws;
+
+            if let Some(c) = conflict {
+                return Some(c);
+            }
         }
         None
+    }
+
+    /// **Is `p` implied by the rest of the learnt clause?**
+    ///
+    /// Walks the implication graph backwards rather than looking only
+    /// one step at a reason (Eén–Sörensson's `litRedundant`).  The
+    /// distinction matters far more with a parity engine than in
+    /// ordinary CDCL: every parity implication's reason names each
+    /// assigned variable of its row, so reasons overlap heavily and a
+    /// literal is usually reachable through a chain rather than
+    /// directly.
+    ///
+    /// Marks made on a successful walk are kept — those variables are
+    /// now known to be implied by the clause — and rolled back on
+    /// failure, which is what `top` records.
+    fn lit_redundant(
+        &mut self,
+        p: Lit,
+        abstract_levels: u32,
+        stack: &mut Vec<Lit>,
+    ) -> bool {
+        let top = self.seen_stack.len();
+        stack.clear();
+        stack.push(p);
+        while let Some(q) = stack.pop() {
+            let qv = var_of(q) as usize;
+            let src = self.reason[qv];
+            let len = match src {
+                Reason::Decision => continue,
+                Reason::Propagated(idx) => self.clauses[idx].len(),
+                Reason::XorPropagated => self.xor_reason[qv].len(),
+            };
+            for i in 0..len {
+                let r = match src {
+                    Reason::Decision => unreachable!(),
+                    Reason::Propagated(idx) => self.clauses[idx][i],
+                    Reason::XorPropagated => self.xor_reason[qv][i],
+                };
+                let rv = var_of(r) as usize;
+                // The propagated literal itself, anything already in the
+                // clause, and anything fixed at level 0 are all fine.
+                if rv == qv || self.seen[rv] || self.level[rv] <= 0 {
+                    continue;
+                }
+                let has_reason = !matches!(self.reason[rv], Reason::Decision);
+                if has_reason && (abstract_level(self.level[rv]) & abstract_levels) != 0 {
+                    self.seen[rv] = true;
+                    self.seen_stack.push(rv as u32);
+                    stack.push(r);
+                } else {
+                    for j in top..self.seen_stack.len() {
+                        self.seen[self.seen_stack[j] as usize] = false;
+                    }
+                    self.seen_stack.truncate(top);
+                    return false;
+                }
+            }
+        }
+        true
     }
 
     /// 1-UIP conflict analysis. Returns `(learnt_clause, backjump_level)`.
@@ -942,34 +1101,43 @@ impl Solver {
     /// allocations on a path taken millions of times.
     fn analyze(&mut self, conflict: Conflict) -> (Vec<Lit>, i32) {
         let current_level = self.trail_lim.len() as i32;
-        let mut learnt: Vec<Lit> = Vec::new();
+        let mut learnt = std::mem::take(&mut self.learnt_buf);
+        learnt.clear();
         let mut counter = 0i32;
         let mut p: Lit = 0;
         let mut src = conflict;
         let mut trail_pos = self.trail.len();
-        let mut reason_buf = std::mem::take(&mut self.reason_buf);
 
         loop {
-            // Copy the current reason clause into the scratch buffer.
-            reason_buf.clear();
-            match src {
-                Conflict::Clause(idx) => reason_buf.extend_from_slice(&self.clauses[idx]),
-                Conflict::Xor => {
-                    if p == 0 {
-                        reason_buf.extend_from_slice(&self.xor_conflict);
-                    } else {
-                        reason_buf.extend_from_slice(&self.xor_reason[var_of(p) as usize]);
-                    }
-                }
-            }
+            // Read the reason in place.  Copying it into a scratch
+            // buffer was a memcpy of up to a hundred literals at every
+            // resolution step, and conflict analysis is the hottest
+            // phase of the solve.
+            let xor_var = if p == 0 { usize::MAX } else { var_of(p) as usize };
+            let len = match src {
+                Conflict::Clause(idx) => self.clauses[idx].len(),
+                Conflict::Xor if xor_var == usize::MAX => self.xor_conflict.len(),
+                Conflict::Xor => self.xor_reason[xor_var].len(),
+            };
 
-            for i in 0..reason_buf.len() {
-                let q = reason_buf[i];
+            self.stats.analyze_lit_visits += len as u64;
+            for i in 0..len {
+                let q = match src {
+                    Conflict::Clause(idx) => self.clauses[idx][i],
+                    Conflict::Xor if xor_var == usize::MAX => self.xor_conflict[i],
+                    Conflict::Xor => self.xor_reason[xor_var][i],
+                };
                 if p != 0 && q == p {
                     continue;
                 }
                 let v = var_of(q) as usize;
-                if !self.seen[v] && self.level[v] >= 0 {
+                // Skip variables fixed at level 0.  Their literals are
+                // permanently false in the learnt clause, so carrying
+                // them adds nothing and costs a great deal: this
+                // encoding propagates heavily at level 0, and including
+                // those literals was leaving learnt clauses averaging
+                // 188 literals on an `n = 19` instance.
+                if !self.seen[v] && self.level[v] > 0 {
                     self.seen[v] = true;
                     self.seen_stack.push(v as u32);
                     // Bump activity, and reposition in the branching heap.
@@ -1012,7 +1180,6 @@ impl Solver {
             }
         }
 
-        self.reason_buf = reason_buf;
 
         // **Local clause minimization** (MiniSat's `analyze` follow-up).
         // A literal whose own reason is built entirely from literals
@@ -1026,50 +1193,63 @@ impl Solver {
         //
         // `seen` is still marked for exactly the clause's literals at
         // this point, which is what makes the test a lookup.
+        self.stats.learnt_lits_raw += learnt.len() as u64;
         if learnt.len() > 1 {
-            let mut kept: Vec<Lit> = Vec::with_capacity(learnt.len());
+            // Cheap filter: a literal can only be redundant if its
+            // reason stays inside the levels the clause already covers.
+            let mut abstract_levels = 0u32;
             for &q in &learnt {
+                abstract_levels |= abstract_level(self.level[var_of(q) as usize]);
+            }
+            let t_min = std::time::Instant::now();
+            let mut stack = std::mem::take(&mut self.redundant_stack);
+            let mut w = 0usize;
+            for r in 0..learnt.len() {
+                let q = learnt[r];
                 let v = var_of(q) as usize;
-                let implied = match self.reason[v] {
-                    Reason::Decision => false,
-                    Reason::Propagated(idx) => self.clauses[idx]
-                        .iter()
-                        .all(|&r| var_of(r) as usize == v || self.seen[var_of(r) as usize]),
-                    Reason::XorPropagated => self.xor_reason[v]
-                        .iter()
-                        .all(|&r| var_of(r) as usize == v || self.seen[var_of(r) as usize]),
-                };
-                if !implied {
-                    kept.push(q);
+                let redundant = !matches!(self.reason[v], Reason::Decision)
+                    && self.lit_redundant(q, abstract_levels, &mut stack);
+                if !redundant {
+                    learnt[w] = q;
+                    w += 1;
                 }
             }
-            learnt = kept;
+            learnt.truncate(w);
+            self.redundant_stack = stack;
+            self.stats.ns_minimize += t_min.elapsed().as_nanos() as u64;
         }
+        self.stats.learnt_lits_kept += learnt.len() as u64;
 
         // Clear only the marks we set.
         for v in self.seen_stack.drain(..) {
             self.seen[v as usize] = false;
         }
 
-        // Asserting literal: ¬p.
-        learnt.insert(0, -p);
+        // Asserting literal: ¬p, then the clause exactly sized for the
+        // database.  The accumulator goes back for the next conflict.
+        let mut clause: Vec<Lit> = Vec::with_capacity(learnt.len() + 1);
+        clause.push(-p);
+        clause.extend_from_slice(&learnt);
+        learnt.clear();
+        self.learnt_buf = learnt;
+
         // Backjump level: the second-highest level in the clause.
         let mut bj_level = 0;
-        if learnt.len() > 1 {
+        if clause.len() > 1 {
             let mut max_i = 1;
-            for i in 2..learnt.len() {
-                if self.level[var_of(learnt[i]) as usize]
-                    > self.level[var_of(learnt[max_i]) as usize]
+            for i in 2..clause.len() {
+                if self.level[var_of(clause[i]) as usize]
+                    > self.level[var_of(clause[max_i]) as usize]
                 {
                     max_i = i;
                 }
             }
-            learnt.swap(1, max_i);
-            bj_level = self.level[var_of(learnt[1]) as usize];
+            clause.swap(1, max_i);
+            bj_level = self.level[var_of(clause[1]) as usize];
         }
         // Decay activity.
         self.activity_inc /= self.activity_decay;
-        (learnt, bj_level)
+        (clause, bj_level)
     }
 
     /// Undo all assignments above `level`.
@@ -1154,9 +1334,15 @@ impl Solver {
             if c.len() < 2 || self.detached.get(idx).copied().unwrap_or(false) {
                 continue;
             }
-            let (w0, w1) = (watch_index(c[0]), watch_index(c[1]));
-            self.watches[w0].push(idx);
-            self.watches[w1].push(idx);
+            let (l0, l1) = (c[0], c[1]);
+            self.watches[watch_index(l0)].push(Watcher {
+                cref: idx,
+                blocker: l1,
+            });
+            self.watches[watch_index(l1)].push(Watcher {
+                cref: idx,
+                blocker: l0,
+            });
         }
     }
 
@@ -1180,6 +1366,9 @@ impl Solver {
             if let Some(conflict_idx) = self.propagate() {
                 self.conflicts += 1;
                 self.stats.conflicts += 1;
+                let lvl = self.trail_lim.len() as u64;
+                self.stats.conflict_level_sum += lvl;
+                self.stats.max_level = self.stats.max_level.max(lvl);
                 self.conflicts_since_restart += 1;
                 if self.conflicts >= self.conflict_budget {
                     return SolveResult::Unknown;
@@ -1187,7 +1376,9 @@ impl Solver {
                 if self.trail_lim.is_empty() {
                     return SolveResult::Unsat;
                 }
+                let t = std::time::Instant::now();
                 let (learnt, bj_level) = self.analyze(conflict_idx);
+                self.stats.ns_analyze += t.elapsed().as_nanos() as u64;
                 self.backjump(bj_level);
                 // Install the learnt clause.
                 if learnt.len() == 1 {
@@ -1200,8 +1391,14 @@ impl Solver {
                     let l0 = learnt[0];
                     let l1 = learnt[1];
                     self.clauses.push(learnt);
-                    self.watches[watch_index(l0)].push(idx);
-                    self.watches[watch_index(l1)].push(idx);
+                    self.watches[watch_index(l0)].push(Watcher {
+                        cref: idx,
+                        blocker: l1,
+                    });
+                    self.watches[watch_index(l1)].push(Watcher {
+                        cref: idx,
+                        blocker: l0,
+                    });
                     // The first lit is the asserting one — it's
                     // implied at the new (lower) level.
                     let _ = self.enqueue(l0, Reason::Propagated(idx));
@@ -1219,7 +1416,9 @@ impl Solver {
                     }
                     let learnt_now = self.clauses.len() - self.n_orig_clauses;
                     if learnt_now > self.max_learnts {
+                        let t = std::time::Instant::now();
                         self.reduce_db();
+                        self.stats.ns_reduce_db += t.elapsed().as_nanos() as u64;
                         // Let the budget grow, so reductions get rarer
                         // as the solve goes deeper.
                         self.max_learnts = self.max_learnts + self.max_learnts / 2;
