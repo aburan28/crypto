@@ -131,6 +131,16 @@ struct HostEngine {
 
     std::vector<W> x, y, pchain, dead;
     std::vector<u64> seed, startIter;
+
+    // Present so runCurve can size either backend the same way; on the host the
+    // count is one walk thread per core and main has already worked it out.
+    static int autoThreads(int) {
+#ifdef _OPENMP
+        return omp_get_max_threads();
+#else
+        return 1;
+#endif
+    }
     std::vector<DpRecord> dp;
     unsigned dpCount = 0;
     WalkParams<W> P;
@@ -265,6 +275,54 @@ struct CudaEngine {
     static const int BATCH = ECC_BATCH;
     WalkParams<W> P;
     std::vector<DpRecord> staging;
+
+    // Bytes of device memory one walk thread needs: x, y and pchain are a field
+    // element per slot, plus the per-lane bookkeeping.
+    static size_t bytesPerThread() {
+        return (size_t)BATCH * M * sizeof(W) * 3
+             + (size_t)BATCH * sizeof(W)
+             + (size_t)BATCH * LANES * sizeof(u64) * 2;
+    }
+
+    // How many threads actually fill this device.
+    //
+    // The old answer was SMs * ECC_THREADS * 2, which divides back to exactly
+    // two blocks per SM no matter what the build asked for -- so a kernel
+    // compiled for four resident blocks launched half of them, paid the
+    // register cut that buys the fourth block, and got no occupancy for it.
+    // Ask the driver instead: cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    // reports what ptxas's register allocation actually admits for this exact
+    // kernel, so the launch tracks the build.
+    //
+    // One wave is the right size.  Every thread runs the same number of steps,
+    // so a second wave adds no work-stealing, only memory.
+    static int autoThreads(int device) {
+        cudaDeviceProp prop;
+        CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+        int perSm = 0;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            &perSm, eccWalkKernel<Cfg, W>, ECC_THREADS, 0));
+        if (perSm < 1) perSm = 1;
+        long long want = (long long)prop.multiProcessorCount * ECC_THREADS * perSm;
+        // Each thread carries BATCH field elements three times over, which at
+        // batch 32 is about 50 KB; a full wave at high occupancy can ask for
+        // more than the card has.  Leave a quarter free for the DP buffer and
+        // the driver, and shrink to whole blocks rather than failing to malloc.
+        size_t freeB = 0, totalB = 0;
+        CUDA_CHECK(cudaMemGetInfo(&freeB, &totalB));
+        const size_t budget = freeB - freeB / 4;
+        const long long fits = (long long)(budget / bytesPerThread());
+        long long got = want < fits ? want : fits;
+        got -= got % ECC_THREADS;
+        if (got < ECC_THREADS) got = ECC_THREADS;
+        printf("device: %s, %d SMs, %d block(s) of %d threads resident per SM\n",
+               prop.name, prop.multiProcessorCount, perSm, (int)ECC_THREADS);
+        printf("launch: %lld threads (%lld blocks), %.1f GB of walk state%s\n",
+               got, got / ECC_THREADS,
+               got * (double)bytesPerThread() / (1024.0 * 1024.0 * 1024.0),
+               got < want ? "  [capped by device memory]" : "");
+        return (int)got;
+    }
 
     void setup(const Options &o, const unsigned long long *cpx, const unsigned long long *cpy,
                const unsigned long long *cqx, const unsigned long long *cqy) {
@@ -890,6 +948,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
 #else
     HostEngine<Cfg> eng;
 #endif
+    if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
     eng.setup(o, px, py, qx, qy);
     printf("backend %s: %d threads x %d slots x %d lanes = %llu walks, dp weight %d, %d steps per launch\n",
            eng.name(), o.threads, (int)ECC_BATCH, (int)WordTraits<typename decltype(eng)::W>::LANES,
@@ -955,21 +1014,18 @@ int main(int argc, char **argv) {
         else if (a == "--help" || a == "-h") { usage(); return 0; }
         else { printf("unknown option %s\n", a.c_str()); usage(); return 1; }
     }
+    // The device thread count is left at 0 here on purpose: it depends on the
+    // register allocation of a kernel that is only instantiated once the curve
+    // is known, so CudaEngine::autoThreads decides it in runCurve.
+#ifdef ECC_NO_CUDA
     if (o.threads <= 0) {
-#ifndef ECC_NO_CUDA
-        cudaDeviceProp prop;
-        CUDA_CHECK(cudaSetDevice(o.device));
-        CUDA_CHECK(cudaGetDeviceProperties(&prop, o.device));
-        o.threads = prop.multiProcessorCount * ECC_THREADS * 2;
-        printf("device: %s, %d SMs\n", prop.name, prop.multiProcessorCount);
-#else
 #ifdef _OPENMP
         o.threads = omp_get_max_threads();
 #else
         o.threads = 1;
 #endif
-#endif
     }
+#endif
 #ifndef ECC_NO_CUDA
     CUDA_CHECK(cudaSetDevice(o.device));
 #endif
