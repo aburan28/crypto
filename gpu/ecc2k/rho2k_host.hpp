@@ -51,7 +51,7 @@ struct Rho2kHost {
             f2e den;
             uint32_t j;
             if (r2k_phase_a(st, prm, cb, den, j) == R2K_MODE_INF) return false;
-            r2k_phase_b(st, prm, j, F2::inv(den));
+            r2k_phase_b(st, prm, j, den, F2::inv(den));
             /* one step multiplies both coefficients by (1 + s^j) */
             a = Sc::mul(a, step_factor[j]);
             b = Sc::mul(b, step_factor[j]);

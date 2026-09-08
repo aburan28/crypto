@@ -132,13 +132,17 @@ G2_HD f2e r2k_canonical_x(const pt2k &P) {
     return best;
 }
 
-/* Phase A: work out the denominator the step needs inverted. */
+/* Phase A: work out the denominator the step needs inverted.
+ *
+ * Only the x coordinate of tau^j(P) is needed here -- the denominator is
+ * x_P + x_{tau^j(P)}.  Pushing y through the same j squarings, as a full
+ * point Frobenius would, computes a value this phase then discards. */
 G2_HD int r2k_phase_a(const rho2k_state &st, const rho2k_params &prm,
                       const uint32_t *cb, f2e &den, uint32_t &j_out) {
     uint32_t j = r2k_j(st.P, prm, cb);
     j_out = j;
-    pt2k T = Koblitz::frob(st.P, (int)j);
-    f2e d = F2::add(st.P.x, T.x);
+    f2e tx = F2::frob(st.P.x, (int)j);
+    f2e d = F2::add(st.P.x, tx);
     if (F2::is_zero(d)) {
         /* tau^j(P) == +-P: the point lies in a proper subfield, or the walk
          * has hit the vanishingly rare fixed point.  Reseed. */
@@ -149,11 +153,15 @@ G2_HD int r2k_phase_a(const rho2k_state &st, const rho2k_params &prm,
     return R2K_MODE_ADD;
 }
 
-/* Phase B: finish the step given inv = 1/den. */
+/* Phase B: finish the step given den = x_P + x_{tau^j(P)} and inv = 1/den.
+ *
+ * den is what phase A already computed, so the x half of the Frobenius does
+ * not have to be redone: the addition formula wants exactly that sum, never
+ * x_{tau^j(P)} on its own.  Only y goes through the j squarings. */
 G2_HD void r2k_phase_b(rho2k_state &st, const rho2k_params &prm, uint32_t j,
-                       const f2e &inv) {
-    pt2k T = Koblitz::frob(st.P, (int)j);
-    st.P = Koblitz::add_with_inv(st.P, T, inv);
+                       const f2e &den, const f2e &inv) {
+    f2e ty = F2::frob(st.P.y, (int)j);
+    st.P = Koblitz::add_frob_with_inv(st.P, ty, den, inv);
 }
 
 /* Unbatched single step, the primitive the Python vectors pin down. */
@@ -285,14 +293,15 @@ G2_HD void r2k_step_batch(const rho2k_ctx &c, uint32_t t) {
         mode[w] = (uint8_t)r2k_phase_a(st[w], c.prm, c.cb, den[w], jj[w]);
     }
 
-    F2::batch_inv(den, W, scratch);
+    /* Inverses land in scratch so den survives; phase B needs both. */
+    F2::batch_inv_keep(den, W, scratch);
 
     for (int w = 0; w < W; w++) {
         uint32_t idx = t + (uint32_t)w * c.nthreads;
         if (mode[w] == R2K_MODE_INF) {
             r2k_reseed(c, idx, st[w], 0);
         } else {
-            r2k_phase_b(st[w], c.prm, jj[w], den[w]);
+            r2k_phase_b(st[w], c.prm, jj[w], den[w], scratch[w]);
             r2k_post(c, idx, st[w]);
         }
         r2k_store(c, idx, st[w]);
@@ -331,7 +340,7 @@ G2_HD void r2k_step_batch_lowmem(const rho2k_ctx &c, uint32_t t) {
         if (m == R2K_MODE_INF) {
             r2k_reseed(c, idx, st, 0);
         } else {
-            r2k_phase_b(st, c.prm, j, inv);
+            r2k_phase_b(st, c.prm, j, den, inv);
             r2k_post(c, idx, st);
         }
         r2k_store(c, idx, st);
@@ -350,7 +359,7 @@ G2_HD void r2k_step_thread_ref(const rho2k_ctx &c, uint32_t t) {
         if (m == R2K_MODE_INF) {
             r2k_reseed(c, idx, st, 0);
         } else {
-            r2k_phase_b(st, c.prm, j, F2::inv(den));
+            r2k_phase_b(st, c.prm, j, den, F2::inv(den));
             r2k_post(c, idx, st);
         }
         r2k_store(c, idx, st);

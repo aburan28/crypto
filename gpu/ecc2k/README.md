@@ -154,18 +154,61 @@ What Koblitz curves give back:
   against 270 for a Fermat inversion modulo a prime.
 
 That last point changes the kernel's shape. Batching inversions across
-walks is worth 27× over a prime field; here it is worth 3–4×, and W beyond
-16 buys almost nothing:
+walks is worth 27× over a prime field; here it is worth 3–4×.
 
-| Batch W | Multiplies per rho step | |
-|---|---|---|
-| 1 | ~28 | one inversion per step |
-| 8 | ~11 | |
-| 16 | ~9.4 | |
-| 32 | ~8.7 | diminishing |
+**Counting only multiplications understates the step, because the Frobenius
+is squarings.** A step applies τ^j to both coordinates with j averaging 6.5
+at the default `nj=8, jmin=3`, so the walk spends more instructions on
+Frobenius than on the addition. In PTX instructions per walk-step (derived
+from the measured 79 per squaring, 405 per multiply, ~10800 per inversion):
 
-(Per step: 2 for the addition, 1 squaring, 3 for Montgomery's trick, the
-Frobenius applications, the class weight, and 23/W for the inversion.)
+| Batch W | Frobenius | addition | inversion share | total |
+|---|---|---|---|---|
+| 8 | 1027 | 889 | 2062 | ~4080 |
+| 16 | 1027 | 889 | 1436 | ~3450 |
+| 32 | 1027 | 889 | 1123 | ~3140 |
+
+So W = 16 is worth about 18% over W = 8 and W = 32 another 10% — not the
+"nothing past 16" an earlier version of this table implied, and the reason
+is that halving the Frobenius work (below) left the inversion a larger
+share of what remains. Measured on the host, where an inversion is
+relatively dearer, W = 32 runs 33% faster per step than W = 8.
+
+### The Frobenius was computed four times over
+
+Each step needs τ^j(P), which is 2j squarings — j for x, j for y. The walk
+was paying 4j, and the low-memory stepper 6j:
+
+- `r2k_phase_a` only needs the denominator `x_P + x_{τ^j(P)}`, but computed
+  the whole point, so the y image cost j squarings and was discarded.
+- `r2k_phase_b` then recomputed the same τ^j(P) from scratch.
+- `r2k_step_batch_lowmem` calls phase A twice by design (it recomputes
+  rather than store), so it paid that waste a third time.
+
+The fix is to notice that **the addition never needs `x_{τ^j(P)}` on its
+own — it needs `x_P + x_{τ^j(P)}`, which is exactly the denominator phase A
+already computed and inverted.** So phase A computes only the x image, and
+phase B only the y image: 2j squarings, the true minimum, with no extra
+state. `batch_inv_keep` writes the inverses into the scratch array that
+already existed rather than over its input, so the denominator survives for
+phase B at no cost in memory.
+
+Measured on the host, steps/s at T=64:
+
+| stepper | before | after | |
+|---|---|---|---|
+| `batch<8>` | 332,600 | 436,800 | **1.31×** |
+| `batch_lowmem<8>` | 257,500 | 364,100 | **1.41×** |
+
+The walk is bit-identical: `r2k_step_single` still computes the plain
+`add(P, frob(P, j))` and the test suite checks all three steppers against
+it and against the Python oracle, so the saving is pure redundancy, not a
+change of definition.
+
+**The addition itself has no slack left.** `add_frob_with_inv` is 2
+multiplications and 1 squaring given the inverse, which is the minimum for
+an affine binary-curve addition; the field addition it is built from is a
+4-word XOR.
 
 ## Occupancy: measured
 

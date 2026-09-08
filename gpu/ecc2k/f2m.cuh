@@ -285,6 +285,26 @@ struct F2 {
     /* Montgomery's trick: one inversion for n elements.  Worth much less
      * here than over a prime field -- an inversion is ~23 multiplies rather
      * than ~270 -- but still a 3-4x win at the batch sizes we use. */
+    /* Batch inversion that leaves the inputs alone, writing the inverses to
+     * `out` instead.  `out` doubles as the prefix-product scratch: at step i
+     * the backward pass reads out[i-1] and writes out[i], and out[i] has
+     * already been consumed by step i+1, so the aliasing is safe.
+     *
+     * The walk wants this because the value it inverts -- x_P + x_{tau^j(P)}
+     * -- is also the term the addition formula needs, so destroying it costs
+     * a Frobenius to rebuild. */
+    static G2_BIG void batch_inv_keep(const elt *x, int n, elt *out) {
+        out[0] = x[0];
+        for (int i = 1; i < n; i++) out[i] = mul(out[i - 1], x[i]);
+        elt t = inv(out[n - 1]);
+        for (int i = n - 1; i > 0; i--) {
+            elt xi = mul(t, out[i - 1]);
+            t = mul(t, x[i]);
+            out[i] = xi;
+        }
+        out[0] = t;
+    }
+
     static G2_BIG void batch_inv(elt *x, int n, elt *scratch) {
         scratch[0] = x[0];
         for (int i = 1; i < n; i++) scratch[i] = mul(scratch[i - 1], x[i]);

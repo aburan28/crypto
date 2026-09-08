@@ -126,6 +126,24 @@ struct Koblitz {
         return r;
     }
 
+    /* P + tau^j(P), given tau^j(P).y, the sum sx = P.x + tau^j(P).x, and
+     * 1/sx.  The walk has both of those already: sx is the denominator it
+     * just inverted.  So the step never needs tau^j(P).x as a value, only
+     * that sum -- which halves the Frobenius work, since only the y
+     * coordinate has to be pushed through the j squarings.
+     *
+     * Identical arithmetic to add_with_inv(P, T, inv) with sx = P.x + T.x;
+     * the batched steppers are checked against that formula bit for bit. */
+    static G2_HD pt2k add_frob_with_inv(const pt2k &P, const f2e &ty,
+                                        const f2e &sx, const f2e &inv) {
+        f2e lam = F::mul(F::add(P.y, ty), inv);
+        pt2k r;
+        r.x = F::add(F::add(F::add(F::sqr(lam), lam), sx), coeff_a());
+        r.y = F::add(F::add(F::mul(lam, F::add(P.x, r.x)), r.x), P.y);
+        r.inf = 0;
+        return r;
+    }
+
     /* Doubling with the inverse of x1 supplied. */
     static G2_HD pt2k dbl_with_inv(const pt2k &P, const f2e &inv) {
         f2e lam = F::add(P.x, F::mul(P.y, inv));
