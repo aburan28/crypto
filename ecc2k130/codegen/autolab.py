@@ -444,17 +444,35 @@ def planConfigs(leaves, batches, threadList, minBlocks, prune, cross, knobSets=N
 
 
 def dedupe(rows):
-    """Collapse configurations that compiled to the same thing."""
+    """Collapse configurations that are the same thing to RUN, not just to build.
+
+    The collapse is over minBlocks alone, and the distinction matters.  Below
+    about 257 total threads the launch bound cannot bind, so every minBlocks at
+    one block size hands ptxas the same problem and gets back the same cubin --
+    that is the redundancy this exists to remove, and it is the one the report
+    describes.
+
+    Block size is not part of it.  ECC_THREADS is not only the second half of
+    __launch_bounds__; it is the block size the kernel is launched with
+    (`<<<blocks, ECC_THREADS>>>`) and the size occupancy is computed for.  An
+    earlier key collapsed across it, on the reasoning that ptxas reported the
+    two identical -- and it does, because 128 threads at minBlocks 2 and 256 at
+    minBlocks 1 are the same register budget.  They are not the same launch.
+    That is not academic: it took the base point 0/32/128/2 out of the results
+    of a real search and left 0/32/256/1 standing in for it, and the measured
+    ladder says those two run at 607 and 315 M it/s.  A shortlist naming the
+    second where the search explored the first is recommending a configuration
+    nobody measured.
+
+    globalCg is in the key even though every static metric is blind to it:
+    collapsing it would drop the one axis this tool cannot rank but can still
+    carry to a GPU, and it would drop it silently."""
     seen = {}
     for r in rows:
-        # globalCg is in the key even though every static metric is blind to it:
-        # collapsing it would drop the one axis this tool cannot rank but can
-        # still carry to a GPU, and it would drop it silently.
-        key = (r['leaf'], r['registers'], r['walkInstrs'],
+        key = (r['leaf'], r['threads'], r['registers'], r['walkInstrs'],
                r['spillBytes'], r['walkLocalOps'], r['warpsPerSM'],
                r.get('smemBytes', 0), r.get('knobs', '-'))
-        if key not in seen or (r['minBlocks'], r['threads']) < (seen[key]['minBlocks'],
-                                                               seen[key]['threads']):
+        if key not in seen or r['minBlocks'] < seen[key]['minBlocks']:
             seen[key] = r
     return list(seen.values())
 
@@ -688,6 +706,19 @@ def selfTest():
     assert len(dedupe([base, cg])) == 2, 'globalCg collapsed away'
     assert len(dedupe([base, dict(base)])) == 1, 'true duplicates must collapse'
 
+    # Two block sizes that ptxas cannot tell apart are still two launches, and
+    # this is the case that actually went wrong: 128 threads at minBlocks 2 and
+    # 256 at minBlocks 1 are one register budget and report identically, so an
+    # earlier key collapsed them and kept the 256 -- which the card runs at half
+    # the rate.  Same block size, different minBlocks, is the collapse that is
+    # meant to happen.
+    wide = dict(base, threads=256, minBlocks=1)
+    assert len(dedupe([base, wide])) == 2, 'collapsed two different launches'
+    assert len(dedupe([base, dict(base, minBlocks=3)])) == 1, \
+        'same launch at a bound that cannot bind must collapse'
+    assert dedupe([dict(base, minBlocks=3), base])[0]['minBlocks'] == 2, \
+        'the surviving row should be the loosest bound, whatever the input order'
+
     # planConfigs must vary the knobs at the base size point only, and must not
     # re-run them at every leaf -- that is the whole reason it is a star.
     plan = planConfigs([0, 33], [32], [128], [2], True, False,
@@ -906,14 +937,28 @@ def main():
     # with no baseline in the same sweep, on the same card, from the same image,
     # which is the only kind of baseline worth having.  So put the all-knobs-off
     # build at the base size point back on the list if the front dropped it.
+    # Over `rows`, not `unique`.  The control is defined by the plan's base
+    # point, so it has to be looked up among the configurations actually
+    # compiled -- a dedupe pass is free to drop that exact row in favour of a
+    # metric-identical one, and when it did, this lookup found nothing and the
+    # shortlist went out with no control at all.  Silently, because "no base row
+    # found" and "base row already on the front" took the same branch.
     baseRow = None
-    for r in unique:
+    for r in rows:
         if (r['leaf'], r['batch'], r['threads'], r['minBlocks']) == \
                 (leaves[0], batches[0], threadList[0], minBlocks[0]) and \
                 r.get('knobs', '-') == '-':
             baseRow = r
             break
-    if baseRow is not None and baseRow not in short:
+    if baseRow is None:
+        print('  no knobs-off build at the base point %d/%d/%d/%d to use as a '
+              'control; the rates below share no baseline'
+              % (leaves[0], batches[0], threadList[0], minBlocks[0]))
+    onFront = any((r['leaf'], r['batch'], r['threads'], r['minBlocks'],
+                   r.get('knobs', '-')) ==
+                  (leaves[0], batches[0], threadList[0], minBlocks[0], '-')
+                  for r in short)
+    if baseRow is not None and not onFront:
         short.append(baseRow)
         print('  ...and the knobs-off build at the base point, which the front '
               'dropped as dominated -- a sweep needs its own control')
