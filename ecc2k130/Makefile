@@ -17,6 +17,7 @@ NVCC    ?= nvcc
 CXX     ?= g++
 CLANG   ?= clang
 PTXAS   ?= ptxas
+PTX     ?= /tmp/autolab.ptx
 CUDAPATH ?= /usr/local/cuda
 BATCH   ?= 32
 THREADS ?= 128
@@ -102,6 +103,12 @@ rehearse: ecc2k130-cpu
 # modal_app.py::autotune` to actually measure.  Uses nvcc when CUDAPATH has one
 # and the check-cuda clang route when it does not; `modal run
 # modal_app.py::autolab` runs the same search in a CPU container that has nvcc.
+# Where a walk iteration actually goes, weighted by how many times a step calls
+# each routine, plus the model's error against every rate ever measured.  Needs
+# PTX for the build in question; make ptx or autolab leaves one behind.
+perfmodel:
+	cd codegen && python3 perfmodel.py --ptx $(PTX)
+
 autolab:
 	cd codegen && python3 autolab.py --cuda-path=$(CUDAPATH) --ptxas=$(PTXAS) \
 	    --clang=$(CLANG) --arch=$(patsubst sm_%,%,$(SMARCH))
@@ -165,4 +172,4 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 
-.PHONY: all generate check-cli check-cycles test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
