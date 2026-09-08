@@ -6917,3 +6917,79 @@ before the write-up, not in its next-steps list.
 ### Commits made
 
 (see PR — F4 range measured, frontier recorded, ranking corrected)
+
+---
+
+## 2026-09-08 (autolab run, fourth session)
+
+### Task picked
+
+Two asks: find more fruitful factor bases, and speed up the SAT and
+point-decomposition steps, trying both on small toy Koblitz curves.
+
+### Work done
+
+- Classified the invariant factor bases completely. A Frobenius-stable
+  F_2-subspace is an F_2[x]/(x^n-1)-submodule, i.e. a binary cyclic code,
+  i.e. a divisor of x^n-1; the irreducible factors correspond to the
+  2-cyclotomic cosets mod n, so the achievable dimensions are the subset
+  sums of the coset sizes.  `cyclotomic_cosets`,
+  `available_subspace_dimensions`.
+- Found and fixed an incompleteness: `factor_x_n_minus_1` only ever
+  returned factors of degree ord_n(2), so at n=9 it missed the degree-2
+  factor and most classified dimensions were unreachable.
+  `all_factors_of_x_n_minus_1` is complete; a test checks the degrees sum
+  to n and the reachable dimensions equal the classification, for every n
+  in the ladder.
+- `build_frobenius_factor_base_from_divisor`: bases from any product of
+  factors, so |F| ~ 2^dim is tunable.
+- `sat::Solver::reset_search`, and `sat_decompose` now enumerates models
+  incrementally -- one encode plus a blocking clause per rejected root,
+  instead of a full Tseitin/XOR rebuild per model.
+- `koblitz_factor_base_survey` example; toy-curve runs across bases with
+  all three oracles cross-checked.
+
+### Findings
+
+**Divisor bases remove the chaining term.**  The summand count is
+m ~ n/dim, and m >= 3 is what forces the chained system and its (m-2)*n
+extra unknowns.  dim ~ (n+1)/2 gives m=2: no intermediates, quadratic,
+~n+1 unknowns.  At n=31 dimension 16 exists, so |F| ~ 2^16, m=2, 32
+unknowns quadratic -- against 190 unknowns cubic for the single-factor
+base.  The scaling target's primary metric was built on the chaining term
+being unavoidable; it is not.
+
+**The construction is empty exactly where it matters, now computed.**
+At n=131 and 163 there are two cosets and the only dimensions are
+0, 1, n-1, n.  Previously asserted in this repo; now a test.
+
+**A constraint I did not expect: the cofactor class.**  x=0 lies in every
+invariant subspace, so the 2-torsion point is always in F, and the base
+can sit entirely off <G>.  A target in <G> needs its summands' h-torsion
+classes to cancel, so on K_1/F_2^7 (cofactor 2, no factor-base point in
+<G>) odd m decomposes *nothing* at any |F|: m=2 gives 11/11, m=3 gives
+0/11, m=4 gives 11/11.  `admissible_summand_counts` computes this from
+one scalar multiplication per point.
+
+This came out of a test I wrote to assert "dim 3 is too small for m=2 at
+n=7", which failed because dim 3 decomposes everything at m=2.  The
+earlier 0/24 I had recorded for that base was m=3 -- inadmissible, not
+undersized.  I had been about to write down a size explanation for a
+parity effect.
+
+### Next step proposal
+
+**n=31 at dim 16, m=2** is now the shortest path to a relation at an n
+the single-factor construction cannot serve.  It needs MAX_N raised past
+24, which needs a generator search that does not scan 2^n abscissae;
+point counting and factoring are already cheap there.
+
+Past n ~ 40 the base cannot be materialised (2^dim points) and would have
+to be handled implicitly through its defining linearised polynomial --
+which is the low-degree condition the algebra already relies on, so this
+looks tractable rather than blocking.
+
+### Commits made
+
+(see PR -- cyclotomic classification, divisor bases, complete
+factorisation, cofactor-class predicate, incremental SAT enumeration)

@@ -1456,6 +1456,21 @@ impl Solver {
     }
 
     /// Total number of (original + learnt) clauses.
+    /// **Return the solver to decision level 0**, undoing the
+    /// assignments a previous [`Self::solve`] left on the trail.
+    ///
+    /// [`Self::add_clause`] assumes it is called before search: a unit
+    /// clause is enqueued at the current level, and the two watched
+    /// literals are chosen without regard to what is already assigned.
+    /// After a SAT answer the trail sits at a non-zero decision level,
+    /// so adding a clause there can silently corrupt those invariants.
+    /// Calling this first makes incremental use — add a blocking clause,
+    /// solve again — safe, which is how a caller enumerates models
+    /// without rebuilding the whole encoding each time.
+    pub fn reset_search(&mut self) {
+        self.backjump(0);
+    }
+
     /// Conflicts encountered by the most recent [`Self::solve`].
     ///
     /// A machine-independent measure of search effort: unlike wall

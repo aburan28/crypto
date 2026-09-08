@@ -223,10 +223,12 @@ pub use koblitz_groebner::{
 };
 pub use koblitz_index_calculus::{
     build_frobenius_factor_base, factor_x_n_minus_1, find_irreducible, frobenius_eigenvalue,
-    enumerate_decompose, find_irreducible_sparse, groebner_decompose, invariant_subspace_basis,
+    all_factors_of_x_n_minus_1, available_subspace_dimensions,
+    build_frobenius_factor_base_from_divisor, cyclotomic_cosets, enumerate_decompose,
+    find_irreducible_sparse, groebner_decompose, invariant_subspace_basis,
     is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp, koblitz_point_count,
     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
-    point_key, points_with_x, span_f2, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve,
+    point_key, points_with_x, span_f2, subspace_basis_for_divisor, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve,
     KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup, SatDecompositionStats,
 };
 pub use ecdsa_audit::{

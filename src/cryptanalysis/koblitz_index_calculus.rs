@@ -350,12 +350,17 @@ pub fn order_of_2_mod_n(n: u32) -> Option<u32> {
     None
 }
 
-/// **Factor `x^n − 1` over `F_2`** into its non-trivial irreducible
-/// factors (i.e. excluding `x − 1`), for odd `n`.
+/// **The degree-`ord_n(2)` irreducible factors of `x^n − 1`** over
+/// `F_2`, found by scanning the `2^ℓ` monic polynomials of that degree.
 ///
-/// Every such factor has degree `ℓ = ord_n(2)`, so they are found by
-/// scanning the `2^ℓ` monic degree-`ℓ` polynomials for the ones that
-/// are irreducible and divide `x^n − 1`.  Returned as bitmasks.
+/// **Not a complete factorisation.**  `x^n − 1` has one irreducible
+/// factor per 2-cyclotomic coset mod `n`, of degree equal to that
+/// coset's size, and `ord_n(2)` is only the *largest* of those sizes.
+/// At `n = 9` the cosets are `{0}`, `{3, 6}` and the six-element rest,
+/// so `x^9 − 1` also has a degree-2 factor that this function does not
+/// return.  Use [`all_factors_of_x_n_minus_1`] for the full list; this
+/// one is kept as-is because
+/// [`build_frobenius_factor_base`] indexes into it.
 pub fn factor_x_n_minus_1(n: u32) -> Vec<u64> {
     let ell = match order_of_2_mod_n(n) {
         Some(l) if l < 40 => l,
@@ -669,6 +674,62 @@ impl FrobeniusFactorBase {
         self.orbits.len()
     }
 
+    /// The class `[r]P` of each factor-base point in the `h`-torsion,
+    /// where `h = #E / r` is the cofactor.
+    ///
+    /// A target `R ∈ ⟨G⟩` has `[r]R = O`, so a decomposition
+    /// `R = Σ P_i` forces `Σ [r]P_i = O`.  When the factor base does not
+    /// meet `⟨G⟩` — which is the common case, since `x = 0` lies in
+    /// every invariant subspace and carries the 2-torsion point — these
+    /// classes are non-trivial and constrain which `m` can work at all.
+    pub fn cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
+        self.points
+            .iter()
+            .map(|p| kc.mul(p, &kc.subgroup_order))
+            .collect()
+    }
+
+    /// **Can an `m`-point decomposition of a target in `⟨G⟩` exist?**
+    ///
+    /// Not a statement about size — about cosets.  Every summand
+    /// contributes its `h`-torsion class, and the classes must cancel.
+    /// On `K_1 / F_2^7` every factor-base point sits in the non-trivial
+    /// class of a cofactor-2 curve, so odd `m` decomposes *nothing* however
+    /// large the factor base is, and even `m` decomposes everything.
+    /// Checking this before a sweep costs one scalar multiplication per
+    /// point and saves searching for decompositions that cannot exist.
+    pub fn m_can_decompose(&self, kc: &KoblitzCurve, m: usize) -> bool {
+        if self.points.is_empty() || m == 0 {
+            return m == 0;
+        }
+        let classes = self.cofactor_classes(kc);
+        // Sums reachable with exactly j summands; the h-torsion is tiny.
+        let key = point_key;
+        let mut reach: Vec<HashMap<(BigUint, BigUint), BinaryPoint>> = Vec::with_capacity(m + 1);
+        let mut zero = HashMap::new();
+        zero.insert(key(&BinaryPoint::Infinity), BinaryPoint::Infinity);
+        reach.push(zero);
+        for j in 1..=m {
+            let mut next: HashMap<(BigUint, BigUint), BinaryPoint> = HashMap::new();
+            for acc in reach[j - 1].values() {
+                for c in &classes {
+                    let sum = kc.add(acc, c);
+                    next.insert(key(&sum), sum);
+                }
+            }
+            reach.push(next);
+        }
+        reach[m].contains_key(&key(&BinaryPoint::Infinity))
+    }
+
+    /// The summand counts in `2 ..= max_m` that [`Self::m_can_decompose`]
+    /// admits — the ones worth trying.
+    pub fn admissible_summand_counts(&self, kc: &KoblitzCurve, max_m: usize) -> Vec<usize> {
+        (2..=max_m)
+            .filter(|&m| self.m_can_decompose(kc, m))
+            .collect()
+    }
+
     /// Lookup table from point identity to factor-base index, as both
     /// decomposition oracles need.
     pub fn index_map(&self) -> HashMap<(BigUint, BigUint), usize> {
@@ -746,6 +807,196 @@ pub fn span_f2(basis: &[F2mElement], n: u32) -> Vec<F2mElement> {
     out
 }
 
+/// **The 2-cyclotomic cosets mod `n`**: orbits of `s ↦ 2s` on `Z/n`.
+///
+/// These classify every Frobenius-stable `F_2`-subspace of `F_{2^n}`.
+/// A subspace closed under squaring is an `F_2[x]/(x^n − 1)`-submodule,
+/// i.e. a binary cyclic code of length `n`, i.e. a divisor of
+/// `x^n − 1`; and the irreducible factors of `x^n − 1` correspond one
+/// for one with these cosets, a coset of size `d` giving a factor of
+/// degree `d`.
+///
+/// So the *available dimensions* of an invariant factor base are
+/// exactly the subset sums of the coset sizes — see
+/// [`available_subspace_dimensions`].
+pub fn cyclotomic_cosets(n: u32) -> Vec<Vec<u32>> {
+    let mut seen = vec![false; n as usize];
+    let mut out = Vec::new();
+    for s in 0..n {
+        if seen[s as usize] {
+            continue;
+        }
+        let mut coset = Vec::new();
+        let mut x = s;
+        while !seen[x as usize] {
+            seen[x as usize] = true;
+            coset.push(x);
+            x = (x * 2) % n;
+        }
+        coset.sort_unstable();
+        out.push(coset);
+    }
+    out
+}
+
+/// **Every dimension a Frobenius-invariant factor base can have** over
+/// `F_{2^n}`, in increasing order.
+///
+/// The subset sums of the cyclotomic coset sizes.  This is a complete
+/// classification, not a heuristic: a stable subspace *is* a divisor of
+/// `x^n − 1`, so no other dimension is achievable.
+///
+/// It is also the answer to "which `n` are worth attacking this way".
+/// When `2` is primitive mod `n` — `n = 131` and `n = 163`, the sizes
+/// that matter — there are only two cosets, `{0}` and everything else,
+/// so the only dimensions are `0, 1, n − 1, n`: nothing usable.  When
+/// `n` has many small cosets the sizes are dense, and the factor base
+/// can be tuned to whatever `|F| = 2^dim` the sizing condition wants.
+pub fn available_subspace_dimensions(n: u32) -> Vec<u32> {
+    let mut reach = std::collections::BTreeSet::from([0u32]);
+    for c in cyclotomic_cosets(n) {
+        let d = c.len() as u32;
+        for r in reach.clone() {
+            reach.insert(r + d);
+        }
+    }
+    reach.into_iter().collect()
+}
+
+/// Product of two `F_2[x]` polynomials given as bitmasks, without
+/// reduction.  `None` if the product would not fit a `u64`.
+fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
+    let (da, db) = (poly_deg(a), poly_deg(b));
+    if let (Some(da), Some(db)) = (da, db) {
+        if da + db >= 64 {
+            return None;
+        }
+    }
+    let mut acc = 0u64;
+    let mut b = b;
+    let mut shift = 0;
+    while b != 0 {
+        if b & 1 == 1 {
+            acc ^= a << shift;
+        }
+        b >>= 1;
+        shift += 1;
+    }
+    Some(acc)
+}
+
+/// **Every irreducible factor of `x^n − 1`** over `F_2`, including
+/// `x + 1`, as bitmasks.
+///
+/// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
+/// divisor may use `x + 1` too, so the divisor-based constructions take
+/// their indices into this list.
+pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
+    let mut out = vec![0b11u64]; // x + 1
+                                 // The degrees that occur are exactly the cyclotomic coset sizes;
+                                 // the size-1 coset is {0}, already covered by x + 1 above.
+    let mut degrees: Vec<u32> = cyclotomic_cosets(n)
+        .iter()
+        .map(|c| c.len() as u32)
+        .filter(|d| *d > 1)
+        .collect();
+    degrees.sort_unstable();
+    degrees.dedup();
+    for d in degrees {
+        if d > 24 {
+            break; // the scan below is 2^d; beyond this it is not worth it
+        }
+        out.extend(irreducible_factors_of_degree(n, d));
+    }
+    out
+}
+
+/// Every irreducible factor of `x^n − 1` of degree exactly `d`.
+///
+/// Scans the `2^d` monic polynomials of that degree.  Used by
+/// [`all_factors_of_x_n_minus_1`]; [`factor_x_n_minus_1`] is the
+/// `d = ord_n(2)` case of the same search.
+fn irreducible_factors_of_degree(n: u32, d: u32) -> Vec<u64> {
+    let mut out = Vec::new();
+    let hi = 1u64 << d;
+    for low in 0..hi {
+        let f = hi | low;
+        if !is_irreducible_f2(f) {
+            continue;
+        }
+        // f | x^n − 1  ⟺  x^n ≡ 1 (mod f).
+        let mut xn = poly_rem(0b10, f);
+        let mut acc = 1u64;
+        let mut e = n;
+        while e > 0 {
+            if e & 1 == 1 {
+                acc = poly_mulmod(acc, xn, f);
+            }
+            xn = poly_mulmod(xn, xn, f);
+            e >>= 1;
+        }
+        if acc == 1 {
+            out.push(f);
+        }
+    }
+    out
+}
+
+/// An `F_2`-basis of the Frobenius-invariant subspace belonging to the
+/// divisor `Π factors[i]`, `i ∈ indices` — dimension = total degree.
+///
+/// The single-factor case ([`invariant_subspace_basis`]) is stuck at
+/// `dim = ord_n(2)`, which is the only dimension one irreducible factor
+/// can give.  Products give every dimension in
+/// [`available_subspace_dimensions`], so the factor base can be sized
+/// to the instance instead of the instance to the factor base.
+pub fn subspace_basis_for_divisor(
+    n: u32,
+    indices: &[usize],
+    irr: &IrreduciblePoly,
+) -> Option<Vec<F2mElement>> {
+    let factors = all_factors_of_x_n_minus_1(n);
+    let mut f = 1u64;
+    for &i in indices {
+        f = poly_mul_full(f, *factors.get(i)?)?;
+    }
+    let deg = poly_deg(f)?;
+    if deg == 0 || deg >= n {
+        return None;
+    }
+    let exps: Vec<u32> = (0..=deg).filter(|k| (f >> k) & 1 == 1).collect();
+    let basis = linearised_kernel_basis(&exps, n, irr);
+    if basis.len() != deg as usize {
+        return None;
+    }
+    Some(basis)
+}
+
+/// **Build a Frobenius-invariant factor base from a divisor** of
+/// `x^n − 1`, rather than from a single irreducible factor.
+///
+/// `indices` select factors from [`all_factors_of_x_n_minus_1`]; the
+/// subspace has dimension equal to their total degree, so `|F| ≈ 2^dim`
+/// is tunable.  That matters because the summand count `m` a
+/// decomposition needs falls as `|F|` grows — `m ≈ n/dim` — and `m ≥ 3`
+/// is what forces the chained system and its `(m − 2)·n` extra
+/// unknowns.  A large enough invariant subspace buys `m = 2` and skips
+/// the chaining entirely.
+pub fn build_frobenius_factor_base_from_divisor(
+    kc: &KoblitzCurve,
+    indices: &[usize],
+) -> Option<FrobeniusFactorBase> {
+    let subspace_basis = subspace_basis_for_divisor(kc.n, indices, &kc.curve.irreducible)?;
+    let ell = subspace_basis.len() as u32;
+    let factors = all_factors_of_x_n_minus_1(kc.n);
+    let mut f_j = 1u64;
+    for &i in indices {
+        f_j = poly_mul_full(f_j, *factors.get(i)?)?;
+    }
+    let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
+    finish_factor_base(kc, ell, f_j, exps, subspace_basis)
+}
+
 /// **Build a Frobenius-invariant factor base** for `curve` from the
 /// `index`-th non-trivial irreducible factor of `x^n − 1`.
 ///
@@ -758,12 +1009,26 @@ pub fn build_frobenius_factor_base(kc: &KoblitzCurve, index: usize) -> Option<Fr
     let f_j = *factors.get(index)?;
     let ell = poly_deg(f_j)?;
     let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
-
     let subspace_basis = linearised_kernel_basis(&exps, kc.n, &kc.curve.irreducible);
-    let subspace = span_f2(&subspace_basis, kc.n);
-    if subspace.len() != (1usize << ell) {
+    if subspace_basis.len() != ell as usize {
         // Kernel dimension must equal deg f_j; anything else means the
         // factor did not divide x^n − 1 after all.
+        return None;
+    }
+    finish_factor_base(kc, ell, f_j, exps, subspace_basis)
+}
+
+/// Shared tail of the factor-base constructors: span the subspace,
+/// collect the points over it, and walk the `π`-orbits.
+fn finish_factor_base(
+    kc: &KoblitzCurve,
+    ell: u32,
+    f_j: u64,
+    exps: Vec<u32>,
+    subspace_basis: Vec<F2mElement>,
+) -> Option<FrobeniusFactorBase> {
+    let subspace = span_f2(&subspace_basis, kc.n);
+    if subspace.len() != (1usize << ell) {
         return None;
     }
 
@@ -1109,9 +1374,13 @@ pub fn sat_decompose(
         }
     }
 
+    // Enumerate models incrementally: encode once, then add a blocking
+    // clause per rejected root and re-solve.  Re-encoding from scratch
+    // each time costs a full Tseitin/XOR build per model examined, and
+    // with `max_models` in the dozens that dominated the loop.
+    let mut enc = encode_boolean_system(sys.n_vars, &equations, &[]);
     let mut blocked: Vec<u64> = Vec::new();
     loop {
-        let mut enc = encode_boolean_system(sys.n_vars, &equations, &blocked);
         stats.solver_calls += 1;
         if enc.trivially_unsat {
             stats.refuted = true;
@@ -1135,6 +1404,18 @@ pub fn sat_decompose(
                     // rather than loop, and report it.
                     stats.spurious += 1;
                     blocked.push(root);
+                    enc.solver.reset_search();
+                    let clause: Vec<i32> = (0..sys.n_vars)
+                        .map(|i| {
+                            let lit = (i + 1) as i32;
+                            if (root >> i) & 1 == 1 {
+                                -lit
+                            } else {
+                                lit
+                            }
+                        })
+                        .collect();
+                    enc.solver.add_clause(clause);
                     continue;
                 }
                 stats.models += 1;
@@ -1149,6 +1430,19 @@ pub fn sat_decompose(
                     stats.exhausted = true;
                     return (None, stats);
                 }
+                // Forbid this assignment and search again.
+                enc.solver.reset_search();
+                let clause: Vec<i32> = (0..sys.n_vars)
+                    .map(|i| {
+                        let lit = (i + 1) as i32;
+                        if (root >> i) & 1 == 1 {
+                            -lit
+                        } else {
+                            lit
+                        }
+                    })
+                    .collect();
+                enc.solver.add_clause(clause);
             }
         }
     }
@@ -1536,6 +1830,140 @@ mod tests {
         let t = r - BigUint::one(); // t = −1 for a = 0
         let lhs = (&kc.lambda * &kc.lambda + BigUint::from(2u32)) % r;
         assert_eq!(lhs, (&t * &kc.lambda) % r);
+    }
+
+    #[test]
+    fn cyclotomic_cosets_partition_and_classify() {
+        for n in [7u32, 9, 15, 21, 31, 63] {
+            let cosets = cyclotomic_cosets(n);
+            let mut all: Vec<u32> = cosets.iter().flatten().copied().collect();
+            all.sort_unstable();
+            assert_eq!(
+                all,
+                (0..n).collect::<Vec<_>>(),
+                "cosets must partition Z/{n}"
+            );
+            // Each coset is closed under doubling.
+            for c in &cosets {
+                for s in c {
+                    assert!(c.contains(&((s * 2) % n)));
+                }
+            }
+        }
+        // 2 is primitive mod 131 and mod 163, so there are only two
+        // cosets and no usable invariant subspace exists at all — the
+        // sizes that matter are exactly the ones this construction
+        // cannot serve.
+        for n in [131u32, 163] {
+            assert_eq!(cyclotomic_cosets(n).len(), 2);
+            assert_eq!(available_subspace_dimensions(n), vec![0, 1, n - 1, n]);
+        }
+    }
+
+    #[test]
+    fn the_factorisation_is_complete() {
+        // One irreducible factor per cyclotomic coset, of that coset's
+        // degree — so the degrees sum to n, and the dimensions the
+        // divisors reach are exactly the classification's.
+        for n in [7u32, 9, 15, 21, 31, 63] {
+            let factors = all_factors_of_x_n_minus_1(n);
+            assert_eq!(factors.len(), cyclotomic_cosets(n).len(), "n = {n}");
+            let degrees: Vec<u32> = factors.iter().map(|f| 63 - f.leading_zeros()).collect();
+            assert_eq!(
+                degrees.iter().sum::<u32>(),
+                n,
+                "degrees must sum to n = {n}"
+            );
+
+            let mut reach = std::collections::BTreeSet::from([0u32]);
+            for d in &degrees {
+                for r in reach.clone() {
+                    reach.insert(r + d);
+                }
+            }
+            assert_eq!(
+                reach.into_iter().collect::<Vec<_>>(),
+                available_subspace_dimensions(n),
+                "reachable dimensions must match the coset classification at n = {n}"
+            );
+        }
+    }
+
+    #[test]
+    fn divisor_factor_bases_are_invariant_and_sized_to_the_divisor() {
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        for indices in [vec![1usize], vec![1, 2], vec![1, 2, 3]] {
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &indices).unwrap();
+            let expected: u32 = indices
+                .iter()
+                .map(|&i| 63 - all_factors_of_x_n_minus_1(15)[i].leading_zeros())
+                .sum();
+            assert_eq!(fb.ell, expected, "dimension is the divisor's degree");
+            assert_eq!(fb.subspace.len(), 1usize << expected);
+
+            let keys: std::collections::HashSet<_> = fb.points.iter().map(point_key).collect();
+            for p in &fb.points {
+                assert!(keys.contains(&point_key(&kc.frobenius(p))), "π(F) ⊆ F");
+                assert!(keys.contains(&point_key(&point_neg(p))), "−F ⊆ F");
+            }
+            assert_eq!(
+                fb.orbits.iter().map(|o| o.len()).sum::<usize>(),
+                fb.points.len()
+            );
+        }
+    }
+
+    #[test]
+    fn a_bigger_invariant_subspace_grows_the_base_the_divisor_asks_for() {
+        // The point of divisor bases: |F| is tunable, so the summand
+        // count m ≈ n/dim a decomposition needs can be brought down to
+        // 2 — which also replaces the cubic chained system with a
+        // quadratic one.
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let small = build_frobenius_factor_base_from_divisor(&kc, &[1]).unwrap();
+        let large = build_frobenius_factor_base_from_divisor(&kc, &[1, 2]).unwrap();
+        assert_eq!((small.ell, large.ell), (3, 6));
+        assert_eq!(small.points.len(), 15);
+        assert_eq!(large.points.len(), 71);
+        assert!(large.orbits.len() > small.orbits.len());
+    }
+
+    #[test]
+    fn the_cofactor_class_decides_which_m_can_decompose() {
+        // Not a size effect: on K_1/F_2^7 (cofactor 2) no factor-base
+        // point lies in ⟨G⟩, so a sum of m of them reaches ⟨G⟩ only for
+        // even m.  Odd m decomposes nothing however big the base is.
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let g = kc.generator().clone();
+        for indices in [vec![1usize], vec![1, 2]] {
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &indices).unwrap();
+            let index_of = fb.index_map();
+            assert!(
+                fb.cofactor_classes(&kc)
+                    .iter()
+                    .all(|c| *c != BinaryPoint::Infinity),
+                "no point of this base lies in ⟨G⟩"
+            );
+            assert_eq!(fb.admissible_summand_counts(&kc, 4), vec![2, 4]);
+
+            // …and the predicate matches what search actually finds.
+            for m in 2..=4usize {
+                let hits = (1..12u32)
+                    .filter(|k| {
+                        let t = kc.mul(&g, &BigUint::from(*k));
+                        enumerate_decompose(&kc, &fb, &index_of, &t, m).is_some()
+                    })
+                    .count();
+                if fb.m_can_decompose(&kc, m) {
+                    assert_eq!(hits, 11, "m = {m} is admissible and should decompose");
+                } else {
+                    assert_eq!(
+                        hits, 0,
+                        "m = {m} is inadmissible and must decompose nothing"
+                    );
+                }
+            }
+        }
     }
 
     #[test]
