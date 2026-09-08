@@ -5,9 +5,11 @@
 **Audit scripts:** `research/ec-index-calculus-review/`
 **Write-up:** <https://claude.ai/code/artifact/25b658b7-4d69-4c3c-82ad-988a50dae691>
 **Provenance:** Review of the prior art closest to
-`src/cryptanalysis/semaev_sat.rs`, which is stuck at `n = 4`–`5`.
-That repository reaches `n = 19` on the same class of system, so the
-question is what it does differently.
+`src/cryptanalysis/semaev_sat.rs`, which was stuck at `n = 4`–`5` while
+that repository reaches `n = 19` on the same class of system.  The
+question was what it does differently; the answer is in
+["What we took from it"](#what-we-took-from-it), and our pipeline now
+reaches `n = 19` too.
 
 ## What it is
 
@@ -121,71 +123,51 @@ violated, with one positive control (a planted solution on a genuine
 Anyone using these 60 files as a regression corpus should expect one
 SAT answer where the filename says `U`.
 
-## Implications for `semaev_sat.rs`
+## What we took from it
 
-Ordered by leverage.  Steps 1 and 3 are independent and both
-necessary; 2 depends on 1; 4 depends on 3; 5 is optional.
+All of the below is implemented; see
+[`RESEARCH_SAT_SEMAEV.md`](./RESEARCH_SAT_SEMAEV.md) for the details
+and the measured numbers.  The pipeline went from stalling at
+`n = 4`–`5` to deciding the `n = 19, l = 6` instance end to end.
 
-1. **Restrict the unknowns to a factor base.**  `weil_descend_s3`
-   produces `2n` bit-variables because `X₁, X₂` range over all of
-   `F_{2^n}`.  Index calculus confines each `Xᵢ` to an `l`-dimensional
-   `F_2`-subspace with `l ≈ n/m`; for this Koblitz setup
-   `V = ⟨1, a, …, a^{l−1}⟩`, so inside `symbolic_variable` the change
-   is close to "emit `l` free bits, not `n`".  The regime change is
-   the point: at `n = 19, m = 3` that is 18 unknowns against 19
-   equations — overdetermined and propagation-friendly — where today
-   we hand the CDCL `n` equations in `2n` unknowns.
+1. **Factor-base restriction** — `weil_descend_s3_subspace` confines
+   each unknown to the `l`-dimensional subspace, turning `n` equations
+   in `2n` unknowns into `n` equations in `m·l ≈ n`.
+2. **Symmetrised `S₄` in char 2** — `binary_semaev_s4`, with squaring
+   implemented as coefficient relocation rather than multiplication.
+   Specialised to `b = 1`; general `b` still needs re-deriving.
+3. **XOR-native Gauss-Jordan** in `sat.rs`, hooked at the `propagate()`
+   fixpoint.  `analyze()` and `backjump()` were untouched, because a
+   reduced row yields a reason clause directly.
+4. **Native parity constraints instead of Tseitin** —
+   `XorEncoding::Native` vs `XorEncoding::Cnf`, both kept so the
+   difference stays measurable.  It is 10.6× the clauses at `n = 19`.
+5. **Bit-sliced coefficients: deliberately deferred.**  It buys descent
+   time, and descent is 11 ms against a four-minute solve.  The
+   algorithmically important half — Frobenius as relocation, and lazy
+   reduction — is implemented; the bit-packing is not.
+6. **Reference corpus** — `semaev_corpus.rs`, parameters only (see
+   below), with `n19l6-19-U` recorded as satisfiable.
 
-2. **Move to `S_4`, symmetrised, in char 2.**  `m = 2` has no
-   asymptotic payoff.  The symmetrised form used upstream, with the
-   `b = 1` of that curve baked in, is
+Also fixed: `collect_xor_lits` no longer smuggles a parity flag in-band
+as literal `0`, which is the DIMACS clause terminator.
 
-   ```
-   f₃ = X_R⁴ + e₁⁴ + e₃⁴ + e₂⁴X_R⁴ + e₃³X_R + e₃e₂²X_R³
-        + e₃e₁²X_R + e₃X_R³ + e₁²e₃²X_R² + e₃²X_R⁴ + e₃² + e₂²X_R²
-   ```
+### An unexpected cross-check
 
-   Evaluating this directly reproduces all 30 planted solutions, so it
-   is safe as a fixture.  General `b` needs re-deriving — the constant
-   is not a free parameter there.  `symmetrized_semaev.rs` already has
-   `elementary_symmetric` / `decompose_symmetric`, but over `MPoly`
-   with BigUint coefficients; the char-2 sibling reuses the structure
-   and drops the modulus.
+Our encoder, written from the algebra rather than from upstream's code,
+produces **exactly** upstream's instance size for the `n = 19, l = 6`
+family: 767 variables, 2 364 ordinary clauses, 52 parity rows, against
+their `p cnf 767 2416` with 52 `x`-lines.  Two independent
+implementations agreeing to the clause is a much stronger check on the
+modelling than any single instance solving.
 
-3. **XOR-native propagation in `sat.rs`** — the highest-impact change,
-   and the one `RESEARCH_SAT_SEMAEV.md` already identifies.  The
-   diagnosis holds: dense parity constraints are the classic case
-   where resolution needs exponentially many steps, and our `n = 5`
-   system is five dense XORs of ~35 terms over shared variables.
-   Hook point: add `xors: Vec<(Vec<u32>, bool)>` to `Solver` and run
-   Gauss-Jordan when the watched-literal loop in `propagate()` reaches
-   fixpoint — eliminate assigned variables, propagate rows down to one
-   unknown, treat an inconsistent row as a conflict.  Because
-   `propagate()` returns `Option<usize>` (a clause index), synthesise
-   the row's reason clause, push it onto `clauses`, and return that
-   index; `analyze()` and `backjump()` then need no changes.
+### On vendoring
 
-4. **Stop paying for Tseitin.**  Step 2 of the current pipeline (one
-   aux + three clauses per quadratic monomial) is exactly the 8.5×
-   measured above.  Cheap route, most of the win: keep the auxiliaries
-   but feed the XOR rows to the Gauss engine from step 3, where
-   monomial variables are just more columns.  Expensive route: a
-   monomial-aware propagator reading ANF directly.
-   While in there: `collect_xor_lits` uses literal `0` as an in-band
-   parity sentinel, which is also the DIMACS clause terminator.  It
-   works because `encode_xor_eq_zero` filters it, but will not survive
-   a refactor that forwards those literals to `add_clause`.  A
-   `parity: bool` alongside the vector costs nothing.
-
-5. **Bit-slice the descent** (optional, perf only).  `F2BoolPoly {
-   coeffs: Vec<bool> }` spends a byte per coefficient; the layout above
-   is 64× denser and makes squaring a shift.  This buys descent time,
-   not tractability — worth doing only once steps 1–3 have moved the
-   wall.
-
-6. **Adopt the 60 instances as a regression corpus** (cheap, anytime).
-   Small, independently generated, with recorded ground truth.  Import
-   alongside `semaev_sat_round_trip_n4`, expecting `n19l6-19-U` SAT.
+The corpus module carries instance *parameters*, not upstream's
+generated DIMACS/ANF files.  Upstream is GPL-3.0 and this crate
+declares no licence, so copying its output would be a licensing
+decision rather than an engineering one; regenerating from parameters
+sidesteps that and exercises more of our own pipeline besides.
 
 ## Landmines in the upstream code
 
