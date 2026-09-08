@@ -197,7 +197,9 @@ ECC_WIDE_UNROLL_PRAGMA
                     F::mul(prod, u, t);
                     F::copy(prod, t);
                 }
-                store(P.pchain, slot, tid, P.threads, prod);
+                // The final product goes directly to inv; reverse traversal
+                // only reads prefixes through BATCH-2.
+                if (slot + 1 < BATCH) store(P.pchain, slot, tid, P.threads, prod);
             }
 
             F::inv(prod, inv);
@@ -235,6 +237,12 @@ ECC_WIDE_UNROLL_PRAGMA
 };
 
 #if defined(__CUDACC__)
+#ifndef ECC_SMEM_SPILL
+#define ECC_SMEM_SPILL 0
+#endif
+#if ECC_SMEM_SPILL && (!defined(__CUDACC_VER_MAJOR__) || __CUDACC_VER_MAJOR__ < 13)
+#error "ECC_SMEM_SPILL requires nvcc from CUDA 13 or newer"
+#endif
 #ifndef ECC_THREADS
 #define ECC_THREADS 128
 #endif
@@ -251,6 +259,9 @@ ECC_WIDE_UNROLL_PRAGMA
 #define ECC_BOUNDS __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 template <class Cfg, class W>
 __global__ void ECC_BOUNDS eccWalkKernel(WalkParams<W> P) {
+#if ECC_SMEM_SPILL
+    asm volatile (".pragma \"enable_smem_spilling\";");
+#endif
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= P.threads) return;
     Kernel<Cfg, W>::run(tid, P);

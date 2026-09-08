@@ -22,6 +22,14 @@ CUDAPATH ?= /usr/local/cuda
 BATCH   ?= 32
 THREADS ?= 128
 MINBLOCKS ?= 2
+STREAM_KARAT ?= 0
+SMEM_SPILL ?= 0
+GLOBAL_CG ?= 0
+# Keep experimental tuning independent: one change per comparison initially.
+GPUFLAGS = -Xptxas -v
+ifeq ($(GLOBAL_CG),1)
+GPUFLAGS += -Xptxas --def-load-cache=cg
+endif
 # The CPU build picks the widest word the target supports (AVX-512 -> 512 lanes,
 # AVX2 -> 256, otherwise 64).  Use a portable baseline when the build machine
 # and the run machine may differ.
@@ -42,7 +50,8 @@ HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
-DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS)
+DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS) \
+       -DECC_STREAM_KARAT=$(STREAM_KARAT) -DECC_SMEM_SPILL=$(SMEM_SPILL)
 
 all: cpu
 
@@ -65,7 +74,7 @@ ecc2k130-cpu: src/main.cu $(HDRS) $(GEN)
 gpu: ecc2k130
 
 ecc2k130: src/main.cu $(HDRS) $(GEN)
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -lineinfo -Xcompiler -O3 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo -Xcompiler -O3 \
 	    -Xcompiler -fopenmp src/main.cu -o $@ -lgomp
 
 # Modal entry-point parameters must survive the trip through click; see
@@ -74,6 +83,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 check-cli:
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/autolab.py --self-test
+	python3 -m unittest discover -s codegen -p 'testbenchreport.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -113,7 +123,14 @@ autolab:
 	cd codegen && python3 autolab.py --cuda-path=$(CUDAPATH) --ptxas=$(PTXAS) \
 	    --clang=$(CLANG) --arch=$(patsubst sm_%,%,$(SMARCH))
 
-test: check-cli check-cycles ecc2k130-cpu
+test-schedule:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_STREAM_KARAT=0 -Wno-unknown-pragmas src/testschedule.cpp -o build/test-schedule-base
+	$(CXX) -O2 -std=c++17 -DECC_STREAM_KARAT=1 -Wno-unknown-pragmas src/testschedule.cpp -o build/test-schedule-stream
+	./build/test-schedule-base
+	./build/test-schedule-stream
+
+test: check-cli check-cycles test-schedule ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -171,5 +188,6 @@ modal:
 
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
+	rm -f build/test-schedule-base build/test-schedule-stream
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean

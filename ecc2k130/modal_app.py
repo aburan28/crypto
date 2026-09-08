@@ -26,6 +26,7 @@ Distinguished points and results land in a Modal Volume, so a search can be
 stopped and resumed and several containers can contribute to one corpus.
 """
 
+import hashlib
 import json
 import os
 import pathlib
@@ -33,11 +34,20 @@ import re
 import signal
 import struct
 import subprocess
+import sys
 import time
 
 import modal
+# Modal imports this module as /root/modal_app.py, separately from the source
+# tree copied into the image. Resolve helpers from that tree on the container.
+REMOTE = "/root/ecc2k130"
+helperRoot = pathlib.Path(__file__).parent if modal.is_local() else pathlib.Path(REMOTE)
+sys.path.insert(0, str(helperRoot))
+from codegen.benchreport import benchResult, bestResult, parseRate, reportsVerified, summarizeSamples
 
-CUDA_VERSION = "12.8.1"
+CUDA_VERSION = os.environ.get("ECC_CUDA_VERSION", "12.8.1")
+if not re.fullmatch(r'\d+\.\d+\.\d+', CUDA_VERSION):
+    raise ValueError("ECC_CUDA_VERSION must be a toolkit version such as 13.0.2")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -72,7 +82,6 @@ BAKED_ARCHES = archesFor(DEFAULT_GPU)
 GENCODE = " ".join(
     "-gencode arch=compute_%s,code=sm_%s" % (a, a) for a in BAKED_ARCHES
 )
-REMOTE = "/root/ecc2k130"
 LOCAL = pathlib.Path(__file__).parent
 
 # What the image already contains.  A request for exactly this on a matching
@@ -93,6 +102,9 @@ image = (
         f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
     )
     .entrypoint([])
+    # Containers re-import this module; preserve the settings that selected
+    # their image and baked architecture rather than reverting to defaults.
+    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -182,7 +194,8 @@ def gpuName():
     return out.strip().splitlines()[0].strip() if rc == 0 and out.strip() else "unknown"
 
 
-def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
+def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
+             streamKarat=False, smemSpill=False, globalCg=False):
     """Rebuild the client for one architecture and one set of knobs."""
     arch = arch or computeCapability()
     # leaf 0 means "let the generator choose by register budget", which is what
@@ -197,7 +210,10 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     # autotune sweep is the previous point's leaf -- so the sweep would score
     # that build twice and label one of them the register-budget choice.
     want = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": minBlocks}
-    if want == BAKED and arch in BAKED_ARCHES and bakedIntact[0]:
+    if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
+        return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
+    experimental = streamKarat or smemSpill or globalCg
+    if want == BAKED and not experimental and arch in BAKED_ARCHES and bakedIntact[0]:
         print(f"sm_{arch}: batch {batch}, threads {threads}, leaf {leaf}, "
               f"minBlocks {minBlocks} is what the image already holds; not rebuilding",
               flush=True)
@@ -212,57 +228,81 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2):
     gencode = f"-gencode arch=compute_{arch},code=sm_{arch}"
     rc, out = shStream(
         f'make -B gpu ARCH="{gencode}" BATCH={batch} THREADS={threads} '
-        f"MINBLOCKS={minBlocks}",
+        f"MINBLOCKS={minBlocks} STREAM_KARAT={int(streamKarat)} "
+        f"SMEM_SPILL={int(smemSpill)} GLOBAL_CG={int(globalCg)}",
         timeout=1800,
         prefix="  build| ",
     )
     return rc == 0, out
 
 
-def parseRate(text):
-    """Iterations per second, in millions, from the client's own report.  The
-    "finished" line carries the average over the whole run, so prefer it."""
-    best = 0.0
-    for line in text.splitlines():
-        if "M it/s" not in line:
-            continue
-        head = line.split("M it/s")[0].split()
-        if not head:
-            continue
+def benchmarkIdentity():
+    """Identity travels with the result even though the image has no .git."""
+    root = pathlib.Path(REMOTE)
+    source = hashlib.sha256()
+    paths = [root / 'Makefile', root / 'modal_app.py']
+    for folder in ('include', 'src', 'generated', 'codegen'):
+        paths += sorted(p for p in (root / folder).rglob('*')
+                        if p.suffix in ('.h', '.cu', '.cpp', '.py'))
+    for path in paths:
+        source.update(str(path.relative_to(root)).encode() + b'\0' + path.read_bytes() + b'\0')
+    rc, compiler = sh('nvcc --version')
+    gpuRc, gpu = sh('nvidia-smi --query-gpu=name,uuid,driver_version,pstate,clocks.current.sm,'
+                   'clocks.current.memory,power.limit,temperature.gpu --format=csv')
+    leaf = re.search(r'LEAF = (\d+)', (root / 'generated/eccF131.h').read_text())
+    return dict(sourceSha256=source.hexdigest(),
+                binarySha256=hashlib.sha256((root / 'ecc2k130').read_bytes()).hexdigest(),
+                actualLeaf=int(leaf.group(1)), compiler=compiler, compilerReturncode=rc,
+                gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
+
+
+def measureBench(steps, launches, workers, preferL1, repeats):
+    if steps <= 0 or launches <= 0 or repeats <= 0 or workers < 0:
+        raise ValueError('steps, launches and repeats must be positive; workers must be nonnegative')
+    cmd = f'./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} --verify 0'
+    if workers:
+        cmd += f' --threads {workers}'
+    if preferL1:
+        cmd += ' --prefer-l1'
+    samples = []
+    for repeat in range(repeats):
         try:
-            rate = float(head[-1])
-        except ValueError:
-            continue
-        if line.strip().startswith("finished"):
-            return rate
-        best = max(best, rate)
-    return best
+            rc, out = sh(cmd, timeout=1800)
+        except subprocess.TimeoutExpired as exc:
+            rc = 124
+            out = exc.stdout or ''
+            if isinstance(out, bytes):
+                out = out.decode(errors='replace')
+            out += '\nbenchmark timed out'
+        sample = benchResult(cmd, rc, out)
+        samples.append(sample)
+        print(f'  repeat {repeat + 1}/{repeats}: {sample["rate"]:.3f} M it/s '
+              f'({"complete" if sample["valid"] else "FAILED"})', flush=True)
+        if not sample['valid']:
+            break
+    return summarizeSamples(samples)
 
 
 # ---------------------------------------------------------------------------
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR, volumes={"/data": volume})
-def runValidate():
+def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
+                streamKarat=False, smemSpill=False, globalCg=False, preferL1=False):
     """Field arithmetic, orbit invariants, solver, and end-to-end discrete
     logarithms recovered on the GPU itself."""
     cc = computeCapability()
     out = ["device: " + gpuName(), "compute capability: " + cc, ""]
-    # Every other entry point rebuilds for the local device; this one runs the
-    # binary baked into the image, so it is the only one a trimmed gencode list
-    # can strand.  That happens when --gpu overrides ECC_GPU, since the image
-    # was built from ECC_GPU at import and cannot know about the override.  The
-    # failure would otherwise be "no kernel image is available for execution on
-    # the device", which says nothing about why.
-    if cc not in BAKED_ARCHES:
-        out.append("image was built for sm_%s but this device is sm_%s "
-                   "(ECC_GPU=%s); rebuilding for it"
-                   % ("/sm_".join(BAKED_ARCHES), cc, DEFAULT_GPU))
-        ok, log = buildFor(32, 128, 0, arch=cc, minBlocks=2)
-        if not ok:
-            return "\n".join(out + ["rebuild failed", log[-2000:]])
+    # Validate the requested candidate on the actual architecture. buildFor
+    # reuses the image only when its untouched binary matches the request.
+    ok, log = buildFor(batch, threads, leaf, arch=cc, minBlocks=minBlocks,
+                       streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
+    if not ok:
+        raise RuntimeError("\n".join(out + ["rebuild failed", log]))
+    out.append(json.dumps(benchmarkIdentity(), indent=2))
+    cacheFlag = ' --prefer-l1' if preferL1 else ''
     rc, t = sh("./ecc2k130-cpu --test")
     out.append(t.strip())
     if rc != 0:
-        return "\n".join(out) + "\nHOST VALIDATION FAILED"
+        raise RuntimeError("\n".join(out) + "\nHOST VALIDATION FAILED")
 
     out.append("\n--- end-to-end on the GPU ---")
     ok = True
@@ -271,16 +311,16 @@ def runValidate():
     # first launch and throw most of the points away.  Curves 19 and 13 have no
     # normal basis, so they exercise the polynomial-basis backend that ECC2K-95
     # depends on; curve 41 is solved through both backends.
-    for curve, instances, threads, steps in (("23", 4, 256, 8), ("19", 4, 256, 8),
+    for curve, instances, workers, steps in (("23", 4, 256, 8), ("19", 4, 256, 8),
                                              ("13", 2, 128, 4), ("41", 4, 2048, 32),
                                              ("41 --poly-basis", 4, 2048, 32)):
         for i in range(instances):
             rc, t = sh(
-                f"./ecc2k130 --curve {curve} --instance {i} --threads {threads} "
-                f"--steps {steps} --dp-cap 262144 --verify 4"
+                f"./ecc2k130 --curve {curve} --instance {i} --threads {workers} "
+                f"--steps {steps} --dp-cap 262144 --verify 4{cacheFlag}"
             )
             line = [l for l in t.splitlines() if "planted" in l or "MISMATCH" in l]
-            good = any("yes" in l for l in line)
+            good = rc == 0 and 'MISMATCH' not in t and any("yes" in l for l in line)
             ok = ok and good
             out.append(f"curve {curve} instance {i}: " + ("; ".join(line) if line else t.strip()[-200:]))
     out.append("GPU END TO END: " + ("all instances solved" if ok else "FAILED"))
@@ -298,33 +338,40 @@ def runValidate():
     # parallel walks, stays inside --dp-cap, and takes well under a minute.
     # Staying inside the cap matters beyond speed: it means a "dropped" count in
     # validate output is a real signal rather than the expected state.
-    rc, t = sh("./ecc2k130 --curve 97 --dp-weight 36 --threads 512 --steps 16 "
-               "--launches 2 --dp-cap 262144 --verify 16", timeout=1800)
-    out.append("\n--- ECC2K-95 reporting path ---")
-    out.append("\n".join(t.strip().splitlines()[-3:]))
-    if "MISMATCH" in t:
-        out.append("ECC2K-95 REPORTS DID NOT REPRODUCE")
-        ok = False
+    for curve, weight, workers in ((97, 36, 512), (131, 50, 128)):
+        rc, t = sh(f"./ecc2k130 --curve {curve} --dp-weight {weight} --threads {workers} "
+                   f"--steps 16 --launches 2 --dp-cap 262144 --verify 16{cacheFlag}", timeout=1800)
+        out.append(f"\n--- GF(2^{curve}) reporting path ---")
+        out.append(t.strip())
+        passed = reportsVerified(rc, t)
+        out.append('REPORT REPLAY: ' + ('PASS' if passed else 'FAILED'))
+        ok = ok and passed
+    if not ok:
+        raise RuntimeError("\n".join(out))
     return "\n".join(out)
 
 
-@app.function(image=image, gpu=DEFAULT_GPU, timeout=1 * HOUR)
+@app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
 def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
-             workers=0, rebuild=True):
-    """Throughput on the challenge curve."""
-    info = {"gpu": gpuName(), "cc": computeCapability(), "batch": batch,
-            "threads": threads, "leaf": leaf, "minBlocks": minBlocks}
+             workers=0, rebuild=True, repeats=3, streamKarat=False,
+             smemSpill=False, globalCg=False, preferL1=False):
+    """Completed-run median on the challenge curve, with reproducible identity."""
+    info = dict(gpu=gpuName(), cc=computeCapability(), batch=batch,
+                threads=threads, leaf=leaf, minBlocks=minBlocks, workers=workers,
+                steps=steps, launches=launches, repeats=repeats, streamKarat=streamKarat,
+                smemSpill=smemSpill, globalCg=globalCg, preferL1=preferL1)
+    want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks)
+    if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
+                        or want != BAKED or info['cc'] not in BAKED_ARCHES):
+        raise ValueError('rebuild=False requires the untouched matching baked binary')
     if rebuild:
-        ok, log = buildFor(batch, threads, leaf, minBlocks=minBlocks)
+        ok, log = buildFor(batch, threads, leaf, minBlocks=minBlocks,
+                           streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
+        info['buildLog'] = log
         if not ok:
-            info["error"] = log[-2000:]
-            return info
-    cmd = f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} --verify 0"
-    if workers:
-        cmd += f" --threads {workers}"
-    rc, out = sh(cmd, timeout=1800)
-    info["rate"] = parseRate(out)
-    info["raw"] = out.strip()[-1200:]
+            return dict(info, valid=False, rate=0.0, error=log)
+    info['identity'] = benchmarkIdentity()
+    info.update(measureBench(steps, launches, workers, preferL1, repeats))
     return info
 
 
@@ -354,16 +401,10 @@ def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs):
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR, volumes={"/data": volume})
 def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33,66",
-                minBlocksList="2,4,8", steps=64, launches=12, configs=""):
-    """Sweep the build-time knobs on the real device and report the best.
-
-    minBlocks is the interesting one: asking ptxas for more resident blocks per
-    SM trades registers for occupancy.  Offline, 2 is free (255 registers, no
-    extra spills) while 8 cuts registers to 64 and nearly doubles spill traffic,
-    so which side wins is exactly what this measures.
-
-    Pass `configs` to measure an explicit list of builds -- ::autolab prints one
-    -- instead of the cross product of the four lists."""
+                minBlocksList="2,4,8", steps=64, launches=12, configs="",
+                workers=0, repeats=3, streamKarat=False, smemSpill=False,
+                globalCg=False, preferL1=False):
+    """Rank completed repetitions by median; retain failed candidates as errors."""
     results = []
     arch = computeCapability()
     name = gpuName()
@@ -371,27 +412,33 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
     print(f"{len(plan)} builds to measure on {name} (sm_{arch})")
     for leaf, batch, threads, mb in plan:
         t0 = time.time()
-        ok, log = buildFor(batch, threads, leaf, arch, mb)
-        cfg = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": mb}
+        ok, log = buildFor(batch, threads, leaf, arch, mb,
+                           streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
+        cfg = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=mb,
+                   workers=workers, repeats=repeats, steps=steps, launches=launches,
+                   streamKarat=streamKarat, smemSpill=smemSpill,
+                   globalCg=globalCg, preferL1=preferL1,
+                   buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
-            results.append(dict(cfg, rate=0.0, error=log[-400:]))
+            results.append(dict(cfg, valid=False, rate=0.0, error=log))
             continue
-        rc, out = sh(
-            f"./ecc2k130 --curve 131 --bench --steps {steps} "
-            f"--launches {launches} --verify 0",
-            timeout=1800,
-        )
-        rate = parseRate(out)
-        results.append(dict(cfg, rate=rate, buildSeconds=round(time.time() - t0, 1)))
+        cfg['identity'] = benchmarkIdentity()
+        cfg.update(measureBench(steps, launches, workers, preferL1, repeats))
+        results.append(cfg)
         print(f"leaf {leaf} threads {threads} batch {batch} "
-              f"minBlocks {mb}: {rate:.3f} M it/s")
+              f"minBlocks {mb}: {cfg['rate']:.3f} M it/s median")
     results.sort(key=lambda r: -r.get("rate", 0.0))
     report = {"gpu": name, "cc": arch, "results": results,
-              "best": results[0] if results else None}
+              "best": bestResult(results)}
     os.makedirs("/data/autotune", exist_ok=True)
-    path = f"/data/autotune/{name.replace(' ', '_')}.json"
-    with open(path, "w") as fh:
-        json.dump(report, fh, indent=2)
+    # Each sweep is evidence, including experiments that lose. Keep the legacy
+    # latest-result path too for existing consumers.
+    stem = name.replace(' ', '_')
+    path = f"/data/autotune/{stem}-{time.time_ns()}.json"
+    report['reportPath'] = path
+    for dest in (path, f"/data/autotune/{stem}.json"):
+        with open(dest, "w") as fh:
+            json.dump(report, fh, indent=2)
     volume.commit()
     return report
 
@@ -433,7 +480,8 @@ def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
 
 @app.function(image=profileImage, gpu=DEFAULT_GPU, timeout=2 * HOUR)
 def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
-               section="", metrics=""):
+               section="", metrics="", workers=0, streamKarat=False,
+               smemSpill=False, globalCg=False, preferL1=False):
     """Profile the walk kernel with Nsight Compute, or say precisely why not.
 
     Whether this works at all is a property of the host, not of this code.
@@ -455,7 +503,8 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         return {"gpu": name, "available": False,
                 "why": "ncu is not on PATH in this image", "log": ver[-2000:]}
 
-    ok, log = buildFor(batch, threads, leaf, arch, minBlocks)
+    ok, log = buildFor(batch, threads, leaf, arch, minBlocks,
+                       streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
     if not ok:
         return {"gpu": name, "available": False, "why": "build failed",
                 "log": log[-2000:]}
@@ -471,11 +520,15 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         what = ("--section SpeedOfLight --section MemoryWorkloadAnalysis "
                 "--section LaunchStats --section Occupancy "
                 "--section WarpStateStats")
+    runFlags = f" --threads {workers}" if workers else ""
+    if preferL1:
+        runFlags += " --prefer-l1"
+    identity = benchmarkIdentity()
     rc, out = shStream(
         f"ncu --target-processes all --kernel-name eccWalkKernel "
         f"--launch-count 1 {what} "
         f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
-        f"--verify 0",
+        f"--verify 0{runFlags}",
         timeout=1 * HOUR,
         prefix="  ncu| ",
     )
@@ -499,7 +552,10 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         }
     return {"gpu": name, "cc": arch, "available": rc == 0,
             "batch": batch, "threads": threads, "leaf": leaf,
-            "minBlocks": minBlocks, "report": out[-2000:] if rc else out}
+            "minBlocks": minBlocks, "workers": workers, "identity": identity,
+            "streamKarat": streamKarat, "smemSpill": smemSpill,
+            "globalCg": globalCg, "preferL1": preferL1,
+            "report": out[-2000:] if rc else out}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -859,31 +915,67 @@ def solveCorpus(curve=131, loadMax=0):
 
 
 # ---------------------------------------------------------------------------
+@app.function(image=image, timeout=1 * HOUR)
+def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=False):
+    """Compile experimental device code on a CPU container, without renting a GPU."""
+    if not re.fullmatch(r'\d+', arch):
+        raise ValueError('arch must be a numeric compute capability')
+    ok, log = buildFor(32, 128, 0, arch=arch, streamKarat=streamKarat,
+                       smemSpill=smemSpill, globalCg=globalCg)
+    if not ok:
+        raise RuntimeError(log)
+    return dict(arch=arch, cudaImageVersion=CUDA_VERSION, streamKarat=streamKarat,
+                smemSpill=smemSpill, globalCg=globalCg, buildLog=log,
+                binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
+
+
 @app.local_entrypoint()
-def validate(gpu: str = ""):
-    print(onGpu(runValidate, gpu).remote())
+def compile_check(arch: str = "120", stream_karat: bool = False,
+                  smem_spill: bool = False, global_cg: bool = False):
+    print(json.dumps(runCompileCheck.remote(arch=arch, streamKarat=stream_karat,
+                                           smemSpill=smem_spill, globalCg=global_cg), indent=2))
+
+
+@app.local_entrypoint()
+def validate(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
+             min_blocks: int = 2, stream_karat: bool = False, smem_spill: bool = False,
+             global_cg: bool = False, prefer_l1: bool = False):
+    print(onGpu(runValidate, gpu).remote(batch=batch, threads=threads, leaf=leaf,
+          minBlocks=min_blocks, streamKarat=stream_karat, smemSpill=smem_spill,
+          globalCg=global_cg, preferL1=prefer_l1))
 
 
 @app.local_entrypoint()
 def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
-          min_blocks: int = 2, steps: int = 64, launches: int = 20):
+          min_blocks: int = 2, steps: int = 64, launches: int = 20,
+          workers: int = 0, repeats: int = 3, stream_karat: bool = False,
+          smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
     r = onGpu(runBench, gpu).remote(batch=batch, threads=threads, leaf=leaf,
-                                    minBlocks=min_blocks, steps=steps, launches=launches)
-    print(json.dumps({k: v for k, v in r.items() if k != "raw"}, indent=2))
-    if "raw" in r:
-        print(r["raw"])
+                                    minBlocks=min_blocks, steps=steps, launches=launches,
+                                    workers=workers, repeats=repeats, streamKarat=stream_karat,
+                                    smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1)
+    print(json.dumps(r, indent=2))
+    if not r.get('valid'):
+        raise RuntimeError('benchmark did not complete successfully')
 
 
 @app.local_entrypoint()
 def autotune(gpu: str = "", batches: str = "8,16,32,64",
              thread_counts: str = "64,128,256", leaves: str = "0,17,33,66",
-             min_blocks_list: str = "2,4,8", configs: str = ""):
+             min_blocks_list: str = "2,4,8", configs: str = "",
+             steps: int = 64, launches: int = 12, workers: int = 0, repeats: int = 3,
+             stream_karat: bool = False, smem_spill: bool = False,
+             global_cg: bool = False, prefer_l1: bool = False):
     """--configs takes leaf:batch:threads:minBlocks entries, as ::autolab
     prints them, and measures exactly those instead of a cross product."""
     r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=thread_counts,
                                        leaves=leaves, minBlocksList=min_blocks_list,
-                                       configs=configs)
+                                       configs=configs, steps=steps, launches=launches,
+                                       workers=workers, repeats=repeats, streamKarat=stream_karat,
+                                       smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1)
     print(json.dumps(r, indent=2))
+    if r['best'] is None:
+        raise RuntimeError('no benchmark candidate completed successfully')
 
 
 @app.local_entrypoint()
@@ -924,20 +1016,24 @@ def campaign(gpu: str = "", batches: str = "4,8,16,32",
 @app.local_entrypoint()
 def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
             min_blocks: int = 2, steps: int = 4, section: str = "",
-            metrics: str = ""):
+            metrics: str = "", workers: int = 0, stream_karat: bool = False,
+            smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
     """Nsight Compute on the walk kernel.
 
     Whether the counters are readable is a host setting rather than anything
     this app controls, so a refusal is itself the answer worth having."""
     r = onGpu(runProfile, gpu).remote(batch=batch, threads=threads, leaf=leaf,
                                       minBlocks=min_blocks, steps=steps,
-                                      section=section, metrics=metrics)
+                                      section=section, metrics=metrics, workers=workers,
+                                      streamKarat=stream_karat, smemSpill=smem_spill,
+                                      globalCg=global_cg, preferL1=prefer_l1)
     if not r.get("available"):
         print("Nsight Compute did not run: %s" % r.get("why"))
         if r.get("remedy"):
             print("  %s" % r["remedy"])
         print(r.get("log", "")[-2000:])
         return
+    print(json.dumps({k: v for k, v in r.items() if k != 'report'}, indent=2))
     print(r["report"])
 
 

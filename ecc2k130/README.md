@@ -1,5 +1,10 @@
 # ECC2K-130 and ECC2K-95
 
+For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
+controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
+That guide supersedes the earlier bandwidth estimates and tuning prescriptions
+below; historical measurements remain recorded here.
+
 A GPU-oriented client for the Certicom binary-curve challenges: Pollard rho with
 a Frobenius-based iteration function, bitsliced, with the field arithmetic
 emitted by a code generator.
@@ -342,16 +347,14 @@ same change was worth about 15% of throughput.
 zero spill loads. What spills is the Karatsuba glue inside `mul` and the kernel
 body, which hold several 131-word intermediates at once.
 
-**On current hardware this loop is close to memory bound, which it was not in
-2009.** With denominators recomputed rather than stored, one walk-step moves
-about 98 bytes (state in and out, plus the Montgomery product chain) and costs
-about 1700 word instructions. A 5090-class part is balanced at roughly 29
-instructions per byte and this design sits at about 18, so memory is the tighter
-of the two constraints by about 1.6x — where the 2009 GTX 295 implementation
-spent only 11.9% of its cycles on DRAM. Compute grew about 100x since then and
-bandwidth about 8x. Anything that reduces bytes per walk-step is now worth more
-than anything that reduces bit operations, which is the opposite of the tradeoff
-the original design faced.
+**The bottleneck needs a device profile.** The former 98-byte state estimate
+omitted one read. At batch 32 the common path requests about 114 bytes of
+global field state per scalar iteration, excluding local arrays and spills.
+The out-of-line arithmetic can add substantial local-memory traffic even when
+an individual leaf has no register spills. Measure DRAM, L1/L2, load/store issue
+pressure and stalls before concluding that DRAM bandwidth or arithmetic is the
+limiting resource. See [TUNING.md](TUNING.md) for the access count and profiler
+command.
 
 ## Running on Modal
 

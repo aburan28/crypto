@@ -70,6 +70,7 @@ struct Options {
     unsigned runId = 1;
     u64 maxIters = 0;
     bool bench = false;
+    bool preferL1 = false;
     bool test = false;
     bool polyBasis = false;
     bool selfCheck = false;
@@ -339,6 +340,14 @@ struct CudaEngine {
         CUDA_CHECK(cudaMalloc(&P.dp, (size_t)o.dpCap * sizeof(DpRecord)));
         CUDA_CHECK(cudaMalloc(&P.dpCount, sizeof(unsigned)));
         CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
+        cudaFuncAttributes attrs;
+        CUDA_CHECK(cudaFuncGetAttributes(&attrs, eccWalkKernel<Cfg, W>));
+        cudaDeviceProp prop;
+        CUDA_CHECK(cudaGetDeviceProperties(&prop, o.device));
+        printf("kernel: %d SMs, %d registers/thread, %zu local bytes/thread, "
+               "%zu shared bytes/block, stream Karatsuba %d, prefer L1 %d\n",
+               prop.multiProcessorCount, attrs.numRegs, attrs.localSizeBytes,
+               attrs.sharedSizeBytes, (int)ECC_STREAM_KARAT, (int)o.preferL1);
         unsigned long long *dk;
         CUDA_CHECK(cudaMalloc(&dk, 12 * sizeof(u64)));
         u64 hk[12];
@@ -796,6 +805,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             printf("no usable checkpoint at %s, starting fresh\n", o.ckptFile.c_str());
     }
 
+    const u64 timedIterBase = iterBase;
     const double t0 = nowSeconds();
     double lastPrint = t0;
     double lastCkpt = t0;
@@ -877,7 +887,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         }
         if (now - lastPrint > 2.0 || (o.launches && launch + 1 == o.launches)) {
             const double el = now - t0;
-            const double it = (double)iterBase * (double)eng.walksPerLaunch();
+            const double it = (double)(iterBase - timedIterBase) * (double)eng.walksPerLaunch();
             printf("  %8.1f s  %10.3f M it/s  %10llu iterations  %8llu dp  %8llu stored"
                    "  %8llu dropped\n",
                    el, it / el / 1e6, (unsigned long long)it, (unsigned long long)totalDp,
@@ -898,7 +908,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         }
     }
     const double el = nowSeconds() - t0;
-    const double it = (double)iterBase * (double)eng.walksPerLaunch();
+    const double it = (double)(iterBase - timedIterBase) * (double)eng.walksPerLaunch();
     printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",
            it / el / 1e6, (unsigned long long)totalDp, (unsigned long long)verified, (unsigned long long)lost);
     if (dpOut) fclose(dpOut);
@@ -945,6 +955,8 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
 
 #ifndef ECC_NO_CUDA
     CudaEngine<Cfg> eng;
+    if (o.preferL1)
+        CUDA_CHECK(cudaFuncSetCacheConfig(eccWalkKernel<Cfg, DeviceWord>, cudaFuncCachePreferL1));
 #else
     HostEngine<Cfg> eng;
 #endif
@@ -977,6 +989,7 @@ static void usage() {
         "  --checkpoint F   save and resume walk state through F\n"
         "  --checkpoint-every S   seconds between checkpoints (default 300)\n"
         "  --bench          throughput only, no distinguished-point handling\n"
+        "  --prefer-l1      request more L1 cache for the CUDA walk kernel\n"
         "  --test           run the validation suite and exit\n"
         "  --device D       CUDA device index\n"
         "\n"
@@ -1009,6 +1022,7 @@ int main(int argc, char **argv) {
         else if (a == "--checkpoint-every" && nx) o.ckptSeconds = atof(argv[++i]);
         else if (a == "--device" && nx) o.device = atoi(argv[++i]);
         else if (a == "--bench") o.bench = true;
+        else if (a == "--prefer-l1") o.preferL1 = true;
         else if (a == "--poly-basis") o.polyBasis = true;
         else if (a == "--test") o.test = true;
         else if (a == "--help" || a == "-h") { usage(); return 0; }
