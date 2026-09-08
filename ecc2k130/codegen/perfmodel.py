@@ -26,6 +26,19 @@ differently:
     has no business predicting the future, and the table below says plainly
     when it cannot.
 
+It has since been tested on an axis it was not fitted to.  Fitted on three
+builds that differ only in unrolling, it was asked about the leaf: leaf 33 runs
+1242 instructions and 445 local operations per iteration against the shipped
+leaf's 1390 and 348, so instruction count alone prefers it -- which is what the
+older cost function in autolab.py did.  Weighting a local operation at twelve
+instructions instead says leaf 33 is 15% slower, and the card measured 719.2
+against 844.3.  Predicted within 1.1%.
+
+The batch axis went the other way and is worth recording as a limit: measured
+844.3, 857.0 and 864.5 at batch 16, 32 and 64, a 2.4% spread that the model gets
+the wrong way round.  Its absolute error there is under 5%, but 2.4% is well
+inside the residual, so it cannot rank those three and does not pretend to.
+
 The cost model itself is deliberately small: a walk iteration costs some
 arithmetic and some local traffic, and the two are weighted against each other
 by one constant.  That constant is fitted, so the tool cannot claim to predict a
@@ -48,10 +61,16 @@ import autolab
 # minBlocks 2, leaf 0.  Every one of them is a full ::bench run on this kernel.
 # A new entry belongs here the moment a build is measured, whether or not it
 # agrees with the model -- the disagreements are the point.
+# Each entry is (label, batch, leaf, rate).  batch and leaf are here because
+# the cost of a build depends on both, and a history that recorded only the rate
+# could not be recomputed when the counting changed.
 MEASURED = (
-    ("full unrolls everywhere", 609.3),
-    ("walk loop unrolls capped", 818.0),
-    ("field element unrolls capped", 857.2),
+    ("full unrolls everywhere", 32, 0, 609.3),
+    ("walk loop unrolls capped", 32, 0, 818.0),
+    ("field element unrolls capped", 32, 0, 857.2),
+    ("batch 16", 16, 0, 844.3),
+    ("batch 64", 64, 0, 864.5),
+    ("leaf 33 at batch 16", 16, 33, 719.2),
 )
 
 
@@ -187,7 +206,7 @@ def main():
 
     hist = json.load(open(args.history))
     points = []
-    for label, rate in MEASURED:
+    for label, batch, leaf, rate in MEASURED:
         h = hist.get(label)
         if h is None:
             continue
@@ -202,7 +221,7 @@ def main():
     print("\nfit: one local operation costs %.1f instructions" % w)
     print("  %-32s %9s %9s %8s" % ("build", "measured", "predicted", "error"))
     worst = 0.0
-    for (label, rate), (instrs, local, _) in zip(MEASURED, points):
+    for (label, _b, _l, rate), (instrs, local, _) in zip(MEASURED, points):
         pred = 1.0 / (c * (instrs + w * local))
         e = 100.0 * (pred - rate) / rate
         worst = max(worst, abs(e))
