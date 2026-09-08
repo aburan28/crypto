@@ -96,12 +96,25 @@ struct Kernel {
         }
     }
 
+    // Lanes that have walked longer than maxIters without reporting.  Cold: it
+    // runs once every ECC_GUARD_PERIOD steps, and inlining a 32-iteration loop
+    // of global loads into the hot body costs registers on every step.
+    static ECC_BIG W overdueLanes(int tid, int slot, const WalkParams<W> &P,
+                                  unsigned long long now) {
+        W dp = ECC_ZERO;
+        for (int lane = 0; lane < LANES; ++lane) {
+            const size_t li = laneIndex(slot, lane, tid, P.threads);
+            if (now - P.startIter[li] >= P.maxIters) dp |= laneMask<W>(lane);
+        }
+        return dp;
+    }
+
     // Report every lane flagged in `mask` and mark it for restart.  Restarting
     // is deferred to the reseed kernel: computing a fresh start point needs 128
     // point additions, and keeping that call chain out of the hot kernel is
     // worth 5.8 KB of per-thread stack frame.  A marked lane keeps walking, but
     // its reports are suppressed until it is revived.
-    static ECC_HD void handleDistinguished(int tid, int slot, W mask, const WalkParams<W> &P,
+    static ECC_BIG void handleDistinguished(int tid, int slot, W mask, const WalkParams<W> &P,
                                            unsigned long long now, const W *x, const W *y) {
         for (int lane = 0; lane < LANES; ++lane) {
             if (!laneBit(mask, lane)) continue;
@@ -160,12 +173,7 @@ struct Kernel {
                 const size_t di = (size_t)slot * (size_t)P.threads + (size_t)tid;
                 WK::hamming(x, hb);
                 W dp = WK::dpMask(hb, P.dpWeight);
-                if (guard) {
-                    for (int lane = 0; lane < LANES; ++lane) {
-                        const size_t li = laneIndex(slot, lane, tid, P.threads);
-                        if (now - P.startIter[li] >= P.maxIters) dp |= laneMask<W>(lane);
-                    }
-                }
+                if (guard) dp |= overdueLanes(tid, slot, P, now);
                 const W alreadyDead = P.dead[di];
                 dp &= ~alreadyDead;
                 if (dp != ECC_ZERO) {
