@@ -17,9 +17,15 @@
 // costs 9820 bytes of spill traffic in the walk kernel against 4784 at any
 // factor of 16 or more, measured with ptxas at batch 32, threads 128,
 // minBlocks 2.  16 is the smallest factor that reaches that plateau.
+// A #pragma does not macro-expand its arguments, so `#pragma unroll
+// ECC_WIDE_UNROLL` reaches nvcc as an undefined identifier and fails the build.
+// _Pragma does expand, after stringification, so route it through that.
 #ifndef ECC_WIDE_UNROLL
 #define ECC_WIDE_UNROLL 16
 #endif
+#define ECC_STRINGIFY_(x) #x
+#define ECC_STRINGIFY(x) ECC_STRINGIFY_(x)
+#define ECC_WIDE_UNROLL_PRAGMA _Pragma(ECC_STRINGIFY(unroll ECC_WIDE_UNROLL))
 
 #ifndef ECC_BATCH
 #define ECC_BATCH 16
@@ -78,11 +84,11 @@ struct Kernel {
     }
 
     static ECC_HD void load(const W *src, int slot, int tid, int threads, W *dst) {
-#pragma unroll ECC_WIDE_UNROLL
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) dst[i] = src[fieldIndex(slot, i, tid, threads)];
     }
     static ECC_HD void store(W *dst, int slot, int tid, int threads, const W *src) {
-#pragma unroll ECC_WIDE_UNROLL
+ECC_WIDE_UNROLL_PRAGMA
         for (int i = 0; i < M; ++i) dst[fieldIndex(slot, i, tid, threads)] = src[i];
     }
 
@@ -225,11 +231,11 @@ struct Kernel {
                 }
                 F::mul(e, ii, lam);
                 F::sqr(lam, t);
-#pragma unroll ECC_WIDE_UNROLL
+ECC_WIDE_UNROLL_PRAGMA
                 for (int i = 0; i < M; ++i) t[i] = ECC_XOR3(t[i], lam[i], d[i]);   // x3
                 F::add(x, t, u);
                 F::mul(lam, u, e);
-#pragma unroll ECC_WIDE_UNROLL
+ECC_WIDE_UNROLL_PRAGMA
                 for (int i = 0; i < M; ++i) y[i] = ECC_XOR3(e[i], t[i], y[i]);
                 store(P.x, slot, tid, P.threads, t);
                 store(P.y, slot, tid, P.threads, y);
