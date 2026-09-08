@@ -190,10 +190,15 @@ a `u64` monomial mask) but it is not what binds. Solve cost saturates at
 `*` node budget exhausted — F4 did not finish, it gave up.
 
 Widening the mask would let `n = 31, m = 4` (82 unknowns) and
-`n = 63, m = 3` (81) be *built*. Nothing suggests they could be
-*solved*: they are 3× the variable count at which SAT already needs
-minutes. **Do not spend the refactor** — it touches `F2BoolMono`, shared
-by ten modules, to buy instances that will not finish.
+`n = 63, m = 3` (81) be *built*. On SAT's numbers nothing suggested they
+could be *solved*, so the refactor — `F2BoolMono` is shared by ten
+modules — was not worth buying instances that would not finish.
+
+**Re-opened for F4 alone, 2026-09-08.** F4 has since been measured
+refuting 46 unknowns in 145 s with a flat split count, which is not the
+profile of an oracle about to fall over at 82. The question the refactor
+answers is now open again on F4's side, and only there; the SAT half of
+the original H2 stays falsified.
 
 The primary metric stands, but its justification changes: driving
 `unknowns` down matters because solve cost explodes in it, not because
@@ -234,6 +239,9 @@ refutations at `n = 15, m = 3` it is 75 ms vs 25.3 s (**340×**). The
 CDCL solver has no XOR-constraint Gaussian elimination (`semaev_sat`'s
 own header says so) and these systems are XOR-dominated, which is the
 obvious suspect.
+**Settled 2026-09-08:** at `n = 21, m = 3` F4 refutes in 50 s and SAT
+returns no verdict in 31 minutes; at `n = 31, m = 3` F4 refutes in 145 s.
+The margin is not a ratio, it is a difference in reachability.
 *Falsifier:* SAT wins at any larger `m` or `n`.
 *Bar:* three instances at `m ≥ 3` with a consistent winner. If SAT wins
 as `m` grows, that inverts which engine deserves the optimisation
@@ -259,8 +267,14 @@ Reordered 2026-09-08 after H2 was falsified. Widening the monomial type
 was #1; it is now struck out, because the instances it unlocks cannot be
 solved anyway.
 
-1. **Cut refutation cost** (H2′, H4). This is where the time goes and
-   where the two oracles differ by 340×.
+1. **Find F4's wall** (was: cut refutation cost). F4 refutes 46
+   unknowns in 145 s and its split count is flat across 39 → 46, so what
+   grows is per-node cost. Map that curve and it predicts where the
+   frontier actually is — and whether the monomial-cap refactor (step 6)
+   would buy solvable instances or unsolvable ones.
+
+2. **Cut refutation cost** (H2′, H4) — now mostly a SAT concern, and SAT
+   is no longer the frontier.
    - **Algebraic preprocessing — done, 2026-09-08.** `sat_decompose`
      now hands the solver the degree-2 Macaulay rows alongside the
      system (`sat_macaulay_degree`, default `Some(2)`). Each row is an
@@ -283,30 +297,58 @@ solved anyway.
      wall clock. **The underdetermined instance is unmoved**: at
      `n = 9, m = 3` (eq/var 0.67) conflicts go 366 726 → 365 681, a 0.3%
      change — the same instances `eq_var_ratio` already flags.
-   - **XOR-native propagation in the CDCL solver** — still open, and now
-     the main remaining lever. The encoding is XOR-dominated and the
+     **It does not extend SAT's reachable range, only the cost inside
+     it.** `n = 21, m = 3` (39 unknowns, eq/var 1.08 — a ratio the
+     predictor says it should help) refutes neither raw nor
+     preprocessed: no verdict in 30+ minutes raw, none in 31 minutes
+     with the degree-2 rows. The 4–12× is a constant factor at 27
+     unknowns, not a change in what SAT can reach.
+
+   - **F4 already reaches past where SAT stops — measured 2026-09-08.**
+     The same refutations, matrix-F4 with splitting, node budget 200 000,
+     all completed (no budget exhaustion, so these are refutations and
+     not give-ups):
+
+     | instance | vars | eq/var | splits | SAT | **F4** |
+     |:---------|-----:|-------:|-------:|----:|-------:|
+     | n=15, m=3 | 27 | 1.11 | 184 | 25.3 s | **1.8 s** |
+     | n=21, m=3 | 39 | 1.08 | 832 | none in 31 min | **50.4 s** |
+     | n=31, m=3 | 46 | 1.35 | 804 | not attempted | **145.3 s** |
+
+     So the refutation frontier is **F4's, not SAT's**, and it currently
+     sits past 46 unknowns — well beyond the 27 every earlier number in
+     this document came from. H4 is no longer a 340× margin; it is a
+     difference in what can be answered at all.
+
+   - **XOR-native propagation in the CDCL solver** — *demoted.* It would
+     improve the oracle that is not the frontier. Worth doing for
+     `semaev_sat`'s other users, not for this thread's metric. The encoding is XOR-dominated and the
      solver reasons about parity constraints only through their CNF
      expansion. Helps every other `semaev_sat` user too.
    - **Make F4's refutations cheaper**, since it already wins: the
      `n = 9, m = 3` raw-target case exhausted the node budget rather
      than returning, so splitting is doing work the algebra should.
-2. **Raise the decomposition probability so refutations are rare.**
+3. **Raise the decomposition probability so refutations are rare.**
    A relation search that refutes most targets is paying the expensive
    case almost every time. `|F|^m / m!` against `r` is the knob;
    `subspace_ladder` plus `bench_instance` can map where it sits. This
    may matter more than making refutation faster.
-3. **Symbolic `S₄` links** (H3). Still worth doing — it cuts the
+4. **Symbolic `S₄` links** (H3). Still worth doing — it cuts the
    variable count, and after H2 we know variables are expensive for
    real reasons rather than for a cap.
-4. **Sparse Macaulay reduction.** `matrix_f4_f2` is dense and capped at
+5. **Sparse Macaulay reduction.** `matrix_f4_f2` is dense and capped at
    `MAX_F4_ROWS`/`MAX_F4_COLS`; the `m = 3` systems already reach 6022
    columns at `D = 3`.
-5. **Extend the ladder past `n = 63`** for *structure only* — the FFD
+6. **Widen the monomial type** — un-struck 2026-09-08. Struck when H2
+   was falsified on SAT's numbers; F4 has since been measured past 46
+   unknowns with a flat split count, so `n = 31, m = 4` (82) and
+   `n = 63, m = 3` (81) are worth building *for F4*. Still a shared-type
+   refactor across ten modules: measure F4's per-node cost curve first
+   (step 1) and let that predict whether 82 unknowns finish, rather than
+   paying the refactor to find out.
+7. **Extend the ladder past `n = 63`** for *structure only* — the FFD
    measurement is cheap and `n = 127` (ℓ = 7) is the first rung that
    resembles a deployed curve. Do not expect to solve there.
-6. ~~**Widen the monomial type.**~~ Falsified as a priority by H2: it
-   buys instances that will not finish. Revisit only if refutation cost
-   comes down by orders of magnitude first.
 
 ## How to run
 
