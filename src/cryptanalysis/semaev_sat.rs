@@ -76,8 +76,12 @@
 //! - **`S₄` is specialised to `b = 1`**, the Koblitz curve
 //!   `y² + xy = x³ + x² + 1`.  See
 //!   [`crate::cryptanalysis::binary_semaev_s4`].
-//! - **Only satisfiable instances are in reach.**  Refuting one means
-//!   exhausting the space rather than stopping at the first witness.
+//! - **The solver does not prune the candidate space.**  Rejecting a
+//!   point costs one conflict per factor-base triple — it walks the
+//!   space rather than cutting it — and is ~7× slower than evaluating
+//!   the symmetrised `S₄` at every triple directly.  Rejection is most
+//!   of an attack's work, so this is the finding that matters most
+//!   about the approach.  `cargo run --release --example semaev_unsat`.
 //! - **Decoded solutions are always re-verified** against the original
 //!   Semaev polynomial over `F_{2ⁿ}`, so an encoding bug shows up as a
 //!   test failure rather than a wrong answer.

@@ -13,11 +13,11 @@ research-direction map.  Rebuilt against the prior art reviewed in
 
 The pipeline used to stall at `n = 4`–`5`.  It now decides every
 satisfiable `n = 19, l = 6` instance in the reference corpus — eleven
-of them, in 50 s total — verifying each decoded decomposition against
+of them, in 17.8 s total — verifying each decoded decomposition against
 the original polynomial over `F_{2¹⁹}`.
 
-Three modelling changes made it possible; five further changes made it
-about 50× faster (see [Making it fast](#making-it-fast)).
+Three modelling changes made it possible; seven further changes made it
+about 128× faster (see [Making it fast](#making-it-fast)).
 
 ### 1. Confine the unknowns to a factor base
 
@@ -93,12 +93,11 @@ and you get a slower solve, not a wrong answer.
 ### 2. Learnt-clause minimization
 
 Ordinary CDCL hygiene that turns out to matter far more here than
-usual.  A parity row's reason clause names *every* assigned variable of
-its combined mask, and Gauss-Jordan makes those masks dense — so
-unminimized learnt clauses ran to hundreds of literals and then had to
-be walked on every propagation.  Local (self-subsuming) minimization
-cut `n15l5` from 1.1 s to 95 ms on the instance it was first measured
-on.
+usual, because reasons here overlap heavily.  Unminimized learnt
+clauses ran to hundreds of literals and then had to be walked on every
+propagation.  The local (self-subsuming) check cut `n15l5` from 1.1 s
+to 95 ms on the instance it was first measured on; §6 later replaced it
+with the recursive version, which roughly halved clause length again.
 
 ### 3. Symmetry breaking
 
@@ -106,7 +105,7 @@ Nothing forbade permutations of `(X₁, X₂, X₃)`, so the search
 rediscovered every solution `3! = 6` times.  `S4Options::break_symmetry`
 adds lexicographic `X₁ ≤ X₂ ≤ X₃` constraints — `2l + 1` clauses per
 adjacent pair, using an "equal so far" auxiliary per bit position.
-Worth a steady ~4.5× across all three families.
+Worth a steady 3–5× across all three families.
 
 ### 4. No more clause-database growth from parity reasoning
 
@@ -262,6 +261,56 @@ implementations written from the algebra rather than from each other,
 landing on the same instance.  Locked in by
 `s4_encoding_size_matches_upstream_generator`.
 
+## Rejection, and the baseline it has to beat
+
+An index-calculus run tests many random points `R` and keeps the rare
+one that decomposes — roughly `1/m!` of them.  So **most of an attack's
+time goes on rejecting points**, and rejection speed, not solve speed,
+decides whether the pipeline can run the attack at all.  Every number
+in the previous section is a satisfiable instance; none of them measure
+that.
+
+Rejection is also the honest benchmark.  Proving unsatisfiability means
+exhausting the space, so there is none of the trajectory luck that
+makes satisfiable timings swing by an order of magnitude — the ten
+`n15l5` rejections all land between 0.26 s and 0.28 s.
+
+`cargo run --release --example semaev_unsat`:
+
+| family | `l` | triples | SAT reject | brute force | ratio | conflicts | confl/triple |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `n15l5` | 5 | 5 984 | 0.27 s | 0.06 s | 4.4× | 5 719 | 0.96 |
+| `n17l6` | 6 | 45 760 | 3.49 s | 0.47 s | 7.4× | 45 605 | 1.00 |
+| `n19l6` | 6 | 45 760 | 3.56 s | 0.50 s | 7.1× | 45 587 | 1.00 |
+
+Two things to take from this, and the second is the important one.
+
+**Rejection is now tractable.**  It used to be out of reach at any
+corpus size; every instance now finishes, and the cost depends on the
+factor-base dimension `l` alone — `n17l6` and `n19l6` are
+indistinguishable because they share `l = 6`.  That is what you would
+expect when the search ranges over an `l`-dimensional subspace, and it
+means the pipeline can finally run the attack loop rather than only its
+lucky half.
+
+**But the solver is not pruning.**  `conflicts/triple = 1.00`: it
+spends exactly one conflict per candidate triple, which is to say it
+walks the whole candidate space rather than cutting it down.  The
+baseline it is being measured against — evaluate the symmetrised `S₄`
+at every sorted triple, a few field multiplications each — does the
+same walk about **7× faster**, because a conflict costs ~80 µs where a
+direct evaluation costs ~10 µs.
+
+So at these parameters the SAT machinery is a slower way to enumerate.
+That does not make the encoding work wrong, but it does say where the
+open question actually is: **does propagation start pruning as `l`
+grows?**  Enumeration is `2^{3l}/3!` and becomes hopeless around
+`l = 12`; if `conflicts/triple` stays at 1 out there, this route does
+not scale and no amount of solver tuning changes that.  If it falls,
+there is a crossover worth finding.  Measuring `l = 7, 8, 9` decides
+it, and that measurement is worth more than any remaining
+micro-optimisation.
+
 ## Reference corpus
 
 `semaev_corpus.rs` carries the parameters of all 60 upstream instances
@@ -321,6 +370,11 @@ Worth singling out:
 - `corpus_labels_match_exhaustive_search` (ignored) — re-derives the
   mislabelling audit in Rust.
 
+`cargo run --release --example semaev_unsat` additionally checks every
+unsatisfiable corpus instance two ways — the solver and exhaustive
+evaluation must agree — which is a cross-check on the encoding as much
+as a benchmark.
+
 ## What's still open
 
 - **Clauses are `Vec<Vec<Lit>>`.**  Every clause is a separate heap
@@ -345,13 +399,11 @@ Worth singling out:
   uses) would be far denser and make relocation a shift.  Deferred
   deliberately: it buys descent time, and descent is 11 ms against a
   4-minute solve.
-- **UNSAT is still out of reach.**  Every result above is a
-  *satisfiable* instance, where the search stops at the first witness.
-  Refuting a `-U` instance means exhausting the space, which the solver
-  does not finish in reasonable time at any corpus size — so
-  `corpus_round_trips_through_the_solver` asserts only the SAT
-  direction.  Symmetry breaking is now in place, which was one of the
-  two prerequisites; the incremental Gauss matrix is the other.
+- **The solver does not prune the candidate space** — one conflict per
+  triple, and 7× slower than evaluating the polynomial directly.  See
+  [Rejection](#rejection-and-the-baseline-it-has-to-beat).  Whether
+  that changes as `l` grows is the question that decides whether this
+  route is worth pursuing further.
 
 ## References
 
