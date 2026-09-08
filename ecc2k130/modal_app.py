@@ -102,6 +102,9 @@ image = (
         f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
     )
     .entrypoint([])
+    # Containers re-import this module; preserve the settings that selected
+    # their image and baked architecture rather than reverting to defaults.
+    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -477,7 +480,8 @@ def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
 
 @app.function(image=profileImage, gpu=DEFAULT_GPU, timeout=2 * HOUR)
 def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
-               section="", metrics=""):
+               section="", metrics="", workers=0, streamKarat=False,
+               smemSpill=False, globalCg=False, preferL1=False):
     """Profile the walk kernel with Nsight Compute, or say precisely why not.
 
     Whether this works at all is a property of the host, not of this code.
@@ -499,7 +503,8 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         return {"gpu": name, "available": False,
                 "why": "ncu is not on PATH in this image", "log": ver[-2000:]}
 
-    ok, log = buildFor(batch, threads, leaf, arch, minBlocks)
+    ok, log = buildFor(batch, threads, leaf, arch, minBlocks,
+                       streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
     if not ok:
         return {"gpu": name, "available": False, "why": "build failed",
                 "log": log[-2000:]}
@@ -515,11 +520,15 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         what = ("--section SpeedOfLight --section MemoryWorkloadAnalysis "
                 "--section LaunchStats --section Occupancy "
                 "--section WarpStateStats")
+    runFlags = f" --threads {workers}" if workers else ""
+    if preferL1:
+        runFlags += " --prefer-l1"
+    identity = benchmarkIdentity()
     rc, out = shStream(
         f"ncu --target-processes all --kernel-name eccWalkKernel "
         f"--launch-count 1 {what} "
         f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
-        f"--verify 0",
+        f"--verify 0{runFlags}",
         timeout=1 * HOUR,
         prefix="  ncu| ",
     )
@@ -543,7 +552,10 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         }
     return {"gpu": name, "cc": arch, "available": rc == 0,
             "batch": batch, "threads": threads, "leaf": leaf,
-            "minBlocks": minBlocks, "report": out[-2000:] if rc else out}
+            "minBlocks": minBlocks, "workers": workers, "identity": identity,
+            "streamKarat": streamKarat, "smemSpill": smemSpill,
+            "globalCg": globalCg, "preferL1": preferL1,
+            "report": out[-2000:] if rc else out}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -1004,20 +1016,24 @@ def campaign(gpu: str = "", batches: str = "4,8,16,32",
 @app.local_entrypoint()
 def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
             min_blocks: int = 2, steps: int = 4, section: str = "",
-            metrics: str = ""):
+            metrics: str = "", workers: int = 0, stream_karat: bool = False,
+            smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
     """Nsight Compute on the walk kernel.
 
     Whether the counters are readable is a host setting rather than anything
     this app controls, so a refusal is itself the answer worth having."""
     r = onGpu(runProfile, gpu).remote(batch=batch, threads=threads, leaf=leaf,
                                       minBlocks=min_blocks, steps=steps,
-                                      section=section, metrics=metrics)
+                                      section=section, metrics=metrics, workers=workers,
+                                      streamKarat=stream_karat, smemSpill=smem_spill,
+                                      globalCg=global_cg, preferL1=prefer_l1)
     if not r.get("available"):
         print("Nsight Compute did not run: %s" % r.get("why"))
         if r.get("remedy"):
             print("  %s" % r["remedy"])
         print(r.get("log", "")[-2000:])
         return
+    print(json.dumps({k: v for k, v in r.items() if k != 'report'}, indent=2))
     print(r["report"])
 
 

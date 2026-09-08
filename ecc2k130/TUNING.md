@@ -22,7 +22,8 @@ state-equivalence checks do not replace CUDA correctness or performance tests.
 | `ECC_CUDA_VERSION` | `12.8.1` | Select the Modal toolkit image before import/build |
 
 The three compile flags are accepted by `make gpu`. The CLI flags are accepted
-by `bench`, `autotune` and, for the arithmetic/cache options, `validate`.
+by `bench`, `autotune` and, for the arithmetic/cache options, `validate` and
+`profile` (the latter also accepts `--workers`).
 `--threads` still controls **block size** in Modal; `--workers` controls **total
 threads**. The C++ binary uses `--threads` for total threads.
 
@@ -105,6 +106,14 @@ intermediates. However, the reverse pass can reuse field state too, so L1 bypass
 can lose. Shared-memory spilling and cache carveout also interact.
 
 ## Profile the exact binary
+
+The existing Modal profiler also accepts candidate settings:
+
+```bash
+ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile --stream-karat
+```
+
+It preserves the upstream diagnostic when the host denies counter access.
 
 On a GPU machine with Nsight Compute and access to performance counters:
 
