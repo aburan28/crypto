@@ -129,7 +129,12 @@ image = (
 # profiler wants it, so putting it in the main image would slow every bench and
 # search rebuild for a tool most runs never invoke.  It layers on top, so the
 # baked binary and the source are already present.
-profileImage = image.apt_install("nsight-compute")
+# Ubuntu's nsight-compute package is 2022.4, which predates Blackwell entirely
+# and fails on sm_120 with "Failed to prepare kernel for profiling / Unknown
+# Error on device 0" -- the profiler does not know the architecture, which does
+# not read as a version problem at all.  The CUDA repository the base image
+# already carries has one that does, installed under /opt/nvidia/nsight-compute.
+profileImage = image.apt_install(f"cuda-nsight-compute-12-{CUDA_VERSION.split('.')[1]}")
 
 volume = modal.Volume.from_name("ecc2k130", create_if_missing=True)
 app = modal.App("ecc2k130")
@@ -498,10 +503,19 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     is identical."""
     arch = computeCapability()
     name = gpuName()
-    rc, ver = sh("ncu --version")
+    # The CUDA repository installs outside PATH, under a versioned directory.
+    rc, found = sh("ls -d /opt/nvidia/nsight-compute/*/ncu 2>/dev/null | sort | tail -1")
+    ncu = found.strip() or "ncu"
+    rc, ver = sh("%s --version" % ncu)
     if rc != 0:
         return {"gpu": name, "available": False,
-                "why": "ncu is not on PATH in this image", "log": ver[-2000:]}
+                "why": "no usable ncu: neither /opt/nvidia/nsight-compute nor PATH",
+                "log": ver[-2000:]}
+    ncuVersion = ""
+    for line in ver.splitlines():
+        if "Version" in line:
+            ncuVersion = line.strip()
+            break
 
     ok, log = buildFor(batch, threads, leaf, arch, minBlocks,
                        streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
@@ -525,7 +539,7 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         runFlags += " --prefer-l1"
     identity = benchmarkIdentity()
     rc, out = shStream(
-        f"ncu --target-processes all --kernel-name eccWalkKernel "
+        f"{ncu} --target-processes all --kernel-name eccWalkKernel "
         f"--launch-count 1 {what} "
         f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
         f"--verify 0{runFlags}",
@@ -550,12 +564,28 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
                        "marginal cost of one multiply, straight off the card"),
             "log": out[-4000:],
         }
-    return {"gpu": name, "cc": arch, "available": rc == 0,
+    # Anything else that went wrong still has to say what.  The first version of
+    # this returned no "why" outside the permission case, so a real failure --
+    # a profiler too old for the architecture -- printed "did not run: None",
+    # which is worse than no diagnosis because it looks like a client bug.
+    why = ""
+    if rc != 0:
+        tooOld = ("Failed to prepare kernel for profiling" in out
+                  or "Unknown Error on device" in out)
+        if tooOld:
+            why = ("ncu could not prepare the kernel, which is what an Nsight "
+                   "Compute older than the device's architecture looks like.  "
+                   "This profiler reports %r and the device is sm_%s"
+                   % (ncuVersion or "an unknown version", arch))
+        else:
+            why = "ncu exited %d; the tail of its output is below" % rc
+    return {"gpu": name, "cc": arch, "available": rc == 0, "why": why,
+            "ncuVersion": ncuVersion,
             "batch": batch, "threads": threads, "leaf": leaf,
             "minBlocks": minBlocks, "workers": workers, "identity": identity,
             "streamKarat": streamKarat, "smemSpill": smemSpill,
             "globalCg": globalCg, "preferL1": preferL1,
-            "report": out[-2000:] if rc else out}
+            "report": out[-4000:] if rc else out}
 
 
 # Expected rho iterations, and the weight cutoff that makes walks short enough
@@ -1028,7 +1058,10 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
                                       streamKarat=stream_karat, smemSpill=smem_spill,
                                       globalCg=global_cg, preferL1=prefer_l1)
     if not r.get("available"):
-        print("Nsight Compute did not run: %s" % r.get("why"))
+        print("Nsight Compute did not run: %s"
+              % (r.get("why") or "no reason recorded, which is itself a bug"))
+        if r.get("ncuVersion"):
+            print("  profiler: %s" % r["ncuVersion"])
         if r.get("remedy"):
             print("  %s" % r["remedy"])
         print(r.get("log", "")[-2000:])
