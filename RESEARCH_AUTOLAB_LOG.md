@@ -6846,3 +6846,74 @@ as SAT, since the rows are its own output fed back.
 
 (see PR — Macaulay preprocessing for the SAT oracle, conflicts accessor,
 soundness tests, target doc updated)
+
+---
+
+## 2026-09-08 (autolab run, third session)
+
+### Task picked
+
+Follow-through on the preprocessing merged in #69: does it *extend the
+reachable range*, or only make the instances we already solve cheaper?
+`n = 21, m = 3` — 39 unknowns, eq/var 1.08 — is the first rung past the
+27-unknown instances every previous number came from.
+
+### Work done
+
+- Ran `n = 21, m = 3` refutation raw and with the degree-2 Macaulay rows,
+  bounded by conflict budget.
+- Re-ordered the arms partway through: the raw arm's non-termination was
+  already established last session, so measuring it first only delayed
+  the arm that carried information. Should have been the preprocessed arm
+  from the start.
+- Then asked the same range question of F4, which the log entry for this
+  session originally deferred to "worth an hour". It took three minutes
+  and changed the conclusion, so it is in this entry instead.
+
+### Findings
+
+**SAT does not reach `n = 21, m = 3` with or without preprocessing.**
+Raw: no verdict in 30+ minutes across two runs. Degree-2 preprocessed:
+none in 31 minutes. The 4-12x from #69 is a constant factor at 27
+unknowns and moves no wall.
+
+**F4 reaches it, and past it.** Same refutations, node budget 200 000,
+all completed rather than exhausting:
+
+```
+n=15 m=3  27 vars  eq/var 1.11  184 splits   1.8 s   (SAT: 25.3 s)
+n=21 m=3  39 vars  eq/var 1.08  832 splits  50.4 s   (SAT: none in 31 min)
+n=31 m=3  46 vars  eq/var 1.35  804 splits 145.3 s   (SAT: not attempted)
+```
+
+So the refutation frontier is **F4's**, and it sits past 46 unknowns --
+well beyond the 27 that every number in the target doc came from until
+today. H4 is settled in its strong form: not a 340x margin but a
+difference in what can be answered at all.
+
+**This demotes the step I had ranked first.** "Cut refutation cost" was
+#1 on the strength of SAT's 25-second refutations, and XOR-native
+propagation was its main move. Improving SAT's refutation improves the
+oracle that is not the frontier. Worth doing for `semaev_sat`'s other
+users; not for this thread's metric.
+
+I nearly shipped the previous ranking with a one-line "worth an hour"
+note deferring the F4 measurement that overturns it. The three-minute
+version of an experiment that could invalidate the write-up belongs
+before the write-up, not in its next-steps list.
+
+### Next step proposal
+
+1. **Find F4's actual wall.** It refutes 46 unknowns in 145 s; the
+   splits count is flat (832 at 39 vars, 804 at 46), so what grows is
+   per-node cost, not search. Push `n = 31, m = 4` (82 unknowns) and
+   `n = 63, m = 3` (81) -- both currently refused by the 64-variable
+   monomial cap. **H2 deserves re-opening on F4's side alone**: it was
+   falsified on SAT's numbers, and F4 has since moved the range.
+2. **Raise the decomposition probability so refutations are rare.**
+   Unchanged, and still cheap relative to everything else.
+3. XOR-native propagation, demoted as above.
+
+### Commits made
+
+(see PR — F4 range measured, frontier recorded, ranking corrected)
