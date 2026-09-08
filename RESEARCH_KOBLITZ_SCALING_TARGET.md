@@ -26,6 +26,28 @@ down.**
 
 ---
 
+## The chaining term is avoidable — 2026-09-08
+
+The metric below counts `(m − 2)·n` chaining unknowns as the thing to
+drive down.  A larger Frobenius-invariant factor base removes that term
+outright: the summand count is `m ≈ n/dim`, so `dim ≈ (n+1)/2` gives
+`m = 2`, no intermediates, a quadratic system, and `≈ n + 1` unknowns
+instead of `≈ n²/dim`.
+
+Those bases exist and are now buildable
+(`build_frobenius_factor_base_from_divisor`; see the classification in
+`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`).  At `n = 31`, dimension 16 is
+available, `|F| ≈ 2^16`, `m = 2`, **32 unknowns, quadratic** — against
+190 unknowns and cubic for the single-factor base.
+
+The binding constraint therefore moves from *variable count* to
+**materialising `2^dim` points**, which is what the current builder
+does.  Two consequences: `n = 31` at dim 16 is reachable today apart
+from `MAX_N` (a `KoblitzCurve::new` guard, not a mathematical limit),
+and past `n ≈ 40` the base would have to be handled implicitly — by its
+defining linearised polynomial, which is exactly the low-degree
+condition the algebra already uses.
+
 ## Primary metric
 
 ```
@@ -266,6 +288,13 @@ what H2 and H3 are trying to make reachable.
 Reordered 2026-09-08 after H2 was falsified. Widening the monomial type
 was #1; it is now struck out, because the instances it unlocks cannot be
 solved anyway.
+
+0. **Take `n = 31` at dim 16, `m = 2`** — the first instance where a
+   divisor base makes a useful `m` quadratic and small (32 unknowns).
+   Needs `MAX_N` raised past 24, which needs a generator search that does
+   not scan `2^n` abscissae; the point counting and factoring are already
+   cheap at that size.  This is the shortest path to a relation at an `n`
+   the single-factor construction cannot serve at all.
 
 1. **Find F4's wall** (was: cut refutation cost). F4 refutes 46
    unknowns in 145 s and its split count is flat across 39 → 46, so what
