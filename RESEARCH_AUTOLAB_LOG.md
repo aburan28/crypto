@@ -6762,3 +6762,87 @@ refutation cost falls by orders of magnitude first.
 
 (see PR — harness split by verdict class, H2 falsified in the target doc,
 next steps reordered)
+
+---
+
+## 2026-09-08 (autolab run, second session)
+
+### Task picked
+
+Same thread, its own new #1 after H2 was falsified: **cut refutation
+cost**. The listed move was XOR-native propagation in `cryptanalysis::sat`.
+Before touching a working CDCL core, tried the cheaper hybrid the
+`semaev_sat` header already points at — hand the solver the algebraic
+consequences F4 derives.
+
+### Work done
+
+- Prototyped: encode the decomposition system *plus* the degree-`D`
+  Macaulay rows from `matrix_f4_f2`, measure SAT refutation cost.
+- Added `sat::Solver::conflicts()`. Wall clock is not comparable across
+  runs; conflicts are, and the first prototype's timings were noisy
+  enough to matter.
+- Wired it in behind `KoblitzIcOptions::sat_macaulay_degree` (default
+  `Some(2)`), threaded through `sat_decompose` and `bench_instance`;
+  `SatDecompositionStats` gained `implied_rows` and `conflicts`.
+- Two tests: the structural trap below, and that preprocessing changes
+  no verdict on 11 targets.
+
+### Findings
+
+**The first prototype was unsound, and the verdict caught it.** Encoding
+the degree-2 rows *in place of* the system returned SAT where the raw
+system returns UNSAT. Cause: `matrix_f4_f2` skips inputs of degree above
+the requested `D`, so the degree-2 rows of a chained (cubic) system carry
+only its quadratic part. Implied rows may be **added, never
+substituted**. Pinned by
+`macaulay_rows_may_be_added_but_never_substituted`; the companion test
+checks the other direction, that every row vanishes on every real
+solution.
+
+**Adding them works, and works where the ratio predicted.** Raw systems,
+conflicts:
+
+```
+n=15 m=3 (eq/var 1.11)  raw 56352 -> D2 4695   (12x)   seed 0x9e37
+n=15 m=3                raw 61557 -> D2 12820  (4.8x)  seed 0xbeef
+n=9  m=3 (eq/var 0.67)  raw 366726 -> D2 365681 (0.3%)  no effect
+```
+
+End-to-end through the harness, gate clean at 0 disagreements:
+
+```
+K_1/F_2^15 m=3  refuted  19216 ms -> 6524 ms  (2.9x)
+K_0/F_2^9  m=3  found       96 ms ->   56 ms  (1.7x)
+K_1/F_2^9  m=2  found     0.89 ms -> 0.89 ms  (--)
+K_0/F_2^7  m=2  refuted   0.12 ms -> 0.08 ms  (1.5x)
+```
+
+Degree 3 is not worth it: marginally fewer conflicts (~3700 vs ~4700) at
+100k+ clauses instead of 9k, and it loses on wall clock.
+
+**`eq_var_ratio` earns its place.** Introduced last session as a guess on
+N=2; it now separates the instances the preprocessing helps (ratio > 1,
+4-12x) from the one it does not (0.67, no change). Still only three
+instances, but the mechanism is clear: with more equations than unknowns
+the degree-2 rows carry new information, and without, they do not.
+
+**`n = 21, m = 3` (39 unknowns) did not refute at all** in over 20
+minutes raw. Not reported as a number; noted as the edge of the range.
+
+### Next step proposal
+
+XOR-native propagation in `cryptanalysis::sat` is now the main remaining
+lever on refutation cost and is unchanged in priority. The preprocessing
+result also sharpens step 2 (raise the decomposition probability): the
+gap between the found and refuted regimes is now 6524 ms vs 56 ms on
+comparable instances, so parameters that refute rarely are worth more
+than they looked.
+
+Worth testing next, cheaply: whether the preprocessing helps *F4* as well
+as SAT, since the rows are its own output fed back.
+
+### Commits made
+
+(see PR — Macaulay preprocessing for the SAT oracle, conflicts accessor,
+soundness tests, target doc updated)

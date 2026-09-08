@@ -125,8 +125,8 @@ use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, solve_boolean_system_filtered, FieldStructure, SolveOptions,
-    SolveStats, SolverEngine,
+    build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
+    SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::encode_boolean_system;
@@ -1052,6 +1052,12 @@ pub struct SatDecompositionStats {
     /// Models that did not satisfy the original system — always zero
     /// unless the CNF encoding is wrong.
     pub spurious: usize,
+    /// Implied Macaulay rows added to the CNF (see
+    /// [`sat_decompose`]'s `macaulay_degree`).
+    pub implied_rows: usize,
+    /// Conflicts across every solve call — a machine-independent
+    /// measure of search effort.
+    pub conflicts: u64,
 }
 
 /// **SAT decomposition**: the same Semaev system as
@@ -1071,6 +1077,7 @@ pub fn sat_decompose(
     target: &BinaryPoint,
     m: usize,
     max_models: usize,
+    macaulay_degree: Option<u32>,
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
     let mut stats = SatDecompositionStats::default();
     let x_r = match target {
@@ -1082,15 +1089,37 @@ pub fn sat_decompose(
         None => return (None, stats),
     };
 
+    // Algebraic preprocessing: hand the solver the degree-`D` Macaulay
+    // consequences of the system alongside the system itself.  Each row
+    // is an `F_2`-combination of multiples of the equations, so it is
+    // implied and adding it cannot change the answer — but it can save
+    // the search from rediscovering it.  Measured on the refuting
+    // instances this cuts conflicts several-fold where the system is
+    // overdetermined, and does nothing where it is not.
+    //
+    // The rows are **added, never substituted**.  `matrix_f4_f2` skips
+    // input polynomials of degree above `D`, so replacing the system
+    // with its degree-2 rows silently drops every cubic equation of a
+    // chained (`m ≥ 3`) system — which turns UNSAT into SAT.
+    let mut equations = sys.equations.clone();
+    if let Some(d) = macaulay_degree {
+        if let Some(rows) = matrix_f4_f2(&sys.equations, sys.n_vars, d) {
+            stats.implied_rows = rows.len();
+            equations.extend(rows);
+        }
+    }
+
     let mut blocked: Vec<u64> = Vec::new();
     loop {
-        let mut enc = encode_boolean_system(sys.n_vars, &sys.equations, &blocked);
+        let mut enc = encode_boolean_system(sys.n_vars, &equations, &blocked);
         stats.solver_calls += 1;
         if enc.trivially_unsat {
             stats.refuted = true;
             return (None, stats);
         }
-        match enc.solver.solve() {
+        let outcome = enc.solver.solve();
+        stats.conflicts += enc.solver.conflicts();
+        match outcome {
             SolveResult::Unsat => {
                 stats.refuted = true;
                 return (None, stats);
@@ -1188,6 +1217,11 @@ pub struct KoblitzIcOptions {
     /// Models one [`DecompositionStrategy::Sat`] decomposition may
     /// examine before giving up.
     pub max_models: usize,
+    /// Macaulay degree whose implied rows are handed to the SAT solver
+    /// alongside the system, or `None` to encode the system alone.
+    /// Degree 2 is cheap and helps on overdetermined instances; degree
+    /// 3 buys fewer conflicts but far more clauses.
+    pub sat_macaulay_degree: Option<u32>,
 }
 
 impl Default for KoblitzIcOptions {
@@ -1202,6 +1236,7 @@ impl Default for KoblitzIcOptions {
             engine: SolverEngine::default(),
             node_budget: 4096,
             max_models: 64,
+            sat_macaulay_degree: Some(2),
         }
     }
 }
@@ -1308,8 +1343,16 @@ pub fn koblitz_index_calculus_dlp(
                 idxs
             }
             DecompositionStrategy::Sat => {
-                let (idxs, stats) =
-                    sat_decompose(kc, &fb, &index_of, &field, &target, opts.m, opts.max_models);
+                let (idxs, stats) = sat_decompose(
+                    kc,
+                    &fb,
+                    &index_of,
+                    &field,
+                    &target,
+                    opts.m,
+                    opts.max_models,
+                    opts.sat_macaulay_degree,
+                );
                 report.sat_calls += stats.solver_calls;
                 report.sat_refutations += usize::from(stats.refuted);
                 idxs
@@ -1613,7 +1656,8 @@ mod tests {
                 20_000,
             );
             assert!(!stats.exhausted, "budget should suffice at n = 9");
-            let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+            let (by_sat, sat_stats) =
+                sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, Some(2));
             assert!(!sat_stats.exhausted, "model cap should suffice at n = 9");
             assert_eq!(sat_stats.spurious, 0, "the CNF encoding must be exact");
             assert_eq!(
@@ -1773,11 +1817,118 @@ mod tests {
 
         for k in 1..29u32 {
             let target = kc.mul(&g, &BigUint::from(k));
-            let (out, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+            let (out, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, Some(2));
             assert!(out.is_none(), "[{k}]G must not decompose");
             assert!(stats.refuted, "[{k}]G should be refuted by UNSAT");
             assert!(!stats.exhausted);
             assert_eq!(stats.spurious, 0);
+        }
+    }
+
+    #[test]
+    fn macaulay_rows_may_be_added_but_never_substituted() {
+        // The trap this preprocessing has to avoid, pinned as a test.
+        //
+        // `matrix_f4_f2` skips input polynomials whose degree exceeds
+        // the Macaulay degree it is asked for.  So the degree-2 rows of
+        // a *cubic* system — every chained m ≥ 3 system — describe only
+        // its quadratic part.  Adding them is sound; replacing the
+        // system with them drops constraints, and on a refuting
+        // instance that turns UNSAT into SAT.
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+        let target = kc.mul(&g, &BigUint::from(6u32));
+        let x_r = match &target {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => unreachable!(),
+        };
+        let sys =
+            build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, 3, &st).unwrap();
+
+        let deg = |p: &crate::cryptanalysis::pq_groebner_f2::F2BoolPoly| {
+            p.terms
+                .iter()
+                .map(|t| t.mask.count_ones())
+                .max()
+                .unwrap_or(0)
+        };
+        assert_eq!(
+            sys.equations.iter().map(deg).max(),
+            Some(3),
+            "the chained system is cubic"
+        );
+
+        // The mechanism: no degree-2 row can carry a cubic monomial, so
+        // the cubic equations are simply absent from that row set.
+        let rows = matrix_f4_f2(&sys.equations, sys.n_vars, 2).unwrap();
+        assert!(
+            rows.iter().all(|r| deg(r) <= 2),
+            "a degree-2 Macaulay row cannot contain a cubic term"
+        );
+        assert!(
+            sys.equations.iter().any(|e| deg(e) == 3),
+            "and the system does contain cubic equations, which those rows drop"
+        );
+    }
+
+    #[test]
+    fn macaulay_rows_are_implied_by_the_system() {
+        // The other half: adding rows is sound.  Every row is an
+        // F_2-combination of multiples of the equations, so it vanishes
+        // wherever the system does.  Verified exhaustively on a
+        // quadratic m = 2 system, which is small enough to scan.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+        let target = kc.mul(&g, &BigUint::from(11u32));
+        let x_r = match &target {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => unreachable!(),
+        };
+        let sys =
+            build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, 2, &st).unwrap();
+        assert_eq!(sys.n_vars, 12);
+
+        let mut solutions = 0;
+        for d in [2u32, 3] {
+            let rows = matrix_f4_f2(&sys.equations, sys.n_vars, d).unwrap();
+            solutions = 0;
+            for pt in 0..(1u64 << sys.n_vars) {
+                if sys.equations.iter().all(|e| e.eval(pt) == 0) {
+                    solutions += 1;
+                    assert!(
+                        rows.iter().all(|e| e.eval(pt) == 0),
+                        "a degree-{d} row rejected a real solution"
+                    );
+                }
+            }
+        }
+        assert!(solutions > 0, "the instance must have solutions to check");
+    }
+
+    #[test]
+    fn macaulay_preprocessing_does_not_change_any_verdict() {
+        // Whatever it does to the cost, it must not touch the answers.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let g = kc.generator().clone();
+        for k in 1..12u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let (plain, s1) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, None);
+            let (hybrid, s2) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, Some(2));
+            assert_eq!(
+                plain.is_some(),
+                hybrid.is_some(),
+                "verdict changed at [{k}]G"
+            );
+            assert_eq!(s1.refuted, s2.refuted, "refutation changed at [{k}]G");
+            assert_eq!(s1.implied_rows, 0);
+            assert_eq!((s1.spurious, s2.spurious), (0, 0));
         }
     }
 
@@ -1794,7 +1945,7 @@ mod tests {
         for k in [5u32, 29] {
             let target = kc.mul(&g, &BigUint::from(k));
             let by_search = enumerate_decompose(&kc, &fb, &index_of, &target, 3);
-            let (by_sat, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 3, 64);
+            let (by_sat, stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 3, 64, Some(2));
             assert_eq!(stats.spurious, 0);
             assert_eq!(by_search.is_some(), by_sat.is_some(), "3-point, [{k}]G");
             if let Some(idxs) = by_sat {

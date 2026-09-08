@@ -69,6 +69,15 @@ report, not a measurement, and no metric from it counts.
 This is what makes the target safe to optimise against: a faster oracle
 that quietly loses decompositions fails the gate.
 
+**A trap it has already caught.** `matrix_f4_f2` skips input polynomials
+whose degree exceeds the Macaulay degree requested, so the degree-2 rows
+of a *cubic* system — every chained `m ≥ 3` system — describe only its
+quadratic part. Implied rows may therefore be **added, never
+substituted**: replacing the system with its degree-2 rows drops every
+cubic equation and turns UNSAT into SAT. Found while prototyping the
+preprocessing below, and pinned by
+`macaulay_rows_may_be_added_but_never_substituted`.
+
 ---
 
 ## Baseline, measured
@@ -251,12 +260,33 @@ was #1; it is now struck out, because the instances it unlocks cannot be
 solved anyway.
 
 1. **Cut refutation cost** (H2′, H4). This is where the time goes and
-   where the two oracles differ by 340×. Two concrete moves:
-   - **XOR-native propagation in the CDCL solver.** The encoding is
-     XOR-dominated and the solver reasons about parity constraints only
-     through their CNF expansion. This is the single change most likely
-     to move SAT's refutation numbers, and it helps every other
-     `semaev_sat` user too.
+   where the two oracles differ by 340×.
+   - **Algebraic preprocessing — done, 2026-09-08.** `sat_decompose`
+     now hands the solver the degree-2 Macaulay rows alongside the
+     system (`sat_macaulay_degree`, default `Some(2)`). Each row is an
+     `F_2`-combination of multiples of the equations, so it is implied
+     and cannot change an answer, but it saves the search from
+     rediscovering it. End-to-end, gate clean:
+
+     | instance | class | SAT without | SAT with | |
+     |:---------|:------|------------:|---------:|--:|
+     | K_1/F_2^15, m=3 | refuted | 19 216 ms | 6 524 ms | 2.9× |
+     | K_0/F_2^9, m=3 | found | 96 ms | 56 ms | 1.7× |
+     | K_1/F_2^9, m=2 | found | 0.89 ms | 0.89 ms | — |
+     | K_0/F_2^7, m=2 | refuted | 0.12 ms | 0.08 ms | 1.5× |
+
+     On the raw systems the conflict counts tell it more sharply: at
+     `n = 15, m = 3` the rows cut conflicts from 56 352 to 4 695 and
+     from 61 557 to 12 820 on two target draws (12× and 4.8×).
+     **Degree 3 is not worth it**: it reaches slightly fewer conflicts
+     (≈3 700) but at 100 000+ clauses instead of 9 000, and loses on
+     wall clock. **The underdetermined instance is unmoved**: at
+     `n = 9, m = 3` (eq/var 0.67) conflicts go 366 726 → 365 681, a 0.3%
+     change — the same instances `eq_var_ratio` already flags.
+   - **XOR-native propagation in the CDCL solver** — still open, and now
+     the main remaining lever. The encoding is XOR-dominated and the
+     solver reasons about parity constraints only through their CNF
+     expansion. Helps every other `semaev_sat` user too.
    - **Make F4's refutations cheaper**, since it already wins: the
      `n = 9, m = 3` raw-target case exhausted the node budget rather
      than returning, so splitting is doing work the algebra should.

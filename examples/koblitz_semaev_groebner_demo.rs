@@ -90,7 +90,7 @@ fn main() {
         );
         let t_alg = t.elapsed();
         let t = Instant::now();
-        let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64);
+        let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, Some(2));
         let t_sat = t.elapsed();
         assert_eq!(sat_stats.spurious, 0);
         let all = [by_search.is_some(), by_algebra.is_some(), by_sat.is_some()];
@@ -138,8 +138,16 @@ fn main() {
         assert!(out.is_none());
         certified += usize::from(stats.infeasible_branches > 0);
         splits += stats.splits;
-        let (sat_out, sat_stats) =
-            sat_decompose(&small, &small_fb, &small_idx, &small_st, &target, 2, 64);
+        let (sat_out, sat_stats) = sat_decompose(
+            &small,
+            &small_fb,
+            &small_idx,
+            &small_st,
+            &target,
+            2,
+            64,
+            Some(2),
+        );
         assert!(sat_out.is_none());
         sat_refuted += usize::from(sat_stats.refuted);
     }

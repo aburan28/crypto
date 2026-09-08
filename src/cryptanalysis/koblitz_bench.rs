@@ -387,8 +387,9 @@ fn median(mut xs: Vec<f64>) -> f64 {
 /// **Benchmark all three oracles** on `targets` pseudo-random points of
 /// `⟨G⟩`, checking they agree.
 ///
-/// `node_budget` bounds the F4 splitting search and `max_models` the
-/// SAT model enumeration; a `None` from either with its budget spent is
+/// `node_budget` bounds the F4 splitting search, `max_models` the SAT
+/// model enumeration, and `macaulay_degree` selects the implied rows
+/// handed to the SAT solver (`Some(2)` is the default elsewhere); a `None` from either with its budget spent is
 /// counted as inconclusive rather than as a refutation.
 ///
 /// Returns `None` if the curve or the factor base cannot be built.
@@ -402,6 +403,7 @@ pub fn bench_instance(
     seed: u64,
     node_budget: usize,
     max_models: usize,
+    macaulay_degree: Option<u32>,
 ) -> Option<InstanceBench> {
     let kc = KoblitzCurve::new(a, n)?;
     let fb = build_frobenius_factor_base(&kc, factor_index)?;
@@ -468,7 +470,16 @@ pub fn bench_instance(
         }
 
         let t = Instant::now();
-        let (by_sat, sat_stats) = sat_decompose(&kc, &fb, &index_of, &st, target, m, max_models);
+        let (by_sat, sat_stats) = sat_decompose(
+            &kc,
+            &fb,
+            &index_of,
+            &st,
+            target,
+            m,
+            max_models,
+            macaulay_degree,
+        );
         let ms = t.elapsed().as_secs_f64() * 1e3;
         sat.3.push(ms);
         match (&by_sat, sat_stats.refuted) {
@@ -715,7 +726,7 @@ mod tests {
 
     #[test]
     fn all_three_oracles_agree_on_a_benchmarked_instance() {
-        let b = bench_instance(0, 9, 0, 2, 6, 0xB0B, 20_000, 64).unwrap();
+        let b = bench_instance(0, 9, 0, 2, 6, 0xB0B, 20_000, 64, Some(2)).unwrap();
         assert_eq!(b.disagreements, 0, "oracles disagreed: {b:?}");
         assert_eq!(b.runs.len(), 3);
         for r in &b.runs {
@@ -750,7 +761,7 @@ mod tests {
         // must not average them into one number.  K_0/F_2^7 refutes
         // every target (its factor base is a single point); K_0/F_2^9
         // decomposes every target.
-        let refuting = bench_instance(0, 7, 0, 2, 4, 1, 20_000, 64).unwrap();
+        let refuting = bench_instance(0, 7, 0, 2, 4, 1, 20_000, 64, Some(2)).unwrap();
         for r in &refuting.runs {
             assert_eq!(r.decomposed, 0);
             assert!(
@@ -764,7 +775,7 @@ mod tests {
                 r.oracle
             );
         }
-        let finding = bench_instance(0, 9, 0, 2, 4, 1, 20_000, 64).unwrap();
+        let finding = bench_instance(0, 9, 0, 2, 4, 1, 20_000, 64, Some(2)).unwrap();
         for r in &finding.runs {
             assert_eq!(r.refuted, 0);
             assert!(r.median_found_ms > 0.0, "{} has no find median", r.oracle);
@@ -792,7 +803,7 @@ mod tests {
     #[test]
     fn json_round_trips_as_valid_json() {
         let profiles = vec![profile_system(9, 0, 2, 3, 1).unwrap()];
-        let benches = vec![bench_instance(0, 9, 0, 2, 2, 1, 20_000, 64).unwrap()];
+        let benches = vec![bench_instance(0, 9, 0, 2, 2, 1, 20_000, 64, Some(2)).unwrap()];
         let text = to_json(&profiles, &benches);
         let parsed: serde_json::Value = serde_json::from_str(&text).unwrap();
         assert_eq!(parsed["systems"][0]["n_vars"], 12);
