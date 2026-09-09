@@ -43,6 +43,14 @@ def runAudit(minBlocks=4, repeats=3):
             print(json.dumps(row), flush=True)
             return row
 
+        arch = client.computeCapability()
+        result["deviceArithmetic"] = run(
+            ["make", "test-packed-cuda", f"ARCH=-gencode arch=compute_{arch},code=sm_{arch}",
+             f"MINBLOCKS={minBlocks}", f"PACKED_SINGLE_PRODUCT={client.PACKED_SINGLE_PRODUCT}",
+             f"PACKED_CACHE_DENOM={client.PACKED_CACHE_DENOM}", f"PACKED_BY_VALUE={client.PACKED_BY_VALUE}",
+             f"PACKED_PERM_SIGMA={client.PACKED_PERM_SIGMA}", f"PACKED_POLY_CHAIN={client.PACKED_POLY_CHAIN}"], 120)
+        if result["deviceArithmetic"]["returncode"]:
+            raise RuntimeError("packed GPU arithmetic failed")
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:

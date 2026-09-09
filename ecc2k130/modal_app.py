@@ -55,6 +55,20 @@ if not re.fullmatch(r'\d+\.\d+\.\d+', CUDA_VERSION):
 PACKED_SINGLE_PRODUCT = os.environ.get("ECC_PACKED_SINGLE_PRODUCT", "0")
 if PACKED_SINGLE_PRODUCT not in ("0", "1"):
     raise ValueError("ECC_PACKED_SINGLE_PRODUCT must be 0 or 1")
+PACKED_CACHE_DENOM = os.environ.get("ECC_PACKED_CACHE_DENOM", "0")
+if PACKED_CACHE_DENOM not in ("0", "1"):
+    raise ValueError("ECC_PACKED_CACHE_DENOM must be 0 or 1")
+PACKED_BY_VALUE = os.environ.get("ECC_PACKED_BY_VALUE", "0")
+if PACKED_BY_VALUE not in ("0", "1"):
+    raise ValueError("ECC_PACKED_BY_VALUE must be 0 or 1")
+PACKED_PERM_SIGMA = os.environ.get("ECC_PACKED_PERM_SIGMA", "0")
+if PACKED_PERM_SIGMA not in ("0", "1", "2", "3"):
+    raise ValueError("ECC_PACKED_PERM_SIGMA must be a bit mask from 0 to 3")
+PACKED_POLY_CHAIN = os.environ.get("ECC_PACKED_POLY_CHAIN", "0")
+if PACKED_POLY_CHAIN not in ("0", "1"):
+    raise ValueError("ECC_PACKED_POLY_CHAIN must be 0 or 1")
+if PACKED_POLY_CHAIN == "1" and PACKED_CACHE_DENOM != "1":
+    raise ValueError("ECC_PACKED_POLY_CHAIN=1 requires ECC_PACKED_CACHE_DENOM=1")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -112,7 +126,11 @@ image = (
     # Containers re-import this module; preserve the settings that selected
     # their image and baked architecture rather than reverting to defaults.
     .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
-          "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT})
+          "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
+          "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
+          "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
+          "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
+          "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -130,7 +148,9 @@ image = (
         f"cd {REMOTE} && make cpu MARCH=x86-64-v3",
         f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
         f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
-        f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT}',
+        f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
+        f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
+        f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN}',
     )
 )
 
@@ -239,7 +259,9 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f'make -B gpu ARCH="{gencode}" BATCH={batch} THREADS={threads} '
         f"MINBLOCKS={minBlocks} STREAM_KARAT={int(streamKarat)} "
         f"SMEM_SPILL={int(smemSpill)} GLOBAL_CG={int(globalCg)} "
-        f"PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT}",
+        f"PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} "
+        f"PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} "
+        f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -265,6 +287,10 @@ def benchmarkIdentity(packed=False):
                 actualLeaf=None if packed else int(leaf.group(1)), generatedLeaf=int(leaf.group(1)),
                 activeBackend='packed-onb131' if packed else 'bitsliced', compiler=compiler, compilerReturncode=rc,
                 packedMultiplier=('single-product' if PACKED_SINGLE_PRODUCT == '1' else 'two-product') if packed else None,
+                packedDenominatorCache=(PACKED_CACHE_DENOM == '1') if packed else None,
+                packedByValue=(PACKED_BY_VALUE == '1') if packed else None,
+                packedFrobeniusMode=int(PACKED_PERM_SIGMA) if packed else None,
+                packedPolynomialChain=(PACKED_POLY_CHAIN == '1') if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 

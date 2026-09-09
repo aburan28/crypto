@@ -5,11 +5,13 @@
 struct PackedCudaEngine : CudaEngine<CfgF131> {
     static const int LANES = 1;
     bool restartPending = false;
+    unsigned *denominators = nullptr;
 
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
         cudaFree(P.x); cudaFree(P.y); cudaFree(P.pchain); cudaFree(P.dead);
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
+        cudaFree(denominators);
     }
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
@@ -27,7 +29,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             &blocks, eccPacked131::walk, ECC_THREADS, 0));
         size_t freeBytes, totalBytes;
         CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
-        const size_t perThread = size_t(BATCH) * (3 * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
+        const size_t perThread = size_t(BATCH) * ((3 + ECC_PACKED_CACHE_DENOM*(1+ECC_PACKED_POLY_CHAIN)) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
         size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
         if (threads > fits) threads = fits;
@@ -52,6 +54,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         const size_t bytes = fieldCount() * sizeof(unsigned);
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
+#if ECC_PACKED_CACHE_DENOM
+        CUDA_CHECK(cudaMalloc(&denominators, bytes*(1+ECC_PACKED_POLY_CHAIN)));
+#endif
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
         CUDA_CHECK(cudaMalloc(&P.seed, laneCount() * sizeof(u64)));
         CUDA_CHECK(cudaMalloc(&P.startIter, laneCount() * sizeof(u64)));
@@ -76,6 +81,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+        printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
+        printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
+        printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
+        printf("packed polynomial chain: %d\n", ECC_PACKED_POLY_CHAIN);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
@@ -83,7 +92,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void launch(u64 iterBase) {
         P.iterBase = iterBase;
-        eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(P);
+        eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
     }
     void reseed(u64 iterBase) {

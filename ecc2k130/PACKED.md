@@ -5,6 +5,20 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
+The latest [polynomial-chain configuration](POLYNOMIAL-CHAIN.md) measures
+**6.058466 billion scalar iterations/s**, and **5.974502 B/s** during normal
+distinguished-point collection, on RTX PRO 6000. Its guide includes all flags
+and the complete GPU audit command.
+
+The latest measured [Frobenius-network configuration](FROBENIUS-NETWORK.md)
+reaches **5.832583 billion scalar iterations/s** on RTX PRO 6000, with
+**5.737182 B/s** during normal distinguished-point collection. Its guide
+contains the full opt-in flag set and audit command.
+
+The opt-in [denominator cache](DENOMINATOR-CACHE.md), combined with the
+single-product multiplier, measures **4.098489 billion scalar iterations/s**
+on RTX PRO 6000. Its guide includes the exact flags and validation command.
+
 An opt-in [single-product multiplier](SINGLE-PRODUCT.md) further raises measured
 RTX PRO 6000 throughput to **3.511807 billion iterations/s** with four resident
 blocks per SM. Enable it with `ECC_PACKED_SINGLE_PRODUCT=1` on Modal, or

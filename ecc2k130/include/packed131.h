@@ -101,13 +101,35 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 // The generated linear transforms convert to/from the polynomial basis used
 // by codegen/build.py, allowing a single product while retaining ONB storage.
 #include "packedtransform131.h"
+#include "packedpolyreduce131.h"
+ECC_HD P131 fromPolynomial131(const P131 &a) {
+    const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
+    return fromPolynomialProduct131(h);
+}
+static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+    uint32_t h[9]; product131(a,b,h);
+    return reducePolynomial131(h);
+}
 #ifndef ECC_PACKED_SINGLE_PRODUCT
 #define ECC_PACKED_SINGLE_PRODUCT 0
 #endif
 #if ECC_PACKED_SINGLE_PRODUCT != 0 && ECC_PACKED_SINGLE_PRODUCT != 1
 #error "ECC_PACKED_SINGLE_PRODUCT must be 0 or 1"
 #endif
-static ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
+#ifndef ECC_PACKED_BY_VALUE
+#define ECC_PACKED_BY_VALUE 0
+#endif
+#if ECC_PACKED_BY_VALUE != 0 && ECC_PACKED_BY_VALUE != 1
+#error "ECC_PACKED_BY_VALUE must be 0 or 1"
+#endif
+#if ECC_PACKED_BY_VALUE
+// Passing these five-word aggregates by value lets the device ABI use
+// registers instead of materializing the caller's operands in local memory.
+using MulArg = P131;
+#else
+using MulArg = const P131 &;
+#endif
+static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
@@ -149,7 +171,22 @@ ECC_HD P131 sqr131(const P131 &a){
  r.v[4]=(rev.v[2]&1u)|((a.v[2]&1u)<<1)|((rev.v[2]&2u)<<1);
  return r;
 }
+#ifndef ECC_PACKED_PERM_SIGMA
+#define ECC_PACKED_PERM_SIGMA 0
+#endif
+#if ECC_PACKED_PERM_SIGMA < 0 || ECC_PACKED_PERM_SIGMA > 3
+#error "ECC_PACKED_PERM_SIGMA must be a bit mask from 0 to 3"
+#endif
+#if ECC_PACKED_PERM_SIGMA
+#include "packedsigma131.h"
+#endif
 ECC_HD P131 sigma131(P131 a,int k){
+#if ECC_PACKED_PERM_SIGMA & 1
+ if(k>=3 && k<=10) return sigmaWalkNetwork131(a,k-3);
+#endif
+#if ECC_PACKED_PERM_SIGMA & 2
+ if(k==16 || k==32 || k==65) return sigmaInvNetwork131(a,k==16?0:k==32?1:2);
+#endif
 #pragma unroll 1
  for(int i=0;i<k;i++)a=sqr131(a);
  return a;
