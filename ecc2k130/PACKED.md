@@ -5,14 +5,23 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
-The first integrated GPU tests measured **2.953879, 2.952835 and 2.955324 billion
-iterations/s** on one RTX PRO 6000 Blackwell Server Edition using CUDA 12.8.1,
-batch 32 and 128 threads/block. Each repetition executed **50,465,865,728 scalar
-walk iterations**, with synchronization and DP fetching included in the timing.
-Those measurements are from the initial integration at `7dd9cde`; validation
-and final PR measurements are reported with their exact source revision in the
-PR. Field-multiplication microbenchmarks and compiler reports are not counted as
-walk-throughput results.
+The final GPU audit on RTX PRO 6000 Blackwell Server Edition, CUDA 12.8.1,
+source `c307bb6`, measured:
+
+| Mode | Repetitions | Throughput (billion scalar iterations/s) |
+|---|---:|---:|
+| Bitsliced control, 49,283,072 walks | 1 | 0.852294 |
+| Packed, 1,540,096 walks | 3 | **2.957961 median** (2.957695–2.958816) |
+| Packed, 49,283,072 walks | 1 | **3.140074** |
+| Packed, normal DP cutoff 34 and restarts | 1 | **2.938099** |
+
+All modes used the same GPU allocation and executable. The normal-DP run
+completed 100,931,731,456 iterations, wrote 2,605 reports and dropped none.
+Reference replay was disabled during that timed run after the separate GPU
+replay/restart/resume validation passed. Each sustained packed benchmark
+repetition performed 50,465,865,728 iterations. Synchronization, DP fetching
+and host processing are included; initial setup is excluded in both backends.
+These are full-walk measurements, not multiplication microbenchmarks.
 
 ## Run it
 
@@ -43,6 +52,13 @@ rejects them rather than labeling duplicate builds as different candidates.
 The bitsliced shared-memory-spilling option is also rejected in packed mode.
 The original autolab/performance model describes bitsliced code and must not be
 used to infer packed performance. Actual GPU timing selects settings.
+
+For sustained collection after validation, `search` and `fanout` expose
+`--verify`: use `--verify 0` when measuring collection throughput. Replaying a
+normal-cutoff trail on the CPU can be expensive; this remains a separate
+correctness check. The default verification budget remains four for backward
+compatibility. Choose an unused run ID and use `--walks 0` for automatic GPU
+worker sizing, or explicitly choose the desired parallel-walk count.
 
 ## Arithmetic
 
