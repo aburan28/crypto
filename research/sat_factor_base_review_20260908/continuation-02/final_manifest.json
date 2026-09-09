@@ -1,0 +1,119 @@
+{
+  "recorded_utc": "2026-09-09T16:07:23.654142+00:00",
+  "scope": "Exact full-universe one-exchange factor-base optimization at degree 19; no unknown scalar recovery",
+  "base_commit": "bd463605fd6d966dcbb8ba40923b746ad8eda1fe",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_sha256": {
+    "examples/koblitz_affine_quotient_base.rs": "9a69e07f594beeaa7c0b7c39312298f6b4d2d2add74a7a45f9f7c02eb6925f46",
+    "examples/koblitz_factor_base_math.rs": "55237c735caa6a76fb02f10e48bac7564f85c6c0b07e1dadd91418bb934c4845",
+    "examples/koblitz_index_calculus_demo.rs": "8d9e81d47302fcf287c3c57728280b3c02c3eb8bab6c9de70507b172de1f8a3d",
+    "examples/support/koblitz_full_orbit_search.rs": "34c236740a709db84e1a186c1a6c605587ef6b3226927f3905caea85b5018d16",
+    "src/cryptanalysis/koblitz_bench.rs": "95a1726392a0b3a12cf89762c97adf62748c30438b9dd89ac5603a1f65e84f19",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "558064336ccb68e9b520c0db0a3d51f83061506750ed793bbcaa763e9de28fee",
+    "src/cryptanalysis/mod.rs": "504aea87bd1d078040eff7ec9ccfd22c01b2d28ac20e25cdcf65cd39ef1ab667"
+  },
+  "input_sha256": {
+    "research/sat_factor_base_review_20260908/continuation-01/orbit-global-n19.jsonl": "c94567b1257a7137c05174c656f7397b694b6bcc6612d9a9dca9095595781151",
+    "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+  },
+  "artifact_sha256": {
+    "FULL_ORBIT_BREAKTHROUGH.md": "dde22f31bea2acba1ee5900f1d5dd6dd50074ca956ed7807e7b8ac443f639cb0",
+    "build.log": "12e03bfeb91502745fa5357ab571f999f156c4e7dfe2917fd44085a656a4fb14",
+    "full-orbit-search-exact3-kick-9101.jsonl": "d972351b2c10930ddcaacd5aaad26165c5017c5817ebd673f59d54c7a40d5004",
+    "full-orbit-search-exact3-kick-9102.jsonl": "96ccc47990c02c7d245b18c5f211db2d07b5e8951a14baadb9d182ebb5f9dcab",
+    "full-orbit-search-exact3-kick-9103.jsonl": "b72daaebbb80033f889cdc10d6efbbbe1db68508df15157ee283d03f94d543bc",
+    "full-orbit-search-exact3-kick-9104.jsonl": "b081e4fbb9123abd9486465a48404f1585821de64bfa15adf9e7f8fbd2fd0576",
+    "full-orbit-search-exact3-kick-9105.jsonl": "155c28c7810037c729ebecf793e4135d58ccf6401318b1539aa1b49c2a38e370",
+    "full-orbit-search-exact3-kick-9106.jsonl": "eee87c55a9c8611ea71201165cfce72d03c43fe4947ce1e9b9926d639ca3e481",
+    "full-orbit-search-exact3-kick-9107.jsonl": "5a5c5d2d1486a4d416bd77be7bc50121ff35872ada1202b4bbe793d45e5db2da",
+    "full-orbit-search-exact3-kick-9108.jsonl": "f02ebec0879a4360a876220f613d859186987e3233305182b38862dee0ca041d",
+    "full-orbit-search-exact3-kick-9118.jsonl": "52b4cfe55d37859850bbd9b8af41386cf2bca179d69de8f184c1562a2c7998b9",
+    "full-orbit-search-hybrid-kick-9104.jsonl": "9cdbd7d3dd4c6474fad4058de33dee8ee26ea0ee627e6532f4a7276f1ca0d48b",
+    "full-orbit-search-hybrid-kick-9105.jsonl": "4980b592bbfd900b46983826936f786229a67e162b51f9661f0895311cafc30d",
+    "full-orbit-search-hybrid-kick-9106.jsonl": "2b42ae54edbe5f05f7b5668168e1ca20336927c755c15183e3388e01cc7494fc",
+    "full-orbit-search-hybrid-kick-9107.jsonl": "3af12e0afa6aa34e43c524a8ed41e8afed4956aea3e27734313345cab470b5a1",
+    "full-orbit-search-hybrid-kick-9108.jsonl": "df8ed1140e9f6d3d97bc18d732d8b18a9917a9e6919d3e713a7b0ca9735f69c1",
+    "full-orbit-search-hybrid-kick-9109-time.txt": "840dcf051a56c45b33c6cde0c2ca24545f4c98de4b5a4d5559d1e90a241753ff",
+    "full-orbit-search-hybrid-kick-9109.jsonl": "eb0b22d21522a97a8f138e72e73be00a62a5609ec07e2bf7745d86ae9e3a1cd3",
+    "full-orbit-search-hybrid-kick-9110-time.txt": "1031cfd2cd13130099c16773dd0359c516cfd8ef19534fa24a13afc7232a1520",
+    "full-orbit-search-hybrid-kick-9110.jsonl": "51f63c0ecb76e66a2c870477a2905241acc2c6d3088f9b8d6d057023c8c3b0b4",
+    "full-orbit-search-hybrid-kick-9111-time.txt": "8778a7e4bea4034a50a595f931dbc171a735febc4ba16ab592e0718be03494ef",
+    "full-orbit-search-hybrid-kick-9111.jsonl": "dae52156467c632a18cde9a4198a04852eafa3eadc6c867685bafa00db8fc805",
+    "full-orbit-search-hybrid-kick-9112-time.txt": "bb52ca4672e526a61ac49134a9c484715913b07633baa5374d1e33ddcf7f0a4b",
+    "full-orbit-search-hybrid-kick-9112.jsonl": "fa791084d929c7cf3b1025742d9a849ca80746c1b1c943d201d3de8d02732acb",
+    "full-orbit-search-hybrid-kick-9113-time.txt": "7dbab63672a6f8d6cfa0438bc00affe815a03915ac56a832cdc80e68b8f43fd7",
+    "full-orbit-search-hybrid-kick-9113.jsonl": "c2571da5b76e469be110f412c108da1d9483b48025cf7e342db55810aeea1587",
+    "full-orbit-search-hybrid-kick-9114-time.txt": "2ea1babcdd6c67c5d3cdd41d8b85c1f741c8c82d2c30fb727c5c9faf396d9a86",
+    "full-orbit-search-hybrid-kick-9114.jsonl": "8a1d40bedb3ec5e89c315202ec615bc90f2d0549ebc16d45b6e38a03eb4e4870",
+    "full-orbit-search-hybrid-kick-9115-time.txt": "244c9b22f9a8f555bd292e896bb4588a2245c419472b67e168103f36f2ae4f39",
+    "full-orbit-search-hybrid-kick-9115.jsonl": "b2d6a446225ed077c6470993db51abea0eb77a6adfeb715c37222f280470dcd0",
+    "full-orbit-search-hybrid-kick-9116-time.txt": "21ab5c0f7a1b94000f45d6bfdbec6c6ae2427676984d183997583f38c15a7752",
+    "full-orbit-search-hybrid-kick-9116.jsonl": "e51d46f1a2e4c46c460a55e79d9c670229ad74d5436639736a311da848ba090b",
+    "full-orbit-search-hybrid-kick-9117-time.txt": "b30e4e73afc140f414cbb3b3bec2279aa600d25160d234e3757d4e2ba040c244",
+    "full-orbit-search-hybrid-kick-9117.jsonl": "f3473de99531d92c057ad10b9ad949b2fa5674cc8e4332584f1cbc234fd3ae06",
+    "full-orbit-search-hybrid-kick-9118-time.txt": "ee532bcb570b746337f6febe88c899923d92fd4148ac8813d7c5a25f9626bfbe",
+    "full-orbit-search-hybrid-kick-9118.jsonl": "dc197f8322d1ef5fb4927b6daf89a33e7866abb05b22ce91e317f8b66585d322",
+    "full-orbit-search-hybrid-kick-9119-time.txt": "efadeecedb801e40d8d34f9f1abe37bc5616e7f19078d63ee72daf2fd74ea16b",
+    "full-orbit-search-hybrid-kick-9119.jsonl": "c14dd0d7d7f54e6d848ba9becd78f5d27a2b58766adc48abfc829ad2ad739d83",
+    "full-orbit-search-hybrid-kick-9120-time.txt": "d995fa04dc1e3d992d0656e493e17b8afe58d42bbeb306729cbbb67c0a965eef",
+    "full-orbit-search-hybrid-kick-9120.jsonl": "01a4504450a473f60567ac20c52d5c0740d66eabdb6971f15a8092aa2216d0a1",
+    "full-orbit-selected-predicate-certificate.json": "2ed149dee1485638cdcd3e14dc08c46e0af324206c9903d6dc072d36950a645d",
+    "full_orbit_predicate_certificate.py": "5e0ad5b3df29970e34d948518a758b9e593b121e11b79ed05d1ffeb70ee96d1a",
+    "protocol.json": "563e2157d122ed66555a24cb0904bda818f6542b97e5a3e6c6a7dfa2a59b317b",
+    "restart-summary.json": "5ab9ca62578cd1a57aca72bee22cd464ec56a7816472c03d953902c4f80a9cde",
+    "run-time-exact3-kick-9101.txt": "a57101004c30a115689977270384b878d2a9856441ae3885b00c72a8259b10b4",
+    "run-time-exact3-kick-9102.txt": "83dda13344a9452c0df74aa72362fa79555e3c029d7b2e8d45c18c9b0e6ac244",
+    "run-time-exact3-kick-9103.txt": "00cde04644f6648f3d06d27c4e82a28425a372207cc54bf599d417282b9451f5",
+    "run-time-exact3-kick-9104.txt": "d9b0159da77b9ac42d38a64bceae35885b10be8e7ba331f9e2bb009af40ca5a3",
+    "run-time-exact3-kick-9105.txt": "7d2d9d24a6b4705a42cff3c06272a31b95b1092ac81de4708592a3f13cf8c940",
+    "run-time-exact3-kick-9106.txt": "00bdb139517aa0b80f88e9aa1639fcaaf36ceba85658263a5bbd1a0ffee0eb02",
+    "run-time-exact3-kick-9107.txt": "7564eb13792afca27313ec35d36ea0e34410f426a5fa2fc4c130c6fc0116b28f",
+    "run-time-exact3-kick-9108.txt": "fe3c74f7f33ef41057201c0205ddece578d323623d7f6e1e42234a6ecd258d72",
+    "run-time-exact3-kick-9118.txt": "8b3035d3da543dff03f041a47d716dbcefd67f366ffc1a848adb1379ed2ae8e7",
+    "run-time-hybrid-kick-9104.txt": "2dd9b825e6973e132cd35d1e2f9286bd05b5fac1943dc77a02685d8c3aff1f4c",
+    "run-time-hybrid-kick-9105.txt": "d04c337a2f9c81b3b36552821186922ebad64a236fd363a09288447c3cd7d6c2",
+    "run-time-hybrid-kick-9106.txt": "d47fd2b0cfc9ab8bddb399cb80279aa7d341cfe139802af77cfd9b030e63f067",
+    "run-time-hybrid-kick-9107.txt": "fbb7472e941c68f7bccd3aa0ef6e3551076149d07f44aa2069774e711972ddd0",
+    "run-time-hybrid-kick-9108.txt": "e7011fba9cdcaa74737b9e2c13db99ac1d2d18cd3265ff29c973e438f70c47a6",
+    "selected-base-sat-round-trip-time.txt": "3e07205b1cd16180bad158902b831396867afa578b8245e14ba04c9a3fc832fb",
+    "selected-base-sat-round-trip.log": "da1196ca20ca87476e582f062a9d8fe4bebb32c307b8e8677f9bf43ba50c52c6",
+    "summarize_restarts.py": "982ca6ffdefd72bebcb96f6a8a3f4468fa1944152514f1096059f2c4cf8211ee",
+    "validation.txt": "15f4a863bb2add62ca1b3f8f7a17477b033cab2d05426da28342ac8fc8ea3651",
+    "verification.txt": "da0306660df49256c03eceadd10d618dfcfc94baaffd2c0eaeb43cf235c3355c",
+    "verify_full_orbit_result.py": "580d94b4111cfa023af8a998de77033583e9007973fd7271cae85caee7b42482"
+  },
+  "selected_base": {
+    "scalar_representatives": [
+      203,
+      2143,
+      2901,
+      9853
+    ],
+    "point_representatives": [
+      [
+        16795,
+        144921
+      ],
+      [
+        1315,
+        90425
+      ],
+      [
+        8461,
+        38471
+      ],
+      [
+        6685,
+        369649
+      ]
+    ],
+    "covered_target_orbits_exactly_three": 6256,
+    "covered_target_orbits_at_most_three": 6300,
+    "target_orbits": 6909,
+    "target_orbit_size": 38,
+    "membership_polynomial_hex": "0x11c1371440e1f138d579",
+    "membership_boolean_degree_upper_bound": 5
+  },
+  "validation": "Two objective-specific full-neighborhood scans converge to the same base; independent Python scalar support, Rust group-law support, symmetric-cube totals, predicate certificate, restart census, and focused Rust tests pass."
+}

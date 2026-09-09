@@ -1,0 +1,28 @@
+Focused validation for the full-orbit continuation
+
+- cargo test --release cryptanalysis::koblitz_index_calculus --locked -- --test-threads=1
+  33 passed; 0 failed; 1 ignored.
+- cargo test --release cryptanalysis::koblitz_index_calculus::tests::selected_explicit_orbit_base_sat_round_trip_n19 --locked -- --ignored --test-threads=1 --nocapture
+  1 passed; solver_calls=1, models=1, conflicts=5472, exhausted=false, spurious=0; test body 2.91 seconds.
+- cargo test --release cryptanalysis::sat --locked -- --test-threads=1
+  16 passed; 0 failed.
+- cargo test --release cryptanalysis::semaev_sat --locked -- --test-threads=1
+  14 passed; 0 failed; 1 ignored.
+- cargo test --release cryptanalysis::semaev_sat::tests::semaev_s4_round_trip_n19_corpus --locked -- --ignored --test-threads=1
+  1 passed; 0 failed.
+- cargo test --release --example koblitz_affine_quotient_base --locked -- --test-threads=1
+  2 passed; 0 failed.
+- cargo test --release --example koblitz_factor_base_math --locked -- --test-threads=1
+  1 passed; 0 failed.
+- cargo check --release --locked for koblitz_affine_quotient_base, koblitz_factor_base_math, koblitz_factor_base_sweep, koblitz_factor_base_validate, koblitz_factor_base_yield, koblitz_quotient_geometry, koblitz_sat_ablation, and koblitz_index_calculus_demo
+  Passed.
+- full_orbit_predicate_certificate.py
+  Passed: four degree-19 factors, squarefree degree-76 product, 76 exact roots, both trace predicates, Boolean-degree upper bound 5.
+- verify_full_orbit_result.py
+  Passed: independent 6909-orbit partition, 6256 exactly-three support, 6300 at-most-three support, bit-for-bit agreement, group-law totals, terminal neighborhood read-back, and selected-base SAT control.
+- summarize_restarts.py
+  Passed: 9 exactly-three and 17 at-most-three deterministic perturbation runs; seed 9118 is the unique record for both objectives in the retained census.
+- final source-bound search repetitions
+  Hybrid: 6300/6909 in 8.34 seconds. Exactly three: 6256/6909 in 7.83 seconds. Both objective-specific scans terminated at the same base with no improving one-orbit neighbor.
+
+The repository emits existing compiler warnings. The full-suite doctest baseline described in the parent PR remains outside this continuation; the focused commands above all returned exit status 0.

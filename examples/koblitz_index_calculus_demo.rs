@@ -17,7 +17,7 @@ fn main() {
     println!();
     println!(
         "{:>2}  {:>1}  {:>3}  {:>10}  {:>9}  {:>3}  {:>6}  {:>7}",
-        "n", "a", "ℓ", "#E(F_2^n)", "r", "h", "|F|", "orbits"
+        "n", "a", "ℓ", "#E(F_2^n)", "r", "h", "|F|", "signed"
     );
     for n in [7u32, 9, 11, 13, 15, 21] {
         for a in [0u8, 1] {
@@ -38,7 +38,7 @@ fn main() {
                 kc.subgroup_order,
                 kc.cofactor,
                 fb.points.len(),
-                fb.orbits.len()
+                fb.unknowns()
             );
         }
     }
@@ -76,8 +76,8 @@ fn main() {
         fb.points.len()
     );
     println!(
-        "π-orbits (= unknowns after collapsing)  : {}",
-        fb.orbits.len()
+        "signed π-orbits (= relation unknowns)     : {}",
+        fb.unknowns()
     );
     println!("λ with π(Q) = [λ]Q on ⟨G⟩               : {}", kc.lambda);
 
@@ -108,7 +108,7 @@ fn main() {
     println!();
     println!(
         "{:>2}{:>3}  {:>6}  {:>7}  {:>10}  {:>10}  {:>8}",
-        "n", "a", "|F|", "orbits", "relations", "lin. alg.", "rho"
+        "n", "a", "|F|", "signed", "relations", "lin. alg.", "rho"
     );
     for n in [9u32, 11, 13] {
         // Whichever of K_0 / K_1 has a usable prime-order subgroup at
@@ -120,7 +120,7 @@ fn main() {
         }) else {
             continue;
         };
-        let model = koblitz_speedup_model(n, fb.points.len(), fb.orbits.len(), 2);
+        let model = koblitz_speedup_model(n, fb.points.len(), fb.unknowns(), 2);
         println!(
             "{:>2}{:>3}  {:>6}  {:>7}  {:>9.2}×  {:>9.2}×  {:>7.2}×",
             n,
@@ -133,8 +133,10 @@ fn main() {
         );
     }
     println!();
-    println!("Relation collection saves ≈ n and the linear algebra ≈ n², both");
-    println!("larger than the √(2n) that Pollard rho already gets from the same");
+    println!("Frobenius saves ≈ n and negation removes the opposite columns;");
+    println!("the observed relation ratio can approach 2n and its square in");
+    println!("the linear algebra. These remain larger structural savings than");
+    println!("the √(2n) that Pollard rho already gets from the same");
     println!("endomorphism — yet index calculus stays the worse attack at the");
     println!("sizes anyone deploys (GGMP, SAC 2020, conclusion).");
     println!();

@@ -1,0 +1,63 @@
+{
+  "recorded_utc": "2026-09-09T17:23:22.986100+00:00",
+  "scope": "Paired complete toy n=19 SAT index-calculus speedup with verified unknown-scalar recovery",
+  "base_commit": "762c8a9ab75bae0a15eb0b330b5c3f5f63487528",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_sha256": {
+    "examples/koblitz_selected_e2e.rs": "31f83059a47958614e288ada9b3073b268b4fa300ffd499420d44dd909f27d22",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "558064336ccb68e9b520c0db0a3d51f83061506750ed793bbcaa763e9de28fee"
+  },
+  "input_sha256": {
+    "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+    "research/sat_factor_base_review_20260908/continuation-02/final_manifest.json": "99855f742bdfe5cf8da7f5043b96a3e074dfb40a323024ef5445922fe1d8f6ce",
+    "research/sat_factor_base_review_20260908/continuation-02/full-orbit-selected-predicate-certificate.json": "2ed149dee1485638cdcd3e14dc08c46e0af324206c9903d6dc072d36950a645d"
+  },
+  "artifact_sha256": {
+    "E2E_SPEEDUP.md": "444474f856f80ee6334fb8548e08a68d89f4c49d4ec3f696666215fa28265cd2",
+    "build.log": "797bd9ed33ce3cae8a308e620e9d5e4115e464bf92e23a57f1349b8292c97c67",
+    "e2e-speedup-summary.json": "e28e4ef0248a89bbb5b462a67ead6d8daebcfc56fcd7ecbd4a8e22b735b09610",
+    "frobenius-seed-1-cap-10000-time.txt": "df2262e92fc4135ee1e5b187f4207a2446404da9d7e33fb139a4b549aca04a18",
+    "frobenius-seed-1-cap-10000.jsonl": "1be375a37c3a2404872c1e0594d38004c364ad4598a2852d5b37f2ff7946b091",
+    "frobenius-seed-1-time.txt": "80f171d4f0fc6c0c7ce5367ab5486fcdde30c0ca2dc455bc4c7bcb6501b9030c",
+    "frobenius-seed-1.jsonl": "39bd73ee0108affa97e11513e7c6dc07a49adc864d00ffb5e041342d0e1a76dd",
+    "frobenius-seed-2-cap-10000-time.txt": "0323fc27f8e3f02c3ade45ca7d8ce438ae791b77dbf6347e2520115765763bf5",
+    "frobenius-seed-2-cap-10000.jsonl": "95bbd8655026ca0aab36cf8a4701cd322b9b4572d6d4332849210ddea1cac1ac",
+    "frobenius-seed-3-cap-10000-time.txt": "a92e4757ad2067b0c1711c6bfa47bc61b3a55d08f469f1766f0e701155c804b7",
+    "frobenius-seed-3-cap-10000.jsonl": "ef82720b119c1ba7c78b532acc40085cebe70f72130e34b6cb27d07e1f71898a",
+    "frobenius-seed-4-cap-10000-time.txt": "d88f00e11e25095d247afa89e240b22050783b9521d15a545be5007357212c85",
+    "frobenius-seed-4-cap-10000.jsonl": "fb2bad31a693c65ed3fc004328c12626104b9ebeab15abf49e140f9b470241e1",
+    "optimized-seed-1-cap-10000-time.txt": "ff75303403f510f4141eba7a164317e291cb19f7b9da145369e0fe462565f02e",
+    "optimized-seed-1-cap-10000.jsonl": "3ede54226fbbb70e95ec6021d05774eb0550020dc8e863c520196f718721fa40",
+    "optimized-seed-1-cap-20000-time.txt": "f8b95bb4423639919645ba1a135463c26435ee8025d534e5ebedf7b2fa742059",
+    "optimized-seed-1-cap-20000.jsonl": "e8ab019a5329a6880801b3766836c6e55d27d9c2ba7579519f65e2c823417993",
+    "optimized-seed-1-cap-5000-time.txt": "3dc51ff85cad1f505ab1f153147f6fa5c50dbbe4203ecb9281618eeedd2857fb",
+    "optimized-seed-1-cap-5000.jsonl": "767d15d91297c9c6eff03bd4c8f7afa165c1f53490ec16892926c26579319758",
+    "optimized-seed-1-time.txt": "588655d2bf9f535b30052d4472c5667435adc72cbef682d3a8bac1fb255d9a29",
+    "optimized-seed-1.jsonl": "487cec619b0a36e8a037f314437baa11d34f77c2a8003612321ced456aca091c",
+    "optimized-seed-2-cap-10000-time.txt": "1227b67109524e7ff693b0343db5c300f16e212d38abc7b426df7f4c114cc88e",
+    "optimized-seed-2-cap-10000.jsonl": "258b7ae22d49d50ad8ab1562820e2fb22fb43298ba93901d6fa8d209367063db",
+    "optimized-seed-3-cap-10000-time.txt": "779007ed9007529431740f50fca3807dfb0cf678738118688d33774a278bd499",
+    "optimized-seed-3-cap-10000.jsonl": "ef50f8dd1b3b3db13210a6c74e54764474796e33ca41bfd85694b209df050776",
+    "optimized-seed-4-cap-10000-time.txt": "d5bd51de8af4c2bda8ae6a96b1b0cfbd7b61a9198a769d07237c3ab4f6eb43cc",
+    "optimized-seed-4-cap-10000.jsonl": "a8b25ca3f8a87a49f4ca92f6e75329ca16fb78afac40d6d2a3c312b11913e367",
+    "protocol.json": "6fc8097633064ac4b4fda5fd474624771c2c0f2e0509d7608381445dfa1328c4",
+    "signed-seed-1-time.txt": "6223baf06d4936f4c478a83c23eb5f52487b75e183ef1f1403a54e24dcca8e3d",
+    "signed-seed-1.jsonl": "c5d60d23d717e3516f0ca0d16088a56b659025fe39adb2e2ceaa88409b46944f",
+    "validation.txt": "1f691d1287bbdcb8a474a33d3021b9fc39f0cb3fea9412d8c0a7f3be3384eff4",
+    "verification.txt": "b87461a4e74596b6e797ab4077da9a6ab5d0f61c88bcfa411ae7d1032d33faa5",
+    "verify_e2e_speedup.py": "d6d2c459e79b46bcf4b1ddb32fabcd0cd4b89e7ae225ad9062f23de73fedef71"
+  },
+  "result": {
+    "completed_pairs": 4,
+    "optimized_total_seconds": 428.684135917,
+    "control_total_seconds": 918.0428925,
+    "aggregate_speedup": 2.141536892976482,
+    "minimum_paired_speedup": 1.2205384518092863,
+    "median_paired_speedup": 2.28190506304131,
+    "geometric_mean_paired_speedup": 2.1464466411548924,
+    "all_unknown_scalars_recovered_and_verified": true,
+    "all_pairs_improved": true
+  },
+  "validation": "Eight matched benchmark arms completed; internal and external timing agreed within two percent; focused Rust tests, cutoff sweep, and fail-closed Python aggregate verifier passed."
+}

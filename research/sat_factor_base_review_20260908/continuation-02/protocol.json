@@ -1,0 +1,62 @@
+{
+  "scope": "Exact finite factor-base support optimization over every signed Frobenius orbit of the degree-19 prime subgroup; no unknown scalar recovery",
+  "curve": "K_1 over F_2[z]/(z^19+z^5+z^2+z+1)",
+  "subgroup_order": 262543,
+  "candidate_orbits": 6909,
+  "candidate_orbit_size": 38,
+  "selected_orbits": 4,
+  "quotient_points": 152,
+  "saturated_affine_lift_points": 305,
+  "objectives": [
+    "exactly three summands",
+    "one, two, or three summands"
+  ],
+  "search": {
+    "method": "deterministic two-orbit perturbations followed by steepest exact one-orbit exchange",
+    "exactly_three_runs": 9,
+    "at_most_three_runs": 17,
+    "selected_seed": 9118,
+    "terminal_neighborhood": "all 27620 proper one-orbit neighbors; 6906 valid candidates per removal including reinsertion of the removed current orbit"
+  },
+  "selected_scalar_representatives": [
+    203,
+    2143,
+    2901,
+    9853
+  ],
+  "selected_point_representatives": [
+    [16795, 144921],
+    [1315, 90425],
+    [8461, 38471],
+    [6685, 369649]
+  ],
+  "results": {
+    "covered_target_orbits_exactly_three": 6256,
+    "covered_target_orbits_at_most_three": 6300,
+    "target_orbits": 6909,
+    "target_orbit_size": 38,
+    "fixed_pool_baseline_exactly_three": 6224,
+    "fixed_pool_baseline_at_most_three": 6257
+  },
+  "selected_base_sat_control": {
+    "target_scalar": 5247,
+    "summand_scalars": [203, 2143, 2901],
+    "solver_calls": 1,
+    "models": 1,
+    "conflicts": 5472,
+    "spurious_models": 0,
+    "exhausted": false,
+    "test_seconds": 2.91,
+    "scope": "one planted public n=19 S4 round trip; not a comparative benchmark"
+  },
+  "guards": [
+    "the scalar search reconstructs all 6909 target orbits and all 262542 nonzero subgroup labels",
+    "the selected support is recomputed by an independent Python modular implementation",
+    "Rust and Python support bitsets agree bit for bit",
+    "the elliptic-curve group-law oracle agrees with both support counts and the symmetric-cube total",
+    "the selected base is rescanned under both objectives and has no improving one-orbit neighbor",
+    "the membership certificate verifies all 76 roots, rationality, trace predicates, minimal polynomials, and squarefreeness",
+    "the selected explicit-domain base passes a native-XOR S4 round trip with group-sum verification"
+  ],
+  "claim_boundary": "Full-universe one-exchange local optimum and exact finite support for the selected degree-19 base; no global four-subset optimum, coupled SAT timing, asymptotic attack, or unknown scalar recovery"
+}

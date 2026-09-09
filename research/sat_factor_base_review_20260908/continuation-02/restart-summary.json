@@ -1,0 +1,430 @@
+{
+  "kind": "full_orbit_restart_summary",
+  "candidate_orbits": 6909,
+  "selected_orbits": 4,
+  "two_orbit_kick": true,
+  "exactly_three_runs": 9,
+  "at_most_three_runs": 17,
+  "best_exactly_three": 6256,
+  "best_at_most_three": 6300,
+  "best_seed": 9118,
+  "runs": [
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9104.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9104,
+      "initial_covered_target_orbits": 6135,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6282,
+      "covered_target_orbits_at_most_three": 6282,
+      "covered_target_orbits_exactly_three": 6236,
+      "selected_indices": [
+        50,
+        948,
+        3409,
+        5643
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9105.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9105,
+      "initial_covered_target_orbits": 5968,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6285,
+      "covered_target_orbits_at_most_three": 6285,
+      "covered_target_orbits_exactly_three": 6254,
+      "selected_indices": [
+        1464,
+        3827,
+        3944,
+        3968
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9106.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9106,
+      "initial_covered_target_orbits": 6072,
+      "accepted_exchanges": 4,
+      "objective_covered_target_orbits": 6294,
+      "covered_target_orbits_at_most_three": 6294,
+      "covered_target_orbits_exactly_three": 6248,
+      "selected_indices": [
+        926,
+        2481,
+        4713,
+        6077
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9107.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9107,
+      "initial_covered_target_orbits": 5878,
+      "accepted_exchanges": 4,
+      "objective_covered_target_orbits": 6291,
+      "covered_target_orbits_at_most_three": 6291,
+      "covered_target_orbits_exactly_three": 6270,
+      "selected_indices": [
+        2039,
+        2472,
+        3505,
+        6880
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9108.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9108,
+      "initial_covered_target_orbits": 5934,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6288,
+      "covered_target_orbits_at_most_three": 6288,
+      "covered_target_orbits_exactly_three": 6243,
+      "selected_indices": [
+        347,
+        1815,
+        4238,
+        6868
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9109.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9109,
+      "initial_covered_target_orbits": 6162,
+      "accepted_exchanges": 1,
+      "objective_covered_target_orbits": 6277,
+      "covered_target_orbits_at_most_three": 6277,
+      "covered_target_orbits_exactly_three": 6245,
+      "selected_indices": [
+        467,
+        1133,
+        1464,
+        5148
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9110.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9110,
+      "initial_covered_target_orbits": 6058,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6287,
+      "covered_target_orbits_at_most_three": 6287,
+      "covered_target_orbits_exactly_three": 6239,
+      "selected_indices": [
+        790,
+        1133,
+        1464,
+        4600
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9111.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9111,
+      "initial_covered_target_orbits": 5923,
+      "accepted_exchanges": 4,
+      "objective_covered_target_orbits": 6278,
+      "covered_target_orbits_at_most_three": 6278,
+      "covered_target_orbits_exactly_three": 6229,
+      "selected_indices": [
+        200,
+        963,
+        2201,
+        3533
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9112.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9112,
+      "initial_covered_target_orbits": 5939,
+      "accepted_exchanges": 1,
+      "objective_covered_target_orbits": 6264,
+      "covered_target_orbits_at_most_three": 6264,
+      "covered_target_orbits_exactly_three": 6238,
+      "selected_indices": [
+        829,
+        2481,
+        5466,
+        5643
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9113.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9113,
+      "initial_covered_target_orbits": 6124,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6277,
+      "covered_target_orbits_at_most_three": 6277,
+      "covered_target_orbits_exactly_three": 6231,
+      "selected_indices": [
+        1464,
+        2585,
+        2586,
+        6787
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9114.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9114,
+      "initial_covered_target_orbits": 6033,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6275,
+      "covered_target_orbits_at_most_three": 6275,
+      "covered_target_orbits_exactly_three": 6242,
+      "selected_indices": [
+        137,
+        1464,
+        5541,
+        6384
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9115.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9115,
+      "initial_covered_target_orbits": 6095,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6291,
+      "covered_target_orbits_at_most_three": 6291,
+      "covered_target_orbits_exactly_three": 6265,
+      "selected_indices": [
+        1133,
+        2803,
+        4586,
+        5295
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9116.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9116,
+      "initial_covered_target_orbits": 6122,
+      "accepted_exchanges": 1,
+      "objective_covered_target_orbits": 6269,
+      "covered_target_orbits_at_most_three": 6269,
+      "covered_target_orbits_exactly_three": 6224,
+      "selected_indices": [
+        1000,
+        1464,
+        5577,
+        5643
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9117.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9117,
+      "initial_covered_target_orbits": 6035,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6275,
+      "covered_target_orbits_at_most_three": 6275,
+      "covered_target_orbits_exactly_three": 6235,
+      "selected_indices": [
+        19,
+        2283,
+        2481,
+        2661
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9118.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9118,
+      "initial_covered_target_orbits": 6079,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6300,
+      "covered_target_orbits_at_most_three": 6300,
+      "covered_target_orbits_exactly_three": 6256,
+      "selected_indices": [
+        200,
+        1913,
+        2481,
+        5643
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9119.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9119,
+      "initial_covered_target_orbits": 5873,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6296,
+      "covered_target_orbits_at_most_three": 6296,
+      "covered_target_orbits_exactly_three": 6276,
+      "selected_indices": [
+        1685,
+        2115,
+        5015,
+        5567
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-hybrid-kick-9120.jsonl",
+      "objective": "at_most_three",
+      "kick_seed": 9120,
+      "initial_covered_target_orbits": 6048,
+      "accepted_exchanges": 1,
+      "objective_covered_target_orbits": 6277,
+      "covered_target_orbits_at_most_three": 6277,
+      "covered_target_orbits_exactly_three": 6225,
+      "selected_indices": [
+        1118,
+        1464,
+        4894,
+        6674
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9101.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9101,
+      "initial_covered_target_orbits": 6029,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6243,
+      "covered_target_orbits_at_most_three": 6270,
+      "covered_target_orbits_exactly_three": 6243,
+      "selected_indices": [
+        3434,
+        3675,
+        3973,
+        5643
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9102.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9102,
+      "initial_covered_target_orbits": 5701,
+      "accepted_exchanges": 5,
+      "objective_covered_target_orbits": 6244,
+      "covered_target_orbits_at_most_three": 6280,
+      "covered_target_orbits_exactly_three": 6244,
+      "selected_indices": [
+        617,
+        1494,
+        4126,
+        4226
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9103.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9103,
+      "initial_covered_target_orbits": 6041,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6237,
+      "covered_target_orbits_at_most_three": 6266,
+      "covered_target_orbits_exactly_three": 6237,
+      "selected_indices": [
+        3888,
+        5544,
+        6255,
+        6599
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9104.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9104,
+      "initial_covered_target_orbits": 6104,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6251,
+      "covered_target_orbits_at_most_three": 6275,
+      "covered_target_orbits_exactly_three": 6251,
+      "selected_indices": [
+        105,
+        954,
+        4233,
+        4581
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9105.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9105,
+      "initial_covered_target_orbits": 5945,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6250,
+      "covered_target_orbits_at_most_three": 6278,
+      "covered_target_orbits_exactly_three": 6250,
+      "selected_indices": [
+        2481,
+        3944,
+        5768,
+        6288
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9106.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9106,
+      "initial_covered_target_orbits": 6041,
+      "accepted_exchanges": 3,
+      "objective_covered_target_orbits": 6245,
+      "covered_target_orbits_at_most_three": 6264,
+      "covered_target_orbits_exactly_three": 6245,
+      "selected_indices": [
+        2481,
+        3655,
+        4713,
+        6163
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9107.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9107,
+      "initial_covered_target_orbits": 5833,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6245,
+      "covered_target_orbits_at_most_three": 6280,
+      "covered_target_orbits_exactly_three": 6245,
+      "selected_indices": [
+        369,
+        1170,
+        1717,
+        5995
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9108.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9108,
+      "initial_covered_target_orbits": 5894,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6251,
+      "covered_target_orbits_at_most_three": 6281,
+      "covered_target_orbits_exactly_three": 6251,
+      "selected_indices": [
+        347,
+        4238,
+        6765,
+        6868
+      ]
+    },
+    {
+      "artifact": "full-orbit-search-exact3-kick-9118.jsonl",
+      "objective": "exactly_three",
+      "kick_seed": 9118,
+      "initial_covered_target_orbits": 6009,
+      "accepted_exchanges": 2,
+      "objective_covered_target_orbits": 6256,
+      "covered_target_orbits_at_most_three": 6300,
+      "covered_target_orbits_exactly_three": 6256,
+      "selected_indices": [
+        200,
+        1913,
+        2481,
+        5643
+      ]
+    }
+  ],
+  "scope": "deterministic restart census; not an exhaustive global search over four-orbit subsets"
+}

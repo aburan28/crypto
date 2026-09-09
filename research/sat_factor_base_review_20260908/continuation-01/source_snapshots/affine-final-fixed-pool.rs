@@ -389,7 +389,6 @@ fn orbit_exchange(kc: &KoblitzCurve, sample: &[u64], exact_targets: &[u64], dire
 }
 
 include!("support/koblitz_global_pool.rs");
-include!("support/koblitz_full_orbit_search.rs");
 
 fn main() {
     let n = std::env::args()
@@ -412,33 +411,6 @@ fn main() {
         }
     }
     let arguments: Vec<_> = std::env::args().collect();
-    if let Some(pos) = arguments.iter().position(|s| s == "--full-orbit-search") {
-        let directory = arguments.get(pos + 1).expect("artifact directory");
-        let max_rounds = arguments
-            .get(pos + 2)
-            .map(|value| value.parse().expect("maximum search rounds"))
-            .unwrap_or(12);
-        let include_shorter = !arguments.iter().any(|value| value == "--exactly-three");
-        let kick_seed = arguments
-            .iter()
-            .position(|value| value == "--kick-seed")
-            .map(|position| {
-                arguments
-                    .get(position + 1)
-                    .expect("kick seed")
-                    .parse()
-                    .expect("integer kick seed")
-            });
-        full_orbit_search(
-            &kc,
-            &exact_targets,
-            directory,
-            max_rounds,
-            include_shorter,
-            kick_seed,
-        );
-        return;
-    }
     if let Some(pos) = arguments.iter().position(|s| s == "--exchange") {
         orbit_exchange(
             &kc,

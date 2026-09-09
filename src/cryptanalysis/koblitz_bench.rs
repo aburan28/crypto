@@ -529,7 +529,7 @@ pub fn bench_instance(
         ell: fb.ell,
         m,
         fb_size: fb.points.len(),
-        orbits: fb.orbits.len(),
+        orbits: fb.unknowns(),
         n_vars,
         targets,
         runs: vec![

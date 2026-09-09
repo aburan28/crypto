@@ -33,14 +33,15 @@
 //!     log_P P' = λ^k · log_P Q      (mod r).
 //! ```
 //!
-//! So the `|F|` unknowns of a classical index calculus collapse to
-//! `≈ |F| / n` unknowns — one per orbit.  Consequences:
+//! Negation adds `log_P(-Q) = -log_P(Q)`, so the `|F|` unknowns of a
+//! classical index calculus collapse to one per signed Frobenius orbit,
+//! generically `≈ |F| / (2n)`. Consequences:
 //!
-//! - **Relation collection:** we need `≈ |F| / n` relations instead of
-//!   `≈ |F|`, i.e. a factor-`n` saving.
-//! - **Linear algebra:** the relation matrix shrinks by a factor `n` in
+//! - **Relation collection:** we need one relation per signed orbit
+//!   unknown instead of one per factor-base point.
+//! - **Linear algebra:** Frobenius shrinks the relation matrix by a factor `n` in
 //!   *both* dimensions, so a quadratic (sparse-linear-algebra) solve
-//!   costs `n²` less.
+//!   costs `n²` less; negation removes the redundant opposite columns.
 //! - **Symmetry breaking:** a decomposition `R = P_1 + … + P_m` is
 //!   found `m!` times if the summands are searched independently.
 //!   Distributing the summands over the shifted factor bases
@@ -657,6 +658,10 @@ pub enum FactorBaseDomain {
     FrobeniusUnion {
         seed_dimension: usize,
     },
+    /// Explicit abscissa representatives, closed under Frobenius.
+    ExplicitFrobeniusOrbits {
+        representatives: usize,
+    },
     /// Reciprocal closure from translation by rational 2-torsion.
     TwoTorsionSaturation,
 }
@@ -686,13 +691,19 @@ pub struct FrobeniusFactorBase {
     pub orbits: Vec<Vec<usize>>,
     /// For each point index: `(orbit, k)` with `point = π^k(representative)`.
     pub orbit_of: Vec<(usize, u32)>,
+    /// Orbits under Frobenius and negation. These are the relation
+    /// columns because `log(-P) = -log(P)` adds no independent unknown.
+    pub signed_orbits: Vec<Vec<usize>>,
+    /// For each point: `(signed orbit, k, negated)` with
+    /// `point = (-1)^negated π^k(representative)`.
+    pub signed_orbit_of: Vec<(usize, u32, bool)>,
 }
 
 impl FrobeniusFactorBase {
     /// Number of unknowns the linear algebra actually carries — one per
-    /// `π`-orbit, versus `points.len()` for a non-invariant base.
+    /// signed `π`-orbit, versus `points.len()` for a non-invariant base.
     pub fn unknowns(&self) -> usize {
-        self.orbits.len()
+        self.signed_orbits.len()
     }
 
     /// The class `[r]P` of each factor-base point in the `h`-torsion,
@@ -1104,6 +1115,44 @@ pub fn build_frobenius_union_factor_base(
     )
 }
 
+/// Build a factor base from explicit abscissa-orbit representatives.
+///
+/// Each supplied coordinate is closed under the `2`-power Frobenius;
+/// rational points above the resulting coordinates are materialised and
+/// constrained exactly by the SAT domain trie. This is the constructor
+/// used for factor bases selected by a finite orbit search, where the
+/// union need not be the Frobenius closure of a small linear seed space.
+pub fn build_explicit_frobenius_orbit_factor_base(
+    kc: &KoblitzCurve,
+    representatives: &[F2mElement],
+) -> Option<FrobeniusFactorBase> {
+    if representatives.is_empty() {
+        return None;
+    }
+    let mut xs = std::collections::BTreeMap::new();
+    for representative in representatives {
+        let mut x = F2mElement::from_biguint(&representative.to_biguint(), kc.n);
+        for _ in 0..kc.n {
+            xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+            x = x.square(&kc.curve.irreducible);
+        }
+    }
+    let ambient = (0..kc.n)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    finish_factor_base_domain(
+        kc,
+        kc.n,
+        0,
+        Vec::new(),
+        ambient,
+        xs.into_values().collect(),
+        FactorBaseDomain::ExplicitFrobeniusOrbits {
+            representatives: representatives.len(),
+        },
+    )
+}
+
 /// B union (B+T), omitting infinity, where T=(0,1) on K_a.
 /// Since [h]T=O for even h, this changes the available torsion lifts
 /// without adding projected points. Translation commutes with Frobenius.
@@ -1185,6 +1234,36 @@ fn finish_factor_base_domain(
         orbits.push(cycle);
     }
 
+    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+    let mut signed_orbits = Vec::new();
+    for start in 0..points.len() {
+        if signed_orbit_of[start].0 != usize::MAX {
+            continue;
+        }
+        let signed_orbit = signed_orbits.len();
+        let mut members = Vec::new();
+        let mut current = points[start].clone();
+        for k in 0..kc.n {
+            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
+                let index = *index_of.get(&point_key(&point))?;
+                if signed_orbit_of[index].0 == usize::MAX {
+                    signed_orbit_of[index] = (signed_orbit, k, negated);
+                    members.push(index);
+                } else if signed_orbit_of[index].0 != signed_orbit {
+                    return None;
+                }
+            }
+            current = kc.frobenius(&current);
+        }
+        if current != points[start] {
+            return None;
+        }
+        signed_orbits.push(members);
+    }
+    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
+        return None;
+    }
+
     Some(FrobeniusFactorBase {
         domain,
         ell,
@@ -1195,6 +1274,8 @@ fn finish_factor_base_domain(
         points,
         orbits,
         orbit_of,
+        signed_orbits,
+        signed_orbit_of,
     })
 }
 
@@ -1221,11 +1302,13 @@ pub struct KoblitzRelation {
     pub coef_a: BigUint,
     /// `b` in `R = [a]G + [b]Q`.
     pub coef_b: BigUint,
-    /// The decomposition, as `(orbit, k)` pairs: summand
-    /// `P_i = π^{k_i}(rep_{o_i})`.
+    /// The decomposition, as `(signed orbit, k)` pairs. Consult
+    /// [`Self::summand_negated`] for the sign of each summand.
     pub summands: Vec<(usize, u32)>,
-    /// Dense row over the orbit unknowns: entry `o` is `Σ_i λ^{k_i}`
-    /// over the summands lying in orbit `o`, reduced mod `r`.
+    /// Whether each summand is `-π^k(rep)` rather than `π^k(rep)`.
+    pub summand_negated: Vec<bool>,
+    /// Dense row over the signed-orbit unknowns: entry `o` is
+    /// `Σ_i (-1)^negated_i λ^{k_i}` over its summands, reduced mod `r`.
     pub row: Vec<BigUint>,
 }
 
@@ -1833,11 +1916,12 @@ fn sat_decompose_union_s4(
 
 /// Turn a decomposition into a relation row over the orbit unknowns.
 ///
-/// With `x_o := log_G ([h]·rep_o)` and `P_i = π^{k_i}(rep_{o_i})`,
+/// With `x_o := log_G ([h]·rep_o)` and
+/// `P_i = (-1)^{s_i}π^{k_i}(rep_{o_i})`,
 /// multiplying `R = Σ_i P_i` by the cofactor `h` gives
 ///
 /// ```text
-///     h·a + h·b·d  ≡  Σ_i λ^{k_i} · x_{o_i}   (mod r),
+///     h·a + h·b·d  ≡  Σ_i (-1)^{s_i} λ^{k_i} · x_{o_i}   (mod r),
 /// ```
 ///
 /// because `π` acts as `[λ]` on the order-`r` subgroup and `[h]P_i`
@@ -1849,19 +1933,46 @@ fn relation_from_decomposition(
     coef_a: &BigUint,
     coef_b: &BigUint,
 ) -> KoblitzRelation {
+    relation_from_decomposition_with_mode(kc, fb, idxs, coef_a, coef_b, true)
+}
+
+fn relation_from_decomposition_with_mode(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    idxs: &[usize],
+    coef_a: &BigUint,
+    coef_b: &BigUint,
+    collapse_negation: bool,
+) -> KoblitzRelation {
     let r = &kc.subgroup_order;
-    let mut row = vec![BigUint::zero(); fb.orbits.len()];
+    let unknowns = if collapse_negation {
+        fb.unknowns()
+    } else {
+        fb.orbits.len()
+    };
+    let mut row = vec![BigUint::zero(); unknowns];
     let mut summands = Vec::with_capacity(idxs.len());
+    let mut summand_negated = Vec::with_capacity(idxs.len());
     for &i in idxs {
-        let (o, k) = fb.orbit_of[i];
-        let coeff = kc.lambda.modpow(&BigUint::from(k), r);
+        let (o, k, negated) = if collapse_negation {
+            fb.signed_orbit_of[i]
+        } else {
+            let (o, k) = fb.orbit_of[i];
+            (o, k, false)
+        };
+        let mut coeff = kc.lambda.modpow(&BigUint::from(k), r);
+        if negated && !coeff.is_zero() {
+            coeff = r - coeff;
+        }
         row[o] = (&row[o] + coeff) % r;
         summands.push((o, k));
+        summand_negated.push(negated);
     }
     KoblitzRelation {
         coef_a: coef_a.clone(),
         coef_b: coef_b.clone(),
         summands,
+        summand_negated,
         row,
     }
 }
@@ -1899,6 +2010,16 @@ pub struct KoblitzIcOptions {
     /// Degree 2 is cheap and helps on overdetermined instances; degree
     /// 3 buys fewer conflicts but far more clauses.
     pub sat_macaulay_degree: Option<u32>,
+    /// Native-XOR/CNF, branching, domain, trace, and conflict controls
+    /// for [`DecompositionStrategy::Sat`].
+    pub sat_options: SatDecompositionOptions,
+    /// Identify `P` and `-P` as one signed Frobenius relation unknown.
+    /// Disable only for a matched Frobenius-only control.
+    pub collapse_negation: bool,
+    /// Attempt the relation solve as soon as `unknowns + 1` equations
+    /// are available and stop only when the recovered scalar verifies.
+    /// Disable to retain the fixed-surplus collection control.
+    pub stop_on_verified_rank: bool,
 }
 
 impl Default for KoblitzIcOptions {
@@ -1914,6 +2035,9 @@ impl Default for KoblitzIcOptions {
             node_budget: 4096,
             max_models: 64,
             sat_macaulay_degree: Some(2),
+            sat_options: SatDecompositionOptions::default(),
+            collapse_negation: true,
+            stop_on_verified_rank: true,
         }
     }
 }
@@ -1923,8 +2047,8 @@ impl Default for KoblitzIcOptions {
 pub struct KoblitzIcReport {
     /// `|F|`.
     pub factor_base_size: usize,
-    /// Number of `π`-orbits, i.e. the number of unknowns actually
-    /// solved for.
+    /// Number of signed `π`-orbits, i.e. the number of unknowns
+    /// actually solved for.
     pub orbit_count: usize,
     /// `ℓ = ord_n(2)`, the dimension of the invariant subspace.
     pub ell: u32,
@@ -1948,8 +2072,39 @@ pub struct KoblitzIcReport {
     pub sat_unknowns: usize,
     /// Encoding/model verification failures; any nonzero value invalidates a run.
     pub sat_invalid_models: usize,
+    /// SAT models examined across relation collection.
+    pub sat_models: usize,
+    /// Cumulative CDCL conflicts across relation collection.
+    pub sat_conflicts: u64,
+    /// Time spent generating candidate targets and decomposing them.
+    pub relation_collection_ns: u128,
+    /// Time spent solving the final modular relation matrix.
+    pub linear_algebra_ns: u128,
+    /// Modular relation solves attempted, including rank-deficient ones.
+    pub linear_solve_attempts: usize,
+    /// Whether negation was folded into signed Frobenius columns.
+    pub collapse_negation: bool,
     /// Log recovered from R = O directly, bypassing the relation matrix.
     pub direct_relation: bool,
+}
+
+fn solve_relation_system(
+    relations: &[KoblitzRelation],
+    relation_unknowns: usize,
+    cofactor: &BigUint,
+    modulus: &BigUint,
+) -> Option<BigUint> {
+    let h = cofactor % modulus;
+    let mut matrix = Vec::with_capacity(relations.len());
+    let mut rhs = Vec::with_capacity(relations.len());
+    for relation in relations {
+        let mut row = relation.row.clone();
+        row.push((modulus - (&h * &relation.coef_b) % modulus) % modulus);
+        matrix.push(row);
+        rhs.push((&h * &relation.coef_a) % modulus);
+    }
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)?;
+    solution.get(relation_unknowns).cloned()
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -1964,14 +2119,33 @@ pub fn koblitz_index_calculus_dlp(
     opts: &KoblitzIcOptions,
 ) -> Option<KoblitzIcReport> {
     let fb = build_frobenius_factor_base(kc, opts.factor_index)?;
+    koblitz_index_calculus_dlp_with_factor_base(kc, q, &fb, opts)
+}
+
+/// Run index calculus with a caller-supplied invariant factor base.
+///
+/// This admits explicit nonlinear orbit unions selected by a finite
+/// search while retaining the same enumeration, Gröbner, and SAT
+/// decomposition controls as [`koblitz_index_calculus_dlp`].
+pub fn koblitz_index_calculus_dlp_with_factor_base(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
+    let relation_unknowns = if opts.collapse_negation {
+        fb.unknowns()
+    } else {
+        fb.orbits.len()
+    };
 
     let index_of = fb.index_map();
 
     let mut report = KoblitzIcReport {
         factor_base_size: fb.points.len(),
-        orbit_count: fb.orbits.len(),
+        orbit_count: relation_unknowns,
         ell: fb.ell,
         relations: 0,
         trials: 0,
@@ -1982,6 +2156,12 @@ pub fn koblitz_index_calculus_dlp(
         sat_refutations: 0,
         sat_unknowns: 0,
         sat_invalid_models: 0,
+        sat_models: 0,
+        sat_conflicts: 0,
+        relation_collection_ns: 0,
+        linear_algebra_ns: 0,
+        linear_solve_attempts: 0,
+        collapse_negation: opts.collapse_negation,
         direct_relation: false,
     };
     if fb.points.is_empty() {
@@ -1989,10 +2169,11 @@ pub fn koblitz_index_calculus_dlp(
     }
 
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let wanted = fb.orbits.len() + opts.extra_relations;
+    let wanted = relation_unknowns + opts.extra_relations.max(1);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    let relation_start = std::time::Instant::now();
 
     while relations.len() < wanted && report.trials < opts.max_trials {
         report.trials += 1;
@@ -2007,17 +2188,21 @@ pub fn koblitz_index_calculus_dlp(
                 report.log = Some(d);
                 report.direct_relation = true;
                 report.relations = relations.len();
+                report.relation_collection_ns = relation_start
+                    .elapsed()
+                    .as_nanos()
+                    .saturating_sub(report.linear_algebra_ns);
                 return Some(report);
             }
             continue;
         }
 
         let found = match opts.strategy {
-            DecompositionStrategy::Enumerate => decompose(kc, &fb, &index_of, &target, opts.m, 0),
+            DecompositionStrategy::Enumerate => decompose(kc, fb, &index_of, &target, opts.m, 0),
             DecompositionStrategy::Groebner => {
                 let (idxs, stats) = groebner_decompose(
                     kc,
-                    &fb,
+                    fb,
                     &index_of,
                     &field,
                     &target,
@@ -2030,49 +2215,78 @@ pub fn koblitz_index_calculus_dlp(
                 idxs
             }
             DecompositionStrategy::Sat => {
-                let (idxs, stats) = sat_decompose(
+                let (idxs, stats) = sat_decompose_with(
                     kc,
-                    &fb,
+                    fb,
                     &index_of,
                     &field,
                     &target,
                     opts.m,
                     opts.max_models,
                     opts.sat_macaulay_degree,
+                    opts.sat_options,
                 );
                 report.sat_calls += stats.solver_calls;
                 report.sat_refutations += usize::from(stats.refuted);
                 report.sat_unknowns += usize::from(stats.exhausted);
                 report.sat_invalid_models += stats.spurious;
+                report.sat_models += stats.models;
+                report.sat_conflicts += stats.conflicts;
                 if stats.spurious != 0 {
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
                     return Some(report);
                 }
                 idxs
             }
         };
         if let Some(idxs) = found {
-            relations.push(relation_from_decomposition(kc, &fb, &idxs, &a, &b));
+            relations.push(relation_from_decomposition_with_mode(
+                kc,
+                fb,
+                &idxs,
+                &a,
+                &b,
+                opts.collapse_negation,
+            ));
+            if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
+                report.linear_solve_attempts += 1;
+                let linear_start = std::time::Instant::now();
+                let candidate =
+                    solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+                    report.log = Some(d);
+                    report.relations = relations.len();
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
+                    return Some(report);
+                }
+            }
         }
     }
+    report.relation_collection_ns = relation_start
+        .elapsed()
+        .as_nanos()
+        .saturating_sub(report.linear_algebra_ns);
     report.relations = relations.len();
-    if relations.len() < fb.orbits.len() + 1 {
+    if relations.len() < relation_unknowns + 1 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
-    let s = fb.orbits.len();
-    let h = &kc.cofactor % r;
-    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
-    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
-    for rel in &relations {
-        let mut row = rel.row.clone();
-        row.push((r - (&h * &rel.coef_b) % r) % r);
-        matrix.push(row);
-        rhs.push((&h * &rel.coef_a) % r);
-    }
-    let sol = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, r)?;
-    let d = sol.get(s)?.clone();
+    report.linear_solve_attempts += 1;
+    let linear_start = std::time::Instant::now();
+    let Some(d) = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r) else {
+        report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+        return Some(report);
+    };
+    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
     if kc.mul(&g, &d) == *q {
         report.log = Some(d);
     }
@@ -2095,13 +2309,14 @@ pub struct KoblitzSpeedup {
     pub n: u32,
     /// Factor-base size `|F|`.
     pub factor_base_size: usize,
-    /// Unknowns after collapsing `π`-orbits.
+    /// Unknowns after collapsing signed `π`-orbits.
     pub unknowns: usize,
     /// `|F| / unknowns` — the measured relation-collection speed-up,
-    /// which the theory predicts is `≈ n`.
+    /// which is generically `≈ 2n` after Frobenius and negation.
     pub relation_collection_speedup: f64,
     /// `(|F| / unknowns)²` — the measured linear-algebra speed-up for a
-    /// quadratic-cost sparse solve, predicted `≈ n²`.
+    /// quadratic-cost sparse solve, generically `≈ 4n²` after both
+    /// identifications. The Frobenius contribution alone is `n²`.
     pub linear_algebra_speedup: f64,
     /// `m!`, the symmetry-breaking saving in the decomposition search.
     pub symmetry_breaking_factor: f64,
@@ -2111,12 +2326,13 @@ pub struct KoblitzSpeedup {
 }
 
 /// Cost model for a Frobenius-invariant index calculus on `n`, a factor
-/// base of `fb_size` points collapsing to `unknowns` orbits, with
+/// base of `fb_size` points collapsing to `unknowns` signed orbits, with
 /// `m`-point decompositions.
 ///
 /// The point of the table is the comparison in the paper's conclusion:
 /// index calculus gains more from the Koblitz structure than rho does
-/// (`n` and `n²` versus `√(2n)`) — and yet stays the worse attack for
+/// (`n` and `n²` from Frobenius, plus the standard negation quotient,
+/// versus `√(2n)`) — and yet stays the worse attack for
 /// the curves anyone deploys, because its un-accelerated cost is so
 /// much higher to begin with.
 pub fn koblitz_speedup_model(n: u32, fb_size: usize, unknowns: usize, m: usize) -> KoblitzSpeedup {
@@ -2387,11 +2603,44 @@ mod tests {
             }
             assert_eq!(&rep, p);
         }
+        // Signed-orbit bookkeeping additionally identifies -P with P.
+        for (i, p) in fb.points.iter().enumerate() {
+            let (o, k, negated) = fb.signed_orbit_of[i];
+            let mut rep = fb.points[fb.signed_orbits[o][0]].clone();
+            for _ in 0..k {
+                rep = kc.frobenius(&rep);
+            }
+            if negated {
+                rep = point_neg(&rep);
+            }
+            assert_eq!(&rep, p);
+        }
         // The orbits partition the factor base.
         assert_eq!(
             fb.orbits.iter().map(|o| o.len()).sum::<usize>(),
             fb.points.len()
         );
+        assert_eq!(
+            fb.signed_orbits.iter().map(|o| o.len()).sum::<usize>(),
+            fb.points.len()
+        );
+        assert!(fb.signed_orbits.len() <= fb.orbits.len());
+        let negated_index = fb
+            .signed_orbit_of
+            .iter()
+            .position(|location| location.2)
+            .expect("the negation-closed base has a negative representative");
+        let (signed_orbit, k, _) = fb.signed_orbit_of[negated_index];
+        let relation = relation_from_decomposition(
+            &kc,
+            &fb,
+            &[negated_index],
+            &BigUint::zero(),
+            &BigUint::zero(),
+        );
+        let lambda_k = kc.lambda.modpow(&BigUint::from(k), &kc.subgroup_order);
+        assert_eq!(relation.row[signed_orbit], &kc.subgroup_order - lambda_k);
+        assert_eq!(relation.summand_negated, vec![true]);
         // Collapsing them is where the factor-n saving comes from.
         assert!(fb.unknowns() * 2 < fb.points.len());
     }
@@ -2409,8 +2658,60 @@ mod tests {
     }
 
     #[test]
+    fn selected_explicit_orbit_base_has_four_relation_columns() {
+        let kc = KoblitzCurve::new(1, 19).unwrap();
+        let representatives: Vec<_> = [16795u64, 1315, 8461, 6685]
+            .into_iter()
+            .map(|value| F2mElement::from_biguint(&BigUint::from(value), kc.n))
+            .collect();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &representatives).unwrap();
+        assert_eq!(
+            fb.domain,
+            FactorBaseDomain::ExplicitFrobeniusOrbits { representatives: 4 }
+        );
+        assert_eq!(fb.subspace.len(), 76);
+        assert_eq!(fb.points.len(), 152);
+        assert_eq!(fb.orbits.len(), 8);
+        assert_eq!(fb.signed_orbits.len(), 4);
+        assert_eq!(fb.unknowns(), 4);
+    }
+
+    #[test]
+    #[ignore = "seconds; deliberate n=19 selected-base SAT round trip"]
+    fn selected_explicit_orbit_base_sat_round_trip_n19() {
+        let kc = KoblitzCurve::new(1, 19).unwrap();
+        let representatives: Vec<_> = [16795u64, 1315, 8461, 6685]
+            .into_iter()
+            .map(|value| F2mElement::from_biguint(&BigUint::from(value), kc.n))
+            .collect();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &representatives).unwrap();
+        let index = fb.index_map();
+        let target = [203u64, 2143, 2901]
+            .into_iter()
+            .map(|scalar| kc.mul(kc.generator(), &BigUint::from(scalar)))
+            .fold(BinaryPoint::Infinity, |sum, point| kc.add(&sum, &point));
+        let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let options = SatDecompositionOptions {
+            branch_on_summands: true,
+            restrict_to_factor_base: true,
+            conflict_budget: 2_000_000,
+            ..Default::default()
+        };
+        let (decomposition, stats) =
+            sat_decompose_with(&kc, &fb, &index, &field, &target, 3, 1024, None, options);
+        eprintln!("selected explicit-orbit SAT stats: {stats:?}");
+        assert_eq!(stats.spurious, 0);
+        assert!(!stats.exhausted, "selected-base SAT exhausted: {stats:?}");
+        let decomposition = decomposition.expect("planted target must decompose");
+        let sum = decomposition
+            .iter()
+            .fold(BinaryPoint::Infinity, |sum, &i| kc.add(&sum, &fb.points[i]));
+        assert_eq!(sum, target);
+    }
+
+    #[test]
     fn relation_rows_are_consistent_with_the_orbit_logs() {
-        // A relation must satisfy h·a + h·b·d ≡ Σ λ^k x_o with
+        // A relation must satisfy h·a + h·b·d ≡ Σ +-λ^k x_o with
         // x_o = log_G([h]·rep_o); check that against brute-forced logs.
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
@@ -2447,7 +2748,7 @@ mod tests {
             if coeff.is_zero() {
                 continue;
             }
-            let rep = fb.points[fb.orbits[o][0]].clone();
+            let rep = fb.points[fb.signed_orbits[o][0]].clone();
             let scaled = kc.mul(&rep, &kc.cofactor);
             let x_o = logs.get(&point_key(&scaled)).expect("in ⟨G⟩ after ×h");
             rhs = (rhs + coeff * x_o) % r;
@@ -2956,14 +3257,41 @@ mod tests {
         let g = kc.generator().clone();
         let d = BigUint::from(53u32);
         let q = kc.mul(&g, &d);
-        let opts = KoblitzIcOptions {
-            strategy: DecompositionStrategy::Sat,
-            ..KoblitzIcOptions::default()
-        };
-        let report = koblitz_index_calculus_dlp(&kc, &q, &opts).unwrap();
-        assert_eq!(report.log, Some(d));
-        assert!(report.sat_calls > 0, "the SAT path must have run");
-        assert_eq!(report.reductions, 0, "no Gröbner work on this path");
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let mut signed_fixed_relations = None;
+        let mut signed_early_relations = None;
+        for (collapse_negation, stop_on_verified_rank) in
+            [(false, false), (true, false), (true, true)]
+        {
+            let opts = KoblitzIcOptions {
+                strategy: DecompositionStrategy::Sat,
+                collapse_negation,
+                stop_on_verified_rank,
+                ..KoblitzIcOptions::default()
+            };
+            let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &fb, &opts).unwrap();
+            assert_eq!(report.log, Some(d.clone()));
+            assert_eq!(report.collapse_negation, collapse_negation);
+            assert_eq!(
+                report.orbit_count,
+                if collapse_negation {
+                    fb.unknowns()
+                } else {
+                    fb.orbits.len()
+                }
+            );
+            assert!(report.sat_calls > 0, "the SAT path must have run");
+            assert_eq!(report.reductions, 0, "no Gröbner work on this path");
+            if !stop_on_verified_rank {
+                assert_eq!(report.relations, report.orbit_count + opts.extra_relations);
+            }
+            if collapse_negation && stop_on_verified_rank {
+                signed_early_relations = Some(report.relations);
+            } else if collapse_negation {
+                signed_fixed_relations = Some(report.relations);
+            }
+        }
+        assert!(signed_early_relations.unwrap() < signed_fixed_relations.unwrap());
     }
 
     #[test]
@@ -3014,9 +3342,9 @@ mod tests {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
         let model = koblitz_speedup_model(kc.n, fb.points.len(), fb.unknowns(), 2);
-        // Orbits have size n except for the short ones, so the measured
-        // relation-collection saving sits just below n.
-        assert!(model.relation_collection_speedup <= kc.n as f64);
+        // Signed orbits have size up to 2n. Short or self-negative
+        // orbits make the measured saving smaller than that ceiling.
+        assert!(model.relation_collection_speedup <= 2.0 * kc.n as f64);
         assert!(model.relation_collection_speedup > kc.n as f64 * 0.5);
         assert!(
             (model.linear_algebra_speedup
