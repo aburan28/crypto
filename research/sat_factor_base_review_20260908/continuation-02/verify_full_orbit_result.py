@@ -126,8 +126,11 @@ for run, objective, score in [
     assert len(scans) == 4
     assert {row["remove_position"] for row in scans} == {0, 1, 2, 3}
     assert all(row["objective"] == objective for row in scans)
+    assert all(row["candidates_scored"] == 6906 for row in scans)
     assert all(row["best_covered_target_orbits"] == score for row in scans)
     assert local["best_neighbor_covered_target_orbits"] == score
+    assert local["proper_neighbors_scored"] == 27620
+    assert local["evaluations_including_current_reinsertions"] == 27624
 
 sat_log = (ROOT / "selected-base-sat-round-trip.log").read_text()
 sat_diagnostics = (ROOT / "selected-base-sat-round-trip-time.txt").read_text()

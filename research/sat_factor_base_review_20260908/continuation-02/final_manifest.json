@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-09-09T16:01:14.360049+00:00",
+  "recorded_utc": "2026-09-09T16:07:23.654142+00:00",
   "scope": "Exact full-universe one-exchange factor-base optimization at degree 19; no unknown scalar recovery",
   "base_commit": "bd463605fd6d966dcbb8ba40923b746ad8eda1fe",
   "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
@@ -8,7 +8,7 @@
     "examples/koblitz_affine_quotient_base.rs": "9a69e07f594beeaa7c0b7c39312298f6b4d2d2add74a7a45f9f7c02eb6925f46",
     "examples/koblitz_factor_base_math.rs": "55237c735caa6a76fb02f10e48bac7564f85c6c0b07e1dadd91418bb934c4845",
     "examples/koblitz_index_calculus_demo.rs": "8d9e81d47302fcf287c3c57728280b3c02c3eb8bab6c9de70507b172de1f8a3d",
-    "examples/support/koblitz_full_orbit_search.rs": "9e715e8182add5c2eabded8bf4f59d75a6876772d89e750402b272d3c50ad9f7",
+    "examples/support/koblitz_full_orbit_search.rs": "34c236740a709db84e1a186c1a6c605587ef6b3226927f3905caea85b5018d16",
     "src/cryptanalysis/koblitz_bench.rs": "95a1726392a0b3a12cf89762c97adf62748c30438b9dd89ac5603a1f65e84f19",
     "src/cryptanalysis/koblitz_index_calculus.rs": "8b33fd846336b81925a71d342184eda222f6b2c827c2d8bab26f6c949bc8b318",
     "src/cryptanalysis/mod.rs": "504aea87bd1d078040eff7ec9ccfd22c01b2d28ac20e25cdcf65cd39ef1ab667"
@@ -18,8 +18,8 @@
     "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
   },
   "artifact_sha256": {
-    "FULL_ORBIT_BREAKTHROUGH.md": "0ecb8b0d2aeb6d4be1239348af30a9c64d84701bb119fd56a4e7f8c1ac779852",
-    "build.log": "7582c1962e3b4189e624cc0cd7ea5d35bb64f47ac8fedff6553b25074caade07",
+    "FULL_ORBIT_BREAKTHROUGH.md": "dde22f31bea2acba1ee5900f1d5dd6dd50074ca956ed7807e7b8ac443f639cb0",
+    "build.log": "12e03bfeb91502745fa5357ab571f999f156c4e7dfe2917fd44085a656a4fb14",
     "full-orbit-search-exact3-kick-9101.jsonl": "d972351b2c10930ddcaacd5aaad26165c5017c5817ebd673f59d54c7a40d5004",
     "full-orbit-search-exact3-kick-9102.jsonl": "96ccc47990c02c7d245b18c5f211db2d07b5e8951a14baadb9d182ebb5f9dcab",
     "full-orbit-search-exact3-kick-9103.jsonl": "b72daaebbb80033f889cdc10d6efbbbe1db68508df15157ee283d03f94d543bc",
@@ -28,7 +28,7 @@
     "full-orbit-search-exact3-kick-9106.jsonl": "eee87c55a9c8611ea71201165cfce72d03c43fe4947ce1e9b9926d639ca3e481",
     "full-orbit-search-exact3-kick-9107.jsonl": "5a5c5d2d1486a4d416bd77be7bc50121ff35872ada1202b4bbe793d45e5db2da",
     "full-orbit-search-exact3-kick-9108.jsonl": "f02ebec0879a4360a876220f613d859186987e3233305182b38862dee0ca041d",
-    "full-orbit-search-exact3-kick-9118.jsonl": "3f2feb92520c4d6109bd45e338404ab73395d618fa34ede50bfc7ce7ae27eeea",
+    "full-orbit-search-exact3-kick-9118.jsonl": "52b4cfe55d37859850bbd9b8af41386cf2bca179d69de8f184c1562a2c7998b9",
     "full-orbit-search-hybrid-kick-9104.jsonl": "9cdbd7d3dd4c6474fad4058de33dee8ee26ea0ee627e6532f4a7276f1ca0d48b",
     "full-orbit-search-hybrid-kick-9105.jsonl": "4980b592bbfd900b46983826936f786229a67e162b51f9661f0895311cafc30d",
     "full-orbit-search-hybrid-kick-9106.jsonl": "2b42ae54edbe5f05f7b5668168e1ca20336927c755c15183e3388e01cc7494fc",
@@ -52,15 +52,15 @@
     "full-orbit-search-hybrid-kick-9116.jsonl": "e51d46f1a2e4c46c460a55e79d9c670229ad74d5436639736a311da848ba090b",
     "full-orbit-search-hybrid-kick-9117-time.txt": "b30e4e73afc140f414cbb3b3bec2279aa600d25160d234e3757d4e2ba040c244",
     "full-orbit-search-hybrid-kick-9117.jsonl": "f3473de99531d92c057ad10b9ad949b2fa5674cc8e4332584f1cbc234fd3ae06",
-    "full-orbit-search-hybrid-kick-9118-time.txt": "330c9dadbb2f4e34faecabff1d35d5aa1c8bd9b7b32a8b7bb86fe4cb5318aa17",
-    "full-orbit-search-hybrid-kick-9118.jsonl": "23bd3b16be50f9777600c102705dc9ba488d9ab1315aec9a32dd667f70386101",
+    "full-orbit-search-hybrid-kick-9118-time.txt": "ee532bcb570b746337f6febe88c899923d92fd4148ac8813d7c5a25f9626bfbe",
+    "full-orbit-search-hybrid-kick-9118.jsonl": "dc197f8322d1ef5fb4927b6daf89a33e7866abb05b22ce91e317f8b66585d322",
     "full-orbit-search-hybrid-kick-9119-time.txt": "efadeecedb801e40d8d34f9f1abe37bc5616e7f19078d63ee72daf2fd74ea16b",
     "full-orbit-search-hybrid-kick-9119.jsonl": "c14dd0d7d7f54e6d848ba9becd78f5d27a2b58766adc48abfc829ad2ad739d83",
     "full-orbit-search-hybrid-kick-9120-time.txt": "d995fa04dc1e3d992d0656e493e17b8afe58d42bbeb306729cbbb67c0a965eef",
     "full-orbit-search-hybrid-kick-9120.jsonl": "01a4504450a473f60567ac20c52d5c0740d66eabdb6971f15a8092aa2216d0a1",
-    "full-orbit-selected-predicate-certificate.json": "c0ed21f765d3a838fadff11aeb6bc85880286b69b3ba07f5f63461ff2f328d50",
+    "full-orbit-selected-predicate-certificate.json": "2ed149dee1485638cdcd3e14dc08c46e0af324206c9903d6dc072d36950a645d",
     "full_orbit_predicate_certificate.py": "5e0ad5b3df29970e34d948518a758b9e593b121e11b79ed05d1ffeb70ee96d1a",
-    "protocol.json": "5b16181ce1d8ae1293b7b67a723d33f30a910bdac4672274bebd0543cb235112",
+    "protocol.json": "563e2157d122ed66555a24cb0904bda818f6542b97e5a3e6c6a7dfa2a59b317b",
     "restart-summary.json": "5ab9ca62578cd1a57aca72bee22cd464ec56a7816472c03d953902c4f80a9cde",
     "run-time-exact3-kick-9101.txt": "a57101004c30a115689977270384b878d2a9856441ae3885b00c72a8259b10b4",
     "run-time-exact3-kick-9102.txt": "83dda13344a9452c0df74aa72362fa79555e3c029d7b2e8d45c18c9b0e6ac244",
@@ -70,7 +70,7 @@
     "run-time-exact3-kick-9106.txt": "00bdb139517aa0b80f88e9aa1639fcaaf36ceba85658263a5bbd1a0ffee0eb02",
     "run-time-exact3-kick-9107.txt": "7564eb13792afca27313ec35d36ea0e34410f426a5fa2fc4c130c6fc0116b28f",
     "run-time-exact3-kick-9108.txt": "fe3c74f7f33ef41057201c0205ddece578d323623d7f6e1e42234a6ecd258d72",
-    "run-time-exact3-kick-9118.txt": "a16f5c0f3a1342db2a94b3ec7d1cc9a9d6af3bc930418caec38d057e7cfd0177",
+    "run-time-exact3-kick-9118.txt": "8b3035d3da543dff03f041a47d716dbcefd67f366ffc1a848adb1379ed2ae8e7",
     "run-time-hybrid-kick-9104.txt": "2dd9b825e6973e132cd35d1e2f9286bd05b5fac1943dc77a02685d8c3aff1f4c",
     "run-time-hybrid-kick-9105.txt": "d04c337a2f9c81b3b36552821186922ebad64a236fd363a09288447c3cd7d6c2",
     "run-time-hybrid-kick-9106.txt": "d47fd2b0cfc9ab8bddb399cb80279aa7d341cfe139802af77cfd9b030e63f067",
@@ -79,9 +79,9 @@
     "selected-base-sat-round-trip-time.txt": "3e07205b1cd16180bad158902b831396867afa578b8245e14ba04c9a3fc832fb",
     "selected-base-sat-round-trip.log": "da1196ca20ca87476e582f062a9d8fe4bebb32c307b8e8677f9bf43ba50c52c6",
     "summarize_restarts.py": "982ca6ffdefd72bebcb96f6a8a3f4468fa1944152514f1096059f2c4cf8211ee",
-    "validation.txt": "f41fe8a0d55710ad07f37eb969dda2feb6761d6e404c6a447f230dcc05f4dde8",
+    "validation.txt": "15f4a863bb2add62ca1b3f8f7a17477b033cab2d05426da28342ac8fc8ea3651",
     "verification.txt": "da0306660df49256c03eceadd10d618dfcfc94baaffd2c0eaeb43cf235c3355c",
-    "verify_full_orbit_result.py": "21707b35ad63241ffa236f084f2daa7340c28c6d66649437b26e2dd3e030fd66"
+    "verify_full_orbit_result.py": "580d94b4111cfa023af8a998de77033583e9007973fd7271cae85caee7b42482"
   },
   "selected_base": {
     "scalar_representatives": [

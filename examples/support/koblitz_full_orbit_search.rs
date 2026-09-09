@@ -349,6 +349,7 @@ fn full_orbit_search(
                 "remove_position":remove_position,"removed_index":chosen[remove_position],
                 "removed_scalar_representative":exact_targets[chosen[remove_position]],
                 "best_added_index":best.0,"best_added_scalar_representative":exact_targets[best.0],
+                "candidates_scored":exact_targets.len()-retained.len(),
                 "best_covered_target_orbits":best.1})
             );
             proposals.push((remove_position, best.0, best.1));
@@ -367,6 +368,8 @@ fn full_orbit_search(
                 json!({"kind":"full_orbit_one_exchange_local_optimum","round":round,
                 "objective":objective,
                 "selected_indices":chosen,"covered_target_orbits":current_score,
+                "proper_neighbors_scored":chosen.len()*(exact_targets.len()-chosen.len()),
+                "evaluations_including_current_reinsertions":chosen.len()*(exact_targets.len()-chosen.len()+1),
                 "best_neighbor_covered_target_orbits":next_score})
             );
             break;

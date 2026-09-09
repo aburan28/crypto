@@ -31,7 +31,7 @@ Exactly 44 target orbits are covered by the one/two-summand branches but not by 
 
 **Search method and guarantee.** On the order-262543 subgroup, Frobenius acts as multiplication by the public characteristic-polynomial root `lambda`. Each candidate orbit therefore contains the 38 public labels `+-lambda^j*k`. For an orbit type `(i,j,k)`, normalize the first summand to its public representative and enumerate the other two 38-element orbits. Mapping each nonzero modular sum back to its signed Frobenius orbit gives the exact support of that type. A four-orbit base is the union of its 20 triple-type supports, plus its single and pair types for the hybrid objective.
 
-For every current base and each of its four removal positions, the implementation scores all 6,909 possible replacement orbits exactly. It accepts the steepest improving exchange and repeats. The terminal scans show that no one-orbit replacement improves the selected base under either objective. This proves one-exchange local optimality over the full candidate universe; it is not a global optimum over all `binomial(6909,4)` bases.
+For every current base and each of its four removal positions, the implementation scores all 6,906 candidates not already among the three retained orbits. It accepts the steepest improving exchange and repeats. Each terminal pass therefore covers all 27,620 proper one-orbit neighbors, plus four reinsertions of the removed current orbit. The terminal scans show that no one-orbit replacement improves the selected base under either objective. This proves one-exchange local optimality over the full candidate universe; it is not a global optimum over all `binomial(6909,4)` bases.
 
 The search used deterministic two-orbit perturbations of the fixed-pool incumbent. The retained census contains nine exactly-three runs and seventeen hybrid runs. Seed 9118 is the unique record in that census for both objectives, and both objective-specific climbs terminate at the same base. The restart census is in `restart-summary.json`; complete JSONL outputs preserve every accepted exchange and terminal full-neighborhood scan.
 
@@ -69,4 +69,4 @@ python3 research/sat_factor_base_review_20260908/continuation-02/summarize_resta
 cargo test --release cryptanalysis::koblitz_index_calculus::tests::selected_explicit_orbit_base_sat_round_trip_n19 --locked -- --ignored --test-threads=1 --nocapture
 ```
 
-The final source-bound repetitions took 8.21 seconds for the hybrid objective and 7.96 seconds for the exactly-three objective on the recorded host. These timings describe the finite factor-base search implementation. They are not timings for solving the coupled Semaev SAT system.
+The final source-bound repetitions took 8.34 seconds for the hybrid objective and 7.83 seconds for the exactly-three objective on the recorded host. These timings describe the finite factor-base search implementation. They are not timings for solving the coupled Semaev SAT system.
