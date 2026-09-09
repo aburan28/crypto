@@ -1933,12 +1933,33 @@ fn relation_from_decomposition(
     coef_a: &BigUint,
     coef_b: &BigUint,
 ) -> KoblitzRelation {
+    relation_from_decomposition_with_mode(kc, fb, idxs, coef_a, coef_b, true)
+}
+
+fn relation_from_decomposition_with_mode(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    idxs: &[usize],
+    coef_a: &BigUint,
+    coef_b: &BigUint,
+    collapse_negation: bool,
+) -> KoblitzRelation {
     let r = &kc.subgroup_order;
-    let mut row = vec![BigUint::zero(); fb.unknowns()];
+    let unknowns = if collapse_negation {
+        fb.unknowns()
+    } else {
+        fb.orbits.len()
+    };
+    let mut row = vec![BigUint::zero(); unknowns];
     let mut summands = Vec::with_capacity(idxs.len());
     let mut summand_negated = Vec::with_capacity(idxs.len());
     for &i in idxs {
-        let (o, k, negated) = fb.signed_orbit_of[i];
+        let (o, k, negated) = if collapse_negation {
+            fb.signed_orbit_of[i]
+        } else {
+            let (o, k) = fb.orbit_of[i];
+            (o, k, false)
+        };
         let mut coeff = kc.lambda.modpow(&BigUint::from(k), r);
         if negated && !coeff.is_zero() {
             coeff = r - coeff;
@@ -1989,6 +2010,16 @@ pub struct KoblitzIcOptions {
     /// Degree 2 is cheap and helps on overdetermined instances; degree
     /// 3 buys fewer conflicts but far more clauses.
     pub sat_macaulay_degree: Option<u32>,
+    /// Native-XOR/CNF, branching, domain, trace, and conflict controls
+    /// for [`DecompositionStrategy::Sat`].
+    pub sat_options: SatDecompositionOptions,
+    /// Identify `P` and `-P` as one signed Frobenius relation unknown.
+    /// Disable only for a matched Frobenius-only control.
+    pub collapse_negation: bool,
+    /// Attempt the relation solve as soon as `unknowns + 1` equations
+    /// are available and stop only when the recovered scalar verifies.
+    /// Disable to retain the fixed-surplus collection control.
+    pub stop_on_verified_rank: bool,
 }
 
 impl Default for KoblitzIcOptions {
@@ -2004,6 +2035,9 @@ impl Default for KoblitzIcOptions {
             node_budget: 4096,
             max_models: 64,
             sat_macaulay_degree: Some(2),
+            sat_options: SatDecompositionOptions::default(),
+            collapse_negation: true,
+            stop_on_verified_rank: true,
         }
     }
 }
@@ -2038,8 +2072,39 @@ pub struct KoblitzIcReport {
     pub sat_unknowns: usize,
     /// Encoding/model verification failures; any nonzero value invalidates a run.
     pub sat_invalid_models: usize,
+    /// SAT models examined across relation collection.
+    pub sat_models: usize,
+    /// Cumulative CDCL conflicts across relation collection.
+    pub sat_conflicts: u64,
+    /// Time spent generating candidate targets and decomposing them.
+    pub relation_collection_ns: u128,
+    /// Time spent solving the final modular relation matrix.
+    pub linear_algebra_ns: u128,
+    /// Modular relation solves attempted, including rank-deficient ones.
+    pub linear_solve_attempts: usize,
+    /// Whether negation was folded into signed Frobenius columns.
+    pub collapse_negation: bool,
     /// Log recovered from R = O directly, bypassing the relation matrix.
     pub direct_relation: bool,
+}
+
+fn solve_relation_system(
+    relations: &[KoblitzRelation],
+    relation_unknowns: usize,
+    cofactor: &BigUint,
+    modulus: &BigUint,
+) -> Option<BigUint> {
+    let h = cofactor % modulus;
+    let mut matrix = Vec::with_capacity(relations.len());
+    let mut rhs = Vec::with_capacity(relations.len());
+    for relation in relations {
+        let mut row = relation.row.clone();
+        row.push((modulus - (&h * &relation.coef_b) % modulus) % modulus);
+        matrix.push(row);
+        rhs.push((&h * &relation.coef_a) % modulus);
+    }
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)?;
+    solution.get(relation_unknowns).cloned()
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -2070,12 +2135,17 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
 ) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
+    let relation_unknowns = if opts.collapse_negation {
+        fb.unknowns()
+    } else {
+        fb.orbits.len()
+    };
 
     let index_of = fb.index_map();
 
     let mut report = KoblitzIcReport {
         factor_base_size: fb.points.len(),
-        orbit_count: fb.unknowns(),
+        orbit_count: relation_unknowns,
         ell: fb.ell,
         relations: 0,
         trials: 0,
@@ -2086,6 +2156,12 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         sat_refutations: 0,
         sat_unknowns: 0,
         sat_invalid_models: 0,
+        sat_models: 0,
+        sat_conflicts: 0,
+        relation_collection_ns: 0,
+        linear_algebra_ns: 0,
+        linear_solve_attempts: 0,
+        collapse_negation: opts.collapse_negation,
         direct_relation: false,
     };
     if fb.points.is_empty() {
@@ -2093,10 +2169,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     }
 
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let wanted = fb.unknowns() + opts.extra_relations;
+    let wanted = relation_unknowns + opts.extra_relations.max(1);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    let relation_start = std::time::Instant::now();
 
     while relations.len() < wanted && report.trials < opts.max_trials {
         report.trials += 1;
@@ -2111,6 +2188,10 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                 report.log = Some(d);
                 report.direct_relation = true;
                 report.relations = relations.len();
+                report.relation_collection_ns = relation_start
+                    .elapsed()
+                    .as_nanos()
+                    .saturating_sub(report.linear_algebra_ns);
                 return Some(report);
             }
             continue;
@@ -2134,7 +2215,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                 idxs
             }
             DecompositionStrategy::Sat => {
-                let (idxs, stats) = sat_decompose(
+                let (idxs, stats) = sat_decompose_with(
                     kc,
                     fb,
                     &index_of,
@@ -2143,40 +2224,69 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                     opts.m,
                     opts.max_models,
                     opts.sat_macaulay_degree,
+                    opts.sat_options,
                 );
                 report.sat_calls += stats.solver_calls;
                 report.sat_refutations += usize::from(stats.refuted);
                 report.sat_unknowns += usize::from(stats.exhausted);
                 report.sat_invalid_models += stats.spurious;
+                report.sat_models += stats.models;
+                report.sat_conflicts += stats.conflicts;
                 if stats.spurious != 0 {
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
                     return Some(report);
                 }
                 idxs
             }
         };
         if let Some(idxs) = found {
-            relations.push(relation_from_decomposition(kc, fb, &idxs, &a, &b));
+            relations.push(relation_from_decomposition_with_mode(
+                kc,
+                fb,
+                &idxs,
+                &a,
+                &b,
+                opts.collapse_negation,
+            ));
+            if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
+                report.linear_solve_attempts += 1;
+                let linear_start = std::time::Instant::now();
+                let candidate =
+                    solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+                    report.log = Some(d);
+                    report.relations = relations.len();
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
+                    return Some(report);
+                }
+            }
         }
     }
+    report.relation_collection_ns = relation_start
+        .elapsed()
+        .as_nanos()
+        .saturating_sub(report.linear_algebra_ns);
     report.relations = relations.len();
-    if relations.len() < fb.unknowns() + 1 {
+    if relations.len() < relation_unknowns + 1 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
-    let s = fb.unknowns();
-    let h = &kc.cofactor % r;
-    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
-    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
-    for rel in &relations {
-        let mut row = rel.row.clone();
-        row.push((r - (&h * &rel.coef_b) % r) % r);
-        matrix.push(row);
-        rhs.push((&h * &rel.coef_a) % r);
-    }
-    let sol = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, r)?;
-    let d = sol.get(s)?.clone();
+    report.linear_solve_attempts += 1;
+    let linear_start = std::time::Instant::now();
+    let Some(d) = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r) else {
+        report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+        return Some(report);
+    };
+    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
     if kc.mul(&g, &d) == *q {
         report.log = Some(d);
     }
@@ -3147,16 +3257,41 @@ mod tests {
         let g = kc.generator().clone();
         let d = BigUint::from(53u32);
         let q = kc.mul(&g, &d);
-        let opts = KoblitzIcOptions {
-            strategy: DecompositionStrategy::Sat,
-            ..KoblitzIcOptions::default()
-        };
-        let fb = build_frobenius_factor_base(&kc, opts.factor_index).unwrap();
-        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &fb, &opts).unwrap();
-        assert_eq!(report.log, Some(d));
-        assert_eq!(report.orbit_count, fb.unknowns());
-        assert!(report.sat_calls > 0, "the SAT path must have run");
-        assert_eq!(report.reductions, 0, "no Gröbner work on this path");
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let mut signed_fixed_relations = None;
+        let mut signed_early_relations = None;
+        for (collapse_negation, stop_on_verified_rank) in
+            [(false, false), (true, false), (true, true)]
+        {
+            let opts = KoblitzIcOptions {
+                strategy: DecompositionStrategy::Sat,
+                collapse_negation,
+                stop_on_verified_rank,
+                ..KoblitzIcOptions::default()
+            };
+            let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &fb, &opts).unwrap();
+            assert_eq!(report.log, Some(d.clone()));
+            assert_eq!(report.collapse_negation, collapse_negation);
+            assert_eq!(
+                report.orbit_count,
+                if collapse_negation {
+                    fb.unknowns()
+                } else {
+                    fb.orbits.len()
+                }
+            );
+            assert!(report.sat_calls > 0, "the SAT path must have run");
+            assert_eq!(report.reductions, 0, "no Gröbner work on this path");
+            if !stop_on_verified_rank {
+                assert_eq!(report.relations, report.orbit_count + opts.extra_relations);
+            }
+            if collapse_negation && stop_on_verified_rank {
+                signed_early_relations = Some(report.relations);
+            } else if collapse_negation {
+                signed_fixed_relations = Some(report.relations);
+            }
+        }
+        assert!(signed_early_relations.unwrap() < signed_fixed_relations.unwrap());
     }
 
     #[test]

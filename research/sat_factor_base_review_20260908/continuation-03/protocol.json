@@ -1,0 +1,66 @@
+{
+  "scope": "Paired complete toy degree-19 index-calculus timing with verified unknown-scalar recovery",
+  "curve": "K_1 over F_2[z]/(z^19+z^5+z^2+z+1)",
+  "subgroup_order": 262543,
+  "factor_base": {
+    "points": 152,
+    "ordinary_frobenius_orbits": 8,
+    "signed_frobenius_orbits": 4,
+    "scalar_representatives": [203, 2143, 2901, 9853],
+    "point_representatives": [[16795, 144921], [1315, 90425], [8461, 38471], [6685, 369649]]
+  },
+  "shared_configuration": {
+    "decomposition_summands": 3,
+    "solver": "in-tree CDCL with native XOR rows",
+    "exact_coordinate_domain": true,
+    "trace_constraint": true,
+    "per_target_conflict_budget": 10000,
+    "max_models_per_target": 1024,
+    "max_target_trials": 64,
+    "fixed_surplus_ceiling": 2
+  },
+  "control": {
+    "name": "frobenius",
+    "relation_columns": 8,
+    "collapse_negation": false,
+    "stop_on_verified_rank": false,
+    "relations_required": 10
+  },
+  "optimized": {
+    "name": "optimized",
+    "relation_columns": 4,
+    "collapse_negation": true,
+    "stop_on_verified_rank": true,
+    "relations_required_on_completed_runs": 5,
+    "early_stop_guard": "candidate scalar must reproduce the public target point"
+  },
+  "pairs": [
+    {"run_seed": 1, "secret": 4242, "execution_order": ["optimized", "control"]},
+    {"run_seed": 2, "secret": 9001, "execution_order": ["optimized", "control"]},
+    {"run_seed": 3, "secret": 17001, "execution_order": ["optimized", "control"]},
+    {"run_seed": 4, "secret": 30001, "execution_order": ["control", "optimized"]}
+  ],
+  "admission": [
+    "both arms use identical curve, factor-base points, target, sampler seed, target order, SAT encoding, and conflict budget",
+    "both arms recover the planted unknown scalar and independently reproduce the public target",
+    "direct-relation shortcuts are rejected",
+    "any invalid SAT model rejects the run",
+    "UNKNOWN is an inconclusive skipped target and never a refutation or relation",
+    "internal end-to-end time must agree with external real time within two percent",
+    "the optimized arm must beat the control in every pair"
+  ],
+  "result": {
+    "completed_pairs": 4,
+    "optimized_total_seconds": 428.684135917,
+    "control_total_seconds": 918.0428925,
+    "aggregate_speedup": 2.141536892976482,
+    "minimum_paired_speedup": 1.2205384518092863,
+    "median_paired_speedup": 2.28190506304131,
+    "geometric_mean_paired_speedup": 2.1464466411548924,
+    "optimized_total_trials": 94,
+    "control_total_trials": 184,
+    "optimized_total_sat_conflicts": 865057,
+    "control_total_sat_conflicts": 1669784
+  },
+  "claim_boundary": "Measured end-to-end constant-factor speedup for the recorded toy degree-19 SAT index-calculus implementation; no exponent improvement, Pollard-rho comparison, global factor-base optimum, or deployed-curve security claim"
+}

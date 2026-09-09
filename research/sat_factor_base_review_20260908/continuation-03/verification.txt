@@ -1,0 +1,5 @@
+Four matched pairs recovered and independently reverified unknown scalars 4242, 9001, 17001, and 30001; seed 4 ran control first.
+Optimized total 428.684136s versus control 918.042893s: 2.141537x aggregate end-to-end speedup.
+Every pair improved: minimum 1.220538x, median 2.281905x, geometric mean 2.146447x.
+The optimized arm used 94 trials and 865057 conflicts; the control used 184 trials and 1669784 conflicts.
+The seed-1 cutoff sweep completed at 5000, 10000, and 20000 conflicts; 10000 was the fastest completing operating point.

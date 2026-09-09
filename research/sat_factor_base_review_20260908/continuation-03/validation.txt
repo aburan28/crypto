@@ -1,0 +1,18 @@
+Focused validation for the end-to-end speedup continuation
+
+- cargo test --release cryptanalysis::koblitz_index_calculus --locked -- --test-threads=1
+  33 passed; 0 failed; 1 deliberate n=19 test ignored.
+- cargo test --release cryptanalysis::koblitz_index_calculus::tests::selected_explicit_orbit_base_sat_round_trip_n19 --locked -- --ignored --test-threads=1
+  1 passed; 0 failed.
+- cargo check --release --example koblitz_selected_e2e --locked
+  Passed.
+- Four optimized and four Frobenius-control processes at a 10000-conflict cutoff
+  All eight returned exit status 0, recovered their planted unknown scalar, reproduced the public target, rejected direct-relation shortcuts, and recorded zero invalid SAT models.
+- Seed-1 optimized cutoff sweep at 5000, 10000, and 20000 conflicts
+  All three completed and verified scalar 4242. The 10000-conflict run was fastest.
+- python3 research/sat_factor_base_review_20260908/continuation-03/verify_e2e_speedup.py
+  Passed matched-input, completion, relation-count, scalar-verification, invalid-model, internal/external-time, cutoff-selection, and aggregate-speedup checks.
+
+Admitted aggregate: optimized 428.684136 seconds versus Frobenius control 918.042893 seconds, a 2.141537x end-to-end speedup. Every pair improved; minimum 1.220538x, median 2.281905x, geometric mean 2.146447x.
+
+The repository emits existing compiler warnings. All focused commands above returned exit status 0. Timing claims use the in-process monotonic interval from curve setup through verified recovery; external process real times agree within two percent.
