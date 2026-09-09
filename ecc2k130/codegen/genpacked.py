@@ -48,7 +48,8 @@ def check(n, inverse):
         actual = x
         for shift,mask in stages(n,inverse):
             actual ^= (actual >> shift) & mask
-        assert actual == expected, (n,inverse,x)
+        if actual != expected:
+            raise ValueError(('packed transform mismatch', n, inverse, x))
 
 
 def emitStages(n, inverse):

@@ -7,10 +7,15 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 import time
 
 import modal
+# Modal re-imports this entry point as /root/packed_audit.py; dependencies live
+# in the source tree copied into client.image.
+if not modal.is_local():
+    sys.path.insert(0, "/root/ecc2k130")
 import modal_app as client
 
 app = modal.App("ecc2k130-packed-audit")
