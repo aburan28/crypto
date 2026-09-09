@@ -7,6 +7,9 @@ namespace eccPacked131 {
 #ifndef ECC_PACKED_CACHE_DENOM
 #define ECC_PACKED_CACHE_DENOM 0
 #endif
+#if ECC_PACKED_CACHE_DENOM != 0 && ECC_PACKED_CACHE_DENOM != 1
+#error "ECC_PACKED_CACHE_DENOM must be 0 or 1"
+#endif
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
