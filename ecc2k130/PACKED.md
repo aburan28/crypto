@@ -5,6 +5,10 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
+The latest [paired-product configuration](PAIRED-PRODUCTS.md) measures
+**6.211583 B scalar iterations/s** and **6.126760 B/s** during normal
+distinguished-point collection on RTX PRO 6000. Its guide includes all flags.
+
 The latest [polynomial-chain configuration](POLYNOMIAL-CHAIN.md) measures
 **6.058466 billion scalar iterations/s**, and **5.974502 B/s** during normal
 distinguished-point collection, on RTX PRO 6000. Its guide includes all flags

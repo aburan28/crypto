@@ -7,6 +7,10 @@ Hamming weights, reports and packed checkpoints keep their normal-basis
 representation. The field inversion helper is unchanged, with conversions at
 its boundary.
 
+The additional [paired-product configuration](PAIRED-PRODUCTS.md) measures
+6.211583 B/s with polynomial chains enabled. The results below describe the
+chain implementation before that additional optimization.
+
 ## Run the measured configuration
 
 ```bash
