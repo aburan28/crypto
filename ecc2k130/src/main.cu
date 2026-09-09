@@ -5,6 +5,7 @@
 // is identical in both cases, only the word width differs (32 bits on the
 // device, 64 on the host).
 #include <signal.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +71,7 @@ struct Options {
     unsigned runId = 1;
     u64 maxIters = 0;
     bool bench = false;
+    bool packed = false;
     bool preferL1 = false;
     bool test = false;
     bool polyBasis = false;
@@ -101,8 +103,8 @@ struct CkptHeader {
 };
 
 static bool ckptHeaderMatches(const CkptHeader &h, int m, int threads, int batch, int lanes,
-                              unsigned runId) {
-    return memcmp(h.magic, "ECC2K130", 8) == 0 && h.version == 1u && h.m == (unsigned)m &&
+                              unsigned runId, unsigned version = 1u) {
+    return memcmp(h.magic, "ECC2K130", 8) == 0 && h.version == version && h.m == (unsigned)m &&
            h.threads == (unsigned)threads && h.batch == (unsigned)batch &&
            h.lanes == (unsigned)lanes && h.runId == runId;
 }
@@ -111,7 +113,7 @@ static bool ckptHeaderMatches(const CkptHeader &h, int m, int threads, int batch
 // writes, and leave the file positioned after the header if it is.  A file cut
 // short by a container that died mid-write has a perfectly good header, and
 // reading it would leave half the walks restored and half still at their start
-// points -- a state no run ever occupied.  Starting fresh is better than that.
+// points -- a state no run ever occupied. Such checkpoints must be rejected.
 static bool ckptPayloadIsWhole(FILE *f, size_t payload) {
     if (fseek(f, 0, SEEK_END) != 0) return false;
     const long total = ftell(f);
@@ -261,6 +263,7 @@ struct HostEngine {
     }
 
     const char *name() const { return "cpu"; }
+    bool needsReseed() const { return false; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
 
@@ -399,9 +402,12 @@ struct CudaEngine {
         return n;
     }
 
-    size_t fieldCount() const { return (size_t)P.threads * BATCH * M; }
+    virtual ~CudaEngine() = default;
+    virtual size_t fieldCount() const { return (size_t)P.threads * BATCH * M; }
     size_t slotCount() const { return (size_t)P.threads * BATCH; }
-    size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
+    virtual size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
+    virtual unsigned checkpointVersion() const { return 1u; }
+    virtual int checkpointLanes() const { return LANES; }
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
         CUDA_CHECK(cudaDeviceSynchronize());
@@ -410,11 +416,11 @@ struct CudaEngine {
         if (!f) return false;
         CkptHeader h;
         memcpy(h.magic, "ECC2K130", 8);
-        h.version = 1u;
+        h.version = checkpointVersion();
         h.m = (unsigned)M;
         h.threads = (unsigned)P.threads;
         h.batch = (unsigned)BATCH;
-        h.lanes = (unsigned)LANES;
+        h.lanes = (unsigned)checkpointLanes();
         h.runId = runId;
         h.iterBase = iterBase;
         bool ok = fwrite(&h, sizeof h, 1, f) == 1;
@@ -448,7 +454,7 @@ struct CudaEngine {
         const size_t payload = (2 * fieldCount() + slotCount()) * sizeof(W) +
                                2 * laneCount() * sizeof(u64);
         bool ok = fread(&h, sizeof h, 1, f) == 1 &&
-                  ckptHeaderMatches(h, M, P.threads, BATCH, LANES, runId) &&
+                  ckptHeaderMatches(h, M, P.threads, BATCH, checkpointLanes(), runId, checkpointVersion()) &&
                   ckptPayloadIsWhole(f, payload);
         if (!ok) { fclose(f); return false; }
         std::vector<W> fbuf(fieldCount());
@@ -474,8 +480,10 @@ struct CudaEngine {
     }
 
     const char *name() const { return "cuda"; }
+    bool needsReseed() const { return false; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
+#include "../include/packedengine.cuh"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -801,8 +809,14 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         if (eng.restore(o.ckptFile.c_str(), &iterBase, o.runId))
             printf("resumed from %s at iteration %llu\n", o.ckptFile.c_str(),
                    (unsigned long long)iterBase);
-        else
-            printf("no usable checkpoint at %s, starting fresh\n", o.ckptFile.c_str());
+        else {
+            struct stat existing;
+            if (stat(o.ckptFile.c_str(), &existing) == 0 || errno != ENOENT) {
+                fprintf(stderr, "checkpoint %s is incompatible or incomplete; use the matching backend/settings or a new checkpoint path\n", o.ckptFile.c_str());
+                return 6;
+            }
+            printf("no checkpoint at %s, starting fresh\n", o.ckptFile.c_str());
+        }
     }
 
     const u64 timedIterBase = iterBase;
@@ -814,7 +828,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         eng.launch(iterBase);
         const unsigned n = eng.fetch(recs);
         iterBase += (u64)o.steps;
-        if (n) eng.reseed(iterBase);
+        if (n || eng.needsReseed()) eng.reseed(iterBase);
         if (n > recs.size()) lost += n - recs.size();
         totalDp += recs.size();
         for (size_t i = 0; i < recs.size(); ++i) {
@@ -954,6 +968,19 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     }
 
 #ifndef ECC_NO_CUDA
+    if (o.packed) {
+        if constexpr (Cfg::M == 131) {
+            PackedCudaEngine eng;
+            if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
+            eng.setup(o, px, py, qx, qy);
+            printf("backend %s: %d threads x %d slots x 1 lanes = %llu walks, dp weight %d, %d steps per launch\n",
+                   eng.name(), o.threads, (int)ECC_BATCH, eng.walksPerLaunch(), o.dpWeight, o.steps);
+            return runSearch<Cfg>(o, eng, sol, haveK ? &knownK : NULL);
+        } else {
+            fprintf(stderr, "--packed is supported only for GF(2^131)\n");
+            return 1;
+        }
+    }
     CudaEngine<Cfg> eng;
     if (o.preferL1)
         CUDA_CHECK(cudaFuncSetCacheConfig(eccWalkKernel<Cfg, DeviceWord>, cudaFuncCachePreferL1));
@@ -989,6 +1016,7 @@ static void usage() {
         "  --checkpoint F   save and resume walk state through F\n"
         "  --checkpoint-every S   seconds between checkpoints (default 300)\n"
         "  --bench          throughput only, no distinguished-point handling\n"
+        "  --packed         packed CUDA backend for GF(2^131); one walk per slot\n"
         "  --prefer-l1      request more L1 cache for the CUDA walk kernel\n"
         "  --test           run the validation suite and exit\n"
         "  --device D       CUDA device index\n"
@@ -1022,6 +1050,7 @@ int main(int argc, char **argv) {
         else if (a == "--checkpoint-every" && nx) o.ckptSeconds = atof(argv[++i]);
         else if (a == "--device" && nx) o.device = atoi(argv[++i]);
         else if (a == "--bench") o.bench = true;
+        else if (a == "--packed") o.packed = true;
         else if (a == "--prefer-l1") o.preferL1 = true;
         else if (a == "--poly-basis") o.polyBasis = true;
         else if (a == "--test") o.test = true;
@@ -1032,6 +1061,7 @@ int main(int argc, char **argv) {
     // register allocation of a kernel that is only instantiated once the curve
     // is known, so CudaEngine::autoThreads decides it in runCurve.
 #ifdef ECC_NO_CUDA
+    if (o.packed) { fprintf(stderr, "--packed requires the CUDA client\n"); return 1; }
     if (o.threads <= 0) {
 #ifdef _OPENMP
         o.threads = omp_get_max_threads();

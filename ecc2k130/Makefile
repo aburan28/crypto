@@ -46,7 +46,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h
+       include/curveparams.h include/packed131.h include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -132,7 +132,12 @@ test-schedule:
 	./build/test-schedule-base
 	./build/test-schedule-stream
 
-test: check-cli check-cycles test-schedule ecc2k130-cpu
+test-packed:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed
+	./build/test-packed
+
+test: check-cli check-cycles test-schedule test-packed ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -191,5 +196,6 @@ modal:
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
+	rm -f build/test-packed
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
