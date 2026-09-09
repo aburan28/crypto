@@ -106,6 +106,13 @@ def generate():
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--out',default='../include/packedtransform131.h')
+    parser.add_argument('--check',action='store_true')
     args=parser.parse_args()
-    Path(args.out).write_text(generate())
-    print('Packed transforms verified on every basis vector and generated:',args.out)
+    generated=generate()
+    if args.check:
+        if Path(args.out).read_text()!=generated:
+            raise SystemExit('packed transform header does not match the generator')
+        print('Packed transforms verified; generated header matches:',args.out)
+    else:
+        Path(args.out).write_text(generated)
+        print('Packed transforms verified on every basis vector and generated:',args.out)

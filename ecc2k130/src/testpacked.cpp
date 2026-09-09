@@ -8,6 +8,17 @@ static unsigned long long randomWord() { state ^= state << 13; state ^= state >>
 static P pack(R::Elem a) { P p; for (int i=0;i<5;i++) p.v[i]=unsigned(a.v[i/2]>>(32*(i&1))); return p; }
 static R::Elem unpack(P p) { unsigned long long a[3]={p.v[0]|(static_cast<unsigned long long>(p.v[1])<<32),p.v[2]|(static_cast<unsigned long long>(p.v[3])<<32),p.v[4]};return R::fromLimbs(a); }
 int main() {
+    // Check every pair of unit coefficients, including the top-three-bit
+    // product and the output fold. Dense cases below also exercise carries in
+    // the integer-mask carryless primitive.
+    for (int i=0;i<131;i++) for (int j=0;j<131;j++) {
+        unsigned long long av[3]={},bv[3]={};
+        av[i/64]=1ull<<(i%64);bv[j/64]=1ull<<(j%64);
+        auto a=R::fromLimbs(av),b=R::fromLimbs(bv);
+        if (unpack(eccPacked131::mul131(pack(a),pack(b)))!=R::mul(a,b)) {
+            printf("packed basis-pair mismatch at %d,%d\n",i,j);return 1;
+        }
+    }
     for (int test=0;test<160;test++) {
         unsigned long long av[3]={randomWord(),randomWord(),randomWord()&7},bv[3]={randomWord(),randomWord(),randomWord()&7};
         if (test<131) {av[0]=av[1]=av[2]=0;av[test/64]=1ull<<(test%64);}
