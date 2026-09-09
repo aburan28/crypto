@@ -33,7 +33,7 @@ def profileResult(returncode, output):
         result.update(kind='profiling_failed',
                       why='Nsight Compute failed (exit %d): %s' %
                           (returncode, errors[0] if errors else 'see profiler output'),
-                      remedy='check the reported profiler version and full log; a generic error does not establish a counter-permission failure')
+                      remedy='run modal run profile_diagnostic.py to compare a tiny CUDA control with profiling; a generic error does not establish a counter-permission failure')
     elif not re.search(r'==PROF==\s+Profiling\s+', output):
         result.update(kind='no_kernel_profiled',
                       why='Nsight Compute exited without reporting a profiled kernel; check the kernel filter')

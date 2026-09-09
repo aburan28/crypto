@@ -9,6 +9,17 @@ The experimental options below have **no claimed GPU throughput gain**. They
 preserve the walk function and remain disabled by default. CPU arithmetic and
 state-equivalence checks do not replace CUDA correctness or performance tests.
 
+User-supplied completed runs on 2026-09-08 reinforce leaving stream Karatsuba
+disabled: its three rates were 747.721, 748.012 and 747.949 M it/s, versus a
+fresh control's 857.220, 857.163 and 857.162 M it/s. Their medians are 747.949
+and 857.163 M it/s respectively (12.74% lower throughput for the stream build).
+Both logs identify CUDA 12.8.1, leaf 66, batch 32, 128 threads/block, two blocks/SM,
+and zero shared allocation. These were different GPU allocations and source
+digests, so this is not a same-host, same-source single-variable experiment.
+Nevertheless, the control repeats the earlier approximately 857 M baseline and
+the stream build has shown no throughput benefit. Its smaller local allocation
+is not evidence of fewer memory instructions or higher speed.
+
 ## What this implementation lets you compare
 
 | Option | Default | Purpose |
@@ -125,6 +136,42 @@ and the local CLI exits nonzero. Explicit counter-access denials are identified
 separately; `Unknown Error on device 0` does not prove a permissions problem.
 An exit of zero without a profiled-kernel marker also fails. Successful results
 include the profiler version, binary path and command alongside build identity.
+
+### If preparation still fails with the pinned profiler
+
+Use the standalone control before rebuilding or tuning the ECC client:
+
+```bash
+modal run profile_diagnostic.py --output profile-diagnostic.json
+```
+
+It builds a separate tiny image and uses one RTX PRO 6000 allocation, with a
+five-minute function limit. The CUDA control has one block, 256 threads and
+1 KiB of device state; its normal run checks all output words. Then it tries
+launch metadata, hardware counters, and application replay with clock/cache
+controls disabled. Each subprocess group has a bounded timeout. The JSON
+records commands, output, exit status, GPU/driver identity and relevant
+read-only process/driver settings. It does not change driver or host security
+settings. An all-failed diagnostic exits nonzero after saving its evidence.
+
+On 2026-09-08, a fresh Modal RTX PRO 6000 allocation with driver 580.95.05 and
+Nsight Compute 2025.3.1 passed normal CUDA execution, but **all three profiler
+controls failed** with exit 9 and `Failed to prepare kernel for profiling`.
+The observed process was UID 0 and the driver reported
+`RmProfilingAdminOnly: 0`. This reproduces the error without ECC arithmetic or
+its large stack. It is evidence of a problem extending beyond the ECC kernel
+on that allocation; it does not identify the exact driver/container failure
+or establish a provider-wide limitation.
+
+Modal describes using gVisor and nvproxy in its
+[runtime](https://modal.com/blog/truly-serverless-gpus). Upstream gVisor has a
+[change adding Nsight-specific control commands](https://github.com/google/gvisor/commit/0904ed11d),
+including commands gated on its profiling capability. Runtime support and
+configuration are therefore concrete questions for the provider, but the
+diagnostic does not reveal Modal's deployed gVisor revision or prove that this
+particular change is missing. Send the small reproducer and JSON to the provider
+to investigate; a supported native profiling host is another way to obtain
+counters. Ordinary unprofiled benchmark comparisons can continue independently.
 
 NVIDIA's [release notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html)
 document Blackwell support and subsequent improvements; the versioned package
