@@ -87,6 +87,22 @@ fn drop_projected_orbit(
             assert!(orbit.iter().all(|&i| !keep[i]));
         }
     }
+    let mut signed_orbits = Vec::new();
+    let mut signed_orbit_of = vec![(0, 0, false); points.len()];
+    for orbit in &fb.signed_orbits {
+        if keep[orbit[0]] {
+            assert!(orbit.iter().all(|&i| keep[i]));
+            let signed_orbit = signed_orbits.len();
+            let indices: Vec<_> = orbit.iter().map(|&i| remap[i]).collect();
+            for (&old, &new) in orbit.iter().zip(&indices) {
+                let (_, power, negated) = fb.signed_orbit_of[old];
+                signed_orbit_of[new] = (signed_orbit, power, negated);
+            }
+            signed_orbits.push(indices);
+        } else {
+            assert!(orbit.iter().all(|&i| !keep[i]));
+        }
+    }
     let xs: HashSet<_> = points
         .iter()
         .filter_map(|p| match p {
@@ -98,6 +114,8 @@ fn drop_projected_orbit(
     fb.points = points;
     fb.orbits = orbits;
     fb.orbit_of = orbit_of;
+    fb.signed_orbits = signed_orbits;
+    fb.signed_orbit_of = signed_orbit_of;
     fb
 }
 

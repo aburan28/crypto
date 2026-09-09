@@ -1,0 +1,5 @@
+Reconstructed all 6909 signed-Frobenius target orbits from the public characteristic-polynomial root.
+Independent modular enumeration verified 6256 exactly-three and 6300 at-most-three target orbits for the selected four-orbit base.
+Both Rust support bitsets match the independent sets bit for bit; the group-law oracle matches the counts and symmetric-cube total.
+The recorded terminal scans cover all four removals and report no improving one-orbit neighbor for either objective.
+The selected explicit domain passes the recorded native-XOR S4 round trip in one model with 5472 conflicts and no invalid or exhausted result.

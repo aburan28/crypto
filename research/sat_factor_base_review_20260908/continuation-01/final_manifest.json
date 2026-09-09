@@ -4,12 +4,12 @@
   "base_commit": "10a3cb80746ada79dc3f577a460e16c75dc4130f",
   "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
   "source_sha256": {
-    "examples/koblitz_factor_base_math.rs": "5e172c090d3b98125234f5e53441449daf9f70cf51fe6dd0a5c3439c0a096723",
-    "examples/koblitz_affine_quotient_base.rs": "963fd7f93c1e4ab42d4156c777a78dc581145b8d46b1db121e4015b2f871af71",
+    "examples/koblitz_factor_base_math.rs": "55237c735caa6a76fb02f10e48bac7564f85c6c0b07e1dadd91418bb934c4845",
+    "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/affine-final-fixed-pool.rs": "963fd7f93c1e4ab42d4156c777a78dc581145b8d46b1db121e4015b2f871af71",
     "examples/koblitz_quotient_geometry.rs": "e7052baa6caa4f824e427b9ab83f3b17dd0ed76007d44e52b069ad9bd5eaa6d5",
     "examples/koblitz_factor_base_yield.rs": "4c08042cbebfab1a557a59656a1b619ce2782a06b9b03276dfc8a352820ecc34",
     "examples/support/koblitz_global_pool.rs": "367cd1a3e4f0d90814a191666afffbf9284bd2546e14b9a6ee0ce6113d417e6e",
-    "src/cryptanalysis/koblitz_index_calculus.rs": "69227dece5c10301451034396c94bd720a484d2431443ce5f262e451e6f5e84e",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "8b33fd846336b81925a71d342184eda222f6b2c827c2d8bab26f6c949bc8b318",
     "src/cryptanalysis/semaev_sat.rs": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7",
     "src/cryptanalysis/sat.rs": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
     "src/binary_ecc/curve.rs": "f50c8a9c0f26fe694af434cf17d0408abef9f6bdb0812ab3a67efa68ac0c3aa6",
@@ -62,7 +62,8 @@
     "source_snapshots/affine-before-global.rs": "f08c4d7eb204bf2a6d4f377f2654f9828f62242c44ad4896dc8f332becc5728b",
     "source_snapshots/quotient-koblitz.rs": "13b3825278c09d99ba16b17bc409cc0ab6ca68c235e91d1e5cd9f2d77c6bbc1a",
     "source_snapshots/affine-conditioned-first-three.rs": "afa419ecee90e02634ed8443ef5dabd33d8c5b77508a03f53bbde4acf050c5ac",
-    "source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+    "source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+    "source_snapshots/affine-final-fixed-pool.rs": "963fd7f93c1e4ab42d4156c777a78dc581145b8d46b1db121e4015b2f871af71"
   },
   "validation": "All completed mathematical runs returned exit status 0; exact support and count checks are in verification.txt; global optimum selected by exhaustive 66045-subset comparison."
 }
