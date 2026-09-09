@@ -16,6 +16,9 @@ namespace eccPacked131 {
 #ifndef ECC_PACKED_PAIR_PRODUCTS
 #define ECC_PACKED_PAIR_PRODUCTS 0
 #endif
+#if ECC_PACKED_PAIR_PRODUCTS && !ECC_PACKED_POLY_CHAIN
+#error "ECC_PACKED_PAIR_PRODUCTS requires polynomial chains"
+#endif
 #if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
 #error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
 #endif

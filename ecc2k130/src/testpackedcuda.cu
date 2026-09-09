@@ -65,6 +65,15 @@ void multiplicationProbe(const P131 *a, const P131 *b, P131 *output, int n) {
     if (i<n) output[i]=eccPacked131::mulPolynomial131(a[i],b[i]);
 }
 
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *second,int n) {
+    int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if(i<n) {
+        auto pair=eccPacked131::mulPolynomialPair131(a[i],b[i],c[i]);
+        first[i]=pair.first;second[i]=pair.second;
+    }
+}
+
 static bool same(P131 a, P131 b) {
     for (int i=0;i<5;i++) if (a.v[i]!=b.v[i]) return false;
     return true;
@@ -115,6 +124,30 @@ static bool polynomialChecks() {
         fprintf(stderr,"GPU polynomial multiplication mismatch at %d\n",i);return false;
     }
     printf("PASS: %d GPU polynomial products, including all 17161 basis pairs\n",n);
+
+    std::vector<P131> c(n),second(n);
+    for(int i=0;i<n;i++) {
+        c[i].v[0]=(b[i].v[0]<<1)|(b[i].v[4]>>2);
+        for(int j=1;j<5;j++) c[i].v[j]=(b[i].v[j]<<1)|(b[i].v[j-1]>>31);
+        c[i].v[4]&=7;
+    }
+    P131 *deviceC,*deviceSecond;
+    checked(cudaMalloc(&deviceA,n*sizeof(P131)));checked(cudaMalloc(&deviceB,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceC,n*sizeof(P131)));checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceSecond,n*sizeof(P131)));
+    checked(cudaMemcpy(deviceA,a.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceB,b.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceC,c.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    pairedProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(deviceA,deviceB,deviceC,deviceOutput,deviceSecond,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaMemcpy(second.data(),deviceSecond,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(deviceA));checked(cudaFree(deviceB));checked(cudaFree(deviceC));
+    checked(cudaFree(deviceOutput));checked(cudaFree(deviceSecond));
+    for(int i=0;i<n;i++) if(!same(output[i],multiplyReference(a[i],b[i])) || !same(second[i],multiplyReference(a[i],c[i]))) {
+        fprintf(stderr,"GPU paired multiplication mismatch at %d\n",i);return false;
+    }
+    printf("PASS: %d GPU paired polynomial products against independent multiplication\n",n);
     return true;
 }
 
