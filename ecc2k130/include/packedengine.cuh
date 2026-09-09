@@ -85,6 +85,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
         printf("packed polynomial chain: %d\n", ECC_PACKED_POLY_CHAIN);
+        printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
+        printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());

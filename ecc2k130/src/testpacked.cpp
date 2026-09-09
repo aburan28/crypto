@@ -26,6 +26,14 @@ int main() {
         if (test<131) {av[0]=av[1]=av[2]=0;av[test/64]=1ull<<(test%64);}
         auto a=R::fromLimbs(av),b=R::fromLimbs(bv);auto pa=pack(a),pb=pack(b);
         auto ap=eccPacked131::toPolynomial131(pa),bp=eccPacked131::toPolynomial131(pb);
+        unsigned long long cv[3]={randomWord(),randomWord(),randomWord()&7};
+        auto c=R::fromLimbs(cv);
+        auto cp=eccPacked131::toPolynomial131(pack(c));
+        auto pair=eccPacked131::mulPolynomialPair131(ap,bp,cp);
+        if (unpack(eccPacked131::fromPolynomial131(pair.first))!=R::mul(a,b) ||
+            unpack(eccPacked131::fromPolynomial131(pair.second))!=R::mul(a,c)) {
+            printf("paired product mismatch at case %d\n",test);return 1;
+        }
         if (unpack(eccPacked131::fromPolynomial131(ap))!=a ||
             unpack(eccPacked131::fromPolynomial131(eccPacked131::mulPolynomial131(ap,bp)))!=R::mul(a,b)) {
             printf("polynomial field mismatch at case %d\n",test);return 1;

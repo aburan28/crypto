@@ -69,6 +69,12 @@ if PACKED_POLY_CHAIN not in ("0", "1"):
     raise ValueError("ECC_PACKED_POLY_CHAIN must be 0 or 1")
 if PACKED_POLY_CHAIN == "1" and PACKED_CACHE_DENOM != "1":
     raise ValueError("ECC_PACKED_POLY_CHAIN=1 requires ECC_PACKED_CACHE_DENOM=1")
+PACKED_UNROLL_INV = os.environ.get("ECC_PACKED_UNROLL_INV", "0")
+PACKED_PAIR_PRODUCTS = os.environ.get("ECC_PACKED_PAIR_PRODUCTS", "0")
+if PACKED_UNROLL_INV not in ("0", "1") or PACKED_PAIR_PRODUCTS not in ("0", "1"):
+    raise ValueError("ECC_PACKED_UNROLL_INV and ECC_PACKED_PAIR_PRODUCTS must be 0 or 1")
+if PACKED_PAIR_PRODUCTS == "1" and PACKED_POLY_CHAIN != "1":
+    raise ValueError("ECC_PACKED_PAIR_PRODUCTS=1 requires ECC_PACKED_POLY_CHAIN=1")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -130,7 +136,9 @@ image = (
           "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
           "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
           "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
-          "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN})
+          "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN,
+          "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
+          "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -150,7 +158,8 @@ image = (
         f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
         f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
         f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
-        f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN}',
+        f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
+        f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS}',
     )
 )
 
@@ -261,7 +270,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"SMEM_SPILL={int(smemSpill)} GLOBAL_CG={int(globalCg)} "
         f"PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} "
         f"PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} "
-        f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN}",
+        f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
+        f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -291,6 +301,8 @@ def benchmarkIdentity(packed=False):
                 packedByValue=(PACKED_BY_VALUE == '1') if packed else None,
                 packedFrobeniusMode=int(PACKED_PERM_SIGMA) if packed else None,
                 packedPolynomialChain=(PACKED_POLY_CHAIN == '1') if packed else None,
+                packedUnrolledInverse=(PACKED_UNROLL_INV == '1') if packed else None,
+                packedPairedProducts=(PACKED_PAIR_PRODUCTS == '1') if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 

@@ -13,6 +13,12 @@ namespace eccPacked131 {
 #ifndef ECC_PACKED_POLY_CHAIN
 #define ECC_PACKED_POLY_CHAIN 0
 #endif
+#ifndef ECC_PACKED_PAIR_PRODUCTS
+#define ECC_PACKED_PAIR_PRODUCTS 0
+#endif
+#if ECC_PACKED_PAIR_PRODUCTS && !ECC_PACKED_POLY_CHAIN
+#error "ECC_PACKED_PAIR_PRODUCTS requires polynomial chains"
+#endif
 #if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
 #error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
 #endif
@@ -139,8 +145,14 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             if (slot) {
 #if ECC_PACKED_POLY_CHAIN
+#if ECC_PACKED_PAIR_PRODUCTS
+                PolynomialPair pair=mulPolynomialPair131(inv,
+                    load(p.pchain,slot-1,tid,p.threads),load(polyDenominators,slot,tid,p.threads));
+                ii=pair.first; inv=pair.second;
+#else
                 ii = mulPolynomial131(inv, load(p.pchain, slot - 1, tid, p.threads));
                 inv = mulPolynomial131(inv, load(polyDenominators, slot, tid, p.threads));
+#endif
 #else
                 ii = mul131(inv, load(p.pchain, slot - 1, tid, p.threads));
                 inv = mul131(inv, d);
