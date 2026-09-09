@@ -129,7 +129,12 @@ def generate():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', default='../include/packedsigma131.h')
+    parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
     generated, n = generate()
-    Path(args.out).write_text(generated)
+    if args.check:
+        if Path(args.out).read_text() != generated:
+            raise SystemExit('Frobenius header does not match the generator')
+    else:
+        Path(args.out).write_text(generated)
     print('PASS: all 256 basis vectors for all 131 Frobenius powers; word operations', n)

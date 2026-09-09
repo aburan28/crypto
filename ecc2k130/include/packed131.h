@@ -110,6 +110,9 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #ifndef ECC_PACKED_BY_VALUE
 #define ECC_PACKED_BY_VALUE 0
 #endif
+#if ECC_PACKED_BY_VALUE != 0 && ECC_PACKED_BY_VALUE != 1
+#error "ECC_PACKED_BY_VALUE must be 0 or 1"
+#endif
 #if ECC_PACKED_BY_VALUE
 // Passing these five-word aggregates by value lets the device ABI use
 // registers instead of materializing the caller's operands in local memory.
@@ -161,6 +164,9 @@ ECC_HD P131 sqr131(const P131 &a){
 }
 #ifndef ECC_PACKED_PERM_SIGMA
 #define ECC_PACKED_PERM_SIGMA 0
+#endif
+#if ECC_PACKED_PERM_SIGMA < 0 || ECC_PACKED_PERM_SIGMA > 3
+#error "ECC_PACKED_PERM_SIGMA must be a bit mask from 0 to 3"
 #endif
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"
