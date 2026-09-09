@@ -50,6 +50,12 @@ CUDA_VERSION = os.environ.get("ECC_CUDA_VERSION", "12.8.1")
 if not re.fullmatch(r'\d+\.\d+\.\d+', CUDA_VERSION):
     raise ValueError("ECC_CUDA_VERSION must be a toolkit version such as 13.0.2")
 
+# This setting is fixed for the image and all rebuilds within it. Keep the
+# previous packed multiplier available for controlled comparisons.
+PACKED_SINGLE_PRODUCT = os.environ.get("ECC_PACKED_SINGLE_PRODUCT", "0")
+if PACKED_SINGLE_PRODUCT not in ("0", "1"):
+    raise ValueError("ECC_PACKED_SINGLE_PRODUCT must be 0 or 1")
+
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
@@ -105,7 +111,8 @@ image = (
     .entrypoint([])
     # Containers re-import this module; preserve the settings that selected
     # their image and baked architecture rather than reverting to defaults.
-    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU})
+    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
+          "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -122,7 +129,8 @@ image = (
         # GPU client picks its own word width on the device.
         f"cd {REMOTE} && make cpu MARCH=x86-64-v3",
         f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
-        f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]}',
+        f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
+        f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT}',
     )
 )
 
@@ -230,7 +238,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
     rc, out = shStream(
         f'make -B gpu ARCH="{gencode}" BATCH={batch} THREADS={threads} '
         f"MINBLOCKS={minBlocks} STREAM_KARAT={int(streamKarat)} "
-        f"SMEM_SPILL={int(smemSpill)} GLOBAL_CG={int(globalCg)}",
+        f"SMEM_SPILL={int(smemSpill)} GLOBAL_CG={int(globalCg)} "
+        f"PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -244,7 +253,7 @@ def benchmarkIdentity(packed=False):
     paths = [root / 'Makefile', root / 'modal_app.py']
     for folder in ('include', 'src', 'generated', 'codegen'):
         paths += sorted(p for p in (root / folder).rglob('*')
-                        if p.suffix in ('.h', '.cu', '.cpp', '.py'))
+                        if p.suffix in ('.h', '.cuh', '.cu', '.cpp', '.py'))
     for path in paths:
         source.update(str(path.relative_to(root)).encode() + b'\0' + path.read_bytes() + b'\0')
     rc, compiler = sh('nvcc --version')
@@ -255,6 +264,7 @@ def benchmarkIdentity(packed=False):
                 binarySha256=hashlib.sha256((root / 'ecc2k130').read_bytes()).hexdigest(),
                 actualLeaf=None if packed else int(leaf.group(1)), generatedLeaf=int(leaf.group(1)),
                 activeBackend='packed-onb131' if packed else 'bitsliced', compiler=compiler, compilerReturncode=rc,
+                packedMultiplier=('single-product' if PACKED_SINGLE_PRODUCT == '1' else 'two-product') if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 

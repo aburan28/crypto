@@ -5,6 +5,12 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
+An opt-in [single-product multiplier](SINGLE-PRODUCT.md) further raises measured
+RTX PRO 6000 throughput to **3.511807 billion iterations/s** with four resident
+blocks per SM. Enable it with `ECC_PACKED_SINGLE_PRODUCT=1` on Modal, or
+`PACKED_SINGLE_PRODUCT=1` with make. The measurements below describe the original
+two-product packed multiplier.
+
 The final GPU audit on RTX PRO 6000 Blackwell Server Edition, CUDA 12.8.1,
 source `c307bb6`, measured:
 

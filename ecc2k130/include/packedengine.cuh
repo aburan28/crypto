@@ -73,8 +73,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::targetY, &yq, sizeof(yq)));
         cudaFuncAttributes attrs;
         CUDA_CHECK(cudaFuncGetAttributes(&attrs, eccPacked131::walk));
-        printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block\n",
-               attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes);
+        printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
+               attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
+               ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());

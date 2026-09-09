@@ -98,9 +98,24 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
     for(int i=0;i<5;i++) r.v[i]=a.v[i]^b.v[i];
     return r;
 }
-// gamma_i gamma_j = gamma_(i+j) + gamma_(i-j), gamma_0=0,
-// gamma_k=gamma_(263-k). Two packed polynomial products implement ONB mul.
+// The generated linear transforms convert to/from the polynomial basis used
+// by codegen/build.py, allowing a single product while retaining ONB storage.
+#include "packedtransform131.h"
+#ifndef ECC_PACKED_SINGLE_PRODUCT
+#define ECC_PACKED_SINGLE_PRODUCT 0
+#endif
+#if ECC_PACKED_SINGLE_PRODUCT != 0 && ECC_PACKED_SINGLE_PRODUCT != 1
+#error "ECC_PACKED_SINGLE_PRODUCT must be 0 or 1"
+#endif
 static ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
+#if ECC_PACKED_SINGLE_PRODUCT
+    const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
+    uint32_t h[9];
+    product131(pa,pb,h);
+    return fromPolynomialProduct131(h);
+#else
+    // gamma_i gamma_j = gamma_(i+j) + gamma_(i-j), gamma_0=0,
+    // gamma_k=gamma_(263-k): the original two-product multiplier.
     uint32_t c[9],d[9];
     P131 rb=reverse131(b),r;
     product131(a,b,c); product131(a,rb,d);
@@ -114,6 +129,7 @@ static ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
     }
     r.v[4]&=7;
     return r;
+#endif
 }
 ECC_HD uint64_t spread32p(uint32_t x){
  uint64_t r=x;
