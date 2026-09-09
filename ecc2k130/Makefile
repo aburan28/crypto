@@ -15,6 +15,7 @@
 #   ARCH     CUDA architectures
 
 NVCC    ?= nvcc
+MODAL   ?= modal
 CXX     ?= g++
 CLANG   ?= clang
 PTXAS   ?= ptxas
@@ -224,6 +225,23 @@ ptx: src/ptxspike.cu $(HDRS) $(GEN)
 modal:
 	modal run modal_app.py::bench --gpu H100
 
+# Audited packed configuration for the RTX PRO 6000 Blackwell Server Edition.
+RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.0.0 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1
+
+bench-rtx-pro6000:
+	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 32 --threads 128 --leaf 0 --min-blocks 4 \
+	    --steps 1024 --launches 32 --repeats 3
+
+audit-rtx-pro6000:
+	mkdir -p build
+	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --min-blocks 4 --repeats 3 \
+	    --output build/rtx-pro6000-audit.json
+
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
@@ -231,4 +249,4 @@ clean:
 	rm -f build/test-packed-network
 	rm -f build/test-packed-cuda
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-packed-cuda rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-packed-cuda rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
