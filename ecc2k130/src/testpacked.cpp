@@ -15,7 +15,9 @@ int main() {
         unsigned long long av[3]={},bv[3]={};
         av[i/64]=1ull<<(i%64);bv[j/64]=1ull<<(j%64);
         auto a=R::fromLimbs(av),b=R::fromLimbs(bv);
-        if (unpack(eccPacked131::mul131(pack(a),pack(b)))!=R::mul(a,b)) {
+        auto pa=eccPacked131::toPolynomial131(pack(a)),pb=eccPacked131::toPolynomial131(pack(b));
+        auto product=eccPacked131::fromPolynomial131(eccPacked131::mulPolynomial131(pa,pb));
+        if (unpack(eccPacked131::mul131(pack(a),pack(b)))!=R::mul(a,b) || unpack(product)!=R::mul(a,b)) {
             printf("packed basis-pair mismatch at %d,%d\n",i,j);return 1;
         }
     }
@@ -23,6 +25,11 @@ int main() {
         unsigned long long av[3]={randomWord(),randomWord(),randomWord()&7},bv[3]={randomWord(),randomWord(),randomWord()&7};
         if (test<131) {av[0]=av[1]=av[2]=0;av[test/64]=1ull<<(test%64);}
         auto a=R::fromLimbs(av),b=R::fromLimbs(bv);auto pa=pack(a),pb=pack(b);
+        auto ap=eccPacked131::toPolynomial131(pa),bp=eccPacked131::toPolynomial131(pb);
+        if (unpack(eccPacked131::fromPolynomial131(ap))!=a ||
+            unpack(eccPacked131::fromPolynomial131(eccPacked131::mulPolynomial131(ap,bp)))!=R::mul(a,b)) {
+            printf("polynomial field mismatch at case %d\n",test);return 1;
+        }
         if (unpack(eccPacked131::mul131(pa,pb))!=R::mul(a,b) ||
             unpack(eccPacked131::sqr131(pa))!=R::sqr(a) ||
             unpack(eccPacked131::inv131(pa))!=R::inv(a)) {
