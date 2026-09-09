@@ -1,0 +1,69 @@
+FILTER cryptanalysis::sat::tests
+
+running 16 tests
+test cryptanalysis::sat::tests::luby_sequence_starts_correctly ... ok
+test cryptanalysis::sat::tests::xor_duplicate_vars_cancel ... ok
+test cryptanalysis::sat::tests::trivial_unsat ... ok
+test cryptanalysis::sat::tests::parse_dimacs_xor_reads_parity_convention ... ok
+test cryptanalysis::sat::tests::xor_empty_row_with_true_rhs_is_unsat ... ok
+test cryptanalysis::sat::tests::xor_and_cnf_interact ... ok
+test cryptanalysis::sat::tests::xor_odd_cycle_is_unsat ... ok
+test cryptanalysis::sat::tests::simple_sat ... ok
+test cryptanalysis::sat::tests::dimacs_roundtrip ... ok
+test cryptanalysis::sat::tests::pigeonhole_3_into_2_is_unsat ... ok
+test cryptanalysis::sat::tests::pigeonhole_5_into_4_is_unsat ... ok
+test cryptanalysis::sat::tests::xor_system_propagates_to_unique_solution ... ok
+test cryptanalysis::sat::tests::random_3sat_around_threshold ... ok
+test cryptanalysis::sat::tests::xor_engine_agrees_with_brute_force ... ok
+test cryptanalysis::sat::tests::aggressive_clause_reduction_preserves_answers ... ok
+test cryptanalysis::sat::tests::incremental_matrix_matches_full_elimination ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 2168 filtered out; finished in 0.01s
+
+FILTER cryptanalysis::semaev_sat::tests
+
+running 15 tests
+test cryptanalysis::semaev_sat::tests::semaev_s4_round_trip_n19_corpus ... ignored, seconds; run with --ignored
+test cryptanalysis::semaev_sat::tests::direct_xor_emits_correct_clause_count ... ok
+test cryptanalysis::semaev_sat::tests::xor_only_system_is_satisfiable ... ok
+test cryptanalysis::semaev_sat::tests::contradictory_system_is_unsat ... ok
+test cryptanalysis::semaev_sat::tests::inconsistent_equation_yields_unsat ... ok
+test cryptanalysis::semaev_sat::tests::cubic_monomials_are_encoded ... ok
+test cryptanalysis::semaev_sat::tests::semaev_sat_round_trip_n5 ... ok
+test cryptanalysis::semaev_sat::tests::semaev_sat_round_trip_n4 ... ok
+test cryptanalysis::semaev_sat::tests::lex_le_accepts_exactly_the_ordered_pairs ... ok
+test cryptanalysis::semaev_sat::tests::s4_encoding_size_matches_upstream_generator ... ok
+test cryptanalysis::semaev_sat::tests::sparse_encodings_match_exhaustive_model_sets ... ok
+test cryptanalysis::semaev_sat::tests::xor_parity_encoding_is_exact_at_every_width ... ok
+test cryptanalysis::semaev_sat::tests::native_xor_is_much_smaller_than_tseitin ... ok
+test cryptanalysis::semaev_sat::tests::semaev_s4_round_trip_n15 ... ok
+test cryptanalysis::semaev_sat::tests::symmetry_breaking_preserves_satisfiability ... ok
+
+test result: ok. 14 passed; 0 failed; 1 ignored; 0 measured; 2169 filtered out; finished in 0.23s
+
+FILTER domain_trie_accepts_exactly_the_allowed_coordinates
+
+running 1 test
+test cryptanalysis::koblitz_index_calculus::tests::domain_trie_accepts_exactly_the_allowed_coordinates ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2183 filtered out; finished in 0.00s
+
+FILTER frobenius_union_domain_is_invariant_and_sat_matches_search
+
+running 1 test
+test cryptanalysis::koblitz_index_calculus::tests::frobenius_union_domain_is_invariant_and_sat_matches_search ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2183 filtered out; finished in 0.03s
+
+FILTER trace_bit_is_a_group_homomorphism_including_torsion
+
+running 1 test
+test cryptanalysis::koblitz_index_calculus::tests::trace_bit_is_a_group_homomorphism_including_torsion ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2183 filtered out; finished in 0.01s
+FILTER reciprocal_saturation_preserves_projection_and_contains_the_base
+
+running 1 test
+test cryptanalysis::koblitz_index_calculus::tests::reciprocal_saturation_preserves_projection_and_contains_the_base ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2183 filtered out; finished in 0.01s

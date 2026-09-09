@@ -508,7 +508,9 @@ pub fn encode_semaev_s4_with(
     if opts.break_symmetry {
         // X₁ ≤ X₂ and X₂ ≤ X₃, lexicographically on the bit vectors.
         for pair in 0..2u32 {
-            let a: Vec<u32> = (0..l).map(|j| to_sat_x(sys.x_var(pair as usize, j))).collect();
+            let a: Vec<u32> = (0..l)
+                .map(|j| to_sat_x(sys.x_var(pair as usize, j)))
+                .collect();
             let bb: Vec<u32> = (0..l)
                 .map(|j| to_sat_x(sys.x_var(pair as usize + 1, j)))
                 .collect();
@@ -912,7 +914,26 @@ pub fn encode_boolean_system(
     equations: &[BoolPoly],
     blocked: &[u64],
 ) -> BoolSystemSatEncoding {
+    encode_boolean_system_with(n_vars, equations, blocked, XorEncoding::Cnf)
+}
+
+/// Encode a sparse Boolean system with either CNF or native XOR rows.
+/// Monomial definitions and model blocking are identical in both modes.
+/// The original entry point retains CNF for reproducible comparisons.
+pub fn encode_boolean_system_with(
+    n_vars: usize,
+    equations: &[BoolPoly],
+    blocked: &[u64],
+    encoding: XorEncoding,
+) -> BoolSystemSatEncoding {
     assert!(n_vars <= 64, "problem variables are packed into a u64");
+    assert!(
+        equations
+            .iter()
+            .flat_map(|eq| &eq.terms)
+            .all(|t| { n_vars == 64 || (t.mask >> n_vars) == 0 }),
+        "monomial references a variable outside the system"
+    );
 
     // One auxiliary per distinct monomial of degree ≥ 2.
     let mut monomial_var: std::collections::BTreeMap<u64, u32> = std::collections::BTreeMap::new();
@@ -933,7 +954,11 @@ pub fn encode_boolean_system(
     let mut xor_chain_aux: Vec<Vec<u32>> = Vec::with_capacity(equations.len());
     for eq in equations {
         let effective = eq.terms.iter().filter(|t| t.mask != 0).count();
-        let chain: Vec<u32> = (0..xor_chain_aux_needed(effective))
+        let count = match encoding {
+            XorEncoding::Cnf => xor_chain_aux_needed(effective),
+            XorEncoding::Native => 0,
+        };
+        let chain: Vec<u32> = (0..count)
             .map(|_| {
                 let v = next;
                 next += 1;
@@ -976,8 +1001,18 @@ pub fn encode_boolean_system(
         }
         // The constant is the target parity, not a literal — the chain
         // widths above already count it that way.
-        if encode_xor_eq_zero(&mut solver, &lits, has_constant, chain) {
-            trivially_unsat = true;
+        match encoding {
+            XorEncoding::Native => {
+                let vars: Vec<u32> = lits.iter().map(|&v| v as u32).collect();
+                if !solver.add_xor(&vars, has_constant) {
+                    trivially_unsat = true;
+                }
+            }
+            XorEncoding::Cnf => {
+                if encode_xor_eq_zero(&mut solver, &lits, has_constant, chain) {
+                    trivially_unsat = true;
+                }
+            }
         }
     }
 
@@ -993,8 +1028,8 @@ pub fn encode_boolean_system(
                 }
             })
             .collect();
-        if !clause.is_empty() {
-            solver.add_clause(clause);
+        if !solver.add_clause(clause) {
+            trivially_unsat = true;
         }
     }
 
@@ -1011,6 +1046,60 @@ mod tests {
     use super::*;
     use crate::cryptanalysis::binary_semaev_s4::{elementary_symmetric_3, symmetrised_s4_eval};
     use crate::cryptanalysis::pq_groebner_f2::F2BoolMono;
+
+    /// Compare complete model sets with direct evaluation, including
+    /// incremental blocking after XOR propagation and backtracking.
+    #[test]
+    fn sparse_encodings_match_exhaustive_model_sets() {
+        use rand::{Rng, SeedableRng};
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x534154);
+        for n in 0..=6usize {
+            for _ in 0..16 {
+                let equations: Vec<BoolPoly> = (0..rng.gen_range(0..=6))
+                    .map(|_| {
+                        let terms = (0..rng.gen_range(0..=12))
+                            .map(|_| F2BoolMono::from_mask(rng.gen_range(0..(1u64 << n))))
+                            .collect();
+                        BoolPoly::from_monos(terms, n)
+                    })
+                    .collect();
+                let expected: std::collections::BTreeSet<u64> = (0..(1u64 << n))
+                    .filter(|&a| equations.iter().all(|e| e.eval(a) == 0))
+                    .collect();
+                for mode in [XorEncoding::Cnf, XorEncoding::Native] {
+                    let mut enc = encode_boolean_system_with(n, &equations, &[], mode);
+                    let mut actual = std::collections::BTreeSet::new();
+                    loop {
+                        match enc.solver.solve() {
+                            SolveResult::Sat => {
+                                let a = enc.model_assignment();
+                                assert!(actual.insert(a), "duplicate model: n={n}, {mode:?}");
+                                assert!(expected.contains(&a), "invalid model: n={n}, {mode:?}");
+                                enc.solver.reset_search();
+                                let clause = (0..n)
+                                    .map(|i| {
+                                        let v = (i + 1) as Lit;
+                                        if (a >> i) & 1 == 1 {
+                                            -v
+                                        } else {
+                                            v
+                                        }
+                                    })
+                                    .collect();
+                                enc.solver.add_clause(clause);
+                            }
+                            SolveResult::Unsat => break,
+                            SolveResult::Unknown => panic!("tiny exhaustive check exhausted"),
+                        }
+                    }
+                    assert_eq!(actual, expected, "n={n}, {mode:?}");
+                    let all: Vec<u64> = expected.iter().copied().collect();
+                    let mut blocked = encode_boolean_system_with(n, &equations, &all, mode);
+                    assert_eq!(blocked.solver.solve(), SolveResult::Unsat);
+                }
+            }
+        }
+    }
 
     /// Parity constraints must be encoded exactly at every width.
     ///
@@ -1191,7 +1280,11 @@ mod tests {
                 },
             );
             // Both encodings must at least agree on being non-trivial.
-            assert!(!plain.trivially_unsat && !sym.trivially_unsat, "{}", inst.name);
+            assert!(
+                !plain.trivially_unsat && !sym.trivially_unsat,
+                "{}",
+                inst.name
+            );
             // The ordered witness of a satisfiable instance survives.
             if inst.truly_sat {
                 let xs = inst
@@ -1204,9 +1297,7 @@ mod tests {
                     .iter()
                     .map(|x| {
                         (0..inst.l)
-                            .filter(|j| {
-                                (x.raw_bits()[(*j / 64) as usize] >> (*j % 64)) & 1 == 1
-                            })
+                            .filter(|j| (x.raw_bits()[(*j / 64) as usize] >> (*j % 64)) & 1 == 1)
                             .map(|j| 1u32 << j)
                             .sum()
                     })
@@ -1289,7 +1380,11 @@ mod tests {
         let mut enc = encode_semaev_s4(n, l, &irr, &b, &x_r, XorEncoding::Native);
         assert!(!enc.trivially_unsat);
         enc.solver.conflict_budget = 2_000_000;
-        assert_eq!(enc.solver.solve(), SolveResult::Sat, "corpus instance is SAT");
+        assert_eq!(
+            enc.solver.solve(),
+            SolveResult::Sat,
+            "corpus instance is SAT"
+        );
 
         let xs = enc.decode();
         let (e1, e2, e3) = elementary_symmetric_3(&xs[0], &xs[1], &xs[2], &irr);
@@ -1325,7 +1420,10 @@ mod tests {
              native {nv} vars / {nc} clauses vs CNF {cv} vars / {cc} clauses"
         );
         assert!(cv > nv, "the CNF path must also allocate chain auxiliaries");
-        assert!(native.solver.n_xors() > 0, "native path must install XOR rows");
+        assert!(
+            native.solver.n_xors() > 0,
+            "native path must install XOR rows"
+        );
         assert_eq!(cnf.solver.n_xors(), 0, "CNF path must install none");
     }
 
