@@ -110,6 +110,14 @@ static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
     uint32_t h[9]; product131(a,b,h);
     return reducePolynomial131(h);
 }
+struct PolynomialPair { P131 first,second; };
+static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+    uint32_t h[9];
+    product131(a,b,h);
+    P131 first=reducePolynomial131(h);
+    product131(a,c,h);
+    return PolynomialPair{first,reducePolynomial131(h)};
+}
 #ifndef ECC_PACKED_SINGLE_PRODUCT
 #define ECC_PACKED_SINGLE_PRODUCT 0
 #endif
