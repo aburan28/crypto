@@ -159,7 +159,19 @@ ECC_HD P131 sqr131(const P131 &a){
  r.v[4]=(rev.v[2]&1u)|((a.v[2]&1u)<<1)|((rev.v[2]&2u)<<1);
  return r;
 }
+#ifndef ECC_PACKED_PERM_SIGMA
+#define ECC_PACKED_PERM_SIGMA 0
+#endif
+#if ECC_PACKED_PERM_SIGMA
+#include "packedsigma131.h"
+#endif
 ECC_HD P131 sigma131(P131 a,int k){
+#if ECC_PACKED_PERM_SIGMA & 1
+ if(k>=3 && k<=10) return sigmaWalkNetwork131(a,k-3);
+#endif
+#if ECC_PACKED_PERM_SIGMA & 2
+ if(k==16 || k==32 || k==65) return sigmaInvNetwork131(a,k==16?0:k==32?1:2);
+#endif
 #pragma unroll 1
  for(int i=0;i<k;i++)a=sqr131(a);
  return a;
