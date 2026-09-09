@@ -1,5 +1,10 @@
 # ECC2K-130 and ECC2K-95
 
+The optional [packed normal-basis CUDA backend](PACKED.md) has measured above
+2 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. Use `--packed`
+with the benchmark/validation entry points; its reports retain the existing
+format, while checkpoints have a separate backend version.
+
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
 That guide supersedes the earlier bandwidth estimates and tuning prescriptions

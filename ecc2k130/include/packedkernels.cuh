@@ -25,7 +25,7 @@ __device__ __forceinline__ int weight(P131 a) {
     return __popc(a.v[0]) + __popc(a.v[1]) + __popc(a.v[2]) + __popc(a.v[3]) + __popc(a.v[4]);
 }
 
-__global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
+static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     const size_t id = size_t(blockIdx.x) * blockDim.x + threadIdx.x;
     if (id >= size_t(p.threads) * ECC_BATCH || (reseed && !p.dead[id])) return;
     const unsigned long long seed = reseed ? p.seed[id] + 1 : eccSeedFor(p.runId, id);
@@ -48,7 +48,7 @@ __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     p.dead[id] = 0;
 }
 
-__global__ void ECC_BOUNDS walk(WalkParams<unsigned> p) {
+static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= p.threads) return;
     unsigned char js[ECC_BATCH];

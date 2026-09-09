@@ -100,7 +100,7 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 }
 // gamma_i gamma_j = gamma_(i+j) + gamma_(i-j), gamma_0=0,
 // gamma_k=gamma_(263-k). Two packed polynomial products implement ONB mul.
-ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
+static ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
     uint32_t c[9],d[9];
     P131 rb=reverse131(b),r;
     product131(a,b,c); product131(a,rb,d);

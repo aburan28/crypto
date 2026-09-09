@@ -79,7 +79,7 @@ class ProfilerTests(unittest.TestCase):
                    sh=lambda cmd: (0, 'Version 2025.3.1.0'),
                    profilerVersionError=profilerVersionError, profileResult=profileResult,
                    buildFor=lambda *args, **kwargs: (True, ''),
-                   benchmarkIdentity=lambda: {}, shStream=invoke)
+                   benchmarkIdentity=lambda *args, **kwargs: {}, shStream=invoke)
         with contextlib.redirect_stdout(io.StringIO()):
             result = loadFunction('runProfile', env)(workers=128, preferL1=True)
         self.assertEqual(result['kind'], 'profiling_failed')

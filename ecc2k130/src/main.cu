@@ -1057,6 +1057,10 @@ int main(int argc, char **argv) {
         else if (a == "--help" || a == "-h") { usage(); return 0; }
         else { printf("unknown option %s\n", a.c_str()); usage(); return 1; }
     }
+    if (o.packed && (o.curve != 131 || o.polyBasis || o.test)) {
+        fprintf(stderr, "--packed selects the GF(2^131) CUDA walk; use --verify for device report validation and make test-packed for host arithmetic\n");
+        return 1;
+    }
     // The device thread count is left at 0 here on purpose: it depends on the
     // register allocation of a kernel that is only instantiated once the curve
     // is known, so CudaEngine::autoThreads decides it in runCurve.

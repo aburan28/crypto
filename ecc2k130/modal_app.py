@@ -237,7 +237,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
     return rc == 0, out
 
 
-def benchmarkIdentity():
+def benchmarkIdentity(packed=False):
     """Identity travels with the result even though the image has no .git."""
     root = pathlib.Path(REMOTE)
     source = hashlib.sha256()
@@ -253,7 +253,8 @@ def benchmarkIdentity():
     leaf = re.search(r'LEAF = (\d+)', (root / 'generated/eccF131.h').read_text())
     return dict(sourceSha256=source.hexdigest(),
                 binarySha256=hashlib.sha256((root / 'ecc2k130').read_bytes()).hexdigest(),
-                actualLeaf=int(leaf.group(1)), compiler=compiler, compilerReturncode=rc,
+                actualLeaf=None if packed else int(leaf.group(1)), generatedLeaf=int(leaf.group(1)),
+                activeBackend='packed-onb131' if packed else 'bitsliced', compiler=compiler, compilerReturncode=rc,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 
@@ -302,7 +303,7 @@ def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
                        streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
     if not ok:
         raise RuntimeError("\n".join(out + ["rebuild failed", log]))
-    out.append(json.dumps(benchmarkIdentity(), indent=2))
+    out.append(json.dumps(benchmarkIdentity(packed), indent=2))
     cacheFlag = ' --prefer-l1' if preferL1 else ''
     rc, t = sh("./ecc2k130-cpu --test")
     out.append(t.strip())
@@ -378,7 +379,7 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
         info['buildLog'] = log
         if not ok:
             return dict(info, valid=False, rate=0.0, error=log)
-    info['identity'] = benchmarkIdentity()
+    info['identity'] = benchmarkIdentity(packed)
     info.update(measureBench(steps, launches, workers, preferL1, repeats, packed))
     return info
 
@@ -455,7 +456,7 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
         if not ok:
             results.append(dict(cfg, valid=False, rate=0.0, error=log))
             continue
-        cfg['identity'] = benchmarkIdentity()
+        cfg['identity'] = benchmarkIdentity(packed)
         cfg.update(measureBench(steps, launches, workers, preferL1, repeats, packed))
         results.append(cfg)
         knobLabel = ' '.join(n for n, on in (('streamKarat', sk), ('smemSpill', ss),
@@ -566,7 +567,7 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     if packed:
         runFlags += ' --packed'
     kernelFilter = "--kernel-name-base demangled --kernel-name 'regex:eccPacked131::walk'" if packed else '--kernel-name eccWalkKernel'
-    identity = benchmarkIdentity()
+    identity = benchmarkIdentity(packed)
     command = (
         f"{NCU_BINARY} --target-processes all {kernelFilter} "
         f"--launch-count 1 {what} "
@@ -699,7 +700,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True, loadMax=50000000, packed=False):
+              checkpointEvery=300, resume=True, loadMax=50000000, packed=False, verify=4):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -755,7 +756,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     print(f"{walks} parallel walks, distinguished-point weight {dpWeight}, "
           f"{plannedIters:.3g} iterations planned this pass")
     cmd = (f"./ecc2k130 --curve {curve} --steps {steps} --run-id {runId} "
-           f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads} "
+           f"--dp-file {dpFile} --verify {verify} --launches 0 --threads {workerThreads} "
            f"--checkpoint-every {int(checkpointEvery)} --load-max {int(loadMax)}")
     cmd += backendFlag
     if resume:
@@ -1074,22 +1075,22 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
-                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed)
+                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed)
+                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
