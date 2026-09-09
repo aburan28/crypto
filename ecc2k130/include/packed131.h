@@ -191,7 +191,22 @@ ECC_HD P131 sigma131(P131 a,int k){
  for(int i=0;i<k;i++)a=sqr131(a);
  return a;
 }
+#ifndef ECC_PACKED_UNROLL_INV
+#define ECC_PACKED_UNROLL_INV 0
+#endif
 ECC_HD P131 inv131(P131 a){
+#if ECC_PACKED_UNROLL_INV
+ // The same Itoh–Tsujii chain with explicit powers: beta_2,4,8,16,32,64,65,130.
+ P131 acc=mul131(sqr131(a),a);
+ acc=mul131(sqr131(sqr131(acc)),acc);
+ acc=mul131(sigma131(acc,4),acc);
+ acc=mul131(sigma131(acc,8),acc);
+ acc=mul131(sigma131(acc,16),acc);
+ acc=mul131(sigma131(acc,32),acc);
+ acc=mul131(sqr131(acc),a);
+ acc=mul131(sigma131(acc,65),acc);
+ return sqr131(acc);
+#else
  P131 acc=a;int k=1;
 #pragma unroll 1
  for(int bit=6;bit>=0;--bit){
@@ -199,6 +214,7 @@ ECC_HD P131 inv131(P131 a){
   if((130>>bit)&1){acc=mul131(sqr131(acc),a);k++;}
  }
  return sqr131(acc);
+#endif
 }
 
 } // namespace eccPacked131
