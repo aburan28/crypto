@@ -6,6 +6,10 @@ preserving the exact iteration, field representation, seeds, reports and
 packed checkpoints. The measured configuration also passes the small field
 operands by value and enables the previously measured denominator cache.
 
+The additional [polynomial-chain configuration](POLYNOMIAL-CHAIN.md) measures
+6.058466 B/s with these networks enabled. The results below describe the
+network implementation before that additional change.
+
 ## Run the measured configuration
 
 From `ecc2k130/`:
