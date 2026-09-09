@@ -28,6 +28,8 @@ SMEM_SPILL ?= 0
 GLOBAL_CG ?= 0
 PACKED_SINGLE_PRODUCT ?= 0
 PACKED_CACHE_DENOM ?= 0
+PACKED_BY_VALUE ?= 0
+PACKED_PERM_SIGMA ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -49,13 +51,14 @@ SMARCH  ?= sm_90
 
 HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
 DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS) \
        -DECC_STREAM_KARAT=$(STREAM_KARAT) -DECC_SMEM_SPILL=$(SMEM_SPILL) \
-       -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT) -DECC_PACKED_CACHE_DENOM=$(PACKED_CACHE_DENOM)
+       -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT) -DECC_PACKED_CACHE_DENOM=$(PACKED_CACHE_DENOM) \
+       -DECC_PACKED_BY_VALUE=$(PACKED_BY_VALUE) -DECC_PACKED_PERM_SIGMA=$(PACKED_PERM_SIGMA)
 
 all: cpu
 
@@ -69,6 +72,7 @@ REGS ?= 255
 generate:
 	cd codegen && python3 gen.py --out ../generated --regs $(REGS)
 	cd codegen && python3 genpacked.py
+	cd codegen && python3 gensigma.py
 
 cpu: ecc2k130-cpu
 
@@ -87,6 +91,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 # catches is otherwise invisible until someone runs that entry point.
 check-cli:
 	python3 codegen/genpacked.py --check --out include/packedtransform131.h
+	python3 codegen/gensigma.py --check --out include/packedsigma131.h
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/checkcli.py profile_diagnostic.py
 	python3 codegen/checkcli.py packed_audit.py
@@ -146,7 +151,17 @@ test-packed:
 	./build/test-packed-base
 	./build/test-packed-single
 
-test: check-cli check-cycles test-schedule test-packed ecc2k130-cpu
+test-packed-network:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+	./build/test-packed-network
+
+test-packed-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedcuda.cu -o build/test-packed-cuda
+	./build/test-packed-cuda
+
+test: check-cli check-cycles test-schedule test-packed test-packed-network ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -206,5 +221,7 @@ clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
+	rm -f build/test-packed-network
+	rm -f build/test-packed-cuda
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-packed-cuda rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal clean

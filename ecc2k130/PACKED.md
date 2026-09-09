@@ -5,6 +5,11 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
+The latest measured [Frobenius-network configuration](FROBENIUS-NETWORK.md)
+reaches **5.832583 billion scalar iterations/s** on RTX PRO 6000, with
+**5.737182 B/s** during normal distinguished-point collection. Its guide
+contains the full opt-in flag set and audit command.
+
 The opt-in [denominator cache](DENOMINATOR-CACHE.md), combined with the
 single-product multiplier, measures **4.098489 billion scalar iterations/s**
 on RTX PRO 6000. Its guide includes the exact flags and validation command.

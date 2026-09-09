@@ -28,10 +28,13 @@ int main() {
             unpack(eccPacked131::inv131(pa))!=R::inv(a)) {
             printf("packed field mismatch at case %d\n",test);return 1;
         }
-        for (int j=3;j<=10;j++) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) return 1;
+        const int powers[]={0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
+        for (int j:powers) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) {
+            printf("packed Frobenius mismatch at case %d, power %d\n",test,j);return 1;
+        }
     }
     P zero{};auto one=pack(R::one());
     if (unpack(eccPacked131::mul131(zero,one))!=R::zero() ||
         unpack(eccPacked131::mul131(one,one))!=R::one()) return 1;
-    puts("PASS: packed multiplication, squaring, inversion and all walk Frobenius exponents against independent reference");
+    puts("PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference");
 }

@@ -82,6 +82,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
         printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
+        printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
+        printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
