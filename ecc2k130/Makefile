@@ -27,6 +27,7 @@ STREAM_KARAT ?= 0
 SMEM_SPILL ?= 0
 GLOBAL_CG ?= 0
 PACKED_SINGLE_PRODUCT ?= 0
+PACKED_CACHE_DENOM ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -54,7 +55,7 @@ GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF2
 
 DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS) \
        -DECC_STREAM_KARAT=$(STREAM_KARAT) -DECC_SMEM_SPILL=$(SMEM_SPILL) \
-       -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT)
+       -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT) -DECC_PACKED_CACHE_DENOM=$(PACKED_CACHE_DENOM)
 
 all: cpu
 

@@ -6,6 +6,10 @@ The normal-basis representation, walk map, distinguished-point predicate,
 reports and packed checkpoint format stay compatible. The old two-product
 multiplier remains the default and the comparison control.
 
+The additional [denominator cache](DENOMINATOR-CACHE.md) avoids a duplicated
+Frobenius calculation in each step and measures 4.098489 B/s with this
+multiplier on RTX PRO 6000. The results below describe the multiplier without denominator caching.
+
 ## Run the measured setting
 
 From `ecc2k130/` on a checkout containing this change:

@@ -4,6 +4,12 @@
 #include "packed131.h"
 
 namespace eccPacked131 {
+#ifndef ECC_PACKED_CACHE_DENOM
+#define ECC_PACKED_CACHE_DENOM 0
+#endif
+#if ECC_PACKED_CACHE_DENOM != 0 && ECC_PACKED_CACHE_DENOM != 1
+#error "ECC_PACKED_CACHE_DENOM must be 0 or 1"
+#endif
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
@@ -48,10 +54,12 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     p.dead[id] = 0;
 }
 
-static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p) {
+static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= p.threads) return;
+#if !ECC_PACKED_CACHE_DENOM
     unsigned char js[ECC_BATCH];
+#endif
     P131 prod, inv;
 #pragma unroll 1
     for (int step = 0; step < p.steps; ++step) {
@@ -81,17 +89,32 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p) {
                 }
             }
             const int j = 3 + ((hw >> 1) & 7);
+#if !ECC_PACKED_CACHE_DENOM
             js[slot] = j;
+#endif
             P131 d = add131(x, sigma131(x, j));
             prod = slot == 0 ? d : mul131(prod, d);
             if (slot + 1 < ECC_BATCH) store(p.pchain, slot, tid, p.threads, prod);
+#if ECC_PACKED_CACHE_DENOM
+            // The high 29 bits are unused by the field. Keep the jump index
+            // beside the denominator, eliminating the separate local array.
+            d.v[4] |= unsigned(j - 3) << 3;
+            store(denominators, slot, tid, p.threads, d);
+#endif
         }
         inv = inv131(prod);
 #pragma unroll 1
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
+#if ECC_PACKED_CACHE_DENOM
+            P131 d = load(denominators, slot, tid, p.threads), ii;
+            const int j = 3 + ((d.v[4] >> 3) & 7);
+            d.v[4] &= 7;
+            P131 e = add131(y, sigma131(y, j));
+#else
             const int j = js[slot];
             P131 d = add131(x, sigma131(x, j)), e = add131(y, sigma131(y, j)), ii;
+#endif
             if (slot) {
                 ii = mul131(inv, load(p.pchain, slot - 1, tid, p.threads));
                 inv = mul131(inv, d);
