@@ -106,6 +106,12 @@ def generate():
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--out',default='../include/packedpolyreduce131.h')
+    parser.add_argument('--check',action='store_true')
     args=parser.parse_args()
-    Path(args.out).write_text(generate())
+    generated=generate()
+    if args.check:
+        if Path(args.out).read_text()!=generated:
+            raise SystemExit('polynomial reduction header does not match the generator')
+    else:
+        Path(args.out).write_text(generated)
     print('PASS: reduction against polynomial long division on every input basis vector and 1000 dense cases')

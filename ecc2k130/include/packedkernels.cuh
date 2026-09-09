@@ -13,6 +13,9 @@ namespace eccPacked131 {
 #ifndef ECC_PACKED_POLY_CHAIN
 #define ECC_PACKED_POLY_CHAIN 0
 #endif
+#if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
+#error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
+#endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_CACHE_DENOM
 #error "ECC_PACKED_POLY_CHAIN requires the denominator cache"
 #endif

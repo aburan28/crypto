@@ -75,6 +75,7 @@ generate:
 	cd codegen && python3 gen.py --out ../generated --regs $(REGS)
 	cd codegen && python3 genpacked.py
 	cd codegen && python3 gensigma.py
+	cd codegen && python3 genpolyreduce.py
 
 cpu: ecc2k130-cpu
 
@@ -94,6 +95,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 check-cli:
 	python3 codegen/genpacked.py --check --out include/packedtransform131.h
 	python3 codegen/gensigma.py --check --out include/packedsigma131.h
+	python3 codegen/genpolyreduce.py --check --out include/packedpolyreduce131.h
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/checkcli.py profile_diagnostic.py
 	python3 codegen/checkcli.py packed_audit.py
