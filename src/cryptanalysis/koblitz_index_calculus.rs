@@ -71,27 +71,34 @@
 //! `v ↦ F_j(v)` on `F_{2^n}`, which is both simpler and self-checking
 //! (the kernel dimension must come out equal to `deg f_j`).
 //!
+//! The implementation also supports smaller invariant nonlinear sets:
+//! a seed subspace can be closed under Frobenius, then optionally under
+//! translation by rational 2-torsion.  These domains are represented by
+//! their exact finite coordinate set.  SAT constrains every summand with
+//! a prefix trie for that set; it does not replace the nonlinear domain
+//! with its full linear span.
+//!
 //! ## Honest scope
 //!
-//! - **Two decomposition oracles, and the algebraic one is not yet the
-//!   faster one.**  "Is `R` a sum of `m` factor-base points?" is
-//!   answered either by
+//! - **Three decomposition oracles.**  "Is `R` a sum of `m` factor-base
+//!   points?" can be answered by
 //!   [`DecompositionStrategy::Groebner`] — Semaev's `S₃` Weil-restricted
 //!   to a low-degree Boolean system over the invariant subspace and
 //!   solved with matrix-F4 (see
-//!   [`crate::cryptanalysis::koblitz_groebner`]), which is the real
-//!   algorithm's oracle — or by
+//!   [`crate::cryptanalysis::koblitz_groebner`]) — by
+//!   [`DecompositionStrategy::Sat`], which encodes the descended
+//!   equations with native XOR rows and exact factor-base membership,
+//!   or by
 //!   [`DecompositionStrategy::Enumerate`], a table-driven search over
 //!   ordered tuples costing `|F|^{m−1}` group operations.  They are
-//!   cross-checked against each other in the tests and always agree.
+//!   cross-checked against each other on the toy cases in the tests.
 //!   At the sizes this module can reach the search is still 10–100×
 //!   *faster* in wall-clock terms: `|F|` is a few dozen points, so
 //!   `|F|^{m−1}` is nothing, while the Macaulay matrix already has
-//!   thousands of columns.  The algebra earns its place on scaling
-//!   rather than on these numbers — its cost tracks the degree of
-//!   regularity of the system instead of `|F|`, and it *refutes* an
-//!   undecomposable target with a certificate (the reduction yields the
-//!   constant `1`) instead of merely failing to find one.
+//!   thousands of columns.  A completed Gröbner or SAT refutation proves
+//!   that the encoded decomposition does not exist; an exhausted budget
+//!   remains inconclusive.  The exact factor-base coverage results do not
+//!   establish a SAT speedup or a solving-complexity bound.
 //! - **Toy parameters only.**  `n ≤ 24` or so: the factor base is
 //!   materialised (`2^ℓ` elements) and the group order is found by
 //!   trial division.  This does not threaten sect163k1 or any other
@@ -129,7 +136,7 @@ use crate::cryptanalysis::koblitz_groebner::{
     SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::sat::SolveResult;
-use crate::cryptanalysis::semaev_sat::encode_boolean_system;
+use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
 
 /// Largest extension degree this module will build a curve for.  The
@@ -641,22 +648,36 @@ pub fn frobenius_eigenvalue(curve: &BinaryCurve, trace: i64, r: &BigUint) -> Opt
 
 // ── Frobenius-invariant factor base ────────────────────────────────
 
+/// Algebraic description of the allowed abscissae.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum FactorBaseDomain {
+    LinearSubspace,
+    /// Union of Frobenius translates of an ell-dimensional seed space.
+    /// The union need not be a linear subspace.
+    FrobeniusUnion {
+        seed_dimension: usize,
+    },
+    /// Reciprocal closure from translation by rational 2-torsion.
+    TwoTorsionSaturation,
+}
+
 /// A Frobenius-invariant factor base and its orbit structure.
 #[derive(Clone, Debug)]
 pub struct FrobeniusFactorBase {
-    /// Degree `ℓ = ord_n(2)` of the chosen factor `f_j` of `x^n − 1`.
+    pub domain: FactorBaseDomain,
+    /// Dimension of the linear ambient coordinates used for descent.
+    /// For a nonlinear union this is n, not log2 of the base size.
     pub ell: u32,
-    /// The chosen `f_j`, as an `F_2[x]` bitmask.
+    /// The chosen `f_j`, as an `F_2[x]` bitmask; zero for a nonlinear union.
     pub f_j: u64,
     /// Exponents `k` with `f_{j,k} = 1`, i.e. the linearised polynomial
     /// is `F_j(X) = Σ X^{2^k}` over these `k`.
     pub linearised_exponents: Vec<u32>,
-    /// The `2^ℓ` roots of `F_j` in `F_{2^n}` — an `F_2`-subspace closed
-    /// under squaring.
+    /// Allowed abscissae, closed under squaring. For LinearSubspace
+    /// these are the 2^ell roots of F_j; for FrobeniusUnion they are a union.
     pub subspace: Vec<F2mElement>,
-    /// An `F_2`-basis of that subspace, `ℓ` elements.  The Gröbner
-    /// decomposition writes its unknowns in this basis, which is what
-    /// keeps the Semaev system quadratic.
+    /// Basis of the ambient linear space used to encode coordinates.
+    /// A union uses the full field basis and requires domain constraints.
     pub subspace_basis: Vec<F2mElement>,
     /// The factor base itself: every point whose abscissa is a root.
     pub points: Vec<BinaryPoint>,
@@ -1032,6 +1053,102 @@ fn finish_factor_base(
         return None;
     }
 
+    finish_factor_base_domain(
+        kc,
+        ell,
+        f_j,
+        exps,
+        subspace_basis,
+        subspace,
+        FactorBaseDomain::LinearSubspace,
+    )
+}
+
+/// Materialise the union of all Frobenius translates of a seed space.
+/// This permits small invariant *sets* even when no small invariant
+/// linear subspace exists. Construction is charged: at most n*2^seed_dim
+/// abscissae before deduplication; SAT uses an explicit domain trie.
+/// This is a toy construction, not a claim of scalable relation solving.
+pub fn build_frobenius_union_factor_base(
+    kc: &KoblitzCurve,
+    seed_basis: &[F2mElement],
+) -> Option<FrobeniusFactorBase> {
+    if seed_basis.is_empty() || seed_basis.len() > 12 {
+        return None;
+    }
+    let seed = span_f2(seed_basis, kc.n);
+    let unique: std::collections::HashSet<_> = seed.iter().map(|x| x.to_biguint()).collect();
+    if unique.len() != (1usize << seed_basis.len()) {
+        return None;
+    }
+    let mut xs = std::collections::BTreeMap::new();
+    for mut x in seed {
+        for _ in 0..kc.n {
+            xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+            x = x.square(&kc.curve.irreducible);
+        }
+    }
+    let ambient: Vec<_> = (0..kc.n)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    finish_factor_base_domain(
+        kc,
+        kc.n,
+        0,
+        Vec::new(),
+        ambient,
+        xs.into_values().collect(),
+        FactorBaseDomain::FrobeniusUnion {
+            seed_dimension: seed_basis.len(),
+        },
+    )
+}
+
+/// B union (B+T), omitting infinity, where T=(0,1) on K_a.
+/// Since [h]T=O for even h, this changes the available torsion lifts
+/// without adding projected points. Translation commutes with Frobenius.
+/// Its x-coordinate action away from T is x -> 1/x.
+pub fn saturate_factor_base_two_torsion(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> Option<FrobeniusFactorBase> {
+    let t = points_with_x(&kc.curve, &F2mElement::zero(kc.n))
+        .into_iter()
+        .next()?;
+    if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
+        return None;
+    }
+    let mut xs = std::collections::BTreeMap::new();
+    for p in &fb.points {
+        for q in [p.clone(), kc.add(p, &t)] {
+            if let BinaryPoint::Affine { x, .. } = q {
+                xs.entry(x.to_biguint()).or_insert(x);
+            }
+        }
+    }
+    let ambient = (0..kc.n)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    finish_factor_base_domain(
+        kc,
+        kc.n,
+        0,
+        Vec::new(),
+        ambient,
+        xs.into_values().collect(),
+        FactorBaseDomain::TwoTorsionSaturation,
+    )
+}
+
+fn finish_factor_base_domain(
+    kc: &KoblitzCurve,
+    ell: u32,
+    f_j: u64,
+    exps: Vec<u32>,
+    subspace_basis: Vec<F2mElement>,
+    subspace: Vec<F2mElement>,
+    domain: FactorBaseDomain,
+) -> Option<FrobeniusFactorBase> {
     let mut points: Vec<BinaryPoint> = Vec::new();
     for x in &subspace {
         for p in points_with_x(&kc.curve, x) {
@@ -1069,6 +1186,7 @@ fn finish_factor_base(
     }
 
     Some(FrobeniusFactorBase {
+        domain,
         ell,
         f_j,
         linearised_exponents: exps,
@@ -1171,8 +1289,8 @@ fn decompose(
 pub enum DecompositionStrategy {
     /// Weil-restrict the Semaev condition `S₃ = 0` to a low-degree
     /// Boolean system over the factor-base subspace and solve it with a
-    /// Gröbner basis — the step that makes the real algorithm
-    /// sub-exponential.  See
+    /// Gröbner basis. Subexponential cost requires additional, unproved
+    /// assumptions about solving these systems. See
     /// [`crate::cryptanalysis::koblitz_groebner`].
     Groebner,
     /// Exhaustive ordered-tuple search over the materialised factor
@@ -1182,10 +1300,9 @@ pub enum DecompositionStrategy {
     Enumerate,
     /// The same Semaev system, handed to the CDCL SAT solver instead of
     /// a Gröbner engine
-    /// ([`crate::cryptanalysis::semaev_sat::encode_boolean_system`]).
-    /// Clause learning rather than degree growth: the two blow up on
-    /// different systems, which is the comparison Soos–Nohl–Castelluccia
-    /// opened and this module lets you measure.
+    /// ([`crate::cryptanalysis::semaev_sat::encode_boolean_system_with`]).
+    /// The default keeps descended parity equations as native XOR rows;
+    /// the CNF path remains available as a controlled comparison.
     Sat,
 }
 
@@ -1325,6 +1442,80 @@ pub struct SatDecompositionStats {
     pub conflicts: u64,
 }
 
+/// Encode a finite set of coordinates without enumerating its complement.
+/// Missing branches of the binary trie become forbidden-prefix clauses.
+/// No auxiliary variables are needed; at most O(ell * |codes|) clauses.
+fn add_coordinate_domain(
+    solver: &mut crate::cryptanalysis::sat::Solver,
+    offset: usize,
+    ell: usize,
+    codes: &[u64],
+) {
+    fn visit(
+        solver: &mut crate::cryptanalysis::sat::Solver,
+        offset: usize,
+        bit: usize,
+        codes: &[u64],
+        prefix: &mut Vec<i32>,
+    ) {
+        if codes.is_empty() {
+            solver.add_clause(prefix.clone());
+            return;
+        }
+        if bit == 0 {
+            return;
+        }
+        let b = bit - 1;
+        let split = codes.partition_point(|code| (code >> b) & 1 == 0);
+        let lit = (offset + b + 1) as i32;
+        prefix.push(lit); // forbid prefix with this bit zero
+        visit(solver, offset, b, &codes[..split], prefix);
+        *prefix.last_mut().unwrap() = -lit;
+        visit(solver, offset, b, &codes[split..], prefix);
+        prefix.pop();
+    }
+    visit(solver, offset, ell, codes, &mut Vec::new());
+}
+
+/// Absolute trace F_(2^n) -> F_2 in the configured field representation.
+fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
+    let mut t = F2mElement::zero(n);
+    let mut power = x.clone();
+    for _ in 0..n {
+        t = t.add(&power);
+        power = power.square(irr);
+    }
+    debug_assert!(t.is_zero() || t == F2mElement::one(n));
+    !t.is_zero()
+}
+
+/// SAT controls for a paired comparison on the same decomposition system.
+#[derive(Clone, Copy, Debug)]
+pub struct SatDecompositionOptions {
+    pub encoding: XorEncoding,
+    /// Prioritize summand coordinates; all other variables remain eligible.
+    pub branch_on_summands: bool,
+    /// Exclude summand coordinates without a rational factor-base point.
+    /// Costs O(m * ell * 2^ell) preprocessing; for materialised bases only.
+    pub restrict_to_factor_base: bool,
+    /// Add the group homomorphism Tr(x(P) + a) as one linear XOR row.
+    pub trace_constraint: bool,
+    /// Cumulative conflict cap across every model of one target.
+    pub conflict_budget: u64,
+}
+
+impl Default for SatDecompositionOptions {
+    fn default() -> Self {
+        Self {
+            encoding: XorEncoding::Native,
+            branch_on_summands: false,
+            restrict_to_factor_base: false,
+            trace_constraint: true,
+            conflict_budget: u64::MAX,
+        }
+    }
+}
+
 /// **SAT decomposition**: the same Semaev system as
 /// [`groebner_decompose`], solved by CDCL.
 ///
@@ -1344,6 +1535,37 @@ pub fn sat_decompose(
     max_models: usize,
     macaulay_degree: Option<u32>,
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    sat_decompose_with(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        max_models,
+        macaulay_degree,
+        SatDecompositionOptions::default(),
+    )
+}
+
+/// Configurable SAT decomposition, retaining CNF as an explicit control.
+/// Pass `macaulay_degree = None` for a SAT-only run without F4 preprocessing.
+/// Three-point unions use the wide S4 encoder (no Macaulay preprocessing);
+/// its optional group trace row is native even with CNF polynomial equations.
+pub fn sat_decompose_with(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    max_models: usize,
+    macaulay_degree: Option<u32>,
+    options: SatDecompositionOptions,
+) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    if m == 3 && fb.domain != FactorBaseDomain::LinearSubspace {
+        return sat_decompose_union_s4(kc, fb, index_of, target, max_models, options);
+    }
     let mut stats = SatDecompositionStats::default();
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
@@ -1367,6 +1589,27 @@ pub fn sat_decompose(
     // with its degree-2 rows silently drops every cubic equation of a
     // chained (`m ≥ 3`) system — which turns UNSAT into SAT.
     let mut equations = sys.equations.clone();
+    if options.trace_constraint {
+        use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+        // For a rational point, delta(P)=Tr(x(P)+a), delta(O)=0,
+        // is a homomorphism to F_2 (Kosters--Yeo, arXiv:1503.08001).
+        // Thus sum Tr(x_i) = Tr(x_R) + (m+1)Tr(a). This is a
+        // necessary group condition, not an assumption about polynomial roots.
+        let rhs = absolute_trace_bit(&x_r, kc.n, &kc.curve.irreducible)
+            ^ (m % 2 == 0 && kc.n % 2 == 1 && kc.a == 1);
+        let mut terms = Vec::new();
+        for (j, basis_element) in fb.subspace_basis.iter().enumerate() {
+            if absolute_trace_bit(basis_element, kc.n, &kc.curve.irreducible) {
+                for i in 0..m {
+                    terms.push(F2BoolMono::var((i * fb.subspace_basis.len() + j) as u32));
+                }
+            }
+        }
+        if rhs {
+            terms.push(F2BoolMono::one());
+        }
+        equations.push(F2BoolPoly::from_monos(terms, sys.n_vars));
+    }
     if let Some(d) = macaulay_degree {
         if let Some(rows) = matrix_f4_f2(&sys.equations, sys.n_vars, d) {
             stats.implied_rows = rows.len();
@@ -1378,7 +1621,44 @@ pub fn sat_decompose(
     // clause per rejected root and re-solve.  Re-encoding from scratch
     // each time costs a full Tseitin/XOR build per model examined, and
     // with `max_models` in the dozens that dominated the loop.
-    let mut enc = encode_boolean_system(sys.n_vars, &equations, &[]);
+    let mut enc = encode_boolean_system_with(sys.n_vars, &equations, &[], options.encoding);
+    enc.solver.conflict_budget = options.conflict_budget;
+    if options.branch_on_summands {
+        enc.solver
+            .set_branch_priority(&(1..=(m * fb.subspace_basis.len()) as u32).collect::<Vec<_>>());
+    }
+    if options.restrict_to_factor_base || fb.domain != FactorBaseDomain::LinearSubspace {
+        let ell = fb.subspace_basis.len();
+        let legal_x: std::collections::HashSet<BigUint> = fb
+            .points
+            .iter()
+            .filter_map(|p| match p {
+                BinaryPoint::Affine { x, .. } => Some(x.to_biguint()),
+                BinaryPoint::Infinity => None,
+            })
+            .collect();
+        let mut codes: Vec<u64> = if fb.domain != FactorBaseDomain::LinearSubspace {
+            // Union construction uses the full polynomial field basis.
+            legal_x
+                .iter()
+                .map(|x| x.to_u64_digits().first().copied().unwrap_or(0))
+                .collect()
+        } else {
+            (0..(1u64 << ell))
+                .filter(|&code| {
+                    legal_x.contains(
+                        &sys.summand_x(&fb.subspace_basis, code, 0, kc.n)
+                            .to_biguint(),
+                    )
+                })
+                .collect()
+        };
+        codes.sort_unstable();
+        codes.dedup();
+        for i in 0..m {
+            add_coordinate_domain(&mut enc.solver, i * ell, ell, &codes);
+        }
+    }
     let mut blocked: Vec<u64> = Vec::new();
     loop {
         stats.solver_calls += 1;
@@ -1387,7 +1667,8 @@ pub fn sat_decompose(
             return (None, stats);
         }
         let outcome = enc.solver.solve();
-        stats.conflicts += enc.solver.conflicts();
+        // The solver counter is cumulative across incremental calls.
+        stats.conflicts = enc.solver.conflicts();
         match outcome {
             SolveResult::Unsat => {
                 stats.refuted = true;
@@ -1400,23 +1681,11 @@ pub fn sat_decompose(
             SolveResult::Sat => {
                 let root = enc.model_assignment();
                 if !sys.equations.iter().all(|e| e.eval(root) == 0) {
-                    // Cannot happen with a correct encoding; block it
-                    // rather than loop, and report it.
+                    // Fail closed: a bad model invalidates this attempt.
+                    // Blocking it and later reporting UNSAT would hide a bug.
                     stats.spurious += 1;
-                    blocked.push(root);
-                    enc.solver.reset_search();
-                    let clause: Vec<i32> = (0..sys.n_vars)
-                        .map(|i| {
-                            let lit = (i + 1) as i32;
-                            if (root >> i) & 1 == 1 {
-                                -lit
-                            } else {
-                                lit
-                            }
-                        })
-                        .collect();
-                    enc.solver.add_clause(clause);
-                    continue;
+                    stats.exhausted = true;
+                    return (None, stats);
                 }
                 stats.models += 1;
                 let xs: Vec<F2mElement> = (0..m)
@@ -1436,6 +1705,120 @@ pub fn sat_decompose(
                     .map(|i| {
                         let lit = (i + 1) as i32;
                         if (root >> i) & 1 == 1 {
+                            -lit
+                        } else {
+                            lit
+                        }
+                    })
+                    .collect();
+                enc.solver.add_clause(clause);
+            }
+        }
+    }
+}
+
+/// The wide symmetrised S4 encoder already supports more than 64
+/// problem variables. Reuse it for three-point union decompositions;
+/// the finite coordinate domain keeps each X inside the union.
+fn sat_decompose_union_s4(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    target: &BinaryPoint,
+    max_models: usize,
+    options: SatDecompositionOptions,
+) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    use crate::cryptanalysis::semaev_sat::encode_semaev_s4;
+    let mut stats = SatDecompositionStats::default();
+    let BinaryPoint::Affine { x: x_r, .. } = target else {
+        stats.exhausted = true;
+        return (None, stats);
+    };
+    let mut enc = encode_semaev_s4(
+        kc.n,
+        kc.n,
+        &kc.curve.irreducible,
+        &kc.curve.b,
+        x_r,
+        options.encoding,
+    );
+    enc.solver.conflict_budget = options.conflict_budget;
+    let mut codes: Vec<_> = fb
+        .points
+        .iter()
+        .filter_map(|p| match p {
+            BinaryPoint::Affine { x, .. } => Some(x.raw_bits().first().copied().unwrap_or(0)),
+            BinaryPoint::Infinity => None,
+        })
+        .collect();
+    codes.sort_unstable();
+    codes.dedup();
+    for i in 0..3 {
+        add_coordinate_domain(&mut enc.solver, i * kc.n as usize, kc.n as usize, &codes);
+    }
+    if options.trace_constraint {
+        let mut vars = Vec::new();
+        for j in 0..kc.n {
+            if absolute_trace_bit(
+                &F2mElement::from_bit_positions(&[j], kc.n),
+                kc.n,
+                &kc.curve.irreducible,
+            ) {
+                for i in 0..3 {
+                    vars.push(i * kc.n + j + 1);
+                }
+            }
+        }
+        let rhs = absolute_trace_bit(x_r, kc.n, &kc.curve.irreducible);
+        // This optional group row is native, including when the
+        // polynomial equations use the CNF control encoding.
+        enc.solver.add_xor(&vars, rhs);
+    }
+    loop {
+        stats.solver_calls += 1;
+        let result = enc.solver.solve();
+        stats.conflicts = enc.solver.conflicts();
+        match result {
+            SolveResult::Unsat => {
+                stats.refuted = true;
+                return (None, stats);
+            }
+            SolveResult::Unknown => {
+                stats.exhausted = true;
+                return (None, stats);
+            }
+            SolveResult::Sat => {
+                let xs = enc.decode();
+                if !crate::cryptanalysis::binary_semaev::binary_semaev_s4(
+                    &xs[0],
+                    &xs[1],
+                    &xs[2],
+                    x_r,
+                    &kc.curve.b,
+                    &kc.curve.irreducible,
+                )
+                .is_zero()
+                {
+                    stats.spurious += 1;
+                    stats.exhausted = true;
+                    return (None, stats);
+                }
+                stats.models += 1;
+                if let Some(ids) = lift_candidate(kc, fb, index_of, &xs, target) {
+                    return (Some(ids), stats);
+                }
+                if stats.models >= max_models {
+                    stats.exhausted = true;
+                    return (None, stats);
+                }
+                let model = enc.solver.model();
+                enc.solver.reset_search();
+                // The x coordinates determine all S4 auxiliaries, so
+                // block the x tuple, including every failed rational lift.
+                let clause = (0..3 * kc.n as usize)
+                    .map(|i| {
+                        let lit = (i + 1) as i32;
+                        if model[i] {
                             -lit
                         } else {
                             lit
@@ -1561,6 +1944,12 @@ pub struct KoblitzIcReport {
     pub sat_calls: usize,
     /// Targets the SAT oracle refuted outright (UNSAT).
     pub sat_refutations: usize,
+    /// Inconclusive attempts (model/conflict caps or invalid models).
+    pub sat_unknowns: usize,
+    /// Encoding/model verification failures; any nonzero value invalidates a run.
+    pub sat_invalid_models: usize,
+    /// Log recovered from R = O directly, bypassing the relation matrix.
+    pub direct_relation: bool,
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -1591,6 +1980,9 @@ pub fn koblitz_index_calculus_dlp(
         infeasible_branches: 0,
         sat_calls: 0,
         sat_refutations: 0,
+        sat_unknowns: 0,
+        sat_invalid_models: 0,
+        direct_relation: false,
     };
     if fb.points.is_empty() {
         return Some(report);
@@ -1613,6 +2005,7 @@ pub fn koblitz_index_calculus_dlp(
             let d = solve_for_d(&a, &b, r)?;
             if kc.mul(&g, &d) == *q {
                 report.log = Some(d);
+                report.direct_relation = true;
                 report.relations = relations.len();
                 return Some(report);
             }
@@ -1649,6 +2042,11 @@ pub fn koblitz_index_calculus_dlp(
                 );
                 report.sat_calls += stats.solver_calls;
                 report.sat_refutations += usize::from(stats.refuted);
+                report.sat_unknowns += usize::from(stats.exhausted);
+                report.sat_invalid_models += stats.spurious;
+                if stats.spurious != 0 {
+                    return Some(report);
+                }
                 idxs
             }
         };
@@ -2055,6 +2453,172 @@ mod tests {
             rhs = (rhs + coeff * x_o) % r;
         }
         assert_eq!(lhs, rhs);
+    }
+
+    #[test]
+    fn reciprocal_saturation_preserves_projection_and_contains_the_base() {
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[0, 3]).unwrap();
+        let saturated = saturate_factor_base_two_torsion(&kc, &fb).unwrap();
+        let keys: std::collections::HashSet<_> = saturated.points.iter().map(point_key).collect();
+        for p in &fb.points {
+            assert!(keys.contains(&point_key(p)));
+        }
+        let project = |base: &FrobeniusFactorBase| -> std::collections::HashSet<_> {
+            base.points
+                .iter()
+                .map(|p| point_key(&kc.mul(p, &kc.cofactor)))
+                .collect()
+        };
+        assert_eq!(project(&fb), project(&saturated));
+        let t = points_with_x(&kc.curve, &F2mElement::zero(kc.n)).remove(0);
+        for p in &saturated.points {
+            assert!(keys.contains(&point_key(&kc.frobenius(p))));
+            if let BinaryPoint::Affine { x, .. } = p {
+                if !x.is_zero() {
+                    let BinaryPoint::Affine {
+                        x: translated_x, ..
+                    } = kc.add(p, &t)
+                    else {
+                        panic!("non-torsion point");
+                    };
+                    assert_eq!(
+                        x.mul(&translated_x, &kc.curve.irreducible),
+                        F2mElement::one(kc.n)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn domain_trie_accepts_exactly_the_allowed_coordinates() {
+        use crate::cryptanalysis::sat::{SolveResult, Solver};
+        for ell in 1..=5usize {
+            for mode in 0..4 {
+                let codes: Vec<_> = (0..(1u64 << ell))
+                    .filter(|x| match mode {
+                        0 => false,
+                        1 => true,
+                        2 => x % 3 == 0,
+                        _ => x & 1 == 1,
+                    })
+                    .collect();
+                for x in 0..(1u64 << ell) {
+                    let mut solver = Solver::new(ell as u32 + 2);
+                    add_coordinate_domain(&mut solver, 2, ell, &codes);
+                    for j in 0..ell {
+                        let lit = (j + 3) as i32;
+                        solver.add_clause(vec![if (x >> j) & 1 == 1 { lit } else { -lit }]);
+                    }
+                    assert_eq!(solver.solve() == SolveResult::Sat, codes.contains(&x));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn frobenius_union_domain_is_invariant_and_sat_matches_search() {
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let basis = vec![F2mElement::one(7), F2mElement::from_bit_positions(&[1], 7)];
+        let fb = build_frobenius_union_factor_base(&kc, &basis).unwrap();
+        let keys: std::collections::HashSet<_> = fb.points.iter().map(point_key).collect();
+        for p in &fb.points {
+            assert!(keys.contains(&point_key(&kc.frobenius(p))));
+            assert!(keys.contains(&point_key(&point_neg(p))));
+        }
+        assert!(matches!(
+            fb.domain,
+            FactorBaseDomain::FrobeniusUnion { seed_dimension: 2 }
+        ));
+        let index = fb.index_map();
+        let st = FieldStructure::new(7, &kc.curve.irreducible);
+        for m in [2, 3] {
+            for k in 1u32..=6 {
+                let target = kc.mul(kc.generator(), &BigUint::from(k));
+                let reference = enumerate_decompose(&kc, &fb, &index, &target, m);
+                let (out, stats) = sat_decompose_with(
+                    &kc,
+                    &fb,
+                    &index,
+                    &st,
+                    &target,
+                    m,
+                    128,
+                    None,
+                    SatDecompositionOptions {
+                        conflict_budget: 100_000,
+                        ..Default::default()
+                    },
+                );
+                assert_eq!(stats.spurious, 0);
+                assert!(!stats.exhausted);
+                assert_eq!(out.is_some(), reference.is_some());
+            }
+        }
+    }
+
+    #[test]
+    fn trace_bit_is_a_group_homomorphism_including_torsion() {
+        for a in [0, 1] {
+            let kc = KoblitzCurve::new(a, 7).unwrap();
+            let delta = |p: &BinaryPoint| match p {
+                BinaryPoint::Infinity => false,
+                BinaryPoint::Affine { x, .. } => {
+                    absolute_trace_bit(x, kc.n, &kc.curve.irreducible) ^ (a == 1)
+                }
+            };
+            let torsion = points_with_x(&kc.curve, &F2mElement::zero(kc.n)).remove(0);
+            for x in 0..(1u32 << kc.n) {
+                let x = F2mElement::from_biguint(&BigUint::from(x), kc.n);
+                for p in points_with_x(&kc.curve, &x) {
+                    for q in [&p, &point_neg(&p), kc.generator(), &torsion] {
+                        assert_eq!(delta(&kc.add(&p, q)), delta(&p) ^ delta(q));
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn native_sat_domain_filter_preserves_group_decompositions() {
+        for (a, n, m) in [(1, 7, 2), (0, 9, 3)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let index = fb.index_map();
+            let st = FieldStructure::new(n, &kc.curve.irreducible);
+            for k in 1u32..=6 {
+                let target = kc.mul(kc.generator(), &BigUint::from(k));
+                let reference = enumerate_decompose(&kc, &fb, &index, &target, m);
+                for restrict in [false, true] {
+                    let (out, stats) = sat_decompose_with(
+                        &kc,
+                        &fb,
+                        &index,
+                        &st,
+                        &target,
+                        m,
+                        128,
+                        None,
+                        SatDecompositionOptions {
+                            restrict_to_factor_base: restrict,
+                            conflict_budget: 1_000_000,
+                            ..Default::default()
+                        },
+                    );
+                    assert!(!stats.exhausted);
+                    assert_eq!(stats.spurious, 0);
+                    assert_eq!(out.is_some(), reference.is_some());
+                    assert_eq!(stats.refuted, out.is_none());
+                    if let Some(ids) = out {
+                        let sum = ids
+                            .iter()
+                            .fold(BinaryPoint::Infinity, |p, &i| kc.add(&p, &fb.points[i]));
+                        assert_eq!(sum, target);
+                    }
+                }
+            }
+        }
     }
 
     #[test]

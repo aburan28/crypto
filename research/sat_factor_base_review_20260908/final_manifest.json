@@ -1,0 +1,32 @@
+{
+  "base_commit": "10a3cb80746ada79dc3f577a460e16c75dc4130f",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "scope": "mathematical factor-base support, multiplicity and coefficient rank; no unknown scalar recovery",
+  "source_sha256": {
+    "src/cryptanalysis/koblitz_index_calculus.rs": "69227dece5c10301451034396c94bd720a484d2431443ce5f262e451e6f5e84e",
+    "src/cryptanalysis/semaev_sat.rs": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7",
+    "src/cryptanalysis/sat.rs": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
+    "examples/koblitz_factor_base_sweep.rs": "378142281968ffb253a67f0cc00d07a5c3fb821a4f0dac48df19169fcdefe600",
+    "examples/koblitz_factor_base_yield.rs": "4c08042cbebfab1a557a59656a1b619ce2782a06b9b03276dfc8a352820ecc34",
+    "examples/koblitz_factor_base_validate.rs": "0329d7109424e72dd5f7f2cd27615939ff98d2b4a834964131158e34f2a9a19b",
+    "examples/koblitz_factor_base_survey.rs": "4d82e73b6ccce3d13a1a3d84c2cfafdd5518f82692226ea59d2faec6a8ed236c",
+    "examples/koblitz_factor_base_math.rs": "5e172c090d3b98125234f5e53441449daf9f70cf51fe6dd0a5c3439c0a096723",
+    "examples/koblitz_sat_ablation.rs": "3d466dc3cf83d4f80010bec8c8897d2e0156c6f62e202c4cab9ac196311f45b9",
+    "Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+  },
+  "artifact_sha256": {
+    "validation.log": "93a43f63f2ad266ba1e1095026f6015e2a6f536537ed59b40a112e3d33902534",
+    "math-reciprocal-n19.jsonl": "99ed276c0b66bf1cc28d8dd99b83cdfe3812acfba84e3f983a26a9ff3ee3bae2",
+    "yield-n19.jsonl": "f79a8c44c76a779a4e7e9249ba2ef75bf1a6cb652ef2e822ae97bd26f0e0b989",
+    "MATHEMATICS.md": "4ad7ffa36fa5943695b45cbd7294112ed888385b8c9c69e2b22ad8e3b1a18d59",
+    "mathematical_checks.txt": "c11afdefbd535af9f06f8478acd6ccdd3ad96fe7e1402bc5c969d5e641aa1dbd",
+    "manifest.json": "407a34946912055808384c4c03615d2616bafda631076de35db22de4cc1e062f",
+    "yield-n15.jsonl": "723b36172fa29ec441304cab3901eb1c858f4333cf924969861000154a1db490",
+    "math-reciprocal-n15.jsonl": "92e7b77660b1ddf86afee3b097347a84008e4588090fb803f4a55fc37179a46d",
+    "math-holdout-n19.jsonl": "c67d5b1d008a1694f0f8e8e61d63a0a5bae771aa0274e840fca42687c8690606",
+    "math-four-orbit-subsets-n19.jsonl": "97e542cc46df750316920d8e6c3167ecc28c0cbadc33277b28b657c2c3e750d3",
+    "math-exact-n15.jsonl": "81976866e08addcf2d781e7ced0c0afc3813193e8aad872f64eeea3143a13c83"
+  },
+  "provenance_note": "Final source digests support reproduction; artifacts were produced across incremental source revisions. Earlier manifest retained."
+}

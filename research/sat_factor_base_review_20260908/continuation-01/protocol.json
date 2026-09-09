@@ -1,0 +1,20 @@
+{
+  "objective": "Exact finite factor-base coverage using target symmetry; cross-degree mathematical comparison only",
+  "plan": [
+    "Check target orbits partition all nonzero public subgroup labels",
+    "Verify each base is Frobenius- and negation-invariant",
+    "Evaluate original n19 five-orbit parent and its five four-orbit subsets exhaustively modulo target symmetry",
+    "Require orbit-weighted representation total to equal independently counted cofactor-admissible triples minus zero sums",
+    "Census n17 and evaluate selected bases before and after rational 2-torsion closure"
+  ],
+  "scope": "No recovery of unknown scalars, no solver-complexity inference",
+  "base_commit": "10a3cb80746ada79dc3f577a460e16c75dc4130f",
+  "source_sha256": {
+    "examples/koblitz_factor_base_math.rs": "5e172c090d3b98125234f5e53441449daf9f70cf51fe6dd0a5c3439c0a096723",
+    "examples/koblitz_factor_base_yield.rs": "4c08042cbebfab1a557a59656a1b619ce2782a06b9b03276dfc8a352820ecc34",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "ba3bd3f5978f2dfee6eb9285af15d9eb119804d2641a04104b76900ba3b15adc",
+    "src/binary_ecc/curve.rs": "f50c8a9c0f26fe694af434cf17d0408abef9f6bdb0812ab3a67efa68ac0c3aa6",
+    "src/binary_ecc/f2m.rs": "7fd026ee6d5d4a4dd13863217b4f66280511add47144ae03a6e36b6ba4298332",
+    "Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+  }
+}

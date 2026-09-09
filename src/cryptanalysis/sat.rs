@@ -631,6 +631,18 @@ impl Solver {
                 return true; // tautology — drop
             }
         }
+        // Incremental clauses may arrive after root propagation has
+        // already consumed the trail. Remove root-false literals before
+        // choosing watches: otherwise both watches can be false with no
+        // pending event to visit them, losing a unit or conflicting clause.
+        // Root assignments persist across reset_search and are consequences
+        // of the permanent formula, so this simplification is sound.
+        if self.trail_lim.is_empty() {
+            if lits.iter().any(|&l| self.lit_value(l) == Some(true)) {
+                return true;
+            }
+            lits.retain(|&l| self.lit_value(l) != Some(false));
+        }
         match lits.len() {
             0 => {
                 self.is_unsat = true;
@@ -1471,7 +1483,7 @@ impl Solver {
         self.backjump(0);
     }
 
-    /// Conflicts encountered by the most recent [`Self::solve`].
+    /// Cumulative conflicts across all calls to [`Self::solve`].
     ///
     /// A machine-independent measure of search effort: unlike wall
     /// clock it is comparable across runs and machines, which is what

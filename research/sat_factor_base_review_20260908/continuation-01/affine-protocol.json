@@ -1,0 +1,34 @@
+{
+  "scope": "Trace-aligned affine seed sets in quotient coordinate u; finite sumsets only",
+  "parameters": {
+    "degrees": [
+      17,
+      19
+    ],
+    "curve_a": 1,
+    "seed_dimensions": [
+      2,
+      3,
+      4
+    ],
+    "trials_per_dimension": 4,
+    "screening_targets": 256,
+    "exact_finalists": 3
+  },
+  "comparison": "at most three affine quotient summands versus exactly three in a torsion-closed lifted base; also report exactly-three quotient coverage separately",
+  "gates": [
+    "complete u-fiber audit at n=7,9",
+    "subgroup membership, Frobenius and negation closure",
+    "exact target-orbit partition",
+    "exact total unordered triples in C union O matches orbit-weighted multiplicity counts",
+    "n19 earlier parent quotient coverage must equal its independently computed lifted coverage"
+  ],
+  "source_sha256": {
+    "examples/koblitz_affine_quotient_base.rs": "ec0e4a9f61640cbcdff7feab37500657de0b626f26a32f760659dd8f3484bd4d",
+    "examples/koblitz_quotient_geometry.rs": "13b3825278c09d99ba16b17bc409cc0ab6ca68c235e91d1e5cd9f2d77c6bbc1a",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "ba3bd3f5978f2dfee6eb9285af15d9eb119804d2641a04104b76900ba3b15adc",
+    "src/binary_ecc/curve.rs": "f50c8a9c0f26fe694af434cf17d0408abef9f6bdb0812ab3a67efa68ac0c3aa6",
+    "src/binary_ecc/f2m.rs": "7fd026ee6d5d4a4dd13863217b4f66280511add47144ae03a6e36b6ba4298332",
+    "Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+  }
+}
