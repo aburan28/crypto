@@ -1,5 +1,10 @@
 # ECC2K-130 and ECC2K-95
 
+The optional [packed normal-basis CUDA backend](PACKED.md) has measured above
+2 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. Use `--packed`
+with the benchmark/validation entry points; its reports retain the existing
+format, while checkpoints have a separate backend version.
+
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
 That guide supersedes the earlier bandwidth estimates and tuning prescriptions
@@ -620,9 +625,9 @@ seed and step counter -- every `--checkpoint-every` seconds (default 300) and
 again on exit, to a temporary file that is then renamed, so an interrupted write
 leaves the previous checkpoint intact rather than a half-written one. The header
 records m, thread count, batch size, lane width and run id; a client that does
-not match refuses the file and starts fresh instead of misreading it. Cost is
-about 49 bytes per walk, so 195 MB for the four million walks the Modal search
-uses by default.
+not match refuses the file without overwriting it. Packed checkpoints use a
+separate version and about 60 bytes per walk; the default bitsliced layout is
+about 49 bytes per walk.
 
 `SIGINT` and `SIGTERM` stop the client between launches rather than killing it:
 it finishes the launch in flight, drains the reports, checkpoints and exits 0.
@@ -631,8 +636,8 @@ for the client to finish writing, and only then commits the volume, so the
 snapshot contains the checkpoint just written rather than the one before it.
 
 Resuming needs the same shape it saved, so pass the same curve, run id, worker
-count and build-time batch size; the header check turns a mismatch into a fresh
-start rather than corruption.
+count, backend and build-time batch size; a mismatched existing checkpoint is
+an error. Use a new checkpoint path or run ID to start a different configuration.
 
 ## Build
 

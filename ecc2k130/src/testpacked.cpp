@@ -1,0 +1,26 @@
+#include "../include/curveparams.h"
+#include "../include/packed131.h"
+#include <cstdio>
+using R = Ref<CfgF131>;
+using P = eccPacked131::P131;
+static unsigned long long state = 0x131ab123456789ULL;
+static unsigned long long randomWord() { state ^= state << 13; state ^= state >> 7; state ^= state << 17; return state; }
+static P pack(R::Elem a) { P p; for (int i=0;i<5;i++) p.v[i]=unsigned(a.v[i/2]>>(32*(i&1))); return p; }
+static R::Elem unpack(P p) { unsigned long long a[3]={p.v[0]|(static_cast<unsigned long long>(p.v[1])<<32),p.v[2]|(static_cast<unsigned long long>(p.v[3])<<32),p.v[4]};return R::fromLimbs(a); }
+int main() {
+    for (int test=0;test<160;test++) {
+        unsigned long long av[3]={randomWord(),randomWord(),randomWord()&7},bv[3]={randomWord(),randomWord(),randomWord()&7};
+        if (test<131) {av[0]=av[1]=av[2]=0;av[test/64]=1ull<<(test%64);}
+        auto a=R::fromLimbs(av),b=R::fromLimbs(bv);auto pa=pack(a),pb=pack(b);
+        if (unpack(eccPacked131::mul131(pa,pb))!=R::mul(a,b) ||
+            unpack(eccPacked131::sqr131(pa))!=R::sqr(a) ||
+            unpack(eccPacked131::inv131(pa))!=R::inv(a)) {
+            printf("packed field mismatch at case %d\n",test);return 1;
+        }
+        for (int j=3;j<=10;j++) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) return 1;
+    }
+    P zero{};auto one=pack(R::one());
+    if (unpack(eccPacked131::mul131(zero,one))!=R::zero() ||
+        unpack(eccPacked131::mul131(one,one))!=R::one()) return 1;
+    puts("PASS: packed multiplication, squaring, inversion and all walk Frobenius exponents against independent reference");
+}

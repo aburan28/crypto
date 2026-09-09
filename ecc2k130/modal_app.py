@@ -237,7 +237,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
     return rc == 0, out
 
 
-def benchmarkIdentity():
+def benchmarkIdentity(packed=False):
     """Identity travels with the result even though the image has no .git."""
     root = pathlib.Path(REMOTE)
     source = hashlib.sha256()
@@ -253,14 +253,17 @@ def benchmarkIdentity():
     leaf = re.search(r'LEAF = (\d+)', (root / 'generated/eccF131.h').read_text())
     return dict(sourceSha256=source.hexdigest(),
                 binarySha256=hashlib.sha256((root / 'ecc2k130').read_bytes()).hexdigest(),
-                actualLeaf=int(leaf.group(1)), compiler=compiler, compilerReturncode=rc,
+                actualLeaf=None if packed else int(leaf.group(1)), generatedLeaf=int(leaf.group(1)),
+                activeBackend='packed-onb131' if packed else 'bitsliced', compiler=compiler, compilerReturncode=rc,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 
-def measureBench(steps, launches, workers, preferL1, repeats):
+def measureBench(steps, launches, workers, preferL1, repeats, packed=False):
     if steps <= 0 or launches <= 0 or repeats <= 0 or workers < 0:
         raise ValueError('steps, launches and repeats must be positive; workers must be nonnegative')
     cmd = f'./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} --verify 0'
+    if packed:
+        cmd += ' --packed'
     if workers:
         cmd += f' --threads {workers}'
     if preferL1:
@@ -287,9 +290,11 @@ def measureBench(steps, launches, workers, preferL1, repeats):
 # ---------------------------------------------------------------------------
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR, volumes={"/data": volume})
 def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
-                streamKarat=False, smemSpill=False, globalCg=False, preferL1=False):
+                streamKarat=False, smemSpill=False, globalCg=False, preferL1=False, packed=False):
     """Field arithmetic, orbit invariants, solver, and end-to-end discrete
     logarithms recovered on the GPU itself."""
+    if packed and (leaf or streamKarat or smemSpill):
+        raise ValueError('packed arithmetic requires leaf=0 and no stream/smem flags')
     cc = computeCapability()
     out = ["device: " + gpuName(), "compute capability: " + cc, ""]
     # Validate the requested candidate on the actual architecture. buildFor
@@ -298,7 +303,7 @@ def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
                        streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
     if not ok:
         raise RuntimeError("\n".join(out + ["rebuild failed", log]))
-    out.append(json.dumps(benchmarkIdentity(), indent=2))
+    out.append(json.dumps(benchmarkIdentity(packed), indent=2))
     cacheFlag = ' --prefer-l1' if preferL1 else ''
     rc, t = sh("./ecc2k130-cpu --test")
     out.append(t.strip())
@@ -340,8 +345,9 @@ def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
     # Staying inside the cap matters beyond speed: it means a "dropped" count in
     # validate output is a real signal rather than the expected state.
     for curve, weight, workers in ((97, 36, 512), (131, 50, 128)):
+        backendFlag = ' --packed' if packed and curve == 131 else ''
         rc, t = sh(f"./ecc2k130 --curve {curve} --dp-weight {weight} --threads {workers} "
-                   f"--steps 16 --launches 2 --dp-cap 262144 --verify 16{cacheFlag}", timeout=1800)
+                   f"--steps 16 --launches 2 --dp-cap 262144 --verify 16{cacheFlag}{backendFlag}", timeout=1800)
         out.append(f"\n--- GF(2^{curve}) reporting path ---")
         out.append(t.strip())
         passed = reportsVerified(rc, t)
@@ -355,12 +361,14 @@ def runValidate(batch=32, threads=128, leaf=0, minBlocks=2,
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
 def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
              workers=0, rebuild=True, repeats=3, streamKarat=False,
-             smemSpill=False, globalCg=False, preferL1=False):
+             smemSpill=False, globalCg=False, preferL1=False, packed=False):
     """Completed-run median on the challenge curve, with reproducible identity."""
+    if packed and (leaf or streamKarat or smemSpill):
+        raise ValueError('packed arithmetic requires leaf=0 and no stream/smem flags')
     info = dict(gpu=gpuName(), cc=computeCapability(), batch=batch,
                 threads=threads, leaf=leaf, minBlocks=minBlocks, workers=workers,
                 steps=steps, launches=launches, repeats=repeats, streamKarat=streamKarat,
-                smemSpill=smemSpill, globalCg=globalCg, preferL1=preferL1)
+                smemSpill=smemSpill, globalCg=globalCg, preferL1=preferL1, packed=packed)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks)
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
@@ -371,8 +379,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
         info['buildLog'] = log
         if not ok:
             return dict(info, valid=False, rate=0.0, error=log)
-    info['identity'] = benchmarkIdentity()
-    info.update(measureBench(steps, launches, workers, preferL1, repeats))
+    info['identity'] = benchmarkIdentity(packed)
+    info.update(measureBench(steps, launches, workers, preferL1, repeats, packed))
     return info
 
 
@@ -422,13 +430,19 @@ def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
 def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33,66",
                 minBlocksList="2,4,8", steps=64, launches=12, configs="",
                 workers=0, repeats=3, streamKarat=False, smemSpill=False,
-                globalCg=False, preferL1=False):
+                globalCg=False, preferL1=False, packed=False):
     """Rank completed repetitions by median; retain failed candidates as errors."""
     results = []
     arch = computeCapability()
     name = gpuName()
+    if packed and not configs.strip():
+        if leaves not in ('0', '0,17,33,66'):
+            raise ValueError('packed arithmetic has no generated-leaf tuning; use --leaves 0')
+        leaves = '0'
     plan = autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
                            (streamKarat, smemSpill, globalCg))
+    if packed and any(leaf or sk or ss for leaf, batch, threads, mb, sk, ss, cg in plan):
+        raise ValueError('packed configs require leaf=0 and no stream/smem flags')
     print(f"{len(plan)} builds to measure on {name} (sm_{arch})")
     for leaf, batch, threads, mb, sk, ss, cg in plan:
         t0 = time.time()
@@ -437,13 +451,13 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
         cfg = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=mb,
                    workers=workers, repeats=repeats, steps=steps, launches=launches,
                    streamKarat=sk, smemSpill=ss,
-                   globalCg=cg, preferL1=preferL1,
+                   globalCg=cg, preferL1=preferL1, packed=packed,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
             results.append(dict(cfg, valid=False, rate=0.0, error=log))
             continue
-        cfg['identity'] = benchmarkIdentity()
-        cfg.update(measureBench(steps, launches, workers, preferL1, repeats))
+        cfg['identity'] = benchmarkIdentity(packed)
+        cfg.update(measureBench(steps, launches, workers, preferL1, repeats, packed))
         results.append(cfg)
         knobLabel = ' '.join(n for n, on in (('streamKarat', sk), ('smemSpill', ss),
                                              ('globalCg', cg)) if on) or 'no knobs'
@@ -504,7 +518,7 @@ def runAutolab(batches="4,8,16,32", threadCounts="64,128,256",
 @app.function(image=profileImage, gpu=DEFAULT_GPU, timeout=2 * HOUR)
 def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
                section="", metrics="", workers=0, streamKarat=False,
-               smemSpill=False, globalCg=False, preferL1=False):
+               smemSpill=False, globalCg=False, preferL1=False, packed=False):
     """Profile the walk kernel with Nsight Compute, or say precisely why not.
 
     Both a compatible profiler and host counter access are required. Check the
@@ -528,6 +542,8 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
         return {"gpu": name, "available": False, "kind": "unsupported_profiler",
                 "why": versionError, "log": ver, "profilerBinary": NCU_BINARY}
 
+    if packed and (leaf or streamKarat or smemSpill):
+        raise ValueError('packed arithmetic requires leaf=0 and no stream/smem flags')
     ok, log = buildFor(batch, threads, leaf, arch, minBlocks,
                        streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg)
     if not ok:
@@ -548,9 +564,12 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     runFlags = f" --threads {workers}" if workers else ""
     if preferL1:
         runFlags += " --prefer-l1"
-    identity = benchmarkIdentity()
+    if packed:
+        runFlags += ' --packed'
+    kernelFilter = "--kernel-name-base demangled --kernel-name 'regex:eccPacked131::walk'" if packed else '--kernel-name eccWalkKernel'
+    identity = benchmarkIdentity(packed)
     command = (
-        f"{NCU_BINARY} --target-processes all --kernel-name eccWalkKernel "
+        f"{NCU_BINARY} --target-processes all {kernelFilter} "
         f"--launch-count 1 {what} "
         f"./ecc2k130 --curve 131 --bench --steps {steps} --launches {launches} "
         f"--verify 0{runFlags}"
@@ -561,7 +580,7 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     result.update(gpu=name, cc=arch, batch=batch, threads=threads, leaf=leaf,
                   minBlocks=minBlocks, workers=workers, identity=identity,
                   streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg,
-                  preferL1=preferL1, profilerBinary=NCU_BINARY, profilerVersion=ver,
+                  preferL1=preferL1, packed=packed, profilerBinary=NCU_BINARY, profilerVersion=ver,
                   command=command)
     return result
 
@@ -681,7 +700,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True, loadMax=50000000):
+              checkpointEvery=300, resume=True, loadMax=50000000, packed=False, verify=4):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -695,12 +714,15 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
 
     Resuming needs the same shape it saved: curve, runId, worker thread count
     and the build-time batch size all appear in the checkpoint header, and a
-    mismatch makes the client start fresh rather than misread the file.  So pass
+    mismatch is rejected without overwriting the checkpoint.  So pass
     the same batch/workers/walksTarget you passed the first time.
 
     curve=97 is ECC2K-95, which Harley's group solved in 1998 after about
     2.16e13 iterations; the published answer is baked into the generated header
     so a recovered logarithm can be checked against it."""
+    if packed and (curve != 131 or leaf):
+        raise ValueError('packed search requires curve=131 and leaf=0')
+    backendFlag = ' --packed' if packed else ''
     if rebuild:
         ok, log = buildFor(batch, threads, leaf)
         if not ok:
@@ -710,7 +732,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     os.makedirs("/data/ckpt", exist_ok=True)
     dpFile = f"/data/dp/curve{curve}-run{runId}.bin"
     ckFile = f"/data/ckpt/curve{curve}-run{runId}.ck"
-    rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0")
+    rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0{backendFlag}")
     rate = parseRate(out) or 1.0
     # The number of reports comes out at roughly four times the number of
     # parallel walks, because each walk has only total/walks steps to spend and
@@ -718,9 +740,14 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # count, not the GPU, decides how much storage the run needs: cap it.
     workerThreads = workers
     if not workerThreads and walksTarget:
-        perThread = batch * 32
+        perThread = batch * (1 if packed else 32)
         workerThreads = max(1024, int(walksTarget) // perThread)
-    walks = workerThreads * batch * 32
+    if not workerThreads:
+        match = re.search(r'backend .*?: (\d+) threads', out)
+        if not match:
+            raise RuntimeError('could not determine the automatic worker count')
+        workerThreads = int(match.group(1))
+    walks = workerThreads * batch * (1 if packed else 32)
     # The bench above measured this GPU, so the length of the pass about to run
     # is known rather than guessed; size the cutoff against that.
     plannedIters = rate * 1e6 * hours * HOUR
@@ -729,8 +756,9 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     print(f"{walks} parallel walks, distinguished-point weight {dpWeight}, "
           f"{plannedIters:.3g} iterations planned this pass")
     cmd = (f"./ecc2k130 --curve {curve} --steps {steps} --run-id {runId} "
-           f"--dp-file {dpFile} --verify 4 --launches 0 --threads {workerThreads} "
+           f"--dp-file {dpFile} --verify {verify} --launches 0 --threads {workerThreads} "
            f"--checkpoint-every {int(checkpointEvery)} --load-max {int(loadMax)}")
+    cmd += backendFlag
     if resume:
         cmd += f" --checkpoint {ckFile}"
     if dpWeight >= 0:
@@ -947,21 +975,21 @@ def compile_check(arch: str = "120", stream_karat: bool = False,
 @app.local_entrypoint()
 def validate(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
              min_blocks: int = 2, stream_karat: bool = False, smem_spill: bool = False,
-             global_cg: bool = False, prefer_l1: bool = False):
+             global_cg: bool = False, prefer_l1: bool = False, packed: bool = False):
     print(onGpu(runValidate, gpu).remote(batch=batch, threads=threads, leaf=leaf,
           minBlocks=min_blocks, streamKarat=stream_karat, smemSpill=smem_spill,
-          globalCg=global_cg, preferL1=prefer_l1))
+          globalCg=global_cg, preferL1=prefer_l1, packed=packed))
 
 
 @app.local_entrypoint()
 def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
           min_blocks: int = 2, steps: int = 64, launches: int = 20,
           workers: int = 0, repeats: int = 3, stream_karat: bool = False,
-          smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
+          smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False, packed: bool = False):
     r = onGpu(runBench, gpu).remote(batch=batch, threads=threads, leaf=leaf,
                                     minBlocks=min_blocks, steps=steps, launches=launches,
                                     workers=workers, repeats=repeats, streamKarat=stream_karat,
-                                    smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1)
+                                    smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1, packed=packed)
     print(json.dumps(r, indent=2))
     if not r.get('valid'):
         raise RuntimeError('benchmark did not complete successfully')
@@ -973,14 +1001,14 @@ def autotune(gpu: str = "", batches: str = "8,16,32,64",
              min_blocks_list: str = "2,4,8", configs: str = "",
              steps: int = 64, launches: int = 12, workers: int = 0, repeats: int = 3,
              stream_karat: bool = False, smem_spill: bool = False,
-             global_cg: bool = False, prefer_l1: bool = False):
+             global_cg: bool = False, prefer_l1: bool = False, packed: bool = False):
     """--configs takes leaf:batch:threads:minBlocks entries, as ::autolab
     prints them, and measures exactly those instead of a cross product."""
     r = onGpu(runAutotune, gpu).remote(batches=batches, threadCounts=thread_counts,
                                        leaves=leaves, minBlocksList=min_blocks_list,
                                        configs=configs, steps=steps, launches=launches,
                                        workers=workers, repeats=repeats, streamKarat=stream_karat,
-                                       smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1)
+                                       smemSpill=smem_spill, globalCg=global_cg, preferL1=prefer_l1, packed=packed)
     print(json.dumps(r, indent=2))
     if r['best'] is None:
         raise RuntimeError('no benchmark candidate completed successfully')
@@ -1025,7 +1053,7 @@ def campaign(gpu: str = "", batches: str = "4,8,16,32",
 def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
             min_blocks: int = 2, steps: int = 4, section: str = "",
             metrics: str = "", workers: int = 0, stream_karat: bool = False,
-            smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False):
+            smem_spill: bool = False, global_cg: bool = False, prefer_l1: bool = False, packed: bool = False):
     """Nsight Compute on the walk kernel.
 
     Print actionable diagnostics and exit nonzero when profiling is unavailable."""
@@ -1033,7 +1061,7 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
                                       minBlocks=min_blocks, steps=steps,
                                       section=section, metrics=metrics, workers=workers,
                                       streamKarat=stream_karat, smemSpill=smem_spill,
-                                      globalCg=global_cg, preferL1=prefer_l1)
+                                      globalCg=global_cg, preferL1=prefer_l1, packed=packed)
     if not r.get("available"):
         print("Nsight Compute did not run: %s" % r.get("why"))
         if r.get("remedy"):
@@ -1047,22 +1075,22 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
-           walks: int = 4000000, load_max: int = 50000000):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
-                                     runId=run_id, walksTarget=walks, loadMax=load_max)
+                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max)
+                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
