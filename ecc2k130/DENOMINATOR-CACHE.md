@@ -11,6 +11,10 @@ cache is transient, rebuilt before use on every step, and excluded from
 checkpoint storage. GPU allocation sizing accounts for its additional 20
 bytes per concurrent walk. The original path remains the default.
 
+The additional [Frobenius networks](FROBENIUS-NETWORK.md) raise measured
+throughput to 5.832583 B/s with this cache enabled. The measurements below
+describe denominator caching before that additional optimization.
+
 ## Run the measured configuration
 
 ```bash
