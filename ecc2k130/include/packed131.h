@@ -107,7 +107,17 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #if ECC_PACKED_SINGLE_PRODUCT != 0 && ECC_PACKED_SINGLE_PRODUCT != 1
 #error "ECC_PACKED_SINGLE_PRODUCT must be 0 or 1"
 #endif
-static ECC_BIG P131 mul131(const P131 &a,const P131 &b) {
+#ifndef ECC_PACKED_BY_VALUE
+#define ECC_PACKED_BY_VALUE 0
+#endif
+#if ECC_PACKED_BY_VALUE
+// Passing these five-word aggregates by value lets the device ABI use
+// registers instead of materializing the caller's operands in local memory.
+using MulArg = P131;
+#else
+using MulArg = const P131 &;
+#endif
+static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
