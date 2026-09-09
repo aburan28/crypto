@@ -5,6 +5,10 @@ iteration function, seed derivation, distinguished-point predicate and report
 format. The original bitsliced backend remains available and remains the
 default, including for existing checkpoints and other fields.
 
+The opt-in [denominator cache](DENOMINATOR-CACHE.md), combined with the
+single-product multiplier, measures **4.098489 billion scalar iterations/s**
+on RTX PRO 6000. Its guide includes the exact flags and validation command.
+
 An opt-in [single-product multiplier](SINGLE-PRODUCT.md) further raises measured
 RTX PRO 6000 throughput to **3.511807 billion iterations/s** with four resident
 blocks per SM. Enable it with `ECC_PACKED_SINGLE_PRODUCT=1` on Modal, or
