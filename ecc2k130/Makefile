@@ -82,6 +82,7 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 # catches is otherwise invisible until someone runs that entry point.
 check-cli:
 	python3 codegen/checkcli.py modal_app.py
+	python3 codegen/checkcli.py profile_diagnostic.py
 	python3 codegen/autolab.py --self-test
 	python3 -m unittest discover -s codegen -p 'test*report.py'
 	python3 -m unittest discover -s codegen -p 'testautotune*.py'
