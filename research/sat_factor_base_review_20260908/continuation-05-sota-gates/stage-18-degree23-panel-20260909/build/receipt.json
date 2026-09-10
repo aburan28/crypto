@@ -1,0 +1,16 @@
+{
+  "binaries": {},
+  "command": [
+    "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_algebraic_e2e",
+    "--example",
+    "koblitz_public_factor_base_discovery"
+  ],
+  "dependency_lock_sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+  "schema": "koblitz_degree23_build_receipt.v1",
+  "status": "failed"
+}

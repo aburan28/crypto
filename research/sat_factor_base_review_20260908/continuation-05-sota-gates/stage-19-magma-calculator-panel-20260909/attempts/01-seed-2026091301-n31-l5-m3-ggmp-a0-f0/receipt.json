@@ -1,0 +1,114 @@
+{
+  "attempt_ordinal": 1,
+  "claim_admitted": false,
+  "clean_terminal": false,
+  "execution_binding_sha256": "baa45dbc8751d4aa08cd47ec52249dfbc698cd300a7d033601c0aa4f4e74f627",
+  "execution_commit": "1f3cdfefaffbc5056cf5f898139e714b877f1695",
+  "execution_tree": "bdc9db1d7af3cc46df6f533a92b79eb1e2449a6f",
+  "finished_at": "2026-09-10T07:53:59.565263Z",
+  "launch_authorization": {
+    "bytes": 3156,
+    "path": "launch-authorization.json",
+    "sha256": "6c4f3b95553d223e5bae109f704c529ee094d76d5989fd5ab13cf286f9a6cb58"
+  },
+  "ordinal": 1,
+  "outcome": "transport_child_error",
+  "recovery_boundary": "transport_child_error_with_retained_files",
+  "request": {
+    "body_bytes": 42145,
+    "body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "baa45dbc8751d4aa08cd47ec52249dfbc698cd300a7d033601c0aa4f4e74f627",
+    "execution_commit": "1f3cdfefaffbc5056cf5f898139e714b877f1695",
+    "execution_manifest_sha256": "a26ddf3febab22989ff85f48eac8bb514815f9db29bc9e7716cfda52c246a8f2",
+    "execution_tree": "bdc9db1d7af3cc46df6f533a92b79eb1e2449a6f",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 21345,
+      "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "response": null,
+  "retained_files": [
+    {
+      "bytes": 1474,
+      "path": "attempt-start.json",
+      "sha256": "d44de6275e2e8c6ba3b8fdc657cd3f035ad91243135544df6bb6407aafa8092d"
+    },
+    {
+      "bytes": 3156,
+      "path": "launch-authorization.json",
+      "sha256": "6c4f3b95553d223e5bae109f704c529ee094d76d5989fd5ab13cf286f9a6cb58"
+    },
+    {
+      "bytes": 42145,
+      "path": "request-body.bin",
+      "sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5"
+    },
+    {
+      "bytes": 931,
+      "path": "transport-metrics.json",
+      "sha256": "f78060b7ab89be33ee12cfe919a45bb22fdd2cde2be79a18577a8b52a78595af"
+    },
+    {
+      "bytes": 2484,
+      "path": "transport.stderr",
+      "sha256": "0caef6187f33cbbf53490c1734dd39c249a2dbffbab399dc4b9ba7cc2b547989"
+    },
+    {
+      "bytes": 0,
+      "path": "transport.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "retry_permitted": false,
+  "schema": "koblitz_magma_calculator_stage19_receipt.v2",
+  "started_at": "2026-09-10T07:53:59.391325Z",
+  "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+  "transport_envelope": null,
+  "transport_process": {
+    "metrics": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+        "--attempt",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0",
+        "--execute-child"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 30244864,
+        "single_core_seconds": 0.124652,
+        "system_seconds": 0.046404,
+        "total_core_seconds": 0.124652,
+        "user_seconds": 0.078248,
+        "wall_seconds": 0.14001608302351087
+      },
+      "orphan_group_terminated": false,
+      "returncode": 1,
+      "timed_out": false,
+      "watchdog_seconds": 75.0
+    },
+    "metrics_file": {
+      "bytes": 931,
+      "path": "transport-metrics.json",
+      "sha256": "f78060b7ab89be33ee12cfe919a45bb22fdd2cde2be79a18577a8b52a78595af"
+    },
+    "stderr": {
+      "bytes": 2484,
+      "path": "transport.stderr",
+      "sha256": "0caef6187f33cbbf53490c1734dd39c249a2dbffbab399dc4b9ba7cc2b547989"
+    },
+    "stdout": {
+      "bytes": 0,
+      "path": "transport.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

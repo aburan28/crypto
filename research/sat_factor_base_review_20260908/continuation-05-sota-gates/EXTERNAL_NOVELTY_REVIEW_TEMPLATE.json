@@ -1,0 +1,105 @@
+{
+  "schema": "koblitz_external_novelty_review.v1",
+  "status": "incomplete_template",
+  "reviewer": {
+    "identity_or_stable_handle": null,
+    "affiliation": null,
+    "independence_statement": null,
+    "conflicts": []
+  },
+  "review_date": null,
+  "artifact_binding": {
+    "repository_commit": null,
+    "stage13_archive_commit": "5dbe54dd468e914b5872d10d06e7c44d01b0a236",
+    "external_magma_plan_sha256": null,
+    "external_magma_run_sha256": null,
+    "external_magma_summary_sha256": null
+  },
+  "factor_base_oracle_audit": {
+    "uses_target_scalar": null,
+    "enumerates_target_subgroup": null,
+    "uses_known_factor_base_logs": null,
+    "uses_discrete_log_labels": null,
+    "uses_other_oracle_input": null,
+    "evidence_paths": []
+  },
+  "gate_assessment": {
+    "1_full_resource_accounting": null,
+    "2_matched_solver_and_ggmp_comparison": null,
+    "3_required_metrics": null,
+    "4_n31_n41_larger_pdp": null,
+    "5_unknown_scalar_without_constructed_logs": null,
+    "6_automorphism_rho_full_cost": null,
+    "7_independent_reproduction_and_novelty": null
+  },
+  "primary_sources": [
+    {
+      "url": "https://eprint.iacr.org/2019/313",
+      "version_or_retrieval_date": null,
+      "content_sha256": null,
+      "sections_or_pages_used": [],
+      "relevance": "WDSat symmetric S4 representation, branching, symmetry breaking, and repeated solver experiments"
+    },
+    {
+      "url": "https://eprint.iacr.org/2020/1315",
+      "version_or_retrieval_date": null,
+      "content_sha256": null,
+      "sections_or_pages_used": [],
+      "relevance": "GGMP Frobenius-invariant and linearized-polynomial factor bases, orbit rewriting, and n=31 Magma comparison"
+    }
+  ],
+  "contribution_assessments": [
+    {
+      "claimed_contribution": "target-independent divisor-kernel factor-base discovery",
+      "classification": null,
+      "allowed_classifications": [
+        "known",
+        "engineering_adaptation",
+        "plausibly_novel",
+        "unsupported"
+      ],
+      "primary_source_citations": [],
+      "rationale": null
+    },
+    {
+      "claimed_contribution": "cofactor-projected signed-Frobenius column reduction",
+      "classification": null,
+      "allowed_classifications": [
+        "known",
+        "engineering_adaptation",
+        "plausibly_novel",
+        "unsupported"
+      ],
+      "primary_source_citations": [],
+      "rationale": null
+    },
+    {
+      "claimed_contribution": "source-bound SAT and point-witness validation pipeline",
+      "classification": null,
+      "allowed_classifications": [
+        "known",
+        "engineering_adaptation",
+        "plausibly_novel",
+        "unsupported"
+      ],
+      "primary_source_citations": [],
+      "rationale": null
+    }
+  ],
+  "full_cost_comparison": {
+    "accounting_boundary": null,
+    "index_calculus": null,
+    "magma_f4": null,
+    "automorphism_optimized_pollard_rho": null,
+    "unpriced_or_missing_resources": []
+  },
+  "final_verdict": null,
+  "allowed_final_verdicts": [
+    "CONCUR",
+    "QUALIFIED",
+    "BREAKS"
+  ],
+  "narrowest_supported_claim": null,
+  "unresolved_confounders": [],
+  "reviewer_signature_or_public_receipt": null
+}

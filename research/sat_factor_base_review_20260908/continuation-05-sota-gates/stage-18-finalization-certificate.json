@@ -1,0 +1,137 @@
+{
+  "amendment_canonical_sha256": "95a08cf7ab3be6519119fdc74af3119b10120dfb93f452459d08af35171a2285",
+  "amendment_file_sha256": "3197b0c34e56585c6f24ea32ce0d5aab2180ca9c578b1fec639c7054eda747c9",
+  "checks": [
+    "77-file immutable panel tree",
+    "historical runner and verifier from Git execution commit",
+    "historical allow-incomplete provisional summary recomputation",
+    "12 exact verified task receipts",
+    "five exact matched target and scalar rows",
+    "source, locked build, binary and post-execution custody",
+    "outer returncode-1 finalization failure and full envelope",
+    "outer envelope excluded from unchanged IC/rho ratios",
+    "twelve exact sequential task intervals inside the outer interval",
+    "post-execution custody present after the final task"
+  ],
+  "claim_boundary": "The five-target degree-23 task panel is complete and verified. The outer driver returned 1 only because of a post-task finalization bug; that operational failure remains charged as a separate full envelope and is excluded from IC/rho algorithm ratios. This correction does not add a task run, asymptotic result, external reproduction, novelty claim, cryptographic-size attack, or SOTA claim.",
+  "classification": "complete_verified_scientific_task_panel_with_additive_finalization_correction",
+  "corrected_summary_canonical_sha256": "3802a57e0d0135db0eff74a1bc340e35f5888b4ec2fc69cdce3d444d84432a4a",
+  "corrected_summary_sha256": "e7144e8904d133e83e30975f89c38df2aa89d683c05480abba44366c9c798123",
+  "execution_commit": "5d069cf659fe6f6f9badb817ef446d64f3ae2782",
+  "existing_panel_files_modified_by_correction": 0,
+  "historical_implementation": {
+    "runner": {
+      "bytes": 36553,
+      "git_blob_oid": "14241b96fcde49028895de343f5fc6cf40ab340f",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py",
+      "sha256": "9fa32b12f26efe8d894451e9b0510e3be0fd57ce606edef3ba64c4ee7ca7f5de"
+    },
+    "verifier": {
+      "bytes": 93616,
+      "git_blob_oid": "3638ad4ba2ff37030ec79c46f5bb91cc57c96958",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+      "sha256": "132eb376ec40e866ce527751f108765b44c77a883776accc11c6d8f603e156d7"
+    }
+  },
+  "immutable_panel": {
+    "artifact_manifest_sha256": "e851458b3607aeaad20cd45bccdfd45d3c4d3c77fd091324e873dfaa4cfa5491",
+    "file_count": 77,
+    "outer_receipt_sha256": "697824eef1531cc004e8a8a5c8f2c1adaceb5bc5052744a5e2ef0e78ea4dbb4d",
+    "outer_stderr_sha256": "82575adbeae039a9670a6efd20e2602158f27c6a4c75765748f12b4fff40dbe6",
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909",
+    "provisional_summary_sha256": "ac348f857ae110e731fddb68e87752068a488b2f45fe97e668b9b3ab481b6afc",
+    "provisional_verification_sha256": "73ce430891b207240a456f66bc1ecba174855226566a5f9b73417258e5ff018b",
+    "run_sha256": "0cdb115c5f2d3049c0d3ab7584796a6c3774c82a600d75b7c5b9469a802bc17d",
+    "total_bytes": 214914,
+    "tree_sha256": "f3b4da6dcf36366663c4c851b9b1deda06c43114376a14f9f55314bb4aa9dea5"
+  },
+  "outer_operational_failure": {
+    "cause": "The inner final preliminary summary called outer-attempt validation while the only outer directory was .staging-0001; the verifier rejected it as invalid or non-sequential after all tasks and post-execution custody had completed.",
+    "classification": "operational_finalization_failure_after_complete_scientific_task_panel",
+    "excluded_from_algorithm_ratios": true,
+    "full_outer_envelope_charged": true,
+    "inner_error": "stage18 runner failed: invalid or non-sequential outer attempt directory",
+    "orphan_group_terminated": false,
+    "outer_peak_rss_bytes": 41680896,
+    "outer_returncode": 1,
+    "outer_total_core_seconds": 744.3242300000001,
+    "outer_wall_seconds": 756.4766490419861,
+    "timed_out": false
+  },
+  "schema": "koblitz_degree23_finalization_correction_certificate.v1",
+  "scientific_tasks_added_by_correction": 0,
+  "status": "verified",
+  "verified_chronology": {
+    "chronology_sha256": "b9dfb31ae953c98bbfcb992a8a31feed1dad110efc6a7070f680cb79445982ad",
+    "last_task_finished_at": "2026-09-10T06:18:16.105512Z",
+    "last_task_id": "row-05-rho-auto",
+    "maximum_task_finish_precedes_outer_finish": true,
+    "outer_finished_at": "2026-09-10T06:18:16.907775Z",
+    "outer_started_at": "2026-09-10T06:05:40.384729Z",
+    "post_execution_present": true,
+    "strictly_sequential": true,
+    "task_count": 12,
+    "task_intervals": [
+      {
+        "finished_at": "2026-09-10T06:05:42.474444Z",
+        "started_at": "2026-09-10T06:05:41.598933Z",
+        "task_id": "discovery-a0"
+      },
+      {
+        "finished_at": "2026-09-10T06:05:43.201567Z",
+        "started_at": "2026-09-10T06:05:42.878726Z",
+        "task_id": "discovery-a1"
+      },
+      {
+        "finished_at": "2026-09-10T06:08:01.552213Z",
+        "started_at": "2026-09-10T06:05:43.610243Z",
+        "task_id": "row-01-ic"
+      },
+      {
+        "finished_at": "2026-09-10T06:08:02.109683Z",
+        "started_at": "2026-09-10T06:08:01.972130Z",
+        "task_id": "row-01-rho-auto"
+      },
+      {
+        "finished_at": "2026-09-10T06:10:06.242053Z",
+        "started_at": "2026-09-10T06:08:02.537435Z",
+        "task_id": "row-02-ic"
+      },
+      {
+        "finished_at": "2026-09-10T06:10:06.808884Z",
+        "started_at": "2026-09-10T06:10:06.686640Z",
+        "task_id": "row-02-rho-auto"
+      },
+      {
+        "finished_at": "2026-09-10T06:12:45.226746Z",
+        "started_at": "2026-09-10T06:10:07.250826Z",
+        "task_id": "row-03-ic"
+      },
+      {
+        "finished_at": "2026-09-10T06:12:45.788540Z",
+        "started_at": "2026-09-10T06:12:45.689868Z",
+        "task_id": "row-03-rho-auto"
+      },
+      {
+        "finished_at": "2026-09-10T06:15:28.670581Z",
+        "started_at": "2026-09-10T06:12:46.172807Z",
+        "task_id": "row-04-ic"
+      },
+      {
+        "finished_at": "2026-09-10T06:15:29.173953Z",
+        "started_at": "2026-09-10T06:15:29.091258Z",
+        "task_id": "row-04-rho-auto"
+      },
+      {
+        "finished_at": "2026-09-10T06:18:15.614785Z",
+        "started_at": "2026-09-10T06:15:29.590693Z",
+        "task_id": "row-05-ic"
+      },
+      {
+        "finished_at": "2026-09-10T06:18:16.105512Z",
+        "started_at": "2026-09-10T06:18:16.017328Z",
+        "task_id": "row-05-rho-auto"
+      }
+    ]
+  }
+}

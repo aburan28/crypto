@@ -14,6 +14,8 @@ on:
       - "scripts/process_meter.py"
       - "scripts/run_koblitz_pdp_matrix.py"
       - "scripts/test_run_koblitz_pdp_matrix.py"
+      - "scripts/run_koblitz_external_magma.py"
+      - "scripts/test_koblitz_external_magma.py"
       - "scripts/test_koblitz_pdp_phase_a.py"
       - "scripts/run_koblitz_blind_pdp_phase_b.py"
       - "scripts/build_koblitz_phase_b_wdsat.py"
@@ -25,8 +27,63 @@ on:
       - "scripts/verify_koblitz_external_reproduction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage13_pdp_panel.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE15_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage16_magma_compact.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-16-magma-compact-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE16_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage17_magma_n41.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-17-magma-n41-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE17_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage18_finalization_correction.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_finalization_correction.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-*"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-*/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE18_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_magma_execution_manifest.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-01-zero-post-parent-check.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-01-summary.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment01.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-tls-get-probe-20260910/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-02-explicit-ca.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-02-summary.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/probe_stage19_magma_tls.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment02.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-output-fold.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-summary.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-final-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_final_archive.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_final_archive.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-magma-calculator-panel-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_amendment03_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_amendment03_magma_calculator_request.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_amendment03_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_amendment03_magma_execution_manifest.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_amendment03_magma_calculator_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE19_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/MAGMA_LICENSED_REPRODUCTION.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/EXTERNAL_NOVELTY_REVIEW_TEMPLATE.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/MAGMA_EXTERNAL_GATE_AUDIT.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage13_correction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pdp-panel-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-balanced-pdp-phase-b-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
@@ -63,10 +120,76 @@ jobs:
           install -m 755 target/release/examples/koblitz_pdp_export "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export"
           install -m 755 target/release/examples/koblitz_pdp_backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend"
           python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export" --backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend" -v
+      - name: Reverify legacy Stage 19 prepared controls at their pinned commit
+        run: |
+          legacy_stage19_dir="$RUNNER_TEMP/koblitz-stage19-legacy-180f8e8"
+          cleanup_legacy_stage19() {
+            git -C "$GITHUB_WORKSPACE" worktree remove --force "$legacy_stage19_dir" >/dev/null 2>&1 || true
+          }
+          trap cleanup_legacy_stage19 EXIT
+          git worktree add --detach "$legacy_stage19_dir" 180f8e8d3b273009953974bac31b88e32e7d3a0f
+          cd "$legacy_stage19_dir"
+          touch .stage19-legacy-offline-dirty-sentinel
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_magma_execution_manifest.py --self-test
+          python3 "$GITHUB_WORKSPACE/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py" legacy
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/prepared-summary.json > /tmp/stage-19-prepared-summary.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment01.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/probe_stage19_magma_tls.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment02.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment02.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-02-summary.json > /tmp/stage-19-amendment-02-summary.json
+      - name: Reverify Amendment 03 prepared controls at their pinned commit
+        run: |
+          amendment03_prepared_dir="$RUNNER_TEMP/koblitz-stage19-amendment03-prepared-5a09482"
+          cleanup_amendment03_prepared() {
+            git -C "$GITHUB_WORKSPACE" worktree remove --force "$amendment03_prepared_dir" >/dev/null 2>&1 || true
+          }
+          trap cleanup_amendment03_prepared EXIT
+          git worktree add --detach "$amendment03_prepared_dir" 5a09482aea0ce57239b9a06a7cf93c03121730a7
+          cd "$amendment03_prepared_dir"
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_amendment03_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_amendment03_magma_calculator_request.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_amendment03_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03_magma_calculator_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_amendment03_magma_execution_manifest.py --self-test
+          python3 "$GITHUB_WORKSPACE/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py" amendment03
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03_magma_calculator_panel.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/prepared-summary.json > /tmp/stage-19-amendment-03-prepared-summary.json
+      - name: Verify completed Magma archive with recorded host context
+        run: |
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_final_archive.py -v
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_final_archive.py > /tmp/stage-19-amendment-03-final-verification.json
       - name: Validate isolated PDP accounting and archived composition
         run: |
           python3 scripts/test_run_koblitz_pdp_matrix.py -v
+          python3 scripts/test_koblitz_external_magma.py -v
+          python3 scripts/run_koblitz_external_magma.py --self-test
+          python3 scripts/run_koblitz_external_magma.py --dry-run-manifest > /tmp/external-magma-dry-run.json
+          python3 -c 'import json; d=json.load(open("/tmp/external-magma-dry-run.json")); assert d["schema"]=="koblitz_external_magma_dry_run_manifest.v1" and d["expected_tasks"]==20 and len(d["tasks"])==20 and d["task_order"]=="seed-major"'
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/stage-15-summary.json > /tmp/stage-15-summary.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage16_magma_compact.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage16_magma_compact.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-16-magma-compact-20260909/stage-16-summary.json > /tmp/stage-16-summary.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage17_magma_n41.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage17_magma_n41.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-17-magma-n41-20260909/stage-17-summary.json > /tmp/stage-17-summary.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_finalization_correction.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_finalization_correction.py > /tmp/stage-18-finalization-certificate.json
+          cmp /tmp/stage-18-finalization-certificate.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-certificate.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage18_finalization_correction.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage18_finalization_correction.py --summary /tmp/stage-18-corrected-summary.json --certificate /tmp/stage-18-corrected-certificate.json --results /tmp/STAGE18_RESULTS.md --manifest /tmp/stage-18-correction-manifest.json
+          cmp /tmp/stage-18-corrected-summary.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-corrected-summary.json
+          cmp /tmp/stage-18-corrected-certificate.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-certificate.json
+          cmp /tmp/STAGE18_RESULTS.md research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE18_RESULTS.md
+          cmp /tmp/stage-18-correction-manifest.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-correction-manifest.json
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment01.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/probe_stage19_magma_tls.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment02.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-summary.json > /tmp/stage-19-amendment-03-summary.json
           python3 scripts/run_koblitz_pdp_matrix.py --output isolated-pdp-smoke --exporter target/release/examples/koblitz_pdp_export --backend target/release/examples/koblitz_pdp_backend --configs 15:5:standard:1:0 --timeout 120 --conflicts 100000 --seed 20261101
           python3 -c 'import json; d=json.load(open("isolated-pdp-smoke/result.json")); r={x["solver"]:x for x in d["instances"][0]["solvers"]}; assert r["native-sat"]["status"]=="sat" and r["native-sat"]["source_witness_valid"] is True; assert r["direct-mitm"]["status"]=="sat" and r["direct-mitm"]["source_witness_valid"] is True; assert d["instances"][0]["source_artifacts_unchanged"] is True'
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py --panel research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909 --output /tmp/panel-summary-relocated.json

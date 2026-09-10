@@ -1,0 +1,182 @@
+{
+  "claim_boundary": "At most ten additional source-equivalent official-calculator F4 terminal receipts. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+  "execution_requirements": {
+    "checkout_clean_outside_runtime_artifacts": true,
+    "current_bytes_must_match_relevant_blobs": true,
+    "network_execution_before_second_commit": false,
+    "record_exact_second_preexecution_commit_and_tree_in_run_and_attempts": true
+  },
+  "first_preexecution_commit": "1b688a3fad968729495bfad236e31c0b1c16653b",
+  "first_preexecution_tree": "18346684ad5d4a277dd02cd44dfbc2fcec9cd358",
+  "prepared_plan_sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46",
+  "prepared_summary_sha256": "5a8f7eeb10dad7a704e56b8cf2d25c94de4867a3137520e6dc5175574059352b",
+  "relevant_blobs": [
+    {
+      "bytes": 13312,
+      "git_blob_oid": "9965b2c1cb98957d018788a031d6598dd49c6e27",
+      "git_mode": "100644",
+      "path": ".github/workflows/koblitz-sota-reproduction.yml",
+      "sha256": "7ebf3c5353971c13f739165f59ee38ddecd578bb2fa4baad2910d60ff77b2a11"
+    },
+    {
+      "bytes": 4988,
+      "git_blob_oid": "ce335fc74f2125e6173a88b6d7567a883c11aa41",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE19_RESULTS.md",
+      "sha256": "afd5fca1ff08c235b8d901167ddca1a395409e3888d05141f1236e3de76d3cac"
+    },
+    {
+      "bytes": 17313,
+      "git_blob_oid": "ffa4d71a554256399fb92ee496c06402d7a7f619",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+      "sha256": "73b707d27808c1a5479a853d728f264b411292ba48941d01d65538893c622eda"
+    },
+    {
+      "bytes": 7937,
+      "git_blob_oid": "803f682b60167ac9799a0a5daf312af92ed04f29",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_magma_execution_manifest.py",
+      "sha256": "5025e3af9b7b93f93ce8ebfc690365be237470e79e64afbf510dd0d3f957afa6"
+    },
+    {
+      "bytes": 18374,
+      "git_blob_oid": "c2bb156a308ca2f70a0de5e6e760ccaa49f093dc",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_magma_calculator_panel.py",
+      "sha256": "1929d14ceb2622fdf5158055e985a9e09a747008176a83801662e5c7118f13f2"
+    },
+    {
+      "bytes": 47188,
+      "git_blob_oid": "cfdddac1327694dc09a1fbecfb9d79109a73a3a7",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_magma_calculator_panel.py",
+      "sha256": "3cd7b5d042d054c144c9eb436bf6c12f15b6edb2cb32c03c58e56c117dee2ead"
+    },
+    {
+      "bytes": 21345,
+      "git_blob_oid": "a9aa34745090252ee660303472e31e19a78bd8fc",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    {
+      "bytes": 20207,
+      "git_blob_oid": "68ece79055c157e724ee4a92c9bb0bce8dfc62f5",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/02-seed-2026091302-n31-l5-m3-standard-a1-f0.magma",
+      "sha256": "09eabd48f3aaa8a27bfac0a25e4c75f81fc3585f4a9cd5a2a1b6a30721ba1a2d"
+    },
+    {
+      "bytes": 20997,
+      "git_blob_oid": "faef5dcb3e1a6a2adb28c5f841af38aa142cdd8d",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/03-seed-2026091302-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "b132b309d4f5c59b1324f8d669f2bc089128272349774564b2cff249c62a688e"
+    },
+    {
+      "bytes": 22593,
+      "git_blob_oid": "bfccea02977d4980cee89621ad38fe9ce3379020",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/04-seed-2026091302-n41-l5-m3-standard-a1-f0.magma",
+      "sha256": "7d2d88601696163d85e5b4e8fdf1dd5bff720313adb4621d3728a76ee11ceb40"
+    },
+    {
+      "bytes": 25971,
+      "git_blob_oid": "ddc4786f504a082b89071d16829acc59bb64bb65",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/05-seed-2026091303-n41-l5-m3-standard-a1-f0.magma",
+      "sha256": "445d7feabae9bdad9d8ac3c2dfe1f19400fc66750543efe7779306bb5701a6ce"
+    },
+    {
+      "bytes": 19361,
+      "git_blob_oid": "f7a2e5ed30e4a1ab90bbd48c0afaf842ba47c5f1",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/06-seed-2026091304-n31-l5-m3-standard-a1-f0.magma",
+      "sha256": "23f6c6b74b53f5e9bfaa1ea5c79341edc89fb97095693abb00672c5122993be8"
+    },
+    {
+      "bytes": 20275,
+      "git_blob_oid": "c329fa7728e570aab67a256c51900d556c470d0f",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/07-seed-2026091304-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "7e3a14167f5e5793250263914e8d1273c281d9cf78a1292b6b3aa1d34855739c"
+    },
+    {
+      "bytes": 24301,
+      "git_blob_oid": "a222ccc7c7a7938c4f20c3d95b5990a699ea5c65",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/08-seed-2026091304-n41-l5-m3-standard-a1-f0.magma",
+      "sha256": "80d96611f8e3e2b56bde16b336cdbf3c9aa6b44b765c9dc0fe4af3f714411451"
+    },
+    {
+      "bytes": 19583,
+      "git_blob_oid": "ac48c76cc769c6af31c2bfd7e838c98e56b168d6",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/09-seed-2026091305-n31-l5-m3-standard-a1-f0.magma",
+      "sha256": "ef2f1e88965913954bfc7a9fbc39167ac854a47f879258ecf368a57989d7e9ca"
+    },
+    {
+      "bytes": 26377,
+      "git_blob_oid": "43240e3eade3807d5a9aded974c450e2b464ef3a",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/inputs/10-seed-2026091305-n41-l5-m3-standard-a1-f0.magma",
+      "sha256": "52205d45f53159dc2fca84d8fc98fdb61b94e151d225a22632db15a3955d8b08"
+    },
+    {
+      "bytes": 26969,
+      "git_blob_oid": "b1e8e4ef531d5d6bea1c0525d10de8ddbfe61a44",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/plan.json",
+      "sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46"
+    },
+    {
+      "bytes": 1784,
+      "git_blob_oid": "59ab045c5d7ed198d296f6c2ef77807e04c6dfdf",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/prepared-summary.json",
+      "sha256": "5a8f7eeb10dad7a704e56b8cf2d25c94de4867a3137520e6dc5175574059352b"
+    },
+    {
+      "bytes": 3454,
+      "git_blob_oid": "d37bb3a7baffac92f81f39daa51a68ce6e33d335",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-protocol.json",
+      "sha256": "c40a89924b82d4e2b21d9035fdeaccfa0e67614f7559b62589dcdaa45605a274"
+    },
+    {
+      "bytes": 24374,
+      "git_blob_oid": "351fd65b9f13b344c8788e16a3989e41585a35c0",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_magma_calculator_panel.py",
+      "sha256": "068cbf5b02754d8b08f60f7831609776bc3e5467739bf834e7f1ff4e00556c39"
+    },
+    {
+      "bytes": 37607,
+      "git_blob_oid": "8a72e84f2741281d73ba3aabcd28c5ba6d999524",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py",
+      "sha256": "7a569e74d7f8679149d689e981da15f23e3586a8b85ded670d2e2a146da72203"
+    },
+    {
+      "bytes": 3471,
+      "git_blob_oid": "ea8957bceacdd1576337cfd951d9e642d7bcd4ca",
+      "git_mode": "100644",
+      "path": "scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    }
+  ],
+  "relevant_path_count": 22,
+  "relevant_path_list_sha256": "64e75588674ea5beef530f73a0239f37315762882cc7fc13463a5ef0c56b504f",
+  "schema": "koblitz_magma_calculator_stage19_execution_manifest.v1",
+  "second_preexecution_commit_rule": {
+    "execution_manifest_must_be_committed": true,
+    "must_descend_from_first_commit": true,
+    "only_allowed_tree_delta": [
+      {
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/execution-manifest.json",
+        "status": "A"
+      }
+    ]
+  }
+}

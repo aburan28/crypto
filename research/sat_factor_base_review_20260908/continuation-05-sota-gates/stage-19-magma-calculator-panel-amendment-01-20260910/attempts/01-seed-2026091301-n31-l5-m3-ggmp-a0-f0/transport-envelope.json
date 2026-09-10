@@ -1,0 +1,24 @@
+{
+  "finished_at": "2026-09-10T08:16:15.612003Z",
+  "http": {
+    "final_url": null,
+    "selected_headers": {},
+    "status": null,
+    "transport_error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)>"
+  },
+  "request": {
+    "body_bytes": 42145,
+    "body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "form_field": "input",
+    "input_bytes": 21345,
+    "input_sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a",
+    "method": "POST",
+    "socket_timeout_seconds": 70.0,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "response": null,
+  "response_byte_limit": 1048576,
+  "schema": "koblitz_magma_calculator_stage19_transport_envelope.v1",
+  "started_at": "2026-09-10T08:16:14.883687Z"
+}

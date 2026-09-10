@@ -1,0 +1,147 @@
+{
+  "attempt": 1,
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+    "23",
+    "1",
+    "2",
+    "12"
+  ],
+  "metrics": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 7569408,
+    "single_core_seconds": 0.28682799999999997,
+    "system_seconds": 0.003218,
+    "total_core_seconds": 0.28682799999999997,
+    "user_seconds": 0.28361,
+    "wall_seconds": 0.28974895901046693
+  },
+  "metrics_sha256": "748e5aa2fffe685b3dee81ff4949bab0f85c09f02dbd0fb76d34afe989b01ed6",
+  "result": {
+    "a": 1,
+    "candidates": [
+      {
+        "abscissae": 4096,
+        "dimension": 12,
+        "divisor_indices": [
+          0,
+          1
+        ],
+        "divisor_polynomial": 7973,
+        "linearised_exponents": [
+          0,
+          2,
+          5,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "m_cofactor_admissible": true,
+        "projected_points": 3957,
+        "projected_signed_frobenius_orbits": 86,
+        "rational_points": 3957,
+        "signed_frobenius_orbits_before_projection": 87,
+        "timing_ns": {
+          "cofactor_admission": 18245541,
+          "factor_base_construction": 66179459,
+          "projection_census": 56143166
+        }
+      },
+      {
+        "abscissae": 4096,
+        "dimension": 12,
+        "divisor_indices": [
+          0,
+          2
+        ],
+        "divisor_polynomial": 5279,
+        "linearised_exponents": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          7,
+          10,
+          12
+        ],
+        "m_cofactor_admissible": true,
+        "projected_points": 3911,
+        "projected_signed_frobenius_orbits": 85,
+        "rational_points": 3911,
+        "signed_frobenius_orbits_before_projection": 86,
+        "timing_ns": {
+          "cofactor_admission": 22788208,
+          "factor_base_construction": 60593625,
+          "projection_census": 59692375
+        }
+      }
+    ],
+    "cofactor": "2",
+    "factor_degrees": [
+      1,
+      11,
+      11
+    ],
+    "forbidden_inputs": {
+      "discrete_log_labels_constructed": false,
+      "relation_yield_used": false,
+      "solver_timing_used": false,
+      "target_constructed": false,
+      "target_subgroup_enumerated": false
+    },
+    "group_order": "8393806",
+    "m": 2,
+    "n": 23,
+    "requested_dimension": 12,
+    "schema": "koblitz_public_factor_base_discovery.v1",
+    "selected": {
+      "abscissae": 4096,
+      "dimension": 12,
+      "divisor_indices": [
+        0,
+        1
+      ],
+      "divisor_polynomial": 7973,
+      "linearised_exponents": [
+        0,
+        2,
+        5,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "m_cofactor_admissible": true,
+      "projected_points": 3957,
+      "projected_signed_frobenius_orbits": 86,
+      "rational_points": 3957,
+      "signed_frobenius_orbits_before_projection": 87,
+      "timing_ns": {
+        "cofactor_admission": 18245541,
+        "factor_base_construction": 66179459,
+        "projection_census": 56143166
+      }
+    },
+    "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+    "sizing_gate": {
+      "m_times_dimension": 24,
+      "n": 23,
+      "passes": true
+    },
+    "subgroup_order": "4196903",
+    "timing_ns": {
+      "curve_and_subgroup_construction": 450417,
+      "end_to_end": 284602792
+    }
+  },
+  "result_sha256": "e0a870f98305a03b8d33b02463965f5ed46cbc643315a41475b2942beab370d1",
+  "schema": "koblitz_degree23_task_receipt.v1",
+  "status": "verified",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "task_id": "discovery-a1",
+  "verified_terminal": true
+}

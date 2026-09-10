@@ -1,0 +1,123 @@
+{
+  "attempt_ordinal": 1,
+  "claim_admitted": false,
+  "clean_terminal": false,
+  "execution_binding_sha256": "607ce0914ec2cb4d47543c34b29c0ba7316192a47ef70b4373f7c2e5ef94d08c",
+  "execution_commit": "2cc5da8d4c08a5c0d4fa17dfb07b42ef3492f335",
+  "execution_tree": "5d80a63cb440ef354bd5bd94b14cbbb35e6bbf2a",
+  "finished_at": "2026-09-10T08:16:15.625297Z",
+  "launch_authorization": {
+    "bytes": 3262,
+    "path": "launch-authorization.consumed.json",
+    "sha256": "546d518023b47ae94dceef377b0e258316d1b862b0a083e9d7e45e53074022fa"
+  },
+  "ordinal": 1,
+  "outcome": "transport_error",
+  "recovery_boundary": null,
+  "request": {
+    "body_bytes": 42145,
+    "body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "607ce0914ec2cb4d47543c34b29c0ba7316192a47ef70b4373f7c2e5ef94d08c",
+    "execution_commit": "2cc5da8d4c08a5c0d4fa17dfb07b42ef3492f335",
+    "execution_manifest_sha256": "13232c96b92bbdd0256f9e5e24b4dd223e080dd974d311d2267561f6ad62ccf6",
+    "execution_tree": "5d80a63cb440ef354bd5bd94b14cbbb35e6bbf2a",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 21345,
+      "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "response": null,
+  "retained_files": [
+    {
+      "bytes": 1567,
+      "path": "attempt-start.json",
+      "sha256": "5c98c86801c96929d5e5af827bcfcf5036dc14ae372f9a5a50afa16aa9b43c6a"
+    },
+    {
+      "bytes": 3262,
+      "path": "launch-authorization.consumed.json",
+      "sha256": "546d518023b47ae94dceef377b0e258316d1b862b0a083e9d7e45e53074022fa"
+    },
+    {
+      "bytes": 42145,
+      "path": "request-body.bin",
+      "sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5"
+    },
+    {
+      "bytes": 929,
+      "path": "transport-envelope.json",
+      "sha256": "4acbb1beedf626e8f3469b74e0283dcbd508e31c01edc31b5e0d03b8a19b1a66"
+    },
+    {
+      "bytes": 954,
+      "path": "transport-metrics.json",
+      "sha256": "3a7acd9747ce1f602bde97a3882b84915e2e6197567294801a16f33f4b84cc62"
+    },
+    {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "6ba16949c3f0346e62ac6d890039b76fd3d2201e7192b0a5f60083338fd6d413"
+    }
+  ],
+  "retry_permitted": false,
+  "schema": "koblitz_magma_calculator_stage19_receipt.v2",
+  "started_at": "2026-09-10T08:16:14.697462Z",
+  "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+  "transport_envelope": {
+    "bytes": 929,
+    "path": "transport-envelope.json",
+    "sha256": "4acbb1beedf626e8f3469b74e0283dcbd508e31c01edc31b5e0d03b8a19b1a66"
+  },
+  "transport_process": {
+    "metrics": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+        "--attempt",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0",
+        "--execute-child"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 33177600,
+        "single_core_seconds": 0.131485,
+        "system_seconds": 0.051427,
+        "total_core_seconds": 0.131485,
+        "user_seconds": 0.08005799999999999,
+        "wall_seconds": 0.8726810408988968
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 75.0
+    },
+    "metrics_file": {
+      "bytes": 954,
+      "path": "transport-metrics.json",
+      "sha256": "3a7acd9747ce1f602bde97a3882b84915e2e6197567294801a16f33f4b84cc62"
+    },
+    "stderr": {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "6ba16949c3f0346e62ac6d890039b76fd3d2201e7192b0a5f60083338fd6d413"
+    }
+  }
+}

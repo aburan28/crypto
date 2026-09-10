@@ -1,0 +1,37 @@
+{
+  "amendment01_tls_failure": {
+    "artifact_files_verified": 23,
+    "artifact_inventory_sha256": "a2f32baba8d1759701b910e96378b6ca2f049d729c2ae9916ab6396f3ce8f8f4",
+    "attempts": 1,
+    "calculator_results_received": 0,
+    "claim_admitted": false,
+    "http_responses_received": 0,
+    "outcome": "transport_error",
+    "post_attempts_started": 1,
+    "terminal_status": "halted_after_nonclean_receipt"
+  },
+  "amendment_sha256": "b9d880fb5a6696c4405b5c25197c79c4b0c1b228d139349a6985ec772537d434",
+  "claim_boundary": "This amendment preserves one terminal TLS operational failure, binds an explicit public CA bundle, and prepares a fresh execution-free artifact. The GET probe submitted no calculator input. Neither failure nor probe is solver, scientific, performance, point-witness, novelty, or SOTA evidence.",
+  "corrected_artifact": {
+    "attempted_new_requests": 0,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910",
+    "plan_sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46",
+    "status": "prepared_not_executed"
+  },
+  "disposition": "verified_tls_failure_with_explicit_ca_prepared_successor",
+  "explicit_tls_binding": {
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "context": "ssl.create_default_context(cafile='/etc/ssl/cert.pem')",
+    "environment_mismatch_rejected": true,
+    "get_probe_body_bytes": 36,
+    "get_probe_body_sha256": "c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161",
+    "get_probe_http_status": 200,
+    "get_probe_no_computation_requested": true
+  },
+  "next_manifest_bound_path_count": 76,
+  "schema": "koblitz_magma_calculator_stage19_amendment_verification.v2"
+}

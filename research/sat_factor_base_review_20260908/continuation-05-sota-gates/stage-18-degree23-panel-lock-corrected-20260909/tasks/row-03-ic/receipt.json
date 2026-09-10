@@ -1,0 +1,110 @@
+{
+  "attempt": 1,
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+    "ic",
+    "23",
+    "0",
+    "2",
+    "1966632",
+    "226800821669791328",
+    "100000",
+    "1000",
+    "divisor:0,2"
+  ],
+  "metrics": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 36061184,
+    "single_core_seconds": 156.423001,
+    "system_seconds": 0.361661,
+    "total_core_seconds": 156.423001,
+    "user_seconds": 156.06134,
+    "wall_seconds": 157.93813720799517
+  },
+  "metrics_sha256": "901b8457ac5df9acdf9dddde52236dd4d574af8f1c71ab1a45e15d39b5d676c9",
+  "result": {
+    "a": 0,
+    "factor_base": {
+      "ell": 12,
+      "m_cofactor_admissible": true,
+      "points": 4281,
+      "projected_signed_frobenius_orbits": 93,
+      "signed_frobenius_orbits_before_projection": 95
+    },
+    "factor_base_predicate": {
+      "divisor_indices": [
+        0,
+        2
+      ],
+      "enumerates_target_subgroup": false,
+      "factor_base_logs_constructed": false,
+      "factor_bitmask": 5279,
+      "factor_spec": "divisor:0,2",
+      "kind": "ggmp_divisor_kernel",
+      "linearised_exponents": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        7,
+        10,
+        12
+      ],
+      "uses_discrete_log_labels": false
+    },
+    "interpretation": "A failed or resource-capped run is operationally inconclusive; success is accepted only after the recovered scalar reproduces the public target point",
+    "kind": "koblitz_unknown_scalar_algebraic_factor_base_e2e",
+    "m": 2,
+    "mode": "ic",
+    "n": 23,
+    "options": {
+      "conflict_budget_per_target": 100000,
+      "max_models": 64,
+      "max_trials": 1000,
+      "parallel_threads": 1
+    },
+    "report": {
+      "collapse_projected_orbits": true,
+      "direct_relation": false,
+      "direct_relations_skipped": 0,
+      "linear_solve_attempts": 1,
+      "m_cofactor_admissible": true,
+      "recovered_scalar": "1966632",
+      "relation_batches": 162,
+      "relations": 94,
+      "sat_calls": 162,
+      "sat_conflicts": 10414153,
+      "sat_invalid_models": 0,
+      "sat_models": 94,
+      "sat_refutations": 0,
+      "sat_unknowns": 68,
+      "trials": 162,
+      "verified_unknown_scalar_recovery": true
+    },
+    "scope": "complete toy index-calculus pipeline over a factor base with no constructed point logs",
+    "seed": 226800821669791328,
+    "subgroup_order": "2095853",
+    "target": {
+      "x": "3329510",
+      "y": "2418086"
+    },
+    "timing_ns": {
+      "cofactor_admission": 30485833,
+      "curve_and_subgroup_construction": 670375,
+      "driver_solve": 157863829500,
+      "end_to_end": 157931312000,
+      "factor_base_predicate_and_materialisation": 66435334,
+      "linear_algebra": 1257959,
+      "projected_orbit_construction": 73678334,
+      "relation_collection": 157757673541,
+      "target_construction": 193375
+    }
+  },
+  "result_sha256": "e0713a2865417701e16b13c2ebbc62f2fb4a600ddb7ac53505e033a2ca212440",
+  "schema": "koblitz_degree23_task_receipt.v1",
+  "status": "verified",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "task_id": "row-03-ic",
+  "verified_terminal": true
+}

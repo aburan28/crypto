@@ -6993,3 +6993,86 @@ looks tractable rather than blocking.
 
 (see PR -- cyclotomic classification, divisor bases, complete
 factorisation, cofactor-class predicate, incremental SAT enumeration)
+
+---
+
+## 2026-09-10 (autolab run)
+
+### Task picked
+
+New thread: devise an algorithmic search — not a formula lookup — for
+point representations beyond affine/projective/Jacobian that give better
+decomposition relations, on prime fields, binary fields and Koblitz
+curves.  Recorded in `RESEARCH_EXOTIC_COORDINATES.md`.
+
+### Work done
+
+- Proved, before writing any search code, what the search space is: a
+  degree-2 coordinate is a Möbius frame on the `x`-line; a coordinate
+  invariant under torsion factors through an isogeny and is worth exactly
+  a change of curve in the isogeny class; the symmetries of the relation
+  that act on *individual* points and descend to the `x`-line are the
+  rational 2-torsion translations and nothing else.  Automorphisms and
+  Frobenius are global.
+- `src/cryptanalysis/coordinate_search.rs`: small prime and binary
+  fields with square-root, Artin–Schreier and log tables; long-Weierstrass
+  group law valid in both characteristics; Möbius maps with fitting,
+  fixed points, conjugation and classification; symmetry detection by
+  fitting and full verification; scope classification by experiment;
+  linearising frames (`t ↦ −t` / `t ↦ t + 1`); invariant coordinates;
+  interpolation of the summation polynomial from random relation tuples
+  by a kernel computation, with a shrinking degree box; verification on
+  fresh relations; fibre-enumerated collapse factor; Frobenius
+  compatibility; a descent model with the Boolean degree read off the
+  monomials.  Thirteen tests, including cross-checks of the interpolated
+  `S₃` against `binary_semaev_s3` and the prime-field closed form.
+- `examples/coordinate_search.rs`: runs the search on `F_1009` curves
+  with 0, 1 and 3 rational 2-torsion points and with `j ∈ {0, 1728}`, on
+  `K₀`, `K₁` for `n = 7, 9, 11, 13`, on a curve over `F₈ ⊂ F₂⁹` and on
+  one over no subfield; prints the Koblitz polynomials.
+
+### Findings
+
+**The degree halves, everywhere there is a rational 2-torsion point.**
+`S₄` goes from `[4,4,4,4]` to `[2,2,2,2,1]` in the involution invariants
+on every such curve, in both characteristics, with or without a rational
+linearising frame.  Collapse factor 2 → 16.
+
+**The frame and the quotient do different jobs.**  On prime fields the
+sign frame alone cuts `S₄` from 439 terms to 57 (semi-invariance kills
+seven eighths of the monomials); the quotient then halves the degrees
+without changing the count.  In characteristic 2 the frame alone makes
+things worse, 24 → 100 terms, and the quotient is what pays: 18 terms,
+degree 2, bit-degree 5 instead of 7.
+
+**Koblitz: the frame is `u = 1/(x + 1)`, over `F₂`, so Frobenius
+survives.**  `w = u² + u = x/(x + 1)²`, `s = Σu`.  Symmetrised `S₃` is
+`w₁w₂w_R + w₁ + w₂ + w_R + s`.  Factor base needs `1 ∈ V`, i.e. the
+divisor of `xⁿ − 1` must contain `x − 1` — tested against
+`subspace_basis_for_divisor`.  Model: `m(l − 1) + 1` unknowns for `m·l`,
+two targets per solve, orbits of size up to `4n`.
+
+**Nothing beyond `E[2]` is reachable per point, by construction.**  The
+`j = 0` automorphisms come out `Global` on `y² = x³ + 7`, the Frobenius
+`Global` on every Koblitz curve; the 4-torsion of `K₀` does not act on
+any degree-2 coordinate and any coordinate it acts on is isogeny-transport
+of the 2-torsion case.  Recorded as H4; the interesting search space is
+functions of *pairs* of points.
+
+A measurement lesson: the collapse factor first read 15 instead of 16
+because a sample through the involution's fixed point has a smaller
+fibre.  It now reports the median.
+
+### Next step proposal
+
+1. Wire the symmetrised `S₃`/`S₄` into `koblitz_groebner` / `semaev_sat`
+   with `w_i ∈ AS(V)` and one linear row for `s`, and run H1–H3 of the
+   research doc — in particular H3, that the `m = 2` regime becomes a
+   single bilinear equation and refutes `n = 21` in under a second.
+2. Tuple-level coordinates (`x(P_i ± P_j)`) so the `Z/4` of `K₀` can act;
+   this is where the `μ₄`-normal form would show up if it is going to.
+3. `F_{p^k}` support in `Gf` for the Gaudry setting.
+
+### Commits made
+
+(see PR — coordinate search module, example, research doc)
