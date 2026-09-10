@@ -1,0 +1,23 @@
+{
+  "schema": "koblitz_ggmp_selected_cell_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "discovery_source": "stage-4-ggmp-discovery-20260909",
+  "selection": {
+    "curve_a": 0,
+    "factor_index": 0,
+    "n": 31,
+    "ell": 5,
+    "m": 3,
+    "distinct_rational_factor_points": 63,
+    "reason": "maximal count 63, tie broken by lower curve_a then lower factor_index"
+  },
+  "target_seed": 20260941,
+  "native_conflict_budget": 100000,
+  "process_watchdog_seconds": 120,
+  "backends": ["native XOR", "WDSat", "CryptoMiniSat", "direct MITM"],
+  "magma": "retain generated input; executable unavailable on this host",
+  "point_witness_gate": "For every SAT backend, decode its three factor coordinates, enumerate rational lifts for each x-coordinate, and require a signed triple summing to the public target.",
+  "accounting": "charge instance construction, native solver, MITM, WDSat clean build, WDSat solve and CryptoMiniSat solve with the existing fresh-process meter",
+  "claim_boundary": "One nondegenerate GGMP cell repairs the reviewed benchmark defect; it is not a repeated scaling result or SOTA."
+}

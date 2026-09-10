@@ -1,0 +1,122 @@
+{
+  "curve": "y^2 + xy = x^3 + 1",
+  "curve_a": 0,
+  "direct_meet_in_the_middle": {
+    "factor_base_ns": 558292,
+    "factor_points": 63,
+    "group_additions": 2018,
+    "pair_entries": 1799,
+    "search_ns": 13719958,
+    "status": "sat",
+    "wall_ns": 14278250,
+    "witness_indices": [
+      54,
+      58,
+      1
+    ]
+  },
+  "ell": 5,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "b05ec8f90fe9595a6e09ed5d5b3ede6c49c169f5ce8f64ca1aef1c618707cefb",
+      "bytes": 122364,
+      "cnf_clauses": 4570,
+      "path": "instance.xor.cnf",
+      "variables": 1311,
+      "xor_rows": 62
+    },
+    "magma_boolean_f4": {
+      "blake3": "7e0121b311864fa7f9263318bf38956000fd683ce88391789853a8a5275c117e",
+      "bytes": 269742,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "91dd23d1a0ef4ac5a8ea93cfeab903eb4e094daea4ba0812ee8641cdd9242829",
+      "bytes": 156863,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "10634482",
+    "218969240",
+    "269786444",
+    "575322700",
+    "1128635964"
+  ],
+  "factor_base_geometry": {
+    "curve_points": 63,
+    "distinct_curve_points": 63,
+    "minimum_required": 3
+  },
+  "factor_base_predicate": {
+    "definition": "kernel of sum X^(2^i) over the set factor exponents",
+    "enumerates_target_subgroup": false,
+    "factor_bitmask": 41,
+    "factor_index": 1,
+    "kind": "ggmp_linearised_kernel",
+    "linearised_exponents": [
+      0,
+      3,
+      5
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    3
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 31,
+  "native_sat": {
+    "conflict_budget": 1,
+    "initial_cnf_clauses": 4570,
+    "result": "unknown",
+    "source_model_valid": null,
+    "stats": {
+      "conflicts": 1,
+      "decisions": 38,
+      "learnt_clauses": 0,
+      "max_level": 38,
+      "propagations": 1136,
+      "restarts": 0,
+      "xor_conflicts": 0,
+      "xor_passes": 40,
+      "xor_propagations": 31
+    },
+    "variables": 1311
+  },
+  "planted_points": [
+    {
+      "x": "1908014542",
+      "y": "307063050"
+    },
+    {
+      "x": "1822446618",
+      "y": "53244134"
+    },
+    {
+      "x": "10634482",
+      "y": "315887630"
+    }
+  ],
+  "representation": "chained_s3",
+  "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+  "seed": 20260932,
+  "source_equations": 62,
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 495,
+  "source_variables": 46,
+  "target": {
+    "x": "1117325044",
+    "y": "1753732553"
+  },
+  "timing_ns": {
+    "factor_base_predicate_construction": 112250,
+    "native_encoding_and_solve": 1597083,
+    "planted_target_construction": 69375,
+    "source_system_construction": 5929250,
+    "whole_process_internal": 32949875
+  }
+}
