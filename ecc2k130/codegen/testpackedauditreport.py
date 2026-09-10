@@ -14,7 +14,13 @@ class PackedAuditCountTests(unittest.TestCase):
         path = Path(__file__).resolve().parents[1] / 'packed_audit.py'
         helper = next(node for node in ast.parse(path.read_text()).body
                       if isinstance(node, ast.FunctionDef) and node.name == 'checkScalarCounts')
-        namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult))
+        modePath = path.with_name('modal_app.py')
+        modeHelper = next(node for node in ast.parse(modePath.read_text()).body
+                          if isinstance(node, ast.FunctionDef) and node.name == 'checkPackedReduction')
+        modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0')
+        exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
+        namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
+                         checkPackedReduction=modeNamespace['checkPackedReduction']))
         exec(compile(ast.Module(body=[helper], type_ignores=[]), str(path), 'exec'), namespace)
         cls.check = staticmethod(namespace['checkScalarCounts'])
 
@@ -23,6 +29,7 @@ class PackedAuditCountTests(unittest.TestCase):
         expected = walks * 1024 * 32
         return (f'backend cuda-packed131: {workers} threads x 32 slots x 1 lanes = {walks} walks, '
                 f'dp weight {weight}, 1024 steps per launch\n'
+                'packed direct reduction: 0\n'
                 f'1.0 s 6000.000 M it/s {expected // 2} iterations 0 dp 0 stored 0 dropped\n'
                 f'2.0 s 6000.000 M it/s {expected} iterations 0 dp 0 stored 0 dropped\n'
                 'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
@@ -50,6 +57,9 @@ class PackedAuditCountTests(unittest.TestCase):
             'wrong batch': raw.replace('32 slots', '16 slots'),
             'wrong steps': raw.replace('1024 steps', '512 steps'),
             'wrong cutoff': self.raw(weight=34),
+            'missing reducer': raw.replace('packed direct reduction: 0\n', ''),
+            'wrong reducer': raw.replace('packed direct reduction: 0', 'packed direct reduction: 1'),
+            'duplicate reducer': raw + 'packed direct reduction: 0\n',
             'drops': raw.replace('0 dropped', '1 dropped'),
             'nonfinite': raw.replace('finished: 6000.000', 'finished: nan'),
         }
