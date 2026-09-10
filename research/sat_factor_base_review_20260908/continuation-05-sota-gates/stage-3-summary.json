@@ -1,0 +1,62 @@
+{
+  "schema": "koblitz_automorphism_rho_stage3_summary.v1",
+  "curve": {
+    "n": 9,
+    "a": 0,
+    "subgroup_order": 127
+  },
+  "automorphism": "signed Frobenius quotient, at most 2n representatives per orbit",
+  "rows": [
+    {
+      "secret": 53,
+      "target": {
+        "x": "226",
+        "y": "196"
+      },
+      "index_calculus": {
+        "wall_seconds": 0.404708500020206,
+        "total_core_seconds": 0.0043289999999999995,
+        "peak_rss_bytes": 2785280,
+        "internal_seconds": 0.002152209
+      },
+      "automorphism_rho": {
+        "quotient_iterations": 2,
+        "group_additions": 6,
+        "restarts": 0,
+        "wall_seconds": 0.4211978339590132,
+        "total_core_seconds": 0.003837,
+        "peak_rss_bytes": 2113536,
+        "internal_seconds": 0.001130833
+      }
+    },
+    {
+      "secret": 101,
+      "target": {
+        "x": "56",
+        "y": "171"
+      },
+      "index_calculus": {
+        "wall_seconds": 0.005122250062413514,
+        "total_core_seconds": 0.003912,
+        "peak_rss_bytes": 2703360,
+        "internal_seconds": 0.002110541
+      },
+      "automorphism_rho": {
+        "quotient_iterations": 4,
+        "group_additions": 12,
+        "restarts": 0,
+        "wall_seconds": 0.0041174580110237,
+        "total_core_seconds": 0.0027549999999999996,
+        "peak_rss_bytes": 2113536,
+        "internal_seconds": 0.000826042
+      }
+    }
+  ],
+  "checks": {
+    "same_targets_as_index_calculus": true,
+    "both_scalars_recovered_and_verified": true,
+    "coefficient_scaling_tracks_canonicalization": "checked dynamically by final target verification; requires independent code review"
+  },
+  "observation": "automorphism rho used fewer total core-seconds than index calculus in both degree-9 pairs",
+  "claim_boundary": "two toy controls; no stable ratio, scaling law, cryptographic-size result, or SOTA claim"
+}
