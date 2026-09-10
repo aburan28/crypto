@@ -47,3 +47,18 @@ Result: fresh Linux/x86-64 checkout reproduced both toy IC and quotient-rho cont
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.
+
+PASS: cargo check --release --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery
+Result: the target-independent divisor census and optional divisor-base end-to-end driver compile.
+
+PASS: focused projected-orbit and cofactor-admission tests.
+Result: 3 passed; 0 failed. The projected map reconstructs every cofactor-projected point exactly, an inadmissible summand count stops before SAT, and scalar-blind recovery survives public projected-column collapse.
+
+PASS: charged degree-15 public divisor census.
+Result: all three degree-8 divisor kernels were charged without target construction or log labels; frozen rule selected [2,4] with 281 rational points and six projected signed-Frobenius columns.
+
+PASS: degree-15 selected-base unknown-scalar run.
+Result: scalar 101 recovered and point-verified from 7 relations in 7 trials with 2,904 conflicts, no direct shortcut, and no invalid model.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage8.py
+Result: five of five frozen degree-15 scalar-blind runs and all matched automorphism-rho controls passed; rho was faster in every pair.

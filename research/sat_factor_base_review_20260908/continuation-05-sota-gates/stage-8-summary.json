@@ -1,0 +1,184 @@
+{
+  "schema": "koblitz_degree15_replication_panel_result.v1",
+  "rows": [
+    {
+      "secret": 17,
+      "seed": 20260981,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 3779,
+        "linear_solve_attempts": 1,
+        "linear_algebra_ns": 11083,
+        "wall_seconds": 0.2094055840279907,
+        "single_core_seconds": 0.19801699999999997,
+        "total_core_seconds": 0.19801699999999997,
+        "peak_rss_bytes": 3784704
+      },
+      "automorphism_rho": {
+        "iterations": 1,
+        "reported_group_additions": 20,
+        "wall_seconds": 0.005236709024757147,
+        "single_core_seconds": 0.003591,
+        "total_core_seconds": 0.003591,
+        "peak_rss_bytes": 2113536
+      },
+      "ic_over_rho_core_ratio": 55.14257866889445
+    },
+    {
+      "secret": 53,
+      "seed": 20260982,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 5231,
+        "linear_solve_attempts": 1,
+        "linear_algebra_ns": 13208,
+        "wall_seconds": 0.2053822500165552,
+        "single_core_seconds": 0.203253,
+        "total_core_seconds": 0.203253,
+        "peak_rss_bytes": 3948544
+      },
+      "automorphism_rho": {
+        "iterations": 2,
+        "reported_group_additions": 23,
+        "wall_seconds": 0.005332082975655794,
+        "single_core_seconds": 0.0036309999999999997,
+        "total_core_seconds": 0.0036309999999999997,
+        "peak_rss_bytes": 2146304
+      },
+      "ic_over_rho_core_ratio": 55.97714128339301
+    },
+    {
+      "secret": 89,
+      "seed": 20260983,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 5235,
+        "linear_solve_attempts": 1,
+        "linear_algebra_ns": 9917,
+        "wall_seconds": 0.20915474998764694,
+        "single_core_seconds": 0.206919,
+        "total_core_seconds": 0.206919,
+        "peak_rss_bytes": 3866624
+      },
+      "automorphism_rho": {
+        "iterations": 3,
+        "reported_group_additions": 26,
+        "wall_seconds": 0.005535291973501444,
+        "single_core_seconds": 0.0038719999999999996,
+        "total_core_seconds": 0.0038719999999999996,
+        "peak_rss_bytes": 2113536
+      },
+      "ic_over_rho_core_ratio": 53.43982438016529
+    },
+    {
+      "secret": 137,
+      "seed": 20260984,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 2288,
+        "linear_solve_attempts": 1,
+        "linear_algebra_ns": 10792,
+        "wall_seconds": 0.19431699998676777,
+        "single_core_seconds": 0.19214599999999998,
+        "total_core_seconds": 0.19214599999999998,
+        "peak_rss_bytes": 3670016
+      },
+      "automorphism_rho": {
+        "iterations": 1,
+        "reported_group_additions": 20,
+        "wall_seconds": 0.005228707916103303,
+        "single_core_seconds": 0.003706,
+        "total_core_seconds": 0.003706,
+        "peak_rss_bytes": 2146304
+      },
+      "ic_over_rho_core_ratio": 51.847274689692384
+    },
+    {
+      "secret": 199,
+      "seed": 20260985,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 3238,
+        "linear_solve_attempts": 1,
+        "linear_algebra_ns": 21083,
+        "wall_seconds": 0.19411799998488277,
+        "single_core_seconds": 0.191941,
+        "total_core_seconds": 0.191941,
+        "peak_rss_bytes": 3768320
+      },
+      "automorphism_rho": {
+        "iterations": 3,
+        "reported_group_additions": 26,
+        "wall_seconds": 0.0052487499779090285,
+        "single_core_seconds": 0.003743,
+        "total_core_seconds": 0.003743,
+        "peak_rss_bytes": 2129920
+      },
+      "ic_over_rho_core_ratio": 51.27998931338499
+    }
+  ],
+  "all_checks_pass": true,
+  "successes": 5,
+  "failures": 0,
+  "distribution": {
+    "index_calculus_relations": {
+      "min": 7,
+      "median": 7,
+      "mean": 7.0,
+      "max": 7
+    },
+    "index_calculus_trials": {
+      "min": 7,
+      "median": 7,
+      "mean": 7.0,
+      "max": 7
+    },
+    "index_calculus_conflicts": {
+      "min": 2288,
+      "median": 3779,
+      "mean": 3954.2,
+      "max": 5235
+    },
+    "index_calculus_wall_seconds": {
+      "min": 0.19411799998488277,
+      "median": 0.2053822500165552,
+      "mean": 0.20247551680076867,
+      "max": 0.2094055840279907
+    },
+    "index_calculus_core_seconds": {
+      "min": 0.191941,
+      "median": 0.19801699999999997,
+      "mean": 0.1984552,
+      "max": 0.206919
+    },
+    "rho_wall_seconds": {
+      "min": 0.005228707916103303,
+      "median": 0.0052487499779090285,
+      "mean": 0.005316308373585344,
+      "max": 0.005535291973501444
+    },
+    "rho_core_seconds": {
+      "min": 0.003591,
+      "median": 0.003706,
+      "mean": 0.0037086000000000003,
+      "max": 0.0038719999999999996
+    },
+    "ic_over_rho_core_ratio": {
+      "min": 51.27998931338499,
+      "median": 53.43982438016529,
+      "mean": 53.537361667106026,
+      "max": 55.97714128339301
+    }
+  },
+  "aggregate": {
+    "index_calculus_core_seconds": 0.9922759999999999,
+    "rho_core_seconds": 0.018543,
+    "maximum_peak_rss_bytes": 3948544
+  },
+  "claim_boundary": "A five-target toy distribution with rho faster in every pair is not an asymptotic crossover or SOTA result."
+}
