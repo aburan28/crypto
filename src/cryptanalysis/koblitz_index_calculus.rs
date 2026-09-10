@@ -56,17 +56,20 @@
 //! The paper's construction (their §4, and the "Examples of Frobenius
 //! invariant factor bases" slide of the SAC talk):
 //!
-//! 1. Factor `x^n − 1 = (x − 1) f_1 f_2 ⋯ f_s` in `F_2[x]`.  When
-//!    `gcd(n, 2) = 1` the `f_i` are distinct irreducible polynomials,
-//!    all of degree `ℓ := ord_n(2)`.
+//! 1. Factor `x^n − 1 = (x − 1) f_1 f_2 ⋯ f_s` in `F_2[x]`.
+//!    For odd `n` the factors are distinct. When `n` is an odd prime,
+//!    the nontrivial factors all have degree `ℓ := ord_n(2)` (GGMP,
+//!    Lemma 4.1); for composite odd `n`, their degrees can differ.
 //! 2. For `f_j = Σ_k f_{j,k} x^k` form the **linearised** polynomial
 //!    `F_j(X) = Σ_k f_{j,k} X^{2^k}`.  Its root set in `F_{2^n}` is an
-//!    `F_2`-subspace `V_j` of dimension `ℓ` (the `F_2[x] ≅ {linearised
+//!    `F_2`-subspace `V_j` of dimension `deg f_j` (the `F_2[x] ≅ {linearised
 //!    polynomials under composition}` isomorphism sends `x^n − 1` to
 //!    `X^{2^n} − X`, so `F_j` divides `X^{2^n} − X`), and `V_j` is
 //!    closed under squaring because the `f_{j,k}` lie in `F_2`.
-//! 3. `F := { P ∈ E(F_{2^n}) : F_j(x(P)) = 0 }` is Frobenius invariant
-//!    of size `≈ 2^ℓ`.
+//! 3. `F := { P ∈ E(F_{2^n}) \ {O} : F_j(x(P)) = 0 }` is Frobenius
+//!    invariant. Its rational-point count depends on which coordinates
+//!    lift to the curve; only the coordinate count `|V_j| = 2^(deg f_j)`
+//!    is exact from the kernel dimension.
 //!
 //! `V_j` is computed here as the kernel of the `F_2`-linear map
 //! `v ↦ F_j(v)` on `F_{2^n}`, which is both simpler and self-checking
@@ -750,11 +753,13 @@ impl FrobeniusFactorBase {
     ///
     /// Not a statement about size — about cosets.  Every summand
     /// contributes its `h`-torsion class, and the classes must cancel.
-    /// On `K_1 / F_2^7` every factor-base point sits in the non-trivial
-    /// class of a cofactor-2 curve, so odd `m` decomposes *nothing* however
-    /// large the factor base is, and even `m` decomposes everything.
-    /// Checking this before a sweep costs one scalar multiplication per
-    /// point and saves searching for decompositions that cannot exist.
+    /// If every factor-base point lies in the non-trivial cofactor-2
+    /// class, odd `m` is excluded and even `m` passes this class test.
+    /// Passing is necessary only: it does not certify a decomposition of
+    /// a prescribed target. Repeated summands are allowed.
+    /// The check uses one public `[r]` multiplication per signed-orbit
+    /// representative, followed by Frobenius/negation expansion and class
+    /// reachability. It can reject decompositions that cannot exist.
     pub fn m_can_decompose(&self, kc: &KoblitzCurve, m: usize) -> bool {
         if self.points.is_empty() || m == 0 {
             return m == 0;
