@@ -1,0 +1,32 @@
+{
+  "schema": "koblitz_degree15_public_divisor_selection.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "discovery_source": "stage-7-public-divisor-20260909/discovery.json",
+  "selection": {
+    "n": 15,
+    "curve_a": 1,
+    "m": 2,
+    "dimension": 8,
+    "divisor_indices": [2, 4],
+    "divisor_polynomial": 465,
+    "linearised_exponents": [0, 4, 6, 7, 8],
+    "abscissae": 256,
+    "rational_factor_points": 281,
+    "signed_frobenius_orbits_before_projection": 11,
+    "projected_signed_frobenius_columns": 6,
+    "reason": "largest rational point count among cofactor-admissible degree-8 divisor kernels"
+  },
+  "unknown_scalar_run": {
+    "secret": 101,
+    "seed": 20260971,
+    "native_conflict_budget_per_target": 10000,
+    "max_trials": 20000,
+    "max_models_per_target": 64,
+    "direct_relation_forbidden": true,
+    "cofactor_projection_column_merge": true
+  },
+  "comparison": "same public target and seed with signed-Frobenius automorphism rho",
+  "process_watchdog_seconds": 300,
+  "claim_boundary": "Selection used no target, relation yield, solver timing, subgroup enumeration or log labels. One completion remains a toy result."
+}
