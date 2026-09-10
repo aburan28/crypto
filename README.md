@@ -58,29 +58,27 @@ cargo test --release
 
 ---
 
-## Index-calculus executable
+## Index-calculus research executable
 
-Build and run the standalone ic binary:
+The standalone ic command supports named/custom curve inspection, generated
+known-answer experiments, and bounded factor-base comparisons with live
+stage reporting.
 
-```sh
-cargo build --release --bin ic
-./target/release/ic
-./target/release/ic --solver sat
-./target/release/ic --help
-```
+    cargo build --release --bin ic
+    ./target/release/ic ecc2k-130
+    ./target/release/ic run --degree 11 --curve-a 1 --known-log 53 --solver enumerate
+    ./target/release/ic generate --degree 9 --seed 42 --out fixture.json
+    ./target/release/ic inspect --file fixture.json
+    ./target/release/ic compare --degree 7 --curve-a 1 --samples 3 --holdout 2 --json
 
-The display follows live factor-base construction, relation collection, matrix
-solving, and group verification, with counts and elapsed time. The default
-engine is Semaev/matrix-F4; --solver sat and --solver enumerate select the
-other existing oracles. Every run uses the fixed public K_0 / GF(2^9) example
-with known logarithm 53. An incomplete or failed result exits unsuccessfully.
-The fixture uses fixed-surplus collection and requires the relation matrix.
-The progress API also reports incomplete matrices and direct-relation shortcuts
-when other library callers enable those paths.
+Imported points are inspected only. Synthetic runs retain the library's
+small-curve limits and verify their known answers. Comparison reports include
+unsuccessful candidates, separate holdout checks, time and memory measurements,
+and explicitly bounded conclusions.
 
-This is a small-curve demonstration. It does not load Certicom challenges or
-external targets, and it does not change the library's curve limits. The
-original crypto command remains the default for cargo run.
+See [the ic guide](docs/ic/README.md) for the parameter schema, capabilities,
+limits, resource accounting, and report semantics. The original crypto
+command remains the default for cargo run.
 
 ## Algorithm coverage
 
