@@ -1934,7 +1934,7 @@ fn relation_from_decomposition(
     coef_a: &BigUint,
     coef_b: &BigUint,
 ) -> KoblitzRelation {
-    relation_from_decomposition_with_mode(kc, fb, idxs, coef_a, coef_b, true)
+    relation_from_decomposition_with_mode(kc, fb, idxs, coef_a, coef_b, true, None)
 }
 
 fn relation_from_decomposition_with_mode(
@@ -1944,22 +1944,35 @@ fn relation_from_decomposition_with_mode(
     coef_a: &BigUint,
     coef_b: &BigUint,
     collapse_negation: bool,
+    projected_orbits: Option<&ProjectedSignedOrbitMap>,
 ) -> KoblitzRelation {
     let r = &kc.subgroup_order;
-    let unknowns = if collapse_negation {
-        fb.unknowns()
-    } else {
-        fb.orbits.len()
-    };
+    let unknowns = projected_orbits.map_or_else(
+        || {
+            if collapse_negation {
+                fb.unknowns()
+            } else {
+                fb.orbits.len()
+            }
+        },
+        |projected| projected.representatives.len(),
+    );
     let mut row = vec![BigUint::zero(); unknowns];
     let mut summands = Vec::with_capacity(idxs.len());
     let mut summand_negated = Vec::with_capacity(idxs.len());
     for &i in idxs {
-        let (o, k, negated) = if collapse_negation {
-            fb.signed_orbit_of[i]
+        let location = if let Some(projected) = projected_orbits {
+            projected.orbit_of[i]
+        } else if collapse_negation {
+            Some(fb.signed_orbit_of[i])
         } else {
             let (o, k) = fb.orbit_of[i];
-            (o, k, false)
+            Some((o, k, false))
+        };
+        let Some((o, k, negated)) = location else {
+            // [h]P = O, so this summand contributes zero after the
+            // relation is projected into the prime-order subgroup.
+            continue;
         };
         let mut coeff = kc.lambda.modpow(&BigUint::from(k), r);
         if negated && !coeff.is_zero() {
@@ -1979,6 +1992,94 @@ fn relation_from_decomposition_with_mode(
 }
 
 // ── Driver ─────────────────────────────────────────────────────────
+
+#[derive(Clone, Debug)]
+struct ProjectedSignedOrbitMap {
+    /// For each factor-base point P, the signed Frobenius location of
+    /// [h]P. `None` means [h]P = O and therefore contributes no column.
+    orbit_of: Vec<Option<(usize, u32, bool)>>,
+    representatives: Vec<BinaryPoint>,
+}
+
+/// Build the quotient factor-base columns after public cofactor projection.
+///
+/// The ordinary factor-base orbit table can contain several columns whose
+/// cofactor projections are the same point, or signed Frobenius translates
+/// of one another, in the prime-order subgroup. Those columns are
+/// algebraically dependent before any relation is collected. Merging them
+/// uses only point multiplication, equality, negation and Frobenius; it does
+/// not compute or attach a discrete logarithm.
+fn projected_signed_orbit_map(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> ProjectedSignedOrbitMap {
+    let projected: Vec<_> = fb
+        .points
+        .iter()
+        .map(|point| kc.mul(point, &kc.cofactor))
+        .collect();
+    let mut representatives: Vec<BinaryPoint> = Vec::new();
+
+    for point in &projected {
+        if *point == BinaryPoint::Infinity {
+            continue;
+        }
+        let mut current = point.clone();
+        let mut canonical = point.clone();
+        let mut canonical_key = point_key(point);
+        for _ in 0..kc.n {
+            for candidate in [current.clone(), point_neg(&current)] {
+                let key = point_key(&candidate);
+                if key < canonical_key {
+                    canonical = candidate;
+                    canonical_key = key;
+                }
+            }
+            current = kc.frobenius(&current);
+        }
+        if !representatives
+            .iter()
+            .any(|representative| *representative == canonical)
+        {
+            representatives.push(canonical);
+        }
+    }
+    representatives.sort_by_key(point_key);
+
+    let orbit_of = projected
+        .iter()
+        .map(|point| {
+            if *point == BinaryPoint::Infinity {
+                return None;
+            }
+            for (orbit, representative) in representatives.iter().enumerate() {
+                let mut current = representative.clone();
+                for k in 0..kc.n {
+                    if current == *point {
+                        return Some((orbit, k, false));
+                    }
+                    if point_neg(&current) == *point {
+                        return Some((orbit, k, true));
+                    }
+                    current = kc.frobenius(&current);
+                }
+            }
+            panic!("cofactor projection was not found in its canonical orbit")
+        })
+        .collect();
+
+    ProjectedSignedOrbitMap {
+        orbit_of,
+        representatives,
+    }
+}
+
+/// Number of nonzero signed-Frobenius columns remaining after every
+/// factor-base point is projected into the prime-order subgroup by `[h]`.
+/// This is a public algebraic property of the factor base, not a log rank.
+pub fn projected_signed_orbit_count(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> usize {
+    projected_signed_orbit_map(kc, fb).representatives.len()
+}
 
 /// Tuning knobs for [`koblitz_index_calculus_dlp`].
 #[derive(Clone, Debug)]
@@ -2028,6 +2129,10 @@ pub struct KoblitzIcOptions {
     /// relation matrix. Disable in index-calculus benchmarks so this generic
     /// direct relation is counted and skipped rather than credited as a solve.
     pub allow_direct_relation: bool,
+    /// Merge factor-base columns whose cofactor projections are equal up to
+    /// signed Frobenius. This removes public algebraic dependencies without
+    /// computing any factor-base logarithm.
+    pub collapse_projected_orbits: bool,
 }
 
 impl Default for KoblitzIcOptions {
@@ -2048,6 +2153,7 @@ impl Default for KoblitzIcOptions {
             stop_on_verified_rank: true,
             relation_batch_size: 1,
             allow_direct_relation: true,
+            collapse_projected_orbits: false,
         }
     }
 }
@@ -2103,6 +2209,11 @@ pub struct KoblitzIcReport {
     /// Direct `aG+bQ=O` trials skipped because the benchmark forbade the
     /// relation-matrix bypass.
     pub direct_relations_skipped: usize,
+    /// Whether the factor base's cofactor classes can sum to zero with
+    /// exactly the requested number of summands.
+    pub m_cofactor_admissible: bool,
+    /// Whether public cofactor-projection dependencies were merged.
+    pub collapse_projected_orbits: bool,
 }
 
 fn solve_relation_system(
@@ -2159,11 +2270,20 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
 ) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
-    let relation_unknowns = if opts.collapse_negation {
-        fb.unknowns()
-    } else {
-        fb.orbits.len()
-    };
+    let projected_orbits = opts
+        .collapse_projected_orbits
+        .then(|| projected_signed_orbit_map(kc, fb));
+    let relation_unknowns = projected_orbits.as_ref().map_or_else(
+        || {
+            if opts.collapse_negation {
+                fb.unknowns()
+            } else {
+                fb.orbits.len()
+            }
+        },
+        |projected| projected.representatives.len(),
+    );
+    let m_cofactor_admissible = fb.m_can_decompose(kc, opts.m);
 
     let index_of = fb.index_map();
 
@@ -2190,8 +2310,10 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         relation_batches: 0,
         direct_relation: false,
         direct_relations_skipped: 0,
+        m_cofactor_admissible,
+        collapse_projected_orbits: opts.collapse_projected_orbits,
     };
-    if fb.points.is_empty() {
+    if fb.points.is_empty() || !m_cofactor_admissible {
         return Some(report);
     }
 
@@ -2321,6 +2443,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                     &a,
                     &b,
                     opts.collapse_negation,
+                    projected_orbits.as_ref(),
                 ));
             }
         }
@@ -2650,6 +2773,58 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn projected_orbit_map_is_algebraic_and_exact() {
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[0, 2]).unwrap();
+        let projected = projected_signed_orbit_map(&kc, &fb);
+        assert_eq!(
+            projected.representatives.len(),
+            projected_signed_orbit_count(&kc, &fb)
+        );
+        assert!(projected.representatives.len() < fb.unknowns());
+        for (index, point) in fb.points.iter().enumerate() {
+            let expected = kc.mul(point, &kc.cofactor);
+            let Some((orbit, k, negated)) = projected.orbit_of[index] else {
+                assert_eq!(expected, BinaryPoint::Infinity);
+                continue;
+            };
+            let mut reconstructed = projected.representatives[orbit].clone();
+            for _ in 0..k {
+                reconstructed = kc.frobenius(&reconstructed);
+            }
+            if negated {
+                reconstructed = point_neg(&reconstructed);
+            }
+            assert_eq!(reconstructed, expected);
+        }
+    }
+
+    #[test]
+    fn inadmissible_summand_count_stops_before_relation_search() {
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[1]).unwrap();
+        let report = koblitz_index_calculus_dlp_with_factor_base(
+            &kc,
+            kc.generator(),
+            &fb,
+            &KoblitzIcOptions {
+                m: 3,
+                strategy: DecompositionStrategy::Sat,
+                allow_direct_relation: false,
+                collapse_projected_orbits: true,
+                ..KoblitzIcOptions::default()
+            },
+        )
+        .unwrap();
+        assert!(!report.m_cofactor_admissible);
+        assert_eq!(
+            (report.trials, report.sat_calls, report.relations),
+            (0, 0, 0)
+        );
+        assert_eq!(report.log, None);
     }
 
     #[test]
@@ -3364,6 +3539,32 @@ mod tests {
             }
         }
         assert!(signed_early_relations.unwrap() < signed_fixed_relations.unwrap());
+    }
+
+    #[test]
+    fn projected_orbit_columns_recover_unknown_scalar_without_labels() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let d = BigUint::from(53u32);
+        let q = kc.mul(kc.generator(), &d);
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let report = koblitz_index_calculus_dlp_with_factor_base(
+            &kc,
+            &q,
+            &fb,
+            &KoblitzIcOptions {
+                strategy: DecompositionStrategy::Sat,
+                allow_direct_relation: false,
+                collapse_projected_orbits: true,
+                ..KoblitzIcOptions::default()
+            },
+        )
+        .unwrap();
+        assert!(report.m_cofactor_admissible);
+        assert!(report.collapse_projected_orbits);
+        assert_eq!(report.orbit_count, projected_signed_orbit_count(&kc, &fb));
+        assert_eq!(report.log, Some(d));
+        assert!(!report.direct_relation);
+        assert_eq!(report.sat_invalid_models, 0);
     }
 
     #[test]

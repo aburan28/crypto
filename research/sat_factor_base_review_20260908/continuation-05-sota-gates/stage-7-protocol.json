@@ -1,0 +1,49 @@
+{
+  "schema": "koblitz_degree15_public_divisor_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Replace the undersized degree-4 factor base with a target-independent divisor kernel and test a scalar-blind degree-15 solve.",
+  "curve": {"n": 15, "a": 1, "subgroup_order": 211},
+  "public_discovery": {
+    "summands": 2,
+    "dimension": 8,
+    "sizing_reason": "m times dimension must be at least n; dimension 8 is the smallest available divisor dimension above 15/2",
+    "candidate_source": "all degree-8 divisors of T^15-1 over F2",
+    "admission": "the factor-base cofactor classes can sum to zero with exactly two summands",
+    "selection_rule": "among admitted candidates, maximize rational factor-base points; then minimize projected signed-Frobenius columns; then choose lexicographically lower divisor indices",
+    "allowed_inputs": [
+      "factorization of T^15-1",
+      "rational points above each linearised kernel",
+      "cofactor-class reachability",
+      "cofactor-projected point equality up to signed Frobenius"
+    ],
+    "forbidden_inputs": [
+      "target point or scalar",
+      "target-subgroup enumeration",
+      "factor-base discrete-log labels",
+      "relation yield",
+      "solver timing"
+    ]
+  },
+  "column_reduction": "Merge only cofactor projections that are equal up to signed Frobenius by public point arithmetic; never compute their discrete logs.",
+  "unknown_scalar_run": {
+    "m": 2,
+    "secret": 101,
+    "seed": 20260971,
+    "native_conflict_budget_per_target": 10000,
+    "max_trials": 20000,
+    "max_models_per_target": 64,
+    "relation_batch_size": 1,
+    "direct_relation_forbidden": true,
+    "invalid_models_forbidden": true
+  },
+  "rho": "same-target signed-Frobenius/negation quotient r-adding walk",
+  "process_watchdog_seconds": 300,
+  "metrics": [
+    "discovery wall, core-seconds and peak RSS",
+    "factor-base construction and projection timers",
+    "index-calculus wall, core-seconds, peak RSS, relations, trials, conflicts and linear algebra",
+    "rho wall, core-seconds, peak RSS, iterations and operation ledger"
+  ],
+  "claim_boundary": "One degree-15 completion is a larger toy result and does not establish a scaling law, crossover, novelty or SOTA."
+}
