@@ -1,0 +1,30 @@
+{
+  "schema": "koblitz_magma_calculator_tls_get_probe.v1",
+  "observed_at_date": "2026-09-10",
+  "request": {
+    "method": "GET",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "no_calculator_input": true,
+    "no_computation_requested": true,
+    "redirects_allowed": false,
+    "socket_timeout_seconds": 70.0,
+    "response_byte_limit": 1048576,
+    "ca_bundle": {
+      "path": "/etc/ssl/cert.pem",
+      "bytes": 333483,
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "tls_context": "ssl.create_default_context(cafile='/etc/ssl/cert.pem')"
+  },
+  "response": {
+    "http_status": 200,
+    "final_url": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "body_path": "response.xml",
+    "body_bytes": 36,
+    "body_sha256": "c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161",
+    "body_complete": true,
+    "date_header_retained": false
+  },
+  "classification": "tls_endpoint_reachability_only",
+  "claim_boundary": "A GET-only TLS reachability probe using the selected CA bundle. It submitted no calculator input, requested no Magma computation, and is not solver, scientific, performance, or POST-delivery evidence."
+}

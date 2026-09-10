@@ -1,0 +1,170 @@
+{
+  "attempt_ordinal": 1,
+  "claim_admitted": true,
+  "classification": "sat_basis_certificate_unverified_model",
+  "clean_terminal": true,
+  "execution_binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+  "execution_commit": "a1001c18524e1e84d83f3e55498b9a26242c1a13",
+  "execution_tree": "9c88f77ac51eb0ca2d2945abb9ea3075b72e0ba7",
+  "finished_at": "2026-09-10T15:31:35.277526Z",
+  "launch_authorization": {
+    "bytes": 3654,
+    "path": "launch-authorization.consumed.json",
+    "sha256": "29dceb6a28a43346a03f394c335f69ac7c29827e468a6564861be9ae80328e46"
+  },
+  "ordinal": 5,
+  "outcome": "clean_f4_terminal",
+  "recovery_boundary": null,
+  "request": {
+    "body_bytes": 38229,
+    "body_sha256": "9bfbebfebc0b8245e58e9899dcec89ede0510200500e90b711aa913fd8672e9e",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+    "execution_commit": "a1001c18524e1e84d83f3e55498b9a26242c1a13",
+    "execution_manifest_sha256": "dce607c27ede667bb8c8a54020d014aafc805448a6567a83fa35922f97b0878e",
+    "execution_tree": "9c88f77ac51eb0ca2d2945abb9ea3075b72e0ba7",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 19407,
+      "path": "inputs/05-seed-2026091304-n31-l5-m3-standard-a1-f0.magma",
+      "sha256": "a96067f560c4995c285db0dc53ba6742c05a008159dfdee1f942145644e86fc3"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19-amendment03/1"
+  },
+  "response": {
+    "bytes": 811,
+    "path": "response.xml",
+    "sha256": "0766eb77edbabf9d0bd5db403fd0391d69d9443c296bb4dfd23acde5c7d8a83e"
+  },
+  "response_identity_verified": true,
+  "retained_files": [
+    {
+      "bytes": 1766,
+      "path": "attempt-start.json",
+      "sha256": "4bb4beb5c733d2a19ec621d3536924beec055b33a89f59b071eabb6c3ea1006f"
+    },
+    {
+      "bytes": 3654,
+      "path": "launch-authorization.consumed.json",
+      "sha256": "29dceb6a28a43346a03f394c335f69ac7c29827e468a6564861be9ae80328e46"
+    },
+    {
+      "bytes": 38229,
+      "path": "request-body.bin",
+      "sha256": "9bfbebfebc0b8245e58e9899dcec89ede0510200500e90b711aa913fd8672e9e"
+    },
+    {
+      "bytes": 811,
+      "path": "response.xml",
+      "sha256": "0766eb77edbabf9d0bd5db403fd0391d69d9443c296bb4dfd23acde5c7d8a83e"
+    },
+    {
+      "bytes": 1376,
+      "path": "transport-envelope.json",
+      "sha256": "0631141d3f1bd96403959a6ef6e79be30ea55c4932869001fdb5bc4f2e49d834"
+    },
+    {
+      "bytes": 955,
+      "path": "transport-metrics.json",
+      "sha256": "c97a0422882ca67dee48753f618611fe1bb7614c1a00454b716956df464b6c72"
+    },
+    {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "0c369630296fb03ed158c3d78f04c304dd0ddc3c079ff0bae31b33a3f02d97bc"
+    }
+  ],
+  "retry_permitted": false,
+  "schema": "koblitz_magma_calculator_stage19_amendment03_receipt.v1",
+  "service": {
+    "alert": null,
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "max_input_bytes": 50000,
+    "max_time_seconds": 60,
+    "server_seed": 3726011121,
+    "service_reported_memory_mb": 201.47,
+    "service_reported_memory_text": "201.47MB",
+    "service_reported_time_seconds": 2.96,
+    "version": "2.29-10",
+    "warning": null
+  },
+  "started_at": "2026-09-10T15:31:31.047411Z",
+  "task_id": "seed-2026091304/n31-l5-m3-standard-a1-f0",
+  "terminal": {
+    "algorithm": "direct-f4-sparse",
+    "basis_size": 43,
+    "cpu_seconds": 2.92,
+    "f4_step_degrees": [
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4
+    ],
+    "gpu_disabled": true,
+    "schema": "koblitz_magma_f4_terminal.v1",
+    "single_thread_requested": true,
+    "terminal_status": "sat",
+    "wall_seconds": 2.92
+  },
+  "transport_envelope": {
+    "bytes": 1376,
+    "path": "transport-envelope.json",
+    "sha256": "0631141d3f1bd96403959a6ef6e79be30ea55c4932869001fdb5bc4f2e49d834"
+  },
+  "transport_process": {
+    "metrics": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_amendment03_magma_calculator_request.py",
+        "--attempt",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/attempts/05-seed-2026091304-n31-l5-m3-standard-a1-f0",
+        "--execute-child"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 35520512,
+        "single_core_seconds": 0.21267,
+        "system_seconds": 0.088504,
+        "total_core_seconds": 0.21267,
+        "user_seconds": 0.124166,
+        "wall_seconds": 4.08497724996414
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 75.0
+    },
+    "metrics_file": {
+      "bytes": 955,
+      "path": "transport-metrics.json",
+      "sha256": "c97a0422882ca67dee48753f618611fe1bb7614c1a00454b716956df464b6c72"
+    },
+    "stderr": {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "0c369630296fb03ed158c3d78f04c304dd0ddc3c079ff0bae31b33a3f02d97bc"
+    }
+  }
+}

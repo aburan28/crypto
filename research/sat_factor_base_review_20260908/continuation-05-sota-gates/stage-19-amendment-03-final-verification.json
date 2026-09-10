@@ -1,0 +1,392 @@
+{
+  "artifact_status": "nine_clean_requests_complete",
+  "attempted_new_requests": 9,
+  "cases": [
+    {
+      "attempt_receipt_sha256": "95f64a3f10955528a8b774a463f5840d0f6fe7f523d139a1bc64b09a3dab5411",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:03.685936Z",
+      "id": "seed-2026091302/n31-l5-m3-standard-a1-f0",
+      "ordinal": 1,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3406000033,
+        "service_reported_memory_mb": 201.41,
+        "service_reported_memory_text": "201.41MB",
+        "service_reported_time_seconds": 3.0,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:30:56.964855Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 2.95,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 2.95
+      }
+    },
+    {
+      "attempt_receipt_sha256": "5deaced597a8af59db74b288ab61083f975849ac93a17abe57458e4f8a725be0",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:20.480204Z",
+      "id": "seed-2026091302/n31-l5-m3-ggmp-a0-f0",
+      "ordinal": 2,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3491259526,
+        "service_reported_memory_mb": 267.81,
+        "service_reported_memory_text": "267.81MB",
+        "service_reported_time_seconds": 13.73,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:05.690054Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 63,
+        "cpu_seconds": 13.7,
+        "f4_step_degrees": [
+          2,
+          2,
+          3,
+          3,
+          4,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 13.71
+      }
+    },
+    {
+      "attempt_receipt_sha256": "82fb1e7854c7f12831962e0dc24c2ffe6b4f2fea2efd1e737fa502b5d24d0577",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:24.703187Z",
+      "id": "seed-2026091302/n41-l5-m3-standard-a1-f0",
+      "ordinal": 3,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3692325105,
+        "service_reported_memory_mb": 32.09,
+        "service_reported_memory_text": "32.09MB",
+        "service_reported_time_seconds": 0.79,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:22.486312Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 0.73,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 0.74
+      }
+    },
+    {
+      "attempt_receipt_sha256": "74272ad89b37c1f2eeb8d9c574d024a935b4135288b91fc5945494bdffa4a6fe",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:29.044056Z",
+      "id": "seed-2026091303/n41-l5-m3-standard-a1-f0",
+      "ordinal": 4,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3339674584,
+        "service_reported_memory_mb": 32.09,
+        "service_reported_memory_text": "32.09MB",
+        "service_reported_time_seconds": 0.77,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:26.712817Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 0.71,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 0.72
+      }
+    },
+    {
+      "attempt_receipt_sha256": "ba3630a993b7563fcc225437130bcc9261248d9996cb4f15f3f5501d504616bb",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:35.277526Z",
+      "id": "seed-2026091304/n31-l5-m3-standard-a1-f0",
+      "ordinal": 5,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3726011121,
+        "service_reported_memory_mb": 201.47,
+        "service_reported_memory_text": "201.47MB",
+        "service_reported_time_seconds": 2.96,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:31.047411Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 2.92,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 2.92
+      }
+    },
+    {
+      "attempt_receipt_sha256": "c5caf8eb457717c5c40a920ca07b6194e572b6249161f193c183bade93a0a6fb",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:52.379843Z",
+      "id": "seed-2026091304/n31-l5-m3-ggmp-a0-f0",
+      "ordinal": 6,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3305988555,
+        "service_reported_memory_mb": 267.94,
+        "service_reported_memory_text": "267.94MB",
+        "service_reported_time_seconds": 13.81,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:37.284207Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 77,
+        "cpu_seconds": 13.77,
+        "f4_step_degrees": [
+          2,
+          2,
+          3,
+          3,
+          4,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 13.78
+      }
+    },
+    {
+      "attempt_receipt_sha256": "96713560c28c67f785f6ef00e8e75389a0ceb099e0b7517c3688b11e4d950b73",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:31:56.499465Z",
+      "id": "seed-2026091304/n41-l5-m3-standard-a1-f0",
+      "ordinal": 7,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 3238618613,
+        "service_reported_memory_mb": 32.09,
+        "service_reported_memory_text": "32.09MB",
+        "service_reported_time_seconds": 0.79,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:54.387390Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 0.74,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 0.74
+      }
+    },
+    {
+      "attempt_receipt_sha256": "28fe425eef3dedcbf310cc55dee229a4b445bc2f3ea6e61283493731a65d4c96",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:32:02.795296Z",
+      "id": "seed-2026091305/n31-l5-m3-standard-a1-f0",
+      "ordinal": 8,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 4281818058,
+        "service_reported_memory_mb": 201.5,
+        "service_reported_memory_text": "201.50MB",
+        "service_reported_time_seconds": 2.95,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:31:58.506192Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 43,
+        "cpu_seconds": 2.91,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 2.9
+      }
+    },
+    {
+      "attempt_receipt_sha256": "15035a65e6d51988cd6a158b873d4f857ee6d9e0e3afc175e15665c74943b463",
+      "classification": "sat_basis_certificate_unverified_model",
+      "clean_f4_terminal": true,
+      "finished_at": "2026-09-10T15:32:07.184864Z",
+      "id": "seed-2026091305/n41-l5-m3-standard-a1-f0",
+      "ordinal": 9,
+      "outcome": "clean_f4_terminal",
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 4214448085,
+        "service_reported_memory_mb": 32.09,
+        "service_reported_memory_text": "32.09MB",
+        "service_reported_time_seconds": 0.79,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "started_at": "2026-09-10T15:32:04.801655Z",
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 55,
+        "cpu_seconds": 0.74,
+        "f4_step_degrees": [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 0.74
+      }
+    }
+  ],
+  "claim": "This artifact binds a bounded official-calculator F4 panel. Clean receipts are source-equivalent basis terminals without Magma-linked point witnesses or solver-process CPU/RSS. It does not execute the licensed twenty-cell matrix and supports no performance, novelty, end-to-end, or SOTA claim.",
+  "claim_boundary": "At most nine additional source-equivalent official-calculator F4 terminal receipts for original Stage 19 tasks 2-10. Together with five earlier terminals and one additive wrapped-response adjudication, nine clean receipts would cover fifteen public-service-accessible n31/n41 tasks. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped solver CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+  "clean_new_f4_terminals": 9,
+  "cross_attempt_spacing_verified": true,
+  "execution_binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+  "expected_new_requests": 9,
+  "five_n59_tasks_excluded_by_input_cap": true,
+  "full_solver_matrix_gate_passed": false,
+  "licensed_twenty_cell_matrix_executed": false,
+  "magma_point_witnesses_validated": 0,
+  "maximum_public_service_f4_terminal_coverage": 15,
+  "one_attempt_no_retry_status": "verified",
+  "one_attempt_no_retry_verified": true,
+  "operational_or_invalid_receipts": 0,
+  "outcome_counts": {
+    "clean_f4_terminal": 9
+  },
+  "performance_ranking_admitted": false,
+  "plan_sha256": "d351a78d5b7a242632bef6c9a954d5f8a8ab028d79a942eaca3189178d13c9f5",
+  "process_scoped_solver_resources_complete": false,
+  "retained_prior_f4_terminals": 6,
+  "schema": "koblitz_magma_calculator_stage19_amendment03_summary.v1",
+  "service_headers_admitted_as_solver_process_metrics": false,
+  "unattempted_new_requests": 0,
+  "verified_public_service_f4_terminal_coverage": 15
+}
