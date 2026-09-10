@@ -719,3 +719,63 @@ relation is linear in degree-3 symmetric functions of the `Γ`-orbits of
 question about bits, not degrees, and needs `F_{p^k}` support to answer
 (§10.5).  The gain that is certain is the collapse: 32 against 8, four
 times as many relation tuples per solve.
+
+### 10.4 Results at `m = 3`
+
+| curve, group, seeds | `|Γ|` | relation | collapse |
+|---|---:|---|---:|
+| `K₁/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | TBD-CTRL | not enumerated |
+| `K₀/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | (control) | 15.9 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i` only | 128 | none up to total degree 5 | **135.3**: the per-point invariants merge distinct `Γ`-orbits at `m = 3` (they separated them at `m = 2`) |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i, Σu` | 128 | degree `[2,2,2,2 \| 1,·,1]` in `v_i = e₂[u_i]`, `e₂[Σu]`, `e₄[Σu]`; 21 terms | **128.0**, exact |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ Πu` | 128 | the same 21-term relation | 128.0 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ pair sums` | 128 | degree `[1,1,1,1 \| 1, 1]` with `e₂[u(1+2)]`, 10 terms — chaining in quotient coordinates | not enumerated |
+| `y² = x³ − x`, one `T`, sign frame, `+ Σu, Πu` | 16 | none up to total degree 4 (the 24-term `S₄` of §3.1 has total degree 6) | not enumerated |
+| `y² = x³ − x`, `E[2]`, `u_i` only | 128 | none up to total degree 5 | not enumerated |
+| `y² = x³ − x`, `E[2]`, `+ Σu, Πu` | 128 | linear in `e₁, e₂, e₄[Πu]`, `e₄[Σu]`, 5 terms | not enumerated |
+| `y² = x³ − x`, `E[2] + Aut` | TBD-AUT | TBD-AUT | not enumerated |
+| `y² = x³ + x + 2`, `E[2]`, `+ Σu, Πu` | 128 | degree 2 in `e_k[Πu]`, `e₄[Σu]`, 17 terms | not enumerated |
+
+The `K₀` row with `Σu` is the `m = 3` analogue of §10.2: degree 2 in each
+per-point quotient coordinate, as the symmetrised `S₄` of §3.2 is in each
+`w_i`, with 21 terms against 18, and a collapse of 128 against 16 —
+eight times as many relation tuples per solve, of which a factor 4 is
+the endomorphism transport and a factor 2 the `T₂` it already contains.
+The price is in the extra invariants: `s = Σu` was linear in the bits of
+a subspace factor base, `e₂[Σu]` and `e₄[Σu]` are not, because `T₄` does
+not act on the `u`-line and the orbit values `u(P_i + kT₄)` are
+algebraic in `u(P_i)`.  A descended version would carry the four coset
+values of each summand as unknowns with their defining quadratics, which
+is the transported system with more variables — or, equivalently and
+more simply, the §8 system on transported targets.  That is the route
+§10.5 takes.
+
+The points-only `T₄` row is a measurement worth keeping: at `m = 2` the
+per-point invariants `e₂, e₃` of the coset separated every `Γ`-orbit; at
+`m = 3` they merge some (collapse 135 above `|Γ| = 128`), and adding
+`Σu` restores exact separation.  The tool reports this rather than
+assuming per-point invariants are complete.
+
+### 10.5 What to do with it, ranked
+
+1. **`π − 1` transport on `K₀`, in the oracle that already exists.**
+   `koblitz_symmetrised` solves the symmetrised system for a target;
+   solve it for `(π − 1)R` instead, with the factor base the preimage of
+   `F_u` under `π − 1`, and each root is a relation for all four of
+   `R + kT₄`, over orbits of size up to `8n`.  No new polynomial, no new
+   solver; the measurement is relations per second end to end, which
+   §8 never made.  This is the only item on the list that changes a
+   number the scaling target cares about.
+2. **`F_{p^k}` in `Gf`**, so the Klein-group invariants meet a subspace
+   factor base and the "bits, not degrees" question of §10.3 can be
+   answered by descent rather than deferred.
+3. **Higher-order seeds through the same engine**: translations by
+   rational 3-torsion on `j = 0` curves together with the `Z/3`
+   automorphism, and the `μ₃`/Hessian structure they generate.  The
+   engine needs nothing new; the curves need 3-torsion, which `K₀`,
+   `K₁` and `secp256k1` do not have.
+4. **Completeness of per-point invariants.**  The `m = 3` merge in the
+   points-only `T₄` row says two symmetric functions of a coset are not
+   always a complete invariant of it; taking all `e_k` (the cap is four)
+   or the coset's minimal polynomial would settle whether that is a
+   cap artefact or a genuine identification.

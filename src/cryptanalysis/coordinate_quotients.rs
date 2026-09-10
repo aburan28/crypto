@@ -142,8 +142,19 @@ impl PointMap {
     }
 }
 
+/// In odd characteristic negation is the scaling by `−1`; use one name for
+/// it so group closure does not count the same map twice.
+fn canonical_auto(curve: &Curve, a: Auto) -> Auto {
+    match a {
+        Auto::Neg if curve.f.p != 2 => Auto::Scale(curve.f.neg(1)),
+        Auto::Scale(u) if curve.f.p == 2 && u != 1 => Auto::Neg,
+        other => other,
+    }
+}
+
 fn compose_auto(curve: &Curve, a: Auto, b: Auto) -> Auto {
     let f = &curve.f;
+    let (a, b) = (canonical_auto(curve, a), canonical_auto(curve, b));
     match (a, b) {
         (Auto::Scale(1), x) | (x, Auto::Scale(1)) => x,
         (Auto::Neg, Auto::Neg) => Auto::Scale(1),
@@ -161,6 +172,14 @@ fn compose_auto(curve: &Curve, a: Auto, b: Auto) -> Auto {
 
 /// Close `generators` into a group, up to `cap` elements.
 pub fn group_closure(curve: &Curve, generators: &[PointMap], cap: usize) -> Option<Vec<PointMap>> {
+    let generators: Vec<PointMap> = generators
+        .iter()
+        .map(|g| PointMap {
+            auto: canonical_auto(curve, g.auto),
+            t: g.t,
+        })
+        .collect();
+    let generators = &generators[..];
     let mut elems: Vec<PointMap> = vec![PointMap::identity()];
     let mut seen: HashSet<PointMap> = elems.iter().copied().collect();
     let mut frontier = elems.clone();
@@ -965,9 +984,9 @@ pub fn format_quotient(f: &Gf, r: &QuotientReport) -> String {
             if (c - r.gamma_order as f64).abs() < 0.5 {
                 " — separates Γ-orbits exactly"
             } else if c > r.gamma_order as f64 {
-                " — MORE collapse than Γ: a symmetry the group misses"
+                " — above |Γ|: the invariants merge distinct Γ-orbits (incomplete), or G misses a symmetry"
             } else {
-                " — less than |Γ|?"
+                " — below |Γ|: degenerate tuples with smaller fibres"
             }
         )),
         None => s.push_str("      collapse: not enumerated (curve too large)\n"),
