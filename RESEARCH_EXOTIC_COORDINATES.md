@@ -398,3 +398,159 @@ into `koblitz_groebner` / `semaev_sat`.
   for a single point, exactly one answer with content — the linearising
   frame of the rational 2-torsion — and this document is the argument that
   the interesting search space is the next one up.
+
+## 8. Measured solves (2026-09-10, second session)
+
+**Module:** `src/cryptanalysis/koblitz_symmetrised.rs`
+**Bench:** `cargo run --release --example symmetrised_oracle_bench`
+
+§5's hypotheses were about solve cost, and §3's numbers were about
+polynomials.  This section closes the gap: the symmetrised polynomials are
+Weil-restricted through the same symbolic field arithmetic the production
+`x`-system uses, solved by the same matrix-F4-with-splitting and the same
+CDCL solver, on the same curve and the same invariant subspace `V`, with
+every verdict gated against exhaustive enumeration on its own base and
+every returned relation re-summed in the group.  Gate failures across the
+whole ladder: zero.
+
+### 8.1 What is solved
+
+Factor base `F_u = {P : u(P) ∈ V}`, `u = 1/(x + 1)`, with `V` the root
+space of a divisor of `xⁿ − 1` containing `x − 1` (so `1 ∈ V`).  Basis
+`1, b₂, …, b_ℓ`; unknowns `c_{i,t}` with `w_i = Σ_t c_{i,t} AS(b_t)` and
+one parity bit `ε` with `s = ε + Σ_{i,t} c_{i,t} b_t + u_R`; `m(ℓ − 1) + 1`
+Boolean unknowns, `n` equations.  `S₃` gives a bilinear system; the
+18-term `S₄` a system of Boolean degree 4 — and, crucially, **no chained
+intermediate points**: the production `m = 3` system is two `S₃` links
+joined by a free field element, `3ℓ + n` unknowns, cubic.  A control arm
+solves the plain 24-term `S₄` in `x` directly (`3ℓ` unknowns, Boolean
+degree 7) to separate "no chaining" from "symmetry".
+
+A root gives `u_i` up to `u_i ↦ u_i + 1` with parity `ε`; the lifted points
+sum to `R` or to `R + T`, both relations over `F_u` since `T ∈ F_u`.  The
+`x`-arms use the production `groebner_decompose`; the SAT arms use one
+encoder for both systems (native XOR rows, no Kosters–Yeo trace row, since
+that row has no linear form in `u`).
+
+### 8.2 Numbers
+
+Medians over 8 targets in `⟨G⟩`, split by verdict; the two bases are
+different sets for the same `V`, so their found/refuted mixes differ and a
+median is only ever compared within a verdict.  `ffd` = first fall
+degree of the system.
+
+`m = 2` (`S₃`):
+
+| instance | dim V | arm | vars | deg | found / refuted | found ms | refuted ms | ffd |
+|---|---:|---|---:|---:|---|---:|---:|---:|
+| `K₀/F₂¹⁵` | 7 | x F4 | 14 | 2 | 1 / 7 | 3.2 | 9.4 | 3 |
+| | | sym F4 | 13 | 2 | 1 / 7 | 2.2 | 4.1 | 4 |
+| | | x SAT | 14 | 2 | 1 / 7 | 1.1 | 1.7 | |
+| | | sym SAT | 13 | 2 | 1 / 7 | 0.6 | 1.0 | |
+| `K₁/F₂¹⁵` | 7 | x F4 | 14 | 2 | 1 / 7 | 5.5 | 9.4 | 3 |
+| | | sym F4 | 13 | 2 | 4 / 4 | 3.3 | 5.7 | 4 |
+| | | x SAT | 14 | 2 | 1 / 7 | 1.3 | 2.0 | |
+| | | sym SAT | 13 | 2 | 4 / 4 | 1.0 | 1.0 | |
+| `K₁/F₂¹⁷` | 9 | x F4 | 18 | 2 | 4 / 4 | 113 | 142 | 3 |
+| | | sym F4 | 17 | 2 | 1 / 7 | 21 | 68 | 4 |
+| | | x SAT | 18 | 2 | 4 / 4 | 12 | 107 | |
+| | | sym SAT | 17 | 2 | 1 / 7 | 2.9 | 21 | |
+| `K₁/F₂²³` | 12 | x F4 / sym F4 | 24 / 23 | 2 | TBD23-2 | | | |
+
+`m = 3` (`S₄`, or chained `S₃`):
+
+| instance | dim V | arm | vars | deg | found / refuted | found ms | refuted ms | effort | ffd |
+|---|---:|---|---:|---:|---|---:|---:|---:|---:|
+| `K₀/F₂⁹` | 3 | x-chained F4 | 18 | 3 | 0 / 8 | – | 50 | 28 | 3 |
+| | | x-direct F4 | 9 | 6 | 0 / 8 | – | 11 | 30 | |
+| | | sym F4 | 7 | 4 | 0 / 8 | – | 0.85 | 3 | |
+| | | x-chained SAT | 18 | 3 | 0 / 8 | – | 42 | 2449 | |
+| | | sym SAT | 7 | 4 | 0 / 8 | – | 0.79 | 20 | |
+| `K₀/F₂¹⁵` | 5 | x-chained F4 | 30 | 3 | 0 / 8 | – | 10 291 | 788 | 3 |
+| | | sym F4 | 13 | 4 | 0 / 8 | – | 29 | 236 | |
+| | | x-chained SAT | 30 | 3 | 0 / 8 | – | 1 898 | 51 445 | |
+| | | sym SAT | 13 | 4 | 0 / 8 | – | 102 | 3 424 | |
+| `K₁/F₂¹⁵` | 5 | x-chained F4 | 30 | 3 | 7 / 1 | 5 672 | 10 169 | 469 | 3 |
+| | | x-direct F4 (4 targets) | 15 | 6 | 4 / 0 | 541 | – | 633 | |
+| | | sym F4 | 13 | 4 | 4 / 4 | 8.0 | 26 | 235 | |
+| | | x-chained SAT | 30 | 3 | 7 / 1 | 5 744 | 227 425 | 161 627 | |
+| | | sym SAT | 13 | 4 | 4 / 4 | 28 | 101 | 3 096 | |
+| `K₁/F₂¹⁷` | 9 | | | | TBD17-3 | | | | |
+| `K₁/F₂²³` | 12 | | | | TBD23-3 | | | | |
+
+Effort is F4 splits or SAT conflicts, machine-independent.  `K₀` has no
+usable prime-order subgroup at `n = 17` and `n = 21` is composite (the
+group order carries the subfield curves' orders), which is why those rows
+are absent.
+
+### 8.3 Reading
+
+**H1 (F4 refutation faster by more than the 2× yield accounts for):
+confirmed, by two to three orders of magnitude at `m = 3`.**  At
+`n = 15` the symmetrised system refutes in 26–29 ms against 10.2–10.3 s
+for the production chained system, ×350–390; found targets 8 ms against
+5.7 s, ×700.  At `m = 2`, where the production system is already
+quadratic and unchained, the gain is a steady ×2 (F4) to ×5 (SAT) on
+refutations.
+
+**Where the `m = 3` gain comes from is now measured, not argued.**  The
+direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
+chained intermediate points is worth ×12 on its own, and the symmetry is
+worth a further ×75 on top.  Both matter; the symmetry matters more.
+The production choice to chain `S₃` rather than use `S₄` was made on the
+grounds that `S₄` is degree 4 per variable and Boolean degree 7; the
+symmetrised `S₄` is degree 2 per variable and Boolean degree 4, and that
+is the version that should have been chained *against*.
+
+**H2 (first fall degree lower): falsified as stated.**  The symmetrised
+`m = 2` system's first fall degree is 4 where the `x`-system's is 3, and
+the symmetrised `S₄` system reports none up to degree 4 where the chained
+system's is 3.  A *higher* fall degree with a *faster* solve: the
+`x`-system's early syzygies are the chaining redundancy, not useful
+structure, and first fall degree is not the predictor here.  The
+machine-independent effort counts are: at `K₀/F₂¹⁵`, `m = 3`, 788 splits
+against 236 and 51 445 conflicts against 3 424.
+
+**H3 (`m = 2` bilinear, sub-second refutation at the production wall):
+supported in form, not yet at the intended `n`.**  The `m = 2`
+symmetrised system is bilinear in `(w₁, w₂)` with `s` linear, as
+predicted; `n = 21` is composite and unavailable to the curve
+constructor, so the wall the earlier sessions measured (`n = 21, m = 3`,
+39 unknowns, 50 s F4, no SAT verdict in 31 min) is re-measured at the
+prime `n = 17` and `n = 23` instead — rows marked TBD above.
+
+**The SAT/F4 asymmetry shrinks.**  The 2026-09-08 sessions found SAT
+340× behind F4 on refutation and unable to reach `n = 21`.  On the
+symmetrised system at `K₁/F₂¹⁵`, `m = 3`, SAT refutes in 101 ms against
+F4's 26 ms — ×4, not ×340 — and the production SAT arm's 227 s refutation
+becomes 0.1 s.  The chained system's `(m − 2)·n` free intermediate bits
+are what CDCL could not handle; without them it is competitive again.
+
+### 8.4 What this does not say
+
+- Toy `n ≤ 23`; nothing about a deployed curve.  The scaling target's own
+  conclusion stands: index calculus remains worse than rho at deployed
+  sizes.  What changed is the *constant*, by two to three orders of
+  magnitude, and the shape of the `m = 3` system.
+- The `x`-arms ran the production code path unchanged, including its
+  choice to chain.  A fairer production baseline would chain the
+  *symmetrised* `S₃`; that arm does not exist yet and would presumably
+  land between "x-direct" and "sym".
+- The bases differ as sets.  `|F_u|` and `|F_x|` are printed and close;
+  the found/refuted mixes are not, and only within-verdict medians were
+  compared.
+- One machine, eight targets per row, medians.  The ×350 at `m = 3` is
+  far outside any plausible noise; the ×2 at `m = 2` is not, and should be
+  read as "consistently faster", not as a precise ratio.
+
+### 8.5 Next
+
+1. Chain the symmetrised `S₃` for `m ≥ 4` and compare against the
+   unchained symmetrised `S₄` at `m = 3` — the system this makes
+   reachable is `m = 4` at `4(ℓ − 1) + 1 + n` unknowns, bilinear links.
+2. Re-run the scaling target's primary ladder
+   (`RESEARCH_KOBLITZ_SCALING_TARGET.md`) with the symmetrised oracle as a
+   fourth strategy in `koblitz_index_calculus`, so end-to-end relation
+   collection and the `4n` orbit collapse are measured, not modelled.
+3. The tuple-level search (§6.2) is unchanged in priority for *new*
+   structure; this section is the existing structure paying out.

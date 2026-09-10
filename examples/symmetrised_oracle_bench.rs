@@ -6,7 +6,11 @@
 //! cargo run --release --example symmetrised_oracle_bench                 # ladder n = 9, 15, 17 (m = 2, 3) and n = 23 (m = 2)
 //! cargo run --release --example symmetrised_oracle_bench -- --full       # also n = 23 at m = 3 (long)
 //! cargo run --release --example symmetrised_oracle_bench -- --only 1 15 3 --direct-all --no-sat --targets 4
+//! cargo run --release --example symmetrised_oracle_bench -- --only 1 23 3 --node-budget 20000 --conflict-budget 200000
 //! ```
+//!
+//! An arm that exhausts its node or conflict budget on a target reports it
+//! as inconclusive rather than running for hours; the budgets are printed.
 //!
 //! `n` must be prime: for composite `n` the group order is divisible by
 //! the orders of the subfield curves and no prime-order subgroup exceeds
@@ -46,6 +50,12 @@ fn main() {
         opts.targets_in_subgroup = false;
     }
     let direct_all = flag("--direct-all");
+    if let Some(b) = value("--node-budget") {
+        opts.node_budget = b;
+    }
+    if let Some(c) = value("--conflict-budget") {
+        opts.conflict_budget = c as u64;
+    }
     // --only a n m: run a single instance.
     let only: Option<(u8, u32, usize)> = args.iter().position(|a| a == "--only").and_then(|i| {
         Some((
