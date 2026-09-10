@@ -9,6 +9,7 @@ converted to UNSAT or scientific evidence.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -186,10 +187,36 @@ def version(binary: str | None) -> dict:
             result = subprocess.run(option, capture_output=True, text=True, timeout=10)
             text = (result.stdout + result.stderr).strip()
             if text:
-                return {"available": True, "path": str(Path(path).resolve()), "version": text[:1000]}
+                resolved = Path(path).resolve()
+                return {
+                    "available": True,
+                    "path": str(resolved),
+                    "version": text[:1000],
+                    "sha256": hashlib.sha256(resolved.read_bytes()).hexdigest(),
+                }
         except (OSError, subprocess.SubprocessError):
             pass
-    return {"available": True, "path": str(Path(path).resolve()), "version": "unreported"}
+    resolved = Path(path).resolve()
+    return {
+        "available": True,
+        "path": str(resolved),
+        "version": "unreported",
+        "sha256": hashlib.sha256(resolved.read_bytes()).hexdigest(),
+    }
+
+
+def git_commit(path: Path) -> str | None:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=path,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
 
 
 def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) -> tuple[dict, str | None]:
@@ -242,6 +269,7 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
         "metrics": run["metrics"],
         "command": run["command"],
         "config": config,
+        "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest() if binary.exists() else None,
     }
     return receipt, str(binary.resolve()) if binary.exists() else None
 
@@ -275,6 +303,7 @@ def main() -> None:
                 "available": args.wdsat_source is not None and (args.wdsat_source / "src" / "makefile").exists(),
                 "path": str(args.wdsat_source.resolve()) if args.wdsat_source else None,
                 "version": "per-instance source build",
+                "source_commit": git_commit(args.wdsat_source) if args.wdsat_source else None,
             }
             if args.wdsat_source
             else version(args.wdsat)
