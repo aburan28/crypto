@@ -455,7 +455,14 @@ degree of the system.
 | | | sym F4 | 17 | 2 | 1 / 7 | 21 | 68 | 4 |
 | | | x SAT | 18 | 2 | 4 / 4 | 12 | 107 | |
 | | | sym SAT | 17 | 2 | 1 / 7 | 2.9 | 21 | |
-| `K₁/F₂²³` | 12 | x F4 / sym F4 | 24 / 23 | 2 | TBD23-2 | | | |
+| `K₀/F₂²³` | 12 | x F4 | 24 | 2 | 3 / 5 | 824 | 3 289 | 3 |
+| | | sym F4 | 23 | 2 | 4 / 4 | 401 | 1 615 | 3 |
+| | | x SAT | 24 | 2 | 3 / 5 | 987 | 16 963 | |
+| | | sym SAT | 23 | 2 | 4 / 4 | 1 153 | 3 746 | |
+| `K₁/F₂²³` | 12 | x F4 | 24 | 2 | 3 / 5 | 675 | 3 367 | 3 |
+| | | sym F4 | 23 | 2 | 5 / 3 | 787 | 1 606 | 3 |
+| | | x SAT | 24 | 2 | 3 / 5 | 14 111 | 82 452 | |
+| | | sym SAT | 23 | 2 | 5 / 3 | 543 | 9 289 | |
 
 `m = 3` (`S₄`, or chained `S₃`):
 
@@ -475,7 +482,12 @@ degree of the system.
 | | | sym F4 | 13 | 4 | 4 / 4 | 8.0 | 26 | 235 | |
 | | | x-chained SAT | 30 | 3 | 7 / 1 | 5 744 | 227 425 | 161 627 | |
 | | | sym SAT | 13 | 4 | 4 / 4 | 28 | 101 | 3 096 | |
-| `K₁/F₂¹⁷` | 9 | | | | TBD17-3 | | | | |
+| `K₁/F₂¹⁷` (4 targets, budgets 3 000 splits / 200 000 conflicts) | 9 | x-chained F4 | 44 | 3 | 4 / 0 | 3 839 | – | 49 | 3 |
+| | | sym F4 | 25 | 4 | 1 / 0, **3 inconclusive** | 2 606 | – | 1 504 | |
+| | | x-chained SAT | 44 | 3 | 0 / 0, **4 inconclusive** | – | – | 200 000 | |
+| | | sym SAT | 25 | 4 | 3 / 0, 1 inconclusive | 23 782 | – | 150 247 | |
+| `K₁/F₂¹⁷` (F4 only, 60 000 splits) | 9 | x-chained F4 | 44 | 3 | 4 / 0 | 3 979 | – | 49 | 3 |
+| | | sym F4 | 25 | 4 | 4 / 0 | 6 203 | – | 3 219 | |
 | `K₁/F₂²³` | 12 | | | | TBD23-3 | | | | |
 
 Effort is F4 splits or SAT conflicts, machine-independent.  `K₀` has no
@@ -486,12 +498,36 @@ are absent.
 ### 8.3 Reading
 
 **H1 (F4 refutation faster by more than the 2× yield accounts for):
-confirmed, by two to three orders of magnitude at `m = 3`.**  At
-`n = 15` the symmetrised system refutes in 26–29 ms against 10.2–10.3 s
-for the production chained system, ×350–390; found targets 8 ms against
-5.7 s, ×700.  At `m = 2`, where the production system is already
-quadratic and unchained, the gain is a steady ×2 (F4) to ×5 (SAT) on
-refutations.
+confirmed at `n ≤ 15` by two to three orders of magnitude at `m = 3`,
+and at `m = 2` all the way to `n = 23`.**  At `n = 15`, `m = 3`, the
+symmetrised system refutes in 26–29 ms against 10.2–10.3 s for the
+production chained system, ×350–390; found targets 8 ms against 5.7 s,
+×700.  At `m = 2`, where the production system is already quadratic and
+unchained, the refutation gain is a steady ×2 on F4 from `n = 15` to
+`n = 23` (3.3 s → 1.6 s at `n = 23`) and ×4–9 on SAT (17 s → 3.7 s on
+`K₀`, 82 s → 9.3 s on `K₁`).  On *found* targets at `m = 2` the two are
+within noise of each other (`K₁/F₂²³`: 0.68 s against 0.79 s).
+
+**H1 is not confirmed at `n = 17`, `m = 3`, and the reason is the
+engine, which is worth stating precisely.**  The only invariant subspace
+containing `1` at `n = 17` has dimension 9, so `|F| ≈ 440` and every
+target decomposes, with on the order of a hundred solutions each.  There
+the symmetrised system has 25 unknowns of Boolean degree 4, and
+`matrix_f4_f2` cannot build a Macaulay matrix above the system's own
+degree at that width (degree 5 exceeds its column limit), so the F4 arm
+is reduced to row echelon plus splitting.  Under a 3 000-split budget it
+found one target and gave up on three; given 60 000 it found all four,
+in a median 6.2 s and 3 219 splits, against 4.0 s and 49 splits for the
+chained production system (44 unknowns, cubic) — ×1.6 slower, and
+sixty times more splitting.  On SAT the
+roles reverse: the symmetrised system found three of four in 24 s and the
+production system none within 200 000 conflicts.  So at `m = 3` the
+symmetrised system is the better *SAT* instance everywhere measured, and
+the better *F4* instance only while its degree-4 Macaulay matrix fits —
+which is `n = 15` here, and a larger column budget elsewhere.  That is a
+statement about `koblitz_groebner`'s engine limits, not about the
+polynomial; it is also exactly the gap §7 flagged between a modelled
+system and a measured solve.
 
 **Where the `m = 3` gain comes from is now measured, not argued.**  The
 direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
