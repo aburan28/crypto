@@ -37,6 +37,35 @@ KNOWN_SOLVER_STATUSES = {
 }
 
 
+def validate_build_provenance(plan: dict, protocol: dict, *, allow_smoke: bool) -> dict:
+    import build_koblitz_phase_b_tools as tool_builder
+
+    tool_builds = plan.get("additional_tool_builds", {})
+    if not isinstance(tool_builds, dict) or set(tool_builds) - {"rust", "cryptominisat"}:
+        raise phase_b.PhaseBError("Phase-B plan has unexpected tool build receipts")
+    if not allow_smoke and set(tool_builds) != {"rust", "cryptominisat"}:
+        raise phase_b.PhaseBError("production scoring requires bound Rust and CryptoMiniSat build receipts")
+    source_state = plan.get("source_revision")
+    if not isinstance(source_state, dict):
+        raise phase_b.PhaseBError("Phase-B plan lacks implementation provenance")
+    phase_b.require_hex40(source_state.get("commit"), "Phase-B implementation revision")
+    evidence_class = plan.get("evidence_class")
+    if evidence_class not in {"operational_smoke", phase_b.PRODUCTION_EVIDENCE_CLASS}:
+        raise phase_b.PhaseBError("Phase-B plan has an unknown evidence class")
+    if evidence_class != "operational_smoke" and (
+        source_state.get("dirty") is not False or source_state.get("porcelain") != []
+        or plan.get("allow_dirty_requested") is not False
+        or set(tool_builds) != {"rust", "cryptominisat"}
+    ):
+        raise phase_b.PhaseBError("Phase-B measurement requires a clean implementation and bound builds")
+    if "rust" in tool_builds:
+        expected_objects = tool_builder.rust_source_objects(phase_b.REPO, source_state["commit"])
+        if expected_objects != plan.get("rust_build_source_objects"):
+            raise phase_b.PhaseBError("Rust build provenance differs from the recorded implementation revision")
+        tool_builder.git(phase_b.REPO, "merge-base", "--is-ancestor", protocol["phase_a_binding"]["source_revision"], source_state["commit"])
+    return tool_builds
+
+
 def validate_process_summary(process: Any, context: str) -> None:
     if not isinstance(process, dict):
         raise phase_b.PhaseBError(f"{context} lacks its process receipt")
@@ -229,6 +258,31 @@ def verify_run_tree(
         raise phase_b.PhaseBError("Phase-B execution plan uses a different solver input binding")
     if plan.get("tool_build_accounting") != protocol["tool_build_accounting"]:
         raise phase_b.PhaseBError("Phase-B execution plan changed the incomplete tool-build accounting")
+    import build_koblitz_phase_b_tools as tool_builder
+    import build_koblitz_phase_b_wdsat as wdsat_builder
+
+    tool_builds = validate_build_provenance(plan, protocol, allow_smoke=allow_smoke)
+    evidence_class = plan["evidence_class"]
+    if plan.get("wdsat_build_capsule_bound") is not True:
+        raise phase_b.PhaseBError("Phase-B execution plan lacks its WDSat build capsule binding")
+    checked_wdsat = wdsat_builder.validate_capsule(
+        run_root / "tool-builds" / "wdsat" / "build-seal.json",
+        protocol,
+        plan["tool_identities"]["wdsat"],
+        plan["source_revision"],
+        require_clean_implementation=evidence_class != "operational_smoke",
+    )
+    if checked_wdsat != plan.get("wdsat_build"):
+        raise phase_b.PhaseBError("Phase-B WDSat build capsule differs from the execution binding")
+    for name, bound in tool_builds.items():
+        checked = tool_builder.validate_receipt(
+            run_root / "tool-builds" / name / "receipt.json", name, plan["tool_identities"],
+            plan["rust_build_source_objects"] if name == "rust" else None,
+            plan["source_revision"],
+            require_clean_implementation=evidence_class != "operational_smoke",
+        )
+        if checked != bound:
+            raise phase_b.PhaseBError("Phase-B tool build receipt differs from the execution binding")
     selected_ids = plan.get("selected_blind_instance_ids")
     if not isinstance(selected_ids, list) or not all(isinstance(value, str) for value in selected_ids):
         raise phase_b.PhaseBError("Phase-B execution plan has an invalid selected-id list")
@@ -303,6 +357,7 @@ def verify_run_tree(
         len(bundle_ids),
         task_results,
         plan["wdsat_build"],
+        tool_builds,
     )
     if summary != independently_summarized:
         raise phase_b.PhaseBError("Phase-B run summary is not independently reproducible")
@@ -326,6 +381,8 @@ def verify_run_tree(
         raise phase_b.PhaseBError("Phase-B run seal full-panel label is not independently derived")
     if not allow_smoke and not independently_full:
         raise phase_b.PhaseBError("scoring requires the independently complete full panel")
+    if evidence_class != "operational_smoke" and not independently_full:
+        raise phase_b.PhaseBError("a partial Phase-B panel cannot carry the full measurement label")
     exports, _ = phase_b.read_json(
         run_root / "export-inventory.json", "Phase-B frozen export inventory"
     )
@@ -340,11 +397,15 @@ def verify_run_tree(
         or exports.get("wdsat_capacity", {}).get("capacity_verified") is not True
     ):
         raise phase_b.PhaseBError("Phase-B frozen export inventory is inconsistent")
-    return seal, plan, bundle, task_results
+    return seal, plan, bundle, task_results, summary
 
 
 def validate_outer_metrics(
-    path: Path, run_root: Path, solver_root: Path, plan: dict[str, Any]
+    path: Path,
+    run_root: Path,
+    solver_root: Path,
+    plan: dict[str, Any],
+    run_summary: dict[str, Any],
 ) -> dict[str, Any]:
     record, data = phase_b.read_json(path, "outer driver metrics")
     if not isinstance(record, dict):
@@ -380,6 +441,9 @@ def validate_outer_metrics(
         or record.get("orphan_group_terminated") is not False
     ):
         raise phase_b.PhaseBError("outer driver did not terminate cleanly")
+    watchdog = record.get("watchdog_seconds")
+    if isinstance(watchdog, bool) or not isinstance(watchdog, (int, float)) or not math.isfinite(watchdog) or watchdog <= 0:
+        raise phase_b.PhaseBError("outer driver metrics use an invalid watchdog")
     metrics = record.get("metrics")
     required = {
         "wall_seconds",
@@ -397,7 +461,8 @@ def validate_outer_metrics(
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
             raise phase_b.PhaseBError("outer driver metrics contain invalid numeric resources")
     if (
-        not isinstance(metrics["peak_rss_bytes"], int)
+        isinstance(metrics["peak_rss_bytes"], bool)
+        or not isinstance(metrics["peak_rss_bytes"], int)
         or metrics["peak_rss_bytes"] < 0
         or metrics["meter"] != "fresh-process getrusage(RUSAGE_CHILDREN)"
         or not math.isclose(
@@ -409,12 +474,20 @@ def validate_outer_metrics(
         or metrics["single_core_seconds"] != metrics["total_core_seconds"]
     ):
         raise phase_b.PhaseBError("outer driver resource accounting is inconsistent")
+    inner = run_summary.get("charged_process_resources")
+    if not isinstance(inner, dict):
+        raise phase_b.PhaseBError("run summary lacks charged process resources")
+    if (
+        metrics["wall_seconds"] + 1e-9 < inner.get("summed_process_wall_seconds", math.inf)
+        or metrics["total_core_seconds"] + 1e-9 < inner.get("total_core_seconds", math.inf)
+    ):
+        raise phase_b.PhaseBError("outer driver resources do not enclose the charged child processes")
     return {
         "path": str(path.resolve()),
         "bytes": len(data),
         "sha256": phase_b.sha256_bytes(data),
         "command": command,
-        "watchdog_seconds": record.get("watchdog_seconds"),
+        "watchdog_seconds": watchdog,
         "metrics": metrics,
         "evidence_class": plan.get("evidence_class"),
     }
@@ -513,19 +586,18 @@ def score_run(
         raise phase_b.PhaseBError(f"score output must be new: {output}")
     protocol, protocol_bytes = phase_b.read_json(protocol_path, "Phase-B protocol")
     phase_b.validate_protocol(protocol)
-    run_seal, plan, bundle, tasks = verify_run_tree(
+    run_seal, plan, bundle, tasks, run_summary = verify_run_tree(
         run_root, solver_root, protocol, protocol_bytes, allow_smoke=allow_smoke
     )
     outer_metrics = (
-        validate_outer_metrics(outer_metrics_path, run_root, solver_root, plan)
+        validate_outer_metrics(outer_metrics_path, run_root, solver_root, plan, run_summary)
         if outer_metrics_path is not None
         else None
     )
     if (
         plan.get("evidence_class")
-        == "internal_measurement_pending_outer_and_tool_build_receipts"
+        == phase_b.PRODUCTION_EVIDENCE_CLASS
         and outer_metrics is None
-        and not allow_smoke
     ):
         raise phase_b.PhaseBError("full scientific scoring requires the bound outer driver receipt")
     if plan.get("evidence_class") == "operational_smoke" and not allow_smoke:
@@ -543,8 +615,11 @@ def score_run(
         backend: {
             "total_core_seconds": 0.0,
             "single_core_seconds": 0.0,
+            "single_core_seconds_alias_of": "total_core_seconds",
+            "single_core_elapsed_seconds": None,
             "summed_process_wall_seconds": 0.0,
             "peak_rss_bytes": 0,
+            "peak_rss_scope": "maximum fresh-process high-water mark, not aggregate parallel memory",
             "conflicts_sum": 0,
             "conflicts_reported": 0,
             "conflict_values": [],
@@ -635,11 +710,20 @@ def score_run(
         },
         "per_cell_backend_class": group_rows,
         "backend_resources": resources,
+        "resource_field_semantics": {
+            "single_core_seconds": "legacy alias of total_core_seconds (user plus system CPU), not measured single-core elapsed time",
+            "single_core_elapsed_seconds": None,
+            "peak_rss_bytes": "maximum fresh-process high-water mark within each backend, not aggregate parallel memory",
+        },
         "native_xor_validation_accounting": "Native process resources include source regeneration, solve, source-model validation, and exact lifted point-witness validation",
         "rows": rows,
         "independent_external_reproduction_satisfied": False,
         "full_cost_gate_passed": False,
-        "full_cost_blockers": protocol["tool_build_accounting"],
+        "full_cost_blockers": phase_b.tool_build_cost_blockers(plan.get("additional_tool_builds", {})),
+        "separately_charged_tool_builds": {
+            name: {"receipt_sha256": value["receipt_sha256"], **value["receipt"]["resources"]}
+            for name, value in sorted(plan.get("additional_tool_builds", {}).items())
+        },
     }
     output.mkdir(parents=False)
     phase_b.write_json_new(output / "score.json", score)

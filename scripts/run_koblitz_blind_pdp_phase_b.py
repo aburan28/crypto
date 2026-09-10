@@ -44,6 +44,7 @@ RUN_PLAN_SCHEMA = "koblitz_pdp_phase_b_execution_plan.v1"
 TASK_SCHEMA = "koblitz_pdp_phase_b_task_result.v1"
 RUN_SUMMARY_SCHEMA = "koblitz_pdp_phase_b_run_summary.v1"
 RUN_SEAL_SCHEMA = "koblitz_pdp_phase_b_run_seal.v1"
+PRODUCTION_EVIDENCE_CLASS = "internal_measurement_with_bound_tool_builds_pending_outer_receipt"
 
 BLIND_TOP_LEVEL_FIELDS = {"schema", "scope", "instance_count", "instances"}
 BLIND_INSTANCE_FIELDS = {
@@ -883,10 +884,22 @@ def run_metered(
     environment: dict[str, str],
     markers: set[str],
     expected_executable_sha256: str | None = None,
+    allow_hardlinked_executable: bool = False,
 ) -> dict[str, Any]:
+    def launch_executable_sha256() -> str:
+        if not allow_hardlinked_executable:
+            return sha256_file(Path(command[0]), f"{role} executable")
+        resolved = Path(command[0]).resolve(strict=True)
+        metadata = resolved.stat()
+        if not stat.S_ISREG(metadata.st_mode) or not os.access(resolved, os.X_OK):
+            raise PhaseBError(f"{role} executable is not a regular executable: {resolved}")
+        return sha256_bytes(resolved.read_bytes())
+
+    if not isinstance(allow_hardlinked_executable, bool):
+        raise PhaseBError(f"{role} hard-link policy must be boolean")
     if expected_executable_sha256 is not None:
         require_hex64(expected_executable_sha256, f"{role} executable identity")
-        if sha256_file(Path(command[0]), f"{role} executable") != expected_executable_sha256:
+        if launch_executable_sha256() != expected_executable_sha256:
             raise PhaseBError(f"{role} executable changed before launch")
     intent_path = task_root / f"{role}.intent.json"
     stdout_path = task_root / f"{role}.stdout"
@@ -992,9 +1005,7 @@ def run_metered(
         raise PhaseBError(f"{role} process receipt has inconsistent resource accounting")
     stdout = regular_file_bytes(stdout_path, f"{role} stdout")
     stderr = regular_file_bytes(stderr_path, f"{role} stderr")
-    if expected_executable_sha256 is not None and sha256_file(
-        Path(command[0]), f"{role} executable"
-    ) != expected_executable_sha256:
+    if expected_executable_sha256 is not None and launch_executable_sha256() != expected_executable_sha256:
         raise PhaseBError(f"{role} executable changed during launch")
     record = dict(metrics)
     record.update(
@@ -1663,7 +1674,9 @@ def summarize_run(
     full_count: int,
     task_results: list[dict[str, Any]],
     wdsat_build: dict[str, Any],
+    tool_builds: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    tool_builds = tool_builds or {}
     statuses: dict[str, Counter[str]] = {backend: Counter() for backend in BACKENDS}
     conflict_values: dict[str, list[int]] = {backend: [] for backend in BACKENDS}
     for task in task_results:
@@ -1701,16 +1714,27 @@ def summarize_run(
         "charged_process_resources": {
             "total_core_seconds": sum(item["total_core_seconds"] for item in resources),
             "single_core_seconds": sum(item["single_core_seconds"] for item in resources),
+            "single_core_seconds_alias_of": "total_core_seconds",
+            "single_core_elapsed_seconds": None,
             "summed_process_wall_seconds": sum(item["wall_seconds"] for item in resources),
             "peak_rss_bytes": max((item["peak_rss_bytes"] for item in resources), default=0),
+            "peak_rss_scope": "maximum fresh-process high-water mark, not aggregate parallel memory",
         },
         "separately_charged_wdsat_build": {
             "receipt_sha256": wdsat_build["receipt_sha256"],
             "total_core_seconds": sum(item["total_core_seconds"] for item in build_metrics),
             "single_core_seconds": sum(item["single_core_seconds"] for item in build_metrics),
+            "single_core_seconds_alias_of": "total_core_seconds",
+            "single_core_elapsed_seconds": None,
             "summed_process_wall_seconds": sum(item["wall_seconds"] for item in build_metrics),
             "peak_rss_bytes": max((item["peak_rss_bytes"] for item in build_metrics), default=0),
+            "peak_rss_scope": "maximum build-child high-water mark, not aggregate parallel memory",
         },
+        "separately_charged_tool_builds": {
+            name: {"receipt_sha256": value["receipt_sha256"], **value["receipt"]["resources"]}
+            for name, value in sorted(tool_builds.items())
+        },
+        "rust_and_cryptominisat_build_receipts_bound": set(tool_builds) == {"rust", "cryptominisat"},
         "selection_complete": len(task_results) == selected_count
         and backend_outcomes == selected_count * len(BACKENDS),
         "full_panel_complete": selected_count == full_count
@@ -1719,14 +1743,23 @@ def summarize_run(
         "truth_scoring_status": "withheld_until_separate_post_run_step",
         "native_xor_validation_accounting": "Each native backend process receipt includes source regeneration, solving, source-model checking, and exact lifted point-witness checking",
         "full_cost_gate_passed": False,
-        "full_cost_blockers": [
-            "fresh metered Rust exporter/backend release build receipt not yet bound",
-            "fresh metered clean CryptoMiniSat configure/build receipt not yet bound",
-        ],
+        "full_cost_blockers": tool_build_cost_blockers(tool_builds),
     }
 
 
+def tool_build_cost_blockers(tool_builds: dict[str, Any]) -> list[str]:
+    missing = [f"fresh metered {name} build receipt not yet bound" for name in ("rust", "cryptominisat") if name not in tool_builds]
+    return missing + [
+        "measured single-core elapsed time is unavailable; legacy single_core_seconds aliases total CPU",
+        "outer build-driver overhead and simultaneous aggregate build memory require separate measurement",
+        "Phase-B costs exclude Phase-A preparation and the remaining end-to-end index-calculus stages",
+    ]
+
+
 def run_panel(args: argparse.Namespace) -> dict[str, Any]:
+    import build_koblitz_phase_b_tools as tool_builder
+    import build_koblitz_phase_b_wdsat as wdsat_builder
+
     protocol, protocol_bytes = read_json(args.protocol, "Phase-B protocol")
     validate_protocol(protocol)
     require_phase_a_ancestor(protocol["phase_a_binding"]["source_revision"])
@@ -1752,21 +1785,36 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         name: executable_identity(path, name, executable=name != "meter")
         for name, path in tools.items()
     }
-    wdsat_receipt_value, wdsat_receipt_bytes = read_json(
-        args.wdsat_build_receipt.resolve(), "WDSat build receipt"
-    )
-    wdsat_build = validate_wdsat_build_receipt(
-        wdsat_receipt_value,
-        wdsat_receipt_bytes,
-        identities["wdsat"],
+    wdsat_build = wdsat_builder.validate_capsule(
+        args.wdsat_build_seal.resolve(),
         protocol,
+        identities["wdsat"],
+        state,
+        require_clean_implementation=full_selection and not args.allow_dirty,
     )
+    tool_receipt_paths = {
+        name: path for name, path in (
+            ("rust", args.rust_build_receipt), ("cryptominisat", args.cryptominisat_build_receipt)
+        ) if path is not None
+    }
+    if full_selection and not args.allow_dirty and set(tool_receipt_paths) != {"rust", "cryptominisat"}:
+        raise PhaseBError("a full production selection requires both Rust and CryptoMiniSat build receipts")
+    source_objects = tool_builder.rust_source_objects(REPO) if "rust" in tool_receipt_paths else None
+    tool_builds = {
+        name: tool_builder.validate_receipt(
+            path.resolve(), name, identities,
+            source_objects if name == "rust" else None,
+            state,
+            require_clean_implementation=full_selection and not args.allow_dirty,
+        )
+        for name, path in tool_receipt_paths.items()
+    }
     environment = safe_child_environment()
     markers = forbidden_material(protocol)
     assert_launch_boundary([], environment, [], markers)
     evidence_class = (
-        "internal_measurement_pending_outer_and_tool_build_receipts"
-        if full_selection and not state["dirty"]
+        PRODUCTION_EVIDENCE_CLASS
+        if full_selection and not state["dirty"] and not args.allow_dirty
         else "operational_smoke"
     )
     plan = {
@@ -1775,10 +1823,14 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         "protocol_path": str(args.protocol.resolve()),
         "protocol_sha256": sha256_bytes(protocol_bytes),
         "source_revision": state,
+        "allow_dirty_requested": args.allow_dirty,
         "solver_input_binding": binding,
         "tool_identities": identities,
         "wdsat_build": wdsat_build,
+        "wdsat_build_capsule_bound": True,
         "tool_build_accounting": protocol["tool_build_accounting"],
+        "additional_tool_builds": tool_builds,
+        "rust_build_source_objects": source_objects,
         "child_environment": environment,
         "stdin": "devnull",
         "close_fds": True,
@@ -1805,6 +1857,26 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
     args.output.mkdir(parents=True)
     (args.output / "tasks").mkdir()
     write_json_new(args.output / "execution-plan.json", plan)
+    frozen_wdsat = wdsat_builder.copy_capsule(
+        args.wdsat_build_seal.resolve(),
+        args.output / "tool-builds" / "wdsat",
+        protocol,
+        identities["wdsat"],
+        state,
+        require_clean_implementation=full_selection and not args.allow_dirty,
+    )
+    if frozen_wdsat != wdsat_build:
+        raise PhaseBError("WDSat build capsule changed while freezing the run")
+    for name, path in tool_receipt_paths.items():
+        destination = args.output / "tool-builds" / name
+        tool_builder.copy_capsule(path.resolve(), destination)
+        if tool_builder.validate_receipt(
+            destination / "receipt.json", name, identities,
+            source_objects if name == "rust" else None,
+            state,
+            require_clean_implementation=full_selection and not args.allow_dirty,
+        ) != tool_builds[name]:
+            raise PhaseBError("tool build receipt changed while freezing the run capsule")
     prepared_tasks = []
     for index, instance in enumerate(selected):
         prepared_tasks.append(
@@ -1858,7 +1930,7 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
     ]
     require_git_state(state, "solver execution")
     summary = summarize_run(
-        args.output, protocol, len(selected), full_count, task_results, wdsat_build
+        args.output, protocol, len(selected), full_count, task_results, wdsat_build, tool_builds
     )
     write_json_new(args.output / "run-summary.json", summary)
     inventory = all_regular_inventory(args.output, {"run-seal.json"})
@@ -1898,8 +1970,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--exporter", type=Path, required=True)
     run.add_argument("--backend", type=Path, required=True)
     run.add_argument("--wdsat", type=Path, required=True)
-    run.add_argument("--wdsat-build-receipt", type=Path, required=True)
+    run.add_argument("--wdsat-build-seal", type=Path, required=True)
     run.add_argument("--cryptominisat", type=Path, required=True)
+    run.add_argument("--rust-build-receipt", type=Path)
+    run.add_argument("--cryptominisat-build-receipt", type=Path)
     run.add_argument("--meter", type=Path, default=DEFAULT_METER)
     run.add_argument("--max-instances", type=int)
     run.add_argument("--allow-dirty", action="store_true")

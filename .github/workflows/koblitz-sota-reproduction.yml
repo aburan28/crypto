@@ -17,6 +17,9 @@ on:
       - "scripts/test_koblitz_pdp_phase_a.py"
       - "scripts/run_koblitz_blind_pdp_phase_b.py"
       - "scripts/build_koblitz_phase_b_wdsat.py"
+      - "scripts/test_koblitz_phase_b_wdsat_custody.py"
+      - "scripts/build_koblitz_phase_b_tools.py"
+      - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
       - "scripts/verify_koblitz_external_reproduction.py"
@@ -26,6 +29,7 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pdp-panel-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-balanced-pdp-phase-b-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -51,6 +55,8 @@ jobs:
           python3 -c 'import json; d=json.load(open("/tmp/balanced-pdp-phase-a-plan.json")); assert d["census_executed"] is False and d["total_selected_instances"] == 160 and d["total_planned_solver_runs"] == 480 and d["largest_canonical_triple_count"] == 18896570'
       - name: Validate blinded PDP Phase-B custody and scoring split
         run: |
+          python3 scripts/test_koblitz_phase_b_tool_builds.py -v
+          python3 scripts/test_koblitz_phase_b_wdsat_custody.py -v
           # Cargo normally hard-links example binaries on Linux. Make dedicated
           # byte copies for the single-link immutable-artifact custody checks.
           mkdir "$RUNNER_TEMP/phase-b-tools"

@@ -15,7 +15,9 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
+import build_koblitz_phase_b_tools as tool_builder
 import run_koblitz_blind_pdp_phase_b as phase_b
 import build_koblitz_phase_b_wdsat as wdsat_builder
 import score_koblitz_blind_pdp_phase_b as phase_b_score
@@ -223,8 +225,8 @@ raise SystemExit(0)
     path.chmod(0o755)
 
 
-def fake_wdsat_receipt(path: Path, binary: Path, *, maximum: int = TEST_WDSAT_MAXIMUM) -> None:
-    zero_metrics = {
+def zero_process_metrics() -> dict:
+    return {
         "wall_seconds": 0.0,
         "user_seconds": 0.0,
         "system_seconds": 0.0,
@@ -233,41 +235,316 @@ def fake_wdsat_receipt(path: Path, binary: Path, *, maximum: int = TEST_WDSAT_MA
         "peak_rss_bytes": 0,
         "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
     }
-    config = test_wdsat_config(maximum)
-    receipt = {
-        "schema": "koblitz_pdp_phase_b_wdsat_build_receipt.v1",
-        "status": "completed",
-        "source_commit": "1" * 40,
-        "source_dirty": False,
-        "config": config,
-        "config_sha256": hashlib.sha256(config.encode()).hexdigest(),
-        "binary_sha256": sha256(binary),
-        "limits": {
-            "max_anf_id": maximum,
-            "max_degree": maximum,
-            "max_id": maximum,
-            "max_buffer_size": maximum,
-            "max_eq": maximum,
-            "max_eq_size": maximum,
-            "max_xeq": maximum,
-            "max_xeq_size": maximum,
-        },
-        "build_processes": [
-            {
-                "role": role,
-                "command": ["/synthetic/" + role],
-                "returncode": 0,
-                "timed_out": False,
-                "orphan_group_terminated": False,
-                "metrics": zero_metrics,
-                "stdout_sha256": hashlib.sha256(b"").hexdigest(),
-                "stderr_sha256": hashlib.sha256(b"").hexdigest(),
-            }
-            for role in ("source-copy", "config-install", "clean", "build", "binary-copy")
-        ],
-        "claim_boundary": "Synthetic test build receipt with separately visible zero-cost fixture metrics",
+
+
+def fake_tool_build_capsule(
+    output: Path,
+    tool: str,
+    identities: dict,
+    rust_source_objects: dict[str, str],
+    implementation_commit: str,
+) -> tuple[Path, dict]:
+    """Create a syntactic build capsule without compiling either measured tool."""
+    output.mkdir()
+    evidence = output / "evidence"
+    evidence.mkdir()
+    tool_names = (
+        ("git", "tar", "cp", "cargo", "rustc")
+        if tool == "rust"
+        else ("git", "tar", "cp", "cmake", "cc", "c++", "make")
+    )
+    toolchain = {
+        name: {
+            "path": f"/synthetic/{tool}/{name}",
+            "resolved_path": f"/synthetic/{tool}/{name}",
+            "bytes": 0,
+            "sha256": hashlib.sha256(f"{tool}:{name}".encode()).hexdigest(),
+        }
+        for name in tool_names
     }
-    path.write_text(json.dumps(receipt, indent=2) + "\n")
+    archive_names = (
+        ("source",)
+        if tool == "rust"
+        else ("source", *tool_builder.CMS_DEPENDENCIES)
+    )
+    archives = {
+        name: {
+            "path": str(output / f"{name}.tar"),
+            "resolved_path": str(output / f"{name}.tar"),
+            "bytes": 0,
+            "sha256": hashlib.sha256(f"{tool}:archive:{name}".encode()).hexdigest(),
+        }
+        for name in archive_names
+    }
+    source_root = output / "source"
+    build_root = output / "build"
+    commands: dict[str, list[str]] = {}
+    source_commit = (
+        implementation_commit if tool == "rust" else tool_builder.CMS_COMMIT
+    )
+    for name in archive_names:
+        commit = (
+            source_commit
+            if name == "source"
+            else tool_builder.CMS_DEPENDENCIES[name]
+        )
+        destination = source_root if name == "source" else output / name
+        paths = tool_builder.RUST_PATHS if tool == "rust" else []
+        commands[f"archive-{name}"] = [
+            toolchain["git"]["path"],
+            "archive",
+            "--format=tar",
+            f"--output={output / (name + '.tar')}",
+            commit,
+            *paths,
+        ]
+        commands[f"extract-{name}"] = [
+            toolchain["tar"]["path"],
+            "-xf",
+            str(output / f"{name}.tar"),
+            "-C",
+            str(destination),
+        ]
+    jobs = "2"
+    environment = (
+        {"CARGO_HOME": str(output / "cargo-home")} if tool == "rust" else {}
+    )
+    if tool == "rust":
+        commands.update(
+            {
+                "install-lock": [
+                    toolchain["cp"]["path"],
+                    str(source_root / tool_builder.RUST_LOCK_PATH),
+                    str(source_root / "Cargo.lock"),
+                ],
+                "version-cargo": [toolchain["cargo"]["path"], "--version", "--verbose"],
+                "version-rustc": [toolchain["rustc"]["path"], "--version", "--verbose"],
+                "vendor": [
+                    toolchain["cargo"]["path"],
+                    "vendor",
+                    "--locked",
+                    "--offline",
+                    "--versioned-dirs",
+                    str(output / "vendor"),
+                ],
+                "build": [
+                    toolchain["cargo"]["path"],
+                    "build",
+                    "--release",
+                    "--locked",
+                    "--offline",
+                    "--jobs",
+                    jobs,
+                    "--target-dir",
+                    str(build_root),
+                    "--example",
+                    "koblitz_pdp_export",
+                    "--example",
+                    "koblitz_pdp_backend",
+                ],
+                "copy-exporter": [
+                    toolchain["cp"]["path"],
+                    str(build_root / "release/examples/koblitz_pdp_export"),
+                    str(output / "bin/koblitz_pdp_export"),
+                ],
+                "copy-backend": [
+                    toolchain["cp"]["path"],
+                    str(build_root / "release/examples/koblitz_pdp_backend"),
+                    str(output / "bin/koblitz_pdp_backend"),
+                ],
+            }
+        )
+    else:
+        commands.update(
+            {
+                "version-cmake": [toolchain["cmake"]["path"], "--version"],
+                "version-cc": [toolchain["cc"]["path"], "--version"],
+                "version-cxx": [toolchain["c++"]["path"], "--version"],
+                "configure": [
+                    toolchain["cmake"]["path"],
+                    "-S",
+                    str(source_root),
+                    "-B",
+                    str(build_root),
+                    "-G",
+                    "Unix Makefiles",
+                    *tool_builder.CMS_FLAGS,
+                    f"-DCMAKE_C_COMPILER={toolchain['cc']['path']}",
+                    f"-DCMAKE_CXX_COMPILER={toolchain['c++']['path']}",
+                    f"-DFETCHCONTENT_SOURCE_DIR_CADICAL={output / 'cadical'}",
+                    f"-DFETCHCONTENT_SOURCE_DIR_CADIBACK={output / 'cadiback'}",
+                ],
+                "build": [
+                    toolchain["cmake"]["path"],
+                    "--build",
+                    str(build_root),
+                    "--target",
+                    "cryptominisat5",
+                    "--parallel",
+                    jobs,
+                ],
+                "copy-cryptominisat": [
+                    toolchain["cp"]["path"],
+                    str(build_root / "cryptominisat5"),
+                    str(output / "bin/cryptominisat5"),
+                ],
+            }
+        )
+    empty_hash = hashlib.sha256(b"").hexdigest()
+    processes = []
+    for role in tool_builder.required_roles(tool):
+        process = {
+            "role": role,
+            "command": commands[role],
+            "returncode": 0,
+            "timed_out": False,
+            "orphan_group_terminated": False,
+            "metrics": zero_process_metrics(),
+            "environment": environment,
+            "stdout_sha256": empty_hash,
+            "stderr_sha256": empty_hash,
+        }
+        processes.append(process)
+        (evidence / f"{role}.stdout").write_bytes(b"")
+        (evidence / f"{role}.stderr").write_bytes(b"")
+        (evidence / f"{role}.metrics.json").write_bytes(
+            phase_b.pretty_bytes(
+                {
+                    key: process[key]
+                    for key in (
+                        "command",
+                        "returncode",
+                        "timed_out",
+                        "orphan_group_terminated",
+                        "metrics",
+                    )
+                }
+            )
+        )
+        (evidence / f"{role}.intent.json").write_bytes(
+            phase_b.pretty_bytes(
+                {"command": process["command"], "environment": environment}
+            )
+        )
+    if tool == "rust":
+        (evidence / "cargo-config.toml").write_bytes(b"")
+        (evidence / "Cargo.lock").write_text("synthetic fixture lock\n")
+    else:
+        (evidence / "CMakeCache.txt").write_text("synthetic fixture cache\n")
+    binary_names = (
+        ("exporter", "backend") if tool == "rust" else ("cryptominisat",)
+    )
+    receipt = {
+        "schema": tool_builder.SCHEMA,
+        "status": "completed",
+        "tool": tool,
+        "source_commit": source_commit,
+        "source_clean": True,
+        "rust_source_objects": rust_source_objects if tool == "rust" else None,
+        "dependency_commits": (
+            {} if tool == "rust" else dict(tool_builder.CMS_DEPENDENCIES)
+        ),
+        "excluded_test_submodules": (
+            {} if tool == "rust" else dict(tool_builder.CMS_UNUSED_SUBMODULES)
+        ),
+        "source_archives": archives,
+        "requested_parallel_jobs": int(jobs),
+        "toolchain": toolchain,
+        "platform": {"system": "synthetic", "machine": "fixture", "release": "0"},
+        "environment": environment,
+        "build_processes": processes,
+        "binaries": {name: identities[name] for name in binary_names},
+        "resources": tool_builder.resource_summary(processes),
+        "accounting_boundary": tool_builder.BOUNDARY,
+        "evidence_inventory": phase_b.all_regular_inventory(evidence),
+        "build_driver_sha256": sha256(Path(tool_builder.__file__)),
+        "process_meter_sha256": sha256(phase_b.DEFAULT_METER),
+        "phase_b_helper_sha256": sha256(Path(phase_b.__file__)),
+        "implementation_state": {
+            "commit": implementation_commit,
+            "dirty": False,
+            "porcelain": [],
+        },
+    }
+    receipt["receipt_payload_sha256"] = phase_b.canonical_sha256(receipt)
+    receipt_path = output / "receipt.json"
+    receipt_path.write_bytes(phase_b.pretty_bytes(receipt))
+    normalized = tool_builder.validate_receipt(
+        receipt_path,
+        tool,
+        identities,
+        rust_source_objects if tool == "rust" else None,
+    )
+    return receipt_path, normalized
+
+
+def tiny_wdsat_build(
+    root: Path, protocol_path: Path, protocol: dict
+) -> tuple[dict, Path, dict]:
+    """Build the tiny C fixture and bind its commit/config into the test protocol."""
+    source = root / "wdsat-source"
+    (source / "src").mkdir(parents=True)
+    (source / "src/config.h").write_text("#define PLACEHOLDER 1\n")
+    (source / "src/main.c").write_text(
+        '#include <stdio.h>\nint main(void) { puts("UNKNOWN"); return 0; }\n'
+    )
+    (source / "src/makefile").write_text(
+        "SHELL=/bin/sh\n"
+        "CC?=cc\n"
+        "all: ../wdsat_solver\n"
+        "../wdsat_solver: main.c config.h\n"
+        "\t$(CC) -O2 main.c -o ../wdsat_solver\n"
+        "clean:\n"
+        "\trm -f *.o ../wdsat_solver\n"
+    )
+    subprocess.run(["git", "init", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "add", "src"], cwd=source, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Phase B Test",
+            "-c",
+            "user.email=phase-b-test@example.invalid",
+            "commit",
+            "-q",
+            "-m",
+            "fixture",
+        ],
+        cwd=source,
+        check=True,
+    )
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=source,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    config = root / "config.h"
+    config.write_text(test_wdsat_config())
+    protocol = copy.deepcopy(protocol)
+    protocol["wdsat_build"] = {
+        "source_commit": commit,
+        "frozen_config_path": "config.h",
+        "frozen_config_sha256": sha256(config),
+        "limits": {
+            "max_anf_id": TEST_WDSAT_MAXIMUM,
+            "max_degree": TEST_WDSAT_MAXIMUM,
+            "max_id": TEST_WDSAT_MAXIMUM,
+            "max_buffer_size": TEST_WDSAT_MAXIMUM,
+            "max_eq": TEST_WDSAT_MAXIMUM,
+            "max_eq_size": TEST_WDSAT_MAXIMUM,
+            "max_xeq": TEST_WDSAT_MAXIMUM,
+            "max_xeq_size": TEST_WDSAT_MAXIMUM,
+        },
+    }
+    protocol_path.write_text(json.dumps(protocol, indent=2) + "\n")
+    output = root / "wdsat-build"
+    seal = wdsat_builder.build(
+        protocol_path, source, config, output, phase_b.DEFAULT_METER
+    )
+    return protocol, output, seal
 
 
 class ContractUnitTests(unittest.TestCase):
@@ -551,72 +828,17 @@ class ContractUnitTests(unittest.TestCase):
     def test_wdsat_builder_emits_runnable_authenticated_receipt(self) -> None:
         with TemporaryDirectory(prefix="phase-b-builder-") as directory:
             root = Path(directory)
-            source = root / "wdsat-source"
-            (source / "src").mkdir(parents=True)
-            (source / "src/config.h").write_text("#define PLACEHOLDER 1\n")
-            (source / "src/main.c").write_text("int main(void) { return 0; }\n")
-            (source / "src/makefile").write_text(
-                "SHELL=/bin/sh\n"
-                "CC?=cc\n"
-                "all: ../wdsat_solver\n"
-                "../wdsat_solver: main.c config.h\n"
-                "\t$(CC) -O2 main.c -o ../wdsat_solver\n"
-                "clean:\n"
-                "\trm -f *.o ../wdsat_solver\n"
-            )
-            subprocess.run(["git", "init", "-q"], cwd=source, check=True)
-            subprocess.run(["git", "add", "src"], cwd=source, check=True)
-            subprocess.run(
-                [
-                    "git",
-                    "-c",
-                    "user.name=Phase B Test",
-                    "-c",
-                    "user.email=phase-b-test@example.invalid",
-                    "commit",
-                    "-q",
-                    "-m",
-                    "fixture",
-                ],
-                cwd=source,
-                check=True,
-            )
-            commit = subprocess.run(
-                ["git", "rev-parse", "HEAD"], cwd=source, text=True, capture_output=True, check=True
-            ).stdout.strip()
-            config = root / "config.h"
-            config.write_text(test_wdsat_config())
             protocol, _ = phase_b.read_json(phase_b.DEFAULT_PROTOCOL, "production protocol fixture")
-            protocol = copy.deepcopy(protocol)
-            protocol["wdsat_build"] = {
-                "source_commit": commit,
-                "frozen_config_path": "config.h",
-                "frozen_config_sha256": sha256(config),
-                "limits": {
-                    "max_anf_id": TEST_WDSAT_MAXIMUM,
-                    "max_degree": TEST_WDSAT_MAXIMUM,
-                    "max_id": TEST_WDSAT_MAXIMUM,
-                    "max_buffer_size": TEST_WDSAT_MAXIMUM,
-                    "max_eq": TEST_WDSAT_MAXIMUM,
-                    "max_eq_size": TEST_WDSAT_MAXIMUM,
-                    "max_xeq": TEST_WDSAT_MAXIMUM,
-                    "max_xeq_size": TEST_WDSAT_MAXIMUM,
-                },
-            }
             protocol_path = root / "protocol.json"
-            protocol_path.write_text(json.dumps(protocol, indent=2) + "\n")
-            output = root / "build-output"
-            seal = wdsat_builder.build(
-                protocol_path, source, config, output, phase_b.DEFAULT_METER
-            )
+            protocol, output, seal = tiny_wdsat_build(root, protocol_path, protocol)
             self.assertEqual(seal["status"], "build_frozen")
             self.assertTrue((output / "wdsat_solver").is_file())
-            receipt, receipt_bytes = phase_b.read_json(output / "receipt.json", "test WDSat receipt")
-            normalized = phase_b.validate_wdsat_build_receipt(
-                receipt,
-                receipt_bytes,
-                phase_b.executable_identity(output / "wdsat_solver", "test WDSat binary"),
+            normalized = wdsat_builder.validate_capsule(
+                output / "build-seal.json",
                 protocol,
+                phase_b.executable_identity(output / "wdsat_solver", "test WDSat binary"),
+                seal["implementation_state"],
+                require_clean_implementation=False,
             )
             self.assertEqual(
                 [item["role"] for item in normalized["build_processes"]],
@@ -634,7 +856,12 @@ class TinyIntegrationTests(unittest.TestCase):
             root = Path(directory)
             phase_a_protocol, bundle, phase_a_seal = tiny_phase_a(self.preparer, root)
             phase_b_protocol = root / "tiny-phase-b-protocol.json"
-            tiny_phase_b_protocol(phase_b_protocol, phase_a_protocol, bundle, phase_a_seal)
+            protocol = tiny_phase_b_protocol(
+                phase_b_protocol, phase_a_protocol, bundle, phase_a_seal
+            )
+            protocol, wdsat_build, _ = tiny_wdsat_build(
+                root, phase_b_protocol, protocol
+            )
             solver_root = root / "solver-input"
             stage = run(
                 [
@@ -676,12 +903,8 @@ class TinyIntegrationTests(unittest.TestCase):
             with self.assertRaises(phase_b.PhaseBError):
                 phase_b.load_solver_root(linked_root, protocol_value)
 
-            wdsat = root / "fake-wdsat"
             cms = root / "fake-cms"
-            fake_unknown_solver(wdsat)
             fake_unknown_solver(cms)
-            build_receipt = root / "wdsat-build.json"
-            fake_wdsat_receipt(build_receipt, wdsat)
             run_root = root / "solver-run"
             hostile_env = dict(os.environ)
             hostile_env.update(
@@ -708,9 +931,9 @@ class TinyIntegrationTests(unittest.TestCase):
                     "--backend",
                     str(self.backend),
                     "--wdsat",
-                    str(wdsat),
-                    "--wdsat-build-receipt",
-                    str(build_receipt),
+                    str(wdsat_build / "wdsat_solver"),
+                    "--wdsat-build-seal",
+                    str(wdsat_build / "build-seal.json"),
                     "--cryptominisat",
                     str(cms),
                     "--allow-dirty",
@@ -718,6 +941,9 @@ class TinyIntegrationTests(unittest.TestCase):
                 env=hostile_env,
             )
             run_seal = json.loads(completed.stdout)
+            execution_plan = json.loads((run_root / "execution-plan.json").read_text())
+            self.assertEqual(execution_plan["evidence_class"], "operational_smoke")
+            self.assertTrue(execution_plan["allow_dirty_requested"])
             self.assertTrue(run_seal["full_panel_complete"])
             self.assertEqual(run_seal["backend_outcomes"], 12)
             export_inventory = json.loads((run_root / "export-inventory.json").read_text())
@@ -743,10 +969,8 @@ class TinyIntegrationTests(unittest.TestCase):
                 self.assertNotIn("ORACLE_PATH", intent["environment"])
                 self.assertNotIn("TARGET_CLASS", intent["environment"])
                 self.assertNotIn("PHASE_B_SECRET", intent["environment"])
-            fake_outputs = list(run_root.glob("tasks/*/wdsat.stdout")) + list(
-                run_root.glob("tasks/*/cryptominisat.stdout")
-            )
-            self.assertEqual(len(fake_outputs), 8)
+            fake_outputs = list(run_root.glob("tasks/*/cryptominisat.stdout"))
+            self.assertEqual(len(fake_outputs), 4)
             for path in fake_outputs:
                 audit_line = next(
                     line for line in path.read_text().splitlines() if line.startswith("PHASE_B_FAKE_AUDIT=")
@@ -905,6 +1129,310 @@ class TinyIntegrationTests(unittest.TestCase):
             )
             self.assertIn("inventory differs", failed.stderr)
             self.assertFalse(tamper_output.exists())
+
+    def test_synthetic_production_evidence_is_copied_and_rescored(self) -> None:
+        with TemporaryDirectory(prefix="phase-b-production-contract-") as directory:
+            root = Path(directory)
+            phase_a_protocol, bundle, phase_a_seal = tiny_phase_a(self.preparer, root)
+            protocol_path = root / "tiny-phase-b-protocol.json"
+            protocol = tiny_phase_b_protocol(
+                protocol_path, phase_a_protocol, bundle, phase_a_seal
+            )
+            implementation_commit = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=phase_b.REPO,
+                text=True,
+                capture_output=True,
+                check=True,
+            ).stdout.strip()
+            clean_state = {
+                "commit": implementation_commit,
+                "dirty": False,
+                "porcelain": [],
+            }
+            with patch.object(phase_b, "git_state", return_value=clean_state):
+                protocol, wdsat_build, wdsat_seal = tiny_wdsat_build(
+                    root, protocol_path, protocol
+                )
+            solver_root = root / "solver-input"
+            phase_b.stage_solver_root(
+                protocol_path, phase_a_seal, bundle, solver_root
+            )
+
+            cms = root / "fake-cms"
+            fake_unknown_solver(cms)
+            runtime_identities = {
+                "exporter": phase_b.executable_identity(
+                    self.exporter, "synthetic production exporter"
+                ),
+                "backend": phase_b.executable_identity(
+                    self.backend, "synthetic production backend"
+                ),
+                "cryptominisat": phase_b.executable_identity(
+                    cms, "synthetic production CryptoMiniSat"
+                ),
+            }
+            rust_source_objects = {
+                path: hashlib.sha1(f"synthetic:{path}".encode()).hexdigest()
+                for path in tool_builder.RUST_PATHS
+            }
+            rust_receipt, rust_build = fake_tool_build_capsule(
+                root / "rust-build",
+                "rust",
+                runtime_identities,
+                rust_source_objects,
+                implementation_commit,
+            )
+            cms_receipt, cms_build = fake_tool_build_capsule(
+                root / "cms-build",
+                "cryptominisat",
+                runtime_identities,
+                rust_source_objects,
+                implementation_commit,
+            )
+
+            run_root = root / "solver-run"
+            run_arguments = [
+                "run",
+                "--protocol",
+                str(protocol_path),
+                "--solver-root",
+                str(solver_root),
+                "--output",
+                str(run_root),
+                "--exporter",
+                str(self.exporter),
+                "--backend",
+                str(self.backend),
+                "--rust-build-receipt",
+                str(rust_receipt),
+                "--wdsat",
+                str(wdsat_build / "wdsat_solver"),
+                "--wdsat-build-seal",
+                str(wdsat_build / "build-seal.json"),
+                "--cryptominisat",
+                str(cms),
+                "--cryptominisat-build-receipt",
+                str(cms_receipt),
+            ]
+            args = phase_b.build_parser().parse_args(run_arguments)
+            synthetic_argv = [str(Path(phase_b.__file__).resolve()), *run_arguments]
+            with (
+                patch.object(phase_b, "git_state", return_value=clean_state),
+                patch.object(
+                    tool_builder,
+                    "rust_source_objects",
+                    return_value=rust_source_objects,
+                ),
+                patch.object(sys, "argv", synthetic_argv),
+            ):
+                run_seal = phase_b.run_panel(args)
+                plan = json.loads((run_root / "execution-plan.json").read_text())
+                summary = json.loads((run_root / "run-summary.json").read_text())
+
+                self.assertEqual(
+                    plan["evidence_class"], phase_b.PRODUCTION_EVIDENCE_CLASS
+                )
+                self.assertFalse(plan["allow_dirty_requested"])
+                self.assertEqual(plan["source_revision"], clean_state)
+                self.assertEqual(
+                    set(plan["additional_tool_builds"]), {"rust", "cryptominisat"}
+                )
+                self.assertEqual(
+                    plan["additional_tool_builds"]["rust"], rust_build
+                )
+                self.assertEqual(
+                    plan["additional_tool_builds"]["cryptominisat"], cms_build
+                )
+                self.assertTrue(run_seal["full_panel_complete"])
+                self.assertEqual(run_seal["backend_outcomes"], 12)
+
+                for name, source in (
+                    ("rust", rust_receipt.parent),
+                    ("cryptominisat", cms_receipt.parent),
+                ):
+                    frozen = run_root / "tool-builds" / name
+                    self.assertEqual(
+                        (frozen / "receipt.json").read_bytes(),
+                        (source / "receipt.json").read_bytes(),
+                    )
+                    self.assertEqual(
+                        phase_b.all_regular_inventory(frozen / "evidence"),
+                        phase_b.all_regular_inventory(source / "evidence"),
+                    )
+
+                frozen_wdsat = run_root / "tool-builds" / "wdsat"
+                self.assertEqual(
+                    (frozen_wdsat / "build-seal.json").read_bytes(),
+                    (wdsat_build / "build-seal.json").read_bytes(),
+                )
+                for item in wdsat_seal["inventory"]:
+                    self.assertEqual(
+                        (frozen_wdsat / item["path"]).read_bytes(),
+                        (wdsat_build / item["path"]).read_bytes(),
+                    )
+                self.assertEqual(
+                    plan["wdsat_build"]["seal_sha256"],
+                    sha256(wdsat_build / "build-seal.json"),
+                )
+                self.assertEqual(summary["selected_instances"], 4)
+                self.assertEqual(summary["backend_outcomes"], 12)
+                self.assertTrue(summary["full_panel_complete"])
+                self.assertTrue(
+                    summary["rust_and_cryptominisat_build_receipts_bound"]
+                )
+                self.assertEqual(
+                    summary["separately_charged_tool_builds"],
+                    {
+                        name: {
+                            "receipt_sha256": value["receipt_sha256"],
+                            **value["receipt"]["resources"],
+                        }
+                        for name, value in sorted(
+                            plan["additional_tool_builds"].items()
+                        )
+                    },
+                )
+                self.assertEqual(
+                    summary["separately_charged_wdsat_build"]["receipt_sha256"],
+                    plan["wdsat_build"]["receipt_sha256"],
+                )
+                self.assertFalse(summary["full_cost_gate_passed"])
+                self.assertFalse(
+                    any(
+                        "build receipt not yet bound" in blocker
+                        for blocker in summary["full_cost_blockers"]
+                    )
+                )
+
+                outer_metrics_path = root / "outer.metrics.json"
+                bad_outer_metrics_path = root / "bad-outer.metrics.json"
+                bad_outer_metrics_path.write_bytes(
+                    phase_b.pretty_bytes(
+                        {
+                            "command": plan["outer_expected_command"],
+                            "returncode": 0,
+                            "watchdog_seconds": 172800,
+                            "timed_out": False,
+                            "orphan_group_terminated": False,
+                            "metrics": zero_process_metrics(),
+                        }
+                    )
+                )
+                with self.assertRaisesRegex(
+                    phase_b.PhaseBError, "do not enclose the charged child processes"
+                ):
+                    phase_b_score.validate_outer_metrics(
+                        bad_outer_metrics_path,
+                        run_root,
+                        solver_root,
+                        plan,
+                        summary,
+                    )
+                outer_values = zero_process_metrics()
+                outer_values["wall_seconds"] = (
+                    summary["charged_process_resources"]["summed_process_wall_seconds"] + 1.0
+                )
+                outer_values["user_seconds"] = (
+                    summary["charged_process_resources"]["total_core_seconds"] + 1.0
+                )
+                outer_values["total_core_seconds"] = outer_values["user_seconds"]
+                outer_values["single_core_seconds"] = outer_values["total_core_seconds"]
+                outer_values["peak_rss_bytes"] = summary["charged_process_resources"]["peak_rss_bytes"]
+                outer_metrics_path.write_bytes(
+                    phase_b.pretty_bytes(
+                        {
+                            "command": plan["outer_expected_command"],
+                            "returncode": 0,
+                            "watchdog_seconds": 172800,
+                            "timed_out": False,
+                            "orphan_group_terminated": False,
+                            "metrics": outer_values,
+                        }
+                    )
+                )
+                with self.assertRaisesRegex(
+                    phase_b.PhaseBError, "requires the bound outer driver receipt"
+                ):
+                    phase_b_score.score_run(
+                        protocol_path,
+                        solver_root,
+                        run_root,
+                        phase_a_seal,
+                        phase_a_seal.parent / "sealed-oracle/oracle-ledger.json",
+                        root / "score-without-outer",
+                        allow_smoke=True,
+                        outer_metrics_path=None,
+                    )
+                score_root = root / "score"
+                score_seal = phase_b_score.score_run(
+                    protocol_path,
+                    solver_root,
+                    run_root,
+                    phase_a_seal,
+                    phase_a_seal.parent / "sealed-oracle/oracle-ledger.json",
+                    score_root,
+                    allow_smoke=False,
+                    outer_metrics_path=outer_metrics_path,
+                )
+                score = json.loads((score_root / "score.json").read_text())
+                self.assertEqual(
+                    score_seal["status"], "post_run_truth_scoring_complete"
+                )
+                self.assertTrue(score["full_panel_scored"])
+                self.assertEqual(score["backend_rows"], 12)
+                self.assertEqual(
+                    score["outer_driver_accounting"]["evidence_class"],
+                    phase_b.PRODUCTION_EVIDENCE_CLASS,
+                )
+                self.assertEqual(
+                    score["separately_charged_tool_builds"],
+                    summary["separately_charged_tool_builds"],
+                )
+                self.assertEqual(
+                    score["full_cost_blockers"], summary["full_cost_blockers"]
+                )
+                self.assertFalse(score["full_cost_gate_passed"])
+
+                tampered_root = root / "tampered-run"
+                shutil.copytree(run_root, tampered_root)
+                tampered_summary_path = tampered_root / "run-summary.json"
+                tampered_summary = json.loads(tampered_summary_path.read_text())
+                tampered_summary["separately_charged_tool_builds"]["rust"][
+                    "total_core_seconds"
+                ] += 1.0
+                tampered_summary_path.write_bytes(
+                    phase_b.pretty_bytes(tampered_summary)
+                )
+                tampered_seal_path = tampered_root / "run-seal.json"
+                tampered_seal = json.loads(tampered_seal_path.read_text())
+                tampered_seal["inventory"] = phase_b.all_regular_inventory(
+                    tampered_root, {"run-seal.json"}
+                )
+                tampered_seal["inventory_sha256"] = phase_b.canonical_sha256(
+                    tampered_seal["inventory"]
+                )
+                tampered_seal_payload = {
+                    key: value
+                    for key, value in tampered_seal.items()
+                    if key != "seal_payload_sha256"
+                }
+                tampered_seal["seal_payload_sha256"] = phase_b.canonical_sha256(
+                    tampered_seal_payload
+                )
+                tampered_seal_path.write_bytes(phase_b.pretty_bytes(tampered_seal))
+                protocol_bytes = protocol_path.read_bytes()
+                with self.assertRaisesRegex(
+                    phase_b.PhaseBError,
+                    "run summary is not independently reproducible",
+                ):
+                    phase_b_score.verify_run_tree(
+                        tampered_root,
+                        solver_root,
+                        protocol,
+                        protocol_bytes,
+                        allow_smoke=False,
+                    )
 
 
 def main() -> None:
