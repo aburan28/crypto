@@ -392,6 +392,7 @@ that makes adding new attacks cheap.
 | Module                                       | Attack                                                  |
 |----------------------------------------------|---------------------------------------------------------|
 | `cryptanalysis::pollard_rho`                 | Pollard ρ for DLP / ECDLP, multi-shard, distinguished-points |
+| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
 | `cryptanalysis::preprocessing_rho`           | Bernstein-Lange precomputation rho                       |
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
@@ -669,6 +670,24 @@ CRYPTO 2010) that uses BCT directly.
 
 Random walk on the cyclic group; collision via Floyd's tortoise-and-hare.
 Expected `√(πn/2)` group operations to recover the discrete log.
+
+**Collaborative mode** (`cryptanalysis::pollard_collab`): many machines share
+one instance.  The job id seeds the walk, so walker `i`'s start point is a
+pure function of `i` and the search space divides into index ranges; peers
+check in distinguished points as `(x, y, a, b)` with `a·P + b·Q = (x, y)`,
+which anyone can verify, and merge each other's check-ins as a CRDT with no
+coordinator.  Try it on one machine:
+
+```bash
+crypto cryptanalysis rho-collab init --curve demo-40 --secret 1badc0de --mailbox /tmp/collab
+crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node alice --threads 2 &
+crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
+crypto cryptanalysis rho-collab status --mailbox /tmp/collab
+```
+
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
+[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
+verified artifact, is [aburan28/cairn#143](https://github.com/aburan28/cairn/pull/143).
 
 ### Index calculus (ECDLP, prime fields)
 
