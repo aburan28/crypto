@@ -1,0 +1,31 @@
+{
+  "schema": "koblitz_ggmp_public_factor_discovery_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Replace the degenerate n=31 GGMP cell using only public field and curve algebra.",
+  "search_space": {
+    "n": 31,
+    "ell": 5,
+    "m": 3,
+    "curve_a": [0, 1],
+    "factor_index": [0, 1, 2, 3, 4, 5],
+    "derivation": "ord_31(2)=5, so T^31-1 has six nontrivial irreducible degree-5 factors"
+  },
+  "forbidden_inputs": [
+    "target scalar",
+    "factor-base point logarithms",
+    "target-subgroup enumeration",
+    "relation yield or solver timing from the final target"
+  ],
+  "primary_metric": "number of distinct rational curve points above the 32-element linearised-polynomial kernel",
+  "selection_rule": "maximize the primary metric; break ties by lower curve_a and then lower factor_index",
+  "admission": "at least three distinct curve points; otherwise classify the candidate as degenerate before target construction",
+  "discovery_run": {
+    "seed_base": 20260931,
+    "native_conflict_budget": 1,
+    "process_watchdog_seconds": 30,
+    "accounting": "fresh process-meter receipt for every candidate, including rejected candidates"
+  },
+  "successor": "Run the selected nondegenerate predicate through native XOR, WDSat, CryptoMiniSat and direct MITM; require source validation plus rational lifting and signed point-sum verification for every SAT model.",
+  "claim_boundary": "A successful replacement repairs one benchmark cell. It does not establish GGMP scaling, a crossover, novelty, or SOTA."
+}
