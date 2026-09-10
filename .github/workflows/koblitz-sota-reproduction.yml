@@ -59,6 +59,7 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-final-verification.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_final_archive.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_final_archive.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-magma-calculator-panel-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/render_stage19_amendment03_magma_calculator_panel.py"
@@ -114,7 +115,7 @@ jobs:
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_magma_calculator_panel.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_magma_execution_manifest.py --self-test
-          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_magma_calculator_panel.py -v
+          python3 "$GITHUB_WORKSPACE/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py" legacy
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_magma_calculator_panel.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/prepared-summary.json > /tmp/stage-19-prepared-summary.json
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment01.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/probe_stage19_magma_tls.py --self-test
@@ -134,7 +135,7 @@ jobs:
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_amendment03_magma_calculator_panel.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03_magma_calculator_panel.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/prepare_stage19_amendment03_magma_execution_manifest.py --self-test
-          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_amendment03_magma_calculator_panel.py -v
+          python3 "$GITHUB_WORKSPACE/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage19_offline_fixture_tests.py" amendment03
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03_magma_calculator_panel.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/prepared-summary.json > /tmp/stage-19-amendment-03-prepared-summary.json
       - name: Verify completed Magma archive with recorded host context
         run: |
