@@ -486,18 +486,43 @@ prime-order subgroup larger than their cofactor — `K_1/2^29`
 `K_0/2^39` — and the constructor rejects the rest, as it did before.
 
 On `K_0/2^31` (h = 1492) the single-factor family cannot be used at all
-in `ic` (`ord_31(2) = 5` gives 65-point bases whose two-summand coverage
-is 0 on every one of them), so this is the first instance the search is
-*necessary* for rather than merely better.  `ic search --degree 31
---curve-a 0 --summands 3 --family divisor --max-dimension 11` scores
-the 42 divisor bases of dimension 5, 6, 10 and 11 on 256 sampled
-targets; the dimension-11 bases (≈ 2 200 points, 36 columns) reach
-three-summand coverage 0.59, i.e. an expected 67 trials for a
-determining system, and the pair table answers each trial in `|F|`
-lookups.  The validated end-to-end run on that base is recorded below
-once it completes.
+in `ic` (`ord_31(2) = 5` gives 63–65-point bases whose three-summand
+coverage is 0 on every one of them), so this is the first instance the
+search is *necessary* for rather than merely better.  `ic search
+--degree 31 --curve-a 0 --summands 3 --family divisor --max-dimension 11
+--targets 256 --validate-top 2 --holdout 2` scores the 42 divisor bases
+of dimension 5, 6, 10 and 11 and their pruned variants — 72 candidates
+on 256 sampled targets in 13 minutes, three quarters of it the
+`|F|²` pair tables — then validates the top two by child runs:
 
-N31_RESULT_PENDING
+| rank | base | points | columns | coverage | expected trials | validated |
+|-----:|:-----|-------:|--------:|---------:|----------------:|:----------|
+| 1 | divisor `[0, 1, 6]`, pruned to 35 orbits | 2 170 | 35 | 0.605 | 62.8 | 2/2 |
+| 2 | divisor `[0, 1, 6]` | 2 421 | 39 | 0.648 | 64.8 | 2/2 |
+
+The pruning step removed four orbits and 251 points at a cost of 4
+points of coverage, which the column count more than repays.  The
+selected recipe then solves fresh targets end to end:
+
+| target | trials | relations (independent) | pair table | relations | linear algebra | wall |
+|:-------|-------:|------------------------:|-----------:|----------:|---------------:|-----:|
+| `[654009]G` | 56 | 33 (33) | 8.65 s | 0.69 s | 0.6 ms | 10.4 s |
+| `[1153191]G` | 68 | 36 (34) | 9.07 s | 0.84 s | 0.7 ms | 10.9 s |
+
+Relation collection is under a second for 2 170 points and 35 columns;
+the run is the pair table.  The first validation runs took 68 s each,
+and profiling that gap found the cofactor-admissibility walk paying
+`|layer| · |classes| ≈ 2.2 · 10^6` point additions at `h = 1492`; the
+walk now generates each sumset layer from one representative per signed
+Frobenius orbit and closes it by squaring (the layers are `π`- and
+negation-invariant because the classes are), which is what took the run
+to 10 s.  The naive walk is kept as a test reference
+(`orbit_generated_admissibility_walk_matches_the_naive_one`).  This is
+a 31-bit prime-order subgroup solved by index calculus over a
+materialised base; it is still a toy, and Pollard rho would take
+milliseconds on it — the point is that the pipeline now reaches the
+sizes the scaling note's step 0 asked for, with the factor base chosen
+by measurement rather than by hand.
 
 ## Open problems from the talk (unimplemented)
 
