@@ -3,10 +3,14 @@
 //! same invariant subspace, with every verdict gated by enumeration.
 //!
 //! ```bash
-//! cargo run --release --example symmetrised_oracle_bench                 # ladder up to n = 15, plus n = 21 at m = 2
-//! cargo run --release --example symmetrised_oracle_bench -- --full       # also n = 21 at m = 3 (minutes)
-//! cargo run --release --example symmetrised_oracle_bench -- --targets 12 --no-sat
+//! cargo run --release --example symmetrised_oracle_bench                 # ladder n = 9, 15, 17 (m = 2, 3) and n = 23 (m = 2)
+//! cargo run --release --example symmetrised_oracle_bench -- --full       # also n = 23 at m = 3 (long)
+//! cargo run --release --example symmetrised_oracle_bench -- --only 1 15 3 --direct-all --no-sat --targets 4
 //! ```
+//!
+//! `n` must be prime: for composite `n` the group order is divisible by
+//! the orders of the subfield curves and no prime-order subgroup exceeds
+//! its cofactor, so `KoblitzCurve::new` refuses it (`n = 21` is out).
 //!
 //! Columns: Boolean unknowns / equations / degree of the arm's system;
 //! found / refuted / inconclusive targets (mixes differ between the two
@@ -41,6 +45,15 @@ fn main() {
     if flag("--whole-group") {
         opts.targets_in_subgroup = false;
     }
+    let direct_all = flag("--direct-all");
+    // --only a n m: run a single instance.
+    let only: Option<(u8, u32, usize)> = args.iter().position(|a| a == "--only").and_then(|i| {
+        Some((
+            args.get(i + 1)?.parse().ok()?,
+            args.get(i + 2)?.parse().ok()?,
+            args.get(i + 3)?.parse().ok()?,
+        ))
+    });
 
     println!("=== Paired oracle benchmark: x-system vs symmetrised system ===");
     println!(
@@ -58,12 +71,19 @@ fn main() {
         (1, 15, 2),
         (0, 15, 3),
         (1, 15, 3),
-        (0, 21, 2),
-        (1, 21, 2),
+        (0, 17, 2),
+        (1, 17, 2),
+        (0, 17, 3),
+        (1, 17, 3),
+        (0, 23, 2),
+        (1, 23, 2),
     ];
     if full {
-        ladder.push((0, 21, 3));
-        ladder.push((1, 21, 3));
+        ladder.push((0, 23, 3));
+        ladder.push((1, 23, 3));
+    }
+    if let Some(one) = only {
+        ladder = vec![one];
     }
     for (a, n, m) in ladder {
         let t0 = Instant::now();
@@ -71,7 +91,7 @@ fn main() {
         // matrices exceed the engine's limits and it only splits.  Keep it
         // where it can finish.
         let mut o = opts.clone();
-        if n > 9 {
+        if n > 9 && !direct_all {
             o.direct_x = false;
         }
         match paired_bench(a, n, m, &o) {
