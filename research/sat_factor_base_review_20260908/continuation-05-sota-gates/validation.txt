@@ -83,3 +83,9 @@ Result: every degree-23 public algebraic candidate field and both selections mat
 
 PASS: indexed projected-orbit performance receipts.
 Result: per-candidate projection time improved by 12.69x to 23.28x, while combined fresh-process degree-23 discovery core time improved by 1.96x.
+
+PASS: orbit_derived_cofactor_classes_match_pointwise_projection.
+Result: distinct cofactor-class sets match full pointwise projection exactly at degrees 15 and 23.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage14.py
+Result: all degree-23 candidate algebra and admission verdicts match Stage 12; combined discovery core time improved by 7.91x incrementally and 15.50x from Stage 10.
