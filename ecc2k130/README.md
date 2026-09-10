@@ -5,6 +5,12 @@ The optional [packed normal-basis CUDA backend](PACKED.md) has measured above
 with the benchmark/validation entry points; its reports retain the existing
 format, while checkpoints have a separate backend version.
 
+For the validated RTX PRO 6000 configuration, use `make bench-rtx-pro6000`
+or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
+CUDA 13.0 and the measured arithmetic settings. The standalone audit measured
+6.317 B scalar walk iterations/s. See
+[RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
+
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
 That guide supersedes the earlier bandwidth estimates and tuning prescriptions
