@@ -1,0 +1,30 @@
+{
+  "attempts": [
+    {
+      "asserts_nothing_about": "Magma variety or basis-export correctness, runtime, memory, or terminal status",
+      "classification": "transport_timeout_operational",
+      "client_watchdog_seconds": 75,
+      "curl_exit_code": 28,
+      "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+      "input_bytes": 34399,
+      "input_path": "seed-2026091301-variety-input.magma",
+      "input_sha256": "3c7244487860b41fc2c5272e61853cdf8a39c63c8c6cbefc18da0154586cdd07",
+      "kind": "variety",
+      "response_file_created": false
+    },
+    {
+      "asserts_nothing_about": "Magma variety or basis-export correctness, runtime, memory, or terminal status",
+      "classification": "transport_timeout_operational",
+      "client_watchdog_seconds": 75,
+      "curl_exit_code": 28,
+      "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+      "input_bytes": 33896,
+      "input_path": "seed-2026091301-basis-export-input.magma",
+      "input_sha256": "2a11c8363e62f5a5eb685781ff1c7f7a2f732c935fda45f1f892144c5264aa18",
+      "kind": "basis_export",
+      "response_file_created": false
+    }
+  ],
+  "recorded_at": "2026-09-09",
+  "schema": "koblitz_magma_calculator_timeout_attempts.v1"
+}

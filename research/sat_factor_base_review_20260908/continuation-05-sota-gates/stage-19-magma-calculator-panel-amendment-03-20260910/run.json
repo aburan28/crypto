@@ -1,0 +1,178 @@
+{
+  "execution_binding": {
+    "binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "checkout_clean_outside_runtime_artifacts": true,
+    "execution_commit": "a1001c18524e1e84d83f3e55498b9a26242c1a13",
+    "execution_manifest": {
+      "bytes": 43425,
+      "git_blob_oid": "4b83fc71e1002b24f2a7a15b73a41c17891cdf20",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/execution-manifest.json",
+      "sha256": "dce607c27ede667bb8c8a54020d014aafc805448a6567a83fa35922f97b0878e"
+    },
+    "execution_tree": "9c88f77ac51eb0ca2d2945abb9ea3075b72e0ba7",
+    "first_preexecution_commit": "5a09482aea0ce57239b9a06a7cf93c03121730a7",
+    "first_preexecution_tree": "50a169bdd1c5a7a64441acc1a1ca7f00a5ce473c",
+    "fresh_preexecution_tls_get_probe": {
+      "claim_boundary": "A GET-only TLS reachability probe using the selected CA bundle. It submitted no calculator input, requested no Magma computation, and is not solver, scientific, performance, or POST-delivery evidence.",
+      "classification": "tls_endpoint_reachability_only",
+      "finished_at": "2026-09-10T15:24:52.276035Z",
+      "fresh_immediately_before_manifest_generation": true,
+      "receipt_sha256": "fb9d88d7baa11a04c2e8a551d8d7a2f5eb897e6a04e1893c9c6612d81235a6f2",
+      "request": {
+        "ca_bundle": {
+          "bytes": 333483,
+          "path": "/etc/ssl/cert.pem",
+          "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+        },
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "method": "GET",
+        "no_calculator_input": true,
+        "no_computation_requested": true,
+        "redirects_allowed": false,
+        "response_byte_limit": 1048576,
+        "socket_timeout_seconds": 70.0,
+        "tls_context": "ssl.create_default_context(cafile='/etc/ssl/cert.pem')"
+      },
+      "response": {
+        "body_bytes": 36,
+        "body_complete": true,
+        "body_path": "response.xml",
+        "body_sha256": "c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161",
+        "date_header_retained": false,
+        "final_url": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "http_status": 200,
+        "selected_headers_without_date": {
+          "content-type": "text/xml;charset=UTF-8",
+          "server": "Apache"
+        }
+      },
+      "schema": "koblitz_magma_calculator_fresh_tls_get_probe.v1",
+      "started_at": "2026-09-10T15:24:51.346835Z",
+      "wall_seconds": 0.9290400000754744
+    },
+    "relevant_blob_count": 102,
+    "relevant_path_list_sha256": "b125ff5cf280fe5a1365df67dc7aadb94857b346d040342de641f328092d42be",
+    "schema": "koblitz_magma_calculator_stage19_amendment03_execution_binding.v1",
+    "tree_delta": [
+      {
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/execution-manifest.json",
+        "status": "A"
+      }
+    ]
+  },
+  "execution_policy": {
+    "attempts_per_task": 1,
+    "explicit_execute_flag_required": true,
+    "halt_after_nonclean_receipt": true,
+    "halted_state_is_terminal": true,
+    "inter_request_delay_seconds": 2,
+    "parallel_workers": 1,
+    "predecessor_ledgers_are_terminal_and_never_resumed": true,
+    "predecessor_started_tasks_excluded": true,
+    "resume_skips_every_started_task": true,
+    "retries_per_task": 0,
+    "task_order": "remaining seed-major frozen order"
+  },
+  "finished_at": "2026-09-10T15:32:07.189645Z",
+  "plan_sha256": "d351a78d5b7a242632bef6c9a954d5f8a8ab028d79a942eaca3189178d13c9f5",
+  "protocol_sha256": "1cfa9e7da0bc982bfe6b8f4eae710fb9ce888ef7e7a5bb23435deb41244ee9c3",
+  "receipts": {
+    "seed-2026091302/n31-l5-m3-ggmp-a0-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/02-seed-2026091302-n31-l5-m3-ggmp-a0-f0/receipt.json",
+      "sha256": "5deaced597a8af59db74b288ab61083f975849ac93a17abe57458e4f8a725be0"
+    },
+    "seed-2026091302/n31-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/01-seed-2026091302-n31-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "95f64a3f10955528a8b774a463f5840d0f6fe7f523d139a1bc64b09a3dab5411"
+    },
+    "seed-2026091302/n41-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/03-seed-2026091302-n41-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "82fb1e7854c7f12831962e0dc24c2ffe6b4f2fea2efd1e737fa502b5d24d0577"
+    },
+    "seed-2026091303/n41-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/04-seed-2026091303-n41-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "74272ad89b37c1f2eeb8d9c574d024a935b4135288b91fc5945494bdffa4a6fe"
+    },
+    "seed-2026091304/n31-l5-m3-ggmp-a0-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/06-seed-2026091304-n31-l5-m3-ggmp-a0-f0/receipt.json",
+      "sha256": "c5caf8eb457717c5c40a920ca07b6194e572b6249161f193c183bade93a0a6fb"
+    },
+    "seed-2026091304/n31-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/05-seed-2026091304-n31-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "ba3630a993b7563fcc225437130bcc9261248d9996cb4f15f3f5501d504616bb"
+    },
+    "seed-2026091304/n41-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/07-seed-2026091304-n41-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "96713560c28c67f785f6ef00e8e75389a0ceb099e0b7517c3688b11e4d950b73"
+    },
+    "seed-2026091305/n31-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/08-seed-2026091305-n31-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "28fe425eef3dedcbf310cc55dee229a4b445bc2f3ea6e61283493731a65d4c96"
+    },
+    "seed-2026091305/n41-l5-m3-standard-a1-f0": {
+      "clean_terminal": true,
+      "outcome": "clean_f4_terminal",
+      "path": "attempts/09-seed-2026091305-n41-l5-m3-standard-a1-f0/receipt.json",
+      "sha256": "15035a65e6d51988cd6a158b873d4f857ee6d9e0e3afc175e15665c74943b463"
+    }
+  },
+  "schema": "koblitz_magma_calculator_stage19_amendment03_run.v1",
+  "started_at": "2026-09-10T15:30:56.961500Z",
+  "status": "complete",
+  "summary": {
+    "all_tasks_attempted": true,
+    "attempted_tasks": 9,
+    "claim_boundary": "At most nine additional source-equivalent official-calculator F4 terminal receipts for original Stage 19 tasks 2-10. Together with five earlier terminals and one additive wrapped-response adjudication, nine clean receipts would cover fifteen public-service-accessible n31/n41 tasks. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped solver CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+    "clean_f4_terminals": 9,
+    "complete_requires_all_nine_clean": true,
+    "expected_tasks": 9,
+    "halted_state_terminal": false,
+    "licensed_twenty_cell_matrix_executed": false,
+    "magma_point_witnesses_validated": 0,
+    "maximum_public_service_f4_terminal_coverage": 15,
+    "one_attempt_no_retry_status": "verified",
+    "one_attempt_no_retry_verified": true,
+    "operational_or_invalid_receipts": 0,
+    "outcome_counts": {
+      "clean_f4_terminal": 9
+    },
+    "performance_ranking_admitted": false,
+    "process_scoped_solver_resources_complete": false,
+    "public_service_f4_terminal_coverage_after_run": 15,
+    "status": "complete",
+    "unattempted_tasks": 0
+  },
+  "task_order": [
+    "seed-2026091302/n31-l5-m3-standard-a1-f0",
+    "seed-2026091302/n31-l5-m3-ggmp-a0-f0",
+    "seed-2026091302/n41-l5-m3-standard-a1-f0",
+    "seed-2026091303/n41-l5-m3-standard-a1-f0",
+    "seed-2026091304/n31-l5-m3-standard-a1-f0",
+    "seed-2026091304/n31-l5-m3-ggmp-a0-f0",
+    "seed-2026091304/n41-l5-m3-standard-a1-f0",
+    "seed-2026091305/n31-l5-m3-standard-a1-f0",
+    "seed-2026091305/n41-l5-m3-standard-a1-f0"
+  ]
+}

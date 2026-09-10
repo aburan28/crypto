@@ -1,0 +1,79 @@
+{
+  "a": 0,
+  "factor_base": {
+    "ell": 12,
+    "m_cofactor_admissible": true,
+    "points": 4281,
+    "projected_signed_frobenius_orbits": 93,
+    "signed_frobenius_orbits_before_projection": 95
+  },
+  "factor_base_predicate": {
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "enumerates_target_subgroup": false,
+    "factor_base_logs_constructed": false,
+    "factor_bitmask": 5279,
+    "factor_spec": "divisor:0,2",
+    "kind": "ggmp_divisor_kernel",
+    "linearised_exponents": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      10,
+      12
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "A failed or resource-capped run is operationally inconclusive; success is accepted only after the recovered scalar reproduces the public target point",
+  "kind": "koblitz_unknown_scalar_algebraic_factor_base_e2e",
+  "m": 2,
+  "mode": "ic",
+  "n": 23,
+  "options": {
+    "conflict_budget_per_target": 100000,
+    "max_models": 64,
+    "max_trials": 1000,
+    "parallel_threads": 1
+  },
+  "report": {
+    "collapse_projected_orbits": true,
+    "direct_relation": false,
+    "direct_relations_skipped": 0,
+    "linear_solve_attempts": 1,
+    "m_cofactor_admissible": true,
+    "recovered_scalar": "1785876",
+    "relation_batches": 172,
+    "relations": 94,
+    "sat_calls": 172,
+    "sat_conflicts": 10790236,
+    "sat_invalid_models": 0,
+    "sat_models": 94,
+    "sat_refutations": 0,
+    "sat_unknowns": 78,
+    "trials": 172,
+    "verified_unknown_scalar_recovery": true
+  },
+  "scope": "complete toy index-calculus pipeline over a factor base with no constructed point logs",
+  "seed": 11656057938264181787,
+  "subgroup_order": "2095853",
+  "target": {
+    "x": "5239510",
+    "y": "6376352"
+  },
+  "timing_ns": {
+    "cofactor_admission": 25592292,
+    "curve_and_subgroup_construction": 651167,
+    "driver_solve": 165910440000,
+    "end_to_end": 165980783666,
+    "factor_base_predicate_and_materialisation": 69138500,
+    "linear_algebra": 3090625,
+    "projected_orbit_construction": 62322750,
+    "relation_collection": 165818491083,
+    "target_construction": 200791
+  }
+}

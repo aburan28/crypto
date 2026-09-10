@@ -1,0 +1,40 @@
+{
+  "finished_at": "2026-09-10T15:31:20.454741Z",
+  "http": {
+    "final_url": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "selected_headers": {
+      "content-type": "text/xml;charset=UTF-8",
+      "date": "Thu, 10 Sep 2026 15:31:06 GMT",
+      "server": "Apache"
+    },
+    "status": 200,
+    "transport_error": null
+  },
+  "request": {
+    "body_bytes": 41505,
+    "body_sha256": "890295e90a6018fb41ca7a49c1589f5865c43f5917c8c7adde534f6d5acaed8d",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "form_field": "input",
+    "input_bytes": 21043,
+    "input_sha256": "605815fd62374b75d3c8430cdd0206a4ba67658d651dd3b61f4635886bd2fe8a",
+    "method": "POST",
+    "socket_timeout_seconds": 70.0,
+    "user_agent": "aburan28-crypto-koblitz-stage19-amendment03/1"
+  },
+  "response": {
+    "body_limit_exceeded": false,
+    "bytes": 810,
+    "complete": true,
+    "path": "response.xml",
+    "response_byte_limit": 1048576,
+    "sha256": "0e37a287f185fee31d831133f47a66d4e3367904356f24c101d718f6bb86b2e4"
+  },
+  "response_byte_limit": 1048576,
+  "schema": "koblitz_magma_calculator_stage19_amendment03_transport_envelope.v1",
+  "started_at": "2026-09-10T15:31:05.974314Z"
+}

@@ -1,0 +1,9 @@
+R := BooleanPolynomialRing(3, "grevlex");
+X := [R.i : i in [1..3]];
+verbose := X[1]*X[2] + X[3] + 1;
+compact := BooleanPolynomial(R, [6, 8, 0]);
+printf "KOBLITZ_MAGMA_MASK_SCHEMA=koblitz_magma_boolean_mask_sanity.v1\n";
+printf "KOBLITZ_MAGMA_MASK_EQUAL=%o\n", verbose eq compact;
+printf "KOBLITZ_MAGMA_MASK_VERBOSE=%o\n", verbose;
+printf "KOBLITZ_MAGMA_MASK_COMPACT=%o\n", compact;
+quit;

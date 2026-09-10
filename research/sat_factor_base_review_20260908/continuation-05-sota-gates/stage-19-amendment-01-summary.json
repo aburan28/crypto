@@ -1,0 +1,42 @@
+{
+  "amendment_sha256": "2ef66bde4b9a6b5789a117a5151f1dc8a7ac688213db1e1952e86fdc8d036ac4",
+  "claim_boundary": "This amendment authenticates a zero-POST operational failure and a corrected execution plan. It is not a Magma execution, solver result, performance result, point witness, independent review, novelty result, or SOTA evidence.",
+  "committed_source_order": {
+    "authorization_consume_line": 267,
+    "authorization_validation_line": 402,
+    "committed_child_sha256": "73b707d27808c1a5479a853d728f264b411292ba48941d01d65538893c622eda",
+    "execution_commit": "1f3cdfefaffbc5056cf5f898139e714b877f1695",
+    "failure_precedes_authorization_consumption": true,
+    "failure_precedes_perform_request": true,
+    "perform_request_line": 404,
+    "validate_meter_parent_line": 266
+  },
+  "corrected_artifact": {
+    "attempted_new_requests": 0,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910",
+    "plan_sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46",
+    "status": "prepared_not_executed"
+  },
+  "disposition": "verified_zero_post_operational_failure_with_fresh_corrected_execution_path",
+  "original_zero_post_failure": {
+    "attempts": 1,
+    "authorization_present_unconsumed": true,
+    "charged_transport_process": {
+      "orphan_group_terminated": false,
+      "peak_rss_bytes": 30244864,
+      "returncode": 1,
+      "system_seconds": 0.046404,
+      "timed_out": false,
+      "total_core_seconds": 0.124652,
+      "user_seconds": 0.078248,
+      "wall_seconds_exact": 0.14001608302351087,
+      "wall_seconds_reported": 0.140016
+    },
+    "immutable_files_verified": 10,
+    "post_requests_started": 0,
+    "response_or_envelope_files": 0,
+    "terminal_status": "halted_after_nonclean_receipt",
+    "tracked_prepared_files_byte_identical_to_correction": 12
+  },
+  "schema": "koblitz_magma_calculator_stage19_amendment_verification.v1"
+}
