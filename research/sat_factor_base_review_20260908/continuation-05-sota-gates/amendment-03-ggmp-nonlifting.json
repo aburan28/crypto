@@ -1,0 +1,20 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "amends": "protocol.json",
+  "trigger": "fresh independent internal review of producer snapshot af089ea9b0fa09872366088668f30101c1feeda6",
+  "finding": {
+    "severity": "high",
+    "cell": {"n": 31, "ell": 5, "m": 3, "basis": "ggmp"},
+    "description": "Both external SAT models satisfy the exported source ANF but decode to x=[0,65536,65536]. The coordinate 65536 does not lift to E(F_(2^31)). Independent enumeration of the 32-element x-domain finds only T=(0,1), so the planted target is the degenerate identity T+T+T=T.",
+    "impact": "The row is an algebraic-model/exporter check, not a meaningful GGMP point-decomposition benchmark. Source-ANF model validation is insufficient for PDP acceptance."
+  },
+  "correction": [
+    "Downgrade the GGMP row and the planted-PDP scaling gate in the composed summaries.",
+    "Require at least three distinct curve points above a generated factor-base x-domain before constructing a planted target.",
+    "Keep the original v2/v3 artifacts immutable.",
+    "Require curve lifting, sign selection and point-sum verification for every future external SAT model."
+  ],
+  "scientific_inference": "No meaningful GGMP PDP solve is established by the affected row. Other source-ANF and direct-MITM measurements retain their explicitly stated scopes.",
+  "external_reproduction": false
+}

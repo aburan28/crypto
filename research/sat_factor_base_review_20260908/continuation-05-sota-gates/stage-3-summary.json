@@ -21,7 +21,11 @@
       },
       "automorphism_rho": {
         "quotient_iterations": 2,
-        "group_additions": 6,
+        "walk_step_additions": 6,
+        "jump_table_additions": 16,
+        "initial_state_additions": 1,
+        "reported_group_additions": 23,
+        "rho_setup_scalar_multiplications": 34,
         "restarts": 0,
         "wall_seconds": 0.4211978339590132,
         "total_core_seconds": 0.003837,
@@ -43,7 +47,11 @@
       },
       "automorphism_rho": {
         "quotient_iterations": 4,
-        "group_additions": 12,
+        "walk_step_additions": 12,
+        "jump_table_additions": 16,
+        "initial_state_additions": 1,
+        "reported_group_additions": 29,
+        "rho_setup_scalar_multiplications": 34,
         "restarts": 0,
         "wall_seconds": 0.0041174580110237,
         "total_core_seconds": 0.0027549999999999996,
@@ -55,7 +63,7 @@
   "checks": {
     "same_targets_as_index_calculus": true,
     "both_scalars_recovered_and_verified": true,
-    "coefficient_scaling_tracks_canonicalization": "checked dynamically by final target verification; requires independent code review"
+    "coefficient_scaling_tracks_canonicalization": "independently replayed with invariant assertions and separate Sage point checks on both frozen runs"
   },
   "observation": "automorphism rho used fewer total core-seconds than index calculus in both degree-9 pairs",
   "claim_boundary": "two toy controls; no stable ratio, scaling law, cryptographic-size result, or SOTA claim"

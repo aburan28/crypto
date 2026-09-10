@@ -201,7 +201,11 @@ fn main() {
                 "scope":"signed-Frobenius quotient r-adding Pollard rho control",
                 "n":n,"a":a,"subgroup_order":curve.subgroup_order.to_string(),
                 "target":point_json(&target),"seed":seed,
-                "iterations":iterations,"group_additions":additions,"restarts":restarts,
+                "iterations":iterations,"walk_step_additions":additions,"restarts":restarts,
+                "jump_table_additions":16,"initial_state_additions":restarts+1,
+                "reported_group_additions":additions+16+u64::from(restarts)+1,
+                "rho_setup_scalar_multiplications":32+2*u64::from(restarts+1),
+                "target_construction_scalar_multiplications":1,
                 "verified_unknown_scalar_recovery":verified,
                 "automorphism_optimized":true,"automorphism_group_bound":2*n,
                 "timing_ns":{"curve_construction":curve_ns,"target_construction":target_ns,"rho":rho_ns,"end_to_end":total.elapsed().as_nanos()}
@@ -317,7 +321,8 @@ fn main() {
             "sat_models":report.sat_models,"sat_refutations":report.sat_refutations,
             "sat_unknowns":report.sat_unknowns,"sat_invalid_models":report.sat_invalid_models,
             "sat_conflicts":report.sat_conflicts,"direct_relation":report.direct_relation,
-            "verified_unknown_scalar_recovery":verified
+            "verified_unknown_scalar_recovery":verified,
+            "recovered_scalar":report.log.as_ref().map(ToString::to_string)
         },
         "timing_ns":{
             "curve_and_subgroup_construction":curve_ns,"target_construction":target_ns,

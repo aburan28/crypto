@@ -264,6 +264,21 @@ fn planted_target(
     }
 }
 
+fn materialise_factor_points(curve: &BinaryCurve, basis: &[F2mElement]) -> Vec<BinaryPoint> {
+    assert!(basis.len() < usize::BITS as usize);
+    let mut points = Vec::new();
+    for mask in 0..(1usize << basis.len()) {
+        let mut x = F2mElement::zero(curve.m);
+        for (i, element) in basis.iter().enumerate() {
+            if (mask >> i) & 1 == 1 {
+                x = x.add(element);
+            }
+        }
+        points.extend(points_with_x(curve, &x));
+    }
+    points
+}
+
 fn direct_mitm(curve: &BinaryCurve, basis: &[F2mElement], target: &BinaryPoint) -> Value {
     if basis.len() > 10 {
         return json!({"status":"not_run","reason":"factor-base materialisation cap","ell_cap":10});
@@ -407,6 +422,14 @@ fn main() {
         order: BigUint::zero(),
         cofactor: BigUint::one(),
     };
+    let factor_points = materialise_factor_points(&curve, &basis);
+    let distinct_factor_points: std::collections::HashSet<_> =
+        factor_points.iter().map(point_key).collect();
+    assert!(
+        distinct_factor_points.len() >= 3,
+        "degenerate factor base: only {} curve point(s) above the algebraic x-domain",
+        distinct_factor_points.len()
+    );
     let target_start = Instant::now();
     let (target, planted) = planted_target(&curve, &basis, seed);
     let target_ns = target_start.elapsed().as_nanos();
@@ -564,6 +587,7 @@ fn main() {
         "irreducible_low_terms":irreducible.low_terms,
         "factor_base_predicate":predicate,
         "factor_base_basis_bitmasks":basis_bits,
+        "factor_base_geometry":{"curve_points":factor_points.len(),"distinct_curve_points":distinct_factor_points.len(),"minimum_required":3},
         "target":target_json,
         "planted_points":planted_points,
         "representation":representation,

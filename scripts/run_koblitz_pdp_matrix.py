@@ -146,8 +146,12 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
             max_var = manifest["exports"]["cryptominisat_xor_dimacs"]["variables"]
             model = parse_cms_model(run["stdout"], max_var)
             model_valid = None if model is None else validate_xor_dimacs(instance / "instance.xor.cnf", model)
+            if model_valid is not True:
+                status = "sat_invalid_model"
+            elif run["returncode"] != 10:
+                status = "sat_invalid_terminal_status"
         elif "s UNSATISFIABLE" in run["stdout"]:
-            status = "unsat"
+            status = "unsat" if run["returncode"] == 20 else "unsat_invalid_terminal_status"
             model_valid = None
         elif run["returncode"] == 0:
             status = "unknown_inconclusive"
