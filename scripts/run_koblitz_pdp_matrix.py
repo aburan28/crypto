@@ -252,7 +252,10 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
     config_start = time.perf_counter()
     (build_root / "src" / "config.h").write_text(config)
     config_wall = time.perf_counter() - config_start
+    clean = run_timed(["make", "-C", "src", "clean"], timeout, build_root)
     run = run_timed(["make", "-C", "src"], timeout, build_root)
+    (build_root / "clean.stdout").write_text(clean["stdout"])
+    (build_root / "clean.stderr").write_text(clean["stderr"])
     (build_root / "build.stdout").write_text(run["stdout"])
     (build_root / "build.stderr").write_text(run["stderr"])
     binary = build_root / "wdsat_solver"
@@ -266,6 +269,12 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
             "metrics": copy_receipt["metrics"],
         },
         "configuration_wall_seconds": config_wall,
+        "clean": {
+            "returncode": clean["returncode"],
+            "timed_out": clean["timed_out"],
+            "metrics": clean["metrics"],
+            "command": clean["command"],
+        },
         "metrics": run["metrics"],
         "command": run["command"],
         "config": config,
@@ -345,7 +354,9 @@ def main() -> None:
             str(instance),
         ]
         generated = run_timed(command, args.timeout, args.exporter.parent)
-        (args.output / f"n{n}-l{ell}-m3-{basis}.export.stdout").write_text(generated["stdout"])
+        (args.output / f"n{n}-l{ell}-m3-{basis}.export.stdout").write_text(
+            generated["stdout"].rstrip() + "\n"
+        )
         (args.output / f"n{n}-l{ell}-m3-{basis}.export.stderr").write_text(generated["stderr"])
         entry = {
             "cell": {"n": n, "ell": ell, "m": 3, "basis": basis},
@@ -387,6 +398,14 @@ def main() -> None:
             (instance / "wdsat.stdout").write_text(run["stdout"])
             (instance / "wdsat.stderr").write_text(run["stderr"])
             entry["solvers"].append(solver_status(run, "wdsat", instance, manifest))
+            if args.wdsat_source:
+                build_root = instance / "wdsat-build"
+                for name in ["clean.stdout", "clean.stderr", "build.stdout", "build.stderr"]:
+                    source = build_root / name
+                    if source.exists():
+                        (instance / f"wdsat-{name}").write_bytes(source.read_bytes())
+                (instance / "wdsat-config.h").write_text(entry["wdsat_build"]["config"])
+                shutil.rmtree(build_root)
         else:
             entry["solvers"].append({"solver": "wdsat", "status": "unavailable_operational"})
 
