@@ -1,0 +1,22 @@
+Focused validation for the tenfold parallel continuation
+
+- cargo test --release cryptanalysis::koblitz_index_calculus --locked -- --test-threads=1
+  34 passed; 0 failed; 1 deliberate n=19 test ignored.
+- cargo test --release cryptanalysis::koblitz_index_calculus::tests::parallel_sat_relation_batches_recover_the_same_log --locked -- --test-threads=1
+  Passed: a four-target deterministic batch recovered and verified the same small-curve log.
+- cargo test --release cryptanalysis::koblitz_index_calculus::tests::selected_explicit_orbit_base_sat_round_trip_n19 --locked -- --ignored --test-threads=1
+  Passed.
+- cargo check --release --example koblitz_selected_e2e --locked
+  Passed.
+- Four optimized batch-10 processes with RAYON_NUM_THREADS=10 and a 10000-conflict cutoff
+  All returned exit status 0, recovered their planted unknown scalar, reproduced the public target, rejected direct-relation shortcuts, and recorded zero invalid SAT models.
+- python3 research/sat_factor_base_review_20260908/continuation-04/verify_parallel_10x.py
+  Passed matched-input, completion, batch, thread, relation-count, scalar-verification, internal/external-time, full-aggregate, holdout-aggregate, batch-selection, and excluded-failure checks.
+
+Admitted full aggregate: parallel optimized 88.334542 seconds versus serial Frobenius control 918.042893 seconds, a 10.392796x end-to-end wall-time speedup.
+
+Held-out aggregate excluding batch-selection seed 3: parallel optimized 71.794793 seconds versus serial control 723.070844 seconds, a 10.071355x speedup.
+
+The seed-4 5000-conflict batch-10 arm reached the 64-trial bound with four relations and no scalar recovery. It is retained as an operational failure and excluded from every speed aggregate.
+
+The repository emits existing compiler warnings. All admitted build, test, and benchmark commands returned exit status 0. Every launched speculative SAT target is included in the recorded trials, conflicts, CPU use, and end-to-end wall interval.

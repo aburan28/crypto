@@ -5,12 +5,12 @@
   "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
   "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
   "source_sha256": {
-    "examples/koblitz_selected_e2e.rs": "31f83059a47958614e288ada9b3073b268b4fa300ffd499420d44dd909f27d22",
-    "src/cryptanalysis/koblitz_index_calculus.rs": "558064336ccb68e9b520c0db0a3d51f83061506750ed793bbcaa763e9de28fee"
+    "research/sat_factor_base_review_20260908/continuation-03/source_snapshots/selected-e2e-serial.rs": "31f83059a47958614e288ada9b3073b268b4fa300ffd499420d44dd909f27d22",
+    "research/sat_factor_base_review_20260908/continuation-03/source_snapshots/koblitz-index-e2e-serial.rs": "558064336ccb68e9b520c0db0a3d51f83061506750ed793bbcaa763e9de28fee"
   },
   "input_sha256": {
     "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
-    "research/sat_factor_base_review_20260908/continuation-02/final_manifest.json": "99855f742bdfe5cf8da7f5043b96a3e074dfb40a323024ef5445922fe1d8f6ce",
+    "research/sat_factor_base_review_20260908/continuation-02/final_manifest.json": "015542da3905c19e9d478540150b123f1a56f648fbb1eb193665ad1f77ab3386",
     "research/sat_factor_base_review_20260908/continuation-02/full-orbit-selected-predicate-certificate.json": "2ed149dee1485638cdcd3e14dc08c46e0af324206c9903d6dc072d36950a645d"
   },
   "artifact_sha256": {
@@ -43,6 +43,8 @@
     "optimized-seed-4-cap-10000.jsonl": "a8b25ca3f8a87a49f4ca92f6e75329ca16fb78afac40d6d2a3c312b11913e367",
     "protocol.json": "6fc8097633064ac4b4fda5fd474624771c2c0f2e0509d7608381445dfa1328c4",
     "signed-seed-1-time.txt": "6223baf06d4936f4c478a83c23eb5f52487b75e183ef1f1403a54e24dcca8e3d",
+    "source_snapshots/koblitz-index-e2e-serial.rs": "558064336ccb68e9b520c0db0a3d51f83061506750ed793bbcaa763e9de28fee",
+    "source_snapshots/selected-e2e-serial.rs": "31f83059a47958614e288ada9b3073b268b4fa300ffd499420d44dd909f27d22",
     "signed-seed-1.jsonl": "c5d60d23d717e3516f0ca0d16088a56b659025fe39adb2e2ceaa88409b46944f",
     "validation.txt": "1f691d1287bbdcb8a474a33d3021b9fc39f0cb3fea9412d8c0a7f3be3384eff4",
     "verification.txt": "b87461a4e74596b6e797ab4077da9a6ab5d0f61c88bcfa411ae7d1032d33faa5",
