@@ -95,38 +95,41 @@ fn automorphism_rho(
 ) -> (BigUint, u64, u64, u32) {
     let modulus = &curve.subgroup_order;
     let mut rng = StdRng::seed_from_u64(seed);
-    let jumps: Vec<(BinaryPoint, BigUint, BigUint)> = (0..16)
-        .map(|_| {
-            let a = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
-            let b = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
-            let point = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b));
-            (point, a, b)
-        })
-        .collect();
-    let bucket = |point: &BinaryPoint| -> usize {
-        match point {
-            BinaryPoint::Infinity => 0,
-            BinaryPoint::Affine { x, y } => {
-                let x0 = x.to_biguint().iter_u64_digits().next().unwrap_or(0);
-                let y0 = y.to_biguint().iter_u64_digits().next().unwrap_or(0);
-                (x0 ^ y0.rotate_left(17)) as usize % jumps.len()
-            }
-        }
-    };
-    let step = |state: QuotientState| {
-        let jump = &jumps[bucket(&state.point)];
-        canonicalize(
-            curve,
-            QuotientState {
-                point: curve.add(&state.point, &jump.0),
-                a: (&state.a + &jump.1) % modulus,
-                b: (&state.b + &jump.2) % modulus,
-            },
-        )
-    };
     let mut additions = 0u64;
     let mut iterations = 0u64;
     for restart in 0..64u32 {
+        // A fruitless cycle is a property of the functional graph, so merely
+        // changing the start point can return to the same bad cycle. Derive a
+        // fresh deterministic jump table for every charged restart.
+        let jumps: Vec<(BinaryPoint, BigUint, BigUint)> = (0..16)
+            .map(|_| {
+                let a = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
+                let b = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
+                let point = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b));
+                (point, a, b)
+            })
+            .collect();
+        let bucket = |point: &BinaryPoint| -> usize {
+            match point {
+                BinaryPoint::Infinity => 0,
+                BinaryPoint::Affine { x, y } => {
+                    let x0 = x.to_biguint().iter_u64_digits().next().unwrap_or(0);
+                    let y0 = y.to_biguint().iter_u64_digits().next().unwrap_or(0);
+                    (x0 ^ y0.rotate_left(17)) as usize % jumps.len()
+                }
+            }
+        };
+        let step = |state: QuotientState| {
+            let jump = &jumps[bucket(&state.point)];
+            canonicalize(
+                curve,
+                QuotientState {
+                    point: curve.add(&state.point, &jump.0),
+                    a: (&state.a + &jump.1) % modulus,
+                    b: (&state.b + &jump.2) % modulus,
+                },
+            )
+        };
         let a = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
         let b = BigUint::from(rng.gen_range(1..modulus.to_u64_digits()[0]));
         let initial = canonicalize(
@@ -193,6 +196,7 @@ fn main() {
         let rho_ns = rho_start.elapsed().as_nanos();
         let verified =
             solution == BigUint::from(secret) && curve.mul(curve.generator(), &solution) == target;
+        let attempts = u64::from(restarts) + 1;
         println!(
             "{}",
             serde_json::to_string_pretty(&json!({
@@ -202,9 +206,9 @@ fn main() {
                 "n":n,"a":a,"subgroup_order":curve.subgroup_order.to_string(),
                 "target":point_json(&target),"seed":seed,
                 "iterations":iterations,"walk_step_additions":additions,"restarts":restarts,
-                "jump_table_additions":16,"initial_state_additions":restarts+1,
-                "reported_group_additions":additions+16+u64::from(restarts)+1,
-                "rho_setup_scalar_multiplications":32+2*u64::from(restarts+1),
+                "jump_table_additions":16*attempts,"initial_state_additions":attempts,
+                "reported_group_additions":additions+17*attempts,
+                "rho_setup_scalar_multiplications":34*attempts,
                 "target_construction_scalar_multiplications":1,
                 "verified_unknown_scalar_recovery":verified,
                 "automorphism_optimized":true,"automorphism_group_bound":2*n,
