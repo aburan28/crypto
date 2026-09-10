@@ -1,166 +1,230 @@
-//! Live progress for the fixed public Koblitz index-calculus example.
-use clap::{Parser, ValueEnum};
-use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_index_calculus_dlp_with_progress, DecompositionStrategy, KoblitzCurve, KoblitzIcEvent,
-    KoblitzIcOptions,
-};
-use num_bigint::BigUint;
+//! Research CLI: read-only curve inspection and bounded known-answer experiments.
+#[path = "ic/experiment.rs"]
+mod experiment;
+#[path = "ic/params.rs"]
+mod params;
+
+use clap::{Args, Parser, Subcommand};
+use serde_json::{json, Value};
 use std::{
-    io::{self, Write},
+    fs::{File, OpenOptions},
+    io::{Read, Write},
+    path::PathBuf,
     process::ExitCode,
-    time::Instant,
 };
 
 #[derive(Parser)]
 #[command(
     name = "ic",
     version,
-    about = "Index calculus with live stage progress"
+    about = "Curve inspection and synthetic index-calculus research"
 )]
 #[command(
-    long_about = "Run the full index-calculus pipeline on the fixed public K_0 / GF(2^9) example with known logarithm 53. Displays factor-base construction, relation collection, linear algebra, and verification. This demo does not accept Certicom challenges or external targets."
+    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, or compare factor-base candidates. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. Imported parameters and points are never sent to a DLP solver."
 )]
 struct Cli {
-    /// Decomposition engine for the same fixed example.
-    #[arg(long, value_enum, default_value_t = Solver::Groebner)]
-    solver: Solver,
+    #[command(subcommand)]
+    command: Option<Action>,
+    /// Shorthand for inspecting a named curve; use ic list for names.
+    #[arg(value_name = "CURVE")]
+    profile: Option<String>,
+    #[command(flatten)]
+    run: experiment::RunArgs,
+    /// Print a machine-readable JSON report, without progress text.
+    #[arg(long, global = true)]
+    json: bool,
+    /// Write the JSON report to a new file; existing files are never overwritten.
+    #[arg(long, global = true)]
+    out: Option<PathBuf>,
 }
-#[derive(Clone, Copy, Debug, ValueEnum)]
-enum Solver {
-    Groebner,
-    Sat,
-    Enumerate,
+#[derive(Subcommand)]
+enum Action {
+    /// List built-in inspection profiles.
+    List,
+    /// Validate mathematical parameters; never solve an imported target.
+    Inspect(InspectArgs),
+    /// Run the pipeline on an internally generated known-answer instance.
+    Run(experiment::RunArgs),
+    /// Generate a reproducible parameter JSON with a random known-answer point.
+    Generate(experiment::GenerateArgs),
+    /// Compare bounded factor-base candidates using training and holdout fixtures.
+    Compare(experiment::CompareArgs),
 }
-impl Solver {
-    fn strategy(self) -> DecompositionStrategy {
-        match self {
-            Self::Groebner => DecompositionStrategy::Groebner,
-            Self::Sat => DecompositionStrategy::Sat,
-            Self::Enumerate => DecompositionStrategy::Enumerate,
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+struct InspectArgs {
+    #[arg(long)]
+    curve: Option<String>,
+    #[arg(long)]
+    file: Option<PathBuf>,
+}
+fn inspect(args: InspectArgs) -> Result<Value, String> {
+    if let Some(name) = args.curve {
+        let p = params::named(&name)?;
+        params::inspect(
+            p,
+            format!("builtin:{name}; local repository parameter definitions"),
+        )
+    } else {
+        let path = args.file.ok_or("supply --curve or --file")?;
+        let (p, hash) = params::load(&path)?;
+        params::inspect(p, format!("file BLAKE3:{hash}"))
+    }
+}
+fn execute(cli: &Cli) -> Result<Value, String> {
+    if cli.command.is_some() && cli.profile.is_some() {
+        return Err("a curve-name shortcut cannot be combined with a subcommand".into());
+    }
+    if (cli.command.is_some() || cli.profile.is_some()) && cli.run != experiment::RunArgs::default()
+    {
+        return Err("root-level experiment options apply only to the default run; put run/compare options after their subcommand".into());
+    }
+    match &cli.command {
+        Some(Action::List) => Ok(
+            json!({"schema_version":1,"operation":"list","status":"complete","curves":params::NAMES}),
+        ),
+        Some(Action::Inspect(args)) => inspect(InspectArgs {
+            curve: args.curve.clone(),
+            file: args.file.clone(),
+        }),
+        Some(Action::Generate(args)) => experiment::generate(args.clone()),
+        Some(Action::Compare(args)) => experiment::compare(args.clone(), cli.json),
+        Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
+        None => {
+            if let Some(name) = &cli.profile {
+                inspect(InspectArgs {
+                    curve: Some(name.clone()),
+                    file: None,
+                })
+            } else {
+                experiment::run(cli.run.clone(), cli.json)
+            }
         }
     }
 }
-struct Progress {
-    since: Instant,
-    update: Instant,
-    collected: usize,
-}
-impl Progress {
-    fn new() -> Self {
-        Self {
-            since: Instant::now(),
-            update: Instant::now(),
-            collected: 0,
+fn binary_hash() -> Option<String> {
+    let mut file = File::open(std::env::current_exe().ok()?).ok()?;
+    let mut hasher = blake3::Hasher::new();
+    let mut buffer = [0u8; 65536];
+    loop {
+        let n = file.read(&mut buffer).ok()?;
+        if n == 0 {
+            break;
         }
+        hasher.update(&buffer[..n]);
     }
-    fn start(&mut self, number: u8, label: &str) {
-        self.since = Instant::now();
-        println!("[{number}/4] {label} ...");
-    }
-    fn event(&mut self, event: KoblitzIcEvent) {
-        match event {
-            KoblitzIcEvent::FactorBaseStarted => self.start(1, "Factor base"),
-            KoblitzIcEvent::FactorBaseReady { points, orbits } => {
-                println!("      {points} points; {orbits} Frobenius orbit columns");
-                println!("      done in {:.3}s", self.since.elapsed().as_secs_f64());
-            }
-            KoblitzIcEvent::RelationCollectionStarted { wanted } => {
-                self.start(2, "Relation collection");
-                println!("      target: {wanted} relations (including surplus)");
-            }
-            KoblitzIcEvent::RelationProgress {
-                collected,
-                wanted,
-                trials,
-            } => {
-                if collected != self.collected || self.update.elapsed().as_secs() >= 1 {
-                    println!(
-                        "      {collected}/{wanted} relations; {trials} trials; {:.3}s",
-                        self.since.elapsed().as_secs_f64()
-                    );
-                    self.collected = collected;
-                    self.update = Instant::now();
-                }
-            }
-            KoblitzIcEvent::RelationCollectionFinished { collected, trials } => {
-                println!("      collection stopped: {collected} relations from {trials} trials in {:.3}s", self.since.elapsed().as_secs_f64());
-            }
-            KoblitzIcEvent::LinearAlgebraStarted { rows, columns } => {
-                self.start(3, "Linear algebra");
+    Some(hasher.finalize().to_hex().to_string())
+}
+fn display(report: &Value) {
+    match report["operation"].as_str() {
+        Some("inspect") => {
+            println!(
+                "Curve: {}\nInspection: {}",
+                report["parameters"]["name"].as_str().unwrap_or("?"),
+                report["status"].as_str().unwrap_or("?")
+            );
+            for check in report["checks"].as_array().into_iter().flatten() {
                 println!(
-                    "      {rows} x {columns} matrix; Gaussian elimination modulo subgroup order"
+                    "  {}: {} — {}",
+                    check["name"].as_str().unwrap_or("?"),
+                    check["status"].as_str().unwrap_or("?"),
+                    check["details"].as_str().unwrap_or("")
                 );
             }
-            KoblitzIcEvent::LinearAlgebraFinished => println!(
-                "      system solved in {:.3}s",
-                self.since.elapsed().as_secs_f64()
-            ),
-            KoblitzIcEvent::LinearAlgebraIncomplete => {
-                println!("      current matrix did not yield a candidate");
-            }
-            KoblitzIcEvent::LinearAlgebraSkipped => {
-                println!("[3/4] Linear algebra skipped: a direct relation supplied the candidate")
-            }
-            KoblitzIcEvent::VerificationStarted => self.start(4, "Verification"),
-            KoblitzIcEvent::VerificationFinished { verified } => println!(
-                "      [d]G = Q: {}; {:.3}s",
-                if verified { "PASS" } else { "FAIL" },
-                self.since.elapsed().as_secs_f64()
-            ),
+            println!("Capabilities: inspection only; imported-target solving is unavailable.");
         }
-        // Keep output live when redirected to a log too.
-        let _ = io::stdout().flush();
+        Some("run") => {
+            println!("Run: {}", report["status"].as_str().unwrap_or("?"));
+            if let Some(result) = report.get("result") {
+                println!(
+                    "Expected: {}; recovered: {}; verified: {}",
+                    result["expected"], result["recovered"], result["verified"]
+                );
+            }
+            println!(
+                "Counts: {}\nResources: {}",
+                report["counts"], report["resources"]
+            );
+        }
+        Some("compare") => {
+            println!(
+                "Comparison: {}; selected factor: {}",
+                report["status"], report["selected_factor_index"]
+            );
+            for candidate in report["candidates"].as_array().into_iter().flatten() {
+                println!(
+                    "  factor {}: eligible {}; median process seconds {}",
+                    candidate["factor_index"],
+                    candidate["eligible"],
+                    candidate["median_process_seconds"]
+                );
+            }
+            println!("Scope: {}", report["scope"]);
+        }
+        Some("error") => {
+            eprintln!(
+                "ic: {}",
+                report["message"].as_str().unwrap_or("operation failed")
+            );
+        }
+        Some("list") => {
+            for name in params::NAMES {
+                println!("{name}");
+            }
+        }
+        _ => println!("{}", serde_json::to_string_pretty(report).unwrap()),
     }
-}
-fn run(cli: Cli) -> Result<(), String> {
-    let started = Instant::now();
-    println!("ic — end-to-end index calculus");
-    println!("Fixture: public synthetic K_0 / GF(2^9); known logarithm 53");
-    println!("Engine: {:?}\n", cli.solver);
-    let curve = KoblitzCurve::new(0, 9).ok_or("could not construct the demo curve")?;
-    let expected = BigUint::from(53u32);
-    let target = curve.mul(curve.generator(), &expected);
-    let options = KoblitzIcOptions {
-        strategy: cli.solver.strategy(),
-        collapse_negation: false,
-        stop_on_verified_rank: false,
-        allow_direct_relation: false,
-        ..KoblitzIcOptions::default()
-    };
-    let mut progress = Progress::new();
-    let report =
-        koblitz_index_calculus_dlp_with_progress(&curve, &target, &options, &mut |event| {
-            progress.event(event)
-        })
-        .ok_or("pipeline could not complete; see the last active stage")?;
-    if report.sat_invalid_models != 0 {
-        return Err(format!("invalid SAT models: {}", report.sat_invalid_models));
-    }
-    let recovered = report.log.ok_or_else(|| {
-        format!(
-            "no verified result: {} relations, {} trials, {} inconclusive SAT attempts",
-            report.relations, report.trials, report.sat_unknowns,
-        )
-    })?;
-    if recovered != expected {
-        return Err(format!(
-            "fixture mismatch: expected {expected}, recovered {recovered}"
-        ));
-    }
-    println!("\nComplete: recovered {recovered}; expected {expected}; fixture check PASS");
-    println!(
-        "Work: {} F4 reductions; {} SAT calls; {} inconclusive SAT attempts",
-        report.reductions, report.sat_calls, report.sat_unknowns
-    );
-    println!("Total elapsed: {:.3}s", started.elapsed().as_secs_f64());
-    Ok(())
 }
 fn main() -> ExitCode {
-    match run(Cli::parse()) {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(error) => {
-            eprintln!("ic: ERROR: {error}");
-            ExitCode::FAILURE
+    let cli = Cli::parse();
+    if let Some(path) = &cli.out {
+        if std::fs::symlink_metadata(path).is_ok() {
+            eprintln!("ic: output already exists: {}", path.display());
+            return ExitCode::FAILURE;
         }
+    }
+    let mut report = match execute(&cli) {
+        Ok(v) => v,
+        Err(message) => {
+            json!({"schema_version":1,"operation":"error","status":"error","message":message})
+        }
+    };
+    // Generated parameter documents remain directly importable under their strict schema.
+    if report.get("operation").is_some() {
+        report["software"] = json!({"version":env!("CARGO_PKG_VERSION"),"os":std::env::consts::OS,
+            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash()});
+    }
+    let success = matches!(
+        report["status"].as_str(),
+        Some("complete" | "checks_passed")
+    ) || report.get("operation").is_none();
+    let text = serde_json::to_string_pretty(&report).expect("JSON serializable");
+    if let Some(path) = &cli.out {
+        let result = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(path)
+            .and_then(|mut f| {
+                f.write_all(text.as_bytes())?;
+                f.write_all(b"\n")?;
+                f.sync_all()
+            });
+        if let Err(error) = result {
+            eprintln!("ic: could not create report {}: {error}", path.display());
+            return ExitCode::FAILURE;
+        }
+    }
+    if cli.json || report.get("operation").is_none() {
+        println!("{text}");
+    } else {
+        display(&report);
+        if let Some(path) = &cli.out {
+            println!("Report saved: {}", path.display());
+        }
+    }
+    if success {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }

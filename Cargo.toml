@@ -18,6 +18,8 @@ name = "crypto_lib"
 path = "src/lib.rs"
 
 [dependencies]
+# Portable CPU-time and peak-RSS measurements for ic research reports.
+libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
 num-integer = "0.1"
