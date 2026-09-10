@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_algebraic_e2e",
+    "--example",
+    "koblitz_public_factor_base_discovery"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.1573937910143286,
+    "user_seconds": 0.023018999999999998,
+    "system_seconds": 0.043546,
+    "total_core_seconds": 0.066565,
+    "single_core_seconds": 0.066565,
+    "peak_rss_bytes": 41680896,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

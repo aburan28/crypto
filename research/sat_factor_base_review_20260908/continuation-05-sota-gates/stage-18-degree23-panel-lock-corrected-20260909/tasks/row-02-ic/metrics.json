@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+    "ic",
+    "23",
+    "0",
+    "2",
+    "1056924",
+    "1300251816495109512",
+    "100000",
+    "1000",
+    "divisor:0,2"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 123.66850095801055,
+    "user_seconds": 120.360639,
+    "system_seconds": 0.351304,
+    "total_core_seconds": 120.711943,
+    "single_core_seconds": 120.711943,
+    "peak_rss_bytes": 35274752,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

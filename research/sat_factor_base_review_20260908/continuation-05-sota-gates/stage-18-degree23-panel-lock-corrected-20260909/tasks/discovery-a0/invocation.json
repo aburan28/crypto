@@ -1,0 +1,49 @@
+{
+  "attempt": 1,
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+    "23",
+    "0",
+    "2",
+    "12"
+  ],
+  "cwd": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909",
+  "driver_observed_wall_seconds": 0.8750345830339938,
+  "finished_at": "2026-09-10T06:05:42.474444Z",
+  "meter_command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+    "--cwd",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909",
+    "--timeout",
+    "600.0",
+    "--stdout",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/discovery-a0/result.json",
+    "--stderr",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/discovery-a0/stderr.txt",
+    "--metrics",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/discovery-a0/metrics.json",
+    "--",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+    "23",
+    "0",
+    "2",
+    "12"
+  ],
+  "meter_launcher_returncode": 0,
+  "schema": "koblitz_degree23_task_invocation.v1",
+  "started_at": "2026-09-10T06:05:41.598933Z",
+  "task": {
+    "command": [
+      "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+      "23",
+      "0",
+      "2",
+      "12"
+    ],
+    "curve_a": 0,
+    "id": "discovery-a0",
+    "kind": "discovery"
+  },
+  "watchdog_seconds": 600.0
+}

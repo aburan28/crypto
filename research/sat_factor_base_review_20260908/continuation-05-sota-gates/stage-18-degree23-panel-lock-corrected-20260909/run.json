@@ -1,0 +1,465 @@
+{
+  "amendment_file_sha256": "f11ae681eece162d3ea83f0379af0d8fa5596d6a8dd1ccfe4bad49f2e750ef2c",
+  "amendment_sha256": "b6e39fefc60981f3ac53fa37bd35bf18a0c25940f998b25d4f025d7f2bbeca9c",
+  "amendment_source": {
+    "bytes": 5332,
+    "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-amendment-01-lock-correction.json",
+    "sha256": "f11ae681eece162d3ea83f0379af0d8fa5596d6a8dd1ccfe4bad49f2e750ef2c"
+  },
+  "artifact_manifest_sha256": "e851458b3607aeaad20cd45bccdfd45d3c4d3c77fd091324e873dfaa4cfa5491",
+  "build_receipt_sha256": "f1bd1db21c006076f9568aee120bf624eb303936abec2b9ae09a52b66c485384",
+  "dependency_lock": {
+    "archive": {
+      "bytes": 15240,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/dependency-lock/Cargo.lock",
+      "sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+    },
+    "destination": {
+      "bytes": 15240,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/Cargo.lock",
+      "sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+    },
+    "installed_by_runner": false,
+    "source": {
+      "bytes": 15240,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock",
+      "sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+    }
+  },
+  "evidence_class": "scientific_candidate",
+  "execution_roots": {
+    "panel": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909",
+    "repository": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909"
+  },
+  "failed_v1_custody": {
+    "artifact_count": 13,
+    "build": {
+      "orphan_group_terminated": false,
+      "peak_rss_bytes": 38453248,
+      "returncode": 101,
+      "status": "failed",
+      "timed_out": false,
+      "total_core_seconds": 0.07159599999999999,
+      "wall_seconds": 0.17625229200348258
+    },
+    "evidence_class": "operational_failure",
+    "excluded_from_ic_rho_ratios": true,
+    "nested_costs_must_not_be_summed": true,
+    "outer_attempt": {
+      "attempt": 1,
+      "orphan_group_terminated": false,
+      "peak_rss_bytes": 38453248,
+      "returncode": 1,
+      "timed_out": false,
+      "total_core_seconds": 0.5059509999999999,
+      "wall_seconds": 0.9864999999990687
+    },
+    "schema": "koblitz_stage18_v1_failure_custody.v1",
+    "scientific_tasks_started": 0,
+    "status": "verified_operational_build_failure_zero_scientific_tasks"
+  },
+  "finished_at": "2026-09-10T06:18:17.767620Z",
+  "host": {
+    "cargo": {
+      "command": [
+        "cargo",
+        "-V"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "cargo 1.93.1 (Homebrew)"
+    },
+    "cpu_model": "arm",
+    "logical_cpus": 14,
+    "physical_memory_bytes": 51539607552,
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "python": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Python 3.13.1"
+    },
+    "rustc": {
+      "command": [
+        "rustc",
+        "-Vv"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+    },
+    "uname": [
+      "Darwin",
+      "Adams-MacBook-Pro.local",
+      "25.6.0",
+      "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+      "arm64",
+      "arm"
+    ]
+  },
+  "implementation": {
+    "meter": {
+      "bytes": 3471,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "runner": {
+      "bytes": 36553,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py",
+      "sha256": "9fa32b12f26efe8d894451e9b0510e3be0fd57ce606edef3ba64c4ee7ca7f5de"
+    },
+    "verifier": {
+      "bytes": 93616,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+      "sha256": "132eb376ec40e866ce527751f108765b44c77a883776accc11c6d8f603e156d7"
+    }
+  },
+  "outer_attempts": [
+    {
+      "attempt": 1,
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/outer-attempts/0001/receipt.json",
+      "receipt_sha256": "697824eef1531cc004e8a8a5c8f2c1adaceb5bc5052744a5e2ef0e78ea4dbb4d"
+    }
+  ],
+  "post_execution": {
+    "binaries": {
+      "discovery_binary": {
+        "bytes": 797360,
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+        "sha256": "70ee9a1772511563fcbdb2eece5760817e9465a32a0a72dfcdbfa866e4747a8b"
+      },
+      "ic_binary": {
+        "bytes": 1266128,
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+        "sha256": "2258f5b320be0cd865367faefbf6a068a3f8789719f0a512db328b2863c0486f"
+      }
+    },
+    "root_lock_sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c",
+    "sources": {
+      "Cargo.toml": {
+        "bytes": 1695,
+        "expected_sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/Cargo.toml",
+        "sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5"
+      },
+      "dependency_lock_snapshot": {
+        "bytes": 15240,
+        "expected_sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock",
+        "sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+      },
+      "examples/koblitz_algebraic_e2e.rs": {
+        "bytes": 16473,
+        "expected_sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_algebraic_e2e.rs",
+        "sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263"
+      },
+      "examples/koblitz_public_factor_base_discovery.rs": {
+        "bytes": 6210,
+        "expected_sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_public_factor_base_discovery.rs",
+        "sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b"
+      },
+      "scripts/process_meter.py": {
+        "bytes": 3471,
+        "expected_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+        "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+      },
+      "src/cryptanalysis/koblitz_index_calculus.rs": {
+        "bytes": 145006,
+        "expected_sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/koblitz_index_calculus.rs",
+        "sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681"
+      },
+      "src/cryptanalysis/sat.rs": {
+        "bytes": 84455,
+        "expected_sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/sat.rs",
+        "sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129"
+      },
+      "src/cryptanalysis/semaev_sat.rs": {
+        "bytes": 60036,
+        "expected_sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7",
+        "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/semaev_sat.rs",
+        "sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7"
+      }
+    }
+  },
+  "protocol_file_sha256": "b7d38807a2b027c929412b81639bc531f39f4c49a6cd20a6069b89b8c9afa13d",
+  "protocol_sha256": "baafe7a774bff90323d3739739044bb559e1938b76bb4915ef8a33348ca9b6dc",
+  "schema": "koblitz_degree23_replication_panel_run.v1",
+  "source_revision": {
+    "algorithm_base_commit": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+    "algorithm_base_is_ancestor": true,
+    "branch": "codex/koblitz-degree23-panel-20260909",
+    "commit": "5d069cf659fe6f6f9badb817ef446d64f3ae2782",
+    "dirty": false,
+    "porcelain": [],
+    "tracked_delta": {
+      "base_commit": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+      "entries": [
+        {
+          "mode": "100644",
+          "object_id": "14241b96fcde49028895de343f5fc6cf40ab340f",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "973b580d9ca9ec57b0085e7547041dce34eddc80",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-amendment-01-lock-correction.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "53675f66eec73745536ba0108c64c8b5ad4c3e9b",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "3fad4850eb4db8b7746681d5d03083d87c9e3913",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/build/metrics.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "2cc9e4d0fce8022d414dd7370f86da1a9410af6b",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/build/process-invocation.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "6e6467bdeec46f36e5f583925e98a5d2deef6061",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/build/receipt.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "795358f611af6424d4ebf22c4624fea5b7a3a56a",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/build/stderr.txt",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/build/stdout.txt",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "79cabfb284c103b546db8aa8314047d799620786",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/dependency-lock/Cargo.lock",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "95312e3063884da4b227b44ae486a16804a0416a",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/invocation.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "b040fa3cdaa0165a759cdf3abc8414e9fe5d8455",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/metrics.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "a635c523225018a258a7f57ed80a118d38d1fa3c",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/receipt.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "82b41100b6c670d9092f4b017df23b358ddf6d62",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/stderr.txt",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/stdout.txt",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "751201d5c7da1de578a60e8b1662d92c2d8bd545",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/protocol.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "3d4b17bfd0196f29f7b26bf72f85f1b8687f8209",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/run.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "751201d5c7da1de578a60e8b1662d92c2d8bd545",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-protocol.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "3638ad4ba2ff37030ec79c46f5bb91cc57c96958",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+          "status": "A",
+          "type": "blob"
+        }
+      ],
+      "head_commit": "5d069cf659fe6f6f9badb817ef446d64f3ae2782",
+      "matches_expected_control_only_delta": true,
+      "schema": "koblitz_stage18_tracked_delta.v1"
+    }
+  },
+  "sources": {
+    "Cargo.toml": {
+      "bytes": 1695,
+      "expected_sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/Cargo.toml",
+      "sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5"
+    },
+    "dependency_lock_snapshot": {
+      "bytes": 15240,
+      "expected_sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock",
+      "sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+    },
+    "examples/koblitz_algebraic_e2e.rs": {
+      "bytes": 16473,
+      "expected_sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_algebraic_e2e.rs",
+      "sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263"
+    },
+    "examples/koblitz_public_factor_base_discovery.rs": {
+      "bytes": 6210,
+      "expected_sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_public_factor_base_discovery.rs",
+      "sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b"
+    },
+    "scripts/process_meter.py": {
+      "bytes": 3471,
+      "expected_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "bytes": 145006,
+      "expected_sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681"
+    },
+    "src/cryptanalysis/sat.rs": {
+      "bytes": 84455,
+      "expected_sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/sat.rs",
+      "sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129"
+    },
+    "src/cryptanalysis/semaev_sat.rs": {
+      "bytes": 60036,
+      "expected_sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/semaev_sat.rs",
+      "sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7"
+    }
+  },
+  "started_at": "2026-09-10T06:05:40.986143Z",
+  "status": "provisional_complete_pending_final_controls",
+  "summary_sha256": "ac348f857ae110e731fddb68e87752068a488b2f45fe97e668b9b3ab481b6afc",
+  "tasks": {
+    "discovery-a0": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/discovery-a0/receipt.json",
+      "receipt_sha256": "0b19b27d0ec09687c2d9d2e69f84aecf3e4cfb0b197351420a44488148f97c10",
+      "status": "verified"
+    },
+    "discovery-a1": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/discovery-a1/receipt.json",
+      "receipt_sha256": "e128ceb0d126ac12f304b95b80bdc8f9185642d54962319d4eff6c4e431555af",
+      "status": "verified"
+    },
+    "row-01-ic": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-01-ic/receipt.json",
+      "receipt_sha256": "fc1fde5094dcf8d7a89ff9bddfa79a90678ccc80d19b220b6bb8de10bfa674e6",
+      "status": "verified"
+    },
+    "row-01-rho-auto": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-01-rho-auto/receipt.json",
+      "receipt_sha256": "cea6ef99f8c938372a6ad759058c7d15af704c1c1aae8aaa774bcf4ef4152ed3",
+      "status": "verified"
+    },
+    "row-02-ic": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-02-ic/receipt.json",
+      "receipt_sha256": "d4e63785ab79b02a65d07401e9522bd93c6f942ad0f6d9a58428c3a7d26a0c47",
+      "status": "verified"
+    },
+    "row-02-rho-auto": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-02-rho-auto/receipt.json",
+      "receipt_sha256": "22c71765abbd1b93c9a217a19f1ebab9090372fc243fe0ad0d51f9ce27eeee18",
+      "status": "verified"
+    },
+    "row-03-ic": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-03-ic/receipt.json",
+      "receipt_sha256": "44246114c95b3cf64f6f054a5d2fb2768243d1f00d7c4790918fbcef22c66b1a",
+      "status": "verified"
+    },
+    "row-03-rho-auto": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-03-rho-auto/receipt.json",
+      "receipt_sha256": "f09dc396799f4cc6d8fcfad946cca0a44872d34a8f78b126a9b64a92d77027c7",
+      "status": "verified"
+    },
+    "row-04-ic": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-04-ic/receipt.json",
+      "receipt_sha256": "c2a205eae04200df73a47693429fb719d8a261a67580b7709b0997c2b04ac593",
+      "status": "verified"
+    },
+    "row-04-rho-auto": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-04-rho-auto/receipt.json",
+      "receipt_sha256": "124b2c95e2e9c3d74029160e6420214a3f86238d668ef4281aeb23c02736d0ae",
+      "status": "verified"
+    },
+    "row-05-ic": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-05-ic/receipt.json",
+      "receipt_sha256": "1ded22fc554d9dce5e741ac17feee4af12b56d654dd6db87df45c0e3e6354aac",
+      "status": "verified"
+    },
+    "row-05-rho-auto": {
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/tasks/row-05-rho-auto/receipt.json",
+      "receipt_sha256": "3a71cf027456d5c4a344ea6e00289168ccfa69bfec711501cc1ead1960aa71f6",
+      "status": "verified"
+    }
+  },
+  "tools": {
+    "discovery_binary": {
+      "bytes": 797360,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+      "sha256": "70ee9a1772511563fcbdb2eece5760817e9465a32a0a72dfcdbfa866e4747a8b"
+    },
+    "ic_binary": {
+      "bytes": 1266128,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+      "sha256": "2258f5b320be0cd865367faefbf6a068a3f8789719f0a512db328b2863c0486f"
+    }
+  },
+  "verification_sha256": "73ce430891b207240a456f66bc1ecba174855226566a5f9b73417258e5ff018b"
+}

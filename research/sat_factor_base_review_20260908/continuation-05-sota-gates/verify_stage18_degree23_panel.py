@@ -1160,7 +1160,17 @@ def validate_outer_attempts(protocol: dict, panel: Path, run: dict,
         return []
     require(root.is_dir() and not root.is_symlink(), "outer-attempts is not a regular directory")
     records = []
-    directories = sorted(root.iterdir())
+    entries = sorted(root.iterdir())
+    staging = [path for path in entries if path.name.startswith(".staging-")]
+    if staging:
+        require(not require_success, "complete panel retains an active outer staging directory")
+        require(
+            len(staging) == 1 and staging[0].is_dir() and not staging[0].is_symlink()
+            and staging[0].name == ".staging-0001",
+            "invalid active outer staging directory",
+        )
+    directories = [path for path in entries if path not in staging]
+    require(not staging or not directories, "completed and active outer attempts coexist")
     require(len(directories) <= 1, "corrected Stage 18 execution was retried")
     for expected_index, directory in enumerate(directories, start=1):
         require(
@@ -1702,6 +1712,25 @@ def self_test() -> dict:
             checks += 1
         else:
             raise AssertionError("duplicate JSON key was accepted")
+        active_panel = root / "active-panel"
+        (active_panel / "outer-attempts/.staging-0001").mkdir(parents=True)
+        active_run = {
+            "execution_roots": {
+                "repository": "/recorded/stage18/repository",
+                "panel": "/recorded/stage18/panel",
+            },
+            "outer_attempts": [],
+        }
+        if validate_outer_attempts(protocol, active_panel.resolve(), active_run, require_success=False) != []:
+            raise AssertionError("active outer staging produced a completed attempt")
+        checks += 1
+        (active_panel / "outer-attempts/0001").mkdir()
+        try:
+            validate_outer_attempts(protocol, active_panel.resolve(), active_run, require_success=False)
+        except VerificationError:
+            checks += 1
+        else:
+            raise AssertionError("coexisting active and completed outer attempts were accepted")
         recorded_repo = Path("/recorded/stage18/repository")
         recorded_panel = Path("/recorded/stage18/panel")
         relocated_panel = root / "relocated-panel"
