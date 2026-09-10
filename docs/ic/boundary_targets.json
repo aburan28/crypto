@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "title": "Index-calculus boundary ledger",
+  "updated": "2026-09-10",
+  "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
+  "stages": [
+    "factor_base",
+    "decomposition",
+    "relation_yield",
+    "rank",
+    "end_to_end_dlp",
+    "vs_rho"
+  ],
+  "how_to_beat": [
+    "Freeze public fixture (curve, seeds, base hash, resource caps).",
+    "Emit hashed JSON evidence under research/ or docs/ic/runs/.",
+    "Pass the row acceptance_gates.",
+    "PR updates current, appends history, sets next_target, links evidence.",
+    "vs_rho and end_to_end_dlp past prior size require independent recomputation."
+  ],
+  "agent_priorities": [
+    {
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "beat": "whole-process wall-clock crossover at n=37, or charged crossover at n=41 with same gates and >=20% margin"
+    },
+    {
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "decomposition",
+      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0"
+    },
+    {
+      "rank": 3,
+      "regime": "binary",
+      "stage": "decomposition",
+      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve"
+    },
+    {
+      "rank": 4,
+      "regime": "prime",
+      "stage": "end_to_end_dlp",
+      "beat": "j=0 known-answer IC at 16 bits agreeing with rho"
+    },
+    {
+      "rank": 5,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield",
+      "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs"
+    }
+  ],
+  "regimes": {
+    "binary": {
+      "label": "Binary fields (Weil–Semaev / non-Koblitz)",
+      "best_stack": [
+        "semaev_decomp",
+        "semaev_sat",
+        "pq_descent",
+        "binary_semaev",
+        "binary_semaev_s4"
+      ],
+      "implementation_caps": {
+        "pq_descent_s3_m_prime_max": 8,
+        "pq_descent_s4_m_prime_max": 5,
+        "ghs_end_to_end": "magic m=1 toys only; higher-genus Jac IC not implemented"
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Subspace / linearized bases; ic runner dim<=12; structure checks through n=36",
+            "metrics": { "ic_factor_dim_cap": 12, "structure_n_max": 36 }
+          },
+          "next_target": {
+            "summary": "Implicit non-materialized base at n>=41 with membership predicate only",
+            "acceptance_gates": [
+              "predicate agrees with exhaustive membership on >=2^16 holdout elements",
+              "retained bytes logged"
+            ]
+          },
+          "evidence": ["docs/ic/README.md", "RESEARCH_SEMAEV_DECOMPOSITION.md"],
+          "history": []
+        },
+        "decomposition": {
+          "status": "record",
+          "current": {
+            "summary": "SAT decides n=19 l=6 corpus; pairs-and-solve validated at n=21 l=7; usable to ~l=12 still O(2^(2l))",
+            "metrics": { "sat_n": 19, "sat_l": 6, "pairs_n": 21, "pairs_l": 7, "usable_l_approx": 12 }
+          },
+          "next_target": {
+            "summary": "Sub-2^(2l) oracle at l=8, <=64 targets, median cost <= half pairs-and-solve",
+            "acceptance_gates": [
+              "zero disagreements vs exhaustive or group check",
+              "budget and host recorded"
+            ]
+          },
+          "evidence": ["RESEARCH_SAT_SEMAEV.md", "RESEARCH_SEMAEV_DECOMPOSITION.md"],
+          "history": []
+        },
+        "relation_yield": {
+          "status": "open",
+          "current": {
+            "summary": "No separate distributional frontier published",
+            "metrics": {}
+          },
+          "next_target": {
+            "summary": "Yield curve at n=21 for one frozen base with 256 natural targets",
+            "acceptance_gates": [
+              "95% CI width <= 0.05 on hit-rate",
+              "collector policy hash frozen"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        },
+        "rank": {
+          "status": "open",
+          "current": {
+            "summary": "Toy matrices only",
+            "metrics": {}
+          },
+          "next_target": {
+            "summary": "Full orbit-reduced rank at n=21 with surplus <= 2K+64",
+            "acceptance_gates": [
+              "rank recomputed after every relation",
+              "terminal rank equals required"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "Toy known-answer / ic framework small degrees",
+            "metrics": { "framework_degree_max_documented": 23 }
+          },
+          "next_target": {
+            "summary": "Known-answer DLP at n=19 with stage timers",
+            "acceptance_gates": [
+              "[d]G = Q",
+              "incomplete stages fail closed"
+            ]
+          },
+          "evidence": ["docs/ic/README.md"],
+          "history": []
+        },
+        "vs_rho": {
+          "status": "not_achieved",
+          "current": {
+            "summary": "No charged binary crossover on record",
+            "metrics": {},
+            "verdict": null
+          },
+          "next_target": {
+            "summary": "Charged single-instance cost < automorphism-aware rho at any eligible n>=15",
+            "acceptance_gates": [
+              "all stages charged in one process series",
+              "independent replay"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        }
+      }
+    },
+    "koblitz": {
+      "label": "Koblitz K_a / F_2^n",
+      "best_stack": [
+        "koblitz_index_calculus",
+        "koblitz_groebner",
+        "semaev_sat",
+        "koblitz_rank_fixture"
+      ],
+      "implementation_caps": {
+        "MAX_N": 41
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Exact/optimized bases at n=19; minimum base feasible at n=41",
+            "metrics": { "exact_n": 19, "feasible_n": 41 },
+            "verdict": "N41_MINIMUM_BASE_FEASIBLE"
+          },
+          "next_target": {
+            "summary": "Balanced base at n=53 under crossover-task resource gate (materialized or implicit+storage lower bound)",
+            "acceptance_gates": [
+              "Frobenius+negation closure verified",
+              "construction RSS and retained bytes logged"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/"
+          ],
+          "history": []
+        },
+        "decomposition": {
+          "status": "record",
+          "current": {
+            "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13",
+            "metrics": {
+              "f4_unknowns": 46,
+              "f4_example": "n=31 m=3 ~145s",
+              "sat_comfortable_unknowns": 27,
+              "classical_demo_n_max": 13
+            }
+          },
+          "next_target": {
+            "summary": "n=31 dim=16 m=2 (32 unknowns, quadratic) median <=1h",
+            "acceptance_gates": [
+              "disagreements=0",
+              "oracle agreement or F4+group check"
+            ]
+          },
+          "evidence": ["RESEARCH_KOBLITZ_SCALING_TARGET.md"],
+          "history": []
+        },
+        "relation_yield": {
+          "status": "record",
+          "current": {
+            "summary": "Exact coverage/yield controls at n=19; collectors at n=37 fixtures",
+            "metrics": { "control_n": 19, "fixture_collector_n": 37 }
+          },
+          "next_target": {
+            "summary": "Distributional yield for frozen (n, eta, base) at n=23",
+            "acceptance_gates": [
+              "256 natural + 64 planted + 64 proven-UNSAT",
+              "preregistered covariates"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md"
+          ],
+          "history": []
+        },
+        "rank": {
+          "status": "record",
+          "current": {
+            "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank",
+            "metrics": { "full_rank_n": 37, "fixture_rank_n": 41 }
+          },
+          "next_target": {
+            "summary": "Single-process rank to K+1 at n=41 with replayable rows",
+            "acceptance_gates": [
+              "independent matrix replay or preserved row transcript"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/",
+            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/"
+          ],
+          "history": []
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps",
+            "metrics": { "demo_n_max": 13, "ic_degree_doc_max": 23 }
+          },
+          "next_target": {
+            "summary": "Known-answer full IC at n=23 with stage timers",
+            "acceptance_gates": [
+              "progress events FB→relations→LA→verify",
+              "[d]G = Q"
+            ]
+          },
+          "evidence": ["docs/ic/README.md", "tests/ic_progress.rs"],
+          "history": []
+        },
+        "vs_rho": {
+          "status": "record",
+          "current": {
+            "summary": "n=37 charged-time crossover (amortized exact-support V2)",
+            "metrics": {
+              "n": 37,
+              "whole_process_wall_crossover": false,
+              "amortized_targets": 1024
+            },
+            "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
+            "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
+          },
+          "next_target": {
+            "summary": "whole-process wall-clock at n=37 OR charged crossover at n=41 with >=20% margin",
+            "acceptance_gates": [
+              "all stages charged",
+              "independent validation",
+              "explicit verdict field for wall or next-rung"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json"
+          ],
+          "history": []
+        }
+      }
+    },
+    "prime": {
+      "label": "Prime fields",
+      "best_stack": [
+        "ec_index_calculus_j0",
+        "ec_index_calculus"
+      ],
+      "implementation_caps": {
+        "generic_ic_bench_bits": 12,
+        "j0_ic_bench_bits": 14,
+        "module_doc_sub_bits": 40,
+        "dense_3sum_nonscaling_wall_bits": 80
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
+            "metrics": {}
+          },
+          "next_target": {
+            "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
+            "acceptance_gates": [
+              "no duplicate orbits",
+              "size vs theory within 5%"
+            ]
+          },
+          "evidence": ["docs/RESEARCH_BENCH_LOG.md", "src/cryptanalysis/ec_index_calculus_j0.rs"],
+          "history": []
+        },
+        "decomposition": {
+          "status": "record",
+          "current": {
+            "summary": "S3 2-decomp through bench sizes",
+            "metrics": { "summation": "S3", "summands": 2 }
+          },
+          "next_target": {
+            "summary": "Verified 3-decomposition relation family on >=14-bit prime with GB cost",
+            "acceptance_gates": [
+              "witnesses sum in the group",
+              "timing and FFD logged"
+            ]
+          },
+          "evidence": ["src/cryptanalysis/ec_index_calculus.rs"],
+          "history": []
+        },
+        "relation_yield": {
+          "status": "record",
+          "current": {
+            "summary": "Enough relations for toys <=14-bit j=0 / <=12-bit generic",
+            "metrics": { "j0_bits_max": 14, "generic_bits_max": 12 }
+          },
+          "next_target": {
+            "summary": "Trials-per-relation vs bitlength for 10–16 bits on frozen ladder",
+            "acceptance_gates": ["at least 3 bitlengths", "R^2 reported"]
+          },
+          "evidence": ["docs/RESEARCH_BENCH_LOG.md"],
+          "history": []
+        },
+        "rank": {
+          "status": "open",
+          "current": {
+            "summary": "Dense GE mod n on toy matrices",
+            "metrics": {}
+          },
+          "next_target": {
+            "summary": "Sparse LA for >=256 FB columns on a 16-bit instance",
+            "acceptance_gates": ["correct vs dense GE on a subsample"]
+          },
+          "evidence": [],
+          "history": []
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success",
+            "metrics": { "generic_bits": 12, "j0_bits": 14 },
+            "best_variant": "j0_zeta_orbit"
+          },
+          "next_target": {
+            "summary": "j=0 known-answer IC at 16 bits under bench harness",
+            "acceptance_gates": [
+              "agrees with rho on same instance",
+              "wall time logged"
+            ]
+          },
+          "evidence": ["docs/RESEARCH_BENCH_LOG.md"],
+          "history": []
+        },
+        "vs_rho": {
+          "status": "not_achieved",
+          "current": {
+            "summary": "IC slower than rho at all measured sizes; dense 3-sum wall ~80 bits",
+            "metrics": { "dense_3sum_wall_bits": 80 },
+            "verdict": null
+          },
+          "next_target": {
+            "summary": "Charged IC < rho on any prime-order instance >=16 bits",
+            "acceptance_gates": [
+              "artifact cost model",
+              "independent replay",
+              "no verifier gaming"
+            ]
+          },
+          "evidence": ["research/ecdlp_autolab/paper.md"],
+          "history": []
+        }
+      }
+    }
+  }
+}
