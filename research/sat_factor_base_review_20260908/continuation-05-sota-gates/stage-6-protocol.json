@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_degree15_unknown_scalar_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Extend scalar-blind end-to-end index calculus and the signed-Frobenius rho control beyond degree 9.",
+  "curve": {"n": 15, "a": 1, "subgroup_order": 211},
+  "factor_base": "GGMP linearised-polynomial kernel from factor index 0 of T^15-1",
+  "forbidden": ["factor-base logs", "subgroup log table", "target-dependent factor-base selection"],
+  "run": {"m": 2, "secret": 101, "seed": 20260961},
+  "index_calculus": {
+    "native_conflict_budget_per_target": 10000,
+    "max_trials": 20000,
+    "max_models_per_target": 64,
+    "relation_batch_size": 1,
+    "direct_relation_forbidden": true,
+    "invalid_models_forbidden": true
+  },
+  "rho": "same-target signed-Frobenius/negation quotient r-adding walk",
+  "process_watchdog_seconds": 300,
+  "metrics": ["wall", "core-seconds", "peak RSS", "relations", "trials", "conflicts", "linear algebra", "rho iterations and operation ledger"],
+  "claim_boundary": "One degree-15 pair is a larger toy feasibility test, not a scaling law or SOTA result."
+}
