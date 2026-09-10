@@ -41,6 +41,9 @@ Result: CryptoMiniSat x=(18,4,65796) has rational lifts whose signed sum is the 
 PASS: local preflight of the external-host reproduction workflow.
 Result: the fail-closed verifier accepted two fresh scalar-blind IC runs and two corrected signed-Frobenius rho runs, including recovered-scalar and complete operation-label fields.
 
+PASS: GitHub Actions external-host run 34426104136.
+Result: fresh Linux/x86-64 checkout reproduced both toy IC and quotient-rho controls, passed 34 focused tests, and uploaded the retained reproduction artifact.
+
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.
