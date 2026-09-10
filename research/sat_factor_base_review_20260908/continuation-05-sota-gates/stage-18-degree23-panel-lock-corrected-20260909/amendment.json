@@ -1,0 +1,130 @@
+{
+  "schema": "koblitz_degree23_replication_panel_amendment.v1",
+  "amendment_id": "STAGE18-AMENDMENT-01-LOCK-CORRECTION",
+  "recorded_at": "2026-09-09",
+  "status": "frozen_before_corrected_execution",
+  "base_protocol": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-protocol.json",
+    "file_sha256": "b7d38807a2b027c929412b81639bc531f39f4c49a6cd20a6069b89b8c9afa13d",
+    "canonical_sha256": "baafe7a774bff90323d3739739044bb559e1938b76bb4915ef8a33348ca9b6dc"
+  },
+  "supersession": {
+    "scope": "dependency-lock custody only",
+    "fields": [
+      {
+        "json_pointer": "/implementation_binding/tracked_lock_snapshot",
+        "prior": "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock",
+        "replacement": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock"
+      },
+      {
+        "json_pointer": "/implementation_binding/tracked_lock_sha256",
+        "prior": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+        "replacement": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
+      }
+    ],
+    "all_other_protocol_fields_remain_byte_identical": true,
+    "crate_versions_changed": false,
+    "lock_change": "Add the already resolved libc crate to the crypto package dependency list; every package version, source and checksum remains unchanged."
+  },
+  "failed_execution": {
+    "panel_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909",
+    "source_commit": "d4416e829b89b0dc856c75bcee91e790eda7333e",
+    "classification": "operational_build_failure_zero_scientific_tasks",
+    "scientific_tasks_started": 0,
+    "resume_or_retry_forbidden": true,
+    "cause": "The frozen v1 lock predates Cargo.toml's direct libc dependency, so cargo build --locked exited 101 before either discovery or target execution.",
+    "old_lock_sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+    "build": {
+      "status": "failed",
+      "returncode": 101,
+      "timed_out": false,
+      "orphan_group_terminated": false,
+      "wall_seconds": 0.17625229200348258,
+      "total_core_seconds": 0.07159599999999999,
+      "peak_rss_bytes": 38453248
+    },
+    "outer_attempt": {
+      "attempt": 1,
+      "returncode": 1,
+      "timed_out": false,
+      "orphan_group_terminated": false,
+      "wall_seconds": 0.9864999999990687,
+      "total_core_seconds": 0.5059509999999999,
+      "peak_rss_bytes": 38453248
+    },
+    "artifact_inventory": [
+      {
+        "path": "build/metrics.json",
+        "bytes": 642,
+        "sha256": "b0abd9cadfad9ce3fe8939638d1632e0828cfe752f97bce1f6551113f03898bb"
+      },
+      {
+        "path": "build/process-invocation.json",
+        "bytes": 1685,
+        "sha256": "b4898d3543cb27b4d7dfd6ecba983f613b96900ff9234f0873599601146410b9"
+      },
+      {
+        "path": "build/receipt.json",
+        "bytes": 412,
+        "sha256": "5ac097829d35b51f092da99a5292a78a6b4d7cab3620414f5fcbf9b73eea2934"
+      },
+      {
+        "path": "build/stderr.txt",
+        "bytes": 260,
+        "sha256": "ee7cc8939c551301ad8692a5776c1eb1d49280e63e39008cd7d84f953cbe08b9"
+      },
+      {
+        "path": "build/stdout.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "dependency-lock/Cargo.lock",
+        "bytes": 15231,
+        "sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+      },
+      {
+        "path": "outer-attempts/0001/invocation.json",
+        "bytes": 2761,
+        "sha256": "37ffe849d15311c5083fd49e5561f3e5a7336c7be767026ef077d749ae59f4b6"
+      },
+      {
+        "path": "outer-attempts/0001/metrics.json",
+        "bytes": 1169,
+        "sha256": "2a3aa99024e88d88ba60b71d373e19158319203a77fba7286c3f1b1a104fdf2b"
+      },
+      {
+        "path": "outer-attempts/0001/receipt.json",
+        "bytes": 1204,
+        "sha256": "140673e11381fbfd4643cbdbe90ef2c36ba544526584d184ef1959c1c99b15fd"
+      },
+      {
+        "path": "outer-attempts/0001/stderr.txt",
+        "bytes": 75,
+        "sha256": "38f5004e6d435ca6ba6b4bfe5417d58fa5779722494c8d7b2338f6c83ccbd490"
+      },
+      {
+        "path": "outer-attempts/0001/stdout.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "protocol.json",
+        "bytes": 8334,
+        "sha256": "b7d38807a2b027c929412b81639bc531f39f4c49a6cd20a6069b89b8c9afa13d"
+      },
+      {
+        "path": "run.json",
+        "bytes": 7654,
+        "sha256": "aa150028dafb8da48f879fa7888436578642b78b1bf14b4cb520812ca7a3fade"
+      }
+    ]
+  },
+  "corrected_execution": {
+    "required_output_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909",
+    "must_start_from_empty_output": true,
+    "resume_or_retry_forbidden": true,
+    "scientific_task_attempts": 1
+  },
+  "claim_boundary": "This amendment repairs dependency-lock custody only. The retained v1 attempt is an operational build failure with zero scientific tasks and supplies no mathematical, cryptanalytic or performance evidence."
+}

@@ -1,0 +1,59 @@
+{
+  "classification": "complete_verified_scientific_task_panel_with_additive_finalization_correction",
+  "file_count": 7,
+  "files": [
+    {
+      "bytes": 2640,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE18_RESULTS.md",
+      "sha256": "d0a65da55097e0d4f9182318d437f3bc496123cfe475bfdfa37a924521d7e0db"
+    },
+    {
+      "bytes": 11335,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage18_finalization_correction.py",
+      "sha256": "8feb27885e870e7582aa9c1b0b2003de4b01a3c8f3bf8469deea2cce7ed8160f"
+    },
+    {
+      "bytes": 6887,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-amendment-02-finalization.json",
+      "sha256": "3197b0c34e56585c6f24ea32ce0d5aab2180ca9c578b1fec639c7054eda747c9"
+    },
+    {
+      "bytes": 6499,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-certificate.json",
+      "sha256": "f8feb3bf35695c1166479edc0af72e23ddc3e0832bd628ba7c773fa22775a03f"
+    },
+    {
+      "bytes": 26991,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-corrected-summary.json",
+      "sha256": "e7144e8904d133e83e30975f89c38df2aa89d683c05480abba44366c9c798123"
+    },
+    {
+      "bytes": 95090,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+      "sha256": "427fe8f661ada2e10f30f64e683ba53c62b9afac3c41c0434c565aef2c6bbdab"
+    },
+    {
+      "bytes": 31586,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_finalization_correction.py",
+      "sha256": "b799dc10a3bde471e2073eb5b82bcb518e5b6a5f167fa3f896ee87fa48a68f2b"
+    }
+  ],
+  "immutable_panel": {
+    "artifact_manifest_sha256": "e851458b3607aeaad20cd45bccdfd45d3c4d3c77fd091324e873dfaa4cfa5491",
+    "file_count": 77,
+    "outer_receipt_sha256": "697824eef1531cc004e8a8a5c8f2c1adaceb5bc5052744a5e2ef0e78ea4dbb4d",
+    "outer_stderr_sha256": "82575adbeae039a9670a6efd20e2602158f27c6a4c75765748f12b4fff40dbe6",
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909",
+    "provisional_summary_sha256": "ac348f857ae110e731fddb68e87752068a488b2f45fe97e668b9b3ab481b6afc",
+    "provisional_verification_sha256": "73ce430891b207240a456f66bc1ecba174855226566a5f9b73417258e5ff018b",
+    "run_sha256": "0cdb115c5f2d3049c0d3ab7584796a6c3774c82a600d75b7c5b9469a802bc17d",
+    "total_bytes": 214914,
+    "tree_sha256": "f3b4da6dcf36366663c4c851b9b1deda06c43114376a14f9f55314bb4aa9dea5"
+  },
+  "immutable_panel_files_modified_by_bundle": 0,
+  "manifest_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-finalization-correction-manifest.json",
+  "schema": "koblitz_degree23_finalization_correction_bundle_manifest.v1",
+  "scientific_tasks_added_by_bundle": 0,
+  "self_excluded": true,
+  "status": "verified"
+}

@@ -1,0 +1,61 @@
+{
+  "attempt": 1,
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+    "rho-auto",
+    "23",
+    "0",
+    "2",
+    "1956519",
+    "10471725251496847725",
+    "100000",
+    "1000",
+    "divisor:0,2"
+  ],
+  "metrics": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 2129920,
+    "single_core_seconds": 0.018176,
+    "system_seconds": 0.0018599999999999999,
+    "total_core_seconds": 0.018176,
+    "user_seconds": 0.016316,
+    "wall_seconds": 0.020273332949727774
+  },
+  "metrics_sha256": "caa81381af11400a67ea959be5768b48e5d366b3645a23b1fdbd8612a4c27236",
+  "result": {
+    "a": 0,
+    "automorphism_group_bound": 46,
+    "automorphism_optimized": true,
+    "initial_state_additions": 1,
+    "iterations": 70,
+    "jump_table_additions": 16,
+    "kind": "koblitz_unknown_scalar_automorphism_rho_control",
+    "mode": "rho-auto",
+    "n": 23,
+    "reported_group_additions": 227,
+    "restarts": 0,
+    "rho_setup_scalar_multiplications": 34,
+    "scope": "signed-Frobenius quotient r-adding Pollard rho control",
+    "seed": 10471725251496847725,
+    "subgroup_order": "2095853",
+    "target": {
+      "x": "335048",
+      "y": "3444171"
+    },
+    "target_construction_scalar_multiplications": 1,
+    "timing_ns": {
+      "curve_construction": 655208,
+      "end_to_end": 15793416,
+      "rho": 14440292,
+      "target_construction": 254291
+    },
+    "verified_unknown_scalar_recovery": true,
+    "walk_step_additions": 210
+  },
+  "result_sha256": "34cb7207409a7a895d5aa610a0c7e726a2ff79407fafe2c7ae275a2438865a4f",
+  "schema": "koblitz_degree23_task_receipt.v1",
+  "status": "verified",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "task_id": "row-04-rho-auto",
+  "verified_terminal": true
+}

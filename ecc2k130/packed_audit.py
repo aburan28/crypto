@@ -23,6 +23,7 @@ app = modal.App("ecc2k130-packed-audit")
 
 def checkScalarCounts(sample, workers, dpWeight):
     """Require the requested packed geometry and its exact completed work."""
+    client.checkPackedReduction(sample)
     raw = sample.get("raw", "")
     completed = client.benchResult(sample.get("command"), sample.get("returncode"), raw)
     backend = re.findall(
@@ -54,7 +55,8 @@ def checkScalarCounts(sample, workers, dpWeight):
               volumes={"/data": client.volume})
 def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
     result = dict(valid=False, minBlocks=minBlocks, repeats=repeats,
-                  batch=32, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32)
+                  batch=32, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
+                  packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1")
     try:
         if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0:
             raise ValueError("min-blocks, repeats and block-threads must be positive")
@@ -82,9 +84,14 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
              f"PACKED_CACHE_DENOM={client.PACKED_CACHE_DENOM}", f"PACKED_BY_VALUE={client.PACKED_BY_VALUE}",
              f"PACKED_PERM_SIGMA={client.PACKED_PERM_SIGMA}", f"PACKED_POLY_CHAIN={client.PACKED_POLY_CHAIN}",
              f"PACKED_UNROLL_INV={client.PACKED_UNROLL_INV}", f"PACKED_PAIR_PRODUCTS={client.PACKED_PAIR_PRODUCTS}",
-             f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}"], 120)
+             f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}",
+             f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
+        arithmeticModes = re.findall(r"^packed arithmetic direct reduction: (.*)$",
+                                     result["deviceArithmetic"]["output"], re.MULTILINE)
+        if arithmeticModes != [client.PACKED_DIRECT_REDUCE]:
+            raise RuntimeError("packed GPU arithmetic reducer identity disagrees with the requested build")
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:

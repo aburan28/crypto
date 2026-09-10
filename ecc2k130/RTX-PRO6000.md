@@ -22,7 +22,8 @@ their original worker and batch counts; benchmark and audit presets do not
 resume user checkpoints. It enables the single
 polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
-The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md).
+The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md)
+and [direct-order polynomial reduction](DIRECT-REDUCTION.md).
 These settings retain the existing iteration, DP report and packed-checkpoint
 semantics. The linked comparison validates normal-to-polynomial resume and
 the reverse direction, and measures both modes on one GPU.
@@ -31,7 +32,41 @@ CUDA 13.0 requires a compatible driver; the tested driver is 580.95.05.
 NVIDIA lists 580.65.06 for the Linux CUDA 13.0 GA toolkit in its
 [release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#cuda-driver).
 
-## Launch and worker tuning
+## Direct-order reduction comparison
+
+The [paired reducer comparison](benchmarks/direct-reduction/comparison.json)
+uses identical B32/T256/min2 settings, 192,512 workers and
+201,863,462,912 scalar updates per sample on one GPU. Three alternating
+benchmark confirmations and three collection runs per mode measured:
+
+| Workload | Previous reducer | Direct reducer | Change |
+|---|---:|---:|---:|
+| Benchmark median B scalar updates/s | 6.826154 | **6.906059** | +1.17% |
+| DP34 collection median B scalar updates/s | 6.722592 | **6.799047** | +1.14% |
+
+The new reducer was faster in every paired repetition. All six collections
+produced identical sorted record multisets: 5,149 records, 164,768 bytes and
+zero drops. GPU arithmetic, complete client integration and whole-state
+comparisons passed before timing. Warm-ups are excluded from these medians.
+[DIRECT-REDUCTION.md](DIRECT-REDUCTION.md) records ranges, derivation, the
+instruction/spill tradeoff and source/binary provenance.
+
+The [updated native preset audit](benchmarks/direct-reduction/native-audit.json)
+runs the normal `make audit-rtx-pro6000` entry point on a separate allocation:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **6.905227** | 6.884149–6.928427 |
+| DP34 collection | **6.767191** | 6.765677–6.767747 |
+
+Every repetition completed 201,863,462,912 scalar updates with reducer mode 1.
+Each collection recorded 5,149 points, 164,768 bytes and zero drops. The expanded
+GPU arithmetic suite and full client validation passed before timing. This
+native audit validates the published command; the paired comparison above
+estimates the reducer's gain. Source, binary and separate audit-entry-point
+hashes are recorded in [DIRECT-REDUCTION.md](DIRECT-REDUCTION.md).
+
+## Historical launch and worker tuning
 
 The [configuration comparison](benchmarks/launch-tuning/configuration-comparison.json)
 uses one GPU, with three alternating confirmations and three collection runs
@@ -92,7 +127,8 @@ paired estimate of the combined speedup.
 
 All comparisons retain compiler, GPU, source and binary identity. Experimental
 source was used to screen configurations; the promoted settings disable those
-experiments. The native audits build the unchanged production C++/CUDA source.
+experiments. These historical native audits build the production C++/CUDA source before
+the direct-reduction change.
 Their source digests identify the frozen audit snapshots; the final PR also
 adds a count-integrity regression test after measurement.
 Do not multiply percentage gains or compare absolute rates across allocations
