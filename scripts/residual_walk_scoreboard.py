@@ -51,21 +51,38 @@ def mean(xs):
     return sum(xs) / len(xs) if xs else float("nan")
 
 
+def variant(r):
+    """Which generic levers a report ran with (absent fields = off)."""
+    parts = []
+    if r.get("negation_map"):
+        parts.append("neg")
+    if r.get("diff_table"):
+        parts.append("diff")
+    if r.get("segment_len"):
+        parts.append(f"seg{r['segment_len']}")
+    return "+".join(parts) or "plain"
+
+
 def cells(rows):
     groups = defaultdict(list)
     for r in rows:
-        groups[(r["bits"], r["factor_base"], r["dp_bits"], r["tag"])].append(r)
+        groups[(r["bits"], r["factor_base"], r["dp_bits"], r["tag"], variant(r))].append(r)
     out = {}
     for key, g in groups.items():
-        bits, fb, dp, tag = key
+        bits, fb, dp, tag, var = key
         sq = [math.sqrt(r["n"]) for r in g]
         n_ops = [r["total_ops"] for r in g]
         kappa_floor = math.sqrt(math.pi / 2) if tag == "R" else math.sqrt(2 * (fb + 1))
+        # The negation map halves the space every residual is compared
+        # against, so the birthday floor drops by sqrt(2).
+        if g[0].get("negation_map"):
+            kappa_floor /= math.sqrt(2)
         out[key] = {
             "bits": bits,
             "B": fb,
             "dp": dp,
             "tag": tag,
+            "variant": var,
             "seeds": len(g),
             "kappa": mean(r["samples"] / s for r, s in zip(g, sq)),
             "kappa_floor": kappa_floor,
@@ -86,8 +103,8 @@ def cells(rows):
 
 
 def sort_key(k):
-    bits, fb, dp, tag = k
-    return (bits, fb, dp, TAG_ORDER.index(tag) if tag in TAG_ORDER else 99)
+    bits, fb, dp, tag, var = k
+    return (bits, fb, dp, TAG_ORDER.index(tag) if tag in TAG_ORDER else 99, var)
 
 
 def fmt(v, d=2):
@@ -101,12 +118,12 @@ def fmt(v, d=2):
 
 
 def print_scoreboard(c):
-    print("| bits | B | dp | tag | seeds | κ = samples/√n | κ floor | κ/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
-    print("|---:|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
+    print("| bits | B | dp | tag | variant | seeds | κ = samples/√n | κ floor | κ/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
+    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
     for k in sorted(c, key=sort_key):
         x = c[k]
-        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
-            x["bits"], x["B"], x["dp"], x["tag"], x["seeds"],
+        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+            x["bits"], x["B"], x["dp"], x["tag"], x["variant"], x["seeds"],
             fmt(x["kappa"]), fmt(x["kappa_floor"]), fmt(x["kappa"] / x["kappa_floor"]),
             fmt(x["c"], 1),
             fmt(100 * x["setup_frac"], 1) + "%", fmt(100 * x["replay_frac"], 1) + "%", fmt(100 * x["verify_frac"], 1) + "%",
@@ -121,26 +138,27 @@ def print_ledger(c):
     print("Optimisation ledger (dp = 0 cells; factors are ratios of S, > 1 means cheaper):\n")
     print("| bits | B | A → B (mutation) | A → C1 (r-adding) | A → C2 (fresh hash) | B → R (drop the base) | C1 → R | B / S floor | C1 / S floor | R / rho floor |")
     print("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
-    keys = sorted({(k[0], k[1]) for k in c if k[2] == 0})
-    for bits, fb in keys:
+    keys = sorted({(k[0], k[1], k[4]) for k in c if k[2] == 0})
+    for bits, fb, var in keys:
         def s(tag):
-            return c.get((bits, fb, 0, tag), {}).get("S", float("nan"))
-        floor = math.sqrt(2 * (fb + 1))
-        print("| {} | {} | {}× | {}× | {}× | {}× | {}× | {}× | {}× | {}× |".format(
-            bits, fb,
+            return c.get((bits, fb, 0, tag, var), {}).get("S", float("nan"))
+        floor = c.get((bits, fb, 0, "B", var), c.get((bits, fb, 0, "A", var), {"S_floor": math.sqrt(2 * (fb + 1))}))["S_floor"]
+        print("| {} | {} ({}) | {}× | {}× | {}× | {}× | {}× | {}× | {}× | {}× |".format(
+            bits, fb, var,
             fmt(s("A") / s("B")), fmt(s("A") / s("C1")), fmt(s("A") / s("C2")),
             fmt(s("B") / s("R")), fmt(s("C1") / s("R")),
-            fmt(s("B") / floor), fmt(s("C1") / floor), fmt(s("R") / math.sqrt(math.pi / 2))))
+            fmt(s("B") / floor), fmt(s("C1") / floor),
+            fmt(s("R") / c.get((bits, fb, 0, "R", var), {"S_floor": math.sqrt(math.pi / 2)})["S_floor"])))
     print()
-    dp_keys = sorted({(k[0], k[1], k[3]) for k in c if k[2] > 0})
+    dp_keys = sorted({(k[0], k[1], k[3], k[4]) for k in c if k[2] > 0})
     if dp_keys:
         print("Distinguished points (memory bought per operation spent):\n")
         print("| bits | B | tag | dp | stored/√n dp=0 | stored/√n dp | memory ÷ | S dp=0 | S dp | ops × |")
         print("|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|")
-        for bits, fb, tag in dp_keys:
-            base = c.get((bits, fb, 0, tag))
+        for bits, fb, tag, var in dp_keys:
+            base = c.get((bits, fb, 0, tag, var)) or c.get((bits, fb, 0, tag, "plain"))
             for k in sorted(c, key=sort_key):
-                if k[:2] == (bits, fb) and k[3] == tag and k[2] > 0 and base:
+                if k[:2] == (bits, fb) and k[3] == tag and k[4] == var and k[2] > 0 and base:
                     x = c[k]
                     print("| {} | {} | {} | {} | {} | {} | {}× | {} | {} | {}× |".format(
                         bits, fb, tag, k[2], fmt(base["stored_over_sqrt_n"], 3), fmt(x["stored_over_sqrt_n"], 4),
@@ -151,18 +169,22 @@ def print_ledger(c):
 
 def compare(run, base, tolerance):
     print(f"Comparison against baseline (tolerance {tolerance:.0%}):\n")
-    print("| bits | B | dp | tag | S baseline | S run | improvement (base/run) | κ baseline | κ run | κ ratio | count invariant beaten? | correct | verdict |")
-    print("|---:|---:|---:|:--|---:|---:|---:|---:|---:|---:|:--|:--|:--|")
+    print("A run cell is matched to the baseline cell with the same (bits, B, dp, tag); "
+          "the baseline variant is used when the run's variant is absent from it. "
+          "κ is compared as κ/κ_floor so the negation map's √2 is not mistaken for a beaten count.\n")
+    print("| bits | B | dp | tag | variant | S baseline | S run | improvement (base/run) | κ/floor baseline | κ/floor run | ratio | count invariant beaten? | correct | verdict |")
+    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|:--|:--|:--|")
     regressions = 0
     for k in sorted(run, key=sort_key):
         x = run[k]
-        b = base.get(k)
+        b = base.get(k) or base.get(k[:4] + ("plain",))
         if b is None:
-            print("| {} | {} | {} | {} | - | {} | new cell | - | {} | - | - | {} | - |".format(
-                x["bits"], x["B"], x["dp"], x["tag"], fmt(x["S"], 1), fmt(x["kappa"]), fmt(x["correct"])))
+            print("| {} | {} | {} | {} | {} | - | {} | new cell | - | {} | - | - | {} | - |".format(
+                x["bits"], x["B"], x["dp"], x["tag"], x["variant"], fmt(x["S"], 1),
+                fmt(x["kappa"] / x["kappa_floor"]), fmt(x["correct"])))
             continue
         imp = b["S"] / x["S"]
-        kr = x["kappa"] / b["kappa"]
+        kr = (x["kappa"] / x["kappa_floor"]) / (b["kappa"] / b["kappa_floor"])
         beaten = kr < 1 - tolerance and x["correct"]
         if not x["correct"]:
             verdict = "WRONG ANSWER"
@@ -174,9 +196,10 @@ def compare(run, base, tolerance):
             verdict = "improvement"
         else:
             verdict = "unchanged"
-        print("| {} | {} | {} | {} | {} | {} | {}× | {} | {} | {} | {} | {} | {} |".format(
-            x["bits"], x["B"], x["dp"], x["tag"], fmt(b["S"], 1), fmt(x["S"], 1), fmt(imp),
-            fmt(b["kappa"]), fmt(x["kappa"]), fmt(kr), "YES" if beaten else "no", fmt(x["correct"]), verdict))
+        print("| {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} | {} | {} | {} | {} |".format(
+            x["bits"], x["B"], x["dp"], x["tag"], x["variant"], fmt(b["S"], 1), fmt(x["S"], 1), fmt(imp),
+            fmt(b["kappa"] / b["kappa_floor"]), fmt(x["kappa"] / x["kappa_floor"]), fmt(kr),
+            "YES" if beaten else "no", fmt(x["correct"]), verdict))
     print()
     return regressions
 

@@ -638,6 +638,22 @@ impl Relation {
     }
 }
 
+/// Representative of the class `{pt, −pt}` (the point with the smaller
+/// `y`) and the sign relating `pt` to it: `pt = sign · canonical`.
+fn negation_class(curve: &Curve, pt: &Pt) -> (Pt, i64) {
+    if !pt.inf && pt.y * 2 > curve.p {
+        (curve.neg(pt), -1)
+    } else {
+        (*pt, 1)
+    }
+}
+
+fn multiset_sum(t1: &[u32], t2: &[u32]) -> Vec<(usize, i64)> {
+    let mut all: Vec<u32> = t1.to_vec();
+    all.extend_from_slice(t2);
+    multiset_diff(&all, &[])
+}
+
 fn multiset_diff(t1: &[u32], t2: &[u32]) -> Vec<(usize, i64)> {
     let mut m: HashMap<u32, i64> = HashMap::new();
     for &i in t1 {
@@ -816,6 +832,21 @@ pub struct WalkOptions {
     /// until the budget is spent so relation yield can be compared at a
     /// fixed cost (`false`; `ops_at_solve` still records the first solve).
     pub stop_when_solved: bool,
+    /// Key the residual table on the class `{L, −L}` so a residual also
+    /// collides with the negative of a stored one (`L(s) = −L(s')` gives
+    /// `(a+a')G + (b+b')Q = ΣT + ΣT'`).  Halves the effective search
+    /// space; only for `dp_bits = 0`, where every residual is stored and
+    /// nothing has to propagate along a walk.
+    pub negation_map: bool,
+    /// Local-mutation walk only: precompute `P_i − P_j` for all pairs so
+    /// a swap costs one addition instead of two (`B(B−1)/2` setup
+    /// operations and points).
+    pub diff_table: bool,
+    /// r-adding walks only: restart the walk after this many steps
+    /// (`0` = never).  Bounds the coefficient replay per collision to
+    /// `2·segment_len` at the price of two scalar multiplications per
+    /// restart.
+    pub segment_len: u64,
 }
 
 impl Default for WalkOptions {
@@ -829,6 +860,9 @@ impl Default for WalkOptions {
             seed: 1,
             walk_cap: 0,
             stop_when_solved: true,
+            negation_map: false,
+            diff_table: false,
+            segment_len: 0,
         }
     }
 }
@@ -846,6 +880,9 @@ pub struct StrategyReport {
     pub dp_bits: u32,
     pub multipliers: usize,
     pub filter_bound: Option<u64>,
+    pub negation_map: bool,
+    pub diff_table: bool,
+    pub segment_len: u64,
     /// Residuals evaluated (independent samples or walk steps).
     pub samples: u64,
     /// Residuals that passed the filter / distinguished-point test and
@@ -897,6 +934,9 @@ impl StrategyReport {
             dp_bits: opts.dp_bits,
             multipliers: opts.multipliers,
             filter_bound: opts.filter_bound,
+            negation_map: opts.negation_map,
+            diff_table: opts.diff_table,
+            segment_len: opts.segment_len,
             samples: 0,
             accepted: 0,
             table_entries: 0,
@@ -1083,6 +1123,26 @@ impl DecompState {
         }
     }
 
+    /// Relation implied by `sign · L(self) = other_sign · L(other)`: the
+    /// plain difference when the signs agree, and
+    /// `(a+a')G + (b+b')Q = ΣT + ΣT'` when they differ.
+    pub fn relation_to_signed(
+        &self,
+        sign: i64,
+        other: &DecompState,
+        other_sign: i64,
+        n: u64,
+    ) -> Relation {
+        if sign == other_sign {
+            return self.relation_to(other, n);
+        }
+        Relation {
+            da: add_mod(self.a % n, other.a % n, n),
+            db: add_mod(self.b % n, other.b % n, n),
+            coeffs: multiset_sum(&self.tuple, &other.tuple),
+        }
+    }
+
     /// Relation implied by `L(self) = sign·P_i` (or `O` when `hit` is
     /// `None`).
     pub fn full_relation(&self, hit: Option<(usize, i64)>) -> Relation {
@@ -1127,7 +1187,23 @@ fn run_explicit(
     curve.reset_ops();
     let start = Instant::now();
     let mut col = Collector::new(inst, fb, strategy, opts);
-    let mut table: HashMap<Pt, DecompState> = HashMap::new();
+    let mut table: HashMap<Pt, (DecompState, i64)> = HashMap::new();
+
+    // Optional `P_i − P_j` table for the local-mutation walk.
+    let diff: Vec<Pt> = if strategy == Strategy::LocalMutationWalk && opts.diff_table {
+        let mut d = vec![Pt::INFINITY; bsize * bsize];
+        for i in 0..bsize {
+            for j in (i + 1)..bsize {
+                let dij = curve.sub(&fb.points[i], &fb.points[j]);
+                d[i * bsize + j] = dij;
+                d[j * bsize + i] = curve.neg(&dij);
+            }
+        }
+        d
+    } else {
+        Vec::new()
+    };
+    let setup_ops = curve.ops();
 
     let mut state = DecompState::random(&mut rng, n, bsize, k);
     let mut l = state.residual(inst, fb);
@@ -1148,13 +1224,25 @@ fn run_explicit(
                 col.push_full(state.full_relation(Some(hit)));
             }
             col.report.accepted += 1;
-            match table.get(&l) {
-                Some(prev) => {
-                    col.push_collision(state.relation_to(prev, n));
+            let (key, sign) = if opts.negation_map {
+                negation_class(curve, &l)
+            } else {
+                (l, 1)
+            };
+            match table.get(&key) {
+                Some((prev, prev_sign)) => {
+                    if *prev == state {
+                        // Same state: a revisit (same sign) or `L = −L`,
+                        // i.e. `L = O`, already reported as a complete
+                        // decomposition.  Neither is progress.
+                        col.count_collision(CollisionKind::Trivial);
+                    } else {
+                        col.push_collision(state.relation_to_signed(sign, prev, *prev_sign, n));
+                    }
                     restart = true;
                 }
                 None => {
-                    table.insert(l, state.clone());
+                    table.insert(key, (state.clone(), sign));
                 }
             }
         }
@@ -1195,8 +1283,12 @@ fn run_explicit(
                             let new = rng.gen_range(0..bsize as u32);
                             let old = state.tuple[slot];
                             if old != new {
-                                l = curve.add(&l, &fb.points[old as usize]);
-                                l = curve.sub(&l, &fb.points[new as usize]);
+                                if diff.is_empty() {
+                                    l = curve.add(&l, &fb.points[old as usize]);
+                                    l = curve.sub(&l, &fb.points[new as usize]);
+                                } else {
+                                    l = curve.add(&l, &diff[old as usize * bsize + new as usize]);
+                                }
                                 state.tuple[slot] = new;
                                 state.tuple.sort_unstable();
                             }
@@ -1217,7 +1309,7 @@ fn run_explicit(
         }
     }
     col.report.table_entries = table.len();
-    col.finish(start, 0)
+    col.finish(start, setup_ops)
 }
 
 /// Fresh-hash walk with distinguished-point storage.
@@ -1231,6 +1323,10 @@ fn run_explicit(
 /// point and stepping in lockstep until the residuals first agree.
 fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> StrategyReport {
     let strategy = Strategy::FreshHashWalk;
+    assert!(
+        !opts.negation_map,
+        "the negation map is implemented for exhaustive storage (dp_bits = 0) only"
+    );
     let curve = &inst.curve;
     let n = curve.n;
     let bsize = fb.len();
@@ -1404,6 +1500,36 @@ impl<'a> RAddingWalk<'a> {
         }
     }
 
+    /// Relation implied by `sign·L(here) = there_sign·L(there)`.
+    fn relation_signed(
+        &self,
+        here: &WalkPosition,
+        sign: i64,
+        there: &WalkPosition,
+        there_sign: i64,
+    ) -> Relation {
+        if sign == there_sign {
+            return self.relation(here, there);
+        }
+        let n = self.inst.curve.n;
+        let mut by_fb: HashMap<usize, i64> = HashMap::new();
+        for (j, m) in self.mults.iter().enumerate() {
+            let total = here.counts[j] as i64 + there.counts[j] as i64;
+            if total != 0 {
+                if let Some(i) = m.fb_index {
+                    *by_fb.entry(i).or_insert(0) += total;
+                }
+            }
+        }
+        let mut coeffs: Vec<(usize, i64)> = by_fb.into_iter().filter(|&(_, c)| c != 0).collect();
+        coeffs.sort_unstable();
+        Relation {
+            da: add_mod(here.a, there.a, n),
+            db: add_mod(here.b, there.b, n),
+            coeffs,
+        }
+    }
+
     /// Relation from `L = sign·P_i` (or `O`).
     fn full_relation(&self, here: &WalkPosition, hit: Option<(usize, i64)>) -> Relation {
         let empty = WalkPosition {
@@ -1441,6 +1567,10 @@ fn run_radding(
         (r, false) => r,
     };
     assert!(r >= 2, "need at least two multipliers");
+    assert!(
+        !(opts.negation_map && opts.dp_bits > 0),
+        "the negation map is implemented for exhaustive storage (dp_bits = 0) only"
+    );
     let mut rng = StdRng::seed_from_u64(opts.seed ^ mix64(strategy.tag().len() as u64 + 29));
     curve.reset_ops();
     let start = Instant::now();
@@ -1479,7 +1609,7 @@ fn run_radding(
     } else {
         (64u64 << opts.dp_bits).max(8 * sqrt_n)
     };
-    let mut table: HashMap<Pt, (u32, u32)> = HashMap::new();
+    let mut table: HashMap<Pt, (u32, u32, i8)> = HashMap::new();
 
     'outer: loop {
         let w = walk.starts.len();
@@ -1506,27 +1636,39 @@ fn run_radding(
             }
             if is_distinguished(&l, opts.dp_bits) {
                 col.report.accepted += 1;
-                match table.get(&l) {
-                    Some(&(w2, s2)) => {
+                let (key, sign) = if opts.negation_map {
+                    negation_class(curve, &l)
+                } else {
+                    (l, 1)
+                };
+                match table.get(&key) {
+                    Some(&(w2, s2, sign2)) => {
+                        let sign2 = sign2 as i64;
                         let before = curve.ops();
                         let here = walk.replay(w, step);
                         let there = walk.replay(w2 as usize, s2 as u64);
                         col.report.replay_ops += curve.ops() - before;
-                        if here.residual != l || there.residual != l {
+                        let there_expected = if sign == sign2 { l } else { curve.neg(&l) };
+                        if here.residual != l || there.residual != there_expected {
                             // Never expected: the walk is deterministic.
                             col.report.relations_failed_verification += 1;
                         } else {
-                            col.push_collision(walk.relation(&here, &there));
+                            col.push_collision(walk.relation_signed(&here, sign, &there, sign2));
                         }
                         break;
                     }
                     None => {
-                        table.insert(l, (w as u32, step as u32));
+                        table.insert(key, (w as u32, step as u32, sign as i8));
                     }
                 }
             }
             if (opts.stop_when_solved && col.report.solved) || curve.ops() >= opts.max_ops {
                 break 'outer;
+            }
+            if opts.segment_len > 0 && step >= opts.segment_len {
+                // Segment boundary: start a fresh walk so that replay
+                // never has to reach back further than one segment.
+                break;
             }
             if step >= walk_cap {
                 col.report.abandoned_walks += 1;
@@ -2083,6 +2225,95 @@ mod tests {
         assert_eq!(filtered.correct, Some(true));
         assert!(filtered.accepted < filtered.samples / 4);
         assert!(filtered.samples > unfiltered.samples);
+    }
+
+    #[test]
+    fn generic_levers_recover_the_planted_logarithm() {
+        // Negation map on every strategy, the difference table on the
+        // local-mutation walk, segmented walks on the r-adding ones.
+        let (inst, fb) = small_setup(18, 24, 31);
+        for strategy in Strategy::ALL {
+            let opts = WalkOptions {
+                k: 3,
+                max_ops: 1 << 26,
+                seed: 7,
+                negation_map: true,
+                diff_table: true,
+                segment_len: 300,
+                ..WalkOptions::default()
+            };
+            let rep = run_strategy(&inst, &fb, strategy, &opts);
+            assert_eq!(
+                rep.correct,
+                Some(true),
+                "{} with levers failed: {rep:?}",
+                rep.strategy
+            );
+            assert_eq!(rep.relations_failed_verification, 0, "{}", rep.strategy);
+            assert!(rep.negation_map && rep.diff_table && rep.segment_len == 300);
+        }
+        // The difference table is paid for in setup and shows up as fewer
+        // walk operations per residual.
+        let plain = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                seed: 7,
+                ..WalkOptions::default()
+            },
+        );
+        let tabled = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                seed: 7,
+                diff_table: true,
+                ..WalkOptions::default()
+            },
+        );
+        assert_eq!(tabled.setup_ops as usize, fb.len() * (fb.len() - 1) / 2);
+        let per_residual = |r: &StrategyReport| r.walk_ops as f64 / (r.samples as f64);
+        assert!(per_residual(&tabled) < per_residual(&plain));
+    }
+
+    #[test]
+    fn negation_class_is_consistent() {
+        let inst = generate_instance(16, 2);
+        let c = &inst.curve;
+        let pt = c.mul(&c.g, 12345);
+        let (k1, s1) = negation_class(c, &pt);
+        let (k2, s2) = negation_class(c, &c.neg(&pt));
+        assert_eq!(k1, k2);
+        assert_eq!(s1, -s2);
+        assert_eq!(c.mul_signed(&k1, s1), pt);
+        // Signed relations from mirrored states verify by arithmetic.
+        let fb = FactorBase::build(c, 8);
+        let s = DecompState {
+            a: 5,
+            b: 9,
+            tuple: vec![1, 3, 3],
+        };
+        let t = DecompState {
+            a: 11,
+            b: 2,
+            tuple: vec![0, 4, 7],
+        };
+        // Force the sign-mismatch branch and check its algebra on a
+        // synthetic equality: build u with L(u) = −L(t) via u = (−a, −b, …)
+        // is impossible with non-negative multiplicities, so check the
+        // identity (a+a')G + (b+b')Q − ΣT − ΣT' = L(s) + L(t) instead.
+        let rel = s.relation_to_signed(1, &t, -1, c.n);
+        let lhs = {
+            let mut acc = c.combine(&inst.q, rel.da, rel.db);
+            for &(i, coef) in &rel.coeffs {
+                acc = c.sub(&acc, &c.mul_signed(&fb.points[i], coef));
+            }
+            acc
+        };
+        let rhs = c.add(&s.residual(&inst, &fb), &t.residual(&inst, &fb));
+        assert_eq!(lhs, rhs);
     }
 
     #[test]

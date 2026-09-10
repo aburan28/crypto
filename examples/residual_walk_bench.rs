@@ -19,7 +19,9 @@
 //! cargo run --release --example residual_walk_bench -- --baseline --json experiments/20_residual_walk_baseline.json
 //! ```
 //!
-//! `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
+//! `--baseline --tuned` runs the same protocol with the generic levers on
+//! (negation map, difference table, 512-step segments) for the
+//! exhaustive-storage rows.  `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
 //! `2^28`, `B = 256`, `k = 3`, seeds 1–3, every strategy, plus `C1` and
 //! `R` with 8 distinguished-point bits; about a minute).  Score it, or
 //! compare it against the frozen baseline, with
@@ -273,7 +275,7 @@ fn panel(quick: bool) -> Panel {
 /// The fixed optimisation protocol: two sizes, one factor base, three
 /// seeds, every strategy, plus the distinguished-point variants of the
 /// two one-op-per-step walks.  Deterministic for a given build.
-fn baseline() -> Vec<StrategyReport> {
+fn baseline(tuned: bool) -> Vec<StrategyReport> {
     let mut out = Vec::new();
     header();
     for bits in [24u32, 28] {
@@ -290,11 +292,18 @@ fn baseline() -> Vec<StrategyReport> {
                 k: 3,
                 max_ops: 1 << 34,
                 seed,
+                negation_map: tuned,
+                diff_table: tuned,
+                segment_len: if tuned { 512 } else { 0 },
                 ..WalkOptions::default()
             };
             run_all(&inst, &fb, &Strategy::ALL, &opts, &mut out);
+            // Distinguished points need the walk itself to propagate a
+            // collision, so the negation map (table-only) is off here.
             let dp = WalkOptions {
                 dp_bits: 8,
+                negation_map: false,
+                segment_len: 0,
                 ..opts.clone()
             };
             run_all(
@@ -322,6 +331,10 @@ fn main() {
     let mut json: Option<String> = None;
     let mut do_panel = false;
     let mut do_baseline = false;
+    let mut tuned = false;
+    let mut negation = false;
+    let mut diff_table = false;
+    let mut segment = 0u64;
     let mut quick = false;
     let mut i = 0;
     let value = |i: &mut usize, args: &[String]| -> String {
@@ -354,11 +367,16 @@ fn main() {
             "--json" => json = Some(value(&mut i, &args)),
             "--panel" => do_panel = true,
             "--baseline" => do_baseline = true,
+            "--tuned" => tuned = true,
+            "--negation" => negation = true,
+            "--diff-table" => diff_table = true,
+            "--segment" => segment = value(&mut i, &args).parse().expect("--segment"),
             "--quick" => quick = true,
             "--help" | "-h" => {
                 println!(
                     "usage: residual_walk_bench [--bits N] [--fb B] [--k K] [--trials T] [--seed S] \
-                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--json FILE] [--panel [--quick]] [--baseline]"
+                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--json FILE] \
+                     [--panel [--quick]] [--baseline [--tuned]]"
                 );
                 return;
             }
@@ -371,7 +389,7 @@ fn main() {
     }
 
     if do_baseline {
-        let reports = baseline();
+        let reports = baseline(tuned);
         if let Some(path) = json {
             fs::write(&path, serde_json::to_string_pretty(&reports).unwrap()).expect("write json");
             println!("\nwrote {path}");
@@ -405,6 +423,9 @@ fn main() {
             max_ops: budget,
             dp_bits: dp,
             seed: seed + t,
+            negation_map: negation,
+            diff_table,
+            segment_len: segment,
             ..WalkOptions::default()
         };
         for &s in &strategies {
