@@ -10,6 +10,11 @@ producers `koblitz_rank_fixture` and `koblitz_rho_fixture` are the measurement
 engines; this Python control plane owns locks, run directories, ledger pinning,
 and fail-closed measurement-schema checks.
 
+## Agent skill
+
+Personal skill (not shipped in this tree): `~/.agents/skills/ic-boundary-autolab/SKILL.md`.
+Install or copy into a Cursor skills path if agents should auto-discover it.
+
 ## Quick start
 
 ```bash

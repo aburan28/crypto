@@ -517,6 +517,7 @@ def draft_vs_rho_claim(
     timing_class = beat["timing_class_goal"]
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
+    producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
     ic_cost = (
         float(direct_obs["whole_process_wall_ms"])
         if timing_class == "whole_process_wall"
@@ -540,7 +541,11 @@ def draft_vs_rho_claim(
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
         "all_stages_charged_same_series": True,
-        "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION",
+        "verdict": (
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
         "claim_boundary": (
             "Public synthetic Koblitz fixture comparison only. Not key recovery, "
             "not asymptotic sub-rho, not an imported-point attack, and not a "
