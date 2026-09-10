@@ -441,7 +441,40 @@ branch against `main` built from the same tree; 4 cores.  Columns are
 relation unknowns; the new default merges signed orbits by cofactor
 projection.
 
-SWEEP_TABLE_PLACEHOLDER
+| curve | solver | columns main → branch | relations main → branch | wall main | wall branch |
+|:------|:-------|:---------------------:|:-----------------------:|----------:|------------:|
+| `K_0/2^9` | enumerate | 7 → 3 | 11 → 4 | 0.010 s | 0.009 s |
+| `K_0/2^9` | groebner | 7 → 3 | 11 → 4 | 0.026 s | 0.012 s |
+| `K_0/2^9` | sat | 7 → 3 | 11 → 4 | 0.014 s | 0.009 s |
+| `K_1/2^11` | enumerate | 91 → 45 | 95 → 16 | 0.035 s | 0.028 s |
+| `K_1/2^11` | groebner | 91 → 45 | 95 → 16 | 0.84 s | 0.071 s |
+| `K_1/2^11` | sat | 91 → 45 | 95 → 32 | 0.216 s | 0.063 s |
+| `K_0/2^13` | enumerate | 309 → 77 | 313 → 12 | 0.140 s | 0.119 s |
+| `K_0/2^13` | groebner | 309 → 77 | 313 → 12 | 6.78 s | 0.223 s |
+| `K_0/2^13` | sat | 309 → 77 | 313 → 20 | 2.17 s | 0.249 s |
+| `K_1/2^17` | enumerate | 13 → 6 | 17 → 7 | 0.063 s | 0.032 s |
+| `K_1/2^17` | groebner | 13 → 6 | 17 → 7 | 1.33 s | 0.222 s |
+| `K_1/2^17` | sat | 13 → 6 | 17 → 7 | 0.555 s | 0.095 s |
+| `K_1/2^23` | enumerate | 91 → 45 | 95 → 23 | 4.31 s | 0.495 s |
+| `K_1/2^23` | groebner | 91 → 45 | 95 → 27 | 206 s | 20.6 s |
+| `K_1/2^23` | sat | 91 → 45 | 95 → 23 | > 900 s (killed) | 137 s |
+| `K_1/2^23` | pair-table (new) | — | 23 | — | 6.2 s |
+
+Three things the table says.  The relation count is what moved: with
+signed, projected columns and the exact stopping rule the run needs
+16 relations at `n = 11` where it collected 95, and 12 at `n = 13` where
+it collected 313 — the algebraic oracles gain 10–30× because they pay per
+relation.  Enumeration was already cheap per trial, so it gains only
+what the trial count gives (9× at `n = 23`).  And the pair table does
+**not** win at `m = 2` on these instances: its one-time build is
+`|F|(|F|+1)/2` point additions at ≈ 9 µs each on this curve arithmetic
+(4.4 s at `|F| = 991`, 12 s at `|F| = 4005`), against a dozen trials of
+`|F|` additions for enumeration.  It pays when trials are many or
+`m ≥ 3`, where enumeration is `|F|²` per trial and the table is `|F|`
+lookups — which is exactly the regime past the old cap below.  On the
+cofactor-2 curves `K_1/2^11`, `K_1/2^17` and `K_1/2^23` three summands
+are inadmissible (no cofactor-class cancellation), and every solver
+reports that up front instead of searching.
 
 ### Past the old cap
 
@@ -452,7 +485,19 @@ prime-order subgroup larger than their cofactor — `K_1/2^29`
 (r = 42 457), `K_0/2^31` (r = 1 439 393, h = 1492), `K_0/2^37` and
 `K_0/2^39` — and the constructor rejects the rest, as it did before.
 
-N31_PLACEHOLDER
+On `K_0/2^31` (h = 1492) the single-factor family cannot be used at all
+in `ic` (`ord_31(2) = 5` gives 65-point bases whose two-summand coverage
+is 0 on every one of them), so this is the first instance the search is
+*necessary* for rather than merely better.  `ic search --degree 31
+--curve-a 0 --summands 3 --family divisor --max-dimension 11` scores
+the 42 divisor bases of dimension 5, 6, 10 and 11 on 256 sampled
+targets; the dimension-11 bases (≈ 2 200 points, 36 columns) reach
+three-summand coverage 0.59, i.e. an expected 67 trials for a
+determining system, and the pair table answers each trial in `|F|`
+lookups.  The validated end-to-end run on that base is recorded below
+once it completes.
+
+N31_RESULT_PENDING
 
 ## Open problems from the talk (unimplemented)
 
