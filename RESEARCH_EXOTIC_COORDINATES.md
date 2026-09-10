@@ -663,6 +663,8 @@ total degree in the invariants is not a cost.
 | `y² = x³ − x / F₁₀₀₉`, one `T`, sign frame | 4 | 8 | `e₂[u_i] = −u_i²`, `e_k[Σu]`, `Πu` | degree 2, 9 terms, weighted 6 | 8.0 |
 | `y² = x³ − x / F₁₀₀₉`, all of `E[2]`, seeds `u_i` only | 8 | **32** | `e₂[u_i]` (the `D₂`-quotient coordinate) | **none up to total degree 5** (predicted degree 8 per variable) | 31.9 |
 | `y² = x³ − x / F₁₀₀₉`, all of `E[2]`, `+ Σu, Πu` | 8 | 32 | `+ e_k[Σu]`, `e_k[Πu]` | `32 + 1001·e₃[Πu] + e₃[Σu]`, linear, weighted 9 | 32.0 |
+| `y² = x³ − x / F₁₀₀₉`, `E[2] + Aut` (`j = 1728`, `|Aut| = 4`) | 16 | **64** | `e₄[u_i]`, `e₄[Σu]`, `e_k[Πu]` | `12 + 3·e₄[Πu] − e₄[Σu] + Σe₄[u_i]`, linear, algebraic | 64.9 |
+| `y² = x³ + x + 2 / F₁₀₀₉`, all of `E[2]` | 8 | 32 | as above | `793 + 817·e₃[Πu] + e₃[Σu]`, linear | 32.0 |
 
 Every relation verified on 200 fresh relation tuples and non-vanishing
 on generic ones; every collapse equals `|Γ|` to the decimal, i.e. the
@@ -701,7 +703,7 @@ size's order, and the linear relation says it is determined by the
 per-point invariants on relations.  The tool's own weighted-degree
 column says "algebraic" for exactly this reason.
 
-### 10.3 The Klein group on a prime curve
+### 10.3 The Klein group on a prime curve, and the automorphisms with it
 
 With all three 2-torsion points rational, `Γ` has order 32 at `m = 2`
 (16 translation tuples summing to zero, times the global sign) and the
@@ -720,6 +722,18 @@ question about bits, not degrees, and needs `F_{p^k}` support to answer
 (§10.5).  The gain that is certain is the collapse: 32 against 8, four
 times as many relation tuples per solve.
 
+Adding the automorphisms of `j = 1728` (`|Aut| = 4`) to the group doubles
+`Γ` again, to 64 at `m = 2` and 256 at `m = 3` — the automorphism acts
+globally, so it contributes a factor `|Aut|/2` — and the invariants
+become `e₄` of orbit sets of size 8; the relation stays linear in the
+tuple invariants and the collapse is 64.9, separation up to degenerate
+tuples.  This is the Duursma–Gaudry–Morain automorphism saving computed
+by the same code path as the torsion one, with no special case for
+"global" symmetries: they simply show up as elements of `Γ` that act on
+all coordinates at once.  (A first version counted `−1` twice on odd
+characteristic, as negation and as scaling by `−1`, and reported
+`|G| = 20`; group closure now canonicalises.)
+
 ### 10.4 Results at `m = 3`
 
 | curve, group, seeds | `|Γ|` | relation | collapse |
@@ -733,7 +747,7 @@ times as many relation tuples per solve.
 | `y² = x³ − x`, one `T`, sign frame, `+ Σu, Πu` | 16 | none up to total degree 4 (the 24-term `S₄` of §3.1 has total degree 6) | not enumerated |
 | `y² = x³ − x`, `E[2]`, `u_i` only | 128 | none up to total degree 5 | not enumerated |
 | `y² = x³ − x`, `E[2]`, `+ Σu, Πu` | 128 | linear in `e₁, e₂, e₄[Πu]`, `e₄[Σu]`, 5 terms | not enumerated |
-| `y² = x³ − x`, `E[2] + Aut` | TBD-AUT | TBD-AUT | not enumerated |
+| `y² = x³ − x`, `E[2] + Aut` | 256 | linear in `e₄[u_i]`, `e₄[Σu]`, `e₁, e₄[Πu]`, 8 terms | not enumerated |
 | `y² = x³ + x + 2`, `E[2]`, `+ Σu, Πu` | 128 | degree 2 in `e_k[Πu]`, `e₄[Σu]`, 17 terms | not enumerated |
 
 The `K₀` row with `Σu` is the `m = 3` analogue of §10.2: degree 2 in each

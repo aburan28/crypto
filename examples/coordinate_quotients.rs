@@ -83,7 +83,7 @@ fn main() {
         fr1,
         &seeds(m, false, false),
         m,
-        4,
+        6,
         max_tuples,
         &mut rng,
     );
@@ -122,7 +122,7 @@ fn main() {
         fr0,
         &seeds(m, false, false),
         m,
-        4,
+        6,
         max_tuples,
         &mut rng,
     );
