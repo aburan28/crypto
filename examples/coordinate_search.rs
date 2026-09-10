@@ -89,7 +89,7 @@ fn main() {
     println!("Columns: vars/degrees/terms of the interpolated relation polynomial;");
     println!("collapse = relation tuples per coordinate vector (median, permutations excluded);");
     println!("Frob = coordinate commutes with the subfield Frobenius; descent = unknowns/equations/degree");
-    println!("of the Boolean system for a subspace factor base, ×targets per solve.");
+    println!("of the Boolean system for a subspace factor base.");
     println!();
 
     println!("---------------- prime fields ----------------");

@@ -31,7 +31,10 @@
 //! A root gives each `w_i`, hence `u_i` up to `u_i ↦ u_i + 1` with the
 //! parity fixed by `ε`, hence `x_i = 1/u_i + 1` up to sign.  The lifted
 //! points sum to `R` or to `R + T`; both are relations over `F_u` since
-//! `T ∈ F_u` (`u(T) = 1 ∈ V`), and the oracle reports which.
+//! `T ∈ F_u` (`u(T) = 1 ∈ V`), and the oracle reports which — but they
+//! are the *same* projected relation, because the index-calculus rows are
+//! multiplied by the cofactor and `[h]T = O`.  The `via T` count is a fact
+//! about lifting, not a second relation.
 //!
 //! ## What is compared
 //!
@@ -600,6 +603,22 @@ pub fn lift_symmetrised_root(
     root: u64,
     target: &BinaryPoint,
 ) -> Option<(Vec<usize>, bool)> {
+    lift_symmetrised_root_accepting(kc, fb, sys, root, target, |_| true)
+}
+
+/// As [`lift_symmetrised_root`], returning the first lift of the root —
+/// over every parity choice and every sign walk — whose index list
+/// `accept` approves.  A root stands for a whole orbit of decompositions,
+/// and a caller with a side condition (every summand in the image of an
+/// endomorphism, say) needs to see all of them.
+pub fn lift_symmetrised_root_accepting(
+    kc: &KoblitzCurve,
+    fb: &SymmetrisedFactorBase,
+    sys: &SymmetrisedSystem,
+    root: u64,
+    target: &BinaryPoint,
+    accept: impl Fn(&[usize]) -> bool,
+) -> Option<(Vec<usize>, bool)> {
     let m = sys.m;
     let u0: Vec<F2mElement> = (0..m).map(|i| sys.summand_u0(fb, root, i, kc.n)).collect();
     let parity = sys.parity(root);
@@ -626,15 +645,79 @@ pub fn lift_symmetrised_root(
         if !ok {
             continue;
         }
-        if let Some(v) = lift_signs(kc, &fb.index_of, &fb.points, &xs, target) {
-            return Some((v, false));
+        for v in lift_signs_all(kc, &fb.index_of, &fb.points, &xs, target) {
+            if accept(&v) {
+                return Some((v, false));
+            }
         }
-        if let Some(mut v) = lift_signs(kc, &fb.index_of, &fb.points, &xs, &shifted) {
+        for mut v in lift_signs_all(kc, &fb.index_of, &fb.points, &xs, &shifted) {
             v.push(fb.two_torsion_index);
-            return Some((v, true));
+            if accept(&v) {
+                return Some((v, true));
+            }
         }
     }
     None
+}
+
+/// Every sign walk over `points_with_x` whose sum hits `target`.
+fn lift_signs_all(
+    kc: &KoblitzCurve,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    points: &[BinaryPoint],
+    xs: &[F2mElement],
+    target: &BinaryPoint,
+) -> Vec<Vec<usize>> {
+    fn walk(
+        kc: &KoblitzCurve,
+        index_of: &HashMap<(BigUint, BigUint), usize>,
+        points: &[BinaryPoint],
+        xs: &[F2mElement],
+        depth: usize,
+        acc: &BinaryPoint,
+        chosen: &mut Vec<usize>,
+        target: &BinaryPoint,
+        out: &mut Vec<Vec<usize>>,
+    ) {
+        if depth == xs.len() {
+            if acc == target {
+                out.push(chosen.clone());
+            }
+            return;
+        }
+        for p in points_with_x(&kc.curve, &xs[depth]) {
+            let Some(&idx) = index_of.get(&point_key(&p)) else {
+                continue;
+            };
+            chosen.push(idx);
+            let next = kc.add(acc, &points[idx]);
+            walk(
+                kc,
+                index_of,
+                points,
+                xs,
+                depth + 1,
+                &next,
+                chosen,
+                target,
+                out,
+            );
+            chosen.pop();
+        }
+    }
+    let mut out = Vec::new();
+    walk(
+        kc,
+        index_of,
+        points,
+        xs,
+        0,
+        &BinaryPoint::Infinity,
+        &mut Vec::new(),
+        target,
+        &mut out,
+    );
+    out
 }
 
 // ── Oracles ────────────────────────────────────────────────────────
@@ -675,6 +758,23 @@ pub fn symmetrised_groebner_decompose(
     engine: SolverEngine,
     node_budget: usize,
 ) -> Option<OracleOutcome> {
+    symmetrised_groebner_decompose_accepting(kc, fb, st, target, m, engine, node_budget, |_| true)
+}
+
+/// As [`symmetrised_groebner_decompose`], but a lifted decomposition is
+/// returned only if `accept` approves its factor-base indices; otherwise
+/// the search continues to the next root.
+#[allow(clippy::too_many_arguments)]
+pub fn symmetrised_groebner_decompose_accepting(
+    kc: &KoblitzCurve,
+    fb: &SymmetrisedFactorBase,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+    accept: impl Fn(&[usize]) -> bool,
+) -> Option<OracleOutcome> {
     let sys = build_symmetrised_system(kc, fb, target, m, st)?;
     let opts = SolveOptions {
         engine,
@@ -684,7 +784,7 @@ pub fn symmetrised_groebner_decompose(
     let mut found: Option<(Vec<usize>, bool)> = None;
     let (_, stats): (Vec<u64>, SolveStats) =
         solve_boolean_system_filtered(&sys.equations, sys.n_vars, &opts, |root| {
-            match lift_symmetrised_root(kc, fb, &sys, root, target) {
+            match lift_symmetrised_root_accepting(kc, fb, &sys, root, target, &accept) {
                 Some(r) => {
                     found = Some(r);
                     true
@@ -874,7 +974,8 @@ pub struct ArmRun {
     pub found: usize,
     pub refuted: usize,
     pub inconclusive: usize,
-    /// Relations that lifted through `R + T`.
+    /// Relations that lifted through `R + T` (the same projected relation
+    /// as one through `R`; counted for information only).
     pub via_t: usize,
     pub median_found_ms: f64,
     pub median_refuted_ms: f64,
@@ -1447,5 +1548,494 @@ mod tests {
         let s3 = build_symmetrised_system(&kc, &fb, &target, 3, &st).unwrap();
         assert_eq!(s3.n_vars, 3 * (fb.ell - 1) + 1);
         assert_eq!(system_degree(&s3.equations), 4);
+    }
+}
+
+// ── π − 1 transport on K_0 ─────────────────────────────────────────
+//
+// On `K_0` the rational points form `E(F_2) ≅ Z/4`, and the endomorphism
+// `φ = π − 1` has exactly that kernel.  The second coordinate search
+// (`RESEARCH_EXOTIC_COORDINATES.md` §10) found that the 4-torsion
+// quadruples the collapse factor and identified the mechanism as `φ`
+// transporting the instance: a decomposition of `φ(R)` over `F_u` lifts to
+// a decomposition of `R + K`, `K ∈ E(F_2)`, over `φ⁻¹(F_u)`.  This section
+// implements that lift and measures what it is worth, which turns out to
+// be a question about *columns*: the index-calculus rows are multiplied by
+// the cofactor `h`, and `[h]` kills `E(F_2)`, so `R + K` and `R` are the
+// same target and `P` and `P + K` the same unknown.  The identity
+// `[h]φ(P) = [λ − 1][h]P` (on `⟨G⟩` the Frobenius is `[λ]`) makes every
+// transported column a known multiple of an `F_u` column.  See
+// `transport_bench` for the numbers and the research note §11 for the
+// correction this forces on the earlier "targets per solve" accounting.
+
+/// `φ(P) = π(P) − P`.
+pub fn frobenius_minus_one(kc: &KoblitzCurve, p: &BinaryPoint) -> BinaryPoint {
+    kc.add(&kc.frobenius(p), &point_neg(p))
+}
+
+/// Preimages of `φ` over the whole (toy) curve, and its kernel.
+#[derive(Clone, Debug)]
+pub struct PhiTable {
+    pub preimages: HashMap<(BigUint, BigUint), Vec<BinaryPoint>>,
+    pub kernel: Vec<BinaryPoint>,
+    pub curve_points: usize,
+}
+
+/// Tabulate `φ` on every affine point of the curve (`n ≤ 24`).
+pub fn phi_table(kc: &KoblitzCurve) -> PhiTable {
+    let n = kc.n;
+    let mut preimages: HashMap<(BigUint, BigUint), Vec<BinaryPoint>> = HashMap::new();
+    let mut kernel = vec![BinaryPoint::Infinity];
+    let mut count = 0usize;
+    for x in 0..(1u64 << n) {
+        for p in points_with_x(&kc.curve, &from_bits(x, n)) {
+            count += 1;
+            let q = frobenius_minus_one(kc, &p);
+            if q == BinaryPoint::Infinity {
+                kernel.push(p.clone());
+            }
+            preimages.entry(point_key(&q)).or_default().push(p);
+        }
+    }
+    PhiTable {
+        preimages,
+        kernel,
+        curve_points: count + 1,
+    }
+}
+
+impl PhiTable {
+    pub fn preimages_of(&self, q: &BinaryPoint) -> &[BinaryPoint] {
+        self.preimages
+            .get(&point_key(q))
+            .map(|v| v.as_slice())
+            .unwrap_or(&[])
+    }
+    pub fn in_kernel(&self, p: &BinaryPoint) -> bool {
+        self.kernel.iter().any(|k| k == p)
+    }
+}
+
+/// Canonical column of a point in the projected relation matrix: the
+/// signed Frobenius orbit of `[h]P`, or `None` when `[h]P = O`.
+pub fn projected_column(kc: &KoblitzCurve, p: &BinaryPoint) -> Option<(BigUint, BigUint)> {
+    let hp = kc.mul(p, &kc.cofactor);
+    if hp == BinaryPoint::Infinity {
+        return None;
+    }
+    let mut best = point_key(&hp);
+    let mut cur = hp;
+    for _ in 0..kc.n {
+        for cand in [cur.clone(), point_neg(&cur)] {
+            let k = point_key(&cand);
+            if k < best {
+                best = k;
+            }
+        }
+        cur = kc.frobenius(&cur);
+    }
+    Some(best)
+}
+
+/// Number of distinct projected columns a set of points occupies.
+pub fn column_count(kc: &KoblitzCurve, points: &[BinaryPoint]) -> usize {
+    points
+        .iter()
+        .filter_map(|p| projected_column(kc, p))
+        .collect::<std::collections::HashSet<_>>()
+        .len()
+}
+
+/// Outcome of one transported solve.
+#[derive(Clone, Debug)]
+pub struct TransportOutcome {
+    /// Indices into `F_u` of the decomposition of `φ(R)` (with `T`
+    /// appended when it went through `φ(R) + T`).
+    pub on_fu: Option<Vec<usize>>,
+    /// Lifted summands `P_i ∈ φ⁻¹(Q_i)` and the kernel element `K` with
+    /// `Σ P_i = R + K`.
+    pub lifted: Option<(Vec<BinaryPoint>, BinaryPoint)>,
+    pub complete: bool,
+    pub effort: u64,
+}
+
+/// Solve the symmetrised system for `φ(R)` and lift the result to a
+/// decomposition of `R + K`, `K ∈ E(F_2)`.
+pub fn transported_symmetrised_decompose(
+    kc: &KoblitzCurve,
+    fb: &SymmetrisedFactorBase,
+    phi: &PhiTable,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> Option<TransportOutcome> {
+    let phi_r = frobenius_minus_one(kc, target);
+    if phi_r == BinaryPoint::Infinity {
+        return None;
+    }
+    // Only decompositions whose every summand has a rational preimage
+    // under φ lift; keep searching roots until one does.
+    let in_image = |idxs: &[usize]| {
+        idxs.iter()
+            .all(|&i| !phi.preimages_of(&fb.points[i]).is_empty())
+    };
+    let o = symmetrised_groebner_decompose_accepting(
+        kc,
+        fb,
+        st,
+        &phi_r,
+        m,
+        engine,
+        node_budget,
+        in_image,
+    )?;
+    let lifted = o.relation.as_ref().and_then(|idxs| {
+        let mut ps = Vec::with_capacity(idxs.len());
+        for &i in idxs {
+            let pre = phi.preimages_of(&fb.points[i]);
+            ps.push(pre.first()?.clone());
+        }
+        let sum = ps
+            .iter()
+            .fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
+        let k = kc.add(&sum, &point_neg(target));
+        phi.in_kernel(&k).then_some((ps, k))
+    });
+    Some(TransportOutcome {
+        on_fu: o.relation,
+        lifted,
+        complete: o.complete,
+        effort: o.effort,
+    })
+}
+
+/// Does `target` decompose as a sum of `m` points of `points` (with
+/// repetition)?  `m ∈ {2, 3}`, by pairs and a hash lookup.
+pub fn decomposes_over(
+    kc: &KoblitzCurve,
+    points: &[BinaryPoint],
+    target: &BinaryPoint,
+    m: usize,
+) -> bool {
+    let index: HashMap<(BigUint, BigUint), usize> = points
+        .iter()
+        .enumerate()
+        .map(|(i, p)| (point_key(p), i))
+        .collect();
+    match m {
+        2 => (0..points.len()).any(|i| {
+            let rest = kc.add(target, &point_neg(&points[i]));
+            index.get(&point_key(&rest)).is_some_and(|&j| j >= i)
+        }),
+        3 => (0..points.len()).any(|i| {
+            let r1 = kc.add(target, &point_neg(&points[i]));
+            (i..points.len()).any(|j| {
+                let rest = kc.add(&r1, &point_neg(&points[j]));
+                index.get(&point_key(&rest)).is_some_and(|&k| k >= j)
+            })
+        }),
+        _ => false,
+    }
+}
+
+/// What the transport is worth, measured on one instance.
+#[derive(Clone, Debug)]
+pub struct TransportBench {
+    pub n: u32,
+    pub m: usize,
+    pub ell: usize,
+    pub fu_points: usize,
+    pub fu_columns: usize,
+    /// Points of `F_u` in the image of `φ` (index 4 in `E(F_{2^n})`), the
+    /// only ones with rational preimages.
+    pub fu_in_image: usize,
+    pub fprime_points: usize,
+    pub fprime_columns: usize,
+    pub union_points: usize,
+    pub union_columns: usize,
+    pub targets: usize,
+    /// Direct symmetrised solve on `R` found a decomposition.
+    pub direct_found: usize,
+    /// Transported solve on `φ(R)` found one and it lifted to `R + K`.
+    pub transported_found: usize,
+    /// Targets where the two verdicts differ (theory says never).
+    pub disagreements: usize,
+    /// Lifts whose `K` was not the identity: relations to `R + K ≠ R`.
+    pub lifts_off_target: usize,
+    /// Enumeration: `R` decomposes over `F_u`, over `φ⁻¹(F_u)`, over the union.
+    pub enum_fu: usize,
+    pub enum_fprime: usize,
+    pub enum_union: usize,
+    /// `[h]φ(P) = [λ−1][h]P` held for every `P ∈ φ⁻¹(F_u)`.
+    pub column_identity_holds: bool,
+    pub median_direct_ms: f64,
+    pub median_transported_ms: f64,
+}
+
+/// Run the transport comparison on `K_0/F_{2^n}`.
+pub fn transport_bench(
+    n: u32,
+    m: usize,
+    targets: usize,
+    seed: u64,
+    node_budget: usize,
+) -> Option<TransportBench> {
+    let kc = KoblitzCurve::new(0, n)?;
+    // On K_0 the u-frame base is a single point (T_2) for small subspaces:
+    // grow the dimension from the m-matched target until it is not.
+    let mut fb = None;
+    for target_dim in (n + 1).div_ceil(m as u32)..n {
+        let divisor = divisor_for_dimension(n, target_dim)?;
+        let cand = build_symmetrised_factor_base(&kc, &divisor)?;
+        if cand.points.len() >= 8 {
+            fb = Some(cand);
+            break;
+        }
+    }
+    let fb = fb?;
+    let st = FieldStructure::new(n, &kc.curve.irreducible);
+    let phi = phi_table(&kc);
+    if phi.kernel.len() != 4 {
+        return None;
+    }
+    // F' = φ⁻¹(F_u)
+    let fprime: Vec<BinaryPoint> = fb
+        .points
+        .iter()
+        .flat_map(|q| phi.preimages_of(q).iter().cloned())
+        .collect();
+    let mut union: Vec<BinaryPoint> = fb.points.clone();
+    {
+        let have: std::collections::HashSet<_> = fb.points.iter().map(point_key).collect();
+        for p in &fprime {
+            if !have.contains(&point_key(p)) {
+                union.push(p.clone());
+            }
+        }
+    }
+    // Column identity.
+    let lam_minus_one =
+        (&kc.lambda + &kc.subgroup_order - BigUint::from(1u32)) % &kc.subgroup_order;
+    let column_identity_holds = fprime.iter().all(|p| {
+        let q = frobenius_minus_one(&kc, p);
+        let hp = kc.mul(p, &kc.cofactor);
+        let hq = kc.mul(&q, &kc.cofactor);
+        kc.mul(&hp, &lam_minus_one) == hq
+    });
+
+    let mut rng = StdRng::seed_from_u64(seed);
+    let g = kc.generator().clone();
+    let r_u64 = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
+    let engine = SolverEngine::default();
+    let mut b = TransportBench {
+        n,
+        m,
+        ell: fb.ell,
+        fu_points: fb.points.len(),
+        fu_columns: column_count(&kc, &fb.points),
+        fu_in_image: fb
+            .points
+            .iter()
+            .filter(|q| !phi.preimages_of(q).is_empty())
+            .count(),
+        fprime_points: fprime.len(),
+        fprime_columns: column_count(&kc, &fprime),
+        union_points: union.len(),
+        union_columns: column_count(&kc, &union),
+        targets: 0,
+        direct_found: 0,
+        transported_found: 0,
+        disagreements: 0,
+        lifts_off_target: 0,
+        enum_fu: 0,
+        enum_fprime: 0,
+        enum_union: 0,
+        column_identity_holds,
+        median_direct_ms: f64::NAN,
+        median_transported_ms: f64::NAN,
+    };
+    let mut direct_ms = Vec::new();
+    let mut transported_ms = Vec::new();
+    while b.targets < targets {
+        let target = kc.mul(&g, &BigUint::from(rng.gen_range(1..r_u64)));
+        let BinaryPoint::Affine { x, .. } = &target else {
+            continue;
+        };
+        if *x == F2mElement::one(n) {
+            continue;
+        }
+        let phi_r = frobenius_minus_one(&kc, &target);
+        if let BinaryPoint::Affine { x, .. } = &phi_r {
+            if *x == F2mElement::one(n) {
+                continue;
+            }
+        } else {
+            continue;
+        }
+        b.targets += 1;
+        let t0 = Instant::now();
+        let direct = symmetrised_groebner_decompose(&kc, &fb, &st, &target, m, engine, node_budget);
+        direct_ms.push(t0.elapsed().as_secs_f64() * 1e3);
+        let direct_found = direct.as_ref().is_some_and(|o| o.relation.is_some());
+        let t0 = Instant::now();
+        let tr =
+            transported_symmetrised_decompose(&kc, &fb, &phi, &st, &target, m, engine, node_budget);
+        transported_ms.push(t0.elapsed().as_secs_f64() * 1e3);
+        let transported_found = tr.as_ref().is_some_and(|o| o.lifted.is_some());
+        if let Some((_, k)) = tr.as_ref().and_then(|o| o.lifted.as_ref()) {
+            if *k != BinaryPoint::Infinity {
+                b.lifts_off_target += 1;
+            }
+        }
+        b.direct_found += usize::from(direct_found);
+        b.transported_found += usize::from(transported_found);
+        if direct_found != transported_found {
+            b.disagreements += 1;
+        }
+        b.enum_fu += usize::from(decomposes_over(&kc, &fb.points, &target, m));
+        b.enum_fprime += usize::from(decomposes_over(&kc, &fprime, &target, m));
+        b.enum_union += usize::from(decomposes_over(&kc, &union, &target, m));
+    }
+    b.median_direct_ms = median(direct_ms);
+    b.median_transported_ms = median(transported_ms);
+    Some(b)
+}
+
+pub fn format_transport(b: &TransportBench) -> String {
+    use std::fmt::Write as _;
+    let mut s = String::new();
+    let _ = writeln!(
+        s,
+        "== K_0/F_2^{}  m = {}  dim V = {}   points/columns:  F_u {}/{} ({} in im φ)   φ⁻¹(F_u) {}/{}   union {}/{}",
+        b.n, b.m, b.ell, b.fu_points, b.fu_columns, b.fu_in_image, b.fprime_points, b.fprime_columns, b.union_points, b.union_columns
+    );
+    let _ = writeln!(
+        s,
+        "   targets {}: direct found {}, transported found {}, disagreements {}, lifts landing on R + K with K ≠ O: {}",
+        b.targets, b.direct_found, b.transported_found, b.disagreements, b.lifts_off_target
+    );
+    let _ = writeln!(
+        s,
+        "   enumeration: decomposes over F_u {}, over φ⁻¹(F_u) {}, over the union {}",
+        b.enum_fu, b.enum_fprime, b.enum_union
+    );
+    let _ = writeln!(
+        s,
+        "   [h]φ(P) = [λ−1][h]P on every P ∈ φ⁻¹(F_u): {};  median ms direct {:.1}, transported {:.1}",
+        b.column_identity_holds, b.median_direct_ms, b.median_transported_ms
+    );
+    s
+}
+
+#[cfg(test)]
+mod transport_tests {
+    use super::*;
+
+    #[test]
+    fn phi_kernel_is_the_rational_points_of_k0() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let phi = phi_table(&kc);
+        assert_eq!(phi.kernel.len(), 4);
+        for k in &phi.kernel {
+            assert_eq!(kc.frobenius(k), *k, "kernel points are F_2-rational");
+        }
+        // every affine point has exactly four affine preimages; O has the
+        // three affine kernel points (O itself is not enumerated)
+        for (k, v) in &phi.preimages {
+            if *k == point_key(&BinaryPoint::Infinity) {
+                assert_eq!(v.len(), 3);
+            } else {
+                assert_eq!(v.len(), 4);
+            }
+        }
+    }
+
+    #[test]
+    fn transported_relation_lifts_and_projects_to_the_same_column_space() {
+        // n = 15: dim-7 V is F_8 + F_32, so the base sits in E[h] and has
+        // one projected column — degenerate for index calculus, but the
+        // transport mechanics can be checked on it.
+        let b = transport_bench(15, 2, 12, 3, 50_000).unwrap();
+        assert!(b.column_identity_holds, "[h]φ(P) = [λ−1][h]P");
+        assert_eq!(
+            b.fprime_points,
+            4 * b.fu_in_image,
+            "four preimages per point in the image"
+        );
+        assert!(b.fu_in_image >= 1 && b.fu_in_image <= b.fu_points);
+        assert!(b.union_points > b.fu_points, "{}", format_transport(&b));
+        // A lift is accepted only when Σ P_i − R ∈ ker φ; the bench counts
+        // lifts, so any lift that happened was in the kernel.
+        assert!(b.transported_found <= b.targets);
+    }
+
+    #[test]
+    fn transported_solve_is_phi_of_r_over_the_image_part() {
+        // The transported verdict is "φ(R) decomposes over F_u ∩ im φ",
+        // which is neither implied by nor implies the direct verdict
+        // "R decomposes over F_u".  Check the implication that does hold:
+        // a lifted relation is a decomposition of R + K over φ⁻¹(F_u).
+        let kc = KoblitzCurve::new(0, 15).unwrap();
+        let divisor = divisor_for_dimension(15, 7).unwrap();
+        let fb = build_symmetrised_factor_base(&kc, &divisor).unwrap();
+        let st = FieldStructure::new(15, &kc.curve.irreducible);
+        let phi = phi_table(&kc);
+        // Targets built to decompose over φ⁻¹(F_u): R = P₁ + P₂ with P_i
+        // preimages of image points of F_u.  Every one must lift.
+        let fprime: Vec<BinaryPoint> = fb
+            .points
+            .iter()
+            .flat_map(|q| phi.preimages_of(q).iter().cloned())
+            .collect();
+        assert!(fprime.len() >= 8);
+        let mut lifted = 0;
+        let mut tried = 0;
+        for i in 0..fprime.len().min(12) {
+            let p1 = &fprime[i];
+            let p2 = &fprime[(i * 7 + 3) % fprime.len()];
+            let target = kc.add(p1, p2);
+            let phi_r = frobenius_minus_one(&kc, &target);
+            let bad = |p: &BinaryPoint| {
+                matches!(p, BinaryPoint::Affine { x, .. } if *x == F2mElement::one(15))
+                    || *p == BinaryPoint::Infinity
+            };
+            if bad(&target) || bad(&phi_r) {
+                continue;
+            }
+            tried += 1;
+            let o = transported_symmetrised_decompose(
+                &kc,
+                &fb,
+                &phi,
+                &st,
+                &target,
+                2,
+                SolverEngine::default(),
+                50_000,
+            )
+            .unwrap();
+            let (ps, kk) = o
+                .lifted
+                .expect("a constructed decomposition must be found and lifted");
+            lifted += 1;
+            assert!(phi.in_kernel(&kk));
+            for p in &ps {
+                let q = frobenius_minus_one(&kc, p);
+                assert!(fb.index_of.contains_key(&point_key(&q)), "φ(P_i) ∈ F_u");
+            }
+            let sum = ps
+                .iter()
+                .fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
+            assert_eq!(sum, kc.add(&target, &kk));
+        }
+        assert!(tried >= 4 && lifted == tried, "{lifted}/{tried} lifted");
     }
 }
