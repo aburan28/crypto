@@ -32,6 +32,12 @@ Result: both fail closed as sat_invalid_model or sat_invalid_terminal_status.
 PASS: process-meter surviving-descendant control.
 Result: orphan_group_terminated=true before the terminal receipt was emitted.
 
+PASS: charged public n=31 GGMP factor/curve census.
+Result: all 12 pairs completed or failed the pre-target geometry gate; six had 63 factor points, six had one; deterministic winner curve_a=0, factor_index=0.
+
+PASS: selected nondegenerate GGMP point-witness verification with Sage.
+Result: CryptoMiniSat x=(18,4,65796) has rational lifts whose signed sum is the public target; direct point decomposition independently reproduced.
+
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.
