@@ -12,7 +12,30 @@ The campaign has advanced from a scalar-labelled degree-19 factor base to algebr
 | 6. Automorphism-optimized Pollard rho | Passed as a toy implementation control | The signed-Frobenius quotient walk recovered every valid matched target. In the five-target Stage 18 degree-23 panel, IC consumed 737.110841 core-seconds versus 0.269064 for matched rho; charging both public discoveries gives a 2,742.274176 aggregate core-time ratio in rho's favor. Rho was faster in every pair. | The full crossover comparison at larger regimes remains open. |
 | 7. External reproduction and novelty review | Partial | A separate internal reviewer returned `QUALIFIED`. GitHub Actions run 34428320022 reproduced public factor-base discovery and scalar-blind IC/rho controls through degree 23 on fresh Linux x86-64 and retained the complete artifact. An explicit review request is open as issue #97. A licensed-host runner and source-pinned novelty-review template now make the remaining return packet concrete. | Unaffiliated reproduction of the n=31/41/59 matrix and a completed external novelty review. A project-authored workflow, empty template, or synthetic runner test is not independent methodology or novelty evidence. |
 
-The degree-59 result is especially constraining: direct MITM found the planted decomposition in 3.13 seconds, while native SAT stopped at 100,000 conflicts and both WDSat and CryptoMiniSat reached 120-second watchdogs. Those capped solver outcomes are inconclusive, but they do not support a SAT advantage.
+The local passes above are limited to their stated measurements. The meter's
+`single_core_seconds` field equals `total_core_seconds`, both user plus system
+CPU; it is not a separate measurement of single-core elapsed time. Requested
+thread counts and maximum per-process RSS do not by themselves establish
+observed single-core execution or aggregate parallel peak memory. Inclusive
+outer receipts must not be added to their nested process charges.
+
+Field-size coverage also does not establish literature-instance equivalence.
+The n41 ell5 m3 cell differs from WDSat's prominent n41 ell20 m2 experiment.
+The n31 standard/GGMP comparison uses different curve coefficients and actual
+base sizes (a=1, 31 points versus a=0, 63 points), so its timing ratio cannot
+isolate the construction's effect. See [the parameter and sampling comparison](LITERATURE_MATCHING_20260910.md).
+
+External reviewers can now bind each gate assessment to individual backend
+and instance observations using [the evidence guide](EXTERNAL_REVIEW_EVIDENCE.md)
+and [review template](EXTERNAL_NOVELTY_REVIEW_TEMPLATE.json). The packet includes
+WDSat, GGMP and 2025 SATIC prior-art questions; empty fields and invitations
+remain requests for evidence, not completed external review.
+
+The earlier single degree-59 observation found the planted decomposition by
+direct MITM in 3.13 seconds, while native SAT stopped at 100,000 conflicts and
+both WDSat and CryptoMiniSat reached 120-second watchdogs. Those capped solver
+outcomes are inconclusive, but they do not support a SAT advantage. The repeated
+Stage 13 panel and its median are reported separately below.
 
 The degree-15 result repairs the earlier undersized-base failure. A public census selected the 281-point degree-8 divisor kernel `[2,4]`; public cofactor projection reduced eleven input signed orbits to six relation columns. Six scalar-blind runs then completed, including a frozen five-target panel. This is stronger end-to-end toy evidence, but automorphism rho remained faster in every matched pair.
 
