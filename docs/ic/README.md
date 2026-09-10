@@ -12,6 +12,12 @@ validation.
 schema** fields — including **FFD / degree of regularity** on algebraic
 `decomposition` frontiers — or they fail closed.
 
+**Autolab runner:** agents push those beats with the local control plane at
+[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+(`boundary_autolab.py`). It pins the ledger, fail-closed validates measurement
+reports, and launches the public-synthetic `koblitz_rank_fixture` /
+`koblitz_rho_fixture` producers for the priority Koblitz `vs_rho` rungs.
+
 ## Commands
 
     cargo build --release --bin ic

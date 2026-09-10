@@ -112,6 +112,7 @@
   },
   "how_to_beat": [
     "Freeze public fixture (curve, seeds, base hash, resource caps).",
+    "Launch via research/sat_factor_base_review_20260908/autolab/boundary_autolab.py (plan/preflight/launch/claim-check).",
     "Emit hashed JSON evidence under research/ or docs/ic/runs/ with every required measurement_schema field for the claimed stage.",
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",

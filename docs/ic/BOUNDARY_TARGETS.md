@@ -71,9 +71,12 @@ same process series. Faster planted decompositions alone never promote to
 ## How to beat a row
 
 1. Freeze a public fixture (curve, seeds, base hash, resource caps).
-2. Run the staged experiment; write a JSON report under `research/` or
-   `docs/ic/runs/` with hashes of executable, inputs, and outputs **and**
-   every required measurement-schema field for that stage.
+2. Run via
+   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+   (`boundary_autolab.py plan|preflight|launch|claim-check`); write a JSON
+   report under `research/` or `docs/ic/runs/` with hashes of executable,
+   inputs, and outputs **and** every required measurement-schema field for
+   that stage.
 3. Pass the row's **acceptance gates**.
 4. Open a PR that:
    - updates the row's `current` block in this file and in
@@ -170,6 +173,7 @@ security impact, not whole-process wall-clock.
 ## Related documents
 
 - [`docs/ic/README.md`](./README.md) — `ic` runner, fixtures, comparison limits
+- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
 - [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
 - [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
 - [`RESEARCH_FFD_MEASUREMENT.md`](../../RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
