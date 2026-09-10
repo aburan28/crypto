@@ -66,6 +66,12 @@ void multiplicationProbe(const P131 *a, const P131 *b, P131 *output, int n) {
 }
 
 __global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void squareProbe(const P131 *input, P131 *output, int n) {
+    int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if (i<n) output[i]=eccPacked131::squarePolynomial131(input[i]);
+}
+
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *second,int n) {
     int i=blockIdx.x*blockDim.x+threadIdx.x;
     if(i<n) {
@@ -76,6 +82,39 @@ void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *sec
 
 static bool same(P131 a, P131 b) {
     for (int i=0;i<5;i++) if (a.v[i]!=b.v[i]) return false;
+    return true;
+}
+
+static bool squareChecks() {
+    // Exercise every coefficient, including the three bits in the top word,
+    // independently of the coefficient-spreading implementation under test.
+    std::vector<P131> input(1); // Zero must remain zero.
+    for (int bit=0;bit<131;bit++) {
+        P131 a{};a.v[bit/32]=1u<<(bit%32);input.push_back(a);
+    }
+    input.push_back(P131{{~0u,~0u,~0u,~0u,7u}});
+    uint32_t state=0x5131263u;
+    for (int i=0;i<1024;i++) {
+        P131 a;
+        for (int word=0;word<5;word++) {
+            state^=state<<13;state^=state>>17;state^=state<<5;
+            a.v[word]=state;
+        }
+        a.v[4]&=7u;input.push_back(a);
+    }
+    int n=int(input.size());std::vector<P131> output(n);
+    P131 *deviceInput,*deviceOutput;
+    checked(cudaMalloc(&deviceInput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMemcpy(deviceInput,input.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    squareProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(deviceInput,deviceOutput,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(deviceInput));checked(cudaFree(deviceOutput));
+    for (int i=0;i<n;i++) if (!same(output[i],multiplyReference(input[i],input[i]))) {
+        fprintf(stderr,"GPU polynomial square mismatch at %d\n",i);return false;
+    }
+    printf("PASS: %d GPU polynomial squares against independent multiplication and long division\n",n);
     return true;
 }
 
@@ -189,5 +228,5 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks()?0:1;
+    return polynomialChecks() && squareChecks()?0:1;
 }

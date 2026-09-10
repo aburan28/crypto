@@ -17,17 +17,19 @@ The preset selects CUDA 13.0.0, the packed backend, batch 32, 128 threads per
 block, minBlocks 4, 1024 steps per launch and 32 launches. It enables the single
 polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
+The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md).
 These settings retain the existing iteration, DP report and packed-checkpoint
-semantics.
+semantics. The linked comparison validates normal-to-polynomial resume and
+the reverse direction, and measures both modes on one GPU.
 
 CUDA 13.0 requires a compatible driver; the tested driver is 580.95.05.
 NVIDIA lists 580.65.06 for the Linux CUDA 13.0 GA toolkit in its
 [release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#cuda-driver).
 
-## Standalone CUDA 13 audit
+## Historical standalone CUDA 13 audit with normal storage
 
-The [standalone audit](benchmarks/cuda13/native-audit.json) uses the normal
-`packed_audit.py` launch path with the preset's environment and parameters,
+The [standalone audit](benchmarks/cuda13/native-audit.json) used the normal
+`packed_audit.py` launch path with the earlier normal-storage preset parameters,
 on the CUDA 13.0.0 image:
 
 | Workload | Median B scalar iterations/s | Range across three repetitions |
@@ -59,8 +61,11 @@ The compiler gain in this comparison was modest.
 
 Every timed run completed 100,931,731,456 scalar walk iterations. Each
 collection repetition wrote 2,633 records, dropped zero, and matched its
-corpus-file size. Synchronization, restarts and host report processing are
-timed; initial setup is excluded. CPU trail replay is disabled during timing
+corpus-file size. Walk synchronization, prior-launch restarts and host report processing were
+timed; initial setup was excluded. These historical binaries did not wait for
+any remaining final asynchronous reseed before stopping the timer. Current
+binaries include that final wait; see the polynomial-state comparison for
+measurements of the corrected timing boundary. CPU trail replay is disabled during timing
 after separate correctness checks pass.
 
 Both binaries passed 3,120 GPU Frobenius vectors, 1,261 reductions, 18,185
@@ -72,8 +77,8 @@ common worker and step counts.
 
 The measured source is commit `4bd7f5d1142896f53be7ed4fe73249dbe3fa4f25`,
 with source digest `69912aa7bd5afcef721bc97030d5741515c5eb40cb4820d7e59210a63587d95b`.
-The preset adds command aliases around those existing build and runtime
-options. Compiler versions, binary hashes, GPU identity and complete raw
+The original preset added command aliases around those build and runtime
+options; the current preset also selects polynomial coordinate storage. Compiler versions, binary hashes, GPU identity and complete raw
 output are included in the comparison artifact.
 
 These measurements count complete scalar walk iterations. They do not

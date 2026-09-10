@@ -49,7 +49,8 @@ def runAudit(minBlocks=4, repeats=3):
              f"MINBLOCKS={minBlocks}", f"PACKED_SINGLE_PRODUCT={client.PACKED_SINGLE_PRODUCT}",
              f"PACKED_CACHE_DENOM={client.PACKED_CACHE_DENOM}", f"PACKED_BY_VALUE={client.PACKED_BY_VALUE}",
              f"PACKED_PERM_SIGMA={client.PACKED_PERM_SIGMA}", f"PACKED_POLY_CHAIN={client.PACKED_POLY_CHAIN}",
-             f"PACKED_UNROLL_INV={client.PACKED_UNROLL_INV}", f"PACKED_PAIR_PRODUCTS={client.PACKED_PAIR_PRODUCTS}"], 120)
+             f"PACKED_UNROLL_INV={client.PACKED_UNROLL_INV}", f"PACKED_PAIR_PRODUCTS={client.PACKED_PAIR_PRODUCTS}",
+             f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
         result["integration"] = run(
