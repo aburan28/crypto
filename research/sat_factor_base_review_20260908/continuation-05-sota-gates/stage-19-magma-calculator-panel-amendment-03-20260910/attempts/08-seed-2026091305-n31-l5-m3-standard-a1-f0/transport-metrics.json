@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_amendment03_magma_calculator_request.py",
+    "--attempt",
+    "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/attempts/08-seed-2026091305-n31-l5-m3-standard-a1-f0",
+    "--execute-child"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 75.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 4.22831783303991,
+    "user_seconds": 0.148286,
+    "system_seconds": 0.09315899999999999,
+    "total_core_seconds": 0.241445,
+    "single_core_seconds": 0.241445,
+    "peak_rss_bytes": 35487744,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}
