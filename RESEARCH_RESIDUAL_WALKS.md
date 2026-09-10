@@ -4,6 +4,7 @@
 **Bench:**  `cargo run --release --example residual_walk_bench -- --panel --json experiments/20_residual_walk_panel.json`
 **Data:**   `experiments/20_residual_walk_panel.json`, `experiments/20_residual_walk_panel.log`
 **Tables:** `python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json`
+**Baseline:** `experiments/20_residual_walk_baseline.json`, scored by `scripts/residual_walk_scoreboard.py` (§9)
 
 > **Result in one line.**  Every residual-collision hybrid tested here
 > recovers the planted logarithm correctly, and every one of them needs
@@ -436,11 +437,167 @@ cargo run --release --example residual_walk_bench -- --bits 24 --fb 256 --trials
 cargo run --release --example residual_walk_bench -- --panel --quick
 cargo run --release --example residual_walk_bench -- --panel --json experiments/20_residual_walk_panel.json
 python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json
+cargo run --release --example residual_walk_bench -- --baseline --json run.json
+python3 scripts/residual_walk_scoreboard.py run.json --baseline experiments/20_residual_walk_baseline.json
 ```
 
 The bench's single-instance mode also accepts `--strategies A,C1,R`,
 `--dp BITS` (applied to the collision-preserving strategies only),
 `--k`, `--budget OPS` and `--json FILE`.
+
+## 9. Optimisation ledger and baseline scoreboard
+
+Sections 4–5 report what each strategy costs.  This section states
+what each *step* bought, where the remaining generic slack is, and
+freezes a baseline that later work is scored against.
+
+### 9.1 Protocol
+
+```bash
+cargo run --release --example residual_walk_bench -- --baseline --json run.json      # ≈ 50 s
+python3 scripts/residual_walk_scoreboard.py run.json                                  # score it
+python3 scripts/residual_walk_scoreboard.py run.json \
+        --baseline experiments/20_residual_walk_baseline.json --fail-on-regression    # compare
+```
+
+The protocol is fixed: `n ≈ 2^24` and `2^28`, `B = 256`, `k = 3`, seeds
+1–3, all five strategies, plus C1 and R with 8 distinguished-point
+bits.  It is deterministic for a given build, so two runs of the same
+code produce identical cells; the frozen reference is
+`experiments/20_residual_walk_baseline.json`.  The comparison prints an
+improvement factor per cell and exits non-zero on a regression beyond
+the tolerance (default 10%), so it can gate a change.
+
+### 9.2 Metrics
+
+For every `(bits, B, dp, strategy)` cell the score is decomposed as
+
+```
+  S = total_ops / √n  ≈  κ · c  +  overheads
+  κ = samples / √n            the collision *count* factor
+  c = walk_ops / samples      group operations per residual
+  overheads                   setup, coefficient replay, verification (fractions of total_ops)
+```
+
+with the floors `κ_floor = √(2(B+1)) = 22.67` for any residual-collision
+method at `B = 256` (birthday), `κ_rho = √(π/2) = 1.25` for plain rho,
+and `S_floor = κ_floor · 1` (one operation per residual, no overhead).
+`ops/rel/√n` is the cost of one *independent* relation in the same
+units; `stored/√n` is peak memory.
+
+### 9.3 The frozen baseline
+
+| bits | B | dp | tag | seeds | κ = samples/√n | κ floor | κ/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |
+|---:|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 24 | 256 | 0 | A | 3 | 22.53 | 22.67 | 0.99 | 68.5 | 0.0% | 0.0% | 0.3% | 1,547.0 | 22.67 | 68.24 | 6.051 | 22.459 | 0 | yes |
+| 24 | 256 | 0 | B | 3 | 23.26 | 22.67 | 1.03 | 2.2 | 0.0% | 0.0% | 9.2% | 56.7 | 22.67 | 2.50 | 0.221 | 23.097 | 313 | yes |
+| 24 | 256 | 0 | C1 | 3 | 22.69 | 22.67 | 1.00 | 1.2 | 3.1% | 53.9% | 25.7% | 158.4 | 22.67 | 6.99 | 0.616 | 22.622 | 0 | yes |
+| 24 | 256 | 0 | C2 | 3 | 22.26 | 22.67 | 0.98 | 68.5 | 0.0% | 0.0% | 0.3% | 1,528.8 | 22.67 | 67.43 | 5.965 | 22.188 | 0 | yes |
+| 24 | 256 | 0 | R | 3 | 1.27 | 1.25 | 1.01 | 1.0 | 16.9% | 47.6% | 0.5% | 3.7 | 1.25 | 2.95 | 3.692 | 1.270 | 0 | yes |
+| 24 | 256 | 8 | C1 | 3 | 91.57 | 22.67 | 4.04 | 1.1 | 1.8% | 47.1% | 17.3% | 273.3 | 22.67 | 12.06 | 1.064 | 0.097 | 0 | yes |
+| 24 | 256 | 8 | R | 3 | 1.34 | 1.25 | 1.07 | 1.0 | 15.9% | 48.5% | 0.5% | 3.9 | 1.25 | 3.11 | 3.903 | 0.004 | 0 | yes |
+| 28 | 256 | 0 | A | 3 | 22.95 | 22.67 | 1.01 | 80.6 | 0.0% | 0.0% | 0.1% | 1,850.6 | 22.67 | 81.63 | 7.248 | 22.929 | 0 | yes |
+| 28 | 256 | 0 | B | 3 | 23.31 | 22.67 | 1.03 | 2.1 | 0.0% | 0.0% | 3.0% | 50.6 | 22.67 | 2.23 | 0.199 | 23.203 | 1,272 | yes |
+| 28 | 256 | 0 | C1 | 3 | 22.87 | 22.67 | 1.01 | 1.1 | 1.0% | 66.2% | 15.0% | 139.3 | 22.67 | 6.15 | 0.542 | 22.855 | 0 | yes |
+| 28 | 256 | 0 | C2 | 3 | 21.93 | 22.67 | 0.97 | 80.6 | 0.0% | 0.0% | 0.1% | 1,768.8 | 22.67 | 78.02 | 6.910 | 21.912 | 0 | yes |
+| 28 | 256 | 0 | R | 3 | 1.33 | 1.25 | 1.06 | 1.0 | 6.1% | 59.7% | 0.2% | 3.9 | 1.25 | 3.10 | 3.890 | 1.327 | 0 | yes |
+| 28 | 256 | 8 | C1 | 3 | 37.16 | 22.67 | 1.64 | 1.0 | 0.9% | 62.8% | 13.0% | 165.0 | 22.67 | 7.28 | 0.642 | 0.089 | 0 | yes |
+| 28 | 256 | 8 | R | 3 | 1.35 | 1.25 | 1.08 | 1.0 | 5.9% | 60.0% | 0.2% | 4.0 | 1.25 | 3.16 | 3.966 | 0.005 | 0 | yes |
+
+Optimisation ledger (dp = 0 cells; factors are ratios of S, > 1 means cheaper):
+
+| bits | B | A → B (mutation) | A → C1 (r-adding) | A → C2 (fresh hash) | B → R (drop the base) | C1 → R | B / S floor | C1 / S floor | R / rho floor |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 24 | 256 | 27.29× | 9.77× | 1.01× | 15.36× | 42.90× | 2.50× | 6.99× | 2.95× |
+| 28 | 256 | 36.55× | 13.28× | 1.05× | 13.01× | 35.82× | 2.23× | 6.15× | 3.10× |
+
+Distinguished points (memory bought per operation spent):
+
+| bits | B | tag | dp | stored/√n dp=0 | stored/√n dp | memory ÷ | S dp=0 | S dp | ops × |
+|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|
+| 24 | 256 | C1 | 8 | 22.622 | 0.0967 | 234× | 158.4 | 273.3 | 1.73× |
+| 24 | 256 | R | 8 | 1.270 | 0.0042 | 301× | 3.7 | 3.9 | 1.06× |
+| 28 | 256 | C1 | 8 | 22.855 | 0.0890 | 257× | 139.3 | 165.0 | 1.18× |
+| 28 | 256 | R | 8 | 1.327 | 0.0054 | 247× | 3.9 | 4.0 | 1.02× |
+
+### 9.4 What each step bought (28-bit row, `B = 256`)
+
+| step | change | κ | c | overheads | S | gain vs previous | distance to generic floor |
+|:--|:--|---:|---:|:--|---:|---:|---:|
+| 0 | A — independent partial sums | 22.95 | 80.6 | verify 0.1% | 1,850.6 | — | 81.6× |
+| 1 | B — mutate one slot, update `L` incrementally | 23.31 | 2.1 | verify 3.0% | 50.6 | **36.6×** | 2.23× |
+| 2 | C1 — collision-preserving r-adding walk | 22.87 | 1.1 | replay 66.2%, verify 15.0%, setup 1.0% | 139.3 | 13.3× vs A, **0.36×** vs B | 6.15× |
+| 2′ | C1 + 8 distinguished-point bits | 37.16 | 1.0 | replay 62.8%, verify 13.0% | 165.0 | 0.84× vs C1; memory **÷257** | 7.28× |
+| 3 | C2 — `s_{t+1} = H(L(s_t))` | 21.93 | 80.6 | verify 0.1% | 1,768.8 | 1.05× vs A | 78.0× |
+| 4 | R — drop the factor base (plain rho) | 1.33 | 1.0 | replay 59.7%, setup 6.1% | 3.9 | **13.0×** vs B, 35.8× vs C1 | 3.10× (rho floor 1.25) |
+
+Reading down the table:
+
+- **Step 1 is the only large generic win, and it is entirely in `c`.**
+  The local-mutation walk keeps `κ` at the birthday value and cuts the
+  cost of constructing a residual from two scalar multiplications
+  (`≈ 3·log₂n`) to one swap (two additions).  The remaining `2.23×`
+  above the floor is that second addition plus verification.
+- **Step 2 buys memory, not operations.**  The collision-preserving walk
+  walks at one operation per residual but pays two-thirds of its budget
+  replaying coefficients after each collision and another 15% verifying
+  the dense rows those coefficients produce.  What it makes possible is
+  step 2′: with 8 distinguished-point bits the table shrinks `257×` for
+  `1.18×` the operations at 28 bits.  At 24 bits the same setting costs
+  `1.73×` (`κ` rises to `4×` the floor) because `2^8 = 256` is no
+  longer small against the mean walk length `√n/κ ≈ 180`; the rule is
+  `2^dp ≪ √n / √(2(B+1))`.
+- **Step 3 is a null step.**  The fresh-hash walk pays the full
+  independent-sample price per residual and gains only collision
+  preservation; with distinguished points its merge-point replay makes
+  it `5–6×` dearer still (panel P5).
+- **Step 4 is the one that matters, and it is not an optimisation of
+  the hybrid.**  Removing the factor base divides `κ` by `17` and `S`
+  by `13`.  No amount of tuning in steps 1–3 can reach it: the best
+  hybrid sits at `2.23×` its own floor, and that floor is `18×` rho's.
+
+### 9.5 Remaining generic slack, quantified
+
+These levers are known, generic, and not yet applied.  Their predicted
+effect on `S` follows from the decomposition above; none touches `κ`
+except the negation map, which lowers every strategy's `κ` by the same
+factor and so leaves the gap to rho unchanged.
+
+| lever | applies to | mechanism | predicted S (28-bit, B = 256) | memory |
+|:--|:--|:--|---:|:--|
+| difference table `P_i − P_j` | B | swap becomes one addition: `c` 2.1 → 1.1 | 50.6 → ≈ 27 (−47%) | `+B²/2` points (1 MB at B = 256) |
+| drop verification from the budget | B, C1 | count it as a check, not as work | B −3%, C1 −15% | — |
+| store coefficient sketches instead of replaying | C1 | replay is 66% of C1 | 139 → ≈ 47 (−66%) | `× r` counters per stored residual |
+| checkpoint replay at the last distinguished point | C1 + dp | replay length ÷ `2^dp` on average | 165 → ≈ 70 | — |
+| negation map | all | `κ` ÷ √2 | −29% everywhere | — |
+| batched inversions (Montgomery trick) | all | cheaper *operation*, same count | `S` unchanged (wall time only) | — |
+
+Applying every lever above to B gives `S ≈ 27 / √2 ≈ 19`, against a
+negation-map floor of `16.0` — and against rho at `3.9` measured, `0.89`
+floor.  That is the ceiling of generic tuning: the hybrid cannot close
+the last `13×` because that factor is `κ`, not `c`.
+
+### 9.6 The target
+
+For any change to the relation generators, the cells to beat at
+`(bits = 28, B = 256, dp = 0)` are:
+
+| tag | S baseline | κ baseline | floor |
+|:--|---:|---:|---:|
+| B  | 50.6  | 23.31 | 22.67 (16.0 with negation) |
+| C1 | 139.3 | 22.87 | 22.67 |
+| R  | 3.9   | 1.33  | 1.25 (0.89 with negation) |
+
+- Lowering `S` while `κ/κ_floor` stays at `≈ 1` is engineering: the
+  levers above bound it at `≈ 19`.
+- **The result that would count as a non-generic advance is
+  `κ/κ_floor < 0.9` on a hybrid**, with `correct = yes` on every seed,
+  zero relations failing verification, and zero trivial collisions
+  counted as relations.  The scoreboard prints this as
+  "count invariant beaten".
+- Not admissible: changing `B` or `k` (the floor moves with them),
+  changing the operation accounting, skipping verification, picking
+  seeds, or counting dependent or trivial relations.
 
 ## References
 

@@ -16,7 +16,14 @@
 //! cargo run --release --example residual_walk_bench -- --bits 24 --fb 256 --trials 3
 //! cargo run --release --example residual_walk_bench -- --panel --json experiments/20_residual_walk_panel.json
 //! cargo run --release --example residual_walk_bench -- --panel --quick
+//! cargo run --release --example residual_walk_bench -- --baseline --json experiments/20_residual_walk_baseline.json
 //! ```
+//!
+//! `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
+//! `2^28`, `B = 256`, `k = 3`, seeds 1–3, every strategy, plus `C1` and
+//! `R` with 8 distinguished-point bits; about a minute).  Score it, or
+//! compare it against the frozen baseline, with
+//! `scripts/residual_walk_scoreboard.py`.
 //!
 //! Every run verifies each relation by scalar multiplication and scores
 //! the recovered logarithm against the planted one.
@@ -263,6 +270,45 @@ fn panel(quick: bool) -> Panel {
     p
 }
 
+/// The fixed optimisation protocol: two sizes, one factor base, three
+/// seeds, every strategy, plus the distinguished-point variants of the
+/// two one-op-per-step walks.  Deterministic for a given build.
+fn baseline() -> Vec<StrategyReport> {
+    let mut out = Vec::new();
+    header();
+    for bits in [24u32, 28] {
+        for seed in 1..=3u64 {
+            let (inst, fb) = setup(bits, 256, seed);
+            println!(
+                "-- n = {} (2^{:.1}), B = {}, seed {}",
+                inst.curve.n,
+                (inst.curve.n as f64).log2(),
+                fb.len(),
+                seed
+            );
+            let opts = WalkOptions {
+                k: 3,
+                max_ops: 1 << 34,
+                seed,
+                ..WalkOptions::default()
+            };
+            run_all(&inst, &fb, &Strategy::ALL, &opts, &mut out);
+            let dp = WalkOptions {
+                dp_bits: 8,
+                ..opts.clone()
+            };
+            run_all(
+                &inst,
+                &fb,
+                &[Strategy::RAddingResidualWalk, Strategy::PlainRho],
+                &dp,
+                &mut out,
+            );
+        }
+    }
+    out
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut bits = 24u32;
@@ -275,6 +321,7 @@ fn main() {
     let mut strategies: Vec<Strategy> = Strategy::ALL.to_vec();
     let mut json: Option<String> = None;
     let mut do_panel = false;
+    let mut do_baseline = false;
     let mut quick = false;
     let mut i = 0;
     let value = |i: &mut usize, args: &[String]| -> String {
@@ -306,11 +353,12 @@ fn main() {
             }
             "--json" => json = Some(value(&mut i, &args)),
             "--panel" => do_panel = true,
+            "--baseline" => do_baseline = true,
             "--quick" => quick = true,
             "--help" | "-h" => {
                 println!(
                     "usage: residual_walk_bench [--bits N] [--fb B] [--k K] [--trials T] [--seed S] \
-                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--json FILE] [--panel [--quick]]"
+                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--json FILE] [--panel [--quick]] [--baseline]"
                 );
                 return;
             }
@@ -320,6 +368,15 @@ fn main() {
             }
         }
         i += 1;
+    }
+
+    if do_baseline {
+        let reports = baseline();
+        if let Some(path) = json {
+            fs::write(&path, serde_json::to_string_pretty(&reports).unwrap()).expect("write json");
+            println!("\nwrote {path}");
+        }
+        return;
     }
 
     if do_panel {
