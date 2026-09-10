@@ -1,9 +1,9 @@
 //! Paired end-to-end index-calculus benchmark on the selected n=19 base.
 //!
 //! ```text
-//! cargo run --release --example koblitz_selected_e2e -- optimized 1 4242 10000 8
-//! cargo run --release --example koblitz_selected_e2e -- signed 1 4242 2000000 1
-//! cargo run --release --example koblitz_selected_e2e -- frobenius 1 4242 2000000 1
+//! cargo run --release --example koblitz_selected_e2e -- optimized 1 4242 10000
+//! cargo run --release --example koblitz_selected_e2e -- signed 1 4242 2000000
+//! cargo run --release --example koblitz_selected_e2e -- frobenius 1 4242 2000000
 //! ```
 //!
 //! Each process includes curve setup, factor-base materialisation,
@@ -41,10 +41,6 @@ fn main() {
         .get(4)
         .map(|value| value.parse().expect("integer conflict budget"))
         .unwrap_or(2_000_000);
-    let relation_batch_size: usize = arguments
-        .get(5)
-        .map(|value| value.parse().expect("integer relation batch size"))
-        .unwrap_or(1);
 
     let end_to_end_start = Instant::now();
     let kc = KoblitzCurve::new(1, 19).expect("degree-19 Koblitz curve");
@@ -80,7 +76,6 @@ fn main() {
         },
         collapse_negation,
         stop_on_verified_rank,
-        relation_batch_size,
         ..KoblitzIcOptions::default()
     };
     let driver_start = Instant::now();
@@ -113,9 +108,6 @@ fn main() {
         "sat_models":report.sat_models,
         "sat_conflicts":report.sat_conflicts,
         "per_target_conflict_budget":conflict_budget,
-        "relation_batch_size":report.relation_batch_size,
-        "relation_batches":report.relation_batches,
-        "rayon_threads":rayon::current_num_threads(),
         "sat_refutations":report.sat_refutations,
         "sat_unknowns":report.sat_unknowns,
         "sat_invalid_models":report.sat_invalid_models,

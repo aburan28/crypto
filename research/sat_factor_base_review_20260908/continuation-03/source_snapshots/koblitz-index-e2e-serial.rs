@@ -127,7 +127,6 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use rayon::prelude::*;
 
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
@@ -2021,9 +2020,6 @@ pub struct KoblitzIcOptions {
     /// are available and stop only when the recovered scalar verifies.
     /// Disable to retain the fixed-surplus collection control.
     pub stop_on_verified_rank: bool,
-    /// Independent SAT targets launched per deterministic relation batch.
-    /// Values above one use Rayon; non-SAT strategies remain serial.
-    pub relation_batch_size: usize,
 }
 
 impl Default for KoblitzIcOptions {
@@ -2042,7 +2038,6 @@ impl Default for KoblitzIcOptions {
             sat_options: SatDecompositionOptions::default(),
             collapse_negation: true,
             stop_on_verified_rank: true,
-            relation_batch_size: 1,
         }
     }
 }
@@ -2089,10 +2084,6 @@ pub struct KoblitzIcReport {
     pub linear_solve_attempts: usize,
     /// Whether negation was folded into signed Frobenius columns.
     pub collapse_negation: bool,
-    /// Requested SAT target batch size.
-    pub relation_batch_size: usize,
-    /// Relation batches actually launched.
-    pub relation_batches: usize,
     /// Log recovered from R = O directly, bypassing the relation matrix.
     pub direct_relation: bool,
 }
@@ -2114,13 +2105,6 @@ fn solve_relation_system(
     }
     let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)?;
     solution.get(relation_unknowns).cloned()
-}
-
-enum RelationAttemptOutcome {
-    Direct,
-    Enumerated(Option<Vec<usize>>),
-    Groebner(Option<Vec<usize>>, SolveStats),
-    Sat(Option<Vec<usize>>, SatDecompositionStats),
 }
 
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
@@ -2178,8 +2162,6 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         linear_algebra_ns: 0,
         linear_solve_attempts: 0,
         collapse_negation: opts.collapse_negation,
-        relation_batch_size: opts.relation_batch_size.max(1),
-        relation_batches: 0,
         direct_relation: false,
     };
     if fb.points.is_empty() {
@@ -2194,137 +2176,96 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     let relation_start = std::time::Instant::now();
 
     while relations.len() < wanted && report.trials < opts.max_trials {
-        let remaining_trials = opts.max_trials - report.trials;
-        let requested_batch = if opts.strategy == DecompositionStrategy::Sat {
-            opts.relation_batch_size.max(1)
-        } else {
-            1
-        };
-        let batch_size = requested_batch.min(remaining_trials);
-        let attempts: Vec<_> = (0..batch_size)
-            .map(|_| {
-                let a = BigUint::from(rng.gen_range(1..r_u64));
-                let b = BigUint::from(rng.gen_range(1..r_u64));
-                let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
-                (a, b, target)
-            })
-            .collect();
-        report.trials += attempts.len();
-        report.relation_batches += 1;
+        report.trials += 1;
+        let a = BigUint::from(rng.gen_range(1..r_u64));
+        let b = BigUint::from(rng.gen_range(1..r_u64));
+        let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
 
-        let evaluate = |(_, _, target): &(BigUint, BigUint, BinaryPoint)| {
-            if *target == BinaryPoint::Infinity {
-                return RelationAttemptOutcome::Direct;
-            }
-            match opts.strategy {
-                DecompositionStrategy::Enumerate => RelationAttemptOutcome::Enumerated(decompose(
-                    kc, fb, &index_of, target, opts.m, 0,
-                )),
-                DecompositionStrategy::Groebner => {
-                    let (idxs, stats) = groebner_decompose(
-                        kc,
-                        fb,
-                        &index_of,
-                        &field,
-                        target,
-                        opts.m,
-                        opts.engine,
-                        opts.node_budget,
-                    );
-                    RelationAttemptOutcome::Groebner(idxs, stats)
-                }
-                DecompositionStrategy::Sat => {
-                    let (idxs, stats) = sat_decompose_with(
-                        kc,
-                        fb,
-                        &index_of,
-                        &field,
-                        target,
-                        opts.m,
-                        opts.max_models,
-                        opts.sat_macaulay_degree,
-                        opts.sat_options,
-                    );
-                    RelationAttemptOutcome::Sat(idxs, stats)
-                }
-            }
-        };
-        let outcomes: Vec<_> = if opts.strategy == DecompositionStrategy::Sat && batch_size > 1 {
-            attempts.par_iter().map(evaluate).collect()
-        } else {
-            attempts.iter().map(evaluate).collect()
-        };
-
-        for outcome in &outcomes {
-            match outcome {
-                RelationAttemptOutcome::Groebner(_, stats) => {
-                    report.reductions += stats.reductions;
-                    report.infeasible_branches += stats.infeasible_branches;
-                }
-                RelationAttemptOutcome::Sat(_, stats) => {
-                    report.sat_calls += stats.solver_calls;
-                    report.sat_refutations += usize::from(stats.refuted);
-                    report.sat_unknowns += usize::from(stats.exhausted);
-                    report.sat_invalid_models += stats.spurious;
-                    report.sat_models += stats.models;
-                    report.sat_conflicts += stats.conflicts;
-                }
-                RelationAttemptOutcome::Direct | RelationAttemptOutcome::Enumerated(_) => {}
-            }
-        }
-        if report.sat_invalid_models != 0 {
-            report.relation_collection_ns = relation_start
-                .elapsed()
-                .as_nanos()
-                .saturating_sub(report.linear_algebra_ns);
-            return Some(report);
-        }
-
-        for ((a, b, _target), outcome) in attempts.into_iter().zip(outcomes) {
-            let found = match outcome {
-                RelationAttemptOutcome::Direct => {
-                    let d = solve_for_d(&a, &b, r)?;
-                    if kc.mul(&g, &d) == *q {
-                        report.log = Some(d);
-                        report.direct_relation = true;
-                        report.relations = relations.len();
-                        report.relation_collection_ns = relation_start
-                            .elapsed()
-                            .as_nanos()
-                            .saturating_sub(report.linear_algebra_ns);
-                        return Some(report);
-                    }
-                    None
-                }
-                RelationAttemptOutcome::Enumerated(idxs)
-                | RelationAttemptOutcome::Groebner(idxs, _)
-                | RelationAttemptOutcome::Sat(idxs, _) => idxs,
-            };
-            if let Some(idxs) = found {
-                relations.push(relation_from_decomposition_with_mode(
-                    kc,
-                    fb,
-                    &idxs,
-                    &a,
-                    &b,
-                    opts.collapse_negation,
-                ));
-            }
-        }
-
-        if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
-            report.linear_solve_attempts += 1;
-            let linear_start = std::time::Instant::now();
-            let candidate = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
-            report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-            if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+        // R = O is the lucky case: d = −a/b directly.
+        if target == BinaryPoint::Infinity {
+            let d = solve_for_d(&a, &b, r)?;
+            if kc.mul(&g, &d) == *q {
                 report.log = Some(d);
+                report.direct_relation = true;
                 report.relations = relations.len();
                 report.relation_collection_ns = relation_start
                     .elapsed()
                     .as_nanos()
                     .saturating_sub(report.linear_algebra_ns);
                 return Some(report);
+            }
+            continue;
+        }
+
+        let found = match opts.strategy {
+            DecompositionStrategy::Enumerate => decompose(kc, fb, &index_of, &target, opts.m, 0),
+            DecompositionStrategy::Groebner => {
+                let (idxs, stats) = groebner_decompose(
+                    kc,
+                    fb,
+                    &index_of,
+                    &field,
+                    &target,
+                    opts.m,
+                    opts.engine,
+                    opts.node_budget,
+                );
+                report.reductions += stats.reductions;
+                report.infeasible_branches += stats.infeasible_branches;
+                idxs
+            }
+            DecompositionStrategy::Sat => {
+                let (idxs, stats) = sat_decompose_with(
+                    kc,
+                    fb,
+                    &index_of,
+                    &field,
+                    &target,
+                    opts.m,
+                    opts.max_models,
+                    opts.sat_macaulay_degree,
+                    opts.sat_options,
+                );
+                report.sat_calls += stats.solver_calls;
+                report.sat_refutations += usize::from(stats.refuted);
+                report.sat_unknowns += usize::from(stats.exhausted);
+                report.sat_invalid_models += stats.spurious;
+                report.sat_models += stats.models;
+                report.sat_conflicts += stats.conflicts;
+                if stats.spurious != 0 {
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
+                    return Some(report);
+                }
+                idxs
+            }
+        };
+        if let Some(idxs) = found {
+            relations.push(relation_from_decomposition_with_mode(
+                kc,
+                fb,
+                &idxs,
+                &a,
+                &b,
+                opts.collapse_negation,
+            ));
+            if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
+                report.linear_solve_attempts += 1;
+                let linear_start = std::time::Instant::now();
+                let candidate =
+                    solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+                    report.log = Some(d);
+                    report.relations = relations.len();
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
+                    return Some(report);
+                }
             }
         }
     }
@@ -3351,24 +3292,6 @@ mod tests {
             }
         }
         assert!(signed_early_relations.unwrap() < signed_fixed_relations.unwrap());
-    }
-
-    #[test]
-    fn parallel_sat_relation_batches_recover_the_same_log() {
-        let kc = KoblitzCurve::new(0, 9).unwrap();
-        let d = BigUint::from(53u32);
-        let q = kc.mul(kc.generator(), &d);
-        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
-        let opts = KoblitzIcOptions {
-            strategy: DecompositionStrategy::Sat,
-            relation_batch_size: 4,
-            ..KoblitzIcOptions::default()
-        };
-        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &fb, &opts).unwrap();
-        assert_eq!(report.log, Some(d));
-        assert_eq!(report.relation_batch_size, 4);
-        assert!(report.relation_batches < report.trials);
-        assert_eq!(report.sat_invalid_models, 0);
     }
 
     #[test]

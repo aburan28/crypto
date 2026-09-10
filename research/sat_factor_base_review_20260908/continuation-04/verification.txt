@@ -1,0 +1,6 @@
+Four fixed-policy parallel runs and four serial controls recovered and independently reverified their unknown scalars.
+Parallel optimized total 88.334542s versus control 918.042893s: 10.392796x aggregate end-to-end speedup.
+Excluding batch-selection seed 3, holdout seeds 1, 2, and 4 give 10.071355x aggregate speedup.
+Geometric mean 10.194145x, median 11.286984x, minimum 6.992173x.
+Batch 10 was fastest among completing seed-3 batches 8, 10, 12, and 16; every admitted run used ten Rayon threads and a 10000-conflict cutoff.
+The seed-4 5000-conflict arm stopped at the 64-trial bound with four relations and is retained only as an operational failure.

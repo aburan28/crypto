@@ -1,0 +1,60 @@
+{
+  "recorded_utc": "2026-09-10T00:05:24.466537+00:00",
+  "scope": "Ten-thread deterministic-batch end-to-end toy n=19 SAT index-calculus speedup",
+  "base_commit": "7b63d859ec42f9d82406320413fb2415db9d67ba",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_sha256": {
+    "examples/koblitz_selected_e2e.rs": "ce5f7bd44e848ca6d80935863e6d8bf26dc48b50c305c61b58dee56e64dd7df8",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "7e1b7a1d02f105107d7b8e5fe2708585cf6feaa86c879d4de90519293c9d1427"
+  },
+  "input_sha256": {
+    "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+    "research/sat_factor_base_review_20260908/continuation-02/full-orbit-selected-predicate-certificate.json": "2ed149dee1485638cdcd3e14dc08c46e0af324206c9903d6dc072d36950a645d",
+    "research/sat_factor_base_review_20260908/continuation-03/final_manifest.json": "dd1b90480ad27b0ee8b50fce4d8a52ed88b63f96fe9fa0cb75d0e5e65840a6aa"
+  },
+  "artifact_sha256": {
+    "PARALLEL_10X.md": "bc16ecfd7ac0f0c960f0c730403f44bc646580ca103ef1f9a2a78001566aca8b",
+    "build.log": "50681170cfda6104e6864b7b989e4ced8153c843d7ef78b305e296b3d9c5b6b8",
+    "optimized-seed-1-batch-10-time.txt": "b8712aa786c88b1447522dd37264ca06d1a63a34a5654829489078ea54bd91b0",
+    "optimized-seed-1-batch-10.jsonl": "c02224dd1441f3a81c4bc3506f21e6aee4318bcf77e5fb83600fbea8187e33db",
+    "optimized-seed-2-batch-10-time.txt": "236fba7a82bb79c0630545ab3a609bb86d2b46952ec757b6bde7e61f62fca8e7",
+    "optimized-seed-2-batch-10.jsonl": "e3a62b389866ad56125968498c82be463a1f9526a632f9737f1c4a81564e8e95",
+    "optimized-seed-3-batch-10-time.txt": "5d2dd7aa6e3e3d19e1102226502954b7d743a0827cf47634795afe3a28670ba1",
+    "optimized-seed-3-batch-10.jsonl": "77fda55ce80ec5c5e608bb7956704803599d1cd04216a78c58a9552156bd56ca",
+    "optimized-seed-3-batch-12-time.txt": "ff78cf1efd375990a1efeab58e1f145b6a8f88aaa029ed71585791d5393cc815",
+    "optimized-seed-3-batch-12.jsonl": "037cdb410784de52ff0138afc81cbb6e8a17e7a2979d8c45da38f697ed3c897d",
+    "optimized-seed-3-batch-16-time.txt": "aa47df56f9e7e4a535bbccaf39d22455cc697c181c0ea12b3c4eab88f5934d28",
+    "optimized-seed-3-batch-16.jsonl": "5904cfef52d8cfa42fdcb757682096182c540e6c03950e3940bf14bc20baaf37",
+    "optimized-seed-3-batch-8-time.txt": "0d75a67c943e93f85d80ca829784690d78aa95d6fa082d8a8e6a9e5741e051f4",
+    "optimized-seed-3-batch-8.jsonl": "f85c324a7bcd8701d61761fea95b51f8a802fb70e60eba4c4b9eab9df197739e",
+    "optimized-seed-4-batch-10-time.txt": "7f67abb99e96c0fc0b002a308fe3dd90a9a13cad6557b3776a3c7370485e4d1b",
+    "optimized-seed-4-batch-10.jsonl": "566a3a89d300391eedd2798b0ed6590170c90b015b94ac26358cf715cdb0e267",
+    "optimized-seed-4-batch-14-threads-12-time.txt": "d5634f4d67bf0073408ae91ae3ffe1619a342b172bd6565d4c26dc12b2f7be86",
+    "optimized-seed-4-batch-14-threads-12.jsonl": "712f167d58c91f8fc88116a55d694bc40ed7edd00988d5d347a2fabcc27695a5",
+    "optimized-seed-4-batch-30-time.txt": "e76833247b163180ac13b91cf5251a0336bb5db5dc2d00fea086f03025a3a267",
+    "optimized-seed-4-batch-30.jsonl": "dbec832f346ff5ad02966143ec02e69d414fe4469f7e0f1c750a54b8ed53c5e9",
+    "optimized-seed-4-cap-5000-batch-10-time.txt": "5e25d42c7bc6623d70ae12d16a363cdb9dd95b9793438576d61c4afffdf897da",
+    "optimized-seed-4-cap-5000-batch-10.jsonl": "3a164ecf894cea305996f424f3e3af30f3f7c222b89714d55c8dfce2a176b81e",
+    "parallel-10x-summary.json": "ced5047d9af9fec14f96a4bfbd52b25af2385235c60e7d3d81c168749b210eaa",
+    "protocol.json": "eccde7028dd864481e81e7571168e56af989044fa8e751e3caf0bb9c4ba7d4d5",
+    "validation.txt": "f05ac8340915196bafd024b49c9a1e0e71eba83b180a53fc4d15b5db2b7aab9c",
+    "verification.txt": "03978b3c4de88e8a8c80dec9d3165f204489d73e6c79265a3a31e9e0a0c2e009",
+    "verify_parallel_10x.py": "d5106fc6a24625682b039dcf7b54f7ea06f6b4909b7a6dbc9d7fcd06cdeb876e"
+  },
+  "result": {
+    "completed_pairs": 4,
+    "rayon_threads": 10,
+    "relation_batch_size": 10,
+    "optimized_total_seconds": 88.334541749,
+    "control_total_seconds": 918.0428925,
+    "aggregate_speedup": 10.392796230364697,
+    "holdout_aggregate_speedup": 10.07135496415453,
+    "minimum_paired_speedup": 6.992173120123248,
+    "median_paired_speedup": 11.286983829571813,
+    "geometric_mean_paired_speedup": 10.194145369730897,
+    "all_unknown_scalars_recovered_and_verified": true,
+    "all_pairs_improved": true
+  },
+  "validation": "Four fixed-policy parallel runs and four source-pinned serial controls completed; full and holdout aggregates exceed 10x; focused Rust tests, batch screen, failed-cutoff exclusion, internal/external timing, and fail-closed verifier passed."
+}
