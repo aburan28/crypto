@@ -12,6 +12,8 @@ S_3(x_1,x_2,x_3)=(x_1x_2+x_1x_3+x_2x_3)^2+x_1x_2x_3+b,
 
 one descends the summation equations to Boolean equations after restricting the summand coordinates to the chosen factor base. A polynomial root still needs rational lifts whose group sum is the intended point. The existing symmetric S4 implementation is specialized to b=1. The sparse S3-chain representation handles general b but has a 64-variable representation limit; a wide S4 representation is now used for three-summand nonlinear Koblitz bases. This is a representation choice, not a complexity theorem. [Semaev's original paper](https://eprint.iacr.org/2004/031).
 
+The [algebraic definition and proof note](continuation-05-sota-gates/FACTOR_BASE_DEFINITION.md) gives the exact kernel-dimension proof, its repeated-factor qualification, and the distinction between coordinate conditions and curve-group relations.
+
 **Invariant linear spaces and invariant sets are different choices.** For odd n, normal-basis coordinates identify the Frobenius module with F2[T]/(T^n-1). Thus invariant linear subspaces correspond to divisors of T^n-1, and their possible dimensions are subset sums of its irreducible-factor degrees. For prime n, the nontrivial degrees are ord_n(2). At n=131 and n=163 those orders are 130 and 162: the only invariant linear dimensions are 0, 1, n-1, n. This conclusion does not forbid small invariant nonlinear sets. Frobenius-invariant factor bases, orbit compression, and their costs are established prior art. [Galbraith–Granger–Merz–Petit](https://sacworkshop.org/SAC20/files/preproceedings/18-IndexCalculus.pdf).
 
 For a small seed space W, define
