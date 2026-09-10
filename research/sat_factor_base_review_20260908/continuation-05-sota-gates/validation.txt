@@ -77,3 +77,6 @@ Result: the original fixed-table process failed operationally; fresh determinist
 
 PASS: local preflight of external reproduction verifier v3.
 Result: retained degree-9, degree-15 and degree-23 artifacts, public discoveries, target matches, recovered scalars and fail-closed fields were all accepted.
+
+PASS: GitHub Actions external-host run 34428320022.
+Result: fresh Linux/x86-64 checkout reproduced public factor-base discovery and scalar-blind IC/rho controls through degree 23, passed 37 focused tests with one ignored, passed the fail-closed verifier, and uploaded the complete artifact.

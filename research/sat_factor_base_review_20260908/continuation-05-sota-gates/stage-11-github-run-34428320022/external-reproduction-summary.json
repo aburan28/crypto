@@ -1,0 +1,201 @@
+{
+  "schema": "koblitz_external_host_reproduction.v3",
+  "environment": {
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "python": "3.12.3"
+  },
+  "degree9_rows": [
+    {
+      "secret": 53,
+      "index_calculus": {
+        "relations": 4,
+        "trials": 4,
+        "conflicts": 91,
+        "wall_seconds": 0.00861869300001672,
+        "core_seconds": 0.008319,
+        "peak_rss_bytes": 13983744
+      },
+      "automorphism_rho": {
+        "iterations": 2,
+        "reported_group_additions": 23,
+        "wall_seconds": 0.002491800999990801,
+        "core_seconds": 0.0021839999999999997,
+        "peak_rss_bytes": 13983744
+      }
+    },
+    {
+      "secret": 101,
+      "index_calculus": {
+        "relations": 4,
+        "trials": 4,
+        "conflicts": 124,
+        "wall_seconds": 0.008603504999996403,
+        "core_seconds": 0.00832,
+        "peak_rss_bytes": 13983744
+      },
+      "automorphism_rho": {
+        "iterations": 4,
+        "reported_group_additions": 29,
+        "wall_seconds": 0.002493595000004234,
+        "core_seconds": 0.002188,
+        "peak_rss_bytes": 13975552
+      }
+    }
+  ],
+  "degree15_public_discovery": {
+    "selected_divisor_indices": [
+      2,
+      4
+    ],
+    "rational_points": 281,
+    "projected_signed_frobenius_orbits": 6,
+    "wall_seconds": 0.4177650420000134,
+    "core_seconds": 0.41741599999999995,
+    "peak_rss_bytes": 13983744
+  },
+  "degree15_rows": [
+    {
+      "secret": 17,
+      "seed": 20260981,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 3779,
+        "wall_seconds": 0.2974564970000131,
+        "core_seconds": 0.297055,
+        "peak_rss_bytes": 13783040
+      },
+      "automorphism_rho": {
+        "iterations": 1,
+        "reported_group_additions": 20,
+        "wall_seconds": 0.0035515929999974105,
+        "core_seconds": 0.0032369999999999994,
+        "peak_rss_bytes": 13967360
+      }
+    },
+    {
+      "secret": 53,
+      "seed": 20260982,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 5231,
+        "wall_seconds": 0.306490881000002,
+        "core_seconds": 0.306112,
+        "peak_rss_bytes": 13983744
+      },
+      "automorphism_rho": {
+        "iterations": 2,
+        "reported_group_additions": 23,
+        "wall_seconds": 0.003616843999992625,
+        "core_seconds": 0.003297,
+        "peak_rss_bytes": 13975552
+      }
+    },
+    {
+      "secret": 89,
+      "seed": 20260983,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 5235,
+        "wall_seconds": 0.31019141199999467,
+        "core_seconds": 0.30969800000000003,
+        "peak_rss_bytes": 13983744
+      },
+      "automorphism_rho": {
+        "iterations": 3,
+        "reported_group_additions": 26,
+        "wall_seconds": 0.0037948069999913514,
+        "core_seconds": 0.003443,
+        "peak_rss_bytes": 13918208
+      }
+    },
+    {
+      "secret": 137,
+      "seed": 20260984,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 2288,
+        "wall_seconds": 0.28543693099999246,
+        "core_seconds": 0.28490499999999996,
+        "peak_rss_bytes": 14012416
+      },
+      "automorphism_rho": {
+        "iterations": 1,
+        "reported_group_additions": 20,
+        "wall_seconds": 0.003669280999986313,
+        "core_seconds": 0.003362,
+        "peak_rss_bytes": 13983744
+      }
+    },
+    {
+      "secret": 199,
+      "seed": 20260985,
+      "index_calculus": {
+        "relations": 7,
+        "trials": 7,
+        "conflicts": 3238,
+        "wall_seconds": 0.2852194349999877,
+        "core_seconds": 0.28479299999999996,
+        "peak_rss_bytes": 14012416
+      },
+      "automorphism_rho": {
+        "iterations": 3,
+        "reported_group_additions": 26,
+        "wall_seconds": 0.003763157000008732,
+        "core_seconds": 0.00342,
+        "peak_rss_bytes": 14012416
+      }
+    }
+  ],
+  "degree23_public_discoveries": [
+    {
+      "curve_a": 0,
+      "selected_divisor_indices": [
+        0,
+        2
+      ],
+      "rational_points": 4281,
+      "projected_signed_frobenius_orbits": 93,
+      "wall_seconds": 9.33149067399998,
+      "core_seconds": 9.330242,
+      "peak_rss_bytes": 13971456
+    },
+    {
+      "curve_a": 1,
+      "selected_divisor_indices": [
+        0,
+        1
+      ],
+      "rational_points": 3957,
+      "projected_signed_frobenius_orbits": 86,
+      "wall_seconds": 7.4051723750000065,
+      "core_seconds": 7.402529,
+      "peak_rss_bytes": 14012416
+    }
+  ],
+  "degree23_pair": {
+    "index_calculus": {
+      "relations": 94,
+      "trials": 147,
+      "conflicts": 8977482,
+      "unknown_sat_targets": 53,
+      "wall_seconds": 233.856566202,
+      "core_seconds": 233.823862,
+      "peak_rss_bytes": 24997888
+    },
+    "automorphism_rho": {
+      "iterations": 518,
+      "restarts": 2,
+      "reported_group_additions": 1605,
+      "wall_seconds": 0.07553529699998762,
+      "core_seconds": 0.07521,
+      "peak_rss_bytes": 13975552
+    }
+  },
+  "all_checks_pass": true,
+  "scope": "GitHub-hosted fresh-checkout reproduction of public factor-base discovery plus degree-9, degree-15 and degree-23 toy correctness and accounting; workflow is project-authored and is not an external novelty review"
+}
