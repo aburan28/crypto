@@ -165,6 +165,7 @@ pub mod pq_groebner_f2;
 pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
+pub mod pollard_collab;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod residual_walk;
