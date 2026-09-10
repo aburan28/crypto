@@ -124,6 +124,8 @@ fn schema_unknown_fields_and_ambiguous_abstract_coordinates_are_rejected() {
 }
 #[test]
 fn supported_larger_fixture_completes_and_reports_resources() {
+    // Control accounting: one column per Frobenius orbit, fixed surplus,
+    // serial trials — the historical 91 + 4 relations.
     let (ok, v) = command(&[
         "run",
         "--degree",
@@ -134,11 +136,38 @@ fn supported_larger_fixture_completes_and_reports_resources() {
         "53",
         "--solver",
         "enumerate",
+        "--control",
+        "--batch",
+        "1",
     ]);
     assert!(ok, "{v}");
     assert_eq!(v["result"]["verified"], true);
     assert_eq!(v["result"]["recovered"], "53");
     assert_eq!(v["counts"]["relations"], 95);
+    assert_eq!(v["mode"]["control"], true);
+    assert_eq!(v["factor_base"]["spec"]["kind"], "factor");
+    // Fast accounting: signed and cofactor-projected columns, and the
+    // incremental solve stops as soon as the scalar is pinned.
+    let (ok, fast) = command(&[
+        "run",
+        "--degree",
+        "11",
+        "--curve-a",
+        "1",
+        "--known-log",
+        "53",
+        "--solver",
+        "enumerate",
+        "--batch",
+        "1",
+    ]);
+    assert!(ok, "{fast}");
+    assert_eq!(fast["result"]["verified"], true);
+    assert_eq!(fast["result"]["recovered"], "53");
+    assert!(fast["counts"]["columns"].as_u64().unwrap() < v["counts"]["columns"].as_u64().unwrap());
+    assert!(fast["counts"]["relations"].as_u64().unwrap() < 95);
+    assert_eq!(fast["counts"]["inconsistent_relations"], 0);
+    assert_eq!(fast["counts"]["verification_failures"], 0);
     assert_eq!(
         v["stages"].as_array().unwrap().last().unwrap()["status"],
         "pass"
@@ -255,4 +284,134 @@ fn point_only_input_reports_the_checks_that_were_attempted() {
         .unwrap()
         .iter()
         .any(|c| c["name"] == "point_subgroup" && c["status"] == "pass"));
+}
+
+#[test]
+fn search_finds_a_validated_base_where_the_legacy_family_yields_nothing() {
+    // K_1 / GF(2^15) with factor index 0 collects no relation at all.
+    let (ok, legacy) = command(&[
+        "run",
+        "--degree",
+        "15",
+        "--curve-a",
+        "1",
+        "--solver",
+        "pair-table",
+        "--max-trials",
+        "500",
+    ]);
+    assert!(!ok);
+    assert_eq!(legacy["status"], "incomplete");
+    assert_eq!(legacy["counts"]["relations"], 0);
+
+    let spec = path();
+    let (ok, v) = command(&[
+        "search",
+        "--degree",
+        "15",
+        "--curve-a",
+        "1",
+        "--family",
+        "divisor",
+        "--max-dimension",
+        "8",
+        "--no-saturate",
+        "--validate-top",
+        "1",
+        "--holdout",
+        "1",
+        "--spec-out",
+        spec.to_str().unwrap(),
+    ]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "complete");
+    assert_eq!(v["exhaustive_targets"], true);
+    assert_eq!(v["targets"], 210);
+    let candidates = v["candidates"].as_array().unwrap();
+    assert!(!candidates.is_empty());
+    // Ranked by expected trials, finite ones first.
+    let scores: Vec<f64> = candidates
+        .iter()
+        .map(|c| c["expected_trials"].as_f64().unwrap_or(f64::INFINITY))
+        .collect();
+    assert!(scores.windows(2).all(|w| w[0] <= w[1]));
+    assert!(candidates
+        .iter()
+        .all(|c| c["spec"]["kind"] == "divisor" || c["spec"]["kind"] == "pruned"));
+    assert_eq!(v["validation"]["runs"][0]["eligible"], true);
+    assert_eq!(v["selected"]["degree"], 15);
+    assert_eq!(v["selected"]["curve_a"], 1);
+
+    // The saved recipe solves a fresh known-answer fixture end to end.
+    let (ok, run) = command(&[
+        "run",
+        "--degree",
+        "15",
+        "--curve-a",
+        "1",
+        "--solver",
+        "pair-table",
+        "--factor-base",
+        spec.to_str().unwrap(),
+        "--known-log",
+        "97",
+    ]);
+    assert!(ok, "{run}");
+    assert_eq!(run["result"]["verified"], true);
+    assert_eq!(run["result"]["recovered"], "97");
+    assert_eq!(run["factor_base"]["spec"], v["selected"]["spec"]);
+    assert_eq!(run["counts"]["inconsistent_relations"], 0);
+
+    // A recipe is bound to its curve.
+    let (ok, wrong) = command(&[
+        "run",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--factor-base",
+        spec.to_str().unwrap(),
+    ]);
+    assert!(!ok);
+    assert_eq!(wrong["operation"], "error");
+    // The recipe file is never overwritten.
+    let (ok, _) = command(&[
+        "search",
+        "--degree",
+        "15",
+        "--curve-a",
+        "1",
+        "--family",
+        "factor",
+        "--validate-top",
+        "0",
+        "--spec-out",
+        spec.to_str().unwrap(),
+    ]);
+    assert!(!ok);
+    std::fs::remove_file(spec).unwrap();
+}
+
+#[test]
+fn every_solver_recovers_the_same_scalar_with_three_summands() {
+    for solver in ["pair-table", "enumerate", "groebner", "sat"] {
+        let (ok, v) = command(&[
+            "run",
+            "--degree",
+            "9",
+            "--curve-a",
+            "0",
+            "--known-log",
+            "77",
+            "--summands",
+            "3",
+            "--solver",
+            solver,
+        ]);
+        assert!(ok, "{solver}: {v}");
+        assert_eq!(v["result"]["verified"], true, "{solver}");
+        assert_eq!(v["result"]["recovered"], "77", "{solver}");
+        assert_eq!(v["counts"]["sat_invalid_models"], 0);
+        assert_eq!(v["counts"]["inconsistent_relations"], 0);
+    }
 }

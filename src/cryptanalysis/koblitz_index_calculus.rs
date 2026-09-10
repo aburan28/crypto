@@ -137,6 +137,7 @@ use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
     SolveOptions, SolveStats, SolverEngine,
 };
+use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
@@ -144,8 +145,11 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.
-pub const MAX_N: u32 = 24;
+/// the mathematics.  Curve construction costs trial division to
+/// `√#E ≈ 2^{n/2}` and a sparse irreducible search; both are cheap to
+/// `n = 40`.  What actually bounds a run is the `2^dim` factor base
+/// and, for the meet-in-the-middle oracle, its `|F|²` pair table.
+pub const MAX_N: u32 = 40;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -476,7 +480,10 @@ impl KoblitzCurve {
         if a > 1 || n < 3 || n > MAX_N {
             return None;
         }
-        let irreducible = find_irreducible(n)?;
+        // Identical to the exhaustive `find_irreducible` wherever both
+        // are defined (a test pins that for every n ≤ 24) and far
+        // cheaper past it: the exhaustive scan would touch 2^n masks.
+        let irreducible = find_irreducible_sparse(n)?;
         let a_fe = if a == 0 {
             F2mElement::zero(n)
         } else {
@@ -654,6 +661,14 @@ pub fn frobenius_eigenvalue(curve: &BinaryCurve, trace: i64, r: &BigUint) -> Opt
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FactorBaseDomain {
     LinearSubspace,
+    /// A subset of the signed Frobenius orbits of a linear subspace
+    /// base, selected by the factor-base search.  The coordinates still
+    /// live in the subspace (so the algebraic system keeps its `ℓ`
+    /// variables per summand); SAT additionally constrains each summand
+    /// to the retained abscissae with the exact domain trie.
+    SubspaceSubset {
+        retained_orbits: usize,
+    },
     /// Union of Frobenius translates of an ell-dimensional seed space.
     /// The union need not be a linear subspace.
     FrobeniusUnion {
@@ -705,6 +720,35 @@ impl FrobeniusFactorBase {
     /// signed `π`-orbit, versus `points.len()` for a non-invariant base.
     pub fn unknowns(&self) -> usize {
         self.signed_orbits.len()
+    }
+
+    /// Whether the abscissae are encoded in the full polynomial basis
+    /// of `F_{2^n}` (nonlinear unions and saturations) rather than in
+    /// the `ℓ`-dimensional basis of an invariant subspace.
+    pub fn uses_ambient_basis(&self) -> bool {
+        !matches!(
+            self.domain,
+            FactorBaseDomain::LinearSubspace | FactorBaseDomain::SubspaceSubset { .. }
+        )
+    }
+
+    /// Canonical abscissa of each signed orbit: the smallest `x` (as an
+    /// integer) among its points.  Stable across rebuilds, so a search
+    /// can name orbits by it.
+    pub fn signed_orbit_abscissa_representatives(&self) -> Vec<BigUint> {
+        self.signed_orbits
+            .iter()
+            .map(|orbit| {
+                orbit
+                    .iter()
+                    .filter_map(|&i| match &self.points[i] {
+                        BinaryPoint::Affine { x, .. } => Some(x.to_biguint()),
+                        BinaryPoint::Infinity => None,
+                    })
+                    .min()
+                    .expect("signed orbits contain affine points")
+            })
+            .collect()
     }
 
     /// The class `[r]P` of each factor-base point in the `h`-torsion,
@@ -760,23 +804,30 @@ impl FrobeniusFactorBase {
             return m == 0;
         }
         let classes = self.distinct_cofactor_classes(kc);
-        // Sums reachable with exactly j summands; the h-torsion is tiny.
-        let key = point_key;
-        let mut reach: Vec<HashMap<(BigUint, BigUint), BinaryPoint>> = Vec::with_capacity(m + 1);
-        let mut zero = HashMap::new();
-        zero.insert(key(&BinaryPoint::Infinity), BinaryPoint::Infinity);
-        reach.push(zero);
+        // Sums reachable with exactly j summands.  Every class lies in
+        // the h-torsion, so each layer has at most h distinct points and
+        // the walk costs at most m·h·|classes| additions; packed keys
+        // keep the dedup allocation-free (the field is at most 62 bits
+        // wide wherever a curve can be built).
+        let identity = pack_point(&BinaryPoint::Infinity);
+        let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
         for j in 1..=m {
-            let mut next: HashMap<(BigUint, BigUint), BinaryPoint> = HashMap::new();
-            for acc in reach[j - 1].values() {
+            let mut seen: HashSet<u64> = HashSet::with_capacity(layer.len() * classes.len());
+            let mut next: Vec<BinaryPoint> = Vec::new();
+            for acc in &layer {
                 for c in &classes {
                     let sum = kc.add(acc, c);
-                    next.insert(key(&sum), sum);
+                    if seen.insert(pack_point(&sum)) {
+                        next.push(sum);
+                    }
                 }
             }
-            reach.push(next);
+            if j == m {
+                return seen.contains(&identity);
+            }
+            layer = next;
         }
-        reach[m].contains_key(&key(&BinaryPoint::Infinity))
+        false
     }
 
     /// The summand counts in `2 ..= max_m` that [`Self::m_can_decompose`]
@@ -1178,6 +1229,62 @@ pub fn build_explicit_frobenius_orbit_factor_base(
     )
 }
 
+/// **Keep only the listed signed orbits** of a factor base.
+///
+/// The retained set is still closed under Frobenius and negation, so
+/// every relation identity survives; what changes is the relation
+/// column count (down to `keep.len()`) and, for the enumeration and
+/// pair-table oracles, the per-target cost.  A subspace base stays in
+/// its subspace coordinates ([`FactorBaseDomain::SubspaceSubset`]); a
+/// nonlinear base becomes an explicit orbit union.  Returns `None` for
+/// an empty or out-of-range selection.
+pub fn restrict_factor_base_to_orbits(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    keep: &[usize],
+) -> Option<FrobeniusFactorBase> {
+    if keep.is_empty() || keep.iter().any(|&o| o >= fb.signed_orbits.len()) {
+        return None;
+    }
+    let mut keep_sorted = keep.to_vec();
+    keep_sorted.sort_unstable();
+    keep_sorted.dedup();
+    let mut xs = std::collections::BTreeMap::new();
+    for &o in &keep_sorted {
+        for &i in &fb.signed_orbits[o] {
+            if let BinaryPoint::Affine { x, .. } = &fb.points[i] {
+                xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+            }
+        }
+    }
+    if fb.uses_ambient_basis() {
+        // One representative per retained orbit; the constructor closes
+        // it under Frobenius again, which is a no-op here.
+        let representatives: Vec<F2mElement> = keep_sorted
+            .iter()
+            .map(|&o| {
+                let i = fb.signed_orbits[o][0];
+                match &fb.points[i] {
+                    BinaryPoint::Affine { x, .. } => x.clone(),
+                    BinaryPoint::Infinity => unreachable!("factor bases hold affine points"),
+                }
+            })
+            .collect();
+        return build_explicit_frobenius_orbit_factor_base(kc, &representatives);
+    }
+    finish_factor_base_domain(
+        kc,
+        fb.ell,
+        fb.f_j,
+        fb.linearised_exponents.clone(),
+        fb.subspace_basis.clone(),
+        xs.into_values().collect(),
+        FactorBaseDomain::SubspaceSubset {
+            retained_orbits: keep_sorted.len(),
+        },
+    )
+}
+
 /// B union (B+T), omitting infinity, where T=(0,1) on K_a.
 /// Since [h]T=O for even h, this changes the available torsion lifts
 /// without adding projected points. Translation commutes with Frobenius.
@@ -1412,6 +1519,158 @@ pub enum DecompositionStrategy {
     /// The default keeps descended parity equations as native XOR rows;
     /// the CNF path remains available as a controlled comparison.
     Sat,
+    /// **Meet in the middle** over a precomputed table of all pair sums
+    /// `P_i + P_j` ([`PairSumTable`]).  `m = 2` is one lookup, `m = 3`
+    /// is `|F|` lookups, `m = 4` is `|F|²` lookups — against
+    /// `|F|^{m−1}` group operations for [`Self::Enumerate`].  Exact and
+    /// complete like enumeration; costs `|F|²` memory once per run.
+    PairTable,
+}
+
+/// Packed identity of a point for hashing and sorting, in one `u64`:
+/// `0` for `O`, otherwise `2(x + 1) + s` where the sign bit `s`
+/// separates `P = (x, y)` from `−P = (x, x + y)` by comparing `y` with
+/// `x + y` as integers (they coincide only at `x = 0`, where `P = −P`).
+/// Exact for every `n ≤ 62`.
+pub fn pack_point(p: &BinaryPoint) -> u64 {
+    match p {
+        BinaryPoint::Infinity => 0,
+        BinaryPoint::Affine { x, y } => {
+            let xb = x.raw_bits().first().copied().unwrap_or(0);
+            let yb = y.raw_bits().first().copied().unwrap_or(0);
+            let sign = u64::from(yb > (xb ^ yb));
+            ((xb + 1) << 1) | sign
+        }
+    }
+}
+
+/// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
+/// by packed point identity so a sum can be looked up by binary search.
+///
+/// This is the birthday-paradox half of a decomposition search: with
+/// the table built once, "is `R` a sum of two base points" is one
+/// lookup, "of three" is `|F|` lookups of `R − P_k`, and "of four" is
+/// `|F|²` lookups of `R − (P_k + P_l)` walked off the table itself.
+/// The factor-base search uses the same table to count *every*
+/// witness of a target, which is what exact yield needs.
+#[derive(Clone, Debug)]
+pub struct PairSumTable {
+    /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
+    entries: Vec<(u64, u32, u32)>,
+}
+
+impl PairSumTable {
+    /// Build the table with `|F|(|F|+1)/2` point additions, in parallel
+    /// over the first index; 16 bytes per entry.  Returns `None` when the
+    /// field is too wide to pack a point into a `u64`.
+    pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        if kc.n > 62 || fb.points.len() > u32::MAX as usize {
+            return None;
+        }
+        let mut entries: Vec<(u64, u32, u32)> = (0..fb.points.len())
+            .into_par_iter()
+            .flat_map_iter(|i| {
+                let kc = kc;
+                let fb = fb;
+                (i..fb.points.len()).map(move |j| {
+                    let sum = kc.add(&fb.points[i], &fb.points[j]);
+                    (pack_point(&sum), i as u32, j as u32)
+                })
+            })
+            .collect();
+        entries.par_sort_unstable();
+        Some(Self { entries })
+    }
+
+    /// Number of stored pair sums (with multiplicity).
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Whether the table is empty.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// All `(i, j)` with `P_i + P_j` equal to the packed point.
+    pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
+        let start = self.entries.partition_point(|e| e.0 < key);
+        let end = start + self.entries[start..].partition_point(|e| e.0 == key);
+        &self.entries[start..end]
+    }
+
+    /// **Decompose** `target` into exactly `m ∈ {2, 3, 4}` base points,
+    /// returning sorted indices, or `None` when no decomposition exists
+    /// (a complete search) or `m` is unsupported.  The returned sum is
+    /// re-checked in the group before it is handed back.
+    pub fn decompose(
+        &self,
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        target: &BinaryPoint,
+        m: usize,
+    ) -> Option<Vec<usize>> {
+        let mut found: Option<Vec<usize>> = None;
+        self.witnesses(kc, fb, target, m, &mut |witness| {
+            found = Some(witness.to_vec());
+            false
+        });
+        let idxs = found?;
+        let sum = idxs
+            .iter()
+            .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+        (sum == *target).then_some(idxs)
+    }
+
+    /// **Enumerate every sorted witness** `i_1 ≤ … ≤ i_m` with
+    /// `Σ P_{i_k} = target`, calling `sink` for each; the sink returns
+    /// `true` to continue and `false` to stop.  Supports `m ∈ {2, 3, 4}`.
+    pub fn witnesses(
+        &self,
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        target: &BinaryPoint,
+        m: usize,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        match m {
+            2 => {
+                for &(_, i, j) in self.lookup(pack_point(target)) {
+                    if !sink(&[i as usize, j as usize]) {
+                        return;
+                    }
+                }
+            }
+            3 => {
+                for (k, p) in fb.points.iter().enumerate() {
+                    let rest = kc.add(target, &point_neg(p));
+                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                        if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                            return;
+                        }
+                    }
+                }
+            }
+            4 => {
+                // Walk the table as the second half: R − (P_k + P_l).
+                let mut last_key: Option<u64> = None;
+                let mut rest = BinaryPoint::Infinity;
+                for &(key, k, l) in &self.entries {
+                    if last_key != Some(key) {
+                        let pair = kc.add(&fb.points[k as usize], &fb.points[l as usize]);
+                        rest = kc.add(target, &point_neg(&pair));
+                        last_key = Some(key);
+                    }
+                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                        if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
+                            return;
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 /// Lift a tuple of candidate `x`-coordinates to factor-base points
@@ -1610,6 +1869,28 @@ pub struct SatDecompositionOptions {
     pub trace_constraint: bool,
     /// Cumulative conflict cap across every model of one target.
     pub conflict_budget: u64,
+    /// Order the summands lexicographically by subspace code,
+    /// `code(x_1) ≤ code(x_2) ≤ … ≤ code(x_m)`.  The summands are
+    /// interchangeable, so if any decomposition exists a sorted one
+    /// does (for a chained system the intermediates simply follow the
+    /// new order), and the constraint is exact: no verdict changes.
+    ///
+    /// **Off by default, because it does not pay here.**  Measured with
+    /// `koblitz_sat_symmetry_ablation` (conflict budget 400 000, verdicts
+    /// cross-checked against search on every target):
+    ///
+    /// | instance | targets | conflicts off | conflicts on |
+    /// |:---------|--------:|--------------:|-------------:|
+    /// | K_0/2^9, m = 3 | 8 | 5 512 | 6 412 |
+    /// | K_1/2^9, m = 2 | 16 | 428 | 823 |
+    /// | K_0/2^7, m = 2 | 16 | 70 | 79 |
+    /// | K_1/2^15, m = 3 | 8 | 0 | 0 |
+    ///
+    /// The degree-2 Macaulay rows and the trace row already leave these
+    /// systems almost propagation-closed, and the `ℓ − 1` "equal so far"
+    /// auxiliaries per adjacent pair add decisions without removing
+    /// search.  Kept as a control for larger chained instances.
+    pub symmetry_breaking: bool,
 }
 
 impl Default for SatDecompositionOptions {
@@ -1620,7 +1901,50 @@ impl Default for SatDecompositionOptions {
             restrict_to_factor_base: false,
             trace_constraint: true,
             conflict_budget: u64::MAX,
+            symmetry_breaking: false,
         }
+    }
+}
+
+/// Install `code(a) ≤ code(b)` (unsigned, bit `width − 1` most
+/// significant) between two blocks of `width` solver variables that
+/// start at 1-indexed `a_first` and `b_first`.
+///
+/// One "equal so far" auxiliary per bit position below the top; the
+/// auxiliaries are only ever *forced true* by equality, never forced
+/// false, so the constraint admits exactly the assignments with
+/// `a ≤ b` and nothing else is excluded.
+fn add_lex_leq(
+    solver: &mut crate::cryptanalysis::sat::Solver,
+    a_first: u32,
+    b_first: u32,
+    width: usize,
+) {
+    if width == 0 {
+        return;
+    }
+    let aux = solver.add_vars(width as u32 - 1);
+    let aux: Vec<i32> = aux.map(|v| v as i32).collect();
+    let a = |t: usize| (a_first + t as u32) as i32;
+    let b = |t: usize| (b_first + t as u32) as i32;
+    // Top bit: a_top → b_top.
+    let top = width - 1;
+    solver.add_clause(vec![-a(top), b(top)]);
+    // e_t means "a and b agree on every bit above t".
+    for t in (0..top).rev() {
+        let e_t = aux[t];
+        // e_t is forced by equality at bit t+1 given e_{t+1} (or the
+        // top level, which is unconditional).
+        let above: Option<i32> = if t + 1 == top { None } else { Some(aux[t + 1]) };
+        for (la, lb) in [(a(t + 1), b(t + 1)), (-a(t + 1), -b(t + 1))] {
+            let mut clause = vec![la, lb, e_t];
+            if let Some(e_above) = above {
+                clause.push(-e_above);
+            }
+            solver.add_clause(clause);
+        }
+        // Under e_t: a_t → b_t.
+        solver.add_clause(vec![-e_t, -a(t), b(t)]);
     }
 }
 
@@ -1671,7 +1995,7 @@ pub fn sat_decompose_with(
     macaulay_degree: Option<u32>,
     options: SatDecompositionOptions,
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
-    if m == 3 && fb.domain != FactorBaseDomain::LinearSubspace {
+    if m == 3 && fb.uses_ambient_basis() {
         return sat_decompose_union_s4(kc, fb, index_of, target, max_models, options);
     }
     let mut stats = SatDecompositionStats::default();
@@ -1731,6 +2055,17 @@ pub fn sat_decompose_with(
     // with `max_models` in the dozens that dominated the loop.
     let mut enc = encode_boolean_system_with(sys.n_vars, &equations, &[], options.encoding);
     enc.solver.conflict_budget = options.conflict_budget;
+    if options.symmetry_breaking {
+        let ell = fb.subspace_basis.len();
+        for i in 1..m {
+            add_lex_leq(
+                &mut enc.solver,
+                ((i - 1) * ell + 1) as u32,
+                (i * ell + 1) as u32,
+                ell,
+            );
+        }
+    }
     if options.branch_on_summands {
         enc.solver
             .set_branch_priority(&(1..=(m * fb.subspace_basis.len()) as u32).collect::<Vec<_>>());
@@ -1745,7 +2080,7 @@ pub fn sat_decompose_with(
                 BinaryPoint::Infinity => None,
             })
             .collect();
-        let mut codes: Vec<u64> = if fb.domain != FactorBaseDomain::LinearSubspace {
+        let mut codes: Vec<u64> = if fb.uses_ambient_basis() {
             // Union construction uses the full polynomial field basis.
             legal_x
                 .iter()
@@ -2196,6 +2531,16 @@ pub struct KoblitzIcReport {
     pub ell: u32,
     /// Relations collected.
     pub relations: usize,
+    /// Relations that raised the rank of the reduced relation matrix.
+    pub independent_relations: usize,
+    /// Relations that were linear combinations of earlier ones.
+    pub dependent_relations: usize,
+    /// Relations contradicting earlier ones.  Any nonzero value means a
+    /// wrong relation was produced; the run fails closed.
+    pub inconsistent_relations: usize,
+    /// Pinned scalars that did not verify as `[d]G = Q`.  Any nonzero
+    /// value likewise invalidates the run.
+    pub verification_failures: usize,
     /// Random `(a, b)` pairs tried.
     pub trials: usize,
     /// Recovered discrete logarithm, if the run succeeded.
@@ -2244,6 +2589,11 @@ pub struct KoblitzIcReport {
     pub projected_orbit_construction_ns: u128,
     /// Time spent proving the requested summand count can reach the subgroup.
     pub cofactor_admission_ns: u128,
+    /// Pair sums stored by the meet-in-the-middle oracle (zero for
+    /// every other strategy).
+    pub pair_table_entries: usize,
+    /// Time spent building that table.
+    pub pair_table_ns: u128,
 }
 
 fn solve_relation_system(
@@ -2279,6 +2629,10 @@ pub enum KoblitzIcEvent {
     FactorBaseReady {
         points: usize,
         orbits: usize,
+    },
+    /// The meet-in-the-middle pair table was built.
+    PairTableReady {
+        entries: usize,
     },
     RelationCollectionStarted {
         wanted: usize,
@@ -2347,6 +2701,19 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {})
 }
 
+/// Run index calculus with a caller-supplied factor base, reporting
+/// progress.  Emits [`KoblitzIcEvent::FactorBaseReady`] but not
+/// `FactorBaseStarted`, since the base was built by the caller.
+pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
+) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress)
+}
+
 fn koblitz_index_calculus_dlp_observed(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -2386,6 +2753,10 @@ fn koblitz_index_calculus_dlp_observed(
         orbit_count: relation_unknowns,
         ell: fb.ell,
         relations: 0,
+        independent_relations: 0,
+        dependent_relations: 0,
+        inconsistent_relations: 0,
+        verification_failures: 0,
         trials: 0,
         log: None,
         reductions: 0,
@@ -2408,27 +2779,66 @@ fn koblitz_index_calculus_dlp_observed(
         collapse_projected_orbits: opts.collapse_projected_orbits,
         projected_orbit_construction_ns,
         cofactor_admission_ns,
+        pair_table_entries: 0,
+        pair_table_ns: 0,
     };
     if fb.points.is_empty() || !m_cofactor_admissible {
         return Some(report);
     }
 
+    // The meet-in-the-middle oracle needs its table once per run.
+    let pair_table = if opts.strategy == DecompositionStrategy::PairTable {
+        let start = std::time::Instant::now();
+        let table = PairSumTable::build(kc, fb)?;
+        report.pair_table_ns = start.elapsed().as_nanos();
+        report.pair_table_entries = table.len();
+        progress(KoblitzIcEvent::PairTableReady {
+            entries: table.len(),
+        });
+        Some(table)
+    } else {
+        None
+    };
+
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let wanted = relation_unknowns + opts.extra_relations.max(1);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
+    // Incremental reduced echelon form over Z/rZ; the dense big-integer
+    // solver is the fallback for a modulus wider than 64 bits.
+    let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     let relation_start = std::time::Instant::now();
 
+    // Extract, announce and verify a candidate scalar from the echelon
+    // form.  `Some(true)` means solved; `Some(false)` means a pinned
+    // scalar failed verification, which only a wrong relation can cause.
+    let finish_incremental = |echelon: &IncrementalRelationSolver,
+                                  report: &mut KoblitzIcReport,
+                                  progress: &mut dyn FnMut(KoblitzIcEvent)|
+     -> Option<bool> {
+        let d = echelon.target_biguint()?;
+        progress(KoblitzIcEvent::LinearAlgebraStarted {
+            rows: echelon.rank(),
+            columns: relation_unknowns + 1,
+        });
+        report.linear_solve_attempts += 1;
+        progress(KoblitzIcEvent::LinearAlgebraFinished);
+        progress(KoblitzIcEvent::VerificationStarted);
+        let verified = kc.mul(&g, &d) == *q;
+        progress(KoblitzIcEvent::VerificationFinished { verified });
+        if verified {
+            report.log = Some(d);
+        } else {
+            report.verification_failures += 1;
+        }
+        Some(verified)
+    };
+
     progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
     while relations.len() < wanted && report.trials < opts.max_trials {
         let remaining_trials = opts.max_trials - report.trials;
-        let requested_batch = if opts.strategy == DecompositionStrategy::Sat {
-            opts.relation_batch_size.max(1)
-        } else {
-            1
-        };
-        let batch_size = requested_batch.min(remaining_trials);
+        let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
                 let a = BigUint::from(rng.gen_range(1..r_u64));
@@ -2448,6 +2858,11 @@ fn koblitz_index_calculus_dlp_observed(
                 DecompositionStrategy::Enumerate => RelationAttemptOutcome::Enumerated(decompose(
                     kc, fb, &index_of, target, opts.m, 0,
                 )),
+                DecompositionStrategy::PairTable => RelationAttemptOutcome::Enumerated(
+                    pair_table
+                        .as_ref()
+                        .and_then(|table| table.decompose(kc, fb, target, opts.m)),
+                ),
                 DecompositionStrategy::Groebner => {
                     let (idxs, stats) = groebner_decompose(
                         kc,
@@ -2477,7 +2892,9 @@ fn koblitz_index_calculus_dlp_observed(
                 }
             }
         };
-        let outcomes: Vec<_> = if opts.strategy == DecompositionStrategy::Sat && batch_size > 1 {
+        // Targets are drawn serially above and consumed in order below,
+        // so the outcome is independent of thread scheduling.
+        let outcomes: Vec<_> = if batch_size > 1 {
             attempts.par_iter().map(evaluate).collect()
         } else {
             attempts.iter().map(evaluate).collect()
@@ -2501,6 +2918,7 @@ fn koblitz_index_calculus_dlp_observed(
             }
         }
         if report.sat_invalid_models != 0 {
+            report.relations = relations.len();
             report.relation_collection_ns = relation_start
                 .elapsed()
                 .as_nanos()
@@ -2508,6 +2926,7 @@ fn koblitz_index_calculus_dlp_observed(
             return Some(report);
         }
 
+        let mut inconsistent = false;
         for ((a, b, _target), outcome) in attempts.into_iter().zip(outcomes) {
             let found = match outcome {
                 RelationAttemptOutcome::Direct => {
@@ -2526,6 +2945,8 @@ fn koblitz_index_calculus_dlp_observed(
                         report.log = Some(d);
                         report.direct_relation = true;
                         report.relations = relations.len();
+                        report.independent_relations =
+                            echelon.as_ref().map_or(0, IncrementalRelationSolver::rank);
                         report.relation_collection_ns = relation_start
                             .elapsed()
                             .as_nanos()
@@ -2542,7 +2963,7 @@ fn koblitz_index_calculus_dlp_observed(
                 | RelationAttemptOutcome::Sat(idxs, _) => idxs,
             };
             if let Some(idxs) = found {
-                relations.push(relation_from_decomposition_with_mode(
+                let relation = relation_from_decomposition_with_mode(
                     kc,
                     fb,
                     &idxs,
@@ -2550,7 +2971,21 @@ fn koblitz_index_calculus_dlp_observed(
                     &b,
                     opts.collapse_negation,
                     projected_orbits.as_ref(),
-                ));
+                );
+                if let Some(echelon) = echelon.as_mut() {
+                    let linear_start = std::time::Instant::now();
+                    let status = echelon.add_relation(&relation, &kc.cofactor);
+                    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                    match status {
+                        RowStatus::Independent => report.independent_relations += 1,
+                        RowStatus::Dependent => report.dependent_relations += 1,
+                        RowStatus::Inconsistent => {
+                            report.inconsistent_relations += 1;
+                            inconsistent = true;
+                        }
+                    }
+                }
+                relations.push(relation);
             }
         }
 
@@ -2559,39 +2994,60 @@ fn koblitz_index_calculus_dlp_observed(
             wanted,
             trials: report.trials,
         });
-        if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
-            progress(KoblitzIcEvent::RelationCollectionFinished {
-                collected: relations.len(),
-                trials: report.trials,
-            });
-            progress(KoblitzIcEvent::LinearAlgebraStarted {
-                rows: relations.len(),
-                columns: relation_unknowns + 1,
-            });
-            report.linear_solve_attempts += 1;
-            let linear_start = std::time::Instant::now();
-            let candidate = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
-            report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-            if candidate.is_none() {
-                progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+        if inconsistent {
+            // A relation contradicts the others: only a wrong
+            // decomposition-to-row rewrite can do that.  Fail closed.
+            break;
+        }
+        if opts.stop_on_verified_rank {
+            if let Some(echelon) = echelon.as_ref() {
+                let linear_start = std::time::Instant::now();
+                let outcome = finish_incremental(echelon, &mut report, progress);
+                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                match outcome {
+                    Some(true) => {
+                        report.relations = relations.len();
+                        report.relation_collection_ns = relation_start
+                            .elapsed()
+                            .as_nanos()
+                            .saturating_sub(report.linear_algebra_ns);
+                        return Some(report);
+                    }
+                    // Pinned but wrong: a wrong relation slipped in.
+                    Some(false) => break,
+                    None => {}
+                }
+            } else if relations.len() >= relation_unknowns + 1 {
+                progress(KoblitzIcEvent::LinearAlgebraStarted {
+                    rows: relations.len(),
+                    columns: relation_unknowns + 1,
+                });
+                report.linear_solve_attempts += 1;
+                let linear_start = std::time::Instant::now();
+                let candidate =
+                    solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                if candidate.is_none() {
+                    progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+                }
+                let candidate = candidate.filter(|d| {
+                    progress(KoblitzIcEvent::LinearAlgebraFinished);
+                    progress(KoblitzIcEvent::VerificationStarted);
+                    let verified = kc.mul(&g, d) == *q;
+                    progress(KoblitzIcEvent::VerificationFinished { verified });
+                    verified
+                });
+                if let Some(d) = candidate {
+                    report.log = Some(d);
+                    report.relations = relations.len();
+                    report.relation_collection_ns = relation_start
+                        .elapsed()
+                        .as_nanos()
+                        .saturating_sub(report.linear_algebra_ns);
+                    return Some(report);
+                }
+                progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
             }
-            let candidate = candidate.filter(|d| {
-                progress(KoblitzIcEvent::LinearAlgebraFinished);
-                progress(KoblitzIcEvent::VerificationStarted);
-                let verified = kc.mul(&g, d) == *q;
-                progress(KoblitzIcEvent::VerificationFinished { verified });
-                verified
-            });
-            if let Some(d) = candidate {
-                report.log = Some(d);
-                report.relations = relations.len();
-                report.relation_collection_ns = relation_start
-                    .elapsed()
-                    .as_nanos()
-                    .saturating_sub(report.linear_algebra_ns);
-                return Some(report);
-            }
-            progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
         }
     }
     report.relation_collection_ns = relation_start
@@ -2603,12 +3059,31 @@ fn koblitz_index_calculus_dlp_observed(
         collected: relations.len(),
         trials: report.trials,
     });
-    if relations.len() < relation_unknowns + 1 {
+    if report.inconsistent_relations > 0 || report.verification_failures > 0 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
+    if let Some(echelon) = echelon.as_ref() {
+        if relations.is_empty() {
+            return Some(report);
+        }
+        let linear_start = std::time::Instant::now();
+        let outcome = finish_incremental(echelon, &mut report, progress);
+        report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+        if outcome.is_none() {
+            progress(KoblitzIcEvent::LinearAlgebraStarted {
+                rows: echelon.rank(),
+                columns: relation_unknowns + 1,
+            });
+            progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+        }
+        return Some(report);
+    }
+    if relations.len() < relation_unknowns + 1 {
+        return Some(report);
+    }
     progress(KoblitzIcEvent::LinearAlgebraStarted {
         rows: relations.len(),
         columns: relation_unknowns + 1,
@@ -3324,6 +3799,235 @@ mod tests {
                     }
                 }
             }
+        }
+    }
+
+    #[test]
+    fn sparse_and_exhaustive_irreducible_searches_agree_up_to_the_old_cap() {
+        // KoblitzCurve::new now uses the sparse search; every field
+        // representation a fixture could have been generated with before
+        // is unchanged.
+        for n in 3..=24u32 {
+            let full = find_irreducible(n).expect("exhaustive search finds one");
+            let sparse = find_irreducible_sparse(n).expect("sparse search finds one");
+            assert_eq!((full.degree, full.low_terms), (sparse.degree, sparse.low_terms), "n = {n}");
+        }
+    }
+
+    #[test]
+    fn pair_table_agrees_with_enumeration_for_two_three_and_four_summands() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index = fb.index_map();
+        let table = PairSumTable::build(&kc, &fb).unwrap();
+        assert_eq!(table.len(), fb.points.len() * (fb.points.len() + 1) / 2);
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        for m in [2usize, 3, 4] {
+            // m = 4 costs |F|³ per enumerated target; keep that one short.
+            let scalars: Vec<u64> = if m == 4 {
+                (1..=12).collect()
+            } else {
+                (1..r).collect()
+            };
+            for k in scalars {
+                let target = kc.mul(kc.generator(), &BigUint::from(k));
+                let reference = enumerate_decompose(&kc, &fb, &index, &target, m);
+                let tabled = table.decompose(&kc, &fb, &target, m);
+                assert_eq!(tabled.is_some(), reference.is_some(), "m = {m}, k = {k}");
+                if let Some(idxs) = tabled {
+                    assert_eq!(idxs.len(), m);
+                    assert!(idxs.windows(2).all(|w| w[0] <= w[1]));
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                    assert_eq!(sum, target);
+                }
+            }
+        }
+        // Every witness the table enumerates is genuine and distinct.
+        let target = kc.mul(kc.generator(), &BigUint::from(53u32));
+        let mut seen = HashSet::new();
+        table.witnesses(&kc, &fb, &target, 3, &mut |idxs| {
+            let sum = idxs
+                .iter()
+                .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+            assert_eq!(sum, target);
+            assert!(seen.insert(idxs.to_vec()), "duplicate witness {idxs:?}");
+            true
+        });
+    }
+
+    #[test]
+    fn packed_point_keys_are_injective() {
+        let kc = KoblitzCurve::new(1, 11).unwrap();
+        let mut keys = HashSet::new();
+        let mut count = 1usize;
+        keys.insert(pack_point(&BinaryPoint::Infinity));
+        for raw in 0..(1u64 << kc.n) {
+            let x = F2mElement::from_biguint(&BigUint::from(raw), kc.n);
+            for p in points_with_x(&kc.curve, &x) {
+                assert!(keys.insert(pack_point(&p)), "collision at {p:?}");
+                count += 1;
+            }
+        }
+        assert_eq!(BigUint::from(count), kc.group_order);
+    }
+
+    #[test]
+    fn pruned_subspace_bases_keep_every_oracle_honest() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let parent = build_frobenius_factor_base_from_divisor(&kc, &[1, 2]).unwrap();
+        assert!(parent.signed_orbits.len() >= 4);
+        let keep: Vec<usize> = (0..parent.signed_orbits.len()).step_by(2).collect();
+        let fb = restrict_factor_base_to_orbits(&kc, &parent, &keep).unwrap();
+        assert_eq!(
+            fb.domain,
+            FactorBaseDomain::SubspaceSubset {
+                retained_orbits: keep.len()
+            }
+        );
+        assert_eq!(fb.signed_orbits.len(), keep.len());
+        assert_eq!(fb.subspace_basis, parent.subspace_basis);
+        assert!(!fb.uses_ambient_basis());
+        let parent_keys: HashSet<_> = parent.points.iter().map(point_key).collect();
+        assert!(fb.points.iter().all(|p| parent_keys.contains(&point_key(p))));
+        let index = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let table = PairSumTable::build(&kc, &fb).unwrap();
+        let mut found = 0;
+        for m in [2usize, 3] {
+            for k in 1u32..=40 {
+                let target = kc.mul(kc.generator(), &BigUint::from(k));
+                let reference = enumerate_decompose(&kc, &fb, &index, &target, m);
+                assert_eq!(
+                    table.decompose(&kc, &fb, &target, m).is_some(),
+                    reference.is_some()
+                );
+                let (sat, stats) = sat_decompose_with(
+                    &kc,
+                    &fb,
+                    &index,
+                    &st,
+                    &target,
+                    m,
+                    256,
+                    Some(2),
+                    SatDecompositionOptions {
+                        conflict_budget: 1_000_000,
+                        ..Default::default()
+                    },
+                );
+                assert_eq!(stats.spurious, 0);
+                assert!(!stats.exhausted, "m = {m}, k = {k}: {stats:?}");
+                assert_eq!(sat.is_some(), reference.is_some(), "m = {m}, k = {k}");
+                if let Some(idxs) = sat {
+                    // Only retained points may appear.
+                    assert!(idxs.iter().all(|&i| i < fb.points.len()));
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                    assert_eq!(sum, target);
+                    found += 1;
+                }
+                let (groebner, _) = groebner_decompose(
+                    &kc,
+                    &fb,
+                    &index,
+                    &st,
+                    &target,
+                    m,
+                    SolverEngine::default(),
+                    20_000,
+                );
+                assert_eq!(groebner.is_some(), reference.is_some(), "F4 m = {m}, k = {k}");
+            }
+        }
+        assert!(found > 0, "the pruned base must still decompose something");
+    }
+
+    #[test]
+    fn lex_leader_constraint_admits_exactly_the_sorted_pairs() {
+        use crate::cryptanalysis::sat::Solver;
+        for width in 1..=4usize {
+            let mut solver = Solver::new(2 * width as u32);
+            add_lex_leq(&mut solver, 1, width as u32 + 1, width);
+            let mut models = HashSet::new();
+            loop {
+                if solver.solve() != SolveResult::Sat {
+                    break;
+                }
+                let model = solver.model();
+                let code = |first: usize| {
+                    (0..width).fold(0u32, |acc, t| acc | (u32::from(model[first + t]) << t))
+                };
+                let (a, b) = (code(0), code(width));
+                assert!(a <= b, "width {width}: {a} > {b}");
+                assert!(models.insert((a, b)));
+                solver.reset_search();
+                let clause = (0..2 * width)
+                    .map(|i| if model[i] { -((i + 1) as i32) } else { (i + 1) as i32 })
+                    .collect();
+                solver.add_clause(clause);
+            }
+            let total = 1u32 << width;
+            assert_eq!(models.len() as u32, total * (total + 1) / 2, "width {width}");
+        }
+    }
+
+    #[test]
+    fn symmetry_breaking_changes_no_sat_verdict() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        for m in [2usize, 3] {
+            for k in 1u32..=24 {
+                let target = kc.mul(kc.generator(), &BigUint::from(k));
+                let reference = enumerate_decompose(&kc, &fb, &index, &target, m);
+                let (out, stats) = sat_decompose_with(
+                    &kc,
+                    &fb,
+                    &index,
+                    &st,
+                    &target,
+                    m,
+                    256,
+                    Some(2),
+                    SatDecompositionOptions {
+                        symmetry_breaking: true,
+                        conflict_budget: 2_000_000,
+                        ..Default::default()
+                    },
+                );
+                assert_eq!(stats.spurious, 0);
+                assert!(!stats.exhausted, "m = {m}, k = {k}: {stats:?}");
+                assert_eq!(out.is_some(), reference.is_some(), "m = {m}, k = {k}");
+                if let Some(idxs) = out {
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                    assert_eq!(sum, target);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn curves_past_the_old_cap_construct_with_a_consistent_frobenius_eigenvalue() {
+        // Only these degrees above 24 have a prime-order subgroup larger
+        // than its cofactor; the others are rejected by the constructor.
+        for (a, n, r) in [(1u8, 29u32, 42_457u64), (0, 31, 1_439_393)] {
+            let kc = KoblitzCurve::new(a, n).expect("usable curve");
+            assert_eq!(kc.subgroup_order, BigUint::from(r));
+            let g = kc.generator().clone();
+            assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
+            for k in [2u32, 3, 1000] {
+                let p = kc.mul(&g, &BigUint::from(k));
+                assert_eq!(kc.frobenius(&p), kc.mul(&p, &kc.lambda));
+            }
+        }
+        for (a, n) in [(0u8, 25u32), (1, 27), (1, 33)] {
+            assert!(KoblitzCurve::new(a, n).is_none(), "K_{a}/2^{n}");
         }
     }
 

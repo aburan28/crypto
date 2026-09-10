@@ -31,6 +31,7 @@ It does not substitute polynomial-basis coordinates.
     ./target/release/ic --solver sat
     ./target/release/ic run --degree 11 --curve-a 1 --known-log 53 --solver enumerate
     ./target/release/ic run --degree 9 --random-target --seed 42 --json
+    ./target/release/ic run --degree 13 --curve-a 0 --solver pair-table --summands 3
 
 The default run uses K_0 over GF(2^9) and known logarithm 53. The solver
 constructs the target from the declared known answer, then checks both the
@@ -39,24 +40,98 @@ to the run command.
 
 The following knobs are recorded in each run report:
 
-- degree: odd values 3 through 23, within the existing library cap of 24;
+- degree: odd values 3 through 39; a curve is usable only when its largest
+  prime factor exceeds the cofactor, which above 23 holds for degrees 29
+  (curve-a 1), 31, 37, and 39 (curve-a 0);
 - curve-a: 0 or 1, with b fixed to 1;
 - known-log: a positive scalar smaller than the selected subgroup order;
 - random-target: draw a known-answer scalar reproducibly from seed;
 - seed: seed for the generated fixture and relation sampler;
-- factor-index: candidate in the existing materialized factor-base family;
-- max-trials: 1 through 20000;
-- solver: groebner, sat, or enumerate.
+- factor-index: candidate in the legacy degree-ord_n(2) factor family;
+- factor-base: a recipe file written by `ic search`, replacing factor-index;
+- summands: factor-base points per relation, 2 (default), 3, or 4;
+- max-trials: 1 through 1000000;
+- solver: groebner, sat, enumerate, or pair-table;
+- batch: targets decomposed per parallel batch (0 = CPU count);
+- control: legacy accounting, see below.
+
+Solvers answer the same question, "is this target a sum of `summands`
+factor-base points", and every returned decomposition is re-added in the
+group before it becomes a relation:
+
+- enumerate: ordered-tuple search, `|F|^(m-1)` group operations per target;
+- pair-table: meet in the middle over a table of all `|F|(|F|+1)/2` pair
+  sums built once per run — one lookup per target for two summands,
+  `|F|` for three, `|F|²` for four (16 bytes per table entry);
+- groebner: the Weil-restricted Semaev system reduced by matrix-F4;
+- sat: the same system, CDCL with native parity rows.
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
-system. Factor-base dimension is capped at 12 before materialization.
-Fixture generation and inspection do not require a usable factor base.
+system. Factor-base materialization is capped at 4096 abscissae
+(dimension 12 for the legacy family). Fixture generation and inspection do
+not require a usable factor base.
 
-The run display follows factor-base construction, relation collection,
-linear algebra, and verification. Every synthetic run requires the
-relation matrix and uses fixed-surplus collection. Incomplete results
-exit unsuccessfully and remain incomplete in JSON reports.
+The run display follows factor-base construction, an optional pair table,
+relation collection, linear algebra, and verification. By default relation
+columns are signed Frobenius orbits merged by their cofactor projection, the
+relation matrix is kept in reduced echelon form over Z/rZ as relations
+arrive, and the run stops the moment the scalar is pinned — dependent
+relations are counted, never padded. An inconsistent relation or a pinned
+scalar that fails `[d]G = Q` invalidates the run outright. `--control`
+restores the earlier accounting for matched comparisons: one column per
+Frobenius orbit, no projection merge, a fixed surplus of relations, and a
+single solve at the end. Incomplete results exit unsuccessfully and remain
+incomplete in JSON reports.
+
+## Searching for a factor base
+
+    ./target/release/ic search --degree 15 --curve-a 1 --spec-out fb15.json
+    ./target/release/ic run --degree 15 --curve-a 1 --factor-base fb15.json --solver pair-table
+    ./target/release/ic search --degree 31 --curve-a 0 --summands 3 --family divisor --max-dimension 11
+
+`search` scores factor bases by the number the pipeline actually pays for:
+the expected trials to collect a determining system,
+`(columns + 1 + extra) / coverage`, where coverage is the fraction of
+subgroup targets that decompose into `summands` base points. Coverage is
+measured exactly on one shared target set — the whole subgroup when
+`r − 1 ≤ --exhaustive-cap` (default 4096), otherwise `--targets` seeded
+samples — by enumerating every witness of every target through the pair
+table. Candidates come from three families:
+
+- factor: the legacy single irreducible factors (`--factor-index`);
+- divisor: every product of irreducible factors of `x^n − 1` whose degree
+  lies in `[--min-dimension, --max-dimension]`, the complete list of
+  Frobenius-stable linear subspaces;
+- union: Frobenius closures of random seed spaces of dimension
+  `--union-min-seed` to `--union-max-seed`, `--union-samples` per dimension
+  plus the standard basis.
+
+Each candidate is also tried after 2-torsion saturation (when the cofactor
+is even; `--no-saturate` skips it) and after greedy orbit pruning
+(`--no-prune` skips it): signed orbits are dropped while doing so lowers the
+expected trial count, which is an exact recount over the witness list
+rather than a re-search. The pruned base stays Frobenius- and
+negation-closed, so every relation identity survives.
+
+The best `--validate-top` candidates are then validated by real child runs
+on `--holdout` fresh known-answer fixtures with `--solver` (default
+pair-table); the selected candidate is the fastest one that verified every
+holdout. `--spec-out` saves its recipe, a small JSON document bound to the
+degree and coefficient it was found on, which `run --factor-base` replays.
+Status is `complete` only with a validated winner; `--validate-top 0`
+reports `unvalidated` with the census ranking alone.
+
+The census is exact on its target set and ignores per-trial oracle cost;
+the report carries `enumeration_ops_per_trial`, `pair_table_lookups_per_trial`
+and `sat_variables` as cost proxies, and the validation runs measure the
+wall time that combines both. A selected candidate is the best validated
+observation on these fixtures, not a global optimum.
+
+Why this matters: `ic run --degree 15 --curve-a 1` with the legacy family
+collects no relation at all in 20 000 trials — the 31-point base never
+reaches the order-211 subgroup with two summands — while the search finds,
+scores and validates bases covering all 210 targets in a few seconds.
 
 ## Random fixtures and custom parameters
 
@@ -93,6 +168,14 @@ Koblitz base-field coefficients a in {0,1}, b=1, and no coordinates.
 
 See prime-example.json and binary-example.json for complete examples.
 
+A factor-base recipe has schema_version 1, degree, curve_a, and a spec:
+
+    {"schema_version":1,"degree":15,"curve_a":1,"spec":{"kind":"divisor","indices":[0,2]}}
+
+Spec kinds are factor, divisor, frobenius_union, two_torsion_saturated, and
+pruned (a parent spec plus the canonical abscissa of every retained signed
+orbit). A recipe is rejected on any other curve.
+
 ## Meaning of validation
 
 The inspector reports every check separately:
@@ -123,9 +206,9 @@ not change these validation rules.
 
 Comparison uses the degree-ord_n(2) irreducible-factor family already
 implemented by the materialized builder. It is not a search over every
-possible factor base. It launches one child process at a time, each using
-only generated known-answer inputs. All candidates receive the same
-training fixtures and solver settings.
+possible factor base — `search` is. It launches one child process at a
+time, each using only generated known-answer inputs. All candidates
+receive the same training fixtures and solver settings.
 
 A candidate must complete and verify every training run before it is
 eligible. The training winner has the smallest observed median process
@@ -152,29 +235,38 @@ Add --json for machine-readable output or --out PATH to save the JSON
 report while retaining the human progress display. Output files are
 created exclusively: an existing path is never overwritten.
 
-Run and comparison reports include normalized parameters, known-answer
-fixtures, seeds, solver settings, status, counts, stages, elapsed time,
-platform, package version, and a BLAKE3 fingerprint of the executable.
-Inspection reports retain normalized inputs and the input-file hash.
-Generated parameter documents remain directly importable.
+Run, comparison and search reports include normalized parameters,
+known-answer fixtures, seeds, solver settings, status, counts, stages,
+elapsed time, platform, package version, and a BLAKE3 fingerprint of the
+executable. Run reports also carry the factor-base recipe and its size,
+per-stage timing, and the relation accounting (independent, dependent and
+inconsistent relations). Inspection reports retain normalized inputs and
+the input-file hash. Generated parameter documents remain directly
+importable.
 
 On macOS and Linux, CPU time and peak resident memory are sampled with
 getrusage before report emission. Peak RSS is normalized to bytes.
-Each comparison run is a fresh process; its resource counters therefore
-do not inherit earlier candidates' high-water marks. Parent counters
-cover the parent only. Unsupported measurements are null, never zero.
-A watchdog-killed child has no complete resource report.
+Each comparison or validation run is a fresh process; its resource
+counters therefore do not inherit earlier candidates' high-water marks.
+Parent counters cover the parent only. Unsupported measurements are null,
+never zero. A watchdog-killed child has no complete resource report.
 
 Exit status is zero for completed synthetic operations and inspections
 whose performed checks pass. Invalid inputs, incomplete experiments,
-inconclusive comparisons, and output-file errors are unsuccessful.
-Clap usage errors use its standard nonzero exit status.
+inconclusive comparisons and searches, and output-file errors are
+unsuccessful. Clap usage errors use its standard nonzero exit status.
 
 ## Verification
 
     cargo test --release --test ic_framework --test ic_progress
+    cargo test --release --lib koblitz_
 
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,
-resource reporting, a degree-11 synthetic run, comparison eligibility,
-separate holdout inputs, and exclusive artifact creation.
+resource reporting, a degree-11 synthetic run under both accountings,
+every solver with three summands, comparison eligibility, separate holdout
+inputs, a search that succeeds where the legacy family yields nothing, the
+binding of recipes to their curve, and exclusive artifact creation. The
+library tests cross-check the pair table, the exact census, orbit pruning
+and the incremental relation solver against exhaustive search and the
+dense modular solver.

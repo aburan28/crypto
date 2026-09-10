@@ -135,8 +135,10 @@ pub mod hnp_ecdsa;
 pub mod j0_twists;
 pub mod koblitz_bench;
 pub mod koblitz_groebner;
+pub mod koblitz_factor_base_search;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
+pub mod koblitz_relation_solver;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod mazur_tate_sigma;
@@ -229,7 +231,9 @@ pub use koblitz_index_calculus::{
     build_frobenius_union_factor_base, cyclotomic_cosets, enumerate_decompose,
     find_irreducible_sparse, groebner_decompose, invariant_subspace_basis,
     is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp,
-    koblitz_index_calculus_dlp_with_factor_base, koblitz_point_count,
+    koblitz_index_calculus_dlp_with_factor_base,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count, pack_point,
+    restrict_factor_base_to_orbits, PairSumTable,
     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
     point_key, points_with_x, saturate_factor_base_two_torsion, span_f2,
     subspace_basis_for_divisor, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,

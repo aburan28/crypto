@@ -115,7 +115,7 @@ Real:
 
 Not real:
 
-- **anything at deployed sizes.**  `n ≤ 24`: the factor base is
+- **anything at deployed sizes.**  `n ≤ 40`: the factor base is
   materialised and `#E` is factored by trial division.
 - **the Gröbner engine's constants** — see below.
 
@@ -320,6 +320,139 @@ which at `n = 63, ℓ = 6` wants 633 unknowns against a 64-variable
 budget.  The first fall degree, measured over 16 target draws per
 instance across the whole ladder to `n = 63`, never exceeds 3 — so the
 systems themselves stay benign; it is the variable count that bites.
+
+## End-to-end optimisation — 2026-09-10
+
+**Modules:** `koblitz_factor_base_search.rs` (search),
+`koblitz_relation_solver.rs` (incremental linear algebra), additions to
+`koblitz_index_calculus.rs` (pair table, orbit restriction, symmetry
+breaking) and `sat.rs` (`Solver::add_vars`).
+**Tool:** `ic search`, `ic run --factor-base`, `ic run --solver pair-table`.
+**Docs:** `docs/ic/README.md`.
+
+Four changes to the pipeline as `ic` runs it, each cross-checked against
+the reference oracle it replaces or the dense solver it supersedes.
+
+### 1. Choosing the factor base by what the pipeline pays for
+
+The run cost is `trials × (cost per trial) + linear algebra`, and the
+expected trial count is `(U + 1 + extra) / p_m` where `U` is the number of
+relation columns and `p_m` the fraction of subgroup points that decompose
+into `m` base points.  Neither `|F|` nor the dimension is the objective;
+`U / p_m` is, and it was never measured by the selection tools — `ic
+compare` timed the legacy single-factor family and the census examples
+counted coverage per *orbit* without a column model.
+
+`koblitz_factor_base_search` measures `p_m` **exactly**: a pair-sum table
+of `F` (every `P_i + P_j`, sorted by a packed point key) enumerates every
+witness `R = P_{i_1} + … + P_{i_m}` of every target, over the whole
+subgroup when `r − 1 ≤ 4096` and over a seeded sample otherwise.  Cofactor
+classes need no separate treatment — a sum lands in `⟨G⟩` or it does not.
+Candidates are the complete divisor lattice of `x^n − 1` in a dimension
+window, Frobenius unions of random seeds, and the 2-torsion saturation of
+either; each is then **pruned** greedily, dropping a signed orbit while
+that lowers `(U + 1 + extra)/p_m`.  The witness list makes each pruning
+step an exact recount, not a re-search: removing orbit `o` loses exactly
+the targets all of whose witnesses use `o`.
+
+The result is a serialisable recipe (`FactorBaseSpec`) that rebuilds the
+identical base, so `ic run --factor-base` replays it and `ic search`
+validates the best few by real child runs on fresh known-answer fixtures
+before selecting the fastest one that verified every holdout.
+
+What it finds.  On `K_1 / F_2^15` (r = 211, h = 154) the legacy base —
+factor index 0, 31 points — yields **no relation at all** in 20 000
+trials: `ic run --degree 15 --curve-a 1` was simply unsolvable.  The
+search scores 86 candidates on all 210 targets in 8 s and validates a
+30-point, one-column pruned union that covers every target; the
+end-to-end run then takes 21 ms.  The prior review's numbers reproduce
+exactly (`the_prior_review_numbers_reproduce`: divisor `[0, 2]` 61 points
+150/210 at `m = 3`, union seeded by 3468, 4413 210/210).
+
+Pruning is where the algorithmic content is.  A signed orbit is a column
+the linear algebra has to determine and a set of summands that make
+targets reachable; the trade is explicit in `(U + 1 + extra)/p_m`, and at
+`n = 15` the greedy pass takes a 301-point, five-column saturated union
+to 30 points and one column at unchanged coverage — the entire subgroup
+is a sum of two points of *one* signed orbit of the projected subgroup.
+That is the extreme case; typical steps drop the singleton 2-torsion
+orbit (`x = 0`, which every invariant subspace contains and which never
+helps) and the low-participation orbits of a saturation.
+
+### 2. A meet-in-the-middle oracle
+
+`DecompositionStrategy::PairTable` answers "is `R` a sum of `m` base
+points" from the same table: one lookup at `m = 2`, `|F|` at `m = 3`,
+`|F|²` at `m = 4`, against `|F|^{m−1}` group operations for enumeration.
+It is exact and complete like enumeration and re-adds every answer in
+the group before it becomes a relation; it costs `|F|(|F|+1)/2` entries
+of 16 bytes once per run (the packed key separates `P` from `−P` by
+comparing `y` with `x + y`, exact to `n ≤ 62`).  At `m = 3` this is what
+makes the raised degree cap usable: `n = 31` needs `m = 3` on a
+dimension-11 base, and enumeration would pay `|F|² ≈ 4 · 10^6` group
+operations per target.
+
+### 3. Incremental modular linear algebra
+
+The driver kept every relation and, in early-stop mode, re-ran a dense
+`BigUint` Gaussian elimination after each batch — `O(U³)` big-integer
+work per check that could not tell "not yet determined" from
+"determined" and had to verify a partial solution in the group.
+`IncrementalRelationSolver` keeps the matrix in reduced row echelon form
+over `Z/rZ` with `u64` arithmetic and updates it per row in `O(U²)`; a
+pivot in the `d` column *is* the answer, so the run stops the moment the
+scalar is pinned.  Dependent relations are counted rather than padded,
+an inconsistent relation fails the run closed, and `verification_failures`
+would flag a pinned-but-wrong scalar, which only a wrong relation could
+produce (it has not happened).  Cross-checked on random planted systems
+against `gaussian_eliminate_mod_n` at five moduli up to 32 bits.
+
+Two accounting changes ride along in `ic run`'s default mode: columns
+are signed Frobenius orbits merged by cofactor projection (both public
+identities were already implemented but disabled in `ic`), and relation
+batches are decomposed in parallel for every oracle, not only SAT.
+`--control` restores the previous accounting for matched comparisons.
+
+### 4. What did not help: symmetry breaking in SAT
+
+The SAT oracle refutes each root `m!` times because the summands are
+interchangeable.  `SatDecompositionOptions::symmetry_breaking` installs
+exact lexicographic `code(x_1) ≤ … ≤ code(x_m)` constraints
+(`Solver::add_vars` grows the encoding after the fact); the constraint
+admits exactly the sorted assignments (`lex_leader_constraint_admits_exactly_the_sorted_pairs`
+counts them) and changes no verdict.  It also does not pay:
+
+| instance | targets | conflicts off | conflicts on |
+|:---------|--------:|--------------:|-------------:|
+| `K_0/2^9`, m = 3 | 8 | 5 512 | 6 412 |
+| `K_1/2^9`, m = 2 | 16 | 428 | 823 |
+| `K_0/2^7`, m = 2 | 16 | 70 | 79 |
+| `K_1/2^15`, m = 3 | 8 | 0 | 0 |
+
+The degree-2 Macaulay rows and the trace row already leave these
+systems nearly propagation-closed, and the auxiliaries add decisions
+without removing search.  Off by default, kept as a control
+(`koblitz_sat_symmetry_ablation`).
+
+### Measured, before and after
+
+`ic run` on the same fixtures, wall time of the whole process, this
+branch against `main` built from the same tree; 4 cores.  Columns are
+relation unknowns; the new default merges signed orbits by cofactor
+projection.
+
+SWEEP_TABLE_PLACEHOLDER
+
+### Past the old cap
+
+`MAX_N` is 40 (was 24); `KoblitzCurve::new` uses the sparse irreducible
+search, which a test pins equal to the exhaustive one for every `n ≤ 24`,
+so no existing fixture changes.  Above 23 only four Koblitz curves have a
+prime-order subgroup larger than their cofactor — `K_1/2^29`
+(r = 42 457), `K_0/2^31` (r = 1 439 393, h = 1492), `K_0/2^37` and
+`K_0/2^39` — and the constructor rejects the rest, as it did before.
+
+N31_PLACEHOLDER
 
 ## Open problems from the talk (unimplemented)
 
