@@ -648,7 +648,11 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         write_json(run / "state.json", state)
 
         env = os.environ.copy()
+        # Default to incremental crosscheck for small rungs; beats may override
+        # (n=53 dense recompute-after-every-relation is hour-class).
         env.setdefault("KIC_INCREMENTAL_RANK_CROSSCHECK", "1")
+        for key, value in (beat.get("env") or {}).items():
+            env[str(key)] = str(value)
         direct_seed = seed_for(beat_id, "direct", 0)
         rho_seed = seed_for(beat_id, "rho", 0)
         direct_cmd = [
