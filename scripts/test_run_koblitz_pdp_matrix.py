@@ -138,6 +138,40 @@ class SourceArtifactCustodyTests(unittest.TestCase):
                 matrix.source_artifact_snapshot(root, manifest)
 
 
+class AssignmentValidationTests(unittest.TestCase):
+    def test_accepts_exact_source_bound_assignment_and_rejects_mismatch(self) -> None:
+        import json
+
+        with TemporaryDirectory() as directory:
+            assignment_path = Path(directory) / "model.json"
+            assignment_path.write_text("[true,false]\n")
+            report = {
+                "schema": "koblitz_pdp_assignment_validation.v1",
+                "status": "valid_point_witness",
+                "source_instance_id": "source-id",
+                "source_instance_verified": True,
+                "regenerated_source_exact": True,
+                "assignment_values": 2,
+                "assignment_blake3": "a" * 64,
+                "source_assignment": [True, False],
+                "source_model_valid": True,
+                "source_witness_valid": True,
+            }
+            manifest = {
+                "source_variables": 2,
+                "source_instance": {"id_blake3": "source-id"},
+            }
+            accepted = matrix.assignment_validation_status(
+                run_record(json.dumps(report)), manifest, assignment_path
+            )
+            self.assertEqual(accepted["status"], "valid_point_witness")
+            report["source_assignment"] = [False, True]
+            rejected = matrix.assignment_validation_status(
+                run_record(json.dumps(report)), manifest, assignment_path
+            )
+            self.assertEqual(rejected["status"], "validation_contract_error")
+
+
 class IsolatedBackendTests(unittest.TestCase):
     def setUp(self) -> None:
         self.manifest = {"source_instance": {"id_blake3": "source-id"}}
@@ -191,6 +225,20 @@ class IsolatedBackendTests(unittest.TestCase):
             )["status"],
             "backend_contract_error",
         )
+
+    def test_accepts_model_cap_only_as_inconclusive(self) -> None:
+        import json
+
+        capped = dict(
+            self.base,
+            status="model_cap_inconclusive",
+            source_model_valid=True,
+            source_witness_valid=False,
+        )
+        row = matrix.isolated_backend_status(
+            run_record(json.dumps(capped)), "native-sat", self.manifest
+        )
+        self.assertEqual(row["status"], "model_cap_inconclusive")
 
 
 if __name__ == "__main__":
