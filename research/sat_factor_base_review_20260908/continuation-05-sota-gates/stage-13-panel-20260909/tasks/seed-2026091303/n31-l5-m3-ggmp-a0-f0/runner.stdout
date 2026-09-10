@@ -1,0 +1,667 @@
+{
+  "schema": "koblitz_pdp_matched_matrix.v1",
+  "scope": "PDP construction and solver matrix; not an end-to-end ECDLP result",
+  "host": {
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.13.1",
+    "logical_cpus": 14
+  },
+  "policy": {
+    "unknown_is_unsat": false,
+    "solver_subprocess_resources_charged": true,
+    "python_orchestration_included_in_child_sum": false,
+    "whole_panel_requires_outer_process_meter": true,
+    "single_thread_requested": true,
+    "missing_tool_is_negative_evidence": false,
+    "producer_runs_solver_backends": false,
+    "native_sat_and_mitm_isolated": true
+  },
+  "tools": {
+    "wdsat": {
+      "available": true,
+      "path": "/Volumes/SSD990/wdsat-binary-sat-review-20260909",
+      "version": "per-instance source build",
+      "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0"
+    },
+    "cryptominisat": {
+      "available": true,
+      "path": "/Volumes/SSD990/cryptominisat-koblitz-20260909/build/cryptominisat5",
+      "version": "c CMS SHA1: 7ae1b4a74259cdce223a584281fb8f090bbd3eed\nc CryptoMiniSat version 5.14.7\nc CMS compilation env CMAKE_CXX_COMPILER = /usr/bin/c++ | CMAKE_CXX_FLAGS =  -fno-stack-protector -msse4.2 -Wno-bitfield-constant-conversion -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 -Wextra-semi -pedantic | COMPILE_DEFINES =  -DNDEBUG -D_FORTIFY_SOURCE=0 | BUILD_SHARED_LIBS = OFF | ONLY_SIMPLE =  | STATS = OFF | SQLITE3_FOUND =  | ZLIB_FOUND = FALSE | VALGRIND_FOUND =  | ENABLE_TESTING = OFF | SLOW_DEBUG = OFF | ENABLE_ASSERTIONS = OFF | PYTHON_EXECUTABLE =  | PYTHON_LIBRARY =  | PYTHON_INCLUDE_DIRS =  | MY_TARGETS =  | LARGEMEM = OFF | LIMITMEM = OFF | BREAKID_LIBRARIES =  | BREAKID-VER = . | \nc Using VMTF, picosat, CaDiCaL, and CadiBack code by Armin Biere\nc CMS is MIT licensed\nc Using code from 'When Boolean Satisfiability Meets Gauss-E. in a Simplex Way'\nc       by C.-S. Han and J.-H. Roland Jiang in CAV 2012. Fixes by M. Soos\nc Using CCAnr from 'CCAnr: A Conf. Checking Based Local ",
+      "sha256": "bfc157d89d4c6a6e32d6aa6299c53f22b990c94e554f9bf1d4111d3ed709061f"
+    },
+    "magma": {
+      "available": false,
+      "path": null,
+      "version": null
+    },
+    "isolated_backend": {
+      "available": true,
+      "path": "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_backend",
+      "version": "koblitz_pdp_backend 1 (koblitz_pdp_isolated_backend.v1)",
+      "sha256": "2ffee417b3a73f1763f3cd77ead25888ad220ec7a1453c54fe428889dc79d6c7"
+    }
+  },
+  "instances": [
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "ggmp",
+        "curve_a": 0,
+        "factor_index": 0
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.013398957904428244,
+          "user_seconds": 0.00509,
+          "system_seconds": 0.002382,
+          "total_core_seconds": 0.0074719999999999995,
+          "single_core_seconds": 0.0074719999999999995,
+          "peak_rss_bytes": 3751936,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_export",
+          "31",
+          "5",
+          "ggmp",
+          "2026091303",
+          "100000",
+          "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0",
+          "0",
+          "0",
+          "--export-only"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "native-sat",
+          "status": "unknown_inconclusive",
+          "conflicts": 100000,
+          "source_model_valid": null,
+          "source_witness_valid": null,
+          "source_instance_id": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 2.844868625048548,
+            "user_seconds": 2.41499,
+            "system_seconds": 0.045068,
+            "total_core_seconds": 2.460058,
+            "single_core_seconds": 2.460058,
+            "peak_rss_bytes": 24510464,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_backend",
+            "native-sat",
+            "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/manifest.json",
+            "100000"
+          ],
+          "backend_report": {
+            "backend": "native-sat",
+            "conflict_budget": 100000,
+            "initial_cnf_clauses": 4570,
+            "interpretation": "Unknown is inconclusive; SAT is accepted only after exact source-row and rational point-witness validation",
+            "manifest_conflict_budget": 100000,
+            "max_models": 64,
+            "models_examined": 0,
+            "native_xor_rows": 62,
+            "nonlifting_models_blocked": 0,
+            "regenerated_source_exact": true,
+            "schema": "koblitz_pdp_isolated_backend.v1",
+            "solver_variables": 1311,
+            "source_artifacts": {
+              "cryptominisat_xor_dimacs": {
+                "blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506",
+                "bytes": 70148,
+                "path": "instance.xor.cnf",
+                "valid": true
+              },
+              "magma_boolean_f4": {
+                "blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1",
+                "bytes": 61062,
+                "path": "instance.magma",
+                "valid": true
+              },
+              "wdsat_anf": {
+                "blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd",
+                "bytes": 36147,
+                "path": "instance.anf",
+                "valid": true
+              }
+            },
+            "source_instance_id": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+            "source_instance_verified": true,
+            "source_model_valid": null,
+            "source_variables": 46,
+            "source_witness_valid": null,
+            "stats": {
+              "analyze_lit_visits": 21412416,
+              "clause_lit_visits": 59070587,
+              "clause_visits": 40602105,
+              "conflicts": 100000,
+              "decisions": 105184,
+              "learnt_clauses": 99999,
+              "learnt_lits_kept": 1953231,
+              "learnt_lits_raw": 6745334,
+              "max_level": 34,
+              "phase_ns": {
+                "analyze": 361912610,
+                "minimize": 116362513,
+                "propagate_clauses": 1734552592,
+                "propagate_xors": 651753880,
+                "reduce_db": 1776167
+              },
+              "propagations": 14795319,
+              "restarts": 254,
+              "xor_conflicts": 52002,
+              "xor_passes": 374852,
+              "xor_propagations": 841459,
+              "xor_reason_lits": 35518076,
+              "xor_repivots": 1667130,
+              "xor_row_ops": 4066980,
+              "xor_row_scans": 19206960
+            },
+            "status": "unknown_inconclusive",
+            "timing_ns": {
+              "encoding": 713958,
+              "solve": 2829125292,
+              "source_verification": 2332666
+            }
+          }
+        },
+        {
+          "solver": "direct-mitm",
+          "status": "sat",
+          "conflicts": null,
+          "source_model_valid": null,
+          "source_witness_valid": true,
+          "source_instance_id": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.030054416973143816,
+            "user_seconds": 0.020458999999999998,
+            "system_seconds": 0.002352,
+            "total_core_seconds": 0.022810999999999998,
+            "single_core_seconds": 0.022810999999999998,
+            "peak_rss_bytes": 3702784,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_backend",
+            "direct-mitm",
+            "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/manifest.json"
+          ],
+          "backend_report": {
+            "backend": "direct-mitm",
+            "exhaustive": true,
+            "factor_points": 63,
+            "group_additions": 2019,
+            "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+            "pair_entries": 1799,
+            "regenerated_source_exact": true,
+            "schema": "koblitz_pdp_isolated_backend.v1",
+            "source_artifacts": {
+              "cryptominisat_xor_dimacs": {
+                "blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506",
+                "bytes": 70148,
+                "path": "instance.xor.cnf",
+                "valid": true
+              },
+              "magma_boolean_f4": {
+                "blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1",
+                "bytes": 61062,
+                "path": "instance.magma",
+                "valid": true
+              },
+              "wdsat_anf": {
+                "blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd",
+                "bytes": 36147,
+                "path": "instance.anf",
+                "valid": true
+              }
+            },
+            "source_instance_id": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+            "source_instance_verified": true,
+            "source_witness_valid": true,
+            "status": "sat",
+            "timing_ns": {
+              "factor_base_materialisation": 489375,
+              "search": 18871625,
+              "source_verification": 2844083
+            },
+            "witness_indices": [
+              18,
+              56,
+              2
+            ]
+          }
+        },
+        {
+          "solver": "wdsat",
+          "status": "timeout_inconclusive",
+          "conflicts": null,
+          "source_model_valid": null,
+          "source_witness_valid": null,
+          "returncode": -15,
+          "timed_out": true,
+          "metrics": {
+            "wall_seconds": 120.01270533306524,
+            "user_seconds": 102.269684,
+            "system_seconds": 2.274669,
+            "total_core_seconds": 104.544353,
+            "single_core_seconds": 104.544353,
+            "peak_rss_bytes": 7356416,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+          ],
+          "magma_terminal": null
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "sat",
+          "conflicts": 241175,
+          "source_model_valid": true,
+          "source_witness_valid": true,
+          "returncode": 10,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 5.051662291982211,
+            "user_seconds": 4.247471,
+            "system_seconds": 0.08469399999999999,
+            "total_core_seconds": 4.332165,
+            "single_core_seconds": 4.332165,
+            "peak_rss_bytes": 18464768,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/cryptominisat-koblitz-20260909/build/cryptominisat5",
+            "--verb",
+            "1",
+            "--threads",
+            "1",
+            "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.xor.cnf"
+          ],
+          "magma_terminal": null,
+          "point_witness_validation": {
+            "status": "valid_point_witness",
+            "returncode": 0,
+            "timed_out": false,
+            "metrics": {
+              "wall_seconds": 0.02535083401016891,
+              "user_seconds": 0.0030949999999999997,
+              "system_seconds": 0.0037749999999999997,
+              "total_core_seconds": 0.006869999999999999,
+              "single_core_seconds": 0.006869999999999999,
+              "peak_rss_bytes": 3031040,
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+            },
+            "command": [
+              "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_backend",
+              "validate-model",
+              "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/manifest.json",
+              "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/cryptominisat.source-model.json"
+            ],
+            "report": {
+              "assignment_blake3": "500d0eb503a0b542d3049f72dfc73d4c25d974f70dbd235286bb4771143d61fc",
+              "assignment_values": 46,
+              "interpretation": "A SAT model is a PDP witness only when its source equations hold and rational factor-base lifts sum to the exact target",
+              "regenerated_source_exact": true,
+              "schema": "koblitz_pdp_assignment_validation.v1",
+              "source_artifacts": {
+                "cryptominisat_xor_dimacs": {
+                  "blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506",
+                  "bytes": 70148,
+                  "path": "instance.xor.cnf",
+                  "valid": true
+                },
+                "magma_boolean_f4": {
+                  "blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1",
+                  "bytes": 61062,
+                  "path": "instance.magma",
+                  "valid": true
+                },
+                "wdsat_anf": {
+                  "blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd",
+                  "bytes": 36147,
+                  "path": "instance.anf",
+                  "valid": true
+                }
+              },
+              "source_assignment": [
+                false,
+                false,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                true,
+                false,
+                false,
+                true,
+                false,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                true,
+                false,
+                true,
+                true,
+                true,
+                false,
+                true,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                false,
+                false,
+                true,
+                true,
+                true,
+                false,
+                true
+              ],
+              "source_instance_id": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+              "source_instance_verified": true,
+              "source_model_valid": true,
+              "source_witness_valid": true,
+              "status": "valid_point_witness",
+              "timing_ns": {
+                "source_verification": 4893542
+              }
+            },
+            "assignment_path": "cryptominisat.source-model.json",
+            "assignment_sha256": "472147ce19acb5130002a58c9d521ebbf7fd2de6ae016e14975c684c0718c9d6",
+            "assignment_blake3": "500d0eb503a0b542d3049f72dfc73d4c25d974f70dbd235286bb4771143d61fc"
+          }
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + 1",
+        "curve_a": 0,
+        "direct_meet_in_the_middle": {
+          "reason": "run koblitz_pdp_backend direct-mitm under a separate process meter",
+          "status": "not_run_in_export_process"
+        },
+        "ell": 5,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506",
+            "bytes": 70148,
+            "cnf_clauses": 4570,
+            "path": "instance.xor.cnf",
+            "variables": 1311,
+            "xor_rows": 62
+          },
+          "magma_boolean_f4": {
+            "blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1",
+            "bytes": 61062,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd",
+            "bytes": 36147,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "2",
+          "4",
+          "16",
+          "256",
+          "65536"
+        ],
+        "factor_base_geometry": {
+          "curve_points": 63,
+          "distinct_curve_points": 63,
+          "minimum_required": 3
+        },
+        "factor_base_predicate": {
+          "definition": "kernel of sum X^(2^i) over the set factor exponents",
+          "enumerates_target_subgroup": false,
+          "factor_bitmask": 37,
+          "factor_index": 0,
+          "kind": "ggmp_linearised_kernel",
+          "linearised_exponents": [
+            0,
+            2,
+            5
+          ],
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          3
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 31,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "reason": "run koblitz_pdp_backend native-sat under a separate process meter",
+          "status": "not_run_in_export_process"
+        },
+        "planted_points": [
+          {
+            "x": "258",
+            "y": "1148041244"
+          },
+          {
+            "x": "65540",
+            "y": "1684106480"
+          },
+          {
+            "x": "65808",
+            "y": "510204194"
+          }
+        ],
+        "representation": "chained_s3",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 2026091303,
+        "source_equations": 62,
+        "source_instance": {
+          "id_blake3": "f07a09621c7bfb29d5e477434a3dd3628d912e3413d3bca4188514f60e0da5cf",
+          "identity": {
+            "curve_a": 0,
+            "ell": 5,
+            "exports": {
+              "cryptominisat_xor_dimacs": {
+                "blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506",
+                "bytes": 70148,
+                "cnf_clauses": 4570,
+                "path": "instance.xor.cnf",
+                "variables": 1311,
+                "xor_rows": 62
+              },
+              "magma_boolean_f4": {
+                "blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1",
+                "bytes": 61062,
+                "path": "instance.magma"
+              },
+              "wdsat_anf": {
+                "blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd",
+                "bytes": 36147,
+                "path": "instance.anf"
+              }
+            },
+            "factor_base_basis_bitmasks": [
+              "2",
+              "4",
+              "16",
+              "256",
+              "65536"
+            ],
+            "factor_base_predicate": {
+              "definition": "kernel of sum X^(2^i) over the set factor exponents",
+              "enumerates_target_subgroup": false,
+              "factor_bitmask": 37,
+              "factor_index": 0,
+              "kind": "ggmp_linearised_kernel",
+              "linearised_exponents": [
+                0,
+                2,
+                5
+              ],
+              "uses_discrete_log_labels": false
+            },
+            "irreducible_low_terms": [
+              0,
+              3
+            ],
+            "m": 3,
+            "n": 31,
+            "representation": "chained_s3",
+            "schema": "koblitz_pdp_source_identity.v1",
+            "seed": 2026091303,
+            "source_equations": 62,
+            "source_variables": 46,
+            "target": {
+              "x": "40715064",
+              "y": "48658925"
+            }
+          },
+          "schema": "koblitz_pdp_source_instance.v1"
+        },
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 103,
+        "source_variables": 46,
+        "target": {
+          "x": "40715064",
+          "y": "48658925"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 109791,
+          "native_encoding_and_solve": null,
+          "planted_target_construction": 65542,
+          "source_system_construction": 859208,
+          "whole_process_internal": 5848833
+        }
+      },
+      "source_artifacts_before": {
+        "cryptominisat_xor_dimacs": {
+          "path": "instance.xor.cnf",
+          "bytes": 70148,
+          "sha256": "a1ab398c50af30893d3bff2cc4b133ade1913979db43fab03a888454eca0521b",
+          "manifest_blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506"
+        },
+        "magma_boolean_f4": {
+          "path": "instance.magma",
+          "bytes": 61062,
+          "sha256": "ffc0a96967314e90da037bcaac2f0ebc590d9f074915fb9ce5392baea1cf6d8b",
+          "manifest_blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1"
+        },
+        "wdsat_anf": {
+          "path": "instance.anf",
+          "bytes": 36147,
+          "sha256": "1403109f62c5161ec412b2a31f0b034a0969af41d5e0be2f8c0b728865162ee2",
+          "manifest_blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd"
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.037058542016893625,
+            "user_seconds": 0.0015,
+            "system_seconds": 0.013283999999999999,
+            "total_core_seconds": 0.014783999999999999,
+            "single_core_seconds": 0.014783999999999999,
+            "peak_rss_bytes": 1654784,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.0003760000690817833,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.030117542017251253,
+            "user_seconds": 0.005425999999999999,
+            "system_seconds": 0.009106999999999999,
+            "total_core_seconds": 0.014532999999999997,
+            "single_core_seconds": 0.014532999999999997,
+            "peak_rss_bytes": 1802240,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.9828245830722153,
+          "user_seconds": 0.559372,
+          "system_seconds": 0.18953199999999998,
+          "total_core_seconds": 0.748904,
+          "single_core_seconds": 0.748904,
+          "peak_rss_bytes": 59310080,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 47\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 1311\n#define __MAX_BUFFER_SIZE__ 20976\n#define __MAX_EQ__ 4586\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 64\n#define __MAX_XEQ_SIZE__ 1312\n",
+        "binary_sha256": "31ff3878c0e67fe911ac7865dbffb24e5a02609dc3b7c12896a98b95e4fa4cc5"
+      },
+      "source_artifacts_after": {
+        "cryptominisat_xor_dimacs": {
+          "path": "instance.xor.cnf",
+          "bytes": 70148,
+          "sha256": "a1ab398c50af30893d3bff2cc4b133ade1913979db43fab03a888454eca0521b",
+          "manifest_blake3": "2388e6459056ad2e01cbb0051af8c4a7457dc602fa2572546b8da6b278fd0506"
+        },
+        "magma_boolean_f4": {
+          "path": "instance.magma",
+          "bytes": 61062,
+          "sha256": "ffc0a96967314e90da037bcaac2f0ebc590d9f074915fb9ce5392baea1cf6d8b",
+          "manifest_blake3": "6a9f75af9c5b3c542e32acb6663d95193ad4ace1e12a7db3b0e134204c110de1"
+        },
+        "wdsat_anf": {
+          "path": "instance.anf",
+          "bytes": 36147,
+          "sha256": "1403109f62c5161ec412b2a31f0b034a0969af41d5e0be2f8c0b728865162ee2",
+          "manifest_blake3": "89d6eda3d9ded63787b00d1dab06a6a72d06a6ffb25a5b35b216db44863570cd"
+        }
+      },
+      "source_artifacts_unchanged": true
+    }
+  ]
+}

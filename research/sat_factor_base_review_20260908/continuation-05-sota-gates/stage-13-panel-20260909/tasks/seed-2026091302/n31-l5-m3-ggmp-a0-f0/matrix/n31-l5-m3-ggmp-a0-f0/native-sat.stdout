@@ -1,0 +1,72 @@
+{
+  "backend": "native-sat",
+  "conflict_budget": 100000,
+  "initial_cnf_clauses": 4570,
+  "interpretation": "Unknown is inconclusive; SAT is accepted only after exact source-row and rational point-witness validation",
+  "manifest_conflict_budget": 100000,
+  "max_models": 64,
+  "models_examined": 0,
+  "native_xor_rows": 62,
+  "nonlifting_models_blocked": 0,
+  "regenerated_source_exact": true,
+  "schema": "koblitz_pdp_isolated_backend.v1",
+  "solver_variables": 1311,
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "f2d8dd3374a5086beb6110dd2b901b9b623bd1698afac27262e3824b88dc7edf",
+      "bytes": 72696,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "c0e6af90287121bf4ab653ffb08dc941f2322eed1de5d4fdb3f3b72acff4192a",
+      "bytes": 68190,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "ea56530bd70ecba6f6193559c701f78876f1744fa78bd8147d5b92f68e1fd189",
+      "bytes": 40695,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+  "source_instance_verified": true,
+  "source_model_valid": null,
+  "source_variables": 46,
+  "source_witness_valid": null,
+  "stats": {
+    "analyze_lit_visits": 21822565,
+    "clause_lit_visits": 58621195,
+    "clause_visits": 39760515,
+    "conflicts": 100000,
+    "decisions": 105476,
+    "learnt_clauses": 99999,
+    "learnt_lits_kept": 2034272,
+    "learnt_lits_raw": 6883356,
+    "max_level": 36,
+    "phase_ns": {
+      "analyze": 380821003,
+      "minimize": 126414062,
+      "propagate_clauses": 1841589649,
+      "propagate_xors": 697479850,
+      "reduce_db": 2119874
+    },
+    "propagations": 15195033,
+    "restarts": 254,
+    "xor_conflicts": 52339,
+    "xor_passes": 374919,
+    "xor_propagations": 889420,
+    "xor_reason_lits": 38510886,
+    "xor_repivots": 1721909,
+    "xor_row_ops": 4256039,
+    "xor_row_scans": 19161227
+  },
+  "status": "unknown_inconclusive",
+  "timing_ns": {
+    "encoding": 588417,
+    "solve": 3007736917,
+    "source_verification": 2051375
+  }
+}

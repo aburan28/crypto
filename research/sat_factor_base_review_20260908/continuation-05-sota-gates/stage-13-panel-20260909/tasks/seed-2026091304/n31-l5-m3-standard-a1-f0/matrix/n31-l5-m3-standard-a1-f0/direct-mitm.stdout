@@ -1,0 +1,44 @@
+{
+  "backend": "direct-mitm",
+  "exhaustive": true,
+  "factor_points": 31,
+  "group_additions": 503,
+  "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+  "pair_entries": 477,
+  "regenerated_source_exact": true,
+  "schema": "koblitz_pdp_isolated_backend.v1",
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "8474e9334fa0df538ad7e5a5f2558bcdb450289ff9fa85d13db46dd628db937e",
+      "bytes": 35316,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "1baf407df56edb04042b23c5b9052be414bbf257ebcaf56f529abc547c03c5ea",
+      "bytes": 65334,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "b720b339376ba44c6a6666e15fda72b880b9bc9ea7ca6a1bb292e87bcbf8d768",
+      "bytes": 40737,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "297298f0c2c7da5655a77487d61e416aaa12c0af25fee96fd874aab68fc49038",
+  "source_instance_verified": true,
+  "source_witness_valid": true,
+  "status": "sat",
+  "timing_ns": {
+    "factor_base_materialisation": 541042,
+    "search": 3282000,
+    "source_verification": 9797000
+  },
+  "witness_indices": [
+    14,
+    25,
+    6
+  ]
+}

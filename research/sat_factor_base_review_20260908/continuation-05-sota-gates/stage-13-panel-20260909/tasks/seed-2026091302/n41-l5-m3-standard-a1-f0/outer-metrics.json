@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/scripts/run_koblitz_pdp_matrix.py",
+    "--output",
+    "/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091302/n41-l5-m3-standard-a1-f0/matrix",
+    "--exporter",
+    "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_export",
+    "--backend",
+    "/Volumes/SSD990/crypto-koblitz-scaling-backends-20260909/target/release/examples/koblitz_pdp_backend",
+    "--timeout",
+    "120",
+    "--conflicts",
+    "100000",
+    "--configs",
+    "41:5:standard:1:0",
+    "--seed",
+    "2026091302",
+    "--wdsat-source",
+    "/Volumes/SSD990/wdsat-binary-sat-review-20260909",
+    "--cryptominisat",
+    "/Volumes/SSD990/cryptominisat-koblitz-20260909/build/cryptominisat5"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 3.501764875021763,
+    "user_seconds": 1.40276,
+    "system_seconds": 0.7173499999999999,
+    "total_core_seconds": 2.12011,
+    "single_core_seconds": 2.12011,
+    "peak_rss_bytes": 59654144,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

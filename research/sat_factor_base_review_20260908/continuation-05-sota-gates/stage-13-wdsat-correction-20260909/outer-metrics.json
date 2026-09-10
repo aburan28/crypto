@@ -1,0 +1,35 @@
+{
+  "command": [
+    "python3",
+    "scripts/run_koblitz_pdp_matrix.py",
+    "--output",
+    "/Volumes/SSD990/koblitz-stage13-wdsat-correction-20260909/matrix",
+    "--exporter",
+    "target/release/examples/koblitz_pdp_export",
+    "--backend",
+    "target/release/examples/koblitz_pdp_backend",
+    "--configs",
+    "59:9:standard:1:0",
+    "--timeout",
+    "120",
+    "--conflicts",
+    "100000",
+    "--seed",
+    "2026091303",
+    "--wdsat-source",
+    "/Volumes/SSD990/wdsat-binary-sat-review-20260909"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 148.12792712496594,
+    "user_seconds": 111.797118,
+    "system_seconds": 3.119031,
+    "total_core_seconds": 114.916149,
+    "single_core_seconds": 114.916149,
+    "peak_rss_bytes": 168689664,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}
