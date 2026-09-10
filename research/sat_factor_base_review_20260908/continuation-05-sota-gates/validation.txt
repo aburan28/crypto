@@ -104,3 +104,6 @@ Result: 38 passed; 0 failed; 1 deliberate slow test ignored after projection ind
 
 PASS: scripts/test_run_koblitz_pdp_matrix.py
 Result: 11 parser, custody, point-witness, model-cap, Magma-terminal, and WDSat-bound tests passed.
+
+PASS: relocated Stage 13 archive verification.
+Result: verification from outside the repository regenerated panel-summary.json byte-for-byte while preserving and checking the execution-time absolute command paths.

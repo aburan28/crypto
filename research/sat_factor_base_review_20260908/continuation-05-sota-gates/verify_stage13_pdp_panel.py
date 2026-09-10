@@ -10,6 +10,7 @@ import json
 import math
 from pathlib import Path
 import statistics
+import tempfile
 from typing import Any
 
 
@@ -215,12 +216,87 @@ def cell_config(cell: dict) -> str:
     )
 
 
+def archive_relative_path(artifact: Path, panel: Path, label: str) -> Path:
+    try:
+        panel_root = panel.resolve(strict=True)
+        resolved = artifact.resolve(strict=True)
+    except OSError as error:
+        raise VerificationError(f"{label}: missing archive path: {error}") from error
+    if not panel_root.is_dir():
+        raise VerificationError("panel archive root is not a directory")
+    try:
+        return resolved.relative_to(panel_root)
+    except ValueError as error:
+        raise VerificationError(f"{label}: archive path escapes the panel root") from error
+
+
+def recorded_archive_path(
+    artifact: Path, panel: Path, recorded_panel: Path, label: str
+) -> Path:
+    return recorded_panel / archive_relative_path(artifact, panel, label)
+
+
+def recorded_panel_root(
+    protocol: dict,
+    panel: Path,
+    selected_task: tuple[int, dict] | None = None,
+) -> Path:
+    """Recover the execution-time panel root without requiring it to still exist.
+
+    Archived command paths are custody data.  Verification reads artifacts from
+    ``panel`` but checks every path-bearing command against the common absolute
+    root recorded by the first frozen task.
+    """
+    candidates = [selected_task] if selected_task is not None else tasks(protocol)
+    located = next(
+        (
+            (seed, cell, path)
+            for seed, cell in candidates
+            if (path := panel / task_relpath(seed, cell) / "invocation.json").is_file()
+        ),
+        None,
+    )
+    if located is None:
+        raise VerificationError("panel has no frozen task invocation from which to recover its root")
+    seed, cell, invocation_path = located
+    archive_relative_path(invocation_path, panel, "recorded-root invocation")
+    invocation = read_json(invocation_path)
+    command = invocation.get("runner_command")
+    if not isinstance(command, list):
+        raise VerificationError("first frozen task lacks a runner command")
+    output = command_option(command, "--output")
+    if output is None:
+        raise VerificationError("first frozen task lacks a unique --output path")
+    root = Path(output)
+    if not root.is_absolute() or ".." in root.parts:
+        raise VerificationError("recorded panel output path is not canonical and absolute")
+    suffix = task_relpath(seed, cell) / "matrix"
+    for component in reversed(suffix.parts):
+        if root.name != component:
+            raise VerificationError("recorded panel output path has an unexpected suffix")
+        root = root.parent
+    if output != str(root / suffix):
+        raise VerificationError("recorded panel output path has a noncanonical spelling")
+    return root
+
+
+def repository_root(path: Path) -> Path:
+    for candidate in (path, *path.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise VerificationError("cannot locate the repository root for the verifier")
+
+
 def validate_panel_run(protocol: dict, panel: Path) -> tuple[dict, str]:
-    run = read_json(panel / "panel-run.json")
+    run_path = panel / "panel-run.json"
+    archive_relative_path(run_path, panel, "panel execution plan")
+    run = read_json(run_path)
     if run.get("schema") != "koblitz_target_matched_pdp_execution_plan.v1":
         raise VerificationError("panel-run.json has the wrong schema")
     if run.get("protocol_sha256") != canonical_sha256(protocol):
         raise VerificationError("panel-run.json is bound to a different protocol")
+    if not isinstance(run.get("repo"), str) or not Path(run["repo"]).is_absolute():
+        raise VerificationError("panel-run.json lacks an absolute execution repository path")
     expected_tasks = [
         {
             "seed": seed,
@@ -280,9 +356,33 @@ def validate_panel_run(protocol: dict, panel: Path) -> tuple[dict, str]:
     return run, canonical_sha256(frozen_identity)
 
 
+def validate_relocated_custody(panel: Path, recorded_panel: Path, run: dict) -> bytes | None:
+    if panel.resolve(strict=True) == recorded_panel:
+        return None
+    custody_path = panel.parent / "stage-13-custody.json"
+    if not custody_path.is_file() or custody_path.is_symlink():
+        raise VerificationError("relocated panel requires its adjacent custody record")
+    custody = read_json(custody_path)
+    source_revision = run["source_revision"]["commit"]
+    if (
+        custody.get("schema") != "koblitz_stage13_panel_custody.v1"
+        or custody.get("panel_archive") != panel.name
+        or custody.get("panel_original_root") != str(recorded_panel)
+        or custody.get("panel_source_revision") != source_revision
+    ):
+        raise VerificationError("relocated panel disagrees with its custody identity")
+    summary_path = panel / "panel-summary.json"
+    archive_relative_path(summary_path, panel, "custody-bound panel summary")
+    summary_bytes = summary_path.read_bytes()
+    if hashlib.sha256(summary_bytes).hexdigest() != custody.get("panel_summary_sha256"):
+        raise VerificationError("relocated panel summary disagrees with its custody hash")
+    return summary_bytes
+
+
 def validate_task_runtime(
     protocol: dict,
     panel: Path,
+    recorded_panel: Path,
     run: dict,
     seed: int,
     cell: dict,
@@ -291,7 +391,13 @@ def validate_task_runtime(
 ) -> tuple[dict, dict]:
     task_dir = panel / task_relpath(seed, cell)
     matrix_dir = task_dir / "matrix"
-    invocation = read_json(task_dir / "invocation.json")
+    invocation_path = task_dir / "invocation.json"
+    recorded_matrix_dir = recorded_archive_path(
+        matrix_dir, panel, recorded_panel, f"{task_dir} matrix directory"
+    )
+    invocation = read_json(
+        panel / archive_relative_path(invocation_path, panel, f"{task_dir} invocation")
+    )
     if invocation.get("seed") != seed or invocation.get("cell") != cell:
         raise VerificationError(f"{task_dir}: invocation does not match frozen task")
     key = f"seed-{seed}/{cell['id']}"
@@ -305,7 +411,7 @@ def validate_task_runtime(
         raise VerificationError(f"{task_dir}: malformed runner command")
     implementation = run["implementation"]
     expected_options = {
-        "--output": str(matrix_dir.resolve()),
+        "--output": str(recorded_matrix_dir),
         "--exporter": implementation["exporter"]["path"],
         "--backend": implementation["backend"]["path"],
         "--timeout": str(protocol["solver_policy"]["per_process_watchdog_seconds"]),
@@ -338,11 +444,26 @@ def validate_task_runtime(
         "--timeout",
         str(protocol["solver_policy"]["whole_cell_watchdog_seconds"]),
         "--stdout",
-        str((task_dir / "runner.stdout").resolve()),
+        str(
+            recorded_archive_path(
+                task_dir / "runner.stdout", panel, recorded_panel, f"{task_dir} stdout"
+            )
+        ),
         "--stderr",
-        str((task_dir / "runner.stderr").resolve()),
+        str(
+            recorded_archive_path(
+                task_dir / "runner.stderr", panel, recorded_panel, f"{task_dir} stderr"
+            )
+        ),
         "--metrics",
-        str((task_dir / "outer-metrics.json").resolve()),
+        str(
+            recorded_archive_path(
+                task_dir / "outer-metrics.json",
+                panel,
+                recorded_panel,
+                f"{task_dir} outer metrics",
+            )
+        ),
         "--",
         *command,
     ]
@@ -433,6 +554,9 @@ def validate_external_point_witness(
     record: dict,
     backend: str,
     manifest_path: Path,
+    recorded_manifest_path: Path,
+    panel: Path,
+    recorded_panel: Path,
     producer_id: str,
     backend_path: str,
     expected_valid: bool,
@@ -460,6 +584,9 @@ def validate_external_point_witness(
     assignment_path = manifest_path.parent / assignment_name
     if not assignment_path.is_file() or assignment_path.is_symlink():
         raise VerificationError(f"{label}: source-model assignment artifact is missing")
+    recorded_assignment_path = recorded_archive_path(
+        assignment_path, panel, recorded_panel, f"{label} source-model assignment"
+    )
     assignment_bytes = assignment_path.read_bytes()
     if hashlib.sha256(assignment_bytes).hexdigest() != validation.get("assignment_sha256"):
         raise VerificationError(f"{label}: source-model assignment SHA-256 changed")
@@ -485,16 +612,26 @@ def validate_external_point_witness(
     expected_command = [
         backend_path,
         "validate-model",
-        str(manifest_path.resolve()),
-        str(assignment_path.resolve()),
+        str(recorded_manifest_path),
+        str(recorded_assignment_path),
     ]
     if validation.get("command") != expected_command:
         raise VerificationError(f"{label}: point-witness validation command changed")
     return validated_metrics(validation, f"{label} point-witness validation")
 
 
-def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receipt: bool) -> dict:
+def verify_cell(
+    protocol: dict,
+    panel: Path,
+    seed: int,
+    cell: dict,
+    write_receipt: bool,
+    recorded_panel: Path | None = None,
+) -> dict:
+    if recorded_panel is None:
+        recorded_panel = recorded_panel_root(protocol, panel, (seed, cell))
     run, execution_identity_sha256 = validate_panel_run(protocol, panel)
+    validate_relocated_custody(panel, recorded_panel, run)
     task_dir = panel / task_relpath(seed, cell)
     matrix_dir = task_dir / "matrix"
     result_path = matrix_dir / "result.json"
@@ -503,12 +640,16 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
         raise VerificationError(f"{task_dir}: missing matrix/result.json")
     if not outer_path.is_file():
         raise VerificationError(f"{task_dir}: missing outer-metrics.json")
+    archive_relative_path(result_path, panel, f"{task_dir} matrix result")
+    archive_relative_path(outer_path, panel, f"{task_dir} outer metrics")
     report = read_json(result_path)
     rows = report.get("instances")
     if not isinstance(rows, list) or len(rows) != 1:
         raise VerificationError(f"{result_path}: expected exactly one matrix instance")
     row = rows[0]
-    _, outer = validate_task_runtime(protocol, panel, run, seed, cell, report, row)
+    _, outer = validate_task_runtime(
+        protocol, panel, recorded_panel, run, seed, cell, report, row
+    )
     actual_cell = row.get("cell", {})
     for field in ("n", "ell", "m", "basis", "curve_a", "factor_index"):
         if actual_cell.get(field) != cell.get(field):
@@ -520,6 +661,9 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
     if len(manifests) != 1:
         raise VerificationError(f"{matrix_dir}: expected one instance manifest, found {len(manifests)}")
     manifest_path = manifests[0]
+    recorded_manifest_path = recorded_archive_path(
+        manifest_path, panel, recorded_panel, f"{task_dir} manifest"
+    )
     manifest = read_json(manifest_path)
     expected_generator_command = [
         run["implementation"]["exporter"]["path"],
@@ -528,7 +672,7 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
         cell["basis"],
         str(seed),
         str(protocol["solver_policy"]["native_conflict_budget"]),
-        str(manifest_path.parent.resolve()),
+        str(recorded_manifest_path.parent),
         str(cell["curve_a"]),
         str(cell["factor_index"]),
         "--export-only",
@@ -578,6 +722,7 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
     semantic = semantic_descriptor(manifest, protocol)
     semantic_hash = canonical_sha256(semantic)
     exports: dict[str, dict] = {}
+    recorded_export_paths: dict[str, Path] = {}
     for export_key, expected_name in EXPORT_KEYS.items():
         declared = manifest.get("exports", {}).get(export_key)
         if not isinstance(declared, dict):
@@ -587,6 +732,9 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
         artifact = manifest_path.parent / expected_name
         if not artifact.is_file():
             raise VerificationError(f"missing export artifact {artifact}")
+        recorded_export_paths[export_key] = recorded_archive_path(
+            artifact, panel, recorded_panel, f"{cell['id']} seed {seed} {export_key} export"
+        )
         size = artifact.stat().st_size
         if declared.get("bytes") != size:
             raise VerificationError(f"{artifact}: size disagrees with manifest")
@@ -753,6 +901,9 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
                 record,
                 backend,
                 manifest_path,
+                recorded_manifest_path,
+                panel,
+                recorded_panel,
                 producer_id,
                 run["implementation"]["backend"]["path"],
                 status == "sat",
@@ -799,14 +950,14 @@ def verify_cell(protocol: dict, panel: Path, seed: int, cell: dict, write_receip
             if status == "unavailable_operational":
                 input_path_verified = None
             else:
-                expected_path = str((manifest_path.parent / EXPORT_KEYS[export_key]).resolve())
+                expected_path = str(recorded_export_paths[export_key])
                 input_path_verified = expected_path in command
                 if not input_path_verified:
                     raise VerificationError(
                         f"{cell['id']} seed {seed}: {backend} command is not bound to {expected_path}"
                     )
         elif backend in {"native-xor", "direct-mitm"}:
-            expected_path = str(manifest_path.resolve())
+            expected_path = str(recorded_manifest_path)
             input_path_verified = expected_path in command
             if not input_path_verified:
                 raise VerificationError(
@@ -921,7 +1072,9 @@ def metric_distribution(values: list[float | int]) -> dict | None:
     }
 
 
-def validate_fixed_ggmp_discovery(protocol: dict) -> dict:
+def validate_fixed_ggmp_discovery(
+    protocol: dict, recorded_repo: Path, live_repo: Path
+) -> dict:
     frozen = protocol.get("fixed_cost_receipts", {}).get("ggmp_public_discovery", {})
     path = HERE / str(frozen.get("path", ""))
     if not path.is_file() or sha256_file(path) != frozen.get("sha256"):
@@ -953,7 +1106,7 @@ def validate_fixed_ggmp_discovery(protocol: dict) -> dict:
     if int(peak) != max(int(row["peak_rss_bytes"]) for row in rows):
         raise VerificationError("GGMP discovery aggregate peak RSS is wrong")
     return {
-        "path": str(path),
+        "path": str(recorded_repo / path.relative_to(live_repo)),
         "sha256": frozen["sha256"],
         "candidate_processes": len(rows),
         "wall_seconds_sequential_sum": sum(float(row["wall_seconds"]) for row in rows),
@@ -966,12 +1119,25 @@ def validate_fixed_ggmp_discovery(protocol: dict) -> dict:
 
 def summarize(protocol: dict, panel: Path, write_receipts: bool, allow_incomplete: bool) -> dict:
     run, execution_identity_sha256 = validate_panel_run(protocol, panel)
-    ggmp_discovery = validate_fixed_ggmp_discovery(protocol)
+    recorded_panel = recorded_panel_root(protocol, panel)
+    custody_summary = validate_relocated_custody(panel, recorded_panel, run)
+    recorded_repo = Path(run["repo"])
+    live_repo = repository_root(HERE)
+    ggmp_discovery = validate_fixed_ggmp_discovery(protocol, recorded_repo, live_repo)
     receipts = []
     failures = []
     for seed, cell in tasks(protocol):
         try:
-            receipts.append(verify_cell(protocol, panel, seed, cell, write_receipts))
+            receipts.append(
+                verify_cell(
+                    protocol,
+                    panel,
+                    seed,
+                    cell,
+                    write_receipts,
+                    recorded_panel=recorded_panel,
+                )
+            )
         except VerificationError as error:
             failures.append({"seed": seed, "cell_id": cell["id"], "error": str(error)})
     if failures and not allow_incomplete:
@@ -1116,10 +1282,10 @@ def summarize(protocol: dict, panel: Path, write_receipts: bool, allow_incomplet
         and wdsat_build_complete
         and magma_executed
     )
-    return {
+    summary = {
         "schema": "koblitz_target_matched_pdp_panel_summary.v1",
         "protocol_sha256": canonical_sha256(protocol),
-        "panel": str(panel.resolve()),
+        "panel": str(recorded_panel),
         "execution_identity_sha256": execution_identity_sha256,
         "evidence_class": evidence_class,
         "scientific_evidence_admissible": scientific_admissible,
@@ -1164,6 +1330,11 @@ def summarize(protocol: dict, panel: Path, write_receipts: bool, allow_incomplet
             else "Operational smoke or incomplete artifact set; no scaling, end-to-end index-calculus, or SOTA inference"
         ),
     }
+    if custody_summary is not None:
+        recomputed = (json.dumps(summary, indent=2, sort_keys=True) + "\n").encode()
+        if recomputed != custody_summary:
+            raise VerificationError("relocated panel does not reproduce its custody-bound summary")
+    return summary
 
 
 def self_test() -> None:
@@ -1175,6 +1346,72 @@ def self_test() -> None:
     assert first[1]["id"] == "n31-l5-m3-standard-a1-f0"
     assert canonical_sha256({"b": 2, "a": 1}) == canonical_sha256({"a": 1, "b": 2})
     assert metric_distribution([3, 1, 2]) == {"count": 3, "min": 1.0, "median": 2.0, "max": 3.0}
+    seed, cell = tasks(protocol)[-1]
+    with tempfile.TemporaryDirectory(prefix="stage13-verifier-self-test-") as directory:
+        temp_root = Path(directory)
+        partial = temp_root / "stage-13-panel-20260909"
+        invocation_path = partial / task_relpath(seed, cell) / "invocation.json"
+        invocation_path.parent.mkdir(parents=True)
+        recorded = Path("/recorded/panel")
+        invocation_path.write_text(
+            json.dumps(
+                {
+                    "runner_command": [
+                        "python3",
+                        "runner.py",
+                        "--output",
+                        str(recorded / task_relpath(seed, cell) / "matrix"),
+                    ]
+                }
+            )
+        )
+        assert recorded_panel_root(protocol, partial) == recorded
+        assert recorded_panel_root(protocol, partial, (seed, cell)) == recorded
+        summary_bytes = b'{"frozen":"summary"}\n'
+        (partial / "panel-summary.json").write_bytes(summary_bytes)
+        run = {"source_revision": {"commit": "frozen-source-revision"}}
+        custody_path = temp_root / "stage-13-custody.json"
+        custody = {
+            "schema": "koblitz_stage13_panel_custody.v1",
+            "panel_archive": partial.name,
+            "panel_original_root": str(recorded),
+            "panel_source_revision": run["source_revision"]["commit"],
+            "panel_summary_sha256": hashlib.sha256(summary_bytes).hexdigest(),
+        }
+        custody_path.write_text(json.dumps(custody))
+        assert validate_relocated_custody(partial, recorded, run) == summary_bytes
+        for field, wrong in (
+            ("panel_archive", "wrong-archive"),
+            ("panel_original_root", "/wrong/root"),
+            ("panel_source_revision", "wrong-revision"),
+            ("panel_summary_sha256", "0" * 64),
+        ):
+            changed = dict(custody)
+            changed[field] = wrong
+            custody_path.write_text(json.dumps(changed))
+            try:
+                validate_relocated_custody(partial, recorded, run)
+            except VerificationError:
+                pass
+            else:
+                raise AssertionError(f"bad custody field {field} was accepted")
+        custody_path.unlink()
+        try:
+            validate_relocated_custody(partial, recorded, run)
+        except VerificationError:
+            pass
+        else:
+            raise AssertionError("relocated archive without custody was accepted")
+        outside = temp_root / "outside.json"
+        outside.write_text("{}")
+        escape = partial / "escape.json"
+        escape.symlink_to(outside)
+        try:
+            archive_relative_path(escape, partial, "self-test escape")
+        except VerificationError:
+            pass
+        else:
+            raise AssertionError("symlink escape was accepted")
     print(json.dumps({"self_test": "pass", "expected_tasks": len(tasks(protocol))}, indent=2))
 
 
