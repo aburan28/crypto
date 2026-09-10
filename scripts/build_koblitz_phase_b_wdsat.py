@@ -188,12 +188,13 @@ def validate_recorded_identity(value: Any, context: str) -> dict[str, Any]:
 
 def resource_summary(processes: list[dict[str, Any]]) -> dict[str, Any]:
     metrics = [process["metrics"] for process in processes]
+    total_core_seconds = round(math.fsum(item["total_core_seconds"] for item in metrics), 12)
     return {
-        "total_core_seconds": sum(item["total_core_seconds"] for item in metrics),
-        "single_core_seconds": sum(item["single_core_seconds"] for item in metrics),
+        "total_core_seconds": total_core_seconds,
+        "single_core_seconds": total_core_seconds,
         "single_core_seconds_alias_of": "total_core_seconds",
         "single_core_elapsed_seconds": None,
-        "summed_process_wall_seconds": sum(item["wall_seconds"] for item in metrics),
+        "summed_process_wall_seconds": round(math.fsum(item["wall_seconds"] for item in metrics), 12),
         "largest_child_peak_rss_bytes": max((item["peak_rss_bytes"] for item in metrics), default=0),
         "aggregate_process_tree_peak_rss_bytes": None,
     }

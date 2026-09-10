@@ -93,8 +93,8 @@ def tool_identity(path: Path) -> dict:
 def resource_summary(processes: list[dict]) -> dict:
     metrics = [item["metrics"] for item in processes]
     return {
-        "total_core_seconds": sum(item["total_core_seconds"] for item in metrics),
-        "summed_process_wall_seconds": sum(item["wall_seconds"] for item in metrics),
+        "total_core_seconds": round(math.fsum(item["total_core_seconds"] for item in metrics), 12),
+        "summed_process_wall_seconds": round(math.fsum(item["wall_seconds"] for item in metrics), 12),
         "largest_child_peak_rss_bytes": max((item["peak_rss_bytes"] for item in metrics), default=0),
         "single_core_elapsed_seconds": None,
         "aggregate_process_tree_peak_rss_bytes": None,

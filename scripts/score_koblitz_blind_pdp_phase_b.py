@@ -681,6 +681,13 @@ def score_run(
     )
     for backend in phase_b.BACKENDS:
         values = sorted(resources[backend].pop("conflict_values"))
+        resources[backend]["total_core_seconds"] = round(
+            resources[backend]["total_core_seconds"], 12
+        )
+        resources[backend]["single_core_seconds"] = resources[backend]["total_core_seconds"]
+        resources[backend]["summed_process_wall_seconds"] = round(
+            resources[backend]["summed_process_wall_seconds"], 12
+        )
         resources[backend].update(
             {
                 "conflict_values": values,
