@@ -722,6 +722,30 @@ impl FrobeniusFactorBase {
             .collect()
     }
 
+    /// Distinct h-torsion classes `[r]P`, derived with one scalar
+    /// multiplication per signed Frobenius orbit.
+    ///
+    /// Multiplication by `r` commutes with Frobenius and negation, so the
+    /// remaining classes in an orbit are recovered with cheap public group
+    /// operations. Multiplicity is irrelevant to exact-summand reachability
+    /// because decomposition permits repeated factor-base points.
+    pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
+        let mut classes = HashMap::new();
+        for orbit in &self.signed_orbits {
+            let Some(&representative) = orbit.first() else {
+                continue;
+            };
+            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
+            for _ in 0..kc.n {
+                for candidate in [current.clone(), point_neg(&current)] {
+                    classes.entry(point_key(&candidate)).or_insert(candidate);
+                }
+                current = kc.frobenius(&current);
+            }
+        }
+        classes.into_values().collect()
+    }
+
     /// **Can an `m`-point decomposition of a target in `⟨G⟩` exist?**
     ///
     /// Not a statement about size — about cosets.  Every summand
@@ -735,7 +759,7 @@ impl FrobeniusFactorBase {
         if self.points.is_empty() || m == 0 {
             return m == 0;
         }
-        let classes = self.cofactor_classes(kc);
+        let classes = self.distinct_cofactor_classes(kc);
         // Sums reachable with exactly j summands; the h-torsion is tiny.
         let key = point_key;
         let mut reach: Vec<HashMap<(BigUint, BigUint), BinaryPoint>> = Vec::with_capacity(m + 1);
@@ -2784,6 +2808,21 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    #[test]
+    fn orbit_derived_cofactor_classes_match_pointwise_projection() {
+        for (a, n, indices) in [(1, 15, vec![2usize, 4]), (0, 23, vec![0usize, 2])] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &indices).unwrap();
+            let pointwise: HashSet<_> = fb.cofactor_classes(&kc).iter().map(point_key).collect();
+            let orbit_derived: HashSet<_> = fb
+                .distinct_cofactor_classes(&kc)
+                .iter()
+                .map(point_key)
+                .collect();
+            assert_eq!(orbit_derived, pointwise, "a={a}, n={n}");
         }
     }
 
