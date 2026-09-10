@@ -620,9 +620,7 @@ pub fn lift_symmetrised_root_accepting(
     accept: impl Fn(&[usize]) -> bool,
 ) -> Option<(Vec<usize>, bool)> {
     let m = sys.m;
-    let u0: Vec<F2mElement> = (0..m)
-        .map(|i| sys.summand_u0(fb, root, i, kc.n))
-        .collect();
+    let u0: Vec<F2mElement> = (0..m).map(|i| sys.summand_u0(fb, root, i, kc.n)).collect();
     let parity = sys.parity(root);
     let shifted = kc.add(target, &fb.two_torsion);
     for mask in 0..(1u32 << m) {
@@ -693,7 +691,17 @@ fn lift_signs_all(
             };
             chosen.push(idx);
             let next = kc.add(acc, &points[idx]);
-            walk(kc, index_of, points, xs, depth + 1, &next, chosen, target, out);
+            walk(
+                kc,
+                index_of,
+                points,
+                xs,
+                depth + 1,
+                &next,
+                chosen,
+                target,
+                out,
+            );
             chosen.pop();
         }
     }
@@ -1669,15 +1677,29 @@ pub fn transported_symmetrised_decompose(
     }
     // Only decompositions whose every summand has a rational preimage
     // under φ lift; keep searching roots until one does.
-    let in_image = |idxs: &[usize]| idxs.iter().all(|&i| !phi.preimages_of(&fb.points[i]).is_empty());
-    let o = symmetrised_groebner_decompose_accepting(kc, fb, st, &phi_r, m, engine, node_budget, in_image)?;
+    let in_image = |idxs: &[usize]| {
+        idxs.iter()
+            .all(|&i| !phi.preimages_of(&fb.points[i]).is_empty())
+    };
+    let o = symmetrised_groebner_decompose_accepting(
+        kc,
+        fb,
+        st,
+        &phi_r,
+        m,
+        engine,
+        node_budget,
+        in_image,
+    )?;
     let lifted = o.relation.as_ref().and_then(|idxs| {
         let mut ps = Vec::with_capacity(idxs.len());
         for &i in idxs {
             let pre = phi.preimages_of(&fb.points[i]);
             ps.push(pre.first()?.clone());
         }
-        let sum = ps.iter().fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
+        let sum = ps
+            .iter()
+            .fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
         let k = kc.add(&sum, &point_neg(target));
         phi.in_kernel(&k).then_some((ps, k))
     });
@@ -1753,7 +1775,13 @@ pub struct TransportBench {
 }
 
 /// Run the transport comparison on `K_0/F_{2^n}`.
-pub fn transport_bench(n: u32, m: usize, targets: usize, seed: u64, node_budget: usize) -> Option<TransportBench> {
+pub fn transport_bench(
+    n: u32,
+    m: usize,
+    targets: usize,
+    seed: u64,
+    node_budget: usize,
+) -> Option<TransportBench> {
     let kc = KoblitzCurve::new(0, n)?;
     // On K_0 the u-frame base is a single point (T_2) for small subspaces:
     // grow the dimension from the m-matched target until it is not.
@@ -1788,7 +1816,8 @@ pub fn transport_bench(n: u32, m: usize, targets: usize, seed: u64, node_budget:
         }
     }
     // Column identity.
-    let lam_minus_one = (&kc.lambda + &kc.subgroup_order - BigUint::from(1u32)) % &kc.subgroup_order;
+    let lam_minus_one =
+        (&kc.lambda + &kc.subgroup_order - BigUint::from(1u32)) % &kc.subgroup_order;
     let column_identity_holds = fprime.iter().all(|p| {
         let q = frobenius_minus_one(&kc, p);
         let hp = kc.mul(p, &kc.cofactor);
@@ -1812,7 +1841,11 @@ pub fn transport_bench(n: u32, m: usize, targets: usize, seed: u64, node_budget:
         ell: fb.ell,
         fu_points: fb.points.len(),
         fu_columns: column_count(&kc, &fb.points),
-        fu_in_image: fb.points.iter().filter(|q| !phi.preimages_of(q).is_empty()).count(),
+        fu_in_image: fb
+            .points
+            .iter()
+            .filter(|q| !phi.preimages_of(q).is_empty())
+            .count(),
         fprime_points: fprime.len(),
         fprime_columns: column_count(&kc, &fprime),
         union_points: union.len(),
@@ -1833,7 +1866,9 @@ pub fn transport_bench(n: u32, m: usize, targets: usize, seed: u64, node_budget:
     let mut transported_ms = Vec::new();
     while b.targets < targets {
         let target = kc.mul(&g, &BigUint::from(rng.gen_range(1..r_u64)));
-        let BinaryPoint::Affine { x, .. } = &target else { continue };
+        let BinaryPoint::Affine { x, .. } = &target else {
+            continue;
+        };
         if *x == F2mElement::one(n) {
             continue;
         }
@@ -1851,7 +1886,8 @@ pub fn transport_bench(n: u32, m: usize, targets: usize, seed: u64, node_budget:
         direct_ms.push(t0.elapsed().as_secs_f64() * 1e3);
         let direct_found = direct.as_ref().is_some_and(|o| o.relation.is_some());
         let t0 = Instant::now();
-        let tr = transported_symmetrised_decompose(&kc, &fb, &phi, &st, &target, m, engine, node_budget);
+        let tr =
+            transported_symmetrised_decompose(&kc, &fb, &phi, &st, &target, m, engine, node_budget);
         transported_ms.push(t0.elapsed().as_secs_f64() * 1e3);
         let transported_found = tr.as_ref().is_some_and(|o| o.lifted.is_some());
         if let Some((_, k)) = tr.as_ref().and_then(|o| o.lifted.as_ref()) {
@@ -1929,7 +1965,11 @@ mod transport_tests {
         // transport mechanics can be checked on it.
         let b = transport_bench(15, 2, 12, 3, 50_000).unwrap();
         assert!(b.column_identity_holds, "[h]φ(P) = [λ−1][h]P");
-        assert_eq!(b.fprime_points, 4 * b.fu_in_image, "four preimages per point in the image");
+        assert_eq!(
+            b.fprime_points,
+            4 * b.fu_in_image,
+            "four preimages per point in the image"
+        );
         assert!(b.fu_in_image >= 1 && b.fu_in_image <= b.fu_points);
         assert!(b.union_points > b.fu_points, "{}", format_transport(&b));
         // A lift is accepted only when Σ P_i − R ∈ ker φ; the bench counts
@@ -1963,20 +2003,37 @@ mod transport_tests {
             let p2 = &fprime[(i * 7 + 3) % fprime.len()];
             let target = kc.add(p1, p2);
             let phi_r = frobenius_minus_one(&kc, &target);
-            let bad = |p: &BinaryPoint| matches!(p, BinaryPoint::Affine { x, .. } if *x == F2mElement::one(15)) || *p == BinaryPoint::Infinity;
+            let bad = |p: &BinaryPoint| {
+                matches!(p, BinaryPoint::Affine { x, .. } if *x == F2mElement::one(15))
+                    || *p == BinaryPoint::Infinity
+            };
             if bad(&target) || bad(&phi_r) {
                 continue;
             }
             tried += 1;
-            let o = transported_symmetrised_decompose(&kc, &fb, &phi, &st, &target, 2, SolverEngine::default(), 50_000).unwrap();
-            let (ps, kk) = o.lifted.expect("a constructed decomposition must be found and lifted");
+            let o = transported_symmetrised_decompose(
+                &kc,
+                &fb,
+                &phi,
+                &st,
+                &target,
+                2,
+                SolverEngine::default(),
+                50_000,
+            )
+            .unwrap();
+            let (ps, kk) = o
+                .lifted
+                .expect("a constructed decomposition must be found and lifted");
             lifted += 1;
             assert!(phi.in_kernel(&kk));
             for p in &ps {
                 let q = frobenius_minus_one(&kc, p);
                 assert!(fb.index_of.contains_key(&point_key(&q)), "φ(P_i) ∈ F_u");
             }
-            let sum = ps.iter().fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
+            let sum = ps
+                .iter()
+                .fold(BinaryPoint::Infinity, |acc, p| kc.add(&acc, p));
             assert_eq!(sum, kc.add(&target, &kk));
         }
         assert!(tried >= 4 && lifted == tried, "{lifted}/{tried} lifted");

@@ -881,7 +881,34 @@ at `n = 23` (dimension 12); `K₁` at `n = 17` and `23`.
 
 ### 11.3 Numbers
 
-TBD-TRANSPORT
+`cargo run --release --example transport_bench`; direct = symmetrised
+F4 solve on `R`, transported = the same on `φ(R)` with every summand
+required in `im φ`, lifted; enumeration by exhaustive search on each
+base; columns = distinct signed Frobenius orbits of `[h]P`.
+
+| instance | `F_u` points / columns (in `im φ`) | `φ⁻¹(F_u)` points / columns | union points / columns | targets | direct found | transported found | enumeration `F_u` / `φ⁻¹(F_u)` / union | median ms direct / transported |
+|---|---|---|---|---:|---:|---:|---|---|
+| `K₀/F₂¹⁵`, `m = 2`, dim 7 | 61 / **1** (30) | 120 / 1 | 181 / 2 | 12 | 1 | 0 | 1 / 0 / 2 | 3.8 / 3.9 |
+| `K₀/F₂¹⁵`, `m = 3`, dim 7 | 61 / **1** (30) | 120 / 1 | 181 / 2 | 12 | 3 | 3 (on other targets) | 3 / 3 / 10 | 2 616 / 2 605 |
+| `K₀/F₂²³`, `m = 2`, dim 12 | 4 049 / 44 (1 104) | 4 416 / 24 | 8 465 / 68 | 4 | 4 | 1 | 4 / 1 / 4 | 355 / 1 464 |
+
+Reading the sound row (`n = 23`): 44 columns for 4 049 points is
+`|F_u| / 4n` to the unit — the `T₂`-closed base's halved column count,
+measured; 1 104 of 4 049 points in the image is the index-4 quarter;
+`φ⁻¹(F_u)` has `4 × 1 104` points in 24 columns of its own, `8n` points
+per column, which is what "orbits of size `8n`" in §10.2 actually
+means — a fact about `φ⁻¹(F_u)`, foldable into `F_u`'s 44 only by a
+`(λ − 1)` fold the driver does not do.  The transported question found
+one target in four against four in four, and cost four times as much
+per solve because the solver has to search past roots whose summands
+lie outside the image.  At dimension 12 the direct question is already
+saturated, so the union column shows no headroom there; at `n = 15`,
+`m = 3`, where the direct question finds 3 of 12, the union would find
+10 — the ceiling a mixed oracle could reach, on an instance whose
+relations are all in one column.
+
+Every transported lift landed in `R + E(F₂)`, and `[h]φ(P) = [λ−1][h]P`
+held on every point of every `φ⁻¹(F_u)`.
 
 ### 11.4 What this changes in the earlier sections
 

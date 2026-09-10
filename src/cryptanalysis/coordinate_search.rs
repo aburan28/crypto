@@ -2216,9 +2216,7 @@ pub fn format_report(f: &Gf, r: &SearchReport) -> String {
         let descent = c
             .descent
             .as_ref()
-            .map(|d| {
-                format!("{}/{}/{}", d.unknowns, d.equations, d.boolean_degree)
-            })
+            .map(|d| format!("{}/{}/{}", d.unknowns, d.equations, d.boolean_degree))
             .unwrap_or_else(|| "-".to_string());
         let _ = writeln!(
             s,
