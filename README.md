@@ -404,6 +404,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::koblitz_bench`               | Scaling harness: system profiles, first fall degree, oracle cost |
 | `cryptanalysis::koblitz_index_calculus`      | …also: cyclotomic classification of invariant factor bases |
 | `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
+| `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |

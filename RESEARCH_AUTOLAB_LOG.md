@@ -7076,3 +7076,83 @@ fibre.  It now reports the median.
 ### Commits made
 
 (see PR — coordinate search module, example, research doc)
+
+---
+
+## 2026-09-10 (autolab run, second session)
+
+### Task picked
+
+Own next step #1 from the first session: wire the symmetrised `S₃`/`S₄`
+into the Koblitz decomposition oracles and run H1–H3, so "the system is
+smaller" is tested against "the solve is faster".  The 2026-09-08
+sessions made the point that those are different claims.
+
+### Work done
+
+- `src/cryptanalysis/koblitz_symmetrised.rs`: factor base in the
+  Artin–Schreier frame (`u = 1/(x + 1)`, `V ∋ 1`, divisor of `xⁿ − 1`
+  containing `x − 1`); the symmetrised polynomials Weil-restricted with
+  `m(ℓ − 1) + 1` unknowns (`w_i` and `s` linear in the bits, one parity
+  bit); root lifting including relations through `R + T`; matrix-F4 and
+  CDCL oracles; a direct unchained `S₄`-in-`x` control arm; a paired
+  benchmark with enumeration gates on every verdict and re-summation of
+  every relation.  Seven tests, including that the hardcoded polynomials
+  equal `coordinate_search`'s interpolation and that F4 and SAT agree
+  with enumeration at `m = 2, 3`.
+- `examples/symmetrised_oracle_bench.rs`: the ladder.  Learned on the
+  way that `n = 21` is unusable — composite, so no prime-order subgroup
+  exceeds its cofactor — and retargeted to `n = 17, 23`.
+
+### Findings
+
+**H1 confirmed by two to three orders of magnitude at `m = 3`.**
+`K₁/F₂¹⁵`: F4 refutes the symmetrised system in 26 ms against 10.2 s for
+the production chained system, found targets 8 ms against 5.7 s.  `K₀`
+the same.  At `m = 2` the gain is ×2 (F4) to ×5 (SAT).  Zero gate
+failures anywhere.
+
+**Decomposed by control arm:** dropping the chained intermediates is
+×12 (direct `S₄` in `x`, 541 ms); the symmetry is a further ×75.
+
+**H2 falsified as stated:** the symmetrised systems have a *higher*
+first fall degree (4 vs 3) and solve faster.  The chained system's early
+syzygies are its own redundancy.  First fall degree is the wrong
+predictor for this comparison; splits and conflicts are the right ones
+(788 → 236, 51 445 → 3 424 at `K₀/F₂¹⁵`).
+
+**SAT is back in the game.**  The production SAT arm's 227 s refutation
+at `K₁/F₂¹⁵`, `m = 3` becomes 101 ms; the F4/SAT gap is ×4, not ×340.
+What CDCL could not handle was the free intermediate field element.
+
+**Not uniformly better, and the exception is the engine.**  At
+`K₁/F₂¹⁷`, `m = 3` (dimension 9 is the only invariant subspace with
+`1`; every target decomposes) the symmetrised system has 25 unknowns of
+Boolean degree 4, above `matrix_f4_f2`'s column limit for a degree-5
+matrix, so F4 is reduced to splitting: 6.2 s and 3 219 splits against
+4.0 s and 49 for the chained system.  On SAT it still wins (3/4 found
+against 0/4).  At `K₁/F₂²³`, `m = 3`, 59 unknowns against 34, the
+production system answers nothing within budget on either engine and
+the symmetrised system finds 2/3 on F4 in 5.8 s.  The wall moved.
+
+**`m = 2` is a constant factor.**  ×2 on F4 refutations from `n = 15`
+to `n = 23`, ×4–9 on SAT; found targets within noise.  H3's
+"sub-second at the wall" is falsified: 1.6 s at `n = 23`, and the first
+fall degree there equals the `x`-system's.
+
+`n = 21` is composite — the group order carries the subfield curves'
+orders and no prime-order subgroup exceeds its cofactor — so the
+constructor refuses it; the earlier `n = 21` numbers were curve-free
+system profiles.  The ladder uses primes.
+
+### Next step proposal
+
+1. Chain the symmetrised `S₃` for `m ≥ 4`; compare against unchained
+   symmetrised `S₄`.
+2. Add the symmetrised oracle as a strategy in `koblitz_index_calculus`
+   and re-run the scaling target's ladder end to end.
+3. Tuple-level coordinates for the `Z/4` of `K₀`, unchanged.
+
+### Commits made
+
+(see PR — oracle module, paired bench, research doc §8)
