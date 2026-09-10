@@ -20,7 +20,7 @@ import urllib.parse
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-20260909"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
 SUMMARY_SCHEMA = "koblitz_magma_calculator_stage19_summary.v2"
 
 
@@ -488,10 +488,17 @@ def verify_attempt(artifact: Path, plan: dict, task: dict, attempt: Path, bindin
         "attempt_ordinal": 1, "started_at": start.get("started_at"), "request": request,
         "execution_commit": binding["execution_commit"], "execution_tree": binding["execution_tree"],
         "execution_binding_sha256": binding["binding_sha256"], "retry_permitted": False,
+        "launch_nonce_sha256": start.get("launch_nonce_sha256"),
         "recovered_empty_attempt_directory": start.get("recovered_empty_attempt_directory"),
     }
     if start != base_start or type(start["recovered_empty_attempt_directory"]) is not bool:
         raise VerificationError(f"{task['id']}: attempt-start receipt changed")
+    nonce_hash = start["launch_nonce_sha256"]
+    if start["recovered_empty_attempt_directory"]:
+        if nonce_hash is not None:
+            raise VerificationError(f"{task['id']}: recovered empty attempt invented a nonce")
+    elif not isinstance(nonce_hash, str) or re.fullmatch(r"[0-9a-f]{64}", nonce_hash) is None:
+        raise VerificationError(f"{task['id']}: launch nonce hash is malformed")
     started = parse_time(start["started_at"], f"{task['id']} started_at")
     required = {
         "schema": RUNNER.RECEIPT_SCHEMA, "task_id": task["id"], "ordinal": task["ordinal"],

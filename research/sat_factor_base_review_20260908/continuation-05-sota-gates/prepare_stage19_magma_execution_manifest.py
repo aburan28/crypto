@@ -15,7 +15,8 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-ARTIFACT = HERE / "stage-19-magma-calculator-panel-20260909"
+ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+ORIGINAL_ARTIFACT = HERE / "stage-19-magma-calculator-panel-20260909"
 OUTPUT = ARTIFACT / "execution-manifest.json"
 SCHEMA = "koblitz_magma_calculator_stage19_execution_manifest.v1"
 
@@ -36,6 +37,9 @@ def load_module(name: str, path: Path):
 RENDERER = load_module("stage19_renderer_for_manifest", HERE / "render_stage19_magma_calculator_panel.py")
 VERIFIER = load_module("stage19_verifier_for_manifest", HERE / "verify_stage19_magma_calculator_panel.py")
 CHILD = load_module("stage19_child_for_manifest", HERE / "post_stage19_magma_calculator_request.py")
+AMENDMENT_VERIFIER = load_module(
+    "stage19_amendment_for_manifest", HERE / "verify_stage19_amendment01.py"
+)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -62,6 +66,9 @@ def relevant_paths() -> list[str]:
         ".github/workflows/koblitz-sota-reproduction.yml",
         "scripts/process_meter.py",
         str((HERE / "STAGE19_RESULTS.md").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-01-zero-post-parent-check.json").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-01-summary.json").relative_to(REPO)),
+        str((HERE / "verify_stage19_amendment01.py").relative_to(REPO)),
         str((HERE / "stage-19-magma-calculator-panel-protocol.json").relative_to(REPO)),
         str((HERE / "render_stage19_magma_calculator_panel.py").relative_to(REPO)),
         str((HERE / "post_stage19_magma_calculator_request.py").relative_to(REPO)),
@@ -77,7 +84,14 @@ def relevant_paths() -> list[str]:
     )
     if len(inputs) != 10:
         raise PreparationError("execution manifest requires exactly ten prepared inputs")
-    return sorted(fixed + inputs)
+    original = sorted(
+        str(path.relative_to(REPO))
+        for path in ORIGINAL_ARTIFACT.rglob("*")
+        if path.is_file() and not path.is_symlink()
+    )
+    if len(original) != 22:
+        raise PreparationError("Amendment 01 requires the exact 22-file original artifact")
+    return sorted(set(fixed + inputs + original))
 
 
 def blob_record(revision: str, relative: str) -> dict:
@@ -115,6 +129,10 @@ def build_manifest() -> dict:
     prepared = VERIFIER.verify(ARTIFACT)
     if prepared.get("artifact_status") != "prepared_not_executed":
         raise PreparationError("prepared Stage 19 artifact is not execution-free")
+    amendment_summary = AMENDMENT_VERIFIER.summarize()
+    amendment_summary_path = HERE / "stage-19-amendment-01-summary.json"
+    if amendment_summary_path.read_bytes() != canonical_bytes(amendment_summary):
+        raise PreparationError("Amendment 01 expected summary does not regenerate byte-for-byte")
     plan, _ = RENDERER.build_plan()
     if (ARTIFACT / "plan.json").read_bytes() != canonical_bytes(plan):
         raise PreparationError("prepared plan differs from deterministic rendering")
@@ -162,6 +180,9 @@ def self_test() -> dict:
     required_suffixes = {
         "plan.json",
         "prepared-summary.json",
+        "stage-19-amendment-01-zero-post-parent-check.json",
+        "stage-19-amendment-01-summary.json",
+        "verify_stage19_amendment01.py",
         "render_stage19_magma_calculator_panel.py",
         "post_stage19_magma_calculator_request.py",
         "run_stage19_magma_calculator_panel.py",
@@ -170,9 +191,14 @@ def self_test() -> dict:
         "koblitz-sota-reproduction.yml",
     }
     names = {Path(path).name for path in paths}
-    if not required_suffixes.issubset(names) or len([p for p in paths if p.endswith(".magma")]) != 10:
+    if not required_suffixes.issubset(names) or len([p for p in paths if p.endswith(".magma")]) != 20:
         raise AssertionError("execution-manifest relevant path set is incomplete")
-    return {"self_test": "pass", "relevant_paths": len(paths), "prepared_inputs": 10}
+    return {
+        "self_test": "pass",
+        "relevant_paths": len(paths),
+        "prepared_inputs": 10,
+        "immutable_original_artifact_files": 22,
+    }
 
 
 def main() -> None:
@@ -188,7 +214,13 @@ def main() -> None:
     try:
         manifest = build_manifest()
         CHILD.atomic_write(OUTPUT, canonical_bytes(manifest))
-    except (PreparationError, VERIFIER.VerificationError, RENDERER.RenderError, CHILD.ChildError) as error:
+    except (
+        PreparationError,
+        VERIFIER.VerificationError,
+        AMENDMENT_VERIFIER.VerificationError,
+        RENDERER.RenderError,
+        CHILD.ChildError,
+    ) as error:
         parser.error(str(error))
     print(json.dumps(manifest, indent=2, sort_keys=True))
 

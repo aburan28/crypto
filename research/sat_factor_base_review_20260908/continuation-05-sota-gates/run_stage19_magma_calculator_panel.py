@@ -9,8 +9,10 @@ import hashlib
 import importlib.util
 import json
 import math
+import os
 from pathlib import Path
 import re
+import secrets
 import stat
 import subprocess
 import sys
@@ -23,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 RENDERER_PATH = HERE / "render_stage19_magma_calculator_panel.py"
 CHILD_PATH = HERE / "post_stage19_magma_calculator_request.py"
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-20260909"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
 METER = REPO / "scripts" / "process_meter.py"
 RUN_SCHEMA = "koblitz_magma_calculator_stage19_run.v2"
 ATTEMPT_SCHEMA = "koblitz_magma_calculator_stage19_attempt.v2"
@@ -161,6 +163,9 @@ def expected_execution_bound_paths() -> set[str]:
         ".github/workflows/koblitz-sota-reproduction.yml",
         "scripts/process_meter.py",
         str((HERE / "STAGE19_RESULTS.md").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-01-zero-post-parent-check.json").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-01-summary.json").relative_to(REPO)),
+        str((HERE / "verify_stage19_amendment01.py").relative_to(REPO)),
         str((HERE / "stage-19-magma-calculator-panel-protocol.json").relative_to(REPO)),
         str((HERE / "render_stage19_magma_calculator_panel.py").relative_to(REPO)),
         str((HERE / "post_stage19_magma_calculator_request.py").relative_to(REPO)),
@@ -176,7 +181,15 @@ def expected_execution_bound_paths() -> set[str]:
     }
     if len(inputs) != 10:
         raise RunError("execution binding requires exactly ten prepared inputs")
-    return fixed | inputs
+    original_artifact = HERE / "stage-19-magma-calculator-panel-20260909"
+    original = {
+        str(path.relative_to(REPO))
+        for path in original_artifact.rglob("*")
+        if path.is_file() and not path.is_symlink()
+    }
+    if len(original) != 22:
+        raise RunError("execution binding requires the exact immutable 22-file original artifact")
+    return fixed | inputs | original
 
 
 def checkout_dirty_paths() -> list[str]:
@@ -410,7 +423,9 @@ def transport_process_record(attempt: Path, expected_command: list[str], timeout
     }
 
 
-def run_metered_transport(attempt: Path, plan: dict, task: dict) -> dict:
+def run_metered_transport(
+    attempt: Path, plan: dict, task: dict, launch_nonce: str
+) -> dict:
     command = [
         str(Path(sys.executable).resolve()), str(CHILD_PATH.resolve()),
         "--attempt", str(attempt.resolve()), "--execute-child",
@@ -422,7 +437,11 @@ def run_metered_transport(attempt: Path, plan: dict, task: dict) -> dict:
         "--stderr", str((attempt / "transport.stderr").resolve()), "--metrics", str((attempt / "transport-metrics.json").resolve()),
         "--", *command,
     ]
-    launcher = subprocess.run(meter_command, cwd=REPO, check=False)
+    child_environment = os.environ.copy()
+    child_environment[CHILD.LAUNCH_NONCE_ENV] = launch_nonce
+    launcher = subprocess.run(
+        meter_command, cwd=REPO, env=child_environment, check=False
+    )
     if launcher.returncode != 0 or not (attempt / "transport-metrics.json").is_file():
         raise RunError(f"transport process meter failed with return code {launcher.returncode}")
     return transport_process_record(attempt, command, timeout)
@@ -513,6 +532,7 @@ def recover_interrupted(
             "schema": ATTEMPT_SCHEMA, "task_id": task["id"], "ordinal": task["ordinal"], "attempt_ordinal": 1,
             "started_at": started_at, "request": request, "execution_commit": binding["execution_commit"],
             "execution_tree": binding["execution_tree"], "execution_binding_sha256": binding["binding_sha256"],
+            "launch_nonce_sha256": None,
             "retry_permitted": False, "recovered_empty_attempt_directory": True,
         }
         atomic_json(start_path, start)
@@ -585,6 +605,12 @@ def audit_existing_receipt(
         raise RunError(f"{task['id']}: existing receipt identity changed")
     if start.get("request") != request or start.get("task_id") != task["id"]:
         raise RunError(f"{task['id']}: attempt start identity changed")
+    nonce_hash = start.get("launch_nonce_sha256")
+    if start.get("recovered_empty_attempt_directory") is True:
+        if nonce_hash is not None:
+            raise RunError(f"{task['id']}: recovered empty attempt invented a nonce")
+    elif not isinstance(nonce_hash, str) or re.fullmatch(r"[0-9a-f]{64}", nonce_hash) is None:
+        raise RunError(f"{task['id']}: launch nonce hash is malformed")
     parse_time(receipt.get("started_at"), f"{task['id']} started_at")
     parse_time(receipt.get("finished_at"), f"{task['id']} finished_at")
     if receipt.get("claim_admitted") is not (receipt.get("clean_terminal") is True):
@@ -695,7 +721,9 @@ def audit_existing_receipt(
     return receipt
 
 
-def create_attempt(artifact: Path, plan: dict, task: dict, binding: dict) -> tuple[Path, dict]:
+def create_attempt(
+    artifact: Path, plan: dict, task: dict, binding: dict
+) -> tuple[Path, dict, str]:
     attempts_root = artifact / "attempts"
     attempts_root.mkdir(parents=True, exist_ok=True)
     if attempts_root.is_symlink() or not attempts_root.is_dir():
@@ -705,10 +733,12 @@ def create_attempt(artifact: Path, plan: dict, task: dict, binding: dict) -> tup
     input_path = artifact / task["named_input"]["path"]
     input_bytes = input_path.read_bytes()
     request = expected_request(plan, task, input_bytes, binding)
+    launch_nonce = secrets.token_hex(32)
     start = {
         "schema": ATTEMPT_SCHEMA, "task_id": task["id"], "ordinal": task["ordinal"], "attempt_ordinal": 1,
         "started_at": now(), "request": request, "execution_commit": binding["execution_commit"],
         "execution_tree": binding["execution_tree"], "execution_binding_sha256": binding["binding_sha256"],
+        "launch_nonce_sha256": sha256_bytes(launch_nonce.encode()),
         "retry_permitted": False, "recovered_empty_attempt_directory": False,
     }
     atomic_json(attempt / "attempt-start.json", start)
@@ -717,7 +747,7 @@ def create_attempt(artifact: Path, plan: dict, task: dict, binding: dict) -> tup
         attempt, plan, task, start, artifact=artifact
     )
     atomic_json(attempt / "launch-authorization.json", authorization)
-    return attempt, start
+    return attempt, start, launch_nonce
 
 
 def wait_for_global_spacing(previous_finished_at: str | None, seconds: float) -> None:
@@ -848,8 +878,8 @@ def run(artifact: Path, resume: bool, execution_binding_override: dict | None = 
     while next_index < len(plan["tasks"]):
         wait_for_global_spacing(previous_finished, float(plan["execution_policy"]["inter_request_delay_seconds"]))
         task = plan["tasks"][next_index]
-        attempt, start = create_attempt(artifact, plan, task, binding)
-        process = run_metered_transport(attempt, plan, task)
+        attempt, start, launch_nonce = create_attempt(artifact, plan, task, binding)
+        process = run_metered_transport(attempt, plan, task, launch_nonce)
         receipt = build_final_receipt(attempt, plan, task, start, process)
         receipts.append(receipt)
         state["receipts"][task["id"]] = receipt_index_entry(artifact, attempt, receipt)

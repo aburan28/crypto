@@ -27,9 +27,10 @@ SOCKET_TIMEOUT_SECONDS = 70.0
 MAX_RESPONSE_BYTES = 1_048_576
 ENVELOPE_SCHEMA = "koblitz_magma_calculator_stage19_transport_envelope.v1"
 SAFE_RESPONSE_HEADERS = ("content-type", "content-length", "date", "server")
+LAUNCH_NONCE_ENV = "KOBLITZ_STAGE19_LAUNCH_NONCE"
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-20260909"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
 PLAN = DEFAULT_ARTIFACT / "plan.json"
 EXECUTION_MANIFEST = DEFAULT_ARTIFACT / "execution-manifest.json"
 METER = REPO / "scripts" / "process_meter.py"
@@ -140,6 +141,7 @@ def expected_launch_authorization(
         "task_id": task["id"],
         "ordinal": task["ordinal"],
         "attempt_ordinal": 1,
+        "launch_nonce_sha256": start["launch_nonce_sha256"],
         "attempt_path": str(attempt.relative_to(artifact)),
         "attempt_start": regular_record(attempt / "attempt-start.json", attempt),
         "plan": regular_record(plan_path, artifact),
@@ -170,23 +172,6 @@ def expected_launch_authorization(
     }
 
 
-def validate_meter_parent(attempt: Path) -> None:
-    result = subprocess.run(
-        ["ps", "-p", str(os.getppid()), "-o", "command="],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    command = result.stdout.strip()
-    required = (
-        str(METER.resolve()),
-        "--timeout 75",
-        str((attempt / "transport-metrics.json").resolve()),
-    )
-    if result.returncode != 0 or any(value not in command for value in required):
-        raise ChildError("request child is not running under the authorized process meter")
-
-
 def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes]:
     try:
         attempt = attempt.resolve(strict=True)
@@ -207,6 +192,13 @@ def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes
     start = read_json(attempt / "attempt-start.json")
     if start.get("schema") != ATTEMPT_START_SCHEMA or start.get("attempt_ordinal") != 1:
         raise ChildError("attempt-start ledger is not the exact one-attempt schema")
+    nonce = os.environ.pop(LAUNCH_NONCE_ENV, None)
+    if (
+        not isinstance(nonce, str)
+        or not re.fullmatch(r"[0-9a-f]{64}", nonce)
+        or sha256_bytes(nonce.encode()) != start.get("launch_nonce_sha256")
+    ):
+        raise ChildError("inherited launch nonce does not match the parent-bound attempt ledger")
     plan = read_json(PLAN)
     tasks = plan.get("tasks")
     if not isinstance(tasks, list):
@@ -263,7 +255,6 @@ def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes
     unexpected = {path.name for path in attempt.iterdir()} - allowed
     if unexpected:
         raise ChildError(f"attempt contains pre-existing transport state: {sorted(unexpected)}")
-    validate_meter_parent(attempt)
     os.replace(authorization_path, consumed_path)
     directory_fd = os.open(attempt, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
     try:

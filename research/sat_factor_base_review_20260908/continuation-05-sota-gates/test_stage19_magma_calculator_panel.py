@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -32,6 +33,7 @@ RUNNER = load_module("stage19_runner_tests", "run_stage19_magma_calculator_panel
 VERIFIER = load_module("stage19_verifier_tests", "verify_stage19_magma_calculator_panel.py")
 CHILD = RUNNER.CHILD
 PREPARER = load_module("stage19_manifest_tests", "prepare_stage19_magma_execution_manifest.py")
+AMENDMENT = load_module("stage19_amendment_tests", "verify_stage19_amendment01.py")
 
 
 def stamp(moment: datetime) -> str:
@@ -279,12 +281,74 @@ class Stage19PanelTests(unittest.TestCase):
                     CHILD.execute(attempt)
             transport.assert_not_called()
 
+    def test_launch_nonce_is_hash_bound_and_not_serialized(self):
+        artifact, plan, binding = self.materialized()
+        task = plan["tasks"][0]
+        attempt, start, nonce = RUNNER.create_attempt(artifact, plan, task, binding)
+        expected_hash = RUNNER.sha256_bytes(nonce.encode())
+        self.assertEqual(expected_hash, start["launch_nonce_sha256"])
+        authorization = RUNNER.read_json(attempt / "launch-authorization.json")
+        self.assertEqual(expected_hash, authorization["launch_nonce_sha256"])
+        self.assertNotIn(nonce.encode(), (attempt / "attempt-start.json").read_bytes())
+        self.assertNotIn(nonce.encode(), (attempt / "launch-authorization.json").read_bytes())
+
+    def test_parent_passes_nonce_only_through_meter_environment(self):
+        artifact, plan, binding = self.materialized()
+        task = plan["tasks"][0]
+        attempt, _, nonce = RUNNER.create_attempt(artifact, plan, task, binding)
+
+        def fake_meter(command, cwd, env, check):  # noqa: ANN001
+            self.assertEqual(nonce, env[CHILD.LAUNCH_NONCE_ENV])
+            stdout = Path(command[command.index("--stdout") + 1])
+            stderr = Path(command[command.index("--stderr") + 1])
+            metrics_path = Path(command[command.index("--metrics") + 1])
+            child_command = command[command.index("--") + 1 :]
+            CHILD.atomic_write(stdout, b"")
+            CHILD.atomic_write(stderr, b"")
+            RUNNER.atomic_json(metrics_path, {
+                "command": child_command, "returncode": 1, "watchdog_seconds": 75.0,
+                "timed_out": False, "orphan_group_terminated": False,
+                "metrics": {
+                    "wall_seconds": 0.01, "user_seconds": 0.0, "system_seconds": 0.0,
+                    "total_core_seconds": 0.0, "single_core_seconds": 0.0,
+                    "peak_rss_bytes": 0, "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+                },
+            })
+            return SimpleNamespace(returncode=0)
+
+        with mock.patch.object(RUNNER.subprocess, "run", side_effect=fake_meter):
+            process = RUNNER.run_metered_transport(attempt, plan, task, nonce)
+        self.assertEqual(1, process["metrics"]["returncode"])
+
+    def test_current_child_removes_ps_and_consumes_before_post(self):
+        source = (HERE / "post_stage19_magma_calculator_request.py").read_text()
+        self.assertNotIn("validate_meter_parent", source)
+        self.assertNotIn('["ps"', source)
+        self.assertLess(
+            source.index("os.replace(authorization_path, consumed_path)"),
+            source.index("result = perform_request(input_bytes)"),
+        )
+
+    def test_amendment01_authenticates_zero_post_failure(self):
+        summary = AMENDMENT.summarize()
+        original = summary["original_zero_post_failure"]
+        self.assertEqual(0, original["post_requests_started"])
+        self.assertTrue(original["authorization_present_unconsumed"])
+        self.assertEqual(0, original["response_or_envelope_files"])
+        self.assertEqual(0.124652, original["charged_transport_process"]["total_core_seconds"])
+        self.assertEqual(30244864, original["charged_transport_process"]["peak_rss_bytes"])
+
+    def test_original_terminal_ledger_cannot_be_selected_for_execution(self):
+        original = HERE / "stage-19-magma-calculator-panel-20260909"
+        with self.assertRaises(RUNNER.RunError):
+            RUNNER.verify_prepared_artifact(original)
+
     def test_nonclean_halt_is_terminal_and_old_nine_request_p0_is_closed(self):
         artifact, plan, binding = self.materialized()
         with mock.patch.object(
             RUNNER,
             "run_metered_transport",
-            side_effect=lambda attempt, current_plan, task: self.fake_process(
+            side_effect=lambda attempt, current_plan, task, nonce: self.fake_process(
                 artifact, attempt, current_plan, task, "transport_error"
             ),
         ) as post:
@@ -318,14 +382,14 @@ class Stage19PanelTests(unittest.TestCase):
     def test_crash_after_response_before_envelope_is_terminal(self):
         def populate(artifact, plan, binding, task, attempt):  # noqa: ANN001
             attempt.rmdir()
-            attempt, _ = RUNNER.create_attempt(artifact, plan, task, binding)
+            attempt, _, _ = RUNNER.create_attempt(artifact, plan, task, binding)
             CHILD.atomic_write(attempt / "response.xml", self.response_xml(task))
         self.assert_recovery_boundary("interrupted_with_unbound_response", populate)
 
     def test_crash_after_response_and_envelope_before_receipt_is_terminal(self):
         def populate(artifact, plan, binding, task, attempt):  # noqa: ANN001
             attempt.rmdir()
-            attempt, _ = RUNNER.create_attempt(artifact, plan, task, binding)
+            attempt, _, _ = RUNNER.create_attempt(artifact, plan, task, binding)
             input_bytes = (artifact / task["named_input"]["path"]).read_bytes()
             body = RUNNER.request_body(input_bytes, "input")
             CHILD.persist_result(attempt, input_bytes, {
@@ -338,7 +402,7 @@ class Stage19PanelTests(unittest.TestCase):
     def test_crash_after_envelope_without_body_is_terminal(self):
         def populate(artifact, plan, binding, task, attempt):  # noqa: ANN001
             attempt.rmdir()
-            attempt, _ = RUNNER.create_attempt(artifact, plan, task, binding)
+            attempt, _, _ = RUNNER.create_attempt(artifact, plan, task, binding)
             input_bytes = (artifact / task["named_input"]["path"]).read_bytes()
             body = RUNNER.request_body(input_bytes, "input")
             CHILD.persist_result(attempt, input_bytes, {
@@ -351,14 +415,14 @@ class Stage19PanelTests(unittest.TestCase):
     def test_crash_after_meter_before_receipt_is_terminal(self):
         def populate(artifact, plan, binding, task, attempt):  # noqa: ANN001
             attempt.rmdir()
-            attempt, _ = RUNNER.create_attempt(artifact, plan, task, binding)
+            attempt, _, _ = RUNNER.create_attempt(artifact, plan, task, binding)
             RUNNER.atomic_json(attempt / "transport-metrics.json", {"timed_out": True})
         self.assert_recovery_boundary("interrupted_after_transport_process", populate)
 
     def test_timeout_after_complete_response_binds_all_bytes_nonclaiming(self):
         artifact, plan, binding = self.materialized()
         task = plan["tasks"][0]
-        attempt, start = RUNNER.create_attempt(artifact, plan, task, binding)
+        attempt, start, _ = RUNNER.create_attempt(artifact, plan, task, binding)
         process = self.fake_process(
             artifact, attempt, plan, task, "clean", timed_out=True, returncode=-15
         )
@@ -374,7 +438,7 @@ class Stage19PanelTests(unittest.TestCase):
     def test_nonzero_after_complete_response_binds_all_bytes_nonclaiming(self):
         artifact, plan, binding = self.materialized()
         task = plan["tasks"][0]
-        attempt, start = RUNNER.create_attempt(artifact, plan, task, binding)
+        attempt, start, _ = RUNNER.create_attempt(artifact, plan, task, binding)
         process = self.fake_process(
             artifact, attempt, plan, task, "clean", returncode=2
         )
@@ -388,7 +452,7 @@ class Stage19PanelTests(unittest.TestCase):
     def test_killed_during_atomic_write_preserves_temp_hash_nonclaiming(self):
         artifact, plan, binding = self.materialized()
         task = plan["tasks"][0]
-        attempt, start = RUNNER.create_attempt(artifact, plan, task, binding)
+        attempt, start, _ = RUNNER.create_attempt(artifact, plan, task, binding)
         os.replace(
             attempt / "launch-authorization.json",
             attempt / "launch-authorization.consumed.json",
@@ -427,7 +491,7 @@ class Stage19PanelTests(unittest.TestCase):
         artifact, plan, binding = self.materialized()
         self.initialize_run(artifact, plan, binding)
         task = plan["tasks"][0]
-        attempt, start = RUNNER.create_attempt(artifact, plan, task, binding)
+        attempt, start, _ = RUNNER.create_attempt(artifact, plan, task, binding)
         process = self.fake_process(artifact, attempt, plan, task, "transport_error")
         receipt = RUNNER.build_final_receipt(attempt, plan, task, start, process)
         self.assertFalse(receipt["clean_terminal"])
@@ -446,13 +510,13 @@ class Stage19PanelTests(unittest.TestCase):
             "now",
             side_effect=[stamp(past), stamp(past), stamp(past + timedelta(seconds=1))],
         ):
-            attempt, start = RUNNER.create_attempt(artifact, plan, first, binding)
+            attempt, start, _ = RUNNER.create_attempt(artifact, plan, first, binding)
             process = self.fake_process(artifact, attempt, plan, first, "clean")
             receipt = RUNNER.build_final_receipt(attempt, plan, first, start, process)
         self.assertTrue(receipt["clean_terminal"])
         seen = []
 
-        def one_later_failure(attempt, current_plan, task):  # noqa: ANN001
+        def one_later_failure(attempt, current_plan, task, nonce):  # noqa: ANN001
             seen.append(task["id"])
             return self.fake_process(artifact, attempt, current_plan, task, "transport_error")
 
@@ -473,7 +537,7 @@ class Stage19PanelTests(unittest.TestCase):
             with mock.patch.object(
                 RUNNER, "now", side_effect=[start_stamp, start_stamp, finish_stamp]
             ):
-                attempt, start = RUNNER.create_attempt(artifact, plan, task, binding)
+                attempt, start, _ = RUNNER.create_attempt(artifact, plan, task, binding)
                 process = self.fake_process(artifact, attempt, plan, task, "clean")
                 receipt = RUNNER.build_final_receipt(attempt, plan, task, start, process)
             receipts.append(receipt)
