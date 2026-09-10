@@ -571,6 +571,49 @@ fn source_point_witness_valid(
     })
 }
 
+fn validate_assignment(
+    instance: VerifiedInstance,
+    assignment_path: &Path,
+) -> Result<(Value, bool), String> {
+    let assignment_bytes = fs::read(assignment_path)
+        .map_err(|error| format!("read {}: {error}", assignment_path.display()))?;
+    let assignment: Vec<bool> = serde_json::from_slice(&assignment_bytes)
+        .map_err(|error| format!("parse {}: {error}", assignment_path.display()))?;
+    if assignment.len() != instance.n_vars as usize {
+        return Err(format!(
+            "assignment has {} values; expected exactly {} source variables",
+            assignment.len(),
+            instance.n_vars
+        ));
+    }
+    let model_valid = validate_rows(&instance.rows, &assignment, instance.n_vars);
+    let witness_valid = source_point_witness_valid(
+        &instance.curve,
+        &instance.basis,
+        &instance.target,
+        &assignment,
+    );
+    let accepted = model_valid && witness_valid;
+    Ok((
+        json!({
+            "schema":"koblitz_pdp_assignment_validation.v1",
+            "status":if accepted {"valid_point_witness"} else if !model_valid {"invalid_source_model"} else {"nonlifting_source_model"},
+            "source_instance_id":instance.id,
+            "source_instance_verified":true,
+            "source_artifacts":instance.artifact_receipts,
+            "regenerated_source_exact":true,
+            "assignment_values":assignment.len(),
+            "assignment_blake3":blake3::hash(&assignment_bytes).to_hex().to_string(),
+            "source_assignment":assignment,
+            "source_model_valid":model_valid,
+            "source_witness_valid":witness_valid,
+            "timing_ns":{"source_verification":instance.verification_ns},
+            "interpretation":"A SAT model is a PDP witness only when its source equations hold and rational factor-base lifts sum to the exact target",
+        }),
+        accepted,
+    ))
+}
+
 fn native_sat(instance: VerifiedInstance, conflict_budget: u64) -> (Value, bool) {
     let encoding_started = Instant::now();
     let (mut solver, initial_clauses, solver_variables) = match instance.source {
@@ -609,30 +652,56 @@ fn native_sat(instance: VerifiedInstance, conflict_budget: u64) -> (Value, bool)
     solver.conflict_budget = conflict_budget;
     let encoding_ns = encoding_started.elapsed().as_nanos();
     let solve_started = Instant::now();
-    let result = solver.solve();
+    let max_models = 64usize;
+    let mut models_examined = 0usize;
+    let mut nonlifting_models_blocked = 0usize;
+    let mut model_valid = None;
+    let mut witness_valid = None;
+    let (status, accepted) = loop {
+        match solver.solve() {
+            SolveResult::Sat => {
+                let assignment = solver.model();
+                let source_valid = validate_rows(&instance.rows, &assignment, instance.n_vars);
+                model_valid = Some(source_valid);
+                if !source_valid {
+                    break ("sat_invalid_model", false);
+                }
+                models_examined += 1;
+                let point_valid = source_point_witness_valid(
+                    &instance.curve,
+                    &instance.basis,
+                    &instance.target,
+                    &assignment,
+                );
+                witness_valid = Some(point_valid);
+                if point_valid {
+                    break ("sat", true);
+                }
+                nonlifting_models_blocked += 1;
+                if models_examined >= max_models {
+                    break ("model_cap_inconclusive", true);
+                }
+                // The factor coordinates determine the rational-lift question.
+                // Block this x tuple while allowing the solver to choose new
+                // chain/correspondence auxiliaries for other tuples.
+                let clause: Vec<i32> = (0..3 * instance.ell)
+                    .map(|index| {
+                        let literal = (index + 1) as i32;
+                        if assignment[index] {
+                            -literal
+                        } else {
+                            literal
+                        }
+                    })
+                    .collect();
+                solver.reset_search();
+                solver.add_clause(clause);
+            }
+            SolveResult::Unsat => break ("unsat", true),
+            SolveResult::Unknown => break ("unknown_inconclusive", true),
+        }
+    };
     let solve_ns = solve_started.elapsed().as_nanos();
-    let (model_valid, witness_valid) = if result == SolveResult::Sat {
-        let assignment = solver.model();
-        (
-            Some(validate_rows(&instance.rows, &assignment, instance.n_vars)),
-            Some(source_point_witness_valid(
-                &instance.curve,
-                &instance.basis,
-                &instance.target,
-                &assignment,
-            )),
-        )
-    } else {
-        (None, None)
-    };
-    let status = match (result, model_valid, witness_valid) {
-        (SolveResult::Sat, Some(true), Some(true)) => "sat",
-        (SolveResult::Sat, Some(false), _) => "sat_invalid_model",
-        (SolveResult::Sat, _, _) => "sat_nonlifting_model",
-        (SolveResult::Unsat, _, _) => "unsat",
-        (SolveResult::Unknown, _, _) => "unknown_inconclusive",
-    };
-    let accepted = model_valid != Some(false) && witness_valid != Some(false);
     (
         json!({
             "schema":"koblitz_pdp_isolated_backend.v1",
@@ -648,6 +717,9 @@ fn native_sat(instance: VerifiedInstance, conflict_budget: u64) -> (Value, bool)
             "solver_variables":solver_variables,
             "initial_cnf_clauses":initial_clauses,
             "native_xor_rows":solver.n_xors(),
+            "max_models":max_models,
+            "models_examined":models_examined,
+            "nonlifting_models_blocked":nonlifting_models_blocked,
             "source_model_valid":model_valid,
             "source_witness_valid":witness_valid,
             "stats":stats_json(&solver.stats),
@@ -760,7 +832,7 @@ fn direct_mitm(instance: VerifiedInstance) -> (Value, bool) {
 }
 
 fn usage() -> &'static str {
-    "usage: koblitz_pdp_backend <native-sat|direct-mitm> <manifest.json> [conflict-budget]"
+    "usage: koblitz_pdp_backend <native-sat|direct-mitm|validate-model> <manifest.json> [conflict-budget|assignment.json]"
 }
 
 fn run(args: &[String]) -> Result<(Value, bool), String> {
@@ -773,6 +845,9 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
     }
     if backend == "native-sat" && args.len() != 4 {
         return Err("native-sat requires a conflict budget".to_string());
+    }
+    if backend == "validate-model" && args.len() != 4 {
+        return Err("validate-model requires an assignment JSON file".to_string());
     }
     let manifest_path = Path::new(&args[2]);
     let instance = verify_instance(manifest_path)?;
@@ -790,6 +865,7 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
             Ok(native_sat(instance, budget))
         }
         "direct-mitm" => Ok(direct_mitm(instance)),
+        "validate-model" => validate_assignment(instance, Path::new(&args[3])),
         _ => Err(format!("unknown backend {backend}; {}", usage())),
     }
 }

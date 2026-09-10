@@ -292,6 +292,20 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
     }
 
 
+def parsed_source_assignment(run: dict, solver: str, manifest: dict) -> list[bool] | None:
+    source_variables = manifest["source_variables"]
+    if solver == "wdsat":
+        model = parse_wdsat_model(run["stdout"], source_variables)
+    elif solver == "cryptominisat":
+        maximum = manifest["exports"]["cryptominisat_xor_dimacs"]["variables"]
+        model = parse_cms_model(run["stdout"], maximum)
+    else:
+        raise ValueError(f"solver {solver} has no parsed assignment")
+    if model is None or len(model) < source_variables:
+        return None
+    return model[:source_variables]
+
+
 def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
     """Validate one isolated native-backend terminal record fail closed."""
     report = None
@@ -301,10 +315,8 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
         pass
     if run["timed_out"]:
         status = "timeout_inconclusive"
-    elif run["returncode"] != 0:
-        status = "backend_rejected_result" if report is not None else "backend_error"
     elif report is None:
-        status = "backend_contract_error"
+        status = "backend_error" if run["returncode"] != 0 else "backend_contract_error"
     else:
         expected_id = manifest.get("source_instance", {}).get("id_blake3")
         artifacts = report.get("source_artifacts")
@@ -331,21 +343,42 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
             status = "backend_contract_error"
         elif backend == "native-sat":
             if (
-                result_status == "sat"
+                run["returncode"] == 0
+                and result_status == "sat"
                 and report.get("source_model_valid") is True
                 and report.get("source_witness_valid") is True
             ):
                 status = "sat"
-            elif result_status in {"unsat", "unknown_inconclusive"}:
+            elif run["returncode"] == 0 and result_status in {
+                "unsat",
+                "unknown_inconclusive",
+                "model_cap_inconclusive",
+            }:
                 status = result_status
+            elif run["returncode"] == 2 and result_status == "sat_invalid_model":
+                status = "sat_invalid_model"
             else:
                 status = "backend_contract_error"
-        elif result_status == "sat" and report.get("source_witness_valid") is True:
+        elif (
+            run["returncode"] == 0
+            and result_status == "sat"
+            and report.get("source_witness_valid") is True
+        ):
             status = "sat"
-        elif result_status == "unsat" and report.get("exhaustive") is True:
+        elif (
+            run["returncode"] == 0
+            and result_status == "unsat"
+            and report.get("exhaustive") is True
+        ):
             status = "unsat"
-        elif result_status == "not_run_resource_cap" and report.get("exhaustive") is False:
+        elif (
+            run["returncode"] == 0
+            and result_status == "not_run_resource_cap"
+            and report.get("exhaustive") is False
+        ):
             status = "not_run_resource_cap"
+        elif run["returncode"] == 2 and result_status == "sat_invalid_witness":
+            status = "sat_invalid_witness"
         else:
             status = "backend_contract_error"
     stats = report.get("stats", {}) if isinstance(report, dict) else {}
@@ -368,6 +401,93 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
         "command": run["command"],
         "backend_report": report,
     }
+
+
+def assignment_validation_status(run: dict, manifest: dict, assignment_path: Path) -> dict:
+    """Validate a metered rational point-witness checker receipt."""
+    report = None
+    try:
+        report = json.loads(run["stdout"])
+    except (json.JSONDecodeError, TypeError):
+        pass
+    assignment_bytes = assignment_path.read_bytes()
+    try:
+        expected_assignment = json.loads(assignment_bytes)
+    except json.JSONDecodeError:
+        expected_assignment = None
+    expected_id = manifest.get("source_instance", {}).get("id_blake3")
+    contract_valid = (
+        isinstance(report, dict)
+        and report.get("schema") == "koblitz_pdp_assignment_validation.v1"
+        and report.get("source_instance_id") == expected_id
+        and report.get("source_instance_verified") is True
+        and report.get("regenerated_source_exact") is True
+        and report.get("assignment_values") == manifest.get("source_variables")
+        and report.get("source_assignment") == expected_assignment
+        and isinstance(report.get("assignment_blake3"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", report["assignment_blake3"])
+    )
+    if run["timed_out"]:
+        status = "timeout_inconclusive"
+    elif not contract_valid:
+        status = "validation_contract_error"
+    elif run["returncode"] == 0:
+        status = (
+            "valid_point_witness"
+            if report.get("status") == "valid_point_witness"
+            and report.get("source_model_valid") is True
+            and report.get("source_witness_valid") is True
+            else "validation_contract_error"
+        )
+    elif run["returncode"] == 2 and report.get("status") in {
+        "invalid_source_model",
+        "nonlifting_source_model",
+    }:
+        status = report["status"]
+    else:
+        status = "validation_backend_error"
+    return {
+        "status": status,
+        "returncode": run["returncode"],
+        "timed_out": run["timed_out"],
+        "metrics": run["metrics"],
+        "command": run["command"],
+        "report": report,
+    }
+def run_assignment_validation(
+    backend: Path,
+    manifest_path: Path,
+    manifest: dict,
+    assignment: list[bool],
+    label: str,
+    timeout: float,
+    instance: Path,
+) -> dict:
+    assignment_path = instance / f"{label}.source-model.json"
+    assignment_bytes = (json.dumps(assignment, separators=(",", ":")) + "\n").encode()
+    assignment_path.write_bytes(assignment_bytes)
+    run = run_timed(
+        [
+            str(backend.resolve()),
+            "validate-model",
+            str(manifest_path),
+            str(assignment_path),
+        ],
+        timeout,
+        instance,
+    )
+    (instance / f"{label}.point-validation.stdout").write_text(run["stdout"])
+    (instance / f"{label}.point-validation.stderr").write_text(run["stderr"])
+    result = assignment_validation_status(run, manifest, assignment_path)
+    result["assignment_path"] = assignment_path.name
+    result["assignment_sha256"] = hashlib.sha256(assignment_bytes).hexdigest()
+    if isinstance(result.get("report"), dict):
+        # The backend's BLAKE3 binds the same file; its source identity and the
+        # runner's independent SHA-256 custody are both retained.
+        result["assignment_blake3"] = result["report"].get("assignment_blake3")
+        if result["report"].get("assignment_values") != len(assignment):
+            result["status"] = "validation_contract_error"
+    return result
 
 
 def version(binary: str | None) -> dict:
@@ -666,7 +786,31 @@ def main() -> None:
             )
             (instance / "wdsat.stdout").write_text(run["stdout"])
             (instance / "wdsat.stderr").write_text(run["stderr"])
-            entry["solvers"].append(solver_status(run, "wdsat", instance, manifest))
+            row = solver_status(run, "wdsat", instance, manifest)
+            if row["status"] == "sat_source_model_unverified_point_witness":
+                assignment = parsed_source_assignment(run, "wdsat", manifest)
+                if assignment is None:
+                    row["status"] = "sat_invalid_model"
+                else:
+                    validation = run_assignment_validation(
+                        args.backend,
+                        manifest_path,
+                        manifest,
+                        assignment,
+                        "wdsat",
+                        args.timeout,
+                        instance,
+                    )
+                    row["point_witness_validation"] = validation
+                    row["source_witness_valid"] = validation["status"] == "valid_point_witness"
+                    row["status"] = (
+                        "sat"
+                        if validation["status"] == "valid_point_witness"
+                        else "sat_nonlifting_model_inconclusive"
+                        if validation["status"] == "nonlifting_source_model"
+                        else "sat_point_validation_error"
+                    )
+            entry["solvers"].append(row)
             if args.wdsat_source:
                 build_root = instance / "wdsat-build"
                 for name in ["clean.stdout", "clean.stderr", "build.stdout", "build.stderr"]:
@@ -686,7 +830,31 @@ def main() -> None:
             )
             (instance / "cryptominisat.stdout").write_text(run["stdout"])
             (instance / "cryptominisat.stderr").write_text(run["stderr"])
-            entry["solvers"].append(solver_status(run, "cryptominisat", instance, manifest))
+            row = solver_status(run, "cryptominisat", instance, manifest)
+            if row["status"] == "sat_source_model_unverified_point_witness":
+                assignment = parsed_source_assignment(run, "cryptominisat", manifest)
+                if assignment is None:
+                    row["status"] = "sat_invalid_model"
+                else:
+                    validation = run_assignment_validation(
+                        args.backend,
+                        manifest_path,
+                        manifest,
+                        assignment,
+                        "cryptominisat",
+                        args.timeout,
+                        instance,
+                    )
+                    row["point_witness_validation"] = validation
+                    row["source_witness_valid"] = validation["status"] == "valid_point_witness"
+                    row["status"] = (
+                        "sat"
+                        if validation["status"] == "valid_point_witness"
+                        else "sat_nonlifting_model_inconclusive"
+                        if validation["status"] == "nonlifting_source_model"
+                        else "sat_point_validation_error"
+                    )
+            entry["solvers"].append(row)
         else:
             entry["solvers"].append({"solver": "cryptominisat", "status": "unavailable_operational"})
 
