@@ -1,0 +1,38 @@
+{
+  "attempt_ordinal": 1,
+  "execution_binding_sha256": "79a14aaa19494c6bc4c7c684fa3866c8e616fe0750400d6d79559de1a82f467b",
+  "execution_commit": "b6c25f4e7c6aa8dde63230efbad2b23018209c46",
+  "execution_tree": "1cce29ac23275235fbfdd80cc556231f106ce61e",
+  "launch_nonce_sha256": "bda616b3741221b5fc9b31366b34508f8374c5e62d7c9b7580cc686948514eb0",
+  "ordinal": 1,
+  "recovered_empty_attempt_directory": false,
+  "request": {
+    "body_bytes": 42145,
+    "body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "79a14aaa19494c6bc4c7c684fa3866c8e616fe0750400d6d79559de1a82f467b",
+    "execution_commit": "b6c25f4e7c6aa8dde63230efbad2b23018209c46",
+    "execution_manifest_sha256": "75665da78f20eea2e3029ec0fdbd0a06f9abf32cf9e66fb0d8b78bcdf6934466",
+    "execution_tree": "1cce29ac23275235fbfdd80cc556231f106ce61e",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 21345,
+      "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "retry_permitted": false,
+  "schema": "koblitz_magma_calculator_stage19_attempt.v2",
+  "started_at": "2026-09-10T14:31:32.530941Z",
+  "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+}

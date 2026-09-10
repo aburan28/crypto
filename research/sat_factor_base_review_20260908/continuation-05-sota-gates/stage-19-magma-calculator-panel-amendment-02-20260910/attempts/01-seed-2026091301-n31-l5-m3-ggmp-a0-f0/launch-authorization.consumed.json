@@ -1,0 +1,83 @@
+{
+  "attempt_ordinal": 1,
+  "attempt_path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0",
+  "attempt_start": {
+    "bytes": 1734,
+    "path": "attempt-start.json",
+    "sha256": "20df43428e71c5fb66b2eaaf45bb7b9882852a3fbb4885c507ef2d835f9ada5d"
+  },
+  "ca_bundle": {
+    "bytes": 333483,
+    "path": "/etc/ssl/cert.pem",
+    "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+  },
+  "child": {
+    "argv": [
+      "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+      "--attempt",
+      "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0",
+      "--execute-child"
+    ],
+    "bytes": 21531,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+    "sha256": "a51bcb2817053c54ef4e606dcdcd69dbb5f5e5e4aafcf25fa691a971f92913d8"
+  },
+  "execution": {
+    "binding_sha256": "79a14aaa19494c6bc4c7c684fa3866c8e616fe0750400d6d79559de1a82f467b",
+    "commit": "b6c25f4e7c6aa8dde63230efbad2b23018209c46",
+    "manifest_sha256": "75665da78f20eea2e3029ec0fdbd0a06f9abf32cf9e66fb0d8b78bcdf6934466",
+    "tree": "1cce29ac23275235fbfdd80cc556231f106ce61e"
+  },
+  "input": {
+    "bytes": 21345,
+    "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+    "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+  },
+  "launch_nonce_sha256": "bda616b3741221b5fc9b31366b34508f8374c5e62d7c9b7580cc686948514eb0",
+  "meter": {
+    "bytes": 3471,
+    "hard_watchdog_seconds": 75,
+    "orphan_process_group_must_be_terminated": true,
+    "path": "scripts/process_meter.py",
+    "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+  },
+  "ordinal": 1,
+  "plan": {
+    "bytes": 26969,
+    "path": "plan.json",
+    "sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46"
+  },
+  "request": {
+    "body_bytes": 42145,
+    "body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "79a14aaa19494c6bc4c7c684fa3866c8e616fe0750400d6d79559de1a82f467b",
+    "execution_commit": "b6c25f4e7c6aa8dde63230efbad2b23018209c46",
+    "execution_manifest_sha256": "75665da78f20eea2e3029ec0fdbd0a06f9abf32cf9e66fb0d8b78bcdf6934466",
+    "execution_tree": "1cce29ac23275235fbfdd80cc556231f106ce61e",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 21345,
+      "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "request_body": {
+    "bytes": 42145,
+    "path": "request-body.bin",
+    "sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5"
+  },
+  "schema": "koblitz_magma_calculator_stage19_launch_authorization.v1",
+  "single_use": true,
+  "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+}

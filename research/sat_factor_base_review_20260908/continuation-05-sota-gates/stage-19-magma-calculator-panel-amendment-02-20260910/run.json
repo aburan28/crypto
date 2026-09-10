@@ -1,0 +1,130 @@
+{
+  "execution_binding": {
+    "binding_sha256": "79a14aaa19494c6bc4c7c684fa3866c8e616fe0750400d6d79559de1a82f467b",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "checkout_clean_outside_runtime_artifacts": true,
+    "execution_commit": "b6c25f4e7c6aa8dde63230efbad2b23018209c46",
+    "execution_manifest": {
+      "bytes": 32869,
+      "git_blob_oid": "4e6222f827c18ee9a37967ca4f47ed6e032c8efb",
+      "git_mode": "100644",
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/execution-manifest.json",
+      "sha256": "75665da78f20eea2e3029ec0fdbd0a06f9abf32cf9e66fb0d8b78bcdf6934466"
+    },
+    "execution_tree": "1cce29ac23275235fbfdd80cc556231f106ce61e",
+    "first_preexecution_commit": "180f8e8d3b273009953974bac31b88e32e7d3a0f",
+    "first_preexecution_tree": "b40580780d7302ff517bcc913fc060eaba22c69b",
+    "fresh_preexecution_tls_get_probe": {
+      "claim_boundary": "A GET-only TLS reachability probe using the selected CA bundle. It submitted no calculator input, requested no Magma computation, and is not solver, scientific, performance, or POST-delivery evidence.",
+      "classification": "tls_endpoint_reachability_only",
+      "finished_at": "2026-09-10T14:29:35.497638Z",
+      "fresh_immediately_before_manifest_generation": true,
+      "receipt_sha256": "c08be79fc80b550588efa4202b9a882996e040d220b85410e9be23965ed91518",
+      "request": {
+        "ca_bundle": {
+          "bytes": 333483,
+          "path": "/etc/ssl/cert.pem",
+          "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+        },
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "method": "GET",
+        "no_calculator_input": true,
+        "no_computation_requested": true,
+        "redirects_allowed": false,
+        "response_byte_limit": 1048576,
+        "socket_timeout_seconds": 70.0,
+        "tls_context": "ssl.create_default_context(cafile='/etc/ssl/cert.pem')"
+      },
+      "response": {
+        "body_bytes": 36,
+        "body_complete": true,
+        "body_path": "response.xml",
+        "body_sha256": "c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161",
+        "date_header_retained": false,
+        "final_url": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "http_status": 200,
+        "selected_headers_without_date": {
+          "content-type": "text/xml;charset=UTF-8",
+          "server": "Apache"
+        }
+      },
+      "schema": "koblitz_magma_calculator_fresh_tls_get_probe.v1",
+      "started_at": "2026-09-10T14:29:33.660672Z",
+      "wall_seconds": 1.836813958012499
+    },
+    "relevant_blob_count": 76,
+    "relevant_path_list_sha256": "9945c0c8dfdd6899228c286b2f1e84c53760d8a240991a0e754ed087958357d1",
+    "schema": "koblitz_magma_calculator_stage19_execution_binding.v1",
+    "tree_delta": [
+      {
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/execution-manifest.json",
+        "status": "A"
+      }
+    ]
+  },
+  "execution_policy": {
+    "attempts_per_task": 1,
+    "explicit_execute_flag_required": true,
+    "halt_after_nonclean_receipt": true,
+    "halted_state_is_terminal": true,
+    "historical_nonclean_prevents_network": true,
+    "inter_request_delay_seconds": 2,
+    "parallel_workers": 1,
+    "resume_skips_every_started_task": true,
+    "retries_per_task": 0,
+    "task_order": "seed-major frozen order"
+  },
+  "finished_at": "2026-09-10T14:31:48.185247Z",
+  "plan_sha256": "6e7214a6608b098ab135a8653cea75979d9a7d6021ffe453f9caa31b6d67fb46",
+  "protocol_sha256": "c40a89924b82d4e2b21d9035fdeaccfa0e67614f7559b62589dcdaa45605a274",
+  "receipts": {
+    "seed-2026091301/n31-l5-m3-ggmp-a0-f0": {
+      "clean_terminal": false,
+      "outcome": "identity_or_terminal_mismatch",
+      "path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/receipt.json",
+      "sha256": "48eab5b0fec6d613c2c2d37f43bc8d16be258d6c7580094d08cff10c14cd0687"
+    }
+  },
+  "schema": "koblitz_magma_calculator_stage19_run.v2",
+  "started_at": "2026-09-10T14:31:32.529150Z",
+  "status": "halted_after_nonclean_receipt",
+  "summary": {
+    "all_tasks_attempted": false,
+    "attempted_tasks": 1,
+    "claim_boundary": "At most ten additional source-equivalent official-calculator F4 terminal receipts. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+    "clean_f4_terminals": 0,
+    "complete_requires_all_ten_clean": false,
+    "expected_tasks": 10,
+    "halted_state_terminal": true,
+    "licensed_twenty_cell_matrix_executed": false,
+    "magma_point_witnesses_validated": 0,
+    "maximum_public_service_f4_terminal_coverage": 15,
+    "one_attempt_no_retry_status": "verified",
+    "one_attempt_no_retry_verified": true,
+    "operational_or_invalid_receipts": 1,
+    "outcome_counts": {
+      "identity_or_terminal_mismatch": 1
+    },
+    "performance_ranking_admitted": false,
+    "process_scoped_solver_resources_complete": false,
+    "public_service_f4_terminal_coverage_after_run": 5,
+    "status": "halted_after_nonclean_receipt",
+    "unattempted_tasks": 9
+  },
+  "task_order": [
+    "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+    "seed-2026091302/n31-l5-m3-standard-a1-f0",
+    "seed-2026091302/n31-l5-m3-ggmp-a0-f0",
+    "seed-2026091302/n41-l5-m3-standard-a1-f0",
+    "seed-2026091303/n41-l5-m3-standard-a1-f0",
+    "seed-2026091304/n31-l5-m3-standard-a1-f0",
+    "seed-2026091304/n31-l5-m3-ggmp-a0-f0",
+    "seed-2026091304/n41-l5-m3-standard-a1-f0",
+    "seed-2026091305/n31-l5-m3-standard-a1-f0",
+    "seed-2026091305/n41-l5-m3-standard-a1-f0"
+  ]
+}
