@@ -290,7 +290,6 @@ fn main() {
     assert_eq!(factor_base.domain, FactorBaseDomain::LinearSubspace);
     let factor = factor_base.f_j;
     let factor_exponents = factor_base.linearised_exponents.clone();
-    let m_cofactor_admissible = factor_base.m_can_decompose(&curve, m);
 
     let options = KoblitzIcOptions {
         m,
@@ -346,7 +345,7 @@ fn main() {
             "ell":factor_base.ell,"points":factor_base.points.len(),
             "signed_frobenius_orbits_before_projection":factor_base.unknowns(),
             "projected_signed_frobenius_orbits":report.orbit_count,
-            "m_cofactor_admissible":m_cofactor_admissible
+            "m_cofactor_admissible":report.m_cofactor_admissible
         },
         "options":{"conflict_budget_per_target":conflict_budget,"max_trials":max_trials,"max_models":64,"parallel_threads":1},
         "report":{
@@ -364,6 +363,8 @@ fn main() {
         "timing_ns":{
             "curve_and_subgroup_construction":curve_ns,"target_construction":target_ns,
             "factor_base_predicate_and_materialisation":factor_base_ns,
+            "projected_orbit_construction":report.projected_orbit_construction_ns,
+            "cofactor_admission":report.cofactor_admission_ns,
             "relation_collection":report.relation_collection_ns,"linear_algebra":report.linear_algebra_ns,
             "driver_solve":solve_ns,"end_to_end":total.elapsed().as_nanos()
         },

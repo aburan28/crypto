@@ -121,7 +121,7 @@
 //!   Pollard lambda search on anomalous binary curves*, Math. Comp. 69
 //!   (2000) — the `√n` rho speed-up we compare against.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -2019,9 +2019,10 @@ fn projected_signed_orbit_map(
         .map(|point| kc.mul(point, &kc.cofactor))
         .collect();
     let mut representatives: Vec<BinaryPoint> = Vec::new();
+    let mut seen = HashSet::new();
 
     for point in &projected {
-        if *point == BinaryPoint::Infinity {
+        if *point == BinaryPoint::Infinity || seen.contains(&point_key(point)) {
             continue;
         }
         let mut current = point.clone();
@@ -2030,6 +2031,7 @@ fn projected_signed_orbit_map(
         for _ in 0..kc.n {
             for candidate in [current.clone(), point_neg(&current)] {
                 let key = point_key(&candidate);
+                seen.insert(key.clone());
                 if key < canonical_key {
                     canonical = candidate;
                     canonical_key = key;
@@ -2037,34 +2039,34 @@ fn projected_signed_orbit_map(
             }
             current = kc.frobenius(&current);
         }
-        if !representatives
-            .iter()
-            .any(|representative| *representative == canonical)
-        {
-            representatives.push(canonical);
-        }
+        representatives.push(canonical);
     }
     representatives.sort_by_key(point_key);
 
+    let mut location_by_key = HashMap::new();
+    for (orbit, representative) in representatives.iter().enumerate() {
+        let mut current = representative.clone();
+        for k in 0..kc.n {
+            location_by_key
+                .entry(point_key(&current))
+                .or_insert((orbit, k, false));
+            location_by_key
+                .entry(point_key(&point_neg(&current)))
+                .or_insert((orbit, k, true));
+            current = kc.frobenius(&current);
+        }
+    }
     let orbit_of = projected
         .iter()
         .map(|point| {
             if *point == BinaryPoint::Infinity {
                 return None;
             }
-            for (orbit, representative) in representatives.iter().enumerate() {
-                let mut current = representative.clone();
-                for k in 0..kc.n {
-                    if current == *point {
-                        return Some((orbit, k, false));
-                    }
-                    if point_neg(&current) == *point {
-                        return Some((orbit, k, true));
-                    }
-                    current = kc.frobenius(&current);
-                }
-            }
-            panic!("cofactor projection was not found in its canonical orbit")
+            Some(
+                *location_by_key
+                    .get(&point_key(point))
+                    .expect("cofactor projection was not found in its canonical orbit"),
+            )
         })
         .collect();
 
@@ -2214,6 +2216,10 @@ pub struct KoblitzIcReport {
     pub m_cofactor_admissible: bool,
     /// Whether public cofactor-projection dependencies were merged.
     pub collapse_projected_orbits: bool,
+    /// Time spent constructing the public signed-Frobenius projection map.
+    pub projected_orbit_construction_ns: u128,
+    /// Time spent proving the requested summand count can reach the subgroup.
+    pub cofactor_admission_ns: u128,
 }
 
 fn solve_relation_system(
@@ -2270,9 +2276,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
 ) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
+    let projection_start = std::time::Instant::now();
     let projected_orbits = opts
         .collapse_projected_orbits
         .then(|| projected_signed_orbit_map(kc, fb));
+    let projected_orbit_construction_ns = projection_start.elapsed().as_nanos();
     let relation_unknowns = projected_orbits.as_ref().map_or_else(
         || {
             if opts.collapse_negation {
@@ -2283,7 +2291,9 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         },
         |projected| projected.representatives.len(),
     );
+    let admission_start = std::time::Instant::now();
     let m_cofactor_admissible = fb.m_can_decompose(kc, opts.m);
+    let cofactor_admission_ns = admission_start.elapsed().as_nanos();
 
     let index_of = fb.index_map();
 
@@ -2312,6 +2322,8 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         direct_relations_skipped: 0,
         m_cofactor_admissible,
         collapse_projected_orbits: opts.collapse_projected_orbits,
+        projected_orbit_construction_ns,
+        cofactor_admission_ns,
     };
     if fb.points.is_empty() || !m_cofactor_admissible {
         return Some(report);
