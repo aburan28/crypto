@@ -1,0 +1,208 @@
+{
+  "schema": "koblitz_degree23_replication_panel_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen_before_execution",
+  "objective": "Measure a five-target degree-23 scalar-blind index-calculus distribution over the previously selected public divisor factor base and compare every exact target with the signed-Frobenius automorphism-rho control.",
+  "implementation_binding": {
+    "algorithm_base_commit": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+    "source_sha256": {
+      "Cargo.toml": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5",
+      "examples/koblitz_algebraic_e2e.rs": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263",
+      "examples/koblitz_public_factor_base_discovery.rs": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b",
+      "scripts/process_meter.py": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f",
+      "src/cryptanalysis/koblitz_index_calculus.rs": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681",
+      "src/cryptanalysis/sat.rs": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
+      "src/cryptanalysis/semaev_sat.rs": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7"
+    },
+    "tracked_lock_snapshot": "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock",
+    "tracked_lock_sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+    "root_lock_copy_required_for_locked_build": true
+  },
+  "curve": {
+    "n": 23,
+    "a": 0,
+    "group_order": "8383412",
+    "subgroup_order": "2095853",
+    "cofactor": "4",
+    "summands": 2
+  },
+  "factor_base": {
+    "selection_source": "stage-10-selected-protocol.json",
+    "selection_reused_without_target_dependent_changes": true,
+    "kind": "GGMP divisor linearised-polynomial kernel",
+    "factor_spec": "divisor:0,2",
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "divisor_polynomial": 5279,
+    "dimension": 12,
+    "linearised_exponents": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      10,
+      12
+    ],
+    "abscissae": 4096,
+    "rational_points": 4281,
+    "signed_frobenius_orbits_before_projection": 95,
+    "projected_signed_frobenius_columns": 93,
+    "enumerates_target_subgroup": false,
+    "uses_discrete_log_labels": false,
+    "factor_base_logs_constructed": false
+  },
+  "target_derivation": {
+    "secret_rule": "1 + OS2IP(SHA256('crypto-koblitz-stage18-secret-v1:' || decimal_index)) mod (subgroup_order - 1)",
+    "seed_rule": "OS2IP(first 8 bytes of SHA256('crypto-koblitz-stage18-seed-v1:' || decimal_index)), big-endian",
+    "selection_uses_relation_yield_or_timing": false
+  },
+  "runs": [
+    {
+      "index": 1,
+      "secret": 1871679,
+      "seed": "7827814920183983948",
+      "secret_sha256": "c075154e130d87475f56b9820bce212a203a77c0739f3c23814c357fca54d786",
+      "seed_sha256": "6ca1fc324511af4cd17a3093c0ea7b8b0734f941ed522577c2a456db27c55ff6",
+      "public_target": {
+        "x": "3881370",
+        "y": "1511041"
+      }
+    },
+    {
+      "index": 2,
+      "secret": 1056924,
+      "seed": "1300251816495109512",
+      "secret_sha256": "9dafec7ce60efaf5e6ba5f902bc0bdad027e3b0f997b28cbc618c4cec4cd1677",
+      "seed_sha256": "120b6c2358bf55888b46f030884eb0300ee59e44f5f2a48c299d39f4133fd6e6",
+      "public_target": {
+        "x": "6067514",
+        "y": "2806957"
+      }
+    },
+    {
+      "index": 3,
+      "secret": 1966632,
+      "seed": "226800821669791328",
+      "secret_sha256": "07260b406c7dfb9b9fd49f1973f1744fc96837d5c4b85f8f7fe2599aa457b15f",
+      "seed_sha256": "0325c2254a650660f390d93b9751f3fe03c2aa2db4c897b2ec7026ed75c34ab8",
+      "public_target": {
+        "x": "3329510",
+        "y": "2418086"
+      }
+    },
+    {
+      "index": 4,
+      "secret": 1956519,
+      "seed": "10471725251496847725",
+      "secret_sha256": "55f63753f0621b03bd9c76c000a0fd75038b97987a6f5461ca2df833bea841e2",
+      "seed_sha256": "91530aa278f5296db13cbf4aaa7702c6ba2e0b35c6960e965f369961d27fd6a7",
+      "public_target": {
+        "x": "335048",
+        "y": "3444171"
+      }
+    },
+    {
+      "index": 5,
+      "secret": 1785876,
+      "seed": "11656057938264181787",
+      "secret_sha256": "2a6db255c800e9b0269f792af2eb8ad0ac3011bf7942ec53816bf5531eaaf883",
+      "seed_sha256": "a1c2a2f03b9bcc1b5983aa4b82881cec06a3bf7522077d5b54ff92dbe5b673b3",
+      "public_target": {
+        "x": "5239510",
+        "y": "6376352"
+      }
+    }
+  ],
+  "public_discovery_rerun": {
+    "curve_variants": [
+      0,
+      1
+    ],
+    "requested_dimension": 12,
+    "selection_rule": "reuse the frozen Stage 10 cross-curve selection; rerun both public censuses only to verify unchanged algebra and measure current optimized setup",
+    "charged_once_per_panel": true,
+    "target_constructed": false,
+    "target_subgroup_enumerated": false,
+    "discrete_log_labels_constructed": false,
+    "relation_yield_used": false,
+    "solver_timing_used": false
+  },
+  "index_calculus": {
+    "engine": "native XOR SAT",
+    "conflict_budget_per_target": 100000,
+    "max_trials": 1000,
+    "max_models_per_target": 64,
+    "relation_batch_size": 1,
+    "parallel_threads": 1,
+    "direct_relation_forbidden": true,
+    "invalid_models_forbidden": true,
+    "cofactor_projection_column_merge": true,
+    "stop_on_verified_rank": true
+  },
+  "rho": {
+    "algorithm": "same-target signed-Frobenius/negation quotient r-adding Pollard rho",
+    "automorphism_group_bound": 46,
+    "fresh_deterministic_jump_table_per_restart": true,
+    "all_setup_and_walk_operation_counters_required": true
+  },
+  "execution": {
+    "task_order": "two public discovery processes, then index-calculus/rho pairs in run-index order",
+    "fresh_process_per_task": true,
+    "parallel_workers": 1,
+    "inner_process_watchdog_seconds": 600,
+    "whole_driver_watchdog_seconds": 7200,
+    "in_stage_retries": 0,
+    "expected_inner_processes": 12,
+    "process_meter": "scripts/process_meter.py",
+    "whole_driver_outer_meter_required": true,
+    "build_is_operational_provenance_not_algorithm_cost": true
+  },
+  "accounting": {
+    "per_process_metrics": [
+      "wall_seconds",
+      "user_seconds",
+      "system_seconds",
+      "single_core_seconds",
+      "total_core_seconds",
+      "peak_rss_bytes"
+    ],
+    "index_calculus_internal_stages": [
+      "curve_and_subgroup_construction",
+      "target_construction",
+      "factor_base_predicate_and_materialisation",
+      "projected_orbit_construction",
+      "cofactor_admission",
+      "relation_collection",
+      "linear_algebra",
+      "end_to_end"
+    ],
+    "online_ratio": "sum(index-calculus process core-seconds) / sum(rho process core-seconds)",
+    "strict_full_ratio": "(one-time public discovery core-seconds + sum(index-calculus process core-seconds)) / sum(rho process core-seconds)",
+    "whole_driver_envelope": "outer process receipt includes orchestration plus every sequential descendant and is reported separately",
+    "no_double_count_rule": "per-target factor-base materialisation remains inside each index-calculus process; the separate discovery charge covers only public candidate search and selection"
+  },
+  "acceptance": {
+    "expected_targets": 5,
+    "all_targets_unique": true,
+    "same_target_ic_rho_required": true,
+    "all_five_scalar_recoveries_required_for_panel_completion": true,
+    "all_capped_or_nonzero_processes_are_inconclusive": true,
+    "recovered_scalar_must_reproduce_public_target": true,
+    "factor_base_oracle_flags_must_remain_false": true,
+    "direct_relation_must_remain_false": true,
+    "sat_invalid_models_must_equal_zero": true,
+    "rho_operation_ledger_must_balance": true
+  },
+  "forbidden_inference": [
+    "a failed row is evidence of no decomposition",
+    "the planted scalar or factor-base point logs are solver inputs",
+    "one five-target toy panel is an asymptotic scaling law",
+    "a local or project-authored reproduction is independent novelty review",
+    "this panel establishes a Koblitz index-calculus SOTA result"
+  ],
+  "claim_boundary": "A complete five-target degree-23 distribution strengthens scalar-blind toy evidence and the full-cost rho comparison only. It does not establish an asymptotic crossover, cryptographic-size attack, novelty, external reproduction, or SOTA."
+}

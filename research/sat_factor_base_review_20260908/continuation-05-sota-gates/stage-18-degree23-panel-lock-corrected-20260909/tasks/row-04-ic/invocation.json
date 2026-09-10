@@ -1,0 +1,70 @@
+{
+  "attempt": 1,
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+    "ic",
+    "23",
+    "0",
+    "2",
+    "1956519",
+    "10471725251496847725",
+    "100000",
+    "1000",
+    "divisor:0,2"
+  ],
+  "cwd": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909",
+  "driver_observed_wall_seconds": 162.49457966699265,
+  "finished_at": "2026-09-10T06:15:28.670581Z",
+  "meter_command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+    "--cwd",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909",
+    "--timeout",
+    "600.0",
+    "--stdout",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/row-04-ic/result.json",
+    "--stderr",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/row-04-ic/stderr.txt",
+    "--metrics",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909/.staging/row-04-ic/metrics.json",
+    "--",
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+    "ic",
+    "23",
+    "0",
+    "2",
+    "1956519",
+    "10471725251496847725",
+    "100000",
+    "1000",
+    "divisor:0,2"
+  ],
+  "meter_launcher_returncode": 0,
+  "schema": "koblitz_degree23_task_invocation.v1",
+  "started_at": "2026-09-10T06:12:46.172807Z",
+  "task": {
+    "command": [
+      "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+      "ic",
+      "23",
+      "0",
+      "2",
+      "1956519",
+      "10471725251496847725",
+      "100000",
+      "1000",
+      "divisor:0,2"
+    ],
+    "id": "row-04-ic",
+    "index": 4,
+    "kind": "ic",
+    "public_target": {
+      "x": "335048",
+      "y": "3444171"
+    },
+    "secret": 1956519,
+    "seed": 10471725251496847725
+  },
+  "watchdog_seconds": 600.0
+}
