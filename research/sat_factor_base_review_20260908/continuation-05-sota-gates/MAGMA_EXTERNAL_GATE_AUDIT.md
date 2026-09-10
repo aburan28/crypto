@@ -1,0 +1,11 @@
+# Magma and external-review gate audit
+
+No Magma executable, installer, or passfile is present in the searched local system and workspace locations. This is operational absence, not evidence about Magma F4 performance.
+
+The exporter now requests one thread, disables GPU execution, fixes the random seed, and calls direct sparse F4 explicitly with `Al := "Direct", Faugere := true, Dense := false, Nthreads := 1`. It emits a machine-readable terminal status, F4 step-degree sequence, basis size, internal CPU time, and internal wall time. The runner rejects a zero exit without the complete marker block. A proper non-unit basis is retained as `sat_basis_certificate_unverified_model` until a separately charged witness-extraction and point-validation phase succeeds. These controls follow Magma's official [Groebner-basis parameters and degree-sequence documentation](https://magma.maths.usyd.edu.au/magma/handbook/text/1314) and [parallel/GPU documentation](https://magma.maths.usyd.edu.au/magma/handbook/parallelism).
+
+The free [Magma Calculator](https://magma.maths.usyd.edu.au/calc/) has a 60-second and 50,000-byte limit and cannot provide the required process-scoped user/system CPU, peak RSS, and whole-process core-seconds. Every Stage 13 `n=31` GGMP input is 61,062 to 69,434 bytes, every `n=41` input is 76,760 to 90,012 bytes, and every `n=59` input is 413,036 to 447,248 bytes. Some `n=31` standard scripts fit the byte limit, but the calculator still cannot execute the full frozen matrix or close the resource-accounting gate.
+
+A claimable Magma run therefore requires a licensed local or institutional binary, or execution by an unaffiliated reviewer with licensed access. It must retain the executable version/hash, host identity, exact generated input hashes, raw output, F4 degrees, process metrics, and separately charged witness extraction for SAT bases.
+
+The independent-review gate also remains incomplete. Issue [#97](https://github.com/aburan28/crypto/issues/97) is open; an explicit request has been directed to a primary WDSat/index-calculus benchmark author. The GitHub-hosted Linux runs are valid fresh-checkout external-environment reproductions of project-authored workflows. They are not unaffiliated methodology or novelty review.

@@ -1,4 +1,4 @@
-Validation snapshot: af089ea9b0fa09872366088668f30101c1feeda6
+Validation log; entries were appended after the initial snapshot af089ea9b0fa09872366088668f30101c1feeda6.
 
 PASS: cargo test --release --lib cryptanalysis::koblitz_index_calculus --locked -- --test-threads=1
 Result: 34 passed; 0 failed; 1 ignored.
@@ -77,3 +77,33 @@ Result: the original fixed-table process failed operationally; fresh determinist
 
 PASS: local preflight of external reproduction verifier v3.
 Result: retained degree-9, degree-15 and degree-23 artifacts, public discoveries, target matches, recovered scalars and fail-closed fields were all accepted.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage12.py
+Result: every degree-23 public algebraic candidate field and both selections match Stage 10; the degree-15 scalar-blind target, relation counters, conflicts and recovered scalar also match their frozen reference.
+
+PASS: indexed projected-orbit performance receipts.
+Result: per-candidate projection time improved by 12.69x to 23.28x, while combined fresh-process degree-23 discovery core time improved by 1.96x.
+
+PASS: orbit_derived_cofactor_classes_match_pointwise_projection.
+Result: distinct cofactor-class sets match full pointwise projection exactly at degrees 15 and 23.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage14.py
+Result: all degree-23 candidate algebra and admission verdicts match Stage 12; combined discovery core time improved by 7.91x incrementally and 15.50x from Stage 10.
+
+PASS: Stage 13 frozen 20-task target-matched PDP panel.
+Result: independent verifier accepted all 20 source-bound tasks, five seeds at n=31 standard/GGMP, n=41 and n=59, every whole-cell outer receipt, all isolated native/MITM receipts, WDSat builds, external SAT witness-validation processes, and immutable export custody.
+
+PASS AFTER AMENDMENT: Stage 13 n=59 WDSat seed 2026091303.
+Result: the original 32,000-entry static buffer failure is retained; exact parsing found 32,263 global XOR atoms, the 32,264-entry successor reproduced identical source hashes and reached the 120-second watchdog like the other four replicates.
+
+QUALIFIED: Stage 13 full solver matrix.
+Result: native XOR, WDSat, CryptoMiniSat and direct MITM have repeated process-complete evidence; Magma direct F4 remains unavailable, so the full backend gate and SOTA claim remain open.
+
+PASS: cargo test --release --lib cryptanalysis::koblitz_index_calculus -- --test-threads=1
+Result: 38 passed; 0 failed; 1 deliberate slow test ignored after projection indexing and orbit-derived cofactor admission.
+
+PASS: scripts/test_run_koblitz_pdp_matrix.py
+Result: 11 parser, custody, point-witness, model-cap, Magma-terminal, and WDSat-bound tests passed.
+
+PASS: relocated Stage 13 archive verification.
+Result: verification from outside the repository regenerated panel-summary.json byte-for-byte while preserving and checking the execution-time absolute command paths.

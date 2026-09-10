@@ -1,0 +1,266 @@
+{
+  "backend_bindings": [
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "native-xor",
+      "conflicts": 100000,
+      "input_export_sha256": null,
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 24674304,
+        "single_core_seconds": 2.671137,
+        "system_seconds": 0.075277,
+        "total_core_seconds": 2.671137,
+        "user_seconds": 2.59586,
+        "wall_seconds": 3.0208888750057667
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "resource_complete": true,
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "unknown_inconclusive"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "wdsat",
+      "conflicts": null,
+      "input_export_sha256": "0062bbe4aa4335cdc3c2bb666670e55e1f10642cbd9b02f0492ba362fbd8528b",
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 7667712,
+        "single_core_seconds": 95.241049,
+        "system_seconds": 3.699141,
+        "total_core_seconds": 95.241049,
+        "user_seconds": 91.541908,
+        "wall_seconds": 120.01152525004
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "resource_complete": true,
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "timeout_inconclusive"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "cryptominisat",
+      "conflicts": 740613,
+      "input_export_sha256": "8133d49cc832219626a9a4f5f1d6e38141a9cfde09f68db37351706d4840a3e6",
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 82821120,
+        "single_core_seconds": 20.328145,
+        "system_seconds": 0.6888599999999999,
+        "total_core_seconds": 20.328145,
+        "user_seconds": 19.639285,
+        "wall_seconds": 24.554390000062995
+      },
+      "point_witness_validation_metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3260416,
+        "single_core_seconds": 0.0077139999999999995,
+        "system_seconds": 0.0038599999999999997,
+        "total_core_seconds": 0.0077139999999999995,
+        "user_seconds": 0.003854,
+        "wall_seconds": 0.02240737504325807
+      },
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "resource_complete": true,
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_model_valid": true,
+      "source_witness_valid": true,
+      "status": "sat"
+    },
+    {
+      "accounting_scope": "unavailable_operational",
+      "backend": "magma-f4",
+      "conflicts": null,
+      "input_export_sha256": "7a85487afd757b4cf5711146a5ccebcb4802cb7e90b420b9f05a18a7f6081cdd",
+      "input_path_verified": null,
+      "metrics": {
+        "meter": null,
+        "peak_rss_bytes": null,
+        "single_core_seconds": null,
+        "system_seconds": null,
+        "total_core_seconds": null,
+        "user_seconds": null,
+        "wall_seconds": null
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "resource_complete": false,
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "unavailable_operational"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "direct-mitm",
+      "conflicts": null,
+      "input_export_sha256": null,
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3735552,
+        "single_core_seconds": 0.022424,
+        "system_seconds": 0.002621,
+        "total_core_seconds": 0.022424,
+        "user_seconds": 0.019802999999999998,
+        "wall_seconds": 0.02981704194098711
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "resource_complete": true,
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_model_valid": null,
+      "source_witness_valid": true,
+      "status": "sat"
+    }
+  ],
+  "evidence_class": "scientific_candidate",
+  "execution_identity_sha256": "f62f2bf356966db12de3d46ad00118f723aeebe9d661351aa7d5760601fca6ca",
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "bytes": 72696,
+      "manifest_blake3": "f2d8dd3374a5086beb6110dd2b901b9b623bd1698afac27262e3824b88dc7edf",
+      "path": "instance.xor.cnf",
+      "sha256": "8133d49cc832219626a9a4f5f1d6e38141a9cfde09f68db37351706d4840a3e6"
+    },
+    "magma_boolean_f4": {
+      "bytes": 68190,
+      "manifest_blake3": "c0e6af90287121bf4ab653ffb08dc941f2322eed1de5d4fdb3f3b72acff4192a",
+      "path": "instance.magma",
+      "sha256": "7a85487afd757b4cf5711146a5ccebcb4802cb7e90b420b9f05a18a7f6081cdd"
+    },
+    "wdsat_anf": {
+      "bytes": 40695,
+      "manifest_blake3": "ea56530bd70ecba6f6193559c701f78876f1744fa78bd8147d5b92f68e1fd189",
+      "path": "instance.anf",
+      "sha256": "0062bbe4aa4335cdc3c2bb666670e55e1f10642cbd9b02f0492ba362fbd8528b"
+    }
+  },
+  "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+  "resource_complete": false,
+  "schema": "koblitz_pdp_source_binding.v1",
+  "semantic_descriptor": {
+    "curve": "y^2 + xy = x^3 + 1",
+    "curve_a": 0,
+    "ell": 5,
+    "factor_base_basis_bitmasks": [
+      "2",
+      "4",
+      "16",
+      "256",
+      "65536"
+    ],
+    "factor_base_predicate": {
+      "definition": "kernel of sum X^(2^i) over the set factor exponents",
+      "enumerates_target_subgroup": false,
+      "factor_bitmask": 37,
+      "factor_index": 0,
+      "kind": "ggmp_linearised_kernel",
+      "linearised_exponents": [
+        0,
+        2,
+        5
+      ],
+      "uses_discrete_log_labels": false
+    },
+    "irreducible_low_terms": [
+      0,
+      3
+    ],
+    "m": 3,
+    "n": 31,
+    "representation": "chained_s3",
+    "seed": 2026091302,
+    "source_equations": 62,
+    "source_max_degree": 3,
+    "source_max_monomials_per_equation": 116,
+    "source_variables": 46,
+    "target": {
+      "x": "1536518584",
+      "y": "940198810"
+    }
+  },
+  "semantic_sha256": "feb0cbcf126145a74007498cc337ae57631ea9de51cbb1f8669e6f40d240d4f4",
+  "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+  "source_producer_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 3948544,
+    "single_core_seconds": 0.011954,
+    "system_seconds": 0.004222,
+    "total_core_seconds": 0.011954,
+    "user_seconds": 0.007731999999999999,
+    "wall_seconds": 0.019543959060683846
+  },
+  "source_producer_timing_ns": {
+    "factor_base_predicate_construction": 313167,
+    "planted_target_construction": 92667,
+    "source_system_construction": 1077333,
+    "whole_process_internal": 8313916
+  },
+  "task": {
+    "cell": {
+      "basis": "ggmp",
+      "curve_a": 0,
+      "ell": 5,
+      "factor_index": 0,
+      "id": "n31-l5-m3-ggmp-a0-f0",
+      "m": 3,
+      "n": 31,
+      "role": "nondegenerate public GGMP linearised-kernel construction selected by the frozen stage-4 census"
+    },
+    "seed": 2026091302
+  },
+  "wdsat_fixed_cost": {
+    "binary_sha256": "31ff3878c0e67fe911ac7865dbffb24e5a02609dc3b7c12896a98b95e4fa4cc5",
+    "build": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 58933248,
+      "single_core_seconds": 0.858486,
+      "system_seconds": 0.24065199999999998,
+      "total_core_seconds": 0.858486,
+      "user_seconds": 0.617834,
+      "wall_seconds": 1.1754687080392614
+    },
+    "clean": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 1785856,
+      "single_core_seconds": 0.022053999999999997,
+      "system_seconds": 0.013862999999999999,
+      "total_core_seconds": 0.022053999999999997,
+      "user_seconds": 0.008191,
+      "wall_seconds": 0.037382708047516644
+    },
+    "complete": true,
+    "configuration_wall_seconds": 0.0005400419468060136,
+    "present": true,
+    "source_copy": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 1687552,
+      "single_core_seconds": 0.020345,
+      "system_seconds": 0.018671,
+      "total_core_seconds": 0.020345,
+      "user_seconds": 0.001674,
+      "wall_seconds": 0.04709004098549485
+    },
+    "status": "completed"
+  },
+  "whole_cell_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 82821120,
+    "single_core_seconds": 119.834311,
+    "system_seconds": 4.979672,
+    "total_core_seconds": 119.834311,
+    "user_seconds": 114.854639,
+    "wall_seconds": 149.8156611250015
+  }
+}

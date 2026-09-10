@@ -1,0 +1,24 @@
+{
+  "schema": "koblitz_orbit_cofactor_admission_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Replace pointwise cofactor-class projection with one scalar multiplication per signed Frobenius orbit while preserving exact summand-count admission.",
+  "algebraic_invariant": "The distinct set of [r]P classes must equal the pointwise set because multiplication by r commutes with Frobenius and negation; repeated summands make class multiplicity irrelevant.",
+  "benchmark_instances": [
+    {"n": 23, "curve_a": 0, "m": 2, "dimension": 12},
+    {"n": 23, "curve_a": 1, "m": 2, "dimension": 12}
+  ],
+  "reference": "stage-12-projected-index-20260909",
+  "required_equal_outputs": [
+    "all factor-base candidate algebra",
+    "cofactor admission verdicts",
+    "projected signed-Frobenius columns",
+    "selected candidate"
+  ],
+  "validation": [
+    "pointwise versus orbit-derived cofactor-class set equality at degrees 15 and 23",
+    "existing exact cofactor-admission tests",
+    "fresh-process wall, core-seconds and peak RSS for both degree-23 discoveries"
+  ],
+  "claim_boundary": "This is public setup-cost engineering and does not change relation yield, SAT complexity, or the SOTA classification."
+}

@@ -1,0 +1,882 @@
+c CMS SHA1: 7ae1b4a74259cdce223a584281fb8f090bbd3eed
+c CryptoMiniSat version 5.14.7
+c CMS compilation env CMAKE_CXX_COMPILER = /usr/bin/c++ | CMAKE_CXX_FLAGS =  -fno-stack-protector -msse4.2 -Wno-bitfield-constant-conversion -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 -Wextra-semi -pedantic | COMPILE_DEFINES =  -DNDEBUG -D_FORTIFY_SOURCE=0 | BUILD_SHARED_LIBS = OFF | ONLY_SIMPLE =  | STATS = OFF | SQLITE3_FOUND =  | ZLIB_FOUND = FALSE | VALGRIND_FOUND =  | ENABLE_TESTING = OFF | SLOW_DEBUG = OFF | ENABLE_ASSERTIONS = OFF | PYTHON_EXECUTABLE =  | PYTHON_LIBRARY =  | PYTHON_INCLUDE_DIRS =  | MY_TARGETS =  | LARGEMEM = OFF | LIMITMEM = OFF | BREAKID_LIBRARIES =  | BREAKID-VER = . | 
+c Using VMTF, picosat, CaDiCaL, and CadiBack code by Armin Biere
+c CMS is MIT licensed
+c Using code from 'When Boolean Satisfiability Meets Gauss-E. in a Simplex Way'
+c       by C.-S. Han and J.-H. Roland Jiang in CAV 2012. Fixes by M. Soos
+c Using CCAnr from 'CCAnr: A Conf. Checking Based Local Search Solver [...]'
+c       by Shaowei Cai, Chuan Luo, and Kaile Su, SAT 2015
+c Using Oracle code from 'Integrating Tree Decompositions [...]'
+c       by Tuukka Korhonen and Matti Jarvisalo, CP 2021
+c Executed with command line: /Volumes/SSD990/cryptominisat-koblitz-20260909/build/cryptominisat5 --verb 1 --threads 1 /Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091304/n59-l9-m3-standard-a1-f0/matrix/n59-l9-m3-standard-a1-f0/instance.xor.cnf
+c Reading file '/Volumes/SSD990/koblitz-stage13-panel-20260909/tasks/seed-2026091304/n59-l9-m3-standard-a1-f0/matrix/n59-l9-m3-standard-a1-f0/instance.xor.cnf'
+c o -- header says num vars:           2000
+c o -- header says num clauses:        6605
+c -- added: 6495 clauses, 110 xor clauses, 2000 vars
+c Parsing time: 0.00 s
+c [sls] 6607 cls, minimum 21 (new global minimum) T: 0.00
+c [sls] 6607 cls, minimum 19 (new global minimum) T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c Executing OCC strategy token(s): 'occ-backw-sub'
+c [occ] Linked in IRRED BIN by default: 4577
+c [occ] Linked in RED   BIN by default: 0
+c Executing OCC strategy token: occ-backw-sub
+c [occ-backw-sub-long-w-long] rem cl: 0 tried: 1922/1922 (100.0%) T: 0.00 T-out: N T-r: 99.98%
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 2 BP 0M T: 0.00
+c [vrep] vars 2 lits 381 rem-bin-cls 8 rem-long-cls 0 BP 0M T: 0.00
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-bve,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4573
+c [occ] Linked in RED   BIN by default: 0
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1998 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.00 cleanup T: 0.00 overhead T: 0.00
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 100.00%
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 3.3000
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [lucky] no luck T: 0.00
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1998  density:0.1455  xorlen avg: 290.74
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [branch] adjusting to: vmtf (from: vsids) var_decay:0.95
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   stb    -  vmt     1  2025    1998  1922  4573    3.38    2.41  1226     0     0     2  245.16  244.76
+c [branch] adjusting to: vsids (from: vmtf) var_decay:0.95
+c rst   stb    O   vs     2  7048    1998  1922  4573    3.38    2.41  2962     0     0     2   70.66   70.61
+c [distill-long-red0] cls tried: 3/1379 T: 0.00 T-out: Y T-r: -107.56%
+c rst   stb    I   vs     3  9097    1998  1922  4573    3.38    2.41  3173     0     0     2   49.51   49.48
+c rst   stb    B   vs     5 11146    1998  1922  4573    3.38    2.41  3328     0     0     2   37.03   37.01
+c [distill-bin] useful/checked/potential: 0/4573/4573 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    B   vs     7   33K    1998  1922  4573    3.38    2.41  7208     0     0     4   40.06   40.04
+c [distill-long-red0] cls tried: 5/1504 T: 0.00 T-out: Y T-r: -81.36%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.82%
+c [distill-bin] useful/checked/potential: 3/4579/4579 lits-rem: 0 cl-rem: 3 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3841 cl-sh     2 cl-rem    3 lit-rem      2 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     3006 cl-sh  1493 cl-rem    2 lit-rem  12731 T: 0.02 T-out: N
+c [sls] 6606 cls, minimum 17 (new global minimum) T: 0.00
+c rst   stb    W   vs     8   34K    1998  1917  4581    3.38    2.41  7202     0     0     2   40.35   40.34
+c rst   stb    O   vs    12   39K    1998  1917  4581    3.38    2.41  8903     0     0     2   41.55   41.54
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 2 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    B   vs    15   53K    1998  1917  4579    3.38    2.41  9482     0     0     2   50.81   50.80
+c [distill-long-red0] cls tried: 5/1379 T: 0.00 T-out: Y T-r: -34.13%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.51%
+c [distill-bin] useful/checked/potential: 7/4585/4585 lits-rem: 0 cl-rem: 7 0-depth-assigns: 0 T: 0.01 T-out: N
+c [sls] 6603 cls, minimum 21 T: 0.00
+c rst   stb    W   vs    16   54K    1998  1917  4578    3.38    2.41 10189     0     0     2   50.51   50.50
+c recursive minimization cost OK: 442K cost/(% lits removed)
+c [g 0] 108x1998 dens: 0.1091 find: 849K (prop 54.7% confl 3.5%) elim: 690K (prop 11.0% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 5 BP 0M T: 0.00
+c [vrep] vars 5 lits 12566 rem-bin-cls 20 rem-long-cls 0 BP 0M T: 0.01
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 2 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4568
+c [occ] Linked in RED   BIN by default: 0
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 864 tried: 4568 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 98.60%
+c [occ-backw-sub-long-w-long] rem cl: 184 tried: 13314/13314 (100.0%) T: 0.00 T-out: N T-r: 99.76%
+c [occ-backw-sub-str-long-w-long] sub: 10 str: 89 tried: 39942/13314 (300.0%) T: 0.01 T-out: N T-r: 98.43%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.00 cleanup T: 0.00 overhead T: 0.00
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.22%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 100.00%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 3.6300
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7037 cl-sh  2230 cl-rem    0 lit-rem  18296 T: 0.05 T-out: Y
+c rst   foc    I   vs    23  120K    1993  1917  4568    3.38    2.41 17900     0     0     0   41.30   41.30
+c [branch] adjusting to: vmtf (from: vsids) var_decay:0.95
+c [distill-long-red0] cls tried: 2/2992 T: 0.00 T-out: Y T-r: -2452.18%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.71%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5799 cl-sh  1652 cl-rem    0 lit-rem  11795 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    F  vmt    24  130K    1993  1917  4568    3.38    2.41 19211     0     0     0   39.92   39.92
+c [branch] adjusting to: vsids (from: vmtf) var_decay:0.95
+c rst   stb    F   vs    25  131K    1993  1917  4568    3.38    2.41 11977     0     0     0   40.61   40.61
+c rst   stb    B   vs    26  132K    1993  1917  4568    3.38    2.41 13001     0     0     0   41.01   41.01
+c recursive minimization cost OK: 569K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1064 find: 1225K (prop 59.3% confl 3.1%) elim: 696K (prop 13.3% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4568
+c [occ] Linked in RED   BIN by default: 0
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 3988 tried: 9136 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 91.00%
+c [occ-backw-sub-long-w-long] rem cl: 5069 tried: 17214/17214 (100.0%) T: 0.01 T-out: N T-r: 93.77%
+c [occ-backw-sub-str-long-w-long] sub: 191 str: 1057 tried: 51642/17214 (300.0%) T: 0.04 T-out: N T-r: 86.47%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.01 cleanup T: 0.00 overhead T: 0.01
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.95%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] consolidate old-sz: 3121K new-sz: 2419K new bits offs: 19 T: 0.00
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 3.9930
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill-long-red0] cls tried: 2/4864 T: 0.01 T-out: Y T-r: -841.91%
+c rst   stb    B   vs    32  142K    1993  1917  4568    3.38    2.41 13315     0     0     0   50.03   50.03
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.55%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [sls] 6593 cls, minimum 20 T: 0.00
+c rst   stb    W   vs    33  150K    1993  1917  4568    3.38    2.41 13617     0     0     0   59.56   59.56
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried    11034 cl-sh  4106 cl-rem    0 lit-rem  28428 T: 0.05 T-out: Y
+c rst   stb    W   vs    34  166K    1993  1917  4568    3.38    2.41   21K     0     0     0   43.75   43.75
+c [distill-long-red0] cls tried: 2/9978 T: 0.02 T-out: Y T-r: -639.38%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.86%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    O   vs    35  167K    1993  1917  4568    3.38    2.41 16169     0     0     0   50.48   50.48
+c rst   stb    O   vs    41  179K    1993  1917  4568    3.38    2.41 13178     0     0     0   47.03   47.03
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     4842 cl-sh   852 cl-rem    0 lit-rem   4713 T: 0.02 T-out: N
+c rst   stb    B   vs    43  181K    1993  1917  4568    3.38    2.41 15226     0     0     0   46.54   46.54
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [distill-long-red0] cls tried: 2/2395 T: 0.00 T-out: Y T-r: -2317.42%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.28%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    B   vs    48  191K    1993  1917  4568    3.38    2.41 16075     0     0     0   41.13   41.13
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   stb    B   vs    49  199K    1993  1917  4568    3.38    2.41   24K     0     0     0   42.70   42.70
+c [distill-long-red0] cls tried: 3/6486 T: 0.01 T-out: Y T-r: -1438.29%
+c [sls] 6593 cls, minimum 21 T: 0.00
+c rst   stb    W   vs    50  200K    1993  1917  4568    3.38    2.41 13202     0     0     0   46.63   46.63
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8122 cl-sh  1496 cl-rem    0 lit-rem   8198 T: 0.04 T-out: Y
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.81%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    W   vs    56  211K    1993  1917  4568    3.38    2.41 15234     0     0     0   42.02   42.02
+c [distill-long-red0] cls tried: 2/3148 T: 0.00 T-out: Y T-r: -1484.00%
+c rst   stb    I   vs    60  217K    1993  1917  4568    3.38    2.41   20K     0     0     0   41.75   41.75
+c rst   stb    I   vs    64  232K    1993  1917  4568    3.38    2.41   25K     0     0     0   42.74   42.74
+c [distill-long-red0] cls tried: 2/4323 T: 0.01 T-out: Y T-r: -160.82%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.12%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     4574 cl-sh   500 cl-rem    0 lit-rem   3409 T: 0.03 T-out: Y
+c rst   stb    B   vs    65  244K    1993  1917  4568    3.38    2.41   25K     0     0     0   43.38   43.38
+c recursive minimization cost OK: 798K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1076 find: 1438K (prop 60.0% confl 4.2%) elim: 705K (prop 11.5% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4568
+c [occ] Linked in RED   BIN by default: 0
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 7588 tried: 13704 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 94.30%
+c [occ-backw-sub-long-w-long] rem cl: 1629 tried: 27221/27221 (100.0%) T: 0.01 T-out: N T-r: 98.34%
+c [occ-backw-sub-str-long-w-long] sub: 96 str: 556 tried: 81663/27221 (300.0%) T: 0.02 T-out: N T-r: 94.09%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.01 cleanup T: 0.00 overhead T: 0.01
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.93%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 4.3923
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [distill-long-red0] cls tried: 2/5806 T: 0.01 T-out: Y T-r: -1407.07%
+c rst   foc    B   vs    67  310K    1993  1917  4568    3.38    2.41 18049     0     0     0   39.56   39.56
+c [branch] adjusting to: vmtf (from: vsids) var_decay:0.95
+c [distill-long-red0] cls tried: 2/3280 T: 0.01 T-out: Y T-r: -427.87%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.74%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     6136 cl-sh  1314 cl-rem    0 lit-rem  12574 T: 0.03 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    #  vmt    68  378K    1993  1917  4568    3.38    2.41   30K     0     0     1   41.38   41.38
+c [distill-long-red0] cls tried: 2/4787 T: 0.01 T-out: Y T-r: -1781.82%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.15%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7631 cl-sh  2660 cl-rem    0 lit-rem  21855 T: 0.03 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    B  vmt    69  378K    1993  1917  4568    3.38    2.41   29K     0     0     1   41.82   41.82
+c rst   foc    B  vmt  1688  387K    1993  1917  4568    3.38    2.41   23K     0     0     1   44.53   44.53
+c [distill-long-red0] cls tried: 2/6040 T: 0.01 T-out: Y T-r: -2529.81%
+c rst   foc    B  vmt  2701  395K    1993  1917  4568    3.38    2.41   31K     0     0     1   45.47   45.47
+c recursive minimization cost OK: 1090K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1127 find: 1788K (prop 67.3% confl 4.6%) elim: 429K (prop 14.7% confl 0.8%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4568
+c [occ] Linked in RED   BIN by default: 1
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 2614 tried: 18273 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 98.01%
+c [occ-backw-sub-long-w-long] rem cl: 299 tried: 35660/35660 (100.0%) T: 0.01 T-out: N T-r: 98.77%
+c [occ-backw-sub-str-long-w-long] sub: 5 str: 209 tried: 106980/35660 (300.0%) T: 0.03 T-out: N T-r: 94.30%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.02 cleanup T: 0.00 overhead T: 0.02
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.92%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 100.00%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 4.8315
+c [branch] rebuilding order heap for all branchings. Current branching: vmtf
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [sls] 6593 cls, minimum 20 T: 0.00
+c rst   foc    W  vmt  3008  397K    1993  1917  4568    3.38    2.41   33K     0     0     1   45.78   45.78
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.67%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7432 cl-sh   862 cl-rem    0 lit-rem   8249 T: 0.03 T-out: Y
+c rst   foc    W  vmt  3816  406K    1993  1917  4568    3.38    2.41   28K     0     0     1   49.86   49.86
+c [distill-long-red0] cls tried: 3/4526 T: 0.01 T-out: Y T-r: -2207.24%
+c rst   foc    W  vmt  4357  414K    1993  1917  4568    3.38    2.41   21K     0     0     1   52.21   52.21
+c rst   foc    F  vmt  4373  418K    1993  1917  4568    3.38    2.41   25K     0     0     1   51.41   51.41
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 97.36%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   foc    F  vmt  4686  428K    1993  1917  4568    3.38    2.41   35K     0     0     1   47.79   47.79
+c [distill-long-red0] cls tried: 2/6366 T: 0.02 T-out: Y T-r: -2589.89%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9568 cl-sh  1167 cl-rem    0 lit-rem  12821 T: 0.04 T-out: Y
+c rst   foc    F  vmt  4836  440K    1993  1917  4568    3.38    2.41   30K     0     0     1   44.41   44.41
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.85%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    B  vmt  4837  440K    1993  1917  4568    3.38    2.41   30K     0     0     1   44.41   44.41
+c [distill-long-red0] cls tried: 2/7047 T: 0.01 T-out: Y T-r: -1158.42%
+c rst   foc    B  vmt  5160  450K    1993  1917  4568    3.38    2.41   23K     0     0     1   42.92   42.91
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried    10092 cl-sh   688 cl-rem    0 lit-rem   4893 T: 0.04 T-out: Y
+c rst   foc    B  vmt  5294  473K    1993  1917  4568    3.38    2.41   32K     0     0     1   39.23   39.23
+c [distill-long-red0] cls tried: 2/5174 T: 0.01 T-out: Y T-r: -1578.64%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.83%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [sls] 6593 cls, minimum 18 T: 0.00
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   foc    W  vmt  5295  473K    1993  1917  4568    3.38    2.41   31K     0     0     1   39.87   39.87
+c rst   foc    W  vmt  5385  495K    1993  1917  4568    3.38    2.41   37K     0     0     1   38.75   38.75
+c [distill-long-red0] cls tried: 2/5918 T: 0.02 T-out: Y T-r: -2640.00%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.73%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7296 cl-sh   429 cl-rem    0 lit-rem   2817 T: 0.04 T-out: Y
+c rst   foc    W  vmt  5402  503K    1993  1917  4568    3.38    2.41   26K     0     0     1   40.87   40.87
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    #  vmt  5403  503K    1993  1917  4568    3.38    2.41   26K     0     0     1   40.87   40.87
+c rst   stb    #  vmt  5434  537K    1993  1917  4568    3.38    2.41   29K     0     0     1   42.80   42.80
+c [branch] adjusting to: vsids (from: vmtf) var_decay:0.95
+c [distill-long-red0] cls tried: 2/5463 T: 0.01 T-out: Y T-r: -2771.98%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.36%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8605 cl-sh   393 cl-rem    0 lit-rem   3734 T: 0.04 T-out: Y
+c [sls] 6593 cls, minimum 19 T: 0.00
+c rst   stb    W   vs  5435  538K    1993  1917  4568    3.38    2.41   30K     0     0     1   43.14   43.14
+c rst   stb    W   vs  5441  549K    1993  1917  4568    3.38    2.41   24K     0     0     1   45.99   45.99
+c [distill-long-red0] cls tried: 2/6519 T: 0.02 T-out: Y T-r: -1234.96%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.72%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    W   vs  5448  562K    1993  1917  4568    3.38    2.41   35K     0     0     1   42.29   42.29
+c [distill-long-red0] cls tried: 2/6100 T: 0.01 T-out: Y T-r: -915.82%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9418 cl-sh   474 cl-rem    0 lit-rem   2375 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    O   vs  5450  571K    1993  1917  4568    3.38    2.41   27K     0     0     1   42.68   42.68
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.35%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   stb    O   vs  5456  582K    1993  1917  4568    3.38    2.41   38K     0     0     1   42.44   42.44
+c [distill-long-red0] cls tried: 2/6877 T: 0.01 T-out: Y T-r: -2235.40%
+c rst   stb    O   vs  5463  594K    1993  1917  4568    3.38    2.41   32K     0     0     1   44.40   44.40
+c [distill-long-red0] cls tried: 2/7721 T: 0.01 T-out: Y T-r: -1918.33%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.74%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5577 cl-sh   473 cl-rem    0 lit-rem   2623 T: 0.04 T-out: Y
+c rst   stb    B   vs  5465  612K    1993  1917  4568    3.38    2.41   32K     0     0     1   43.52   43.52
+c recursive minimization cost OK: 1499K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1058 find: 2971K (prop 53.5% confl 3.9%) elim: 1839K (prop 12.0% confl 0.6%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4568
+c [occ] Linked in RED   BIN by default: 1
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 1054 tried: 22842 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 97.24%
+c [occ-backw-sub-long-w-long] rem cl: 719 tried: 34518/34518 (100.0%) T: 0.01 T-out: N T-r: 99.17%
+c [occ-backw-sub-str-long-w-long] sub: 24 str: 115 tried: 103554/34518 (300.0%) T: 0.03 T-out: N T-r: 95.83%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.02 cleanup T: 0.00 overhead T: 0.02
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.93%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 5.3147
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill-long-red0] cls tried: 2/5642 T: 0.01 T-out: Y T-r: -4925.27%
+c rst   stb    B   vs  5469  623K    1993  1917  4568    3.38    2.41   42K     0     0     1   41.78   41.78
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 96.90%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7498 cl-sh   290 cl-rem    0 lit-rem   1667 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [sls] 6593 cls, minimum 20 T: 0.00
+c rst   stb    W   vs  5474  632K    1993  1917  4568    3.38    2.41   33K     0     0     1   39.87   39.87
+c [distill-long-red0] cls tried: 2/6252 T: 0.01 T-out: Y T-r: -1566.84%
+c rst   stb    W   vs  5480  644K    1993  1917  4568    3.38    2.41   26K     0     0     1   43.59   43.58
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.82%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill-long-red0] cls tried: 2/6685 T: 0.01 T-out: Y T-r: -2591.71%
+c rst   stb    W   vs  5483  654K    1993  1917  4568    3.38    2.41   36K     0     0     1   42.57   42.57
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8437 cl-sh   334 cl-rem    0 lit-rem   1482 T: 0.04 T-out: Y
+c rst   stb    I   vs  5488  664K    1993  1917  4568    3.38    2.41   27K     0     0     1   41.81   41.81
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.43%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill-long-red0] cls tried: 2/6824 T: 0.01 T-out: Y T-r: -2140.11%
+c rst   stb    I   vs  5495  676K    1993  1917  4568    3.38    2.41   39K     0     0     1   42.09   42.09
+c [distill-long-red0] cls tried: 2/7964 T: 0.02 T-out: Y T-r: -1760.16%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.82%
+c [distill-bin] useful/checked/potential: 0/4568/4568 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8334 cl-sh   598 cl-rem    0 lit-rem   6281 T: 0.05 T-out: Y
+c rst   stb    I   vs  5497  701K    1993  1917  4568    3.38    2.41   44K     0     0     3   47.10   47.10
+c [distill-long-red0] cls tried: 2/7979 T: 0.02 T-out: Y T-r: -1291.22%
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    B   vs  5498  734K    1993  1917  4568    3.38    2.41   37K     0     0     3   47.65   47.64
+c [distill-long-red0] cls tried: 2/7003 T: 0.01 T-out: Y T-r: -705.38%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.22%
+c [distill-bin] useful/checked/potential: 3/4570/4570 lits-rem: 0 cl-rem: 3 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     6286 cl-sh   288 cl-rem    0 lit-rem   2666 T: 0.04 T-out: Y
+c [sls] 6592 cls, minimum 21 T: 0.00
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   stb    W   vs  5499  799K    1993  1917  4567    3.38    2.41   39K     0     0     3   42.39   42.38
+c [distill-long-red0] cls tried: 2/7514 T: 0.02 T-out: Y T-r: -1004.04%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.81%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5915 cl-sh   295 cl-rem    0 lit-rem   2604 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 1 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    O   vs  5500  800K    1993  1917  4567    3.38    2.41   40K     0     0     2   42.78   42.78
+c rst   stb    O   vs  5508  814K    1993  1917  4567    3.38    2.41   32K     0     0     2   48.65   48.64
+c [distill-long-red0] cls tried: 2/7756 T: 0.01 T-out: Y T-r: -2934.98%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.20%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   stb    O   vs  5514  832K    1993  1917  4567    3.38    2.41   50K     0     0     2   49.59   49.58
+c [distill-long-red0] cls tried: 2/7827 T: 0.01 T-out: Y T-r: -3554.04%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5193 cl-sh   273 cl-rem    0 lit-rem   2353 T: 0.04 T-out: Y
+c rst   stb    B   vs  5515  833K    1993  1917  4567    3.38    2.41   30K     0     0     2   51.93   51.93
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.72%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   stb    B   vs  5523  846K    1993  1917  4567    3.38    2.41   43K     0     0     2   47.82   47.81
+c [distill-long-red0] cls tried: 2/7314 T: 0.01 T-out: Y T-r: -2413.33%
+c rst   stb    B   vs  5529  865K    1993  1917  4567    3.38    2.41   39K     0     0     2   42.07   42.06
+c [distill-long-red0] cls tried: 2/8121 T: 0.01 T-out: Y T-r: -795.09%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.23%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5288 cl-sh   301 cl-rem    0 lit-rem   1845 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   stb    B   vs  5530  881K    1993  1917  4567    3.38    2.41   34K     0     0     2   40.19   40.19
+c [distill-long-red0] cls tried: 2/8982 T: 0.02 T-out: Y T-r: -3545.49%
+c [sls] 6592 cls, minimum 17 T: 0.00
+c rst   stb    W   vs  5531  882K    1993  1917  4567    3.38    2.41   33K     0     0     2   40.93   40.93
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.81%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     4401 cl-sh   337 cl-rem    0 lit-rem   2126 T: 0.04 T-out: Y
+c rst   stb    W   vs  5540  898K    1993  1917  4567    3.38    2.41   48K     0     0     2   41.29   41.29
+c [distill-long-red0] cls tried: 2/9151 T: 0.01 T-out: Y T-r: -1852.58%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.21%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   stb    W   vs  5545  914K    1993  1917  4567    3.38    2.41   42K     0     0     2   43.04   43.04
+c recursive minimization cost OK: 2093K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1052 find: 4823K (prop 59.1% confl 3.3%) elim: 2871K (prop 11.7% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4567
+c [occ] Linked in RED   BIN by default: 2
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 2142 tried: 27411 0-depth-assigns: 0 T: 0.00 T-out: N T-r: 96.84%
+c [occ-backw-sub-long-w-long] rem cl: 821 tried: 44872/44872 (100.0%) T: 0.01 T-out: N T-r: 98.88%
+c [occ-backw-sub-str-long-w-long] sub: 46 str: 172 tried: 134616/44872 (300.0%) T: 0.04 T-out: N T-r: 95.24%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.03 cleanup T: 0.00 overhead T: 0.03
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.92%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 5.8462
+c [branch] rebuilding order heap for all branchings. Current branching: vsids
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill-long-red0] cls tried: 2/7047 T: 0.02 T-out: Y T-r: -4620.91%
+c rst   stb    I   vs  5549  918K    1993  1917  4567    3.38    2.41   46K     0     0     2   43.10   43.10
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5639 cl-sh   140 cl-rem    0 lit-rem   1274 T: 0.05 T-out: Y
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.67%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [distill-long-red0] cls tried: 2/8428 T: 0.02 T-out: Y T-r: -2769.53%
+c rst   stb    I   vs  5559  934K    1993  1917  4567    3.38    2.41   41K     0     0     2   42.41   42.41
+c [distill-long-red0] cls tried: 2/9137 T: 0.01 T-out: Y T-r: -3246.04%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.81%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     3877 cl-sh   299 cl-rem    0 lit-rem   2016 T: 0.05 T-out: Y
+c rst   stb    I   vs  5562  963K    1993  1917  4567    3.38    2.41   46K     0     0     2   41.96   41.95
+c [distill-long-red0] cls tried: 2/10483 T: 0.02 T-out: Y T-r: -2751.53%
+c rst   stb    B   vs  5563  996K    1993  1917  4567    3.38    2.41   56K     0     0     2   43.64   43.64
+c [distill-long-red0] cls tried: 2/10474 T: 0.02 T-out: Y T-r: -3529.09%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.72%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.03 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     3820 cl-sh   435 cl-rem    0 lit-rem   3472 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [sls] 6592 cls, minimum 21 T: 0.00
+c rst   stb    W   vs  5567 1001K    1993  1917  4567    3.38    2.41   37K     0     0     2   44.69   44.68
+c [distill-long-red0] cls tried: 2/8219 T: 0.02 T-out: Y T-r: -5666.00%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.78%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   stb    W   vs  5577 1020K    1993  1917  4567    3.38    2.41   56K     0     0     2   44.47   44.47
+c rst   foc    W   vs  5578 1023K    1993  1917  4567    3.38    2.41   34K     0     0     2   45.58   45.58
+c [branch] adjusting to: vmtf (from: vsids) var_decay:0.95
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7735 cl-sh   379 cl-rem    0 lit-rem   2935 T: 0.05 T-out: Y
+c rst   foc    W  vmt  5579 1023K    1993  1917  4567    3.38    2.41   34K     0     0     2   45.50   45.50
+c [distill-long-red0] cls tried: 2/8801 T: 0.02 T-out: Y T-r: -3031.51%
+c rst   foc    W  vmt  5958 1088K    1993  1917  4567    3.38    2.41   50K     0     0     2   33.17   33.17
+c [distill-long-red0] cls tried: 2/10002 T: 0.03 T-out: Y T-r: -1914.14%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.85%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8594 cl-sh   988 cl-rem    0 lit-rem   3809 T: 0.05 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   foc    B  vmt  5959 1088K    1993  1917  4567    3.38    2.41   39K     0     0     2   35.63   35.62
+c [distill-long-red0] cls tried: 2/9166 T: 0.02 T-out: Y T-r: -2292.76%
+c rst   foc    B  vmt  6758 1105K    1993  1917  4567    3.38    2.41   35K     0     0     2   39.44   39.44
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.31%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7427 cl-sh   688 cl-rem    0 lit-rem   2983 T: 0.05 T-out: Y
+c rst   foc    B  vmt  7009 1123K    1993  1917  4567    3.38    2.41   33K     0     0     2   42.03   42.02
+c [distill-long-red0] cls tried: 2/7047 T: 0.01 T-out: Y T-r: -2758.82%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.67%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [sls] 6592 cls, minimum 20 T: 0.00
+c rst   foc    W  vmt  7014 1137K    1993  1917  4567    3.38    2.41   46K     0     0     2   41.52   41.52
+c [distill-long-red0] cls tried: 2/10072 T: 0.02 T-out: Y T-r: -3254.07%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5899 cl-sh   795 cl-rem    0 lit-rem   5617 T: 0.05 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    W  vmt  7098 1158K    1993  1917  4567    3.38    2.41   40K     0     0     2   42.93   42.93
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.30%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   foc    W  vmt  7121 1183K    1993  1917  4567    3.38    2.41   41K     0     0     2   42.28   42.28
+c [distill-long-red0] cls tried: 2/9263 T: 0.02 T-out: Y T-r: -3840.47%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.73%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5277 cl-sh   541 cl-rem    0 lit-rem   3594 T: 0.04 T-out: Y
+c rst   foc    F  vmt  7122 1183K    1993  1917  4567    3.38    2.41   41K     0     0     2   42.35   42.35
+c [distill-long-red0] cls tried: 2/9287 T: 0.02 T-out: Y T-r: -5630.84%
+c rst   foc    F  vmt  8226 1206K    1993  1917  4567    3.38    2.41   39K     0     0     2   44.43   44.43
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.22%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8304 cl-sh   653 cl-rem    0 lit-rem   4051 T: 0.05 T-out: Y
+c [distill-long-red0] cls tried: 2/8959 T: 0.02 T-out: Y T-r: -5936.42%
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    F  vmt  8312 1228K    1993  1917  4567    3.38    2.41   35K     0     0     2   44.79   44.79
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.89%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   foc    B  vmt  8313 1228K    1993  1917  4567    3.38    2.41   35K     0     0     2   44.79   44.79
+c [distill-long-red0] cls tried: 2/9001 T: 0.01 T-out: Y T-r: -3268.18%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9072 cl-sh   492 cl-rem    0 lit-rem   3113 T: 0.05 T-out: Y
+c rst   foc    B  vmt  8643 1256K    1993  1917  4567    3.38    2.41   36K     0     0     2   39.54   39.54
+c [distill-long-red0] cls tried: 2/9605 T: 0.02 T-out: Y T-r: -2517.16%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.93%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   foc    B  vmt  8680 1277K    1993  1917  4567    3.38    2.41   56K     0     0     2   37.25   37.25
+c [distill-long-red0] cls tried: 2/10307 T: 0.02 T-out: Y T-r: -3368.76%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.77%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5756 cl-sh   395 cl-rem    0 lit-rem   2416 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [sls] 6592 cls, minimum 23 T: 0.00
+c rst   foc    W  vmt  8681 1277K    1993  1917  4567    3.38    2.41   55K     0     0     2   37.51   37.50
+c [distill-long-red0] cls tried: 2/9886 T: 0.02 T-out: Y T-r: -4078.47%
+c rst   foc    W  vmt  8823 1309K    1993  1917  4567    3.38    2.41   58K     0     0     2   36.58   36.58
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.54%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5098 cl-sh   351 cl-rem    0 lit-rem   1961 T: 0.05 T-out: Y
+c recursive minimization cost OK: 2793K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1229 find: 5945K (prop 54.3% confl 3.5%) elim: 4382K (prop 11.3% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4567
+c [occ] Linked in RED   BIN by default: 2
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 3996 tried: 31980 0-depth-assigns: 0 T: 0.01 T-out: N T-r: 95.72%
+c [occ-backw-sub-long-w-long] rem cl: 2791 tried: 39307/39307 (100.0%) T: 0.02 T-out: N T-r: 95.69%
+c [occ-backw-sub-str-long-w-long] sub: 4 str: 809 tried: 117921/39307 (300.0%) T: 0.08 T-out: N T-r: 87.18%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.02 cleanup T: 0.00 overhead T: 0.02
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.93%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] not consolidating
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 6.4308
+c [branch] rebuilding order heap for all branchings. Current branching: vmtf
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill-long-red0] cls tried: 2/9091 T: 0.02 T-out: Y T-r: -2193.22%
+c rst   foc    #  vmt  8854 1323K    1993  1917  4567    3.38    2.41   43K     0     0     2   38.09   38.09
+c [distill-long-red0] cls tried: 2/9865 T: 0.02 T-out: Y T-r: -4483.00%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.66%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5003 cl-sh   268 cl-rem    0 lit-rem   1873 T: 0.04 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    #  vmt  9148 1346K    1993  1917  4567    3.38    2.41   41K     0     0     2   37.96   37.96
+c rst   foc    #  vmt  9155 1379K    1993  1917  4567    3.38    2.41   48K     0     0     2   38.08   38.07
+c [distill-long-red0] cls tried: 2/9957 T: 0.03 T-out: Y T-r: -6123.98%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.65%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     5232 cl-sh   383 cl-rem    0 lit-rem   3084 T: 0.04 T-out: Y
+c rst   foc    B  vmt  9156 1379K    1993  1917  4567    3.38    2.41   43K     0     0     2   39.51   39.51
+c [distill-long-red0] cls tried: 2/10435 T: 0.02 T-out: Y T-r: -2092.64%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.77%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    B  vmt  9601 1401K    1993  1917  4567    3.38    2.41   39K     0     0     2   38.30   38.30
+c [distill-long-red0] cls tried: 2/10307 T: 0.02 T-out: Y T-r: -4028.78%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     6271 cl-sh   407 cl-rem    0 lit-rem   3044 T: 0.05 T-out: Y
+c rst   foc    B  vmt  9782 1425K    1993  1917  4567    3.38    2.41   61K     0     0     2   37.64   37.64
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.75%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [sls] 6592 cls, minimum 20 T: 0.00
+c  res  pol bran  nres  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
+c rst   foc    W  vmt  9783 1425K    1993  1917  4567    3.38    2.41   61K     0     0     2   37.64   37.64
+c [distill-long-red0] cls tried: 2/9089 T: 0.02 T-out: Y T-r: -4875.58%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7491 cl-sh   361 cl-rem    0 lit-rem   2499 T: 0.05 T-out: Y
+c [distill-long-red0] cls tried: 2/9277 T: 0.02 T-out: Y T-r: -3609.31%
+c rst   foc    W  vmt  9923 1448K    1993  1917  4567    3.38    2.41   58K     0     0     2   37.92   37.92
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.70%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill-long-red0] cls tried: 2/9238 T: 0.02 T-out: Y T-r: -4345.96%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7274 cl-sh   283 cl-rem    0 lit-rem   1936 T: 0.05 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.29%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   foc    F  vmt 10153 1470K    1993  1917  4567    3.38    2.41   51K     0     0     2   37.47   37.47
+c [distill-long-red0] cls tried: 2/9667 T: 0.02 T-out: Y T-r: -2000.36%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.86%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9913 cl-sh   420 cl-rem    0 lit-rem   2829 T: 0.06 T-out: Y
+c rst   foc    F  vmt 11275 1493K    1993  1917  4567    3.38    2.41   44K     0     0     2   40.96   40.95
+c [distill-long-red0] cls tried: 2/9747 T: 0.02 T-out: Y T-r: -1706.29%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 97.97%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.03 T-out: N
+c rst   foc    F  vmt 11524 1536K    1993  1917  4567    3.38    2.41   59K     0     0     2   39.69   39.69
+c [distill-long-red0] cls tried: 2/9099 T: 0.01 T-out: Y T-r: -3330.07%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.84%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.03 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried    10040 cl-sh   235 cl-rem    0 lit-rem   1843 T: 0.05 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.96% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    B  vmt 11525 1536K    1993  1917  4567    3.38    2.41   59K     0     0     2   39.80   39.80
+c [distill-long-red0] cls tried: 2/11104 T: 0.04 T-out: Y T-r: -1885.56%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.38%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   foc    B  vmt 11594 1566K    1993  1917  4567    3.38    2.41   46K     0     0     2   40.09   40.09
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9359 cl-sh   898 cl-rem    0 lit-rem   5439 T: 0.05 T-out: Y
+c [distill-long-red0] cls tried: 2/8704 T: 0.03 T-out: Y T-r: -2513.49%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.78%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.03 T-out: N
+c [sls] 6592 cls, minimum 20 T: 0.00
+c rst   foc    W  vmt 11730 1586K    1993  1917  4567    3.38    2.41   39K     0     0     2   38.86   38.86
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7876 cl-sh   457 cl-rem    0 lit-rem   2902 T: 0.05 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [distill-long-red0] cls tried: 2/7201 T: 0.03 T-out: Y T-r: -1529.27%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.35%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.01 T-out: N
+c rst   foc    W  vmt 11835 1623K    1993  1917  4567    3.38    2.41   45K     0     0     2   37.90   37.90
+c [distill-long-red0] cls tried: 2/7773 T: 0.01 T-out: Y T-r: -1760.53%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     7923 cl-sh   282 cl-rem    0 lit-rem   2114 T: 0.05 T-out: Y
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.72%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c rst   foc    #  vmt 11953 1634K    1993  1917  4567    3.38    2.41   55K     0     0     2   36.98   36.98
+c [distill-long-red0] cls tried: 2/8670 T: 0.03 T-out: Y T-r: -1627.49%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried    10042 cl-sh   464 cl-rem    0 lit-rem   3018 T: 0.05 T-out: Y
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 98.35%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill-long-red0] cls tried: 2/8489 T: 0.02 T-out: Y T-r: -1567.78%
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    #  vmt 16466 1660K    1993  1917  4567    3.38    2.41   53K     0     0     2   41.59   41.59
+c [distill-long-red0] cls tried: 2/8599 T: 0.01 T-out: Y T-r: -3315.33%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.86%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9229 cl-sh   190 cl-rem    0 lit-rem   1480 T: 0.05 T-out: Y
+c [distill-long-red0] cls tried: 2/8075 T: 0.02 T-out: Y T-r: -2684.69%
+c rst   foc    B  vmt 17481 1683K    1993  1917  4567    3.38    2.41   53K     0     0     2   46.68   46.68
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 96.94%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill-long-red0] cls tried: 2/11569 T: 0.04 T-out: Y T-r: -2550.53%
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9086 cl-sh   949 cl-rem    0 lit-rem   6848 T: 0.06 T-out: Y
+c rst   foc    B  vmt 17748 1714K    1993  1917  4567    3.38    2.41   43K     0     0     3   42.17   42.17
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.77%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c recursive minimization cost OK: 2934K cost/(% lits removed)
+c [g 0] 108x1993 dens: 0.1180 find: 6111K (prop 57.9% confl 3.6%) elim: 3151K (prop 12.4% confl 0.5%)
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: sub-impl
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c --> Executing strategy token: breakid
+c Executing OCC strategy token(s): 'occ-backw-sub-str,occ-clean-implicit,occ-bve,occ-bva,occ-ternary-res,occ-xor'
+c [occ] Linked in IRRED BIN by default: 4567
+c [occ] Linked in RED   BIN by default: 3
+c Executing OCC strategy token: occ-backw-sub-str
+c [occ-backw-sub-str-long-w-bins] subs: 0 str: 9667 tried: 36550 0-depth-assigns: 0 T: 0.01 T-out: N T-r: 94.09%
+c [occ-backw-sub-long-w-long] rem cl: 4291 tried: 45588/45588 (100.0%) T: 0.03 T-out: N T-r: 94.53%
+c [occ-backw-sub-str-long-w-long] sub: 26 str: 568 tried: 136764/45588 (300.0%) T: 0.12 T-out: N T-r: 83.67%
+c Executing OCC strategy token: occ-clean-implicit
+c Executing OCC strategy token: occ-bve
+c [occ-empty-res] Empty resolvent elimed: 0 T: 0.00 T-out: N
+c [occ-bve] tried:     0 v-elim:     0 free-vars: 1993 T: 0.00 T-out: N T-r: 100.00%
+c [occur] link-in T: 0.03 cleanup T: 0.00 overhead T: 0.03
+c [occ-xor-bve] elimed: 0 T: 0.00 T-out: N
+c Executing OCC strategy token: occ-bva
+c Executing OCC strategy token: occ-ternary-res
+c [occ-ternary-res] Ternary res-tri: 0 res-bin: 0 sub: 0 str: 0 T: 0.00 T-out: N T-r: 99.93%
+c Executing OCC strategy token: occ-xor
+c [occ-xor] sort occur list T: 0.00
+c [occ-xor] found      0 T: 0.00 T-out: N T-r: 99.99%
+c --> Executing strategy token: card-find
+c --> Executing strategy token: cl-consolidate
+c [mem] consolidate old-sz: 10271K new-sz: 8065K new bits offs: 20 T: 0.00
+c --> Executing strategy token: scc-vrepl
+c [scc] new: 0 BP 0M T: 0.00
+c --> Executing strategy token: renumber
+c --> Executing strategy token: louvain-comms
+c [mem] consolidate mini T: 0.00
+c [timeout] global_timeout_multiplier: 7.0738
+c [branch] rebuilding order heap for all branchings. Current branching: vmtf
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 108 GJ matrices: 0 T: 0.00
+c [matrix] performing matrix init
+c [matrix] Good   matrix  0    108 x 1993  density:0.1452  xorlen avg: 289.37
+c [matrix] Using 1 matrices recovered from 108 xors T: 0.00 T-out: N
+c [distill-long-red0] cls tried: 2/12889 T: 0.03 T-out: Y T-r: -3587.02%
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.97% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.01 T-out: N T-r: 98.63%
+c [distill-bin] useful/checked/potential: 2/4569/4569 lits-rem: 0 cl-rem: 2 0-depth-assigns: 0 T: 0.01 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     8503 cl-sh  1238 cl-rem    0 lit-rem   4651 T: 0.07 T-out: Y
+c [sls] 6592 cls, minimum 19 T: 0.00
+c rst   foc    W  vmt 17823 1735K    1993  1917  4567    3.38    2.41   29K     0     0     4   42.37   42.36
+c [distill-long-red0] cls tried: 2/11085 T: 0.03 T-out: Y T-r: -1820.56%
+c rst   foc    W  vmt 18009 1778K    1993  1917  4567    3.38    2.41   48K     0     0     4   37.63   37.63
+c [distill-long-red0] cls tried: 2/7739 T: 0.02 T-out: Y T-r: -347.91%
+c [full-probe] bin_only: 1 set: 0 repl: 0 T: 0.00 T-out: N T-r: 99.70%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried    10020 cl-sh  1467 cl-rem    0 lit-rem   5102 T: 0.06 T-out: Y
+c [distill-long-red0] cls tried: 2/7943 T: 0.05 T-out: Y T-r: -1528.04%
+c [full-probe] bin_only: 0 set: 0 repl: 0 T: 0.00 T-out: N T-r: 98.86%
+c [distill-bin] useful/checked/potential: 0/4567/4567 lits-rem: 0 cl-rem: 0 0-depth-assigns: 0 T: 0.02 T-out: N
+c [distill] watch-based irred-- cl tried     3834 cl-sh     0 cl-rem    0 lit-rem      0 T: 0.00 T-out: N
+c [distill] watch-based   red-- cl tried     9535 cl-sh  1156 cl-rem    0 lit-rem   7337 T: 0.06 T-out: Y
+c [impl-str] lit bin: 0 set-var: 0 T: 0.00 T-out: N T-r: 99.98% w-visit: 4000
+c [impl-sub] bin: 0 T: 0.00 T-out: N w-visit: 4000
+c rst   foc    F  vmt 18147 1804K    1993  1917  4567    3.38    2.41   29K     0     0     4   41.98   41.97

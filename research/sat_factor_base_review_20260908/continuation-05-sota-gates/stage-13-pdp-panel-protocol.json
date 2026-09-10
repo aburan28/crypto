@@ -1,0 +1,155 @@
+{
+  "schema": "koblitz_target_matched_pdp_panel_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen_before_execution",
+  "scope": "Repeated planted point-decomposition measurements over public algebraic factor-base predicates; no target-subgroup enumeration, discrete-log labels, relation collection, or private-key recovery",
+  "claim_boundary": "This panel can establish matched PDP scaling evidence only. It is not an end-to-end index-calculus result, a random-target SAT/UNSAT distribution, or a Koblitz index-calculus SOTA claim.",
+  "execution_order": "seed-major, then cells in listed order; one process at a time",
+  "replicate_seeds": [
+    2026091301,
+    2026091302,
+    2026091303,
+    2026091304,
+    2026091305
+  ],
+  "cells": [
+    {
+      "id": "n31-l5-m3-standard-a1-f0",
+      "n": 31,
+      "ell": 5,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "role": "degree-31 size-matched polynomial-subspace control"
+    },
+    {
+      "id": "n31-l5-m3-ggmp-a0-f0",
+      "n": 31,
+      "ell": 5,
+      "m": 3,
+      "basis": "ggmp",
+      "curve_a": 0,
+      "factor_index": 0,
+      "role": "nondegenerate public GGMP linearised-kernel construction selected by the frozen stage-4 census"
+    },
+    {
+      "id": "n41-l5-m3-standard-a1-f0",
+      "n": 41,
+      "ell": 5,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "role": "degree-41 literature scaling rung"
+    },
+    {
+      "id": "n59-l9-m3-standard-a1-f0",
+      "n": 59,
+      "ell": 9,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "role": "larger WDSat/PDP scaling rung within the current n<64 field representation"
+    }
+  ],
+  "target_matching": {
+    "rule": "Invoke the matrix runner separately for every cell and pass the replicate seed unchanged. Native XOR, WDSat, CryptoMiniSat, generated Magma F4, and direct MITM in that cell must bind to the same manifest, target, factor-base basis, source equations, and source-instance identifier.",
+    "construction_comparison_boundary": "The standard and GGMP n=31 predicates induce different planted targets even when given the same RNG seed. They are separate source instances and are not presented as a same-target comparison with each other.",
+    "seed_offset_forbidden": true,
+    "selective_rerun_rule": "A partial or resumed execution retains its task list and cannot be reported as the complete panel until all twenty frozen tasks verify."
+  },
+  "source_identity": {
+    "semantic_fields": [
+      "n",
+      "ell",
+      "m",
+      "seed",
+      "curve",
+      "curve_a",
+      "irreducible_low_terms",
+      "factor_base_predicate",
+      "factor_base_basis_bitmasks",
+      "target",
+      "representation",
+      "source_variables",
+      "source_equations",
+      "source_max_degree",
+      "source_max_monomials_per_equation"
+    ],
+    "semantic_hash": "SHA-256 of canonical JSON containing exactly the semantic fields",
+    "export_hashes": "SHA-256 and byte length recomputed from instance.anf, instance.xor.cnf, and instance.magma after all backend processes terminate",
+    "source_instance_id": "SHA-256 of canonical JSON containing the semantic hash and the three recomputed export records",
+    "producer_identity": "Also retain the producer's BLAKE3 koblitz_pdp_source_instance.v1 identifier and require both isolated Rust backends to authenticate it and regenerate the source exactly.",
+    "backend_binding": "Every backend receipt repeats the source-instance identifier and, for file-consuming solvers, the exact recomputed input-file hash.",
+    "interpretation": "The identifier establishes byte and lineage matching. Equivalence of the three exporter encodings remains covered by the independent source-equivalence checker; equal identifiers alone are not a proof of algebraic equivalence."
+  },
+  "solver_policy": {
+    "native_conflict_budget": 100000,
+    "per_process_watchdog_seconds": 120,
+    "whole_cell_watchdog_seconds": 1200,
+    "single_thread_requested": true,
+    "unknown_is_unsat": false,
+    "missing_backend_is_algorithmic_evidence": false,
+    "required_backend_bindings": [
+      "native-xor",
+      "wdsat",
+      "cryptominisat",
+      "magma-f4",
+      "direct-mitm"
+    ],
+    "sat_witness_boundary": "Native SAT incrementally blocks nonlifting x-tuples and is accepted only after both source-polynomial and rational point-sum validation; exhaustion of its 64-model cap is model_cap_inconclusive. WDSat and CryptoMiniSat run a separately metered validate-model process and become SAT only for a valid rational point sum; a source-valid nonlifting model is sat_nonlifting_model_inconclusive. A Magma proper-ideal certificate remains sat_basis_certificate_unverified_model until witness extraction and validation succeeds.",
+    "ggmp_role": "GGMP is a factor-base/source-system construction represented by the n=31 GGMP cell, not a sixth SAT solver."
+  },
+  "accounting": {
+    "outer_meter": "Run each complete one-cell matrix invocation under scripts/process_meter.py. This charges orchestration and all sequential descendants in addition to per-backend receipts.",
+    "parallel_workers": 1,
+    "required_per_backend_metrics": [
+      "wall_seconds",
+      "single_core_seconds",
+      "total_core_seconds",
+      "peak_rss_bytes",
+      "conflicts_when_exposed"
+    ],
+    "fixed_costs": "Report WDSat copy/configure/clean/build receipts and the stage-4 public GGMP discovery receipt separately from per-target solves. Do not silently amortize either cost.",
+    "native_and_mitm_gate": "A complete panel requires isolated fresh-process receipts for native XOR and direct MITM. Legacy exporter-internal nanosecond clocks remain explicitly incomplete accounting.",
+    "full_cost_boundary": "This PDP panel does not contain relation collection or modular linear algebra, so it cannot by itself close the full index-calculus cost gate."
+  },
+  "fixed_cost_receipts": {
+    "ggmp_public_discovery": {
+      "path": "stage-4-discovery-summary.json",
+      "sha256": "9664e7af15f904571766f54197c126f9f02abd1b00e1a8a0e2ac399c233a4495",
+      "selected_curve_a": 0,
+      "selected_factor_index": 0,
+      "charge_once_per_panel": true
+    },
+    "wdsat_build": "Each target cell must retain source-copy, configuration, clean, and build receipts. The whole-cell meter charges the configuration CPU and memory while its own wall clock is reported separately."
+  },
+  "acceptance": {
+    "expected_tasks": 20,
+    "each_task": [
+      "Manifest parameters and seed equal the frozen protocol",
+      "All three export files exist and their recomputed sizes match the manifest",
+      "All five backend bindings carry one source-instance identifier",
+      "Any SAT model passes the runner's fail-closed source-model validation",
+      "Only a solver result with a separately validated rational point witness counts as a SAT point decomposition; WDSat and CryptoMiniSat use the charged validate-model process, while nonlifting models and proper-ideal Magma certificates remain inconclusive",
+      "Unknown and timeout outcomes remain inconclusive",
+      "A whole-cell outer process receipt is retained"
+    ],
+    "panel": [
+      "All twenty tasks verify",
+      "Every available backend has five target-matched receipts at every applicable cell",
+      "Magma absence is reported as unavailable_operational rather than filled from another backend",
+      "Resource distributions are reported without converting internal timers into isolated process measurements"
+    ]
+  },
+  "execution": {
+    "driver": "run_stage13_pdp_panel.py",
+    "verifier": "verify_stage13_pdp_panel.py",
+    "matrix_runner": "../../../scripts/run_koblitz_pdp_matrix.py",
+    "isolated_backend": "../../../target/release/examples/koblitz_pdp_backend",
+    "resume": "The driver verifies a completed leaf before skipping it and never overwrites an existing scientific artifact.",
+    "clean_checkout_required_for_full_evidence": true
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "koblitz_orbit_cofactor_admission_result.v1",
+  "semantic_equivalence": true,
+  "degree23_rows": [
+    {
+      "curve_a": 0,
+      "candidates": [
+        {
+          "divisor_indices": [
+            0,
+            1
+          ],
+          "reference_admission_ns": 1396340000,
+          "orbit_admission_ns": 31097625,
+          "speedup": 44.90182128056403
+        },
+        {
+          "divisor_indices": [
+            0,
+            2
+          ],
+          "reference_admission_ns": 1653788875,
+          "orbit_admission_ns": 25585458,
+          "speedup": 64.63784525569173
+        }
+      ],
+      "reference_wall_seconds": 4.02447712502908,
+      "orbit_wall_seconds": 0.8617070410400629,
+      "reference_core_seconds": 3.258001,
+      "orbit_core_seconds": 0.438432,
+      "process_core_speedup": 7.431029213196117
+    },
+    {
+      "curve_a": 1,
+      "candidates": [
+        {
+          "divisor_indices": [
+            0,
+            1
+          ],
+          "reference_admission_ns": 1171100000,
+          "orbit_admission_ns": 17852875,
+          "speedup": 65.5972777493821
+        },
+        {
+          "divisor_indices": [
+            0,
+            2
+          ],
+          "reference_admission_ns": 1008953416,
+          "orbit_admission_ns": 17415375,
+          "speedup": 57.93463626249794
+        }
+      ],
+      "reference_wall_seconds": 2.4978790830355138,
+      "orbit_wall_seconds": 0.2640389159787446,
+      "reference_core_seconds": 2.279514,
+      "orbit_core_seconds": 0.261898,
+      "process_core_speedup": 8.703823625991797
+    }
+  ],
+  "combined": {
+    "original_stage10_core_seconds": 10.857294,
+    "indexed_projection_stage12_core_seconds": 5.537515,
+    "orbit_admission_stage14_core_seconds": 0.70033,
+    "incremental_process_core_speedup": 7.907008124741194,
+    "cumulative_process_core_speedup": 15.503111390344552
+  },
+  "claim_boundary": "Public setup-cost engineering with unchanged algebraic outputs; not a relation-solving or SOTA result."
+}

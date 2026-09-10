@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_stage13_panel_custody.v1",
+  "recorded_at": "2026-09-09",
+  "panel_source_revision": "67cf7f559cf6cf4c70fc16f22eb5dd68e4883d31",
+  "panel_original_root": "/Volumes/SSD990/koblitz-stage13-panel-20260909",
+  "panel_archive": "stage-13-panel-20260909",
+  "panel_files": 599,
+  "panel_summary_sha256": "a1ef9a35b9ae80c972c3d9dbf45d1336c49944e20a10e6839f9c3debce483040",
+  "corrected_summary_sha256": "f5af90849e17f75d3bf86c93323f01cab4fbac3993e3b972dc5687309860095f",
+  "correction_source_revision": "ea90be8285951a20052073bc873a1b741abe4a53",
+  "correction_original_root": "/Volumes/SSD990/koblitz-stage13-wdsat-correction-20260909",
+  "correction_archive": "stage-13-wdsat-correction-20260909",
+  "correction_files": 22,
+  "correction_outer_metrics_sha256": "b2542e3708f52835d42323a2f6a919db25714c40d923bb4eaeeac5d1c54ae4f8",
+  "correction_matrix_sha256": "576963b61c7a975a620090f91c34285d378cefbdfeee490168027e7726e486b7",
+  "external_tools": {
+    "wdsat_source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+    "cryptominisat_sha256": "bfc157d89d4c6a6e32d6aa6299c53f22b990c94e554f9bf1d4111d3ed709061f",
+    "magma": "unavailable"
+  },
+  "classification": "Complete five-seed planted-PDP artifact set through n=59 with additive WDSat correction; full solver matrix remains incomplete without Magma."
+}

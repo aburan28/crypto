@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Run matched binary-Koblitz PDP instances through available solver backends.
 
-Every subprocess is wrapped by macOS ``/usr/bin/time -lp``.  Missing tools and
+Every subprocess is wrapped by ``process_meter.py``.  Missing tools and
 watchdog expirations are recorded as operational outcomes; they are never
-converted to UNSAT or scientific evidence.
+converted to UNSAT or scientific evidence.  The producer only exports the
+source instance; native SAT and direct MITM run in separate metered processes.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -122,7 +124,98 @@ def validate_xor_dimacs(path: Path, model: list[bool]) -> bool:
     return True
 
 
+def source_artifact_snapshot(instance: Path, manifest: dict) -> dict:
+    """Hash the three immutable source exports at one custody boundary."""
+    exports = manifest.get("exports")
+    expected = {"wdsat_anf", "cryptominisat_xor_dimacs", "magma_boolean_f4"}
+    if not isinstance(exports, dict) or set(exports) != expected:
+        raise ValueError("manifest must contain exactly the three source exports")
+    receipt = {}
+    for name in sorted(expected):
+        descriptor = exports[name]
+        relative = Path(descriptor.get("path", ""))
+        if relative.is_absolute() or len(relative.parts) != 1 or relative.parts[0] in {"", ".", ".."}:
+            raise ValueError(f"unsafe source export path for {name}")
+        path = instance / relative
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"source export for {name} is missing or is a symlink")
+        data = path.read_bytes()
+        if descriptor.get("bytes") != len(data):
+            raise ValueError(f"source export byte count changed for {name}")
+        receipt[name] = {
+            "path": str(relative),
+            "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "manifest_blake3": descriptor.get("blake3"),
+        }
+    return receipt
+
+
+def parse_magma_terminal(output: str) -> dict | None:
+    """Parse the complete marker block emitted by ``instance.magma``."""
+    marker_prefix = "KOBLITZ_MAGMA_"
+    markers: dict[str, str] = {}
+    for line in output.splitlines():
+        line = line.strip()
+        if not line.startswith(marker_prefix) or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key in markers:
+            return None
+        markers[key] = value.strip()
+    required = {
+        "KOBLITZ_MAGMA_SCHEMA",
+        "KOBLITZ_MAGMA_ALGORITHM",
+        "KOBLITZ_MAGMA_STATUS",
+        "KOBLITZ_MAGMA_F4_DEGREES",
+        "KOBLITZ_MAGMA_BASIS_SIZE",
+        "KOBLITZ_MAGMA_CPU_SECONDS",
+        "KOBLITZ_MAGMA_WALL_SECONDS",
+    }
+    if set(markers) != required:
+        return None
+    if markers["KOBLITZ_MAGMA_SCHEMA"] != "koblitz_magma_f4_terminal.v1":
+        return None
+    if markers["KOBLITZ_MAGMA_ALGORITHM"] != "direct-f4-sparse":
+        return None
+    status = markers["KOBLITZ_MAGMA_STATUS"]
+    if status not in {"SAT", "UNSAT"}:
+        return None
+    degrees_text = markers["KOBLITZ_MAGMA_F4_DEGREES"]
+    if not re.fullmatch(r"\[\s*(?:\d+(?:\s*,\s*\d+)*)?\s*\]", degrees_text):
+        return None
+    degrees = [int(value) for value in re.findall(r"\d+", degrees_text)]
+    try:
+        basis_size = int(markers["KOBLITZ_MAGMA_BASIS_SIZE"])
+        cpu_seconds = float(markers["KOBLITZ_MAGMA_CPU_SECONDS"])
+        wall_seconds = float(markers["KOBLITZ_MAGMA_WALL_SECONDS"])
+    except ValueError:
+        return None
+    if (
+        basis_size < 1
+        or not math.isfinite(cpu_seconds)
+        or not math.isfinite(wall_seconds)
+        or cpu_seconds < 0
+        or wall_seconds < 0
+    ):
+        return None
+    if status == "UNSAT" and basis_size != 1:
+        return None
+    return {
+        "schema": markers["KOBLITZ_MAGMA_SCHEMA"],
+        "algorithm": markers["KOBLITZ_MAGMA_ALGORITHM"],
+        "terminal_status": status.lower(),
+        "f4_step_degrees": degrees,
+        "basis_size": basis_size,
+        "cpu_seconds": cpu_seconds,
+        "wall_seconds": wall_seconds,
+        "single_thread_requested": True,
+        "gpu_disabled": True,
+    }
+
+
 def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dict:
+    terminal = None
     if run["timed_out"]:
         status = "timeout_inconclusive"
         conflicts = None
@@ -131,8 +224,12 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
         lines = [line.strip() for line in run["stdout"].splitlines() if line.strip()]
         model = parse_wdsat_model(run["stdout"], manifest["source_variables"])
         if model is not None:
-            status = "sat"
             model_valid = validate_wdsat_anf(instance / "instance.anf", model)
+            status = (
+                "sat_source_model_unverified_point_witness"
+                if model_valid
+                else "sat_invalid_model"
+            )
         elif any("UNSAT" in line for line in lines):
             status = "unsat"
             model_valid = None
@@ -150,6 +247,8 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
                 status = "sat_invalid_model"
             elif run["returncode"] != 10:
                 status = "sat_invalid_terminal_status"
+            else:
+                status = "sat_source_model_unverified_point_witness"
         elif "s UNSATISFIABLE" in run["stdout"]:
             status = "unsat" if run["returncode"] == 20 else "unsat_invalid_terminal_status"
             model_valid = None
@@ -161,23 +260,234 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
             model_valid = None
         matches = re.findall(r"(?:conflicts|Conflicts)\s*[:=]?\s*(\d+)", run["stdout"] + run["stderr"])
         conflicts = int(matches[-1]) if matches else None
-    else:
+    elif solver == "magma-f4":
         text = run["stdout"] + run["stderr"]
-        status = "completed" if run["returncode"] == 0 else "solver_error"
         conflicts = None
         model_valid = None
-        if "Runtime error" in text or "Error" in text:
+        terminal = parse_magma_terminal(run["stdout"])
+        if run["returncode"] != 0 or "Runtime error" in text or "User error" in text:
             status = "solver_error"
+        elif terminal is None:
+            status = "terminal_certificate_missing"
+        elif terminal["terminal_status"] == "unsat":
+            status = "unsat"
+        else:
+            # A non-unit Boolean Gröbner basis establishes a proper ideal,
+            # but this script deliberately does not run a second solver to
+            # extract a model.  Keep the distinction visible and fail closed.
+            status = "sat_basis_certificate_unverified_model"
+    else:
+        raise ValueError(f"unknown solver {solver}")
     return {
         "solver": solver,
         "status": status,
         "conflicts": conflicts,
         "source_model_valid": model_valid,
+        "source_witness_valid": None,
         "returncode": run["returncode"],
         "timed_out": run["timed_out"],
         "metrics": run["metrics"],
         "command": run["command"],
+        "magma_terminal": terminal,
     }
+
+
+def parsed_source_assignment(run: dict, solver: str, manifest: dict) -> list[bool] | None:
+    source_variables = manifest["source_variables"]
+    if solver == "wdsat":
+        model = parse_wdsat_model(run["stdout"], source_variables)
+    elif solver == "cryptominisat":
+        maximum = manifest["exports"]["cryptominisat_xor_dimacs"]["variables"]
+        model = parse_cms_model(run["stdout"], maximum)
+    else:
+        raise ValueError(f"solver {solver} has no parsed assignment")
+    if model is None or len(model) < source_variables:
+        return None
+    return model[:source_variables]
+
+
+def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
+    """Validate one isolated native-backend terminal record fail closed."""
+    report = None
+    try:
+        report = json.loads(run["stdout"])
+    except (json.JSONDecodeError, TypeError):
+        pass
+    if run["timed_out"]:
+        status = "timeout_inconclusive"
+    elif report is None:
+        status = "backend_error" if run["returncode"] != 0 else "backend_contract_error"
+    else:
+        expected_id = manifest.get("source_instance", {}).get("id_blake3")
+        artifacts = report.get("source_artifacts")
+        artifacts_valid = (
+            isinstance(artifacts, dict)
+            and set(artifacts)
+            == {"wdsat_anf", "cryptominisat_xor_dimacs", "magma_boolean_f4"}
+            and all(
+                isinstance(receipt, dict) and receipt.get("valid") is True
+                for receipt in artifacts.values()
+            )
+        )
+        contract_valid = (
+            report.get("schema") == "koblitz_pdp_isolated_backend.v1"
+            and report.get("backend") == backend
+            and expected_id is not None
+            and report.get("source_instance_id") == expected_id
+            and report.get("source_instance_verified") is True
+            and report.get("regenerated_source_exact") is True
+            and artifacts_valid
+        )
+        result_status = report.get("status")
+        if not contract_valid:
+            status = "backend_contract_error"
+        elif backend == "native-sat":
+            if (
+                run["returncode"] == 0
+                and result_status == "sat"
+                and report.get("source_model_valid") is True
+                and report.get("source_witness_valid") is True
+            ):
+                status = "sat"
+            elif run["returncode"] == 0 and result_status in {
+                "unsat",
+                "unknown_inconclusive",
+                "model_cap_inconclusive",
+            }:
+                status = result_status
+            elif run["returncode"] == 2 and result_status == "sat_invalid_model":
+                status = "sat_invalid_model"
+            else:
+                status = "backend_contract_error"
+        elif (
+            run["returncode"] == 0
+            and result_status == "sat"
+            and report.get("source_witness_valid") is True
+        ):
+            status = "sat"
+        elif (
+            run["returncode"] == 0
+            and result_status == "unsat"
+            and report.get("exhaustive") is True
+        ):
+            status = "unsat"
+        elif (
+            run["returncode"] == 0
+            and result_status == "not_run_resource_cap"
+            and report.get("exhaustive") is False
+        ):
+            status = "not_run_resource_cap"
+        elif run["returncode"] == 2 and result_status == "sat_invalid_witness":
+            status = "sat_invalid_witness"
+        else:
+            status = "backend_contract_error"
+    stats = report.get("stats", {}) if isinstance(report, dict) else {}
+    return {
+        "solver": backend,
+        "status": status,
+        "conflicts": stats.get("conflicts"),
+        "source_model_valid": (
+            report.get("source_model_valid") if isinstance(report, dict) else None
+        ),
+        "source_witness_valid": (
+            report.get("source_witness_valid") if isinstance(report, dict) else None
+        ),
+        "source_instance_id": (
+            report.get("source_instance_id") if isinstance(report, dict) else None
+        ),
+        "returncode": run["returncode"],
+        "timed_out": run["timed_out"],
+        "metrics": run["metrics"],
+        "command": run["command"],
+        "backend_report": report,
+    }
+
+
+def assignment_validation_status(run: dict, manifest: dict, assignment_path: Path) -> dict:
+    """Validate a metered rational point-witness checker receipt."""
+    report = None
+    try:
+        report = json.loads(run["stdout"])
+    except (json.JSONDecodeError, TypeError):
+        pass
+    assignment_bytes = assignment_path.read_bytes()
+    try:
+        expected_assignment = json.loads(assignment_bytes)
+    except json.JSONDecodeError:
+        expected_assignment = None
+    expected_id = manifest.get("source_instance", {}).get("id_blake3")
+    contract_valid = (
+        isinstance(report, dict)
+        and report.get("schema") == "koblitz_pdp_assignment_validation.v1"
+        and report.get("source_instance_id") == expected_id
+        and report.get("source_instance_verified") is True
+        and report.get("regenerated_source_exact") is True
+        and report.get("assignment_values") == manifest.get("source_variables")
+        and report.get("source_assignment") == expected_assignment
+        and isinstance(report.get("assignment_blake3"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", report["assignment_blake3"])
+    )
+    if run["timed_out"]:
+        status = "timeout_inconclusive"
+    elif not contract_valid:
+        status = "validation_contract_error"
+    elif run["returncode"] == 0:
+        status = (
+            "valid_point_witness"
+            if report.get("status") == "valid_point_witness"
+            and report.get("source_model_valid") is True
+            and report.get("source_witness_valid") is True
+            else "validation_contract_error"
+        )
+    elif run["returncode"] == 2 and report.get("status") in {
+        "invalid_source_model",
+        "nonlifting_source_model",
+    }:
+        status = report["status"]
+    else:
+        status = "validation_backend_error"
+    return {
+        "status": status,
+        "returncode": run["returncode"],
+        "timed_out": run["timed_out"],
+        "metrics": run["metrics"],
+        "command": run["command"],
+        "report": report,
+    }
+def run_assignment_validation(
+    backend: Path,
+    manifest_path: Path,
+    manifest: dict,
+    assignment: list[bool],
+    label: str,
+    timeout: float,
+    instance: Path,
+) -> dict:
+    assignment_path = instance / f"{label}.source-model.json"
+    assignment_bytes = (json.dumps(assignment, separators=(",", ":")) + "\n").encode()
+    assignment_path.write_bytes(assignment_bytes)
+    run = run_timed(
+        [
+            str(backend.resolve()),
+            "validate-model",
+            str(manifest_path),
+            str(assignment_path),
+        ],
+        timeout,
+        instance,
+    )
+    (instance / f"{label}.point-validation.stdout").write_text(run["stdout"])
+    (instance / f"{label}.point-validation.stderr").write_text(run["stderr"])
+    result = assignment_validation_status(run, manifest, assignment_path)
+    result["assignment_path"] = assignment_path.name
+    result["assignment_sha256"] = hashlib.sha256(assignment_bytes).hexdigest()
+    if isinstance(result.get("report"), dict):
+        # The backend's BLAKE3 binds the same file; its source identity and the
+        # runner's independent SHA-256 custody are both retained.
+        result["assignment_blake3"] = result["report"].get("assignment_blake3")
+        if result["report"].get("assignment_values") != len(assignment):
+            result["status"] = "validation_contract_error"
+    return result
 
 
 def version(binary: str | None) -> dict:
@@ -223,6 +533,32 @@ def git_commit(path: Path) -> str | None:
         return None
 
 
+def wdsat_xor_atom_count(path: Path) -> int:
+    """Count the global XOR atoms consumed by WDSat's ANF parser."""
+    count = 0
+    for line in path.read_text().splitlines():
+        tokens = line.split()
+        if not tokens or tokens[0] != "x":
+            continue
+        index = 1
+        while index < len(tokens) and tokens[index] != "0":
+            token = tokens[index]
+            if token.startswith("."):
+                try:
+                    degree = int(token[1:])
+                except ValueError as error:
+                    raise ValueError(f"invalid ANF degree token {token!r}") from error
+                if degree < 2 or index + degree >= len(tokens):
+                    raise ValueError(f"invalid ANF monomial at token {index}")
+                index += degree + 1
+            else:
+                index += 1
+            count += 1
+        if index >= len(tokens) or tokens[index] != "0":
+            raise ValueError("ANF equation lacks its zero terminator")
+    return count
+
+
 def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) -> tuple[dict, str | None]:
     """Build an instance-sized WDSat binary and return its charged receipt."""
     build_root = instance / "wdsat-build"
@@ -239,13 +575,14 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
     max_eq = int(cms["cnf_clauses"])
     max_xeq = int(cms["xor_rows"])
     max_terms = int(manifest["source_max_monomials_per_equation"])
+    source_xor_atoms = wdsat_xor_atom_count(instance / "instance.anf")
     config = "\n".join(
         [
             "#define __XG_ENHANCED__",
             f"#define __MAX_ANF_ID__ {n_source + 1}",
             f"#define __MAX_DEGREE__ {max_degree + 1}",
             f"#define __MAX_ID__ {max_id}",
-            f"#define __MAX_BUFFER_SIZE__ {max(5000, max_terms * 8, max_id * 16)}",
+            f"#define __MAX_BUFFER_SIZE__ {max(5000, max_terms * 8, max_id * 16, source_xor_atoms + 1)}",
             f"#define __MAX_EQ__ {max(64, max_eq + 16)}",
             f"#define __MAX_EQ_SIZE__ {max_degree + 2}",
             f"#define __MAX_XEQ__ {max(8, max_xeq + 2)}",
@@ -282,6 +619,7 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
         "metrics": run["metrics"],
         "command": run["command"],
         "config": config,
+        "source_xor_atoms": source_xor_atoms,
         "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest() if binary.exists() else None,
     }
     return receipt, str(binary.resolve()) if binary.exists() else None
@@ -291,6 +629,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="new result directory")
     parser.add_argument("--exporter", type=Path, required=True, help="built koblitz_pdp_export binary")
+    parser.add_argument(
+        "--backend", type=Path, required=True, help="built koblitz_pdp_backend binary"
+    )
     parser.add_argument("--wdsat", help="WDSat binary")
     parser.add_argument("--wdsat-source", type=Path, help="WDSat checkout to right-size and build per cell")
     parser.add_argument("--cryptominisat", help="CryptoMiniSat binary")
@@ -310,6 +651,8 @@ def main() -> None:
     args.output = args.output.resolve()
     if not args.exporter.exists():
         parser.error("exporter does not exist; build the release example first")
+    if not args.backend.exists():
+        parser.error("backend does not exist; build the release example first")
 
     tools = {
         "wdsat": (
@@ -324,6 +667,7 @@ def main() -> None:
         ),
         "cryptominisat": version(args.cryptominisat),
         "magma": version(args.magma),
+        "isolated_backend": version(str(args.backend.resolve())),
     }
     report = {
         "schema": "koblitz_pdp_matched_matrix.v1",
@@ -336,9 +680,13 @@ def main() -> None:
         },
         "policy": {
             "unknown_is_unsat": False,
-            "all_process_resources_charged": True,
+            "solver_subprocess_resources_charged": True,
+            "python_orchestration_included_in_child_sum": False,
+            "whole_panel_requires_outer_process_meter": True,
             "single_thread_requested": True,
             "missing_tool_is_negative_evidence": False,
+            "producer_runs_solver_backends": False,
+            "native_sat_and_mitm_isolated": True,
         },
         "tools": tools,
         "instances": [],
@@ -364,11 +712,12 @@ def main() -> None:
         ]
         if len(parts) == 5:
             command.extend([str(curve_a), str(factor_index)])
+        command.append("--export-only")
         generated = run_timed(command, args.timeout, args.exporter.parent)
-        (args.output / f"n{n}-l{ell}-m3-{basis}.export.stdout").write_text(
+        (args.output / f"{instance.name}.export.stdout").write_text(
             generated["stdout"].rstrip() + "\n"
         )
-        (args.output / f"n{n}-l{ell}-m3-{basis}.export.stderr").write_text(generated["stderr"])
+        (args.output / f"{instance.name}.export.stderr").write_text(generated["stderr"])
         entry = {
             "cell": {
                 "n": n,
@@ -400,6 +749,56 @@ def main() -> None:
             continue
         manifest = json.loads(manifest_path.read_text())
         entry["manifest"] = manifest
+        if (
+            manifest.get("native_sat", {}).get("status") != "not_run_in_export_process"
+            or manifest.get("direct_meet_in_the_middle", {}).get("status")
+            != "not_run_in_export_process"
+        ):
+            entry["artifact_status"] = {
+                "status": "producer_isolation_contract_error",
+                "asserts_nothing_about": "isolated native-SAT or MITM resources",
+            }
+            report["instances"].append(entry)
+            (args.output / "progress.json").write_text(json.dumps(report, indent=2) + "\n")
+            continue
+        try:
+            entry["source_artifacts_before"] = source_artifact_snapshot(instance, manifest)
+        except (OSError, ValueError) as error:
+            entry["artifact_status"] = {
+                "status": "source_artifact_snapshot_failed",
+                "error": str(error),
+                "asserts_nothing_about": "backend correctness or performance",
+            }
+            report["instances"].append(entry)
+            (args.output / "progress.json").write_text(json.dumps(report, indent=2) + "\n")
+            continue
+
+        native_run = run_timed(
+            [
+                str(args.backend.resolve()),
+                "native-sat",
+                str(manifest_path),
+                str(args.conflicts),
+            ],
+            args.timeout,
+            instance,
+        )
+        (instance / "native-sat.stdout").write_text(native_run["stdout"])
+        (instance / "native-sat.stderr").write_text(native_run["stderr"])
+        entry["solvers"].append(
+            isolated_backend_status(native_run, "native-sat", manifest)
+        )
+
+        mitm_run = run_timed(
+            [str(args.backend.resolve()), "direct-mitm", str(manifest_path)],
+            args.timeout,
+            instance,
+        )
+        (instance / "direct-mitm.stdout").write_text(mitm_run["stdout"])
+        (instance / "direct-mitm.stderr").write_text(mitm_run["stderr"])
+        entry["solvers"].append(
+            isolated_backend_status(mitm_run, "direct-mitm", manifest)
+        )
 
         wdsat_binary = tools["wdsat"]["path"]
         if args.wdsat_source and tools["wdsat"]["available"]:
@@ -415,7 +814,31 @@ def main() -> None:
             )
             (instance / "wdsat.stdout").write_text(run["stdout"])
             (instance / "wdsat.stderr").write_text(run["stderr"])
-            entry["solvers"].append(solver_status(run, "wdsat", instance, manifest))
+            row = solver_status(run, "wdsat", instance, manifest)
+            if row["status"] == "sat_source_model_unverified_point_witness":
+                assignment = parsed_source_assignment(run, "wdsat", manifest)
+                if assignment is None:
+                    row["status"] = "sat_invalid_model"
+                else:
+                    validation = run_assignment_validation(
+                        args.backend,
+                        manifest_path,
+                        manifest,
+                        assignment,
+                        "wdsat",
+                        args.timeout,
+                        instance,
+                    )
+                    row["point_witness_validation"] = validation
+                    row["source_witness_valid"] = validation["status"] == "valid_point_witness"
+                    row["status"] = (
+                        "sat"
+                        if validation["status"] == "valid_point_witness"
+                        else "sat_nonlifting_model_inconclusive"
+                        if validation["status"] == "nonlifting_source_model"
+                        else "sat_point_validation_error"
+                    )
+            entry["solvers"].append(row)
             if args.wdsat_source:
                 build_root = instance / "wdsat-build"
                 for name in ["clean.stdout", "clean.stderr", "build.stdout", "build.stderr"]:
@@ -435,13 +858,43 @@ def main() -> None:
             )
             (instance / "cryptominisat.stdout").write_text(run["stdout"])
             (instance / "cryptominisat.stderr").write_text(run["stderr"])
-            entry["solvers"].append(solver_status(run, "cryptominisat", instance, manifest))
+            row = solver_status(run, "cryptominisat", instance, manifest)
+            if row["status"] == "sat_source_model_unverified_point_witness":
+                assignment = parsed_source_assignment(run, "cryptominisat", manifest)
+                if assignment is None:
+                    row["status"] = "sat_invalid_model"
+                else:
+                    validation = run_assignment_validation(
+                        args.backend,
+                        manifest_path,
+                        manifest,
+                        assignment,
+                        "cryptominisat",
+                        args.timeout,
+                        instance,
+                    )
+                    row["point_witness_validation"] = validation
+                    row["source_witness_valid"] = validation["status"] == "valid_point_witness"
+                    row["status"] = (
+                        "sat"
+                        if validation["status"] == "valid_point_witness"
+                        else "sat_nonlifting_model_inconclusive"
+                        if validation["status"] == "nonlifting_source_model"
+                        else "sat_point_validation_error"
+                    )
+            entry["solvers"].append(row)
         else:
             entry["solvers"].append({"solver": "cryptominisat", "status": "unavailable_operational"})
 
         if tools["magma"]["available"]:
             run = run_timed(
-                [tools["magma"]["path"], "-b", str(instance / "instance.magma")],
+                [
+                    tools["magma"]["path"],
+                    "-t",
+                    "1",
+                    "-b",
+                    str(instance / "instance.magma"),
+                ],
                 args.timeout,
                 instance,
             )
@@ -450,6 +903,22 @@ def main() -> None:
             entry["solvers"].append(solver_status(run, "magma-f4", instance, manifest))
         else:
             entry["solvers"].append({"solver": "magma-f4", "status": "unavailable_operational"})
+        try:
+            entry["source_artifacts_after"] = source_artifact_snapshot(instance, manifest)
+            entry["source_artifacts_unchanged"] = (
+                entry["source_artifacts_before"] == entry["source_artifacts_after"]
+            )
+        except (OSError, ValueError) as error:
+            entry["source_artifacts_after"] = {
+                "status": "source_artifact_snapshot_failed",
+                "error": str(error),
+            }
+            entry["source_artifacts_unchanged"] = False
+        if not entry["source_artifacts_unchanged"]:
+            entry["artifact_status"] = {
+                "status": "source_artifacts_changed_during_backend_matrix",
+                "asserts_nothing_about": "cross-backend comparability",
+            }
         report["instances"].append(entry)
         (args.output / "progress.json").write_text(json.dumps(report, indent=2) + "\n")
 

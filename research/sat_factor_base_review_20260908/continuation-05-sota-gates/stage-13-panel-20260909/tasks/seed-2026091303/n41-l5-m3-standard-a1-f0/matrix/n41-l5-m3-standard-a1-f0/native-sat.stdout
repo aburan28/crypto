@@ -1,0 +1,72 @@
+{
+  "backend": "native-sat",
+  "conflict_budget": 100000,
+  "initial_cnf_clauses": 1505,
+  "interpretation": "Unknown is inconclusive; SAT is accepted only after exact source-row and rational point-witness validation",
+  "manifest_conflict_budget": 100000,
+  "max_models": 64,
+  "models_examined": 1,
+  "native_xor_rows": 68,
+  "nonlifting_models_blocked": 0,
+  "regenerated_source_exact": true,
+  "schema": "koblitz_pdp_isolated_backend.v1",
+  "solver_variables": 502,
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "27ce42b4d382d7886e1ebccd29638d53fb62751157f22310f2b87875fae435ec",
+      "bytes": 42081,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "174cb55f3b56ae9fe22a4053f4124492cc46664e45026f79bf94c70ec38328ca",
+      "bytes": 88584,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "55069529719e9b7c753a45c1f68869a51377cdd1fcdc9057a259ab8402d44e0d",
+      "bytes": 55457,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "11061d2bfb513787d20f80af99b80e7401d8e9078c16c14e399793c82e3b2ec0",
+  "source_instance_verified": true,
+  "source_model_valid": true,
+  "source_variables": 42,
+  "source_witness_valid": true,
+  "stats": {
+    "analyze_lit_visits": 55349,
+    "clause_lit_visits": 15610,
+    "clause_visits": 28443,
+    "conflicts": 93,
+    "decisions": 103,
+    "learnt_clauses": 93,
+    "learnt_lits_kept": 5513,
+    "learnt_lits_raw": 15381,
+    "max_level": 15,
+    "phase_ns": {
+      "analyze": 1088371,
+      "minimize": 364498,
+      "propagate_clauses": 1160669,
+      "propagate_xors": 2094226,
+      "reduce_db": 0
+    },
+    "propagations": 23205,
+    "restarts": 0,
+    "xor_conflicts": 88,
+    "xor_passes": 369,
+    "xor_propagations": 1711,
+    "xor_reason_lits": 30201,
+    "xor_repivots": 4787,
+    "xor_row_ops": 24937,
+    "xor_row_scans": 16435
+  },
+  "status": "sat",
+  "timing_ns": {
+    "encoding": 9898583,
+    "solve": 5271750,
+    "source_verification": 8109709
+  }
+}

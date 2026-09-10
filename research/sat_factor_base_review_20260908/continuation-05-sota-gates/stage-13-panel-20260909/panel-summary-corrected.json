@@ -1,0 +1,103 @@
+{
+  "schema": "koblitz_stage13_wdsat_correction_result.v1",
+  "source_identity_equal": true,
+  "source_instance_blake3": "723663abe5a55a8ac1f566ca3cf45a53f858d366fa30bb2abfa83269ac010b0b",
+  "source_xor_atoms": 32263,
+  "corrected_buffer_size": 32264,
+  "corrected_n59_wdsat_rows": [
+    {
+      "seed": 2026091301,
+      "source": "original_panel",
+      "status": "timeout_inconclusive",
+      "wall_seconds": 120.0051529170014,
+      "total_core_seconds": 116.513682,
+      "single_core_seconds": 116.513682,
+      "peak_rss_bytes": 14254080
+    },
+    {
+      "seed": 2026091302,
+      "source": "original_panel",
+      "status": "timeout_inconclusive",
+      "wall_seconds": 120.00817491696216,
+      "total_core_seconds": 100.014345,
+      "single_core_seconds": 100.014345,
+      "peak_rss_bytes": 14221312
+    },
+    {
+      "seed": 2026091303,
+      "source": "additive_correction",
+      "status": "timeout_inconclusive",
+      "wall_seconds": 120.0173510418972,
+      "total_core_seconds": 98.396824,
+      "single_core_seconds": 98.396824,
+      "peak_rss_bytes": 14450688
+    },
+    {
+      "seed": 2026091304,
+      "source": "original_panel",
+      "status": "timeout_inconclusive",
+      "wall_seconds": 120.0173389579868,
+      "total_core_seconds": 47.617014999999995,
+      "single_core_seconds": 47.617014999999995,
+      "peak_rss_bytes": 14237696
+    },
+    {
+      "seed": 2026091305,
+      "source": "original_panel",
+      "status": "timeout_inconclusive",
+      "wall_seconds": 120.01603654096834,
+      "total_core_seconds": 59.573258,
+      "single_core_seconds": 59.573258,
+      "peak_rss_bytes": 14106624
+    }
+  ],
+  "corrected_n59_wdsat_distribution": {
+    "statuses": {
+      "timeout_inconclusive": 5
+    },
+    "wall_seconds": {
+      "count": 5,
+      "min": 120.0051529170014,
+      "median": 120.01603654096834,
+      "max": 120.0173510418972
+    },
+    "total_core_seconds": {
+      "count": 5,
+      "min": 47.617014999999995,
+      "median": 98.396824,
+      "max": 116.513682
+    },
+    "single_core_seconds": {
+      "count": 5,
+      "min": 47.617014999999995,
+      "median": 98.396824,
+      "max": 116.513682
+    },
+    "peak_rss_bytes": {
+      "count": 5,
+      "min": 14106624.0,
+      "median": 14237696.0,
+      "max": 14450688.0
+    }
+  },
+  "correction_process": {
+    "wall_seconds": 148.12792712496594,
+    "user_seconds": 111.797118,
+    "system_seconds": 3.119031,
+    "total_core_seconds": 114.916149,
+    "single_core_seconds": 114.916149,
+    "peak_rss_bytes": 168689664,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  },
+  "charged_campaign_totals": {
+    "original_panel_plus_ggmp_discovery_core_seconds": 1467.1986749999999,
+    "additive_correction_core_seconds": 114.916149,
+    "total_core_seconds": 1582.1148239999998,
+    "original_panel_plus_ggmp_discovery_wall_seconds": 1946.8505087950034,
+    "additive_correction_wall_seconds": 148.12792712496594,
+    "total_sequential_wall_seconds": 2094.9784359199693,
+    "peak_rss_bytes": 254754816
+  },
+  "composition_rule": "Replace only the failed seed-2026091303 n=59 WDSat distribution arm; retain every original process cost and add the correction process cost.",
+  "claim_boundary": "The corrected panel is complete except for unavailable Magma; it is planted-PDP evidence, not an end-to-end index-calculus or SOTA result."
+}
