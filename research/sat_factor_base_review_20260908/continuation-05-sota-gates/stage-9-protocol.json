@@ -1,0 +1,25 @@
+{
+  "schema": "koblitz_degree21_public_divisor_discovery_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Extend target-independent divisor-kernel discovery beyond degree 15 before deciding whether an unknown-scalar run is feasible.",
+  "curve": {"n": 21, "a": 0},
+  "public_discovery": {
+    "summands": 2,
+    "dimension": 11,
+    "sizing_reason": "dimension 11 is the smallest expected divisor dimension with two times dimension at least 21",
+    "candidate_source": "all degree-11 divisors of T^21-1 over F2",
+    "admission": "the factor-base cofactor classes can sum to zero with exactly two summands",
+    "selection_rule": "among admitted candidates, maximize rational factor-base points; then minimize projected signed-Frobenius columns; then choose lexicographically lower divisor indices",
+    "forbidden_inputs": [
+      "target point or scalar",
+      "target-subgroup enumeration",
+      "factor-base discrete-log labels",
+      "relation yield",
+      "solver timing"
+    ]
+  },
+  "process_watchdog_seconds": 300,
+  "decision_gate": "Freeze a separate unknown-scalar protocol only if discovery terminates, at least one candidate is admitted, and the selected base is within the current materialisation guard.",
+  "claim_boundary": "A public degree-21 census or later toy solve is not a scaling law, crossover, novelty or SOTA result."
+}

@@ -124,6 +124,9 @@ fn main() {
         serde_json::to_string_pretty(&json!({
             "schema":"koblitz_public_factor_base_discovery.v1",
             "n":n,"a":a,"m":m,
+            "group_order":curve.group_order.to_string(),
+            "subgroup_order":curve.subgroup_order.to_string(),
+            "cofactor":curve.cofactor.to_string(),
             "requested_dimension":wanted_dimension,
             "sizing_gate":{"m_times_dimension":m*wanted_dimension,"n":n,"passes":m*wanted_dimension >= n as usize},
             "factor_degrees":factor_degrees,
