@@ -5,6 +5,10 @@ bounded, reproducible index-calculus experiments on internally generated
 known-answer Koblitz instances. Imported points are used only for mathematical
 validation.
 
+**Agent scoreboard:** per-stage records and next targets to beat live in
+[`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
+[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime).
+
 ## Commands
 
     cargo build --release --bin ic

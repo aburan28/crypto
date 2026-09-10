@@ -565,7 +565,10 @@ Headline empirical findings (most recent):
 | Boomerang decay (ToySpn r=1..4)     | ~8 bits/round| 5.05     | 0.990 | empirical signature |
 
 See also [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) for the
-attack/curve-family applicability matrix.
+attack/curve-family applicability matrix, and
+[`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) for the
+per-stage index-calculus records agents should try to beat (binary / Koblitz /
+prime).
 
 ---
 
@@ -778,6 +781,7 @@ problems generally.
 - [`RESEARCH_EXOTIC_COORDINATES.md`](./RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
+- [`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) — index-calculus per-stage boundary ledger (beat targets for agents).
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
 - [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
 - [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.
