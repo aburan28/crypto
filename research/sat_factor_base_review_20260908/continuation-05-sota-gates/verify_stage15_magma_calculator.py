@@ -111,6 +111,8 @@ def parse_calculator_xml(path: Path) -> dict:
     required = {"max_time", "max_input", "seed", "version", "time", "memory"}
     if not required.issubset(headers):
         raise VerificationError(f"{path}: incomplete calculator headers")
+    if set(headers) - required - {"warning", "alert"}:
+        raise VerificationError(f"{path}: unexpected calculator header")
     try:
         maximum_time = int(headers["max_time"])
         maximum_input = int(headers["max_input"])
@@ -147,6 +149,7 @@ def parse_calculator_xml(path: Path) -> dict:
             "service_reported_memory_text": headers["memory"],
             "service_reported_memory_mb": parse_memory_mb(headers["memory"]),
             "warning": headers.get("warning"),
+            "alert": headers.get("alert"),
         },
         "output": output,
     }
@@ -208,7 +211,7 @@ def panel_inventory() -> dict:
     discovered = sorted(PANEL.glob("tasks/seed-*/*/matrix/*/instance.magma"))
     if sorted(paths) != discovered or len(paths) != 20:
         raise VerificationError("Stage 13 Magma inventory is not the exact frozen 20 tasks")
-    eligible = [path for path in paths if path.stat().st_size < OBSERVED_MAX_INPUT]
+    eligible = [path for path in paths if path.stat().st_size <= OBSERVED_MAX_INPUT]
     expected_eligible = [exact_instance(seed) for seed in SEEDS]
     if sorted(eligible) != sorted(expected_eligible):
         raise VerificationError("calculator-eligible frozen input set changed")
@@ -261,7 +264,7 @@ def verify_case(seed: int) -> dict:
         raise VerificationError(
             f"seed {seed}: calculator adaptation changed more than SetNthreads(1)"
         )
-    if len(adapted) >= 50_000:
+    if len(adapted) > OBSERVED_MAX_INPUT:
         raise VerificationError(f"seed {seed}: adapted input exceeds the calculator cap")
 
     exact_response = parse_calculator_xml(ARTIFACT / f"seed-{seed}-exact-response.xml")
@@ -271,6 +274,7 @@ def verify_case(seed: int) -> dict:
     exact_warning = exact_response["service"]["warning"]
     if (
         exact_warning is None
+        or exact_response["service"]["alert"] is not None
         or "SetNthreads" not in exact_response["output"]
         or "Illegal operation" not in exact_response["output"]
     ):
@@ -279,7 +283,11 @@ def verify_case(seed: int) -> dict:
     adapted_response = parse_calculator_xml(ARTIFACT / f"seed-{seed}-adapted-response.xml")
     require_clean_f4_output(adapted_response["output"], seed)
     adapted_terminal = parse_magma_terminal(adapted_response["output"])
-    if adapted_terminal is None or adapted_response["service"]["warning"] is not None:
+    if (
+        adapted_terminal is None
+        or adapted_response["service"]["warning"] is not None
+        or adapted_response["service"]["alert"] is not None
+    ):
         raise VerificationError(f"seed {seed}: adapted response is not a clean F4 terminal")
     if terminal_identity(exact_terminal) != terminal_identity(adapted_terminal):
         raise VerificationError(f"seed {seed}: exact and adapted F4 terminals disagree")
@@ -295,6 +303,7 @@ def verify_case(seed: int) -> dict:
     )
     if (
         witness_response["service"]["warning"] is None
+        or witness_response["service"]["alert"] is not None
         or "GetTempDir" not in witness_response["output"]
         or "KOBLITZ_MAGMA_WITNESS_ASSIGNMENT=" in witness_response["output"]
     ):

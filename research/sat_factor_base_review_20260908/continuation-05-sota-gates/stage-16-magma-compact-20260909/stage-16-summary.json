@@ -1,0 +1,392 @@
+{
+  "additional_compact_ggmp_responses": 2,
+  "cases": [
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "sat_basis_certificate_unverified_model",
+      "input_path": "seed-2026091303-compact-input.magma",
+      "point_witness_validated": false,
+      "process_scoped_resources_complete": false,
+      "representation": "compact BooleanPolynomial monomial-mask list",
+      "response_path": "seed-2026091303-response.xml",
+      "response_sha256": "3079160c48b4d1f6f431b6bb868ee6c61823540b1041dbb1fc42a786485cfb75",
+      "seed": 2026091303,
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 4097621701,
+        "service_reported_memory_mb": 267.94,
+        "service_reported_memory_text": "267.94MB",
+        "service_reported_time_seconds": 13.779,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "source_equivalence": {
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_input_bytes": 47680,
+        "compact_input_sha256": "99a216bd87d9d77007120ee9a0d907a25d0186ae103c607f0f88a1de5965a164",
+        "constant_mapping": "WDSat XOR rows without T have RHS true and map to a Magma constant term",
+        "equation_monomial_lists_equal": true,
+        "equations": 62,
+        "seed": 2026091303,
+        "source_anf_sha256": "1403109f62c5161ec412b2a31f0b034a0969af41d5e0be2f8c0b728865162ee2",
+        "source_magma_sha256": "ffc0a96967314e90da037bcaac2f0ebc590d9f074915fb9ce5392baea1cf6d8b",
+        "variables": 46
+      },
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 87,
+        "cpu_seconds": 13.76,
+        "f4_step_degrees": [
+          2,
+          2,
+          3,
+          3,
+          4,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 13.77
+      }
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "sat_basis_certificate_unverified_model",
+      "input_path": "seed-2026091305-compact-input.magma",
+      "point_witness_validated": false,
+      "process_scoped_resources_complete": false,
+      "representation": "compact BooleanPolynomial monomial-mask list",
+      "response_path": "seed-2026091305-response.xml",
+      "response_sha256": "d7acadeda625ff9e927ae4713e393c0b43c7138a80cee669faa15bf58257006c",
+      "seed": 2026091305,
+      "service": {
+        "alert": null,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "max_input_bytes": 50000,
+        "max_time_seconds": 60,
+        "server_seed": 1005805858,
+        "service_reported_memory_mb": 267.88,
+        "service_reported_memory_text": "267.88MB",
+        "service_reported_time_seconds": 13.83,
+        "version": "2.29-10",
+        "warning": null
+      },
+      "source_equivalence": {
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_input_bytes": 48284,
+        "compact_input_sha256": "73237e89419aa7dc89e06bab33cc6093af0f381b494549eeee40e29402f6e646",
+        "constant_mapping": "WDSat XOR rows without T have RHS true and map to a Magma constant term",
+        "equation_monomial_lists_equal": true,
+        "equations": 62,
+        "seed": 2026091305,
+        "source_anf_sha256": "afa3609d26e273cfd41f3d6157d8543b282c9b97fc91a05bed233d6faa421daa",
+        "source_magma_sha256": "cb9420cd81ae7b63a25dcbe05eae00c59dae27dfc0432cbfab36cb9fff527070",
+        "variables": 46
+      },
+      "terminal": {
+        "algorithm": "direct-f4-sparse",
+        "basis_size": 87,
+        "cpu_seconds": 13.82,
+        "f4_step_degrees": [
+          2,
+          2,
+          3,
+          3,
+          4,
+          3,
+          4
+        ],
+        "gpu_disabled": true,
+        "schema": "koblitz_magma_f4_terminal.v1",
+        "single_thread_requested": true,
+        "terminal_status": "sat",
+        "wall_seconds": 13.82
+      }
+    }
+  ],
+  "claim": "Two additional n=31 GGMP systems have source-equivalent compact direct-F4 proper-ideal terminals. The compact renderer is monomial-list equivalent to all twenty frozen ANF/Magma pairs. These receipts lack point witnesses and process-scoped resources and do not complete the Magma matrix or support a SOTA claim.",
+  "constructor_sanity": {
+    "input_path": "boolean-mask-sanity.magma",
+    "input_sha256": "3d400ba3142d4706304bc29b806c3833c23073ddc03dfde894df1c65a80eaf4e",
+    "response_path": "boolean-mask-sanity.xml",
+    "response_sha256": "1fc7cba0342114d8711b1bfb36e51a589dd6471ad6d18b8cfa1fca7766de37f5",
+    "variable_mask_convention": "variable i is represented by integer bit 1 << i",
+    "verbose_equals_compact": true
+  },
+  "equivalence_inventory": {
+    "all_equation_monomial_lists_equal": true,
+    "calculator_eligible": [
+      {
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "seed": 2026091301
+      },
+      {
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "seed": 2026091303
+      },
+      {
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "seed": 2026091303
+      },
+      {
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "seed": 2026091305
+      }
+    ],
+    "rows": [
+      {
+        "anf_sha256": "ee518614ed984686a5b2b28d031a59426b79aa494e3bdb0a2588c1fed74f4abc",
+        "basis": "standard",
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "compact_bytes": 29952,
+        "compact_sha256": "9159b146f5478718a6e6e916a5e5f19e70bd36242f8eadf3f9cd384369c812d6",
+        "equations": 58,
+        "fits_calculator": true,
+        "seed": 2026091301,
+        "variables": 42,
+        "verbose_magma_sha256": "fd82e5b47caf1904bd9e7cc5e6c8ae126644014868ea23a396b8f2bb5f3bacfd"
+      },
+      {
+        "anf_sha256": "8ce5a2c46809c2b75e473c2ccdb96203ba4f3c77874fa59f68a2dfcfc68b5870",
+        "basis": "ggmp",
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_bytes": 53957,
+        "compact_sha256": "2dd03db8cda576a9de2c97b42cc65cdbfa9845bffc5035387bd7cbe35f17af74",
+        "equations": 62,
+        "fits_calculator": false,
+        "seed": 2026091301,
+        "variables": 46,
+        "verbose_magma_sha256": "f8a776dcb37cd76ede13bb9b7ad430fdce61d37589579c61802ff236c66749e5"
+      },
+      {
+        "anf_sha256": "3e4e8ebd01208aa39657f26f376b8b71e166c4c8dc401bc212673e152d96d427",
+        "basis": "standard",
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "compact_bytes": 69652,
+        "compact_sha256": "076f3f4350c181ab0d3934da1da1027083686c37c2b70a22287b557618ea7511",
+        "equations": 68,
+        "fits_calculator": false,
+        "seed": 2026091301,
+        "variables": 42,
+        "verbose_magma_sha256": "f0e9616306de8e2ee42c8ec29c67550f6d51253bae90076ef4215a290e78778a"
+      },
+      {
+        "anf_sha256": "110d18b1135892ccc7d43b263aee3352817c795c3e1a5f123eda7bd2e7dec088",
+        "basis": "standard",
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "compact_bytes": 638611,
+        "compact_sha256": "6a2bd2135775dc9e546308fe3cfcfecddeb22920863a53a067462ad6ba8dadab",
+        "equations": 110,
+        "fits_calculator": false,
+        "seed": 2026091301,
+        "variables": 78,
+        "verbose_magma_sha256": "348691b6a6678b1655c7bf7be464c2bbd945dcd81aa45a52167ed1efa11a9613"
+      },
+      {
+        "anf_sha256": "3e010c33e1d3fe0ed993772246241d4430ad6237e7cdf162a70d1665d45b27cb",
+        "basis": "standard",
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "compact_bytes": 61311,
+        "compact_sha256": "d35cd1b5bd21328202bceacf0d55dcd046f84fba223be921a4c3098c0d592f7b",
+        "equations": 58,
+        "fits_calculator": false,
+        "seed": 2026091302,
+        "variables": 42,
+        "verbose_magma_sha256": "ae77502faed37f52293f6e231d0a33c008447b9337a7d5f4fcceff68ed60eb57"
+      },
+      {
+        "anf_sha256": "0062bbe4aa4335cdc3c2bb666670e55e1f10642cbd9b02f0492ba362fbd8528b",
+        "basis": "ggmp",
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_bytes": 52518,
+        "compact_sha256": "f92a2f708da637da448ad12c302f6912e3cd2f878e0e7815c9911747fb01e2cb",
+        "equations": 62,
+        "fits_calculator": false,
+        "seed": 2026091302,
+        "variables": 46,
+        "verbose_magma_sha256": "7a85487afd757b4cf5711146a5ccebcb4802cb7e90b420b9f05a18a7f6081cdd"
+      },
+      {
+        "anf_sha256": "6a4ac9da9f24085a6d38bb7ecf38d07ea61551b2c1b6b96dbfedcd833123270e",
+        "basis": "standard",
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "compact_bytes": 69196,
+        "compact_sha256": "65bc91c5285fe304e7055bc29371475eb43b93d5aad0dba13e65fb69163cbc44",
+        "equations": 68,
+        "fits_calculator": false,
+        "seed": 2026091302,
+        "variables": 42,
+        "verbose_magma_sha256": "68f51424b33c839dd1a9e3483cd8c7a02c383b602bf6d39365bb38afc6e213eb"
+      },
+      {
+        "anf_sha256": "a35b3eff3ee0530b93326ae1542e99f7dd7d5488029335e33bcee2de9c1866ba",
+        "basis": "standard",
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "compact_bytes": 620588,
+        "compact_sha256": "f6afd71ed0bce8777254b29fd1a3c863f31c6d49bf0ef48ab4b10f2a7b15c22d",
+        "equations": 110,
+        "fits_calculator": false,
+        "seed": 2026091302,
+        "variables": 78,
+        "verbose_magma_sha256": "07511e24c8c54411f92a135fb08ef956539bbabe92aace500985ad3b68bd814e"
+      },
+      {
+        "anf_sha256": "c780c21290bf0e607ea5dcdf83da6cff8d23ad0ff577dd43e55dc15c36b18fb0",
+        "basis": "standard",
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "compact_bytes": 23570,
+        "compact_sha256": "4482191e66ed35df68bbe3d43ff3ba22f2966095c98111aa9c0a461f2357b335",
+        "equations": 58,
+        "fits_calculator": true,
+        "seed": 2026091303,
+        "variables": 42,
+        "verbose_magma_sha256": "93dbea20524f854176e4bfc3ef68080b3a8e5b9df63f206016a79d8c7e2a9689"
+      },
+      {
+        "anf_sha256": "1403109f62c5161ec412b2a31f0b034a0969af41d5e0be2f8c0b728865162ee2",
+        "basis": "ggmp",
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_bytes": 47680,
+        "compact_sha256": "99a216bd87d9d77007120ee9a0d907a25d0186ae103c607f0f88a1de5965a164",
+        "equations": 62,
+        "fits_calculator": true,
+        "seed": 2026091303,
+        "variables": 46,
+        "verbose_magma_sha256": "ffc0a96967314e90da037bcaac2f0ebc590d9f074915fb9ce5392baea1cf6d8b"
+      },
+      {
+        "anf_sha256": "fb7162307f6bf9aa738a8691deec381b7b261aa00b6e7975a94fbc30efffe394",
+        "basis": "standard",
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "compact_bytes": 79868,
+        "compact_sha256": "5fe4e652d07b5aca7e3a0ae40954f8a0bdf3f32a0601e2aeb1d6eb59b49c3f3a",
+        "equations": 68,
+        "fits_calculator": false,
+        "seed": 2026091303,
+        "variables": 42,
+        "verbose_magma_sha256": "d22f64a082cb82e4d22d1d00fb11868e41da52dd119803979be9f82eafe47040"
+      },
+      {
+        "anf_sha256": "e8ba722fd343b16f8a6068f05900c6e7084ca02c1e0a67c876d204cbd745f485",
+        "basis": "standard",
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "compact_bytes": 642680,
+        "compact_sha256": "a6ee1a4447761f9fa0ba4dd9491f305757f8ab7cfddd504abda8f8ec5a74184e",
+        "equations": 110,
+        "fits_calculator": false,
+        "seed": 2026091303,
+        "variables": 78,
+        "verbose_magma_sha256": "4948f3faf768e422a046fcc3bc0398d835468c33f30b94599b1f72f39e6f7ec2"
+      },
+      {
+        "anf_sha256": "923b5a58d0fd922815109c378f9c39647a32602f35b3d68fb2d1d2e8844f6775",
+        "basis": "standard",
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "compact_bytes": 58338,
+        "compact_sha256": "a60e6a0e29b2ebec073fe70536e373261fd798062ff33d615e1adb5b178629b5",
+        "equations": 58,
+        "fits_calculator": false,
+        "seed": 2026091304,
+        "variables": 42,
+        "verbose_magma_sha256": "f5f5771f9b48fa2ca0592de75f1c01819d1c344a0f8c3e5d714dd8441e37fb5f"
+      },
+      {
+        "anf_sha256": "cb1027d26d50313548e13719ac123701e885c2c6b43b06846146be9e697d5ab4",
+        "basis": "ggmp",
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_bytes": 50883,
+        "compact_sha256": "517841cf8558d9d4657354e238472f0e7c70cc12611fe41eeaf27e97a9145917",
+        "equations": 62,
+        "fits_calculator": false,
+        "seed": 2026091304,
+        "variables": 46,
+        "verbose_magma_sha256": "a9e522ed1dd2bb6bdf0dc5bab5a3471e7c59ab79883c40806cababfe80fd17cf"
+      },
+      {
+        "anf_sha256": "e1db3c5dbe7de7b6a56405af34284869f870196fb7181dbc8a58a0aa2d774262",
+        "basis": "standard",
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "compact_bytes": 74441,
+        "compact_sha256": "fbd7d582778fa1ff913a7f7f11771f73a6e4bec7a5088f35f1e80dccdd723e02",
+        "equations": 68,
+        "fits_calculator": false,
+        "seed": 2026091304,
+        "variables": 42,
+        "verbose_magma_sha256": "c79453a23c46b6d39e863c7c1a608f4fca37edc19ec377097376edf9fa541bfe"
+      },
+      {
+        "anf_sha256": "a930ad193b8b624c0b8d16acf8478a847e30ed06901d5cacc56b4f1d263e55fc",
+        "basis": "standard",
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "compact_bytes": 628812,
+        "compact_sha256": "be4986addf4ceea3a345ef62841a0f7b7cd510110c5e08f1f31629afc8e2fc56",
+        "equations": 110,
+        "fits_calculator": false,
+        "seed": 2026091304,
+        "variables": 78,
+        "verbose_magma_sha256": "d8e81052083a4e7c4ae5d4b23afddcf975e942132d5632c5db8d2d9ffb0beb57"
+      },
+      {
+        "anf_sha256": "4b9848726f883c9a8e69ff7300c34d2dfaa162a3921401ed3240be17b3ecb3b9",
+        "basis": "standard",
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "compact_bytes": 59176,
+        "compact_sha256": "fe4ffcb94b4065ad122361e566900a53df84b07d451e6999305005e877d72697",
+        "equations": 58,
+        "fits_calculator": false,
+        "seed": 2026091305,
+        "variables": 42,
+        "verbose_magma_sha256": "58be038a34591285a9eab1fbf00b27cfca03cd57f46dd317a352f86c60dfbd1b"
+      },
+      {
+        "anf_sha256": "afa3609d26e273cfd41f3d6157d8543b282c9b97fc91a05bed233d6faa421daa",
+        "basis": "ggmp",
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "compact_bytes": 48284,
+        "compact_sha256": "73237e89419aa7dc89e06bab33cc6093af0f381b494549eeee40e29402f6e646",
+        "equations": 62,
+        "fits_calculator": true,
+        "seed": 2026091305,
+        "variables": 46,
+        "verbose_magma_sha256": "cb9420cd81ae7b63a25dcbe05eae00c59dae27dfc0432cbfab36cb9fff527070"
+      },
+      {
+        "anf_sha256": "4d8ec8cc57d13e9541b42bac878a535ea2e42d615e0ba9a7415fa07e1dbe660a",
+        "basis": "standard",
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "compact_bytes": 81116,
+        "compact_sha256": "01dda7f9509500f2bee0bccc8df3e76a55448b7ad32287626d96ceeee9765130",
+        "equations": 68,
+        "fits_calculator": false,
+        "seed": 2026091305,
+        "variables": 42,
+        "verbose_magma_sha256": "90800d08c9696d1131221233f44670ec3ef81d2a97195a64f79bc92934b2b75d"
+      },
+      {
+        "anf_sha256": "44a350563ae9ff2e3d363bbed7fa6432b0b99a55f028c2f70ee5e689e5088534",
+        "basis": "standard",
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "compact_bytes": 596016,
+        "compact_sha256": "a1f5556c6aa396a05ba7afaa059dae7f7e81f4b0485b19a93163a4ba0102a461",
+        "equations": 110,
+        "fits_calculator": false,
+        "seed": 2026091305,
+        "variables": 78,
+        "verbose_magma_sha256": "b1bd2fb403956a23864c2b0c9b5e3784f925991d4c67d3f4fc1f762c628d61f6"
+      }
+    ],
+    "tasks": 20
+  },
+  "evidence_class": "source_equivalent_external_service_receipt",
+  "full_magma_matrix_executed": false,
+  "full_solver_matrix_gate_passed": false,
+  "magma_process_resource_receipts_complete": false,
+  "schema": "koblitz_magma_compact_stage16_summary.v1",
+  "validated_magma_point_witnesses": 0
+}
