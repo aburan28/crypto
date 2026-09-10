@@ -738,8 +738,8 @@ characteristic, as negation and as scaling by `−1`, and reported
 
 | curve, group, seeds | `|Γ|` | relation | collapse |
 |---|---:|---|---:|
-| `K₁/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | TBD-CTRL | not enumerated |
-| `K₀/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | (control) | 15.9 |
+| `K₁/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | **the 18-term symmetrised `S₄` of §3.2, exactly**: degrees `[2,2,2,2,1]`, total degree 6, weighted 12 | not enumerated |
+| `K₀/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | the same 18 terms | 15.9 |
 | `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i` only | 128 | none up to total degree 5 | **135.3**: the per-point invariants merge distinct `Γ`-orbits at `m = 3` (they separated them at `m = 2`) |
 | `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i, Σu` | 128 | degree `[2,2,2,2 \| 1,·,1]` in `v_i = e₂[u_i]`, `e₂[Σu]`, `e₄[Σu]`; 21 terms | **128.0**, exact |
 | `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ Πu` | 128 | the same 21-term relation | 128.0 |
@@ -749,6 +749,12 @@ characteristic, as negation and as scaling by `−1`, and reported
 | `y² = x³ − x`, `E[2]`, `+ Σu, Πu` | 128 | linear in `e₁, e₂, e₄[Πu]`, `e₄[Σu]`, 5 terms | not enumerated |
 | `y² = x³ − x`, `E[2] + Aut` | 256 | linear in `e₄[u_i]`, `e₄[Σu]`, `e₁, e₄[Πu]`, 8 terms | not enumerated |
 | `y² = x³ + x + 2`, `E[2]`, `+ Σu, Πu` | 128 | degree 2 in `e_k[Πu]`, `e₄[Σu]`, 17 terms | not enumerated |
+
+The control rows are the strongest check the second search gets: given
+only "translate by `T₂`, negate", the group engine finds the relation
+subgroup, builds `w_i = e₂[u_i]` and `s = Σu` without being told what
+they are, and interpolates the same 18 monomials §3.2 obtained from the
+hand-derived invariants.
 
 The `K₀` row with `Σu` is the `m = 3` analogue of §10.2: degree 2 in each
 per-point quotient coordinate, as the symmetrised `S₄` of §3.2 is in each
