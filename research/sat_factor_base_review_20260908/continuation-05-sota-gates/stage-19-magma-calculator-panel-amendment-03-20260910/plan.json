@@ -1,0 +1,616 @@
+{
+  "claim_boundary": "At most nine additional source-equivalent official-calculator F4 terminal receipts for original Stage 19 tasks 2-10. Together with five earlier terminals and one additive wrapped-response adjudication, nine clean receipts would cover fifteen public-service-accessible n31/n41 tasks. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped solver CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+  "dependencies": [
+    {
+      "bytes": 8040,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pdp-panel-protocol.json",
+      "sha256": "971aab65d3b0859b57c1ccfd69f66f9392c30d0aa6471b59036c90833972a0eb"
+    },
+    {
+      "bytes": 1332,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-custody.json",
+      "sha256": "0bc4f79c3c6d1be85deb2f1cb50e0bb0db9cc75c10c1f398e179982e7201deca"
+    },
+    {
+      "bytes": 20350,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py",
+      "sha256": "67d67ab6b13ff9e392029db2d63165ad31bbbdd37288576d114a4960a065424e"
+    },
+    {
+      "bytes": 17821,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage16_magma_compact.py",
+      "sha256": "85be6e77cd96d0b92cb0c3cc0746316968bcd4ba1a99c8332f2c8511712695d8"
+    },
+    {
+      "bytes": 8689,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage17_magma_n41.py",
+      "sha256": "2c6c651ae5d9a699245bc15ccd346f0340a87a99fa46a5915159bd42884dcdf4"
+    },
+    {
+      "bytes": 14929,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/stage-15-summary.json",
+      "sha256": "a955cf9e265576a2fd5296905b597ecf6f15e92d628d905db7351c533329e319"
+    },
+    {
+      "bytes": 16031,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-16-magma-compact-20260909/stage-16-summary.json",
+      "sha256": "599e5ff6e0cdb3725af0d303029f5e6f9387e4bd79ce08fa65d0e635f5dd0644"
+    },
+    {
+      "bytes": 8122,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-17-magma-n41-20260909/stage-17-summary.json",
+      "sha256": "8de51c09d6799aba4d93694df67efdd3884ce013e2830bd8f30f4928e0aaea24"
+    },
+    {
+      "bytes": 16738,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_amendment03.py",
+      "sha256": "ea35a01a516fa38dc1be751a918ec9e2de86cce0fc94f84222d3d357e5d80c14"
+    },
+    {
+      "bytes": 3368,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-summary.json",
+      "sha256": "12e45f97982eeedd0bdaf025949af453c5ba5673130f31e1eb7c8bed0a364993"
+    }
+  ],
+  "execution_policy": {
+    "attempts_per_task": 1,
+    "explicit_execute_flag_required": true,
+    "halt_after_nonclean_receipt": true,
+    "halted_state_is_terminal": true,
+    "inter_request_delay_seconds": 2,
+    "parallel_workers": 1,
+    "predecessor_ledgers_are_terminal_and_never_resumed": true,
+    "predecessor_started_tasks_excluded": true,
+    "resume_skips_every_started_task": true,
+    "retries_per_task": 0,
+    "task_order": "remaining seed-major frozen order"
+  },
+  "named_eligible_tasks": 15,
+  "planned_requests": 9,
+  "predecessor_attempt_starts": [
+    {
+      "artifact": "stage-19-magma-calculator-panel-20260909",
+      "attempt_ordinal": 1,
+      "attempt_start": {
+        "bytes": 1474,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/attempt-start.json",
+        "sha256": "d44de6275e2e8c6ba3b8fdc657cd3f035ad91243135544df6bb6407aafa8092d"
+      },
+      "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+    },
+    {
+      "artifact": "stage-19-magma-calculator-panel-amendment-01-20260910",
+      "attempt_ordinal": 1,
+      "attempt_start": {
+        "bytes": 1567,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/attempt-start.json",
+        "sha256": "5c98c86801c96929d5e5af827bcfcf5036dc14ae372f9a5a50afa16aa9b43c6a"
+      },
+      "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+    },
+    {
+      "artifact": "stage-19-magma-calculator-panel-amendment-02-20260910",
+      "attempt_ordinal": 1,
+      "attempt_start": {
+        "bytes": 1734,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910/attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/attempt-start.json",
+        "sha256": "20df43428e71c5fb66b2eaaf45bb7b9882852a3fbb4885c507ef2d835f9ada5d"
+      },
+      "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+    }
+  ],
+  "predecessor_attempted_task_ids": [
+    "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+  ],
+  "protocol": {
+    "bytes": 5365,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-magma-calculator-panel-protocol.json",
+    "sha256": "1cfa9e7da0bc982bfe6b8f4eae710fb9ce888ef7e7a5bb23435deb41244ee9c3"
+  },
+  "representation": "one named Boolean-ring generator per source variable",
+  "retained_prior_expected_summaries": [
+    {
+      "bytes": 14929,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/stage-15-summary.json",
+      "sha256": "a955cf9e265576a2fd5296905b597ecf6f15e92d628d905db7351c533329e319",
+      "stage": 15
+    },
+    {
+      "bytes": 16031,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-16-magma-compact-20260909/stage-16-summary.json",
+      "sha256": "599e5ff6e0cdb3725af0d303029f5e6f9387e4bd79ce08fa65d0e635f5dd0644",
+      "stage": 16
+    },
+    {
+      "bytes": 8122,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-17-magma-n41-20260909/stage-17-summary.json",
+      "sha256": "8de51c09d6799aba4d93694df67efdd3884ce013e2830bd8f30f4928e0aaea24",
+      "stage": 17
+    },
+    {
+      "amendment": 3,
+      "bytes": 3368,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-amendment-03-summary.json",
+      "sha256": "12e45f97982eeedd0bdaf025949af453c5ba5673130f31e1eb7c8bed0a364993",
+      "stage": 19
+    }
+  ],
+  "retained_prior_f4_terminals": 6,
+  "retained_prior_receipts": [
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "response_sha256": "d0115162aeb1ab69c99ef7c6d51741362cbefe1e8a45a23e7898bf512b113795",
+      "seed": 2026091301,
+      "stage": 15
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "response_sha256": "5666b14b25c63a47a42cf217461e332056057ad8d31d7ee8f216799cacd89266",
+      "seed": 2026091303,
+      "stage": 15
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "response_sha256": "3079160c48b4d1f6f431b6bb868ee6c61823540b1041dbb1fc42a786485cfb75",
+      "seed": 2026091303,
+      "stage": 16
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "response_sha256": "d7acadeda625ff9e927ae4713e393c0b43c7138a80cee669faa15bf58257006c",
+      "seed": 2026091305,
+      "stage": 16
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "response_sha256": "6726ffd9095a47d3031971fdd1092d17b7c4701ae6e92393a176008e2abfb908",
+      "seed": 2026091301,
+      "stage": 17
+    },
+    {
+      "amendment": 3,
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "response_sha256": "f3a3ff4eb72d22be22a198adf9f4032f2c5df45703f997a4ee6f9d047219773e",
+      "seed": 2026091301,
+      "source": "additive_exact_fold_adjudication",
+      "stage": 19,
+      "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+    }
+  ],
+  "schema": "koblitz_magma_calculator_stage19_amendment03_plan.v1",
+  "service": {
+    "client_timeout_seconds": 75,
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "expected_version": "2.29-10",
+    "form_field": "input",
+    "max_input_bytes": 50000,
+    "max_response_bytes": 1048576,
+    "max_service_seconds": 60,
+    "published_calculator_page": "https://magma.maths.usyd.edu.au/calc/",
+    "user_agent": "aburan28-crypto-koblitz-stage19-amendment03/1"
+  },
+  "source_archive": {
+    "all_equation_monomial_lists_equal": true,
+    "commit": "5dbe54dd468e914b5872d10d06e7c44d01b0a236",
+    "source_revision": "67cf7f559cf6cf4c70fc16f22eb5dd68e4883d31",
+    "verified_tasks": 20
+  },
+  "successor_tasks_disjoint_from_predecessor_attempts": true,
+  "task_order": "remaining seed-major frozen order",
+  "tasks": [
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 58,
+      "id": "seed-2026091302/n31-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 20253,
+        "path": "inputs/01-seed-2026091302-n31-l5-m3-standard-a1-f0.magma",
+        "sha256": "1cb57677df423554550e55f8feab6c1b2f26871c63afde8f255014cd555bf75a"
+      },
+      "ordinal": 1,
+      "original_stage19_ordinal": 2,
+      "producer_source_instance_blake3": "e8325bfed2248f5f5697f499a9f2fc42bf287c63db9f949dd3c0b890bcf4c7ca",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "de9a1c19d75f629512538b49e851b8b9",
+        "source_instance_sha256_lo": "ed9ff34c3ab7938cec455ed0d9199fd2",
+        "task_id": "seed-2026091302/n31-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091302,
+      "source_anf": {
+        "bytes": 42580,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "3e010c33e1d3fe0ed993772246241d4430ad6237e7cdf162a70d1665d45b27cb"
+      },
+      "source_binding": {
+        "bytes": 9786,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "355a6033236e659173b73beaf6b08739f0f604f635c917981a912571215718d4"
+      },
+      "source_instance_sha256": "de9a1c19d75f629512538b49e851b8b9ed9ff34c3ab7938cec455ed0d9199fd2",
+      "source_verbose_magma": {
+        "bytes": 68350,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "ae77502faed37f52293f6e231d0a33c008447b9337a7d5f4fcceff68ed60eb57"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 62,
+      "id": "seed-2026091302/n31-l5-m3-ggmp-a0-f0",
+      "named_input": {
+        "bytes": 21043,
+        "path": "inputs/02-seed-2026091302-n31-l5-m3-ggmp-a0-f0.magma",
+        "sha256": "605815fd62374b75d3c8430cdd0206a4ba67658d651dd3b61f4635886bd2fe8a"
+      },
+      "ordinal": 2,
+      "original_stage19_ordinal": 3,
+      "producer_source_instance_blake3": "2a7ad10cce8ab1e36afa6dcd8abd955b8e284ff01de4e2f5f1b83a410a113930",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "012a4bbaf9ebd7e76e698cba8732a735",
+        "source_instance_sha256_lo": "66594503fb0753d8449aa8ca6b365e40",
+        "task_id": "seed-2026091302/n31-l5-m3-ggmp-a0-f0"
+      },
+      "seed": 2026091302,
+      "source_anf": {
+        "bytes": 40695,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.anf",
+        "sha256": "0062bbe4aa4335cdc3c2bb666670e55e1f10642cbd9b02f0492ba362fbd8528b"
+      },
+      "source_binding": {
+        "bytes": 9556,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-ggmp-a0-f0/source-binding.json",
+        "sha256": "fdd9bfc4932327128daf63e572f4e88e1ebbb2b1fd9e169e2458cfb96bc41202"
+      },
+      "source_instance_sha256": "012a4bbaf9ebd7e76e698cba8732a73566594503fb0753d8449aa8ca6b365e40",
+      "source_verbose_magma": {
+        "bytes": 68190,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.magma",
+        "sha256": "7a85487afd757b4cf5711146a5ccebcb4802cb7e90b420b9f05a18a7f6081cdd"
+      },
+      "variables": 46
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 68,
+      "id": "seed-2026091302/n41-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 22639,
+        "path": "inputs/03-seed-2026091302-n41-l5-m3-standard-a1-f0.magma",
+        "sha256": "423a1009b5408beb13f650923e3432cb5960cd359a81d5f15725875d8fb4b974"
+      },
+      "ordinal": 3,
+      "original_stage19_ordinal": 4,
+      "producer_source_instance_blake3": "90fbf64b5250d65cd0ba4828b72604a3004a552a79348c1c4e294ab6e043adfd",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "b4103a9cda9a5e0d09fce565132f5e34",
+        "source_instance_sha256_lo": "43ef9d53f6ab880f18a84938daf71c36",
+        "task_id": "seed-2026091302/n41-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091302,
+      "source_anf": {
+        "bytes": 47792,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "6a4ac9da9f24085a6d38bb7ecf38d07ea61551b2c1b6b96dbfedcd833123270e"
+      },
+      "source_binding": {
+        "bytes": 9624,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n41-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "6335e4c7171ef172b706f37b4e919b2fed9dec5de4c261d1eab5994b6086cddc"
+      },
+      "source_instance_sha256": "b4103a9cda9a5e0d09fce565132f5e3443ef9d53f6ab880f18a84938daf71c36",
+      "source_verbose_magma": {
+        "bytes": 76760,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091302/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "68f51424b33c839dd1a9e3483cd8c7a02c383b602bf6d39365bb38afc6e213eb"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 68,
+      "id": "seed-2026091303/n41-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 26017,
+        "path": "inputs/04-seed-2026091303-n41-l5-m3-standard-a1-f0.magma",
+        "sha256": "2cfd9dc67bb3e994c7f605c5e70bc983fe4b239d664c7ffae8492684a6fa3513"
+      },
+      "ordinal": 4,
+      "original_stage19_ordinal": 5,
+      "producer_source_instance_blake3": "11061d2bfb513787d20f80af99b80e7401d8e9078c16c14e399793c82e3b2ec0",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "eca16d893f22bf1ac58cda4a24a754d6",
+        "source_instance_sha256_lo": "36ce4d13a60d26989e03d8782b802e95",
+        "task_id": "seed-2026091303/n41-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091303,
+      "source_anf": {
+        "bytes": 55457,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091303/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "fb7162307f6bf9aa738a8691deec381b7b261aa00b6e7975a94fbc30efffe394"
+      },
+      "source_binding": {
+        "bytes": 9655,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091303/n41-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "4949b0add74c84ba7dc1dbcf422ba61d41a6c96a0744e57f6149e14aed6ea129"
+      },
+      "source_instance_sha256": "eca16d893f22bf1ac58cda4a24a754d636ce4d13a60d26989e03d8782b802e95",
+      "source_verbose_magma": {
+        "bytes": 88584,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091303/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "d22f64a082cb82e4d22d1d00fb11868e41da52dd119803979be9f82eafe47040"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 58,
+      "id": "seed-2026091304/n31-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 19407,
+        "path": "inputs/05-seed-2026091304-n31-l5-m3-standard-a1-f0.magma",
+        "sha256": "a96067f560c4995c285db0dc53ba6742c05a008159dfdee1f942145644e86fc3"
+      },
+      "ordinal": 5,
+      "original_stage19_ordinal": 6,
+      "producer_source_instance_blake3": "297298f0c2c7da5655a77487d61e416aaa12c0af25fee96fd874aab68fc49038",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "32e46dced2587ca4a45e69f88e400e67",
+        "source_instance_sha256_lo": "949fbedd04a4dccddba97abc6ab79304",
+        "task_id": "seed-2026091304/n31-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091304,
+      "source_anf": {
+        "bytes": 40737,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "923b5a58d0fd922815109c378f9c39647a32602f35b3d68fb2d1d2e8844f6775"
+      },
+      "source_binding": {
+        "bytes": 9600,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "3080a92595008da6968bc0a36d74eb030c9021a4fff8ba3238a1f6788b3828d2"
+      },
+      "source_instance_sha256": "32e46dced2587ca4a45e69f88e400e67949fbedd04a4dccddba97abc6ab79304",
+      "source_verbose_magma": {
+        "bytes": 65334,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "f5f5771f9b48fa2ca0592de75f1c01819d1c344a0f8c3e5d714dd8441e37fb5f"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 62,
+      "id": "seed-2026091304/n31-l5-m3-ggmp-a0-f0",
+      "named_input": {
+        "bytes": 20321,
+        "path": "inputs/06-seed-2026091304-n31-l5-m3-ggmp-a0-f0.magma",
+        "sha256": "967b107f161b3b4ce935d80acf7235528aaa34ece13a6dd1d2297c5c9b9eb731"
+      },
+      "ordinal": 6,
+      "original_stage19_ordinal": 7,
+      "producer_source_instance_blake3": "10fa9dcec78bd509a23f34d83339d8aee514799ba3b67d29f36ecb186f20c984",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "a26e183007fcf380f227d24240148ec1",
+        "source_instance_sha256_lo": "a6e58d5dadfc47f8d9e0692b80825be6",
+        "task_id": "seed-2026091304/n31-l5-m3-ggmp-a0-f0"
+      },
+      "seed": 2026091304,
+      "source_anf": {
+        "bytes": 39018,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.anf",
+        "sha256": "cb1027d26d50313548e13719ac123701e885c2c6b43b06846146be9e697d5ab4"
+      },
+      "source_binding": {
+        "bytes": 9571,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-ggmp-a0-f0/source-binding.json",
+        "sha256": "2601ea10a8c23497b37f112bafb63d2206109b9755a6cf27b429a7a6a307ca04"
+      },
+      "source_instance_sha256": "a26e183007fcf380f227d24240148ec1a6e58d5dadfc47f8d9e0692b80825be6",
+      "source_verbose_magma": {
+        "bytes": 65698,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n31-l5-m3-ggmp-a0-f0/matrix/n31-l5-m3-ggmp-a0-f0/instance.magma",
+        "sha256": "a9e522ed1dd2bb6bdf0dc5bab5a3471e7c59ab79883c40806cababfe80fd17cf"
+      },
+      "variables": 46
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 68,
+      "id": "seed-2026091304/n41-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 24347,
+        "path": "inputs/07-seed-2026091304-n41-l5-m3-standard-a1-f0.magma",
+        "sha256": "bc8ff1931d6d716d86776192a66f4c78c0e70d4a91957832120facabedddd55a"
+      },
+      "ordinal": 7,
+      "original_stage19_ordinal": 8,
+      "producer_source_instance_blake3": "6dc27aa9aff78d4d5d868fddc761dafed9e2c90be90f9456bf7f68ac90ca1320",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "e6d9af5aa606ab567117df0d316265ce",
+        "source_instance_sha256_lo": "2b06db0e4962791ca6469581969bac9d",
+        "task_id": "seed-2026091304/n41-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091304,
+      "source_anf": {
+        "bytes": 51677,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "e1db3c5dbe7de7b6a56405af34284869f870196fb7181dbc8a58a0aa2d774262"
+      },
+      "source_binding": {
+        "bytes": 9604,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n41-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "9217b1d55d64f6f26cd97f25f34b9125e9eaef846e30104548b70ddebd16c1df"
+      },
+      "source_instance_sha256": "e6d9af5aa606ab567117df0d316265ce2b06db0e4962791ca6469581969bac9d",
+      "source_verbose_magma": {
+        "bytes": 82754,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091304/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "c79453a23c46b6d39e863c7c1a608f4fca37edc19ec377097376edf9fa541bfe"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 58,
+      "id": "seed-2026091305/n31-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 19629,
+        "path": "inputs/08-seed-2026091305-n31-l5-m3-standard-a1-f0.magma",
+        "sha256": "ef55e731a239b49ee935246a851ebf8882c0193f24c9a6942175305ce6e61e33"
+      },
+      "ordinal": 8,
+      "original_stage19_ordinal": 9,
+      "producer_source_instance_blake3": "700249c444634365f4a8623b225c980d810378fd882522023af417637468bb34",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "89c71d64614fa6c3f808eccc5656c528",
+        "source_instance_sha256_lo": "67d4d1ffba389eea2c872427d45240b7",
+        "task_id": "seed-2026091305/n31-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091305,
+      "source_anf": {
+        "bytes": 41161,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "4b9848726f883c9a8e69ff7300c34d2dfaa162a3921401ed3240be17b3ecb3b9"
+      },
+      "source_binding": {
+        "bytes": 9681,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n31-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "82f5d1e22990eec3ea845d05154e1315b6cd0e92f9b0bc2c859669488e6c1061"
+      },
+      "source_instance_sha256": "89c71d64614fa6c3f808eccc5656c52867d4d1ffba389eea2c872427d45240b7",
+      "source_verbose_magma": {
+        "bytes": 66132,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "58be038a34591285a9eab1fbf00b27cfca03cd57f46dd317a352f86c60dfbd1b"
+      },
+      "variables": 42
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "controls": {
+        "algorithm": "direct-f4-sparse",
+        "boolean_ring_order": "grevlex",
+        "dense": false,
+        "deterministic_seed": 1,
+        "gpu_disabled": true,
+        "threads": 1
+      },
+      "equation_monomial_lists_equal": true,
+      "equations": 68,
+      "id": "seed-2026091305/n41-l5-m3-standard-a1-f0",
+      "named_input": {
+        "bytes": 26423,
+        "path": "inputs/09-seed-2026091305-n41-l5-m3-standard-a1-f0.magma",
+        "sha256": "f0050b5fa152b82d621356cb11a06df1fefe8b38446ca9408d9bb85b4213586f"
+      },
+      "ordinal": 9,
+      "original_stage19_ordinal": 10,
+      "producer_source_instance_blake3": "689729ba9c011ad7cc912e3fb484d38d2231751ed58f99dc9094d88fe7aa95b5",
+      "response_identity_markers": {
+        "generic_backslash_unfolding_permitted": false,
+        "source_instance_sha256_hi": "166b9fb39d46e8df95307adb6290271e",
+        "source_instance_sha256_lo": "7a0504621f386de854f9d1b5a66760eb",
+        "task_id": "seed-2026091305/n41-l5-m3-standard-a1-f0"
+      },
+      "seed": 2026091305,
+      "source_anf": {
+        "bytes": 56371,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.anf",
+        "sha256": "4d8ec8cc57d13e9541b42bac878a535ea2e42d615e0ba9a7415fa07e1dbe660a"
+      },
+      "source_binding": {
+        "bytes": 9679,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n41-l5-m3-standard-a1-f0/source-binding.json",
+        "sha256": "cc39e1724bb3c8b6d0a57df23c311e0e27f9f3e41ecb4a2ede2c5d7153323ec0"
+      },
+      "source_instance_sha256": "166b9fb39d46e8df95307adb6290271e7a0504621f386de854f9d1b5a66760eb",
+      "source_verbose_magma": {
+        "bytes": 90012,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091305/n41-l5-m3-standard-a1-f0/matrix/n41-l5-m3-standard-a1-f0/instance.magma",
+        "sha256": "90800d08c9696d1131221233f44670ec3ef81d2a97195a64f79bc92934b2b75d"
+      },
+      "variables": 42
+    }
+  ]
+}

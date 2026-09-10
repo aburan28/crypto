@@ -1,0 +1,64 @@
+{
+  "schema": "koblitz_magma_calculator_stage19_protocol.v1",
+  "stage": 19,
+  "title": "Bounded official-calculator completion panel for the remaining named n31/n41 inputs",
+  "prepared_from_revision": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+  "stage13_archive_commit": "5dbe54dd468e914b5872d10d06e7c44d01b0a236",
+  "stage13_source_revision": "67cf7f559cf6cf4c70fc16f22eb5dd68e4883d31",
+  "service": {
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "form_field": "input",
+    "published_calculator_page": "https://magma.maths.usyd.edu.au/calc/",
+    "expected_version": "2.29-10",
+    "max_input_bytes": 50000,
+    "max_service_seconds": 60,
+    "client_timeout_seconds": 75,
+    "max_response_bytes": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19/1"
+  },
+  "execution_policy": {
+    "task_order": "seed-major frozen order",
+    "parallel_workers": 1,
+    "attempts_per_task": 1,
+    "retries_per_task": 0,
+    "inter_request_delay_seconds": 2,
+    "halt_after_nonclean_receipt": true,
+    "resume_skips_every_started_task": true,
+    "halted_state_is_terminal": true,
+    "historical_nonclean_prevents_network": true,
+    "explicit_execute_flag_required": true
+  },
+  "retained_prior_f4_terminals": [
+    {"seed": 2026091301, "cell_id": "n31-l5-m3-standard-a1-f0", "stage": 15},
+    {"seed": 2026091303, "cell_id": "n31-l5-m3-standard-a1-f0", "stage": 15},
+    {"seed": 2026091303, "cell_id": "n31-l5-m3-ggmp-a0-f0", "stage": 16},
+    {"seed": 2026091305, "cell_id": "n31-l5-m3-ggmp-a0-f0", "stage": 16},
+    {"seed": 2026091301, "cell_id": "n41-l5-m3-standard-a1-f0", "stage": 17}
+  ],
+  "tasks": [
+    {"ordinal": 1, "seed": 2026091301, "cell_id": "n31-l5-m3-ggmp-a0-f0"},
+    {"ordinal": 2, "seed": 2026091302, "cell_id": "n31-l5-m3-standard-a1-f0"},
+    {"ordinal": 3, "seed": 2026091302, "cell_id": "n31-l5-m3-ggmp-a0-f0"},
+    {"ordinal": 4, "seed": 2026091302, "cell_id": "n41-l5-m3-standard-a1-f0"},
+    {"ordinal": 5, "seed": 2026091303, "cell_id": "n41-l5-m3-standard-a1-f0"},
+    {"ordinal": 6, "seed": 2026091304, "cell_id": "n31-l5-m3-standard-a1-f0"},
+    {"ordinal": 7, "seed": 2026091304, "cell_id": "n31-l5-m3-ggmp-a0-f0"},
+    {"ordinal": 8, "seed": 2026091304, "cell_id": "n41-l5-m3-standard-a1-f0"},
+    {"ordinal": 9, "seed": 2026091305, "cell_id": "n31-l5-m3-standard-a1-f0"},
+    {"ordinal": 10, "seed": 2026091305, "cell_id": "n41-l5-m3-standard-a1-f0"}
+  ],
+  "admission": {
+    "representation": "one named Boolean-ring generator per source variable",
+    "required_controls": [
+      "BooleanPolynomialRing with grevlex order",
+      "SetGPU(false)",
+      "SetSeed(1)",
+      "direct Faugere F4",
+      "Dense := false",
+      "Nthreads := 1 on GroebnerBasis"
+    ],
+    "source_equivalence": "ordered Boolean monomial lists must match the frozen Stage 13 ANF and verbose Magma exports",
+    "clean_terminal": "exact task-id and source-SHA-256 markers followed by the seven F4 markers, HTTP 200 at the exact endpoint, no service warning or alert"
+  },
+  "claim_boundary": "At most ten additional source-equivalent official-calculator F4 terminal receipts. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking."
+}

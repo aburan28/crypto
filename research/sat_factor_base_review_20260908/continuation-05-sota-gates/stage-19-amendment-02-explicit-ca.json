@@ -1,0 +1,57 @@
+{
+  "amendment": 2,
+  "amendment01_tls_failure": {
+    "artifact_file_count": 23,
+    "artifact_inventory_sha256": "a2f32baba8d1759701b910e96378b6ca2f049d729c2ae9916ab6396f3ce8f8f4",
+    "artifact_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910",
+    "attempts": 1,
+    "calculator_result_received": false,
+    "claim_admitted": false,
+    "http_response_received": false,
+    "outcome": "transport_error",
+    "post_attempts_started": 1,
+    "request_body_sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5",
+    "run_sha256": "8db9ce65f853751249413f2d7067a9fd8e346c1189dcd8b3289e27fd940b7ca9",
+    "summary_sha256": "54a15069e4ae7371ac884cf93eb05e1b52c5276d676e9c2fdb0cb1ca5943b35d",
+    "terminal_status": "halted_after_nonclean_receipt",
+    "transport_envelope_sha256": "4acbb1beedf626e8f3469b74e0283dcbd508e31c01edc31b5e0d03b8a19b1a66",
+    "transport_error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)>"
+  },
+  "claim_boundary": "This amendment preserves one terminal TLS operational failure, binds an explicit public CA bundle, and prepares a fresh execution-free artifact. The GET probe submitted no calculator input. Neither failure nor probe is solver, scientific, performance, point-witness, novelty, or SOTA evidence.",
+  "corrected_artifact": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-02-20260910",
+  "explicit_ca": {
+    "bytes": 333483,
+    "path": "/etc/ssl/cert.pem",
+    "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+  },
+  "recorded_at": "2026-09-10",
+  "schema": "koblitz_magma_calculator_stage19_amendment.v1",
+  "tls_get_probe": {
+    "body_bytes": 36,
+    "body_sha256": "c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161",
+    "http_status": 200,
+    "method": "GET",
+    "no_computation_requested": true,
+    "receipt_sha256": "eb2f2730f47104ab03fcd687e7e7916b89631610c5f421710be2eb3d7a2e8033",
+    "response_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-tls-get-probe-20260910/response.xml"
+  },
+  "tls_policy": {
+    "context": "ssl.create_default_context(cafile='/etc/ssl/cert.pem')",
+    "forbidden_environment_overrides": [
+      "SSL_CERT_DIR",
+      "REQUESTS_CA_BUNDLE",
+      "CURL_CA_BUNDLE"
+    ],
+    "required_child_environment": {
+      "SSL_CERT_FILE": "/etc/ssl/cert.pem"
+    },
+    "selected_ca_mismatch_fails_closed": true
+  },
+  "two_commit_manifest": {
+    "bind_amendment01_artifact_files": 23,
+    "bind_original_artifact_files": 22,
+    "bind_tls_probe_files": 2,
+    "execution_before_second_commit": false,
+    "second_commit_only_adds_execution_manifest": true
+  }
+}

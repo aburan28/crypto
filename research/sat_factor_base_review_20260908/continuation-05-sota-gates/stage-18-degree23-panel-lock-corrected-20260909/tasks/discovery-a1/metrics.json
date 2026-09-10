@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+    "23",
+    "1",
+    "2",
+    "12"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.28974895901046693,
+    "user_seconds": 0.28361,
+    "system_seconds": 0.003218,
+    "total_core_seconds": 0.28682799999999997,
+    "single_core_seconds": 0.28682799999999997,
+    "peak_rss_bytes": 7569408,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

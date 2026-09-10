@@ -396,12 +396,15 @@ that makes adding new attacks cheap.
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
 | `cryptanalysis::ec_index_calculus`           | Semaev S₃ index calculus on prime-field curves          |
+| `cryptanalysis::residual_walk`               | Partial-decomposition residual walks: rho-style collision search over factor-base decompositions, measured against plain rho |
 | `cryptanalysis::ec_index_calculus_j0`        | ζ-orbit-reduced IC on j=0 curves + Eisenstein-smooth FB |
 | `cryptanalysis::koblitz_index_calculus`      | Frobenius-invariant-factor-base IC on Koblitz curves (GGMP) |
 | `cryptanalysis::koblitz_groebner`            | Semaev S₃ Weil restriction + matrix-F4 decomposition oracle |
 | `cryptanalysis::semaev_sat`                  | CNF encoding of Semaev systems for the CDCL solver (3rd oracle) |
 | `cryptanalysis::koblitz_bench`               | Scaling harness: system profiles, first fall degree, oracle cost |
 | `cryptanalysis::koblitz_index_calculus`      | …also: cyclotomic classification of invariant factor bases |
+| `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
+| `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
@@ -563,7 +566,10 @@ Headline empirical findings (most recent):
 | Boomerang decay (ToySpn r=1..4)     | ~8 bits/round| 5.05     | 0.990 | empirical signature |
 
 See also [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) for the
-attack/curve-family applicability matrix.
+attack/curve-family applicability matrix, and
+[`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) for the
+per-stage index-calculus records agents should try to beat (binary / Koblitz /
+prime).
 
 ---
 
@@ -771,9 +777,13 @@ problems generally.
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
+- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`).
 - [`RESEARCH_TII_MCELIECE.md`](./RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
+- [`RESEARCH_EXOTIC_COORDINATES.md`](./RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
+- [`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) — index-calculus per-stage boundary ledger (beat targets for agents).
+- [`research/sat_factor_base_review_20260908/autolab/`](./research/sat_factor_base_review_20260908/autolab/) — agent autolab runner wired to the IC boundary ledger.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
 - [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
 - [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.

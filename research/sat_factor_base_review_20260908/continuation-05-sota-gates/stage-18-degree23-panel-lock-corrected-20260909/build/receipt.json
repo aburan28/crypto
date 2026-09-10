@@ -1,0 +1,27 @@
+{
+  "binaries": {
+    "discovery_binary": {
+      "bytes": 797360,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+      "sha256": "70ee9a1772511563fcbdb2eece5760817e9465a32a0a72dfcdbfa866e4747a8b"
+    },
+    "ic_binary": {
+      "bytes": 1266128,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+      "sha256": "2258f5b320be0cd865367faefbf6a068a3f8789719f0a512db328b2863c0486f"
+    }
+  },
+  "command": [
+    "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_algebraic_e2e",
+    "--example",
+    "koblitz_public_factor_base_discovery"
+  ],
+  "dependency_lock_sha256": "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c",
+  "schema": "koblitz_degree23_build_receipt.v1",
+  "status": "verified"
+}

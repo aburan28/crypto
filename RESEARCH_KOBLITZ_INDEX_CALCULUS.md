@@ -115,7 +115,7 @@ Real:
 
 Not real:
 
-- **anything at deployed sizes.**  `n ≤ 40`: the factor base is
+- **anything at deployed sizes.**  `n ≤ 41`: the factor base is
   materialised and `#E` is factored by trial division.
 - **the Gröbner engine's constants** — see below.
 

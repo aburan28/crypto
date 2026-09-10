@@ -1,0 +1,170 @@
+{
+  "attempt_ordinal": 1,
+  "claim_admitted": true,
+  "classification": "sat_basis_certificate_unverified_model",
+  "clean_terminal": true,
+  "execution_binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+  "execution_commit": "a1001c18524e1e84d83f3e55498b9a26242c1a13",
+  "execution_tree": "9c88f77ac51eb0ca2d2945abb9ea3075b72e0ba7",
+  "finished_at": "2026-09-10T15:31:03.685936Z",
+  "launch_authorization": {
+    "bytes": 3654,
+    "path": "launch-authorization.consumed.json",
+    "sha256": "bc1e661f517bbe49656369061b412373f257d8b1865c49c89ed89343c0b73155"
+  },
+  "ordinal": 1,
+  "outcome": "clean_f4_terminal",
+  "recovery_boundary": null,
+  "request": {
+    "body_bytes": 39921,
+    "body_sha256": "391b23b46b6168cd6f21483b8fb76e0bffa7c3c122a96087f18d58da1b8f9382",
+    "ca_bundle": {
+      "bytes": 333483,
+      "path": "/etc/ssl/cert.pem",
+      "sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
+    },
+    "content_type": "application/x-www-form-urlencoded",
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "execution_binding_sha256": "a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25",
+    "execution_commit": "a1001c18524e1e84d83f3e55498b9a26242c1a13",
+    "execution_manifest_sha256": "dce607c27ede667bb8c8a54020d014aafc805448a6567a83fa35922f97b0878e",
+    "execution_tree": "9c88f77ac51eb0ca2d2945abb9ea3075b72e0ba7",
+    "form_field": "input",
+    "hard_parent_watchdog_seconds": 75,
+    "input": {
+      "bytes": 20253,
+      "path": "inputs/01-seed-2026091302-n31-l5-m3-standard-a1-f0.magma",
+      "sha256": "1cb57677df423554550e55f8feab6c1b2f26871c63afde8f255014cd555bf75a"
+    },
+    "method": "POST",
+    "response_byte_limit": 1048576,
+    "user_agent": "aburan28-crypto-koblitz-stage19-amendment03/1"
+  },
+  "response": {
+    "bytes": 811,
+    "path": "response.xml",
+    "sha256": "eb5208d8b5b55259e4c5e9d71ae6ac38229c84588dae154a385742bd64d96d2d"
+  },
+  "response_identity_verified": true,
+  "retained_files": [
+    {
+      "bytes": 1766,
+      "path": "attempt-start.json",
+      "sha256": "50d13f42824b1ca7a105c878ae26ac130eb05bbcfcc345c9814e2690c01c8675"
+    },
+    {
+      "bytes": 3654,
+      "path": "launch-authorization.consumed.json",
+      "sha256": "bc1e661f517bbe49656369061b412373f257d8b1865c49c89ed89343c0b73155"
+    },
+    {
+      "bytes": 39921,
+      "path": "request-body.bin",
+      "sha256": "391b23b46b6168cd6f21483b8fb76e0bffa7c3c122a96087f18d58da1b8f9382"
+    },
+    {
+      "bytes": 811,
+      "path": "response.xml",
+      "sha256": "eb5208d8b5b55259e4c5e9d71ae6ac38229c84588dae154a385742bd64d96d2d"
+    },
+    {
+      "bytes": 1376,
+      "path": "transport-envelope.json",
+      "sha256": "9d5be3de27f5add5449e6a2372dcc752a386801a1c2abffb6db338aff37379a3"
+    },
+    {
+      "bytes": 1003,
+      "path": "transport-metrics.json",
+      "sha256": "e22bb215cd934569a9c22c22fead7b07cae1c7076033037e58fb9cca6f393022"
+    },
+    {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "f06c40a63075f21fd797274a0e432cce0dbdef75d9ebed89f8dfd521d23a6d8e"
+    }
+  ],
+  "retry_permitted": false,
+  "schema": "koblitz_magma_calculator_stage19_amendment03_receipt.v1",
+  "service": {
+    "alert": null,
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "max_input_bytes": 50000,
+    "max_time_seconds": 60,
+    "server_seed": 3406000033,
+    "service_reported_memory_mb": 201.41,
+    "service_reported_memory_text": "201.41MB",
+    "service_reported_time_seconds": 3.0,
+    "version": "2.29-10",
+    "warning": null
+  },
+  "started_at": "2026-09-10T15:30:56.964855Z",
+  "task_id": "seed-2026091302/n31-l5-m3-standard-a1-f0",
+  "terminal": {
+    "algorithm": "direct-f4-sparse",
+    "basis_size": 43,
+    "cpu_seconds": 2.95,
+    "f4_step_degrees": [
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4
+    ],
+    "gpu_disabled": true,
+    "schema": "koblitz_magma_f4_terminal.v1",
+    "single_thread_requested": true,
+    "terminal_status": "sat",
+    "wall_seconds": 2.95
+  },
+  "transport_envelope": {
+    "bytes": 1376,
+    "path": "transport-envelope.json",
+    "sha256": "9d5be3de27f5add5449e6a2372dcc752a386801a1c2abffb6db338aff37379a3"
+  },
+  "transport_process": {
+    "metrics": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_amendment03_magma_calculator_request.py",
+        "--attempt",
+        "/Volumes/SSD990/crypto-koblitz-magma-calculator-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-03-20260910/attempts/01-seed-2026091302-n31-l5-m3-standard-a1-f0",
+        "--execute-child"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 35684352,
+        "single_core_seconds": 0.22036099999999997,
+        "system_seconds": 0.08541499999999999,
+        "total_core_seconds": 0.22036099999999997,
+        "user_seconds": 0.13494599999999998,
+        "wall_seconds": 6.6330350410426036
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 75.0
+    },
+    "metrics_file": {
+      "bytes": 1003,
+      "path": "transport-metrics.json",
+      "sha256": "e22bb215cd934569a9c22c22fead7b07cae1c7076033037e58fb9cca6f393022"
+    },
+    "stderr": {
+      "bytes": 0,
+      "path": "transport.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 98,
+      "path": "transport.stdout",
+      "sha256": "f06c40a63075f21fd797274a0e432cce0dbdef75d9ebed89f8dfd521d23a6d8e"
+    }
+  }
+}

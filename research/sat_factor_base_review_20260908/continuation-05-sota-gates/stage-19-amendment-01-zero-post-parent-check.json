@@ -1,0 +1,69 @@
+{
+  "schema": "koblitz_magma_calculator_stage19_amendment.v1",
+  "amendment": 1,
+  "recorded_at": "2026-09-10",
+  "disposition": "operational_failure_zero_post_terminal_no_retry",
+  "original_artifact": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-20260909",
+  "corrected_artifact": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-19-magma-calculator-panel-amendment-01-20260910",
+  "original_execution": {
+    "first_preexecution_commit": "1b688a3fad968729495bfad236e31c0b1c16653b",
+    "execution_commit": "1f3cdfefaffbc5056cf5f898139e714b877f1695",
+    "execution_tree": "bdc9db1d7af3cc46df6f533a92b79eb1e2449a6f",
+    "execution_binding_sha256": "baa45dbc8751d4aa08cd47ec52249dfbc698cd300a7d033601c0aa4f4e74f627",
+    "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+    "attempts": 1,
+    "post_requests_started": 0,
+    "status": "halted_after_nonclean_receipt",
+    "outcome": "transport_child_error"
+  },
+  "zero_post_proof": {
+    "failure": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+    "traceback_function": "validate_meter_parent",
+    "traceback_source_line": 174,
+    "traceback_call_line": 266,
+    "committed_child_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/post_stage19_magma_calculator_request.py",
+    "committed_child_git_blob_oid": "ffa4d71a554256399fb92ee496c06402d7a7f619",
+    "committed_child_sha256": "73b707d27808c1a5479a853d728f264b411292ba48941d01d65538893c622eda",
+    "required_source_order": [
+      "validate_meter_parent(attempt)",
+      "os.replace(authorization_path, consumed_path)",
+      "perform_request(input_bytes)"
+    ],
+    "launch_authorization_present": true,
+    "launch_authorization_consumed_present": false,
+    "transport_envelope_present": false,
+    "response_present": false,
+    "claim_admitted": false
+  },
+  "charged_transport_process": {
+    "returncode": 1,
+    "timed_out": false,
+    "orphan_group_terminated": false,
+    "wall_seconds_exact": 0.14001608302351087,
+    "wall_seconds_reported": 0.140016,
+    "user_seconds": 0.078248,
+    "system_seconds": 0.046404,
+    "total_core_seconds": 0.124652,
+    "peak_rss_bytes": 30244864
+  },
+  "immutable_files": [
+    {"path": "execution-manifest.json", "bytes": 9492, "sha256": "a26ddf3febab22989ff85f48eac8bb514815f9db29bc9e7716cfda52c246a8f2"},
+    {"path": "run.json", "bytes": 4059, "sha256": "1007cf4e9c8a27ad06de15177108de227552e3230ed72c51e2e5099717f8014e"},
+    {"path": "summary.json", "bytes": 1158, "sha256": "b0806b90be7621e8e6834ebcc32ad7c4b361e2bfe4513fc3def5fc3d56e70b23"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/attempt-start.json", "bytes": 1474, "sha256": "d44de6275e2e8c6ba3b8fdc657cd3f035ad91243135544df6bb6407aafa8092d"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/launch-authorization.json", "bytes": 3156, "sha256": "6c4f3b95553d223e5bae109f704c529ee094d76d5989fd5ab13cf286f9a6cb58"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/receipt.json", "bytes": 4357, "sha256": "b94e1f42b0b5763d1561bb3967562a02c2fc9c76ce2080e2e48e9648c574f767"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/request-body.bin", "bytes": 42145, "sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/transport-metrics.json", "bytes": 931, "sha256": "f78060b7ab89be33ee12cfe919a45bb22fdd2cde2be79a18577a8b52a78595af"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/transport.stderr", "bytes": 2484, "sha256": "0caef6187f33cbbf53490c1734dd39c249a2dbffbab399dc4b9ba7cc2b547989"},
+    {"path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/transport.stdout", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  ],
+  "correction": {
+    "removed_operation": "sandbox-forbidden ps parent inspection",
+    "replacement": "single-use random launch nonce whose SHA-256 is bound in attempt-start and launch authorization and whose value is inherited only by the metered child",
+    "hard_parent_watchdog_retained": true,
+    "old_ledger_must_not_resume": true,
+    "new_execution_requires_fresh_two_commit_manifest": true
+  },
+  "claim_boundary": "This amendment authenticates a zero-POST operational failure and a corrected execution plan. It is not a Magma execution, solver result, performance result, point witness, independent review, novelty result, or SOTA evidence."
+}

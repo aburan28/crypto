@@ -1,0 +1,175 @@
+{
+  "evidence_class": "scientific_candidate",
+  "execution_roots": {
+    "panel": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909",
+    "repository": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909"
+  },
+  "host": {
+    "cargo": {
+      "command": [
+        "cargo",
+        "-V"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "cargo 1.93.1 (Homebrew)"
+    },
+    "cpu_model": "arm",
+    "logical_cpus": 14,
+    "physical_memory_bytes": 51539607552,
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "python": {
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Python 3.13.1"
+    },
+    "rustc": {
+      "command": [
+        "rustc",
+        "-Vv"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+    },
+    "uname": [
+      "Darwin",
+      "Adams-MacBook-Pro.local",
+      "25.6.0",
+      "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+      "arm64",
+      "arm"
+    ]
+  },
+  "implementation": {
+    "meter": {
+      "bytes": 3471,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "runner": {
+      "bytes": 32782,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py",
+      "sha256": "65dd6dcec1184ea500901eea7920b2cf72c72f2e60f691f8fa061a78ab32509d"
+    },
+    "verifier": {
+      "bytes": 71970,
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+      "sha256": "cb5f6511a351c6398819b10963dc74ebfe50c79ebc1666a7bc866c66763b557a"
+    }
+  },
+  "outer_attempts": [
+    {
+      "attempt": 1,
+      "receipt": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909/outer-attempts/0001/receipt.json",
+      "receipt_sha256": "140673e11381fbfd4643cbdbe90ef2c36ba544526584d184ef1959c1c99b15fd"
+    }
+  ],
+  "protocol_file_sha256": "b7d38807a2b027c929412b81639bc531f39f4c49a6cd20a6069b89b8c9afa13d",
+  "protocol_sha256": "baafe7a774bff90323d3739739044bb559e1938b76bb4915ef8a33348ca9b6dc",
+  "schema": "koblitz_degree23_replication_panel_run.v1",
+  "source_revision": {
+    "algorithm_base_commit": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+    "algorithm_base_is_ancestor": true,
+    "branch": "codex/koblitz-degree23-panel-20260909",
+    "commit": "d4416e829b89b0dc856c75bcee91e790eda7333e",
+    "dirty": false,
+    "porcelain": [],
+    "tracked_delta": {
+      "base_commit": "754f76b2e313fff98b3fbed11bc246c3744a1591",
+      "entries": [
+        {
+          "mode": "100644",
+          "object_id": "c4bcefc1e0b0141f0e9b98669d5593379648840c",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "751201d5c7da1de578a60e8b1662d92c2d8bd545",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-protocol.json",
+          "status": "A",
+          "type": "blob"
+        },
+        {
+          "mode": "100644",
+          "object_id": "e50430d6ab0b86bd5619df5c039febef9744dec7",
+          "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py",
+          "status": "A",
+          "type": "blob"
+        }
+      ],
+      "head_commit": "d4416e829b89b0dc856c75bcee91e790eda7333e",
+      "matches_expected_control_only_delta": true,
+      "schema": "koblitz_stage18_tracked_delta.v1"
+    }
+  },
+  "sources": {
+    "Cargo.toml": {
+      "bytes": 1695,
+      "expected_sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/Cargo.toml",
+      "sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5"
+    },
+    "dependency_lock_snapshot": {
+      "bytes": 15231,
+      "expected_sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock",
+      "sha256": "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+    },
+    "examples/koblitz_algebraic_e2e.rs": {
+      "bytes": 16473,
+      "expected_sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_algebraic_e2e.rs",
+      "sha256": "1bc7ba2ca6d3803a8438b1f32c990914c64f2167a17ea519bcae53fa1d4be263"
+    },
+    "examples/koblitz_public_factor_base_discovery.rs": {
+      "bytes": 6210,
+      "expected_sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/examples/koblitz_public_factor_base_discovery.rs",
+      "sha256": "416ab6ec893dbff54e65df1da6b01e7e4b883a0cbf75821c27165bdbe785ab9b"
+    },
+    "scripts/process_meter.py": {
+      "bytes": 3471,
+      "expected_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "bytes": 145006,
+      "expected_sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "cc0cde413adf1179afd1b8cd3d9133e13f422acdff395e0c953a310069a7a681"
+    },
+    "src/cryptanalysis/sat.rs": {
+      "bytes": 84455,
+      "expected_sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/sat.rs",
+      "sha256": "9290dd9bab2b640b0a4ab06dd79a36e99feefb067b637b1543b8c084291d2129"
+    },
+    "src/cryptanalysis/semaev_sat.rs": {
+      "bytes": 60036,
+      "expected_sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7",
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/src/cryptanalysis/semaev_sat.rs",
+      "sha256": "18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7"
+    }
+  },
+  "started_at": "2026-09-10T05:49:26.936731Z",
+  "status": "running",
+  "tasks": {},
+  "tools": {
+    "discovery_binary": {
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_public_factor_base_discovery",
+      "sha256": null
+    },
+    "ic_binary": {
+      "path": "/Volumes/SSD990/crypto-koblitz-degree23-panel-20260909/target/release/examples/koblitz_algebraic_e2e",
+      "sha256": null
+    }
+  }
+}

@@ -95,7 +95,7 @@ pub fn load_factor_base(path: &Path) -> Result<FactorBaseDocument, String> {
 }
 #[derive(Clone, Debug, PartialEq, Args, Serialize)]
 pub struct RunArgs {
-    /// Odd extension degree for a generated GF(2^n) test curve, 3..=39.
+    /// Odd extension degree for a generated GF(2^n) test curve, 3..=41.
     #[arg(long,default_value_t=9,value_parser=degree)]
     pub degree: u32,
     /// Koblitz coefficient a; b is always 1.
