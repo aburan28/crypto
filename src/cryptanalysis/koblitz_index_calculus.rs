@@ -2272,6 +2272,40 @@ enum RelationAttemptOutcome {
     Sat(Option<Vec<usize>>, SatDecompositionStats),
 }
 
+/// Live milestones from the existing small-curve pipeline.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum KoblitzIcEvent {
+    FactorBaseStarted,
+    FactorBaseReady {
+        points: usize,
+        orbits: usize,
+    },
+    RelationCollectionStarted {
+        wanted: usize,
+    },
+    RelationProgress {
+        collected: usize,
+        wanted: usize,
+        trials: usize,
+    },
+    RelationCollectionFinished {
+        collected: usize,
+        trials: usize,
+    },
+    LinearAlgebraStarted {
+        rows: usize,
+        columns: usize,
+    },
+    LinearAlgebraFinished,
+    /// The current relation matrix did not yield a candidate.
+    LinearAlgebraIncomplete,
+    LinearAlgebraSkipped,
+    VerificationStarted,
+    VerificationFinished {
+        verified: bool,
+    },
+}
+
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
 /// Frobenius-invariant factor base.
 ///
@@ -2283,8 +2317,20 @@ pub fn koblitz_index_calculus_dlp(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
 ) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_with_progress(kc, q, opts, &mut |_| {})
+}
+
+/// The same small-curve solver with synchronous progress notifications.
+/// Events follow real operations and can repeat when rank checks resume collection.
+pub fn koblitz_index_calculus_dlp_with_progress(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
+) -> Option<KoblitzIcReport> {
+    progress(KoblitzIcEvent::FactorBaseStarted);
     let fb = build_frobenius_factor_base(kc, opts.factor_index)?;
-    koblitz_index_calculus_dlp_with_factor_base(kc, q, &fb, opts)
+    koblitz_index_calculus_dlp_observed(kc, q, &fb, opts, progress)
 }
 
 /// Run index calculus with a caller-supplied invariant factor base.
@@ -2297,6 +2343,16 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     q: &BinaryPoint,
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
+) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {})
+}
+
+fn koblitz_index_calculus_dlp_observed(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
 ) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
@@ -2320,6 +2376,10 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     let cofactor_admission_ns = admission_start.elapsed().as_nanos();
 
     let index_of = fb.index_map();
+    progress(KoblitzIcEvent::FactorBaseReady {
+        points: fb.points.len(),
+        orbits: relation_unknowns,
+    });
 
     let mut report = KoblitzIcReport {
         factor_base_size: fb.points.len(),
@@ -2360,6 +2420,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     let relation_start = std::time::Instant::now();
 
+    progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
     while relations.len() < wanted && report.trials < opts.max_trials {
         let remaining_trials = opts.max_trials - report.trials;
         let requested_batch = if opts.strategy == DecompositionStrategy::Sat {
@@ -2455,6 +2516,12 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                         continue;
                     }
                     let d = solve_for_d(&a, &b, r)?;
+                    progress(KoblitzIcEvent::RelationCollectionFinished {
+                        collected: relations.len(),
+                        trials: report.trials,
+                    });
+                    progress(KoblitzIcEvent::LinearAlgebraSkipped);
+                    progress(KoblitzIcEvent::VerificationStarted);
                     if kc.mul(&g, &d) == *q {
                         report.log = Some(d);
                         report.direct_relation = true;
@@ -2463,8 +2530,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                             .elapsed()
                             .as_nanos()
                             .saturating_sub(report.linear_algebra_ns);
+                        progress(KoblitzIcEvent::VerificationFinished { verified: true });
                         return Some(report);
                     }
+                    progress(KoblitzIcEvent::VerificationFinished { verified: false });
+                    progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
                     None
                 }
                 RelationAttemptOutcome::Enumerated(idxs)
@@ -2484,12 +2554,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
             }
         }
 
+        progress(KoblitzIcEvent::RelationProgress {
+            collected: relations.len(),
+            wanted,
+            trials: report.trials,
+        });
         if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
+            progress(KoblitzIcEvent::RelationCollectionFinished {
+                collected: relations.len(),
+                trials: report.trials,
+            });
+            progress(KoblitzIcEvent::LinearAlgebraStarted {
+                rows: relations.len(),
+                columns: relation_unknowns + 1,
+            });
             report.linear_solve_attempts += 1;
             let linear_start = std::time::Instant::now();
             let candidate = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
             report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-            if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+            if candidate.is_none() {
+                progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+            }
+            let candidate = candidate.filter(|d| {
+                progress(KoblitzIcEvent::LinearAlgebraFinished);
+                progress(KoblitzIcEvent::VerificationStarted);
+                let verified = kc.mul(&g, d) == *q;
+                progress(KoblitzIcEvent::VerificationFinished { verified });
+                verified
+            });
+            if let Some(d) = candidate {
                 report.log = Some(d);
                 report.relations = relations.len();
                 report.relation_collection_ns = relation_start
@@ -2498,6 +2591,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                     .saturating_sub(report.linear_algebra_ns);
                 return Some(report);
             }
+            progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
         }
     }
     report.relation_collection_ns = relation_start
@@ -2505,22 +2599,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         .as_nanos()
         .saturating_sub(report.linear_algebra_ns);
     report.relations = relations.len();
+    progress(KoblitzIcEvent::RelationCollectionFinished {
+        collected: relations.len(),
+        trials: report.trials,
+    });
     if relations.len() < relation_unknowns + 1 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
+    progress(KoblitzIcEvent::LinearAlgebraStarted {
+        rows: relations.len(),
+        columns: relation_unknowns + 1,
+    });
     report.linear_solve_attempts += 1;
     let linear_start = std::time::Instant::now();
     let Some(d) = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r) else {
         report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+        progress(KoblitzIcEvent::LinearAlgebraIncomplete);
         return Some(report);
     };
     report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-    if kc.mul(&g, &d) == *q {
+    progress(KoblitzIcEvent::LinearAlgebraFinished);
+    progress(KoblitzIcEvent::VerificationStarted);
+    let verified = kc.mul(&g, &d) == *q;
+    if verified {
         report.log = Some(d);
     }
+    progress(KoblitzIcEvent::VerificationFinished { verified });
     Some(report)
 }
 
