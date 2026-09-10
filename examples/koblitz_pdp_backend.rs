@@ -218,31 +218,67 @@ fn verify_exports(directory: &Path, exports: &Value) -> Result<Value, String> {
     Ok(Value::Object(receipts))
 }
 
-fn source_identity_from_manifest(manifest: &Value) -> Value {
-    json!({
-        "schema":"koblitz_pdp_source_identity.v1",
-        "n":manifest["n"],
-        "ell":manifest["ell"],
-        "m":manifest["m"],
-        "seed":manifest["seed"],
-        "curve_a":manifest["curve_a"],
-        "irreducible_low_terms":manifest["irreducible_low_terms"],
-        "factor_base_predicate":manifest["factor_base_predicate"],
-        "factor_base_basis_bitmasks":manifest["factor_base_basis_bitmasks"],
-        "target":manifest["target"],
-        "representation":manifest["representation"],
-        "source_variables":manifest["source_variables"],
-        "source_equations":manifest["source_equations"],
-        "exports":manifest["exports"],
-    })
+fn source_identity_from_manifest(manifest: &Value, source_schema: &str) -> Result<Value, String> {
+    match source_schema {
+        "koblitz_pdp_source_instance.v1" => Ok(json!({
+            "schema":"koblitz_pdp_source_identity.v1",
+            "n":manifest["n"],
+            "ell":manifest["ell"],
+            "m":manifest["m"],
+            "seed":manifest["seed"],
+            "curve_a":manifest["curve_a"],
+            "irreducible_low_terms":manifest["irreducible_low_terms"],
+            "factor_base_predicate":manifest["factor_base_predicate"],
+            "factor_base_basis_bitmasks":manifest["factor_base_basis_bitmasks"],
+            "target":manifest["target"],
+            "representation":manifest["representation"],
+            "source_variables":manifest["source_variables"],
+            "source_equations":manifest["source_equations"],
+            "exports":manifest["exports"],
+        })),
+        "koblitz_pdp_source_instance.v2" => Ok(json!({
+            "schema":"koblitz_pdp_source_identity.v2",
+            "n":manifest["n"],
+            "ell":manifest["ell"],
+            "m":manifest["m"],
+            "seed":manifest["seed"],
+            "blind_instance_id":manifest["blind_instance_id"],
+            "target_mode":manifest["target_mode"],
+            "curve_a":manifest["curve_a"],
+            "irreducible_low_terms":manifest["irreducible_low_terms"],
+            "factor_base_predicate":manifest["factor_base_predicate"],
+            "factor_base_basis_bitmasks":manifest["factor_base_basis_bitmasks"],
+            "target":manifest["target"],
+            "representation":manifest["representation"],
+            "source_variables":manifest["source_variables"],
+            "source_equations":manifest["source_equations"],
+            "exports":manifest["exports"],
+        })),
+        other => Err(format!("unsupported source_instance schema {other}")),
+    }
 }
 
 fn verify_source_identity(manifest: &Value) -> Result<String, String> {
     let source = &manifest["source_instance"];
-    if source["schema"] != "koblitz_pdp_source_instance.v1" {
-        return Err("unsupported or missing source_instance schema".to_string());
+    let source_schema = value_string(&source["schema"], "source_instance.schema")?;
+    match source_schema {
+        "koblitz_pdp_source_instance.v1" => {
+            if manifest.get("blind_instance_id").is_some() || manifest.get("target_mode").is_some()
+            {
+                return Err(
+                    "legacy source identity cannot carry explicit-target fields".to_string()
+                );
+            }
+        }
+        "koblitz_pdp_source_instance.v2" => {
+            value_string(&manifest["blind_instance_id"], "blind_instance_id")?;
+            if manifest["target_mode"] != "explicit_affine" {
+                return Err("v2 source identity requires explicit_affine target mode".to_string());
+            }
+        }
+        _ => {}
     }
-    let identity = source_identity_from_manifest(manifest);
+    let identity = source_identity_from_manifest(manifest, source_schema)?;
     if source["identity"] != identity {
         return Err("source identity does not match the top-level manifest".to_string());
     }
