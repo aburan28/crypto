@@ -396,6 +396,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
 | `cryptanalysis::ec_index_calculus`           | Semaev S₃ index calculus on prime-field curves          |
+| `cryptanalysis::residual_walk`               | Partial-decomposition residual walks: rho-style collision search over factor-base decompositions, measured against plain rho |
 | `cryptanalysis::ec_index_calculus_j0`        | ζ-orbit-reduced IC on j=0 curves + Eisenstein-smooth FB |
 | `cryptanalysis::koblitz_index_calculus`      | Frobenius-invariant-factor-base IC on Koblitz curves (GGMP) |
 | `cryptanalysis::koblitz_groebner`            | Semaev S₃ Weil restriction + matrix-F4 decomposition oracle |
@@ -771,6 +772,7 @@ problems generally.
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
+- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`).
 - [`RESEARCH_TII_MCELIECE.md`](./RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
