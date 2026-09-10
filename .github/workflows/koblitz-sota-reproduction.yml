@@ -50,7 +50,13 @@ jobs:
           target/release/koblitz_pdp_prepare plan --protocol research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json > /tmp/balanced-pdp-phase-a-plan.json
           python3 -c 'import json; d=json.load(open("/tmp/balanced-pdp-phase-a-plan.json")); assert d["census_executed"] is False and d["total_selected_instances"] == 160 and d["total_planned_solver_runs"] == 480 and d["largest_canonical_triple_count"] == 18896570'
       - name: Validate blinded PDP Phase-B custody and scoring split
-        run: python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter target/release/examples/koblitz_pdp_export --backend target/release/examples/koblitz_pdp_backend -v
+        run: |
+          # Cargo normally hard-links example binaries on Linux. Make dedicated
+          # byte copies for the single-link immutable-artifact custody checks.
+          mkdir "$RUNNER_TEMP/phase-b-tools"
+          install -m 755 target/release/examples/koblitz_pdp_export "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export"
+          install -m 755 target/release/examples/koblitz_pdp_backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend"
+          python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export" --backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend" -v
       - name: Validate isolated PDP accounting and archived composition
         run: |
           python3 scripts/test_run_koblitz_pdp_matrix.py -v
