@@ -225,7 +225,32 @@ fn magma_script(n_vars: u32, rows: &[Row]) -> String {
         }
     }
     format!(
-        "SetNthreads(1);\nR := BooleanPolynomialRing({}, \"grevlex\");\nX := [R.i : i in [1..{}]];\nF := [{}];\nI := ideal<R | F>;\ntime GroebnerBasis(I);\nquit;\n",
+        concat!(
+            "SetNthreads(1);\n",
+            "SetGPU(false);\n",
+            "SetSeed(1);\n",
+            "R := BooleanPolynomialRing({}, \"grevlex\");\n",
+            "X := [R.i : i in [1..{}]];\n",
+            "F := [{}];\n",
+            "I := ideal<R | F>;\n",
+            "cpu_start := Cputime();\n",
+            "wall_start := Realtime();\n",
+            "G, D := GroebnerBasis(I : Al := \"Direct\", Faugere := true, Dense := false, Nthreads := 1);\n",
+            "cpu_seconds := Cputime(cpu_start);\n",
+            "wall_seconds := Realtime(wall_start);\n",
+            "printf \"KOBLITZ_MAGMA_SCHEMA=koblitz_magma_f4_terminal.v1\\n\";\n",
+            "printf \"KOBLITZ_MAGMA_ALGORITHM=direct-f4-sparse\\n\";\n",
+            "if #G eq 1 and G[1] eq R!1 then\n",
+            "  printf \"KOBLITZ_MAGMA_STATUS=UNSAT\\n\";\n",
+            "else\n",
+            "  printf \"KOBLITZ_MAGMA_STATUS=SAT\\n\";\n",
+            "end if;\n",
+            "printf \"KOBLITZ_MAGMA_F4_DEGREES=%o\\n\", D;\n",
+            "printf \"KOBLITZ_MAGMA_BASIS_SIZE=%o\\n\", #G;\n",
+            "printf \"KOBLITZ_MAGMA_CPU_SECONDS=%o\\n\", cpu_seconds;\n",
+            "printf \"KOBLITZ_MAGMA_WALL_SECONDS=%o\\n\", wall_seconds;\n",
+            "quit;\n"
+        ),
         n_vars,
         n_vars,
         polynomials.join(",\n  ")
@@ -345,11 +370,56 @@ fn stats_json(stats: &SolverStats) -> Value {
     })
 }
 
+fn source_instance_record(
+    n: u32,
+    ell: usize,
+    seed: u64,
+    curve_a: u8,
+    irreducible_low_terms: &[u32],
+    predicate: &Value,
+    basis_bits: &[String],
+    target: &Value,
+    representation: &str,
+    source_variables: u32,
+    source_equations: usize,
+    exports: &Value,
+) -> Value {
+    // serde_json's default map is ordered, so this compact encoding is a
+    // deterministic, cross-process identity for the source instance.  The
+    // isolated backends recompute it after hashing every exported file.
+    let identity = json!({
+        "schema":"koblitz_pdp_source_identity.v1",
+        "n":n,
+        "ell":ell,
+        "m":3,
+        "seed":seed,
+        "curve_a":curve_a,
+        "irreducible_low_terms":irreducible_low_terms,
+        "factor_base_predicate":predicate,
+        "factor_base_basis_bitmasks":basis_bits,
+        "target":target,
+        "representation":representation,
+        "source_variables":source_variables,
+        "source_equations":source_equations,
+        "exports":exports,
+    });
+    let encoded = serde_json::to_vec(&identity).expect("source identity json");
+    json!({
+        "schema":"koblitz_pdp_source_instance.v1",
+        "id_blake3":blake3::hash(&encoded).to_hex().to_string(),
+        "identity":identity,
+    })
+}
+
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    let mut args: Vec<String> = std::env::args().collect();
+    let export_only = args.last().map(String::as_str) == Some("--export-only");
+    if export_only {
+        args.pop();
+    }
     assert!(
         matches!(args.len(), 7 | 9),
-        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir> [curve-a factor-index]"
+        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir> [curve-a factor-index] [--export-only]"
     );
     let n: u32 = args[1].parse().expect("n");
     let requested_ell: usize = args[2].parse().expect("ell");
@@ -484,90 +554,113 @@ fn main() {
     write(&output.join("instance.magma"), &magma);
 
     let native_start = Instant::now();
-    let (native_result, native_stats, native_vars, native_clauses, model_valid) =
-        if let Some(system) = chained_system {
-            let mut encoding = encode_boolean_system_with(
-                system.n_vars,
-                &system.equations,
-                &[],
-                XorEncoding::Native,
-            );
-            encoding.solver.conflict_budget = conflict_budget;
-            let initial_clauses = encoding.solver.n_clauses();
-            let result = encoding.solver.solve();
-            let valid = (result == SolveResult::Sat).then(|| {
-                let assignment = encoding.solver.model();
-                system.equations.iter().all(|equation| {
-                    equation.terms.iter().fold(false, |parity, term| {
-                        let monomial = if term.mask == 0 {
-                            true
-                        } else {
-                            (0..system.n_vars)
-                                .filter(|i| (term.mask >> i) & 1 == 1)
-                                .all(|i| assignment[i])
-                        };
-                        parity ^ monomial
-                    }) == false
-                })
-            });
-            (
-                format!("{result:?}").to_lowercase(),
-                stats_json(&encoding.solver.stats),
-                encoding.solver.n_vars(),
-                initial_clauses,
-                valid,
-            )
-        } else {
-            let mut encoding = encode_semaev_s4_with(
-                n,
-                requested_ell as u32,
-                &irreducible,
-                &F2mElement::one(n),
-                &target_x,
-                S4Options {
-                    encoding: XorEncoding::Native,
-                    // The external ANF/CNF-XOR/Magma files below carry
-                    // exactly the source equations and no ordering clauses.
-                    // Keep this arm byte-semantically matched to them.
-                    break_symmetry: false,
-                },
-            );
-            encoding.solver.conflict_budget = conflict_budget;
-            let initial_clauses = encoding.solver.n_clauses();
-            let result = encoding.solver.solve();
-            let valid = (result == SolveResult::Sat).then(|| {
-                let decoded = encoding.decode();
-                let check = crypto_lib::cryptanalysis::binary_semaev_s4::elementary_symmetric_3(
-                    &decoded[0],
-                    &decoded[1],
-                    &decoded[2],
-                    &irreducible,
+    let native_sat = if export_only {
+        json!({
+            "status":"not_run_in_export_process",
+            "reason":"run koblitz_pdp_backend native-sat under a separate process meter",
+            "conflict_budget":conflict_budget,
+        })
+    } else {
+        let (native_result, native_stats, native_vars, native_clauses, model_valid) =
+            if let Some(system) = chained_system {
+                let mut encoding = encode_boolean_system_with(
+                    system.n_vars,
+                    &system.equations,
+                    &[],
+                    XorEncoding::Native,
                 );
-                crypto_lib::cryptanalysis::binary_semaev_s4::symmetrised_s4_eval(
-                    &check.0,
-                    &check.1,
-                    &check.2,
-                    &target_x,
-                    &irreducible,
+                encoding.solver.conflict_budget = conflict_budget;
+                let initial_clauses = encoding.solver.n_clauses();
+                let result = encoding.solver.solve();
+                let valid = (result == SolveResult::Sat).then(|| {
+                    let assignment = encoding.solver.model();
+                    system.equations.iter().all(|equation| {
+                        equation.terms.iter().fold(false, |parity, term| {
+                            let monomial = if term.mask == 0 {
+                                true
+                            } else {
+                                (0..system.n_vars)
+                                    .filter(|i| (term.mask >> i) & 1 == 1)
+                                    .all(|i| assignment[i])
+                            };
+                            parity ^ monomial
+                        }) == false
+                    })
+                });
+                (
+                    format!("{result:?}").to_lowercase(),
+                    stats_json(&encoding.solver.stats),
+                    encoding.solver.n_vars(),
+                    initial_clauses,
+                    valid,
                 )
-                .is_zero()
-            });
-            (
-                format!("{result:?}").to_lowercase(),
-                stats_json(&encoding.solver.stats),
-                encoding.solver.n_vars(),
-                initial_clauses,
-                valid,
-            )
-        };
-    let native_ns = native_start.elapsed().as_nanos();
-    assert_ne!(
-        model_valid,
-        Some(false),
-        "native SAT model failed the source ANF system"
-    );
+            } else {
+                let mut encoding = encode_semaev_s4_with(
+                    n,
+                    requested_ell as u32,
+                    &irreducible,
+                    &F2mElement::one(n),
+                    &target_x,
+                    S4Options {
+                        encoding: XorEncoding::Native,
+                        // The external ANF/CNF-XOR/Magma files below carry
+                        // exactly the source equations and no ordering clauses.
+                        // Keep this arm byte-semantically matched to them.
+                        break_symmetry: false,
+                    },
+                );
+                encoding.solver.conflict_budget = conflict_budget;
+                let initial_clauses = encoding.solver.n_clauses();
+                let result = encoding.solver.solve();
+                let valid = (result == SolveResult::Sat).then(|| {
+                    let decoded = encoding.decode();
+                    let check = crypto_lib::cryptanalysis::binary_semaev_s4::elementary_symmetric_3(
+                        &decoded[0],
+                        &decoded[1],
+                        &decoded[2],
+                        &irreducible,
+                    );
+                    crypto_lib::cryptanalysis::binary_semaev_s4::symmetrised_s4_eval(
+                        &check.0,
+                        &check.1,
+                        &check.2,
+                        &target_x,
+                        &irreducible,
+                    )
+                    .is_zero()
+                });
+                (
+                    format!("{result:?}").to_lowercase(),
+                    stats_json(&encoding.solver.stats),
+                    encoding.solver.n_vars(),
+                    initial_clauses,
+                    valid,
+                )
+            };
+        assert_ne!(
+            model_valid,
+            Some(false),
+            "native SAT model failed the source ANF system"
+        );
+        json!({
+            "result":native_result,
+            "conflict_budget":conflict_budget,
+            "variables":native_vars,
+            "initial_cnf_clauses":native_clauses,
+            "source_model_valid":model_valid,
+            "stats":native_stats
+        })
+    };
+    let native_ns = (!export_only).then(|| native_start.elapsed().as_nanos());
 
-    let mitm = direct_mitm(&curve, &basis, &target);
+    let mitm = if export_only {
+        json!({
+            "status":"not_run_in_export_process",
+            "reason":"run koblitz_pdp_backend direct-mitm under a separate process meter",
+        })
+    } else {
+        direct_mitm(&curve, &basis, &target)
+    };
     let basis_bits: Vec<String> = basis.iter().map(|x| x.to_biguint().to_string()).collect();
     let planted_points: Vec<Value> = planted
         .iter()
@@ -586,6 +679,25 @@ fn main() {
         }),
         BinaryPoint::Infinity => Value::Null,
     };
+    let exports = json!({
+        "wdsat_anf":{"path":"instance.anf","bytes":anf.len(),"blake3":blake3::hash(anf.as_bytes()).to_hex().to_string()},
+        "cryptominisat_xor_dimacs":{"path":"instance.xor.cnf","variables":cms_vars,"cnf_clauses":cnf_clauses,"xor_rows":xor_rows,"bytes":cms.len(),"blake3":blake3::hash(cms.as_bytes()).to_hex().to_string()},
+        "magma_boolean_f4":{"path":"instance.magma","bytes":magma.len(),"blake3":blake3::hash(magma.as_bytes()).to_hex().to_string()}
+    });
+    let source_instance = source_instance_record(
+        n,
+        basis.len(),
+        seed,
+        curve_a,
+        &irreducible.low_terms,
+        &predicate,
+        &basis_bits,
+        &target_json,
+        representation,
+        n_vars,
+        rows.len(),
+        &exports,
+    );
     let manifest = json!({
         "kind":"binary_koblitz_pdp_cross_solver_instance",
         "scope":"standalone planted point-decomposition problem; not a completed index-calculus attack",
@@ -606,11 +718,8 @@ fn main() {
         "source_equations":rows.len(),
         "source_max_degree":rows.iter().flat_map(|row| &row.monomials).map(Vec::len).max().unwrap_or(0),
         "source_max_monomials_per_equation":rows.iter().map(|row| row.monomials.len()).max().unwrap_or(0),
-        "exports":{
-            "wdsat_anf":{"path":"instance.anf","bytes":anf.len(),"blake3":blake3::hash(anf.as_bytes()).to_hex().to_string()},
-            "cryptominisat_xor_dimacs":{"path":"instance.xor.cnf","variables":cms_vars,"cnf_clauses":cnf_clauses,"xor_rows":xor_rows,"bytes":cms.len(),"blake3":blake3::hash(cms.as_bytes()).to_hex().to_string()},
-            "magma_boolean_f4":{"path":"instance.magma","bytes":magma.len(),"blake3":blake3::hash(magma.as_bytes()).to_hex().to_string()}
-        },
+        "exports":exports,
+        "source_instance":source_instance,
         "timing_ns":{
             "factor_base_predicate_construction":predicate_ns,
             "planted_target_construction":target_ns,
@@ -618,14 +727,7 @@ fn main() {
             "native_encoding_and_solve":native_ns,
             "whole_process_internal":total_start.elapsed().as_nanos()
         },
-        "native_sat":{
-            "result":native_result,
-            "conflict_budget":conflict_budget,
-            "variables":native_vars,
-            "initial_cnf_clauses":native_clauses,
-            "source_model_valid":model_valid,
-            "stats":native_stats
-        },
+        "native_sat":native_sat,
         "direct_meet_in_the_middle":mitm,
         "interpretation":"SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT"
     });
