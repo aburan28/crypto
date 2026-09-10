@@ -117,6 +117,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
+        printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
