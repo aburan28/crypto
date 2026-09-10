@@ -379,7 +379,7 @@ def fake_tool_build_capsule(
                     "--build",
                     str(build_root),
                     "--target",
-                    "cryptominisat5",
+                    "cryptominisat5-bin",
                     "--parallel",
                     jobs,
                 ],

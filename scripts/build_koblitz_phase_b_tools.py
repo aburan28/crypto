@@ -179,7 +179,7 @@ def build(tool: str, source: Path, output: Path, jobs: int, timeout: int) -> dic
             measured(f"version-{label}", [commands[executable]["path"], "--version"], source_root)
         measured("configure", [commands["cmake"]["path"], "-S", str(source_root), "-B", str(build_root), "-G", "Unix Makefiles", *CMS_FLAGS, f"-DCMAKE_C_COMPILER={commands['cc']['path']}", f"-DCMAKE_CXX_COMPILER={commands['c++']['path']}", f"-DFETCHCONTENT_SOURCE_DIR_CADICAL={output / 'cadical'}", f"-DFETCHCONTENT_SOURCE_DIR_CADIBACK={output / 'cadiback'}"], output)
         shutil.copyfile(build_root / "CMakeCache.txt", evidence / "CMakeCache.txt")
-        measured("build", [commands["cmake"]["path"], "--build", str(build_root), "--target", "cryptominisat5", "--parallel", str(jobs)], output)
+        measured("build", [commands["cmake"]["path"], "--build", str(build_root), "--target", "cryptominisat5-bin", "--parallel", str(jobs)], output)
         binaries = {"cryptominisat": build_root / "cryptominisat5"}
     packaged = output / "bin"
     packaged.mkdir()
@@ -359,7 +359,7 @@ def validate_recipe(value: dict) -> None:
         for label, executable in (("cmake", "cmake"), ("cc", "cc"), ("cxx", "c++")):
             expected[f"version-{label}"] = [commands[executable]["path"], "--version"]
         expected["configure"] = [commands["cmake"]["path"], "-S", str(source_root), "-B", str(build_root), "-G", "Unix Makefiles", *CMS_FLAGS, f"-DCMAKE_C_COMPILER={commands['cc']['path']}", f"-DCMAKE_CXX_COMPILER={commands['c++']['path']}", f"-DFETCHCONTENT_SOURCE_DIR_CADICAL={output / 'cadical'}", f"-DFETCHCONTENT_SOURCE_DIR_CADIBACK={output / 'cadiback'}"]
-        expected["build"] = [commands["cmake"]["path"], "--build", str(build_root), "--target", "cryptominisat5", "--parallel", jobs]
+        expected["build"] = [commands["cmake"]["path"], "--build", str(build_root), "--target", "cryptominisat5-bin", "--parallel", jobs]
         binary_paths = {"cryptominisat": build_root / "cryptominisat5"}
     for name, binary in binary_paths.items():
         expected[f"copy-{name}"] = [commands["cp"]["path"], str(binary), str(output / "bin" / binary.name)]

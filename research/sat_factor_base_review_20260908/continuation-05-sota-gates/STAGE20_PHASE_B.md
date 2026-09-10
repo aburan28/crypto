@@ -44,7 +44,8 @@ The recipe separately archives the clean CaDiCaL and CaDiBaCk sources already
 present in that checkout at `878a600ea92ce3a9173b069ab294429c851acf85` and
 `acc8bb55b98e35afe0dc228662bf41d8341b8a9b`. CMake network fetching is disabled.
 The eleven fixed test/utility submodules are recorded as unused exclusions;
-the recipe disables testing and builds only `cryptominisat5`. Compiler paths,
+the recipe disables testing and builds only the `cryptominisat5-bin` executable
+target. Compiler paths,
 tool versions, environment, CMake cache, source archives and binary hashes
 remain in the artifact. Previously installed system libraries, including GMP,
 are an explicit dependency of this build environment.
