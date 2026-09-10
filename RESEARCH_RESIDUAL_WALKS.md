@@ -189,7 +189,18 @@ residuals with `dp` zero hash bits cuts the table by `≈ 2^{dp}` at a
 cost of a few extra steps per walk; the relation count and the solve
 are unchanged.  For A and B the module refuses the option, because a
 residual collision between non-preserving states does not propagate
-to a later distinguished point.
+to a later distinguished point.  There is a second, less obvious
+requirement that the first version of this experiment got wrong: the
+fresh-hash walk is *memoryless*, so once two walks have merged they
+carry identical states, and the collision observed at the next
+distinguished point is trivial.  The relation lives only at the merge
+point, where the two predecessor states differ, and has to be located
+by replaying both walks from their stored starts (the van
+Oorschot–Wiener step).  Without that replay C2 with `dp = 4` needed
+`16×` the residuals and produced thousands of trivial collisions; with
+it, its count returns to the `√(2n(B+1))` line and the replay cost
+appears in the `replay ops` column.  C1 and R avoid the issue only
+because their `(walk, step)` states keep their coefficient history.
 
 **Meet in the middle (P6).**  At `B ≈ (4n)^{1/4}` the 4-decomposition
 search delivers about one weight-4 relation per target at `≈ B²/2`

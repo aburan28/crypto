@@ -55,7 +55,11 @@
 //!
 //! *Collision-preserving* means that equal residuals lead to equal
 //! successors, which is what makes distinguished-point storage (and
-//! hence low memory) legitimate.  Strategies A and B are not; for them
+//! hence low memory) legitimate.  Note the corollary: after two walks
+//! merge, a memoryless walk (C2) carries identical states, so the
+//! relation lives only at the merge point and must be recovered by
+//! replaying both walks from their starts; C1 and R keep their
+//! coefficient history and replay for the same reason.  Strategies A and B are not; for them
 //! `filter_bound` implements the "reject residuals outside a small set"
 //! idea so its cost can be measured directly.
 //!
@@ -1116,14 +1120,9 @@ fn run_explicit(
     let bsize = fb.len();
     let k = opts.k.max(1);
     assert!(
-        strategy == Strategy::FreshHashWalk || opts.dp_bits == 0,
-        "distinguished points need a collision-preserving walk"
+        opts.dp_bits == 0,
+        "distinguished points need a collision-preserving walk with merge-point replay"
     );
-    let dp_bits = if strategy == Strategy::FreshHashWalk {
-        opts.dp_bits
-    } else {
-        0
-    };
     let mut rng = StdRng::seed_from_u64(opts.seed ^ mix64(strategy.tag().len() as u64 + 17));
     curve.reset_ops();
     let start = Instant::now();
@@ -1148,16 +1147,14 @@ fn run_explicit(
             } else if let Some(hit) = fb.lookup(&l) {
                 col.push_full(state.full_relation(Some(hit)));
             }
-            if is_distinguished(&l, dp_bits) {
-                col.report.accepted += 1;
-                match table.get(&l) {
-                    Some(prev) => {
-                        col.push_collision(state.relation_to(prev, n));
-                        restart = true;
-                    }
-                    None => {
-                        table.insert(l, state.clone());
-                    }
+            col.report.accepted += 1;
+            match table.get(&l) {
+                Some(prev) => {
+                    col.push_collision(state.relation_to(prev, n));
+                    restart = true;
+                }
+                None => {
+                    table.insert(l, state.clone());
                 }
             }
         }
@@ -1217,6 +1214,116 @@ fn run_explicit(
                 }
             }
             _ => unreachable!(),
+        }
+    }
+    col.report.table_entries = table.len();
+    col.finish(start, 0)
+}
+
+/// Fresh-hash walk with distinguished-point storage.
+///
+/// The state `s_{t+1} = H(L(s_t))` is memoryless, so once two walks
+/// have merged they carry *identical* states, and the collision seen at
+/// the next distinguished point is trivial.  The only relation lives at
+/// the merge point, where the two predecessor states differ; as in van
+/// Oorschot–Wiener, it is located by replaying both walks from their
+/// stored starts, aligning them to equal distance from the distinguished
+/// point and stepping in lockstep until the residuals first agree.
+fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> StrategyReport {
+    let strategy = Strategy::FreshHashWalk;
+    let curve = &inst.curve;
+    let n = curve.n;
+    let bsize = fb.len();
+    let k = opts.k.max(1);
+    let mut rng = StdRng::seed_from_u64(opts.seed ^ mix64(strategy.tag().len() as u64 + 17));
+    curve.reset_ops();
+    let start = Instant::now();
+    let mut col = Collector::new(inst, fb, strategy, opts);
+    let sqrt_n = (n as f64).sqrt() as u64;
+    let walk_cap = if opts.walk_cap > 0 {
+        opts.walk_cap
+    } else {
+        (64u64 << opts.dp_bits).max(8 * sqrt_n)
+    };
+    let mut starts: Vec<DecompState> = Vec::new();
+    let mut table: HashMap<Pt, (u32, u32)> = HashMap::new();
+
+    let advance = |state: &mut DecompState, l: &mut Pt| {
+        *state = DecompState::from_residual(l, n, bsize, k);
+        *l = state.residual(inst, fb);
+    };
+    // Predecessor states at the merge point of walk `w1` after `t1`
+    // transitions and walk `w2` after `t2`, both of which sit on the
+    // same distinguished residual.
+    let locate_merge = |starts: &[DecompState], w1: usize, t1: u64, w2: usize, t2: u64| {
+        let mut s1 = starts[w1].clone();
+        let mut l1 = s1.residual(inst, fb);
+        let mut s2 = starts[w2].clone();
+        let mut l2 = s2.residual(inst, fb);
+        let (mut i1, mut i2) = (0u64, 0u64);
+        while t1 - i1 > t2 - i2 {
+            advance(&mut s1, &mut l1);
+            i1 += 1;
+        }
+        while t2 - i2 > t1 - i1 {
+            advance(&mut s2, &mut l2);
+            i2 += 1;
+        }
+        loop {
+            if l1 == l2 {
+                return Some(s1.relation_to(&s2, n));
+            }
+            if i1 >= t1 {
+                return None;
+            }
+            advance(&mut s1, &mut l1);
+            advance(&mut s2, &mut l2);
+            i1 += 1;
+            i2 += 1;
+        }
+    };
+
+    'outer: loop {
+        let w = starts.len();
+        let mut state = DecompState::random(&mut rng, n, bsize, k);
+        starts.push(state.clone());
+        col.report.walks += 1;
+        let mut l = state.residual(inst, fb);
+        let mut step = 0u64;
+        loop {
+            col.report.samples += 1;
+            if l.inf {
+                col.push_full(state.full_relation(None));
+            } else if let Some(hit) = fb.lookup(&l) {
+                col.push_full(state.full_relation(Some(hit)));
+            }
+            if is_distinguished(&l, opts.dp_bits) {
+                col.report.accepted += 1;
+                match table.get(&l) {
+                    Some(&(w2, s2)) => {
+                        let before = curve.ops();
+                        let rel = locate_merge(&starts, w, step, w2 as usize, s2 as u64);
+                        col.report.replay_ops += curve.ops() - before;
+                        match rel {
+                            Some(rel) => col.push_collision(rel),
+                            None => col.report.relations_failed_verification += 1,
+                        }
+                        break;
+                    }
+                    None => {
+                        table.insert(l, (w as u32, step as u32));
+                    }
+                }
+            }
+            if (opts.stop_when_solved && col.report.solved) || curve.ops() >= opts.max_ops {
+                break 'outer;
+            }
+            if step >= walk_cap {
+                col.report.abandoned_walks += 1;
+                break;
+            }
+            advance(&mut state, &mut l);
+            step += 1;
         }
     }
     col.report.table_entries = table.len();
@@ -1442,6 +1549,7 @@ pub fn run_strategy(
 ) -> StrategyReport {
     assert!(!fb.is_empty(), "empty factor base");
     match strategy {
+        Strategy::FreshHashWalk if opts.dp_bits > 0 => run_fresh_hash_dp(inst, fb, opts),
         Strategy::IndependentSamples | Strategy::LocalMutationWalk | Strategy::FreshHashWalk => {
             run_explicit(inst, fb, strategy, opts)
         }
@@ -1789,6 +1897,30 @@ mod tests {
             assert!(
                 rep.table_entries * 4 < rep.samples as usize,
                 "DP storage should be sparse"
+            );
+            // Merged walks must be resolved to their merge point, not
+            // reported as a trivial collision of identical states.
+            assert_eq!(
+                rep.collisions_trivial, 0,
+                "{} with DPs: {rep:?}",
+                rep.strategy
+            );
+            assert_eq!(rep.relations_failed_verification, 0);
+            let full = run_strategy(
+                &inst,
+                &fb,
+                strategy,
+                &WalkOptions {
+                    dp_bits: 0,
+                    ..opts.clone()
+                },
+            );
+            assert!(
+                rep.samples < 3 * full.samples + 1000,
+                "{}: DP mode needed {} samples vs {} without DPs",
+                rep.strategy,
+                rep.samples,
+                full.samples
             );
         }
     }
