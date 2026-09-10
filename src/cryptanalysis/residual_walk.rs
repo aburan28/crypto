@@ -847,6 +847,13 @@ pub struct WalkOptions {
     /// `2·segment_len` at the price of two scalar multiplications per
     /// restart.
     pub segment_len: u64,
+    /// Local-mutation walk only: keep mutating after a collision instead
+    /// of drawing a fresh random state.  The walk is driven by its own
+    /// randomness, not by the residual, so nothing merges and the two
+    /// scalar multiplications of a restart are simply saved.  (The
+    /// collision-preserving walks must restart: after a merge every
+    /// further step would re-collide.)
+    pub continue_after_collision: bool,
 }
 
 impl Default for WalkOptions {
@@ -863,6 +870,7 @@ impl Default for WalkOptions {
             negation_map: false,
             diff_table: false,
             segment_len: 0,
+            continue_after_collision: false,
         }
     }
 }
@@ -883,6 +891,7 @@ pub struct StrategyReport {
     pub negation_map: bool,
     pub diff_table: bool,
     pub segment_len: u64,
+    pub continue_after_collision: bool,
     /// Residuals evaluated (independent samples or walk steps).
     pub samples: u64,
     /// Residuals that passed the filter / distinguished-point test and
@@ -937,6 +946,7 @@ impl StrategyReport {
             negation_map: opts.negation_map,
             diff_table: opts.diff_table,
             segment_len: opts.segment_len,
+            continue_after_collision: opts.continue_after_collision,
             samples: 0,
             accepted: 0,
             table_entries: 0,
@@ -1264,7 +1274,7 @@ fn run_explicit(
                 l = state.residual(inst, fb);
             }
             Strategy::LocalMutationWalk => {
-                if restart {
+                if restart && !opts.continue_after_collision {
                     col.report.walks += 1;
                     state = DecompState::random(&mut rng, n, bsize, k);
                     l = state.residual(inst, fb);
@@ -2240,6 +2250,7 @@ mod tests {
                 negation_map: true,
                 diff_table: true,
                 segment_len: 300,
+                continue_after_collision: true,
                 ..WalkOptions::default()
             };
             let rep = run_strategy(&inst, &fb, strategy, &opts);
@@ -2249,6 +2260,9 @@ mod tests {
                 "{} with levers failed: {rep:?}",
                 rep.strategy
             );
+            if strategy == Strategy::LocalMutationWalk {
+                assert_eq!(rep.walks, 1, "a continuing mutation walk never restarts");
+            }
             assert_eq!(rep.relations_failed_verification, 0, "{}", rep.strategy);
             assert!(rep.negation_map && rep.diff_table && rep.segment_len == 300);
         }

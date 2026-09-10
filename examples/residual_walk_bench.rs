@@ -20,8 +20,8 @@
 //! ```
 //!
 //! `--baseline --tuned` runs the same protocol with the generic levers on
-//! (negation map, difference table, 512-step segments) for the
-//! exhaustive-storage rows.  `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
+//! (negation map, difference table, 512-step segments, no restart after
+//! a collision on the mutation walk) for the exhaustive-storage rows.  `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
 //! `2^28`, `B = 256`, `k = 3`, seeds 1–3, every strategy, plus `C1` and
 //! `R` with 8 distinguished-point bits; about a minute).  Score it, or
 //! compare it against the frozen baseline, with
@@ -295,6 +295,7 @@ fn baseline(tuned: bool) -> Vec<StrategyReport> {
                 negation_map: tuned,
                 diff_table: tuned,
                 segment_len: if tuned { 512 } else { 0 },
+                continue_after_collision: tuned,
                 ..WalkOptions::default()
             };
             run_all(&inst, &fb, &Strategy::ALL, &opts, &mut out);
@@ -335,6 +336,7 @@ fn main() {
     let mut negation = false;
     let mut diff_table = false;
     let mut segment = 0u64;
+    let mut continue_walk = false;
     let mut quick = false;
     let mut i = 0;
     let value = |i: &mut usize, args: &[String]| -> String {
@@ -371,11 +373,12 @@ fn main() {
             "--negation" => negation = true,
             "--diff-table" => diff_table = true,
             "--segment" => segment = value(&mut i, &args).parse().expect("--segment"),
+            "--continue" => continue_walk = true,
             "--quick" => quick = true,
             "--help" | "-h" => {
                 println!(
                     "usage: residual_walk_bench [--bits N] [--fb B] [--k K] [--trials T] [--seed S] \
-                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--json FILE] \
+                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--continue] [--json FILE] \
                      [--panel [--quick]] [--baseline [--tuned]]"
                 );
                 return;
@@ -426,6 +429,7 @@ fn main() {
             negation_map: negation,
             diff_table,
             segment_len: segment,
+            continue_after_collision: continue_walk,
             ..WalkOptions::default()
         };
         for &s in &strategies {

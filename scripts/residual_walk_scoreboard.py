@@ -54,12 +54,15 @@ def mean(xs):
 def variant(r):
     """Which generic levers a report ran with (absent fields = off)."""
     parts = []
-    if r.get("negation_map"):
+    tag = r.get("tag")
+    if r.get("negation_map") and r.get("dp_bits", 0) == 0:
         parts.append("neg")
-    if r.get("diff_table"):
+    if r.get("diff_table") and tag == "B":
         parts.append("diff")
-    if r.get("segment_len"):
+    if r.get("segment_len") and tag in ("C1", "R"):
         parts.append(f"seg{r['segment_len']}")
+    if r.get("continue_after_collision") and tag == "B":
+        parts.append("cont")
     return "+".join(parts) or "plain"
 
 
@@ -185,7 +188,9 @@ def compare(run, base, tolerance):
             continue
         imp = b["S"] / x["S"]
         kr = (x["kappa"] / x["kappa_floor"]) / (b["kappa"] / b["kappa_floor"])
-        beaten = kr < 1 - tolerance and x["correct"]
+        # Plain rho is a single-collision process whose first-collision
+        # time has a wide spread; its kappa is the reference, not a target.
+        beaten = x["tag"] != "R" and kr < 1 - tolerance and x["correct"]
         if not x["correct"]:
             verdict = "WRONG ANSWER"
             regressions += 1
