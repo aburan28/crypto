@@ -607,3 +607,195 @@ are what CDCL could not handle; without them it is competitive again.
    collection and the `4n` orbit collapse are measured, not modelled.
 3. The tuple-level search (§6.2) is unchanged in priority for *new*
    structure; this section is the existing structure paying out.
+
+## 10. Second search: quotients by any finite group, invariants by orbit sums
+
+**Module:** `src/cryptanalysis/coordinate_quotients.rs`
+**Demo:** `cargo run --release --example coordinate_quotients` (`-- 3` for `m = 3`)
+
+§1 closed the per-point search space; §6.2 and §6.4 named what was left —
+the joint invariants of `E[2] ≅ (Z/2)²`, and coordinates on tuples so that
+the 4-torsion of `K₀`, which does not act on the `x`-line, can act.  Both
+need invariants of a group that is no longer a single involution.  Rather
+than derive them by hand per group, the second search does it
+algorithmically:
+
+1. **Close** a generating set of point maps `P ↦ α(P) + T` into a finite
+   group `G`.
+2. **Find `Γ ⊆ G^{m+1}` by experiment**: keep the tuples `(γ_i)` with
+   `Σ γ_i(P_i) = O` on random relation tuples.  For 2-torsion this gives
+   even weight, for 4-torsion weights summing to `0 mod 4`, for
+   automorphisms "all equal" — none of which the code is told.
+3. **Invariants as orbit-set symmetric functions.**  For a seed `f` of the
+   tuple (`u(P_i)`, `u(P_i ± P_j)`, `Σu`, `Πu`) the values `{f(γP)}` over
+   `Γ` form a set; its elementary symmetric functions `e_k` are invariant.
+   Sets, not multisets: over `F₂` even multiplicities kill every `e_k`.
+   Constants and duplicates are dropped, at most four `e_k` per seed.
+4. **Minimal-degree relation, identities removed.**  At each total degree
+   two kernels are computed, on relation tuples and on arbitrary tuples;
+   a relation is a vector of the first outside the span of the second.
+   Without this step the first thing found on the 2-torsion quotient is
+   `s² + s = Σw`, which holds everywhere.  The identity basis pivots on
+   the monomials heaviest in the tuple seeds, so reduction strips exactly
+   the identity's part and the 5-term `w₁w₂w_R + w₁ + w₂ + w_R + s` comes
+   out as itself.
+5. **Collapse, exactly**: every relation tuple on the curve is enumerated
+   and hashed by its invariant vector.  Collapse `= |Γ|` means the
+   invariants separate `Γ`-orbits; more would mean a symmetry `G` misses.
+
+A caveat the tool now enforces on itself: the "degree in `u`" of an
+invariant is only defined when every map `Γ` applies acts on the `u`-line
+affinely (`u ↦ au + b`).  Translation by `T₄` does not act on the `u`-line
+at all, so for it the weighted degree is reported as *algebraic*, and the
+total degree in the invariants is not a cost.
+
+### 10.1 Results at `m = 2`
+
+| curve, group | `|G|` | `|Γ|` | invariants | relation | collapse |
+|---|---:|---:|---|---|---:|
+| `K₁/F₂⁷`, `⟨T₂, −⟩`, seeds `u_i, Σu` | 4 | 8 | `e₂[u_i] = w_i`, `Σu = s` | `w₁w₂w_R + w₁ + w₂ + w_R + s`, degree 3, weighted 6 | 7.8 |
+| `K₁/F₂⁷`, same, `+ Πu` | 4 | 8 | `+ e_k[Πu]` | degree 2 in the invariants, weighted 9 | 8.0 |
+| `K₀/F₂⁷`, `⟨T₂, −⟩` | 4 | 8 | as `K₁` | the same 5-term relation | 7.8 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, seeds `u_i` only | 8 | **32** | `v_i = e₂[u_i]` (and `e₃[u_i]`) | degree `[2, 2, 2]`, 11 terms: `1 + Σv_i + Σv_iv_j + v₁v₂v_R + Σv_i²v_j²` | **32.0** |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, seeds `u_i, Σu` | 8 | 32 | `+ e₂[Σu], e₃[Σu]` | `1 + e₂[Σu] + v₁ + v₂ + v_R`, linear, algebraic | 32.0 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ Πu` | 8 | 32 | `+ e_k[Πu]` | `1 + e₃[Πu] + e₂[Σu]` | 32.0 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ pair sums/differences` | 8 | 32 | pair invariants all redundant | the same 5-term linear relation | 32.0 |
+| `y² = x³ − x / F₁₀₀₉`, one `T`, sign frame | 4 | 8 | `e₂[u_i] = −u_i²`, `e_k[Σu]`, `Πu` | degree 2, 9 terms, weighted 6 | 8.0 |
+| `y² = x³ − x / F₁₀₀₉`, all of `E[2]`, seeds `u_i` only | 8 | **32** | `e₂[u_i]` (the `D₂`-quotient coordinate) | **none up to total degree 5** (predicted degree 8 per variable) | 31.9 |
+| `y² = x³ − x / F₁₀₀₉`, all of `E[2]`, `+ Σu, Πu` | 8 | 32 | `+ e_k[Σu]`, `e_k[Πu]` | `32 + 1001·e₃[Πu] + e₃[Σu]`, linear, weighted 9 | 32.0 |
+| `y² = x³ − x / F₁₀₀₉`, `E[2] + Aut` (`j = 1728`, `|Aut| = 4`) | 16 | **64** | `e₄[u_i]`, `e₄[Σu]`, `e_k[Πu]` | `12 + 3·e₄[Πu] − e₄[Σu] + Σe₄[u_i]`, linear, algebraic | 64.9 |
+| `y² = x³ + x + 2 / F₁₀₀₉`, all of `E[2]` | 8 | 32 | as above | `793 + 817·e₃[Πu] + e₃[Σu]`, linear | 32.0 |
+
+Every relation verified on 200 fresh relation tuples and non-vanishing
+on generic ones; every collapse equals `|Γ|` to the decimal, i.e. the
+orbit-set invariants separate the relation group's orbits exactly, in
+every case.  (`m = 3` rows: §10.4.)
+
+### 10.2 What the `K₀` result is, and is not
+
+The 4-torsion quadruples the collapse — 32 relation tuples per
+coordinate vector against 8 — and the invariant coordinates it produces,
+`e₂` of the `⟨T₄, −1⟩`-orbit of `u(P)`, are a coordinate on
+`E/⟨T₄, −1⟩`.  On `K₀` the quotient by `E(F₂) = ⟨T₄⟩` is the
+endomorphism `π − 1`, so this is not a new curve model: it is index
+calculus on the *same* curve with the instance transported through
+`π − 1`.  §1.2 said such transport "buys what a change of curve buys";
+the measurement makes that precise, and it is not nothing:
+
+- one solve on the transported instance is a relation for all four
+  targets `R + kT₄`, not two (`T₄ ∈ E(F₂)` is a known small-order
+  generator, as `T₂` already was);
+- the factor base is `⟨π, τ_{T₄}, −1⟩`-stable, orbits of size up to
+  `8n`, so the relation matrix shrinks by a further factor 2 in both
+  dimensions relative to the `T₂` case of §4.3;
+- the polynomial to solve is whatever one solves on `K₀` — including the
+  symmetrised `S₃`/`S₄` of §8, since `K₀` has its own `T₂`.  The two
+  structures compose rather than compete.
+
+What it is not: a per-point coordinate of lower degree.  The points-only
+row shows the transported polynomial as it is: degree 2 in each `v_i`,
+eleven terms — Semaev's `S₃` of `K₀` written in the `e₂`-coordinate of
+`E/⟨T₄, −1⟩`, which is Möbius-equivalent to `x` on the isogenous copy but
+not to `x` itself, hence 11 terms where `S₃` in `x` has 5.  The relation
+that is *linear* once `e₂[Σu]` is added is not a degree-1 summation
+polynomial: `e₂[Σu]` is an algebraic function of the `u_i` of the orbit
+size's order, and the linear relation says it is determined by the
+per-point invariants on relations.  The tool's own weighted-degree
+column says "algebraic" for exactly this reason.
+
+### 10.3 The Klein group on a prime curve, and the automorphisms with it
+
+With all three 2-torsion points rational, `Γ` has order 32 at `m = 2`
+(16 translation tuples summing to zero, times the global sign) and the
+orbit-set invariants separate its orbits exactly.  But the expectation
+behind §6.4 — that the per-point degree halves once per independent
+involution — is **false**, and the tool shows it: the per-point
+invariant `e₂` of `{u, −u, c/u, −c/u}` is the `D₂`-quotient coordinate
+of degree 4 on the `x`-line, and among those coordinates alone there is
+no relation up to total degree 5 (the count of §1.3 predicts degree 8
+per variable: eight points share a value, so the third coordinate takes
+`8·8/8` values).  The second involution does not lower the per-point
+degree; it moves the content into the tuple invariants, where the
+relation is linear in degree-3 symmetric functions of the `Γ`-orbits of
+`Σu` and `Πu`.  Whether that is a cheaper system after descent is a
+question about bits, not degrees, and needs `F_{p^k}` support to answer
+(§10.5).  The gain that is certain is the collapse: 32 against 8, four
+times as many relation tuples per solve.
+
+Adding the automorphisms of `j = 1728` (`|Aut| = 4`) to the group doubles
+`Γ` again, to 64 at `m = 2` and 256 at `m = 3` — the automorphism acts
+globally, so it contributes a factor `|Aut|/2` — and the invariants
+become `e₄` of orbit sets of size 8; the relation stays linear in the
+tuple invariants and the collapse is 64.9, separation up to degenerate
+tuples.  This is the Duursma–Gaudry–Morain automorphism saving computed
+by the same code path as the torsion one, with no special case for
+"global" symmetries: they simply show up as elements of `Γ` that act on
+all coordinates at once.  (A first version counted `−1` twice on odd
+characteristic, as negation and as scaling by `−1`, and reported
+`|G| = 20`; group closure now canonicalises.)
+
+### 10.4 Results at `m = 3`
+
+| curve, group, seeds | `|Γ|` | relation | collapse |
+|---|---:|---|---:|
+| `K₁/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | **the 18-term symmetrised `S₄` of §3.2, exactly**: degrees `[2,2,2,2,1]`, total degree 6, weighted 12 | not enumerated |
+| `K₀/F₂⁷`, `⟨T₂, −⟩`, `u_i, Σu` | 16 | the same 18 terms | 15.9 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i` only | 128 | none up to total degree 5 | **135.3**: the per-point invariants merge distinct `Γ`-orbits at `m = 3` (they separated them at `m = 2`) |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `u_i, Σu` | 128 | degree `[2,2,2,2 \| 1,·,1]` in `v_i = e₂[u_i]`, `e₂[Σu]`, `e₄[Σu]`; 21 terms | **128.0**, exact |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ Πu` | 128 | the same 21-term relation | 128.0 |
+| `K₀/F₂⁷`, `⟨T₄, −⟩`, `+ pair sums` | 128 | degree `[1,1,1,1 \| 1, 1]` with `e₂[u(1+2)]`, 10 terms — chaining in quotient coordinates | not enumerated |
+| `y² = x³ − x`, one `T`, sign frame, `+ Σu, Πu` | 16 | none up to total degree 4 (the 24-term `S₄` of §3.1 has total degree 6) | not enumerated |
+| `y² = x³ − x`, `E[2]`, `u_i` only | 128 | none up to total degree 5 | not enumerated |
+| `y² = x³ − x`, `E[2]`, `+ Σu, Πu` | 128 | linear in `e₁, e₂, e₄[Πu]`, `e₄[Σu]`, 5 terms | not enumerated |
+| `y² = x³ − x`, `E[2] + Aut` | 256 | linear in `e₄[u_i]`, `e₄[Σu]`, `e₁, e₄[Πu]`, 8 terms | not enumerated |
+| `y² = x³ + x + 2`, `E[2]`, `+ Σu, Πu` | 128 | degree 2 in `e_k[Πu]`, `e₄[Σu]`, 17 terms | not enumerated |
+
+The control rows are the strongest check the second search gets: given
+only "translate by `T₂`, negate", the group engine finds the relation
+subgroup, builds `w_i = e₂[u_i]` and `s = Σu` without being told what
+they are, and interpolates the same 18 monomials §3.2 obtained from the
+hand-derived invariants.
+
+The `K₀` row with `Σu` is the `m = 3` analogue of §10.2: degree 2 in each
+per-point quotient coordinate, as the symmetrised `S₄` of §3.2 is in each
+`w_i`, with 21 terms against 18, and a collapse of 128 against 16 —
+eight times as many relation tuples per solve, of which a factor 4 is
+the endomorphism transport and a factor 2 the `T₂` it already contains.
+The price is in the extra invariants: `s = Σu` was linear in the bits of
+a subspace factor base, `e₂[Σu]` and `e₄[Σu]` are not, because `T₄` does
+not act on the `u`-line and the orbit values `u(P_i + kT₄)` are
+algebraic in `u(P_i)`.  A descended version would carry the four coset
+values of each summand as unknowns with their defining quadratics, which
+is the transported system with more variables — or, equivalently and
+more simply, the §8 system on transported targets.  That is the route
+§10.5 takes.
+
+The points-only `T₄` row is a measurement worth keeping: at `m = 2` the
+per-point invariants `e₂, e₃` of the coset separated every `Γ`-orbit; at
+`m = 3` they merge some (collapse 135 above `|Γ| = 128`), and adding
+`Σu` restores exact separation.  The tool reports this rather than
+assuming per-point invariants are complete.
+
+### 10.5 What to do with it, ranked
+
+1. **`π − 1` transport on `K₀`, in the oracle that already exists.**
+   `koblitz_symmetrised` solves the symmetrised system for a target;
+   solve it for `(π − 1)R` instead, with the factor base the preimage of
+   `F_u` under `π − 1`, and each root is a relation for all four of
+   `R + kT₄`, over orbits of size up to `8n`.  No new polynomial, no new
+   solver; the measurement is relations per second end to end, which
+   §8 never made.  This is the only item on the list that changes a
+   number the scaling target cares about.
+2. **`F_{p^k}` in `Gf`**, so the Klein-group invariants meet a subspace
+   factor base and the "bits, not degrees" question of §10.3 can be
+   answered by descent rather than deferred.
+3. **Higher-order seeds through the same engine**: translations by
+   rational 3-torsion on `j = 0` curves together with the `Z/3`
+   automorphism, and the `μ₃`/Hessian structure they generate.  The
+   engine needs nothing new; the curves need 3-torsion, which `K₀`,
+   `K₁` and `secp256k1` do not have.
+4. **Completeness of per-point invariants.**  The `m = 3` merge in the
+   points-only `T₄` row says two symmetric functions of a coset are not
+   always a complete invariant of it; taking all `e_k` (the cap is four)
+   or the coset's minimal polynomial would settle whether that is a
+   cap artefact or a genuine identification.

@@ -392,6 +392,7 @@ that makes adding new attacks cheap.
 | Module                                       | Attack                                                  |
 |----------------------------------------------|---------------------------------------------------------|
 | `cryptanalysis::pollard_rho`                 | Pollard ρ for DLP / ECDLP, multi-shard, distinguished-points |
+| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
 | `cryptanalysis::preprocessing_rho`           | Bernstein-Lange precomputation rho                       |
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
@@ -405,6 +406,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::koblitz_index_calculus`      | …also: cyclotomic classification of invariant factor bases |
 | `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
 | `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
+| `cryptanalysis::coordinate_quotients`        | Invariants of any finite group of point maps by orbit sums: relation subgroup by experiment, minimal-degree relation, exact collapse |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
@@ -669,6 +671,24 @@ CRYPTO 2010) that uses BCT directly.
 Random walk on the cyclic group; collision via Floyd's tortoise-and-hare.
 Expected `√(πn/2)` group operations to recover the discrete log.
 
+**Collaborative mode** (`cryptanalysis::pollard_collab`): many machines share
+one instance.  The job id seeds the walk, so walker `i`'s start point is a
+pure function of `i` and the search space divides into index ranges; peers
+check in distinguished points as `(x, y, a, b)` with `a·P + b·Q = (x, y)`,
+which anyone can verify, and merge each other's check-ins as a CRDT with no
+coordinator.  Try it on one machine:
+
+```bash
+crypto cryptanalysis rho-collab init --curve demo-40 --secret 1badc0de --mailbox /tmp/collab
+crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node alice --threads 2 &
+crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
+crypto cryptanalysis rho-collab status --mailbox /tmp/collab
+```
+
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
+[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
+verified artifact, is [aburan28/cairn#143](https://github.com/aburan28/cairn/pull/143).
+
 ### Index calculus (ECDLP, prime fields)
 
 Semaev's summation polynomials `S_n(x_1, …, x_n)` vanish iff there exist
@@ -777,7 +797,7 @@ problems generally.
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
-- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`).
+- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`).
 - [`RESEARCH_TII_MCELIECE.md`](./RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
 - [`RESEARCH_EXOTIC_COORDINATES.md`](./RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.

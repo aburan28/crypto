@@ -443,7 +443,7 @@ impl Pt {
 
 /// An automorphism of `E` fixing `O`, in the shapes that occur over the
 /// fields handled here.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Auto {
     /// `P ↦ −P`.
     Neg,
