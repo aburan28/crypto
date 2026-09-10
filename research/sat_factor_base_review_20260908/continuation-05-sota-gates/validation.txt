@@ -77,3 +77,9 @@ Result: the original fixed-table process failed operationally; fresh determinist
 
 PASS: local preflight of external reproduction verifier v3.
 Result: retained degree-9, degree-15 and degree-23 artifacts, public discoveries, target matches, recovered scalars and fail-closed fields were all accepted.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage12.py
+Result: every degree-23 public algebraic candidate field and both selections match Stage 10; the degree-15 scalar-blind target, relation counters, conflicts and recovered scalar also match their frozen reference.
+
+PASS: indexed projected-orbit performance receipts.
+Result: per-candidate projection time improved by 12.69x to 23.28x, while combined fresh-process degree-23 discovery core time improved by 1.96x.
