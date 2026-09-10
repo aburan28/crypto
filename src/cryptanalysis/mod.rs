@@ -138,6 +138,7 @@ pub mod koblitz_bench;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
+pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod mazur_tate_sigma;
