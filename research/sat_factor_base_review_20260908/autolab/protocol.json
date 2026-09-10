@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "objective": "Agent-facing control plane for pushing docs/ic/boundary_targets.json beat targets with fail-closed measurement-schema validation.",
+  "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
+  "ledger": {
+    "path": "docs/ic/boundary_targets.json",
+    "markdown": "docs/ic/BOUNDARY_TARGETS.md",
+    "required_schema_version": 2
+  },
+  "scope": {
+    "public_synthetic_fixtures_only": true,
+    "private_key_recovery": false,
+    "external_or_imported_points": false,
+    "asymptotic_sub_sqrt_claim_admitted": false
+  },
+  "producers": {
+    "direct": {
+      "example": "koblitz_rank_fixture",
+      "source": "examples/koblitz_rank_fixture.rs",
+      "usage": "<n> <a> <eta_numerator> <eta_denominator> <seed> [pair_mode] [target_mode] [query_mode] [batch_fixtures]"
+    },
+    "rho": {
+      "example": "koblitz_rho_fixture",
+      "source": "examples/koblitz_rho_fixture.rs",
+      "usage": "<n> <a> <mode> <fixtures> [reference|packed] [batch_seed]"
+    }
+  },
+  "beats": {
+    "smoke.koblitz.vs_rho.n13": {
+      "label": "Setup smoke: Koblitz n=13 charged+wall comparison (1 fixture)",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 0,
+      "n": 13,
+      "a": 0,
+      "eta": [1, 2],
+      "timing_class_goal": "whole_process_wall",
+      "fixtures": 1,
+      "direct": {
+        "pair_mode": "signed_expanded",
+        "target_mode": "independent",
+        "query_mode": "pair_pair_16"
+      },
+      "rho": {
+        "quotient_mode": "signed_frobenius",
+        "backend": "packed"
+      },
+      "resource_cap_bytes": 17179869184,
+      "note": "Confirms deps, lock, producers, and schema validation. Not a ledger promotion."
+    },
+    "koblitz.vs_rho.n37_wall": {
+      "label": "Priority #1a: whole-process wall-clock crossover at n=37",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 1,
+      "n": 37,
+      "a": 0,
+      "eta": [1, 2],
+      "timing_class_goal": "whole_process_wall",
+      "fixtures_default": 1,
+      "fixtures_full": 1024,
+      "direct": {
+        "pair_mode": "signed_expanded",
+        "target_mode": "independent",
+        "query_mode": "pair_pair_16"
+      },
+      "rho": {
+        "quotient_mode": "signed_frobenius",
+        "backend": "packed"
+      },
+      "resource_cap_bytes": 17179869184,
+      "acceptance_gates": [
+        "all stages charged in the same process series",
+        "independent validation",
+        "timing_class=whole_process_wall",
+        "automorphism_discount explicit (sqrt(2n) / A=2*n)",
+        "verdict field set",
+        "measurement_schema.vs_rho required fields present"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target"
+    },
+    "koblitz.vs_rho.n41_charged": {
+      "label": "Priority #1b: charged crossover at n=41 with >=20% margin",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 1,
+      "n": 41,
+      "a": 0,
+      "eta": [1, 2],
+      "timing_class_goal": "algorithmic_charged",
+      "fixtures_default": 1,
+      "fixtures_full": 1024,
+      "direct": {
+        "pair_mode": "signed_expanded",
+        "target_mode": "independent",
+        "query_mode": "pair_pair_16"
+      },
+      "rho": {
+        "quotient_mode": "signed_frobenius",
+        "backend": "packed"
+      },
+      "resource_cap_bytes": 17179869184,
+      "acceptance_gates": [
+        "all stages charged in the same process series",
+        "independent validation",
+        "timing_class=algorithmic_charged",
+        "automorphism_discount explicit (sqrt(2n) / A=2*n)",
+        ">=20% margin vs rho",
+        "measurement_schema.vs_rho required fields present"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target"
+    }
+  },
+  "lock": {
+    "path": "runs/autolab.lock",
+    "current_path": "runs/current.json"
+  },
+  "historical_note": "Earlier specialized runners (kic_autolab, beats_rho_autolab, direct_n37_autolab) left only __pycache__ bytecode under sibling autolab_* dirs. This control plane replaces them for boundary-ledger work and drives the still-present Rust producers."
+}

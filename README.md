@@ -782,6 +782,7 @@ problems generally.
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
 - [`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) — index-calculus per-stage boundary ledger (beat targets for agents).
+- [`research/sat_factor_base_review_20260908/autolab/`](./research/sat_factor_base_review_20260908/autolab/) — agent autolab runner wired to the IC boundary ledger.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
 - [`gpu/ecc/README.md`](./gpu/ecc/README.md) — GPU elliptic-curve kernels.
 - [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](./gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.

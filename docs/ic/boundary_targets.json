@@ -1,8 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "title": "Index-calculus boundary ledger",
   "updated": "2026-09-10",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
+  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
     "factor_base",
     "decomposition",
@@ -11,12 +12,112 @@
     "end_to_end_dlp",
     "vs_rho"
   ],
+  "measurement_schema": {
+    "fail_closed": true,
+    "global_provenance_required": [
+      "fixture_hash",
+      "executable_or_source_hash",
+      "host_id",
+      "resource_caps",
+      "seeds",
+      "claim_boundary_non_claims"
+    ],
+    "factor_base": {
+      "required": [
+        "n_or_bits",
+        "factor_base_size_F",
+        "orbit_count_K",
+        "dimension_l_or_dim",
+        "construction_method",
+        "materialized",
+        "construction_wall_ms",
+        "retained_bytes"
+      ],
+      "notes": "orbit_count_K may equal |F| when no orbit reduction applies; state that explicitly."
+    },
+    "decomposition": {
+      "required": [
+        "n_or_bits",
+        "m_summands",
+        "dimension_l_or_dim",
+        "unknowns",
+        "system_degree",
+        "eq_var_ratio",
+        "ffd_or_degree_of_regularity",
+        "oracle_class",
+        "median_ms_per_target",
+        "largest_solvable"
+      ],
+      "unknowns_formula_when_applicable": "m*l + (m-2)*n",
+      "ffd_requirement": "Algebraic frontier claims (groebner / F4 / SAT on Semaev systems) must measure FFD/DoR (min/max/mean over draws). Enumerate / pairs_and_solve may set ffd.status=inapplicable with reason, but must still record system degree and unknowns when a polynomial system exists.",
+      "optional_when_measured": [
+        "macaulay_degree_max",
+        "f4_splits",
+        "sat_conflicts",
+        "verdict_mix"
+      ]
+    },
+    "relation_yield": {
+      "required": [
+        "n_or_bits",
+        "base_id_or_hash",
+        "eta_or_coverage_policy",
+        "pr_decomposition_or_hit_rate_with_ci",
+        "trials_per_relation",
+        "target_mix"
+      ],
+      "target_mix_fields": ["natural", "planted_sat", "proven_unsat"]
+    },
+    "rank": {
+      "required": [
+        "n_or_bits",
+        "orbit_columns_K",
+        "relations_collected",
+        "relations_needed",
+        "surplus",
+        "matrix_dims",
+        "sparse_or_dense",
+        "rank_accumulation",
+        "la_wall_ms_or_la_charged_ms"
+      ],
+      "notes": "This is relation-matrix LA over the subgroup order, not GB FFD."
+    },
+    "end_to_end_dlp": {
+      "required": [
+        "n_or_bits",
+        "recovered_d_verified",
+        "stage_timers",
+        "claim_boundary"
+      ]
+    },
+    "vs_rho": {
+      "required": [
+        "n_or_bits",
+        "timing_class",
+        "ic_cost",
+        "rho_cost",
+        "automorphism_discount",
+        "all_stages_charged_same_series",
+        "verdict",
+        "claim_boundary",
+        "independent_replay_pointer"
+      ],
+      "timing_class_enum": [
+        "algorithmic_charged",
+        "projection_matched",
+        "whole_process_wall"
+      ],
+      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control"
+    }
+  },
   "how_to_beat": [
     "Freeze public fixture (curve, seeds, base hash, resource caps).",
-    "Emit hashed JSON evidence under research/ or docs/ic/runs/.",
+    "Launch via research/sat_factor_base_review_20260908/autolab/boundary_autolab.py (plan/preflight/launch/claim-check).",
+    "Emit hashed JSON evidence under research/ or docs/ic/runs/ with every required measurement_schema field for the claimed stage.",
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",
-    "vs_rho and end_to_end_dlp past prior size require independent recomputation."
+    "vs_rho and end_to_end_dlp past prior size require independent recomputation.",
+    "Incomplete measurement_schema fields fail closed — no row promotion."
   ],
   "agent_priorities": [
     {
@@ -29,13 +130,13 @@
       "rank": 2,
       "regime": "koblitz",
       "stage": "decomposition",
-      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0"
+      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged"
     },
     {
       "rank": 3,
       "regime": "binary",
       "stage": "decomposition",
-      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve"
+      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged"
     },
     {
       "rank": 4,
@@ -48,6 +149,12 @@
       "regime": "binary_and_prime",
       "stage": "relation_yield",
       "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs"
+    },
+    {
+      "rank": 6,
+      "regime": "all",
+      "stage": "decomposition",
+      "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts"
     }
   ],
   "regimes": {
@@ -63,20 +170,28 @@
       "implementation_caps": {
         "pq_descent_s3_m_prime_max": 8,
         "pq_descent_s4_m_prime_max": 5,
-        "ghs_end_to_end": "magic m=1 toys only; higher-genus Jac IC not implemented"
+        "ghs_end_to_end": "magic m=1 toys only; higher-genus Jac IC not implemented",
+        "ic_factor_dim_cap": 12
       },
       "records": {
         "factor_base": {
           "status": "record",
           "current": {
-            "summary": "Subspace / linearized bases; ic runner dim<=12; structure checks through n=36",
-            "metrics": { "ic_factor_dim_cap": 12, "structure_n_max": 36 }
+            "summary": "Subspace / linearized bases; ic runner dim<=12; structure checks through n=36; mostly materialized",
+            "metrics": {
+              "ic_factor_dim_cap": 12,
+              "structure_n_max": 36,
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
           },
           "next_target": {
             "summary": "Implicit non-materialized base at n>=41 with membership predicate only",
             "acceptance_gates": [
               "predicate agrees with exhaustive membership on >=2^16 holdout elements",
-              "retained bytes logged"
+              "retained bytes logged",
+              "construction_wall_ms logged"
             ]
           },
           "evidence": ["docs/ic/README.md", "RESEARCH_SEMAEV_DECOMPOSITION.md"],
@@ -85,27 +200,54 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "SAT decides n=19 l=6 corpus; pairs-and-solve validated at n=21 l=7; usable to ~l=12 still O(2^(2l))",
-            "metrics": { "sat_n": 19, "sat_l": 6, "pairs_n": 21, "pairs_l": 7, "usable_l_approx": 12 }
+            "summary": "SAT decides n=19 l=6 corpus; pairs-and-solve validated at n=21 l=7; usable to ~l=12 still O(2^(2l)); full-field S3 FFD=3 on n=3..7 harness",
+            "metrics": {
+              "sat_n": 19,
+              "sat_l": 6,
+              "pairs_n": 21,
+              "pairs_l": 7,
+              "usable_l_approx": 12,
+              "oracle_classes": ["sat", "pairs_and_solve", "enumerate"],
+              "ffd": {
+                "full_field_weil_s3": {
+                  "value": 3,
+                  "n_range": [3, 7],
+                  "source": "RESEARCH_FFD_MEASUREMENT.md"
+                },
+                "subspace_sat_pairs_ladder": {
+                  "status": "unmeasured",
+                  "reason": "Frontier SAT/pairs rows historically logged conflicts and wall time only"
+                }
+              }
+            }
           },
           "next_target": {
-            "summary": "Sub-2^(2l) oracle at l=8, <=64 targets, median cost <= half pairs-and-solve",
+            "summary": "Sub-2^(2l) oracle at l=8, <=64 targets, median cost <= half pairs-and-solve; FFD required",
             "acceptance_gates": [
               "zero disagreements vs exhaustive or group check",
-              "budget and host recorded"
+              "budget and host recorded",
+              "ffd min/max/mean over >=16 draws present (or explicit inapplicable+reason)"
             ]
           },
-          "evidence": ["RESEARCH_SAT_SEMAEV.md", "RESEARCH_SEMAEV_DECOMPOSITION.md"],
+          "evidence": [
+            "RESEARCH_SAT_SEMAEV.md",
+            "RESEARCH_SEMAEV_DECOMPOSITION.md",
+            "RESEARCH_FFD_MEASUREMENT.md"
+          ],
           "history": []
         },
         "relation_yield": {
           "status": "open",
           "current": {
             "summary": "No separate distributional frontier published",
-            "metrics": {}
+            "metrics": {
+              "pr_decomposition": null,
+              "trials_per_relation": null,
+              "target_mix": null
+            }
           },
           "next_target": {
-            "summary": "Yield curve at n=21 for one frozen base with 256 natural targets",
+            "summary": "Yield curve at n=21 for one frozen base with 256 natural targets; publish trials-per-relation",
             "acceptance_gates": [
               "95% CI width <= 0.05 on hit-rate",
               "collector policy hash frozen"
@@ -118,13 +260,18 @@
           "status": "open",
           "current": {
             "summary": "Toy matrices only",
-            "metrics": {}
+            "metrics": {
+              "matrix_dims": null,
+              "sparse_or_dense": null,
+              "la_cost_ms": null
+            }
           },
           "next_target": {
-            "summary": "Full orbit-reduced rank at n=21 with surplus <= 2K+64",
+            "summary": "Full orbit-reduced rank at n=21 with surplus <= 2K+64; publish dims and LA cost",
             "acceptance_gates": [
               "rank recomputed after every relation",
-              "terminal rank equals required"
+              "terminal rank equals required",
+              "matrix_dims and sparse_or_dense logged"
             ]
           },
           "evidence": [],
@@ -134,13 +281,17 @@
           "status": "record",
           "current": {
             "summary": "Toy known-answer / ic framework small degrees",
-            "metrics": { "framework_degree_max_documented": 23 }
+            "metrics": {
+              "framework_degree_max_documented": 23,
+              "claim_boundary": "synthetic_known_answer"
+            }
           },
           "next_target": {
             "summary": "Known-answer DLP at n=19 with stage timers",
             "acceptance_gates": [
               "[d]G = Q",
-              "incomplete stages fail closed"
+              "incomplete stages fail closed",
+              "stage_timers present"
             ]
           },
           "evidence": ["docs/ic/README.md"],
@@ -150,14 +301,18 @@
           "status": "not_achieved",
           "current": {
             "summary": "No charged binary crossover on record",
-            "metrics": {},
+            "metrics": {
+              "timing_class": null,
+              "automorphism_discount": null
+            },
             "verdict": null
           },
           "next_target": {
             "summary": "Charged single-instance cost < automorphism-aware rho at any eligible n>=15",
             "acceptance_gates": [
               "all stages charged in one process series",
-              "independent replay"
+              "independent replay",
+              "timing_class and automorphism_discount explicit"
             ]
           },
           "evidence": [],
@@ -176,12 +331,21 @@
       "implementation_caps": {
         "MAX_N": 41
       },
+      "unknowns_formula": "m*l + (m-2)*n",
+      "automorphism_discount_default": "sqrt(2n) with A=2*n",
       "records": {
         "factor_base": {
           "status": "record",
           "current": {
             "summary": "Exact/optimized bases at n=19; minimum base feasible at n=41",
-            "metrics": { "exact_n": 19, "feasible_n": 41 },
+            "metrics": {
+              "exact_n": 19,
+              "feasible_n": 41,
+              "construction_method": "frobenius_invariant_linearized_or_point_defined",
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            },
             "verdict": "N41_MINIMUM_BASE_FEASIBLE"
           },
           "next_target": {
@@ -199,35 +363,66 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13",
+            "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13; FFD ladder measured",
             "metrics": {
               "f4_unknowns": 46,
               "f4_example": "n=31 m=3 ~145s",
               "sat_comfortable_unknowns": 27,
-              "classical_demo_n_max": 13
+              "classical_demo_n_max": 13,
+              "unknowns_formula": "m*l + (m-2)*n",
+              "ffd": {
+                "ladder_source": "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+                "draws_per_row": 16,
+                "headline": "No measured system falls later than D=3; chained m>=3 falls at FFD=3; m=2 often FFD 2-3 and overdetermined",
+                "examples": [
+                  {"n": 31, "l": 5, "m": 3, "vars": 46, "eqs": 62, "deg": 3, "ffd_min": 3, "ffd_max": 3},
+                  {"n": 31, "l": 5, "m": 2, "vars": 10, "eqs": 31, "deg": 2, "ffd_min": 2, "ffd_max": 2},
+                  {"n": 21, "l": 6, "m": 3, "vars": 39, "eqs": 42, "deg": 3, "ffd_min": 3, "ffd_max": 3}
+                ]
+              },
+              "f4_splits": "flat across 39→46 unknowns (scaling note)",
+              "oracle_classes": ["enumerate", "groebner", "sat"]
             }
           },
           "next_target": {
-            "summary": "n=31 dim=16 m=2 (32 unknowns, quadratic) median <=1h",
+            "summary": "n=31 dim=16 m=2 (32 unknowns, quadratic) median <=1h; FFD + eq/var + splits/conflicts required",
+            "metrics_template": {
+              "n": 31,
+              "dim": 16,
+              "m": 2,
+              "unknowns": 32,
+              "system_degree": "quadratic"
+            },
             "acceptance_gates": [
               "disagreements=0",
-              "oracle agreement or F4+group check"
+              "oracle agreement or F4+group check",
+              "ffd min/max/mean logged",
+              "median_ms_per_target logged"
             ]
           },
-          "evidence": ["RESEARCH_KOBLITZ_SCALING_TARGET.md"],
+          "evidence": [
+            "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md"
+          ],
           "history": []
         },
         "relation_yield": {
           "status": "record",
           "current": {
             "summary": "Exact coverage/yield controls at n=19; collectors at n=37 fixtures",
-            "metrics": { "control_n": 19, "fixture_collector_n": 37 }
+            "metrics": {
+              "control_n": 19,
+              "fixture_collector_n": 37,
+              "trials_per_relation": null,
+              "target_mix_published": false
+            }
           },
           "next_target": {
             "summary": "Distributional yield for frozen (n, eta, base) at n=23",
             "acceptance_gates": [
               "256 natural + 64 planted + 64 proven-UNSAT",
-              "preregistered covariates"
+              "preregistered covariates",
+              "trials_per_relation reported"
             ]
           },
           "evidence": [
@@ -238,13 +433,21 @@
         "rank": {
           "status": "record",
           "current": {
-            "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank",
-            "metrics": { "full_rank_n": 37, "fixture_rank_n": 41 }
+            "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank (relation-matrix LA, not GB FFD)",
+            "metrics": {
+              "full_rank_n": 37,
+              "fixture_rank_n": 41,
+              "amortized_targets": 1024,
+              "sparse_or_dense": null,
+              "la_charged_ms": null,
+              "note": "Do not report this stage as FFD"
+            }
           },
           "next_target": {
-            "summary": "Single-process rank to K+1 at n=41 with replayable rows",
+            "summary": "Single-process rank to K+1 at n=41 with replayable rows; publish dims, surplus, LA cost",
             "acceptance_gates": [
-              "independent matrix replay or preserved row transcript"
+              "independent matrix replay or preserved row transcript",
+              "matrix_dims and la_wall_ms_or_la_charged_ms logged"
             ]
           },
           "evidence": [
@@ -257,7 +460,11 @@
           "status": "record",
           "current": {
             "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps",
-            "metrics": { "demo_n_max": 13, "ic_degree_doc_max": 23 }
+            "metrics": {
+              "demo_n_max": 13,
+              "ic_degree_doc_max": 23,
+              "claim_boundary": "synthetic_known_answer"
+            }
           },
           "next_target": {
             "summary": "Known-answer full IC at n=23 with stage timers",
@@ -272,11 +479,14 @@
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=37 charged-time crossover (amortized exact-support V2)",
+            "summary": "n=37 charged-time crossover (amortized exact-support V2); n=41 base feasible only",
             "metrics": {
               "n": 37,
+              "timing_class": "algorithmic_charged",
               "whole_process_wall_crossover": false,
-              "amortized_targets": 1024
+              "amortized_targets": 1024,
+              "automorphism_discount": "sqrt(2n) / A=2*n family",
+              "n41_status": "N41_MINIMUM_BASE_FEASIBLE_only_not_crossover"
             },
             "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
             "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
@@ -286,7 +496,8 @@
             "acceptance_gates": [
               "all stages charged",
               "independent validation",
-              "explicit verdict field for wall or next-rung"
+              "explicit verdict field for wall or next-rung",
+              "timing_class and automorphism_discount explicit"
             ]
           },
           "evidence": [
@@ -313,13 +524,19 @@
           "status": "record",
           "current": {
             "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
-            "metrics": {}
+            "metrics": {
+              "construction_methods": ["small_x", "zeta_orbit", "eisenstein_smooth"],
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
           },
           "next_target": {
             "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
             "acceptance_gates": [
               "no duplicate orbits",
-              "size vs theory within 5%"
+              "size vs theory within 5%",
+              "construction_wall_ms and retained_bytes logged"
             ]
           },
           "evidence": ["docs/RESEARCH_BENCH_LOG.md", "src/cryptanalysis/ec_index_calculus_j0.rs"],
@@ -328,14 +545,24 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "S3 2-decomp through bench sizes",
-            "metrics": { "summation": "S3", "summands": 2 }
+            "summary": "S3 2-decomp through bench sizes; S4/Gröbner not a scaling win; FFD not published on 2-decomp frontier",
+            "metrics": {
+              "summation": "S3",
+              "summands": 2,
+              "system_degree": "quadratic_typical",
+              "ffd": {
+                "status": "unmeasured",
+                "reason": "Current bench frontier records wall scaling / alpha fits, not FFD/DoR"
+              },
+              "oracle_classes": ["semaev_s3_2decomp"]
+            }
           },
           "next_target": {
-            "summary": "Verified 3-decomposition relation family on >=14-bit prime with GB cost",
+            "summary": "Verified 3-decomposition relation family on >=14-bit prime with GB cost and FFD",
             "acceptance_gates": [
               "witnesses sum in the group",
-              "timing and FFD logged"
+              "timing and FFD logged",
+              "unknowns, system_degree, eq_var_ratio, median_ms_per_target logged"
             ]
           },
           "evidence": ["src/cryptanalysis/ec_index_calculus.rs"],
@@ -345,7 +572,11 @@
           "status": "record",
           "current": {
             "summary": "Enough relations for toys <=14-bit j=0 / <=12-bit generic",
-            "metrics": { "j0_bits_max": 14, "generic_bits_max": 12 }
+            "metrics": {
+              "j0_bits_max": 14,
+              "generic_bits_max": 12,
+              "trials_per_relation_curve": null
+            }
           },
           "next_target": {
             "summary": "Trials-per-relation vs bitlength for 10–16 bits on frozen ladder",
@@ -358,11 +589,18 @@
           "status": "open",
           "current": {
             "summary": "Dense GE mod n on toy matrices",
-            "metrics": {}
+            "metrics": {
+              "sparse_or_dense": "dense",
+              "matrix_dims": null,
+              "la_cost_ms": null
+            }
           },
           "next_target": {
-            "summary": "Sparse LA for >=256 FB columns on a 16-bit instance",
-            "acceptance_gates": ["correct vs dense GE on a subsample"]
+            "summary": "Sparse LA for >=256 FB columns on a 16-bit instance; publish dims and LA cost",
+            "acceptance_gates": [
+              "correct vs dense GE on a subsample",
+              "matrix_dims and la cost logged"
+            ]
           },
           "evidence": [],
           "history": []
@@ -371,14 +609,19 @@
           "status": "record",
           "current": {
             "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success",
-            "metrics": { "generic_bits": 12, "j0_bits": 14 },
-            "best_variant": "j0_zeta_orbit"
+            "metrics": {
+              "generic_bits": 12,
+              "j0_bits": 14,
+              "best_variant": "j0_zeta_orbit",
+              "claim_boundary": "synthetic_known_answer"
+            }
           },
           "next_target": {
             "summary": "j=0 known-answer IC at 16 bits under bench harness",
             "acceptance_gates": [
               "agrees with rho on same instance",
-              "wall time logged"
+              "wall time logged",
+              "stage_timers present"
             ]
           },
           "evidence": ["docs/RESEARCH_BENCH_LOG.md"],
@@ -388,7 +631,11 @@
           "status": "not_achieved",
           "current": {
             "summary": "IC slower than rho at all measured sizes; dense 3-sum wall ~80 bits",
-            "metrics": { "dense_3sum_wall_bits": 80 },
+            "metrics": {
+              "dense_3sum_wall_bits": 80,
+              "timing_class": null,
+              "automorphism_discount": "n/a_prime_generic_unless_stated"
+            },
             "verdict": null
           },
           "next_target": {
@@ -396,7 +643,8 @@
             "acceptance_gates": [
               "artifact cost model",
               "independent replay",
-              "no verifier gaming"
+              "no verifier gaming",
+              "timing_class explicit"
             ]
           },
           "evidence": ["research/ecdlp_autolab/paper.md"],
