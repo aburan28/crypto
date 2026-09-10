@@ -62,3 +62,6 @@ Result: scalar 101 recovered and point-verified from 7 relations in 7 trials wit
 
 PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage8.py
 Result: five of five frozen degree-15 scalar-blind runs and all matched automorphism-rho controls passed; rho was faster in every pair.
+
+OPERATIONAL STOP: charged degree-21 public divisor census on K_0 and amended K_1 successor.
+Result: both processes stopped before factor-base construction because the current curve driver did not supply a usable prime-order subgroup; no scientific inference was admitted.
