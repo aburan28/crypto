@@ -7156,3 +7156,78 @@ system profiles.  The ladder uses primes.
 ### Commits made
 
 (see PR — oracle module, paired bench, research doc §8)
+
+---
+
+## 2026-09-10 (autolab run, third session on exotic coordinates)
+
+### Task picked
+
+"Test out new exotic coordinates."  The first session proved per-point
+coordinates see nothing beyond the rational 2-torsion, so new
+coordinates have to come from the two spaces it left open: the joint
+invariants of the whole group `E[2] ≅ (Z/2)²`, and coordinates on tuples
+of points where `K₀`'s 4-torsion can act.  Both need invariants of a
+group that is not a single involution, and deriving those by hand per
+group is the kind of thing the algorithm should do.
+
+### Work done
+
+- `src/cryptanalysis/coordinate_quotients.rs`: close point maps into a
+  group; find the relation-preserving subgroup `Γ ⊆ G^{m+1}` by
+  experiment; invariants as elementary symmetric functions of orbit
+  *sets* of seed functions (sets, not multisets — even multiplicities
+  kill every `e_k` over `F₂`); minimal-total-degree relation with the
+  identities among invariants quotiented out (the first thing found
+  otherwise is `s² + s = Σw`, which holds everywhere); exact collapse by
+  enumerating every relation tuple, memoised per point.
+- The identity basis pivots on monomials heaviest in the tuple seeds, so
+  reducing a relation against it strips exactly the identity's part; the
+  5-term symmetrised `S₃` of the first session comes back as itself.
+  Before that fix the representative had 8 terms.
+- Weighted degree in `u` is reported only when every projected map is
+  affine on the `u`-line; `T₄` is not, and the column says "algebraic".
+- `examples/coordinate_quotients.rs`: `K₁` control, `K₀` with `T₂` and
+  with `T₄` (points only, `+Σu`, `+Πu`, `+ pair sums/differences`),
+  `y² = x³ − x / F₁₀₀₉` with one `T`, all of `E[2]`, and `E[2] + Aut`;
+  a one-torsion prime curve.  Three tests.
+
+### Findings
+
+**The orbit-set invariants separate `Γ`-orbits exactly, every time.**
+Collapse equals `|Γ|` to the decimal in every run: 8 for `⟨T₂, −⟩`, 32
+for `⟨T₄, −⟩` on `K₀`, 32 for `E[2]` on the prime curve.
+
+**`K₀`'s 4-torsion quadruples the collapse, and it is the endomorphism
+`π − 1`.**  The per-point invariant is a coordinate on `E/⟨T₄, −1⟩`, and
+on `K₀` the quotient by `E(F₂)` is `π − 1`, so this is the same curve with
+the instance transported: four targets `R + kT₄` per solve, orbits of
+size up to `8n`, and it composes with the `T₂` symmetrisation of the
+previous sessions rather than replacing it.  The relation being linear in
+the invariants is the transport in disguise, not a lower-degree
+polynomial — `e₂[Σu]` is algebraic in the `u_i`.
+
+**The Klein group on `y² = x³ − x`**: `|Γ| = 32` at `m = 2`, separated
+exactly; §6.4's "complete `E[2]`" done.  Prime-field and `F_{p^k}` only.
+
+**Pair seeds add nothing.**  With `u(P_i ± P_j)` included on `K₀` every
+pair invariant is redundant and the same 5-term relation is found.
+
+A method lesson worth keeping: total degree in a set of invariants is
+not a cost.  Adding `Πu` to the seeds lowered the relation's total
+degree from 3 to 2 while raising its degree in the `u_i` from 6 to 9.
+The tool now prints both and refuses the second when it is undefined.
+
+### Next step proposal
+
+1. Wire the `π − 1` transport into `koblitz_symmetrised` for `K₀`: the
+   symmetrised system unchanged, targets transported, four relations
+   per solve, `8n`-orbits — and measure relations per second end to end.
+2. `F_{p^k}` in `Gf`, so the Klein invariants meet a subspace factor
+   base (Gaudry's setting) where they can be descended.
+3. Seeds of higher order: translations by rational 3-torsion on
+   `j = 0` curves and the `Z/3` automorphism, through the same engine.
+
+### Commits made
+
+(see PR — quotient module, example, research note §10)

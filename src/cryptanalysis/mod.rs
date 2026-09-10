@@ -109,6 +109,7 @@ pub mod cga_hnc;
 pub mod cipher_registry;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
+pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod descent_algebraic;
 pub mod descent_expansion;
