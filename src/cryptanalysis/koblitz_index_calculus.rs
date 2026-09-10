@@ -103,12 +103,12 @@
 //!   that the encoded decomposition does not exist; an exhausted budget
 //!   remains inconclusive.  The exact factor-base coverage results do not
 //!   establish a SAT speedup or a solving-complexity bound.
-//! - **Toy parameters only.**  `n ≤ 24` or so: the factor base is
-//!   materialised (`2^ℓ` elements) and the group order is found by
-//!   trial division.  This does not threaten sect163k1 or any other
-//!   deployed Koblitz curve — as the paper's own conclusion puts it,
-//!   index calculus remains *worse* than rho for curves used in
-//!   practice.
+//! - **Toy / research rungs only.**  Curve construction via
+//!   [`KoblitzCurve::new`] is guarded by [`MAX_N`] (currently 41) so the
+//!   factor base can be materialised and the group order factored.  This
+//!   does not threaten sect163k1 or any other deployed Koblitz curve —
+//!   as the paper's own conclusion puts it, index calculus remains
+//!   *worse* than rho for curves used in practice.
 //!
 //! ## References
 //!
@@ -148,7 +148,7 @@ use crate::utils::mod_inverse;
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
 /// the mathematics.
-pub const MAX_N: u32 = 24;
+pub const MAX_N: u32 = 41;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -479,7 +479,9 @@ impl KoblitzCurve {
         if a > 1 || n < 3 || n > MAX_N {
             return None;
         }
-        let irreducible = find_irreducible(n)?;
+        // Dense mask search is fine to ~24; sparse (trinomial/pentanomial)
+        // is required to reach the boundary-ledger rungs at n=37 / n=41.
+        let irreducible = find_irreducible_sparse(n)?;
         let a_fe = if a == 0 {
             F2mElement::zero(n)
         } else {
