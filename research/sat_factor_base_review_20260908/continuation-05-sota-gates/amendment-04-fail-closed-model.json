@@ -1,0 +1,18 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "amends": "protocol.json",
+  "trigger": "independent known-bad control using a synthetic incomplete CryptoMiniSat SAT model",
+  "finding": {
+    "severity": "high",
+    "description": "The parser returned source_model_valid=null for an incomplete SAT model, while the composition check accepted every value that was not false.",
+    "impact": "A truncated or missing model could pass the aggregate source-validation gate despite having no validated assignment. The archived real CMS models are complete; the defect is in fail-closed admission."
+  },
+  "correction": [
+    "Classify a SAT banner without a complete, source-valid model as sat_invalid_model.",
+    "Require source_model_valid is exactly true for every arm whose status is sat.",
+    "Retain timeout and Unknown as inconclusive rather than requiring a model."
+  ],
+  "scientific_inference": "No archived cell changes because all admitted archived SAT models are complete and source-valid. Future and synthetic incomplete models now fail closed.",
+  "external_reproduction": false
+}

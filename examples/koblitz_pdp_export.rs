@@ -264,6 +264,21 @@ fn planted_target(
     }
 }
 
+fn materialise_factor_points(curve: &BinaryCurve, basis: &[F2mElement]) -> Vec<BinaryPoint> {
+    assert!(basis.len() < usize::BITS as usize);
+    let mut points = Vec::new();
+    for mask in 0..(1usize << basis.len()) {
+        let mut x = F2mElement::zero(curve.m);
+        for (i, element) in basis.iter().enumerate() {
+            if (mask >> i) & 1 == 1 {
+                x = x.add(element);
+            }
+        }
+        points.extend(points_with_x(curve, &x));
+    }
+    points
+}
+
 fn direct_mitm(curve: &BinaryCurve, basis: &[F2mElement], target: &BinaryPoint) -> Value {
     if basis.len() > 10 {
         return json!({"status":"not_run","reason":"factor-base materialisation cap","ell_cap":10});
@@ -332,10 +347,9 @@ fn stats_json(stats: &SolverStats) -> Value {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(
-        args.len(),
-        7,
-        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir>"
+    assert!(
+        matches!(args.len(), 7 | 9),
+        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir> [curve-a factor-index]"
     );
     let n: u32 = args[1].parse().expect("n");
     let requested_ell: usize = args[2].parse().expect("ell");
@@ -343,6 +357,13 @@ fn main() {
     let seed: u64 = args[4].parse().expect("seed");
     let conflict_budget: u64 = args[5].parse().expect("conflict budget");
     let output = PathBuf::from(&args[6]);
+    let curve_a: u8 = args
+        .get(7)
+        .map_or(1, |value| value.parse().expect("curve a"));
+    let requested_factor_index: usize = args
+        .get(8)
+        .map_or(0, |value| value.parse().expect("factor index"));
+    assert!(curve_a <= 1, "Koblitz curve parameter a must be 0 or 1");
     assert!(
         !output.exists(),
         "output path must be new: {}",
@@ -370,7 +391,7 @@ fn main() {
             )
         }
         "ggmp" => {
-            let factor_index = 0usize;
+            let factor_index = requested_factor_index;
             let (irr, basis) = invariant_subspace_basis(n, factor_index)
                 .expect("GGMP invariant subspace for this degree");
             assert_eq!(
@@ -401,12 +422,24 @@ fn main() {
     let curve = BinaryCurve {
         m: n,
         irreducible: irreducible.clone(),
-        a: F2mElement::one(n),
+        a: if curve_a == 0 {
+            F2mElement::zero(n)
+        } else {
+            F2mElement::one(n)
+        },
         b: F2mElement::one(n),
         generator: BinaryPoint::Infinity,
         order: BigUint::zero(),
         cofactor: BigUint::one(),
     };
+    let factor_points = materialise_factor_points(&curve, &basis);
+    let distinct_factor_points: std::collections::HashSet<_> =
+        factor_points.iter().map(point_key).collect();
+    assert!(
+        distinct_factor_points.len() >= 3,
+        "degenerate factor base: only {} curve point(s) above the algebraic x-domain",
+        distinct_factor_points.len()
+    );
     let target_start = Instant::now();
     let (target, planted) = planted_target(&curve, &basis, seed);
     let target_ns = target_start.elapsed().as_nanos();
@@ -560,10 +593,12 @@ fn main() {
         "ell":basis.len(),
         "m":3,
         "seed":seed,
-        "curve":"y^2 + xy = x^3 + x^2 + 1",
+        "curve":if curve_a == 0 {"y^2 + xy = x^3 + 1"} else {"y^2 + xy = x^3 + x^2 + 1"},
+        "curve_a":curve_a,
         "irreducible_low_terms":irreducible.low_terms,
         "factor_base_predicate":predicate,
         "factor_base_basis_bitmasks":basis_bits,
+        "factor_base_geometry":{"curve_points":factor_points.len(),"distinct_curve_points":distinct_factor_points.len(),"minimum_required":3},
         "target":target_json,
         "planted_points":planted_points,
         "representation":representation,

@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_external_reproduction_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "environment": "GitHub-hosted ubuntu-latest runner, fresh checkout, stable Rust toolchain",
+  "runs": [
+    {"mode": "ic", "n": 9, "a": 0, "m": 2, "secret": 53, "seed": 20260921},
+    {"mode": "rho-auto", "n": 9, "a": 0, "m": 2, "secret": 53, "seed": 20260921},
+    {"mode": "ic", "n": 9, "a": 0, "m": 2, "secret": 101, "seed": 20260922},
+    {"mode": "rho-auto", "n": 9, "a": 0, "m": 2, "secret": 101, "seed": 20260922}
+  ],
+  "required_checks": [
+    "both index-calculus scalars recovered and reproduced their public targets",
+    "no direct-relation shortcut or invalid SAT model",
+    "factor-base construction records no scalar labels, point logs, or subgroup enumeration",
+    "both signed-Frobenius quotient-rho controls recover the same targets",
+    "fresh-process wall, core-seconds and peak RSS retained for every arm",
+    "focused Koblitz library tests pass"
+  ],
+  "artifact": "GitHub Actions artifact koblitz-sota-gate-external-reproduction",
+  "claim_boundary": "This can satisfy external-host correctness reproduction for the toy controls. It is not an independent external novelty review and does not reproduce the n=31/41/59 solver matrix."
+}

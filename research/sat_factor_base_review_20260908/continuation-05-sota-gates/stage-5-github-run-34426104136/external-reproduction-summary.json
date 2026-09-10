@@ -1,0 +1,48 @@
+{
+  "schema": "koblitz_external_host_reproduction.v1",
+  "environment": {
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "python": "3.12.3"
+  },
+  "rows": [
+    {
+      "secret": 53,
+      "index_calculus": {
+        "relations": 5,
+        "trials": 5,
+        "conflicts": 122,
+        "wall_seconds": 0.004258673000009594,
+        "core_seconds": 0.003957,
+        "peak_rss_bytes": 13983744
+      },
+      "automorphism_rho": {
+        "iterations": 2,
+        "reported_group_additions": 23,
+        "wall_seconds": 0.0023921439999980976,
+        "core_seconds": 0.00212,
+        "peak_rss_bytes": 13983744
+      }
+    },
+    {
+      "secret": 101,
+      "index_calculus": {
+        "relations": 5,
+        "trials": 5,
+        "conflicts": 125,
+        "wall_seconds": 0.004334746000012046,
+        "core_seconds": 0.004016,
+        "peak_rss_bytes": 14012416
+      },
+      "automorphism_rho": {
+        "iterations": 4,
+        "reported_group_additions": 29,
+        "wall_seconds": 0.0024538499999948726,
+        "core_seconds": 0.00218,
+        "peak_rss_bytes": 13963264
+      }
+    }
+  ],
+  "all_checks_pass": true,
+  "scope": "independent GitHub-hosted environment reproduction of toy correctness and accounting; not an external novelty review"
+}

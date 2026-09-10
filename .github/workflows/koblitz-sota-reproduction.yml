@@ -1,0 +1,39 @@
+name: Koblitz SOTA-gate reproduction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "examples/koblitz_algebraic_e2e.rs"
+      - "scripts/process_meter.py"
+      - "scripts/verify_koblitz_external_reproduction.py"
+      - ".github/workflows/koblitz-sota-reproduction.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce-toy-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build frozen executables
+        run: cargo build --release --example koblitz_algebraic_e2e
+      - name: Reproduce scalar-blind index calculus and quotient rho
+        run: |
+          mkdir -p external-reproduction
+          cp Cargo.lock external-reproduction/Cargo.lock
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/ic-53.json --stderr external-reproduction/ic-53.stderr --metrics external-reproduction/ic-53.metrics.json -- target/release/examples/koblitz_algebraic_e2e ic 9 0 2 53 20260921 10000 20000
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/rho-auto-53.json --stderr external-reproduction/rho-auto-53.stderr --metrics external-reproduction/rho-auto-53.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 9 0 2 53 20260921 10000 20000
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/ic-101.json --stderr external-reproduction/ic-101.stderr --metrics external-reproduction/ic-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e ic 9 0 2 101 20260922 10000 20000
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/rho-auto-101.json --stderr external-reproduction/rho-auto-101.stderr --metrics external-reproduction/rho-auto-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 9 0 2 101 20260922 10000 20000
+          python3 scripts/verify_koblitz_external_reproduction.py external-reproduction
+      - name: Focused library tests
+        run: cargo test --release --lib cryptanalysis::koblitz_index_calculus -- --test-threads=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: koblitz-sota-gate-external-reproduction
+          path: external-reproduction
+          if-no-files-found: error

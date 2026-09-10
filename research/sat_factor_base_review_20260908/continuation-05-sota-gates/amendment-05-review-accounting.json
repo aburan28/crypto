@@ -1,0 +1,14 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "trigger": "QUALIFIED independent internal review",
+  "corrections": [
+    "Require CryptoMiniSat SAT and UNSAT text to agree with exit status 10 and 20 respectively.",
+    "Rename stage-3's archived 6/12 addition counts as walk-step additions; add 16 jump-table additions, one initial-state addition per restart, and 34 setup scalar multiplications for the no-restart runs.",
+    "Record the recovered scalar in future stage-2 result JSON rather than only a verified boolean.",
+    "After the launched process leader exits, explicitly terminate any surviving member of its process group before the meter emits a receipt.",
+    "Describe first-launch wall anomalies as unexplained; the receipts do not establish a cold-start cause."
+  ],
+  "archived_results": "Original stage-2 and stage-3 JSON remains immutable. Corrected labels and derived counts are additive in the summaries and future executable output.",
+  "external_reproduction": false
+}

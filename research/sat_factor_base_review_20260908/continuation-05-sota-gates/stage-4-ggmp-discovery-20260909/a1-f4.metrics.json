@@ -1,0 +1,26 @@
+{
+  "command": [
+    "target/release/examples/koblitz_pdp_export",
+    "31",
+    "5",
+    "ggmp",
+    "20260941",
+    "1",
+    "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-4-ggmp-discovery-20260909/candidate-a1-f4",
+    "1",
+    "4"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 30.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.041474124998785555,
+    "user_seconds": 0.034998999999999995,
+    "system_seconds": 0.0031019999999999997,
+    "total_core_seconds": 0.038100999999999996,
+    "single_core_seconds": 0.038100999999999996,
+    "peak_rss_bytes": 8208384,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -56,6 +56,21 @@ def main() -> None:
         watchdog.start()
         process.wait()
         watchdog.cancel()
+        orphan_group_terminated = False
+        try:
+            # The leader may already be reaped while descendants remain in
+            # its process group.  poll() cannot detect those descendants.
+            os.killpg(process.pid, 0)
+        except ProcessLookupError:
+            pass
+        else:
+            orphan_group_terminated = True
+            os.killpg(process.pid, signal.SIGTERM)
+            time.sleep(0.05)
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
     wall = time.perf_counter() - started
     after = resource.getrusage(resource.RUSAGE_CHILDREN)
     user = after.ru_utime - before.ru_utime
@@ -67,6 +82,7 @@ def main() -> None:
         "returncode": process.returncode,
         "watchdog_seconds": args.timeout,
         "timed_out": timed_out.is_set(),
+        "orphan_group_terminated": orphan_group_terminated,
         "metrics": {
             "wall_seconds": wall,
             "user_seconds": user,

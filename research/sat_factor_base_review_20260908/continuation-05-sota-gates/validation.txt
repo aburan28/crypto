@@ -20,6 +20,30 @@ Result: two same-target signed-Frobenius quotient-rho controls verified.
 PASS: exhaustive degree-9 quotient-rho smoke over every nonzero scalar 1..126, with seed 20261000+scalar.
 Result: exhaustive_n9_unknown_scalars_fail=0.
 
+PASS: post-review factor-base geometry guards.
+Result: n=31 standard reports 31 distinct curve points; n=31 GGMP aborts before target construction with exactly one curve point.
+
+QUALIFIED: independent internal review of snapshots b9b7d3b and af089ea.
+Result: source/export equivalence and toy recovery arithmetic reproduced; n=31 GGMP models are nonlifting; incomplete-model, operation-ledger and process-group cleanup defects identified and corrected additively. This is not external reproduction.
+
+PASS: synthetic incomplete and invalid-terminal CryptoMiniSat controls.
+Result: both fail closed as sat_invalid_model or sat_invalid_terminal_status.
+
+PASS: process-meter surviving-descendant control.
+Result: orphan_group_terminated=true before the terminal receipt was emitted.
+
+PASS: charged public n=31 GGMP factor/curve census.
+Result: all 12 pairs completed or failed the pre-target geometry gate; six had 63 factor points, six had one; deterministic winner curve_a=0, factor_index=0.
+
+PASS: selected nondegenerate GGMP point-witness verification with Sage.
+Result: CryptoMiniSat x=(18,4,65796) has rational lifts whose signed sum is the public target; direct point decomposition independently reproduced.
+
+PASS: local preflight of the external-host reproduction workflow.
+Result: the fail-closed verifier accepted two fresh scalar-blind IC runs and two corrected signed-Frobenius rho runs, including recovered-scalar and complete operation-label fields.
+
+PASS: GitHub Actions external-host run 34426104136.
+Result: fresh Linux/x86-64 checkout reproduced both toy IC and quotient-rho controls, passed 34 focused tests, and uploaded the retained reproduction artifact.
+
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.

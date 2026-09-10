@@ -1,0 +1,4 @@
+
+thread 'main' (89781740) panicked at examples/koblitz_pdp_export.rs:438:5:
+degenerate factor base: only 1 curve point(s) above the algebraic x-domain
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

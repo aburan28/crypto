@@ -1,0 +1,63 @@
+{
+  "a": 0,
+  "factor_base": {
+    "ell": 6,
+    "points": 55,
+    "signed_frobenius_orbits": 4
+  },
+  "factor_base_predicate": {
+    "enumerates_target_subgroup": false,
+    "factor_base_logs_constructed": false,
+    "factor_bitmask": 73,
+    "factor_index": 0,
+    "kind": "ggmp_linearised_kernel",
+    "linearised_exponents": [
+      0,
+      3,
+      6
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "A failed or resource-capped run is operationally inconclusive; success is accepted only after the recovered scalar reproduces the public target point",
+  "kind": "koblitz_unknown_scalar_algebraic_factor_base_e2e",
+  "m": 2,
+  "mode": "ic",
+  "n": 9,
+  "options": {
+    "conflict_budget_per_target": 10000,
+    "max_models": 64,
+    "max_trials": 20000,
+    "parallel_threads": 1
+  },
+  "report": {
+    "direct_relation": false,
+    "linear_solve_attempts": 1,
+    "recovered_scalar": "101",
+    "relation_batches": 5,
+    "relations": 5,
+    "sat_calls": 5,
+    "sat_conflicts": 125,
+    "sat_invalid_models": 0,
+    "sat_models": 5,
+    "sat_refutations": 0,
+    "sat_unknowns": 0,
+    "trials": 5,
+    "verified_unknown_scalar_recovery": true
+  },
+  "scope": "complete toy index-calculus pipeline over a factor base with no constructed point logs",
+  "seed": 20260922,
+  "subgroup_order": "127",
+  "target": {
+    "x": "56",
+    "y": "171"
+  },
+  "timing_ns": {
+    "curve_and_subgroup_construction": 160501,
+    "driver_solve": 2272039,
+    "end_to_end": 3005885,
+    "factor_base_predicate_and_materialisation": 498425,
+    "linear_algebra": 9628,
+    "relation_collection": 2231123,
+    "target_construction": 35907
+  }
+}

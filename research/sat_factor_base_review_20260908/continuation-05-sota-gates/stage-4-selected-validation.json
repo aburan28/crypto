@@ -1,0 +1,43 @@
+{
+  "schema": "koblitz_ggmp_selected_cell_validation.v1",
+  "selection_reproduced": true,
+  "factor_domain_size": 32,
+  "factor_curve_points": 63,
+  "target": {
+    "x": "2001054410",
+    "y": "716769412"
+  },
+  "planted_point_sum_valid": true,
+  "cryptominisat": {
+    "source_model_valid": true,
+    "x_coordinates": [
+      18,
+      4,
+      65796
+    ],
+    "rational_lifts_exist": [
+      true,
+      true,
+      true
+    ],
+    "signed_point_sum_valid": true,
+    "witness": [
+      [
+        18,
+        1206634098
+      ],
+      [
+        4,
+        2061662724
+      ],
+      [
+        65796,
+        830590088
+      ]
+    ]
+  },
+  "direct_mitm_point_decomposition_reproduced": true,
+  "native_sat": "unknown",
+  "wdsat": "timeout_inconclusive",
+  "claim_boundary": "one nondegenerate public-parameter GGMP cell; no scaling or SOTA claim"
+}

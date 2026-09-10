@@ -20,12 +20,12 @@ The table reports solver-kernel wall time. WDSat and CryptoMiniSat also have iso
 | 41 | standard | 0.060848 / 6.42 | 0.042600 / 3.59 | 0.539471 / 56.64 | 0.301732 / 8.50 |
 | 59 | standard | 12.091462 / 188.80 | 117.999105 / 13.59 | 0.512332 / 54.95 | 119.261571 / 171.03 |
 
-At n=31 and n=41, every available solver returned a source-validated SAT model. At n=59, direct MITM found the planted decomposition in about 3.13 seconds; native SAT stopped at 100,000 conflicts, WDSat reached the 120-second watchdog, and CryptoMiniSat reached the same watchdog. Both capped solver outcomes are inconclusive.
+At n=31 and n=41, every available solver returned a source-ANF-validated SAT model. Source validation alone does not prove that the model coordinates lift to curve points. At n=59, direct MITM found the planted decomposition in about 3.13 seconds; native SAT stopped at 100,000 conflicts, WDSat reached the 120-second watchdog, and CryptoMiniSat reached the same watchdog. Both capped solver outcomes are inconclusive.
 
-The n=31 GGMP cell derives its five-dimensional factor base as the kernel of a linearised polynomial obtained from a factor of T^31-1. It is an admissible construction, but this single planted target is not a causal comparison with the standard-basis cell because the two cells use different factor-base predicates and targets.
+The n=31 GGMP cell derives its five-dimensional x-domain as the kernel of a linearised polynomial obtained from a factor of T^31-1. Independent review found that only T=(0,1) lifts from this domain, the planted relation is T+T+T=T, and both external models contain the nonlifting coordinate x=65536. This row is a degenerate algebraic-model/exporter check, not a meaningful GGMP point-decomposition benchmark. The generator now rejects any such domain with fewer than three distinct curve points.
 
 Magma is not installed on this host, so the generated `.magma` inputs are retained but F4 is an operationally missing baseline. The n=67 cell exceeds the current n<64 field-bitmask implementation and asserts nothing about PDP hardness.
 
-This clears only the one-instance planted-PDP scaling sub-gate through n=59. Unknown-scalar end-to-end runs, fully isolated process accounting for every arm, Magma F4, automorphism-optimized Pollard rho, repeated scaling, external reproduction, and novelty review remain open. The result is not a Koblitz index-calculus SOTA claim.
+Direct MITM confirms planted point decompositions through n=59, but the SAT outputs are not yet lift-validated end to end. Fully isolated process accounting for every PDP arm, Magma F4, repeated scaling, external reproduction, and novelty review remain open. The result is not a Koblitz index-calculus SOTA claim.
 
 Primary comparisons: Trimoska-Ionica-Dequen, *A SAT-Based Approach for Index Calculus on Binary Elliptic Curves* (ePrint 2019/313); Galbraith-Granger-Merz-Petit, *On Index Calculus Algorithms for Subfield Curves* (ePrint 2020/1315).

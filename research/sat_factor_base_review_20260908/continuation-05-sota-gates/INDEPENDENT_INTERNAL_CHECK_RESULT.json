@@ -1,0 +1,1469 @@
+{
+  "review_type": "internal independent review; not external reproduction",
+  "base_snapshot": "b9b7d3bd063e46dac342ab45c2476c2150162888",
+  "stage3_snapshot": "af089ea9b0fa09872366088668f30101c1feeda6",
+  "stage1": [
+    {
+      "cell": "n15-l5-m3-standard",
+      "n": 15,
+      "ell": 5,
+      "predicate_basis": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "factor_points": 47,
+      "target": {
+        "x": "32271",
+        "y": "11897"
+      },
+      "planted_points": [
+        {
+          "x": "7",
+          "y": "19509"
+        },
+        {
+          "x": "0",
+          "y": "1"
+        },
+        {
+          "x": "16",
+          "y": "20234"
+        }
+      ],
+      "source_rows_reconstructed": true,
+      "exports_semantically_equivalent": true,
+      "checks": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            0,
+            16,
+            7
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            0,
+            16,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "n31-l5-m3-standard",
+      "n": 31,
+      "ell": 5,
+      "predicate_basis": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "factor_points": 31,
+      "target": {
+        "x": "1899261362",
+        "y": "1245205008"
+      },
+      "planted_points": [
+        {
+          "x": "21",
+          "y": "187060385"
+        },
+        {
+          "x": "23",
+          "y": "1117564286"
+        },
+        {
+          "x": "28",
+          "y": "1384621962"
+        }
+      ],
+      "source_rows_reconstructed": true,
+      "exports_semantically_equivalent": true,
+      "checks": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            28,
+            21,
+            23
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            23,
+            28,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "n31-l5-m3-ggmp",
+      "n": 31,
+      "ell": 5,
+      "predicate_basis": [
+        2,
+        4,
+        16,
+        256,
+        65536
+      ],
+      "factor_points": 1,
+      "target": {
+        "x": "0",
+        "y": "1"
+      },
+      "planted_points": [
+        {
+          "x": "0",
+          "y": "1"
+        },
+        {
+          "x": "0",
+          "y": "1"
+        },
+        {
+          "x": "0",
+          "y": "1"
+        }
+      ],
+      "source_rows_reconstructed": true,
+      "exports_semantically_equivalent": true,
+      "checks": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": false,
+          "xs": [
+            0,
+            65536,
+            65536
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": false,
+          "xs": [
+            0,
+            65536,
+            65536
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "n41-l5-m3-standard",
+      "n": 41,
+      "ell": 5,
+      "predicate_basis": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "factor_points": 25,
+      "target": {
+        "x": "1905385743183",
+        "y": "2095117988296"
+      },
+      "planted_points": [
+        {
+          "x": "30",
+          "y": "543600355105"
+        },
+        {
+          "x": "3",
+          "y": "1425167322643"
+        },
+        {
+          "x": "28",
+          "y": "1545821366437"
+        }
+      ],
+      "source_rows_reconstructed": true,
+      "exports_semantically_equivalent": true,
+      "checks": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            28,
+            30,
+            3
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "sat",
+          "source_model_valid": true,
+          "rational_point_decomposition": true,
+          "xs": [
+            3,
+            28,
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "n59-l9-m3-standard",
+      "n": 59,
+      "ell": 9,
+      "predicate_basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ],
+      "factor_points": 483,
+      "target": {
+        "x": "34756472868338126",
+        "y": "364198638095089054"
+      },
+      "planted_points": [
+        {
+          "x": "286",
+          "y": "349643848945327627"
+        },
+        {
+          "x": "179",
+          "y": "229231114568314349"
+        },
+        {
+          "x": "307",
+          "y": "376715780163884320"
+        }
+      ],
+      "source_rows_reconstructed": true,
+      "exports_semantically_equivalent": true,
+      "checks": [
+        {
+          "solver": "wdsat",
+          "status": "timeout_inconclusive"
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "timeout_inconclusive"
+        }
+      ]
+    }
+  ],
+  "internal_replays": {
+    "stage2": [
+      {
+        "secret": 53,
+        "matrix_rank": 4,
+        "rows": 5,
+        "columns": 5,
+        "recovered": 53,
+        "conflicts": 122,
+        "direct_relations": 0
+      },
+      {
+        "secret": 101,
+        "matrix_rank": 4,
+        "rows": 5,
+        "columns": 5,
+        "recovered": 101,
+        "conflicts": 125,
+        "direct_relations": 0
+      }
+    ],
+    "stage3": [
+      {
+        "secret": 53,
+        "canonical_states": 7,
+        "collisions": 1,
+        "recovered": 53,
+        "iterations": 2,
+        "walk_additions": 6,
+        "restarts": 0
+      },
+      {
+        "secret": 101,
+        "canonical_states": 13,
+        "collisions": 1,
+        "recovered": 101,
+        "iterations": 4,
+        "walk_additions": 12,
+        "restarts": 0
+      }
+    ]
+  },
+  "stage2_transcript": {
+    "P": [
+      "352",
+      "466"
+    ],
+    "basis": [
+      "12",
+      "22",
+      "36",
+      "70",
+      "134",
+      "258"
+    ],
+    "cofactor": "4",
+    "irreducible_low_terms": [
+      0,
+      1
+    ],
+    "kind": "internal producer-library transcript replay for independent arithmetic checking",
+    "lambda": "22",
+    "points": [
+      [
+        "0",
+        "1"
+      ],
+      [
+        "12",
+        "389"
+      ],
+      [
+        "12",
+        "393"
+      ],
+      [
+        "22",
+        "452"
+      ],
+      [
+        "22",
+        "466"
+      ],
+      [
+        "36",
+        "266"
+      ],
+      [
+        "36",
+        "302"
+      ],
+      [
+        "40",
+        "51"
+      ],
+      [
+        "40",
+        "27"
+      ],
+      [
+        "70",
+        "259"
+      ],
+      [
+        "70",
+        "325"
+      ],
+      [
+        "74",
+        "467"
+      ],
+      [
+        "74",
+        "409"
+      ],
+      [
+        "80",
+        "497"
+      ],
+      [
+        "80",
+        "417"
+      ],
+      [
+        "92",
+        "253"
+      ],
+      [
+        "92",
+        "161"
+      ],
+      [
+        "110",
+        "303"
+      ],
+      [
+        "110",
+        "321"
+      ],
+      [
+        "120",
+        "451"
+      ],
+      [
+        "120",
+        "443"
+      ],
+      [
+        "138",
+        "118"
+      ],
+      [
+        "138",
+        "252"
+      ],
+      [
+        "144",
+        "446"
+      ],
+      [
+        "144",
+        "302"
+      ],
+      [
+        "180",
+        "410"
+      ],
+      [
+        "180",
+        "302"
+      ],
+      [
+        "184",
+        "253"
+      ],
+      [
+        "184",
+        "69"
+      ],
+      [
+        "192",
+        "299"
+      ],
+      [
+        "192",
+        "491"
+      ],
+      [
+        "204",
+        "175"
+      ],
+      [
+        "204",
+        "99"
+      ],
+      [
+        "228",
+        "253"
+      ],
+      [
+        "228",
+        "25"
+      ],
+      [
+        "276",
+        "488"
+      ],
+      [
+        "276",
+        "252"
+      ],
+      [
+        "280",
+        "255"
+      ],
+      [
+        "280",
+        "487"
+      ],
+      [
+        "294",
+        "303"
+      ],
+      [
+        "294",
+        "9"
+      ],
+      [
+        "328",
+        "303"
+      ],
+      [
+        "328",
+        "103"
+      ],
+      [
+        "350",
+        "509"
+      ],
+      [
+        "350",
+        "163"
+      ],
+      [
+        "352",
+        "178"
+      ],
+      [
+        "352",
+        "466"
+      ],
+      [
+        "374",
+        "164"
+      ],
+      [
+        "374",
+        "466"
+      ],
+      [
+        "402",
+        "467"
+      ],
+      [
+        "402",
+        "65"
+      ],
+      [
+        "414",
+        "354"
+      ],
+      [
+        "414",
+        "252"
+      ],
+      [
+        "472",
+        "467"
+      ],
+      [
+        "472",
+        "11"
+      ]
+    ],
+    "r": "127",
+    "runs": [
+      {
+        "Q": [
+          "226",
+          "196"
+        ],
+        "secret": 53,
+        "seed": 20260921,
+        "trials": [
+          {
+            "a": 115,
+            "b": 123,
+            "calls": 1,
+            "conflicts": 1,
+            "index": 0,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "366",
+              "192"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              48,
+              54
+            ]
+          },
+          {
+            "a": 53,
+            "b": 107,
+            "calls": 1,
+            "conflicts": 31,
+            "index": 1,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "492",
+              "330"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              21,
+              53
+            ]
+          },
+          {
+            "a": 124,
+            "b": 109,
+            "calls": 1,
+            "conflicts": 47,
+            "index": 2,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "138",
+              "118"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              32,
+              38
+            ]
+          },
+          {
+            "a": 55,
+            "b": 14,
+            "calls": 1,
+            "conflicts": 12,
+            "index": 3,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "182",
+              "204"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              15,
+              48
+            ]
+          },
+          {
+            "a": 55,
+            "b": 19,
+            "calls": 1,
+            "conflicts": 31,
+            "index": 4,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "404",
+              "249"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              13,
+              19
+            ]
+          }
+        ]
+      },
+      {
+        "Q": [
+          "56",
+          "171"
+        ],
+        "secret": 101,
+        "seed": 20260922,
+        "trials": [
+          {
+            "a": 83,
+            "b": 9,
+            "calls": 1,
+            "conflicts": 30,
+            "index": 0,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "180",
+              "302"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              1,
+              19
+            ]
+          },
+          {
+            "a": 105,
+            "b": 29,
+            "calls": 1,
+            "conflicts": 62,
+            "index": 1,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "90",
+              "475"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              27,
+              40
+            ]
+          },
+          {
+            "a": 107,
+            "b": 86,
+            "calls": 1,
+            "conflicts": 1,
+            "index": 2,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "366",
+              "192"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              48,
+              54
+            ]
+          },
+          {
+            "a": 34,
+            "b": 84,
+            "calls": 1,
+            "conflicts": 31,
+            "index": 3,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "492",
+              "330"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              21,
+              53
+            ]
+          },
+          {
+            "a": 107,
+            "b": 59,
+            "calls": 1,
+            "conflicts": 1,
+            "index": 4,
+            "invalid_models": 0,
+            "models": 1,
+            "refuted": false,
+            "target": [
+              "366",
+              "430"
+            ],
+            "unknown": false,
+            "witness_indices": [
+              47,
+              53
+            ]
+          }
+        ]
+      }
+    ],
+    "signed_orbit_of": [
+      [
+        0,
+        0,
+        false
+      ],
+      [
+        1,
+        0,
+        false
+      ],
+      [
+        1,
+        0,
+        true
+      ],
+      [
+        2,
+        0,
+        false
+      ],
+      [
+        2,
+        0,
+        true
+      ],
+      [
+        2,
+        8,
+        false
+      ],
+      [
+        2,
+        8,
+        true
+      ],
+      [
+        1,
+        7,
+        false
+      ],
+      [
+        1,
+        7,
+        true
+      ],
+      [
+        1,
+        8,
+        false
+      ],
+      [
+        1,
+        8,
+        true
+      ],
+      [
+        3,
+        0,
+        false
+      ],
+      [
+        3,
+        0,
+        true
+      ],
+      [
+        1,
+        1,
+        false
+      ],
+      [
+        1,
+        1,
+        true
+      ],
+      [
+        3,
+        1,
+        false
+      ],
+      [
+        3,
+        1,
+        true
+      ],
+      [
+        3,
+        8,
+        false
+      ],
+      [
+        3,
+        8,
+        true
+      ],
+      [
+        1,
+        4,
+        false
+      ],
+      [
+        1,
+        4,
+        true
+      ],
+      [
+        2,
+        7,
+        false
+      ],
+      [
+        2,
+        7,
+        true
+      ],
+      [
+        2,
+        2,
+        false
+      ],
+      [
+        2,
+        2,
+        true
+      ],
+      [
+        2,
+        5,
+        false
+      ],
+      [
+        2,
+        5,
+        true
+      ],
+      [
+        3,
+        4,
+        false
+      ],
+      [
+        3,
+        4,
+        true
+      ],
+      [
+        1,
+        3,
+        false
+      ],
+      [
+        1,
+        3,
+        true
+      ],
+      [
+        1,
+        6,
+        false
+      ],
+      [
+        1,
+        6,
+        true
+      ],
+      [
+        3,
+        7,
+        false
+      ],
+      [
+        3,
+        7,
+        true
+      ],
+      [
+        2,
+        1,
+        false
+      ],
+      [
+        2,
+        1,
+        true
+      ],
+      [
+        1,
+        2,
+        false
+      ],
+      [
+        1,
+        2,
+        true
+      ],
+      [
+        3,
+        5,
+        false
+      ],
+      [
+        3,
+        5,
+        true
+      ],
+      [
+        3,
+        2,
+        false
+      ],
+      [
+        3,
+        2,
+        true
+      ],
+      [
+        1,
+        5,
+        false
+      ],
+      [
+        1,
+        5,
+        true
+      ],
+      [
+        2,
+        3,
+        false
+      ],
+      [
+        2,
+        3,
+        true
+      ],
+      [
+        2,
+        6,
+        false
+      ],
+      [
+        2,
+        6,
+        true
+      ],
+      [
+        3,
+        6,
+        false
+      ],
+      [
+        3,
+        6,
+        true
+      ],
+      [
+        2,
+        4,
+        false
+      ],
+      [
+        2,
+        4,
+        true
+      ],
+      [
+        3,
+        3,
+        false
+      ],
+      [
+        3,
+        3,
+        true
+      ]
+    ],
+    "signed_orbits": [
+      [
+        0
+      ],
+      [
+        1,
+        2,
+        13,
+        14,
+        37,
+        38,
+        29,
+        30,
+        19,
+        20,
+        43,
+        44,
+        31,
+        32,
+        7,
+        8,
+        9,
+        10
+      ],
+      [
+        3,
+        4,
+        35,
+        36,
+        23,
+        24,
+        45,
+        46,
+        51,
+        52,
+        25,
+        26,
+        47,
+        48,
+        21,
+        22,
+        5,
+        6
+      ],
+      [
+        11,
+        12,
+        15,
+        16,
+        41,
+        42,
+        53,
+        54,
+        27,
+        28,
+        39,
+        40,
+        49,
+        50,
+        33,
+        34,
+        17,
+        18
+      ]
+    ]
+  },
+  "stage3_transcript": {
+    "P": {
+      "x": "352",
+      "y": "466"
+    },
+    "kind": "internal frozen rho function replay with invariant assertions",
+    "lambda": "22",
+    "runs": [
+      {
+        "collisions": [
+          {
+            "a1": "94",
+            "a2": "12",
+            "b1": "41",
+            "b2": "9",
+            "denominator": "95",
+            "numerator": "82",
+            "point": {
+              "x": "22",
+              "y": "452"
+            }
+          }
+        ],
+        "iterations": 2,
+        "restarts": 0,
+        "secret": 53,
+        "seed": 20260921,
+        "solution": "53",
+        "states": [
+          {
+            "a": "111",
+            "b": "41",
+            "input": {
+              "x": "346",
+              "y": "94"
+            },
+            "new_a": "70",
+            "new_b": "27",
+            "output": {
+              "x": "122",
+              "y": "18"
+            }
+          },
+          {
+            "a": "6",
+            "b": "68",
+            "input": {
+              "x": "348",
+              "y": "481"
+            },
+            "new_a": "17",
+            "new_b": "108",
+            "output": {
+              "x": "56",
+              "y": "147"
+            }
+          },
+          {
+            "a": "6",
+            "b": "68",
+            "input": {
+              "x": "348",
+              "y": "481"
+            },
+            "new_a": "17",
+            "new_b": "108",
+            "output": {
+              "x": "56",
+              "y": "147"
+            }
+          },
+          {
+            "a": "49",
+            "b": "120",
+            "input": {
+              "x": "138",
+              "y": "118"
+            },
+            "new_a": "94",
+            "new_b": "41",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "49",
+            "b": "120",
+            "input": {
+              "x": "138",
+              "y": "118"
+            },
+            "new_a": "94",
+            "new_b": "41",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "97",
+            "b": "85",
+            "input": {
+              "x": "366",
+              "y": "192"
+            },
+            "new_a": "78",
+            "new_b": "33",
+            "output": {
+              "x": "154",
+              "y": "70"
+            }
+          },
+          {
+            "a": "14",
+            "b": "74",
+            "input": {
+              "x": "352",
+              "y": "178"
+            },
+            "new_a": "12",
+            "new_b": "9",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          }
+        ],
+        "walk_additions": 6
+      },
+      {
+        "collisions": [
+          {
+            "a1": "23",
+            "a2": "12",
+            "b1": "70",
+            "b2": "94",
+            "denominator": "24",
+            "numerator": "11",
+            "point": {
+              "x": "22",
+              "y": "452"
+            }
+          }
+        ],
+        "iterations": 4,
+        "restarts": 0,
+        "secret": 101,
+        "seed": 20260922,
+        "solution": "101",
+        "states": [
+          {
+            "a": "35",
+            "b": "63",
+            "input": {
+              "x": "296",
+              "y": "456"
+            },
+            "new_a": "97",
+            "new_b": "73",
+            "output": {
+              "x": "122",
+              "y": "18"
+            }
+          },
+          {
+            "a": "101",
+            "b": "56",
+            "input": {
+              "x": "444",
+              "y": "350"
+            },
+            "new_a": "12",
+            "new_b": "23",
+            "output": {
+              "x": "154",
+              "y": "70"
+            }
+          },
+          {
+            "a": "101",
+            "b": "56",
+            "input": {
+              "x": "444",
+              "y": "350"
+            },
+            "new_a": "12",
+            "new_b": "23",
+            "output": {
+              "x": "154",
+              "y": "70"
+            }
+          },
+          {
+            "a": "16",
+            "b": "6",
+            "input": {
+              "x": "478",
+              "y": "457"
+            },
+            "new_a": "3",
+            "new_b": "17",
+            "output": {
+              "x": "54",
+              "y": "145"
+            }
+          },
+          {
+            "a": "16",
+            "b": "6",
+            "input": {
+              "x": "478",
+              "y": "457"
+            },
+            "new_a": "3",
+            "new_b": "17",
+            "output": {
+              "x": "54",
+              "y": "145"
+            }
+          },
+          {
+            "a": "87",
+            "b": "45",
+            "input": {
+              "x": "328",
+              "y": "103"
+            },
+            "new_a": "44",
+            "new_b": "14",
+            "output": {
+              "x": "74",
+              "y": "409"
+            }
+          },
+          {
+            "a": "48",
+            "b": "124",
+            "input": {
+              "x": "352",
+              "y": "178"
+            },
+            "new_a": "23",
+            "new_b": "70",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "87",
+            "b": "45",
+            "input": {
+              "x": "328",
+              "y": "103"
+            },
+            "new_a": "44",
+            "new_b": "14",
+            "output": {
+              "x": "74",
+              "y": "409"
+            }
+          },
+          {
+            "a": "107",
+            "b": "98",
+            "input": {
+              "x": "36",
+              "y": "302"
+            },
+            "new_a": "59",
+            "new_b": "3",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "16",
+            "b": "31",
+            "input": {
+              "x": "36",
+              "y": "302"
+            },
+            "new_a": "29",
+            "new_b": "80",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "48",
+            "b": "124",
+            "input": {
+              "x": "352",
+              "y": "178"
+            },
+            "new_a": "23",
+            "new_b": "70",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "113",
+            "b": "108",
+            "input": {
+              "x": "36",
+              "y": "302"
+            },
+            "new_a": "54",
+            "new_b": "37",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          },
+          {
+            "a": "11",
+            "b": "65",
+            "input": {
+              "x": "36",
+              "y": "302"
+            },
+            "new_a": "12",
+            "new_b": "94",
+            "output": {
+              "x": "22",
+              "y": "452"
+            }
+          }
+        ],
+        "walk_additions": 12
+      }
+    ]
+  },
+  "metric_checks": {
+    "composed_rows_match_v2_v3": 5,
+    "cpu_arithmetic_records": 52
+  },
+  "synthetic_incomplete_cms_model": {
+    "status": "sat",
+    "source_model_valid": null,
+    "composition_accepts": true
+  }
+}

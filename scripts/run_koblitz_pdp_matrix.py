@@ -146,8 +146,12 @@ def solver_status(run: dict, solver: str, instance: Path, manifest: dict) -> dic
             max_var = manifest["exports"]["cryptominisat_xor_dimacs"]["variables"]
             model = parse_cms_model(run["stdout"], max_var)
             model_valid = None if model is None else validate_xor_dimacs(instance / "instance.xor.cnf", model)
+            if model_valid is not True:
+                status = "sat_invalid_model"
+            elif run["returncode"] != 10:
+                status = "sat_invalid_terminal_status"
         elif "s UNSATISFIABLE" in run["stdout"]:
-            status = "unsat"
+            status = "unsat" if run["returncode"] == 20 else "unsat_invalid_terminal_status"
             model_valid = None
         elif run["returncode"] == 0:
             status = "unknown_inconclusive"
@@ -296,7 +300,7 @@ def main() -> None:
     parser.add_argument(
         "--configs",
         default="15:5:standard,31:5:standard,31:5:ggmp,41:5:standard,59:9:standard,67:9:standard",
-        help="comma-separated n:ell:basis cells",
+        help="comma-separated n:ell:basis[:curve_a:factor_index] cells",
     )
     parser.add_argument("--seed", type=int, default=20260909)
     args = parser.parse_args()
@@ -341,9 +345,14 @@ def main() -> None:
     }
 
     for cell_index, cell in enumerate(args.configs.split(",")):
-        n_text, ell_text, basis = cell.split(":")
+        parts = cell.split(":")
+        if len(parts) not in (3, 5):
+            parser.error(f"bad cell {cell!r}; expected n:ell:basis[:curve_a:factor_index]")
+        n_text, ell_text, basis = parts[:3]
+        curve_a, factor_index = (int(parts[3]), int(parts[4])) if len(parts) == 5 else (1, 0)
         n, ell = int(n_text), int(ell_text)
-        instance = args.output / f"n{n}-l{ell}-m3-{basis}"
+        suffix = f"-a{curve_a}-f{factor_index}" if len(parts) == 5 else ""
+        instance = args.output / f"n{n}-l{ell}-m3-{basis}{suffix}"
         command = [
             str(args.exporter.resolve()),
             str(n),
@@ -353,13 +362,22 @@ def main() -> None:
             str(args.conflicts),
             str(instance),
         ]
+        if len(parts) == 5:
+            command.extend([str(curve_a), str(factor_index)])
         generated = run_timed(command, args.timeout, args.exporter.parent)
         (args.output / f"n{n}-l{ell}-m3-{basis}.export.stdout").write_text(
             generated["stdout"].rstrip() + "\n"
         )
         (args.output / f"n{n}-l{ell}-m3-{basis}.export.stderr").write_text(generated["stderr"])
         entry = {
-            "cell": {"n": n, "ell": ell, "m": 3, "basis": basis},
+            "cell": {
+                "n": n,
+                "ell": ell,
+                "m": 3,
+                "basis": basis,
+                "curve_a": curve_a,
+                "factor_index": factor_index,
+            },
             "generator": {
                 "status": "timeout_inconclusive" if generated["timed_out"] else (
                     "completed" if generated["returncode"] == 0 else "failed_operational"

@@ -96,6 +96,9 @@ def main() -> None:
                     "build_total_core_seconds": metric(build, "total_core_seconds"),
                     "build_peak_rss_bytes": metric(build, "peak_rss_bytes"),
                     "binary_sha256": build["binary_sha256"],
+                    "rational_point_decomposition": (
+                        False if old["cell"]["basis"] == "ggmp" else (True if wdsat["status"] == "sat" else None)
+                    ),
                 },
                 "cryptominisat": {
                     "status": cms["status"],
@@ -104,8 +107,24 @@ def main() -> None:
                     "wall_seconds": metric(cms, "wall_seconds"),
                     "total_core_seconds": metric(cms, "total_core_seconds"),
                     "peak_rss_bytes": metric(cms, "peak_rss_bytes"),
+                    "rational_point_decomposition": (
+                        False if old["cell"]["basis"] == "ggmp" else (True if cms["status"] == "sat" else None)
+                    ),
                 },
                 "magma_f4": {"status": "unavailable_operational"},
+                "independent_geometry_qualification": (
+                    {
+                        "status": "degenerate_algebraic_model_check",
+                        "factor_curve_points": 1,
+                        "only_point": "T=(0,1)",
+                        "planted_relation": "T+T+T=T",
+                        "external_model_x_coordinates": [0, 65536, 65536],
+                        "nonlifting_coordinates": [65536, 65536],
+                        "meaningful_point_decomposition_model": False,
+                    }
+                    if old["cell"]["basis"] == "ggmp"
+                    else None
+                ),
             }
         )
 
@@ -119,7 +138,7 @@ def main() -> None:
         "rows": rows,
         "checks": {
             "all_available_sat_models_source_valid": all(
-                arm.get("source_model_valid") is not False
+                arm.get("status") != "sat" or arm.get("source_model_valid") is True
                 for row in rows
                 if row["status"] == "completed"
                 for arm in [row["native_sat"], row["wdsat"], row["cryptominisat"]]
@@ -136,12 +155,14 @@ def main() -> None:
                 for row in rows
                 if row["status"] == "completed"
             ),
+            "all_sat_models_are_verified_point_decompositions": False,
+            "point_model_shortfall": "external SAT models were checked against source ANF; the n=31 GGMP models independently fail curve lifting",
         },
         "gate_status": {
             "1_full_cost_all_stages": "partial: stage-1 PDP setup/build/solve resources are charged; relation collection and linear algebra await the end-to-end stage",
-            "2_matched_solver_matrix": "partial: native XOR, WDSat, CryptoMiniSat and direct MITM ran; GGMP n=31 ran; Magma F4 is unavailable",
+            "2_matched_solver_matrix": "partial: native XOR, WDSat, CryptoMiniSat and direct MITM ran; Magma F4 is unavailable; the n=31 GGMP row is a degenerate algebraic-model check",
             "3_required_metrics": "partial: external solver process metrics are complete; native SAT and MITM need isolated process receipts instead of the combined exporter receipt",
-            "4_n31_n41_and_larger_pdp": "passed for one planted SAT PDP per rung at n=31, n=41 and n=59; no scaling law or population claim",
+            "4_n31_n41_and_larger_pdp": "partial: planted targets are point-decomposable by direct MITM at n=31, n=41 and n=59, but external SAT outputs are only source-ANF validated and the GGMP n=31 model is nonlifting",
             "5_unknown_scalar_end_to_end": "pending",
             "6_automorphism_optimized_pollard_rho": "pending",
             "7_external_reproduction_and_novelty": "pending",
@@ -193,13 +214,13 @@ def main() -> None:
         )
     lines += [
         "",
-        "At n=31 and n=41, every available solver returned a source-validated SAT model. At n=59, direct MITM found the planted decomposition in about 3.13 seconds; native SAT stopped at 100,000 conflicts, WDSat reached the 120-second watchdog, and CryptoMiniSat reached the same watchdog. Both capped solver outcomes are inconclusive.",
+        "At n=31 and n=41, every available solver returned a source-ANF-validated SAT model. Source validation alone does not prove that the model coordinates lift to curve points. At n=59, direct MITM found the planted decomposition in about 3.13 seconds; native SAT stopped at 100,000 conflicts, WDSat reached the 120-second watchdog, and CryptoMiniSat reached the same watchdog. Both capped solver outcomes are inconclusive.",
         "",
-        "The n=31 GGMP cell derives its five-dimensional factor base as the kernel of a linearised polynomial obtained from a factor of T^31-1. It is an admissible construction, but this single planted target is not a causal comparison with the standard-basis cell because the two cells use different factor-base predicates and targets.",
+        "The n=31 GGMP cell derives its five-dimensional x-domain as the kernel of a linearised polynomial obtained from a factor of T^31-1. Independent review found that only T=(0,1) lifts from this domain, the planted relation is T+T+T=T, and both external models contain the nonlifting coordinate x=65536. This row is a degenerate algebraic-model/exporter check, not a meaningful GGMP point-decomposition benchmark. The generator now rejects any such domain with fewer than three distinct curve points.",
         "",
         "Magma is not installed on this host, so the generated `.magma` inputs are retained but F4 is an operationally missing baseline. The n=67 cell exceeds the current n<64 field-bitmask implementation and asserts nothing about PDP hardness.",
         "",
-        "This clears only the one-instance planted-PDP scaling sub-gate through n=59. Unknown-scalar end-to-end runs, fully isolated process accounting for every arm, Magma F4, automorphism-optimized Pollard rho, repeated scaling, external reproduction, and novelty review remain open. The result is not a Koblitz index-calculus SOTA claim.",
+        "Direct MITM confirms planted point decompositions through n=59, but the SAT outputs are not yet lift-validated end to end. Fully isolated process accounting for every PDP arm, Magma F4, repeated scaling, external reproduction, and novelty review remain open. The result is not a Koblitz index-calculus SOTA claim.",
         "",
         "Primary comparisons: Trimoska-Ionica-Dequen, *A SAT-Based Approach for Index Calculus on Binary Elliptic Curves* (ePrint 2019/313); Galbraith-Granger-Merz-Petit, *On Index Calculus Algorithms for Subfield Curves* (ePrint 2020/1315).",
         "",
