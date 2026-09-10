@@ -533,6 +533,32 @@ def git_commit(path: Path) -> str | None:
         return None
 
 
+def wdsat_xor_atom_count(path: Path) -> int:
+    """Count the global XOR atoms consumed by WDSat's ANF parser."""
+    count = 0
+    for line in path.read_text().splitlines():
+        tokens = line.split()
+        if not tokens or tokens[0] != "x":
+            continue
+        index = 1
+        while index < len(tokens) and tokens[index] != "0":
+            token = tokens[index]
+            if token.startswith("."):
+                try:
+                    degree = int(token[1:])
+                except ValueError as error:
+                    raise ValueError(f"invalid ANF degree token {token!r}") from error
+                if degree < 2 or index + degree >= len(tokens):
+                    raise ValueError(f"invalid ANF monomial at token {index}")
+                index += degree + 1
+            else:
+                index += 1
+            count += 1
+        if index >= len(tokens) or tokens[index] != "0":
+            raise ValueError("ANF equation lacks its zero terminator")
+    return count
+
+
 def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) -> tuple[dict, str | None]:
     """Build an instance-sized WDSat binary and return its charged receipt."""
     build_root = instance / "wdsat-build"
@@ -549,13 +575,14 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
     max_eq = int(cms["cnf_clauses"])
     max_xeq = int(cms["xor_rows"])
     max_terms = int(manifest["source_max_monomials_per_equation"])
+    source_xor_atoms = wdsat_xor_atom_count(instance / "instance.anf")
     config = "\n".join(
         [
             "#define __XG_ENHANCED__",
             f"#define __MAX_ANF_ID__ {n_source + 1}",
             f"#define __MAX_DEGREE__ {max_degree + 1}",
             f"#define __MAX_ID__ {max_id}",
-            f"#define __MAX_BUFFER_SIZE__ {max(5000, max_terms * 8, max_id * 16)}",
+            f"#define __MAX_BUFFER_SIZE__ {max(5000, max_terms * 8, max_id * 16, source_xor_atoms + 1)}",
             f"#define __MAX_EQ__ {max(64, max_eq + 16)}",
             f"#define __MAX_EQ_SIZE__ {max_degree + 2}",
             f"#define __MAX_XEQ__ {max(8, max_xeq + 2)}",
@@ -592,6 +619,7 @@ def build_wdsat(source: Path, instance: Path, manifest: dict, timeout: float) ->
         "metrics": run["metrics"],
         "command": run["command"],
         "config": config,
+        "source_xor_atoms": source_xor_atoms,
         "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest() if binary.exists() else None,
     }
     return receipt, str(binary.resolve()) if binary.exists() else None

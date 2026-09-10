@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_stage13_wdsat_buffer_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "trigger": "The n=59 standard task at seed 2026091303 returned WDSat exit -6 before search because dimacs_nb_of_atoms_xe exceeded the generated __MAX_BUFFER_SIZE__ of 32000.",
+  "classification": "operational_static_bound_failure",
+  "scientific_inference": "No WDSat solving conclusion is admitted from the failed arm. The other source-bound backend receipts and the remaining nineteen tasks retain their scopes.",
+  "root_cause": "__MAX_BUFFER_SIZE__ bounded the global count of XOR atoms across the ANF file, but the runner sized it from per-equation and auxiliary-variable proxies. The failing source contains 32263 global XOR atoms.",
+  "change": "Parse the exact exported ANF grammar before building WDSat and require __MAX_BUFFER_SIZE__ to exceed its global XOR-atom count. Retain the original task and run one additive same-seed correction under an outer process meter.",
+  "frozen_inputs_unchanged": [
+    "n=59",
+    "ell=9",
+    "m=3",
+    "standard factor-base predicate",
+    "curve_a=1",
+    "factor_index=0",
+    "seed=2026091303",
+    "native conflict budget=100000",
+    "per-process watchdog=120 seconds"
+  ],
+  "composition": "Replace only the failed WDSat arm in the five-seed distribution. Retain all original costs and add the complete correction-process cost to campaign accounting.",
+  "claim_boundary": "A terminal correction repairs one operational receipt; it does not supply Magma, an end-to-end index-calculus result, or a SOTA claim."
+}

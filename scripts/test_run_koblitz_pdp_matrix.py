@@ -137,6 +137,12 @@ class SourceArtifactCustodyTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 matrix.source_artifact_snapshot(root, manifest)
 
+    def test_wdsat_global_atom_bound_is_counted_from_anf(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "instance.anf"
+            path.write_text("p cnf 3 2\nx .2 1 2 3 T 0\nx 1 2 0\n")
+            self.assertEqual(matrix.wdsat_xor_atom_count(path), 5)
+
 
 class AssignmentValidationTests(unittest.TestCase):
     def test_accepts_exact_source_bound_assignment_and_rejects_mismatch(self) -> None:
