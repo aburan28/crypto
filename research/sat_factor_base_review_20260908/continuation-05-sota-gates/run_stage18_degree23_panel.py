@@ -22,9 +22,11 @@ import verify_stage18_degree23_panel as verify
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 DEFAULT_PROTOCOL = HERE / "stage-18-degree23-panel-protocol.json"
-DEFAULT_OUTPUT = HERE / "stage-18-degree23-panel-20260909"
+DEFAULT_AMENDMENT = HERE / "stage-18-amendment-01-lock-correction.json"
+DEFAULT_OUTPUT = HERE / "stage-18-degree23-panel-lock-corrected-20260909"
+FAILED_V1_OUTPUT = HERE / "stage-18-degree23-panel-20260909"
 DEFAULT_METER = REPO / "scripts" / "process_meter.py"
-DEFAULT_LOCK = REPO / "research" / "sat_factor_base_review_20260908" / "continuation-01" / "source_snapshots" / "Cargo.lock"
+DEFAULT_LOCK = HERE / "stage-18-corrected-Cargo.lock"
 DEFAULT_IC_BINARY = REPO / "target" / "release" / "examples" / "koblitz_algebraic_e2e"
 DEFAULT_DISCOVERY_BINARY = REPO / "target" / "release" / "examples" / "koblitz_public_factor_base_discovery"
 LOCK_ARCHIVE_RELATIVE = Path("dependency-lock/Cargo.lock")
@@ -74,6 +76,19 @@ def protocol_source(path: Path) -> Path:
     if resolved != DEFAULT_PROTOCOL.resolve(strict=True):
         raise RunnerError("scientific execution requires the committed Stage 18 protocol path")
     return resolved
+
+
+def amendment_source(path: Path, protocol: dict) -> tuple[Path, dict]:
+    resolved = path.resolve(strict=True)
+    if path.is_symlink() or not resolved.is_file():
+        raise RunnerError("Stage 18 lock amendment is not a regular file")
+    if resolved != DEFAULT_AMENDMENT.resolve(strict=True):
+        raise RunnerError("corrected execution requires the committed Stage 18 lock amendment")
+    amendment = verify.read_json(resolved)
+    verify.validate_amendment(amendment, protocol)
+    if verify.sha256_file(resolved) != verify.EXPECTED_AMENDMENT_FILE_SHA256:
+        raise RunnerError("Stage 18 lock amendment bytes changed")
+    return resolved, amendment
 
 
 def host_identity() -> dict:
@@ -172,6 +187,15 @@ def safe_output(path: Path) -> Path:
         raise RunnerError(f"unsafe output directory: {resolved}")
     if path.exists() and path.is_symlink():
         raise RunnerError("output directory cannot be a symlink")
+    return resolved
+
+
+def corrected_output(path: Path) -> Path:
+    resolved = safe_output(path)
+    if resolved == FAILED_V1_OUTPUT.resolve():
+        raise RunnerError("the retained v1 failure cannot be resumed or overwritten")
+    if resolved != DEFAULT_OUTPUT.resolve():
+        raise RunnerError("corrected Stage 18 requires the amendment-bound fresh output path")
     return resolved
 
 
@@ -301,8 +325,9 @@ def ensure_build(panel: Path, meter: Path) -> dict:
     return validate_build(panel, command)
 
 
-def initial_run(protocol: dict, protocol_path: Path, panel: Path, meter: Path,
-                allow_dirty: bool) -> dict:
+def initial_run(protocol: dict, protocol_path: Path, amendment: dict,
+                amendment_path: Path, failed_v1_custody: dict, panel: Path,
+                meter: Path, allow_dirty: bool) -> dict:
     state = git_state(panel)
     if not state["algorithm_base_is_ancestor"]:
         raise RunnerError("PR105/head is not an ancestor of the execution checkout")
@@ -313,10 +338,16 @@ def initial_run(protocol: dict, protocol_path: Path, panel: Path, meter: Path,
     sources = source_identities()
     frozen_protocol = panel / "protocol.json"
     frozen_protocol.write_bytes(protocol_path.read_bytes())
+    frozen_amendment = panel / "amendment.json"
+    frozen_amendment.write_bytes(amendment_path.read_bytes())
     return {
         "schema": verify.RUN_SCHEMA,
         "protocol_sha256": verify.canonical_sha256(protocol),
         "protocol_file_sha256": verify.sha256_file(frozen_protocol),
+        "amendment_sha256": verify.canonical_sha256(amendment),
+        "amendment_file_sha256": verify.sha256_file(frozen_amendment),
+        "amendment_source": file_identity(amendment_path),
+        "failed_v1_custody": failed_v1_custody,
         "execution_roots": {
             "repository": str(REPO.resolve()), "panel": str(panel.resolve()),
         },
@@ -439,31 +470,40 @@ def post_execution_custody(run: dict) -> dict:
 
 
 def inner_execute(args: argparse.Namespace) -> int:
+    if args.resume:
+        raise RunnerError("corrected Stage 18 cannot resume or retry any prior panel")
     protocol_path = protocol_source(args.protocol)
     protocol = verify.read_json(protocol_path)
     verify.validate_protocol(protocol)
-    panel = safe_output(args.output)
+    amendment_path, amendment = amendment_source(args.amendment, protocol)
+    failed_v1_custody = verify.validate_failed_v1_custody(amendment, protocol)
+    panel = corrected_output(args.output)
     meter = args.meter.resolve(strict=True)
     if verify.sha256_file(meter) != verify.SOURCE_SHA256["scripts/process_meter.py"]:
         raise RunnerError("process meter differs from the frozen implementation")
     run_path = panel / "run.json"
-    if not run_path.exists():
-        panel.mkdir(parents=True, exist_ok=True)
-        run = initial_run(protocol, protocol_path, panel, meter, args.allow_dirty)
-        atomic_json(run_path, run)
-    else:
-        if not args.resume:
-            raise RunnerError("panel exists; use --resume")
-        run = verify.read_json(run_path)
-        immutable_run_identity(run, protocol, meter, panel, args.allow_dirty)
-        if run.get("status") == "complete_verified_panel":
-            raise RunnerError("completed panel cannot be resumed")
-        run.setdefault("resumed_at", []).append(now())
+    if run_path.exists():
+        raise RunnerError("corrected Stage 18 output already contains a run and cannot be retried")
+    panel.mkdir(parents=True, exist_ok=True)
+    run = initial_run(
+        protocol, protocol_path, amendment, amendment_path, failed_v1_custody,
+        panel, meter, args.allow_dirty,
+    )
+    atomic_json(run_path, run)
     run["status"] = "running"
     atomic_json(run_path, run)
 
     run["dependency_lock"] = install_lockfile(panel)
-    build = ensure_build(panel, meter)
+    atomic_json(run_path, run)
+    try:
+        build = ensure_build(panel, meter)
+    except RunnerError:
+        build_receipt = panel / "build" / "receipt.json"
+        if build_receipt.is_file():
+            run["build_receipt_sha256"] = verify.sha256_file(build_receipt)
+            run["status"] = "inconclusive_build_failure"
+            atomic_json(run_path, run)
+        raise
     run["build_receipt_sha256"] = verify.sha256_file(panel / "build" / "receipt.json")
     run["tools"] = build["binaries"]
     atomic_json(run_path, run)
@@ -548,10 +588,11 @@ def finalize_outer(protocol: dict, panel: Path, outer_index: int) -> dict:
         "schema": "koblitz_degree23_panel_verification.v1",
         "status": summary["status"], "outer_attempt_finalized": outer_index,
         "protocol_sha256": verify.canonical_sha256(protocol),
+        "amendment_sha256": summary["amendment_sha256"],
         "summary_sha256": verify.sha256_file(panel / "summary.json"),
         "artifact_manifest_sha256": verify.sha256_file(panel / "artifact-manifest.json"),
         "exact_frozen_task_count": 12,
-        "claim_boundary": protocol["claim_boundary"],
+        "claim_boundary": summary["claim_boundary"],
     }
     atomic_json(panel / "verification.json", verification)
     run_path = panel / "run.json"
@@ -567,25 +608,26 @@ def finalize_outer(protocol: dict, panel: Path, outer_index: int) -> dict:
 
 
 def outer_execute(args: argparse.Namespace) -> int:
+    if args.resume:
+        raise RunnerError("corrected Stage 18 cannot resume or retry any prior panel")
     protocol_path = protocol_source(args.protocol)
     protocol = verify.read_json(protocol_path)
     verify.validate_protocol(protocol)
-    panel = safe_output(args.output)
+    amendment_path, amendment = amendment_source(args.amendment, protocol)
+    verify.validate_failed_v1_custody(amendment, protocol)
+    panel = corrected_output(args.output)
     existed = panel.exists()
-    if args.resume and not existed:
-        raise RunnerError("--resume requires an existing panel output")
-    if existed and not args.resume:
-        raise RunnerError("output exists; choose a new path or use --resume")
+    if existed:
+        raise RunnerError("corrected Stage 18 output already exists; retries require a new amendment")
     panel.mkdir(parents=True, exist_ok=True)
     index, staging, final = next_outer_attempt(panel)
     staging.mkdir()
     child = [
         str(Path(sys.executable).resolve()), str(Path(__file__).resolve()), "--inner",
-        "--protocol", str(protocol_path), "--output", str(panel),
+        "--protocol", str(protocol_path), "--amendment", str(amendment_path),
+        "--output", str(panel),
         "--meter", str(args.meter.resolve()),
     ]
-    if existed or args.resume:
-        child.append("--resume")
     if args.allow_dirty:
         child.append("--allow-dirty")
     invocation = {
@@ -632,6 +674,11 @@ def plan(args: argparse.Namespace) -> dict:
     protocol_path = protocol_source(args.protocol)
     protocol = verify.read_json(protocol_path)
     verify.validate_protocol(protocol)
+    amendment_path, amendment = amendment_source(args.amendment, protocol)
+    failed_v1_custody = verify.validate_failed_v1_custody(amendment, protocol)
+    output = corrected_output(args.output)
+    if output.exists():
+        raise RunnerError("corrected Stage 18 output already exists and cannot be retried")
     sources = source_identities()
     tasks = verify.task_plan(protocol, str(DEFAULT_DISCOVERY_BINARY.resolve()), str(DEFAULT_IC_BINARY.resolve()))
     state = git_state(args.output)
@@ -642,6 +689,10 @@ def plan(args: argparse.Namespace) -> dict:
     return {
         "schema": "koblitz_degree23_replication_panel_plan.v1",
         "protocol_sha256": verify.canonical_sha256(protocol),
+        "amendment_sha256": verify.canonical_sha256(amendment),
+        "amendment_file_sha256": verify.sha256_file(amendment_path),
+        "failed_v1_custody": failed_v1_custody,
+        "corrected_output": str(output),
         "source_revision": state, "tracked_delta": state["tracked_delta"], "sources": sources,
         "dependency_lock_destination": str((REPO / "Cargo.lock").resolve()),
         "build_command": build_command(), "build_watchdog_seconds": BUILD_WATCHDOG_SECONDS,
@@ -653,13 +704,15 @@ def plan(args: argparse.Namespace) -> dict:
 def self_test() -> dict:
     protocol = verify.read_json(DEFAULT_PROTOCOL)
     verify.validate_protocol(protocol)
+    amendment_path, amendment = amendment_source(DEFAULT_AMENDMENT, protocol)
+    failed_v1_custody = verify.validate_failed_v1_custody(amendment, protocol)
     tasks = verify.task_plan(protocol, str(DEFAULT_DISCOVERY_BINARY.resolve()), str(DEFAULT_IC_BINARY.resolve()))
     if [task["id"] for task in tasks[:4]] != ["discovery-a0", "discovery-a1", "row-01-ic", "row-01-rho-auto"]:
         raise AssertionError("wrong frozen task ordering")
     if tasks[-1]["command"][-3:] != ["100000", "1000", "divisor:0,2"]:
         raise AssertionError("wrong frozen command tail")
     source_identities()
-    checks = 4
+    checks = 6
     try:
         safe_output(REPO)
     except RunnerError:
@@ -690,6 +743,25 @@ def self_test() -> dict:
             checks += 1
         else:
             raise AssertionError("interrupted outer attempt was ignored")
+        initial_panel = root / "initial-panel"
+        initial_panel.mkdir()
+        initial = initial_run(
+            protocol, DEFAULT_PROTOCOL, amendment, amendment_path, failed_v1_custody,
+            initial_panel, DEFAULT_METER, True,
+        )
+        if (
+            initial.get("amendment_sha256") != verify.EXPECTED_AMENDMENT_SHA256
+            or initial.get("failed_v1_custody") != failed_v1_custody
+            or initial.get("evidence_class") != "operational_smoke"
+        ):
+            raise AssertionError("corrected initial-run binding changed")
+        checks += 1
+        try:
+            corrected_output(FAILED_V1_OUTPUT)
+        except RunnerError:
+            checks += 1
+        else:
+            raise AssertionError("retained v1 output was accepted for corrected execution")
     state = git_state()
     if not state["algorithm_base_is_ancestor"]:
         raise AssertionError("frozen base ancestry check failed")
@@ -709,12 +781,15 @@ def self_test() -> dict:
     return {
         "self_test": "pass", "checks": checks, "frozen_tasks": len(tasks),
         "protocol_sha256": verify.canonical_sha256(protocol),
+        "amendment_sha256": verify.canonical_sha256(amendment),
+        "failed_v1_scientific_tasks": 0,
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--protocol", type=Path, default=DEFAULT_PROTOCOL)
+    parser.add_argument("--amendment", type=Path, default=DEFAULT_AMENDMENT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--meter", type=Path, default=DEFAULT_METER)
     parser.add_argument("--resume", action="store_true")

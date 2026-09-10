@@ -13,13 +13,16 @@ from pathlib import Path
 import statistics
 import subprocess
 import tempfile
+import tomllib
 from typing import Any
 
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 DEFAULT_PROTOCOL = HERE / "stage-18-degree23-panel-protocol.json"
-DEFAULT_PANEL = HERE / "stage-18-degree23-panel-20260909"
+DEFAULT_AMENDMENT = HERE / "stage-18-amendment-01-lock-correction.json"
+DEFAULT_PANEL = HERE / "stage-18-degree23-panel-lock-corrected-20260909"
+FAILED_V1_PANEL = HERE / "stage-18-degree23-panel-20260909"
 
 PROTOCOL_SCHEMA = "koblitz_degree23_replication_panel_protocol.v1"
 RUN_SCHEMA = "koblitz_degree23_replication_panel_run.v1"
@@ -27,19 +30,51 @@ RECEIPT_SCHEMA = "koblitz_degree23_task_receipt.v1"
 SUMMARY_SCHEMA = "koblitz_degree23_replication_panel_result.v1"
 BUILD_WATCHDOG_SECONDS = 1800.0
 ALGORITHM_BASE_COMMIT = "754f76b2e313fff98b3fbed11bc246c3744a1591"
-LOCK_SHA256 = "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+V1_LOCK_SHA256 = "4365fcd166506a05c3ef4bc5ad6894293885e37ef799352816e2f75dc3793719"
+LOCK_SHA256 = "b1b9362b067675711e6facc11e2176701ce663dedb86d831a4ca6beb3079e64c"
 EXPECTED_PROTOCOL_SHA256 = "baafe7a774bff90323d3739739044bb559e1938b76bb4915ef8a33348ca9b6dc"
+EXPECTED_PROTOCOL_FILE_SHA256 = "b7d38807a2b027c929412b81639bc531f39f4c49a6cd20a6069b89b8c9afa13d"
+EXPECTED_AMENDMENT_SHA256 = "b6e39fefc60981f3ac53fa37bd35bf18a0c25940f998b25d4f025d7f2bbeca9c"
+EXPECTED_AMENDMENT_FILE_SHA256 = "f11ae681eece162d3ea83f0379af0d8fa5596d6a8dd1ccfe4bad49f2e750ef2c"
 PROTOCOL_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-protocol.json")
+AMENDMENT_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-amendment-01-lock-correction.json")
+CORRECTED_LOCK_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-corrected-Cargo.lock")
+V1_LOCK_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock")
+FAILED_V1_PANEL_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-20260909")
+CORRECTED_PANEL_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-18-degree23-panel-lock-corrected-20260909")
 RUNNER_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage18_degree23_panel.py")
 VERIFIER_RELATIVE = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage18_degree23_panel.py")
 METER_RELATIVE = Path("scripts/process_meter.py")
 LOCK_ARCHIVE_RELATIVE = Path("dependency-lock/Cargo.lock")
 IC_BINARY_RELATIVE = Path("target/release/examples/koblitz_algebraic_e2e")
 DISCOVERY_BINARY_RELATIVE = Path("target/release/examples/koblitz_public_factor_base_discovery")
+EXPECTED_CORRECTION_PATHS = [
+    RUNNER_RELATIVE,
+    AMENDMENT_RELATIVE,
+    CORRECTED_LOCK_RELATIVE,
+    FAILED_V1_PANEL_RELATIVE / "build/metrics.json",
+    FAILED_V1_PANEL_RELATIVE / "build/process-invocation.json",
+    FAILED_V1_PANEL_RELATIVE / "build/receipt.json",
+    FAILED_V1_PANEL_RELATIVE / "build/stderr.txt",
+    FAILED_V1_PANEL_RELATIVE / "build/stdout.txt",
+    FAILED_V1_PANEL_RELATIVE / "dependency-lock/Cargo.lock",
+    FAILED_V1_PANEL_RELATIVE / "outer-attempts/0001/invocation.json",
+    FAILED_V1_PANEL_RELATIVE / "outer-attempts/0001/metrics.json",
+    FAILED_V1_PANEL_RELATIVE / "outer-attempts/0001/receipt.json",
+    FAILED_V1_PANEL_RELATIVE / "outer-attempts/0001/stderr.txt",
+    FAILED_V1_PANEL_RELATIVE / "outer-attempts/0001/stdout.txt",
+    FAILED_V1_PANEL_RELATIVE / "protocol.json",
+    FAILED_V1_PANEL_RELATIVE / "run.json",
+    PROTOCOL_RELATIVE,
+    VERIFIER_RELATIVE,
+]
 EXPECTED_CONTROL_DELTA = [
-    {"status": "A", "path": str(RUNNER_RELATIVE), "mode": "100644", "type": "blob"},
-    {"status": "A", "path": str(PROTOCOL_RELATIVE), "mode": "100644", "type": "blob"},
-    {"status": "A", "path": str(VERIFIER_RELATIVE), "mode": "100644", "type": "blob"},
+    {"status": "A", "path": str(path), "mode": "100644", "type": "blob"}
+    for path in EXPECTED_CORRECTION_PATHS
+]
+V1_EXPECTED_CONTROL_DELTA = [
+    {"status": "A", "path": str(path), "mode": "100644", "type": "blob"}
+    for path in (RUNNER_RELATIVE, PROTOCOL_RELATIVE, VERIFIER_RELATIVE)
 ]
 SOURCE_SHA256 = {
     "Cargo.toml": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5",
@@ -281,7 +316,10 @@ def require_expected_control_delta(delta: Any) -> None:
         )
         _hex_identifier(entry.get("object_id"), f"tracked-delta object: {entry.get('path')}")
         projection.append({key: entry[key] for key in ("status", "path", "mode", "type")})
-    require(projection == EXPECTED_CONTROL_DELTA, "execution commit changes tracked files outside the three Stage 18 controls")
+    require(
+        projection == EXPECTED_CONTROL_DELTA,
+        "execution commit differs from the exact Stage 18 correction custody bundle",
+    )
     require(delta.get("matches_expected_control_only_delta") is True, "tracked-delta admissibility flag changed")
 
 
@@ -364,7 +402,7 @@ def validate_protocol(protocol: dict) -> None:
         == "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock",
         "tracked lock path changed",
     )
-    require(binding.get("tracked_lock_sha256") == LOCK_SHA256, "tracked lock hash changed")
+    require(binding.get("tracked_lock_sha256") == V1_LOCK_SHA256, "v1 tracked lock hash changed")
     require(binding.get("root_lock_copy_required_for_locked_build") is True, "root lock-copy policy changed")
     curve = protocol.get("curve", {})
     require(curve == {
@@ -414,6 +452,129 @@ def validate_protocol(protocol: dict) -> None:
     rho = protocol.get("rho", {})
     require(rho.get("automorphism_group_bound") == 46, "rho automorphism bound changed")
     require(rho.get("fresh_deterministic_jump_table_per_restart") is True, "rho jump refresh changed")
+
+
+def validate_lock_correction() -> None:
+    old_path = REPO / V1_LOCK_RELATIVE
+    corrected_path = REPO / CORRECTED_LOCK_RELATIVE
+    require(
+        old_path.is_file() and not old_path.is_symlink()
+        and sha256_file(old_path) == V1_LOCK_SHA256,
+        "v1 dependency lock snapshot changed",
+    )
+    require(
+        corrected_path.is_file() and not corrected_path.is_symlink()
+        and sha256_file(corrected_path) == LOCK_SHA256,
+        "corrected dependency lock snapshot changed",
+    )
+    old_bytes = old_path.read_bytes()
+    corrected_bytes = corrected_path.read_bytes()
+    insertion_point = b' "hex",\n'
+    require(old_bytes.count(insertion_point) == 1, "v1 root dependency insertion point changed")
+    require(
+        corrected_bytes == old_bytes.replace(
+            insertion_point, insertion_point + b' "libc",\n', 1,
+        ),
+        "corrected lock is not the exact one-line libc insertion",
+    )
+    try:
+        old = tomllib.loads(old_bytes.decode("utf-8"))
+        corrected = tomllib.loads(corrected_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
+        raise VerificationError(f"cannot parse dependency lock correction: {error}") from error
+    require(old.get("version") == corrected.get("version") == 4, "Cargo lock format version changed")
+    old_packages = old.get("package")
+    corrected_packages = corrected.get("package")
+    require(
+        isinstance(old_packages, list) and isinstance(corrected_packages, list)
+        and len(old_packages) == len(corrected_packages) == 68,
+        "Cargo package inventory changed",
+    )
+    old_root = [package for package in old_packages if package.get("name") == "crypto"]
+    corrected_root = [package for package in corrected_packages if package.get("name") == "crypto"]
+    require(len(old_root) == len(corrected_root) == 1, "root crypto package record changed")
+    expected_root = copy.deepcopy(old_root[0])
+    dependencies = list(expected_root.get("dependencies", []))
+    require("libc" not in dependencies and dependencies.count("hex") == 1, "v1 root dependency list changed")
+    dependencies.insert(dependencies.index("hex") + 1, "libc")
+    expected_root["dependencies"] = dependencies
+    require(corrected_root[0] == expected_root, "corrected root package dependency list changed")
+    require(
+        [package for package in corrected_packages if package.get("name") != "crypto"]
+        == [package for package in old_packages if package.get("name") != "crypto"],
+        "non-root Cargo package record changed",
+    )
+    libc_records = [package for package in corrected_packages if package.get("name") == "libc"]
+    require(libc_records == [{
+        "name": "libc", "version": "0.2.186",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66",
+    }], "existing libc package identity changed")
+
+
+def validate_amendment(amendment: dict, protocol: dict) -> None:
+    validate_protocol(protocol)
+    validate_lock_correction()
+    require(
+        canonical_sha256(amendment) == EXPECTED_AMENDMENT_SHA256,
+        "Stage 18 lock amendment differs from the exact frozen canonical digest",
+    )
+    require(
+        sha256_file(DEFAULT_AMENDMENT) == EXPECTED_AMENDMENT_FILE_SHA256,
+        "tracked Stage 18 lock amendment bytes changed",
+    )
+    require(
+        amendment.get("schema") == "koblitz_degree23_replication_panel_amendment.v1"
+        and amendment.get("amendment_id") == "STAGE18-AMENDMENT-01-LOCK-CORRECTION"
+        and amendment.get("status") == "frozen_before_corrected_execution",
+        "wrong Stage 18 lock amendment identity",
+    )
+    require(sha256_file(DEFAULT_PROTOCOL) == EXPECTED_PROTOCOL_FILE_SHA256, "v1 protocol bytes changed")
+    base = amendment.get("base_protocol", {})
+    require(base == {
+        "path": str(PROTOCOL_RELATIVE),
+        "file_sha256": EXPECTED_PROTOCOL_FILE_SHA256,
+        "canonical_sha256": EXPECTED_PROTOCOL_SHA256,
+    }, "amendment base-protocol binding changed")
+    fields = amendment.get("supersession", {}).get("fields")
+    require(fields == [
+        {
+            "json_pointer": "/implementation_binding/tracked_lock_snapshot",
+            "prior": protocol["implementation_binding"]["tracked_lock_snapshot"],
+            "replacement": str(CORRECTED_LOCK_RELATIVE),
+        },
+        {
+            "json_pointer": "/implementation_binding/tracked_lock_sha256",
+            "prior": protocol["implementation_binding"]["tracked_lock_sha256"],
+            "replacement": LOCK_SHA256,
+        },
+    ], "amendment lock supersession changed")
+    require(
+        amendment.get("supersession", {}).get("all_other_protocol_fields_remain_byte_identical") is True,
+        "amendment does not preserve the rest of v1",
+    )
+    require(
+        amendment.get("corrected_execution", {}).get("required_output_path")
+        == str(CORRECTED_PANEL_RELATIVE),
+        "amendment corrected output path changed",
+    )
+    require(
+        amendment.get("corrected_execution", {}).get("resume_or_retry_forbidden") is True,
+        "amendment retry boundary changed",
+    )
+    require(
+        amendment.get("failed_execution", {}).get("panel_path") == str(FAILED_V1_PANEL_RELATIVE)
+        and amendment.get("failed_execution", {}).get("scientific_tasks_started") == 0
+        and amendment.get("failed_execution", {}).get("resume_or_retry_forbidden") is True,
+        "amendment failed-run boundary changed",
+    )
+    require(
+        CORRECTED_LOCK_RELATIVE.is_absolute() is False
+        and (REPO / CORRECTED_LOCK_RELATIVE).is_file()
+        and not (REPO / CORRECTED_LOCK_RELATIVE).is_symlink()
+        and sha256_file(REPO / CORRECTED_LOCK_RELATIVE) == LOCK_SHA256,
+        "corrected Stage 18 lock snapshot is missing or changed",
+    )
 
 
 def task_plan(protocol: dict, discovery_binary: str, ic_binary: str) -> list[dict]:
@@ -600,6 +761,154 @@ def validate_meter(meter: dict, expected_command: list[str], watchdog: float) ->
     return metrics, success
 
 
+def validate_failed_v1_custody(amendment: dict, protocol: dict, panel: Path = FAILED_V1_PANEL) -> dict:
+    """Validate the immutable zero-scientific-task v1 build failure."""
+    validate_amendment(amendment, protocol)
+    require(panel.is_dir() and not panel.is_symlink(), "retained v1 failure panel is missing")
+    inventory = amendment["failed_execution"].get("artifact_inventory")
+    require(isinstance(inventory, list) and len(inventory) == 13, "failed-panel inventory changed")
+    listed = set()
+    for row in inventory:
+        require(
+            isinstance(row, dict) and set(row) == {"path", "bytes", "sha256"},
+            "invalid failed-panel inventory row",
+        )
+        relative = Path(row["path"])
+        require(not relative.is_absolute() and ".." not in relative.parts, "unsafe failed-panel path")
+        artifact = panel / relative
+        require(artifact.is_file() and not artifact.is_symlink(), f"failed-panel artifact is not regular: {relative}")
+        require(str(relative) not in listed, f"duplicate failed-panel artifact: {relative}")
+        listed.add(str(relative))
+        require(
+            artifact.stat().st_size == row["bytes"] and sha256_file(artifact) == row["sha256"],
+            f"failed-panel artifact changed: {relative}",
+        )
+    observed = set()
+    for artifact in panel.rglob("*"):
+        if artifact.is_dir():
+            require(not artifact.is_symlink(), f"symlink directory in failed panel: {artifact}")
+            continue
+        require(artifact.is_file() and not artifact.is_symlink(), f"non-regular failed-panel artifact: {artifact}")
+        observed.add(str(artifact.relative_to(panel)))
+    require(observed == listed, "retained v1 failure root inventory changed")
+
+    run = read_json(panel / "run.json")
+    recorded_repo, recorded_panel = _execution_roots(run)
+    require(
+        recorded_panel == recorded_repo / FAILED_V1_PANEL_RELATIVE,
+        "failed v1 recorded output path changed",
+    )
+    require(run.get("schema") == RUN_SCHEMA, "failed v1 run schema changed")
+    require(run.get("protocol_sha256") == EXPECTED_PROTOCOL_SHA256, "failed v1 protocol hash changed")
+    require(run.get("protocol_file_sha256") == EXPECTED_PROTOCOL_FILE_SHA256, "failed v1 protocol bytes changed")
+    require(read_json(panel / "protocol.json") == protocol, "failed v1 protocol copy changed")
+    require(run.get("evidence_class") == "scientific_candidate", "failed v1 evidence class changed")
+    require(run.get("status") == "running", "failed v1 pre-finalization status changed")
+    require(run.get("tasks") == {}, "failed v1 unexpectedly contains scientific tasks")
+    revision = run.get("source_revision", {})
+    failed_commit = amendment["failed_execution"]["source_commit"]
+    require(revision.get("commit") == failed_commit and revision.get("dirty") is False, "failed v1 source revision changed")
+    recomputed = git_tracked_delta(REPO, failed_commit)
+    projection = [
+        {key: entry[key] for key in ("status", "path", "mode", "type")}
+        for entry in recomputed["entries"]
+    ]
+    require(projection == V1_EXPECTED_CONTROL_DELTA, "failed v1 execution commit delta changed")
+    recorded_delta = revision.get("tracked_delta", {})
+    require(
+        recorded_delta.get("base_commit") == ALGORITHM_BASE_COMMIT
+        and recorded_delta.get("head_commit") == failed_commit
+        and recorded_delta.get("entries") == recomputed["entries"]
+        and recorded_delta.get("matches_expected_control_only_delta") is True,
+        "failed v1 recorded source delta changed",
+    )
+    implementation = run.get("implementation", {})
+    require(set(implementation) == {"runner", "verifier", "meter"}, "failed v1 implementation inventory changed")
+    _validate_historical_identity(implementation["runner"], recorded_repo, RUNNER_RELATIVE, "failed v1 runner")
+    _validate_historical_identity(implementation["verifier"], recorded_repo, VERIFIER_RELATIVE, "failed v1 verifier")
+    _validate_historical_identity(
+        implementation["meter"], recorded_repo, METER_RELATIVE, "failed v1 meter",
+        SOURCE_SHA256["scripts/process_meter.py"],
+    )
+    require(sha256_file(panel / LOCK_ARCHIVE_RELATIVE) == V1_LOCK_SHA256, "failed v1 archived lock changed")
+
+    build = panel / "build"
+    _regular_inventory(build, {"process-invocation.json", "stdout.txt", "stderr.txt", "metrics.json", "receipt.json"})
+    build_receipt = read_json(build / "receipt.json")
+    build_command = build_receipt.get("command")
+    require(
+        isinstance(build_command, list) and len(build_command) == 8
+        and Path(build_command[0]).name == "cargo"
+        and build_command[1:] == [
+            "build", "--release", "--locked", "--example", "koblitz_algebraic_e2e",
+            "--example", "koblitz_public_factor_base_discovery",
+        ],
+        "failed v1 build command changed",
+    )
+    build_meter = read_json(build / "metrics.json")
+    build_metrics, build_success = validate_meter(build_meter, build_command, BUILD_WATCHDOG_SECONDS)
+    require(not build_success and build_meter["returncode"] == 101, "failed v1 build terminal changed")
+    require(build_receipt == {
+        "schema": "koblitz_degree23_build_receipt.v1", "status": "failed",
+        "command": build_command, "dependency_lock_sha256": V1_LOCK_SHA256,
+        "binaries": {},
+    }, "failed v1 build receipt changed")
+    build_invocation = read_json(build / "process-invocation.json")
+    _validate_process_invocation(
+        build_invocation, build_command, recorded_repo, BUILD_WATCHDOG_SECONDS,
+        implementation["meter"]["path"], recorded_panel / ".staging-build/stdout.txt",
+        recorded_panel / ".staging-build/stderr.txt", recorded_panel / ".staging-build/metrics.json",
+        run["host"]["python"]["command"][0],
+    )
+
+    outer = panel / "outer-attempts/0001"
+    _regular_inventory(outer, {"invocation.json", "stdout.txt", "stderr.txt", "metrics.json", "receipt.json"})
+    outer_invocation = read_json(outer / "invocation.json")
+    outer_command = outer_invocation.get("command")
+    require(outer_command == [
+        run["host"]["python"]["command"][0], implementation["runner"]["path"],
+        "--inner", "--protocol", str(recorded_repo / PROTOCOL_RELATIVE),
+        "--output", str(recorded_panel), "--meter", implementation["meter"]["path"],
+    ], "failed v1 outer command changed")
+    _validate_process_invocation(
+        outer_invocation, outer_command, recorded_repo, 7200.0, implementation["meter"]["path"],
+        recorded_panel / "outer-attempts/.staging-0001/stdout.txt",
+        recorded_panel / "outer-attempts/.staging-0001/stderr.txt",
+        recorded_panel / "outer-attempts/.staging-0001/metrics.json",
+        run["host"]["python"]["command"][0],
+    )
+    outer_meter = read_json(outer / "metrics.json")
+    outer_metrics, outer_success = validate_meter(outer_meter, outer_command, 7200.0)
+    require(not outer_success and outer_meter["returncode"] == 1, "failed v1 outer terminal changed")
+    outer_receipt = read_json(outer / "receipt.json")
+    require(outer_receipt == {
+        "schema": "koblitz_degree23_outer_receipt.v1", "attempt": 1,
+        "returncode": 1, "timed_out": False, "orphan_group_terminated": False,
+        "metrics": outer_metrics, "command": outer_command,
+    }, "failed v1 outer receipt changed")
+    require(run.get("outer_attempts") == [{
+        "attempt": 1, "receipt": str(recorded_panel / "outer-attempts/0001/receipt.json"),
+        "receipt_sha256": sha256_file(outer / "receipt.json"),
+    }], "failed v1 outer index changed")
+
+    frozen_build = amendment["failed_execution"]["build"]
+    frozen_outer = amendment["failed_execution"]["outer_attempt"]
+    for key in ("wall_seconds", "total_core_seconds", "peak_rss_bytes"):
+        require(build_metrics[key] == frozen_build[key], f"failed v1 build cost changed: {key}")
+        require(outer_metrics[key] == frozen_outer[key], f"failed v1 outer cost changed: {key}")
+    return {
+        "schema": "koblitz_stage18_v1_failure_custody.v1",
+        "status": "verified_operational_build_failure_zero_scientific_tasks",
+        "evidence_class": "operational_failure",
+        "scientific_tasks_started": 0,
+        "artifact_count": len(inventory),
+        "build": frozen_build,
+        "outer_attempt": frozen_outer,
+        "nested_costs_must_not_be_summed": True,
+        "excluded_from_ic_rho_ratios": True,
+    }
+
+
 def _regular_inventory(directory: Path, expected: set[str]) -> None:
     require(directory.is_dir() and not directory.is_symlink(), f"task leaf is not a regular directory: {directory}")
     observed = set()
@@ -621,6 +930,10 @@ def verify_task_leaf(protocol: dict, panel: Path, task: dict, write_receipt: boo
     require(invocation.get("attempt") == 1, "scientific task was retried")
     run = read_json(panel / "run.json")
     recorded_repo, recorded_panel = _execution_roots(run)
+    require(
+        recorded_panel == recorded_repo / CORRECTED_PANEL_RELATIVE,
+        "corrected Stage 18 recorded output path changed",
+    )
     recorded_staging = recorded_panel / ".staging" / task["id"]
     python_path = run.get("host", {}).get("python", {}).get("command", [None])[0]
     meter_path = run.get("implementation", {}).get("meter", {}).get("path")
@@ -672,7 +985,8 @@ def _distribution(values: list[float | int]) -> dict | None:
     return {"min": min(values), "median": statistics.median(values), "mean": statistics.fmean(values), "max": max(values)}
 
 
-def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: bool) -> None:
+def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: bool,
+                         allow_build_failure: bool = False) -> bool:
     require(run.get("schema") == RUN_SCHEMA, "wrong run schema")
     require(run.get("protocol_sha256") == canonical_sha256(protocol), "run protocol hash mismatch")
     recorded_repo, recorded_panel = _execution_roots(run)
@@ -680,6 +994,14 @@ def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: b
     require(protocol_copy.is_file() and not protocol_copy.is_symlink(), "frozen protocol copy is missing")
     require(read_json(protocol_copy) == protocol, "frozen protocol copy differs")
     require(run.get("protocol_file_sha256") == sha256_file(protocol_copy), "protocol byte hash changed")
+    amendment_copy = panel / "amendment.json"
+    require(amendment_copy.is_file() and not amendment_copy.is_symlink(), "frozen amendment copy is missing")
+    amendment = read_json(amendment_copy)
+    validate_amendment(amendment, protocol)
+    require(read_json(DEFAULT_AMENDMENT) == amendment, "panel amendment differs from the tracked amendment")
+    require(run.get("amendment_sha256") == canonical_sha256(amendment), "run amendment hash mismatch")
+    require(run.get("amendment_file_sha256") == sha256_file(amendment_copy), "amendment byte hash changed")
+    require(run.get("failed_v1_custody") == validate_failed_v1_custody(amendment, protocol), "failed v1 custody summary changed")
     revision = run.get("source_revision")
     require(isinstance(revision, dict), "run lacks source revision")
     require(revision.get("algorithm_base_commit") == ALGORITHM_BASE_COMMIT, "run base commit changed")
@@ -721,7 +1043,12 @@ def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: b
             f"frozen source {relative}", expected_hash,
         )
         require(sources[relative].get("expected_sha256") == expected_hash, f"missing expected source hash: {relative}")
-    lock_relative = Path(protocol["implementation_binding"]["tracked_lock_snapshot"])
+    amendment_source = run.get("amendment_source")
+    _validate_mapped_identity(
+        amendment_source, recorded_repo, AMENDMENT_RELATIVE, DEFAULT_AMENDMENT,
+        "Stage 18 lock amendment", EXPECTED_AMENDMENT_FILE_SHA256,
+    )
+    lock_relative = CORRECTED_LOCK_RELATIVE
     lock = REPO / lock_relative
     _validate_mapped_identity(
         sources["dependency_lock_snapshot"], recorded_repo, lock_relative, lock,
@@ -764,18 +1091,10 @@ def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: b
     )
     tools = run.get("tools")
     require(isinstance(tools, dict) and set(tools) == {"ic_binary", "discovery_binary"}, "run binary inventory changed")
-    _validate_historical_identity(
-        tools["ic_binary"], recorded_repo, IC_BINARY_RELATIVE, "historical IC binary",
-    )
-    _validate_historical_identity(
-        tools["discovery_binary"], recorded_repo, DISCOVERY_BINARY_RELATIVE,
-        "historical discovery binary",
-    )
     build = panel / "build"
     require(build.is_dir() and not build.is_symlink(), "build archive missing")
     _regular_inventory(build, {"process-invocation.json", "stdout.txt", "stderr.txt", "metrics.json", "receipt.json"})
     build_receipt = read_json(build / "receipt.json")
-    require(build_receipt.get("status") == "verified", "locked release build was not verified")
     command = build_receipt.get("command")
     require(
         isinstance(command, list) and len(command) == 8
@@ -789,7 +1108,6 @@ def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: b
     _canonical_absolute(command[0], "historical cargo executable")
     build_metrics = read_json(build / "metrics.json")
     _, build_success = validate_meter(build_metrics, command, BUILD_WATCHDOG_SECONDS)
-    require(build_success, "locked release build process failed")
     build_invocation = read_json(build / "process-invocation.json")
     require(build_invocation.get("schema") == "koblitz_degree23_process_invocation.v1", "wrong build invocation schema")
     python_path = run.get("host", {}).get("python", {}).get("command", [None])[0]
@@ -801,14 +1119,36 @@ def validate_run_custody(protocol: dict, panel: Path, run: dict, require_post: b
         recorded_build / "stderr.txt", recorded_build / "metrics.json", python_path,
     )
     require(build_receipt.get("dependency_lock_sha256") == LOCK_SHA256, "build lock hash changed")
-    require(build_receipt.get("binaries") == tools, "build/run binary identities differ")
     require(run.get("build_receipt_sha256") == sha256_file(build / "receipt.json"), "build receipt hash changed")
+    if not build_success:
+        require(allow_build_failure, "locked release build process failed")
+        require(
+            build_receipt.get("status") == "failed" and build_receipt.get("binaries") == {},
+            "failed build receipt changed",
+        )
+        require(tools == {
+            "ic_binary": {"path": str(recorded_repo / IC_BINARY_RELATIVE), "sha256": None},
+            "discovery_binary": {"path": str(recorded_repo / DISCOVERY_BINARY_RELATIVE), "sha256": None},
+        }, "failed build unexpectedly produced binary identities")
+        require(run.get("status") == "inconclusive_build_failure", "failed build run status changed")
+        require(not require_post, "failed build cannot have complete post-execution custody")
+        return False
+    require(build_receipt.get("status") == "verified", "locked release build was not verified")
+    _validate_historical_identity(
+        tools["ic_binary"], recorded_repo, IC_BINARY_RELATIVE, "historical IC binary",
+    )
+    _validate_historical_identity(
+        tools["discovery_binary"], recorded_repo, DISCOVERY_BINARY_RELATIVE,
+        "historical discovery binary",
+    )
+    require(build_receipt.get("binaries") == tools, "build/run binary identities differ")
     if require_post:
         post = run.get("post_execution")
         require(isinstance(post, dict), "complete run lacks post-execution custody")
         require(post.get("sources") == sources, "source identity changed after execution")
         require(post.get("binaries") == tools, "binary identity changed after execution")
         require(post.get("root_lock_sha256") == LOCK_SHA256, "root lock changed after execution")
+    return True
 
 
 def validate_outer_attempts(protocol: dict, panel: Path, run: dict,
@@ -821,6 +1161,7 @@ def validate_outer_attempts(protocol: dict, panel: Path, run: dict,
     require(root.is_dir() and not root.is_symlink(), "outer-attempts is not a regular directory")
     records = []
     directories = sorted(root.iterdir())
+    require(len(directories) <= 1, "corrected Stage 18 execution was retried")
     for expected_index, directory in enumerate(directories, start=1):
         require(
             directory.is_dir() and not directory.is_symlink()
@@ -834,21 +1175,20 @@ def validate_outer_attempts(protocol: dict, panel: Path, run: dict,
         require(invocation.get("schema") == "koblitz_degree23_outer_invocation.v1", "wrong outer invocation schema")
         require(invocation.get("attempt") == int(directory.name), "outer attempt index changed")
         command = invocation.get("command")
-        require(isinstance(command, list) and len(command) >= 9, "invalid outer child command")
+        require(isinstance(command, list) and len(command) >= 11, "invalid outer child command")
         require(command[:4] == [
             run["host"]["python"]["command"][0], run["implementation"]["runner"]["path"],
             "--inner", "--protocol",
         ], "outer child prefix changed")
         require(command[4] == str(recorded_repo / PROTOCOL_RELATIVE), "outer protocol path changed")
-        require(command[5:9] == [
+        require(command[5:11] == [
+            "--amendment", str(recorded_repo / AMENDMENT_RELATIVE),
             "--output", str(recorded_panel), "--meter", run["implementation"]["meter"]["path"],
         ], "outer child paths changed")
         allowed_tail = []
-        if int(directory.name) > 1:
-            allowed_tail.append("--resume")
         if run.get("evidence_class") == "operational_smoke":
             allowed_tail.append("--allow-dirty")
-        require(command[9:] == allowed_tail, "outer child options changed")
+        require(command[11:] == allowed_tail, "outer child options changed")
         _validate_process_invocation(
             invocation, command, recorded_repo, 7200.0, run["implementation"]["meter"]["path"],
             recorded_directory / "stdout.txt", recorded_directory / "stderr.txt",
@@ -914,6 +1254,11 @@ def validate_final_inventory(panel: Path) -> dict:
     require(verification.get("schema") == "koblitz_degree23_panel_verification.v1", "wrong verification schema")
     require(verification.get("status") == summary.get("status"), "verification/summary status mismatch")
     require(verification.get("protocol_sha256") == run.get("protocol_sha256"), "verification protocol hash mismatch")
+    require(
+        verification.get("amendment_sha256") == run.get("amendment_sha256")
+        == summary.get("amendment_sha256"),
+        "verification amendment hash mismatch",
+    )
     require(verification.get("artifact_manifest_sha256") == sha256_file(panel / "artifact-manifest.json"), "verification manifest hash changed")
     require(verification.get("summary_sha256") == sha256_file(panel / "summary.json"), "verification summary hash changed")
     require(verification.get("exact_frozen_task_count") == 12, "verification task count changed")
@@ -924,6 +1269,19 @@ def validate_final_inventory(panel: Path) -> dict:
     require(run.get("artifact_manifest_sha256") == verification.get("artifact_manifest_sha256"), "run manifest hash mismatch")
     require(run.get("verification_sha256") == sha256_file(panel / "verification.json"), "run verification hash mismatch")
     return manifest
+
+
+def validate_optional_controls(panel: Path, summary: dict, validate_controls: bool) -> None:
+    if not validate_controls:
+        return
+    controls = [panel / name for name in ("summary.json", "artifact-manifest.json", "verification.json")]
+    if any(path.exists() for path in controls):
+        require(
+            all(path.is_file() and not path.is_symlink() for path in controls),
+            "final panel controls are incomplete or non-regular",
+        )
+        require(read_json(panel / "summary.json") == summary, "archived summary differs from recomputation")
+        validate_final_inventory(panel)
 
 
 def _charged_totals(receipts: list[dict]) -> dict:
@@ -967,11 +1325,56 @@ def summarize(protocol: dict, panel: Path, allow_incomplete: bool = False,
               validate_controls: bool = True) -> dict:
     validate_protocol(protocol)
     run = read_json(panel / "run.json")
-    validate_run_custody(protocol, panel, run, require_post=not allow_incomplete)
+    build_success = validate_run_custody(
+        protocol, panel, run, require_post=not allow_incomplete,
+        allow_build_failure=allow_incomplete,
+    )
     _, recorded_panel = _execution_roots(run)
     outer_attempts = validate_outer_attempts(
         protocol, panel, run, require_success=not allow_incomplete
     )
+    if not build_success:
+        require(allow_incomplete, "failed build cannot form a complete panel")
+        require(run.get("tasks") == {}, "failed build panel contains scientific task records")
+        build_meter = read_json(panel / "build/metrics.json")
+        build_metrics = build_meter["metrics"]
+        outer_core = sum(item["metrics"]["total_core_seconds"] for item in outer_attempts)
+        outer_wall = sum(item["metrics"]["wall_seconds"] for item in outer_attempts)
+        summary = {
+            "schema": SUMMARY_SCHEMA,
+            "status": "inconclusive_build_failure",
+            "task_panel_complete": False,
+            "expected_tasks": 12,
+            "attempted_tasks": 0,
+            "verified_tasks": 0,
+            "status_counts": {},
+            "rows": [
+                {"index": index, "secret": secret, "seed": str(seed), "status": "not_started"}
+                for index, secret, seed in EXPECTED_RUNS
+            ],
+            "comparison": "inconclusive_no_scientific_tasks",
+            "accounting": {
+                "scientific_processes": 0,
+                "build_operational_metrics": build_metrics,
+                "build_returncode": build_meter["returncode"],
+                "algorithm_ratios": None,
+            },
+            "outer_driver_receipts": {
+                "attempts": len(outer_attempts),
+                "all_completed_attempts_core_seconds": outer_core,
+                "all_completed_attempts_wall_seconds": outer_wall,
+                "maximum_peak_rss_bytes": max(
+                    (item["metrics"]["peak_rss_bytes"] for item in outer_attempts),
+                    default=None,
+                ),
+                "nested_build_cost_must_not_be_added_to_outer_envelope": True,
+            },
+            "failed_v1_custody": run["failed_v1_custody"],
+            "amendment_sha256": run["amendment_sha256"],
+            "claim_boundary": read_json(panel / "amendment.json")["claim_boundary"],
+        }
+        validate_optional_controls(panel, summary, validate_controls)
+        return summary
     tools = run.get("tools", {})
     discovery_binary = tools.get("discovery_binary", {}).get("path")
     ic_binary = tools.get("ic_binary", {}).get("path")
@@ -1094,6 +1497,8 @@ def summarize(protocol: dict, panel: Path, allow_incomplete: bool = False,
     )
     summary = {
         "schema": SUMMARY_SCHEMA,
+        "amendment_sha256": run["amendment_sha256"],
+        "failed_v1_custody": run["failed_v1_custody"],
         "status": (
             "complete_verified_panel" if complete
             else "provisional_complete_pending_final_controls" if task_complete
@@ -1146,22 +1551,27 @@ def summarize(protocol: dict, panel: Path, allow_incomplete: bool = False,
     }
     if not allow_incomplete:
         require(len(receipts) == 12, "panel archive is incomplete")
-    if validate_controls:
-        controls = [panel / name for name in ("summary.json", "artifact-manifest.json", "verification.json")]
-        if any(path.exists() for path in controls):
-            require(
-                all(path.is_file() and not path.is_symlink() for path in controls),
-                "final panel controls are incomplete or non-regular",
-            )
-            require(read_json(panel / "summary.json") == summary, "archived summary differs from recomputation")
-            validate_final_inventory(panel)
+    validate_optional_controls(panel, summary, validate_controls)
     return summary
 
 
 def self_test() -> dict:
     protocol = read_json(DEFAULT_PROTOCOL)
     validate_protocol(protocol)
-    checks = 1
+    amendment = read_json(DEFAULT_AMENDMENT)
+    validate_amendment(amendment, protocol)
+    failure = validate_failed_v1_custody(amendment, protocol)
+    if failure["scientific_tasks_started"] != 0:
+        raise AssertionError("failed v1 custody admitted a scientific task")
+    checks = 3
+    amendment_mutation = copy.deepcopy(amendment)
+    amendment_mutation["supersession"]["fields"][1]["replacement"] = V1_LOCK_SHA256
+    try:
+        validate_amendment(amendment_mutation, protocol)
+    except VerificationError:
+        checks += 1
+    else:
+        raise AssertionError("amendment lock-hash mutation was accepted")
     stage14 = HERE / "stage-14-orbit-admission-20260909"
     for a in (0, 1):
         validate_discovery_result(read_json(stage14 / f"a{a}" / "discovery.json"), a)
@@ -1297,7 +1707,7 @@ def self_test() -> dict:
         relocated_panel = root / "relocated-panel"
         relocated_lock = relocated_panel / LOCK_ARCHIVE_RELATIVE
         relocated_lock.parent.mkdir(parents=True)
-        relocated_lock.write_bytes((REPO / "research/sat_factor_base_review_20260908/continuation-01/source_snapshots/Cargo.lock").read_bytes())
+        relocated_lock.write_bytes((REPO / CORRECTED_LOCK_RELATIVE).read_bytes())
         lock_identity = {
             "path": str(recorded_panel / LOCK_ARCHIVE_RELATIVE),
             "bytes": relocated_lock.stat().st_size,
@@ -1338,7 +1748,12 @@ def self_test() -> dict:
             checks += 1
         else:
             raise AssertionError("changed relocated lock was accepted")
-    return {"self_test": "pass", "checks": checks, "frozen_tasks": 12, "protocol_sha256": canonical_sha256(protocol)}
+    return {
+        "self_test": "pass", "checks": checks, "frozen_tasks": 12,
+        "protocol_sha256": canonical_sha256(protocol),
+        "amendment_sha256": canonical_sha256(amendment),
+        "failed_v1_scientific_tasks": 0,
+    }
 
 
 def main() -> None:
