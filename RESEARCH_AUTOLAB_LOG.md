@@ -7125,8 +7125,25 @@ predictor for this comparison; splits and conflicts are the right ones
 at `K₁/F₂¹⁵`, `m = 3` becomes 101 ms; the F4/SAT gap is ×4, not ×340.
 What CDCL could not handle was the free intermediate field element.
 
-Pending in this session: `K₁/F₂¹⁷` at `m = 3` and `K₁/F₂²³`, rows marked
-TBD in the research doc until the run finishes.
+**Not uniformly better, and the exception is the engine.**  At
+`K₁/F₂¹⁷`, `m = 3` (dimension 9 is the only invariant subspace with
+`1`; every target decomposes) the symmetrised system has 25 unknowns of
+Boolean degree 4, above `matrix_f4_f2`'s column limit for a degree-5
+matrix, so F4 is reduced to splitting: 6.2 s and 3 219 splits against
+4.0 s and 49 for the chained system.  On SAT it still wins (3/4 found
+against 0/4).  At `K₁/F₂²³`, `m = 3`, 59 unknowns against 34, the
+production system answers nothing within budget on either engine and
+the symmetrised system finds 2/3 on F4 in 5.8 s.  The wall moved.
+
+**`m = 2` is a constant factor.**  ×2 on F4 refutations from `n = 15`
+to `n = 23`, ×4–9 on SAT; found targets within noise.  H3's
+"sub-second at the wall" is falsified: 1.6 s at `n = 23`, and the first
+fall degree there equals the `x`-system's.
+
+`n = 21` is composite — the group order carries the subfield curves'
+orders and no prime-order subgroup exceeds its cofactor — so the
+constructor refuses it; the earlier `n = 21` numbers were curve-free
+system profiles.  The ladder uses primes.
 
 ### Next step proposal
 

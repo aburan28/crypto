@@ -488,7 +488,10 @@ degree of the system.
 | | | sym SAT | 25 | 4 | 3 / 0, 1 inconclusive | 23 782 | – | 150 247 | |
 | `K₁/F₂¹⁷` (F4 only, 60 000 splits) | 9 | x-chained F4 | 44 | 3 | 4 / 0 | 3 979 | – | 49 | 3 |
 | | | sym F4 | 25 | 4 | 4 / 0 | 6 203 | – | 3 219 | |
-| `K₁/F₂²³` | 12 | | | | TBD23-3 | | | | |
+| `K₁/F₂²³` (3 targets, budgets 3 000 splits / 200 000 conflicts) | 12 | x-chained F4 | 59 | 3 | 0 / 0, **3 inconclusive** | – | – | budget | 3 |
+| | | sym F4 | 34 | 4 | 2 / 0, 1 inconclusive | 5 795 | – | 135 | |
+| | | x-chained SAT | 59 | 3 | 0 / 0, **3 inconclusive** | – | – | 200 000 | |
+| | | sym SAT | 34 | 4 | 0 / 0, **3 inconclusive** | – | – | 200 000 | |
 
 Effort is F4 splits or SAT conflicts, machine-independent.  `K₀` has no
 usable prime-order subgroup at `n = 17` and `n = 21` is composite (the
@@ -548,12 +551,26 @@ machine-independent effort counts are: at `K₀/F₂¹⁵`, `m = 3`, 788 splits
 against 236 and 51 445 conflicts against 3 424.
 
 **H3 (`m = 2` bilinear, sub-second refutation at the production wall):
-supported in form, not yet at the intended `n`.**  The `m = 2`
-symmetrised system is bilinear in `(w₁, w₂)` with `s` linear, as
-predicted; `n = 21` is composite and unavailable to the curve
-constructor, so the wall the earlier sessions measured (`n = 21, m = 3`,
-39 unknowns, 50 s F4, no SAT verdict in 31 min) is re-measured at the
-prime `n = 17` and `n = 23` instead — rows marked TBD above.
+supported in form, falsified on the number.**  The `m = 2` symmetrised
+system is bilinear in `(w₁, w₂)` with `s` linear, as predicted, but at
+`n = 23` (the nearest prime to the `n = 21` the earlier sessions used,
+which is composite and unavailable to the curve constructor) it refutes
+in 1.6 s on F4, not under a second, and its first fall degree is 3, the
+same as the `x`-system's.  The `m = 2` gain is a constant factor of 2.
+
+**The wall moves at `m = 3`, and that is the result that matters for
+the scaling target.**  At `K₁/F₂²³`, `m = 3`, the chained production
+system has 59 unknowns and answers *nothing* on three targets within
+3 000 splits or 200 000 conflicts; the symmetrised system has 34 and
+finds two of the three on F4 in a median 5.8 s with 135 splits (SAT,
+without a Macaulay matrix to lean on, also fails within budget).  At
+`n = 17` the production system is faster on F4 (found regime, dimension
+9 forced by the cyclotomic structure); at `n = 23` it does not finish.
+Read together with the `n = 15` numbers: the symmetrised `S₄` is a
+worse F4 instance than the chained system only in the narrow band where
+the chained system's 44 unknowns still split cheaply and the symmetrised
+system's degree-4 Macaulay matrix no longer fits the engine — and past
+that band it is the only system this engine answers at all.
 
 **The SAT/F4 asymmetry shrinks.**  The 2026-09-08 sessions found SAT
 340× behind F4 on refutation and unable to reach `n = 21`.  On the
