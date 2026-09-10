@@ -58,6 +58,28 @@ cargo test --release
 
 ---
 
+## Index-calculus research executable
+
+The standalone ic command supports named/custom curve inspection, generated
+known-answer experiments, and bounded factor-base comparisons with live
+stage reporting.
+
+    cargo build --release --bin ic
+    ./target/release/ic ecc2k-130
+    ./target/release/ic run --degree 11 --curve-a 1 --known-log 53 --solver enumerate
+    ./target/release/ic generate --degree 9 --seed 42 --out fixture.json
+    ./target/release/ic inspect --file fixture.json
+    ./target/release/ic compare --degree 7 --curve-a 1 --samples 3 --holdout 2 --json
+
+Imported points are inspected only. Synthetic runs retain the library's
+small-curve limits and verify their known answers. Comparison reports include
+unsuccessful candidates, separate holdout checks, time and memory measurements,
+and explicitly bounded conclusions.
+
+See [the ic guide](docs/ic/README.md) for the parameter schema, capabilities,
+limits, resource accounting, and report semantics. The original crypto
+command remains the default for cargo run.
+
 ## Algorithm coverage
 
 ### Symmetric primitives

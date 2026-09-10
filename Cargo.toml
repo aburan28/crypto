@@ -2,17 +2,24 @@
 name = "crypto"
 version = "0.1.0"
 edition = "2021"
+default-run = "crypto"
 description = "Educational comprehensive cryptography library: ECC, RSA, AES, ChaCha20, SHA, KDF, PQC"
 
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
 
+[[bin]]
+name = "ic"
+path = "src/bin/ic.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
 
 [dependencies]
+# Portable CPU-time and peak-RSS measurements for ic research reports.
+libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
 num-integer = "0.1"

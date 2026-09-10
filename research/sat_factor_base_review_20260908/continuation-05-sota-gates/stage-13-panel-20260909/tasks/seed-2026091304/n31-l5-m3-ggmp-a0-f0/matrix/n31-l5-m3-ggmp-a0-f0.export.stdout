@@ -1,0 +1,162 @@
+{
+  "curve": "y^2 + xy = x^3 + 1",
+  "curve_a": 0,
+  "direct_meet_in_the_middle": {
+    "reason": "run koblitz_pdp_backend direct-mitm under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "ell": 5,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "815f1e994548f108c80df5f469b131b923a48e6b4b6bdac5f09cfd29e55dc128",
+      "bytes": 71811,
+      "cnf_clauses": 4570,
+      "path": "instance.xor.cnf",
+      "variables": 1311,
+      "xor_rows": 62
+    },
+    "magma_boolean_f4": {
+      "blake3": "0afe94abffd2714475dc4b4bc0c35fa134191c312a50170859f1dafd7050e4bd",
+      "bytes": 65698,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "b6b27a0ee8b6d8e25e0d6978f517286e2d381cc6269952bf35ae8f4008b1f821",
+      "bytes": 39018,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "2",
+    "4",
+    "16",
+    "256",
+    "65536"
+  ],
+  "factor_base_geometry": {
+    "curve_points": 63,
+    "distinct_curve_points": 63,
+    "minimum_required": 3
+  },
+  "factor_base_predicate": {
+    "definition": "kernel of sum X^(2^i) over the set factor exponents",
+    "enumerates_target_subgroup": false,
+    "factor_bitmask": 37,
+    "factor_index": 0,
+    "kind": "ggmp_linearised_kernel",
+    "linearised_exponents": [
+      0,
+      2,
+      5
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    3
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 31,
+  "native_sat": {
+    "conflict_budget": 100000,
+    "reason": "run koblitz_pdp_backend native-sat under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "planted_points": [
+    {
+      "x": "22",
+      "y": "1422471290"
+    },
+    {
+      "x": "276",
+      "y": "908440004"
+    },
+    {
+      "x": "65792",
+      "y": "1994920814"
+    }
+  ],
+  "representation": "chained_s3",
+  "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+  "seed": 2026091304,
+  "source_equations": 62,
+  "source_instance": {
+    "id_blake3": "10fa9dcec78bd509a23f34d83339d8aee514799ba3b67d29f36ecb186f20c984",
+    "identity": {
+      "curve_a": 0,
+      "ell": 5,
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "815f1e994548f108c80df5f469b131b923a48e6b4b6bdac5f09cfd29e55dc128",
+          "bytes": 71811,
+          "cnf_clauses": 4570,
+          "path": "instance.xor.cnf",
+          "variables": 1311,
+          "xor_rows": 62
+        },
+        "magma_boolean_f4": {
+          "blake3": "0afe94abffd2714475dc4b4bc0c35fa134191c312a50170859f1dafd7050e4bd",
+          "bytes": 65698,
+          "path": "instance.magma"
+        },
+        "wdsat_anf": {
+          "blake3": "b6b27a0ee8b6d8e25e0d6978f517286e2d381cc6269952bf35ae8f4008b1f821",
+          "bytes": 39018,
+          "path": "instance.anf"
+        }
+      },
+      "factor_base_basis_bitmasks": [
+        "2",
+        "4",
+        "16",
+        "256",
+        "65536"
+      ],
+      "factor_base_predicate": {
+        "definition": "kernel of sum X^(2^i) over the set factor exponents",
+        "enumerates_target_subgroup": false,
+        "factor_bitmask": 37,
+        "factor_index": 0,
+        "kind": "ggmp_linearised_kernel",
+        "linearised_exponents": [
+          0,
+          2,
+          5
+        ],
+        "uses_discrete_log_labels": false
+      },
+      "irreducible_low_terms": [
+        0,
+        3
+      ],
+      "m": 3,
+      "n": 31,
+      "representation": "chained_s3",
+      "schema": "koblitz_pdp_source_identity.v1",
+      "seed": 2026091304,
+      "source_equations": 62,
+      "source_variables": 46,
+      "target": {
+        "x": "1075440058",
+        "y": "792074951"
+      }
+    },
+    "schema": "koblitz_pdp_source_instance.v1"
+  },
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 112,
+  "source_variables": 46,
+  "target": {
+    "x": "1075440058",
+    "y": "792074951"
+  },
+  "timing_ns": {
+    "factor_base_predicate_construction": 110209,
+    "native_encoding_and_solve": null,
+    "planted_target_construction": 132375,
+    "source_system_construction": 1973625,
+    "whole_process_internal": 8203375
+  }
+}

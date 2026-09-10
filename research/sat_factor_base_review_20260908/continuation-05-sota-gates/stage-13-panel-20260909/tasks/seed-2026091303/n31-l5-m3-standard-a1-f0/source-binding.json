@@ -1,0 +1,267 @@
+{
+  "backend_bindings": [
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "native-xor",
+      "conflicts": 26,
+      "input_export_sha256": null,
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3850240,
+        "single_core_seconds": 0.007079,
+        "system_seconds": 0.002434,
+        "total_core_seconds": 0.007079,
+        "user_seconds": 0.004645,
+        "wall_seconds": 0.013621874968521297
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+      "resource_complete": true,
+      "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+      "source_model_valid": true,
+      "source_witness_valid": true,
+      "status": "sat"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "wdsat",
+      "conflicts": 6,
+      "input_export_sha256": "c780c21290bf0e607ea5dcdf83da6cff8d23ad0ff577dd43e55dc15c36b18fb0",
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3604480,
+        "single_core_seconds": 0.0043749999999999995,
+        "system_seconds": 0.002852,
+        "total_core_seconds": 0.0043749999999999995,
+        "user_seconds": 0.0015229999999999998,
+        "wall_seconds": 0.4543110829545185
+      },
+      "point_witness_validation_metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3145728,
+        "single_core_seconds": 0.004834,
+        "system_seconds": 0.00165,
+        "total_core_seconds": 0.004834,
+        "user_seconds": 0.0031839999999999998,
+        "wall_seconds": 0.008046125061810017
+      },
+      "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+      "resource_complete": true,
+      "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+      "source_model_valid": true,
+      "source_witness_valid": true,
+      "status": "sat"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "cryptominisat",
+      "conflicts": 0,
+      "input_export_sha256": "4c40d0987728677a87e75eb60db88782b0cdeb20f8f62a515732de36f6b9c2ef",
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 4554752,
+        "single_core_seconds": 0.0054459999999999995,
+        "system_seconds": 0.002796,
+        "total_core_seconds": 0.0054459999999999995,
+        "user_seconds": 0.00265,
+        "wall_seconds": 0.010148625005967915
+      },
+      "point_witness_validation_metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3129344,
+        "single_core_seconds": 0.004621,
+        "system_seconds": 0.001906,
+        "total_core_seconds": 0.004621,
+        "user_seconds": 0.002715,
+        "wall_seconds": 0.008261915994808078
+      },
+      "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+      "resource_complete": true,
+      "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+      "source_model_valid": true,
+      "source_witness_valid": true,
+      "status": "sat"
+    },
+    {
+      "accounting_scope": "unavailable_operational",
+      "backend": "magma-f4",
+      "conflicts": null,
+      "input_export_sha256": "93dbea20524f854176e4bfc3ef68080b3a8e5b9df63f206016a79d8c7e2a9689",
+      "input_path_verified": null,
+      "metrics": {
+        "meter": null,
+        "peak_rss_bytes": null,
+        "single_core_seconds": null,
+        "system_seconds": null,
+        "total_core_seconds": null,
+        "user_seconds": null,
+        "wall_seconds": null
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+      "resource_complete": false,
+      "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "unavailable_operational"
+    },
+    {
+      "accounting_scope": "isolated_process",
+      "backend": "direct-mitm",
+      "conflicts": null,
+      "input_export_sha256": null,
+      "input_path_verified": true,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3358720,
+        "single_core_seconds": 0.011581,
+        "system_seconds": 0.0027069999999999998,
+        "total_core_seconds": 0.011581,
+        "user_seconds": 0.008874,
+        "wall_seconds": 0.016514249960891902
+      },
+      "point_witness_validation_metrics": null,
+      "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+      "resource_complete": true,
+      "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+      "source_model_valid": null,
+      "source_witness_valid": true,
+      "status": "sat"
+    }
+  ],
+  "evidence_class": "scientific_candidate",
+  "execution_identity_sha256": "f62f2bf356966db12de3d46ad00118f723aeebe9d661351aa7d5760601fca6ca",
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "bytes": 24246,
+      "manifest_blake3": "d3d42b70434f913c7949cdf9ac7aec94c7237a71f171157ae4b0f3d85d17f6a6",
+      "path": "instance.xor.cnf",
+      "sha256": "4c40d0987728677a87e75eb60db88782b0cdeb20f8f62a515732de36f6b9c2ef"
+    },
+    "magma_boolean_f4": {
+      "bytes": 26834,
+      "manifest_blake3": "3bfaf6e157e62bbd36583862345812d3dbeb21c5af9e18da4f34027848b1e5bc",
+      "path": "instance.magma",
+      "sha256": "93dbea20524f854176e4bfc3ef68080b3a8e5b9df63f206016a79d8c7e2a9689"
+    },
+    "wdsat_anf": {
+      "bytes": 16318,
+      "manifest_blake3": "e112656f52faced886ba7e0e28920b3953ec8054c52f9ab36e5c6c55f082f3cf",
+      "path": "instance.anf",
+      "sha256": "c780c21290bf0e607ea5dcdf83da6cff8d23ad0ff577dd43e55dc15c36b18fb0"
+    }
+  },
+  "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+  "resource_complete": false,
+  "schema": "koblitz_pdp_source_binding.v1",
+  "semantic_descriptor": {
+    "curve": "y^2 + xy = x^3 + x^2 + 1",
+    "curve_a": 1,
+    "ell": 5,
+    "factor_base_basis_bitmasks": [
+      "1",
+      "2",
+      "4",
+      "8",
+      "16"
+    ],
+    "factor_base_predicate": {
+      "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+      "enumerates_target_subgroup": false,
+      "kind": "polynomial_subspace",
+      "uses_discrete_log_labels": false
+    },
+    "irreducible_low_terms": [
+      0,
+      3
+    ],
+    "m": 3,
+    "n": 31,
+    "representation": "symmetrised_s4",
+    "seed": 2026091303,
+    "source_equations": 58,
+    "source_max_degree": 3,
+    "source_max_monomials_per_equation": 91,
+    "source_variables": 42,
+    "target": {
+      "x": "15",
+      "y": "1237286287"
+    }
+  },
+  "semantic_sha256": "e4313610b628d6b8fca93caceac983668ce4eb1a3c8a3190ff7ec16e6d37c18e",
+  "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e",
+  "source_producer_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 3506176,
+    "single_core_seconds": 0.008295,
+    "system_seconds": 0.002983,
+    "total_core_seconds": 0.008295,
+    "user_seconds": 0.005312,
+    "wall_seconds": 0.017885499983094633
+  },
+  "source_producer_timing_ns": {
+    "factor_base_predicate_construction": 113125,
+    "planted_target_construction": 274500,
+    "source_system_construction": 2336541,
+    "whole_process_internal": 7069291
+  },
+  "task": {
+    "cell": {
+      "basis": "standard",
+      "curve_a": 1,
+      "ell": 5,
+      "factor_index": 0,
+      "id": "n31-l5-m3-standard-a1-f0",
+      "m": 3,
+      "n": 31,
+      "role": "degree-31 size-matched polynomial-subspace control"
+    },
+    "seed": 2026091303
+  },
+  "wdsat_fixed_cost": {
+    "binary_sha256": "9d049cc27192698a0decfdd9a54b4e1818125c8c27718fdea05f3289978b8193",
+    "build": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 59834368,
+      "single_core_seconds": 1.035313,
+      "system_seconds": 0.416738,
+      "total_core_seconds": 1.035313,
+      "user_seconds": 0.618575,
+      "wall_seconds": 1.4914140419568866
+    },
+    "clean": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 1835008,
+      "single_core_seconds": 0.021563,
+      "system_seconds": 0.013984,
+      "total_core_seconds": 0.021563,
+      "user_seconds": 0.007579,
+      "wall_seconds": 0.047124791075475514
+    },
+    "complete": true,
+    "configuration_wall_seconds": 0.0003863750025629997,
+    "present": true,
+    "source_copy": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 1671168,
+      "single_core_seconds": 0.014177,
+      "system_seconds": 0.013016,
+      "total_core_seconds": 0.014177,
+      "user_seconds": 0.001161,
+      "wall_seconds": 0.03746116696856916
+    },
+    "status": "completed"
+  },
+  "whole_cell_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 59834368,
+    "single_core_seconds": 1.753826,
+    "system_seconds": 0.678187,
+    "total_core_seconds": 1.753826,
+    "user_seconds": 1.075639,
+    "wall_seconds": 2.890875000040978
+  }
+}

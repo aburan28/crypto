@@ -121,7 +121,7 @@
 //!   Pollard lambda search on anomalous binary curves*, Math. Comp. 69
 //!   (2000) — the `√n` rho speed-up we compare against.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -722,6 +722,30 @@ impl FrobeniusFactorBase {
             .collect()
     }
 
+    /// Distinct h-torsion classes `[r]P`, derived with one scalar
+    /// multiplication per signed Frobenius orbit.
+    ///
+    /// Multiplication by `r` commutes with Frobenius and negation, so the
+    /// remaining classes in an orbit are recovered with cheap public group
+    /// operations. Multiplicity is irrelevant to exact-summand reachability
+    /// because decomposition permits repeated factor-base points.
+    pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
+        let mut classes = HashMap::new();
+        for orbit in &self.signed_orbits {
+            let Some(&representative) = orbit.first() else {
+                continue;
+            };
+            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
+            for _ in 0..kc.n {
+                for candidate in [current.clone(), point_neg(&current)] {
+                    classes.entry(point_key(&candidate)).or_insert(candidate);
+                }
+                current = kc.frobenius(&current);
+            }
+        }
+        classes.into_values().collect()
+    }
+
     /// **Can an `m`-point decomposition of a target in `⟨G⟩` exist?**
     ///
     /// Not a statement about size — about cosets.  Every summand
@@ -735,7 +759,7 @@ impl FrobeniusFactorBase {
         if self.points.is_empty() || m == 0 {
             return m == 0;
         }
-        let classes = self.cofactor_classes(kc);
+        let classes = self.distinct_cofactor_classes(kc);
         // Sums reachable with exactly j summands; the h-torsion is tiny.
         let key = point_key;
         let mut reach: Vec<HashMap<(BigUint, BigUint), BinaryPoint>> = Vec::with_capacity(m + 1);
@@ -2019,9 +2043,10 @@ fn projected_signed_orbit_map(
         .map(|point| kc.mul(point, &kc.cofactor))
         .collect();
     let mut representatives: Vec<BinaryPoint> = Vec::new();
+    let mut seen = HashSet::new();
 
     for point in &projected {
-        if *point == BinaryPoint::Infinity {
+        if *point == BinaryPoint::Infinity || seen.contains(&point_key(point)) {
             continue;
         }
         let mut current = point.clone();
@@ -2030,6 +2055,7 @@ fn projected_signed_orbit_map(
         for _ in 0..kc.n {
             for candidate in [current.clone(), point_neg(&current)] {
                 let key = point_key(&candidate);
+                seen.insert(key.clone());
                 if key < canonical_key {
                     canonical = candidate;
                     canonical_key = key;
@@ -2037,34 +2063,34 @@ fn projected_signed_orbit_map(
             }
             current = kc.frobenius(&current);
         }
-        if !representatives
-            .iter()
-            .any(|representative| *representative == canonical)
-        {
-            representatives.push(canonical);
-        }
+        representatives.push(canonical);
     }
     representatives.sort_by_key(point_key);
 
+    let mut location_by_key = HashMap::new();
+    for (orbit, representative) in representatives.iter().enumerate() {
+        let mut current = representative.clone();
+        for k in 0..kc.n {
+            location_by_key
+                .entry(point_key(&current))
+                .or_insert((orbit, k, false));
+            location_by_key
+                .entry(point_key(&point_neg(&current)))
+                .or_insert((orbit, k, true));
+            current = kc.frobenius(&current);
+        }
+    }
     let orbit_of = projected
         .iter()
         .map(|point| {
             if *point == BinaryPoint::Infinity {
                 return None;
             }
-            for (orbit, representative) in representatives.iter().enumerate() {
-                let mut current = representative.clone();
-                for k in 0..kc.n {
-                    if current == *point {
-                        return Some((orbit, k, false));
-                    }
-                    if point_neg(&current) == *point {
-                        return Some((orbit, k, true));
-                    }
-                    current = kc.frobenius(&current);
-                }
-            }
-            panic!("cofactor projection was not found in its canonical orbit")
+            Some(
+                *location_by_key
+                    .get(&point_key(point))
+                    .expect("cofactor projection was not found in its canonical orbit"),
+            )
         })
         .collect();
 
@@ -2214,6 +2240,10 @@ pub struct KoblitzIcReport {
     pub m_cofactor_admissible: bool,
     /// Whether public cofactor-projection dependencies were merged.
     pub collapse_projected_orbits: bool,
+    /// Time spent constructing the public signed-Frobenius projection map.
+    pub projected_orbit_construction_ns: u128,
+    /// Time spent proving the requested summand count can reach the subgroup.
+    pub cofactor_admission_ns: u128,
 }
 
 fn solve_relation_system(
@@ -2242,6 +2272,40 @@ enum RelationAttemptOutcome {
     Sat(Option<Vec<usize>>, SatDecompositionStats),
 }
 
+/// Live milestones from the existing small-curve pipeline.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum KoblitzIcEvent {
+    FactorBaseStarted,
+    FactorBaseReady {
+        points: usize,
+        orbits: usize,
+    },
+    RelationCollectionStarted {
+        wanted: usize,
+    },
+    RelationProgress {
+        collected: usize,
+        wanted: usize,
+        trials: usize,
+    },
+    RelationCollectionFinished {
+        collected: usize,
+        trials: usize,
+    },
+    LinearAlgebraStarted {
+        rows: usize,
+        columns: usize,
+    },
+    LinearAlgebraFinished,
+    /// The current relation matrix did not yield a candidate.
+    LinearAlgebraIncomplete,
+    LinearAlgebraSkipped,
+    VerificationStarted,
+    VerificationFinished {
+        verified: bool,
+    },
+}
+
 /// **Solve `Q = [d]·G`** on a Koblitz curve by index calculus over a
 /// Frobenius-invariant factor base.
 ///
@@ -2253,8 +2317,20 @@ pub fn koblitz_index_calculus_dlp(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
 ) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_with_progress(kc, q, opts, &mut |_| {})
+}
+
+/// The same small-curve solver with synchronous progress notifications.
+/// Events follow real operations and can repeat when rank checks resume collection.
+pub fn koblitz_index_calculus_dlp_with_progress(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
+) -> Option<KoblitzIcReport> {
+    progress(KoblitzIcEvent::FactorBaseStarted);
     let fb = build_frobenius_factor_base(kc, opts.factor_index)?;
-    koblitz_index_calculus_dlp_with_factor_base(kc, q, &fb, opts)
+    koblitz_index_calculus_dlp_observed(kc, q, &fb, opts, progress)
 }
 
 /// Run index calculus with a caller-supplied invariant factor base.
@@ -2268,11 +2344,23 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
 ) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {})
+}
+
+fn koblitz_index_calculus_dlp_observed(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
+) -> Option<KoblitzIcReport> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
+    let projection_start = std::time::Instant::now();
     let projected_orbits = opts
         .collapse_projected_orbits
         .then(|| projected_signed_orbit_map(kc, fb));
+    let projected_orbit_construction_ns = projection_start.elapsed().as_nanos();
     let relation_unknowns = projected_orbits.as_ref().map_or_else(
         || {
             if opts.collapse_negation {
@@ -2283,9 +2371,15 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         },
         |projected| projected.representatives.len(),
     );
+    let admission_start = std::time::Instant::now();
     let m_cofactor_admissible = fb.m_can_decompose(kc, opts.m);
+    let cofactor_admission_ns = admission_start.elapsed().as_nanos();
 
     let index_of = fb.index_map();
+    progress(KoblitzIcEvent::FactorBaseReady {
+        points: fb.points.len(),
+        orbits: relation_unknowns,
+    });
 
     let mut report = KoblitzIcReport {
         factor_base_size: fb.points.len(),
@@ -2312,6 +2406,8 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         direct_relations_skipped: 0,
         m_cofactor_admissible,
         collapse_projected_orbits: opts.collapse_projected_orbits,
+        projected_orbit_construction_ns,
+        cofactor_admission_ns,
     };
     if fb.points.is_empty() || !m_cofactor_admissible {
         return Some(report);
@@ -2324,6 +2420,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     let relation_start = std::time::Instant::now();
 
+    progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
     while relations.len() < wanted && report.trials < opts.max_trials {
         let remaining_trials = opts.max_trials - report.trials;
         let requested_batch = if opts.strategy == DecompositionStrategy::Sat {
@@ -2419,6 +2516,12 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                         continue;
                     }
                     let d = solve_for_d(&a, &b, r)?;
+                    progress(KoblitzIcEvent::RelationCollectionFinished {
+                        collected: relations.len(),
+                        trials: report.trials,
+                    });
+                    progress(KoblitzIcEvent::LinearAlgebraSkipped);
+                    progress(KoblitzIcEvent::VerificationStarted);
                     if kc.mul(&g, &d) == *q {
                         report.log = Some(d);
                         report.direct_relation = true;
@@ -2427,8 +2530,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                             .elapsed()
                             .as_nanos()
                             .saturating_sub(report.linear_algebra_ns);
+                        progress(KoblitzIcEvent::VerificationFinished { verified: true });
                         return Some(report);
                     }
+                    progress(KoblitzIcEvent::VerificationFinished { verified: false });
+                    progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
                     None
                 }
                 RelationAttemptOutcome::Enumerated(idxs)
@@ -2448,12 +2554,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
             }
         }
 
+        progress(KoblitzIcEvent::RelationProgress {
+            collected: relations.len(),
+            wanted,
+            trials: report.trials,
+        });
         if opts.stop_on_verified_rank && relations.len() >= relation_unknowns + 1 {
+            progress(KoblitzIcEvent::RelationCollectionFinished {
+                collected: relations.len(),
+                trials: report.trials,
+            });
+            progress(KoblitzIcEvent::LinearAlgebraStarted {
+                rows: relations.len(),
+                columns: relation_unknowns + 1,
+            });
             report.linear_solve_attempts += 1;
             let linear_start = std::time::Instant::now();
             let candidate = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
             report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-            if let Some(d) = candidate.filter(|d| kc.mul(&g, d) == *q) {
+            if candidate.is_none() {
+                progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+            }
+            let candidate = candidate.filter(|d| {
+                progress(KoblitzIcEvent::LinearAlgebraFinished);
+                progress(KoblitzIcEvent::VerificationStarted);
+                let verified = kc.mul(&g, d) == *q;
+                progress(KoblitzIcEvent::VerificationFinished { verified });
+                verified
+            });
+            if let Some(d) = candidate {
                 report.log = Some(d);
                 report.relations = relations.len();
                 report.relation_collection_ns = relation_start
@@ -2462,6 +2591,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
                     .saturating_sub(report.linear_algebra_ns);
                 return Some(report);
             }
+            progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
         }
     }
     report.relation_collection_ns = relation_start
@@ -2469,22 +2599,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         .as_nanos()
         .saturating_sub(report.linear_algebra_ns);
     report.relations = relations.len();
+    progress(KoblitzIcEvent::RelationCollectionFinished {
+        collected: relations.len(),
+        trials: report.trials,
+    });
     if relations.len() < relation_unknowns + 1 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
+    progress(KoblitzIcEvent::LinearAlgebraStarted {
+        rows: relations.len(),
+        columns: relation_unknowns + 1,
+    });
     report.linear_solve_attempts += 1;
     let linear_start = std::time::Instant::now();
     let Some(d) = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r) else {
         report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+        progress(KoblitzIcEvent::LinearAlgebraIncomplete);
         return Some(report);
     };
     report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-    if kc.mul(&g, &d) == *q {
+    progress(KoblitzIcEvent::LinearAlgebraFinished);
+    progress(KoblitzIcEvent::VerificationStarted);
+    let verified = kc.mul(&g, &d) == *q;
+    if verified {
         report.log = Some(d);
     }
+    progress(KoblitzIcEvent::VerificationFinished { verified });
     Some(report)
 }
 
@@ -2772,6 +2915,21 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    #[test]
+    fn orbit_derived_cofactor_classes_match_pointwise_projection() {
+        for (a, n, indices) in [(1, 15, vec![2usize, 4]), (0, 23, vec![0usize, 2])] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &indices).unwrap();
+            let pointwise: HashSet<_> = fb.cofactor_classes(&kc).iter().map(point_key).collect();
+            let orbit_derived: HashSet<_> = fb
+                .distinct_cofactor_classes(&kc)
+                .iter()
+                .map(point_key)
+                .collect();
+            assert_eq!(orbit_derived, pointwise, "a={a}, n={n}");
         }
     }
 

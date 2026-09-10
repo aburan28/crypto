@@ -1,0 +1,79 @@
+{
+  "assignment_blake3": "7f58bb2cd5b59a92b8e9d8d0f50ea2a966ce37189753f2f4a2c0a8df76859715",
+  "assignment_values": 42,
+  "interpretation": "A SAT model is a PDP witness only when its source equations hold and rational factor-base lifts sum to the exact target",
+  "regenerated_source_exact": true,
+  "schema": "koblitz_pdp_assignment_validation.v1",
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "27ce42b4d382d7886e1ebccd29638d53fb62751157f22310f2b87875fae435ec",
+      "bytes": 42081,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "174cb55f3b56ae9fe22a4053f4124492cc46664e45026f79bf94c70ec38328ca",
+      "bytes": 88584,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "55069529719e9b7c753a45c1f68869a51377cdd1fcdc9057a259ab8402d44e0d",
+      "bytes": 55457,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_assignment": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    false,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    false,
+    true,
+    false,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "source_instance_id": "11061d2bfb513787d20f80af99b80e7401d8e9078c16c14e399793c82e3b2ec0",
+  "source_instance_verified": true,
+  "source_model_valid": true,
+  "source_witness_valid": true,
+  "status": "valid_point_witness",
+  "timing_ns": {
+    "source_verification": 9885125
+  }
+}

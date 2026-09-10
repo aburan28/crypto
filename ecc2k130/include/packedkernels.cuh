@@ -25,6 +25,15 @@ namespace eccPacked131 {
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_CACHE_DENOM
 #error "ECC_PACKED_POLY_CHAIN requires the denominator cache"
 #endif
+#ifndef ECC_PACKED_POLY_STATE
+#define ECC_PACKED_POLY_STATE 0
+#endif
+#if ECC_PACKED_POLY_STATE != 0 && ECC_PACKED_POLY_STATE != 1
+#error "ECC_PACKED_POLY_STATE must be 0 or 1"
+#endif
+#if ECC_PACKED_POLY_STATE && (!ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
+#error "ECC_PACKED_POLY_STATE requires the denominator cache and polynomial chains"
+#endif
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
@@ -62,6 +71,12 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
         x = nx;
     }
     const int slot = int(id / p.threads), tid = int(id % p.threads);
+#if ECC_PACKED_POLY_STATE
+    // Seed construction uses the established normal-basis point arithmetic.
+    // Only the persistent coordinate representation changes.
+    x = toPolynomial131(x);
+    y = toPolynomial131(y);
+#endif
     store(p.x, slot, tid, p.threads, x);
     store(p.y, slot, tid, p.threads, y);
     p.seed[id] = seed;
@@ -72,7 +87,7 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= p.threads) return;
-#if ECC_PACKED_POLY_CHAIN
+#if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_POLY_STATE
     unsigned *polyDenominators=denominators+size_t(p.threads)*ECC_BATCH*5;
 #endif
 #if !ECC_PACKED_CACHE_DENOM
@@ -86,6 +101,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #pragma unroll 1
         for (int slot = 0; slot < ECC_BATCH; ++slot) {
             P131 x = load(p.x, slot, tid, p.threads);
+#if ECC_PACKED_POLY_STATE
+            x = fromPolynomial131(x);
+#endif
             const int hw = weight(x);
             const size_t id = size_t(slot) * p.threads + tid;
             if (!p.dead[id]) {
@@ -96,7 +114,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                         rec.seed = p.seed[id];
                         rec.iters = now - p.startIter[id];
                         toLimbs(x, rec.x);
+#if ECC_PACKED_POLY_STATE
+                        toLimbs(fromPolynomial131(load(p.y, slot, tid, p.threads)), rec.y);
+#else
                         toLimbs(load(p.y, slot, tid, p.threads), rec.y);
+#endif
                         p.dp[dest] = rec;
                     }
                     p.dead[id] = 1;
@@ -114,7 +136,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_POLY_CHAIN
             P131 dp = toPolynomial131(d);
             prod = slot == 0 ? dp : mulPolynomial131(prod, dp);
+#if !ECC_PACKED_POLY_STATE
             store(polyDenominators, slot, tid, p.threads, dp);
+#endif
 #else
             prod = slot == 0 ? d : mul131(prod, d);
 #endif
@@ -122,8 +146,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_CACHE_DENOM
             // The high 29 bits are unused by the field. Keep the jump index
             // beside the denominator, eliminating the separate local array.
+#if ECC_PACKED_POLY_STATE
+            dp.v[4] |= unsigned(j - 3) << 3;
+            store(denominators, slot, tid, p.threads, dp);
+#else
             d.v[4] |= unsigned(j - 3) << 3;
             store(denominators, slot, tid, p.threads, d);
+#endif
 #endif
         }
 #if ECC_PACKED_POLY_CHAIN
@@ -134,7 +163,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #pragma unroll 1
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
-#if ECC_PACKED_CACHE_DENOM
+#if ECC_PACKED_POLY_STATE
+            P131 dp = load(denominators, slot, tid, p.threads), ii;
+            const int j = 3 + ((dp.v[4] >> 3) & 7);
+            dp.v[4] &= 7;
+            const P131 normalY = fromPolynomial131(y);
+            P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+#elif ECC_PACKED_CACHE_DENOM
             P131 d = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((d.v[4] >> 3) & 7);
             d.v[4] &= 7;
@@ -147,17 +182,32 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_POLY_CHAIN
 #if ECC_PACKED_PAIR_PRODUCTS
                 PolynomialPair pair=mulPolynomialPair131(inv,
-                    load(p.pchain,slot-1,tid,p.threads),load(polyDenominators,slot,tid,p.threads));
+                    load(p.pchain,slot-1,tid,p.threads),
+#if ECC_PACKED_POLY_STATE
+                    dp);
+#else
+                    load(polyDenominators,slot,tid,p.threads));
+#endif
                 ii=pair.first; inv=pair.second;
 #else
                 ii = mulPolynomial131(inv, load(p.pchain, slot - 1, tid, p.threads));
+#if ECC_PACKED_POLY_STATE
+                inv = mulPolynomial131(inv, dp);
+#else
                 inv = mulPolynomial131(inv, load(polyDenominators, slot, tid, p.threads));
+#endif
 #endif
 #else
                 ii = mul131(inv, load(p.pchain, slot - 1, tid, p.threads));
                 inv = mul131(inv, d);
 #endif
             } else ii = inv;
+#if ECC_PACKED_POLY_STATE
+            P131 lambdaPoly = mulPolynomial131(ep, ii);
+            P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+            P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
+            P131 ny = add131(add131(product, nx), y);
+#else
 #if ECC_PACKED_POLY_CHAIN
             P131 lambdaPoly = mulPolynomial131(toPolynomial131(e), ii);
             P131 lambda = fromPolynomial131(lambdaPoly);
@@ -170,6 +220,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 ny = add131(add131(fromPolynomial131(product), nx), y);
 #else
             P131 ny = add131(add131(mul131(lambda, add131(x, nx)), nx), y);
+#endif
 #endif
             store(p.x, slot, tid, p.threads, nx);
             store(p.y, slot, tid, p.threads, ny);

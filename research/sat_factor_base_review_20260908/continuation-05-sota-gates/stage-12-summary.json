@@ -1,0 +1,77 @@
+{
+  "schema": "koblitz_projected_orbit_index_result.v1",
+  "semantic_equivalence": true,
+  "degree23_discovery_rows": [
+    {
+      "curve_a": 0,
+      "candidate_projection_rows": [
+        {
+          "divisor_indices": [
+            0,
+            1
+          ],
+          "reference_projection_ns": 1841204625,
+          "indexed_projection_ns": 145139459,
+          "speedup": 12.685761940176448
+        },
+        {
+          "divisor_indices": [
+            0,
+            2
+          ],
+          "reference_projection_ns": 2716478458,
+          "indexed_projection_ns": 166194583,
+          "speedup": 16.345168470382696
+        }
+      ],
+      "reference_wall_seconds": 7.462601166102104,
+      "indexed_wall_seconds": 4.02447712502908,
+      "reference_core_seconds": 6.228588,
+      "indexed_core_seconds": 3.258001,
+      "process_core_speedup": 1.9117821019698888
+    },
+    {
+      "curve_a": 1,
+      "candidate_projection_rows": [
+        {
+          "divisor_indices": [
+            0,
+            1
+          ],
+          "reference_projection_ns": 1553247625,
+          "indexed_projection_ns": 80663375,
+          "speedup": 19.255921600106618
+        },
+        {
+          "divisor_indices": [
+            0,
+            2
+          ],
+          "reference_projection_ns": 1504511125,
+          "indexed_projection_ns": 64637458,
+          "speedup": 23.276149334337994
+        }
+      ],
+      "reference_wall_seconds": 4.709467332926579,
+      "indexed_wall_seconds": 2.4978790830355138,
+      "reference_core_seconds": 4.628706,
+      "indexed_core_seconds": 2.279514,
+      "process_core_speedup": 2.0305670419220943
+    }
+  ],
+  "degree23_combined": {
+    "reference_core_seconds": 10.857294,
+    "indexed_core_seconds": 5.537515,
+    "process_core_speedup": 1.960679835630242
+  },
+  "degree15_scalar_blind_smoke": {
+    "secret": 53,
+    "relations": 7,
+    "trials": 7,
+    "conflicts": 5231,
+    "recovered_and_verified": true,
+    "reference_core_seconds": 0.203253,
+    "indexed_core_seconds": 0.11832999999999999
+  },
+  "claim_boundary": "Setup-cost engineering with identical algebraic outputs and recovery counters; not a relation-solving or SOTA result."
+}

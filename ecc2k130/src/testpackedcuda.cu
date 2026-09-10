@@ -34,7 +34,9 @@ static P131 expected(P131 a, int power) {
 struct RawPolynomial { uint32_t v[9]; };
 
 static P131 reduceReference(RawPolynomial h) {
-    // Long division, independent of the generated reciprocal reduction.
+    // Long division, independent of either generated reduction network.
+    // The nine-word interface ignores bits above the degree-260 boundary.
+    h.v[8]&=31u;
     const int terms[]={0,2,3,64,66,67,96,98,99,112,114,115,120,122,123,124,128,130,131};
     for (int degree=260;degree>=131;--degree) if ((h.v[degree/32]>>(degree%32))&1u) {
         for (int term:terms) {
@@ -66,6 +68,12 @@ void multiplicationProbe(const P131 *a, const P131 *b, P131 *output, int n) {
 }
 
 __global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void squareProbe(const P131 *input, P131 *output, int n) {
+    int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if (i<n) output[i]=eccPacked131::squarePolynomial131(input[i]);
+}
+
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *second,int n) {
     int i=blockIdx.x*blockDim.x+threadIdx.x;
     if(i<n) {
@@ -75,7 +83,42 @@ void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *sec
 }
 
 static bool same(P131 a, P131 b) {
+    // Compare all five words so noncanonical output bits cannot be hidden by
+    // the basis conversions used elsewhere in the arithmetic tests.
     for (int i=0;i<5;i++) if (a.v[i]!=b.v[i]) return false;
+    return (a.v[4]&~7u)==0;
+}
+
+static bool squareChecks() {
+    // Exercise every coefficient, including the three bits in the top word,
+    // independently of the coefficient-spreading implementation under test.
+    std::vector<P131> input(1); // Zero must remain zero.
+    for (int bit=0;bit<131;bit++) {
+        P131 a{};a.v[bit/32]=1u<<(bit%32);input.push_back(a);
+    }
+    input.push_back(P131{{~0u,~0u,~0u,~0u,7u}});
+    uint32_t state=0x5131263u;
+    for (int i=0;i<1024;i++) {
+        P131 a;
+        for (int word=0;word<5;word++) {
+            state^=state<<13;state^=state>>17;state^=state<<5;
+            a.v[word]=state;
+        }
+        a.v[4]&=7u;input.push_back(a);
+    }
+    int n=int(input.size());std::vector<P131> output(n);
+    P131 *deviceInput,*deviceOutput;
+    checked(cudaMalloc(&deviceInput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMemcpy(deviceInput,input.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    squareProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(deviceInput,deviceOutput,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(deviceInput));checked(cudaFree(deviceOutput));
+    for (int i=0;i<n;i++) if (!same(output[i],multiplyReference(input[i],input[i]))) {
+        fprintf(stderr,"GPU polynomial square mismatch at %d\n",i);return false;
+    }
+    printf("PASS: %d GPU polynomial squares against independent multiplication and long division\n",n);
     return true;
 }
 
@@ -89,6 +132,12 @@ static bool polynomialChecks() {
     for (int i=0;i<1000;i++) {
         RawPolynomial h;for (int j=0;j<9;j++) h.v[j]=random();h.v[8]&=31;raw.push_back(h);
     }
+    raw.push_back(RawPolynomial{});
+    RawPolynomial full;for (auto &word:full.v) word=~0u;full.v[8]=31u;raw.push_back(full);
+    const size_t bounded=raw.size();
+    for (size_t i=0;i<bounded;i++) {
+        RawPolynomial poisoned=raw[i];poisoned.v[8]|=0xffffffe0u;raw.push_back(poisoned);
+    }
     int n=int(raw.size());std::vector<P131> output(n);
     RawPolynomial *deviceRaw;P131 *deviceOutput;
     checked(cudaMalloc(&deviceRaw,n*sizeof(RawPolynomial)));
@@ -101,7 +150,7 @@ static bool polynomialChecks() {
     for (int i=0;i<n;i++) if (!same(output[i],reduceReference(raw[i]))) {
         fprintf(stderr,"GPU polynomial reduction mismatch at %d\n",i);return false;
     }
-    printf("PASS: %d GPU polynomial reductions against long division\n",n);
+    printf("PASS: %d GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs\n",n);
 
     std::vector<P131> a,b;
     for (int i=0;i<131;i++) for (int j=0;j<131;j++) {
@@ -111,6 +160,8 @@ static bool polynomialChecks() {
         P131 x,y;for (int j=0;j<5;j++) {x.v[j]=random();y.v[j]=random();}
         x.v[4]&=7;y.v[4]&=7;a.push_back(x);b.push_back(y);
     }
+    const P131 edges[]={P131{},P131{{1,0,0,0,0}},P131{{~0u,~0u,~0u,~0u,7u}}};
+    for (P131 x:edges) for (P131 y:edges) { a.push_back(x);b.push_back(y); }
     n=int(a.size());output.resize(n);P131 *deviceA,*deviceB;
     checked(cudaMalloc(&deviceA,n*sizeof(P131)));checked(cudaMalloc(&deviceB,n*sizeof(P131)));
     checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
@@ -152,6 +203,7 @@ static bool polynomialChecks() {
 }
 
 int main() {
+    printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     const int selected[] = {0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
     std::vector<P131> input;
     std::vector<int> powers;
@@ -189,5 +241,5 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks()?0:1;
+    return polynomialChecks() && squareChecks()?0:1;
 }

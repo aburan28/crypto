@@ -1,0 +1,26 @@
+{
+  "schema": "koblitz_projected_orbit_index_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Replace the quadratic projected-orbit lookup with a point-key index while preserving every public algebraic classification.",
+  "implementation_invariant": "For every factor-base point P, the optimized map returns the same signed Frobenius location of [h]P as exhaustive reconstruction; no discrete logarithm or target is used.",
+  "benchmark_instances": [
+    {"n": 23, "curve_a": 0, "m": 2, "dimension": 12},
+    {"n": 23, "curve_a": 1, "m": 2, "dimension": 12}
+  ],
+  "reference": "stage-10-degree23-public-20260909",
+  "required_equal_outputs": [
+    "candidate divisor indices",
+    "rational point counts",
+    "cofactor admission verdicts",
+    "projected point counts",
+    "projected signed-Frobenius orbit counts",
+    "selected candidate"
+  ],
+  "validation": [
+    "projected-orbit exact-reconstruction unit test",
+    "degree-15 scalar-blind recovery smoke",
+    "fresh-process wall, core-seconds and peak RSS for both degree-23 discoveries"
+  ],
+  "claim_boundary": "This is setup-cost engineering. It is not a relation-solving speedup, scaling law, or SOTA result."
+}
