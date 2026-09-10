@@ -1,6 +1,6 @@
 # Stage 19: frozen official-calculator completion panel
 
-Stage 19 froze the ten remaining named-generator inputs among the fifteen Stage 13 n=31/n=41 tasks that fit the official Magma Calculator's published 50,000-byte limit. Its first two ledgers stopped on local operational failures. Amendment 02 later received one complete calculator response; Amendment 03 preserves its non-admitted receipt and adds a narrow adjudication of the response's wrapped source marker. Five earlier terminals plus that adjudication now cover six public-service-accessible F4 tasks. Nine never-started tasks remain in the prepared successor.
+Stage 19 froze the ten remaining named-generator inputs among the fifteen Stage 13 n=31/n=41 tasks that fit the official Magma Calculator's published 50,000-byte limit. Its first two ledgers stopped on local operational failures. Amendment 02 later received one complete calculator response; Amendment 03 preserves its non-admitted receipt and adds a narrow adjudication of the response's wrapped source marker. The separate Amendment 03 successor then completed the nine tasks that had never started. Five earlier terminals, one additive adjudication, and nine clean successor receipts now cover all fifteen public-service-accessible F4 tasks.
 
 The protocol fixes seed-major order, one sequential worker, exactly one attempt per task, zero retries, a two-second inter-request delay, a 75-second hard parent watchdog around the service's 60-second limit, a 1 MiB response cap, and a halt after the first non-clean receipt. Network submission requires an explicit `--execute` flag. A halted run is terminal. On resume, any historical or recovered non-clean receipt prevents every later request; only a fully verified clean prefix may continue, after enforcing the retained two-second spacing boundary.
 
@@ -38,9 +38,24 @@ Amendment 03 binds all 24 Amendment 02 files at commit `f5dba0fc84a8d6c22c0098e8
 
 The successor artifact `stage-19-magma-calculator-panel-amendment-03-20260910/` contains only original Stage 19 ordinals 2–10, renumbered locally 1–9. Its renderer scans every predecessor attempt-start and requires their task-ID union to contain only excluded original task 1. The nine successor IDs must be disjoint from that union. Each new input prints the source digest as independently labeled high and low 32-character hexadecimal halves. Every identity output line is at most 63 bytes, and the new parser requires the task ID and both halves exactly once while rejecting legacy source markers, duplicates, swaps, omissions, and every backslash. It never applies generic unfolding.
 
-The successor retains one worker, one attempt per task, zero retries, two-second spacing, the 75-second parent watchdog, bounded response custody, terminal halt after a non-clean receipt, and an explicit `--execute` gate. It has separate scripts and schemas and cannot select or resume the Amendment 02 artifact. Its future first clean commit binds the original 22-file ledger, Amendment 01's 23 files, Amendment 02's 24 files, the additive adjudication, all nine prepared inputs, and the two-file TLS probe. Manifest generation must authenticate the exact CA and perform one fresh GET-only probe. A second commit may add only the execution manifest. No Amendment 03 POST has been made.
+The successor retains one worker, one attempt per task, zero retries, two-second spacing, the 75-second parent watchdog, bounded response custody, terminal halt after a non-clean receipt, and an explicit `--execute` gate. It has separate scripts and schemas and cannot select or resume the Amendment 02 artifact. First pre-execution commit `5a09482aea0ce57239b9a06a7cf93c03121730a7` binds the original 22-file ledger, Amendment 01's 23 files, Amendment 02's 24 files, the additive adjudication, all nine prepared inputs, and the two-file TLS probe. Manifest generation authenticated the exact CA and recorded a fresh HTTP-200 GET-only receipt with the exact 36-byte body in 0.929040 seconds. Second pre-execution commit `a1001c18524e1e84d83f3e55498b9a26242c1a13` adds only the 102-path execution manifest. The execution binding SHA-256 is `a4863f418ed593f04cb85df131d8e85277b67415b3b760bfc7976c0d84a6dc25`.
 
-Even nine future clean successor receipts would still lack Magma-linked point witnesses, process-scoped solver CPU and RSS, and all five n=59 tasks. They cannot set the licensed-runner or solver-matrix gates and support no performance, novelty, end-to-end index-calculus, or SOTA claim.
+All nine successor requests returned clean, identity-bound SAT/F4 terminals with no warning or alert. The three n=31 standard terminals have basis size 43 and degrees `[2,3,3,3,3,3,4]`; the two n=31 GGMP terminals have basis sizes 63 and 77 and degrees `[2,2,3,3,4,3,4]`; the four n=41 standard terminals have basis sizes 43, 43, 43, and 55 and degrees `[2,3,3,3,3]`. The nine calculator-internal F4 timers sum to 39.17 CPU-seconds and 39.20 wall-seconds. These are supporting service fields, not process-scoped host measurements.
+
+The nine local transport children consumed 2.035780 total core-seconds and 53.343016 summed wall-seconds, with maximum client RSS 35,684,352 bytes. The complete sequential parent ledger spanned 70.228145 wall-seconds, verified the two-second spacing boundaries, made exactly nine attempts, and made no retry. These are local delivery and custody costs, not Magma solver resources.
+
+The complete public-calculator result still lacks Magma-linked point witnesses, basis exports, process-scoped Magma user/system CPU and RSS, and all five n=59 tasks. It cannot set the licensed-runner or solver-matrix gates and supports no performance, novelty, end-to-end index-calculus, or SOTA claim.
+
+The completed ledger is archived at commit `b8cc5d684dbaf4144d2d9fdc6d53da567142ce45`.
+For offline reproduction on another host, run `python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_final_archive.py`.
+The adapter authenticates all 96 current result/summary files against that Git
+tree, loads the original verifier in a temporary detached checkout, and
+interprets the fixed historical Python path, checkout path, authorization
+arguments, and CA record. It performs no TLS request and leaves the live
+runner unchanged. All original source, blob, response, chronology, spacing,
+and authorization checks still run; the final summary must regenerate
+byte-for-byte. CI verifies prepared-only controls at their respective frozen
+commits and the completed archive through this offline adapter.
 
 Prepared checks:
 
@@ -55,5 +70,6 @@ Prepared checks:
 - byte-exact verification of the complete 24-file Amendment 02 terminal ledger and its Git commit;
 - exact-fold positive and malformed-fold negative controls, with no generic unfolding;
 - task-set disjointness across all three predecessor attempt-start ledgers;
-- 102-path next-manifest inventory covering all prior Stage 19 artifacts and the nine-task successor;
-- no Amendment 03 calculator POST submitted.
+- 102-path execution-manifest inventory covering all prior Stage 19 artifacts and the nine-task successor;
+- nine clean one-attempt/no-retry successor receipts and zero unattempted successor tasks;
+- final verifier status `nine_clean_requests_complete` and public-service coverage 15 of 15 eligible tasks.
