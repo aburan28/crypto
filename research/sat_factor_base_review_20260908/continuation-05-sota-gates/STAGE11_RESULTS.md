@@ -1,0 +1,9 @@
+# Stage 11: GitHub-hosted degree-15 and degree-23 reproduction
+
+GitHub Actions run [34428320022](https://github.com/aburan28/crypto/actions/runs/34428320022) completed successfully on `ubuntu-latest` at PR head `5bfb888`. From a fresh checkout it built both executables, reran the public factor-base discoveries, reproduced the degree-9 controls, five degree-15 IC/rho pairs, and the degree-23 IC/rho pair, passed the fail-closed verifier, passed 37 focused Koblitz tests with one deliberate slow test ignored, and uploaded the retained artifact.
+
+The Linux public discovery reproduced divisor `[2,4]`, 281 rational points, and six projected signed-Frobenius columns at degree 15. All five degree-15 index-calculus runs again used seven relations in seven trials with exactly the local conflict counts. Median IC core time was 0.297055 seconds; median rho core time was 0.003362 seconds. Rho was faster in every pair.
+
+At degree 23, Linux reproduced both public curve censuses and selected `K_0` divisor `[0,2]`, with 4,281 rational points and 93 projected columns. The scalar-blind solver reproduced 94 relations in 147 trials, 8,977,482 conflicts, 53 conflict-capped unknown targets, zero invalid models, no direct shortcut, and verified scalar 101. It used 233.823862 core-seconds, 233.856566 seconds wall, and 23.84 MiB peak RSS. The two public discovery processes added 16.732771 core-seconds. Corrected signed-Frobenius rho reproduced 518 iterations, two restarts, 1,605 charged additions, and the same scalar in 0.075210 core-seconds.
+
+This is an external-host, fresh-checkout reproduction authored and verified by the project. It is not an independently designed reproduction or novelty assessment. It does not supply Magma F4 or the repeated n=31/41/59 solver matrix, so the external/novelty gate remains partial.

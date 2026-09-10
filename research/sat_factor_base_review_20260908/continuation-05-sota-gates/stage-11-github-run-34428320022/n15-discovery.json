@@ -1,0 +1,142 @@
+{
+  "a": 1,
+  "candidates": [
+    {
+      "abscissae": 256,
+      "dimension": 8,
+      "divisor_indices": [
+        2,
+        3
+      ],
+      "divisor_polynomial": 443,
+      "linearised_exponents": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "m_cofactor_admissible": true,
+      "projected_points": 121,
+      "projected_signed_frobenius_orbits": 4,
+      "rational_points": 211,
+      "signed_frobenius_orbits_before_projection": 8,
+      "timing_ns": {
+        "cofactor_admission": 77239193,
+        "factor_base_construction": 2919232,
+        "projection_census": 28392374
+      }
+    },
+    {
+      "abscissae": 256,
+      "dimension": 8,
+      "divisor_indices": [
+        2,
+        4
+      ],
+      "divisor_polynomial": 465,
+      "linearised_exponents": [
+        0,
+        4,
+        6,
+        7,
+        8
+      ],
+      "m_cofactor_admissible": true,
+      "projected_points": 181,
+      "projected_signed_frobenius_orbits": 6,
+      "rational_points": 281,
+      "signed_frobenius_orbits_before_projection": 11,
+      "timing_ns": {
+        "cofactor_admission": 117440709,
+        "factor_base_construction": 2984623,
+        "projection_census": 38690650
+      }
+    },
+    {
+      "abscissae": 256,
+      "dimension": 8,
+      "divisor_indices": [
+        3,
+        4
+      ],
+      "divisor_polynomial": 279,
+      "linearised_exponents": [
+        0,
+        1,
+        2,
+        4,
+        8
+      ],
+      "m_cofactor_admissible": true,
+      "projected_points": 151,
+      "projected_signed_frobenius_orbits": 5,
+      "rational_points": 251,
+      "signed_frobenius_orbits_before_projection": 10,
+      "timing_ns": {
+        "cofactor_admission": 111535081,
+        "factor_base_construction": 3007426,
+        "projection_census": 33745549
+      }
+    }
+  ],
+  "cofactor": "154",
+  "factor_degrees": [
+    1,
+    2,
+    4,
+    4,
+    4
+  ],
+  "forbidden_inputs": {
+    "discrete_log_labels_constructed": false,
+    "relation_yield_used": false,
+    "solver_timing_used": false,
+    "target_constructed": false,
+    "target_subgroup_enumerated": false
+  },
+  "group_order": "32494",
+  "m": 2,
+  "n": 15,
+  "requested_dimension": 8,
+  "schema": "koblitz_public_factor_base_discovery.v1",
+  "selected": {
+    "abscissae": 256,
+    "dimension": 8,
+    "divisor_indices": [
+      2,
+      4
+    ],
+    "divisor_polynomial": 465,
+    "linearised_exponents": [
+      0,
+      4,
+      6,
+      7,
+      8
+    ],
+    "m_cofactor_admissible": true,
+    "projected_points": 181,
+    "projected_signed_frobenius_orbits": 6,
+    "rational_points": 281,
+    "signed_frobenius_orbits_before_projection": 11,
+    "timing_ns": {
+      "cofactor_admission": 117440709,
+      "factor_base_construction": 2984623,
+      "projection_census": 38690650
+    }
+  },
+  "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+  "sizing_gate": {
+    "m_times_dimension": 16,
+    "n": 15,
+    "passes": true
+  },
+  "subgroup_order": "211",
+  "timing_ns": {
+    "curve_and_subgroup_construction": 220492,
+    "end_to_end": 416247172
+  }
+}
