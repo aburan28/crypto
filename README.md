@@ -403,6 +403,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::semaev_sat`                  | CNF encoding of Semaev systems for the CDCL solver (3rd oracle) |
 | `cryptanalysis::koblitz_bench`               | Scaling harness: system profiles, first fall degree, oracle cost |
 | `cryptanalysis::koblitz_index_calculus`      | …also: cyclotomic classification of invariant factor bases |
+| `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
@@ -774,6 +775,7 @@ problems generally.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
 - [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`).
 - [`RESEARCH_TII_MCELIECE.md`](./RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
+- [`RESEARCH_EXOTIC_COORDINATES.md`](./RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.
 - [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
 - [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
