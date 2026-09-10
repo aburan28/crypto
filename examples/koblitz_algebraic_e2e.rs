@@ -287,6 +287,7 @@ fn main() {
         collapse_negation: true,
         stop_on_verified_rank: true,
         relation_batch_size: 1,
+        allow_direct_relation: false,
     };
     let solve_start = Instant::now();
     let report =
@@ -317,6 +318,7 @@ fn main() {
         "options":{"conflict_budget_per_target":conflict_budget,"max_trials":max_trials,"max_models":64,"parallel_threads":1},
         "report":{
             "relations":report.relations,"trials":report.trials,"relation_batches":report.relation_batches,
+            "direct_relations_skipped":report.direct_relations_skipped,
             "linear_solve_attempts":report.linear_solve_attempts,"sat_calls":report.sat_calls,
             "sat_models":report.sat_models,"sat_refutations":report.sat_refutations,
             "sat_unknowns":report.sat_unknowns,"sat_invalid_models":report.sat_invalid_models,

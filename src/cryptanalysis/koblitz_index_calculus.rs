@@ -2024,6 +2024,10 @@ pub struct KoblitzIcOptions {
     /// Independent SAT targets launched per deterministic relation batch.
     /// Values above one use Rayon; non-SAT strategies remain serial.
     pub relation_batch_size: usize,
+    /// Permit `aG+bQ=O` to recover the target scalar without the factor-base
+    /// relation matrix. Disable in index-calculus benchmarks so this generic
+    /// direct relation is counted and skipped rather than credited as a solve.
+    pub allow_direct_relation: bool,
 }
 
 impl Default for KoblitzIcOptions {
@@ -2043,6 +2047,7 @@ impl Default for KoblitzIcOptions {
             collapse_negation: true,
             stop_on_verified_rank: true,
             relation_batch_size: 1,
+            allow_direct_relation: true,
         }
     }
 }
@@ -2095,6 +2100,9 @@ pub struct KoblitzIcReport {
     pub relation_batches: usize,
     /// Log recovered from R = O directly, bypassing the relation matrix.
     pub direct_relation: bool,
+    /// Direct `aG+bQ=O` trials skipped because the benchmark forbade the
+    /// relation-matrix bypass.
+    pub direct_relations_skipped: usize,
 }
 
 fn solve_relation_system(
@@ -2181,6 +2189,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         relation_batch_size: opts.relation_batch_size.max(1),
         relation_batches: 0,
         direct_relation: false,
+        direct_relations_skipped: 0,
     };
     if fb.points.is_empty() {
         return Some(report);
@@ -2283,6 +2292,10 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
         for ((a, b, _target), outcome) in attempts.into_iter().zip(outcomes) {
             let found = match outcome {
                 RelationAttemptOutcome::Direct => {
+                    if !opts.allow_direct_relation {
+                        report.direct_relations_skipped += 1;
+                        continue;
+                    }
                     let d = solve_for_d(&a, &b, r)?;
                     if kc.mul(&g, &d) == *q {
                         report.log = Some(d);
