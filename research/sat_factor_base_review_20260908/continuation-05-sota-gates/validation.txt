@@ -38,6 +38,9 @@ Result: all 12 pairs completed or failed the pre-target geometry gate; six had 6
 PASS: selected nondegenerate GGMP point-witness verification with Sage.
 Result: CryptoMiniSat x=(18,4,65796) has rational lifts whose signed sum is the public target; direct point decomposition independently reproduced.
 
+PASS: local preflight of the external-host reproduction workflow.
+Result: the fail-closed verifier accepted two fresh scalar-blind IC runs and two corrected signed-Frobenius rho runs, including recovered-scalar and complete operation-label fields.
+
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.
