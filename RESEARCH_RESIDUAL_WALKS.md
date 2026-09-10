@@ -4,7 +4,7 @@
 **Bench:**  `cargo run --release --example residual_walk_bench -- --panel --json experiments/20_residual_walk_panel.json`
 **Data:**   `experiments/20_residual_walk_panel.json`, `experiments/20_residual_walk_panel.log`
 **Tables:** `python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json`
-**Baseline:** `experiments/20_residual_walk_baseline.json`, scored by `scripts/residual_walk_scoreboard.py` (§9)
+**Baseline:** `experiments/20_residual_walk_baseline.json` (plain) and `experiments/20_residual_walk_tuned.json` (levers on), scored by `scripts/residual_walk_scoreboard.py` (§9)
 
 > **Result in one line.**  Every residual-collision hybrid tested here
 > recovers the planted logarithm correctly, and every one of them needs
@@ -80,7 +80,10 @@ One module, `cryptanalysis::residual_walk`, containing:
   which is what makes distinguished-point storage legitimate.  B is the
   literal "change one point at a time and update the residual cheaply"
   experiment; C1 is the collision-preserving construction; C2 is the
-  literal `s_{t+1} = H(L(s_t))` construction.
+  literal `s_{t+1} = H(L(s_t))` construction.  Four generic levers
+  (negation map on the residual table, a `P_i − P_j` table for B,
+  segmented walks for C1 and R, no restart after a collision for B)
+  are available as options and measured in §9.7.
 
 - Every collision is classified before it counts: **trivial** (same
   canonical state — tuples are stored as sorted multisets, so two
@@ -439,6 +442,8 @@ cargo run --release --example residual_walk_bench -- --panel --json experiments/
 python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json
 cargo run --release --example residual_walk_bench -- --baseline --json run.json
 python3 scripts/residual_walk_scoreboard.py run.json --baseline experiments/20_residual_walk_baseline.json
+cargo run --release --example residual_walk_bench -- --baseline --tuned --json tuned.json
+python3 scripts/residual_walk_scoreboard.py tuned.json --baseline experiments/20_residual_walk_tuned.json
 ```
 
 The bench's single-instance mode also accepts `--strategies A,C1,R`,
@@ -556,12 +561,13 @@ Reading down the table:
   by `13`.  No amount of tuning in steps 1–3 can reach it: the best
   hybrid sits at `2.23×` its own floor, and that floor is `18×` rho's.
 
-### 9.5 Remaining generic slack, quantified
+### 9.5 Remaining generic slack, quantified (predictions; measured in §9.7)
 
-These levers are known, generic, and not yet applied.  Their predicted
-effect on `S` follows from the decomposition above; none touches `κ`
-except the negation map, which lowers every strategy's `κ` by the same
-factor and so leaves the gap to rho unchanged.
+These levers are known and generic.  Their predicted effect on `S`
+follows from the decomposition above; none touches `κ` except the
+negation map, which lowers every strategy's `κ` by the same factor and
+so leaves the gap to rho unchanged.  §9.7 applies them and reports the
+measured effect next to each prediction.
 
 | lever | applies to | mechanism | predicted S (28-bit, B = 256) | memory |
 |:--|:--|:--|---:|:--|
@@ -598,6 +604,119 @@ For any change to the relation generators, the cells to beat at
 - Not admissible: changing `B` or `k` (the floor moves with them),
   changing the operation accounting, skipping verification, picking
   seeds, or counting dependent or trivial relations.
+
+After round 2 (§9.7) the bar for *engineering* moves to the tuned
+cells, frozen in `experiments/20_residual_walk_tuned.json`:
+
+| tag | variant | S tuned | S/floor | κ/floor |
+|:--|:--|---:|---:|---:|
+| B  | neg+diff+cont | 19.7 | 1.23 | 1.02 |
+| C1 | neg+seg512    | 39.4 | 2.46 | 1.00 |
+| R  | neg+seg512    | 1.2  | 1.34 | 0.96 |
+
+The research target is unchanged: `κ/κ_floor < 0.9` on a hybrid.
+
+### 9.7 Round 2: the levers applied and measured
+
+Four generic levers were implemented behind `WalkOptions` flags
+(`negation_map`, `diff_table`, `segment_len`, `continue_after_collision`;
+bench flags `--negation`, `--diff-table`, `--segment N`, `--continue`,
+protocol `--baseline --tuned`) and measured one at a time and together
+on the 28-bit, `B = 256` rows of the protocol, three seeds each.  The
+fourth lever was not in the §9.5 list; the difference-table ablation
+exposed it (a restart after every collision was costing the mutation
+walk `0.39` operations per residual, `1,500` restarts per run).
+
+**Single-lever ablation (28-bit, `B = 256`, `dp = 0`).**  `κ` is
+`samples/√n`, `c` is walk operations per residual, fractions are of
+total operations, `S` is total operations over `√n`:
+
+| lever(s) | tag | κ | c | setup | replay | verify | S | gain vs baseline | walks | trivial | correct |
+|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| none (frozen baseline) | A | 22.95 | 80.58 | 0.0% | 0.0% | 0.1% | 1850.6 | 1.00× | 1 | 0 | yes |
+| none (frozen baseline) | B | 23.31 | 2.11 | 0.0% | 0.0% | 3.0% | 50.6 | 1.00× | 1526 | 1272 | yes |
+| none (frozen baseline) | C1 | 22.87 | 1.06 | 1.0% | 66.2% | 15.0% | 139.3 | 1.00× | 258 | 0 | yes |
+| none (frozen baseline) | C2 | 21.93 | 80.59 | 0.0% | 0.0% | 0.1% | 1768.8 | 1.00× | 256 | 0 | yes |
+| none (frozen baseline) | R | 1.33 | 1.01 | 6.1% | 59.7% | 0.2% | 3.9 | 1.00× | 2 | 0 | yes |
+| negation map | A | 16.10 | 80.59 | 0.0% | 0.0% | 0.1% | 1299.4 | 1.42× | 1 | 0 | yes |
+| negation map | B | 16.16 | 2.14 | 0.0% | 0.0% | 4.2% | 36.0 | 1.41× | 1140 | 883 | yes |
+| negation map | C1 | 16.17 | 1.09 | 1.3% | 63.2% | 19.0% | 108.1 | 1.29× | 258 | 0 | yes |
+| negation map | C2 | 15.64 | 80.59 | 0.0% | 0.0% | 0.1% | 1261.7 | 1.40× | 256 | 0 | yes |
+| negation map | R | 0.70 | 1.02 | 11.6% | 56.2% | 0.4% | 2.1 | 1.81× | 2 | 0 | yes |
+| difference table | B | 23.31 | 1.36 | 6.5% | 0.0% | 4.2% | 35.6 | 1.42× | 1526 | 1272 | yes |
+| continue after collision | B | 23.02 | 1.74 | 0.0% | 0.0% | 2.0% | 41.0 | 1.24× | 1 | 1268 | yes |
+| segment 128 | C1 | 22.86 | 1.62 | 3.0% | 10.9% | 7.0% | 46.9 | 2.97× | 2656 | 0 | yes |
+| segment 512 | C1 | 22.08 | 1.18 | 3.1% | 25.0% | 14.3% | 45.4 | 3.07× | 751 | 0 | yes |
+| segment 2048 | C1 | 22.36 | 1.08 | 2.1% | 44.8% | 18.0% | 68.6 | 2.03× | 328 | 0 | yes |
+| negation + difference table + continue | B | 16.28 | 1.00 | 11.7% | 0.0% | 5.9% | 19.7 | 2.57× | 1 | 898 | yes |
+| negation + segment 512 | C1 | 15.96 | 1.20 | 3.6% | 28.4% | 19.4% | 39.4 | 3.54× | 588 | 0 | yes |
+| negation + segment 512 | R | 0.85 | 1.17 | 16.4% | 2.3% | 0.5% | 1.2 | 3.27× | 26 | 0 | yes |
+
+Predicted versus measured, per lever:
+
+| lever | predicted (§9.5) | measured | note |
+|:--|:--|:--|:--|
+| negation map | `κ ÷ √2`, `S` −29% on every strategy | `κ` 22.95 → 16.10 (÷1.43); A 1.42×, B 1.41×, C1 1.29×, C2 1.40×, R 1.81× | C1 gains less because its replay and verification do not scale with `κ`; rho gains more because its first collision comes sooner |
+| difference table | `c` 2.1 → 1.1, `S` −47% | `c` 2.11 → 1.36, `S` 50.6 → 35.6 (1.42×) | the residual `0.36` above 1.0 was the restart cost, which became lever 4 |
+| continue after collision | (not predicted) | `c` 2.11 → 1.74, `S` 1.24×, walks 1,526 → 1 | free: the RNG-driven walk has nothing to restart from |
+| segments (C1) | replay −66% at best | 128: 2.97×, **512: 3.07×**, 2048: 2.03× | replay 66% → 25% at 512; shorter segments pay restarts (3%) and lose nothing else |
+| all levers, B | ceiling ≈ 19 | **19.7** (2.57×), `c = 1.00` | one operation per residual reached; what is left is the difference table's setup (11.7%) and verification (5.9%) |
+| all levers, C1 | — | **39.4** (3.54×) | replay 28%, verification 19%, setup 4% remain |
+| all levers, R | — | **1.2** (3.27×), 1.34× its floor | reference moves too: the gap B/R is now 16×, C1/R 33× |
+
+**The tuned protocol against the frozen baseline.**  Every cell
+improves, every run recovers the planted `d`, no relation fails
+verification, and — the point of the exercise — `κ/κ_floor` stays
+within `0.98–1.02` on every hybrid after every lever.  The generic
+levers moved `S` exactly as the `κ · c + overheads` decomposition said
+they would and never touched the count:
+
+| bits | B | dp | tag | variant | S baseline | S run | improvement (base/run) | κ/floor baseline | κ/floor run | ratio | count invariant beaten? | correct | verdict |
+|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|:--|:--|:--|
+| 24 | 256 | 0 | A | neg | 1,547.0 | 1,093.3 | 1.42× | 0.99 | 0.99 | 1.00 | no | yes | improvement |
+| 24 | 256 | 0 | B | neg+diff+cont | 56.7 | 29.8 | 1.90× | 1.03 | 1.02 | 0.99 | no | yes | improvement |
+| 24 | 256 | 0 | C1 | neg+seg512 | 158.4 | 86.6 | 1.83× | 1.00 | 1.00 | 1.00 | no | yes | improvement |
+| 24 | 256 | 0 | C2 | neg | 1,528.8 | 1,094.9 | 1.40× | 0.98 | 0.99 | 1.01 | no | yes | improvement |
+| 24 | 256 | 0 | R | neg+seg512 | 3.7 | 1.4 | 2.55× | 1.01 | 0.58 | 0.57 | no | yes | improvement |
+| 24 | 256 | 8 | C1 | plain | 273.3 | 273.3 | 1.00× | 4.04 | 4.04 | 1.00 | no | yes | unchanged |
+| 24 | 256 | 8 | R | plain | 3.9 | 3.9 | 1.00× | 1.07 | 1.07 | 1.00 | no | yes | unchanged |
+| 28 | 256 | 0 | A | neg | 1,850.6 | 1,299.4 | 1.42× | 1.01 | 1.00 | 0.99 | no | yes | improvement |
+| 28 | 256 | 0 | B | neg+diff+cont | 50.6 | 19.7 | 2.57× | 1.03 | 1.02 | 0.99 | no | yes | improvement |
+| 28 | 256 | 0 | C1 | neg+seg512 | 139.3 | 39.4 | 3.54× | 1.01 | 1.00 | 0.99 | no | yes | improvement |
+| 28 | 256 | 0 | C2 | neg | 1,768.8 | 1,261.7 | 1.40× | 0.97 | 0.98 | 1.01 | no | yes | improvement |
+| 28 | 256 | 0 | R | neg+seg512 | 3.9 | 1.2 | 3.27× | 1.06 | 0.96 | 0.90 | no | yes | improvement |
+| 28 | 256 | 8 | C1 | plain | 165.0 | 165.0 | 1.00× | 1.64 | 1.64 | 1.00 | no | yes | unchanged |
+| 28 | 256 | 8 | R | plain | 4.0 | 4.0 | 1.00× | 1.08 | 1.08 | 1.00 | no | yes | unchanged |
+
+Scoreboard of the tuned run (the `dp = 8` rows are unchanged because
+the negation map, being table-only, is not available with distinguished
+points):
+
+| bits | B | dp | tag | variant | seeds | κ = samples/√n | κ floor | κ/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |
+|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 24 | 256 | 0 | A | neg | 3 | 15.89 | 16.03 | 0.99 | 68.5 | 0.0% | 0.0% | 0.5% | 1,093.3 | 16.03 | 68.20 | 4.265 | 15.818 | 0 | yes |
+| 24 | 256 | 0 | B | neg+diff+cont | 3 | 16.34 | 16.03 | 1.02 | 1.0 | 31.6% | 0.0% | 13.5% | 29.8 | 16.03 | 1.86 | 0.117 | 16.195 | 227 | yes |
+| 24 | 256 | 0 | C1 | neg+seg512 | 3 | 16.03 | 16.03 | 1.00 | 1.3 | 5.7% | 40.5% | 29.1% | 86.6 | 16.03 | 5.40 | 0.337 | 15.951 | 0 | yes |
+| 24 | 256 | 0 | C2 | neg | 3 | 15.92 | 16.03 | 0.99 | 68.5 | 0.0% | 0.0% | 0.5% | 1,094.9 | 16.03 | 68.30 | 4.266 | 15.843 | 0 | yes |
+| 24 | 256 | 0 | R | neg+seg512 | 3 | 0.52 | 0.89 | 0.58 | 1.2 | 42.5% | 15.8% | 1.3% | 1.4 | 0.89 | 1.63 | 1.449 | 0.516 | 0 | yes |
+| 24 | 256 | 8 | C1 | plain | 3 | 91.57 | 22.67 | 4.04 | 1.1 | 1.8% | 47.1% | 17.3% | 273.3 | 22.67 | 12.06 | 1.064 | 0.097 | 0 | yes |
+| 24 | 256 | 8 | R | plain | 3 | 1.34 | 1.25 | 1.07 | 1.0 | 15.9% | 48.5% | 0.5% | 3.9 | 1.25 | 3.11 | 3.903 | 0.004 | 0 | yes |
+| 28 | 256 | 0 | A | neg | 3 | 16.10 | 16.03 | 1.00 | 80.6 | 0.0% | 0.0% | 0.1% | 1,299.4 | 16.03 | 81.06 | 5.076 | 16.085 | 0 | yes |
+| 28 | 256 | 0 | B | neg+diff+cont | 3 | 16.28 | 16.03 | 1.02 | 1.0 | 11.7% | 0.0% | 5.9% | 19.7 | 16.03 | 1.23 | 0.077 | 16.203 | 898 | yes |
+| 28 | 256 | 0 | C1 | neg+seg512 | 3 | 15.96 | 16.03 | 1.00 | 1.2 | 3.6% | 28.4% | 19.4% | 39.4 | 16.03 | 2.46 | 0.153 | 15.943 | 0 | yes |
+| 28 | 256 | 0 | C2 | neg | 3 | 15.64 | 16.03 | 0.98 | 80.6 | 0.0% | 0.0% | 0.1% | 1,261.7 | 16.03 | 78.70 | 4.916 | 15.623 | 0 | yes |
+| 28 | 256 | 0 | R | neg+seg512 | 3 | 0.85 | 0.89 | 0.96 | 1.2 | 16.4% | 2.3% | 0.5% | 1.2 | 0.89 | 1.34 | 1.192 | 0.848 | 0 | yes |
+| 28 | 256 | 8 | C1 | plain | 3 | 37.16 | 22.67 | 1.64 | 1.0 | 0.9% | 62.8% | 13.0% | 165.0 | 22.67 | 7.28 | 0.642 | 0.089 | 0 | yes |
+| 28 | 256 | 8 | R | plain | 3 | 1.35 | 1.25 | 1.08 | 1.0 | 5.9% | 60.0% | 0.2% | 4.0 | 1.25 | 3.16 | 3.966 | 0.005 | 0 | yes |
+
+**What round 2 establishes.**  The best hybrid now runs at one group
+operation per residual and `1.23×` its generic floor; the r-adding walk
+at `2.46×`.  The remaining slack is bookkeeping (verification, setup,
+replay), worth at most another `1.2–2×`, and none of it moves `κ`.
+Plain rho, tuned with the same two applicable levers, sits at `1.2`
+against the hybrids' `19.7` and `39.4`: the factor between them is the
+`√(B+1) / √(π/4) ≈ 18×` count ratio, unchanged since round 1.  The next
+improvement that matters is not on this list; it has to lower `κ`.
 
 ## References
 
