@@ -1,0 +1,9 @@
+cc -O3 -Wall -std=gnu11 -c main.c -o main.o
+cc -O3 -Wall -std=gnu11 -c wdsat_utils.c -o wdsat_utils.o
+cc -O3 -Wall -std=gnu11 -c dimacs.c -o dimacs.o
+cc -O3 -Wall -std=gnu11 -c cnf.c -o cnf.o
+cc -O3 -Wall -std=gnu11 -c xorset.c -o xorset.o
+cc -O3 -Wall -std=gnu11 -c xorgauss.c -o xorgauss.o
+cc -O3 -Wall -std=gnu11 -c wdsat.c -o wdsat.o
+cc -O3 -Wall -std=gnu11 -c fp.c -o fp.o
+cc main.o wdsat_utils.o dimacs.o cnf.o xorset.o xorgauss.o wdsat.o fp.o -o ../wdsat_solver  -lm

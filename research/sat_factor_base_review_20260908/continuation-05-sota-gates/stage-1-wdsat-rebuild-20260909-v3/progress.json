@@ -1,0 +1,1210 @@
+{
+  "schema": "koblitz_pdp_matched_matrix.v1",
+  "scope": "PDP construction and solver matrix; not an end-to-end ECDLP result",
+  "host": {
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.13.1",
+    "logical_cpus": 14
+  },
+  "policy": {
+    "unknown_is_unsat": false,
+    "all_process_resources_charged": true,
+    "single_thread_requested": true,
+    "missing_tool_is_negative_evidence": false
+  },
+  "tools": {
+    "wdsat": {
+      "available": true,
+      "path": "/Volumes/SSD990/wdsat-binary-sat-review-20260909",
+      "version": "per-instance source build",
+      "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0"
+    },
+    "cryptominisat": {
+      "available": false,
+      "path": null,
+      "version": null
+    },
+    "magma": {
+      "available": false,
+      "path": null,
+      "version": null
+    }
+  },
+  "instances": [
+    {
+      "cell": {
+        "n": 15,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.06984195904806256,
+          "user_seconds": 0.064866,
+          "system_seconds": 0.002039,
+          "total_core_seconds": 0.06690499999999999,
+          "single_core_seconds": 0.06690499999999999,
+          "peak_rss_bytes": 5881856,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "15",
+          "5",
+          "standard",
+          "20260909",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n15-l5-m3-standard"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "conflicts": 8,
+          "source_model_valid": true,
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.4473213329911232,
+            "user_seconds": 0.0009419999999999999,
+            "system_seconds": 0.001186,
+            "total_core_seconds": 0.0021279999999999997,
+            "single_core_seconds": 0.0021279999999999997,
+            "peak_rss_bytes": 3457024,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n15-l5-m3-standard/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n15-l5-m3-standard/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "unavailable_operational"
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + x^2 + 1",
+        "direct_meet_in_the_middle": {
+          "factor_base_ns": 229708,
+          "factor_points": 47,
+          "group_additions": 1129,
+          "pair_entries": 1077,
+          "search_ns": 3581667,
+          "status": "sat",
+          "wall_ns": 3811375,
+          "witness_indices": [
+            11,
+            21,
+            0
+          ]
+        },
+        "ell": 5,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "ec45f7ae2fbdfb7c88f1b8a7e527b01b6d3735c62503344190a15811f50ada15",
+            "bytes": 26275,
+            "cnf_clauses": 1505,
+            "path": "instance.xor.cnf",
+            "variables": 502,
+            "xor_rows": 42
+          },
+          "magma_boolean_f4": {
+            "blake3": "4887fec4f7cff5d7bc5ff5498f35544403d69b702d180d79cce7e7617a928907",
+            "bytes": 33667,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "7cd6622a46c6ca3f3efc4d739164bbffc5dcc14c1ab5ce3a9387b717e1d68f1b",
+            "bytes": 21074,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "1",
+          "2",
+          "4",
+          "8",
+          "16"
+        ],
+        "factor_base_predicate": {
+          "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+          "enumerates_target_subgroup": false,
+          "kind": "polynomial_subspace",
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          1
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 15,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "initial_cnf_clauses": 1505,
+          "result": "sat",
+          "source_model_valid": true,
+          "stats": {
+            "conflicts": 2731,
+            "decisions": 2874,
+            "learnt_clauses": 2731,
+            "max_level": 15,
+            "propagations": 550977,
+            "restarts": 14,
+            "xor_conflicts": 2720,
+            "xor_passes": 10599,
+            "xor_propagations": 42757
+          },
+          "variables": 502
+        },
+        "planted_points": [
+          {
+            "x": "7",
+            "y": "19509"
+          },
+          {
+            "x": "0",
+            "y": "1"
+          },
+          {
+            "x": "16",
+            "y": "20234"
+          }
+        ],
+        "representation": "symmetrised_s4",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 20260909,
+        "source_equations": 42,
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 158,
+        "source_variables": 42,
+        "target": {
+          "x": "32271",
+          "y": "11897"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 647083,
+          "native_encoding_and_solve": 56364375,
+          "planted_target_construction": 55542,
+          "source_system_construction": 2899292,
+          "whole_process_internal": 66451750
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.018517624936066568,
+            "user_seconds": 0.000776,
+            "system_seconds": 0.008797,
+            "total_core_seconds": 0.009573,
+            "single_core_seconds": 0.009573,
+            "peak_rss_bytes": 1622016,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.000164708006195724,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.02019391697831452,
+            "user_seconds": 0.004027,
+            "system_seconds": 0.006286,
+            "total_core_seconds": 0.010313,
+            "single_core_seconds": 0.010313,
+            "peak_rss_bytes": 1802240,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.6644943329738453,
+          "user_seconds": 0.435691,
+          "system_seconds": 0.187792,
+          "total_core_seconds": 0.623483,
+          "single_core_seconds": 0.623483,
+          "peak_rss_bytes": 59310080,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 43\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 502\n#define __MAX_BUFFER_SIZE__ 8032\n#define __MAX_EQ__ 1521\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 44\n#define __MAX_XEQ_SIZE__ 503\n",
+        "binary_sha256": "be0b486e0ae62daee0dbed16d292399bf08a1150f095367d70eb93f90c445570"
+      }
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.02351070800796151,
+          "user_seconds": 0.019806,
+          "system_seconds": 0.0017859999999999998,
+          "total_core_seconds": 0.021592,
+          "single_core_seconds": 0.021592,
+          "peak_rss_bytes": 5423104,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "31",
+          "5",
+          "standard",
+          "20260910",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-standard"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "conflicts": 6615,
+          "source_model_valid": true,
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.24457970808725804,
+            "user_seconds": 0.036549,
+            "system_seconds": 0.0013859999999999999,
+            "total_core_seconds": 0.037934999999999997,
+            "single_core_seconds": 0.037934999999999997,
+            "peak_rss_bytes": 3670016,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-standard/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-standard/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "unavailable_operational"
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + x^2 + 1",
+        "direct_meet_in_the_middle": {
+          "factor_base_ns": 535959,
+          "factor_points": 31,
+          "group_additions": 518,
+          "pair_entries": 477,
+          "search_ns": 3458458,
+          "status": "sat",
+          "wall_ns": 3994417,
+          "witness_indices": [
+            24,
+            28,
+            21
+          ]
+        },
+        "ell": 5,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "449e414e04ac8cb66689aac31a099d7cc669a8409e78b3ac4023561bb67c74d2",
+            "bytes": 33634,
+            "cnf_clauses": 1505,
+            "path": "instance.xor.cnf",
+            "variables": 502,
+            "xor_rows": 58
+          },
+          "magma_boolean_f4": {
+            "blake3": "73330c0460e1d95bb17566dc9417e1200dbf592c472a1b6dfdff76dd0b6f2395",
+            "bytes": 58797,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "b0e011ef0c165a8bb94d7ccb05d97358108521d2d904ecd1d56d24eb4305751a",
+            "bytes": 36938,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "1",
+          "2",
+          "4",
+          "8",
+          "16"
+        ],
+        "factor_base_predicate": {
+          "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+          "enumerates_target_subgroup": false,
+          "kind": "polynomial_subspace",
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          3
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 31,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "initial_cnf_clauses": 1505,
+          "result": "sat",
+          "source_model_valid": true,
+          "stats": {
+            "conflicts": 244,
+            "decisions": 274,
+            "learnt_clauses": 244,
+            "max_level": 15,
+            "propagations": 61921,
+            "restarts": 2,
+            "xor_conflicts": 244,
+            "xor_passes": 964,
+            "xor_propagations": 4205
+          },
+          "variables": 502
+        },
+        "planted_points": [
+          {
+            "x": "21",
+            "y": "187060385"
+          },
+          {
+            "x": "23",
+            "y": "1117564286"
+          },
+          {
+            "x": "28",
+            "y": "1384621962"
+          }
+        ],
+        "representation": "symmetrised_s4",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 20260910,
+        "source_equations": 58,
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 156,
+        "source_variables": 42,
+        "target": {
+          "x": "1899261362",
+          "y": "1245205008"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 63083,
+          "native_encoding_and_solve": 9332125,
+          "planted_target_construction": 135875,
+          "source_system_construction": 3660166,
+          "whole_process_internal": 20266125
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.05630399996880442,
+            "user_seconds": 0.00073,
+            "system_seconds": 0.0077659999999999995,
+            "total_core_seconds": 0.008496,
+            "single_core_seconds": 0.008496,
+            "peak_rss_bytes": 1622016,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.00019391707610338926,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.010773375048302114,
+            "user_seconds": 0.003767,
+            "system_seconds": 0.004376,
+            "total_core_seconds": 0.008143,
+            "single_core_seconds": 0.008143,
+            "peak_rss_bytes": 1802240,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.5382752500008792,
+          "user_seconds": 0.435093,
+          "system_seconds": 0.123859,
+          "total_core_seconds": 0.558952,
+          "single_core_seconds": 0.558952,
+          "peak_rss_bytes": 59113472,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 43\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 502\n#define __MAX_BUFFER_SIZE__ 8032\n#define __MAX_EQ__ 1521\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 60\n#define __MAX_XEQ_SIZE__ 503\n",
+        "binary_sha256": "9d049cc27192698a0decfdd9a54b4e1818125c8c27718fdea05f3289978b8193"
+      }
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "ggmp"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.0118921659886837,
+          "user_seconds": 0.008298999999999999,
+          "system_seconds": 0.001624,
+          "total_core_seconds": 0.009923,
+          "single_core_seconds": 0.009923,
+          "peak_rss_bytes": 4390912,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "31",
+          "5",
+          "ggmp",
+          "20260911",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-ggmp"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "conflicts": 12,
+          "source_model_valid": true,
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.2174871249590069,
+            "user_seconds": 0.0013469999999999999,
+            "system_seconds": 0.001465,
+            "total_core_seconds": 0.002812,
+            "single_core_seconds": 0.002812,
+            "peak_rss_bytes": 7356416,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-ggmp/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n31-l5-m3-ggmp/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "unavailable_operational"
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + x^2 + 1",
+        "direct_meet_in_the_middle": {
+          "factor_base_ns": 348834,
+          "factor_points": 1,
+          "group_additions": 2,
+          "pair_entries": 1,
+          "search_ns": 3667,
+          "status": "sat",
+          "wall_ns": 352501,
+          "witness_indices": [
+            0,
+            0,
+            0
+          ]
+        },
+        "ell": 5,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "5b50959447d7953836ccf84c8ed7c33129d5842e37f368d242e09fdc9fbb5a8b",
+            "bytes": 59677,
+            "cnf_clauses": 4570,
+            "path": "instance.xor.cnf",
+            "variables": 1311,
+            "xor_rows": 62
+          },
+          "magma_boolean_f4": {
+            "blake3": "6faf8c762bdc92d5bc963a5f265aa5500684b85402971ce5fa6f23fbcc858cd9",
+            "bytes": 31299,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "d2404ea5c1be232fd5ac13997613fd67bc1b161e28a92cc40042b2c80fedcf89",
+            "bytes": 18564,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "2",
+          "4",
+          "16",
+          "256",
+          "65536"
+        ],
+        "factor_base_predicate": {
+          "definition": "kernel of sum X^(2^i) over the set factor exponents",
+          "enumerates_target_subgroup": false,
+          "factor_bitmask": 37,
+          "factor_index": 0,
+          "kind": "ggmp_linearised_kernel",
+          "linearised_exponents": [
+            0,
+            2,
+            5
+          ],
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          3
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 31,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "initial_cnf_clauses": 4570,
+          "result": "sat",
+          "source_model_valid": true,
+          "stats": {
+            "conflicts": 319,
+            "decisions": 405,
+            "learnt_clauses": 319,
+            "max_level": 25,
+            "propagations": 66855,
+            "restarts": 2,
+            "xor_conflicts": 248,
+            "xor_passes": 1575,
+            "xor_propagations": 1894
+          },
+          "variables": 1311
+        },
+        "planted_points": [
+          {
+            "x": "0",
+            "y": "1"
+          },
+          {
+            "x": "0",
+            "y": "1"
+          },
+          {
+            "x": "0",
+            "y": "1"
+          }
+        ],
+        "representation": "chained_s3",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 20260911,
+        "source_equations": 62,
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 85,
+        "source_variables": 46,
+        "target": {
+          "x": "0",
+          "y": "1"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 105958,
+          "native_encoding_and_solve": 4334875,
+          "planted_target_construction": 779750,
+          "source_system_construction": 441833,
+          "whole_process_internal": 8813667
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.01602424995508045,
+            "user_seconds": 0.00075,
+            "system_seconds": 0.007187,
+            "total_core_seconds": 0.007937,
+            "single_core_seconds": 0.007937,
+            "peak_rss_bytes": 1622016,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.000141416909173131,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.011200791923329234,
+            "user_seconds": 0.003884,
+            "system_seconds": 0.004677,
+            "total_core_seconds": 0.008561,
+            "single_core_seconds": 0.008561,
+            "peak_rss_bytes": 1769472,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.5174390830798075,
+          "user_seconds": 0.41150899999999996,
+          "system_seconds": 0.127331,
+          "total_core_seconds": 0.53884,
+          "single_core_seconds": 0.53884,
+          "peak_rss_bytes": 58851328,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 47\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 1311\n#define __MAX_BUFFER_SIZE__ 20976\n#define __MAX_EQ__ 4586\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 64\n#define __MAX_XEQ_SIZE__ 1312\n",
+        "binary_sha256": "31ff3878c0e67fe911ac7865dbffb24e5a02609dc3b7c12896a98b95e4fa4cc5"
+      }
+    },
+    {
+      "cell": {
+        "n": 41,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.062490624957717955,
+          "user_seconds": 0.059094999999999995,
+          "system_seconds": 0.001846,
+          "total_core_seconds": 0.060940999999999995,
+          "single_core_seconds": 0.060940999999999995,
+          "peak_rss_bytes": 6586368,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "41",
+          "5",
+          "standard",
+          "20260912",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n41-l5-m3-standard"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "wdsat",
+          "status": "sat",
+          "conflicts": 6392,
+          "source_model_valid": true,
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.25081474997568876,
+            "user_seconds": 0.041219,
+            "system_seconds": 0.0013809999999999998,
+            "total_core_seconds": 0.0426,
+            "single_core_seconds": 0.0426,
+            "peak_rss_bytes": 3768320,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n41-l5-m3-standard/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n41-l5-m3-standard/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "unavailable_operational"
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + x^2 + 1",
+        "direct_meet_in_the_middle": {
+          "factor_base_ns": 980542,
+          "factor_points": 25,
+          "group_additions": 327,
+          "pair_entries": 309,
+          "search_ns": 3531083,
+          "status": "sat",
+          "wall_ns": 4511625,
+          "witness_indices": [
+            22,
+            24,
+            1
+          ]
+        },
+        "ell": 5,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "479c99ce2447908a07b851cb4df367732dd09ba145bed0c0747d5c35fefbc338",
+            "bytes": 38213,
+            "cnf_clauses": 1505,
+            "path": "instance.xor.cnf",
+            "variables": 502,
+            "xor_rows": 68
+          },
+          "magma_boolean_f4": {
+            "blake3": "eeb7d7486da2bb7dd2734aeb1bc89d5210fa5ee0844eca05c5ce03fe30daf1c0",
+            "bytes": 74351,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "9abe724b05fe742311e4d28a08545e989580c194bdbf9bf79dce9451cdc9a071",
+            "bytes": 46683,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "1",
+          "2",
+          "4",
+          "8",
+          "16"
+        ],
+        "factor_base_predicate": {
+          "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+          "enumerates_target_subgroup": false,
+          "kind": "polynomial_subspace",
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          3
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 41,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "initial_cnf_clauses": 1505,
+          "result": "sat",
+          "source_model_valid": true,
+          "stats": {
+            "conflicts": 1981,
+            "decisions": 2103,
+            "learnt_clauses": 1981,
+            "max_level": 15,
+            "propagations": 383445,
+            "restarts": 12,
+            "xor_conflicts": 1813,
+            "xor_passes": 7508,
+            "xor_propagations": 31076
+          },
+          "variables": 502
+        },
+        "planted_points": [
+          {
+            "x": "30",
+            "y": "543600355105"
+          },
+          {
+            "x": "3",
+            "y": "1425167322643"
+          },
+          {
+            "x": "28",
+            "y": "1545821366437"
+          }
+        ],
+        "representation": "symmetrised_s4",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 20260912,
+        "source_equations": 68,
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 157,
+        "source_variables": 42,
+        "target": {
+          "x": "1905385743183",
+          "y": "2095117988296"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 127834,
+          "native_encoding_and_solve": 46676333,
+          "planted_target_construction": 197792,
+          "source_system_construction": 4519292,
+          "whole_process_internal": 59163958
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.015452250023372471,
+            "user_seconds": 0.000856,
+            "system_seconds": 0.007038,
+            "total_core_seconds": 0.007894,
+            "single_core_seconds": 0.007894,
+            "peak_rss_bytes": 1654784,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.00014245894271880388,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.01166695891879499,
+            "user_seconds": 0.004117,
+            "system_seconds": 0.004905,
+            "total_core_seconds": 0.009021999999999999,
+            "single_core_seconds": 0.009021999999999999,
+            "peak_rss_bytes": 1753088,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.5256810840219259,
+          "user_seconds": 0.417178,
+          "system_seconds": 0.122293,
+          "total_core_seconds": 0.539471,
+          "single_core_seconds": 0.539471,
+          "peak_rss_bytes": 59392000,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 43\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 502\n#define __MAX_BUFFER_SIZE__ 8032\n#define __MAX_EQ__ 1521\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 70\n#define __MAX_XEQ_SIZE__ 503\n",
+        "binary_sha256": "2a2324d9ecf4073722849fa919ae651a1158e1b43a99ae824c60cd20b4c7ccdc"
+      }
+    },
+    {
+      "cell": {
+        "n": 59,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 12.025069291004911,
+          "user_seconds": 11.887968,
+          "system_seconds": 0.042536,
+          "total_core_seconds": 11.930504,
+          "single_core_seconds": 11.930504,
+          "peak_rss_bytes": 198983680,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "59",
+          "9",
+          "standard",
+          "20260913",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n59-l9-m3-standard"
+        ]
+      },
+      "solvers": [
+        {
+          "solver": "wdsat",
+          "status": "timeout_inconclusive",
+          "conflicts": null,
+          "source_model_valid": null,
+          "returncode": -15,
+          "timed_out": true,
+          "metrics": {
+            "wall_seconds": 120.00516933307517,
+            "user_seconds": 117.451065,
+            "system_seconds": 0.54804,
+            "total_core_seconds": 117.999105,
+            "single_core_seconds": 117.999105,
+            "peak_rss_bytes": 14254080,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n59-l9-m3-standard/wdsat-build/wdsat_solver",
+            "-i",
+            "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n59-l9-m3-standard/instance.anf",
+            "-g",
+            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+          ]
+        },
+        {
+          "solver": "cryptominisat",
+          "status": "unavailable_operational"
+        },
+        {
+          "solver": "magma-f4",
+          "status": "unavailable_operational"
+        }
+      ],
+      "manifest": {
+        "curve": "y^2 + xy = x^3 + x^2 + 1",
+        "direct_meet_in_the_middle": {
+          "factor_base_ns": 32662833,
+          "factor_points": 483,
+          "group_additions": 117053,
+          "pair_entries": 116635,
+          "search_ns": 3032097375,
+          "status": "sat",
+          "wall_ns": 3064760208,
+          "witness_indices": [
+            266,
+            288,
+            166
+          ]
+        },
+        "ell": 9,
+        "exports": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "17cf7d38f92513d2938d594ede9ff14c8c7f23572a61b54852bf417e6daabbe0",
+            "bytes": 231086,
+            "cnf_clauses": 6495,
+            "path": "instance.xor.cnf",
+            "variables": 2000,
+            "xor_rows": 110
+          },
+          "magma_boolean_f4": {
+            "blake3": "900712e6e41ff35e9c48f22129dccb0ce9e12a152b317ae61c3744607019fc65",
+            "bytes": 436815,
+            "path": "instance.magma"
+          },
+          "wdsat_anf": {
+            "blake3": "6860e758acd4afb49dfa07e66c5f6aee082a3f13529009732cd45f9c2169d38e",
+            "bytes": 277422,
+            "path": "instance.anf"
+          }
+        },
+        "factor_base_basis_bitmasks": [
+          "1",
+          "2",
+          "4",
+          "8",
+          "16",
+          "32",
+          "64",
+          "128",
+          "256"
+        ],
+        "factor_base_predicate": {
+          "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+          "enumerates_target_subgroup": false,
+          "kind": "polynomial_subspace",
+          "uses_discrete_log_labels": false
+        },
+        "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+        "irreducible_low_terms": [
+          0,
+          2,
+          4,
+          7
+        ],
+        "kind": "binary_koblitz_pdp_cross_solver_instance",
+        "m": 3,
+        "n": 59,
+        "native_sat": {
+          "conflict_budget": 100000,
+          "initial_cnf_clauses": 6495,
+          "result": "unknown",
+          "source_model_valid": null,
+          "stats": {
+            "conflicts": 100000,
+            "decisions": 105316,
+            "learnt_clauses": 99999,
+            "max_level": 27,
+            "propagations": 81464817,
+            "restarts": 254,
+            "xor_conflicts": 99720,
+            "xor_passes": 399629,
+            "xor_propagations": 3161741
+          },
+          "variables": 2000
+        },
+        "planted_points": [
+          {
+            "x": "286",
+            "y": "349643848945327627"
+          },
+          {
+            "x": "179",
+            "y": "229231114568314349"
+          },
+          {
+            "x": "307",
+            "y": "376715780163884320"
+          }
+        ],
+        "representation": "symmetrised_s4",
+        "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+        "seed": 20260913,
+        "source_equations": 110,
+        "source_max_degree": 3,
+        "source_max_monomials_per_equation": 551,
+        "source_variables": 78,
+        "target": {
+          "x": "34756472868338126",
+          "y": "364198638095089054"
+        },
+        "timing_ns": {
+          "factor_base_predicate_construction": 757791,
+          "native_encoding_and_solve": 8905446166,
+          "planted_target_construction": 684709,
+          "source_system_construction": 32219000,
+          "whole_process_internal": 12019151000
+        }
+      },
+      "wdsat_build": {
+        "status": "completed",
+        "source_copy": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.014651333098299801,
+            "user_seconds": 0.000838,
+            "system_seconds": 0.006847,
+            "total_core_seconds": 0.007685,
+            "single_core_seconds": 0.007685,
+            "peak_rss_bytes": 1622016,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          }
+        },
+        "configuration_wall_seconds": 0.0001230000052601099,
+        "clean": {
+          "returncode": 0,
+          "timed_out": false,
+          "metrics": {
+            "wall_seconds": 0.011575208976864815,
+            "user_seconds": 0.0040019999999999995,
+            "system_seconds": 0.004863,
+            "total_core_seconds": 0.008865,
+            "single_core_seconds": 0.008865,
+            "peak_rss_bytes": 1753088,
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+          },
+          "command": [
+            "make",
+            "-C",
+            "src",
+            "clean"
+          ]
+        },
+        "metrics": {
+          "wall_seconds": 0.506202791002579,
+          "user_seconds": 0.391005,
+          "system_seconds": 0.12132699999999999,
+          "total_core_seconds": 0.512332,
+          "single_core_seconds": 0.512332,
+          "peak_rss_bytes": 57622528,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "make",
+          "-C",
+          "src"
+        ],
+        "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 79\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 2000\n#define __MAX_BUFFER_SIZE__ 32000\n#define __MAX_EQ__ 6511\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 112\n#define __MAX_XEQ_SIZE__ 2001\n",
+        "binary_sha256": "1c699c2ea9673a1d9bdf9e5851e8d8f91077cf05dd9ac9cab31a3005173aede7"
+      }
+    },
+    {
+      "cell": {
+        "n": 67,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "failed_operational",
+        "returncode": 101,
+        "metrics": {
+          "wall_seconds": 0.01046224997844547,
+          "user_seconds": 0.000997,
+          "system_seconds": 0.001872,
+          "total_core_seconds": 0.002869,
+          "single_core_seconds": 0.002869,
+          "peak_rss_bytes": 1884160,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "67",
+          "9",
+          "standard",
+          "20260914",
+          "100000",
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n67-l9-m3-standard"
+        ]
+      },
+      "solvers": [],
+      "artifact_status": {
+        "status": "missing_manifest_operational",
+        "expected_path": "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n67-l9-m3-standard/manifest.json",
+        "asserts_nothing_about": "the PDP, factor base, or solver performance"
+      }
+    }
+  ]
+}
