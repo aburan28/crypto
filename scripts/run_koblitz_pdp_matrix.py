@@ -294,6 +294,7 @@ def main() -> None:
     if args.output.exists():
         parser.error("output must be a new path")
     args.output.mkdir(parents=True)
+    args.output = args.output.resolve()
     if not args.exporter.exists():
         parser.error("exporter does not exist; build the release example first")
 
@@ -360,7 +361,13 @@ def main() -> None:
         }
         manifest_path = instance / "manifest.json"
         if not manifest_path.exists():
+            entry["artifact_status"] = {
+                "status": "missing_manifest_operational",
+                "expected_path": str(manifest_path),
+                "asserts_nothing_about": "the PDP, factor base, or solver performance",
+            }
             report["instances"].append(entry)
+            (args.output / "progress.json").write_text(json.dumps(report, indent=2) + "\n")
             continue
         manifest = json.loads(manifest_path.read_text())
         entry["manifest"] = manifest

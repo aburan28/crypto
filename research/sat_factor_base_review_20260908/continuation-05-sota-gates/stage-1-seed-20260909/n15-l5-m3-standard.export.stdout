@@ -1,0 +1,109 @@
+{
+  "curve": "y^2 + xy = x^3 + x^2 + 1",
+  "direct_meet_in_the_middle": {
+    "factor_base_ns": 240959,
+    "factor_points": 47,
+    "group_additions": 1129,
+    "pair_entries": 1077,
+    "search_ns": 3807958,
+    "status": "sat",
+    "wall_ns": 4048917,
+    "witness_indices": [
+      11,
+      21,
+      0
+    ]
+  },
+  "ell": 5,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "ec45f7ae2fbdfb7c88f1b8a7e527b01b6d3735c62503344190a15811f50ada15",
+      "bytes": 26275,
+      "cnf_clauses": 1505,
+      "path": "instance.xor.cnf",
+      "variables": 502,
+      "xor_rows": 42
+    },
+    "magma_boolean_f4": {
+      "blake3": "4887fec4f7cff5d7bc5ff5498f35544403d69b702d180d79cce7e7617a928907",
+      "bytes": 33667,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "7cd6622a46c6ca3f3efc4d739164bbffc5dcc14c1ab5ce3a9387b717e1d68f1b",
+      "bytes": 21074,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "1",
+    "2",
+    "4",
+    "8",
+    "16"
+  ],
+  "factor_base_predicate": {
+    "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+    "enumerates_target_subgroup": false,
+    "kind": "polynomial_subspace",
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    1
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 15,
+  "native_sat": {
+    "conflict_budget": 100000,
+    "initial_cnf_clauses": 1505,
+    "result": "sat",
+    "source_model_valid": true,
+    "stats": {
+      "conflicts": 2731,
+      "decisions": 2874,
+      "learnt_clauses": 2731,
+      "max_level": 15,
+      "propagations": 550977,
+      "restarts": 14,
+      "xor_conflicts": 2720,
+      "xor_passes": 10599,
+      "xor_propagations": 42757
+    },
+    "variables": 502
+  },
+  "planted_points": [
+    {
+      "x": "7",
+      "y": "19509"
+    },
+    {
+      "x": "0",
+      "y": "1"
+    },
+    {
+      "x": "16",
+      "y": "20234"
+    }
+  ],
+  "representation": "symmetrised_s4",
+  "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+  "seed": 20260909,
+  "source_equations": 42,
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 158,
+  "source_variables": 42,
+  "target": {
+    "x": "32271",
+    "y": "11897"
+  },
+  "timing_ns": {
+    "factor_base_predicate_construction": 619625,
+    "native_encoding_and_solve": 58277500,
+    "planted_target_construction": 55834,
+    "source_system_construction": 3103792,
+    "whole_process_internal": 69108666
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "schema": "koblitz_pdp_matched_matrix.v1",
+  "scope": "PDP construction and solver matrix; not an end-to-end ECDLP result",
+  "host": {
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.13.1",
+    "logical_cpus": 14
+  },
+  "policy": {
+    "unknown_is_unsat": false,
+    "all_process_resources_charged": true,
+    "single_thread_requested": true,
+    "missing_tool_is_negative_evidence": false
+  },
+  "tools": {
+    "wdsat": {
+      "available": true,
+      "path": "/Volumes/SSD990/wdsat-binary-sat-review-20260909",
+      "version": "per-instance source build",
+      "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0"
+    },
+    "cryptominisat": {
+      "available": true,
+      "path": "/Volumes/SSD990/cryptominisat-koblitz-20260909/build/cryptominisat5",
+      "version": "c CMS SHA1: 7ae1b4a74259cdce223a584281fb8f090bbd3eed\nc CryptoMiniSat version 5.14.7\nc CMS compilation env CMAKE_CXX_COMPILER = /usr/bin/c++ | CMAKE_CXX_FLAGS =  -fno-stack-protector -msse4.2 -Wno-bitfield-constant-conversion -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 -Wextra-semi -pedantic | COMPILE_DEFINES =  -DNDEBUG -D_FORTIFY_SOURCE=0 | BUILD_SHARED_LIBS = OFF | ONLY_SIMPLE =  | STATS = OFF | SQLITE3_FOUND =  | ZLIB_FOUND = FALSE | VALGRIND_FOUND =  | ENABLE_TESTING = OFF | SLOW_DEBUG = OFF | ENABLE_ASSERTIONS = OFF | PYTHON_EXECUTABLE =  | PYTHON_LIBRARY =  | PYTHON_INCLUDE_DIRS =  | MY_TARGETS =  | LARGEMEM = OFF | LIMITMEM = OFF | BREAKID_LIBRARIES =  | BREAKID-VER = . | \nc Using VMTF, picosat, CaDiCaL, and CadiBack code by Armin Biere\nc CMS is MIT licensed\nc Using code from 'When Boolean Satisfiability Meets Gauss-E. in a Simplex Way'\nc       by C.-S. Han and J.-H. Roland Jiang in CAV 2012. Fixes by M. Soos\nc Using CCAnr from 'CCAnr: A Conf. Checking Based Local ",
+      "sha256": "bfc157d89d4c6a6e32d6aa6299c53f22b990c94e554f9bf1d4111d3ed709061f"
+    },
+    "magma": {
+      "available": false,
+      "path": null,
+      "version": null
+    }
+  },
+  "instances": [
+    {
+      "cell": {
+        "n": 15,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.07779816701076925,
+          "user_seconds": 0.067411,
+          "system_seconds": 0.003169,
+          "total_core_seconds": 0.07058,
+          "single_core_seconds": 0.07058,
+          "peak_rss_bytes": 5750784,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "15",
+          "5",
+          "standard",
+          "20260909",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n15-l5-m3-standard"
+        ]
+      },
+      "solvers": []
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.02487595798447728,
+          "user_seconds": 0.021351,
+          "system_seconds": 0.00199,
+          "total_core_seconds": 0.023340999999999997,
+          "single_core_seconds": 0.023340999999999997,
+          "peak_rss_bytes": 5357568,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "31",
+          "5",
+          "standard",
+          "20260910",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n31-l5-m3-standard"
+        ]
+      },
+      "solvers": []
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "ggmp"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.011314125033095479,
+          "user_seconds": 0.008308,
+          "system_seconds": 0.001586,
+          "total_core_seconds": 0.009894,
+          "single_core_seconds": 0.009894,
+          "peak_rss_bytes": 4440064,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "31",
+          "5",
+          "ggmp",
+          "20260911",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n31-l5-m3-ggmp"
+        ]
+      },
+      "solvers": []
+    },
+    {
+      "cell": {
+        "n": 41,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 0.06598908302839845,
+          "user_seconds": 0.061954999999999996,
+          "system_seconds": 0.002433,
+          "total_core_seconds": 0.064388,
+          "single_core_seconds": 0.064388,
+          "peak_rss_bytes": 6717440,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "41",
+          "5",
+          "standard",
+          "20260912",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n41-l5-m3-standard"
+        ]
+      },
+      "solvers": []
+    },
+    {
+      "cell": {
+        "n": 59,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "completed",
+        "returncode": 0,
+        "metrics": {
+          "wall_seconds": 12.070944375009276,
+          "user_seconds": 12.010124,
+          "system_seconds": 0.048366,
+          "total_core_seconds": 12.058489999999999,
+          "single_core_seconds": 12.058489999999999,
+          "peak_rss_bytes": 197345280,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "59",
+          "9",
+          "standard",
+          "20260913",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n59-l9-m3-standard"
+        ]
+      },
+      "solvers": []
+    },
+    {
+      "cell": {
+        "n": 67,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "generator": {
+        "status": "failed_operational",
+        "returncode": 101,
+        "metrics": {
+          "wall_seconds": 0.0034692080225795507,
+          "user_seconds": 0.000781,
+          "system_seconds": 0.001084,
+          "total_core_seconds": 0.001865,
+          "single_core_seconds": 0.001865,
+          "peak_rss_bytes": 1884160,
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+        },
+        "command": [
+          "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/target/release/examples/koblitz_pdp_export",
+          "67",
+          "9",
+          "standard",
+          "20260914",
+          "100000",
+          "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909/n67-l9-m3-standard"
+        ]
+      },
+      "solvers": []
+    }
+  ]
+}
