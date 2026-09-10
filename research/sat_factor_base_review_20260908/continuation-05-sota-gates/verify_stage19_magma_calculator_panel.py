@@ -20,7 +20,7 @@ import urllib.parse
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-02-20260910"
 SUMMARY_SCHEMA = "koblitz_magma_calculator_stage19_summary.v2"
 
 
@@ -177,6 +177,21 @@ def verify_execution_binding(binding: dict) -> dict:
         raise VerificationError("execution relevant-blob count changed")
     if {record.get("path") for record in records if isinstance(record, dict)} != RUNNER.expected_execution_bound_paths():
         raise VerificationError("execution manifest required path set changed")
+    ca_bundle = CHILD.ca_bundle_record()
+    if (
+        manifest.get("external_dependencies", {}).get("ca_bundle") != ca_bundle
+        or binding.get("ca_bundle") != ca_bundle
+    ):
+        raise VerificationError("execution CA bundle identity changed")
+    probe = RUNNER.TLS_PROBE.archived_records()
+    if (
+        manifest.get("preexecution_tls_get_probe") != probe
+        or manifest.get("fresh_preexecution_tls_probe_sha256")
+        != probe["receipt"]["sha256"]
+        or binding.get("fresh_preexecution_tls_probe_sha256")
+        != probe["receipt"]["sha256"]
+    ):
+        raise VerificationError("execution TLS GET probe binding changed")
     for record in records:
         relative = record.get("path") if isinstance(record, dict) else None
         if not isinstance(relative, str):
@@ -203,6 +218,7 @@ def expected_request(plan: dict, task: dict, input_bytes: bytes, binding: dict) 
         "input": task["named_input"], "body_bytes": len(body), "body_sha256": sha256_bytes(body),
         "hard_parent_watchdog_seconds": service["client_timeout_seconds"],
         "response_byte_limit": service["max_response_bytes"],
+        "ca_bundle": binding["ca_bundle"],
         "execution_commit": binding["execution_commit"], "execution_tree": binding["execution_tree"],
         "execution_binding_sha256": binding["binding_sha256"],
         "execution_manifest_sha256": binding["execution_manifest"]["sha256"],
@@ -271,6 +287,7 @@ def verify_envelope(attempt: Path, plan: dict, task: dict, request: dict) -> tup
         "user_agent": request["user_agent"], "input_bytes": task["named_input"]["bytes"],
         "input_sha256": task["named_input"]["sha256"], "body_bytes": request["body_bytes"],
         "body_sha256": request["body_sha256"], "socket_timeout_seconds": CHILD.SOCKET_TIMEOUT_SECONDS,
+        "ca_bundle": request["ca_bundle"],
     }
     if envelope.get("request") != child_request or envelope.get("response_byte_limit") != plan["service"]["max_response_bytes"]:
         raise VerificationError(f"{task['id']}: envelope request or byte limit changed")
@@ -648,7 +665,10 @@ def self_test() -> dict:
     data = inputs[Path(task["named_input"]["path"]).name]
     if task["id"].encode() not in data or task["source_instance_sha256"].encode() not in data:
         raise AssertionError("identity markers are absent from named input")
-    if plan["service"]["max_response_bytes"] != CHILD.MAX_RESPONSE_BYTES:
+    if (
+        plan["service"]["max_response_bytes"] != CHILD.MAX_RESPONSE_BYTES
+        or CHILD.expected_ca_bundle_record()["sha256"] != CHILD.CA_BUNDLE_SHA256
+    ):
         raise AssertionError("response byte-limit contract changed")
     return {"self_test": "pass", "expected_requests": 10, "identity_bound_inputs": 10, "response_byte_limit": CHILD.MAX_RESPONSE_BYTES}
 

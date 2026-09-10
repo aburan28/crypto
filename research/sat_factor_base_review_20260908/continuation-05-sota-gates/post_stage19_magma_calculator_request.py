@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import ssl
 import stat
 import subprocess
 import tempfile
@@ -28,9 +29,14 @@ MAX_RESPONSE_BYTES = 1_048_576
 ENVELOPE_SCHEMA = "koblitz_magma_calculator_stage19_transport_envelope.v1"
 SAFE_RESPONSE_HEADERS = ("content-type", "content-length", "date", "server")
 LAUNCH_NONCE_ENV = "KOBLITZ_STAGE19_LAUNCH_NONCE"
+CA_BUNDLE_ENV = "SSL_CERT_FILE"
+FORBIDDEN_TLS_ENV = ("SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE")
+CA_BUNDLE = Path("/etc/ssl/cert.pem")
+CA_BUNDLE_BYTES = 333483
+CA_BUNDLE_SHA256 = "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994"
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-02-20260910"
 PLAN = DEFAULT_ARTIFACT / "plan.json"
 EXECUTION_MANIFEST = DEFAULT_ARTIFACT / "execution-manifest.json"
 METER = REPO / "scripts" / "process_meter.py"
@@ -72,6 +78,38 @@ def regular_record(path: Path, relative_to: Path | None = None) -> dict:
         "bytes": len(data),
         "sha256": sha256_bytes(data),
     }
+
+
+def expected_ca_bundle_record() -> dict:
+    """Return the frozen CA identity without consulting the live filesystem."""
+    return {
+        "path": "/etc/ssl/cert.pem",
+        "bytes": CA_BUNDLE_BYTES,
+        "sha256": CA_BUNDLE_SHA256,
+    }
+
+
+def ca_bundle_record() -> dict:
+    """Read and authenticate the CA selected for a live probe or POST."""
+    record = regular_record(CA_BUNDLE)
+    if record != expected_ca_bundle_record():
+        raise ChildError("selected CA bundle identity changed")
+    return record
+
+
+def validate_tls_environment(allow_unset_ca: bool = False) -> None:
+    selected = os.environ.get(CA_BUNDLE_ENV)
+    if selected != str(CA_BUNDLE) and not (allow_unset_ca and selected in {None, ""}):
+        raise ChildError("SSL_CERT_FILE does not name the bound CA bundle")
+    mismatches = {name: os.environ[name] for name in FORBIDDEN_TLS_ENV if os.environ.get(name)}
+    if mismatches:
+        raise ChildError(f"conflicting TLS environment overrides are set: {sorted(mismatches)}")
+
+
+def create_tls_context() -> ssl.SSLContext:
+    validate_tls_environment()
+    ca_bundle_record()
+    return ssl.create_default_context(cafile=str(CA_BUNDLE))
 
 
 def git(*args: str) -> bytes:
@@ -154,6 +192,7 @@ def expected_launch_authorization(
             "binding_sha256": start["execution_binding_sha256"],
             "manifest_sha256": start["request"]["execution_manifest_sha256"],
         },
+        "ca_bundle": expected_ca_bundle_record(),
         "meter": {
             **regular_record(METER, REPO),
             "hard_watchdog_seconds": 75,
@@ -237,6 +276,21 @@ def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes
         for record in manifest.get("relevant_blobs", [])
         if isinstance(record, dict)
     }
+    if manifest.get("external_dependencies", {}).get("ca_bundle") != ca_bundle_record():
+        raise ChildError("execution manifest CA bundle identity changed")
+    probe_receipt = HERE / "stage-19-tls-get-probe-20260910" / "receipt.json"
+    probe_response = HERE / "stage-19-tls-get-probe-20260910" / "response.xml"
+    probe = manifest.get("preexecution_tls_get_probe")
+    if (
+        not isinstance(probe, dict)
+        or probe.get("receipt") != regular_record(probe_receipt, HERE)
+        or probe.get("response") != regular_record(probe_response, HERE)
+        or probe.get("http_status") != 200
+        or probe.get("no_computation_requested") is not True
+        or manifest.get("fresh_preexecution_tls_probe_sha256")
+        != sha256_bytes(probe_receipt.read_bytes())
+    ):
+        raise ChildError("execution manifest TLS GET probe binding changed")
     for path in (PLAN, input_path, METER, Path(__file__).resolve()):
         relative = str(path.relative_to(REPO))
         record = relevant.get(relative)
@@ -255,6 +309,7 @@ def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes
     unexpected = {path.name for path in attempt.iterdir()} - allowed
     if unexpected:
         raise ChildError(f"attempt contains pre-existing transport state: {sorted(unexpected)}")
+    validate_tls_environment()
     os.replace(authorization_path, consumed_path)
     directory_fd = os.open(attempt, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
     try:
@@ -302,7 +357,10 @@ def perform_request(input_bytes: bytes) -> dict:
             "User-Agent": USER_AGENT,
         },
     )
-    opener = urllib.request.build_opener(NoRedirect())
+    context = create_tls_context()
+    opener = urllib.request.build_opener(
+        NoRedirect(), urllib.request.HTTPSHandler(context=context)
+    )
     try:
         with opener.open(request, timeout=SOCKET_TIMEOUT_SECONDS) as response:
             payload, exceeded = bounded_read(response)
@@ -375,6 +433,7 @@ def persist_result(output: Path, input_bytes: bytes, result: dict, started_at: s
             "body_bytes": result["request_body_bytes"],
             "body_sha256": result["request_body_sha256"],
             "socket_timeout_seconds": SOCKET_TIMEOUT_SECONDS,
+            "ca_bundle": ca_bundle_record(),
         },
         "http": {
             "status": result["http_status"],
@@ -403,11 +462,18 @@ def self_test() -> dict:
         FORM_FIELD: [sample.decode("ascii")]
     }:
         raise AssertionError("form encoding does not round-trip")
+    if expected_ca_bundle_record() != {
+        "path": "/etc/ssl/cert.pem",
+        "bytes": CA_BUNDLE_BYTES,
+        "sha256": CA_BUNDLE_SHA256,
+    }:
+        raise AssertionError("explicit CA bundle identity changed")
     return {
         "self_test": "pass",
         "response_byte_limit": MAX_RESPONSE_BYTES,
         "socket_timeout_seconds": SOCKET_TIMEOUT_SECONDS,
         "sample_body_sha256": sha256_bytes(body),
+        "ca_bundle": expected_ca_bundle_record(),
     }
 
 

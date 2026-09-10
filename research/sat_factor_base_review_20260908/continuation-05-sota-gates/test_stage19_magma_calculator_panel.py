@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from contextlib import ExitStack
 from datetime import datetime, timedelta, timezone
 import importlib.util
 import io
@@ -34,6 +35,8 @@ VERIFIER = load_module("stage19_verifier_tests", "verify_stage19_magma_calculato
 CHILD = RUNNER.CHILD
 PREPARER = load_module("stage19_manifest_tests", "prepare_stage19_magma_execution_manifest.py")
 AMENDMENT = load_module("stage19_amendment_tests", "verify_stage19_amendment01.py")
+AMENDMENT02 = load_module("stage19_amendment02_tests", "verify_stage19_amendment02.py")
+TLS_PROBE = load_module("stage19_tls_probe_tests", "probe_stage19_magma_tls.py")
 
 
 def stamp(moment: datetime) -> str:
@@ -62,6 +65,8 @@ class Stage19PanelTests(unittest.TestCase):
             },
             "relevant_blob_count": 21,
             "relevant_path_list_sha256": "7" * 64,
+            "ca_bundle": CHILD.expected_ca_bundle_record(),
+            "fresh_preexecution_tls_probe_sha256": "8" * 64,
             "checkout_clean_outside_runtime_artifacts": True,
         }
         body["binding_sha256"] = RUNNER.sha256_bytes(RUNNER.canonical_bytes(body))
@@ -299,6 +304,8 @@ class Stage19PanelTests(unittest.TestCase):
 
         def fake_meter(command, cwd, env, check):  # noqa: ANN001
             self.assertEqual(nonce, env[CHILD.LAUNCH_NONCE_ENV])
+            self.assertEqual(str(CHILD.CA_BUNDLE), env[CHILD.CA_BUNDLE_ENV])
+            self.assertFalse(any(name in env for name in CHILD.FORBIDDEN_TLS_ENV))
             stdout = Path(command[command.index("--stdout") + 1])
             stderr = Path(command[command.index("--stderr") + 1])
             metrics_path = Path(command[command.index("--metrics") + 1])
@@ -330,13 +337,93 @@ class Stage19PanelTests(unittest.TestCase):
         )
 
     def test_amendment01_authenticates_zero_post_failure(self):
-        summary = AMENDMENT.summarize()
-        original = summary["original_zero_post_failure"]
+        amendment = AMENDMENT.read_json(AMENDMENT.AMENDMENT)
+        original = AMENDMENT.verify_original(amendment)
         self.assertEqual(0, original["post_requests_started"])
         self.assertTrue(original["authorization_present_unconsumed"])
         self.assertEqual(0, original["response_or_envelope_files"])
         self.assertEqual(0.124652, original["charged_transport_process"]["total_core_seconds"])
         self.assertEqual(30244864, original["charged_transport_process"]["peak_rss_bytes"])
+
+    def test_amendment02_preserves_tls_failure_and_prepares_explicit_ca(self):
+        summary = AMENDMENT02.summarize()
+        self.assertEqual(23, summary["amendment01_tls_failure"]["artifact_files_verified"])
+        self.assertEqual("prepared_not_executed", summary["corrected_artifact"]["status"])
+        self.assertEqual(0, summary["corrected_artifact"]["attempted_new_requests"])
+        tls = summary["explicit_tls_binding"]
+        self.assertEqual(CHILD.CA_BUNDLE_SHA256, tls["ca_bundle"]["sha256"])
+        self.assertEqual(200, tls["get_probe_http_status"])
+        self.assertEqual(TLS_PROBE.EXPECTED_BODY_SHA256, tls["get_probe_body_sha256"])
+
+    def test_tls_environment_overrides_fail_closed(self):
+        with mock.patch.dict(os.environ, {CHILD.CA_BUNDLE_ENV: str(CHILD.CA_BUNDLE)}, clear=True):
+            CHILD.validate_tls_environment()
+            os.environ[CHILD.CA_BUNDLE_ENV] = "/tmp/wrong-ca.pem"
+            with self.assertRaises(CHILD.ChildError):
+                CHILD.validate_tls_environment()
+
+    def test_static_checks_survive_missing_or_different_live_ca_but_execution_fails(self):
+        modules = {
+            id(module): module
+            for module in (
+                CHILD,
+                RUNNER.CHILD,
+                VERIFIER.CHILD,
+                PREPARER.CHILD,
+                TLS_PROBE.CHILD,
+                AMENDMENT02.CHILD,
+                AMENDMENT02.PROBE.CHILD,
+                AMENDMENT02.RUNNER.CHILD,
+                AMENDMENT02.STAGE19.CHILD,
+            )
+        }.values()
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_root = Path(temporary)
+            different = temporary_root / "different-ca.pem"
+            different.write_bytes(b"not the frozen CA bundle\n")
+            for live_path in (temporary_root / "missing-ca.pem", different):
+                with self.subTest(live_path=live_path.name), ExitStack() as stack:
+                    for module in modules:
+                        stack.enter_context(mock.patch.object(module, "CA_BUNDLE", live_path))
+                    CHILD.self_test()
+                    RUNNER.self_test()
+                    VERIFIER.self_test()
+                    PREPARER.self_test()
+                    TLS_PROBE.self_test()
+                    AMENDMENT02.self_test()
+                    AMENDMENT02.summarize()
+                    with self.assertRaises(CHILD.ChildError):
+                        CHILD.ca_bundle_record()
+                    with self.assertRaises(PREPARER.CHILD.ChildError):
+                        PREPARER.live_external_dependencies()
+                    with self.assertRaises(RUNNER.CHILD.ChildError):
+                        RUNNER.live_ca_bundle_for_execution(
+                            RUNNER.CHILD.expected_ca_bundle_record()
+                        )
+                    with mock.patch.dict(
+                        os.environ,
+                        {CHILD.CA_BUNDLE_ENV: str(live_path)},
+                        clear=True,
+                    ):
+                        with self.assertRaises(CHILD.ChildError):
+                            CHILD.create_tls_context()
+                    with mock.patch.dict(
+                        os.environ,
+                        {TLS_PROBE.CHILD.CA_BUNDLE_ENV: str(live_path)},
+                        clear=True,
+                    ):
+                        with self.assertRaises(TLS_PROBE.CHILD.ChildError):
+                            TLS_PROBE.exact_context()
+        with mock.patch.dict(
+            os.environ,
+            {
+                CHILD.CA_BUNDLE_ENV: str(CHILD.CA_BUNDLE),
+                CHILD.FORBIDDEN_TLS_ENV[0]: "/tmp/conflicting-ca-dir",
+            },
+            clear=True,
+        ):
+            with self.assertRaises(CHILD.ChildError):
+                CHILD.validate_tls_environment()
 
     def test_original_terminal_ledger_cannot_be_selected_for_execution(self):
         original = HERE / "stage-19-magma-calculator-panel-20260909"

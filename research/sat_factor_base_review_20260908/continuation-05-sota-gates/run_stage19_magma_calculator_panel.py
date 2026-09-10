@@ -25,7 +25,8 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 RENDERER_PATH = HERE / "render_stage19_magma_calculator_panel.py"
 CHILD_PATH = HERE / "post_stage19_magma_calculator_request.py"
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+TLS_PROBE_PATH = HERE / "probe_stage19_magma_tls.py"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-02-20260910"
 METER = REPO / "scripts" / "process_meter.py"
 RUN_SCHEMA = "koblitz_magma_calculator_stage19_run.v2"
 ATTEMPT_SCHEMA = "koblitz_magma_calculator_stage19_attempt.v2"
@@ -48,6 +49,7 @@ def load_module(name: str, path: Path):
 
 RENDERER = load_module("stage19_renderer_for_runner", RENDERER_PATH)
 CHILD = load_module("stage19_child_for_runner", CHILD_PATH)
+TLS_PROBE = load_module("stage19_tls_probe_for_runner", TLS_PROBE_PATH)
 STAGE15 = RENDERER.STAGE15
 atomic_write = CHILD.atomic_write
 
@@ -166,6 +168,10 @@ def expected_execution_bound_paths() -> set[str]:
         str((HERE / "stage-19-amendment-01-zero-post-parent-check.json").relative_to(REPO)),
         str((HERE / "stage-19-amendment-01-summary.json").relative_to(REPO)),
         str((HERE / "verify_stage19_amendment01.py").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-02-explicit-ca.json").relative_to(REPO)),
+        str((HERE / "stage-19-amendment-02-summary.json").relative_to(REPO)),
+        str((HERE / "verify_stage19_amendment02.py").relative_to(REPO)),
+        str((HERE / "probe_stage19_magma_tls.py").relative_to(REPO)),
         str((HERE / "stage-19-magma-calculator-panel-protocol.json").relative_to(REPO)),
         str((HERE / "render_stage19_magma_calculator_panel.py").relative_to(REPO)),
         str((HERE / "post_stage19_magma_calculator_request.py").relative_to(REPO)),
@@ -189,7 +195,23 @@ def expected_execution_bound_paths() -> set[str]:
     }
     if len(original) != 22:
         raise RunError("execution binding requires the exact immutable 22-file original artifact")
-    return fixed | inputs | original
+    amendment01_artifact = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+    amendment01 = {
+        str(path.relative_to(REPO))
+        for path in amendment01_artifact.rglob("*")
+        if path.is_file() and not path.is_symlink()
+    }
+    if len(amendment01) != 23:
+        raise RunError("execution binding requires the exact immutable 23-file Amendment 01 artifact")
+    probe_artifact = HERE / "stage-19-tls-get-probe-20260910"
+    probe = {
+        str(path.relative_to(REPO))
+        for path in probe_artifact.rglob("*")
+        if path.is_file() and not path.is_symlink()
+    }
+    if len(probe) != 2:
+        raise RunError("execution binding requires the exact two-file TLS GET probe")
+    return fixed | inputs | original | amendment01 | probe
 
 
 def checkout_dirty_paths() -> list[str]:
@@ -205,6 +227,14 @@ def checkout_dirty_paths() -> list[str]:
             raise RunError("quoted git status paths are unsupported in execution preflight")
         paths.append(path)
     return paths
+
+
+def live_ca_bundle_for_execution(expected: dict) -> dict:
+    """Authenticate the live CA before accepting an execution binding."""
+    observed = CHILD.ca_bundle_record()
+    if expected != observed:
+        raise RunError("execution manifest CA bundle identity changed")
+    return observed
 
 
 def validate_execution_binding(artifact: Path, resume: bool) -> dict:
@@ -238,6 +268,16 @@ def validate_execution_binding(artifact: Path, resume: bool) -> dict:
         raise RunError("execution manifest relevant-blob inventory is incomplete")
     if {record.get("path") for record in records if isinstance(record, dict)} != expected_execution_bound_paths():
         raise RunError("execution manifest does not bind the exact required path set")
+    ca_bundle = live_ca_bundle_for_execution(
+        manifest.get("external_dependencies", {}).get("ca_bundle")
+    )
+    probe = TLS_PROBE.archived_records()
+    if (
+        manifest.get("preexecution_tls_get_probe") != probe
+        or manifest.get("fresh_preexecution_tls_probe_sha256")
+        != probe["receipt"]["sha256"]
+    ):
+        raise RunError("execution manifest TLS GET probe binding changed")
     seen = set()
     for record in records:
         if not isinstance(record, dict) or set(record) != {"path", "git_mode", "git_blob_oid", "bytes", "sha256"}:
@@ -271,6 +311,10 @@ def validate_execution_binding(artifact: Path, resume: bool) -> dict:
         "execution_manifest": {**manifest_record, "git_mode": manifest_mode, "git_blob_oid": manifest_blob},
         "relevant_blob_count": len(records),
         "relevant_path_list_sha256": manifest["relevant_path_list_sha256"],
+        "ca_bundle": ca_bundle,
+        "fresh_preexecution_tls_probe_sha256": manifest.get(
+            "fresh_preexecution_tls_probe_sha256"
+        ),
         "checkout_clean_outside_runtime_artifacts": True,
     }
     binding["binding_sha256"] = sha256_bytes(canonical_bytes(binding))
@@ -286,6 +330,7 @@ def expected_request(plan: dict, task: dict, input_bytes: bytes, binding: dict) 
         "input": task["named_input"], "body_bytes": len(body), "body_sha256": sha256_bytes(body),
         "hard_parent_watchdog_seconds": service["client_timeout_seconds"],
         "response_byte_limit": service["max_response_bytes"],
+        "ca_bundle": binding["ca_bundle"],
         "execution_commit": binding["execution_commit"], "execution_tree": binding["execution_tree"],
         "execution_binding_sha256": binding["binding_sha256"],
         "execution_manifest_sha256": binding["execution_manifest"]["sha256"],
@@ -344,6 +389,7 @@ def validate_transport_envelope(attempt: Path, task: dict, request: dict) -> tup
         "user_agent": request["user_agent"], "input_bytes": task["named_input"]["bytes"],
         "input_sha256": task["named_input"]["sha256"], "body_bytes": request["body_bytes"],
         "body_sha256": request["body_sha256"], "socket_timeout_seconds": CHILD.SOCKET_TIMEOUT_SECONDS,
+        "ca_bundle": request["ca_bundle"],
     }
     if envelope.get("request") != expected_child_request or envelope.get("response_byte_limit") != CHILD.MAX_RESPONSE_BYTES:
         raise RunError(f"{task['id']}: transport request binding changed")
@@ -426,6 +472,10 @@ def transport_process_record(attempt: Path, expected_command: list[str], timeout
 def run_metered_transport(
     attempt: Path, plan: dict, task: dict, launch_nonce: str
 ) -> dict:
+    try:
+        CHILD.validate_tls_environment(allow_unset_ca=True)
+    except CHILD.ChildError as error:
+        raise RunError(str(error)) from error
     command = [
         str(Path(sys.executable).resolve()), str(CHILD_PATH.resolve()),
         "--attempt", str(attempt.resolve()), "--execute-child",
@@ -439,6 +489,9 @@ def run_metered_transport(
     ]
     child_environment = os.environ.copy()
     child_environment[CHILD.LAUNCH_NONCE_ENV] = launch_nonce
+    child_environment[CHILD.CA_BUNDLE_ENV] = str(CHILD.CA_BUNDLE)
+    for variable in CHILD.FORBIDDEN_TLS_ENV:
+        child_environment.pop(variable, None)
     launcher = subprocess.run(
         meter_command, cwd=REPO, env=child_environment, check=False
     )
@@ -911,7 +964,11 @@ def self_test() -> dict:
     body = request_body(data, plan["service"]["form_field"])
     if urllib.parse.parse_qs(body.decode("ascii"), strict_parsing=True) != {"input": [data.decode("ascii")]}:
         raise AssertionError("form body does not decode to the exact named input")
-    if plan["service"]["client_timeout_seconds"] != 75 or CHILD.MAX_RESPONSE_BYTES != 1_048_576:
+    if (
+        plan["service"]["client_timeout_seconds"] != 75
+        or CHILD.MAX_RESPONSE_BYTES != 1_048_576
+        or CHILD.expected_ca_bundle_record()["sha256"] != CHILD.CA_BUNDLE_SHA256
+    ):
         raise AssertionError("transport bounds changed")
     return {
         "self_test": "pass", "attempts_per_task": 1, "retries_per_task": 0,

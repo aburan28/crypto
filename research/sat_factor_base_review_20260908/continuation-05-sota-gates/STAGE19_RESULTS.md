@@ -14,6 +14,18 @@ The first execution envelope at commits `1b688a3` and `1f3cdfe` stopped inside t
 
 The original 22-file prepared/failure artifact at `stage-19-magma-calculator-panel-20260909/` remains byte-identical and must never be resumed. The corrected fresh output is `stage-19-magma-calculator-panel-amendment-01-20260910/`. It replaces only the sandbox-forbidden parent inspection with the nonce-bound portable launch check while retaining the exact task/body/commit/manifest ledger, one-attempt rule, and hard process-meter watchdog. It requires a new two-commit execution manifest before use.
 
+## Amendment 02: explicit CA after terminal TLS failure
+
+The Amendment 01 successor made one POST attempt, atomically consumed its authorization, and retained a transport envelope, but its TLS handshake failed before any HTTP response with `CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate`. It received no calculator output, admitted no result, and halted permanently after the single non-clean receipt. Its complete 23-file artifact is frozen under `stage-19-magma-calculator-panel-amendment-01-20260910/`; Amendment 02 verifies the canonical inventory digest `a2f32baba8d1759701b910e96378b6ca2f049d729c2ae9916ab6396f3ce8f8f4` before accepting the successor.
+
+Amendment 02 binds `/etc/ssl/cert.pem` by its exact 333,483-byte size and SHA-256 `9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994`. The transport constructs `ssl.create_default_context(cafile="/etc/ssl/cert.pem")`; the parent rejects conflicting `SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, or `CURL_CA_BUNDLE` settings, then passes only the exact selected file to the child. The manifest, run binding, attempt request, launch authorization, and transport envelope all repeat the CA record and fail closed if its bytes or environment selection changes.
+
+Static archive verification uses the frozen expected CA record and does not require the verifier host to provide the same live trust store. This keeps CI portable while still checking the explicit context call, override rejection, archived probe bytes, and the source paths that enforce live authentication. Manifest creation, execution-binding admission, authorization consumption, a fresh `--probe`, and TLS-context creation independently read and authenticate the live `/etc/ssl/cert.pem`; a missing or different file stops those live paths.
+
+A separately archived GET-only probe used the same explicit context and received HTTP 200 with the exact 36-byte XML body SHA-256 `c96bf54dfc5469d7a6178b115e82337ea5f1552038028cf2fa14a38db1e72161`. It sent no calculator input and requested no computation, so it establishes TLS endpoint reachability only. It is not POST delivery, Magma execution, solver, scientific, or performance evidence.
+
+The new execution-free default is `stage-19-magma-calculator-panel-amendment-02-20260910/`. Its future first pre-execution commit must include this implementation, all ten regenerated inputs, the Amendment 02 record and verification summary, the complete original and Amendment 01 ledgers, and the two-file GET-probe archive. Manifest generation then binds those 76 paths plus the external CA identity. The second pre-execution commit may add only that manifest; no POST is permitted before it.
+
 Execution uses two pre-execution commits. The first clean commit contains the implementation and prepared artifact. `prepare_stage19_magma_execution_manifest.py --write` then records that commit and tree plus the Git blob IDs, sizes, and SHA-256 hashes for the workflow, protocol, renderer, transport child, runner, verifier, tests, manifest preparer, results, prepared plan/summary, and all ten inputs. The manifest alone is committed in a second commit. The runner refuses execution unless that is the exact tree delta, every relevant current byte matches both commits, and the checkout is clean outside allowed runtime artifacts. The exact second commit, tree, manifest blob, and binding hash are repeated in the run and attempt receipts.
 
 The offline verifier reconstructs every source and input independently, enforces a contiguous seed-major attempt prefix and one fixed attempt directory per task, recomputes request and response custody, and applies the strict seven-marker parser. Service-reported time and memory remain opaque metadata. Even ten clean receipts would still lack Magma-linked point witnesses, process-scoped CPU and RSS, and all five n=59 tasks. They cannot set the licensed-runner or solver-matrix gates and support no performance, novelty, end-to-end index-calculus, or SOTA claim.
@@ -25,4 +37,8 @@ Prepared checks:
 - crash-boundary recovery tests for an empty attempt, start-only attempt, meter-only attempt, response without envelope, and retained response plus envelope;
 - deterministic regeneration of `plan.json`, all ten named inputs, and `prepared-summary.json` in the corrected artifact;
 - byte-exact verification of the original zero-POST failure ledger and committed call order;
+- byte-exact verification of the 23-file Amendment 01 TLS-failure ledger;
+- explicit CA identity and environment-conflict rejection tests;
+- archived no-compute GET probe verification (HTTP 200, 36 bytes, exact body hash);
+- 76-path next-manifest inventory covering all prior Stage 19 artifacts;
 - no calculator POST submitted.

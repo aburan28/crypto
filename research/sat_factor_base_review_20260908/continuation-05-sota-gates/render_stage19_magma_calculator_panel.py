@@ -17,7 +17,7 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 PROTOCOL = HERE / "stage-19-magma-calculator-panel-protocol.json"
-DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-01-20260910"
+DEFAULT_ARTIFACT = HERE / "stage-19-magma-calculator-panel-amendment-02-20260910"
 STAGE13_PROTOCOL = HERE / "stage-13-pdp-panel-protocol.json"
 STAGE13_CUSTODY = HERE / "stage-13-custody.json"
 STAGE15_VERIFIER = HERE / "verify_stage15_magma_calculator.py"
