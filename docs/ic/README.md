@@ -7,7 +7,10 @@ validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
-[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime).
+[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime;
+`schema_version` 2). Beat claims must include the ledger's **measurement
+schema** fields — including **FFD / degree of regularity** on algebraic
+`decomposition` frontiers — or they fail closed.
 
 ## Commands
 
