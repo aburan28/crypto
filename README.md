@@ -680,7 +680,9 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
-Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
+[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
+verified artifact: [`docs/POLLARD_COLLAB_CAIRN.md`](./docs/POLLARD_COLLAB_CAIRN.md).
 
 ### Index calculus (ECDLP, prime fields)
 
