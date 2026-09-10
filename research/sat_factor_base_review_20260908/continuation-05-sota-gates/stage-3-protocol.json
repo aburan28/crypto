@@ -1,0 +1,24 @@
+{
+  "schema": "koblitz_automorphism_rho_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "purpose": "Add the missing same-target Pollard-rho control on the quotient by negation and Koblitz Frobenius.",
+  "construction": "A 16-way r-adding walk canonicalizes every state over {plus or minus Frobenius^k : 0 <= k < n}. When canonicalization multiplies a point by plus or minus lambda^k, it multiplies both tracked coefficients by the same public scalar modulo the subgroup order.",
+  "collision_equation": "Equal canonical points give (a1-a2)P=(b2-b1)Q; invert the denominator modulo the prime subgroup order and verify the candidate against Q.",
+  "runs": [
+    {"n": 9, "a": 0, "secret": 53, "seed": 20260921},
+    {"n": 9, "a": 0, "secret": 101, "seed": 20260922}
+  ],
+  "controls": [
+    "Targets and seeds match stage 2",
+    "Every returned scalar must reproduce the public target",
+    "Generic rho from stage 2 remains the non-quotient control",
+    "Report quotient iterations and actual group additions separately because canonicalization also performs field squarings"
+  ],
+  "accounting": {
+    "watchdog_seconds_per_process": 120,
+    "metrics": ["wall seconds", "user seconds", "system seconds", "total core-seconds", "peak RSS", "quotient iterations", "group additions", "restarts"],
+    "instrument": "fresh process_meter.py process per arm"
+  },
+  "claim_boundary": "Two degree-9 controls can validate implementation and full-cost reporting. They cannot establish asymptotic scaling, cryptographic-size superiority, or SOTA."
+}
