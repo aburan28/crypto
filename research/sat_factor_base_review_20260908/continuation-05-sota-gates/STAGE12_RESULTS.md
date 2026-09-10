@@ -1,6 +1,6 @@
 # Stage 12: indexed public projection map
 
-The original public cofactor-projection pass found each projected factor-base point by scanning every signed-Frobenius representative. The replacement first identifies each orbit, builds one point-key lookup for all signed Frobenius translates, and then classifies every projected point by constant-time lookup. It uses the same public point operations and computes no discrete logarithm.
+The original public cofactor-projection pass found each projected factor-base point by scanning every signed-Frobenius representative. The replacement first identifies each orbit, builds one point-key hash table for all signed Frobenius translates, and then classifies every projected point by hash-table lookup. It uses the same public point operations and computes no discrete logarithm.
 
 The verifier compared every degree-23 candidate field against the frozen Stage 10 outputs: divisor indices and polynomials, linearised exponents, dimensions, abscissa counts, rational-point counts, cofactor admission, projected point counts, projected signed-Frobenius counts, and selected candidates were identical.
 
