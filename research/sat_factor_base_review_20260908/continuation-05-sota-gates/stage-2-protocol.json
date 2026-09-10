@@ -1,0 +1,40 @@
+{
+  "schema": "koblitz_unknown_scalar_algebraic_factor_base_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "purpose": "Remove the scalar-labelled factor-base defect from complete toy index-calculus runs and establish a same-curve generic-rho control.",
+  "curve": {"n": 9, "a": 0, "equation": "y^2+xy=x^3+1"},
+  "factor_base": {
+    "construction": "GGMP linearised-polynomial kernel from factor index 0 of T^9-1",
+    "selection_inputs": ["n", "a", "field irreducible", "factor index"],
+    "forbidden_inputs": ["target scalar", "factor-base point logarithms", "subgroup log table"],
+    "materialisation_charged": true
+  },
+  "index_calculus": {
+    "m": 2,
+    "solver": "in-tree native-XOR CDCL",
+    "max_trials": 20000,
+    "max_models_per_target": 64,
+    "conflict_budget_per_target": 10000,
+    "macaulay_preprocessing": null,
+    "collapse_negation": true,
+    "stop_on_verified_rank": true,
+    "relation_batch_size": 1
+  },
+  "runs": [
+    {"secret": 53, "seed": 20260921},
+    {"secret": 101, "seed": 20260922}
+  ],
+  "controls": [
+    "Same target and curve through generic Pollard rho",
+    "Reject any index-calculus run that recovers from a direct aP+bQ=O relation",
+    "Reject any nonzero invalid-model count",
+    "Recompute [d]P and require equality with the public target"
+  ],
+  "accounting": {
+    "watchdog_seconds_per_process": 120,
+    "metrics": ["wall seconds", "user seconds", "system seconds", "total core-seconds", "peak RSS", "SAT conflicts", "relations", "trials", "linear-algebra time"],
+    "instrument": "fresh process_meter.py process per arm"
+  },
+  "claim_boundary": "These are toy unknown-scalar completions. Generic rho is not the required signed-Frobenius automorphism-optimized rho baseline, and no SOTA claim follows."
+}

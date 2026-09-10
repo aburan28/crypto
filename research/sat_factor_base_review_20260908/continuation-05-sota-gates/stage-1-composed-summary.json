@@ -1,0 +1,377 @@
+{
+  "schema": "koblitz_pdp_stage1_composition.v1",
+  "source_runs": {
+    "v2": "stage-1-seed-20260909-v2/result.json",
+    "v3_wdsat_replacement": "stage-1-wdsat-rebuild-20260909-v3/result.json"
+  },
+  "composition_rule": "v3 replaces only v2 WDSat cells; v2 supplies native SAT, direct MITM and CryptoMiniSat",
+  "rows": [
+    {
+      "cell": {
+        "n": 15,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "status": "completed",
+      "representation": "symmetrised_s4",
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "source": {
+        "variables": 42,
+        "equations": 42,
+        "max_degree": 3,
+        "anf_blake3": "7cd6622a46c6ca3f3efc4d739164bbffc5dcc14c1ab5ce3a9387b717e1d68f1b",
+        "xor_dimacs_blake3": "ec45f7ae2fbdfb7c88f1b8a7e527b01b6d3735c62503344190a15811f50ada15",
+        "magma_blake3": "4887fec4f7cff5d7bc5ff5498f35544403d69b702d180d79cce7e7617a928907",
+        "v2_v3_exports_identical": true
+      },
+      "combined_exporter_process": {
+        "wall_seconds": 0.0766050829552114,
+        "total_core_seconds": 0.067911,
+        "peak_rss_bytes": 5701632,
+        "includes": "predicate, target, source/export, native SAT, direct MITM"
+      },
+      "native_sat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 2731,
+        "wall_seconds": 0.056453333,
+        "process_core_and_peak_note": "available only for the combined exporter process in stage 1"
+      },
+      "direct_mitm": {
+        "status": "sat",
+        "wall_seconds": 0.003889375,
+        "factor_points": 47,
+        "group_additions": 1129
+      },
+      "wdsat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 8,
+        "wall_seconds": 0.4473213329911232,
+        "total_core_seconds": 0.0021279999999999997,
+        "peak_rss_bytes": 3457024,
+        "build_total_core_seconds": 0.623483,
+        "build_peak_rss_bytes": 59310080,
+        "binary_sha256": "be0b486e0ae62daee0dbed16d292399bf08a1150f095367d70eb93f90c445570"
+      },
+      "cryptominisat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 0,
+        "wall_seconds": 0.010865458054468036,
+        "total_core_seconds": 0.009722999999999999,
+        "peak_rss_bytes": 4734976
+      },
+      "magma_f4": {
+        "status": "unavailable_operational"
+      }
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "status": "completed",
+      "representation": "symmetrised_s4",
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "source": {
+        "variables": 42,
+        "equations": 58,
+        "max_degree": 3,
+        "anf_blake3": "b0e011ef0c165a8bb94d7ccb05d97358108521d2d904ecd1d56d24eb4305751a",
+        "xor_dimacs_blake3": "449e414e04ac8cb66689aac31a099d7cc669a8409e78b3ac4023561bb67c74d2",
+        "magma_blake3": "73330c0460e1d95bb17566dc9417e1200dbf592c472a1b6dfdff76dd0b6f2395",
+        "v2_v3_exports_identical": true
+      },
+      "combined_exporter_process": {
+        "wall_seconds": 0.02285483304876834,
+        "total_core_seconds": 0.021561,
+        "peak_rss_bytes": 5472256,
+        "includes": "predicate, target, source/export, native SAT, direct MITM"
+      },
+      "native_sat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 244,
+        "wall_seconds": 0.009183667,
+        "process_core_and_peak_note": "available only for the combined exporter process in stage 1"
+      },
+      "direct_mitm": {
+        "status": "sat",
+        "wall_seconds": 0.004038376,
+        "factor_points": 31,
+        "group_additions": 518
+      },
+      "wdsat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 6615,
+        "wall_seconds": 0.24457970808725804,
+        "total_core_seconds": 0.037934999999999997,
+        "peak_rss_bytes": 3670016,
+        "build_total_core_seconds": 0.558952,
+        "build_peak_rss_bytes": 59113472,
+        "binary_sha256": "9d049cc27192698a0decfdd9a54b4e1818125c8c27718fdea05f3289978b8193"
+      },
+      "cryptominisat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 6790,
+        "wall_seconds": 0.07431449997238815,
+        "total_core_seconds": 0.072967,
+        "peak_rss_bytes": 6324224
+      },
+      "magma_f4": {
+        "status": "unavailable_operational"
+      }
+    },
+    {
+      "cell": {
+        "n": 31,
+        "ell": 5,
+        "m": 3,
+        "basis": "ggmp"
+      },
+      "status": "completed",
+      "representation": "chained_s3",
+      "factor_base_predicate": {
+        "definition": "kernel of sum X^(2^i) over the set factor exponents",
+        "enumerates_target_subgroup": false,
+        "factor_bitmask": 37,
+        "factor_index": 0,
+        "kind": "ggmp_linearised_kernel",
+        "linearised_exponents": [
+          0,
+          2,
+          5
+        ],
+        "uses_discrete_log_labels": false
+      },
+      "source": {
+        "variables": 46,
+        "equations": 62,
+        "max_degree": 3,
+        "anf_blake3": "d2404ea5c1be232fd5ac13997613fd67bc1b161e28a92cc40042b2c80fedcf89",
+        "xor_dimacs_blake3": "5b50959447d7953836ccf84c8ed7c33129d5842e37f368d242e09fdc9fbb5a8b",
+        "magma_blake3": "6faf8c762bdc92d5bc963a5f265aa5500684b85402971ce5fa6f23fbcc858cd9",
+        "v2_v3_exports_identical": true
+      },
+      "combined_exporter_process": {
+        "wall_seconds": 0.011195375001989305,
+        "total_core_seconds": 0.009989999999999999,
+        "peak_rss_bytes": 4423680,
+        "includes": "predicate, target, source/export, native SAT, direct MITM"
+      },
+      "native_sat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 319,
+        "wall_seconds": 0.00419325,
+        "process_core_and_peak_note": "available only for the combined exporter process in stage 1"
+      },
+      "direct_mitm": {
+        "status": "sat",
+        "wall_seconds": 0.000347458,
+        "factor_points": 1,
+        "group_additions": 2
+      },
+      "wdsat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 12,
+        "wall_seconds": 0.2174871249590069,
+        "total_core_seconds": 0.002812,
+        "peak_rss_bytes": 7356416,
+        "build_total_core_seconds": 0.53884,
+        "build_peak_rss_bytes": 58851328,
+        "binary_sha256": "31ff3878c0e67fe911ac7865dbffb24e5a02609dc3b7c12896a98b95e4fa4cc5"
+      },
+      "cryptominisat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 0,
+        "wall_seconds": 0.012487833970226347,
+        "total_core_seconds": 0.011274,
+        "peak_rss_bytes": 6062080
+      },
+      "magma_f4": {
+        "status": "unavailable_operational"
+      }
+    },
+    {
+      "cell": {
+        "n": 41,
+        "ell": 5,
+        "m": 3,
+        "basis": "standard"
+      },
+      "status": "completed",
+      "representation": "symmetrised_s4",
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "source": {
+        "variables": 42,
+        "equations": 68,
+        "max_degree": 3,
+        "anf_blake3": "9abe724b05fe742311e4d28a08545e989580c194bdbf9bf79dce9451cdc9a071",
+        "xor_dimacs_blake3": "479c99ce2447908a07b851cb4df367732dd09ba145bed0c0747d5c35fefbc338",
+        "magma_blake3": "eeb7d7486da2bb7dd2734aeb1bc89d5210fa5ee0844eca05c5ce03fe30daf1c0",
+        "v2_v3_exports_identical": true
+      },
+      "combined_exporter_process": {
+        "wall_seconds": 0.06204054190311581,
+        "total_core_seconds": 0.060848,
+        "peak_rss_bytes": 6733824,
+        "includes": "predicate, target, source/export, native SAT, direct MITM"
+      },
+      "native_sat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 1981,
+        "wall_seconds": 0.046368625,
+        "process_core_and_peak_note": "available only for the combined exporter process in stage 1"
+      },
+      "direct_mitm": {
+        "status": "sat",
+        "wall_seconds": 0.004636667,
+        "factor_points": 25,
+        "group_additions": 327
+      },
+      "wdsat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 6392,
+        "wall_seconds": 0.25081474997568876,
+        "total_core_seconds": 0.0426,
+        "peak_rss_bytes": 3768320,
+        "build_total_core_seconds": 0.539471,
+        "build_peak_rss_bytes": 59392000,
+        "binary_sha256": "2a2324d9ecf4073722849fa919ae651a1158e1b43a99ae824c60cd20b4c7ccdc"
+      },
+      "cryptominisat": {
+        "status": "sat",
+        "source_model_valid": true,
+        "conflicts": 28099,
+        "wall_seconds": 0.3033351249760017,
+        "total_core_seconds": 0.301732,
+        "peak_rss_bytes": 8912896
+      },
+      "magma_f4": {
+        "status": "unavailable_operational"
+      }
+    },
+    {
+      "cell": {
+        "n": 59,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "status": "completed",
+      "representation": "symmetrised_s4",
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "source": {
+        "variables": 78,
+        "equations": 110,
+        "max_degree": 3,
+        "anf_blake3": "6860e758acd4afb49dfa07e66c5f6aee082a3f13529009732cd45f9c2169d38e",
+        "xor_dimacs_blake3": "17cf7d38f92513d2938d594ede9ff14c8c7f23572a61b54852bf417e6daabbe0",
+        "magma_blake3": "900712e6e41ff35e9c48f22129dccb0ce9e12a152b317ae61c3744607019fc65",
+        "v2_v3_exports_identical": true
+      },
+      "combined_exporter_process": {
+        "wall_seconds": 12.101284249918535,
+        "total_core_seconds": 12.091462,
+        "peak_rss_bytes": 197967872,
+        "includes": "predicate, target, source/export, native SAT, direct MITM"
+      },
+      "native_sat": {
+        "status": "unknown",
+        "source_model_valid": null,
+        "conflicts": 100000,
+        "wall_seconds": 8.918729625,
+        "process_core_and_peak_note": "available only for the combined exporter process in stage 1"
+      },
+      "direct_mitm": {
+        "status": "sat",
+        "wall_seconds": 3.126873375,
+        "factor_points": 483,
+        "group_additions": 117053
+      },
+      "wdsat": {
+        "status": "timeout_inconclusive",
+        "source_model_valid": null,
+        "conflicts": null,
+        "wall_seconds": 120.00516933307517,
+        "total_core_seconds": 117.999105,
+        "peak_rss_bytes": 14254080,
+        "build_total_core_seconds": 0.512332,
+        "build_peak_rss_bytes": 57622528,
+        "binary_sha256": "1c699c2ea9673a1d9bdf9e5851e8d8f91077cf05dd9ac9cab31a3005173aede7"
+      },
+      "cryptominisat": {
+        "status": "timeout_inconclusive",
+        "source_model_valid": null,
+        "conflicts": null,
+        "wall_seconds": 120.01409758301452,
+        "total_core_seconds": 119.26157099999999,
+        "peak_rss_bytes": 179339264
+      },
+      "magma_f4": {
+        "status": "unavailable_operational"
+      }
+    },
+    {
+      "cell": {
+        "n": 67,
+        "ell": 9,
+        "m": 3,
+        "basis": "standard"
+      },
+      "status": "failed_operational",
+      "reason": {
+        "status": "missing_manifest_operational",
+        "expected_path": "/Volumes/SSD990/crypto-koblitz-sota-gates-20260909/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-seed-20260909-v2/n67-l9-m3-standard/manifest.json",
+        "asserts_nothing_about": "the PDP, factor base, or solver performance"
+      }
+    }
+  ],
+  "checks": {
+    "all_available_sat_models_source_valid": true,
+    "all_v2_v3_exports_identical": true,
+    "unknown_never_counted_as_unsat": true,
+    "factor_base_predicates_deny_scalar_labels": true
+  },
+  "gate_status": {
+    "1_full_cost_all_stages": "partial: stage-1 PDP setup/build/solve resources are charged; relation collection and linear algebra await the end-to-end stage",
+    "2_matched_solver_matrix": "partial: native XOR, WDSat, CryptoMiniSat and direct MITM ran; GGMP n=31 ran; Magma F4 is unavailable",
+    "3_required_metrics": "partial: external solver process metrics are complete; native SAT and MITM need isolated process receipts instead of the combined exporter receipt",
+    "4_n31_n41_and_larger_pdp": "passed for one planted SAT PDP per rung at n=31, n=41 and n=59; no scaling law or population claim",
+    "5_unknown_scalar_end_to_end": "pending",
+    "6_automorphism_optimized_pollard_rho": "pending",
+    "7_external_reproduction_and_novelty": "pending"
+  },
+  "claim": "Strong internal engineering and planted-PDP evidence only; not a Koblitz index-calculus SOTA result"
+}
