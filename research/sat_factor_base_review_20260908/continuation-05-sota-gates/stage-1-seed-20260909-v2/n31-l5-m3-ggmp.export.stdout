@@ -1,0 +1,116 @@
+{
+  "curve": "y^2 + xy = x^3 + x^2 + 1",
+  "direct_meet_in_the_middle": {
+    "factor_base_ns": 341791,
+    "factor_points": 1,
+    "group_additions": 2,
+    "pair_entries": 1,
+    "search_ns": 5667,
+    "status": "sat",
+    "wall_ns": 347458,
+    "witness_indices": [
+      0,
+      0,
+      0
+    ]
+  },
+  "ell": 5,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "5b50959447d7953836ccf84c8ed7c33129d5842e37f368d242e09fdc9fbb5a8b",
+      "bytes": 59677,
+      "cnf_clauses": 4570,
+      "path": "instance.xor.cnf",
+      "variables": 1311,
+      "xor_rows": 62
+    },
+    "magma_boolean_f4": {
+      "blake3": "6faf8c762bdc92d5bc963a5f265aa5500684b85402971ce5fa6f23fbcc858cd9",
+      "bytes": 31299,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "d2404ea5c1be232fd5ac13997613fd67bc1b161e28a92cc40042b2c80fedcf89",
+      "bytes": 18564,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "2",
+    "4",
+    "16",
+    "256",
+    "65536"
+  ],
+  "factor_base_predicate": {
+    "definition": "kernel of sum X^(2^i) over the set factor exponents",
+    "enumerates_target_subgroup": false,
+    "factor_bitmask": 37,
+    "factor_index": 0,
+    "kind": "ggmp_linearised_kernel",
+    "linearised_exponents": [
+      0,
+      2,
+      5
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    3
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 31,
+  "native_sat": {
+    "conflict_budget": 100000,
+    "initial_cnf_clauses": 4570,
+    "result": "sat",
+    "source_model_valid": true,
+    "stats": {
+      "conflicts": 319,
+      "decisions": 405,
+      "learnt_clauses": 319,
+      "max_level": 25,
+      "propagations": 66855,
+      "restarts": 2,
+      "xor_conflicts": 248,
+      "xor_passes": 1575,
+      "xor_propagations": 1894
+    },
+    "variables": 1311
+  },
+  "planted_points": [
+    {
+      "x": "0",
+      "y": "1"
+    },
+    {
+      "x": "0",
+      "y": "1"
+    },
+    {
+      "x": "0",
+      "y": "1"
+    }
+  ],
+  "representation": "chained_s3",
+  "scope": "standalone planted point-decomposition problem; not a completed index-calculus attack",
+  "seed": 20260911,
+  "source_equations": 62,
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 85,
+  "source_variables": 46,
+  "target": {
+    "x": "0",
+    "y": "1"
+  },
+  "timing_ns": {
+    "factor_base_predicate_construction": 112666,
+    "native_encoding_and_solve": 4193250,
+    "planted_target_construction": 840292,
+    "source_system_construction": 449542,
+    "whole_process_internal": 7971250
+  }
+}

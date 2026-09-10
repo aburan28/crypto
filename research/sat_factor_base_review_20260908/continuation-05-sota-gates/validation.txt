@@ -1,0 +1,25 @@
+Validation snapshot: af089ea9b0fa09872366088668f30101c1feeda6
+
+PASS: cargo test --release --lib cryptanalysis::koblitz_index_calculus --locked -- --test-threads=1
+Result: 34 passed; 0 failed; 1 ignored.
+
+PASS: cargo check --release --example koblitz_pdp_export --example koblitz_algebraic_e2e --locked
+Result: both new examples compile; repository-wide pre-existing warnings remain.
+
+PASS: python3 -m py_compile scripts/process_meter.py scripts/run_koblitz_pdp_matrix.py research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage1.py research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage2.py research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage3.py
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage1.py
+Result: v2 and v3 source-export hashes are identical for every generated cell; all available SAT models validate against the source systems.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage2.py
+Result: two scalar-blind index-calculus completions and same-target generic-rho controls verified.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage3.py
+Result: two same-target signed-Frobenius quotient-rho controls verified.
+
+PASS: exhaustive degree-9 quotient-rho smoke over every nonzero scalar 1..126, with seed 20261000+scalar.
+Result: exhaustive_n9_unknown_scalars_fail=0.
+
+PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
+
+PASS: no non-target file over 95 MB in the branch worktree.

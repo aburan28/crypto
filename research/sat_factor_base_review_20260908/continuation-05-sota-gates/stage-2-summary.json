@@ -1,0 +1,79 @@
+{
+  "schema": "koblitz_unknown_scalar_stage2_summary.v1",
+  "curve": {
+    "n": 9,
+    "a": 0,
+    "subgroup_order": 127
+  },
+  "factor_base": {
+    "kind": "GGMP linearised-polynomial kernel",
+    "ell": 6,
+    "points": 55,
+    "signed_frobenius_orbits": 4,
+    "factor_base_logs_constructed": false,
+    "target_subgroup_enumerated_for_factor_base_selection": false
+  },
+  "rows": [
+    {
+      "secret": 53,
+      "target": {
+        "x": "226",
+        "y": "196"
+      },
+      "index_calculus": {
+        "relations": 5,
+        "trials": 5,
+        "sat_conflicts": 122,
+        "linear_solve_attempts": 1,
+        "wall_seconds": 0.404708500020206,
+        "total_core_seconds": 0.0043289999999999995,
+        "peak_rss_bytes": 2785280,
+        "internal_end_to_end_seconds": 0.002152209,
+        "verified": true
+      },
+      "generic_rho": {
+        "iterations": 22,
+        "wall_seconds": 0.003367624944075942,
+        "total_core_seconds": 0.002111,
+        "peak_rss_bytes": 2080768,
+        "internal_end_to_end_seconds": 0.000294292,
+        "automorphism_optimized": false,
+        "verified": true
+      }
+    },
+    {
+      "secret": 101,
+      "target": {
+        "x": "56",
+        "y": "171"
+      },
+      "index_calculus": {
+        "relations": 5,
+        "trials": 5,
+        "sat_conflicts": 125,
+        "linear_solve_attempts": 1,
+        "wall_seconds": 0.005122250062413514,
+        "total_core_seconds": 0.003912,
+        "peak_rss_bytes": 2703360,
+        "internal_end_to_end_seconds": 0.002110541,
+        "verified": true
+      },
+      "generic_rho": {
+        "iterations": 16,
+        "wall_seconds": 0.0039013749919831753,
+        "total_core_seconds": 0.002195,
+        "peak_rss_bytes": 2080768,
+        "internal_end_to_end_seconds": 0.000281208,
+        "automorphism_optimized": false,
+        "verified": true
+      }
+    }
+  ],
+  "checks": {
+    "both_unknown_scalars_recovered_and_verified": true,
+    "no_direct_relation_shortcut": true,
+    "no_invalid_sat_model": true,
+    "same_targets_used_for_ic_and_rho": true
+  },
+  "claim": "two complete toy unknown-scalar runs over an algebraically defined factor base; generic rho controls only; no automorphism-optimized comparison or SOTA claim"
+}

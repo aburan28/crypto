@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "amends": "protocol.json",
+  "reason": "The stage-1 v2 WDSat source copies contained object files compiled against a prior static config.h. Replacing config.h followed by make did not rebuild those objects. Every per-cell binary had the same SHA-256, and cells above n=15 failed static-bound assertions.",
+  "affected_run": "stage-1-seed-20260909-v2",
+  "classification": "failed_operational_stale_wdsat_objects",
+  "scientific_inference": "none from the WDSat cells that failed before search",
+  "change": "Run and charge make -C src clean before every per-cell WDSat build, then compile against the exact generated static limits.",
+  "frozen_science_unchanged": [
+    "cells",
+    "seeds",
+    "factor-base predicates",
+    "source equations and their hashes",
+    "conflict budget",
+    "process watchdog",
+    "WDSat search flags",
+    "success and invalidation criteria"
+  ],
+  "successor_run": "stage-1-wdsat-rebuild-20260909-v3",
+  "composition_rule": "Use v3 only to replace v2 WDSat cells. Keep v2 generator, native SAT, direct MITM and CryptoMiniSat records unchanged."
+}

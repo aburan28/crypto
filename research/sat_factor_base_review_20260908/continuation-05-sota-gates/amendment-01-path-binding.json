@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "amends": "protocol.json",
+  "reason": "The first admitted launch passed a relative result path to exporter subprocesses whose working directory was the release-binary directory. Exporters completed for n <= 63, but their manifests were therefore outside the coordinator's expected artifact root and no external solver was dispatched.",
+  "affected_run": "stage-1-seed-20260909",
+  "classification": "failed_operational_path_binding",
+  "scientific_inference": "none",
+  "change": "Resolve the result root to an absolute path before constructing any per-cell path.",
+  "frozen_science_unchanged": [
+    "cells",
+    "seeds",
+    "factor-base predicates",
+    "source equations",
+    "conflict budget",
+    "process watchdog",
+    "solver configurations",
+    "success and invalidation criteria"
+  ],
+  "successor_run": "stage-1-seed-20260909-v2",
+  "additional_observation": "The n=67 cell exceeds the current n<64 polynomial-bitmask field implementation. It remains in the successor matrix as an explicit operational boundary; n=59 remains the required larger-than-41 literature PDP rung."
+}
