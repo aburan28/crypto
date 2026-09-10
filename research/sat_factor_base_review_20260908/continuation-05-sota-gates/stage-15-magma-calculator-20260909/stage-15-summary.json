@@ -1,0 +1,298 @@
+{
+  "cases": [
+    {
+      "adapted_submission": {
+        "classification": "sat_basis_certificate_unverified_model",
+        "point_witness_validated": false,
+        "process_scoped_resources_complete": false,
+        "response": {
+          "output": "KOBLITZ_MAGMA_SCHEMA=koblitz_magma_f4_terminal.v1\nKOBLITZ_MAGMA_ALGORITHM=direct-f4-sparse\nKOBLITZ_MAGMA_STATUS=SAT\nKOBLITZ_MAGMA_F4_DEGREES=[ 2, 3, 3, 3, 3 ]\nKOBLITZ_MAGMA_BASIS_SIZE=102\nKOBLITZ_MAGMA_CPU_SECONDS=0.440\nKOBLITZ_MAGMA_WALL_SECONDS=0.450\n\n",
+          "response_bytes": 578,
+          "response_path": "seed-2026091301-adapted-response.xml",
+          "response_sha256": "d0115162aeb1ab69c99ef7c6d51741362cbefe1e8a45a23e7898bf512b113795",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 1133184943,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.48,
+            "version": "2.29-10",
+            "warning": null
+          }
+        },
+        "terminal": {
+          "algorithm": "direct-f4-sparse",
+          "basis_size": 102,
+          "cpu_seconds": 0.44,
+          "f4_step_degrees": [
+            2,
+            3,
+            3,
+            3,
+            3
+          ],
+          "gpu_disabled": true,
+          "schema": "koblitz_magma_f4_terminal.v1",
+          "single_thread_requested": true,
+          "terminal_status": "sat",
+          "wall_seconds": 0.45
+        }
+      },
+      "calculator_adaptation": {
+        "bytes": 33806,
+        "f4_controls_retained": true,
+        "path": "seed-2026091301-adapted-input.magma",
+        "rule": "remove exactly the unsupported global SetNthreads(1) line; retain Nthreads := 1 on GroebnerBasis",
+        "sha256": "1de047cafe10b89eaeef254b291dcc61b991a6edafc1c64d1d72bdd08a115101",
+        "source_system_byte_identical": true
+      },
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "exact_submission": {
+        "classification": "f4_markers_after_calculator_setup_error",
+        "response": {
+          "output": "\n>> SetNthreads(1);\n              ^\nRuntime error in 'SetNthreads': Illegal operation\n\nKOBLITZ_MAGMA_SCHEMA=koblitz_magma_f4_terminal.v1\nKOBLITZ_MAGMA_ALGORITHM=direct-f4-sparse\nKOBLITZ_MAGMA_STATUS=SAT\nKOBLITZ_MAGMA_F4_DEGREES=[ 2, 3, 3, 3, 3 ]\nKOBLITZ_MAGMA_BASIS_SIZE=102\nKOBLITZ_MAGMA_CPU_SECONDS=0.450\nKOBLITZ_MAGMA_WALL_SECONDS=0.450\n\n",
+          "response_bytes": 795,
+          "response_path": "seed-2026091301-exact-response.xml",
+          "response_sha256": "d287a00f710481e9b81fd5261e0cc181fcd84b14b18bf1da147fdbb0a2991be6",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 146824692,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.49,
+            "version": "2.29-10",
+            "warning": "An error occurred. See the output for details."
+          }
+        },
+        "scientific_terminal_admitted": false,
+        "terminal": {
+          "algorithm": "direct-f4-sparse",
+          "basis_size": 102,
+          "cpu_seconds": 0.45,
+          "f4_step_degrees": [
+            2,
+            3,
+            3,
+            3,
+            3
+          ],
+          "gpu_disabled": true,
+          "schema": "koblitz_magma_f4_terminal.v1",
+          "single_thread_requested": true,
+          "terminal_status": "sat",
+          "wall_seconds": 0.45
+        }
+      },
+      "seed": 2026091301,
+      "source": {
+        "bytes": 33822,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091301/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.magma",
+        "producer_source_instance_blake3": "7ac0bfbe3b7a4fa3d76a43ae37f0a4103ff62a5e6bf7e13edbd44b303c2f351a",
+        "sha256": "fd82e5b47caf1904bd9e7cc5e6c8ae126644014868ea23a396b8f2bb5f3bacfd",
+        "source_instance_sha256": "8d8d65c508d0cb292cc304cd98f44abbbcaed2a06a3be92feba12a6a4474ced6"
+      },
+      "witness_attempt": {
+        "assignment_obtained": false,
+        "bytes": 33697,
+        "classification": "calculator_temp_directory_unavailable_operational",
+        "path": "seed-2026091301-sat-witness-input.magma",
+        "response": {
+          "output": "\nSAT(\n    B: [ $.1 + $.6 + $.11 + $.16, $.2 + $.7 + $.12 + $.17, $.3 + $....\n)\ndo_sat(\n    B: [ $.1 + $.6 + $.11 + $.16, $.2 + $.7 + $.12 + $.17, $.3 + $....,\n    Exclude: [],\n    Verbose: false\n)\nIn file \"/magma/package//Commut/Solve/sat.m\", line 328, column 46:\n>>     root := Sprintf(\"%o/msat.%o.\", GetTempDir(), Getpid());\n                                                ^\nRuntime error in 'GetTempDir': Illegal operation\n\nKOBLITZ_MAGMA_WITNESS_SCHEMA=koblitz_magma_sat_witness.v1\n\n>> if sat then\n      ^\nUser error: Identifier 'sat' has not been declared or assigned\nKOBLITZ_MAGMA_WITNESS_CPU_SECONDS=0.000\nKOBLITZ_MAGMA_WITNESS_WALL_SECONDS=0.010\n\n",
+          "response_bytes": 1223,
+          "response_path": "seed-2026091301-sat-witness-response.xml",
+          "response_sha256": "4b0a7ff0c1a564e493d6e06bcd8e1d4d55ba6bfe4100fef17c2a182d7d66e33e",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 1116345587,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.04,
+            "version": "2.29-10",
+            "warning": "An error occurred. See the output for details."
+          }
+        },
+        "sha256": "02cd39b12bde642caa57970306a03b0819db846f62ec69cd45451fe954f6f6b0",
+        "source_system_byte_identical": true
+      }
+    },
+    {
+      "adapted_submission": {
+        "classification": "sat_basis_certificate_unverified_model",
+        "point_witness_validated": false,
+        "process_scoped_resources_complete": false,
+        "response": {
+          "output": "KOBLITZ_MAGMA_SCHEMA=koblitz_magma_f4_terminal.v1\nKOBLITZ_MAGMA_ALGORITHM=direct-f4-sparse\nKOBLITZ_MAGMA_STATUS=SAT\nKOBLITZ_MAGMA_F4_DEGREES=[ 2, 3, 3, 3, 3 ]\nKOBLITZ_MAGMA_BASIS_SIZE=102\nKOBLITZ_MAGMA_CPU_SECONDS=0.420\nKOBLITZ_MAGMA_WALL_SECONDS=0.420\n\n",
+          "response_bytes": 578,
+          "response_path": "seed-2026091303-adapted-response.xml",
+          "response_sha256": "5666b14b25c63a47a42cf217461e332056057ad8d31d7ee8f216799cacd89266",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 1183715551,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.45,
+            "version": "2.29-10",
+            "warning": null
+          }
+        },
+        "terminal": {
+          "algorithm": "direct-f4-sparse",
+          "basis_size": 102,
+          "cpu_seconds": 0.42,
+          "f4_step_degrees": [
+            2,
+            3,
+            3,
+            3,
+            3
+          ],
+          "gpu_disabled": true,
+          "schema": "koblitz_magma_f4_terminal.v1",
+          "single_thread_requested": true,
+          "terminal_status": "sat",
+          "wall_seconds": 0.42
+        }
+      },
+      "calculator_adaptation": {
+        "bytes": 26818,
+        "f4_controls_retained": true,
+        "path": "seed-2026091303-adapted-input.magma",
+        "rule": "remove exactly the unsupported global SetNthreads(1) line; retain Nthreads := 1 on GroebnerBasis",
+        "sha256": "95103be43ce34379aa2a88afd360a74dc72e98b30b50c35286b732d24b6723d4",
+        "source_system_byte_identical": true
+      },
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "exact_submission": {
+        "classification": "f4_markers_after_calculator_setup_error",
+        "response": {
+          "output": "\n>> SetNthreads(1);\n              ^\nRuntime error in 'SetNthreads': Illegal operation\n\nKOBLITZ_MAGMA_SCHEMA=koblitz_magma_f4_terminal.v1\nKOBLITZ_MAGMA_ALGORITHM=direct-f4-sparse\nKOBLITZ_MAGMA_STATUS=SAT\nKOBLITZ_MAGMA_F4_DEGREES=[ 2, 3, 3, 3, 3 ]\nKOBLITZ_MAGMA_BASIS_SIZE=102\nKOBLITZ_MAGMA_CPU_SECONDS=0.420\nKOBLITZ_MAGMA_WALL_SECONDS=0.430\n\n",
+          "response_bytes": 795,
+          "response_path": "seed-2026091303-exact-response.xml",
+          "response_sha256": "951c5c168b97e3dcea39b59ee8191640372641da10cc80cb0711f6ecd43cea1f",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 449994187,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.45,
+            "version": "2.29-10",
+            "warning": "An error occurred. See the output for details."
+          }
+        },
+        "scientific_terminal_admitted": false,
+        "terminal": {
+          "algorithm": "direct-f4-sparse",
+          "basis_size": 102,
+          "cpu_seconds": 0.42,
+          "f4_step_degrees": [
+            2,
+            3,
+            3,
+            3,
+            3
+          ],
+          "gpu_disabled": true,
+          "schema": "koblitz_magma_f4_terminal.v1",
+          "single_thread_requested": true,
+          "terminal_status": "sat",
+          "wall_seconds": 0.43
+        }
+      },
+      "seed": 2026091303,
+      "source": {
+        "bytes": 26834,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/tasks/seed-2026091303/n31-l5-m3-standard-a1-f0/matrix/n31-l5-m3-standard-a1-f0/instance.magma",
+        "producer_source_instance_blake3": "7a59b89ee31a6fab251c97f52d35ebf14f2d8634ace0f7fdecbc1f7d81dc8483",
+        "sha256": "93dbea20524f854176e4bfc3ef68080b3a8e5b9df63f206016a79d8c7e2a9689",
+        "source_instance_sha256": "0b11ff0ea4449282f6fd75fd80c52e7a5d527e9bc561266ba445b90c14c7e77e"
+      },
+      "witness_attempt": {
+        "assignment_obtained": false,
+        "bytes": 26709,
+        "classification": "calculator_temp_directory_unavailable_operational",
+        "path": "seed-2026091303-sat-witness-input.magma",
+        "response": {
+          "output": "\nSAT(\n    B: [ $.1 + $.6 + $.11 + $.16, $.2 + $.7 + $.12 + $.17, $.3 + $....\n)\ndo_sat(\n    B: [ $.1 + $.6 + $.11 + $.16, $.2 + $.7 + $.12 + $.17, $.3 + $....,\n    Exclude: [],\n    Verbose: false\n)\nIn file \"/magma/package//Commut/Solve/sat.m\", line 328, column 46:\n>>     root := Sprintf(\"%o/msat.%o.\", GetTempDir(), Getpid());\n                                                ^\nRuntime error in 'GetTempDir': Illegal operation\n\nKOBLITZ_MAGMA_WITNESS_SCHEMA=koblitz_magma_sat_witness.v1\n\n>> if sat then\n      ^\nUser error: Identifier 'sat' has not been declared or assigned\nKOBLITZ_MAGMA_WITNESS_CPU_SECONDS=0.000\nKOBLITZ_MAGMA_WITNESS_WALL_SECONDS=0.000\n\n",
+          "response_bytes": 1223,
+          "response_path": "seed-2026091303-sat-witness-response.xml",
+          "response_sha256": "0a7db4cd772a887afe56104be0fd17296cb4a767a26828a5cbd494866e236055",
+          "service": {
+            "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+            "max_input_bytes": 50000,
+            "max_time_seconds": 60,
+            "server_seed": 1082660593,
+            "service_reported_memory_mb": 32.09,
+            "service_reported_memory_text": "32.09MB",
+            "service_reported_time_seconds": 0.03,
+            "version": "2.29-10",
+            "warning": "An error occurred. See the output for details."
+          }
+        },
+        "sha256": "1afc0834b3c7c26f819c25de38393af11bbb960d9b53732c0177142ae5fe37f3",
+        "source_system_byte_identical": true
+      }
+    }
+  ],
+  "claim": "Two target-matched n=31 standard systems have supporting Magma F4 proper-ideal certificates. They lack Magma-derived point witnesses and process-scoped resource receipts; the other eighteen frozen inputs have no retained calculator responses and were outside the observed input cap. This is partial external-service evidence, not a complete Magma benchmark or SOTA result.",
+  "clean_source_equivalent_f4_terminals": 2,
+  "evidence_class": "exploratory_external_service_receipt",
+  "exact_archived_inputs_under_service_cap": 2,
+  "exact_archived_submissions": 2,
+  "frozen_inputs_without_retained_response": 18,
+  "frozen_panel_tasks": 20,
+  "full_magma_matrix_executed": false,
+  "full_solver_matrix_gate_passed": false,
+  "ineligible_input_size_range_bytes": [
+    61062,
+    447248
+  ],
+  "magma_process_resource_receipts_complete": false,
+  "schema": "koblitz_magma_calculator_stage15_summary.v1",
+  "service": {
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "observed_max_input_bytes": 50000,
+    "observed_max_time_seconds": 60,
+    "observed_version": "2.29-10"
+  },
+  "timeout_attempts": {
+    "attempts": [
+      {
+        "asserts_nothing_about": "Magma variety or basis-export correctness, runtime, memory, or terminal status",
+        "classification": "transport_timeout_operational",
+        "client_watchdog_seconds": 75,
+        "curl_exit_code": 28,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "input_bytes": 34399,
+        "input_path": "seed-2026091301-variety-input.magma",
+        "input_sha256": "3c7244487860b41fc2c5272e61853cdf8a39c63c8c6cbefc18da0154586cdd07",
+        "kind": "variety",
+        "response_file_created": false
+      },
+      {
+        "asserts_nothing_about": "Magma variety or basis-export correctness, runtime, memory, or terminal status",
+        "classification": "transport_timeout_operational",
+        "client_watchdog_seconds": 75,
+        "curl_exit_code": 28,
+        "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+        "input_bytes": 33896,
+        "input_path": "seed-2026091301-basis-export-input.magma",
+        "input_sha256": "2a11c8363e62f5a5eb685781ff1c7f7a2f732c935fda45f1f892144c5264aa18",
+        "kind": "basis_export",
+        "response_file_created": false
+      }
+    ],
+    "recorded_at": "2026-09-09",
+    "schema": "koblitz_magma_calculator_timeout_attempts.v1"
+  },
+  "validated_magma_point_witnesses": 0
+}

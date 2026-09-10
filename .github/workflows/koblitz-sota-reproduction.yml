@@ -15,6 +15,11 @@ on:
       - "scripts/verify_koblitz_external_reproduction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage13_pdp_panel.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE15_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/MAGMA_EXTERNAL_GATE_AUDIT.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage13_correction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pdp-panel-protocol.json"
       - ".github/workflows/koblitz-sota-reproduction.yml"
@@ -35,6 +40,8 @@ jobs:
         run: |
           python3 scripts/test_run_koblitz_pdp_matrix.py -v
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --self-test
+          python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/stage-15-summary.json > /tmp/stage-15-summary.json
           python3 scripts/run_koblitz_pdp_matrix.py --output isolated-pdp-smoke --exporter target/release/examples/koblitz_pdp_export --backend target/release/examples/koblitz_pdp_backend --configs 15:5:standard:1:0 --timeout 120 --conflicts 100000 --seed 20261101
           python3 -c 'import json; d=json.load(open("isolated-pdp-smoke/result.json")); r={x["solver"]:x for x in d["instances"][0]["solvers"]}; assert r["native-sat"]["status"]=="sat" and r["native-sat"]["source_witness_valid"] is True; assert r["direct-mitm"]["status"]=="sat" and r["direct-mitm"]["source_witness_valid"] is True; assert d["instances"][0]["source_artifacts_unchanged"] is True'
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py --panel research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909 --output /tmp/panel-summary-relocated.json
