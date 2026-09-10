@@ -1,0 +1,106 @@
+{
+  "schema": "koblitz_index_calculus_sota_gate_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen_stage_1",
+  "scope": "Mathematical and defensive evaluation of binary/Koblitz point decomposition and index calculus; no deployed target or private-key recovery",
+  "claim_boundary": "Until all seven campaign gates pass, results are internal engineering or toy-research measurements and are not a Koblitz index-calculus SOTA claim",
+  "factor_base_admissibility": {
+    "required": [
+      "The predicate is a function only of public field and curve parameters",
+      "No enumeration of the target prime-order subgroup is used to choose the predicate",
+      "No discrete-log labels of factor-base points are constructed or consumed",
+      "Discovery, predicate construction, materialisation, rationality and subgroup-membership filtering are timed and charged when present"
+    ],
+    "stage_1_predicates": [
+      "standard polynomial subspace span(1,z,...,z^(ell-1))",
+      "GGMP linearised-polynomial kernel derived from an irreducible factor of T^n-1"
+    ],
+    "excluded": "The scalar-selected explicit Frobenius-orbit base used in continuation-02 through continuation-04"
+  },
+  "stage_1_pdp_matrix": {
+    "purpose": "Freeze one-source, matched point-decomposition instances and measure every locally available solver without conflating a PDP with a complete DLP",
+    "m": 3,
+    "seed": 20260909,
+    "seed_rule": "cell i uses seed 20260909+i in listed order",
+    "cells": [
+      {"n": 15, "ell": 5, "basis": "standard", "role": "smoke and exporter validation"},
+      {"n": 31, "ell": 5, "basis": "standard", "role": "GGMP Table 2 size-matched vector-space control"},
+      {"n": 31, "ell": 5, "basis": "ggmp", "role": "GGMP linearised-polynomial construction"},
+      {"n": 41, "ell": 5, "basis": "standard", "role": "GGMP Table 3 degree rung"},
+      {"n": 59, "ell": 9, "basis": "standard", "role": "WDSat literature PDP rung"},
+      {"n": 67, "ell": 9, "basis": "standard", "role": "larger WDSat literature PDP rung"}
+    ],
+    "representations": {
+      "standard": "Symmetrised S4 source ANF, exported to native in-tree XOR, WDSat ANF, CryptoMiniSat CNF-XOR and Magma BooleanPolynomialRing from the same rows",
+      "ggmp": "Chained S3 source ANF over the algebraically derived invariant basis, exported to the same backends from the same rows"
+    },
+    "instance_class": "Planted SAT point-decomposition targets generated from three factor-base points. This tests witness-finding cost; a later matched random-target panel is required for refutation cost.",
+    "solver_conflict_budget": 100000,
+    "process_watchdog_seconds": 120,
+    "replications": 1,
+    "required_backends": [
+      "in-tree native-XOR CDCL",
+      "WDSat",
+      "CryptoMiniSat",
+      "Magma F4",
+      "direct meet-in-the-middle",
+      "GGMP construction"
+    ],
+    "missing_backend_rule": "Record unavailable_operational and continue other cells. Missing licensed or installed software is not negative evidence about the algorithm.",
+    "unknown_rule": "A resource-capped Unknown or timeout is inconclusive and is never UNSAT.",
+    "model_gate": "Every SAT model must satisfy the frozen source ANF. A model-validation failure invalidates the cell."
+  },
+  "accounting": {
+    "required_stages": [
+      "factor-base discovery",
+      "predicate construction",
+      "factor-base materialisation and membership filtering",
+      "target or relation candidate generation",
+      "system construction and export",
+      "relation collection including every failed or unknown solver call",
+      "linear algebra and rank checks",
+      "unknown-scalar recovery and point verification",
+      "all parallel speculative work"
+    ],
+    "required_metrics": [
+      "single-core seconds",
+      "total core-seconds",
+      "peak resident memory",
+      "solver conflicts when exposed",
+      "wall-clock seconds",
+      "thread count and host identity"
+    ],
+    "instrument": "Each command runs under a fresh Python meter process using getrusage(RUSAGE_CHILDREN), so user time, system time and maximum RSS are scoped to that command. Internal nanosecond stage timers and solver counters are retained in the instance manifest."
+  },
+  "later_stages": {
+    "stage_2": "Complete unknown-scalar relation-collection and linear-algebra runs with an admissible algebraic factor base whose point logs are not known by construction.",
+    "stage_3": "Measure the same curve and targets with a verified signed-Frobenius/negation quotient Pollard-rho implementation; charge setup, cores, memory and wall time.",
+    "stage_4": "Repeat the frozen panel across seeds and hosts, obtain an external reproduction, then conduct independent source-pinned novelty review."
+  },
+  "success_criteria": [
+    "All stage-1 requested cells are generated from admissible predicates and have source hashes",
+    "Every available backend has a truthful terminal or inconclusive record with the required resource fields",
+    "n=31 and n=41 are executed, plus at least one larger literature PDP rung",
+    "The later-stage unknown-scalar, Pollard-rho, external-reproduction and novelty gates are completed before any SOTA claim"
+  ],
+  "invalidation_rules": [
+    "Selecting a factor base from scalar labels or a subgroup log table",
+    "Comparing solver outputs generated from different source polynomial rows as if matched",
+    "Dropping discovery, setup, failed calls, linear algebra or parallel speculative work from a full-cost total",
+    "Treating Unknown, timeout, missing Magma or missing CryptoMiniSat as UNSAT or algorithmic evidence",
+    "Calling a PDP-only result an end-to-end ECDLP result",
+    "Calling an internal agent review an external reproduction"
+  ],
+  "primary_sources": [
+    {
+      "title": "A SAT-Based Approach for Index Calculus on Binary Elliptic Curves",
+      "locator": "ePrint 2019/313; arXiv:2001.11229",
+      "provenance": "retrieved and locally source-pinned in the Crypto Autoresearcher corpus"
+    },
+    {
+      "title": "On Index Calculus Algorithms for Subfield Curves",
+      "locator": "ePrint 2020/1315; SAC 2020",
+      "provenance": "retrieved 2026-09-09"
+    }
+  ]
+}
