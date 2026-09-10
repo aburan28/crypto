@@ -9,11 +9,14 @@ on:
       - "examples/koblitz_pdp_export.rs"
       - "examples/koblitz_pdp_backend.rs"
       - "src/cryptanalysis/koblitz_index_calculus.rs"
+      - "src/cryptanalysis/koblitz_pdp_phase_a.rs"
+      - "src/bin/koblitz_pdp_prepare.rs"
       - "scripts/process_meter.py"
       - "scripts/run_koblitz_pdp_matrix.py"
       - "scripts/test_run_koblitz_pdp_matrix.py"
       - "scripts/run_koblitz_external_magma.py"
       - "scripts/test_koblitz_external_magma.py"
+      - "scripts/test_koblitz_pdp_phase_a.py"
       - "scripts/verify_koblitz_external_reproduction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage13_pdp_panel.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py"
@@ -40,6 +43,7 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/compose_stage13_correction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pdp-panel-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -55,7 +59,13 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - name: Build frozen executables
-        run: cargo build --release --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery --example koblitz_pdp_export --example koblitz_pdp_backend
+        run: cargo build --release --bin koblitz_pdp_prepare --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery --example koblitz_pdp_export --example koblitz_pdp_backend
+      - name: Validate balanced PDP Phase-A preparation
+        run: |
+          cargo test --release --lib cryptanalysis::koblitz_pdp_phase_a -- --test-threads=1
+          python3 scripts/test_koblitz_pdp_phase_a.py --preparer target/release/koblitz_pdp_prepare --exporter target/release/examples/koblitz_pdp_export --backend target/release/examples/koblitz_pdp_backend
+          target/release/koblitz_pdp_prepare plan --protocol research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json > /tmp/balanced-pdp-phase-a-plan.json
+          python3 -c 'import json; d=json.load(open("/tmp/balanced-pdp-phase-a-plan.json")); assert d["census_executed"] is False and d["total_selected_instances"] == 160 and d["total_planned_solver_runs"] == 480 and d["largest_canonical_triple_count"] == 18896570'
       - name: Validate isolated PDP accounting and archived composition
         run: |
           python3 scripts/test_run_koblitz_pdp_matrix.py -v

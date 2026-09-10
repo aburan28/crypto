@@ -35,6 +35,7 @@ PACKED_POLY_CHAIN ?= 0
 PACKED_UNROLL_INV ?= 0
 PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
+PACKED_DIRECT_REDUCE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -56,7 +57,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -65,7 +66,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT) -DECC_PACKED_CACHE_DENOM=$(PACKED_CACHE_DENOM) \
        -DECC_PACKED_BY_VALUE=$(PACKED_BY_VALUE) -DECC_PACKED_PERM_SIGMA=$(PACKED_PERM_SIGMA) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
-       -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE)
+       -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
+       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE)
 
 all: cpu
 
@@ -81,6 +83,7 @@ generate:
 	cd codegen && python3 genpacked.py
 	cd codegen && python3 gensigma.py
 	cd codegen && python3 genpolyreduce.py
+	cd codegen && python3 gendirectreduce.py
 
 cpu: ecc2k130-cpu
 
@@ -101,6 +104,7 @@ check-cli:
 	python3 codegen/genpacked.py --check --out include/packedtransform131.h
 	python3 codegen/gensigma.py --check --out include/packedsigma131.h
 	python3 codegen/genpolyreduce.py --check --out include/packedpolyreduce131.h
+	python3 codegen/gendirectreduce.py --check --out include/packeddirectreduce131.h
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/checkcli.py profile_diagnostic.py
 	python3 codegen/checkcli.py packed_audit.py
@@ -109,6 +113,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'test*report.py'
 	python3 -m unittest discover -s codegen -p 'testautotune*.py'
 	python3 -m unittest discover -s codegen -p 'testpolystateaudit.py'
+	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -157,15 +162,17 @@ test-schedule:
 
 test-packed:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-base
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-single
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-base
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-single
 	./build/test-packed-base
 	./build/test-packed-single
 
 test-packed-network:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
 	./build/test-packed-network
+	./build/test-packed-network-direct
 
 test-packed-cuda:
 	mkdir -p build
@@ -239,7 +246,7 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.0.0 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
                  ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
-                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -255,7 +262,7 @@ clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
-	rm -f build/test-packed-network
+	rm -f build/test-packed-network build/test-packed-network-direct
 	rm -f build/test-packed-cuda
 	rm -f build/test-timing
 
