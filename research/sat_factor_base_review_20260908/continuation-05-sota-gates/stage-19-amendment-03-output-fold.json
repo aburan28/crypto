@@ -1,0 +1,110 @@
+{
+  "amendment": 3,
+  "claim_boundary": "This additive adjudication recognizes one source-equivalent official-calculator SAT/F4 terminal from immutable raw bytes after an exact expected source-marker presentation fold. The Amendment 02 receipt, run, and summary remain terminal and non-admitted. The recovered terminal supplies no basis export, Magma-linked point witness, process-scoped solver CPU or RSS, performance ranking, independent review, novelty, end-to-end index-calculus result, or SOTA evidence; service-reported time and memory remain opaque metadata.",
+  "derived_adjudication": {
+    "classification": "sat_basis_certificate_unverified_model",
+    "fold": {
+      "content_columns_before_backslash": 79,
+      "first_raw_line_bytes": 80,
+      "generic_unfolding_permitted": false,
+      "scope": "source_identity_marker_only",
+      "tail_hex_characters": 13
+    },
+    "named_input": {
+      "bytes": 21345,
+      "path": "inputs/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0.magma",
+      "sha256": "75b4a08fcbe1a78d91ee8a377e474ef8dc3328c70ae8f5cc2cb06c5bba9d033a"
+    },
+    "normalized_output_sha256": "647f35a2b2d16f41e29027640336f46aaa084ce1977de364b207223d3f474453",
+    "raw_output_sha256": "fcce92225df8893948fd1bea74ef7410ebacfcf375084ce50e9e42394f6d5263",
+    "request_body": {
+      "bytes": 42145,
+      "path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/request-body.bin",
+      "sha256": "f5ae3092d0648fe1871204551c92989b024f62a8bc6ef7c383f650a0c6a7c3d5"
+    },
+    "response": {
+      "bytes": 777,
+      "path": "attempts/01-seed-2026091301-n31-l5-m3-ggmp-a0-f0/response.xml",
+      "sha256": "f3a3ff4eb72d22be22a198adf9f4032f2c5df45703f997a4ee6f9d047219773e"
+    },
+    "service": {
+      "alert": null,
+      "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+      "max_input_bytes": 50000,
+      "max_time_seconds": 60,
+      "server_seed": 3592290473,
+      "service_reported_memory_mb": 267.91,
+      "service_reported_memory_text": "267.91MB",
+      "service_reported_time_seconds": 13.83,
+      "version": "2.29-10",
+      "warning": null
+    },
+    "source_equivalent": true,
+    "source_instance_sha256": "be7845358890032febb640bab05d7d7c6e9b3105ecdd10e692b44aadacb39bf2",
+    "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+    "terminal": {
+      "algorithm": "direct-f4-sparse",
+      "basis_size": 47,
+      "cpu_seconds": 13.79,
+      "f4_step_degrees": [
+        2,
+        2,
+        3,
+        3,
+        4,
+        3,
+        4
+      ],
+      "gpu_disabled": true,
+      "schema": "koblitz_magma_f4_terminal.v1",
+      "single_thread_requested": true,
+      "terminal_status": "sat",
+      "wall_seconds": 13.79
+    }
+  },
+  "immutable_amendment02": {
+    "commit": "f5dba0fc84a8d6c22c0098e8a8c3506ece55c4f1",
+    "files": 24,
+    "inventory_sha256": "896eaad60525581290a2cc54721aaaba1796ac25808aaba015ebf48e6ed77b35"
+  },
+  "original_ledger_policy": {
+    "amendment02_bytes_mutable": false,
+    "derived_adjudication_is_additive": true,
+    "in_place_reclassification_permitted": false,
+    "old_ledger_resume_permitted": false,
+    "started_task_retry_permitted": false
+  },
+  "recorded_at": "2026-09-10",
+  "schema": "koblitz_magma_calculator_stage19_amendment.v1",
+  "scientific_inference": "One additional public-service-accessible source-equivalent F4 terminal is recoverable from the frozen response. The result remains a basis terminal without a validated Magma point witness and does not change any performance or SOTA gate.",
+  "successor_policy": {
+    "future_source_digest_markers": "two independently labeled 32-hex-character halves",
+    "generic_backslash_unfolding_permitted": false,
+    "network_execution_in_this_amendment": false,
+    "predecessor_attempted_task_ids_must_be_disjoint": true,
+    "recovered_task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0",
+    "successor_contains_original_stage19_ordinals": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "successor_local_ordinals": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "trigger": "The official calculator represented the 92-character source identity marker as one 79-character content line plus a backslash and one 13-character continuation line; the strict unwrapped identity parser therefore produced a false negative."
+}

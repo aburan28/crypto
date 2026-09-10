@@ -1,0 +1,157 @@
+{
+  "admission": {
+    "clean_terminal": "exact v2 split identity markers followed by the seven F4 markers, HTTP 200 at the exact endpoint, no service warning or alert",
+    "generic_backslash_unfolding_permitted": false,
+    "representation": "one named Boolean-ring generator per source variable",
+    "required_controls": [
+      "BooleanPolynomialRing with grevlex order",
+      "SetGPU(false)",
+      "SetSeed(1)",
+      "direct Faugere F4",
+      "Dense := false",
+      "Nthreads := 1 on GroebnerBasis"
+    ],
+    "source_equivalence": "ordered Boolean monomial lists must match the frozen Stage 13 ANF and verbose Magma exports",
+    "source_identity": "exact task ID followed by exactly one SHA-256 high-half marker and exactly one low-half marker, each containing 32 lowercase hexadecimal characters and no backslash"
+  },
+  "amendment": 3,
+  "claim_boundary": "At most nine additional source-equivalent official-calculator F4 terminal receipts for original Stage 19 tasks 2-10. Together with five earlier terminals and one additive wrapped-response adjudication, nine clean receipts would cover fifteen public-service-accessible n31/n41 tasks. These requests cannot provide basis exports, Magma-linked point witnesses, process-scoped solver CPU or RSS, the five n59 cells, licensed-runner completion, independent methodology, novelty, end-to-end scaling, or a SOTA result. Service time and memory headers remain opaque metadata and are excluded from performance ranking.",
+  "execution_policy": {
+    "attempts_per_task": 1,
+    "explicit_execute_flag_required": true,
+    "halt_after_nonclean_receipt": true,
+    "halted_state_is_terminal": true,
+    "inter_request_delay_seconds": 2,
+    "parallel_workers": 1,
+    "predecessor_ledgers_are_terminal_and_never_resumed": true,
+    "predecessor_started_tasks_excluded": true,
+    "resume_skips_every_started_task": true,
+    "retries_per_task": 0,
+    "task_order": "remaining seed-major frozen order"
+  },
+  "predecessors": [
+    {
+      "allowed_attempted_task_ids": [
+        "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+      ],
+      "artifact": "stage-19-magma-calculator-panel-20260909"
+    },
+    {
+      "allowed_attempted_task_ids": [
+        "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+      ],
+      "artifact": "stage-19-magma-calculator-panel-amendment-01-20260910"
+    },
+    {
+      "allowed_attempted_task_ids": [
+        "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+      ],
+      "artifact": "stage-19-magma-calculator-panel-amendment-02-20260910"
+    }
+  ],
+  "prepared_from_revision": "f5dba0fc84a8d6c22c0098e8a8c3506ece55c4f1",
+  "recovered_terminal": {
+    "amendment_summary": "stage-19-amendment-03-summary.json",
+    "classification": "sat_basis_certificate_unverified_model",
+    "task_id": "seed-2026091301/n31-l5-m3-ggmp-a0-f0"
+  },
+  "retained_prior_f4_terminals": [
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "seed": 2026091301,
+      "stage": 15
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "seed": 2026091303,
+      "stage": 15
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "seed": 2026091303,
+      "stage": 16
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "seed": 2026091305,
+      "stage": 16
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "seed": 2026091301,
+      "stage": 17
+    }
+  ],
+  "schema": "koblitz_magma_calculator_stage19_amendment03_protocol.v1",
+  "service": {
+    "client_timeout_seconds": 75,
+    "endpoint": "https://magma.maths.usyd.edu.au/xml/calculator.xml",
+    "expected_version": "2.29-10",
+    "form_field": "input",
+    "max_input_bytes": 50000,
+    "max_response_bytes": 1048576,
+    "max_service_seconds": 60,
+    "published_calculator_page": "https://magma.maths.usyd.edu.au/calc/",
+    "user_agent": "aburan28-crypto-koblitz-stage19-amendment03/1"
+  },
+  "stage": 19,
+  "stage13_archive_commit": "5dbe54dd468e914b5872d10d06e7c44d01b0a236",
+  "stage13_source_revision": "67cf7f559cf6cf4c70fc16f22eb5dd68e4883d31",
+  "tasks": [
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "ordinal": 1,
+      "original_stage19_ordinal": 2,
+      "seed": 2026091302
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "ordinal": 2,
+      "original_stage19_ordinal": 3,
+      "seed": 2026091302
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "ordinal": 3,
+      "original_stage19_ordinal": 4,
+      "seed": 2026091302
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "ordinal": 4,
+      "original_stage19_ordinal": 5,
+      "seed": 2026091303
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "ordinal": 5,
+      "original_stage19_ordinal": 6,
+      "seed": 2026091304
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "ordinal": 6,
+      "original_stage19_ordinal": 7,
+      "seed": 2026091304
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "ordinal": 7,
+      "original_stage19_ordinal": 8,
+      "seed": 2026091304
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "ordinal": 8,
+      "original_stage19_ordinal": 9,
+      "seed": 2026091305
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "ordinal": 9,
+      "original_stage19_ordinal": 10,
+      "seed": 2026091305
+    }
+  ],
+  "title": "Bounded official-calculator successor for the nine never-started n31/n41 inputs"
+}
