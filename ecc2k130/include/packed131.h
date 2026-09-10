@@ -170,6 +170,19 @@ ECC_HD uint64_t spread32p(uint32_t x){
  r=(r|(r<<1))&0x5555555555555555ull;
  return r;
 }
+// Polynomial coefficients square into the even positions of a degree-260
+// product. This is distinct from sqr131's normal-basis permutation.
+ECC_HD P131 squarePolynomial131(P131 a) {
+    uint32_t h[9];
+#pragma unroll
+    for (int i = 0; i < 4; ++i) {
+        const uint64_t w = spread32p(a.v[i]);
+        h[2 * i] = uint32_t(w);
+        h[2 * i + 1] = uint32_t(w >> 32);
+    }
+    h[8] = uint32_t(spread32p(a.v[4]));
+    return reducePolynomial131(h);
+}
 ECC_HD P131 sqr131(const P131 &a){
  P131 rev=reverse131(a),r;
  uint64_t lo=(spread32p(a.v[0])<<1)^spread32p(rev.v[0]);

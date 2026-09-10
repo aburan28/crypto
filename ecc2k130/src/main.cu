@@ -88,7 +88,8 @@ struct Options {
 
 
 // Checkpoint layout: a header naming the configuration the state belongs to,
-// then the raw walk arrays.  A checkpoint is only loadable back into the same
+// then the walk arrays (packed coordinates use normal basis on disk).
+// A checkpoint is only loadable back into the same
 // curve, thread count, batch and lane width, so a resumed run continues exactly
 // the walks it left off rather than silently starting new ones.
 struct CkptHeader {
@@ -207,6 +208,8 @@ struct HostEngine {
 #endif
         for (int t = 0; t < pp.threads; ++t) K::reseed(t, pp);
     }
+
+    void synchronize() const {}
 
     unsigned fetch(std::vector<DpRecord> &out) {
         const unsigned n = dpCount;
@@ -391,6 +394,8 @@ struct CudaEngine {
         CUDA_CHECK(cudaGetLastError());
     }
 
+    void synchronize() const { CUDA_CHECK(cudaDeviceSynchronize()); }
+
     unsigned fetch(std::vector<DpRecord> &out) {
         CUDA_CHECK(cudaDeviceSynchronize());
         unsigned n = 0;
@@ -408,6 +413,11 @@ struct CudaEngine {
     virtual size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
     virtual unsigned checkpointVersion() const { return 1u; }
     virtual int checkpointLanes() const { return LANES; }
+    // Backends may use a different coordinate representation on the device.
+    // These hooks preserve the checkpoint representation without touching
+    // live device state; the default backend already stores checkpoint words.
+    virtual void exportCheckpointField(std::vector<W> &) const {}
+    virtual void importCheckpointField(std::vector<W> &) const {}
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
         CUDA_CHECK(cudaDeviceSynchronize());
@@ -430,6 +440,7 @@ struct CudaEngine {
         const W *fields[2] = {P.x, P.y};
         for (int i = 0; i < 2 && ok; ++i) {
             CUDA_CHECK(cudaMemcpy(fbuf.data(), fields[i], fbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
+            exportCheckpointField(fbuf);
             ok = fwrite(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
         }
         if (ok) {
@@ -463,7 +474,10 @@ struct CudaEngine {
         W *fields[2] = {P.x, P.y};
         for (int i = 0; i < 2 && ok; ++i) {
             ok = fread(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
-            if (ok) CUDA_CHECK(cudaMemcpy(fields[i], fbuf.data(), fbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
+            if (ok) {
+                importCheckpointField(fbuf);
+                CUDA_CHECK(cudaMemcpy(fields[i], fbuf.data(), fbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
+            }
         }
         if (ok) {
             ok = fread(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
@@ -921,6 +935,8 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             lastPrint = now;
         }
     }
+    // Include any final asynchronous reseed in the completed-run rate.
+    eng.synchronize();
     const double el = nowSeconds() - t0;
     const double it = (double)(iterBase - timedIterBase) * (double)eng.walksPerLaunch();
     printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",

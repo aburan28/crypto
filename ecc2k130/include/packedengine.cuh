@@ -17,6 +17,34 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
     unsigned checkpointVersion() const override { return 2u; }
     int checkpointLanes() const override { return 1; }
+#if ECC_PACKED_POLY_STATE
+    // Packed checkpoint v2 always stores normal-basis coordinates, including
+    // when the running kernel stores polynomial coordinates. Transform only
+    // the staging buffer, using the same slot/word/thread layout as load/store.
+    void convertCheckpointField(std::vector<unsigned> &words, bool toPolynomial) const {
+        const int threads = P.threads;
+#pragma omp parallel for collapse(2) schedule(static)
+        for (int slot = 0; slot < BATCH; ++slot) {
+            for (int tid = 0; tid < threads; ++tid) {
+                eccPacked131::P131 a;
+                for (int word = 0; word < 5; ++word)
+                    a.v[word] = words[(size_t(slot) * 5 + word) * threads + tid];
+                const auto b = toPolynomial ? eccPacked131::toPolynomial131(a)
+                                            : eccPacked131::fromPolynomial131(a);
+                for (int word = 0; word < 5; ++word)
+                    words[(size_t(slot) * 5 + word) * threads + tid] = b.v[word];
+            }
+        }
+    }
+    void exportCheckpointField(std::vector<unsigned> &words) const override {
+        convertCheckpointField(words, false);
+    }
+    void importCheckpointField(std::vector<unsigned> &words) const override {
+        convertCheckpointField(words, true);
+    }
+#endif
+    static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
+        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
@@ -29,7 +57,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             &blocks, eccPacked131::walk, ECC_THREADS, 0));
         size_t freeBytes, totalBytes;
         CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
-        const size_t perThread = size_t(BATCH) * ((3 + ECC_PACKED_CACHE_DENOM*(1+ECC_PACKED_POLY_CHAIN)) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
+        const size_t perThread = size_t(BATCH) *
+            ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
         size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
         if (threads > fits) threads = fits;
@@ -55,7 +84,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
 #if ECC_PACKED_CACHE_DENOM
-        CUDA_CHECK(cudaMalloc(&denominators, bytes*(1+ECC_PACKED_POLY_CHAIN)));
+        CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
 #endif
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
         CUDA_CHECK(cudaMalloc(&P.seed, laneCount() * sizeof(u64)));
@@ -85,6 +114,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
         printf("packed polynomial chain: %d\n", ECC_PACKED_POLY_CHAIN);
+        printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);

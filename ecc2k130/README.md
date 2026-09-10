@@ -1,7 +1,9 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed normal-basis CUDA backend](PACKED.md) has measured above
-2 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. Use `--packed`
+The optional [packed CUDA backend](PACKED.md) has measured above
+6 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. The
+[polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
+conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
 with the benchmark/validation entry points; its reports retain the existing
 format, while checkpoints have a separate backend version.
 
