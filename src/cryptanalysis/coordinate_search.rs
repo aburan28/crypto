@@ -1968,8 +1968,6 @@ pub struct DescentModel {
     /// polynomial: a monomial `Π v_i^{e_i}` has bit-degree `Σ popcount(e_i)`
     /// because `v ↦ v^{2^k}` is `F_2`-linear.
     pub boolean_degree: u32,
-    /// Distinct targets one solve of the system covers.
-    pub targets_per_solve: u32,
 }
 
 /// Bit-degree of the descended polynomial: `Σ_i popcount(e_i)` maximised
@@ -1988,7 +1986,9 @@ pub fn boolean_degree(poly: &RelationPolynomial) -> u32 {
 /// under the Artin–Schreier map, which is `F_2`-linear with kernel `{0, 1}`,
 /// so `w_i` carries `l − 1` bits; the extra invariant `s = Σ u_i` satisfies
 /// `s² + s = Σ w_i`, again linear in the bits, so it contributes one free
-/// bit after linear elimination.  One solve covers `R` and `R + T`.
+/// bit after linear elimination.  (A solve that lands on `R + T` is the
+/// same projected relation as one on `R`, since the cofactor kills `T`;
+/// an earlier version counted it as a second target.)
 pub fn descent_model(
     cs: &CoordinateSystem,
     poly: &RelationPolynomial,
@@ -2003,7 +2003,6 @@ pub fn descent_model(
             unknowns: m32 * (l - 1) + 1,
             equations: n,
             boolean_degree: boolean_degree(poly),
-            targets_per_solve: 2,
         }
     } else {
         DescentModel {
@@ -2011,7 +2010,6 @@ pub fn descent_model(
             unknowns: m32 * l,
             equations: n,
             boolean_degree: boolean_degree(poly),
-            targets_per_solve: 1,
         }
     }
 }
@@ -2219,10 +2217,7 @@ pub fn format_report(f: &Gf, r: &SearchReport) -> String {
             .descent
             .as_ref()
             .map(|d| {
-                format!(
-                    "{}/{}/{} ×{}",
-                    d.unknowns, d.equations, d.boolean_degree, d.targets_per_solve
-                )
+                format!("{}/{}/{}", d.unknowns, d.equations, d.boolean_degree)
             })
             .unwrap_or_else(|| "-".to_string());
         let _ = writeln!(

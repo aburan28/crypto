@@ -218,13 +218,15 @@ Identical rows for `K₀` and `K₁` at `n = 7, 9, 11, 13` — the polynomials
 have `F₂` coefficients, so only the descent model depends on `n`.  `l` is
 the factor-base subspace dimension `⌈n/m⌉`.
 
-| coordinates | degrees | terms | collapse | Frobenius | unknowns / equations / bit-degree, `n = 13, l = 5` | targets per solve |
-|---|---|---:|---:|---|---|---:|
-| `x` | `[4,4,4,4]` | 24 | 2 | yes | 15 / 13 / 7 | 1 |
-| `x`, `e_k` | `[4,4,4,4]` | 12 | – | yes | – | 1 |
-| `u = 1/(x + 1)`, plain | `[4,4,4,4]` | 100 | 2 | yes | 15 / 13 / 5 | 1 |
-| `u / w = u² + u, s = Σu` | `[2,2,2,2,1]` | 18 | 16 | yes | 13 / 13 / 5 | 2 |
-| … `e_k` | `[2,2,2,2,1]` | 10 | – | yes | – | 2 |
+| coordinates | degrees | terms | collapse | Frobenius | unknowns / equations / bit-degree, `n = 13, l = 5` |
+|---|---|---:|---:|---|---|
+| `x` | `[4,4,4,4]` | 24 | 2 | yes | 15 / 13 / 7 |
+| `x`, `e_k` | `[4,4,4,4]` | 12 | – | yes | – |
+| `u = 1/(x + 1)`, plain | `[4,4,4,4]` | 100 | 2 | yes | 15 / 13 / 5 |
+| `u / w = u² + u, s = Σu` | `[2,2,2,2,1]` | 18 | 16 | yes | 13 / 13 / 5 |
+| … `e_k` | `[2,2,2,2,1]` | 10 | – | yes | – |
+
+(A "targets per solve" column that stood here was withdrawn in §11.)
 
 The polynomials, valid for every `n` and both `a`:
 
@@ -317,10 +319,10 @@ count):
 - Orbits: the factor base is stable under `⟨π, τ_T, −1⟩`, of order up to
   `4n`, so the relation matrix shrinks by a further factor 2 in both
   dimensions relative to the signed Frobenius orbits used today.
-- Yield: one solve of the symmetrised system decides `R` and `R + T`.
-  Since `T ∉ ⟨G⟩` for the prime-order subgroup, the second target is a
-  different cofactor class; the `admissible_summand_counts` bookkeeping
-  already handles that.
+- Yield: one solve of the symmetrised system decides `R` and `R + T`
+  together — which is one relation, not two: the driver multiplies rows
+  by the cofactor and `[h]T = O` (§11.1).  The earlier reading of this
+  bullet as "two targets per solve" was wrong.
 
 The 4-torsion of `K₀` cannot be reached this way (§1.3).  Kohel's
 `μ₄`-normal form, where translation by `T₄` cyclically permutes the four
@@ -683,8 +685,7 @@ calculus on the *same* curve with the instance transported through
 the measurement makes that precise, and it is not nothing:
 
 - one solve on the transported instance is a relation for all four
-  targets `R + kT₄`, not two (`T₄ ∈ E(F₂)` is a known small-order
-  generator, as `T₂` already was);
+  targets `R + kT₄` — withdrawn in §11: those are one projected target;
 - the factor base is `⟨π, τ_{T₄}, −1⟩`-stable, orbits of size up to
   `8n`, so the relation matrix shrinks by a further factor 2 in both
   dimensions relative to the `T₂` case of §4.3;
@@ -799,3 +800,98 @@ assuming per-point invariants are complete.
    always a complete invariant of it; taking all `e_k` (the cap is four)
    or the coset's minimal polynomial would settle whether that is a
    cap artefact or a genuine identification.
+
+## 11. The `π − 1` transport on `K₀`, measured — and a correction
+
+**Code:** `koblitz_symmetrised::{phi_table, transported_symmetrised_decompose,
+transport_bench}`, `examples/transport_bench.rs`.
+
+§10.2 read the 4-torsion result as the endomorphism `φ = π − 1` (kernel
+`E(F₂) ≅ Z/4`) transporting the instance, and §10.5 ranked "solve for
+`φ(R)`, lift, get four targets `R + kT₄` per solve" first among the next
+steps.  Implementing it settles the question, and not in the direction
+the ranking assumed.
+
+### 11.1 What the rows are
+
+The index-calculus driver (`koblitz_index_calculus_dlp_observed`) forms
+every relation as `Σ_o c_o x_o − (h·b)·d ≡ h·a (mod r)`: the row is
+multiplied by the cofactor `h`, the unknowns are logs of `[h]P` for orbit
+representatives `P`, and `collapse_projected_orbits` merges points with
+the same `[h]P`.  Two consequences that the earlier sections got wrong:
+
+- **Targets differing by a point killed by `h` are the same target.**
+  `[h]` kills `E(F₂)`, so `R`, `R + T₂`, `R + kT₄` all give the row
+  `[h]R`.  "One solve covers `R` and `R + T`" (§4.3, §8) and "four
+  targets per solve" (§10.2, §10.4) are bookkeeping, not relations.  A
+  decomposition of `R + T₂` over a `T₂`-closed base is a decomposition of
+  `R` with one summand shifted; the symmetrised system finds one exactly
+  when the plain system would.  What the `T₂` symmetrisation buys is the
+  smaller system (§8's ×350 stands) and the `T₂`-closed base's halved
+  column count; nothing else.  The `targets_per_solve` field of the
+  descent model and the `×2` in §8's table are withdrawn.
+- **Transported columns are the old columns.**  For `P ∈ φ⁻¹(Q)`, on
+  `⟨G⟩` the Frobenius is `[λ]`, so `[h]φ(P) = [λ − 1][h]P`: the unknown
+  for `P` is a known multiple of the unknown for `Q`.  Verified on every
+  point of `φ⁻¹(F_u)` in every run below.
+
+One more thing the first draft of this section got wrong, and the bench
+caught within a minute: the transported solve is **not** the direct
+solve in disguise.  It answers "does `φ(R)` decompose over `F_u`, with
+every summand in the image of `φ`?", which is "does `R` decompose over
+`F' = φ⁻¹(F_u)`?" — a different base from `F_u`, so the two verdicts
+neither imply nor exclude each other, and on the toy instance one target
+decomposed directly and not transported.  What the transport is, then:
+a *second* decomposition question on the same unknowns, at the same
+cost as the first.
+
+### 11.2 What a second question is worth
+
+`φ` is not surjective on rational points: its image has index
+`|ker φ| = 4` in `E(F_{2^n})`, so only a quarter of `F_u` has rational
+preimages and `F' = φ⁻¹(F_u)` has `4·|F_u ∩ im φ| ≈ |F_u|` points.  The
+transported question succeeds with probability about
+`(|F_u|/4)^m / (m!·|im φ|) = p·4^{1−m}` against the direct question's
+`p`: a quarter as often at `m = 2`, a sixteenth at `m = 3`.  So it is a
+worse question than the direct one, at equal cost.
+
+The unknowns it produces are foldable but not automatically folded: the
+driver's columns are signed Frobenius orbits of *points* `[h]P`, and
+`[λ − 1]⁻¹[h]Q` is a different point from `[h]Q`, so today's linear
+algebra would give `F'` its own columns (the `union` count in the table)
+unless taught to fold by `(λ − 1)`, exactly as it already folds
+Frobenius orbits by `λ^k`.  With that folding, the union `F_u ∪ F'` has
+about twice the points at the column count of `F_u`, and a target that
+decomposes over the union with summands from *both* halves is a relation
+at no extra column cost — the `union` enumeration column is how often
+that happens, and it is the ceiling a mixed oracle could reach.  The
+catch is that oracle: a mixed `P₁ + P₂ = R` with `P₁ ∈ F_u`, `P₂ ∈ F'`
+is a system in `u(P₁)` and `u(φ(P₂))`, and `x(P₂)` is tied to
+`x(φ(P₂))` by a degree-4 correspondence — the chained-intermediate cost
+§8 removed, back again.
+
+A separate degeneracy the bench exposed, relevant to every session in
+this thread: at composite `n` the divisors of `xⁿ − 1` containing
+`x − 1` of moderate degree are sums of subfield polynomials — at
+`n = 15`, dimension 7 is `F₈ + F₃₂` — so `F_u` consists of subfield
+points, sits inside `E[h]`, and occupies **one** projected column.  The
+`n = 15` rows of §8 are solves of a system whose relations the linear
+algebra could not use.  `K₀` has a non-degenerate instance in range only
+at `n = 23` (dimension 12); `K₁` at `n = 17` and `23`.
+
+### 11.3 Numbers
+
+TBD-TRANSPORT
+
+### 11.4 What this changes in the earlier sections
+
+- §4.3 "Yield" bullet, §8's "`×2` targets per solve" column and the
+  `targets_per_solve` model field: withdrawn (this section).
+- §10.2's three bullets: the first ("four targets per solve") is
+  withdrawn; the second (orbits of `8n`) is the halved column count of a
+  `T₂`-closed base, already available without `φ`; the third
+  (composition with the `T₂` symmetrisation) stands but composes nothing
+  new.
+- §10.5 item 1: done, negative.  The remaining items stand, and the
+  union-base ceiling measured here is the number a mixed oracle would
+  have to justify itself against.
