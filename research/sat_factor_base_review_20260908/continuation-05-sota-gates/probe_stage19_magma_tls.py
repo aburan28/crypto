@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import socket
@@ -91,6 +92,65 @@ def archived_records() -> dict:
         "http_status": receipt["response"]["http_status"],
         "no_computation_requested": receipt["request"]["no_computation_requested"],
     }
+
+
+def parse_time(value: Any, label: str) -> datetime:
+    if not isinstance(value, str) or not value.endswith("Z"):
+        raise ProbeError(f"{label} is not a UTC timestamp")
+    try:
+        return datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError as error:
+        raise ProbeError(f"{label} is not an ISO timestamp") from error
+
+
+def verify_fresh(receipt: dict) -> dict:
+    """Validate a newly observed probe receipt without consulting the live CA file."""
+    if not isinstance(receipt, dict):
+        raise ProbeError("fresh TLS GET probe is not an object")
+    body = dict(receipt)
+    claimed_hash = body.pop("receipt_sha256", None)
+    if claimed_hash != sha256_bytes(canonical_bytes(body)):
+        raise ProbeError("fresh TLS GET probe receipt hash changed")
+    expected_keys = {
+        "schema", "started_at", "finished_at", "wall_seconds", "request",
+        "response", "fresh_immediately_before_manifest_generation",
+        "classification", "claim_boundary", "receipt_sha256",
+    }
+    if set(receipt) != expected_keys or receipt.get("schema") != FRESH_SCHEMA:
+        raise ProbeError("fresh TLS GET probe schema changed")
+    archived = verify_archived()
+    if (
+        receipt.get("request") != archived["request"]
+        or receipt.get("classification") != archived["classification"]
+        or receipt.get("claim_boundary") != archived["claim_boundary"]
+        or receipt.get("fresh_immediately_before_manifest_generation") is not True
+    ):
+        raise ProbeError("fresh TLS GET probe request or claim boundary changed")
+    response = receipt.get("response")
+    if not isinstance(response, dict):
+        raise ProbeError("fresh TLS GET probe response is malformed")
+    headers = response.get("selected_headers_without_date")
+    expected_response = dict(archived["response"])
+    if (
+        not isinstance(headers, dict)
+        or set(headers) - {"content-type", "content-length", "server"}
+        or any(not isinstance(value, str) for value in headers.values())
+        or {key: value for key, value in response.items() if key != "selected_headers_without_date"}
+        != expected_response
+    ):
+        raise ProbeError("fresh TLS GET probe response bytes or headers changed")
+    started = parse_time(receipt.get("started_at"), "fresh probe started_at")
+    finished = parse_time(receipt.get("finished_at"), "fresh probe finished_at")
+    wall = receipt.get("wall_seconds")
+    if (
+        finished < started
+        or not isinstance(wall, (int, float))
+        or isinstance(wall, bool)
+        or not math.isfinite(wall)
+        or wall < 0
+    ):
+        raise ProbeError("fresh TLS GET probe chronology changed")
+    return receipt
 
 
 def verify_archived() -> dict:
@@ -186,7 +246,7 @@ def perform_probe() -> dict:
         "claim_boundary": archived["claim_boundary"],
     }
     result["receipt_sha256"] = sha256_bytes(canonical_bytes(result))
-    return result
+    return verify_fresh(result)
 
 
 def self_test() -> dict:

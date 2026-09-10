@@ -157,21 +157,30 @@ def verify_tls_implementation(amendment: dict) -> dict:
     required = {
         "child": (
             "ssl.create_default_context(cafile=str(CA_BUNDLE))",
-            "manifest.get(\"external_dependencies\", {}).get(\"ca_bundle\") != ca_bundle_record()",
+            "live_ca = ca_bundle_record()",
+            "manifest.get(\"external_dependencies\", {}).get(\"ca_bundle\") != live_ca",
+            'fresh_probe = manifest.get("fresh_preexecution_tls_get_probe")',
             "SSL_CERT_FILE does not name the bound CA bundle",
             "conflicting TLS environment overrides are set",
         ),
         "preparer": (
             'return {"ca_bundle": CHILD.ca_bundle_record()}',
-            '"external_dependencies": live_external_dependencies()',
+            "external_dependencies = live_external_dependencies()",
+            '"external_dependencies": external_dependencies',
+            "fresh_probe = TLS_PROBE.verify_fresh(TLS_PROBE.perform_probe())",
+            '"archived_tls_get_probe": TLS_PROBE.archived_records()',
+            '"fresh_preexecution_tls_get_probe": fresh_probe',
         ),
         "runner": (
             "observed = CHILD.ca_bundle_record()",
             "ca_bundle = live_ca_bundle_for_execution(",
+            "fresh_probe = TLS_PROBE.verify_fresh(",
+            '"fresh_preexecution_tls_get_probe": fresh_probe',
         ),
         "probe": (
             "CHILD.ca_bundle_record()",
             "ssl.create_default_context(cafile=str(CHILD.CA_BUNDLE))",
+            "return verify_fresh(result)",
         ),
     }
     sources = {
@@ -184,7 +193,7 @@ def verify_tls_implementation(amendment: dict) -> dict:
         if any(marker not in sources[label] for marker in markers):
             raise VerificationError(f"{label} source lacks a live explicit-CA check")
     if not (
-        child_source.index('manifest.get("external_dependencies", {}).get("ca_bundle") != ca_bundle_record()')
+        child_source.index("live_ca = ca_bundle_record()")
         < child_source.index("os.replace(authorization_path, consumed_path)")
         < child_source.index("result = perform_request(input_bytes)")
     ):

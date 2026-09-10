@@ -271,13 +271,17 @@ def validate_execution_binding(artifact: Path, resume: bool) -> dict:
     ca_bundle = live_ca_bundle_for_execution(
         manifest.get("external_dependencies", {}).get("ca_bundle")
     )
-    probe = TLS_PROBE.archived_records()
+    archived_probe = TLS_PROBE.archived_records()
     if (
-        manifest.get("preexecution_tls_get_probe") != probe
-        or manifest.get("fresh_preexecution_tls_probe_sha256")
-        != probe["receipt"]["sha256"]
+        manifest.get("archived_tls_get_probe") != archived_probe
     ):
-        raise RunError("execution manifest TLS GET probe binding changed")
+        raise RunError("execution manifest archived TLS GET probe binding changed")
+    try:
+        fresh_probe = TLS_PROBE.verify_fresh(
+            manifest.get("fresh_preexecution_tls_get_probe")
+        )
+    except TLS_PROBE.ProbeError as error:
+        raise RunError(str(error)) from error
     seen = set()
     for record in records:
         if not isinstance(record, dict) or set(record) != {"path", "git_mode", "git_blob_oid", "bytes", "sha256"}:
@@ -312,9 +316,7 @@ def validate_execution_binding(artifact: Path, resume: bool) -> dict:
         "relevant_blob_count": len(records),
         "relevant_path_list_sha256": manifest["relevant_path_list_sha256"],
         "ca_bundle": ca_bundle,
-        "fresh_preexecution_tls_probe_sha256": manifest.get(
-            "fresh_preexecution_tls_probe_sha256"
-        ),
+        "fresh_preexecution_tls_get_probe": fresh_probe,
         "checkout_clean_outside_runtime_artifacts": True,
     }
     binding["binding_sha256"] = sha256_bytes(canonical_bytes(binding))

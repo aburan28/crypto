@@ -276,21 +276,51 @@ def validate_and_consume_authorization(attempt: Path) -> tuple[dict, dict, bytes
         for record in manifest.get("relevant_blobs", [])
         if isinstance(record, dict)
     }
-    if manifest.get("external_dependencies", {}).get("ca_bundle") != ca_bundle_record():
+    live_ca = ca_bundle_record()
+    if manifest.get("external_dependencies", {}).get("ca_bundle") != live_ca:
         raise ChildError("execution manifest CA bundle identity changed")
     probe_receipt = HERE / "stage-19-tls-get-probe-20260910" / "receipt.json"
     probe_response = HERE / "stage-19-tls-get-probe-20260910" / "response.xml"
-    probe = manifest.get("preexecution_tls_get_probe")
+    archived_probe = manifest.get("archived_tls_get_probe")
     if (
-        not isinstance(probe, dict)
-        or probe.get("receipt") != regular_record(probe_receipt, HERE)
-        or probe.get("response") != regular_record(probe_response, HERE)
-        or probe.get("http_status") != 200
-        or probe.get("no_computation_requested") is not True
-        or manifest.get("fresh_preexecution_tls_probe_sha256")
-        != sha256_bytes(probe_receipt.read_bytes())
+        not isinstance(archived_probe, dict)
+        or archived_probe.get("receipt") != regular_record(probe_receipt, HERE)
+        or archived_probe.get("response") != regular_record(probe_response, HERE)
+        or archived_probe.get("http_status") != 200
+        or archived_probe.get("no_computation_requested") is not True
     ):
-        raise ChildError("execution manifest TLS GET probe binding changed")
+        raise ChildError("execution manifest archived TLS GET probe binding changed")
+    archived_receipt = read_json(probe_receipt)
+    fresh_probe = manifest.get("fresh_preexecution_tls_get_probe")
+    if not isinstance(fresh_probe, dict):
+        raise ChildError("execution manifest fresh TLS GET probe is missing")
+    fresh_body = dict(fresh_probe)
+    fresh_hash = fresh_body.pop("receipt_sha256", None)
+    fresh_response = fresh_probe.get("response")
+    selected_headers = (
+        fresh_response.get("selected_headers_without_date")
+        if isinstance(fresh_response, dict)
+        else None
+    )
+    if (
+        fresh_probe.get("schema") != "koblitz_magma_calculator_fresh_tls_get_probe.v1"
+        or fresh_hash != sha256_bytes(canonical_bytes(fresh_body))
+        or fresh_probe.get("fresh_immediately_before_manifest_generation") is not True
+        or fresh_probe.get("request") != archived_receipt.get("request")
+        or fresh_probe.get("classification") != archived_receipt.get("classification")
+        or fresh_probe.get("claim_boundary") != archived_receipt.get("claim_boundary")
+        or not isinstance(selected_headers, dict)
+        or set(selected_headers) - {"content-type", "content-length", "server"}
+        or any(not isinstance(value, str) for value in selected_headers.values())
+        or {
+            key: value
+            for key, value in fresh_response.items()
+            if key != "selected_headers_without_date"
+        }
+        != archived_receipt.get("response")
+        or fresh_probe.get("request", {}).get("ca_bundle") != live_ca
+    ):
+        raise ChildError("execution manifest fresh TLS GET probe binding changed")
     for path in (PLAN, input_path, METER, Path(__file__).resolve()):
         relative = str(path.relative_to(REPO))
         record = relevant.get(relative)

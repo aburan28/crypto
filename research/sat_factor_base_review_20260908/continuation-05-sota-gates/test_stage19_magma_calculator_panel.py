@@ -43,6 +43,28 @@ def stamp(moment: datetime) -> str:
     return moment.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def fresh_probe_fixture() -> dict:
+    archived = TLS_PROBE.verify_archived()
+    receipt = {
+        "schema": TLS_PROBE.FRESH_SCHEMA,
+        "started_at": "2026-09-10T14:00:00Z",
+        "finished_at": "2026-09-10T14:00:00.125000Z",
+        "wall_seconds": 0.125,
+        "request": archived["request"],
+        "response": {
+            **archived["response"],
+            "selected_headers_without_date": {},
+        },
+        "fresh_immediately_before_manifest_generation": True,
+        "classification": archived["classification"],
+        "claim_boundary": archived["claim_boundary"],
+    }
+    receipt["receipt_sha256"] = TLS_PROBE.sha256_bytes(
+        TLS_PROBE.canonical_bytes(receipt)
+    )
+    return receipt
+
+
 class Stage19PanelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -66,7 +88,7 @@ class Stage19PanelTests(unittest.TestCase):
             "relevant_blob_count": 21,
             "relevant_path_list_sha256": "7" * 64,
             "ca_bundle": CHILD.expected_ca_bundle_record(),
-            "fresh_preexecution_tls_probe_sha256": "8" * 64,
+            "fresh_preexecution_tls_get_probe": {"receipt_sha256": "8" * 64},
             "checkout_clean_outside_runtime_artifacts": True,
         }
         body["binding_sha256"] = RUNNER.sha256_bytes(RUNNER.canonical_bytes(body))
@@ -414,6 +436,79 @@ class Stage19PanelTests(unittest.TestCase):
                     ):
                         with self.assertRaises(TLS_PROBE.CHILD.ChildError):
                             TLS_PROBE.exact_context()
+
+    def test_manifest_calls_one_fresh_probe_and_rejects_archived_substitution(self):
+        fresh = fresh_probe_fixture()
+        events = []
+
+        def fake_git(*args):  # noqa: ANN001
+            if args == ("status", "--porcelain=v1", "--untracked-files=all"):
+                return b""
+            if args == ("rev-parse", "HEAD"):
+                return ("1" * 40 + "\n").encode()
+            if args == ("rev-parse", "HEAD^{tree}"):
+                return ("2" * 40 + "\n").encode()
+            raise AssertionError(f"unexpected Git call: {args}")
+
+        def fake_blob(_revision, relative):  # noqa: ANN001
+            return {
+                "path": relative,
+                "git_mode": "100644",
+                "git_blob_oid": "3" * 40,
+                "bytes": 1,
+                "sha256": "4" * 64,
+            }
+
+        def live_dependencies():
+            events.append("live-ca")
+            return {"ca_bundle": CHILD.expected_ca_bundle_record()}
+
+        def perform_probe():
+            events.append("fresh-probe")
+            return fresh
+
+        with (
+            mock.patch.object(PREPARER, "git", side_effect=fake_git),
+            mock.patch.object(PREPARER, "blob_record", side_effect=fake_blob),
+            mock.patch.object(
+                PREPARER, "live_external_dependencies", side_effect=live_dependencies
+            ),
+            mock.patch.object(
+                PREPARER.TLS_PROBE, "perform_probe", side_effect=perform_probe
+            ) as probe,
+        ):
+            manifest = PREPARER.build_manifest()
+        probe.assert_called_once_with()
+        self.assertEqual(["live-ca", "fresh-probe"], events)
+        self.assertEqual(fresh, manifest["fresh_preexecution_tls_get_probe"])
+        self.assertEqual(
+            PREPARER.TLS_PROBE.archived_records(), manifest["archived_tls_get_probe"]
+        )
+
+        with (
+            mock.patch.object(PREPARER, "git", side_effect=fake_git),
+            mock.patch.object(PREPARER, "blob_record", side_effect=fake_blob),
+            mock.patch.object(
+                PREPARER,
+                "live_external_dependencies",
+                return_value={"ca_bundle": CHILD.expected_ca_bundle_record()},
+            ),
+            mock.patch.object(
+                PREPARER.TLS_PROBE,
+                "perform_probe",
+                return_value=PREPARER.TLS_PROBE.verify_archived(),
+            ),
+        ):
+            with self.assertRaises(PREPARER.TLS_PROBE.ProbeError):
+                PREPARER.build_manifest()
+
+        with mock.patch.object(
+            PREPARER.TLS_PROBE,
+            "perform_probe",
+            side_effect=AssertionError("self-test attempted network probe"),
+        ) as probe:
+            PREPARER.self_test()
+        probe.assert_not_called()
         with mock.patch.dict(
             os.environ,
             {

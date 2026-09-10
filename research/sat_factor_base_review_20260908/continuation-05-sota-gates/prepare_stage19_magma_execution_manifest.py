@@ -171,6 +171,8 @@ def build_manifest() -> dict:
         raise PreparationError("Git did not return full commit and tree identities")
     paths = relevant_paths()
     records = [blob_record(revision, path) for path in paths]
+    external_dependencies = live_external_dependencies()
+    fresh_probe = TLS_PROBE.verify_fresh(TLS_PROBE.perform_probe())
     return {
         "schema": SCHEMA,
         "first_preexecution_commit": revision,
@@ -194,16 +196,15 @@ def build_manifest() -> dict:
         "prepared_summary_sha256": sha256_bytes(
             (ARTIFACT / "prepared-summary.json").read_bytes()
         ),
-        "external_dependencies": live_external_dependencies(),
-        "preexecution_tls_get_probe": TLS_PROBE.archived_records(),
-        "fresh_preexecution_tls_probe_sha256": sha256_bytes(
-            (HERE / "stage-19-tls-get-probe-20260910" / "receipt.json").read_bytes()
-        ),
+        "external_dependencies": external_dependencies,
+        "archived_tls_get_probe": TLS_PROBE.archived_records(),
+        "fresh_preexecution_tls_get_probe": fresh_probe,
         "execution_requirements": {
             "checkout_clean_outside_runtime_artifacts": True,
             "current_bytes_must_match_relevant_blobs": True,
             "record_exact_second_preexecution_commit_and_tree_in_run_and_attempts": True,
-            "network_execution_before_second_commit": False,
+            "calculator_post_before_second_commit": False,
+            "fresh_get_during_manifest_generation": True,
         },
         "claim_boundary": plan["claim_boundary"],
     }

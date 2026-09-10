@@ -183,15 +183,19 @@ def verify_execution_binding(binding: dict) -> dict:
         or binding.get("ca_bundle") != ca_bundle
     ):
         raise VerificationError("execution CA bundle identity changed")
-    probe = RUNNER.TLS_PROBE.archived_records()
+    archived_probe = RUNNER.TLS_PROBE.archived_records()
     if (
-        manifest.get("preexecution_tls_get_probe") != probe
-        or manifest.get("fresh_preexecution_tls_probe_sha256")
-        != probe["receipt"]["sha256"]
-        or binding.get("fresh_preexecution_tls_probe_sha256")
-        != probe["receipt"]["sha256"]
+        manifest.get("archived_tls_get_probe") != archived_probe
     ):
-        raise VerificationError("execution TLS GET probe binding changed")
+        raise VerificationError("execution archived TLS GET probe binding changed")
+    try:
+        fresh_probe = RUNNER.TLS_PROBE.verify_fresh(
+            manifest.get("fresh_preexecution_tls_get_probe")
+        )
+    except RUNNER.TLS_PROBE.ProbeError as error:
+        raise VerificationError(str(error)) from error
+    if binding.get("fresh_preexecution_tls_get_probe") != fresh_probe:
+        raise VerificationError("execution fresh TLS GET probe binding changed")
     for record in records:
         relative = record.get("path") if isinstance(record, dict) else None
         if not isinstance(relative, str):
