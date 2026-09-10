@@ -4,10 +4,11 @@ use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    factor_x_n_minus_1, koblitz_index_calculus_dlp_with_factor_base_and_progress,
-    order_of_2_mod_n, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent,
-    KoblitzIcOptions, MAX_N,
+    factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
+    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, MAX_N,
 };
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -252,6 +253,253 @@ pub struct SearchArgs {
     /// Write the selected factor-base recipe here (never overwrites).
     #[arg(long)]
     pub spec_out: Option<PathBuf>,
+}
+/// Precompute the factor-base logarithm database once for a curve.
+#[derive(Clone, Debug, Args)]
+pub struct LogsArgs {
+    #[arg(long,default_value_t=9,value_parser=degree)]
+    pub degree: u32,
+    #[arg(long,default_value_t=0,value_parser=clap::value_parser!(u8).range(0..=1))]
+    pub curve_a: u8,
+    /// Candidate index in the legacy degree-ord_n(2) factor-base family.
+    #[arg(long, default_value_t = 0, conflicts_with = "factor_base")]
+    pub factor_index: usize,
+    /// Factor-base recipe saved by `ic search` (JSON); replaces --factor-index.
+    #[arg(long)]
+    pub factor_base: Option<PathBuf>,
+    /// Factor-base points per relation (2, 3 or 4).
+    #[arg(long,default_value_t=2,value_parser=clap::value_parser!(u8).range(2..=4))]
+    pub summands: u8,
+    #[arg(long,default_value_t=200_000,value_parser=clap::value_parser!(u32).range(1..=1_000_000))]
+    pub max_trials: u32,
+    #[arg(long,value_enum,default_value_t=Solver::PairTable)]
+    pub solver: Solver,
+    #[arg(long, default_value_t = 0x4b_6f_62_6c_69_74_7a_00u64)]
+    pub seed: u64,
+    /// Write the logarithm database here; an existing path is never overwritten.
+    #[arg(long = "database")]
+    pub database: PathBuf,
+}
+/// Recover a target's logarithm by descent, reusing a saved database.
+#[derive(Clone, Debug, Args)]
+pub struct SolveArgs {
+    #[arg(long,default_value_t=9,value_parser=degree)]
+    pub degree: u32,
+    #[arg(long,default_value_t=0,value_parser=clap::value_parser!(u8).range(0..=1))]
+    pub curve_a: u8,
+    /// Logarithm database written by `ic logs`.
+    #[arg(long)]
+    pub logs: PathBuf,
+    /// Public logarithm of the synthetic target; defaults to 53 unless --random-target.
+    #[arg(long,value_parser=clap::value_parser!(u64).range(1..),conflicts_with="random_target")]
+    pub known_log: Option<u64>,
+    /// Draw a deterministic random known-answer target from --seed.
+    #[arg(long)]
+    pub random_target: bool,
+    #[arg(long, default_value_t = 0x4b_6f_62_6c_69_74_7a_00u64)]
+    pub seed: u64,
+    #[arg(long,default_value_t=2,value_parser=clap::value_parser!(u8).range(2..=4))]
+    pub summands: u8,
+    #[arg(long,default_value_t=200_000,value_parser=clap::value_parser!(u32).range(1..=1_000_000))]
+    pub max_trials: u32,
+    #[arg(long,value_enum,default_value_t=Solver::PairTable)]
+    pub solver: Solver,
+}
+/// A serialised factor-base logarithm database, bound to its curve and
+/// factor base so it cannot be replayed on another.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LogTableDocument {
+    pub schema_version: u32,
+    pub degree: u32,
+    pub curve_a: u8,
+    pub spec: FactorBaseSpec,
+    pub subgroup_order: String,
+    pub cofactor: String,
+    pub summands: u8,
+    pub solver: Solver,
+    /// `(x, y, log_G point)` per relation column; coordinates hex, log decimal.
+    pub columns: Vec<LogColumn>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LogColumn {
+    pub x: String,
+    pub y: String,
+    pub log: String,
+}
+pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
+    let mut data = Vec::new();
+    File::open(path)
+        .map_err(|e| format!("{}: {e}", path.display()))?
+        .take(16_777_217)
+        .read_to_end(&mut data)
+        .map_err(|e| e.to_string())?;
+    if data.len() > 16_777_216 {
+        return Err("logarithm database exceeds 16 MiB".into());
+    }
+    let doc: LogTableDocument =
+        serde_json::from_slice(&data).map_err(|e| format!("invalid logarithm database JSON: {e}"))?;
+    if doc.schema_version != 1 {
+        return Err("unsupported logarithm database schema version".into());
+    }
+    Ok(doc)
+}
+fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
+    KoblitzIcOptions {
+        m: summands as usize,
+        strategy: strategy.strategy(),
+        collapse_negation: true,
+        collapse_projected_orbits: true,
+        allow_direct_relation: false,
+        max_trials: max_trials as usize,
+        seed,
+        ..KoblitzIcOptions::default()
+    }
+}
+pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
+    let begin = Instant::now();
+    if std::fs::symlink_metadata(&args.database).is_ok() {
+        return Err(format!("logarithm database already exists: {}", args.database.display()));
+    }
+    let spec = match &args.factor_base {
+        Some(path) => {
+            let doc = load_factor_base(path)?;
+            if doc.degree != args.degree || doc.curve_a != args.curve_a {
+                return Err(format!(
+                    "factor-base recipe was found on K_{} / GF(2^{}), not K_{} / GF(2^{})",
+                    doc.curve_a, doc.degree, args.curve_a, args.degree
+                ));
+            }
+            doc.spec
+        }
+        None => {
+            validate_factor_size(args.degree)?;
+            FactorBaseSpec::Factor {
+                index: args.factor_index,
+            }
+        }
+    };
+    let c = curve(args.degree, args.curve_a)?;
+    let fb = materialize(&c, &spec)?;
+    if !quiet {
+        println!(
+            "ic — factor-base logarithm precomputation on K_{} / GF(2^{}); r = {}\nFactor base: {}; {} summands; engine {}",
+            c.a, c.n, c.subgroup_order,
+            serde_json::to_string(&spec).unwrap_or_default(), args.summands, args.solver.name()
+        );
+        let _ = std::io::stdout().flush();
+    }
+    let opts = ic_options(args.solver, args.summands, args.max_trials, args.seed);
+    let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
+        .ok_or("factor base has no usable projected columns for this summand count")?;
+    if !report.verified {
+        return Ok(json!({"schema_version":1,"operation":"logs","status":"incomplete",
+            "evidence_scope":"synthetic_known_answer",
+            "reason":"relations did not determine every column logarithm within the trial budget",
+            "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
+            "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+            "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
+    }
+    let columns: Vec<LogColumn> = table
+        .columns
+        .iter()
+        .map(|(point, log)| match point {
+            BinaryPoint::Affine { x, y } => LogColumn {
+                x: params::hex(&x.to_biguint()),
+                y: params::hex(&y.to_biguint()),
+                log: log.to_string(),
+            },
+            BinaryPoint::Infinity => unreachable!("projected columns are affine"),
+        })
+        .collect();
+    let doc = LogTableDocument {
+        schema_version: 1,
+        degree: c.n,
+        curve_a: c.a,
+        spec: spec.clone(),
+        subgroup_order: c.subgroup_order.to_string(),
+        cofactor: c.cofactor.to_string(),
+        summands: args.summands,
+        solver: args.solver,
+        columns,
+    };
+    write_new(&args.database, &serde_json::to_value(&doc).map_err(|e| e.to_string())?)?;
+    Ok(json!({"schema_version":1,"operation":"logs","status":"complete",
+        "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
+        "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
+        "factor_base":factor_base_json(&spec,&fb,report.columns),
+        "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+        "verified":true,"out":args.database.display().to_string(),
+        "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
+        "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",
+        "limitations":["No imported target was used.","This precomputation does not establish scaling or challenge readiness."]}))
+}
+pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
+    let begin = Instant::now();
+    let doc = load_log_table(&args.logs)?;
+    if doc.degree != args.degree || doc.curve_a != args.curve_a {
+        return Err(format!(
+            "logarithm database was built on K_{} / GF(2^{}), not K_{} / GF(2^{})",
+            doc.curve_a, doc.degree, args.curve_a, args.degree
+        ));
+    }
+    let c = curve(args.degree, args.curve_a)?;
+    if doc.subgroup_order != c.subgroup_order.to_string() {
+        return Err("logarithm database subgroup order does not match the reconstructed curve".into());
+    }
+    let fb = materialize(&c, &doc.spec)?;
+    // Reconstruct the table and re-verify every column against the curve.
+    let mut columns = Vec::with_capacity(doc.columns.len());
+    for col in &doc.columns {
+        let x = F2mElement::from_biguint(&params::number(&col.x)?, c.n);
+        let y = F2mElement::from_biguint(&params::number(&col.y)?, c.n);
+        let log = params::number(&col.log)?;
+        columns.push((BinaryPoint::Affine { x, y }, log));
+    }
+    let table = FactorBaseLogTable { columns };
+    if !table.verify(&c) {
+        return Err("logarithm database failed re-verification: a column log does not satisfy [x]G == point".into());
+    }
+    // Build the synthetic known-answer target.
+    let k = if args.random_target {
+        let mut rng = StdRng::seed_from_u64(args.seed ^ 0x534f_4c56_4552_5447);
+        BigUint::from(rng.gen_range(1..c.subgroup_order.to_u64_digits()[0]))
+    } else {
+        BigUint::from(args.known_log.unwrap_or(53))
+    };
+    if k >= c.subgroup_order {
+        return Err(format!(
+            "known logarithm must be nonzero and smaller than subgroup order {}",
+            c.subgroup_order
+        ));
+    }
+    let target = c.mul(c.generator(), &k);
+    if !quiet {
+        println!(
+            "ic — individual-logarithm descent on K_{} / GF(2^{}); r = {}\nDatabase: {} columns (verified); target log {k}; {} summands; engine {}",
+            c.a, c.n, c.subgroup_order, table.len(), args.summands, args.solver.name()
+        );
+        let _ = std::io::stdout().flush();
+    }
+    let opts = ic_options(args.solver, args.summands, args.max_trials, args.seed);
+    let outcome = individual_log(&c, &fb, &table, &target, &opts);
+    let (recovered, report) = match outcome {
+        Some((d, r)) => (Some(d), r),
+        None => (None, crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogReport::default()),
+    };
+    let verified = recovered.as_ref() == Some(&k)
+        && recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == target);
+    Ok(json!({"schema_version":1,"operation":"solve",
+        "status":if verified{"complete"}else{"incomplete"},
+        "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
+        "database":{"columns":table.len(),"reverified":true,"spec":doc.spec,
+            "source":args.logs.display().to_string(),"summands_precomputed":doc.summands},
+        "result":{"expected":k.to_string(),"recovered":recovered.as_ref().map(ToString::to_string),"verified":verified},
+        "counts":{"descent_trials":report.trials},
+        "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
+        "scope":"per-target individual logarithm: one relation over a reused, re-verified factor-base logarithm database",
+        "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]}))
 }
 fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
     // Keep this guard even for internal callers, independently of Clap.

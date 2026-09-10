@@ -3236,6 +3236,328 @@ pub fn koblitz_speedup_model(n: u32, fb_size: usize, unknowns: usize, m: usize) 
     }
 }
 
+// ── Factor-base logarithms and individual-logarithm descent ─────────
+//
+// A CADO-NFS-style pipeline separates two costs that the plain driver
+// above conflates.  The plain driver bakes the target `Q` into every
+// relation (`R = [a]G + [b]Q`) and rebuilds the whole relation matrix
+// per target.  A production pipeline instead:
+//
+//   1. **precomputes**, once per curve and factor base, the discrete
+//      logarithm of every relation column — the *factor-base logarithm
+//      database*;
+//   2. **descends** each target with a single relation, reading the
+//      column logs out of that database — the *individual logarithm*.
+//
+// Both stages live here because they need the private projected-orbit
+// map and relation builder.  Only the projected representation is
+// supported (the `ic` default): its columns are the canonical
+// cofactor projections `R_o ∈ ⟨G⟩`, so a column logarithm
+// `x_o = log_G R_o` is a genuine discrete log that certifies itself —
+// `[x_o]G == R_o` — with no reliance on the collection being correct.
+
+/// A solved factor-base logarithm database: for each relation column,
+/// the point `R_o ∈ ⟨G⟩` and its discrete logarithm `x_o = log_G R_o`.
+///
+/// Reusable across every target on the same curve and factor base.  The
+/// table is self-certifying: [`Self::verify`] rechecks `[x_o]G == R_o`
+/// for every column with one scalar multiplication each, so a loaded
+/// table cannot silently carry a wrong logarithm.
+#[derive(Clone, Debug)]
+pub struct FactorBaseLogTable {
+    /// `(R_o, log_G R_o)` per relation column, in projected-column order.
+    pub columns: Vec<(BinaryPoint, BigUint)>,
+}
+
+impl FactorBaseLogTable {
+    /// The number of column logarithms.
+    pub fn len(&self) -> usize {
+        self.columns.len()
+    }
+
+    /// Whether the table has no columns.
+    pub fn is_empty(&self) -> bool {
+        self.columns.is_empty()
+    }
+
+    /// Recheck every stored logarithm by `[x_o]G == R_o`.  Cheap
+    /// (one scalar multiplication per column) and total: it depends on
+    /// nothing but the curve and the table itself.
+    pub fn verify(&self, kc: &KoblitzCurve) -> bool {
+        let g = kc.generator();
+        self.columns.iter().all(|(point, log)| {
+            *point != BinaryPoint::Infinity
+                && log < &kc.subgroup_order
+                && &kc.mul(g, log) == point
+        })
+    }
+
+    /// Look a column point's logarithm up by point identity.
+    fn log_of(&self) -> HashMap<(BigUint, BigUint), BigUint> {
+        self.columns
+            .iter()
+            .map(|(point, log)| (point_key(point), log.clone()))
+            .collect()
+    }
+}
+
+/// What a factor-base logarithm precomputation did.
+#[derive(Clone, Debug, Default)]
+pub struct LogTableReport {
+    /// Relation columns solved (equals the table length on success).
+    pub columns: usize,
+    /// `[a]G` probes drawn.
+    pub trials: usize,
+    /// Probes that decomposed into a usable relation.
+    pub relations: usize,
+    /// Whether every column logarithm verified as `[x_o]G == R_o`.
+    pub verified: bool,
+}
+
+/// Dispatch one decomposition question `target = Σ_{i} P_{i}` (`m`
+/// summands) to the requested oracle, mirroring the driver's own
+/// dispatch.  A prebuilt pair table is used when supplied.
+#[allow(clippy::too_many_arguments)]
+fn decompose_once(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    field: &FieldStructure,
+    pair: Option<&PairSumTable>,
+    opts: &KoblitzIcOptions,
+    target: &BinaryPoint,
+) -> Option<Vec<usize>> {
+    match opts.strategy {
+        DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
+        DecompositionStrategy::PairTable => {
+            pair.expect("pair table required").decompose(kc, fb, target, opts.m)
+        }
+        DecompositionStrategy::Groebner => {
+            groebner_decompose(
+                kc, fb, index_of, field, target, opts.m, opts.engine, opts.node_budget,
+            )
+            .0
+        }
+        DecompositionStrategy::Sat => {
+            sat_decompose_with(
+                kc,
+                fb,
+                index_of,
+                field,
+                target,
+                opts.m,
+                opts.max_models,
+                opts.sat_macaulay_degree,
+                opts.sat_options,
+            )
+            .0
+        }
+    }
+}
+
+/// **Precompute the factor-base logarithm database.**
+///
+/// Draws `R = [a]G` probes (`b = 0`, so the target plays no part),
+/// decomposes each over the factor base, and rewrites it as a row
+/// `Σ_o c_o x_o ≡ h·a (mod r)` over the projected columns.  Once the
+/// rows determine every column, the whole logarithm vector is read off
+/// in one solve and each entry is certified by `[x_o]G == R_o`.
+///
+/// This is the once-per-curve cost a per-target descent then amortises.
+/// Returns `None` only for a degenerate factor base (no projected
+/// columns, or the field too wide for the pair table); an exhausted
+/// trial budget yields a report with `verified = false`.
+pub fn solve_factor_base_logs(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+) -> Option<(FactorBaseLogTable, LogTableReport)> {
+    let r = &kc.subgroup_order;
+    let g = kc.generator().clone();
+    let projected = projected_signed_orbit_map(kc, fb);
+    let n_cols = projected.representatives.len();
+    let mut report = LogTableReport::default();
+    if n_cols == 0 || !fb.m_can_decompose(kc, opts.m) {
+        return None;
+    }
+    let index_of = fb.index_map();
+    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    let h = &kc.cofactor % r;
+
+    let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
+    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    let mut matrix: Vec<Vec<BigUint>> = Vec::new();
+    let mut rhs: Vec<BigUint> = Vec::new();
+    let mut last_attempt = 0usize;
+
+    while report.trials < opts.max_trials {
+        report.trials += 1;
+        let a = BigUint::from(rng.gen_range(1..r_u64));
+        let target = kc.mul(&g, &a);
+        if target == BinaryPoint::Infinity {
+            continue;
+        }
+        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
+        else {
+            continue;
+        };
+        let relation = relation_from_decomposition_with_mode(
+            kc, fb, &idxs, &a, &BigUint::zero(), opts.collapse_negation, Some(&projected),
+        );
+        matrix.push(relation.row);
+        rhs.push((&h * &a) % r);
+        report.relations += 1;
+
+        // Attempt a solve once there are at least as many relations as
+        // columns and at least one new row since the last attempt.
+        if matrix.len() >= n_cols && matrix.len() > last_attempt {
+            last_attempt = matrix.len();
+            let mut m = matrix.clone();
+            let mut b = rhs.clone();
+            if let Some(solution) = gaussian_eliminate_mod_n(&mut m, &mut b, r) {
+                let columns: Vec<(BinaryPoint, BigUint)> = projected
+                    .representatives
+                    .iter()
+                    .zip(solution.iter())
+                    .map(|(point, log)| (point.clone(), log.clone()))
+                    .collect();
+                let table = FactorBaseLogTable { columns };
+                if table.verify(kc) {
+                    report.columns = n_cols;
+                    report.verified = true;
+                    return Some((table, report));
+                }
+            }
+        }
+    }
+    report.columns = n_cols;
+    // Best-effort table from whatever was collected; unverified.
+    let mut m = matrix.clone();
+    let mut b = rhs.clone();
+    let columns = gaussian_eliminate_mod_n(&mut m, &mut b, r)
+        .map(|solution| {
+            projected
+                .representatives
+                .iter()
+                .zip(solution)
+                .map(|(point, log)| (point.clone(), log))
+                .collect()
+        })
+        .unwrap_or_default();
+    Some((FactorBaseLogTable { columns }, report))
+}
+
+/// What an individual-logarithm descent did.
+#[derive(Clone, Debug, Default)]
+pub struct IndividualLogReport {
+    /// `[a]G + [b]Q` probes drawn before one descended.
+    pub trials: usize,
+    /// The recovered logarithm, if the descent succeeded and verified.
+    pub log: Option<BigUint>,
+}
+
+/// **Recover `log_G Q` with one relation, reusing a solved table.**
+///
+/// Draws `R = [a]G + [b]Q` probes until one decomposes over the factor
+/// base; that single relation gives
+/// `h·a + h·b·d ≡ Σ_o c_o x_o (mod r)`, and with the column logs `x_o`
+/// already known the scalar `d = log_G Q` falls out of one modular
+/// inverse.  The recovered `d` is re-checked as `[d]G == Q` before it
+/// is returned, so a `Some` is never a false positive.
+///
+/// This is the per-target half of the split: no relation matrix, just
+/// one decomposition and a lookup.  The table must belong to the same
+/// curve and factor base (its columns are matched to the rebuilt
+/// projected columns by point identity).
+pub fn individual_log(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+) -> Option<(BigUint, IndividualLogReport)> {
+    let r = &kc.subgroup_order;
+    let g = kc.generator().clone();
+    let projected = projected_signed_orbit_map(kc, fb);
+    if projected.representatives.len() != table.columns.len() {
+        return None;
+    }
+    let mut report = IndividualLogReport::default();
+    if *q == BinaryPoint::Infinity {
+        // Q = O has logarithm 0.
+        report.log = Some(BigUint::zero());
+        return Some((BigUint::zero(), report));
+    }
+    let index_of = fb.index_map();
+    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    let log_of = table.log_of();
+    // Column logs in the rebuilt column order (matched by point identity).
+    let column_log: Vec<BigUint> = projected
+        .representatives
+        .iter()
+        .map(|point| log_of.get(&point_key(point)).cloned())
+        .collect::<Option<Vec<_>>>()?;
+    let h = &kc.cofactor % r;
+
+    let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x44_45_53_43_45_4e_54_00);
+    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    while report.trials < opts.max_trials {
+        report.trials += 1;
+        let a = BigUint::from(rng.gen_range(1..r_u64));
+        let b = BigUint::from(rng.gen_range(1..r_u64));
+        let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
+        if target == BinaryPoint::Infinity {
+            // Degenerate relation [a]G + [b]Q = O already yields d.
+            if let Some(d) = solve_for_d(&a, &b, r) {
+                if kc.mul(&g, &d) == *q {
+                    report.log = Some(d.clone());
+                    return Some((d, report));
+                }
+            }
+            continue;
+        }
+        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
+        else {
+            continue;
+        };
+        let relation = relation_from_decomposition_with_mode(
+            kc, fb, &idxs, &a, &b, opts.collapse_negation, Some(&projected),
+        );
+        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
+        let mut sum = BigUint::zero();
+        for (coeff, log) in relation.row.iter().zip(&column_log) {
+            if !coeff.is_zero() {
+                sum = (sum + coeff * log) % r;
+            }
+        }
+        let ha = (&h * &a) % r;
+        let numerator = (sum + r - ha) % r;
+        let hb = (&h * &b) % r;
+        let Some(hb_inv) = mod_inverse(&hb, r) else {
+            continue;
+        };
+        let d = (numerator * hb_inv) % r;
+        if kc.mul(&g, &d) == *q {
+            report.log = Some(d.clone());
+            return Some((d, report));
+        }
+        // A non-matching d means this factor base cannot place Q in the
+        // span its columns log (e.g. Q outside the reachable subgroup);
+        // keep trying other relations before giving up.
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4099,6 +4421,70 @@ mod tests {
         for (a, n) in [(0u8, 25u32), (1, 27), (1, 33)] {
             assert!(KoblitzCurve::new(a, n).is_none(), "K_{a}/2^{n}");
         }
+    }
+
+    #[test]
+    fn factor_base_logs_precompute_and_descend_every_target() {
+        // The CADO split: solve the column logs once, then recover every
+        // target with a single descent, and cross-check against both a
+        // brute-forced discrete log and the plain matrix driver.
+        // Bases whose projected columns a two-summand relation search
+        // determines in full (high coverage), so the whole log vector
+        // is solvable: K_0/2^9 (3 columns) and K_1/2^11 (45 columns).
+        for (a, n) in [(0u8, 9u32), (1, 11)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let opts = KoblitzIcOptions {
+                m: 2,
+                strategy: DecompositionStrategy::PairTable,
+                collapse_negation: true,
+                collapse_projected_orbits: true,
+                allow_direct_relation: false,
+                max_trials: 20_000,
+                ..KoblitzIcOptions::default()
+            };
+            let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+            assert!(report.verified, "K_{a}/2^{n}: log table did not verify");
+            assert!(table.verify(&kc));
+            assert_eq!(table.len(), report.columns);
+            // Every column really is the log of its point.
+            for (point, log) in &table.columns {
+                assert_eq!(&kc.mul(kc.generator(), log), point);
+                assert!(*point != BinaryPoint::Infinity);
+            }
+            // Descend a batch of known-answer targets; one shared table.
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let g = kc.generator().clone();
+            for k in [1u64, 2, 7, 53, r / 2, r - 1] {
+                let expected = BigUint::from(k % r);
+                let q = kc.mul(&g, &expected);
+                let (recovered, ir) = individual_log(&kc, &fb, &table, &q, &opts)
+                    .unwrap_or_else(|| panic!("K_{a}/2^{n}: no descent for k = {k}"));
+                assert_eq!(recovered, expected, "K_{a}/2^{n} k = {k}");
+                assert_eq!(ir.log.as_ref(), Some(&expected));
+                assert!(ir.trials >= 1);
+                assert_eq!(kc.mul(&g, &recovered), q);
+            }
+            // O has logarithm 0 without any probing.
+            let (zero, _) = individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
+            assert!(zero.is_zero());
+        }
+    }
+
+    #[test]
+    fn a_wrong_column_log_fails_the_table_verification() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            strategy: DecompositionStrategy::Enumerate,
+            allow_direct_relation: false,
+            ..KoblitzIcOptions::default()
+        };
+        let (mut table, report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        assert!(report.verified && table.verify(&kc));
+        // Corrupt one logarithm; verification must catch it.
+        table.columns[0].1 = (&table.columns[0].1 + BigUint::one()) % &kc.subgroup_order;
+        assert!(!table.verify(&kc));
     }
 
     #[test]

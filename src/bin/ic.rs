@@ -51,6 +51,10 @@ enum Action {
     Compare(experiment::CompareArgs),
     /// Search divisor, union and pruned factor bases by exact relation yield, then validate.
     Search(experiment::SearchArgs),
+    /// Precompute the factor-base logarithm database once for a curve.
+    Logs(experiment::LogsArgs),
+    /// Recover a target's logarithm by descent, reusing a saved database.
+    Solve(experiment::SolveArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -92,6 +96,8 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Generate(args)) => experiment::generate(args.clone()),
         Some(Action::Compare(args)) => experiment::compare(args.clone(), cli.json),
         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
+        Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
+        Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -209,6 +215,34 @@ fn display(report: &Value) {
             }
             if let Some(path) = report["spec_out"].as_str() {
                 println!("Recipe saved: {path}");
+            }
+        }
+        Some("logs") => {
+            println!(
+                "Logs: {}; {} columns; {} trials; {} relations",
+                report["status"],
+                report["counts"]["columns"],
+                report["counts"]["trials"],
+                report["counts"]["relations"]
+            );
+            if let Some(path) = report["out"].as_str() {
+                println!("Database saved: {path}");
+            } else if let Some(reason) = report["reason"].as_str() {
+                println!("Reason: {reason}");
+            }
+        }
+        Some("solve") => {
+            println!(
+                "Solve: {}; database columns {} (re-verified)",
+                report["status"],
+                report["database"]["columns"]
+            );
+            if let Some(result) = report.get("result") {
+                println!(
+                    "Expected: {}; recovered: {}; verified: {}; descent trials: {}",
+                    result["expected"], result["recovered"], result["verified"],
+                    report["counts"]["descent_trials"]
+                );
             }
         }
         Some("error") => {

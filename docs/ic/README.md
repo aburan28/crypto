@@ -133,6 +133,48 @@ collects no relation at all in 20 000 trials — the 31-point base never
 reaches the order-211 subgroup with two summands — while the search finds,
 scores and validates bases covering all 210 targets in a few seconds.
 
+## Factor-base logarithms and individual-logarithm descent
+
+    ./target/release/ic logs --degree 9 --curve-a 0 --solver pair-table --database logs9.json
+    ./target/release/ic solve --degree 9 --curve-a 0 --logs logs9.json --known-log 53
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json
+    ./target/release/ic solve --degree 31 --curve-a 0 --summands 3 --logs logs31.json --random-target --seed 7
+
+Like a number-field-sieve pipeline, `ic` separates the two costs the
+plain `run` conflates. `run` bakes the target into every relation
+(`R = [a]G + [b]Q`) and rebuilds the whole relation matrix per target.
+Instead:
+
+- `ic logs` **precomputes**, once per curve and factor base, the
+  discrete logarithm of every relation column — the factor-base
+  logarithm database. It draws `R = [a]G` probes (no target), decomposes
+  each over the factor base, rewrites it as `Σ_o c_o x_o ≡ h·a (mod r)`
+  over the projected columns, and once the rows determine every column
+  reads the whole logarithm vector off in one solve. Every column log is
+  certified by `[x_o]G == R_o` before the database is written; a
+  database that fails that check is never emitted.
+- `ic solve` **descends** a target with a single relation, reusing the
+  database. It draws `R = [a]G + [b]Q` until one decomposes, giving
+  `h·a + h·b·d ≡ Σ_o c_o x_o (mod r)`; with the column logs known, the
+  scalar `d = log_G Q` falls out of one modular inverse, and the
+  recovered `d` is re-checked as `[d]G == Q` before it is returned. On
+  load the whole database is re-verified against the reconstructed curve,
+  so a tampered or mismatched database is rejected, not trusted.
+
+The database is a JSON document bound to its degree, coefficient,
+subgroup order and factor-base spec; `solve` rejects it on any other
+curve. Only the projected column representation is used (the `ic`
+default): its columns are canonical cofactor projections `R_o ∈ ⟨G⟩`, so
+each column logarithm is a genuine, self-certifying discrete log.
+
+The precomputation reaches whatever the factor base and summand count
+support. On `K_0/2^31` over a search-selected dimension-11 base
+(`--summands 3`, 35 columns) it completes in about 15 s; each subsequent
+target then needs one or two relations. The `logs` trial budget
+(`--max-trials`, default 200000) bounds the search for a full-rank
+relation set; a base whose coverage cannot determine every column
+reports `incomplete` rather than emitting an unverified database.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json

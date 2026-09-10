@@ -415,3 +415,74 @@ fn every_solver_recovers_the_same_scalar_with_three_summands() {
         assert_eq!(v["counts"]["inconsistent_relations"], 0);
     }
 }
+
+#[test]
+fn factor_base_logarithm_database_precomputes_then_descends() {
+    // Precompute the database once, then recover several targets by
+    // descent reusing it — the CADO-style split.
+    let db = path();
+    let (ok, logs) = command(&[
+        "logs",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--solver",
+        "pair-table",
+        "--database",
+        db.to_str().unwrap(),
+    ]);
+    assert!(ok, "{logs}");
+    assert_eq!(logs["status"], "complete");
+    assert_eq!(logs["verified"], true);
+    assert_eq!(logs["counts"]["columns"], 3);
+
+    for k in ["1", "53", "126"] {
+        let (ok, solve) = command(&[
+            "solve",
+            "--degree",
+            "9",
+            "--curve-a",
+            "0",
+            "--logs",
+            db.to_str().unwrap(),
+            "--known-log",
+            k,
+            "--solver",
+            "pair-table",
+        ]);
+        assert!(ok, "{solve}");
+        assert_eq!(solve["status"], "complete");
+        assert_eq!(solve["result"]["verified"], true);
+        assert_eq!(solve["result"]["recovered"], k);
+        assert_eq!(solve["database"]["reverified"], true);
+    }
+
+    // A database is bound to its curve.
+    let (ok, wrong) = command(&[
+        "solve",
+        "--degree",
+        "11",
+        "--curve-a",
+        "1",
+        "--logs",
+        db.to_str().unwrap(),
+        "--known-log",
+        "5",
+    ]);
+    assert!(!ok);
+    assert_eq!(wrong["operation"], "error");
+
+    // The database file is never overwritten.
+    let (ok, _) = command(&[
+        "logs",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--database",
+        db.to_str().unwrap(),
+    ]);
+    assert!(!ok);
+    std::fs::remove_file(db).unwrap();
+}

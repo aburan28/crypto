@@ -524,6 +524,54 @@ milliseconds on it — the point is that the pipeline now reaches the
 sizes the scaling note's step 0 asked for, with the factor base chosen
 by measurement rather than by hand.
 
+## The CADO-style split: factor-base logs, then descent — 2026-09-10
+
+**Modules:** `koblitz_index_calculus::{solve_factor_base_logs,
+individual_log, FactorBaseLogTable}`.
+**Tool:** `ic logs` (precompute), `ic solve` (per-target descent).
+**Docs:** `docs/ic/README.md`.
+
+The driver above bakes the target `Q` into every relation
+(`R = [a]G + [b]Q`) and rebuilds the whole relation matrix for each `Q`.
+A number-field-sieve pipeline instead solves the factor-base logarithms
+**once per curve** and then recovers each target with a single
+individual-logarithm relation.  Both stages are now implemented.
+
+- **Precompute.**  `solve_factor_base_logs` draws `R = [a]G` probes
+  (`b = 0`), decomposes each over the factor base, and rewrites it as a
+  row `Σ_o c_o x_o ≡ h·a (mod r)` over the projected columns.  Once the
+  rows determine every column, the whole logarithm vector is read off in
+  one dense modular solve.  Only the projected representation is used:
+  its columns are the canonical cofactor projections `R_o ∈ ⟨G⟩`, so a
+  column logarithm `x_o = log_G R_o` is a genuine discrete log that
+  certifies itself — the table is accepted only when `[x_o]G == R_o`
+  for **every** column, which depends on nothing but the curve and the
+  table.
+- **Descend.**  `individual_log` draws `R = [a]G + [b]Q` until one
+  decomposes, giving `h·a + h·b·d ≡ Σ_o c_o x_o (mod r)`; with the
+  column logs known, `d = log_G Q` is one modular inverse, re-checked as
+  `[d]G == Q`.  No relation matrix — one decomposition and a lookup.
+
+Measured on `K_0/2^31` (r = 1 439 393) over the search-selected
+dimension-11 base (35 projected columns, `m = 3`):
+
+| stage | work | wall |
+|:------|:-----|-----:|
+| `ic logs` precompute (once) | 129 probes to full column rank, all 35 logs certified | 15.4 s |
+| `ic solve` descent (per target) | 1–2 relations | ~10 s* |
+
+`*` each `solve` is a separate process that rebuilds the pair table
+(≈9 s at this base size); in a single process the table is built once
+and the descent itself is milliseconds.  The point is structural: the
+per-target cost is one decomposition, not a 35-column matrix rebuild, so
+`n` targets cost one precompute plus `n` cheap descents rather than `n`
+full solves.  This is the first stage that makes precomputation reuse
+and batched targets meaningful, and the shortest path to the individual
+logarithm / descent stage a full pipeline needs.  Tested by
+`factor_base_logs_precompute_and_descend_every_target` (cross-checked
+against brute-forced logs) and `ic`'s
+`factor_base_logarithm_database_precomputes_then_descends`.
+
 ## Open problems from the talk (unimplemented)
 
 - Couveignes–Lercier invariant factor bases via isogenies between
