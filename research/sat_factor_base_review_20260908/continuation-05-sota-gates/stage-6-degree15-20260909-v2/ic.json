@@ -1,0 +1,64 @@
+{
+  "a": 1,
+  "factor_base": {
+    "ell": 4,
+    "points": 31,
+    "signed_frobenius_orbits": 2
+  },
+  "factor_base_predicate": {
+    "enumerates_target_subgroup": false,
+    "factor_base_logs_constructed": false,
+    "factor_bitmask": 19,
+    "factor_index": 0,
+    "kind": "ggmp_linearised_kernel",
+    "linearised_exponents": [
+      0,
+      1,
+      4
+    ],
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "A failed or resource-capped run is operationally inconclusive; success is accepted only after the recovered scalar reproduces the public target point",
+  "kind": "koblitz_unknown_scalar_algebraic_factor_base_e2e",
+  "m": 2,
+  "mode": "ic",
+  "n": 15,
+  "options": {
+    "conflict_budget_per_target": 10000,
+    "max_models": 64,
+    "max_trials": 20000,
+    "parallel_threads": 1
+  },
+  "report": {
+    "direct_relation": false,
+    "direct_relations_skipped": 90,
+    "linear_solve_attempts": 0,
+    "recovered_scalar": null,
+    "relation_batches": 20000,
+    "relations": 0,
+    "sat_calls": 19910,
+    "sat_conflicts": 13040,
+    "sat_invalid_models": 0,
+    "sat_models": 0,
+    "sat_refutations": 19910,
+    "sat_unknowns": 0,
+    "trials": 20000,
+    "verified_unknown_scalar_recovery": false
+  },
+  "scope": "complete toy index-calculus pipeline over a factor base with no constructed point logs",
+  "seed": 20260961,
+  "subgroup_order": "211",
+  "target": {
+    "x": "19413",
+    "y": "13958"
+  },
+  "timing_ns": {
+    "curve_and_subgroup_construction": 345042,
+    "driver_solve": 4455717208,
+    "end_to_end": 4456310167,
+    "factor_base_predicate_and_materialisation": 185375,
+    "linear_algebra": 0,
+    "relation_collection": 4455670750,
+    "target_construction": 39959
+  }
+}

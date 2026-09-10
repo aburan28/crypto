@@ -1,0 +1,11 @@
+{
+  "schema": "koblitz_degree15_unknown_scalar_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "trigger": "The first frozen run reached aG+bQ=O on trial 152 after 151 SAT refutations and zero factor-base relations.",
+  "classification": "invalid_direct_relation_bypass",
+  "scientific_inference": "The run does not establish index-calculus completion. It does show no genuine factor-base relation in its first 151 targets.",
+  "change": "When allow_direct_relation=false, count and skip every infinity target instead of solving for d. Retain all such trials in the charged trial count.",
+  "frozen_inputs_unchanged": ["curve", "factor base", "secret", "seed", "m", "conflict budget", "max trials", "watchdog"],
+  "successor_run": "stage-6-degree15-20260909-v2",
+  "claim_boundary": "A zero-relation or exhausted successor is a scoped feasibility result for this base and m, not evidence against all algebraic factor bases."
+}

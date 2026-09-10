@@ -1,0 +1,27 @@
+{
+  "command": [
+    "target/release/examples/koblitz_algebraic_e2e",
+    "rho-auto",
+    "15",
+    "1",
+    "2",
+    "89",
+    "20260983",
+    "10000",
+    "20000",
+    "divisor:2,4"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 300.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.005535291973501444,
+    "user_seconds": 0.002548,
+    "system_seconds": 0.0013239999999999999,
+    "total_core_seconds": 0.0038719999999999996,
+    "single_core_seconds": 0.0038719999999999996,
+    "peak_rss_bytes": 2113536,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

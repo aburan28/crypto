@@ -1,0 +1,36 @@
+{
+  "schema": "koblitz_degree15_replication_panel.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Test whether the successful degree-15 scalar-blind run persists across independently sampled public targets and compare every target with automorphism rho.",
+  "curve": {"n": 15, "a": 1, "subgroup_order": 211},
+  "factor_base": {
+    "source": "stage-7-selected-protocol.json",
+    "kind": "GGMP divisor kernel",
+    "divisor_indices": [2, 4],
+    "dimension": 8,
+    "selection_reused_without_target-dependent changes": true
+  },
+  "runs": [
+    {"secret": 17, "seed": 20260981},
+    {"secret": 53, "seed": 20260982},
+    {"secret": 89, "seed": 20260983},
+    {"secret": 137, "seed": 20260984},
+    {"secret": 199, "seed": 20260985}
+  ],
+  "index_calculus": {
+    "m": 2,
+    "native_conflict_budget_per_target": 10000,
+    "max_trials": 20000,
+    "max_models_per_target": 64,
+    "relation_batch_size": 1,
+    "direct_relation_forbidden": true,
+    "invalid_models_forbidden": true,
+    "cofactor_projection_column_merge": true
+  },
+  "rho": "same-target signed-Frobenius/negation quotient r-adding walk",
+  "execution": "sequential fresh processes",
+  "process_watchdog_seconds": 300,
+  "metrics": ["wall", "single-core seconds", "total core-seconds", "peak RSS", "conflicts", "relations", "trials", "linear algebra", "rho operation ledger"],
+  "claim_boundary": "Five successful repetitions would establish a toy distribution only; they do not establish an asymptotic crossover or SOTA."
+}

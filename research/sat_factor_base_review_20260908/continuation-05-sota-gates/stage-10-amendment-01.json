@@ -1,0 +1,11 @@
+{
+  "schema": "koblitz_degree23_rho_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "trigger": "The frozen signed-Frobenius rho control exhausted 64 restarts because every restart reused the same 16-jump functional graph.",
+  "classification": "operational_baseline_failure",
+  "scientific_inference": "The failed process is not a valid rho timing comparison. It does not affect the independently verified index-calculus recovery.",
+  "change": "Regenerate a deterministic 16-entry jump table from the frozen seed for every restart, and charge every table in jump additions and setup scalar multiplications.",
+  "frozen_inputs_unchanged": ["curve", "target scalar", "seed", "quotient", "jump-table size", "restart cap", "watchdog"],
+  "successor": "Repeat the same-target rho process and accept it only if the recovered scalar reproduces the public target.",
+  "claim_boundary": "The corrected run is a toy baseline implementation control, not an asymptotic rho result."
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "koblitz_degree23_public_divisor_discovery_protocol.v1",
+  "recorded_at": "2026-09-09",
+  "status": "frozen",
+  "objective": "Extend target-independent divisor-kernel discovery and, conditionally, scalar-blind recovery beyond degree 15.",
+  "search_space": {
+    "n": 23,
+    "curve_a": [0, 1],
+    "summands": 2,
+    "dimension": 12,
+    "sizing_reason": "dimension 12 is the smallest available invariant divisor dimension with two times dimension at least 23"
+  },
+  "candidate_source": "all degree-12 divisors of T^23-1 over F2 on both public Koblitz curve variants",
+  "admission": "curve construction succeeds and the factor-base cofactor classes can sum to zero with exactly two summands",
+  "selection_rule": "among all admitted curve/divisor candidates, maximize rational factor-base points; then minimize projected signed-Frobenius columns; then choose lower curve_a and lexicographically lower divisor indices",
+  "forbidden_inputs": [
+    "target point or scalar",
+    "target-subgroup enumeration",
+    "factor-base discrete-log labels",
+    "relation yield",
+    "solver timing"
+  ],
+  "execution": "one charged fresh process per curve variant",
+  "process_watchdog_seconds": 300,
+  "decision_gate": "Freeze a separate unknown-scalar run only after both curve processes terminate and a winner is selected by the frozen public rule.",
+  "claim_boundary": "A degree-23 public census or toy completion is not a scaling law, crossover, novelty or SOTA result."
+}

@@ -5,6 +5,8 @@ on:
   pull_request:
     paths:
       - "examples/koblitz_algebraic_e2e.rs"
+      - "examples/koblitz_public_factor_base_discovery.rs"
+      - "src/cryptanalysis/koblitz_index_calculus.rs"
       - "scripts/process_meter.py"
       - "scripts/verify_koblitz_external_reproduction.py"
       - ".github/workflows/koblitz-sota-reproduction.yml"
@@ -20,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Build frozen executables
-        run: cargo build --release --example koblitz_algebraic_e2e
+        run: cargo build --release --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery
       - name: Reproduce scalar-blind index calculus and quotient rho
         run: |
           mkdir -p external-reproduction
@@ -29,6 +31,17 @@ jobs:
           python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/rho-auto-53.json --stderr external-reproduction/rho-auto-53.stderr --metrics external-reproduction/rho-auto-53.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 9 0 2 53 20260921 10000 20000
           python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/ic-101.json --stderr external-reproduction/ic-101.stderr --metrics external-reproduction/ic-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e ic 9 0 2 101 20260922 10000 20000
           python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/rho-auto-101.json --stderr external-reproduction/rho-auto-101.stderr --metrics external-reproduction/rho-auto-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 9 0 2 101 20260922 10000 20000
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/n15-discovery.json --stderr external-reproduction/n15-discovery.stderr --metrics external-reproduction/n15-discovery.metrics.json -- target/release/examples/koblitz_public_factor_base_discovery 15 1 2 8
+          for run_pair in 17:20260981 53:20260982 89:20260983 137:20260984 199:20260985; do
+            run_secret=${run_pair%%:*}
+            run_seed=${run_pair##*:}
+            python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/n15-ic-${run_secret}.json --stderr external-reproduction/n15-ic-${run_secret}.stderr --metrics external-reproduction/n15-ic-${run_secret}.metrics.json -- target/release/examples/koblitz_algebraic_e2e ic 15 1 2 ${run_secret} ${run_seed} 10000 20000 divisor:2,4
+            python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 120 --stdout external-reproduction/n15-rho-auto-${run_secret}.json --stderr external-reproduction/n15-rho-auto-${run_secret}.stderr --metrics external-reproduction/n15-rho-auto-${run_secret}.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 15 1 2 ${run_secret} ${run_seed} 10000 20000 divisor:2,4
+          done
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 300 --stdout external-reproduction/n23-discovery-a0.json --stderr external-reproduction/n23-discovery-a0.stderr --metrics external-reproduction/n23-discovery-a0.metrics.json -- target/release/examples/koblitz_public_factor_base_discovery 23 0 2 12
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 300 --stdout external-reproduction/n23-discovery-a1.json --stderr external-reproduction/n23-discovery-a1.stderr --metrics external-reproduction/n23-discovery-a1.metrics.json -- target/release/examples/koblitz_public_factor_base_discovery 23 1 2 12
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 300 --stdout external-reproduction/n23-ic-101.json --stderr external-reproduction/n23-ic-101.stderr --metrics external-reproduction/n23-ic-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e ic 23 0 2 101 20261001 100000 1000 divisor:0,2
+          python3 scripts/process_meter.py --cwd "$GITHUB_WORKSPACE" --timeout 300 --stdout external-reproduction/n23-rho-auto-101.json --stderr external-reproduction/n23-rho-auto-101.stderr --metrics external-reproduction/n23-rho-auto-101.metrics.json -- target/release/examples/koblitz_algebraic_e2e rho-auto 23 0 2 101 20261001 100000 1000 divisor:0,2
           python3 scripts/verify_koblitz_external_reproduction.py external-reproduction
       - name: Focused library tests
         run: cargo test --release --lib cryptanalysis::koblitz_index_calculus -- --test-threads=1

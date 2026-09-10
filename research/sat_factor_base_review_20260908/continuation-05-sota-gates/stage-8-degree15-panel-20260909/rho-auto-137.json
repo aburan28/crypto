@@ -1,0 +1,30 @@
+{
+  "a": 1,
+  "automorphism_group_bound": 30,
+  "automorphism_optimized": true,
+  "initial_state_additions": 1,
+  "iterations": 1,
+  "jump_table_additions": 16,
+  "kind": "koblitz_unknown_scalar_automorphism_rho_control",
+  "mode": "rho-auto",
+  "n": 15,
+  "reported_group_additions": 20,
+  "restarts": 0,
+  "rho_setup_scalar_multiplications": 34,
+  "scope": "signed-Frobenius quotient r-adding Pollard rho control",
+  "seed": 20260984,
+  "subgroup_order": "211",
+  "target": {
+    "x": "30043",
+    "y": "4901"
+  },
+  "target_construction_scalar_multiplications": 1,
+  "timing_ns": {
+    "curve_construction": 206417,
+    "end_to_end": 1496708,
+    "rho": 1198458,
+    "target_construction": 54416
+  },
+  "verified_unknown_scalar_recovery": true,
+  "walk_step_additions": 3
+}

@@ -47,3 +47,33 @@ Result: fresh Linux/x86-64 checkout reproduced both toy IC and quotient-rho cont
 PASS: git diff --check on implementation, protocols, synthesis, and verifier changes.
 
 PASS: no non-target file over 95 MB in the branch worktree.
+
+PASS: cargo check --release --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery
+Result: the target-independent divisor census and optional divisor-base end-to-end driver compile.
+
+PASS: focused projected-orbit and cofactor-admission tests.
+Result: 3 passed; 0 failed. The projected map reconstructs every cofactor-projected point exactly, an inadmissible summand count stops before SAT, and scalar-blind recovery survives public projected-column collapse.
+
+PASS: charged degree-15 public divisor census.
+Result: all three degree-8 divisor kernels were charged without target construction or log labels; frozen rule selected [2,4] with 281 rational points and six projected signed-Frobenius columns.
+
+PASS: degree-15 selected-base unknown-scalar run.
+Result: scalar 101 recovered and point-verified from 7 relations in 7 trials with 2,904 conflicts, no direct shortcut, and no invalid model.
+
+PASS: python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage8.py
+Result: five of five frozen degree-15 scalar-blind runs and all matched automorphism-rho controls passed; rho was faster in every pair.
+
+OPERATIONAL STOP: charged degree-21 public divisor census on K_0 and amended K_1 successor.
+Result: both processes stopped before factor-base construction because the current curve driver did not supply a usable prime-order subgroup; no scientific inference was admitted.
+
+PASS: charged degree-23 public divisor census on K_0 and K_1.
+Result: all four degree-12 candidates passed the cofactor gate; frozen cross-curve rule selected K_0 divisor [0,2] with 4,281 rational points and 93 projected signed-Frobenius columns.
+
+PASS: degree-23 unknown-scalar completion.
+Result: scalar 101 recovered and point-verified from 94 relations in 147 trials; 53 SAT calls were conflict-capped unknown, with zero invalid models and zero direct shortcuts.
+
+PASS AFTER AMENDMENT: degree-23 automorphism-rho control.
+Result: the original fixed-table process failed operationally; fresh deterministic jump tables per restart recovered scalar 101 with the full table/setup operation ledger charged.
+
+PASS: local preflight of external reproduction verifier v3.
+Result: retained degree-9, degree-15 and degree-23 artifacts, public discoveries, target matches, recovered scalars and fail-closed fields were all accepted.

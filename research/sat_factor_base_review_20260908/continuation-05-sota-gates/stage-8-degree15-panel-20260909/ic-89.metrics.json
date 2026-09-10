@@ -1,0 +1,27 @@
+{
+  "command": [
+    "target/release/examples/koblitz_algebraic_e2e",
+    "ic",
+    "15",
+    "1",
+    "2",
+    "89",
+    "20260983",
+    "10000",
+    "20000",
+    "divisor:2,4"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 300.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.20915474998764694,
+    "user_seconds": 0.203501,
+    "system_seconds": 0.003418,
+    "total_core_seconds": 0.206919,
+    "single_core_seconds": 0.206919,
+    "peak_rss_bytes": 3866624,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

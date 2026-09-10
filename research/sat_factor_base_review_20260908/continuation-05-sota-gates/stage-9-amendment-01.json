@@ -1,0 +1,11 @@
+{
+  "schema": "koblitz_degree21_public_divisor_discovery_amendment.v1",
+  "recorded_at": "2026-09-09",
+  "trigger": "The frozen K_0 process returned 101 before factor construction because KoblitzCurve::new(0,21) did not supply the required prime-order subgroup.",
+  "classification": "operational_precondition_failure",
+  "scientific_inference": "The failed process says nothing about factor-base quality or decomposition feasibility because no candidate or target was constructed.",
+  "change": "Run the same public dimension-11 census on K_1 by changing only curve_a from 0 to 1.",
+  "frozen_inputs_unchanged": ["n", "m", "dimension", "candidate source", "admission rule", "selection rule", "watchdog", "forbidden inputs"],
+  "successor_run": "stage-9-degree21-public-20260909-v2",
+  "claim_boundary": "A K_1 census or later toy solve is not evidence about K_0 and is not a SOTA result."
+}
