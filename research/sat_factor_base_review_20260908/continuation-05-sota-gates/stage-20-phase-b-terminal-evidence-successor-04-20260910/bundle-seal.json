@@ -1,10 +1,37 @@
 {
+  "archived_sources": {
+    "process_meter_source": {
+      "bytes": 3471,
+      "path": "source/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "report": {
+      "bytes": 12564,
+      "path": "source/STAGE20_PHASE_B_RESULTS_20260910.md",
+      "sha256": "88f5ce5f238987d43ad2af2d4d21109f64006411ee87481938a9d2d964c866fc"
+    },
+    "scorer_source": {
+      "bytes": 39664,
+      "path": "source/score_koblitz_blind_pdp_phase_b.py",
+      "sha256": "cb93b26fd9a63f0f554f61586ab6065a3ad71589f9c6c067d75a937d43a703c6"
+    },
+    "summary": {
+      "bytes": 29206,
+      "path": "source/stage-20-phase-b-result-summary-20260910.json",
+      "sha256": "f1d2c5d4962bd8ea9f6ba005a9ffef0b185d1d6084efbb7f77d6cbfb6071679a"
+    },
+    "verifier_source": {
+      "bytes": 15869,
+      "path": "source/verify_stage20_phase_b_terminal_evidence.py",
+      "sha256": "ff4b27ab39aae12bc114ad6ab69f0eecfb2f2934e26acb54e0beb06c95552838"
+    }
+  },
   "claim_boundary": {
     "full_cost_gate_passed": false,
     "independent_external_reproduction_satisfied": false,
     "koblitz_index_calculus_sota": false
   },
-  "created_at": "2026-09-11T01:48:06.710227Z",
+  "created_at": "2026-09-11T02:15:08.255114Z",
   "cross_bindings": {
     "phase_a_implementation_commit": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88",
     "phase_b_implementation_commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
@@ -220,37 +247,35 @@
       "bytes": 220571,
       "path": "score/score.json",
       "sha256": "cc6a999e4438a01b44c187039f1fa7ff684d2c8f38192d7c4032159d62bf806e"
-    }
-  ],
-  "inventory_sha256": "057956f16236f848502cf9a6c0d50b4420aea66e205c8c991e1047bdf2c785ad",
-  "repository_artifacts": {
-    "process_meter_source": {
+    },
+    {
+      "bytes": 12564,
+      "path": "source/STAGE20_PHASE_B_RESULTS_20260910.md",
+      "sha256": "88f5ce5f238987d43ad2af2d4d21109f64006411ee87481938a9d2d964c866fc"
+    },
+    {
       "bytes": 3471,
-      "path": "scripts/process_meter.py",
+      "path": "source/process_meter.py",
       "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
     },
-    "report": {
-      "bytes": 12411,
-      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE20_PHASE_B_RESULTS_20260910.md",
-      "sha256": "b44fa2d349f6bed06821c76dccfcffe24e7c1cf3f479b265ea66cab8c35f6d30"
-    },
-    "scorer_source": {
+    {
       "bytes": 39664,
-      "path": "scripts/score_koblitz_blind_pdp_phase_b.py",
+      "path": "source/score_koblitz_blind_pdp_phase_b.py",
       "sha256": "cb93b26fd9a63f0f554f61586ab6065a3ad71589f9c6c067d75a937d43a703c6"
     },
-    "summary": {
+    {
       "bytes": 29206,
-      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-result-summary-20260910.json",
+      "path": "source/stage-20-phase-b-result-summary-20260910.json",
       "sha256": "f1d2c5d4962bd8ea9f6ba005a9ffef0b185d1d6084efbb7f77d6cbfb6071679a"
     },
-    "verifier_source": {
-      "bytes": 16095,
-      "path": "scripts/verify_stage20_phase_b_terminal_evidence.py",
-      "sha256": "2a6b49f0d2755e0ba6ecc2db0309a7fdf51ba99133455a27c697338c2d1e9aa7"
+    {
+      "bytes": 15869,
+      "path": "source/verify_stage20_phase_b_terminal_evidence.py",
+      "sha256": "ff4b27ab39aae12bc114ad6ab69f0eecfb2f2934e26acb54e0beb06c95552838"
     }
-  },
+  ],
+  "inventory_sha256": "91b88652a3200c7bc1218d56346561d8937e82920c6504498556ec12b6ffe94e",
   "schema": "koblitz_pdp_phase_b_terminal_evidence_seal.v1",
-  "seal_payload_sha256": "fffbe688c35396a1507e29fcad13e81276544b1697a27e417b3a3fd4c5a68255",
+  "seal_payload_sha256": "e3e1a6a38fb5586204a9b89c5b37fe5be11096704150fb0d9e9663a1a7d5f2d3",
   "status": "terminal_scored_evidence_frozen"
 }
