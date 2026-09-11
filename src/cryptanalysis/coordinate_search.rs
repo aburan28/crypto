@@ -146,10 +146,15 @@ pub struct Gf {
     poly: u64,
     sqrt_tab: Vec<u32>,
     as_tab: Vec<u32>,
-    /// Binary fields: `log_tab[a] = k` with `g^k = a`, `exp_tab[k] = g^k`
-    /// (doubled so that `exp_tab[i + j]` needs no reduction).
+    /// Binary and odd-extension fields: `log_tab[a] = k` with `g^k = a`,
+    /// `exp_tab[k] = g^k` (doubled so that `exp_tab[i + j]` needs no
+    /// reduction).
     log_tab: Vec<u32>,
     exp_tab: Vec<u32>,
+    /// Odd-characteristic extension `F_{p^n} = F_p[t]/(f)`: the monic
+    /// irreducible `f`'s coefficients `c_0 … c_{n−1}` (`t^n = −Σ c_i t^i`).
+    /// Elements are digit vectors `Σ a_i p^i ↔ Σ a_i t^i`.
+    ext_poly: Vec<u64>,
 }
 
 impl Gf {
@@ -173,7 +178,121 @@ impl Gf {
             as_tab: Vec::new(),
             log_tab: Vec::new(),
             exp_tab: Vec::new(),
+            ext_poly: Vec::new(),
         }
+    }
+
+    /// Odd-characteristic extension field `F_{p^k}`, `p^k < 2²²`, `k ≥ 2`,
+    /// as `F_p[t]/(f)` for the lexicographically first monic irreducible
+    /// `f` of degree `k`.  Elements are base-`p` digit vectors, so the
+    /// digits of an element are its coordinates in the basis `1, t, …,
+    /// t^{k−1}` — which is what a Weil descent to `F_p` reads off.
+    pub fn extension(p: u64, k: u32) -> Self {
+        assert!(p >= 3 && is_prime_u64(p), "{p} is not an odd prime");
+        assert!(k >= 2, "use Gf::prime for k = 1");
+        let q = p.pow(k);
+        assert!(q < (1 << 22), "extension field out of toy range");
+        let ext_poly = find_irreducible_fp(p, k).expect("an irreducible polynomial exists");
+        let mut f = Gf {
+            p,
+            n: k,
+            q,
+            poly: 0,
+            sqrt_tab: Vec::new(),
+            as_tab: Vec::new(),
+            log_tab: Vec::new(),
+            exp_tab: Vec::new(),
+            ext_poly,
+        };
+        let order = q - 1;
+        let mut gen = p; // the element t
+        loop {
+            let mut exp_tab = vec![0u32; 2 * order as usize];
+            let mut log_tab = vec![NONE32; q as usize];
+            let mut v = 1u64;
+            let mut ok = true;
+            for kk in 0..order {
+                if log_tab[v as usize] != NONE32 {
+                    ok = false;
+                    break;
+                }
+                log_tab[v as usize] = kk as u32;
+                exp_tab[kk as usize] = v as u32;
+                exp_tab[(kk + order) as usize] = v as u32;
+                v = f.ext_mul_raw(v, gen);
+            }
+            if ok {
+                f.log_tab = log_tab;
+                f.exp_tab = exp_tab;
+                break;
+            }
+            gen += 1;
+            assert!(gen < q, "no generator found");
+        }
+        let mut sqrt_tab = vec![NONE32; q as usize];
+        for a in 0..q {
+            let sq = f.mul(a, a) as usize;
+            if sqrt_tab[sq] == NONE32 {
+                sqrt_tab[sq] = a as u32;
+            }
+        }
+        f.sqrt_tab = sqrt_tab;
+        f
+    }
+
+    /// Is this an odd-characteristic extension field?
+    pub fn is_odd_extension(&self) -> bool {
+        self.p != 2 && self.n > 1
+    }
+
+    /// Base-`p` digits of an element (coordinates in `1, t, …, t^{n−1}`).
+    pub fn digits(&self, a: u64) -> Vec<u64> {
+        let mut d = Vec::with_capacity(self.n as usize);
+        let mut a = a;
+        for _ in 0..self.n {
+            d.push(a % self.p);
+            a /= self.p;
+        }
+        d
+    }
+
+    /// Element from base-`p` digits.
+    pub fn from_digits(&self, d: &[u64]) -> u64 {
+        let mut a = 0u64;
+        for &c in d.iter().rev() {
+            a = a * self.p + (c % self.p);
+        }
+        a
+    }
+
+    /// Schoolbook product in `F_p[t]/(f)`, no tables.
+    fn ext_mul_raw(&self, a: u64, b: u64) -> u64 {
+        let n = self.n as usize;
+        let p = self.p;
+        let da = self.digits(a);
+        let db = self.digits(b);
+        let mut prod = vec![0u64; 2 * n - 1];
+        for i in 0..n {
+            if da[i] == 0 {
+                continue;
+            }
+            for j in 0..n {
+                prod[i + j] = (prod[i + j] + da[i] * db[j]) % p;
+            }
+        }
+        // reduce: t^n = −Σ c_i t^i
+        for deg in (n..2 * n - 1).rev() {
+            let c = prod[deg];
+            if c == 0 {
+                continue;
+            }
+            prod[deg] = 0;
+            for i in 0..n {
+                let sub = (c * self.ext_poly[i]) % p;
+                prod[deg - n + i] = (prod[deg - n + i] + p - sub) % p;
+            }
+        }
+        self.from_digits(&prod[..n])
     }
 
     /// Binary field `F_{2^n}` with the same irreducible polynomial the
@@ -201,6 +320,7 @@ impl Gf {
             as_tab: Vec::new(),
             log_tab: Vec::new(),
             exp_tab: Vec::new(),
+            ext_poly: Vec::new(),
         };
         // Discrete-log tables from a generator of the multiplicative group.
         let order = q - 1;
@@ -249,6 +369,10 @@ impl Gf {
     pub fn add(&self, a: u64, b: u64) -> u64 {
         if self.p == 2 {
             a ^ b
+        } else if self.n > 1 {
+            let (da, db) = (self.digits(a), self.digits(b));
+            let d: Vec<u64> = da.iter().zip(&db).map(|(x, y)| (x + y) % self.p).collect();
+            self.from_digits(&d)
         } else {
             let s = a + b;
             if s >= self.q {
@@ -261,6 +385,14 @@ impl Gf {
     pub fn sub(&self, a: u64, b: u64) -> u64 {
         if self.p == 2 {
             a ^ b
+        } else if self.n > 1 {
+            let (da, db) = (self.digits(a), self.digits(b));
+            let d: Vec<u64> = da
+                .iter()
+                .zip(&db)
+                .map(|(x, y)| (x + self.p - y) % self.p)
+                .collect();
+            self.from_digits(&d)
         } else if a >= b {
             a - b
         } else {
@@ -270,6 +402,13 @@ impl Gf {
     pub fn neg(&self, a: u64) -> u64 {
         if self.p == 2 || a == 0 {
             a
+        } else if self.n > 1 {
+            let d: Vec<u64> = self
+                .digits(a)
+                .iter()
+                .map(|x| (self.p - x) % self.p)
+                .collect();
+            self.from_digits(&d)
         } else {
             self.q - a
         }
@@ -296,6 +435,16 @@ impl Gf {
     }
 
     pub fn mul(&self, a: u64, b: u64) -> u64 {
+        if self.n > 1 && self.p != 2 {
+            if a == 0 || b == 0 {
+                return 0;
+            }
+            if self.log_tab.is_empty() {
+                return self.ext_mul_raw(a, b);
+            }
+            let k = self.log_tab[a as usize] as usize + self.log_tab[b as usize] as usize;
+            return self.exp_tab[k] as u64;
+        }
         if self.p == 2 {
             if a == 0 || b == 0 {
                 return 0;
@@ -338,7 +487,7 @@ impl Gf {
     }
     pub fn inv(&self, a: u64) -> u64 {
         assert!(a != 0, "inverse of zero");
-        if self.p == 2 && !self.log_tab.is_empty() {
+        if self.n > 1 && !self.log_tab.is_empty() {
             let order = (self.q - 1) as usize;
             let k = self.log_tab[a as usize] as usize;
             return self.exp_tab[(order - k) % order] as u64;
@@ -363,6 +512,8 @@ impl Gf {
     pub fn frob(&self, a: u64) -> u64 {
         if self.p == 2 {
             self.mul(a, a)
+        } else if self.n > 1 {
+            self.pow(a, self.p)
         } else {
             a
         }
@@ -393,6 +544,15 @@ impl Gf {
             "∞".to_string()
         } else if self.p == 2 {
             format!("0x{a:x}")
+        } else if self.n > 1 {
+            let d = self.digits(a);
+            format!(
+                "[{}]",
+                d.iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            )
         } else {
             a.to_string()
         }
@@ -400,10 +560,60 @@ impl Gf {
     pub fn name(&self) -> String {
         if self.p == 2 {
             format!("F_2^{}", self.n)
+        } else if self.n > 1 {
+            format!("F_{}^{}", self.p, self.n)
         } else {
             format!("F_{}", self.p)
         }
     }
+}
+
+/// Lexicographically first monic irreducible polynomial of degree `k`
+/// over `F_p`, as `c_0 … c_{k−1}` (leading coefficient implicit), by trial
+/// division by every monic polynomial of degree `1 … k/2`.
+fn find_irreducible_fp(p: u64, k: u32) -> Option<Vec<u64>> {
+    let k = k as usize;
+    // polynomials as coefficient vectors, low to high, leading coeff 1
+    fn rem_is_zero(p: u64, f: &[u64], g: &[u64]) -> bool {
+        // f, g monic (leading coefficient 1 stored explicitly)
+        let mut r: Vec<u64> = f.to_vec();
+        let dg = g.len() - 1;
+        while r.len() > dg && r.len() >= g.len() {
+            let lead = r[r.len() - 1];
+            if lead != 0 {
+                let shift = r.len() - g.len();
+                for (i, &gc) in g.iter().enumerate() {
+                    r[shift + i] = (r[shift + i] + p * lead - (lead * gc) % p) % p;
+                }
+            }
+            r.pop();
+        }
+        r.iter().all(|&c| c == 0)
+    }
+    let total = p.pow(k as u32);
+    for code in 0..total {
+        let mut f: Vec<u64> = (0..k).map(|i| (code / p.pow(i as u32)) % p).collect();
+        if f[0] == 0 {
+            continue; // divisible by t
+        }
+        f.push(1);
+        let mut irreducible = true;
+        'outer: for dg in 1..=k / 2 {
+            for gcode in 0..p.pow(dg as u32) {
+                let mut g: Vec<u64> = (0..dg).map(|i| (gcode / p.pow(i as u32)) % p).collect();
+                g.push(1);
+                if rem_is_zero(p, &f, &g) {
+                    irreducible = false;
+                    break 'outer;
+                }
+            }
+        }
+        if irreducible {
+            f.pop();
+            return Some(f);
+        }
+    }
+    None
 }
 
 fn is_prime_u64(n: u64) -> bool {
@@ -437,6 +647,13 @@ impl Pt {
         match self {
             Pt::Inf => INF,
             Pt::Aff(x, _) => *x,
+        }
+    }
+    /// `y(P)`, with `y(O) = ∞`.
+    pub fn y(&self) -> u64 {
+        match self {
+            Pt::Inf => INF,
+            Pt::Aff(_, y) => *y,
         }
     }
 }
@@ -2293,6 +2510,75 @@ mod tests {
         assert_eq!(solvable, 64); // trace-zero elements
                                   // Frobenius fixes exactly F_2
         assert_eq!(f.subfield_elements(1), vec![0, 1]);
+    }
+
+    #[test]
+    fn odd_extension_field_arithmetic() {
+        let f = Gf::extension(13, 3);
+        assert_eq!(f.q, 2197);
+        for a in 1..f.q {
+            assert_eq!(f.mul(a, f.inv(a)), 1);
+            assert_eq!(f.add(a, f.neg(a)), 0);
+        }
+        // associativity / distributivity spot checks
+        let mut rng = Rng64::new(4);
+        for _ in 0..500 {
+            let (a, b, c) = (f.random(&mut rng), f.random(&mut rng), f.random(&mut rng));
+            assert_eq!(f.mul(f.mul(a, b), c), f.mul(a, f.mul(b, c)));
+            assert_eq!(f.mul(a, f.add(b, c)), f.add(f.mul(a, b), f.mul(a, c)));
+        }
+        // (q+1)/2 squares including 0; Frobenius fixes exactly F_p
+        let squares = (0..f.q).filter(|&a| f.sqrt(a).is_some()).count() as u64;
+        assert_eq!(squares, (f.q + 1) / 2);
+        assert_eq!(f.subfield_elements(1).len(), 13);
+        assert!(
+            f.subfield_elements(1).iter().all(|&a| a < 13),
+            "F_p is the digit-0 line"
+        );
+        let a = f.random(&mut rng);
+        assert_eq!(f.frob_pow(a, 3), a, "Frobenius has order k");
+    }
+
+    #[test]
+    fn interpolated_s3_over_an_extension_field_matches_the_closed_form() {
+        let f = Gf::extension(13, 2);
+        let c = Curve::short_weierstrass(f, 12, 0, "y²=x³−x/F_13^2");
+        let pts = c.affine_points();
+        assert_eq!(c.two_torsion().len(), 3);
+        let mut rng = Rng64::new(6);
+        let cs = CoordinateSystem::plain(&Frame::weierstrass(), false);
+        let res = interpolate_relation(&c, &pts, &cs, 2, &mut rng).unwrap();
+        assert_eq!(res.poly.degrees(), vec![2, 2, 2]);
+        let f = &c.f;
+        let (a, b) = (12u64, 0u64);
+        let s3 = |x1: u64, x2: u64, x3: u64| -> u64 {
+            let two = f.add(1, 1);
+            let four = f.add(two, two);
+            let d = f.sub(x1, x2);
+            let t1 = f.mul(f.mul(d, d), f.mul(x3, x3));
+            let inner = f.add(f.mul(f.add(x1, x2), f.add(f.mul(x1, x2), a)), f.mul(two, b));
+            let t2 = f.mul(f.mul(two, inner), x3);
+            let e = f.sub(f.mul(x1, x2), a);
+            let t3 = f.sub(f.mul(e, e), f.mul(f.mul(four, b), f.add(x1, x2)));
+            f.add(f.sub(t1, t2), t3)
+        };
+        let mut ratio = None;
+        for _ in 0..50 {
+            let v: Vec<u64> = (0..3).map(|_| f.random(&mut rng)).collect();
+            let mine = res.poly.eval(f, &v);
+            let theirs = s3(v[0], v[1], v[2]);
+            if theirs == 0 {
+                assert_eq!(mine, 0);
+                continue;
+            }
+            let r = f.div(mine, theirs);
+            match ratio {
+                None => ratio = Some(r),
+                Some(r0) => assert_eq!(r, r0),
+            }
+        }
+        // the curve is defined over F_13, so the Frobenius is a symmetry
+        assert_eq!(c.subfield_degree(), Some(1));
     }
 
     #[test]

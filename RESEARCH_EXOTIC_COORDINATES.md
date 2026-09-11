@@ -922,3 +922,255 @@ held on every point of every `φ⁻¹(F_u)`.
 - §10.5 item 1: done, negative.  The remaining items stand, and the
   union-base ceiling measured here is the number a mixed oracle would
   have to justify itself against.
+
+## 12. `F_{p^k}`: the Klein invariants meet a subspace factor base
+
+**Code:** `coordinate_search::Gf::extension`,
+`src/cryptanalysis/coordinate_descent.rs`, `examples/klein_descent.rs`.
+
+§10.3 left the Klein group's worth as "a question about bits, not
+degrees", unanswerable on a prime field because there is no subspace
+factor base there.  Gaudry's setting has one: `E/F_{p^k}` with the base
+`{P : x(P) ∈ F_p}`, and if the coordinate change is `F_p`-rational every
+invariant of a factor-base point is in `F_p`, so a relation over
+`F_{p^k}` in `F_p`-unknowns is `k` relations over `F_p` — the digits of
+its coefficients — and the repo's `F_p` Buchberger can solve it.
+
+### 12.1 What had to be built
+
+- `Gf::extension(p, k)`: `F_{p^k} = F_p[t]/(f)` with elements as base-`p`
+  digit vectors, so the digits *are* the coordinates a descent reads
+  off; log tables for multiplication; the search and quotient engines
+  run on it unchanged (the interpolated `S₃` over `F_{13²}` matches the
+  closed form; the Frobenius is detected as a global symmetry).
+- **Fixed-target quotients.**  The decomposition problem fixes `R`, so
+  the symmetry group is `Γ₀ = Γ ∩ (G^m × {id})`, the seeds are functions
+  of the summands only, and the relation is interpolated from summand
+  tuples with `Σ P_i = R` for that `R`, with identities among the
+  invariants quotiented out and *kept* — they are equations of the
+  descended system.  Every invariant is checked to be `F_p`-valued on
+  the base before anything is descended or timed.
+- **The setting itself.**  A curve *over* `F_p` makes the base
+  `E(F_p)`, a subgroup, and every target that decomposes is `F_p`-rational
+  — the first version of the example measured exactly that degenerate
+  case.  The family `y² = x(x² − αx + 1)`, `α ∉ F_p`, has `T = (0, 0)`
+  with `x(P + T) = 1/x`, fixed points `±1`, hence an `F_p`-rational sign
+  frame `u = (x − 1)/(x + 1)` and the base `{u ∈ F_p} = {x ∈ F_p}` minus
+  the frame's pole, while the curve is not over `F_p`; the other two
+  2-torsion points are rational iff `α² − 4` is a square.
+
+### 12.2 The Klein group does not descend, and why
+
+On every curve in Gaudry's setting the invariants of the full `E[2]`
+are **not** `F_p`-valued on the base (the `F_p?` column); the single
+involution's are.  The reason is structural: the base is an `F_p`-line
+in `P¹` (the sign frame's `F_p ∪ {∞}`), and for the Klein
+symmetrisation to apply, that line must be stable under all three
+involutions `x ↦ e_T + c_T/(x − e_T)`.  That forces every `e_T` and
+`c_T` into `F_p`, i.e. all three 2-torsion abscissae into `F_p`, i.e. the
+curve over `F_p` — the degenerate case.  On the over-`F_p` control the
+Klein invariants are indeed `F_p`-valued, and the base is `E(F_p)`.
+
+So §6.4's "complete `E[2]`" and §10.3's fourfold collapse are real on
+the curve but unusable with a subspace factor base on any curve for
+which that base is worth having.  The Klein direction closes here, on a
+measured negative.
+
+### 12.3 One involution against Gaudry, descended
+
+`m = 2`, `k = 3`, targets: four sums of two base points with
+`x(R) ∉ F_p`, four random points.  Both arms agree on every verdict.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | GB ms found / refuted |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.6 |
+| | one `T`, `w = u²`, `Πu` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.2 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₁₃⁴`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 4 | 4 | 9 | 0.3 / 0.8 |
+| | one `T` | 2 | 3 | 5 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| control `y² = x³ − x / F₂₉³` (over `F_p`) | all three | | | | | | no decomposable target off `E(F_p)` exists; Klein `F_p`-valued |
+
+At `m = 2` the one-involution system is the smaller one on every count
+the Gröbner engine sees — total degree 2 against 4, five terms against
+nine — at the price of one more unknown (`Πu`) and one more equation
+(the identity `(Πu)² = w₁w₂`), and it is three to seven times faster on
+Buchberger, with identical verdicts on every target.  These are
+sub-millisecond systems; the ranking, not the ratio, is the result.
+
+### 12.4 `m = 3`
+
+TBD-K3
+
+---
+
+## 13. Higher-order seeds: rational 3-torsion on `j = 0` curves
+
+**Code:** `coordinate_quotients::{Chart, Line, run_quotient_boxed}`,
+`coordinate_descent::compare_arms`, `examples/three_torsion.rs`.
+
+§10.5's last open item.  Setting: `E : y² = x³ + b` over `F_q` with
+`q ≡ 1 (mod 3)` (so the order-3 automorphism `ω : (x, y) ↦ (ωx, y)` is
+rational) and `b` a square, so `T = (0, √b)` is a rational point of
+order 3.  Two toy curves over `F₁₀₀₉`: **A** `b = 2` (no rational
+2-torsion, `#E = 1053`) and **B** `b = 1` (full rational 2-torsion as
+well, a 6-torsion point, `#E = 948`).
+
+### 13.1 Where a 3-torsion translation is a Möbius map
+
+§3's lemma stands: `τ_T` does not act on the `x`-line, and the quotient
+engine on `x` finds exactly what the lemma predicts.  The orbit
+`{x(P), x(P + T), x(P − T)}` has `e₂ = 0` and `e₃ = −4b` constant, and
+the one non-constant invariant is
+
+    e₁ = x + 4b/x² = (x³ + 4b)/x²,
+
+Vélu's `x`-coordinate on `E/⟨T⟩` (unit test
+`three_torsion_is_velu_on_the_x_line_and_mobius_on_the_y_line`).
+"Translation-invariant coordinates factor through isogenies" — a change
+of curve, nothing else.
+
+But `τ_T` commutes with `ω` (`ω` fixes `T`), so it descends to the
+quotient `E → E/⟨ω⟩ ≅ P¹`, which is the **`y`-line**.  There
+
+    y(P + T) = √b (y − 3√b) / (y + √b),
+
+a Möbius map of order 3 with fixed points `±√b·√−3` — rational exactly
+when `−3` is a square, i.e. `q ≡ 1 (mod 3)`, the same condition that
+makes `ω` rational.  The chart
+
+    v = (y − s)/(y + s),   s = √b·√−3,
+
+diagonalises it: `τ_T : v ↦ ω^{±1} v`, and `−1 : v ↦ 1/v`.  So on the
+`v`-line `⟨τ_T, −1⟩` is the dihedral group of order 6 in `PGL₂`, `ω`
+acts trivially, and the invariants of a single point are `v³` (under
+the translation) and `V = v³ + v⁻³` (under the whole group) — the
+3-torsion analogue, one degree up, of the 2-torsion sign frame `t ↦ −t`
+with invariant `t²`.  The engine gained a `Chart` (a Möbius frame on
+the `x`- or the `y`-line) to run on it; the chart's action is verified
+on every point of the curve before anything is measured.
+
+### 13.2 Results at `m = 2`
+
+Exact collapse over all relation tuples; relation of minimal total
+degree; `p = 1009`.
+
+| curve | line, group `G` | `|G|` | `|Γ|` | invariants | relation (degrees per invariant) | terms | collapse |
+|---|---|---:|---:|---|---|---:|---:|
+| A | `x`, `⟨−1⟩` (Semaev) | 2 | 2 | `x_i` | `S₃`, `[2, 2, 2]` | 9 | 2.0 |
+| A | `x`, `⟨τ₃, −1⟩` | 6 | 18 | `e₁[x_i]` (Vélu), orbit sums of `Πx, Σx` | degree 1 among the tuple invariants only | 5 | 18.0 |
+| A | `x`, `⟨τ₃, −1, ω⟩` | 18 | 54 | `e₃[x_i]`, orbit sums of `Πx` | degree 1 among the tuple invariants only | 3 | 54.5 |
+| A | `y`, `⟨−1⟩` (`y`-Semaev) | 2 | 2 | `y_i²`, `(Πy)²`, `(Σy)²` | `[3, 3, 3, 1, 3]` | 34 | 6.0 (misses `ω`) |
+| A | `v`, `⟨τ₃⟩` | 3 | 9 | `v_i³`, `Πv` | `[1, 1, 1, 2]` | 8 | 27.0 (misses `ω`) |
+| A | `v`, `⟨τ₃, −1⟩` | 6 | 18 | `V_i = v_i³ + v_i⁻³`, `P = Πv + 1/Πv` | `[1, 1, 1, 3]` | 10 | 54.9 (misses `ω`) |
+| A | `v`, `⟨τ₃, −1, ω⟩` | 18 | 54 | same | same, `[1, 1, 1, 3]` | 10 | 54.8 — separates `Γ`-orbits |
+| A | `v`, `⟨τ₃, −1, ω⟩` + `Σv` seed | 18 | 54 | `V_i`, `P`, `e₃[Σv]` | same; `Σv` unused | 10 | 54.8 |
+| B | `u` (sign frame), `⟨τ₂, −1⟩` (control) | 4 | 8 | `w_i = u_i²`, `Πu` | `[1, 1, 1, 2]` | 9 | 8.0 |
+| B | `u`, `⟨τ₂, τ₃, −1⟩ = ⟨τ₆, −1⟩` | 12 | 72 | `e₂, e₄` of the 6-orbit of `u_i`, orbit sums of `Πu, Σu` | `[1, ·, 1, ·, 1, ·, 1, 1, …]`, linear in `e₂[u_i]` | 6 | 72.0 |
+| B | `v`, `⟨τ₃, −1, ω⟩` | 18 | 54 | `V_i`, `P` | `[1, 1, 1, 3]` | 10 | 54.7 |
+
+The `v`-line relations, read off the interpolated coefficients
+(`−12 = 997`, `−2 = 1007` mod 1009):
+
+- under the translations alone, with `Πv` as the tuple invariant,
+
+      (v₁³ − 1)(v₂³ − 1)(v₃³ − 1) = (v₁v₂v₃ − 1)³        for P₁ + P₂ + P₃ = O;
+
+- under the full group, with `V_i = v_i³ + v_i⁻³` and `P = Πv + 1/Πv`,
+
+      (V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³,
+
+  which is the same identity squared (`V − 2 = (v³ − 1)²/v³`), and is
+  **multilinear in the point invariants**: degree 1 in each `V_i`, all
+  the remaining degree in the single tuple unknown `P`.
+
+Three things the table settles.
+
+1. **The degree does drop, one order up from §3.**  Per variable, the
+   summation relation has degree 2 in `x` (Semaev), 3 in `y`
+   (`y : E → P¹` has degree 3), and 1 in `V = v³ + v⁻³` — as
+   `S₃` goes from degree 2 in `x` to degree 1 in `w = t²` on the sign
+   frame (§3.2, §10.1).  The mechanism is the same: the tuple invariant
+   (`P` here, `s = Σu` there) carries the degree the point invariants
+   lose, and an identity among the invariants (`(Πv)³ = v₁³v₂³v₃³`,
+   i.e. `P³ − 3P = Π³ + Π⁻³` expressed in the `V_i`) ties it back —
+   quotiented out by the engine, kept as an equation by the descent.
+2. **The collapse is `|Γ| = 54`, exactly, and the 0.7–0.9 excess is
+   degenerate tuples** (points with `v ∈ {0, ∞}` or in `E[3]`), as the
+   `ω`-less runs show by missing exactly the factor 3 the automorphism
+   adds.  On curve B the 6-torsion group collapses 72 tuples per vector
+   on the `u`-line, again exactly.
+3. **On the `x`-line the 3-torsion group is worthless**, as §3 said: the
+   only point invariant is Vélu's coordinate, and the minimal-degree
+   relation the engine finds is a linear one among the *tuple*
+   invariants — an artefact of the orbit sums of `Πx`, not a
+   decomposition relation.  (The Vélu coordinate's own relation is `S₃`
+   on `E/⟨T⟩`, degree 2, which the engine would report at total degree 4
+   if the tuple seeds were dropped.)
+
+### 13.3 What the multilinear relation is worth — the §11 accounting
+
+`V` identifies a point up to `⟨T, ω, −1⟩`: 18 points per value (6 values
+of `v`, 3 points per value).  The projected-relation accounting of
+§11.4 applies verbatim: `[3]` kills `T`, `ω` is an endomorphism acting as
+a known scalar `λ` (`λ² + λ + 1 ≡ 0 mod ℓ`) on the prime-order subgroup,
+and `−1` is a sign, so a base `{V(P) ∈ S}` of `18|S|` points is `|S|`
+columns (signed `ω`-orbits of `[3]P`), and one solve is one row.  No
+free relations — that was §11's correction, and it holds here.
+
+What is left is the solve: at `m = 2`, unknowns `(V₁, V₂, P)` with the
+multilinear relation, the identity tying `P` to the `V_i` (descended
+as an equation), and `V_R` known, against Semaev's
+`(x₁, x₂)` with one equation of degree 2 in each.  That is the shape
+§12.3 found cheaper by 3–7× for one involution.  §13.4 measures it.
+
+### 13.4 Gaudry's setting over `F₃₁³`: two bases
+
+`E : y² = x³ + b` over `F₃₁³` with `b ∉ F_p`, `b` a square and `−b` a
+cube (`#E = 29484`, `T₃` rational).  Two factor bases, each
+`F_p`-definable, each with the same four arms; `m = 2`, six decomposable
+targets per base.
+
+The second base needs a word.  `{v ∈ F_p}` is `{y ∈ s·F_p}`, whose
+`x³ = −b(3r² + 1)`, `r ∈ F_p`; every element of `F_p` is a cube in
+`F_{p³}` (`p ≡ 1 mod 3`), so that base has `≈ 3p` points when `−b` is a
+cube and two points when it is not — and `−b` a cube is exactly
+`E[2] ⊂ E(F_{p³})`.  The first draft of the example took the first
+square `b ∉ F_p` and got a two-point base; the choice above is forced.
+
+| base | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | GB ms (median) |
+|---|---|---:|---:|---:|---:|---:|---|---:|
+| `{x ∈ F_p}` (20 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 2 | 3 | 4 | 9 | yes | 0.5 |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 3 | 4 | – | 1 | 4 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | 3 | – | 3 | 6 | **no** | – |
+| | `v`, `⟨τ₃, −1⟩` | 3 | 3 | – | 2 | 6 | **no** | – |
+| `{v ∈ F_p}` (86 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 2 | – | 4 | 9 | **no** | – |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 3 | 4 | – | 1 | 4 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | 3 | 7 | 3 | 6 | yes | 0.1 |
+| | `v`, `⟨τ₃, −1⟩` | 3 | 3 | 3 | 2 | 6 | yes | 0.0 |
+
+No arm crosses bases: the `x`-line systems are `F_p`-valued only on the
+`x`-base, the `v`-line systems only on the `v`-base (the chart's
+coefficients `s = √b√−3` are in `F_{p³}`, so `x ∈ F_p` says nothing
+about `v` and conversely).  So the Vélu arm fails here for the reason
+§12.2 gave for the Klein group — its transport is not over `F_p` — and
+the 3-torsion frame does **not** improve Gaudry's base; what it does is
+define a second base of its own, on which its system is the smallest
+one measured in this note: three `F_p`-unknowns, three `F_p`-equations,
+total degree 2, six terms, against Gaudry's two unknowns, three
+equations of degree 4, nine terms on the other base, and against the
+plain `y`-line system on the same base (seven equations, degree 3).
+Every verdict agrees (no refutation on decomposable targets).  As in
+§12.3 these are sub-millisecond Buchberger runs and only the ranking is
+the result; at this size the two bases are also of different sizes (20
+against 86 points, both `≈ p` up to the constants above), so the
+relation *yield* per base is not compared here.
+
+### 13.5 `m = 3`
+
+TBD-T3M3
