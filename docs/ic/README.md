@@ -188,6 +188,50 @@ target then needs one or two relations. The `logs` trial budget
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
+## Running the pipeline as a resumable workflow
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --stop-after logs
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31          # resumes
+
+Like a number-field-sieve run, `ic workflow` executes the pipeline as
+stages whose outputs live on disk, so a run can be stopped, inspected
+and resumed without redoing finished work:
+
+1. **select** — the factor base, either an explicit recipe or the
+   best-by-census candidate of the factor-base search; written as
+   `factor_base.json`.
+2. **logs** — the factor-base logarithm database over that base
+   (`logs.json`), every column certified by `[x]G == R`.
+3. **solve** — each target descended with one relation reusing the
+   database; `solutions.json` is rewritten after every target, so an
+   interrupted run resumes at the first unsolved one. The pair table is
+   built once for the whole batch.
+
+`state.json` records a BLAKE3 digest of the parameter file and each
+stage's status. A rerun in the same directory reloads existing
+artifacts, re-verifies them against the reconstructed curve (a stale or
+tampered artifact is an error, never trusted), and continues from the
+first incomplete stage; a parameter file whose digest differs is refused
+so one directory never mixes two experiments. Artifacts are written
+atomically. `--stop-after select|logs|solve` ends the run early.
+
+A parameter file (schema_version 1):
+
+    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+     "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
+     "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
+                    "max_dimension":11,"targets":256,"saturate":false},
+     "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
+
+`factor_base.mode` is `spec` (with a recipe as written by `ic search`)
+or `search` (the census search's knobs; the best candidate is taken
+without child validation). Each target is a synthetic known-answer
+instance: `known_log` names the scalar, `random_seed` draws one
+reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
+or `sat`. The report lists every stage with whether it ran or was
+reused, and every solution with its expected and recovered scalar.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json

@@ -572,6 +572,32 @@ logarithm / descent stage a full pipeline needs.  Tested by
 against brute-forced logs) and `ic`'s
 `factor_base_logarithm_database_precomputes_then_descends`.
 
+## The resumable workflow driver — 2026-09-11
+
+**Tool:** `ic workflow --params wf.json --dir runs/…` (`src/bin/ic/workflow.rs`).
+**Docs:** `docs/ic/README.md`.
+
+The stages above now run as a number-field-sieve-style workflow: a
+parameter file names the curve, the factor-base source (an explicit
+recipe or the census search), the oracle and the targets; the driver
+executes **select → logs → solve** with every output on disk in a run
+directory and a `state.json` manifest carrying the parameter digest and
+each stage's status.  A rerun reloads existing artifacts, re-verifies
+them against the reconstructed curve — a stale or tampered
+`logs.json` is an error, never trusted — and continues from the first
+incomplete stage; the solve stage rewrites `solutions.json` after each
+target, so an interrupted batch resumes at the first unsolved one.  A
+parameter file whose digest differs is refused, so one directory never
+mixes two experiments.  `individual_log_with_pair_table` lets the batch
+build the `|F|²` pair table once instead of once per target.
+
+Exercised end to end on `K_0/2^9` (stop after select, resume through
+logs, finish solve, full reuse, tamper rejection, digest refusal) and on
+`K_1/2^15` with `mode: search`, where the census picked the same
+30-point one-column pruned union as the interactive search and all five
+targets descended in one relation each; the interactive `ic` tests cover
+the stage-by-stage resume.
+
 ## Open problems from the talk (unimplemented)
 
 - Couveignes–Lercier invariant factor bases via isogenies between

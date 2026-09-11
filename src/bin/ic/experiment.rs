@@ -345,7 +345,7 @@ pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
     }
     Ok(doc)
 }
-fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
+pub(crate) fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
     KoblitzIcOptions {
         m: summands as usize,
         strategy: strategy.strategy(),
@@ -356,6 +356,60 @@ fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> Kob
         seed,
         ..KoblitzIcOptions::default()
     }
+}
+/// Serialise a solved logarithm table, bound to its curve and factor base.
+pub(crate) fn log_table_to_doc(
+    c: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+    summands: u8,
+    solver: Solver,
+    table: &FactorBaseLogTable,
+) -> LogTableDocument {
+    let columns: Vec<LogColumn> = table
+        .columns
+        .iter()
+        .map(|(point, log)| match point {
+            BinaryPoint::Affine { x, y } => LogColumn {
+                x: params::hex(&x.to_biguint()),
+                y: params::hex(&y.to_biguint()),
+                log: log.to_string(),
+            },
+            BinaryPoint::Infinity => unreachable!("projected columns are affine"),
+        })
+        .collect();
+    LogTableDocument {
+        schema_version: 1,
+        degree: c.n,
+        curve_a: c.a,
+        spec: spec.clone(),
+        subgroup_order: c.subgroup_order.to_string(),
+        cofactor: c.cofactor.to_string(),
+        summands,
+        solver,
+        columns,
+    }
+}
+/// Rebuild a logarithm table from its document and re-verify every column
+/// against the reconstructed curve; a tampered or mismatched table is an error.
+pub(crate) fn log_table_from_doc(
+    c: &KoblitzCurve,
+    doc: &LogTableDocument,
+) -> Result<FactorBaseLogTable, String> {
+    if doc.degree != c.n || doc.curve_a != c.a || doc.subgroup_order != c.subgroup_order.to_string() {
+        return Err("logarithm database does not belong to this curve".into());
+    }
+    let mut columns = Vec::with_capacity(doc.columns.len());
+    for col in &doc.columns {
+        let x = F2mElement::from_biguint(&params::number(&col.x)?, c.n);
+        let y = F2mElement::from_biguint(&params::number(&col.y)?, c.n);
+        let log = params::number(&col.log)?;
+        columns.push((BinaryPoint::Affine { x, y }, log));
+    }
+    let table = FactorBaseLogTable { columns };
+    if !table.verify(c) {
+        return Err("logarithm database failed re-verification: a column log does not satisfy [x]G == point".into());
+    }
+    Ok(table)
 }
 pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
@@ -401,29 +455,7 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
     }
-    let columns: Vec<LogColumn> = table
-        .columns
-        .iter()
-        .map(|(point, log)| match point {
-            BinaryPoint::Affine { x, y } => LogColumn {
-                x: params::hex(&x.to_biguint()),
-                y: params::hex(&y.to_biguint()),
-                log: log.to_string(),
-            },
-            BinaryPoint::Infinity => unreachable!("projected columns are affine"),
-        })
-        .collect();
-    let doc = LogTableDocument {
-        schema_version: 1,
-        degree: c.n,
-        curve_a: c.a,
-        spec: spec.clone(),
-        subgroup_order: c.subgroup_order.to_string(),
-        cofactor: c.cofactor.to_string(),
-        summands: args.summands,
-        solver: args.solver,
-        columns,
-    };
+    let doc = log_table_to_doc(&c, &spec, args.summands, args.solver, &table);
     write_new(&args.database, &serde_json::to_value(&doc).map_err(|e| e.to_string())?)?;
     Ok(json!({"schema_version":1,"operation":"logs","status":"complete",
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
@@ -450,17 +482,7 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     }
     let fb = materialize(&c, &doc.spec)?;
     // Reconstruct the table and re-verify every column against the curve.
-    let mut columns = Vec::with_capacity(doc.columns.len());
-    for col in &doc.columns {
-        let x = F2mElement::from_biguint(&params::number(&col.x)?, c.n);
-        let y = F2mElement::from_biguint(&params::number(&col.y)?, c.n);
-        let log = params::number(&col.log)?;
-        columns.push((BinaryPoint::Affine { x, y }, log));
-    }
-    let table = FactorBaseLogTable { columns };
-    if !table.verify(&c) {
-        return Err("logarithm database failed re-verification: a column log does not satisfy [x]G == point".into());
-    }
+    let table = log_table_from_doc(&c, &doc)?;
     // Build the synthetic known-answer target.
     let k = if args.random_target {
         let mut rng = StdRng::seed_from_u64(args.seed ^ 0x534f_4c56_4552_5447);
@@ -501,7 +523,7 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
         "scope":"per-target individual logarithm: one relation over a reused, re-verified factor-base logarithm database",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]}))
 }
-fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+pub(crate) fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
     // Keep this guard even for internal callers, independently of Clap.
     if n < 3 || n > MAX_N || n % 2 == 0 || a > 1 {
         return Err("unsupported synthetic curve parameters".into());
@@ -525,7 +547,7 @@ fn known(curve: &KoblitzCurve, args: &RunArgs) -> Result<BigUint, String> {
     }
     Ok(n)
 }
-fn validate_factor_size(n: u32) -> Result<u32, String> {
+pub(crate) fn validate_factor_size(n: u32) -> Result<u32, String> {
     let dim = order_of_2_mod_n(n).ok_or("no supported factor-base family for this degree")?;
     if dim > MAX_FACTOR_DIMENSION {
         return Err(format!("factor-base dimension {dim} exceeds the materialization limit {MAX_FACTOR_DIMENSION}; use ic search and --factor-base, or inspection and fixture generation"));
@@ -554,7 +576,7 @@ fn factor_base_spec(args: &RunArgs) -> Result<FactorBaseSpec, String> {
         }
     }
 }
-fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
+pub(crate) fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
     let fb = spec.materialize(kc)?;
     if fb.subspace.len() > MAX_ABSCISSAE {
         return Err(format!(
@@ -564,7 +586,7 @@ fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFact
     }
     Ok(fb)
 }
-fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
+pub(crate) fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
     json!({"spec":spec,"family":spec.family(),
         "domain":crypto_lib::cryptanalysis::koblitz_factor_base_search::domain_label(&fb.domain),
         "dimension":fb.ell,"abscissae":fb.subspace.len(),"points":fb.points.len(),

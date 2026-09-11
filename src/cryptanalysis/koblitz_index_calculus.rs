@@ -3489,6 +3489,26 @@ pub fn individual_log(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
 ) -> Option<(BigUint, IndividualLogReport)> {
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    individual_log_with_pair_table(kc, fb, table, q, opts, pair.as_ref())
+}
+
+/// [`individual_log`] with a caller-supplied pair table, so a batch of
+/// targets over one factor base builds the `|F|²` table once instead
+/// of once per target.  `pair` is required when the strategy is
+/// [`DecompositionStrategy::PairTable`] and ignored otherwise.
+pub fn individual_log_with_pair_table(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    pair: Option<&PairSumTable>,
+) -> Option<(BigUint, IndividualLogReport)> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
     let projected = projected_signed_orbit_map(kc, fb);
@@ -3501,13 +3521,11 @@ pub fn individual_log(
         report.log = Some(BigUint::zero());
         return Some((BigUint::zero(), report));
     }
+    if opts.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+        return None;
+    }
     let index_of = fb.index_map();
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let pair = if opts.strategy == DecompositionStrategy::PairTable {
-        Some(PairSumTable::build(kc, fb)?)
-    } else {
-        None
-    };
     let log_of = table.log_of();
     // Column logs in the rebuilt column order (matched by point identity).
     let column_log: Vec<BigUint> = projected
@@ -3534,8 +3552,7 @@ pub fn individual_log(
             }
             continue;
         }
-        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
-        else {
+        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair, opts, &target) else {
             continue;
         };
         let relation = relation_from_decomposition_with_mode(

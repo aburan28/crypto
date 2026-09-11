@@ -3,6 +3,8 @@
 mod experiment;
 #[path = "ic/params.rs"]
 mod params;
+#[path = "ic/workflow.rs"]
+mod workflow;
 
 use clap::{Args, Parser, Subcommand};
 use serde_json::{json, Value};
@@ -55,6 +57,8 @@ enum Action {
     Logs(experiment::LogsArgs),
     /// Recover a target's logarithm by descent, reusing a saved database.
     Solve(experiment::SolveArgs),
+    /// Run or resume a staged select → logs → solve pipeline from a parameter file.
+    Workflow(workflow::WorkflowArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -98,6 +102,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
+        Some(Action::Workflow(args)) => workflow::run(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -245,6 +250,29 @@ fn display(report: &Value) {
                 );
             }
         }
+        Some("workflow") => {
+            println!(
+                "Workflow: {}; run {}{}; {}",
+                report["status"],
+                report["run_number"],
+                if report["resumed"] == true { " (resumed)" } else { "" },
+                report["run_directory"].as_str().unwrap_or("?")
+            );
+            for st in report["stages"].as_array().into_iter().flatten() {
+                println!(
+                    "  {:<6} {:<8} {}",
+                    st["stage"].as_str().unwrap_or("?"),
+                    st["status"].as_str().unwrap_or("?"),
+                    if st["ran"] == true { "ran" } else { "reused" }
+                );
+            }
+            if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
+                println!("Solutions: {} verified of {}", sol["verified"], sol["count"]);
+            }
+            if let Some(f) = report["failure"].as_str() {
+                println!("Failure: {f}");
+            }
+        }
         Some("error") => {
             eprintln!(
                 "ic: {}",
@@ -280,7 +308,7 @@ fn main() -> ExitCode {
     }
     let success = matches!(
         report["status"].as_str(),
-        Some("complete" | "checks_passed")
+        Some("complete" | "checks_passed" | "stopped")
     ) || report.get("operation").is_none();
     let text = serde_json::to_string_pretty(&report).expect("JSON serializable");
     if let Some(path) = &cli.out {
