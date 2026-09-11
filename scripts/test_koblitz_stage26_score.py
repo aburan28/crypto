@@ -26,7 +26,7 @@ class Stage26ScoreTests(unittest.TestCase):
         value = score.completion_gate_audit()
         self.assertEqual(value["2_same_instance_backend_matrix"]["status"], "partial")
         self.assertIn("licensed Magma F4 execution on all 160 inputs", value["2_same_instance_backend_matrix"]["missing"])
-        self.assertEqual(value["5_unknown_scalar"]["status"], "finite_degree23_complete")
+        self.assertEqual(value["5_unknown_scalar"]["status"], "finite_degree23_and_degree31_complete")
         self.assertEqual(value["7_external_review"]["status"], "missing")
         self.assertIn("not a Koblitz index-calculus SOTA", value["overall"])
 
@@ -43,6 +43,14 @@ class Stage26ScoreTests(unittest.TestCase):
         self.assertFalse(value["factor_base_logs_known_by_construction"])
         self.assertEqual(value["attempt_totals"]["relation_found"], 252)
         self.assertGreater(value["ratios"]["setup_charged_ic_over_rho_core"], 1600)
+
+    def test_n31_unknown_scalar_control_binding(self) -> None:
+        value = score.n31_unknown_scalar_control()
+        self.assertEqual(value["degree"], 31)
+        self.assertEqual(value["completed_unknown_scalar_targets"], 5)
+        self.assertFalse(value["factor_base_logs_known_by_construction"])
+        self.assertGreater(value["online_ic_over_rho_wall"], 13)
+        self.assertGreater(value["amortised_ic_over_rho_wall"], 800)
 
     def test_natural_relation_yield_binding(self) -> None:
         value = score.natural_relation_yield_control()

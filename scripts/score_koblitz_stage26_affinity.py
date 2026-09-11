@@ -19,6 +19,7 @@ import run_koblitz_stage25_single_core as stage25_tool
 import score_koblitz_blind_pdp_phase_b as phase_b_score
 import verify_koblitz_stage27_result as stage27_verifier
 import verify_koblitz_stage28_relation_yield_replay as stage28_verifier
+import verify_koblitz_stage30_31_results as stage30_31_verifier
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -290,6 +291,34 @@ def natural_relation_yield_control() -> dict[str, Any]:
     }
 
 
+def n31_unknown_scalar_control() -> dict[str, Any]:
+    replayed = stage30_31_verifier.verify()
+    retained_path = STAGE / "stage-30-31-verification-20260911.json"
+    retained = read_json(retained_path, "Stage-30/31 verification")
+    require(replayed == retained, "Stage-30/31 verification is not byte-derivable")
+    require(replayed.get("status") == "validated_factor_base_and_five_public_unknown_scalars_verified", "Stage-30/31 result is incomplete")
+    targets = replayed.get("stage31", {}).get("targets")
+    require(isinstance(targets, list) and len(targets) == 5, "Stage-31 target count changed")
+    require(all(target.get("expected") == "not_constructed" and target.get("verified") is True and target.get("target", {}).get("target_scalar_constructed") is False for target in targets), "Stage-31 target boundary changed")
+    return {
+        "verification": replayed,
+        "retained_verification": {"path": str(retained_path.relative_to(REPO)), "bytes": retained_path.stat().st_size, "sha256": phase_b.sha256_file(retained_path, "Stage-30/31 verification")},
+        "completed_unknown_scalar_targets": 5,
+        "degree": 31,
+        "factor_base_logs_known_by_construction": False,
+        "target_scalars_known_by_construction": False,
+        "online_ic_over_rho_wall": replayed["comparisons"]["online_ic_over_rho_wall"],
+        "amortised_ic_over_rho_wall": replayed["comparisons"]["amortised_ic_over_rho_wall"],
+        "successful_path_core_seconds": 6214.831656,
+        "successful_path_sequential_wall_seconds": 1958.1645045230002,
+        "cumulative_with_failed_search_core_seconds": 8259.02439,
+        "cumulative_with_failed_search_wall_seconds": 2858.1754323140003,
+        "independent_external_reproduction_satisfied": False,
+        "full_cost_gate_passed": False,
+        "koblitz_index_calculus_sota": False,
+    }
+
+
 def completion_gate_audit() -> dict[str, Any]:
     return {
         "1_full_cost_accounting": {
@@ -321,14 +350,14 @@ def completion_gate_audit() -> dict[str, Any]:
             "missing": ["end-to-end index-calculus scaling at those degrees"],
         },
         "5_unknown_scalar": {
-            "status": "finite_degree23_complete",
-            "proved": ["five public unknown-scalar targets completed without constructed target scalars or factor-base log labels"],
-            "missing": ["larger unknown-scalar end-to-end regimes"],
+            "status": "finite_degree23_and_degree31_complete",
+            "proved": ["five degree-23 public unknown-scalar targets completed without constructed target scalars or factor-base log labels", "five degree-31 public hash-derived targets completed using relation-derived and group-certified factor-base logs"],
+            "missing": ["n=41 and larger unknown-scalar end-to-end regimes"],
         },
         "6_pollard_rho": {
-            "status": "finite_degree23_complete_full_scope_partial",
-            "proved": ["same-target signed-Frobenius/negation rho controls for all five unknown-scalar targets"],
-            "missing": ["one fully unified cost comparison at the n=31, n=41, and larger end-to-end regimes"],
+            "status": "finite_degree23_and_degree31_complete_full_scope_partial",
+            "proved": ["same-target signed-Frobenius/negation rho controls for all five degree-23 unknown-scalar targets", "same-target signed-Frobenius rho controls for all five degree-31 public unknown-scalar targets, including search, build, relation, log, descent, and failed-predecessor costs"],
+            "missing": ["one fully unified cost comparison at n=41 and a larger end-to-end regime"],
         },
         "7_external_review": {
             "status": "missing",
@@ -461,6 +490,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
     direct_mitm = matched_direct_mitm()
     unknown_scalar = unknown_scalar_control()
     relation_yield = natural_relation_yield_control()
+    n31_unknown_scalar = n31_unknown_scalar_control()
     outer_core = math.fsum(row["outer_resources"]["total_core_seconds"] for row in cells.values())
     outer_elapsed = math.fsum(row["outer_resources"]["single_core_elapsed_seconds"] for row in cells.values())
     result = {
@@ -488,6 +518,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         "tool_accounting": tool_accounting,
         "matched_direct_mitm": direct_mitm,
         "unknown_scalar_index_calculus_and_rho": unknown_scalar,
+        "n31_unknown_scalar_index_calculus_and_rho": n31_unknown_scalar,
         "natural_relation_yield": relation_yield,
         "charged_total_core_seconds_available": outer_core + direct_mitm["resources"]["summed_outer_total_core_seconds"] + tool_accounting["acquisition_total_core_seconds"] + tool_accounting["build_total_core_seconds"],
         "charged_scope": "tool source acquisition, exact tool builds, eight one-CPU packet/cell envelopes, 480 SAT-backend outcomes, and 160 matched direct-MITM outcomes",
