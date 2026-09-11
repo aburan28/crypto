@@ -137,3 +137,8 @@ of 5.16. Streaming x/y from DRAM instead costs about 100 bytes per update,
   more. Twenty billion updates per second on this curve therefore needs
   about three of these GPUs, as [aws/README.md](aws/README.md) already
   budgets.
+* Changing platform does not escape this bound either. An FPGA has no shared
+  integer pipe — the walk's bit operations occupy fabric instead of issue
+  slots — but [FPGA-CEILING.md](FPGA-CEILING.md) estimates one VU47P at 5–12 B
+  iterations/s, competitive with one GPU rather than past it, because the same
+  five multiplications per step bind both platforms.
