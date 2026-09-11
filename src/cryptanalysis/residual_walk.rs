@@ -1105,6 +1105,19 @@ pub struct WalkOptions {
     /// instead of from a seed table.  Each quadratic solved is charged as
     /// one operation-equivalent in `oracle_ops`.
     pub s3_oracle: bool,
+    /// Explicit-state strategies only: test every residual for
+    /// `L = ±P_i ± P_j ± P_k` (distinct indices) algebraically — `S₃`
+    /// applied twice: the roots `x(L ∓ P_i)` for each `i`, then for each
+    /// `j > i` the quadratic in `x_k` — with no table.  `B²` quadratics
+    /// per residual, each charged as one operation-equivalent.
+    pub s4_oracle: bool,
+    /// Explicit-state strategies only: look the `2B` neighbours
+    /// `L ∓ P_k` of every residual up in the table (one group operation
+    /// each, charged to the oracle).  With `seed_pairs` this is the
+    /// meet-in-the-middle triple oracle; a neighbour that is `±P_m` is a
+    /// pair decomposition and one that matches a walked residual is an
+    /// ordinary collision with one extra term.
+    pub mitm_neighbours: bool,
 }
 
 impl Default for WalkOptions {
@@ -1125,6 +1138,8 @@ impl Default for WalkOptions {
             use_automorphism: false,
             seed_pairs: false,
             s3_oracle: false,
+            s4_oracle: false,
+            mitm_neighbours: false,
         }
     }
 }
@@ -1154,12 +1169,19 @@ pub struct StrategyReport {
     /// (signed pair sums); they count towards the total point count.
     pub seeded_points: u64,
     pub s3_oracle: bool,
-    /// Quadratics solved by the `S₃` oracle, each charged as one
-    /// operation-equivalent (a square root costs about what an affine
-    /// addition costs) and included in `total_ops`.
+    pub s4_oracle: bool,
+    pub mitm_neighbours: bool,
+    /// Work charged to the oracles and included in `total_ops`:
+    /// quadratics solved (one operation-equivalent each — a square root
+    /// costs about what an affine addition costs) plus the group
+    /// operations of the neighbour lookups.
     pub oracle_ops: u64,
-    /// Complete decompositions `L = ±P_i ± P_j` the oracle found.
+    /// Complete decompositions the oracles found (`L = ±P_i ± P_j`, or
+    /// `± P_k` more).
     pub oracle_hits: u64,
+    /// Neighbour lookups that matched a *walked* residual rather than a
+    /// seed: ordinary collisions with one extra term.
+    pub neighbour_collisions: u64,
     /// Residuals evaluated (independent samples or walk steps).
     pub samples: u64,
     /// Residuals that passed the filter / distinguished-point test and
@@ -1219,8 +1241,11 @@ impl StrategyReport {
             j_zero: inst.aut.is_some(),
             seeded_points: 0,
             s3_oracle: opts.s3_oracle,
+            s4_oracle: opts.s4_oracle,
+            mitm_neighbours: opts.mitm_neighbours,
             oracle_ops: 0,
             oracle_hits: 0,
+            neighbour_collisions: 0,
             samples: 0,
             accepted: 0,
             table_entries: 0,
@@ -1261,6 +1286,10 @@ struct Collector<'a> {
     system: RelationSystem,
     report: StrategyReport,
     la_time: Duration,
+    /// Oracle work that was *not* a group operation (quadratic solves);
+    /// `report.oracle_ops` additionally holds the oracle's group ops,
+    /// which the curve counter already contains.
+    oracle_solves: u64,
 }
 
 impl<'a> Collector<'a> {
@@ -1271,7 +1300,25 @@ impl<'a> Collector<'a> {
             system: RelationSystem::new(inst.curve.n, fb.len() + 1),
             report: StrategyReport::new(inst, fb, strategy, opts),
             la_time: Duration::ZERO,
+            oracle_solves: 0,
         }
+    }
+
+    /// Charge `solves` quadratic solves to the oracle.
+    fn charge_solves(&mut self, solves: u64) {
+        self.oracle_solves += solves;
+        self.report.oracle_ops += solves;
+    }
+
+    /// Charge group operations performed since `before` to the oracle
+    /// (they are already in the curve counter).
+    fn charge_group_ops(&mut self, before: u64) {
+        self.report.oracle_ops += self.inst.curve.ops() - before;
+    }
+
+    /// Group operations plus non-group oracle work so far.
+    fn spent(&self) -> u64 {
+        self.inst.curve.ops() + self.oracle_solves
     }
 
     fn count_collision(&mut self, kind: CollisionKind) {
@@ -1320,7 +1367,7 @@ impl<'a> Collector<'a> {
                     self.report.solved = true;
                     self.report.recovered = Some(d);
                     self.report.correct = Some(d == self.inst.d);
-                    self.report.ops_at_solve = Some(curve.ops() + self.report.oracle_ops);
+                    self.report.ops_at_solve = Some(curve.ops() + self.oracle_solves);
                 }
             }
         } else {
@@ -1331,7 +1378,7 @@ impl<'a> Collector<'a> {
     }
 
     fn finish(mut self, start: Instant, setup_ops: u64) -> StrategyReport {
-        let total = self.inst.curve.ops() + self.report.oracle_ops;
+        let total = self.inst.curve.ops() + self.oracle_solves;
         self.report.setup_ops = setup_ops;
         self.report.total_ops = total;
         self.report.walk_ops = total
@@ -1590,6 +1637,79 @@ pub fn s3_pair_oracle(inst: &Instance, fb: &FactorBase, l: &Pt) -> (Vec<Vec<(usi
     (found, solves)
 }
 
+/// Roots of `S₃(x₁, x₂, X) = 0`, i.e. the candidates for `x(P₁ ± P₂)`,
+/// and whether a quadratic was solved (`x₁ = x₂` is skipped).
+fn s3_roots(curve: &Curve, x1: u64, x2: u64) -> (Vec<u64>, bool) {
+    if x1 == x2 {
+        return (Vec::new(), false);
+    }
+    let p = curve.p;
+    let (a, b, c) = s3_in_x3(curve, x1, x2);
+    let disc = sub_mod(mul_mod(b, b, p), mul_mod(4, mul_mod(a, c, p), p), p);
+    let Some(r) = sqrt_fast(disc, p) else {
+        return (Vec::new(), true);
+    };
+    let inv2a = inv_mod(mul_mod(2, a, p), p);
+    let mut roots = vec![mul_mod(sub_mod(p - b, r, p), inv2a, p)];
+    if r != 0 {
+        roots.push(mul_mod(add_mod(p - b, r, p), inv2a, p));
+    }
+    (roots, true)
+}
+
+/// Decide `L = s_i P_i + s_j P_j + s_k P_k` with `i < j < k` by applying
+/// `S₃` twice: the roots `Y = x(L ∓ P_i)` for each `i`, then for each
+/// `j > i` the roots `X` of `S₃(Y, x_j, X)`, looked up in the factor base.
+/// Signs are settled by group arithmetic.  Returns the decompositions
+/// and the number of quadratics solved (`≈ B²`).  Pairs and repeated
+/// indices are left to the other oracles.
+pub fn s4_triple_oracle(inst: &Instance, fb: &FactorBase, l: &Pt) -> (Vec<Vec<(usize, i64)>>, u64) {
+    let curve = &inst.curve;
+    let mut found = Vec::new();
+    let mut solves = 0u64;
+    if l.inf {
+        return (found, 0);
+    }
+    let bsize = fb.len();
+    for i in 0..bsize {
+        let (ys, solved) = s3_roots(curve, l.x, fb.points[i].x);
+        solves += solved as u64;
+        for y in ys {
+            for j in (i + 1)..bsize {
+                let (xs, solved) = s3_roots(curve, y, fb.points[j].x);
+                solves += solved as u64;
+                for x in xs {
+                    let Some(&k) = fb.by_x.get(&x) else {
+                        continue;
+                    };
+                    if k <= j {
+                        continue;
+                    }
+                    // L − s_i P_i − s_j P_j = s_k P_k for some signs.
+                    for s_i in [1i64, -1] {
+                        let after_i = curve.sub(l, &curve.mul_signed(&fb.points[i], s_i));
+                        for s_j in [1i64, -1] {
+                            let rest = curve.sub(&after_i, &curve.mul_signed(&fb.points[j], s_j));
+                            let pk = fb.points[k];
+                            let s_k = if rest == pk {
+                                1
+                            } else if rest == curve.neg(&pk) {
+                                -1
+                            } else {
+                                continue;
+                            };
+                            found.push(vec![(i, s_i), (j, s_j), (k, s_k)]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    found.sort();
+    found.dedup();
+    (found, solves)
+}
+
 /// The fold the options ask for on this instance.
 fn fold_mode(inst: &Instance, opts: &WalkOptions) -> Fold {
     if opts.use_automorphism && inst.aut.is_some() {
@@ -1723,12 +1843,66 @@ fn run_explicit(
                 col.push_full(state.full_relation(Some(hit)));
             }
             if opts.s3_oracle {
+                let before = curve.ops();
                 let (hits, solves) = s3_pair_oracle(inst, fb, &l);
-                col.report.oracle_ops += solves;
+                col.charge_solves(solves);
+                col.charge_group_ops(before);
                 for terms in hits {
                     col.report.oracle_hits += 1;
                     col.push_full(state.full_relation_with(&terms));
                 }
+            }
+            if opts.s4_oracle {
+                let before = curve.ops();
+                let (hits, solves) = s4_triple_oracle(inst, fb, &l);
+                col.charge_solves(solves);
+                col.charge_group_ops(before);
+                for terms in hits {
+                    col.report.oracle_hits += 1;
+                    col.push_full(state.full_relation_with(&terms));
+                }
+            }
+            if opts.mitm_neighbours {
+                let before = curve.ops();
+                for kk in 0..bsize {
+                    for sign in [1i64, -1] {
+                        // z = L − sign·P_k is the residual of `state` with
+                        // one more term.
+                        let z = if sign == 1 {
+                            curve.sub(&l, &fb.points[kk])
+                        } else {
+                            curve.add(&l, &fb.points[kk])
+                        };
+                        let mut zs = state.clone();
+                        if sign == 1 {
+                            zs.tuple.push(kk as u32);
+                        } else {
+                            zs.minus.push(kk as u32);
+                        }
+                        let zs = zs.canonical();
+                        if z.inf {
+                            col.report.oracle_hits += 1;
+                            col.push_full(zs.full_relation(None));
+                            continue;
+                        }
+                        if let Some(hit) = fold_lookup(inst, fb, mode, &z) {
+                            col.report.oracle_hits += 1;
+                            col.push_full(zs.full_relation(Some(hit)));
+                        }
+                        let (zkey, zf) = fold(inst, mode, &z);
+                        if let Some((prev, prev_f)) = table.get(&zkey) {
+                            if prev.a == 0 && prev.b == 0 {
+                                col.report.oracle_hits += 1;
+                            } else {
+                                col.report.neighbour_collisions += 1;
+                            }
+                            if *prev != zs {
+                                col.push_collision(zs.relation_scaled(zf, prev, *prev_f, n));
+                            }
+                        }
+                    }
+                }
+                col.charge_group_ops(before);
             }
             col.report.accepted += 1;
             let (key, f) = fold(inst, mode, &l);
@@ -1749,9 +1923,7 @@ fn run_explicit(
                 }
             }
         }
-        if (opts.stop_when_solved && col.report.solved)
-            || curve.ops() + col.report.oracle_ops >= opts.max_ops
-        {
+        if (opts.stop_when_solved && col.report.solved) || col.spent() >= opts.max_ops {
             break;
         }
         match strategy {
@@ -1829,7 +2001,12 @@ fn run_explicit(
 fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> StrategyReport {
     let strategy = Strategy::FreshHashWalk;
     assert!(
-        !opts.negation_map && !opts.use_automorphism && !opts.seed_pairs && !opts.s3_oracle,
+        !opts.negation_map
+            && !opts.use_automorphism
+            && !opts.seed_pairs
+            && !opts.s3_oracle
+            && !opts.s4_oracle
+            && !opts.mitm_neighbours,
         "folding and seeding are implemented for exhaustive storage (dp_bits = 0) only"
     );
     let curve = &inst.curve;
@@ -2985,6 +3162,101 @@ mod tests {
             hits += oracle.len();
         }
         assert!(hits >= 3, "the constructed targets must be found");
+    }
+
+    #[test]
+    fn s4_oracle_agrees_with_brute_force_triples() {
+        let inst = generate_instance(18, 23);
+        let c = &inst.curve;
+        let fb = FactorBase::build(c, 12);
+        let brute = |l: &Pt| {
+            let mut out = Vec::new();
+            for i in 0..fb.len() {
+                for j in (i + 1)..fb.len() {
+                    for k in (j + 1)..fb.len() {
+                        for s_i in [1i64, -1] {
+                            for s_j in [1i64, -1] {
+                                for s_k in [1i64, -1] {
+                                    let pt = c.add(
+                                        &c.add(
+                                            &c.mul_signed(&fb.points[i], s_i),
+                                            &c.mul_signed(&fb.points[j], s_j),
+                                        ),
+                                        &c.mul_signed(&fb.points[k], s_k),
+                                    );
+                                    if pt == *l {
+                                        out.push(vec![(i, s_i), (j, s_j), (k, s_k)]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            out.sort();
+            out.dedup();
+            out
+        };
+        let mut targets = vec![
+            c.add(&c.add(&fb.points[1], &fb.points[5]), &c.neg(&fb.points[9])),
+            c.sub(&c.sub(&fb.points[0], &fb.points[3]), &fb.points[11]),
+            c.add(&c.add(&fb.points[2], &fb.points[7]), &fb.points[8]),
+        ];
+        for k in 1..25u64 {
+            targets.push(c.mul(&c.g, k * 104_729));
+        }
+        let mut hits = 0;
+        for l in &targets {
+            let (oracle, solves) = s4_triple_oracle(&inst, &fb, l);
+            assert_eq!(
+                oracle,
+                brute(l),
+                "S4 oracle disagrees with brute force at {l:?}"
+            );
+            assert!(solves <= (fb.len() * fb.len()) as u64);
+            hits += oracle.len();
+        }
+        assert!(hits >= 3);
+    }
+
+    #[test]
+    fn s4_and_mitm_runs_solve_and_are_charged() {
+        let (inst, fb) = small_setup(18, 16, 14);
+        let s4 = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                k: 3,
+                max_ops: 1 << 30,
+                seed: 5,
+                negation_map: true,
+                s4_oracle: true,
+                ..WalkOptions::default()
+            },
+        );
+        assert_eq!(s4.correct, Some(true), "{s4:?}");
+        assert_eq!(s4.relations_failed_verification, 0);
+        assert!(s4.oracle_ops >= s4.samples * 100);
+        let mitm = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                k: 3,
+                max_ops: 1 << 30,
+                seed: 5,
+                negation_map: true,
+                seed_pairs: true,
+                mitm_neighbours: true,
+                ..WalkOptions::default()
+            },
+        );
+        assert_eq!(mitm.correct, Some(true), "{mitm:?}");
+        assert_eq!(mitm.relations_failed_verification, 0);
+        // Two group operations per factor-base point per residual.
+        assert!(mitm.oracle_ops >= mitm.samples * 2 * fb.len() as u64);
+        assert!(mitm.total_ops >= mitm.oracle_ops + mitm.setup_ops);
     }
 
     #[test]

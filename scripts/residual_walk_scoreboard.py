@@ -71,6 +71,10 @@ def variant(r):
         parts.append("j0")
     if r.get("s3_oracle"):
         parts.append("s3")
+    if r.get("s4_oracle"):
+        parts.append("s4")
+    if r.get("mitm_neighbours"):
+        parts.append("mitm3")
     return "+".join(parts) or "plain"
 
 
@@ -213,7 +217,11 @@ def compare(run, base, tolerance):
         kr = (x["kappa_total"] / x["kappa_floor"]) / (b["kappa_total"] / b["kappa_floor"])
         # Plain rho is a single-collision process whose first-collision
         # time has a wide spread; its kappa is the reference, not a target.
-        beaten = x["tag"] != "R" and kr < 1 - tolerance and x["correct"]
+        # An oracle run tests each residual against virtual points it never
+        # paid for, so its walked count is not comparable to the floor: it
+        # is scored on S, and the count flag is withheld.
+        oracle = x["oracle_frac"] > 0
+        beaten = x["tag"] != "R" and kr < 1 - tolerance and x["correct"] and not oracle
         if not x["correct"]:
             verdict = "WRONG ANSWER"
             regressions += 1
@@ -227,7 +235,7 @@ def compare(run, base, tolerance):
         print("| {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} | {} | {} | {} | {} |".format(
             x["bits"], x["B"], x["dp"], x["tag"], x["variant"], fmt(b["S"], 1), fmt(x["S"], 1), fmt(imp),
             fmt(b["kappa_total"] / b["kappa_floor"]), fmt(x["kappa_total"] / x["kappa_floor"]), fmt(kr),
-            "YES" if beaten else "no", fmt(x["correct"]), verdict))
+            "n/a (oracle)" if oracle else ("YES" if beaten else "no"), fmt(x["correct"]), verdict))
     print()
     return regressions
 

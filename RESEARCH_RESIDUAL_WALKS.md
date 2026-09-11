@@ -857,7 +857,53 @@ less than `κ` because the folded relations are dearer to verify
 is a larger share of a smaller total.  Rho folds too — `0.9 → 0.5` —
 so the hybrid-to-rho ratio is where it was, within rho's spread.
 
-### 10.4 Where this leaves κ
+### 10.4 Candidate 3 — the Semaev `S₃` pair oracle
+
+The one non-generic operation available on a prime-field curve is a
+summation polynomial.  `S₃(x₁, x₂, x₃) = 0` exactly when some
+`(x_i, ±y_i)` sum to `O`, so a residual `L` lies in `±F ± F` if and only
+if, for some factor-base `x_i`, the quadratic `S₃(x_L, x_i, X) = 0` has
+a root `X` that is itself a factor-base abscissa.  That is a membership
+test for the same `2B²`-element set as the signed-pair seed table of
+§10.2, done from `B` square roots per residual instead of from memory
+(`s3_oracle`; `s3_in_x3` is checked against the crate's `BigUint`
+implementation, and `s3_pair_oracle` against brute force over every
+signed pair).  Each quadratic solved is charged as one
+operation-equivalent — a square root is one field exponentiation,
+about the price of an affine addition — which is generous to the
+oracle.
+
+Measured on the tuned mutation walk (`--oracle s3`; `n ≈ 2^24, 2^28`,
+`B = 256`, three seeds each):
+
+| bits | κ walked | oracle hits | oracle share of budget | S | S tuned (no oracle) | S ratio |
+|---:|---:|---:|---:|---:|---:|---:|
+| 24 | 6.01 | ≈ 225 | 98.7% | 1,559.8 | 29.8 | 52× worse |
+| 28 | 12.37 | ≈ 100 | 99.5% | 3,183.0 | 19.7 | 162× worse |
+
+Two things are true at once.  The walked count does fall — to `0.77`
+of the floor at 28 bits and `0.38` at 24 bits, where nearly every
+residual decomposes — because each residual is now compared against
+`2B²` *virtual* points that were never generated.  And the cost of
+those comparisons is `B` operation-equivalents per residual against
+one for a table lookup, so the total work is two orders of magnitude
+above the plain walk and three above rho.  The oracle checks `2B`
+potential coincidences per operation; the residual table, once it
+holds `T` entries, checks `T` per operation, and `T ≈ 16√n ≈ 230,000`
+at 28 bits against `2B = 512`.  The seed table of §10.2 is the same
+oracle with the `2B²` checks paid once instead of per residual, and it
+already showed that even at that price the total count does not move.
+
+The scoreboard therefore withholds the "count invariant beaten" flag
+on oracle runs and scores them on `S`: their walked `κ` is not a count
+of points paid for, and the bound of §10.1 is a bound on points.  For
+an `S₃`-style oracle to beat the walk it would have to check more than
+`T` coincidences per operation, i.e. decide membership in a set larger
+than the residual table at unit cost — which is what a summation
+polynomial does *not* do: it trades memory for square roots, one per
+factor-base element.
+
+### 10.5 Where this leaves κ
 
 | what was tried | κ (walked) | κ_total | κ_total / floor | verdict |
 |:--|---:|---:|---:|:--|
@@ -865,6 +911,7 @@ so the hybrid-to-rho ratio is where it was, within rho's spread.
 | + signed-pair seeding | 12.15 | 16.76 | 1.05 | count relabelled, not reduced |
 | `j = 0` control (negation only) | 17.09 | 17.09 | 1.07 | reference on the structured curve |
 | `j = 0` with 6-fold | 9.47 | 9.47 | 1.02 | κ ÷ 1.8, floor ÷ 1.73; rho ÷ 1.8 as well |
+| `S₃` pair oracle | 12.37 | (virtual) | — | walked count relabelled as `B` square roots per residual; `S` 162× worse |
 
 Three statements now stand on measurement rather than argument:
 
@@ -886,9 +933,9 @@ Three statements now stand on measurement rather than argument:
    fold-aware floor — has to make two *distinct* formal combinations
    coincide with probability above `γ/n`, which is to say it has to
    compute something about the coordinates that the group law does
-   not.  The summation-polynomial oracles elsewhere in this repository
-   are the only candidates of that kind on prime fields, and at these
-   sizes they cost more per residual than they save in count (§6).
+   not.  The summation-polynomial oracle is the only candidate of that
+   kind on prime fields; §10.4 measures `S₃` at `B` square roots per
+   residual and finds it two orders of magnitude behind the walk.
 
 ## References
 
