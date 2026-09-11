@@ -53,10 +53,15 @@ to the run command.
 
 The following knobs are recorded in each run report:
 
-- degree: odd values 3 through 41; a curve is usable only when its largest
-  prime factor exceeds the cofactor, which above 23 holds for degrees 29
-  (curve-a 1), 31, 37, and 39 (curve-a 0);
-- curve-a: 0 or 1, with b fixed to 1;
+- degree: the field degree n; odd values 3 through 63 for the Koblitz
+  family (a curve is usable only when its largest prime factor exceeds
+  the cofactor, which above 23 holds for degrees 29 (curve-a 1), 31, 37,
+  and 39 (curve-a 0)), or k times an odd number for a subfield curve;
+- curve-a: 0 or 1, with b fixed to 1, for a Koblitz curve; the
+  coordinate of a in the subfield basis otherwise;
+- subfield: the degree k of the subfield the curve is defined over,
+  q = 2^k (default 1, the Koblitz family; up to 8), see below;
+- curve-b: the coordinate of b in the subfield basis (default 1);
 - known-log: a positive scalar smaller than the selected subgroup order;
 - random-target: draw a known-answer scalar reproducibly from seed;
 - seed: seed for the generated fixture and relation sampler;
@@ -96,6 +101,42 @@ restores the earlier accounting for matched comparisons: one column per
 Frobenius orbit, no projection merge, a fixed surplus of relations, and a
 single solve at the end. Incomplete results exit unsuccessfully and remain
 incomplete in JSON reports.
+
+### Subfield curves beyond the Koblitz family
+
+    ./target/release/ic run --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --solver pair-table
+    ./target/release/ic search --degree 22 --subfield 2 --curve-a 1 --curve-b 3 --family divisor
+    ./target/release/ic logs --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --database logs14.json
+
+The Galbraith–Granger–Merz–Petit construction needs only that the curve
+be defined over a subfield: with `--subfield k` the synthetic curve is
+`y² + xy = x³ + a x² + b` with `a, b ∈ GF(2^k) ⊂ GF(2^n)`, `n = k · e`
+and `e` odd, and the `2^k`-power Frobenius `π` plays the role squaring
+plays on a Koblitz curve. `a` and `b` are named by their coordinates in
+an `F_2`-basis of the subfield (the kernel of `X^{2^k} + X`), so
+`--subfield 1 --curve-a a --curve-b 1` is exactly `K_a`. Point counting
+goes through `#E(GF(2^k))`, found by enumeration, and the trace
+recurrence `s_i = t·s_{i−1} − q·s_{i−2}`; `λ` is the root of
+`λ² − tλ + q` with `π(G) = [λ]G`.
+
+The invariant factor bases are the kernels of `q`-linearised
+polynomials `Σ c_i X^{q^i}` with `c_i ∈ GF(q)`, classified by the
+irreducible factors of `x^e − 1` over `GF(q)` (Cantor–Zassenhaus over
+`GF(q)`, carried out inside `GF(2^n)`); a factor of degree `d` gives a
+subspace of `2^{kd}` abscissae whose points fall into orbits of length
+dividing `e`. Recipe indices refer to that factor list, which for `k = 1`
+is the familiar `F_2` list in the same order, so every Koblitz recipe,
+document and report is unchanged. Documents record `subfield` and
+`curve_b` (omitted when 1) and are bound to them. Two things differ
+from the Koblitz case in practice: an even `n` is allowed (the
+Artin–Schreier solve for even degree is a linear solve, not the
+half-trace), and when `x^e − 1` splits into binomials `x^d − c` over
+`GF(q)` the invariant subspaces are multiplicative cosets whose
+inverses land in the reciprocal factor's subspace, so a curve with
+`Tr(a) = 1` and `b = 1` has no points over them at all — the search
+scores such bases at zero and a run over one reports a base with no
+usable columns, so pick `b` (or `a`) accordingly, as the examples above
+do.
 
 ## Searching for a factor base
 
