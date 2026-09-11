@@ -8,6 +8,10 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-affinity.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-artifact.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result-seal.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-math-replay.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-verification.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE25_SINGLE_CORE_RESULTS.md"
       - ".github/workflows/koblitz-stage25-single-core.yml"
   workflow_dispatch:
@@ -33,6 +37,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import importlib.util
+          import hashlib
           import json
           from pathlib import Path
 
@@ -43,6 +48,8 @@ jobs:
           stage = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates")
           result = module.validate_result(json.loads((stage / "stage-25-single-core-result.json").read_text()))
           affinity = module.validate_affinity(json.loads((stage / "stage-25-single-core-affinity.json").read_text()))
+          artifact = json.loads((stage / "stage-25-single-core-artifact.json").read_text())
+          verification = json.loads((stage / "stage-25-single-core-verification.json").read_text())
           assert result["affinity"] == affinity
           assert result["status"] == "complete_single_cpu_affinity_control"
           assert result["profile"] == "production"
@@ -50,6 +57,24 @@ jobs:
           assert result["accounting_boundary"]["covers_stage20_n31_n41_n59_backend_matrix"] is False
           assert result["full_cost_gate_passed"] is False
           assert result["koblitz_index_calculus_sota"] is False
+          assert artifact["status"] == "github_artifact_downloaded_and_portable_stage23_verified"
+          assert artifact["workflow_run"]["id"] == 34623323265
+          assert artifact["portable_stage23"]["status"] == "compact_terminal_evidence_structurally_verified"
+          assert artifact["portable_stage23"]["downloaded_artifact_hidden_files_preserved"] is True
+          for name, identity in artifact["committed_files"].items():
+              data = (stage / name).read_bytes()
+              assert len(data) == identity["bytes"]
+              assert hashlib.sha256(data).hexdigest() == identity["sha256"]
+          replay_identity = artifact["additive_retained_math_replay"]["result"]
+          replay_data = (stage / replay_identity["path"]).read_bytes()
+          assert len(replay_data) == replay_identity["bytes"]
+          assert hashlib.sha256(replay_data).hexdigest() == replay_identity["sha256"]
+          replay = json.loads(replay_data)
+          assert replay["status"] == "PASS" and replay["check_count"] == 1251
+          assert replay["retained_mathematical_witness_replay_completed"] is True
+          assert replay["independent_mathematical_payload_replay_completed"] is False
+          assert verification["status"] == "single_cpu_affinity_receipt_verified"
+          assert verification["single_core_elapsed_seconds"] == result["measurements"]["single_core_elapsed_seconds"]
           PY
       - name: Run full one-CPU Stage-23 production control
         if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
