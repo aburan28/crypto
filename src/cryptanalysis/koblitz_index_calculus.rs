@@ -134,7 +134,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
-use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
+use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_groebner::{
@@ -441,7 +441,24 @@ pub struct KoblitzCurve {
     pub cofactor: BigUint,
     /// The eigenvalue of `π` on `⟨generator⟩`: `π(Q) = [λ]Q`.
     pub lambda: BigUint,
+    /// Degree `k` of the subfield the curve is defined over, `q = 2^k`;
+    /// `1` for a Koblitz curve.  `π` is the `q`-power Frobenius and
+    /// `trace`, `lambda` refer to it.
+    pub k: u32,
+    /// `q = 2^k`.
+    pub q: u64,
+    /// Coordinates of `a` and `b` in `subfield_basis`; for `k = 1`
+    /// these are `a` and `1`.
+    pub a_index: u64,
+    pub b_index: u64,
+    /// An `F_2`-basis of `F_q ⊂ F_{2^n}` (the kernel of `X^q + X`).
+    pub subfield_basis: Vec<F2mElement>,
 }
+
+/// Largest subfield degree [`KoblitzCurve::subfield`] accepts: the
+/// curve's `F_q`-points are counted by enumeration, and `a` must fit
+/// the byte the documents carry.
+pub const MAX_SUBFIELD_DEGREE: u32 = 8;
 
 /// `#E(K_a / F_{2^n}) = 2^n + 1 − s_n`, where `s_0 = 2`, `s_1 = t` and
 /// `s_k = t·s_{k−1} − 2·s_{k−2}` (Koblitz's recurrence for the traces
@@ -456,6 +473,39 @@ pub fn koblitz_point_count(a: u8, n: u32) -> BigUint {
     }
     let count = (1i128 << n) + 1 - s_cur;
     BigUint::from(count as u128)
+}
+
+/// `#E(F_{q^e}) = q^e + 1 − s_e` from the trace `t` of the `q`-power
+/// Frobenius (`s_0 = 2`, `s_1 = t`, `s_i = t·s_{i−1} − q·s_{i−2}`).
+pub fn subfield_group_order(trace: i128, q: u64, e: u32) -> BigUint {
+    let q = q as i128;
+    let (mut s_prev, mut s_cur) = (2i128, trace);
+    for _ in 1..e {
+        let next = trace * s_cur - q * s_prev;
+        s_prev = s_cur;
+        s_cur = next;
+    }
+    let count = q.pow(e) + 1 - s_cur;
+    BigUint::from(count as u128)
+}
+
+/// `#E(F_q)` for a curve whose coefficients lie in the subfield spanned
+/// by `basis`, by enumerating the `q` abscissae and keeping the points
+/// whose ordinate is also in `F_q`.
+fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u64 {
+    let n = curve.m;
+    let irr = &curve.irreducible;
+    let mut count = 1u64; // O
+    for x in span_f2(basis, n) {
+        for p in points_with_x(curve, &x) {
+            if let BinaryPoint::Affine { y, .. } = &p {
+                if y.square_k_times(k, irr) == *y {
+                    count += 1;
+                }
+            }
+        }
+    }
+    count
 }
 
 /// Trial-division factorisation into `(prime, exponent)` pairs.  Only
@@ -489,7 +539,32 @@ impl KoblitzCurve {
     /// polynomial is found, or if the largest prime factor of `#E` is
     /// too small for the subgroup to be usable (`r ≤ h`, or `r² | #E`).
     pub fn new(a: u8, n: u32) -> Option<Self> {
-        if a > 1 || n < 3 || n > MAX_N {
+        if a > 1 {
+            return None;
+        }
+        Self::subfield(1, n, u64::from(a), 1)
+    }
+
+    /// **A curve defined over `F_q`, `q = 2^k`, taken over `F_{2^n}`**
+    /// with `n = k·e`, `e` odd: `y² + xy = x³ + a x² + b` with
+    /// `a, b ∈ F_q` given by their coordinates `a_index` (`< q`) and
+    /// `b_index` (`1 ≤ b_index < q`) in the `F_2`-basis of the subfield.
+    /// `k = 1` is the Koblitz family (`b_index = 1`); `k ≤`
+    /// [`MAX_SUBFIELD_DEGREE`].  The `q`-power Frobenius `π` is an
+    /// endomorphism with `π² − tπ + q = 0`, `t` the trace over `F_q`
+    /// (found by counting `E(F_q)`), and `#E(F_{2^n})` follows from the
+    /// same recurrence as for `K_a`.  Everything else — the prime-order
+    /// subgroup, its generator and `λ` — is as for [`Self::new`].
+    pub fn subfield(k: u32, n: u32, a_index: u64, b_index: u64) -> Option<Self> {
+        if k == 0 || k > MAX_SUBFIELD_DEGREE || n < 3 || n > MAX_N || n % k != 0 {
+            return None;
+        }
+        let ext = n / k;
+        if ext < 3 || ext % 2 == 0 {
+            return None;
+        }
+        let q = 1u64 << k;
+        if a_index >= q || b_index == 0 || b_index >= q {
             return None;
         }
         // Identical to the exhaustive `find_irreducible` wherever both
@@ -498,12 +573,23 @@ impl KoblitzCurve {
         // masks: the sparse (trinomial/pentanomial) search is what
         // reaches the boundary-ledger rungs at n = 37 / n = 41.
         let irreducible = find_irreducible_sparse(n)?;
-        let a_fe = if a == 0 {
-            F2mElement::zero(n)
-        } else {
-            F2mElement::one(n)
+        // F_q ⊂ F_{2^n} is the kernel of X^{2^k} + X.
+        let subfield_basis = linearised_kernel_basis(&[0, k], n, &irreducible);
+        if subfield_basis.len() != k as usize {
+            return None;
+        }
+        let combine = |index: u64| {
+            let mut acc = F2mElement::zero(n);
+            for (i, e) in subfield_basis.iter().enumerate() {
+                if (index >> i) & 1 == 1 {
+                    acc = acc.add(e);
+                }
+            }
+            acc
         };
-        let b_fe = F2mElement::one(n);
+        let a_fe = combine(a_index);
+        let b_fe = combine(b_index);
+        let a = a_index as u8;
 
         // Arithmetic-only shell; generator/order are filled in below.
         let mut curve = BinaryCurve {
@@ -516,7 +602,8 @@ impl KoblitzCurve {
             cofactor: BigUint::one(),
         };
 
-        let group_order = koblitz_point_count(a, n);
+        let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
+        let group_order = subfield_group_order(trace, q, ext);
         let factors = factorise(group_order.clone());
         let (r, e) = factors.last()?.clone();
         if e != 1 {
@@ -544,6 +631,9 @@ impl KoblitzCurve {
             1u64 << 20
         };
         let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
+        if k > 1 {
+            state ^= (u64::from(k) << 40) ^ (b_index << 48);
+        }
         for i in 0..budget {
             let raw = if exhaustive {
                 i
@@ -576,8 +666,8 @@ impl KoblitzCurve {
         curve.order = r.clone();
         curve.cofactor = cofactor.clone();
 
-        let trace: i64 = if a == 0 { -1 } else { 1 };
-        let lambda = frobenius_eigenvalue(&curve, trace, &r)?;
+        let trace = i64::try_from(trace).ok()?;
+        let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
 
         Some(Self {
             a,
@@ -588,17 +678,59 @@ impl KoblitzCurve {
             subgroup_order: r,
             cofactor,
             lambda,
+            k,
+            q,
+            a_index,
+            b_index,
+            subfield_basis,
         })
     }
 
-    /// The `2`-power Frobenius `π(x, y) = (x², y²)`.
+    /// The `q`-power Frobenius `π(x, y) = (x^q, y^q)` — squaring for a
+    /// Koblitz curve.
     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
         match p {
             BinaryPoint::Infinity => BinaryPoint::Infinity,
             BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
-                x: x.square(&self.curve.irreducible),
-                y: y.square(&self.curve.irreducible),
+                x: self.frobenius_x(x),
+                y: self.frobenius_x(y),
             },
+        }
+    }
+
+    /// `x ↦ x^q`, the Frobenius on abscissae.
+    pub fn frobenius_x(&self, x: &F2mElement) -> F2mElement {
+        x.square_k_times(self.k, &self.curve.irreducible)
+    }
+
+    /// The degree `e = n / k` of `F_{2^n}` over the subfield: the
+    /// length every Frobenius orbit divides.
+    pub fn extension_degree(&self) -> u32 {
+        self.n / self.k
+    }
+
+    /// The subfield element with the given coordinates in
+    /// [`Self::subfield_basis`].
+    pub fn subfield_element(&self, index: u64) -> F2mElement {
+        let mut acc = F2mElement::zero(self.n);
+        for (i, e) in self.subfield_basis.iter().enumerate() {
+            if (index >> i) & 1 == 1 {
+                acc = acc.add(e);
+            }
+        }
+        acc
+    }
+
+    /// Short label: `K_a / GF(2^n)`, or the subfield form
+    /// `E_{a,b}/GF(2^k) over GF(2^n)`.
+    pub fn label(&self) -> String {
+        if self.k == 1 {
+            format!("K_{} / GF(2^{})", self.a, self.n)
+        } else {
+            format!(
+                "E_{{{},{}}}/GF(2^{}) over GF(2^{})",
+                self.a_index, self.b_index, self.k, self.n
+            )
         }
     }
 
@@ -659,14 +791,26 @@ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
 /// `λ² − tλ + 2 ≡ 0 (mod r)`; which one is settled by testing
 /// `π(G) = [λ]G`.
 pub fn frobenius_eigenvalue(curve: &BinaryCurve, trace: i64, r: &BigUint) -> Option<BigUint> {
+    frobenius_eigenvalue_q(curve, trace, 2, 1, r)
+}
+
+/// [`frobenius_eigenvalue`] for the `q`-power Frobenius, `q = 2^k`:
+/// `λ` is a root of `λ² − tλ + q ≡ 0 (mod r)` with `π_q(G) = [λ]G`.
+pub fn frobenius_eigenvalue_q(
+    curve: &BinaryCurve,
+    trace: i64,
+    q: u64,
+    k: u32,
+    r: &BigUint,
+) -> Option<BigUint> {
     let t = if trace >= 0 {
         BigUint::from(trace as u64) % r
     } else {
         r - (BigUint::from((-trace) as u64) % r)
     };
-    // disc = t² − 8
+    // disc = t² − 4q
     let t_sq = (&t * &t) % r;
-    let disc = (&t_sq + r - (BigUint::from(8u32) % r)) % r;
+    let disc = (&t_sq + r - (BigUint::from(4 * q) % r)) % r;
     let s = sqrt_mod_p(&disc, r)?;
     let inv2 = mod_inverse(&BigUint::from(2u32), r)?;
 
@@ -674,8 +818,8 @@ pub fn frobenius_eigenvalue(curve: &BinaryCurve, trace: i64, r: &BigUint) -> Opt
     let pi_g = match g {
         BinaryPoint::Infinity => return None,
         BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
-            x: x.square(&curve.irreducible),
-            y: y.square(&curve.irreducible),
+            x: x.square_k_times(k, &curve.irreducible),
+            y: y.square_k_times(k, &curve.irreducible),
         },
     };
     for sign in [true, false] {
@@ -968,14 +1112,46 @@ fn signed_frobenius_orbit_representatives(
 /// basis `1, z, …, z^{n−1}`; the kernel basis is read off by row
 /// reducing `[image | preimage]`.
 pub fn linearised_kernel_basis(exps: &[u32], n: u32, irr: &IrreduciblePoly) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
-    for i in 0..n {
-        let basis = F2mElement::from_bit_positions(&[i], n);
+    kernel_basis_of(n, |basis| {
         let mut img = F2mElement::zero(n);
         for &k in exps {
             img = img.add(&basis.square_k_times(k, irr));
         }
+        img
+    })
+}
+
+/// An `F_2`-basis of the kernel of the `q`-linearised polynomial
+/// `L(X) = Σ_i c_i X^{q^i}`, `q = 2^k`, acting on `F_{2^n}`.  With
+/// `c_i ∈ F_q` the kernel is `π_q`-invariant; for `c_i ∈ F_2` and
+/// `k = 1` this is [`linearised_kernel_basis`].
+pub fn q_linearised_kernel_basis(
+    coeffs: &[F2mElement],
+    k: u32,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> Vec<F2mElement> {
+    kernel_basis_of(n, |basis| {
+        let mut img = F2mElement::zero(n);
+        for (i, c) in coeffs.iter().enumerate() {
+            if c.is_zero() {
+                continue;
+            }
+            let power = basis.square_k_times(i as u32 * k, irr);
+            img = img.add(&c.mul(&power, irr));
+        }
+        img
+    })
+}
+
+/// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
+/// on the polynomial basis.
+fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
+    // Column i = F(z^i), packed into the low n bits of a u64.
+    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    for i in 0..n {
+        let basis = F2mElement::from_bit_positions(&[i], n);
+        let img = image(&basis);
         let img_bits = img.raw_bits().first().copied().unwrap_or(0);
         rows.push((img_bits, 1u64 << i));
     }
@@ -1192,11 +1368,194 @@ pub fn subspace_basis_for_divisor(
     Some(basis)
 }
 
-/// **Build a Frobenius-invariant factor base from a divisor** of
-/// `x^n − 1`, rather than from a single irreducible factor.
+// ── Invariant subspaces over a subfield ────────────────────────────
+
+/// An `F_2[x]` bitmask as a polynomial with `F_{2^n}` coefficients.
+fn bitmask_poly(mask: u64, n: u32) -> F2mPoly {
+    let coeffs = (0..64)
+        .map(|i| {
+            if (mask >> i) & 1 == 1 {
+                F2mElement::one(n)
+            } else {
+                F2mElement::zero(n)
+            }
+        })
+        .collect();
+    F2mPoly::from_coeffs(coeffs, n)
+}
+
+/// The bitmask of a polynomial whose coefficients are all `0` or `1`.
+fn poly_bitmask(p: &F2mPoly) -> Option<u64> {
+    let deg = p.degree()?;
+    if deg >= 64 {
+        return None;
+    }
+    let mut mask = 0u64;
+    for i in 0..=deg {
+        let c = p.coeff(i);
+        if c.is_zero() {
+            continue;
+        }
+        if c != F2mElement::one(p.m) {
+            return None;
+        }
+        mask |= 1 << i;
+    }
+    Some(mask)
+}
+
+/// Canonical order of factor polynomials: by degree, then by the
+/// coefficients from the leading one down.
+fn poly_sort_key(p: &F2mPoly) -> (usize, Vec<BigUint>) {
+    let deg = p.degree().unwrap_or(0);
+    (deg, (0..=deg).rev().map(|i| p.coeff(i).to_biguint()).collect())
+}
+
+/// **Every monic irreducible factor of `x^e − 1` over `F_q`**,
+/// `e = n / k`, with coefficients as elements of `F_q ⊂ F_{2^n}`, in a
+/// canonical order.  These classify the `π_q`-invariant `F_q`-subspaces
+/// of `F_{2^n}` exactly as the `F_2` factors classify the
+/// Frobenius-stable subspaces of a Koblitz field
+/// ([`all_factors_of_x_n_minus_1`], which this returns for `k = 1` in
+/// the same order, so recipe indices are unchanged).
 ///
-/// `indices` select factors from [`all_factors_of_x_n_minus_1`]; the
-/// subspace has dimension equal to their total degree, so `|F| ≈ 2^dim`
+/// For `k > 1` the factorisation is Cantor–Zassenhaus over `F_q`
+/// carried out inside `F_{2^n}`: distinct-degree splitting by
+/// `gcd(x^{q^d} − x, ·)`, then equal-degree splitting with the
+/// `F_2`-trace map `T(r) = Σ_{i < kd} r^{2^i}` of random `F_q[x]`
+/// elements.
+pub fn invariant_factors(kc: &KoblitzCurve) -> Vec<F2mPoly> {
+    let n = kc.n;
+    if kc.k == 1 {
+        return all_factors_of_x_n_minus_1(n)
+            .into_iter()
+            .map(|mask| bitmask_poly(mask, n))
+            .collect();
+    }
+    let irr = &kc.curve.irreducible;
+    let ext = kc.extension_degree() as usize;
+    let mut coeffs = vec![F2mElement::zero(n); ext + 1];
+    coeffs[0] = F2mElement::one(n);
+    coeffs[ext] = F2mElement::one(n);
+    let mut remaining = F2mPoly::from_coeffs(coeffs, n);
+    let mut rng = StdRng::seed_from_u64(0x5355_4246_4945_4c44 ^ u64::from(n) ^ (u64::from(kc.k) << 32));
+    let mut factors: Vec<F2mPoly> = Vec::new();
+    let x = F2mPoly::x(n);
+    let mut h = x.clone();
+    let mut d = 1usize;
+    while let Some(deg) = remaining.degree() {
+        if deg == 0 {
+            break;
+        }
+        if 2 * d > deg {
+            factors.push(remaining.monic(irr));
+            break;
+        }
+        for _ in 0..kc.k {
+            h = h.square_mod(&remaining, irr);
+        }
+        let g = remaining.gcd(&h.add(&x), irr);
+        if g.degree().is_some_and(|gd| gd > 0) {
+            equal_degree_split(kc, &g, d, &mut rng, &mut factors);
+            remaining = remaining.divrem(&g, irr).0;
+            if remaining.degree().is_some_and(|rd| rd > 0) {
+                h = h.rem(&remaining, irr);
+            }
+        }
+        d += 1;
+    }
+    factors.sort_by_key(poly_sort_key);
+    factors
+}
+
+/// Split a product `g` of distinct irreducibles of degree `d` over
+/// `F_q` into its factors (Cantor–Zassenhaus, characteristic 2).
+fn equal_degree_split(
+    kc: &KoblitzCurve,
+    g: &F2mPoly,
+    d: usize,
+    rng: &mut StdRng,
+    out: &mut Vec<F2mPoly>,
+) {
+    let irr = &kc.curve.irreducible;
+    let n = kc.n;
+    let Some(deg) = g.degree() else { return };
+    if deg == d {
+        out.push(g.monic(irr));
+        return;
+    }
+    loop {
+        let coeffs: Vec<F2mElement> = (0..deg)
+            .map(|_| kc.subfield_element(rng.gen_range(0..kc.q)))
+            .collect();
+        let r = F2mPoly::from_coeffs(coeffs, n);
+        if r.degree().is_none() {
+            continue;
+        }
+        let mut t = r.rem(g, irr);
+        let mut acc = t.clone();
+        for _ in 1..(kc.k as usize * d) {
+            t = t.square_mod(g, irr);
+            acc = acc.add(&t);
+        }
+        let f = g.gcd(&acc, irr);
+        if let Some(fd) = f.degree() {
+            if fd > 0 && fd < deg {
+                let other = g.divrem(&f, irr).0.monic(irr);
+                equal_degree_split(kc, &f, d, rng, out);
+                equal_degree_split(kc, &other, d, rng, out);
+                return;
+            }
+        }
+    }
+}
+
+/// Indices into [`invariant_factors`] of the factors of largest degree
+/// — the legacy single-factor family ([`build_frobenius_factor_base`]).
+/// For `k = 1` this is the order of [`factor_x_n_minus_1`].
+pub fn top_factor_indices(kc: &KoblitzCurve) -> Vec<usize> {
+    let factors = invariant_factors(kc);
+    let top = factors.iter().filter_map(F2mPoly::degree).max().unwrap_or(0);
+    factors
+        .iter()
+        .enumerate()
+        .filter(|(_, f)| f.degree() == Some(top) && top > 0)
+        .map(|(i, _)| i)
+        .collect()
+}
+
+/// An `F_2`-basis of the `π_q`-invariant subspace of the divisor
+/// `Π factors[i]`, `i ∈ indices`, of `x^e − 1` over `F_q`, together
+/// with the divisor itself: `F_2`-dimension `k · deg`.  `None` for an
+/// empty or improper divisor.  For `k = 1` this is
+/// [`subspace_basis_for_divisor`].
+pub fn subspace_basis_for_factors(
+    kc: &KoblitzCurve,
+    indices: &[usize],
+) -> Option<(Vec<F2mElement>, F2mPoly)> {
+    let irr = &kc.curve.irreducible;
+    let factors = invariant_factors(kc);
+    let mut f = F2mPoly::one(kc.n);
+    for &i in indices {
+        f = f.mul(factors.get(i)?, irr);
+    }
+    let deg = f.degree()?;
+    if deg == 0 || deg >= kc.extension_degree() as usize {
+        return None;
+    }
+    let basis = q_linearised_kernel_basis(&f.coeffs, kc.k, kc.n, irr);
+    if basis.len() != deg * kc.k as usize {
+        return None;
+    }
+    Some((basis, f))
+}
+
+/// **Build a Frobenius-invariant factor base from a divisor** of
+/// `x^e − 1` over the subfield (`e = n` for a Koblitz curve), rather
+/// than from a single irreducible factor.
+///
+/// `indices` select factors from [`invariant_factors`]; the subspace
+/// has `F_2`-dimension `k` times their total degree, so `|F| ≈ 2^dim`
 /// is tunable.  That matters because the summand count `m` a
 /// decomposition needs falls as `|F|` grows — `m ≈ n/dim` — and `m ≥ 3`
 /// is what forces the chained system and its `(m − 2)·n` extra
@@ -1206,36 +1565,28 @@ pub fn build_frobenius_factor_base_from_divisor(
     kc: &KoblitzCurve,
     indices: &[usize],
 ) -> Option<FrobeniusFactorBase> {
-    let subspace_basis = subspace_basis_for_divisor(kc.n, indices, &kc.curve.irreducible)?;
+    let (subspace_basis, f) = subspace_basis_for_factors(kc, indices)?;
     let ell = subspace_basis.len() as u32;
-    let factors = all_factors_of_x_n_minus_1(kc.n);
-    let mut f_j = 1u64;
-    for &i in indices {
-        f_j = poly_mul_full(f_j, *factors.get(i)?)?;
-    }
-    let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
+    let (f_j, exps) = if kc.k == 1 {
+        let mask = poly_bitmask(&f)?;
+        (mask, (0..=ell).filter(|k| (mask >> k) & 1 == 1).collect())
+    } else {
+        (0, Vec::new())
+    };
     finish_factor_base(kc, ell, f_j, exps, subspace_basis)
 }
 
 /// **Build a Frobenius-invariant factor base** for `curve` from the
-/// `index`-th non-trivial irreducible factor of `x^n − 1`.
+/// `index`-th irreducible factor of largest degree of `x^e − 1` over
+/// the subfield ([`top_factor_indices`]).
 ///
-/// `index` selects which of the `(n − 1)/ℓ` factors to use; different
+/// `index` selects which of the `(e − 1)/ℓ` factors to use; different
 /// factors give different (and, as the paper notes, sometimes needed —
 /// a single invariant base may not yield `n` independent relations)
 /// factor bases of the same size.
 pub fn build_frobenius_factor_base(kc: &KoblitzCurve, index: usize) -> Option<FrobeniusFactorBase> {
-    let factors = factor_x_n_minus_1(kc.n);
-    let f_j = *factors.get(index)?;
-    let ell = poly_deg(f_j)?;
-    let exps: Vec<u32> = (0..=ell).filter(|k| (f_j >> k) & 1 == 1).collect();
-    let subspace_basis = linearised_kernel_basis(&exps, kc.n, &kc.curve.irreducible);
-    if subspace_basis.len() != ell as usize {
-        // Kernel dimension must equal deg f_j; anything else means the
-        // factor did not divide x^n − 1 after all.
-        return None;
-    }
-    finish_factor_base(kc, ell, f_j, exps, subspace_basis)
+    let idx = *top_factor_indices(kc).get(index)?;
+    build_frobenius_factor_base_from_divisor(kc, &[idx])
 }
 
 /// Shared tail of the factor-base constructors: span the subspace,
@@ -1282,9 +1633,9 @@ pub fn build_frobenius_union_factor_base(
     }
     let mut xs = std::collections::BTreeMap::new();
     for mut x in seed {
-        for _ in 0..kc.n {
+        for _ in 0..kc.extension_degree() {
             xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
-            x = x.square(&kc.curve.irreducible);
+            x = kc.frobenius_x(&x);
         }
     }
     let ambient: Vec<_> = (0..kc.n)
@@ -1320,9 +1671,9 @@ pub fn build_explicit_frobenius_orbit_factor_base(
     let mut xs = std::collections::BTreeMap::new();
     for representative in representatives {
         let mut x = F2mElement::from_biguint(&representative.to_biguint(), kc.n);
-        for _ in 0..kc.n {
+        for _ in 0..kc.extension_degree() {
             xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
-            x = x.square(&kc.curve.irreducible);
+            x = kc.frobenius_x(&x);
         }
     }
     let ambient = (0..kc.n)
@@ -2140,7 +2491,7 @@ pub fn sat_decompose_with(
         // Thus sum Tr(x_i) = Tr(x_R) + (m+1)Tr(a). This is a
         // necessary group condition, not an assumption about polynomial roots.
         let rhs = absolute_trace_bit(&x_r, kc.n, &kc.curve.irreducible)
-            ^ (m % 2 == 0 && kc.n % 2 == 1 && kc.a == 1);
+            ^ (m % 2 == 0 && absolute_trace_bit(&kc.curve.a, kc.n, &kc.curve.irreducible));
         let mut terms = Vec::new();
         for (j, basis_element) in fb.subspace_basis.iter().enumerate() {
             if absolute_trace_bit(basis_element, kc.n, &kc.curve.irreducible) {
@@ -6386,5 +6737,237 @@ mod tests {
         assert_eq!(model.symmetry_breaking_factor, 2.0);
         // The paper's headline comparison: more than rho's √(2n).
         assert!(model.relation_collection_speedup > model.rho_speedup);
+    }
+}
+#[cfg(test)]
+mod subfield_tests {
+    use super::*;
+    use crate::cryptanalysis::koblitz_factor_base_search::{search, Family, SearchOptions};
+
+    fn opts(m: usize) -> KoblitzIcOptions {
+        KoblitzIcOptions {
+            m,
+            strategy: DecompositionStrategy::PairTable,
+            collapse_negation: true,
+            collapse_projected_orbits: true,
+            allow_direct_relation: false,
+            max_trials: 40_000,
+            ..KoblitzIcOptions::default()
+        }
+    }
+
+    #[test]
+    fn the_subfield_constructor_reproduces_the_koblitz_curves() {
+        for (a, n) in [(0u8, 9u32), (1, 11), (1, 15), (0, 13), (1, 7)] {
+            let koblitz = KoblitzCurve::new(a, n).unwrap();
+            let general = KoblitzCurve::subfield(1, n, u64::from(a), 1).unwrap();
+            assert_eq!(koblitz.group_order, general.group_order);
+            assert_eq!(koblitz.subgroup_order, general.subgroup_order);
+            assert_eq!(koblitz.cofactor, general.cofactor);
+            assert_eq!(koblitz.lambda, general.lambda);
+            assert_eq!(koblitz.trace, general.trace);
+            assert_eq!(koblitz.curve.generator, general.curve.generator);
+            assert_eq!(koblitz.group_order, koblitz_point_count(a, n));
+            assert_eq!((koblitz.k, koblitz.q, koblitz.a_index, koblitz.b_index), (1, 2, u64::from(a), 1));
+            assert_eq!(koblitz.subfield_basis, vec![F2mElement::one(n)]);
+            assert_eq!(koblitz.label(), format!("K_{a} / GF(2^{n})"));
+            // The factor list and the legacy family are the F_2 ones.
+            let masks: Vec<u64> = invariant_factors(&koblitz).iter().map(|f| poly_bitmask(f).unwrap()).collect();
+            assert_eq!(masks, all_factors_of_x_n_minus_1(n));
+            assert_eq!(top_factor_indices(&koblitz).len(), factor_x_n_minus_1(n).len());
+            for (i, &idx) in top_factor_indices(&koblitz).iter().enumerate() {
+                assert_eq!(masks[idx], factor_x_n_minus_1(n)[i]);
+            }
+        }
+        assert!(KoblitzCurve::new(2, 9).is_none());
+        assert!(KoblitzCurve::subfield(1, 9, 0, 2).is_none(), "b must be 1 over F_2");
+        assert!(KoblitzCurve::subfield(2, 9, 0, 1).is_none(), "k must divide n");
+        assert!(KoblitzCurve::subfield(2, 12, 0, 1).is_none(), "n / k must be odd");
+        assert!(KoblitzCurve::subfield(2, 10, 4, 1).is_none(), "a below q");
+        assert!(KoblitzCurve::subfield(9, 27, 0, 1).is_none(), "k ≤ 8");
+    }
+
+    #[test]
+    fn subfield_curves_count_points_correctly() {
+        // #E(F_{2^n}) from #E(F_q) and the trace recurrence against a
+        // full enumeration of the abscissae; the coefficients lie in
+        // the subfield and the group order is where it should be.
+        let mut checked = 0;
+        for (k, n, a, b) in [(2u32, 6u32, 0u64, 2u64), (2, 10, 0, 2), (2, 14, 0, 2), (3, 9, 1, 1), (3, 9, 2, 5), (4, 12, 3, 5), (2, 10, 3, 3)] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+            checked += 1;
+            let irr = &kc.curve.irreducible;
+            let q = 1u64 << k;
+            assert_eq!(kc.q, q);
+            assert_eq!(kc.extension_degree(), n / k);
+            assert_eq!(kc.subfield_basis.len(), k as usize);
+            for e in &kc.subfield_basis {
+                assert_eq!(e.square_k_times(k, irr), *e, "basis lies in F_q");
+            }
+            assert_eq!(kc.curve.a.square_k_times(k, irr), kc.curve.a);
+            assert_eq!(kc.curve.b.square_k_times(k, irr), kc.curve.b);
+            assert!(!kc.curve.b.is_zero());
+            let mut count = 1u64;
+            for raw in 0..(1u64 << n) {
+                let x = F2mElement::from_biguint(&BigUint::from(raw), n);
+                count += points_with_x(&kc.curve, &x).len() as u64;
+            }
+            assert_eq!(BigUint::from(count), kc.group_order, "k={k} n={n} a={a} b={b}");
+            assert_eq!(&kc.subgroup_order * &kc.cofactor, kc.group_order);
+            assert!((kc.trace.unsigned_abs() as f64) <= 2.0 * (q as f64).sqrt() + 1e-9, "Hasse over F_q");
+            assert_eq!(kc.mul(kc.generator(), &kc.subgroup_order), BinaryPoint::Infinity);
+        }
+        assert!(checked >= 3, "only {checked} instances constructed");
+    }
+
+    #[test]
+    fn the_q_frobenius_acts_as_lambda_on_subfield_curves() {
+        for (k, n, a, b) in [(2u32, 10u32, 0u64, 2u64), (2, 14, 0, 2), (2, 14, 1, 2), (3, 15, 1, 3)] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+            let r = &kc.subgroup_order;
+            // λ² − tλ + q ≡ 0 (mod r).
+            let t = if kc.trace >= 0 { BigUint::from(kc.trace as u64) % r } else { r - BigUint::from((-kc.trace) as u64) % r };
+            let lhs = (&kc.lambda * &kc.lambda + BigUint::from(kc.q)) % r;
+            let rhs = (&t * &kc.lambda) % r;
+            assert_eq!(lhs, rhs, "characteristic equation");
+            let g = kc.generator();
+            for s in [1u64, 2, 3, 17, 1000] {
+                let p = kc.mul(g, &BigUint::from(s));
+                assert_eq!(kc.frobenius(&p), kc.mul(&p, &kc.lambda), "k={k} n={n}: π ≠ [λ] on [{s}]G");
+                assert_eq!(kc.frobenius(&p), BinaryPoint::Affine {
+                    x: match &p { BinaryPoint::Affine { x, .. } => x.square_k_times(k, &kc.curve.irreducible), _ => unreachable!() },
+                    y: match &p { BinaryPoint::Affine { y, .. } => y.square_k_times(k, &kc.curve.irreducible), _ => unreachable!() },
+                });
+            }
+        }
+    }
+
+    #[test]
+    fn invariant_factors_over_the_subfield_factor_x_e_minus_1() {
+        for (k, n, a, b) in [(2u32, 10u32, 0u64, 2u64), (2, 14, 0, 2), (2, 18, 2, 2), (3, 15, 1, 3), (4, 20, 3, 5), (2, 26, 0, 2)] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+            let irr = &kc.curve.irreducible;
+            let e = kc.extension_degree();
+            let factors = invariant_factors(&kc);
+            // Product is x^e − 1, every factor monic with coefficients in F_q.
+            let mut product = F2mPoly::one(n);
+            for f in &factors {
+                assert_eq!(f.lead(), F2mElement::one(n));
+                for c in &f.coeffs {
+                    assert_eq!(c.square_k_times(k, irr), *c, "coefficient outside F_q");
+                }
+                product = product.mul(f, irr);
+            }
+            let mut coeffs = vec![F2mElement::zero(n); e as usize + 1];
+            coeffs[0] = F2mElement::one(n);
+            coeffs[e as usize] = F2mElement::one(n);
+            assert!(product.eq_poly(&F2mPoly::from_coeffs(coeffs, n)), "k={k} n={n}: product is not x^e − 1");
+            // Degrees are the q-cyclotomic coset sizes mod e.
+            let q_mod = (kc.q % u64::from(e)) as u32;
+            let mut seen = vec![false; e as usize];
+            let mut sizes = Vec::new();
+            for start in 0..e {
+                if seen[start as usize] { continue; }
+                let mut x = start;
+                let mut size = 0;
+                while !seen[x as usize] { seen[x as usize] = true; size += 1; x = (x * q_mod) % e; }
+                sizes.push(size);
+            }
+            sizes.sort_unstable();
+            let mut degrees: Vec<usize> = factors.iter().map(|f| f.degree().unwrap()).collect();
+            degrees.sort_unstable();
+            assert_eq!(degrees, sizes, "k={k} n={n}");
+            assert!(top_factor_indices(&kc).iter().all(|&i| factors[i].degree() == Some(*sizes.last().unwrap())));
+            // The canonical order is deterministic across rebuilds.
+            let again = invariant_factors(&kc);
+            assert!(factors.iter().zip(&again).all(|(x, y)| x.eq_poly(y)));
+            // Each factor's kernel is π_q-invariant, of F_2-dimension k·deg,
+            // and annihilated by the linearised polynomial.
+            for (idx, f) in factors.iter().enumerate() {
+                let (basis, _) = subspace_basis_for_factors(&kc, &[idx]).unwrap();
+                assert_eq!(basis.len(), k as usize * f.degree().unwrap());
+                let span = span_f2(&basis, n);
+                let keys: HashSet<BigUint> = span.iter().map(F2mElement::to_biguint).collect();
+                assert_eq!(keys.len(), span.len());
+                for x in &span {
+                    assert!(keys.contains(&kc.frobenius_x(x).to_biguint()), "not π_q-invariant");
+                    let mut img = F2mElement::zero(n);
+                    for (i, c) in f.coeffs.iter().enumerate() {
+                        img = img.add(&c.mul(&x.square_k_times(i as u32 * k, irr), irr));
+                    }
+                    assert!(img.is_zero(), "not in the kernel");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn subfield_factor_bases_are_invariant_and_solve_the_dlp() {
+        // E_{0,2}/GF(4) over GF(2^14): r = 4159, h = 4.
+        let kc = KoblitzCurve::subfield(2, 14, 0, 2).unwrap();
+        let factors = invariant_factors(&kc);
+        let idx = (0..factors.len())
+            .filter_map(|i| build_frobenius_factor_base_from_divisor(&kc, &[i]).map(|fb| (fb.points.len(), i)))
+            .max()
+            .map(|(_, i)| i)
+            .unwrap();
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[idx]).unwrap();
+        assert!(fb.points.len() > 20, "{} points", fb.points.len());
+        let keys = fb.index_map();
+        for p in &fb.points {
+            assert!(keys.contains_key(&point_key(&kc.frobenius(p))), "base not π_q-invariant");
+            assert!(keys.contains_key(&point_key(&point_neg(p))));
+        }
+        for orbit in &fb.orbits {
+            assert_eq!(kc.extension_degree() % orbit.len() as u32, 0, "orbit length divides e");
+        }
+        assert!(fb.m_can_decompose(&kc, 2));
+        let o = opts(2);
+        // Relation rows are consistent with the true logarithms.
+        let (table, report) = solve_factor_base_logs(&kc, &fb, &o).unwrap();
+        assert!(report.verified, "{report:?}");
+        assert!(table.verify(&kc));
+        for k in [1u64, 2, 53, 4000] {
+            let expected = BigUint::from(k);
+            let q = kc.mul(kc.generator(), &expected);
+            let (d, _) = individual_log(&kc, &fb, &table, &q, &o).unwrap();
+            assert_eq!(d, expected);
+        }
+        // And the one-shot driver on the same base.
+        let target = kc.mul(kc.generator(), &BigUint::from(777u32));
+        let rep = koblitz_index_calculus_dlp_with_factor_base(&kc, &target, &fb, &o).unwrap();
+        assert_eq!(rep.log, Some(BigUint::from(777u32)));
+        // The search enumerates the subfield factor families and scores them.
+        let sopts = SearchOptions {
+            m: 2,
+            min_dimension: 2,
+            max_dimension: 8,
+            max_abscissae: 4096,
+            families: vec![Family::Factor, Family::Divisor],
+            union_seed_dimensions: (2, 2),
+            union_samples: 0,
+            sample_targets: 64,
+            exhaustive_cap: 4096,
+            extra_relations: 2,
+            prune: false,
+            saturate: false,
+            projected_columns: true,
+            seed: 1,
+        };
+        let sreport = search(&kc, &sopts);
+        assert!(sreport.candidates.len() >= factors.len());
+        assert!(sreport.best().is_some());
+    }
+
+    #[test]
+    fn a_curve_without_points_over_a_binomial_subspace_is_reported_not_solved() {
+        // E_{2,1}/GF(4) over GF(2^18): Tr(a) = 1, b = 1, x^9 − 1 splits
+        // into binomials, and every invariant subspace carries only x = 0.
+        let kc = KoblitzCurve::subfield(2, 18, 2, 1).unwrap();
+        for idx in 0..invariant_factors(&kc).len() {
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &[idx]).unwrap();
+            assert_eq!(fb.points.len(), 1);
+            assert!(solve_factor_base_logs(&kc, &fb, &opts(2)).is_none());
+        }
     }
 }

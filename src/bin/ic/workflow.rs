@@ -74,6 +74,28 @@ pub struct CurveParams {
     pub degree: u32,
     #[serde(default)]
     pub curve_a: u8,
+    /// Subfield degree `k` (`q = 2^k`); 1 is the Koblitz family.
+    #[serde(default = "one_u32", skip_serializing_if = "is_one_u32")]
+    pub subfield: u32,
+    /// Coordinate of `b` in the subfield basis (1 for Koblitz curves).
+    #[serde(default = "one_u64", skip_serializing_if = "is_one_u64")]
+    pub curve_b: u64,
+}
+fn one_u32() -> u32 {
+    1
+}
+fn one_u64() -> u64 {
+    1
+}
+fn is_one_u32(v: &u32) -> bool {
+    *v == 1
+}
+fn is_one_u64(v: &u64) -> bool {
+    *v == 1
+}
+/// Whether a document's curve fields name `c`.
+fn same_curve(degree: u32, curve_a: u8, subfield: u32, curve_b: u64, c: &KoblitzCurve) -> bool {
+    degree == c.n && curve_a == c.a && subfield == c.k && curve_b == c.b_index
 }
 
 /// How the select stage obtains the factor base.
@@ -243,9 +265,9 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if p.max_trials == 0 || p.max_trials > 1_000_000 {
         return Err("max_trials must be 1..=1000000".into());
     }
-    experiment::degree(&p.curve.degree.to_string())?;
-    if p.curve.curve_a > 1 {
-        return Err("curve_a must be 0 or 1".into());
+    experiment::field_degree(&p.curve.degree.to_string())?;
+    if p.curve.subfield == 1 && p.curve.curve_a > 1 {
+        return Err("curve_a must be 0 or 1 for a Koblitz curve".into());
     }
     let col = &p.collection;
     if col.unit_trials == 0 || col.unit_trials > 100_000_000 {
@@ -341,6 +363,10 @@ pub struct RelationUnitDocument {
     pub params_digest: String,
     pub degree: u32,
     pub curve_a: u8,
+    #[serde(default = "one_u32", skip_serializing_if = "is_one_u32")]
+    pub subfield: u32,
+    #[serde(default = "one_u64", skip_serializing_if = "is_one_u64")]
+    pub curve_b: u64,
     pub spec: FactorBaseSpec,
     pub summands: u8,
     pub unit: usize,
@@ -368,6 +394,10 @@ pub struct SolutionsDocument {
     pub schema_version: u32,
     pub degree: u32,
     pub curve_a: u8,
+    #[serde(default = "one_u32", skip_serializing_if = "is_one_u32")]
+    pub subfield: u32,
+    #[serde(default = "one_u64", skip_serializing_if = "is_one_u64")]
+    pub curve_b: u64,
     pub params_digest: String,
     pub solutions: Vec<Solution>,
 }
@@ -594,17 +624,16 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         }
     };
     say(&format!(
-        "ic — workflow {:?} in {} ({}); K_{} / GF(2^{}); {} summands; engine {}",
+        "ic — workflow {:?} in {} ({}); {}; {} summands; engine {}",
         p.name,
         args.dir.display(),
         if resumed { format!("resuming, run {}", state.runs) } else { "fresh".into() },
-        p.curve.curve_a,
-        p.curve.degree,
+        experiment::curve_label(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b),
         p.summands,
         p.solver.name()
     ));
 
-    let c = experiment::curve(p.curve.degree, p.curve.curve_a)?;
+    let c = experiment::curve(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b)?;
     let mut stage_reports: Vec<Value> = Vec::new();
     let mut overall_failed: Option<String> = None;
 
@@ -614,7 +643,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let (spec, fb): (FactorBaseSpec, FrobeniusFactorBase) =
         if state.select.status == StageStatus::Complete && fb_path.exists() {
             let doc: FactorBaseDocument = read_json(&fb_path)?;
-            if doc.degree != c.n || doc.curve_a != c.a {
+            if !doc.matches(&c) {
                 return Err("factor_base.json does not belong to this curve".into());
             }
             let fb = experiment::materialize(&c, &doc.spec)?;
@@ -642,6 +671,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 schema_version: 1,
                 degree: c.n,
                 curve_a: c.a,
+                subfield: c.k,
+                curve_b: c.b_index,
                 spec: spec.clone(),
             };
             write_atomic(&fb_path, &doc)?;
@@ -897,7 +928,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let t2 = Instant::now();
     let mut solutions: SolutionsDocument = if sol_path.exists() {
         let d: SolutionsDocument = read_json(&sol_path)?;
-        if d.params_digest != digest || d.degree != c.n || d.curve_a != c.a {
+        if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c) {
             return Err("solutions.json belongs to a different run".into());
         }
         d
@@ -906,6 +937,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             schema_version: 1,
             degree: c.n,
             curve_a: c.a,
+            subfield: c.k,
+            curve_b: c.b_index,
             params_digest: digest.clone(),
             solutions: Vec::new(),
         }
@@ -991,7 +1024,7 @@ fn finish(
 ) -> Value {
     json!({"schema_version":1,"operation":"workflow","status":status,
         "evidence_scope":"synthetic_known_answer",
-        "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"summands":p.summands,"solver":p.solver,
+        "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,"summands":p.summands,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,
@@ -1036,8 +1069,7 @@ fn load_units(
         };
         let belongs = doc.schema_version == 1
             && doc.params_digest == digest
-            && doc.degree == c.n
-            && doc.curve_a == c.a
+            && same_curve(doc.degree, doc.curve_a, doc.subfield, doc.curve_b, c)
             && doc.spec == *spec
             && doc.summands == summands
             && name == format!("unit-{:05}.json", doc.unit);
@@ -1081,6 +1113,8 @@ fn collect_unit(
         params_digest: digest.to_string(),
         degree: c.n,
         curve_a: c.a,
+        subfield: c.k,
+        curve_b: c.b_index,
         spec: spec.clone(),
         summands: p.summands,
         unit,

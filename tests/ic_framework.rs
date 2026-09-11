@@ -655,3 +655,63 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     std::fs::remove_file(params).unwrap();
     std::fs::remove_file(other).unwrap();
 }
+
+#[test]
+fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
+    // E_{0,2}/GF(4) over GF(2^14): the 4-power Frobenius family.
+    let (ok, run) = command(&[
+        "run", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
+        "--solver", "pair-table", "--known-log", "53",
+    ]);
+    assert!(ok, "{run}");
+    assert_eq!(run["result"]["verified"], true);
+    assert_eq!(run["result"]["recovered"], "53");
+
+    let db = path();
+    let (ok, logs) = command(&[
+        "logs", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
+        "--solver", "pair-table", "--database", db.to_str().unwrap(),
+    ]);
+    assert!(ok, "{logs}");
+    assert_eq!(logs["status"], "complete");
+    assert_eq!(logs["verified"], true);
+    let doc: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
+    assert_eq!(doc["subfield"], 2);
+    assert_eq!(doc["curve_b"], 2);
+    assert_eq!(doc["degree"], 14);
+
+    let (ok, solve) = command(&[
+        "solve", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
+        "--logs", db.to_str().unwrap(), "--known-log", "4000", "--solver", "pair-table",
+    ]);
+    assert!(ok, "{solve}");
+    assert_eq!(solve["result"]["verified"], true);
+    assert_eq!(solve["result"]["recovered"], "4000");
+
+    // The database is bound to the subfield curve: a Koblitz reading of
+    // the same degree is refused, and so is another b.
+    let (ok, v) = command(&[
+        "solve", "--degree", "14", "--curve-a", "0", "--logs", db.to_str().unwrap(), "--known-log", "5",
+    ]);
+    assert!(!ok, "{v}");
+    let (ok, v) = command(&[
+        "solve", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "3",
+        "--logs", db.to_str().unwrap(), "--known-log", "5",
+    ]);
+    assert!(!ok, "{v}");
+    std::fs::remove_file(db).unwrap();
+
+    // Koblitz documents are unchanged: no subfield fields are written.
+    let db = path();
+    let (ok, _) = command(&["logs", "--degree", "9", "--curve-a", "0", "--solver", "pair-table", "--database", db.to_str().unwrap()]);
+    assert!(ok);
+    let doc: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
+    assert!(doc.get("subfield").is_none() && doc.get("curve_b").is_none());
+    std::fs::remove_file(db).unwrap();
+
+    // Parameter validation: n/k must be odd, coefficients below q.
+    let (ok, _) = command(&["run", "--degree", "12", "--subfield", "2", "--curve-b", "2"]);
+    assert!(!ok);
+    let (ok, _) = command(&["run", "--degree", "14", "--subfield", "2", "--curve-a", "4", "--curve-b", "2"]);
+    assert!(!ok);
+}

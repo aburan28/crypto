@@ -811,3 +811,70 @@ This is the stage that makes the pipeline's collection cost scale with
 machines rather than cores: every unit is independent, the merge is one
 scalar multiplication per relation, and the linear algebra of the
 previous entry is what turns the merged relations into the database.
+
+## Beyond Koblitz: subfield curves `E/GF(2^k)` over `GF(2^{ke})` — 2026-09-11
+
+**Modules:** `koblitz_index_calculus::{KoblitzCurve::subfield, invariant_factors,
+top_factor_indices, subspace_basis_for_factors, q_linearised_kernel_basis,
+subfield_group_order, frobenius_eigenvalue_q}`; `binary_semaev::solve_artin_schreier`.
+**Tool:** `ic run|search|logs|solve --subfield k --curve-a a --curve-b b`,
+workflow `curve.subfield` / `curve.curve_b`.
+**Docs:** `docs/ic/README.md`.
+
+Everything the pipeline does with a Koblitz curve uses one fact: the
+curve is defined over a subfield, so a power of Frobenius is an
+endomorphism acting as a known scalar `λ` on the prime-order subgroup,
+and the invariant factor bases are the `π`-stable subspaces.  The
+pipeline now takes that fact at its generality (GGMP §4 with `q = 2^k`):
+
+- `KoblitzCurve::subfield(k, n, a, b)` builds `y² + xy = x³ + ax² + b`
+  with `a, b ∈ GF(2^k) ⊂ GF(2^n)`, `n = k·e`, `e` odd, the coefficients
+  named by coordinates in the `F_2`-basis of the subfield (the kernel of
+  `X^{2^k} + X`).  `#E(GF(2^k))` is counted by enumeration, the trace
+  `t` of the `q`-power Frobenius follows, and `#E(GF(2^n))` comes from
+  `s_i = t·s_{i−1} − q·s_{i−2}` — the Koblitz recurrence with `2`
+  replaced by `q`; `λ` is the root of `λ² − tλ + q` with `π(G) = [λ]G`.
+  `KoblitzCurve::new(a, n)` is `subfield(1, n, a, 1)` and a test pins
+  every field of the two equal, so the Koblitz path is unchanged.
+- The invariant subspaces are the kernels of `q`-linearised polynomials
+  `Σ c_i X^{q^i}`, `c_i ∈ GF(q)`, classified by the irreducible factors
+  of `x^e − 1` over `GF(q)`.  Those are found by Cantor–Zassenhaus over
+  `GF(q)` run inside `GF(2^n)` (`F2mPoly` arithmetic with coefficients
+  in the subfield: distinct-degree splitting by `gcd(x^{q^d} − x, ·)`,
+  equal-degree splitting with the absolute-trace map of random
+  `GF(q)[x]` elements), sorted canonically; for `k = 1` the list is the
+  `F_2` bit-mask list in the same order, so recipe indices, documents
+  and reports are unchanged.  A factor of degree `d` gives `2^{kd}`
+  abscissae and orbits of length dividing `e`.  Every factor-base
+  constructor, the search families, the pair table, the cofactor
+  admissibility walk, relation rewriting, filtering, block Wiedemann,
+  the log database and the descent then work as they are, with
+  `kc.frobenius` the `q`-power map; the only oracle-side change is the
+  Kosters–Yeo trace row's constant, `Tr(a)` for `a` in the subfield.
+- The Artin–Schreier solver used to brute-force `2^m` candidates for
+  even `m` (and refuse `m > 20`).  Even field degrees are the normal
+  case for even `k`, so `t² + t = c` is now solved as the `F_2`-linear
+  system it is (bit-packed elimination, `m ≤ 63`), which took a
+  `GF(2^18)` point lookup from 29 ms to microseconds.
+
+Two structural observations from the first instances:
+
+- Point counts check out against full enumeration on `E_{0,2}/GF(4)`
+  over `GF(2^6)`, `GF(2^10)` and `GF(2^14)` (76, 964 and 16 636 points);
+  `E_{0,2}/GF(4)` over `GF(2^14)` has `r = 4159`, `h = 4`, and `x^7 − 1`
+  factors over `GF(4)` as degrees `(1, 3, 3)`, giving invariant bases
+  of 3, 43 and 71 points — the 71-point one solves the DLP and
+  precomputes a certified log database with two summands (pinned by
+  `subfield_factor_bases_are_invariant_and_solve_the_dlp`).
+- When `x^e − 1` splits into binomials `x^d − c` over `GF(q)` (`e = 9`,
+  `q = 4`: degrees `1, 1, 1, 3, 3`), each invariant subspace minus `0`
+  is a multiplicative coset `{x : x^d = c}` and its inverses form the
+  reciprocal factor's coset, which has absolute trace `0`.  With
+  `Tr(a) = 1` and `b = 1` the Artin–Schreier condition
+  `Tr(x + a + b/x²) = 0` then fails for every `x ≠ 0` in every such
+  subspace: `E_{2,1}/GF(4)` over `GF(2^18)` has *no* factor-base points
+  at all beyond `(0, √b)`, on any of its five invariant subspaces, while
+  `b ∈ {ω, ω²}` on the same field restores them.  The search scores
+  such bases at zero and a run over one reports a base with no usable
+  columns; the choice of `b` is a genuine parameter of the family, not
+  a cosmetic one.

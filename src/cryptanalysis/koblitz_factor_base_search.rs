@@ -53,7 +53,7 @@ use serde::{Deserialize, Serialize};
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
 use super::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, build_frobenius_factor_base,
+    invariant_factors, top_factor_indices, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     projected_signed_orbit_count, restrict_factor_base_to_orbits,
     saturate_factor_base_two_torsion, span_f2, FactorBaseDomain, FrobeniusFactorBase,
@@ -115,9 +115,9 @@ impl FactorBaseSpec {
     pub fn materialize(&self, kc: &KoblitzCurve) -> Result<FrobeniusFactorBase, String> {
         match self {
             Self::Factor { index } => build_frobenius_factor_base(kc, *index)
-                .ok_or_else(|| format!("no degree-ord_n(2) factor with index {index} at n = {}", kc.n)),
+                .ok_or_else(|| format!("no top-degree invariant factor with index {index} on {}", kc.label())),
             Self::Divisor { indices } => {
-                let factors = all_factors_of_x_n_minus_1(kc.n);
+                let factors = invariant_factors(kc);
                 let mut sorted = indices.clone();
                 sorted.sort_unstable();
                 sorted.dedup();
@@ -126,9 +126,10 @@ impl FactorBaseSpec {
                 }
                 if sorted.iter().any(|&i| i >= factors.len()) {
                     return Err(format!(
-                        "divisor index out of range: x^{} − 1 has {} irreducible factors",
-                        kc.n,
-                        factors.len()
+                        "divisor index out of range: x^{} − 1 has {} irreducible factors over GF(2^{})",
+                        kc.extension_degree(),
+                        factors.len(),
+                        kc.k
                     ));
                 }
                 build_frobenius_factor_base_from_divisor(kc, &sorted)
@@ -751,15 +752,19 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
     }
     let mut push = |spec: FactorBaseSpec| push_unique(&mut specs, &mut seen, spec);
     if opts.families.contains(&Family::Factor) {
-        let count = super::koblitz_index_calculus::factor_x_n_minus_1(kc.n).len();
+        let count = top_factor_indices(kc).len();
         for index in 0..count {
             push(FactorBaseSpec::Factor { index });
         }
     }
     if opts.families.contains(&Family::Divisor) {
-        let factors = all_factors_of_x_n_minus_1(kc.n);
+        let factors = invariant_factors(kc);
         if !factors.is_empty() && factors.len() <= 20 {
-            let degrees: Vec<u32> = factors.iter().map(|f| 63 - f.leading_zeros()).collect();
+            // F_2-dimension of each factor's invariant subspace.
+            let degrees: Vec<u32> = factors
+                .iter()
+                .map(|f| kc.k * f.degree().unwrap_or(0) as u32)
+                .collect();
             for mask in 1usize..(1usize << factors.len()) {
                 let indices: Vec<usize> = (0..factors.len())
                     .filter(|i| (mask >> i) & 1 == 1)
