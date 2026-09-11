@@ -11,7 +11,7 @@ import os
 from pathlib import Path, PurePosixPath
 import stat
 import subprocess
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 
 MANIFEST_SCHEMA = "koblitz_stage23_terminal_evidence_manifest.v1"
@@ -193,14 +193,20 @@ def _open_absolute_directory(path: Path, context: str, *, create: bool = False) 
         raise
 
 
-def _read_regular_at(parent_fd: int, name: str, context: str) -> bytes:
+def _read_regular_at(
+    parent_fd: int,
+    name: str,
+    context: str,
+    *,
+    allow_hardlink: bool = False,
+) -> bytes:
     flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(name, flags, dir_fd=parent_fd)
     try:
         metadata = os.fstat(descriptor)
         if not stat.S_ISREG(metadata.st_mode):
             raise EvidenceError(f"{context} must be a regular non-symlink file")
-        if metadata.st_nlink != 1:
+        if metadata.st_nlink != 1 and not allow_hardlink:
             raise EvidenceError(f"{context} must not be hard-linked")
         chunks: list[bytes] = []
         while True:
@@ -309,7 +315,12 @@ def validate_inventory_records(value: Any, context: str) -> list[dict[str, Any]]
     return records
 
 
-def tree_inventory(root: Path, *, excluded: Iterable[str] = ()) -> list[dict[str, Any]]:
+def tree_inventory(
+    root: Path,
+    *,
+    excluded: Iterable[str] = (),
+    allow_hardlinks: Callable[[str], bool] | None = None,
+) -> list[dict[str, Any]]:
     excluded_set = set(excluded)
     records: list[dict[str, Any]] = []
     root_fd = _open_absolute_directory(root, "artifact-tree root")
@@ -336,7 +347,12 @@ def tree_inventory(root: Path, *, excluded: Iterable[str] = ()) -> list[dict[str
                 continue
             if not stat.S_ISREG(metadata.st_mode):
                 raise EvidenceError(f"artifact tree contains inadmissible file {relative}")
-            data = _read_regular_at(directory_fd, name, f"artifact file {relative}")
+            data = _read_regular_at(
+                directory_fd,
+                name,
+                f"artifact file {relative}",
+                allow_hardlink=bool(allow_hardlinks and allow_hardlinks(relative)),
+            )
             if relative not in excluded_set:
                 records.append({"path": relative, "bytes": len(data), "sha256": sha256(data)})
         names_after = sorted(os.listdir(directory_fd))
@@ -1387,7 +1403,14 @@ def _validate_terminal_run_input(run_root: Path) -> tuple[dict[str, Any], list[d
     inventory = validate_inventory_records(seal["inventory"], "original run-seal inventory")
     if canonical_sha256(inventory) != seal["inventory_sha256"]:
         raise EvidenceError("original run-seal inventory hash is invalid")
-    actual = tree_inventory(run_root, excluded={"run-seal.json"})
+    # Cargo hard-links some hashed build artifacts on Linux. These files are
+    # authenticated against the source run seal and omitted from the compact
+    # bundle. Retained evidence remains strictly single-link.
+    actual = tree_inventory(
+        run_root,
+        excluded={"run-seal.json"},
+        allow_hardlinks=is_build_target_path,
+    )
     if actual != inventory:
         raise EvidenceError("original run bytes changed after terminal sealing")
     if seal["scientific_measurement_admitted"] is not False:
