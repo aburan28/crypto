@@ -1005,7 +1005,32 @@ sub-millisecond systems; the ranking, not the ratio, is the result.
 
 ### 12.4 `m = 3`
 
-TBD-K3
+`m = 3` needed two things the `m = 2` run did not: a degree *box* for the
+interpolation (Semaev's `S₄` has total degree 12 but degree 4 in each
+point, and 12 in five unknowns is far over the monomial cap; with the
+box it is recovered with its 125 terms after descent), and a wall-clock
+budget per Buchberger run, because the repo's Buchberger does not
+return from the descended `S₄` in any useful time.  Budget 180 s, two
+decomposable and two random targets per curve.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s, every target |
+| | one `T`, `w = u²`, `Πu` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s, every target |
+| | Klein | 16 | 9 | – | 2 | 8 | **no** | – |
+TBD-K3-ROWS
+
+What `m = 3` settles is the shape and not the time.  The one-involution
+system is a third of the degree (4 against 12) and a quarter of the
+size (35 terms against 125) of Gaudry's, at the cost of one more unknown
+and five more equations (the descended identities), and the Klein
+group is again not `F_p`-valued — the §12.2 obstruction does not depend
+on `m`.  The repo's Buchberger finishes neither system inside three
+minutes on any target, so it cannot rank them; that is a statement
+about the solver (a textbook Buchberger, no F4/F5, no degree bound), not
+about the systems, and the `m = 2` ranking (§12.3) stands as the only
+timed one.  An F4 over `F_p` with a degree bound is the tool this row
+needs; the repo's `groebner_f4` is Buchberger-based despite its name.
 
 ---
 
