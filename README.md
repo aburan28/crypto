@@ -408,6 +408,7 @@ that makes adding new attacks cheap.
 | `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
 | `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
 | `cryptanalysis::coordinate_quotients`        | Invariants of any finite group of point maps by orbit sums: relation subgroup by experiment, minimal-degree relation, exact collapse |
+| `cryptanalysis::f4_fp`                        | Degree-bounded F4 over a small prime field: normal strategy, symbolic preprocessing, parallel dense row reduction mod `p`, cooperative deadline, solving by root finding and substitution — the engine that times the coordinate-descent systems at `m = 3` |
 | `cryptanalysis::coordinate_descent`          | Fixed-target quotient systems over `F_{p^k}` descended to `F_p` (Gaudry's setting) and timed on the F_p Gröbner engine; `Chart` puts frames on the `y`-line, where 3-torsion translations of `j = 0` curves are Möbius maps (`examples/three_torsion.rs`) |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |

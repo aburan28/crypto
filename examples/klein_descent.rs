@@ -6,7 +6,7 @@
 //! ```
 
 use crypto_lib::cryptanalysis::coordinate_descent::{
-    compare_arms, format_arms, standard_arms, DescentArm,
+    compare_arms, format_arms, standard_arms, DescentArm, F4Verdict,
 };
 use crypto_lib::cryptanalysis::coordinate_quotients::two_torsion_frame;
 use crypto_lib::cryptanalysis::coordinate_search::{Curve, Gf, Pt, Rng64, INF};
@@ -116,14 +116,44 @@ fn run(
                 .filter_map(|(_, arms)| arms.get(ai))
                 .filter(|a| a.inconsistent)
                 .count();
+            let f4_ms: Vec<f64> = rows
+                .iter()
+                .filter(|(k, _)| k == kind)
+                .filter_map(|(_, arms)| arms.get(ai))
+                .filter(|a| a.error.is_none())
+                .map(|a| a.f4_ms)
+                .collect();
+            let f4_deg: Vec<f64> = rows
+                .iter()
+                .filter(|(k, _)| k == kind)
+                .filter_map(|(_, arms)| arms.get(ai))
+                .filter(|a| a.error.is_none() && a.f4_verdict != F4Verdict::NotRun)
+                .map(|a| a.f4_degree as f64)
+                .collect();
+            let f4_refuted = rows
+                .iter()
+                .filter(|(k, _)| k == kind)
+                .filter_map(|(_, arms)| arms.get(ai))
+                .filter(|a| a.f4_verdict == F4Verdict::Refuted)
+                .count();
+            let f4_undet = rows
+                .iter()
+                .filter(|(k, _)| k == kind)
+                .filter_map(|(_, arms)| arms.get(ai))
+                .filter(|a| a.f4_verdict == F4Verdict::Undetermined)
+                .count();
             let label = rows[0].1[ai].label.clone();
             println!(
-                "     {:<34} {:<12} n = {:>2}  median GB ms {:>8.1}  refuted {}",
+                "     {:<34} {:<12} n = {:>2}  median GB ms {:>8.1}  refuted {}   | F4 median ms {:>8.1}  solving degree {:>4.1}  refuted {}  undetermined {}",
                 label,
                 kind,
                 ms.len(),
                 median(ms),
-                refuted
+                refuted,
+                median(f4_ms),
+                median(f4_deg),
+                f4_refuted,
+                f4_undet
             );
         }
     }
