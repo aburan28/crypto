@@ -1,0 +1,68 @@
+{
+  "schema": "koblitz_phase_b_magma_replay_protocol.v1",
+  "status": "frozen_before_external_execution",
+  "source": {
+    "terminal_bundle_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-terminal-evidence-successor-04-20260910",
+    "terminal_bundle_seal_sha256": "ac457996498d8748b94cfed360e8c1dcc0f53bc04c8a7e134e5ac526b8a0702b",
+    "blind_bundle_sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77",
+    "phase_b_protocol_sha256": "5de2d43527286054ad348b182145d07a988b1236a141377d01b0e7f6f5a38ddb",
+    "terminal_run_seal_sha256": "e528f9bbaa6b7554224379cb32f7b1ed5be0a3cb8bde15e56dee7d1a5f75b538",
+    "terminal_run_inventory_sha256": "bb4377054700edf3049a7590b9b9fdd8fe6a0c57b6a216a7928dd211dc74a12c",
+    "terminal_score_seal_sha256": "675f951516ecd9a81ac11f669dc8bf56a321d5da0a59b60cb04b784a7f0e7cab",
+    "terminal_score_sha256": "cc6a999e4438a01b44c187039f1fa7ff684d2c8f38192d7c4032159d62bf806e",
+    "phase_b_implementation_commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0"
+  },
+  "packet": {
+    "instance_count": 160,
+    "order": "exact blind-bundle order",
+    "required_files_per_instance": [
+      "instance.magma",
+      "manifest.json"
+    ],
+    "copy_source_exports_byte_for_byte": true,
+    "ground_truth_allowed": false,
+    "class_oracle_or_known_witness_labels_allowed": false
+  },
+  "execution": {
+    "parallel_workers": 1,
+    "magma_threads": 1,
+    "gpu_enabled": false,
+    "f4_algorithm": "GroebnerBasis(I : Al := \"Direct\", Faugere := true, Dense := false, Nthreads := 1)",
+    "watchdog_seconds_per_process": 120,
+    "attempts_per_phase": 1,
+    "retry_allowed": false,
+    "phases": [
+      "primary-direct-sparse-f4",
+      "direct-sparse-f4-plus-sat-g-if-proper-basis",
+      "exact-backend-point-validation-if-model"
+    ],
+    "unknown_or_timeout_is_unsat": false,
+    "unknown_or_timeout_is_inconclusive": true
+  },
+  "preflight": {
+    "bind_magma_executable_hash_and_version": true,
+    "bind_minisat_executable_hash_and_version": true,
+    "bind_backend_executable_hash_and_version": true,
+    "bind_process_meter_hash": true,
+    "bind_runner_hash_and_repository_state": true,
+    "bind_host_identity": true,
+    "require_license_access_statement": true,
+    "expected_backend_sha256": "14ec9a3d976371b6b100fa32a4ab916f50ddc88aad18fb6c6df8e81de925f96d",
+    "expected_backend_bytes": 1018784,
+    "expected_process_meter_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+  },
+  "return": {
+    "write_once": true,
+    "seal_after_all_selected_tasks": true,
+    "score_only_after_return_seal": true,
+    "retain_raw_stdout_stderr_metrics_and_commands": true
+  },
+  "claim_boundary": {
+    "licensed_magma_execution_completed": false,
+    "independent_external_reproduction_satisfied": false,
+    "novelty_review_satisfied": false,
+    "full_cost_gate_passed": false,
+    "koblitz_index_calculus_sota": false,
+    "statement": "A prepared replay packet or passing dry-run establishes custody and execution readiness only. Only a sealed licensed-host return can establish matched Magma observations; independent reproduction and novelty remain separate gates."
+  }
+}
