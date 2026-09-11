@@ -7459,3 +7459,77 @@ results, and they favour the quotient systems 3–7×.
 
 (see PR — `Chart`, boxed interpolation, `compare_arms`,
 `three_torsion` example, research note §13)
+
+---
+
+## 2026-09-11 (autolab run, seventh session on exotic coordinates)
+
+### Task picked
+
+The sixth session's next step: an F4 over `F_p` with a degree bound,
+so the `m = 3` systems of §12.4 and §13.5 can be ranked.  Then, with the
+goal "several new point representations" set, the lines beyond `x`.
+
+### Work done
+
+- `f4_fp`: Faugère's F4, normal strategy, degree bound on the pairs,
+  symbolic preprocessing, dense parallel row reduction mod `p`,
+  product criterion, cooperative deadline, solving by root finding and
+  substitution with every solution checked.  Four unit tests including
+  six random zero-dimensional systems against brute force.  Two bugs
+  caught by the tests on the way: dropping a basis element made
+  redundant by a new leading monomial *before* their pair was
+  processed (wrong basis), and a tail reduction that re-inserted the
+  cancelled leading term (infinite loop).
+- `compare_arms` times F4 next to Buchberger (`GB_ENGINE`,
+  `F4_MAX_DEGREE`) and reports the solving degree, verdict, solution
+  count and largest matrix; the Gaudry-setting test asserts the two
+  engines agree.
+- `Line::{X2, Iso2(T), Iso3(T)}`, `descended_map`, `linearised_chart`:
+  charts on the quotient by an automorphism and on isogeny lines, with
+  the induced Möbius map fitted and verified on every point.  A
+  canonicalisation bug surfaced (negation written as `(x, y) ↦ (x, −y)`
+  on a long-Weierstrass curve made the group closure diverge) and is
+  fixed.
+- `examples/exotic_charts.rs`, research note §14–§15.
+
+### Findings
+
+**F4 settles `m = 3` (§14.2).**  Gaudry's descended `S₄` solves in
+22–48 s at solving degree 14 on a 2200 × 2500 matrix; the one-involution
+system in 0.5–0.8 s at solving degree 7 on 740 × 820: **30–60× faster,
+half the solving degree**, same verdict on every target.  At `m = 2`
+the gap was 3–7×; it widens with `m`, as the halving of the relation's
+degree per point predicts for a solver governed by the solving degree.
+The first row of the thread where the coordinate change is worth more
+than a constant, and it is the ordinary one — one rational 2-torsion
+point, the sign frame, the product invariant.
+
+**Four representations beyond the `x`-line, two of them new lines
+(§15).**  The `y`-line of a `j = 0` curve (3-torsion, the multilinear
+relation of §13) and the `x²`-line of a `j = 1728` curve (a sign frame
+rational for every `a`, but degree 4 per point) are quotients by
+automorphisms; the 2-isogeny line with 4-torsion and the 3-isogeny line
+with 6-torsion are the 2-torsion sign frame of the isogenous curve
+pulled back — the engine reproduces the §10.1 relation to the
+coefficient with the collapse multiplied by the kernel order.  The
+recipe is uniform: a point map that does not act on `x`, a quotient
+line on which it does, the fit verified on every point, the engine for
+the rest.
+
+### Next step proposal
+
+Bring the F4 to the Koblitz side: the `F₂` systems of §8 are solved by
+the repo's Boolean F4/SAT; a comparison of solving degrees between the
+plain and the symmetrised systems at `n = 23`, `m = 3` (where the wall
+moved, §8.3) would say whether the 2-torsion frame's gain there is the
+same halving as over `F_p`.  On the representation side the list is
+complete for the groups the structural lemmas allow at `j = 0`,
+`j = 1728` and for rational torsion up to 6; a `j = 0` curve over
+`F_{p²}` with the full `E[3]` rational (the 3-torsion analogue of the
+Klein group) is the one untried case.
+
+### Commits made
+
+(see PR — `f4_fp`, `compare_arms` F4 columns, `Line::{X2, Iso2, Iso3}`,
+`exotic_charts`, research note §14–§15)
