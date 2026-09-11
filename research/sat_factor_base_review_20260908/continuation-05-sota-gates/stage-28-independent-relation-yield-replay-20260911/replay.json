@@ -1,0 +1,53 @@
+{
+  "arms": {
+    "natural": {
+      "hits": 163,
+      "targets": 256,
+      "verified_witnesses": 163
+    },
+    "planted_sat": {
+      "hits": 64,
+      "targets": 64,
+      "verified_witnesses": 64
+    },
+    "proven_unsat": {
+      "hits": 0,
+      "targets": 64,
+      "verified_witnesses": 0
+    }
+  },
+  "canonical_pair_oracle_replayed": true,
+  "checked_witnesses": 227,
+  "discrete_log_labels_used": false,
+  "factor_base": {
+    "abscissae": 4096,
+    "dimension": 12,
+    "factor_base_blake3": "9b5bb635f1c505cb871a9e8723d2b79109688606cc42323ab92e05b8beaf4b58",
+    "rational_points": 4281
+  },
+  "factor_base_materialization_replayed": true,
+  "field": {
+    "modulus_low_terms": [
+      0,
+      5
+    ],
+    "n": 23
+  },
+  "full_cost_gate_passed": false,
+  "implementation": "separate fixed-width finite-field and binary-curve implementation",
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "pair_oracle": {
+    "canonical_pair_transcript_blake3": "c7a8ab74fc4ed9ea3832244f99b92e87b75ea268ffbcc89fb72fc15cd069ccae",
+    "canonical_pairs": 9165621,
+    "duplicate_pair_sums": 3589773,
+    "enumerated_pairs": 9165621,
+    "unique_target_entries": 5575848
+  },
+  "rows": 384,
+  "schema": "koblitz_stage28_independent_relation_yield_replay.v1",
+  "scientific_measurement_admitted": "finite_public_synthetic_internal_replay_complete",
+  "status": "PASS",
+  "target_subgroup_enumerated": false,
+  "witness_curve_readdition_replayed": true
+}
