@@ -1246,7 +1246,8 @@ the count is sub-birthday (`κ ∝ n^{-1/6}`) and the cost per relation
 is a constant — and the constant, measured honestly in the same units
 as everything else in this note, places the crossover with rho near
 `2^{111}`.  That is the number to improve on: any change to the solver
-is scored by `C₃`, and the target is `13 · n^{1/6}`.
+is scored by `C₃`, and the target is `13 · n^{1/6}`.  §11.5 is the
+first round of that.
 
 ## References
 
