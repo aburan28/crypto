@@ -5,6 +5,7 @@
 **Data:**   `experiments/20_residual_walk_panel.json`, `experiments/20_residual_walk_panel.log`
 **Tables:** `python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json`
 **Baseline:** `experiments/20_residual_walk_baseline.json` (plain) and `experiments/20_residual_walk_tuned.json` (levers on), scored by `scripts/residual_walk_scoreboard.py` (§9)
+**Round 3:** `experiments/20_residual_walk_seeded.json`, `experiments/20_residual_walk_structure.json` (§10)
 
 > **Result in one line.**  Every residual-collision hybrid tested here
 > recovers the planted logarithm correctly, and every one of them needs
@@ -444,6 +445,9 @@ cargo run --release --example residual_walk_bench -- --baseline --json run.json
 python3 scripts/residual_walk_scoreboard.py run.json --baseline experiments/20_residual_walk_baseline.json
 cargo run --release --example residual_walk_bench -- --baseline --tuned --json tuned.json
 python3 scripts/residual_walk_scoreboard.py tuned.json --baseline experiments/20_residual_walk_tuned.json
+cargo run --release --example residual_walk_bench -- --seeded --json seeded.json      # §10.2
+cargo run --release --example residual_walk_bench -- --structure --json structure.json  # §10.3
+cargo run --release --example residual_walk_bench -- --bits 28 --j0 --aut --negation --diff-table --continue --strategies B,R
 ```
 
 The bench's single-instance mode also accepts `--strategies A,C1,R`,
@@ -597,7 +601,9 @@ For any change to the relation generators, the cells to beat at
 - Lowering `S` while `κ/κ_floor` stays at `≈ 1` is engineering: the
   levers above bound it at `≈ 19`.
 - **The result that would count as a non-generic advance is
-  `κ/κ_floor < 0.9` on a hybrid**, with `correct = yes` on every seed,
+  `κ_total/κ_floor < 0.9` on a hybrid**, where `κ_total` counts walked
+  *and* precomputed residuals and the floor is `√(2(B+1)/γ)` for the
+  fold order `γ` in use (§10.1), with `correct = yes` on every seed,
   zero relations failing verification, and zero trivial collisions
   counted as relations.  The scoreboard prints this as
   "count invariant beaten".
@@ -717,6 +723,172 @@ Plain rho, tuned with the same two applicable levers, sits at `1.2`
 against the hybrids' `19.7` and `39.4`: the factor between them is the
 `√(B+1) / √(π/4) ≈ 18×` count ratio, unchanged since round 1.  The next
 improvement that matters is not on this list; it has to lower `κ`.
+
+## 10. Round 3: trying to lower κ
+
+Round 2 left the count factor untouched by construction.  This round
+attacks it directly, with one candidate on each side of the generic
+line.
+
+### 10.1 What "lowering κ" can and cannot mean
+
+Every relation this module collects is a coincidence between two group
+elements whose decompositions over `{G, Q} ∪ F` are known: two walked
+residuals, a walked residual and a stored one, a residual and `±P_i`.
+Let `P` be the number of such elements a run has paid for — walked
+residuals *and* anything precomputed and stored to collide against —
+and let `γ` be the size of the classes the table is keyed on (1, 2 with
+the negation map, 6 with an order-3 automorphism).  In the generic
+group model the elements are formal linear combinations of `G, Q, P_i`
+with unknown logarithms, and two *distinct* combinations coincide with
+probability `1/n` (Shoup's argument: the difference is a non-zero
+linear form in the unknowns, which vanishes on at most a `1/n` fraction
+of assignments).  Folding by `γ` multiplies the pairs that can coincide
+by `γ`, so
+
+```
+  E[#relations]  ≤  γ · P(P−1)/(2n)      ⇒      P  ≥  √(2 n R / γ)   for R relations.
+```
+
+Hence, for `R = B + 1` independent relations,
+
+```
+  κ_total := P / √n  ≥  √(2(B+1)/γ),
+```
+
+which is exactly the floor the scoreboard prints — provided `P` counts
+*every* element with a known decomposition.  Two consequences shape
+what follows.
+
+1. **Precomputation cannot lower `κ_total`.**  A residual that is
+   stored before the walk collides exactly like one that is walked
+   (each pair coincides with probability `1/n`), so moving work from
+   the walk to a seed table changes which term of `γP²/(2n)` the
+   relations come from, not their number.  What it *can* do is shrink
+   the walked count `κ = samples/√n` — the quantity the scoreboard
+   printed until now — which is why the scoreboard now reports
+   `κ_total = (samples + seeded)/√n` and compares that to the floor.
+   The Semaev `S₃` oracle ("is `L ∈ ±F ± F`?") decides membership in
+   the same set of `2B²` elements algebraically instead of from memory;
+   in this accounting it is the same event with the same rate and a
+   higher cost per residual (`B` square roots instead of one lookup),
+   so it is not run.
+2. **Only a larger `γ` lowers the floor.**  Within generic operations
+   the only handle on the bound is the group of automorphisms the
+   fold can use — `±1` on every curve, and additionally `ζ` of order 3
+   on `j = 0` curves (order 2 on `j = 1728`).  A structural fold lowers
+   `κ` by `√3` for the hybrid *and* for rho, so it moves both sides of
+   the comparison and leaves their ratio alone; but it is the one
+   honest reduction of `κ` available, and it should be measured rather
+   than asserted.
+
+Both candidates are implemented behind flags (`seed_pairs`,
+`use_automorphism` on a `generate_j0_instance`), verified by the same
+scalar-multiplication check as every other relation, and measured on
+the round-2 protocol sizes (`n ≈ 2^24, 2^28`, `B = 256` unknowns, seeds
+1–3).
+
+### 10.2 Candidate 1 — seeding the table with every signed pair sum
+
+`--seeded`: the round-2 tuned mutation walk (negation map, difference
+table, no restart) with the table pre-filled with the classes of
+`±P_i ± P_j` for all `i < j` (`B(B−1)/2 = 32,640` pairs, two classes
+each under the negation map, two additions per pair, all counted in
+`setup`).  Seeds that coincide with each other or with `±P_k` yield
+factor-base-only relations at seeding time, as any collision would.
+
+| bits | B | dp | tag | variant | seeds | κ = samples/√n | seeded/√n | κ_total | κ floor | κ_total/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |
+|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 24 | 256 | 0 | B | neg+diff+cont+seed2 | 3 | 3.66 | 18.84 | 22.51 | 16.03 | 1.40 | 0.9 | 81.3% | 0.0% | 8.5% | 35.0 | 16.03 | 2.19 | 0.138 | 22.453 | 48 | yes |
+| 28 | 256 | 0 | B | neg+diff+cont+seed2 | 3 | 12.15 | 4.60 | 16.76 | 16.03 | 1.05 | 1.0 | 33.8% | 0.0% | 6.9% | 20.4 | 16.03 | 1.28 | 0.080 | 16.691 | 679 | yes |
+
+At 28 bits the walked count drops from `17.09` to `12.15` — the walk
+stops `29%` earlier — and the total count is `16.76` against the
+unseeded `16.28`: the `4.60·√n` seeds replaced walked residuals one for
+one, `S` is unchanged (`20.4` vs `19.7`), and `κ_total/κ_floor` is
+`1.05` vs `1.02`.  At 24 bits the seed table alone (`18.8·√n`) already
+exceeds the `16.0·√n` residuals the birthday bound needs, so the run
+is over-seeded: the walk finishes after `3.7·√n` residuals but the
+total is `22.5·√n` and `S` regresses to `35.0`.  Both rows are what
+§10.1 predicts to the second digit.  A seed is not a cheaper residual;
+it is the same residual paid for earlier.
+
+### 10.3 Candidate 2 — folding by the `j = 0` automorphism
+
+`--structure`: random `j = 0` curves of prime order (`y² = x³ + b`,
+`p ≡ 1 mod 3`, `n ≡ 1 mod 3`), the automorphism `ζ(x, y) = (ωx, y) = λ·P`
+recovered and checked at generation, a factor base of `256` orbit
+representatives (smallest canonical `x`, one point per `⟨±1, ζ⟩`-orbit),
+and the three one-op strategies with every round-2 lever, run twice on
+the same instances: with negation folding only (`j0`, the control) and
+with the six-element fold (`aut6+j0`).  Under the fold a table hit
+`L(s) = f·C`, `L(s') = f'·C` gives `f'·L(s) = f·L(s')`, a relation whose
+coefficients are `λ`-powers; it is stored in factored form and verified
+with two full-size scalar multiplications (`Relation::scaled`).
+
+| bits | B | dp | tag | variant | seeds | κ = samples/√n | seeded/√n | κ_total | κ floor | κ_total/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |
+|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 24 | 256 | 0 | B | neg+diff+cont+aut6+j0 | 3 | 9.30 | 0.00 | 9.30 | 9.26 | 1.00 | 1.0 | 29.6% | 0.0% | 42.6% | 33.5 | 9.26 | 3.62 | 0.131 | 9.189 | 114 | yes |
+| 24 | 256 | 0 | B | neg+diff+cont+j0 | 3 | 16.15 | 0.00 | 16.15 | 16.03 | 1.01 | 1.0 | 31.9% | 0.0% | 16.0% | 31.0 | 16.03 | 1.94 | 0.121 | 16.009 | 209 | yes |
+| 24 | 256 | 0 | C1 | neg+seg512+aut6+j0 | 3 | 9.47 | 0.00 | 9.47 | 9.26 | 1.02 | 1.5 | 6.2% | 36.7% | 39.5% | 83.2 | 9.26 | 8.99 | 0.324 | 9.393 | 0 | yes |
+| 24 | 256 | 0 | C1 | neg+seg512+j0 | 3 | 16.16 | 0.00 | 16.16 | 16.03 | 1.01 | 1.3 | 5.8% | 40.6% | 29.0% | 88.8 | 16.03 | 5.54 | 0.346 | 16.083 | 0 | yes |
+| 24 | 256 | 0 | R | neg+seg512+aut6+j0 | 3 | 0.63 | 0.00 | 0.63 | 0.51 | 1.23 | 1.2 | 39.2% | 12.0% | 4.0% | 1.6 | 0.51 | 3.17 | 1.347 | 0.629 | 0 | yes |
+| 24 | 256 | 0 | R | neg+seg512+j0 | 3 | 1.16 | 0.00 | 1.16 | 0.89 | 1.31 | 1.1 | 28.3% | 12.9% | 1.3% | 2.3 | 0.89 | 2.55 | 1.928 | 1.159 | 0 | yes |
+| 28 | 256 | 0 | B | neg+diff+cont+aut6+j0 | 3 | 9.47 | 0.00 | 9.47 | 9.26 | 1.02 | 1.0 | 14.8% | 0.0% | 25.1% | 15.7 | 9.26 | 1.70 | 0.061 | 9.411 | 521 | yes |
+| 28 | 256 | 0 | B | neg+diff+cont+j0 | 3 | 17.09 | 0.00 | 17.09 | 16.03 | 1.07 | 1.0 | 11.2% | 0.0% | 6.7% | 20.8 | 16.03 | 1.30 | 0.081 | 17.005 | 927 | yes |
+| 28 | 256 | 0 | C1 | neg+seg512+aut6+j0 | 3 | 9.41 | 0.00 | 9.41 | 9.26 | 1.02 | 1.2 | 4.1% | 30.4% | 31.9% | 34.9 | 9.26 | 3.77 | 0.136 | 9.387 | 0 | yes |
+| 28 | 256 | 0 | C1 | neg+seg512+j0 | 3 | 16.76 | 0.00 | 16.76 | 16.03 | 1.05 | 1.2 | 3.5% | 27.9% | 19.2% | 40.7 | 16.03 | 2.54 | 0.158 | 16.739 | 0 | yes |
+| 28 | 256 | 0 | R | neg+seg512+aut6+j0 | 3 | 0.26 | 0.00 | 0.26 | 0.51 | 0.51 | 1.2 | 36.3% | 5.7% | 2.3% | 0.5 | 0.51 | 1.03 | 0.528 | 0.263 | 0 | yes |
+| 28 | 256 | 0 | R | neg+seg512+j0 | 3 | 0.58 | 0.00 | 0.58 | 0.89 | 0.65 | 1.2 | 23.3% | 6.3% | 0.7% | 0.9 | 0.89 | 1.02 | 0.900 | 0.577 | 0 | yes |
+
+Per row at 28 bits (three seeds):
+
+| strategy | κ control | κ folded | ratio | floor ratio | κ/floor control → folded | S control → folded |
+|:--|---:|---:|---:|---:|:--|:--|
+| B  | 17.09 | 9.47 | 1.80 | 1.73 | 1.07 → 1.02 | 20.8 → 15.7 (1.32×) |
+| C1 | 16.76 | 9.41 | 1.78 | 1.73 | 1.05 → 1.02 | 40.7 → 34.9 (1.17×) |
+| R  | 0.58  | 0.26 | 2.2  | 1.73 | 0.65 → 0.51 | 0.9 → 0.5 (single-collision spread) |
+
+The fold lowers `κ` by the predicted `√3` on every strategy and lowers
+the floor by exactly the same factor, so `κ/κ_floor` stays at `1.0`:
+this is the count moving *with* its bound, not below it.  `S` improves
+less than `κ` because the folded relations are dearer to verify
+(`25–32%` of the budget, from `7–19%`) and the difference-table setup
+is a larger share of a smaller total.  Rho folds too — `0.9 → 0.5` —
+so the hybrid-to-rho ratio is where it was, within rho's spread.
+
+### 10.4 Where this leaves κ
+
+| what was tried | κ (walked) | κ_total | κ_total / floor | verdict |
+|:--|---:|---:|---:|:--|
+| round-2 tuned B, 28 bits | 16.28 | 16.28 | 1.02 | reference |
+| + signed-pair seeding | 12.15 | 16.76 | 1.05 | count relabelled, not reduced |
+| `j = 0` control (negation only) | 17.09 | 17.09 | 1.07 | reference on the structured curve |
+| `j = 0` with 6-fold | 9.47 | 9.47 | 1.02 | κ ÷ 1.8, floor ÷ 1.73; rho ÷ 1.8 as well |
+
+Three statements now stand on measurement rather than argument:
+
+1. **Precomputation cannot lower `κ_total`.**  Seeding traded walked
+   residuals for stored ones one for one and left `S` unchanged; the
+   scoreboard now counts seeds, and the only thing the old walked-only
+   `κ` would have "shown" is that the walk stopped early.
+2. **Structure lowers `κ` only by lowering the floor.**  The `j = 0`
+   fold is the sole honest reduction of `κ` found — `√3`, as the
+   automorphism group predicts — and it applies to plain rho in the
+   same measure.  The generic argument of §10.1 says this is the only
+   kind of reduction available to anything that adds, negates and
+   compares points: the automorphism group is the whole handle.
+3. **The `√(B+1)` gap to rho is not a property of the walk.**  It is
+   the number of unknowns the relations have to determine, and every
+   lever, structural or generic, has left `κ_total/κ_floor` between
+   `1.00` and `1.07`.  Anything that lowers it below `0.9` on a hybrid
+   at fixed `B` — the target of §9.6, now stated in `κ_total` with a
+   fold-aware floor — has to make two *distinct* formal combinations
+   coincide with probability above `γ/n`, which is to say it has to
+   compute something about the coordinates that the group law does
+   not.  The summation-polynomial oracles elsewhere in this repository
+   are the only candidates of that kind on prime fields, and at these
+   sizes they cost more per residual than they save in count (§6).
 
 ## References
 

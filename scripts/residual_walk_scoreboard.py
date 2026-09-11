@@ -63,6 +63,12 @@ def variant(r):
         parts.append(f"seg{r['segment_len']}")
     if r.get("continue_after_collision") and tag == "B":
         parts.append("cont")
+    if r.get("fold_order", 1) == 6:
+        parts.append("aut6")
+    if r.get("seed_pairs") or r.get("seeded_points"):
+        parts.append("seed2")
+    if r.get("j_zero"):
+        parts.append("j0")
     return "+".join(parts) or "plain"
 
 
@@ -76,10 +82,11 @@ def cells(rows):
         sq = [math.sqrt(r["n"]) for r in g]
         n_ops = [r["total_ops"] for r in g]
         kappa_floor = math.sqrt(math.pi / 2) if tag == "R" else math.sqrt(2 * (fb + 1))
-        # The negation map halves the space every residual is compared
-        # against, so the birthday floor drops by sqrt(2).
-        if g[0].get("negation_map"):
-            kappa_floor /= math.sqrt(2)
+        # Folding by a group of order gamma (2 for the negation map, 6
+        # with the j = 0 automorphism) divides the space every residual
+        # is compared against, so the birthday floor drops by sqrt(gamma).
+        gamma = g[0].get("fold_order") or (2 if g[0].get("negation_map") else 1)
+        kappa_floor /= math.sqrt(gamma)
         out[key] = {
             "bits": bits,
             "B": fb,
@@ -88,6 +95,10 @@ def cells(rows):
             "variant": var,
             "seeds": len(g),
             "kappa": mean(r["samples"] / s for r, s in zip(g, sq)),
+            # Seeded residuals have a known decomposition and collide like
+            # walked ones; the honest count includes them.
+            "kappa_total": mean((r["samples"] + r.get("seeded_points", 0)) / s for r, s in zip(g, sq)),
+            "seeded_over_sqrt_n": mean(r.get("seeded_points", 0) / s for r, s in zip(g, sq)),
             "kappa_floor": kappa_floor,
             "c": mean(r["walk_ops"] / r["samples"] for r in g),
             "setup_frac": mean(r["setup_ops"] / t for r, t in zip(g, n_ops)),
@@ -121,13 +132,14 @@ def fmt(v, d=2):
 
 
 def print_scoreboard(c):
-    print("| bits | B | dp | tag | variant | seeds | κ = samples/√n | κ floor | κ/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
-    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
+    print("| bits | B | dp | tag | variant | seeds | κ = samples/√n | seeded/√n | κ_total | κ floor | κ_total/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
+    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
     for k in sorted(c, key=sort_key):
         x = c[k]
-        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
             x["bits"], x["B"], x["dp"], x["tag"], x["variant"], x["seeds"],
-            fmt(x["kappa"]), fmt(x["kappa_floor"]), fmt(x["kappa"] / x["kappa_floor"]),
+            fmt(x["kappa"]), fmt(x["seeded_over_sqrt_n"]), fmt(x["kappa_total"]),
+            fmt(x["kappa_floor"]), fmt(x["kappa_total"] / x["kappa_floor"]),
             fmt(x["c"], 1),
             fmt(100 * x["setup_frac"], 1) + "%", fmt(100 * x["replay_frac"], 1) + "%", fmt(100 * x["verify_frac"], 1) + "%",
             fmt(x["S"], 1), fmt(x["S_floor"], 2), fmt(x["S"] / x["S_floor"], 2),
@@ -174,20 +186,26 @@ def compare(run, base, tolerance):
     print(f"Comparison against baseline (tolerance {tolerance:.0%}):\n")
     print("A run cell is matched to the baseline cell with the same (bits, B, dp, tag); "
           "the baseline variant is used when the run's variant is absent from it. "
-          "κ is compared as κ/κ_floor so the negation map's √2 is not mistaken for a beaten count.\n")
-    print("| bits | B | dp | tag | variant | S baseline | S run | improvement (base/run) | κ/floor baseline | κ/floor run | ratio | count invariant beaten? | correct | verdict |")
+          "κ_total (walked + seeded residuals) is compared as κ_total/κ_floor, with the floor "
+          "adjusted for the fold order, so neither folding nor precomputation is mistaken for a beaten count.\n")
+    print("| bits | B | dp | tag | variant | S baseline | S run | improvement (base/run) | κ_total/floor baseline | κ_total/floor run | ratio | count invariant beaten? | correct | verdict |")
     print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|:--|:--|:--|")
     regressions = 0
     for k in sorted(run, key=sort_key):
         x = run[k]
         b = base.get(k) or base.get(k[:4] + ("plain",))
         if b is None:
+            # Fall back to any baseline cell with the same (bits, B, dp, tag);
+            # prefer the one with the fewest levers.
+            candidates = [v for kk, v in base.items() if kk[:4] == k[:4]]
+            b = min(candidates, key=lambda v: len(v["variant"]), default=None)
+        if b is None:
             print("| {} | {} | {} | {} | {} | - | {} | new cell | - | {} | - | - | {} | - |".format(
                 x["bits"], x["B"], x["dp"], x["tag"], x["variant"], fmt(x["S"], 1),
-                fmt(x["kappa"] / x["kappa_floor"]), fmt(x["correct"])))
+                fmt(x["kappa_total"] / x["kappa_floor"]), fmt(x["correct"])))
             continue
         imp = b["S"] / x["S"]
-        kr = (x["kappa"] / x["kappa_floor"]) / (b["kappa"] / b["kappa_floor"])
+        kr = (x["kappa_total"] / x["kappa_floor"]) / (b["kappa_total"] / b["kappa_floor"])
         # Plain rho is a single-collision process whose first-collision
         # time has a wide spread; its kappa is the reference, not a target.
         beaten = x["tag"] != "R" and kr < 1 - tolerance and x["correct"]
@@ -203,7 +221,7 @@ def compare(run, base, tolerance):
             verdict = "unchanged"
         print("| {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} | {} | {} | {} | {} |".format(
             x["bits"], x["B"], x["dp"], x["tag"], x["variant"], fmt(b["S"], 1), fmt(x["S"], 1), fmt(imp),
-            fmt(b["kappa"] / b["kappa_floor"]), fmt(x["kappa"] / x["kappa_floor"]), fmt(kr),
+            fmt(b["kappa_total"] / b["kappa_floor"]), fmt(x["kappa_total"] / x["kappa_floor"]), fmt(kr),
             "YES" if beaten else "no", fmt(x["correct"]), verdict))
     print()
     return regressions
