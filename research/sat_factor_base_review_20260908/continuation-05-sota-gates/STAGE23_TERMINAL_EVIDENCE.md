@@ -61,6 +61,16 @@ be executed to authenticate their own bundle, and do not replace the
 independently pinned verifier. The trusted verifier treats every bundled source
 and verifier file as inert data.
 
+The first independently reviewed publication of this trusted verifier is
+commit `f977ab014a5ba00aa6084542e2b09cc766a20092`. Its wrapper SHA-256 is
+`c3a2431c7d6c99d0e9efcf13b441d00e86937220bd9a883faa42c47f12026da9`,
+and its core SHA-256 is
+`307c4933fc18fdbd2385224a6eab78e6283509c765dece45fde6a07ca91310bb`.
+The reviewed successor-03 bundle seal is
+`d2b096d39b9158e8da844d89c58732b83dfb9a38ebe08df4f1229a88a581ca5c`;
+its compressed publication SHA-256 is
+`7886a767b0fe0f3372bd034429e3616632c40ea1781de835602fa08b72e9dd44`.
+
 The typed external-tool map retains Python, Cargo, and rustc identities for
 command reconstruction. Each mapped path, size, and SHA-256 must equal the
 corresponding immutable entry in the archived source binding; the tool map
