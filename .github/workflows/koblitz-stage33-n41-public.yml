@@ -1,0 +1,72 @@
+name: Koblitz Stage 33 n41 public unknown scalar
+
+on:
+  pull_request:
+    paths:
+      - "src/bin/ic/workflow.rs"
+      - "tests/ic_framework.rs"
+      - "scripts/run_koblitz_stage33_n41_unknown_scalar.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-unknown-params.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE33_N41_PUBLIC_UNKNOWN_SCALAR.md"
+      - ".github/workflows/koblitz-stage33-n41-public.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate the public-target boundary and workflow label
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage33_n41_unknown_scalar.py
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py self-test
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          RUSTFLAGS=-Awarnings cargo test --locked --test ic_framework \
+            workflow_runs_in_stages_and_resumes_without_redoing_work -- --exact
+          rm Cargo.lock
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n41-public-unknown-scalar:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean dependency acquisition and four-core build
+        run: |
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage33-build" \
+            --jobs 4 \
+            --timeout 3000
+      - name: Run factor-base discovery, logs, five public targets, and rho on one CPU
+        run: |
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py run \
+            --build "$RUNNER_TEMP/stage33-build" \
+            --output "$RUNNER_TEMP/stage33-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py verify \
+            --build "$RUNNER_TEMP/stage33-build" \
+            --output "$RUNNER_TEMP/stage33-run" \
+            > "$RUNNER_TEMP/stage33-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage33-n41-public-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage33-build
+            ${{ runner.temp }}/stage33-run
+            ${{ runner.temp }}/stage33-verification.json
