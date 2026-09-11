@@ -2,8 +2,8 @@
 
 The standalone ic executable inspects elliptic-curve parameters and runs
 bounded, reproducible index-calculus experiments on internally generated
-known-answer Koblitz instances. Imported points are used only for mathematical
-validation.
+known-answer or public hash-derived Koblitz targets. Imported parameter-file
+points are used only for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
@@ -50,6 +50,19 @@ The default run uses K_0 over GF(2^9) and known logarithm 53. The solver
 constructs the target from the declared known answer, then checks both the
 recovered value and the group identity. No public point file can be passed
 to the run command.
+
+The staged `workflow` command also accepts a scalar-blind public target:
+
+```json
+{"targets":[{"public_hash_seed":29}]}
+```
+
+This form hashes the curve identity, seed, and counter to an abscissa,
+chooses a lift from the next digest bit, and applies the public cofactor.
+It constructs and records no target scalar. Both individual descent and
+the signed-Frobenius rho baseline accept a recovered value only after
+checking `[d]G = Q`. The older `known_log` and `random_seed` forms retain
+their expected-scalar check as an additional known-answer control.
 
 The following knobs are recorded in each run report:
 

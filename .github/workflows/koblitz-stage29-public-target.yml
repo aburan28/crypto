@@ -1,0 +1,26 @@
+name: Koblitz Stage 29 public unknown target
+
+on:
+  pull_request:
+    paths:
+      - "src/bin/ic/workflow.rs"
+      - "tests/ic_framework.rs"
+      - "docs/ic/README.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE29_PUBLIC_TARGET.md"
+      - ".github/workflows/koblitz-stage29-public-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-target-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test known and scalar-blind workflow targets
+        run: |
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          cargo test --release --locked --test ic_framework -- --test-threads=1
