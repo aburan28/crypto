@@ -245,6 +245,14 @@ class Stage21ControlPlaneTests(unittest.TestCase):
             with self.assertRaisesRegex(bridge.Stage21Error, "hard-linked"):
                 bridge.regular_bytes(original, "hard-link fixture")
 
+    def test_tool_identity_preserves_multicall_shim_basename(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            shim = Path(directory) / "python-shim"
+            shim.symlink_to(Path(sys.executable).resolve())
+            identity = bridge.tool_identity(shim, "shim fixture")
+            self.assertEqual(identity["path"], str(shim.absolute()))
+            self.assertEqual(identity["sha256"], bridge.sha256_bytes(Path(sys.executable).resolve().read_bytes()))
+
     def test_blake3_vectors_and_derivable_payload_tampering(self) -> None:
         self.assertEqual(
             bridge.blake3_hex(b""),

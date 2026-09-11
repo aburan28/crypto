@@ -58,6 +58,9 @@ jobs:
               for task_stderr in sorted((root / "stage21-run/tasks").glob("*/stderr")):
                   print(f"--- {task_stderr.relative_to(root)} ---")
                   print(task_stderr.read_text())
+                  task_stdout = task_stderr.with_name("stdout")
+                  print(f"--- {task_stdout.relative_to(root)} ---")
+                  print(task_stdout.read_text())
               raise SystemExit(
                   "metered Stage-21 smoke failed: "
                   f"returncode={metrics['returncode']} timed_out={metrics['timed_out']} "
