@@ -1511,30 +1511,14 @@ fn solve_at_degree(
         standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
     let mut nfs = NormalForms::new(&mat, &pivots, &std_index, dim, p);
     // Multiplication matrix of e₁: column b ↦ NF(e₁ · b).
-    let mut m_e1 = vec![vec![0u64; dim]; dim];
-    let mut ok = true;
-    for (bi, &bc) in standard.iter().enumerate() {
-        let m = cols[bc];
-        let shifted = [m[0] + 1, m[1], m[2]];
-        let Some(&sc) = col_index.get(&shifted) else {
-            ok = false;
-            break;
-        };
-        let Some(nf) = nfs.nf(sc, muls) else {
-            ok = false;
-            break;
-        };
-        for (ri, &val) in nf.iter().enumerate() {
-            m_e1[ri][bi] = val;
-        }
-    }
+    let m_e1 = mult_matrix(&cols, &col_index, &standard, [1, 0, 0], &mut nfs, muls);
     stats.macaulay_muls += *muls - before;
-    if !ok {
+    let Some(m_e1) = m_e1 else {
         if debug {
             eprintln!("  degree {degree}: normal form of e1·b unavailable");
         }
         return None;
-    }
+    };
     // Eigenvalues in F_p from the characteristic polynomial.
     let cp = charpoly_mod_p(&m_e1, p, muls);
     let ring = PolyRing::new(p);
@@ -1585,13 +1569,35 @@ fn solve_at_degree(
     if debug {
         eprintln!("  charpoly degree {} roots {:?}", cp.0.len() - 1, lambdas);
     }
+    let mut m_other: [Option<Vec<Vec<u64>>>; 2] = [None, None];
     for lam in lambdas {
-        let ker = eigenvectors_mod_p(&mt, lam, p, muls);
-        if ker.len() != 1 {
-            stats.degenerate_eigenspaces += 1;
-        }
+        let mut ker = eigenvectors_mod_p(&mt, lam, p, muls);
         if debug {
             eprintln!("  λ = {lam}: kernel dim {}", ker.len());
+        }
+        if ker.len() > 1 {
+            // Two or more solutions share e₁ = λ (or the point is not
+            // reduced): the kernel basis vectors are not evaluation
+            // functionals.  Split the eigenspace by the commuting
+            // operators e₂ and then e₃, restricted to it.
+            stats.degenerate_eigenspaces += 1;
+            for (k, var) in [[0u8, 1, 0], [0, 0, 1]].into_iter().enumerate() {
+                if ker.len() <= 1 {
+                    break;
+                }
+                if m_other[k].is_none() {
+                    let before = *muls;
+                    m_other[k] = mult_matrix(&cols, &col_index, &standard, var, &mut nfs, muls);
+                    stats.macaulay_muls += *muls - before;
+                }
+                let Some(mv) = &m_other[k] else {
+                    break;
+                };
+                ker = split_eigenspace(&ker, mv, p, rng, muls);
+                if debug {
+                    eprintln!("    split by e{}: {} vectors", k + 2, ker.len());
+                }
+            }
         }
         for w in &ker {
             if w[i0] == 0 {
@@ -1754,6 +1760,112 @@ impl<'a> NormalForms<'a> {
         self.memo[c] = Some(v.clone());
         Some(v)
     }
+}
+
+/// Multiplication matrix of the variable `var` on the quotient:
+/// column `b` ↦ `NF(var · b)`, `None` when some product's normal form
+/// is unavailable at this degree.
+fn mult_matrix(
+    cols: &[[u8; 3]],
+    col_index: &HashMap<[u8; 3], usize>,
+    standard: &[usize],
+    var: [u8; 3],
+    nfs: &mut NormalForms,
+    muls: &mut u64,
+) -> Option<Vec<Vec<u64>>> {
+    let dim = standard.len();
+    let mut m = vec![vec![0u64; dim]; dim];
+    for (bi, &bc) in standard.iter().enumerate() {
+        let b = cols[bc];
+        let shifted = [b[0] + var[0], b[1] + var[1], b[2] + var[2]];
+        let &sc = col_index.get(&shifted)?;
+        let nf = nfs.nf(sc, muls)?;
+        for (ri, &val) in nf.iter().enumerate() {
+            m[ri][bi] = val;
+        }
+    }
+    Some(m)
+}
+
+/// Given a basis `w` of an eigenspace of `M_{e₁}ᵀ` (row functionals)
+/// and another multiplication matrix `mv` (commuting with `M_{e₁}`),
+/// return the eigenvectors of `mv`ᵀ restricted to that space: the
+/// space is invariant, so `wᵢ · mv = Σⱼ aᵢⱼ wⱼ`, and the left
+/// eigenvectors of the small matrix `a` combine the `wⱼ` into
+/// functionals that are simultaneous eigenvectors.  Vectors of an
+/// eigenvalue whose kernel is still degenerate are returned as they
+/// are (for a further split by the next variable).
+fn split_eigenspace(
+    w: &[Vec<u64>],
+    mv: &[Vec<u64>],
+    p: u64,
+    rng: &mut StdRng,
+    muls: &mut u64,
+) -> Vec<Vec<u64>> {
+    let k = w.len();
+    let dim = mv.len();
+    // y_i = w_i · mv.
+    let mut y = vec![vec![0u64; dim]; k];
+    for i in 0..k {
+        for l in 0..dim {
+            if w[i][l] == 0 {
+                continue;
+            }
+            for j in 0..dim {
+                if mv[l][j] != 0 {
+                    y[i][j] = am(y[i][j], mm(w[i][l], mv[l][j], p), p);
+                    *muls += 1;
+                }
+            }
+        }
+    }
+    // Coefficients a_{ij} with y_i = Σ_j a_{ij} w_j: solve [Wᵀ | y_iᵀ].
+    let mut a = vec![vec![0u64; k]; k];
+    for i in 0..k {
+        let mut sys: Vec<Vec<u64>> = (0..dim)
+            .map(|r| {
+                let mut row: Vec<u64> = (0..k).map(|j| w[j][r]).collect();
+                row.push(y[i][r]);
+                row
+            })
+            .collect();
+        let pivots = rref_mod_p(&mut sys, p, muls);
+        for (r, &pc) in pivots.iter().enumerate() {
+            if pc < k {
+                a[i][pc] = sys[r][k];
+            }
+        }
+    }
+    // Left eigenvectors of a: kernel of (aᵀ − μ I).
+    let mut at = vec![vec![0u64; k]; k];
+    for i in 0..k {
+        for j in 0..k {
+            at[j][i] = a[i][j];
+        }
+    }
+    let cp = charpoly_mod_p(&a, p, muls);
+    let ring = PolyRing::new(p);
+    let mus = ring.roots(&cp, rng);
+    *muls += ring.muls.get();
+    let mut out = Vec::new();
+    for mu in mus {
+        for v in eigenvectors_mod_p(&at, mu, p, muls) {
+            let mut u = vec![0u64; dim];
+            for j in 0..k {
+                if v[j] == 0 {
+                    continue;
+                }
+                for r in 0..dim {
+                    if w[j][r] != 0 {
+                        u[r] = am(u[r], mm(v[j], w[j][r], p), p);
+                        *muls += 1;
+                    }
+                }
+            }
+            out.push(u);
+        }
+    }
+    out
 }
 
 /// Triple oracle built on [`solve_s4_subspace`]: decompositions of `R`
