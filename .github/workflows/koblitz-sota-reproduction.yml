@@ -204,13 +204,22 @@ jobs:
         run: |
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/test_stage19_final_archive.py -v
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage19_final_archive.py > /tmp/stage-19-amendment-03-final-verification.json
-      - name: Validate isolated PDP accounting and archived composition
+      - name: Reverify legacy Stage 13 Magma runner at its pinned meter
         run: |
-          python3 scripts/test_run_koblitz_pdp_matrix.py -v
+          legacy_stage13_dir="$RUNNER_TEMP/koblitz-stage13-meter-62be8cf6"
+          cleanup_legacy_stage13() {
+            git -C "$GITHUB_WORKSPACE" worktree remove --force "$legacy_stage13_dir" >/dev/null 2>&1 || true
+          }
+          trap cleanup_legacy_stage13 EXIT
+          git worktree add --detach "$legacy_stage13_dir" 62be8cf6dfdaf1aec54e0a8f290ed55b822229a0
+          cd "$legacy_stage13_dir"
           python3 scripts/test_koblitz_external_magma.py -v
           python3 scripts/run_koblitz_external_magma.py --self-test
           python3 scripts/run_koblitz_external_magma.py --dry-run-manifest > /tmp/external-magma-dry-run.json
           python3 -c 'import json; d=json.load(open("/tmp/external-magma-dry-run.json")); assert d["schema"]=="koblitz_external_magma_dry_run_manifest.v1" and d["expected_tasks"]==20 and len(d["tasks"])==20 and d["task_order"]=="seed-major"'
+      - name: Validate isolated PDP accounting and archived composition
+        run: |
+          python3 scripts/test_run_koblitz_pdp_matrix.py -v
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --self-test
           python3 research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage15_magma_calculator.py --expected research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-15-magma-calculator-20260909/stage-15-summary.json > /tmp/stage-15-summary.json
