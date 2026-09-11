@@ -17,6 +17,10 @@ measured a 1.17% benchmark gain and 1.14% collection gain from direct reduction.
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records measured
 instruction-pipe and memory ceilings for this GPU and shows why one card
 cannot reach 15–20 B iterations/s with any known arithmetic.
+[FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
+measures the generated field circuits as 6-input lookup tables, and finds one
+FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
+and about 5–10x better per watt.
 
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
@@ -663,6 +667,8 @@ make bench        # throughput on the challenge curve
 make gpu          # CUDA client (needs nvcc)
 make check-cuda   # type-check host and device with clang, no GPU or nvcc needed
 make ptx          # device compile + ptxas report, no GPU needed
+make verilog      # emit the FPGA datapath from the same IR, no toolchain needed
+make check-verilog # simulate the emitted RTL against the field model
 ```
 
 Build-time knobs: `BATCH` (walks batched per inversion, default 32), `THREADS`
