@@ -46,12 +46,18 @@ fn main() {
     if flag("--no-direct") {
         opts.direct_x = false;
     }
+    if flag("--no-x") {
+        opts.chained_x = false;
+    }
     if flag("--whole-group") {
         opts.targets_in_subgroup = false;
     }
     let direct_all = flag("--direct-all");
     if let Some(b) = value("--node-budget") {
         opts.node_budget = b;
+    }
+    if let Some(d) = value("--f4-degree") {
+        opts.f4_max_degree = d as u32;
     }
     if let Some(c) = value("--conflict-budget") {
         opts.conflict_budget = c as u64;

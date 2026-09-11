@@ -7540,3 +7540,91 @@ rational.
 
 (see PR — `f4_fp`, `compare_arms` F4 columns, `Line::{X2, Iso2, Iso3}`,
 `exotic_charts`, research note §14–§15)
+
+
+## 2026-09-11 (autolab run, eighth session on exotic coordinates)
+
+### Task picked
+
+The seventh session's next step: bring the solver question to the
+Koblitz side and compare the plain and symmetrised `F₂` systems by
+their algebra rather than by a wall-clock number taken at whatever
+settings the engine happened to ship with.
+
+### Work done
+
+- Read `koblitz_groebner::reduce_system` again instead of trusting §8's
+  account of it.  The `MatrixF4` cap is an **absolute** Macaulay degree:
+  each node sets `base = max(residual degree, 2)` and builds matrices
+  at `base ..= max(cap, base)`.  §8's claim — that the shipped cap of 3
+  gave the degree-4 symmetrised systems no algebra while the degree-3
+  `x`-chained ones got a round — is wrong twice over.  `max(cap, base)`
+  builds the symmetrised system's degree-4 matrix regardless; and
+  raising the cap to 4 gives the *`x`-chained* system the extra round,
+  not the symmetrised one.
+- Made the algebra measurable rather than inferred: `SolveStats` and
+  `OracleOutcome` carry `max_degree_built` and `oversize`, `ArmRun`
+  aggregates them, and `format_paired` prints a `built` column that
+  reads `d/k!` when `k` targets had a matrix refused for size.
+  `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS` override the shipped caps.
+- `PairedOptions::chained_x` (`--no-x`) runs the symmetrised arm alone,
+  so `n = 17` and `n = 23` can be measured at a raised cap without
+  paying for the `x`-chained arm's blow-up (which is hours there).
+- Sweep: both arms at caps 3, 4, 5 on `K₀/F₂¹⁵`, `K₁/F₂¹⁵`, `K₁/F₂¹⁷`,
+  `K₁/F₂²³`, size caps at 60 000 × 300 000.  Research note §17, and a
+  pointer from §8 to it.
+
+### Findings
+
+**The symmetrised system is the smaller Macaulay problem, not the
+larger one (§17).**  At cap 5 on `K₀/F₂¹⁵` the `built` column reports
+`4/1!` for the 30-variable `x`-chained arm — its degree-5 matrix is
+refused even at three and seven and a half times the shipped caps —
+and `5` for the 13-variable symmetrised arm.  §8 had the direction of
+this backwards.
+
+**Extra Macaulay degree is priced by variable count, not by frame.**
+Cap 3 → 4 divides the `x`-chained arm's splits by 25 and multiplies its
+time by 38; the same step on the symmetrised arm at 13 variables
+divides splits by 15 and multiplies time by 1.15.  But the symmetrised
+arm at 25 variables (`n = 17`) pays 49× for its cap 4 → 5.  The frame
+is not what makes the algebra cheap; the size is.
+
+**Comparing at equal caps is not comparing at equal algebra.**  The
+fair pairs are (`x` at cap `d`, symmetrised at cap `d + 1`).  Along
+that diagonal the symmetrised system wins by ×300 and ×4 600 at
+`K₀/F₂¹⁵`, ×640 and ×6 200 at `K₁/F₂¹⁵`, and loses by ×0.2 at
+`K₁/F₂¹⁷`.  §8's `n = 17` verdict survives; its explanation does not.
+What sinks the symmetrised system there is split count (3 219 against
+49), not matrix size — the dimension-9 subspace gives every target
+around a hundred decompositions and the splitter pays for each.
+
+**`n = 23` is unchanged and is the row that matters.**  The
+59-variable `x`-chained system is inconclusive on all three targets
+within a 3 000-split budget; the symmetrised one finds two of three in
+5.7 s, and 15 splits at cap 4.
+
+### Process notes
+
+- A background sweep script that `cd`s into the working tree writes its
+  completion marker there.  Two stray marker files landed in the repo
+  before the pattern was caught; write markers by absolute path into
+  the scratchpad.
+- The container restarted mid-sweep and took three waiting tasks and
+  two running benches with it.  Long sweeps want their results written
+  per-cell as they complete, which these did — only the last cell was
+  lost and had to be re-run.
+
+### Next step proposal
+
+The `n = 17` loss is a statement about the repo's splitting heuristic
+(lowest free variable) as much as about the systems.  The symmetrised
+unknowns come in Frobenius orbits; a splitter that chose its variable
+by that structure is the obvious next thing to build, and `n = 17` is
+the instance that would show whether it helps.  Second: the `built`
+column now makes it cheap to find each system's actual degree ceiling
+under the engine, which is the number the scaling target needs.
+
+### Commits made
+
+(see PR — `built` column and `--no-x`, research note §17, §8 pointer)
