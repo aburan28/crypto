@@ -25,10 +25,10 @@ class PackedAuditCountTests(unittest.TestCase):
         exec(compile(ast.Module(body=[helper], type_ignores=[]), str(path), 'exec'), namespace)
         cls.check = staticmethod(namespace['checkScalarCounts'])
 
-    def raw(self, workers=192512, weight=0):
-        walks = workers * 32
+    def raw(self, workers=192512, weight=0, batch=32):
+        walks = workers * batch
         expected = walks * 1024 * 32
-        return (f'backend cuda-packed131: {workers} threads x 32 slots x 1 lanes = {walks} walks, '
+        return (f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {walks} walks, '
                 f'dp weight {weight}, 1024 steps per launch\n'
                 'packed direct reduction: 0\n'
                 'packed generated product: 0\n'
@@ -90,6 +90,28 @@ class PackedAuditCountTests(unittest.TestCase):
         self.assertTrue(self.check(sample, 192512, 34))
         self.assertEqual(sample['reportedIterations'], 201863462912)
         self.assertFalse(self.check(self.sample(self.raw()), 192512, 34))
+
+    def test_batch_and_workers_preserve_the_same_scalar_population(self):
+        for batch, workers in ((8, 770048), (16, 385024), (32, 192512)):
+            for weight in (0, 34):
+                with self.subTest(batch=batch, weight=weight):
+                    sample = self.sample(self.raw(workers, weight, batch))
+                    self.assertTrue(self.check(sample, workers, weight, batch))
+                    self.assertEqual(sample['requestedBatch'], batch)
+                    self.assertEqual(sample['actualBatch'], batch)
+                    self.assertEqual(sample['scalarWalks'], 6160384)
+                    self.assertEqual(sample['reportedIterations'], 201863462912)
+
+    def test_same_count_does_not_hide_wrong_geometry(self):
+        for batch, workers in ((8, 770048), (16, 385024)):
+            # This completed B32 fixture has the same total scalar work, but
+            # must not satisfy a request for a different batch or population.
+            sample = self.sample(self.raw())
+            self.assertFalse(self.check(sample, workers, 0, batch))
+            self.assertEqual(sample['rate'], 0)
+            sample = self.sample(self.raw(workers, 0, batch))
+            self.assertFalse(self.check(sample, 192512, 0, batch))
+            self.assertEqual(sample['rate'], 0)
 
 
 if __name__ == '__main__':

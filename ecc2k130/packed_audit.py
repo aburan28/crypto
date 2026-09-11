@@ -21,7 +21,7 @@ import modal_app as client
 app = modal.App("ecc2k130-packed-audit")
 
 
-def checkScalarCounts(sample, workers, dpWeight):
+def checkScalarCounts(sample, workers, dpWeight, batch=32):
     """Require the requested packed geometry and its exact completed work."""
     client.checkPackedReduction(sample)
     raw = sample.get("raw", "")
@@ -33,16 +33,17 @@ def checkScalarCounts(sample, workers, dpWeight):
     actual = walks = expected = None
     shapeOk = len(backend) == 1
     if shapeOk:
-        actual, batch, walks, weight, steps = map(int, backend[0])
+        actual, actualBatch, walks, weight, steps = map(int, backend[0])
         expected = walks * 1024 * 32
-        shapeOk = (actual > 0 and batch == 32 and walks == actual * batch
+        shapeOk = (actual > 0 and batch > 0 and actualBatch == batch and walks == actual * batch
                    and steps == 1024 and weight == dpWeight
                    and (workers == 0 or actual == workers))
     counts = [int(row[0]) for row in progress]
     countsOk = (shapeOk and bool(counts) and counts[-1] == expected
                 and counts == sorted(counts) and all(0 < count <= expected for count in counts)
                 and all(int(row[1]) == 0 for row in progress))
-    sample.update(requestedWorkers=workers, actualWorkers=actual, scalarWalks=walks,
+    sample.update(requestedWorkers=workers, actualWorkers=actual, requestedBatch=batch,
+                  actualBatch=int(backend[0][1]) if len(backend) == 1 else None, scalarWalks=walks,
                   expectedIterations=expected, reportedIterations=counts[-1] if counts else None)
     sample["valid"] = bool(sample.get("valid") and completed["valid"] and countsOk)
     sample["rate"] = completed["rate"] if sample["valid"] else 0.0
@@ -53,20 +54,20 @@ def checkScalarCounts(sample, workers, dpWeight):
 
 @app.function(image=client.image, gpu=client.DEFAULT_GPU, timeout=1800,
               volumes={"/data": client.volume})
-def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
+def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
     result = dict(valid=False, minBlocks=minBlocks, repeats=repeats,
-                  batch=32, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
+                  batch=batch, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
                   packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1",
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
-        if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0:
-            raise ValueError("min-blocks, repeats and block-threads must be positive")
+        if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0 or batch <= 0:
+            raise ValueError("min-blocks, repeats, block-threads and batch must be positive")
         if workers < 0:
             raise ValueError("workers must be nonnegative (0 selects automatic workers)")
-        ok, build = client.buildFor(32, blockThreads, 0, minBlocks=minBlocks)
+        ok, build = client.buildFor(batch, blockThreads, 0, minBlocks=minBlocks)
         result["build"] = build
         if not ok:
             raise RuntimeError("CUDA build failed")
@@ -83,7 +84,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
         arch = client.computeCapability()
         result["deviceArithmetic"] = run(
             ["make", "test-packed-cuda", f"ARCH=-gencode arch=compute_{arch},code=sm_{arch}",
-             "BATCH=32", f"THREADS={blockThreads}", f"MINBLOCKS={minBlocks}",
+             f"BATCH={batch}", f"THREADS={blockThreads}", f"MINBLOCKS={minBlocks}",
              f"PACKED_SINGLE_PRODUCT={client.PACKED_SINGLE_PRODUCT}",
              f"PACKED_CACHE_DENOM={client.PACKED_CACHE_DENOM}", f"PACKED_BY_VALUE={client.PACKED_BY_VALUE}",
              f"PACKED_PERM_SIGMA={client.PACKED_PERM_SIGMA}", f"PACKED_POLY_CHAIN={client.PACKED_POLY_CHAIN}",
@@ -124,7 +125,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
         result["benchmark"] = client.measureBench(1024, 32, workers, False, repeats, packed=True)
         benchmarkSamples = result["benchmark"].get("samples", [])
         for sample in benchmarkSamples:
-            checkScalarCounts(sample, workers, 0)
+            checkScalarCounts(sample, workers, 0, batch)
         result["benchmark"] = client.summarizeSamples(benchmarkSamples)
         if len(benchmarkSamples) != repeats:
             result["benchmark"].update(valid=False, rate=0.0, error="benchmark did not complete every requested repetition")
@@ -146,7 +147,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
                     command += ["--threads", str(workers)]
                 row = run(command, 180)
                 sample = client.benchResult(row["command"], row["returncode"], row["output"])
-                checkScalarCounts(sample, workers, 34)
+                checkScalarCounts(sample, workers, 34, batch)
                 records = corpus.stat().st_size if corpus.exists() else 0
                 final = re.findall(r"finished:.*?, (\d+) distinguished points "
                                    r"\(0 verified against the reference, (\d+) dropped\)",
@@ -175,8 +176,9 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
 
 @app.local_entrypoint()
 def main(output: str = "packed-audit.json", min_blocks: int = 4, repeats: int = 3,
-         block_threads: int = 128, workers: int = 0):
-    result = runAudit.remote(minBlocks=min_blocks, repeats=repeats, blockThreads=block_threads, workers=workers)
+         block_threads: int = 128, workers: int = 0, batch: int = 32):
+    result = runAudit.remote(minBlocks=min_blocks, repeats=repeats, blockThreads=block_threads, workers=workers,
+                             batch=batch)
     Path(output).write_text(json.dumps(result, indent=2) + "\n")
     print(f"Audit saved to {output}")
     if not result["valid"]:
