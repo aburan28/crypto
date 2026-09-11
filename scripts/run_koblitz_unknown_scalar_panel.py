@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 from typing import Any
@@ -568,7 +569,13 @@ def validate_binaries(
         identity = custody.validate_tool_identity(claimed[name], name)
         if Path(identity["path"]).resolve() != expected_path:
             raise Stage23Error(f"{name} binary path changed")
-        built = custody.file_identity(
+        copied = custody.file_identity(expected_path, f"copied {name}")
+        if (copied["bytes"], copied["sha256"]) != (
+            identity["bytes"],
+            identity["sha256"],
+        ):
+            raise Stage23Error(f"copied {name} differs from its tool identity")
+        built = build_output_identity(
             run_root / "build-target" / "release" / "examples" / name,
             f"built {name}",
         )
@@ -578,6 +585,28 @@ def validate_binaries(
     if {path.name for path in binaries_root.iterdir()} != names:
         raise Stage23Error("binary directory inventory changed")
     return identities
+
+
+def build_output_identity(path: Path, context: str) -> dict[str, Any]:
+    """Identify a Cargo artifact while allowing Cargo-internal hard links.
+
+    Cargo may hard-link an example executable to its hashed artifact on Linux.
+    The complete build tree is covered by the immutable run inventory, and the
+    separately copied executable is still required to be a single-link regular
+    file by ``validate_tool_identity``.
+    """
+    try:
+        metadata = path.lstat()
+    except OSError as error:
+        raise Stage23Error(f"cannot stat {context} {path}: {error}") from error
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+        raise Stage23Error(f"{context} must be a regular non-symlink file: {path}")
+    data = path.read_bytes()
+    return {
+        "path": str(path.resolve()),
+        "bytes": len(data),
+        "sha256": custody.sha256_bytes(data),
+    }
 
 
 def reconstruct_row(

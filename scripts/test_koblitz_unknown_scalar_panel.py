@@ -6,6 +6,7 @@ from __future__ import annotations
 from copy import deepcopy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -890,6 +891,40 @@ class Stage23Tests(unittest.TestCase):
                     )
                 )
             self.assertEqual(permissive["status"], "verification_frozen")
+
+    def test_cargo_build_hardlink_is_allowed_but_copied_binary_hardlink_is_not(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="stage23-build-hardlink-") as temporary:
+            parent = Path(temporary)
+            run_root, outer = make_complete_rank_deficient_run(parent / "accepted")
+            built = (
+                run_root
+                / "build-target/release/examples/koblitz_unknown_scalar_panel"
+            )
+            os.link(built, parent / "cargo-hashed-artifact")
+            verified = stage23.verify(
+                types.SimpleNamespace(
+                    run_root=run_root,
+                    outer_metrics=outer,
+                    output=parent / "accepted-verification",
+                )
+            )
+            self.assertEqual(verified["status"], "verification_frozen")
+
+            forged_root, forged_outer = make_complete_rank_deficient_run(
+                parent / "forged"
+            )
+            copied = forged_root / "binaries/koblitz_unknown_scalar_panel"
+            os.link(copied, parent / "external-binary-link")
+            with self.assertRaisesRegex(
+                stage23.custody.Stage21Error, "must not be hard-linked"
+            ):
+                stage23.verify(
+                    types.SimpleNamespace(
+                        run_root=forged_root,
+                        outer_metrics=forged_outer,
+                        output=parent / "forged-verification",
+                    )
+                )
 
     def test_plan_is_write_once_and_outside_checkout(self) -> None:
         parser_args = type("Args", (), {})()
