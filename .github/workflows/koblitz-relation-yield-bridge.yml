@@ -13,6 +13,9 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-21-relation-yield-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE21_RELATION_YIELD.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE21_RELATION_YIELD_RESULTS_20260910.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-21-relation-yield-result-summary-20260910.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-21-relation-yield-result-seal-20260910.json"
       - ".github/workflows/koblitz-relation-yield-bridge.yml"
   workflow_dispatch:
 
@@ -44,6 +47,7 @@ jobs:
             --outer-metrics "$RUNNER_TEMP/stage21-outer/driver.metrics.json" \
             > "$RUNNER_TEMP/stage21-plan.json"
           python3 - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
@@ -94,4 +98,17 @@ jobs:
           verification = json.loads((root / "stage21-verification/verification.json").read_text())
           assert verification["scientific_measurement_admitted"] is False
           assert verification["measurement_admission_status"] == "operational_smoke_only"
+
+          repo = Path(os.environ["GITHUB_WORKSPACE"])
+          evidence = repo / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
+          seal = json.loads((evidence / "stage-21-relation-yield-result-seal-20260910.json").read_text())
+          payload = {key: value for key, value in seal.items() if key != "seal_payload_sha256"}
+          canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          assert seal["seal_payload_sha256"] == hashlib.sha256(canonical).hexdigest()
+          for artifact in seal["repository_artifacts"].values():
+              data = (repo / artifact["path"]).read_bytes()
+              assert artifact["bytes"] == len(data)
+              assert artifact["sha256"] == hashlib.sha256(data).hexdigest()
+          assert seal["claim_boundary"]["scientific_measurement_admitted"] is False
+          assert seal["claim_boundary"]["koblitz_index_calculus_sota"] is False
           PY
