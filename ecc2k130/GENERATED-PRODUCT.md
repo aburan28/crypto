@@ -103,6 +103,13 @@ The native source digest is
 `d18667225ba454e86179756a6b036b0bfbb721107b2fe313bc4a6a1b1af49be4`;
 the linked client binary hash is
 `e1c2f918b0b0b4a28278346b3de91435e0bbbd6e34405383175eb03ae5aad76c`.
+The remote aggregate covers 65 code/build files; the local manifest also
+retains the audit entry point and documentation. Source and binary identity
+are recorded before the native checks. The
+[independent native review](benchmarks/generated-product/native-audit-review.json)
+recomputes that aggregate and verifies all six completed counters, rates,
+mode markers, correctness gates and corpus sizes. This native artifact does
+not retain post-sample hashes or a full linked-client disassembly.
 Raw native audit SHA256:
 `c9686d2eaa20282acedbeef45ea0dbc1548ff2365fa7e7cbb11428b5ac221f72`.
 
