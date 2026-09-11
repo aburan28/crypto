@@ -1,0 +1,71 @@
+{
+  "valid": true,
+  "kind": "raw128 sparse/dense GPU correctness only",
+  "timed": false,
+  "commands": [
+    {
+      "label": "GPU before",
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version",
+        "--format=csv"
+      ],
+      "returncode": 0,
+      "timedOut": false,
+      "output": "name, uuid, driver_version\nNVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-2a02db4f-117f-e26d-9dc2-c64b5cc301b4, 580.95.05\n"
+    },
+    {
+      "label": "raw128 validation",
+      "command": [
+        "/tmp/sparse-hybrid-probe"
+      ],
+      "returncode": 0,
+      "timedOut": false,
+      "output": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, sm_120, 188 SMs\n{\"valid\":true,\"basisPairs\":16384,\"edgePairs\":64,\"densePairs\":64,\"cases\":16512,\"coefficientComparisons\":4227072,\"rawProductComparisons\":33024,\"timed\":false}\n"
+    },
+    {
+      "label": "GPU after",
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version",
+        "--format=csv"
+      ],
+      "returncode": 0,
+      "timedOut": false,
+      "output": "name, uuid, driver_version\nNVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-2a02db4f-117f-e26d-9dc2-c64b5cc301b4, 580.95.05\n"
+    }
+  ],
+  "compileReceipt": {
+    "valid": true,
+    "error": null,
+    "remoteArtifact": "/data/sparse-hybrid-compile/1789146475576782330/result.json",
+    "rawSha256": "08740322b47770f0000d4c4de2ce55bf33045594abfdec15aebcdd7a57abefc0",
+    "artifactBytes": 30814,
+    "compileAttempts": 1,
+    "gpuAllocated": false
+  },
+  "binarySha256": "9378d6805f6951b30e8f610e98cd2e9e6d18a7469b47391e7eee93d058aae7cf",
+  "sourceSha256": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "gpu": [
+    "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    " GPU-2a02db4f-117f-e26d-9dc2-c64b5cc301b4",
+    " 580.95.05"
+  ],
+  "programOutput": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, sm_120, 188 SMs\n{\"valid\":true,\"basisPairs\":16384,\"edgePairs\":64,\"densePairs\":64,\"cases\":16512,\"coefficientComparisons\":4227072,\"rawProductComparisons\":33024,\"timed\":false}\n",
+  "validation": {
+    "valid": true,
+    "basisPairs": 16384,
+    "edgePairs": 64,
+    "densePairs": 64,
+    "cases": 16512,
+    "coefficientComparisons": 4227072,
+    "rawProductComparisons": 33024,
+    "timed": false
+  },
+  "remoteArtifact": "/data/sparse-hybrid-validation/1789147826059447765/result.json"
+}
