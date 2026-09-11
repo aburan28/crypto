@@ -7503,7 +7503,12 @@ the gap was 3–7×; it widens with `m`, as the halving of the relation's
 degree per point predicts for a solver governed by the solving degree.
 The first row of the thread where the coordinate change is worth more
 than a constant, and it is the ordinary one — one rational 2-torsion
-point, the sign frame, the product invariant.
+point, the sign frame, the product invariant.  The 3-torsion frame at
+`m = 3` (§14.3) goes the other way: solving degree 12 against 14 but a
+matrix 2.5× larger and 5–8× the time, the tuple unknown's degree 8
+paid in columns.  (A wrong reduction of the descended equations —
+`interreduce` on a generating set — was caught by the solution count
+and replaced by `autoreduce`.)
 
 **Four representations beyond the `x`-line, two of them new lines
 (§15).**  The `y`-line of a `j = 0` curve (3-torsion, the multilinear

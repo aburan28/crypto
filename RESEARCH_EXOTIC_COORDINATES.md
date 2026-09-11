@@ -1318,18 +1318,44 @@ larger groups.
 
 ### 14.3 The 3-torsion frame at `m = 3`
 
-TBD-F4-T3
+`y² = x³ + b` over `F₃₁³` (§13.4's curve), `GB_ENGINE=f4`, bound 24,
+300 s budget, two decomposable targets per base.
+
+| base | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix | verdict |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 19 000–35 000 | 14 | 2166 × 2512 | found (6) |
+| `{v ∈ F_p}` | `v_i³`, `Πv` under `⟨τ₃⟩` | 4 / 167 (autoreduced before the solve) | 9 | 118 | 152 000 | 12 | 5953 × 6598 | found (162) |
+
+The first attempt handed F4 the 167 descended equations as they came
+— every identity up to the relation's degree, multiples included —
+and went undetermined at 300 s on a 6065 × 6710 matrix; autoreducing
+the generating set first (`f4_fp::autoreduce`; not `interreduce`, which
+is sound only on a Gröbner-like set and silently dropped the digit
+equations sharing a leading monomial — caught by the solution count)
+brought it inside the budget but barely changed the matrix: the size
+is the system's, not the redundancy's.
+
+So at `m = 3` the 3-torsion frame **does not pay**: a lower solving
+degree (12 against 14) on a matrix two and a half times larger, and
+five to eight times the time, where the 2-torsion frame (§14.2) halves
+the degree and divides the time by thirty.  The two frames differ in
+what the tuple unknown carries — `Πu` of degree 3 in the `u_i` for the
+2-torsion frame, `Πv` of degree 8 in the relation for the 3-torsion one
+(§13.5) — and F4 pays for that degree in columns.  The `m = 2`
+advantage of the `v`-base system (§13.4) is a small-`m` result, like
+its multilinearity.
 
 ### 14.4 What this changes
 
 The thread's standing summary — "a real reduction of the relation
 degree per point at every `m`, no free relations once the projection is
 accounted for, and a solve smaller by a constant the solver cannot
-rank" — loses its last clause: the solve is smaller by a factor that
-grows with `m`, and at `m = 3` it is measured.  The gain is still per
+rank" — loses its last clause for the 2-torsion frame: its solve is
+smaller by a factor that grows with `m`, and at `m = 3` it is measured.
+The 3-torsion frame keeps only the first clause.  The gain is still per
 solve, not per relation (§11.4), and still needs a rational 2-torsion
-point (or a 3-torsion point on a `j = 0` curve) and, in Gaudry's
-setting, a base on which the invariants stay in `F_p` (§12.2, §13.4).
+point and, in Gaudry's setting, a base on which the invariants stay in
+`F_p` (§12.2).
 
 ---
 
