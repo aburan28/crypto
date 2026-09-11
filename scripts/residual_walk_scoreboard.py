@@ -69,6 +69,8 @@ def variant(r):
         parts.append("seed2")
     if r.get("j_zero"):
         parts.append("j0")
+    if r.get("s3_oracle"):
+        parts.append("s3")
     return "+".join(parts) or "plain"
 
 
@@ -104,6 +106,8 @@ def cells(rows):
             "setup_frac": mean(r["setup_ops"] / t for r, t in zip(g, n_ops)),
             "replay_frac": mean(r["replay_ops"] / t for r, t in zip(g, n_ops)),
             "verify_frac": mean(r["verify_ops"] / t for r, t in zip(g, n_ops)),
+            "oracle_frac": mean(r.get("oracle_ops", 0) / t for r, t in zip(g, n_ops)),
+            "oracle_hits": mean(r.get("oracle_hits", 0) for r in g),
             "S": mean(t / s for t, s in zip(n_ops, sq)),
             "S_floor": kappa_floor,
             "ops_per_relation_over_sqrt_n": mean(
@@ -132,16 +136,17 @@ def fmt(v, d=2):
 
 
 def print_scoreboard(c):
-    print("| bits | B | dp | tag | variant | seeds | κ = samples/√n | seeded/√n | κ_total | κ floor | κ_total/floor | c ops/residual | setup | replay | verify | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
-    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
+    print("| bits | B | dp | tag | variant | seeds | κ = samples/√n | seeded/√n | κ_total | κ floor | κ_total/floor | c ops/residual | setup | replay | verify | oracle | S = ops/√n | S floor | S/floor | ops/rel/√n | stored/√n | trivial | correct |")
+    print("|---:|---:|---:|:--|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|")
     for k in sorted(c, key=sort_key):
         x = c[k]
-        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+        print("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
             x["bits"], x["B"], x["dp"], x["tag"], x["variant"], x["seeds"],
             fmt(x["kappa"]), fmt(x["seeded_over_sqrt_n"]), fmt(x["kappa_total"]),
             fmt(x["kappa_floor"]), fmt(x["kappa_total"] / x["kappa_floor"]),
             fmt(x["c"], 1),
             fmt(100 * x["setup_frac"], 1) + "%", fmt(100 * x["replay_frac"], 1) + "%", fmt(100 * x["verify_frac"], 1) + "%",
+            fmt(100 * x["oracle_frac"], 1) + "%",
             fmt(x["S"], 1), fmt(x["S_floor"], 2), fmt(x["S"] / x["S_floor"], 2),
             fmt(x["ops_per_relation_over_sqrt_n"], 3), fmt(x["stored_over_sqrt_n"], 3),
             fmt(x["trivial"], 0), fmt(x["correct"])))
