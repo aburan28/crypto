@@ -600,12 +600,7 @@ pub fn f4_time(p: u64, sys: &DescendedSystem) -> (f64, u32, F4Verdict, usize, (u
     // The descended identities are every identity up to the relation's
     // degree, multiples of lower ones included; interreducing them first
     // keeps the first F4 matrix from being built out of redundant rows.
-    let normalised: Vec<f4_fp::Poly> = eqs
-        .iter()
-        .map(|f| f4_fp::normalise(f, p, Ordering::Grevlex))
-        .filter(|f| !f.is_empty())
-        .collect();
-    let eqs = f4_fp::interreduce(&normalised, p, Ordering::Grevlex);
+    let eqs = f4_fp::autoreduce(&eqs, p, Ordering::Grevlex);
     let opts = F4Options::new(Ordering::Grevlex, f4_max_degree()).with_budget(groebner_budget());
     let r = f4_fp::solve(&eqs, sys.fp_unknowns, p, &opts);
     let (verdict, n) = match &r.verdict {
@@ -916,7 +911,9 @@ mod tests {
         // systems and finds the decomposition (checked against the system)
         for a in &arms[..2] {
             assert_eq!(a.f4_verdict, F4Verdict::Found, "{text}");
-            assert!(a.f4_solutions >= 1, "{text}");
+            // a decomposition, not a positive-dimensional variety: the
+            // fibre of a decomposable target is a handful of tuples
+            assert!((1..=16).contains(&a.f4_solutions), "{text}");
             assert!(a.f4_ms.is_finite() && a.f4_ms < 30_000.0, "{text}");
         }
         // a random target off the base is refuted by both engines the
