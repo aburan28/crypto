@@ -1971,6 +1971,244 @@ pub struct GaudryReport {
     pub solve_stats: SolveStats,
     pub cross_checked: u64,
     pub cross_check_mismatches: u64,
+    /// Linear algebra: `"dense"` (incremental elimination) or
+    /// `"wiedemann"`; multiplications modulo `n` it performed; the
+    /// number of unknowns and rows it was given; the mean row weight
+    /// of those rows; solve attempts (Wiedemann retries with more rows).
+    pub la_mode: String,
+    pub la_ops: u64,
+    pub la_unknowns: usize,
+    pub la_rows: usize,
+    pub la_avg_weight: f64,
+    pub la_attempts: u64,
+    /// `F_p`-multiplication equivalents charged per multiplication
+    /// modulo `n` (`n ≈ p³`: schoolbook, `9`).
+    pub la_fp_equiv: f64,
+    /// Large primes: the small base `|F'|` (`= |F|` when unused), the
+    /// maximum number of large primes accepted per relation, the
+    /// decompositions by number of large primes (`0, 1, 2, ≥ 3`), and
+    /// the full relations produced by eliminating large primes.
+    pub small_base: usize,
+    pub max_large_primes: u8,
+    pub lp_histogram: [u64; 4],
+    pub lp_full_relations: u64,
+}
+
+/// Options of a Gaudry-style run; see [`run_gaudry_opts`].
+#[derive(Clone, Debug, Serialize)]
+pub struct GaudryOptions {
+    pub max_residuals: u64,
+    pub solver: Solver,
+    /// Run the other oracle on every residual and count disagreements.
+    pub cross_check: bool,
+    /// Solve the relation system by sequential Wiedemann on a square
+    /// selection of rows instead of incremental dense elimination.
+    pub sparse_la: bool,
+    /// Size of the small factor base `F'` (the first `small_base`
+    /// points of the base); `0` means the whole base and no large
+    /// primes.
+    pub small_base: usize,
+    /// Decompositions with more large primes than this are discarded.
+    pub max_large_primes: u8,
+}
+
+impl Default for GaudryOptions {
+    fn default() -> Self {
+        GaudryOptions {
+            max_residuals: 1_000_000,
+            solver: Solver::MeetInTheMiddle,
+            cross_check: false,
+            sparse_la: false,
+            small_base: 0,
+            max_large_primes: 0,
+        }
+    }
+}
+
+/// A relation as a sparse row: `Σ coeff · x_col ≡ rhs (mod n)`.
+#[derive(Clone, Debug)]
+pub struct SparseRel {
+    pub cols: Vec<(usize, u64)>,
+    pub rhs: u64,
+}
+
+impl SparseRel {
+    /// `self − f · other`, columns merged; counts the multiplications.
+    fn sub_scaled(&self, f: u64, other: &SparseRel, n: u64, ops: &mut u64) -> SparseRel {
+        let mut acc: HashMap<usize, u64> = self.cols.iter().copied().collect();
+        for &(c, v) in &other.cols {
+            let e = acc.entry(c).or_insert(0);
+            *e = (*e + n - mm(f, v, n)) % n;
+            *ops += 1;
+        }
+        let mut cols: Vec<(usize, u64)> = acc.into_iter().filter(|&(_, v)| v != 0).collect();
+        cols.sort_unstable();
+        *ops += 1;
+        SparseRel {
+            cols,
+            rhs: (self.rhs + n - mm(f, other.rhs, n)) % n,
+        }
+    }
+}
+
+/// Structured elimination of large-prime columns (columns `≥ small`):
+/// each large prime gets at most one pivot relation; a new relation is
+/// reduced by the pivots of its large primes until either none is
+/// left (a full relation over the small base, returned) or one is
+/// left without a pivot (the relation becomes that prime's pivot).
+/// Pivots only ever contain primes that had no pivot when they were
+/// stored, so reduction terminates.  This is the graph method of the
+/// double-large-prime variation with arbitrary coefficients.
+pub struct LargePrimeEliminator {
+    small: usize,
+    n: u64,
+    pivots: HashMap<usize, SparseRel>,
+}
+
+impl LargePrimeEliminator {
+    pub fn new(small: usize, n: u64) -> Self {
+        LargePrimeEliminator {
+            small,
+            n,
+            pivots: HashMap::new(),
+        }
+    }
+
+    pub fn feed(&mut self, mut rel: SparseRel, ops: &mut u64) -> Option<SparseRel> {
+        loop {
+            let lp: Vec<(usize, u64)> = rel
+                .cols
+                .iter()
+                .copied()
+                .filter(|&(c, _)| c >= self.small)
+                .collect();
+            if lp.is_empty() {
+                return Some(rel);
+            }
+            let Some(&(c, v)) = lp.iter().find(|(c, _)| self.pivots.contains_key(c)) else {
+                // No pivot for any of its large primes: store under one.
+                let (c, v) = lp[0];
+                let inv = inv_mod(v, self.n);
+                *ops += rel.cols.len() as u64 + 1;
+                let cols = rel
+                    .cols
+                    .iter()
+                    .map(|&(cc, vv)| (cc, mm(vv, inv, self.n)))
+                    .collect();
+                let rhs = mm(rel.rhs, inv, self.n);
+                self.pivots.insert(c, SparseRel { cols, rhs });
+                return None;
+            };
+            let piv = self.pivots[&c].clone();
+            rel = rel.sub_scaled(v, &piv, self.n, ops);
+        }
+    }
+}
+
+/// Berlekamp–Massey over `Z/n` (`n` prime): the shortest linear
+/// recurrence `Σ_{j=0}^{L} c_j s_{i−j} = 0` (`c_0 = 1`) satisfied by
+/// the sequence; returns `c`.
+fn berlekamp_massey_u64(seq: &[u64], n: u64, ops: &mut u64) -> Vec<u64> {
+    let mut c = vec![1u64];
+    let mut b = vec![1u64];
+    let mut l = 0usize;
+    let mut m = 1usize;
+    let mut bb = 1u64;
+    for i in 0..seq.len() {
+        let mut d = seq[i];
+        for j in 1..=l {
+            if j < c.len() {
+                d = am(d, mm(c[j], seq[i - j], n), n);
+                *ops += 1;
+            }
+        }
+        if d == 0 {
+            m += 1;
+            continue;
+        }
+        let coef = mm(d, inv_mod(bb, n), n);
+        let t = c.clone();
+        if c.len() < b.len() + m {
+            c.resize(b.len() + m, 0);
+        }
+        for j in 0..b.len() {
+            c[j + m] = sm(c[j + m], mm(coef, b[j], n), n);
+            *ops += 1;
+        }
+        if 2 * l <= i {
+            l = i + 1 - l;
+            b = t;
+            bb = d;
+            m = 1;
+        } else {
+            m += 1;
+        }
+    }
+    c.truncate(l + 1);
+    c
+}
+
+/// Sequential Wiedemann for `A x = b` with `A` the square sparse
+/// matrix whose rows are `rows` (rhs inside each row), `ncols`
+/// unknowns.  Returns `x` verified against every row, or `None` when
+/// the minimal polynomial found has a zero constant term (singular
+/// selection, or an unlucky projection after the retries).
+pub fn wiedemann_u64(
+    rows: &[SparseRel],
+    ncols: usize,
+    n: u64,
+    rng: &mut StdRng,
+    ops: &mut u64,
+) -> Option<Vec<u64>> {
+    assert_eq!(rows.len(), ncols);
+    let mat_vec = |v: &[u64], ops: &mut u64| -> Vec<u64> {
+        rows.iter()
+            .map(|r| {
+                let mut acc = 0u64;
+                for &(c, a) in &r.cols {
+                    acc = am(acc, mm(a, v[c], n), n);
+                }
+                *ops += r.cols.len() as u64;
+                acc
+            })
+            .collect()
+    };
+    let b: Vec<u64> = rows.iter().map(|r| r.rhs).collect();
+    for _attempt in 0..3 {
+        let u: Vec<u64> = (0..ncols).map(|_| rng.gen_range(0..n)).collect();
+        let mut seq = Vec::with_capacity(2 * ncols);
+        let mut v = b.clone();
+        for _ in 0..2 * ncols {
+            let mut d = 0u64;
+            for i in 0..ncols {
+                d = am(d, mm(u[i], v[i], n), n);
+            }
+            *ops += ncols as u64;
+            seq.push(d);
+            v = mat_vec(&v, ops);
+        }
+        let c = berlekamp_massey_u64(&seq, n, ops);
+        let l = c.len() - 1;
+        if l == 0 || c[l] == 0 {
+            continue;
+        }
+        // x = −(1/c_L) Σ_{j<L} c_j A^{L−1−j} b, by Horner.
+        let mut acc = vec![0u64; ncols];
+        for &cj in c.iter().take(l) {
+            acc = mat_vec(&acc, ops);
+            for i in 0..ncols {
+                acc[i] = am(acc[i], mm(cj, b[i], n), n);
+            }
+            *ops += ncols as u64;
+        }
+        let neg_inv = (n - inv_mod(c[l], n)) % n;
+        let x: Vec<u64> = acc.iter().map(|&a| mm(a, neg_inv, n)).collect();
+        *ops += ncols as u64;
+        if mat_vec(&x, ops) == b {
+            return Some(x);
+        }
+    }
+    None
 }
 
 /// Which triple oracle a run uses.
@@ -2010,6 +2248,42 @@ pub fn run_gaudry_with(
     solver: Solver,
     cross_check: bool,
 ) -> GaudryReport {
+    run_gaudry_opts(
+        inst,
+        base,
+        seed,
+        &GaudryOptions {
+            max_residuals,
+            solver,
+            cross_check,
+            ..GaudryOptions::default()
+        },
+    )
+}
+
+/// The general run: oracle choice, cross-check, sparse linear algebra
+/// and the large-prime variation, per [`GaudryOptions`].
+pub fn run_gaudry_opts(
+    inst: &Instance3,
+    base: &SubspaceBase,
+    seed: u64,
+    opts: &GaudryOptions,
+) -> GaudryReport {
+    let max_residuals = opts.max_residuals;
+    let solver = opts.solver;
+    let cross_check = opts.cross_check;
+    let small = if opts.small_base == 0 || opts.small_base >= base.len() {
+        base.len()
+    } else {
+        opts.small_base
+    };
+    let max_lp = if small == base.len() {
+        0
+    } else {
+        opts.max_large_primes
+    };
+    let unknowns = small + 1;
+    let la_fp_equiv = 9.0;
     let curve = &inst.curve;
     let n = curve.n;
     let mut rng = StdRng::seed_from_u64(seed ^ 0x9A0D);
@@ -2035,7 +2309,13 @@ pub fn run_gaudry_with(
     let precompute_muls = curve.field.muls();
     curve.reset();
     let mut stats = SolveStats::default();
-    let mut system = RelationSystem::new(n, base.len() + 1);
+    let mut system = RelationSystem::new(n, unknowns);
+    let mut eliminator = LargePrimeEliminator::new(small, n);
+    let mut full_rels: Vec<SparseRel> = Vec::new();
+    let mut la_ops = 0u64;
+    let mut la_attempts = 0u64;
+    let mut next_attempt = unknowns;
+    let mut la_rows_used = 0usize;
     let mut rep = GaudryReport {
         p: curve.field.p,
         n,
@@ -2063,6 +2343,21 @@ pub fn run_gaudry_with(
         solve_stats: SolveStats::default(),
         cross_checked: 0,
         cross_check_mismatches: 0,
+        la_mode: if opts.sparse_la {
+            "wiedemann".to_string()
+        } else {
+            "dense".to_string()
+        },
+        la_ops: 0,
+        la_unknowns: unknowns,
+        la_rows: 0,
+        la_avg_weight: 0.0,
+        la_attempts: 0,
+        la_fp_equiv,
+        small_base: small,
+        max_large_primes: max_lp,
+        lp_histogram: [0; 4],
+        lp_full_relations: 0,
     };
     let mut la = std::time::Duration::ZERO;
     while rep.residuals < max_residuals {
@@ -2133,18 +2428,75 @@ pub fn run_gaudry_with(
                 continue;
             }
             rep.relations_verified += 1;
-            let mut row = vec![0u64; base.len() + 1];
-            for &(i, c) in &terms {
-                let v = c.unsigned_abs() % n;
-                row[i] = if c >= 0 { v } else { (n - v) % n };
+            // Sparse relation: base columns, then the `d` column at
+            // index `small`; large primes keep their base index (≥ small
+            // and < base.len()), shifted by one to make room for `d`.
+            let mut cols: Vec<(usize, u64)> = terms
+                .iter()
+                .map(|&(i, c)| {
+                    let v = c.unsigned_abs() % n;
+                    let v = if c >= 0 { v } else { (n - v) % n };
+                    (if i < small { i } else { i + 1 }, v)
+                })
+                .collect();
+            cols.push((small, (n - b) % n));
+            cols.sort_unstable();
+            let lp_count = cols.iter().filter(|&&(c, _)| c > small).count();
+            rep.lp_histogram[lp_count.min(3)] += 1;
+            if lp_count > max_lp as usize {
+                continue;
             }
-            row[base.len()] = (n - b) % n;
             let t0 = Instant::now();
-            if system.insert(row, a) {
-                rep.relations_independent += 1;
-                if let Some(dd) = system.solved(base.len()) {
-                    rep.solved = true;
-                    rep.correct = Some(dd == inst.d);
+            let rel = SparseRel { cols, rhs: a };
+            let full = if lp_count == 0 {
+                Some(rel)
+            } else {
+                let f = eliminator.feed(rel, &mut la_ops);
+                if f.is_some() {
+                    rep.lp_full_relations += 1;
+                }
+                f
+            };
+            if let Some(full) = full {
+                if opts.sparse_la {
+                    full_rels.push(full);
+                    rep.relations_independent = full_rels.len() as u64;
+                    if full_rels.len() >= next_attempt {
+                        la_attempts += 1;
+                        let sel: Vec<SparseRel> = if full_rels.len() == unknowns {
+                            full_rels.clone()
+                        } else {
+                            let mut idx: Vec<usize> = (0..full_rels.len()).collect();
+                            for i in (1..idx.len()).rev() {
+                                let j = rng.gen_range(0..=i);
+                                idx.swap(i, j);
+                            }
+                            idx[..unknowns]
+                                .iter()
+                                .map(|&i| full_rels[i].clone())
+                                .collect()
+                        };
+                        la_rows_used = sel.len();
+                        if let Some(x) = wiedemann_u64(&sel, unknowns, n, &mut rng, &mut la_ops) {
+                            rep.solved = true;
+                            rep.correct = Some(x[small] == inst.d);
+                        } else {
+                            next_attempt = full_rels.len() + (unknowns / 20).max(1);
+                        }
+                    }
+                } else {
+                    let mut row = vec![0u64; unknowns];
+                    for &(c, v) in &full.cols {
+                        row[c] = v;
+                    }
+                    if system.insert(row, full.rhs) {
+                        rep.relations_independent += 1;
+                        if let Some(dd) = system.solved(small) {
+                            rep.solved = true;
+                            rep.correct = Some(dd == inst.d);
+                        }
+                    }
+                    la_rows_used = system.rank();
                 }
             }
             la += t0.elapsed();
@@ -2153,13 +2505,32 @@ pub fn run_gaudry_with(
             break;
         }
     }
-    rep.rank = system.rank();
+    rep.rank = if opts.sparse_la {
+        if rep.solved {
+            unknowns
+        } else {
+            0
+        }
+    } else {
+        system.rank()
+    };
     rep.group_ops = curve.ops();
     rep.solver = solver;
     rep.precompute_fp_muls = precompute_muls;
     rep.solve_stats = stats;
-    rep.total_ops =
-        rep.group_ops as f64 + (rep.oracle_fp_muls + precompute_muls) as f64 / fp_per_add;
+    rep.la_ops = la_ops + system.ops();
+    rep.la_rows = la_rows_used;
+    rep.la_attempts = la_attempts;
+    if opts.sparse_la {
+        rep.la_avg_weight = if full_rels.is_empty() {
+            0.0
+        } else {
+            full_rels.iter().map(|r| r.cols.len()).sum::<usize>() as f64 / full_rels.len() as f64
+        };
+    }
+    rep.total_ops = rep.group_ops as f64
+        + (rep.oracle_fp_muls + precompute_muls) as f64 / fp_per_add
+        + rep.la_ops as f64 * la_fp_equiv / fp_per_add;
     rep.s = rep.total_ops / (n as f64).sqrt();
     rep.fp_muls_per_pair_test = rep.oracle_fp_muls as f64 / rep.pair_tests.max(1) as f64;
     rep.decomposition_rate = rep.decompositions as f64 / rep.residuals as f64;
@@ -2456,6 +2827,129 @@ mod tests {
         // few need the degree-11 matrix.
         assert!(stats.retried_at_degree_11 * 10 <= stats.solves, "{stats:?}");
         assert!(stats.quotient_dim_total >= 40 * 60, "{stats:?}");
+    }
+
+    #[test]
+    fn wiedemann_solves_random_sparse_systems() {
+        let n = 1_000_003u64;
+        let mut rng = StdRng::seed_from_u64(5);
+        for trial in 0..5 {
+            let m = 40 + trial * 7;
+            let x: Vec<u64> = (0..m).map(|_| rng.gen_range(0..n)).collect();
+            let rows: Vec<SparseRel> = (0..m)
+                .map(|i| {
+                    let mut cols: Vec<(usize, u64)> = vec![(i, rng.gen_range(1..n))];
+                    for _ in 0..3 {
+                        let c = rng.gen_range(0..m);
+                        if cols.iter().all(|&(cc, _)| cc != c) {
+                            cols.push((c, rng.gen_range(1..n)));
+                        }
+                    }
+                    cols.sort_unstable();
+                    let rhs = cols
+                        .iter()
+                        .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+                    SparseRel { cols, rhs }
+                })
+                .collect();
+            let mut ops = 0u64;
+            let sol = wiedemann_u64(&rows, m, n, &mut rng, &mut ops);
+            assert_eq!(sol.as_deref(), Some(&x[..]), "trial {trial}");
+            assert!(ops > 0);
+        }
+        // Berlekamp–Massey on a known recurrence: Fibonacci mod n has
+        // connection polynomial 1 − x − x².
+        let mut seq = vec![0u64, 1];
+        for i in 2..40 {
+            seq.push(am(seq[i - 1], seq[i - 2], n));
+        }
+        let mut ops = 0u64;
+        let c = berlekamp_massey_u64(&seq, n, &mut ops);
+        assert_eq!(c, vec![1, n - 1, n - 1]);
+    }
+
+    #[test]
+    fn large_prime_elimination_cancels_every_large_prime() {
+        let n = 1_000_003u64;
+        let small = 5usize;
+        let mut rng = StdRng::seed_from_u64(9);
+        let mut el = LargePrimeEliminator::new(small, n);
+        // Hidden solution over 5 small columns and 6 large primes.
+        let x: Vec<u64> = (0..small + 6).map(|_| rng.gen_range(0..n)).collect();
+        let mut full = 0;
+        let mut ops = 0u64;
+        for _ in 0..200 {
+            let mut cols: Vec<(usize, u64)> = Vec::new();
+            for _ in 0..3 {
+                let c = if rng.gen_bool(0.6) {
+                    small + rng.gen_range(0..6)
+                } else {
+                    rng.gen_range(0..small)
+                };
+                let v = if rng.gen_bool(0.5) { 1 } else { n - 1 };
+                if let Some(e) = cols.iter_mut().find(|(cc, _)| *cc == c) {
+                    e.1 = am(e.1, v, n);
+                } else {
+                    cols.push((c, v));
+                }
+            }
+            cols.retain(|&(_, v)| v != 0);
+            cols.sort_unstable();
+            let rhs = cols
+                .iter()
+                .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+            if let Some(f) = el.feed(SparseRel { cols, rhs }, &mut ops) {
+                assert!(f.cols.iter().all(|&(c, _)| c < small), "{f:?}");
+                let lhs = f
+                    .cols
+                    .iter()
+                    .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+                assert_eq!(lhs, f.rhs, "combined relation must still hold");
+                full += 1;
+            }
+        }
+        assert!(full > 100, "{full}");
+    }
+
+    #[test]
+    fn sparse_and_large_prime_runs_recover_the_logarithm() {
+        let inst = generate_instance3(67, 11);
+        let mut rng = StdRng::seed_from_u64(3);
+        let base = SubspaceBase::build(&inst, &mut rng);
+        let sparse = run_gaudry_opts(
+            &inst,
+            &base,
+            1,
+            &GaudryOptions {
+                max_residuals: 50_000,
+                solver: Solver::Groebner,
+                sparse_la: true,
+                ..GaudryOptions::default()
+            },
+        );
+        assert_eq!(sparse.correct, Some(true), "{sparse:?}");
+        assert_eq!(sparse.la_mode, "wiedemann");
+        assert!(
+            sparse.la_ops > 0 && sparse.la_avg_weight <= 4.0,
+            "{sparse:?}"
+        );
+        let lp = run_gaudry_opts(
+            &inst,
+            &base,
+            1,
+            &GaudryOptions {
+                max_residuals: 200_000,
+                solver: Solver::Groebner,
+                sparse_la: true,
+                small_base: base.len() / 3,
+                max_large_primes: 2,
+                ..GaudryOptions::default()
+            },
+        );
+        assert_eq!(lp.correct, Some(true), "{lp:?}");
+        assert!(lp.lp_full_relations > 0, "{lp:?}");
+        assert!(lp.lp_histogram[1] + lp.lp_histogram[2] > 0, "{lp:?}");
+        assert_eq!(lp.la_unknowns, base.len() / 3 + 1);
     }
 
     #[test]

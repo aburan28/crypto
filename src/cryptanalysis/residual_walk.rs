@@ -916,6 +916,8 @@ pub struct RelationSystem {
     n: u64,
     cols: usize,
     pivots: Vec<(usize, Vec<u64>, u64)>,
+    /// Multiplications modulo `n` performed so far.
+    ops: u64,
 }
 
 impl RelationSystem {
@@ -924,6 +926,7 @@ impl RelationSystem {
             n,
             cols: unknowns,
             pivots: Vec::new(),
+            ops: 0,
         }
     }
 
@@ -931,22 +934,31 @@ impl RelationSystem {
         self.pivots.len()
     }
 
+    /// Multiplications modulo `n` performed by `insert` so far.
+    pub fn ops(&self) -> u64 {
+        self.ops
+    }
+
     /// Insert one equation; returns `true` if it was independent of the
     /// rows already present.
     pub fn insert(&mut self, mut row: Vec<u64>, mut rhs: u64) -> bool {
         assert_eq!(row.len(), self.cols);
         let n = self.n;
+        let mut ops = 0u64;
         for (col, prow, prhs) in &self.pivots {
             let f = row[*col];
             if f != 0 {
                 for c in 0..self.cols {
                     if prow[c] != 0 {
                         row[c] = sub_mod(row[c], mul_mod(f, prow[c], n), n);
+                        ops += 1;
                     }
                 }
                 rhs = sub_mod(rhs, mul_mod(f, *prhs, n), n);
+                ops += 1;
             }
         }
+        self.ops += ops;
         let Some(col) = row.iter().position(|&v| v != 0) else {
             return false;
         };
@@ -955,17 +967,21 @@ impl RelationSystem {
             *v = mul_mod(*v, inv, n);
         }
         rhs = mul_mod(rhs, inv, n);
+        let mut ops = self.cols as u64 + 1;
         for (_, prow, prhs) in self.pivots.iter_mut() {
             let f = prow[col];
             if f != 0 {
                 for c in 0..self.cols {
                     if row[c] != 0 {
                         prow[c] = sub_mod(prow[c], mul_mod(f, row[c], n), n);
+                        ops += 1;
                     }
                 }
                 *prhs = sub_mod(*prhs, mul_mod(f, rhs, n), n);
+                ops += 1;
             }
         }
+        self.ops += ops;
         self.pivots.push((col, row, rhs));
         true
     }
