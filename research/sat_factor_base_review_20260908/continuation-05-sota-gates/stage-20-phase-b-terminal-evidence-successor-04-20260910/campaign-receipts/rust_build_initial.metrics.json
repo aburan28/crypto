@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/build_koblitz_phase_b_tools.py",
+    "rust",
+    "--source",
+    "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-20260910",
+    "--jobs",
+    "2"
+  ],
+  "returncode": 2,
+  "watchdog_seconds": 3600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 2.357244790997356,
+    "user_seconds": 0.500626,
+    "system_seconds": 0.612265,
+    "total_core_seconds": 1.1128909999999999,
+    "single_core_seconds": 1.1128909999999999,
+    "peak_rss_bytes": 63307776,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

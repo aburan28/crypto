@@ -1,0 +1,934 @@
+{
+  "accounting_boundary": {
+    "cost_scope": "Source archival, extraction, tool-version probes, configure and compilation; charged once per build, separately from per-instance solver costs",
+    "cpu_scope": "RUSAGE_CHILDREN includes waited compiler and linker descendants, including parallel jobs; total core-seconds are not single-core elapsed time",
+    "excluded": [
+      "prior toolchain and system dependency installation",
+      "prior source acquisition",
+      "aggregate simultaneous build memory",
+      "outer Python build-driver overhead"
+    ],
+    "full_cost_gate_passed": false,
+    "memory_scope": "peak_rss_bytes is the largest child high-water RSS, not simultaneous aggregate RSS of a parallel process tree",
+    "single_core_elapsed_seconds": null
+  },
+  "binaries": {
+    "cryptominisat": {
+      "bytes": 3455008,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/bin/cryptominisat5",
+      "sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af"
+    }
+  },
+  "build_driver_sha256": "23b17301c2edabff705eb794f4a14c931450f6ea6f6d2a368a5504ccf3fe0e97",
+  "build_processes": [
+    {
+      "command": [
+        "/usr/bin/git",
+        "archive",
+        "--format=tar",
+        "--output=/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/source.tar",
+        "7ae1b4a74259cdce223a584281fb8f090bbd3eed"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "archive-source.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 7716864,
+        "single_core_seconds": 0.02969,
+        "system_seconds": 0.014582,
+        "total_core_seconds": 0.02969,
+        "user_seconds": 0.015108,
+        "wall_seconds": 0.05416958301793784
+      },
+      "metrics_path": "archive-source.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "archive-source",
+      "stderr_bytes": 0,
+      "stderr_path": "archive-source.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "archive-source.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/tar",
+        "-xf",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/source.tar",
+        "-C",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/source"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "extract-source.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3489792,
+        "single_core_seconds": 0.08709599999999999,
+        "system_seconds": 0.08012799999999999,
+        "total_core_seconds": 0.08709599999999999,
+        "user_seconds": 0.006967999999999999,
+        "wall_seconds": 0.11348604108206928
+      },
+      "metrics_path": "extract-source.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "extract-source",
+      "stderr_bytes": 0,
+      "stderr_path": "extract-source.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "extract-source.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/git",
+        "archive",
+        "--format=tar",
+        "--output=/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadical.tar",
+        "878a600ea92ce3a9173b069ab294429c851acf85"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "archive-cadical.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 7045120,
+        "single_core_seconds": 0.027283,
+        "system_seconds": 0.013323,
+        "total_core_seconds": 0.027283,
+        "user_seconds": 0.01396,
+        "wall_seconds": 0.04275045800022781
+      },
+      "metrics_path": "archive-cadical.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "archive-cadical",
+      "stderr_bytes": 0,
+      "stderr_path": "archive-cadical.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "archive-cadical.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/tar",
+        "-xf",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadical.tar",
+        "-C",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadical"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "extract-cadical.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3489792,
+        "single_core_seconds": 0.082549,
+        "system_seconds": 0.076125,
+        "total_core_seconds": 0.082549,
+        "user_seconds": 0.006424,
+        "wall_seconds": 0.11456024996004999
+      },
+      "metrics_path": "extract-cadical.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "extract-cadical",
+      "stderr_bytes": 0,
+      "stderr_path": "extract-cadical.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "extract-cadical.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/git",
+        "archive",
+        "--format=tar",
+        "--output=/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadiback.tar",
+        "acc8bb55b98e35afe0dc228662bf41d8341b8a9b"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "archive-cadiback.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 4931584,
+        "single_core_seconds": 0.018213,
+        "system_seconds": 0.009644,
+        "total_core_seconds": 0.018213,
+        "user_seconds": 0.008569,
+        "wall_seconds": 0.02509845793247223
+      },
+      "metrics_path": "archive-cadiback.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "archive-cadiback",
+      "stderr_bytes": 0,
+      "stderr_path": "archive-cadiback.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "archive-cadiback.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/tar",
+        "-xf",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadiback.tar",
+        "-C",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadiback"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "extract-cadiback.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3309568,
+        "single_core_seconds": 0.013399,
+        "system_seconds": 0.009855,
+        "total_core_seconds": 0.013399,
+        "user_seconds": 0.003544,
+        "wall_seconds": 0.016780833015218377
+      },
+      "metrics_path": "extract-cadiback.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "extract-cadiback",
+      "stderr_bytes": 0,
+      "stderr_path": "extract-cadiback.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "extract-cadiback.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "--version"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "version-cmake.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 10518528,
+        "single_core_seconds": 0.00971,
+        "system_seconds": 0.006239,
+        "total_core_seconds": 0.00971,
+        "user_seconds": 0.0034709999999999997,
+        "wall_seconds": 0.025074959034100175
+      },
+      "metrics_path": "version-cmake.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "version-cmake",
+      "stderr_bytes": 0,
+      "stderr_path": "version-cmake.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 90,
+      "stdout_path": "version-cmake.stdout",
+      "stdout_sha256": "b13eeca6556efa6ab5522c08f7550f5876ed088a9739d0e6e5c79acf5bd4f20e",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/cc",
+        "--version"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "version-cc.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 16482304,
+        "single_core_seconds": 0.092359,
+        "system_seconds": 0.08490199999999999,
+        "total_core_seconds": 0.092359,
+        "user_seconds": 0.007457,
+        "wall_seconds": 0.1946542919613421
+      },
+      "metrics_path": "version-cc.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "version-cc",
+      "stderr_bytes": 0,
+      "stderr_path": "version-cc.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 158,
+      "stdout_path": "version-cc.stdout",
+      "stdout_sha256": "8b9ffbbb441d63746c134ceca11585f336632283b11435cd06f92c82a86497e7",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/usr/bin/c++",
+        "--version"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "version-cxx.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 16498688,
+        "single_core_seconds": 0.016146,
+        "system_seconds": 0.007939,
+        "total_core_seconds": 0.016146,
+        "user_seconds": 0.008206999999999999,
+        "wall_seconds": 0.02247900003567338
+      },
+      "metrics_path": "version-cxx.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "version-cxx",
+      "stderr_bytes": 0,
+      "stderr_path": "version-cxx.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 158,
+      "stdout_path": "version-cxx.stdout",
+      "stdout_sha256": "8b9ffbbb441d63746c134ceca11585f336632283b11435cd06f92c82a86497e7",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "-S",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/source",
+        "-B",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/build",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DSTATIC_BINARY=ON",
+        "-DENABLE_TESTING=OFF",
+        "-DNOMPI=ON",
+        "-DNOBREAKID=ON",
+        "-DFETCHCONTENT_FULLY_DISCONNECTED=ON",
+        "-DCMAKE_C_COMPILER=/usr/bin/cc",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/c++",
+        "-DFETCHCONTENT_SOURCE_DIR_CADICAL=/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadical",
+        "-DFETCHCONTENT_SOURCE_DIR_CADIBACK=/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadiback"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "configure.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 39862272,
+        "single_core_seconds": 4.32644,
+        "system_seconds": 2.29879,
+        "total_core_seconds": 4.32644,
+        "user_seconds": 2.02765,
+        "wall_seconds": 5.859853166970424
+      },
+      "metrics_path": "configure.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "configure",
+      "stderr_bytes": 831,
+      "stderr_path": "configure.stderr",
+      "stderr_sha256": "17eda95fb7e4eb67fc6dae784214c16c031827d6a10413fb6180723e2b523088",
+      "stdout_bytes": 3265,
+      "stdout_path": "configure.stdout",
+      "stdout_sha256": "68cfc3b14b082dc43fde0e74a65cd33d61ac162168b34f6138309e0e21466db8",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "--build",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/build",
+        "--target",
+        "cryptominisat5-bin",
+        "--parallel",
+        "2"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "build.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1053556736,
+        "single_core_seconds": 143.201349,
+        "system_seconds": 16.7205,
+        "total_core_seconds": 143.201349,
+        "user_seconds": 126.480849,
+        "wall_seconds": 89.00515433307737
+      },
+      "metrics_path": "build.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "build",
+      "stderr_bytes": 315851,
+      "stderr_path": "build.stderr",
+      "stderr_sha256": "8491098a013d29d12f0b464c78029bca9edd34ff5242357ca774a0d37b54c224",
+      "stdout_bytes": 13176,
+      "stdout_path": "build.stdout",
+      "stdout_sha256": "6a68290a69c6f5ba0ead5a77fcda14b07fd539f008c5102c12c5b3afe20bda0e",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    },
+    {
+      "command": [
+        "/bin/cp",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/build/cryptominisat5",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/bin/cryptominisat5"
+      ],
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+        "RAYON_NUM_THREADS": "1",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC",
+        "VECLIB_MAXIMUM_THREADS": "1"
+      },
+      "inputs": [],
+      "intent_path": "copy-cryptominisat.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 2326528,
+        "single_core_seconds": 0.0028829999999999997,
+        "system_seconds": 0.0021869999999999997,
+        "total_core_seconds": 0.0028829999999999997,
+        "user_seconds": 0.000696,
+        "wall_seconds": 0.005084916017949581
+      },
+      "metrics_path": "copy-cryptominisat.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "copy-cryptominisat",
+      "stderr_bytes": 0,
+      "stderr_path": "copy-cryptominisat.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "copy-cryptominisat.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    }
+  ],
+  "dependency_commits": {
+    "cadiback": "acc8bb55b98e35afe0dc228662bf41d8341b8a9b",
+    "cadical": "878a600ea92ce3a9173b069ab294429c851acf85"
+  },
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+    "RAYON_NUM_THREADS": "1",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "evidence_inventory": [
+    {
+      "bytes": 24745,
+      "path": "CMakeCache.txt",
+      "sha256": "5504455519a975a22006102096f28a4b077ef32dadb152d2aa145beaa388b6b9"
+    },
+    {
+      "bytes": 859,
+      "path": "archive-cadiback.intent.json",
+      "sha256": "4291b7dbb8445ffa49d4a29429636dccd48f1b204a7483848f77ba570ff72566"
+    },
+    {
+      "bytes": 621,
+      "path": "archive-cadiback.metrics.json",
+      "sha256": "55aa6cc155a42d4134006ae5fc961c009e5eca6ce468254a835f0e6cbe290e04"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-cadiback.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-cadiback.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 856,
+      "path": "archive-cadical.intent.json",
+      "sha256": "541a50537c806db1bde5fac30615ad452e8cdb5359cbb372779566ae3ac00708"
+    },
+    {
+      "bytes": 619,
+      "path": "archive-cadical.metrics.json",
+      "sha256": "387bf807d4516cc8fec9ccd1c5ba01648e3f941278c520adfec0b41a8c0e2e7b"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-cadical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-cadical.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 830,
+      "path": "archive-source.intent.json",
+      "sha256": "4e9b1e05984392655e2caa18e115e884706e84435312311d03130ff320092309"
+    },
+    {
+      "bytes": 617,
+      "path": "archive-source.metrics.json",
+      "sha256": "fc0f12122a8ce1ba182f9c1dd991c5ad5d4cff1d0aee115b1a872b0e9d0162e3"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-source.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "archive-source.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 849,
+      "path": "build.intent.json",
+      "sha256": "560908386803f1b7267f0f9ece91db05a427369fe32cc623728f0d355ff58703"
+    },
+    {
+      "bytes": 623,
+      "path": "build.metrics.json",
+      "sha256": "d1f536afebba7eb1344c46e5911b1486eb42a85216c8abb0394ff26f80736147"
+    },
+    {
+      "bytes": 315851,
+      "path": "build.stderr",
+      "sha256": "8491098a013d29d12f0b464c78029bca9edd34ff5242357ca774a0d37b54c224"
+    },
+    {
+      "bytes": 13176,
+      "path": "build.stdout",
+      "sha256": "6a68290a69c6f5ba0ead5a77fcda14b07fd539f008c5102c12c5b3afe20bda0e"
+    },
+    {
+      "bytes": 1448,
+      "path": "configure.intent.json",
+      "sha256": "1e83b50803419eacb0b0f4b580d34f5e32169e24cd5bba73ec9c5fc1be146887"
+    },
+    {
+      "bytes": 1207,
+      "path": "configure.metrics.json",
+      "sha256": "5f3b9e47a6991350a121dda16d338326667c8ea2371fa42ef8dd61daaddbaed1"
+    },
+    {
+      "bytes": 831,
+      "path": "configure.stderr",
+      "sha256": "17eda95fb7e4eb67fc6dae784214c16c031827d6a10413fb6180723e2b523088"
+    },
+    {
+      "bytes": 3265,
+      "path": "configure.stdout",
+      "sha256": "68cfc3b14b082dc43fde0e74a65cd33d61ac162168b34f6138309e0e21466db8"
+    },
+    {
+      "bytes": 880,
+      "path": "copy-cryptominisat.intent.json",
+      "sha256": "4b6522bea8154a2fd1abeadfe243c96a48f149ecd6267e764f1c19a26f1f37f9"
+    },
+    {
+      "bytes": 675,
+      "path": "copy-cryptominisat.metrics.json",
+      "sha256": "2afa8c762932d66017103b8bfb8b22c7db94af77a53d725d6a2e88b079b0ccda"
+    },
+    {
+      "bytes": 0,
+      "path": "copy-cryptominisat.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "copy-cryptominisat.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 886,
+      "path": "extract-cadiback.intent.json",
+      "sha256": "57ac9ca56d91f54a19f126db652d632ca686a4ff0f241a57f4d21ad8a7480762"
+    },
+    {
+      "bytes": 644,
+      "path": "extract-cadiback.metrics.json",
+      "sha256": "b0d262d585b946e5bea70315da7211843b27e2aaec5f8472af4c53b05afb0f64"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-cadiback.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-cadiback.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 883,
+      "path": "extract-cadical.intent.json",
+      "sha256": "d50cf725cc1b4f5f63f675eafdebb2cec7291644c73e250b88ef773c771d7611"
+    },
+    {
+      "bytes": 641,
+      "path": "extract-cadical.metrics.json",
+      "sha256": "69d5fdc387cf47f466b58ee14316241398f5aaa58d4edf5e65cc3ca9abf93e1d"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-cadical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-cadical.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 880,
+      "path": "extract-source.intent.json",
+      "sha256": "0e7ced8f7cc17cc0887bf06a9566f9772f235a1aaba1878b0fa71376a848900a"
+    },
+    {
+      "bytes": 684,
+      "path": "extract-source.metrics.json",
+      "sha256": "ef1f0612993dab2b2e54f113a38cec665660feb443386b1958d0da8987919ae2"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-source.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "extract-source.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 692,
+      "path": "version-cc.intent.json",
+      "sha256": "2198a3f54a2b4b2f27d75e164213ffef3077143426ad08e9e7316a04be606412"
+    },
+    {
+      "bytes": 459,
+      "path": "version-cc.metrics.json",
+      "sha256": "a530b8574965d070ea4b4210b5291966da61098bcd06192225510f47c31ac046"
+    },
+    {
+      "bytes": 0,
+      "path": "version-cc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 158,
+      "path": "version-cc.stdout",
+      "sha256": "8b9ffbbb441d63746c134ceca11585f336632283b11435cd06f92c82a86497e7"
+    },
+    {
+      "bytes": 707,
+      "path": "version-cmake.intent.json",
+      "sha256": "96b44f9b5fab625c585323fd6f22aeeaa41806181b7ced18d2507ddc7c9bc875"
+    },
+    {
+      "bytes": 473,
+      "path": "version-cmake.metrics.json",
+      "sha256": "2a98e9c90863aa8772b564dd31633ea88674cb4fda00a68f89f57dba16e70360"
+    },
+    {
+      "bytes": 0,
+      "path": "version-cmake.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 90,
+      "path": "version-cmake.stdout",
+      "sha256": "b13eeca6556efa6ab5522c08f7550f5876ed088a9739d0e6e5c79acf5bd4f20e"
+    },
+    {
+      "bytes": 694,
+      "path": "version-cxx.intent.json",
+      "sha256": "e401984d945d890eb13a2fd5b7ccb8bd3eb15b776a7b607c170fa2edb445292c"
+    },
+    {
+      "bytes": 462,
+      "path": "version-cxx.metrics.json",
+      "sha256": "334a53b6a4baab0c88aedde6c54bf720438e9e9b42234858d4227d61147c3c83"
+    },
+    {
+      "bytes": 0,
+      "path": "version-cxx.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 158,
+      "path": "version-cxx.stdout",
+      "sha256": "8b9ffbbb441d63746c134ceca11585f336632283b11435cd06f92c82a86497e7"
+    }
+  ],
+  "excluded_test_submodules": {
+    "tests/pbsugar": "3441462ed0af5f3d7d2b6a7ce55938ae305f34f4",
+    "tests/simp-checks/simplifiy_testfiles": "345531cca666687830df6f57192e51d1f6ac52cc",
+    "tests/xor_cnf_tests": "a0963d220a22e7f1433d7fb3c23d8f34a67a5611",
+    "utils/OutputCheck": "3232d0937dcabf59df7ceb776f27b4d5cff6194d",
+    "utils/cnf-utils": "b8f1daf34293180613bfc081f919f327a622a561",
+    "utils/gtest": "1d17ea141d2c11b8917d2c7d029f1c4e2b9769b2",
+    "utils/licensecheck": "74128e614361de8e57854d432fb0d22c28624737",
+    "utils/lingeling-ala": "3c733d8d1c75055d4cc1a722ecaccd6130086b1f",
+    "utils/minisat": "b58f67e5c1d4cc0be8ad588095a41182dfdfd259",
+    "utils/minisat_only_elim_and_subsume": "a114747d6509a53c24c7c9a862d1b9111bc874da",
+    "utils/sha1-sat": "e6347c118f183b1ec29d30d05e3f1dc39fccb949"
+  },
+  "implementation_state": {
+    "commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
+    "dirty": false,
+    "porcelain": []
+  },
+  "phase_b_helper_sha256": "a6c3b4d11b1a7e34614f403b53742c9056ccc2db3f4fe0719c3db91c4b7a1c56",
+  "platform": {
+    "machine": "arm64",
+    "release": "25.6.0",
+    "system": "Darwin"
+  },
+  "process_meter_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f",
+  "receipt_payload_sha256": "7d0de0e86733d9b14cc9300cb279e8493d9f38a7b803a4883f66ec4149092c69",
+  "requested_parallel_jobs": 2,
+  "resources": {
+    "aggregate_process_tree_peak_rss_bytes": null,
+    "largest_child_peak_rss_bytes": 1053556736,
+    "single_core_elapsed_seconds": null,
+    "summed_process_wall_seconds": 95.479146290105,
+    "total_core_seconds": 147.907117
+  },
+  "rust_source_objects": null,
+  "schema": "koblitz_pdp_phase_b_tool_build_receipt.v1",
+  "source_archives": {
+    "cadiback": {
+      "bytes": 112640,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadiback.tar",
+      "sha256": "e0aa8f5d67c04527135dde5fe5f943e672d6af11a6f7f924e9f0c07ad3bffba0"
+    },
+    "cadical": {
+      "bytes": 4044800,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/cadical.tar",
+      "sha256": "8264713f3dc1c4455162d2912238712bd8030fceabec0f4b430d106b5a58058d"
+    },
+    "source": {
+      "bytes": 5068800,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/source.tar",
+      "sha256": "467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323"
+    }
+  },
+  "source_clean": true,
+  "source_commit": "7ae1b4a74259cdce223a584281fb8f090bbd3eed",
+  "status": "completed",
+  "tool": "cryptominisat",
+  "toolchain": {
+    "c++": {
+      "bytes": 118640,
+      "path": "/usr/bin/c++",
+      "resolved_path": "/usr/bin/c++",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    },
+    "cc": {
+      "bytes": 118640,
+      "path": "/usr/bin/cc",
+      "resolved_path": "/usr/bin/cc",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    },
+    "cmake": {
+      "bytes": 13340664,
+      "path": "/opt/homebrew/bin/cmake",
+      "resolved_path": "/opt/homebrew/Cellar/cmake/4.2.1/bin/cmake",
+      "sha256": "0e7b8ce34151f3b4e2d8fa2f62c04db0239cb331119020d49a95afe5386cd4a8"
+    },
+    "cp": {
+      "bytes": 152976,
+      "path": "/bin/cp",
+      "resolved_path": "/bin/cp",
+      "sha256": "48f8e2964a1866e3e734f5dbdd0949ee2f30a881540f8925d480407d1be0f3cc"
+    },
+    "git": {
+      "bytes": 118640,
+      "path": "/usr/bin/git",
+      "resolved_path": "/usr/bin/git",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    },
+    "make": {
+      "bytes": 118640,
+      "path": "/usr/bin/make",
+      "resolved_path": "/usr/bin/make",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    },
+    "tar": {
+      "bytes": 274448,
+      "path": "/usr/bin/tar",
+      "resolved_path": "/usr/bin/bsdtar",
+      "sha256": "bc069dd7ef2ecea4c27ff9daa97f4ba4c5a1a41938bad8050e96bce5daa64346"
+    }
+  }
+}

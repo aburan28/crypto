@@ -561,6 +561,46 @@ impl Solver {
         self.xors.len()
     }
 
+    /// **Add `count` fresh variables**, returning their 1-indexed
+    /// range.  Every per-variable structure grows, the parity bitmasks
+    /// are widened, and the live Gauss-Jordan matrix is rebuilt on the
+    /// next propagation.  Meant for callers that layer constraints —
+    /// symmetry breaking, cardinality chains — over an encoding they
+    /// did not size themselves; call it before `solve`, at level 0.
+    pub fn add_vars(&mut self, count: u32) -> std::ops::RangeInclusive<u32> {
+        debug_assert!(
+            self.trail_lim.is_empty(),
+            "add_vars must be called at decision level 0"
+        );
+        let old = self.n_vars;
+        let new_total = old + count;
+        let n = new_total as usize;
+        let words = bs_words(new_total);
+        self.assignment.resize(n, None);
+        self.assigned_w.resize(words, 0);
+        self.value_w.resize(words, 0);
+        self.level.resize(n, -1);
+        self.reason.resize(n, Reason::Decision);
+        self.saved_phase.resize(n, true);
+        self.activity.resize(n, 0.0);
+        self.watches.resize(2 * n, Vec::new());
+        self.xor_reason.resize(n, Vec::new());
+        self.seen.resize(n, false);
+        self.branch_priority.resize(n, false);
+        self.order.pos.resize(n, -1);
+        for row in &mut self.xors {
+            row.mask.resize(words, 0);
+        }
+        self.matrix.clear();
+        self.pivot.clear();
+        self.xor_epoch = u64::MAX;
+        self.n_vars = new_total;
+        for v in old..new_total {
+            self.order.insert(v, &self.activity, &self.branch_priority);
+        }
+        (old + 1)..=new_total
+    }
+
     /// **Branch on these variables first**, exhausting them before any
     /// other variable is ever chosen as a decision.
     ///

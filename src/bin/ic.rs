@@ -20,7 +20,7 @@ use std::{
     about = "Curve inspection and synthetic index-calculus research"
 )]
 #[command(
-    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, or compare factor-base candidates. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. Imported parameters and points are never sent to a DLP solver."
+    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, compare factor-base candidates, or search for high-yield factor bases. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. Imported parameters and points are never sent to a DLP solver."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -49,6 +49,12 @@ enum Action {
     Generate(experiment::GenerateArgs),
     /// Compare bounded factor-base candidates using training and holdout fixtures.
     Compare(experiment::CompareArgs),
+    /// Search divisor, union and pruned factor bases by exact relation yield, then validate.
+    Search(experiment::SearchArgs),
+    /// Precompute the factor-base logarithm database once for a curve.
+    Logs(experiment::LogsArgs),
+    /// Recover a target's logarithm by descent, reusing a saved database.
+    Solve(experiment::SolveArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -89,6 +95,9 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         }),
         Some(Action::Generate(args)) => experiment::generate(args.clone()),
         Some(Action::Compare(args)) => experiment::compare(args.clone(), cli.json),
+        Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
+        Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
+        Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -160,6 +169,81 @@ fn display(report: &Value) {
                 );
             }
             println!("Scope: {}", report["scope"]);
+        }
+        Some("search") => {
+            println!(
+                "Search: {}; {} candidates scored on {} targets{}",
+                report["status"],
+                report["candidate_count"],
+                report["targets"],
+                if report["exhaustive_targets"] == true {
+                    " (whole subgroup)"
+                } else {
+                    " (sampled)"
+                }
+            );
+            for (i, c) in report["candidates"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .take(10)
+                .enumerate()
+            {
+                println!(
+                    "  #{:<2} {:<22} points {:>5} columns {:>4} coverage {:>6} expected trials {}",
+                    i + 1,
+                    c["family"].as_str().unwrap_or("?"),
+                    c["points"],
+                    c["unknowns"],
+                    c["coverage"]
+                        .as_f64()
+                        .map_or("—".to_string(), |v| format!("{v:.3}")),
+                    c["expected_trials"]
+                        .as_f64()
+                        .map_or("∞".to_string(), |v| format!("{v:.1}"))
+                );
+            }
+            for v in report["validation"]["runs"].as_array().into_iter().flatten() {
+                println!(
+                    "  validated #{}: eligible {}; median process seconds {}",
+                    v["rank"], v["eligible"], v["median_process_seconds"]
+                );
+            }
+            match report["selected"].get("spec") {
+                Some(spec) => println!("Selected: {spec}"),
+                None => println!("Selected: none"),
+            }
+            if let Some(path) = report["spec_out"].as_str() {
+                println!("Recipe saved: {path}");
+            }
+        }
+        Some("logs") => {
+            println!(
+                "Logs: {}; {} columns; {} trials; {} relations",
+                report["status"],
+                report["counts"]["columns"],
+                report["counts"]["trials"],
+                report["counts"]["relations"]
+            );
+            if let Some(path) = report["out"].as_str() {
+                println!("Database saved: {path}");
+            } else if let Some(reason) = report["reason"].as_str() {
+                println!("Reason: {reason}");
+            }
+        }
+        Some("solve") => {
+            println!(
+                "Solve: {}; database columns {} (re-verified)",
+                report["status"],
+                report["database"]["columns"]
+            );
+            if let Some(result) = report.get("result") {
+                println!(
+                    "Expected: {}; recovered: {}; verified: {}; descent trials: {}",
+                    result["expected"], result["recovered"], result["verified"],
+                    report["counts"]["descent_trials"]
+                );
+            }
         }
         Some("error") => {
             eprintln!(
