@@ -1,0 +1,81 @@
+name: Koblitz unknown-scalar panel
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.toml"
+      - "examples/koblitz_unknown_scalar_panel.rs"
+      - "examples/koblitz_public_factor_base_discovery.rs"
+      - "scripts/run_koblitz_unknown_scalar_panel.py"
+      - "scripts/test_koblitz_unknown_scalar_panel.py"
+      - "scripts/run_koblitz_relation_yield_bridge.py"
+      - "scripts/process_meter.py"
+      - "src/cryptanalysis/koblitz_index_calculus.rs"
+      - "src/cryptanalysis/koblitz_pdp_phase_a.rs"
+      - "src/cryptanalysis/sat.rs"
+      - "src/cryptanalysis/semaev_sat.rs"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-23-unknown-scalar-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE23_UNKNOWN_SCALAR.md"
+      - ".github/workflows/koblitz-unknown-scalar-panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-and-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frozen dependency lock
+        run: cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+      - name: Test Python control plane
+        run: python3 scripts/test_koblitz_unknown_scalar_panel.py
+      - name: Test arbitrary-target Rust producer
+        run: cargo test --locked --example koblitz_unknown_scalar_panel
+      - name: Run and verify full outer-metered smoke
+        run: |
+          mkdir -p "$RUNNER_TEMP/stage23-run-outer"
+          python3 scripts/run_koblitz_unknown_scalar_panel.py plan \
+            --profile smoke \
+            --allow-dirty \
+            --output "$RUNNER_TEMP/stage23-run" \
+            > "$RUNNER_TEMP/stage23-plan.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          plan = json.loads((root / "stage23-plan.json").read_text())
+          subprocess.run(plan["outer_command"], check=True)
+          metrics = json.loads((root / "stage23-run-outer/driver.metrics.json").read_text())
+          if metrics["returncode"] != 0 or metrics["timed_out"] or metrics["orphan_group_terminated"]:
+              print((root / "stage23-run-outer/driver.stderr").read_text())
+              raise SystemExit("Stage-23 outer smoke failed")
+          PY
+          python3 scripts/run_koblitz_unknown_scalar_panel.py verify \
+            --run-root "$RUNNER_TEMP/stage23-run" \
+            --outer-metrics "$RUNNER_TEMP/stage23-run-outer/driver.metrics.json" \
+            --output "$RUNNER_TEMP/stage23-verification"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          summary = json.loads((root / "stage23-run/run-summary.json").read_text())
+          verification = json.loads((root / "stage23-verification/verification.json").read_text())
+          assert summary["status"] == "complete_verified_panel"
+          assert summary["completed_rows"] == summary["expected_rows"] == 2
+          assert all(row["row_complete"] for row in summary["rows"])
+          assert all(row["recovered_scalars_match"] for row in summary["rows"])
+          assert verification["scientific_measurement_admitted"] is False
+          assert verification["measurement_admission_status"] == "operational_smoke_only"
+          assert verification["full_cost_gate_passed"] is False
+          assert verification["koblitz_index_calculus_sota"] is False
+          PY
