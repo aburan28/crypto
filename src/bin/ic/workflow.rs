@@ -37,13 +37,16 @@
 //! directory never silently mixes two experiments.  Artifacts are
 //! written atomically (temp file, then rename).
 //!
-//! Every target is a synthetic known-answer instance built from the
-//! parameter file; imported points are never solved.
+//! A target may be a synthetic known-answer instance or a public point
+//! derived by domain-separated hash-to-curve and cofactor projection.
+//! The public form never constructs an expected scalar; successful IC
+//! and rho results are certified only by `[d]G = Q`.
 
 use super::experiment::{
     self, log_table_from_doc, log_table_to_doc, FactorBaseDocument, LinearAlgebraMode,
     LogTableDocument, Solver,
 };
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
@@ -51,7 +54,7 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     individual_log_with_pair_table, koblitz_signed_frobenius_rho_with_progress,
-    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    point_key, points_with_x, solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
     RelationCollector, RelationWorkUnit,
 };
@@ -171,8 +174,9 @@ fn default_true() -> bool {
     true
 }
 
-/// One synthetic known-answer target: an explicit scalar, or one drawn
-/// reproducibly from a seed.  Exactly one field must be set.
+/// One target: an explicit scalar, a reproducibly drawn known scalar,
+/// or a public hash-to-curve target whose scalar is never constructed.
+/// Exactly one field must be set.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TargetSpec {
@@ -180,6 +184,8 @@ pub struct TargetSpec {
     pub known_log: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub random_seed: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_hash_seed: Option<u64>,
 }
 
 /// The linear algebra of the logs stage: `dense` elimination or
@@ -307,9 +313,11 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
         return Err("collection.units must be at least 1 and at most collection.max_units (≤ 100000)".into());
     }
     for (i, t) in p.targets.iter().enumerate() {
-        if t.known_log.is_some() == t.random_seed.is_some() {
+        if [t.known_log.is_some(), t.random_seed.is_some(), t.public_hash_seed.is_some()]
+            .into_iter().filter(|set| *set).count() != 1
+        {
             return Err(format!(
-                "target {i}: set exactly one of known_log or random_seed"
+                "target {i}: set exactly one of known_log, random_seed, or public_hash_seed"
             ));
         }
     }
@@ -412,10 +420,25 @@ pub struct RelationUnitDocument {
 pub struct Solution {
     pub index: usize,
     pub expected: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target: Option<TargetRecord>,
     pub recovered: Option<String>,
     pub verified: bool,
     pub descent_trials: usize,
     pub elapsed_seconds: f64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TargetRecord {
+    pub kind: String,
+    pub x: String,
+    pub y: String,
+    pub target_scalar_constructed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_hash_seed: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public_hash_counter: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -522,7 +545,7 @@ fn known_scalar(c: &KoblitzCurve, t: &TargetSpec) -> Result<BigUint, String> {
     let k = if let Some(s) = &t.known_log {
         super::params::number(s)?
     } else {
-        let seed = t.random_seed.expect("validated: one of known_log/random_seed");
+        let seed = t.random_seed.expect("validated known-scalar target has known_log or random_seed");
         let mut rng = StdRng::seed_from_u64(seed ^ 0x534f_4c56_4552_5447);
         BigUint::from(rng.gen_range(1..c.subgroup_order.to_u64_digits()[0]))
     };
@@ -533,6 +556,88 @@ fn known_scalar(c: &KoblitzCurve, t: &TargetSpec) -> Result<BigUint, String> {
         ));
     }
     Ok(k)
+}
+
+fn point_record(
+    point: &BinaryPoint,
+    kind: &str,
+    target_scalar_constructed: bool,
+    public_hash_seed: Option<u64>,
+    public_hash_counter: Option<u64>,
+) -> Result<TargetRecord, String> {
+    let BinaryPoint::Affine { x, y } = point else {
+        return Err("target is the point at infinity".into());
+    };
+    Ok(TargetRecord {
+        kind: kind.into(),
+        x: x.to_biguint().to_string(),
+        y: y.to_biguint().to_string(),
+        target_scalar_constructed,
+        public_hash_seed,
+        public_hash_counter,
+    })
+}
+
+fn public_hash_target(c: &KoblitzCurve, seed: u64) -> Result<(BinaryPoint, TargetRecord), String> {
+    const DOMAIN: &[u8] = b"ic-workflow-public-target-v1\0";
+    let mask = (1u64 << c.n) - 1;
+    for counter in 0u64..1_000_000 {
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(DOMAIN);
+        hasher.update(&c.n.to_le_bytes());
+        hasher.update(&[c.a]);
+        hasher.update(&c.k.to_le_bytes());
+        hasher.update(&c.b_index.to_le_bytes());
+        hasher.update(&seed.to_le_bytes());
+        hasher.update(&counter.to_le_bytes());
+        let digest = hasher.finalize();
+        let bytes = digest.as_bytes();
+        let mut word = [0u8; 8];
+        word.copy_from_slice(&bytes[..8]);
+        let x = F2mElement::from_biguint(&BigUint::from(u64::from_le_bytes(word) & mask), c.n);
+        let mut lifts = points_with_x(&c.curve, &x);
+        lifts.sort_by_key(point_key);
+        if lifts.is_empty() {
+            continue;
+        }
+        let raw = lifts[usize::from(bytes[8] & 1) % lifts.len()].clone();
+        let target = c.mul(&raw, &c.cofactor);
+        if target == BinaryPoint::Infinity {
+            continue;
+        }
+        if c.mul(&target, &c.subgroup_order) != BinaryPoint::Infinity {
+            return Err("public hash target did not enter the prime-order subgroup".into());
+        }
+        let record = point_record(
+            &target,
+            "public_hash_to_curve_cofactor",
+            false,
+            Some(seed),
+            Some(counter),
+        )?;
+        return Ok((target, record));
+    }
+    Err("public hash-to-curve target attempt cap exhausted".into())
+}
+
+fn resolve_target(
+    c: &KoblitzCurve,
+    target: &TargetSpec,
+) -> Result<(BinaryPoint, Option<BigUint>, TargetRecord), String> {
+    if let Some(seed) = target.public_hash_seed {
+        let (point, record) = public_hash_target(c, seed)?;
+        Ok((point, None, record))
+    } else {
+        let scalar = known_scalar(c, target)?;
+        let point = c.mul(c.generator(), &scalar);
+        let kind = if target.known_log.is_some() {
+            "known_log"
+        } else {
+            "random_known_log"
+        };
+        let record = point_record(&point, kind, true, None, None)?;
+        Ok((point, Some(scalar), record))
+    }
 }
 
 trait IsZeroExt {
@@ -994,20 +1099,21 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut failed_now = 0usize;
     for i in pending {
         let t = Instant::now();
-        let k = known_scalar(&c, &p.targets[i])?;
-        let q = c.mul(c.generator(), &k);
+        let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
         let outcome = individual_log_with_pair_table(&c, &fb, &table, &q, &ic, pair.as_ref());
         let (recovered, trials) = match outcome {
             Some((d, r)) => (Some(d), r.trials),
             None => (None, 0),
         };
-        let verified = recovered.as_ref() == Some(&k)
-            && recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q);
+        let verified = recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
+            && expected.as_ref().map_or(true, |known| recovered.as_ref() == Some(known));
         // Replace any earlier unverified attempt for this index.
         solutions.solutions.retain(|s| s.index != i);
         solutions.solutions.push(Solution {
             index: i,
-            expected: k.to_string(),
+            expected: expected.as_ref().map(ToString::to_string)
+                .unwrap_or_else(|| "not_constructed".into()),
+            target: Some(target_record),
             recovered: recovered.map(|d| d.to_string()),
             verified,
             descent_trials: trials,
@@ -1049,8 +1155,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let mut rows = Vec::with_capacity(p.targets.len());
         let (mut rho_seconds, mut rho_iterations, mut rho_verified) = (0.0f64, 0u64, 0usize);
         for i in 0..p.targets.len() {
-            let k = known_scalar(&c, &p.targets[i])?;
-            let q = c.mul(c.generator(), &k);
+            let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
             let options = KoblitzSignedRhoOptions {
                 seed: p.baseline.rho_seed ^ (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15),
                 max_iterations_per_restart: p.baseline.rho_max_iterations,
@@ -1060,13 +1165,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             let t = Instant::now();
             let report = koblitz_signed_frobenius_rho_with_progress(&c, &q, &options, &mut |_| {});
             let secs = t.elapsed().as_secs_f64();
-            let verified = report.verified && report.recovered_log.as_ref() == Some(&k);
+            let verified = report.verified
+                && report.recovered_log.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
+                && expected.as_ref().map_or(true, |known| report.recovered_log.as_ref() == Some(known));
             rho_seconds += secs;
             rho_iterations += report.iterations;
             rho_verified += usize::from(verified);
             rows.push(json!({"index":i,"verified":verified,"iterations":report.iterations,
                 "restarts":report.restarts_attempted,"seconds":secs,
-                "walk_group_additions":report.charges.walk_group_additions}));
+                "walk_group_additions":report.charges.walk_group_additions,
+                "recovered":report.recovered_log.as_ref().map(ToString::to_string),
+                "target":target_record}));
             say(&format!(
                 "      target {i}: rho {} after {} iterations ({:.3}s)",
                 if verified { "verified" } else { "FAILED" },
@@ -1084,7 +1193,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let ratio = |ic: f64| if ic > 0.0 { rho_per_target / ic } else { f64::INFINITY };
         let vs_rho = json!({
             "n":c.n,"subgroup_order":c.subgroup_order.to_string(),"targets":p.targets.len(),
-            "claim_boundary":"synthetic_known_answer",
+            "claim_boundary":if p.targets.iter().any(|target| target.public_hash_seed.is_some()) {
+                "public_hash_unknown_scalar"
+            } else {
+                "synthetic_known_answer"
+            },
             "automorphism_discount":{"family":"signed Frobenius classes, A = 2n","n":c.n,"sqrt_2n":(2.0*c.n as f64).sqrt()},
             "timing_class":{"charged":"algorithmic_charged: per-target descent wall (one decomposition and a lookup) against the ρ walk on the same target in the same process",
                             "amortised":"select + collect + logs + pair-table wall divided over the targets, plus descent",

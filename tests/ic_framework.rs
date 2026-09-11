@@ -530,7 +530,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
             "collection":{"unit_trials":128,"units":2,"max_units":8},
             "baseline":{"rho":true,"rho_max_iterations":100000},
             "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
-            "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"}]
+            "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"},{"public_hash_seed":29}]
         }))
         .unwrap(),
     )
@@ -604,26 +604,34 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "complete");
-    assert_eq!(v["solutions"]["verified"], 3);
-    assert_eq!(v["solutions"]["count"], 3);
+    assert_eq!(v["solutions"]["verified"], 4);
+    assert_eq!(v["solutions"]["count"], 4);
     let stages = v["stages"].as_array().unwrap();
     assert_eq!(stages[1]["ran"], false, "collection must be reused");
     assert_eq!(stages[2]["ran"], false, "logs must be reused");
     assert_eq!(stages[3]["stage"], "solve");
-    assert_eq!(stages[3]["solved_now"], 3);
-    // The rho baseline ran on the same three targets in this process.
+    assert_eq!(stages[3]["solved_now"], 4);
+    // The rho baseline ran on the same four targets in this process.
     assert_eq!(stages[4]["stage"], "baseline");
     let vs = &stages[4]["vs_rho"];
-    assert_eq!(vs["targets"], 3);
-    assert_eq!(vs["rho"]["verified"], 3);
-    assert_eq!(vs["ic"]["verified"], 3);
+    assert_eq!(vs["targets"], 4);
+    assert_eq!(vs["rho"]["verified"], 4);
+    assert_eq!(vs["ic"]["verified"], 4);
+    assert_eq!(vs["claim_boundary"], "public_hash_unknown_scalar");
     assert!(vs["rho"]["seconds_per_target"].as_f64().unwrap() > 0.0);
     assert!(vs["ratio"]["charged"].as_f64().unwrap() > 0.0);
     assert!(vs["verdict"]["charged_crossover"].is_boolean());
     assert!(dir.join("baseline.json").exists());
     for item in v["solutions"]["items"].as_array().unwrap() {
         assert_eq!(item["verified"], true);
-        assert_eq!(item["expected"], item["recovered"]);
+        if item["target"]["kind"] == "public_hash_to_curve_cofactor" {
+            assert_eq!(item["expected"], "not_constructed");
+            assert_eq!(item["target"]["target_scalar_constructed"], false);
+            assert!(item["recovered"].as_str().is_some());
+        } else {
+            assert_eq!(item["expected"], item["recovered"]);
+            assert_eq!(item["target"]["target_scalar_constructed"], true);
+        }
     }
 
     // A full rerun does no new work.
@@ -632,7 +640,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(v["status"], "complete");
     assert_eq!(v["run_number"], 6, "the refused worker run persisted nothing");
     assert_eq!(v["stages"][3]["solved_now"], 0);
-    assert_eq!(v["stages"][3]["already_solved"], 3);
+    assert_eq!(v["stages"][3]["already_solved"], 4);
     assert_eq!(v["state"]["units_collected"], 2);
 
     // A different parameter set is refused in the same directory.
