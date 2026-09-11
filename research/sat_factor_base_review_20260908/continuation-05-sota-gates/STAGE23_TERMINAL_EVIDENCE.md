@@ -71,6 +71,13 @@ The reviewed successor-03 bundle seal is
 its compressed publication SHA-256 is
 `7886a767b0fe0f3372bd034429e3616632c40ea1781de835602fa08b72e9dd44`.
 
+The compatible Stage-25 packager successor is commit
+`051013c69b04a334a201106c4f6dd3aeb34adf97`, with core SHA-256
+`90e6b5032b889e2f75727de2b5e4e6fcd7c56f55f62aa52ec45c9d8941a741f1`.
+It permits hard-linked Cargo artifacts only while authenticating the omitted
+`build-target/` partition. Retained evidence and every compact-bundle
+verification path remain single-link and use the same strict descriptor checks.
+
 The typed external-tool map retains Python, Cargo, and rustc identities for
 command reconstruction. Each mapped path, size, and SHA-256 must equal the
 corresponding immutable entry in the archived source binding; the tool map
