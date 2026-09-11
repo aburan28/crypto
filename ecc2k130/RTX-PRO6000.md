@@ -54,6 +54,13 @@ and zero drops. Every timed sample completed 201,863,462,912 scalar updates.
 See [NATIVE-CARRYLESS.md](NATIVE-CARRYLESS.md) for the ranges, correctness
 checks, compiler requirements and public-code binding.
 
+The [public preset audit](benchmarks/clmad/native-audit.json) ran the command
+above and measured **8.671278 B/s** benchmark median and **8.507975 B/s**
+collection median on a separate GPU allocation. Arithmetic and integration
+checks passed; all six samples completed 201,863,462,912 updates. Each
+collection retained 5,149 records with zero drops. These native-command
+measurements validate reproduction and are separate from the paired gain.
+
 ## Historical tiled-state preset comparison
 
 The [controlled tiled-state comparison](benchmarks/tiled-state/comparison.json)

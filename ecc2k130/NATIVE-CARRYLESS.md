@@ -51,6 +51,17 @@ thread with zero stack, local or shared bytes. These static observations do
 not predict an instruction-for-instruction speedup or establish a hardware
 ceiling. The measured complete-walk rate remains below 15 B/s.
 
+The separate [published-command audit](benchmarks/clmad/native-audit.json)
+ran `make audit-rtx-pro6000` from the committed public source. It measured
+**8.671278 B/s** benchmark median (8.671204–8.671598) and **8.507975 B/s**
+collection median (8.506510–8.509265). All six samples completed the exact
+scalar budget with the native-mode marker; each collection retained 5,149
+records with zero drops. The [audit review](benchmarks/clmad/native-audit-review.json)
+binds the source, binary, compiler, runtime flags and counts. This separate
+allocation validates the command and does not estimate an additional gain.
+It retains corpus counts and sizes; content equality comes from the paired
+comparison above.
+
 ## Build and verify
 
 For the fixed RTX preset:
