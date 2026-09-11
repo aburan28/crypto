@@ -15,6 +15,7 @@ from typing import Any
 import koblitz_stage26_affinity_inputs as packet_tool
 import run_koblitz_blind_pdp_phase_b as phase_b
 import run_koblitz_stage26_affinity_cell as cell_tool
+import run_koblitz_stage25_single_core as stage25_tool
 import score_koblitz_blind_pdp_phase_b as phase_b_score
 import verify_koblitz_stage27_result as stage27_verifier
 
@@ -26,6 +27,7 @@ SEAL_SCHEMA = "koblitz_stage26_affinity_score_seal.v1"
 EXPECTED_RUN = 34632018379
 EXPECTED_COMMIT = "03968a5da2a511abb723652529de34dc60e10942"
 DIRECT_MITM_SCORE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-27-direct-mitm-result-20260911/score.json"
+STAGE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
 
 
 class Stage26ScoreError(RuntimeError):
@@ -191,6 +193,94 @@ def matched_direct_mitm() -> dict[str, Any]:
     }
 
 
+def unknown_scalar_control() -> dict[str, Any]:
+    names = {
+        "result": "stage-25-single-core-result.json",
+        "verification": "stage-25-single-core-verification.json",
+        "artifact": "stage-25-single-core-artifact.json",
+        "math_replay": "stage-25-single-core-math-replay.json",
+        "affinity": "stage-25-single-core-affinity.json",
+        "result_seal": "stage-25-single-core-result-seal.json",
+    }
+    values = {key: read_json(STAGE / name, f"Stage-25 {key}") for key, name in names.items()}
+    result = stage25_tool.validate_result(values["result"])
+    affinity = stage25_tool.validate_affinity(values["affinity"])
+    require(result["affinity"] == affinity, "Stage-25 result and affinity differ")
+    artifact = values["artifact"]
+    require(artifact.get("status") == "github_artifact_downloaded_and_portable_stage23_verified", "Stage-25 artifact is incomplete")
+    for name, identity in artifact.get("committed_files", {}).items():
+        path = STAGE / name
+        require(path.is_file() and path.stat().st_size == identity["bytes"] and phase_b.sha256_file(path, "Stage-25 committed file") == identity["sha256"], "Stage-25 committed file changed")
+    verification = values["verification"]
+    require(verification.get("status") == "single_cpu_affinity_receipt_verified" and verification.get("completed_rows") == 5, "Stage-25 verification is incomplete")
+    require(verification.get("single_core_elapsed_seconds") == result["measurements"]["single_core_elapsed_seconds"], "Stage-25 single-core time changed")
+    replay = values["math_replay"]
+    require(replay.get("status") == "PASS" and replay.get("check_count") == 1251, "Stage-25 retained-math replay is incomplete")
+    require(replay.get("retained_mathematical_witness_replay_completed") is True and replay.get("independent_mathematical_payload_replay_completed") is False, "Stage-25 replay boundary changed")
+    require(replay.get("attempt_totals") == {"attempts": 437, "conflicts": 28422672, "models": 252, "relation_found": 252, "solver_calls": 437, "unknown": 185}, "Stage-25 relation totals changed")
+    return {
+        "file_identities": {key: {"path": name, "bytes": (STAGE / name).stat().st_size, "sha256": phase_b.sha256_file(STAGE / name, f"Stage-25 {key}")} for key, name in names.items()},
+        "status": result["status"],
+        "profile": result["profile"],
+        "completed_unknown_scalar_targets": 5,
+        "factor_base_logs_known_by_construction": False,
+        "target_scalars_known_by_construction": False,
+        "measurements": result["measurements"],
+        "attempt_totals": replay["attempt_totals"],
+        "factor_base": replay["factor_base"],
+        "discovery": replay["discovery"],
+        "rho_totals": replay["rho_totals"],
+        "rho_charge_totals": replay["rho_charge_totals"],
+        "ratios": replay["ratios"],
+        "retained_math_checks": replay["check_count"],
+        "retained_mathematical_witness_replay_completed": True,
+        "independent_mathematical_payload_replay_completed": False,
+        "independent_external_reproduction_satisfied": False,
+        "full_cost_gate_passed": False,
+        "koblitz_index_calculus_sota": False,
+    }
+
+
+def natural_relation_yield_control() -> dict[str, Any]:
+    summary_path = STAGE / "stage-21-relation-yield-result-summary-20260910.json"
+    seal_path = STAGE / "stage-21-relation-yield-result-seal-20260910.json"
+    summary = read_json(summary_path, "Stage-21 relation-yield summary")
+    seal = read_json(seal_path, "Stage-21 relation-yield seal")
+    payload = dict(seal)
+    claimed = payload.pop("seal_payload_sha256", None)
+    require(claimed == phase_b.canonical_sha256(payload), "Stage-21 relation-yield seal is invalid")
+    repository_summary = seal.get("repository_artifacts", {}).get("summary", {})
+    require(repository_summary.get("path") == str(summary_path.relative_to(REPO)), "Stage-21 summary path changed")
+    require(repository_summary.get("bytes") == summary_path.stat().st_size and repository_summary.get("sha256") == phase_b.sha256_file(summary_path, "Stage-21 summary"), "Stage-21 summary identity changed")
+    factor_base = summary.get("factor_base", {})
+    require(
+        factor_base.get("selection_used_target") is False
+        and factor_base.get("selection_used_relation_yield") is False
+        and factor_base.get("factor_base_discrete_log_labels_constructed") is False
+        and factor_base.get("target_subgroup_enumerated_for_selection") is False,
+        "Stage-21 algebraic factor-base boundary changed",
+    )
+    natural = summary.get("measurement", {}).get("natural", {})
+    require(natural.get("targets") == 256 and natural.get("hits") == 163 and natural.get("misses") == 93, "Stage-21 natural-yield totals changed")
+    admission = summary.get("verification_and_admission", {})
+    require(admission.get("measurement_admission_status") == "pending_independent_payload_replay" and admission.get("scientific_measurement_admitted") is False, "Stage-21 admission boundary changed")
+    return {
+        "summary": {"path": str(summary_path.relative_to(REPO)), "bytes": summary_path.stat().st_size, "sha256": phase_b.sha256_file(summary_path, "Stage-21 summary")},
+        "seal": {"path": str(seal_path.relative_to(REPO)), "bytes": seal_path.stat().st_size, "sha256": phase_b.sha256_file(seal_path, "Stage-21 seal")},
+        "status": summary["status"],
+        "factor_base": factor_base,
+        "natural": natural,
+        "planted_sat": summary["measurement"]["planted_sat"],
+        "proven_unsat": summary["measurement"]["proven_unsat"],
+        "internal_timing_seconds": summary["internal_timing_seconds"],
+        "operation_counts": summary["operation_counts"],
+        "resource_totals": summary["resource_totals"],
+        "verification_and_admission": admission,
+        "full_cost_gate_passed": False,
+        "koblitz_index_calculus_sota": False,
+    }
+
+
 def validate_task_source(task_root: Path, packet: Path, packet_record: dict[str, Any]) -> None:
     expected = {Path(row["path"]).name: row for row in packet_record["files"]}
     instance = task_root / "instance"
@@ -311,6 +401,8 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
     tool_accounting = tool_costs(args.tools_root)
     workflow = workflow_accounting(args.workflow_metadata, set(cell_roots))
     direct_mitm = matched_direct_mitm()
+    unknown_scalar = unknown_scalar_control()
+    relation_yield = natural_relation_yield_control()
     outer_core = math.fsum(row["outer_resources"]["total_core_seconds"] for row in cells.values())
     outer_elapsed = math.fsum(row["outer_resources"]["single_core_elapsed_seconds"] for row in cells.values())
     result = {
@@ -337,6 +429,8 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         },
         "tool_accounting": tool_accounting,
         "matched_direct_mitm": direct_mitm,
+        "unknown_scalar_index_calculus_and_rho": unknown_scalar,
+        "natural_relation_yield": relation_yield,
         "charged_total_core_seconds_available": outer_core + direct_mitm["resources"]["summed_outer_total_core_seconds"] + tool_accounting["acquisition_total_core_seconds"] + tool_accounting["build_total_core_seconds"],
         "charged_scope": "tool source acquisition, exact tool builds, eight one-CPU packet/cell envelopes, 480 SAT-backend outcomes, and 160 matched direct-MITM outcomes",
         "rows": rows,

@@ -29,6 +29,20 @@ class Stage26ScoreTests(unittest.TestCase):
         self.assertEqual(value["classification_counts"], {"true_negative": 80, "true_positive": 80})
         self.assertIsNone(value["conflicts"])
 
+    def test_unknown_scalar_control_binding(self) -> None:
+        value = score.unknown_scalar_control()
+        self.assertEqual(value["completed_unknown_scalar_targets"], 5)
+        self.assertFalse(value["factor_base_logs_known_by_construction"])
+        self.assertEqual(value["attempt_totals"]["relation_found"], 252)
+        self.assertGreater(value["ratios"]["setup_charged_ic_over_rho_core"], 1600)
+
+    def test_natural_relation_yield_binding(self) -> None:
+        value = score.natural_relation_yield_control()
+        self.assertEqual(value["natural"]["targets"], 256)
+        self.assertEqual(value["natural"]["hits"], 163)
+        self.assertFalse(value["factor_base"]["factor_base_discrete_log_labels_constructed"])
+        self.assertEqual(value["verification_and_admission"]["measurement_admission_status"], "pending_independent_payload_replay")
+
     def test_elapsed_time(self) -> None:
         self.assertEqual(score.elapsed_time("1:02.50"), 62.5)
         self.assertEqual(score.elapsed_time("1:02:03"), 3723.0)
