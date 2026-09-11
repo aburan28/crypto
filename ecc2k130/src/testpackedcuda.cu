@@ -204,6 +204,7 @@ static bool polynomialChecks() {
 
 int main() {
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
+    printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
     const int selected[] = {0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
     std::vector<P131> input;
     std::vector<int> powers;

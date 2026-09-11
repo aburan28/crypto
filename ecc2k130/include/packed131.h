@@ -112,21 +112,42 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #else
 #include "packedpolyreduce131.h"
 #endif
+#ifndef ECC_PACKED_GENERATED_PRODUCT
+#define ECC_PACKED_GENERATED_PRODUCT 0
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT != 0 && ECC_PACKED_GENERATED_PRODUCT != 1
+#error "ECC_PACKED_GENERATED_PRODUCT must be 0 or 1"
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_DIRECT_REDUCE
+#error "ECC_PACKED_GENERATED_PRODUCT requires ECC_PACKED_DIRECT_REDUCE"
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT
+#include "packedgeneratedproduct131.h"
+#endif
 ECC_HD P131 fromPolynomial131(const P131 &a) {
     const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
     return fromPolynomialProduct131(h);
 }
 static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+#if ECC_PACKED_GENERATED_PRODUCT
+    return generatedProduct131(a,b);
+#else
     uint32_t h[9]; product131(a,b,h);
     return reducePolynomial131(h);
+#endif
 }
 struct PolynomialPair { P131 first,second; };
 static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+#if ECC_PACKED_GENERATED_PRODUCT
+    P131 first=generatedProduct131(a,b);
+    return PolynomialPair{first,generatedProduct131(a,c)};
+#else
     uint32_t h[9];
     product131(a,b,h);
     P131 first=reducePolynomial131(h);
     product131(a,c,h);
     return PolynomialPair{first,reducePolynomial131(h)};
+#endif
 }
 #ifndef ECC_PACKED_SINGLE_PRODUCT
 #define ECC_PACKED_SINGLE_PRODUCT 0

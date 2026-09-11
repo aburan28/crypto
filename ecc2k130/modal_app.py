@@ -84,6 +84,11 @@ if PACKED_POLY_STATE == "1" and (PACKED_CACHE_DENOM != "1" or PACKED_POLY_CHAIN 
 PACKED_DIRECT_REDUCE = os.environ.get("ECC_PACKED_DIRECT_REDUCE", "0")
 if PACKED_DIRECT_REDUCE not in ("0", "1"):
     raise ValueError("ECC_PACKED_DIRECT_REDUCE must be 0 or 1")
+PACKED_GENERATED_PRODUCT = os.environ.get("ECC_PACKED_GENERATED_PRODUCT", "0")
+if PACKED_GENERATED_PRODUCT not in ("0", "1"):
+    raise ValueError("ECC_PACKED_GENERATED_PRODUCT must be 0 or 1")
+if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
+    raise ValueError("ECC_PACKED_GENERATED_PRODUCT=1 requires ECC_PACKED_DIRECT_REDUCE=1")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -125,7 +130,8 @@ LOCAL = pathlib.Path(__file__).parent
 # was spending minutes recompiling a binary it already had, in silence.
 BAKED = {"batch": 32, "threads": 128, "leaf": 0, "minBlocks": 2,
          "packedPolynomialState": PACKED_POLY_STATE == "1",
-         "packedDirectReduction": PACKED_DIRECT_REDUCE == "1"}
+         "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
+         "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1"}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
 # ./ecc2k130 in place, so once anything has rebuilt, the image's baked binary is
@@ -151,7 +157,8 @@ image = (
           "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
           "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
           "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
-          "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE})
+          "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
+          "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -173,7 +180,8 @@ image = (
         f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
-        f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE}',
+        f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT}',
     )
 )
 
@@ -263,7 +271,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
     # that build twice and label one of them the register-budget choice.
     want = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": minBlocks,
             "packedPolynomialState": PACKED_POLY_STATE == "1",
-            "packedDirectReduction": PACKED_DIRECT_REDUCE == "1"}
+            "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
+            "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1"}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
     experimental = streamKarat or smemSpill or globalCg
@@ -288,7 +297,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} "
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
-        f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE}",
+        f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -323,19 +333,25 @@ def benchmarkIdentity(packed=False):
                 packedPairedProducts=(PACKED_PAIR_PRODUCTS == '1') if packed else None,
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
+                packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 
 def checkPackedReduction(sample):
-    """Reject rates from a packed binary whose reducer differs from this image."""
-    modes = re.findall(r'^packed direct reduction: (.*)$', sample.get('raw', ''), re.MULTILINE)
-    actual = modes[0] if len(modes) == 1 else None
-    sample.update(expectedPackedDirectReduction=PACKED_DIRECT_REDUCE == '1',
-                  packedDirectReduction=(actual == '1') if actual in ('0', '1') else None)
-    sample['valid'] = bool(sample.get('valid') and actual == PACKED_DIRECT_REDUCE)
+    """Reject rates whose packed reducer or generated-product mode disagrees."""
+    for marker, field, expectedField, expected in (
+        ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
+        ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
+    ):
+        modes = re.findall(r'^packed ' + marker + r': (.*)$', sample.get('raw', ''), re.MULTILINE)
+        actual = modes[0] if len(modes) == 1 else None
+        sample[expectedField] = expected == '1'
+        sample[field] = (actual == '1') if actual in ('0', '1') else None
+        sample['valid'] = bool(sample.get('valid') and actual == expected)
+        if actual != expected:
+            sample.setdefault('error', 'packed ' + marker + ' identity is missing, duplicated or different from the requested build')
     if not sample['valid']:
         sample['rate'] = 0.0
-        sample.setdefault('error', 'packed reducer identity is missing, duplicated or different from the requested build')
     return sample['valid']
 
 
@@ -453,10 +469,12 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 steps=steps, launches=launches, repeats=repeats, streamKarat=streamKarat,
                 smemSpill=smemSpill, globalCg=globalCg, preferL1=preferL1, packed=packed,
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
-                packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None)
+                packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
+                packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
                 packedPolynomialState=PACKED_POLY_STATE == '1',
-                packedDirectReduction=PACKED_DIRECT_REDUCE == '1')
+                packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
+                packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1')
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
         raise ValueError('rebuild=False requires the untouched matching baked binary')
@@ -541,6 +559,7 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    globalCg=cg, preferL1=preferL1, packed=packed,
                    packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
+                   packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
             results.append(dict(cfg, valid=False, rate=0.0, error=log))
@@ -1053,6 +1072,7 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 smemSpill=smemSpill, globalCg=globalCg, buildLog=log,
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
+                packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
 
 

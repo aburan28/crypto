@@ -13,7 +13,7 @@ collection runs; it writes `build/rtx-pro6000-audit.json`. Both allocate one
 RTX PRO 6000 Blackwell Server Edition through Modal. Set `MODAL=/path/to/modal`
 when using a specific client environment.
 
-The preset selects CUDA 13.0.0, the packed backend, batch 32, 256 threads per
+The preset selects CUDA 13.3.1, the packed backend, batch 32, 256 threads per
 block, minBlocks 2, 192,512 worker threads, 1,024 steps per launch and 32 launches.
 The selected worker count is twice the automatic count on the tested 188-SM
 server GPU. Set `RTX_PRO6000_WORKERS=0` to use automatic workers, or provide
@@ -22,20 +22,68 @@ their original worker and batch counts; benchmark and audit presets do not
 resume user checkpoints. It enables the single
 polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
-The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md)
-and [direct-order polynomial reduction](DIRECT-REDUCTION.md).
+The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md),
+[direct-order polynomial reduction](DIRECT-REDUCTION.md), and the
+[generated polynomial-product schedule](GENERATED-PRODUCT.md).
 These settings retain the existing iteration, DP report and packed-checkpoint
 semantics. The linked comparison validates normal-to-polynomial resume and
 the reverse direction, and measures both modes on one GPU.
 
-CUDA 13.0 requires a compatible driver; the tested driver is 580.95.05.
-NVIDIA lists 580.65.06 for the Linux CUDA 13.0 GA toolkit in its
-[release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#cuda-driver).
+The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
+NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or
+newer, subject to its feature and native-code conditions. The comparison
+disabled PTX JIT and validated the actual device paths before timing. See
+[NVIDIA’s compatibility guidance](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html).
 
-The measured hardware ceilings that bound this preset are in
+Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
+with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Direct-order reduction comparison
+## Generated-product preset comparison
+
+The [controlled comparison](benchmarks/generated-product/comparison.json)
+compares the previous CUDA 13.0 native preset with generated products on
+CUDA 13.3. Both run on one RTX PRO 6000 with the same worker population,
+launch geometry and **201,863,462,912 complete scalar updates per sample**.
+Three alternating confirmation runs per mode measured:
+
+| Workload | Previous preset | Generated product + CUDA 13.3 | Change |
+|---|---:|---:|---:|
+| Benchmark median B scalar updates/s | 6.860749 | **6.924275** | +0.926% |
+| DP34 collection median B scalar updates/s | 6.764850 | **6.819016** | +0.801% |
+
+The candidate was faster in every paired benchmark and collection run. All
+six collections had identical sorted record multisets: 5,149 records,
+164,768 bytes and zero drops. The GPU arithmetic suites, full client checks
+and common-state comparisons passed. Warmups and initial screening samples
+are excluded from these confirmation medians. The independent
+[artifact review](benchmarks/generated-product/comparison-review.json) binds
+source, binaries, compiler versions, complete code and exact counters.
+
+This measures the combined source/compiler/linked-runtime change; it does
+not isolate a generator-only gain. General generated-product defaults remain
+off. [GENERATED-PRODUCT.md](GENERATED-PRODUCT.md) gives the implementation,
+reproduction commands, ranges and validation scope.
+
+The [published-command audit](benchmarks/generated-product/native-audit.json)
+ran `make audit-rtx-pro6000` from the public implementation on a separate
+allocation and measured:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **6.960528** | 6.937184–6.963077 |
+| DP34 collection | **6.809915** | 6.807981–6.817479 |
+
+Every repetition completed the same 201,863,462,912 scalar updates with the
+requested generated-product mode. Each collection recorded 5,149 points,
+164,768 bytes and zero drops. GPU arithmetic and full client integration
+checks passed. This audit retains corpus counts and sizes; matching content
+hashes are supplied by the paired comparison. The separate native result
+validates the published command and does not measure another percentage gain.
+Source, linked-binary and public-device-code bindings are documented in
+[GENERATED-PRODUCT.md](GENERATED-PRODUCT.md).
+
+## Historical direct-order reduction comparison
 
 The [paired reducer comparison](benchmarks/direct-reduction/comparison.json)
 uses identical B32/T256/min2 settings, 192,512 workers and
@@ -54,7 +102,7 @@ comparisons passed before timing. Warm-ups are excluded from these medians.
 [DIRECT-REDUCTION.md](DIRECT-REDUCTION.md) records ranges, derivation, the
 instruction/spill tradeoff and source/binary provenance.
 
-The [updated native preset audit](benchmarks/direct-reduction/native-audit.json)
+The [earlier direct-reduction preset audit](benchmarks/direct-reduction/native-audit.json)
 runs the normal `make audit-rtx-pro6000` entry point on a separate allocation:
 
 | Workload | Median B scalar updates/s | Range across three repetitions |
@@ -193,5 +241,5 @@ options; the current preset also selects polynomial coordinate storage. Compiler
 output are included in the comparison artifact.
 
 These measurements count complete scalar walk iterations. They do not
-establish 60 B iterations/s, performance on other GPUs, or live clock traces;
+establish 15 B iterations/s, performance on other GPUs, or live clock traces;
 the GPU-state metadata is a snapshot taken before validation.
