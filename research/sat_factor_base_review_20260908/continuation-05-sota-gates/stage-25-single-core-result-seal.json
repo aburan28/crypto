@@ -1,0 +1,45 @@
+{
+  "affinity": {
+    "bytes": 593,
+    "path": "/home/runner/work/_temp/stage25-single-core/affinity.json",
+    "sha256": "8ef90e46df0420b5e8148b5e89fd6a1b447c7bdcb6bf0215041a3420e114e1b3"
+  },
+  "protocol": {
+    "bytes": 2254,
+    "path": "/home/runner/work/_temp/stage25-single-core/protocol.json",
+    "sha256": "bb86886bb0b1959d66f2f1582efbf779231c97114546daf6ce5395ec36765964"
+  },
+  "result": {
+    "bytes": 3395,
+    "path": "/home/runner/work/_temp/stage25-single-core/result.json",
+    "sha256": "307d137cc92fad4d7998e040dfc322001930f868b7b0403e27f85e9a1a92f134"
+  },
+  "schema": "koblitz_stage25_single_core_seal.v1",
+  "seal_payload_sha256": "90de58676dc4155a8ecafffdd7cb43d60a0249b554bd27982074e1d034de5908",
+  "source": {
+    "bytes": 5911,
+    "path": "/home/runner/work/_temp/stage25-single-core/source.json",
+    "sha256": "7de3431d83c136c4bbcfad992f40f87a68cec12e84416989934e9d13a8375775"
+  },
+  "stage23_outer_metrics": {
+    "bytes": 741,
+    "path": "/home/runner/work/_temp/stage25-single-core/stage23-run-outer/driver.metrics.json",
+    "sha256": "14f0e2b08e85261a689e181e49f2a758446c017b98baa15ee043f800986b92ce"
+  },
+  "stage23_plan": {
+    "bytes": 1821,
+    "path": "/home/runner/work/_temp/stage25-single-core/stage23-plan.json",
+    "sha256": "82c1d8e37625df4ec734b8720cbcbf0b443d420d325472912766f9ab90f67be1"
+  },
+  "stage23_run_seal": {
+    "bytes": 150740,
+    "path": "/home/runner/work/_temp/stage25-single-core/stage23-run/run-seal.json",
+    "sha256": "21a317423826f0f209ae976d43c91509fb8c6216d6f7c2e3304ac50dc94a73e7"
+  },
+  "stage23_verification_seal": {
+    "bytes": 676,
+    "path": "/home/runner/work/_temp/stage25-single-core/stage23-verification/verification-seal.json",
+    "sha256": "40ba92581a6c28be84d6c002a2678b2b5f40870dbb9ab08248019e6d6652cb96"
+  },
+  "status": "complete"
+}

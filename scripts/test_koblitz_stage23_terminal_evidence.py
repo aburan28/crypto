@@ -101,7 +101,9 @@ def patched_stage23(source: Path) -> ExitStack:
     return stack
 
 
-def make_bundle(root: Path) -> tuple[Path, dict[str, Path]]:
+def make_bundle(
+    root: Path, *, hardlink_build_output: bool = False
+) -> tuple[Path, dict[str, Path]]:
     source = build_source_repo(root)
     evidence = root / "evidence"
     with patched_stage23(source):
@@ -119,6 +121,11 @@ def make_bundle(root: Path) -> tuple[Path, dict[str, Path]]:
                 outer_metrics=outer_metrics,
                 output=project,
             )
+        )
+    if hardlink_build_output:
+        os.link(
+            run_root / "build-target/release/examples/koblitz_unknown_scalar_panel",
+            root / "external-cargo-build-hardlink",
         )
     bundle = root / "bundle"
     core.package_bundle(
@@ -276,6 +283,17 @@ class Stage23TerminalEvidenceTests(unittest.TestCase):
             (self.bundle / "source-extra/Cargo.lock").read_bytes(),
             (self.bundle / "source-tree" / core.FROZEN_LOCK_RELATIVE).read_bytes(),
         )
+
+    def test_packager_allows_hardlinks_only_in_omitted_cargo_build_tree(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="stage23-cargo-hardlink-") as temporary:
+            bundle, _ = make_bundle(
+                Path(temporary).resolve(), hardlink_build_output=True
+            )
+            result = core.verify_bundle(bundle)
+            self.assertEqual(
+                result["status"], "compact_terminal_evidence_structurally_verified"
+            )
+            self.assertEqual(result["completed_rows"], 2)
 
     def test_rejects_signed_extra_file_and_path_traversal(self) -> None:
         extra = self.clone_bundle("extra")
