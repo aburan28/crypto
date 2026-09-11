@@ -29,10 +29,10 @@ Prepare and verify the packet on the source host:
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py prepare \
   --run-root /Volumes/SSD990/koblitz-balanced-pdp-phase-b-run-successor-01-20260910 \
-  --output /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910
+  --output /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-03-20260910
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py verify-packet \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-03-20260910
 ```
 
 Only that sealed packet and a clean checkout containing the runner, process
@@ -55,14 +55,14 @@ The production point validator must match the charged Phase-B backend exactly:
 
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py preflight \
-  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
+  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-03-20260910 \
   --magma /licensed/path/magma \
   --minisat /path/to/minisat \
   --backend /path/to/koblitz_pdp_backend \
   --license-access-statement-file /path/to/license-access.txt
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py run \
-  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
+  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-03-20260910 \
   --magma /licensed/path/magma \
   --minisat /path/to/minisat \
   --backend /path/to/koblitz_pdp_backend \
@@ -104,11 +104,11 @@ the score:
 
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py verify-return \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-03-20260910 \
   --return-root /path/to/returned-magma-results
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py score \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-03-20260910 \
   --return-root /path/to/returned-magma-results \
   --output /Volumes/SSD990/koblitz-phase-b-magma-replay-score-20260910
 ```
@@ -126,20 +126,21 @@ The hardened successor packet prepared after rebasing to the relocatable
 Phase-B evidence bundle contains exactly 160 Magma inputs, 160 matching
 manifests, the protocol, and the packet manifest. Its terminal identities are:
 
-- packet-seal SHA-256: `1548c85abaecd61a4079235bb75705eaf6d085d5fb11660a575e04b620bb4342`;
-- inventory SHA-256: `3a160c4bbfbcbcc9be36e20d739923e81212beb3ad3e2ad9cad22b94d3d4c856`;
-- manifest SHA-256: `dcd2a602e6e9e2073483d6a9a1efd84bf5c5d983256b41ff20ce1f1d10e2d886`;
-- protocol SHA-256: `3afd6baa75be22639b451a9fb4d021976baaf56e6c6d2edd5b35113656f1c6cd`.
+- packet-seal SHA-256: `16313ff5a4bec0cf337eeb0a5016b8cc48e7d4ca2177a5f8c74ba463cb377b40`;
+- inventory SHA-256: `0cc81965cbc54bdda8f3d41a03af2ef430aa6a2781eb4b323cf2a7fbe717fda5`;
+- manifest SHA-256: `b1b3c6d8443e04ab65a18e583fcf848b941f9f73168a9cec2c0f78070bdcabaa`;
+- protocol SHA-256: `b37de30c53015992667dd3cb3751c4f26b44d3a2ff298f6bf95ef4d4868455a9`.
 
-The predecessor packet and successor-01 remain retained. They are superseded:
-the hardened verifier rejects the predecessor preflight, and successor-01 is
-bound to the older non-relocatable terminal-evidence bundle. No Magma task has
+The predecessor, successor-01, and successor-02 packets remain retained. They
+are superseded: the hardened verifier rejects the predecessor preflight,
+successor-01 is bound to the older non-relocatable terminal-evidence bundle,
+and successor-02 pins the pre-merge process-meter identity. No Magma task has
 run on any packet.
 
-The class-blind successor-02 packet is distributed with this branch as
-`stage-22-phase-b-magma-replay-packet-successor-02-20260910.tar.gz`. Its archive
+The class-blind successor-03 packet is distributed with this branch as
+`stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz`. Its archive
 SHA-256 is
-`97c87bce7da810674ead478f5a04ef6739c5da7e269287c42b21c91f1887fe54`.
+`f0c9521b190f4f613036223da94b9c8536ed0bec9fb053b97be843c871c797b9`.
 CI checks the archive digest, rejects absolute paths, parent traversal, links,
 and special files, extracts it into a fresh directory, and reruns
 `verify-packet`. The archive contains no oracle, target class, known witness,

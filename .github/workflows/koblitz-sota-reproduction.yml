@@ -96,8 +96,8 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-terminal-evidence-successor-04-20260910/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE22_PHASE_B_MAGMA_REPLAY.md"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-02-20260910.tar.gz"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-02-20260910.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz.sha256"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -145,7 +145,7 @@ jobs:
           import tarfile
 
           stage = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates")
-          name = "stage-22-phase-b-magma-replay-packet-successor-02-20260910.tar.gz"
+          name = "stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz"
           archive = stage / name
           expected = (stage / f"{name}.sha256").read_text().split()[0]
           assert hashlib.sha256(archive.read_bytes()).hexdigest() == expected
@@ -157,7 +157,7 @@ jobs:
                   assert not path.is_absolute() and ".." not in path.parts
                   assert member.isfile() or member.isdir()
               packet.extractall(destination)
-          packet_root = destination / "koblitz-phase-b-magma-replay-packet-successor-02-20260910"
+          packet_root = destination / "koblitz-phase-b-magma-replay-packet-successor-03-20260910"
           subprocess.run(
               ["python3", "scripts/run_koblitz_phase_b_magma_replay.py", "verify-packet", "--packet", str(packet_root)],
               check=True,
