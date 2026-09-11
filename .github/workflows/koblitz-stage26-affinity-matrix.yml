@@ -51,7 +51,7 @@ jobs:
           git -C "$RUNNER_TEMP/cms" checkout 7ae1b4a74259cdce223a584281fb8f090bbd3eed
           mkdir -p "$RUNNER_TEMP/cms/build/_deps"
           printf 'build/\n' >> "$RUNNER_TEMP/cms/.git/info/exclude"
-          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cadical.time" git clone https://github.com/arminbiere/cadical.git "$RUNNER_TEMP/cms/build/_deps/cadical-src"
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cadical.time" git clone https://github.com/meelgroup/cadical.git "$RUNNER_TEMP/cms/build/_deps/cadical-src"
           git -C "$RUNNER_TEMP/cms/build/_deps/cadical-src" checkout 878a600ea92ce3a9173b069ab294429c851acf85
           /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cadiback.time" git clone https://github.com/meelgroup/cadiback.git "$RUNNER_TEMP/cms/build/_deps/cadiback-src"
           git -C "$RUNNER_TEMP/cms/build/_deps/cadiback-src" checkout acc8bb55b98e35afe0dc228662bf41d8341b8a9b
