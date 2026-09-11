@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/score_koblitz_blind_pdp_phase_b.py",
+    "--protocol",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-capacity-successor-01-20260910/protocol.json",
+    "--solver-root",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-solver-input-20260910",
+    "--run-root",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-run-successor-01-20260910",
+    "--phase-a-seal",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-a-20260910/prepared/seal.json",
+    "--oracle-ledger",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-a-20260910/prepared/sealed-oracle/oracle-ledger.json",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-score-successor-01-20260910",
+    "--outer-metrics",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-outer-successor-01-20260910/driver.metrics.json"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 1.282406875048764,
+    "user_seconds": 0.30927699999999997,
+    "system_seconds": 0.385662,
+    "total_core_seconds": 0.694939,
+    "single_core_seconds": 0.694939,
+    "peak_rss_bytes": 49135616,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

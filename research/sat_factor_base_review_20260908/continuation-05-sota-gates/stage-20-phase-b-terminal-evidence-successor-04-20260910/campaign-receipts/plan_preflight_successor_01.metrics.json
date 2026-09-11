@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/run_koblitz_blind_pdp_phase_b.py",
+    "run",
+    "--solver-root",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-solver-input-20260910",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-run-20260910",
+    "--exporter",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-03-20260910/bin/koblitz_pdp_export",
+    "--backend",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-03-20260910/bin/koblitz_pdp_backend",
+    "--rust-build-receipt",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-03-20260910/receipt.json",
+    "--wdsat",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-successor-02-20260910/wdsat_solver",
+    "--wdsat-build-seal",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-successor-02-20260910/build-seal.json",
+    "--cryptominisat",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/bin/cryptominisat5",
+    "--cryptominisat-build-receipt",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/receipt.json",
+    "--plan"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.5950535419397056,
+    "user_seconds": 0.148494,
+    "system_seconds": 0.201982,
+    "total_core_seconds": 0.350476,
+    "single_core_seconds": 0.350476,
+    "peak_rss_bytes": 36651008,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "blind_bundle_path": "blind/bundle.json",
+  "blind_bundle_sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77",
+  "execution_status": "not_run",
+  "implementation": {
+    "build_time_source_root": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-20260910",
+    "preparer_binary_path": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-20260910/target/release/koblitz_pdp_prepare",
+    "preparer_binary_sha256": "666bd29043066b8bc42ab6642e0084367b4115a24058db1ffeef0b5544e86d1b",
+    "schema": "koblitz_pdp_phase_a_implementation_provenance.v1",
+    "source_revision": {
+      "available": true,
+      "commit": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88",
+      "dirty": false,
+      "porcelain": []
+    }
+  },
+  "normalized_invocation": [
+    "target/release/koblitz_pdp_prepare",
+    "prepare",
+    "--protocol",
+    "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-a-20260910/prepared",
+    "--max-canonical-triples",
+    "18896570"
+  ],
+  "oracle_ledger_path": "sealed-oracle/oracle-ledger.json",
+  "oracle_ledger_sha256": "0e4ac5d9dd92b11e6b896342eeef076e985c12ad931c1acc97e0d9c2e626890a",
+  "preparation_plan_path": "preparation-plan.json",
+  "preparation_plan_sha256": "56b619d3bcb8bbad723333d4642946fbb7ef5b1393f6151c1f39947cc378a1c0",
+  "protocol_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json",
+  "protocol_sha256": "69544ee3a0b0250dd720e1b498e8f03cdf7d4427ab11bfb551325cf29b86fd53",
+  "requested_max_canonical_triples": 18896570,
+  "schema": "koblitz_pdp_phase_a_seal.v1",
+  "selected_cell_ids": [
+    "n31-l5-m3-ggmp-a0-f0",
+    "n31-l5-m3-standard-a1-f0",
+    "n41-l5-m3-standard-a1-f0",
+    "n59-l9-m3-standard-a1-f0"
+  ],
+  "solver_access_boundary": "Only the blind directory may be passed to solver processes",
+  "status": "sealed_before_solver_execution"
+}

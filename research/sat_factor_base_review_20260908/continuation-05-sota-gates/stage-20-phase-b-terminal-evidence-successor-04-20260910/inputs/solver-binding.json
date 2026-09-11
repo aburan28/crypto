@@ -1,0 +1,19 @@
+{
+  "binding_payload_sha256": "9340befa2fa28a8d460018f36e96efd05459a7e2bd9d00fb4142b7b7e78a0cd1",
+  "blind_bundle_bytes": 86902,
+  "blind_bundle_path": "blind/bundle.json",
+  "blind_bundle_schema": "koblitz_pdp_blind_bundle.v1",
+  "blind_bundle_sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77",
+  "blind_instance_count": 160,
+  "phase_a_source_revision": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88",
+  "schema": "koblitz_pdp_phase_b_solver_input_binding.v1",
+  "scope": "Sanitized class-blind input binding for the separately metered Phase-B solver run",
+  "selected_cell_ids": [
+    "n31-l5-m3-ggmp-a0-f0",
+    "n31-l5-m3-standard-a1-f0",
+    "n41-l5-m3-standard-a1-f0",
+    "n59-l9-m3-standard-a1-f0"
+  ],
+  "source_phase_a_protocol_sha256": "69544ee3a0b0250dd720e1b498e8f03cdf7d4427ab11bfb551325cf29b86fd53",
+  "source_phase_a_seal_sha256": "01b7fbab8bccbb45c7e3e6a46640ff5997cefee303416afd9671da7cc2e13632"
+}

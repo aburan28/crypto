@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/build_koblitz_phase_b_wdsat.py",
+    "--source",
+    "/Volumes/SSD990/wdsat-binary-sat-review-20260909",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-20260910"
+  ],
+  "returncode": 1,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 3.174999332986772,
+    "user_seconds": 1.360195,
+    "system_seconds": 1.048732,
+    "total_core_seconds": 2.4089270000000003,
+    "single_core_seconds": 2.4089270000000003,
+    "peak_rss_bytes": 58032128,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}
