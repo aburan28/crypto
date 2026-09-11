@@ -1,0 +1,25 @@
+{
+  "command": [
+    "target/release/koblitz_pdp_prepare",
+    "prepare",
+    "--protocol",
+    "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json",
+    "--output",
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-a-20260910/prepared",
+    "--max-canonical-triples",
+    "18896570"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 7200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 1109.6102739589987,
+    "user_seconds": 1061.541188,
+    "system_seconds": 10.645307,
+    "total_core_seconds": 1072.186495,
+    "single_core_seconds": 1072.186495,
+    "peak_rss_bytes": 2182103040,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

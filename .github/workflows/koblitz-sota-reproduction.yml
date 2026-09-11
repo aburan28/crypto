@@ -24,6 +24,7 @@ on:
       - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
+      - "scripts/verify_stage20_phase_b_terminal_evidence.py"
       - "scripts/verify_koblitz_external_reproduction.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/run_stage13_pdp_panel.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/verify_stage13_pdp_panel.py"
@@ -87,6 +88,9 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-balanced-pdp-phase-a-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-balanced-pdp-phase-b-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE20_PHASE_B_RESULTS_20260910.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-result-summary-20260910.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-terminal-evidence-successor-03-20260910/**"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -120,6 +124,8 @@ jobs:
           install -m 755 target/release/examples/koblitz_pdp_export "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export"
           install -m 755 target/release/examples/koblitz_pdp_backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend"
           python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export" --backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend" -v
+      - name: Verify terminal Phase-B result evidence
+        run: python3 scripts/verify_stage20_phase_b_terminal_evidence.py
       - name: Reverify legacy Stage 19 prepared controls at their pinned commit
         run: |
           legacy_stage19_dir="$RUNNER_TEMP/koblitz-stage19-legacy-180f8e8"

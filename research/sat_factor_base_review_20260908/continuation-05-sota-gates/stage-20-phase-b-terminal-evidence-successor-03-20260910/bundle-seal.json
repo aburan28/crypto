@@ -1,0 +1,256 @@
+{
+  "claim_boundary": {
+    "full_cost_gate_passed": false,
+    "independent_external_reproduction_satisfied": false,
+    "koblitz_index_calculus_sota": false
+  },
+  "created_at": "2026-09-11T01:48:06.710227Z",
+  "cross_bindings": {
+    "phase_a_implementation_commit": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88",
+    "phase_b_implementation_commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
+    "run_inventory_sha256": "bb4377054700edf3049a7590b9b9fdd8fe6a0c57b6a216a7928dd211dc74a12c",
+    "run_seal_file_sha256": "e528f9bbaa6b7554224379cb32f7b1ed5be0a3cb8bde15e56dee7d1a5f75b538",
+    "score_seal_file_sha256": "675f951516ecd9a81ac11f669dc8bf56a321d5da0a59b60cb04b784a7f0e7cab",
+    "score_sha256": "cc6a999e4438a01b44c187039f1fa7ff684d2c8f38192d7c4032159d62bf806e",
+    "scorer_metrics_sha256": "0e71b1de01d81b2ae30c5f9f0cf8f3b381a8857225593b3de7a5b2af42031800",
+    "wdsat_build_receipt_sha256": "7239950c441ca46554bbabdbd3c9e4768adfa6b2c784bd1b6696446b22054fa7"
+  },
+  "inventory": [
+    {
+      "bytes": 1808,
+      "path": "accounting/phase-b-driver.metrics.json",
+      "sha256": "b8a7ca762135112209c4981e666286fd2b59f0a9576df12d34a9376b86f34b22"
+    },
+    {
+      "bytes": 1359,
+      "path": "accounting/scorer.metrics.json",
+      "sha256": "0e71b1de01d81b2ae30c5f9f0cf8f3b381a8857225593b3de7a5b2af42031800"
+    },
+    {
+      "bytes": 0,
+      "path": "accounting/scorer.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 530,
+      "path": "accounting/scorer.stdout",
+      "sha256": "675f951516ecd9a81ac11f669dc8bf56a321d5da0a59b60cb04b784a7f0e7cab"
+    },
+    {
+      "bytes": 820,
+      "path": "builds/cryptominisat-outer.metrics.json",
+      "sha256": "d713de21482077368087d98780f6aa4aee372c0cb4e0562b32dea032ebf21f0a"
+    },
+    {
+      "bytes": 32654,
+      "path": "builds/cryptominisat-receipt.json",
+      "sha256": "c2a9be07fb510e378b935433c8c091dd4f515e2f05e24154f8ef00e83fc191f4"
+    },
+    {
+      "bytes": 814,
+      "path": "builds/rust-outer.metrics.json",
+      "sha256": "a229508c5bf3fede9e96b4bf6b517e6020a863cb7f19661747049b97414a5d60"
+    },
+    {
+      "bytes": 26922,
+      "path": "builds/rust-receipt.json",
+      "sha256": "de34841bbf582143a41ae01d50b6fc5e029626e7c09cd254b895a5c1d652cb9a"
+    },
+    {
+      "bytes": 8558,
+      "path": "builds/wdsat-build-seal.json",
+      "sha256": "effbedb65036d867fb202d800edcc0a8efb050a941563329e4019c3f57ae15c3"
+    },
+    {
+      "bytes": 1013,
+      "path": "builds/wdsat-outer.metrics.json",
+      "sha256": "71a4a2df3060a0f246dcf083f4163a6cd460d22a594074640e4cabf70895fd57"
+    },
+    {
+      "bytes": 15367,
+      "path": "builds/wdsat-receipt.json",
+      "sha256": "7239950c441ca46554bbabdbd3c9e4768adfa6b2c784bd1b6696446b22054fa7"
+    },
+    {
+      "bytes": 820,
+      "path": "campaign-receipts/cryptominisat_build_final.metrics.json",
+      "sha256": "d713de21482077368087d98780f6aa4aee372c0cb4e0562b32dea032ebf21f0a"
+    },
+    {
+      "bytes": 768,
+      "path": "campaign-receipts/cryptominisat_build_initial.metrics.json",
+      "sha256": "200e0e5923adb1216feb9acb3a99ad7ea3e88cfc75475521b1bf4a48f23b1b25"
+    },
+    {
+      "bytes": 763,
+      "path": "campaign-receipts/cryptominisat_build_successor_01.metrics.json",
+      "sha256": "970b93d771d12ea40497d3c701e1fe658a23df302b9894d54cc6c5921520255b"
+    },
+    {
+      "bytes": 751,
+      "path": "campaign-receipts/phase_a_preparer.metrics.json",
+      "sha256": "f88ddd495335e981ca1df201d51fcb8af3a78670e0e357afcf6733b35099df91"
+    },
+    {
+      "bytes": 1808,
+      "path": "campaign-receipts/phase_b_run_final.metrics.json",
+      "sha256": "b8a7ca762135112209c4981e666286fd2b59f0a9576df12d34a9376b86f34b22"
+    },
+    {
+      "bytes": 1660,
+      "path": "campaign-receipts/phase_b_run_initial.metrics.json",
+      "sha256": "0b69e594bb3014dc84e436af9a8849b1ada49aca771e56450e6db9369c6bdede"
+    },
+    {
+      "bytes": 1359,
+      "path": "campaign-receipts/phase_b_score.metrics.json",
+      "sha256": "0e71b1de01d81b2ae30c5f9f0cf8f3b381a8857225593b3de7a5b2af42031800"
+    },
+    {
+      "bytes": 882,
+      "path": "campaign-receipts/phase_b_stage.metrics.json",
+      "sha256": "b7e7adffabb8c4a356b9beb2d2141c863d8c63a5c32c04726a9a21f127b829b9"
+    },
+    {
+      "bytes": 1660,
+      "path": "campaign-receipts/plan_preflight_initial.metrics.json",
+      "sha256": "98686d0b2e2cfc723f4bf8eba393a68c79e6e127eb14e51868bb7789e8c178d8"
+    },
+    {
+      "bytes": 1659,
+      "path": "campaign-receipts/plan_preflight_successor_01.metrics.json",
+      "sha256": "eecdba2f0d5ee2151e1b69d8a5e41fedb3ca5cf36d68d19fba08b4133514c31b"
+    },
+    {
+      "bytes": 1805,
+      "path": "campaign-receipts/plan_preflight_successor_02.metrics.json",
+      "sha256": "f2abcd527e0599ef064ec71156ab5684cf9ab95f995805d60994fd09e9deae8a"
+    },
+    {
+      "bytes": 814,
+      "path": "campaign-receipts/rust_build_final.metrics.json",
+      "sha256": "a229508c5bf3fede9e96b4bf6b517e6020a863cb7f19661747049b97414a5d60"
+    },
+    {
+      "bytes": 769,
+      "path": "campaign-receipts/rust_build_initial.metrics.json",
+      "sha256": "b5572df483fb33fe5f8b9f77d7c39339778cd06359503dddd58d34269c2fd4c1"
+    },
+    {
+      "bytes": 771,
+      "path": "campaign-receipts/rust_build_successor_01.metrics.json",
+      "sha256": "2b29d6043a796bd577d2ef31ea2103beb30068b985ee0418e4d13bd2c198a7ee"
+    },
+    {
+      "bytes": 785,
+      "path": "campaign-receipts/rust_build_successor_02.metrics.json",
+      "sha256": "4e8f472aba896e1f7c83c8c12a5ec33d99d1970ba8cc533c5214272abf4e109a"
+    },
+    {
+      "bytes": 495,
+      "path": "campaign-receipts/rust_dependency_fetch_initial.metrics.json",
+      "sha256": "53da0618023be05e7c9866b223916e1069f0b7cae8c55f780b5485b8fa4dc33a"
+    },
+    {
+      "bytes": 470,
+      "path": "campaign-receipts/rust_dependency_fetch_successor_01.metrics.json",
+      "sha256": "7ca8962b35010950c41b2fca398de1d3908c3823ede0ddd6c04e1ed174649ef0"
+    },
+    {
+      "bytes": 1013,
+      "path": "campaign-receipts/wdsat_build_final.metrics.json",
+      "sha256": "71a4a2df3060a0f246dcf083f4163a6cd460d22a594074640e4cabf70895fd57"
+    },
+    {
+      "bytes": 716,
+      "path": "campaign-receipts/wdsat_build_initial.metrics.json",
+      "sha256": "b4c0aac03c2f6b024e76d503db8528515c3580132370058e9baebe2a40995f04"
+    },
+    {
+      "bytes": 755,
+      "path": "campaign-receipts/wdsat_build_successor_01.metrics.json",
+      "sha256": "35d1784308b3ff62f3bdb886ce1cb7bee20ad9d9fc71d1df2f0eafeb6e0e1583"
+    },
+    {
+      "bytes": 756,
+      "path": "campaign-receipts/wdsat_build_successor_02.metrics.json",
+      "sha256": "d13688db3b96f5b17225846e4833ffcd09dd003d6651f02bb7b750664fcade07"
+    },
+    {
+      "bytes": 86902,
+      "path": "inputs/blind-bundle.json",
+      "sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77"
+    },
+    {
+      "bytes": 6587,
+      "path": "inputs/phase-a-protocol.json",
+      "sha256": "69544ee3a0b0250dd720e1b498e8f03cdf7d4427ab11bfb551325cf29b86fd53"
+    },
+    {
+      "bytes": 1994,
+      "path": "inputs/phase-a-seal.json",
+      "sha256": "01b7fbab8bccbb45c7e3e6a46640ff5997cefee303416afd9671da7cc2e13632"
+    },
+    {
+      "bytes": 7529,
+      "path": "inputs/phase-b-protocol.json",
+      "sha256": "5de2d43527286054ad348b182145d07a988b1236a141377d01b0e7f6f5a38ddb"
+    },
+    {
+      "bytes": 939,
+      "path": "inputs/solver-binding.json",
+      "sha256": "5a78bd6577676af1ebcb102fc351b98fbfec02720ea1b59d359bd0a7b5abcd8b"
+    },
+    {
+      "bytes": 1126422,
+      "path": "run/run-seal.json",
+      "sha256": "e528f9bbaa6b7554224379cb32f7b1ed5be0a3cb8bde15e56dee7d1a5f75b538"
+    },
+    {
+      "bytes": 8937,
+      "path": "run/run-summary.json",
+      "sha256": "198a3ec9a4569f1a73a51ea92fa3d525475af038223408a3b1ca2de780459003"
+    },
+    {
+      "bytes": 530,
+      "path": "score/score-seal.json",
+      "sha256": "675f951516ecd9a81ac11f669dc8bf56a321d5da0a59b60cb04b784a7f0e7cab"
+    },
+    {
+      "bytes": 220571,
+      "path": "score/score.json",
+      "sha256": "cc6a999e4438a01b44c187039f1fa7ff684d2c8f38192d7c4032159d62bf806e"
+    }
+  ],
+  "inventory_sha256": "057956f16236f848502cf9a6c0d50b4420aea66e205c8c991e1047bdf2c785ad",
+  "repository_artifacts": {
+    "process_meter_source": {
+      "bytes": 3471,
+      "path": "scripts/process_meter.py",
+      "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+    },
+    "report": {
+      "bytes": 12411,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE20_PHASE_B_RESULTS_20260910.md",
+      "sha256": "b44fa2d349f6bed06821c76dccfcffe24e7c1cf3f479b265ea66cab8c35f6d30"
+    },
+    "scorer_source": {
+      "bytes": 39664,
+      "path": "scripts/score_koblitz_blind_pdp_phase_b.py",
+      "sha256": "cb93b26fd9a63f0f554f61586ab6065a3ad71589f9c6c067d75a937d43a703c6"
+    },
+    "summary": {
+      "bytes": 29206,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-phase-b-result-summary-20260910.json",
+      "sha256": "f1d2c5d4962bd8ea9f6ba005a9ffef0b185d1d6084efbb7f77d6cbfb6071679a"
+    },
+    "verifier_source": {
+      "bytes": 16095,
+      "path": "scripts/verify_stage20_phase_b_terminal_evidence.py",
+      "sha256": "2a6b49f0d2755e0ba6ecc2db0309a7fdf51ba99133455a27c697338c2d1e9aa7"
+    }
+  },
+  "schema": "koblitz_pdp_phase_b_terminal_evidence_seal.v1",
+  "seal_payload_sha256": "fffbe688c35396a1507e29fcad13e81276544b1697a27e417b3a3fd4c5a68255",
+  "status": "terminal_scored_evidence_frozen"
+}
