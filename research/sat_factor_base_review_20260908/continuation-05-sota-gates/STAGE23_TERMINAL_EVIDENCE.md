@@ -78,6 +78,20 @@ It permits hard-linked Cargo artifacts only while authenticating the omitted
 `build-target/` partition. Retained evidence and every compact-bundle
 verification path remain single-link and use the same strict descriptor checks.
 
+The core verifier was extended on 2026-09-11 to read both ρ walk shapes, and
+its SHA-256 is now
+`93118d2e45700c81a19361f47dba57cf13e93e5314dfbc6036cfba33bb54682c`.
+The ρ baseline moved from Floyd cycle finding to the distinguished-point
+method, so a fresh report carries `parallel_walks` and
+`cycle_escape_doublings`, and balances its setup ledger on
+`(jumps + walks)` points per rebuild, its addition ledger on
+`partition_hashes + cycle_escape_doublings`, and its canonicalization
+ledger on `walks · rebuilds + advances + escapes`. **A report without
+`parallel_walks` is historical and is still checked against the Floyd
+identities it was sealed under** — the retained successor-03 bundle above
+included — so the hash change extends the verifier's reach and relaxes
+nothing for evidence already on record.
+
 The typed external-tool map retains Python, Cargo, and rustc identities for
 command reconstruction. Each mapped path, size, and SHA-256 must equal the
 corresponding immutable entry in the archived source binding; the tool map

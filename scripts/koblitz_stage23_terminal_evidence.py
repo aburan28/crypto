@@ -1131,16 +1131,61 @@ def validate_rho(result: dict[str, Any], target: dict[str, Any], profile: str) -
     charges = result.get("charges", {})
     if report.get("jump_table_rebuilds") != report.get("restarts_attempted"):
         raise EvidenceError("rho restart and jump-table counts differ")
-    if charges.get("setup_scalar_multiplications") != 34 * report.get("jump_table_rebuilds", -1):
-        raise EvidenceError("rho setup scalar-multiplication ledger does not balance")
-    if charges.get("setup_group_additions") != 17 * report.get("jump_table_rebuilds", -1):
-        raise EvidenceError("rho setup addition ledger does not balance")
-    if charges.get("coefficient_draws") != charges.get("setup_scalar_multiplications"):
-        raise EvidenceError("rho coefficient-draw ledger does not balance")
-    if charges.get("walk_group_additions") != charges.get("partition_hashes") or charges.get("walk_group_additions") != 3 * report.get("iterations", -1):
-        raise EvidenceError("rho walk ledger does not balance")
-    if charges.get("canonicalizations") != report.get("restarts_attempted", -1) + charges.get("walk_group_additions", -1):
-        raise EvidenceError("rho canonicalization ledger does not balance")
+    # Two walk shapes appear in the evidence this verifier reads, and each
+    # balances its own way.  A report carrying `parallel_walks` comes from
+    # the distinguished-point walk: it steps that many trajectories
+    # together, draws a starting point for each beside the jump table, and
+    # spends extra additions doubling out of fruitless cycles.  A report
+    # without it is historical, from the Floyd walk that advanced one
+    # tortoise and two hare steps per iteration from a single start.
+    rebuilds = report.get("jump_table_rebuilds", -1)
+    walks = report.get("parallel_walks")
+    if walks is None:
+        if charges.get("setup_scalar_multiplications") != 34 * rebuilds:
+            raise EvidenceError("rho setup scalar-multiplication ledger does not balance")
+        if charges.get("setup_group_additions") != 17 * rebuilds:
+            raise EvidenceError("rho setup addition ledger does not balance")
+        if charges.get("coefficient_draws") != charges.get("setup_scalar_multiplications"):
+            raise EvidenceError("rho coefficient-draw ledger does not balance")
+        if charges.get("walk_group_additions") != charges.get("partition_hashes") or charges.get(
+            "walk_group_additions"
+        ) != 3 * report.get("iterations", -1):
+            raise EvidenceError("rho walk ledger does not balance")
+        if charges.get("canonicalizations") != report.get(
+            "restarts_attempted", -1
+        ) + charges.get("walk_group_additions", -1):
+            raise EvidenceError("rho canonicalization ledger does not balance")
+    else:
+        if not isinstance(walks, int) or walks < 1:
+            raise EvidenceError("rho report has an invalid parallel-walk count")
+        setup_points = (16 + walks) * rebuilds
+        if charges.get("setup_scalar_multiplications") != 2 * setup_points:
+            raise EvidenceError("rho setup scalar-multiplication ledger does not balance")
+        if charges.get("setup_group_additions") != setup_points:
+            raise EvidenceError("rho setup addition ledger does not balance")
+        if charges.get("coefficient_draws") != charges.get("setup_scalar_multiplications"):
+            raise EvidenceError("rho coefficient-draw ledger does not balance")
+        # One addition and one partition hash per advance; the rest are
+        # the doublings that escape a fruitless cycle.
+        if charges.get("walk_group_additions") != (
+            charges.get("partition_hashes", -1) + charges.get("cycle_escape_doublings", -1)
+        ) or charges.get("cycle_escape_doublings", -1) < charges.get("fruitless_cycles", 0):
+            raise EvidenceError("rho walk ledger does not balance")
+        if charges.get("canonicalizations") != (
+            walks * rebuilds
+            + charges.get("partition_hashes", -1)
+            + charges.get("cycle_escape_doublings", -1)
+        ):
+            raise EvidenceError("rho canonicalization ledger does not balance")
+        # Each charged iteration examines one state, which either advances
+        # (one hash) or escapes a cycle (at least one hash, at most the
+        # 64-state enumeration bound).
+        if not (
+            report.get("iterations", -1) - walks
+            <= charges.get("partition_hashes", -1)
+            <= report.get("iterations", -1) + 64 * charges.get("fruitless_cycles", 0)
+        ):
+            raise EvidenceError("rho walk step ledger does not balance")
     curve_n = 23 if profile == "production" else 7
     if (
         charges.get("frobenius_maps") != charges.get("negations_examined")

@@ -4048,6 +4048,10 @@ pub struct KoblitzSignedRhoCharges {
     /// Collisions of two identical states — a fruitless cycle of the
     /// quotient walk — escaped by doubling instead of restarting.
     pub fruitless_cycles: u64,
+    /// Doublings spent escaping those cycles.  Each is also counted in
+    /// `walk_group_additions`, so the walk's addition ledger closes as
+    /// `walk_group_additions = partition_hashes + cycle_escape_doublings`.
+    pub cycle_escape_doublings: u64,
 }
 
 /// Terminal report for an arbitrary public target. A missing log is an honest
@@ -4060,6 +4064,11 @@ pub struct KoblitzSignedRhoReport {
     pub iterations: u64,
     pub restarts_attempted: u32,
     pub jump_table_rebuilds: u32,
+    /// Walks actually stepped together per restart, after scaling the
+    /// requested count down to what the instance can use.  The setup
+    /// ledger closes as `setup_group_additions = (jump_count +
+    /// parallel_walks) · jump_table_rebuilds`.
+    pub parallel_walks: usize,
     pub setup_ns: u128,
     pub walk_ns: u128,
     pub verification_ns: u128,
@@ -4185,6 +4194,7 @@ fn escape_cycle_reference(
     let mut escaped = best;
     for _ in 0..=attempt {
         charges.walk_group_additions += 1;
+        charges.cycle_escape_doublings += 1;
         escaped = canonicalize_signed_rho(
             curve,
             KoblitzSignedRhoState {
@@ -4410,6 +4420,7 @@ impl FastRhoWalk<'_> {
         let mut escaped = best;
         for _ in 0..=attempt {
             charges.walk_group_additions += 1;
+            charges.cycle_escape_doublings += 1;
             escaped = self.canonicalize(
                 FastRhoState {
                     point: self.fc.double(escaped.point),
@@ -4546,6 +4557,7 @@ fn signed_rho_fast(
         iterations: 0,
         restarts_attempted: 0,
         jump_table_rebuilds: 0,
+        parallel_walks: 0,
         setup_ns: 0,
         walk_ns: 0,
         verification_ns: 0,
@@ -4572,10 +4584,9 @@ fn signed_rho_fast(
             restart,
             jumps: jumps.len(),
         });
-        let mut states: Vec<FastRhoState> = (0..rho_effective_walks(
-            options.parallel_walks,
-            rho_expected_steps(modulus, curve.n),
-        ))
+        report.parallel_walks =
+            rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus, curve.n));
+        let mut states: Vec<FastRhoState> = (0..report.parallel_walks)
             .map(|_| {
                 let (point, a, b) = draw(&mut report);
                 walk.canonicalize(
@@ -4750,6 +4761,7 @@ pub fn koblitz_signed_frobenius_rho_reference(
         iterations: 0,
         restarts_attempted: 0,
         jump_table_rebuilds: 0,
+        parallel_walks: 0,
         setup_ns: 0,
         walk_ns: 0,
         verification_ns: 0,
@@ -4777,10 +4789,9 @@ pub fn koblitz_signed_frobenius_rho_reference(
             restart,
             jumps: jumps.len(),
         });
-        let mut states: Vec<KoblitzSignedRhoState> = (0..rho_effective_walks(
-            options.parallel_walks,
-            rho_expected_steps(modulus_u64, curve.n),
-        ))
+        report.parallel_walks =
+            rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus_u64, curve.n));
+        let mut states: Vec<KoblitzSignedRhoState> = (0..report.parallel_walks)
             .map(|_| {
                 let (point, a, b) = draw(&mut report);
                 canonicalize_signed_rho(
@@ -5846,6 +5857,65 @@ enum Probe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rho_charge_ledgers_close() {
+        // The custody validators of the unknown-scalar panel check these
+        // identities on every rho run, so the walk has to hold them by
+        // construction.
+        for (a, n, jumps, walks) in [(0u8, 9u32, 16usize, 1usize), (1, 19, 8, 4), (0, 31, 16, 32)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            for seed in 0..3u64 {
+                let d = BigUint::from((seed * 65_537 + 3) % r);
+                let q = kc.mul(kc.generator(), &d);
+                let report = koblitz_signed_frobenius_rho_with_progress(
+                    &kc,
+                    &q,
+                    &KoblitzSignedRhoOptions {
+                        seed,
+                        jump_count: jumps,
+                        max_restarts: 8,
+                        max_iterations_per_restart: 1 << 20,
+                        progress_interval: 0,
+                        parallel_walks: walks,
+                    },
+                    &mut |_| {},
+                );
+                let c = &report.charges;
+                let rebuilds = u64::from(report.jump_table_rebuilds);
+                let setup_points = (jumps + report.parallel_walks) as u64;
+                assert_eq!(report.jump_table_rebuilds, report.restarts_attempted);
+                assert_eq!(c.setup_group_additions, setup_points * rebuilds);
+                assert_eq!(c.setup_scalar_multiplications, 2 * setup_points * rebuilds);
+                assert_eq!(c.coefficient_draws, c.setup_scalar_multiplications);
+                // Every advance is one addition and one partition hash;
+                // the extra additions are the escape doublings.
+                assert_eq!(
+                    c.walk_group_additions,
+                    c.partition_hashes + c.cycle_escape_doublings
+                );
+                // One canonicalization per setup point, per advance and
+                // per escape doubling.
+                assert_eq!(
+                    c.canonicalizations,
+                    report.parallel_walks as u64 * rebuilds
+                        + c.partition_hashes
+                        + c.cycle_escape_doublings
+                );
+                // Each charged iteration examines one state, which either
+                // advances (one hash) or escapes (at least one hash, at
+                // most the 64-state enumeration bound).
+                assert!(report.iterations.saturating_sub(report.parallel_walks as u64) <= c.partition_hashes);
+                assert!(c.partition_hashes <= report.iterations + 64 * c.fruitless_cycles);
+                assert_eq!(c.frobenius_maps, c.negations_examined);
+                assert_eq!(c.frobenius_maps % u64::from(n), 0);
+                assert!(c.frobenius_maps <= c.canonicalizations * u64::from(n));
+                assert!(c.collisions >= c.failed_collisions);
+                assert!(report.parallel_walks >= 1 && report.parallel_walks <= walks);
+            }
+        }
+    }
 
     #[test]
     fn every_stored_pair_sum_is_found_by_lookup() {
