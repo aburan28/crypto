@@ -1562,4 +1562,54 @@ mod tests {
         );
         assert!(qs.is_some());
     }
+
+    #[test]
+    fn a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed() {
+        // On E/⟨α⟩ the translation by Q is a Möbius map iff α(Q) = Q, i.e.
+        // Q ∈ E[1 − α]: E[2] for α = −1 (the Klein group on x), the three
+        // points {O, ±T₃} for α = ω on the y-line, {O, T₂} for α = i on the
+        // x²-line.  So no line carries all of E[3].
+        let f = Gf::prime(1009);
+        // j = 0 with full rational E[3]: −4b a cube and −3b a square
+        let cube = |a: u64| f.pow(a, (f.p - 1) / 3) == 1;
+        let b = (1..f.p)
+            .find(|&b| {
+                f.sqrt(b).is_some()
+                    && cube(f.neg(f.mul(4, b)))
+                    && f.sqrt(f.neg(f.mul(3, b))).is_some()
+            })
+            .unwrap();
+        let c = Curve::short_weierstrass(f.clone(), 0, b, "j=0");
+        let pts = c.affine_points();
+        let e3 = torsion_points(&c, &pts, 3);
+        assert_eq!(e3.len(), 8, "full E[3] rational");
+        let omega = (2..f.p).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        let om = Auto::Scale(omega);
+        let mut descend = 0;
+        for &q in &e3 {
+            let fixed = c.apply_auto(om, q) == q;
+            let m = descended_map(&c, &pts, Line::Y, &PointMap::translate(q));
+            assert_eq!(m.is_some(), fixed, "{q:?}");
+            descend += usize::from(fixed);
+        }
+        assert_eq!(descend, 2, "only ±T₃ = (0, ±√b)");
+        // j = 1728 with full rational E[2]: a a square (x² + a splits)
+        let i = (2..f.p).find(|&u| f.mul(u, u) == f.neg(1)).unwrap();
+        let a = (2..f.p).find(|&a| f.sqrt(f.neg(a)).is_some()).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), a, 0, "j=1728");
+        let pts = c.affine_points();
+        let e2 = torsion_points(&c, &pts, 2);
+        assert_eq!(e2.len(), 3);
+        let iota = Auto::Scale(i);
+        let mut descend = 0;
+        for &q in &e2 {
+            let fixed = c.apply_auto(iota, q) == q;
+            let m = descended_map(&c, &pts, Line::X2, &PointMap::translate(q));
+            assert_eq!(m.is_some(), fixed, "{q:?}");
+            descend += usize::from(fixed);
+            // on the x-line (quotient by −1) every 2-torsion translation descends
+            assert!(descended_map(&c, &pts, Line::X, &PointMap::translate(q)).is_some());
+        }
+        assert_eq!(descend, 1, "only T = (0, 0)");
+    }
 }
