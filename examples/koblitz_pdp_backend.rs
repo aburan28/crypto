@@ -868,7 +868,7 @@ fn direct_mitm(instance: VerifiedInstance) -> (Value, bool) {
 }
 
 fn usage() -> &'static str {
-    "usage: koblitz_pdp_backend <native-sat|direct-mitm|validate-model> <manifest.json> [conflict-budget|assignment.json]"
+    "usage: koblitz_pdp_backend <verify-source|native-sat|direct-mitm|validate-model> <manifest.json> [conflict-budget|assignment.json]"
 }
 
 fn run(args: &[String]) -> Result<(Value, bool), String> {
@@ -876,8 +876,8 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
         return Err(usage().to_string());
     }
     let backend = args[1].as_str();
-    if backend == "direct-mitm" && args.len() != 3 {
-        return Err("direct-mitm does not take a conflict budget".to_string());
+    if matches!(backend, "verify-source" | "direct-mitm") && args.len() != 3 {
+        return Err(format!("{backend} does not take a conflict budget"));
     }
     if backend == "native-sat" && args.len() != 4 {
         return Err("native-sat requires a conflict budget".to_string());
@@ -888,6 +888,22 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
     let manifest_path = Path::new(&args[2]);
     let instance = verify_instance(manifest_path)?;
     match backend {
+        "verify-source" => Ok((
+            json!({
+                "schema":"koblitz_pdp_source_verification.v1",
+                "status":"verified",
+                "source_instance_id":instance.id,
+                "source_instance_verified":true,
+                "source_artifacts":instance.artifact_receipts,
+                "regenerated_source_exact":true,
+                "n":instance.n,
+                "ell":instance.ell,
+                "source_variables":instance.n_vars,
+                "timing_ns":{"source_verification":instance.verification_ns},
+                "interpretation":"The algebraic factor base, explicit affine target, source identity, and all exported equations were independently reconstructed without running a solver",
+            }),
+            true,
+        )),
         "native-sat" => {
             let budget = args[3]
                 .parse::<u64>()

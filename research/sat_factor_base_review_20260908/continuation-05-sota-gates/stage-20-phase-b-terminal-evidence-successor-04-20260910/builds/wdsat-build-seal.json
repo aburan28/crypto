@@ -1,0 +1,270 @@
+{
+  "binary_identity": {
+    "bytes": 114608,
+    "path": "wdsat_solver",
+    "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+  },
+  "binary_path": "wdsat_solver",
+  "binary_sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185",
+  "config_sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352",
+  "implementation_state": {
+    "commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
+    "dirty": false,
+    "porcelain": []
+  },
+  "inventory": [
+    {
+      "bytes": 1187,
+      "path": "binary-copy.intent.json",
+      "sha256": "427135ddf7b5c6fa3f1c39dee83762d46d4fbad8a4956c80dca7a826c8ab30bf"
+    },
+    {
+      "bytes": 676,
+      "path": "binary-copy.metrics.json",
+      "sha256": "6685bde3127a166e4e337a3866c3f97c6756533eadc48655b100fec63d3fcad2"
+    },
+    {
+      "bytes": 0,
+      "path": "binary-copy.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "binary-copy.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4760,
+      "path": "build.intent.json",
+      "sha256": "599a21d1095f18bb298ae7e5f9d66f5f603cc14d0146e4371d59e0df700dbf4e"
+    },
+    {
+      "bytes": 473,
+      "path": "build.metrics.json",
+      "sha256": "cc9f9d0d2ddef26bebf53bac19b9222fcc1a4aeb338094fb434555b939bb1dbf"
+    },
+    {
+      "bytes": 0,
+      "path": "build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 555,
+      "path": "build.stdout",
+      "sha256": "bda1279faf30fa7521c844135222ed499cb4abbf1d1c7b63138ded4af17ecfa6"
+    },
+    {
+      "bytes": 16778,
+      "path": "build/src/cnf.c",
+      "sha256": "ec86f8f08d9272579b20d6dfb9513ca69bdfca3c490e4b11e75878f13745a9ee"
+    },
+    {
+      "bytes": 1866,
+      "path": "build/src/cnf.h",
+      "sha256": "f1c5479b60c4a49192c84569a74a9838b855c44411e35c066817076c90879a62"
+    },
+    {
+      "bytes": 15696,
+      "path": "build/src/cnf.o",
+      "sha256": "2e48269acab77a1358127740485b8e235bfdc444ec3bbe92174af8accad586e3"
+    },
+    {
+      "bytes": 237,
+      "path": "build/src/config.h",
+      "sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352"
+    },
+    {
+      "bytes": 38752,
+      "path": "build/src/dimacs.c",
+      "sha256": "d165dea3b5c2919c8d29a05a037e0b98ed7aac4ff9f7c8c073a7a9c2151d9ffb"
+    },
+    {
+      "bytes": 2213,
+      "path": "build/src/dimacs.h",
+      "sha256": "f40ede80353b747851463b0fd376c3b9f7e394367b21df115ab8f5f797b30cfd"
+    },
+    {
+      "bytes": 18384,
+      "path": "build/src/dimacs.o",
+      "sha256": "4e4249ee896bf300ec47e4cf0a8303f5099a400f3fda432c7d258dc6aa23d954"
+    },
+    {
+      "bytes": 8112,
+      "path": "build/src/fp.c",
+      "sha256": "c51eca3b78beb801810ab82a9ae5d97af688338d567ec4c645873ec4adf1fd06"
+    },
+    {
+      "bytes": 1096,
+      "path": "build/src/fp.h",
+      "sha256": "cff83916044c1370c0c07f271fa8eea6446ff1e29032618821cdda3c75b68e97"
+    },
+    {
+      "bytes": 10040,
+      "path": "build/src/fp.o",
+      "sha256": "aee2b0b43399f1a1c09750f60953b78958958d2556117b67f010fc91ca63a290"
+    },
+    {
+      "bytes": 4248,
+      "path": "build/src/main.c",
+      "sha256": "0ab5b48557aa3a5a6229124bda3dea36a1a771d2a8f92721e6d44a4291b0973d"
+    },
+    {
+      "bytes": 6912,
+      "path": "build/src/main.o",
+      "sha256": "9041d2ad6b39497e22dbad02a97bff59a6cf3eccf60840b80cf849806f3d6b26"
+    },
+    {
+      "bytes": 602,
+      "path": "build/src/makefile",
+      "sha256": "3cbeb6537587d54d28c37937e17d841b551d774f7a9946aeee91264e9413b48d"
+    },
+    {
+      "bytes": 13723,
+      "path": "build/src/wdsat.c",
+      "sha256": "1f17ba03459bbdda89539e542bbda75d8860037082a25d7c073dc0d90095a732"
+    },
+    {
+      "bytes": 746,
+      "path": "build/src/wdsat.h",
+      "sha256": "476b9ae9fcf66b140625e6b8f44179a121bcc08cb425f63dd7b6caf02c1d6e8a"
+    },
+    {
+      "bytes": 14712,
+      "path": "build/src/wdsat.o",
+      "sha256": "7979aa668297b832a1eee7b0019a04a0b2991448d478ca6878c904d1300cd556"
+    },
+    {
+      "bytes": 1205,
+      "path": "build/src/wdsat_utils.c",
+      "sha256": "430b2d23de167854782cfd46dd0e08987abcd1d69cfde69d82482dd81899740e"
+    },
+    {
+      "bytes": 6860,
+      "path": "build/src/wdsat_utils.h",
+      "sha256": "15cd7a3921902d157e7c83bc333c516ec8ba685e91170c897e06c5fe3654479b"
+    },
+    {
+      "bytes": 1176,
+      "path": "build/src/wdsat_utils.o",
+      "sha256": "b193eadadb45b2027dfc41512f8f069ebed00065acc39931d227b3f6ee877bcf"
+    },
+    {
+      "bytes": 30129,
+      "path": "build/src/xorgauss.c",
+      "sha256": "e9c62dda272a3801999b03da2ada8282539796caf98befd6768ce79027e526ec"
+    },
+    {
+      "bytes": 4841,
+      "path": "build/src/xorgauss.h",
+      "sha256": "02014f27602a0e02553467acde33d14c69c7aa0f8a5fc01f16deece57b438445"
+    },
+    {
+      "bytes": 38960,
+      "path": "build/src/xorgauss.o",
+      "sha256": "c5c852327611d7ddf11403582526ef06cb44e47bebf33e36feb56ed7164bad5f"
+    },
+    {
+      "bytes": 11794,
+      "path": "build/src/xorset.c",
+      "sha256": "584ef01e43561df607a7e65d340dcd30736121834c4b66f81f9f208b6d924c0d"
+    },
+    {
+      "bytes": 3039,
+      "path": "build/src/xorset.h",
+      "sha256": "0cb90df166194472d21bcb7740d5ab2c1887db89eea9e2522a4d06e977099db9"
+    },
+    {
+      "bytes": 11864,
+      "path": "build/src/xorset.o",
+      "sha256": "5e39995ae50bd3a4973b4c8b1b3fe05a3fd2fa47352d162a0d6d72526850f495"
+    },
+    {
+      "bytes": 114608,
+      "path": "build/wdsat_solver",
+      "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+    },
+    {
+      "bytes": 1014,
+      "path": "clean.intent.json",
+      "sha256": "73853111a2a39443d8985c1c7f1abddc12ae3b672a07d8285bd65d462c155366"
+    },
+    {
+      "bytes": 477,
+      "path": "clean.metrics.json",
+      "sha256": "558bc0a857c0535717e05cea3dac1e72f400aa61e19b47eec077d88e31886112"
+    },
+    {
+      "bytes": 0,
+      "path": "clean.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17,
+      "path": "clean.stdout",
+      "sha256": "a3515c316ebd9e7c90a2a42b194022151e5a247df963425832fe5923d04eedbd"
+    },
+    {
+      "bytes": 947,
+      "path": "config-install.intent.json",
+      "sha256": "6b7321dd9ef287e71d646c3dec27577ab7581bc5df85d7bc2a8f974a73132bf2"
+    },
+    {
+      "bytes": 660,
+      "path": "config-install.metrics.json",
+      "sha256": "1a530a7ed8749949ef251a425d208f06928fa962b9fb3566d1f0877244f76a9d"
+    },
+    {
+      "bytes": 0,
+      "path": "config-install.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "config-install.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2849,
+      "path": "configured-source-inventory.json",
+      "sha256": "2d978157d70201b1daa50a0f29f6ef244ee5edbdfcfb15c360493a31a7346a96"
+    },
+    {
+      "bytes": 15367,
+      "path": "receipt.json",
+      "sha256": "7239950c441ca46554bbabdbd3c9e4768adfa6b2c784bd1b6696446b22054fa7"
+    },
+    {
+      "bytes": 907,
+      "path": "source-copy.intent.json",
+      "sha256": "02daed924e973c90984fc1d919f6f0a28f87e9120db7f7ac8f96dde578bbf66e"
+    },
+    {
+      "bytes": 645,
+      "path": "source-copy.metrics.json",
+      "sha256": "4e7835b14b07cfca5523329e23a01f263e461464062700ad7aa840e2875fcdeb"
+    },
+    {
+      "bytes": 0,
+      "path": "source-copy.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "source-copy.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 114608,
+      "path": "wdsat_solver",
+      "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+    }
+  ],
+  "inventory_sha256": "833a035a40bd5d6e788e3f77141d973c0f2b8f6b9eb1cfa2f349a9e0dbc1d277",
+  "protocol_payload_sha256": "d1b408fd9ae810c14f8ea9d11123fd8f7beaea203d406d43c9ec3087a87f1a60",
+  "receipt_path": "receipt.json",
+  "receipt_sha256": "7239950c441ca46554bbabdbd3c9e4768adfa6b2c784bd1b6696446b22054fa7",
+  "schema": "koblitz_pdp_phase_b_wdsat_build_seal.v2",
+  "seal_payload_sha256": "f32730f26f40f4881294c69df7dd5fcfe3cf583603531869acba8ca86c6bf383",
+  "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+  "status": "build_frozen"
+}
