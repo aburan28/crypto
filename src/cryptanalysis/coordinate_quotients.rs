@@ -300,10 +300,17 @@ impl PointMap {
 
 /// In odd characteristic negation is the scaling by `−1`; use one name for
 /// it so group closure does not count the same map twice.
+/// `(x, y) ↦ (u²x, u³y)` is an automorphism only of a curve with
+/// `a₁ = a₃ = 0`; there, in odd characteristic, negation is `Scale(−1)`.
+fn short_form(curve: &Curve) -> bool {
+    curve.a1 == 0 && curve.a3 == 0
+}
+
 fn canonical_auto(curve: &Curve, a: Auto) -> Auto {
     match a {
-        Auto::Neg if curve.f.p != 2 => Auto::Scale(curve.f.neg(1)),
+        Auto::Neg if curve.f.p != 2 && short_form(curve) => Auto::Scale(curve.f.neg(1)),
         Auto::Scale(u) if curve.f.p == 2 && u != 1 => Auto::Neg,
+        Auto::Scale(u) if curve.f.p != 2 && !short_form(curve) && u == curve.f.neg(1) => Auto::Neg,
         other => other,
     }
 }
@@ -316,8 +323,8 @@ fn compose_auto(curve: &Curve, a: Auto, b: Auto) -> Auto {
         (Auto::Neg, Auto::Neg) => Auto::Scale(1),
         (Auto::Scale(u), Auto::Scale(v)) => Auto::Scale(f.mul(u, v)),
         (Auto::Neg, Auto::Scale(u)) | (Auto::Scale(u), Auto::Neg) => {
-            if f.p == 2 {
-                // only Scale(1) exists in char 2 for these curves
+            if f.p == 2 || !short_form(curve) {
+                // only ±1 exist here, and Scale(u) with u ≠ 1 is not one
                 Auto::Neg
             } else {
                 Auto::Scale(f.neg(u))
@@ -1505,5 +1512,54 @@ mod tests {
         };
         let mo = descended_map(&cb, &pts, line, &om).unwrap();
         assert!(matches!(mo.kind(&f), MobiusKind::Scaling(_)));
+    }
+
+    #[test]
+    fn four_torsion_on_the_two_isogeny_line_gives_a_system() {
+        let f = Gf::prime(1009);
+        let b = 2u64;
+        let c4 = Curve {
+            a1: 1,
+            a2: f.neg(b),
+            a3: f.neg(b),
+            a4: 0,
+            a6: 0,
+            label: "4-torsion".into(),
+            f: f.clone(),
+        };
+        let pts = c4.affine_points();
+        let t4 = Pt::Aff(0, 0);
+        let t2 = c4.mul(t4, 2);
+        let tau4 = PointMap::translate(t4);
+        let (chart, kind, _) = linearised_chart(&c4, &pts, Line::Iso2(t2), &tau4).unwrap();
+        assert_eq!(kind, FrameKind::Sign);
+        let mut rng = Rng64::new(9);
+        let group = group_closure(&c4, &[tau4, PointMap::negate()], 64).unwrap();
+        assert_eq!(group.len(), 8);
+        let gamma = relation_subgroup(&c4, &pts, &group, 2, 12, &mut rng);
+        assert_eq!(gamma.len(), 32, "16 translation triples × global sign");
+        let probes: Vec<Vec<Pt>> = (0..24)
+            .map(|_| relation_tuple(&c4, &pts, 2, &mut rng))
+            .collect();
+        let ok = probes
+            .iter()
+            .filter(|t| orbit_set(&c4, &chart, &gamma, &Seed::Point(0), t).is_some())
+            .count();
+        assert!(ok >= 8, "only {ok} probe tuples have a full orbit set");
+        let qs = build_quotient_system(
+            &c4,
+            &pts,
+            &[tau4, PointMap::negate()],
+            chart,
+            &[
+                Seed::Point(0),
+                Seed::Point(1),
+                Seed::Point(2),
+                Seed::Product,
+            ],
+            2,
+            &mut rng,
+        );
+        assert!(qs.is_some());
     }
 }
