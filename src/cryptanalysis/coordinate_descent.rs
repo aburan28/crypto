@@ -44,7 +44,7 @@
 //! three systems against each other on the same engine, nothing more.
 
 use std::collections::HashMap;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use num_bigint::BigUint;
 
@@ -495,6 +495,34 @@ pub fn groebner_time(p: u64, sys: &DescendedSystem) -> (usize, f64, bool) {
     (red.len(), ms, inconsistent)
 }
 
+/// Wall-clock budget for one Buchberger run in [`compare_arms`]: the
+/// `GB_BUDGET_SECS` environment variable, default 120 s.  Buchberger on a
+/// descended degree-12 `S₄` system does not return in any useful time,
+/// and a comparison must be able to say so rather than hang.
+pub fn groebner_budget() -> Duration {
+    std::env::var("GB_BUDGET_SECS")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .map(Duration::from_secs)
+        .unwrap_or(Duration::from_secs(120))
+}
+
+/// [`groebner_time`] on its own thread, `None` if it exceeds `budget`
+/// (the thread is left to finish on its own; the process does not wait).
+pub fn groebner_time_bounded(
+    p: u64,
+    sys: &DescendedSystem,
+    budget: Duration,
+) -> Option<(usize, f64, bool)> {
+    let sys = sys.clone();
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let r = groebner_time(p, &sys);
+        let _ = tx.send(r);
+    });
+    rx.recv_timeout(budget).ok()
+}
+
 /// One arm of the comparison.
 #[derive(Clone, Debug)]
 pub struct DescentArm {
@@ -509,6 +537,8 @@ pub struct DescentArm {
     pub basis_size: usize,
     pub groebner_ms: f64,
     pub inconsistent: bool,
+    /// Buchberger exceeded [`groebner_budget`]; `groebner_ms` is `+∞`.
+    pub timed_out: bool,
     pub error: Option<String>,
 }
 
@@ -618,6 +648,7 @@ pub fn compare_arms(
                 basis_size: 0,
                 groebner_ms: f64::NAN,
                 inconsistent: false,
+                timed_out: false,
                 error: Some("no system".into()),
             });
             continue;
@@ -627,10 +658,13 @@ pub fn compare_arms(
             Ok(d) => {
                 // A system whose unknowns are not F_p-valued on the base
                 // has no descent; do not time a meaningless basis.
-                let (basis_size, ms, inconsistent) = if d.fp_valued {
-                    groebner_time(f.p, &d)
+                let (basis_size, ms, inconsistent, timed_out) = if d.fp_valued {
+                    match groebner_time_bounded(f.p, &d, groebner_budget()) {
+                        Some((b, ms, inc)) => (b, ms, inc, false),
+                        None => (0, f64::INFINITY, false, true),
+                    }
                 } else {
-                    (0, f64::NAN, false)
+                    (0, f64::NAN, false, false)
                 };
                 out.push(DescentArm {
                     label,
@@ -644,6 +678,7 @@ pub fn compare_arms(
                     basis_size,
                     groebner_ms: ms,
                     inconsistent,
+                    timed_out,
                     error: None,
                 });
             }
@@ -659,6 +694,7 @@ pub fn compare_arms(
                 basis_size: 0,
                 groebner_ms: f64::NAN,
                 inconsistent: false,
+                timed_out: false,
                 error: Some(e),
             }),
         }
@@ -687,7 +723,9 @@ pub fn format_arms(arms: &[DescentArm]) -> String {
             a.monomials,
             if a.fp_valued { "yes" } else { "NO" },
             a.groebner_ms,
-            if a.inconsistent {
+            if a.timed_out {
+                "> budget".to_string()
+            } else if a.inconsistent {
                 "{1}".to_string()
             } else {
                 a.basis_size.to_string()
