@@ -6,6 +6,8 @@
 #   make gpu          CUDA build (needs nvcc)
 #   make ptx          device-only compile + ptxas report (needs clang or nvcc,
 #                     but no GPU) -- register, spill and code-size numbers
+#   make verilog      emit the FPGA datapath from the same IR (python3 only)
+#   make check-verilog  simulate the emitted RTL against the field model
 #
 # Build-time knobs:
 #   BATCH      walks batched into one field inversion per thread (default 32)
@@ -87,6 +89,16 @@ generate:
 	cd codegen && python3 genpolyreduce.py
 	cd codegen && python3 gendirectreduce.py
 	python3 codegen/genpackedproduct.py
+
+# FPGA datapath: the same IR emitted as pipelined Verilog instead of C.
+# See ../FPGA-CEILING.md; needs python3 only, no FPGA toolchain.
+verilog:
+	cd codegen && python3 genverilog.py --out ../generated/rtl
+
+# Read the emitted RTL back and simulate it against field.Onb.  Checks the
+# emission (stage crossings, register chains, output wiring), not the IR.
+check-verilog:
+	cd codegen && python3 testverilog.py --rtl ../generated/rtl
 
 cpu: ecc2k130-cpu
 
@@ -193,7 +205,7 @@ test-timing:
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
 	./build/test-timing
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-timing ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-timing check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through

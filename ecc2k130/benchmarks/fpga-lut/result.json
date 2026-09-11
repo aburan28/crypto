@@ -1,0 +1,172 @@
+{
+  "field": "GF(2^131), permuted type-II ONB",
+  "mapper": {
+    "k": 6,
+    "priorityCuts": 10,
+    "note": "no LUT_6_2 dual-output packing; counts are an upper bound"
+  },
+  "verified": "every multiplier checked against field.Onb on 64 random inputs",
+  "circuits": [
+    {
+      "circuit": "multiply, direct ONB",
+      "gates": 42706,
+      "gateDepth": 10,
+      "lutDepthOpt": 10970,
+      "lutDepthOptLevels": 6,
+      "lutAreaOpt": 10970,
+      "lutAreaOptLevels": 6,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 6,
+          "flipFlops": 19457
+        },
+        "levelsPerStage2": {
+          "stages": 3,
+          "flipFlops": 7247
+        },
+        "levelsPerStage3": {
+          "stages": 2,
+          "flipFlops": 3143
+        }
+      }
+    },
+    {
+      "circuit": "multiply, conversion cut 131",
+      "gates": 36001,
+      "gateDepth": 202,
+      "lutDepthOpt": 14539,
+      "lutDepthOptLevels": 54,
+      "lutAreaOpt": 9515,
+      "lutAreaOptLevels": 85,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 54,
+          "flipFlops": 174421
+        },
+        "levelsPerStage2": {
+          "stages": 27,
+          "flipFlops": 86882
+        },
+        "levelsPerStage3": {
+          "stages": 18,
+          "flipFlops": 58127
+        }
+      }
+    },
+    {
+      "circuit": "multiply, conversion cut 66",
+      "gates": 27940,
+      "gateDepth": 139,
+      "lutDepthOpt": 11337,
+      "lutDepthOptLevels": 36,
+      "lutAreaOpt": 7661,
+      "lutAreaOptLevels": 54,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 36,
+          "flipFlops": 77655
+        },
+        "levelsPerStage2": {
+          "stages": 18,
+          "flipFlops": 38625
+        },
+        "levelsPerStage3": {
+          "stages": 12,
+          "flipFlops": 25904
+        }
+      }
+    },
+    {
+      "circuit": "multiply, conversion cut 33",
+      "gates": 22119,
+      "gateDepth": 109,
+      "lutDepthOpt": 8902,
+      "lutDepthOptLevels": 28,
+      "lutAreaOpt": 6344,
+      "lutAreaOptLevels": 40,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 28,
+          "flipFlops": 39064
+        },
+        "levelsPerStage2": {
+          "stages": 14,
+          "flipFlops": 19305
+        },
+        "levelsPerStage3": {
+          "stages": 10,
+          "flipFlops": 12880
+        }
+      }
+    },
+    {
+      "circuit": "multiply, conversion cut 17",
+      "gates": 18424,
+      "gateDepth": 95,
+      "lutDepthOpt": 7344,
+      "lutDepthOptLevels": 25,
+      "lutAreaOpt": 5659,
+      "lutAreaOptLevels": 33,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 25,
+          "flipFlops": 24913
+        },
+        "levelsPerStage2": {
+          "stages": 13,
+          "flipFlops": 12342
+        },
+        "levelsPerStage3": {
+          "stages": 9,
+          "flipFlops": 8182
+        }
+      }
+    },
+    {
+      "circuit": "multiply, conversion cut 9",
+      "gates": 16494,
+      "gateDepth": 91,
+      "lutDepthOpt": 6787,
+      "lutDepthOptLevels": 24,
+      "lutAreaOpt": 5563,
+      "lutAreaOptLevels": 32,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 24,
+          "flipFlops": 20793
+        },
+        "levelsPerStage2": {
+          "stages": 12,
+          "flipFlops": 10091
+        },
+        "levelsPerStage3": {
+          "stages": 8,
+          "flipFlops": 6570
+        }
+      }
+    },
+    {
+      "circuit": "hamming weight",
+      "gates": 268,
+      "gateDepth": 21,
+      "lutDepthOpt": 79,
+      "lutDepthOptLevels": 5,
+      "lutAreaOpt": 91,
+      "lutAreaOptLevels": 13,
+      "pipelining": {
+        "levelsPerStage1": {
+          "stages": 5,
+          "flipFlops": 127
+        },
+        "levelsPerStage2": {
+          "stages": 3,
+          "flipFlops": 54
+        },
+        "levelsPerStage3": {
+          "stages": 2,
+          "flipFlops": 16
+        }
+      }
+    }
+  ]
+}
