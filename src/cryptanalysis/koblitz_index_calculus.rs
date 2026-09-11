@@ -104,7 +104,7 @@
 //!   remains inconclusive.  The exact factor-base coverage results do not
 //!   establish a SAT speedup or a solving-complexity bound.
 //! - **Toy / research rungs only.**  Curve construction via
-//!   [`KoblitzCurve::new`] is guarded by [`MAX_N`] (currently 41) so the
+//!   [`KoblitzCurve::new`] is guarded by [`MAX_N`] (currently 63) so the
 //!   factor base can be materialised and the group order factored.  This
 //!   does not threaten sect163k1 or any other deployed Koblitz curve —
 //!   as the paper's own conclusion puts it, index calculus remains
@@ -148,12 +148,16 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.  Curve construction costs trial division to
-/// `√#E ≈ 2^{n/2}` and a sparse irreducible search; both are cheap to
-/// the boundary-ledger rungs at `n = 37` / `n = 41`.  What actually
-/// bounds a run is the `2^dim` factor base and, for the
-/// meet-in-the-middle oracle, its `|F|²` pair table.
-pub const MAX_N: u32 = 41;
+/// the mathematics.  Field elements are packed in a `u64`, so the
+/// absolute limit is `n < 64`.  Past `n ≈ 24` the generator is found
+/// by deterministic sampling rather than a full abscissa sweep; point
+/// counting still uses the closed Koblitz recurrence (no `2^n` scan).
+/// Curve construction costs trial division to `√#E ≈ 2^{n/2}` and a
+/// sparse irreducible search; both are still cheap at the
+/// boundary-ledger rungs through `n = 53`.  What actually bounds a run
+/// is the `2^dim` factor base and, for the meet-in-the-middle oracle,
+/// its `|F|²` pair table.
+pub const MAX_N: u32 = 63;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -520,18 +524,47 @@ impl KoblitzCurve {
         }
 
         // A generator of the order-r subgroup: kill the cofactor on
-        // successive curve points until the result is non-trivial.
+        // curve points until the result is non-trivial.  Exhaustive
+        // abscissa search is fine through ~24 bits; past that a full
+        // `2^n` sweep is impossible, so sample deterministically from
+        // a fixed LCG (reproducible across hosts).
         let mut generator = BinaryPoint::Infinity;
-        for raw in 0..(1u64 << n) {
+        let mask = if n >= 64 {
+            u64::MAX
+        } else {
+            (1u64 << n) - 1
+        };
+        let exhaustive = n <= 24;
+        let budget = if exhaustive {
+            1u64 << n
+        } else {
+            // ~1M trials is plenty: a random x hits the curve ~1/2 of
+            // the time and survives the cofactor map with probability
+            // ≈ 1 − 1/r ≫ 2^{-20} on admitted rungs.
+            1u64 << 20
+        };
+        let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
+        for i in 0..budget {
+            let raw = if exhaustive {
+                i
+            } else {
+                state = state
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1);
+                state & mask
+            };
             let x = F2mElement::from_biguint(&BigUint::from(raw), n);
             let pts = points_with_x(&curve, &x);
             let mut found = false;
             for p in pts {
                 let cand = scalar_mul(&curve, &p, &cofactor);
                 if cand != BinaryPoint::Infinity {
-                    generator = cand;
-                    found = true;
-                    break;
+                    // Confirm order divides r (reject accidental torsion).
+                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
+                        generator = cand;
+                        found = true;
+                        break;
+                    }
                 }
             }
             if found {
@@ -3592,6 +3625,18 @@ mod tests {
             }
             assert!(is_irreducible_f2(mask), "n = {n}");
         }
+    }
+
+    #[test]
+    fn constructs_past_prior_ceiling_n53() {
+        // Ledger next factor-base / vs_rho rung past MAX_N=41.
+        let curve = KoblitzCurve::new(0, 53).expect("K_0/F_2^53 must construct");
+        assert_eq!(curve.n, 53);
+        assert!(curve.subgroup_order.bits() >= 40);
+        assert_eq!(
+            scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
+            BinaryPoint::Infinity
+        );
     }
 
     #[test]
