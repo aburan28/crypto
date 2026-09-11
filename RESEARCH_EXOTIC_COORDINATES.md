@@ -534,6 +534,11 @@ statement about `koblitz_groebner`'s engine limits, not about the
 polynomial; it is also exactly the gap §7 flagged between a modelled
 system and a measured solve.
 
+(§17 reruns this comparison with the degree cap and the size caps made
+explicit, and corrects the account of what the shipped cap of 3 did to
+each arm.  The `n = 17` verdict survives; the reason stated here does
+not, in the form it is stated.)
+
 **Where the `m = 3` gain comes from is now measured, not argued.**  The
 direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
 chained intermediate points is worth ×12 on its own, and the symmetry is
@@ -1465,37 +1470,60 @@ log entry proposes.
 
 ## 17. The Koblitz comparison at equal Macaulay degree
 
-**Code:** `PairedOptions::f4_max_degree` (`--f4-degree`),
-`F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS`, `SolveStats::{max_degree_built,
-oversize}`; `examples/symmetrised_oracle_bench.rs`.
+**Code:** `PairedOptions::{f4_max_degree, chained_x}` (`--f4-degree`,
+`--no-x`), `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS`,
+`SolveStats::{max_degree_built, oversize}`, the `built` column of
+`format_paired`; `examples/symmetrised_oracle_bench.rs`.
+
+### What the engine's degree cap actually means
 
 §8 compared the `x`-chained and the symmetrised systems under the
 repo's Boolean solver as it ships: matrix-F4 up to Macaulay degree 3,
-then splitting.  Reading the engine again for this section showed
-that this was not an equal comparison.  The symmetrised `m = 3`
-systems have degree 4, and the engine builds Macaulay matrices only
-from the equations' own degree up to its cap, so at cap 3 it built the
-degree-4 matrix of the bare equations — no multiples — and did the
-rest by splitting and propagation.  The `x`-chained systems (degree 3)
-got one round of multiplication.  §8's "effort" column therefore
-compared a system with algebra against a system without, and the
-symmetrised system still won at `n = 15` and `n = 23` while losing at
-`n = 17`.
+then splitting.  Reading `reduce_system` again for this section shows
+that the cap is an **absolute** Macaulay degree, not a number of rounds
+above a system's own degree.  At every node the engine sets
+`base = max(degree of the residual system, 2)` and builds matrices at
+`base, base+1, …, max(cap, base)`, stopping early when a row becomes
+the constant `1` or forces a variable.
 
-This section reruns both arms at Macaulay degree 3, 4 and 5 with the
-size caps raised (60 000 rows, 300 000 columns), four decomposable or
-refuted targets per instance, no SAT.  "Effort" is splits; a degree
-whose matrix exceeded the caps falls back to the largest that fits.
+Two consequences, both of which §8 missed.
 
-| instance | arm | vars | deg | F4 degree 3: ms / splits | degree 4: ms / splits | degree 5: ms / splits |
+1. A cap of `d` gives the degree-3 `x`-chained system `d − 3` rounds of
+   multiplication above its own equations and the degree-4 symmetrised
+   system only `d − 4`.  **Equal caps are not equal algebra.**  Going
+   from cap 3 to cap 4 hands the `x`-chained arm a whole extra degree at
+   the root and hands the symmetrised arm nothing there.
+2. The cap never *lowers* the first matrix: `max(cap, base)` means the
+   symmetrised system's degree-4 matrix gets built even at cap 3.  So
+   §8's setting did not starve the symmetrised arm at the root, as a
+   first reading of the cap suggests.  What it starved were the deeper
+   nodes, where propagation has already pulled the residual system down
+   to degree 3 and a cap of 4 buys a round there.  That is why raising
+   the cap moves the symmetrised arm's split count at all.
+
+The `built` column added here reports the highest degree at which a
+matrix was actually built, and flags targets where a matrix was refused
+for exceeding the size caps — so the table below states measured
+algebra rather than a flag value.
+
+### The rerun
+
+Both arms, Macaulay caps 3, 4 and 5, size caps raised to 60 000 rows
+and 300 000 columns, four decomposable-or-refuted targets per instance
+(three at `n = 23`), no SAT.  "Effort" is splits.  Cells marked
+sym-only were run with `--no-x`: at a raised cap the `x`-chained arm
+costs hours on the larger fields and its trend is already fixed by the
+`n = 15` rows.
+
+| instance | arm | vars | own deg | cap 3: ms / splits | cap 4: ms / splits | cap 5: ms / splits |
 |---|---|---:|---:|---|---|---|
-| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 (degree-5 matrix over the caps: fell back to 4) |
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 |
 | | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | 75 / 15 |
-| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | – |
-| | symmetrised | 13 | 4 | 6 (found), 26 (refuted) / 29 | 9, 29 / 8 | – |
-| `K₁/F₂¹⁷` (found) | `x`-chained | 44 | 3 | 3 963 / 49 | TBD-KD-B |
-| | symmetrised | 25 | 4 | 5 537 / 3 219 | TBD-KD-B |
-| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | budget (§8) | TBD-KD-D |
-| | symmetrised | 34 | 4 | 5 795 / 135 (§8) | TBD-KD-D |
+| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | 232 031 / 24 |
+| | symmetrised | 13 | 4 | 6 found, 26 refuted / 29 | 9, 29 / 8 | 35, 63 / 6 |
+| `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
+| | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | TBD-KD-F5 |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | TBD-KD-G3 | – | – |
+| | symmetrised | 34 | 4 | TBD-KD-G3 | TBD-KD-G4 | TBD-KD-G5 |
 
 TBD-KD-READING
