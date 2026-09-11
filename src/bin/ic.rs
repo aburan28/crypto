@@ -3,6 +3,8 @@
 mod experiment;
 #[path = "ic/params.rs"]
 mod params;
+#[path = "ic/workflow.rs"]
+mod workflow;
 
 use clap::{Args, Parser, Subcommand};
 use serde_json::{json, Value};
@@ -55,6 +57,8 @@ enum Action {
     Logs(experiment::LogsArgs),
     /// Recover a target's logarithm by descent, reusing a saved database.
     Solve(experiment::SolveArgs),
+    /// Run or resume a staged select → logs → solve pipeline from a parameter file.
+    Workflow(workflow::WorkflowArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -98,6 +102,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
+        Some(Action::Workflow(args)) => workflow::run(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -124,6 +129,31 @@ fn binary_hash() -> Option<String> {
     }
     Some(hasher.finalize().to_hex().to_string())
 }
+/// One line for the `linear_algebra` object of a logs report.
+fn linear_algebra_summary(la: &Value) -> String {
+    let mut line = format!(
+        "{} ({} attempts, {:.3}s)",
+        la["mode"].as_str().unwrap_or("?"),
+        la["attempts"],
+        la["seconds"].as_f64().unwrap_or(0.0)
+    );
+    if let Some(s) = la.get("sparse").filter(|v| !v.is_null()) {
+        let f = &s["filter"];
+        line.push_str(&format!(
+            "; filtered {} rows × {} columns to a core of {} ({} singletons, {} excess rows, {} merged)",
+            f["rows_in"], f["columns_in"], s["core_dimension"], f["singletons_removed"],
+            f["excess_rows_removed"], f["merged_columns"]
+        ));
+        if let Some(w) = s.get("wiedemann").filter(|v| !v.is_null()) {
+            line.push_str(&format!(
+                "; block Wiedemann {}×{}, {} Krylov terms, {} products",
+                w["block_m"], w["block_n"], w["sequence_length"], w["products"]
+            ));
+        }
+    }
+    line
+}
+
 fn display(report: &Value) {
     match report["operation"].as_str() {
         Some("inspect") => {
@@ -225,6 +255,9 @@ fn display(report: &Value) {
                 report["counts"]["trials"],
                 report["counts"]["relations"]
             );
+            if let Some(la) = report.get("linear_algebra").filter(|v| !v.is_null()) {
+                println!("Linear algebra: {}", linear_algebra_summary(la));
+            }
             if let Some(path) = report["out"].as_str() {
                 println!("Database saved: {path}");
             } else if let Some(reason) = report["reason"].as_str() {
@@ -243,6 +276,32 @@ fn display(report: &Value) {
                     result["expected"], result["recovered"], result["verified"],
                     report["counts"]["descent_trials"]
                 );
+            }
+        }
+        Some("workflow") => {
+            println!(
+                "Workflow: {}; run {}{}; {}",
+                report["status"],
+                report["run_number"],
+                if report["resumed"] == true { " (resumed)" } else { "" },
+                report["run_directory"].as_str().unwrap_or("?")
+            );
+            for st in report["stages"].as_array().into_iter().flatten() {
+                println!(
+                    "  {:<6} {:<8} {}",
+                    st["stage"].as_str().unwrap_or("?"),
+                    st["status"].as_str().unwrap_or("?"),
+                    if st["ran"] == true { "ran" } else { "reused" }
+                );
+                if let Some(la) = st.get("linear_algebra").filter(|v| !v.is_null()) {
+                    println!("         linear algebra: {}", linear_algebra_summary(la));
+                }
+            }
+            if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
+                println!("Solutions: {} verified of {}", sol["verified"], sol["count"]);
+            }
+            if let Some(f) = report["failure"].as_str() {
+                println!("Failure: {f}");
             }
         }
         Some("error") => {
@@ -280,7 +339,7 @@ fn main() -> ExitCode {
     }
     let success = matches!(
         report["status"].as_str(),
-        Some("complete" | "checks_passed")
+        Some("complete" | "checks_passed" | "stopped")
     ) || report.get("operation").is_none();
     let text = serde_json::to_string_pretty(&report).expect("JSON serializable");
     if let Some(path) = &cli.out {

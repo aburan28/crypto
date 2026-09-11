@@ -135,6 +135,9 @@ use rayon::prelude::*;
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
+use crate::cryptanalysis::koblitz_sparse_la::{
+    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+};
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
@@ -2605,6 +2608,23 @@ pub struct KoblitzIcOptions {
     /// signed Frobenius. This removes public algebraic dependencies without
     /// computing any factor-base logarithm.
     pub collapse_projected_orbits: bool,
+    /// How [`solve_factor_base_logs`] solves the relation matrix.
+    pub linear_algebra: LinearAlgebra,
+}
+
+/// The linear-algebra stage of the factor-base logarithm precompute.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LinearAlgebra {
+    /// Dense big-integer Gaussian elimination
+    /// ([`crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n`]),
+    /// attempted after every new relation once there are as many rows
+    /// as columns.  The reference path.
+    Dense,
+    /// Relation filtering followed by block Wiedemann on the reduced
+    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]); falls back to
+    /// [`Self::Dense`] when the subgroup order does not fit the `u64`
+    /// arithmetic.
+    Sparse(SparseSolveOptions),
 }
 
 impl Default for KoblitzIcOptions {
@@ -2626,6 +2646,7 @@ impl Default for KoblitzIcOptions {
             relation_batch_size: 1,
             allow_direct_relation: true,
             collapse_projected_orbits: false,
+            linear_algebra: LinearAlgebra::Dense,
         }
     }
 }
@@ -3353,6 +3374,15 @@ pub struct LogTableReport {
     pub relations: usize,
     /// Whether every column logarithm verified as `[x_o]G == R_o`.
     pub verified: bool,
+    /// Linear solves attempted (each on the relations collected so far).
+    pub solve_attempts: usize,
+    /// Wall time spent in those solves.
+    pub linear_algebra_seconds: f64,
+    /// Whether the sparse path (filtering + block Wiedemann) was used.
+    pub sparse: bool,
+    /// Filtering and block Wiedemann statistics of the last sparse
+    /// attempt, when the sparse path was used.
+    pub sparse_report: Option<SparseSolveReport>,
 }
 
 /// Dispatch one decomposition question `target = Σ_{i} P_{i}` (`m`
@@ -3408,6 +3438,13 @@ fn decompose_once(
 /// Returns `None` only for a degenerate factor base (no projected
 /// columns, or the field too wide for the pair table); an exhausted
 /// trial budget yields a report with `verified = false`.
+///
+/// The linear algebra is chosen by [`KoblitzIcOptions::linear_algebra`].
+/// The sparse path keeps only the nonzero entries of each row (at most
+/// `m` per relation), skips the solve until every column occurs in some
+/// row, and then filters the matrix and runs block Wiedemann on the
+/// core; the dense path re-eliminates the full big-integer matrix after
+/// every new row.
 pub fn solve_factor_base_logs(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -3432,9 +3469,57 @@ pub fn solve_factor_base_logs(
 
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
-    let mut matrix: Vec<Vec<BigUint>> = Vec::new();
-    let mut rhs: Vec<BigUint> = Vec::new();
+    let sparse_opts = match opts.linear_algebra {
+        LinearAlgebra::Sparse(s) if koblitz_sparse_la::modulus_supported(r) => Some(s),
+        _ => None,
+    };
+    report.sparse = sparse_opts.is_some();
+    let mut dense_matrix: Vec<Vec<BigUint>> = Vec::new();
+    let mut dense_rhs: Vec<BigUint> = Vec::new();
+    let mut sparse_rows: Vec<SparseRow> = Vec::new();
     let mut last_attempt = 0usize;
+    // A failed block Wiedemann run costs a whole Krylov sequence, so the
+    // sparse path waits for a batch of new rows between attempts; the
+    // dense path keeps its attempt-per-row behaviour.
+    let interval = if sparse_opts.is_some() { (n_cols / 32).max(1) } else { 1 };
+
+    let table_from = |solution: Vec<BigUint>| -> FactorBaseLogTable {
+        let columns = projected
+            .representatives
+            .iter()
+            .zip(solution)
+            .map(|(point, log)| (point.clone(), log))
+            .collect();
+        FactorBaseLogTable { columns }
+    };
+    let mut attempt = |dense_matrix: &Vec<Vec<BigUint>>,
+                       dense_rhs: &Vec<BigUint>,
+                       sparse_rows: &Vec<SparseRow>,
+                       report: &mut LogTableReport|
+     -> Option<Vec<BigUint>> {
+        report.solve_attempts += 1;
+        let begin = std::time::Instant::now();
+        let solution = match sparse_opts {
+            Some(sopts) => {
+                let (outcome, sreport) =
+                    koblitz_sparse_la::solve_sparse_system(sparse_rows, n_cols, r_u64, &sopts);
+                report.sparse_report = Some(sreport);
+                match outcome {
+                    SparseSolveOutcome::Solved(x) => {
+                        Some(x.into_iter().map(BigUint::from).collect())
+                    }
+                    SparseSolveOutcome::Undetermined | SparseSolveOutcome::Inconsistent => None,
+                }
+            }
+            None => {
+                let mut m = dense_matrix.clone();
+                let mut b = dense_rhs.clone();
+                gaussian_eliminate_mod_n(&mut m, &mut b, r)
+            }
+        };
+        report.linear_algebra_seconds += begin.elapsed().as_secs_f64();
+        solution
+    };
 
     while report.trials < opts.max_trials {
         report.trials += 1;
@@ -3450,24 +3535,21 @@ pub fn solve_factor_base_logs(
         let relation = relation_from_decomposition_with_mode(
             kc, fb, &idxs, &a, &BigUint::zero(), opts.collapse_negation, Some(&projected),
         );
-        matrix.push(relation.row);
-        rhs.push((&h * &a) % r);
+        let rhs = (&h * &a) % r;
+        if sparse_opts.is_some() {
+            sparse_rows.push(SparseRow::from_dense(&relation.row, &rhs, r_u64));
+        } else {
+            dense_matrix.push(relation.row);
+            dense_rhs.push(rhs);
+        }
         report.relations += 1;
 
         // Attempt a solve once there are at least as many relations as
-        // columns and at least one new row since the last attempt.
-        if matrix.len() >= n_cols && matrix.len() > last_attempt {
-            last_attempt = matrix.len();
-            let mut m = matrix.clone();
-            let mut b = rhs.clone();
-            if let Some(solution) = gaussian_eliminate_mod_n(&mut m, &mut b, r) {
-                let columns: Vec<(BinaryPoint, BigUint)> = projected
-                    .representatives
-                    .iter()
-                    .zip(solution.iter())
-                    .map(|(point, log)| (point.clone(), log.clone()))
-                    .collect();
-                let table = FactorBaseLogTable { columns };
+        // columns and enough new rows since the last attempt.
+        if report.relations >= n_cols && report.relations - last_attempt >= interval {
+            last_attempt = report.relations;
+            if let Some(solution) = attempt(&dense_matrix, &dense_rhs, &sparse_rows, &mut report) {
+                let table = table_from(solution);
                 if table.verify(kc) {
                     report.columns = n_cols;
                     report.verified = true;
@@ -3478,17 +3560,8 @@ pub fn solve_factor_base_logs(
     }
     report.columns = n_cols;
     // Best-effort table from whatever was collected; unverified.
-    let mut m = matrix.clone();
-    let mut b = rhs.clone();
-    let columns = gaussian_eliminate_mod_n(&mut m, &mut b, r)
-        .map(|solution| {
-            projected
-                .representatives
-                .iter()
-                .zip(solution)
-                .map(|(point, log)| (point.clone(), log))
-                .collect()
-        })
+    let columns = attempt(&dense_matrix, &dense_rhs, &sparse_rows, &mut report)
+        .map(|solution| table_from(solution).columns)
         .unwrap_or_default();
     Some((FactorBaseLogTable { columns }, report))
 }
@@ -3522,6 +3595,26 @@ pub fn individual_log(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
 ) -> Option<(BigUint, IndividualLogReport)> {
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    individual_log_with_pair_table(kc, fb, table, q, opts, pair.as_ref())
+}
+
+/// [`individual_log`] with a caller-supplied pair table, so a batch of
+/// targets over one factor base builds the `|F|²` table once instead
+/// of once per target.  `pair` is required when the strategy is
+/// [`DecompositionStrategy::PairTable`] and ignored otherwise.
+pub fn individual_log_with_pair_table(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    pair: Option<&PairSumTable>,
+) -> Option<(BigUint, IndividualLogReport)> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
     let projected = projected_signed_orbit_map(kc, fb);
@@ -3534,13 +3627,11 @@ pub fn individual_log(
         report.log = Some(BigUint::zero());
         return Some((BigUint::zero(), report));
     }
+    if opts.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+        return None;
+    }
     let index_of = fb.index_map();
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let pair = if opts.strategy == DecompositionStrategy::PairTable {
-        Some(PairSumTable::build(kc, fb)?)
-    } else {
-        None
-    };
     let log_of = table.log_of();
     // Column logs in the rebuilt column order (matched by point identity).
     let column_log: Vec<BigUint> = projected
@@ -3567,8 +3658,7 @@ pub fn individual_log(
             }
             continue;
         }
-        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
-        else {
+        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair, opts, &target) else {
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
@@ -4538,6 +4628,58 @@ mod tests {
         // Corrupt one logarithm; verification must catch it.
         table.columns[0].1 = (&table.columns[0].1 + BigUint::one()) % &kc.subgroup_order;
         assert!(!table.verify(&kc));
+    }
+
+    #[test]
+    fn sparse_and_dense_linear_algebra_certify_the_same_log_table() {
+        // Same curve, base, oracle and seed: the two linear-algebra paths
+        // see the same relations and must certify the same logarithms.
+        // (The bases whose two-summand coverage determines every column:
+        // K_0/2^9 with 3 columns, K_1/2^11 with 45.)
+        for (a, n) in [(0u8, 9u32), (1, 11)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let base = KoblitzIcOptions {
+                m: 2,
+                strategy: DecompositionStrategy::PairTable,
+                collapse_negation: true,
+                collapse_projected_orbits: true,
+                allow_direct_relation: false,
+                max_trials: 40_000,
+                ..KoblitzIcOptions::default()
+            };
+            let dense = KoblitzIcOptions {
+                linear_algebra: LinearAlgebra::Dense,
+                ..base.clone()
+            };
+            let sparse = KoblitzIcOptions {
+                linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions {
+                    wiedemann: koblitz_sparse_la::BlockWiedemannOptions {
+                        block_m: 2,
+                        block_n: 3,
+                        margin: 8,
+                    },
+                    ..SparseSolveOptions::default()
+                }),
+                ..base.clone()
+            };
+            let (dt, dr) = solve_factor_base_logs(&kc, &fb, &dense).unwrap();
+            let (st, sr) = solve_factor_base_logs(&kc, &fb, &sparse).unwrap();
+            assert!(dr.verified && !dr.sparse && dr.sparse_report.is_none(), "K_{a}/2^{n} dense");
+            assert!(sr.verified && sr.sparse, "K_{a}/2^{n} sparse: {sr:?}");
+            assert!(dt.verify(&kc) && st.verify(&kc));
+            assert_eq!(dt.columns, st.columns, "K_{a}/2^{n}: the two paths disagree");
+            let srep = sr.sparse_report.as_ref().expect("sparse statistics");
+            assert_eq!(srep.filter.columns_in, st.len());
+            assert_eq!(srep.core_dimension + srep.reconstructed_columns, st.len());
+            assert!(sr.solve_attempts >= 1 && dr.solve_attempts >= 1);
+            assert!(sr.linear_algebra_seconds >= 0.0);
+            // The sparse path never attempts a solve before every column
+            // is covered, so it needs at least as many relations as
+            // columns and no more attempts than the dense path.
+            assert!(sr.relations >= st.len());
+            assert!(sr.solve_attempts <= dr.solve_attempts, "K_{a}/2^{n}: {} > {}", sr.solve_attempts, dr.solve_attempts);
+        }
     }
 
     #[test]

@@ -436,6 +436,31 @@ fn factor_base_logarithm_database_precomputes_then_descends() {
     assert_eq!(logs["status"], "complete");
     assert_eq!(logs["verified"], true);
     assert_eq!(logs["counts"]["columns"], 3);
+    assert_eq!(logs["linear_algebra"]["mode"], "sparse");
+    assert!(logs["linear_algebra"]["attempts"].as_u64().unwrap() >= 1);
+
+    // The dense path certifies the very same database.
+    let dense_db = path();
+    let (ok, dense) = command(&[
+        "logs",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--solver",
+        "pair-table",
+        "--linear-algebra",
+        "dense",
+        "--database",
+        dense_db.to_str().unwrap(),
+    ]);
+    assert!(ok, "{dense}");
+    assert_eq!(dense["linear_algebra"]["mode"], "dense");
+    assert!(dense["linear_algebra"]["sparse"].is_null());
+    let a: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
+    let b: Value = serde_json::from_slice(&std::fs::read(&dense_db).unwrap()).unwrap();
+    assert_eq!(a["columns"], b["columns"], "sparse and dense databases differ");
+    std::fs::remove_file(dense_db).unwrap();
 
     for k in ["1", "53", "126"] {
         let (ok, solve) = command(&[
@@ -485,4 +510,105 @@ fn factor_base_logarithm_database_precomputes_then_descends() {
     ]);
     assert!(!ok);
     std::fs::remove_file(db).unwrap();
+}
+
+#[test]
+fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
+    let dir = std::env::temp_dir().join(format!(
+        "ic-workflow-{}-{}",
+        std::process::id(),
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    let params = path();
+    std::fs::write(
+        &params,
+        serde_json::to_vec(&json!({
+            "schema_version":1,"name":"k0n9","curve":{"degree":9,"curve_a":0},
+            "summands":2,"solver":"pair_table","seed":1,
+            "linear_algebra":{"mode":"sparse","sparse":{"wiedemann":{"block_m":2,"block_n":2}}},
+            "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
+            "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"}]
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    let p = params.to_str().unwrap();
+    let d = dir.to_str().unwrap();
+
+    // Stage by stage: each rerun reuses what the previous one produced.
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--stop-after", "select"]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "stopped");
+    assert_eq!(v["run_number"], 1);
+    assert!(dir.join("factor_base.json").exists());
+    assert!(!dir.join("logs.json").exists());
+
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--stop-after", "logs"]);
+    assert!(ok, "{v}");
+    assert_eq!(v["resumed"], true);
+    let stages = v["stages"].as_array().unwrap();
+    assert_eq!(stages[0]["stage"], "select");
+    assert_eq!(stages[0]["ran"], false, "select must be reused");
+    assert_eq!(stages[1]["stage"], "logs");
+    assert_eq!(stages[1]["ran"], true);
+    assert_eq!(stages[1]["linear_algebra"]["mode"], "sparse");
+    // Three columns: the filter eliminates them all and no Wiedemann run
+    // is needed, but the filtering statistics are reported.
+    assert_eq!(stages[1]["linear_algebra"]["sparse"]["filter"]["columns_in"], 3);
+    assert_eq!(stages[1]["linear_algebra"]["sparse"]["core_dimension"], 0);
+    assert!(dir.join("logs.json").exists());
+
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "complete");
+    assert_eq!(v["solutions"]["verified"], 3);
+    assert_eq!(v["solutions"]["count"], 3);
+    let stages = v["stages"].as_array().unwrap();
+    assert_eq!(stages[1]["ran"], false, "logs must be reused");
+    assert_eq!(stages[2]["stage"], "solve");
+    assert_eq!(stages[2]["solved_now"], 3);
+    for item in v["solutions"]["items"].as_array().unwrap() {
+        assert_eq!(item["verified"], true);
+        assert_eq!(item["expected"], item["recovered"]);
+    }
+
+    // A full rerun does no new work.
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "complete");
+    assert_eq!(v["run_number"], 4);
+    assert_eq!(v["stages"][2]["solved_now"], 0);
+    assert_eq!(v["stages"][2]["already_solved"], 3);
+
+    // A different parameter set is refused in the same directory.
+    let other = path();
+    std::fs::write(
+        &other,
+        serde_json::to_vec(&json!({
+            "schema_version":1,"name":"k0n9","curve":{"degree":9,"curve_a":0},
+            "summands":2,"solver":"pair_table","seed":2,
+            "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
+            "targets":[{"known_log":"53"}]
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    let (ok, v) = command(&["workflow", "--params", other.to_str().unwrap(), "--dir", d]);
+    assert!(!ok);
+    assert_eq!(v["operation"], "error");
+
+    // A tampered logarithm database is rejected on resume, not trusted.
+    let logs_path = dir.join("logs.json");
+    let mut doc: Value = serde_json::from_slice(&std::fs::read(&logs_path).unwrap()).unwrap();
+    let log: u64 = doc["columns"][0]["log"].as_str().unwrap().parse().unwrap();
+    doc["columns"][0]["log"] = json!(((log + 1) % 127).to_string());
+    std::fs::write(&logs_path, serde_json::to_vec(&doc).unwrap()).unwrap();
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
+    assert!(!ok);
+    assert_eq!(v["operation"], "error");
+
+    std::fs::remove_dir_all(&dir).unwrap();
+    std::fs::remove_file(params).unwrap();
+    std::fs::remove_file(other).unwrap();
 }
