@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/home/runner/work/crypto/crypto/target/release/ic",
+    "--json",
+    "workflow",
+    "--params",
+    "/home/runner/work/_temp/stage31-run/params.json",
+    "--dir",
+    "/home/runner/work/_temp/stage31-run/workflow"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 3600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 248.48423623400004,
+    "user_seconds": 905.148735,
+    "system_seconds": 0.250344,
+    "total_core_seconds": 905.399079,
+    "single_core_seconds": 905.399079,
+    "peak_rss_bytes": 157622272,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

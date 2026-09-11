@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "degree": 31,
+  "curve_a": 0,
+  "params_digest": "1591e92319c465f5fb6409f6aef7c4846c9ffdd172f20a14213b743bd7f46d7b",
+  "solutions": [
+    {
+      "index": 0,
+      "expected": "not_constructed",
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "x": "2120207720",
+        "y": "1880876365",
+        "target_scalar_constructed": false,
+        "public_hash_seed": 31001,
+        "public_hash_counter": 0
+      },
+      "recovered": "387577",
+      "verified": true,
+      "descent_trials": 1,
+      "elapsed_seconds": 0.751574908
+    },
+    {
+      "index": 1,
+      "expected": "not_constructed",
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "x": "111379212",
+        "y": "555577684",
+        "target_scalar_constructed": false,
+        "public_hash_seed": 31002,
+        "public_hash_counter": 0
+      },
+      "recovered": "157369",
+      "verified": true,
+      "descent_trials": 1,
+      "elapsed_seconds": 0.760236745
+    },
+    {
+      "index": 2,
+      "expected": "not_constructed",
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "x": "673639366",
+        "y": "1091840695",
+        "target_scalar_constructed": false,
+        "public_hash_seed": 31003,
+        "public_hash_counter": 1
+      },
+      "recovered": "88334",
+      "verified": true,
+      "descent_trials": 1,
+      "elapsed_seconds": 0.737489284
+    },
+    {
+      "index": 3,
+      "expected": "not_constructed",
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "x": "985859144",
+        "y": "1812606916",
+        "target_scalar_constructed": false,
+        "public_hash_seed": 31004,
+        "public_hash_counter": 0
+      },
+      "recovered": "1049842",
+      "verified": true,
+      "descent_trials": 1,
+      "elapsed_seconds": 0.742004113
+    },
+    {
+      "index": 4,
+      "expected": "not_constructed",
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "x": "2048889642",
+        "y": "1570827429",
+        "target_scalar_constructed": false,
+        "public_hash_seed": 31005,
+        "public_hash_counter": 0
+      },
+      "recovered": "1409351",
+      "verified": true,
+      "descent_trials": 2,
+      "elapsed_seconds": 0.825431856
+    }
+  ]
+}
