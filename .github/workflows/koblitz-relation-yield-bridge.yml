@@ -55,6 +55,9 @@ jobs:
           metrics = json.loads((root / "stage21-outer/driver.metrics.json").read_text())
           if metrics["returncode"] != 0 or metrics["timed_out"] or metrics["orphan_group_terminated"]:
               print((root / "stage21-outer/driver.stderr").read_text())
+              for task_stderr in sorted((root / "stage21-run/tasks").glob("*/stderr")):
+                  print(f"--- {task_stderr.relative_to(root)} ---")
+                  print(task_stderr.read_text())
               raise SystemExit(
                   "metered Stage-21 smoke failed: "
                   f"returncode={metrics['returncode']} timed_out={metrics['timed_out']} "
