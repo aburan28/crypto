@@ -82,7 +82,7 @@ use crate::cryptanalysis::descent_lowgamma::{
     descend_on_subspace, is_decomposable_on_subspace, BasisFamily, FactorSubspace,
 };
 use crate::cryptanalysis::ffd_harness::{
-    num_monomials_upto_degree, quad_monomial_index, F2BoolPoly,
+    monomial_index, num_monomials_upto_degree, quad_monomial_index, F2BoolPoly,
 };
 use crate::cryptanalysis::pc_degree_harness::refutation_scan;
 
@@ -596,6 +596,526 @@ pub fn run_hybrid_sweep(
     })
 }
 
+// ── Lever L4: degree falls (mutants) ────────────────────────────────
+//
+// A *syzygy* and a *degree fall* are not the same thing, and the
+// distinction decides whether this lever exists at all.
+//
+// EXP-J (`examples/ffd_syzygy.rs`) found that the descended Semaev system
+// carries exactly one excess relation at degree 3, of the form
+// `Σ_i ℓ_i · f_i ≡ 0`. That is a **pure syzygy**: the combination vanishes
+// identically, so it yields no polynomial. Adding it to the generating set
+// adds literally nothing; it only costs the solver one zero reduction,
+// which is a constant factor (what F5's criterion avoids), not a degree.
+//
+// A **degree fall** is the other case: a combination of degree-`D` rows
+// whose degree-`D` part cancels but whose remainder is **nonzero**, hence a
+// new element of the ideal of degree `≤ D−1`. That *is* worth adding, and
+// the reason is not that the solver cannot find it — at degree `D` it
+// already has it in its row space — but that once `g` is a generator, the
+// rows `x_k · g` become available at degree `D`, and those are degree-`D+1`
+// products of the original generators. The Macaulay tower genuinely
+// accelerates. This is the mutant mechanism of MutantXL / the degree-fall
+// strategy used against HFE.
+//
+// So `extract_degree_falls` separates the two populations and returns only
+// the falls, and only those independent of the generators already present.
+
+/// What the degree-3 top-part cancellation space contains.
+#[derive(Clone, Debug)]
+pub struct DegreeFallReport {
+    /// Macaulay degree scanned (3 — the first degree where a fall can occur
+    /// for a quadratic system).
+    pub degree: u32,
+    /// Degree-`D` rows considered: the products `x_k · f_i`.
+    pub rows: usize,
+    /// Dimension of the space of combinations whose top-degree part cancels.
+    pub cancel_dim: usize,
+    /// Cancellations whose remainder is *also* zero — pure syzygies, which
+    /// yield nothing. EXP-J's relation lands here.
+    pub pure_syzygies: usize,
+    /// Cancellations with a nonzero remainder: genuine degree falls.
+    pub falls: usize,
+    /// The falls that are linearly independent of the original generators —
+    /// the only ones worth adding, since a fall already in `span{f_i}` is a
+    /// generator the solver has.
+    pub new_generators: Vec<F2BoolPoly>,
+}
+
+/// Multiply the monomial set of a degree-≤2 Boolean polynomial by `x_k`
+/// (multilinearly, `x_k² = x_k`) and XOR-accumulate into a bitset over the
+/// degree-≤3 monomial space.
+fn cubic_row_bits(f: &F2BoolPoly, num_vars: u32, k: u32, words: usize) -> Vec<u64> {
+    let mut acc = vec![0u64; words];
+    let push = |mono: &[u32], acc: &mut Vec<u64>| {
+        let idx = monomial_index(mono, num_vars, 3);
+        acc[idx / 64] ^= 1u64 << (idx % 64);
+    };
+    let with_k = |mono: &mut Vec<u32>| {
+        if let Err(pos) = mono.binary_search(&k) {
+            mono.insert(pos, k);
+        }
+    };
+    if f.coeffs[0] {
+        let mut m = vec![];
+        with_k(&mut m);
+        push(&m, &mut acc);
+    }
+    for i in 0..num_vars {
+        if f.coeffs[1 + i as usize] {
+            let mut m = vec![i];
+            with_k(&mut m);
+            push(&m, &mut acc);
+        }
+    }
+    for i in 0..num_vars {
+        for j in (i + 1)..num_vars {
+            let idx = quad_monomial_index(i, j, num_vars);
+            if idx < f.coeffs.len() && f.coeffs[idx] {
+                let mut m = vec![i, j];
+                with_k(&mut m);
+                if m.len() <= 3 {
+                    push(&m, &mut acc);
+                }
+            }
+        }
+    }
+    acc
+}
+
+/// Mask a degree-≤3 bitset down to its **cubic** monomials only.
+fn cubic_part_only(bits: &[u64], num_vars: u32, words: usize) -> Vec<u64> {
+    let low = num_monomials_upto_degree(num_vars, 2) as usize;
+    let mut out = vec![0u64; words];
+    for idx in low..(num_monomials_upto_degree(num_vars, 3) as usize) {
+        if (bits[idx / 64] >> (idx % 64)) & 1 == 1 {
+            out[idx / 64] |= 1u64 << (idx % 64);
+        }
+    }
+    out
+}
+
+/// Convert a degree-≤3 bitset known to have no cubic monomials back into a
+/// [`F2BoolPoly`].
+fn bits_to_poly(bits: &[u64], num_vars: u32) -> F2BoolPoly {
+    let mut f = F2BoolPoly::zero(num_vars);
+    if (bits[0] >> monomial_index(&[], num_vars, 3)) & 1 == 1 {
+        f.coeffs[0] ^= true;
+    }
+    for i in 0..num_vars {
+        let idx = monomial_index(&[i], num_vars, 3);
+        if (bits[idx / 64] >> (idx % 64)) & 1 == 1 {
+            f.coeffs[1 + i as usize] ^= true;
+        }
+    }
+    for i in 0..num_vars {
+        for j in (i + 1)..num_vars {
+            let idx = monomial_index(&[i, j], num_vars, 3);
+            if (bits[idx / 64] >> (idx % 64)) & 1 == 1 {
+                f.coeffs[quad_monomial_index(i, j, num_vars)] ^= true;
+            }
+        }
+    }
+    f
+}
+
+fn lead_bit(v: &[u64]) -> Option<usize> {
+    v.iter()
+        .enumerate()
+        .find(|(_, w)| **w != 0)
+        .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+}
+
+/// Extract the degree-3 falls of a quadratic Boolean system.
+///
+/// Builds the rows `x_k · f_i`, finds every combination whose **cubic part**
+/// cancels (Gaussian elimination with provenance over the cubic monomials
+/// only), then evaluates each such combination in full. A zero result is a
+/// pure syzygy; a nonzero one is a degree fall of degree ≤ 2. Falls that lie
+/// in `span_{F_2}{f_i}` are discarded — they are generators the solver
+/// already has — and the rest are returned as `new_generators`.
+pub fn extract_degree_falls(eqs: &[F2BoolPoly], num_vars: u32) -> DegreeFallReport {
+    let cols3 = num_monomials_upto_degree(num_vars, 3) as usize;
+    let words = cols3.div_ceil(64);
+    let low_words = (num_monomials_upto_degree(num_vars, 2) as usize).div_ceil(64);
+
+    // Full and cubic-only bit vectors for every row x_k·f_i.
+    let mut full: Vec<Vec<u64>> = Vec::with_capacity(eqs.len() * num_vars as usize);
+    let mut cubic: Vec<Vec<u64>> = Vec::with_capacity(eqs.len() * num_vars as usize);
+    for f in eqs {
+        for k in 0..num_vars {
+            let bits = cubic_row_bits(f, num_vars, k, words);
+            cubic.push(cubic_part_only(&bits, num_vars, words));
+            full.push(bits);
+        }
+    }
+
+    // Null space of the cubic-part map, carrying provenance so we can
+    // re-evaluate each cancellation on the full rows.
+    struct Pivot {
+        vec: Vec<u64>,
+        lead: usize,
+        combo: Vec<u32>,
+    }
+    let mut pivots: Vec<Pivot> = Vec::new();
+    let mut deps: Vec<Vec<u32>> = Vec::new();
+    for (j, col) in cubic.iter().enumerate() {
+        let mut vec = col.clone();
+        let mut combo = vec![j as u32];
+        loop {
+            let Some(l) = lead_bit(&vec) else { break };
+            match pivots.iter().find(|p| p.lead == l) {
+                Some(p) => {
+                    for w in 0..words {
+                        vec[w] ^= p.vec[w];
+                    }
+                    // Symmetric difference of the provenance sets.
+                    let mut merged: Vec<u32> = Vec::new();
+                    let (mut a, mut b) = (0usize, 0usize);
+                    while a < combo.len() && b < p.combo.len() {
+                        match combo[a].cmp(&p.combo[b]) {
+                            std::cmp::Ordering::Less => {
+                                merged.push(combo[a]);
+                                a += 1;
+                            }
+                            std::cmp::Ordering::Greater => {
+                                merged.push(p.combo[b]);
+                                b += 1;
+                            }
+                            std::cmp::Ordering::Equal => {
+                                a += 1;
+                                b += 1;
+                            }
+                        }
+                    }
+                    merged.extend_from_slice(&combo[a..]);
+                    merged.extend_from_slice(&p.combo[b..]);
+                    combo = merged;
+                }
+                None => {
+                    pivots.push(Pivot {
+                        vec: vec.clone(),
+                        lead: l,
+                        combo: combo.clone(),
+                    });
+                    break;
+                }
+            }
+        }
+        if lead_bit(&vec).is_none() {
+            combo.sort_unstable();
+            deps.push(combo);
+        }
+    }
+
+    // Seed the independence basis with the original generators, so a fall
+    // that merely reproduces one of them is not counted as new.
+    let poly_bits = |f: &F2BoolPoly| -> Vec<u64> {
+        let mut v = vec![0u64; low_words.max(1)];
+        if f.coeffs[0] {
+            v[0] ^= 1;
+        }
+        for i in 0..num_vars {
+            if f.coeffs[1 + i as usize] {
+                let idx = monomial_index(&[i], num_vars, 2);
+                v[idx / 64] ^= 1u64 << (idx % 64);
+            }
+        }
+        for i in 0..num_vars {
+            for j in (i + 1)..num_vars {
+                let qi = quad_monomial_index(i, j, num_vars);
+                if qi < f.coeffs.len() && f.coeffs[qi] {
+                    let idx = monomial_index(&[i, j], num_vars, 2);
+                    v[idx / 64] ^= 1u64 << (idx % 64);
+                }
+            }
+        }
+        v
+    };
+    let mut basis: Vec<(usize, Vec<u64>)> = Vec::new();
+    let insert = |mut v: Vec<u64>, basis: &mut Vec<(usize, Vec<u64>)>| -> bool {
+        loop {
+            let Some(l) = lead_bit(&v) else { return false };
+            match basis.iter().find(|(bl, _)| *bl == l) {
+                Some((_, bv)) => {
+                    for w in 0..v.len() {
+                        v[w] ^= bv[w];
+                    }
+                }
+                None => {
+                    basis.push((l, v));
+                    return true;
+                }
+            }
+        }
+    };
+    for f in eqs {
+        insert(poly_bits(f), &mut basis);
+    }
+
+    let mut pure = 0usize;
+    let mut falls = 0usize;
+    let mut new_generators = Vec::new();
+    for combo in &deps {
+        let mut acc = vec![0u64; words];
+        for &c in combo {
+            for w in 0..words {
+                acc[w] ^= full[c as usize][w];
+            }
+        }
+        if lead_bit(&acc).is_none() {
+            pure += 1;
+            continue;
+        }
+        falls += 1;
+        let g = bits_to_poly(&acc, num_vars);
+        if insert(poly_bits(&g), &mut basis) {
+            new_generators.push(g);
+        }
+    }
+
+    DegreeFallReport {
+        degree: 3,
+        rows: cubic.len(),
+        cancel_dim: deps.len(),
+        pure_syzygies: pure,
+        falls,
+        new_generators,
+    }
+}
+
+/// log2 cost of a Macaulay elimination at degree `D` on a system of `eqs`
+/// quadratics in `vars` Boolean variables:
+///
+/// ```text
+///   rows(D) = eqs · cols(vars, D−2)      (multipliers up to degree D−2)
+///   cost    = rows(D) · cols(vars, D)^{ω−1}
+/// ```
+///
+/// Unlike the pure `cols^ω` model used for hybrid slicing, this one keeps
+/// the row count explicit — lever L4 *adds* generators, so it pays for a
+/// lower degree with a wider matrix, and a model blind to rows would score
+/// that trade as free.
+pub fn log2_macaulay_cost(vars: u32, eqs: u32, degree: u32, omega: f64) -> f64 {
+    let cols = num_monomials_upto_degree(vars, degree) as f64;
+    let mult = num_monomials_upto_degree(vars, degree.saturating_sub(2)) as f64;
+    let rows = eqs as f64 * mult;
+    rows.log2() + (omega - 1.0) * cols.log2()
+}
+
+/// Jensen-correct expected log2 cost over a `D*` histogram.
+pub fn log2_expected_cost(hist: &BTreeMap<u32, u32>, vars: u32, eqs: u32, omega: f64) -> f64 {
+    let total: u32 = hist.values().sum();
+    if total == 0 {
+        return f64::NAN;
+    }
+    let mut acc = 0.0f64;
+    for (&d, &c) in hist {
+        acc += (c as f64 / total as f64) * log2_macaulay_cost(vars, eqs, d, omega).exp2();
+    }
+    acc.log2()
+}
+
+/// Repeatedly extract degree-3 falls and fold them back into the generating
+/// set until no new generator appears or `rounds` is exhausted.
+///
+/// One round is not the whole story: a fall added as a generator creates new
+/// products `x_k · g`, which can cancel against each other and produce
+/// *further* falls that were degree-4 consequences of the original system.
+/// Iterating to saturation is what MutantXL does, and it is cheap here —
+/// each round is one degree-3 kernel, strictly less work than the degree-3
+/// Macaulay rank the solver performs anyway.
+///
+/// Returns the saturated system and the per-round count of new generators.
+pub fn saturate_with_falls(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    rounds: u32,
+) -> (Vec<F2BoolPoly>, Vec<usize>) {
+    let mut current = eqs.to_vec();
+    let mut per_round = Vec::new();
+    for _ in 0..rounds {
+        let report = extract_degree_falls(&current, num_vars);
+        let added = report.new_generators.len();
+        per_round.push(added);
+        if added == 0 {
+            break;
+        }
+        current.extend(report.new_generators);
+    }
+    (current, per_round)
+}
+
+/// One matched-target comparison: `D*` before and after adding the degree-3
+/// falls to the generating set.
+#[derive(Clone, Debug)]
+pub struct MutantRow {
+    pub n: u32,
+    pub n_sub: u32,
+    pub full_vars: u32,
+    pub targets: u32,
+    /// Mean `D*` of the raw descended system.
+    pub dstar_base_mean: f64,
+    /// `D*` histogram of the raw system (degree → count), for a
+    /// Jensen-correct cost expectation.
+    pub dstar_base_hist: BTreeMap<u32, u32>,
+    /// Mean `D*` after augmenting with the new degree-3 generators.
+    pub dstar_aug_mean: f64,
+    /// `D*` histogram of the augmented system.
+    pub dstar_aug_hist: BTreeMap<u32, u32>,
+    /// Targets where augmenting strictly lowered `D*`.
+    pub improved: u32,
+    /// Targets where augmenting *raised* `D*` (must be 0 — adding ideal
+    /// elements cannot make the system harder).
+    pub worsened: u32,
+    /// Mean dimension of the cubic cancellation space.
+    pub cancel_dim_mean: f64,
+    /// Mean count of pure syzygies (EXP-J's population).
+    pub pure_syzygies_mean: f64,
+    /// Mean count of genuine degree falls.
+    pub falls_mean: f64,
+    /// Mean count of falls that were new generators in the first round.
+    pub new_generators_mean: f64,
+    /// Mean number of saturation rounds that produced at least one new
+    /// generator (1 = a single round exhausted the falls).
+    pub productive_rounds_mean: f64,
+    /// Mean total generators added across all rounds.
+    pub total_added_mean: f64,
+    /// Mean equation count of the saturated system (the extra Macaulay rows
+    /// the degree reduction is paid for with).
+    pub aug_eqs_mean: f64,
+    /// log2 of the mean **extraction** cost: every saturation round builds
+    /// the degree-3 rows of the system as it stands and takes a kernel, and
+    /// that work is what produces the falls. Charging only the cheap
+    /// augmented solve would be double-counting the saving — the tower still
+    /// had to reach degree 3 to get there.
+    pub log2_extraction_cost: f64,
+    /// The highest Macaulay degree the augmented route actually touches:
+    /// `max(3, D*_aug)`, since extraction itself works at degree 3. This is
+    /// the honest single-number comparison against `D*_base`.
+    pub working_degree_mean: f64,
+}
+
+/// Run the L4 comparison at one operating point over `targets`
+/// non-decomposable targets, measuring `D*` on the same target twice — once
+/// on the raw system, once on the system augmented with its degree-3 falls.
+#[allow(clippy::too_many_arguments)]
+pub fn run_mutant_cell(
+    family: BasisFamily,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    targets: u32,
+    d_max: u32,
+    rounds: u32,
+    seed: u64,
+) -> Option<MutantRow> {
+    let full_vars = 2 * n_sub;
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    let (mut base_sum, mut aug_sum) = (0.0f64, 0.0f64);
+    let (mut improved, mut worsened, mut found) = (0u32, 0u32, 0u32);
+    let (mut cancel_sum, mut pure_sum, mut fall_sum, mut newgen_sum) = (0.0, 0.0, 0.0, 0.0);
+    let (mut rounds_sum, mut added_sum, mut augeqs_sum) = (0.0f64, 0.0f64, 0.0f64);
+    let mut base_hist: BTreeMap<u32, u32> = BTreeMap::new();
+    let mut aug_hist: BTreeMap<u32, u32> = BTreeMap::new();
+    let (mut extract_cost_sum, mut working_sum) = (0.0f64, 0.0f64);
+
+    let mut attempts = 0u32;
+    while found < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                FactorSubspace::build(family, n, n_sub, irr, seed ^ (0x9E37 + attempts as u64))?
+            }
+            _ => FactorSubspace::build(family, n, n_sub, irr, 0)?,
+        };
+        let b = rand_nz(n, &mut next);
+        let x3 = rand_nz(n, &mut next);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+
+        let eqs = descend_on_subspace(n, &v, irr, &b, &x3);
+        let (_, base, _) = refutation_scan(&eqs, full_vars, d_max);
+        let Some(base) = base else { continue };
+
+        let report = extract_degree_falls(&eqs, full_vars);
+        let (aug, per_round) = saturate_with_falls(&eqs, full_vars, rounds);
+        // Charge every saturation round: round r operates on the system as it
+        // stood going in, so its generator count is n + (all falls added so
+        // far). Summed in linear space, then logged by the caller.
+        let mut eqs_so_far = eqs.len() as u32;
+        let mut extract_linear = 0.0f64;
+        for added in &per_round {
+            extract_linear += log2_macaulay_cost(full_vars, eqs_so_far, 3, 2.807).exp2();
+            eqs_so_far += *added as u32;
+        }
+        let (_, augd, _) = refutation_scan(&aug, full_vars, d_max);
+        let Some(augd) = augd else { continue };
+
+        found += 1;
+        base_sum += base as f64;
+        aug_sum += augd as f64;
+        *base_hist.entry(base).or_insert(0) += 1;
+        *aug_hist.entry(augd).or_insert(0) += 1;
+        if augd < base {
+            improved += 1;
+        }
+        if augd > base {
+            worsened += 1;
+        }
+        cancel_sum += report.cancel_dim as f64;
+        pure_sum += report.pure_syzygies as f64;
+        fall_sum += report.falls as f64;
+        newgen_sum += report.new_generators.len() as f64;
+        extract_cost_sum += extract_linear;
+        working_sum += augd.max(3) as f64;
+        rounds_sum += per_round.iter().filter(|c| **c > 0).count() as f64;
+        added_sum += per_round.iter().sum::<usize>() as f64;
+        augeqs_sum += aug.len() as f64;
+    }
+
+    if found == 0 {
+        return None;
+    }
+    let f = found as f64;
+    Some(MutantRow {
+        n,
+        n_sub,
+        full_vars,
+        targets: found,
+        dstar_base_mean: base_sum / f,
+        dstar_base_hist: base_hist,
+        dstar_aug_mean: aug_sum / f,
+        dstar_aug_hist: aug_hist,
+        improved,
+        worsened,
+        cancel_dim_mean: cancel_sum / f,
+        pure_syzygies_mean: pure_sum / f,
+        falls_mean: fall_sum / f,
+        new_generators_mean: newgen_sum / f,
+        productive_rounds_mean: rounds_sum / f,
+        total_added_mean: added_sum / f,
+        aug_eqs_mean: augeqs_sum / f,
+        log2_extraction_cost: (extract_cost_sum / f).log2(),
+        working_degree_mean: working_sum / f,
+    })
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -938,6 +1458,182 @@ mod tests {
             sweep.collapse_fraction().is_none(),
             "no collapse to report when k=0 is already at the floor"
         );
+    }
+
+    // ── Lever L4: degree falls ──────────────────────────────────────
+
+    /// **The load-bearing correctness test for L4.** Every extracted degree
+    /// fall must lie in the ideal, so it must vanish at every common zero of
+    /// the system. Checked by brute force on a satisfiable instance: if the
+    /// extraction were wrong — a mis-indexed monomial, a botched provenance
+    /// XOR — it would manufacture polynomials outside the ideal and this
+    /// would catch it.
+    #[test]
+    fn degree_falls_vanish_on_every_solution() {
+        let n = 6;
+        let irr = choose_irreducible(n);
+        let v = FactorSubspace::build(BasisFamily::Coordinate, n, 3, &irr, 0).unwrap();
+        let nvars = 6u32;
+
+        let mut checked_any = false;
+        for bb in 1u32..8 {
+            for xx in 1u32..8 {
+                let b = F2mElement::from_bit_positions(
+                    &(0..n).filter(|i| (bb >> i) & 1 == 1).collect::<Vec<_>>(),
+                    n,
+                );
+                let x3 = F2mElement::from_bit_positions(
+                    &(0..n).filter(|i| (xx >> i) & 1 == 1).collect::<Vec<_>>(),
+                    n,
+                );
+                if b.is_zero() || x3.is_zero() {
+                    continue;
+                }
+                let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
+                let report = extract_degree_falls(&eqs, nvars);
+                if report.new_generators.is_empty() {
+                    continue;
+                }
+                // All common zeros of the original system.
+                for mask in 0u32..(1 << nvars) {
+                    let x: Vec<bool> = (0..nvars).map(|i| (mask >> i) & 1 == 1).collect();
+                    if !eqs.iter().all(|f| !eval_bool(f, nvars, &x)) {
+                        continue;
+                    }
+                    checked_any = true;
+                    for g in &report.new_generators {
+                        assert!(
+                            !eval_bool(g, nvars, &x),
+                            "extracted fall does not vanish at a solution of the system"
+                        );
+                    }
+                }
+            }
+        }
+        assert!(
+            checked_any,
+            "test vacuous: no satisfiable instance with falls was found"
+        );
+    }
+
+    /// The cancellation space must split exactly into pure syzygies (nothing
+    /// gained) and genuine falls (a new lower-degree polynomial). The whole
+    /// point of L4 is that these are different populations.
+    #[test]
+    fn cancellation_space_splits_into_syzygies_and_falls() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let v = FactorSubspace::build(BasisFamily::Coordinate, n, 5, &irr, 0).unwrap();
+        let b = F2mElement::from_bit_positions(&[0, 3], n);
+        let x3 = F2mElement::from_bit_positions(&[1, 4], n);
+        let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
+        let r = extract_degree_falls(&eqs, 10);
+        assert_eq!(
+            r.cancel_dim,
+            r.pure_syzygies + r.falls,
+            "every cancellation is either a pure syzygy or a fall"
+        );
+        assert!(r.new_generators.len() <= r.falls);
+        assert_eq!(r.rows, eqs.len() * 10);
+    }
+
+    /// New generators must be linearly independent of the original equations
+    /// and of each other — a "fall" already in the span is a generator the
+    /// solver has, and counting it would inflate the lever's apparent value.
+    #[test]
+    fn new_generators_are_independent_of_the_originals() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let v = FactorSubspace::build(BasisFamily::Coordinate, n, 5, &irr, 0).unwrap();
+        let b = F2mElement::from_bit_positions(&[2], n);
+        let x3 = F2mElement::from_bit_positions(&[0, 1], n);
+        let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
+        let r = extract_degree_falls(&eqs, 10);
+        // Re-derive independence from scratch: the rank of (eqs ++ new) must
+        // be exactly len(eqs-rank) + len(new).
+        let rank_of = |set: &[F2BoolPoly]| -> usize {
+            let mut basis: Vec<(usize, Vec<u64>)> = Vec::new();
+            let mut rank = 0;
+            for f in set {
+                let mut v: Vec<u64> = vec![0; f.coeffs.len().div_ceil(64)];
+                for (i, c) in f.coeffs.iter().enumerate() {
+                    if *c {
+                        v[i / 64] ^= 1u64 << (i % 64);
+                    }
+                }
+                loop {
+                    let Some(l) = v
+                        .iter()
+                        .enumerate()
+                        .find(|(_, w)| **w != 0)
+                        .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+                    else {
+                        break;
+                    };
+                    match basis.iter().find(|(bl, _)| *bl == l) {
+                        Some((_, bv)) => {
+                            for w in 0..v.len() {
+                                v[w] ^= bv[w];
+                            }
+                        }
+                        None => {
+                            basis.push((l, v.clone()));
+                            rank += 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            rank
+        };
+        let base = rank_of(&eqs);
+        let mut both = eqs.clone();
+        both.extend(r.new_generators.iter().cloned());
+        assert_eq!(
+            rank_of(&both),
+            base + r.new_generators.len(),
+            "new generators must add exactly their own count to the rank"
+        );
+    }
+
+    /// Adding elements of the ideal can only help: `D*` must never rise.
+    /// This is the invariant that makes the L4 measurement trustworthy.
+    #[test]
+    fn augmenting_with_falls_never_raises_dstar() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let cell = run_mutant_cell(BasisFamily::Coordinate, n, 5, &irr, 4, 7, 4, 0x1D0A)
+            .expect("coordinate family is feasible");
+        assert_eq!(
+            cell.worsened, 0,
+            "augmenting with ideal elements raised D* — the extraction is unsound"
+        );
+        assert!(cell.dstar_aug_mean <= cell.dstar_base_mean + 1e-9);
+    }
+
+    /// Saturation must terminate: either it runs out of new generators (a
+    /// trailing zero round) or it stops at the cap, and it must never shrink
+    /// the system.
+    #[test]
+    fn saturation_terminates_and_only_grows_the_system() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let v = FactorSubspace::build(BasisFamily::Coordinate, n, 5, &irr, 0).unwrap();
+        let b = F2mElement::from_bit_positions(&[1, 2], n);
+        let x3 = F2mElement::from_bit_positions(&[3], n);
+        let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
+        let cap = 5;
+        let (sat, per_round) = saturate_with_falls(&eqs, 10, cap);
+        assert!(sat.len() >= eqs.len());
+        assert_eq!(sat.len(), eqs.len() + per_round.iter().sum::<usize>());
+        assert!(per_round.len() <= cap as usize);
+        if (per_round.len() as u32) < cap {
+            assert_eq!(
+                *per_round.last().unwrap(),
+                0,
+                "early stop only when a round yields nothing"
+            );
+        }
     }
 
     /// The load-bearing claim of the whole lever: raising the determination
