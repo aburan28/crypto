@@ -1,8 +1,10 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed CUDA backend](PACKED.md) has measured **8.703518 billion
+The optional [packed CUDA backend](PACKED.md) has measured **13.206088 billion
 complete scalar walk iterations/s** on RTX PRO 6000 Blackwell using
-[native carryless multiplication](NATIVE-CARRYLESS.md). The
+[native carryless multiplication](NATIVE-CARRYLESS.md) and the
+[16-slot batch preset](BATCH-TUNING.md). Collection measured **12.936060 B/s**.
+The
 [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
 with the benchmark/validation entry points; its reports retain the existing
@@ -10,14 +12,15 @@ format, while checkpoints have a separate backend version.
 
 For the validated RTX PRO 6000 configuration, use `make bench-rtx-pro6000`
 or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
-CUDA 13.3.1 and the measured arithmetic settings. The controlled native
-comparison measured a 22.40% benchmark gain and 21.65% collection gain over
-the previous software arithmetic at the same geometry and compiler. See
+CUDA 13.3.1 and the measured arithmetic settings. The controlled batch
+comparison measured a 52.26% benchmark gain and 52.04% collection gain over
+the previous native batch-32 preset at the same logical population. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
-[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records measured
-instruction-pipe and memory ceilings for this GPU and shows why one card
-cannot reach 15–20 B iterations/s with any known arithmetic.
+[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
+instruction-pipe and memory probes for the earlier software arithmetic.
+The native carryless and batch comparisons above give the current complete
+walk measurements; the 15 B/s target remains unachieved.
 [FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
@@ -55,7 +58,7 @@ code that would run on a GPU is what the test suite exercises.
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per core |
-| CUDA client | host and device both compile; **never run on a GPU here** |
+| CUDA client | complete packed walks measured at 13.206088 B/s on one RTX PRO 6000 |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
 

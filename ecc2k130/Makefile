@@ -272,7 +272,7 @@ modal:
 	modal run modal_app.py::bench --gpu H100
 
 # Audited packed configuration for the RTX PRO 6000 Blackwell Server Edition.
-RTX_PRO6000_WORKERS ?= 192512
+RTX_PRO6000_WORKERS ?= 385024
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
@@ -282,12 +282,12 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
-	    --batch 32 --threads 256 --leaf 0 --min-blocks 2 \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
 audit-rtx-pro6000:
 	mkdir -p build
-	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --min-blocks 2 --block-threads 256 --repeats 3 --workers $(RTX_PRO6000_WORKERS) \
+	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --batch 16 --min-blocks 2 --block-threads 256 --repeats 3 --workers $(RTX_PRO6000_WORKERS) \
 	    --output build/rtx-pro6000-audit.json
 
 clean:
