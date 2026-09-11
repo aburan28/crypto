@@ -270,9 +270,35 @@ pub fn interpolate_and_descend(
     max_total_degree: u32,
     rng: &mut Rng64,
 ) -> Result<DescendedSystem, String> {
+    interpolate_and_descend_boxed(curve, pts, factor_base, sys, max_total_degree, None, rng)
+}
+
+/// [`interpolate_and_descend`] with a per-variable degree cap `(point,
+/// tuple)` on top of the total degree, as in
+/// `coordinate_quotients::interpolate_quotient_boxed`; needed at `m = 3`,
+/// where Semaev's `S₄` has total degree 12 but degree 4 in each point.
+pub fn interpolate_and_descend_boxed(
+    curve: &Curve,
+    pts: &[Pt],
+    factor_base: &[Pt],
+    sys: &FixedTargetSystem,
+    max_total_degree: u32,
+    caps: Option<(u32, u32)>,
+    rng: &mut Rng64,
+) -> Result<DescendedSystem, String> {
     let f = &curve.f;
     let nv = sys.invariants.len();
     let m = sys.m;
+    let var_caps: Vec<u32> = sys
+        .invariants
+        .iter()
+        .map(|&(si, _, _)| match (caps, &sys.seeds[si]) {
+            (None, _) => u32::MAX,
+            (Some((p, _)), Seed::Point(_)) => p,
+            (Some((_, t)), _) => t,
+        })
+        .collect();
+    let mut last_len = 0usize;
     let mut rel_samples: Vec<Vec<u64>> = Vec::new();
     let mut all_samples: Vec<Vec<u64>> = Vec::new();
     // F_p-valuedness on the factor base
@@ -292,7 +318,14 @@ pub fn interpolate_and_descend(
         }
     }
     for d in 1..=max_total_degree {
-        let monos = monomials_up_to_total_degree(nv, d);
+        let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d)
+            .into_iter()
+            .filter(|e| e.iter().zip(&var_caps).all(|(k, c)| k <= c))
+            .collect();
+        if monos.len() == last_len {
+            continue; // box saturated at this total degree
+        }
+        last_len = monos.len();
         if monos.len() > 3000 {
             return Err(format!("degree {d} needs {} monomials", monos.len()));
         }
@@ -492,6 +525,26 @@ pub fn compare_descents(
     m: usize,
     rng: &mut Rng64,
 ) -> Vec<DescentArm> {
+    let (base, arms) = standard_arms(curve, pts, m, rng);
+    compare_arms(curve, pts, target, m, base, arms, rng)
+}
+
+/// The interpolation degree box for `m` summands: total degree and
+/// `(point, tuple)` caps.  Semaev's relation has degree `2^{m−1}` in each
+/// point; the quotient invariants have at most that, the tuple invariants
+/// at most twice it.
+pub fn degree_box(m: usize) -> (u32, Option<(u32, u32)>) {
+    if m <= 2 {
+        (6, None)
+    } else {
+        let d = 1u32 << (m - 1);
+        (d * m as u32 + 2, Some((d, 2 * d)))
+    }
+}
+
+/// The three standard arms and the base chart they share (the 2-torsion
+/// sign frame on the `x`-line).
+pub fn standard_arms(curve: &Curve, pts: &[Pt], m: usize, rng: &mut Rng64) -> (Chart, Vec<Arm>) {
     let t2 = torsion_points(curve, pts, 2);
     let frame = two_torsion_frame(curve, pts, rng);
     let point_seeds: Vec<Seed> = (0..m).map(Seed::Point).collect();
@@ -524,7 +577,7 @@ pub fn compare_descents(
             with_extras,
         ));
     }
-    compare_arms(curve, pts, target, m, Chart::x(frame), arms, rng)
+    (Chart::x(frame), arms)
 }
 
 /// Run arbitrary arms on one curve and target.  The factor base is the
@@ -569,7 +622,8 @@ pub fn compare_arms(
             });
             continue;
         };
-        match interpolate_and_descend(curve, pts, &factor_base, &sys, 6, rng) {
+        let (max_deg, caps) = degree_box(m);
+        match interpolate_and_descend_boxed(curve, pts, &factor_base, &sys, max_deg, caps, rng) {
             Ok(d) => {
                 // A system whose unknowns are not F_p-valued on the base
                 // has no descent; do not time a meaningless basis.

@@ -759,15 +759,53 @@ pub fn interpolate_quotient(
     max_monomials: usize,
     rng: &mut Rng64,
 ) -> Result<QuotientRelation, String> {
+    interpolate_quotient_boxed(curve, pts, qs, max_total_degree, max_monomials, None, rng)
+}
+
+/// [`interpolate_quotient`] with a per-variable degree cap on top of the
+/// total degree: `caps = (point, tuple)` bounds the exponent of every
+/// invariant seeded by a single point, and of every other invariant.  The
+/// total degree still grows one step at a time, so the relation found is
+/// still of minimal total degree within the box; the box only keeps the
+/// monomial count down where the relation is known to be of bounded
+/// degree in each point (as summation relations are).
+pub fn interpolate_quotient_boxed(
+    curve: &Curve,
+    pts: &[Pt],
+    qs: &QuotientSystem,
+    max_total_degree: u32,
+    max_monomials: usize,
+    caps: Option<(u32, u32)>,
+    rng: &mut Rng64,
+) -> Result<QuotientRelation, String> {
     let f = &curve.f;
     let nv = qs.invariants.len();
     let names: Vec<String> = qs.invariants.iter().map(|i| i.name()).collect();
+    let var_caps: Vec<u32> = qs
+        .invariants
+        .iter()
+        .map(|inv| match (caps, &inv.seed) {
+            (None, _) => u32::MAX,
+            (Some((p, _)), Seed::Point(_)) => p,
+            (Some((_, t)), _) => t,
+        })
+        .collect();
     let mut rel_samples: Vec<Vec<u64>> = Vec::new();
     let mut all_samples: Vec<Vec<u64>> = Vec::new();
     let mut cache = EvalCache::default();
     let mut identities_seen = Vec::new();
+    let mut last_len = 0usize;
     for d in 1..=max_total_degree {
-        let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d);
+        let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d)
+            .into_iter()
+            .filter(|e| e.iter().zip(&var_caps).all(|(k, c)| k <= c))
+            .collect();
+        if monos.len() == last_len {
+            // the box is saturated: nothing new at this total degree
+            identities_seen.push(0usize);
+            continue;
+        }
+        last_len = monos.len();
         if monos.len() > max_monomials {
             return Err(format!(
                 "no relation up to total degree {}; degree {d} needs {} monomials (cap {max_monomials}); identities per degree {:?}",
@@ -975,8 +1013,39 @@ pub fn run_quotient(
     max_tuples: usize,
     rng: &mut Rng64,
 ) -> Option<QuotientReport> {
+    run_quotient_boxed(
+        curve,
+        pts,
+        label,
+        generators,
+        chart,
+        seeds,
+        m,
+        max_total_degree,
+        None,
+        max_tuples,
+        rng,
+    )
+}
+
+/// [`run_quotient`] with the per-variable degree caps of
+/// [`interpolate_quotient_boxed`].
+#[allow(clippy::too_many_arguments)]
+pub fn run_quotient_boxed(
+    curve: &Curve,
+    pts: &[Pt],
+    label: &str,
+    generators: &[PointMap],
+    chart: impl Into<Chart>,
+    seeds: &[Seed],
+    m: usize,
+    max_total_degree: u32,
+    caps: Option<(u32, u32)>,
+    max_tuples: usize,
+    rng: &mut Rng64,
+) -> Option<QuotientReport> {
     let qs = build_quotient_system(curve, pts, generators, chart.into(), seeds, m, rng)?;
-    let relation = interpolate_quotient(curve, pts, &qs, max_total_degree, 3000, rng);
+    let relation = interpolate_quotient_boxed(curve, pts, &qs, max_total_degree, 3000, caps, rng);
     let weighted_degree = relation.as_ref().ok().and_then(|r| qs.weighted_degree(r));
     let collapse = exact_collapse(curve, pts, &qs, max_tuples);
     Some(QuotientReport {

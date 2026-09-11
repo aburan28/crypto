@@ -10,7 +10,7 @@
 //! into `v ↦ ω v` and negation into `v ↦ 1/v`: the 3-torsion analogue of
 //! the 2-torsion sign frame.  This example runs the quotient engine on
 //! both lines, then tests which of the resulting invariants descend to
-//! `F_p` in Gaudry's setting over `F_{13³}`.
+//! `F_p` in Gaudry's setting over `F_{31³}`.
 //!
 //! ```bash
 //! cargo run --release --example three_torsion            # m = 2
@@ -19,7 +19,7 @@
 
 use crypto_lib::cryptanalysis::coordinate_descent::{compare_arms, format_arms, Arm, DescentArm};
 use crypto_lib::cryptanalysis::coordinate_quotients::{
-    format_quotient, run_quotient, torsion_points, two_torsion_frame, Chart, PointMap, Seed,
+    format_quotient, run_quotient_boxed, torsion_points, two_torsion_frame, Chart, PointMap, Seed,
 };
 use crypto_lib::cryptanalysis::coordinate_search::{Auto, Curve, Gf, Mobius, Pt, Rng64, INF};
 use std::time::Instant;
@@ -100,12 +100,13 @@ fn run(
     seeds: &[Seed],
     m: usize,
     max_deg: u32,
+    caps: Option<(u32, u32)>,
     max_tuples: usize,
     rng: &mut Rng64,
 ) {
     let t0 = Instant::now();
-    match run_quotient(
-        curve, pts, label, gens, chart, seeds, m, max_deg, max_tuples, rng,
+    match run_quotient_boxed(
+        curve, pts, label, gens, chart, seeds, m, max_deg, caps, max_tuples, rng,
     ) {
         Some(r) => print!("{}", format_quotient(&curve.f, &r)),
         None => println!("   [{label}] no system (empty Γ or no non-constant invariant)"),
@@ -126,10 +127,15 @@ fn median(v: Vec<f64>) -> f64 {
 /// factor base per chart (`x ∈ F_p`, then `v ∈ F_p`), the same arms on
 /// each, medians of the Buchberger time over `targets` decomposable targets.
 fn descent(m: usize, targets: usize, rng: &mut Rng64) {
-    let f = Gf::extension(13, 3);
-    // b ∉ F_p, a square (so T = (0, √b) is rational over F_{p³})
+    let f = Gf::extension(31, 3);
+    // b ∉ F_p, a square (so T = (0, √b) is rational over F_{p³}), and −b a
+    // cube: the base {v ∈ F_p} is {y ∈ s·F_p}, whose x³ = −b(3r² + 1) with
+    // r ∈ F_p, and every element of F_p is a cube in F_{p³} (p ≡ 1 mod 3),
+    // so that base is ~3p points when −b is a cube and ~2 when it is not.
+    // (−b a cube is rational 2-torsion, E[2] ⊂ E(F_{p³}).)
+    let cube = |a: u64| f.pow(a, (f.q - 1) / 3) == 1;
     let b = (f.p..f.q)
-        .find(|&b| !f.in_subfield(b, 1) && f.sqrt(b).is_some())
+        .find(|&b| !f.in_subfield(b, 1) && f.sqrt(b).is_some() && cube(f.neg(b)))
         .unwrap();
     let (c, t3) = j0_curve(f.clone(), b, "y²=x³+b");
     let f = &c.f;
@@ -218,8 +224,22 @@ fn main() {
         .nth(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(2);
+    let descent_only = std::env::args().any(|a| a == "--descent-only");
+    if descent_only {
+        let mut rng = Rng64::new(0x3333);
+        descent(m, if m == 2 { 6 } else { 2 }, &mut rng);
+        return;
+    }
     let max_tuples = if m == 2 { 4_000_000 } else { 2_000_000 };
-    let deg = if m == 2 { 9 } else { 8 };
+    // At m = 3 the relations are of total degree beyond what 3000
+    // monomials allow in five unknowns, but of bounded degree in each
+    // point invariant (Semaev: 4 in each x; the 3-torsion frame: 3 in
+    // each V): box the interpolation by point / tuple degree.
+    let (deg, caps) = if m == 2 {
+        (9, None)
+    } else {
+        (16, Some((4, 8)))
+    };
     let mut rng = Rng64::new(0x3333);
     println!("=== 3-torsion seeds on j = 0 curves, m = {m} ===");
     println!();
@@ -264,33 +284,40 @@ fn main() {
         &points(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
-    run(
-        &ca,
-        &pts,
-        "x, ⟨τ₃, −⟩: points+Σ+Π",
-        &[tau, neg],
-        xid,
-        &points_sum_product(m),
-        m,
-        deg,
-        max_tuples,
-        &mut rng,
-    );
-    run(
-        &ca,
-        &pts,
-        "x, ⟨τ₃, −, ω⟩: points+Π",
-        &[tau, neg, om],
-        xid,
-        &points_product(m),
-        m,
-        deg,
-        max_tuples,
-        &mut rng,
-    );
+    // The x-line quotients only recover Vélu's isogeny (§13.1); at m = 3
+    // their tuple invariants blow the monomial cap for nothing.
+    if m == 2 {
+        run(
+            &ca,
+            &pts,
+            "x, ⟨τ₃, −⟩: points+Σ+Π",
+            &[tau, neg],
+            xid,
+            &points_sum_product(m),
+            m,
+            deg,
+            caps,
+            max_tuples,
+            &mut rng,
+        );
+        run(
+            &ca,
+            &pts,
+            "x, ⟨τ₃, −, ω⟩: points+Π",
+            &[tau, neg, om],
+            xid,
+            &points_product(m),
+            m,
+            deg,
+            caps,
+            max_tuples,
+            &mut rng,
+        );
+    }
     run(
         &ca,
         &pts,
@@ -300,6 +327,7 @@ fn main() {
         &points_sum_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -312,6 +340,7 @@ fn main() {
         &points_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -324,6 +353,7 @@ fn main() {
         &points_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -336,6 +366,7 @@ fn main() {
         &points_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -348,6 +379,7 @@ fn main() {
         &points_sum_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -378,6 +410,7 @@ fn main() {
         &points_sum_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -390,6 +423,7 @@ fn main() {
         &points_sum_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
@@ -403,12 +437,13 @@ fn main() {
         &points_product(m),
         m,
         deg,
+        caps,
         max_tuples,
         &mut rng,
     );
     println!();
 
-    // ---- Gaudry's setting over F_13^3
+    // ---- Gaudry's setting over F_31^3
     if m == 2 {
         descent(2, 6, &mut rng);
     } else {

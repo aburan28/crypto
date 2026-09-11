@@ -5,7 +5,9 @@
 //! cargo run --release --example klein_descent
 //! ```
 
-use crypto_lib::cryptanalysis::coordinate_descent::{compare_descents, format_arms, DescentArm};
+use crypto_lib::cryptanalysis::coordinate_descent::{
+    compare_arms, format_arms, standard_arms, DescentArm,
+};
 use crypto_lib::cryptanalysis::coordinate_quotients::two_torsion_frame;
 use crypto_lib::cryptanalysis::coordinate_search::{Curve, Gf, Pt, Rng64, INF};
 
@@ -18,7 +20,14 @@ fn median(v: Vec<f64>) -> f64 {
     v[v.len() / 2]
 }
 
-fn run(curve: &Curve, m: usize, decomposable: usize, random: usize, rng: &mut Rng64) {
+fn run(
+    curve: &Curve,
+    m: usize,
+    decomposable: usize,
+    random: usize,
+    skip: &[String],
+    rng: &mut Rng64,
+) {
     let f = &curve.f;
     let pts = curve.affine_points();
     // The base every arm shares: u ∈ F_p and finite, in the sign frame
@@ -64,8 +73,26 @@ fn run(curve: &Curve, m: usize, decomposable: usize, random: usize, rng: &mut Rn
     }
     // Per-arm medians over the targets, split by kind.
     let mut rows: Vec<(String, Vec<DescentArm>)> = Vec::new();
+    let (base_chart, all_arms) = standard_arms(curve, &pts, m, rng);
+    let all_arms: Vec<_> = all_arms
+        .into_iter()
+        .filter(|a| !skip.iter().any(|s| a.0.contains(s.as_str())))
+        .collect();
     for (t, kind) in &targets {
-        let arms = compare_descents(curve, &pts, *t, m, rng);
+        // one arm at a time, with progress on stderr: at m = 3 a single
+        // Buchberger run can take minutes
+        let mut arms = Vec::new();
+        for arm in &all_arms {
+            let t0 = std::time::Instant::now();
+            let mut r = compare_arms(curve, &pts, *t, m, base_chart, vec![arm.clone()], rng);
+            eprintln!(
+                "   [{kind} target {:?}] {} done in {:.1} s",
+                t,
+                arm.0,
+                t0.elapsed().as_secs_f64()
+            );
+            arms.append(&mut r);
+        }
         rows.push((kind.to_string(), arms));
     }
     // print the first decomposable target's table in full
@@ -134,6 +161,26 @@ fn main() {
         .nth(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(2);
+    // `klein_descent [m] [--targets N] [--skip LABEL]...`
+    let args: Vec<String> = std::env::args().collect();
+    let mut targets = 4usize;
+    let mut skip: Vec<String> = Vec::new();
+    let mut i = 2;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--targets" => {
+                targets = args.get(i + 1).and_then(|s| s.parse().ok()).unwrap_or(4);
+                i += 2;
+            }
+            "--skip" => {
+                if let Some(l) = args.get(i + 1) {
+                    skip.push(l.clone());
+                }
+                i += 2;
+            }
+            _ => i += 1,
+        }
+    }
     let mut rng = Rng64::new(0x5EED);
     println!("=== Klein invariants over F_p^k, fixed-target systems descended to F_p, m = {m} ===");
     println!();
@@ -144,11 +191,39 @@ fn main() {
     println!();
     println!("-- Gaudry's setting: curves over F_p^k not defined over F_p, base {{x ∈ F_p}} not a subgroup --");
     println!();
-    run(&alpha_curve(Gf::extension(29, 3), true), m, 4, 4, &mut rng);
-    run(&alpha_curve(Gf::extension(29, 3), false), m, 4, 4, &mut rng);
-    run(&alpha_curve(Gf::extension(17, 3), true), m, 4, 4, &mut rng);
+    run(
+        &alpha_curve(Gf::extension(29, 3), true),
+        m,
+        targets,
+        targets,
+        &skip,
+        &mut rng,
+    );
+    run(
+        &alpha_curve(Gf::extension(29, 3), false),
+        m,
+        targets,
+        targets,
+        &skip,
+        &mut rng,
+    );
+    run(
+        &alpha_curve(Gf::extension(17, 3), true),
+        m,
+        targets,
+        targets,
+        &skip,
+        &mut rng,
+    );
     if m == 2 {
-        run(&alpha_curve(Gf::extension(13, 4), true), m, 4, 4, &mut rng);
+        run(
+            &alpha_curve(Gf::extension(13, 4), true),
+            m,
+            targets,
+            targets,
+            &skip,
+            &mut rng,
+        );
     }
     println!(
         "-- Degenerate control: a curve over F_p, where {{x ∈ F_p}} = E(F_p) is a subgroup --"
@@ -157,8 +232,9 @@ fn main() {
     run(
         &Curve::short_weierstrass(Gf::extension(29, 3), 28, 0, "y²=x³−x"),
         m,
-        4,
-        4,
+        targets,
+        targets,
+        &skip,
         &mut rng,
     );
 }
