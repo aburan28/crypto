@@ -137,6 +137,7 @@ use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
     SolveOptions, SolveStats, SolverEngine,
@@ -2007,6 +2008,15 @@ pub fn pack_point(p: &BinaryPoint) -> u64 {
     }
 }
 
+/// Hash of a packed pair sum for the presence filter, independent of the
+/// bucket index (which uses the key's high bits).
+#[inline]
+fn pair_filter_hash(key: u64) -> u64 {
+    let mut h = key.wrapping_mul(0xff51_afd7_ed55_8ccd);
+    h ^= h >> 33;
+    h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
+}
+
 /// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
 /// by packed point identity so a sum can be looked up by binary search.
 ///
@@ -2020,29 +2030,89 @@ pub fn pack_point(p: &BinaryPoint) -> u64 {
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
     entries: Vec<(u64, u32, u32)>,
+    /// Single-word arithmetic on the curve, for the table build and the
+    /// `|F|` subtractions of a three-summand search.
+    curve: FastCurve,
+    /// The factor-base points, lifted once.
+    points: Vec<FastPoint>,
+    /// `−P_k` for every base point, the addends of `R − P_k`.
+    negated: Vec<FastPoint>,
+    /// `bucket_start[b]..bucket_start[b + 1]` is the run of entries whose
+    /// packed sum has `b` as its top bits (`key >> bucket_shift`): a
+    /// lookup lands in its bucket with one indexed load instead of
+    /// walking a binary search across the whole table.
+    bucket_start: Vec<u32>,
+    bucket_shift: u32,
+    /// One bit per hashed key, about four per stored sum: a lookup that
+    /// finds its bit clear is certainly absent and never touches the
+    /// entries.  Most lookups of a decomposition search miss, and the
+    /// entries are far too large to cache, so this turns the hot path
+    /// from a miss in a table of hundreds of megabytes into one in a
+    /// few.  No false negatives, so the answer is unchanged.
+    present: Vec<u64>,
+    present_mask: u64,
 }
 
 impl PairSumTable {
-    /// Build the table with `|F|(|F|+1)/2` point additions, in parallel
-    /// over the first index; 16 bytes per entry.  Returns `None` when the
-    /// field is too wide to pack a point into a `u64`.
+    /// Build the table with `|F|(|F|+1)/2` point additions — one field
+    /// inversion per row by Montgomery's trick, rows in parallel; 16
+    /// bytes per entry.  Returns `None` when the field is too wide to
+    /// pack a point into a `u64`.
     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
-        if kc.n > 62 || fb.points.len() > u32::MAX as usize {
+        if fb.points.len() > u32::MAX as usize {
             return None;
         }
-        let mut entries: Vec<(u64, u32, u32)> = (0..fb.points.len())
+        let curve = FastCurve::new(&kc.curve)?;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+        let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
             .into_par_iter()
             .flat_map_iter(|i| {
-                let kc = kc;
-                let fb = fb;
-                (i..fb.points.len()).map(move |j| {
-                    let sum = kc.add(&fb.points[i], &fb.points[j]);
-                    (pack_point(&sum), i as u32, j as u32)
-                })
+                let mut sums = Vec::with_capacity(points.len() - i);
+                let mut scratch = BatchScratch::default();
+                curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+                sums.into_iter()
+                    .enumerate()
+                    .map(move |(offset, sum)| (sum.pack(), i as u32, (i + offset) as u32))
             })
             .collect();
         entries.par_sort_unstable();
-        Some(Self { entries })
+        if entries.len() > u32::MAX as usize {
+            return None;
+        }
+        // Packed sums are `< 2^(n+2)`; about one bucket per entry, at
+        // most 2^26 of them.
+        let key_bits = curve.n + 2;
+        let bucket_bits = (usize::BITS - entries.len().leading_zeros())
+            .clamp(1, 26)
+            .min(key_bits);
+        let bucket_shift = key_bits - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let mut bucket_start = vec![0u32; buckets + 1];
+        for &(key, _, _) in &entries {
+            bucket_start[(key >> bucket_shift) as usize + 1] += 1;
+        }
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        // Four bits per entry, rounded up to a power of two.
+        let filter_bits = (usize::BITS - (entries.len().max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let mut present = vec![0u64; (1usize << filter_bits) / 64];
+        for &(key, _, _) in &entries {
+            let h = (pair_filter_hash(key) & present_mask) as usize;
+            present[h >> 6] |= 1u64 << (h & 63);
+        }
+        Some(Self {
+            entries,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+        })
     }
 
     /// Number of stored pair sums (with multiplicity).
@@ -2055,17 +2125,34 @@ impl PairSumTable {
         self.entries.is_empty()
     }
 
+    /// The single-word curve the table was built on.
+    pub fn curve(&self) -> &FastCurve {
+        &self.curve
+    }
+
     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
+    #[inline]
     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
-        let start = self.entries.partition_point(|e| e.0 < key);
-        let end = start + self.entries[start..].partition_point(|e| e.0 == key);
-        &self.entries[start..end]
+        let h = (pair_filter_hash(key) & self.present_mask) as usize;
+        if self.present[h >> 6] >> (h & 63) & 1 == 0 {
+            return &[];
+        }
+        let bucket = (key >> self.bucket_shift) as usize;
+        let Some(&lo) = self.bucket_start.get(bucket) else {
+            return &[];
+        };
+        let hi = self.bucket_start[bucket + 1];
+        let run = &self.entries[lo as usize..hi as usize];
+        let start = run.partition_point(|e| e.0 < key);
+        let end = start + run[start..].partition_point(|e| e.0 == key);
+        &run[start..end]
     }
 
     /// **Decompose** `target` into exactly `m ∈ {2, 3, 4}` base points,
     /// returning sorted indices, or `None` when no decomposition exists
     /// (a complete search) or `m` is unsupported.  The returned sum is
-    /// re-checked in the group before it is handed back.
+    /// re-checked in the general group arithmetic before it is handed
+    /// back.
     pub fn decompose(
         &self,
         kc: &KoblitzCurve,
@@ -2073,16 +2160,26 @@ impl PairSumTable {
         target: &BinaryPoint,
         m: usize,
     ) -> Option<Vec<usize>> {
+        let idxs = self.decompose_fast(self.curve.lift(target), m)?;
+        let sum = idxs
+            .iter()
+            .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+        (sum == *target).then_some(idxs)
+    }
+
+    /// [`Self::decompose`] on a lifted target, re-checked in the
+    /// single-word arithmetic.
+    pub fn decompose_fast(&self, target: FastPoint, m: usize) -> Option<Vec<usize>> {
         let mut found: Option<Vec<usize>> = None;
-        self.witnesses(kc, fb, target, m, &mut |witness| {
+        self.witnesses_fast(target, m, &mut |witness| {
             found = Some(witness.to_vec());
             false
         });
         let idxs = found?;
         let sum = idxs
             .iter()
-            .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
-        (sum == *target).then_some(idxs)
+            .fold(FastPoint::INFINITY, |s, &i| self.curve.add(s, self.points[i]));
+        (sum == target).then_some(idxs)
     }
 
     /// **Enumerate every sorted witness** `i_1 ≤ … ≤ i_m` with
@@ -2090,24 +2187,38 @@ impl PairSumTable {
     /// `true` to continue and `false` to stop.  Supports `m ∈ {2, 3, 4}`.
     pub fn witnesses(
         &self,
-        kc: &KoblitzCurve,
-        fb: &FrobeniusFactorBase,
+        _kc: &KoblitzCurve,
+        _fb: &FrobeniusFactorBase,
         target: &BinaryPoint,
+        m: usize,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        self.witnesses_fast(self.curve.lift(target), m, sink)
+    }
+
+    /// [`Self::witnesses`] on a lifted target.
+    pub fn witnesses_fast(
+        &self,
+        target: FastPoint,
         m: usize,
         sink: &mut dyn FnMut(&[usize]) -> bool,
     ) {
         match m {
             2 => {
-                for &(_, i, j) in self.lookup(pack_point(target)) {
+                for &(_, i, j) in self.lookup(target.pack()) {
                     if !sink(&[i as usize, j as usize]) {
                         return;
                     }
                 }
             }
             3 => {
-                for (k, p) in fb.points.iter().enumerate() {
-                    let rest = kc.add(target, &point_neg(p));
-                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                // R − P_k for every k with one field inversion.
+                let mut rests = Vec::with_capacity(self.points.len());
+                let mut scratch = BatchScratch::default();
+                self.curve
+                    .add_many(target, &self.negated, &mut rests, &mut scratch);
+                for (k, rest) in rests.iter().enumerate() {
+                    for &(_, i, j) in self.lookup(rest.pack()) {
                         if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
                             return;
                         }
@@ -2117,14 +2228,16 @@ impl PairSumTable {
             4 => {
                 // Walk the table as the second half: R − (P_k + P_l).
                 let mut last_key: Option<u64> = None;
-                let mut rest = BinaryPoint::Infinity;
+                let mut rest = FastPoint::INFINITY;
                 for &(key, k, l) in &self.entries {
                     if last_key != Some(key) {
-                        let pair = kc.add(&fb.points[k as usize], &fb.points[l as usize]);
-                        rest = kc.add(target, &point_neg(&pair));
+                        let pair = self
+                            .curve
+                            .add(self.points[k as usize], self.points[l as usize]);
+                        rest = self.curve.add(target, self.curve.neg(pair));
                         last_key = Some(key);
                     }
-                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                    for &(_, i, j) in self.lookup(rest.pack()) {
                         if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
                             return;
                         }
@@ -3896,6 +4009,13 @@ pub struct KoblitzSignedRhoOptions {
     pub max_restarts: u32,
     pub max_iterations_per_restart: u64,
     pub progress_interval: u64,
+    /// Independent walks stepped together, sharing one jump table, one
+    /// table of stored points and — in the single-word arithmetic — one
+    /// field inversion per round.  Collisions between two walks are
+    /// exactly as useful as collisions within one, so this is the
+    /// standard way to make the inversion a point addition needs cost
+    /// `3 + 1/w` multiplications instead of `2n`.
+    pub parallel_walks: usize,
 }
 
 impl Default for KoblitzSignedRhoOptions {
@@ -3906,6 +4026,7 @@ impl Default for KoblitzSignedRhoOptions {
             max_restarts: 64,
             max_iterations_per_restart: 1 << 28,
             progress_interval: 256,
+            parallel_walks: 32,
         }
     }
 }
@@ -3924,6 +4045,9 @@ pub struct KoblitzSignedRhoCharges {
     pub partition_hashes: u64,
     pub collisions: u64,
     pub failed_collisions: u64,
+    /// Collisions of two identical states — a fruitless cycle of the
+    /// quotient walk — escaped by doubling instead of restarting.
+    pub fruitless_cycles: u64,
 }
 
 /// Terminal report for an arbitrary public target. A missing log is an honest
@@ -4014,6 +4138,66 @@ fn rho_sub_mod(left: &BigUint, right: &BigUint, modulus: &BigUint) -> BigUint {
     }
 }
 
+/// The jump-table partition of a canonical point.  The low bits of `x`
+/// are not usable on their own: on `K_0` every subgroup point has
+/// `Tr(x) = 0`, which in a basis where only `Tr(1) ≠ 0` fixes the low
+/// bit of `x`, so the coordinates are mixed through a multiply first.
+#[inline]
+fn rho_bucket(x: u64, y: u64, jumps: usize) -> usize {
+    (rho_mix(x, y) >> 32) as usize % jumps
+}
+
+/// Mix both coordinates into every bit, so that the jump partition and
+/// the choice of stored points are independent of each other.
+#[inline]
+fn rho_mix(x: u64, y: u64) -> u64 {
+    (x ^ y.rotate_left(17)).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+}
+
+/// [`FastRhoWalk::escape_cycle`] in the general arithmetic: enumerate the
+/// fruitless cycle, take its smallest state as the cycle's
+/// representative, and double that `attempt + 1` times.
+fn escape_cycle_reference(
+    curve: &KoblitzCurve,
+    jumps: &[(BinaryPoint, BigUint, BigUint)],
+    state: KoblitzSignedRhoState,
+    attempt: u32,
+    charges: &mut KoblitzSignedRhoCharges,
+) -> (KoblitzSignedRhoState, (BigUint, BigUint)) {
+    const MAX_CYCLE: usize = 64;
+    let start = point_key(&state.point);
+    let mut best_key = start.clone();
+    let mut best = state.clone();
+    let mut current = state;
+    for _ in 0..MAX_CYCLE {
+        current = signed_rho_step(curve, jumps, current, charges);
+        let key = point_key(&current.point);
+        if key == start {
+            break;
+        }
+        if key < best_key {
+            best_key = key;
+            best = current.clone();
+        }
+    }
+    let modulus = &curve.subgroup_order;
+    let two = BigUint::from(2u32);
+    let mut escaped = best;
+    for _ in 0..=attempt {
+        charges.walk_group_additions += 1;
+        escaped = canonicalize_signed_rho(
+            curve,
+            KoblitzSignedRhoState {
+                point: curve.add(&escaped.point, &escaped.point),
+                coefficient_a: (&escaped.coefficient_a * &two) % modulus,
+                coefficient_b: (&escaped.coefficient_b * &two) % modulus,
+            },
+            charges,
+        );
+    }
+    (escaped, best_key)
+}
+
 fn signed_rho_step(
     curve: &KoblitzCurve,
     jumps: &[(BinaryPoint, BigUint, BigUint)],
@@ -4025,7 +4209,7 @@ fn signed_rho_step(
         BinaryPoint::Affine { x, y } => {
             let x0 = x.to_biguint().iter_u64_digits().next().unwrap_or(0);
             let y0 = y.to_biguint().iter_u64_digits().next().unwrap_or(0);
-            (x0 ^ y0.rotate_left(17)) as usize % jumps.len()
+            rho_bucket(x0, y0, jumps.len())
         }
     };
     charges.partition_hashes += 1;
@@ -4045,13 +4229,516 @@ fn signed_rho_step(
 /// Recover the discrete logarithm of an arbitrary public subgroup target with
 /// a signed-Frobenius/negation quotient rho walk. The target scalar is neither
 /// an input nor used for verification; success is checked only by `[d]G == Q`.
+///
+/// The walk runs in single-word arithmetic ([`FastCurve`]) whenever the
+/// field fits, and is step-for-step the same walk as
+/// [`koblitz_signed_frobenius_rho_reference`]: the same jumps, the same
+/// partition, the same canonical representative and the same operation
+/// ledger, so the two agree on every counter and the recovered log.
 pub fn koblitz_signed_frobenius_rho_with_progress(
     curve: &KoblitzCurve,
     target: &BinaryPoint,
     options: &KoblitzSignedRhoOptions,
     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
 ) -> KoblitzSignedRhoReport {
+    match FastCurve::new(&curve.curve) {
+        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress),
+        None => koblitz_signed_frobenius_rho_reference(curve, target, options, progress),
+    }
+}
+
+#[derive(Clone, Copy)]
+struct FastRhoState {
+    point: FastPoint,
+    coefficient_a: u64,
+    coefficient_b: u64,
+}
+
+/// The walk's constants: the curve, the subgroup order and `±λ^k mod r`
+/// for every `k < n`.
+struct FastRhoWalk<'a> {
+    fc: &'a FastCurve,
+    frobenius_degree: u32,
+    orbit_length: u32,
+    modulus: u64,
+    lambda_pow: Vec<u64>,
+    /// A point is stored when the mixed bits of its coordinates end in
+    /// this many zeros, so the table holds about `2^16` of them however
+    /// long the walk is.
+    trail_mask: u64,
+}
+
+#[inline]
+fn mulmod_u64(a: u64, b: u64, m: u64) -> u64 {
+    ((a as u128 * b as u128) % m as u128) as u64
+}
+
+/// The expected number of walk steps before a useful collision, for a
+/// subgroup of order `r` under the signed Frobenius group of order
+/// `2n`: `√(πr/2) / √(2n)`.  The birthday bound divided by the square
+/// root of the automorphism group, which is the discount the walk
+/// actually gets and the figure the ledger quotes.
+pub fn rho_expected_steps(r: u64, n: u32) -> f64 {
+    (std::f64::consts::PI * r as f64 / 2.0).sqrt() / f64::from(2 * n).sqrt()
+}
+
+/// Slots in the direct-mapped cache of recently visited points every
+/// walk keeps beside its table of stored points.  It costs one indexed
+/// compare per step and catches both a fruitless cycle (the same state
+/// again) and a genuine collision (the same point with different
+/// coefficients) as long as the repeat is within a few thousand steps —
+/// which is what the quotient walk's cycles are.  The table of stored
+/// points is what catches a repeat further back than that.
+const RECENT_SLOTS: usize = 1 << 12;
+
+/// A recently visited point: its key and the coefficients it was
+/// reached with.  `None` for an empty slot.
+type RecentSlot<K> = Option<(K, u64, u64)>;
+
+/// The slot a key occupies in the recent-point cache.
+#[inline]
+fn recent_slot(x: u64, y: u64) -> usize {
+    (rho_mix(x, y) >> 20) as usize & (RECENT_SLOTS - 1)
+}
+
+/// `trail_mask` for a walk expected to take `steps` of them: a point is
+/// stored once in about `2^6` of the expected walk length, so the table
+/// costs a hash lookup on a small fraction of the steps and still holds
+/// enough points that the walk cannot cycle past all of them.  Storing
+/// far more than that makes the hash table, not the curve arithmetic,
+/// the cost of the walk; storing far fewer risks a cycle with no stored
+/// point in it.
+fn rho_trail_mask(steps: f64) -> u64 {
+    let bits = (steps.max(1.0).log2().round() as i64 - 6).clamp(0, 12) as u32;
+    (1u64 << bits) - 1
+}
+
+impl FastRhoWalk<'_> {
+    /// Whether this point is one of the stored ones.
+    #[inline]
+    fn is_stored(&self, key: (u64, u64)) -> bool {
+        rho_mix(key.0, key.1) & self.trail_mask == 0
+    }
+
+    /// The smallest `(x, y)` over the signed Frobenius orbit of the
+    /// state, with the coefficients scaled by the matching `±λ^k`.
+    fn canonicalize(&self, state: FastRhoState, charges: &mut KoblitzSignedRhoCharges) -> FastRhoState {
+        charges.canonicalizations += 1;
+        if state.point.infinity {
+            return state;
+        }
+        // Negation leaves `x` alone, so the orbit minimum is decided by
+        // the abscissae first: walk `x` through the orbit (one squaring
+        // chain, no `y`), then lift `y` to the winning power only and
+        // pick the sign there.  Same representative as comparing every
+        // `(x, y)` pair, at a little over half the squarings.
+        let field = &self.fc.field;
+        let mut x = state.point.x;
+        let mut best_x = x;
+        let mut best_k = 0u32;
+        for k in 1..self.orbit_length {
+            x = field.sqr_k(x, self.frobenius_degree);
+            if x < best_x {
+                best_x = x;
+                best_k = k;
+            }
+        }
+        charges.frobenius_maps += u64::from(self.orbit_length);
+        charges.negations_examined += u64::from(self.orbit_length);
+        let y = field.sqr_k(state.point.y, best_k * self.frobenius_degree);
+        let negated_y = best_x ^ y;
+        let lambda_k = self.lambda_pow[best_k as usize];
+        let (point, factor) = if negated_y < y {
+            (
+                FastPoint::affine(best_x, negated_y),
+                if lambda_k == 0 {
+                    0
+                } else {
+                    self.modulus - lambda_k
+                },
+            )
+        } else {
+            (FastPoint::affine(best_x, y), lambda_k)
+        };
+        FastRhoState {
+            point,
+            coefficient_a: mulmod_u64(state.coefficient_a, factor, self.modulus),
+            coefficient_b: mulmod_u64(state.coefficient_b, factor, self.modulus),
+        }
+    }
+
+    /// **Escape a fruitless cycle.**  Negating the point flips the sign
+    /// of the coefficients, so a cycle of the quotient walk can return
+    /// to its own starting state: the jump sums cancel and the
+    /// collision the cycle produces carries no information.  Both
+    /// walkers sit on the same state when that happens, which is what
+    /// [`KoblitzSignedRhoCharges::fruitless_cycles`] counts.
+    ///
+    /// The way out has to be a function of the **cycle**, not of the
+    /// state the walkers happen to stand on: every path that later
+    /// enters the same cycle must leave it at the same point, or the
+    /// walk stops being a deterministic map and collisions stop
+    /// appearing at all.  So enumerate the cycle, take its smallest
+    /// state as the representative, and double that.  `attempt` counts
+    /// how often this same cycle was escaped before, and the
+    /// representative is doubled that many times — a cycle whose double
+    /// walks straight back into it is still left on the next encounter.
+    fn escape_cycle(
+        &self,
+        jumps: &[(FastPoint, u64, u64)],
+        state: FastRhoState,
+        attempt: u32,
+        charges: &mut KoblitzSignedRhoCharges,
+    ) -> (FastRhoState, (u64, u64)) {
+        // Enumerate the cycle through `state` and keep its smallest
+        // member.  A fruitless cycle is short (two states in the
+        // overwhelming majority); the bound only stops a pathological
+        // walk from enumerating a long rho cycle.
+        const MAX_CYCLE: usize = 64;
+        let mut best = state;
+        let mut current = state;
+        for _ in 0..MAX_CYCLE {
+            current = self.step(jumps, current, charges);
+            if (current.point.x, current.point.y) == (state.point.x, state.point.y) {
+                break;
+            }
+            if (current.point.x, current.point.y) < (best.point.x, best.point.y) {
+                best = current;
+            }
+        }
+        let key = (best.point.x, best.point.y);
+        let mut escaped = best;
+        for _ in 0..=attempt {
+            charges.walk_group_additions += 1;
+            escaped = self.canonicalize(
+                FastRhoState {
+                    point: self.fc.double(escaped.point),
+                    coefficient_a: (escaped.coefficient_a * 2) % self.modulus,
+                    coefficient_b: (escaped.coefficient_b * 2) % self.modulus,
+                },
+                charges,
+            );
+        }
+        (escaped, key)
+    }
+
+    fn step(
+        &self,
+        jumps: &[(FastPoint, u64, u64)],
+        state: FastRhoState,
+        charges: &mut KoblitzSignedRhoCharges,
+    ) -> FastRhoState {
+        let bucket = if state.point.infinity {
+            0
+        } else {
+            rho_bucket(state.point.x, state.point.y, jumps.len())
+        };
+        charges.partition_hashes += 1;
+        charges.walk_group_additions += 1;
+        let jump = &jumps[bucket];
+        let m = self.modulus;
+        self.canonicalize(
+            FastRhoState {
+                point: self.fc.add(state.point, jump.0),
+                coefficient_a: (state.coefficient_a + jump.1) % m,
+                coefficient_b: (state.coefficient_b + jump.2) % m,
+            },
+            charges,
+        )
+    }
+}
+
+/// How many walks to actually step together: every extra walk costs two
+/// scalar multiplications of setup, which is wasted on an instance whose
+/// whole walk is a few hundred steps.  Keep the batch well under the
+/// expected walk length, and never above what the caller asked for.
+fn rho_effective_walks(requested: usize, expected_steps: f64) -> usize {
+    let affordable = (expected_steps / 64.0) as usize;
+    requested.min(affordable.max(1)).max(1)
+}
+
+/// Turn a collision into a candidate logarithm, verify it in the general
+/// arithmetic and charge the verification separately from the walk.
+/// `Some(report)` means the walk is finished; `None` means the relation
+/// was unusable and the caller should restart.
+#[allow(clippy::too_many_arguments)]
+fn rho_finish_collision(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    modulus: &BigUint,
+    first: (u64, u64),
+    second: (u64, u64),
+    restart: u32,
+    walk_started: std::time::Instant,
+    report: &mut KoblitzSignedRhoReport,
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> Option<KoblitzSignedRhoReport> {
+    report.charges.collisions += 1;
+    let numerator = rho_sub_mod(&BigUint::from(first.0), &BigUint::from(second.0), modulus);
+    let denominator = rho_sub_mod(&BigUint::from(second.1), &BigUint::from(first.1), modulus);
+    let candidate =
+        mod_inverse(&denominator, modulus).map(|inverse| (&numerator * inverse) % modulus);
+    // Close the walk segment before collision processing.  Candidate
+    // verification is a separately charged stage and must never be
+    // counted in `walk_ns` as well.
+    report.walk_ns += walk_started.elapsed().as_nanos();
+    let verification_started = std::time::Instant::now();
+    // Verified in the general arithmetic, independently of the walk.
+    let verified = candidate.as_ref().is_some_and(|value| {
+        report.charges.candidate_verification_scalar_multiplications += 1;
+        curve.mul(curve.generator(), value) == *target
+    });
+    report.verification_ns += verification_started.elapsed().as_nanos();
+    progress(KoblitzSignedRhoEvent::Collision { restart, verified });
+    if verified {
+        report.recovered_log = candidate;
+        report.verified = true;
+        report.exhausted = false;
+        progress(KoblitzSignedRhoEvent::Finished {
+            verified: true,
+            exhausted: false,
+        });
+        return Some(report.clone());
+    }
+    report.charges.failed_collisions += 1;
+    None
+}
+
+fn signed_rho_fast(
+    fc: &FastCurve,
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    options: &KoblitzSignedRhoOptions,
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> KoblitzSignedRhoReport {
     assert!(options.jump_count > 0, "rho needs at least one jump");
+    assert!(options.parallel_walks > 0, "rho needs at least one walk");
+    let modulus_big = &curve.subgroup_order;
+    let modulus = modulus_big.to_u64_digits().first().copied().unwrap_or(0);
+    assert!(modulus > 2, "rho subgroup order must fit u64");
+    assert_eq!(modulus_big.bits(), 64 - modulus.leading_zeros() as u64);
+    let lambda = (&curve.lambda % modulus_big)
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(0);
+    let mut lambda_pow = Vec::with_capacity(curve.n as usize);
+    let mut current = 1u64;
+    for _ in 0..curve.n {
+        lambda_pow.push(current);
+        current = mulmod_u64(current, lambda, modulus);
+    }
+    let walk = FastRhoWalk {
+        fc,
+        frobenius_degree: curve.k,
+        orbit_length: curve.n,
+        modulus,
+        lambda_pow,
+        trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
+    };
+    let g = fc.lift(curve.generator());
+    let q = fc.lift(target);
+    let mut rng = StdRng::seed_from_u64(options.seed);
+    let mut report = KoblitzSignedRhoReport {
+        recovered_log: None,
+        verified: false,
+        exhausted: true,
+        iterations: 0,
+        restarts_attempted: 0,
+        jump_table_rebuilds: 0,
+        setup_ns: 0,
+        walk_ns: 0,
+        verification_ns: 0,
+        charges: KoblitzSignedRhoCharges::default(),
+    };
+
+    'restarts: for restart in 0..options.max_restarts {
+        report.restarts_attempted += 1;
+        progress(KoblitzSignedRhoEvent::RestartStarted { restart });
+        let setup_started = std::time::Instant::now();
+        let mut draw = |report: &mut KoblitzSignedRhoReport| {
+            let a = rng.gen_range(1..modulus);
+            let b = rng.gen_range(1..modulus);
+            report.charges.coefficient_draws += 2;
+            report.charges.setup_scalar_multiplications += 2;
+            report.charges.setup_group_additions += 1;
+            (fc.add(fc.mul_u64(g, a), fc.mul_u64(q, b)), a, b)
+        };
+        let jumps = (0..options.jump_count)
+            .map(|_| draw(&mut report))
+            .collect::<Vec<_>>();
+        report.jump_table_rebuilds += 1;
+        progress(KoblitzSignedRhoEvent::JumpTableReady {
+            restart,
+            jumps: jumps.len(),
+        });
+        let mut states: Vec<FastRhoState> = (0..rho_effective_walks(
+            options.parallel_walks,
+            rho_expected_steps(modulus, curve.n),
+        ))
+            .map(|_| {
+                let (point, a, b) = draw(&mut report);
+                walk.canonicalize(
+                    FastRhoState {
+                        point,
+                        coefficient_a: a,
+                        coefficient_b: b,
+                    },
+                    &mut report.charges,
+                )
+            })
+            .collect();
+        report.setup_ns += setup_started.elapsed().as_nanos();
+
+        let walk_started = std::time::Instant::now();
+        if options.max_iterations_per_restart == 0 {
+            report.walk_ns += walk_started.elapsed().as_nanos();
+            continue;
+        }
+        // Stored points, shared by every walk of this restart; the
+        // recent-point cache beside it catches the short cycles.
+        let mut table: HashMap<(u64, u64), (u64, u64)> = HashMap::new();
+        let mut recent: Vec<RecentSlot<(u64, u64)>> = vec![None; RECENT_SLOTS];
+        let mut escapes: HashMap<(u64, u64), u32> = HashMap::new();
+        let mut addends: Vec<FastPoint> = Vec::with_capacity(states.len());
+        let mut points: Vec<FastPoint> = Vec::with_capacity(states.len());
+        let mut sums: Vec<FastPoint> = Vec::with_capacity(states.len());
+        let mut scratch = BatchScratch::default();
+        let mut next_progress = options.progress_interval;
+        while report.iterations < options.max_iterations_per_restart {
+            let mut examined = 0u64;
+            for index in 0..states.len() {
+                if report.iterations >= options.max_iterations_per_restart {
+                    break;
+                }
+                report.iterations += 1;
+                examined += 1;
+                let state = states[index];
+                let key = (state.point.x, state.point.y);
+                let slot = recent_slot(key.0, key.1);
+                let seen = match recent[slot] {
+                    Some((k, a0, b0)) if k == key => Some((a0, b0)),
+                    _ => None,
+                };
+                // A state the walks have already been in carries no
+                // information and means one of them is cycling.
+                let repeated = match seen {
+                    Some(previous) => Some(previous),
+                    None => {
+                        recent[slot] = Some((key, state.coefficient_a, state.coefficient_b));
+                        if walk.is_stored(key) {
+                            match table.get(&key) {
+                                Some(&previous) => Some(previous),
+                                None => {
+                                    table.insert(
+                                        key,
+                                        (state.coefficient_a, state.coefficient_b),
+                                    );
+                                    None
+                                }
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                };
+                match repeated {
+                    None => {}
+                    Some(previous)
+                        if previous == (state.coefficient_a, state.coefficient_b) =>
+                    {
+                        report.charges.fruitless_cycles += 1;
+                        let attempt = escapes.get(&key).copied().unwrap_or(0);
+                        let (escaped, cycle_key) =
+                            walk.escape_cycle(&jumps, state, attempt, &mut report.charges);
+                        *escapes.entry(cycle_key).or_insert(0) += 1;
+                        states[index] = escaped;
+                    }
+                    Some(previous) => {
+                        if let Some(outcome) = rho_finish_collision(
+                            curve,
+                            target,
+                            modulus_big,
+                            previous,
+                            (state.coefficient_a, state.coefficient_b),
+                            restart,
+                            walk_started,
+                            &mut report,
+                            progress,
+                        ) {
+                            return outcome;
+                        }
+                        continue 'restarts;
+                    }
+                }
+            }
+            if options.progress_interval != 0 && report.iterations >= next_progress {
+                progress(KoblitzSignedRhoEvent::WalkProgress {
+                    restart,
+                    iterations: report.iterations,
+                });
+                next_progress = report.iterations + options.progress_interval;
+            }
+            if report.iterations >= options.max_iterations_per_restart {
+                // The advance past the final examined state is never
+                // looked at, so it is never charged either.
+                break;
+            }
+            // Advance every walk, sharing one field inversion.
+            addends.clear();
+            points.clear();
+            for state in states.iter().take(examined as usize) {
+                let bucket = if state.point.infinity {
+                    0
+                } else {
+                    rho_bucket(state.point.x, state.point.y, jumps.len())
+                };
+                report.charges.partition_hashes += 1;
+                report.charges.walk_group_additions += 1;
+                addends.push(jumps[bucket].0);
+                points.push(state.point);
+            }
+            sums.clear();
+            fc.add_pairwise(&points, &addends, &mut sums, &mut scratch);
+            for (index, &sum) in sums.iter().enumerate() {
+                let state = states[index];
+                let bucket = if state.point.infinity {
+                    0
+                } else {
+                    rho_bucket(state.point.x, state.point.y, jumps.len())
+                };
+                let jump = &jumps[bucket];
+                states[index] = walk.canonicalize(
+                    FastRhoState {
+                        point: sum,
+                        coefficient_a: (state.coefficient_a + jump.1) % modulus,
+                        coefficient_b: (state.coefficient_b + jump.2) % modulus,
+                    },
+                    &mut report.charges,
+                );
+            }
+        }
+        report.walk_ns += walk_started.elapsed().as_nanos();
+    }
+    progress(KoblitzSignedRhoEvent::Finished {
+        verified: false,
+        exhausted: true,
+    });
+    report
+}
+
+/// The general-arithmetic reference walk of
+/// [`koblitz_signed_frobenius_rho_with_progress`]: the same algorithm on
+/// [`BinaryPoint`]s, kept for fields wider than a word and as the
+/// oracle the single-word walk is tested against.
+pub fn koblitz_signed_frobenius_rho_reference(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    options: &KoblitzSignedRhoOptions,
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> KoblitzSignedRhoReport {
+    assert!(options.jump_count > 0, "rho needs at least one jump");
+    assert!(options.parallel_walks > 0, "rho needs at least one walk");
     let modulus = &curve.subgroup_order;
     let modulus_u64 = modulus.to_u64_digits().first().copied().unwrap_or(0);
     assert!(modulus_u64 > 2, "rho subgroup order must fit u64");
@@ -4073,36 +4760,40 @@ pub fn koblitz_signed_frobenius_rho_with_progress(
         report.restarts_attempted += 1;
         progress(KoblitzSignedRhoEvent::RestartStarted { restart });
         let setup_started = std::time::Instant::now();
+        let mut draw = |report: &mut KoblitzSignedRhoReport| {
+            let a = BigUint::from(rng.gen_range(1..modulus_u64));
+            let b = BigUint::from(rng.gen_range(1..modulus_u64));
+            report.charges.coefficient_draws += 2;
+            report.charges.setup_scalar_multiplications += 2;
+            report.charges.setup_group_additions += 1;
+            let point = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b));
+            (point, a, b)
+        };
         let jumps = (0..options.jump_count)
-            .map(|_| {
-                let a = BigUint::from(rng.gen_range(1..modulus_u64));
-                let b = BigUint::from(rng.gen_range(1..modulus_u64));
-                report.charges.coefficient_draws += 2;
-                report.charges.setup_scalar_multiplications += 2;
-                report.charges.setup_group_additions += 1;
-                let point = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b));
-                (point, a, b)
-            })
+            .map(|_| draw(&mut report))
             .collect::<Vec<_>>();
         report.jump_table_rebuilds += 1;
         progress(KoblitzSignedRhoEvent::JumpTableReady {
             restart,
             jumps: jumps.len(),
         });
-        let a = BigUint::from(rng.gen_range(1..modulus_u64));
-        let b = BigUint::from(rng.gen_range(1..modulus_u64));
-        report.charges.coefficient_draws += 2;
-        report.charges.setup_scalar_multiplications += 2;
-        report.charges.setup_group_additions += 1;
-        let initial = canonicalize_signed_rho(
-            curve,
-            KoblitzSignedRhoState {
-                point: curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b)),
-                coefficient_a: a,
-                coefficient_b: b,
-            },
-            &mut report.charges,
-        );
+        let mut states: Vec<KoblitzSignedRhoState> = (0..rho_effective_walks(
+            options.parallel_walks,
+            rho_expected_steps(modulus_u64, curve.n),
+        ))
+            .map(|_| {
+                let (point, a, b) = draw(&mut report);
+                canonicalize_signed_rho(
+                    curve,
+                    KoblitzSignedRhoState {
+                        point,
+                        coefficient_a: a,
+                        coefficient_b: b,
+                    },
+                    &mut report.charges,
+                )
+            })
+            .collect();
         report.setup_ns += setup_started.elapsed().as_nanos();
 
         let walk_started = std::time::Instant::now();
@@ -4110,59 +4801,110 @@ pub fn koblitz_signed_frobenius_rho_with_progress(
             report.walk_ns += walk_started.elapsed().as_nanos();
             continue;
         }
-        let mut tortoise = signed_rho_step(curve, &jumps, initial.clone(), &mut report.charges);
-        let hare_once = signed_rho_step(curve, &jumps, initial, &mut report.charges);
-        let mut hare = signed_rho_step(curve, &jumps, hare_once, &mut report.charges);
-        for local_iteration in 0..options.max_iterations_per_restart {
-            report.iterations += 1;
-            if options.progress_interval != 0
-                && (local_iteration + 1) % options.progress_interval == 0
-            {
+        let trail_mask = rho_trail_mask(rho_expected_steps(modulus_u64, curve.n));
+        let coordinates = |point: &BinaryPoint| -> (u64, u64) {
+            match point {
+                BinaryPoint::Infinity => (0, 0),
+                BinaryPoint::Affine { x, y } => (
+                    x.to_biguint().iter_u64_digits().next().unwrap_or(0),
+                    y.to_biguint().iter_u64_digits().next().unwrap_or(0),
+                ),
+            }
+        };
+        let mut table: HashMap<(BigUint, BigUint), (u64, u64)> = HashMap::new();
+        let mut recent: Vec<RecentSlot<(BigUint, BigUint)>> = vec![None; RECENT_SLOTS];
+        let mut escapes: HashMap<(BigUint, BigUint), u32> = HashMap::new();
+        let mut next_progress = options.progress_interval;
+        while report.iterations < options.max_iterations_per_restart {
+            let mut examined = 0usize;
+            for index in 0..states.len() {
+                if report.iterations >= options.max_iterations_per_restart {
+                    break;
+                }
+                report.iterations += 1;
+                examined += 1;
+                let state = states[index].clone();
+                let key = point_key(&state.point);
+                let (x0, y0) = coordinates(&state.point);
+                let coefficients = (
+                    state.coefficient_a.to_u64_digits().first().copied().unwrap_or(0),
+                    state.coefficient_b.to_u64_digits().first().copied().unwrap_or(0),
+                );
+                let slot = recent_slot(x0, y0);
+                let seen = match &recent[slot] {
+                    Some((k, a0, b0)) if *k == key => Some((*a0, *b0)),
+                    _ => None,
+                };
+                let repeated = match seen {
+                    Some(previous) => Some(previous),
+                    None => {
+                        recent[slot] = Some((key.clone(), coefficients.0, coefficients.1));
+                        if rho_mix(x0, y0) & trail_mask == 0 {
+                            match table.get(&key) {
+                                Some(&previous) => Some(previous),
+                                None => {
+                                    table.insert(key.clone(), coefficients);
+                                    None
+                                }
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                };
+                match repeated {
+                    None => {}
+                    Some(previous) if previous == coefficients => {
+                        report.charges.fruitless_cycles += 1;
+                        let attempt = escapes.get(&key).copied().unwrap_or(0);
+                        let (escaped, cycle_key) = escape_cycle_reference(
+                            curve,
+                            &jumps,
+                            state,
+                            attempt,
+                            &mut report.charges,
+                        );
+                        *escapes.entry(cycle_key).or_insert(0) += 1;
+                        states[index] = escaped;
+                    }
+                    Some(previous) => {
+                        if let Some(outcome) = rho_finish_collision(
+                            curve,
+                            target,
+                            modulus,
+                            previous,
+                            coefficients,
+                            restart,
+                            walk_started,
+                            &mut report,
+                            progress,
+                        ) {
+                            return outcome;
+                        }
+                        continue 'restarts;
+                    }
+                }
+            }
+            if options.progress_interval != 0 && report.iterations >= next_progress {
                 progress(KoblitzSignedRhoEvent::WalkProgress {
                     restart,
                     iterations: report.iterations,
                 });
+                next_progress = report.iterations + options.progress_interval;
             }
-            if tortoise.point == hare.point {
-                report.charges.collisions += 1;
-                let numerator = rho_sub_mod(&tortoise.coefficient_a, &hare.coefficient_a, modulus);
-                let denominator =
-                    rho_sub_mod(&hare.coefficient_b, &tortoise.coefficient_b, modulus);
-                let candidate = mod_inverse(&denominator, modulus)
-                    .map(|inverse| (&numerator * inverse) % modulus);
-                // Close the walk segment before collision processing. Candidate
-                // verification is a separately charged stage and must never be
-                // counted in `walk_ns` as well.
-                report.walk_ns += walk_started.elapsed().as_nanos();
-                let verification_started = std::time::Instant::now();
-                let verified = candidate.as_ref().is_some_and(|value| {
-                    report.charges.candidate_verification_scalar_multiplications += 1;
-                    curve.mul(curve.generator(), value) == *target
-                });
-                report.verification_ns += verification_started.elapsed().as_nanos();
-                progress(KoblitzSignedRhoEvent::Collision { restart, verified });
-                if verified {
-                    report.recovered_log = candidate;
-                    report.verified = true;
-                    report.exhausted = false;
-                    progress(KoblitzSignedRhoEvent::Finished {
-                        verified: true,
-                        exhausted: false,
-                    });
-                    return report;
-                }
-                report.charges.failed_collisions += 1;
-                continue 'restarts;
-            }
-            // The three states below are consumed by the next comparison.
-            // Do not charge an unused advance after the final permitted
-            // comparison of an exhausted restart.
-            if local_iteration + 1 == options.max_iterations_per_restart {
+            if report.iterations >= options.max_iterations_per_restart {
+                // The advance past the final examined state is never
+                // looked at, so it is never charged either.
                 break;
             }
-            tortoise = signed_rho_step(curve, &jumps, tortoise, &mut report.charges);
-            let hare_once = signed_rho_step(curve, &jumps, hare, &mut report.charges);
-            hare = signed_rho_step(curve, &jumps, hare_once, &mut report.charges);
+            for index in 0..examined {
+                states[index] = signed_rho_step(
+                    curve,
+                    &jumps,
+                    states[index].clone(),
+                    &mut report.charges,
+                );
+            }
         }
         report.walk_ns += walk_started.elapsed().as_nanos();
     }
@@ -4431,6 +5173,8 @@ pub struct RelationCollector<'a> {
     index_of: HashMap<(BigUint, BigUint), usize>,
     field: FieldStructure,
     pair: PairSource<'a>,
+    /// Single-word curve and lifted generator when the field fits.
+    fast: Option<(FastCurve, FastPoint)>,
     r_u64: u64,
 }
 
@@ -4487,6 +5231,10 @@ impl<'a> RelationCollector<'a> {
             .copied()
             .unwrap_or(1)
             .max(2);
+        let fast = FastCurve::new(&kc.curve).map(|fc| {
+            let g = fc.lift(kc.generator());
+            (fc, g)
+        });
         Some(Self {
             kc,
             fb,
@@ -4494,6 +5242,7 @@ impl<'a> RelationCollector<'a> {
             index_of: fb.index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             pair,
+            fast,
             r_u64,
         })
     }
@@ -4520,19 +5269,36 @@ impl<'a> RelationCollector<'a> {
         let end = unit.start.saturating_add(unit.count);
         let probe = |t: u64| -> Option<CollectedRelation> {
             let a = probe_scalar(unit.seed, t, self.r_u64);
-            let target = self.kc.mul(g, &BigUint::from(a));
-            if target == BinaryPoint::Infinity {
-                return None;
-            }
-            let points = decompose_once(
-                self.kc,
-                self.fb,
-                &self.index_of,
-                &self.field,
-                self.pair_table(),
-                self.opts,
-                &target,
-            )?;
+            let points = match (&self.fast, self.pair_table()) {
+                // [a]G and the decomposition in single-word arithmetic.
+                (Some((fc, g_fast)), Some(pair))
+                    if self.opts.strategy == DecompositionStrategy::PairTable =>
+                {
+                    let target = fc.mul_u64(*g_fast, a);
+                    if target.infinity {
+                        return None;
+                    }
+                    pair.decompose_fast(target, self.opts.m)?
+                }
+                _ => {
+                    let target = match &self.fast {
+                        Some((fc, g_fast)) => fc.lower(fc.mul_u64(*g_fast, a)),
+                        None => self.kc.mul(g, &BigUint::from(a)),
+                    };
+                    if target == BinaryPoint::Infinity {
+                        return None;
+                    }
+                    decompose_once(
+                        self.kc,
+                        self.fb,
+                        &self.index_of,
+                        &self.field,
+                        self.pair_table(),
+                        self.opts,
+                        &target,
+                    )?
+                }
+            };
             Some(CollectedRelation {
                 trial: t,
                 a,
@@ -4877,7 +5643,9 @@ pub fn individual_log(
 /// [`individual_log`] with a caller-supplied pair table, so a batch of
 /// targets over one factor base builds the `|F|²` table once instead
 /// of once per target.  `pair` is required when the strategy is
-/// [`DecompositionStrategy::PairTable`] and ignored otherwise.
+/// [`DecompositionStrategy::PairTable`] and ignored otherwise.  For a
+/// batch of targets build one [`IndividualLogSolver`] instead: this
+/// rebuilds the orbit map of the base for every call.
 pub fn individual_log_with_pair_table(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -4886,89 +5654,369 @@ pub fn individual_log_with_pair_table(
     opts: &KoblitzIcOptions,
     pair: Option<&PairSumTable>,
 ) -> Option<(BigUint, IndividualLogReport)> {
-    let r = &kc.subgroup_order;
-    let g = kc.generator().clone();
-    let projected = projected_signed_orbit_map(kc, fb);
-    if projected.representatives.len() != table.columns.len() {
-        return None;
-    }
-    let mut report = IndividualLogReport::default();
-    if *q == BinaryPoint::Infinity {
-        // Q = O has logarithm 0.
-        report.log = Some(BigUint::zero());
-        return Some((BigUint::zero(), report));
-    }
-    if opts.strategy == DecompositionStrategy::PairTable && pair.is_none() {
-        return None;
-    }
-    let index_of = fb.index_map();
-    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let log_of = table.log_of();
-    // Column logs in the rebuilt column order (matched by point identity).
-    let column_log: Vec<BigUint> = projected
-        .representatives
-        .iter()
-        .map(|point| log_of.get(&point_key(point)).cloned())
-        .collect::<Option<Vec<_>>>()?;
-    let h = &kc.cofactor % r;
+    IndividualLogSolver::new(kc, fb, table, opts, pair)?.solve(q)
+}
 
-    let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x44_45_53_43_45_4e_54_00);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
-    while report.trials < opts.max_trials {
-        report.trials += 1;
-        let a = BigUint::from(rng.gen_range(1..r_u64));
-        let b = BigUint::from(rng.gen_range(1..r_u64));
-        let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
-        if target == BinaryPoint::Infinity {
-            // Degenerate relation [a]G + [b]Q = O already yields d.
-            if let Some(d) = solve_for_d(&a, &b, r) {
-                if kc.mul(&g, &d) == *q {
-                    report.log = Some(d.clone());
-                    return Some((d, report));
-                }
-            }
-            continue;
+/// The target-independent half of a descent — the signed-orbit map of
+/// the base, its column logarithms, the decomposition oracle's tables
+/// and the single-word curve for the probes — built once and reused
+/// for every target of a batch.
+pub struct IndividualLogSolver<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    opts: &'a KoblitzIcOptions,
+    pair: Option<&'a PairSumTable>,
+    projected: ProjectedSignedOrbitMap,
+    column_log: Vec<BigUint>,
+    index_of: HashMap<(BigUint, BigUint), usize>,
+    field: FieldStructure,
+    /// Single-word curve and lifted generator when the field fits.
+    fast: Option<(FastCurve, FastPoint)>,
+    h: BigUint,
+    r_u64: u64,
+}
+
+impl<'a> IndividualLogSolver<'a> {
+    /// `None` when the table's columns do not match the base's signed
+    /// orbits, a column has no logarithm, or the strategy needs a pair
+    /// table and none was supplied.
+    pub fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        table: &FactorBaseLogTable,
+        opts: &'a KoblitzIcOptions,
+        pair: Option<&'a PairSumTable>,
+    ) -> Option<Self> {
+        let projected = projected_signed_orbit_map(kc, fb);
+        if projected.representatives.len() != table.columns.len() {
+            return None;
         }
-        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair, opts, &target) else {
-            continue;
-        };
-        let relation = relation_from_decomposition_with_mode(
+        if opts.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+            return None;
+        }
+        let log_of = table.log_of();
+        let column_log: Vec<BigUint> = projected
+            .representatives
+            .iter()
+            .map(|point| log_of.get(&point_key(point)).cloned())
+            .collect::<Option<Vec<_>>>()?;
+        let r = &kc.subgroup_order;
+        let fast = FastCurve::new(&kc.curve).map(|fc| {
+            let g = fc.lift(kc.generator());
+            (fc, g)
+        });
+        Some(Self {
             kc,
             fb,
-            &idxs,
-            &a,
-            &b,
-            opts.collapse_negation,
-            Some(&projected),
-        );
-        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
-        let mut sum = BigUint::zero();
-        for (coeff, log) in relation.row.iter().zip(&column_log) {
-            if !coeff.is_zero() {
-                sum = (sum + coeff * log) % r;
-            }
-        }
-        let ha = (&h * &a) % r;
-        let numerator = (sum + r - ha) % r;
-        let hb = (&h * &b) % r;
-        let Some(hb_inv) = mod_inverse(&hb, r) else {
-            continue;
-        };
-        let d = (numerator * hb_inv) % r;
-        if kc.mul(&g, &d) == *q {
-            report.log = Some(d.clone());
-            return Some((d, report));
-        }
-        // A non-matching d means this factor base cannot place Q in the
-        // span its columns log (e.g. Q outside the reachable subgroup);
-        // keep trying other relations before giving up.
+            opts,
+            pair,
+            projected,
+            column_log,
+            index_of: fb.index_map(),
+            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
+            fast,
+            h: &kc.cofactor % r,
+            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+        })
     }
-    None
+
+    /// Decompose `[a]G + [b]Q` for the probe `(a, b)`, or `None` when the
+    /// probe is `O` (reported separately) or does not decompose.
+    fn probe(&self, q: &BinaryPoint, q_fast: Option<FastPoint>, a: u64, b: u64) -> Probe {
+        if let (Some((fc, g)), Some(qf)) = (&self.fast, q_fast) {
+            let target = fc.add(fc.mul_u64(*g, a), fc.mul_u64(qf, b));
+            if target.infinity {
+                return Probe::Degenerate;
+            }
+            let idxs = match (self.opts.strategy, self.pair) {
+                (DecompositionStrategy::PairTable, Some(pair)) => {
+                    pair.decompose_fast(target, self.opts.m)
+                }
+                _ => decompose_once(
+                    self.kc,
+                    self.fb,
+                    &self.index_of,
+                    &self.field,
+                    self.pair,
+                    self.opts,
+                    &fc.lower(target),
+                ),
+            };
+            return idxs.map_or(Probe::Miss, Probe::Decomposed);
+        }
+        let g = self.kc.generator();
+        let target = self.kc.add(
+            &self.kc.mul(g, &BigUint::from(a)),
+            &self.kc.mul(q, &BigUint::from(b)),
+        );
+        if target == BinaryPoint::Infinity {
+            return Probe::Degenerate;
+        }
+        decompose_once(
+            self.kc,
+            self.fb,
+            &self.index_of,
+            &self.field,
+            self.pair,
+            self.opts,
+            &target,
+        )
+        .map_or(Probe::Miss, Probe::Decomposed)
+    }
+
+    /// The logarithm of `q` to the base's generator, verified as
+    /// `[d]G = Q` in the general arithmetic before it is returned.
+    pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
+        let kc = self.kc;
+        let r = &kc.subgroup_order;
+        let g = kc.generator();
+        let mut report = IndividualLogReport::default();
+        if *q == BinaryPoint::Infinity {
+            // Q = O has logarithm 0.
+            report.log = Some(BigUint::zero());
+            return Some((BigUint::zero(), report));
+        }
+        let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
+        let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x44_45_53_43_45_4e_54_00);
+        while report.trials < self.opts.max_trials {
+            report.trials += 1;
+            let a = rng.gen_range(1..self.r_u64);
+            let b = rng.gen_range(1..self.r_u64);
+            let idxs = match self.probe(q, q_fast, a, b) {
+                Probe::Decomposed(idxs) => idxs,
+                Probe::Miss => continue,
+                Probe::Degenerate => {
+                    // Degenerate relation [a]G + [b]Q = O already yields d.
+                    if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                        if kc.mul(g, &d) == *q {
+                            report.log = Some(d.clone());
+                            return Some((d, report));
+                        }
+                    }
+                    continue;
+                }
+            };
+            let a = BigUint::from(a);
+            let b = BigUint::from(b);
+            let relation = relation_from_decomposition_with_mode(
+                kc,
+                self.fb,
+                &idxs,
+                &a,
+                &b,
+                self.opts.collapse_negation,
+                Some(&self.projected),
+            );
+            // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
+            let mut sum = BigUint::zero();
+            for (coeff, log) in relation.row.iter().zip(&self.column_log) {
+                if !coeff.is_zero() {
+                    sum = (sum + coeff * log) % r;
+                }
+            }
+            let ha = (&self.h * &a) % r;
+            let numerator = (sum + r - ha) % r;
+            let hb = (&self.h * &b) % r;
+            let Some(hb_inv) = mod_inverse(&hb, r) else {
+                continue;
+            };
+            let d = (numerator * hb_inv) % r;
+            if kc.mul(g, &d) == *q {
+                report.log = Some(d.clone());
+                return Some((d, report));
+            }
+            // A non-matching d means this factor base cannot place Q in the
+            // span its columns log (e.g. Q outside the reachable subgroup);
+            // keep trying other relations before giving up.
+        }
+        None
+    }
+}
+
+/// Outcome of one descent probe.
+enum Probe {
+    /// `[a]G + [b]Q = O`.
+    Degenerate,
+    /// The probe did not decompose.
+    Miss,
+    /// The probe decomposed into these base indices.
+    Decomposed(Vec<usize>),
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_stored_pair_sum_is_found_by_lookup() {
+        // The presence filter must never hide an entry.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let table = PairSumTable::build(&kc, &fb).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        for i in 0..fb.points.len() {
+            for j in i..fb.points.len() {
+                let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
+                let hits = table.lookup(sum.pack());
+                assert!(
+                    hits.iter().any(|&(_, a, b)| (a as usize, b as usize) == (i, j)),
+                    "pair ({i}, {j}) missing from the table"
+                );
+            }
+        }
+        // And a point that is no pair sum is reported absent.
+        let mut absent = 0usize;
+        for k in 1..512u64 {
+            if table.lookup(k * 2 + 1_000_001).is_empty() {
+                absent += 1;
+            }
+        }
+        assert!(absent > 0, "the filter claimed every probe was present");
+    }
+
+    #[test]
+    fn rho_escapes_fruitless_cycles_instead_of_restarting() {
+        // Two jumps make the negation 2-cycle of the quotient walk
+        // frequent; every walk must still end in a verified log.
+        let kc = KoblitzCurve::new(1, 19).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let mut escaped_total = 0;
+        for seed in 0..12u64 {
+            let d = BigUint::from((seed * 104_729 + 7) % r);
+            let q = kc.mul(kc.generator(), &d);
+            let options = KoblitzSignedRhoOptions {
+                seed,
+                jump_count: 2,
+                max_restarts: 4,
+                max_iterations_per_restart: 1 << 20,
+                progress_interval: 0,
+                parallel_walks: 4,
+            };
+            let report = koblitz_signed_frobenius_rho_with_progress(&kc, &q, &options, &mut |_| {});
+            assert!(report.verified, "seed {seed}");
+            assert_eq!(report.recovered_log, Some(d));
+            escaped_total += report.charges.fruitless_cycles;
+        }
+        assert!(escaped_total > 0, "the two-jump walk never met a fruitless cycle");
+    }
+
+    #[test]
+    fn rho_step_count_tracks_the_birthday_bound() {
+        // The walk must cost about √(πr/2)/√(2n) steps: a walk that
+        // mixes badly, or one whose fruitless cycles are not escaped,
+        // shows up here as a step count far above the bound.
+        for (a, n) in [(0u8, 19u32), (1, 19), (0, 31)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let expected = rho_expected_steps(r, n);
+            let mut total = 0f64;
+            let trials = 6u64;
+            for seed in 0..trials {
+                let d = BigUint::from((seed * 7_919 + 11) % r);
+                let q = kc.mul(kc.generator(), &d);
+                let report = koblitz_signed_frobenius_rho_with_progress(
+                    &kc,
+                    &q,
+                    &KoblitzSignedRhoOptions {
+                        seed,
+                        progress_interval: 0,
+                        ..KoblitzSignedRhoOptions::default()
+                    },
+                    &mut |_| {},
+                );
+                assert!(report.verified, "K_{a}/2^{n} seed {seed} did not recover the log");
+                assert_eq!(report.recovered_log, Some(d));
+                total += report.iterations as f64;
+            }
+            let mean = total / trials as f64;
+            assert!(
+                mean < 8.0 * expected,
+                "K_{a}/2^{n}: {mean:.0} steps on average against a {expected:.0}-step bound"
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "a few seconds per target in release; the degree-41 rung of the ledger"]
+    fn rho_recovers_logs_at_degree_41() {
+        let kc = KoblitzCurve::new(0, 41).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let expected = rho_expected_steps(r, 41);
+        for seed in 0..2u64 {
+            let d = BigUint::from((seed * 1_000_003 + 123_456_789) % r);
+            let q = kc.mul(kc.generator(), &d);
+            let report = koblitz_signed_frobenius_rho_with_progress(
+                &kc,
+                &q,
+                &KoblitzSignedRhoOptions {
+                    seed,
+                    progress_interval: 0,
+                    ..KoblitzSignedRhoOptions::default()
+                },
+                &mut |_| {},
+            );
+            assert!(
+                report.verified,
+                "seed {seed}: {} steps, {} fruitless cycles",
+                report.iterations, report.charges.fruitless_cycles
+            );
+            assert_eq!(report.recovered_log, Some(d));
+            assert!((report.iterations as f64) < 20.0 * expected);
+        }
+    }
+
+    #[test]
+    fn single_word_rho_walk_matches_the_reference_step_for_step() {
+        for (a, n, seed) in [(0u8, 9u32, 1u64), (1, 11, 2), (1, 15, 3), (0, 9, 4)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let d = BigUint::from(seed * 7919 % r + 1);
+            let q = kc.mul(kc.generator(), &d);
+            let options = KoblitzSignedRhoOptions {
+                seed,
+                jump_count: 8,
+                max_restarts: 8,
+                max_iterations_per_restart: 1 << 16,
+                progress_interval: 0,
+                parallel_walks: 4,
+            };
+            let fast = koblitz_signed_frobenius_rho_with_progress(&kc, &q, &options, &mut |_| {});
+            let reference =
+                koblitz_signed_frobenius_rho_reference(&kc, &q, &options, &mut |_| {});
+            assert!(fast.verified, "K_{a}/2^{n}: fast walk found the log");
+            assert_eq!(fast.recovered_log, Some(d.clone()));
+            assert_eq!(fast.recovered_log, reference.recovered_log);
+            assert_eq!(fast.iterations, reference.iterations);
+            assert_eq!(fast.restarts_attempted, reference.restarts_attempted);
+            assert_eq!(fast.charges, reference.charges);
+        }
+    }
+
+    #[test]
+    fn descent_solver_reuses_its_setup_across_targets() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::PairTable,
+            ..KoblitzIcOptions::default()
+        };
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        for d in [1u64, 2, 17, r / 2, r - 1] {
+            let d = BigUint::from(d);
+            let q = kc.mul(kc.generator(), &d);
+            let (found, report) = solver.solve(&q).expect("descends");
+            assert_eq!(found, d);
+            let (again, report_again) =
+                individual_log_with_pair_table(&kc, &fb, &table, &q, &opts, Some(&pair)).unwrap();
+            assert_eq!(again, d);
+            assert_eq!(report.trials, report_again.trials);
+        }
+        assert_eq!(solver.solve(&BinaryPoint::Infinity).unwrap().0, BigUint::zero());
+    }
 
     #[test]
     fn irreducibility_test_matches_known_polynomials() {
@@ -6603,6 +7651,7 @@ mod tests {
                 max_restarts: 16,
                 max_iterations_per_restart: 1 << 20,
                 progress_interval: 256,
+                parallel_walks: 4,
             },
             &mut |event| {
                 if matches!(event, KoblitzSignedRhoEvent::Collision { .. }) && !delayed_collision {
@@ -6638,6 +7687,7 @@ mod tests {
                         max_restarts: 1,
                         max_iterations_per_restart: 1,
                         progress_interval: 0,
+                        parallel_walks: 4,
                     },
                     &mut |event| events.push(event),
                 );
@@ -6648,7 +7698,10 @@ mod tests {
         assert!(report.exhausted);
         assert_eq!(report.restarts_attempted, 1);
         assert_eq!(report.iterations, 1);
-        assert_eq!(report.charges.walk_group_additions, 3 * report.iterations);
+        // One comparison, no advance past it: the walk is a single
+        // trajectory, so an advance is one group addition and this
+        // restart makes none.
+        assert_eq!(report.charges.walk_group_additions, 0);
         assert!(matches!(
             events.last(),
             Some(KoblitzSignedRhoEvent::Finished {

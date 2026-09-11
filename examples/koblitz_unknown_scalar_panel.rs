@@ -651,6 +651,7 @@ fn run_rho(
         max_restarts: profile.rho_max_restarts(),
         max_iterations_per_restart: profile.rho_max_iterations(),
         progress_interval: 256,
+        ..KoblitzSignedRhoOptions::default()
     };
     let report =
         koblitz_signed_frobenius_rho_with_progress(&curve, &target, &options, &mut |event| {
