@@ -64,7 +64,7 @@ jobs:
           archive = stage / name
           archive_sha256 = "7886a767b0fe0f3372bd034429e3616632c40ea1781de835602fa08b72e9dd44"
           wrapper_sha256 = "c3a2431c7d6c99d0e9efcf13b441d00e86937220bd9a883faa42c47f12026da9"
-          core_sha256 = "90e6b5032b889e2f75727de2b5e4e6fcd7c56f55f62aa52ec45c9d8941a741f1"
+          core_sha256 = "93118d2e45700c81a19361f47dba57cf13e93e5314dfbc6036cfba33bb54682c"
           bundle_seal_sha256 = "d2b096d39b9158e8da844d89c58732b83dfb9a38ebe08df4f1229a88a581ca5c"
           bundle_manifest_sha256 = "0dc95216c59a5cd8f9aea6346c4336711f0fd4ef7b1c75481da9944118e5af48"
           expected_checksum = f"{archive_sha256}  {name}\n"
