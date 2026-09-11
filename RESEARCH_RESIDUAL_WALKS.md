@@ -1246,7 +1246,98 @@ the count is sub-birthday (`κ ∝ n^{-1/6}`) and the cost per relation
 is a constant — and the constant, measured honestly in the same units
 as everything else in this note, places the crossover with rho near
 `2^{111}`.  That is the number to improve on: any change to the solver
-is scored by `C₃`, and the target is `13 · n^{1/6}`.
+is scored by `C₃`, and the target is `13 · n^{1/6}`.  §11.5 is the
+first round of that.
+
+### 11.5 Lowering `C₃`: the Macaulay step
+
+`C₃` was `92 %` Macaulay reduction, so that is where the round went.
+Each step below was measured at `p = 271`, seed `1`, on the same
+residual stream (`--cross-check` on, so the residual sequence is
+identical and every step's output is compared with the
+meet-in-the-middle oracle on every residual); the ledger is in `F_p`
+multiplications per residual.
+
+| step | Macaulay | of which forward / normal forms | `C₃` | ratio to baseline | cross-check |
+|---|---:|---:|---:|---:|---:|
+| §11.4 baseline: Gauss–Jordan to reduced echelon form, count charged per row operation | 4,445,000 | 1,100,000 / 3,350,000 (Jordan phase) | 4,817,000 | 1 | 0 / 728 |
+| accounting correction: count only the multiplications performed (zero entries of the pivot row are skipped) | 2,860,000 | 620,000 / 2,240,000 | 3,230,000 | 0.67 | same algorithm |
+| forward elimination only, normal forms by memoised back-substitution | 1,155,000 | 610,000 / 540,000 | 1,527,000 | 0.32 | 0 / 728 |
+| learned row mask (drop the `30` Koszul-redundant rows found on the first residual) — *not kept* | 1,126,000 | 579,000 / 547,000 | 1,493,000 | 0.31 | `1 %` of residuals miss and redo (`300`-residual run; `1,515,000` without the mask on that stream) |
+
+The first row is the §11.4 number.  The second is the same algorithm
+counted honestly: the row-operation loop skipped the zero entries of
+the pivot row but charged a full row length, so the §11.4 constant was
+overstated by `1.5×` — the correction is recorded as a step because
+the ledger has to say so, not as an improvement.  The third row is the
+algorithmic change: the reduced echelon form was being built for all
+`222` pivot rows (the Jordan phase, three quarters of the reduction)
+when only the normal forms of the `64` products `e₁ · b` are needed;
+forward elimination plus back-substitution restricted, by memoisation,
+to the pivot columns those products actually reach costs a quarter of
+that.  The fourth row is the classical Macaulay row selection done
+empirically — the `30` rows that reduce to zero on one residual are the
+same rows on the next — and it buys `2 %`, because a row that reduces
+to zero is cheap to reduce, and loses part of it again to the `1 %` of
+residuals where the learned set is wrong and the matrix is redone; it
+is not in the code.
+
+One correctness fix came out of the wider cross-checks (`p = 523`,
+seed `2`: `1` mismatch in `400`): when two solutions share
+`e₁ = λ`, the `λ`-eigenspace of `M_{e₁}ᵀ` is two-dimensional and its
+kernel basis vectors are not evaluation functionals, so both solutions
+were lost.  The fix restricts the commuting operators `M_{e₂}` and
+then `M_{e₃}` to the eigenspace and takes their eigenvectors there; it
+costs nothing measurable (the normal forms it needs are already
+memoised) and the cross-checks are clean again: `0 / 728` at `p = 271`,
+`0 / 400` at `p = 523`, `0 / 800` at `p = 1039`.
+
+Protocol with the new solver (`--protocol --groebner`, the same sizes
+and seeds, `experiments/21_gaudry_cubic_c3.json`):
+
+| `p` | `n` | base | residuals | `C₃` | forward / normal forms | fallback | total ops | `S` | §11.4 `S` | MITM `S` | rho `S` | `S` / rho `S` | wall |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | 129 | 941 | 1.53·10⁶ | 41 % / 35 % | 1 | 23·10⁶ | 5,139 | 14,866 | 1,224 | 0.81 | 6,346× | 18 s |
+| 271 | 2^24.2 | 136 | 773 | 1.53·10⁶ | 40 % / 35 % | 0 | 19·10⁶ | 4,218 | 14,866 | 1,224 | 1.51 | 2,799× | 15 s |
+| 523 | 2^27.1 | 256 | 1,461 | 1.55·10⁶ | 40 % / 35 % | 2 | 36·10⁶ | 3,022 | 10,758 | 1,640 | 1.38 | 2,184× | 28 s |
+| 523 | 2^27.1 | 240 | 1,880 | 1.55·10⁶ | 40 % / 35 % | 2 | 46·10⁶ | 3,872 | 10,758 | 1,640 | 0.98 | 3,935× | 37 s |
+| 1039 | 2^30.1 | 507 | 3,038 | 1.57·10⁶ | 40 % / 35 % | 4 | 76·10⁶ | 2,265 | 6,597 | 2,707 | 1.29 | 1,760× | 60 s |
+| 1039 | 2^30.1 | 532 | 2,646 | 1.58·10⁶ | 40 % / 34 % | 6 | 67·10⁶ | 1,992 | 6,597 | 2,707 | 1.45 | 1,372× | 53 s |
+| 2083 | 2^33.1 | 1,088 | 5,528 | 1.57·10⁶ | 39 % / 35 % | 3 | 139·10⁶ | 1,459 | 4,623 | 3,805 | 1.62 | 901× | 110 s |
+| 2083 | 2^33.1 | 1,048 | 5,967 | 1.57·10⁶ | 39 % / 35 % | 2 | 149·10⁶ | 1,567 | 4,623 | 3,805 | 1.78 | 881× | 119 s |
+
+Every run recovered the planted `d`.  What changed and what did not:
+
+- **`C₃ ≈ 1.53–1.58 · 10⁶`, `3.1×` below §11.4**, total work `∝ n^{0.31}` again,, still a constant
+  across sizes; the forward elimination is `≈ 40 %`, the normal forms
+  `≈ 35 %`, the characteristic polynomial, eigenvectors and root
+  finding the remaining `≈ 25 %` — the Macaulay step is no longer nine
+  tenths of the cost, and the next factor of two would have to come
+  from all three parts.
+- **The solve now beats the meet-in-the-middle oracle inside the
+  measured range.**  Break-even is `2|F| · 1,850 ≈ 1.55·10⁶`, i.e.
+  `|F| ≈ 420`, `p ≈ 840`, `n ≈ 2^{29}`; at `p = 1039` the solve is
+  `S ≈ 2,100` against `2,707`, at `p = 2083` `≈ 1,500` against
+  `3,805`, and the gap widens as `n^{1/3}` from there.
+- **The crossover with rho moves from `2^{111}` to `2^{101}`.**
+  `C₃ < 13 · n^{1/6}` with `C₃ = 1.55·10⁶` gives `n^{1/6} > 1.2·10⁵`,
+  `n > 2^{101}`.  A `3×` change in the constant is a `3⁶ ≈ 700×`
+  change in the crossover size and ten bits of `n`; every further
+  halving of `C₃` is worth six bits.  The ratio to rho at the
+  measured sizes is `≈ 4,000×` at 24 bits and `≈ 890×` at 33 bits
+  (per-size means).
+- **What is left in `C₃`.**  The forward elimination of a `252 × 286`
+  matrix of rank `222` with `35`-term rows fills in after the first
+  block and costs what dense elimination costs; a structured
+  elimination that keeps the degree blocks separate is worth perhaps
+  a further `1.5×`, and the `30` redundant rows `≈ 5 %`.  Below that
+  the only lever is the size of the system: three quartics in three
+  unknowns with `64` solutions is what `S₄` on `E(F_{p³})` is, and a
+  `64`-solution zero-dimensional system does not get solved in much
+  under `10⁵` field operations by any dense method.  The realistic
+  floor for this design is therefore `C₃ ≈ 3–5 · 10⁵`, a crossover
+  near `2^{90}`; the note's conclusion stands, with the number
+  sharpened.
 
 ## References
 

@@ -41,9 +41,13 @@ fn one(p: u64, seed: u64, max_residuals: u64, solver: Solver, cross_check: bool)
     let r = run_rho3(&inst, seed);
     let per_residual = g.oracle_fp_muls as f64 / g.residuals.max(1) as f64;
     println!(
-        "p={:>5} n=2^{:5.1} B={:>4} {:?} | residuals={:>6} decomp={:>5} rate={:.3} indep={:>4} Fp_muls/residual={:>10.0} (macaulay {:>10.0}, precompute {:>9}) Fp/add={:>5.1} group_ops={:>9} total_ops={:>12.0} S={:>10.1} ok={:?} xcheck={}/{} retries={} fallback={} {:>7.0} ms | rho: steps={:>8} S={:>6.1} ok={:?}",
+        "p={:>5} n=2^{:5.1} B={:>4} {:?} | residuals={:>6} decomp={:>5} rate={:.3} indep={:>4} Fp_muls/residual={:>10.0} (macaulay {:>10.0} = echelon {:>9.0} + nf {:>9.0}; rows {:>5.1}; precompute {:>9}) Fp/add={:>5.1} group_ops={:>9} total_ops={:>12.0} S={:>10.1} ok={:?} xcheck={}/{} retries={} fallback={} {:>7.0} ms | rho: steps={:>8} S={:>6.1} ok={:?}",
         g.p, g.bits, g.base, g.solver, g.residuals, g.decompositions, g.decomposition_rate, g.relations_independent,
-        per_residual, g.solve_stats.macaulay_muls as f64 / g.solve_stats.solves.max(1) as f64, g.precompute_fp_muls,
+        per_residual, g.solve_stats.macaulay_muls as f64 / g.solve_stats.solves.max(1) as f64,
+        g.solve_stats.echelon_muls as f64 / g.solve_stats.solves.max(1) as f64,
+        (g.solve_stats.macaulay_muls - g.solve_stats.echelon_muls) as f64 / g.solve_stats.solves.max(1) as f64,
+        g.solve_stats.macaulay_rows as f64 / g.solve_stats.solves.max(1) as f64,
+        g.precompute_fp_muls,
         g.fp_muls_per_add, g.group_ops, g.total_ops, g.s, g.correct,
         g.cross_check_mismatches, g.cross_checked, g.solve_stats.retried_at_degree_11, g.solve_stats.unsolved, g.wall_ms,
         r.steps, r.s, r.correct
