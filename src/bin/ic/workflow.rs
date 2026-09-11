@@ -102,6 +102,20 @@ fn baseline_is_default(b: &BaselineParams) -> bool {
     let d = BaselineParams::default();
     !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
 }
+
+fn evidence_scope(p: &WorkflowParams) -> &'static str {
+    let public = p
+        .targets
+        .iter()
+        .filter(|target| target.public_hash_seed.is_some())
+        .count();
+    match (public, p.targets.len()) {
+        (0, _) => "synthetic_known_answer",
+        (count, total) if count == total => "public_hash_unknown_scalar",
+        _ => "mixed_synthetic_known_answer_and_public_hash_unknown_scalar",
+    }
+}
+
 /// Whether a document's curve fields name `c`.
 fn same_curve(degree: u32, curve_a: u8, subfield: u32, curve_b: u64, c: &KoblitzCurve) -> bool {
     degree == c.n && curve_a == c.a && subfield == c.k && curve_b == c.b_index
@@ -1249,7 +1263,7 @@ fn finish(
     status: &str,
 ) -> Value {
     json!({"schema_version":1,"operation":"workflow","status":status,
-        "evidence_scope":"synthetic_known_answer",
+        "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,"summands":p.summands,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,

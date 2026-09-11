@@ -604,6 +604,10 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "complete");
+    assert_eq!(
+        v["evidence_scope"],
+        "mixed_synthetic_known_answer_and_public_hash_unknown_scalar"
+    );
     assert_eq!(v["solutions"]["verified"], 4);
     assert_eq!(v["solutions"]["count"], 4);
     let stages = v["stages"].as_array().unwrap();
