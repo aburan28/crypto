@@ -738,6 +738,11 @@ pub struct OracleOutcome {
     pub degree: u32,
     /// Engine-specific effort: F4 splits, or SAT conflicts.
     pub effort: u64,
+    /// Highest Macaulay degree the F4 engine actually built a matrix at
+    /// (0 for SAT arms, or when every matrix exceeded the size caps).
+    pub built_degree: u32,
+    /// Macaulay matrices refused for exceeding the size caps.
+    pub oversize: usize,
 }
 
 fn system_degree(eqs: &[F2BoolPoly]) -> u32 {
@@ -801,6 +806,8 @@ pub fn symmetrised_groebner_decompose_accepting(
         n_equations: sys.equations.len(),
         degree: system_degree(&sys.equations),
         effort: stats.splits as u64,
+        built_degree: stats.max_degree_built,
+        oversize: stats.oversize,
     })
 }
 
@@ -846,6 +853,8 @@ pub fn direct_x_groebner_decompose(
         n_equations: equations.len(),
         degree: system_degree(&equations),
         effort: stats.splits as u64,
+        built_degree: stats.max_degree_built,
+        oversize: stats.oversize,
     })
 }
 
@@ -872,6 +881,8 @@ fn sat_loop(
             n_equations: equations.len(),
             degree,
             effort,
+            built_degree: 0,
+            oversize: 0,
         }
     };
     loop {
@@ -986,6 +997,12 @@ pub struct ArmRun {
     pub gate_failures: usize,
     /// First fall degree of the system at the first target, if computed.
     pub first_fall_degree: Option<u32>,
+    /// Highest Macaulay degree the engine built a matrix at, over the
+    /// instance's targets.  Below the requested cap it means the larger
+    /// matrices exceeded the size caps and the engine fell back.
+    pub built_degree: u32,
+    /// Targets on which at least one Macaulay matrix was refused for size.
+    pub oversize_targets: usize,
 }
 
 /// The paired comparison on one instance.
@@ -1018,6 +1035,15 @@ pub struct PairedOptions {
     /// Draw targets from the prime-order subgroup (as index calculus
     /// does) rather than from the whole group.
     pub targets_in_subgroup: bool,
+    /// Run the production `x`-chained arm.  At a raised Macaulay degree
+    /// that arm costs hours on the larger fields, so a run that only
+    /// needs the symmetrised cell can switch it off.
+    pub chained_x: bool,
+    /// Highest Macaulay degree the F4 engine builds before splitting.
+    /// The symmetrised systems have degree 4 (`m = 3`), so at the
+    /// default 3 they get no algebraic reduction at all before the
+    /// first split; 4 or 5 is what a fair comparison needs.
+    pub f4_max_degree: u32,
 }
 
 impl Default for PairedOptions {
@@ -1032,6 +1058,8 @@ impl Default for PairedOptions {
             direct_x: true,
             ffd_max_degree: 4,
             targets_in_subgroup: true,
+            chained_x: true,
+            f4_max_degree: 3,
         }
     }
 }
@@ -1059,6 +1087,8 @@ struct Acc {
     effort: Vec<f64>,
     gate_failures: usize,
     ffd: Option<u32>,
+    built_degree: u32,
+    oversize_targets: usize,
 }
 
 impl Acc {
@@ -1078,6 +1108,8 @@ impl Acc {
             effort: Vec::new(),
             gate_failures: 0,
             ffd: None,
+            built_degree: 0,
+            oversize_targets: 0,
         }
     }
     /// Record one outcome against the truth `(exists, target_sum_check)`.
@@ -1087,6 +1119,10 @@ impl Acc {
         self.degree = o.degree;
         self.total_ms += ms;
         self.effort.push(o.effort as f64);
+        self.built_degree = self.built_degree.max(o.built_degree);
+        if o.oversize > 0 {
+            self.oversize_targets += 1;
+        }
         match (&o.relation, o.complete) {
             (Some(_), _) => {
                 self.found += 1;
@@ -1124,6 +1160,8 @@ impl Acc {
             median_effort: median(self.effort),
             gate_failures: self.gate_failures,
             first_fall_degree: self.ffd,
+            built_degree: self.built_degree,
+            oversize_targets: self.oversize_targets,
         }
     }
 }
@@ -1177,7 +1215,9 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
     let mut sym = Acc::new("sym F4");
     let mut x_chain_sat = Acc::new("x-chained SAT");
     let mut sym_sat = Acc::new("sym SAT");
-    let engine = SolverEngine::default();
+    let engine = SolverEngine::MatrixF4 {
+        max_degree: opts.f4_max_degree,
+    };
 
     for (ti, target) in targets.iter().enumerate() {
         // Truth on each base.
@@ -1203,42 +1243,47 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
             })
         };
 
-        // x-chained (production path).
-        let t0 = Instant::now();
-        let (rel, stats) = groebner_decompose(
-            &kc,
-            &fb_x,
-            &index_x,
-            &st,
-            target,
-            m,
-            engine,
-            opts.node_budget,
-        );
-        let ms = t0.elapsed().as_secs_f64() * 1e3;
         let x_r = match target {
             BinaryPoint::Affine { x, .. } => x.clone(),
             BinaryPoint::Infinity => unreachable!(),
         };
-        let chained_sys =
-            build_decomposition_system(&fb_x.subspace_basis, &x_r, &kc.curve.b, m, &st)?;
-        let o = OracleOutcome {
-            used_t: false,
-            complete: !stats.exhausted,
-            n_vars: chained_sys.n_vars,
-            n_equations: chained_sys.equations.len(),
-            degree: system_degree(&chained_sys.equations),
-            effort: stats.splits as u64,
-            relation: rel.clone(),
-        };
-        x_chain.record(&o, ms, truth_x, sum_check_x(&rel));
-        if ti == 0 && opts.ffd_max_degree >= 2 {
-            x_chain.ffd = first_fall_degree(
-                &chained_sys.equations,
-                chained_sys.n_vars,
-                opts.ffd_max_degree,
-            )
-            .0;
+
+        // x-chained (production path).
+        if opts.chained_x {
+            let t0 = Instant::now();
+            let (rel, stats) = groebner_decompose(
+                &kc,
+                &fb_x,
+                &index_x,
+                &st,
+                target,
+                m,
+                engine,
+                opts.node_budget,
+            );
+            let ms = t0.elapsed().as_secs_f64() * 1e3;
+            let chained_sys =
+                build_decomposition_system(&fb_x.subspace_basis, &x_r, &kc.curve.b, m, &st)?;
+            let o = OracleOutcome {
+                used_t: false,
+                complete: !stats.exhausted,
+                n_vars: chained_sys.n_vars,
+                n_equations: chained_sys.equations.len(),
+                degree: system_degree(&chained_sys.equations),
+                effort: stats.splits as u64,
+                built_degree: stats.max_degree_built,
+                oversize: stats.oversize,
+                relation: rel.clone(),
+            };
+            x_chain.record(&o, ms, truth_x, sum_check_x(&rel));
+            if ti == 0 && opts.ffd_max_degree >= 2 {
+                x_chain.ffd = first_fall_degree(
+                    &chained_sys.equations,
+                    chained_sys.n_vars,
+                    opts.ffd_max_degree,
+                )
+                .0;
+            }
         }
 
         // x-direct S₄.
@@ -1284,21 +1329,23 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
         }
 
         if opts.sat {
-            let t0 = Instant::now();
-            if let Some(o) = chained_x_sat_decompose(
-                &kc,
-                &fb_x.subspace_basis,
-                &fb_x.points,
-                &index_x,
-                &st,
-                target,
-                m,
-                opts.conflict_budget,
-                opts.max_models,
-            ) {
-                let ms = t0.elapsed().as_secs_f64() * 1e3;
-                let ok = sum_check_x(&o.relation);
-                x_chain_sat.record(&o, ms, truth_x, ok);
+            if opts.chained_x {
+                let t0 = Instant::now();
+                if let Some(o) = chained_x_sat_decompose(
+                    &kc,
+                    &fb_x.subspace_basis,
+                    &fb_x.points,
+                    &index_x,
+                    &st,
+                    target,
+                    m,
+                    opts.conflict_budget,
+                    opts.max_models,
+                ) {
+                    let ms = t0.elapsed().as_secs_f64() * 1e3;
+                    let ok = sum_check_x(&o.relation);
+                    x_chain_sat.record(&o, ms, truth_x, ok);
+                }
             }
             let t0 = Instant::now();
             if let Some(o) = symmetrised_sat_decompose(
@@ -1317,13 +1364,18 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
         }
     }
 
-    let mut arms = vec![x_chain.finish()];
+    let mut arms = Vec::new();
+    if opts.chained_x {
+        arms.push(x_chain.finish());
+    }
     if m == 3 && opts.direct_x {
         arms.push(x_direct.finish());
     }
     arms.push(sym.finish());
     if opts.sat {
-        arms.push(x_chain_sat.finish());
+        if opts.chained_x {
+            arms.push(x_chain_sat.finish());
+        }
         arms.push(sym_sat.finish());
     }
     Some(PairedBench {
@@ -1350,7 +1402,7 @@ pub fn format_paired(b: &PairedBench) -> String {
     );
     let _ = writeln!(
         s,
-        "   {:<14} {:>4} {:>4} {:>3} {:>5} {:>7} {:>6} {:>5} {:>12} {:>12} {:>9} {:>4} {:>5}",
+        "   {:<14} {:>4} {:>4} {:>3} {:>5} {:>7} {:>6} {:>5} {:>12} {:>12} {:>9} {:>5} {:>4} {:>5}",
         "arm",
         "vars",
         "eqs",
@@ -1362,6 +1414,7 @@ pub fn format_paired(b: &PairedBench) -> String {
         "found ms",
         "refuted ms",
         "effort",
+        "built",
         "ffd",
         "gate"
     );
@@ -1377,7 +1430,7 @@ pub fn format_paired(b: &PairedBench) -> String {
     for a in &b.arms {
         let _ = writeln!(
             s,
-            "   {:<14} {:>4} {:>4} {:>3} {:>5} {:>7} {:>6} {:>5} {:>12} {:>12} {:>9} {:>4} {:>5}",
+            "   {:<14} {:>4} {:>4} {:>3} {:>5} {:>7} {:>6} {:>5} {:>12} {:>12} {:>9} {:>5} {:>4} {:>5}",
             a.arm,
             a.n_vars,
             a.n_equations,
@@ -1389,6 +1442,11 @@ pub fn format_paired(b: &PairedBench) -> String {
             fmt(a.median_found_ms),
             fmt(a.median_refuted_ms),
             fmt(a.median_effort),
+            match (a.built_degree, a.oversize_targets) {
+                (0, _) => "-".to_string(),
+                (d, 0) => d.to_string(),
+                (d, k) => format!("{d}/{k}!"),
+            },
             a.first_fall_degree
                 .map(|d| d.to_string())
                 .unwrap_or_else(|| "-".into()),
@@ -1515,6 +1573,8 @@ mod tests {
             direct_x: true,
             ffd_max_degree: 0,
             targets_in_subgroup: false,
+            chained_x: true,
+            f4_max_degree: 3,
         };
         let b = paired_bench(a, n, m, &opts).unwrap();
         for arm in &b.arms {

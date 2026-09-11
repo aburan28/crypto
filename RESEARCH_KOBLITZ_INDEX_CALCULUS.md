@@ -878,3 +878,121 @@ Two structural observations from the first instances:
   such bases at zero and a run over one reports a base with no usable
   columns; the choice of `b` is a genuine parameter of the family, not
   a cosmetic one.
+
+## Scaling to the ledger rungs, and a ρ baseline that was lying — 2026-09-11
+
+The pipeline now runs end to end at the boundary ledger's Koblitz rungs
+— `K_0/F_{2^n}` for `n = 31, 37, 39, 41`, 32 synthetic known-answer
+targets each, with the in-process signed-Frobenius ρ baseline. The
+parameter files are `docs/ic/params/k0n{31,37,39,41}.json` and the
+measurements `docs/ic/runs/koblitz-scaling-20260911.json` (two
+consecutive series from one build on one host).
+
+### Single-word arithmetic
+
+Every hot loop used to run on `Vec<u64>`-backed field elements that
+allocate on each operation, which for the `n ≤ 62` fields this pipeline
+actually uses costs about two orders of magnitude more than the
+arithmetic. `cryptanalysis::koblitz_fast` puts a point in two `u64`s on
+top of the existing carry-less `Gf2`:
+
+- `add`, `double`, `mul`, the `2^k` Frobenius, and the packed identity,
+  all checked against `binary_ecc::curve` on random points including
+  `O`, `P + P`, `P + (−P)` and points outside the prime-order subgroup;
+- `add_many` (one summand, many addends) and `add_pairwise` (matched
+  slices), each spending **one** field inversion for the whole slice by
+  Montgomery's trick, which is what a point addition's inversion costs
+  when enough of them happen together.
+
+The pair-sum table builds its rows with `add_many`, and answers a lookup
+through a bucket index plus a presence filter — one bit per hashed key,
+four bits per entry — so the overwhelming majority of lookups, which
+miss, never touch the hundreds of megabytes of entries. Measured at
+`n = 41`: the descent went 242 → 157 ms per target from the filter
+alone. The descent's target-independent setup (signed-orbit map, column
+logarithms, oracle tables) moved into `IndividualLogSolver`, built once
+per batch rather than once per target.
+
+Degree 31, 32 targets, before → after the single-word rewrite: descent
+715 → 1.6 ms per target, collection 12.4 → 1.1 s.
+
+### The ρ baseline was failing, not losing
+
+The first version of the scaling run reported a **charged crossover of
+1.009 at `n = 41`**. It was an artifact, and the way it failed is worth
+recording.
+
+That baseline used Floyd cycle finding. On a negation-quotient walk the
+canonical representative flips the sign of the coefficients, so a walk
+can return to *its own previous state*: going round such a cycle adds a
+jump and then subtracts it, and the accumulated coefficients come back
+unchanged. Floyd's meeting then happens at that cycle — tortoise and
+hare holding identical `(a, b)` — and the collision carries no
+information. Every restart burned itself on one within a few hundred
+steps: at `n = 41` the baseline recovered **0 of 32** logarithms while
+charging 1.4M iterations, and a ρ that never finishes is trivially
+"slower" than anything.
+
+The replacement is the distinguished-point method:
+
+- one trajectory per walk; a direct-mapped cache of recent points
+  (4096 slots) catches short cycles *and* nearby collisions; a sparse
+  table of stored points — about one in `2^6` of the expected walk
+  length — catches the long-range collision;
+- a cycle is escaped by doubling **the cycle's own smallest state**, so
+  every path entering the same cycle leaves it at the same point and the
+  walk stays a deterministic map; a repeat doubles further;
+- walks are stepped in batches sharing one field inversion
+  (`parallel_walks`, default 32), scaled down when the whole walk is
+  shorter than the setup would cost — at `n = 31` a 171-step walk would
+  otherwise spend more on 32 jump tables than on walking.
+
+The general-arithmetic walk stays as `koblitz_signed_frobenius_rho_reference`
+and is asserted equal step for step, on every charge counter. Two tests
+hold the walk to theory: the mean step count against
+`√(πr/2) / √(2n)`, and the degree-41 rung (ignored by default).
+
+### What the rungs actually measure
+
+| `n` | `r` bits | base points | columns | relations | core | collect | logs | trials/target | descent/target | ρ/target | ρ steps | charged ρ/IC |
+|-----|---------|-------------|---------|-----------|------|---------|------|---------------|----------------|----------|---------|--------------|
+| 31 | 21 | 2170 | 35 | 78 | 13 | 1.1 s | 0.6 s | 2 | 1.6 ms | 1.2 ms | 171 | 0.73 |
+| 37 | 28 | 3851 | 26 | 39 | 6 | 1.5 s | 1.4 s | 62 | 22.9 ms | 4.8 ms | 2259 | 0.21 |
+| 39 | 27 | 5151 | 33 | 49 | 7 | 12.2 s | 8.2 s | 125 | 52.8 ms | 2.7 ms | 1072 | 0.05 |
+| 41 | 40 | 4759 | 29 | 52 | 10 | 2.0 s | 5.3 s | 387 | 141 ms | 90 ms | 126425 | 0.64 |
+
+All 32 targets solve and all 32 ρ runs verify at every rung. **No rung
+crosses**: the charged ratio is below 1 everywhere, and the closest
+(`n = 41`, ≈ 0.64–0.73) is the rung where ρ has the most room left,
+not the least.
+
+Three things the table says plainly:
+
+1. **The descent is decomposition-bound.** Trials per target track
+   `1/coverage` — 2 at `n = 31`, 387 at `n = 41` — and each trial is a
+   pair-table search over the whole base. Everything else (linear
+   algebra at 0.2 ms, relation collection, the log database) is noise
+   by comparison. A faster descent means a base with better coverage
+   per abscissa, not faster field arithmetic.
+2. **The linear algebra has stopped being the problem.** Filtering
+   reduces 26–35 columns to cores of 6–13 and block Wiedemann solves
+   them in under 0.3 ms; `n = 39`'s 5151-point base costs 12 s to
+   *collect* relations for and 8 ms to solve.
+3. **`n = 39` is the wrong kind of rung.** Its cofactor is 8012 and its
+   subgroup only 27 bits, so ρ finishes in a thousand steps while the
+   base is the largest of the four. Degree 41, with `h = 4` and a 40-bit
+   subgroup, is the honest one.
+
+### Where the remaining headroom is
+
+- **Coverage per abscissa.** At `n = 41` the census measures coverage
+  `2^-8` on a 4759-point base: 387 trials per target. The union and
+  2-torsion-saturated families at seed dimension 6 are the largest
+  bases inside the 4096-abscissa cap; past that the pair table is
+  quadratic in abscissae, so the next gain has to come from bases whose
+  *witness* count per point is higher, not from more points.
+- **ρ still has room**, which is the honest reading of any ratio near 1:
+  the walk is a single core with batched inversions, while the published
+  records for this size use many cores and tighter inner loops. Until a
+  rung beats a ρ that has had the same attention, a ratio near 1 is a
+  statement about two implementations, not about two algorithms.

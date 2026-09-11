@@ -113,6 +113,7 @@ pub mod coleman_integration;
 pub mod coordinate_descent;
 pub mod coordinate_quotients;
 pub mod coordinate_search;
+pub mod degree_reduction;
 pub mod descent_algebraic;
 pub mod descent_expansion;
 pub mod descent_lowgamma;
@@ -146,6 +147,7 @@ pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
+pub mod koblitz_fast;
 pub mod koblitz_sparse_la;
 pub mod koblitz_symmetrised;
 pub mod lattice;
@@ -258,7 +260,8 @@ pub use koblitz_index_calculus::{
     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
     koblitz_index_calculus_dlp_with_factor_base,
     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
-    koblitz_signed_frobenius_rho_with_progress, koblitz_speedup_model, linearised_kernel,
+    koblitz_signed_frobenius_rho_reference, koblitz_signed_frobenius_rho_with_progress,
+    koblitz_speedup_model, linearised_kernel, IndividualLogSolver,
     linearised_kernel_basis, order_of_2_mod_n, pack_point, point_key, points_with_x, probe_scalar,
     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
     solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2,

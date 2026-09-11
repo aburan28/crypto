@@ -53,8 +53,9 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    individual_log_with_pair_table, koblitz_signed_frobenius_rho_with_progress,
-    point_key, points_with_x, solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x,
+    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    IndividualLogSolver,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
     RelationCollector, RelationWorkUnit,
 };
@@ -101,6 +102,20 @@ fn baseline_is_default(b: &BaselineParams) -> bool {
     let d = BaselineParams::default();
     !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
 }
+
+fn evidence_scope(p: &WorkflowParams) -> &'static str {
+    let public = p
+        .targets
+        .iter()
+        .filter(|target| target.public_hash_seed.is_some())
+        .count();
+    match (public, p.targets.len()) {
+        (0, _) => "synthetic_known_answer",
+        (count, total) if count == total => "public_hash_unknown_scalar",
+        _ => "mixed_synthetic_known_answer_and_public_hash_unknown_scalar",
+    }
+}
+
 /// Whether a document's curve fields name `c`.
 fn same_curve(degree: u32, curve_a: u8, subfield: u32, curve_b: u64, c: &KoblitzCurve) -> bool {
     degree == c.n && curve_a == c.a && subfield == c.k && curve_b == c.b_index
@@ -1097,10 +1112,19 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     let mut solved_now = 0usize;
     let mut failed_now = 0usize;
+    // The orbit map, column logs and oracle tables are target-independent:
+    // set up once for the whole batch.
+    let solver = if pending.is_empty() {
+        None
+    } else {
+        IndividualLogSolver::new(&c, &fb, &table, &ic, pair.as_ref())
+    };
     for i in pending {
-        let t = Instant::now();
         let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
-        let outcome = individual_log_with_pair_table(&c, &fb, &table, &q, &ic, pair.as_ref());
+        // Timed like the ρ baseline: the descent on the public point
+        // only, not the construction of the target.
+        let t = Instant::now();
+        let outcome = solver.as_ref().and_then(|s| s.solve(&q));
         let (recovered, trials) = match outcome {
             Some((d, r)) => (Some(d), r.trials),
             None => (None, 0),
@@ -1239,7 +1263,7 @@ fn finish(
     status: &str,
 ) -> Value {
     json!({"schema_version":1,"operation":"workflow","status":status,
-        "evidence_scope":"synthetic_known_answer",
+        "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,"summands":p.summands,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,

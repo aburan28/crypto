@@ -7,8 +7,24 @@ on:
       - "scripts/koblitz_stage26_affinity_inputs.py"
       - "scripts/run_koblitz_stage26_affinity_cell.py"
       - "scripts/test_koblitz_stage26_affinity.py"
+      - "scripts/score_koblitz_stage26_affinity.py"
+      - "scripts/test_koblitz_stage26_score.py"
+      - "scripts/verify_koblitz_stage26_result.py"
+      - "scripts/compose_koblitz_stage26_stage32.py"
+      - "scripts/test_koblitz_stage26_stage32_composition.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-terminal-evidence-successor-01-20260911.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-terminal-evidence-successor-01-20260911.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage32-wdsat-capacity-evidence-34649735091.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage32-wdsat-capacity-evidence-34649735091.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-26-affinity-artifacts-34632018379.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-26-affinity-workflow-34632018379.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-26-affinity-matrix-result-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-artifacts-34649735091.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-workflow-34649735091.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-26-affinity-matrix-stage32-corrected-result-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE26_32_PHASE_B_RESULTS.md"
       - ".github/workflows/koblitz-stage26-affinity-matrix.yml"
 
 permissions:
@@ -29,6 +45,14 @@ jobs:
           python3 scripts/koblitz_stage26_affinity_inputs.py verify \
             --packet "$RUNNER_TEMP/stage26-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
             > "$RUNNER_TEMP/stage26-packet-verification.json"
+          python3 scripts/test_koblitz_stage26_score.py -v
+          python3 scripts/verify_koblitz_stage26_result.py \
+            > "$RUNNER_TEMP/stage26-result-verification.json"
+          python3 scripts/run_koblitz_stage32_wdsat_correction.py self-test \
+            > "$RUNNER_TEMP/stage32-self-test.json"
+          python3 scripts/test_koblitz_stage26_stage32_composition.py -v
+          python3 scripts/compose_koblitz_stage26_stage32.py verify \
+            > "$RUNNER_TEMP/stage26-stage32-composition-verification.json"
 
   build-tools:
     if: ${{ github.event_name == 'workflow_dispatch' }}

@@ -4,7 +4,12 @@ on:
   pull_request:
     paths:
       - "scripts/run_koblitz_stage31_n31_unknown_scalar.py"
+      - "scripts/verify_koblitz_stage30_31_results.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE31_N31_UNKNOWN_SCALAR.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE30_31_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-n31-factor-search-result-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-31-n31-unknown-scalar-result-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-31-verification-20260911.json"
       - ".github/workflows/koblitz-stage31-n31-unknown-scalar.yml"
   workflow_dispatch:
 
@@ -17,7 +22,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/run_koblitz_stage31_n31_unknown_scalar.py self-test
+      - name: Validate controls and retained results
+        run: |
+          python3 scripts/run_koblitz_stage31_n31_unknown_scalar.py self-test
+          if test -f research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-31-verification-20260911.json; then
+            python3 scripts/verify_koblitz_stage30_31_results.py > "$RUNNER_TEMP/stage30-31-verification.json"
+            cmp "$RUNNER_TEMP/stage30-31-verification.json" research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-31-verification-20260911.json
+          fi
+
+  replay-retained-result:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Reverify relation logs, public solutions, and rho
+        run: |
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          cargo build --release --locked --bin ic
+          cp -R research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-31-n31-unknown-scalar-result-20260911/stage31-run/workflow "$RUNNER_TEMP/workflow"
+          target/release/ic --json workflow \
+            --params research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-31-n31-unknown-scalar-result-20260911/stage31-run/params.json \
+            --dir "$RUNNER_TEMP/workflow" \
+            > "$RUNNER_TEMP/replay.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          value = json.loads((Path(os.environ["RUNNER_TEMP"]) / "replay.json").read_text())
+          assert value["status"] == "complete"
+          assert value["solutions"]["count"] == value["solutions"]["verified"] == 5
+          assert all(row["expected"] == "not_constructed" and row["verified"] for row in value["solutions"]["items"])
+          baseline = next(row["vs_rho"] for row in value["stages"] if row["stage"] == "baseline")
+          assert baseline["claim_boundary"] == "public_hash_unknown_scalar"
+          assert baseline["ic"]["verified"] == baseline["rho"]["verified"] == 5
+          PY
 
   unknown-scalar:
     if: ${{ github.event_name == 'workflow_dispatch' }}

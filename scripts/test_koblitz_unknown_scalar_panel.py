@@ -188,18 +188,24 @@ def rho_result(item: dict, *, complete: bool = True) -> dict:
             "iterations": 2,
             "jump_table_rebuilds": 1,
             "restarts_attempted": 1,
+            "parallel_walks": 1,
         },
+        # One walk: 16 jumps plus one start is 17 setup points, two
+        # examined states with one advance between them, and a
+        # canonicalization for the start and for that advance.
         "charges": {
             "coefficient_draws": 34,
             "setup_scalar_multiplications": 34,
             "setup_group_additions": 17,
-            "walk_group_additions": 6,
-            "canonicalizations": 7,
-            "frobenius_maps": 49,
-            "negations_examined": 49,
-            "partition_hashes": 6,
+            "walk_group_additions": 1,
+            "canonicalizations": 2,
+            "frobenius_maps": 14,
+            "negations_examined": 14,
+            "partition_hashes": 1,
             "collisions": 1,
             "failed_collisions": 0,
+            "fruitless_cycles": 0,
+            "cycle_escape_doublings": 0,
         },
         "progress": [
             {"event": "rho_restart_started"},

@@ -1,0 +1,122 @@
+name: Koblitz Stage 33 n41 public unknown scalar
+
+on:
+  pull_request:
+    paths:
+      - "src/bin/ic/workflow.rs"
+      - "tests/ic_framework.rs"
+      - "scripts/run_koblitz_stage33_n41_unknown_scalar.py"
+      - "scripts/verify_koblitz_stage33_result.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-unknown-params.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE33_N41_PUBLIC_UNKNOWN_SCALAR.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE33_N41_PUBLIC_UNKNOWN_SCALAR_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-workflow-34653116265.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-artifacts-34653116265.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-result-20260911/**"
+      - ".github/workflows/koblitz-stage33-n41-public.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate the public-target boundary and workflow label
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage33_n41_unknown_scalar.py
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py self-test
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          RUSTFLAGS=-Awarnings cargo test --locked --test ic_framework \
+            workflow_runs_in_stages_and_resumes_without_redoing_work -- --exact
+          rm Cargo.lock
+          if test -f research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-33-n41-public-result-20260911/verification.json; then
+            python3 scripts/verify_koblitz_stage33_result.py verify \
+              > "$RUNNER_TEMP/stage33-retained-verification.json"
+          fi
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  replay-retained-result:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Reverify retained relations, logs, public targets, and rho
+        run: |
+          sha256sum --check research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz.sha256
+          mkdir "$RUNNER_TEMP/stage33-archive"
+          tar -xzf research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz \
+            -C "$RUNNER_TEMP/stage33-archive"
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          RUSTFLAGS=-Awarnings cargo build --release --locked --bin ic
+          cp -R "$RUNNER_TEMP/stage33-archive/koblitz-stage33-n41-public-34653116265/stage33-run/workflow" \
+            "$RUNNER_TEMP/stage33-replay"
+          target/release/ic --json workflow \
+            --params "$RUNNER_TEMP/stage33-archive/koblitz-stage33-n41-public-34653116265/stage33-run/params.json" \
+            --dir "$RUNNER_TEMP/stage33-replay" \
+            > "$RUNNER_TEMP/stage33-replay.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          value = json.loads((Path(os.environ["RUNNER_TEMP"]) / "stage33-replay.json").read_text())
+          assert value["status"] == "complete"
+          assert value["evidence_scope"] == "public_hash_unknown_scalar"
+          assert value["solutions"]["count"] == value["solutions"]["verified"] == 5
+          assert all(row["expected"] == "not_constructed" and row["verified"] for row in value["solutions"]["items"])
+          baseline = next(row["vs_rho"] for row in value["stages"] if row["stage"] == "baseline")
+          assert baseline["claim_boundary"] == "public_hash_unknown_scalar"
+          assert baseline["ic"]["verified"] == baseline["rho"]["verified"] == 5
+          PY
+          rm Cargo.lock
+          python3 scripts/verify_koblitz_stage33_result.py verify \
+            > "$RUNNER_TEMP/stage33-static-verification.json"
+
+  n41-public-unknown-scalar:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean dependency acquisition and four-core build
+        run: |
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage33-build" \
+            --jobs 4 \
+            --timeout 3000
+      - name: Run factor-base discovery, logs, five public targets, and rho on one CPU
+        run: |
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py run \
+            --build "$RUNNER_TEMP/stage33-build" \
+            --output "$RUNNER_TEMP/stage33-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage33_n41_unknown_scalar.py verify \
+            --build "$RUNNER_TEMP/stage33-build" \
+            --output "$RUNNER_TEMP/stage33-run" \
+            > "$RUNNER_TEMP/stage33-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage33-n41-public-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage33-build
+            ${{ runner.temp }}/stage33-run
+            ${{ runner.temp }}/stage33-verification.json

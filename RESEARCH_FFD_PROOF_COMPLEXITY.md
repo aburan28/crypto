@@ -507,6 +507,13 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
 
 ## 5. The attacker's corollary (so this is two-sided, not just defense)
 
+> **Now an active thread:** `RESEARCH_DEGREE_REDUCTION.md` builds out this
+> section — the lever taxonomy (factor-base structure / symmetrisation /
+> hybrid slicing / precomputed degree falls), a ledger R1–R5 with
+> pre-registered gates, and `src/cryptanalysis/degree_reduction.rs`.
+> Iteration 1 killed the hybrid-slicing lever and flagged that the `Δ_low`
+> screen below is calibrated only *within* a fixed system shape.
+
 The same theory hands the *attacker* a search target: **maximize the early
 Hilbert defect `Δ_low`**. It unifies every known speedup as "inject
 low-degree algebraic relations":

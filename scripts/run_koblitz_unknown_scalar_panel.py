@@ -971,18 +971,40 @@ def validate_rho(
     charges = result.get("charges", {})
     if report.get("jump_table_rebuilds") != report.get("restarts_attempted"):
         raise Stage23Error("rho restart and jump-table counts differ")
-    if charges.get("setup_scalar_multiplications") != 34 * report.get("jump_table_rebuilds", -1):
+    # The walk steps `parallel_walks` trajectories together and draws a
+    # starting point for each beside the jump table, so the setup ledger
+    # closes on (jumps + walks) points per rebuild.
+    walks = report.get("parallel_walks")
+    if not isinstance(walks, int) or walks < 1:
+        raise Stage23Error("rho report omits its parallel-walk count")
+    setup_points = (16 + walks) * report.get("jump_table_rebuilds", -1)
+    if charges.get("setup_scalar_multiplications") != 2 * setup_points:
         raise Stage23Error("rho setup scalar-multiplication ledger does not balance")
-    if charges.get("setup_group_additions") != 17 * report.get("jump_table_rebuilds", -1):
+    if charges.get("setup_group_additions") != setup_points:
         raise Stage23Error("rho setup addition ledger does not balance")
     if charges.get("coefficient_draws") != charges.get("setup_scalar_multiplications"):
         raise Stage23Error("rho coefficient-draw ledger does not balance")
-    if charges.get("walk_group_additions") != charges.get("partition_hashes"):
+    # One addition and one partition hash per advance; the additions
+    # beyond that are the doublings that escape a fruitless cycle.
+    if charges.get("walk_group_additions") != (
+        charges.get("partition_hashes", -1) + charges.get("cycle_escape_doublings", -1)
+    ):
         raise Stage23Error("rho walk-addition ledger does not balance")
-    if charges.get("walk_group_additions") != 3 * report.get("iterations", -1):
-        raise Stage23Error("rho Floyd-walk addition ledger does not balance")
+    if charges.get("cycle_escape_doublings", -1) < charges.get("fruitless_cycles", 0):
+        raise Stage23Error("rho cycle-escape ledger does not balance")
+    # Each charged iteration examines one state, which either advances
+    # (one hash) or escapes a cycle (at least one hash, at most the
+    # 64-state enumeration bound).
+    hashes = charges.get("partition_hashes", -1)
+    iterations = report.get("iterations", -1)
+    cycles = charges.get("fruitless_cycles", 0)
+    if not iterations - walks <= hashes <= iterations + 64 * cycles:
+        raise Stage23Error("rho walk ledger does not balance")
+    # One canonicalization per setup point, per advance and per escape.
     if charges.get("canonicalizations") != (
-        report.get("restarts_attempted", -1) + charges.get("walk_group_additions", -1)
+        walks * report.get("jump_table_rebuilds", -1)
+        + charges.get("partition_hashes", -1)
+        + charges.get("cycle_escape_doublings", -1)
     ):
         raise Stage23Error("rho canonicalization ledger does not balance")
     curve_n = 23 if actual_profile == "production" else 7
