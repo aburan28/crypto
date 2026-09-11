@@ -857,7 +857,112 @@ less than `κ` because the folded relations are dearer to verify
 is a larger share of a smaller total.  Rho folds too — `0.9 → 0.5` —
 so the hybrid-to-rho ratio is where it was, within rho's spread.
 
-### 10.4 Where this leaves κ
+### 10.4 Candidate 3 — the Semaev `S₃` pair oracle
+
+The one non-generic operation available on a prime-field curve is a
+summation polynomial.  `S₃(x₁, x₂, x₃) = 0` exactly when some
+`(x_i, ±y_i)` sum to `O`, so a residual `L` lies in `±F ± F` if and only
+if, for some factor-base `x_i`, the quadratic `S₃(x_L, x_i, X) = 0` has
+a root `X` that is itself a factor-base abscissa.  That is a membership
+test for the same `2B²`-element set as the signed-pair seed table of
+§10.2, done from `B` square roots per residual instead of from memory
+(`s3_oracle`; `s3_in_x3` is checked against the crate's `BigUint`
+implementation, and `s3_pair_oracle` against brute force over every
+signed pair).  Each quadratic solved is charged as one
+operation-equivalent — a square root is one field exponentiation,
+about the price of an affine addition — which is generous to the
+oracle.
+
+Measured on the tuned mutation walk (`--oracle s3`; `n ≈ 2^24, 2^28`,
+`B = 256`, three seeds each):
+
+| bits | κ walked | oracle hits | oracle share of budget | S | S tuned (no oracle) | S ratio |
+|---:|---:|---:|---:|---:|---:|---:|
+| 24 | 6.01 | ≈ 225 | 98.7% | 1,559.8 | 29.8 | 52× worse |
+| 28 | 12.37 | ≈ 100 | 99.5% | 3,183.0 | 19.7 | 162× worse |
+
+Two things are true at once.  The walked count does fall — to `0.77`
+of the floor at 28 bits and `0.38` at 24 bits, where nearly every
+residual decomposes — because each residual is now compared against
+`2B²` *virtual* points that were never generated.  And the cost of
+those comparisons is `B` operation-equivalents per residual against
+one for a table lookup, so the total work is two orders of magnitude
+above the plain walk and three above rho.  The oracle checks `2B`
+potential coincidences per operation; the residual table, once it
+holds `T` entries, checks `T` per operation, and `T ≈ 16√n ≈ 230,000`
+at 28 bits against `2B = 512`.  The seed table of §10.2 is the same
+oracle with the `2B²` checks paid once instead of per residual, and it
+already showed that even at that price the total count does not move.
+
+The scoreboard therefore withholds the "count invariant beaten" flag
+on oracle runs and scores them on `S`: their walked `κ` is not a count
+of points paid for, and the bound of §10.1 is a bound on points.  For
+an `S₃`-style oracle to beat the walk it would have to check more than
+`T` coincidences per operation, i.e. decide membership in a set larger
+than the residual table at unit cost — which is what a summation
+polynomial does *not* do: it trades memory for square roots, one per
+factor-base element.
+
+### 10.5 Candidate 4 — triple decompositions (`S₄`, and its meet-in-the-middle form)
+
+Three summands reach a far larger set: signed triples with distinct
+indices number `8·C(B,3) ≈ 22·10⁶` at `B = 256`, about a tenth of `n`
+at 28 bits, so roughly one residual in ten decomposes outright and no
+collision is needed for it.  Two oracles decide membership:
+
+- **Algebraic `S₄`** (`s4_oracle`): `S₄ = Res(S₃, S₃)`, evaluated as
+  `S₃` applied twice — for each `i` the roots `Y = x(L ∓ P_i)`, then for
+  each `j > i` the roots `X` of `S₃(Y, x_j, X)`, looked up in the base.
+  `B²` quadratics per residual, no table at all.  Checked against brute
+  force over every signed distinct-index triple.
+- **Meet in the middle** (`mitm_neighbours` with `seed_pairs`): the
+  `2B` neighbours `L ∓ P_k` are computed (one group operation each) and
+  looked up in the table that already holds every `±P_i ± P_j`; a hit
+  on a seed is a triple, a neighbour in `±F` is a pair, a hit on a
+  walked residual is an ordinary collision with one extra term.  `2B`
+  operations per residual plus the `B²` seed table.
+
+Measured on the tuned mutation walk (`--oracle s4`, `--oracle mitm3`;
+`n ≈ 2^24, 2^28`, `B = 256`, three seeds each):
+
+| oracle | bits | κ walked | decompositions found | oracle share | S | S tuned | S ratio |
+|:--|---:|---:|---:|---:|---:|---:|---:|
+| meet in the middle | 24 | 0.02 | ≈ 420 | 40.5% (+59.4% seed table) | 48.2 | 29.8 | 1.6× worse |
+| meet in the middle | 28 | 0.15 | ≈ 705 | 92.1% | 90.1 | 19.7 | 4.6× worse |
+| algebraic `S₄` | 24 | 0.04 | ≈ 251 | 99.4% | 2,504.8 | 29.8 | 84× worse |
+| algebraic `S₄` | 28 | 0.17 | ≈ 262 | 100.0% | 11,153.4 | 19.7 | 566× worse |
+
+The meet-in-the-middle oracle is the strongest count reduction in this
+note by a wide margin — at 28 bits a run walks `≈ 2,000` residuals,
+`0.15·√n`, and about one in three of them decomposes through a
+neighbour (`≈ 700` triples for `253` independent relations; the rest
+are dependent, as expected once the rank nears `B + 1`) — and it is
+still `4.6×` the cost of the plain walk, `60×` rho's.  The reason is
+the same ledger as before: `512` neighbour operations per residual
+against one.  Per operation it checks `2B² ≈ 131,000` virtual
+coincidences (each neighbour against the whole seed table), which is
+close to the `T ≈ 230,000` a walked table lookup checks at these sizes
+— so the two are within a small factor of each other, and the walk
+wins because its checks come with a stored point that keeps paying.
+As `n` grows, `T ∝ √n` outpaces `2B²` unless `B` grows like `n^{1/3}`,
+at which point the seed table's `B²` cost is itself `n^{2/3}`: the
+whole route is `Θ(n^{2/3})`, the textbook figure for index calculus
+with 3-decompositions and a linear-algebra-sized base, and the
+measured `S` of `48 → 90` from 24 to 28 bits (`1.9×` for `16×` in `n`,
+i.e. `n^{0.23}`) is on its way there.
+
+The algebraic `S₄` is the same test with the seed table replaced by a
+square root per pair `(i, j)`: `B²` operation-equivalents per residual
+instead of `2B`, i.e. `128×` dearer per residual at `B = 256`, with the
+only advantage that nothing is stored.  Measured, it is the lowest walked count in this note — `κ = 0.17` at
+28 bits, `≈ 2,400` residuals of which `262` decomposed, one in nine as
+predicted — and the highest cost: `S = 11,153`, `566×` the tuned walk
+and `9,000×` rho, with the oracle at `100.0%` of the budget.  The two
+triple oracles decide the same membership at `2B` versus `B²`
+operations per residual, and their `S` differ by that ratio (`90`
+against `11,153` is `124×`, against `B/2 = 128`).
+
+### 10.6 Where this leaves κ
 
 | what was tried | κ (walked) | κ_total | κ_total / floor | verdict |
 |:--|---:|---:|---:|:--|
@@ -865,6 +970,9 @@ so the hybrid-to-rho ratio is where it was, within rho's spread.
 | + signed-pair seeding | 12.15 | 16.76 | 1.05 | count relabelled, not reduced |
 | `j = 0` control (negation only) | 17.09 | 17.09 | 1.07 | reference on the structured curve |
 | `j = 0` with 6-fold | 9.47 | 9.47 | 1.02 | κ ÷ 1.8, floor ÷ 1.73; rho ÷ 1.8 as well |
+| `S₃` pair oracle | 12.37 | (virtual) | — | walked count relabelled as `B` square roots per residual; `S` 162× worse |
+| triple oracle, meet in the middle | 0.15 | (virtual) | — | one residual in three decomposes; `2B` operations each; `S` 4.6× worse, `Θ(n^{2/3})` |
+| triple oracle, algebraic `S₄` | 0.17 | (virtual) | — | `B²` square roots per residual; `S` 566× worse |
 
 Three statements now stand on measurement rather than argument:
 
@@ -886,9 +994,126 @@ Three statements now stand on measurement rather than argument:
    fold-aware floor — has to make two *distinct* formal combinations
    coincide with probability above `γ/n`, which is to say it has to
    compute something about the coordinates that the group law does
-   not.  The summation-polynomial oracles elsewhere in this repository
-   are the only candidates of that kind on prime fields, and at these
-   sizes they cost more per residual than they save in count (§6).
+   not.  The summation-polynomial oracles are the only candidates of
+   that kind on prime fields; §10.4 and §10.5 measure `S₃`, `S₄` and the
+   meet-in-the-middle triple oracle and find every one of them behind
+   the walk in operations — the count they save is bought with
+   per-residual work that grows with the base, and the best of them
+   scales as `n^{2/3}`.
+
+## 11. Gaudry's setting: a subspace factor base on `E(F_{p³})`
+
+§10.4–10.5 measured the summation-polynomial oracles where they are
+weakest.  On a prime field there is no proper additive subspace, so the
+factor base `{x < B}` has no algebraic structure and `S₃` can only be
+used one base element at a time.  Gaudry's index calculus (2009) is the
+setting where the polynomials earn their keep: `E` over `F_{q^k}`, the
+base `F = {P : x(P) ∈ F_q}` — an `F_q`-subspace of abscissae — and the
+Weil restriction of `S_{m+1}(x_1, …, x_m, x_R) = 0`, with the `x_i`
+unknown in `F_q`, a system of `k` polynomial equations over `F_q` in
+`m` unknowns whose solving cost does not depend on `|F|`.  For fixed
+`k ≥ 3` this beats rho asymptotically, with constants that grow fast
+in `k`.
+
+### 11.1 What was built
+
+`cryptanalysis::gaudry_cubic`, `k = m = 3`:
+
+- `F_{p³} = F_p[t]/(t³ − c)` with an `F_p`-multiplication counter;
+  random curves `y² = x³ + ax + b`, `a, b ∈ F_{p³}`, of prime order
+  `n ≈ p³` (BSGS over the Hasse interval); the subspace base of the
+  `≈ p/2` points with `x ∈ F_p`.
+- The **Weil-restricted `S₃` pair test**: `S₃(x_Y, X₁, X₂) = 0` with
+  `X₁, X₂ ∈ F_p` unknown is three quadratics over `F_p`; `X₂` is
+  eliminated by the explicit `4×4` Sylvester resultant of the first
+  two, leaving a degree-`≤ 8` polynomial in `X₁` whose `F_p`-roots are
+  found by Cantor–Zassenhaus, completed to `X₂` by the quadratic
+  formula, checked against the third component and the base, and
+  signed by group arithmetic.  Checked against brute force over every
+  signed pair.  Cost `O(log p)` field multiplications, independent of
+  the base size — where the prime-field `S₃` oracle needed one square
+  root per base element.
+- The **triple oracle** in meet-in-the-middle form: for every `P_k`
+  in the base, `Y = R ∓ P_k` (one group operation) and the pair test on
+  `Y`; distinct-index triples reported once.  Checked on constructed
+  triples and verified by arithmetic on every decomposition.
+- Relation collection by full decomposition of random `R = aG + bQ`
+  until `d` is determined (the same `RelationSystem`), and **rho on the
+  same group** for the reference.  Accounting: group operations are
+  affine additions in `E(F_{p³})`; oracle work is counted in `F_p`
+  multiplications and converted at the measured cost of one affine
+  addition on that field (`≈ 63`), so `S = total/√n` is comparable
+  across the whole note.
+
+What is *not* built is Gaudry's `O(1)` solve of the three-unknown `S₄`
+system (symmetrised variables and a Gröbner basis or resultant
+cascade), which would remove the remaining factor `2|F|` from the
+per-residual cost.  The report separates that factor so the effect of
+adding it can be read off.
+
+### 11.2 Measured
+
+`cargo run --release --example gaudry_cubic_bench -- --protocol`, two
+seeds per size, `p ≡ 1 (mod 3)`:
+
+| `p` | `n` | base | residuals | decomposition rate | pair tests / residual | `F_p` mults / pair test | ops / residual | total ops | `S` | rho steps | rho `S` | `S` / rho `S` | wall |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | 132 | 815 | 0.152 | 265 | 1,512 | 6,694 | 5.5·10⁶ | 1,224 | 2,952 | 1.16 | 1,057× | 6 s |
+| 523 | 2^27.1 | 248 | 1,534 | 0.152 | 496 | 1,557 | 12,835 | 19.6·10⁶ | 1,640 | 11,681 | 1.18 | 1,385× | 20 s |
+| 1039 | 2^30.1 | 520 | 2,928 | 0.166 | 1,039 | 1,811 | 30,989 | 90.7·10⁶ | 2,707 | 43,086 | 1.37 | 1,978× | 91 s |
+| 2083 | 2^33.1 | 1,068 | 5,555 | 0.180 | 2,136 | 1,856 | 65,170 | 361.7·10⁶ | 3,805 | 158,426 | 1.70 | 2,240× | 361 s |
+
+Every run recovered the planted `d`, for both methods.  Least-squares
+exponents over the four sizes: total operations `∝ n^{0.69}`
+(prediction `n^{2/3}`), operations per residual `∝ n^{0.38}`
+(`2|F| ∝ n^{1/3}` times the slow growth of the pair test, `1,512 →
+1,856` `F_p` multiplications as `log p` grows), residuals `∝ n^{0.31}`
+(`≈ |F|/rate`).
+
+### 11.3 Reading it
+
+The pieces of Gaudry's argument are all visible, and so is what is
+missing:
+
+- **The subspace makes the pair test cheap.**  `≈ 1,500–1,900` `F_p`
+  multiplications, about `25–30` affine additions, to decide
+  `Y ∈ ±F ± F` for a base of `130–1,070` points — the prime-field
+  `S₃` oracle paid one square root *per base element* for the same
+  decision (§10.4).  That is the `O(1)`-versus-`O(|F|)` gap the Weil
+  restriction buys, measured.
+- **The decomposition rate is what the count predicts.**
+  `(2|F|)³/6n ≈ 0.15–0.18` of residuals are signed distinct-index
+  triples, so `≈ 6` residuals per relation and `≈ 6|F|` residuals in
+  all: `815 → 5,555` as `|F|` goes `132 → 1,068`.  The relation count
+  is `∝ n^{1/3}`, not `∝ √n` — the count factor `κ` is finally
+  *sub-birthday*: `815/√n = 0.20` at 24 bits and `5,555/√n = 0.06` at
+  33 bits, falling as `n^{-1/6}`.
+- **The cost is still `Θ(n^{2/3})`, because the triple test is still
+  a loop over the base.**  Each residual runs `2|F|` pair tests, so
+  operations per residual grow like `n^{1/3}` and the total like
+  `n^{2/3}`; measured `n^{0.69}`.  Against rho's `n^{1/2}` the ratio
+  widens with `n`: `1,057×` at 24 bits, `2,240×` at 33 bits.
+- **What Gaudry's `O(1)` solve would change.**  Replacing the
+  `2|F|` pair tests by one solve of the three-unknown system costs
+  some constant `C₃` per residual instead of `2|F| · 1,800` `F_p`
+  multiplications (`4.8·10⁵` at `p = 271`, `4.0·10⁶` at `p = 2083`);
+  the total becomes `≈ 6|F| · C₃ ∝ n^{1/3}`, and the crossover with
+  rho sits where `6|F| C₃ < 1.25 √n · 63`, i.e. `C₃ < 13 · n^{1/6}`
+  `F_p` multiplications — `C₃ < 600` at 33 bits, `C₃ < 5,000` at 50
+  bits, `C₃ < 10⁶` at 100 bits.  A resultant cascade on the symmetrised
+  system is in the `10⁵–10⁶` range by the degree count of §10; a tuned
+  Gröbner solve is what the literature uses.  The linear algebra
+  (`|F| ∝ n^{1/3}` unknowns, `n^{2/3}` dense, `n^{1/3+ε}` sparse with
+  double large primes) then decides the exponent, which is how
+  Gaudry's `Õ(q^{2−2/k})` arises.
+
+So the subspace base does what the prime-field base could not — it
+makes the count sub-birthday — and at these sizes it does so at three
+orders of magnitude more work than rho, with a scaling exponent that
+only improves once the last loop over the base is replaced by an
+algebraic solve.  That solve is the next thing to build; its constant
+`C₃` is the number that decides whether the method beats rho at any
+size that fits in this module.
 
 ## References
 

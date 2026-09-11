@@ -19,7 +19,9 @@
 //! cargo run --release --example residual_walk_bench -- --baseline --json experiments/20_residual_walk_baseline.json
 //! ```
 //!
-//! `--seeded` and `--structure` are the round-3 protocols aimed at the
+//! `--oracle s3|s4|mitm3` runs the decomposition oracles (Semaev `S₃`
+//! pairs, algebraic `S₄` triples, seed table plus neighbour lookups) in
+//! place of the seed table (`--s3`, `--s4`, `--mitm3` for single runs).  `--seeded` and `--structure` are the round-3 protocols aimed at the
 //! count factor κ (signed-pair seeding; `j = 0` automorphism folding);
 //! `--j0`, `--aut` and `--seed-pairs` expose the same knobs for single
 //! runs.  `--baseline --tuned` runs the same protocol with the generic levers on
@@ -130,6 +132,42 @@ fn setup_j0(bits: u32, fb: usize, seed: u64) -> (Instance, FactorBase) {
 /// base of 256 unknowns; B, C1 and R with every generic lever, once with
 /// negation folding only (control) and once with the 6-fold automorphism
 /// folding.
+/// Oracle protocols on the baseline instances, mutation walk with every
+/// generic lever: `s3` (Semaev `S₃` pair oracle), `s4` (algebraic
+/// triple oracle, `S₃` twice), `mitm3` (signed-pair seed table plus the
+/// `2B` neighbour lookups).
+fn oracle_protocol(kind: &str) -> Vec<StrategyReport> {
+    let mut out = Vec::new();
+    header();
+    for bits in [24u32, 28] {
+        for seed in 1..=3u64 {
+            let (inst, fb) = setup(bits, 256, seed);
+            println!(
+                "-- n = {} (2^{:.1}), B = {}, seed {}, oracle {kind}",
+                inst.curve.n,
+                (inst.curve.n as f64).log2(),
+                fb.len(),
+                seed
+            );
+            let opts = WalkOptions {
+                k: 3,
+                max_ops: 1 << 40,
+                seed,
+                negation_map: true,
+                diff_table: true,
+                continue_after_collision: true,
+                s3_oracle: kind == "s3",
+                s4_oracle: kind == "s4",
+                seed_pairs: kind == "mitm3",
+                mitm_neighbours: kind == "mitm3",
+                ..WalkOptions::default()
+            };
+            run_all(&inst, &fb, &[Strategy::LocalMutationWalk], &opts, &mut out);
+        }
+    }
+    out
+}
+
 fn kappa_protocol(structure: bool) -> Vec<StrategyReport> {
     let mut out = Vec::new();
     header();
@@ -416,6 +454,10 @@ fn main() {
     let mut j0 = false;
     let mut aut = false;
     let mut seed_pairs = false;
+    let mut s3 = false;
+    let mut s4 = false;
+    let mut mitm3 = false;
+    let mut do_oracle: Option<String> = None;
     let mut negation = false;
     let mut diff_table = false;
     let mut segment = 0u64;
@@ -460,14 +502,18 @@ fn main() {
             "--j0" => j0 = true,
             "--aut" => aut = true,
             "--seed-pairs" => seed_pairs = true,
+            "--s3" => s3 = true,
+            "--s4" => s4 = true,
+            "--mitm3" => mitm3 = true,
+            "--oracle" => do_oracle = Some(value(&mut i, &args)),
             "--seeded" => do_seeded = true,
             "--structure" => do_structure = true,
             "--quick" => quick = true,
             "--help" | "-h" => {
                 println!(
                     "usage: residual_walk_bench [--bits N] [--fb B] [--k K] [--trials T] [--seed S] \
-                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--continue] [--j0] [--aut] [--seed-pairs] [--json FILE] \
-                     [--seeded] [--structure] \
+                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--continue] [--j0] [--aut] [--seed-pairs] [--s3] [--s4] [--mitm3] [--json FILE] \
+                     [--seeded] [--structure] [--oracle s3|s4|mitm3] \
                      [--panel [--quick]] [--baseline [--tuned]]"
                 );
                 return;
@@ -478,6 +524,19 @@ fn main() {
             }
         }
         i += 1;
+    }
+
+    if let Some(kind) = do_oracle {
+        if !["s3", "s4", "mitm3"].contains(&kind.as_str()) {
+            eprintln!("--oracle takes s3, s4 or mitm3");
+            std::process::exit(2);
+        }
+        let reports = oracle_protocol(&kind);
+        if let Some(path) = json {
+            fs::write(&path, serde_json::to_string_pretty(&reports).unwrap()).expect("write json");
+            println!("\nwrote {path}");
+        }
+        return;
     }
 
     if do_seeded || do_structure {
@@ -534,6 +593,9 @@ fn main() {
             continue_after_collision: continue_walk,
             use_automorphism: aut,
             seed_pairs,
+            s3_oracle: s3,
+            s4_oracle: s4,
+            mitm_neighbours: mitm3,
             ..WalkOptions::default()
         };
         for &s in &strategies {
