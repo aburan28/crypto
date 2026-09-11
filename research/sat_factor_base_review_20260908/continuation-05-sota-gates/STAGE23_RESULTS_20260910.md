@@ -152,9 +152,34 @@ rows, resources, ratios, and claim flags without executing bundled code.
 
 The bundle passed ten adversarial tests and a moved, recursively read-only
 verification. It closes a custody and relocation gap, not the independent
-scientific replay gate. Independent target, finite-field, factor-base,
-relation-witness, curve-validity, IC point, and complete rho-walk replay remain
-pending. SAT refutation proofs and conflict provenance are not present.
+scientific replay gate. The bundle itself marks target, finite-field,
+factor-base, relation-witness, curve-validity, IC point, and complete rho-walk
+replay as pending. Stage 24 addresses the retained mathematical witnesses
+additively; SAT proof/conflict provenance and the hidden rho trajectory remain
+unavailable.
+
+## Additive retained-mathematics replay
+
+Stage 24 adds two separately written, project-internal mathematical replays.
+They do not execute the producer, retained binaries, bundled verifier, or
+producer verification Booleans. The committed replay uses an independently
+locked official `blake3` 1.8.7 helper and a separate implementation of the
+binary field, Koblitz group law, algebraic factor base, signed-Frobenius
+projection, relation construction, modular elimination, and point checks.
+
+Across 1,251 stable check units it independently reproduced the field and
+curve, both public discovery panels, all five target streams and identities,
+the 4,281-point factor base and 93 projected columns, all 437 relation-attempt
+targets, all 252 admitted decompositions and relation rows, all five modular
+ranks and target scalars, and all ten IC/rho `[d]G = Q` equations. Five focused
+tamper controls also passed.
+
+The narrow additive status is
+`retained_mathematical_witness_replay_completed: true`. The broader
+`independent_mathematical_payload_replay_completed` flag remains false because
+the archive does not retain SAT proof/conflict trajectories or rho jump tables,
+per-step states, partitions, and collision coefficients. This is local
+project-internal replay, so the external-reproduction flag also remains false.
 
 ## Gate status
 

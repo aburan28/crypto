@@ -12,6 +12,8 @@ on:
       - "scripts/package_koblitz_stage23_terminal_evidence.py"
       - "scripts/test_koblitz_stage23_terminal_evidence.py"
       - "scripts/verify_koblitz_stage23_terminal_evidence.py"
+      - "scripts/koblitz_stage24_math_replay.py"
+      - "scripts/test_koblitz_stage24_math_replay.py"
       - "scripts/run_koblitz_relation_yield_bridge.py"
       - "scripts/process_meter.py"
       - "src/cryptanalysis/koblitz_index_calculus.rs"
@@ -23,9 +25,11 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE23_UNKNOWN_SCALAR.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE23_RESULTS_20260910.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE23_TERMINAL_EVIDENCE.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE24_INDEPENDENT_MATH_REPLAY.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-23-terminal-evidence-protocol.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-23-unknown-scalar-production-successor-03-terminal-evidence-20260910.tar.gz"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-23-unknown-scalar-production-successor-03-terminal-evidence-20260910.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-24-independent-math-replay-20260910/**"
       - ".github/workflows/koblitz-unknown-scalar-panel.yml"
   workflow_dispatch:
 
@@ -111,6 +115,28 @@ jobs:
           PY
       - name: Test arbitrary-target Rust producer
         run: cargo test --locked --example koblitz_unknown_scalar_panel
+      - name: Replay retained production mathematics independently
+        run: |
+          if python3 -O -B scripts/koblitz_stage24_math_replay.py --help; then
+            echo "optimized Python unexpectedly enabled a PASS-capable replay"
+            exit 1
+          fi
+          cp -R \
+            research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-24-independent-math-replay-20260910/blake3-helper \
+            "$RUNNER_TEMP/stage24-blake3-helper"
+          cargo build --offline --locked --release \
+            --manifest-path "$RUNNER_TEMP/stage24-blake3-helper/Cargo.toml"
+          bundle="$RUNNER_TEMP/stage23-terminal-evidence/koblitz-stage23-unknown-scalar-production-successor-03-terminal-evidence-20260910"
+          helper="$RUNNER_TEMP/stage24-blake3-helper/target/release/stage24-independent-blake3"
+          python3 -B scripts/koblitz_stage24_math_replay.py \
+            --bundle "$bundle" \
+            --blake3-helper "$helper" \
+            > "$RUNNER_TEMP/stage24-replay.json"
+          python3 -B scripts/test_koblitz_stage24_math_replay.py \
+            --bundle "$bundle" \
+            --blake3-helper "$helper" \
+            --expected-result \
+              research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-24-independent-math-replay-20260910/replay-result.json
       - name: Run and verify full outer-metered smoke
         run: |
           mkdir -p "$RUNNER_TEMP/stage23-run-outer"
