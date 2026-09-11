@@ -2461,27 +2461,54 @@ pub fn run_gaudry_opts(
                 if opts.sparse_la {
                     full_rels.push(full);
                     rep.relations_independent = full_rels.len() as u64;
-                    if full_rels.len() >= next_attempt {
+                    // Unknowns that appear in no relation yet cannot be
+                    // determined and would make every square selection
+                    // singular: solve on the active columns only.
+                    let mut active = vec![false; unknowns];
+                    for r in &full_rels {
+                        for &(c, _) in &r.cols {
+                            active[c] = true;
+                        }
+                    }
+                    let n_active = active.iter().filter(|&&a| a).count();
+                    if active[small] && full_rels.len() >= n_active.max(next_attempt) {
                         la_attempts += 1;
-                        let sel: Vec<SparseRel> = if full_rels.len() == unknowns {
-                            full_rels.clone()
-                        } else {
-                            let mut idx: Vec<usize> = (0..full_rels.len()).collect();
+                        let mut map = vec![usize::MAX; unknowns];
+                        let mut k = 0;
+                        for c in 0..unknowns {
+                            if active[c] {
+                                map[c] = k;
+                                k += 1;
+                            }
+                        }
+                        let mut idx: Vec<usize> = (0..full_rels.len()).collect();
+                        if full_rels.len() > n_active {
                             for i in (1..idx.len()).rev() {
                                 let j = rng.gen_range(0..=i);
                                 idx.swap(i, j);
                             }
-                            idx[..unknowns]
-                                .iter()
-                                .map(|&i| full_rels[i].clone())
-                                .collect()
-                        };
+                        }
+                        let sel: Vec<SparseRel> = idx[..n_active]
+                            .iter()
+                            .map(|&i| SparseRel {
+                                cols: full_rels[i]
+                                    .cols
+                                    .iter()
+                                    .map(|&(c, v)| (map[c], v))
+                                    .collect(),
+                                rhs: full_rels[i].rhs,
+                            })
+                            .collect();
                         la_rows_used = sel.len();
-                        if let Some(x) = wiedemann_u64(&sel, unknowns, n, &mut rng, &mut la_ops) {
+                        rep.la_unknowns = n_active;
+                        let x = wiedemann_u64(&sel, n_active, n, &mut rng, &mut la_ops);
+                        // Accept only a logarithm the group confirms.
+                        let dd = x.map(|x| x[map[small]]);
+                        if dd.is_some_and(|dd| curve.mul(&curve.g, dd) == inst.q) {
                             rep.solved = true;
-                            rep.correct = Some(x[small] == inst.d);
+                            rep.correct = Some(dd == Some(inst.d));
                         } else {
-                            next_attempt = full_rels.len() + (unknowns / 20).max(1);
+                            next_attempt = full_rels.len() + (n_active / 20).max(1);
                         }
                     }
                 } else {
