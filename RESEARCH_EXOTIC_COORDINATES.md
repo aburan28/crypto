@@ -1380,6 +1380,12 @@ line on another curve, and the engine says which is which.
   6-torsion has a 2-isogenous neighbour where the same sign frame
   applies and may be cheaper), but not new gains.
 
+At `m = 3` the two isogeny lines give the `x`-line's own `m = 3`
+relation again — 93 terms, degrees `[4, 4, 4, 1, 3, 0, 1]` in
+`(W₁..W₄, Πu, e₂[Σu], e₄[Σu])`, total degree 6, exactly the control of
+§13.2 — with `|Γ| = 128 = 16 × 8` and `432 = 54 × 8`.  The
+classification holds at every `m` measured.
+
 What the four have in common is the recipe: pick a point map `g` that
 does not act on the `x`-line, find a quotient line on which it does
 (`descended_map` fits and verifies the Möbius map; `linearised_chart`
