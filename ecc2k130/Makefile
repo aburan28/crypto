@@ -12,6 +12,7 @@
 #   THREADS    CUDA block size (default 128)
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
+#   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
@@ -36,6 +37,7 @@ PACKED_UNROLL_INV ?= 0
 PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
+PACKED_ADD_COMBINE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -67,7 +69,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_BY_VALUE=$(PACKED_BY_VALUE) -DECC_PACKED_PERM_SIGMA=$(PACKED_PERM_SIGMA) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
-       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE)
+       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE)
 
 all: cpu
 
@@ -171,8 +173,10 @@ test-packed-network:
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
 	./build/test-packed-network
 	./build/test-packed-network-direct
+	./build/test-packed-network-add
 
 test-packed-cuda:
 	mkdir -p build
@@ -262,7 +266,7 @@ clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
-	rm -f build/test-packed-network build/test-packed-network-direct
+	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-add
 	rm -f build/test-packed-cuda
 	rm -f build/test-timing
 
