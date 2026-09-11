@@ -216,7 +216,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     started = time.monotonic()
     sampler = TreeSampler()
     sampler.__enter__()
-    packet_check = packet_tool.verify_packet(args.packet)
+    packet_check = packet_tool.verify(args.packet)
     manifest = read_json(args.packet / "packet-manifest.json")
     if packet_check["packet_inventory_sha256"] != args.packet_inventory_sha256:
         raise Stage26Error("packet inventory differs from the required workflow identity")
