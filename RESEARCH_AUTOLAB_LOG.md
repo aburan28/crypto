@@ -7357,3 +7357,75 @@ companion: `F_p`-valuedness on the base before descent.
 
 (see PR — `Gf::extension`, `coordinate_descent`, `klein_descent`
 example, research note §12)
+
+---
+
+## 2026-09-11 (autolab run, sixth session on exotic coordinates)
+
+### Task picked
+
+§10.5's last open item: higher-order seeds — rational 3-torsion on
+`j = 0` curves — plus the `m = 3` rows §12.4 still owed.
+
+### Work done
+
+- `Chart`: a Möbius frame on the `x`- or the `y`-line, threaded through
+  the quotient and descent engines (`Mobius` still converts to an
+  `x`-chart, so nothing upstream changed).  Needed because a 3-torsion
+  translation is not Möbius on `x` but is on `y` when it commutes with
+  the order-3 automorphism (`j = 0`, `q ≡ 1 mod 3`).
+- Boxed interpolation (`interpolate_quotient_boxed`,
+  `interpolate_and_descend_boxed`): per-variable degree caps for point
+  and tuple invariants on top of the total degree, so that `m = 3`
+  relations (Semaev's `S₄`: total degree 12, degree 4 per point) fit
+  under the 3000-monomial cap.  `S₄` is now recovered at `m = 3` with
+  191 terms, as it should be.
+- `compare_arms` / `standard_arms`: arbitrary arms on a chosen base
+  chart; the Klein example runs its arms one at a time with progress.
+- `examples/three_torsion.rs`: curves A (`b = 2`) and B (`b = 1`) over
+  `F₁₀₀₉`, eleven quotient runs on both lines at `m = 2`, the `v`-line
+  runs at `m = 3`, and the descent over `F₃₁³` on two bases.
+- Unit test: the `x`-line quotient by `⟨τ₃, −1⟩` is Vélu's coordinate
+  `x + 4b/x²`; the chart `v = (y − s)/(y + s)`, `s = √b√−3`, has
+  `τ₃ : v ↦ ω^{±1}v` and `−1 : v ↦ 1/v` on every point.
+
+### Findings
+
+**The 3-torsion frame exists, on the `y`-line, and does what the
+2-torsion frame did one degree up.**  Summation relations have degree 2
+per variable in `x`, 3 in `y`, and 1 in `V = v³ + v⁻³`:
+
+    (V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³,   P = Πv + 1/Πv,
+
+equivalently `Π(v_i³ − 1) = (Πv_i − 1)³` — multilinear in the point
+invariants, all the remaining degree in one tuple unknown.  Collapse
+`|Γ| = 54` exactly at `m = 2` (18 tuples of translations summing to zero
+× 6 automorphisms), diagnosed as such by the engine when `ω` is left
+out of `G` (collapse 3× above `|Γ|`).
+
+**On the `x`-line the 3-torsion group is Vélu's isogeny and nothing
+else** — the §3 lemma, now measured: `e₂`, `e₃` of the orbit are
+constant, `e₁ = (x³ + 4b)/x²`.
+
+**The accounting of §11 holds unchanged**: `V` identifies a point up to
+`⟨T, ω, −1⟩`, all of which the projection kills or turns into a known
+scalar, so one solve is one row.  The gain is in the solve.
+
+**In Gaudry's setting the frame does not descend on Gaudry's base, and
+defines a base of its own.**  On `{x ∈ F_p}` only Semaev is
+`F_p`-valued; on `{v ∈ F_p}` only the `v`-line systems are, and there
+the 3-torsion system is the smallest one in this note (3 unknowns, 3
+equations, total degree 2, 6 terms).  `{v ∈ F_p}` is non-empty in the
+useful sense only when `−b` is a cube (`E[2]` rational) — the first
+draft got a two-point base.
+
+TBD-LOG-M3
+
+### Next step proposal
+
+TBD-LOG-NEXT
+
+### Commits made
+
+(see PR — `Chart`, boxed interpolation, `compare_arms`,
+`three_torsion` example, research note §13)
