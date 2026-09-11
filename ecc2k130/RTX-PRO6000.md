@@ -24,7 +24,9 @@ polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
 The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md),
 [direct-order polynomial reduction](DIRECT-REDUCTION.md), and the
-[generated polynomial-product schedule](GENERATED-PRODUCT.md). It groups
+[generated polynomial-product schedule](GENERATED-PRODUCT.md) as its software
+fallback. [Native carryless multiplication](NATIVE-CARRYLESS.md) takes
+precedence in the current preset. It groups
 packed state into [256-worker tiles](TILED-STATE.md), preserving coalesced
 warp accesses while simplifying field addressing.
 These settings retain the existing iteration, DP report and packed-checkpoint
@@ -41,7 +43,18 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Tiled-state preset comparison
+## Native carryless preset comparison
+
+The [controlled native comparison](benchmarks/clmad/comparison.json) measured
+**8.703518 B complete scalar updates/s**, versus **7.110440 B/s** for the
+software control (+22.4048%). DP34 collection measured **8.534325 B/s** versus
+**7.015447 B/s** (+21.6505%). All three pairs per workload favored the native
+implementation. The six collection multisets matched, with 5,149 records
+and zero drops. Every timed sample completed 201,863,462,912 scalar updates.
+See [NATIVE-CARRYLESS.md](NATIVE-CARRYLESS.md) for the ranges, correctness
+checks, compiler requirements and public-code binding.
+
+## Historical tiled-state preset comparison
 
 The [controlled tiled-state comparison](benchmarks/tiled-state/comparison.json)
 keeps generated-product arithmetic, CUDA 13.3.73, B32/T256/minBlocks2 and

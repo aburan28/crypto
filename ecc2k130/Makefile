@@ -199,6 +199,12 @@ test-generated-product:
 	python3 codegen/genpackedproduct.py --check
 	python3 -m unittest discover -s codegen -p testgeneratedproduct.py
 
+test-clmad:
+	python3 -m unittest discover -s codegen -p testclmad.py
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
+	./build/test-packed-clmad-host
+
 test-packed-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedcuda.cu -o build/test-packed-cuda
@@ -209,7 +215,7 @@ test-timing:
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
 	./build/test-timing
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-timing check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -272,7 +278,7 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
                  ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
                  ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
-                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_STATE_TILE=256
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -289,7 +295,8 @@ clean:
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
+	rm -f build/test-packed-clmad-host
 	rm -f build/test-packed-cuda
 	rm -f build/test-timing
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-packed-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

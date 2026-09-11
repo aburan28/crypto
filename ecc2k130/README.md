@@ -1,7 +1,8 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed CUDA backend](PACKED.md) has measured above
-6 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. The
+The optional [packed CUDA backend](PACKED.md) has measured **8.703518 billion
+complete scalar walk iterations/s** on RTX PRO 6000 Blackwell using
+[native carryless multiplication](NATIVE-CARRYLESS.md). The
 [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
 with the benchmark/validation entry points; its reports retain the existing
@@ -9,9 +10,9 @@ format, while checkpoints have a separate backend version.
 
 For the validated RTX PRO 6000 configuration, use `make bench-rtx-pro6000`
 or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
-CUDA 13.0 and the measured arithmetic settings. The current preset audit
-measured 6.905 B scalar walk iterations/s. A separate paired comparison
-measured a 1.17% benchmark gain and 1.14% collection gain from direct reduction. See
+CUDA 13.3.1 and the measured arithmetic settings. The controlled native
+comparison measured a 22.40% benchmark gain and 21.65% collection gain over
+the previous software arithmetic at the same geometry and compiler. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records measured

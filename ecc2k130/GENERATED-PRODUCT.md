@@ -4,7 +4,10 @@
 of the existing packed GF(2^131) polynomial product. Its default is zero,
 retaining the handwritten product and reducer. Generated products require
 `PACKED_DIRECT_REDUCE=1`. The RTX PRO 6000 preset enables generated products
-and selects CUDA 13.3.1; other general defaults remain unchanged.
+and selects CUDA 13.3.1. The current preset also enables
+[native carryless multiplication](NATIVE-CARRYLESS.md), which takes precedence;
+the generated schedule remains its software fallback. Other general defaults
+remain unchanged.
 
 The generated function keeps the existing 144 widening-product events and
 their coupled low/high outputs. It schedules native input preparation, the
