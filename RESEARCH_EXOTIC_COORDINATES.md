@@ -1504,7 +1504,13 @@ Two consequences, both of which §8 missed.
 The `built` column added here reports the highest degree at which a
 matrix was actually built, and flags targets where a matrix was refused
 for exceeding the size caps — so the table below states measured
-algebra rather than a flag value.
+algebra rather than a flag value.  It immediately settles one thing the
+first draft of this section could only infer: at cap 5 on `K₀/F₂¹⁵` the
+`x`-chained arm reports `built = 4` with a refusal, while the
+symmetrised arm reports `built = 5`.  **The symmetrised system fits a
+degree-5 Macaulay matrix where the `x`-chained one does not**, at caps
+of 60 000 rows and 300 000 columns — three and seven and a half times
+the shipped ones.
 
 ### The rerun
 
@@ -1517,13 +1523,13 @@ costs hours on the larger fields and its trend is already fixed by the
 
 | instance | arm | vars | own deg | cap 3: ms / splits | cap 4: ms / splits | cap 5: ms / splits |
 |---|---|---:|---:|---|---|---|
-| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 |
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 (built 4: the degree-5 matrix was refused) |
 | | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | 75 / 15 |
 | `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | 232 031 / 24 |
 | | symmetrised | 13 | 4 | 6 found, 26 refuted / 29 | 9, 29 / 8 | 35, 63 / 6 |
 | `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
 | | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | TBD-KD-F5 |
-| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | TBD-KD-G3 | – | – |
-| | symmetrised | 34 | 4 | TBD-KD-G3 | TBD-KD-G4 | TBD-KD-G5 |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | 0/3, budget / 907 | – | – |
+| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | TBD-KD-G5 |
 
 TBD-KD-READING
