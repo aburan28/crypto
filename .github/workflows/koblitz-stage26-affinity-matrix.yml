@@ -1,0 +1,157 @@
+name: Koblitz Stage 26 one-CPU Phase-B matrix
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/koblitz_stage26_affinity_inputs.py"
+      - "scripts/run_koblitz_stage26_affinity_cell.py"
+      - "scripts/test_koblitz_stage26_affinity.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz.sha256"
+      - ".github/workflows/koblitz-stage26-affinity-matrix.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Stage-26 controls and exact packet
+        run: |
+          python3 scripts/test_koblitz_stage26_affinity.py -v
+          sha256sum --check research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz.sha256
+          mkdir "$RUNNER_TEMP/stage26-packet"
+          tar -xzf research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz -C "$RUNNER_TEMP/stage26-packet"
+          python3 scripts/koblitz_stage26_affinity_inputs.py verify \
+            --packet "$RUNNER_TEMP/stage26-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
+            > "$RUNNER_TEMP/stage26-packet-verification.json"
+
+  build-tools:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install build prerequisites
+        run: sudo apt-get update && sudo apt-get install -y libboost-program-options-dev libm4ri-dev zlib1g-dev
+      - name: Acquire pinned solver sources
+        run: |
+          mkdir -p "$RUNNER_TEMP/acquisition"
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/wdsat.time" git clone https://github.com/aburan28/WDSat.git "$RUNNER_TEMP/wdsat"
+          git -C "$RUNNER_TEMP/wdsat" checkout 55d55b2620d768d9f7c78dcd8990a0689533c1d0
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cms.time" git clone https://github.com/msoos/cryptominisat.git "$RUNNER_TEMP/cms"
+          git -C "$RUNNER_TEMP/cms" checkout 7ae1b4a74259cdce223a584281fb8f090bbd3eed
+          mkdir -p "$RUNNER_TEMP/cms/build/_deps"
+          printf 'build/\n' >> "$RUNNER_TEMP/cms/.git/info/exclude"
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cadical.time" git clone https://github.com/arminbiere/cadical.git "$RUNNER_TEMP/cms/build/_deps/cadical-src"
+          git -C "$RUNNER_TEMP/cms/build/_deps/cadical-src" checkout 878a600ea92ce3a9173b069ab294429c851acf85
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/cadiback.time" git clone https://github.com/meelgroup/cadiback.git "$RUNNER_TEMP/cms/build/_deps/cadiback-src"
+          git -C "$RUNNER_TEMP/cms/build/_deps/cadiback-src" checkout acc8bb55b98e35afe0dc228662bf41d8341b8a9b
+          git -C "$RUNNER_TEMP/wdsat" status --porcelain=v1
+          git -C "$RUNNER_TEMP/cms" status --porcelain=v1
+      - name: Build and meter exact tools
+        run: |
+          python3 scripts/build_koblitz_phase_b_wdsat.py \
+            --source "$RUNNER_TEMP/wdsat" \
+            --output "$RUNNER_TEMP/wdsat-build"
+          python3 scripts/build_koblitz_phase_b_tools.py rust \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/rust-build" \
+            --jobs 4 --timeout 1800
+          python3 scripts/build_koblitz_phase_b_tools.py cryptominisat \
+            --source "$RUNNER_TEMP/cms" \
+            --output "$RUNNER_TEMP/cms-build" \
+            --jobs 4 --timeout 1800
+          mkdir "$RUNNER_TEMP/stage26-tools"
+          install -m 755 "$RUNNER_TEMP/rust-build/bin/koblitz_pdp_backend" "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend"
+          install -m 755 "$RUNNER_TEMP/wdsat-build/wdsat_solver" "$RUNNER_TEMP/stage26-tools/wdsat_solver"
+          install -m 755 "$RUNNER_TEMP/cms-build/bin/cryptominisat5" "$RUNNER_TEMP/stage26-tools/cryptominisat5"
+          cp -R "$RUNNER_TEMP/acquisition" "$RUNNER_TEMP/stage26-tools/"
+          mkdir -p "$RUNNER_TEMP/stage26-tools/build-evidence/wdsat" "$RUNNER_TEMP/stage26-tools/build-evidence/rust" "$RUNNER_TEMP/stage26-tools/build-evidence/cryptominisat"
+          find "$RUNNER_TEMP/wdsat-build" -maxdepth 1 -type f ! -name wdsat_solver -exec cp '{}' "$RUNNER_TEMP/stage26-tools/build-evidence/wdsat/" ';'
+          cp "$RUNNER_TEMP/rust-build/receipt.json" "$RUNNER_TEMP/stage26-tools/build-evidence/rust/"
+          cp -R "$RUNNER_TEMP/rust-build/evidence" "$RUNNER_TEMP/stage26-tools/build-evidence/rust/"
+          cp "$RUNNER_TEMP/cms-build/receipt.json" "$RUNNER_TEMP/stage26-tools/build-evidence/cryptominisat/"
+          cp -R "$RUNNER_TEMP/cms-build/evidence" "$RUNNER_TEMP/stage26-tools/build-evidence/cryptominisat/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: koblitz-stage26-tools-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: error
+          path: ${{ runner.temp }}/stage26-tools
+
+  one-cpu-cell:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: build-tools
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        cell:
+          - n31-l5-m3-standard-a1-f0
+          - n31-l5-m3-ggmp-a0-f0
+          - n41-l5-m3-standard-a1-f0
+          - n59-l9-m3-standard-a1-f0
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: koblitz-stage26-tools-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage26-tools
+      - name: Verify and extract the truth-free packet
+        run: |
+          sha256sum --check research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz.sha256
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import os
+          import tarfile
+
+          archive = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz")
+          destination = Path(os.environ["RUNNER_TEMP"]) / "stage26-packet"
+          destination.mkdir()
+          with tarfile.open(archive, "r:gz") as source:
+              for member in source.getmembers():
+                  path = PurePosixPath(member.name)
+                  assert not path.is_absolute() and ".." not in path.parts
+                  assert member.isfile() or member.isdir()
+              source.extractall(destination)
+          PY
+          python3 scripts/koblitz_stage26_affinity_inputs.py verify \
+            --packet "$RUNNER_TEMP/stage26-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
+            > "$RUNNER_TEMP/packet-verification.json"
+      - name: Run one complete cell on one CPU
+        run: |
+          chmod 755 "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend" "$RUNNER_TEMP/stage26-tools/wdsat_solver" "$RUNNER_TEMP/stage26-tools/cryptominisat5"
+          python3 scripts/run_koblitz_stage26_affinity_cell.py run \
+            --packet "$RUNNER_TEMP/stage26-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
+            --packet-inventory-sha256 c937afb9b172d114768b0b96a4b5ccf66e91fbf278b77c58ed49f0fd74af37f7 \
+            --cell "${{ matrix.cell }}" \
+            --output "$RUNNER_TEMP/stage26-${{ matrix.cell }}" \
+            --backend "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend" \
+            --wdsat "$RUNNER_TEMP/stage26-tools/wdsat_solver" \
+            --cryptominisat "$RUNNER_TEMP/stage26-tools/cryptominisat5"
+          python3 scripts/run_koblitz_stage26_affinity_cell.py verify \
+            --output "$RUNNER_TEMP/stage26-${{ matrix.cell }}" \
+            > "$RUNNER_TEMP/stage26-${{ matrix.cell }}-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage26-${{ matrix.cell }}-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/packet-verification.json
+            ${{ runner.temp }}/stage26-${{ matrix.cell }}
+            ${{ runner.temp }}/stage26-${{ matrix.cell }}-verification.json
