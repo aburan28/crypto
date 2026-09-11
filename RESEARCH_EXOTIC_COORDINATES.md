@@ -1330,3 +1330,59 @@ grows with `m`, and at `m = 3` it is measured.  The gain is still per
 solve, not per relation (§11.4), and still needs a rational 2-torsion
 point (or a 3-torsion point on a `j = 0` curve) and, in Gaudry's
 setting, a base on which the invariants stay in `F_p` (§12.2, §13.4).
+
+---
+
+## 15. Charts beyond the `x`-line: four point representations, classified
+
+**Code:** `coordinate_quotients::{Line, Chart, descended_map,
+linearised_chart}`, `examples/exotic_charts.rs`, `examples/three_torsion.rs`.
+
+§3's lemma — a degree-2 coordinate is a Möbius frame on the `x`-line,
+and only 2-torsion translations act on that line — bounds what the
+`x`-line can carry.  The way past it is to change the line: a quotient
+of `E` by a finite group of point maps that *contains* the translation
+one wants, so that the translation descends to a Möbius map there.
+Four such lines were built, the induced Möbius map fitted on three
+points and verified on every point of the curve, linearised when its
+fixed points are rational, and run through the quotient engine
+(`p = 1009`, `m = 2`, exact collapse).
+
+| # | curve | line (degree on `E`) | map that descends | as Möbius map | frame | invariant per point | relation (degrees) | terms | collapse = `|Γ|` |
+|---|---|---|---|---|---|---|---|---:|---:|
+| 1 | `y² = x³ + b`, `q ≡ 1 mod 3` | `y` (3): quotient by `ω` | 3-torsion `τ_T` | `y ↦ √b(y − 3√b)/(y + √b)`, order 3 | `v = (y − s)/(y + s)`: `v ↦ ωv` | `V = v³ + v⁻³` | `(V₁−2)(V₂−2)(V₃−2) = (P−2)³`, `[1, 1, 1, 3]` | 10 | 54 |
+| 2 | `y² = x³ + ax`, `p ≡ 1 mod 4` | `x²` (4): quotient by `i` | 2-torsion `τ_T` (`x ↦ a/x`) | `x² ↦ a²/x²`, fixed points `±a` | sign frame on `x²`, **rational for every `a`** (on `x` only for `a` a square) | `W = ((x² − a)/(x² + a))²` | `[4, 4, 1, 4]` with `Πu` | 30 | 16 (with `i`) |
+| 3 | Tate normal form, rational `T₄` | `x′ = x(P) + x(P + T₂)` (2): `E/⟨T₂⟩` | 4-torsion `τ_{T₄}` (not Möbius on `x`) | involution `x′ ↦ c/x′` | sign frame on `x′` | `W = u′²` | TBD-EX-B | | |
+| 4 | `y² = x³ + 1`, rational `T₆` | `x″ = x + x(P+T₃) + x(P−T₃)` (3): `E/⟨T₃⟩` (Vélu) | 2-torsion `τ_{T₂}` (with `τ_{T₃}` trivial, `ω` a scaling) | involution, and `ω: x″ ↦ ωx″` | sign frame on `x″` | `W = u″²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 72 (with `T₃`) TBD-EX-C |
+
+Two of the four are new lines in the strict sense and two are the old
+line on another curve, and the engine says which is which.
+
+- **#1 and #2 are quotients by automorphisms** (`ω` of order 3, `i` of
+  order 4), which exist only at `j = 0` and `j = 1728`.  On them a
+  translation that is invisible on `x` (3-torsion) or a frame that is
+  irrational on `x` (2-torsion with `a` a non-square) becomes a
+  rational linear map.  #1 gives a lower relation degree than the
+  `x`-line (§13.2); #2 does not — its relation has degree 4 per point
+  where Semaev's has 2 — so #2 is a representation that exists where
+  the sign frame does not, not a better one.
+- **#3 and #4 are isogeny lines**: the `x`-line of `E/⟨T⟩` pulled back
+  to `E`.  A translation by a point `Q` with `[k]Q ∈ ⟨T⟩` descends
+  because its image on `E/⟨T⟩` is torsion of lower order, and the
+  representation is exactly the 2-torsion sign frame *of the isogenous
+  curve*: #4's relation is the 9-term one of §10.1 to the coefficient,
+  with the collapse multiplied by the kernel order (72 = 8 × 9).  This is
+  the §3 lemma "translation-invariant coordinates factor through
+  isogenies" seen from the other side: the engine finds the coordinate
+  the isogeny already had.  By the §11 accounting the extra collapse is
+  the cofactor's, not a new relation, so #3 and #4 are changes of curve —
+  legitimate, sometimes convenient (a curve with rational 4- or
+  6-torsion has a 2-isogenous neighbour where the same sign frame
+  applies and may be cheaper), but not new gains.
+
+What the four have in common is the recipe: pick a point map `g` that
+does not act on the `x`-line, find a quotient line on which it does
+(`descended_map` fits and verifies the Möbius map; `linearised_chart`
+frames it), and let the quotient engine measure the invariants.  Every
+line in the table was found this way, and the fits fail loudly (τ_{T₃}
+on `x`, τ_{T₄} on `x`) where the lemma says they must.
