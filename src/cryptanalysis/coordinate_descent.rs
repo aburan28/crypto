@@ -53,6 +53,7 @@ use super::coordinate_quotients::{
     two_torsion_frame, Chart, PointMap, Seed,
 };
 use super::coordinate_search::{kernel, Curve, Gf, Mobius, Pt, Rng64, INF};
+use super::f4_fp::{self, F4Options, Verdict};
 use super::groebner_f4::{buchberger, reduce_basis, Ordering};
 use super::symmetrized_semaev::MPoly;
 use crate::ecc::field::FieldElement;
@@ -539,7 +540,83 @@ pub struct DescentArm {
     pub inconsistent: bool,
     /// Buchberger exceeded [`groebner_budget`]; `groebner_ms` is `+∞`.
     pub timed_out: bool,
+    /// Degree-bounded F4 ([`f4_fp`]): milliseconds, solving degree,
+    /// verdict, number of solutions (all checked against the system),
+    /// and the largest matrix.
+    pub f4_ms: f64,
+    pub f4_degree: u32,
+    pub f4_verdict: F4Verdict,
+    pub f4_solutions: usize,
+    pub f4_matrix: (usize, usize),
     pub error: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum F4Verdict {
+    NotRun,
+    Found,
+    Refuted,
+    /// Degree bound or budget reached first.
+    Undetermined,
+    /// A reported solution did not satisfy the system.
+    Wrong,
+}
+
+impl F4Verdict {
+    pub fn short(&self) -> &'static str {
+        match self {
+            F4Verdict::NotRun => "–",
+            F4Verdict::Found => "found",
+            F4Verdict::Refuted => "refuted",
+            F4Verdict::Undetermined => "undet.",
+            F4Verdict::Wrong => "WRONG",
+        }
+    }
+}
+
+/// Which Gröbner engines [`compare_arms`] times: `GB_ENGINE` = `both`
+/// (default), `f4`, or `buchberger`.
+pub fn engines() -> (bool, bool) {
+    match std::env::var("GB_ENGINE").as_deref() {
+        Ok("f4") => (false, true),
+        Ok("buchberger") => (true, false),
+        _ => (true, true),
+    }
+}
+
+/// Degree bound for the F4 runs: `F4_MAX_DEGREE`, default 24.
+pub fn f4_max_degree() -> u32 {
+    std::env::var("F4_MAX_DEGREE")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(24)
+}
+
+/// Solve a descended system with the degree-bounded F4 under the same
+/// budget as Buchberger; every solution is checked against the system.
+pub fn f4_time(p: u64, sys: &DescendedSystem) -> (f64, u32, F4Verdict, usize, (usize, usize)) {
+    let mut eqs: Vec<f4_fp::Poly> = sys.equations.clone();
+    eqs.extend(sys.identities.iter().cloned());
+    let opts = F4Options::new(Ordering::Grevlex, f4_max_degree()).with_budget(groebner_budget());
+    let r = f4_fp::solve(&eqs, sys.fp_unknowns, p, &opts);
+    let (verdict, n) = match &r.verdict {
+        Verdict::Inconsistent => (F4Verdict::Refuted, 0),
+        Verdict::Undetermined => (F4Verdict::Undetermined, 0),
+        Verdict::Solutions(sols) => {
+            let ok = sols
+                .iter()
+                .all(|x| eqs.iter().all(|f| f4_fp::eval(f, x, p) == 0));
+            (
+                if ok {
+                    F4Verdict::Found
+                } else {
+                    F4Verdict::Wrong
+                },
+                sols.len(),
+            )
+        }
+    };
+    (r.ms, r.solving_degree, verdict, n, (r.max_rows, r.max_cols))
 }
 
 /// One candidate coordinate system for [`compare_arms`]: label, group
@@ -649,6 +726,11 @@ pub fn compare_arms(
                 groebner_ms: f64::NAN,
                 inconsistent: false,
                 timed_out: false,
+                f4_ms: f64::NAN,
+                f4_degree: 0,
+                f4_verdict: F4Verdict::NotRun,
+                f4_solutions: 0,
+                f4_matrix: (0, 0),
                 error: Some("no system".into()),
             });
             continue;
@@ -658,7 +740,8 @@ pub fn compare_arms(
             Ok(d) => {
                 // A system whose unknowns are not F_p-valued on the base
                 // has no descent; do not time a meaningless basis.
-                let (basis_size, ms, inconsistent, timed_out) = if d.fp_valued {
+                let (run_bb, run_f4) = engines();
+                let (basis_size, ms, inconsistent, timed_out) = if d.fp_valued && run_bb {
                     match groebner_time_bounded(f.p, &d, groebner_budget()) {
                         Some((b, ms, inc)) => (b, ms, inc, false),
                         None => (0, f64::INFINITY, false, true),
@@ -666,6 +749,12 @@ pub fn compare_arms(
                 } else {
                     (0, f64::NAN, false, false)
                 };
+                let (f4_ms, f4_degree, f4_verdict, f4_solutions, f4_matrix) =
+                    if d.fp_valued && run_f4 {
+                        f4_time(f.p, &d)
+                    } else {
+                        (f64::NAN, 0, F4Verdict::NotRun, 0, (0, 0))
+                    };
                 out.push(DescentArm {
                     label,
                     gamma0_order: sys.gamma0.len(),
@@ -679,6 +768,11 @@ pub fn compare_arms(
                     groebner_ms: ms,
                     inconsistent,
                     timed_out,
+                    f4_ms,
+                    f4_degree,
+                    f4_verdict,
+                    f4_solutions,
+                    f4_matrix,
                     error: None,
                 });
             }
@@ -695,6 +789,11 @@ pub fn compare_arms(
                 groebner_ms: f64::NAN,
                 inconsistent: false,
                 timed_out: false,
+                f4_ms: f64::NAN,
+                f4_degree: 0,
+                f4_verdict: F4Verdict::NotRun,
+                f4_solutions: 0,
+                f4_matrix: (0, 0),
                 error: Some(e),
             }),
         }
@@ -705,8 +804,8 @@ pub fn compare_arms(
 pub fn format_arms(arms: &[DescentArm]) -> String {
     let mut s = String::new();
     s.push_str(&format!(
-        "   {:<34} {:>4} {:>6} {:>6} {:>6} {:>5} {:>4} {:>8} {:>6}  {}\n",
-        "arm", "|Γ₀|", "F_p-unk", "F_p-eq", "deg", "terms", "F_p?", "GB ms", "basis", "invariants"
+        "   {:<34} {:>4} {:>6} {:>6} {:>6} {:>5} {:>4} {:>8} {:>8} {:>8} {:>4} {:>8} {:>3} {:>11}  {}\n",
+        "arm", "|Γ₀|", "F_p-unk", "F_p-eq", "deg", "terms", "F_p?", "GB ms", "basis", "F4 ms", "sdeg", "verdict", "#", "matrix", "invariants"
     ));
     for a in arms {
         if let Some(e) = &a.error {
@@ -714,7 +813,7 @@ pub fn format_arms(arms: &[DescentArm]) -> String {
             continue;
         }
         s.push_str(&format!(
-            "   {:<34} {:>4} {:>6} {:>6} {:>6} {:>5} {:>4} {:>8.1} {:>6}  {}\n",
+            "   {:<34} {:>4} {:>6} {:>6} {:>6} {:>5} {:>4} {:>8.1} {:>8} {:>8.1} {:>4} {:>8} {:>3} {:>11}  {}\n",
             a.label,
             a.gamma0_order,
             a.fp_unknowns,
@@ -730,6 +829,11 @@ pub fn format_arms(arms: &[DescentArm]) -> String {
             } else {
                 a.basis_size.to_string()
             },
+            a.f4_ms,
+            a.f4_degree,
+            a.f4_verdict.short(),
+            a.f4_solutions,
+            format!("{}×{}", a.f4_matrix.0, a.f4_matrix.1),
             a.invariants.join(", ")
         ));
     }
@@ -799,5 +903,30 @@ mod tests {
         // the Klein group: larger Γ₀, but its invariants leave F_p on the base
         assert!(arms[2].gamma0_order > arms[1].gamma0_order);
         assert!(!arms[2].fp_valued, "{text}");
+        // the degree-bounded F4 agrees with Buchberger on both descended
+        // systems and finds the decomposition (checked against the system)
+        for a in &arms[..2] {
+            assert_eq!(a.f4_verdict, F4Verdict::Found, "{text}");
+            assert!(a.f4_solutions >= 1, "{text}");
+            assert!(a.f4_ms.is_finite() && a.f4_ms < 30_000.0, "{text}");
+        }
+        // a random target off the base is refuted by both engines the
+        // same way (or found by both)
+        let random = pts
+            .iter()
+            .copied()
+            .find(|&r| matches!(r, Pt::Aff(x, _) if !c.f.in_subfield(x, 1)) && !base.contains(&r))
+            .unwrap();
+        let arms2 = compare_descents(&c, &pts, random, 2, &mut rng);
+        let text2 = format_arms(&arms2);
+        for a in &arms2[..2] {
+            assert_ne!(a.f4_verdict, F4Verdict::Undetermined, "{text2}");
+            assert_ne!(a.f4_verdict, F4Verdict::Wrong, "{text2}");
+            assert_eq!(
+                a.f4_verdict == F4Verdict::Refuted,
+                a.inconsistent,
+                "{text2}"
+            );
+        }
     }
 }

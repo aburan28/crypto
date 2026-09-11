@@ -127,6 +127,7 @@ pub mod eds_residue;
 pub mod eds_mov;
 pub mod eds_net;
 pub mod eds_tate;
+pub mod f4_fp;
 pub mod ffd_harness;
 pub mod fght_snfs;
 pub mod ghs_descent;
