@@ -19,6 +19,7 @@ import run_koblitz_stage26_affinity_cell as cell
 
 class Stage26Tests(unittest.TestCase):
     def test_truth_keys_are_rejected_recursively(self) -> None:
+        self.assertTrue(callable(inputs.verify))
         inputs.validate_no_truth({"factor_base": {"algebraic": True}})
         with self.assertRaises(inputs.Stage26InputError):
             inputs.validate_no_truth({"nested": [{"known_witness": [1, 2, 3]}]})
