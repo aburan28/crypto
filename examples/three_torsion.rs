@@ -260,6 +260,16 @@ fn main() {
     } else {
         (20, Some((3, 8)))
     };
+    // `THREE_TORSION_VCAPS=point,tuple` overrides the v-line box at m = 3;
+    // the total degree then covers the whole box.
+    let vcaps = std::env::var("THREE_TORSION_VCAPS")
+        .ok()
+        .and_then(|v| {
+            let mut it = v.split(',').filter_map(|x| x.trim().parse::<u32>().ok());
+            Some((it.next()?, it.next()?))
+        })
+        .or(vcaps);
+    let vdeg = vcaps.map_or(vdeg, |(pc, tc)| vdeg.max((m as u32 + 1) * pc + tc));
     let mut rng = Rng64::new(0x3333);
     println!("=== 3-torsion seeds on j = 0 curves, m = {m} ===");
     println!();
