@@ -1005,7 +1005,39 @@ sub-millisecond systems; the ranking, not the ratio, is the result.
 
 ### 12.4 `m = 3`
 
-TBD-K3
+`m = 3` needed two things the `m = 2` run did not: a degree *box* for the
+interpolation (Semaev's `S₄` has total degree 12 but degree 4 in each
+point, and 12 in five unknowns is far over the monomial cap; with the
+box it is recovered with its 125 terms after descent), and a wall-clock
+budget per Buchberger run, because the repo's Buchberger does not
+return from the descended `S₄` in any useful time.  Budget 180 s, two
+decomposable and two random targets per curve.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s, every target |
+| | one `T`, `w = u²`, `Πu` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s, every target |
+| | Klein | 16 | 9 | – | 2 | 8 | **no** | – |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s (first target) |
+| | one `T` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s (first target) |
+
+The run was stopped there: every timed-out Buchberger keeps running on
+its own thread, and after eight of them the machine was at load 16 on
+four cores and starving the other experiments.  The remaining curves
+(`F₁₇³`, the over-`F_p` control) were not run at `m = 3`; nothing in the
+first two suggests they would differ.
+
+What `m = 3` settles is the shape and not the time.  The one-involution
+system is a third of the degree (4 against 12) and a quarter of the
+size (35 terms against 125) of Gaudry's, at the cost of one more unknown
+and five more equations (the descended identities), and the Klein
+group is again not `F_p`-valued — the §12.2 obstruction does not depend
+on `m`.  The repo's Buchberger finishes neither system inside three
+minutes on any target, so it cannot rank them; that is a statement
+about the solver (a textbook Buchberger, no F4/F5, no degree bound), not
+about the systems, and the `m = 2` ranking (§12.3) stands as the only
+timed one.  An F4 over `F_p` with a degree bound is the tool this row
+needs; the repo's `groebner_f4` is Buchberger-based despite its name.
 
 ---
 
@@ -1173,4 +1205,54 @@ relation *yield* per base is not compared here.
 
 ### 13.5 `m = 3`
 
-TBD-T3M3
+Curve A, `p = 1009`, the same boxes as §12.4 (a per-variable cap on
+the point invariants and on the tuple invariant on top of the total
+degree; without it `S₄` itself is out of reach).
+
+| line, group `G` | `|Γ|` | invariants | box (point, tuple) | relation | terms |
+|---|---:|---|---|---|---:|
+| `x`, `⟨−1⟩` (Semaev) | 2 | `x_i` | (4, –), total ≤ 16 | `S₄`, `[4, 4, 4, 4]`, total degree 12 | 191 |
+| `x`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | Vélu `e₁[x_i]`, orbit sums of `Πx, Σx` | (4, 8) | none under the monomial cap (12 invariants) / none up to total degree 11 | – |
+| `y`, `⟨−1⟩` | 2 | `y_i²`, `(Πy)²`, `(Σy)²` | (4, 8) | none up to total degree 8 (`y` has degree 9 per point) | – |
+| `v`, `⟨τ₃⟩` | 27 | `v_i³`, `Πv` | (3, 8), total ≤ 20 | `[3, 3, 3, 3, 8]`, total degree 10 | 310 |
+| `v`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | `V_i = v_i³ + v_i⁻³`, `P = Πv + 1/Πv` | (3, 8), total ≤ 20 | none | – |
+| same | | same | (4, 8), 5625 monomials, one kernel at total degree 24 | none | – |
+| same | | same | (3, 12), 3328 monomials, one kernel at total degree 24 | none | – |
+| same, `+ Σv` seed | 162 | `V_i`, `P`, `e₃, e₄[Σv]` | (3, 8) | none under the monomial cap | – |
+
+So at `m = 3` the 3-torsion frame behaves like the 2-torsion one **only
+on the translation side**: in `v_i³` the relation has degree 3 in each
+point where Semaev's has 4 (one degree down, as `w = u²` takes `S₄` from
+4 to 2 — a smaller step here), with the tuple unknown `Πv` carrying
+degree 8.  Folding the sign in as well, which at `m = 2` gave the
+multilinear `(V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³`, gives **nothing** in
+any box tried: there is no relation among `V_i = v_i³ + v_i⁻³` and
+`P = Πv + 1/Πv` of degree ≤ 4 in each `V_i` and ≤ 8 in `P`, nor of
+degree ≤ 3 and ≤ 12.  The `m = 2` multilinearity was a small-`m`
+accident of the sign symmetrisation, not a pattern.  This is the same
+place §10.4 found the Klein group's advantage thinning at `m = 3`.
+
+For the decomposition problem itself the sign is irrelevant anyway: a
+fixed target breaks the global sign, so the fixed-target group `Γ₀` is
+the translations alone, and the `m = 3` system on the `v`-base is the
+`v_i³, Πv` one — four `F_p`-unknowns, total degree 9, 118 terms before
+descent, against Gaudry's three unknowns, total degree 12, 125 terms.
+Measured over `F₃₁³`:
+
+| base | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger (180 s budget) |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` (20 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > budget, both targets |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box (`y` has degree 9 per point) | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | – | 9 | 118 | **no** | – |
+| `{v ∈ F_p}` (86 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | – | 12 | 125 | **no** | – |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | 167 | 9 | 118 | yes | > budget, both targets |
+
+The same picture as §12.4: bases and `F_p`-valuedness exactly as at
+`m = 2`, a smaller-degree system on the `v`-base (9 against 12), and a
+Buchberger that finishes neither.  The 167 descended equations of the
+`v`-system are the 3 digits of the relation plus the identities among
+`v_i³` and `Πv` up to the box's degree — an F4 with a degree bound
+would take most of them as redundant; Buchberger does not.
