@@ -1402,6 +1402,11 @@ pub struct SolveStats {
     /// F_p multiplications spent in the MITM fallback for unsolved
     /// residuals (also included in `fp_muls`).
     pub fallback_fp_muls: u64,
+    /// Macaulay rows built, summed over attempts.
+    pub macaulay_rows: u64,
+    /// Split of `macaulay_muls`: forward elimination vs the normal
+    /// forms read off by back-substitution.
+    pub echelon_muls: u64,
 }
 
 /// Solve `S₄(x₁, x₂, x₃, x_R) = 0` for `x_i ∈ F_p` with cost
@@ -1421,223 +1426,334 @@ pub fn solve_s4_subspace(
     stats: &mut SolveStats,
 ) -> Option<Vec<[u64; 3]>> {
     let f = &inst.curve.field;
-    let p = f.p;
     let mut muls = 0u64;
     stats.solves += 1;
     let comps = pre.weil_restrict(f, x_r);
     muls += pre.terms.len() as u64 * 15;
 
-    let mut result: Vec<[u64; 3]> = Vec::new();
-    let mut solved_at_some_degree = false;
     for degree in [10u8, 11, 12, 13] {
-        let escalate = |stats: &mut SolveStats, degree: u8| match degree {
-            10 => stats.retried_at_degree_11 += 1,
-            11 => stats.retried_at_degree_12 += 1,
-            12 => stats.retried_at_degree_13 += 1,
-            _ => stats.unsolved += 1,
-        };
-        // Macaulay matrix at `degree`.
-        let cols = monomials_grevlex_desc(degree);
-        let col_index: HashMap<[u8; 3], usize> =
-            cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-        let shifts = monomials_grevlex_desc(degree - 4);
-        let mut mat: Vec<Vec<u64>> = Vec::with_capacity(3 * shifts.len());
-        for comp in &comps {
-            for sh in &shifts {
-                let mut row = vec![0u64; cols.len()];
-                for (&e, &c) in comp {
-                    let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2]];
-                    let ci = col_index[&m];
-                    row[ci] = am(row[ci], c, p);
-                }
-                mat.push(row);
+        match solve_at_degree(inst, &comps, degree, rng, stats, &mut muls) {
+            Some(res) => {
+                stats.fp_muls += muls;
+                return Some(res);
             }
+            None => match degree {
+                10 => stats.retried_at_degree_11 += 1,
+                11 => stats.retried_at_degree_12 += 1,
+                12 => stats.retried_at_degree_13 += 1,
+                _ => stats.unsolved += 1,
+            },
         }
-        let before = muls;
-        let pivots = rref_mod_p(&mut mat, p, &mut muls);
-        stats.macaulay_muls += muls - before;
-        let pivot_set: std::collections::HashSet<usize> = pivots.iter().copied().collect();
-        // Standard monomials: non-pivot columns of degree ≤ degree − 1.
-        let standard: Vec<usize> = (0..cols.len())
-            .filter(|&c| !pivot_set.contains(&c))
-            .filter(|&c| (cols[c][0] + cols[c][1] + cols[c][2]) < degree)
-            .collect();
-        let dim = standard.len();
-        if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+    }
+    if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+        eprintln!("  gave up after degree 13");
+    }
+    stats.fp_muls += muls;
+    None
+}
+
+/// One attempt at Macaulay degree `degree`; `None` when the quotient
+/// does not close at that degree.  On success returns the sorted
+/// solution triples.
+fn solve_at_degree(
+    inst: &Instance3,
+    comps: &[HashMap<[u8; 3], u64>; 3],
+    degree: u8,
+    rng: &mut StdRng,
+    stats: &mut SolveStats,
+    muls: &mut u64,
+) -> Option<Vec<[u64; 3]>> {
+    let p = inst.curve.field.p;
+    let debug = std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some();
+    // Macaulay matrix at `degree`: every Weil component times every
+    // monomial of degree ≤ degree − 4, columns in descending grevlex.
+    let cols = monomials_grevlex_desc(degree);
+    let col_index: HashMap<[u8; 3], usize> =
+        cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+    let shifts = monomials_grevlex_desc(degree - 4);
+    let mut mat: Vec<Vec<u64>> = Vec::with_capacity(3 * shifts.len());
+    for comp in comps {
+        for sh in &shifts {
+            let mut row = vec![0u64; cols.len()];
+            for (&e, &c) in comp {
+                let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2]];
+                let ci = col_index[&m];
+                row[ci] = am(row[ci], c, p);
+            }
+            mat.push(row);
+        }
+    }
+    stats.macaulay_rows += mat.len() as u64;
+    let before = *muls;
+    let pivots = echelon_mod_p(&mut mat, p, muls);
+    stats.echelon_muls += *muls - before;
+    let pivot_set: std::collections::HashSet<usize> = pivots.iter().copied().collect();
+    // Standard monomials: non-pivot columns of degree ≤ degree − 1.
+    let standard: Vec<usize> = (0..cols.len())
+        .filter(|&c| !pivot_set.contains(&c))
+        .filter(|&c| (cols[c][0] + cols[c][1] + cols[c][2]) < degree)
+        .collect();
+    let dim = standard.len();
+    if debug {
+        eprintln!(
+            "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}",
+            mat.len(),
+            cols.len(),
+            pivots.len()
+        );
+    }
+    if dim == 0 || dim > 64 {
+        stats.macaulay_muls += *muls - before;
+        return None;
+    }
+    stats.quotient_dim_total += dim as u64;
+    let std_index: HashMap<usize, usize> =
+        standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
+    let mut nfs = NormalForms::new(&mat, &pivots, &std_index, dim, p);
+    // Multiplication matrix of e₁: column b ↦ NF(e₁ · b).
+    let mut m_e1 = vec![vec![0u64; dim]; dim];
+    let mut ok = true;
+    for (bi, &bc) in standard.iter().enumerate() {
+        let m = cols[bc];
+        let shifted = [m[0] + 1, m[1], m[2]];
+        let Some(&sc) = col_index.get(&shifted) else {
+            ok = false;
+            break;
+        };
+        let Some(nf) = nfs.nf(sc, muls) else {
+            ok = false;
+            break;
+        };
+        for (ri, &val) in nf.iter().enumerate() {
+            m_e1[ri][bi] = val;
+        }
+    }
+    stats.macaulay_muls += *muls - before;
+    if !ok {
+        if debug {
+            eprintln!("  degree {degree}: normal form of e1·b unavailable");
+        }
+        return None;
+    }
+    // Eigenvalues in F_p from the characteristic polynomial.
+    let cp = charpoly_mod_p(&m_e1, p, muls);
+    let ring = PolyRing::new(p);
+    let lambdas = ring.roots(&cp, rng);
+    // Transpose for left eigenvectors (evaluation functionals).
+    let mut mt = vec![vec![0u64; dim]; dim];
+    for i in 0..dim {
+        for j in 0..dim {
+            mt[j][i] = m_e1[i][j];
+        }
+    }
+    let idx_of = |mono: [u8; 3]| -> Option<usize> {
+        col_index.get(&mono).and_then(|c| std_index.get(c)).copied()
+    };
+    let (Some(i1), Some(i2), Some(i3), Some(i0)) = (
+        idx_of([1, 0, 0]),
+        idx_of([0, 1, 0]),
+        idx_of([0, 0, 1]),
+        idx_of([0, 0, 0]),
+    ) else {
+        if debug {
+            let low: Vec<[u8; 3]> = pivots
+                .iter()
+                .map(|&c| cols[c])
+                .filter(|m| (m[0] + m[1] + m[2]) <= 3)
+                .collect();
             eprintln!(
-                "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}",
-                mat.len(),
-                cols.len(),
-                pivots.len()
+                "  degree {degree}: 1, e1, e2 or e3 is not standard; low-degree pivots {low:?}"
             );
         }
-        if dim == 0 || dim > 64 {
-            escalate(stats, degree);
-            continue;
-        }
-        stats.quotient_dim_total += dim as u64;
-        let std_index: HashMap<usize, usize> =
-            standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
-        let pivot_row: HashMap<usize, usize> =
-            pivots.iter().enumerate().map(|(r, &c)| (c, r)).collect();
-        // Normal form of a monomial column over the standard basis.
-        let normal_form = |c: usize| -> Option<Vec<u64>> {
-            let mut v = vec![0u64; dim];
-            if let Some(&i) = std_index.get(&c) {
-                v[i] = 1;
-                return Some(v);
-            }
-            let &r = pivot_row.get(&c)?;
-            for j in (c + 1)..cols.len() {
-                let val = mat[r][j];
-                if val != 0 {
-                    let &i = std_index.get(&j)?; // must be standard in RREF
-                    v[i] = (p - val) % p;
+        *muls += ring.muls.get();
+        return None;
+    };
+    let eval_comp = |comp: &HashMap<[u8; 3], u64>, e: [u64; 3]| -> u64 {
+        let mut acc = 0u64;
+        for (&m, &c) in comp {
+            let mut t = c;
+            for (k, &v) in e.iter().enumerate() {
+                for _ in 0..m[k] {
+                    t = mm(t, v, p);
                 }
             }
-            Some(v)
-        };
-        // Multiplication matrix of e₁: column b ↦ NF(e₁ · b).
-        let mut m_e1 = vec![vec![0u64; dim]; dim];
-        let mut ok = true;
-        for (bi, &bc) in standard.iter().enumerate() {
-            let m = cols[bc];
-            let shifted = [m[0] + 1, m[1], m[2]];
-            let Some(&sc) = col_index.get(&shifted) else {
-                ok = false;
-                break;
-            };
-            let Some(nf) = normal_form(sc) else {
-                ok = false;
-                break;
-            };
-            for (ri, val) in nf.into_iter().enumerate() {
-                m_e1[ri][bi] = val;
+            acc = am(acc, t, p);
+        }
+        acc
+    };
+    let mut candidates: Vec<[u64; 3]> = Vec::new();
+    if debug {
+        eprintln!("  charpoly degree {} roots {:?}", cp.0.len() - 1, lambdas);
+    }
+    for lam in lambdas {
+        let ker = eigenvectors_mod_p(&mt, lam, p, muls);
+        if ker.len() != 1 {
+            stats.degenerate_eigenspaces += 1;
+        }
+        if debug {
+            eprintln!("  λ = {lam}: kernel dim {}", ker.len());
+        }
+        for w in &ker {
+            if w[i0] == 0 {
+                continue;
+            }
+            let inv = inv_mod(w[i0], p);
+            let e = [mm(w[i1], inv, p), mm(w[i2], inv, p), mm(w[i3], inv, p)];
+            if e[0] != lam {
+                continue;
+            }
+            if comps.iter().all(|comp| eval_comp(comp, e) == 0) {
+                candidates.push(e);
             }
         }
-        if !ok {
-            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
-                eprintln!("  degree {degree}: normal form of e1·b unavailable");
-            }
-            escalate(stats, degree);
-            continue;
-        }
-        // Eigenvalues in F_p from the characteristic polynomial.
-        let cp = charpoly_mod_p(&m_e1, p, &mut muls);
-        let ring = PolyRing::new(p);
-        let lambdas = ring.roots(&cp, rng);
-        // Transpose for left eigenvectors (evaluation functionals).
-        let mut mt = vec![vec![0u64; dim]; dim];
-        for i in 0..dim {
-            for j in 0..dim {
-                mt[j][i] = m_e1[i][j];
-            }
-        }
-        let idx_of = |mono: [u8; 3]| -> Option<usize> {
-            col_index.get(&mono).and_then(|c| std_index.get(c)).copied()
-        };
-        let (Some(i1), Some(i2), Some(i3), Some(i0)) = (
-            idx_of([1, 0, 0]),
-            idx_of([0, 1, 0]),
-            idx_of([0, 0, 1]),
-            idx_of([0, 0, 0]),
-        ) else {
-            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
-                let low: Vec<[u8; 3]> = pivots
-                    .iter()
-                    .map(|&c| cols[c])
-                    .filter(|m| (m[0] + m[1] + m[2]) <= 3)
-                    .collect();
-                eprintln!(
-                    "  degree {degree}: 1, e1, e2 or e3 is not standard; low-degree pivots {low:?}"
-                );
-            }
-            escalate(stats, degree);
-            continue;
-        };
-        let eval_comp = |comp: &HashMap<[u8; 3], u64>, e: [u64; 3]| -> u64 {
-            let mut acc = 0u64;
-            for (&m, &c) in comp {
-                let mut t = c;
-                for (k, &v) in e.iter().enumerate() {
-                    for _ in 0..m[k] {
-                        t = mm(t, v, p);
-                    }
-                }
-                acc = am(acc, t, p);
-            }
-            acc
-        };
-        let mut candidates: Vec<[u64; 3]> = Vec::new();
-        if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
-            eprintln!("  charpoly degree {} roots {:?}", cp.0.len() - 1, lambdas);
-        }
-        for lam in lambdas {
-            let ker = eigenvectors_mod_p(&mt, lam, p, &mut muls);
-            if ker.len() != 1 {
-                stats.degenerate_eigenspaces += 1;
-            }
-            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
-                eprintln!("  λ = {lam}: kernel dim {}", ker.len());
-            }
-            for w in &ker {
-                if w[i0] == 0 {
-                    continue;
-                }
-                let inv = inv_mod(w[i0], p);
-                let e = [mm(w[i1], inv, p), mm(w[i2], inv, p), mm(w[i3], inv, p)];
-                if e[0] != lam {
-                    continue;
-                }
-                if comps.iter().all(|comp| eval_comp(comp, e) == 0) {
-                    candidates.push(e);
-                }
-            }
-        }
-        candidates.sort_unstable();
-        candidates.dedup();
-        stats.e_solutions += candidates.len() as u64;
-        // Split each cubic T³ − e₁T² + e₂T − e₃ over F_p.
-        for e in candidates {
-            let cubic = UPoly(vec![(p - e[2]) % p, e[1], (p - e[0]) % p, 1]);
-            let roots = ring.roots(&cubic, rng);
-            // Three roots counted with multiplicity: the cubic must equal
-            // Π (T − r) for some multiset drawn from its distinct roots.
-            let mut triple: Option<[u64; 3]> = None;
-            'outer: for &r1 in &roots {
-                for &r2 in &roots {
-                    for &r3 in &roots {
-                        if r1 <= r2 && r2 <= r3 {
-                            let s1 = am(am(r1, r2, p), r3, p);
-                            let s2 = am(am(mm(r1, r2, p), mm(r1, r3, p), p), mm(r2, r3, p), p);
-                            let s3 = mm(mm(r1, r2, p), r3, p);
-                            if s1 == e[0] && s2 == e[1] && s3 == e[2] {
-                                triple = Some([r1, r2, r3]);
-                                break 'outer;
-                            }
+    }
+    candidates.sort_unstable();
+    candidates.dedup();
+    stats.e_solutions += candidates.len() as u64;
+    // Split each cubic T³ − e₁T² + e₂T − e₃ over F_p.
+    let mut result: Vec<[u64; 3]> = Vec::new();
+    for e in candidates {
+        let cubic = UPoly(vec![(p - e[2]) % p, e[1], (p - e[0]) % p, 1]);
+        let roots = ring.roots(&cubic, rng);
+        // Three roots counted with multiplicity: the cubic must equal
+        // Π (T − r) for some multiset drawn from its distinct roots.
+        let mut triple: Option<[u64; 3]> = None;
+        'outer: for &r1 in &roots {
+            for &r2 in &roots {
+                for &r3 in &roots {
+                    if r1 <= r2 && r2 <= r3 {
+                        let s1 = am(am(r1, r2, p), r3, p);
+                        let s2 = am(am(mm(r1, r2, p), mm(r1, r3, p), p), mm(r2, r3, p), p);
+                        let s3 = mm(mm(r1, r2, p), r3, p);
+                        if s1 == e[0] && s2 == e[1] && s3 == e[2] {
+                            triple = Some([r1, r2, r3]);
+                            break 'outer;
                         }
                     }
                 }
             }
-            if let Some(t) = triple {
-                stats.split_cubics += 1;
-                result.push(t);
-            }
         }
-        muls += ring.muls.get();
-        solved_at_some_degree = true;
-        break;
+        if let Some(t) = triple {
+            stats.split_cubics += 1;
+            result.push(t);
+        }
     }
-    if !solved_at_some_degree && std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
-        eprintln!("  gave up after degree 13");
-    }
-    stats.fp_muls += muls;
-    if !solved_at_some_degree {
-        return None;
-    }
+    *muls += ring.muls.get();
     result.sort_unstable();
     result.dedup();
     Some(result)
+}
+
+/// Forward elimination to row echelon form over `F_p` (pivot rows
+/// normalised to a leading `1`), sparse-aware: only rows with a nonzero
+/// entry in the pivot column are touched, and only the nonzero entries
+/// of the pivot row are multiplied — `muls` counts exactly those.
+/// Returns the pivot columns in order; row `k` is the pivot row of
+/// `pivots[k]` and rows from `pivots.len()` on are zero.
+fn echelon_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
+    let rows = m.len();
+    let cols = if rows > 0 { m[0].len() } else { 0 };
+    let mut pivots = Vec::new();
+    let mut r = 0;
+    for c in 0..cols {
+        if r >= rows {
+            break;
+        }
+        let Some(pr) = (r..rows).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        m.swap(r, pr);
+        let inv = inv_mod(m[r][c], p);
+        let mut nz: Vec<usize> = Vec::new();
+        for j in c..cols {
+            if m[r][j] != 0 {
+                m[r][j] = mm(m[r][j], inv, p);
+                nz.push(j);
+            }
+        }
+        *muls += nz.len() as u64;
+        let pivot_row = m[r].clone();
+        for i in (r + 1)..rows {
+            if m[i][c] != 0 {
+                let fct = m[i][c];
+                for &j in &nz {
+                    m[i][j] = sm(m[i][j], mm(fct, pivot_row[j], p), p);
+                }
+                *muls += nz.len() as u64;
+            }
+        }
+        pivots.push(c);
+        r += 1;
+    }
+    pivots
+}
+
+/// Normal forms over the standard monomials, by memoised
+/// back-substitution in the echelon form — the reduced echelon form is
+/// never built, only the normal forms actually asked for.
+struct NormalForms<'a> {
+    m: &'a [Vec<u64>],
+    pivot_row: HashMap<usize, usize>,
+    std_index: &'a HashMap<usize, usize>,
+    dim: usize,
+    p: u64,
+    memo: Vec<Option<Vec<u64>>>,
+}
+
+impl<'a> NormalForms<'a> {
+    fn new(
+        m: &'a [Vec<u64>],
+        pivots: &[usize],
+        std_index: &'a HashMap<usize, usize>,
+        dim: usize,
+        p: u64,
+    ) -> Self {
+        let cols = if m.is_empty() { 0 } else { m[0].len() };
+        NormalForms {
+            m,
+            pivot_row: pivots.iter().enumerate().map(|(r, &c)| (c, r)).collect(),
+            std_index,
+            dim,
+            p,
+            memo: vec![None; cols],
+        }
+    }
+
+    /// `None` when column `c` is neither standard nor a pivot (a
+    /// monomial the matrix does not reduce at this degree).
+    fn nf(&mut self, c: usize, muls: &mut u64) -> Option<Vec<u64>> {
+        if let Some(v) = &self.memo[c] {
+            return Some(v.clone());
+        }
+        let p = self.p;
+        let mut v = vec![0u64; self.dim];
+        if let Some(&i) = self.std_index.get(&c) {
+            v[i] = 1;
+            self.memo[c] = Some(v.clone());
+            return Some(v);
+        }
+        let &r = self.pivot_row.get(&c)?;
+        let cols = self.m[r].len();
+        for j in (c + 1)..cols {
+            let a = self.m[r][j];
+            if a == 0 {
+                continue;
+            }
+            if let Some(&i) = self.std_index.get(&j) {
+                v[i] = sm(v[i], a, p);
+            } else {
+                let w = self.nf(j, muls)?;
+                for (k, &wk) in w.iter().enumerate() {
+                    if wk != 0 {
+                        v[k] = sm(v[k], mm(a, wk, p), p);
+                        *muls += 1;
+                    }
+                }
+            }
+        }
+        self.memo[c] = Some(v.clone());
+        Some(v)
+    }
 }
 
 /// Triple oracle built on [`solve_s4_subspace`]: decompositions of `R`
