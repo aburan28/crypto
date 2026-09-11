@@ -53,8 +53,9 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    individual_log_with_pair_table, koblitz_signed_frobenius_rho_with_progress,
-    point_key, points_with_x, solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x,
+    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    IndividualLogSolver,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
     RelationCollector, RelationWorkUnit,
 };
@@ -1097,10 +1098,19 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     let mut solved_now = 0usize;
     let mut failed_now = 0usize;
+    // The orbit map, column logs and oracle tables are target-independent:
+    // set up once for the whole batch.
+    let solver = if pending.is_empty() {
+        None
+    } else {
+        IndividualLogSolver::new(&c, &fb, &table, &ic, pair.as_ref())
+    };
     for i in pending {
-        let t = Instant::now();
         let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
-        let outcome = individual_log_with_pair_table(&c, &fb, &table, &q, &ic, pair.as_ref());
+        // Timed like the ρ baseline: the descent on the public point
+        // only, not the construction of the target.
+        let t = Instant::now();
+        let outcome = solver.as_ref().and_then(|s| s.solve(&q));
         let (recovered, trials) = match outcome {
             Some((d, r)) => (Some(d), r.trials),
             None => (None, 0),

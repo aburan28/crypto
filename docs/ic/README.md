@@ -398,6 +398,40 @@ Each comes with the ratio `ρ / IC` and a boolean verdict; a verdict is
 carries them, but promoting a row still goes through the ledger's own
 autolab and independent-replay process.
 
+The baseline is a real opponent, not a formality, so read it first:
+
+- It walks the `A = 2n` signed Frobenius classes, by the
+  distinguished-point method — a direct-mapped cache of recent points
+  for the short cycles, a sparse table of stored points for the
+  long-range collision.
+- Fruitless cycles (a cycle whose jumps cancel, which the negation map
+  makes common) are escaped by doubling the cycle's own smallest state,
+  so the walk stays a deterministic map. `charges.fruitless_cycles`
+  counts them.
+- Walks are stepped in batches sharing one field inversion
+  (`parallel_walks`, default 32, scaled down on instances whose whole
+  walk is shorter than the setup would cost).
+- Its step count tracks `√(πr/2) / √(2n)`; a run far above that is a
+  broken baseline, and a `vs_rho` verdict built on one means nothing.
+  `rho.verified` must equal the target count — **a ρ that fails to
+  recover its logarithms makes every ratio in the block meaningless**,
+  which is exactly how an earlier revision of this baseline produced a
+  spurious charged crossover at `n = 41`.
+
+### Ledger rungs, ready to run
+
+`docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the
+boundary ledger as parameter files — 32 known-answer targets each, the
+ρ baseline on, collection units sized to the base:
+
+    ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
+
+`docs/ic/runs/koblitz-scaling-20260911.json` records two consecutive
+series of all four, with per-stage timings, filter and Wiedemann
+statistics, and both ρ and IC verification counts. No rung crosses: the
+charged ρ/IC ratio is below 1 at every one. Read its
+`what_this_is_not` before quoting any number from it.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json
