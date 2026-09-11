@@ -1018,7 +1018,14 @@ decomposable and two random targets per curve.
 | `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s, every target |
 | | one `T`, `w = u²`, `Πu` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s, every target |
 | | Klein | 16 | 9 | – | 2 | 8 | **no** | – |
-TBD-K3-ROWS
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s (first target) |
+| | one `T` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s (first target) |
+
+The run was stopped there: every timed-out Buchberger keeps running on
+its own thread, and after eight of them the machine was at load 16 on
+four cores and starving the other experiments.  The remaining curves
+(`F₁₇³`, the over-`F_p` control) were not run at `m = 3`; nothing in the
+first two suggests they would differ.
 
 What `m = 3` settles is the shape and not the time.  The one-involution
 system is a third of the degree (4 against 12) and a quarter of the
