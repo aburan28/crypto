@@ -1,0 +1,82 @@
+name: Koblitz relation-yield bridge
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.toml"
+      - "examples/koblitz_relation_yield_bridge.rs"
+      - "examples/koblitz_public_factor_base_discovery.rs"
+      - "scripts/run_koblitz_relation_yield_bridge.py"
+      - "scripts/test_koblitz_relation_yield_bridge.py"
+      - "scripts/process_meter.py"
+      - "src/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-21-relation-yield-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE21_RELATION_YIELD.md"
+      - ".github/workflows/koblitz-relation-yield-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-and-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frozen dependency lock
+        run: cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+      - name: Validate Python custody rules
+        run: python3 scripts/test_koblitz_relation_yield_bridge.py
+      - name: Validate Rust producer
+        run: cargo test --locked --example koblitz_relation_yield_bridge
+      - name: Run full outer-metered ineligible smoke and verify custody
+        run: |
+          mkdir -p "$RUNNER_TEMP/stage21-outer"
+          python3 scripts/run_koblitz_relation_yield_bridge.py plan \
+            --smoke \
+            --output "$RUNNER_TEMP/stage21-run" \
+            --outer-stdout "$RUNNER_TEMP/stage21-outer/driver.stdout" \
+            --outer-stderr "$RUNNER_TEMP/stage21-outer/driver.stderr" \
+            --outer-metrics "$RUNNER_TEMP/stage21-outer/driver.metrics.json" \
+            > "$RUNNER_TEMP/stage21-plan.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          plan = json.loads((root / "stage21-plan.json").read_text())
+          subprocess.run(plan["required_outer_meter_command"], check=True)
+          PY
+          python3 scripts/run_koblitz_relation_yield_bridge.py verify \
+            --run-root "$RUNNER_TEMP/stage21-run" \
+            --outer-metrics "$RUNNER_TEMP/stage21-outer/driver.metrics.json" \
+            --output "$RUNNER_TEMP/stage21-verification"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          result = json.loads((root / "stage21-run/tasks/01-yield-smoke/result.json").read_text())
+          assert result["evidence_class"] == "operational_smoke_only_ineligible_for_ledger_promotion"
+          assert result["production_defaults_used"] is False
+          assert result["measurement_schema"]["target_mix"] == {
+              "natural": 8,
+              "planted_sat": 4,
+              "proven_unsat": 4,
+          }
+          assert result["arms"]["planted_sat"]["hits"] == 4
+          assert result["arms"]["proven_unsat"]["hits"] == 0
+          assert result["exact_pair_table"]["canonical_pairs"] == 120
+          assert result["exact_pair_table"]["enumerated_pairs"] == 120
+          assert len(result["ordered_covariate_rows"]) == 16
+          assert result["resource_accounting_boundary"]["peak_rss_bytes"] is None
+          verification = json.loads((root / "stage21-verification/verification.json").read_text())
+          assert verification["scientific_measurement_admitted"] is False
+          assert verification["measurement_admission_status"] == "operational_smoke_only"
+          PY
